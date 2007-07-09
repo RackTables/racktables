@@ -1,0 +1,21 @@
+- use printLog in assertion functions
+- use a separate flag for rail problems in RackObject
+- object deletion
+- rack picture attachments
+- bulk address reservation
+- helper to find unused addresses when binding them from object page
+- reports page:
+  - connected objects w/o rackspace
+	- objects of certain types w/o asset tag
+	- connected objects in distinct rack rows
+	- last history entries
+	- warranty expiration
+- bug: can't view/click on remote side in port list, if remote side is nameless
+- bug: cannot update port 'e4/4', if port 'e 4/4' exists
+- use user ID instead of username where possible
+- eliminate default_port_type
+- keep all configuration variables in a single array
+- check words usage before deletion from a chapter
+- bug: search function is called 4 times per 1 search (see functions.php)
+- bug: non-existent dictionary words result in empty selects. workaround: use left join
+- fixme: don't permit rack resize to cross non-free units

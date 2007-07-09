@@ -1,0 +1,15 @@
+0.14.6
+	bugfix: don't hide IPv4 address name for a free address
+0.14.5 2007-03-08
+	bugfix: lots of adjustments to allow database be MySQL 4.0
+0.14.4 2007-02-21
+	bugfix: provide proper SQL init files
+	bugfix: produce less PHP warnings
+	bugfix: corrected error messages
+	bugfix: don't fail on an empty database
+	bugfix: multi-object form works again
+	bugfix: fixed CSS errors
+	bugfix: don't list the same port more than once in pop-up list
+	bugfix: don't allow to ban admin access
+0.14.3 2007-02-15
+	initial release

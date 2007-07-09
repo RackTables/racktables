@@ -1,0 +1,495 @@
+td.submit {
+	text-align: center;
+}
+
+th.rack {
+	font: bold 12px Verdana, sans-serif;
+}
+
+li.step {
+	list-style-type: circle;
+}
+
+li.cstep {
+	list-style-type: disc;
+}
+
+body {
+  font-family: Arial, Sans-Serif, sans-serif;
+  font-size : small;
+}
+
+table.molecule {
+	width: 200px;
+}
+
+.molecule {
+	font: bold 12px Verdana, sans-serif;
+	border: 1px solid black;
+	border-top: 0px solid black;
+	border-right: 0px solid black;
+	text-align: center;
+}
+
+.molecule th {
+	border-top: 1px solid black;
+	border-right: 1px solid black;
+}
+
+.molecule td {
+	border-top: 1px solid black;
+	border-right: 1px solid black;
+}
+
+.portlet {
+	text-align: center;
+	background-color: #ffffff;
+	border: 1px dashed #3c78b5;
+	padding: 5px;
+	margin: 5px;
+}
+
+.tdright {
+	text-align: right;
+}
+
+.tdleft {
+	text-align: left;
+}
+.tdcenter {
+	text-align: center;
+}
+table.objectview {
+	width: 100%;
+}
+
+td.pcleft {
+	vertical-align: top;
+	text-align: center;
+}
+
+td.pcright {
+	vertical-align: top;
+	text-align: center;
+}
+
+.msg_error, .msg_success, .msg_200, .msg_300, .msg_500 {
+	text-align: left;
+	border: 1px solid;
+	padding: 2px;
+	margin: 5px;
+}
+
+.msg_error, .msg_500 {
+	background-color: #ffa0a0;
+	border-color: red;
+	font-weight: bold;
+	text-align: center;
+}
+
+.msg_success, .msg_200 {
+	background-color: #a0ffa0;
+	border-color: green;
+	font-weight: bold;
+	text-align: center;
+}
+
+.msg_300 {
+	background-color: #c0c0c0;
+	border-color: black;
+}
+
+.opt_attr_th {
+	background-color: #ffffa0;
+	text-align: right;
+}
+
+.widetable td {
+	border-top: 1px solid black;
+}
+
+tr.port_highlight {
+	background-color: lime;
+}
+
+.row_even {
+	background-color: #d0d0d0;
+}
+
+.row_odd {
+	background-color: #e8e8e8;
+}
+
+table.cooltable {
+	border: 1px solid black;
+}
+
+table.cooltable th {
+	border-bottom: 1px solid black;
+}
+
+th.vert_th {
+	border-right: 1px solid black;
+}
+
+tr.hl {
+	background-color: #505050;
+	font-weight: bold;
+}
+
+.description {
+	font-size: 9px;
+}
+
+.trwarning {
+	background-color: #FF8080;
+}
+
+.trbusy {
+	background-color: #D0D0FF;
+}
+
+tr.mainheader {
+	background-color: black;
+}
+
+div.greeting {
+	color: white;
+	text-align: right;
+}
+
+/* Contents of original static.css end here, the rest is pi.css */
+
+body {
+  margin: 0px;
+  background-attachment : fixed;
+  background-color : #FCFCFC;
+  font-family: Arial, Sans-Serif, sans-serif;
+  font-size : small;
+}
+/* collapse space between headings, and where paragraph follows heading */
+hr {
+  height : 1px;
+}
+
+a {
+	font-family: Verdana, sans-serif;
+	color: #3c78b5;
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+/* anchors  must be defined in order (link,visited,active,hover) 
+   to avoid unpredictable results */
+
+input {
+	background-color : #f0f0f0;
+	border-width : 1px;
+	border-style : solid;
+	border-color : #000000;
+}
+input [type="text"] {
+}
+textarea {
+	background-color : #f0f0f0;
+	border-width : 1px;
+	border-style : solid;
+	border-color : #000000;
+}
+.topright {
+	font-size : x-small;
+	color : #ffffff;
+}
+.username {
+	font-size : small;
+	font-weight : bold;
+	display : inline;
+}
+.menubar, .menubar a {
+	font-family: Verdana, arial, sans-serif;
+	font-size: 17px;
+	line-height: 20px;
+	background-color : #3c78b5;
+	color : #ffffff;
+	text-decoration : none;
+}
+.menuitem, .menuitem a {
+}
+.activemenuitem, .activemenuitem a {
+	background-color : #3c78b5;
+}
+.activemenuitem a:hover {
+	text-decoration: underline;
+}
+
+.footer {
+	background-color : #fff7f2;
+	font-size : x-small;
+}
+.maintable {
+	height : 100%;
+}
+.contenttable {
+	margin-top : 100px;
+	margin-bottom : 100px;
+	border-width : 1px;
+	border-color : #000000;
+	border-style : solid;
+	background-color : #fff7f2;
+}
+.errortable {
+	margin : 1px;
+	border: 1px solid black;
+	background-color : #ff5050;
+	text-align: center;
+	font: bold 11px Verdana, sans-serif;
+}
+.confirmtable {
+	margin : 1px;
+	border: 1px solid black;
+	background-color : #5050ff;
+	text-align: center;
+	font: bold 11px Verdana, sans-serif;
+}
+#foldertab {
+padding: 3px 0px 3px 8px;
+margin-left: 0;
+border-bottom: 1px solid #3c78b5;
+font: bold 11px Verdana, sans-serif;
+}
+
+#foldertab li {
+list-style: none;
+margin: 0;
+display: inline;
+}
+
+#foldertab li a {
+padding: 3px 0.5em;
+margin-left: 3px;
+border: 1px solid #3c78b5;
+border-bottom: none;
+background: #3c78b5;
+text-decoration: none;
+}
+
+#foldertab li a:link { color: #ffffff; }
+#foldertab li a:visited { color: #ffffff; }
+
+#foldertab li a:hover {
+color: #ffffff;
+background: #003366;
+border-color: #003366;
+}
+
+#foldertab li a.current {
+background: white;
+border-bottom: 1px solid white;
+color: black;
+}
+
+#foldertab li a.current:link { color: black; }
+#foldertab li a.current:visited { color: black; }
+#foldertab li a.current:hover {
+background: white;
+border-bottom: 1px solid white;
+color: black;
+}
+
+.greynavbar {background-color: #f0f0f0; border-top: 1px solid #3c78b5; margin-top: 0px}
+
+
+/* alphabet list */
+ul#squaretab {
+margin-left: 0;
+padding-left: 0;
+white-space: nowrap;
+font: bold 8px Verdana, sans-serif;
+}
+
+#squaretab li {
+display: inline;
+list-style-type: none;
+}
+
+#squaretab a {
+padding: 2px 6px;
+border: 1px solid #3c78b5;
+}
+
+#squaretab a:link, #squaretab a:visited {
+color: #fff;
+background-color: #3c78b5;
+text-decoration: none;
+}
+
+#squaretab a:hover {
+color: #ffffff;
+background-color: #003366;
+border-color: #003366;
+text-decoration: none;
+}
+
+#squaretab li a.current {
+background: white;
+color: black;
+}
+
+
+
+.miniracks {
+	width: 100px;
+	border: 0px solid black;
+	padding: 3px;
+	margin: 3px;
+	text-align: center;
+	display: inline;
+}
+
+.miniracks img {
+	border: 0px;
+}
+
+.miniracks a {
+	padding: 3px;
+	margin: 3px;
+}
+
+.rackname {
+	font: bold 10px Verdana, sans-serif;
+	color: #000;
+	padding: 3px;
+	margin: 3px;
+
+}
+
+.rack {
+	font: bold 12px Verdana, sans-serif;
+	border: 1px solid black;
+	border-top: 0px solid black;
+	border-right: 0px solid black;
+	text-align: center;
+}
+
+.rack th {
+	border-top: 1px solid black;
+	border-right: 1px solid black;
+}
+
+.rack td {
+	border-top: 1px solid black;
+	border-right: 1px solid black;
+}
+
+.rack a {
+	font: bold 10px Verdana, sans-serif;
+	color: #000;
+	text-decoration: none;
+}
+
+.rack a:hover {
+	text-decoration: underline;
+}
+
+.rackspace {
+}
+
+.rackspace img {
+	border: 0;
+	display: inline;
+	margin: 0;
+	padding: 0;
+}
+
+.rackspace h2 {
+	font: bold 25px Verdana, sans-serif;
+}
+
+.rackspace h3 {
+	font: bold 20px Verdana, sans-serif;
+}
+
+.rackspace a {
+	color: #000;
+	text-decoration: none;
+}
+
+.rackspace a:hover {
+	color: #000;
+	text-decoration: underline;
+}
+
+.mainmenu a {
+	color: #254a6f;
+	text-decoration: none;
+}
+
+.mainmenu a:hover {
+	text-decoration: underline;
+}
+
+.mainmenu img {
+	border: 0px;
+}
+
+.unracked {
+	background-color: #f0f0f0;
+	border: 1px solid #3c78b5;
+}
+
+.unracked li {
+	text-align: left;
+	list-style-type: none;
+}
+
+.unracked li a {
+	color: #254a6f;
+	text-decoration: none;
+	font: bold 10px Verdana, sans-serif;
+}
+
+.unracked li a:hover {
+	text-decoration: underline;
+}
+
+.allobjects li {
+	text-align: left;
+	list-style-type: none;
+}
+
+.allobjects li a {
+	color: #254a6f;
+	text-decoration: none;
+	font: bold 10px Verdana, sans-serif;
+}
+
+.allobjects li a:hover {
+	text-decoration: underline;
+}
+
+.visible {
+	display: block;
+}
+
+.invisible {
+	display: none;
+}
+
+.allobjects {
+	vertical-align: top;
+}
+
+.allobjects select {
+        background-color : #f0f0f0;
+        border-width : 1px;
+        border-style : solid;
+        border-color : #000000;
+}
+
+div.commentblock {
+	white-space: pre;
+	text-align: left;
+}

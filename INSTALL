@@ -1,0 +1,26 @@
+This file describes installation process for RackTables 0.14.5
+
+I. Dependencies.
+
+For database you must have a MySQL server installation version 4.0 or 5.0:
+Fedora6: # yum install mysql-server mysql
+ALTLinux Compact 3.0: apt-get install MySQL-server MySQL-client
+
+For web-frontend you must have Apache and PHP 5 with PDO extension:
+Fedora 6: # yum install httpd php php-mysql php-pdo
+
+II. Layout
+1. Unpack the tarball and make it web-accessible, e.g. http://yourcompany.com/racktables
+or http://racktables.mysite.org.
+2. Go into 'inc' directory, copy secret-sample.php to secret.php and modify accordingly.
+3. Edit install/init-auth.sql and change admin password
+4. Change $enterprise in inc/config.php
+
+III. Database setup
+mysql> use database_name;
+mysql> source install/init-structure.sql
+mysql> source install/init-auth.sql
+mysql> source install/init-dictbase.sql
+mysql> source install/init-dictvendors.sql
+
+IV. Remove install/init-auth.sql
