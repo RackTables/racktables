@@ -19,13 +19,13 @@
 - bug: search function is called 4 times per 1 search (see functions.php)
 - bug: non-existent dictionary words result in empty selects. workaround: use left join
 - fixme: don't permit rack resize to cross non-free units
-- FreeBSD in server OS chapter
-- 1000Base-ZX, 10GBase-ER/LR/LRM/ZR/LX4/CX4/Kx into port type chapter
-- switches auto-constructor
++ FreeBSD in server OS chapter
++ 1000Base-ZX, 10GBase-ER/LR/LRM/ZR/LX4/CX4/Kx into port type chapter
++ KVM port type
+- objects auto-constructor
 - CDP parser
 - object teams
 - colo customer page
-- 3750G-24TS-1U Catalyst into switch model chapter
 - racks custom sort order
 - better tabindex in editRanges() HTML code
 - addRange: auto-replace '/' with <tab>
