@@ -44,7 +44,8 @@ function renderRackThumb ($rack_id = 0)
 	$offset[2] = 3 + $rtwidth[0] + $rtwidth[1];
 	$totalheight = 3 + 3 + $rackData['height'] * 2;
 	$totalwidth = $offset[2] + $rtwidth[2] + 3;
-	$img = @imagecreatetruecolor ($totalwidth, $totalheight);
+	$img = @imagecreatetruecolor ($totalwidth, $totalheight)
+		or die("Cannot Initialize new GD image stream");
 	global $color;
 	imagerectangle ($img, 0, 0, $totalwidth - 1, $totalheight - 1, colorFromHex ($img, '000000'));
 	imagerectangle ($img, 1, 1, $totalwidth - 2, $totalheight - 2, colorFromHex ($img, 'c0c0c0'));
