@@ -2796,4 +2796,27 @@ function renderUIConfig ()
 	echo "Here be dragons :-P";
 }
 
+function renderVLANMembership ($object_id = 0)
+{
+	global $root, $pageno, $tabno;
+	if ($object_id <= 0)
+	{
+		showError ('Invalid object_id in renderVLANMembership()');
+		return;
+	}
+	showMessageOrError();
+	startPortlet ('VLAN membership');
+	$endpoints = findAllEndpoints ($object_id);
+	if (count ($endpoints) == 0)
+		echo 'Can\'t find any mean to reach current object. Please either set FQDN attribute or assign an IP address to the object.';
+	elseif (count ($endpoints) > 1)
+		echo 'More than one IP address are present at this device, please configure FQDN attribute.';
+	else
+	{
+		echo "Using endpoint ${endpoints[0]} to reach the device.";
+		// FIXME: fetch the data and render the form.
+	}
+	finishPortlet();
+}
+
 ?>
