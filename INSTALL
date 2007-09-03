@@ -17,10 +17,14 @@ or http://racktables.mysite.org.
 4. Change $enterprise in inc/config.php
 
 III. Database setup
+mysql> create database_name;
 mysql> use database_name;
 mysql> source install/init-structure.sql
 mysql> source install/init-auth.sql
 mysql> source install/init-dictbase.sql
 mysql> source install/init-dictvendors.sql
+mysql> grant all privileges on database_name.* to XXX@YYY identified by 'ZZZ';
+
+Make sure your inc/secret.php matches real values you used in the above request.
 
 IV. Remove install/init-auth.sql
