@@ -819,4 +819,23 @@ function useupPort ()
 		return "${root}?page=${pageno}&tab=${tabno}&object_id=${object_id}&error=" . urlencode ("Error removing reservation!");
 }
 
+function updateVLANMembership ()
+{
+	global $root, $pageno, $tabno;
+	assertUIntArg ('object_id');
+
+// Fetch current assignment.
+
+	$error_count = $success_count = 0;
+// Find appropriate values in submitted data and submit new values
+// for execution in case of difference found.
+
+// Generate a message depending on error counter and redirect.
+	return
+		"${root}?page=${pageno}&tab=${tabno}&" .
+		($error_count == 0 ? 'message' : 'error') .
+		"=" . urlencode ("${error_count} failures and ${success_count} successfull changes.");
+
+}
+
 ?>
