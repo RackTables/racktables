@@ -133,6 +133,9 @@ function handler_object ($tabno)
 		case 'portfwrd':
 			renderIPAddressPortForwarding($_REQUEST['object_id']);
 			break;
+		case 'switchvlans':
+			renderVLANMembership($_REQUEST['object_id']);
+			break;
 		default:
 			showError ("Invalid tab '${tabno}' requested in handler_object().");
 	}
