@@ -52,6 +52,8 @@ $tab['object']['rackspace'] = 'Rackspace';
 $tab['object']['ports'] = 'Ports';
 $tab['object']['network'] = 'IPv4';
 $tab['object']['portfwrd'] = 'Port Forwarding';
+$tab['object']['switchvlans'] = 'VLANs';
+$trigger['object']['switchvlans'] = 'trigger_switchvlans';
 $ophandler['object']['ports']['addPort'] = 'addPortForObject';
 $ophandler['object']['ports']['delPort'] = 'delPortFromObject';
 $ophandler['object']['ports']['editPort'] = 'editPortForObject';
@@ -67,6 +69,7 @@ $ophandler['object']['edit']['upd'] = 'updateAttrValue';
 $ophandler['object']['portfwrd']['forwardPorts'] = 'addPortForwarding';
 $ophandler['object']['portfwrd']['delPortForwarding'] = 'delPortForwarding';
 $ophandler['object']['portfwrd']['updPortForwarding'] = 'updPortForwarding';
+$ophandler['object']['switchvlans']['submit'] = 'updateVLANMembership';
 
 $page['ipv4space']['title'] = 'static_title';
 $page['ipv4space']['handler'] = 'handler_ipv4space';
@@ -227,7 +230,7 @@ function getTitle ($pageno, $tabno)
 
 function showTabs ($pageno, $tabno)
 {
-	global $tab, $root, $page, $remote_username;
+	global $tab, $root, $page, $remote_username, $trigger;
 	if (!isset ($tab[$pageno]['default']))
 		return;
 	echo "<td><div class=greynavbar><ul id=foldertab style='margin-bottom: 0px; padding-top: 10px;'>";
@@ -235,6 +238,13 @@ function showTabs ($pageno, $tabno)
 	{
 		// Hide forbidden tabs.
 		if (authorized ($remote_username, $pageno, $tabidx) == FALSE)
+			continue;
+		// Dynamic tabs should only be shown in certain cases (trigger exists and returns true).
+		if
+		(
+			isset ($trigger[$pageno][$tabidx]) &&
+			$trigger[$pageno][$tabidx] () != TRUE
+		)
 			continue;
 		echo '<li><a' . (($tabidx == $tabno) ? ' class=current' : '');
 		echo " href='${root}?page=${pageno}&tab=${tabidx}";
