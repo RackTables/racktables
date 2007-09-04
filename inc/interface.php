@@ -2796,6 +2796,8 @@ function renderUIConfig ()
 	echo "Here be dragons :-P";
 }
 
+// This function queries the backend about current VLAN configuration and
+// renders a form suitable for submit.
 function renderVLANMembership ($object_id = 0)
 {
 	global $root, $pageno, $tabno, $remote_username;
@@ -2824,13 +2826,13 @@ function renderVLANMembership ($object_id = 0)
 			showError ('Failed to get any response from queryGateway() or the gateway returned');
 			return;
 		}
-		if ($data[0] != 'OK')
+		if ($data[0] != 'OK!')
 		{
 			showError ("Gateway failure: ${data[0]}");
 			return;
 		}
 		// Now we have VLAN list in $data[1] and port list in $data[2]. Let's sort this out.
-		$vlanlist = array_unique (explode (',', substr ($data[1], strlen ('OK '))));
+		$vlanlist = array_unique (explode (',', substr ($data[1], strlen ('OK!'))));
 		sort ($vlanlist);
 		if (count ($vlanlist) == 0)
 		{
@@ -2858,6 +2860,7 @@ function renderVLANMembership ($object_id = 0)
 		echo "<input type=hidden name=page value='${pageno}'>";
 		echo "<input type=hidden name=tab value='${tabno}'>";
 		echo "<input type=hidden name=op value=submit>";
+		echo "<input type=hidden name=object_id value=${object_id}>";
 		echo "<input type=hidden name=portcount value=" . count ($portlist) . ">\n";
 		$portno = 0;
 		foreach ($portlist as $portname => $vlanid)
