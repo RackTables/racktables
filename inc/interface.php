@@ -2798,25 +2798,99 @@ function renderUIConfig ()
 
 function renderVLANMembership ($object_id = 0)
 {
-	global $root, $pageno, $tabno;
+	global $root, $pageno, $tabno, $remote_username;
 	if ($object_id <= 0)
 	{
 		showError ('Invalid object_id in renderVLANMembership()');
 		return;
 	}
 	showMessageOrError();
-	startPortlet ('VLAN membership');
 	$endpoints = findAllEndpoints ($object_id);
 	if (count ($endpoints) == 0)
 		echo 'Can\'t find any mean to reach current object. Please either set FQDN attribute or assign an IP address to the object.';
 	elseif (count ($endpoints) > 1)
-		echo 'More than one IP address are present at this device, please configure FQDN attribute.';
+		echo 'More than one IP address is assigned to this object, please configure FQDN attribute.';
 	else
 	{
-		echo "Using endpoint ${endpoints[0]} to reach the device.";
-		// FIXME: fetch the data and render the form.
+		// FIXME: find actual HW and SW data and pass to the gateway.
+		$data = queryGateway
+		(
+			$tabno,
+			array ($endpoints[0], 'hwtype', 'swtype', $remote_username),
+			array ('listvlans', 'listports')
+		);
+		if ($data == NULL)
+		{
+			showError ('Failed to get any response from queryGateway() or the gateway returned');
+			return;
+		}
+		if ($data[0] != 'OK')
+		{
+			showError ("Gateway failure: ${data[0]}");
+			return;
+		}
+		// Now we have VLAN list in $data[1] and port list in $data[2]. Let's sort this out.
+		$vlanlist = array_unique (explode (',', substr ($data[1], strlen ('OK '))));
+		sort ($vlanlist);
+		if (count ($vlanlist) == 0)
+		{
+			showError ("Gateway succeeded, but returned no VLAN records.");
+			return;
+		}
+		$portlist = array();
+		foreach (explode (',', substr ($data[2], strlen ('OK '))) as $pair)
+		{
+			list ($portname, $vlanid) = explode ('=', $pair);
+			$portlist[$portname] = $vlanid;
+		}
+		if (count ($portlist) == 0)
+		{
+			showError ("Gateway succeeded, but returned no port records.");
+			return;
+		}
+		// We don't sort the port list, as the gateway is believed to have done this already
+		// (or at least the underlying switch software ought to).
+		// Here the visual part of the work comes. Top row, then bottom.
+		startPortlet ('Current configuration');
+
+		echo "<table class=widetable cellspacing=0 cellpadding='5' align=center><tr>";
+		echo "<form action='${root}process.php' method=post>";
+		echo "<input type=hidden name=page value='${pageno}'>";
+		echo "<input type=hidden name=tab value='${tabno}'>";
+		echo "<input type=hidden name=op value=submit>";
+		echo "<input type=hidden name=portcount value=" . count ($portlist) . ">\n";
+		$portno = 0;
+		foreach ($portlist as $portname => $vlanid)
+		{
+			// Don't let big boxes break our fancy pages.
+			if (($portno) % PORTS_PER_ROW == 0)
+			{
+				if ($portno > 0)
+					echo "</tr>\n";
+				echo "<tr><th>" . ($portno + 1) . "-" . ($portno + PORTS_PER_ROW) . "</th>";
+			}
+			echo "<td>${portname} ";
+			if ($vlanid == 'trunk')
+				echo '[trunk]';
+			else
+			{
+				echo "<input type=hidden name=portname_${portno} value='${portname}'>";
+				echo "<select name=vlanid_${portno}>";
+				foreach ($vlanlist as $dummy => $v)
+				{
+					echo "<option value=${v}";
+					if ($v == $vlanid)
+						echo ' selected';
+					echo ">${v}</option>";
+				}
+				echo "</select>";
+			}
+			$portno++;
+			echo "</td>";
+		}
+		echo "</tr><tr><td colspan=" . (PORTS_PER_ROW + 1) . "><input type=submit value='Save changes'></form></td></tr></table>";
+		finishPortlet();
 	}
-	finishPortlet();
 }
 
 ?>
