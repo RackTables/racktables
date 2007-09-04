@@ -24,10 +24,13 @@ while read cmd arg; do
 	date >> /tmp/main.log
 	case $cmd in
 		listvlans)
-			echo 'OK 200,201,202,203,204,205'
+			echo 'OK 200,204,203,202,201,205,333,334'
 			;;
 		listports)
-			echo 'OK fa0/0/1=200,fa0/0/2=201,fa0/0/3=202,fa0/0/4=trunk'
+			echo -n 'OK fa0/0/1=200,fa0/0/2=205,fa0/0/3=202,fa0/0/4=trunk,fa0/0/5=333,fa0/0/6=334,fa0/0/7=333,fa0/0/8=334,'
+			echo -n 'fa0/0/9=200,fa0/0/10=205,fa0/0/11=202,fa0/0/12=trunk,fa0/0/13=333,fa0/0/14=334,fa0/0/15=333,fa0/0/16=334,'
+			echo -n 'fa0/1/1=200,fa0/1/2=205,fa0/1/3=202,fa0/1/4=trunk,fa0/1/5=333,fa0/1/6=334,fa0/1/7=333,fa0/1/8=334,'
+			echo 'fa0/1/9=200,fa0/1/10=205,fa0/1/11=202,fa0/1/12=trunk,fa0/1/13=333,fa0/1/14=334,fa0/1/15=333,fa0/1/16=334'
 			;;
 		set)
 			echo 'OK'
