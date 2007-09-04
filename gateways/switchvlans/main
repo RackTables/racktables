@@ -1,0 +1,40 @@
+#!/bin/bash
+
+# This is a RackTables gateway for changing switch ports membership
+# across VLANs. It works accordingly to the gateway protocol described
+# in gateways.php and accepts the following commands on its stdin:
+# * listvlans: list all VLANs found on the switch, propably filtering
+# out those administratively prohibited. Only the VLANs from this
+# list will be allowed as new destination for 'set' command.
+# * listports: list all ports on the switch and their current status.
+# Untagged (switchport mode access) ports will be shown with their
+# VLAN ID and tagged ports will be shown as 'trunk' regardless of
+# how many VLANs they are members of.
+
+usage()
+{
+	echo "Usage: $0 <endpoint> <hwtype> <swtype> <username>"
+	exit 1;
+}
+
+[ $# = 4 ] || usage
+
+while read cmd arg; do
+	echo -n $cmd >> /tmp/main.log
+	date >> /tmp/main.log
+	case $cmd in
+		listvlans)
+			echo 'OK 200,201,202,203,204,205'
+			;;
+		listports)
+			echo 'OK fa0/0/1=200,fa0/0/2=201,fa0/0/3=202,fa0/0/4=trunk'
+			;;
+		set)
+			echo 'OK'
+			;;
+		*)
+			echo "ERR 'unknown command $cmd'"
+	esac
+done
+
+exit 0
