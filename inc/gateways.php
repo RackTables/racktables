@@ -43,13 +43,14 @@ function queryGateway ($gwname, $arguments, $questions)
 	fclose ($pipes[0]);
 
 // Fetch replies.
-	$answers = array();
+	$answers = array ('OK');
 	while (!feof($pipes[1]))
 	{
 		$a = fgets ($pipes[1]);
 		if (empty ($a))
 			continue;
-		array_push ($answers, $a);
+		// Somehow I got a space appended at the end. Kick it.
+		$answers[] = trim ($a);
 	}
 	fclose($pipes[1]);
 
