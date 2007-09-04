@@ -63,6 +63,9 @@ define ('TYPE_ROUTER', 7);
 // Row-scope picture scale factor.
 define ('ROW_SCALE', 2);
 
+// Max switch port per one row on the switchvlans dynamic tab.
+define ('PORTS_PER_ROW', 12);
+
 // New-style image declarations.
 $image['error']['path'] = 'pix/error.png';
 $image['error']['width'] = 76;
