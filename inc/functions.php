@@ -1016,7 +1016,7 @@ function findAllEndpoints ($object_id)
 	$regular = array();
 	foreach ($addresses as $idx => $address)
 		if ($address['type'] == 'regular')
-			array_push ($regular, $address['ip']);
+			$regular[] = $address['ip'];
 	return $regular;
 }
 
