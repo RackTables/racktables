@@ -362,4 +362,16 @@ function handler_reports ($tabno)
 	}
 }
 
+function handler_help ($tabno)
+{
+	switch ($tabno)
+	{
+		case 'default':
+			renderHelpContents();
+			break;
+		default:
+			showError ("Invalid tab '${tabno}' requested in handler_help().");
+	}
+}
+
 ?>

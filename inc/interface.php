@@ -40,6 +40,10 @@ function renderIndex ()
 						<h1><a href='<? echo $root; ?>?page=reports'>Reports<br>
 						<? printImageHREF ('reports'); ?></a></h1>
 					</td>
+					<td>
+						<h1><a href='<? echo $root; ?>?page=help'>Help<br>
+						<? printImageHREF ('help'); ?></a></h1>
+					</td>
 				</tr>
 			</table>
 			</div>
@@ -2894,6 +2898,11 @@ function renderVLANMembership ($object_id = 0)
 		echo "</tr><tr><td colspan=" . (PORTS_PER_ROW + 1) . "><input type=submit value='Save changes'></form></td></tr></table>";
 		finishPortlet();
 	}
+}
+
+function renderHelpContents ()
+{
+	echo 'Hello there. All existing help snippets scattered across other tabs are going to be gathered here. Soon.';
 }
 
 ?>
