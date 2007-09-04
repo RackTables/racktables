@@ -43,7 +43,7 @@ function queryGateway ($gwname, $arguments, $questions)
 	fclose ($pipes[0]);
 
 // Fetch replies.
-	$answers = array ('OK');
+	$answers = array ('OK!');
 	while (!feof($pipes[1]))
 	{
 		$a = fgets ($pipes[1]);
