@@ -36,6 +36,8 @@ $tab['rack']['default'] = 'View';
 $tab['rack']['edit'] = 'Properties';
 $tab['rack']['design'] = 'Design';
 $tab['rack']['problems'] = 'Problems';
+$helptab['rack']['design'] = 'rackspace';
+$helptab['rack']['problems'] = 'rackspace';
 
 $page['objgroup']['title'] = 'dynamic_title_objgroup';
 $page['objgroup']['handler'] = 'handler_objgroup';
@@ -174,8 +176,17 @@ $tab['reports']['default'] = 'View';
 $page['help']['title'] = 'static_title';
 $page['help']['handler'] = 'handler_help';
 $page['help']['parent'] = 'index';
-$tab['help']['default'] = 'Contents';
+$tab['help']['default'] = 'Welcome';
 $tab['help']['quickstart'] = 'Quick start';
+$tab['help']['workflow'] = 'Workflow';
+$tab['help']['rackspace'] = 'Rackspace';
+$tab['help']['objects'] = 'Objects';
+$tab['help']['nets'] = 'Network addresses';
+$tab['help']['auth'] = 'User accounts & permissions';
+$tab['help']['dict'] = 'Dictionary';
+$tab['help']['ports'] = 'Ports and links';
+$tab['help']['bcp'] = 'Best practices';
+$tab['help']['hacking'] = 'Hacker\'s guide';
 
 // This function returns array if page numbers leading to the target page
 // plus page number of target page itself. The first element is the target
