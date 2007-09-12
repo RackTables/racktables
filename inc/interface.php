@@ -2907,23 +2907,23 @@ function renderHelpContents ()
 	{
 		case 'quickstart':
 			echo
-"
+'
 The world of a datacenter consists of resources. The first resource to start
 with is rackspace, which in turn is built up from racks. To create yur first
 rack, open Configuration->Dictionary page and go to "Edit words" tab.
-
+<p>
 Here you see a bunch of portlets, each holding some odd data. The one you need
 right now is called "RackRow (3)". The only thing you need to do now is to think
 about the name you want to assign to the first group of your racks and to type
 it into the form and press OK. This can be changed later, so a simple "server
 room" is Ok.
-
+<p>
 Now get back to the main page and head into Rackspace page. You will see you
 rack row with zero racks. Click it and go to "Add new rack" tab. This is the
 moment where you create the rack itself, supplying its name and height.
-
+<p>
 To populate the rack, you need some stuff called objects. See the next page.
-";
+';
 			break;
 		default:
 			echo 'Hello there. All existing help snippets scattered across other tabs are going to be gathered here. Soon.';
