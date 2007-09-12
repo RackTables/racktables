@@ -37,11 +37,11 @@ function renderIndex ()
 							<? printImageHREF ('config'); ?></a></h1>
 					</td>
 					<td>
-						<h1><a href='<? echo $root; ?>?page=reports'>Reports<br>
+						<h1><a href='<? echo $root; ?>?page=reports'>[ Reports ]<br>
 						<? printImageHREF ('reports'); ?></a></h1>
 					</td>
 					<td>
-						<h1><a href='<? echo $root; ?>?page=help'>Help<br>
+						<h1><a href='<? echo $root; ?>?page=help'>[ Help ]<br>
 						<? printImageHREF ('help'); ?></a></h1>
 					</td>
 				</tr>
@@ -493,7 +493,7 @@ function printSelect ($rowList, $select_name, $selected_id = 1)
 }
 
 // This is a universal editor of rack design/waste.
-function renderGridForm ($rack_id = 0, $filter, $header, $submit, $help, $state1, $state2)
+function renderGridForm ($rack_id = 0, $filter, $header, $submit, $state1, $state2)
 {
 	if ($rack_id == 0)
 	{
@@ -534,7 +534,7 @@ function renderGridForm ($rack_id = 0, $filter, $header, $submit, $help, $state1
 	finishPortlet();
 
 	echo "</td>\n";
-	echo "<td class=pcright rowspan=2>";
+	echo "<td class=pcright>";
 
 	// Grid form.
 	startPortlet ($header);
@@ -551,35 +551,17 @@ function renderGridForm ($rack_id = 0, $filter, $header, $submit, $help, $state1
 	echo "</table></center>\n";
 	echo "<br><input type=submit name=do_update value='${submit}'></form><br><br>\n";
 	finishPortlet();
-	echo "</td></tr>\n";
-
-	// Help portlet.
-	echo '<tr><td class=pcleft>';
-	startPortlet ('Help');
-	echo "<p align=justify style='margin-left: 30px; margin-right: 30px;'>$help</p>";
-	finishPortlet();
-	echo "</td></td></table>\n";
+	echo "</td></tr></table>\n";
 }
 
 function renderRackDesign ($rack_id)
 {
-	$help =
-		"Rack design defines the physical layout of a rack cabinet. " .
-		"Most common reason to use this tab is absence of back rails, although " .
-		"any other design can be defined. " .
-		"In this tab you can change atoms' state between 'free' and 'absent'.<br>" .
-		"A selected checkbox means atom presence.";
-	renderGridForm ($rack_id, 'applyRackDesignMask', 'Rack design', 'Set rack design', $help, 'A', 'F');
+	renderGridForm ($rack_id, 'applyRackDesignMask', 'Rack design', 'Set rack design', 'A', 'F');
 }
 
 function renderRackProblems ($rack_id = 0)
 {
-	$help =
-		"Rack problems prevent free rackspace from being used for mounting. Such rackspace is considered " .
-		"unusable. After the problem is gone, the atom can become free again. " .
-		"In this tab you can change atoms' state from free to unusable and back.<br>" .
-		"A selected checkbox means a problem.";
-	renderGridForm ($rack_id, 'applyRackProblemMask', 'Rack problems', 'Mark unusable atoms', $help, 'F', 'U');
+	renderGridForm ($rack_id, 'applyRackProblemMask', 'Rack problems', 'Mark unusable atoms', 'F', 'U');
 }
 
 function startPortlet ($title = '')
@@ -2897,37 +2879,6 @@ function renderVLANMembership ($object_id = 0)
 		}
 		echo "</tr><tr><td colspan=" . (PORTS_PER_ROW + 1) . "><input type=submit value='Save changes'></form></td></tr></table>";
 		finishPortlet();
-	}
-}
-
-function renderHelpContents ()
-{
-	global $tabno;
-	switch ($tabno)
-	{
-		case 'quickstart':
-			echo
-'
-The world of a datacenter consists of resources. The first resource to start
-with is rackspace, which in turn is built up from racks. To create yur first
-rack, open Configuration->Dictionary page and go to "Edit words" tab.
-<p>
-Here you see a bunch of portlets, each holding some odd data. The one you need
-right now is called "RackRow (3)". The only thing you need to do now is to think
-about the name you want to assign to the first group of your racks and to type
-it into the form and press OK. This can be changed later, so a simple "server
-room" is Ok.
-<p>
-Now get back to the main page and head into Rackspace page. You will see you
-rack row with zero racks. Click it and go to "Add new rack" tab. This is the
-moment where you create the rack itself, supplying its name and height.
-<p>
-To populate the rack, you need some stuff called objects. See the next page.
-';
-			break;
-		default:
-			echo 'Hello there. All existing help snippets scattered across other tabs are going to be gathered here. Soon.';
-			break;
 	}
 }
 
