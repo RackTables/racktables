@@ -116,5 +116,8 @@ $image['delete']['width'] = 16;
 $image['delete']['height'] = 16;
 $image['grant'] = $image['add'];
 $image['revoke'] = $image['delete'];
+$image['helphint']['path'] = 'pix/helphint.png';
+$image['helphint']['width'] = 24;
+$image['helphint']['height'] = 24;
 
 ?>
