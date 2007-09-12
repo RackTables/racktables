@@ -182,10 +182,10 @@ function static_title ($pageno)
 			$ret['name'] = 'config.php';
 			break;
 		case 'reports':
-			$ret['name'] = 'Reports';
+			$ret['name'] = '[ Reports ]';
 			break;
 		case 'help':
-			$ret['name'] = 'Help';
+			$ret['name'] = '[ Help ]';
 			break;
 		default:
 			$ret['name'] = 'UNKNOWN';
