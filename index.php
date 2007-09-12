@@ -24,7 +24,7 @@ foreach ($color as $statecode => $colorcode)
 <body>
  <table border=0 cellpadding=0 cellspacing=0 width='100%' height='100%' class=maintable>
  <tr class=mainheader>
-  <td>
+  <td colspan=2>
    <table width='100%' cellspacing=0 cellpadding=2 border=0>
    <tr>
     <td valign=top><? printImageHREF ('logo'); ?></td>
@@ -35,7 +35,7 @@ foreach ($color as $statecode => $colorcode)
  </tr>
 
  <tr>
-  <td class="menubar">
+  <td class="menubar" colspan=2>
    <table border="0" width="100%" cellpadding="3" cellspacing="0">
    <tr>
 <? showPathAndSearch ($pageno); ?>
@@ -47,11 +47,12 @@ foreach ($color as $statecode => $colorcode)
 	<tr>
 <?
 	showTabs ($pageno, $tabno);
+	lookupHelpTopic ($pageno, $tabno);
 ?>
 	</tr>
 
  <tr>
-  <td>
+  <td colspan=2>
 <?
 if (isset ($page[$pageno]['handler']))
 	$page[$pageno]['handler'] ($tabno);
