@@ -175,6 +175,7 @@ $page['help']['title'] = 'static_title';
 $page['help']['handler'] = 'handler_help';
 $page['help']['parent'] = 'index';
 $tab['help']['default'] = 'Contents';
+$tab['help']['quickstart'] = 'Quick start';
 
 // This function returns array if page numbers leading to the target page
 // plus page number of target page itself. The first element is the target
