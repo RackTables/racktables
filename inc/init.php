@@ -81,5 +81,6 @@ require_once 'inc/pagehandlers.php';
 require_once 'inc/ophandlers.php';
 require_once 'inc/triggers.php';
 require_once 'inc/gateways.php';
+require_once 'inc/help.php';
 
 ?>
