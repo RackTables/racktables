@@ -47,7 +47,6 @@ foreach ($color as $statecode => $colorcode)
 	<tr>
 <?
 	showTabs ($pageno, $tabno);
-	lookupHelpTopic ($pageno, $tabno);
 ?>
 	</tr>
 

@@ -19,10 +19,10 @@ function lookupHelpTopic ($pageno, $tabno)
 	global $helptab;
 	if (!isset ($helptab[$pageno][$tabno]))
 		return;
-	echo "<td><a href='" . genHelpLink ($helptab[$pageno][$tabno]);
+	echo "<li style='position: absolute; top: 80px; right: 0px;'><a style='background-color: #f0f0f0; border: 0;' href='" . genHelpLink ($helptab[$pageno][$tabno]);
 	echo "' alt='Help' title='Help is available for this page'>";
 	printImageHREF ('helphint');
-	echo '</a></td>';
+	echo '</a>';
 	return;
 }
 
