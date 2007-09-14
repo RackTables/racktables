@@ -55,6 +55,9 @@ $tab['object']['ports'] = 'Ports';
 $tab['object']['network'] = 'IPv4';
 $tab['object']['portfwrd'] = 'NATv4';
 $tab['object']['switchvlans'] = 'VLANs';
+$helptab['object']['network'] = 'iprange';
+$helptab['object']['ports'] = 'ports';
+$helptab['object']['portfwrd'] = 'portfwrd';
 $trigger['object']['switchvlans'] = 'trigger_switchvlans';
 $ophandler['object']['ports']['addPort'] = 'addPortForObject';
 $ophandler['object']['ports']['delPort'] = 'delPortFromObject';
@@ -78,6 +81,7 @@ $page['ipv4space']['handler'] = 'handler_ipv4space';
 $page['ipv4space']['parent'] = 'index';
 $tab['ipv4space']['default'] = 'Browse';
 $tab['ipv4space']['newrange'] = 'Manage ranges';
+$helptab['ipv4space']['title'] = 'iprange';
 $ophandler['ipv4space']['newrange']['addRange'] = 'addNewrange';
 $ophandler['ipv4space']['newrange']['delRange'] = 'delRange';
 
