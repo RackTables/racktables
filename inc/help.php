@@ -146,6 +146,7 @@ have a server.
 				"paste the output to the textarea and click \"Parse output\" button. Also, you need to ".
 				"choose which port type is to be used, since it's not possible to guess that from the output.";
 			finishPortlet();
+			break;
 //------------------------------------------------------------------------
 		case 'portfwrd':
 			startPortlet ('NATv4');
@@ -159,6 +160,7 @@ have a server.
 				"addresses/ports. That will represent an L4 loadbalancing. And vice versa, multiple sources can be ".
 				"translated to one target";
 			finishPortlet();
+			break;
 //------------------------------------------------------------------------
 		case 'workflow':
 			startPortlet ('People');
