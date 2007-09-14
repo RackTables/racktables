@@ -185,7 +185,6 @@ $tab['help']['nets'] = 'Network addresses';
 $tab['help']['auth'] = 'User accounts & permissions';
 $tab['help']['dict'] = 'Dictionary';
 $tab['help']['ports'] = 'Ports and links';
-$tab['help']['bcp'] = 'Best practices';
 $tab['help']['hacking'] = 'Hacker\'s guide';
 
 // This function returns array if page numbers leading to the target page

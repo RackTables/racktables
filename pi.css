@@ -49,6 +49,10 @@ table.molecule {
 	margin: 5px;
 }
 
+.portlet .helptext {
+	text-align: left;
+}
+
 .tdright {
 	text-align: right;
 }

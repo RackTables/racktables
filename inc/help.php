@@ -43,10 +43,11 @@ software, just follow to the next tab.
 			break;
 //------------------------------------------------------------------------
 		case 'quickstart':
+			startPortlet ('The 1st rack');
 			echo
 '
 The datacenter world is built up from resources. The first resource to start
-with is rackspace, which in turn is built up from racks. To create yur first
+with is rackspace, which in turn is built up from racks. To create your first
 rack, open Configuration->Dictionary page and go to "Edit words" tab.
 <p>
 Here you see a bunch of portlets, each holding some odd data. The one you need
@@ -57,10 +58,17 @@ room" is Ok.
 <p>
 Now get back to the main page and head into Rackspace page. You will see you
 rack row with zero racks. Click it and go to "Add new rack" tab. This is the
-moment where you create the rack itself, supplying its name and height.
-<p>
-To populate the rack, you need some stuff called objects. See the next page.
+moment where you create the rack itself, supplying its name and height. The rack
+is empty.
 ';
+			finishPortlet();
+			startPortlet ('The 1st object');
+			echo
+'
+To populate the rack, you need some stuff called objects. Let\'s assume you
+have a server. 
+';
+			finishPortlet();
 			break;
 //------------------------------------------------------------------------
 		case 'rackspace':
@@ -78,6 +86,62 @@ To populate the rack, you need some stuff called objects. See the next page.
 				"unusable. After the problem is gone, the atom can become free again. " .
 				"In this tab you can change atoms' state from free to unusable and back.<br>" .
 				"A selected checkbox means a problem.";
+			finishPortlet();
+			break;
+//------------------------------------------------------------------------
+		case 'workflow':
+			startPortlet ('People');
+			echo
+'
+<div class=helptext>
+<ul>
+	<li>Datacenter engineers</li>
+	<li>System administrators</li>
+	<li>Network administrators</li>
+	<li>Helpdesk</li>
+</ul>
+</div>
+';
+			finishPortlet();
+			startPortlet ('Common tasks');
+			echo
+'
+<div class=helptext>
+<ul>
+	<li>Resource allocation</li>
+	<li>Search</li>
+	<li>Changes tracking</li>
+</ul>
+</div>
+';
+			finishPortlet();
+			startPortlet ('Effective collaboration and best practices');
+			echo
+'
+<div class=helptext>
+<ul>
+	<li>Resource allocation</li>
+	<li>Search</li>
+	<li>Changes tracking</li>
+</ul>
+</div>
+';
+			finishPortlet();
+			break;
+//------------------------------------------------------------------------
+		case 'objects':
+			startPortlet ('Object life cycle');
+			echo
+'
+<div class=helptext>
+<ul>
+	<li>Creation</li>
+	<li>Resource allocation</li>
+	<li>Possible changes</li>
+	<li>Retiring</li>
+</ul>
+</div>
+';
 			finishPortlet();
 			break;
 //------------------------------------------------------------------------
