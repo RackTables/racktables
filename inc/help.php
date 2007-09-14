@@ -46,6 +46,7 @@ software, just follow to the next tab.
 			startPortlet ('The 1st rack');
 			echo
 '
+<div class=helptext>
 The datacenter world is built up from resources. The first resource to start
 with is rackspace, which in turn is built up from racks. To create your first
 rack, open Configuration->Dictionary page and go to "Edit words" tab.
@@ -60,13 +61,16 @@ Now get back to the main page and head into Rackspace page. You will see you
 rack row with zero racks. Click it and go to "Add new rack" tab. This is the
 moment where you create the rack itself, supplying its name and height. The rack
 is empty.
+</div>
 ';
 			finishPortlet();
 			startPortlet ('The 1st object');
 			echo
 '
+<div class=helptext>
 To populate the rack, you need some stuff called objects. Let\'s assume you
-have a server. 
+have a server.
+</div>
 ';
 			finishPortlet();
 			break;
@@ -74,30 +78,37 @@ have a server.
 		case 'rackspace':
 			startPortlet ('Rack design');
 			echo
+				'<div class=helptext>' .
 				"Rack design defines the physical layout of a rack cabinet. " .
 				"Most common reason to use the tab is absence of back rails, although " .
 				"any other design can be defined.<p>" .
 				"In this tab you can change mounting atoms' state between 'free' and 'absent'.<br>" .
-				"A selected checkbox means atom presence.";
+				"A selected checkbox means atom presence." .
+				'</div>';
 			finishPortlet();
 			startPortlet ('Rackspace problems');
 			echo
+				'<div class=helptext>' .
 				"Rack problems prevent free rackspace from being used for mounting. Such rackspace is considered " .
 				"unusable. After the problem is gone, the atom can become free again. " .
 				"In this tab you can change atoms' state from free to unusable and back.<br>" .
-				"A selected checkbox means a problem.";
+				"A selected checkbox means a problem." .
+				'</div>';
 			finishPortlet();
 			break;
 //------------------------------------------------------------------------
-		case 'iprange':
+		case 'nets':
 			startPortlet ('IP Range');
-			echo 
+			echo
+				'<div class=helptext>' .
 				"This tab manages IPv4 resources. All IPv4 addresses are grouped to subnets. Subnets are flat and don't make a hierarchy. " .
 				"In other words, the whole IPv4 range you have can be divided into subnets. " .
-				"Every IPv4 address there must belong to one and only one subnetwork.";
+				"Every IPv4 address there must belong to one and only one subnetwork." .
+				'</div>';
 			finishPortlet();
 			startPortlet ('IP Address');
 			echo 
+				'<div class=helptext>' .
 				"Every IP address can be either bound to an interface or free. On the other hand, it can " .
 				"be either reserved or not. That makes 4 possible states: bound - reserved, bound - unreserved, free - reserved ".
 				"free - unreserved. The first state is considered as \"conflicting\" and will be shown red-highlited. ".
@@ -120,14 +131,28 @@ have a server.
 				"in loadbalancing technics where loadbalancers simply do ARP proxy; they rewrite L2 address ".
 				"in L2 frames with target's address and resend them back to the network. Virtual interfaces ".
 				"do not conflict with any other interface types. Note: do not use virtual interfaces if ".
-				"your loadbalancer uses NAT. There is a NAT tab for that instead.";
-
+				"your loadbalancer uses NAT. There is a NAT tab for that instead." .
+				'</div>';
+			finishPortlet();
+			startPortlet ('NATv4');
+			echo
+				'<div class=helptext>' .
+				"Boxes can translate their own L4 addresses to other L4 addresses on other boxes. This is called ".
+				"NAT. In protocol selection box you can choose 2 protocols so far, UDP and TCP. Source is one of ".
+				"IP addresses assigned to the box and after a colon is a box for numerical port. As a target you ".
+				"have to choose a target IP address and port it will be translated to. Add a decription if you like. ".
+				"After submitting the form you will find that if there was an object assined to the target IP address ".
+				"it will be shown as well. A single source IP address/port can be assigned to multiple target IP ".
+				"addresses/ports. That will represent an L4 loadbalancing. And vice versa, multiple sources can be ".
+				"translated to one target" .
+				'</div>';
 			finishPortlet();
 			break;
 //------------------------------------------------------------------------
 		case 'ports':
 			startPortlet ('Ports');
 			echo
+				'<div class=helptext>' .
 				"A port or physical interface is a small thingy on your box you can connect a cable to. ".
 				"So far this software can only handle network ports. No power outlets yet. Each port can ".
 				"have a local name, that is how this port is visible from the OS point of view. For linux box ".
@@ -144,21 +169,8 @@ have a server.
 				"be linked to LC/100-BASE FX. In many cases you'll need to add a bunch of ports from a switch. ".
 				"In this case there is a text area and a format selector. Just choose your device and format, ".
 				"paste the output to the textarea and click \"Parse output\" button. Also, you need to ".
-				"choose which port type is to be used, since it's not possible to guess that from the output.";
-			finishPortlet();
-			break;
-//------------------------------------------------------------------------
-		case 'portfwrd':
-			startPortlet ('NATv4');
-			echo
-				"Boxes can translate their own L4 addresses to other L4 addresses on other boxes. This is called ".
-				"NAT. In protocol selection box you can choose 2 protocols so far, UDP and TCP. Source is one of ".
-				"IP addresses assigned to the box and after a colon is a box for numerical port. As a target you ".
-				"have to choose a target IP address and port it will be translated to. Add a decription if you like. ".
-				"After submitting the form you will find that if there was an object assined to the target IP address ".
-				"it will be shown as well. A single source IP address/port can be assigned to multiple target IP ".
-				"addresses/ports. That will represent an L4 loadbalancing. And vice versa, multiple sources can be ".
-				"translated to one target";
+				"choose which port type is to be used, since it's not possible to guess that from the output." .
+				'</div>';
 			finishPortlet();
 			break;
 //------------------------------------------------------------------------
@@ -192,11 +204,7 @@ have a server.
 			echo
 '
 <div class=helptext>
-<ul>
-	<li>Resource allocation</li>
-	<li>Search</li>
-	<li>Changes tracking</li>
-</ul>
+BCP go here.
 </div>
 ';
 			finishPortlet();
