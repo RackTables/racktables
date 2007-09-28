@@ -5,6 +5,12 @@
 *
 */
 
+$page = array();
+$tab = array();
+$helptab = array();
+$trigger = array();
+$ophandler = array();
+
 $page['index']['title'] = 'static_title';
 $page['index']['handler'] = 'renderIndex';
 
