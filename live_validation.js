@@ -1,3 +1,9 @@
+// This file has been downloaded from the following URL:
+// http://www.openjs.com/scripts/forms/live_validation/
+// (Live Validator 1.00.A Beta)
+// It was declared as released under BSD license at that moment.
+// The content below is a verbatim copy.
+
 var Validate = {
 	elements:[],
 	//Some General purpose functions
