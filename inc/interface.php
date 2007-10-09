@@ -2367,7 +2367,7 @@ function renderPermissionsEditForm ()
 	echo "<input type=hidden name=tab value='${tabno}'>\n";
 	// FIXME: border=0 doesn't work here for unknown reason
 	echo "<td>";
-	printImageInput ('grant', 103);
+	printImageHREF ('grant', '', TRUE, 103);
 	echo "</td>";
 	echo "<td><select name=access_userid>";
 	echo "<option value=0>ANY</option>";
@@ -2603,7 +2603,7 @@ function renderChaptersEditor ()
 	echo "<input type=hidden name=tab value='${tabno}'>";
 	echo "<input type=hidden name=op value=add>";
 	echo '<tr><td>';
-	printImageInput ('add');
+	printImageHREF ('add', '', TRUE);
 	echo "</td><td colspan=3><input type=text name=chapter_name></td>";
 	echo '</tr>';
 	echo '</form>';
@@ -2670,7 +2670,7 @@ function renderEditAttributesForm ()
 	echo "<input type=hidden name=tab value='${tabno}'>";
 	echo "<input type=hidden name=op value=add>";
 	echo '<tr><td>';
-	printImageInput ('add');
+	printImageHREF ('add', '', TRUE);
 	echo "</td><td><input type=text name=attr_name></td>";
 	echo '<td><select name=attr_type>';
 	echo '<option value=uint>uint</option>';
@@ -2720,7 +2720,7 @@ function renderEditAttrMapForm ()
 	echo "<input type=hidden name=tab value='${tabno}'>";
 	echo "<input type=hidden name=op value=add>";
 	echo '<tr><td>';
-	printImageInput ('add');
+	printImageHREF ('add', '', TRUE);
 	echo "</td><td><select name=attr_id>";
 	$shortType['uint'] = 'U';
 	$shortType['float'] = 'F';
@@ -2744,34 +2744,80 @@ function renderEditAttrMapForm ()
 	finishPortlet();
 }
 
-function printImageHREF ($tag, $title = '')
+function printImageHREF ($tag, $title = '', $do_input = FALSE, $tabindex = 0)
 {
-	global $root, $image;
+	global $root;
+	$image['error']['path'] = 'pix/error.png';
+	$image['error']['width'] = 76;
+	$image['error']['height'] = 17;
+	$image['favicon']['path'] = 'pix/racktables.ico';
+	$image['favicon']['width'] = 16;
+	$image['favicon']['height'] = 16;
+	$image['logo']['path'] = 'pix/defaultlogo.png';
+	$image['logo']['width'] = 210;
+	$image['logo']['height'] = 40;
+	$image['rackspace']['path'] = 'pix/racks.png';
+	$image['rackspace']['width'] = 218;
+	$image['rackspace']['height'] = 200;
+	$image['objects']['path'] = 'pix/server.png';
+	$image['objects']['width'] = 218;
+	$image['objects']['height'] = 200;
+	$image['ipv4space']['path'] = 'pix/addressspace.png';
+	$image['ipv4space']['width'] = 218;
+	$image['ipv4space']['height'] = 200;
+	$image['config']['path'] = 'pix/configuration.png';
+	$image['config']['width'] = 218;
+	$image['config']['height'] = 200;
+	$image['reports']['path'] = 'pix/report.png';
+	$image['reports']['width'] = 218;
+	$image['reports']['height'] = 200;
+	$image['help']['path'] = 'pix/help.png';
+	$image['help']['width'] = 218;
+	$image['help']['height'] = 200;
+	$image['reserve']['path'] = 'pix/stop.png';
+	$image['reserve']['width'] = 16;
+	$image['reserve']['height'] = 16;
+	$image['useup']['path'] = 'pix/go.png';
+	$image['useup']['width'] = 16;
+	$image['useup']['height'] = 16;
+	$image['blockuser'] = $image['reserve'];
+	$image['unblockuser'] = $image['useup'];
+	$image['link']['path'] = 'pix/link.png';
+	$image['link']['width'] = 24;
+	$image['link']['height'] = 24;
+	$image['unlink']['path'] = 'pix/unlink.png';
+	$image['unlink']['width'] = 24;
+	$image['unlink']['height'] = 24;
+	$image['add']['path'] = 'pix/greenplus.png';
+	$image['add']['width'] = 16;
+	$image['add']['height'] = 16;
+	$image['delete']['path'] = 'pix/delete_s.gif';
+	$image['delete']['width'] = 16;
+	$image['delete']['height'] = 16;
+	$image['grant'] = $image['add'];
+	$image['revoke'] = $image['delete'];
+	$image['helphint']['path'] = 'pix/helphint.png';
+	$image['helphint']['width'] = 24;
+	$image['helphint']['height'] = 24;
 	if (!isset ($image[$tag]))
 		$tag = 'error';
 	$img = $image[$tag];
-	echo
-		"<img " .
-		"src='${root}${img['path']}' " .
-		"width=${img['width']} " .
-		"height=${img['height']} " .
-		"border=0 " .
-		(empty ($title) ? '' : "title='${title}'") .
-		">";
-}
-
-function printImageInput ($tag, $tabindex = 0)
-{
-	global $root, $image;
-	if (!isset ($image[$tag]))
-		$tag = 'error';
-	$img = $image[$tag];
-	echo
-		"<input type=image name=submit " .
-		"src='${root}${img['path']}' " .
-		"border=0 " .
-		($tabindex ? '' : "tabindex=${tabindex}") .
-		">";
+	if ($do_input == TRUE)
+		echo
+			"<input type=image name=submit " .
+			"src='${root}${img['path']}' " .
+			"border=0 " .
+			($tabindex ? '' : "tabindex=${tabindex}") .
+			">";
+	else
+		echo
+			"<img " .
+			"src='${root}${img['path']}' " .
+			"width=${img['width']} " .
+			"height=${img['height']} " .
+			"border=0 " .
+			(empty ($title) ? '' : "title='${title}'") .
+			">";
 }
 
 // This function returns URL for favourite icon.
