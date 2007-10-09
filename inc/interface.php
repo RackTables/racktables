@@ -2504,9 +2504,9 @@ function renderDictionary ()
 		startPortlet ($chapter['name'] . ' (' . count ($chapter['word']) . ')');
 		echo "<table class=cooltable border=0 cellpadding=5 cellspacing=0 align=center>\n";
 		$order = 'odd';
-		foreach ($chapter['word'] as $value)
+		foreach ($chapter['word'] as $key => $value)
 		{
-			echo "<tr class=row_${order}><td class=tdleft>${value}</td></tr>";
+			echo "<tr class=row_${order}><td class=tdleft><div title='key=${key}'>${value}</div></td></tr>";
 			$order = $nextorder[$order];
 		}
 		echo "</table>";

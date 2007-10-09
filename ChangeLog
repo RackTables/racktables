@@ -2,6 +2,7 @@
 	new feature: browser-side validation for a new IPv4 network
 	  (contributed by Aaron Dummer)
 	new feature: logout link (same author)
+	new feature: key hint in dictionary browser
 	bugfix: don't hide IPv4 address name for a free address
 	update: new stock values in dictionary chapters: server OS type,
 		PortType, switch models
