@@ -5,11 +5,13 @@
 *
 */
 
-$enterprise = 'MyCompanyName';
+
+/* The following parameters/constants are necessary, although they are unlikely
+ * to change. They just have to be stored somewhere and this is the place.
+ */
+
 // This is the name of hash used to store account password hashes in the database.
 define ('PASSWORD_HASH', 'sha1');
-define ('VERSION', '0.14.6');
-
 $rtwidth[0] = 9;
 $rtwidth[1] = 21;
 $rtwidth[2] = 9;
@@ -48,6 +50,16 @@ $color['Thw'] = 'ff8080';
 $nextorder['odd'] = 'even';
 $nextorder['even'] = 'odd';
 
+
+
+/*******************************************************************************
+ * The following parameters are likely to be changed by user, thus they
+ * are listed below until we implement a configuration storage to move
+ * them there.
+ */
+
+$enterprise = 'MyCompanyName';
+
 // Taken from the database, RJ-45/100Base-TX
 $default_port_type = 6;
 
@@ -65,5 +77,11 @@ define ('ROW_SCALE', 2);
 
 // Max switch port per one row on the switchvlans dynamic tab.
 define ('PORTS_PER_ROW', 12);
+
+/*******************************************************************************
+ * And finally there are some things that we'd still like to see in the
+ * configuration storage, but not changeable by user.
+ */
+define ('VERSION', '0.14.6');
 
 ?>
