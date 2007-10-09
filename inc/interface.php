@@ -1620,7 +1620,21 @@ function renderAddNewRange ()
 {
 	global $root, $pageno, $tabno;
 	showMessageOrError();
-	echo "<table class='widetable' border=0 cellpadding=10 cellpadding=0 align='center'>\n";
+
+	echo "<center><h2>Add New Range</h2></center>\n";
+	echo "<table class='widetable' border=0 cellpadding=10 align='center'>\n";
+	echo "<tr><th>Address range</th><th>Name</th><th>&nbsp;</th></tr>\n";
+	echo "<form name='add_new_range' action='process.php'>\n";
+	echo "<input type=hidden name=op value=addRange>\n";
+	echo "<input type=hidden name=page value='${pageno}'>\n";
+	echo "<input type=hidden name=tab value='${tabno}'>\n";
+	echo "<tr><td class='tdcenter'><input type=text name='range' size=18 class='live-validate'></td>\n";
+	echo "<td class='tdcenter'><input type=text name='name' size='20'></td>\n";
+	echo "<td class='tdcenter'><input type=submit value='Add a new range'></td></tr>\n";
+	echo "</form></table><br><br>\n";
+
+	echo "<center><h2>Existing Ranges</h2></center>\n";
+	echo "<table class='widetable' border=0 cellpadding=10 align='center'>\n";
 	$addrspaceList = getAddressspaceList();
 	echo "<tr><th>&nbsp;</th><th>Address range</th><th>Name</th><th>Total/used addresses</th></tr>";
 	foreach ($addrspaceList as $iprange)
@@ -1643,14 +1657,9 @@ function renderAddNewRange ()
 		echo ($iprange['ip_bin'] | $iprange['mask_bin_inv']) - ($iprange['ip_bin'] & $iprange['mask_bin'])+1;
 		echo "/";
 		echo $usedips;
+		#echo "</td></tr></table>";
 		echo "</td></tr>";
 	}
-	echo "<form action='process.php'>";
-	echo "<input type=hidden name=op value=addRange>";
-	echo "<input type=hidden name=page value='${pageno}'>\n";
-	echo "<input type=hidden name=tab value='${tabno}'>\n";
-	echo "<tr><td colspan=4 class='tdcenter'><input type=text name=ip size=10>/<input type=text name=mask size=10>&nbsp;<input type=text name='name' size='20'>&nbsp;<input type=submit value='Add a new range'></td></tr>";
-	echo "</form></table>\n";
 }
 
 function renderIPRange ()

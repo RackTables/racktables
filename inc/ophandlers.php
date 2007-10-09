@@ -408,10 +408,9 @@ function addNewRange ()
 {
 	global $root, $pageno, $tabno;
 
-	$ip = $_REQUEST['ip'];
-	$mask = $_REQUEST['mask'];
+	$range = $_REQUEST['range'];
 	$name = $_REQUEST['name'];
-	$error = addRange($ip, $mask, $name);
+	$error = addRange($range, $name);
 	if ($error != '')
 	{
 		return "${root}?page=${pageno}&tab=${tabno}&error=".urlencode($error);

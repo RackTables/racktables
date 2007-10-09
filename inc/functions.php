@@ -364,8 +364,13 @@ function binInvMaskFromDec ($maskL)
 	return $binmask;
 }
 
-function addRange ($ip='', $mask='', $name='')
+function addRange ($range='', $name='')
 {
+	// $range is in x.x.x.x/x format, split into ip/mask vars
+	$rangeArray = explode('/', $range);
+	$ip = $rangeArray[0];
+	$mask = $rangeArray[1];
+
 	$ipL = ip2long($ip);
 	$maskL = ip2long($mask);
 	if ($ipL == -1 || $ipL === FALSE)

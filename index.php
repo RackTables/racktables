@@ -13,13 +13,29 @@ echo "<style type='text/css'>\n";
 foreach ($color as $statecode => $colorcode)
 {
 	echo "td.state_${statecode} {\n";
-	echo "text-align: center;\n";
-	echo "background-color: #${colorcode};\n";
-	echo "font: bold 10px Verdana, sans-serif;\n";
+	echo "\ttext-align: center;\n";
+	echo "\tbackground-color: #${colorcode};\n";
+	echo "\tfont: bold 10px Verdana, sans-serif;\n";
 	echo "}\n\n";
 }
 ?>
+.validation-error {
+	border:1px solid red;
+}
+
+.validation-success {
+	border:1px solid green;
+}
 	</style>
+	<script language='javascript' type='text/javascript' src='live_validation.js'></script>
+	<script type="text/javascript">
+	function init() {
+		document.add_new_range.range.setAttribute('match', "^\\d\\d?\\d?\\.\\d\\d?\\d?\\.\\d\\d?\\d?\\.\\d\\d?\\d?\\/\\d\\d?$");
+
+		Validate.init();
+	}
+	window.onload=init;
+	</script>
 	</head>
 <body>
  <table border=0 cellpadding=0 cellspacing=0 width='100%' height='100%' class=maintable>
