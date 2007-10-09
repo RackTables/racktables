@@ -22,10 +22,9 @@
 // finishes prematurely or exits with non-zero return code,
 // a single-item array is returned with the only "ERR" record,
 // which explains the reason.
-function queryGateway ($gwname, $arguments, $questions)
+function queryGateway ($gwname, $questions)
 {
 	$execpath = "./gateways/{$gwname}/main";
-	$argline = implode (' ', $arguments);
 	$dspec = array
 	(
 		0 => array ("pipe", "r"),
@@ -33,7 +32,7 @@ function queryGateway ($gwname, $arguments, $questions)
 		2 => array ("file", "/dev/null", "a")
 	);
 	$pipes = array();
-	$gateway = proc_open ("${execpath} ${argline}", $dspec, $pipes);
+	$gateway = proc_open ($execpath, $dspec, $pipes);
 	if (!is_resource ($gateway))
 		return array ('ERR proc_open() failed in queryGateway()');
 
@@ -43,7 +42,7 @@ function queryGateway ($gwname, $arguments, $questions)
 	fclose ($pipes[0]);
 
 // Fetch replies.
-	$answers = array ('OK!');
+	$answers = array ();
 	while (!feof($pipes[1]))
 	{
 		$a = fgets ($pipes[1]);

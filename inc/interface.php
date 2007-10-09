@@ -2810,20 +2810,32 @@ function renderVLANMembership ($object_id = 0)
 	else
 	{
 		// FIXME: find actual HW and SW data and pass to the gateway.
+		$hwtype = $swtype = 'unknown';
+		foreach (getAttrValues ($object_id) as $record)
+		{
+			if ($record['name'] == 'SW type' && !empty ($record['value']))
+				$swtype = str_replace (' ', '+', $record['value']);
+			if ($record['name'] == 'HW type' && !empty ($record['value']))
+				$hwtype = str_replace (' ', '+', $record['value']);
+		}
 		$data = queryGateway
 		(
 			$tabno,
-			array ($endpoints[0], 'hwtype', 'swtype', $remote_username),
-			array ('listvlans', 'listports')
+			array ("connect ${endpoints[0]} $hwtype $swtype ${remote_username}", 'listvlans', 'listports')
 		);
 		if ($data == NULL)
 		{
 			showError ('Failed to get any response from queryGateway() or the gateway returned');
 			return;
 		}
-		if ($data[0] != 'OK!')
+		if (strpos ($data[0], 'OK!') !== 0)
 		{
-			showError ("Gateway failure: ${data[0]}");
+			showError ("Gateway failure: returned code ${data[0]}.");
+			return;
+		}
+		if (count ($data) != 3)
+		{
+			showError ("Gateway failure: mailformed reply.");
 			return;
 		}
 		// Now we have VLAN list in $data[1] and port list in $data[2]. Let's sort this out.

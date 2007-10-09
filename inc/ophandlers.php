@@ -842,7 +842,7 @@ function updateVLANMembership ()
 			urlencode ('More than one IP address is assigned to this object, please configure FQDN attribute.');
 
 // Just convert the input and feed it into the gateway.
-	$questions = array();
+	$questions = array("connect ${endpoints[0]} hwtype swtype ${remote_username}");
 	for ($i = 0; $i < $portcount; $i++)
 	{
 		if (!isset ($_REQUEST["portname_${i}"]))
@@ -856,7 +856,6 @@ function updateVLANMembership ()
 	$data = queryGateway
 	(
 		$tabno,
-		array ($endpoints[0], 'hwtype', 'swtype', $remote_username),
 		$questions
 	);
 	$error_count = $success_count = 0;
