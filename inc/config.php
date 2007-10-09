@@ -7,8 +7,11 @@
 
 
 /* The following parameters/constants are necessary, although they are unlikely
- * to change. They just have to be stored somewhere and this is the place.
+ * to change (at least in the current release). They just have to be stored
+ * somewhere and this is the place.
  */
+
+define ('VERSION', '0.14.6');
 
 // This is the name of hash used to store account password hashes in the database.
 define ('PASSWORD_HASH', 'sha1');
@@ -61,7 +64,7 @@ $nextorder['even'] = 'odd';
 $enterprise = 'MyCompanyName';
 
 // Taken from the database, RJ-45/100Base-TX
-$default_port_type = 6;
+$default_port_type = 11;
 
 // Number of lines in object mass-adding form.
 define ('MASSCOUNT', 15);
@@ -82,6 +85,5 @@ define ('PORTS_PER_ROW', 12);
  * And finally there are some things that we'd still like to see in the
  * configuration storage, but not changeable by user.
  */
-define ('VERSION', '0.14.6');
 
 ?>
