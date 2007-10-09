@@ -1,0 +1,81 @@
+#!/bin/sh
+
+[ $# = 4 ] || exit 2
+
+ENDPOINT=$1
+COMMAND=$2
+VLANINFO=$3
+PORTINFO=$4
+
+prepare_load_commands()
+{
+	[ $# = 1 ] || exit 1
+	local skip=yes cval
+	while read line; do
+		if [ "$skip" = "yes" -a "$line" = "# S-T-A-R-T" ]; then
+			skip=no
+			continue
+		fi
+		if [ "$skip" = "no" -a "$line" = "# S-T-O-P" ]; then
+			skip=yes
+			continue
+		fi
+		[ "$skip" = "yes" ] && continue
+		# Allow comments.
+		[ -z "${line###*}" ] && continue
+
+		# First endpoint string/regexp match is sufficient for us.
+		cval=`echo $line | cut -s -d' ' -f1`
+		if [ -z "${1##$cval}" ]; then
+			# Don't be too smart at the moment, just be able to handle
+			# the known-good case ;-)
+
+			echo $line | cut -s -d' ' -f6 > $CMDS1
+			echo en >> $CMDS1
+			echo $line | cut -s -d' ' -f7 >> $CMDS1
+
+			# same for ports
+			echo $line | cut -s -d' ' -f6 > $CMDS2
+			echo en >> $CMDS2
+			echo $line | cut -s -d' ' -f7 >> $CMDS2
+			break
+		fi
+	done < `dirname $0`/cisco.secrets.php
+	printf 'term len 0\nshow vlan brief\nquit\n' >> $CMDS1
+	printf 'term len 0\nshow int status\nquit\n' >> $CMDS2
+}
+
+do_load()
+{
+	nc $ENDPOINT 23 < $CMDS1 | fgrep active | cut -d' ' -f1 > $VLANINFO
+	nc $ENDPOINT 23 < $CMDS2 | egrep '^(Et|Fa|Gi|Te)' | sed -E 's/ +(notconnect|connected) +/=/;s/=(trunk|([0-9]+)) .*$/=\1/' > $PORTINFO
+}
+
+# This one is for VLAN list.
+CMDS1=`mktemp /tmp/cisco.connector.XXXX`
+[ -f "$CMDS1" ] || exit 2
+
+# And this one holds ports list.
+CMDS2=`mktemp /tmp/cisco.connector.XXXX`
+if ! [ -f "$CMDS2" ]; then
+	rm -f "$CMDS1"
+	exit 2
+fi
+
+case $COMMAND in
+	load)
+		prepare_load_commands $ENDPOINT
+		do_load
+	;;
+	save)
+		rm -f "$CMDS1" "$CMDS2"
+		exit 1
+	;;
+	*)
+		rm -f "$CMDS1" "$CMDS2"
+		exit 2
+	;;
+esac
+
+rm -f "$CMDS1" "$CMDS2"
+exit 0

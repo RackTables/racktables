@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # This is a RackTables gateway for changing switch ports membership
 # across VLANs. It works accordingly to the gateway protocol described
@@ -11,31 +11,174 @@
 # VLAN ID and tagged ports will be shown as 'trunk' regardless of
 # how many VLANs they are members of.
 
-usage()
+authorized()
 {
-	echo "Usage: $0 <endpoint> <hwtype> <swtype> <username>"
-	exit 1;
+	local endp=$1 user=$2 action=$3 arg1=$4 arg2=$5 skip=yes cval
+	[ -z "$endp" -o -z "$user" -o -z "$action" ] && return 1
+
+	# Now we strip PHP wrapping(s) and process auth rules only.
+	# Accept more than one ruleset on the floor.
+	while read line; do
+		if [ "$skip" = "yes" -a "$line" = "# S-T-A-R-T" ]; then
+			skip=no
+			continue
+		fi
+		if [ "$skip" = "no" -a "$line" = "# S-T-O-P" ]; then
+			skip=yes
+			continue
+		fi
+		[ "$skip" = "yes" ] && continue
+		# Allow comments.
+		[ -z "${line###*}" ] && continue
+
+		# Parse the line and try to make a decision earliest possible.
+		# Username and endpoint must match values/regexps, action
+		# must exactly match. Action arguments are tested agains values
+		# or regexps, but only for 'change' action.
+		# If the current rule doesn't match, advance to the next one.
+		# We will fail authorization by default anyway.
+
+		# Test action.
+		cval=`echo "$line" | cut -s -d' ' -f3`
+		[ "$action" = "$cval" ] || continue
+
+		# Test username.
+		cval=`echo "$line" | cut -s -d' ' -f2 | cut -s -d'@' -f1`
+		[ -z "${user##$cval}" ] || continue
+
+		# Test endpoint.
+		cval=`echo "$line" | cut -s -d' ' -f2 | cut -s -d'@' -f2`
+		[ -z "${endp##$cval}" ] || continue
+
+		if [ "$caction" = "change" ]; then
+			[ -z "$arg1" -o -z "$arg2" ] && return 1
+			cval=`echo "$line" | cut -s -d' ' -f4`
+			[ -z "${arg1##$cval}" ] || continue
+			cval=`echo "$line" | cut -s -d' ' -f5`
+			[ -z "${arg2##$cval}" ] || continue
+		fi
+
+		# All criterias match. Pick the permission and bail out.
+		cval=`echo "$line" | cut -s -d' ' -f1`
+		if [ "$cval" = "allow" ]; then
+			return 0
+		else
+			return 1
+		fi
+	done < `dirname $0`/userauth.php
+	return 1
 }
 
-[ $# = 4 ] || usage
+# Not only connect, but gather all the data at once.
+do_connect()
+{
+	# sanity checks
+	local endpoint=`echo $args | cut -s -d' ' -f1`
+	local hw=`echo $args | cut -s -d' ' -f2`
+	local sw=`echo $args | cut -s -d' ' -f3`
+	local user=`echo $args | cut -s -d' ' -f4`
+	if [ -z "$endpoint" -o -z "$hw" -o -z "$sw" -o -z "$user" ]; then
+		echo 'ERR!too few arguments to connect'
+		return
+	fi
+	# authorize user, look for "connect" privilege
+	if ! authorized $endpoint $user connect; then
+		echo "ERR!User $user is not authorized to connect to $endpoint"
+		return
+	fi
 
-while read cmd arg1 arg2; do
+	# prepare temp files
+	PORTINFO=`mktemp /tmp/racktables.XXXX`
+	if ! [ -f "$PORTINFO" ]; then
+		echo 'ERR!could not create portinfo tmpfile'
+		return
+	fi
+	VLANINFO=`mktemp /tmp/racktables.XXXX`
+	if ! [ -f "$VLANINFO" ]; then
+		echo 'ERR!could not create vlaninfo tmpfile'
+		rm -f "$PORTINFO"
+		return
+	fi
+
+	# get the data
+	case "$sw" in
+		Cisco+IOS+12.2)
+			`dirname $0`/cisco.connector $endpoint load "$VLANINFO" "$PORTINFO"
+			ret=$?
+			if [ $ret = 0 ]; then
+				CONNECTED=1
+				echo "OK!connected to $endpoint";
+			else
+				echo "ERR!Cannot connect to $endpoint, connector returned code $ret"
+			fi
+		;;
+		*)
+			echo "ERR!Don't know how to handle $sw"
+			rm -f "$PORTINFO" "$VLANINFO"
+		;;
+	esac
+}
+
+do_listfile()
+{
+	local F=$1
+	if ! [ -f "$F" ]; then
+		echo "ERR!Lost temp file '$F' on the way"
+		return
+	fi
+	echo -n 'OK!'
+	local COMMA=''
+	# tr might do the work, but use our chance to perform filtering once more
+	cat "$F" | while read line; do
+		[ "$line" = "" ] && continue
+		echo -n "$COMMA$line"
+		COMMA=','
+	done
+	echo
+}
+
+do_set()
+{
+	echo 'OK!'
+}
+
+CONNECTED=0
+
+# main loop
+while read cmd args; do
 	case $cmd in
+		connect)
+			if [ $CONNECTED = 1 ]; then
+				echo 'ERR!Already connected'
+			else
+				do_connect $args
+			fi
+			;;
 		listvlans)
-			echo 'OK!200,204,203,202,201,205,333,334'
+			if [ $CONNECTED = 1 ]; then
+				do_listfile "$VLANINFO"
+			else
+				echo 'ERR!Not connected'
+			fi
 			;;
 		listports)
-			echo -n 'OK!fa0/0/1=200,fa0/0/2=205,fa0/0/3=202,fa0/0/4=trunk,fa0/0/5=333,fa0/0/6=334,fa0/0/7=333,fa0/0/8=334,'
-			echo -n 'fa0/0/9=200,fa0/0/10=205,fa0/0/11=202,fa0/0/12=trunk,fa0/0/13=333,fa0/0/14=334,fa0/0/15=333,fa0/0/16=334,'
-			echo -n 'fa0/1/1=200,fa0/1/2=205,fa0/1/3=202,fa0/1/4=trunk,fa0/1/5=333,fa0/1/6=334,fa0/1/7=333,fa0/1/8=334,'
-			echo 'fa0/1/9=200,fa0/1/10=205,fa0/1/11=202,fa0/1/12=trunk,fa0/1/13=333,fa0/1/14=334,fa0/1/15=333,fa0/1/16=334'
+			if [ $CONNECTED = 1 ]; then
+				do_listfile "$PORTINFO"
+			else
+				echo 'ERR!Not connected'
+			fi
 			;;
 		set)
-			echo 'OK!'
+			if [ $CONNECTED = 1 ]; then
+				do_set $args
+			else
+				echo 'ERR!Not connected'
+			fi
 			;;
 		*)
 			echo "ERR!unknown command $cmd"
 	esac
 done
 
+rm -f "$PORTINFO" "$VLANINFO"
 exit 0
