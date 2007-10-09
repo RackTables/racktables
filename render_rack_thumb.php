@@ -15,8 +15,8 @@ renderRackThumb ($_REQUEST['rack_id']);
 //------------------------------------------------------------------------
 function renderError ()
 {
-	global $image;
-	$img = imagecreatefrompng ($image['error']['path']);
+	// A hardcoded value is worth of saving lots of code here.
+	$img = imagecreatefrompng ('pix/error.png');
 	header("Content-type: image/png");
 	imagepng ($img);
 	imagedestroy ($img);
