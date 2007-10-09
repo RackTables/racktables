@@ -2098,7 +2098,7 @@ function printGreeting ()
 {
 	global $remote_username, $accounts;
 	$account = $accounts[$remote_username];
-	echo "Hello, ${account['user_realname']}. This is RackTables " . VERSION;
+	echo "Hello, ${account['user_realname']}. This is RackTables " . VERSION . ". Click <a href=logout.php>here</a> to logout.";
 }
 
 function renderSearchResults ()
