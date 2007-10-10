@@ -2837,8 +2837,128 @@ function renderUIConfig ()
 	echo "Here be dragons :-P";
 }
 
-// This function queries the backend about current VLAN configuration and
-// renders a form suitable for submit.
+// This functions returns an array for VLAN list, and an array for port list (both
+// form another array themselves).
+// The ports in the latter array are marked with either VLAN ID or 'trunk'.
+// We don't sort the port list, as the gateway is believed to have done this already
+// (or at least the underlying switch software ought to). This is important, as the
+// port info is transferred to/from form not by names, but by numbers.
+function getSwitchVLANs ($object_id = 0)
+{
+	global $remote_username;
+	if ($object_id <= 0)
+	{
+		showError ('Invalid object_id in getSwitchVLANs()');
+		return;
+	}
+	$endpoints = findAllEndpoints ($object_id);
+	if (count ($endpoints) == 0)
+	{
+		showError ('Can\'t find any mean to reach current object. Please either set FQDN attribute or assign an IP address to the object.');
+		return NULL;
+	}
+	if (count ($endpoints) > 1)
+	{
+		showError ('More than one IP address is assigned to this object, please configure FQDN attribute.');
+		return NULL;
+	}
+	$hwtype = $swtype = 'unknown';
+	foreach (getAttrValues ($object_id) as $record)
+	{
+		if ($record['name'] == 'SW type' && !empty ($record['value']))
+			$swtype = str_replace (' ', '+', $record['value']);
+		if ($record['name'] == 'HW type' && !empty ($record['value']))
+			$hwtype = str_replace (' ', '+', $record['value']);
+	}
+	$data = queryGateway
+	(
+		'switchvlans',
+		array ("connect ${endpoints[0]} $hwtype $swtype ${remote_username}", 'listvlans', 'listports')
+	);
+	if ($data == NULL)
+	{
+		showError ('Failed to get any response from queryGateway() or the gateway died');
+		return NULL;
+	}
+	if (strpos ($data[0], 'OK!') !== 0)
+	{
+		showError ("Gateway failure: returned code ${data[0]}.");
+		return NULL;
+	}
+	if (count ($data) != 3)
+	{
+		showError ("Gateway failure: mailformed reply.");
+		return NULL;
+	}
+	// Now we have VLAN list in $data[1] and port list in $data[2]. Let's sort this out.
+	$vlanlist = array_unique (explode (',', substr ($data[1], strlen ('OK!'))));
+	sort ($vlanlist);
+	if (count ($vlanlist) == 0)
+	{
+		showError ("Gateway succeeded, but returned no VLAN records.");
+		return NULL;
+	}
+	$portlist = array();
+	foreach (explode (',', substr ($data[2], strlen ('OK '))) as $pair)
+	{
+		list ($portname, $vlanid) = explode ('=', $pair);
+		$portlist[] = array ('portname' => $portname, 'vlanid' => $vlanid);
+	}
+	if (count ($portlist) == 0)
+	{
+		showError ("Gateway succeeded, but returned no port records.");
+		return NULL;
+	}
+	return array ($vlanlist, $portlist);
+}
+
+function setSwitchVLANs ($object_id = 0, $setcmd)
+{
+	global $remote_username;
+	$log = array();
+	if ($object_id <= 0)
+		return array (array ('code' => 'error', 'message' => 'Invalid object_id in setSwitchVLANs()'));
+	$endpoints = findAllEndpoints ($object_id);
+	if (count ($endpoints) == 0)
+		return array (array ('code' => 'error', 'message' => 'Can\'t find any mean to reach current object. Please either set FQDN attribute or assign an IP address to the object.'));
+	if (count ($endpoints) > 1)
+		return array (array ('code' => 'error', 'message' => 'More than one IP address is assigned to this object, please configure FQDN attribute.'));
+	$hwtype = $swtype = 'unknown';
+	foreach (getAttrValues ($object_id) as $record)
+	{
+		if ($record['name'] == 'SW type' && !empty ($record['value']))
+			$swtype = strtr ($record['value'], ' ', '+');
+		if ($record['name'] == 'HW type' && !empty ($record['value']))
+			$hwtype = strtr ($record['value'], ' ', '+');
+	}
+	$data = queryGateway
+	(
+		'switchvlans',
+		array ("connect ${endpoints[0]} $hwtype $swtype ${remote_username}", $setcmd)
+	);
+	if ($data == NULL)
+		return array (array ('code' => 'error', 'message' => 'Failed to get any response from queryGateway() or the gateway died'));
+	if (strpos ($data[0], 'OK!') !== 0)
+		return array (array ('code' => 'error', 'message' => "Gateway failure: returned code ${data[0]}."));
+	if (count ($data) != 2)
+		return array (array ('code' => 'error', 'message' => 'Gateway failure: mailformed reply.'));
+	// Finally we can parse the response into message array.
+	$ret = array();
+	foreach (split (';', substr ($data[1], strlen ('OK!'))) as $text)
+	{
+		if (strpos ($text, 'I!') === 0)
+			$code = 'success';
+		elseif (strpos ($text, 'W!') === 0)
+			$code = 'warning';
+		else // All improperly formatted messages must be treated as error conditions.
+			$code = 'error';
+		$ret[] = array ('code' => $code, 'message' => substr ($text, 2));
+	}
+	return $ret;
+}
+
+// This function queries the gateway about current VLAN configuration and
+// renders a form suitable for submit. Ah, and it does submit processing as well.
 function renderVLANMembership ($object_id = 0)
 {
 	global $root, $pageno, $tabno, $remote_username;
@@ -2847,106 +2967,97 @@ function renderVLANMembership ($object_id = 0)
 		showError ('Invalid object_id in renderVLANMembership()');
 		return;
 	}
-	showMessageOrError();
-	$endpoints = findAllEndpoints ($object_id);
-	if (count ($endpoints) == 0)
-		echo 'Can\'t find any mean to reach current object. Please either set FQDN attribute or assign an IP address to the object.';
-	elseif (count ($endpoints) > 1)
-		echo 'More than one IP address is assigned to this object, please configure FQDN attribute.';
-	else
-	{
-		// FIXME: find actual HW and SW data and pass to the gateway.
-		$hwtype = $swtype = 'unknown';
-		foreach (getAttrValues ($object_id) as $record)
-		{
-			if ($record['name'] == 'SW type' && !empty ($record['value']))
-				$swtype = str_replace (' ', '+', $record['value']);
-			if ($record['name'] == 'HW type' && !empty ($record['value']))
-				$hwtype = str_replace (' ', '+', $record['value']);
-		}
-		$data = queryGateway
-		(
-			$tabno,
-			array ("connect ${endpoints[0]} $hwtype $swtype ${remote_username}", 'listvlans', 'listports')
-		);
-		if ($data == NULL)
-		{
-			showError ('Failed to get any response from queryGateway() or the gateway returned');
-			return;
-		}
-		if (strpos ($data[0], 'OK!') !== 0)
-		{
-			showError ("Gateway failure: returned code ${data[0]}.");
-			return;
-		}
-		if (count ($data) != 3)
-		{
-			showError ("Gateway failure: mailformed reply.");
-			return;
-		}
-		// Now we have VLAN list in $data[1] and port list in $data[2]. Let's sort this out.
-		$vlanlist = array_unique (explode (',', substr ($data[1], strlen ('OK!'))));
-		sort ($vlanlist);
-		if (count ($vlanlist) == 0)
-		{
-			showError ("Gateway succeeded, but returned no VLAN records.");
-			return;
-		}
-		$portlist = array();
-		foreach (explode (',', substr ($data[2], strlen ('OK '))) as $pair)
-		{
-			list ($portname, $vlanid) = explode ('=', $pair);
-			$portlist[$portname] = $vlanid;
-		}
-		if (count ($portlist) == 0)
-		{
-			showError ("Gateway succeeded, but returned no port records.");
-			return;
-		}
-		// We don't sort the port list, as the gateway is believed to have done this already
-		// (or at least the underlying switch software ought to).
-		// Here the visual part of the work comes. Top row, then bottom.
-		startPortlet ('Current configuration');
 
-		echo "<table class=widetable cellspacing=0 cellpadding='5' align=center><tr>";
-		echo "<form action='${root}process.php' method=post>";
-		echo "<input type=hidden name=page value='${pageno}'>";
-		echo "<input type=hidden name=tab value='${tabno}'>";
-		echo "<input type=hidden name=op value=submit>";
-		echo "<input type=hidden name=object_id value=${object_id}>";
-		echo "<input type=hidden name=portcount value=" . count ($portlist) . ">\n";
-		$portno = 0;
-		foreach ($portlist as $portname => $vlanid)
+	// Handle probable pending submit.
+	if (isset ($_REQUEST['portcount']))
+	{
+		$data = getSwitchVLANs ($object_id);
+		if ($data === NULL)
 		{
-			// Don't let big boxes break our fancy pages.
-			if (($portno) % PORTS_PER_ROW == 0)
-			{
-				if ($portno > 0)
-					echo "</tr>\n";
-				echo "<tr><th>" . ($portno + 1) . "-" . ($portno + PORTS_PER_ROW) . "</th>";
-			}
-			echo "<td>${portname}<br>";
-			if ($vlanid == 'trunk')
-				echo '<select disabled multiple="multiple" size=1><option>[trunk]</option></select>';
+			showError ('getSwitchVLANs() failed in renderVLANMembership() during submit processing');
+			return;
+		}
+		list ($vlanlist, $portlist) = $data;
+		// Here we just build up 1 set command for the gateway with all of the ports
+		// included. The gateway is expected to filter unnecessary changes silently
+		// and to provide a list of responses with either error or success message
+		// for each of the rest.
+		assertUIntArg ('portcount');
+		$nports = $_REQUEST['portcount'];
+		$prefix = 'set ';
+		$log = array();
+		$setcmd = '';
+		for ($i = 0; $i < $nports; $i++)
+			if
+			(
+				!isset ($_REQUEST['portname_' . $i]) ||
+				!isset ($_REQUEST['vlanid_' . $i]) ||
+				$_REQUEST['portname_' . $i] != $portlist[$i]['portname']
+			)
+				$log[] = array ('code' => 'error', 'message' => "Ignoring mailformed record #${i} in form submit");
+			elseif
+			(
+				$_REQUEST['vlanid_' . $i] == $portlist[$i]['vlanid'] ||
+				$portlist[$i]['vlaind'] == 'TRUNK'
+			)
+				continue;
 			else
 			{
-				echo "<input type=hidden name=portname_${portno} value='${portname}'>";
-				echo "<select name=vlanid_${portno}>";
-				foreach ($vlanlist as $dummy => $v)
-				{
-					echo "<option value=${v}";
-					if ($v == $vlanid)
-						echo ' selected';
-					echo ">${v}</option>";
-				}
-				echo "</select>";
+				$setcmd .= $prefix . $_REQUEST['portname_' . $i] . '=' . $_REQUEST['vlanid_' . $i];
+				$prefix = ';';
 			}
-			$portno++;
-			echo "</td>";
-		}
-		echo "</tr><tr><td colspan=" . (PORTS_PER_ROW + 1) . "><input type=submit value='Save changes'></form></td></tr></table>";
-		finishPortlet();
+		printLog ($log);
+		// Feed the gateway and interpret its (non)response.
+		if ($setcmd != '')
+			printLog (setSwitchVLANs ($object_id, $setcmd));
 	}
+
+	// Reload and render.
+	$data = getSwitchVLANs ($object_id);
+	if ($data === NULL)
+		return;
+	list ($vlanlist, $portlist) = $data;
+	startPortlet ('Current configuration');
+	echo "<table class=widetable cellspacing=0 cellpadding='5' align=center><tr>";
+	echo "<form method=post>";
+	echo "<input type=hidden name=page value='${pageno}'>";
+	echo "<input type=hidden name=tab value='${tabno}'>";
+	echo "<input type=hidden name=object_id value=${object_id}>";
+	echo "<input type=hidden name=portcount value=" . count ($portlist) . ">\n";
+	$portno = 0;
+	foreach ($portlist as $port)
+	{
+		// Don't let wide forms break our fancy pages.
+		if ($portno % PORTS_PER_ROW == 0)
+		{
+			if ($portno > 0)
+				echo "</tr>\n";
+			echo "<tr><th>" . ($portno + 1) . "-" . ($portno + PORTS_PER_ROW) . "</th>";
+		}
+		echo '<td>' . $port['portname'] . '<br>';
+		echo "<input type=hidden name=portname_${portno} value=" . $port['portname'] . '>';
+		if ($port['vlanid'] == 'trunk')
+		{
+			echo "<input type=hidden name=vlanid_${portno} value='trunk'>";
+			echo "<select disabled multiple='multiple' size=1><option>TRUNK</option></select>";
+		}
+		else
+		{
+			echo "<select name=vlanid_${portno}>";
+			foreach ($vlanlist as $dummy => $v)
+			{
+				echo "<option value=${v}";
+				if ($v == $port['vlanid'])
+					echo ' selected';
+				echo ">${v}</option>";
+			}
+			echo "</select>";
+		}
+		$portno++;
+		echo "</td>";
+	}
+	echo "</tr><tr><td colspan=" . (PORTS_PER_ROW + 1) . "><input type=submit value='Save changes'></form></td></tr></table>";
+	finishPortlet();
 }
 
 ?>

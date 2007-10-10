@@ -4,10 +4,10 @@
 
 ENDPOINT=$1
 COMMAND=$2
-VLANINFO=$3
-PORTINFO=$4
+FILE1=$3
+FILE2=$4
 
-prepare_load_commands()
+prepare_fetch_commands()
 {
 	[ $# = 1 ] || exit 1
 	local skip=yes cval
@@ -45,10 +45,21 @@ prepare_load_commands()
 	printf 'term len 0\nshow int status\nquit\n' >> $CMDS2
 }
 
-do_load()
+prepare_push_commands()
 {
-	nc $ENDPOINT 23 < $CMDS1 | fgrep active | cut -d' ' -f1 > $VLANINFO
-	nc $ENDPOINT 23 < $CMDS2 | egrep '^(Et|Fa|Gi|Te)' | sed -E 's/ +(notconnect|connected) +/=/;s/=(trunk|([0-9]+)) .*$/=\1/' > $PORTINFO
+}
+
+do_fetch()
+{
+	nc $ENDPOINT 23 < $CMDS1 | fgrep active | cut -d' ' -f1 > $FILE1
+	nc $ENDPOINT 23 < $CMDS2 | egrep '^(Et|Fa|Gi|Te)' | sed -E 's/ +(notconnect|connected) +/=/;s/=(trunk|([0-9]+)) .*$/=\1/' > $FILE2
+}
+
+do_push()
+{
+	echo "E!this is a stub" >> "$FILE2"
+	echo "W!this is another stub" >> "$FILE2"
+	echo "I!have a good time!" >> "$FILE2"
 }
 
 # This one is for VLAN list.
@@ -63,13 +74,13 @@ if ! [ -f "$CMDS2" ]; then
 fi
 
 case $COMMAND in
-	load)
-		prepare_load_commands $ENDPOINT
-		do_load
+	fetch)
+		prepare_fetch_commands $ENDPOINT
+		do_fetch
 	;;
-	save)
-		rm -f "$CMDS1" "$CMDS2"
-		exit 1
+	push)
+		prepare_push_commands $ENDPOINT
+		do_push
 	;;
 	*)
 		rm -f "$CMDS1" "$CMDS2"

@@ -11,6 +11,13 @@
 # VLAN ID and tagged ports will be shown as 'trunk' regardless of
 # how many VLANs they are members of.
 
+endpoint=
+hw=
+sw=
+user=
+CONNECTED=0
+
+
 authorized()
 {
 	local endp=$1 user=$2 action=$3 arg1=$4 arg2=$5 skip=yes cval
@@ -50,7 +57,7 @@ authorized()
 		cval=`echo "$line" | cut -s -d' ' -f2 | cut -s -d'@' -f2`
 		[ -z "${endp##$cval}" ] || continue
 
-		if [ "$caction" = "change" ]; then
+		if [ "$action" = "change" ]; then
 			[ -z "$arg1" -o -z "$arg2" ] && return 1
 			cval=`echo "$line" | cut -s -d' ' -f4`
 			[ -z "${arg1##$cval}" ] || continue
@@ -73,10 +80,10 @@ authorized()
 do_connect()
 {
 	# sanity checks
-	local endpoint=`echo $args | cut -s -d' ' -f1`
-	local hw=`echo $args | cut -s -d' ' -f2`
-	local sw=`echo $args | cut -s -d' ' -f3`
-	local user=`echo $args | cut -s -d' ' -f4`
+	endpoint=`echo $args | cut -s -d' ' -f1`
+	hw=`echo $args | cut -s -d' ' -f2`
+	sw=`echo $args | cut -s -d' ' -f3`
+	user=`echo $args | cut -s -d' ' -f4`
 	if [ -z "$endpoint" -o -z "$hw" -o -z "$sw" -o -z "$user" ]; then
 		echo 'ERR!too few arguments to connect'
 		return
@@ -103,7 +110,7 @@ do_connect()
 	# get the data
 	case "$sw" in
 		Cisco+IOS+12.2)
-			`dirname $0`/cisco.connector $endpoint load "$VLANINFO" "$PORTINFO"
+			`dirname $0`/cisco.connector $endpoint fetch "$VLANINFO" "$PORTINFO"
 			ret=$?
 			if [ $ret = 0 ]; then
 				CONNECTED=1
@@ -139,10 +146,69 @@ do_listfile()
 
 do_set()
 {
-	echo 'OK!'
-}
+	# sanity checks
+	local setline=$1
+	if [ -z "$setline" ]; then
+		echo 'ERR!missing set argument'
+		return
+	fi
+	local brand
+	case "$sw" in
+		Cisco+IOS+12.2)
+			brand=cisco
+		;;
+		*)
+			echo "ERR!Don't know how to handle $sw at $endpoint"
+			return
+		;;
+	esac
+	local REQUESTS=`mktemp /tmp/racktables.XXXX`
+	local REPLIES=`mktemp /tmp/racktables.XXXX`
+	echo $1 | tr ';' '\n' | while read setexpr; do
+		portname=`echo $setexpr | cut -s -d'=' -f1`
+		newvlan=`echo $setexpr | cut -s -d'=' -f2`
+		curvlan=`egrep "^$portname=" $PORTINFO | cut -s -d'=' -f2`
+		if [ -z "$curvlan" ]; then
+			echo "E!Could not find port $portname" >> "$REPLIES"
+			continue
+		fi
+		if [ "$curvlan" = "trunk" ]; then
+			echo "E!Port $portname is a trunk" >> "$REPLIES"
+			continue
+		fi
+		# Authorize user for each change.
+		if ! authorized $endpoint $user change $curvlan $newvlan; then
+			echo "E!User $user is not authorized to assign port $portname@$endpoint from VLAN $curvlan to VLAN $newvlan" >> "$REPLIES"
+			continue
+		fi
+		echo "$portname $newvlan" >> "$REQUESTS"
+	done
+	nr=`egrep -c '^.' "$REPLIES"`
+	if [ "$nr" -ge 1 ]; then
+		echo "W!$nr request(s) have been ignored" >> "$REPLIES"
+	fi
 
-CONNECTED=0
+	nq=`egrep -c '^.' "$REQUESTS"`
+	if [ "$nq" -gt 1 ]; then
+		# Go!
+		sh -x `dirname $0`/$brand.connector $endpoint push "$REQUESTS" "$REPLIES"
+		local ret=$?
+
+		if [ $ret != 0 ]; then
+			echo "ERR!Failed to configure $endpoint, connector returned code $ret"
+			return
+		fi
+		echo "I!$nq port(s) have been reconfigured" >> "$REPLIES"
+	fi
+	echo -n 'OK!'
+	local SEMICOLON=
+	while read reply; do
+		echo -n $SEMICOLON$reply
+		SEMICOLON=';'
+	done < "$REPLIES"
+	echo
+	rm -f "$REQUESTS" "$REPLIES"
+}
 
 # main loop
 while read cmd args; do
