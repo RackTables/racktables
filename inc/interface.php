@@ -2925,9 +2925,9 @@ function renderVLANMembership ($object_id = 0)
 					echo "</tr>\n";
 				echo "<tr><th>" . ($portno + 1) . "-" . ($portno + PORTS_PER_ROW) . "</th>";
 			}
-			echo "<td>${portname} ";
+			echo "<td>${portname}<br>";
 			if ($vlanid == 'trunk')
-				echo '[trunk]';
+				echo '<select disabled multiple="multiple" size=1><option>[trunk]</option></select>';
 			else
 			{
 				echo "<input type=hidden name=portname_${portno} value='${portname}'>";
