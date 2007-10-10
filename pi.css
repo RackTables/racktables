@@ -77,7 +77,7 @@ td.pcright {
 	text-align: center;
 }
 
-.msg_error, .msg_success, .msg_200, .msg_300, .msg_500 {
+.msg_error, .msg_success, .msg_warning, .msg_200, .msg_300, .msg_500 {
 	text-align: left;
 	border: 1px solid;
 	padding: 2px;
@@ -101,6 +101,13 @@ td.pcright {
 .msg_300 {
 	background-color: #c0c0c0;
 	border-color: black;
+}
+
+.msg_warning {
+	background-color: #ff9966;
+	border-color: #ff3300;
+	font-weight: bold;
+	text-align: center;
 }
 
 .opt_attr_th {
