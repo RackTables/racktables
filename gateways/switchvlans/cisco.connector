@@ -45,8 +45,55 @@ prepare_fetch_commands()
 	printf 'term len 0\nshow int status\nquit\n' >> $CMDS2
 }
 
+# FIXME: this is almost a dup!
 prepare_push_commands()
 {
+	[ $# = 1 ] || exit 1
+	local skip=yes cval
+	while read line; do
+		if [ "$skip" = "yes" -a "$line" = "# S-T-A-R-T" ]; then
+			skip=no
+			continue
+		fi
+		if [ "$skip" = "no" -a "$line" = "# S-T-O-P" ]; then
+			skip=yes
+			continue
+		fi
+		[ "$skip" = "yes" ] && continue
+		# Allow comments.
+		[ -z "${line###*}" ] && continue
+
+		# First endpoint string/regexp match is sufficient for us.
+		cval=`echo $line | cut -s -d' ' -f1`
+		if [ -z "${1##$cval}" ]; then
+			# Don't be too smart at the moment, just be able to handle
+			# the known-good case ;-)
+
+			echo $line | cut -s -d' ' -f6 > $CMDS1
+			echo en >> $CMDS1
+			echo $line | cut -s -d' ' -f7 >> $CMDS1
+
+			break
+		fi
+	done < `dirname $0`/cisco.secrets.php
+
+
+
+
+	printf 'term len 0\nconf t\n' >> $CMDS1
+	while read portname vlanid; do
+		if [ -z "$portname" -o -z "$vlanid" ]; then
+			echo "E!could not parse input in connector" >> "$FILE2"
+			continue
+		fi
+		if [ "$vlanid" = "trunk" ]; then
+			echo "E!trunking is not allowed" >> "$FILE2"
+			continue
+		fi
+		printf "int $portname\nswi access vlan $vlanid\nexit\n" >> $CMDS1
+		echo "I!Port $portname@$ENDPOINT has been assigned to VLAN $vlanid" >> "$FILE2"
+	done < "$FILE1"
+	printf "end\nquit\n" >> $CMDS1
 }
 
 do_fetch()
@@ -57,9 +104,10 @@ do_fetch()
 
 do_push()
 {
-	echo "E!this is a stub" >> "$FILE2"
-	echo "W!this is another stub" >> "$FILE2"
-	echo "I!have a good time!" >> "$FILE2"
+	nc $ENDPOINT 23 < $CMDS1 >/dev/null
+#	echo "E!this is a stub" >> "$FILE2"
+#	echo "W!this is another stub" >> "$FILE2"
+#	echo "I!have a good time!" >> "$FILE2"
 }
 
 # This one is for VLAN list.

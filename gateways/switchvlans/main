@@ -176,6 +176,7 @@ do_set()
 			echo "E!Port $portname is a trunk" >> "$REPLIES"
 			continue
 		fi
+		[ "$curvlan" = "$newvlan" ] && continue
 		# Authorize user for each change.
 		if ! authorized $endpoint $user change $curvlan $newvlan; then
 			echo "E!User $user is not authorized to assign port $portname@$endpoint from VLAN $curvlan to VLAN $newvlan" >> "$REPLIES"
@@ -185,20 +186,20 @@ do_set()
 	done
 	nr=`egrep -c '^.' "$REPLIES"`
 	if [ "$nr" -ge 1 ]; then
-		echo "W!$nr request(s) have been ignored" >> "$REPLIES"
+		echo "W!$nr change request(s) have been ignored" >> "$REPLIES"
 	fi
 
 	nq=`egrep -c '^.' "$REQUESTS"`
-	if [ "$nq" -gt 1 ]; then
+	if [ "$nq" -ge 1 ]; then
 		# Go!
-		sh -x `dirname $0`/$brand.connector $endpoint push "$REQUESTS" "$REPLIES"
+		`dirname $0`/$brand.connector $endpoint push "$REQUESTS" "$REPLIES"
 		local ret=$?
 
 		if [ $ret != 0 ]; then
 			echo "ERR!Failed to configure $endpoint, connector returned code $ret"
 			return
 		fi
-		echo "I!$nq port(s) have been reconfigured" >> "$REPLIES"
+		echo "I!$nq change request(s) have been processed" >> "$REPLIES"
 	fi
 	echo -n 'OK!'
 	local SEMICOLON=
