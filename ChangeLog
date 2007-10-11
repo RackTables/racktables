@@ -3,6 +3,7 @@
 	  (contributed by Aaron Dummer)
 	new feature: logout link (same author)
 	new feature: key hint in dictionary browser
+	new feature: switch VLANs gateway with Cisco connector (others to come)
 	bugfix: don't hide IPv4 address name for a free address
 	update: new stock values in dictionary chapters: server OS type,
 		PortType, switch models
