@@ -1008,20 +1008,22 @@ function getObjectForwards($object_id)
 }
 
 // This function returns an array of single element of object's FQDN attribute,
-// if FQDN is set. Otherwise an array of all 'regular' IP addresses of the
+// if FQDN is set. The next choice is object's common name, if it looks like a
+// hostname. Otherwise an array of all 'regular' IP addresses of the
 // object is returned (which may appear 0 and more elements long).
-// FIXME: attribute id for FQDN
-function findAllEndpoints ($object_id)
+function findAllEndpoints ($object_id, $fallback = '')
 {
 	$values = getAttrValues ($object_id);
 	foreach ($values as $record)
-		if ($record['id'] == 3 && !empty ($record['value']))
+		if ($record['name'] == 'FQDN' && !empty ($record['value']))
 			return array ($record['value']);
 	$addresses = getObjectAddresses ($object_id);
 	$regular = array();
 	foreach ($addresses as $idx => $address)
 		if ($address['type'] == 'regular')
 			$regular[] = $address['ip'];
+	if (!count ($regular) && !empty ($fallback))
+		return array ($fallback);
 	return $regular;
 }
 

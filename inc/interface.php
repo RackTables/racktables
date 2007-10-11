@@ -2851,7 +2851,8 @@ function getSwitchVLANs ($object_id = 0)
 		showError ('Invalid object_id in getSwitchVLANs()');
 		return;
 	}
-	$endpoints = findAllEndpoints ($object_id);
+	$objectInfo = getObjectInfo ($object_id);
+	$endpoints = findAllEndpoints ($object_id, $objectInfo['name']);
 	if (count ($endpoints) == 0)
 	{
 		showError ('Can\'t find any mean to reach current object. Please either set FQDN attribute or assign an IP address to the object.');
