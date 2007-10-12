@@ -15,8 +15,9 @@ endpoint=
 hw=
 sw=
 user=
+handler=
 CONNECTED=0
-
+MYDIR=`dirname $0`
 
 authorized()
 {
@@ -72,22 +73,32 @@ authorized()
 		else
 			return 1
 		fi
-	done < `dirname $0`/userauth.php
+	done < "$MYDIR/userauth.php"
 	return 1
 }
 
-# Not only connect, but gather all the data at once.
+# Not only connect, but gather all the data at once and remember the context.
 do_connect()
 {
-	# sanity checks
 	endpoint=`echo $args | cut -s -d' ' -f1`
 	hw=`echo $args | cut -s -d' ' -f2`
 	sw=`echo $args | cut -s -d' ' -f3`
 	user=`echo $args | cut -s -d' ' -f4`
+	# sanity checks
 	if [ -z "$endpoint" -o -z "$hw" -o -z "$sw" -o -z "$user" ]; then
 		echo 'ERR!too few arguments to connect'
 		return
 	fi
+	case "$sw" in
+		Cisco+IOS+12.0|Cisco+IOS+12.2)
+			handler=cisco
+		;;
+		*)
+			echo "ERR!Don't know how to handle $sw on $endpoint"
+			return
+		;;
+	esac
+
 	# authorize user, look for "connect" privilege
 	if ! authorized $endpoint $user connect; then
 		echo "ERR!User $user is not authorized to connect to $endpoint"
@@ -108,22 +119,14 @@ do_connect()
 	fi
 
 	# get the data
-	case "$sw" in
-		Cisco+IOS+12.0|Cisco+IOS+12.2)
-			`dirname $0`/cisco.connector $endpoint fetch "$VLANINFO" "$PORTINFO"
-			ret=$?
-			if [ $ret = 0 ]; then
-				CONNECTED=1
-				echo "OK!connected to $endpoint";
-			else
-				echo "ERR!Cannot connect to $endpoint, connector returned code $ret"
-			fi
-		;;
-		*)
-			echo "ERR!Don't know how to handle $sw"
-			rm -f "$PORTINFO" "$VLANINFO"
-		;;
-	esac
+	"$MYDIR/$handler.connector" $endpoint fetch "$VLANINFO" "$PORTINFO"
+	ret=$?
+	if [ $ret = 0 ]; then
+		CONNECTED=1
+		echo "OK!connected to $endpoint";
+	else
+		echo "ERR!Cannot connect to $endpoint, connector returned code $ret"
+	fi
 }
 
 do_listfile()
@@ -152,16 +155,6 @@ do_set()
 		echo 'ERR!missing set argument'
 		return
 	fi
-	local brand
-	case "$sw" in
-		Cisco+IOS+12.0|Cisco+IOS+12.2)
-			brand=cisco
-		;;
-		*)
-			echo "ERR!Don't know how to handle $sw at $endpoint"
-			return
-		;;
-	esac
 	local REQUESTS=`mktemp /tmp/racktables.XXXX`
 	local REPLIES=`mktemp /tmp/racktables.XXXX`
 	echo $1 | tr ';' '\n' | while read setexpr; do
@@ -192,7 +185,7 @@ do_set()
 	nq=`egrep -c '^.' "$REQUESTS"`
 	if [ "$nq" -ge 1 ]; then
 		# Go!
-		`dirname $0`/$brand.connector $endpoint push "$REQUESTS" "$REPLIES"
+		"$MYDIR/$handler.connector" $endpoint push "$REQUESTS" "$REPLIES"
 		local ret=$?
 
 		if [ $ret != 0 ]; then
@@ -206,6 +199,7 @@ do_set()
 	while read reply; do
 		echo -n $SEMICOLON$reply
 		SEMICOLON=';'
+		[ -w "$MYDIR/changes.log" ] && echo "$reply" >> "$MYDIR/changes.log"
 	done < "$REPLIES"
 	echo
 	rm -f "$REQUESTS" "$REPLIES"
