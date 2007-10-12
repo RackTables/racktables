@@ -2924,7 +2924,8 @@ function setSwitchVLANs ($object_id = 0, $setcmd)
 	$log = array();
 	if ($object_id <= 0)
 		return array (array ('code' => 'error', 'message' => 'Invalid object_id in setSwitchVLANs()'));
-	$endpoints = findAllEndpoints ($object_id);
+	$objectInfo = getObjectInfo ($object_id);
+	$endpoints = findAllEndpoints ($object_id, $objectInfo['name']);
 	if (count ($endpoints) == 0)
 		return array (array ('code' => 'error', 'message' => 'Can\'t find any mean to reach current object. Please either set FQDN attribute or assign an IP address to the object.'));
 	if (count ($endpoints) > 1)
