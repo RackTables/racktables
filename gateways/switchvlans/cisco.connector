@@ -1,16 +1,16 @@
 #!/bin/sh
 
-[ $# = 4 ] || exit 2
+[ $# = 4 ] || exit 1
 
 ENDPOINT=$1
 COMMAND=$2
 FILE1=$3
 FILE2=$4
 
-prepare_fetch_commands()
+prepare_connect_commands()
 {
-	[ $# = 1 ] || exit 1
-	local skip=yes cval
+	[ $# = 1 ] || exit 2
+	local skip=yes cval found=no
 	while read line; do
 		if [ "$skip" = "yes" -a "$line" = "# S-T-A-R-T" ]; then
 			skip=no
@@ -27,6 +27,7 @@ prepare_fetch_commands()
 		# First endpoint string/regexp match is sufficient for us.
 		cval=`echo $line | cut -s -d' ' -f1`
 		if [ -z "${1##$cval}" ]; then
+			found=yes
 			# Don't be too smart at the moment, just be able to handle
 			# the known-good case ;-)
 
@@ -41,45 +42,19 @@ prepare_fetch_commands()
 			break
 		fi
 	done < `dirname $0`/cisco.secrets.php
+	[ "$found" = "yes" ] && return
+	echo "E!connector could not find credentials for $1" >> "$FILE2"
+	exit 3
+}
+
+prepare_fetch_commands()
+{
 	printf 'term len 0\nshow vlan brief\nquit\n' >> $CMDS1
 	printf 'term len 0\nshow int status\nquit\n' >> $CMDS2
 }
 
-# FIXME: this is almost a dup!
 prepare_push_commands()
 {
-	[ $# = 1 ] || exit 1
-	local skip=yes cval
-	while read line; do
-		if [ "$skip" = "yes" -a "$line" = "# S-T-A-R-T" ]; then
-			skip=no
-			continue
-		fi
-		if [ "$skip" = "no" -a "$line" = "# S-T-O-P" ]; then
-			skip=yes
-			continue
-		fi
-		[ "$skip" = "yes" ] && continue
-		# Allow comments.
-		[ -z "${line###*}" ] && continue
-
-		# First endpoint string/regexp match is sufficient for us.
-		cval=`echo $line | cut -s -d' ' -f1`
-		if [ -z "${1##$cval}" ]; then
-			# Don't be too smart at the moment, just be able to handle
-			# the known-good case ;-)
-
-			echo $line | cut -s -d' ' -f6 > $CMDS1
-			echo en >> $CMDS1
-			echo $line | cut -s -d' ' -f7 >> $CMDS1
-
-			break
-		fi
-	done < `dirname $0`/cisco.secrets.php
-
-
-
-
 	printf 'term len 0\nconf t\n' >> $CMDS1
 	while read portname vlanid; do
 		if [ -z "$portname" -o -z "$vlanid" ]; then
@@ -98,43 +73,64 @@ prepare_push_commands()
 
 do_fetch()
 {
-	nc $ENDPOINT 23 < $CMDS1 | fgrep active | cut -d' ' -f1 > $FILE1
-	nc $ENDPOINT 23 < $CMDS2 | egrep '^(Et|Fa|Gi|Te)' | sed -E 's/ +(notconnect|connected) +/=/;s/=(trunk|([0-9]+)) .*$/=\1/' > $FILE2
+	nc $ENDPOINT 23 < $CMDS1 > "$OUT1"
+	if fgrep -q '% Bad passwords' "$OUT1"; then
+		echo "E!password mismatch while trying to connect to $ENDPOINT" >> "$FILE2"
+		exit 4
+	fi
+	nc $ENDPOINT 23 < $CMDS2 > "$OUT2"
+	cat "$OUT1" | fgrep ' active    ' | cut -d' ' -f1 > $FILE1
+	cat "$OUT2" | egrep '^(Et|Fa|Gi|Te)' | sed -E 's/ +(notconnect|connected) +/=/;s/=(trunk|([0-9]+)) .*$/=\1/' > $FILE2
 }
 
 do_push()
 {
 	nc $ENDPOINT 23 < $CMDS1 >/dev/null
-#	echo "E!this is a stub" >> "$FILE2"
-#	echo "W!this is another stub" >> "$FILE2"
-#	echo "I!have a good time!" >> "$FILE2"
 }
 
-# This one is for VLAN list.
-CMDS1=`mktemp /tmp/cisco.connector.XXXX`
-[ -f "$CMDS1" ] || exit 2
+remove_tempfiles()
+{
+	[ -f "$CMDS1" ] && rm -f "$CMDS1"
+	[ -f "$CMDS2" ] && rm -f "$CMDS2"
+	[ -f "$OUT1" ] && rm -f "$OUT1"
+	[ -f "$OUT2" ] && rm -f "$OUT2"
+}
 
-# And this one holds ports list.
-CMDS2=`mktemp /tmp/cisco.connector.XXXX`
-if ! [ -f "$CMDS2" ]; then
-	rm -f "$CMDS1"
-	exit 2
-fi
+create_tempfiles()
+{
+	# This one is for VLAN list.
+	CMDS1=`mktemp /tmp/cisco.connector.XXXX`
+	# And this one holds ports list.
+	CMDS2=`mktemp /tmp/cisco.connector.XXXX`
+	# The following are two buffers to hold the whole switch output
+	# before filtering.
+	OUT1=`mktemp /tmp/cisco.connector.XXXX`
+	OUT2=`mktemp /tmp/cisco.connector.XXXX`
+	[ -f "$CMDS1" -a -f "$CMDS2" -a -f "$OUT1" -a -f "$OUT2" ] && return
+	echo "E!connector cannot create tempfiles" >> "$FILE2"
+	remove_tempfiles
+	exit 5
+}
 
 case $COMMAND in
 	fetch)
-		prepare_fetch_commands $ENDPOINT
+		create_tempfiles
+		prepare_connect_commands $ENDPOINT
+		prepare_fetch_commands
 		do_fetch
+		remove_tempfiles
 	;;
 	push)
-		prepare_push_commands $ENDPOINT
+		create_tempfiles
+		prepare_connect_commands $ENDPOINT
+		prepare_push_commands
 		do_push
+		remove_tempfiles
 	;;
 	*)
-		rm -f "$CMDS1" "$CMDS2"
-		exit 2
+		echo "E!unknown command for connector" >> "$FILE2"
+		exit 6
 	;;
 esac
 
-rm -f "$CMDS1" "$CMDS2"
 exit 0
