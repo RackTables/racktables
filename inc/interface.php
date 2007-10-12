@@ -2012,14 +2012,15 @@ function renderAddMultipleObjectsForm ()
 	global $pageno, $tabno, $nextorder;
 
 	$type_id = array();
+	$global_type_id = 0;
 	$name = array();
 	$asset_no = array();
 	$keepvalues = FALSE;
+	$log = array();
 	// Look for current submit.
-	if (isset ($_REQUEST['got_data']))
+	if (isset ($_REQUEST['got_fast_data']))
 	{
 		$keepvalues = TRUE;
-		$log = array();
 		for ($i=0; $i < MASSCOUNT; $i++)
 		{
 			if (!isset ($_REQUEST["${i}_object_type_id"]))
@@ -2047,27 +2048,59 @@ function renderAddMultipleObjectsForm ()
 			else
 				$log[] = array ('code' => 'error', 'message' => 'commitAddObject() failed in renderAddMultipleObjectsForm()');
 		}
-		printLog ($log);
 	}
+	elseif (isset ($_REQUEST['got_very_fast_data']))
+	{
+		$keepvalues = TRUE;
+		assertUIntArg ('global_type_id', TRUE);
+		assertStringArg ('namelist', TRUE);
+		$global_type_id = $_REQUEST['global_type_id'];
+		if ($global_type_id == 0)
+		{
+			if (!empty ($_REQUEST['namelist']))
+				$log[] = array ('code' => 'error', 'message' => 'Object type is not selected, check the form below');
+			else
+				$log[] = array ('code' => 'error', 'message' => 'Empty form has been ignored. Cheers.');
+		}
+		else
+		{
+			// The name extractor below was stolen from ophandlers.php:addMultiPorts()
+			$names1 = explode ('\n', $_REQUEST['namelist']);
+			$names2 = array();
+			foreach ($names1 as $line)
+			{
+				$parts = explode ('\r', $line);
+				reset ($parts);
+				if (empty ($parts[0]))
+					continue;
+				else
+					$names2[] = rtrim ($parts[0]);
+			}
+			foreach ($names2 as $cname)
+				if (commitAddObject ($cname, '', '', $global_type_id, '') === TRUE)
+					$log[] = array ('code' => 'success', 'message' => "Added new object '${cname}'");
+				else
+					$log[] = array ('code' => 'error', 'message' => "Could not add '${cname}'");
+		}
+	}
+	printLog ($log);
 
 	// Render a form for the next.
 	$typelist = getObjectTypeList();
 	$typelist[0]['dict_key'] = 0;
-	$typelist[0]['dict_value'] = 'SKIP';
-	$order = 'odd';
-	startPortlet ('Add multiple objects');
+	$typelist[0]['dict_value'] = 'select type...';
+
+	startPortlet ('Fast way');
 	echo '<form>';
 	echo "<input type=hidden name=page value=${pageno}>";
 	echo "<input type=hidden name=tab value=${tabno}>";
 	echo '<table border=0 align=center>';
 	echo "<tr><th>Object type</th><th>Common name</th><th>Visible label</th><th>Asset tag</th><th>Barcode</th></tr>\n";
-	// If a user forgot to select object type on input (it is 'SKIP'), we keep his
+	// If a user forgot to select object type on input, we keep his
 	// previous input in the form.
-	$order = 'odd';
 	for ($i = 0; $i < MASSCOUNT; $i++)
 	{
-		echo '<tr class=row_{order}>';
-		echo '<td>';
+		echo '<tr><td>';
 		printSelect ($typelist, "${i}_object_type_id", 0);
 		echo '</td>';
 		echo "<td><input type=text size=30 name=${i}_object_name";
@@ -2087,10 +2120,22 @@ function renderAddMultipleObjectsForm ()
 			echo " value='${barcode[$i]}'";
 		echo "></td>";
 		echo "</tr>\n";
-		$order = $nextorder[$order];
 	}
-	echo "<tr><td class=submit colspan=5><input type=submit name=got_data value='Create'></td></tr>\n";
+	echo "<tr><td class=submit colspan=5><input type=submit name=got_fast_data value='Create'></td></tr>\n";
 	echo "</form></table>\n";
+	finishPortlet();
+
+	startPortlet ('Very fast way');
+	echo '<form>';
+	echo "<input type=hidden name=page value=${pageno}>";
+	echo "<input type=hidden name=tab value=${tabno}>";
+	echo 'For each line shown below create an object of type ';
+	printSelect ($typelist, "global_type_id", 0);
+	echo " <input type=submit name=got_very_fast_data value='Go!'><br>\n";
+	echo "<textarea name=namelist cols=40 rows=25>\n";
+	if ($keepvalues and $global_type_id == 0)
+		echo $_REQUEST['namelist'];
+	echo "</textarea></form>\n";
 	finishPortlet();
 }
 
