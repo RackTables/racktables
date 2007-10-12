@@ -109,7 +109,7 @@ do_connect()
 
 	# get the data
 	case "$sw" in
-		Cisco+IOS+12.2)
+		Cisco+IOS+12.0|Cisco+IOS+12.2)
 			`dirname $0`/cisco.connector $endpoint fetch "$VLANINFO" "$PORTINFO"
 			ret=$?
 			if [ $ret = 0 ]; then
@@ -154,7 +154,7 @@ do_set()
 	fi
 	local brand
 	case "$sw" in
-		Cisco+IOS+12.2)
+		Cisco+IOS+12.0|Cisco+IOS+12.2)
 			brand=cisco
 		;;
 		*)
