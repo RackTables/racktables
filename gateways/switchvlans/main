@@ -3,13 +3,22 @@
 # This is a RackTables gateway for changing switch ports membership
 # across VLANs. It works accordingly to the gateway protocol described
 # in gateways.php and accepts the following commands on its stdin:
+#
+# * connect: connect to a switch, fetch all necessary data, store and
+#   disconnect
+#
 # * listvlans: list all VLANs found on the switch, propably filtering
 # out those administratively prohibited. Only the VLANs from this
 # list will be allowed as new destination for 'set' command.
+#
 # * listports: list all ports on the switch and their current status.
-# Untagged (switchport mode access) ports will be shown with their
-# VLAN ID and tagged ports will be shown as 'trunk' regardless of
-# how many VLANs they are members of.
+#   Untagged (switchport mode access) ports will be shown with their
+#   VLAN ID and tagged ports will be shown as 'trunk' regardless of
+#   how many VLANs they are members of.
+#
+# * listmacs: output unsorted list of all dynamically learned MAC
+#   addresses present on the switch
+#
 
 endpoint=
 hw=
@@ -117,9 +126,15 @@ do_connect()
 		rm -f "$PORTINFO"
 		return
 	fi
+	MACINFO=`mktemp /tmp/racktables.XXXX`
+	if ! [ -f "$MACINFO" ]; then
+		echo 'ERR!could not create MACinfo tmpfile'
+		rm -f "$PORTINFO" "$VLANINFO"
+		return
+	fi
 
 	# get the data
-	"$MYDIR/$handler.connector" $endpoint fetch "$VLANINFO" "$PORTINFO"
+	"$MYDIR/$handler.connector" $endpoint $hw $sw fetch "$VLANINFO" "$PORTINFO" "$MACINFO"
 	ret=$?
 	if [ $ret = 0 ]; then
 		CONNECTED=1
@@ -185,7 +200,7 @@ do_set()
 	nq=`egrep -c '^.' "$REQUESTS"`
 	if [ "$nq" -ge 1 ]; then
 		# Go!
-		"$MYDIR/$handler.connector" $endpoint push "$REQUESTS" "$REPLIES"
+		"$MYDIR/$handler.connector" $endpoint $hw $sw push "$REQUESTS" "$REPLIES" "$MACINFO"
 		local ret=$?
 
 		if [ $ret != 0 ]; then
@@ -241,5 +256,5 @@ while read cmd args; do
 	esac
 done
 
-rm -f "$PORTINFO" "$VLANINFO"
+rm -f "$PORTINFO" "$VLANINFO" "$MACINFO"
 exit 0

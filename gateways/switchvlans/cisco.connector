@@ -1,11 +1,14 @@
 #!/bin/sh
 
-[ $# = 4 ] || exit 1
+[ $# = 7 ] || exit 1
 
 ENDPOINT=$1
-COMMAND=$2
-FILE1=$3
-FILE2=$4
+HW=$2
+SW=$3
+COMMAND=$4
+FILE1=$5
+FILE2=$6
+FILE3=$7
 
 prepare_connect_commands()
 {
@@ -51,6 +54,7 @@ prepare_fetch_commands()
 {
 	printf 'term len 0\nshow vlan brief\nquit\n' >> $CMDS1
 	printf 'term len 0\nshow int status\nquit\n' >> $CMDS2
+	printf 'term len 0\nshow mac-address-table dynamic\nquit\n' >> $CMDS3
 }
 
 prepare_push_commands()
@@ -79,8 +83,11 @@ do_fetch()
 		exit 4
 	fi
 	nc $ENDPOINT 23 < $CMDS2 > "$OUT2"
+	nc $ENDPOINT 23 < $CMDS3 > "$OUT3"
 	cat "$OUT1" | fgrep ' active    ' | sed -E 's/^([[:digit:]]+)[[:space:]]+(.+)[[:space:]]+ active    (.*)/\1=\2/;s/[[:space:]]+$//' > $FILE1
 	cat "$OUT2" | egrep '^(Et|Fa|Gi|Te)' | sed -E 's/ +(notconnect|connected) +/=/;s/=(trunk|([0-9]+)) .*$/=\1/' > $FILE2
+	# FIXME
+#	cat "$OUT3" > "$FILE3" 
 }
 
 do_push()
@@ -92,21 +99,26 @@ remove_tempfiles()
 {
 	[ -f "$CMDS1" ] && rm -f "$CMDS1"
 	[ -f "$CMDS2" ] && rm -f "$CMDS2"
+	[ -f "$CMDS3" ] && rm -f "$CMDS3"
 	[ -f "$OUT1" ] && rm -f "$OUT1"
 	[ -f "$OUT2" ] && rm -f "$OUT2"
+	[ -f "$OUT3" ] && rm -f "$OUT3"
 }
 
 create_tempfiles()
 {
 	# This one is for VLAN list.
 	CMDS1=`mktemp /tmp/cisco.connector.XXXX`
-	# And this one holds ports list.
+	# And this one holds ports list...
 	CMDS2=`mktemp /tmp/cisco.connector.XXXX`
-	# The following are two buffers to hold the whole switch output
+	# ...and one more for MAC address table
+	CMDS3=`mktemp /tmp/cisco.connector.XXXX`
+	# The following are buffers to hold the whole switch output
 	# before filtering.
 	OUT1=`mktemp /tmp/cisco.connector.XXXX`
 	OUT2=`mktemp /tmp/cisco.connector.XXXX`
-	[ -f "$CMDS1" -a -f "$CMDS2" -a -f "$OUT1" -a -f "$OUT2" ] && return
+	OUT3=`mktemp /tmp/cisco.connector.XXXX`
+	[ -f "$CMDS1" -a -f "$CMDS2" -a -f "$CMDS3" -a -f "$OUT1" -a -f "$OUT2" -a -f "$OUT3" ] && return
 	echo "E!connector cannot create tempfiles" >> "$FILE2"
 	remove_tempfiles
 	exit 5
