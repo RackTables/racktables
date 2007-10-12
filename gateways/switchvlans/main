@@ -137,12 +137,12 @@ do_listfile()
 		return
 	fi
 	echo -n 'OK!'
-	local COMMA=''
+	local semicolon=''
 	# tr might do the work, but use our chance to perform filtering once more
 	cat "$F" | while read line; do
 		[ "$line" = "" ] && continue
-		echo -n "$COMMA$line"
-		COMMA=','
+		echo -n "$semicolon$line"
+		semicolon=';'
 	done
 	echo
 }

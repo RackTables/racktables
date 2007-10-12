@@ -79,7 +79,7 @@ do_fetch()
 		exit 4
 	fi
 	nc $ENDPOINT 23 < $CMDS2 > "$OUT2"
-	cat "$OUT1" | fgrep ' active    ' | cut -d' ' -f1 > $FILE1
+	cat "$OUT1" | fgrep ' active    ' | sed -E 's/^([[:digit:]]+)[[:space:]]+(.+)[[:space:]]+ active    (.*)/\1=\2/;s/[[:space:]]+$//' > $FILE1
 	cat "$OUT2" | egrep '^(Et|Fa|Gi|Te)' | sed -E 's/ +(notconnect|connected) +/=/;s/=(trunk|([0-9]+)) .*$/=\1/' > $FILE2
 }
 

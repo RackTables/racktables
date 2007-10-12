@@ -2892,15 +2892,20 @@ function getSwitchVLANs ($object_id = 0)
 		return NULL;
 	}
 	// Now we have VLAN list in $data[1] and port list in $data[2]. Let's sort this out.
-	$vlanlist = array_unique (explode (',', substr ($data[1], strlen ('OK!'))));
-	sort ($vlanlist);
-	if (count ($vlanlist) == 0)
+	$tmp = array_unique (explode (';', substr ($data[1], strlen ('OK!'))));
+	if (count ($tmp) == 0)
 	{
 		showError ("Gateway succeeded, but returned no VLAN records.");
 		return NULL;
 	}
+	$vlanlist = array();
+	foreach ($tmp as $record)
+	{
+		list ($vlanid, $vlandescr) = explode ('=', $record);
+		$vlanlist[$vlanid] = $vlandescr;
+	}
 	$portlist = array();
-	foreach (explode (',', substr ($data[2], strlen ('OK '))) as $pair)
+	foreach (explode (';', substr ($data[2], strlen ('OK '))) as $pair)
 	{
 		list ($portname, $vlanid) = explode ('=', $pair);
 		$portlist[] = array ('portname' => $portname, 'vlanid' => $vlanid);
@@ -3018,7 +3023,25 @@ function renderVLANMembership ($object_id = 0)
 	if ($data === NULL)
 		return;
 	list ($vlanlist, $portlist) = $data;
-	startPortlet ('Current configuration');
+
+	echo '<table border=0 width="100%"><tr><td class=pcleft>'; // --------------------------------------------------
+
+	startPortlet ('VLAN table');
+	echo '<table class=cooltable cellspacing=0 cellpadding=5 align=center>';
+	echo "<tr><th>ID</th><th>Description</th></tr>";
+	$order = 'even';
+	global $nextorder;
+	foreach ($vlanlist as $id => $descr)
+	{
+		echo "<tr class=row_${order}><td class=tdright>${id}</td><td class=tdleft>${descr}</td></tr>";
+		$order = $nextorder[$order];
+	}
+	echo '</table>';
+	finishPortlet();
+
+	echo '</td><td class=pcright>'; // ------------------------------------------------------------
+
+	startPortlet ('Port configuration');
 	echo "<table class=widetable cellspacing=0 cellpadding='5' align=center><tr>";
 	echo "<form method=post>";
 	echo "<input type=hidden name=page value='${pageno}'>";
@@ -3045,7 +3068,7 @@ function renderVLANMembership ($object_id = 0)
 		else
 		{
 			echo "<select name=vlanid_${portno}>";
-			foreach ($vlanlist as $dummy => $v)
+			foreach ($vlanlist as $v => $d)
 			{
 				echo "<option value=${v}";
 				if ($v == $port['vlanid'])
@@ -3059,6 +3082,8 @@ function renderVLANMembership ($object_id = 0)
 	}
 	echo "</tr><tr><td colspan=" . (PORTS_PER_ROW + 1) . "><input type=submit value='Save changes'></form></td></tr></table>";
 	finishPortlet();
+
+	echo '</td></tr></table>'; // -------------------------------------
 }
 
 ?>
