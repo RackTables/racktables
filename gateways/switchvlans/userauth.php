@@ -6,8 +6,8 @@ deny intruder@test connect
 allow *@test connect
 allow admin@core* connect
 # temp entry
-allow admin@213.180.214.65 connect
-allow admin@213.180.214.66 connect
+allow admin@switch1 connect
+allow admin@switch2 connect
 deny *@s* connect
 allow username@endpoint change 1 2
 allow username@* change 999 *
