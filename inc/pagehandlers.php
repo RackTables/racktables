@@ -275,18 +275,6 @@ function handler_perms ($tabno)
 	}
 }
 
-function handler_ro ($tabno)
-{
-	switch ($tabno)
-	{
-		case 'default':
-			renderReadonlyParameters();
-			break;
-		default:
-			showError ("Invalid tab '${tabno}' requested in handler_ro().");
-	}
-}
-
 function handler_ui ($tabno)
 {
 	switch ($tabno)

@@ -180,10 +180,8 @@ $ophandler['dict']['chapters']['add'] = 'addChapter';
 $page['ui']['title'] = 'static_title';
 $page['ui']['handler'] = 'handler_ui';
 $page['ui']['parent'] = 'config';
-
-$page['ro']['title'] = 'static_title';
-$page['ro']['handler'] = 'handler_ro';
-$page['ro']['parent'] = 'config';
+$tab['ui']['default'] = 'View';
+$tab['ui']['edit'] = '[ Change ]';
 
 $page['reports']['title'] = 'static_title';
 $page['reports']['handler'] = 'handler_reports';
@@ -199,10 +197,10 @@ $tab['help']['workflow'] = 'Workflow';
 $tab['help']['rackspace'] = 'Rackspace';
 $tab['help']['objects'] = 'Objects';
 $tab['help']['nets'] = 'Networking';
-$tab['help']['auth'] = 'User accounts & permissions';
-$tab['help']['dict'] = 'Dictionary';
+$tab['help']['auth'] = '[ User accounts & permissions ]';
+$tab['help']['dict'] = '[ Dictionary ]';
 $tab['help']['ports'] = 'Ports and links';
-$tab['help']['hacking'] = 'Hacker\'s guide';
+$tab['help']['hacking'] = '[ Hacker\'s guide ]';
 
 // This function returns array if page numbers leading to the target page
 // plus page number of target page itself. The first element is the target

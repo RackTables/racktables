@@ -176,16 +176,13 @@ function static_title ($pageno)
 			$ret['name'] = 'Dictionary';
 			break;
 		case 'ui':
-			$ret['name'] = '[ User interface ]';
-			break;
-		case 'ro':
-			$ret['name'] = 'config.php';
+			$ret['name'] = 'User interface';
 			break;
 		case 'reports':
 			$ret['name'] = '[ Reports ]';
 			break;
 		case 'help':
-			$ret['name'] = '[ Help ]';
+			$ret['name'] = 'Help';
 			break;
 		default:
 			$ret['name'] = 'UNKNOWN';

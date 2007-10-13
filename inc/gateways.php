@@ -59,4 +59,131 @@ function queryGateway ($gwname, $questions)
 	return $answers;
 }
 
+// This functions returns an array for VLAN list, and an array for port list (both
+// form another array themselves).
+// The ports in the latter array are marked with either VLAN ID or 'trunk'.
+// We don't sort the port list, as the gateway is believed to have done this already
+// (or at least the underlying switch software ought to). This is important, as the
+// port info is transferred to/from form not by names, but by numbers.
+function getSwitchVLANs ($object_id = 0)
+{
+	global $remote_username;
+	if ($object_id <= 0)
+	{
+		showError ('Invalid object_id in getSwitchVLANs()');
+		return;
+	}
+	$objectInfo = getObjectInfo ($object_id);
+	$endpoints = findAllEndpoints ($object_id, $objectInfo['name']);
+	if (count ($endpoints) == 0)
+	{
+		showError ('Can\'t find any mean to reach current object. Please either set FQDN attribute or assign an IP address to the object.');
+		return NULL;
+	}
+	if (count ($endpoints) > 1)
+	{
+		showError ('More than one IP address is assigned to this object, please configure FQDN attribute.');
+		return NULL;
+	}
+	$hwtype = $swtype = 'unknown';
+	foreach (getAttrValues ($object_id) as $record)
+	{
+		if ($record['name'] == 'SW type' && !empty ($record['value']))
+			$swtype = str_replace (' ', '+', $record['value']);
+		if ($record['name'] == 'HW type' && !empty ($record['value']))
+			$hwtype = str_replace (' ', '+', $record['value']);
+	}
+	$data = queryGateway
+	(
+		'switchvlans',
+		array ("connect ${endpoints[0]} $hwtype $swtype ${remote_username}", 'listvlans', 'listports')
+	);
+	if ($data == NULL)
+	{
+		showError ('Failed to get any response from queryGateway() or the gateway died');
+		return NULL;
+	}
+	if (strpos ($data[0], 'OK!') !== 0)
+	{
+		showError ("Gateway failure: returned code ${data[0]}.");
+		return NULL;
+	}
+	if (count ($data) != 3)
+	{
+		showError ("Gateway failure: mailformed reply.");
+		return NULL;
+	}
+	// Now we have VLAN list in $data[1] and port list in $data[2]. Let's sort this out.
+	$tmp = array_unique (explode (';', substr ($data[1], strlen ('OK!'))));
+	if (count ($tmp) == 0)
+	{
+		showError ("Gateway succeeded, but returned no VLAN records.");
+		return NULL;
+	}
+	$vlanlist = array();
+	foreach ($tmp as $record)
+	{
+		list ($vlanid, $vlandescr) = explode ('=', $record);
+		$vlanlist[$vlanid] = $vlandescr;
+	}
+	$portlist = array();
+	foreach (explode (';', substr ($data[2], strlen ('OK '))) as $pair)
+	{
+		list ($portname, $vlanid) = explode ('=', $pair);
+		$portlist[] = array ('portname' => $portname, 'vlanid' => $vlanid);
+	}
+	if (count ($portlist) == 0)
+	{
+		showError ("Gateway succeeded, but returned no port records.");
+		return NULL;
+	}
+	return array ($vlanlist, $portlist);
+}
+
+function setSwitchVLANs ($object_id = 0, $setcmd)
+{
+	global $remote_username;
+	$log = array();
+	if ($object_id <= 0)
+		return array (array ('code' => 'error', 'message' => 'Invalid object_id in setSwitchVLANs()'));
+	$objectInfo = getObjectInfo ($object_id);
+	$endpoints = findAllEndpoints ($object_id, $objectInfo['name']);
+	if (count ($endpoints) == 0)
+		return array (array ('code' => 'error', 'message' => 'Can\'t find any mean to reach current object. Please either set FQDN attribute or assign an IP address to the object.'));
+	if (count ($endpoints) > 1)
+		return array (array ('code' => 'error', 'message' => 'More than one IP address is assigned to this object, please configure FQDN attribute.'));
+	$hwtype = $swtype = 'unknown';
+	foreach (getAttrValues ($object_id) as $record)
+	{
+		if ($record['name'] == 'SW type' && !empty ($record['value']))
+			$swtype = strtr ($record['value'], ' ', '+');
+		if ($record['name'] == 'HW type' && !empty ($record['value']))
+			$hwtype = strtr ($record['value'], ' ', '+');
+	}
+	$data = queryGateway
+	(
+		'switchvlans',
+		array ("connect ${endpoints[0]} $hwtype $swtype ${remote_username}", $setcmd)
+	);
+	if ($data == NULL)
+		return array (array ('code' => 'error', 'message' => 'Failed to get any response from queryGateway() or the gateway died'));
+	if (strpos ($data[0], 'OK!') !== 0)
+		return array (array ('code' => 'error', 'message' => "Gateway failure: returned code ${data[0]}."));
+	if (count ($data) != 2)
+		return array (array ('code' => 'error', 'message' => 'Gateway failure: mailformed reply.'));
+	// Finally we can parse the response into message array.
+	$ret = array();
+	foreach (split (';', substr ($data[1], strlen ('OK!'))) as $text)
+	{
+		if (strpos ($text, 'I!') === 0)
+			$code = 'success';
+		elseif (strpos ($text, 'W!') === 0)
+			$code = 'warning';
+		else // All improperly formatted messages must be treated as error conditions.
+			$code = 'error';
+		$ret[] = array ('code' => $code, 'message' => substr ($text, 2));
+	}
+	return $ret;
+}
+
 ?>
