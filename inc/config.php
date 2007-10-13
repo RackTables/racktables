@@ -70,10 +70,10 @@ $default_port_type = 11;
 define ('MASSCOUNT', 15);
 define ('MAXSELSIZE', 30);
 
-// FIXME: This is taken right from the database.
-define ('TYPE_SERVER', 4);
-define ('TYPE_SWITCH', 8);
-define ('TYPE_ROUTER', 7);
+// These are the object types, which assume a common name to be normally
+// configured. If a name is absent for an object of one of such types,
+// HTML output is corrected to accent this misconfiguration.
+define ('NAMEFUL_OBJTYPES', '4,7,8');
 
 // Row-scope picture scale factor.
 define ('ROW_SCALE', 2);

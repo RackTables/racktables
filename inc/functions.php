@@ -31,16 +31,10 @@ function displayedName ($objectData)
 {
 	if ($objectData['name'] != '')
 		return $objectData['name'];
+	elseif (in_array ($objectData['objtype_id'], explode (',', NAMEFUL_OBJTYPES)))
+		return "ANONYMOUS " . $objectData['objtype_name'];
 	else
-		switch ($objectData['objtype_id'])
-		{
-			case TYPE_SERVER:
-			case TYPE_SWITCH:
-			case TYPE_ROUTER:
-				return "ANONYMOUS " . $objectData['objtype_name'];
-			default:
-				return "[${objectData['objtype_name']}]";
-		}
+		return "[${objectData['objtype_name']}]";
 }
 
 // This function finds height of solid rectangle of atoms, which are all

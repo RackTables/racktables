@@ -612,25 +612,13 @@ function renderRackObject ($object_id = 0)
 	echo "<table border=0 cellspacing=0 cellpadding=3 width='100%'>\n";
 	if (!empty ($info['name']))
 		echo "<tr><th width='50%' class=tdright>Common name:</th><td class=tdleft>${info['name']}</td></tr>\n";
-	else
-		switch ($info['objtype_id'])
-		{
-			case TYPE_SERVER:
-			case TYPE_SWITCH:
-			case TYPE_ROUTER:
-				echo "<tr><td colspan=2 class=msg_error>Common name is missing.</td></tr>\n";
-		}
+	elseif (in_array ($info['objtype_id'], explode (',', NAMEFUL_OBJTYPES)))
+		echo "<tr><td colspan=2 class=msg_error>Common name is missing.</td></tr>\n";
 	echo "<tr><th width='50%' class=tdright>Object type:</th><td class=tdleft>${info['objtype_name']}</td></tr>\n";
 	if (!empty ($info['asset_no']))
 		echo "<tr><th width='50%' class=tdright>Asset tag:</th><td class=tdleft>${info['asset_no']}</td></tr>\n";
-	else
-		switch ($info['objtype_id'])
-		{
-			case TYPE_SERVER:
-			case TYPE_SWITCH:
-			case TYPE_ROUTER:
-				echo "<tr><td colspan=2 class=msg_error>Asset tag is missing.</td></tr>\n";
-		}
+	elseif (in_array ($info['objtype_id'], explode (',', NAMEFUL_OBJTYPES)))
+		echo "<tr><td colspan=2 class=msg_error>Asset tag is missing.</td></tr>\n";
 	if (!empty ($info['label']))
 		echo "<tr><th width='50%' class=tdright>Visible label:</th><td class=tdleft>${info['label']}</td></tr>\n";
 	if (!empty ($info['barcode']))
