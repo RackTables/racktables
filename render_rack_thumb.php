@@ -22,12 +22,18 @@ function renderError ()
 	imagedestroy ($img);
 }
 
+// Having a local caching array speeds things up. A little.
 function colorFromHex ($image, $hex)
 {
+	static $colorcache = array ();
+	if (isset ($colorcache[$hex]))
+		return $colorcache[$hex];
 	$r = hexdec ('0x' . substr ($hex, 0, 2));
 	$g = hexdec ('0x' . substr ($hex, 2, 2));
 	$b = hexdec ('0x' . substr ($hex, 4, 2));
-	return imagecolorallocate ($image, $r, $g, $b);
+	$c = imagecolorallocate ($image, $r, $g, $b);
+	$colorcache[$hex] = $c;
+	return $c;
 }
 
 function renderRackThumb ($rack_id = 0)
@@ -38,7 +44,13 @@ function renderRackThumb ($rack_id = 0)
 		return;
 	}
 	markupObjectProblems ($rackData);
-	global $rtwidth;
+	// Cache in a local array, because we are going to use those values often.
+	$rtwidth = array
+	(
+		0 => getConfigVar ('rtwidth_0'),
+		1 => getConfigVar ('rtwidth_1'),
+		2 => getConfigVar ('rtwidth_2')
+	);
 	$offset[0] = 3;
 	$offset[1] = 3 + $rtwidth[0];
 	$offset[2] = 3 + $rtwidth[0] + $rtwidth[1];
@@ -46,7 +58,10 @@ function renderRackThumb ($rack_id = 0)
 	$totalwidth = $offset[2] + $rtwidth[2] + 3;
 	$img = @imagecreatetruecolor ($totalwidth, $totalheight)
 		or die("Cannot Initialize new GD image stream");
-	global $color;
+	// cache our palette as well
+	$color = array();
+	foreach (array ('F', 'A', 'U', 'T', 'Th', 'Tw', 'Thw') as $statecode)
+		$color[$statecode] = getConfigVar ('color_' . $statecode);
 	imagerectangle ($img, 0, 0, $totalwidth - 1, $totalheight - 1, colorFromHex ($img, '000000'));
 	imagerectangle ($img, 1, 1, $totalwidth - 2, $totalheight - 2, colorFromHex ($img, 'c0c0c0'));
 	imagerectangle ($img, 2, 2, $totalwidth - 3, $totalheight - 3, colorFromHex ($img, '000000'));

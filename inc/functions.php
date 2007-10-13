@@ -31,7 +31,7 @@ function displayedName ($objectData)
 {
 	if ($objectData['name'] != '')
 		return $objectData['name'];
-	elseif (in_array ($objectData['objtype_id'], explode (',', NAMEFUL_OBJTYPES)))
+	elseif (in_array ($objectData['objtype_id'], explode (',', getConfigVar ('NAMEFUL_OBJTYPES'))))
 		return "ANONYMOUS " . $objectData['objtype_name'];
 	else
 		return "[${objectData['objtype_name']}]";

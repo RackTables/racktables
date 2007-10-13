@@ -10,11 +10,11 @@ echo "<link rel=stylesheet type='text/css' href=pi.css />\n";
 echo "<link rel=icon href='" . getFaviconURL() . "' type='image/x-icon' />";
 echo "<style type='text/css'>\n";
 // Print style information
-foreach ($color as $statecode => $colorcode)
+foreach (array ('F', 'A', 'U', 'T', 'Th', 'Tw', 'Thw') as $statecode)
 {
 	echo "td.state_${statecode} {\n";
 	echo "\ttext-align: center;\n";
-	echo "\tbackground-color: #${colorcode};\n";
+	echo "\tbackground-color: #" . (getConfigVar ('color_' . $statecode)) . ";\n";
 	echo "\tfont: bold 10px Verdana, sans-serif;\n";
 	echo "}\n\n";
 }

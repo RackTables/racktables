@@ -1799,4 +1799,45 @@ function useDeleteBlade ($tablename, $keyname, $keyvalue, $quotekey = TRUE)
 		return TRUE;
 }
 
+function loadConfigCache ()
+{
+	global $dbxlink;
+	$query = 'select varname, varvalue, vartype, is_hidden, emptyok, description from Config';
+	$result = $dbxlink->query ($query);
+	if ($result == NULL)
+	{
+		$errorInfo = $dbxlink->errorInfo();
+		showError ("SQL query '${query}'\nwith message '${errorInfo[2]}'\nfailed in getAttrValues()");
+		return NULL;
+	}
+	$cache = array();
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
+		$cache[$row['varname']] = $row;
+	$result->closeCursor();
+	return $cache;
+}
+
+// setConfigVar() is expected to perform all necessary filtering
+function storeConfigVar ($varname = NULL, $varvalue = NULL)
+{
+	if ($varname == NULL || $varvalue == NULL)
+	{
+		showError ('Invalid arguments to storeConfigVar()');
+		return FALSE;
+	}
+	$query = "update Config set varvalue='${varvalue}' where varname='${varname}' limit 1";
+	$result = $dbxlink->query ($query);
+	if ($result == NULL)
+	{
+		showError ("SQL query '${query}' failed in storeConfigVar()");
+		return FALSE;
+	}
+	$rc = $result->rowCount();
+	$result->closeCursor();
+	if ($rc == 1)
+		return TRUE;
+	showError ("Something went wrong in storeConfigVar() when updatating '${varname}'");
+	return FALSE;
+}
+
 ?>

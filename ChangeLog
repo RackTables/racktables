@@ -9,6 +9,7 @@
 	update: new stock values in dictionary chapters: server OS type,
 		PortType, switch models
 	update: make GigE default port type
+	update: configuration is now stored in the database
 0.14.5 2007-03-08
 	bugfix: lots of adjustments to allow database be MySQL 4.0
 0.14.4 2007-02-21

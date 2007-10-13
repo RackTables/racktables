@@ -14,7 +14,7 @@ II. Layout
 or http://racktables.mysite.org.
 2. Go into 'inc' directory, copy secret-sample.php to secret.php and modify accordingly.
 3. Edit install/init-auth.sql and change admin password
-4. Change $enterprise in inc/config.php
+4. [FIXME: this isn't true anymore] Change $enterprise in inc/config.php
 
 III. Database setup
 mysql> create database_name;

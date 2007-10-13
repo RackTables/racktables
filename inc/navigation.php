@@ -224,9 +224,9 @@ function getPath ($targetno)
 
 function showPathAndSearch ($pageno)
 {
-	global $root, $page, $enterprise;
+	global $root, $page;
 	// Path.
-	echo "<td class=activemenuitem width='99%'>${enterprise} RackTables";
+	echo "<td class=activemenuitem width='99%'>" . getConfigVar ('enterprise') . " RackTables";
 	if (isset ($page[$pageno]['title']))
 	{
 		$path = getPath ($pageno);
@@ -250,15 +250,11 @@ function showPathAndSearch ($pageno)
 
 function getTitle ($pageno, $tabno)
 {
-	global $page, $enterprise;
-	if (isset ($page[$pageno]['title']))
-	{
-		$ret = $page[$pageno]['title']($pageno);
-		$ret = $ret['name'];
-	}
-	else
-		$ret = $enterprise;
-	return $ret;
+	global $page;
+	if (!isset ($page[$pageno]['title']))
+		return getConfigVar ('enterprise');
+	$tmp = $page[$pageno]['title']($pageno);
+	return $tmp['name'];
 }
 
 function showTabs ($pageno, $tabno)

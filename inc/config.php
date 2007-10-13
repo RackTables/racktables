@@ -1,89 +1,75 @@
 <?
 /*
-*
-*  This is RackTables public configuration file.
-*
-*/
-
-
-/* The following parameters/constants are necessary, although they are unlikely
- * to change (at least in the current release). They just have to be stored
- * somewhere and this is the place.
+ *
+ * This file used to hold a collection of constants, variables and arrays,
+ * which drived the way misc RackTables functions performed. Now most of
+ * then have gone into the database, and there is perhaps a user interface
+ * for changing them. This file now provides a couple of functions to
+ * access the new config storage.
+ *
  */
 
-define ('VERSION', '0.14.6');
 
-// This is the name of hash used to store account password hashes in the database.
+// Current code version is subject to change with each new release.
+define ('CODE_VERSION', '0.14.6');
+
+// The name of hash used to store account password hashes
+// in the database. I think, we are happy with this one forever.
 define ('PASSWORD_HASH', 'sha1');
-$rtwidth[0] = 9;
-$rtwidth[1] = 21;
-$rtwidth[2] = 9;
 
-// Free atoms. They are available for allocation to objects.
-// They are not stored in the database.
-// HSV: 180-25-75
-$color['F'] = '8fbfbf';
+function getConfigVar ($varname = '')
+{
+	global $configCache;
+	// We assume the only point of cache init, and it is init.php. If it
+	// has failed, we don't retry loading.
+	if (!isset ($configCache))
+	{
+		showError ("Configuration cache is unavailable in getConfigVar()");
+		die;
+	}
+	if ($varname == '')
+	{
+		showError ("Missing argument to getConfigVar()");
+		die;
+	}
+	if (isset ($configCache[$varname]))
+	{
+		// Try casting to int, if possible.
+		if ($configCache[$varname]['vartype'] == 'unit')
+			return 0 + $configCache[$varname]['varvalue'];
+		else
+			return $configCache[$varname]['varvalue'];
+	}
+	return NULL;
+}
 
-// Absent atoms.
-// HSV: 0-0-75
-$color['A'] = 'bfbfbf';
-
-// Unusable atoms. Some problems keep them to be 'F'.
-// HSV: 0-25-75
-$color['U'] = 'bf8f8f';
-
-// Taken atoms. object_id should be present then.
-// HSV: 180-50-50
-$color['T'] = '408080';
-
-// Taken atoms with highlight. They are not stored in the database and
-// are only used for highlighting.
-// HSV: 180-50-100
-$color['Th'] = '80ffff';
-
-// Taken atoms with object problem. This is detected at runtime.
-// HSV: 0-50-50
-$color['Tw'] = '804040';
-
-// An object can be both current and problematic. We run highlightObject() first
-// and markupObjectProblems() second.
-// HSV: 0-50-100
-$color['Thw'] = 'ff8080';
-
-$nextorder['odd'] = 'even';
-$nextorder['even'] = 'odd';
-
-
-
-/*******************************************************************************
- * The following parameters are likely to be changed by user, thus they
- * are listed below until we implement a configuration storage to move
- * them there.
- */
-
-$enterprise = 'MyCompanyName';
-
-// Taken from the database, RJ-45/100Base-TX
-$default_port_type = 11;
-
-// Number of lines in object mass-adding form.
-define ('MASSCOUNT', 15);
-define ('MAXSELSIZE', 30);
-
-// These are the object types, which assume a common name to be normally
-// configured. If a name is absent for an object of one of such types,
-// HTML output is corrected to accent this misconfiguration.
-define ('NAMEFUL_OBJTYPES', '4,7,8');
-
-// Row-scope picture scale factor.
-define ('ROW_SCALE', 2);
-
-// Max switch port per one row on the switchvlans dynamic tab.
-define ('PORTS_PER_ROW', 12);
-
-/*******************************************************************************
- * And finally there are some things that we'd still like to see in the
- * configuration storage, but not changeable by user.
- */
+function setConfigVar ($varname = '', $varvalue = '')
+{
+	global $configCache;
+	if (!isset ($configCache))
+	{
+		showError ('Configuration cache is unavailable in setConfigVar()');
+		die;
+	}
+	if (empty ($varname))
+	{
+		showError ("Empty argument to setConfigVar()");
+		die;
+	}
+	// We don't operate on unknown data.
+	if (!isset ($configCache[$varname]))
+	{
+		showError ("setConfigVar() doesn't know how to handle '${varname}'");
+		die;
+	}
+	if (empty ($varvalue) && $configCache[$varname]['emptyok'] != 'yes')
+	{
+		showError ("'${varname}' is configured to take non-empty value. Perhaps there was a reason to do so.");
+		die;
+	}
+	// Update cache only if the changes went into DB.
+	if (storeConfigVar ($varname, $varvalue))
+		$configCache[$varname]['varvalue'] = $varvalue;
+}
 
 ?>

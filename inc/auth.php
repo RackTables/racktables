@@ -14,7 +14,6 @@ function authenticate ()
 		showError ('Password hash not supported, authentication impossible.');
 		die();
 	}
-	global $enterprise;
 	if
 	(
 		!isset ($_SERVER['PHP_AUTH_USER']) or
@@ -22,7 +21,7 @@ function authenticate ()
 		!authenticated ($_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW'])
 	)
 	{
-		header ("WWW-Authenticate: Basic realm=\"${enterprise} RackTables access\"");
+		header ('WWW-Authenticate: Basic realm="' . getConfigVar ('enterprise') . ' RackTables access"');
 		header ('HTTP/1.0 401 Unauthorized');
 		showError ('This system requires authentication. You should use a username and a password.');
 		die();

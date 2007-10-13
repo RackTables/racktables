@@ -13,7 +13,7 @@
 - bug: can't view/click on remote side in port list, if remote side is nameless
 - bug: cannot update port 'e4/4', if port 'e 4/4' exists
 - use user ID instead of username where possible
-- eliminate default_port_type
++ eliminate default_port_type
 - keep all configuration variables in a single array
 - check words usage before deletion from a chapter
 - bug: search function is called 4 times per 1 search (see functions.php)

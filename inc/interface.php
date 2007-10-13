@@ -5,6 +5,10 @@
 *
 */
 
+// Interface function's special.
+$nextorder['odd'] = 'even';
+$nextorder['even'] = 'odd';
+
 // Main menu.
 function renderIndex ()
 {
@@ -60,8 +64,8 @@ function renderRackspace ()
 <?
 	// generate thumb gallery
 	$rackrowList = getRackRowInfo();
-	global $rtwidth, $root, $nextorder;
-	$rackwidth = $rtwidth[0] + $rtwidth[1] + $rtwidth[2];
+	global $root, $nextorder;
+	$rackwidth = getConfigVar ('rtwidth_0') + getConfigVar ('rtwidth_1') + getConfigVar ('rtwidth_2');
 	$order = 'odd';
 	foreach ($rackrowList as $rackrow)
 	{
@@ -110,8 +114,8 @@ function renderRow ($row_id)
 
 	echo "</td><td class=pcright>";
 
-	global $rtwidth, $root, $nextorder;
-	$rackwidth = $rtwidth[0] + $rtwidth[1] + $rtwidth[2];
+	global $root, $nextorder;
+	$rackwidth = getConfigVar ('rtwidth_0') + getConfigVar ('rtwidth_1') + getConfigVar ('rtwidth_2');
 	$rackList = getRacksForRow ($row_id);
 	$order = 'odd';
 	startPortlet ('Racks');
@@ -119,8 +123,8 @@ function renderRow ($row_id)
 	foreach ($rackList as $dummy => $rack)
 	{
 		echo "<td align=center class=row_${order}><a href='${root}?page=rack&rack_id=${rack['id']}'>";
-		echo "<img border=0 width=" . $rackwidth * ROW_SCALE . " height=";
-		echo (3 + 3 + $rack['height'] * 2) * ROW_SCALE;
+		echo "<img border=0 width=" . $rackwidth * getConfigVar ('ROW_SCALE') . " height=";
+		echo (3 + 3 + $rack['height'] * 2) * getConfigVar ('ROW_SCALE');
 		echo " title='${rack['height']} units'";
 		echo "src='render_rack_thumb.php?rack_id=${rack['id']}'>";
 		echo "<br>${rack['name']}</a></td>";
@@ -612,12 +616,12 @@ function renderRackObject ($object_id = 0)
 	echo "<table border=0 cellspacing=0 cellpadding=3 width='100%'>\n";
 	if (!empty ($info['name']))
 		echo "<tr><th width='50%' class=tdright>Common name:</th><td class=tdleft>${info['name']}</td></tr>\n";
-	elseif (in_array ($info['objtype_id'], explode (',', NAMEFUL_OBJTYPES)))
+	elseif (in_array ($info['objtype_id'], explode (',', getConfigVar ('NAMEFUL_OBJTYPES'))))
 		echo "<tr><td colspan=2 class=msg_error>Common name is missing.</td></tr>\n";
 	echo "<tr><th width='50%' class=tdright>Object type:</th><td class=tdleft>${info['objtype_name']}</td></tr>\n";
 	if (!empty ($info['asset_no']))
 		echo "<tr><th width='50%' class=tdright>Asset tag:</th><td class=tdleft>${info['asset_no']}</td></tr>\n";
-	elseif (in_array ($info['objtype_id'], explode (',', NAMEFUL_OBJTYPES)))
+	elseif (in_array ($info['objtype_id'], explode (',', getConfigVar ('NAMEFUL_OBJTYPES'))))
 		echo "<tr><td colspan=2 class=msg_error>Asset tag is missing.</td></tr>\n";
 	if (!empty ($info['label']))
 		echo "<tr><th width='50%' class=tdright>Visible label:</th><td class=tdleft>${info['label']}</td></tr>\n";
@@ -848,7 +852,7 @@ function renderRackObject ($object_id = 0)
 
 function renderRackMultiSelect ($sname, $racks, $selected)
 {
-	echo "<select name=${sname} multiple size=" . MAXSELSIZE . " onchange='getElementById(\"racks\").submit()'>\n";
+	echo "<select name=${sname} multiple size=" . getConfigVar ('MAXSELSIZE') . " onchange='getElementById(\"racks\").submit()'>\n";
 	foreach ($racks as $rack)
 	{
 		echo "<option value=${rack['id']}";
@@ -939,7 +943,7 @@ function renderPortsForObject ($object_id = 0)
 	echo "<input type=hidden name=tab value='${tabno}'>\n";
 	echo "<td><select name='port_type_id' tabindex=102>\n";
 	$types = getPortTypes();
-	global $default_port_type;
+	$default_port_type = getConfigVar ('default_port_type');
 	foreach ($types as $typeid => $typename)
 	{
 		echo "<option value='${typeid}'";
@@ -2009,7 +2013,8 @@ function renderAddMultipleObjectsForm ()
 	if (isset ($_REQUEST['got_fast_data']))
 	{
 		$keepvalues = TRUE;
-		for ($i=0; $i < MASSCOUNT; $i++)
+		$max = getConfigVar ('MASSCOUNT');
+		for ($i = 0; $i < $max; $i++)
 		{
 			if (!isset ($_REQUEST["${i}_object_type_id"]))
 			{
@@ -2086,7 +2091,8 @@ function renderAddMultipleObjectsForm ()
 	echo "<tr><th>Object type</th><th>Common name</th><th>Visible label</th><th>Asset tag</th><th>Barcode</th></tr>\n";
 	// If a user forgot to select object type on input, we keep his
 	// previous input in the form.
-	for ($i = 0; $i < MASSCOUNT; $i++)
+	$max = getConfigVar ('MASSCOUNT');
+	for ($i = 0; $i < $max; $i++)
 	{
 		echo '<tr><td>';
 		printSelect ($typelist, "${i}_object_type_id", 0);
@@ -2131,7 +2137,7 @@ function printGreeting ()
 {
 	global $remote_username, $accounts;
 	$account = $accounts[$remote_username];
-	echo "Hello, ${account['user_realname']}. This is RackTables " . VERSION . ". Click <a href=logout.php>here</a> to logout.";
+	echo "Hello, ${account['user_realname']}. This is RackTables " . CODE_VERSION . ". Click <a href=logout.php>here</a> to logout.";
 }
 
 function renderSearchResults ()
@@ -2420,14 +2426,17 @@ function renderPermissionsEditForm ()
 
 function renderReadonlyParameters ()
 {
-	global $color, $default_port_type;
+	$default_port_type = getConfigVar ('default_port_type');
 	startPortlet ('config.php');
 	echo '<table border=0 align=center>';
-	echo "<tr><th class=tdright>version:</th><td class=tdleft>" . VERSION . "</td></tr>\n";
+	echo "<tr><th class=tdright>Code version:</th><td class=tdleft>" . CODE_VERSION . "</td></tr>\n";
 	echo "<tr><th class=tdright>password hash:</th><td class=tdleft>" . PASSWORD_HASH . "</td></tr>\n";
 	echo "<tr><th class=tdright>default port type:</th><td class=tdleft>${default_port_type}</td></tr>\n";
-	foreach ($color as $class => $value)
-		echo "<tr><th class=tdright bgcolor='#${value}'>color for class ${class}</th><td class=tdleft>${value}</td></tr>\n";
+	foreach (array ('F', 'A', 'U', 'T', 'Th', 'Tw', 'Thw') as $class)
+		echo
+			"<tr><th class=tdright bgcolor='#" . getConfigVar ('color_' . $class) .
+			"'>color for class ${class}</th><td class=tdleft>" .
+			getConfigVar ('color_' . $class) . "</td></tr>\n";
 	echo "</table>\n";
 	finishPortlet();
 }
@@ -3083,14 +3092,15 @@ function renderVLANMembership ($object_id = 0)
 	echo "<input type=hidden name=object_id value=${object_id}>";
 	echo "<input type=hidden name=portcount value=" . count ($portlist) . ">\n";
 	$portno = 0;
+	$ports_per_row = getConfigVar ('PORTS_PER_ROW');
 	foreach ($portlist as $port)
 	{
 		// Don't let wide forms break our fancy pages.
-		if ($portno % PORTS_PER_ROW == 0)
+		if ($portno % $ports_per_row == 0)
 		{
 			if ($portno > 0)
 				echo "</tr>\n";
-			echo "<tr><th>" . ($portno + 1) . "-" . ($portno + PORTS_PER_ROW) . "</th>";
+			echo "<tr><th>" . ($portno + 1) . "-" . ($portno + $ports_per_row) . "</th>";
 		}
 		echo '<td>' . $port['portname'] . '<br>';
 		echo "<input type=hidden name=portname_${portno} value=" . $port['portname'] . '>';
@@ -3114,7 +3124,7 @@ function renderVLANMembership ($object_id = 0)
 		$portno++;
 		echo "</td>";
 	}
-	echo "</tr><tr><td colspan=" . (PORTS_PER_ROW + 1) . "><input type=submit value='Save changes'></form></td></tr></table>";
+	echo "</tr><tr><td colspan=" . ($ports_per_row + 1) . "><input type=submit value='Save changes'></form></td></tr></table>";
 	finishPortlet();
 
 	echo '</td></tr></table>'; // -------------------------------------
