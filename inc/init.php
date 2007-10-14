@@ -53,6 +53,13 @@ if (isset ($_SERVER['PHP_AUTH_USER']))
 if (isset ($_SERVER['PHP_AUTH_PW']))
 	$_SERVER['PHP_AUTH_PW'] = escapeString ($_SERVER['PHP_AUTH_PW']);
 
+$configCache = loadConfigCache();
+if (!count ($configCache))
+{
+	showError ('Failed to load configuration from the database.');
+	die();
+}
+
 // Now init authentication.
 
 require_once 'inc/auth.php';
@@ -71,12 +78,6 @@ authenticate();
 // Note that we don't perform autorization here, so each 1st level page
 // has to do it in its way, e.g. to call authorize().
 
-$configCache = loadConfigCache();
-if (!count ($configCache))
-{
-	showError ('Failed to load configuration from the database.');
-	die();
-}
 
 
 $remote_username = $_SERVER['PHP_AUTH_USER'];
