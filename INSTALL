@@ -1,4 +1,4 @@
-This file describes installation process for RackTables 0.14.5
+This file describes installation process for RackTables 0.14.6
 
 I. Dependencies.
 
@@ -12,19 +12,23 @@ Fedora 6: # yum install httpd php php-mysql php-pdo php-gd
 II. Layout
 1. Unpack the tarball and make it web-accessible, e.g. http://yourcompany.com/racktables
 or http://racktables.mysite.org.
-2. Go into 'inc' directory, copy secret-sample.php to secret.php and modify accordingly.
-3. Edit install/init-auth.sql and change admin password
-4. [FIXME: this isn't true anymore] Change $enterprise in inc/config.php
+2. Edit install/init-auth.sql and change admin password
 
 III. Database setup
 mysql> create database_name;
 mysql> use database_name;
 mysql> source install/init-structure.sql
 mysql> source install/init-auth.sql
+$ rm -f install/init-auth.sql
 mysql> source install/init-dictbase.sql
 mysql> source install/init-dictvendors.sql
 mysql> grant all privileges on database_name.* to XXX@YYY identified by 'ZZZ';
 
 Make sure your inc/secret.php matches real values you used in the above request.
 
-IV. Remove install/init-auth.sql
+IV. Customisation
+mysql> update Config set varvalue = 'YourName' where varname = 'enterprise'
+(Will be changed to a more cenvenient way in next versions.)
+
+IV. $ rm -f install/init-auth.sql
+(Just to be sure you did.)

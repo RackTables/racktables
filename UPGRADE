@@ -1,0 +1,11 @@
+RackTables now provides an automatic database upgrade feature.
+If you already have a working installation, the following
+procedure should be sufficient:
+
+0. BACKUP YOUR DATABASE
+1. Remove all existing files except inc/secret.php and gateways'
+   configuration (in the gateways directory).
+2. Unpack the new tarball into the place.
+3. Open the RackTables page in your browser.
+4. Follow instructions. Normally, everything should be Ok. If it
+   is not so, write down the failed quieries for further investigation.
