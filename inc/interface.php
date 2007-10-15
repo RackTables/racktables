@@ -2969,7 +2969,7 @@ function renderVLANMembership ($object_id = 0)
 				echo "</tr>\n";
 			echo "<tr><th>" . ($portno + 1) . "-" . ($portno + $ports_per_row) . "</th>";
 		}
-		echo '<td>' . $port['portname'] . '<br>';
+		echo '<td class=port_' . $port['status'] . '>' . $port['portname'] . '<br>';
 		echo "<input type=hidden name=portname_${portno} value=" . $port['portname'] . '>';
 		if ($port['vlanid'] == 'trunk')
 		{

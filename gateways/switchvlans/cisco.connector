@@ -85,7 +85,7 @@ do_fetch()
 	nc $ENDPOINT 23 < $CMDS2 > "$OUT2"
 	nc $ENDPOINT 23 < $CMDS3 > "$OUT3"
 	cat "$OUT1" | fgrep ' active    ' | sed -E 's/^([[:digit:]]+)[[:space:]]+(.+)[[:space:]]+ active    (.*)/\1=\2/;s/[[:space:]]+$//' > $FILE1
-	cat "$OUT2" | egrep '^(Et|Fa|Gi|Te)' | sed -E 's/ +(notconnect|connected) +/=/;s/=(trunk|([0-9]+)) .*$/=\1/' > $FILE2
+	cat "$OUT2" | egrep '^(Et|Fa|Gi|Te)' | sed -E 's/ +(notconnect|connected) +/=\1,/;s/,(trunk|([0-9]+)) .*$/,\1/' > $FILE2
 	# FIXME
 #	cat "$OUT3" > "$FILE3" 
 }

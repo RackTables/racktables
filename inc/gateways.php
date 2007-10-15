@@ -127,10 +127,11 @@ function getSwitchVLANs ($object_id = 0)
 		$vlanlist[$vlanid] = $vlandescr;
 	}
 	$portlist = array();
-	foreach (explode (';', substr ($data[2], strlen ('OK '))) as $pair)
+	foreach (explode (';', substr ($data[2], strlen ('OK!'))) as $pair)
 	{
-		list ($portname, $vlanid) = explode ('=', $pair);
-		$portlist[] = array ('portname' => $portname, 'vlanid' => $vlanid);
+		list ($portname, $pair2) = explode ('=', $pair);
+		list ($status, $vlanid) = explode (',', $pair2);
+		$portlist[] = array ('portname' => $portname, 'status' => $status, 'vlanid' => $vlanid);
 	}
 	if (count ($portlist) == 0)
 	{

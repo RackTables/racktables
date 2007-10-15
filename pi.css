@@ -504,3 +504,11 @@ div.commentblock {
 	white-space: pre;
 	text-align: left;
 }
+
+.port_connected {
+	background-color: red;
+}
+
+.port_notconnect {
+	background-color: green;
+}
