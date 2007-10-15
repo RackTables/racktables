@@ -5,6 +5,7 @@
 	new feature: key hint in dictionary browser
 	new feature: switch VLANs gateway with Cisco connector (others to come)
 	new feature: one more form for objects mass-creation
+	new feature: automatic database upgrades
 	bugfix: don't hide IPv4 address name for a free address
 	update: new stock values in dictionary chapters: server OS type,
 		PortType, switch models
