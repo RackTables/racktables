@@ -18,7 +18,8 @@ function authenticate ()
 	(
 		!isset ($_SERVER['PHP_AUTH_USER']) or
 		!isset ($_SERVER['PHP_AUTH_PW']) or
-		!authenticated ($_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW'])
+		!authenticated ($_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW']) or
+		isset ($_REQUEST['logout'])
 	)
 	{
 		header ('WWW-Authenticate: Basic realm="' . getConfigVar ('enterprise') . ' RackTables access"');
