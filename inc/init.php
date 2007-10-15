@@ -53,6 +53,18 @@ if (isset ($_SERVER['PHP_AUTH_USER']))
 if (isset ($_SERVER['PHP_AUTH_PW']))
 	$_SERVER['PHP_AUTH_PW'] = escapeString ($_SERVER['PHP_AUTH_PW']);
 
+$dbver = getDatabaseVersion();
+if ($dbver != CODE_VERSION)
+{
+	echo '<p align=justify>This Racktables installation seems to be ' .
+		'just upgraded to version ' . CODE_VERSION . ', while the '.
+		'database is still of version ' . $dbver . '. No user will be ' .
+		'either authenticated or shown any page until the upgrade is ' .
+		"finished. Follow <a href='${root}upgrade.php'>this link</a> and " .
+		'authenticate as administrator to finish the upgrade.</p>';
+	die;
+}
+
 $configCache = loadConfigCache();
 if (!count ($configCache))
 {

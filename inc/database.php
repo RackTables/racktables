@@ -1840,4 +1840,29 @@ function storeConfigVar ($varname = NULL, $varvalue = NULL)
 	return FALSE;
 }
 
+// Database version detector. Should behave corretly on any
+// working dataset a user might have.
+function getDatabaseVersion ()
+{
+	global $dbxlink;
+	$query = "select varvalue from Config where varname = 'DB_VERSION' and vartype = 'string'";
+	$result = $dbxlink->query ($query);
+	if ($result == NULL)
+	{
+		$errorInfo = $dbxlink->errorInfo();
+		if ($errorInfo[0] == '42S02') // ER_NO_SUCH_TABLE
+			return '0.14.4';
+		die ('SQL query #1 failed in getDatabaseVersion() with error ' . $errorInfo[2]);
+	}
+	$rows = $result->fetchAll (PDO::FETCH_NUM);
+	if (count ($rows) != 1 || empty ($rows[0][0]))
+	{
+		$result->closeCursor();
+		die ('Cannot guess database version. Config table is present, but DB_VERSION is missing or invalid. Giving up.');
+	}
+	$ret = $rows[0][0];
+	$result->closeCursor();
+	return $ret;
+}
+
 ?>
