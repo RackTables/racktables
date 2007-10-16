@@ -37,11 +37,10 @@ prepare_connect_commands()
 			echo $line | cut -s -d' ' -f6 > $CMDS1
 			echo en >> $CMDS1
 			echo $line | cut -s -d' ' -f7 >> $CMDS1
-
 			# same for ports
-			echo $line | cut -s -d' ' -f6 > $CMDS2
-			echo en >> $CMDS2
-			echo $line | cut -s -d' ' -f7 >> $CMDS2
+			cat "$CMDS1" > "$CMDS2"
+			# ...and MAC addresses
+			cat "$CMDS1" > "$CMDS3"
 			break
 		fi
 	done < `dirname $0`/cisco.secrets.php
@@ -87,7 +86,11 @@ do_fetch()
 	cat "$OUT1" | fgrep ' active    ' | sed -E 's/^([[:digit:]]+)[[:space:]]+(.+)[[:space:]]+ active    (.*)/\1=\2/;s/[[:space:]]+$//' > $FILE1
 	cat "$OUT2" | egrep '^(Et|Fa|Gi|Te)' | sed -E 's/ +(notconnect|connected) +/=\1,/;s/,(trunk|([0-9]+)) .*$/,\1/' > $FILE2
 	# FIXME
-#	cat "$OUT3" > "$FILE3" 
+	# Here we need to distinguish between different platforms and IOS version,
+	# cause they produce output in different formats.
+	if [ "$SW" = "Cisco+IOS+12.0" ]; then
+		cat "$OUT3" | tr -d '\r' | fgrep Dynamic | sed -E 's/ +Dynamic +([0-9]+) +(.+)/=\1@\2/;s/FastEthernet/Fa/;s/GigabitEthernet/Gi/' > "$FILE3"
+	fi
 }
 
 do_push()

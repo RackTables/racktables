@@ -244,6 +244,13 @@ while read cmd args; do
 				echo 'ERR!Not connected'
 			fi
 			;;
+		listmacs)
+			if [ $CONNECTED = 1 ]; then
+				do_listfile "$MACINFO"
+			else
+				echo 'ERR!Not connected'
+			fi
+			;;
 		set)
 			if [ $CONNECTED = 1 ]; then
 				do_set $args
