@@ -175,7 +175,7 @@ do_set()
 	echo $1 | tr ';' '\n' | while read setexpr; do
 		portname=`echo $setexpr | cut -s -d'=' -f1`
 		newvlan=`echo $setexpr | cut -s -d'=' -f2`
-		curvlan=`egrep "^$portname=" $PORTINFO | cut -s -d'=' -f2`
+		curvlan=`egrep "^$portname=" $PORTINFO | cut -s -d'=' -f2 | cut -d',' -f2`
 		if [ -z "$curvlan" ]; then
 			echo "E!Could not find port $portname" >> "$REPLIES"
 			continue
@@ -214,7 +214,8 @@ do_set()
 	while read reply; do
 		echo -n $SEMICOLON$reply
 		SEMICOLON=';'
-		[ -w "$MYDIR/changes.log" ] && echo "$reply" >> "$MYDIR/changes.log"
+		timestamp=`date '+%Y-%M-%d %H:%M:%S'`
+		[ -w "$MYDIR/changes.log" ] && echo "$timestamp $user@$endpoint $reply" >> "$MYDIR/changes.log"
 	done < "$REPLIES"
 	echo
 	rm -f "$REQUESTS" "$REPLIES"
