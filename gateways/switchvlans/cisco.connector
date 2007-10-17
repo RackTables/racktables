@@ -90,6 +90,13 @@ do_fetch()
 	# cause they produce output in different formats.
 	if [ "$SW" = "Cisco+IOS+12.0" ]; then
 		cat "$OUT3" | tr -d '\r' | fgrep Dynamic | sed -E 's/ +Dynamic +([0-9]+) +(.+)/=\1@\2/;s/FastEthernet/Fa/;s/GigabitEthernet/Gi/' > "$FILE3"
+	elif [ "$SW" = "Cisco+IOS+12.2" ]; then
+		case "$HW" in
+			Cisco+Catalyst+35*|Cisco+Catalyst+37*|Cisco+Catalyst+2960*|Cisco+Catalyst+2970*)
+				cat "$OUT3" | tr -d '\r' | fgrep DYNAMIC | \
+				sed -E 's/ +([0-9]+) +(.+)    DYNAMIC +(.+)/\2=\1@\3/;s/FastEthernet/Fa/;s/GigabitEthernet/Gi/' > "$FILE3"
+			;;
+		esac
 	fi
 }
 
