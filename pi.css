@@ -506,21 +506,21 @@ div.commentblock {
 }
 
 .port_connected_none {
-	background-color: #ffff80;
+	background-color: #bfffbf;
 }
 
 .port_connected_single {
-	background-color: #ffff00;
+	background-color: #bfffbf;
 }
 
 .port_connected_multi {
-	background-color: #ff8080;
+	background-color: #00ff00;
 }
 
 .port_notconnect {
-	background-color: #80ff80;
+	background-color: #c0c0c0;
 }
 
 .port_unknown {
-	background-color: #808080;
+	background-color: #ff0000;
 }
