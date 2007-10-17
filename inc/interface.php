@@ -2932,12 +2932,14 @@ function renderVLANMembership ($object_id = 0)
 	$data = getSwitchVLANs ($object_id);
 	if ($data === NULL)
 		return;
-	list ($vlanlist, $portlist) = $data;
+	list ($vlanlist, $portlist, $maclist) = $data;
 
-	echo '<table border=0 width="100%"><tr><td class=pcleft>'; // --------------------------------------------------
+	// This table divides the space into 2 columns.
+	echo '<table border=0 width="100%"><tr><td class=pcleft>';
 
+	// left column: 1 portlet
 	startPortlet ('VLAN table');
-	echo '<table class=cooltable cellspacing=0 cellpadding=5 align=center>';
+	echo '<table class=cooltable cellspacing=0 cellpadding=5 align=center width="100%">';
 	echo "<tr><th>ID</th><th>Description</th></tr>";
 	$order = 'even';
 	global $nextorder;
@@ -2949,10 +2951,12 @@ function renderVLANMembership ($object_id = 0)
 	echo '</table>';
 	finishPortlet();
 
-	echo '</td><td class=pcright>'; // ------------------------------------------------------------
+	echo '</td><td class=pcright>';
+	// Right column: table with 2 rows, each holding 1 portlet
+	echo '<table border=0 width="100%"><tr><td>';
 
 	startPortlet ('Port configuration');
-	echo "<table class=widetable cellspacing=0 cellpadding='5' align=center><tr>";
+	echo "<table class=widetable cellspacing=3 cellpadding=5 align=center width='100%'><tr>";
 	echo "<form method=post>";
 	echo "<input type=hidden name=page value='${pageno}'>";
 	echo "<input type=hidden name=tab value='${tabno}'>";
@@ -2969,7 +2973,24 @@ function renderVLANMembership ($object_id = 0)
 				echo "</tr>\n";
 			echo "<tr><th>" . ($portno + 1) . "-" . ($portno + $ports_per_row) . "</th>";
 		}
-		echo '<td class=port_' . $port['status'] . '>' . $port['portname'] . '<br>';
+		echo '<td class=port_';
+		if ($port['status'] == 'notconnect')
+			echo 'notconnect';
+		elseif ($port['status'] != 'connected')
+			echo 'unknown';
+		elseif (!isset ($maclist[$port['portname']]))
+			echo 'connected_none';
+		else
+		{
+			$maccount = 0;
+			foreach ($maclist[$port['portname']] as $vlanid => $addrs)
+				$maccount += count ($addrs);
+			if ($maccount == 1)
+				echo 'connected_single';
+			else
+				echo 'connected_multi';
+		}
+		echo '>' . $port['portname'] . '<br>';
 		echo "<input type=hidden name=portname_${portno} value=" . $port['portname'] . '>';
 		if ($port['vlanid'] == 'trunk')
 		{
@@ -2994,7 +3015,30 @@ function renderVLANMembership ($object_id = 0)
 	echo "</tr><tr><td colspan=" . ($ports_per_row + 1) . "><input type=submit value='Save changes'></form></td></tr></table>";
 	finishPortlet();
 
-	echo '</td></tr></table>'; // -------------------------------------
+	echo '</td></tr><tr><td align=center>';
+	// second row
+	if (count ($maclist))
+	{
+		startPortlet ('MAC address table');
+		echo '<table border=0 class=cooltable align=center cellspacing=0 cellpadding=5>';
+		echo "<tr><th>Port</th><th>VLAN ID</th><th>MAC address</th></tr>\n";
+		$order = 'even';
+		foreach ($maclist as $portname => $portdata)
+			foreach ($portdata as $vlanid => $addrgroup)
+				foreach ($addrgroup as $addr)
+				{
+					echo "<tr class=row_${order}><td>$portname</td><td>$vlanid</td><td>$addr</td></tr>\n";
+					$order = $nextorder[$order];
+				}
+		echo '</table>';
+		finishPortlet();
+	}
+
+	// End of 2-portlet table.
+	echo '</td></tr></table>';
+
+	// End of main table.
+	echo '</td></tr></table>';
 }
 
 ?>

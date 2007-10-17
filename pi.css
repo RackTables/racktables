@@ -505,10 +505,22 @@ div.commentblock {
 	text-align: left;
 }
 
-.port_connected {
-	background-color: red;
+.port_connected_none {
+	background-color: #ffff80;
+}
+
+.port_connected_single {
+	background-color: #ffff00;
+}
+
+.port_connected_multi {
+	background-color: #ff8080;
 }
 
 .port_notconnect {
-	background-color: green;
+	background-color: #80ff80;
+}
+
+.port_unknown {
+	background-color: #808080;
 }

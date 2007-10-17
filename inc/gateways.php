@@ -60,7 +60,7 @@ function queryGateway ($gwname, $questions)
 }
 
 // This functions returns an array for VLAN list, and an array for port list (both
-// form another array themselves).
+// form another array themselves) and another one with MAC address list.
 // The ports in the latter array are marked with either VLAN ID or 'trunk'.
 // We don't sort the port list, as the gateway is believed to have done this already
 // (or at least the underlying switch software ought to). This is important, as the
@@ -93,11 +93,14 @@ function getSwitchVLANs ($object_id = 0)
 		if ($record['name'] == 'HW type' && !empty ($record['value']))
 			$hwtype = str_replace (' ', '+', $record['value']);
 	}
-	$data = queryGateway
+	$commands = array
 	(
-		'switchvlans',
-		array ("connect ${endpoints[0]} $hwtype $swtype ${remote_username}", 'listvlans', 'listports')
+		"connect ${endpoints[0]} $hwtype $swtype ${remote_username}",
+		'listvlans',
+		'listports',
+		'listmacs'
 	);
+	$data = queryGateway ('switchvlans', $commands);
 	if ($data == NULL)
 	{
 		showError ('Failed to get any response from queryGateway() or the gateway died');
@@ -108,7 +111,7 @@ function getSwitchVLANs ($object_id = 0)
 		showError ("Gateway failure: returned code ${data[0]}.");
 		return NULL;
 	}
-	if (count ($data) != 3)
+	if (count ($data) != count ($commands))
 	{
 		showError ("Gateway failure: mailformed reply.");
 		return NULL;
@@ -138,7 +141,16 @@ function getSwitchVLANs ($object_id = 0)
 		showError ("Gateway succeeded, but returned no port records.");
 		return NULL;
 	}
-	return array ($vlanlist, $portlist);
+	$maclist = array();
+	foreach (explode (';', substr ($data[3], strlen ('OK!'))) as $pair)
+	{
+		list ($macaddr, $pair2) = explode ('=', $pair);
+		if (empty ($pair2))
+			continue;
+		list ($vlanid, $ifname) = explode ('@', $pair2);
+		$maclist[$ifname][$vlanid][] = $macaddr;
+	}
+	return array ($vlanlist, $portlist, $maclist);
 }
 
 function setSwitchVLANs ($object_id = 0, $setcmd)
