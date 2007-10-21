@@ -18,6 +18,7 @@ III. Database setup
 mysql> create database_name;
 mysql> use database_name;
 mysql> source install/init-structure.sql
+mysql> source install/init-config.sql
 mysql> source install/init-auth.sql
 $ rm -f install/init-auth.sql
 mysql> source install/init-dictbase.sql

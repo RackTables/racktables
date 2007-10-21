@@ -323,6 +323,22 @@ CREATE TABLE `UserPermission` (
   `access` enum('yes','no') NOT NULL default 'no',
   UNIQUE KEY `user_id` (`user_id`,`page`,`tab`)
 ) ENGINE=MyISAM;
+
+--
+-- Table structure for table `Config`
+--
+
+DROP TABLE IF EXISTS `Config`;
+CREATE TABLE `Config` (
+  `varname` char(32) NOT NULL,
+  `varvalue` char(64) NOT NULL,
+  `vartype` enum('string','uint') NOT NULL default 'string',
+  `emptyok` enum('yes','no') NOT NULL default 'no',
+  `is_hidden` enum('yes','no') NOT NULL default 'yes',
+  `description` text,
+  PRIMARY KEY  (`varname`)
+) ENGINE=MyISAM;
+
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
