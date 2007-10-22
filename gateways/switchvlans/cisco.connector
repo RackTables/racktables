@@ -71,7 +71,7 @@ prepare_push_commands()
 		printf "int $portname\nswi access vlan $vlanid\nexit\n" >> $CMDS1
 		echo "I!Port $portname@$ENDPOINT has been assigned to VLAN $vlanid" >> "$FILE2"
 	done < "$FILE1"
-	printf "end\nquit\n" >> $CMDS1
+	printf "end\nwri\nquit\n" >> $CMDS1
 }
 
 do_fetch()
