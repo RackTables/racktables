@@ -214,7 +214,7 @@ do_set()
 	while read reply; do
 		echo -n $SEMICOLON$reply
 		SEMICOLON=';'
-		timestamp=`date '+%Y-%M-%d %H:%M:%S'`
+		timestamp=`date '+%Y-%m-%d %H:%M:%S'`
 		[ -w "$MYDIR/changes.log" ] && echo "$timestamp $user@$endpoint $reply" >> "$MYDIR/changes.log"
 	done < "$REPLIES"
 	echo
