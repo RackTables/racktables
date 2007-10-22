@@ -1,3 +1,7 @@
+0.14.7
+	bugfix: provide better SQL dumps for new installations
+	bugfix: gateways/switchvlans minor updates
+	new feature: cisco 2900 series support for gateways/switchvlans
 0.14.6 2007-10-15
 	new feature: browser-side validation for a new IPv4 network
 	  (contributed by Aaron Dummer)
