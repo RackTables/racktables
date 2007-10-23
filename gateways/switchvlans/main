@@ -191,8 +191,13 @@ do_set()
 			continue
 		fi
 		echo "$portname $newvlan" >> "$REQUESTS"
+		cmembers=`grep -c ",$newvlan$" "$PORTINFO"`
+		if [ "$cmembers" = "0" ]; then
+			echo "W!Port $portname seems to be the first in VLAN $newvlan at this switch." >> "$REPLIES"
+			echo "W!Check uplink/downlink configuration for proper operation." >> "$REPLIES"
+		fi
 	done
-	nr=`egrep -c '^.' "$REPLIES"`
+	nr=`egrep -c '^E!.' "$REPLIES"`
 	if [ "$nr" -ge 1 ]; then
 		echo "W!$nr change request(s) have been ignored" >> "$REPLIES"
 	fi
