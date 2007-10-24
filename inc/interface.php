@@ -385,14 +385,17 @@ function renderEditObjectForm ($object_id)
 	global $root;
 	echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
 	echo "<tr><th>&nbsp;</th><th>Attribute</th><th>Value</th><th>&nbsp;</th></tr>\n";
+	echo "<form method=post action='${root}process.php'>\n";
+	echo "<input type=hidden name=page value=${pageno}>\n";
+	echo "<input type=hidden name=tab value=${tabno}>\n";
+	echo "<input type=hidden name=op value=upd>\n";
+	echo "<input type=hidden name=object_id value=${object_id}>\n";
+	echo '<input type=hidden name=num_attrs value=' . count($values) . ">\n";
+
+	$i = 0;
 	foreach ($values as $record)
 	{
-		echo "<form method=post action='${root}process.php'>";
-		echo "<input type=hidden name=page value=${pageno}>";
-		echo "<input type=hidden name=tab value=${tabno}>";
-		echo "<input type=hidden name=op value=upd>";
-		echo "<input type=hidden name=object_id value=${object_id}>";
-		echo "<input type=hidden name=attr_id value=${record['id']}>";
+		echo "<input type=hidden name=${i}_attr_id value=${record['id']}>";
 		echo "<tr><td><a href=${root}process.php?page=${pageno}&tab=${tabno}&op=del&object_id=${object_id}&attr_id=${record['id']}>";
 		printImageHREF ('delete', 'Delete value');
 		echo "</a></td>";
@@ -402,18 +405,19 @@ function renderEditObjectForm ($object_id)
 			case 'uint':
 			case 'float':
 			case 'string':
-				echo "<input type=text name=value value='${record['value']}'>";
+				echo "<input type=text name=${i}_value value='${record['value']}'>";
 				break;
 			case 'dict':
 				$chapter = readChapter ($record['chapter_name']);
 				$chapter[] = array ('dict_key' => 0, 'dict_value' => '-- NOT SET --');
-				printSelect ($chapter, 'value', $record['key']);
+				printSelect ($chapter, "${i}_value", $record['key']);
 				break;
 		}
-		echo "</td>";
-		echo "<td><input type=submit value='OK'></td></tr>\n";
-		echo "</form>";
+		echo "</td></tr>\n";
+		$i++;
 	}
+	echo "<tr><td colspan=3><input type=submit value='Update'></td></tr>\n";
+	echo "</form>";
 	echo "</table>\n";
 	finishPortlet();
 	echo '</td>';

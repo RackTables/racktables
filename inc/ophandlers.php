@@ -791,19 +791,58 @@ function resetAttrValue ()
 		return "${root}?page=${pageno}&tab=${tabno}&object_id=${object_id}&error=" . urlencode ("Reset failed!");
 }
 
-function updateAttrValue ()
+function updateAttrValues ()
 {
 	global $root, $pageno, $tabno;
-	assertUIntArg ('attr_id');
 	assertUIntArg ('object_id');
-	// The value could be uint/float, but we don't know ATM. Let SQL
-	// server check this and complain.
-	assertStringArg ('value');
 	$object_id = $_REQUEST['object_id'];
-	if (commitUpdateAttrValue ($object_id, $_REQUEST['attr_id'], $_REQUEST['value']) === TRUE)
-		return "${root}?page=${pageno}&tab=${tabno}&object_id=${object_id}&message=" . urlencode ('Update succeeded.');
-	else
+	$oldvalues = getAttrValues ($object_id);
+
+	assertUIntArg ('num_attrs');
+	$num_attrs = $_REQUEST['num_attrs'];
+	$result = array();
+
+	for ($i = 0; $i < $num_attrs; $i++)
+	{
+		assertUIntArg ("${i}_attr_id");
+		$attr_id = $_REQUEST["${i}_attr_id"];
+
+		// Field is empty, delete attribute and move on.
+		if (empty($_REQUEST["${i}_value"]))
+		{
+			commitResetAttrValue ($object_id, $attr_id);
+			continue;
+		}
+
+		// The value could be uint/float, but we don't know ATM. Let SQL
+		// server check this and complain.
+		assertStringArg ("${i}_value");
+		$value = $_REQUEST["${i}_value"];
+		switch ($oldvalues[$attr_id]['type'])
+		{
+			case 'uint':
+			case 'float':
+			case 'string':
+				$oldvalue = $oldvalues[$attr_id]['value'];
+				break;
+			case 'dict':
+				$oldvalue = $oldvalues[$attr_id]['key'];
+				break;
+			default:
+				showError ('Internal structure error in updateAttrValues()');
+				die;
+		}
+		if ($value == $oldvalue)
+			continue;
+
+		// Note if the queries succeed or not, it determines which page they see.
+		$result[] = commitUpdateAttrValue ($object_id, $attr_id, $value);
+	}
+
+	if (in_array(false, $result))
 		return "${root}?page=${pageno}&tab=${tabno}&object_id=${object_id}&error=" . urlencode ("Update failed!");
+
+	return "${root}?page=${pageno}&tab=${tabno}&object_id=${object_id}&message=" . urlencode ('Update succeeded.');
 }
 
 function useupPort ()
