@@ -1807,7 +1807,7 @@ function loadConfigCache ()
 	if ($result == NULL)
 	{
 		$errorInfo = $dbxlink->errorInfo();
-		showError ("SQL query '${query}'\nwith message '${errorInfo[2]}'\nfailed in getAttrValues()");
+		showError ("SQL query '${query}'\nwith message '${errorInfo[2]}'\nfailed in loadConfigCache()");
 		return NULL;
 	}
 	$cache = array();
