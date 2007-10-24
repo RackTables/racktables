@@ -80,8 +80,6 @@ function updPortForwarding ()
 	
 }
 
-
-
 function addPortForObject ()
 {
 	global $root, $pageno, $tabno;
