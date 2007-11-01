@@ -1760,6 +1760,25 @@ function commitUseupPort ($port_id = 0)
 	
 }
 
+function commitUpdateUI ($varname, $vartype, $emptyok, $varvalue, $description)
+{
+	if (empty ($varname) || empty ($vartype) || empty ($emptyok) || empty ($varvalue)|| empty ($description))
+	{
+		showError ('Not all required args to commitUpdateUI() are present.');
+		return FALSE;
+	}
+	global $dbxlink;
+	$query = "UPDATE Config SET vartype='${vartype}', emptyok='${emptyok}', varvalue='${varvalue}', description='${description}' " .
+			"WHERE varname='${varname}'";
+	$result = $dbxlink->query ($query);
+	if ($result->rowCount() != 1)
+	{
+		showError ('Error updating config in commitUpdateUI()');
+		return FALSE;
+	}
+	return TRUE;
+}
+
 // This is a swiss-knife blade to insert a record into a table.
 // The first argument is table name.
 // The second argument is an array of "name" => "value" pairs.
@@ -1802,7 +1821,7 @@ function useDeleteBlade ($tablename, $keyname, $keyvalue, $quotekey = TRUE)
 function loadConfigCache ()
 {
 	global $dbxlink;
-	$query = 'select varname, varvalue, vartype, is_hidden, emptyok, description from Config';
+	$query = 'SELECT varname, varvalue, vartype, is_hidden, emptyok, description FROM Config ORDER BY varname';
 	$result = $dbxlink->query ($query);
 	if ($result == NULL)
 	{

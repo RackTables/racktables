@@ -181,7 +181,8 @@ $page['ui']['title'] = 'static_title';
 $page['ui']['handler'] = 'handler_ui';
 $page['ui']['parent'] = 'config';
 $tab['ui']['default'] = 'View';
-$tab['ui']['edit'] = '[ Change ]';
+$tab['ui']['edit'] = 'Change';
+$ophandler['ui']['edit']['upd'] = 'updateUI';
 
 $page['reports']['title'] = 'static_title';
 $page['reports']['handler'] = 'handler_reports';

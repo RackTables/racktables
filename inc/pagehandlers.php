@@ -282,6 +282,9 @@ function handler_ui ($tabno)
 		case 'default':
 			renderUIConfig();
 			break;
+		case 'edit':
+			renderUIConfigEditForm();
+			break;
 		default:
 			showError ("Invalid tab '${tabno}' requested in handler_ui().");
 	}
