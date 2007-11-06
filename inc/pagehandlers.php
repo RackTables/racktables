@@ -136,6 +136,9 @@ function handler_object ($tabno)
 		case 'switchvlans':
 			renderVLANMembership($_REQUEST['object_id']);
 			break;
+		case 'snmpportfinder':
+			renderSNMPPortFinder($_REQUEST['object_id']);
+			break;
 		default:
 			showError ("Invalid tab '${tabno}' requested in handler_object().");
 	}

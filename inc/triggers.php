@@ -35,4 +35,20 @@ function trigger_switchvlans ()
 	return FALSE;
 }
 
+// SNMP port finder tab trigger. At the moment we decide on showing it
+// for pristine switches only. Once a user has begun
+// filling the data in, we stop showing the tab.
+function trigger_snmpportfinder ()
+{
+	assertUIntArg ('object_id');
+	$object_id = $_REQUEST['object_id'];
+	$object = getObjectInfo ($object_id);
+	if ($object['objtype_id'] != 8)
+		return FALSE;
+	$tails = getObjectPortsAndLinks ($object_id);
+	if (count ($tails))
+		return FALSE;
+	return TRUE;
+}
+
 ?>

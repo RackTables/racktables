@@ -3112,4 +3112,22 @@ function renderVLANMembership ($object_id = 0)
 	echo '</td></tr></table>';
 }
 
+// This snippet either renders a form inviting the user to start SNMP query
+// on the current device or displays the result of the scan.
+function renderSNMPPortFinder ($object_id = 0)
+{
+	global $root, $pageno, $tabno, $remote_username;
+	if ($object_id <= 0)
+	{
+		showError ('Invalid object_id in renderSNMPPortFinder()');
+		return;
+	}
+	if (isset ($_REQUEST['do_scan']))
+	{
+		echo "Here come the scan results.";
+		return;
+	}
+	echo "Does this look like a form?";
+}
+
 ?>
