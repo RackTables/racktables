@@ -3122,12 +3122,125 @@ function renderSNMPPortFinder ($object_id = 0)
 		showError ('Invalid object_id in renderSNMPPortFinder()');
 		return;
 	}
+// FIXME: check if SNMP PHP extension is available!
 	if (isset ($_REQUEST['do_scan']))
 	{
-		echo "Here come the scan results.";
+		$log = array();
+// http://www.cisco.com/en/US/products/ps6406/prod_models_comparison.html
+// http://cisco.com/en/US/products/sw/cscowork/ps2064/products_device_support_table09186a0080803bb4.html
+#		$ciscomodel[694] = 'WS-C2960-24TC-L (24 Ethernet 10/100 ports and 2 dual-purpose uplinks)';
+#		$ciscomodel[695] = 'WS-C2960-48TC-L (48 Ethernet 10/100 ports and 2 dual-purpose uplinks)';
+		$ciscomodel[696] = 'WS-C2960G-24TC-L (20 Ethernet 10/100/1000 ports and 4 dual-purpose uplinks)';
+		$ciscomodel[697] = 'WS-C2960G-48TC-L (44 Ethernet 10/100/1000 ports and 4 dual-purpose uplinks)';
+#		$ciscomodel[716] = 'WS-C2960-24TT-L (24 Ethernet 10/100 ports and 2 10/100/1000 uplinks)';
+#		$ciscomodel[717] = 'WS-C2960-48TT-L (48 Ethernet 10/100 ports and 2 10/100/1000 uplinks)';
+		assertStringArg ('community');
+		$community = $_REQUEST['community'];
+		$objectInfo = getObjectInfo ($object_id);
+		$endpoints = findAllEndpoints ($object_id, $objectInfo['name']);
+		$sysDescr = snmpget ($endpoints[0], $community, 'sysDescr.0');
+		// Strip the object type, it's always string here.
+		$sysDescr = substr ($sysDescr, strlen ('STRING: '));
+		if (strpos ($sysDescr, 'Cisco IOS Software') === 0)
+			$log[] = array ('code' => 'success', 'message' => 'Seems to be a Cisco box');
+		$sysObjectID = snmpget ($endpoints[0], $community, 'sysObjectID.0');
+		// Transform OID
+		$sysObjectID = substr ($sysObjectID, strlen ('OID: SNMPv2-SMI::enterprises.9.1.'));
+		if (!isset ($ciscomodel[$sysObjectID]))
+		{
+			$log[] = array ('code' => 'error', 'message' => 'Could not guess exact HW model!');
+			printLog ($log);
+			return;
+		}
+		$log[] = array ('code' => 'success', 'message' => 'HW is ' . $ciscomodel[$sysObjectID]);
+		// Now fetch ifType, ifDescr and ifPhysAddr and let model-specific code sort the data out.
+		$ifType = snmpwalkoid ($endpoints[0], $community, 'ifType');
+		$ifDescr = snmpwalkoid ($endpoints[0], $community, 'ifdescr');
+		$ifPhysAddress = snmpwalkoid ($endpoints[0], $community, 'ifPhysAddress');
+		// Combine 3 tables into 1...
+		$ifList1 = array();
+		foreach ($ifType as $key => $val)
+		{
+			list ($dummy, $ifIndex) = explode ('.', $key);
+			list ($dummy, $type) = explode (' ', $val);
+			$ifList1[$ifIndex]['type'] = $type;
+		}
+		foreach ($ifDescr as $key => $val)
+		{
+			list ($dummy, $ifIndex) = explode ('.', $key);
+			list ($dummy, $descr) = explode (' ', $val);
+			$ifList1[$ifIndex]['descr'] = trim ($descr, '"');
+		}
+		foreach ($ifPhysAddress as $key => $val)
+		{
+			list ($dummy, $ifIndex) = explode ('.', $key);
+			list ($dummy, $addr) = explode (':', $val);
+			$addr = str_replace (' ', '', $addr);
+			$ifList1[$ifIndex]['phyad'] = $addr;
+		}
+		// ...and then reverse it inside out to make description the key.
+		$ifList2 = array();
+		foreach ($ifList1 as $ifIndex => $data)
+		{
+			$ifList2[$data['descr']]['type'] = $data['type'];
+			$ifList2[$data['descr']]['phyad'] = $data['phyad'];
+			$ifList2[$data['descr']]['idx'] = $ifIndex;
+		}
+		unset ($ifList1);
+		$newports = 0;
+		// Now we can directly pick necessary ports from the table accordingly
+		// to our known hardware model.
+		switch ($sysObjectID)
+		{
+		// FIXME: chassis edge switches often share a common naming scheme, so
+		// the sequences below have to be generalized. Let's have some duplicated
+		// code for the time being, as this is the first implementation ever.
+			case '697': // WS-C2960G-48TC-L
+				// 44 copper ports: 1X, 2X, 3X...
+				// 4 combo ports: 45, 46, 47, 48. Don't list SFP connectors atm, as it's not
+				// clear how to fit them into current Ports table structure.
+				for ($i = 1; $i <= 48; $i++)
+				{
+					$label = ($i >= 45) ? "${i}" : "${i}X";
+					$error = commitAddPort ($object_id, 'gi0/' . $i, 11, $label, $ifList2["GigabitEthernet0/${i}"]['phyad']);
+					if ($error == '')
+						$newports++;
+					else
+						$log[] = array ('code' => 'error', 'message' => 'Failed to add port ' . $label . ': ' . $error);
+				}
+				break;
+			case '696': // WS-C2960G-24TC-L
+				// Quite similar to the above.
+				for ($i = 1; $i <= 24; $i++)
+				{
+					$label = ($i >= 21) ? "${i}" : "${i}X";
+					$error = commitAddPort ($object_id, 'gi0/' . $i, 11, $label, $ifList2["GigabitEthernet0/${i}"]['phyad']);
+					if ($error == '')
+						$newports++;
+					else
+						$log[] = array ('code' => 'error', 'message' => 'Failed to add port ' . $label . ': ' . $error);
+				}
+				break;
+			default:
+				showError ("Unexpected sysObjectID '${sysObjectID}' in renderSNMPPortFinder()");
+		}
+		if ($newports > 0)
+			$log[] = array ('code' => 'success', 'message' => "Added ${newports} new ports");
+		printLog ($log);
 		return;
 	}
-	echo "Does this look like a form?";
+	echo "<form method=post>\n";
+	echo "<input type=hidden name=pageno value='${pageno}'>\n";
+	echo "<input type=hidden name=tabno value='${pageno}'>\n";
+?>
+<p align=center>
+This switch has no ports listed, that's why you see this form. If you supply SNMP community,
+I can try atomatic data harvesting on the switch. As soon as at least one relevant port is found,
+this tab will not be seen any more. Good luck.<br>
+<input type=text name=community value='public'>
+<input type=submit name='do_scan' value='Go!'> 
+</p>
+<?
 }
 
 ?>
