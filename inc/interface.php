@@ -3128,12 +3128,17 @@ function renderSNMPPortFinder ($object_id = 0)
 		$log = array();
 // http://www.cisco.com/en/US/products/ps6406/prod_models_comparison.html
 // http://cisco.com/en/US/products/sw/cscowork/ps2064/products_device_support_table09186a0080803bb4.html
+		$ciscomodel[283] = 'WS-C6509-E (9-slot system)';
 #		$ciscomodel[694] = 'WS-C2960-24TC-L (24 Ethernet 10/100 ports and 2 dual-purpose uplinks)';
 #		$ciscomodel[695] = 'WS-C2960-48TC-L (48 Ethernet 10/100 ports and 2 dual-purpose uplinks)';
 		$ciscomodel[696] = 'WS-C2960G-24TC-L (20 Ethernet 10/100/1000 ports and 4 dual-purpose uplinks)';
 		$ciscomodel[697] = 'WS-C2960G-48TC-L (44 Ethernet 10/100/1000 ports and 4 dual-purpose uplinks)';
 #		$ciscomodel[716] = 'WS-C2960-24TT-L (24 Ethernet 10/100 ports and 2 10/100/1000 uplinks)';
 #		$ciscomodel[717] = 'WS-C2960-48TT-L (48 Ethernet 10/100 ports and 2 10/100/1000 uplinks)';
+#		$ciscomodel[633] = 'WS-C3560-24TS (24 Ethernet 10/100 ports and 2 10/100/1000 SFP uplinks)';
+		$ciscomodel[634] = 'WS-C3560-48TS (48 Ethernet 10/100 ports and 4 10/100/1000 SFP uplinks)';
+#		$ciscomodel[563] = 'WS-C3560-24PS (24 Ethernet 10/100 POE ports and 2 10/100/1000 SFP uplinks)';
+		$ciscomodel[564] = 'WS-C3560-48PS (48 Ethernet 10/100 POE ports and 4 10/100/1000 SFP uplinks)';
 		assertStringArg ('community');
 		$community = $_REQUEST['community'];
 		$objectInfo = getObjectInfo ($object_id);
@@ -3186,7 +3191,6 @@ function renderSNMPPortFinder ($object_id = 0)
 			$ifList2[$data['descr']]['phyad'] = $data['phyad'];
 			$ifList2[$data['descr']]['idx'] = $ifIndex;
 		}
-		unset ($ifList1);
 		$newports = 0;
 		// Now we can directly pick necessary ports from the table accordingly
 		// to our known hardware model.
@@ -3219,6 +3223,61 @@ function renderSNMPPortFinder ($object_id = 0)
 						$newports++;
 					else
 						$log[] = array ('code' => 'error', 'message' => 'Failed to add port ' . $label . ': ' . $error);
+				}
+				break;
+			case '564': // WS-C3560-48PS
+			case '634': // WS-C3560-48TS
+				for ($i = 1; $i <= 48; $i++)
+				{
+					$label = "${i}X";
+					$error = commitAddPort ($object_id, 'fa0/' . $i, 11, $label, $ifList2["FastEthernet0/${i}"]['phyad']);
+					if ($error == '')
+						$newports++;
+					else
+						$log[] = array ('code' => 'error', 'message' => 'Failed to add port ' . $label . ': ' . $error);
+				}
+				for ($i = 1; $i <= 4; $i++)
+				{
+					$label = "${i}";
+					$error = commitAddPort ($object_id, 'gi0/' . $i, 11, $label, $ifList2["GigabitEthernet0/${i}"]['phyad']);
+					if ($error == '')
+						$newports++;
+					else
+						$log[] = array ('code' => 'error', 'message' => 'Failed to add port ' . $label . ': ' . $error);
+				}
+				break;
+		// For modular devices we don't iterate over all possible port names,
+		// but use the first list to pick everything that looks legitimate
+		// for this hardware. It would be correct to fetch the list of modules
+		// installed to generate lists of ports, but who is going to implement
+		// this?
+			case '283': // WS-C6509-E
+				foreach ($ifList1 as $port)
+				{
+					if ($port['type'] != 'ethernet-csmacd(6)')
+						continue;
+					// Copper Fa/Gi harvesting is relatively simple, while 10Gig ports can
+					// have random samples of transciever units.
+					if (strpos ($port['descr'], 'FastEthernet') === 0) // Fa
+					{
+						$prefix = 'fa';
+						$ptype = 6; // RJ-45/100Base-TX
+						list ($slotno, $portno) = explode ('/', substr ($port['descr'], strlen ('FastEthernet')));
+					}
+					elseif (strpos ($port['descr'], 'GigabitEthernet') === 0) // Gi
+					{
+						$prefix = 'gi';
+						$ptype = 11; // RJ-45/1000Base-T
+						list ($slotno, $portno) = explode ('/', substr ($port['descr'], strlen ('GigabitEthernet')));
+					}
+					else continue;
+					$label = "slot ${slotno} port ${portno}";
+					$pname = "${prefix}${slotno}/${portno}";
+					$error = commitAddPort ($object_id, $pname, $ptype, $label, $port['phyad']);
+					if ($error == '')
+						$newports++;
+					else
+						$log[] = array ('code' => 'error', 'message' => 'Failed to add port ' . $pname . ': ' . $error);
 				}
 				break;
 			default:
