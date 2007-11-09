@@ -1,6 +1,7 @@
 0.14.7
 	bugfix: provide better SQL dumps for new installations
 	bugfix: gateways/switchvlans minor updates
+	bugfix: logout link could fail sometimes
 	update: better attributes edit form by Aaron Dummer
 	new feature: cisco 2900 series support for gateways/switchvlans
 0.14.6 2007-10-15
