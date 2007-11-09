@@ -11,7 +11,9 @@
 $root = (empty($_SERVER['HTTPS'])?'http':'https').
 	'://'.
 	(isset($_SERVER['HTTP_HOST'])?$_SERVER['HTTP_HOST']:($_SERVER['SERVER_NAME'].($_SERVER['SERVER_PORT']=='80'?'':$_SERVER['SERVER_PORT']))).
-	dirname($_SERVER['PHP_SELF']).'/';
+	dirname($_SERVER['PHP_SELF']);
+if (substr ($root, -1) != '/')
+	$root .= '/';
 
 // This is the first thing we need to do.
 require_once 'inc/config.php';
