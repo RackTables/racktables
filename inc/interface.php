@@ -1271,6 +1271,8 @@ function renderRackSpaceForObject ($object_id = 0)
 		echo "<tr><th width='10%'>&nbsp;</th><th width='20%'>Front</th>";
 		echo "<th width='50%'>Interior</th><th width='20%'>Back</th></tr>\n";
 		renderAtomGrid ($rackData);
+		echo "<tr><th width='10%'>&nbsp;</th><th width='20%'>Front</th>";
+		echo "<th width='50%'>Interior</th><th width='20%'>Back</th></tr>\n";
 		echo "</table></center>\n";
 		echo '</td>';
 	}
