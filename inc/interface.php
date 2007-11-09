@@ -2139,7 +2139,7 @@ function renderAddMultipleObjectsForm ()
 
 function printGreeting ()
 {
-	global $remote_username, $accounts;
+	global $remote_username, $accounts, $root;
 	$account = $accounts[$remote_username];
 	echo "Hello, ${account['user_realname']}. This is RackTables " . CODE_VERSION . ". Click <a href='${root}?logout'>here</a> to logout.";
 }
