@@ -5,6 +5,7 @@
 	bugfix: avoid short PHP tags for better compatibility across
 	  different PHP installations (reported by Tom Laermans)
 	update: better attributes edit form by Aaron Dummer
+	update: display rack row name as well in the Object/Rackspace tab
 	new feature: cisco 2900 series support for gateways/switchvlans
 0.14.6 2007-10-15
 	new feature: browser-side validation for a new IPv4 network
