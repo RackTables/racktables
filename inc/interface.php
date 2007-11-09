@@ -3230,7 +3230,7 @@ function renderSNMPPortFinder ($object_id = 0)
 				for ($i = 1; $i <= 48; $i++)
 				{
 					$label = "${i}X";
-					$error = commitAddPort ($object_id, 'fa0/' . $i, 11, $label, $ifList2["FastEthernet0/${i}"]['phyad']);
+					$error = commitAddPort ($object_id, 'fa0/' . $i, 6, $label, $ifList2["FastEthernet0/${i}"]['phyad']);
 					if ($error == '')
 						$newports++;
 					else
