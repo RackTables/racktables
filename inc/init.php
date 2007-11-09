@@ -1,4 +1,4 @@
-<?
+<?php
 /*
 *
 * This file performs RackTables initialisation. After you include it

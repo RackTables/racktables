@@ -1,4 +1,4 @@
-<?
+<?php
 /*
 *
 *  This file implements generic navigation for RackTables.

@@ -1,4 +1,4 @@
-<?
+<?php
 
 require 'inc/init.php';
 authorize();
@@ -43,8 +43,8 @@ foreach (array ('F', 'A', 'U', 'T', 'Th', 'Tw', 'Thw') as $statecode)
   <td colspan=2>
    <table width='100%' cellspacing=0 cellpadding=2 border=0>
    <tr>
-    <td valign=top><? printImageHREF ('logo'); ?></td>
-    <td valign=top><div class=greeting><? printGreeting(); ?></div></td>
+    <td valign=top><?php printImageHREF ('logo'); ?></td>
+    <td valign=top><div class=greeting><?php printGreeting(); ?></div></td>
    </tr>
    </table>
   </td>
@@ -54,21 +54,21 @@ foreach (array ('F', 'A', 'U', 'T', 'Th', 'Tw', 'Thw') as $statecode)
   <td class="menubar" colspan=2>
    <table border="0" width="100%" cellpadding="3" cellspacing="0">
    <tr>
-<? showPathAndSearch ($pageno); ?>
+<?php showPathAndSearch ($pageno); ?>
    </tr>
    </table>
   </td>
  </tr>
 
 	<tr>
-<?
+<?php
 	showTabs ($pageno, $tabno);
 ?>
 	</tr>
 
  <tr>
   <td colspan=2>
-<?
+<?php
 if (isset ($page[$pageno]['handler']))
 	$page[$pageno]['handler'] ($tabno);
 else

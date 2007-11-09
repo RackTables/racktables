@@ -1,4 +1,4 @@
-<?
+<?php
 /*
 *
 *  This is RackTables secret configuration file.

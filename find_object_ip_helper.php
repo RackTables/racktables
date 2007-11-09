@@ -1,4 +1,4 @@
-<?
+<?php
 	require 'inc/init.php';
 	// This is our context.
 	$pageno = 'objects';
@@ -9,7 +9,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en" style="height: 100%;">
 <head>
  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-<?
+<?php
 echo '<title>' . getTitle ($pageno, $tabno) . "</title>\n";
 echo "<link rel=stylesheet type='text/css' href=pi.css />\n";
 echo "<link rel=icon href='" . getFaviconURL() . "' type='image/x-icon' />";
@@ -21,7 +21,7 @@ echo "<link rel=icon href='" . getFaviconURL() . "' type='image/x-icon' />";
 <h2>Choose a port:</h2><br><br>
 <input type=hidden id='ip'>
 <select size="30" id="addresses">
-<?
+<?php
 	authorize();
 	renderObjectAddressesAndNames ();
 ?>

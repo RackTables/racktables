@@ -1,4 +1,4 @@
-<?
+<?php
 /*
 *
 *  This file is a library of computational functions for RackTables.

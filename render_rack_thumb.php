@@ -1,4 +1,4 @@
-<?
+<?php
 
 // This page outputs PNG rack thumbnail.
 

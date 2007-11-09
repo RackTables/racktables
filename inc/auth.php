@@ -1,4 +1,4 @@
-<?
+<?php
 /*
 
 Authentication library for RackTables.

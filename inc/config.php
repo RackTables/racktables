@@ -1,4 +1,4 @@
-<?
+<?php
 /*
  *
  * This file used to hold a collection of constants, variables and arrays,

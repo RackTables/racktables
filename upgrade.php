@@ -1,4 +1,4 @@
-<?
+<?php
 
 // At the moment we assume, that for any two releases we can
 // sequentally execute all batches, that separate them, and

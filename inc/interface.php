@@ -1,4 +1,4 @@
-<?
+<?php
 /*
 *
 *  This file contains frontend functions for RackTables.
@@ -21,32 +21,32 @@ function renderIndex ()
 			<table width='100%' cellspacing=0 cellpadding=30 class=mainmenu border=0>
 				<tr>
 					<td>
-						<h1><a href='<? echo $root; ?>?page=rackspace'>Rackspace<br>
-						<? printImageHREF ('rackspace'); ?></a></h1>
+						<h1><a href='<?php echo $root; ?>?page=rackspace'>Rackspace<br>
+						<?php printImageHREF ('rackspace'); ?></a></h1>
 					</td>
 					<td>
-						<h1><a href='<? echo $root; ?>?page=objects'>Objects<br>
-						<? printImageHREF ('objects'); ?></a></h1>
+						<h1><a href='<?php echo $root; ?>?page=objects'>Objects<br>
+						<?php printImageHREF ('objects'); ?></a></h1>
 					</td>
 					<td>
-							<h1><a href='<? echo $root; ?>?page=ipv4space'>IPv4 space<br>
-							<? printImageHREF ('ipv4space'); ?></a></h1>
+							<h1><a href='<?php echo $root; ?>?page=ipv4space'>IPv4 space<br>
+							<?php printImageHREF ('ipv4space'); ?></a></h1>
 					</td>
 				</tr>
 			</table>
 			<table width='100%' cellspacing=0 cellpadding=30 class=mainmenu border=0>
 				<tr>
 					<td>
-							<h1><a href='<? echo $root; ?>?page=config'>Configuration<br>
-							<? printImageHREF ('config'); ?></a></h1>
+							<h1><a href='<?php echo $root; ?>?page=config'>Configuration<br>
+							<?php printImageHREF ('config'); ?></a></h1>
 					</td>
 					<td>
-						<h1><a href='<? echo $root; ?>?page=reports'>[ Reports ]<br>
-						<? printImageHREF ('reports'); ?></a></h1>
+						<h1><a href='<?php echo $root; ?>?page=reports'>[ Reports ]<br>
+						<?php printImageHREF ('reports'); ?></a></h1>
 					</td>
 					<td>
-						<h1><a href='<? echo $root; ?>?page=help'>Help<br>
-						<? printImageHREF ('help'); ?></a></h1>
+						<h1><a href='<?php echo $root; ?>?page=help'>Help<br>
+						<?php printImageHREF ('help'); ?></a></h1>
 					</td>
 				</tr>
 			</table>
@@ -54,14 +54,14 @@ function renderIndex ()
 		</td>
 	</tr>
 </table>
-<?
+<?php
 }
 
 function renderRackspace ()
 {
 ?>
 	<table border=0 cellpadding=10 cellpadding=1>
-<?
+<?php
 	// generate thumb gallery
 	$rackrowList = getRackRowInfo();
 	global $root, $nextorder;
@@ -3299,7 +3299,7 @@ this tab will not be seen any more. Good luck.<br>
 <input type=text name=community value='public'>
 <input type=submit name='do_scan' value='Go!'> 
 </p>
-<?
+<?php
 }
 
 ?>
