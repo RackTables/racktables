@@ -1336,12 +1336,13 @@ function renderUnmountedObjectsPortlet ()
 	global $root, $nextorder;
 	$order = 'odd';
 	echo '<br><br><table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
-	echo '<tr><th>Common name</th><th>Visible label</th><th>Asset number</th></tr>';
+	echo '<tr><th>Common name</th><th>Visible label</th><th>Asset number</th><th>Barcode</th></tr>';
 	foreach ($objs as $obj)
 	{
 		echo "<tr class=row_${order}><td><a href='${root}?page=object&object_id=${obj['id']}'>${obj['dname']}</a></td>";
 		echo "<td>${obj['label']}</td>";
-		echo "<td>${obj['asset_no']}</td></tr>";
+		echo "<td>${obj['asset_no']}</td>";
+		echo "<td>${obj['barcode']}</td></tr>";
 		$order = $nextorder[$order];
 	}
 	echo "</table><br>\n";
@@ -1426,7 +1427,7 @@ function renderObjectGroup ($group_id = 0)
 
 	startPortlet ('Object group');
 	echo '<br><br><table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
-	echo '<tr><th>Common name</th><th>Visible label</th><th>Asset tag</th><th>Rack</th></tr>';
+	echo '<tr><th>Common name</th><th>Visible label</th><th>Asset tag</th><th>Barcode</th><th>Rack</th></tr>';
 	$order = 'odd';
 	global $nextorder;
 	foreach ($objects as $obj)
@@ -1434,6 +1435,7 @@ function renderObjectGroup ($group_id = 0)
 		echo "<tr class=row_${order}><td><a href='${root}?page=object&object_id=${obj['id']}'>${obj['dname']}</a></td>";
 		echo "<td>${obj['label']}</td>";
 		echo "<td>${obj['asset_no']}</td>";
+		echo "<td>${obj['barcode']}</td>";
 		if ($obj['rack_id'])
 			echo "<td><a href='${root}?page=rack&rack_id=${obj['rack_id']}'>${obj['Rack_name']}</a></td>";
 		else
