@@ -17,8 +17,9 @@ function getRackRowInfo ($rackrow_id = 0)
 {
 	global $dbxlink;
 	$query =
-		"select dict_key, dict_value, count(Rack.id) as count, sum(Rack.height) as sum " .
-		"from Chapter natural join Dictionary left join Rack on Rack.id = dict_key " .
+		"select dict_key, dict_value, count(Rack.id) as count, " .
+		"if(isnull(sum(Rack.height)),0,sum(Rack.height)) as sum " .
+		"from Chapter natural join Dictionary left join Rack on Rack.row_id = dict_key " .
 		"where chapter_name = 'RackRow' " .
 		($rackrow_id > 0 ? "and dict_key = ${rackrow_id} " : '') .
 		"group by dict_key order by dict_value";
