@@ -304,8 +304,8 @@ function renderNewRackForm ($row_id)
 	echo "<input type=hidden name=row_id value=${row_id}>";
 	echo '<table border=0 align=center>';
 	echo "<tr><th class=tdright>Name (required):</th><td class=tdleft><input type=text name=rack_name tabindex=1></td></tr>\n";
-	echo "<tr><th class=tdright>Height in units (required):</th><td class=tdleft><input type=text name=rack_height></td></tr>\n";
-	echo "<tr><th class=tdright>Comment:</th><td class=tdleft><input type=text name=rack_comment></td></tr>\n";
+	echo "<tr><th class=tdright>Height in units (required):</th><td class=tdleft><input type=text name=rack_height tabindex=2></td></tr>\n";
+	echo "<tr><th class=tdright>Comment:</th><td class=tdleft><input type=text name=rack_comment tabindex=3></td></tr>\n";
 	echo "<tr><td class=submit colspan=2><input type=submit name=got_data value='Create'></td></tr>\n";
 	echo '</form></table>';
 	finishPortlet();
