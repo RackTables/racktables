@@ -686,7 +686,7 @@ function getUnmountedObjects ()
 		'select dict_value as objtype_name, dict_key as objtype_id, name, label, barcode, id, asset_no from ' .
 		'RackObject inner join Dictionary on objtype_id = dict_key natural join Chapter ' .
 		'left join RackSpace on id = object_id '.
-		'where rack_id is null and chapter_name = "RackObjectType" order by dict_value, name';
+		'where rack_id is null and chapter_name = "RackObjectType" order by dict_value, name, label, asset_no, barcode';
 	$result = $dbxlink->query ($query);
 	if ($result == NULL)
 	{
