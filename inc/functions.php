@@ -438,70 +438,65 @@ function getIPRange ($id = 0)
 		"where id = '$id'";
 	$result = $dbxlink->query ($query);
 	if ($result == NULL)
-	{
 		return NULL;
-	}
-	else
+	$ret=array();
+	if ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
-		$ret=array();
-		if ($row = $result->fetch (PDO::FETCH_ASSOC))
+		$ret['id'] = $row['IPRanges_id'];
+		$ret['ip'] = $row['IPRanges_ip'];
+		$ret['ip_bin'] = ip2long($ret['ip']);
+		$ret['mask_bin'] = binMaskFromDec($row['IPRanges_mask']);
+		$ret['mask_bin_inv'] = binInvMaskFromDec($row['IPRanges_mask']);
+		$ret['name'] = $row['IPRanges_name'];
+		$ret['mask'] = $row['IPRanges_mask'];
+		$ret['addrlist'] = array();
+
+		$result->closeCursor();
+		$query =
+			"select ".
+			"IPAddress.ip as ip_bin, ".
+			"INET_NTOA(IPAddress.ip) as ip, ".
+			"IPAddress.name as name, ".
+			"IPAddress.reserved as reserved, ".
+			"IPBonds.object_id as object_id, ".
+			"RackObject.name as object_name, ".
+			"IPBonds.name as bond_name, ".
+			"IPBonds.type as bond_type ".
+			"from IPAddress left join ".
+				"(IPBonds join RackObject on IPBonds.object_id = RackObject.id) ".
+			"on IPAddress.ip = IPBonds.ip ".
+			"where IPAddress.ip >= '".sprintf('%u', ($ret['ip_bin'] & $ret['mask_bin']))."' and ".
+				"IPAddress.ip <= '".sprintf('%u', ($ret['ip_bin'] | ($ret['mask_bin_inv']) ))."' ".
+			"having (reserved='yes' or name != '' or IPAddress.name != '' or object_id is not NULL) ". 
+			"order by IPAddress.ip, IPBonds.type, RackObject.name";
+		$res_list=$dbxlink->query ($query);
+		$prev_ip=0;
+		if ($res_list != NULL)
 		{
-			$ret['id'] = $row['IPRanges_id'];
-			$ret['ip'] = $row['IPRanges_ip'];
-			$ret['ip_bin'] = ip2long($ret['ip']);
-			$ret['mask_bin'] = binMaskFromDec($row['IPRanges_mask']);
-			$ret['mask_bin_inv'] = binInvMaskFromDec($row['IPRanges_mask']);
-			$ret['name'] = $row['IPRanges_name'];
-			$ret['mask'] = $row['IPRanges_mask'];
-			$ret['addrlist'] = array();
-
-			$result->closeCursor();
-			$query =
-				"select ".
-				"IPAddress.ip as ip_bin, ".
-				"INET_NTOA(IPAddress.ip) as ip, ".
-				"IPAddress.name as name, ".
-				"IPAddress.reserved as reserved, ".
-				"IPBonds.object_id as object_id, ".
-				"RackObject.name as object_name, ".
-				"IPBonds.name as bond_name, ".
-				"IPBonds.type as bond_type ".
-				"from IPAddress left join ".
-					"(IPBonds join RackObject on IPBonds.object_id = RackObject.id) ".
-				"on IPAddress.ip = IPBonds.ip ".
-				"where IPAddress.ip >= '".sprintf('%u', ($ret['ip_bin'] & $ret['mask_bin']))."' and ".
-					"IPAddress.ip <= '".sprintf('%u', ($ret['ip_bin'] | ($ret['mask_bin_inv']) ))."' ".
-				"having (reserved='yes' or name != '' or IPAddress.name != '' or object_id is not NULL) ". 
-				"order by IPAddress.ip, IPBonds.type, RackObject.name";
-			$res_list=$dbxlink->query ($query);
-			$prev_ip=0;
-			if ($res_list != NULL)
+			while ($row1 = $res_list->fetch (PDO::FETCH_ASSOC))
 			{
-				while ($row1 = $res_list->fetch (PDO::FETCH_ASSOC))
+				if ($prev_ip != $row1['ip'])
 				{
-					if ($prev_ip != $row1['ip'])
-					{
-						$refcount=0;
-						$count=ip2long($row1['ip']);
-						$ret['addrlist'][$count]['name'] = $row1['name'];
-						$ret['addrlist'][$count]['reserved'] = $row1['reserved'];
-						$ret['addrlist'][$count]['ip'] = $row1['ip'];
-						$ret['addrlist'][$count]['ip_bin'] = ip2long($row1['ip']);
-						$prev_ip = $ret['addrlist'][$count]['ip'];
-						$ret['addrlist'][$count]['references'] = array();
-					}
-
-					if ($row1['bond_type'])
-					{
-						$ret['addrlist'][$count]['references'][$refcount]['type'] = $row1['bond_type'];
-						$ret['addrlist'][$count]['references'][$refcount]['name'] = $row1['bond_name'];
-						$ret['addrlist'][$count]['references'][$refcount]['object_id'] = $row1['object_id'];
-						$ret['addrlist'][$count]['references'][$refcount]['object_name'] = $row1['object_name'];
-						$refcount++;
-					}
+					$refcount=0;
+					$count=ip2long($row1['ip']);
+					$ret['addrlist'][$count]['name'] = $row1['name'];
+					$ret['addrlist'][$count]['reserved'] = $row1['reserved'];
+					$ret['addrlist'][$count]['ip'] = $row1['ip'];
+					$ret['addrlist'][$count]['ip_bin'] = ip2long($row1['ip']);
+					$prev_ip = $ret['addrlist'][$count]['ip'];
+					$ret['addrlist'][$count]['references'] = array();
 				}
-				$res_list->closeCursor();
+
+				if ($row1['bond_type'])
+				{
+					$ret['addrlist'][$count]['references'][$refcount]['type'] = $row1['bond_type'];
+					$ret['addrlist'][$count]['references'][$refcount]['name'] = $row1['bond_name'];
+					$ret['addrlist'][$count]['references'][$refcount]['object_id'] = $row1['object_id'];
+					$ret['addrlist'][$count]['references'][$refcount]['object_name'] = $row1['object_name'];
+					$refcount++;
+				}
 			}
+			$res_list->closeCursor();
 		}
 	}
 	return $ret;
