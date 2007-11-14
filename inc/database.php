@@ -795,7 +795,7 @@ function getObjectAddressesAndNames ()
 	$result = $dbxlink->query ($query);
 	if ($result == NULL)
 	{
-		showError ("SQL query failure in getObjectAddressesAndNames($type_id)");
+		showError ("SQL query failure in getObjectAddressesAndNames()");
 		return NULL;
 	}
 	$ret = array();
