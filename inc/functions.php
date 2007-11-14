@@ -518,20 +518,14 @@ function getIPAddress ($ip=0)
 		"where ip = INET_ATON('$ip')";
 	$result = $dbxlink->query ($query);
 	if ($result == NULL)
-	{
 		return NULL;
-	}
-	else
+	if ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
-		if ($row = $result->fetch (PDO::FETCH_ASSOC))
-		{
-			$ret['exists'] = 1;
-			$ret['ip_bin'] = $row['ip'];
-			$ret['ip'] = $ip;
-			$ret['name'] = $row['name'];
-			$ret['reserved'] = $row['reserved'];
-		}
-		$result->fetch (PDO::FETCH_ASSOC);
+		$ret['exists'] = 1;
+		$ret['ip_bin'] = $row['ip'];
+		$ret['ip'] = $ip;
+		$ret['name'] = $row['name'];
+		$ret['reserved'] = $row['reserved'];
 	}
 	$result->closeCursor();
 
@@ -557,8 +551,6 @@ function getIPAddress ($ip=0)
 			$count++;
 		}
 		$result1->closeCursor();
-
-
 	}
 
 	return $ret;
