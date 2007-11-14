@@ -35,7 +35,7 @@ function getConfigVar ($varname = '')
 	if (isset ($configCache[$varname]))
 	{
 		// Try casting to int, if possible.
-		if ($configCache[$varname]['vartype'] == 'unit')
+		if ($configCache[$varname]['vartype'] == 'uint')
 			return 0 + $configCache[$varname]['varvalue'];
 		else
 			return $configCache[$varname]['varvalue'];
@@ -43,7 +43,9 @@ function getConfigVar ($varname = '')
 	return NULL;
 }
 
-function setConfigVar ($varname = '', $varvalue = '')
+// In softfail mode die only on fatal errors, letting the user check
+// and resubmit his input.
+function setConfigVar ($varname = '', $varvalue = '', $softfail = FALSE)
 {
 	global $configCache;
 	if (!isset ($configCache))
@@ -64,12 +66,29 @@ function setConfigVar ($varname = '', $varvalue = '')
 	}
 	if (empty ($varvalue) && $configCache[$varname]['emptyok'] != 'yes')
 	{
-		showError ("'${varname}' is configured to take non-empty value. Perhaps there was a reason to do so.");
+		$errormsg = "'${varname}' is configured to take non-empty value. Perhaps there was a reason to do so.";
+		if ($softfail)
+			return $errormsg;
+		showError ($errormsg);
+		die;
+	}
+	if ($configCache[$varname]['vartype'] == 'uint' && (!is_numeric ($varvalue) or $varvalue < 0 ))
+	{
+		$errormsg = "'${varname}' can accept UINT values only";
+		if ($softfail)
+			return $errormsg;
+		showError ($errormsg);
 		die;
 	}
 	// Update cache only if the changes went into DB.
 	if (storeConfigVar ($varname, $varvalue))
+	{
 		$configCache[$varname]['varvalue'] = $varvalue;
+		if ($softfail)
+			return '';
+	}
+	elseif ($softfail)
+		return "storeConfigVar() failed in setConfigVar()";
 }
 
 ?>

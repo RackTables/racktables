@@ -911,41 +911,34 @@ function updateVLANMembership ()
 
 function updateUI ()
 {
-	global $root;
+	global $root, $pageno, $tabno;
 	$oldvalues = loadConfigCache();
 
 	assertUIntArg ('num_vars');
 	$num_vars = $_REQUEST['num_vars'];
-	$result = array();
+	$error = '';
 
 	for ($i = 0; $i < $num_vars; $i++)
 	{
 		assertStringArg ("${i}_varname");
-		assertStringArg ("${i}_vartype");
-		assertStringArg ("${i}_emptyok");
 		assertStringArg ("${i}_varvalue");
-		assertStringArg ("${i}_description");
 		$varname = $_REQUEST["${i}_varname"];
-		$vartype = $_REQUEST["${i}_vartype"];
-		$emptyok = $_REQUEST["${i}_emptyok"];
 		$varvalue = $_REQUEST["${i}_varvalue"];
-		$description = $_REQUEST["${i}_description"];
 
-		// If form values = values in DB, don't bother updating DB
-		if ($oldvalues[$varname]['vartype'] == $vartype && 
-			$oldvalues[$varname]['emptyok'] == $emptyok && 
-			$oldvalues[$varname]['varvalue'] == $varvalue && 
-			$oldvalues[$varname]['description'] == $description)
+		// If form value = value in DB, don't bother updating DB
+		if ($varvalue == getConfigVar ($varname))
 			continue;
 
 		// Note if the queries succeed or not, it determines which page they see.
-		$result[] = commitUpdateUI ($varname, $vartype, $emptyok, $varvalue, $description);
+		$error = setConfigVar ($varname, $varvalue, TRUE);
+		if (!empty ($error))
+			break;
 	}
 
-	if (in_array(false, $result))
-		return "${root}?page=ui&tab=default&error=" . urlencode ("Update failed!");
+	if ($error != '')
+		return "${root}?page=${pageno}&tab=${tabno}&error=" . urlencode ("Update failed with error: " . $error);
 
-	return "${root}?page=ui&tab=default&message=" . urlencode ("Update succeeded.");
+	return "${root}?page=${pageno}&tab=${tabno}&message=" . urlencode ("Update succeeded.");
 }
 
 ?>

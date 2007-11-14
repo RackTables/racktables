@@ -185,7 +185,8 @@ function getObjectInfo ($object_id = 0)
 	$result = $dbxlink->query ($query);
 	if ($result == NULL)
 	{
-		showError ('SQL query failure in getObjectInfo()');
+		$ei = $dbxlink->errorInfo();
+		showError ("SQL query failed in getObjectInfo (${object_id}) with error ${ei[1]} (${ei[2]})");
 		return NULL;
 	}
 	if (($row = $result->fetch (PDO::FETCH_ASSOC)) == NULL)
@@ -925,7 +926,12 @@ function getObjectAddresses ($object_id = 0)
 		$count=0;
 		$refcount=0;
 		$prev_ip = 0;
-		while ($row = $result->fetch (PDO::FETCH_ASSOC))
+		// We are going to call getObjectInfo() for some rows,
+		// hence the connector must be unloaded from the
+		// current data.
+		$rows = $result->fetchAll (PDO::FETCH_ASSOC);
+		$result->closeCursor();
+		foreach ($rows as $row)
 		{
 			if ($prev_ip != $row['IPBonds_ip'])
 			{
@@ -945,13 +951,17 @@ function getObjectAddresses ($object_id = 0)
 				$ret[$count]['references'][$refcount]['type'] = $row['RemoteBonds_type'];
 				$ret[$count]['references'][$refcount]['name'] = $row['RemoteBonds_name'];
 				$ret[$count]['references'][$refcount]['object_id'] = $row['RemoteBonds_object_id'];
-				$oi = getObjectInfo ($row['RemoteBonds_object_id']);
-				$ret[$count]['references'][$refcount]['object_name'] = displayedName ($oi);
+				if (empty ($row['RemoteBonds_object_id']))
+					$ret[$count]['references'][$refcount]['object_name'] = $row['RemoteObject_name'];
+				else
+				{
+					$oi = getObjectInfo ($row['RemoteBonds_object_id']);
+					$ret[$count]['references'][$refcount]['object_name'] = displayedName ($oi);
+				}
 				$refcount++;
 			}
 		}
 	}
-	$result->closeCursor();
 	return $ret;
 }
 
@@ -1765,25 +1775,6 @@ function commitUseupPort ($port_id = 0)
 	
 }
 
-function commitUpdateUI ($varname, $vartype, $emptyok, $varvalue, $description)
-{
-	if (empty ($varname) || empty ($vartype) || empty ($emptyok) || empty ($varvalue)|| empty ($description))
-	{
-		showError ('Not all required args to commitUpdateUI() are present.');
-		return FALSE;
-	}
-	global $dbxlink;
-	$query = "UPDATE Config SET vartype='${vartype}', emptyok='${emptyok}', varvalue='${varvalue}', description='${description}' " .
-			"WHERE varname='${varname}'";
-	$result = $dbxlink->query ($query);
-	if ($result->rowCount() != 1)
-	{
-		showError ('Error updating config in commitUpdateUI()');
-		return FALSE;
-	}
-	return TRUE;
-}
-
 // This is a swiss-knife blade to insert a record into a table.
 // The first argument is table name.
 // The second argument is an array of "name" => "value" pairs.
@@ -1844,6 +1835,7 @@ function loadConfigCache ()
 // setConfigVar() is expected to perform all necessary filtering
 function storeConfigVar ($varname = NULL, $varvalue = NULL)
 {
+	global $dbxlink;
 	if ($varname == NULL || $varvalue == NULL)
 	{
 		showError ('Invalid arguments to storeConfigVar()');

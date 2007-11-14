@@ -2863,7 +2863,32 @@ function getFaviconURL ()
 
 function renderReportSummary ()
 {
-	echo "Here be dragons :-P";
+	startPortlet ("Here be dragons");
+	dragon();
+	dragon();
+	dragon();
+	echo 'ASCII art &copy; Daniel C. Au';
+	finishPortlet();
+}
+
+function dragon ()
+{
+?>
+<div class=dragon><pre><font color="#00ff33">
+                 \||/
+                 |  <font color="#ff0000">@</font>___oo  
+       /\  /\   / (__<font color=yellow>,,,,</font>|
+      ) /^\) ^\/ _)
+      )   /^\/   _) 
+      )   _ /  / _)
+  /\  )/\/ ||  | )_)    
+ &lt;  &gt;      |(<font color=white>,,</font>) )__)
+  ||      /    \)___)\
+  | \____(      )___) )___
+   \______(_______<font color=white>;;;</font> __<font color=white>;;;</font>
+
+</font></pre></div>
+<?php
 }
 
 function renderUIConfig ()
@@ -2871,21 +2896,17 @@ function renderUIConfig ()
 	global $configCache, $nextorder;
 	showMessageOrError();
 	startPortlet ('Current configuration');
-	echo '<table class=cooltable border=0 cellpadding=5 cellspacing=0 align=center>';
-	echo '<tr><th class=tdleft>Name</th><th class=tdleft>Type</th><th class=tdleft>Ok<br>if<br>empty?</th><th class=tdleft>Value</th><th class=tdleft>Description</th></tr>';
+	echo '<table class=cooltable border=0 cellpadding=5 cellspacing=0 align=center width="50%">';
+	echo '<tr><th class=tdleft>Option</th><th class=tdleft>Value</th></tr>';
 	$order = 'odd';
 	foreach ($configCache as $v)
 	{
-		if ($v['is_hidden'] == 'no')
-		{
-			echo "<tr class=row_${order}>";
-			echo "<td class=tdleft>${v['varname']}</td>";
-			echo "<td class=tdleft>${v['vartype']}</td>";
-			echo "<td class=tdleft>${v['emptyok']}</td>"; 
-			echo "<td class=tdleft>${v['varvalue']}</td>";
-			echo "<td class=tdleft>${v['description']}</td></tr>\n";
-			$order = $nextorder[$order];
-		}
+		if ($v['is_hidden'] != 'no')
+			continue;
+		echo "<tr class=row_${order}>";
+		echo "<td class=tdright>${v['description']}</td>\n";
+		echo "<td class=tdleft>${v['varvalue']}</td></tr>";
+		$order = $nextorder[$order];
 	}
 	echo "</table>\n";
 	finishPortlet();
@@ -2893,58 +2914,30 @@ function renderUIConfig ()
 
 function renderUIConfigEditForm ()
 {
-	global $root, $configCache;
+	global $root, $pageno, $tabno, $configCache;
 	showMessageOrError();
 	startPortlet ('Current configuration');
-	echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
-	echo "<tr><th class=tdleft>Name</th>";
-	echo "<th class=tdleft>Type</th>";
-	echo "<th class=tdleft>Ok<br>if<br>empty?</th>";
-	echo "<th class=tdleft>Value</th>";
-	echo "<th class=tdleft>Description</th></tr>\n";
+	echo "<table cellspacing=0 cellpadding=5 align=center class=widetable width='50%'>\n";
+	echo "<tr><th class=tdleft>Option</th>";
+	echo "<th class=tdleft>Value</th></tr>";
 	echo "<form action='${root}process.php'>";
 	echo "<input type=hidden name=op value='upd'>";
-	echo "<input type=hidden name=page value='ui'>\n";
-	echo "<input type=hidden name=tab value='edit'>\n";
+	echo "<input type=hidden name=page value='${pageno}'>\n";
+	echo "<input type=hidden name=tab value='${tabno}'>\n";
 
 	$i = 0;
 	foreach ($configCache as $v)
 	{
-		if ($v['is_hidden'] == 'no')
-		{
-			echo "<input type=hidden name=${i}_varname value='${v['varname']}'>";
-			echo "<tr><td class=tdleft>${v['varname']}</td>";
-
-			echo "<td class=tdleft><select name=${i}_vartype>";
-			echo "<option value=string";
-			if ($v['vartype'] == 'string')
-				echo " selected";
-			echo ">string</option>";
-			echo "<option value=uint";
-			if ($v['vartype'] == 'uint')
-				echo " selected";
-			echo ">uint</option>";
-			echo "</select></td>";
-
-			echo "<td class=tdleft><select name=${i}_emptyok>";
-			echo "<option value=no";
-			if ($v['emptyok'] == 'no')
-				echo " selected";
-			echo ">no</option>";
-			echo "<option value=yes";
-			if ($v['emptyok'] == 'yes')
-				echo " selected";
-			echo ">yes</option>";
-			echo "</select></td>";
-			
-			echo "<td><input type=text name=${i}_varvalue value='${v['varvalue']}' size=24></td>";
-			echo "<td><input type=text name=${i}_description value='${v['description']}' size=64></td>";
-			echo "</tr>\n";
-			$i++;
-		}
+		if ($v['is_hidden'] != 'no')
+			continue;
+		echo "<input type=hidden name=${i}_varname value='${v['varname']}'>";
+		echo "<tr><td class=tdright>${v['description']}</td>";
+		echo "<td class=tdleft><input type=text name=${i}_varvalue value='${v['varvalue']}' size=24></td>";
+		echo "</tr>\n";
+		$i++;
 	}
 	echo "<input type=hidden name=num_vars value=${i}>\n";
-	echo "<tr><td colspan=5><input type=submit value='Save changes'></td></tr>";
+	echo "<tr><td colspan=2><input type=submit value='Save changes'></td></tr>";
 	echo "</form>";
 	finishPortlet();
 }
