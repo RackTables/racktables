@@ -431,7 +431,6 @@ function getIPRange ($id = 0)
 		"select ".
 		"id as IPRanges_id, ".
 		"INET_NTOA(ip) as IPRanges_ip, ".
-		"ip as IPRanges_ip_bin, ".
 		"mask as IPRanges_mask, ".
 		"name as IPRanges_name ".
 		"from IPRanges ".
@@ -445,58 +444,62 @@ function getIPRange ($id = 0)
 		return $ret;
 	$ret['id'] = $row['IPRanges_id'];
 	$ret['ip'] = $row['IPRanges_ip'];
-	$ret['ip_bin'] = $row['IPRanges_ip_bin'];
+	$ret['ip_bin'] = ip2long ($row['IPRanges_ip']);
 	$ret['mask_bin'] = binMaskFromDec($row['IPRanges_mask']);
 	$ret['mask_bin_inv'] = binInvMaskFromDec($row['IPRanges_mask']);
 	$ret['name'] = $row['IPRanges_name'];
 	$ret['mask'] = $row['IPRanges_mask'];
 	$ret['addrlist'] = array();
 	$result->closeCursor();
-	$first_bin = sprintf ('%u', ($ret['ip_bin'] & $ret['mask_bin']));
-	$last_bin = sprintf ('%u', ($ret['ip_bin'] | ($ret['mask_bin_inv'])));
+	// We risk losing some significant bits in an unsigned 32bit integer,
+	// unless it is converted to a string.
+	$db_first = "'" . sprintf ('%u', 0x00000000 + $ret['ip_bin'] & $ret['mask_bin']) . "'";
+	$db_last  = "'" . sprintf ('%u', 0x00000000 + $ret['ip_bin'] | ($ret['mask_bin_inv'])) . "'";
 
 	// Don't try to build up the whole structure in a single pass. Request
 	// the list of user comments and reservations and merge allocations in
 	// at a latter point.
 	$query =
-		"select ip as ip_bin, INET_NTOA(ip) as ip, name, reserved from IPAddress " .
-		"where ip between ${first_bin} and ${last_bin} " .
+		"select INET_NTOA(ip) as ip, name, reserved from IPAddress " .
+		"where ip between ${db_first} and ${db_last} " .
 		"and (reserved = 'yes' or name != '')";
 	$ipa_res = $dbxlink->query ($query);
 	if ($ipa_res == NULL)
 		return $ret;
 	while ($row = $ipa_res->fetch (PDO::FETCH_ASSOC))
 	{
-		$ret['addrlist'][$row['ip_bin']] = $row;
+		$ip_bin = ip2long ($row['ip']);
+		$ret['addrlist'][$ip_bin] = $row;
 		$tmp = array();
 		foreach (array ('ip', 'name', 'reserved') as $cname)
 			$tmp[$cname] = $row[$cname];
 		$tmp['references'] = array();
-		$ret['addrlist'][$row['ip_bin']] = $tmp;
+		$ret['addrlist'][$ip_bin] = $tmp;
 	}
 	$ipa_res->closeCursor();
 
 	$query =
-		"select ipb.ip as ip_bin, INET_NTOA(ipb.ip) as ip, ro.id as object_id," .
+		"select INET_NTOA(ipb.ip) as ip, ro.id as object_id," .
 		"ro.name as object_name, ipb.name, ipb.type from " .
 		"IPBonds as ipb inner join RackObject as ro on ipb.object_id = ro.id " .
-		"where ip between ${first_bin} and ${last_bin} " .
+		"where ip between ${db_first} and ${db_last} " .
 		"order by ipb.type, object_name";
 	$ipb_res = $dbxlink->query ($query);
 	while ($row = $ipb_res->fetch (PDO::FETCH_ASSOC))
 	{
-		if (!isset ($ret['addrlist'][$row['ip_bin']]))
+		$ip_bin = ip2long ($row['ip']);
+		if (!isset ($ret['addrlist'][$ip_bin]))
 		{
-			$ret['addrlist'][$row['ip_bin']] = array();
-			$ret['addrlist'][$row['ip_bin']]['ip'] = $row['ip'];
-			$ret['addrlist'][$row['ip_bin']]['name'] = '';
-			$ret['addrlist'][$row['ip_bin']]['reserved'] = 'no';
-			$ret['addrlist'][$row['ip_bin']]['references'] = array();
+			$ret['addrlist'][$ip_bin] = array();
+			$ret['addrlist'][$ip_bin]['ip'] = $row['ip'];
+			$ret['addrlist'][$ip_bin]['name'] = '';
+			$ret['addrlist'][$ip_bin]['reserved'] = 'no';
+			$ret['addrlist'][$ip_bin]['references'] = array();
 		}
 		$tmp = array();
 		foreach (array ('object_id', 'object_name', 'type', 'name') as $cname)
 			$tmp[$cname] = $row[$cname];
-		$ret['addrlist'][$row['ip_bin']]['references'][] = $tmp;
+		$ret['addrlist'][$ip_bin]['references'][] = $tmp;
 	}
 	$ipb_res->closeCursor();
 
