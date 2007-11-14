@@ -1639,10 +1639,7 @@ function renderAddNewRange ()
 	foreach ($addrspaceList as $iprange)
 	{
 		$range = getIPRange($iprange['id']);
-		$usedips = 0;
-		foreach ($range['addrlist'] as $addr)
-			if (count($addr['references'])>0 || $addr['reserved']=='yes')
-				$usedips++;
+		$usedips = count ($range['addrlist']);
 		echo "<tr>";
 		if ($usedips == 0)
 		{
