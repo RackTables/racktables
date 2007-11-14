@@ -479,10 +479,13 @@ function getIPRange ($id = 0)
 	$ipa_res->closeCursor();
 
 	$query =
-		"select INET_NTOA(ipb.ip) as ip, ro.id as object_id," .
-		"ro.name as object_name, ipb.name, ipb.type from " .
+		"select INET_NTOA(ipb.ip) as ip, ro.id as object_id, " .
+		"ro.name as object_name, ipb.name, ipb.type, objtype_id, " .
+		"dict_value as objtype_name from " .
 		"IPBonds as ipb inner join RackObject as ro on ipb.object_id = ro.id " .
+		"left join Dictionary on objtype_id=dict_key natural join Chapter " .
 		"where ip between ${db_first} and ${db_last} " .
+		"and chapter_name = 'RackObjectType'" .
 		"order by ipb.type, object_name";
 	$ipb_res = $dbxlink->query ($query);
 	while ($row = $ipb_res->fetch (PDO::FETCH_ASSOC))
@@ -497,8 +500,12 @@ function getIPRange ($id = 0)
 			$ret['addrlist'][$ip_bin]['references'] = array();
 		}
 		$tmp = array();
-		foreach (array ('object_id', 'object_name', 'type', 'name') as $cname)
+		foreach (array ('object_id', 'type', 'name') as $cname)
 			$tmp[$cname] = $row[$cname];
+		$quasiobject['name'] = $row['object_name'];
+		$quasiobject['objtype_id'] = $row['objtype_id'];
+		$quasiobject['objtype_name'] = $row['objtype_name'];
+		$tmp['object_name'] = displayedName ($quasiobject);
 		$ret['addrlist'][$ip_bin]['references'][] = $tmp;
 	}
 	$ipb_res->closeCursor();
@@ -506,57 +513,63 @@ function getIPRange ($id = 0)
 	return $ret;
 }
 
+// Don't require any records in IPAddress, but if there is one,
+// merge the data between getting allocation list. Collect enough data
+// to call displayedName() ourselves.
 function getIPAddress ($ip=0)
 {
 	$ret = array();
-	$ret['range'] = getIPRange($ip);
 	$ret['bonds'] = array();
 	$ret['outpf'] = array();
 	$ret['inpf'] = array();
 	$ret['exists'] = 0;
+	$ret['name'] = '';
 	$ret['reserved'] = 'no';
 	global $dbxlink;
 	$query =
 		"select ".
-		"ip, name, reserved ".
+		"name, reserved ".
 		"from IPAddress ".
-		"where ip = INET_ATON('$ip')";
+		"where ip = INET_ATON('$ip') and (reserved = 'yes' or name != '')";
 	$result = $dbxlink->query ($query);
 	if ($result == NULL)
 		return NULL;
 	if ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
 		$ret['exists'] = 1;
-		$ret['ip_bin'] = $row['ip'];
-		$ret['ip'] = $ip;
 		$ret['name'] = $row['name'];
 		$ret['reserved'] = $row['reserved'];
 	}
 	$result->closeCursor();
 
-	if ($ret['exists'] == 1)
+	$query =
+		"select ".
+		"IPBonds.object_id as object_id, ".
+		"IPBonds.name as name, ".
+		"IPBonds.type as type, ".
+		"objtype_id, dict_value as objtype_name, " .
+		"RackObject.name as object_name ".
+		"from IPBonds join RackObject on IPBonds.object_id=RackObject.id ".
+		"left join Dictionary on objtype_id=dict_key natural join Chapter " .
+		"where IPBonds.ip=INET_ATON('$ip') ".
+		"and chapter_name = 'RackObjectType' " .
+		"order by RackObject.id, IPBonds.name";
+	$result = $dbxlink->query ($query);
+	$count=0;
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
-		$query =
-			"select ".
-			"IPBonds.object_id as object_id, ".
-			"IPBonds.name as name, ".
-			"IPBonds.type as type, ".
-			"RackObject.name as object_name ".
-			"from IPBonds join RackObject on IPBonds.object_id=RackObject.id ".
-			"where IPBonds.ip=INET_ATON('$ip') ".
-			"order by RackObject.id, IPBonds.name";
-		$result1 = $dbxlink->query ($query);
-		$count=0;
-		while ($row = $result1->fetch (PDO::FETCH_ASSOC))
-		{
-			$ret['bonds'][$count]['object_id'] = $row['object_id'];
-			$ret['bonds'][$count]['name'] = $row['name'];
-			$ret['bonds'][$count]['type'] = $row['type'];
-			$ret['bonds'][$count]['object_name'] = $row['object_name'];
-			$count++;
-		}
-		$result1->closeCursor();
+		$ret['bonds'][$count]['object_id'] = $row['object_id'];
+		$ret['bonds'][$count]['name'] = $row['name'];
+		$ret['bonds'][$count]['type'] = $row['type'];
+		$qo = array();
+		$qo['name'] = $row['object_name'];
+		$qo['objtype_id'] = $row['objtype_id'];
+		$qo['objtype_name'] = $row['objtype_name'];
+		$ret['bonds'][$count]['object_name'] = displayedName ($qo);
+		$count++;
+		$ret['exists'] = 1;
 	}
+	$result->closeCursor();
 
 	return $ret;
 }
@@ -574,7 +587,7 @@ function bindIpToObject ($ip='', $object_id=0, $name='', $type='')
 		'IPBonds',
 		array
 		(
-			'ip' => INET_ATON('$ip'),
+			'ip' => "INET_ATON('$ip')",
 			'object_id' => "'${object_id}'",
 			'name' => "'${name}'",
 			'type' => "'${type}'"
