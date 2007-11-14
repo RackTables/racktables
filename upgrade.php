@@ -129,6 +129,9 @@ CREATE TABLE `Config` (
 			$query[] = "INSERT INTO `Config` VALUES ('PORTS_PER_ROW','12','uint','no','yes','Max switch port per one row on the switchvlans dynamic tab.')";
 			$query[] = "INSERT INTO `Config` VALUES ('DB_VERSION','0.14.6','string','no','yes','Database version.')";
 			break; // --------------------------------------------
+		case '0.14.7':
+			$query[] = "delete from IPAddress where name = '' and reserved != 'yes'";
+			break; // --------------------------------------------
 		default:
 			showError ("executeUpgradeBatch () failed, because batch '${batchid}' isn't defined");
 			die;
