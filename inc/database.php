@@ -1056,6 +1056,7 @@ function updateAddress ($ip=0, $name='', $reserved='no')
 		return 'useInsertBlade() failed in updateAddress()';
 }
 
+// FIXME: This function doesn't wipe relevant records from IPAddress table.
 function commitDeleteRange ($id = 0)
 {
 	if ($id <= 0)
