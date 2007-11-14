@@ -1705,7 +1705,7 @@ function renderIPRange ()
 
 	for($ip = $startip; $ip<=$endip; $ip++)
 	{
-		if ( (isset($range['addrlist'][$ip])) && ($range['addrlist'][$ip]['ip_bin'] == $ip) )
+		if (isset ($range['addrlist'][$ip]))
 		{
 			$numshared = countRefsOfType($range['addrlist'][$ip]['references'], 'shared', 'eq');
 			$numreg = countRefsOfType($range['addrlist'][$ip]['references'], 'regular', 'eq');
