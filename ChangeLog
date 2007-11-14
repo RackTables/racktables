@@ -4,8 +4,10 @@
 	bugfix: logout link could fail sometimes
 	bugfix: avoid short PHP tags for better compatibility across
 	  different PHP installations (reported by Tom Laermans)
+	bugfix: remove odd records from IPAddress once more
+	bugfix: fixed IPv4 address browsing for MySQL-4 DB
 	update: better attributes edit form by Aaron Dummer
-	update: display rack row name as well in the Object/Rackspace tab
+	update: numerous UI adjustments across all pages
 	new feature: cisco 2900 series support for gateways/switchvlans
 0.14.6 2007-10-15
 	new feature: browser-side validation for a new IPv4 network
