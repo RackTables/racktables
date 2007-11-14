@@ -885,6 +885,8 @@ function unlinkPort ($port)
 	
 }
 
+// FIXME: after falling back to using existing getObjectInfo we don't
+// need that large query. Shrink it some later.
 function getObjectAddresses ($object_id = 0)
 {
 	if ($object_id == 0)
@@ -943,7 +945,8 @@ function getObjectAddresses ($object_id = 0)
 				$ret[$count]['references'][$refcount]['type'] = $row['RemoteBonds_type'];
 				$ret[$count]['references'][$refcount]['name'] = $row['RemoteBonds_name'];
 				$ret[$count]['references'][$refcount]['object_id'] = $row['RemoteBonds_object_id'];
-				$ret[$count]['references'][$refcount]['object_name'] = $row['RemoteObject_name'];
+				$oi = getObjectInfo ($row['RemoteBonds_object_id']);
+				$ret[$count]['references'][$refcount]['object_name'] = displayedName ($oi);
 				$refcount++;
 			}
 		}

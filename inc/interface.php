@@ -590,7 +590,10 @@ function printRefsOfType ($refs, $type, $eq)
 		if ($eq($ref['type'], $type))
 		{
 			if ($gotone) echo ', ';
-			echo "<a href='${root}?page=object&object_id=${ref['object_id']}'>${ref['object_name']}</a>";
+			echo "<a href='${root}?page=object&object_id=${ref['object_id']}'>";
+			if (!empty ($ref['name']))
+				echo $ref['name'] . '@';
+			echo "${ref['object_name']}</a>";
 			$gotone=1;
 		}
 	}
