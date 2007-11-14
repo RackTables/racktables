@@ -1725,7 +1725,9 @@ function renderIPRange ()
 				echo "<b>Reserved;</b> ";
 			foreach ($range['addrlist'][$ip]['references'] as $ref)
 			{
-				echo "<a href='${root}?page=object&object_id=${ref['object_id']}'>${ref['object_name']}[${ref['name']}]</a>; ";
+				echo "<a href='${root}?page=object&object_id=${ref['object_id']}'>";
+				echo $ref['name'] . (empty ($ref['name']) ? '' : '@');
+				echo "${ref['object_name']}</a>; ";
 			}
 			echo "</td></tr>\n";
 		}
