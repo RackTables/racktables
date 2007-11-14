@@ -561,23 +561,21 @@ function bindIpToObject ($ip='', $object_id=0, $name='', $type='')
 	global $dbxlink;
 
 	$range = getRangeByIp($ip);
-
 	if (!$range)
 		return 'Non-existant ip address. Try adding IP range first';
 
-	$address = getIPAddress($ip);
-
-	if ($address['exists'] == 0)
-	{
-		$query =
-			"insert into IPAddress set ip=INET_ATON('$ip')";
-		$dbxlink->exec ($query);
-	}
-
-	$query =
-		"insert into IPBonds set ip=INET_ATON('$ip'), object_id='$object_id', name='$name', type='$type'";
-	$result = $dbxlink->exec ($query);
-	return '';
+	$result = useInsertBlade
+	(
+		'IPBonds',
+		array
+		(
+			'ip' => INET_ATON('$ip'),
+			'object_id' => "'${object_id}'",
+			'name' => "'${name}'",
+			'type' => "'${type}'"
+		)
+	);
+	return $result ? '' : 'useInsertBlade() failed in bindIpToObject()';
 }
 
 // This function looks up 'has_problems' flag for 'T' atoms
