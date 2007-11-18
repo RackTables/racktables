@@ -39,6 +39,7 @@ function getDBUpgradePath ($v1, $v2)
 function executeUpgradeBatch ($batchid)
 {
 	$query = array();
+	global $dbxlink;
 	switch ($batchid)
 	{
 		case '0.14.5':
@@ -130,15 +131,218 @@ CREATE TABLE `Config` (
 			$query[] = "INSERT INTO `Config` VALUES ('DB_VERSION','0.14.6','string','no','yes','Database version.')";
 			break; // --------------------------------------------
 		case '0.14.7':
+			// IPAddress is hopefully fixed now finally.
 			$query[] = "delete from IPAddress where name = '' and reserved != 'yes'";
+
+			// Now rebuild the dictionary into a new table with the same data,
+			// but proper indexing. We are going to convert compound index
+			// into 1-field one to employ AUTO_INCREMENT properly. This means
+			// renumbering lots of records in Dictionary and adjusting records
+			// in related tables. After that we can safely swap the tables.
+			$query[] = 'create table Dictionary_0_14_7_new (chapter_no int(10) unsigned NOT NULL, dict_key int(10) unsigned NOT NULL auto_increment PRIMARY KEY, dict_value char(128) default NULL)';
+			// Convert the fields to unsigned on occasion.
+			$query[] = 'create table PortCompat_0_14_7_new (type1 int(10) unsigned NOT NULL, type2 int(10) unsigned NOT NULL)';
+
+			// Find all chapter numbers, which will require AttributeValue adjustment.
+			$q2 = 'select distinct chapter_no from AttributeMap where chapter_no != 0';
+			$r2 = $dbxlink->query ($q2);
+			$chaplist = $r2->fetchAll (PDO::FETCH_NUM);
+			$r2->closeCursor();
+			$chaplist = $chaplist[0];
+
+			$stock = array();
+			// Below I list the records, which are known to be the stock
+			// dictionary records of 0.14.6 release.
+			$stock[1] = array
+			(
+				1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 14, 15, 16
+			);
+			$stock[2] = array
+			(
+				3, 4, 5, 6, 7, 8, 9,
+				10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
+				20, 21, 22, 23, 24, 25, 26, 27, 28
+			);
+			$stock[11] = array
+			(
+				1, 3, 4, 5, 6, 7, 8, 9,
+				10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
+				21, 22, 24, 25, 26, 27, 28, 29,
+				30, 31, 32, 33, 34, 35, 36, 37, 38, 39,
+				40, 41, 42, 43, 44, 45, 46, 47, 48, 49,
+				50, 51, 52, 53, 54, 55, 56, 57, 58, 59,
+				60, 61, 62, 63, 64, 65, 66, 67, 68, 69,
+				70, 71, 72, 73, 74, 75, 76
+			);
+			$stock[12] = array
+			(
+				1, 11, 13, 14, 15, 16, 17, 18, 19, 20, 26, 29,
+				31, 32, 33, 34, 35, 36, 37, 38, 39,
+				40, 41, 42, 43, 44, 45, 46, 47, 48, 49,
+				50, 51,	52, 53, 54, 55, 56, 57, 58, 59,
+				60, 61, 62, 63, 64, 65, 66, 67, 68, 69,
+				70, 71, 72, 73, 74, 75, 76, 77, 78, 79,
+				80, 81, 82, 83, 84, 85, 86, 87, 88, 89,
+				90, 91, 92, 93, 94, 95, 96, 97, 98, 99,
+				100, 101, 102, 103, 104, 105, 106, 107, 108, 109,
+				110, 111, 112, 113
+			);
+			$stock[13] = array
+			(
+				1, 2, 3, 4, 5, 6, 7, 8, 9,
+				10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
+				20, 21, 22, 23, 24, 25, 26, 27, 28, 29,
+				30, 31, 32
+			);
+			$stock[14] = array
+			(
+				1, 2, 9, 11, 13, 15, 19, 20, 21, 22
+			);
+			$stock[16] = array
+			(
+				1, 2, 3, 4, 5, 6, 7, 8
+			);
+			$stock[17] = array
+			(
+				1, 2, 3, 4, 5, 6, 7, 8, 9,
+				10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
+				20, 21, 22, 23, 24, 25, 26, 27, 28, 29,
+				30, 31, 32, 33, 34, 35, 36, 37, 38, 39,
+				40, 41, 42, 43, 44, 45, 46, 47, 48, 49,
+				50
+			);
+			$stock[18] = array
+			(
+				1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14
+			);
+			$stock[19] = array
+			(
+				1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11
+			);
+			$stock[20] = array
+			(
+				1, 2
+			);
+
+			// Load dictionary and transform into two tree structures for
+			// stock and user record sets.
+			$dict = array();
+			$q3 = 'select chapter_no, dict_key, dict_value from Dictionary';
+			$r3 = $dbxlink->query ($q3);
+
+			while ($row = $r3->fetch (PDO::FETCH_ASSOC)
+			{
+				$tree = 'user';
+				$dict_key = $row['dict_key'];
+				$chapter_no = $row['chapter_no'];
+				switch ($chapter_no)
+				{
+					case 1: // RackObjectType
+					case 2: // PortType
+					case 11: // server models
+					case 12: // network switch models
+					case 13: // server OS type
+					case 14: // network switch OS type
+					case 16: // router OS type
+					case 17: // router models
+					case 18: // disk array models
+					case 19: // tape library models
+					case 20: // Protocols
+						if (in_array ($dict_key, $stock[$chapter_no]))
+							$tree = 'stock';
+						break;
+				}
+				$dict[$tree][$chapter_no][$dict_key]['value'] = $row['dict_value'];
+			}
+			$r3->closeCursor();
+
+
+			// Now we store stock dataset first, bump up key value and store
+			// user's data. After that we will know the new dict_key for all
+			// records.
+			// The result of both datasets processing is saved in $new_dict.
+			// Save on calling LAST_ISERT_ID() each time by keeping own key.
+			$newkey = 1;
+			$new_dict = array();
+			foreach ($dict['stock'] as $chapter_no => $words)
+			{
+				$new_dict[$chapter_no] = array();
+				foreach ($words as $dict_key => $entry)
+				{
+					$query[] = "insert into Dictionary_0_14_7_new " .
+						"values (${chapter_no}, ${newkey}, '${entry['value']}')";
+					$new_dict[$chapter_no][$dict_key] = $entry;
+					$new_dict[$chapter_no][$dict_key]['newkey'] = $newkey;
+					$newkey++;
+				}
+			}
+			$newkey = 10000;
+			foreach ($dict['user'] as $chapter_no => $words)
+			{
+				// Some chapters may appear on the user dataset only.
+				if (!isset ($new_dict[$chapter_no]))
+					$new_dict[$chapter_no] = array();
+				foreach ($words as $dict_key => $entry)
+				{
+					$query[] = "insert into Dictionary_0_14_7_new " .
+						"values (${chapter_no}, ${newkey}, '${entry['value']}')";
+					$new_dict[$chapter_no][$dict_key] = $entry;
+					$new_dict[$chapter_no][$dict_key]['newkey'] = $newkey;
+					$newkey++;
+				}
+			}
+			// The new table should now have adequate AUTO_INCREMENT w/o our care.
+
+			// Now we iterate over the joint dataset, picking some chapters and
+			// performing additional processing:
+			// 1 (RackObjectType) --- adjust RackObject and regenerate AttributeMap
+			// 2 (PortType) --- regenerate PortCompat and adjust Port
+			// 3 (RackRow) --- adjust Rack
+			// 20 (Protocols) --- adjust PortForwarding
+			// All other chapters listed in $chaplist --- adjust AttributeValue
+			
+			$query[] = "delete from AttributeMap";
+			foreach ($new_dict as $chapter_no => $words)
+			{
+				foreach ($words as $oldkey => $data)
+				{
+					$value = $data['value'];
+					$newkey = $data['newkey'];
+					if ($chapter_no == 1)
+					{
+						$q4 = "select id from RackObject where objtype_id = ${oldkey}";
+						$r4 = $dbxlink->query ($q4);
+						while ($row = $r4->fetch (PDO::FETCH_ASSOC))
+							$query[] = "update RackObject set objtype_id = ${newkey} where id = ${row['id']} limit 1";
+						$r4->closeCursor();
+
+						$q4 = "select attr_id, chapter_no from AttributeMap where objtype_id = ${oldkey}";
+						$r4 = $dbxlink->query ($q4);
+						while ($row = $r4->fetch (PDO::FETCH_ASSOC))
+							$query[] = "insert into AttributeMap (objtype_id, attr_id, chapter_no) values (${newkey}, ${row['attr_id']}, ${row['chapter_no']})";
+						$r4->closeCursor();
+					}
+					elseif ($chapter_no == 3)
+					{
+						$q4 = "select id from Rack where row_id = ${oldkey}";
+						$r4 = $dbxlink->query ($q4);
+						while ($row = $r4->fetch (PDO::FETCH_ASSOC))
+							$query[] = "update Rack set row_id = ${newkey} where id = ${row['id']} limit 1";
+						$r4->closeCursor();
+					}
+				}
+			}
+
+			// We are done.
+			$query[] = "update Config set varvalue = '0.14.7' where varname = 'DB_VERSION'";
 			break; // --------------------------------------------
 		default:
 			showError ("executeUpgradeBatch () failed, because batch '${batchid}' isn't defined");
 			die;
 			break;
 	}
-	global $dbxlink;
 	$failures = array();
+	$ndots = 0;
 	echo "<pre>Executing database upgrade batch '${batchid}: ";
 	foreach ($query as $q)
 	{
@@ -146,6 +350,11 @@ CREATE TABLE `Config` (
 		if ($result != NULL)
 		{
 			echo '.';
+			if (++$ndots == 50)
+			{
+				echo "\n";
+				$ndots = 0;
+			}
 			continue;
 		}
 		echo '!';
