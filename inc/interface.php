@@ -1625,13 +1625,14 @@ function renderAddNewRange ()
 
 	echo "<center><h2>Add New Range</h2></center>\n";
 	echo "<table class='widetable' border=0 cellpadding=10 align='center'>\n";
-	echo "<tr><th>Address range</th><th>Name</th><th>&nbsp;</th></tr>\n";
+	echo "<tr><th>Address range</th><th>Name</th><th>C&gt;*</th><th>&nbsp;</th></tr>\n";
 	echo "<form name='add_new_range' action='process.php'>\n";
 	echo "<input type=hidden name=op value=addRange>\n";
 	echo "<input type=hidden name=page value='${pageno}'>\n";
 	echo "<input type=hidden name=tab value='${tabno}'>\n";
 	echo "<tr><td class='tdcenter'><input type=text name='range' size=18 class='live-validate'></td>\n";
 	echo "<td class='tdcenter'><input type=text name='name' size='20'></td>\n";
+	echo "<td class='tdcenter'><input type=checkbox name='is_bcast' checked></td>\n";
 	echo "<td class='tdcenter'><input type=submit value='Add a new range'></td></tr>\n";
 	echo "</form></table><br><br>\n";
 

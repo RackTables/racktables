@@ -358,7 +358,7 @@ function binInvMaskFromDec ($maskL)
 	return $binmask;
 }
 
-function addRange ($range='', $name='')
+function addRange ($range='', $name='', $is_bcast = FALSE)
 {
 	// $range is in x.x.x.x/x format, split into ip/mask vars
 	$rangeArray = explode('/', $range);
@@ -421,6 +421,14 @@ function addRange ($range='', $name='')
 	$query =
 		"insert into IPRanges set ip=".sprintf('%u', $ipL).", mask='$maskL', name='$name'";
 	$result = $dbxlink->exec ($query);
+
+	if ($is_bcast and $maskL < 31)
+	{
+		$network_addr = long2ip ($ipL);
+		$broadcast_addr = long2ip ($ipL | binInvMaskFromDec ($maskL));
+		updateAddress ($network_addr, 'network', 'yes');
+		updateAddress ($broadcast_addr, 'broadcast', 'yes');
+	}
 	return '';
 }
 

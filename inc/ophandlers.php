@@ -408,7 +408,8 @@ function addNewRange ()
 
 	$range = $_REQUEST['range'];
 	$name = $_REQUEST['name'];
-	$error = addRange($range, $name);
+	$is_bcast = $_REQUEST['is_bcast'];
+	$error = addRange($range, $name, $is_bcast == 'on');
 	if ($error != '')
 	{
 		return "${root}?page=${pageno}&tab=${tabno}&error=".urlencode($error);
