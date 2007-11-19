@@ -1930,8 +1930,7 @@ function renderIPAddressPortForwarding ($object_id=0)
 	$forwards = getObjectForwards ($object_id);
 	$addresses = getObjectAddresses ($object_id);
 	showMessageOrError();
-	echo "<center><h1>Port Forwardings</h1></center>\n";
-	echo "<center><h3>Forwarding out:</h3></center>";
+	echo "<center><h2>NAT performed here</h2></center>";
 
 	echo "<table class='widetable' cesspadding=5 cellspacing=0 border=0 align='center'>\n";
 	echo "<tr><th></th><th>Source</th><th>Target</th><th>Target Objects</th><th>Description</th></tr>\n";
@@ -1950,7 +1949,7 @@ function renderIPAddressPortForwarding ($object_id=0)
 
 		echo "<tr class='$class'>";
 		echo "<td><a href='process.php?op=delPortForwarding&localip=${pf['localip']}&localport=${pf['localport']}&remoteip=${pf['remoteip']}&remoteport=${pf['remoteport']}&proto=${pf['proto_bin']}&object_id=$object_id&page=${pageno}&tab=${tabno}'><img src='${root}/pix/delete_s.gif' title='Delete port forwarding' border=0 width=16 height=16></a></td>";
-		echo "<td>${pf['proto']}/$name:<a href='${root}?page=ipaddress&tab=default&ip=${pf['localip']}'>${pf['localip']}</a>:${pf['localport']}</td>";
+		echo "<td>${pf['proto']}/${name}: <a href='${root}?page=ipaddress&tab=default&ip=${pf['localip']}'>${pf['localip']}</a>:${pf['localport']}</td>";
 		echo "<td><a href='${root}?page=ipaddress&tab=default&ip=${pf['remoteip']}'>${pf['remoteip']}</a>:${pf['remoteport']}</td>";
 
 		$address=getIPAddress($pf['remoteip']);
@@ -1968,7 +1967,8 @@ function renderIPAddressPortForwarding ($object_id=0)
 	echo "<tr align='center'><td colspan=2><select name='proto'><option value='1'>TCP</option><option value='2'>UDP</option></select><select name='localip'>";
 
 	foreach ($addresses as $addr)
-		echo "<option value='${addr['ip']}'>" . (empty ($addr['name']) ? '' : "${addr['name']}:") . "${addr['ip']}</option>";
+		echo "<option value='${addr['ip']}'>" . (empty ($addr['name']) ? '' : "${addr['name']}: ") .
+			"${addr['ip']}" . (empty ($addr['address_name']) ? '' : " (${addr['address_name']})") . "</option>";
 
 	echo "</select>:<input type='text' name='localport' size='4'></td><td><input type='text' name='remoteip' id='remoteip' size='10'>";
 	echo "<a href='javascript:;' onclick='window.open(\"${root}/find_object_ip_helper.php\", \"findobjectip\", \"height=700, width=400, location=no, menubar=no, resizable=yes, scrollbars=no, status=no, titlebar=no, toolbar=no\");'><img src='${root}/pix/find.png' title='Find object' border=0 height=16 width=16></a>";
@@ -1978,7 +1978,7 @@ function renderIPAddressPortForwarding ($object_id=0)
 	echo "</table><br><br>";
 
 
-	echo "<center><h3>Forwarded from:</h3></center>";
+	echo "<center><h2>NAT connections arriving here</h2></center>";
 	echo "<table class='widetable' cesspadding=5 cellspacing=0 border=0 align='center'>\n";
 	echo "<tr><th></th><th>Source</th><th>Source objects</th><th>Target</th><th>Description</th></tr>\n";
 
