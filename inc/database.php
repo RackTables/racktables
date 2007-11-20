@@ -1836,7 +1836,7 @@ function loadConfigCache ()
 function storeConfigVar ($varname = NULL, $varvalue = NULL)
 {
 	global $dbxlink;
-	if ($varname == NULL || $varvalue == NULL)
+	if (empty ($varname) || $varvalue === NULL)
 	{
 		showError ('Invalid arguments to storeConfigVar()');
 		return FALSE;
