@@ -924,7 +924,7 @@ function updateUI ()
 	for ($i = 0; $i < $num_vars; $i++)
 	{
 		assertStringArg ("${i}_varname");
-		assertStringArg ("${i}_varvalue");
+		assertStringArg ("${i}_varvalue", TRUE);
 		$varname = $_REQUEST["${i}_varname"];
 		$varvalue = $_REQUEST["${i}_varvalue"];
 
