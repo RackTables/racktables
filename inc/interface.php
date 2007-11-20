@@ -302,8 +302,11 @@ function renderNewRackForm ($row_id)
 	echo "<input type=hidden name=tab value=${tabno}>";
 	echo "<input type=hidden name=row_id value=${row_id}>";
 	echo '<table border=0 align=center>';
+	$defh = getConfigVar ('DEFAULT_RACK_HEIGHT');
+	if ($defh == 0)
+		$defh = '';
 	echo "<tr><th class=tdright>Name (required):</th><td class=tdleft><input type=text name=rack_name tabindex=1></td></tr>\n";
-	echo "<tr><th class=tdright>Height in units (required):</th><td class=tdleft><input type=text name=rack_height tabindex=2></td></tr>\n";
+	echo "<tr><th class=tdright>Height in units (required):</th><td class=tdleft><input type=text name=rack_height tabindex=2 value='${defh}'></td></tr>\n";
 	echo "<tr><th class=tdright>Comment:</th><td class=tdleft><input type=text name=rack_comment tabindex=3></td></tr>\n";
 	echo "<tr><td class=submit colspan=2><input type=submit name=got_data value='Create'></td></tr>\n";
 	echo '</form></table>';
@@ -1665,18 +1668,15 @@ function renderAddNewRange ()
 function renderIPRange ()
 {
 	global $root;
-	$maxperpage=256;
+	$maxperpage = getConfigVar ('IPV4_ADDRS_PER_PAGE');
 	$id = $_REQUEST['id'];
 	if (isset($_REQUEST['pg']))
 		$page = $_REQUEST['pg'];
 	else
 		$page=0;
 
-	$paging=0;
-
 	$range = getIPRange($id);
 	echo "<center><h1>${range['ip']}/${range['mask']}</h1><h2>${range['name']}</h2></center>\n";
-
 
 	$startip = $range['ip_bin'] & $range['mask_bin'];
 	$endip = $range['ip_bin'] | $range['mask_bin_inv'];
@@ -1685,12 +1685,13 @@ function renderIPRange ()
 	$numpages = 0;
 	if($endip - $startip > $maxperpage)
 	{
-		$paging=1;
 		$numpages = ($endip - $startip)/$maxperpage;
 		$startip = $startip + $page * $maxperpage;
 		$endip = $startip + $maxperpage-1;
 	}
 	echo "<center>";
+	if ($numpages)
+		echo '<h3>' . long2ip ($startip) . ' ~ ' . long2ip ($endip) . '</h3>';
 	for ($i=0; $i<$numpages; $i++)
 	{
 		if ($i == $page)
