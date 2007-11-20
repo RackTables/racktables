@@ -72,7 +72,7 @@ function setConfigVar ($varname = '', $varvalue = '', $softfail = FALSE)
 		showError ($errormsg);
 		die;
 	}
-	if ($configCache[$varname]['vartype'] == 'uint' && (!is_numeric ($varvalue) or $varvalue < 0 ))
+	if (!empty ($varvalue) && $configCache[$varname]['vartype'] == 'uint' && (!is_numeric ($varvalue) or $varvalue < 0 ))
 	{
 		$errormsg = "'${varname}' can accept UINT values only";
 		if ($softfail)
@@ -88,7 +88,7 @@ function setConfigVar ($varname = '', $varvalue = '', $softfail = FALSE)
 			return '';
 	}
 	elseif ($softfail)
-		return "storeConfigVar() failed in setConfigVar()";
+		return "storeConfigVar ('${varname}', '${varvalue}') failed in setConfigVar()";
 }
 
 ?>
