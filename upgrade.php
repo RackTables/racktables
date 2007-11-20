@@ -252,7 +252,7 @@ CREATE TABLE `Config` (
 							$tree = 'stock';
 						break;
 				}
-				$dict[$tree][$chapter_no][$dict_key]['value'] = $row['dict_value'];
+				$dict[$tree][$chapter_no][$dict_key] = array ('value' => $row['dict_value']);
 			}
 			$r3->closeCursor();
 
@@ -296,7 +296,7 @@ CREATE TABLE `Config` (
 			// Now we iterate over the joint dataset, picking some chapters and
 			// performing additional processing:
 			// 1 (RackObjectType) --- adjust RackObject and regenerate AttributeMap
-			// 2 (PortType) --- regenerate PortCompat and adjust Port
+			// 2 (PortType) --- adjust Port and regenerate PortCompat (at a latter point)
 			// 3 (RackRow) --- adjust Rack
 			// 20 (Protocols) --- adjust PortForwarding
 			// All other chapters listed in $chaplist --- adjust AttributeValue
@@ -322,7 +322,23 @@ CREATE TABLE `Config` (
 							$query[] = "insert into AttributeMap (objtype_id, attr_id, chapter_no) values (${newkey}, ${row['attr_id']}, ${row['chapter_no']})";
 						$r4->closeCursor();
 					}
+					elseif ($chapter_no == 2)
+					{
+						$q4 = "select id from Port where type = ${oldkey}";
+						$r4 = $dbxlink->query ($q4);
+						while ($row = $r4->fetch (PDO::FETCH_ASSOC))
+							$query[] = "update Port set type = ${newkey} where id = ${row['id']} limit 1";
+						$r4->closeCursor();
+					}
 					elseif ($chapter_no == 3)
+					{
+						$q4 = "select id from Rack where row_id = ${oldkey}";
+						$r4 = $dbxlink->query ($q4);
+						while ($row = $r4->fetch (PDO::FETCH_ASSOC))
+							$query[] = "update Rack set row_id = ${newkey} where id = ${row['id']} limit 1";
+						$r4->closeCursor();
+					}
+					elseif ($chapter_no == 20)
 					{
 						$q4 = "select id from Rack where row_id = ${oldkey}";
 						$r4 = $dbxlink->query ($q4);
@@ -332,6 +348,34 @@ CREATE TABLE `Config` (
 					}
 				}
 			}
+			// Now it's possible to schedule PortCompat regeneration.
+			$query[] = "delete from PortCompat";
+			$q5 = "select type1, type2 from PortCompat";
+			$r5 = $dbxlink->query ($q5);
+			while ($row = $r5->fetch (PDO::FETCH_ASSOC))
+			{
+				$new_type1 = $new_dict[2][$row['type1']]['newkey'];
+				$new_type2 = $new_dict[2][$row['type2']]['newkey'];
+				$query[] = "insert into PortCompat (type1, type2) values (${new_type1}, ${new_type2})";
+			}
+			$r5->closeCursor();
+
+			// Give the configuration some finish
+			$query[] = "update Config set is_hidden = 'yes' where varname = 'color_F'";
+			$query[] = "update Config set is_hidden = 'yes' where varname = 'color_A'";
+			$query[] = "update Config set is_hidden = 'yes' where varname = 'color_U'";
+			$query[] = "update Config set is_hidden = 'yes' where varname = 'color_T'";
+			$query[] = "update Config set is_hidden = 'yes' where varname = 'color_Th'";
+			$query[] = "update Config set is_hidden = 'yes' where varname = 'color_Tw'";
+			$query[] = "update Config set is_hidden = 'yes' where varname = 'color_Thw'";
+			$query[] = "update Config set description = 'Default port type' where varname = 'default_port_type'";
+			$query[] = "update Config set description = 'Picture scale for rack row display' where varname = 'ROW_SCALE'";
+			$query[] = "update Config set description = 'Organization name' where varname = 'enterprise'";
+			$query[] = "update Config set description = 'Expect common name configured for the following object types' where varname = 'NAMEFUL_OBJTYPES'";
+			$query[] = "update Config set description = '&lt;SELECT&gt; lists height' where varname = 'MAXSELSIZE'";
+			$query[] = "update Config set description = '&quot;Fast&quot; form is this many records tall' where varname = 'MASSCOUNT'";
+			$query[] = "INSERT INTO `Config` VALUES ('IPV4_ADDRS_PER_PAGE','256','uint','no','no','IPv4 addresses per page')";
+			$query[] = "INSERT INTO `Config` VALUES ('DEFAULT_RACK_HEIGHT','42','uint','yes','no','Default rack height');";
 
 			// We are done.
 			$query[] = "update Config set varvalue = '0.14.7' where varname = 'DB_VERSION'";
