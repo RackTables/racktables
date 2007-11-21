@@ -230,7 +230,7 @@ CREATE TABLE `Config` (
 			$q3 = 'select chapter_no, dict_key, dict_value from Dictionary';
 			$r3 = $dbxlink->query ($q3);
 
-			while ($row = $r3->fetch (PDO::FETCH_ASSOC)
+			while ($row = $r3->fetch (PDO::FETCH_ASSOC))
 			{
 				$tree = 'user';
 				$dict_key = $row['dict_key'];
@@ -375,7 +375,7 @@ CREATE TABLE `Config` (
 			$query[] = "update Config set description = '&lt;SELECT&gt; lists height' where varname = 'MAXSELSIZE'";
 			$query[] = "update Config set description = '&quot;Fast&quot; form is this many records tall' where varname = 'MASSCOUNT'";
 			$query[] = "INSERT INTO `Config` VALUES ('IPV4_ADDRS_PER_PAGE','256','uint','no','no','IPv4 addresses per page')";
-			$query[] = "INSERT INTO `Config` VALUES ('DEFAULT_RACK_HEIGHT','42','uint','yes','no','Default rack height');";
+			$query[] = "INSERT INTO `Config` VALUES ('DEFAULT_RACK_HEIGHT','42','uint','yes','no','Default rack height')";
 
 			// We are done.
 			$query[] = "update Config set varvalue = '0.14.7' where varname = 'DB_VERSION'";
