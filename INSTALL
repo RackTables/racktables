@@ -1,4 +1,4 @@
-This file describes installation process for RackTables 0.14.6
+This file describes installation process for RackTables 0.14.7
 
 I. Dependencies.
 
@@ -26,10 +26,6 @@ mysql> source install/init-dictvendors.sql
 mysql> grant all privileges on database_name.* to XXX@YYY identified by 'ZZZ';
 
 Make sure your inc/secret.php matches real values you used in the above request.
-
-IV. Customisation
-mysql> update Config set varvalue = 'YourName' where varname = 'enterprise'
-(Will be changed to a more cenvenient way in next versions.)
 
 IV. $ rm -f install/init-auth.sql
 (Just to be sure you did.)
