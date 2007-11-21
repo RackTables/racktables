@@ -197,3 +197,26 @@ INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (2,28,'
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (20,1,'TCP');
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (20,2,'UDP');
 UNLOCK TABLES;
+
+LOCK TABLES `Config` WRITE;
+INSERT INTO `Config` VALUES ('rtwidth_0','9','uint','no','yes','');
+INSERT INTO `Config` VALUES ('rtwidth_1','21','uint','no','yes','');
+INSERT INTO `Config` VALUES ('rtwidth_2','9','uint','no','yes','');
+INSERT INTO `Config` VALUES ('color_F','8fbfbf','string','no','yes','HSV: 180-25-75. Free atoms, they are available for allocation to objects.');
+INSERT INTO `Config` VALUES ('color_A','bfbfbf','string','no','yes','HSV: 0-0-75. Absent atoms.');
+INSERT INTO `Config` VALUES ('color_U','bf8f8f','string','no','yes','HSV: 0-25-75. Unusable atoms. Some problems keep them from being free.');
+INSERT INTO `Config` VALUES ('color_T','408080','string','no','yes','HSV: 180-50-50. Taken atoms, object_id should be set for such.');
+INSERT INTO `Config` VALUES ('color_Th','80ffff','string','no','yes','HSV: 180-50-100. Taken atoms with highlight. They are not stored in the database and are only used for highlighting.');
+INSERT INTO `Config` VALUES ('color_Tw','804040','string','no','yes','HSV: 0-50-50. Taken atoms with object problem. This is detected at runtime.');
+INSERT INTO `Config` VALUES ('color_Thw','ff8080','string','no','yes','HSV: 0-50-100. An object can be both current and problematic. We run highlightObject() first and markupObjectProblems() second.');
+INSERT INTO `Config` VALUES ('default_port_type','11','uint','no','no','Default port type');
+INSERT INTO `Config` VALUES ('MASSCOUNT','15','uint','no','no','&quot;Fast&quot; form is this many records tall');
+INSERT INTO `Config` VALUES ('MAXSELSIZE','30','uint','no','no','&lt;SELECT&gt; lists height');
+INSERT INTO `Config` VALUES ('enterprise','MyCompanyName','string','no','no','Organization name');
+INSERT INTO `Config` VALUES ('NAMEFUL_OBJTYPES','4,7,8','string','yes','no','Expect common name configured for the following object types');
+INSERT INTO `Config` VALUES ('ROW_SCALE','2','uint','no','no','Picture scale for rack row display');
+INSERT INTO `Config` VALUES ('PORTS_PER_ROW','12','uint','no','yes','Max switch port per one row on the switchvlans dynamic tab.');
+INSERT INTO `Config` VALUES ('IPV4_ADDRS_PER_PAGE','256','uint','no','no','IPv4 addresses per page');
+INSERT INTO `Config` VALUES ('DEFAULT_RACK_HEIGHT','42','uint','yes','no','Default rack height');
+INSERT INTO `Config` VALUES ('DB_VERSION','0.14.7','string','no','yes','Database version.');
+UNLOCK TABLES;
