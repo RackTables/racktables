@@ -696,7 +696,7 @@ function renderRackObject ($object_id = 0)
 	usort($addresses, 'sortAddresses');
 	if (count ($addresses))
 	{
-		startPortlet ('Network addresses');
+		startPortlet ('IPv4 addresses');
 		echo "<table cellspacing=0 cellpadding='5' align='center' class='widetable'>\n";
 		echo "<tr><th>Interface name</th><th>IP Address</th><th>Description</th><th>Misc</th></tr>\n";
 		foreach ($addresses as $addr)
@@ -780,15 +780,15 @@ function renderRackObject ($object_id = 0)
 	$forwards = getObjectForwards ($object_id);
 	if (count($forwards['in']) or count($forwards['out']))
 	{
-		startPortlet('Port Forwarding');
+		startPortlet('NATv4');
 
 		if (count($forwards['out']))
 		{
 
-			echo "<h3>Forwarding out:</h3>";
+			echo "<h3>locally performed NAT</h3>";
 
 			echo "<table class='widetable' cesspadding=5 cellspacing=0 border=0 align='center'>\n";
-			echo "<tr><th>Source</th><th>Target</th><th>Target Objects</th><th>Description</th></tr>\n";
+			echo "<tr><th>Proto</th><th>Match endpoint</th><th>Translate to</th><th>Target object</th><th>Rule comment</th></tr>\n";
 
 			foreach ($forwards['out'] as $pf)
 			{
@@ -804,15 +804,18 @@ function renderRackObject ($object_id = 0)
 
 				echo "<tr class='$class'>";
 
-				echo "<td>${pf['proto']}/$name:<a href='${root}?page=ipaddress&tab=default&ip=${pf['localip']}'>${pf['localip']}</a>:${pf['localport']}</td>";
+				echo "<td>${pf['proto']}</td><td class=tdleft>${name}: <a href='${root}?page=ipaddress&tab=default&ip=${pf['localip']}'>${pf['localip']}</a>:${pf['localport']}</td>";
 
-				echo "<td><a href='${root}?page=ipaddress&tab=default&ip=${pf['remoteip']}'>${pf['remoteip']}</a>:${pf['remoteport']}</td>";
+				echo "<td class=tdleft><a href='${root}?page=ipaddress&tab=default&ip=${pf['remoteip']}'>${pf['remoteip']}</a>:${pf['remoteport']}</td>";
 
 				$address=getIPAddress($pf['remoteip']);
 
 				echo "<td class='description'>";
-				foreach($address['bonds'] as $bond)
-					echo "<a href='${root}?page=object&tab=default&object_id=${bond['object_id']}'>${bond['object_name']}(${bond['name']})</a> ";
+				if (count ($address['bonds']))
+					foreach($address['bonds'] as $bond)
+						echo "<a href='${root}?page=object&tab=default&object_id=${bond['object_id']}'>${bond['object_name']}(${bond['name']})</a> ";
+				elseif (!empty ($pf['remote_addr_name']))
+					echo '(' . $pf['remote_addr_name'] . ')';
 
 				echo "</td><td class='description'>${pf['description']}</td>";
 
@@ -822,10 +825,10 @@ function renderRackObject ($object_id = 0)
 		}
 		if (count($forwards['in']))
 		{
-			echo "<h3>Forwarded from:</h3>";
+			echo "<h3>arriving NAT connections</h3>";
 
 			echo "<table class='widetable' cesspadding=5 cellspacing=0 border=0 align='center'>\n";
-			echo "<tr><th>Source</th><th>Source objects</th><th>Target</th><th>Description</th></tr>\n";
+			echo "<tr><th>Matched endpoint</th><th>Source object</th><th>Translated to</th><th>Rule comment</th></tr>\n";
 
 			foreach ($forwards['in'] as $pf)
 			{
@@ -1931,10 +1934,10 @@ function renderIPAddressPortForwarding ($object_id=0)
 	$forwards = getObjectForwards ($object_id);
 	$addresses = getObjectAddresses ($object_id);
 	showMessageOrError();
-	echo "<center><h2>NAT performed here</h2></center>";
+	echo "<center><h2>locally performed NAT</h2></center>";
 
 	echo "<table class='widetable' cesspadding=5 cellspacing=0 border=0 align='center'>\n";
-	echo "<tr><th></th><th>Source</th><th>Target</th><th>Target Objects</th><th>Description</th></tr>\n";
+	echo "<tr><th></th><th>Match endpoint</th><th>Translate to</th><th>Target object</th><th>Comment</th></tr>\n";
 
 	foreach ($forwards['out'] as $pf)
 	{
@@ -1950,14 +1953,20 @@ function renderIPAddressPortForwarding ($object_id=0)
 
 		echo "<tr class='$class'>";
 		echo "<td><a href='process.php?op=delPortForwarding&localip=${pf['localip']}&localport=${pf['localport']}&remoteip=${pf['remoteip']}&remoteport=${pf['remoteport']}&proto=${pf['proto_bin']}&object_id=$object_id&page=${pageno}&tab=${tabno}'><img src='${root}/pix/delete_s.gif' title='Delete port forwarding' border=0 width=16 height=16></a></td>";
-		echo "<td>${pf['proto']}/${name}: <a href='${root}?page=ipaddress&tab=default&ip=${pf['localip']}'>${pf['localip']}</a>:${pf['localport']}</td>";
+		echo "<td>${pf['proto']}/${name}: <a href='${root}?page=ipaddress&tab=default&ip=${pf['localip']}'>${pf['localip']}</a>:${pf['localport']}";
+		if (!empty ($pf['local_addr_name']))
+			echo ' (' . $pf['local_addr_name'] . ')';
+		echo "</td>";
 		echo "<td><a href='${root}?page=ipaddress&tab=default&ip=${pf['remoteip']}'>${pf['remoteip']}</a>:${pf['remoteport']}</td>";
 
 		$address=getIPAddress($pf['remoteip']);
 
 		echo "<td class='description'>";
-		foreach($address['bonds'] as $bond)
-			echo "<a href='${root}?page=object&tab=default&object_id=${bond['object_id']}'>${bond['object_name']}(${bond['name']})</a> ";
+		if (count ($address['bonds']))
+			foreach($address['bonds'] as $bond)
+				echo "<a href='${root}?page=object&tab=default&object_id=${bond['object_id']}'>${bond['object_name']}(${bond['name']})</a> ";
+		elseif (!empty ($pf['remote_addr_name']))
+			echo '(' . $pf['remote_addr_name'] . ')';
 		echo "</td><form action='process.php'><input type='hidden' name='op' value='updPortForwarding'><input type=hidden name=page value='${pageno}'><input type=hidden name=tab value='${tabno}'><input type='hidden' name='object_id' value='$object_id'><input type='hidden' name='localip' value='${pf['localip']}'><input type='hidden' name='localport' value='${pf['localport']}'><input type='hidden' name='remoteip' value='${pf['remoteip']}'><input type='hidden' name='remoteport' value='${pf['remoteport']}'><input type='hidden' name='proto' value='${pf['proto_bin']}'><td class='description'><input type='text' name='description' value='${pf['description']}'> <input type='submit' value='OK'></td></form>";
 		echo "</tr>";
 	}
@@ -1979,7 +1988,7 @@ function renderIPAddressPortForwarding ($object_id=0)
 	echo "</table><br><br>";
 
 
-	echo "<center><h2>NAT connections arriving here</h2></center>";
+	echo "<center><h2>arriving NAT connections</h2></center>";
 	echo "<table class='widetable' cesspadding=5 cellspacing=0 border=0 align='center'>\n";
 	echo "<tr><th></th><th>Source</th><th>Source objects</th><th>Target</th><th>Description</th></tr>\n";
 

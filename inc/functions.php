@@ -958,21 +958,20 @@ function getObjectForwards($object_id)
 		"localport, ".
 		"INET_NTOA(remoteip) as remoteip, ".
 		"remoteport, ".
+		"ipa1.name as local_addr_name, " .
+		"ipa2.name as remote_addr_name, " .
 		"description ".
 		"from PortForwarding inner join Dictionary on proto = dict_key natural join Chapter ".
+		"left join IPAddress as ipa1 on PortForwarding.localip = ipa1.ip " .
+		"left join IPAddress as ipa2 on PortForwarding.remoteip = ipa2.ip " .
 		"where object_id='$object_id' and chapter_name = 'Protocols' ".
 		"order by localip, localport, proto, remoteip, remoteport";
 	$result2 = $dbxlink->query ($query);
 	$count=0;
 	while ($row = $result2->fetch (PDO::FETCH_ASSOC))
 	{
-		$ret['out'][$count]['proto'] = $row['proto'];
-		$ret['out'][$count]['proto_bin'] = $row['proto_bin'];
-		$ret['out'][$count]['localip'] = $row['localip'];
-		$ret['out'][$count]['localport'] = $row['localport'];
-		$ret['out'][$count]['remoteip'] = $row['remoteip'];
-		$ret['out'][$count]['remoteport'] = $row['remoteport'];
-		$ret['out'][$count]['description'] = $row['description'];
+		foreach (array ('proto', 'proto_bin', 'localport', 'localip', 'remoteport', 'remoteip', 'description', 'local_addr_name', 'remote_addr_name') as $cname)
+			$ret['out'][$count][$cname] = $row[$cname];
 		$count++;
 	}
 	$result2->closeCursor();
@@ -988,22 +987,15 @@ function getObjectForwards($object_id)
 		"PortForwarding.object_id as object_id, ".
 		"RackObject.name as object_name, ".
 		"description ".
-		"from ((PortForwarding join IPBonds on remoteip=ip) join RackObject on PortForwarding.object_id=RackObject.id) inner join Dictionary on proto = dict_key natural join Chapter ".
+		"from ((PortForwarding join IPBonds on remoteip=IPBonds.ip) join RackObject on PortForwarding.object_id=RackObject.id) inner join Dictionary on proto = dict_key natural join Chapter ".
 		"where IPBonds.object_id='$object_id' and chapter_name = 'Protocols' ".
 		"order by remoteip, remoteport, proto, localip, localport";
 	$result3 = $dbxlink->query ($query);
 	$count=0;
 	while ($row = $result3->fetch (PDO::FETCH_ASSOC))
 	{
-		$ret['in'][$count]['proto'] = $row['proto'];
-		$ret['in'][$count]['proto_bin'] = $row['proto_bin'];
-		$ret['in'][$count]['localport'] = $row['localport'];
-		$ret['in'][$count]['localip'] = $row['localip'];
-		$ret['in'][$count]['remoteport'] = $row['remoteport'];
-		$ret['in'][$count]['remoteip'] = $row['remoteip'];
-		$ret['in'][$count]['object_id'] = $row['object_id'];
-		$ret['in'][$count]['object_name'] = $row['object_name'];
-		$ret['in'][$count]['description'] = $row['description'];
+		foreach (array ('proto', 'proto_bin', 'localport', 'localip', 'remoteport', 'remoteip', 'object_id', 'object_name', 'description', 'local_addr_name') as $cname)
+			$ret['in'][$count][$cname] = $row[$cname];
 		$count++;
 	}
 	$result3->closeCursor();
