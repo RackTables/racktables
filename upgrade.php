@@ -143,12 +143,16 @@ CREATE TABLE `Config` (
 			// Convert the fields to unsigned on occasion.
 			$query[] = 'create table PortCompat_0_14_7_new (type1 int(10) unsigned NOT NULL, type2 int(10) unsigned NOT NULL)';
 
+echo '<pre>';
 			// Find all chapter numbers, which will require AttributeValue adjustment.
 			$q2 = 'select distinct chapter_no from AttributeMap where chapter_no != 0';
 			$r2 = $dbxlink->query ($q2);
-			$chaplist = $r2->fetchAll (PDO::FETCH_NUM);
+			$chaplist = array();
+			while ($row = $r2->fetch (PDO::FETCH_NUM))
+				$chaplist[] = $row[0];
+print_r ($chaplist);
 			$r2->closeCursor();
-			$chaplist = $chaplist[0];
+			unset ($r2);
 
 			$stock = array();
 			// Below I list the records, which are known to be the stock
@@ -255,6 +259,7 @@ CREATE TABLE `Config` (
 				$dict[$tree][$chapter_no][$dict_key] = array ('value' => $row['dict_value']);
 			}
 			$r3->closeCursor();
+			unset ($r3);
 
 
 			// Now we store stock dataset first, bump up key value and store
@@ -292,6 +297,9 @@ CREATE TABLE `Config` (
 				}
 			}
 			// The new table should now have adequate AUTO_INCREMENT w/o our care.
+			// Install the new data.
+			$query[] = 'drop table Dictionary';
+			$query[] = 'alter table Dictionary_0_14_7_new rename to Dictionary';
 
 			// Now we iterate over the joint dataset, picking some chapters and
 			// performing additional processing:
@@ -304,61 +312,80 @@ CREATE TABLE `Config` (
 			$query[] = "delete from AttributeMap";
 			foreach ($new_dict as $chapter_no => $words)
 			{
+echo "Processing chapter ${chapter_no}\n";
+print_r ($chaplist);
 				foreach ($words as $oldkey => $data)
 				{
 					$value = $data['value'];
 					$newkey = $data['newkey'];
+echo "oldkey == ${oldkey} newkey == ${newkey} value == ${value}\n";
 					if ($chapter_no == 1)
 					{
 						$q4 = "select id from RackObject where objtype_id = ${oldkey}";
+echo "${q4}\n";
 						$r4 = $dbxlink->query ($q4);
 						while ($row = $r4->fetch (PDO::FETCH_ASSOC))
 							$query[] = "update RackObject set objtype_id = ${newkey} where id = ${row['id']} limit 1";
 						$r4->closeCursor();
+unset ($r4);
 
-						$q4 = "select attr_id, chapter_no from AttributeMap where objtype_id = ${oldkey}";
-						$r4 = $dbxlink->query ($q4);
-						while ($row = $r4->fetch (PDO::FETCH_ASSOC))
+						$q5 = "select attr_id, chapter_no from AttributeMap where objtype_id = ${oldkey}";
+						$r5 = $dbxlink->query ($q5);
+						while ($row = $r5->fetch (PDO::FETCH_ASSOC))
 							$query[] = "insert into AttributeMap (objtype_id, attr_id, chapter_no) values (${newkey}, ${row['attr_id']}, ${row['chapter_no']})";
-						$r4->closeCursor();
+						$r5->closeCursor();
+unset ($r5);
 					}
 					elseif ($chapter_no == 2)
 					{
-						$q4 = "select id from Port where type = ${oldkey}";
-						$r4 = $dbxlink->query ($q4);
-						while ($row = $r4->fetch (PDO::FETCH_ASSOC))
+						$q46 = "select id from Port where type = ${oldkey}";
+echo "${q46}\n";
+						$r46 = $dbxlink->query ($q46);
+						if ($r46 == NULL)
+							echo 'ERROR';
+						while ($row = $r46->fetch (PDO::FETCH_ASSOC))
+{
+echo 'HIT!';
 							$query[] = "update Port set type = ${newkey} where id = ${row['id']} limit 1";
-						$r4->closeCursor();
+}
+						$r46->closeCursor();
+unset ($r46);
 					}
 					elseif ($chapter_no == 3)
 					{
-						$q4 = "select id from Rack where row_id = ${oldkey}";
-						$r4 = $dbxlink->query ($q4);
-						while ($row = $r4->fetch (PDO::FETCH_ASSOC))
+						$q7 = "select id from Rack where row_id = ${oldkey}";
+						$r7 = $dbxlink->query ($q7);
+						while ($row = $r7->fetch (PDO::FETCH_ASSOC))
 							$query[] = "update Rack set row_id = ${newkey} where id = ${row['id']} limit 1";
-						$r4->closeCursor();
+						$r7->closeCursor();
+unset ($r7);
 					}
 					elseif ($chapter_no == 20)
 					{
-						$q4 = "select id from Rack where row_id = ${oldkey}";
-						$r4 = $dbxlink->query ($q4);
-						while ($row = $r4->fetch (PDO::FETCH_ASSOC))
+						$q8 = "select id from Rack where row_id = ${oldkey}";
+						$r8 = $dbxlink->query ($q4);
+						while ($row = $r8->fetch (PDO::FETCH_ASSOC))
 							$query[] = "update Rack set row_id = ${newkey} where id = ${row['id']} limit 1";
-						$r4->closeCursor();
+						$r8->closeCursor();
+unset ($r8);
+					}
+					elseif (in_array ($chapter_no, $chaplist))
+					{
 					}
 				}
 			}
 			// Now it's possible to schedule PortCompat regeneration.
 			$query[] = "delete from PortCompat";
-			$q5 = "select type1, type2 from PortCompat";
-			$r5 = $dbxlink->query ($q5);
-			while ($row = $r5->fetch (PDO::FETCH_ASSOC))
+			$q9 = "select type1, type2 from PortCompat";
+			$r9 = $dbxlink->query ($q9);
+			while ($row = $r9->fetch (PDO::FETCH_ASSOC))
 			{
 				$new_type1 = $new_dict[2][$row['type1']]['newkey'];
 				$new_type2 = $new_dict[2][$row['type2']]['newkey'];
 				$query[] = "insert into PortCompat (type1, type2) values (${new_type1}, ${new_type2})";
 			}
-			$r5->closeCursor();
+			$r9->closeCursor();
+echo '</pre>';
 
 			// Give the configuration some finish
 			$query[] = "update Config set is_hidden = 'yes' where varname = 'color_F'";
@@ -378,7 +405,7 @@ CREATE TABLE `Config` (
 			$query[] = "INSERT INTO `Config` VALUES ('DEFAULT_RACK_HEIGHT','42','uint','yes','no','Default rack height')";
 
 			// We are done.
-			$query[] = "update Config set varvalue = '0.14.7' where varname = 'DB_VERSION'";
+#			$query[] = "update Config set varvalue = '0.14.7' where varname = 'DB_VERSION'";
 			break; // --------------------------------------------
 		default:
 			showError ("executeUpgradeBatch () failed, because batch '${batchid}' isn't defined");
@@ -388,22 +415,23 @@ CREATE TABLE `Config` (
 	$failures = array();
 	$ndots = 0;
 	echo "<pre>Executing database upgrade batch '${batchid}: ";
+print_r ($query);
 	foreach ($query as $q)
 	{
 		$result = $dbxlink->query ($q);
 		if ($result != NULL)
-		{
 			echo '.';
-			if (++$ndots == 50)
-			{
-				echo "\n";
-				$ndots = 0;
-			}
-			continue;
+		else
+		{
+			echo '!';
+			$errorInfo = $dbxlink->errorInfo();
+			$failures[] = array ($q, $errorInfo[2]);
 		}
-		echo '!';
-		$errorInfo = $dbxlink->errorInfo();
-		$failures[] = array ($q, $errorInfo[2]);
+		if (++$ndots == 50)
+		{
+			echo "\n";
+			$ndots = 0;
+		}
 	}
 	echo '<br>';
 	if (!count ($failures))
@@ -477,9 +505,12 @@ $dbver = getDatabaseVersion();
 echo 'Code version == ' . CODE_VERSION;
 echo '<br>Database version == ' . $dbver;
 if ($dbver == CODE_VERSION)
+{
+	executeUpgradeBatch ('0.14.7');
 	die ("<p align=justify>Your database seems to be up-to-date. " .
 		"Now the best thing to do would be to follow to the <a href='${root}'>main page</a> " .
 		"and explore your data. Have a nice day.</p>");
+}
 
 foreach (getDBUpgradePath ($dbver, CODE_VERSION) as $batchid)
 	executeUpgradeBatch ($batchid);
