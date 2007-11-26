@@ -3138,16 +3138,31 @@ function renderSNMPPortFinder ($object_id = 0)
 // http://www.cisco.com/en/US/products/ps6406/prod_models_comparison.html
 // http://cisco.com/en/US/products/sw/cscowork/ps2064/products_device_support_table09186a0080803bb4.html
 		$ciscomodel[283] = 'WS-C6509-E (9-slot system)';
+		$hwtype[283] = 52;
 #		$ciscomodel[694] = 'WS-C2960-24TC-L (24 Ethernet 10/100 ports and 2 dual-purpose uplinks)';
 #		$ciscomodel[695] = 'WS-C2960-48TC-L (48 Ethernet 10/100 ports and 2 dual-purpose uplinks)';
 		$ciscomodel[696] = 'WS-C2960G-24TC-L (20 Ethernet 10/100/1000 ports and 4 dual-purpose uplinks)';
+		$hwtype[696] = 71;
 		$ciscomodel[697] = 'WS-C2960G-48TC-L (44 Ethernet 10/100/1000 ports and 4 dual-purpose uplinks)';
+		$hwtype[697] = 70;
 #		$ciscomodel[716] = 'WS-C2960-24TT-L (24 Ethernet 10/100 ports and 2 10/100/1000 uplinks)';
 #		$ciscomodel[717] = 'WS-C2960-48TT-L (48 Ethernet 10/100 ports and 2 10/100/1000 uplinks)';
 #		$ciscomodel[633] = 'WS-C3560-24TS (24 Ethernet 10/100 ports and 2 10/100/1000 SFP uplinks)';
+#		$hwtype[633] = 73;
 		$ciscomodel[634] = 'WS-C3560-48TS (48 Ethernet 10/100 ports and 4 10/100/1000 SFP uplinks)';
+		$hwtype[634] = 74;
 #		$ciscomodel[563] = 'WS-C3560-24PS (24 Ethernet 10/100 POE ports and 2 10/100/1000 SFP uplinks)';
+#		$hwtype[563] = 75;
 		$ciscomodel[564] = 'WS-C3560-48PS (48 Ethernet 10/100 POE ports and 4 10/100/1000 SFP uplinks)';
+		$hwtype[564] = 76;
+		$ciscomodel[58] = 'WS-C4503 (3-slot system)';
+		$hwtype[58] = 49;
+		$ciscomodel[503] = '4503 (3-slot system)';
+		$hwtype[503] = 49;
+		$ciscomodel[59] = 'WS-C4506 (6-slot system)';
+		$hwtype[59] = 60;
+		$ciscomodel[502] = '4506 (6-slot system)';
+		$hwtype[502] = 60;
 		assertStringArg ('community');
 		$community = $_REQUEST['community'];
 		$objectInfo = getObjectInfo ($object_id);
@@ -3260,6 +3275,10 @@ function renderSNMPPortFinder ($object_id = 0)
 		// for this hardware. It would be correct to fetch the list of modules
 		// installed to generate lists of ports, but who is going to implement
 		// this?
+			case '503': // 4503
+			case '58': // WS-C4503
+			case '502': // 4506
+			case '59': // WS-C4506
 			case '283': // WS-C6509-E
 				foreach ($ifList1 as $port)
 				{
