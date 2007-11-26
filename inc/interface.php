@@ -3035,7 +3035,7 @@ function renderVLANMembership ($object_id = 0)
 	// Right column: table with 2 rows, each holding 1 portlet
 	echo '<table border=0 width="100%"><tr><td>';
 
-	startPortlet ('Port configuration');
+	startPortlet ('Current status');
 	echo "<table class=widetable cellspacing=3 cellpadding=5 align=center width='100%'><tr>";
 	echo "<form method=post>";
 	echo "<input type=hidden name=page value='${pageno}'>";
@@ -3056,6 +3056,8 @@ function renderVLANMembership ($object_id = 0)
 		echo '<td class=port_';
 		if ($port['status'] == 'notconnect')
 			echo 'notconnect';
+		elseif ($port['status'] == 'disabled')
+			echo 'disabled';
 		elseif ($port['status'] != 'connected')
 			echo 'unknown';
 		elseif (!isset ($maclist[$port['portname']]))

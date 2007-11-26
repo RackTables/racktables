@@ -526,6 +526,10 @@ div.commentblock {
 	background-color: #c0c0c0;
 }
 
+.port_disabled {
+	background-color: #606060;
+}
+
 .port_unknown {
 	background-color: #ff0000;
 }
