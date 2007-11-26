@@ -3135,8 +3135,9 @@ function renderSNMPPortFinder ($object_id = 0)
 	if (isset ($_REQUEST['do_scan']))
 	{
 		$log = array();
-// http://www.cisco.com/en/US/products/ps6406/prod_models_comparison.html
-// http://cisco.com/en/US/products/sw/cscowork/ps2064/products_device_support_table09186a0080803bb4.html
+// IDs: http://cisco.com/en/US/products/sw/cscowork/ps2064/products_device_support_table09186a0080803bb4.html
+// 2960: http://www.cisco.com/en/US/products/ps6406/prod_models_comparison.html
+// 3560: http://cisco.com/en/US/products/hw/switches/ps5528/products_data_sheet09186a00801f3d7f.html
 		$ciscomodel[283] = 'WS-C6509-E (9-slot system)';
 // FIXME: hwtype hardcoded value will become invalid after the Dictionary table transformation
 // in 0.14.7 version. Either the values will have to be adjusted as well or we have to switch
@@ -3158,6 +3159,14 @@ function renderSNMPPortFinder ($object_id = 0)
 #		$hwtype[563] = 75;
 		$ciscomodel[564] = 'WS-C3560-48PS (48 Ethernet 10/100 POE ports and 4 10/100/1000 SFP uplinks)';
 		$hwtype[564] = 76;
+		$ciscomodel[614] = 'WS-C3560G-24PS (24 Ethernet 10/100/1000 POE ports and 4 10/100/1000 SFP uplinks)';
+		$hwtype[614] = 79;
+		$ciscomodel[615] = 'WS-C3560G-24TS (24 Ethernet 10/100/1000 ports and 4 10/100/1000 SFP uplinks)';
+		$hwtype[615] = 77;
+		$ciscomodel[616] = 'WS-C3560G-48PS (48 Ethernet 10/100/1000 POE ports and 4 10/100/1000 SFP uplinks)';
+		$hwtype[616] = 80;
+		$ciscomodel[617] = 'WS-C3560G-48TS (48 Ethernet 10/100/1000 ports and 4 10/100/1000 SFP uplinks)';
+		$hwtype[617] = 78;
 		$ciscomodel[58] = 'WS-C4503 (3-slot system)';
 		$hwtype[58] = 49;
 		$ciscomodel[503] = '4503 (3-slot system)';
@@ -3173,7 +3182,7 @@ function renderSNMPPortFinder ($object_id = 0)
 		$sysDescr = snmpget ($endpoints[0], $community, 'sysDescr.0');
 		// Strip the object type, it's always string here.
 		$sysDescr = substr ($sysDescr, strlen ('STRING: '));
-		if (strpos ($sysDescr, 'Cisco IOS Software') === 0)
+		if (strpos ($sysDescr, 'Cisco IOS Software') === 0 or strpos ($sysDescr, 'Cisco Internetwork Operating System Software') === 0)
 			$log[] = array ('code' => 'success', 'message' => 'Seems to be a Cisco box');
 		else
 		{
@@ -3305,6 +3314,30 @@ function renderSNMPPortFinder ($object_id = 0)
 				for ($i = 1; $i <= 4; $i++)
 				{
 					$label = "${i}";
+					$error = commitAddPort ($object_id, 'gi0/' . $i, 11, $label, $ifList2["GigabitEthernet0/${i}"]['phyad']);
+					if ($error == '')
+						$newports++;
+					else
+						$log[] = array ('code' => 'error', 'message' => 'Failed to add port ' . $label . ': ' . $error);
+				}
+				break;
+			case '614': // WS-C3560G-24PS
+			case '615': // WS-C3560G-24TS
+				for ($i = 1; $i <= 24; $i++)
+				{
+					$label = "${i}X";
+					$error = commitAddPort ($object_id, 'gi0/' . $i, 11, $label, $ifList2["GigabitEthernet0/${i}"]['phyad']);
+					if ($error == '')
+						$newports++;
+					else
+						$log[] = array ('code' => 'error', 'message' => 'Failed to add port ' . $label . ': ' . $error);
+				}
+				break;
+			case '616': // WS-C3560G-48PS
+			case '617': // WS-C3560G-48TS
+				for ($i = 1; $i <= 48; $i++)
+				{
+					$label = "${i}X";
 					$error = commitAddPort ($object_id, 'gi0/' . $i, 11, $label, $ifList2["GigabitEthernet0/${i}"]['phyad']);
 					if ($error == '')
 						$newports++;
