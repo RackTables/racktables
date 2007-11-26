@@ -3137,6 +3137,7 @@ function renderSNMPPortFinder ($object_id = 0)
 		$log = array();
 // IDs: http://cisco.com/en/US/products/sw/cscowork/ps2064/products_device_support_table09186a0080803bb4.html
 // 2960: http://www.cisco.com/en/US/products/ps6406/prod_models_comparison.html
+// 2970: http://cisco.com/en/US/products/hw/switches/ps5206/products_qanda_item09186a00801b1750.shtml
 // 3560: http://cisco.com/en/US/products/hw/switches/ps5528/products_data_sheet09186a00801f3d7f.html
 		$ciscomodel[283] = 'WS-C6509-E (9-slot system)';
 // FIXME: hwtype hardcoded value will become invalid after the Dictionary table transformation
@@ -3151,6 +3152,10 @@ function renderSNMPPortFinder ($object_id = 0)
 		$hwtype[697] = 70;
 #		$ciscomodel[716] = 'WS-C2960-24TT-L (24 Ethernet 10/100 ports and 2 10/100/1000 uplinks)';
 #		$ciscomodel[717] = 'WS-C2960-48TT-L (48 Ethernet 10/100 ports and 2 10/100/1000 uplinks)';
+		$ciscomodel[527] = 'WS-C2970G-24T (24 Ethernet 10/100/1000 ports)';
+		$hwtype[527] = 114;
+		$ciscomodel[561] = 'WS-C2970G-24TS (24 Ethernet 10/100/1000 ports and 4 10/100/1000 SFP uplinks)';
+		$hwtype[561] = 115;
 #		$ciscomodel[633] = 'WS-C3560-24TS (24 Ethernet 10/100 ports and 2 10/100/1000 SFP uplinks)';
 #		$hwtype[633] = 73;
 		$ciscomodel[634] = 'WS-C3560-48TS (48 Ethernet 10/100 ports and 4 10/100/1000 SFP uplinks)';
@@ -3323,6 +3328,8 @@ function renderSNMPPortFinder ($object_id = 0)
 				break;
 			case '614': // WS-C3560G-24PS
 			case '615': // WS-C3560G-24TS
+			case '527': // WS-C2970G-24T
+			case '561': // WS-C2970G-24TS
 				for ($i = 1; $i <= 24; $i++)
 				{
 					$label = "${i}X";
