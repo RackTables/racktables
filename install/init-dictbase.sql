@@ -215,7 +215,7 @@ INSERT INTO `Config` VALUES ('MAXSELSIZE','30','uint','no','no','&lt;SELECT&gt; 
 INSERT INTO `Config` VALUES ('enterprise','MyCompanyName','string','no','no','Organization name');
 INSERT INTO `Config` VALUES ('NAMEFUL_OBJTYPES','4,7,8','string','yes','no','Expect common name configured for the following object types');
 INSERT INTO `Config` VALUES ('ROW_SCALE','2','uint','no','no','Picture scale for rack row display');
-INSERT INTO `Config` VALUES ('PORTS_PER_ROW','12','uint','no','yes','Max switch port per one row on the switchvlans dynamic tab.');
+INSERT INTO `Config` VALUES ('PORTS_PER_ROW','12','uint','no','no','Ports per row in VLANs tab');
 INSERT INTO `Config` VALUES ('IPV4_ADDRS_PER_PAGE','256','uint','no','no','IPv4 addresses per page');
 INSERT INTO `Config` VALUES ('DEFAULT_RACK_HEIGHT','42','uint','yes','no','Default rack height');
 INSERT INTO `Config` VALUES ('DB_VERSION','0.14.7','string','no','yes','Database version.');
