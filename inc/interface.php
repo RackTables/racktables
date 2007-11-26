@@ -3138,6 +3138,9 @@ function renderSNMPPortFinder ($object_id = 0)
 // http://www.cisco.com/en/US/products/ps6406/prod_models_comparison.html
 // http://cisco.com/en/US/products/sw/cscowork/ps2064/products_device_support_table09186a0080803bb4.html
 		$ciscomodel[283] = 'WS-C6509-E (9-slot system)';
+// FIXME: hwtype hardcoded value will become invalid after the Dictionary table transformation
+// in 0.14.7 version. Either the values will have to be adjusted as well or we have to switch
+// to value lookup (not reliable).
 		$hwtype[283] = 52;
 #		$ciscomodel[694] = 'WS-C2960-24TC-L (24 Ethernet 10/100 ports and 2 dual-purpose uplinks)';
 #		$ciscomodel[695] = 'WS-C2960-48TC-L (48 Ethernet 10/100 ports and 2 dual-purpose uplinks)';
@@ -3172,6 +3175,37 @@ function renderSNMPPortFinder ($object_id = 0)
 		$sysDescr = substr ($sysDescr, strlen ('STRING: '));
 		if (strpos ($sysDescr, 'Cisco IOS Software') === 0)
 			$log[] = array ('code' => 'success', 'message' => 'Seems to be a Cisco box');
+		else
+		{
+			$log[] = array ('code' => 'error', 'message' => 'No idea how to handle ' . $sysDescr);
+			printLog ($log);
+			return;
+		}
+
+		// It's a Cisco. Go on.
+		$attrs = getAttrValues ($object_id);
+		// Only fill in attribute values, if they are not set.
+		// FIXME: this is hardcoded
+
+		if (empty ($attrs[5]['value'])) // SW version
+		{
+			$IOSversion = ereg_replace ('^.*, Version ([^ ]+), .*$', '\\1', $sysDescr);
+			$error = commitUpdateAttrValue ($object_id, 5, $IOSversion);
+			if ($error == TRUE)
+				$log[] = array ('code' => 'success', 'message' => 'SW version set to ' . $IOSversion);
+			else
+				$log[] = array ('code' => 'error', 'message' => 'Failed settig SW version: ' . $error);
+		}
+
+		if (empty ($attrs[4]['value']) and substr ($IOSversion, 0, 4) == '12.2') // switch OS type
+		{
+			$error = commitUpdateAttrValue ($object_id, 4, 21);
+			if ($error == TRUE)
+				$log[] = array ('code' => 'success', 'message' => 'Switch OS type set to Cisco IOS 12.2');
+			else
+				$log[] = array ('code' => 'error', 'message' => 'Failed settig Switch OS type: ' . $error);
+		}
+
 		$sysObjectID = snmpget ($endpoints[0], $community, 'sysObjectID.0');
 		// Transform OID
 		$sysObjectID = substr ($sysObjectID, strlen ('OID: SNMPv2-SMI::enterprises.9.1.'));
@@ -3182,6 +3216,14 @@ function renderSNMPPortFinder ($object_id = 0)
 			return;
 		}
 		$log[] = array ('code' => 'success', 'message' => 'HW is ' . $ciscomodel[$sysObjectID]);
+		if (empty ($attrs[2]['value']) and isset ($hwtype[$sysObjectID])) // switch HW type
+		{
+			$error = commitUpdateAttrValue ($object_id, 2, $hwtype[$sysObjectID]);
+			if ($error == TRUE)
+				$log[] = array ('code' => 'success', 'message' => 'HW type set to ' . $ciscomodel[$sysObjectID]);
+			else
+				$log[] = array ('code' => 'error', 'message' => 'Failed settig HW type: ' . $error);
+		}
 		// Now fetch ifType, ifDescr and ifPhysAddr and let model-specific code sort the data out.
 		$ifType = snmpwalkoid ($endpoints[0], $community, 'ifType');
 		$ifDescr = snmpwalkoid ($endpoints[0], $community, 'ifdescr');
