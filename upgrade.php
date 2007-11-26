@@ -231,7 +231,7 @@ print_r ($chaplist);
 			// Load dictionary and transform into two tree structures for
 			// stock and user record sets.
 			$dict = array();
-			$q3 = 'select chapter_no, dict_key, dict_value from Dictionary';
+			$q3 = 'select chapter_no, dict_key, dict_value from Dictionary order by chapter_no, dict_key';
 			$r3 = $dbxlink->query ($q3);
 
 			while ($row = $r3->fetch (PDO::FETCH_ASSOC))
@@ -310,46 +310,43 @@ print_r ($chaplist);
 			// All other chapters listed in $chaplist --- adjust AttributeValue
 			
 			$query[] = "delete from AttributeMap";
+			$query[] = "delete from AttributeValue";
 			foreach ($new_dict as $chapter_no => $words)
 			{
 echo "Processing chapter ${chapter_no}\n";
-print_r ($chaplist);
 				foreach ($words as $oldkey => $data)
 				{
 					$value = $data['value'];
 					$newkey = $data['newkey'];
+					// Even if the key doesn't change, go on to have
+					// AttributeMap regenerated completely.
 echo "oldkey == ${oldkey} newkey == ${newkey} value == ${value}\n";
 					if ($chapter_no == 1)
 					{
 						$q4 = "select id from RackObject where objtype_id = ${oldkey}";
-echo "${q4}\n";
 						$r4 = $dbxlink->query ($q4);
 						while ($row = $r4->fetch (PDO::FETCH_ASSOC))
 							$query[] = "update RackObject set objtype_id = ${newkey} where id = ${row['id']} limit 1";
 						$r4->closeCursor();
-unset ($r4);
+						unset ($r4);
 
 						$q5 = "select attr_id, chapter_no from AttributeMap where objtype_id = ${oldkey}";
 						$r5 = $dbxlink->query ($q5);
 						while ($row = $r5->fetch (PDO::FETCH_ASSOC))
 							$query[] = "insert into AttributeMap (objtype_id, attr_id, chapter_no) values (${newkey}, ${row['attr_id']}, ${row['chapter_no']})";
 						$r5->closeCursor();
-unset ($r5);
+						unset ($r5);
 					}
 					elseif ($chapter_no == 2)
 					{
 						$q46 = "select id from Port where type = ${oldkey}";
-echo "${q46}\n";
 						$r46 = $dbxlink->query ($q46);
 						if ($r46 == NULL)
 							echo 'ERROR';
 						while ($row = $r46->fetch (PDO::FETCH_ASSOC))
-{
-echo 'HIT!';
 							$query[] = "update Port set type = ${newkey} where id = ${row['id']} limit 1";
-}
 						$r46->closeCursor();
-unset ($r46);
+						unset ($r46);
 					}
 					elseif ($chapter_no == 3)
 					{
@@ -358,19 +355,32 @@ unset ($r46);
 						while ($row = $r7->fetch (PDO::FETCH_ASSOC))
 							$query[] = "update Rack set row_id = ${newkey} where id = ${row['id']} limit 1";
 						$r7->closeCursor();
-unset ($r7);
+						unset ($r7);
 					}
 					elseif ($chapter_no == 20)
 					{
-						$q8 = "select id from Rack where row_id = ${oldkey}";
-						$r8 = $dbxlink->query ($q4);
+						$q8 = "select object_id, localip, localport, remoteip, remoteport from PortForwarding where proto = ${oldkey}";
+						$r8 = $dbxlink->query ($q8);
 						while ($row = $r8->fetch (PDO::FETCH_ASSOC))
-							$query[] = "update Rack set row_id = ${newkey} where id = ${row['id']} limit 1";
+							$query[] = "update PortForwarding set proto = ${newkey} where " .
+							"object_id = ${row['object_id']} and localip = ${row['localip']} and " .
+							"localport = ${row['localport']} and remoteip = ${row['remoteip']} and " .
+							"remoteport = ${row['remoteport']} and proto = ${oldkey} limit 1";
 						$r8->closeCursor();
-unset ($r8);
+						unset ($r8);
 					}
 					elseif (in_array ($chapter_no, $chaplist))
 					{
+						$q81 = "select object_id, attr_id from " .
+						"AttributeValue natural join Attribute natural join AttributeMap " .
+						"inner join RackObject on RackObject.id = object_id and RackObject.objtype_id = AttributeMap.objtype_id " .
+						"where attr_type = 'dict' and chapter_no = ${chapter_no} and uint_value = ${oldkey}";
+						$r81 = $dbxlink->query ($q81);
+						while ($row = $r81->fetch (PDO::FETCH_ASSOC))
+							$query[] = "insert into AttributeValue (object_id, attr_id, uint_value) " .
+							"values (${row['object_id']}, ${row['attr_id']}, ${newkey})";
+						$r81->closeCursor();
+						unset ($r81);
 					}
 				}
 			}
@@ -385,6 +395,7 @@ unset ($r8);
 				$query[] = "insert into PortCompat (type1, type2) values (${new_type1}, ${new_type2})";
 			}
 			$r9->closeCursor();
+			unset ($r9);
 echo '</pre>';
 
 			// Give the configuration some finish
@@ -401,6 +412,7 @@ echo '</pre>';
 			$query[] = "update Config set description = 'Expect common name configured for the following object types' where varname = 'NAMEFUL_OBJTYPES'";
 			$query[] = "update Config set description = '&lt;SELECT&gt; lists height' where varname = 'MAXSELSIZE'";
 			$query[] = "update Config set description = '&quot;Fast&quot; form is this many records tall' where varname = 'MASSCOUNT'";
+			$query[] = "update Config set is_hidden = 'no', description = 'Ports per row in VLANs tab' where varname = 'PORTS_PER_ROW'";
 			$query[] = "INSERT INTO `Config` VALUES ('IPV4_ADDRS_PER_PAGE','256','uint','no','no','IPv4 addresses per page')";
 			$query[] = "INSERT INTO `Config` VALUES ('DEFAULT_RACK_HEIGHT','42','uint','yes','no','Default rack height')";
 
