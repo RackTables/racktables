@@ -140,8 +140,6 @@ CREATE TABLE `Config` (
 			// renumbering lots of records in Dictionary and adjusting records
 			// in related tables. After that we can safely swap the tables.
 			$query[] = 'create table Dictionary_0_14_7_new (chapter_no int(10) unsigned NOT NULL, dict_key int(10) unsigned NOT NULL auto_increment PRIMARY KEY, dict_value char(128) default NULL)';
-			// Convert the fields to unsigned on occasion.
-			$query[] = 'create table PortCompat_0_14_7_new (type1 int(10) unsigned NOT NULL, type2 int(10) unsigned NOT NULL)';
 
 echo '<pre>';
 			// Find all chapter numbers, which will require AttributeValue adjustment.
@@ -274,7 +272,7 @@ print_r ($chaplist);
 				$new_dict[$chapter_no] = array();
 				foreach ($words as $dict_key => $entry)
 				{
-					$query[] = "insert into Dictionary_0_14_7_new " .
+					$query[] = "insert into Dictionary_0_14_7_new (chapter_no, dict_key, dict_value) " .
 						"values (${chapter_no}, ${newkey}, '${entry['value']}')";
 					$new_dict[$chapter_no][$dict_key] = $entry;
 					$new_dict[$chapter_no][$dict_key]['newkey'] = $newkey;
@@ -310,7 +308,6 @@ print_r ($chaplist);
 			// All other chapters listed in $chaplist --- adjust AttributeValue
 			
 			$query[] = "delete from AttributeMap";
-			$query[] = "delete from AttributeValue";
 			foreach ($new_dict as $chapter_no => $words)
 			{
 echo "Processing chapter ${chapter_no}\n";
@@ -377,15 +374,17 @@ echo "oldkey == ${oldkey} newkey == ${newkey} value == ${value}\n";
 						"where attr_type = 'dict' and chapter_no = ${chapter_no} and uint_value = ${oldkey}";
 						$r81 = $dbxlink->query ($q81);
 						while ($row = $r81->fetch (PDO::FETCH_ASSOC))
-							$query[] = "insert into AttributeValue (object_id, attr_id, uint_value) " .
-							"values (${row['object_id']}, ${row['attr_id']}, ${newkey})";
+							$query[] = "update AttributeValue set uint_value = ${newkey} " .
+							"where object_id = ${row['object_id']} and attr_id = ${row['attr_id']}";
 						$r81->closeCursor();
 						unset ($r81);
 					}
 				}
 			}
 			// Now it's possible to schedule PortCompat regeneration.
-			$query[] = "delete from PortCompat";
+			// Convert the fields to unsigned on occasion.
+			$query[] = 'drop table PortCompat';
+			$query[] = 'create table PortCompat (type1 int(10) unsigned NOT NULL, type2 int(10) unsigned NOT NULL)';
 			$q9 = "select type1, type2 from PortCompat";
 			$r9 = $dbxlink->query ($q9);
 			while ($row = $r9->fetch (PDO::FETCH_ASSOC))
