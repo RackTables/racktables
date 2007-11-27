@@ -187,7 +187,7 @@ print_r ($chaplist);
 				80, 81, 82, 83, 84, 85, 86, 87, 88, 89,
 				90, 91, 92, 93, 94, 95, 96, 97, 98, 99,
 				100, 101, 102, 103, 104, 105, 106, 107, 108, 109,
-				110, 111, 112, 113
+				110, 111, 112, 113, 114, 115
 			);
 			$stock[13] = array
 			(
@@ -414,6 +414,9 @@ echo '</pre>';
 			$query[] = "update Config set is_hidden = 'no', description = 'Ports per row in VLANs tab' where varname = 'PORTS_PER_ROW'";
 			$query[] = "INSERT INTO `Config` VALUES ('IPV4_ADDRS_PER_PAGE','256','uint','no','no','IPv4 addresses per page')";
 			$query[] = "INSERT INTO `Config` VALUES ('DEFAULT_RACK_HEIGHT','42','uint','yes','no','Default rack height')";
+			// After Dictionary transformation we ought to list 337 stock records there.
+			$query[] = "INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (12,338,'Cisco Catalyst 4948-10GE')";
+			$query[] = "INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (12,339,'Cisco Catalyst 2950T-48-SI')";
 
 			// We are done.
 #			$query[] = "update Config set varvalue = '0.14.7' where varname = 'DB_VERSION'";
