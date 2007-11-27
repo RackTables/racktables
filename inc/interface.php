@@ -2795,9 +2795,6 @@ function printImageHREF ($tag, $title = '', $do_input = FALSE, $tabindex = 0)
 	$image['error']['path'] = 'pix/error.png';
 	$image['error']['width'] = 76;
 	$image['error']['height'] = 17;
-	$image['favicon']['path'] = 'pix/racktables.ico';
-	$image['favicon']['width'] = 16;
-	$image['favicon']['height'] = 16;
 	$image['logo']['path'] = 'pix/defaultlogo.png';
 	$image['logo']['width'] = 210;
 	$image['logo']['height'] = 40;
@@ -2868,8 +2865,8 @@ function printImageHREF ($tag, $title = '', $do_input = FALSE, $tabindex = 0)
 // This function returns URL for favourite icon.
 function getFaviconURL ()
 {
-	global $root, $image;
-	return $root . $image['favicon']['path'];
+	global $root;
+	return $root . 'pix/racktables.ico';
 }
 
 function renderReportSummary ()
