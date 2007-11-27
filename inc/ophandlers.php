@@ -946,6 +946,7 @@ function updateUI ()
 
 function resetUIConfig()
 {
+	global $root, $pageno, $tabno;
 	setConfigVar ('default_port_type','11');
 	setConfigVar ('MASSCOUNT','15');
 	setConfigVar ('MAXSELSIZE','30');
@@ -954,6 +955,7 @@ function resetUIConfig()
 	setConfigVar ('PORTS_PER_ROW','12');
 	setConfigVar ('IPV4_ADDRS_PER_PAGE','256');
 	setConfigVar ('DEFAULT_RACK_HEIGHT','42');
+	return "${root}?page=${pageno}&tab=default&message=" . urlencode ("Reset complete");
 }
 
 ?>
