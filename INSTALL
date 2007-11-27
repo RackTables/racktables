@@ -2,7 +2,7 @@ This file describes installation process for RackTables 0.14.7
 
 I. Dependencies.
 
-For database you must have a MySQL server installation version 4.0 or 5.0:
+For database you must have a MySQL server installation version 4.x or 5.x:
 Fedora6: # yum install mysql-server mysql
 ALTLinux Compact 3.0: apt-get install MySQL-server MySQL-client
 
