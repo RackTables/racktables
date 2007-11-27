@@ -944,4 +944,16 @@ function updateUI ()
 	return "${root}?page=${pageno}&tab=${tabno}&message=" . urlencode ("Update succeeded.");
 }
 
+function resetUIConfig()
+{
+	setConfigVar ('default_port_type','11');
+	setConfigVar ('MASSCOUNT','15');
+	setConfigVar ('MAXSELSIZE','30');
+	setConfigVar ('NAMEFUL_OBJTYPES','4,7,8');
+	setConfigVar ('ROW_SCALE','2');
+	setConfigVar ('PORTS_PER_ROW','12');
+	setConfigVar ('IPV4_ADDRS_PER_PAGE','256');
+	setConfigVar ('DEFAULT_RACK_HEIGHT','42');
+}
+
 ?>

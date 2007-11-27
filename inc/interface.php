@@ -3414,4 +3414,16 @@ this tab will not be seen any more. Good luck.<br>
 <?php
 }
 
+function renderUIResetForm()
+{
+	global $root, $pageno, $tabno
+	echo "<form method=post action='${root}process.php'>";
+	echo "<input type=hidden name=page value=${pageno}>";
+	echo "<input type=hidden name=tab value=${tabno}>";
+	echo "<input type=hidden name=op value=go>";
+	echo "This button will reset user interface configuration to its defaults (except organization name): ";
+	echo "<input type=submit value='proceed'>";
+	echo "</form>";
+}
+
 ?>
