@@ -83,7 +83,7 @@ do_fetch()
 	fi
 	nc $ENDPOINT 23 < $CMDS2 > "$OUT2"
 	nc $ENDPOINT 23 < $CMDS3 > "$OUT3"
-	cat "$OUT1" | fgrep ' active    ' | sed -E 's/^([[:digit:]]+)[[:space:]]+(.+)[[:space:]]+ active    (.*)/\1=\2/;s/[[:space:]]+$//' > $FILE1
+	cat "$OUT1" | fgrep ' active    ' | sed -E 's/^([[:digit:]]+)[[:space:]]+(.+)[[:space:]]+active    (.*)/\1=\2/;s/[[:space:]]+$//' > $FILE1
 	cat "$OUT2" | egrep '^(Et|Fa|Gi|Te)' | sed -E 's/^([A-Za-z/0-9]+).+(connected|notconnect|disabled) +/\1=\2,/;s/,(trunk|([0-9]+)) .*$/,\1/' > $FILE2
 	# FIXME
 	# Here we need to distinguish between different platforms and IOS version,
