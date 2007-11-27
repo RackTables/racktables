@@ -3401,6 +3401,11 @@ function renderSNMPPortFinder ($object_id = 0)
 			default:
 				showError ("Unexpected sysObjectID '${sysObjectID}' in renderSNMPPortFinder()");
 		}
+		$error = commitAddPort ($object_id, 'con0', 16, 'console', '');
+		if ($error == '')
+			$newports++;
+		else
+			$log[] = array ('code' => 'error', 'message' => 'Failed to add console port : ' . $error);
 		if ($newports > 0)
 			$log[] = array ('code' => 'success', 'message' => "Added ${newports} new ports");
 		printLog ($log);
