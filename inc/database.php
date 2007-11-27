@@ -1850,9 +1850,9 @@ function storeConfigVar ($varname = NULL, $varvalue = NULL)
 	}
 	$rc = $result->rowCount();
 	$result->closeCursor();
-	if ($rc == 1)
+	if ($rc == 0 or $rc == 1)
 		return TRUE;
-	showError ("Something went wrong in storeConfigVar() when updatating '${varname}'");
+	showError ("Something went wrong in storeConfigVar('${varname}', '${varvalue}')");
 	return FALSE;
 }
 
