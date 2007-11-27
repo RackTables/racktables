@@ -3041,7 +3041,8 @@ function renderVLANMembership ($object_id = 0)
 	echo "<input type=hidden name=page value='${pageno}'>";
 	echo "<input type=hidden name=tab value='${tabno}'>";
 	echo "<input type=hidden name=object_id value=${object_id}>";
-	echo "<input type=hidden name=portcount value=" . count ($portlist) . ">\n";
+	$portcount = count ($portlist);
+	echo "<input type=hidden name=portcount value=" . $portcount . ">\n";
 	$portno = 0;
 	$ports_per_row = getConfigVar ('PORTS_PER_ROW');
 	foreach ($portlist as $port)
@@ -3051,7 +3052,7 @@ function renderVLANMembership ($object_id = 0)
 		{
 			if ($portno > 0)
 				echo "</tr>\n";
-			echo "<tr><th>" . ($portno + 1) . "-" . ($portno + $ports_per_row) . "</th>";
+			echo "<tr><th>" . ($portno + 1) . "-" . ($portno + $ports_per_row > $portcount ? $portcount : $portno + $ports_per_row) . "</th>";
 		}
 		echo '<td class=port_';
 		if ($port['status'] == 'notconnect')
