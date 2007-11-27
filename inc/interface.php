@@ -3182,6 +3182,9 @@ function renderSNMPPortFinder ($object_id = 0)
 		$hwtype[59] = 60;
 		$ciscomodel[502] = '4506 (6-slot system)';
 		$hwtype[502] = 60;
+		$ciscomodel[626] = 'WS-C4948 (48 Ethernet 10/100/1000 ports and 4 10/100/1000 SFP uplinks)';
+		$hwtype[626] = 51;
+		$ciscomodel[659] = 'WS-C4948-10GE (48 Ethernet 10/100/1000 ports and 2 X2 uplinks)';
 		assertStringArg ('community');
 		$community = $_REQUEST['community'];
 		$objectInfo = getObjectInfo ($object_id);
@@ -3236,7 +3239,7 @@ function renderSNMPPortFinder ($object_id = 0)
 		{
 			$error = commitUpdateAttrValue ($object_id, 2, $hwtype[$sysObjectID]);
 			if ($error == TRUE)
-				$log[] = array ('code' => 'success', 'message' => 'HW type set to ' . $ciscomodel[$sysObjectID]);
+				$log[] = array ('code' => 'success', 'message' => 'HW type updated Ok');
 			else
 				$log[] = array ('code' => 'error', 'message' => 'Failed settig HW type: ' . $error);
 		}
@@ -3344,6 +3347,8 @@ function renderSNMPPortFinder ($object_id = 0)
 				break;
 			case '616': // WS-C3560G-48PS
 			case '617': // WS-C3560G-48TS
+			case '626': // WS-C4948
+			case '659': // WS-C4948-10GE
 				for ($i = 1; $i <= 48; $i++)
 				{
 					$label = "${i}X";
