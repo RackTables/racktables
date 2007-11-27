@@ -3141,7 +3141,9 @@ function renderSNMPPortFinder ($object_id = 0)
 // IDs: http://cisco.com/en/US/products/sw/cscowork/ps2064/products_device_support_table09186a0080803bb4.html
 // 2960: http://www.cisco.com/en/US/products/ps6406/prod_models_comparison.html
 // 2970: http://cisco.com/en/US/products/hw/switches/ps5206/products_qanda_item09186a00801b1750.shtml
+// 3500XL: http://cisco.com/en/US/products/hw/switches/ps637/products_eol_models.html
 // 3560: http://cisco.com/en/US/products/hw/switches/ps5528/products_data_sheet09186a00801f3d7f.html
+// 3750: http://cisco.com/en/US/products/hw/switches/ps5023/products_data_sheet09186a008016136f.html
 		$ciscomodel[283] = 'WS-C6509-E (9-slot system)';
 // FIXME: hwtype hardcoded value will become invalid after the Dictionary table transformation
 // in 0.14.7 version. Either the values will have to be adjusted as well or we have to switch
@@ -3185,7 +3187,7 @@ function renderSNMPPortFinder ($object_id = 0)
 		$hwtype[502] = 60;
 		$ciscomodel[626] = 'WS-C4948 (48 Ethernet 10/100/1000 ports and 4 10/100/1000 SFP uplinks)';
 		$hwtype[626] = 51;
-		$ciscomodel[659] = 'WS-C4948-10GE (48 Ethernet 10/100/1000 ports and 2 X2 uplinks)';
+		$ciscomodel[659] = 'WS-C4948-10GE (48 Ethernet 10/100/1000 ports and 2 10Gb X2 uplinks)';
 		assertStringArg ('community');
 		$community = $_REQUEST['community'];
 		$objectInfo = getObjectInfo ($object_id);
