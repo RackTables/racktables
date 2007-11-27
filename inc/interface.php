@@ -3416,7 +3416,7 @@ this tab will not be seen any more. Good luck.<br>
 
 function renderUIResetForm()
 {
-	global $root, $pageno, $tabno
+	global $root, $pageno, $tabno;
 	echo "<form method=post action='${root}process.php'>";
 	echo "<input type=hidden name=page value=${pageno}>";
 	echo "<input type=hidden name=tab value=${tabno}>";
