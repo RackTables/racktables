@@ -13,7 +13,6 @@
 - bug: can't view/click on remote side in port list, if remote side is nameless
 - bug: cannot update port 'e4/4', if port 'e 4/4' exists
 - use user ID instead of username where possible
-+ keep all configuration variables in a single array
 - check words usage before deletion from a chapter
 - bug: search function is called 4 times per 1 search (see functions.php)
 - bug: non-existent dictionary words result in empty selects. workaround: use left join
@@ -24,5 +23,4 @@
 - colo customer page
 - racks custom sort order
 - better tabindex in editRanges() HTML code
-+ addRange: auto-replace '/' with <tab>
 - add htaccess to gateways dir
