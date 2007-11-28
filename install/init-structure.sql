@@ -82,9 +82,10 @@ CREATE TABLE `Dictionary` (
   `chapter_no` int(10) unsigned NOT NULL,
   `dict_key` int(10) unsigned NOT NULL auto_increment,
   `dict_value` char(128) default NULL,
-  PRIMARY KEY  (`chapter_no`,`dict_key`),
-  UNIQUE KEY `chapter_no` (`chapter_no`,`dict_value`)
-) ENGINE=MyISAM AUTO_INCREMENT=10000;
+  PRIMARY KEY  (`dict_key`),
+  UNIQUE KEY `chap_to_key` (`chapter_no`,`dict_key`),
+  UNIQUE KEY `chap_to_val` (`chapter_no`,`dict_value`)
+) ENGINE=MyISAM AUTO_INCREMENT=50000;
 
 --
 -- Table structure for table `IPAddress`
@@ -187,8 +188,8 @@ CREATE TABLE `Port` (
 
 DROP TABLE IF EXISTS `PortCompat`;
 CREATE TABLE `PortCompat` (
-  `type1` int(11) NOT NULL,
-  `type2` int(11) NOT NULL
+  `type1` int(10) unsigned NOT NULL,
+  `type2` int(10) unsigned NOT NULL
 ) ENGINE=MyISAM;
 
 --
