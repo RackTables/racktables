@@ -279,7 +279,7 @@ print_r ($chaplist);
 					$newkey++;
 				}
 			}
-			$newkey = 10000;
+			$newkey = 50000;
 			foreach ($dict['user'] as $chapter_no => $words)
 			{
 				// Some chapters may appear on the user dataset only.
@@ -496,6 +496,26 @@ echo '</pre>';
 			$new_words[] = array (12 => 'Foundry NetIron M2404F');
 			$new_words[] = array (12 => 'Foundry NetIron M2404C');
 			$new_words[] = array (17 => 'Foundry BigIron RX-32');
+			$new_words[] = array (13 => 'Debian 2.0 (hamm)');
+			$new_words[] = array (13 => 'Debian 2.1 (slink)');
+			$new_words[] = array (13 => 'Debian 2.2 (potato)');
+			$new_words[] = array (13 => 'Debian 4.0 (etch)');
+			$new_words[] = array (13 => 'ALTLinux Server 4.0');
+			$new_words[] = array (13 => 'ALTLinux Master 4.0');
+			$new_words[] = array (13 => 'ALTLinux Sisyphus');
+			$new_words[] = array (13 => 'openSUSE 10.0');
+			$new_words[] = array (13 => 'openSUSE 10.1');
+			$new_words[] = array (13 => 'openSUSE 10.2');
+			$new_words[] = array (13 => 'openSUSE 10.3');
+			$new_words[] = array (13 => 'Ubuntu 4.10');
+			$new_words[] = array (13 => 'Ubuntu 5.04');
+			$new_words[] = array (13 => 'Ubuntu 5.10');
+			$new_words[] = array (13 => 'Ubuntu 6.06 LTS');
+			$new_words[] = array (13 => 'Ubuntu 6.10');
+			$new_words[] = array (13 => 'Ubuntu 7.04');
+			$new_words[] = array (13 => 'Ubuntu 7.10');
+			$new_words[] = array (13 => 'Ubuntu 8.04 LTS');
+			$new_words[] = array (13 => 'RHEL5');
 
 
 
