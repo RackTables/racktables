@@ -2873,7 +2873,7 @@ function renderReportSummary ()
 {
 	echo "<table width='100%'>\n";
 	echo "<tr><td class=pcleft>\n";
-	startPortlet ("Dictionary stats");
+	startPortlet ("Dictionary/objects stats");
 	echo "<table>\n";
 	foreach (getDictStats() as $header => $data)
 	{

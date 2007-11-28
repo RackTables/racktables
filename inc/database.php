@@ -1356,14 +1356,14 @@ function getDictStats ()
 	$query =
 		"select chapter_no, chapter_name, count(dict_key) as wc from " .
 		"Chapter natural left join Dictionary group by chapter_no";
-	$result = $dbxlink->query ($query);
-	if ($result == NULL)
+	$result1 = $dbxlink->query ($query);
+	if ($result1 == NULL)
 	{
-		showError ('SQL query failed in getDictStats()');
+		showError ('SQL query #1 failed in getDictStats()');
 		return NULL;
 	}
 	$tc = $tw = $uc = $uw = 0;
-	while ($row = $result->fetch (PDO::FETCH_ASSOC))
+	while ($row = $result1->fetch (PDO::FETCH_ASSOC))
 	{
 		$tc++;
 		$tw += $row['wc'];;
@@ -1372,12 +1372,34 @@ function getDictStats ()
 		$uc++;
 		$uw += $row['wc'];;
 	}
-	$result->closeCursor();
+	$result1->closeCursor();
+	$query = "select count(attr_id) as attrc from RackObject as ro left join " .
+		"AttributeValue as av on ro.id = av.object_id group by ro.id";
+	$result2 = $dbxlink->query ($query);
+	if ($result2 == NULL)
+	{
+		showError ('SQL query #2 failed in getDictStats()');
+		return NULL;
+	}
+	$to = $ta = $so = 0;
+	while ($row = $result2->fetch (PDO::FETCH_ASSOC))
+	{
+		$to++;
+		if ($row['attrc'] != 0)
+		{
+			$so++;
+			$ta += $row['attrc'];
+		}
+	}
+	$result2->closeCursor();
 	$ret = array();
 	$ret['Total chapters in dictionary'] = $tc;
 	$ret['Total words in dictionary'] = $tw;
 	$ret['User chapters'] = $uc;
 	$ret['Words in user chapters'] = $uw;
+	$ret['Total objects'] = $to;
+	$ret['Objects with stickers'] = $so;
+	$ret['Total stickers attached']  = $ta;
 	return $ret;
 }
 
