@@ -525,6 +525,9 @@ echo '</pre>';
 				foreach ($tmp as $chapter_no => $dict_value)
 					$query[] = 'INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) ' .
 						"VALUES (${chapter_no}, ${dict_key}, '${dict_value}')";
+			// Resetting to defaults is worse, than remapping, but better than
+			// leaving messed values.
+			$query[] = "update Config set varvalue = '24' where varname = 'default_port_type' limit 1";
 			// We are done.
 #			$query[] = "update Config set varvalue = '0.14.7' where varname = 'DB_VERSION'";
 			break; // --------------------------------------------
