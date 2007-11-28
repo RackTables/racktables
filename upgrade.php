@@ -516,6 +516,8 @@ echo '</pre>';
 			$new_words[] = array (13 => 'Ubuntu 7.10');
 			$new_words[] = array (13 => 'Ubuntu 8.04 LTS');
 			$new_words[] = array (13 => 'RHEL5');
+			$new_words[] = array (18 => 'Dell PowerVault 210S');
+			$new_words[] = array (18 => 'Dell PowerVault 221S');
 
 
 
