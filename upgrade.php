@@ -414,10 +414,90 @@ echo '</pre>';
 			$query[] = "update Config set is_hidden = 'no', description = 'Ports per row in VLANs tab' where varname = 'PORTS_PER_ROW'";
 			$query[] = "INSERT INTO `Config` VALUES ('IPV4_ADDRS_PER_PAGE','256','uint','no','no','IPv4 addresses per page')";
 			$query[] = "INSERT INTO `Config` VALUES ('DEFAULT_RACK_HEIGHT','42','uint','yes','no','Default rack height')";
-			// After Dictionary transformation we ought to list 337 stock records there.
-			$query[] = "INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (12,338,'Cisco Catalyst 4948-10GE')";
-			$query[] = "INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (12,339,'Cisco Catalyst 2950T-48-SI')";
+			// After Dictionary transformation we ought to list 337 stock records in DB. Add more.
+			$new_words = array();
+			$new_words[338] = array (12 => 'Dell PowerConnect 2216');
+			$new_words[] = array (12 => 'Dell PowerConnect 2224');
+			$new_words[] = array (12 => 'Dell PowerConnect 2324');
+			$new_words[] = array (12 => 'Dell PowerConnect 2708');
+			$new_words[] = array (12 => 'Dell PowerConnect 2716');
+			$new_words[] = array (12 => 'Dell PowerConnect 2724');
+			$new_words[] = array (12 => 'Dell PowerConnect 2748');
+			$new_words[] = array (12 => 'Dell PowerConnect 3424');
+			$new_words[] = array (12 => 'Dell PowerConnect 3424P');
+			$new_words[] = array (12 => 'Dell PowerConnect 3448');
+			$new_words[] = array (12 => 'Dell PowerConnect 3448P');
+			$new_words[] = array (12 => 'Dell PowerConnect 5324');
+			$new_words[] = array (12 => 'Dell PowerConnect 6224');
+			$new_words[] = array (12 => 'Dell PowerConnect 6224P');
+			$new_words[] = array (12 => 'Dell PowerConnect 6224F');
+			$new_words[] = array (12 => 'Dell PowerConnect 6248');
+			$new_words[] = array (12 => 'Dell PowerConnect 6248P');
+			$new_words[] = array (11 => 'Dell PowerEdge 6850');
+			$new_words[] = array (11 => 'Dell PowerEdge 6950');
+			$new_words[] = array (11 => 'Dell PowerEdge R900');
+			$new_words[] = array (11 => 'Dell PowerEdge 4400');
+			$new_words[] = array (11 => 'Dell PowerEdge 2650');
+			$new_words[] = array (11 => 'Dell PowerEdge 2550');
+			$new_words[] = array (11 => 'Dell PowerEdge 750');
+			$new_words[] = array (11 => 'Dell PowerEdge 2450');
+			$new_words[] = array (11 => 'Dell PowerEdge 850');
+			$new_words[] = array (11 => 'Dell PowerEdge 1850');
+			$new_words[] = array (11 => 'Dell PowerEdge 860');
+			$new_words[] = array (11 => 'Dell PowerEdge 2900');
+			$new_words[] = array (11 => 'Dell PowerEdge 2970');
+			$new_words[] = array (11 => 'Dell PowerEdge SC1435');
+			$new_words[] = array (12 => 'Cisco Catalyst 6509');
+			$new_words[] = array (12 => 'Cisco ME 6524GS-8S');
+			$new_words[] = array (12 => 'Cisco ME 6524GT-8S');
+			$new_words[] = array (12 => 'Cisco Catalyst 4503-E');
+			$new_words[] = array (12 => 'Cisco Catalyst 4506-E');
+			$new_words[] = array (12 => 'Cisco Catalyst 4507R-E');
+			$new_words[] = array (12 => 'Cisco Catalyst 4510R-E');
+			$new_words[] = array (12 => 'Cisco Catalyst 3750-24TE-M');
+			$new_words[] = array (12 => 'Cisco Catalyst 4948-10GE');
+			$new_words[] = array (12 => 'Cisco ME 4924-10GE');
+			$new_words[] = array (12 => 'Cisco Catalyst 2960-24');
+			$new_words[] = array (12 => 'Cisco Catalyst 2950-24');
+			$new_words[] = array (12 => 'Cisco Catalyst 2950-12');
+			$new_words[] = array (12 => 'Cisco Catalyst 2950C-24');
+			$new_words[] = array (12 => 'Cisco Catalyst 2950G-24-DC');
+			$new_words[] = array (12 => 'Cisco Catalyst 2950SX-48');
+			$new_words[] = array (12 => 'Cisco Catalyst 2950SX-24');
+			$new_words[] = array (12 => 'Cisco Catalyst 2950T-24');
+			$new_words[] = array (12 => 'Cisco Catalyst 2950T-48');
+			$new_words[] = array (12 => 'Cisco Catalyst 2950G-12');
+			$new_words[] = array (12 => 'Cisco Catalyst 2950G-24');
+			$new_words[] = array (12 => 'Cisco Catalyst 2950G-48');
+			$new_words[] = array (12 => 'Cisco Catalyst 2940-8-TT');
+			$new_words[] = array (12 => 'Cisco Catalyst 2940-8-TF');
+			$new_words[] = array (12 => 'Cisco Catalyst 3508G XL');
+			$new_words[] = array (12 => 'Cisco Catalyst 3512 XL');
+			$new_words[] = array (12 => 'Cisco Catalyst 3524 XL');
+			$new_words[] = array (12 => 'Cisco Catalyst 3524 PWR XL');
+			$new_words[] = array (12 => 'Cisco Catalyst 3548 XL');
+			$new_words[] = array (12 => 'Cisco ME 2400-24TS-A');
+			$new_words[] = array (12 => 'Cisco ME 2400-24TS-D');
+			$new_words[] = array (12 => 'Cisco Catalyst 3550-12T');
+			$new_words[] = array (12 => 'Cisco Catalyst 3550-12G');
+			$new_words[] = array (12 => 'Cisco Catalyst 3550-24');
+			$new_words[] = array (12 => 'Cisco Catalyst 3550-24 FX');
+			$new_words[] = array (12 => 'Cisco Catalyst 3550-24 DC');
+			$new_words[] = array (12 => 'Cisco Catalyst 3550-24 PWR');
+			$new_words[] = array (12 => 'Cisco Catalyst 3550-48');
+			$new_words[] = array (12 => 'Cisco ME 3400G-12CS-A');
+			$new_words[] = array (12 => 'Cisco ME 3400G-12CS-D');
+			$new_words[] = array (12 => 'Cisco ME 3400G-2CS-A');
+			$new_words[] = array (12 => 'Cisco ME 3400-24TS-A');
+			$new_words[] = array (12 => 'Cisco ME 3400-24TS-D');
+			$new_words[] = array (12 => 'Cisco ME 3400-24FS-A');
 
+
+
+			foreach ($new_words as $dict_key => $tmp)
+				foreach ($tmp as $chapter_no => $dict_value)
+					$query[] = 'INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) ' .
+						"VALUES (${chapter_no}, ${dict_key}, '${dict_value}')";
 			// We are done.
 #			$query[] = "update Config set varvalue = '0.14.7' where varname = 'DB_VERSION'";
 			break; // --------------------------------------------
