@@ -489,6 +489,13 @@ echo '</pre>';
 			$new_words[] = array (12 => 'Cisco ME 3400-24TS-A');
 			$new_words[] = array (12 => 'Cisco ME 3400-24TS-D');
 			$new_words[] = array (12 => 'Cisco ME 3400-24FS-A');
+			$new_words[] = array (12 => 'Foundry FastIron GS 624XGP');
+			$new_words[] = array (12 => 'Foundry FastIron GS 624XGP-POE');
+			$new_words[] = array (12 => 'Foundry FastIron LS 624');
+			$new_words[] = array (12 => 'Foundry FastIron LS 648');
+			$new_words[] = array (12 => 'Foundry NetIron M2404F');
+			$new_words[] = array (12 => 'Foundry NetIron M2404C');
+			$new_words[] = array (17 => 'Foundry BigIron RX-32');
 
 
 
