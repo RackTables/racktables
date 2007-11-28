@@ -3,7 +3,7 @@
  *
  * This file used to hold a collection of constants, variables and arrays,
  * which drived the way misc RackTables functions performed. Now most of
- * then have gone into the database, and there is perhaps a user interface
+ * them have gone into the database, and there is a user interface
  * for changing them. This file now provides a couple of functions to
  * access the new config storage.
  *
