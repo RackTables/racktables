@@ -139,7 +139,17 @@ CREATE TABLE `Config` (
 			// into 1-field one to employ AUTO_INCREMENT properly. This means
 			// renumbering lots of records in Dictionary and adjusting records
 			// in related tables. After that we can safely swap the tables.
-			$query[] = 'create table Dictionary_0_14_7_new (chapter_no int(10) unsigned NOT NULL, dict_key int(10) unsigned NOT NULL auto_increment PRIMARY KEY, dict_value char(128) default NULL)';
+#			$query[] = 'create table Dictionary_0_14_7_new (chapter_no int(10) unsigned NOT NULL, dict_key int(10) unsigned NOT NULL auto_increment PRIMARY KEY, dict_value char(128) default NULL)';
+			$query[] = "
+CREATE TABLE `Dictionary_0_14_7_new` (
+  `chapter_no` int(10) unsigned NOT NULL,
+  `dict_key` int(10) unsigned NOT NULL auto_increment,
+  `dict_value` char(128) default NULL,
+  PRIMARY KEY  (`dict_key`),
+  UNIQUE KEY `chap_to_key` (`chapter_no`,`dict_key`),
+  UNIQUE KEY `chap_to_val` (`chapter_no`,`dict_value`)
+) TYPE=MyISAM AUTO_INCREMENT=50000
+";
 
 echo '<pre>';
 			// Find all chapter numbers, which will require AttributeValue adjustment.
@@ -317,7 +327,7 @@ echo "Processing chapter ${chapter_no}\n";
 					$newkey = $data['newkey'];
 					// Even if the key doesn't change, go on to have
 					// AttributeMap regenerated completely.
-echo "oldkey == ${oldkey} newkey == ${newkey} value == ${value}\n";
+#echo "oldkey == ${oldkey} newkey == ${newkey} value == ${value}\n";
 					if ($chapter_no == 1)
 					{
 						$q4 = "select id from RackObject where objtype_id = ${oldkey}";
@@ -501,7 +511,6 @@ echo '</pre>';
 			$new_words[] = array (13 => 'Debian 2.2 (potato)');
 			$new_words[] = array (13 => 'Debian 4.0 (etch)');
 			$new_words[] = array (13 => 'ALTLinux Server 4.0');
-			$new_words[] = array (13 => 'ALTLinux Master 4.0');
 			$new_words[] = array (13 => 'ALTLinux Sisyphus');
 			$new_words[] = array (13 => 'openSUSE 10.0');
 			$new_words[] = array (13 => 'openSUSE 10.1');
@@ -538,8 +547,7 @@ echo '</pre>';
 	}
 	$failures = array();
 	$ndots = 0;
-	echo "<pre>Executing database upgrade batch '${batchid}: ";
-print_r ($query);
+	echo "<pre>Executing database upgrade batch '${batchid}:\n";
 	foreach ($query as $q)
 	{
 		$result = $dbxlink->query ($q);
