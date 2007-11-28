@@ -41,7 +41,7 @@ function renderIndex ()
 							<?php printImageHREF ('config'); ?></a></h1>
 					</td>
 					<td>
-						<h1><a href='<?php echo $root; ?>?page=reports'>[ Reports ]<br>
+						<h1><a href='<?php echo $root; ?>?page=reports'>Reports<br>
 						<?php printImageHREF ('reports'); ?></a></h1>
 					</td>
 					<td>
@@ -2871,12 +2871,27 @@ function getFaviconURL ()
 
 function renderReportSummary ()
 {
+	echo "<table width='100%'>\n";
+	echo "<tr><td class=pcleft>\n";
+	startPortlet ("Dictionary stats");
+	echo "<table>\n";
+	foreach (getDictStats() as $header => $data)
+	{
+		echo "<tr><th>${header}:</th><td>${data}</td></tr>\n";
+	}
+	echo "</table>\n";
+	finishPortlet();
+
+	echo "</td><td class=pcright>\n";
+
 	startPortlet ("Here be dragons");
 	dragon();
 	dragon();
 	dragon();
 	echo 'ASCII art &copy; Daniel C. Au';
 	finishPortlet();
+	echo "</td></tr>\n";
+	echo "</table>\n";
 }
 
 function dragon ()

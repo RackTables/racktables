@@ -179,7 +179,7 @@ function static_title ($pageno)
 			$ret['name'] = 'User interface';
 			break;
 		case 'reports':
-			$ret['name'] = '[ Reports ]';
+			$ret['name'] = 'Reports';
 			break;
 		case 'help':
 			$ret['name'] = 'Help';

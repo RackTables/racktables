@@ -11,6 +11,7 @@
 	new feature: more cisco models support in gateways/switchvlans
 	new feature: initial implementation of SNMP port data importer
 	new feature: reset UI configuration to defaults
+	new feature: initial reports code
 0.14.6 2007-10-15
 	new feature: browser-side validation for a new IPv4 network
 	  (contributed by Aaron Dummer)

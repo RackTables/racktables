@@ -1349,6 +1349,38 @@ function getDict ()
 	return $dict;
 }
 
+function getDictStats ()
+{
+	$stock_chapters = array (1, 2, 3, 11, 12, 13, 14, 16, 17, 18, 19, 20);
+	global $dbxlink;
+	$query =
+		"select chapter_no, chapter_name, count(dict_key) as wc from " .
+		"Chapter natural left join Dictionary group by chapter_no";
+	$result = $dbxlink->query ($query);
+	if ($result == NULL)
+	{
+		showError ('SQL query failed in getDictStats()');
+		return NULL;
+	}
+	$tc = $tw = $uc = $uw = 0;
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
+	{
+		$tc++;
+		$tw += $row['wc'];;
+		if (in_array ($row['chapter_no'], $stock_chapters))
+			continue;
+		$uc++;
+		$uw += $row['wc'];;
+	}
+	$result->closeCursor();
+	$ret = array();
+	$ret['Total chapters in dictionary'] = $tc;
+	$ret['Total words in dictionary'] = $tw;
+	$ret['User chapters'] = $uc;
+	$ret['Words in user chapters'] = $uw;
+	return $ret;
+}
+
 function commitUpdateDictionary ($chapter_no = 0, $dict_key = 0, $dict_value = '')
 {
 	if ($chapter_no <= 0 or $dict_key <= 0 or empty ($dict_value))
