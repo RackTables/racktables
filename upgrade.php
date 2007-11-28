@@ -469,8 +469,6 @@ echo '</pre>';
 			$new_words[] = array (12 => 'Cisco Catalyst 2950G-12');
 			$new_words[] = array (12 => 'Cisco Catalyst 2950G-24');
 			$new_words[] = array (12 => 'Cisco Catalyst 2950G-48');
-			$new_words[] = array (12 => 'Cisco Catalyst 2940-8-TT');
-			$new_words[] = array (12 => 'Cisco Catalyst 2940-8-TF');
 			$new_words[] = array (12 => 'Cisco Catalyst 3508G XL');
 			$new_words[] = array (12 => 'Cisco Catalyst 3512 XL');
 			$new_words[] = array (12 => 'Cisco Catalyst 3524 XL');
