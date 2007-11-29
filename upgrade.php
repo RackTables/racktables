@@ -529,6 +529,8 @@ echo '</pre>';
 			$new_words[] = array (18 => 'Dell PowerVault 221S');
 			$new_words[] = array (2 => 'dry contact');
 			$new_words[] = array (2 => 'unknown');
+			// Two above records ought to take keys 439 and 440.
+			$query[] = "INSERT INTO `PortCompat` (`type1`, `type2`) VALUES (439,439)";
 
 
 

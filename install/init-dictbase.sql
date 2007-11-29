@@ -150,6 +150,7 @@ INSERT INTO `PortCompat` (`type1`, `type2`) VALUES (38,38);
 INSERT INTO `PortCompat` (`type1`, `type2`) VALUES (39,39);
 INSERT INTO `PortCompat` (`type1`, `type2`) VALUES (40,40);
 INSERT INTO `PortCompat` (`type1`, `type2`) VALUES (41,41);
+INSERT INTO `PortCompat` (`type1`, `type2`) VALUES (439,439);
 UNLOCK TABLES;
 
 LOCK TABLES `Dictionary` WRITE;
