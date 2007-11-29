@@ -196,6 +196,8 @@ INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (2,40,'
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (2,41,'10GBase-Kx');
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (20,336,'TCP');
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (20,337,'UDP');
+INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (2,439,'dry contact');
+INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (2,440,'unknown');
 UNLOCK TABLES;
 
 LOCK TABLES `Config` WRITE;

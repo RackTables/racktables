@@ -527,6 +527,8 @@ echo '</pre>';
 			$new_words[] = array (13 => 'RHEL5');
 			$new_words[] = array (18 => 'Dell PowerVault 210S');
 			$new_words[] = array (18 => 'Dell PowerVault 221S');
+			$new_words[] = array (2 => 'dry contact');
+			$new_words[] = array (2 => 'unknown');
 
 
 
