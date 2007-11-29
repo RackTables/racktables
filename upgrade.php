@@ -139,7 +139,6 @@ CREATE TABLE `Config` (
 			// into 1-field one to employ AUTO_INCREMENT properly. This means
 			// renumbering lots of records in Dictionary and adjusting records
 			// in related tables. After that we can safely swap the tables.
-#			$query[] = 'create table Dictionary_0_14_7_new (chapter_no int(10) unsigned NOT NULL, dict_key int(10) unsigned NOT NULL auto_increment PRIMARY KEY, dict_value char(128) default NULL)';
 			$query[] = "
 CREATE TABLE `Dictionary_0_14_7_new` (
   `chapter_no` int(10) unsigned NOT NULL,
@@ -566,6 +565,7 @@ echo '</pre>';
 		if (++$ndots == 50)
 		{
 			echo "\n";
+			flush();
 			$ndots = 0;
 		}
 	}
