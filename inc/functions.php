@@ -827,6 +827,11 @@ function sortByName ($a, $b)
 	return sortTokenize($a['name'], $b['name']);
 }
 
+function sortRacks ($a, $b)
+{
+	return sortTokenize($a['row_name'] . ': ' . $a['name'], $b['row_name'] . ': ' . $b['name']);
+}
+
 function eq ($a, $b)
 {
 	return $a==$b;
