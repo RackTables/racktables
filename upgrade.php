@@ -530,6 +530,10 @@ echo '</pre>';
 			$new_words[] = array (2 => 'unknown');
 			// Two above records ought to take keys 439 and 440.
 			$query[] = "INSERT INTO `PortCompat` (`type1`, `type2`) VALUES (439,439)";
+			$new_words[] = array (13 => 'CentOS-2');
+			$new_words[] = array (13 => 'CentOS-3');
+			$new_words[] = array (13 => 'CentOS-4');
+			$new_words[] = array (13 => 'CentOS-5');
 
 
 

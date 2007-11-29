@@ -394,4 +394,8 @@ INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (13,435
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (13,436,'RHEL5');
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (18,437,'Dell PowerVault 210S');
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (18,438,'Dell PowerVault 221S');
+INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (13,441,'CentOS-2');
+INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (13,442,'CentOS-3');
+INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (13,443,'CentOS-4');
+INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (13,444,'CentOS-5');
 UNLOCK TABLES;
