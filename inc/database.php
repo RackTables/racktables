@@ -1354,8 +1354,8 @@ function getDictStats ()
 	$stock_chapters = array (1, 2, 3, 11, 12, 13, 14, 16, 17, 18, 19, 20);
 	global $dbxlink;
 	$query =
-		"select chapter_no, chapter_name, count(dict_key) as wc from " .
-		"Chapter natural left join Dictionary group by chapter_no";
+		"select Chapter.chapter_no, chapter_name, count(dict_key) as wc from " .
+		"Chapter natural left join Dictionary group by Chapter.chapter_no";
 	$result1 = $dbxlink->query ($query);
 	if ($result1 == NULL)
 	{
