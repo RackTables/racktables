@@ -870,7 +870,7 @@ function renderRackMultiSelect ($sname, $racks, $selected)
 		echo "<option value=${rack['id']}";
 		if (!(array_search ($rack['id'], $selected) === FALSE))
 			echo ' selected';
-		echo">${rack['row_name']}:${rack['name']}</option>\n";
+		echo">${rack['name']}</option>\n";
 	}
 	echo "</select>\n";
 }

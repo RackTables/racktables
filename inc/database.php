@@ -82,7 +82,7 @@ function getRacksForRow ($row_id = 0)
 {
 	global $dbxlink;
 	$query =
-		"select Rack.id, Rack.name, height, Rack.comment, row_id, dict_value as row_name " .
+		"select Rack.id, concat(dict_value, ': ', Rack.name) as name, height, Rack.comment, row_id, dict_value as row_name " .
 		"from Rack left join Dictionary on row_id = dict_key natural join Chapter " .
 		"where chapter_name = 'RackRow' and Rack.deleted = 'no' " .
 		(($row_id == 0) ? "" : "and row_id = ${row_id} ") .
