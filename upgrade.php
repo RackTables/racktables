@@ -375,7 +375,7 @@ echo '<pre>';
 					}
 					elseif (in_array ($chapter_no, $chaplist))
 					{
-						$q81 = "select object_id, attr_id from " .
+						$q81 = "select object_id, AttributeValue.attr_id from " .
 						"AttributeValue natural join Attribute natural join AttributeMap " .
 						"inner join RackObject on RackObject.id = object_id and RackObject.objtype_id = AttributeMap.objtype_id " .
 						"where attr_type = 'dict' and chapter_no = ${chapter_no} and uint_value = ${oldkey}";
