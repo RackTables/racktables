@@ -25,9 +25,12 @@ function trigger_switchvlans ()
 	$values = getAttrValues ($object_id);
 	foreach ($values as $record)
 	{
-		if ($record['id'] != 4)
+		if ($record['id'] != 4) // SW type
 			continue;
-		if (in_array ($record['key'], array (1, 20, 21)))
+		// Cisco IOS 12.0
+		// Cisco IOS 12.1
+		// Cisco IOS 12.2
+		if (in_array ($record['key'], array (244, 251, 252)))
 			return TRUE;
 		else
 			return FALSE;
