@@ -8,7 +8,7 @@
 // Returning an empty array means that no upgrade is necessary.
 function getDBUpgradePath ($v1, $v2)
 {
-	$versionhistory = array ('0.14.4', '0.14.5', '0.14.6');
+	$versionhistory = array ('0.14.4', '0.14.5', '0.14.6', '0.14.7');
 	if (!in_array ($v1, $versionhistory) || !in_array ($v2, $versionhistory))
 	{
 		showError ("An upgrade path has been requested for versions '${v1}' and '${v2}', " .
@@ -646,7 +646,6 @@ echo 'Code version == ' . CODE_VERSION;
 echo '<br>Database version == ' . $dbver;
 if ($dbver == CODE_VERSION)
 {
-	executeUpgradeBatch ('0.14.7');
 	die ("<p align=justify>Your database seems to be up-to-date. " .
 		"Now the best thing to do would be to follow to the <a href='${root}'>main page</a> " .
 		"and explore your data. Have a nice day.</p>");
