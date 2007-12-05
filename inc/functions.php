@@ -999,7 +999,7 @@ function getObjectForwards($object_id)
 	$count=0;
 	while ($row = $result3->fetch (PDO::FETCH_ASSOC))
 	{
-		foreach (array ('proto', 'proto_bin', 'localport', 'localip', 'remoteport', 'remoteip', 'object_id', 'object_name', 'description', 'local_addr_name') as $cname)
+		foreach (array ('proto', 'proto_bin', 'localport', 'localip', 'remoteport', 'remoteip', 'object_id', 'object_name', 'description') as $cname)
 			$ret['in'][$count][$cname] = $row[$cname];
 		$count++;
 	}
