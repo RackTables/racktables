@@ -3160,46 +3160,47 @@ function renderSNMPPortFinder ($object_id = 0)
 // FIXME: hwtype hardcoded value will become invalid after the Dictionary table transformation
 // in 0.14.7 version. Either the values will have to be adjusted as well or we have to switch
 // to value lookup (not reliable).
-		$hwtype[283] = 52;
+		$hwtype[283] = 148;
 #		$ciscomodel[694] = 'WS-C2960-24TC-L (24 Ethernet 10/100 ports and 2 dual-purpose uplinks)';
 #		$ciscomodel[695] = 'WS-C2960-48TC-L (48 Ethernet 10/100 ports and 2 dual-purpose uplinks)';
 		$ciscomodel[696] = 'WS-C2960G-24TC-L (20 Ethernet 10/100/1000 ports and 4 dual-purpose uplinks)';
-		$hwtype[696] = 71;
+		$hwtype[696] = 167;
 		$ciscomodel[697] = 'WS-C2960G-48TC-L (44 Ethernet 10/100/1000 ports and 4 dual-purpose uplinks)';
-		$hwtype[697] = 70;
+		$hwtype[697] = 166;
 #		$ciscomodel[716] = 'WS-C2960-24TT-L (24 Ethernet 10/100 ports and 2 10/100/1000 uplinks)';
 #		$ciscomodel[717] = 'WS-C2960-48TT-L (48 Ethernet 10/100 ports and 2 10/100/1000 uplinks)';
 		$ciscomodel[527] = 'WS-C2970G-24T (24 Ethernet 10/100/1000 ports)';
-		$hwtype[527] = 114;
+		$hwtype[527] = 210;
 		$ciscomodel[561] = 'WS-C2970G-24TS (24 Ethernet 10/100/1000 ports and 4 10/100/1000 SFP uplinks)';
 		$hwtype[561] = 115;
 #		$ciscomodel[633] = 'WS-C3560-24TS (24 Ethernet 10/100 ports and 2 10/100/1000 SFP uplinks)';
-#		$hwtype[633] = 73;
+#		$hwtype[633] = 169;
 		$ciscomodel[634] = 'WS-C3560-48TS (48 Ethernet 10/100 ports and 4 10/100/1000 SFP uplinks)';
-		$hwtype[634] = 74;
+		$hwtype[634] = 170;
 #		$ciscomodel[563] = 'WS-C3560-24PS (24 Ethernet 10/100 POE ports and 2 10/100/1000 SFP uplinks)';
-#		$hwtype[563] = 75;
+#		$hwtype[563] = 171;
 		$ciscomodel[564] = 'WS-C3560-48PS (48 Ethernet 10/100 POE ports and 4 10/100/1000 SFP uplinks)';
-		$hwtype[564] = 76;
+		$hwtype[564] = 172;
 		$ciscomodel[614] = 'WS-C3560G-24PS (24 Ethernet 10/100/1000 POE ports and 4 10/100/1000 SFP uplinks)';
-		$hwtype[614] = 79;
+		$hwtype[614] = 175;
 		$ciscomodel[615] = 'WS-C3560G-24TS (24 Ethernet 10/100/1000 ports and 4 10/100/1000 SFP uplinks)';
-		$hwtype[615] = 77;
+		$hwtype[615] = 173;
 		$ciscomodel[616] = 'WS-C3560G-48PS (48 Ethernet 10/100/1000 POE ports and 4 10/100/1000 SFP uplinks)';
-		$hwtype[616] = 80;
+		$hwtype[616] = 176;
 		$ciscomodel[617] = 'WS-C3560G-48TS (48 Ethernet 10/100/1000 ports and 4 10/100/1000 SFP uplinks)';
-		$hwtype[617] = 78;
+		$hwtype[617] = 174;
 		$ciscomodel[58] = 'WS-C4503 (3-slot system)';
-		$hwtype[58] = 49;
+		$hwtype[58] = 145;
 		$ciscomodel[503] = '4503 (3-slot system)';
-		$hwtype[503] = 49;
+		$hwtype[503] = 145;
 		$ciscomodel[59] = 'WS-C4506 (6-slot system)';
-		$hwtype[59] = 60;
+		$hwtype[59] = 156;
 		$ciscomodel[502] = '4506 (6-slot system)';
-		$hwtype[502] = 60;
+		$hwtype[502] = 156;
 		$ciscomodel[626] = 'WS-C4948 (48 Ethernet 10/100/1000 ports and 4 10/100/1000 SFP uplinks)';
-		$hwtype[626] = 51;
+		$hwtype[626] = 147;
 		$ciscomodel[659] = 'WS-C4948-10GE (48 Ethernet 10/100/1000 ports and 2 10Gb X2 uplinks)';
+		$hwtype[659] = 377;
 		assertStringArg ('community');
 		$community = $_REQUEST['community'];
 		$objectInfo = getObjectInfo ($object_id);
@@ -3233,7 +3234,7 @@ function renderSNMPPortFinder ($object_id = 0)
 
 		if (empty ($attrs[4]['value']) and substr ($IOSversion, 0, 4) == '12.2') // switch OS type
 		{
-			$error = commitUpdateAttrValue ($object_id, 4, 21);
+			$error = commitUpdateAttrValue ($object_id, 4, 252);
 			if ($error == TRUE)
 				$log[] = array ('code' => 'success', 'message' => 'Switch OS type set to Cisco IOS 12.2');
 			else
@@ -3306,7 +3307,7 @@ function renderSNMPPortFinder ($object_id = 0)
 				for ($i = 1; $i <= 48; $i++)
 				{
 					$label = ($i >= 45) ? "${i}" : "${i}X";
-					$error = commitAddPort ($object_id, 'gi0/' . $i, 11, $label, $ifList2["GigabitEthernet0/${i}"]['phyad']);
+					$error = commitAddPort ($object_id, 'gi0/' . $i, 24, $label, $ifList2["GigabitEthernet0/${i}"]['phyad']);
 					if ($error == '')
 						$newports++;
 					else
@@ -3318,7 +3319,7 @@ function renderSNMPPortFinder ($object_id = 0)
 				for ($i = 1; $i <= 24; $i++)
 				{
 					$label = ($i >= 21) ? "${i}" : "${i}X";
-					$error = commitAddPort ($object_id, 'gi0/' . $i, 11, $label, $ifList2["GigabitEthernet0/${i}"]['phyad']);
+					$error = commitAddPort ($object_id, 'gi0/' . $i, 24, $label, $ifList2["GigabitEthernet0/${i}"]['phyad']);
 					if ($error == '')
 						$newports++;
 					else
@@ -3330,7 +3331,7 @@ function renderSNMPPortFinder ($object_id = 0)
 				for ($i = 1; $i <= 48; $i++)
 				{
 					$label = "${i}X";
-					$error = commitAddPort ($object_id, 'fa0/' . $i, 6, $label, $ifList2["FastEthernet0/${i}"]['phyad']);
+					$error = commitAddPort ($object_id, 'fa0/' . $i, 19, $label, $ifList2["FastEthernet0/${i}"]['phyad']);
 					if ($error == '')
 						$newports++;
 					else
@@ -3339,7 +3340,7 @@ function renderSNMPPortFinder ($object_id = 0)
 				for ($i = 1; $i <= 4; $i++)
 				{
 					$label = "${i}";
-					$error = commitAddPort ($object_id, 'gi0/' . $i, 11, $label, $ifList2["GigabitEthernet0/${i}"]['phyad']);
+					$error = commitAddPort ($object_id, 'gi0/' . $i, 24, $label, $ifList2["GigabitEthernet0/${i}"]['phyad']);
 					if ($error == '')
 						$newports++;
 					else
@@ -3353,7 +3354,7 @@ function renderSNMPPortFinder ($object_id = 0)
 				for ($i = 1; $i <= 24; $i++)
 				{
 					$label = "${i}X";
-					$error = commitAddPort ($object_id, 'gi0/' . $i, 11, $label, $ifList2["GigabitEthernet0/${i}"]['phyad']);
+					$error = commitAddPort ($object_id, 'gi0/' . $i, 24, $label, $ifList2["GigabitEthernet0/${i}"]['phyad']);
 					if ($error == '')
 						$newports++;
 					else
@@ -3367,7 +3368,7 @@ function renderSNMPPortFinder ($object_id = 0)
 				for ($i = 1; $i <= 48; $i++)
 				{
 					$label = "${i}X";
-					$error = commitAddPort ($object_id, 'gi0/' . $i, 11, $label, $ifList2["GigabitEthernet0/${i}"]['phyad']);
+					$error = commitAddPort ($object_id, 'gi0/' . $i, 24, $label, $ifList2["GigabitEthernet0/${i}"]['phyad']);
 					if ($error == '')
 						$newports++;
 					else
@@ -3393,13 +3394,13 @@ function renderSNMPPortFinder ($object_id = 0)
 					if (strpos ($port['descr'], 'FastEthernet') === 0) // Fa
 					{
 						$prefix = 'fa';
-						$ptype = 6; // RJ-45/100Base-TX
+						$ptype = 19; // RJ-45/100Base-TX
 						list ($slotno, $portno) = explode ('/', substr ($port['descr'], strlen ('FastEthernet')));
 					}
 					elseif (strpos ($port['descr'], 'GigabitEthernet') === 0) // Gi
 					{
 						$prefix = 'gi';
-						$ptype = 11; // RJ-45/1000Base-T
+						$ptype = 24; // RJ-45/1000Base-T
 						list ($slotno, $portno) = explode ('/', substr ($port['descr'], strlen ('GigabitEthernet')));
 					}
 					else continue;
@@ -3415,7 +3416,7 @@ function renderSNMPPortFinder ($object_id = 0)
 			default:
 				showError ("Unexpected sysObjectID '${sysObjectID}' in renderSNMPPortFinder()");
 		}
-		$error = commitAddPort ($object_id, 'con0', 16, 'console', '');
+		$error = commitAddPort ($object_id, 'con0', 29, 'console', '');
 		if ($error == '')
 			$newports++;
 		else
