@@ -5,6 +5,7 @@ I. Dependencies.
 For database you must have a MySQL server installation version 4.x or 5.x:
 Fedora6: # yum install mysql-server mysql
 ALTLinux Compact 3.0: apt-get install MySQL-server MySQL-client
+ALTLinux Desktop 4.0: apt-get install MySQL-server 
 
 For web-frontend you must have Apache and PHP 5 with PDO extension:
 Fedora 6: # yum install httpd php php-mysql php-pdo php-gd
