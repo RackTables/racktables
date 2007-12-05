@@ -157,7 +157,6 @@ echo '<pre>';
 			$chaplist = array();
 			while ($row = $r2->fetch (PDO::FETCH_NUM))
 				$chaplist[] = $row[0];
-print_r ($chaplist);
 			$r2->closeCursor();
 			unset ($r2);
 
@@ -319,7 +318,6 @@ print_r ($chaplist);
 			$query[] = "delete from AttributeMap";
 			foreach ($new_dict as $chapter_no => $words)
 			{
-echo "Processing chapter ${chapter_no}\n";
 				foreach ($words as $oldkey => $data)
 				{
 					$value = $data['value'];
@@ -545,7 +543,7 @@ echo '</pre>';
 			// leaving messed values.
 			$query[] = "update Config set varvalue = '24' where varname = 'default_port_type' limit 1";
 			// We are done.
-#			$query[] = "update Config set varvalue = '0.14.7' where varname = 'DB_VERSION'";
+			$query[] = "update Config set varvalue = '0.14.7' where varname = 'DB_VERSION'";
 			break; // --------------------------------------------
 		default:
 			showError ("executeUpgradeBatch () failed, because batch '${batchid}' isn't defined");
@@ -597,7 +595,9 @@ echo '</pre>';
 $root = (empty($_SERVER['HTTPS'])?'http':'https').
 	'://'.
 	(isset($_SERVER['HTTP_HOST'])?$_SERVER['HTTP_HOST']:($_SERVER['SERVER_NAME'].($_SERVER['SERVER_PORT']=='80'?'':$_SERVER['SERVER_PORT']))).
-	dirname($_SERVER['PHP_SELF']).'/';
+	dirname($_SERVER['PHP_SELF']);
+if (substr ($root, -1) != '/')
+	$root .= '/';
 
 // The below will be necessary as long as we rely on showError()
 require_once 'inc/interface.php';
