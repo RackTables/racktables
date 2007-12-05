@@ -8,6 +8,7 @@
 	bugfix: fixed IPv4 address browsing for MySQL-4 DB
 	update: better attributes edit form by Aaron Dummer
 	update: numerous UI adjustments across all pages
+	update: new Dell, Foundry and Cisco records in the dictionary
 	new feature: more cisco models support in gateways/switchvlans
 	new feature: initial implementation of SNMP port data importer
 	new feature: UI configuration reset tab
