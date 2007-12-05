@@ -1,5 +1,6 @@
 0.14.8
 	bugfix: adjusted hardcoded values in VLAN trigger
+	bugfix: adjusted HW, SW and port types in SNMP data collector
 0.14.7 2007-12-05
 	bugfix: provide better SQL dumps for new installations
 	bugfix: gateways/switchvlans minor updates
