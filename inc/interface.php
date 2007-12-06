@@ -630,7 +630,7 @@ function renderRackObject ($object_id = 0)
 	echo "<tr><th width='50%' class=tdright>Object type:</th><td class=tdleft>${info['objtype_name']}</td></tr>\n";
 	if (!empty ($info['asset_no']))
 		echo "<tr><th width='50%' class=tdright>Asset tag:</th><td class=tdleft>${info['asset_no']}</td></tr>\n";
-	elseif (in_array ($info['objtype_id'], explode (',', getConfigVar ('NAMEFUL_OBJTYPES'))))
+	elseif (in_array ($info['objtype_id'], explode (',', getConfigVar ('REQUIRE_ASSET_TAG_FOR'))))
 		echo "<tr><td colspan=2 class=msg_error>Asset tag is missing.</td></tr>\n";
 	if (!empty ($info['label']))
 		echo "<tr><th width='50%' class=tdright>Visible label:</th><td class=tdleft>${info['label']}</td></tr>\n";

@@ -545,6 +545,9 @@ echo '</pre>';
 			// We are done.
 			$query[] = "update Config set varvalue = '0.14.7' where varname = 'DB_VERSION'";
 			break; // --------------------------------------------
+		case '0.14.8':
+			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('REQUIRE_ASSET_TAG_FOR','4,7,8','string','yes','no','Require asset tag for the following object types')";
+			break; // --------------------------------------------
 		default:
 			showError ("executeUpgradeBatch () failed, because batch '${batchid}' isn't defined");
 			die;

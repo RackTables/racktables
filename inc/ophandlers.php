@@ -955,6 +955,7 @@ function resetUIConfig()
 	setConfigVar ('PORTS_PER_ROW','12');
 	setConfigVar ('IPV4_ADDRS_PER_PAGE','256');
 	setConfigVar ('DEFAULT_RACK_HEIGHT','42');
+	setConfigVar ('REQUIRE_ASSET_TAG_FOR','4,7,8');
 	return "${root}?page=${pageno}&tab=default&message=" . urlencode ("Reset complete");
 }
 
