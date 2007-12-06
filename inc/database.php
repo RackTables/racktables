@@ -275,6 +275,12 @@ function getObjectPortsAndLinks ($object_id = 0)
 			$ret[$count]['remote_name'] = htmlentities ($row['RemotePort_name'], ENT_QUOTES);
 			$ret[$count]['remote_object_id'] = $row['RemotePort_object_id'];
 			$ret[$count]['remote_object_name'] = $row['RackObject_name'];
+			// Save on displayedName() calls.
+			if (empty ($row['RackObject_name']) and !empty ($row['RemotePort_object_id']))
+			{
+				$oi = getObjectInfo ($row['RemotePort_object_id']);
+				$ret[$count]['remote_object_name'] = displayedName ($oi);
+			}
 			$count++;
 		}
 	}

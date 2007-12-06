@@ -10,7 +10,7 @@
 	- connected objects in distinct rack rows
 	- last history entries
 	- warranty expiration
-- bug: can't view/click on remote side in port list, if remote side is nameless
++ bug: can't view/click on remote side in port list, if remote side is nameless
 - bug: cannot update port 'e4/4', if port 'e 4/4' exists
 - use user ID instead of username where possible
 - check words usage before deletion from a chapter
