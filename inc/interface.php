@@ -3461,17 +3461,19 @@ function renderUIResetForm()
 function renderFirstRowForm ()
 {
 	global $root, $pageno, $tabno;
-	echo "<form method=post>\n";
-	echo "<input type=hidden name=pageno value='${pageno}'>\n";
-	echo "<input type=hidden name=tabno value='${pageno}'>\n";
+	echo "<form action='${root}process.php'>\n";
+	echo "<input type=hidden name=page value=dict>\n";
+	echo "<input type=hidden name=tab value=edit>\n";
+	echo "<input type=hidden name=op value=add>\n";
+	echo "<input type=hidden name=chapter_no value=3>\n";
 ?>
 <p align=center>
 Your rackspace seems to be empty, and this form will create your first rack row,
 just fill in the name. All the subsequent rack rows will have to be added from the
 Dictionary edit page in Configuration section.
 <br>
-<input type=text name=row_name value='server room'>
-<input type=submit name='do_scan' value='Go!'> 
+<input type=text name=dict_value value='my server room'>
+<input type=submit value='OK'> 
 </p>
 <?php
 }
