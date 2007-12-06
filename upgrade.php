@@ -532,9 +532,6 @@ echo '</pre>';
 			$new_words[] = array (13 => 'CentOS-3');
 			$new_words[] = array (13 => 'CentOS-4');
 			$new_words[] = array (13 => 'CentOS-5');
-
-
-
 			foreach ($new_words as $dict_key => $tmp)
 				foreach ($tmp as $chapter_no => $dict_value)
 					$query[] = 'INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) ' .
@@ -547,6 +544,15 @@ echo '</pre>';
 			break; // --------------------------------------------
 		case '0.14.8':
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('REQUIRE_ASSET_TAG_FOR','4,7,8','string','yes','no','Require asset tag for the following object types')";
+			$query[] = "alter table Port modify column id int(10) unsigned NOT NULL auto_increment";
+			$query[] = "alter table Port modify column object_id int(10) unsigned NOT NULL";
+			$query[] = "alter table Port modify column type int(10) unsigned NOT NULL";
+			$query[] = "alter table Link modify column porta int(10) unsigned";
+			$query[] = "alter table Link modify column portb int(10) unsigned";
+			$query[] = "alter table Port add index `type` (type)";
+			$query[] = "alter table PortCompat add index `type1` (type1)";
+			$query[] = "alter table PortCompat add index `type2` (type2)";
+			$query[] = "update Config set varvalue = '0.14.8' where varname = 'DB_VERSION'";
 			break; // --------------------------------------------
 		default:
 			showError ("executeUpgradeBatch () failed, because batch '${batchid}' isn't defined");

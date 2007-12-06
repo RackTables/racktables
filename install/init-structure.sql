@@ -179,7 +179,8 @@ CREATE TABLE `Port` (
   `label` char(255) default NULL,
   PRIMARY KEY  (`id`),
   UNIQUE KEY `object_id` (`object_id`,`name`),
-  UNIQUE KEY `l2address` (`l2address`)
+  UNIQUE KEY `l2address` (`l2address`),
+  KEY `type` (`type`)
 ) ENGINE=MyISAM;
 
 --
@@ -189,7 +190,9 @@ CREATE TABLE `Port` (
 DROP TABLE IF EXISTS `PortCompat`;
 CREATE TABLE `PortCompat` (
   `type1` int(10) unsigned NOT NULL,
-  `type2` int(10) unsigned NOT NULL
+  `type2` int(10) unsigned NOT NULL,
+  KEY `type1` (`type1`),
+  KEY `type2` (`type2`)
 ) ENGINE=MyISAM;
 
 --
