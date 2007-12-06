@@ -131,8 +131,8 @@ CREATE TABLE `IPRanges` (
 
 DROP TABLE IF EXISTS `Link`;
 CREATE TABLE `Link` (
-  `porta` int(11) NOT NULL,
-  `portb` int(11) NOT NULL,
+  `porta` int(10) unsigned NOT NULL,
+  `portb` int(10) unsigned NOT NULL,
   PRIMARY KEY  (`porta`,`portb`),
   UNIQUE KEY `porta` (`porta`),
   UNIQUE KEY `portb` (`portb`)
@@ -170,10 +170,10 @@ CREATE TABLE `MountOperation` (
 
 DROP TABLE IF EXISTS `Port`;
 CREATE TABLE `Port` (
-  `id` int(11) NOT NULL auto_increment,
-  `object_id` int(11) NOT NULL,
+  `id` int(10) unsigned NOT NULL auto_increment,
+  `object_id` int(10) unsigned NOT NULL,
   `name` char(255) NOT NULL,
-  `type` int(11) NOT NULL,
+  `type` int(10) unsigned NOT NULL,
   `l2address` char(64) default NULL,
   `reservation_comment` char(255) default NULL,
   `label` char(255) default NULL,
