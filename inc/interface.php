@@ -3026,26 +3026,7 @@ function renderVLANMembership ($object_id = 0)
 		return;
 	list ($vlanlist, $portlist, $maclist) = $data;
 
-	// This table divides the space into 2 columns.
-	echo '<table border=0 width="100%"><tr><td class=pcleft>';
-
-	// left column: 1 portlet
-	startPortlet ('VLAN table');
-	echo '<table class=cooltable cellspacing=0 cellpadding=5 align=center width="100%">';
-	echo "<tr><th>ID</th><th>Description</th></tr>";
-	$order = 'even';
-	global $nextorder;
-	foreach ($vlanlist as $id => $descr)
-	{
-		echo "<tr class=row_${order}><td class=tdright>${id}</td><td class=tdleft>${descr}</td></tr>";
-		$order = $nextorder[$order];
-	}
-	echo '</table>';
-	finishPortlet();
-
-	echo '</td><td class=pcright>';
-	// Right column: table with 2 rows, each holding 1 portlet
-	echo '<table border=0 width="100%"><tr><td>';
+	echo '<table border=0 width="100%"><tr><td colspan=3>';
 
 	startPortlet ('Current status');
 	echo "<table class=widetable cellspacing=3 cellpadding=5 align=center width='100%'><tr>";
@@ -3110,8 +3091,36 @@ function renderVLANMembership ($object_id = 0)
 	echo "</tr><tr><td colspan=" . ($ports_per_row + 1) . "><input type=submit value='Save changes'></form></td></tr></table>";
 	finishPortlet();
 
-	echo '</td></tr><tr><td align=center>';
-	// second row
+	echo '</td></tr><tr><td class=pcleft>';
+	startPortlet ('VLAN table');
+	echo '<table class=cooltable cellspacing=0 cellpadding=5 align=center width="100%">';
+	echo "<tr><th>ID</th><th>Description</th></tr>";
+	$order = 'even';
+	global $nextorder;
+	foreach ($vlanlist as $id => $descr)
+	{
+		echo "<tr class=row_${order}><td class=tdright>${id}</td><td class=tdleft>${descr}</td></tr>";
+		$order = $nextorder[$order];
+	}
+	echo '</table>';
+	finishPortlet();
+
+	echo '</td><td class=pcright>';
+
+	startPortlet ('Color legend');
+	echo '<table>';
+	echo "<tr><th>port state</th><th>color code</th></tr>";
+	echo "<tr><td>not connected</td><td class=port_notconnect>SAMPLE</td></tr>";
+	echo "<tr><td>disabled</td><td class=port_disabled>SAMPLE</td></tr>";
+	echo "<tr><td>unknown</td><td class=port_unknown>SAMPLE</td></tr>";
+	echo "<tr><td>connected with none MAC addresses active</td><td class=port_connected_none>SAMPLE</td></tr>";
+	echo "<tr><td>connected with 1 MAC addresses active</td><td class=port_connected_single>SAMPLE</td></tr>";
+	echo "<tr><td>connected with 1+ MAC addresses active</td><td class=port_connected_multi>SAMPLE</td></tr>";
+	echo '</table>';
+	finishPortlet();
+
+	echo '</td><td class=pcright>';
+
 	if (count ($maclist))
 	{
 		startPortlet ('MAC address table');
@@ -3128,9 +3137,6 @@ function renderVLANMembership ($object_id = 0)
 		echo '</table>';
 		finishPortlet();
 	}
-
-	// End of 2-portlet table.
-	echo '</td></tr></table>';
 
 	// End of main table.
 	echo '</td></tr></table>';

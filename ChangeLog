@@ -5,6 +5,7 @@
 	bugfix: nameless object in link list could not be clicked
 	bugfix: fix Port and Link tables structure
 	update: corrected some dictionary entries
+	update: better layout for Live VLANs tab
 	new feature: UI option to control asset tag warning
 	new feature: UUID (RFC4122) sticker
 0.14.7 2007-12-05
