@@ -178,6 +178,9 @@ function handler_rackspace ($tabno)
 		case 'history':
 			renderRackspaceHistory ();
 			break;
+		case 'firstrow':
+			renderFirstRowForm ();
+			break;
 		default:
 			showError ("Invalid tab '${tabno}' requested in handler_rackspace().");
 	}

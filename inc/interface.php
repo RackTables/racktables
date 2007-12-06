@@ -3458,4 +3458,22 @@ function renderUIResetForm()
 	echo "</form>";
 }
 
+function renderFirstRowForm ()
+{
+	global $root, $pageno, $tabno;
+	echo "<form method=post>\n";
+	echo "<input type=hidden name=pageno value='${pageno}'>\n";
+	echo "<input type=hidden name=tabno value='${pageno}'>\n";
+?>
+<p align=center>
+Your rackspace seems to be empty, and this form will create your first rack row,
+just fill in the name. All the subsequent rack rows will have to be added from the
+Dictionary edit page in Configuration section.
+<br>
+<input type=text name=row_name value='server room'>
+<input type=submit name='do_scan' value='Go!'> 
+</p>
+<?php
+}
+
 ?>

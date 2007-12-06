@@ -19,6 +19,8 @@ $page['rackspace']['handler'] = 'handler_rackspace';
 $page['rackspace']['parent'] = 'index';
 $tab['rackspace']['default'] = 'Browse';
 $tab['rackspace']['history'] = 'History';
+$tab['rackspace']['firstrow'] = 'Click me!';
+$trigger['rackspace']['firstrow'] = 'trigger_emptyRackspace';
 
 $page['objects']['title'] = 'static_title';
 $page['objects']['handler'] = 'handler_objects';
