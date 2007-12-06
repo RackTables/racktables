@@ -16,6 +16,7 @@ INSERT INTO `Attribute` (`attr_id`, `attr_type`, `attr_name`) VALUES (20,'string
 INSERT INTO `Attribute` (`attr_id`, `attr_type`, `attr_name`) VALUES (21,'string','support contract expiration');
 INSERT INTO `Attribute` (`attr_id`, `attr_type`, `attr_name`) VALUES (22,'string','HW warranty expiration');
 INSERT INTO `Attribute` (`attr_id`, `attr_type`, `attr_name`) VALUES (24,'string','SW warranty expiration');
+INSERT INTO `Attribute` (`attr_id`, `attr_type`, `attr_name`) VALUES (25,'string','UUID');
 UNLOCK TABLES;
 
 LOCK TABLES `AttributeMap` WRITE;
@@ -26,6 +27,7 @@ INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_no`) VALUES (4,4,1
 INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_no`) VALUES (4,14,15);
 INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_no`) VALUES (4,21,18);
 INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_no`) VALUES (4,22,18);
+INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_no`) VALUES (4,25,0);
 INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_no`) VALUES (4,24,18);
 INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_no`) VALUES (5,1,0);
 INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_no`) VALUES (5,2,18);

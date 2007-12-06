@@ -6,6 +6,7 @@
 	bugfix: fix Port and Link tables structure
 	update: corrected some dictionary entries
 	new feature: UI option to control asset tag warning
+	new feature: UUID (RFC4122) sticker
 0.14.7 2007-12-05
 	bugfix: provide better SQL dumps for new installations
 	bugfix: gateways/switchvlans minor updates

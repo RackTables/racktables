@@ -558,7 +558,8 @@ echo '</pre>';
 			$query[] = "update Dictionary set dict_value = 'Foundry BigIron 15000' where dict_key = 311";
 			$query[] = "update Dictionary set dict_value = 'RHF7' where dict_key = 232";
 			$query[] = "update Dictionary set dict_value = 'RHF8' where dict_key = 242";
-			$query[] = "";
+			$query[] = "INSERT INTO `Attribute` (`attr_id`, `attr_type`, `attr_name`) VALUES (25,'string','UUID');";
+			$query[] = "INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_no`) VALUES (4,25,0);";
 			$query[] = "update Config set varvalue = '0.14.8' where varname = 'DB_VERSION'";
 			break; // --------------------------------------------
 		default:
