@@ -4,6 +4,7 @@
 	bugfix: Cisco connector: tolerate switch ports in suspended state
 	bugfix: nameless object in link list could not be clicked
 	bugfix: fix Port and Link tables structure
+	update: corrected some dictionary entries
 	new feature: UI option to control asset tag warning
 0.14.7 2007-12-05
 	bugfix: provide better SQL dumps for new installations

@@ -544,6 +544,7 @@ echo '</pre>';
 			break; // --------------------------------------------
 		case '0.14.8':
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('REQUIRE_ASSET_TAG_FOR','4,7,8','string','yes','no','Require asset tag for the following object types')";
+#			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('AUTO_PORTS_CONFIG','FIXME','string','yes','no','Autoports configuration')";
 			$query[] = "alter table Port modify column id int(10) unsigned NOT NULL auto_increment";
 			$query[] = "alter table Port modify column object_id int(10) unsigned NOT NULL";
 			$query[] = "alter table Port modify column type int(10) unsigned NOT NULL";
@@ -552,6 +553,12 @@ echo '</pre>';
 			$query[] = "alter table Port add index `type` (type)";
 			$query[] = "alter table PortCompat add index `type1` (type1)";
 			$query[] = "alter table PortCompat add index `type2` (type2)";
+			$query[] = "update Dictionary set dict_value = 'Debian 3.0 (woody)' where dict_key = 234";
+			$query[] = "update Dictionary set dict_value = 'Debian 3.1 (sarge)' where dict_key = 235";
+			$query[] = "update Dictionary set dict_value = 'Foundry BigIron 15000' where dict_key = 311";
+			$query[] = "update Dictionary set dict_value = 'RHF7' where dict_key = 232";
+			$query[] = "update Dictionary set dict_value = 'RHF8' where dict_key = 242";
+			$query[] = "";
 			$query[] = "update Config set varvalue = '0.14.8' where varname = 'DB_VERSION'";
 			break; // --------------------------------------------
 		default:
