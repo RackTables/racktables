@@ -1524,7 +1524,7 @@ function readChapter ($chapter_name = '')
 	global $dbxlink;
 	$query =
 		"select dict_key, dict_value from Dictionary natural join Chapter " .
-		"where chapter_name = '${chapter_name}' order by dict_value";
+		"where chapter_name = '${chapter_name}'";
 	$result = $dbxlink->query ($query);
 	if ($result == NULL)
 	{
@@ -1536,6 +1536,8 @@ function readChapter ($chapter_name = '')
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 		$chapter[$row['dict_key']] = parseWikiLink ($row['dict_value'], 'o');
 	$result->closeCursor();
+	// SQL ORDER BY had no sense, because we need to sort after link rendering, not before.
+	asort ($chapter);
 	return $chapter;
 }
 
