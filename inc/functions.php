@@ -1037,14 +1037,14 @@ function findAllEndpoints ($object_id, $fallback = '')
 // (rendering <A HREF>) or O (for <OPTION>).
 function parseWikiLink ($line, $which)
 {
-	if (preg_match ('\[\[.+\]\]', $line) == 0)
+	if (preg_match ('/^\[\[.+\]\]$/', $line) == 0)
 		return $line;
-	$line = preg_replace ('\[\[.+\]\]', '$1', $line);
-	$s = split ('|', $line);
+	$line = preg_replace ('/^\[\[(.+)\]\]$/', '$1', $line);
+	$s = explode ('|', $line);
 	$o_value = trim ($s[0]);
 	$a_value = trim ($s[1]);
 	if ($which == 'a')
-		return $a_value;
+		return "<a href='${a_value}'>${o_value}</a>";
 	if ($which == 'o')
 		return $o_value;
 }
