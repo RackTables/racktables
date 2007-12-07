@@ -93,9 +93,10 @@ function getSwitchVLANs ($object_id = 0)
 		if ($record['name'] == 'HW type' && !empty ($record['value']))
 			$hwtype = str_replace (' ', '+', $record['value']);
 	}
+	$endpoint = str_replace (' ', '+', $endpoints[0]);
 	$commands = array
 	(
-		"connect ${endpoints[0]} $hwtype $swtype ${remote_username}",
+		"connect ${endpoint} ${hwtype} ${swtype} ${remote_username}",
 		'listvlans',
 		'listports',
 		'listmacs'
