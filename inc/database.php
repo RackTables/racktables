@@ -1722,9 +1722,8 @@ function getAttrValues ($object_id)
 			case 'float':
 			case 'string':
 			case 'dict':
-				$record['value'] = $row[$row['attr_type'] . '_value'];
-				$record['o_value'] = parseWikiLink ($record['value'], 'o');
-				$record['a_value'] = parseWikiLink ($record['value'], 'a');
+				$record['value'] = parseWikiLink ($row[$row['attr_type'] . '_value'], 'o');
+				$record['a_value'] = parseWikiLink ($row[$row['attr_type'] . '_value'], 'a');
 				$record['chapter_name'] = $row['chapter_name'];
 				$record['key'] = $row['uint_value'];
 				break;

@@ -640,7 +640,7 @@ function renderRackObject ($object_id = 0)
 		echo "<tr><td colspan=2 class=msg_error>Has problems</td></tr>\n";
 	foreach (getAttrValues ($object_id) as $record)
 		if (!empty ($record['value']))
-			echo "<tr><th width='50%' class=opt_attr_th>${record['name']}:</th><td class=tdleft>${record['value']}</td></tr>\n";
+			echo "<tr><th width='50%' class=opt_attr_th>${record['name']}:</th><td class=tdleft>${record['a_value']}</td></tr>\n";
 	echo "</table><br>\n";
 	finishPortlet();
 
