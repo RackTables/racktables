@@ -167,8 +167,8 @@ INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (12,206
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (12,207,'Foundry ServerIron 850');
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (12,208,'Foundry ServerIron GT C');
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (12,209,'Foundry ServerIron GT E');
-INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (12,210,'Cisco Catalyst 2970G-24T');
-INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (12,211,'Cisco Catalyst 2970G-24TS');
+INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (12,210,'[[Cisco Catalyst 2970G-24T | http://www.cisco.com/en/US/products/hw/switches/ps5206/ps5313/index.html]]');
+INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (12,211,'[[Cisco Catalyst 2970G-24TS | http://www.cisco.com/en/US/products/hw/switches/ps5206/ps5437/index.html]]');
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (13,212,'RHFC1');
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (13,213,'RHFC2');
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (13,214,'RHFC3');
