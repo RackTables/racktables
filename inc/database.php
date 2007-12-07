@@ -213,11 +213,7 @@ function getObjectInfo ($object_id = 0)
 
 function getPortTypes ()
 {
-	$chapter = readChapter ('PortType');
-	$ret = array();
-	foreach ($chapter as $entry)
-		$ret[$entry['dict_key']] = $entry['dict_value'];
-	return $ret;
+	return readChapter ('PortType');
 }
 
 function getObjectPortsAndLinks ($object_id = 0)
