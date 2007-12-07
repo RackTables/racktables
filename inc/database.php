@@ -1537,7 +1537,12 @@ function readChapter ($chapter_name = '')
 	}
 	$chapter = array();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-		$chapter[] = $row;
+	{
+		$word = array();
+		$word['dict_key'] = $row['dict_key'];
+		$word['dict_value'] = parseWikiLink ($row['dict_value'], 'o');
+		$chapter[] = $word;
+	}
 	$result->closeCursor();
 	return $chapter;
 }
