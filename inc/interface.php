@@ -411,7 +411,7 @@ function renderEditObjectForm ($object_id)
 				break;
 			case 'dict':
 				$chapter = readChapter ($record['chapter_name']);
-				$chapter[] = array ('dict_key' => 0, 'dict_value' => '-- NOT SET --');
+				$chapter[0] = '-- NOT SET --';
 				printSelect ($chapter, "${i}_value", $record['key']);
 				break;
 		}
@@ -474,7 +474,7 @@ function renderEditRackForm ($rack_id)
 	echo "<input type=hidden name=rack_id value=${rack_id}>";
 	echo '<table border=0 align=center>';
 	echo "<tr><th class=tdright>Rack row:</th><td class=tdleft>";
-	printSelect (getRackRowInfo(), 'rack_row_id', $rack['row_id']);
+	printSelect (readChapter ('RackRow'), 'rack_row_id', $rack['row_id']);
 	echo "</td></tr>\n";
 	echo "<tr><th class=tdright>Name (required):</th><td class=tdleft><input type=text name=rack_name value='${rack['name']}'></td></tr>\n";
 	echo "<tr><th class=tdright>Height (required):</th><td class=tdleft><input type=text name=rack_height value='${rack['height']}'></td></tr>\n";
@@ -492,12 +492,12 @@ function renderEditRackForm ($rack_id)
 function printSelect ($rowList, $select_name, $selected_id = 1)
 {
 	echo "<select name=${select_name}>";
-	foreach ($rowList as $dummy => $data)
+	foreach ($rowList as $dict_key => $dict_value)
 	{
-		echo "<option value=${data['dict_key']}";
-		if ($data['dict_key'] == $selected_id)
+		echo "<option value=${dict_key}";
+		if ($dict_key == $selected_id)
 			echo ' selected';
-		echo ">${data['dict_value']}</option>";
+		echo ">${dict_value}</option>";
 	}
 	echo "</select>";
 }
@@ -2100,8 +2100,7 @@ function renderAddMultipleObjectsForm ()
 
 	// Render a form for the next.
 	$typelist = getObjectTypeList();
-	$typelist[0]['dict_key'] = 0;
-	$typelist[0]['dict_value'] = 'select type...';
+	$typelist[0] = 'select type...';
 
 	startPortlet ('Fast way');
 	echo '<form>';

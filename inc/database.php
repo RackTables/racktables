@@ -1516,7 +1516,8 @@ function commitDeleteChapter ($chapter_no = 0)
 	return TRUE;
 }
 
-// This is a dictionary accessor.
+// This is a dictionary accessor. We perform link rendering, so the user sees
+// nice <select> drop-downs.
 function readChapter ($chapter_name = '')
 {
 	if (empty ($chapter_name))
@@ -1537,12 +1538,7 @@ function readChapter ($chapter_name = '')
 	}
 	$chapter = array();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-	{
-		$word = array();
-		$word['dict_key'] = $row['dict_key'];
-		$word['dict_value'] = parseWikiLink ($row['dict_value'], 'o');
-		$chapter[] = $word;
-	}
+		$chapter[$row['dict_key']] = parseWikiLink ($row['dict_value'], 'o');
 	$result->closeCursor();
 	return $chapter;
 }
