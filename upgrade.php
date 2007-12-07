@@ -550,6 +550,12 @@ echo '</pre>';
 			$query[] = "alter table Port modify column type int(10) unsigned NOT NULL";
 			$query[] = "alter table Link modify column porta int(10) unsigned";
 			$query[] = "alter table Link modify column portb int(10) unsigned";
+			$query[] = "alter table PortForwarding modify column object_id int(10) unsigned not null";
+			$query[] = "alter table PortForwarding modify column localport smallint(5) unsigned not null";
+			$query[] = "alter table PortForwarding modify column remoteport smallint(5) unsigned not null";
+			$query[] = "alter table IPBonds modify column object_id int(10) unsigned not null";
+			$query[] = "alter table IPRanges modify column id int(10) unsigned not null";
+			$query[] = "alter table IPRanges modify column mask int(10) unsigned not null";
 			$query[] = "alter table Port add index `type` (type)";
 			$query[] = "alter table PortCompat add index `type1` (type1)";
 			$query[] = "alter table PortCompat add index `type2` (type2)";
@@ -560,6 +566,8 @@ echo '</pre>';
 			$query[] = "update Dictionary set dict_value = 'RHF8' where dict_key = 242";
 			$query[] = "INSERT INTO `Attribute` (`attr_id`, `attr_type`, `attr_name`) VALUES (25,'string','UUID');";
 			$query[] = "INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_no`) VALUES (4,25,0);";
+			$query[] = "update Dictionary set dict_value = '[[Cisco Catalyst 2970G-24T | http://www.cisco.com/en/US/products/hw/switches/ps5206/ps5313/index.html]]' where dict_key = 210";
+			$query[] = "update Dictionary set dict_value = '[[Cisco Catalyst 2970G-24TS | http://www.cisco.com/en/US/products/hw/switches/ps5206/ps5437/index.html]]' where dict_key = 211";
 			$query[] = "update Config set varvalue = '0.14.8' where varname = 'DB_VERSION'";
 			break; // --------------------------------------------
 		default:

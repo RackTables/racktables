@@ -105,7 +105,7 @@ CREATE TABLE `IPAddress` (
 
 DROP TABLE IF EXISTS `IPBonds`;
 CREATE TABLE `IPBonds` (
-  `object_id` int(11) NOT NULL,
+  `object_id` int(10) unsigned NOT NULL,
   `ip` int(10) unsigned NOT NULL,
   `name` char(255) NOT NULL,
   `type` enum('regular','shared','virtual') default NULL,
@@ -118,9 +118,9 @@ CREATE TABLE `IPBonds` (
 
 DROP TABLE IF EXISTS `IPRanges`;
 CREATE TABLE `IPRanges` (
-  `id` int(11) NOT NULL auto_increment,
+  `id` int(10) unsigned NOT NULL auto_increment,
   `ip` int(10) unsigned NOT NULL,
-  `mask` int(11) NOT NULL,
+  `mask` int(10) unsigned NOT NULL,
   `name` char(255) default NULL,
   PRIMARY KEY  (`id`)
 ) ENGINE=MyISAM;
@@ -201,12 +201,12 @@ CREATE TABLE `PortCompat` (
 
 DROP TABLE IF EXISTS `PortForwarding`;
 CREATE TABLE `PortForwarding` (
-  `object_id` int(11) NOT NULL,
+  `object_id` int(10) unsigned NOT NULL,
   `proto` int(11) NOT NULL,
   `localip` int(10) unsigned NOT NULL,
-  `localport` int(11) NOT NULL,
+  `localport` smallint(5) unsigned NOT NULL,
   `remoteip` int(10) unsigned NOT NULL,
-  `remoteport` int(11) NOT NULL,
+  `remoteport` smallint(5) unsigned NOT NULL,
   `description` char(255) default NULL,
   PRIMARY KEY  (`object_id`,`proto`,`localip`,`localport`,`remoteip`,`remoteport`),
   KEY `localip` (`localip`),

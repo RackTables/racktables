@@ -3,7 +3,7 @@
 	bugfix: adjusted HW, SW and port types in SNMP data collector
 	bugfix: Cisco connector: tolerate switch ports in suspended state
 	bugfix: nameless object in link list could not be clicked
-	bugfix: fix Port and Link tables structure
+	bugfix: fix SQL tables structure
 	update: corrected some dictionary entries
 	update: better layout for Live VLANs tab
 	new feature: UI option to control asset tag warning
