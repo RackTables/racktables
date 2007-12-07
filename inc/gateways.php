@@ -174,10 +174,11 @@ function setSwitchVLANs ($object_id = 0, $setcmd)
 		if ($record['name'] == 'HW type' && !empty ($record['value']))
 			$hwtype = strtr ($record['value'], ' ', '+');
 	}
+	$endpoint = str_replace (' ', '+', $endpoints[0]);
 	$data = queryGateway
 	(
 		'switchvlans',
-		array ("connect ${endpoints[0]} $hwtype $swtype ${remote_username}", $setcmd)
+		array ("connect ${endpoint} ${hwtype} ${swtype} ${remote_username}", $setcmd)
 	);
 	if ($data == NULL)
 		return array (array ('code' => 'error', 'message' => 'Failed to get any response from queryGateway() or the gateway died'));
