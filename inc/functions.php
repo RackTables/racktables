@@ -1028,4 +1028,25 @@ function findAllEndpoints ($object_id, $fallback = '')
 	return $regular;
 }
 
+// Some records in the dictionary may be written as plain text or as Wiki
+// link in the following syntax:
+// 1. word
+// 2. [[word URL]] // FIXME: this isn't working
+// 3. [[word word word | URL]]
+// This function parses the line and returns text suitable for either A
+// (rendering <A HREF>) or O (for <OPTION>).
+function parseWikiLink ($line, $which)
+{
+	if (preg_match ('\[\[.+\]\]', $line) == 0)
+		return $line;
+	$line = preg_replace ('\[\[.+\]\]', '$1', $line);
+	$s = split ('|', $line);
+	$o_value = trim ($s[0]);
+	$a_value = trim ($s[1]);
+	if ($which == 'a')
+		return $a_value;
+	if ($which == 'o')
+		return $o_value;
+}
+
 ?>
