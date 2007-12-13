@@ -111,7 +111,7 @@ function markAllSpans (&$rackData = NULL)
 {
 	if ($rackData == NULL)
 	{
-		showError ('Invalid rackData in markupAllSpans()');
+		showError ('Invalid rackData in markAllSpans()');
 		return;
 	}
 	for ($i = $rackData['height']; $i > 0; $i--)
