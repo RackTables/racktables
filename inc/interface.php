@@ -183,7 +183,7 @@ function renderRack ($rack_id = 0, $hl_obj_id = 0)
 	echo "<th width='50%'>Interior</th><th width='20%'>${markup['back']}</th></tr>\n";
 	for ($i = $rackData['height']; $i > 0; $i--)
 	{
-		echo '<tr><th>' . ($rackData['botom_is_unit1'] == 'yes' ? $i : rackData['height'] - $i + 1) . '</th>';
+		echo '<tr><th>' . ($rackData['botom_is_unit1'] == 'yes' ? $i : $rackData['height'] - $i + 1) . '</th>';
 		for ($locidx = 0; $locidx < 3; $locidx++)
 		{
 			if (isset ($rackData[$i][$locidx]['skipped']))
