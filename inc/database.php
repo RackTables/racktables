@@ -82,7 +82,8 @@ function getRacksForRow ($row_id = 0)
 {
 	global $dbxlink;
 	$query =
-		"select Rack.id, Rack.name, height, Rack.comment, row_id, dict_value as row_name " .
+		"select Rack.id, Rack.name, height, Rack.comment, row_id, " .
+		"left_is_front, bottom_is_unit1, dict_value as row_name " .
 		"from Rack left join Dictionary on row_id = dict_key natural join Chapter " .
 		"where chapter_name = 'RackRow' and Rack.deleted = 'no' " .
 		(($row_id == 0) ? "" : "and row_id = ${row_id} ") .
@@ -94,9 +95,19 @@ function getRacksForRow ($row_id = 0)
 		return;
 	}
 	$ret = array();
-	$clist = array ('id', 'name', 'height', 'comment', 'row_id', 'row_name');
+	$clist = array
+	(
+		'id',
+		'name',
+		'height',
+		'comment',
+		'row_id',
+		'left_is_front',
+		'bottom_is_unit1',
+		'row_name'
+	);
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-		foreach ($clist as $dummy => $cname)
+		foreach ($clist as $cname)
 			$ret[$row['id']][$cname] = $row[$cname];
 	$result->closeCursor();
 	usort ($ret, 'sortRacks');
@@ -116,7 +127,8 @@ function getRackData ($rack_id = 0, $silent = FALSE)
 	}
 	global $dbxlink;
 	$query =
-		"select Rack.id, Rack.name, row_id, height, Rack.comment, dict_value as row_name from " .
+		"select Rack.id, Rack.name, row_id, height, Rack.comment, " .
+		"left_is_front, bottom_is_unit1, dict_value as row_name from " .
 		"Rack left join Dictionary on Rack.row_id = dict_key natural join Chapter " .
 		"where chapter_name = 'RackRow' and Rack.id='${rack_id}' and Rack.deleted = 'no' limit 1";
 	$result1 = $dbxlink->query ($query);
@@ -134,12 +146,19 @@ function getRackData ($rack_id = 0, $silent = FALSE)
 	}
 
 	// load metadata
-	$rack['id'] = $row['id'];
-	$rack['name'] = $row['name'];
-	$rack['height'] = $row['height'];
-	$rack['comment'] = $row['comment'];
-	$rack['row_id'] = $row['row_id'];
-	$rack['row_name'] = $row['row_name'];
+	$clist = array
+	(
+		'id',
+		'name',
+		'height',
+		'comment',
+		'row_id',
+		'left_is_front',
+		'bottom_is_unit1',
+		'row_name'
+	);
+	foreach ($clist as $cname)
+		$rack[$cname] = $row[$cname];
 	$result1->closeCursor();
 
 	// start with default rackspace

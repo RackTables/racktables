@@ -174,12 +174,16 @@ function renderRack ($rack_id = 0, $hl_obj_id = 0)
 	if ($next_id != NULL)
 		echo " <a href='${root}?page=rack&rack_id=${next_id}'>&gt; &gt; &gt;</a>";
 	echo "</h2>\n";
+	if ($rackData['left_is_front'] == 'yes')
+		$markup = array ('left' => 'Front', 'right' => 'Back');
+	else
+		$markup = array ('left' => 'Back', 'right' => 'Front');
 	echo "<table class=rack border=0 cellspacing=0 cellpadding=1>\n";
-	echo "<tr><th width='10%'>&nbsp;</th><th width='20%'>Front</th>";
-	echo "<th width='50%'>Interior</th><th width='20%'>Back</th></tr>\n";
+	echo "<tr><th width='10%'>&nbsp;</th><th width='20%'>${markup['front']}</th>";
+	echo "<th width='50%'>Interior</th><th width='20%'>${markup['back']}</th></tr>\n";
 	for ($i = $rackData['height']; $i > 0; $i--)
 	{
-		echo "<tr><th>$i</th>";
+		echo '<tr><th>' . ($rackData['botom_is_unit1'] == 'yes' ? $i : rackData['height'] - $i + 1) . '</th>';
 		for ($locidx = 0; $locidx < 3; $locidx++)
 		{
 			if (isset ($rackData[$i][$locidx]['skipped']))
@@ -2504,12 +2508,12 @@ function renderRackPage ($rack_id)
 {
 	if ($rack_id == 0)
 	{
-		showError ('Invalid rack_id in renderRack()');
+		showError ('Invalid rack_id in renderRackPage()');
 		return;
 	}
 	if (($rackData = getRackData ($rack_id)) == NULL)
 	{
-		showError ('getRackData() failed in renderRack()');
+		showError ('getRackData() failed in renderRackPage()');
 		return;
 	}
 	echo "<table border=0 class=objectview cellspacing=0 cellpadding=0><tr>";
