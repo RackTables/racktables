@@ -1131,7 +1131,7 @@ function getUserPermissions ()
 	$query =
 		"select UserPermission.user_id, user_name, page, tab, access from " .
 		"UserPermission natural left join UserAccount where (user_name is not null) or " .
-		"(user_name is null and UserPermission.user_id = 0) order by user_id, page, tab";
+		"(user_name is null and UserPermission.user_id = 0) order by user_name, page, tab";
 	$result = $dbxlink->query ($query);
 	if ($result == NULL)
 	{
