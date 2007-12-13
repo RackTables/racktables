@@ -3075,13 +3075,21 @@ function renderVLANMembership ($object_id = 0)
 		else
 		{
 			echo "<select name=vlanid_${portno}>";
+			// A port may belong to a VLAN, which is absent from the VLAN table, this is normal.
+			// We must be able to render its SELECT properly at least.
+			$in_table = FALSE;
 			foreach ($vlanlist as $v => $d)
 			{
 				echo "<option value=${v}";
 				if ($v == $port['vlanid'])
+				{
 					echo ' selected';
-				echo ">${v}</option>";
+					$in_table = TRUE;
+				}
+				echo ">${v}</option>\n";
 			}
+			if (!$in_table)
+				echo "<option value=${port['vlanid']} selected>${port['vlanid']}</option>\n";
 			echo "</select>";
 		}
 		$portno++;
