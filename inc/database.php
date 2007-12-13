@@ -1108,7 +1108,7 @@ function getUserAccounts ()
 	global $dbxlink;
 	$query =
 		'select user_id, user_name, user_password_hash, user_realname, user_enabled ' .
-		'from UserAccount order by user_id';
+		'from UserAccount order by user_name';
 	$result = $dbxlink->query ($query);
 	if ($result == NULL)
 	{
