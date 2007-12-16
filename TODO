@@ -1,26 +1,343 @@
-- use printLog in assertion functions
-- use a separate flag for rail problems in RackObject
-- asset management
-- rack picture attachments
+The features marked with [UI] must have a configuration option accessible from
+the user inteface page, so that a user could disable them. The items tagged
+with [AD] come from Aaron's TODO list.
+
+***************************************
+***                                 ***
+***      MINOR FEATURES MISSING     ***
+***                                 ***
+***************************************
+
 - bulk address reservation
-- helper to find unused addresses when binding them from object page
-- reports page:
-  - connected objects w/o rackspace
-	- objects of certain types w/o asset tag
+	There should be a tab on the IP subnet page, which would allow to reserve/release multiple IP
+	addresses at once (and set/unset comment for all of them as well)
+
+- fix tabindex in editRanges() HTML code
+
+- Allow a user to sort racks in the row manually.
+
+- add reports
+	- connected objects w/o rackspace
+	- all objects of certain types w/o asset tag/common name
 	- connected objects in distinct rack rows
 	- last history entries
 	- warranty expiration
-+ bug: can't view/click on remote side in port list, if remote side is nameless
-- bug: cannot update port 'e4/4', if port 'e 4/4' exists
-- use user ID instead of username where possible
-- check words usage before deletion from a chapter
-- bug: search function is called 4 times per 1 search (see functions.php)
-- bug: non-existent dictionary words result in empty selects. workaround: use left join
-- fixme: don't permit rack resize to cross non-free units
-- objects auto-constructor
-- CDP parser
-- object teams
+	- list of all object stickers
+	- orphaned stickers
+
+- helper to find unused addresses when binding them from object page
+
+- [UI] detect known MAC addresses
+	In the Live VLANs tab we dump the MAC address table retrieved from a switch as plain text.
+	We should test each MAC address against being stored in Ports table and generate links
+	to the object and port where appropriate.
+
+- Portless KVM switch trigger
+	For an empty KVM switch it would be convenient to fill in number of ports and submit once
+	to get necessary number of KVM ports created and numbered automatically.
+
+- Portless server trigger
+	For an empty server with no ports configured there should be rendered a tab, which would
+	allow running AutoPorts procedure manually.
+
+- IP addresses and NAT rules comments should be searchable
+
+- Terminating NAT rules are not listed on the IP address default tab.
+
+- Address type terminology is confusing.
+	Replace current regular/virtual/shared keywords with (hopefully) something more obvious,
+	e. g., connected, host-local and virtual.
+
+- Ignore masklen for IP addresses silently.
+	When adding an IP address or NAT rule, ignore optional trailing /xx to tolerate copy-pasted
+	data.	Ideally, the masklen first ought to be verified for equality to the masklen of
+	covering IP subnet.
+
+- [UI] When listing IP addresses for an object, don't repeat the same interface name each
+	time, generate a spanned header instead.
+
+- Rearrange dictionary pages so, that they become more usable for both reading and editing.
+
+- Live tabs should have own CSS class with a different color.
+
+- [UI] NATv4 tab should be shown only for certain object types or for objects, which already
+	have some NAT rules configured. Writing a trigger would do this most naturally.
+
+- User's records should be rendered differently from the stock ones, when viewing/editing
+	the dictionary.
+
+- Split KVM port type into more specific KVM-host and KVM-term, adjust PortCompat appropriately,
+	so that connecting 2 servers or 2 KVM switches to each other isn't possible any more. Port table
+	will have to be corrected automatically, at least for the servers.
+
+- [UI] When adding an object/multiple objects, consider checking DEFAULT_OBJECT_TYPE config
+	variable, and if it is set, render <SELECT> input pre-selected with that type.
+
+- When listing objects and their racks, show the latter with their row name.
+
+- If we have the only rack in the field, include it into the working copy silently to
+	save a click.
+
+- When editing the dictionary, it's necessary to bypass wiki link parsing and present the words
+	as they are, but in the viewing mode it's more expected to see the links rendered.
+
+- Show rackspace usage/problems percentage and objects/external cables count on Rack page
+	in the info portlet.
+
+- The "C>*" (network is broadcast) checkbox is always on by default, altough default value
+	should be	stored in a config option.
+
+- Sometimes it is important to know exact plug type of the console port, thus abstract
+	"async serial" has to be broken down into DB-9, DB-25 and RJ-45 records (mutually
+	interconnectable, hence people usually have necessary cables around).
+
+***************************************
+***                                 ***
+***         FEATURES MISSING        ***
+***                                 ***
+***************************************
+
+- password change page
+	There should be a new page under the Configuration, which would let a user to change password.
+
+- [UI] persistent working copy
+	Save the last set of active racks in the Rackspace tab for each user instead of presenting him
+	with the fewest racks possible. There may be a timeout to stop showing racks with no changes
+	done.
+
+- Per-user options.
+	This is going to happen sooner or later, especially after implementing at least half of the
+	current TODO list.
+
+- [UI] hide empty columns
+	When we render e. g. network ports portlet, some columns of the table could happen completely
+	empty. We might hide such columns.
+
+- [UI] combine IPv4 and NATv4 where possible
+	Right now we list NAT rules in a separate table, but the listing would be much more readable, if
+	each rule was showed in a subtree under its IP address of an object. All unmatched (without a
+	proper termination) NAT rules would be listed in the traditional way.
+
+- [UI] AutoPorts
+	Store a string in a config variable, which would describe for each object type, how many ports
+	of which types should RackTables create upon creating a new object. The first employment for
+	this feature would be to start add 1 KVM-host and 2 Ethernet ports to each server by default.
+
+- HTTP installer
+	As long as we list only INSERT queries in the install/init-*.sql files, it seems worth
+	implementing install.php. This would prevent new installations from having init-quth.sql below
+	the web document root as a side-effect.
+
+- Rack thumbs caching
+	It's not necessary to generate rack thumb PNGs based on the live data from DB. To speed up
+	rackspace rendering and keep the pictures up-to-date, the following approach should be used:
+	1. Extend Rack table with a BLOB column for the thumb cache (a filesystem cache wouldn't be
+		secure at all) and a "cache valid" flag.
+	2. Change render_rack_thumb.php to use valid cached data, if any, otherwise generate
+		the PNG bytestream for the user and cache it in DB.
+	3. Change all procedures, which result in thumb invalidation (rackspace allocation, object or
+		rack problem markup, rack design change), to reset cache for involved rack(s).
+
+- Introduce "multiplexer" and "KVM switch" object types and load the dictionary with relevant
+	models list. After this is done, rename "switch" object type into "network switch" for clarity.
+
+- Rewrite "properties" tab in the object page so, that the user don't have to use two different
+	forms to edit similar data (static and optional), so much more that they are rendered together
+	in the viewing tab.
+
+- Rack flipping
+	Implement horizontal and vertical rack flipping. Vertical flipping would just indicate, if the
+	user wants to see rack front facing right or left today (with all the hardware following the
+	rack flip). Horizontal flipping would mean, that the rack taxonomy implies the top unit to be
+	numbered #1 and this looks more like a permanent property. This way, we either don't allow
+	h.f. for a rack holding any stuff, or map unit numbers on the fly somehow to keep rackspace
+	records consistent. There should be some handling for the case of resizing a h.f.'ed rack, so
+	that existing stuff doesn't slide up (as the distance to U1 remains constant by default).
+
+- Indicate front side on the thumb picture somehow (given that horizontal flipping works).
+
+- All files, which are subject to be modified by user, must be moved into a dedicated directory
+	to make upgrades more painless and secure.
+
+- "Add multiple racks" tab.
+
 - colo customer page
-- racks custom sort order
-- better tabindex in editRanges() HTML code
-- add htaccess to gateways dir
+	Implement a special edition of object viewing page, which would:
+	1. either render the target object only, or hide the names of all other objects in the rack;
+	2. check, that the current user is explicitly listed as the owner of the object requested
+		(by a mean of special sticker);
+	3. render remote network devices and ports, but wouldn't allow clicking;
+	4. same for IP addresses.
+	The only and main purpose of this page would be to assist colocation service customers in
+	accessing their hardware on-site and performing maintenance.
+
+***************************************
+***                                 ***
+***      MAJOR FEATURES MISSING     ***
+***                                 ***
+***************************************
+
+- [AD] rack (picture) attachments
+	Implement "attachments" tab for racks and objects, which would allow attaching random files
+	and generate thumbnails for those of them, which seem to be picture files (like it is done
+	in JIRA).
+
+- Asset management
+	This is a long-awaited silver bullet, which would ease documenting the hardware with no
+	rackspace allocated. The solution would be to introduce "rooms" of an abstract capacity
+	and taxonomy, capable of containing the objects. An object then could be either rack-mounted
+	or placed into a room. By default all objects happen to belong to the "floor", which is
+	equivalent to the current "unmounted objects" list. A special room, "attic" could be used to
+	accept objects, which are considered deleted. Such objects would be excluded from all
+	views, lists, searches and reports, but still available directly from the attic.
+
+- "Live CDP" tab
+	Although simple to explain, not yet known how to implement feature. Having the port list
+	with remote switches configured, we could paste "sh cdp ne"/"sh fdp ne" output into a text
+	area, submit and expect some AI to point out all inconsistencies and probably adjust the
+	data in DB accoring to the field data. The only implementation requirement clear so far
+	is having some naming on procedural conventions across the organization.
+
+- Unified IP address tree
+	This feature would allow representing the whole IP address space as a tree. The idea
+	can be best illustrated by WordPress categories. First of all, we let IP addresses to
+	exist without a containing subnet. To be precise, we introduce subnet 0.0.0.0/0, which
+	contains the whole IPv4 space, and call it "root". Then we remove the constraint, which
+	prevented us from letting one IP prefix to contain another IP prefix. After that
+	we can present the whole address space as a tree, which can hold every possible IP address
+	on either one of branches or the root depending on which of the prefixes matched best for
+	each particular address. This will allow us to have branches, which will reflect not
+	only connected prefixes or routed networks, but any arbitrary super- or subnets.
+
+- Object hierarchy
+	Building a tree of IP subnets is only a metter of calculation. Building a tree of objects
+	requires only just a little more. Provide the root group, then allow a user to inherit
+	more groups from the root or any other group, and we have a tree similar to the one of
+	IP addresses. The current "objects" page has a list of object group types to the left,
+	it is nothing else, as what the object root tree should look initially.
+
+- Auto-constructor
+	This feature consists of some encoded intelligence combined with field data. For example,
+	if we render a brand new network switch, router or KVM switch, of which is known its
+	hardware model only, a trigger could fire, which would offer to create all that ports,
+	which are guaranteed to be present on this hardware. However, this mostly applies to
+	chassis models, whilst modular hardware requires a different approach. Usually the
+	information necessary to build up a modular device is its module list and one or more
+	"base MAC address"es. The only estimation I can give at the moment is that this code
+	will require a long and gradual implementation.
+
+- User groups
+	Granting the same permission to half of new users is sometimes a boring procedure.
+
+- More means of user authentication and authorization
+	LDAP/AD, of course.
+
+- Live PTR tab
+	Add a tab to the IP subnet page, which would list the back-resolved PTR DNS records for each
+	IP address. The user then should be able to mark, which records he wants to be updated from
+	the live data. To ease DNS maintenance, the IP addresses, which have both comment field set
+	and PTR record resolved, should be highlighted in the case strings differ. Should we allow
+	prefixes and suffixes for comment auto-assignment?
+
+- Pluggable ports support
+	To provide appropriate support for GBIC/SFP/X2/SmartSerial ports, the following logic should
+	be implemented:
+	1. Introduce generalized (empty) and all possible media modules as port types: {SFP-1000,
+		SFP-1000Base-SX, SFP-1000Base-LX...}, {GBIC-1000, GBIC-1000Base-T, GBIC-1000Base-SX,
+		GBIC-1000Base-LX...}
+	2. Allow an empty port belonging to one of such types to be switched into any other type of
+		the same group.
+	3. Adjust PortCompat to let any *-1000Base-SX to connect to *-1000Base-SX and so on.
+	Once the above is complete, a port w/o a module would indicate its module plug type and
+	couldn't be connected to anything. After the physical installation of some particular module
+	port type would had to be hanged to more specific L1 type. After that we could connect the
+	port to any other port with the same L1 carrier type. Due to the limited number of modules
+	or cables available connector type (LC, SC, FC) would still be encoded in the port type like
+	it is done now.
+
+- Data export and import
+	For backup purposes it is recommended to distinguish stock data from the data entered
+	by user and generate an SQL dump with the latter. And if we could correctly narrow down
+	the process to some rack(s), the resulting dump would be a good supplement for the hardware
+	transferred across different companies.
+
+***************************************
+***                                 ***
+***           KNOWN BUGS            ***
+***                                 ***
+***************************************
+
+- An object cannot be deleted.
+	This isn't considered a bug, because we still hope to implement the asset management
+	feature. Once this is done, there will be a special "room" to place deleted objects into.
+
+- php-snmp detection
+	We don't detect properly probable absence of php-snmp module. An appropriate message should be
+	shown in such case.
+
+- Cannot update port 'e4/4', if port 'e 4/4' exists.
+
+- A rack can be resized to lose allocated units.
+
+- A word can be deleted from a chapter, even if referenced by some stickers.
+
+- A chapter can be deleted from the dictionary, even if referenced by sticker map.
+
+- Gateways directory isn't protected with any .htaccess rules, exposing local modifications
+	(if any) to the scripts to any HTTP client.
+
+- Live VLANs gateway is known to work with FreeBSD sed only.
+
+- SNMP timeout isn't properly handled by SNMP data harvester.
+
+- renderRackObject() doesn't handle missing objects appropriately.
+
+- [AD] single quotes aren't displayed properly in field contents
+
+- Moving a rack into another row is currently broken.
+
+***************************************
+***                                 ***
+***           INTERNALS             ***
+***                                 ***
+***************************************
+
+- Use printLog() in assertion functions.
+
+- Use a separate flag for rail problems in RackObject.
+
+- Use user ID instead of username where possible.
+
+- Search function is called 4 times per 1 search (see functions.php).
+
+- renderIPRange() could use printRefsOfType()
+
+- Should getObjectAddressesAndNames() be replaced with getObjectAddresses()?
+
+- Check that ophandlers.php:addNewRange() employs assertions properly.
+
+- Clean up pagehandlers.php from pointless endless case constructs (most probably
+	with a help of new "tabhandler" navigation index).
+
+- Review init-dictbase.sql to wipe ghost references from AttributeMap to chapter_no.
+
+- Look if foreach(getPortTypes()) can be replaced with more standard printSelect()
+
+- Cast Rack.height column to unsigned 8-bit type (will break racks more than 255 units high).
+
+***************************************
+***                                 ***
+***          INFRASTRUCTURE         ***
+***                                 ***
+***************************************
+
+- The project misses a good logo; once we get and merge it, make the logo a link to the
+	project's website.
+
+- Publish commented screenshots on the main web-site, so people can understand what the
+	project is about.
+
+- The project needs a wikispace and a bug tracker; Trac seems to be the proper
+	solution for this, but with a tricky installation procedure. Anyway, we have to wait
+	till the new hosting server is ready to find out, which tools can be used for
+	documentation and	bug tracking.
