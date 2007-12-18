@@ -568,8 +568,8 @@ echo '</pre>';
 			$query[] = "INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_no`) VALUES (4,25,0);";
 			$query[] = "update Dictionary set dict_value = '[[Cisco Catalyst 2970G-24T | http://www.cisco.com/en/US/products/hw/switches/ps5206/ps5313/index.html]]' where dict_key = 210";
 			$query[] = "update Dictionary set dict_value = '[[Cisco Catalyst 2970G-24TS | http://www.cisco.com/en/US/products/hw/switches/ps5206/ps5437/index.html]]' where dict_key = 211";
-			$query[] = "alter table Rack add column left_is_front enum ('yes', 'no') not null default 'yes' after height";
-			$query[] = "alter table Rack add column bottom_is_unit1 enum ('yes', 'no') not null default 'yes' after left_is_front";
+#			$query[] = "alter table Rack add column left_is_front enum ('yes', 'no') not null default 'yes' after height";
+#			$query[] = "alter table Rack add column bottom_is_unit1 enum ('yes', 'no') not null default 'yes' after left_is_front";
 			$query[] = "update Config set varvalue = '0.14.8' where varname = 'DB_VERSION'";
 			break; // --------------------------------------------
 		default:

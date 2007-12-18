@@ -83,7 +83,7 @@ function getRacksForRow ($row_id = 0)
 	global $dbxlink;
 	$query =
 		"select Rack.id, Rack.name, height, Rack.comment, row_id, " .
-		"left_is_front, bottom_is_unit1, dict_value as row_name " .
+		"'yes' as left_is_front, 'yes' as bottom_is_unit1, dict_value as row_name " .
 		"from Rack left join Dictionary on row_id = dict_key natural join Chapter " .
 		"where chapter_name = 'RackRow' and Rack.deleted = 'no' " .
 		(($row_id == 0) ? "" : "and row_id = ${row_id} ") .
@@ -128,7 +128,7 @@ function getRackData ($rack_id = 0, $silent = FALSE)
 	global $dbxlink;
 	$query =
 		"select Rack.id, Rack.name, row_id, height, Rack.comment, " .
-		"left_is_front, bottom_is_unit1, dict_value as row_name from " .
+		"'yes' as left_is_front, 'yes' as bottom_is_unit1, dict_value as row_name from " .
 		"Rack left join Dictionary on Rack.row_id = dict_key natural join Chapter " .
 		"where chapter_name = 'RackRow' and Rack.id='${rack_id}' and Rack.deleted = 'no' limit 1";
 	$result1 = $dbxlink->query ($query);
