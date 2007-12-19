@@ -231,7 +231,7 @@ function showPathAndSearch ($pageno)
 {
 	global $root, $page;
 	// Path.
-	echo "<td class=activemenuitem width='99%'>" . getConfigVar ('enterprise') . " RackTables";
+	echo "<td class=activemenuitem width='99%'>" . getConfigVar ('enterprise');
 	if (isset ($page[$pageno]['title']))
 	{
 		$path = getPath ($pageno);
