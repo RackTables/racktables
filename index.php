@@ -43,7 +43,7 @@ foreach (array ('F', 'A', 'U', 'T', 'Th', 'Tw', 'Thw') as $statecode)
   <td colspan=2>
    <table width='100%' cellspacing=0 cellpadding=2 border=0>
    <tr>
-    <td valign=top><?php printImageHREF ('logo'); ?></td>
+    <td valign=top><a href='http://racktables.org/'><?php printImageHREF ('logo'); ?></a></td>
     <td valign=top><div class=greeting><?php printGreeting(); ?></div></td>
    </tr>
    </table>
