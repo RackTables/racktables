@@ -253,6 +253,6 @@ We don't detect properly probable absence of php-snmp module. An appropriate mes
 * Cast Rack.height column to unsigned 8-bit type (will break racks more than 255 units high).
 ----
 ====Infrastructure issues
-* The project misses a good logo; once we get and merge it, make the logo a link to the project's website.
+* [done] The project misses a [good] logo; once we get and merge it, make the logo a link to the project's website.
 * Publish commented screenshots on the main web-site, so people can better understand what the project is about.
 * The project needs a wikispace and a bug tracker; Trac seems to be the proper solution for this, but with a tricky installation procedure. Anyway, we have to wait till the new hosting server is ready to find out, which tools can be used for documentation and bug tracking.
