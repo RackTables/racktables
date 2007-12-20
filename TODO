@@ -77,55 +77,55 @@ When editing the dictionary, it's necessary to bypass wiki link parsing and pres
 Sometimes it is important to know exact plug type of the console port, thus abstract "async serial" has to be broken down into DB-9, DB-25 and RJ-45 records (mutually interconnectable, hence people usually have necessary cables around).
 ----
 ====Features missing
-* password change page
+* [trac#27] password change page
 
 There should be a new page under the Configuration, which would let a user to change password.
 
-* [UI] persistent working copy
+* [UI] [trac#28] persistent working copy
 
 Save the last set of active racks in the Rackspace tab for each user instead of presenting him with the fewest racks possible. There may be a timeout to stop showing racks with no changes done.
 
-* Per-user options.
+* [trac#29] Per-user options.
 
 This is going to happen sooner or later, especially after implementing at least half of the current TODO list.
 
-* [UI] hide empty columns
+* [UI] [trac#30] hide empty columns
 
 When we render e. g. network ports portlet, some columns of the table could happen completely empty. We might hide such columns.
 
-* [UI] combine IPv4 and NATv4 where possible
+* [UI] [trac#31] combine IPv4 and NATv4 where possible
 
 Right now we list NAT rules in a separate table, but the listing would be much more readable, if each rule was showed in a subtree under its IP address of an object. All unmatched (without a proper termination) NAT rules would be listed in the traditional way.
 
-* [UI] AutoPorts
+* [UI] [trac#32] AutoPorts
 
 Store a string in a config variable, which would describe for each object type, how many ports of which types should RackTables create upon creating a new object. The first employment for this feature would be to start add 1 KVM-host and 2 Ethernet ports to each server by default.
 
-* HTTP installer
+* [trac#33] HTTP installer
 
 As long as we list only INSERT queries in the install/init-*.sql files, it seems worth implementing install.php. This would prevent new installations from having init-quth.sql below the web document root as a side-effect.
 
-* Rack thumbs caching
+* [trac#34] Rack thumbs caching
 
 It's not necessary to generate rack thumb PNGs based on the live data from DB. To speed up rackspace rendering and keep the pictures up-to-date, the following approach should be used:
  * Extend Rack table with a BLOB column for the thumb cache (a filesystem cache wouldn't be secure at all) and a "cache valid" flag.
  * Change render_rack_thumb.php to use valid cached data, if any, otherwise generate the PNG bytestream for the user and cache it in DB.
  * Change all procedures, which result in thumb invalidation (rackspace allocation, object or rack problem markup, rack design change), to reset cache for involved rack(s).
 
-* Introduce "multiplexer" and "KVM switch" object types and load the dictionary with relevant models list. After this is done, rename "switch" object type into "network switch" for clarity.
-*  Rewrite "properties" tab in the object page so, that the user don't have to use two different forms to edit similar data (static and optional), so much more that they are rendered together in the viewing tab.
+* [trac#35] Introduce "multiplexer" and "KVM switch" object types and load the dictionary with relevant models list. After this is done, rename "switch" object type into "network switch" for clarity.
+* [trac#36] Rewrite "properties" tab in the object page so, that the user don't have to use two different forms to edit similar data (static and optional), so much more that they are rendered together in the viewing tab.
 
-* Rack flipping
+* [trac#37] Rack flipping
 
 Implement horizontal and vertical rack flipping. Vertical flipping would just indicate, if the user wants to see rack front facing right or left today (with all the hardware following the rack flip). Horizontal flipping would mean, that the rack taxonomy implies the top unit to be numbered #1 and this looks more like a permanent property. This way, we either don't allow h.f. for a rack holding any stuff, or map unit numbers on the fly somehow to keep rackspace records consistent. There should be some handling for the case of resizing a h.f.'ed rack, so that existing stuff doesn't slide up (as the distance to U1 remains constant by default).
 
-* Indicate front side on the thumb picture somehow (given that horizontal flipping works).
+* [trac#38] Indicate front side on the thumb picture somehow (given that horizontal flipping works).
 
-* All files, which are subject to be modified by user, must be moved into a dedicated directory to make upgrades more painless and secure.
+* [trac#39] All files, which are subject to be modified by user, must be moved into a dedicated directory to make upgrades more painless and secure.
 
-* "Add multiple racks" tab.
+* [trac#40] "Add multiple racks" tab.
 
-* colo customer page
+* [trac#41] colo customer page
 
 Implement a special edition of object viewing page, which would:
  # either render the target object only, or hide the names of all other objects in the rack;
