@@ -3,12 +3,12 @@
 The features marked with [UI] must have a configuration option accessible from the user inteface page, so that a user could disable them. The items tagged with [AD] come from Aaron's TODO list.
 ----
 ====Minor features missing
-* bulk address reservation
+* [trac#26] bulk address reservation
 
 There should be a tab on the IP subnet page, which would allow to reserve/release multiple IP addresses at once (and set/unset comment for all of them as well)
 
-* fix tabindex in editRanges() HTML code
-* Allow a user to sort racks in the row manually.
+* [trac#25] fix tabindex in editRanges() HTML code
+* [trac#9] Allow a user to sort racks in the row manually.
 * add reports
  * connected objects w/o rackspace
  * all objects of certain types w/o asset tag/common name
@@ -17,62 +17,62 @@ There should be a tab on the IP subnet page, which would allow to reserve/releas
  * warranty expiration
  * list of all object stickers
  * orphaned stickers
-* helper to find unused addresses when binding them from object page
-* [UI] detect known MAC addresses
+* [trac#24] helper to find unused addresses when binding them from object page
+* [UI] [trac#10] detect known MAC addresses
 
 In the Live VLANs tab we dump the MAC address table retrieved from a switch as plain text. We should test each MAC address against being stored in Ports table and generate links to the object and port where appropriate.
 
-* Portless KVM switch trigger
+* [trac#7] Portless KVM switch trigger
 
 For an empty KVM switch it would be convenient to fill in number of ports and submit once to get necessary number of KVM ports created and numbered automatically.
 
-* Portless server trigger
+* [trac#8] Portless server trigger
 
 For an empty server with no ports configured there should be rendered a tab, which would allow running AutoPorts procedure manually.
 
-* IP addresses and NAT rules comments should be searchable
-* Terminating NAT rules are not listed on the IP address default tab.
-* Address type terminology is confusing.
+* [trac#20] IP addresses and NAT rules comments should be searchable
+* [trac#23] Terminating NAT rules are not listed on the IP address default tab.
+* [trac#6] Address type terminology is confusing.
 
 Replace current regular/virtual/shared keywords with (hopefully) something more obvious, e. g., connected, host-local and virtual.
 
-* Ignore masklen for IP addresses silently.
+* [trac#22] Ignore masklen for IP addresses silently.
 
 When adding an IP address or NAT rule, ignore optional trailing /xx to tolerate copy-pasted data. Ideally, the masklen first ought to be verified for equality to the masklen of covering IP subnet.
 
-* [UI] Don't flood the address table
+* [UI] [trac#19] Don't flood the address table
 
 When listing IP addresses for an object, don't repeat the same interface name each time, generate a spanned header instead.
 
-* Rearrange dictionary pages so, that they become more usable for both reading and editing.
-* Live tabs should have own CSS class with a different color.
-* [UI] Add a trigger for NATv4 tab
+* [trac#17] Rearrange dictionary pages so, that they become more usable for both reading and editing.
+* [trac#18] Live tabs should have own CSS class with a different color.
+* [UI] [trac#13] Add a trigger for NATv4 tab
 
 The tab should be shown only for certain object types or for objects, which already have some NAT rules configured. Writing a trigger would do this most naturally.
 
-* User's records should be rendered differently from the stock ones, when viewing/editing the dictionary.
+* [trac#12] User's records should be rendered differently from the stock ones, when viewing/editing the dictionary.
 
-* Split KVM port type
+* [trac#5] Split KVM port type
 
 ...into more specific KVM-host and KVM-term, adjust PortCompat appropriately, so that connecting 2 servers or 2 KVM switches to each other isn't possible any more. Port table will have to be corrected automatically, at least for the servers.
 
-* [UI] Object type can have defaults
+* [UI] [trac#4] Object type can have defaults
 
 When adding an object/multiple objects, consider checking DEFAULT_OBJECT_TYPE config variable, and if it is set, render <SELECT> input pre-selected with that type.
 
-* When listing objects and their racks, show the latter with their row name.
+* [trac#16] When listing objects and their racks, show the latter with their row name.
 
-* If we have the only rack in the field, include it into the working copy silently to save a click.
+* [trac#15] If we have the only rack in the field, include it into the working copy silently to save a click.
 
-* Smarter wiki links
+* [trac#11] Smarter wiki links
 
 When editing the dictionary, it's necessary to bypass wiki link parsing and present the words as they are, but in the viewing mode it's more expected to see the links rendered.
 
-* Show rackspace usage/problems percentage and objects/external cables count on Rack page in the info portlet.
+* [trac#14] Show rackspace usage/problems percentage and objects/external cables count on Rack page in the info portlet.
 
-* The "C>*" (network is broadcast) checkbox is always on by default, altough default value should be stored in a config option.
+* [trac#21] The "C>*" (network is broadcast) checkbox is always on by default, altough default value should be stored in a config option.
 
-* More async types
+* [trac#3] More async types
 
 Sometimes it is important to know exact plug type of the console port, thus abstract "async serial" has to be broken down into DB-9, DB-25 and RJ-45 records (mutually interconnectable, hence people usually have necessary cables around).
 ----
@@ -248,9 +248,9 @@ We don't detect properly probable absence of php-snmp module. An appropriate mes
 * Should getObjectAddressesAndNames() be replaced with getObjectAddresses()?
 * Check that ophandlers.php:addNewRange() employs assertions properly.
 * Clean up pagehandlers.php from pointless endless case constructs (most probably with a help of new "tabhandler" navigation index).
-* Review init-dictbase.sql to wipe ghost references from AttributeMap to chapter_no.
+* [trac#2] Review init-dictbase.sql to wipe ghost references from AttributeMap to chapter_no.
 * Look if foreach(getPortTypes()) can be replaced with more standard printSelect()
-* Cast Rack.height column to unsigned 8-bit type (will break racks more than 255 units high).
+* [trac#1] Cast Rack.height column to unsigned 8-bit type (will break racks more than 255 units high).
 ----
 ====Infrastructure issues
 * [done] The project misses a [good] logo; once we get and merge it, make the logo a link to the project's website.
