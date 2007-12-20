@@ -220,24 +220,24 @@ The only and main purpose of this page would be to assist colocation service cus
 	transferred across different companies.
 ----
 ====Known bugs
-* An object cannot be deleted.
+* [trac#42] An object cannot be deleted.
 
 This isn't considered a bug, because we still hope to implement the asset management feature. Once this is done, there will be a special "room" to place deleted objects into.
 
-* php-snmp detection
+* [trac#43] php-snmp detection
 
 We don't detect properly probable absence of php-snmp module. An appropriate message should be shown in such case.
 
-* Cannot update port 'e4/4', if port 'e 4/4' exists.
-* A rack can be resized to lose allocated units.
-* A word can be deleted from a chapter, even if referenced by some stickers.
-* A chapter can be deleted from the dictionary, even if referenced by sticker map.
-* Gateways directory isn't protected with any .htaccess rules, exposing local modifications (if any) to the scripts to any HTTP client.
-* Live VLANs gateway is known to work with FreeBSD sed only.
-* SNMP timeout isn't properly handled by SNMP data harvester.
-* renderRackObject() doesn't handle missing objects appropriately.
-* [AD] single quotes aren't displayed properly in field contents
-* Moving a rack into another row is currently broken.
+* [trac#44] Cannot update port 'e4/4', if port 'e 4/4' exists.
+* [trac#45] A rack can be resized to lose allocated units.
+* [trac#46] A word can be deleted from a chapter, even if referenced by some stickers.
+* [trac#47] A chapter can be deleted from the dictionary, even if referenced by sticker map.
+* [trac#48] Gateways directory isn't protected with any .htaccess rules, exposing local modifications (if any) to the scripts to any HTTP client.
+* [trac#49] Live VLANs gateway is known to work with FreeBSD sed only.
+* [trac#50] SNMP timeout isn't properly handled by SNMP data harvester.
+* [trac#51] renderRackObject() doesn't handle missing objects appropriately.
+* [AD] [trac#52] single quotes aren't displayed properly in field contents
+* [trac#53] Moving a rack into another row is currently broken.
 ----
 ====Internals
 * Use printLog() in assertion functions.
