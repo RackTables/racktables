@@ -6,6 +6,7 @@
 	bugfix: fix SQL tables structure
 	bugfix: Live VLANs displayed VLANs missing from switch table improperly
 	bugfix: sort auth data by username
+	bugfix: NATv4 rules were added incorrectly
 	update: corrected some dictionary entries
 	update: better layout for Live VLANs tab
 	update: better logo

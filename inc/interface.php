@@ -1978,7 +1978,9 @@ function renderIPAddressPortForwarding ($object_id=0)
 	echo "<input type='hidden' name='object_id' value='$object_id'>";
 	echo "<input type=hidden name=page value='${pageno}'>\n";
 	echo "<input type=hidden name=tab value='${tabno}'>\n";
-	echo "<tr align='center'><td colspan=2><select name='proto'><option value='1'>TCP</option><option value='2'>UDP</option></select><select name='localip'>";
+	echo "<tr align='center'><td colspan=2>";
+	printSelect (readChapter ('Protocols'), 'proto');
+	echo "<select name='localip'>";
 
 	foreach ($addresses as $addr)
 		echo "<option value='${addr['ip']}'>" . (empty ($addr['name']) ? '' : "${addr['name']}: ") .
