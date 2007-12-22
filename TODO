@@ -1,17 +1,3 @@
-======RackTables status
-=====TODO list
-The features marked with [UI] must have a configuration option accessible from the user inteface page, so that a user could disable them. The items tagged with [AD] come from Aaron's TODO list.
-----
-====Minor features missing
-* add reports
- * connected objects w/o rackspace
- * all objects of certain types w/o asset tag/common name
- * connected objects in distinct rack rows
- * last history entries
- * warranty expiration
- * list of all object stickers
- * orphaned stickers
-----
 ====Internals
 * Use printLog() in assertion functions.
 * Use a separate flag for rail problems in RackObject.
@@ -22,7 +8,3 @@ The features marked with [UI] must have a configuration option accessible from t
 * Check that ophandlers.php:addNewRange() employs assertions properly.
 * Clean up pagehandlers.php from pointless endless case constructs (most probably with a help of new "tabhandler" navigation index).
 * Look if foreach(getPortTypes()) can be replaced with more standard printSelect()
-----
-====Infrastructure issues
-* Publish commented screenshots on the main web-site, so people can better understand what the project is about.
-* The project needs a wikispace and a bug tracker; Trac seems to be the proper solution for this, but with a tricky installation procedure. Anyway, we have to wait till the new hosting server is ready to find out, which tools can be used for documentation and bug tracking.
