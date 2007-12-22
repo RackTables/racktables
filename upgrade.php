@@ -8,7 +8,7 @@
 // Returning an empty array means that no upgrade is necessary.
 function getDBUpgradePath ($v1, $v2)
 {
-	$versionhistory = array ('0.14.4', '0.14.5', '0.14.6', '0.14.7');
+	$versionhistory = array ('0.14.4', '0.14.5', '0.14.6', '0.14.7', '0.14.8');
 	if (!in_array ($v1, $versionhistory) || !in_array ($v2, $versionhistory))
 	{
 		showError ("An upgrade path has been requested for versions '${v1}' and '${v2}', " .
@@ -544,7 +544,6 @@ echo '</pre>';
 			break; // --------------------------------------------
 		case '0.14.8':
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('REQUIRE_ASSET_TAG_FOR','4,7,8','string','yes','no','Require asset tag for the following object types')";
-#			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('AUTO_PORTS_CONFIG','FIXME','string','yes','no','Autoports configuration')";
 			$query[] = "alter table Port modify column id int(10) unsigned NOT NULL auto_increment";
 			$query[] = "alter table Port modify column object_id int(10) unsigned NOT NULL";
 			$query[] = "alter table Port modify column type int(10) unsigned NOT NULL";
@@ -568,10 +567,14 @@ echo '</pre>';
 			$query[] = "INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_no`) VALUES (4,25,0);";
 			$query[] = "update Dictionary set dict_value = '[[Cisco Catalyst 2970G-24T | http://www.cisco.com/en/US/products/hw/switches/ps5206/ps5313/index.html]]' where dict_key = 210";
 			$query[] = "update Dictionary set dict_value = '[[Cisco Catalyst 2970G-24TS | http://www.cisco.com/en/US/products/hw/switches/ps5206/ps5437/index.html]]' where dict_key = 211";
-#			$query[] = "alter table Rack add column left_is_front enum ('yes', 'no') not null default 'yes' after height";
-#			$query[] = "alter table Rack add column bottom_is_unit1 enum ('yes', 'no') not null default 'yes' after left_is_front";
 			$query[] = "update Config set varvalue = '0.14.8' where varname = 'DB_VERSION'";
 			break; // --------------------------------------------
+#		case '0.14.9':
+#			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('AUTO_PORTS_CONFIG','FIXME','string','yes','no','Autoports configuration')";
+#			$query[] = "alter table Rack add column left_is_front enum ('yes', 'no') not null default 'yes' after height";
+#			$query[] = "alter table Rack add column bottom_is_unit1 enum ('yes', 'no') not null default 'yes' after left_is_front";
+#			$query[] = "update Config set varvalue = '0.14.9' where varname = 'DB_VERSION'";
+#			break; // --------------------------------------------
 		default:
 			showError ("executeUpgradeBatch () failed, because batch '${batchid}' isn't defined");
 			die;

@@ -1,4 +1,4 @@
-0.14.8
+0.14.8 2007-12-22
 	bugfix: adjusted hardcoded values in VLAN trigger
 	bugfix: adjusted HW, SW and port types in SNMP data collector
 	bugfix: Cisco connector: tolerate switch ports in suspended state
