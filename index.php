@@ -71,8 +71,19 @@ foreach (array ('F', 'A', 'U', 'T', 'Th', 'Tw', 'Thw') as $statecode)
 <?php
 if (isset ($tabhandler[$pageno][$tabno]))
 {
-	if (isset ($page[$pageno]['bypass']))
-		$tabhandler[$pageno][$tabno] ($page[$pageno]['bypass']);
+	if (isset ($page[$pageno]['bypass']) && isset ($page[$pageno]['bypass_type']))
+	{
+		switch ($page[$pageno]['bypass_type'])
+		{
+			case 'uint':
+				assertUIntArg ($page[$pageno]['bypass']);
+				break;
+			default:
+				showError ("Dispatching error for bypass parameter");
+				break;
+		}
+		$tabhandler[$pageno][$tabno] ($_REQUEST[$page[$pageno]['bypass']]);
+	}
 	else
 		$tabhandler[$pageno][$tabno] ();
 }

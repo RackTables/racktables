@@ -54,6 +54,7 @@ $page['objgroup']['parent'] = 'objects';
 
 $page['object']['title'] = 'dynamic_title_object';
 $page['object']['bypass'] = 'object_id';
+$page['object']['bypass_type'] = 'uint';
 $page['object']['parent'] = 'objgroup';
 $tab['object']['default'] = 'View';
 $tab['object']['edit'] = 'Properties';
