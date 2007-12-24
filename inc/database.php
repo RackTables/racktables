@@ -67,10 +67,19 @@ function getObjectList ($type_id = 0)
 		return;
 	}
 	$ret = array();
-	$clist = array ('id', 'name', 'label', 'barcode', 'objtype_name', 'objtype_id', 'asset_no', 'rack_id', 'Rack_name');
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
-		foreach ($clist as $dummy => $cname)
+		foreach (array (
+			'id',
+			'name',
+			'label',
+			'barcode',
+			'objtype_name',
+			'objtype_id',
+			'asset_no',
+			'rack_id',
+			'Rack_name'
+			) as $cname)
 			$ret[$row['id']][$cname] = $row[$cname];
 		$ret[$row['id']]['dname'] = displayedName ($ret[$row['id']]);
 	}
