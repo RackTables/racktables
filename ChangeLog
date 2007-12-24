@@ -1,5 +1,6 @@
 0.14.9
 	bugfix: upgrade to 0.14.8 broke IPv4 prefix creation
+	bugfix: more DB cleanups
 0.14.8 2007-12-22
 	bugfix: adjusted hardcoded values in VLAN trigger
 	bugfix: adjusted HW, SW and port types in SNMP data collector

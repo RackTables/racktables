@@ -224,7 +224,7 @@ CREATE TABLE `Rack` (
   `name` char(255) default NULL,
   `deleted` enum('yes','no') NOT NULL default 'no',
   `row_id` int(10) unsigned NOT NULL default '1',
-  `height` int(10) unsigned NOT NULL default '42',
+  `height` tinyint(3) unsigned NOT NULL default '42',
   `comment` text,
   PRIMARY KEY  (`id`)
 ) ENGINE=MyISAM;
