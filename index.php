@@ -69,7 +69,14 @@ foreach (array ('F', 'A', 'U', 'T', 'Th', 'Tw', 'Thw') as $statecode)
  <tr>
   <td colspan=2>
 <?php
-if (isset ($page[$pageno]['handler']))
+if (isset ($tabhandler[$pageno][$tabno]))
+{
+	if (isset ($page[$pageno]['bypass']))
+		$tabhandler[$pageno][$tabno] ($page[$pageno]['bypass']);
+	else
+		$tabhandler[$pageno][$tabno] ();
+}
+elseif (isset ($page[$pageno]['handler']))
 	$page[$pageno]['handler'] ($tabno);
 else
 	showError ("Failed to find handler for page '${pageno}'");

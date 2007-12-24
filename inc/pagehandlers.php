@@ -110,40 +110,6 @@ function handler_rack ($tabno)
 	}
 }
 
-function handler_object ($tabno)
-{
-	assertUIntArg ('object_id');
-	switch ($tabno)
-	{
-		case 'default':
-			renderRackObject ($_REQUEST['object_id']);
-			break;
-		case 'rackspace':
-			renderRackSpaceForObject ($_REQUEST['object_id']);
-			break;
-		case 'ports':
-			renderPortsForObject ($_REQUEST['object_id']);
-			break;
-		case 'network':
-			renderNetworkForObject ($_REQUEST['object_id']);
-			break;
-		case 'edit':
-			renderEditObjectForm ($_REQUEST['object_id']);
-			break;
-		case 'portfwrd':
-			renderIPAddressPortForwarding($_REQUEST['object_id']);
-			break;
-		case 'switchvlans':
-			renderVLANMembership($_REQUEST['object_id']);
-			break;
-		case 'snmpportfinder':
-			renderSNMPPortFinder($_REQUEST['object_id']);
-			break;
-		default:
-			showError ("Invalid tab '${tabno}' requested in handler_object().");
-	}
-}
-
 function handler_objects ($tabno)
 {
 	switch ($tabno)
