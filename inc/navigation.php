@@ -10,6 +10,7 @@ $tab = array();
 $helptab = array();
 $trigger = array();
 $ophandler = array();
+$tabhandler = array();
 
 $page['index']['title'] = 'static_title';
 $page['index']['handler'] = 'renderIndex';
