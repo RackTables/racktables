@@ -81,6 +81,7 @@ $helptab['object']['portfwrd'] = 'nets';
 $helptab['object']['rackspace'] = 'rackspace';
 $trigger['object']['switchvlans'] = 'trigger_switchvlans';
 $trigger['object']['snmpportfinder'] = 'trigger_snmpportfinder';
+$trigger['object']['lvsconfig'] = 'trigger_lvsconfig';
 $ophandler['object']['ports']['addPort'] = 'addPortForObject';
 $ophandler['object']['ports']['delPort'] = 'delPortFromObject';
 $ophandler['object']['ports']['editPort'] = 'editPortForObject';
