@@ -3491,9 +3491,41 @@ Dictionary edit page in Configuration section.
 <?php
 }
 
-function renderLVSConfig ($object_id)
+function renderLVSConfig ($object_id = 0)
 {
-	dragon();
+	if ($object_id <= 0)
+	{
+		showError ('Invalid object_id in renderLVSConfig()');
+		return;
+	}
+	$natrules = getObjectForwards ($object_id);
+	$lvsconfig = array();
+	foreach ($natrules['out'] as $rule)
+	{
+		$lvsconfig [$rule['localip']] ['description'] = $rule['local_addr_name'];
+		$lvsconfig [$rule['localip']] [$rule['proto']] [$rule['localport']] ['rs'] [] = array
+		(
+			'address' => $rule['remoteip'],
+			'port' => $rule['remoteport'],
+			'description' => $rule['remote_addr_name']
+		);
+	}
+	echo '<pre>';
+	foreach ($lvsconfig as $vip => $vipdata)
+		foreach (readChapter ('Protocols') as $proto)
+		{
+			if (!isset ($vipdata[$proto]))
+				continue;
+			foreach ($vipdata[$proto] as $vport => $vportdata)
+			{
+				echo "# auto-VIP: ${vipdata['description']}\n";
+				echo "virtual_server ${vip} ${vport}\n";
+				foreach ($vportdata['rs'] as $rs)
+					echo "\treal_server ${rs['address']} ${rs['port']} {\n\t}\n";
+				echo "}\n\n";
+			}
+		}
+	echo '</pre>';
 }
 
 ?>
