@@ -3491,4 +3491,9 @@ Dictionary edit page in Configuration section.
 <?php
 }
 
+function renderLVSConfig ($object_id)
+{
+	dragon();
+}
+
 ?>

@@ -60,4 +60,14 @@ function trigger_emptyRackspace ()
 	return (count (readChapter ('RackRow')) == 0);
 }
 
+function trigger_lvsconfig ()
+{
+	assertUIntArg ('object_id');
+	$object_id = $_REQUEST['object_id'];
+	$object = getObjectInfo ($object_id);
+	if ($object['objtype_id'] != 4) // server
+		return FALSE;
+	return (count (getObjectForwards ($object_id)) > 1);
+}
+
 ?>
