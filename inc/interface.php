@@ -3521,7 +3521,11 @@ function renderLVSConfig ($object_id = 0)
 				echo '# auto-VIP: ' . (empty ($vipdata['description']) ? 'NO NAME' : $vipdata['description'])  . "\n";
 				echo "virtual_server ${vip} ${vport}\n";
 				foreach ($vportdata['rs'] as $rs)
+				{
+					if (!empty ($rs['description']))
+						echo "\t# " . $rs['description'] . "\n";
 					echo "\treal_server ${rs['address']} ${rs['port']} {\n\t}\n";
+				}
 				echo "}\n\n";
 			}
 		}
