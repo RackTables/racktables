@@ -67,7 +67,8 @@ function trigger_lvsconfig ()
 	$object = getObjectInfo ($object_id);
 	if ($object['objtype_id'] != 4) // server
 		return FALSE;
-	return (count (getObjectForwards ($object_id)) > 1);
+	$natrules = getObjectForwards ($object_id);
+	return (count ($natrules['out']) > 0);
 }
 
 ?>
