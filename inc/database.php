@@ -1969,4 +1969,14 @@ function getDatabaseVersion ()
 	return $ret;
 }
 
+function getSLBSummary ()
+{
+	$query = 'select IPRealServer.vsid, IPVirtualService.vip as vip_bin, ' .
+		'inet_ntoa(IPVirtualService.vip) as vip, IPVirtualService.vport, ro.id as object_id, ' .
+		'count(rsid) as rscount from IPLBConfig inner join RackObject as ro on ro.id = object_id ' .
+		'inner join IPRealServer on IPLBConfig.rsid = IPRealServer.id ' .
+		'inner join IPVirtualService on IPRealServer.vsid = IPVirtualService.vsid ' .
+		'group by ro.id, IPVirtualService.vsid order by vip_bin, object_id';
+}
+
 ?>
