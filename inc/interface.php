@@ -1613,9 +1613,12 @@ function renderRackspaceHistory ()
 function renderAddressspace ()
 {
 	global $root;
+	echo '<table border=0 class=objectview cellspacing=0 cellpadding=0><tr><td class=pcleft>';
+
+	startPortlet ('Subnets');
 	echo "<table class='widetable' border=0 cellpadding=10 cellspacing=0 align='center'>\n";
 	$addrspaceList = getAddressspaceList();
-	echo "<tr><th>Address range</th><th>Name</th><th>Total/used addresses</th></tr>";
+	echo "<tr><th>Subnet</th><th>Name</th><th>Total/used addresses</th></tr>";
 	foreach ($addrspaceList as $iprange)
 	{
 		echo "<tr><td><a href='${root}?page=iprange&id=${iprange['id']}'>${iprange['ip']}/${iprange['mask']}</a></td><td>${iprange['name']}</td><td>";
@@ -1626,6 +1629,14 @@ function renderAddressspace ()
 		echo "</td></tr>";
 	}
 	echo "</table>\n";
+	finishPortlet();
+
+	echo "</td>\n<td class=pcright>";
+
+	startPortlet ('SLB summary');
+	finishPortlet ();
+
+	echo '</td></tr></table>';
 }
 
 function renderAddNewRange ()
@@ -1633,7 +1644,7 @@ function renderAddNewRange ()
 	global $root, $pageno, $tabno;
 	showMessageOrError();
 
-	echo "<center><h2>Add New Range</h2></center>\n";
+	echo "<center><h2>Add New</h2></center>\n";
 	echo "<table class='widetable' border=0 cellpadding=10 align='center'>\n";
 	echo "<tr><th>Address range</th><th>Name</th><th>C&gt;*</th><th>&nbsp;</th></tr>\n";
 	echo "<form name='add_new_range' action='process.php'>\n";
@@ -1646,7 +1657,7 @@ function renderAddNewRange ()
 	echo "<td class='tdcenter'><input type=submit value='Add a new range'></td></tr>\n";
 	echo "</form></table><br><br>\n";
 
-	echo "<center><h2>Existing Ranges</h2></center>\n";
+	echo "<center><h2>Manage Existing</h2></center>\n";
 	echo "<table class='widetable' border=0 cellpadding=10 align='center'>\n";
 	$addrspaceList = getAddressspaceList();
 	echo "<tr><th>&nbsp;</th><th>Address range</th><th>Name</th><th>Total/used addresses</th></tr>";
