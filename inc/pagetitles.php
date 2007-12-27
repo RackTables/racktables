@@ -184,6 +184,9 @@ function static_title ($pageno)
 		case 'help':
 			$ret['name'] = 'Help';
 			break;
+		case 'vservice':
+			$ret['name'] = 'Virtual service';
+			break;
 		default:
 			$ret['name'] = 'UNKNOWN';
 			break;
