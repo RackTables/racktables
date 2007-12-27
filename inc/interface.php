@@ -1635,11 +1635,15 @@ function renderAddressspace ()
 
 	startPortlet ('SLB summary');
 	$summary = getSLBSummary();
+#echo '<pre>';
+#print_r ($summary);
+#echo '</pre>';
+	// A single id-keyed array isn't used here to preserve existing
+	// order of LBs returned by getSLBSummary()
 	$lblist = array();
 	$lbdname = array();
-	foreach ($summary as $ports)
-		foreach ($ports as $lbs)
-			foreach ($lbs as $lb_object_id => $dummy)
+	foreach ($summary as $vipdata)
+		foreach (array_keys ($vipdata['rspools']) as $lb_object_id)
 			if (!in_array ($lb_object_id, $lblist))
 			{
 				$oi = getObjectInfo ($lb_object_id);
@@ -1655,14 +1659,14 @@ function renderAddressspace ()
 		foreach ($lblist as $lb_object_id)
 			echo "<th><a href='$root?page=object&tab=default&object_id=${lb_object_id}'>" . $lbdname[$lb_object_id]  . "</a></th>";
 		echo "</tr>\n";
-		foreach ($summary as $vip => $ports)
-			foreach ($ports as $vport => $lbs)
-			{
-				echo "<tr><td class=tdleft><a href='$root?page=ipaddress&tab=default&ip=${vip}'>${vip}</a>:${vport}</th>";
-				foreach ($lblist as $lb_object_id)
-					echo '<td>' . (isset ($lbs[$lb_object_id]) ? $lbs[$lb_object_id] : '&nbsp;') . '</td>';
-				echo "</tr>";
-			}
+		foreach ($summary as $vsid => $vsdata)
+		{
+			echo "<tr><td class=tdleft><a href='$root?page=vservice&tab=default&id=${vsid}'>";
+			echo $vsdata['vip'] . ':' . $vsdata['vport'] . '/' . $vsdata['proto'] . '</a></td>';
+			foreach ($lblist as $lb_object_id)
+				echo '<td>' . (isset ($vsdata['rspools'][$lb_object_id]) ? $vsdata['rspools'][$lb_object_id] : '&nbsp;') . '</td>';
+			echo "</tr>";
+		}
 		echo "</table>\n";
 	}
 	finishPortlet ();

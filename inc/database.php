@@ -1976,7 +1976,8 @@ function getSLBSummary ()
 	global $dbxlink;
 	$query = 'select IPRealServer.vsid, IPVirtualService.vip as vip_bin, ' .
 		'inet_ntoa(IPVirtualService.vip) as vip, IPVirtualService.vport, ro.id as object_id, ' .
-		'count(rsid) as rscount from IPLBConfig inner join RackObject as ro on ro.id = object_id ' .
+		'count(rsid) as rscount, proto, IPVirtualService.vsid as vsid ' .
+		'from IPLBConfig inner join RackObject as ro on ro.id = object_id ' .
 		'inner join IPRealServer on IPLBConfig.rsid = IPRealServer.id ' .
 		'inner join IPVirtualService on IPRealServer.vsid = IPVirtualService.vsid ' .
 		'group by ro.id, IPVirtualService.vsid order by vip_bin, object_id';
@@ -1990,10 +1991,15 @@ function getSLBSummary ()
 	$ret = array();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
-		$object_id = $row['object_id'];
-		if (!isset ($ret[$row['vip']][$row['vport']]))
-			$ret[$row['vip']][$row['vport']] = array();
-		$ret[$row['vip']][$row['vport']][$object_id] = $row['rscount'];
+		$vsid = $row['vsid'];
+		if (!isset ($ret[$vsid]))
+		{
+			$ret[$vsid] = array();
+			foreach (array ('vip', 'vport', 'proto') as $cname)
+				$ret[$vsid][$cname] = $row[$cname];
+			$ret[$vsid]['rspools'] = array();
+		}
+		$ret[$vsid]['rspools'][$row['object_id']] = $row['rscount'];
 	}
 	return $ret;
 }
