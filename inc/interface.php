@@ -1634,6 +1634,37 @@ function renderAddressspace ()
 	echo "</td>\n<td class=pcright>";
 
 	startPortlet ('SLB summary');
+	$summary = getSLBSummary();
+	$lblist = array();
+	$lbdname = array();
+	foreach ($summary as $ports)
+		foreach ($ports as $lbs)
+			foreach ($lbs as $lb_object_id => $dummy)
+			if (!in_array ($lb_object_id, $lblist))
+			{
+				$oi = getObjectInfo ($lb_object_id);
+				$lbdname[$lb_object_id] = $oi['dname'];
+				$lblist[] = $lb_object_id;
+			}
+	if (!count ($summary))
+		echo 'none configured';
+	else
+	{
+		echo "<table class='widetable' border=0 cellpadding=5 cellspacing=0 align='center'>\n";
+		echo "<tr><th>&nbsp;</th>";
+		foreach ($lblist as $lb_object_id)
+			echo "<th><a href='$root?page=object&tab=default&object_id=${lb_object_id}'>" . $lbdname[$lb_object_id]  . "</a></th>";
+		echo "</tr>\n";
+		foreach ($summary as $vip => $ports)
+			foreach ($ports as $vport => $lbs)
+			{
+				echo "<tr><td class=tdleft><a href='$root?page=ipaddress&tab=default&ip=${vip}'>${vip}</a>:${vport}</th>";
+				foreach ($lblist as $lb_object_id)
+					echo '<td>' . (isset ($lbs[$lb_object_id]) ? $lbs[$lb_object_id] : '&nbsp;') . '</td>';
+				echo "</tr>";
+			}
+		echo "</table>\n";
+	}
 	finishPortlet ();
 
 	echo '</td></tr></table>';

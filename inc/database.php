@@ -1969,14 +1969,33 @@ function getDatabaseVersion ()
 	return $ret;
 }
 
+// Return an array of virtual service. For each of them list configured
+// load balancers with real server counter.
 function getSLBSummary ()
 {
+	global $dbxlink;
 	$query = 'select IPRealServer.vsid, IPVirtualService.vip as vip_bin, ' .
 		'inet_ntoa(IPVirtualService.vip) as vip, IPVirtualService.vport, ro.id as object_id, ' .
 		'count(rsid) as rscount from IPLBConfig inner join RackObject as ro on ro.id = object_id ' .
 		'inner join IPRealServer on IPLBConfig.rsid = IPRealServer.id ' .
 		'inner join IPVirtualService on IPRealServer.vsid = IPVirtualService.vsid ' .
 		'group by ro.id, IPVirtualService.vsid order by vip_bin, object_id';
+	$result = $dbxlink->query ($query);
+	if ($result == NULL)
+	{
+		$errorInfo = $dbxlink->errorInfo();
+		showError ("SQL query '${query}' failed with message '${errorInfo[2]}'", __FUNCTION__);
+		return NULL;
+	}
+	$ret = array();
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
+	{
+		$object_id = $row['object_id'];
+		if (!isset ($ret[$row['vip']][$row['vport']]))
+			$ret[$row['vip']][$row['vport']] = array();
+		$ret[$row['vip']][$row['vport']][$object_id] = $row['rscount'];
+	}
+	return $ret;
 }
 
 ?>
