@@ -91,12 +91,12 @@ function renderRow ($row_id)
 {
 	if ($row_id == 0)
 	{
-		showError ('Invalid row_id in renderRow()');
+		showError ('Invalid row_id', __FUNCTION__);
 		return;
 	}
 	if (($rowInfo = getRackRowInfo ($row_id)) == NULL)
 	{
-		showError ('getRackRowInfo() failed in renderRow()');
+		showError ('getRackRowInfo() failed', __FUNCTION__);
 		return;
 	}
 	// Main layout starts.
@@ -135,10 +135,10 @@ function renderRow ($row_id)
 	echo "</td></tr></table>";
 }
 
-function showError ($info = '')
+function showError ($info = '', $funcname = 'N/A')
 {
 	global $root;
-	echo '<div class=msg_error>An error has occured. ';
+	echo '<div class=msg_error>An error has occured in function [${funcname}]. ';
 	if (empty ($info))
 		echo 'No additional information is available.';
 	else
@@ -151,12 +151,12 @@ function renderRack ($rack_id = 0, $hl_obj_id = 0)
 {
 	if ($rack_id == 0)
 	{
-		showError ('Invalid rack_id in renderRack()');
+		showError ('Invalid rack_id', __FUNCTION__);
 		return;
 	}
 	if (($rackData = getRackData ($rack_id)) == NULL)
 	{
-		showError ('getRackData() failed in renderRack()');
+		showError ('getRackData() failed', __FUNCTION__);
 		return;
 	}
 	global $root, $pageno, $tabno;
@@ -352,7 +352,7 @@ function renderEditObjectForm ($object_id)
 	$object = getObjectInfo ($object_id);
 	if ($object == NULL)
 	{
-		showError ('getObjectInfo() failed in renderEditObjectForm()');
+		showError ('getObjectInfo() failed', __FUNCTION__);
 		return;
 	}
 
@@ -466,7 +466,7 @@ function renderEditRackForm ($rack_id)
 	$rack = getRackData ($rack_id);
 	if ($rack == NULL)
 	{
-		showError ('getRackData() failed in renderEditRackForm()');
+		showError ('getRackData() failed', __FUNCTION__);
 		return;
 	}
 
