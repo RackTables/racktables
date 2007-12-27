@@ -1621,7 +1621,7 @@ function renderAddressspace ()
 	echo "<tr><th>Subnet</th><th>Name</th><th>Total/used addresses</th></tr>";
 	foreach ($addrspaceList as $iprange)
 	{
-		echo "<tr><td><a href='${root}?page=iprange&id=${iprange['id']}'>${iprange['ip']}/${iprange['mask']}</a></td><td>${iprange['name']}</td><td>";
+		echo "<tr><td class=tdleft><a href='${root}?page=iprange&id=${iprange['id']}'>${iprange['ip']}/${iprange['mask']}</a></td><td>${iprange['name']}</td><td>";
 		echo ($iprange['ip_bin'] | $iprange['mask_bin_inv']) - ($iprange['ip_bin'] & $iprange['mask_bin'])+1;
 		$range = getIPRange($iprange['id']);
 		echo "/";
