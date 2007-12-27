@@ -2001,7 +2001,36 @@ function getSLBSummary ()
 		}
 		$ret[$vsid]['rspools'][$row['object_id']] = $row['rscount'];
 	}
+	$result->closeCursor();
 	return $ret;
+}
+
+function getVServiceInfo ($vsid = 0)
+{
+	global $dbxlink;
+	$query = "select inet_ntoa(vip) as vip, vport, proto, name, vsconfig, default_rsconfig, " .
+		"rs.id as rsid, inet_ntoa(rs.rsip) as rsip, rsport as rsport from " .
+		"IPVirtualService as vs inner join IPRealServer as rs on vs.vsid = rs.vsid " .
+		"where vs.vsid = ${vsid} order by rsip, rsport";
+	$result = $dbxlink->query ($query);
+	if ($result == NULL)
+	{
+		showError ('SQL query failed', __FUNCTION__);
+		return NULL;
+	}
+	$vsinfo = array ();
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
+	{
+		if (!isset ($vsinfo['vip']))
+		{
+			foreach (array ('vip', 'vport', 'proto', 'name', 'vsconfig', 'default_rsconfig') as $cname)
+				$vsinfo[$cname] = $row[$cname];
+			$vsinfo['rslist'] = array();
+		}
+		$vsinfo['rslist'][] = array ('rsid' => $row['rsid'], 'rsip' => $row['rsip'], 'rsport' => $row['rsport']);
+	}
+	$result->closeCursor();
+	return $vsinfo;
 }
 
 ?>

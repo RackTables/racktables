@@ -3579,9 +3579,17 @@ function renderLVSConfig ($object_id = 0)
 	echo '</pre>';
 }
 
-function renderVirtualService ()
+function renderVirtualService ($vsid = 0)
 {
-	dragon();
+	if ($vsid <= 0)
+	{
+		showError ('Invalid vsid', __FUNCTION__);
+		return;
+	}
+	$vsinfo = getVServiceInfo ($vsid);
+echo '<pre>';
+print_r ($vsinfo);
+echo '</pre>';
 }
 
 ?>
