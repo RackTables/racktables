@@ -1976,7 +1976,7 @@ function getSLBSummary ()
 	global $dbxlink;
 	$query = 'select IPRealServer.vsid, IPVirtualService.vip as vip_bin, ' .
 		'inet_ntoa(IPVirtualService.vip) as vip, IPVirtualService.vport, ro.id as object_id, ' .
-		'count(rsid) as rscount, proto, IPVirtualService.vsid as vsid ' .
+		'count(rsid) as rscount, proto, IPVirtualService.vsid as vsid, IPVirtualService.name ' .
 		'from IPLBConfig inner join RackObject as ro on ro.id = object_id ' .
 		'inner join IPRealServer on IPLBConfig.rsid = IPRealServer.id ' .
 		'inner join IPVirtualService on IPRealServer.vsid = IPVirtualService.vsid ' .
