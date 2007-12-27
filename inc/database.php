@@ -1995,7 +1995,7 @@ function getSLBSummary ()
 		if (!isset ($ret[$vsid]))
 		{
 			$ret[$vsid] = array();
-			foreach (array ('vip', 'vport', 'proto') as $cname)
+			foreach (array ('vip', 'vport', 'proto', 'name') as $cname)
 				$ret[$vsid][$cname] = $row[$cname];
 			$ret[$vsid]['rspools'] = array();
 		}

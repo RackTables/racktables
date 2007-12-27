@@ -1655,7 +1655,7 @@ function renderAddressspace ()
 	else
 	{
 		echo "<table class='widetable' border=0 cellpadding=5 cellspacing=0 align='center'>\n";
-		echo "<tr><th>&nbsp;</th>";
+		echo "<tr><th>VIP</th><th>Name</th>";
 		foreach ($lblist as $lb_object_id)
 			echo "<th><a href='$root?page=object&tab=default&object_id=${lb_object_id}'>" . $lbdname[$lb_object_id]  . "</a></th>";
 		echo "</tr>\n";
@@ -1663,6 +1663,7 @@ function renderAddressspace ()
 		{
 			echo "<tr><td class=tdleft><a href='$root?page=vservice&tab=default&id=${vsid}'>";
 			echo $vsdata['vip'] . ':' . $vsdata['vport'] . '/' . $vsdata['proto'] . '</a></td>';
+			echo "<td>${vsdata['name']}</td>";
 			foreach ($lblist as $lb_object_id)
 				echo '<td>' . (isset ($vsdata['rspools'][$lb_object_id]) ? $vsdata['rspools'][$lb_object_id] : '&nbsp;') . '</td>';
 			echo "</tr>";
@@ -3576,6 +3577,11 @@ function renderLVSConfig ($object_id = 0)
 			}
 		}
 	echo '</pre>';
+}
+
+function renderVirtualService ()
+{
+	dragon();
 }
 
 ?>
