@@ -1049,4 +1049,14 @@ function parseWikiLink ($line, $which)
 		return $o_value;
 }
 
+function buildVServiceName ($vsinfo = NULL)
+{
+	if ($vsinfo == NULL)
+	{
+		showError ('NULL argument', __FUNCTION__);
+		return NULL;
+	}
+	return 'VS ' . $vsinfo['vip'] . ':' . $vsinfo['vport'] . '/' . $vsinfo['proto'];
+}
+
 ?>
