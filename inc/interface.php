@@ -3581,6 +3581,7 @@ function renderLVSConfig ($object_id = 0)
 
 function renderVirtualService ($vsid = 0)
 {
+	global $root;
 	if ($vsid <= 0)
 	{
 		showError ('Invalid vsid', __FUNCTION__);
