@@ -511,12 +511,12 @@ function renderGridForm ($rack_id = 0, $filter, $header, $submit, $state1, $stat
 {
 	if ($rack_id == 0)
 	{
-		showError ('Invalid rack_id in renderGridFrom()');
+		showError ('Invalid rack_id', __FUNCTION__);
 		return;
 	}
 	if (($rackData = getRackData ($rack_id)) == NULL)
 	{
-		showError ('getRackData() failed in renderGridFrom()');
+		showError ('getRackData() failed', __FUNCTION__);
 		return;
 	}
 
@@ -611,13 +611,13 @@ function renderRackObject ($object_id = 0)
 	global $root;
 	if ($object_id <= 0)
 	{
-		showError ('Invalid object_id in renderRackObject()');
+		showError ('Invalid object_id', __FUNCTION__);
 		return;
 	}
 	$info = getObjectInfo ($object_id);
 	if ($info == NULL)
 	{
-		showError ('getObjectInfo() failed in renderRackObject()');
+		showError ('getObjectInfo() failed', __FUNCTION__);
 		return;
 	}
 	// Main layout starts.
@@ -893,7 +893,7 @@ function renderPortsForObject ($object_id = 0)
 	global $root, $pageno, $tabno;
 	if ($object_id <= 0)
 	{
-		showError ('Invalid object_id in renderPortsForObject()');
+		showError ('Invalid object_id', __FUNCTION__);
 		return;
 	}
 	showMessageOrError();
@@ -1008,7 +1008,7 @@ function renderNetworkForObject ($object_id=0)
 	global $root, $pageno, $tabno;
 	if ($object_id <= 0)
 	{
-		showError ('Invalid object_id in renderNetworkForObject()');
+		showError ('Invalid object_id', __FUNCTION__);
 		return;
 	}
 	showMessageOrError();
@@ -1147,7 +1147,7 @@ function renderRackSpaceForObject ($object_id = 0)
 {
 	if ($object_id <= 0)
 	{
-		showError ('Invalid object_id in renderRackSpaceForObject()');
+		showError ('Invalid object_id', __FUNCTION__);
 		return;
 	}
 	$is_submit = isset ($_REQUEST['got_atoms']);
@@ -1155,7 +1155,7 @@ function renderRackSpaceForObject ($object_id = 0)
 	$info = getObjectInfo ($object_id);
 	if ($info == NULL)
 	{
-		showError ('getObjectInfo() failed in renderRackSpaceForObject()');
+		showError ('getObjectInfo() failed', __FUNCTION__);
 		return;
 	}
 	// Always process occupied racks plus racks chosen by user. First get racks with
@@ -1164,7 +1164,7 @@ function renderRackSpaceForObject ($object_id = 0)
 	if ($workingRacksData === NULL)
 	{
 		print_r ($workingRacksData);
-		showError ('getResidentRacksData() failed in renderRackSpaceForObject()');
+		showError ('getResidentRacksData() failed', __FUNCTION__);
 		return;
 	}
 
@@ -1177,7 +1177,7 @@ function renderRackSpaceForObject ($object_id = 0)
 				$rackData = getRackData ($cand_id);
 				if ($rackData == NULL)
 				{
-					showError ('getRackData() failed in renderRackSpaceForObject()');
+					showError ('getRackData() failed', __FUNCTION__);
 					return NULL;
 				}
 				$workingRacksData[$cand_id] = $rackData;
@@ -1344,7 +1344,7 @@ function renderUnmountedObjectsPortlet ()
 	$objs = getUnmountedObjects();
 	if ($objs === NULL)
 	{
-		showError ('getUnmountedObjects() failed in renderUnmountedObjectsPortlet()');
+		showError ('getUnmountedObjects() failed', __FUNCTION__);
 		return;
 	}
 	global $root, $nextorder;
@@ -1369,7 +1369,7 @@ function renderProblematicObjectsPortlet ()
 	$objs = getProblematicObjects();
 	if ($objs === NULL)
 	{
-		showError ('getProblematicObjects() failed in renderProblematicObjectsPortlet()');
+		showError ('getProblematicObjects() failed', __FUNCTION__);
 		return;
 	}
 	global $root, $nextorder;
@@ -1392,7 +1392,7 @@ function renderObjectGroupSummary ()
 	$summary = getObjectGroupInfo();
 	if ($summary === NULL)
 	{
-		showError ('getObjectGroupInfo() failed in renderObjectGroupSummary()');
+		showError ('getObjectGroupInfo() failed', __FUNCTION__);
 		return;
 	}
 	echo "<table border=0 class=objectview>\n";
@@ -1418,13 +1418,13 @@ function renderObjectGroup ($group_id = 0)
 	$summary = getObjectGroupInfo();
 	if ($summary == NULL)
 	{
-		showError ('getObjectGroupInfo() failed in renderObjectGroup()');
+		showError ('getObjectGroupInfo() failed', __FUNCTION__);
 		return;
 	}
 	$objects = getObjectList ($group_id);
 	if ($objects === NULL)
 	{
-		showError ('getObjectList() failed in renderObjectGroup()');
+		showError ('getObjectList() failed', __FUNCTION__);
 		return;
 	}
 	echo "<table border=0 class=objectview>\n";
@@ -1513,14 +1513,14 @@ function renderHistory ($object_type, $object_id)
 			$extra = 9;
 			break;
 		default:
-			showError ("Uknown object type '${object_type}' in renderHistory()");
+			showError ("Uknown object type '${object_type}'", __FUNCTION__);
 			return;
 	}
 	global $dbxlink;
 	$result = $dbxlink->query ($query);
 	if ($result == NULL)
 	{
-		showError ('SQL query failed in renderHistory()');
+		showError ('SQL query failed', __FUNCTION__);
 		return;
 	}
 	echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
@@ -2218,12 +2218,12 @@ function renderSearchResults ()
 	$terms = trim ($_REQUEST['q']);
 	if (empty ($terms))
 	{
-		showError ('Search string cannot be empty.');
+		showError ('Search string cannot be empty.', __FUNCTION__);
 		return;
 	}
 	if (!authorized ($remote_username, 'object', 'default'))
 	{
-		showError ('You are not authorized for viewing information about objects.');
+		showError ('You are not authorized for viewing information about objects.', __FUNCTION__);
 		return;
 	}
 	// If we search for L2 address, we can either find one or find none.
@@ -2557,12 +2557,12 @@ function renderRackPage ($rack_id)
 {
 	if ($rack_id == 0)
 	{
-		showError ('Invalid rack_id in renderRackPage()');
+		showError ('Invalid rack_id', __FUNCTION__);
 		return;
 	}
 	if (($rackData = getRackData ($rack_id)) == NULL)
 	{
-		showError ('getRackData() failed in renderRackPage()');
+		showError ('getRackData() failed', __FUNCTION__);
 		return;
 	}
 	echo "<table border=0 class=objectview cellspacing=0 cellpadding=0><tr>";
@@ -3024,7 +3024,7 @@ function renderVLANMembership ($object_id = 0)
 	global $root, $pageno, $tabno, $remote_username;
 	if ($object_id <= 0)
 	{
-		showError ('Invalid object_id in renderVLANMembership()');
+		showError ('Invalid object_id', __FUNCTION__);
 		return;
 	}
 
@@ -3034,7 +3034,7 @@ function renderVLANMembership ($object_id = 0)
 		$data = getSwitchVLANs ($object_id);
 		if ($data === NULL)
 		{
-			showError ('getSwitchVLANs() failed in renderVLANMembership() during submit processing');
+			showError ('getSwitchVLANs() failed during submit processing', __FUNCTION__);
 			return;
 		}
 		list ($vlanlist, $portlist) = $data;
@@ -3209,7 +3209,7 @@ function renderSNMPPortFinder ($object_id = 0)
 	global $root, $pageno, $tabno, $remote_username;
 	if ($object_id <= 0)
 	{
-		showError ('Invalid object_id in renderSNMPPortFinder()');
+		showError ('Invalid object_id', __FUNCTION__);
 		return;
 	}
 // FIXME: check if SNMP PHP extension is available!
@@ -3480,7 +3480,7 @@ function renderSNMPPortFinder ($object_id = 0)
 				}
 				break;
 			default:
-				showError ("Unexpected sysObjectID '${sysObjectID}' in renderSNMPPortFinder()");
+				showError ("Unexpected sysObjectID '${sysObjectID}'", __FUNCTION__);
 		}
 		$error = commitAddPort ($object_id, 'con0', 29, 'console', '');
 		if ($error == '')
@@ -3542,7 +3542,7 @@ function renderLVSConfig ($object_id = 0)
 {
 	if ($object_id <= 0)
 	{
-		showError ('Invalid object_id in renderLVSConfig()');
+		showError ('Invalid object_id', __FUNCTION__);
 		return;
 	}
 	$natrules = getObjectForwards ($object_id);
