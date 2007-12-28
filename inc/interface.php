@@ -3613,7 +3613,7 @@ function renderVirtualService ($vsid = 0)
 	echo "<tr><th>Real IP address</th><th>Real port</th><th>[LBs]</tr>\n";
 	foreach ($vsinfo['rslist'] as $rsinfo)
 	{
-		echo "<tr><td><a href='${root}?page=ipv4address&tab=default&ip=${rsinfo['rsip']}'>${rsinfo['rsip']}</a></td>";
+		echo "<tr><td><a href='${root}?page=ipaddress&tab=default&ip=${rsinfo['rsip']}'>${rsinfo['rsip']}</a></td>";
 		echo "<td>${rsinfo['rsport']}</td>";
 		echo "<td>[LB config]</td></tr>";
 	}
