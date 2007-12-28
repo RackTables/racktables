@@ -11,7 +11,7 @@ function authenticate ()
 {
 	if (array_search (PASSWORD_HASH, hash_algos()) === FALSE)
 	{
-		showError ('Password hash not supported, authentication impossible.');
+		showError ('Password hash not supported, authentication impossible.', __FUNCTION__);
 		die();
 	}
 	if
@@ -78,7 +78,7 @@ function getHashByID ($user_id = 0)
 {
 	if ($user_id <= 0)
 	{
-		showError ('Invalid user_id in getHashByID()');
+		showError ('Invalid user_id', __FUNCTION__);
 		return NULL;
 	}
 	global $accounts;
