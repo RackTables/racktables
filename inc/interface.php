@@ -3429,12 +3429,22 @@ function renderSNMPPortFinder ($object_id = 0)
 				break;
 			case '616': // WS-C3560G-48PS
 			case '617': // WS-C3560G-48TS
+				for ($i = 1; $i <= 48; $i++)
+				{
+					$label = "${i}X";
+					$error = commitAddPort ($object_id, 'gi0/' . $i, 24, $label, $ifList2["GigabitEthernet0/${i}"]['phyad']);
+					if ($error == '')
+						$newports++;
+					else
+						$log[] = array ('code' => 'error', 'message' => 'Failed to add port ' . $label . ': ' . $error);
+				}
+				break;
 			case '626': // WS-C4948
 			case '659': // WS-C4948-10GE
 				for ($i = 1; $i <= 48; $i++)
 				{
 					$label = "${i}X";
-					$error = commitAddPort ($object_id, 'gi0/' . $i, 24, $label, $ifList2["GigabitEthernet0/${i}"]['phyad']);
+					$error = commitAddPort ($object_id, 'gi1/' . $i, 24, $label, $ifList2["GigabitEthernet1/${i}"]['phyad']);
 					if ($error == '')
 						$newports++;
 					else
