@@ -3602,7 +3602,7 @@ function renderVirtualService ($vsid = 0)
 	if (!empty ($vsinfo['name']))
 		echo "<tr><th width='50%' class=tdright>Name:</th><td class=tdleft>${vsinfo['name']}</td></tr>\n";
 	echo "<tr><th width='50%' class=tdright>Protocol:</th><td class=tdleft>${vsinfo['proto']}</td></tr>\n";
-	echo "<tr><th width='50%' class=tdright>Virtual IP address:</th><td class=tdleft>${vsinfo['vip']}</td></tr>\n";
+	echo "<tr><th width='50%' class=tdright>Virtual IP address:</th><td class=tdleft><a href='${root}?page=ipaddress&tab=default&ip=${vsinfo['vip']}'>${vsinfo['vip']}</a></td></tr>\n";
 	echo "<tr><th width='50%' class=tdright>Virtual port:</th><td class=tdleft>${vsinfo['vport']}</td></tr>\n";
 	echo "</table>\n";
 	finishPortlet ();
