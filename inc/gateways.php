@@ -70,19 +70,19 @@ function getSwitchVLANs ($object_id = 0)
 	global $remote_username;
 	if ($object_id <= 0)
 	{
-		showError ('Invalid object_id in getSwitchVLANs()');
+		showError ('Invalid object_id', __FUNCTION__);
 		return;
 	}
 	$objectInfo = getObjectInfo ($object_id);
 	$endpoints = findAllEndpoints ($object_id, $objectInfo['name']);
 	if (count ($endpoints) == 0)
 	{
-		showError ('Can\'t find any mean to reach current object. Please either set FQDN attribute or assign an IP address to the object.');
+		showError ('Can\'t find any mean to reach current object. Please either set FQDN attribute or assign an IP address to the object.', __FUNCTION__);
 		return NULL;
 	}
 	if (count ($endpoints) > 1)
 	{
-		showError ('More than one IP address is assigned to this object, please configure FQDN attribute.');
+		showError ('More than one IP address is assigned to this object, please configure FQDN attribute.', __FUNCTION__);
 		return NULL;
 	}
 	$hwtype = $swtype = 'unknown';
@@ -104,24 +104,24 @@ function getSwitchVLANs ($object_id = 0)
 	$data = queryGateway ('switchvlans', $commands);
 	if ($data == NULL)
 	{
-		showError ('Failed to get any response from queryGateway() or the gateway died');
+		showError ('Failed to get any response from queryGateway() or the gateway died', __FUNCTION__);
 		return NULL;
 	}
 	if (strpos ($data[0], 'OK!') !== 0)
 	{
-		showError ("Gateway failure: returned code ${data[0]}.");
+		showError ("Gateway failure: returned code ${data[0]}.", __FUNCTION__);
 		return NULL;
 	}
 	if (count ($data) != count ($commands))
 	{
-		showError ("Gateway failure: mailformed reply.");
+		showError ("Gateway failure: mailformed reply.", __FUNCTION__);
 		return NULL;
 	}
 	// Now we have VLAN list in $data[1] and port list in $data[2]. Let's sort this out.
 	$tmp = array_unique (explode (';', substr ($data[1], strlen ('OK!'))));
 	if (count ($tmp) == 0)
 	{
-		showError ("Gateway succeeded, but returned no VLAN records.");
+		showError ("Gateway succeeded, but returned no VLAN records.", __FUNCTION__);
 		return NULL;
 	}
 	$vlanlist = array();
@@ -139,7 +139,7 @@ function getSwitchVLANs ($object_id = 0)
 	}
 	if (count ($portlist) == 0)
 	{
-		showError ("Gateway succeeded, but returned no port records.");
+		showError ("Gateway succeeded, but returned no port records.", __FUNCTION__);
 		return NULL;
 	}
 	$maclist = array();

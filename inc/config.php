@@ -24,12 +24,12 @@ function getConfigVar ($varname = '')
 	// has failed, we don't retry loading.
 	if (!isset ($configCache))
 	{
-		showError ("Configuration cache is unavailable in getConfigVar()");
+		showError ("Configuration cache is unavailable", __FUNCTION__);
 		die;
 	}
 	if ($varname == '')
 	{
-		showError ("Missing argument to getConfigVar()");
+		showError ("Missing argument", __FUNCTION__);
 		die;
 	}
 	if (isset ($configCache[$varname]))
@@ -50,18 +50,18 @@ function setConfigVar ($varname = '', $varvalue = '', $softfail = FALSE)
 	global $configCache;
 	if (!isset ($configCache))
 	{
-		showError ('Configuration cache is unavailable in setConfigVar()');
+		showError ('Configuration cache is unavailable', __FUNCTION__);
 		die;
 	}
 	if (empty ($varname))
 	{
-		showError ("Empty argument to setConfigVar()");
+		showError ("Empty argument", __FUNCTION__);
 		die;
 	}
 	// We don't operate on unknown data.
 	if (!isset ($configCache[$varname]))
 	{
-		showError ("setConfigVar() doesn't know how to handle '${varname}'");
+		showError ("don't know how to handle '${varname}'", __FUNCTION__);
 		die;
 	}
 	if (empty ($varvalue) && $configCache[$varname]['emptyok'] != 'yes')
@@ -69,7 +69,7 @@ function setConfigVar ($varname = '', $varvalue = '', $softfail = FALSE)
 		$errormsg = "'${varname}' is configured to take non-empty value. Perhaps there was a reason to do so.";
 		if ($softfail)
 			return $errormsg;
-		showError ($errormsg);
+		showError ($errormsg, __FUNCTION__);
 		die;
 	}
 	if (!empty ($varvalue) && $configCache[$varname]['vartype'] == 'uint' && (!is_numeric ($varvalue) or $varvalue < 0 ))
@@ -77,7 +77,7 @@ function setConfigVar ($varname = '', $varvalue = '', $softfail = FALSE)
 		$errormsg = "'${varname}' can accept UINT values only";
 		if ($softfail)
 			return $errormsg;
-		showError ($errormsg);
+		showError ($errormsg, __FUNCTION__);
 		die;
 	}
 	// Update cache only if the changes went into DB.

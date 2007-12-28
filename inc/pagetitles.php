@@ -39,7 +39,7 @@ function dynamic_title_row ()
 			$rack = getRackData ($_REQUEST['rack_id']);
 			if ($rack == NULL)
 			{
-				showError ('getRackData() failed in dynamic_title_row()');
+				showError ('getRackData() failed', __FUNCTION__);
 				return NULL;
 			}
 			$ret['name'] = $rack['row_name'];
@@ -50,7 +50,7 @@ function dynamic_title_row ()
 			$rowInfo = getRackRowInfo ($_REQUEST['row_id']);
 			if ($rowInfo == NULL)
 			{
-				showError ('getRackRowInfo() failed in dynamic_title_row()');
+				showError ('getRackRowInfo() failed', __FUNCTION__);
 				return NULL;
 			}
 			$ret['name'] = $rowInfo['dict_value'];
@@ -79,7 +79,7 @@ function dynamic_title_object ()
 			$object = getObjectInfo ($_REQUEST['object_id']);
 			if ($object == NULL)
 			{
-				showError ('getObjectInfo() failed in dynamic_title_object()');
+				showError ('getObjectInfo() failed', __FUNCTION__);
 				return NULL;
 			}
 			$ret['name'] = $object['dname'];
@@ -134,7 +134,7 @@ function dynamic_title_objgroup ()
 			$groupInfo = getObjectGroupInfo ($_REQUEST['group_id']);
 			if ($groupInfo == NULL)
 			{
-				showError ('getObjectGroupInfo() failed in dynamic_title_objgroup()');
+				showError ('getObjectGroupInfo() failed', __FUNCTION__);
 				return NULL;
 			}
 			$ret['name'] = $groupInfo['name'];
@@ -145,7 +145,7 @@ function dynamic_title_objgroup ()
 			$objectInfo = getObjectInfo ($_REQUEST['object_id']);
 			if ($objectInfo == NULL)
 			{
-				showError ('getObjectInfo() failed in dynamic_title_objgroup()');
+				showError ('getObjectInfo() failed', __FUNCTION__);
 				return NULL;
 			}
 			$ret['name'] = $objectInfo['objtype_name'];

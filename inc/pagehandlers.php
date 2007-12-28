@@ -11,22 +11,22 @@ function assertUIntArg ($argname, $allow_zero = FALSE)
 {
 	if (!isset ($_REQUEST[$argname]))
 	{
-		showError ("Parameter '${argname}' is missing.");
+		showError ("Parameter '${argname}' is missing.", __FUNCTION__);
 		die();
 	}
 	if (!is_numeric ($_REQUEST[$argname]))
 	{
-		showError ("Parameter '${argname}' is not a number.");
+		showError ("Parameter '${argname}' is not a number.", __FUNCTION__);
 		die();
 	}
 	if ($_REQUEST[$argname] < 0)
 	{
-		showError ("Parameter '${argname}' is less than zero.");
+		showError ("Parameter '${argname}' is less than zero.", __FUNCTION__);
 		die();
 	}
 	if (!$allow_zero and $_REQUEST[$argname] == 0)
 	{
-		showError ("Parameter '${argname}' is equal to zero.");
+		showError ("Parameter '${argname}' is equal to zero.", __FUNCTION__);
 		die();
 	}
 }
@@ -37,17 +37,17 @@ function assertStringArg ($argname, $ok_if_empty = FALSE)
 {
 	if (!isset ($_REQUEST[$argname]))
 	{
-		showError ("Parameter '${argname}' is missing.");
+		showError ("Parameter '${argname}' is missing.", __FUNCTION__);
 		die();
 	}
 	if (!is_string ($_REQUEST[$argname]))
 	{
-		showError ("Parameter '${argname}' is not a string.");
+		showError ("Parameter '${argname}' is not a string.", __FUNCTION__);
 		die();
 	}
 	if (!$ok_if_empty and empty ($_REQUEST[$argname]))
 	{
-		showError ("Parameter '${argname}' is an empty string.");
+		showError ("Parameter '${argname}' is an empty string.", __FUNCTION__);
 		die();
 	}
 }
@@ -56,17 +56,17 @@ function assertBoolArg ($argname, $ok_if_empty = FALSE)
 {
 	if (!isset ($_REQUEST[$argname]))
 	{
-		showError ("Parameter '${argname}' is missing.");
+		showError ("Parameter '${argname}' is missing.", __FUNCTION__);
 		die();
 	}
 	if (!is_string ($_REQUEST[$argname]) or $_REQUEST[$argname] != 'on')
 	{
-		showError ("Parameter '${argname}' is not a string.");
+		showError ("Parameter '${argname}' is not a string.", __FUNCTION__);
 		die();
 	}
 	if (!$ok_if_empty and empty ($_REQUEST[$argname]))
 	{
-		showError ("Parameter '${argname}' is an empty string.");
+		showError ("Parameter '${argname}' is an empty string.", __FUNCTION__);
 		die();
 	}
 }
@@ -90,7 +90,7 @@ function handler_config ($tabno)
 			renderConfigMainpage();
 			break;
 		default:
-			showError ("Invalid tab '${tabno}' requested in handler_config().");
+			showError ("Invalid tab '${tabno}' requested.", __FUNCTION__);
 	}
 }
 
@@ -105,7 +105,7 @@ function handler_portmap ($tabno)
 			renderPortMap (TRUE);
 			break;
 		default:
-			showError ("Invalid tab '${tabno}' requested in handler_portmap().");
+			showError ("Invalid tab '${tabno}' requested.", __FUNCTION__);
 	}
 }
 

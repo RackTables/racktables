@@ -527,7 +527,7 @@ function updateUserAccount ()
 	$old_hash = getHashByID ($id);
 	if ($old_hash == NULL)
 	{
-		showError ('getHashByID() failed in updateUserAccount()');
+		showError ('getHashByID() failed', __FUNCTION__);
 		return;
 	}
 	// Update user password only if provided password is not the same as current password hash.
@@ -643,7 +643,7 @@ function savePortMap ()
 							$error_count++;
 						break;
 					default:
-						showError ('oldCompatTable is invalid in savePortMap()');
+						showError ('oldCompatTable is invalid', __FUNCTION__);
 						break;
 				}
 	return
@@ -830,7 +830,7 @@ function updateAttrValues ()
 				$oldvalue = $oldvalues[$attr_id]['key'];
 				break;
 			default:
-				showError ('Internal structure error in updateAttrValues()');
+				showError ('Internal structure error', __FUNCTION__);
 				die;
 		}
 		if ($value == $oldvalue)

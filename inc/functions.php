@@ -111,7 +111,7 @@ function markAllSpans (&$rackData = NULL)
 {
 	if ($rackData == NULL)
 	{
-		showError ('Invalid rackData in markAllSpans()');
+		showError ('Invalid rackData', __FUNCTION__);
 		return;
 	}
 	for ($i = $rackData['height']; $i > 0; $i--)
@@ -141,7 +141,7 @@ function delRow ($row_id = 0)
 {
 	if ($row_id == 0)
 	{
-		showError ('Not all required args to delRow() are present.');
+		showError ('Not all required args are present.', __FUNCTION__);
 		return;
 	}
 	if (!isset ($_REQUEST['confirmed']) || $_REQUEST['confirmed'] != 'true')
@@ -154,7 +154,7 @@ function delRow ($row_id = 0)
 	$result = $dbxlink->query ("update RackRow set deleted = 'yes' where id=${row_id} limit 1");
 	if ($result->rowCount() != 1)
 	{
-		showError ('Marked ' . $result.rowCount() . ' rows as deleted, but expected 1');
+		showError ('Marked ' . $result.rowCount() . ' rows as deleted, but expected 1', __FUNCTION__);
 		return;
 	}
 	echo 'OK<br>';
@@ -166,7 +166,7 @@ function delRack ($rack_id = 0)
 {
 	if ($rack_id == 0)
 	{
-		showError ('Not all required args to delRack() are present.');
+		showError ('Not all required args are present.', __FUNCTION__);
 		return;
 	}
 	if (!isset ($_REQUEST['confirmed']) || $_REQUEST['confirmed'] != 'true')
@@ -179,7 +179,7 @@ function delRack ($rack_id = 0)
 	$result = $dbxlink->query ("update Rack set deleted = 'yes' where id=${rack_id} limit 1");
 	if ($result->rowCount() != 1)
 	{
-		showError ('Marked ' . $result.rowCount() . ' rows as deleted, but expected 1');
+		showError ('Marked ' . $result.rowCount() . ' rows as deleted, but expected 1', __FUNCTION__);
 		return;
 	}
 	echo 'OK<br>';
@@ -191,7 +191,7 @@ function delObject ($object_id = 0)
 {
 	if ($object_id == 0)
 	{
-		showError ('Not all required args to delObject() are present.');
+		showError ('Not all required args are present.', __FUNCTION__);
 		return;
 	}
 	if (!isset ($_REQUEST['confirmed']) || $_REQUEST['confirmed'] != 'true')
@@ -204,7 +204,7 @@ function delObject ($object_id = 0)
 	$result = $dbxlink->query ("update RackObject set deleted = 'yes' where id=${object_id} limit 1");
 	if ($result->rowCount() != 1)
 	{
-		showError ('Marked ' . $result.rowCount() . ' rows as deleted, but expected 1');
+		showError ('Marked ' . $result.rowCount() . ' rows as deleted, but expected 1', __FUNCTION__);
 		return;
 	}
 	echo 'OK<br>';
@@ -653,7 +653,7 @@ function mergeSearchResults (&$objects, $terms, $fieldname)
 	$result = $dbxlink->query($query);
 	if ($result == NULL)
 	{
-		showError ("SQL query failed in mergeSearchResults()");
+		showError ("SQL query failed", __FUNCTION__);
 		return NULL;
 	}
 // FIXME: this dead call was executed 4 times per 1 object search!
@@ -731,7 +731,7 @@ function getPrevIDforRack ($row_id = 0, $rack_id = 0)
 {
 	if ($row_id <= 0 or $rack_id <= 0)
 	{
-		showError ('Invalid arguments passed to getPrevIDforRack()');
+		showError ('Invalid arguments passed', __FUNCTION__);
 		return NULL;
 	}
 	$rackList = getRacksForRow ($row_id);
@@ -745,7 +745,7 @@ function getNextIDforRack ($row_id = 0, $rack_id = 0)
 {
 	if ($row_id <= 0 or $rack_id <= 0)
 	{
-		showError ('Invalid arguments passed to getNextIDforRack()');
+		showError ('Invalid arguments passed', __FUNCTION__);
 		return NULL;
 	}
 	$rackList = getRacksForRow ($row_id);
