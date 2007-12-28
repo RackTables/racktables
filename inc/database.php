@@ -26,7 +26,7 @@ function getRackRowInfo ($rackrow_id = 0)
 	$result = $dbxlink->query ($query);
 	if ($result == NULL)
 	{
-		showError ('SQL query failed in getRackRowInfo()');
+		showError ('SQL query failed', __FUNCTION__);
 		return NULL;
 	}
 	$ret = array();
@@ -63,7 +63,7 @@ function getObjectList ($type_id = 0)
 	$result = $dbxlink->query ($query);
 	if ($result == NULL)
 	{
-		showError ('SQL query failed in getObjectList()');
+		showError ('SQL query failed', __FUNCTION__);
 		return;
 	}
 	$ret = array();
@@ -100,7 +100,7 @@ function getRacksForRow ($row_id = 0)
 	$result = $dbxlink->query ($query);
 	if ($result == NULL)
 	{
-		showError ('SQL query failed in getRacksForRow()');
+		showError ('SQL query failed', __FUNCTION__);
 		return;
 	}
 	$ret = array();
@@ -131,7 +131,7 @@ function getRackData ($rack_id = 0, $silent = FALSE)
 	if ($rack_id == 0)
 	{
 		if ($silent == FALSE)
-			showError ('Invalid rack_id in getRackData()');
+			showError ('Invalid rack_id', __FUNCTION__);
 		return NULL;
 	}
 	global $dbxlink;
@@ -144,13 +144,13 @@ function getRackData ($rack_id = 0, $silent = FALSE)
 	if ($result1 == NULL)
 	{
 		if ($silent == FALSE)
-			showError ("SQL query #1 failed in getRackData()");
+			showError ("SQL query #1 failed", __FUNCTION__);
 		return NULL;
 	}
 	if (($row = $result1->fetch (PDO::FETCH_ASSOC)) == NULL)
 	{
 		if ($silent == FALSE)
-			showError ('Query #1 succeded, but returned no data in getRackData()');
+			showError ('Query #1 succeded, but returned no data', __FUNCTION__);
 		return NULL;
 	}
 
@@ -184,7 +184,7 @@ function getRackData ($rack_id = 0, $silent = FALSE)
 	if ($result2 == NULL)
 	{
 		if ($silent == FALSE)
-			showError ('SQL query failure #2 in getRackData()');
+			showError ('SQL query failure #2', __FUNCTION__);
 		return NULL;
 	}
 	global $loclist;
@@ -202,7 +202,7 @@ function getObjectInfo ($object_id = 0)
 {
 	if ($object_id == 0)
 	{
-		showError ('Invalid object_id in getObjectInfo()');
+		showError ('Invalid object_id', __FUNCTION__);
 		return;
 	}
 	global $dbxlink;
@@ -214,12 +214,12 @@ function getObjectInfo ($object_id = 0)
 	if ($result == NULL)
 	{
 		$ei = $dbxlink->errorInfo();
-		showError ("SQL query failed in getObjectInfo (${object_id}) with error ${ei[1]} (${ei[2]})");
+		showError ("SQL query failed with error ${ei[1]} (${ei[2]})", __FUNCTION__);
 		return NULL;
 	}
 	if (($row = $result->fetch (PDO::FETCH_ASSOC)) == NULL)
 	{
-		showError ('Query succeded, but returned no data in getObjectInfo()');
+		showError ('Query succeded, but returned no data', __FUNCTION__);
 		$ret = NULL;
 	}
 	else
@@ -248,7 +248,7 @@ function getObjectPortsAndLinks ($object_id = 0)
 {
 	if ($object_id == 0)
 	{
-		showError ('Invalid object_id in getObjectPorts()');
+		showError ('Invalid object_id', __FUNCTION__);
 		return;
 	}
 	global $dbxlink;
@@ -319,7 +319,7 @@ function commitAddRack ($name, $height, $row_id, $comment)
 	$result1 = $dbxlink->query ($query);
 	if ($result1 == NULL)
 	{
-		showError ('SQL query failed in commitAddRack()');
+		showError ('SQL query failed', __FUNCTION__);
 		return FALSE;
 	}
 	// last_insert_id() is MySQL-specific
@@ -327,7 +327,7 @@ function commitAddRack ($name, $height, $row_id, $comment)
 	$result2 = $dbxlink->query ($query);
 	if ($result2 == NULL)
 	{
-		showError ('Cannot get last ID in commitAddRack()');
+		showError ('Cannot get last ID', __FUNCTION__);
 		return FALSE;
 	}
 	// we always have a row
@@ -351,12 +351,12 @@ function commitAddObject ($new_name, $new_label, $new_barcode, $new_type_id, $ne
 	if ($result1 == NULL)
 	{
 		$errorInfo = $dbxlink->errorInfo();
-		showError ("SQL query '${query}' failed in commitAddObject(): " . $errorInfo[2]);
+		showError ("SQL query '${query}' failed: ${errorInfo[2]}", __FUNCTION__);
 		die;
 	}
 	if ($result1->rowCount() != 1)
 	{
-		showError ('Adding new object failed in commitAddObject()');
+		showError ('Adding new object failed', __FUNCTION__);
 		return FALSE;
 	}
 	$query = 'select last_insert_id()';
@@ -364,7 +364,7 @@ function commitAddObject ($new_name, $new_label, $new_barcode, $new_type_id, $ne
 	if ($result2 == NULL)
 	{
 		$errorInfo = $dbxlink->errorInfo();
-		showError ("SQL query '${query}' failed in commitAddObject(): " . $errorInfo[2]);
+		showError ("SQL query '${query}' failed: ${errorInfo[2]}", __FUNCTION__);
 		die;
 	}
 	// we always have a row
@@ -378,7 +378,7 @@ function commitUpdateObject ($object_id = 0, $new_name = '', $new_label = '', $n
 {
 	if ($object_id == 0 || $new_type_id == 0)
 	{
-		showError ('Not all required args to commitUpdateObject() are present.');
+		showError ('Not all required args are present.', __FUNCTION__);
 		return FALSE;
 	}
 	global $dbxlink;
@@ -391,12 +391,12 @@ function commitUpdateObject ($object_id = 0, $new_name = '', $new_label = '', $n
 	$result = $dbxlink->query ($query);
 	if ($result == NULL)
 	{
-		showError ("SQL query '${query}' failed in commitUpdateObject");
+		showError ("SQL query '${query}' failed", __FUNCTION__);
 		return FALSE;
 	}
 	if ($result->rowCount() != 1)
 	{
-		showError ('Error updating object information in commitUpdateObject()');
+		showError ('Error updating object information', __FUNCTION__);
 		return FALSE;
 	}
 	$result->closeCursor();
@@ -407,7 +407,7 @@ function commitUpdateRack ($rack_id, $new_name, $new_height, $new_row_id, $new_c
 {
 	if (empty ($rack_id) || empty ($new_name) || empty ($new_height))
 	{
-		showError ('Not all required args to commitUpdateRack() are present.');
+		showError ('Not all required args are present.', __FUNCTION__);
 		return FALSE;
 	}
 	global $dbxlink;
@@ -416,7 +416,7 @@ function commitUpdateRack ($rack_id, $new_name, $new_height, $new_row_id, $new_c
 	$result1 = $dbxlink->query ($query);
 	if ($result1->rowCount() != 1)
 	{
-		showError ('Error updating rack information in commitUpdateRack()');
+		showError ('Error updating rack information', __FUNCTION__);
 		return FALSE;
 	}
 	return recordHistory ('Rack', "id = ${rack_id}");
@@ -501,7 +501,7 @@ function getMoleculeForObject ($object_id = 0)
 {
 	if ($object_id == 0)
 	{
-		showError ("object_id == 0 in getMoleculeForObject()");
+		showError ("object_id == 0", __FUNCTION__);
 		return NULL;
 	}
 	global $dbxlink;
@@ -511,7 +511,7 @@ function getMoleculeForObject ($object_id = 0)
 	$result = $dbxlink->query ($query);
 	if ($result == NULL)
 	{
-		showError ("SQL query failed in getMoleculeForObject()");
+		showError ("SQL query failed", __FUNCTION__);
 		return NULL;
 	}
 	$ret = $result->fetchAll (PDO::FETCH_ASSOC);
@@ -524,7 +524,7 @@ function getMolecule ($mid = 0)
 {
 	if ($mid == 0)
 	{
-		showError ("mid == 0 in getMolecule()");
+		showError ("mid == 0", __FUNCTION__);
 		return NULL;
 	}
 	global $dbxlink;
@@ -534,7 +534,7 @@ function getMolecule ($mid = 0)
 	$result = $dbxlink->query ($query);
 	if ($result == NULL)
 	{
-		showError ("SQL query failed in getMolecule()");
+		showError ("SQL query failed", __FUNCTION__);
 		return NULL;
 	}
 	$ret = $result->fetchAll (PDO::FETCH_ASSOC);
@@ -551,14 +551,14 @@ function createMolecule ($molData)
 	$result1 = $dbxlink->query ($query);
 	if ($result1->rowCount() != 1)
 	{
-		showError ('Error inserting into Molecule in createMolecule()');
+		showError ('Error inserting into Molecule', __FUNCTION__);
 		return NULL;
 	}
 	$query = 'select last_insert_id()';
 	$result2 = $dbxlink->query ($query);
 	if ($result2 == NULL)
 	{
-		showError ('Cannot get last ID in createMolecule().');
+		showError ('Cannot get last ID.', __FUNCTION__);
 		return NULL;
 	}
 	$row = $result2->fetch (PDO::FETCH_NUM);
@@ -575,7 +575,7 @@ function createMolecule ($molData)
 		$result3 = $dbxlink->query ($query);
 		if ($result3 == NULL or $result3->rowCount() != 1)
 		{
-			showError ('Error inserting into Atom in createMolecule()');
+			showError ('Error inserting into Atom', __FUNCTION__);
 			return NULL;
 		}
 	}
@@ -594,7 +594,7 @@ function recordHistory ($tableName, $whereClause)
 	$result = $dbxlink->query ($query);
 	if ($result == NULL or $result->rowCount() != 1)
 	{
-		showError ("SQL query failed in recordHistory() for table ${tableName}");
+		showError ("SQL query failed for table ${tableName}", __FUNCTION__);
 		return FALSE;
 	}
 	return TRUE;
@@ -611,7 +611,7 @@ function getRackspaceHistory ()
 	$result = $dbxlink->query ($query);
 	if ($result == NULL)
 	{
-		showError ('SQL query failed in getRackspaceHistory()');
+		showError ('SQL query failed', __FUNCTION__);
 		return;
 	}
 	$ret = $result->fetchAll(PDO::FETCH_ASSOC);
@@ -624,7 +624,7 @@ function getOperationMolecules ($op_id = 0)
 {
 	if ($op_id <= 0)
 	{
-		showError ("Missing argument to getOperationMolecules()");
+		showError ("Missing argument", __FUNCTION__);
 		return;
 	}
 	global $dbxlink;
@@ -632,14 +632,14 @@ function getOperationMolecules ($op_id = 0)
 	$result = $dbxlink->query ($query);
 	if ($result == NULL)
 	{
-		showError ("SQL query failed in getOperationMolecules()");
+		showError ("SQL query failed", __FUNCTION__);
 		return;
 	}
 	// We expect one row.
 	$row = $result->fetch (PDO::FETCH_ASSOC);
 	if ($row == NULL)
 	{
-		showError ("SQL query succeded, but returned no results in getOperationMolecules().");
+		showError ("SQL query succeded, but returned no results.", __FUNCTION__);
 		return;
 	}
 	$omid = $row['old_molecule_id'];
@@ -652,7 +652,7 @@ function getResidentRacksData ($object_id = 0)
 {
 	if ($object_id <= 0)
 	{
-		showError ('Invalid object_id in getResidentRacksData()');
+		showError ('Invalid object_id', __FUNCTION__);
 		return;
 	}
 	$query = "select distinct rack_id from RackSpace where object_id = ${object_id} order by rack_id";
@@ -660,7 +660,7 @@ function getResidentRacksData ($object_id = 0)
 	$result = $dbxlink->query ($query);
 	if ($result == NULL)
 	{
-		showError ("SQL query failed in getResidentRacksData()");
+		showError ("SQL query failed", __FUNCTION__);
 		return;
 	}
 	$rows = $result->fetchAll (PDO::FETCH_NUM);
@@ -671,7 +671,7 @@ function getResidentRacksData ($object_id = 0)
 		$rackData = getRackData ($row[0]);
 		if ($rackData == NULL)
 		{
-			showError ('getRackData() failed in getResidentRacksData()');
+			showError ('getRackData() failed', __FUNCTION__);
 			return NULL;
 		}
 		$ret[$row[0]] = $rackData;
@@ -692,7 +692,7 @@ function getObjectGroupInfo ($group_id = 0)
 	$result = $dbxlink->query ($query);
 	if ($result == NULL)
 	{
-		showError ('SQL query failed in getObjectGroupSummary');
+		showError ('SQL query failed', __FUNCTION__);
 		return NULL;
 	}
 	$ret = array();
@@ -721,7 +721,7 @@ function getUnmountedObjects ()
 	$result = $dbxlink->query ($query);
 	if ($result == NULL)
 	{
-		showError ('SQL query failure in getUnmountedObjects()');
+		showError ('SQL query failure', __FUNCTION__);
 		return NULL;
 	}
 	$ret = array();
@@ -746,7 +746,7 @@ function getProblematicObjects ()
 	$result = $dbxlink->query ($query);
 	if ($result == NULL)
 	{
-		showError ('SQL query failure in getProblematicObjects()');
+		showError ('SQL query failure', __FUNCTION__);
 		return NULL;
 	}
 	$ret = array();
@@ -765,7 +765,7 @@ function commitAddPort ($object_id = 0, $port_name, $port_type_id, $port_label, 
 {
 	if ($object_id <= 0)
 	{
-		showError ('Invalid object_id in commitAddPort()');
+		showError ('Invalid object_id', __FUNCTION__);
 		return;
 	}
 	$port_l2address = l2addressForDatabase ($port_l2address);
@@ -826,7 +826,7 @@ function getObjectAddressesAndNames ()
 	$result = $dbxlink->query ($query);
 	if ($result == NULL)
 	{
-		showError ("SQL query failure in getObjectAddressesAndNames()");
+		showError ("SQL query failure", __FUNCTION__);
 		return NULL;
 	}
 	$ret = array();
@@ -867,7 +867,7 @@ function getEmptyPortsOfType ($type_id)
 	$result = $dbxlink->query ($query);
 	if ($result == NULL)
 	{
-		showError ("SQL query failure in getEmptyPortsOfType($type_id)");
+		showError ("SQL query failure, type_id == ${type_id}", __FUNCTION__);
 		return NULL;
 	}
 	$ret = array();
@@ -922,7 +922,7 @@ function getObjectAddresses ($object_id = 0)
 {
 	if ($object_id == 0)
 	{
-		showError ('Invalid object_id in getObjectAddresses()');
+		showError ('Invalid object_id', __FUNCTION__);
 		return;
 	}
 	global $dbxlink;
@@ -947,7 +947,7 @@ function getObjectAddresses ($object_id = 0)
 	$result = $dbxlink->query ($query);
 	if ($result == NULL)
 	{
-		showError ("SQL query failed in getObjectAddresses()");
+		showError ("SQL query failed", __FUNCTION__);
 		return NULL;
 	}
 	else
@@ -1140,7 +1140,7 @@ function getUserAccounts ()
 	$result = $dbxlink->query ($query);
 	if ($result == NULL)
 	{
-		showError ('SQL query failed in getUserAccounts()');
+		showError ('SQL query failed', __FUNCTION__);
 		return NULL;
 	}
 	$ret = array();
@@ -1163,7 +1163,7 @@ function getUserPermissions ()
 	$result = $dbxlink->query ($query);
 	if ($result == NULL)
 	{
-		showError ('SQL query failed in getUserPermissions()');
+		showError ('SQL query failed', __FUNCTION__);
 		return NULL;
 	}
 	$ret = array();
@@ -1186,7 +1186,7 @@ function searchByl2address ($l2addr)
 	$result = $dbxlink->query ($query);
 	if ($result == NULL)
 	{
-		showError ('SQL query failed in objectIDbyl2address()');
+		showError ('SQL query failed', __FUNCTION__);
 		return NULL;
 	}
 	$rows = $result->fetchAll (PDO::FETCH_ASSOC);
@@ -1195,7 +1195,7 @@ function searchByl2address ($l2addr)
 		return NULL;
 	if (count ($rows) == 1) // Target found.
 		return $rows[0];
-	showError ('More than one results found in objectIDbyl2address(). This is probably a broken unique key.');
+	showError ('More than one results was found. This is probably a broken unique key.', __FUNCTION__);
 	return NULL;
 }
 
@@ -1207,7 +1207,7 @@ function getPortID ($object_id, $port_name)
 	$result = $dbxlink->query ($query);
 	if ($result == NULL)
 	{
-		showError ('SQL query failed in getPortID()');
+		showError ('SQL query failed', __FUNCTION__);
 		return NULL;
 	}
 	$rows = $result->fetchAll (PDO::FETCH_NUM);
@@ -1241,7 +1241,7 @@ function commitUpdateUserAccount ($id, $new_username, $new_realname, $new_passwo
 	$result = $dbxlink->query ($query);
 	if ($result == NULL)
 	{
-		showError ('SQL query failed in commitUpdateUserAccount()');
+		showError ('SQL query failed', __FUNCTION__);
 		die;
 	}
 	return TRUE;
@@ -1256,7 +1256,7 @@ function commitEnableUserAccount ($id, $new_enabled_value)
 	$result = $dbxlink->query ($query);
 	if ($result == NULL)
 	{
-		showError ('SQL query failed in commitEnableUserAccount()');
+		showError ('SQL query failed', __FUNCTION__);
 		die;
 	}
 	return TRUE;
@@ -1286,7 +1286,7 @@ function commitRevokePermission ($userid, $page, $tab)
 	$result = $dbxlink->query ($query);
 	if ($result == NULL)
 	{
-		showError ('SQL query failed in commitRevokePermission()');
+		showError ('SQL query failed', __FUNCTION__);
 		die;
 	}
 	return TRUE;
@@ -1306,7 +1306,7 @@ function getPortCompat ()
 	$result = $dbxlink->query ($query);
 	if ($result == NULL)
 	{
-		showError ('SQL query failed in getPortCompat()');
+		showError ('SQL query failed', __FUNCTION__);
 		return NULL;
 	}
 	$ret = $result->fetchAll (PDO::FETCH_ASSOC);
@@ -1319,14 +1319,14 @@ function removePortCompat ($type1 = 0, $type2 = 0)
 	global $dbxlink;
 	if ($type1 == 0 or $type2 == 0)
 	{
-		showError ('Invalid arguments to removePortCompat');
+		showError ('Invalid arguments', __FUNCTION__);
 		die;
 	}
 	$query = "delete from PortCompat where type1 = ${type1} and type2 = ${type2} limit 1";
 	$result = $dbxlink->query ($query);
 	if ($result == NULL)
 	{
-		showError ('SQL query failed in removePortCompat()');
+		showError ('SQL query failed', __FUNCTION__);
 		die;
 	}
 	return TRUE;
@@ -1336,7 +1336,7 @@ function addPortCompat ($type1 = 0, $type2 = 0)
 {
 	if ($type1 <= 0 or $type2 <= 0)
 	{
-		showError ('Invalid arguments to addPortCompat');
+		showError ('Invalid arguments', __FUNCTION__);
 		die;
 	}
 	return useInsertBlade
@@ -1358,7 +1358,7 @@ function getDict ()
 	$result = $dbxlink->query ($query);
 	if ($result == NULL)
 	{
-		showError ('SQL query failed in getDict()');
+		showError ('SQL query failed', __FUNCTION__);
 		return NULL;
 	}
 	$dict = array();
@@ -1389,7 +1389,7 @@ function getDictStats ()
 	$result1 = $dbxlink->query ($query);
 	if ($result1 == NULL)
 	{
-		showError ('SQL query #1 failed in getDictStats()');
+		showError ('SQL query #1 failed', __FUNCTION__);
 		return NULL;
 	}
 	$tc = $tw = $uc = $uw = 0;
@@ -1408,7 +1408,7 @@ function getDictStats ()
 	$result2 = $dbxlink->query ($query);
 	if ($result2 == NULL)
 	{
-		showError ('SQL query #2 failed in getDictStats()');
+		showError ('SQL query #2 failed', __FUNCTION__);
 		return NULL;
 	}
 	$to = $ta = $so = 0;
@@ -1437,7 +1437,7 @@ function commitUpdateDictionary ($chapter_no = 0, $dict_key = 0, $dict_value = '
 {
 	if ($chapter_no <= 0 or $dict_key <= 0 or empty ($dict_value))
 	{
-		showError ('Invalid args to commitUpdateDictionary()');
+		showError ('Invalid args', __FUNCTION__);
 		die;
 	}
 	global $dbxlink;
@@ -1447,7 +1447,7 @@ function commitUpdateDictionary ($chapter_no = 0, $dict_key = 0, $dict_value = '
 	$result = $dbxlink->query ($query);
 	if ($result == NULL)
 	{
-		showError ('SQL query failed in commitUpdateDictionary()');
+		showError ('SQL query failed', __FUNCTION__);
 		die;
 	}
 	return TRUE;
@@ -1457,7 +1457,7 @@ function commitSupplementDictionary ($chapter_no = 0, $dict_value = '')
 {
 	if ($chapter_no <= 0 or empty ($dict_value))
 	{
-		showError ('Invalid args to commitSupplementDictionary()');
+		showError ('Invalid args', __FUNCTION__);
 		die;
 	}
 	return useInsertBlade
@@ -1471,7 +1471,7 @@ function commitReduceDictionary ($chapter_no = 0, $dict_key = 0)
 {
 	if ($chapter_no <= 0 or $dict_key <= 0)
 	{
-		showError ('Invalid args to commitReduceDictionary()');
+		showError ('Invalid args', __FUNCTION__);
 		die;
 	}
 	global $dbxlink;
@@ -1481,7 +1481,7 @@ function commitReduceDictionary ($chapter_no = 0, $dict_key = 0)
 	$result = $dbxlink->query ($query);
 	if ($result == NULL)
 	{
-		showError ('SQL query failed in commitReduceDictionary()');
+		showError ('SQL query failed', __FUNCTION__);
 		die;
 	}
 	return TRUE;
@@ -1491,7 +1491,7 @@ function commitAddChapter ($chapter_name = '')
 {
 	if (empty ($chapter_name))
 	{
-		showError ('Invalid args to commitAddChapter()');
+		showError ('Invalid args', __FUNCTION__);
 		die;
 	}
 	return useInsertBlade
@@ -1505,7 +1505,7 @@ function commitUpdateChapter ($chapter_no = 0, $chapter_name = '')
 {
 	if ($chapter_no <= 0 or empty ($chapter_name))
 	{
-		showError ('Invalid args to commitUpdateChapter()');
+		showError ('Invalid args', __FUNCTION__);
 		die;
 	}
 	global $dbxlink;
@@ -1515,7 +1515,7 @@ function commitUpdateChapter ($chapter_no = 0, $chapter_name = '')
 	$result = $dbxlink->query ($query);
 	if ($result == NULL)
 	{
-		showError ('SQL query failed in commitUpdateChapter()');
+		showError ('SQL query failed', __FUNCTION__);
 		die;
 	}
 	return TRUE;
@@ -1525,7 +1525,7 @@ function commitDeleteChapter ($chapter_no = 0)
 {
 	if ($chapter_no <= 0)
 	{
-		showError ('Invalid args to commitDeleteChapter()');
+		showError ('Invalid args', __FUNCTION__);
 		die;
 	}
 	global $dbxlink;
@@ -1534,7 +1534,7 @@ function commitDeleteChapter ($chapter_no = 0)
 	$result = $dbxlink->query ($query);
 	if ($result == NULL)
 	{
-		showError ('SQL query failed in commitDeleteChapter()');
+		showError ('SQL query failed', __FUNCTION__);
 		die;
 	}
 	return TRUE;
@@ -1546,7 +1546,7 @@ function readChapter ($chapter_name = '')
 {
 	if (empty ($chapter_name))
 	{
-		showError ('invalid argument to readChapter()');
+		showError ('invalid argument', __FUNCTION__);
 		return NULL;
 	}
 	global $dbxlink;
@@ -1557,7 +1557,7 @@ function readChapter ($chapter_name = '')
 	if ($result == NULL)
 	{
 		$errorInfo = $dbxlink->errorInfo();
-		showError ("SQL query '${query}'\nwith message '${errorInfo[2]}'\nfailed in readChapter('${chapter_name}')");
+		showError ("SQL query '${query}'\nwith message '${errorInfo[2]}'\nfailed for chapter_no = '${chapter_name}'", __FUNCTION__);
 		return NULL;
 	}
 	$chapter = array();
@@ -1585,7 +1585,7 @@ function getAttrMap ()
 	if ($result == NULL)
 	{
 		$errorInfo = $dbxlink->errorInfo();
-		showError ("SQL query '${query}'\nwith message '${errorInfo[2]}'\nfailed in getAttrMap()");
+		showError ("SQL query '${query}'\nwith message '${errorInfo[2]}'\nfailed", __FUNCTION__);
 		return NULL;
 	}
 	$ret = array();
@@ -1618,7 +1618,7 @@ function commitUpdateAttribute ($attr_id = 0, $attr_name = '')
 {
 	if ($attr_id <= 0 or empty ($attr_name))
 	{
-		showError ('Invalid args to commitUpdateAttribute()');
+		showError ('Invalid args', __FUNCTION__);
 		die;
 	}
 	global $dbxlink;
@@ -1628,7 +1628,7 @@ function commitUpdateAttribute ($attr_id = 0, $attr_name = '')
 	$result = $dbxlink->query ($query);
 	if ($result == NULL)
 	{
-		showError ("SQL query '${query}' failed in commitUpdateAttribute()");
+		showError ("SQL query '${query}' failed", __FUNCTION__);
 		die;
 	}
 	return TRUE;
@@ -1638,7 +1638,7 @@ function commitAddAttribute ($attr_name = '', $attr_type = '')
 {
 	if (empty ($attr_name))
 	{
-		showError ('Invalid args to commitAddAttribute()');
+		showError ('Invalid args', __FUNCTION__);
 		die;
 	}
 	switch ($attr_type)
@@ -1649,7 +1649,7 @@ function commitAddAttribute ($attr_name = '', $attr_type = '')
 		case 'dict':
 			break;
 		default:
-			showError ('Invalid args to commitAddAttribute()');
+			showError ('Invalid args', __FUNCTION__);
 			die;
 	}
 	return useInsertBlade
@@ -1663,7 +1663,7 @@ function commitDeleteAttribute ($attr_id = 0)
 {
 	if ($attr_id <= 0)
 	{
-		showError ('Invalid args to commitDeleteAttribute()');
+		showError ('Invalid args', __FUNCTION__);
 		die;
 	}
 	return useDeleteBlade ('Attribute', 'attr_id', $attr_id);
@@ -1674,7 +1674,7 @@ function commitSupplementAttrMap ($attr_id = 0, $objtype_id = 0, $chapter_no = 0
 {
 	if ($attr_id <= 0 or $objtype_id <= 0 or $chapter_no <= 0)
 	{
-		showError ('Invalid args to commitSupplementAttrMap()');
+		showError ('Invalid args', __FUNCTION__);
 		die;
 	}
 	return useInsertBlade
@@ -1693,7 +1693,7 @@ function commitReduceAttrMap ($attr_id = 0, $objtype_id)
 {
 	if ($attr_id <= 0 or $objtype_id <= 0)
 	{
-		showError ('Invalid args to commitReduceAttrMap()');
+		showError ('Invalid args', __FUNCTION__);
 		die;
 	}
 	global $dbxlink;
@@ -1703,7 +1703,7 @@ function commitReduceAttrMap ($attr_id = 0, $objtype_id)
 	$result = $dbxlink->query ($query);
 	if ($result == NULL)
 	{
-		showError ('SQL query failed in commitReduceAttrMap()');
+		showError ('SQL query failed', __FUNCTION__);
 		die;
 	}
 	return TRUE;
@@ -1716,7 +1716,7 @@ function getAttrValues ($object_id)
 {
 	if ($object_id <= 0)
 	{
-		showError ('Invalid argument to getAttrValues()');
+		showError ('Invalid argument', __FUNCTION__);
 		return NULL;
 	}
 	global $dbxlink;
@@ -1734,7 +1734,7 @@ function getAttrValues ($object_id)
 	if ($result == NULL)
 	{
 		$errorInfo = $dbxlink->errorInfo();
-		showError ("SQL query '${query}'\nwith message '${errorInfo[2]}'\nfailed in getAttrValues()");
+		showError ("SQL query '${query}'\nwith message '${errorInfo[2]}'\nfailed", __FUNCTION__);
 		return NULL;
 	}
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
@@ -1768,7 +1768,7 @@ function commitResetAttrValue ($object_id = 0, $attr_id = 0)
 {
 	if ($object_id <= 0 or $attr_id <= 0)
 	{
-		showError ('Invalid arguments to commitResetAttrValue()');
+		showError ('Invalid arguments', __FUNCTION__);
 		die;
 	}
 	global $dbxlink;
@@ -1776,7 +1776,7 @@ function commitResetAttrValue ($object_id = 0, $attr_id = 0)
 	$result = $dbxlink->query ($query);
 	if ($result == NULL)
 	{
-		showError ('SQL query failed in commitResetAttrValue()');
+		showError ('SQL query failed', __FUNCTION__);
 		die;
 	}
 	return TRUE;
@@ -1787,7 +1787,7 @@ function commitUpdateAttrValue ($object_id = 0, $attr_id = 0, $value = '')
 {
 	if ($object_id <= 0 or $attr_id <= 0)
 	{
-		showError ('Invalid arguments to commitUpdateAttrValue()');
+		showError ('Invalid arguments', __FUNCTION__);
 		die;
 	}
 	if (empty ($value))
@@ -1797,13 +1797,13 @@ function commitUpdateAttrValue ($object_id = 0, $attr_id = 0, $value = '')
 	$result = $dbxlink->query ($query1);
 	if ($result == NULL)
 	{
-		showError ('SQL query #1 failed in commitUpdateAttrValue()');
+		showError ('SQL query #1 failed', __FUNCTION__);
 		die;
 	}
 	$row = $result->fetch (PDO::FETCH_NUM);
 	if ($row == NULL)
 	{
-		showError ('SQL query #1 returned no results in commitUpdateAttrValue()');
+		showError ('SQL query #1 returned no results', __FUNCTION__);
 		die;
 	}
 	$attr_type = $row[0];
@@ -1819,7 +1819,7 @@ function commitUpdateAttrValue ($object_id = 0, $attr_id = 0, $value = '')
 			$column = 'uint_value';
 			break;
 		default:
-			showError ("Unknown attribute type '${attr_type}' met in commitUpdateAttrValue()");
+			showError ("Unknown attribute type '${attr_type}' met", __FUNCTION__);
 			die;
 	}
 	$query2 =
@@ -1828,7 +1828,7 @@ function commitUpdateAttrValue ($object_id = 0, $attr_id = 0, $value = '')
 	$result = $dbxlink->query ($query2);
 	if ($result == NULL)
 	{
-		showError ('SQL query #2 failed in commitUpdateAttrValue()');
+		showError ('SQL query #2 failed', __FUNCTION__);
 		die;
 	}
 	// We know $value isn't empty here.
@@ -1838,7 +1838,7 @@ function commitUpdateAttrValue ($object_id = 0, $attr_id = 0, $value = '')
 	$result = $dbxlink->query ($query3);
 	if ($result == NULL)
 	{
-		showError ('SQL query #3 failed in commitUpdateAttrValue()');
+		showError ('SQL query #3 failed', __FUNCTION__);
 		die;
 	}
 	return TRUE;
@@ -1848,7 +1848,7 @@ function commitUseupPort ($port_id = 0)
 {
 	if ($port_id <= 0)
 	{
-		showError ("Invalid argument to commitUseupPort()");
+		showError ("Invalid argument", __FUNCTION__);
 		die;
 	}
 	global $dbxlink;
@@ -1856,7 +1856,7 @@ function commitUseupPort ($port_id = 0)
 	$result = $dbxlink->exec ($query);
 	if ($result == NULL)
 	{
-		showError ("SQL query failed in commitUseupPort()");
+		showError ("SQL query failed", __FUNCTION__);
 		die;
 	}
 	return TRUE;
@@ -1910,7 +1910,7 @@ function loadConfigCache ()
 	if ($result == NULL)
 	{
 		$errorInfo = $dbxlink->errorInfo();
-		showError ("SQL query '${query}'\nwith message '${errorInfo[2]}'\nfailed in loadConfigCache()");
+		showError ("SQL query '${query}'\nwith message '${errorInfo[2]}'\nfailed", __FUNCTION__);
 		return NULL;
 	}
 	$cache = array();
@@ -1926,21 +1926,21 @@ function storeConfigVar ($varname = NULL, $varvalue = NULL)
 	global $dbxlink;
 	if (empty ($varname) || $varvalue === NULL)
 	{
-		showError ('Invalid arguments to storeConfigVar()');
+		showError ('Invalid arguments', __FUNCTION__);
 		return FALSE;
 	}
 	$query = "update Config set varvalue='${varvalue}' where varname='${varname}' limit 1";
 	$result = $dbxlink->query ($query);
 	if ($result == NULL)
 	{
-		showError ("SQL query '${query}' failed in storeConfigVar()");
+		showError ("SQL query '${query}' failed", __FUNCTION__);
 		return FALSE;
 	}
 	$rc = $result->rowCount();
 	$result->closeCursor();
 	if ($rc == 0 or $rc == 1)
 		return TRUE;
-	showError ("Something went wrong in storeConfigVar('${varname}', '${varvalue}')");
+	showError ("Something went wrong for args '${varname}', '${varvalue}'", __FUNCTION__);
 	return FALSE;
 }
 
