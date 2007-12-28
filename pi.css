@@ -515,11 +515,11 @@ div.commentblock {
 }
 
 .port_connected_single {
-	background-color: #bfffbf;
+	background-color: #00ff00;
 }
 
 .port_connected_multi {
-	background-color: #00ff00;
+	background-color: #ffff00;
 }
 
 .port_notconnect {
