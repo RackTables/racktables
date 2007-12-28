@@ -3587,9 +3587,57 @@ function renderVirtualService ($vsid = 0)
 		return;
 	}
 	$vsinfo = getVServiceInfo ($vsid);
-echo '<pre>';
-print_r ($vsinfo);
-echo '</pre>';
+#echo '<pre>';
+#print_r ($vsinfo);
+#echo '</pre>';
+	echo '<table border=0 class=objectview cellspacing=0 cellpadding=0>';
+	if (!empty ($vsinfo['name']))
+		echo "<tr><td colspan=2 align=center><h1>${vsinfo['name']}</h1></td></tr>\n";
+	echo '<tr>';
+
+	echo '<td class=pcleft>';
+	startPortlet ('Frontend');
+	echo "<table border=0 cellspacing=0 cellpadding=3 width='100%'>\n";
+	if (!empty ($vsinfo['name']))
+		echo "<tr><th width='50%' class=tdright>Name:</th><td class=tdleft>${vsinfo['name']}</td></tr>\n";
+	echo "<tr><th width='50%' class=tdright>Protocol:</th><td class=tdleft>${vsinfo['proto']}</td></tr>\n";
+	echo "<tr><th width='50%' class=tdright>Virtual IP address:</th><td class=tdleft>${vsinfo['vip']}</td></tr>\n";
+	echo "<tr><th width='50%' class=tdright>Virtual port:</th><td class=tdleft>${vsinfo['vport']}</td></tr>\n";
+	echo "</table>\n";
+	finishPortlet ();
+	echo '</td>';
+
+	echo '<td class=pcright rowspan=3>';
+	startPortlet ('Backend');
+	echo "<table cellspacing=0 cellpadding='5' align='center' class='widetable'>\n";
+	echo "<tr><th>Real IP address</th><th>Real port</th><th>[LBs]</tr>\n";
+	foreach ($vsinfo['rslist'] as $rsinfo)
+	{
+		echo "<tr><td><a href='${root}?page=ipv4address&tab=default&ip=${rsinfo['rsip']}'>${rsinfo['rsip']}</a></td>";
+		echo "<td>${rsinfo['rsport']}</td>";
+		echo "<td>[LB config]</td></tr>";
+	}
+	echo "</table>\n";
+	finishPortlet ();
+	echo '</td>';
+
+	echo "</tr>\n<tr>";
+
+	echo '<td>';
+	startPortlet ('Virtual service configuration');
+	echo "<pre>${vsinfo['vsconfig']}</pre>";
+	finishPortlet ();
+	echo '</td>';
+
+	echo "</tr>\n<tr>";
+
+	echo '<td>';
+	startPortlet ('Default real server configuration');
+	echo "<pre>${vsinfo['default_rsconfig']}</pre>";
+	finishPortlet ();
+	echo '</td>';
+
+	echo '</tr><table>';
 }
 
 ?>
