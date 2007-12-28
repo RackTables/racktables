@@ -91,6 +91,23 @@ function dynamic_title_object ()
 	return $ret;
 }
 
+function dynamic_title_vservice ()
+{
+	global $pageno;
+	$ret = array();
+	switch ($pageno)
+	{
+		case 'vservice':
+			assertUIntArg ('id');
+			$ret['name'] = buildVServiceName (getVServiceInfo ($_REQUEST['id']));
+			$ret['params']['id'] = $_REQUEST['id'];
+			break;
+		default:
+			return NULL;
+	}
+	return $ret;
+}
+
 function dynamic_title_search ()
 {
 	if (isset ($_REQUEST['q']))
@@ -183,9 +200,6 @@ function static_title ($pageno)
 			break;
 		case 'help':
 			$ret['name'] = 'Help';
-			break;
-		case 'vservice':
-			$ret['name'] = 'Virtual service';
 			break;
 		default:
 			$ret['name'] = 'UNKNOWN';

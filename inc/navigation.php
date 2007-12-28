@@ -151,7 +151,7 @@ $ophandler['ipaddress']['assignment']['delIpAssignment'] = 'delIpAssignment';
 $ophandler['ipaddress']['assignment']['editBondForAddress'] = 'editIpAssignment';
 $ophandler['ipaddress']['assignment']['bindObjectToIp'] = 'addIpAssignment';
 
-$page['vservice']['title'] = 'static_title';
+$page['vservice']['title'] = 'dynamic_title_vservice';
 $page['vservice']['parent'] = 'ipv4space';
 $page['vservice']['bypass'] = 'id';
 $page['vservice']['bypass_type'] = 'uint';

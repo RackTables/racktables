@@ -1056,7 +1056,7 @@ function buildVServiceName ($vsinfo = NULL)
 		showError ('NULL argument', __FUNCTION__);
 		return NULL;
 	}
-	return 'VS ' . $vsinfo['vip'] . ':' . $vsinfo['vport'] . '/' . $vsinfo['proto'];
+	return $vsinfo['vip'] . ':' . $vsinfo['vport'] . '/' . $vsinfo['proto'];
 }
 
 ?>

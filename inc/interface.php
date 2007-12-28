@@ -1662,7 +1662,7 @@ function renderAddressspace ()
 		foreach ($summary as $vsid => $vsdata)
 		{
 			echo "<tr><td class=tdleft><a href='$root?page=vservice&tab=default&id=${vsid}'>";
-			echo $vsdata['vip'] . ':' . $vsdata['vport'] . '/' . $vsdata['proto'] . '</a></td>';
+			echo buildVServiceName ($vsdata);
 			echo "<td>${vsdata['name']}</td>";
 			foreach ($lblist as $lb_object_id)
 				echo '<td>' . (isset ($vsdata['rspools'][$lb_object_id]) ? $vsdata['rspools'][$lb_object_id] : '&nbsp;') . '</td>';
