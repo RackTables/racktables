@@ -156,6 +156,8 @@ $page['vservice']['parent'] = 'ipv4space';
 $page['vservice']['bypass'] = 'id';
 $page['vservice']['bypass_type'] = 'uint';
 $tab['vservice']['default'] = 'View';
+$tab['vservice']['configs'] = '[Configuration]';
+$tab['vservice']['rspool'] = '[Real servers]';
 $tabhandler['vservice']['default'] = 'renderVirtualService';
 
 $page['search']['title'] = 'dynamic_title_search';
