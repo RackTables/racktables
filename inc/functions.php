@@ -1059,4 +1059,20 @@ function buildVServiceName ($vsinfo = NULL)
 	return $vsinfo['vip'] . ':' . $vsinfo['vport'] . '/' . $vsinfo['proto'];
 }
 
+// rackspace usage for a single rack
+// (T + W + U) / (height * 3 - A)
+function getRSUforRack ($rack_id = 0)
+{
+	if ($rack_id = 0)
+	{
+		showError ('Invalid argument', __FUNCTION__);
+		return NULL;
+	}
+	$rackdata = getRackData ($rack_id);
+	$n_T = $n_W = $n_U = $n_A = 0;
+echo '<pre>';
+print_r ($rackData);
+echo '</pre>';
+}
+
 ?>
