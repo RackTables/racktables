@@ -1072,7 +1072,7 @@ function getRSUforRack ($data = NULL)
 	for ($unit_no = $data['height']; $unit_no > 0; $unit_no--)
 		for ($locidx = 0; $locidx < 3; $locidx++)
 			$counter[$data[$unit_no][$locidx]['state']]++;
-	return ($counter['T'] + $counter['W'] + $counter['U']) / ($data['height'] * 3 - $counter['A']);
+	return ($counter['T'] + $counter['W'] + $counter['U']) / ($counter['T'] + $counter['W'] + $counter['U'] + $counter['F']);
 }
 
 // Same for row.
@@ -1084,11 +1084,15 @@ function getRSUforRackRow ($rowData = NULL)
 		return NULL;
 	}
 	$counter = array ('A' => 0, 'U' => 0, 'T' => 0, 'W' => 0, 'F' => 0);
-	foreach ($rowData as $data)
+	foreach (array_keys ($rowData) as $rack_id)
+	{
+		$data = getRackData ($rack_id);
+		$total_height += $data['height'];
 		for ($unit_no = $data['height']; $unit_no > 0; $unit_no--)
 			for ($locidx = 0; $locidx < 3; $locidx++)
 				$counter[$data[$unit_no][$locidx]['state']]++;
-	return ($counter['T'] + $counter['W'] + $counter['U']) / ($data['height'] * 3 - $counter['A']);
+	}
+	return ($counter['T'] + $counter['W'] + $counter['U']) / ($counter['T'] + $counter['W'] + $counter['U'] + $counter['F']);
 }
 
 ?>
