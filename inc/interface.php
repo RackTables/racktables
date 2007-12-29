@@ -99,6 +99,7 @@ function renderRow ($row_id)
 		showError ('getRackRowInfo() failed', __FUNCTION__);
 		return;
 	}
+	$rackList = getRacksForRow ($row_id);
 	// Main layout starts.
 	echo "<table border=0 class=objectview cellspacing=0 cellpadding=0>";
 
@@ -108,6 +109,9 @@ function renderRow ($row_id)
 	echo "<table border=0 cellspacing=0 cellpadding=3 width='100%'>\n";
 	echo "<tr><th width='50%' class=tdright>Racks:</th><td class=tdleft>${rowInfo['count']}</td></tr>\n";
 	echo "<tr><th width='50%' class=tdright>Units:</th><td class=tdleft>${rowInfo['sum']}</td></tr>\n";
+	echo "<tr><th width='50%' class=tdright>Utilization:</th><td class=tdleft>";
+	renderProgressBar (getRSUforRackRow ($rackList));
+	echo "</td></tr>\n";
 	echo "</table><br>\n";
 	finishPortlet();
 
@@ -115,7 +119,6 @@ function renderRow ($row_id)
 
 	global $root, $nextorder;
 	$rackwidth = getConfigVar ('rtwidth_0') + getConfigVar ('rtwidth_1') + getConfigVar ('rtwidth_2');
-	$rackList = getRacksForRow ($row_id);
 	$order = 'odd';
 	startPortlet ('Racks');
 	echo "<table border=0 cellspacing=5 align='center'><tr>";
