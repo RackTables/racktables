@@ -1061,18 +1061,33 @@ function buildVServiceName ($vsinfo = NULL)
 
 // rackspace usage for a single rack
 // (T + W + U) / (height * 3 - A)
-function getRSUforRack ($rack_id = 0)
+function getRSUforRack ($data = NULL)
 {
-	if ($rack_id == 0)
+	if ($data == NULL)
 	{
 		showError ('Invalid argument', __FUNCTION__);
 		return NULL;
 	}
-	$data = getRackData ($rack_id);
 	$counter = array ('A' => 0, 'U' => 0, 'T' => 0, 'W' => 0, 'F' => 0);
 	for ($unit_no = $data['height']; $unit_no > 0; $unit_no--)
 		for ($locidx = 0; $locidx < 3; $locidx++)
 			$counter[$data[$unit_no][$locidx]['state']]++;
+	return ($counter['T'] + $counter['W'] + $counter['U']) / ($data['height'] * 3 - $counter['A']);
+}
+
+// Same for row.
+function getRSUforRackRow ($rowData = NULL)
+{
+	if ($rowData == NULL)
+	{
+		showError ('Invalid argument', __FUNCTION__);
+		return NULL;
+	}
+	$counter = array ('A' => 0, 'U' => 0, 'T' => 0, 'W' => 0, 'F' => 0);
+	foreach ($rowData as $data)
+		for ($unit_no = $data['height']; $unit_no > 0; $unit_no--)
+			for ($locidx = 0; $locidx < 3; $locidx++)
+				$counter[$data[$unit_no][$locidx]['state']]++;
 	return ($counter['T'] + $counter['W'] + $counter['U']) / ($data['height'] * 3 - $counter['A']);
 }
 
