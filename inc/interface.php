@@ -2574,7 +2574,9 @@ function renderRackPage ($rack_id)
 	echo "<tr><th width='50%' class=tdright>Rack row:</th><td class=tdleft>${rackData['row_name']}</td></tr>\n";
 	echo "<tr><th width='50%' class=tdright>Name:</th><td class=tdleft>${rackData['name']}</td></tr>\n";
 	echo "<tr><th width='50%' class=tdright>Height:</th><td class=tdleft>${rackData['height']}</td></tr>\n";
-	echo "<tr><th width='50%' class=tdright>Utilization:</th><td class=tdleft>" . getRUSforRack ($rack_ids) . "</td></tr>\n";
+	echo "<tr><th width='50%' class=tdright>Utilization:</th><td class=tdleft>";
+	renderProgressBar (getRSUforRack ($rack_id));
+	echo "</td></tr>\n";
 	if (!empty ($rackData['comment']))
 		echo "<tr><th width='50%' class=tdright>Comment:</th><td class=tdleft>${rackData['comment']}</td></tr>\n";
 	echo '</table>';
@@ -3650,6 +3652,16 @@ function renderVirtualService ($vsid = 0)
 	echo '</td>';
 
 	echo '</tr><table>';
+}
+
+function renderProgressBar ($percentage = 0)
+{
+	$done = ((int) ($percentage * 100));
+	$left = 100 - $done;
+	echo "<table width=100px height=10px border=0 cellspacing=0 cellpadding=0><tr>";
+	echo "<td class=state_T width='${done}%'><div title='${done}%'>&nbsp;</div></td>";
+	echo "<td class=state_F><div title='${left}%'>&nbsp;</div></td>";
+	echo "</tr></table>";
 }
 
 ?>
