@@ -1069,7 +1069,7 @@ function getRSUforRack ($rack_id = 0)
 		return NULL;
 	}
 	$data = getRackData ($rack_id);
-	$counter = array ('A' => 0, 'U' => 0, 'T' => 0, 'W' => 0);
+	$counter = array ('A' => 0, 'U' => 0, 'T' => 0, 'W' => 0, 'F' => 0);
 	for ($unit_no = $data['height']; $unit_no > 0; $unit_no--)
 		for ($locidx = 0; $locidx < 3; $locidx++)
 			$counter[$data[$unit_no][$locidx]['state']]++;
