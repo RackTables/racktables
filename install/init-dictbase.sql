@@ -214,7 +214,7 @@ INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, descriptio
 INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('color_Th','80ffff','string','no','yes','HSV: 180-50-100. Taken atoms with highlight. They are not stored in the database and are only used for highlighting.');
 INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('color_Tw','804040','string','no','yes','HSV: 0-50-50. Taken atoms with object problem. This is detected at runtime.');
 INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('color_Thw','ff8080','string','no','yes','HSV: 0-50-100. An object can be both current and problematic. We run highlightObject() first and markupObjectProblems() second.');
-INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('default_port_type','11','uint','no','no','Default port type');
+INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('default_port_type','24','uint','no','no','Default port type');
 INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('MASSCOUNT','15','uint','no','no','&quot;Fast&quot; form is this many records tall');
 INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('MAXSELSIZE','30','uint','no','no','&lt;SELECT&gt; lists height');
 INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('enterprise','MyCompanyName','string','no','no','Organization name');
