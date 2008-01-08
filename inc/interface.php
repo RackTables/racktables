@@ -2549,11 +2549,10 @@ function renderConfigMainpage ()
 	global $pageno, $root;
 	$children = getDirectChildPages ($pageno);
 	echo '<ul>';
+	// FIXME: assume all config kids to have static titles at the moment,
+	// but use some proper abstract function later.
 	foreach ($children as $cpageno => $child)
-	{
-		$ctitle = $child['title']($cpageno);
-		echo "<li><a href='${root}?page=${cpageno}'>" . $ctitle['name'] . "</li>\n";
-	}
+		echo "<li><a href='${root}?page=${cpageno}'>" . $child['title'] . "</li>\n";
 	echo '';
 	echo '</ul>';
 }
