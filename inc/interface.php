@@ -1690,10 +1690,10 @@ function renderAddNewRange ()
 	echo "<input type=hidden name=op value=addRange>\n";
 	echo "<input type=hidden name=page value='${pageno}'>\n";
 	echo "<input type=hidden name=tab value='${tabno}'>\n";
-	echo "<tr><td class='tdcenter'><input type=text name='range' size=18 class='live-validate'></td>\n";
-	echo "<td class='tdcenter'><input type=text name='name' size='20'></td>\n";
-	echo "<td class='tdcenter'><input type=checkbox name='is_bcast' checked></td>\n";
-	echo "<td class='tdcenter'><input type=submit value='Add a new range'></td></tr>\n";
+	echo "<tr><td class='tdcenter'><input type=text name='range' size=18 class='live-validate' tabindex=1></td>\n";
+	echo "<td class='tdcenter'><input type=text name='name' size='20' tabindex=2></td>\n";
+	echo "<td class='tdcenter'><input type=checkbox name='is_bcast' tabindex=3 checked></td>\n";
+	echo "<td class='tdcenter'><input type=submit value='Add a new range' tabindex=4></td></tr>\n";
 	echo "</form></table><br><br>\n";
 
 	echo "<center><h2>Manage Existing</h2></center>\n";
