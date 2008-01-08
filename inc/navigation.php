@@ -12,10 +12,10 @@ $trigger = array();
 $ophandler = array();
 $tabhandler = array();
 
-$page['index']['title'] = 'static_title';
+$page['index']['title'] = 'Main page';
 $page['index']['handler'] = 'renderIndex';
 
-$page['rackspace']['title'] = 'static_title';
+$page['rackspace']['title'] = 'Rackspace';
 $page['rackspace']['parent'] = 'index';
 $tab['rackspace']['default'] = 'Browse';
 $tab['rackspace']['history'] = 'History';
@@ -25,7 +25,7 @@ $tabhandler['rackspace']['default'] = 'renderRackspace';
 $tabhandler['rackspace']['history'] = 'renderRackspaceHistory';
 $tabhandler['rackspace']['firstrow'] = 'renderFirstRowForm';
 
-$page['objects']['title'] = 'static_title';
+$page['objects']['title'] = 'Objects';
 $page['objects']['parent'] = 'index';
 $tab['objects']['default'] = 'View';
 $tab['objects']['newobj'] = 'Add an object';
@@ -34,7 +34,7 @@ $tabhandler['objects']['default'] = 'renderObjectGroupSummary';
 $tabhandler['objects']['newobj'] = 'renderNewObjectForm';
 $tabhandler['objects']['newmulti'] = 'renderAddMultipleObjectsForm';
 
-$page['row']['title'] = 'dynamic_title_row';
+$page['row']['title_handler'] = 'dynamic_title_row';
 $page['row']['bypass'] = 'row_id';
 $page['row']['bypass_type'] = 'uint';
 $page['row']['parent'] = 'rackspace';
@@ -43,7 +43,7 @@ $tab['row']['newrack'] = 'Add new rack';
 $tabhandler['row']['default'] = 'renderRow';
 $tabhandler['row']['newrack'] = 'renderNewRackForm';
 
-$page['rack']['title'] = 'dynamic_title_rack';
+$page['rack']['title_handler'] = 'dynamic_title_rack';
 $page['rack']['bypass'] = 'rack_id';
 $page['rack']['bypass_type'] = 'uint';
 $page['rack']['parent'] = 'row';
@@ -58,12 +58,12 @@ $tabhandler['rack']['problems'] = 'renderRackProblems';
 $helptab['rack']['design'] = 'rackspace';
 $helptab['rack']['problems'] = 'rackspace';
 
-$page['objgroup']['title'] = 'dynamic_title_objgroup';
+$page['objgroup']['title_handler'] = 'dynamic_title_objgroup';
 $page['objgroup']['handler'] = 'handler_objgroup';
 $page['objgroup']['bypass'] = 'group_id';
 $page['objgroup']['parent'] = 'objects';
 
-$page['object']['title'] = 'dynamic_title_object';
+$page['object']['title_handler'] = 'dynamic_title_object';
 $page['object']['bypass'] = 'object_id';
 $page['object']['bypass_type'] = 'uint';
 $page['object']['parent'] = 'objgroup';
@@ -109,7 +109,7 @@ $ophandler['object']['portfwrd']['delPortForwarding'] = 'delPortForwarding';
 $ophandler['object']['portfwrd']['updPortForwarding'] = 'updPortForwarding';
 $ophandler['object']['switchvlans']['submit'] = 'updateVLANMembership';
 
-$page['ipv4space']['title'] = 'static_title';
+$page['ipv4space']['title'] = 'IPv4 space';
 $page['ipv4space']['parent'] = 'index';
 $tab['ipv4space']['default'] = 'Browse';
 $tab['ipv4space']['newrange'] = 'Subnets';
@@ -123,7 +123,7 @@ $tabhandler['ipv4space']['newrange'] = 'renderAddNewRange';
 $ophandler['ipv4space']['newrange']['addRange'] = 'addNewrange';
 $ophandler['ipv4space']['newrange']['delRange'] = 'delRange';
 
-$page['iprange']['title'] = 'dynamic_title_iprange';
+$page['iprange']['title_handler'] = 'dynamic_title_iprange';
 $page['iprange']['parent'] = 'ipv4space';
 $page['iprange']['bypass'] = 'id';
 $tab['iprange']['default'] = 'Browse';
@@ -134,7 +134,7 @@ $tabhandler['iprange']['default'] = 'renderIPRange';
 $tabhandler['iprange']['properties'] = 'renderIPRangeProperties';
 $ophandler['iprange']['properties']['editRange'] = 'editRange';
 
-$page['ipaddress']['title'] = 'dynamic_title_ipaddress';
+$page['ipaddress']['title_handler'] = 'dynamic_title_ipaddress';
 $page['ipaddress']['parent'] = 'iprange';
 $page['ipaddress']['bypass'] = 'ip';
 $tab['ipaddress']['default'] = 'Browse';
@@ -151,7 +151,7 @@ $ophandler['ipaddress']['assignment']['delIpAssignment'] = 'delIpAssignment';
 $ophandler['ipaddress']['assignment']['editBondForAddress'] = 'editIpAssignment';
 $ophandler['ipaddress']['assignment']['bindObjectToIp'] = 'addIpAssignment';
 
-$page['vservice']['title'] = 'dynamic_title_vservice';
+$page['vservice']['title_handler'] = 'dynamic_title_vservice';
 $page['vservice']['parent'] = 'ipv4space';
 $page['vservice']['bypass'] = 'id';
 $page['vservice']['bypass_type'] = 'uint';
@@ -160,16 +160,16 @@ $tab['vservice']['configs'] = '[Configuration]';
 $tab['vservice']['rspool'] = '[Real servers]';
 $tabhandler['vservice']['default'] = 'renderVirtualService';
 
-$page['search']['title'] = 'dynamic_title_search';
+$page['search']['title_handler'] = 'dynamic_title_search';
 $page['search']['handler'] = 'handler_search';
 $page['search']['parent'] = 'index';
 $page['search']['bypass'] = 'q';
 
-$page['config']['title'] = 'static_title';
+$page['config']['title'] = 'Configuration';
 $page['config']['handler'] = 'handler_config';
 $page['config']['parent'] = 'index';
 
-$page['accounts']['title'] = 'static_title';
+$page['accounts']['title'] = 'Accounts';
 $page['accounts']['parent'] = 'config';
 $tab['accounts']['default'] = 'View';
 $tab['accounts']['edit'] = 'Change';
@@ -180,7 +180,7 @@ $ophandler['accounts']['edit']['createAccount'] = 'createUserAccount';
 $ophandler['accounts']['edit']['disableAccount'] = 'disableUserAccount';
 $ophandler['accounts']['edit']['enableAccount'] = 'enableUserAccount';
 
-$page['perms']['title'] = 'static_title';
+$page['perms']['title'] = 'Permissions';
 $page['perms']['parent'] = 'config';
 $tab['perms']['default'] = 'View';
 $tab['perms']['edit'] = 'Change';
@@ -189,14 +189,14 @@ $tabhandler['perms']['edit'] = 'renderPermissionsEditForm';
 $ophandler['perms']['edit']['revoke'] = 'revokePermission';
 $ophandler['perms']['edit']['grant'] = 'grantPermission';
 
-$page['portmap']['title'] = 'static_title';
+$page['portmap']['title'] = 'Port compatibility map';
 $page['portmap']['handler'] = 'handler_portmap';
 $page['portmap']['parent'] = 'config';
 $tab['portmap']['default'] = 'View';
 $tab['portmap']['edit'] = 'Change';
 $ophandler['portmap']['edit']['save'] = 'savePortMap';
 
-$page['attrs']['title'] = 'static_title';
+$page['attrs']['title'] = 'Attributes';
 $page['attrs']['parent'] = 'config';
 $tab['attrs']['default'] = 'View';
 $tab['attrs']['editattrs'] = 'Edit attributes';
@@ -210,7 +210,7 @@ $ophandler['attrs']['editattrs']['del'] = 'deleteAttribute';
 $ophandler['attrs']['editmap']['add'] = 'supplementAttrMap';
 $ophandler['attrs']['editmap']['del'] = 'reduceAttrMap';
 
-$page['dict']['title'] = 'static_title';
+$page['dict']['title'] = 'Dictionary';
 $page['dict']['parent'] = 'config';
 $tab['dict']['default'] = 'View';
 $tab['dict']['edit'] = 'Edit words';
@@ -225,7 +225,7 @@ $ophandler['dict']['chapters']['del'] = 'delChapter';
 $ophandler['dict']['chapters']['upd'] = 'updateChapter';
 $ophandler['dict']['chapters']['add'] = 'addChapter';
 
-$page['ui']['title'] = 'static_title';
+$page['ui']['title'] = 'User interface';
 $page['ui']['parent'] = 'config';
 $tab['ui']['default'] = 'View';
 $tab['ui']['edit'] = 'Change';
@@ -236,12 +236,12 @@ $tabhandler['ui']['reset'] = 'renderUIResetForm';
 $ophandler['ui']['edit']['upd'] = 'updateUI';
 $ophandler['ui']['reset']['go'] = 'resetUIConfig';
 
-$page['reports']['title'] = 'static_title';
+$page['reports']['title'] = 'Reports';
 $page['reports']['parent'] = 'index';
 $tab['reports']['default'] = 'View';
 $tabhandler['reports']['default'] = 'renderReportSummary';
 
-$page['help']['title'] = 'static_title';
+$page['help']['title'] = 'Help';
 $page['help']['handler'] = 'renderHelpTab';
 $page['help']['parent'] = 'index';
 $tab['help']['default'] = 'Welcome';
@@ -278,17 +278,20 @@ function showPathAndSearch ($pageno)
 	global $root, $page;
 	// Path.
 	echo "<td class=activemenuitem width='99%'>" . getConfigVar ('enterprise');
-	if (isset ($page[$pageno]['title']))
+	$path = getPath ($pageno);
+	foreach ($path as $no)
 	{
-		$path = getPath ($pageno);
-		foreach ($path as $dummy => $no)
-		{
-			$title = $page[$no]['title']($no);
-			echo ": <a href='${root}?page=${no}";
-			foreach ($title['params'] as $param_name => $param_value)
-				echo "&${param_name}=${param_value}";
-			echo "'>" .$title['name'] . "</a>";
-		}
+		$title['params'] = array();
+		if (isset ($page[$no]['title']))
+			$title['name'] = $page[$no]['title'];
+		elseif (isset ($page[$no]['title_handler']))
+			$title = $page[$no]['title_handler']($no);
+		else
+			$title['name'] = '[N/A]';
+		echo ": <a href='${root}?page=${no}";
+		foreach ($title['params'] as $param_name => $param_value)
+			echo "&${param_name}=${param_value}";
+		echo "'>" . $title['name'] . "</a>";
 	}
 	echo "</td>";
 	// Search form.
@@ -302,10 +305,15 @@ function showPathAndSearch ($pageno)
 function getTitle ($pageno, $tabno)
 {
 	global $page;
-	if (!isset ($page[$pageno]['title']))
+	if (isset ($page[$pageno]['title']))
+		return $page[$pageno]['title'];
+	elseif (isset ($page[$pageno]['title_handler']))
+	{
+		$tmp = $page[$pageno]['title_handler']($pageno);
+		return $tmp['name'];
+	}
+	else
 		return getConfigVar ('enterprise');
-	$tmp = $page[$pageno]['title']($pageno);
-	return $tmp['name'];
 }
 
 function showTabs ($pageno, $tabno)
