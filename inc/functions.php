@@ -57,6 +57,10 @@ function rectHeight ($rackData, $startRow, $template_idx)
 			{
 				if (isset ($rackData[$startRow - $height][$locidx]['skipped']))
 					break 2;
+				if (isset ($rackData[$startRow - $height][$locidx]['rowspan']))
+					break 2;
+				if (isset ($rackData[$startRow - $height][$locidx]['colspan']))
+					break 2;
 				if ($rackData[$startRow - $height][$locidx]['state'] != 'T')
 					break 2;
 				if ($object_id == 0)
@@ -71,7 +75,9 @@ function rectHeight ($rackData, $startRow, $template_idx)
 		$height++;
 	}
 	while ($startRow - $height > 0);
-//	echo "for startRow==${startRow} and template==(${template[0]}, ${template[1]}, ${template[2]}) height==${height}<br>\n";
+#	echo "for startRow==${startRow} and template==(" . ($template[$template_idx][0] ? 'T' : 'F');
+#	echo ', ' . ($template[$template_idx][1] ? 'T' : 'F') . ', ' . ($template[$template_idx][2] ? 'T' : 'F');
+#	echo ") height==${height}<br>\n";
 	return $height;
 }
 
@@ -88,14 +94,16 @@ function markSpan (&$rackData, $startRow, $maxheight, $template_idx)
 			if ($template[$template_idx][$locidx])
 			{
 				// Add colspan/rowspan to the first row met and mark the following ones to skip.
+				// Explicitly show even single-cell spanned atoms, because rectHeight()
+				// is expeciting this data for correct calculation.
 				if ($colspan != 0)
 					$rackData[$startRow - $height][$locidx]['skipped'] = TRUE;
 				else
 				{
 					$colspan = $templateWidth[$template_idx];
-					if ($colspan > 1)
+					if ($colspan >= 1)
 						$rackData[$startRow - $height][$locidx]['colspan'] = $colspan;
-					if ($maxheight > 1)
+					if ($maxheight >= 1)
 						$rackData[$startRow - $height][$locidx]['rowspan'] = $maxheight;
 				}
 			}
@@ -104,9 +112,9 @@ function markSpan (&$rackData, $startRow, $maxheight, $template_idx)
 	return;
 }
 
-// This function finds rowspan/solspan/skipped atom attributes for renderRack()
-// What we actually have to do is to find all possible rectangles for each objects
-// and then find the widest of those with the maximal square.
+// This function sets rowspan/solspan/skipped atom attributes for renderRack()
+// What we actually have to do is to find _all_ possible rectangles for each unit
+// and then select the widest of those with the maximal square.
 function markAllSpans (&$rackData = NULL)
 {
 	if ($rackData == NULL)
@@ -115,26 +123,34 @@ function markAllSpans (&$rackData = NULL)
 		return;
 	}
 	for ($i = $rackData['height']; $i > 0; $i--)
+		while (markBestSpan ($rackData, $i));
+}
+
+// Calculate height of 6 possible span templates (array is presorted by width
+// descending) and mark the best (if any).
+function markBestSpan (&$rackData, $i)
+{
+	global $template, $templateWidth;
+	for ($j = 0; $j < 6; $j++)
 	{
-		// calculate height of 6 possible span templates (array is presorted by width descending)
-		global $template;
-		for ($j = 0; $j < 6; $j++)
-			$height[$j] = rectHeight ($rackData, $i, $j);
-		// find the widest rectangle of those with maximal height
-		$maxheight = max ($height);
-		if ($maxheight > 0)
-		{
-			$best_template_index = 0;
-			for ($j = 0; $j < 6; $j++)
-				if ($height[$j] == $maxheight)
-				{
-					$best_template_index = $j;
-					break;
-				}
-			// distribute span marks
-			markSpan ($rackData, $i, $maxheight, $best_template_index);
-		}
+		$height[$j] = rectHeight ($rackData, $i, $j);
+		$square[$j] = $height[$j] * $templateWidth[$j];
 	}
+	// find the widest rectangle of those with maximal height
+	$maxsquare = max ($square);
+	if (!$maxsquare)
+		return FALSE;
+	$best_template_index = 0;
+	for ($j = 0; $j < 6; $j++)
+		if ($square[$j] == $maxsquare)
+		{
+			$best_template_index = $j;
+			$bestheight = $height[$j];
+			break;
+		}
+	// distribute span marks
+	markSpan ($rackData, $i, $bestheight, $best_template_index);
+	return TRUE;
 }
 
 function delRow ($row_id = 0)

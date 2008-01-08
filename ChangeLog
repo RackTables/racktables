@@ -2,6 +2,7 @@
 	bugfix: upgrade to 0.14.8 broke IPv4 prefix creation
 	bugfix: more DB cleanups
 	bugfix: SNMP didn't work properly for C4948 ports
+	bugfix: rowspan attribute was computed incorrectly sometimes
 	update: Live VLANs color legend now distinguishes between 1 and 0
 		MAC addresses on a port
 0.14.8 2007-12-22
