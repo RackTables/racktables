@@ -2601,23 +2601,31 @@ function renderDictionary ()
 {
 	global $nextorder;
 	$dict = getDict();
-	echo "<table border=0><tr>";
-	foreach ($dict as $chapter)
+	echo "<br><table class=cooltable border=0 cellpadding=5 cellspacing=0 align=center>\n";
+	$order = 'odd';
+	foreach ($dict as $chapter_no => $chapter)
 	{
-		echo "<td class=pcleft>";
-		startPortlet ($chapter['name'] . ' (' . count ($chapter['word']) . ')');
-		echo "<table class=cooltable border=0 cellpadding=5 cellspacing=0 align=center>\n";
-		$order = 'odd';
-		foreach ($chapter['word'] as $key => $value)
+		echo "<tr><th>Chapter</th><th>[refcnt]</th><th>Word</th></tr>\n";
+		$wc = count ($chapter['word']);
+		echo "<tr class=row_${order}><td class=tdleft" . ($wc ? " rowspan = ${wc}" : '');
+		echo "><div title='number=${chapter_no}'>${chapter['name']} (${wc} records)</div></td>";
+		if (!$wc)
+			echo "<td colspan=2>none</td>";
+		else
 		{
-			echo "<tr class=row_${order}><td class=tdleft><div title='key=${key}'>${value}</div></td></tr>";
-			$order = $nextorder[$order];
+			$chap_start = TRUE;
+			foreach ($chapter['word'] as $key => $value)
+			{
+				if (!$chap_start)
+					echo "<tr class=row_${order}>";
+				else
+					$chap_start = FALSE;
+				echo "<td></td><td><div title='key=${key}'>${value}</div></td></tr>\n";
+				$order = $nextorder[$order];
+			}
 		}
-		echo "</table>";
-		finishPortlet();
-		echo "</td>";
 	}
-	echo "</tr></table>";
+	echo "</table>\n";
 }
 
 function renderDictionaryEditor ()
