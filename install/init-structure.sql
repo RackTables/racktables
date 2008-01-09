@@ -113,6 +113,33 @@ CREATE TABLE `IPBonds` (
 ) ENGINE=MyISAM;
 
 --
+-- Table structure for table `IPLoadBalancer`
+--
+
+DROP TABLE IF EXISTS `IPLoadBalancer`;
+CREATE TABLE `IPLoadBalancer` (
+  `object_id` int(10) unsigned default NULL,
+  `rspool_id` int(10) unsigned default NULL,
+  `vsconfig_extra` text,
+  `rsconfig_extra` text,
+  UNIQUE KEY `object_id` (`object_id`,`rspool_id`)
+) ENGINE=MyISAM;
+
+--
+-- Table structure for table `IPRSPool`
+--
+
+DROP TABLE IF EXISTS `IPRSPool`;
+CREATE TABLE `IPRSPool` (
+  `id` int(10) unsigned NOT NULL auto_increment,
+  `vs_id` int(10) unsigned default NULL,
+  `name` char(255) default NULL,
+  `vsconfig` text,
+  `rsconfig` text,
+  PRIMARY KEY  (`id`)
+) ENGINE=MyISAM;
+
+--
 -- Table structure for table `IPRanges`
 --
 
@@ -123,6 +150,37 @@ CREATE TABLE `IPRanges` (
   `mask` int(10) unsigned NOT NULL,
   `name` char(255) default NULL,
   PRIMARY KEY  (`id`)
+) ENGINE=MyISAM;
+
+--
+-- Table structure for table `IPRealServer`
+--
+
+DROP TABLE IF EXISTS `IPRealServer`;
+CREATE TABLE `IPRealServer` (
+  `id` int(10) unsigned NOT NULL auto_increment,
+  `rsip` int(10) unsigned default NULL,
+  `rsport` smallint(5) unsigned default NULL,
+  `rspool_id` int(10) unsigned default NULL,
+  `config` text,
+  PRIMARY KEY  (`id`)
+) ENGINE=MyISAM;
+
+--
+-- Table structure for table `IPVirtualService`
+--
+
+DROP TABLE IF EXISTS `IPVirtualService`;
+CREATE TABLE `IPVirtualService` (
+  `id` int(10) unsigned NOT NULL auto_increment,
+  `vip` int(10) unsigned default NULL,
+  `vport` smallint(5) unsigned default NULL,
+  `proto` enum('TCP','UDP') NOT NULL default 'TCP',
+  `name` char(255) default NULL,
+  `default_vsconfig` text,
+  `default_rsconfig` text,
+  PRIMARY KEY  (`id`),
+  UNIQUE KEY `endpoint` (`vip`,`vport`,`proto`)
 ) ENGINE=MyISAM;
 
 --
