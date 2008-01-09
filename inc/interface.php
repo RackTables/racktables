@@ -3676,4 +3676,42 @@ function renderProgressBar ($percentage = 0)
 	echo "</tr></table>";
 }
 
+function renderVSRSPoolForm ($vsid = 0)
+{
+	global $root, $pageno, $tabno;
+	if ($vsid <= 0)
+	{
+		showError ('Invalid vsid', __FUNCTION__);
+		return;
+	}
+	$vsinfo = getVServiceInfo ($vsid);
+	echo '<pre>';
+	print_r ($vsinfo);
+	echo '</pre>';
+
+	echo "<center><h2>Add New</h2></center>\n";
+	echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
+	echo "<tr><th>Address</th><th>Port</th><th>&nbsp;</th></tr>\n";
+	echo "<form action='${root}process.php'>";
+	echo "<input type=hidden name=page value='${pageno}'>\n";
+	echo "<input type=hidden name=tab value='${tabno}'>\n";
+	echo "<input type=hidden name=op value=addRealServer>";
+	echo "<input type=hidden name=vsid value='${vsid}'>";
+	echo "<tr><td><input type=text name=vsip tabindex=1></td>";
+	echo "<td><input type=text name=vsport tabindex=2></td>";
+	echo "<td><input type=submit value='OK' tabindex=3></tr>\n";
+	echo "</table>\n";
+
+	echo "<center><h2>Manage Existing</h2></center>\n";
+	echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
+	echo "<tr><th>&nbsp;</th><th>Address</th><th>Port</th><th>[Allocation]</th></tr>\n";
+	foreach ($vsinfo['rslist'] as $rs)
+	{
+		echo "<tr><td><a href='${root}process.php?op=delRealServer&page=${pageno}&tab=${tabno}&rsid=${rs['rsid']}'>";
+		printImageHREF ('delete', 'Delete this real server');
+		echo "</td><td>${rs['rsip']}</td><td>${rs['rsport']}</td><td>&nbsp;</td></tr>\n";
+	}
+	echo "</table>\n";
+}
+
 ?>
