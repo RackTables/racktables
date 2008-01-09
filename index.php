@@ -90,7 +90,7 @@ if (isset ($tabhandler[$pageno][$tabno]))
 elseif (isset ($page[$pageno]['handler']))
 	$page[$pageno]['handler'] ($tabno);
 else
-	showError ("Failed to find handler for page '${pageno}'");
+	showError ("Failed to find handler for page '${pageno}', tab '${tabno}'");
 ?>
 	</td>
 	</tr>
