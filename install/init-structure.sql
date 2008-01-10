@@ -177,8 +177,8 @@ CREATE TABLE `IPVirtualService` (
   `vport` smallint(5) unsigned default NULL,
   `proto` enum('TCP','UDP') NOT NULL default 'TCP',
   `name` char(255) default NULL,
-  `default_vsconfig` text,
-  `default_rsconfig` text,
+  `vsconfig` text,
+  `rsconfig` text,
   PRIMARY KEY  (`id`),
   UNIQUE KEY `endpoint` (`vip`,`vport`,`proto`)
 ) ENGINE=MyISAM;
