@@ -162,7 +162,7 @@ CREATE TABLE `IPRealServer` (
   `rsip` int(10) unsigned default NULL,
   `rsport` smallint(5) unsigned default NULL,
   `rspool_id` int(10) unsigned default NULL,
-  `config` text,
+  `rsconfig` text,
   PRIMARY KEY  (`id`)
 ) ENGINE=MyISAM;
 
