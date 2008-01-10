@@ -157,9 +157,19 @@ $page['vservice']['bypass'] = 'id';
 $page['vservice']['bypass_type'] = 'uint';
 $tab['vservice']['default'] = 'View';
 $tab['vservice']['configs'] = '[Configuration]';
-$tab['vservice']['rspool'] = 'Real servers';
+$tab['vservice']['rspool'] = 'RS pools';
 $tabhandler['vservice']['default'] = 'renderVirtualService';
 $tabhandler['vservice']['rspool'] = 'renderVSRSPoolForm';
+
+$page['rspool']['title'] = 'RS pool';
+$page['rspool']['parent'] = 'ipv4space';
+$page['rspool']['bypass'] = 'id';
+$page['rspool']['bypass_type'] = 'uint';
+$tab['rspool']['default'] = 'View';
+$tab['rspool']['editrs'] = '[Real Servers]';
+$tab['rspool']['editlb'] = '[Load Balancers]';
+$tabhandler['rspool']['default'] = 'renderRSPool';
+
 
 $page['search']['title_handler'] = 'dynamic_title_search';
 $page['search']['handler'] = 'handler_search';

@@ -1974,12 +1974,12 @@ function getDatabaseVersion ()
 function getSLBSummary ()
 {
 	global $dbxlink;
-	$query = 'select vs.id as vsid, vip as vip_bin, inet_ntoa(vip) as vip, vport, proto, ' .
+	$query = 'select vs.id as vsid, inet_ntoa(vip) as vip, vport, proto, ' .
 		'vs.name, rsp.id as pool_id, rsp.name as pool_name, object_id, count(rs.id) as rscount from ' .
 		'IPVirtualService as vs inner join IPRSPool as rsp on vs.id = rsp.vs_id ' .
 		'inner join IPRealServer as rs on rs.rspool_id = rsp.id ' .
 		'inner join IPLoadBalancer as lb on rsp.id = lb.rspool_id ' .
-		'group by rsp.id, object_id order by vip_bin, object_id';
+		'group by rsp.id, object_id order by vip, object_id';
 	$result = $dbxlink->query ($query);
 	if ($result == NULL)
 	{
@@ -2034,6 +2034,58 @@ function getVServiceInfo ($vsid = 0)
 	}
 	$result->closeCursor();
 	return $vsinfo;
+}
+
+// Collect and return the following info about the given real server pool:
+// basic information
+// parent virtual service information
+// load balancers list
+// real servers list
+
+function getRSPoolInfo ($id = 0)
+{
+	global $dbxlink;
+	$query1 = "select ${id} as id, vs_id, pool.name, pool.vsconfig, pool.rsconfig, inet_ntoa(vip) as vip, proto, " .
+		"vs.name as vs_name, vs.vsconfig as vs_vsconfig, vs.rsconfig as vs_rsconfig from " .
+		"IPRSPool as pool inner join IPVirtualService as vs on pool.vs_id = vs.id where pool.id = ${id}";
+	$result1 = $dbxlink->query ($query1);
+	if ($result1 == NULL)
+	{
+		showError ('SQL query #1 failed', __FUNCTION__);
+		return NULL;
+	}
+	$ret = array();
+	$row = $result1->fetch (PDO::FETCH_ASSOC);
+	if (!$row)
+		return NULL;
+	foreach (array ('id', 'name', 'vsconfig', 'rsconfig', 'vs_id', 'vip', 'vs_name', 'vs_vsconfig', 'vs_rsconfig') as $c)
+		$ret[$c] = $row[$c];
+	$result1->closeCursor();
+	$ret['lblist'] = array();
+	$ret['rslist'] = array();
+	$query2 = "select object_id, vsconfig, rsconfig from IPLoadBalancer where rspool_id = ${id} order by object_id";
+	$result2 = $dbxlink->query ($query2);
+	if ($result2 == NULL)
+	{
+		showError ('SQL query #2 failed', __FUNCTION__);
+		return NULL;
+	}
+	while ($row = $result2->fetch (PDO::FETCH_ASSOC))
+		foreach (array ('vsconfig', 'rsconfig') as $c)
+			$ret['lblist'][$row['object_id']][$c] = $row[$c];
+	$result2->closeCursor();
+	$query3 = "select id, inet_ntoa(rsip) as rsip, rsport, rsconfig from IPRealServer where rspool_id = ${id} order by rsip, rsport";
+	$result3 = $dbxlink->query ($query3);
+	if ($result3 == NULL)
+	{
+		showError ('SQL query #3 failed', __FUNCTION__);
+		return NULL;
+	}
+	while ($row = $result3->fetch (PDO::FETCH_ASSOC))
+		foreach (array ('rsip', 'rsport', 'rsconfig') as $c)
+			$ret['rslist'][$row['id']][$c] = $row[$c];
+	$result3->closeCursor();
+	return $ret;
 }
 
 ?>

@@ -1660,7 +1660,7 @@ function renderAddressspace ()
 		echo "<table class='widetable' border=0 cellpadding=5 cellspacing=0 align='center'>\n";
 		echo "<tr><th>VIP</th><th>Name</th>";
 		foreach ($lblist as $lb_object_id)
-			echo "<th><a href='$root?page=object&tab=default&object_id=${lb_object_id}'>" . $lbdname[$lb_object_id]  . "</a></th>";
+			echo "<th><a href='${root}?page=object&tab=default&object_id=${lb_object_id}'>" . $lbdname[$lb_object_id]  . "</a></th>";
 		echo "</tr>\n";
 		foreach ($summary as $vsid => $vsdata)
 		{
@@ -1674,7 +1674,10 @@ function renderAddressspace ()
 					echo '&nbsp;';
 				else
 					foreach ($vsdata['lblist'][$lb_object_id] as $pool_id => $pool_info)
-						echo $pool_info['size'] . '@(' . $pool_info['name'] . ')';
+					{
+						echo $pool_info['size'] . "@(<a href='${root}?page=rspool&id=${pool_id}'>";
+			       			echo $pool_info['name'] . '</a>)';
+					}
 				echo '</td>';
 			}
 			echo "</tr>\n";
@@ -3720,6 +3723,72 @@ function renderVSRSPoolForm ($vsid = 0)
 		echo "</td><td>${rs['rsip']}</td><td>${rs['rsport']}</td><td>&nbsp;</td></tr>\n";
 	}
 	echo "</table>\n";
+}
+
+function renderRSPool ($pool_id = 0)
+{
+	global $root;
+	if ($pool_id <= 0)
+	{
+		showError ('Invalid pool_id', __FUNCTION__);
+		return;
+	}
+	$poolInfo = getRSPoolInfo ($pool_id);
+	if ($poolInfo == NULL)
+	{
+		showError ('getRSPoolInfo() returned NULL', __FUNCTION__);
+		return;
+	}
+
+	echo "<table border=0 class=objectview cellspacing=0 cellpadding=0>";
+	if (!empty ($poolInfo['name']))
+		echo "<tr><td colspan=2 align=center><h1>{$poolInfo['name']}</h1></td></tr>";
+	echo "<tr><td>\n";
+
+	startPortlet ('Configuration');
+	echo "<table border=0 cellspacing=0 cellpadding=3 width='100%'>\n";
+	if (!empty ($poolInfo['name']))
+		echo "<tr><th width='50%' class=tdright>Pool name:</th><td class=tdleft>${poolInfo['name']}</td></tr>\n";
+	echo "<tr><th width='50%' class=tdright>Real servers:</th><td class=tdleft>" . count ($poolInfo['rslist']) . "</td></tr>\n";
+	echo "<tr><th width='50%' class=tdright>Load balancers:</th><td class=tdleft>" . count ($poolInfo['lblist']) . "</td></tr>\n";
+	echo "<tr><th width='50%' class=tdright>Virtual service:</th><td class=tdleft>[" . $poolInfo['vip'] . "]</td></tr>\n";
+	if (!empty ($poolInfo['vs_name']))
+		echo "<tr><th width='50%' class=tdright>VS name:</th><td class=tdleft>${poolInfo['vs_name']}</td></tr>\n";
+	echo "</table>";
+	finishPortlet();
+
+	echo "</td><td rowspan=2 valign=top>\n";
+
+	startPortlet ('Real servers');
+	echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
+	echo "<tr><th>address</th><th>port</th><th>configuration</th></tr>";
+	foreach ($poolInfo['rslist'] as $rs)
+	{
+		echo "<tr><td><a href='${root}?page=ipaddress&ip=${rs['rsip']}'>${rs['rsip']}</a></td>";
+		echo "<td>${rs['rsport']}</td><td>${rs['rsconfig']}</td></tr>\n";
+	}
+	echo "</table>\n";
+	finishPortlet();
+
+	echo "</td></tr>\n<tr><td>";
+	
+	startPortlet ('Load balancers');
+	echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
+	echo "<tr><th>object</th><th>VS config</th><th>RS config</th></tr>";
+	foreach ($poolInfo['lblist'] as $object_id => $lbinfo)
+	{
+		$oi = getObjectInfo ($object_id);
+		echo "<tr><td><a href='${root}?page=object&object_id=${object_id}'>${oi['dname']}</a></td>";
+		echo "<td>${lbinfo['vsconfig']}</td><td>${lbinfo['rsconfig']}</td></tr>\n";
+	}
+	echo "</table>\n";
+	finishPortlet();
+
+	echo "\n";
+	echo "</td></tr></table>\n";
+#echo '<pre>';
+#print_r ($poolInfo);
+#echo '</pre>';
 }
 
 ?>
