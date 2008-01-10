@@ -1969,18 +1969,17 @@ function getDatabaseVersion ()
 	return $ret;
 }
 
-// Return an array of virtual service. For each of them list configured
+// Return an array of virtual services. For each of them list configured
 // load balancers with real server counter.
 function getSLBSummary ()
 {
 	global $dbxlink;
-	$query = 'select IPRealServer.vsid, IPVirtualService.vip as vip_bin, ' .
-		'inet_ntoa(IPVirtualService.vip) as vip, IPVirtualService.vport, ro.id as object_id, ' .
-		'count(rsid) as rscount, proto, IPVirtualService.vsid as vsid, IPVirtualService.name ' .
-		'from IPLBConfig inner join RackObject as ro on ro.id = object_id ' .
-		'inner join IPRealServer on IPLBConfig.rsid = IPRealServer.id ' .
-		'inner join IPVirtualService on IPRealServer.vsid = IPVirtualService.vsid ' .
-		'group by ro.id, IPVirtualService.vsid order by vip_bin, object_id';
+	$query = 'select vs.id as vsid, vip as vip_bin, inet_ntoa(vip) as vip, vport, proto, ' .
+		'vs.name, rsp.name as pool_name, object_id, count(rs.id) as rscount from ' .
+		'IPVirtualService as vs inner join IPRSPool as rsp on vs.id = rsp.vs_id ' .
+		'inner join IPRealServer as rs on rs.rspool_id = rsp.id ' .
+		'inner join IPLoadBalancer as lb on rsp.id = lb.rspool_id ' .
+		'group by rsp.id, object_id order by vip_bin, object_id';
 	$result = $dbxlink->query ($query);
 	if ($result == NULL)
 	{
