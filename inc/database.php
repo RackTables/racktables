@@ -1969,13 +1969,13 @@ function getDatabaseVersion ()
 	return $ret;
 }
 
-// Return an array of virtual services. For each of them list configured
-// load balancers with real server counter.
+// Return an array of virtual services. For each of them list real server pools
+// with their load balancers and other stats.
 function getSLBSummary ()
 {
 	global $dbxlink;
 	$query = 'select vs.id as vsid, vip as vip_bin, inet_ntoa(vip) as vip, vport, proto, ' .
-		'vs.name, rsp.name as pool_name, object_id, count(rs.id) as rscount from ' .
+		'vs.name, rsp.id as pool_id, rsp.name as pool_name, object_id, count(rs.id) as rscount from ' .
 		'IPVirtualService as vs inner join IPRSPool as rsp on vs.id = rsp.vs_id ' .
 		'inner join IPRealServer as rs on rs.rspool_id = rsp.id ' .
 		'inner join IPLoadBalancer as lb on rsp.id = lb.rspool_id ' .
@@ -1991,19 +1991,23 @@ function getSLBSummary ()
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
 		$vsid = $row['vsid'];
+		$object_id = $row['object_id'];
 		if (!isset ($ret[$vsid]))
 		{
 			$ret[$vsid] = array();
 			foreach (array ('vip', 'vport', 'proto', 'name') as $cname)
 				$ret[$vsid][$cname] = $row[$cname];
-			$ret[$vsid]['rspools'] = array();
+			$ret[$vsid]['lblist'] = array();
 		}
-		$ret[$vsid]['rspools'][$row['object_id']] = $row['rscount'];
+		$ret[$vsid]['lblist'][$row['object_id']][$row['pool_id']] = array ('size' => $row['rscount'], 'name' => $row['pool_name']);
 	}
 	$result->closeCursor();
 	return $ret;
 }
 
+// Get the detailed composition of a particular virtual service, namely the list
+// of all pools, each shown with the list of objects servicing it. VS/RS configs
+// will be returned as well.
 function getVServiceInfo ($vsid = 0)
 {
 	global $dbxlink;

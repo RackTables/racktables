@@ -1646,7 +1646,7 @@ function renderAddressspace ()
 	$lblist = array();
 	$lbdname = array();
 	foreach ($summary as $vipdata)
-		foreach (array_keys ($vipdata['rspools']) as $lb_object_id)
+		foreach (array_keys ($vipdata['lblist']) as $lb_object_id)
 			if (!in_array ($lb_object_id, $lblist))
 			{
 				$oi = getObjectInfo ($lb_object_id);
@@ -1664,12 +1664,20 @@ function renderAddressspace ()
 		echo "</tr>\n";
 		foreach ($summary as $vsid => $vsdata)
 		{
-			echo "<tr><td class=tdleft><a href='$root?page=vservice&tab=default&id=${vsid}'>";
+			echo "<tr><td class=tdleft><a href='$root?page=vservice&tab=default&id=${vsid}'>[";
 			echo buildVServiceName ($vsdata);
-			echo "<td>${vsdata['name']}</td>";
+			echo "]</td><td>${vsdata['name']}</td>";
 			foreach ($lblist as $lb_object_id)
-				echo '<td>' . (isset ($vsdata['rspools'][$lb_object_id]) ? $vsdata['rspools'][$lb_object_id] : '&nbsp;') . '</td>';
-			echo "</tr>";
+			{
+				echo '<td>';
+				if (!count ($vsdata['lblist']))
+					echo '&nbsp;';
+				else
+					foreach ($vsdata['lblist'][$lb_object_id] as $pool_id => $pool_info)
+						echo $pool_info['size'] . '@(' . $pool_info['name'] . ')';
+				echo '</td>';
+			}
+			echo "</tr>\n";
 		}
 		echo "</table>\n";
 	}
