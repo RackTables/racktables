@@ -120,8 +120,8 @@ DROP TABLE IF EXISTS `IPLoadBalancer`;
 CREATE TABLE `IPLoadBalancer` (
   `object_id` int(10) unsigned default NULL,
   `rspool_id` int(10) unsigned default NULL,
-  `vsconfig_extra` text,
-  `rsconfig_extra` text,
+  `vsconfig` text,
+  `rsconfig` text,
   UNIQUE KEY `object_id` (`object_id`,`rspool_id`)
 ) ENGINE=MyISAM;
 
