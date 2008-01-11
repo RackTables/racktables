@@ -3842,6 +3842,7 @@ function renderRSPool ($pool_id = 0)
 
 function renderVSList ()
 {
+	global $root;
 	$vslist = getVSList();
 	echo "<table class=widetable border=0 cellpadding=10 cellspacing=0 align=center>\n";
 	echo "<tr><th>endpoint</th><th>name</th><th>VS configuration</th><th>RS configuration</th></tr>";
