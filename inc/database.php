@@ -2067,9 +2067,8 @@ function getVServiceInfo ($vsid = 0)
 function getRSPoolInfo ($id = 0)
 {
 	global $dbxlink;
-	$query1 = "select ${id} as id, vs_id, pool.name, pool.vsconfig, pool.rsconfig, inet_ntoa(vip) as vip, proto, " .
-		"vs.name as vs_name, vs.vsconfig as vs_vsconfig, vs.rsconfig as vs_rsconfig from " .
-		"IPRSPool as pool inner join IPVirtualService as vs on pool.vs_id = vs.id where pool.id = ${id}";
+	$query1 = "select ${id} as id, vs_id, name, vsconfig, rsconfig from " .
+		"IPRSPool where id = ${id}";
 	$result1 = $dbxlink->query ($query1);
 	if ($result1 == NULL)
 	{
@@ -2080,7 +2079,7 @@ function getRSPoolInfo ($id = 0)
 	$row = $result1->fetch (PDO::FETCH_ASSOC);
 	if (!$row)
 		return NULL;
-	foreach (array ('id', 'name', 'vsconfig', 'rsconfig', 'vs_id', 'vip', 'vs_name', 'vs_vsconfig', 'vs_rsconfig') as $c)
+	foreach (array ('id', 'name', 'vsconfig', 'rsconfig', 'vs_id') as $c)
 		$ret[$c] = $row[$c];
 	$result1->closeCursor();
 	$ret['lblist'] = array();

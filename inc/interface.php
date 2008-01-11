@@ -3777,7 +3777,9 @@ function renderRSPool ($pool_id = 0)
 		echo "<tr><th width='50%' class=tdright>Pool name:</th><td class=tdleft>${poolInfo['name']}</td></tr>\n";
 	echo "<tr><th width='50%' class=tdright>Real servers:</th><td class=tdleft>" . count ($poolInfo['rslist']) . "</td></tr>\n";
 	echo "<tr><th width='50%' class=tdright>Load balancers:</th><td class=tdleft>" . count ($poolInfo['lblist']) . "</td></tr>\n";
-	echo "<tr><th width='50%' class=tdright>Virtual service:</th><td class=tdleft>[" . $poolInfo['vip'] . "]</td></tr>\n";
+	echo "<tr><th width='50%' class=tdright>Virtual service:</th><td class=tdleft>";
+	echo "<a href='${root}?page=vservice&id=${poolInfo['vs_id']}'>" . buildVServiceName (getVServiceInfo ($poolInfo['vs_id']));
+	echo "</a></td></tr>\n";
 	if (!empty ($poolInfo['vs_name']))
 		echo "<tr><th width='50%' class=tdright>VS name:</th><td class=tdleft>${poolInfo['vs_name']}</td></tr>\n";
 	echo "</table>";
@@ -3787,7 +3789,7 @@ function renderRSPool ($pool_id = 0)
 
 	startPortlet ('Real servers');
 	echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
-	echo "<tr><th>address</th><th>port</th><th>configuration</th></tr>";
+	echo "<tr><th>address</th><th>port</th><th>RS configuration</th></tr>";
 	foreach ($poolInfo['rslist'] as $rs)
 	{
 		echo "<tr><td><a href='${root}?page=ipaddress&ip=${rs['rsip']}'>${rs['rsip']}</a></td>";
@@ -3812,9 +3814,9 @@ function renderRSPool ($pool_id = 0)
 
 	echo "\n";
 	echo "</td></tr></table>\n";
-#echo '<pre>';
-#print_r ($poolInfo);
-#echo '</pre>';
+echo '<pre>';
+print_r ($poolInfo);
+echo '</pre>';
 }
 
 ?>
