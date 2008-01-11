@@ -161,8 +161,10 @@ $tab['vservice']['default'] = 'View';
 $tab['vservice']['configs'] = '[Configuration]';
 $tabhandler['vservice']['default'] = 'renderVirtualService';
 
-$page['rspools']['title'] = '[RS pools]';
+$page['rspools']['title'] = 'RS pools';
 $page['rspools']['parent'] = 'ipv4space';
+$tab['rspools']['default'] = 'View';
+$tabhandler['rspools']['default'] = 'renderRSPoolList';
 
 $page['rspool']['title_handler'] = 'dynamic_title_rspool';
 $page['rspool']['parent'] = 'rspools';

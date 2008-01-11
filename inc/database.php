@@ -2186,4 +2186,24 @@ function getVSList ()
 	return $vslist;
 }
 
+// Return the list of RS pool, indexed by pool id.
+function getRSPoolList ()
+{
+	global $dbxlink;
+	$query = "select id, vs_id, name, vsconfig, rsconfig from IPRSPool order by vs_id, name";
+	$result = $dbxlink->query ($query);
+	if ($result == NULL)
+	{
+		showError ('SQL query failed', __FUNCTION__);
+		return NULL;
+	}
+	$pool_list = array ();
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
+		foreach (array ('vs_id', 'name', 'vsconfig', 'rsconfig') as $cname)
+			$pool_list[$row['id']][$cname] = $row[$cname];
+	$result->closeCursor();
+	return $pool_list;
+}
+
+
 ?>

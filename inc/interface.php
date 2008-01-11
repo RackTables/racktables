@@ -3858,4 +3858,31 @@ function renderVSList ()
 	echo "</table>";
 }
 
+function renderRSPoolList ()
+{
+	global $root;
+	$pool_list = getRSPoolList();
+	if ($pool_list == NULL)
+	{
+		showError ('getRSPoolList() failed', __FUNCTION__);
+		return;
+	}
+	$vsinfocache = array();
+	echo "<table class=widetable border=0 cellpadding=10 cellspacing=0 align=center>\n";
+	echo "<tr><th>parent VS</th><th>name</th><th>VS configuration</th><th>RS configuration</th></tr>";
+	foreach ($pool_list as $pool_id => $pool_info)
+	{
+		if (!isset ($vsinfocache[$pool_info['vs_id']]))
+			$vsinfocache[$pool_info['vs_id']] = getVServiceInfo ($pool_info['vs_id']);
+		echo "<tr><td><a href='${root}?page=vservice&id=${pool_info['vs_id']}'>";
+		echo buildVServiceName ($vsinfocache[$pool_info['vs_id']]) . '</a></td>';
+		echo "<td><a href='${root}?page=rspool&id=${pool_id}'>";
+		echo (empty ($pool_info['name']) ? 'ANONYMOUS' : $pool_info['name']) . '</a></td>';
+		echo "<td><pre>${pool_info['vsconfig']}</pre></td>";
+		echo "<td><pre>${pool_info['rsconfig']}</pre></td>";
+		echo "</tr>\n";
+	}
+	echo "</table>";
+}
+
 ?>
