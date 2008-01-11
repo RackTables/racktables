@@ -1615,7 +1615,7 @@ function renderRackspaceHistory ()
 
 function renderAddressspace ()
 {
-	global $root;
+	global $root, $page;
 	echo '<table border=0 class=objectview cellspacing=0 cellpadding=0><tr><td class=pcleft>';
 
 	startPortlet ('Subnets');
@@ -1636,7 +1636,14 @@ function renderAddressspace ()
 
 	echo "</td>\n<td class=pcright>";
 
-	startPortlet ('SLB summary');
+	startPortlet ('SLB details');
+	echo "<table border=0 width='100%'><tr>";
+	foreach (array ('vservices', 'rspools', 'rservers', 'lbs') as $pno)
+		echo "<td><h3>[<a href='${root}?page=${pno}'>" . $page[$pno]['title'] . "</a>]</h3></td>";
+	echo '</tr></table>';
+	finishPortlet();
+
+	startPortlet ('current SLB setup');
 	$summary = getSLBSummary();
 #echo '<pre>';
 #print_r ($summary);
@@ -1664,9 +1671,9 @@ function renderAddressspace ()
 		echo "</tr>\n";
 		foreach ($summary as $vsid => $vsdata)
 		{
-			echo "<tr><td class=tdleft><a href='$root?page=vservice&tab=default&id=${vsid}'>[";
+			echo "<tr><td class=tdleft><a href='$root?page=vservice&tab=default&id=${vsid}'>";
 			echo buildVServiceName ($vsdata);
-			echo "]</td><td>${vsdata['name']}</td>";
+			echo "</td><td>${vsdata['name']}</td>";
 			foreach ($lblist as $lb_object_id)
 			{
 				echo '<td>';
@@ -3617,7 +3624,7 @@ function renderLVSConfig ($object_id = 0)
 
 function renderVirtualService ($vsid = 0)
 {
-	global $root;
+	global $root, $nextorder;
 	if ($vsid <= 0)
 	{
 		showError ('Invalid vsid', __FUNCTION__);
@@ -3653,11 +3660,12 @@ function renderVirtualService ($vsid = 0)
 
 	echo '<td class=pcright>';
 	startPortlet ('Backend');
-	echo "<table cellspacing=0 cellpadding=5 align=center border=1>\n";
+	echo "<table cellspacing=0 cellpadding=5 align=center border=0>\n";
 	echo "<tr><th>real server pool</th><th>load balancers</th></tr>\n";
+	$order = 'odd';
 	foreach ($vsinfo['rspool'] as $pool_id => $poolInfo)
 	{
-		echo '<tr><td class=tdleft>';
+		echo "<tr class=row_${order}><td class=tdleft>";
 		// Pool info
 		echo '<table width=100%>';
 		echo "<tr><td colspan=2><a href='${root}?page=rspool&id=${pool_id}'>";

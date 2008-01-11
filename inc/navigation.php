@@ -113,9 +113,6 @@ $page['ipv4space']['title'] = 'IPv4 space';
 $page['ipv4space']['parent'] = 'index';
 $tab['ipv4space']['default'] = 'Browse';
 $tab['ipv4space']['newrange'] = 'Subnets';
-$tab['ipv4space']['editrstab'] = '[SLB RSs]';
-$tab['ipv4space']['editlbconf'] = '[SLB LBs]';
-$tab['ipv4space']['editvstab'] = '[SLB VSs]';
 $helptab['ipv4space']['default'] = 'nets';
 $helptab['ipv4space']['newrange'] = 'nets';
 $tabhandler['ipv4space']['default'] = 'renderAddressspace';
@@ -151,17 +148,22 @@ $ophandler['ipaddress']['assignment']['delIpAssignment'] = 'delIpAssignment';
 $ophandler['ipaddress']['assignment']['editBondForAddress'] = 'editIpAssignment';
 $ophandler['ipaddress']['assignment']['bindObjectToIp'] = 'addIpAssignment';
 
+$page['vservices']['title'] = 'Virtual services';
+$page['vservices']['parent'] = 'ipv4space';
+
 $page['vservice']['title_handler'] = 'dynamic_title_vservice';
-$page['vservice']['parent'] = 'ipv4space';
+$page['vservice']['parent'] = 'vservices';
 $page['vservice']['bypass'] = 'id';
 $page['vservice']['bypass_type'] = 'uint';
 $tab['vservice']['default'] = 'View';
-$tab['vservice']['configs'] = '[VS Configuration]';
-$tab['vservice']['rspools'] = '[RS pools]';
+$tab['vservice']['configs'] = '[Configuration]';
 $tabhandler['vservice']['default'] = 'renderVirtualService';
 
+$page['rspools']['title'] = 'RS pools';
+$page['rspools']['parent'] = 'ipv4space';
+
 $page['rspool']['title_handler'] = 'dynamic_title_rspool';
-$page['rspool']['parent'] = 'ipv4space';
+$page['rspool']['parent'] = 'rspools';
 $page['rspool']['bypass'] = 'id';
 $page['rspool']['bypass_type'] = 'uint';
 $tab['rspool']['default'] = 'View';
@@ -172,6 +174,12 @@ $tabhandler['rspool']['editrslist'] = 'renderRSPoolServerForm';
 $ophandler['rspool']['editrslist']['addRS'] = 'addRealServer';
 $ophandler['rspool']['editrslist']['delRS'] = 'deleteRealServer';
 $ophandler['rspool']['editrslist']['updRS'] = 'updateRealServer';
+
+$page['rservers']['title'] = 'Real servers';
+$page['rservers']['parent'] = 'ipv4space';
+
+$page['lbs']['title'] = 'Load balancers';
+$page['lbs']['parent'] = 'ipv4space';
 
 $page['search']['title_handler'] = 'dynamic_title_search';
 $page['search']['handler'] = 'handler_search';
