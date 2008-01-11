@@ -3799,7 +3799,7 @@ function renderRSPool ($pool_id = 0)
 	foreach ($poolInfo['rslist'] as $rs)
 	{
 		echo "<tr><td><a href='${root}?page=ipaddress&ip=${rs['rsip']}'>${rs['rsip']}</a></td>";
-		echo "<td>${rs['rsport']}</td><td>${rs['rsconfig']}</td></tr>\n";
+		echo "<td>${rs['rsport']}</td><td><pre>${rs['rsconfig']}</pre></td></tr>\n";
 	}
 	echo "</table>\n";
 	finishPortlet();
