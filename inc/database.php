@@ -2109,4 +2109,28 @@ function getRSPoolInfo ($id = 0)
 	return $ret;
 }
 
+function addRStoRSPool ($pool_id = 0, $rsip = '', $rsport = 0, $rsconfig = '')
+{
+	if ($pool_id <= 0 or $rsport <= 0)
+	{
+		showError ('Invalid arguments', __FUNCTION__);
+		die;
+	}
+	if (long2ip (ip2long ($rsip)) !== $rsip)
+	{
+		showError ("Invalid IP address '${rsip}'", __FUNCTION__);
+		die;
+	}
+	return useInsertBlade
+	(
+		'IPRealServer',
+		array
+		(
+			'rsip' => "inet_aton('${rsip}')",
+			'rsport' => $rsport,
+			'rspool_id' => $pool_id,
+			'rsconfig' => (empty ($rsconfig) ? 'NULL' : "'${rsconfig}'"))
+	);
+}
+
 ?>

@@ -959,4 +959,22 @@ function resetUIConfig()
 	return "${root}?page=${pageno}&tab=default&message=" . urlencode ("Reset complete");
 }
 
+function addRealServer ()
+{
+	global $root, $pageno, $tabno;
+
+	assertUIntArg ('id');
+	assertStringArg ('rsip');
+	assertUIntArg ('rsport');
+	assertStringArg ('rsconfig', TRUE);
+	$pool_id = $_REQUEST['id'];
+	$rsip = $_REQUEST['rsip'];
+	$rsport = $_REQUEST['rsport'];
+	$rsconfig = $_REQUEST['rsconfig'];
+	if (!addRStoRSPool ($pool_id, $rsip, $rsport, $rsconfig))
+		return "${root}?page=${pageno}&tab=${tabno}&id=$pool_id&error=" . urlencode ('addRStoRSPool() failed');
+	else
+		return "${root}?page=${pageno}&tab=${tabno}&id=$pool_id&message=" . urlencode ("Real server successfully added");
+}
+
 ?>

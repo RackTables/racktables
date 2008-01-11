@@ -3713,40 +3713,46 @@ function renderProgressBar ($percentage = 0)
 	echo "</tr></table>";
 }
 
-function renderVSRSPoolForm ($vsid = 0)
+function renderRSPoolServerForm ($pool_id = 0)
 {
 	global $root, $pageno, $tabno;
-	if ($vsid <= 0)
+	if ($pool_id <= 0)
 	{
-		showError ('Invalid vsid', __FUNCTION__);
+		showError ('Invalid pool_id', __FUNCTION__);
 		return;
 	}
-	$vsinfo = getVServiceInfo ($vsid);
-	echo '<pre>';
-	print_r ($vsinfo);
-	echo '</pre>';
+	showMessageOrError();
+	$poolInfo = getRSPoolInfo ($pool_id);
 
-	echo "<center><h2>Add New</h2></center>\n";
+	startPortlet ('Add new');
 	echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
 	echo "<tr><th>Address</th><th>Port</th><th>&nbsp;</th></tr>\n";
 	echo "<form action='${root}process.php'>";
 	echo "<input type=hidden name=page value='${pageno}'>\n";
 	echo "<input type=hidden name=tab value='${tabno}'>\n";
-	echo "<input type=hidden name=op value=addRealServer>";
-	echo "<input type=hidden name=vsid value='${vsid}'>";
-	echo "<tr><td><input type=text name=vsip tabindex=1></td>";
-	echo "<td><input type=text name=vsport tabindex=2></td>";
+	echo "<input type=hidden name=op value=addRS>";
+	echo "<input type=hidden name=id value='${pool_id}'>";
+	echo "<tr><td><input type=text name=rsip tabindex=1></td>";
+	echo "<td><input type=text name=rsport tabindex=2></td>";
 	echo "<td><input type=submit value='OK' tabindex=3></tr>\n";
+	echo "<tr><th colspan=3>configuration</th></tr>";
+	echo "<tr><td colspan=3><textarea name=rsconfig rows=10 cols=80 tabindex=4></textarea></td></tr>";
 	echo "</table>\n";
+	finishPortlet();
 
 	echo "<center><h2>Manage Existing</h2></center>\n";
 	echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
-	echo "<tr><th>&nbsp;</th><th>Address</th><th>Port</th><th>[Allocation]</th></tr>\n";
-	foreach ($vsinfo['rslist'] as $rs)
+	echo "<tr><th>&nbsp;</th><th>Address</th><th>Port</th><th>configuration</th></tr>\n";
+	foreach ($poolInfo['rslist'] as $rsid => $rs)
 	{
-		echo "<tr><td><a href='${root}process.php?op=delRealServer&page=${pageno}&tab=${tabno}&rsid=${rs['rsid']}'>";
+		echo "<tr><td><a href='${root}process.php?op=delRealServer&page=${pageno}&tab=${tabno}&rsid=${rsid}'>";
 		printImageHREF ('delete', 'Delete this real server');
-		echo "</td><td>${rs['rsip']}</td><td>${rs['rsport']}</td><td>&nbsp;</td></tr>\n";
+		echo "</td><td>${rs['rsip']}</td><td>${rs['rsport']}</td><td>";
+		if (empty ($rs['rsconfig']))
+			echo '&nbsp;';
+		else
+			echo "<pre>${rs['rsconfig']}</pre>";
+		echo "</td></tr>\n";
 	}
 	echo "</table>\n";
 }
@@ -3814,9 +3820,9 @@ function renderRSPool ($pool_id = 0)
 
 	echo "\n";
 	echo "</td></tr></table>\n";
-echo '<pre>';
-print_r ($poolInfo);
-echo '</pre>';
+#echo '<pre>';
+#print_r ($poolInfo);
+#echo '</pre>';
 }
 
 ?>
