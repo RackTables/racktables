@@ -170,6 +170,8 @@ $tab['rspool']['editlb'] = '[Load Balancers]';
 $tabhandler['rspool']['default'] = 'renderRSPool';
 $tabhandler['rspool']['editrslist'] = 'renderRSPoolServerForm';
 $ophandler['rspool']['editrslist']['addRS'] = 'addRealServer';
+$ophandler['rspool']['editrslist']['delRS'] = 'deleteRealServer';
+$ophandler['rspool']['editrslist']['updRS'] = 'updateRealServer';
 
 $page['search']['title_handler'] = 'dynamic_title_search';
 $page['search']['handler'] = 'handler_search';

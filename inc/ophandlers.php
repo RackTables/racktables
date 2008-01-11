@@ -974,7 +974,41 @@ function addRealServer ()
 	if (!addRStoRSPool ($pool_id, $rsip, $rsport, $rsconfig))
 		return "${root}?page=${pageno}&tab=${tabno}&id=$pool_id&error=" . urlencode ('addRStoRSPool() failed');
 	else
-		return "${root}?page=${pageno}&tab=${tabno}&id=$pool_id&message=" . urlencode ("Real server successfully added");
+		return "${root}?page=${pageno}&tab=${tabno}&id=$pool_id&message=" . urlencode ("Real server was successfully added");
+}
+
+function deleteRealServer ()
+{
+	global $root, $pageno, $tabno;
+
+	assertUIntArg ('pool_id');
+	assertUIntArg ('id');
+	$rsid = $_REQUEST['id'];
+	$pool_id = $_REQUEST['pool_id'];
+	if (!commitDeleteRS ($rsid))
+		return "${root}?page=${pageno}&tab=${tabno}&id=$pool_id&error=" . urlencode ('commitDeleteRS() failed');
+	else
+		return "${root}?page=${pageno}&tab=${tabno}&id=$pool_id&message=" . urlencode ("Real server was successfully deleted");
+}
+
+function updateRealServer ()
+{
+	global $root, $pageno, $tabno;
+
+	assertUIntArg ('id');
+	assertUIntArg ('pool_id');
+	assertStringArg ('rsip');
+	assertUIntArg ('rsport');
+	assertStringArg ('rsconfig', TRUE);
+	$pool_id = $_REQUEST['pool_id'];
+	$rsid = $_REQUEST['id'];
+	$rsip = $_REQUEST['rsip'];
+	$rsport = $_REQUEST['rsport'];
+	$rsconfig = $_REQUEST['rsconfig'];
+	if (!commitUpdateRS ($rsid, $rsip, $rsport, $rsconfig))
+		return "${root}?page=${pageno}&tab=${tabno}&id=$pool_id&error=" . urlencode ('commitUpdateRS() failed');
+	else
+		return "${root}?page=${pageno}&tab=${tabno}&id=$pool_id&message=" . urlencode ("Real server was successfully updated");
 }
 
 ?>

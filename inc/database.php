@@ -2133,4 +2133,37 @@ function addRStoRSPool ($pool_id = 0, $rsip = '', $rsport = 0, $rsconfig = '')
 	);
 }
 
+function commitDeleteRS ($id = 0)
+{
+	if ($id <= 0)
+		return FALSE;
+	return useDeleteBlade ('IPRealServer', 'id', $id);
+}
+
+function commitUpdateRS ($rsid = 0, $rsip = '', $rsport = 0, $rsconfig = '')
+{
+	if ($rsid <= 0 or $rsport <= 0)
+	{
+		showError ('Invalid args', __FUNCTION__);
+		die;
+	}
+	if (long2ip (ip2long ($rsip)) !== $rsip)
+	{
+		showError ("Invalid IP address '${rsip}'", __FUNCTION__);
+		die;
+	}
+	global $dbxlink;
+	$query =
+		"update IPRealServer set rsip = inet_aton('${rsip}'), rsport = ${rsport}, rsconfig = " .
+		(empty ($rsconfig) ? 'NULL' : "'#{rsconfig}'") .
+		" where id = ${rsid} limit 1";
+	$result = $dbxlink->query ($query);
+	if ($result == NULL)
+	{
+		showError ("SQL query '${query}' failed", __FUNCTION__);
+		die;
+	}
+	return TRUE;
+}
+
 ?>
