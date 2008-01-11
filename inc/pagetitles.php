@@ -108,6 +108,24 @@ function dynamic_title_vservice ()
 	return $ret;
 }
 
+function dynamic_title_rspool ()
+{
+	global $pageno;
+	$ret = array();
+	switch ($pageno)
+	{
+		case 'rspool':
+			assertUIntArg ('id');
+			$poolInfo = getRSPoolInfo ($_REQUEST['id']);
+			$ret['name'] = 'RS pool' . (empty ($poolInfo['name']) ? '' : ' "' . $poolInfo['name'] . '"');
+			$ret['params']['id'] = $_REQUEST['id'];
+			break;
+		default:
+			return NULL;
+	}
+	return $ret;
+}
+
 function dynamic_title_search ()
 {
 	if (isset ($_REQUEST['q']))

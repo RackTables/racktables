@@ -160,7 +160,7 @@ $tab['vservice']['configs'] = '[VS Configuration]';
 $tab['vservice']['rspools'] = '[RS pools]';
 $tabhandler['vservice']['default'] = 'renderVirtualService';
 
-$page['rspool']['title'] = 'RS pool';
+$page['rspool']['title_handler'] = 'dynamic_title_rspool';
 $page['rspool']['parent'] = 'ipv4space';
 $page['rspool']['bypass'] = 'id';
 $page['rspool']['bypass_type'] = 'uint';
