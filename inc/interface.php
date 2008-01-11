@@ -2613,9 +2613,9 @@ function renderDictionary ()
 	global $nextorder;
 	$dict = getDict();
 	echo "<br><table class=cooltable border=0 cellpadding=5 cellspacing=0 align=center>\n";
-	$order = 'odd';
 	foreach ($dict as $chapter_no => $chapter)
 	{
+		$order = 'odd';
 		echo "<tr><th>Chapter</th><th>[refcnt]</th><th>Word</th></tr>\n";
 		$wc = count ($chapter['word']);
 		echo "<tr class=row_${order}><td class=tdleft" . ($wc ? " rowspan = ${wc}" : '');
@@ -2631,7 +2631,7 @@ function renderDictionary ()
 					echo "<tr class=row_${order}>";
 				else
 					$chap_start = FALSE;
-				echo "<td></td><td><div title='key=${key}'>${value}</div></td></tr>\n";
+				echo "<td>&nbsp;</td><td><div title='key=${key}'>${value}</div></td></tr>\n";
 				$order = $nextorder[$order];
 			}
 		}
