@@ -117,7 +117,7 @@ function dynamic_title_rspool ()
 		case 'rspool':
 			assertUIntArg ('id');
 			$poolInfo = getRSPoolInfo ($_REQUEST['id']);
-			$ret['name'] = empty ($poolInfo['name']) ? '' : 'ANONYMOUS' . $poolInfo['name'];
+			$ret['name'] = empty ($poolInfo['name']) ? 'ANONYMOUS' : $poolInfo['name'];
 			$ret['params']['id'] = $_REQUEST['id'];
 			break;
 		default:
