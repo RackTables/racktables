@@ -2011,28 +2011,50 @@ function getSLBSummary ()
 function getVServiceInfo ($vsid = 0)
 {
 	global $dbxlink;
-	$query = "select inet_ntoa(vip) as vip, vport, proto, name, vsconfig, default_rsconfig, " .
-		"rs.id as rsid, inet_ntoa(rs.rsip) as rsip, rsport as rsport from " .
-		"IPVirtualService as vs inner join IPRealServer as rs on vs.vsid = rs.vsid " .
-		"where vs.vsid = ${vsid} order by rsip, rsport";
-	$result = $dbxlink->query ($query);
-	if ($result == NULL)
+	$query1 = "select inet_ntoa(vip) as vip, vport, proto, name, vsconfig, rsconfig " .
+		"from IPVirtualService where id = ${vsid}";
+	$result1 = $dbxlink->query ($query1);
+	if ($result1 == NULL)
 	{
-		showError ('SQL query failed', __FUNCTION__);
+		showError ('SQL query #1 failed', __FUNCTION__);
 		return NULL;
 	}
 	$vsinfo = array ();
-	while ($row = $result->fetch (PDO::FETCH_ASSOC))
+	$row = $result1->fetch (PDO::FETCH_ASSOC);
+	if (!$row)
+		return NULL;
+	foreach (array ('vip', 'vport', 'proto', 'name', 'vsconfig', 'rsconfig') as $cname)
+		$vsinfo[$cname] = $row[$cname];
+	$vsinfo['rspool'] = array();
+	$result1->closeCursor();
+	$query2 = "select pool.id, name, pool.vsconfig, pool.rsconfig, object_id, " .
+		"lb.vsconfig as lb_vsconfig, lb.rsconfig as lb_rsconfig from " .
+		"IPRSPool as pool left join IPLoadBalancer as lb on pool.id = lb.rspool_id " .
+		"where vs_id = ${vsid} order by pool.name, object_id";
+	$result2 = $dbxlink->query ($query2);
+	if ($result2 == NULL)
 	{
-		if (!isset ($vsinfo['vip']))
-		{
-			foreach (array ('vip', 'vport', 'proto', 'name', 'vsconfig', 'default_rsconfig') as $cname)
-				$vsinfo[$cname] = $row[$cname];
-			$vsinfo['rslist'] = array();
-		}
-		$vsinfo['rslist'][] = array ('rsid' => $row['rsid'], 'rsip' => $row['rsip'], 'rsport' => $row['rsport']);
+		showError ('SQL query #2 failed', __FUNCTION__);
+		return NULL;
 	}
-	$result->closeCursor();
+	while ($row = $result2->fetch (PDO::FETCH_ASSOC))
+	{
+		if (!isset ($vsinfo['rspool'][$row['id']]))
+		{
+			$vsinfo['rspool'][$row['id']]['name'] = $row['name'];
+			$vsinfo['rspool'][$row['id']]['vsconfig'] = $row['vsconfig'];
+			$vsinfo['rspool'][$row['id']]['rsconfig'] = $row['rsconfig'];
+			$vsinfo['rspool'][$row['id']]['lblist'] = array();
+		}
+		if ($row['object_id'] == NULL)
+			continue;
+		$vsinfo['rspool'][$row['id']]['lblist'][$row['object_id']] = array
+		(
+			'vsconfig' => $row['lb_vsconfig'],
+			'rsconfig' => $row['lb_rsconfig']
+		);
+	}
+	$result2->closeCursor();
 	return $vsinfo;
 }
 

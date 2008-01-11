@@ -1670,13 +1670,13 @@ function renderAddressspace ()
 			foreach ($lblist as $lb_object_id)
 			{
 				echo '<td>';
-				if (!count ($vsdata['lblist']))
+				if (!isset ($vsdata['lblist'][$lb_object_id]))
 					echo '&nbsp;';
 				else
 					foreach ($vsdata['lblist'][$lb_object_id] as $pool_id => $pool_info)
 					{
 						echo $pool_info['size'] . "@(<a href='${root}?page=rspool&id=${pool_id}'>";
-			       			echo $pool_info['name'] . '</a>)';
+						echo $pool_info['name'] . '</a>)';
 					}
 				echo '</td>';
 			}
@@ -3624,9 +3624,6 @@ function renderVirtualService ($vsid = 0)
 		return;
 	}
 	$vsinfo = getVServiceInfo ($vsid);
-#echo '<pre>';
-#print_r ($vsinfo);
-#echo '</pre>';
 	echo '<table border=0 class=objectview cellspacing=0 cellpadding=0>';
 	if (!empty ($vsinfo['name']))
 		echo "<tr><td colspan=2 align=center><h1>${vsinfo['name']}</h1></td></tr>\n";
@@ -3640,41 +3637,70 @@ function renderVirtualService ($vsid = 0)
 	echo "<tr><th width='50%' class=tdright>Protocol:</th><td class=tdleft>${vsinfo['proto']}</td></tr>\n";
 	echo "<tr><th width='50%' class=tdright>Virtual IP address:</th><td class=tdleft><a href='${root}?page=ipaddress&tab=default&ip=${vsinfo['vip']}'>${vsinfo['vip']}</a></td></tr>\n";
 	echo "<tr><th width='50%' class=tdright>Virtual port:</th><td class=tdleft>${vsinfo['vport']}</td></tr>\n";
-	echo "</table>\n";
-	finishPortlet ();
-	echo '</td>';
-
-	echo '<td class=pcright rowspan=3>';
-	startPortlet ('Backend');
-	echo "<table cellspacing=0 cellpadding='5' align='center' class='widetable'>\n";
-	echo "<tr><th>Real IP address</th><th>Real port</th><th>[LBs]</tr>\n";
-	foreach ($vsinfo['rslist'] as $rsinfo)
+	if (!empty ($vsinfo['vsconfig']))
 	{
-		echo "<tr><td><a href='${root}?page=ipaddress&tab=default&ip=${rsinfo['rsip']}'>${rsinfo['rsip']}</a></td>";
-		echo "<td>${rsinfo['rsport']}</td>";
-		echo "<td>[LB config]</td></tr>";
+		echo "<tr><th width='50%' class=tdright>VS configuration:</th><td class=tdleft>&nbsp;</td></tr>\n";
+		echo "<tr><td class=tdleft colspan=2><pre>${vsinfo['vsconfig']}</pre></td></tr>\n";
+	}
+	if (!empty ($vsinfo['rsconfig']))
+	{
+		echo "<tr><th width='50%' class=tdright>RS configuration:</th><td class=tdleft>&nbsp;</td></tr>\n";
+		echo "<tr><td class=tdleft colspan=2><pre>${vsinfo['rsconfig']}</pre></td></tr>\n";
 	}
 	echo "</table>\n";
 	finishPortlet ();
 	echo '</td>';
 
-	echo "</tr>\n<tr>";
-
-	echo '<td>';
-	startPortlet ('Virtual service configuration');
-	echo "<pre>${vsinfo['vsconfig']}</pre>";
-	finishPortlet ();
-	echo '</td>';
-
-	echo "</tr>\n<tr>";
-
-	echo '<td>';
-	startPortlet ('Default real server configuration');
-	echo "<pre>${vsinfo['default_rsconfig']}</pre>";
+	echo '<td class=pcright>';
+	startPortlet ('Backend');
+	echo "<table cellspacing=0 cellpadding=5 align=center border=1>\n";
+	echo "<tr><th>real server pool</th><th>load balancers</th></tr>\n";
+	foreach ($vsinfo['rspool'] as $pool_id => $poolInfo)
+	{
+		echo '<tr><td class=tdleft>';
+		// Pool info
+		echo '<table width=100%>';
+		echo "<tr><td colspan=2><a href='${root}?page=rspool&id=${pool_id}'>";
+		if (!empty ($poolInfo['name']))
+			echo $poolInfo['name'];
+		else
+			echo 'ANONYMOUS';
+		echo "</a></td></tr>";
+		if (!empty ($poolInfo['vsconfig']))
+			echo "<tr><th>VS config</th><td><pre>${poolInfo['vsconfig']}</pre></td></tr>";
+		if (!empty ($poolInfo['rsconfig']))
+			echo "<tr><th>RS config</th><td><pre>${poolInfo['rsconfig']}</pre></td></tr>";
+		echo '</table>';
+		echo '</td><td>';
+		// LB list
+		if (!count ($poolInfo['lblist']))
+			echo 'none';
+		else
+		{
+			echo '<table width=100%>';
+			foreach ($poolInfo['lblist'] as $object_id => $lbInfo)
+			{
+				// FIXME: dname should be cached
+				$oi = getObjectInfo ($object_id);
+				echo "<tr><td colspan=2><a href='${root}?page=object&object_id=${object_id}'>";
+				echo $oi['dname'] . '</a></td></tr>';
+				if (!empty ($lbInfo['vsconfig']))
+					echo "<tr><th>VS config</th><td><pre>${lbInfo['vsconfig']}</pre></td></tr>";
+				if (!empty ($lbInfo['rsconfig']))
+					echo "<tr><th>RS config</th><td><pre>${lbInfo['rsconfig']}</pre></td></tr>";
+			}
+			echo '</table>';
+		}
+		echo "</td></tr>\n";
+	}
+	echo "</table>\n";
 	finishPortlet ();
 	echo '</td>';
 
 	echo '</tr><table>';
+#echo '<pre>';
+#print_r ($vsinfo);
+#echo '</pre>';
 }
 
 function renderProgressBar ($percentage = 0)
