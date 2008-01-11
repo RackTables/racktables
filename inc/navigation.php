@@ -150,6 +150,8 @@ $ophandler['ipaddress']['assignment']['bindObjectToIp'] = 'addIpAssignment';
 
 $page['vservices']['title'] = 'Virtual services';
 $page['vservices']['parent'] = 'ipv4space';
+$tab['vservices']['default'] = 'View';
+$tabhandler['vservices']['default'] = 'renderVSList';
 
 $page['vservice']['title_handler'] = 'dynamic_title_vservice';
 $page['vservice']['parent'] = 'vservices';
@@ -159,7 +161,7 @@ $tab['vservice']['default'] = 'View';
 $tab['vservice']['configs'] = '[Configuration]';
 $tabhandler['vservice']['default'] = 'renderVirtualService';
 
-$page['rspools']['title'] = 'RS pools';
+$page['rspools']['title'] = '[RS pools]';
 $page['rspools']['parent'] = 'ipv4space';
 
 $page['rspool']['title_handler'] = 'dynamic_title_rspool';
@@ -175,10 +177,10 @@ $ophandler['rspool']['editrslist']['addRS'] = 'addRealServer';
 $ophandler['rspool']['editrslist']['delRS'] = 'deleteRealServer';
 $ophandler['rspool']['editrslist']['updRS'] = 'updateRealServer';
 
-$page['rservers']['title'] = 'Real servers';
+$page['rservers']['title'] = '[Real servers]';
 $page['rservers']['parent'] = 'ipv4space';
 
-$page['lbs']['title'] = 'Load balancers';
+$page['lbs']['title'] = '[Load balancers]';
 $page['lbs']['parent'] = 'ipv4space';
 
 $page['search']['title_handler'] = 'dynamic_title_search';

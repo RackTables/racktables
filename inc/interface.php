@@ -1639,7 +1639,7 @@ function renderAddressspace ()
 	startPortlet ('SLB details');
 	echo "<table border=0 width='100%'><tr>";
 	foreach (array ('vservices', 'rspools', 'rservers', 'lbs') as $pno)
-		echo "<td><h3>[<a href='${root}?page=${pno}'>" . $page[$pno]['title'] . "</a>]</h3></td>";
+		echo "<td><h3><a href='${root}?page=${pno}'>" . $page[$pno]['title'] . "</a></h3></td>";
 	echo '</tr></table>';
 	finishPortlet();
 
@@ -3700,6 +3700,7 @@ function renderVirtualService ($vsid = 0)
 			echo '</table>';
 		}
 		echo "</td></tr>\n";
+		$order = $nextorder[$order];
 	}
 	echo "</table>\n";
 	finishPortlet ();
@@ -3837,6 +3838,23 @@ function renderRSPool ($pool_id = 0)
 #echo '<pre>';
 #print_r ($poolInfo);
 #echo '</pre>';
+}
+
+function renderVSList ()
+{
+	$vslist = getVSList();
+	echo "<table class=widetable border=0 cellpadding=10 cellspacing=0 align=center>\n";
+	echo "<tr><th>endpoint</th><th>name</th><th>VS configuration</th><th>RS configuration</th></tr>";
+	foreach ($vslist as $vsid => $vsinfo)
+	{
+		echo "<tr><td><a href='${root}?page=vservice&id=${vsid}'>" . buildVServiceName ($vsinfo);
+		echo "</a></td>";
+		echo "<td>${vsinfo['name']}</td>";
+		echo "<td><pre>${vsinfo['vsconfig']}</pre></td>";
+		echo "<td><pre>${vsinfo['rsconfig']}</pre></td>";
+		echo "</tr>\n";
+	}
+	echo "</table>";
 }
 
 ?>

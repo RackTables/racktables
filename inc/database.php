@@ -2166,4 +2166,24 @@ function commitUpdateRS ($rsid = 0, $rsip = '', $rsport = 0, $rsconfig = '')
 	return TRUE;
 }
 
+// Return the list of virtual services, indexed by vs_id.
+function getVSList ()
+{
+	global $dbxlink;
+	$query = "select id, inet_ntoa(vip) as vip, vport, proto, name, vsconfig, rsconfig " .
+		"from IPVirtualService order by vip, vport, proto";
+	$result = $dbxlink->query ($query);
+	if ($result == NULL)
+	{
+		showError ('SQL query failed', __FUNCTION__);
+		return NULL;
+	}
+	$vslist = array ();
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
+		foreach (array ('vip', 'vport', 'proto', 'name', 'vsconfig', 'rsconfig') as $cname)
+			$vslist[$row['id']][$cname] = $row[$cname];
+	$result->closeCursor();
+	return $vslist;
+}
+
 ?>
