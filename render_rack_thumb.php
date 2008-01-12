@@ -72,7 +72,7 @@ function renderRackThumb ($rack_id = 0)
 	// cache our palette as well
 	$color = array();
 	foreach (array ('F', 'A', 'U', 'T', 'Th', 'Tw', 'Thw') as $statecode)
-		$color[$statecode] = getConfigVar ('color_' . $statecode);
+		$color[$statecode] = colorFromHex ($img, getConfigVar ('color_' . $statecode));
 	imagerectangle ($img, 0, 0, $totalwidth - 1, $totalheight - 1, colorFromHex ($img, '000000'));
 	imagerectangle ($img, 1, 1, $totalwidth - 2, $totalheight - 2, colorFromHex ($img, 'c0c0c0'));
 	imagerectangle ($img, 2, 2, $totalwidth - 3, $totalheight - 3, colorFromHex ($img, '000000'));
@@ -90,7 +90,7 @@ function renderRackThumb ($rack_id = 0)
 				3 + ($rackData['height'] - $unit_no) * 2,
 				$offset[$locidx] + $rtwidth[$locidx] - 1,
 				3 + ($rackData['height'] - $unit_no) * 2 + 1,
-				colorFromHex ($img, $color[$colorcode])
+				$color[$colorcode]
 			);
 		}
 	}
@@ -101,14 +101,14 @@ function renderRackThumb ($rack_id = 0)
 
 function renderProgressBarImage ($done)
 {
-	$img = @imagecreatetruecolor (100, 10)
-	$color['T'] = getConfigVar ('color_T');
-	$color['F'] = getConfigVar ('color_F');
+	$img = @imagecreatetruecolor (100, 10);
+	$color['T'] = colorFromHex ($img, getConfigVar ('color_T'));
+	$color['F'] = colorFromHex ($img, getConfigVar ('color_F'));
+	imagefilledrectangle ($img, 0, 0, $done, 10, $color['T']);
+	imagefilledrectangle ($img, $done, 0, 100, 10, $color['F']);
 	header("Content-type: image/png");
 	imagepng ($img);
 	imagedestroy ($img);
-	imagefilledrectangle ($img, 0, 0, $done, 10, $color['T']);
-	imagefilledrectangle ($img, $done, 0, 100, 10, $color['F']);
 }
 
 ?>
