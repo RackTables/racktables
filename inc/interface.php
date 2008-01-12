@@ -78,7 +78,7 @@ function renderRackspace ()
 			echo "<img border=0 width=${rackwidth} height=";
 			echo 3 + 3 + $rack['height'] * 2;
 			echo " title='${rack['height']} units'";
-			echo "src='render_rack_thumb.php?rack_id=${rack['id']}'>";
+			echo "src='render_rack_thumb.php?img=minirack&rack_id=${rack['id']}'>";
 			echo "<br>${rack['name']}</a></td>";
 		}
 		echo "</tr></table></tr>\n";
@@ -128,7 +128,7 @@ function renderRow ($row_id)
 		echo "<img border=0 width=" . $rackwidth * getConfigVar ('ROW_SCALE') . " height=";
 		echo (3 + 3 + $rack['height'] * 2) * getConfigVar ('ROW_SCALE');
 		echo " title='${rack['height']} units'";
-		echo "src='render_rack_thumb.php?rack_id=${rack['id']}'>";
+		echo "src='render_rack_thumb.php?img=minirack&rack_id=${rack['id']}'>";
 		echo "<br>${rack['name']}</a></td>";
 		$order = $nextorder[$order];
 	}
@@ -3715,11 +3715,7 @@ function renderVirtualService ($vsid = 0)
 function renderProgressBar ($percentage = 0)
 {
 	$done = ((int) ($percentage * 100));
-	$left = 100 - $done;
-	echo "<table width=100px height=10px border=0 cellspacing=0 cellpadding=0><tr>";
-	echo "<td class=state_T width='${done}%'><div title='${done}%'>&nbsp;</div></td>";
-	echo "<td class=state_F><div title='${left}%'>&nbsp;</div></td>";
-	echo "</tr></table>";
+	echo "<img width=100 height=10 border=0 src='${root}render_rack_thumb.php?img=progressbar&done=${done}'>";
 }
 
 function renderRSPoolServerForm ($pool_id = 0)

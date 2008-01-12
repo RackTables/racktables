@@ -4,13 +4,24 @@
 
 require 'inc/init.php';
 
-// Thumbnails are rendered in security context of rackspace.
-$pageno = 'rackspace';
-$tabno = 'default';
-authorize();
-
-assertUIntArg ('rack_id');
-renderRackThumb ($_REQUEST['rack_id']);
+assertStringArg ('img');
+switch ($_REQUEST['img'])
+{
+	case 'minirack':
+		// Thumbnails are rendered in security context of rackspace.
+		$pageno = 'rackspace';
+		$tabno = 'default';
+		authorize();
+		assertUIntArg ('rack_id');
+		renderRackThumb ($_REQUEST['rack_id']);
+		break;
+	case 'progressbar':
+		assertUIntArg ('done');
+		renderProgressBarImage ($_REQUEST['done']);
+		break;
+	default:
+		renderError();
+}
 
 //------------------------------------------------------------------------
 function renderError ()
@@ -86,6 +97,18 @@ function renderRackThumb ($rack_id = 0)
 	header("Content-type: image/png");
 	imagepng ($img);
 	imagedestroy ($img);
+}
+
+function renderProgressBarImage ($done)
+{
+	$img = @imagecreatetruecolor (100, 10)
+	$color['T'] = getConfigVar ('color_T');
+	$color['F'] = getConfigVar ('color_F');
+	header("Content-type: image/png");
+	imagepng ($img);
+	imagedestroy ($img);
+	imagefilledrectangle ($img, 0, 0, $done, 10, $color['T']);
+	imagefilledrectangle ($img, $done, 0, 100, 10, $color['F']);
 }
 
 ?>
