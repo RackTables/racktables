@@ -2600,6 +2600,9 @@ function renderRackPage ($rack_id)
 	echo "<tr><th width='50%' class=tdright>Utilization:</th><td class=tdleft>";
 	renderProgressBar (getRSUforRack ($rackData));
 	echo "</td></tr>\n";
+	echo "<tr><th width='50%' class=tdright>Objects:</th><td class=tdleft>";
+	echo getObjectCount ($rackData);
+	echo "</td></tr>\n";
 	if (!empty ($rackData['comment']))
 		echo "<tr><th width='50%' class=tdright>Comment:</th><td class=tdleft>${rackData['comment']}</td></tr>\n";
 	echo '</table>';

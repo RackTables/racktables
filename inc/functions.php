@@ -1112,4 +1112,18 @@ function getRSUforRackRow ($rowData = NULL)
 	return ($counter['T'] + $counter['W'] + $counter['U']) / ($counter['T'] + $counter['W'] + $counter['U'] + $counter['F']);
 }
 
+function getObjectCount ($rackData)
+{
+	$objects = array();
+	for ($i = $rackData['height']; $i > 0; $i--)
+		for ($locidx = 0; $locidx < 3; $locidx++)
+			if
+			(
+				$rackData[$i][$locidx]['state'] == 'T' and
+				!in_array ($rackData[$i][$locidx]['object_id'], $objects)
+			)
+				$objects[] = $rackData[$i][$locidx]['object_id'];
+	return count ($objects);
+}
+
 ?>
