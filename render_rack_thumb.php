@@ -16,7 +16,7 @@ switch ($_REQUEST['img'])
 		renderRackThumb ($_REQUEST['rack_id']);
 		break;
 	case 'progressbar':
-		assertUIntArg ('done');
+		assertUIntArg ('done', TRUE);
 		renderProgressBarImage ($_REQUEST['done']);
 		break;
 	default:
