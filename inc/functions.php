@@ -1100,6 +1100,7 @@ function getRSUforRackRow ($rowData = NULL)
 		return NULL;
 	}
 	$counter = array ('A' => 0, 'U' => 0, 'T' => 0, 'W' => 0, 'F' => 0);
+	$total_height = 0;
 	foreach (array_keys ($rowData) as $rack_id)
 	{
 		$data = getRackData ($rack_id);
