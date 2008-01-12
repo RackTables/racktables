@@ -465,7 +465,7 @@ function processGridForm (&$rackData, $unchecked_state, $checked_state, $object_
 				"unit_no = ${unit_no} and atom = '${atom}' limit 1";
 			$r = $dbxlink->query ($query);
 			if ($r == NULL)
-				return array ('code' => 500, 'message' => "${rack_name}: SQL DELETE query failed in processGridForm()");
+				return array ('code' => 500, 'message' => __FUNCTION__ . ": ${rack_name}: SQL DELETE query failed");
 			if ($newstate != 'F')
 			{
 				$query =
@@ -473,7 +473,7 @@ function processGridForm (&$rackData, $unchecked_state, $checked_state, $object_
 					"values(${rack_id}, ${unit_no}, '${atom}', '${newstate}') ";
 				$r = $dbxlink->query ($query);
 				if ($r == NULL)
-					return array ('code' => 500, 'message' => "${rack_name}: SQL INSERT query failed in processGridForm()");
+					return array ('code' => 500, 'message' => __FUNCTION__ . ": ${rack_name}: SQL INSERT query failed");
 			}
 			if ($newstate == 'T' and $object_id != 0)
 			{
@@ -808,9 +808,9 @@ function commitUpdatePort ($port_id, $port_name, $port_label, $port_l2address, $
 function delObjectPort ($port_id)
 {
 	if (unlinkPort ($port_id) != '')
-		return 'unlinkPort() failed in delObjectPort()';
+		return __FUNCTION__ . ': unlinkPort() failed';
 	if (useDeleteBlade ('Port', 'id', $port_id) != TRUE)
-		return 'useDeleteBlade() failed in delObjectPort()';
+		return __FUNCTION__ . ': useDeleteBlade() failed';
 	return '';
 }
 
@@ -1103,11 +1103,11 @@ function updateAddress ($ip=0, $name='', $reserved='no')
 function commitDeleteRange ($id = 0)
 {
 	if ($id <= 0)
-		return 'Invalid range ID in commitDeleteRange()';
+		return __FUNCTION__ . ': Invalid range ID';
 	if (useDeleteBlade ('IPRanges', 'id', $id))
 		return '';
 	else
-		return 'SQL query failed in commitDeleteRange';
+		return __FUNCTION__ . ': SQL query failed';
 }
 
 function updateBond ($ip='', $object_id=0, $name='', $type='')
@@ -1956,13 +1956,13 @@ function getDatabaseVersion ()
 		$errorInfo = $dbxlink->errorInfo();
 		if ($errorInfo[0] == '42S02') // ER_NO_SUCH_TABLE
 			return '0.14.4';
-		die ('SQL query #1 failed in getDatabaseVersion() with error ' . $errorInfo[2]);
+		die (__FUNCTION__ . ': SQL query #1 failed with error ' . $errorInfo[2]);
 	}
 	$rows = $result->fetchAll (PDO::FETCH_NUM);
 	if (count ($rows) != 1 || empty ($rows[0][0]))
 	{
 		$result->closeCursor();
-		die ('Cannot guess database version. Config table is present, but DB_VERSION is missing or invalid. Giving up.');
+		die (__FUNCTION__ . ': Cannot guess database version. Config table is present, but DB_VERSION is missing or invalid. Giving up.');
 	}
 	$ret = $rows[0][0];
 	$result->closeCursor();

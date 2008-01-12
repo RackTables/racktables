@@ -34,7 +34,7 @@ function queryGateway ($gwname, $questions)
 	$pipes = array();
 	$gateway = proc_open ($execpath, $dspec, $pipes);
 	if (!is_resource ($gateway))
-		return array ('ERR proc_open() failed in queryGateway()');
+		return array ('ERR proc_open() failed in ' . __FUNCTION__);
 
 // Dialogue starts. Send all questions.
 	foreach ($questions as $q)
@@ -159,7 +159,7 @@ function setSwitchVLANs ($object_id = 0, $setcmd)
 	global $remote_username;
 	$log = array();
 	if ($object_id <= 0)
-		return array (array ('code' => 'error', 'message' => 'Invalid object_id in setSwitchVLANs()'));
+		return array (array ('code' => 'error', 'message' => __FUNCTION__ . ': Invalid object_id'));
 	$objectInfo = getObjectInfo ($object_id);
 	$endpoints = findAllEndpoints ($object_id, $objectInfo['name']);
 	if (count ($endpoints) == 0)
@@ -181,7 +181,7 @@ function setSwitchVLANs ($object_id = 0, $setcmd)
 		array ("connect ${endpoint} ${hwtype} ${swtype} ${remote_username}", $setcmd)
 	);
 	if ($data == NULL)
-		return array (array ('code' => 'error', 'message' => 'Failed to get any response from queryGateway() or the gateway died'));
+		return array (array ('code' => 'error', 'message' => __FUNCTION__ . ': Failed to get any response from queryGateway() or the gateway died'));
 	if (strpos ($data[0], 'OK!') !== 0)
 		return array (array ('code' => 'error', 'message' => "Gateway failure: returned code ${data[0]}."));
 	if (count ($data) != 2)

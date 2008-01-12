@@ -228,7 +228,7 @@ BCP go here.
 //------------------------------------------------------------------------
 		default:
 			startPortlet ('Oops!');
-			echo "There was no help text found for help tab '${tabno}' in renderHelpTab().";
+			echo __FUNCTION__ . ": There was no help text found for help tab '${tabno}'";
 			finishPortlet();
 			break;
 //------------------------------------------------------------------------

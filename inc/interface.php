@@ -258,7 +258,7 @@ function renderNewObjectForm ()
 		if (commitAddObject ($name, $label, $barcode, $type_id, $asset_no) === TRUE)
 			$log[] = array ('code' => 'success', 'message' => "Added new object '${name}'");
 		else
-			$log[] = array ('code' => 'error', 'message' => 'commitAddObject() failed in renderNewObjectForm()');
+			$log[] = array ('code' => 'error', 'message' => __FUNCTION__ . ': commitAddObject() failed');
 		printLog ($log);
 	}
 
@@ -298,7 +298,7 @@ function renderNewRackForm ($row_id)
 		if (commitAddRack ($name, $height, $row_id, $comment) === TRUE)
 			$log[] = array ('code' => 'success', 'message' => "Added new rack '${name}'");
 		else
-			$log[] = array ('code' => 'error', 'message' => 'commitAddRack() failed in renderNewRackForm()');
+			$log[] = array ('code' => 'error', 'message' => __FUNCTION__ . 'commitAddRack() failed');
 		printLog ($log);
 	}
 
@@ -347,7 +347,7 @@ function renderEditObjectForm ($object_id)
 		if (commitUpdateObject ($object_id, $name, $label, $barcode, $type_id, $has_problems, $asset_no, $comment) === TRUE)
 			$log[] = array ('code' => 'success', 'message' => "Updated object '${name}'");
 		else
-			$log[] = array ('code' => 'error', 'message' => 'commitUpdateObject() failed in renderEditObjectForm()');
+			$log[] = array ('code' => 'error', 'message' => __FUNCTION__ . ': commitUpdateObject() failed');
 		printLog ($log);
 	}
 
@@ -461,7 +461,7 @@ function renderEditRackForm ($rack_id)
 		if (commitUpdateRack ($rack_id, $name, $height, $row_id, $comment) === TRUE)
 			$log[] = array ('code' => 'success', 'message' => "Updated rack '${name}'");
 		else
-			$log[] = array ('code' => 'error', 'message' => 'commitUpdateRack() failed in renderEditRackForm()');
+			$log[] = array ('code' => 'error', 'message' => __FUNCTION__ . ': commitUpdateRack() failed');
 		printLog ($log);
 	}
 
@@ -1209,7 +1209,7 @@ function renderRackSpaceForObject ($object_id = 0)
 				// Reload our working copy after form processing.
 				$rackData = getRackData ($rack_id);
 				if ($rackData == NULL)
-					$log[] = array ('code' => 500, 'message' => 'Working copy update failed in renderRackSpaceForObject()');
+					$log[] = array ('code' => 500, 'message' => 'Working copy update failed in ', __FUNCTION__);
 				applyObjectMountMask ($rackData, $object_id);
 				$workingRacksData[$rack_id] = $rackData;
 			}
@@ -2136,7 +2136,7 @@ function renderAddMultipleObjectsForm ()
 			if (commitAddObject ($name[$i], $label[$i], $barcode[$i], $type_id[$i], $asset_no[$i]) === TRUE)
 				$log[] = array ('code' => 'success', 'message' => "Added new object '${name[$i]}'");
 			else
-				$log[] = array ('code' => 'error', 'message' => 'commitAddObject() failed in renderAddMultipleObjectsForm()');
+				$log[] = array ('code' => 'error', 'message' => __FUNCTION__ . ': commitAddObject() failed');
 		}
 	}
 	elseif (isset ($_REQUEST['got_very_fast_data']))
