@@ -1621,15 +1621,16 @@ function renderAddressspace ()
 	startPortlet ('Subnets');
 	echo "<table class='widetable' border=0 cellpadding=10 cellspacing=0 align='center'>\n";
 	$addrspaceList = getAddressspaceList();
-	echo "<tr><th>Subnet</th><th>Name</th><th>Total/used addresses</th></tr>";
+	echo "<tr><th>Subnet</th><th>Name</th><th>Utilization</th></tr>";
 	foreach ($addrspaceList as $iprange)
 	{
-		echo "<tr><td class=tdleft><a href='${root}?page=iprange&id=${iprange['id']}'>${iprange['ip']}/${iprange['mask']}</a></td><td>${iprange['name']}</td><td>";
-		echo ($iprange['ip_bin'] | $iprange['mask_bin_inv']) - ($iprange['ip_bin'] & $iprange['mask_bin'])+1;
-		$range = getIPRange($iprange['id']);
-		echo "/";
-		echo count($range['addrlist']);
-		echo "</td></tr>";
+		$range = getIPRange ($iprange['id']);
+		$total = ($iprange['ip_bin'] | $iprange['mask_bin_inv']) - ($iprange['ip_bin'] & $iprange['mask_bin']) + 1;
+		$used = count ($range['addrlist']);
+		echo "<tr><td class=tdleft><a href='${root}?page=iprange&id=${iprange['id']}'>${iprange['ip']}/${iprange['mask']}</a></td>";
+		echo "<td class=tdleft>${iprange['name']}</td><td class=tdleft>";
+		renderProgressBar ($used/$total);
+		echo " ${used}/${total}</td></tr>";
 	}
 	echo "</table>\n";
 	finishPortlet();
