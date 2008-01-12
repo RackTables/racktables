@@ -78,7 +78,7 @@ function renderRackspace ()
 			echo "<img border=0 width=${rackwidth} height=";
 			echo 3 + 3 + $rack['height'] * 2;
 			echo " title='${rack['height']} units'";
-			echo "src='render_rack_thumb.php?img=minirack&rack_id=${rack['id']}'>";
+			echo "src='render_image.php?img=minirack&rack_id=${rack['id']}'>";
 			echo "<br>${rack['name']}</a></td>";
 		}
 		echo "</tr></table></tr>\n";
@@ -128,7 +128,7 @@ function renderRow ($row_id)
 		echo "<img border=0 width=" . $rackwidth * getConfigVar ('ROW_SCALE') . " height=";
 		echo (3 + 3 + $rack['height'] * 2) * getConfigVar ('ROW_SCALE');
 		echo " title='${rack['height']} units'";
-		echo "src='render_rack_thumb.php?img=minirack&rack_id=${rack['id']}'>";
+		echo "src='render_image.php?img=minirack&rack_id=${rack['id']}'>";
 		echo "<br>${rack['name']}</a></td>";
 		$order = $nextorder[$order];
 	}
@@ -3717,7 +3717,7 @@ function renderProgressBar ($percentage = 0)
 {
 	global $root;
 	$done = ((int) ($percentage * 100));
-	echo "<img width=100 height=10 border=0 src='${root}render_rack_thumb.php?img=progressbar&done=${done}'>";
+	echo "<img width=100 height=10 border=0 src='${root}render_image.php?img=progressbar&done=${done}'>";
 }
 
 function renderRSPoolServerForm ($pool_id = 0)
