@@ -3714,6 +3714,7 @@ function renderVirtualService ($vsid = 0)
 
 function renderProgressBar ($percentage = 0)
 {
+	global $root;
 	$done = ((int) ($percentage * 100));
 	echo "<img width=100 height=10 border=0 src='${root}render_rack_thumb.php?img=progressbar&done=${done}'>";
 }
