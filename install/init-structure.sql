@@ -284,6 +284,7 @@ CREATE TABLE `Rack` (
   `row_id` int(10) unsigned NOT NULL default '1',
   `height` tinyint(3) unsigned NOT NULL default '42',
   `comment` text,
+  `thumb_data` blob,
   PRIMARY KEY  (`id`)
 ) ENGINE=MyISAM;
 

@@ -572,6 +572,7 @@ echo '</pre>';
 		case '0.14.9':
 			$query[] = "alter table IPRanges modify column id int(10) unsigned not null auto_increment";
 			$query[] = "alter table Rack modify column height tinyint(3) unsigned not null default '42'";
+			$query[] = "alter table Rack add column thumb_data blob after comment";
 			break; // --------------------------------------------
 #		case '0.14.10':
 #			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('AUTO_PORTS_CONFIG','FIXME','string','yes','no','Autoports configuration')";
