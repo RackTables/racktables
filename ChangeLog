@@ -6,6 +6,8 @@
 	update: Live VLANs color legend now distinguishes between 1 and 0
 		MAC addresses on a port
 	update: fixed tabindex in NATv4 rules form
+	new feature: more information for rack view
+	new feature: rack thumbnails caching
 0.14.8 2007-12-22
 	bugfix: adjusted hardcoded values in VLAN trigger
 	bugfix: adjusted HW, SW and port types in SNMP data collector
