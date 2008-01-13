@@ -65,7 +65,7 @@ function renderRackThumb ($rack_id = 0)
 	}
 }
 
-// Return a binary string containing the PNG minirack.
+// Output a binary string containing the PNG minirack.
 function generateMiniRack ($rack_id)
 {
 	if (($rackData = getRackData ($rack_id, TRUE)) == NULL)
