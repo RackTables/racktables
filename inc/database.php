@@ -490,7 +490,10 @@ function processGridForm (&$rackData, $unchecked_state, $checked_state, $object_
 		}
 	}
 	if ($rackchanged)
+	{
+		resetThumbCache ($rack_id);
 		return array ('code' => 200, 'message' => "${rack_name}: All changes were successfully saved.");
+	}
 	else
 		return array ('code' => 300, 'message' => "${rack_name}: No changes.");
 }
@@ -648,7 +651,7 @@ function getOperationMolecules ($op_id = 0)
 	return array ($omid, $nmid);
 }
 
-function getResidentRacksData ($object_id = 0)
+function getResidentRacksData ($object_id = 0, $fetch_rackdata = TRUE)
 {
 	if ($object_id <= 0)
 	{
@@ -664,6 +667,7 @@ function getResidentRacksData ($object_id = 0)
 		return;
 	}
 	$rows = $result->fetchAll (PDO::FETCH_NUM);
+print_r($rows);
 	$result->closeCursor();
 	$ret = array();
 	foreach ($rows as $row)
@@ -2233,6 +2237,18 @@ function saveThumbCache ($rack_id = 0, $cache = NULL)
 	}
 	$data = base64_encode ($cache);
 	$query = "update Rack set thumb_data = '${data}' where id = ${rack_id} limit 1";
+	$result = $dbxlink->exec ($query);
+}
+
+function resetThumbCache ($rack_id = 0)
+{
+	global $dbxlink;
+	if ($rack_id == 0)
+	{
+		showError ('Invalid argument', __FUNCTION__);
+		return;
+	}
+	$query = "update Rack set thumb_data = NULL where id = ${rack_id} limit 1";
 	$result = $dbxlink->exec ($query);
 }
 

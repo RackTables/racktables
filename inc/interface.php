@@ -348,6 +348,9 @@ function renderEditObjectForm ($object_id)
 			$log[] = array ('code' => 'success', 'message' => "Updated object '${name}'");
 		else
 			$log[] = array ('code' => 'error', 'message' => __FUNCTION__ . ': commitUpdateObject() failed');
+		// Invalidate thumb cache of all racks objects could occupy.
+		foreach (getResidentRacksData ($object_id, FALSE) as $rack_id)
+			resetThumbCache ($rack_id);
 		printLog ($log);
 	}
 
@@ -462,6 +465,7 @@ function renderEditRackForm ($rack_id)
 			$log[] = array ('code' => 'success', 'message' => "Updated rack '${name}'");
 		else
 			$log[] = array ('code' => 'error', 'message' => __FUNCTION__ . ': commitUpdateRack() failed');
+		resetThumbCache ($rack_id);
 		printLog ($log);
 	}
 
