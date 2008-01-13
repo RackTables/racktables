@@ -2205,5 +2205,35 @@ function getRSPoolList ()
 	return $pool_list;
 }
 
+function loadThumbCache ($rack_id = 0)
+{
+	global $dbxlink;
+	$ret = NULL;
+	$query = "select thumb_data from Rack where id = ${rack_id} and thumb_data is not null limit 1";
+	$result = $dbxlink->query ($query);
+	if ($result == NULL)
+	{
+		showError ('SQL query failed', __FUNCTION__);
+		return NULL;
+	}
+	$row = $result->fetch (PDO::FETCH_ASSOC);
+	if ($row)
+		$ret = base64_decode ($row['thumb_data']);
+	$result->closeCursor();
+	return $ret;
+}
+
+function saveThumbCache ($rack_id = 0, $cache = NULL)
+{
+	global $dbxlink;
+	if ($rack_id == 0 or $cache == NULL)
+	{
+		showError ('Invalid arguments', __FUNCTION__);
+		return;
+	}
+	$data = base64_encode ($cache);
+	$query = "update Rack set thumb_data = '${data}' where id = ${rack_id} limit 1";
+	$result = $dbxlink->exec ($query);
+}
 
 ?>
