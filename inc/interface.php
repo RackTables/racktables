@@ -3724,7 +3724,7 @@ function renderProgressBar ($percentage = 0)
 {
 	global $root;
 	$done = ((int) ($percentage * 100));
-	echo "<img width=100 height=10 border=0 src='${root}render_image.php?img=progressbar&done=${done}'>";
+	echo "<img width=100 height=10 border=0 title='${done}%' src='${root}render_image.php?img=progressbar&done=${done}'>";
 }
 
 function renderRSPoolServerForm ($pool_id = 0)
