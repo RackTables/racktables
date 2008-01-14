@@ -2647,7 +2647,7 @@ function renderDictionary ()
 	foreach ($dict as $chapter_no => $chapter)
 	{
 		$order = 'odd';
-		echo "<tr><th>Chapter</th><th>[refcnt]</th><th>Word</th></tr>\n";
+		echo "<tr><th>Chapter</th><th>refs</th><th>Word</th></tr>\n";
 		$wc = count ($chapter['word']);
 		echo "<tr class=row_${order}><td class=tdleft" . ($wc ? " rowspan = ${wc}" : '');
 		echo "><div title='number=${chapter_no}'>${chapter['name']} (${wc} records)</div></td>";
