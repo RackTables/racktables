@@ -2121,11 +2121,6 @@ function addRStoRSPool ($pool_id = 0, $rsip = '', $rsport = 0, $rsconfig = '')
 		showError ('Invalid arguments', __FUNCTION__);
 		die;
 	}
-	if (long2ip (ip2long ($rsip)) !== $rsip)
-	{
-		showError ("Invalid IP address '${rsip}'", __FUNCTION__);
-		die;
-	}
 	return useInsertBlade
 	(
 		'IPRealServer',
@@ -2134,6 +2129,28 @@ function addRStoRSPool ($pool_id = 0, $rsip = '', $rsport = 0, $rsconfig = '')
 			'rsip' => "inet_aton('${rsip}')",
 			'rsport' => $rsport,
 			'rspool_id' => $pool_id,
+			'rsconfig' => (empty ($rsconfig) ? 'NULL' : "'${rsconfig}'")
+		)
+	);
+}
+
+function commitCreateVS ($vip = '', $vport = 0, $proto = '', $name = '', $vsconfig, $rsconfig)
+{
+	if (empty ($vip) or $vport <= 0 or empty ($proto))
+	{
+		showError ('Invalid arguments', __FUNCTION__);
+		die;
+	}
+	return useInsertBlade
+	(
+		'IPVirtualService',
+		array
+		(
+			'vip' => "inet_aton('${vip}')",
+			'vport' => $vport,
+			'proto' => "'${proto}'",
+			'name' => (empty ($name) ? 'NULL' : "'${name}'"),
+			'vsconfig' => (empty ($vsconfig) ? 'NULL' : "'${vsconfig}'"),
 			'rsconfig' => (empty ($rsconfig) ? 'NULL' : "'${rsconfig}'")
 		)
 	);
@@ -2164,6 +2181,13 @@ function commitDeleteRS ($id = 0)
 	if ($id <= 0)
 		return FALSE;
 	return useDeleteBlade ('IPRealServer', 'id', $id);
+}
+
+function commitDeleteVS ($id = 0)
+{
+	if ($id <= 0)
+		return FALSE;
+	return useDeleteBlade ('IPVirtualService', 'id', $id);
 }
 
 function commitDeleteLB ($object_id = 0, $pool_id = 0)
@@ -2230,12 +2254,38 @@ function commitUpdateLB ($object_id = 0, $pool_id = 0, $vsconfig = '', $rsconfig
 		return TRUE;
 }
 
+function commitUpdateVS ($vsid = 0, $vip = '', $vport = 0, $proto = '', $name = '', $vsconfig = '', $rsconfig = '')
+{
+	if ($vsid <= 0 or empty ($vip) or $vport <= 0 or empty ($proto))
+	{
+		showError ('Invalid args', __FUNCTION__);
+		die;
+	}
+	global $dbxlink;
+	$query = "update IPVirtualService set " .
+		"vip = inet_aton('${vip}'), " .
+		"vport = ${vport}, " .
+		"proto = '${proto}', " .
+		'name = ' . (empty ($name) ? 'NULL,' : "'${name}', ") .
+		'vsconfig = ' . (empty ($vsconfig) ? 'NULL,' : "'${vsconfig}', ") .
+		'rsconfig = ' . (empty ($rsconfig) ? 'NULL,' : "'${rsconfig}' ") .
+		"where id = ${vsid} limit 1";
+	$result = $dbxlink->exec ($query);
+	if ($result === NULL)
+		return FALSE;
+	elseif ($result != 1)
+		return FALSE;
+	else
+		return TRUE;
+}
+
 // Return the list of virtual services, indexed by vs_id.
 function getVSList ()
 {
 	global $dbxlink;
-	$query = "select id, inet_ntoa(vip) as vip, vport, proto, name, vsconfig, rsconfig " .
-		"from IPVirtualService order by vip, vport, proto";
+	$query = "select vs.id, inet_ntoa(vip) as vip, vport, proto, vs.name, vs.vsconfig, vs.rsconfig, count(pool.id) as poolcount " .
+		"from IPVirtualService as vs left join IPRSPool as pool on pool.vs_id = vs.id " .
+		"group by vs.id order by vs.vip, proto, vport";
 	$result = $dbxlink->query ($query);
 	if ($result == NULL)
 	{
@@ -2244,7 +2294,7 @@ function getVSList ()
 	}
 	$vslist = array ();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-		foreach (array ('vip', 'vport', 'proto', 'name', 'vsconfig', 'rsconfig') as $cname)
+		foreach (array ('vip', 'vport', 'proto', 'name', 'vsconfig', 'rsconfig', 'poolcount') as $cname)
 			$vslist[$row['id']][$cname] = $row[$cname];
 	$result->closeCursor();
 	return $vslist;

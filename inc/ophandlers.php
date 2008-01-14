@@ -964,17 +964,34 @@ function addRealServer ()
 	global $root, $pageno, $tabno;
 
 	assertUIntArg ('id');
-	assertStringArg ('rsip');
+	assertIPv4Arg ('rsip');
 	assertUIntArg ('rsport');
 	assertStringArg ('rsconfig', TRUE);
 	$pool_id = $_REQUEST['id'];
-	$rsip = $_REQUEST['rsip'];
-	$rsport = $_REQUEST['rsport'];
-	$rsconfig = $_REQUEST['rsconfig'];
-	if (!addRStoRSPool ($pool_id, $rsip, $rsport, $rsconfig))
-		return "${root}?page=${pageno}&tab=${tabno}&id=$pool_id&error=" . urlencode ('addRStoRSPool() failed');
+	if (!addRStoRSPool ($pool_id, $_REQUEST['rsip'], $_REQUEST['rsport'], $_REQUEST['rsconfig']))
+		return "${root}?page=${pageno}&tab=${tabno}&id=${pool_id}&error=" . urlencode ('addRStoRSPool() failed');
 	else
-		return "${root}?page=${pageno}&tab=${tabno}&id=$pool_id&message=" . urlencode ("Real server was successfully added");
+		return "${root}?page=${pageno}&tab=${tabno}&id=${pool_id}&message=" . urlencode ("Real server was successfully added");
+}
+
+function addVService ()
+{
+	global $root, $pageno, $tabno;
+
+	assertIPv4Arg ('vip');
+	assertUIntArg ('vport');
+	assertStringArg ('proto');
+	$proto = $_REQUEST['proto'];
+	if ($proto != 'TCP' and $proto != 'UDP')
+		return "${root}?page=${pageno}&tab=${tabno}&error=" . urlencode (__FUNCTION__ . ': invalid protocol');
+	assertStringArg ('name', TRUE);
+	assertStringArg ('vsconfig', TRUE);
+	assertStringArg ('rsconfig', TRUE);
+	$pool_id = $_REQUEST['id'];
+	if (!commitCreateVS ($_REQUEST['vip'], $_REQUEST['vport'], $proto, $_REQUEST['name'], $_REQUEST['vsconfig'], $_REQUEST['rsconfig']))
+		return "${root}?page=${pageno}&tab=${tabno}&error=" . urlencode ('commitCreateVS() failed');
+	else
+		return "${root}?page=${pageno}&tab=${tabno}&message=" . urlencode ("Virtual service was successfully created");
 }
 
 function deleteRealServer ()
@@ -983,12 +1000,11 @@ function deleteRealServer ()
 
 	assertUIntArg ('pool_id');
 	assertUIntArg ('id');
-	$rsid = $_REQUEST['id'];
 	$pool_id = $_REQUEST['pool_id'];
-	if (!commitDeleteRS ($rsid))
-		return "${root}?page=${pageno}&tab=${tabno}&id=$pool_id&error=" . urlencode ('commitDeleteRS() failed');
+	if (!commitDeleteRS ($_REQUEST['id']))
+		return "${root}?page=${pageno}&tab=${tabno}&id=${pool_id}&error=" . urlencode ('commitDeleteRS() failed');
 	else
-		return "${root}?page=${pageno}&tab=${tabno}&id=$pool_id&message=" . urlencode ("Real server was successfully deleted");
+		return "${root}?page=${pageno}&tab=${tabno}&id=${pool_id}&message=" . urlencode ("Real server was successfully deleted");
 }
 
 function deleteLoadBalancer ()
@@ -997,12 +1013,22 @@ function deleteLoadBalancer ()
 
 	assertUIntArg ('object_id');
 	assertUIntArg ('pool_id');
-	$object_id = $_REQUEST['object_id'];
 	$pool_id = $_REQUEST['pool_id'];
-	if (!commitDeleteLB ($object_id, $pool_id))
-		return "${root}?page=${pageno}&tab=${tabno}&id=$pool_id&error=" . urlencode ('commitDeleteLB() failed');
+	if (!commitDeleteLB ($_REQUEST['object_id'], $pool_id))
+		return "${root}?page=${pageno}&tab=${tabno}&id=${pool_id}&error=" . urlencode ('commitDeleteLB() failed');
 	else
-		return "${root}?page=${pageno}&tab=${tabno}&id=$pool_id&message=" . urlencode ("Load balancer was successfully deleted");
+		return "${root}?page=${pageno}&tab=${tabno}&id=${pool_id}&message=" . urlencode ("Load balancer was successfully deleted");
+}
+
+function deleteVService ()
+{
+	global $root, $pageno, $tabno;
+
+	assertUIntArg ('id');
+	if (!commitDeleteVS ($_REQUEST['id']))
+		return "${root}?page=${pageno}&tab=${tabno}&error=" . urlencode ('commitDeleteVS() failed');
+	else
+		return "${root}?page=${pageno}&tab=${tabno}&message=" . urlencode ("Virtual service was successfully deleted");
 }
 
 function updateRealServer ()
@@ -1011,15 +1037,15 @@ function updateRealServer ()
 
 	assertUIntArg ('id');
 	assertUIntArg ('pool_id');
-	assertStringArg ('rsip');
+	assertIPv4Arg ('rsip');
 	assertUIntArg ('rsport');
 	assertStringArg ('rsconfig', TRUE);
 	// only necessary for generating next URL
 	$pool_id = $_REQUEST['pool_id'];
 	if (!commitUpdateRS ($_REQUEST['id'], $_REQUEST['rsip'], $_REQUEST['rsport'], $_REQUEST['rsconfig']))
-		return "${root}?page=${pageno}&tab=${tabno}&id=$pool_id&error=" . urlencode ('commitUpdateRS() failed');
+		return "${root}?page=${pageno}&tab=${tabno}&id=${pool_id}&error=" . urlencode ('commitUpdateRS() failed');
 	else
-		return "${root}?page=${pageno}&tab=${tabno}&id=$pool_id&message=" . urlencode ("Real server was successfully updated");
+		return "${root}?page=${pageno}&tab=${tabno}&id=${pool_id}&message=" . urlencode ("Real server was successfully updated");
 }
 
 function updateLoadbalancer ()
@@ -1032,9 +1058,26 @@ function updateLoadbalancer ()
 	assertStringArg ('rsconfig', TRUE);
 	$pool_id = $_REQUEST['pool_id'];
 	if (!commitUpdateLB ($_REQUEST['object_id'], $pool_id, $_REQUEST['vsconfig'], $_REQUEST['rsconfig']))
-		return "${root}?page=${pageno}&tab=${tabno}&id=$pool_id&error=" . urlencode ('commitUpdateLB() failed');
+		return "${root}?page=${pageno}&tab=${tabno}&id=${pool_id}&error=" . urlencode ('commitUpdateLB() failed');
 	else
-		return "${root}?page=${pageno}&tab=${tabno}&id=$pool_id&message=" . urlencode ("Real server was successfully updated");
+		return "${root}?page=${pageno}&tab=${tabno}&id=${pool_id}&message=" . urlencode ("Real server was successfully updated");
+}
+
+function updateVService ()
+{
+	global $root, $pageno, $tabno;
+
+	assertUIntArg ('id');
+	assertIPv4Arg ('vip');
+	assertUIntArg ('vport');
+	assertStringArg ('proto');
+	assertStringArg ('name', TRUE);
+	assertStringArg ('vsconfig', TRUE);
+	assertStringArg ('rsconfig', TRUE);
+	if (!commitUpdateVS ($_REQUEST['id'], $_REQUEST['vip'], $_REQUEST['vport'], $_REQUEST['proto'], $_REQUEST['name'], $_REQUEST['vsconfig'], $_REQUEST['rsconfig']))
+		return "${root}?page=${pageno}&tab=${tabno}&error=" . urlencode ('commitUpdateVS() failed');
+	else
+		return "${root}?page=${pageno}&tab=${tabno}&message=" . urlencode ("Virtual service was successfully updated");
 }
 
 function addLoadBalancer ()
@@ -1050,9 +1093,9 @@ function addLoadBalancer ()
 	$vsconfig = $_REQUEST['vsconfig'];
 	$rsconfig = $_REQUEST['rsconfig'];
 	if (!addLBtoRSPool ($pool_id, $object_id, $vsconfig, $rsconfig))
-		return "${root}?page=${pageno}&tab=${tabno}&id=$pool_id&error=" . urlencode ('addLBtoRSPool() failed');
+		return "${root}?page=${pageno}&tab=${tabno}&id=${pool_id}&error=" . urlencode ('addLBtoRSPool() failed');
 	else
-		return "${root}?page=${pageno}&tab=${tabno}&id=$pool_id&message=" . urlencode ("Load balancer was successfully added");
+		return "${root}?page=${pageno}&tab=${tabno}&id=${pool_id}&message=" . urlencode ("Load balancer was successfully added");
 }
 
 ?>

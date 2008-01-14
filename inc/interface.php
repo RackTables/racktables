@@ -3757,22 +3757,6 @@ function renderRSPoolServerForm ($pool_id = 0)
 	showMessageOrError();
 	$poolInfo = getRSPoolInfo ($pool_id);
 
-	startPortlet ('Add new');
-	echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
-	echo "<tr><th>Address</th><th>Port</th><th>&nbsp;</th></tr>\n";
-	echo "<form action='${root}process.php'>";
-	echo "<input type=hidden name=page value='${pageno}'>\n";
-	echo "<input type=hidden name=tab value='${tabno}'>\n";
-	echo "<input type=hidden name=op value=addRS>";
-	echo "<input type=hidden name=id value='${pool_id}'>";
-	echo "<tr><td><input type=text name=rsip tabindex=1></td>";
-	echo "<td><input type=text name=rsport tabindex=2></td>";
-	echo "<td><input type=submit value='OK' tabindex=3></tr>\n";
-	echo "<tr><th colspan=3>configuration</th></tr>";
-	echo "<tr><td colspan=3><textarea name=rsconfig rows=10 cols=80 tabindex=4></textarea></td></tr>";
-	echo "</form></table>\n";
-	finishPortlet();
-
 	startPortlet ('Manage existing');
 	echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
 	echo "<tr><th>&nbsp;</th><th>Address</th><th>Port</th><th>configuration</th><th>&nbsp;</th></tr>\n";
@@ -3795,34 +3779,28 @@ function renderRSPoolServerForm ($pool_id = 0)
 	}
 	echo "</table>\n";
 	finishPortlet();
+
+	startPortlet ('Add new');
+	echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
+	echo "<tr><th>Address</th><th>Port</th><th>&nbsp;</th></tr>\n";
+	echo "<form action='${root}process.php'>";
+	echo "<input type=hidden name=page value='${pageno}'>\n";
+	echo "<input type=hidden name=tab value='${tabno}'>\n";
+	echo "<input type=hidden name=op value=addRS>";
+	echo "<input type=hidden name=id value='${pool_id}'>";
+	echo "<tr><td><input type=text name=rsip tabindex=1></td>";
+	echo "<td><input type=text name=rsport tabindex=2></td>";
+	echo "<td><input type=submit value='OK' tabindex=3></tr>\n";
+	echo "<tr><th colspan=3>configuration</th></tr>";
+	echo "<tr><td colspan=3><textarea name=rsconfig rows=10 cols=80 tabindex=4></textarea></td></tr>";
+	echo "</form></table>\n";
+	finishPortlet();
 }
 
 function renderRSPoolLBForm ($pool_id = 0)
 {
 	global $root, $pageno, $tabno;
 	showMessageOrError();
-	startPortlet ('Add new');
-		echo "<input type=hidden name=id value='${pool_id}'>";
-	echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
-	echo "<tr><th>Object</th><th>VS config</th><th>RS config</th><th>&nbsp;</th></tr>\n";
-	echo "<form action='${root}process.php'>";
-	echo "<input type=hidden name=page value='${pageno}'>\n";
-	echo "<input type=hidden name=tab value='${tabno}'>\n";
-	echo "<input type=hidden name=op value=addLB>";
-	echo "<input type=hidden name=pool_id value='${pool_id}'>";
-	echo "<tr valign=top><td><select name='object_id' tabindex=1>";
-	foreach (array(4, 7, 8) as $type)
-	{
-		$objects = getObjectList ($type);
-		foreach ($objects as $object)
-			echo "<option value='${object['id']}'>${object['dname']}</option>";
-	}
-	echo "</select></td>";
-	echo "<td><textarea name=vsconfig></textarea></td>";
-	echo "<td><textarea name=rsconfig></textarea></td>";
-	echo "<td><input type=submit value=OK tabindex=2></td></tr>\n";
-	echo "</form></table>\n";
-	finishPortlet();
 
 	startPortlet ('Manage existing');
 	$poolInfo = getRSPoolInfo ($pool_id);
@@ -3845,6 +3823,27 @@ function renderRSPoolLBForm ($pool_id = 0)
 		echo "<td><textarea name=rsconfig>${lbinfo['rsconfig']}</textarea></td>";
 		echo "<td><input type=submit value=OK></td></tr></form>\n";
 	}
+	echo "</table>\n";
+	finishPortlet();
+
+	startPortlet ('Add new');
+	echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
+	echo "<form action='${root}process.php'>";
+	echo "<input type=hidden name=page value='${pageno}'>\n";
+	echo "<input type=hidden name=tab value='${tabno}'>\n";
+	echo "<input type=hidden name=op value=addLB>";
+	echo "<input type=hidden name=pool_id value='${pool_id}'>";
+	echo "<tr valign=top><th>Object</th><td><select name='object_id' tabindex=1>";
+	foreach (array(4, 7, 8) as $type)
+	{
+		$objects = getObjectList ($type);
+		foreach ($objects as $object)
+			echo "<option value='${object['id']}'>${object['dname']}</option>";
+	}
+	echo "</select></td><td rowspan=3 valign=middle><input type=submit value=OK tabindex=2></td></tr>\n";
+	echo "<tr><th>VS config</th><td><textarea name=vsconfig rows=10 cols=80></textarea></td></tr>";
+	echo "<tr><th>RS config</th><td><textarea name=rsconfig rows=10 cols=80></textarea></td></tr>";
+	echo "</form></table>\n";
 	finishPortlet();
 }
 
@@ -3937,19 +3936,14 @@ function renderVSList ()
 
 function renderVSListEditForm ()
 {
-	global $root;
-
-	startPortlet ('Add new');
-	echo "<table class=widetable border=0 cellpadding=10 cellspacing=0 align=center>\n";
-	echo "<tr><th>&nbsp;</th><th>VIP</th><th>port</th><th>proto</th><th>name</th>";
-	echo "<th>VS configuration</th><th>RS configuration</th><th></th></tr>";
-	echo "</table>";
-	finishPortlet();
+	global $root, $pageno, $tabno;
+	showMessageOrError();
 
 	startPortlet ('Manage existing');
 	echo "<table class=widetable border=0 cellpadding=10 cellspacing=0 align=center>\n";
 	echo "<tr><th>&nbsp;</th><th>VIP</th><th>port</th><th>proto</th><th>name</th>";
 	echo "<th>VS configuration</th><th>RS configuration</th><th></th></tr>";
+	$protocols = array ('TCP' => 'TCP', 'UDP' => 'UDP');
 	foreach (getVSList() as $vsid => $vsinfo)
 	{
 		echo "<form method=post action='${root}process.php'>\n";
@@ -3957,18 +3951,49 @@ function renderVSListEditForm ()
 		echo "<input type=hidden name=tab value=${tabno}>\n";
 		echo "<input type=hidden name=op value=upd>\n";
 		echo "<input type=hidden name=id value=${vsid}>\n";
-		echo "<tr valign=top>["; //<a href='${root}?process.php?page=${pageno}&tab=${tabno}&op=del&id=${vsid}'>";
-		printImageHREF ('delete', 'delete virtual service');
-		echo "</a>]</td><td class=tdleft><input type=text name=vip tabindex=1>${vsinfo['vip']}</td>";
-		echo "<td class=tdleft><input type=text name=vport value='${vsinfo['vport']}' tabindex=2></td>";
-		echo "<td class=tdleft><select name=proto tabindex=3><option value=TCP selected><option value=UDP></select></td>";
+		echo "<tr valign=top><td>";
+		if ($vsinfo['poolcount'])
+			echo '&nbsp;';
+		else
+		{
+			echo "<a href='${root}process.php?page=${pageno}&tab=${tabno}&op=del&id=${vsid}'>";
+			printImageHREF ('delete', 'delete virtual service');
+			echo '</a>';
+		}
+		echo "</td><td class=tdleft><input type=text name=vip value='${vsinfo['vip']}'></td>";
+		echo "<td class=tdleft><input type=text name=vport value='${vsinfo['vport']}'></td>";
+		echo "<td class=tdleft>";
+		printSelect ($protocols, 'proto', $vsinfo['proto']);
+		echo "</td>";
 		echo "<td class=tdleft><input type=text name=name value='${vsinfo['name']}'></td>";
-		echo "<td><textarea cols=80 rows=10>${vsinfo['vsconfig']}</textarea></td>";
-		echo "<td><textarea cols=80 rows=10>${vsinfo['rsconfig']}</textarea></td>";
+		echo "<td><textarea name=vsconfig>${vsinfo['vsconfig']}</textarea></td>";
+		echo "<td><textarea name=rsconfig>${vsinfo['rsconfig']}</textarea></td>";
 		echo "<td><input type=submit value=OK></td>";
 		echo "</tr></form>\n";
 	}
 	echo "</table>";
+	finishPortlet();
+
+	startPortlet ('Add new');
+	echo "<form method=post action='${root}process.php'>\n";
+	echo "<input type=hidden name=page value=${pageno}>\n";
+	echo "<input type=hidden name=tab value=${tabno}>\n";
+	echo "<input type=hidden name=op value=add>\n";
+	echo "<input type=hidden name=id value=${vsid}>\n";
+	echo "<table class=widetable border=0 cellpadding=10 cellspacing=0 align=center>\n";
+	echo "<tr><th>&nbsp;</th><th>VIP</th><th>port</th><th>proto</th><th>name</th><th>&nbsp;</th></tr>";
+	echo "<tr valign=top><td>&nbsp;</td>";
+	echo "<td><input type=text name=vip tabindex=1></td>";
+	echo "<td><input type=text name=vport tabindex=2></td>";
+	echo "<td>";
+	printSelect ($protocols, 'proto', 'TCP');
+	echo "</td>";
+	echo "<td><input type=text name=name tabindex=4></td>";
+	echo "<td rowspan=3 valign=middle><input type=submit value=OK tabindex=5></td></tr>";
+	echo "<tr><th>VS configuration</th><td colspan=4 class=tdleft><textarea name=vsconfig rows=10 cols=80></textarea></td></tr>";
+	echo "<tr><th>RS configuration</th><td colspan=4 class=tdleft><textarea name=rsconfig rows=10 cols=80></textarea></td></tr>";
+	echo "</table>";
+	echo "</form>\n";
 	finishPortlet();
 }
 
