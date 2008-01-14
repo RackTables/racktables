@@ -2662,7 +2662,8 @@ function renderDictionary ()
 					echo "<tr class=row_${order}>";
 				else
 					$chap_start = FALSE;
-				echo "<td>&nbsp;</td><td><div title='key=${key}'>${value}</div></td></tr>\n";
+				echo '<td>' . ($chapter['refcnt'][$key] ? $chapter['refcnt'][$key] : '&nbsp;') . '</td>';
+				echo "<td><div title='key=${key}'>${value}</div></td></tr>\n";
 				$order = $nextorder[$order];
 			}
 		}

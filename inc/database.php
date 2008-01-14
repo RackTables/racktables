@@ -1357,17 +1357,17 @@ function addPortCompat ($type1 = 0, $type2 = 0)
 function getDict ()
 {
 	global $dbxlink;
-	$query =
+	$query1 =
 		"select chapter_name, Chapter.chapter_no, dict_key, dict_value, sticky from " .
 		"Chapter natural left join Dictionary order by chapter_name, dict_value";
-	$result = $dbxlink->query ($query);
-	if ($result == NULL)
+	$result1 = $dbxlink->query ($query1);
+	if ($result1 == NULL)
 	{
-		showError ('SQL query failed', __FUNCTION__);
+		showError ('SQL query #1 failed', __FUNCTION__);
 		return NULL;
 	}
 	$dict = array();
-	while ($row = $result->fetch (PDO::FETCH_ASSOC))
+	while ($row = $result1->fetch (PDO::FETCH_ASSOC))
 	{
 		$chapter_no = $row['chapter_no'];
 		if (!isset ($dict[$chapter_no]))
@@ -1378,9 +1378,31 @@ function getDict ()
 			$dict[$chapter_no]['word'] = array();
 		}
 		if ($row['dict_key'] != NULL)
+		{
 			$dict[$chapter_no]['word'][$row['dict_key']] = $row['dict_value'];
+			$dict[$chapter_no]['refcnt'][$row['dict_key']] = 0;
+		}
 	}
-	$result->closeCursor();
+	$result1->closeCursor();
+// Find the list of all assigned values of dictionary-addressed attributes, each with
+// chapter/word keyed reference counters. Use the structure to adjust reference counters
+// of the returned disctionary words.
+	$query2 = "select a.attr_id, am.chapter_no, uint_value, count(object_id) as refcnt " .
+		"from Attribute as a inner join AttributeMap as am on a.attr_id = am.attr_id " .
+		"inner join AttributeValue as av on a.attr_id = av.attr_id " .
+		"inner join Dictionary as d on am.chapter_no = d.chapter_no and av.uint_value = d.dict_key " .
+		"where attr_type = 'dict' group by a.attr_id, am.chapter_no, uint_value " .
+		"order by a.attr_id, am.chapter_no, uint_value";
+	$result2 = $dbxlink->query ($query2);
+	if ($result2 == NULL)
+	{
+		showError ('SQL query #2 failed', __FUNCTION__);
+		return NULL;
+	}
+	$refcnt = array();
+	while ($row = $result2->fetch (PDO::FETCH_ASSOC))
+		$dict[$row['chapter_no']]['refcnt'][$row['uint_value']] = $row['refcnt'];
+	$result2->closeCursor();
 	return $dict;
 }
 
