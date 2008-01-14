@@ -74,7 +74,7 @@ function assertBoolArg ($argname, $ok_if_empty = FALSE)
 function assertIPv4Arg ($argname, $ok_if_empty = FALSE)
 {
 	assertStringArg ($argname, $ok_if_empty);
-	if (!empty ($_REQUEST[$argname]) and long2ip (ip2long ($_REQUEST[$argname])) !== $_REQUEST[$argname]))
+	if (!empty ($_REQUEST[$argname]) and long2ip (ip2long ($_REQUEST[$argname])) !== $_REQUEST[$argname])
 	{
 		showError ("IPv4 address validation failed for value '" . $_REQUEST[$argname] . "'", __FUNCTION__);
 		die();
