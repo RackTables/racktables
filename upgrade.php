@@ -573,6 +573,44 @@ echo '</pre>';
 			$query[] = "alter table IPRanges modify column id int(10) unsigned not null auto_increment";
 			$query[] = "alter table Rack modify column height tinyint(3) unsigned not null default '42'";
 			$query[] = "alter table Rack add column thumb_data blob after comment";
+			$query[] = "
+CREATE TABLE `IPLoadBalancer` (
+  `object_id` int(10) unsigned default NULL,
+  `rspool_id` int(10) unsigned default NULL,
+  `vsconfig` text,
+  `rsconfig` text,
+  UNIQUE KEY `object_id` (`object_id`,`rspool_id`)
+) ENGINE=MyISAM";
+			$query[] = "
+CREATE TABLE `IPRSPool` (
+  `id` int(10) unsigned NOT NULL auto_increment,
+  `vs_id` int(10) unsigned default NULL,
+  `name` char(255) default NULL,
+  `vsconfig` text,
+  `rsconfig` text,
+  PRIMARY KEY  (`id`)
+) ENGINE=MyISAM";
+			$query[] = "
+CREATE TABLE `IPRealServer` (
+  `id` int(10) unsigned NOT NULL auto_increment,
+  `rsip` int(10) unsigned default NULL,
+  `rsport` smallint(5) unsigned default NULL,
+  `rspool_id` int(10) unsigned default NULL,
+  `rsconfig` text,
+  PRIMARY KEY  (`id`)
+) ENGINE=MyISAM";
+			$query[] = "
+CREATE TABLE `IPVirtualService` (
+  `id` int(10) unsigned NOT NULL auto_increment,
+  `vip` int(10) unsigned default NULL,
+  `vport` smallint(5) unsigned default NULL,
+  `proto` enum('TCP','UDP') NOT NULL default 'TCP',
+  `name` char(255) default NULL,
+  `vsconfig` text,
+  `rsconfig` text,
+  PRIMARY KEY  (`id`),
+  UNIQUE KEY `endpoint` (`vip`,`vport`,`proto`)
+) ENGINE=MyISAM";
 			break; // --------------------------------------------
 #		case '0.14.10':
 #			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('AUTO_PORTS_CONFIG','FIXME','string','yes','no','Autoports configuration')";
