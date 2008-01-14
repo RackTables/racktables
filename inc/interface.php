@@ -4026,4 +4026,66 @@ function renderRSPoolList ()
 	echo "</table>";
 }
 
+function editRSPools ()
+{
+	global $root, $pageno, $tabno;
+	showMessageOrError();
+	$pool_list = getRSPoolList();
+	// Something we are going to render as a SELECT element later.
+	$vs_list = array ();
+	foreach (getVSList() as $vsid => $vsinfo)
+		$vs_list[$vsid] = buildVServiceName ($vsinfo) . (empty ($vsinfo['name']) ? '' : " (${vsinfo['name']})");
+
+	startPortlet ('Manage existing');
+	echo "<table class=widetable border=0 cellpadding=10 cellspacing=0 align=center>\n";
+	echo "<tr><th>&nbsp;</th><th>parent VS</th><th>name</th><th>VS configuration</th><th>RS configuration</th><th>&nbsp;</th></tr>";
+	foreach ($pool_list as $pool_id => $pool_info)
+	{
+		echo "<form method=post action='${root}process.php'>\n";
+		echo "<input type=hidden name=page value=${pageno}>\n";
+		echo "<input type=hidden name=tab value=${tabno}>\n";
+		echo "<input type=hidden name=op value=upd>\n";
+		echo "<input type=hidden name=id value=${pool_id}>\n";
+		echo "<tr valign=top><td>";
+		if ($pool_info['rscount'])
+			echo '&nbsp;';
+		else
+		{
+			echo "<a href='${root}process.php?page=${pageno}&tab=${tabno}&op=del&id=${pool_id}'>";
+			printImageHREF ('delete', 'delete real server pool');
+			echo '</a>';
+		}
+		echo "</td><td class=tdleft>";
+		printSelect ($vs_list, 'vs_id', $pool_info['vs_id']);
+		echo "</td>";
+		echo "<td class=tdleft><input type=text name=name value='${pool_info['name']}'></td>";
+		echo "<td><textarea name=vsconfig>${pool_info['vsconfig']}</textarea></td>";
+		echo "<td><textarea name=rsconfig>${pool_info['rsconfig']}</textarea></td>";
+		echo "<td><input type=submit value=OK></td>";
+		echo "</tr></form>\n";
+	}
+	echo "</table>";
+	finishPortlet();
+
+	startPortlet ('Add new');
+	echo "<form method=post action='${root}process.php'>\n";
+	echo "<input type=hidden name=page value=${pageno}>\n";
+	echo "<input type=hidden name=tab value=${tabno}>\n";
+	echo "<input type=hidden name=op value=add>\n";
+	echo "<table class=widetable border=0 cellpadding=10 cellspacing=0 align=center>\n";
+	echo "<tr><th>&nbsp;</th><th>parent VS</th><th>name</th><th>&nbsp;</th></tr>";
+	echo "<tr valign=top><td>&nbsp;</td><td>";
+	// FIXME: change printSelect to accept tabindex and markup this form appropriately (others probably as well).
+	// Note: array_merge() will renumber array keys and mess things up. Use '+' instead.
+	$vs_list = array (0 => 'select virtual service') + $vs_list;
+	printSelect ($vs_list, 'vs_id', 0);
+	echo "</td>";
+	echo "<td class=tdleft><input type=text name=name></td>";
+	echo "<td rowspan=3 valign=middle><input type=submit value=OK></td></tr>";
+	echo "<tr><th>VS configuration</th><td colspan=2><textarea name=vsconfig rows=10 cols=80></textarea></td></tr>";
+	echo "<tr><th>RS configuration</th><td colspan=2><textarea name=rsconfig rows=10 cols=80></textarea></td></tr>";
+	echo "</table></form>";
+	finishPortlet();
+}
+
 ?>

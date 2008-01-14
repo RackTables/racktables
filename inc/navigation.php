@@ -167,7 +167,12 @@ $page['vservice']['handler'] = 'renderVirtualService';
 $page['rspools']['title'] = 'RS pools';
 $page['rspools']['parent'] = 'ipv4space';
 $tab['rspools']['default'] = 'View';
+$tab['rspools']['edit'] = 'Edit';
 $tabhandler['rspools']['default'] = 'renderRSPoolList';
+$tabhandler['rspools']['edit'] = 'editRSPools';
+$ophandler['rspools']['edit']['add'] = 'addRSPool';
+$ophandler['rspools']['edit']['del'] = 'deleteRSPool';
+$ophandler['rspools']['edit']['upd'] = 'updateRSPool';
 
 $page['rspool']['title_handler'] = 'dynamic_title_rspool';
 $page['rspool']['parent'] = 'rspools';

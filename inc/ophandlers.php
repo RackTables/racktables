@@ -1089,13 +1089,49 @@ function addLoadBalancer ()
 	assertStringArg ('vsconfig', TRUE);
 	assertStringArg ('rsconfig', TRUE);
 	$pool_id = $_REQUEST['pool_id'];
-	$object_id = $_REQUEST['object_id'];
-	$vsconfig = $_REQUEST['vsconfig'];
-	$rsconfig = $_REQUEST['rsconfig'];
-	if (!addLBtoRSPool ($pool_id, $object_id, $vsconfig, $rsconfig))
+	if (!addLBtoRSPool ($pool_id, $_REQUEST['object_id'], $_REQUEST['vsconfig'], $_REQUEST['rsconfig']))
 		return "${root}?page=${pageno}&tab=${tabno}&id=${pool_id}&error=" . urlencode ('addLBtoRSPool() failed');
 	else
 		return "${root}?page=${pageno}&tab=${tabno}&id=${pool_id}&message=" . urlencode ("Load balancer was successfully added");
+}
+
+function addRSPool ()
+{
+	global $root, $pageno, $tabno;
+
+	assertUIntArg ('vs_id');
+	assertStringArg ('name', TRUE);
+	assertStringArg ('vsconfig', TRUE);
+	assertStringArg ('rsconfig', TRUE);
+	if (!commitCreateRSPool ($_REQUEST['vs_id'], $_REQUEST['name'], $_REQUEST['vsconfig'], $_REQUEST['rsconfig']))
+		return "${root}?page=${pageno}&tab=${tabno}&error=" . urlencode ('commitCreateRSPool() failed');
+	else
+		return "${root}?page=${pageno}&tab=${tabno}&message=" . urlencode ("Real server pool was successfully created");
+}
+
+function deleteRSPool ()
+{
+	global $root, $pageno, $tabno;
+
+	assertUIntArg ('id');
+	if (!commitDeleteRSPool ($_REQUEST['id']))
+		return "${root}?page=${pageno}&tab=${tabno}&error=" . urlencode ('commitDeleteRSPool() failed');
+	else
+		return "${root}?page=${pageno}&tab=${tabno}&message=" . urlencode ("Real server pool was successfully deleted");
+}
+
+function updateRSPool ()
+{
+	global $root, $pageno, $tabno;
+
+	assertUIntArg ('id');
+	assertStringArg ('name', TRUE);
+	assertStringArg ('vsconfig', TRUE);
+	assertStringArg ('rsconfig', TRUE);
+	if (!commitUpdateRSPool ($_REQUEST['id'], $_REQUEST['name'], $_REQUEST['vsconfig'], $_REQUEST['rsconfig']))
+		return "${root}?page=${pageno}&tab=${tabno}&error=" . urlencode ('commitUpdateRSPool() failed');
+	else
+		return "${root}?page=${pageno}&tab=${tabno}&message=" . urlencode ("Real server pool was successfully updated");
 }
 
 ?>

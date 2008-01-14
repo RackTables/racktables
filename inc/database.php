@@ -2268,8 +2268,8 @@ function commitUpdateVS ($vsid = 0, $vip = '', $vport = 0, $proto = '', $name = 
 		"proto = '${proto}', " .
 		'name = ' . (empty ($name) ? 'NULL,' : "'${name}', ") .
 		'vsconfig = ' . (empty ($vsconfig) ? 'NULL,' : "'${vsconfig}', ") .
-		'rsconfig = ' . (empty ($rsconfig) ? 'NULL,' : "'${rsconfig}' ") .
-		"where id = ${vsid} limit 1";
+		'rsconfig = ' . (empty ($rsconfig) ? 'NULL' : "'${rsconfig}'") .
+		" where id = ${vsid} limit 1";
 	$result = $dbxlink->exec ($query);
 	if ($result === NULL)
 		return FALSE;
@@ -2394,6 +2394,63 @@ function getRSPoolsForObject ($object_id = 0)
 			$pool_list[$row['id']][$cname] = $row[$cname];
 	$result->closeCursor();
 	return $pool_list;
+}
+
+function commitCreateRSPool ($vs_id = 0, $name = '', $vsconfig, $rsconfig)
+{
+	if ($vs_id <= 0)
+	{
+		showError ('Invalid argument', __FUNCTION__);
+		die;
+	}
+	return useInsertBlade
+	(
+		'IPRSPool',
+		array
+		(
+			'vs_id' => $vs_id,
+			'name' => (empty ($name) ? 'NULL' : "'${name}'"),
+			'vsconfig' => (empty ($vsconfig) ? 'NULL' : "'${vsconfig}'"),
+			'rsconfig' => (empty ($rsconfig) ? 'NULL' : "'${rsconfig}'")
+		)
+	);
+}
+
+function commitDeleteRSPool ($pool_id = 0)
+{
+	global $dbxlink;
+	if ($pool_id <= 0)
+		return FALSE;
+	$query = "delete from IPRSPool where id = ${pool_id} limit 1";
+	$result = $dbxlink->exec ($query);
+	if ($result === NULL)
+		return FALSE;
+	elseif ($result != 1)
+		return FALSE;
+	else
+		return TRUE;
+}
+
+function commitUpdateRSPool ($pool_id = 0, $name = '', $vsconfig = '', $rsconfig = '')
+{
+	if ($pool_id <= 0)
+	{
+		showError ('Invalid arg', __FUNCTION__);
+		die;
+	}
+	global $dbxlink;
+	$query = "update IPRSPool set " .
+		'name = ' . (empty ($name) ? 'NULL,' : "'${name}', ") .
+		'vsconfig = ' . (empty ($vsconfig) ? 'NULL,' : "'${vsconfig}', ") .
+		'rsconfig = ' . (empty ($rsconfig) ? 'NULL' : "'${rsconfig}'") .
+		" where id = ${pool_id} limit 1";
+	$result = $dbxlink->exec ($query);
+	if ($result === NULL)
+		return FALSE;
+	elseif ($result != 1)
+		return FALSE;
+	else
+		return TRUE;
 }
 
 ?>
