@@ -151,7 +151,12 @@ $ophandler['ipaddress']['assignment']['bindObjectToIp'] = 'addIpAssignment';
 $page['vservices']['title'] = 'Virtual services';
 $page['vservices']['parent'] = 'ipv4space';
 $tab['vservices']['default'] = 'View';
+$tab['vservices']['edit'] = 'Edit';
 $tabhandler['vservices']['default'] = 'renderVSList';
+$tabhandler['vservices']['edit'] = 'renderVSListEditForm';
+$ophandler['vservices']['edit']['add'] = 'addVService';
+$ophandler['vservices']['edit']['del'] = 'deleteVService';
+$ophandler['vservices']['edit']['upd'] = 'updateVService';
 
 $page['vservice']['title_handler'] = 'dynamic_title_vservice';
 $page['vservice']['parent'] = 'vservices';

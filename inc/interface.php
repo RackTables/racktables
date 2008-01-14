@@ -3935,6 +3935,43 @@ function renderVSList ()
 	echo "</table>";
 }
 
+function renderVSListEditForm ()
+{
+	global $root;
+
+	startPortlet ('Add new');
+	echo "<table class=widetable border=0 cellpadding=10 cellspacing=0 align=center>\n";
+	echo "<tr><th>&nbsp;</th><th>VIP</th><th>port</th><th>proto</th><th>name</th>";
+	echo "<th>VS configuration</th><th>RS configuration</th><th></th></tr>";
+	echo "</table>";
+	finishPortlet();
+
+	startPortlet ('Manage existing');
+	echo "<table class=widetable border=0 cellpadding=10 cellspacing=0 align=center>\n";
+	echo "<tr><th>&nbsp;</th><th>VIP</th><th>port</th><th>proto</th><th>name</th>";
+	echo "<th>VS configuration</th><th>RS configuration</th><th></th></tr>";
+	foreach (getVSList() as $vsid => $vsinfo)
+	{
+		echo "<form method=post action='${root}process.php'>\n";
+		echo "<input type=hidden name=page value=${pageno}>\n";
+		echo "<input type=hidden name=tab value=${tabno}>\n";
+		echo "<input type=hidden name=op value=upd>\n";
+		echo "<input type=hidden name=id value=${vsid}>\n";
+		echo "<tr valign=top>["; //<a href='${root}?process.php?page=${pageno}&tab=${tabno}&op=del&id=${vsid}'>";
+		printImageHREF ('delete', 'delete virtual service');
+		echo "</a>]</td><td class=tdleft><input type=text name=vip tabindex=1>${vsinfo['vip']}</td>";
+		echo "<td class=tdleft><input type=text name=vport value='${vsinfo['vport']}' tabindex=2></td>";
+		echo "<td class=tdleft><select name=proto tabindex=3><option value=TCP selected><option value=UDP></select></td>";
+		echo "<td class=tdleft><input type=text name=name value='${vsinfo['name']}'></td>";
+		echo "<td><textarea cols=80 rows=10>${vsinfo['vsconfig']}</textarea></td>";
+		echo "<td><textarea cols=80 rows=10>${vsinfo['rsconfig']}</textarea></td>";
+		echo "<td><input type=submit value=OK></td>";
+		echo "</tr></form>\n";
+	}
+	echo "</table>";
+	finishPortlet();
+}
+
 function renderRSPoolList ()
 {
 	global $root;
