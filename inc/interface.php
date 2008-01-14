@@ -857,6 +857,25 @@ function renderRackObject ($object_id = 0)
 		finishPortlet();
 	}
 
+	$pools = getRSPoolsForObject ($object_id);
+	if (count ($pools))
+	{
+		startPortlet ('Real server pools');
+		echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
+		echo "<tr><th>virtual service</th><th>RS pool</th><th>real servers</th></tr>\n";
+		foreach ($pools as $pool_id => $poolinfo)
+		{
+			echo "<tr><td class=tdleft><a href='${root}?page=vservice&id=${poolinfo['vs_id']}'>";
+			echo buildVServiceName ($poolinfo) . '</a>';
+			if (!empty ($poolinfo['vs_name']))
+				echo " (${poolinfo['vs_name']})";
+			echo "</td><td class=tdleft><a href='${root}?page=rspool&id=${pool_id}'>";
+			echo $poolinfo['name'] . '</a></td><td class=tdleft>' . $poolinfo['rscount'] . '</td>';
+			echo "</tr>\n";
+		}
+		echo "</table>\n";
+		finishPortlet();
+	}
 	echo "</td>\n";
 
 	// After left column we have (surprise!) right column with rackspace portled only.

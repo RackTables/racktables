@@ -2312,4 +2312,36 @@ function resetThumbCache ($rack_id = 0)
 	$result = $dbxlink->exec ($query);
 }
 
+// Return a tactical overview of RS pools configured with enough info to render
+// links to pages with detailed info. We might decide exposing more detailed tree
+// at some latter point.
+function getRSPoolsForObject ($object_id = 0)
+{
+	if ($object_id <= 0)
+	{
+		showError ('Invalid object_id', __FUNCTION__);
+		return NULL;
+	}
+	global $dbxlink;
+	$query = "select pool.id, pool.name, vs_id, vs.name as vs_name, count(rsip) as rscount, " .
+		"inet_ntoa(vs.vip) as vip, vs.vport, vs.proto from " .
+		"IPLoadBalancer as lb inner join IPRSPool as pool on lb.rspool_id = pool.id " .
+		"inner join IPVirtualService as vs on pool.vs_id = vs.id " .
+		"left join IPRealServer as rs on pool.id = rs.rspool_id " .
+		"where lb.object_id = ${object_id} group by pool.id " .
+		"order by vip, vport, proto, name";
+	$result = $dbxlink->query ($query);
+	if ($result == NULL)
+	{
+		showError ('SQL query failed', __FUNCTION__);
+		return NULL;
+	}
+	$pool_list = array ();
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
+		foreach (array ('name', 'vs_id', 'vs_name', 'rscount', 'vip', 'vport', 'proto') as $cname)
+			$pool_list[$row['id']][$cname] = $row[$cname];
+	$result->closeCursor();
+	return $pool_list;
+}
+
 ?>
