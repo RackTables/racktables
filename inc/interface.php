@@ -1669,9 +1669,6 @@ function renderAddressspace ()
 
 	startPortlet ('current SLB setup');
 	$summary = getSLBSummary();
-#echo '<pre>';
-#print_r ($summary);
-#echo '</pre>';
 	// A single id-keyed array isn't used here to preserve existing
 	// order of LBs returned by getSLBSummary()
 	$lblist = array();
@@ -1759,9 +1756,9 @@ function renderAddNewRange ()
 		echo "<td><a href='${root}?page=iprange&id=${iprange['id']}'>${iprange['ip']}/${iprange['mask']}</a></td><td>${iprange['name']}</td><td class=tdleft>";
 		renderProgressBar ($usedips / $totalips);
 		echo " ${usedips}/${totalips}";
-		#echo "</td></tr></table>";
 		echo "</td></tr>";
 	}
+	echo "</table>";
 }
 
 function renderIPRange ()
@@ -3736,9 +3733,6 @@ function renderVirtualService ()
 	echo '</td>';
 
 	echo '</tr><table>';
-#echo '<pre>';
-#print_r ($vsinfo);
-#echo '</pre>';
 }
 
 function renderProgressBar ($percentage = 0)
@@ -3913,9 +3907,6 @@ function renderRSPool ($pool_id = 0)
 
 	echo "\n";
 	echo "</td></tr></table>\n";
-#echo '<pre>';
-#print_r ($poolInfo);
-#echo '</pre>';
 }
 
 function renderVSList ()
