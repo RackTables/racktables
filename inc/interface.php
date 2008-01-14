@@ -2675,6 +2675,7 @@ function renderDictionaryEditor ()
 {
 	global $root, $pageno, $tabno, $nextorder;
 	$dict = getDict();
+	showMessageOrError();
 	echo "<br><table class=cooltable border=0 cellpadding=5 cellspacing=0 align=center>\n";
 	foreach ($dict as $chapter_no => $chapter)
 	{
@@ -2691,7 +2692,7 @@ function renderDictionaryEditor ()
 		echo "<input type=hidden name=chapter_no value='${chapter['no']}'>";
 		echo "<td>&nbsp;</td>";
 		echo "<td class=tdright><input type=text name=dict_value size=32></td>";
-		echo "<td><input type=submit value=OK></td>";
+		echo "<td><input type=submit value='Add new'></td>";
 		echo '</tr></form>';
 		foreach ($chapter['word'] as $key => $value)
 		{
@@ -2701,10 +2702,10 @@ function renderDictionaryEditor ()
 			echo "<input type=hidden name=op value='upd'>";
 			echo "<input type=hidden name=chapter_no value='${chapter['no']}'>";
 			echo "<input type=hidden name=dict_key value='${key}'>";
-			echo '<td>';
+			echo "<tr class=row_${order}><td>";
 			// Prevent deleting words currently used somewhere.
 			if ($chapter['refcnt'][$key])
-				echo $chapter['refcnt'][$key]
+				echo $chapter['refcnt'][$key];
 			else
 			{
 				echo "<a href='${root}process.php?page=${pageno}&tab=${tabno}&op=del&chapter_no=${chapter['no']}&dict_key=${key}'>";
