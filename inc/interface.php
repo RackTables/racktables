@@ -1741,11 +1741,12 @@ function renderAddNewRange ()
 	echo "<center><h2>Manage Existing</h2></center>\n";
 	echo "<table class='widetable' border=0 cellpadding=10 align='center'>\n";
 	$addrspaceList = getAddressspaceList();
-	echo "<tr><th>&nbsp;</th><th>Address range</th><th>Name</th><th>Total/used addresses</th></tr>";
+	echo "<tr><th>&nbsp;</th><th>Address range</th><th>Name</th><th>Utilization</th></tr>";
 	foreach ($addrspaceList as $iprange)
 	{
 		$range = getIPRange($iprange['id']);
 		$usedips = count ($range['addrlist']);
+		$totalips = ($iprange['ip_bin'] | $iprange['mask_bin_inv']) - ($iprange['ip_bin'] & $iprange['mask_bin']) + 1;
 		echo "<tr>";
 		if ($usedips == 0)
 		{
@@ -1755,10 +1756,9 @@ function renderAddNewRange ()
 		}
 		else
 			echo "<td>&nbsp</td>";
-		echo "<td><a href='${root}?page=iprange&id=${iprange['id']}'>${iprange['ip']}/${iprange['mask']}</a></td><td>${iprange['name']}</td><td>";
-		echo ($iprange['ip_bin'] | $iprange['mask_bin_inv']) - ($iprange['ip_bin'] & $iprange['mask_bin'])+1;
-		echo "/";
-		echo $usedips;
+		echo "<td><a href='${root}?page=iprange&id=${iprange['id']}'>${iprange['ip']}/${iprange['mask']}</a></td><td>${iprange['name']}</td><td class=tdleft>";
+		renderProgressBar ($usedips / $totalips);
+		echo " ${usedips}/${totalips}";
 		#echo "</td></tr></table>";
 		echo "</td></tr>";
 	}
