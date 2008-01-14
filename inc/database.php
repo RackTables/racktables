@@ -2292,12 +2292,12 @@ function getVSList ()
 		showError ('SQL query failed', __FUNCTION__);
 		return NULL;
 	}
-	$vslist = array ();
+	$ret = array ();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 		foreach (array ('vip', 'vport', 'proto', 'name', 'vsconfig', 'rsconfig', 'poolcount') as $cname)
-			$vslist[$row['id']][$cname] = $row[$cname];
+			$ret[$row['id']][$cname] = $row[$cname];
 	$result->closeCursor();
-	return $vslist;
+	return $ret;
 }
 
 // Return the list of RS pool, indexed by pool id.
@@ -2313,12 +2313,12 @@ function getRSPoolList ()
 		showError ('SQL query failed', __FUNCTION__);
 		return NULL;
 	}
-	$pool_list = array ();
+	$ret = array ();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 		foreach (array ('vs_id', 'name', 'rscount', 'vsconfig', 'rsconfig') as $cname)
-			$pool_list[$row['id']][$cname] = $row[$cname];
+			$ret[$row['id']][$cname] = $row[$cname];
 	$result->closeCursor();
-	return $pool_list;
+	return $ret;
 }
 
 function loadThumbCache ($rack_id = 0)
@@ -2464,12 +2464,31 @@ function getRSList ()
 		showError ('SQL query failed', __FUNCTION__);
 		return NULL;
 	}
-	$rslist = array ();
+	$ret = array ();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 		foreach (array ('rsip', 'rsport', 'rspool_id', 'rsconfig') as $cname)
-			$rslist[$row['id']][$cname] = $row[$cname];
+			$ret[$row['id']][$cname] = $row[$cname];
 	$result->closeCursor();
-	return $rslist;
+	return $ret;
+}
+
+// Return the list of all currently configured load balancers with their pool count.
+function getLBList ()
+{
+	global $dbxlink;
+	$query = "select object_id, count(rspool_id) as poolcount " .
+		"from IPLoadBalancer group by object_id order by object_id";
+	$result = $dbxlink->query ($query);
+	if ($result == NULL)
+	{
+		showError ('SQL query failed', __FUNCTION__);
+		return NULL;
+	}
+	$ret = array ();
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
+		$ret[$row['object_id']] = $row['poolcount'];
+	$result->closeCursor();
+	return $ret;
 }
 
 ?>

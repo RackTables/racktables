@@ -195,8 +195,9 @@ $page['rservers']['title'] = 'Real servers';
 $page['rservers']['parent'] = 'ipv4space';
 $page['rservers']['handler'] = 'renderRealServerList';
 
-$page['lbs']['title'] = '[Load balancers]';
+$page['lbs']['title'] = 'Load balancers';
 $page['lbs']['parent'] = 'ipv4space';
+$page['lbs']['handler'] = 'renderLBList';
 
 $page['search']['title_handler'] = 'dynamic_title_search';
 $page['search']['handler'] = 'handler_search';

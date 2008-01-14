@@ -4081,6 +4081,7 @@ function editRSPools ()
 
 function renderRealServerList ()
 {
+	global $root;
 	$rslist = getRSList ();
 	$pool_list = getRSPoolList ();
 	echo "<table class=widetable border=0 cellpadding=10 cellspacing=0 align=center>\n";
@@ -4097,4 +4098,22 @@ function renderRealServerList ()
 	}
 	echo "</table>";
 }
+
+function renderLBList ()
+{
+	global $root;
+	echo "<table class=widetable border=0 cellpadding=10 cellspacing=0 align=center>\n";
+	echo "<tr><th>Object</th><th>RS pools configured</th></tr>";
+	$oicache = array();
+	foreach (getLBList() as $object_id => $poolcount)
+	{
+		if (!isset ($oicache[$object_id]))
+			$oicache[$object_id] = getObjectInfo ($object_id);
+		echo "<tr valign=top><td><a href='${root}?page=object&object_id=${object_id}'>";
+		echo $oicache[$object_id]['dname'] . '</a></td>';
+		echo "<td>${poolcount}</td></tr>";
+	}
+	echo "</table>";
+}
+
 ?>
