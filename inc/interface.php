@@ -2673,15 +2673,26 @@ function renderDictionary ()
 
 function renderDictionaryEditor ()
 {
-	global $root, $pageno, $tabno;
-	showMessageOrError();
+	global $root, $pageno, $tabno, $nextorder;
 	$dict = getDict();
-	echo "<table border=0><tr>";
-	foreach ($dict as $chapter)
+	echo "<br><table class=cooltable border=0 cellpadding=5 cellspacing=0 align=center>\n";
+	foreach ($dict as $chapter_no => $chapter)
 	{
-		echo "<td class=pcleft>";
-		startPortlet ($chapter['name'] . ' (' . count ($chapter['word']) . ')');
-		echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
+		$order = 'odd';
+		echo "<tr><th>Chapter</th><th>refs</th><th>Word</th><th>&nbsp;</th></tr>\n";
+		$wc = count ($chapter['word']);
+		// One extra span for the new record per each chapter block.
+		echo "<tr class=row_${order}><td class=tdleft" . ($wc ? ' rowspan = ' . ($wc + 1) : '');
+		echo "><div title='number=${chapter_no}'>${chapter['name']} (${wc} records)</div></td>";
+		echo "<form action='${root}process.php' method=post>";
+		echo "<input type=hidden name=page value='${pageno}'>";
+		echo "<input type=hidden name=tab value='${tabno}'>";
+		echo "<input type=hidden name=op value=add>";
+		echo "<input type=hidden name=chapter_no value='${chapter['no']}'>";
+		echo "<td>&nbsp;</td>";
+		echo "<td class=tdright><input type=text name=dict_value size=32></td>";
+		echo "<td><input type=submit value=OK></td>";
+		echo '</tr></form>';
 		foreach ($chapter['word'] as $key => $value)
 		{
 			echo "<form action='${root}process.php' method=post>";
@@ -2690,29 +2701,24 @@ function renderDictionaryEditor ()
 			echo "<input type=hidden name=op value='upd'>";
 			echo "<input type=hidden name=chapter_no value='${chapter['no']}'>";
 			echo "<input type=hidden name=dict_key value='${key}'>";
-			echo '<tr>';
-			echo "<td><a href='${root}process.php?page=${pageno}&tab=${tabno}&op=del&chapter_no=${chapter['no']}&dict_key=${key}'>";
-			printImageHREF ('delete', 'Delete word');
-			echo "</a></td>";
+			echo '<td>';
+			// Prevent deleting words currently used somewhere.
+			if ($chapter['refcnt'][$key])
+				echo $chapter['refcnt'][$key]
+			else
+			{
+				echo "<a href='${root}process.php?page=${pageno}&tab=${tabno}&op=del&chapter_no=${chapter['no']}&dict_key=${key}'>";
+				printImageHREF ('delete', 'Delete word');
+				echo "</a>";
+			}
+			echo '</td>';
 			echo "<td class=tdright><input type=text name=dict_value size=32 value='${value}'></td>";
 			echo "<td><input type=submit value=OK></td>";
-			echo '</tr></form>';
-		}
-		echo "<form action='${root}process.php' method=post>";
-		echo "<input type=hidden name=page value='${pageno}'>";
-		echo "<input type=hidden name=tab value='${tabno}'>";
-		echo "<input type=hidden name=op value=add>";
-		echo "<input type=hidden name=chapter_no value='${chapter['no']}'>";
-		echo '<tr>';
-		echo "<td>&nbsp;</td>";
-		echo "<td class=tdright><input type=text name=dict_value size=32></td>";
-		echo "<td><input type=submit value=OK></td>";
-		echo '</tr></form>';
-		echo "</table>";
-		finishPortlet();
-		echo "</td>";
-	}
-	echo "</tr></table>";
+			echo "</tr></form>\n";
+			$order = $nextorder[$order];
+		} // foreach ($chapter['word']
+	} // foreach ($dict
+	echo "</table>\n";
 }
 
 // We don't allow to rename/delete a sticky chapter and we don't allow
