@@ -2134,7 +2134,28 @@ function addRStoRSPool ($pool_id = 0, $rsip = '', $rsport = 0, $rsconfig = '')
 			'rsip' => "inet_aton('${rsip}')",
 			'rsport' => $rsport,
 			'rspool_id' => $pool_id,
-			'rsconfig' => (empty ($rsconfig) ? 'NULL' : "'${rsconfig}'"))
+			'rsconfig' => (empty ($rsconfig) ? 'NULL' : "'${rsconfig}'")
+		)
+	);
+}
+
+function addLBtoRSPool ($pool_id = 0, $object_id = 0, $vsconfig = '', $rsconfig = '')
+{
+	if ($pool_id <= 0 or $object_id <= 0)
+	{
+		showError ('Invalid arguments', __FUNCTION__);
+		die;
+	}
+	return useInsertBlade
+	(
+		'IPLoadBalancer',
+		array
+		(
+			'object_id' => $object_id,
+			'rspool_id' => $pool_id,
+			'vsconfig' => (empty ($vsconfig) ? 'NULL' : "'${vsconfig}'"),
+			'rsconfig' => (empty ($rsconfig) ? 'NULL' : "'${rsconfig}'")
+		)
 	);
 }
 
@@ -2143,6 +2164,21 @@ function commitDeleteRS ($id = 0)
 	if ($id <= 0)
 		return FALSE;
 	return useDeleteBlade ('IPRealServer', 'id', $id);
+}
+
+function commitDeleteLB ($object_id = 0, $pool_id = 0)
+{
+	global $dbxlink;
+	if ($object_id <= 0 or $pool_id <= 0)
+		return FALSE;
+	$query = "delete from IPLoadBalancer where object_id = ${object_id} and rspool_id = ${pool_id} limit 1";
+	$result = $dbxlink->exec ($query);
+	if ($result === NULL)
+		return FALSE;
+	elseif ($result != 1)
+		return FALSE;
+	else
+		return TRUE;
 }
 
 function commitUpdateRS ($rsid = 0, $rsip = '', $rsport = 0, $rsconfig = '')
@@ -2160,7 +2196,7 @@ function commitUpdateRS ($rsid = 0, $rsip = '', $rsport = 0, $rsconfig = '')
 	global $dbxlink;
 	$query =
 		"update IPRealServer set rsip = inet_aton('${rsip}'), rsport = ${rsport}, rsconfig = " .
-		(empty ($rsconfig) ? 'NULL' : "'#{rsconfig}'") .
+		(empty ($rsconfig) ? 'NULL' : "'${rsconfig}'") .
 		" where id = ${rsid} limit 1";
 	$result = $dbxlink->query ($query);
 	if ($result == NULL)
@@ -2169,6 +2205,29 @@ function commitUpdateRS ($rsid = 0, $rsip = '', $rsport = 0, $rsconfig = '')
 		die;
 	}
 	return TRUE;
+}
+
+function commitUpdateLB ($object_id = 0, $pool_id = 0, $vsconfig = '', $rsconfig = '')
+{
+	if ($object_id <= 0 or $pool_id <= 0)
+	{
+		showError ('Invalid args', __FUNCTION__);
+		die;
+	}
+	global $dbxlink;
+	$query =
+		"update IPLoadBalancer set vsconfig = " .
+		(empty ($vsconfig) ? 'NULL' : "'${vsconfig}'") .
+		', rsconfig = ' .
+		(empty ($rsconfig) ? 'NULL' : "'${rsconfig}'") .
+		" where object_id = ${object_id} and rspool_id = ${pool_id} limit 1";
+	$result = $dbxlink->exec ($query);
+	if ($result === NULL)
+		return FALSE;
+	elseif ($result != 1)
+		return FALSE;
+	else
+		return TRUE;
 }
 
 // Return the list of virtual services, indexed by vs_id.

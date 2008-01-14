@@ -172,12 +172,16 @@ $page['rspool']['bypass'] = 'id';
 $page['rspool']['bypass_type'] = 'uint';
 $tab['rspool']['default'] = 'View';
 $tab['rspool']['editrslist'] = 'Real Servers';
-$tab['rspool']['editlb'] = '[Load Balancers]';
+$tab['rspool']['editlblist'] = 'Load Balancers';
 $tabhandler['rspool']['default'] = 'renderRSPool';
 $tabhandler['rspool']['editrslist'] = 'renderRSPoolServerForm';
+$tabhandler['rspool']['editlblist'] = 'renderRSPoolLBForm';
 $ophandler['rspool']['editrslist']['addRS'] = 'addRealServer';
 $ophandler['rspool']['editrslist']['delRS'] = 'deleteRealServer';
 $ophandler['rspool']['editrslist']['updRS'] = 'updateRealServer';
+$ophandler['rspool']['editlblist']['addLB'] = 'addLoadBalancer';
+$ophandler['rspool']['editlblist']['delLB'] = 'deleteLoadBalancer';
+$ophandler['rspool']['editlblist']['updLB'] = 'updateLoadBalancer';
 
 $page['rservers']['title'] = '[Real servers]';
 $page['rservers']['parent'] = 'ipv4space';

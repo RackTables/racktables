@@ -991,6 +991,20 @@ function deleteRealServer ()
 		return "${root}?page=${pageno}&tab=${tabno}&id=$pool_id&message=" . urlencode ("Real server was successfully deleted");
 }
 
+function deleteLoadBalancer ()
+{
+	global $root, $pageno, $tabno;
+
+	assertUIntArg ('object_id');
+	assertUIntArg ('pool_id');
+	$object_id = $_REQUEST['object_id'];
+	$pool_id = $_REQUEST['pool_id'];
+	if (!commitDeleteLB ($object_id, $pool_id))
+		return "${root}?page=${pageno}&tab=${tabno}&id=$pool_id&error=" . urlencode ('commitDeleteLB() failed');
+	else
+		return "${root}?page=${pageno}&tab=${tabno}&id=$pool_id&message=" . urlencode ("Load balancer was successfully deleted");
+}
+
 function updateRealServer ()
 {
 	global $root, $pageno, $tabno;
@@ -1000,15 +1014,45 @@ function updateRealServer ()
 	assertStringArg ('rsip');
 	assertUIntArg ('rsport');
 	assertStringArg ('rsconfig', TRUE);
+	// only necessary for generating next URL
 	$pool_id = $_REQUEST['pool_id'];
-	$rsid = $_REQUEST['id'];
-	$rsip = $_REQUEST['rsip'];
-	$rsport = $_REQUEST['rsport'];
-	$rsconfig = $_REQUEST['rsconfig'];
-	if (!commitUpdateRS ($rsid, $rsip, $rsport, $rsconfig))
+	if (!commitUpdateRS ($_REQUEST['id'], $_REQUEST['rsip'], $_REQUEST['rsport'], $_REQUEST['rsconfig']))
 		return "${root}?page=${pageno}&tab=${tabno}&id=$pool_id&error=" . urlencode ('commitUpdateRS() failed');
 	else
 		return "${root}?page=${pageno}&tab=${tabno}&id=$pool_id&message=" . urlencode ("Real server was successfully updated");
+}
+
+function updateLoadbalancer ()
+{
+	global $root, $pageno, $tabno;
+
+	assertUIntArg ('object_id');
+	assertUIntArg ('pool_id');
+	assertStringArg ('vsconfig', TRUE);
+	assertStringArg ('rsconfig', TRUE);
+	$pool_id = $_REQUEST['pool_id'];
+	if (!commitUpdateLB ($_REQUEST['object_id'], $pool_id, $_REQUEST['vsconfig'], $_REQUEST['rsconfig']))
+		return "${root}?page=${pageno}&tab=${tabno}&id=$pool_id&error=" . urlencode ('commitUpdateLB() failed');
+	else
+		return "${root}?page=${pageno}&tab=${tabno}&id=$pool_id&message=" . urlencode ("Real server was successfully updated");
+}
+
+function addLoadBalancer ()
+{
+	global $root, $pageno, $tabno;
+
+	assertUIntArg ('pool_id');
+	assertUIntArg ('object_id');
+	assertStringArg ('vsconfig', TRUE);
+	assertStringArg ('rsconfig', TRUE);
+	$pool_id = $_REQUEST['pool_id'];
+	$object_id = $_REQUEST['object_id'];
+	$vsconfig = $_REQUEST['vsconfig'];
+	$rsconfig = $_REQUEST['rsconfig'];
+	if (!addLBtoRSPool ($pool_id, $object_id, $vsconfig, $rsconfig))
+		return "${root}?page=${pageno}&tab=${tabno}&id=$pool_id&error=" . urlencode ('addLBtoRSPool() failed');
+	else
+		return "${root}?page=${pageno}&tab=${tabno}&id=$pool_id&message=" . urlencode ("Load balancer was successfully added");
 }
 
 ?>

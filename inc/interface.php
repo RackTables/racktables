@@ -3754,7 +3754,7 @@ function renderRSPoolServerForm ($pool_id = 0)
 	echo "</form></table>\n";
 	finishPortlet();
 
-	echo "<center><h2>Manage Existing</h2></center>\n";
+	startPortlet ('Manage existing');
 	echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
 	echo "<tr><th>&nbsp;</th><th>Address</th><th>Port</th><th>configuration</th><th>&nbsp;</th></tr>\n";
 	foreach ($poolInfo['rslist'] as $rsid => $rs)
@@ -3775,6 +3775,58 @@ function renderRSPoolServerForm ($pool_id = 0)
 		echo "</tr></form>\n";
 	}
 	echo "</table>\n";
+	finishPortlet();
+}
+
+function renderRSPoolLBForm ($pool_id = 0)
+{
+	global $root, $pageno, $tabno;
+	showMessageOrError();
+	startPortlet ('Add new');
+		echo "<input type=hidden name=id value='${pool_id}'>";
+	echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
+	echo "<tr><th>Object</th><th>VS config</th><th>RS config</th><th>&nbsp;</th></tr>\n";
+	echo "<form action='${root}process.php'>";
+	echo "<input type=hidden name=page value='${pageno}'>\n";
+	echo "<input type=hidden name=tab value='${tabno}'>\n";
+	echo "<input type=hidden name=op value=addLB>";
+	echo "<input type=hidden name=pool_id value='${pool_id}'>";
+	echo "<tr valign=top><td><select name='object_id' tabindex=1>";
+	foreach (array(4, 7, 8) as $type)
+	{
+		$objects = getObjectList ($type);
+		foreach ($objects as $object)
+			echo "<option value='${object['id']}'>${object['dname']}</option>";
+	}
+	echo "</select></td>";
+	echo "<td><textarea name=vsconfig></textarea></td>";
+	echo "<td><textarea name=rsconfig></textarea></td>";
+	echo "<td><input type=submit value=OK tabindex=2></td></tr>\n";
+	echo "</form></table>\n";
+	finishPortlet();
+
+	startPortlet ('Manage existing');
+	$poolInfo = getRSPoolInfo ($pool_id);
+	echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
+	echo "<tr><th>&nbsp;</th><th>Object</th><th>VS config</th><th>RS config</th><th>&nbsp;</th></tr>\n";
+	foreach ($poolInfo['lblist'] as $object_id => $lbinfo)
+	{
+		$oi = getObjectInfo ($object_id);
+		echo "<form action='${root}process.php'>";
+		echo "<input type=hidden name=page value='${pageno}'>\n";
+		echo "<input type=hidden name=tab value='${tabno}'>\n";
+		echo "<input type=hidden name=op value=updLB>";
+		echo "<input type=hidden name=pool_id value='${pool_id}'>";
+		echo "<input type=hidden name=object_id value='${object_id}'>";
+		echo "<tr valign=top><td><a href='${root}process.php?page=${pageno}&tab=${tabno}&op=delLB&pool_id=${pool_id}&object_id=${object_id}'>";
+		printImageHREF ('delete', 'Unconfigure');
+		echo "</a></td>";
+		echo "<td class=tdleft><a href='${root}?page=object&object_id=${object_id}'>${oi['dname']}</a></td>";
+		echo "<td><textarea name=vsconfig>${lbinfo['vsconfig']}</textarea></td>";
+		echo "<td><textarea name=rsconfig>${lbinfo['rsconfig']}</textarea></td>";
+		echo "<td><input type=submit value=OK></td></tr></form>\n";
+	}
+	finishPortlet();
 }
 
 function renderRSPool ($pool_id = 0)
@@ -3804,8 +3856,9 @@ function renderRSPool ($pool_id = 0)
 	echo "<tr><th width='50%' class=tdright>Real servers:</th><td class=tdleft>" . count ($poolInfo['rslist']) . "</td></tr>\n";
 	echo "<tr><th width='50%' class=tdright>Load balancers:</th><td class=tdleft>" . count ($poolInfo['lblist']) . "</td></tr>\n";
 	echo "<tr><th width='50%' class=tdright>Virtual service:</th><td class=tdleft>";
-	echo "<a href='${root}?page=vservice&id=${poolInfo['vs_id']}'>" . buildVServiceName (getVServiceInfo ($poolInfo['vs_id']));
-	echo "</a></td></tr>\n";
+	$vsinfo = getVServiceInfo ($poolInfo['vs_id']);
+	echo "<a href='${root}?page=vservice&id=${poolInfo['vs_id']}'>" . buildVServiceName ($vsinfo);
+	echo "</a>" . (empty ($vsinfo['name']) ? '' : " (${vsinfo['name']})") . "</td></tr>\n";
 	if (!empty ($poolInfo['vs_name']))
 		echo "<tr><th width='50%' class=tdright>VS name:</th><td class=tdleft>${poolInfo['vs_name']}</td></tr>\n";
 	echo "</table>";
@@ -3818,8 +3871,8 @@ function renderRSPool ($pool_id = 0)
 	echo "<tr><th>address</th><th>port</th><th>RS configuration</th></tr>";
 	foreach ($poolInfo['rslist'] as $rs)
 	{
-		echo "<tr><td><a href='${root}?page=ipaddress&ip=${rs['rsip']}'>${rs['rsip']}</a></td>";
-		echo "<td>${rs['rsport']}</td><td><pre>${rs['rsconfig']}</pre></td></tr>\n";
+		echo "<tr valign=top><td class=tdleft><a href='${root}?page=ipaddress&ip=${rs['rsip']}'>${rs['rsip']}</a></td>";
+		echo "<td class=tdleft>${rs['rsport']}</td><td class=tdleft><pre>${rs['rsconfig']}</pre></td></tr>\n";
 	}
 	echo "</table>\n";
 	finishPortlet();
@@ -3832,8 +3885,8 @@ function renderRSPool ($pool_id = 0)
 	foreach ($poolInfo['lblist'] as $object_id => $lbinfo)
 	{
 		$oi = getObjectInfo ($object_id);
-		echo "<tr><td><a href='${root}?page=object&object_id=${object_id}'>${oi['dname']}</a></td>";
-		echo "<td>${lbinfo['vsconfig']}</td><td>${lbinfo['rsconfig']}</td></tr>\n";
+		echo "<tr valign=top><td class=tdleft><a href='${root}?page=object&object_id=${object_id}'>${oi['dname']}</a></td>";
+		echo "<td class=tdleft><pre>${lbinfo['vsconfig']}</pre></td><td class=tdleft><pre>${lbinfo['rsconfig']}</pre></td></tr>\n";
 	}
 	echo "</table>\n";
 	finishPortlet();
@@ -3853,9 +3906,9 @@ function renderVSList ()
 	echo "<tr><th>endpoint</th><th>name</th><th>VS configuration</th><th>RS configuration</th></tr>";
 	foreach ($vslist as $vsid => $vsinfo)
 	{
-		echo "<tr><td><a href='${root}?page=vservice&id=${vsid}'>" . buildVServiceName ($vsinfo);
+		echo "<tr valign=top><td class=tdleft><a href='${root}?page=vservice&id=${vsid}'>" . buildVServiceName ($vsinfo);
 		echo "</a></td>";
-		echo "<td>${vsinfo['name']}</td>";
+		echo "<td class=tdleft>${vsinfo['name']}</td>";
 		echo "<td><pre>${vsinfo['vsconfig']}</pre></td>";
 		echo "<td><pre>${vsinfo['rsconfig']}</pre></td>";
 		echo "</tr>\n";
