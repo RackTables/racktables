@@ -191,8 +191,9 @@ $ophandler['rspool']['editlblist']['addLB'] = 'addLoadBalancer';
 $ophandler['rspool']['editlblist']['delLB'] = 'deleteLoadBalancer';
 $ophandler['rspool']['editlblist']['updLB'] = 'updateLoadBalancer';
 
-$page['rservers']['title'] = '[Real servers]';
+$page['rservers']['title'] = 'Real servers';
 $page['rservers']['parent'] = 'ipv4space';
+$page['rservers']['handler'] = 'renderRealServerList';
 
 $page['lbs']['title'] = '[Load balancers]';
 $page['lbs']['parent'] = 'ipv4space';

@@ -4079,4 +4079,22 @@ function editRSPools ()
 	finishPortlet();
 }
 
+function renderRealServerList ()
+{
+	$rslist = getRSList ();
+	$pool_list = getRSPoolList ();
+	echo "<table class=widetable border=0 cellpadding=10 cellspacing=0 align=center>\n";
+	echo "<tr><th>RS pool</th><th>real IP address</th><th>real port</th><th>RS configuration</th></tr>";
+	foreach ($rslist as $rsinfo)
+	{
+		echo "<tr valign=top><td><a href='${root}?page=rspool&id=${rsinfo['rspool_id']}'>";
+		echo empty ($pool_list[$rsinfo['rspool_id']]['name']) ? 'ANONYMOUS' : $pool_list[$rsinfo['rspool_id']]['name'];
+		echo '</a></td>';
+		echo "<td><a href='${root}?page=ipaddress&ip=${rsinfo['rsip']}'>${rsinfo['rsip']}</a></td>";
+		echo "<td>${rsinfo['rsport']}</td>";
+		echo "<td><pre>${rsinfo['rsconfig']}</pre></td>";
+		echo "</tr>\n";
+	}
+	echo "</table>";
+}
 ?>

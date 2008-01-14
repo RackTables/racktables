@@ -2453,4 +2453,23 @@ function commitUpdateRSPool ($pool_id = 0, $name = '', $vsconfig = '', $rsconfig
 		return TRUE;
 }
 
+function getRSList ()
+{
+	global $dbxlink;
+	$query = "select id, inet_ntoa(rsip) as rsip, rsport, rspool_id, rsconfig " .
+		"from IPRealServer order by rspool_id, IPRealServer.rsip, rsport";
+	$result = $dbxlink->query ($query);
+	if ($result == NULL)
+	{
+		showError ('SQL query failed', __FUNCTION__);
+		return NULL;
+	}
+	$rslist = array ();
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
+		foreach (array ('rsip', 'rsport', 'rspool_id', 'rsconfig') as $cname)
+			$rslist[$row['id']][$cname] = $row[$cname];
+	$result->closeCursor();
+	return $rslist;
+}
+
 ?>
