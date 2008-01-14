@@ -2304,7 +2304,9 @@ function getVSList ()
 function getRSPoolList ()
 {
 	global $dbxlink;
-	$query = "select id, vs_id, name, vsconfig, rsconfig from IPRSPool order by vs_id, name";
+	$query = "select pool.id, vs_id, pool.name, count(rs.id) as rscount, pool.vsconfig, pool.rsconfig " .
+		"from IPRSPool as pool left join IPRealServer as rs on pool.id = rs.rspool_id " .
+		"group by pool.id order by vs_id, name";
 	$result = $dbxlink->query ($query);
 	if ($result == NULL)
 	{
@@ -2313,7 +2315,7 @@ function getRSPoolList ()
 	}
 	$pool_list = array ();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-		foreach (array ('vs_id', 'name', 'vsconfig', 'rsconfig') as $cname)
+		foreach (array ('vs_id', 'name', 'rscount', 'vsconfig', 'rsconfig') as $cname)
 			$pool_list[$row['id']][$cname] = $row[$cname];
 	$result->closeCursor();
 	return $pool_list;
