@@ -550,23 +550,23 @@ function getIPAddress ($ip=0)
 	$ret['name'] = '';
 	$ret['reserved'] = 'no';
 	global $dbxlink;
-	$query =
+	$query1 =
 		"select ".
 		"name, reserved ".
 		"from IPAddress ".
 		"where ip = INET_ATON('$ip') and (reserved = 'yes' or name != '')";
-	$result = $dbxlink->query ($query);
-	if ($result == NULL)
+	$result1 = $dbxlink->query ($query1);
+	if ($result1 == NULL)
 		return NULL;
-	if ($row = $result->fetch (PDO::FETCH_ASSOC))
+	if ($row = $result1->fetch (PDO::FETCH_ASSOC))
 	{
 		$ret['exists'] = 1;
 		$ret['name'] = $row['name'];
 		$ret['reserved'] = $row['reserved'];
 	}
-	$result->closeCursor();
+	$result1->closeCursor();
 
-	$query =
+	$query2 =
 		"select ".
 		"IPBonds.object_id as object_id, ".
 		"IPBonds.name as name, ".
@@ -578,9 +578,9 @@ function getIPAddress ($ip=0)
 		"where IPBonds.ip=INET_ATON('$ip') ".
 		"and chapter_name = 'RackObjectType' " .
 		"order by RackObject.id, IPBonds.name";
-	$result = $dbxlink->query ($query);
+	$result2 = $dbxlink->query ($query2);
 	$count=0;
-	while ($row = $result->fetch (PDO::FETCH_ASSOC))
+	while ($row = $result2->fetch (PDO::FETCH_ASSOC))
 	{
 		$ret['bonds'][$count]['object_id'] = $row['object_id'];
 		$ret['bonds'][$count]['name'] = $row['name'];
@@ -593,7 +593,7 @@ function getIPAddress ($ip=0)
 		$count++;
 		$ret['exists'] = 1;
 	}
-	$result->closeCursor();
+	$result2->closeCursor();
 
 	return $ret;
 }
