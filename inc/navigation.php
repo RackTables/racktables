@@ -162,9 +162,7 @@ $page['vservice']['title_handler'] = 'dynamic_title_vservice';
 $page['vservice']['parent'] = 'vservices';
 $page['vservice']['bypass'] = 'id';
 $page['vservice']['bypass_type'] = 'uint';
-$tab['vservice']['default'] = 'View';
-$tab['vservice']['configs'] = '[Configuration]';
-$tabhandler['vservice']['default'] = 'renderVirtualService';
+$page['vservice']['handler'] = 'renderVirtualService';
 
 $page['rspools']['title'] = 'RS pools';
 $page['rspools']['parent'] = 'ipv4space';

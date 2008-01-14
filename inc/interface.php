@@ -3649,8 +3649,10 @@ function renderLVSConfig ($object_id = 0)
 	echo '</pre>';
 }
 
-function renderVirtualService ($vsid = 0)
+function renderVirtualService ()
 {
+	assertUIntArg ('id');
+	$vsid = $_REQUEST['id'];
 	global $root, $nextorder;
 	if ($vsid <= 0)
 	{
