@@ -1697,7 +1697,7 @@ function renderAddressspace ()
 			echo "</td>";
 			foreach ($lblist as $lb_object_id)
 			{
-				echo '<td>';
+				echo '<td class=tdleft>';
 				if (!isset ($vsdata['lblist'][$lb_object_id]))
 					echo '&nbsp;';
 				else
