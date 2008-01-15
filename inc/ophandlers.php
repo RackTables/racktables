@@ -1099,11 +1099,10 @@ function addRSPool ()
 {
 	global $root, $pageno, $tabno;
 
-	assertUIntArg ('vs_id');
 	assertStringArg ('name', TRUE);
 	assertStringArg ('vsconfig', TRUE);
 	assertStringArg ('rsconfig', TRUE);
-	if (!commitCreateRSPool ($_REQUEST['vs_id'], $_REQUEST['name'], $_REQUEST['vsconfig'], $_REQUEST['rsconfig']))
+	if (!commitCreateRSPool ($_REQUEST['name'], $_REQUEST['vsconfig'], $_REQUEST['rsconfig']))
 		return "${root}?page=${pageno}&tab=${tabno}&error=" . urlencode ('commitCreateRSPool() failed');
 	else
 		return "${root}?page=${pageno}&tab=${tabno}&message=" . urlencode ("Real server pool was successfully created");

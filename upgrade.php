@@ -577,14 +577,14 @@ echo '</pre>';
 CREATE TABLE `IPLoadBalancer` (
   `object_id` int(10) unsigned default NULL,
   `rspool_id` int(10) unsigned default NULL,
+  `vs_id` int(10) unsigned default NULL,
   `vsconfig` text,
   `rsconfig` text,
-  UNIQUE KEY `object_id` (`object_id`,`rspool_id`)
+  UNIQUE KEY `LB-VS` (`object_id`,`vs_id`)
 ) ENGINE=MyISAM";
 			$query[] = "
 CREATE TABLE `IPRSPool` (
   `id` int(10) unsigned NOT NULL auto_increment,
-  `vs_id` int(10) unsigned default NULL,
   `name` char(255) default NULL,
   `vsconfig` text,
   `rsconfig` text,
@@ -597,7 +597,8 @@ CREATE TABLE `IPRealServer` (
   `rsport` smallint(5) unsigned default NULL,
   `rspool_id` int(10) unsigned default NULL,
   `rsconfig` text,
-  PRIMARY KEY  (`id`)
+  PRIMARY KEY  (`id`),
+  UNIQUE KEY `pool-endpoint` (`rspool_id`,`rsip`,`rsport`)
 ) ENGINE=MyISAM";
 			$query[] = "
 CREATE TABLE `IPVirtualService` (
@@ -609,7 +610,6 @@ CREATE TABLE `IPVirtualService` (
   `vsconfig` text,
   `rsconfig` text,
   PRIMARY KEY  (`id`),
-  UNIQUE KEY `endpoint` (`vip`,`vport`,`proto`)
 ) ENGINE=MyISAM";
 			break; // --------------------------------------------
 #		case '0.14.10':

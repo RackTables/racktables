@@ -862,15 +862,12 @@ function renderRackObject ($object_id = 0)
 	{
 		startPortlet ('Real server pools');
 		echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
-		echo "<tr><th>virtual service</th><th>RS pool</th><th>real servers</th></tr>\n";
+		echo "<tr><th>RS pool</th><th>real servers</th></tr>\n";
 		foreach ($pools as $pool_id => $poolinfo)
 		{
-			echo "<tr><td class=tdleft><a href='${root}?page=vservice&id=${poolinfo['vs_id']}'>";
-			echo buildVServiceName ($poolinfo) . '</a>';
-			if (!empty ($poolinfo['vs_name']))
-				echo " (${poolinfo['vs_name']})";
-			echo "</td><td class=tdleft><a href='${root}?page=rspool&id=${pool_id}'>";
-			echo $poolinfo['name'] . '</a></td><td class=tdleft>' . $poolinfo['rscount'] . '</td>';
+			echo "<tr><td class=tdleft><a href='${root}?page=rspool&id=${pool_id}'>";
+			echo (empty ($poolinfo['name']) ? 'ANONYMOUS' : $poolinfo['name']);
+		       	echo '</a></td><td class=tdleft>' . $poolinfo['rscount'] . '</td>';
 			echo "</tr>\n";
 		}
 		echo "</table>\n";
@@ -3845,9 +3842,9 @@ function renderRSPoolLBForm ($pool_id = 0)
 		foreach ($objects as $object)
 			echo "<option value='${object['id']}'>${object['dname']}</option>";
 	}
-	echo "</select></td><td rowspan=3 valign=middle><input type=submit value=OK tabindex=2></td></tr>\n";
-	echo "<tr><th>VS config</th><td><textarea name=vsconfig rows=10 cols=80></textarea></td></tr>";
-	echo "<tr><th>RS config</th><td><textarea name=rsconfig rows=10 cols=80></textarea></td></tr>";
+	echo "</select></td><td><input type=submit value=OK tabindex=2></td></tr>\n";
+	echo "<tr><th>VS config</th><td colspan=2><textarea name=vsconfig rows=10 cols=80></textarea></td></tr>";
+	echo "<tr><th>RS config</th><td colspan=2><textarea name=rsconfig rows=10 cols=80></textarea></td></tr>";
 	echo "</form></table>\n";
 	finishPortlet();
 }
@@ -3878,12 +3875,6 @@ function renderRSPool ($pool_id = 0)
 		echo "<tr><th width='50%' class=tdright>Pool name:</th><td class=tdleft>${poolInfo['name']}</td></tr>\n";
 	echo "<tr><th width='50%' class=tdright>Real servers:</th><td class=tdleft>" . count ($poolInfo['rslist']) . "</td></tr>\n";
 	echo "<tr><th width='50%' class=tdright>Load balancers:</th><td class=tdleft>" . count ($poolInfo['lblist']) . "</td></tr>\n";
-	echo "<tr><th width='50%' class=tdright>Virtual service:</th><td class=tdleft>";
-	$vsinfo = getVServiceInfo ($poolInfo['vs_id']);
-	echo "<a href='${root}?page=vservice&id=${poolInfo['vs_id']}'>" . buildVServiceName ($vsinfo);
-	echo "</a>" . (empty ($vsinfo['name']) ? '' : " (${vsinfo['name']})") . "</td></tr>\n";
-	if (!empty ($poolInfo['vs_name']))
-		echo "<tr><th width='50%' class=tdright>VS name:</th><td class=tdleft>${poolInfo['vs_name']}</td></tr>\n";
 	echo "</table>";
 	finishPortlet();
 
@@ -4005,15 +3996,11 @@ function renderRSPoolList ()
 		showError ('getRSPoolList() failed', __FUNCTION__);
 		return;
 	}
-	$vsinfocache = array();
 	echo "<table class=widetable border=0 cellpadding=10 cellspacing=0 align=center>\n";
-	echo "<tr><th>parent VS</th><th>name</th><th>VS configuration</th><th>RS configuration</th></tr>";
+	echo "<tr><th>refcnt</th><th>name</th><th>VS configuration</th><th>RS configuration</th></tr>";
 	foreach ($pool_list as $pool_id => $pool_info)
 	{
-		if (!isset ($vsinfocache[$pool_info['vs_id']]))
-			$vsinfocache[$pool_info['vs_id']] = getVServiceInfo ($pool_info['vs_id']);
-		echo "<tr><td><a href='${root}?page=vservice&id=${pool_info['vs_id']}'>";
-		echo buildVServiceName ($vsinfocache[$pool_info['vs_id']]) . '</a></td>';
+		echo '<tr><td>' . ($pool_info['refcnt'] ? $pool_info['refcnt'] : '&nbsp;') . '</td>';
 		echo "<td><a href='${root}?page=rspool&id=${pool_id}'>";
 		echo (empty ($pool_info['name']) ? 'ANONYMOUS' : $pool_info['name']) . '</a></td>';
 		echo "<td><pre>${pool_info['vsconfig']}</pre></td>";
@@ -4028,14 +4015,10 @@ function editRSPools ()
 	global $root, $pageno, $tabno;
 	showMessageOrError();
 	$pool_list = getRSPoolList();
-	// Something we are going to render as a SELECT element later.
-	$vs_list = array ();
-	foreach (getVSList() as $vsid => $vsinfo)
-		$vs_list[$vsid] = buildVServiceName ($vsinfo) . (empty ($vsinfo['name']) ? '' : " (${vsinfo['name']})");
 
 	startPortlet ('Manage existing');
 	echo "<table class=widetable border=0 cellpadding=10 cellspacing=0 align=center>\n";
-	echo "<tr><th>&nbsp;</th><th>parent VS</th><th>name</th><th>VS configuration</th><th>RS configuration</th><th>&nbsp;</th></tr>";
+	echo "<tr><th>&nbsp;</th><th>name</th><th>VS configuration</th><th>RS configuration</th><th>&nbsp;</th></tr>";
 	foreach ($pool_list as $pool_id => $pool_info)
 	{
 		echo "<form method=post action='${root}process.php'>\n";
@@ -4044,7 +4027,7 @@ function editRSPools ()
 		echo "<input type=hidden name=op value=upd>\n";
 		echo "<input type=hidden name=id value=${pool_id}>\n";
 		echo "<tr valign=top><td>";
-		if ($pool_info['rscount'])
+		if ($pool_info['refcnt'])
 			echo '&nbsp;';
 		else
 		{
@@ -4052,8 +4035,6 @@ function editRSPools ()
 			printImageHREF ('delete', 'delete real server pool');
 			echo '</a>';
 		}
-		echo "</td><td class=tdleft>";
-		printSelect ($vs_list, 'vs_id', $pool_info['vs_id']);
 		echo "</td>";
 		echo "<td class=tdleft><input type=text name=name value='${pool_info['name']}'></td>";
 		echo "<td><textarea name=vsconfig>${pool_info['vsconfig']}</textarea></td>";
@@ -4070,15 +4051,9 @@ function editRSPools ()
 	echo "<input type=hidden name=tab value=${tabno}>\n";
 	echo "<input type=hidden name=op value=add>\n";
 	echo "<table class=widetable border=0 cellpadding=10 cellspacing=0 align=center>\n";
-	echo "<tr><th>&nbsp;</th><th>parent VS</th><th>name</th><th>&nbsp;</th></tr>";
-	echo "<tr valign=top><td>&nbsp;</td><td>";
-	// FIXME: change printSelect to accept tabindex and markup this form appropriately (others probably as well).
-	// Note: array_merge() will renumber array keys and mess things up. Use '+' instead.
-	$vs_list = array (0 => 'select virtual service') + $vs_list;
-	printSelect ($vs_list, 'vs_id', 0);
-	echo "</td>";
-	echo "<td class=tdleft><input type=text name=name></td>";
-	echo "<td rowspan=3 valign=middle><input type=submit value=OK></td></tr>";
+	echo "<tr><th>name</th>";
+	echo "<td><input type=text name=name></td>";
+	echo "<td><input type=submit value=OK></td></tr>";
 	echo "<tr><th>VS configuration</th><td colspan=2><textarea name=vsconfig rows=10 cols=80></textarea></td></tr>";
 	echo "<tr><th>RS configuration</th><td colspan=2><textarea name=rsconfig rows=10 cols=80></textarea></td></tr>";
 	echo "</table></form>";

@@ -2003,9 +2003,9 @@ function getSLBSummary ()
 	global $dbxlink;
 	$query = 'select vs.id as vsid, inet_ntoa(vip) as vip, vport, proto, ' .
 		'vs.name, rsp.id as pool_id, rsp.name as pool_name, object_id, count(rs.id) as rscount from ' .
-		'IPVirtualService as vs inner join IPRSPool as rsp on vs.id = rsp.vs_id ' .
-		'inner join IPRealServer as rs on rs.rspool_id = rsp.id ' .
-		'inner join IPLoadBalancer as lb on rsp.id = lb.rspool_id ' .
+		'IPVirtualService as vs inner join IPLoadBalancer as lb on vs.id = lb.vs_id ' .
+		'inner join IPRSPool as rsp on lb.rspool_id = rsp.id ' .
+		'inner join IPRealServer as rs on lb.rspool_id = rs.rspool_id ' .
 		'group by rsp.id, object_id order by vip, object_id';
 	$result = $dbxlink->query ($query);
 	if ($result == NULL)
@@ -2094,7 +2094,7 @@ function getVServiceInfo ($vsid = 0)
 function getRSPoolInfo ($id = 0)
 {
 	global $dbxlink;
-	$query1 = "select ${id} as id, vs_id, name, vsconfig, rsconfig from " .
+	$query1 = "select ${id} as id, name, vsconfig, rsconfig from " .
 		"IPRSPool where id = ${id}";
 	$result1 = $dbxlink->query ($query1);
 	if ($result1 == NULL)
@@ -2106,7 +2106,7 @@ function getRSPoolInfo ($id = 0)
 	$row = $result1->fetch (PDO::FETCH_ASSOC);
 	if (!$row)
 		return NULL;
-	foreach (array ('id', 'name', 'vsconfig', 'rsconfig', 'vs_id') as $c)
+	foreach (array ('id', 'name', 'vsconfig', 'rsconfig') as $c)
 		$ret[$c] = $row[$c];
 	$result1->closeCursor();
 	$ret['lblist'] = array();
@@ -2303,11 +2303,12 @@ function commitUpdateVS ($vsid = 0, $vip = '', $vport = 0, $proto = '', $name = 
 }
 
 // Return the list of virtual services, indexed by vs_id.
+// Each record will be shown with its basic info plus RS pools counter.
 function getVSList ()
 {
 	global $dbxlink;
-	$query = "select vs.id, inet_ntoa(vip) as vip, vport, proto, vs.name, vs.vsconfig, vs.rsconfig, count(pool.id) as poolcount " .
-		"from IPVirtualService as vs left join IPRSPool as pool on pool.vs_id = vs.id " .
+	$query = "select vs.id, inet_ntoa(vip) as vip, vport, proto, vs.name, vs.vsconfig, vs.rsconfig, count(rspool_id) as poolcount " .
+		"from IPVirtualService as vs left join IPLoadBalancer as lb on vs.id = lb.vs_id " .
 		"group by vs.id order by vs.vip, proto, vport";
 	$result = $dbxlink->query ($query);
 	if ($result == NULL)
@@ -2327,9 +2328,9 @@ function getVSList ()
 function getRSPoolList ()
 {
 	global $dbxlink;
-	$query = "select pool.id, vs_id, pool.name, count(rs.id) as rscount, pool.vsconfig, pool.rsconfig " .
-		"from IPRSPool as pool left join IPRealServer as rs on pool.id = rs.rspool_id " .
-		"group by pool.id order by vs_id, name";
+	$query = "select pool.id, pool.name, count(rspool_id) as refcnt, pool.vsconfig, pool.rsconfig " .
+		"from IPRSPool as pool left join IPLoadBalancer as lb on pool.id = lb.rspool_id " .
+		"group by pool.id order by pool.id, name";
 	$result = $dbxlink->query ($query);
 	if ($result == NULL)
 	{
@@ -2338,7 +2339,7 @@ function getRSPoolList ()
 	}
 	$ret = array ();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-		foreach (array ('vs_id', 'name', 'rscount', 'vsconfig', 'rsconfig') as $cname)
+		foreach (array ('name', 'refcnt', 'vsconfig', 'rsconfig') as $cname)
 			$ret[$row['id']][$cname] = $row[$cname];
 	$result->closeCursor();
 	return $ret;
@@ -2398,13 +2399,11 @@ function getRSPoolsForObject ($object_id = 0)
 		return NULL;
 	}
 	global $dbxlink;
-	$query = "select pool.id, pool.name, vs_id, vs.name as vs_name, count(rsip) as rscount, " .
-		"inet_ntoa(vs.vip) as vip, vs.vport, vs.proto from " .
+	$query = "select pool.id, pool.name, count(rsip) as rscount from " .
 		"IPLoadBalancer as lb inner join IPRSPool as pool on lb.rspool_id = pool.id " .
-		"inner join IPVirtualService as vs on pool.vs_id = vs.id " .
-		"left join IPRealServer as rs on pool.id = rs.rspool_id " .
-		"where lb.object_id = ${object_id} group by pool.id " .
-		"order by vip, vport, proto, name";
+		"left join IPRealServer as rs on lb.rspool_id = rs.rspool_id " .
+		"where lb.object_id = ${object_id} group by lb.rspool_id " .
+		"order by pool.name";
 	$result = $dbxlink->query ($query);
 	if ($result == NULL)
 	{
@@ -2413,25 +2412,19 @@ function getRSPoolsForObject ($object_id = 0)
 	}
 	$pool_list = array ();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-		foreach (array ('name', 'vs_id', 'vs_name', 'rscount', 'vip', 'vport', 'proto') as $cname)
+		foreach (array ('name', 'rscount') as $cname)
 			$pool_list[$row['id']][$cname] = $row[$cname];
 	$result->closeCursor();
 	return $pool_list;
 }
 
-function commitCreateRSPool ($vs_id = 0, $name = '', $vsconfig, $rsconfig)
+function commitCreateRSPool ($name = '', $vsconfig = '', $rsconfig = '')
 {
-	if ($vs_id <= 0)
-	{
-		showError ('Invalid argument', __FUNCTION__);
-		die;
-	}
 	return useInsertBlade
 	(
 		'IPRSPool',
 		array
 		(
-			'vs_id' => $vs_id,
 			'name' => (empty ($name) ? 'NULL' : "'${name}'"),
 			'vsconfig' => (empty ($vsconfig) ? 'NULL' : "'${vsconfig}'"),
 			'rsconfig' => (empty ($rsconfig) ? 'NULL' : "'${rsconfig}'")
