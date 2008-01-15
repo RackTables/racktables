@@ -3889,12 +3889,17 @@ function renderRSPool ($pool_id = 0)
 
 	startPortlet ('Load balancers (' . count ($poolInfo['lblist']) . ')');
 	echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
-	echo "<tr><th>object</th><th>VS config</th><th>RS config</th></tr>";
-	foreach ($poolInfo['lblist'] as $object_id => $lbinfo)
+	echo "<tr><th>VS</th><th>LB</th><th>VS config</th><th>RS config</th></tr>";
+	foreach ($poolInfo['lblist'] as $object_id => $vslist)
+		foreach ($vslist as $vs_id => $configs)
 	{
 		$oi = getObjectInfo ($object_id);
-		echo "<tr valign=top><td class=tdleft><a href='${root}?page=object&object_id=${object_id}'>${oi['dname']}</a></td>";
-		echo "<td class=tdleft><pre>${lbinfo['vsconfig']}</pre></td><td class=tdleft><pre>${lbinfo['rsconfig']}</pre></td></tr>\n";
+		$vi = getVServiceInfo ($vs_id);
+		echo "<tr valign=top><td class=tdleft><a href='${root}?page=vservice&id=${vs_id}'>";
+		echo buildVServiceName ($vi);
+		echo "</a></td><td class=tdleft><a href='${root}?page=object&object_id=${object_id}'>${oi['dname']}</a></td>";
+		echo "<td class=tdleft><pre>${configs['vsconfig']}</pre></td>";
+		echo "<td class=tdleft><pre>${configs['rsconfig']}</pre></td></tr>\n";
 	}
 	echo "</table>\n";
 	finishPortlet();
