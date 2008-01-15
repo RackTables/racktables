@@ -3710,9 +3710,9 @@ function renderVirtualService ()
 			echo 'ANONYMOUS';
 		echo "</a></td></tr>";
 		if (!empty ($poolInfo['vsconfig']))
-			echo "<tr><th>VS config</th><td><pre>${poolInfo['vsconfig']}</pre></td></tr>";
+			echo "<tr><th>VS config</th><td class=tdleft><pre>${poolInfo['vsconfig']}</pre></td></tr>";
 		if (!empty ($poolInfo['rsconfig']))
-			echo "<tr><th>RS config</th><td><pre>${poolInfo['rsconfig']}</pre></td></tr>";
+			echo "<tr><th>RS config</th><td class=tdleft><pre>${poolInfo['rsconfig']}</pre></td></tr>";
 		echo '</table>';
 		echo '</td><td>';
 		// LB list
@@ -3728,9 +3728,9 @@ function renderVirtualService ()
 				echo "<tr><td colspan=2><a href='${root}?page=object&object_id=${object_id}'>";
 				echo $oi['dname'] . '</a></td></tr>';
 				if (!empty ($lbInfo['vsconfig']))
-					echo "<tr><th>VS config</th><td><pre>${lbInfo['vsconfig']}</pre></td></tr>";
+					echo "<tr><th>VS config</th><td class=tdleft><pre>${lbInfo['vsconfig']}</pre></td></tr>";
 				if (!empty ($lbInfo['rsconfig']))
-					echo "<tr><th>RS config</th><td><pre>${lbInfo['rsconfig']}</pre></td></tr>";
+					echo "<tr><th>RS config</th><td class=tdleft><pre>${lbInfo['rsconfig']}</pre></td></tr>";
 			}
 			echo '</table>';
 		}
