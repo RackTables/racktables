@@ -947,7 +947,7 @@ function updateUI ()
 function resetUIConfig()
 {
 	global $root, $pageno, $tabno;
-	setConfigVar ('default_port_type','11');
+	setConfigVar ('default_port_type','24');
 	setConfigVar ('MASSCOUNT','15');
 	setConfigVar ('MAXSELSIZE','30');
 	setConfigVar ('NAMEFUL_OBJTYPES','4,7,8');
