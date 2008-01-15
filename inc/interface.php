@@ -1683,7 +1683,7 @@ function renderAddressspace ()
 	else
 	{
 		echo "<table class='widetable' border=0 cellpadding=5 cellspacing=0 align='center'>\n";
-		echo "<tr><th>VS</th>";
+		echo "<tr><th>VS&nbsp;&darr; LB&nbsp;&rarr;</th>";
 		foreach ($lblist as $lb_object_id)
 			echo "<th><a href='${root}?page=object&tab=default&object_id=${lb_object_id}'>" . $lbdname[$lb_object_id]  . "</a></th>";
 		echo "</tr>\n";
@@ -1703,7 +1703,7 @@ function renderAddressspace ()
 				else
 				{
 					echo $vsdata['lblist'][$lb_object_id]['size'];
-					echo "@(<a href='${root}?page=rspool&id=";
+					echo " (<a href='${root}?page=rspool&id=";
 				       	echo $vsdata['lblist'][$lb_object_id]['id'] . "'>";
 					echo $vsdata['lblist'][$lb_object_id]['name'] . '</a>)';
 				}
