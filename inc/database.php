@@ -2007,6 +2007,12 @@ function getSLBSummary ()
 		'inner join IPRSPool as rsp on lb.rspool_id = rsp.id ' .
 		'inner join IPRealServer as rs on lb.rspool_id = rs.rspool_id ' .
 		'group by rsp.id, object_id order by vip, object_id';
+	$query = 'select vs.id as vsid, inet_ntoa(vip) as vip, vport, proto, vs.name, object_id, ' .
+		'lb.rspool_id, pool.name as pool_name, count(rs.id) as rscount ' .
+		'from IPVirtualService as vs inner join IPLoadBalancer as lb on vs.id = lb.vs_id ' .
+		'inner join IPRSPool as pool on rspool_id = pool.id ' .
+		'left join IPRealServer as rs on rs.rspool_id = lb.rspool_id ' .
+		'group by vs.id, object_id order by vs.vip, object_id';
 	$result = $dbxlink->query ($query);
 	if ($result == NULL)
 	{
@@ -2026,7 +2032,13 @@ function getSLBSummary ()
 				$ret[$vsid][$cname] = $row[$cname];
 			$ret[$vsid]['lblist'] = array();
 		}
-		$ret[$vsid]['lblist'][$row['object_id']][$row['pool_id']] = array ('size' => $row['rscount'], 'name' => $row['pool_name']);
+		// There's only one assigned RS pool possible for each LB-VS combination.
+		$ret[$vsid]['lblist'][$row['object_id']] = array
+		(
+			'id' => $row['rspool_id'],
+			'size' => $row['rscount'],
+			'name' => $row['pool_name']
+		);
 	}
 	$result->closeCursor();
 	return $ret;

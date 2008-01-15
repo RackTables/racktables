@@ -1657,15 +1657,15 @@ function renderAddressspace ()
 
 	echo "</td>\n<td class=pcright>";
 
-	startPortlet ('SLB details');
+	startPortlet ('SLB configuration');
 	echo "<table border=0 width='100%'><tr>";
 	foreach (array ('vservices', 'rspools', 'rservers', 'lbs') as $pno)
 		echo "<td><h3><a href='${root}?page=${pno}'>" . $page[$pno]['title'] . "</a></h3></td>";
 	echo '</tr></table>';
 	finishPortlet();
 
-	startPortlet ('current SLB setup');
 	$summary = getSLBSummary();
+	startPortlet ('SLB tactical overview');
 	// A single id-keyed array isn't used here to preserve existing
 	// order of LBs returned by getSLBSummary()
 	$lblist = array();
@@ -1683,7 +1683,7 @@ function renderAddressspace ()
 	else
 	{
 		echo "<table class='widetable' border=0 cellpadding=5 cellspacing=0 align='center'>\n";
-		echo "<tr><th>VIP</th><th>Name</th>";
+		echo "<tr><th>VS</th>";
 		foreach ($lblist as $lb_object_id)
 			echo "<th><a href='${root}?page=object&tab=default&object_id=${lb_object_id}'>" . $lbdname[$lb_object_id]  . "</a></th>";
 		echo "</tr>\n";
@@ -1691,18 +1691,22 @@ function renderAddressspace ()
 		{
 			echo "<tr><td class=tdleft><a href='$root?page=vservice&tab=default&id=${vsid}'>";
 			echo buildVServiceName ($vsdata);
-			echo "</td><td>${vsdata['name']}</td>";
+			echo '</a>';
+			if (!empty ($vsdata['name']))
+				echo " (${vsdata['name']})";
+			echo "</td>";
 			foreach ($lblist as $lb_object_id)
 			{
 				echo '<td>';
 				if (!isset ($vsdata['lblist'][$lb_object_id]))
 					echo '&nbsp;';
 				else
-					foreach ($vsdata['lblist'][$lb_object_id] as $pool_id => $pool_info)
-					{
-						echo $pool_info['size'] . "@(<a href='${root}?page=rspool&id=${pool_id}'>";
-						echo $pool_info['name'] . '</a>)';
-					}
+				{
+					echo $vsdata['lblist'][$lb_object_id]['size'];
+					echo "@(<a href='${root}?page=rspool&id=";
+				       	echo $vsdata['lblist'][$lb_object_id]['id'] . "'>";
+					echo $vsdata['lblist'][$lb_object_id]['name'] . '</a>)';
+				}
 				echo '</td>';
 			}
 			echo "</tr>\n";
