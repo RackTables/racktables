@@ -3822,7 +3822,7 @@ function renderRSPoolLBForm ($pool_id = 0)
 			echo "<input type=hidden name=pool_id value='${pool_id}'>";
 			echo "<input type=hidden name=vs_id value='${vs_id}'>";
 			echo "<input type=hidden name=object_id value='${object_id}'>";
-			echo "<tr valign=top><td><a href='${root}process.php?page=${pageno}&tab=${tabno}&op=delLB&pool_id=${pool_id}&object_id=${object_id}'>";
+			echo "<tr valign=top><td><a href='${root}process.php?page=${pageno}&tab=${tabno}&op=delLB&pool_id=${pool_id}&object_id=${object_id}&vs_id=${vs_id}'>";
 			printImageHREF ('delete', 'Unconfigure');
 			echo "</a></td>";
 			echo "<td class=tdleft><a href='${root}?page=object&object_id=${object_id}'>${oi['dname']}</a></td>";

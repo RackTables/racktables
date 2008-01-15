@@ -1013,8 +1013,9 @@ function deleteLoadBalancer ()
 
 	assertUIntArg ('object_id');
 	assertUIntArg ('pool_id');
+	assertUIntArg ('vs_id');
 	$pool_id = $_REQUEST['pool_id'];
-	if (!commitDeleteLB ($_REQUEST['object_id'], $pool_id))
+	if (!commitDeleteLB ($_REQUEST['object_id'], $pool_id, $_REQUEST['vs_id']))
 		return "${root}?page=${pageno}&tab=${tabno}&id=${pool_id}&error=" . urlencode ('commitDeleteLB() failed');
 	else
 		return "${root}?page=${pageno}&tab=${tabno}&id=${pool_id}&message=" . urlencode ("Load balancer was successfully deleted");

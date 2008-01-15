@@ -2217,7 +2217,7 @@ function commitDeleteVS ($id = 0)
 function commitDeleteLB ($object_id = 0, $pool_id = 0, $vs_id = 0)
 {
 	global $dbxlink;
-	if ($object_id <= 0 or $pool_id <= 0 or $vs_id = 0)
+	if ($object_id <= 0 or $pool_id <= 0 or $vs_id <= 0)
 		return FALSE;
 	$query = "delete from IPLoadBalancer where object_id = ${object_id} and " .
 		"rspool_id = ${pool_id} and vs_id = ${vs_id} limit 1";
