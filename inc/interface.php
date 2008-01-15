@@ -3761,7 +3761,24 @@ function renderRSPoolServerForm ($pool_id = 0)
 	showMessageOrError();
 	$poolInfo = getRSPoolInfo ($pool_id);
 
-	startPortlet ('Manage existing');
+	startPortlet ('Add new');
+	echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
+	echo "<tr><th>Address</th><th>Port</th><th>&nbsp;</th></tr>\n";
+	echo "<form action='${root}process.php'>";
+	echo "<input type=hidden name=page value='${pageno}'>\n";
+	echo "<input type=hidden name=tab value='${tabno}'>\n";
+	echo "<input type=hidden name=op value=addRS>";
+	echo "<input type=hidden name=id value='${pool_id}'>";
+	echo "<tr><td><input type=text name=rsip tabindex=1></td>";
+	echo "<td><input type=text name=rsport tabindex=2></td>";
+	echo "<td><input type=submit value='OK' tabindex=3></tr>\n";
+	echo "<tr><th colspan=3>configuration</th></tr>";
+	echo "<tr><td colspan=3><textarea name=rsconfig rows=10 cols=80 tabindex=4></textarea></td></tr>";
+	echo "</form></table>\n";
+	finishPortlet();
+
+	$rsc = count ($poolInfo['rslist']);
+	startPortlet ("Manage existing (${rsc})");
 	echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
 	echo "<tr><th>&nbsp;</th><th>Address</th><th>Port</th><th>configuration</th><th>&nbsp;</th></tr>\n";
 	foreach ($poolInfo['rslist'] as $rsid => $rs)
@@ -3783,22 +3800,6 @@ function renderRSPoolServerForm ($pool_id = 0)
 	}
 	echo "</table>\n";
 	finishPortlet();
-
-	startPortlet ('Add new');
-	echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
-	echo "<tr><th>Address</th><th>Port</th><th>&nbsp;</th></tr>\n";
-	echo "<form action='${root}process.php'>";
-	echo "<input type=hidden name=page value='${pageno}'>\n";
-	echo "<input type=hidden name=tab value='${tabno}'>\n";
-	echo "<input type=hidden name=op value=addRS>";
-	echo "<input type=hidden name=id value='${pool_id}'>";
-	echo "<tr><td><input type=text name=rsip tabindex=1></td>";
-	echo "<td><input type=text name=rsport tabindex=2></td>";
-	echo "<td><input type=submit value='OK' tabindex=3></tr>\n";
-	echo "<tr><th colspan=3>configuration</th></tr>";
-	echo "<tr><td colspan=3><textarea name=rsconfig rows=10 cols=80 tabindex=4></textarea></td></tr>";
-	echo "</form></table>\n";
-	finishPortlet();
 }
 
 function renderRSPoolLBForm ($pool_id = 0)
@@ -3806,8 +3807,8 @@ function renderRSPoolLBForm ($pool_id = 0)
 	global $root, $pageno, $tabno;
 	showMessageOrError();
 
-	startPortlet ('Manage existing');
 	$poolInfo = getRSPoolInfo ($pool_id);
+	startPortlet ('Manage existing (' . count ($poolInfo['lblist']) . ')');
 	echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
 	echo "<tr><th>&nbsp;</th><th>Object</th><th>VS config</th><th>RS config</th><th>&nbsp;</th></tr>\n";
 	foreach ($poolInfo['lblist'] as $object_id => $lbinfo)
@@ -3869,7 +3870,7 @@ function renderRSPool ($pool_id = 0)
 	echo "<table border=0 class=objectview cellspacing=0 cellpadding=0>";
 	if (!empty ($poolInfo['name']))
 		echo "<tr><td colspan=2 align=center><h1>{$poolInfo['name']}</h1></td></tr>";
-	echo "<tr><td>\n";
+	echo "<tr><td class=pcleft>\n";
 
 	startPortlet ('Configuration');
 	echo "<table border=0 cellspacing=0 cellpadding=3 width='100%'>\n";
@@ -3886,22 +3887,7 @@ function renderRSPool ($pool_id = 0)
 	echo "</table>";
 	finishPortlet();
 
-	echo "</td><td rowspan=2 valign=top>\n";
-
-	startPortlet ('Real servers');
-	echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
-	echo "<tr><th>address</th><th>port</th><th>RS configuration</th></tr>";
-	foreach ($poolInfo['rslist'] as $rs)
-	{
-		echo "<tr valign=top><td class=tdleft><a href='${root}?page=ipaddress&ip=${rs['rsip']}'>${rs['rsip']}</a></td>";
-		echo "<td class=tdleft>${rs['rsport']}</td><td class=tdleft><pre>${rs['rsconfig']}</pre></td></tr>\n";
-	}
-	echo "</table>\n";
-	finishPortlet();
-
-	echo "</td></tr>\n<tr><td>";
-	
-	startPortlet ('Load balancers');
+	startPortlet ('Load balancers (' . count ($poolInfo['lblist']) . ')');
 	echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
 	echo "<tr><th>object</th><th>VS config</th><th>RS config</th></tr>";
 	foreach ($poolInfo['lblist'] as $object_id => $lbinfo)
@@ -3913,7 +3899,19 @@ function renderRSPool ($pool_id = 0)
 	echo "</table>\n";
 	finishPortlet();
 
-	echo "\n";
+	echo "</td><td class=pcright>\n";
+
+	startPortlet ('Real servers (' . count ($poolInfo['rslist']) . ')');
+	echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
+	echo "<tr><th>address</th><th>port</th><th>RS configuration</th></tr>";
+	foreach ($poolInfo['rslist'] as $rs)
+	{
+		echo "<tr valign=top><td class=tdleft><a href='${root}?page=ipaddress&ip=${rs['rsip']}'>${rs['rsip']}</a></td>";
+		echo "<td class=tdleft>${rs['rsport']}</td><td class=tdleft><pre>${rs['rsconfig']}</pre></td></tr>\n";
+	}
+	echo "</table>\n";
+	finishPortlet();
+
 	echo "</td></tr></table>\n";
 }
 
