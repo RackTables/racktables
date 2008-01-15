@@ -2122,7 +2122,8 @@ function getRSPoolInfo ($id = 0)
 		foreach (array ('vsconfig', 'rsconfig') as $c)
 			$ret['lblist'][$row['object_id']][$c] = $row[$c];
 	$result2->closeCursor();
-	$query3 = "select id, inet_ntoa(rsip) as rsip, rsport, rsconfig from IPRealServer where rspool_id = ${id} order by rsip, rsport";
+	$query3 = "select id, inet_ntoa(rsip) as rsip, rsport, rsconfig from " .
+		"IPRealServer where rspool_id = ${id} order by IPRealServer.rsip, rsport";
 	$result3 = $dbxlink->query ($query3);
 	if ($result3 == NULL)
 	{
