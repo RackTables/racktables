@@ -1048,16 +1048,17 @@ function updateRealServer ()
 		return "${root}?page=${pageno}&tab=${tabno}&id=${pool_id}&message=" . urlencode ("Real server was successfully updated");
 }
 
-function updateLoadbalancer ()
+function updateLoadBalancer ()
 {
 	global $root, $pageno, $tabno;
 
 	assertUIntArg ('object_id');
 	assertUIntArg ('pool_id');
+	assertUIntArg ('vs_id');
 	assertStringArg ('vsconfig', TRUE);
 	assertStringArg ('rsconfig', TRUE);
 	$pool_id = $_REQUEST['pool_id'];
-	if (!commitUpdateLB ($_REQUEST['object_id'], $pool_id, $_REQUEST['vsconfig'], $_REQUEST['rsconfig']))
+	if (!commitUpdateLB ($_REQUEST['object_id'], $pool_id, $_REQUEST['vs_id'], $_REQUEST['vsconfig'], $_REQUEST['rsconfig']))
 		return "${root}?page=${pageno}&tab=${tabno}&id=${pool_id}&error=" . urlencode ('commitUpdateLB() failed');
 	else
 		return "${root}?page=${pageno}&tab=${tabno}&id=${pool_id}&message=" . urlencode ("Real server was successfully updated");
@@ -1086,10 +1087,11 @@ function addLoadBalancer ()
 
 	assertUIntArg ('pool_id');
 	assertUIntArg ('object_id');
+	assertUIntArg ('vs_id');
 	assertStringArg ('vsconfig', TRUE);
 	assertStringArg ('rsconfig', TRUE);
 	$pool_id = $_REQUEST['pool_id'];
-	if (!addLBtoRSPool ($pool_id, $_REQUEST['object_id'], $_REQUEST['vsconfig'], $_REQUEST['rsconfig']))
+	if (!addLBtoRSPool ($pool_id, $_REQUEST['object_id'], $_REQUEST['vs_id'], $_REQUEST['vsconfig'], $_REQUEST['rsconfig']))
 		return "${root}?page=${pageno}&tab=${tabno}&id=${pool_id}&error=" . urlencode ('addLBtoRSPool() failed');
 	else
 		return "${root}?page=${pageno}&tab=${tabno}&id=${pool_id}&message=" . urlencode ("Load balancer was successfully added");

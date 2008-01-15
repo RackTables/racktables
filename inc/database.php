@@ -2088,13 +2088,13 @@ function getVServiceInfo ($vsid = 0)
 // Collect and return the following info about the given real server pool:
 // basic information
 // parent virtual service information
-// load balancers list
+// load balancers list (each with a list of VSes)
 // real servers list
 
 function getRSPoolInfo ($id = 0)
 {
 	global $dbxlink;
-	$query1 = "select ${id} as id, name, vsconfig, rsconfig from " .
+	$query1 = "select id, name, vsconfig, rsconfig from " .
 		"IPRSPool where id = ${id}";
 	$result1 = $dbxlink->query ($query1);
 	if ($result1 == NULL)
@@ -2111,7 +2111,7 @@ function getRSPoolInfo ($id = 0)
 	$result1->closeCursor();
 	$ret['lblist'] = array();
 	$ret['rslist'] = array();
-	$query2 = "select object_id, vsconfig, rsconfig from IPLoadBalancer where rspool_id = ${id} order by object_id";
+	$query2 = "select object_id, vs_id, vsconfig, rsconfig from IPLoadBalancer where rspool_id = ${id} order by object_id";
 	$result2 = $dbxlink->query ($query2);
 	if ($result2 == NULL)
 	{
@@ -2120,7 +2120,7 @@ function getRSPoolInfo ($id = 0)
 	}
 	while ($row = $result2->fetch (PDO::FETCH_ASSOC))
 		foreach (array ('vsconfig', 'rsconfig') as $c)
-			$ret['lblist'][$row['object_id']][$c] = $row[$c];
+			$ret['lblist'][$row['object_id']][$row['vs_id']][$c] = $row[$c];
 	$result2->closeCursor();
 	$query3 = "select id, inet_ntoa(rsip) as rsip, rsport, rsconfig from " .
 		"IPRealServer where rspool_id = ${id} order by IPRealServer.rsip, rsport";
@@ -2179,9 +2179,9 @@ function commitCreateVS ($vip = '', $vport = 0, $proto = '', $name = '', $vsconf
 	);
 }
 
-function addLBtoRSPool ($pool_id = 0, $object_id = 0, $vsconfig = '', $rsconfig = '')
+function addLBtoRSPool ($pool_id = 0, $object_id = 0, $vs_id = 0, $vsconfig = '', $rsconfig = '')
 {
-	if ($pool_id <= 0 or $object_id <= 0)
+	if ($pool_id <= 0 or $object_id <= 0 or $vs_id <= 0)
 	{
 		showError ('Invalid arguments', __FUNCTION__);
 		die;
@@ -2193,6 +2193,7 @@ function addLBtoRSPool ($pool_id = 0, $object_id = 0, $vsconfig = '', $rsconfig 
 		(
 			'object_id' => $object_id,
 			'rspool_id' => $pool_id,
+			'vs_id' => $vs_id,
 			'vsconfig' => (empty ($vsconfig) ? 'NULL' : "'${vsconfig}'"),
 			'rsconfig' => (empty ($rsconfig) ? 'NULL' : "'${rsconfig}'")
 		)
@@ -2213,12 +2214,13 @@ function commitDeleteVS ($id = 0)
 	return useDeleteBlade ('IPVirtualService', 'id', $id);
 }
 
-function commitDeleteLB ($object_id = 0, $pool_id = 0)
+function commitDeleteLB ($object_id = 0, $pool_id = 0, $vs_id = 0)
 {
 	global $dbxlink;
-	if ($object_id <= 0 or $pool_id <= 0)
+	if ($object_id <= 0 or $pool_id <= 0 or $vs_id = 0)
 		return FALSE;
-	$query = "delete from IPLoadBalancer where object_id = ${object_id} and rspool_id = ${pool_id} limit 1";
+	$query = "delete from IPLoadBalancer where object_id = ${object_id} and " .
+		"rspool_id = ${pool_id} and vs_id = ${vs_id} limit 1";
 	$result = $dbxlink->exec ($query);
 	if ($result === NULL)
 		return FALSE;
@@ -2254,9 +2256,9 @@ function commitUpdateRS ($rsid = 0, $rsip = '', $rsport = 0, $rsconfig = '')
 	return TRUE;
 }
 
-function commitUpdateLB ($object_id = 0, $pool_id = 0, $vsconfig = '', $rsconfig = '')
+function commitUpdateLB ($object_id = 0, $pool_id = 0, $vs_id = 0, $vsconfig = '', $rsconfig = '')
 {
-	if ($object_id <= 0 or $pool_id <= 0)
+	if ($object_id <= 0 or $pool_id <= 0 or $vs_id <= 0)
 	{
 		showError ('Invalid args', __FUNCTION__);
 		die;
@@ -2267,7 +2269,8 @@ function commitUpdateLB ($object_id = 0, $pool_id = 0, $vsconfig = '', $rsconfig
 		(empty ($vsconfig) ? 'NULL' : "'${vsconfig}'") .
 		', rsconfig = ' .
 		(empty ($rsconfig) ? 'NULL' : "'${rsconfig}'") .
-		" where object_id = ${object_id} and rspool_id = ${pool_id} limit 1";
+		" where object_id = ${object_id} and rspool_id = ${pool_id} " .
+		"and vs_id = ${vs_id} limit 1";
 	$result = $dbxlink->exec ($query);
 	if ($result === NULL)
 		return FALSE;
