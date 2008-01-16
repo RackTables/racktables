@@ -611,6 +611,8 @@ CREATE TABLE `IPVirtualService` (
   `rsconfig` text,
   PRIMARY KEY  (`id`),
 ) ENGINE=MyISAM";
+			$query[] = "INSERT INTO `Config` VALUES ('DEFAULT_SLB_VS_PORT','','uint','yes','no','Default port of SLB virtual service');";
+			$query[] = "INSERT INTO `Config` VALUES ('DEFAULT_SLB_RS_PORT','','uint','yes','no','Default port of SLB real server')";
 			break; // --------------------------------------------
 #		case '0.14.10':
 #			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('AUTO_PORTS_CONFIG','FIXME','string','yes','no','Autoports configuration')";

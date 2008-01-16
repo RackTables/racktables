@@ -3743,7 +3743,10 @@ function renderRSPoolServerForm ($pool_id = 0)
 	echo "<input type=hidden name=op value=addRS>";
 	echo "<input type=hidden name=id value='${pool_id}'>";
 	echo "<tr><td><input type=text name=rsip tabindex=1></td>";
-	echo "<td><input type=text name=rsport tabindex=2></td>";
+	$default_port = getConfigVar ('DEFAULT_SLB_RS_PORT');
+	if ($default_port == 0)
+		$default_port = '';
+	echo "<td><input type=text name=rsport size=5 value='${default_port}'  tabindex=2></td>";
 	echo "<td><input type=submit value='OK' tabindex=3></tr>\n";
 	echo "<tr><th colspan=3>configuration</th></tr>";
 	echo "<tr><td colspan=3><textarea name=rsconfig rows=10 cols=80 tabindex=4></textarea></td></tr>";
@@ -3766,7 +3769,7 @@ function renderRSPoolServerForm ($pool_id = 0)
 		echo "&op=delRS&pool_id=${pool_id}&id=${rsid}'>";
 		printImageHREF ('delete', 'Delete this real server');
 		echo "</td><td><input type=text name=rsip value='${rs['rsip']}'></td>";
-		echo "<td><input type=text name=rsport value='${rs['rsport']}'></td>";
+		echo "<td><input type=text name=rsport size=5 value='${rs['rsport']}'></td>";
 		echo "<td><textarea name=rsconfig>${rs['rsconfig']}</textarea></td>";
 		echo "<td><input type=submit value='OK'></td>";
 		echo "</tr></form>\n";
@@ -3941,7 +3944,7 @@ function renderVSListEditForm ()
 			echo '</a>';
 		}
 		echo "</td><td class=tdleft><input type=text name=vip value='${vsinfo['vip']}'></td>";
-		echo "<td class=tdleft><input type=text name=vport value='${vsinfo['vport']}'></td>";
+		echo "<td class=tdleft><input type=text name=vport size=5 value='${vsinfo['vport']}'></td>";
 		echo "<td class=tdleft>";
 		printSelect ($protocols, 'proto', $vsinfo['proto']);
 		echo "</td>";
@@ -3964,8 +3967,10 @@ function renderVSListEditForm ()
 	echo "<tr><th>&nbsp;</th><th>VIP</th><th>port</th><th>proto</th><th>name</th><th>&nbsp;</th></tr>";
 	echo "<tr valign=top><td>&nbsp;</td>";
 	echo "<td><input type=text name=vip tabindex=1></td>";
-	echo "<td><input type=text name=vport tabindex=2></td>";
-	echo "<td>";
+	$default_port = getConfigVar ('DEFAULT_SLB_VS_PORT');
+	if ($default_port == 0)
+		$default_port = '';
+	echo "<td><input type=text name=vport size=5 value='${default_port}' tabindex=2></td><td>";
 	printSelect ($protocols, 'proto', 'TCP');
 	echo "</td>";
 	echo "<td><input type=text name=name tabindex=4></td>";
