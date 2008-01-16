@@ -2005,13 +2005,9 @@ function renderIPAddressAssignment ()
 	echo "<input type='hidden' name='ip' value='$ip'>";
 	echo "<td colspan=2><select name='object_id'>";
 
-	foreach (array(1, 4, 7, 8, 12, 14) as $type) 
-	{
-		//get all Balck Boxes, Servers, Routers, Switches, UPS, Modems
-		$objects = getObjectList($type);
-		foreach ($objects as $object)
+	foreach (explode (',', getConfigVar ('IPV4_PERFORMERS')) as $type) 
+		foreach (getObjectList ($type) as $object)
 			echo "<option value='${object['id']}'>${object['dname']}</option>";
-	}
 
 	echo "</select></td><td><input type='text' name='bond_name' value='' size=10></td>";
 	echo "<td><select name='bond_type'><option value='regular'>Regular</option><option value='virtual'>Virtual</option><option value='shared'>Shared</option></select></td>";

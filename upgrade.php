@@ -613,6 +613,8 @@ CREATE TABLE `IPVirtualService` (
 ) ENGINE=MyISAM";
 			$query[] = "INSERT INTO `Config` VALUES ('DEFAULT_SLB_VS_PORT','','uint','yes','no','Default port of SLB virtual service');";
 			$query[] = "INSERT INTO `Config` VALUES ('DEFAULT_SLB_RS_PORT','','uint','yes','no','Default port of SLB real server')";
+			$query[] = "INSERT INTO `Config` VALUES ('IPV4_PERFORMERS','1,4,7,8,12,14','string','yes','no','IPv4-capable object types')";
+			$query[] = "INSERT INTO `Config` VALUES ('NATV4_PERFORMERS','4,7,8','string','yes','no','NATv4-capable object types')";
 			break; // --------------------------------------------
 #		case '0.14.10':
 #			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('AUTO_PORTS_CONFIG','FIXME','string','yes','no','Autoports configuration')";

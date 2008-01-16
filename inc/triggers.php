@@ -63,7 +63,21 @@ function trigger_emptyRackspace ()
 function trigger_lvsconfig ()
 {
 	assertUIntArg ('object_id');
-	return count (getRSPoolsForObject ($_REQUEST['object_id']) > 0);
+	return count (getRSPoolsForObject ($_REQUEST['object_id'])) > 0;
+}
+
+function trigger_ipv4 ()
+{
+	assertUIntArg ('object_id');
+	$info = getObjectInfo ($_REQUEST['object_id']);
+	return in_array ($info['objtype_id'], explode (',', getConfigVar ('IPV4_PERFORMERS')));
+}
+
+function trigger_natv4 ()
+{
+	assertUIntArg ('object_id');
+	$info = getObjectInfo ($_REQUEST['object_id']);
+	return in_array ($info['objtype_id'], explode (',', getConfigVar ('NATV4_PERFORMERS')));
 }
 
 ?>
