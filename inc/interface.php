@@ -3624,7 +3624,28 @@ function renderLVSConfig ($object_id = 0)
 	}
 	$lbconfig = buildLBConfig ($object_id);
 	echo '<pre>';
-	print_r ($lbconfig);
+	echo "#\n#\n# This configuration has been generated automatically by RackTables\n";
+	echo "# for object_id == ${object_id}\n#\n#\n\n\n";
+	foreach ($lbconfig as $vs_id => $vsinfo)
+	{
+		$vsheader = "########################################################\n" .
+			"# VS (id == ${vs_id}): " . (empty ($vsinfo['vs_name']) ? 'NO NAME' : $vsinfo['vs_name']) . "\n" .
+			"# RS pool (id == ${vsinfo['pool_id']}): " . (empty ($vsinfo['pool_name']) ? 'ANONYMOUS' : $vsinfo['pool_name']) . "\n" .
+			"########################################################\n";
+		# The order of inheritance is: VS -> LB -> pool [ -> RS ]
+		$vsconfig = $vsinfo['vs_vsconfig'] . $vsinfo['lb_vsconfig'] . $vsinfo['pool_vsconfig'];
+		echo $vsheader;
+		echo "virtual_server ${vsinfo['vip']} ${vsinfo['vport']} {\n";
+		echo "${vsconfig}\n";
+		foreach ($vsinfo['rslist'] as $rs)
+		{
+			$rsconfig = $vsinfo['vs_rsconfig'] . $vsinfo['lb_rsconfig'] . $vsinfo['pool_rsconfig'] . $rs['rs_rsconfig'];
+			echo "\treal_server ${rs['rsip']} ${rs['rsport']} {\n";
+			echo "\t${rsconfig}\n";
+			echo "\t}\n";
+		}
+		echo "}\n\n\n";
+	}
 	echo '</pre>';
 }
 

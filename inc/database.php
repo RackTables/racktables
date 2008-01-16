@@ -2538,14 +2538,15 @@ function buildLBConfig ($object_id)
 	}
 	global $dbxlink;
 	$ret = array();
-	$query = 'select lb.rspool_id, vs_id, vs.vsconfig as vs_vsconfig, vs.rsconfig as vs_rsconfig, ' .
-		'lb.vsconfig as lb_vsconfig, lb.rsconfig as lb_rsconfig, ' .
+	$query = 'select vs_id, inet_ntoa(vip) as vip, vport, proto, vs.name as vs_name, ' .
+		'vs.vsconfig as vs_vsconfig, vs.rsconfig as vs_rsconfig, ' .
+		'lb.vsconfig as lb_vsconfig, lb.rsconfig as lb_rsconfig, pool.id as pool_id, pool.name as pool_name, ' .
 		'pool.vsconfig as pool_vsconfig, pool.rsconfig as pool_rsconfig, ' .
-		'rs.rsconfig as rs_rsconfig from ' .
-		'IPLoadBalancer as lb inner join IPVirtualService as vs on lb.vs_id = vs.id ' .
-		'inner join IPRSPool as pool on pool.id = lb.rspool_id ' .
+		'rs.id as rs_id, inet_ntoa(rsip) as rsip, rsport, rs.rsconfig as rs_rsconfig from ' .
+		'IPLoadBalancer as lb inner join IPRSPool as pool on lb.rspool_id = pool.id ' .
+		'inner join IPVirtualService as vs on lb.vs_id = vs.id ' .
 		'inner join IPRealServer as rs on lb.rspool_id = rs.rspool_id ' .
-		"where lb.object_id = ${object_id}";
+		"where lb.object_id = ${object_id} order by vs.vip, vport, proto, pool.name, rs.rsip, rs.rsport";
 	$result = $dbxlink->query ($query);
 	if ($result == NULL)
 	{
@@ -2554,6 +2555,15 @@ function buildLBConfig ($object_id)
 	}
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
+		$vs_id = $row['vs_id'];
+		if (!isset ($ret[$vs_id]))
+		{
+			foreach (array ('vip', 'vport', 'proto', 'vs_name', 'vs_vsconfig', 'vs_rsconfig', 'lb_vsconfig', 'lb_rsconfig', 'pool_vsconfig', 'pool_rsconfig', 'pool_id', 'pool_name') as $c)
+				$ret[$vs_id][$c] = $row[$c];
+			$ret[$vs_id]['rslist'] = array();
+		}
+		foreach (array ('rsip', 'rsport', 'rs_rsconfig') as $c)
+			$ret[$vs_id]['rslist'][$row['rs_id']][$c] = $row[$c];
 	}
 	$result->closeCursor();
 	return $ret;
