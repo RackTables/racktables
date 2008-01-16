@@ -2403,9 +2403,10 @@ function resetThumbCache ($rack_id = 0)
 	$result = $dbxlink->exec ($query);
 }
 
-// Return a tactical overview of RS pools configured with enough info to render
-// links to pages with detailed info. We might decide exposing more detailed tree
-// at some latter point.
+// Return the list of attached RS pools for the given object. As long as we have
+// the LB-VS UNIQUE in IPLoadBalancer table, it is Ok to key returned records
+// by vs_id, because there will be only one RS pool listed for each VS of the
+// current object.
 function getRSPoolsForObject ($object_id = 0)
 {
 	if ($object_id <= 0)
@@ -2414,23 +2415,25 @@ function getRSPoolsForObject ($object_id = 0)
 		return NULL;
 	}
 	global $dbxlink;
-	$query = "select pool.id, pool.name, count(rsip) as rscount from " .
-		"IPLoadBalancer as lb inner join IPRSPool as pool on lb.rspool_id = pool.id " .
-		"left join IPRealServer as rs on lb.rspool_id = rs.rspool_id " .
-		"where lb.object_id = ${object_id} group by lb.rspool_id " .
-		"order by pool.name";
+	$query = 'select vs_id, inet_ntoa(vip) as vip, vport, proto, vs.name, pool.id as pool_id, ' .
+		'pool.name as pool_name, count(rsip) as rscount from ' .
+		'IPLoadBalancer as lb inner join IPRSPool as pool on lb.rspool_id = pool.id ' .
+		'inner join IPVirtualService as vs on lb.vs_id = vs.id ' .
+		'left join IPRealServer as rs on lb.rspool_id = rs.rspool_id ' .
+		"where lb.object_id = ${object_id} " .
+		'group by lb.rspool_id, lb.vs_id order by vs.vip, vport, proto, pool.name';
 	$result = $dbxlink->query ($query);
 	if ($result == NULL)
 	{
 		showError ('SQL query failed', __FUNCTION__);
 		return NULL;
 	}
-	$pool_list = array ();
+	$ret = array ();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-		foreach (array ('name', 'rscount') as $cname)
-			$pool_list[$row['id']][$cname] = $row[$cname];
+		foreach (array ('vip', 'vport', 'proto', 'name', 'pool_id', 'pool_name', 'rscount') as $cname)
+			$ret[$row['vs_id']][$cname] = $row[$cname];
 	$result->closeCursor();
-	return $pool_list;
+	return $ret;
 }
 
 function commitCreateRSPool ($name = '', $vsconfig = '', $rsconfig = '')

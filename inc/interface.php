@@ -862,12 +862,17 @@ function renderRackObject ($object_id = 0)
 	{
 		startPortlet ('Real server pools');
 		echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
-		echo "<tr><th>RS pool</th><th>real servers</th></tr>\n";
-		foreach ($pools as $pool_id => $poolinfo)
+		echo "<tr><th>VS</th><th>RS pool</th><th>real servers</th></tr>\n";
+		foreach ($pools as $vs_id => $info)
 		{
-			echo "<tr><td class=tdleft><a href='${root}?page=rspool&id=${pool_id}'>";
-			echo (empty ($poolinfo['name']) ? 'ANONYMOUS' : $poolinfo['name']);
-		       	echo '</a></td><td class=tdleft>' . $poolinfo['rscount'] . '</td>';
+			echo "<tr><td class=tdleft><a href='${root}?page=vservice&id=${vs_id}'>";
+			echo buildVServiceName ($info);
+			echo '</a>';
+			if (!empty ($info['name']))
+				echo " (${info['name']})";
+			echo "</td><td class=tdleft><a href='${root}?page=rspool&id=${info['pool_id']}'>";
+			echo (empty ($info['pool_name']) ? 'ANONYMOUS' : $info['pool_name']);
+		       	echo '</a></td><td class=tdleft>' . $info['rscount'] . '</td>';
 			echo "</tr>\n";
 		}
 		echo "</table>\n";
