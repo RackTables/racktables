@@ -4048,8 +4048,8 @@ function editRSPools ()
 	echo "<input type=hidden name=op value=add>\n";
 	echo "<table class=widetable border=0 cellpadding=10 cellspacing=0 align=center>\n";
 	echo "<tr><th>name</th>";
-	echo "<td><input type=text name=name></td>";
-	echo "<td><input type=submit value=OK></td></tr>";
+	echo "<td><input type=text name=name tabindex=1></td>";
+	echo "<td><input type=submit tabindex=1 value=OK></td></tr>";
 	echo "<tr><th>VS configuration</th><td colspan=2><textarea name=vsconfig rows=10 cols=80></textarea></td></tr>";
 	echo "<tr><th>RS configuration</th><td colspan=2><textarea name=rsconfig rows=10 cols=80></textarea></td></tr>";
 	echo "</table></form>";
