@@ -12,6 +12,7 @@
 	new feature: more information for rack view
 	new feature: rack thumbnails caching
 	new feature: rackspace and IPv4 subnets utilization indicator
+	new feature: IPv4 and NATv4 tabs are now context-dependent
 0.14.8 2007-12-22
 	bugfix: adjusted hardcoded values in VLAN trigger
 	bugfix: adjusted HW, SW and port types in SNMP data collector
