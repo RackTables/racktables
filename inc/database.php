@@ -2522,4 +2522,37 @@ function getLBList ()
 	return $ret;
 }
 
+// For the given object return: it vsconfig/rsconfig; the list of RS pools
+// attached (each with vsconfig/rsconfig in turn), each with the list of
+// virtual services terminating the pool. Each pool also lists all real
+// servers with rsconfig.
+function buildLBConfig ($object_id)
+{
+	if ($object_id <= 0)
+	{
+		showError ('Invalid arg', __FUNCTION__);
+		return NULL;
+	}
+	global $dbxlink;
+	$ret = array();
+	$query = 'select lb.rspool_id, vs_id, vs.vsconfig as vs_vsconfig, vs.rsconfig as vs_rsconfig, ' .
+		'lb.vsconfig as lb_vsconfig, lb.rsconfig as lb_rsconfig, ' .
+		'pool.vsconfig as pool_vsconfig, pool.rsconfig as pool_rsconfig, ' .
+		'rs.rsconfig as rs_rsconfig from ' .
+		'IPLoadBalancer as lb inner join IPVirtualService as vs on lb.vs_id = vs.id ' .
+		'inner join IPRSPool as pool on pool.id = lb.rspool_id ' .
+		'inner join IPRealServer as rs on lb.rspool_id = rs.rspool_id ' .
+		"where lb.object_id = ${object_id}";
+	$result = $dbxlink->query ($query);
+	if ($result == NULL)
+	{
+		showError ('SQL query failed', __FUNCTION__);
+		return NULL;
+	}
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
+	{
+	}
+	$result->closeCursor();
+	return $ret;
+}
 ?>

@@ -63,12 +63,7 @@ function trigger_emptyRackspace ()
 function trigger_lvsconfig ()
 {
 	assertUIntArg ('object_id');
-	$object_id = $_REQUEST['object_id'];
-	$object = getObjectInfo ($object_id);
-	if ($object['objtype_id'] != 4) // server
-		return FALSE;
-	$natrules = getObjectForwards ($object_id);
-	return (count ($natrules['out']) > 0);
+	return count (getRSPoolsForObject ($_REQUEST['object_id']) > 0);
 }
 
 ?>
