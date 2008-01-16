@@ -159,6 +159,7 @@ CREATE TABLE `IPRanges` (
 DROP TABLE IF EXISTS `IPRealServer`;
 CREATE TABLE `IPRealServer` (
   `id` int(10) unsigned NOT NULL auto_increment,
+  `inservice` enum('yes','no') NOT NULL default 'no',
   `rsip` int(10) unsigned default NULL,
   `rsport` smallint(5) unsigned default NULL,
   `rspool_id` int(10) unsigned default NULL,

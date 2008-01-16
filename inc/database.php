@@ -2134,7 +2134,7 @@ function getRSPoolInfo ($id = 0)
 		foreach (array ('vsconfig', 'rsconfig') as $c)
 			$ret['lblist'][$row['object_id']][$row['vs_id']][$c] = $row[$c];
 	$result2->closeCursor();
-	$query3 = "select id, inet_ntoa(rsip) as rsip, rsport, rsconfig from " .
+	$query3 = "select id, inservice, inet_ntoa(rsip) as rsip, rsport, rsconfig from " .
 		"IPRealServer where rspool_id = ${id} order by IPRealServer.rsip, rsport";
 	$result3 = $dbxlink->query ($query3);
 	if ($result3 == NULL)
@@ -2143,7 +2143,7 @@ function getRSPoolInfo ($id = 0)
 		return NULL;
 	}
 	while ($row = $result3->fetch (PDO::FETCH_ASSOC))
-		foreach (array ('rsip', 'rsport', 'rsconfig') as $c)
+		foreach (array ('inservice', 'rsip', 'rsport', 'rsconfig') as $c)
 			$ret['rslist'][$row['id']][$c] = $row[$c];
 	$result3->closeCursor();
 	return $ret;
@@ -2490,7 +2490,7 @@ function commitUpdateRSPool ($pool_id = 0, $name = '', $vsconfig = '', $rsconfig
 function getRSList ()
 {
 	global $dbxlink;
-	$query = "select id, inet_ntoa(rsip) as rsip, rsport, rspool_id, rsconfig " .
+	$query = "select id, inservice, inet_ntoa(rsip) as rsip, rsport, rspool_id, rsconfig " .
 		"from IPRealServer order by rspool_id, IPRealServer.rsip, rsport";
 	$result = $dbxlink->query ($query);
 	if ($result == NULL)
@@ -2500,7 +2500,7 @@ function getRSList ()
 	}
 	$ret = array ();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-		foreach (array ('rsip', 'rsport', 'rspool_id', 'rsconfig') as $cname)
+		foreach (array ('inservice', 'rsip', 'rsport', 'rspool_id', 'rsconfig') as $cname)
 			$ret[$row['id']][$cname] = $row[$cname];
 	$result->closeCursor();
 	return $ret;
@@ -2546,7 +2546,8 @@ function buildLBConfig ($object_id)
 		'IPLoadBalancer as lb inner join IPRSPool as pool on lb.rspool_id = pool.id ' .
 		'inner join IPVirtualService as vs on lb.vs_id = vs.id ' .
 		'inner join IPRealServer as rs on lb.rspool_id = rs.rspool_id ' .
-		"where lb.object_id = ${object_id} order by vs.vip, vport, proto, pool.name, rs.rsip, rs.rsport";
+		"where lb.object_id = ${object_id} and rs.inservice = 'yes' " .
+		"order by vs.vip, vport, proto, pool.name, rs.rsip, rs.rsport";
 	$result = $dbxlink->query ($query);
 	if ($result == NULL)
 	{
@@ -2568,4 +2569,23 @@ function buildLBConfig ($object_id)
 	$result->closeCursor();
 	return $ret;
 }
+
+function commitSetInService ($rs_id = 0, $inservice = '')
+{
+	if ($rs_id <= 0 or empty ($inservice))
+	{
+		showError ('Invalid args', __FUNCTION__);
+		return NULL;
+	}
+	global $dbxlink;
+	$query = "update IPRealServer set inservice = '${inservice}' where id = ${rs_id} limit 1";
+	$result = $dbxlink->exec ($query);
+	if ($result === NULL)
+		return FALSE;
+	elseif ($result != 1)
+		return FALSE;
+	else
+		return TRUE;
+}
+
 ?>

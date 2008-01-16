@@ -1136,4 +1136,33 @@ function updateRSPool ()
 		return "${root}?page=${pageno}&tab=${tabno}&message=" . urlencode ("Real server pool was successfully updated");
 }
 
+function updateRSInService ()
+{
+	global $root, $pageno, $tabno;
+	assertUIntArg ('id');
+	assertUIntArg ('rscount');
+	$pool_id = $_REQUEST['id'];
+	$orig = getRSPoolInfo ($pool_id);
+	$nbad = $ngood = 0;
+	for ($i = 1; $i <= $_REQUEST['rscount']; $i++)
+	{
+		$rs_id = $_REQUEST["rsid_${i}"];
+		if (isset ($_REQUEST["inservice_${i}"]) and $_REQUEST["inservice_${i}"] == 'on')
+			$newval = 'yes';
+		else
+			$newval = 'no';
+		if ($newval != $orig['rslist'][$rs_id]['inservice'])
+		{
+			if (commitSetInService ($rs_id, $newval))
+				$ngood++;
+			else
+				$nbad++;
+		}
+	}
+	if (!$nbad)
+		return "${root}?page=${pageno}&tab=${tabno}&id=${pool_id}&message=" . urlencode ($ngood . " real server(s) were successfully (de)activated");
+	else
+		return "${root}?page=${pageno}&tab=${tabno}&id=${pool_id}&error=" . urlencode ("Encountered ${nbad} errors, (de)activated ${ngood} real servers");
+}
+
 ?>

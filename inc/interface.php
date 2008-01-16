@@ -2960,6 +2960,12 @@ function printImageHREF ($tag, $title = '', $do_input = FALSE, $tabindex = 0)
 	$image['helphint']['path'] = 'pix/helphint.png';
 	$image['helphint']['width'] = 24;
 	$image['helphint']['height'] = 24;
+	$image['inservice']['path'] = 'pix/go.png';
+	$image['inservice']['width'] = 16;
+	$image['inservice']['height'] = 16;
+	$image['notinservice']['path'] = 'pix/stop.png';
+	$image['notinservice']['width'] = 16;
+	$image['notinservice']['height'] = 16;
 	if (!isset ($image[$tag]))
 		$tag = 'error';
 	$img = $image[$tag];
@@ -3909,10 +3915,15 @@ function renderRSPool ($pool_id = 0)
 
 	startPortlet ('Real servers (' . count ($poolInfo['rslist']) . ')');
 	echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
-	echo "<tr><th>address</th><th>port</th><th>RS configuration</th></tr>";
+	echo "<tr><th>in service</th><th>address</th><th>port</th><th>RS configuration</th></tr>";
 	foreach ($poolInfo['rslist'] as $rs)
 	{
-		echo "<tr valign=top><td class=tdleft><a href='${root}?page=ipaddress&ip=${rs['rsip']}'>${rs['rsip']}</a></td>";
+		echo "<tr valign=top><td align=center>";
+		if ($rs['inservice'] == 'yes')
+			printImageHREF ('inservice', 'in service');
+		else
+			printImageHREF ('notinservice', 'NOT in service');
+		echo "</td><td class=tdleft><a href='${root}?page=ipaddress&ip=${rs['rsip']}'>${rs['rsip']}</a></td>";
 		echo "<td class=tdleft>${rs['rsport']}</td><td class=tdleft><pre>${rs['rsconfig']}</pre></td></tr>\n";
 	}
 	echo "</table>\n";
@@ -4083,13 +4094,17 @@ function renderRealServerList ()
 	$rslist = getRSList ();
 	$pool_list = getRSPoolList ();
 	echo "<table class=widetable border=0 cellpadding=10 cellspacing=0 align=center>\n";
-	echo "<tr><th>RS pool</th><th>real IP address</th><th>real port</th><th>RS configuration</th></tr>";
+	echo "<tr><th>RS pool</th><th>in service</th><th>real IP address</th><th>real port</th><th>RS configuration</th></tr>";
 	foreach ($rslist as $rsinfo)
 	{
 		echo "<tr valign=top><td><a href='${root}?page=rspool&id=${rsinfo['rspool_id']}'>";
 		echo empty ($pool_list[$rsinfo['rspool_id']]['name']) ? 'ANONYMOUS' : $pool_list[$rsinfo['rspool_id']]['name'];
-		echo '</a></td>';
-		echo "<td><a href='${root}?page=ipaddress&ip=${rsinfo['rsip']}'>${rsinfo['rsip']}</a></td>";
+		echo '</a></td><td align=center>';
+		if ($rsinfo['inservice'] == 'yes')
+			printImageHREF ('inservice', 'in service');
+		else
+			printImageHREF ('notinservice', 'NOT in service');
+		echo "</td><td><a href='${root}?page=ipaddress&ip=${rsinfo['rsip']}'>${rsinfo['rsip']}</a></td>";
 		echo "<td>${rsinfo['rsport']}</td>";
 		echo "<td><pre>${rsinfo['rsconfig']}</pre></td>";
 		echo "</tr>\n";
@@ -4112,6 +4127,38 @@ function renderLBList ()
 		echo "<td>${poolcount}</td></tr>";
 	}
 	echo "</table>";
+}
+
+function renderRSPoolRSInServiceForm ($pool_id = 0)
+{
+	global $root, $pageno, $tabno;
+	if ($pool_id <= 0)
+	{
+		showError ('Invalid pool_id', __FUNCTION__);
+		return;
+	}
+	showMessageOrError();
+	$poolInfo = getRSPoolInfo ($pool_id);
+	$rscount = count ($poolInfo['rslist']);
+	echo "<form method=post action='${root}process.php'>\n";
+	echo "<input type=hidden name=page value=${pageno}>\n";
+	echo "<input type=hidden name=tab value=${tabno}>\n";
+	echo "<input type=hidden name=op value=upd>\n";
+	echo "<input type=hidden name=id value=${pool_id}>\n";
+	echo "<input type=hidden name=rscount value=${rscount}>\n";
+	echo "<table class=widetable border=0 cellpadding=10 cellspacing=0 align=center>\n";
+	echo "<tr><th>RS address</th><th>RS port</th><th>RS configuration</th><th>in service</th></tr>\n";
+	$recno = 1;
+	foreach ($poolInfo['rslist'] as $rs_id => $rsinfo)
+	{
+		echo "<input type=hidden name=rsid_${recno} value=${rs_id}>\n";
+		echo "<tr valign=top><td>${rsinfo['rsip']}</td><td>${rsinfo['rsport']}</td><td><pre>${rsinfo['rsconfig']}</pre></td>";
+		echo "<td><input type=checkbox tabindex=${recno} name=inservice_${recno}" . ($rsinfo['inservice'] == 'yes' ? ' checked' : '') . "></td>";
+		echo "</tr>";
+		$recno++;
+	}
+	echo "<tr><td colspan=4 align=center><input type=submit value=OK tabindex=${recno}></td></tr>";
+	echo "</table>\n</form>";
 }
 
 ?>
