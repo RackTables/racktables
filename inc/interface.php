@@ -3818,7 +3818,7 @@ function renderRSPoolLBForm ($pool_id = 0)
 	echo "<input type=hidden name=op value=addLB>";
 	echo "<input type=hidden name=pool_id value='${pool_id}'>";
 	echo "<tr valign=top><th>LB / VS</th><td class=tdleft><select name='object_id' tabindex=1>";
-	foreach (array(4, 7, 8) as $type)
+	foreach (explode (',', getConfigVar ('NATV4_PERFORMERS')) as $type)
 	{
 		$objects = getObjectList ($type);
 		foreach ($objects as $object)
