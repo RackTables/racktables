@@ -191,6 +191,7 @@ $tabhandler['rspool']['rsinservice'] = 'renderRSPoolRSInServiceForm';
 $ophandler['rspool']['editrslist']['addRS'] = 'addRealServer';
 $ophandler['rspool']['editrslist']['delRS'] = 'deleteRealServer';
 $ophandler['rspool']['editrslist']['updRS'] = 'updateRealServer';
+$ophandler['rspool']['editrslist']['addMany'] = 'addRealServers';
 $ophandler['rspool']['editlblist']['addLB'] = 'addLoadBalancer';
 $ophandler['rspool']['editlblist']['delLB'] = 'deleteLoadBalancer';
 $ophandler['rspool']['editlblist']['updLB'] = 'updateLoadBalancer';

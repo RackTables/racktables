@@ -959,6 +959,7 @@ function resetUIConfig()
 	return "${root}?page=${pageno}&tab=default&message=" . urlencode ("Reset complete");
 }
 
+// Add single record.
 function addRealServer ()
 {
 	global $root, $pageno, $tabno;
@@ -972,6 +973,53 @@ function addRealServer ()
 		return "${root}?page=${pageno}&tab=${tabno}&id=${pool_id}&error=" . urlencode ('addRStoRSPool() failed');
 	else
 		return "${root}?page=${pageno}&tab=${tabno}&id=${pool_id}&message=" . urlencode ("Real server was successfully added");
+}
+
+// Parse textarea submitted and try adding a real server for each line.
+function addRealServers ()
+{
+	global $root, $pageno, $tabno;
+
+	assertUIntArg ('id');
+	assertStringArg ('format');
+	assertStringArg ('rawtext');
+	$pool_id = $_REQUEST['id'];
+	$rawtext = str_replace ('\r', '', $_REQUEST['rawtext']);
+	$ngood = $nbad = 0;
+	$rsconfig = '';
+	// Keep in mind, that the text will have HTML entities (namely '>') escaped.
+	foreach (explode ('\n', $rawtext) as $line)
+	{
+		if (empty ($line))
+			continue;
+		$match = array ();
+		switch ($_REQUEST['format'])
+		{
+			case 'ipvs_2': // address and port only
+				if (!preg_match ('/^  -&gt; ([0-9\.]+):([0-9]+) /', $line, $match))
+					continue;
+				if (addRStoRSPool ($pool_id, $match[1], $match[2], ''))
+					$ngood++;
+				else
+					$nbad++;
+				break;
+			case 'ipvs_3': // address, port and weight
+				if (!preg_match ('/^  -&gt; ([0-9\.]+):([0-9]+) +[a-zA-Z]+ +([0-9]+) /', $line, $match))
+					continue;
+				if (addRStoRSPool ($pool_id, $match[1], $match[2], 'weight ' . $match[3]))
+					$ngood++;
+				else
+					$nbad++;
+				break;
+			default:
+				return "${root}?page=${pageno}&tab=${tabno}&id=${pool_id}&error=" . urlencode (__FUNCTION__ . ': invalid format requested');
+				break;
+		}
+	}
+	if ($nbad == 0 and $ngood > 0)
+		return "${root}?page=${pageno}&tab=${tabno}&id=${pool_id}&message=" . urlencode ("Successfully added ${ngood} real servers");
+	else
+		return "${root}?page=${pageno}&tab=${tabno}&id=${pool_id}&error=" . urlencode ("Added ${ngood} real servers and encountered ${nbad} errors");
 }
 
 function addVService ()
@@ -1037,13 +1085,13 @@ function updateRealServer ()
 	global $root, $pageno, $tabno;
 
 	assertUIntArg ('id');
-	assertUIntArg ('pool_id');
+	assertUIntArg ('rs_id');
 	assertIPv4Arg ('rsip');
 	assertUIntArg ('rsport');
 	assertStringArg ('rsconfig', TRUE);
 	// only necessary for generating next URL
-	$pool_id = $_REQUEST['pool_id'];
-	if (!commitUpdateRS ($_REQUEST['id'], $_REQUEST['rsip'], $_REQUEST['rsport'], $_REQUEST['rsconfig']))
+	$pool_id = $_REQUEST['id'];
+	if (!commitUpdateRS ($_REQUEST['rs_id'], $_REQUEST['rsip'], $_REQUEST['rsport'], $_REQUEST['rsconfig']))
 		return "${root}?page=${pageno}&tab=${tabno}&id=${pool_id}&error=" . urlencode ('commitUpdateRS() failed');
 	else
 		return "${root}?page=${pageno}&tab=${tabno}&id=${pool_id}&message=" . urlencode ("Real server was successfully updated");

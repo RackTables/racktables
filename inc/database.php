@@ -2416,7 +2416,7 @@ function getRSPoolsForObject ($object_id = 0)
 	}
 	global $dbxlink;
 	$query = 'select vs_id, inet_ntoa(vip) as vip, vport, proto, vs.name, pool.id as pool_id, ' .
-		'pool.name as pool_name, count(rsip) as rscount from ' .
+		'pool.name as pool_name, count(rsip) as rscount, lb.vsconfig, lb.rsconfig from ' .
 		'IPLoadBalancer as lb inner join IPRSPool as pool on lb.rspool_id = pool.id ' .
 		'inner join IPVirtualService as vs on lb.vs_id = vs.id ' .
 		'left join IPRealServer as rs on lb.rspool_id = rs.rspool_id ' .
@@ -2430,7 +2430,7 @@ function getRSPoolsForObject ($object_id = 0)
 	}
 	$ret = array ();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-		foreach (array ('vip', 'vport', 'proto', 'name', 'pool_id', 'pool_name', 'rscount') as $cname)
+		foreach (array ('vip', 'vport', 'proto', 'name', 'pool_id', 'pool_name', 'rscount', 'vsconfig', 'rsconfig') as $cname)
 			$ret[$row['vs_id']][$cname] = $row[$cname];
 	$result->closeCursor();
 	return $ret;
