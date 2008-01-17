@@ -19,6 +19,10 @@ Form.Element.Resize = function( oProps )
     this.props.maxHeight = 0;
     this.props.stopResize = 1;
     this.props.resizeType = 'auto';
+    this.props.setTo = 'none';
+    this.props.resetTo = 'orig';
+    this.props.setEvent = '';
+    this.props.resetEvent = 'dblclick';
 
     // directions/corners resize activation flags
     this.props.resizeFlags = {
@@ -48,7 +52,7 @@ Form.Element.Resize = function( oProps )
 }
 
 // version
-Form.Element.Resize.VERSION = '0.05';
+Form.Element.Resize.VERSION = '0.06';
 
 // class methods
 Form.Element.Resize.prototype = {
@@ -128,12 +132,19 @@ _init: function()
     this.dom.elementOriginalHeight = oElement.offsetHeight;
 
     // event handling
-    // double click inside the element restores its original dimensions
-    this._addEvent(
-        oElementCloned,
-        'dblclick',
-        function() { oFER._reset(); }
-    );
+    if (this.props.setEvent != '')
+      this._addEvent(
+          oElementCloned,
+          this.props.setEvent,
+          function() { oFER._set(); }
+      );
+
+    if (this.props.resetEvent != '')
+      this._addEvent(
+          oElementCloned,
+          this.props.resetEvent,
+          function() { oFER._reset(); }
+      );
 
     // mouse move while left button is pressed resizes the element
     // if shift key is pressed the resize is proportional (x = y)
@@ -296,23 +307,60 @@ _resize: function( e )
     }
 },
 
-// _reset: called when a double click event is fired, restores the original dimensions of the element
+_set: function()
+{
+  this._setreset (this.props.setTo);
+},
+
 _reset: function()
 {
-    if( ! this.dom.elementOriginalWidth && ! this.dom.elementOriginalHeight ) { return true; }
+  this._setreset (this.props.resetTo);
+},
 
-    with( this.dom.containerEl.style )
+_setreset: function(how)
+{
+  switch (how)
+  {
+  case 'min':
+    if(this.props.minWidth)
     {
-        width = this.dom.elementOriginalWidth + 'px';
-        height = this.dom.elementOriginalHeight + 'px';
+        this.dom.containerEl.style.width = this.props.minWidth + 'px';
+        this.dom.elementEl.style.width = this.props.minWidth + 'px';
     }
-
-    with( this.dom.elementEl.style )
+    if(this.props.minHeight)
     {
-
-        width = this.dom.elementOriginalWidth + 'px';
-        height = this.dom.elementOriginalHeight + 'px';
+        this.dom.containerEl.style.height = this.props.minHeight + 'px';
+        this.dom.elementEl.style.height = this.props.minHeight + 'px';
     }
+    break;
+  case 'max':
+    if(this.props.maxWidth)
+    {
+        this.dom.containerEl.style.width = this.props.maxWidth + 'px';
+        this.dom.elementEl.style.width = this.props.maxWidth + 'px';
+    }
+    if(this.props.maxHeight)
+    {
+        this.dom.containerEl.style.height = this.props.maxHeight + 'px';
+        this.dom.elementEl.style.height = this.props.maxHeight + 'px';
+    }
+    break;
+  case 'orig':
+    if(this.dom.elementOriginalWidth)
+    {
+        this.dom.containerEl.style.width = this.dom.elementOriginalWidth + 'px';
+        this.dom.elementEl.style.width = this.dom.elementOriginalWidth + 'px';
+    }
+    if(this.dom.elementOriginalHeight)
+    {
+        this.dom.containerEl.style.height = this.dom.elementOriginalHeight + 'px';
+        this.dom.elementEl.style.height = this.dom.elementOriginalHeight + 'px';
+    }
+    break;
+  default:
+    return true;
+    break;
+  }
 },
 
 // _addEvent: cross-browser event handler
@@ -355,9 +403,9 @@ Form.Element.Resize - Unobtrusive javascript class for make a standard form fiel
 =head1 DESCRIPTION
 
 This nice class implement some methods for add a mouse-driven resize feature on form fields such as text inputs, textareas and select controls.
-Clicking and dragging the borders or the corners of the form element will resize it while double clicking inside the element will restore its
-original dimensions (this does not work with select elements in Internet Explorer and Firefox).
-It is also possible to specify the minimum and maximum width and height allowed when the element is resized.
+Clicking and dragging the borders or the corners of the form element will resize it while double clicking inside the element will either restore its
+original dimensions (this does not work with select elements in Internet Explorer and Firefox) or change its size to minimum/maximum depending
+on the configuration. It is possible to specify the minimum and maximum width and height allowed when the element is resized.
 
 Tested under Firefox 2, Internet Explorer 6/7, Opera 9.
 
@@ -435,6 +483,26 @@ By default this property is not set, so there is not limit to the resize.
 
  new Form.Element.Resize({ elementId: 'message', maxHeight: 350 });
 
+=item C<setEvent>
+
+Standard event name, which triggers input element to be "set" accordingly
+to the "setTo" property.
+
+=item C<resetEvent>
+
+Standard event name, which triggers input element to be "reset" accordingly
+to the "resetTo" property.
+
+=item C<setTo>
+
+Controls the way input size will change. Possible values are: 'orig' (restore
+to the initial size), 'min' (set to the minimum width and height, if either
+is configured) and 'max' (same for maximum).
+
+=item C<resetTo>
+
+Works exactly as the "setTo" property, but for the "reset" event.
+
 =item C<containerId>
 
 ID of the generated container element, useful for add some CSS rules on it.
@@ -455,7 +523,6 @@ Class of the generated container element, useful for add some CSS rules on it.
   <textarea id="message" name="message"></textarea>
   <script type="text/javascript">new Form.Element.Resize({ elementId: 'message', containerClass: 'resizable' });</script>
  </form>
-
 
  // or in a more unobtrusive way put the new in an included javascript file.
  // be sure to call the new when the page is loaded!
