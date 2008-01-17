@@ -3773,7 +3773,7 @@ function renderProgressBar ($percentage = 0)
 
 function renderRSPoolServerForm ($pool_id = 0)
 {
-	global $root, $pageno, $tabno;
+	global $root, $pageno, $tabno, $nextorder;
 	if ($pool_id <= 0)
 	{
 		showError ('Invalid pool_id', __FUNCTION__);
@@ -3784,8 +3784,9 @@ function renderRSPoolServerForm ($pool_id = 0)
 
 	$rsc = count ($poolInfo['rslist']);
 	startPortlet ("Manage existing (${rsc})");
-	echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
+	echo "<table cellspacing=0 cellpadding=5 align=center class=cooltable>\n";
 	echo "<tr><th>&nbsp;</th><th>Address</th><th>Port</th><th>configuration</th><th>&nbsp;</th></tr>\n";
+	$order = 'odd';
 	foreach ($poolInfo['rslist'] as $rsid => $rs)
 	{
 		echo "<form action='${root}process.php'>";
@@ -3794,14 +3795,16 @@ function renderRSPoolServerForm ($pool_id = 0)
 		echo "<input type=hidden name=op value=updRS>";
 		echo "<input type=hidden name=rs_id value='${rsid}'>";
 		echo "<input type=hidden name=id value='${pool_id}'>";
-		echo "<tr valign=top><td><a href='${root}process.php?page=${pageno}&tab=${tabno}";
+		echo "<tr valign=top class=row_${order}><td><a href='${root}process.php?page=${pageno}&tab=${tabno}";
 		echo "&op=delRS&pool_id=${pool_id}&id=${rsid}'>";
 		printImageHREF ('delete', 'Delete this real server');
 		echo "</td><td><input type=text name=rsip value='${rs['rsip']}'></td>";
 		echo "<td><input type=text name=rsport size=5 value='${rs['rsport']}'></td>";
-		echo "<td><textarea name=rsconfig>${rs['rsconfig']}</textarea></td>";
+		echo "<td><textarea name=rsconfig id=rsconfig_${rsid}>${rs['rsconfig']}</textarea></td>";
+		printResizeJS ("rsconfig_${rsid}");
 		echo "<td><input type=submit value='OK'></td>";
 		echo "</tr></form>\n";
+		$order = $nextorder[$order];
 	}
 	echo "</table>\n";
 	finishPortlet();
@@ -3842,7 +3845,7 @@ function renderRSPoolServerForm ($pool_id = 0)
 
 function renderRSPoolLBForm ($pool_id = 0)
 {
-	global $root, $pageno, $tabno;
+	global $root, $pageno, $tabno, $nextorder;
 	showMessageOrError();
 
 	$poolInfo = getRSPoolInfo ($pool_id);
@@ -3850,8 +3853,9 @@ function renderRSPoolLBForm ($pool_id = 0)
 	foreach (getVSList() as $vsid => $vsinfo)
 		$vs_list[$vsid] = buildVServiceName ($vsinfo) . (empty ($vsinfo['name']) ? '' : " (${vsinfo['name']})");
 	startPortlet ('Manage existing (' . count ($poolInfo['lblist']) . ')');
-	echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
+	echo "<table cellspacing=0 cellpadding=5 align=center class=cooltable>\n";
 	echo "<tr><th>&nbsp;</th><th>LB</th><th>VS</th><th>VS config</th><th>RS config</th><th>&nbsp;</th></tr>\n";
+	$order = 'odd';
 	foreach ($poolInfo['lblist'] as $object_id => $vslist)
 		foreach ($vslist as $vs_id => $configs)
 		{
@@ -3863,7 +3867,7 @@ function renderRSPoolLBForm ($pool_id = 0)
 			echo "<input type=hidden name=pool_id value='${pool_id}'>";
 			echo "<input type=hidden name=vs_id value='${vs_id}'>";
 			echo "<input type=hidden name=object_id value='${object_id}'>";
-			echo "<tr valign=top><td><a href='${root}process.php?page=${pageno}&tab=${tabno}&op=delLB&pool_id=${pool_id}&object_id=${object_id}&vs_id=${vs_id}'>";
+			echo "<tr valign=top class=row_${order}><td><a href='${root}process.php?page=${pageno}&tab=${tabno}&op=delLB&pool_id=${pool_id}&object_id=${object_id}&vs_id=${vs_id}'>";
 			printImageHREF ('delete', 'Unconfigure');
 			echo "</a></td>";
 			echo "<td class=tdleft><a href='${root}?page=object&object_id=${object_id}'>${oi['dname']}</a></td>";
@@ -3872,9 +3876,12 @@ function renderRSPoolLBForm ($pool_id = 0)
 			echo buildVServiceName ($vsinfo) . '</a>';
 			if (!empty ($vsinfo['name']))
 				echo " (${vsinfo['name']})";
-			echo "<td><textarea name=vsconfig>${configs['vsconfig']}</textarea></td>";
-			echo "<td><textarea name=rsconfig>${configs['rsconfig']}</textarea></td>";
+			echo "<td><textarea name=vsconfig id=vsconfig_${object_id}_${vs_id}>${configs['vsconfig']}</textarea></td>";
+			echo "<td><textarea name=rsconfig id=rsconfig_${object_id}_${vs_id}>${configs['rsconfig']}</textarea></td>";
+			printResizeJS ("vsconfig_${object_id}_${vs_id}");
+			printResizeJS ("rsconfig_${object_id}_${vs_id}");
 			echo "<td><input type=submit value=OK></td></tr></form>\n";
+			$order = $nextorder[$order];
 		}
 	echo "</table>\n";
 	finishPortlet();
@@ -4022,32 +4029,8 @@ function renderVSListEditForm ()
 		echo "<td class=tdleft><input type=text name=name value='${vsinfo['name']}'></td>";
 		echo "<td><textarea name=vsconfig id=vsconfig_${vsid}>${vsinfo['vsconfig']}</textarea></td>";
 		echo "<td><textarea name=rsconfig id=rsconfig_${vsid}>${vsinfo['rsconfig']}</textarea></td>";
-?>
-		<script type="text/javascript">
-		new Form.Element.Resize
-		({
-			elementId: '<?php echo 'vsconfig_' . $vsid; ?>',
-			maxWidth: 400,
-			maxHeight: 150,
-			setTo: 'max',
-			setEvent: 'focus',
-			resetTo: 'orig',
-			resetEvent: 'blur',
-			resizeType: {}
-		});
-		new Form.Element.Resize
-		({
-			elementId: '<?php echo 'rsconfig_' . $vsid; ?>',
-			maxWidth: 400,
-			maxHeight: 150,
-			setTo: 'max',
-			setEvent: 'focus',
-			resetTo: 'orig',
-			resetEvent: 'blur',
-			resizeType: {}
-		});
-		</script>
-<?php
+		printResizeJS ("vsconfig_${vsid}");
+		printResizeJS ("rsconfig_${vsid}");
 		echo "<td><input type=submit value=OK></td>";
 		echo "</tr></form>\n";
 		$order = $nextorder[$order];
@@ -4105,13 +4088,14 @@ function renderRSPoolList ()
 
 function editRSPools ()
 {
-	global $root, $pageno, $tabno;
+	global $root, $pageno, $tabno, $nextorder;
 	showMessageOrError();
 	$pool_list = getRSPoolList();
 
 	startPortlet ('Manage existing');
-	echo "<table class=widetable border=0 cellpadding=10 cellspacing=0 align=center>\n";
+	echo "<table class=cooltable border=0 cellpadding=10 cellspacing=0 align=center>\n";
 	echo "<tr><th>&nbsp;</th><th>name</th><th>VS configuration</th><th>RS configuration</th><th>&nbsp;</th></tr>";
+	$order='odd';
 	foreach ($pool_list as $pool_id => $pool_info)
 	{
 		echo "<form method=post action='${root}process.php'>\n";
@@ -4119,7 +4103,7 @@ function editRSPools ()
 		echo "<input type=hidden name=tab value=${tabno}>\n";
 		echo "<input type=hidden name=op value=upd>\n";
 		echo "<input type=hidden name=id value=${pool_id}>\n";
-		echo "<tr valign=top><td>";
+		echo "<tr valign=top class=row_${order}><td>";
 		if ($pool_info['refcnt'])
 			echo '&nbsp;';
 		else
@@ -4130,10 +4114,13 @@ function editRSPools ()
 		}
 		echo "</td>";
 		echo "<td class=tdleft><input type=text name=name value='${pool_info['name']}'></td>";
-		echo "<td><textarea name=vsconfig>${pool_info['vsconfig']}</textarea></td>";
-		echo "<td><textarea name=rsconfig>${pool_info['rsconfig']}</textarea></td>";
+		echo "<td><textarea id=vsconfig_${pool_id} name=vsconfig>${pool_info['vsconfig']}</textarea></td>";
+		echo "<td><textarea id=rsconfig_${pool_id} name=rsconfig>${pool_info['rsconfig']}</textarea></td>";
+		printResizeJS ("vsconfig_${pool_id}");
+		printResizeJS ("rsconfig_${pool_id}");
 		echo "<td><input type=submit value=OK></td>";
 		echo "</tr></form>\n";
+		$order = $nextorder[$order];
 	}
 	echo "</table>";
 	finishPortlet();
@@ -4224,6 +4211,25 @@ function renderRSPoolRSInServiceForm ($pool_id = 0)
 	}
 	echo "<tr><td colspan=4 align=center><input type=submit value=OK tabindex=${recno}></td></tr>";
 	echo "</table>\n</form>";
+}
+
+function printResizeJS ($elementid)
+{
+?>
+		<script type="text/javascript">
+		new Form.Element.Resize
+		({
+			elementId: '<?php echo $elementid; ?>',
+			maxWidth: 400,
+			maxHeight: 150,
+			setTo: 'max',
+			setEvent: 'focus',
+			resetTo: 'orig',
+			resetEvent: 'blur',
+			resizeType: {}
+		});
+		</script>
+<?php
 }
 
 ?>
