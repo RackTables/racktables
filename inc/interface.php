@@ -3989,14 +3989,15 @@ function renderVSList ()
 
 function renderVSListEditForm ()
 {
-	global $root, $pageno, $tabno;
+	global $root, $pageno, $tabno, $nextorder;
 	showMessageOrError();
 
 	startPortlet ('Manage existing');
-	echo "<table class=widetable border=0 cellpadding=10 cellspacing=0 align=center>\n";
+	echo "<table class=cooltable border=0 cellpadding=10 cellspacing=0 align=center>\n";
 	echo "<tr><th>&nbsp;</th><th>VIP</th><th>port</th><th>proto</th><th>name</th>";
 	echo "<th>VS configuration</th><th>RS configuration</th><th></th></tr>";
 	$protocols = array ('TCP' => 'TCP', 'UDP' => 'UDP');
+	$order = 'odd';
 	foreach (getVSList() as $vsid => $vsinfo)
 	{
 		echo "<form method=post action='${root}process.php'>\n";
@@ -4004,7 +4005,7 @@ function renderVSListEditForm ()
 		echo "<input type=hidden name=tab value=${tabno}>\n";
 		echo "<input type=hidden name=op value=upd>\n";
 		echo "<input type=hidden name=id value=${vsid}>\n";
-		echo "<tr valign=top><td>";
+		echo "<tr valign=top class=row_${order}><td>";
 		if ($vsinfo['poolcount'])
 			echo '&nbsp;';
 		else
@@ -4019,10 +4020,37 @@ function renderVSListEditForm ()
 		printSelect ($protocols, 'proto', $vsinfo['proto']);
 		echo "</td>";
 		echo "<td class=tdleft><input type=text name=name value='${vsinfo['name']}'></td>";
-		echo "<td><textarea name=vsconfig>${vsinfo['vsconfig']}</textarea></td>";
-		echo "<td><textarea name=rsconfig>${vsinfo['rsconfig']}</textarea></td>";
+		echo "<td><textarea name=vsconfig id=vsconfig_${vsid}>${vsinfo['vsconfig']}</textarea></td>";
+		echo "<td><textarea name=rsconfig id=rsconfig_${vsid}>${vsinfo['rsconfig']}</textarea></td>";
+?>
+		<script type="text/javascript">
+		new Form.Element.Resize
+		({
+			elementId: '<?php echo 'vsconfig_' . $vsid; ?>',
+			maxWidth: 400,
+			maxHeight: 150,
+			setTo: 'max',
+			setEvent: 'focus',
+			resetTo: 'orig',
+			resetEvent: 'blur',
+			resizeType: {}
+		});
+		new Form.Element.Resize
+		({
+			elementId: '<?php echo 'rsconfig_' . $vsid; ?>',
+			maxWidth: 400,
+			maxHeight: 150,
+			setTo: 'max',
+			setEvent: 'focus',
+			resetTo: 'orig',
+			resetEvent: 'blur',
+			resizeType: {}
+		});
+		</script>
+<?php
 		echo "<td><input type=submit value=OK></td>";
 		echo "</tr></form>\n";
+		$order = $nextorder[$order];
 	}
 	echo "</table>";
 	finishPortlet();
