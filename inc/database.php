@@ -2001,16 +2001,10 @@ function getDatabaseVersion ()
 function getSLBSummary ()
 {
 	global $dbxlink;
-	$query = 'select vs.id as vsid, inet_ntoa(vip) as vip, vport, proto, ' .
-		'vs.name, rsp.id as pool_id, rsp.name as pool_name, object_id, count(rs.id) as rscount from ' .
-		'IPVirtualService as vs inner join IPLoadBalancer as lb on vs.id = lb.vs_id ' .
-		'inner join IPRSPool as rsp on lb.rspool_id = rsp.id ' .
-		'inner join IPRealServer as rs on lb.rspool_id = rs.rspool_id ' .
-		'group by rsp.id, object_id order by vip, object_id';
 	$query = 'select vs.id as vsid, inet_ntoa(vip) as vip, vport, proto, vs.name, object_id, ' .
 		'lb.rspool_id, pool.name as pool_name, count(rs.id) as rscount ' .
 		'from IPVirtualService as vs inner join IPLoadBalancer as lb on vs.id = lb.vs_id ' .
-		'inner join IPRSPool as pool on rspool_id = pool.id ' .
+		'inner join IPRSPool as pool on lb.rspool_id = pool.id ' .
 		'left join IPRealServer as rs on rs.rspool_id = lb.rspool_id ' .
 		'group by vs.id, object_id order by vs.vip, object_id';
 	$result = $dbxlink->query ($query);
