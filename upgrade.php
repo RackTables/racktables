@@ -610,18 +610,19 @@ CREATE TABLE `IPVirtualService` (
   `name` char(255) default NULL,
   `vsconfig` text,
   `rsconfig` text,
-  PRIMARY KEY  (`id`),
+  PRIMARY KEY  (`id`)
 ) ENGINE=MyISAM";
-			$query[] = "INSERT INTO `Config` VALUES ('DEFAULT_SLB_VS_PORT','','uint','yes','no','Default port of SLB virtual service');";
+			$query[] = "INSERT INTO `Config` VALUES ('DEFAULT_SLB_VS_PORT','','uint','yes','no','Default port of SLB virtual service')";
 			$query[] = "INSERT INTO `Config` VALUES ('DEFAULT_SLB_RS_PORT','','uint','yes','no','Default port of SLB real server')";
 			$query[] = "INSERT INTO `Config` VALUES ('IPV4_PERFORMERS','1,4,7,8,12,14','string','yes','no','IPv4-capable object types')";
 			$query[] = "INSERT INTO `Config` VALUES ('NATV4_PERFORMERS','4,7,8','string','yes','no','NATv4-capable object types')";
+			$query[] = "update Config set varvalue = '0.14.9' where varname = 'DB_VERSION'";
 			break; // --------------------------------------------
 #		case '0.14.10':
 #			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('AUTO_PORTS_CONFIG','FIXME','string','yes','no','Autoports configuration')";
 #			$query[] = "alter table Rack add column left_is_front enum ('yes', 'no') not null default 'yes' after height";
 #			$query[] = "alter table Rack add column bottom_is_unit1 enum ('yes', 'no') not null default 'yes' after left_is_front";
-#			$query[] = "update Config set varvalue = '0.14.9' where varname = 'DB_VERSION'";
+#			$query[] = "update Config set varvalue = '0.14.10' where varname = 'DB_VERSION'";
 #			break; // --------------------------------------------
 		default:
 			showError ("executeUpgradeBatch () failed, because batch '${batchid}' isn't defined");
