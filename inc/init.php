@@ -29,8 +29,8 @@ else
 	showError
 	(
 		"Database connection parameters are read from inc/secret.php file, " .
-		"which cannot be found.\nCopy provided inc/secret-sample.php to " .
-		"inc/secret.php and modify to your setup.\n\nThen reload the page."
+		"which cannot be found.\nYou probably need to complete the installation " .
+		"procedure by following <a href='${root}install.php'>this link</a>."
 	);
 	die;
 }
