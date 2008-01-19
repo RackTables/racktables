@@ -32,6 +32,7 @@ foreach (array ('F', 'A', 'U', 'T', 'Th', 'Tw', 'Thw') as $statecode)
 	<script language='javascript' type='text/javascript' src='js/collapsible_textareas.js'></script>
 	<script type="text/javascript">
 	function init() {
+		setupTextareas();
 		document.add_new_range.range.setAttribute('match', "^\\d\\d?\\d?\\.\\d\\d?\\d?\\.\\d\\d?\\d?\\.\\d\\d?\\d?\\/\\d\\d?$");
 
 		Validate.init();
