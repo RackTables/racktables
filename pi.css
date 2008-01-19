@@ -536,6 +536,6 @@ div.commentblock {
 
 /* Collapsible Textareas classes */
 .collapse_tareas input, .collapse_tareas textarea { font: 10pt arial, sans-serif; border: 1px solid #888; }
-.collapse_tareas textarea { height: 1.45em; }
-.collapse_tareas textarea.compact { height: 1.45em !important; }
-.collapse_tareas textarea.expanded { height: 5em !important; }
+.collapse_tareas textarea { height: 4em; }
+.collapse_tareas textarea.compact { height: 4em !important; width: 20em !important; }
+.collapse_tareas textarea.expanded { height: 20em !important; width: 40em !important; }
