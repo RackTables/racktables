@@ -3789,7 +3789,7 @@ function renderRSPoolServerForm ($pool_id = 0)
 	$order = 'odd';
 	foreach ($poolInfo['rslist'] as $rsid => $rs)
 	{
-		echo "<form action='${root}process.php'>";
+		echo "<form class=collapse_tareas action='${root}process.php'>";
 		echo "<input type=hidden name=page value='${pageno}'>\n";
 		echo "<input type=hidden name=tab value='${tabno}'>\n";
 		echo "<input type=hidden name=op value=updRS>";
@@ -3860,7 +3860,7 @@ function renderRSPoolLBForm ($pool_id = 0)
 		foreach ($vslist as $vs_id => $configs)
 		{
 			$oi = getObjectInfo ($object_id);
-			echo "<form action='${root}process.php'>";
+			echo "<form class=collapse_tareas action='${root}process.php'>";
 			echo "<input type=hidden name=page value='${pageno}'>\n";
 			echo "<input type=hidden name=tab value='${tabno}'>\n";
 			echo "<input type=hidden name=op value=updLB>";
@@ -4007,7 +4007,7 @@ function renderVSListEditForm ()
 	$order = 'odd';
 	foreach (getVSList() as $vsid => $vsinfo)
 	{
-		echo "<form method=post action='${root}process.php'>\n";
+		echo "<form class=collapse_tareas method=post action='${root}process.php'>\n";
 		echo "<input type=hidden name=page value=${pageno}>\n";
 		echo "<input type=hidden name=tab value=${tabno}>\n";
 		echo "<input type=hidden name=op value=upd>\n";
@@ -4098,7 +4098,7 @@ function editRSPools ()
 	$order='odd';
 	foreach ($pool_list as $pool_id => $pool_info)
 	{
-		echo "<form method=post action='${root}process.php'>\n";
+		echo "<form class=collapse_tareas method=post action='${root}process.php'>\n";
 		echo "<input type=hidden name=page value=${pageno}>\n";
 		echo "<input type=hidden name=tab value=${tabno}>\n";
 		echo "<input type=hidden name=op value=upd>\n";
@@ -4213,8 +4213,10 @@ function renderRSPoolRSInServiceForm ($pool_id = 0)
 	echo "</table>\n</form>";
 }
 
+// Disabled at the moment.
 function printResizeJS ($elementid)
 {
+	return;
 ?>
 		<script type="text/javascript">
 		new Form.Element.Resize
