@@ -41,3 +41,24 @@ function bigSmlTextarea(e)
 	else
 		node.className = node.className.replace(/expanded/gi, "");
 }
+
+function setupForm (formid)
+{
+	var formArea = document.getElementById (formid);
+	var txtAreas = formArea.getElementsByTagName ("textarea");
+	for (var i=0; i<txtAreas.length; i++)
+	{
+		var thisTxtArea = txtAreas[i];
+		if (thisTxtArea.addEventListener)
+		{
+			thisTxtArea.addEventListener("focus", bigSmlTextarea, false);
+			thisTxtArea.addEventListener("blur", bigSmlTextarea, false);
+		}
+		else
+		{ // IE
+			thisTxtArea.attachEvent("onfocus", bigSmlTextarea);
+			thisTxtArea.attachEvent("onblur", bigSmlTextarea);
+		}
+	}
+}
+
