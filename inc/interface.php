@@ -3789,7 +3789,7 @@ function renderRSPoolServerForm ($pool_id = 0)
 	$order = 'odd';
 	foreach ($poolInfo['rslist'] as $rsid => $rs)
 	{
-		echo "<form class=collapse_tareas action='${root}process.php'>";
+		echo "<form action='${root}process.php'>";
 		echo "<input type=hidden name=page value='${pageno}'>\n";
 		echo "<input type=hidden name=tab value='${tabno}'>\n";
 		echo "<input type=hidden name=op value=updRS>";
@@ -3800,8 +3800,7 @@ function renderRSPoolServerForm ($pool_id = 0)
 		printImageHREF ('delete', 'Delete this real server');
 		echo "</td><td><input type=text name=rsip value='${rs['rsip']}'></td>";
 		echo "<td><input type=text name=rsport size=5 value='${rs['rsport']}'></td>";
-		echo "<td><textarea name=rsconfig id=rsconfig_${rsid}>${rs['rsconfig']}</textarea></td>";
-		printResizeJS ("rsconfig_${rsid}");
+		echo "<td><textarea name=rsconfig>${rs['rsconfig']}</textarea></td>";
 		echo "<td><input type=submit value='OK'></td>";
 		echo "</tr></form>\n";
 		$order = $nextorder[$order];
@@ -3860,7 +3859,7 @@ function renderRSPoolLBForm ($pool_id = 0)
 		foreach ($vslist as $vs_id => $configs)
 		{
 			$oi = getObjectInfo ($object_id);
-			echo "<form class=collapse_tareas action='${root}process.php'>";
+			echo "<form action='${root}process.php'>";
 			echo "<input type=hidden name=page value='${pageno}'>\n";
 			echo "<input type=hidden name=tab value='${tabno}'>\n";
 			echo "<input type=hidden name=op value=updLB>";
@@ -3876,10 +3875,8 @@ function renderRSPoolLBForm ($pool_id = 0)
 			echo buildVServiceName ($vsinfo) . '</a>';
 			if (!empty ($vsinfo['name']))
 				echo " (${vsinfo['name']})";
-			echo "<td><textarea name=vsconfig id=vsconfig_${object_id}_${vs_id}>${configs['vsconfig']}</textarea></td>";
-			echo "<td><textarea name=rsconfig id=rsconfig_${object_id}_${vs_id}>${configs['rsconfig']}</textarea></td>";
-			printResizeJS ("vsconfig_${object_id}_${vs_id}");
-			printResizeJS ("rsconfig_${object_id}_${vs_id}");
+			echo "<td><textarea name=vsconfig>${configs['vsconfig']}</textarea></td>";
+			echo "<td><textarea name=rsconfig>${configs['rsconfig']}</textarea></td>";
 			echo "<td><input type=submit value=OK></td></tr></form>\n";
 			$order = $nextorder[$order];
 		}
@@ -4007,7 +4004,7 @@ function renderVSListEditForm ()
 	$order = 'odd';
 	foreach (getVSList() as $vsid => $vsinfo)
 	{
-		echo "<form class=collapse_tareas method=post action='${root}process.php'>\n";
+		echo "<form method=post action='${root}process.php'>\n";
 		echo "<input type=hidden name=page value=${pageno}>\n";
 		echo "<input type=hidden name=tab value=${tabno}>\n";
 		echo "<input type=hidden name=op value=upd>\n";
@@ -4027,10 +4024,8 @@ function renderVSListEditForm ()
 		printSelect ($protocols, 'proto', $vsinfo['proto']);
 		echo "</td>";
 		echo "<td class=tdleft><input type=text name=name value='${vsinfo['name']}'></td>";
-		echo "<td><textarea name=vsconfig id=vsconfig_${vsid}>${vsinfo['vsconfig']}</textarea></td>";
-		echo "<td><textarea name=rsconfig id=rsconfig_${vsid}>${vsinfo['rsconfig']}</textarea></td>";
-		printResizeJS ("vsconfig_${vsid}");
-		printResizeJS ("rsconfig_${vsid}");
+		echo "<td><textarea name=vsconfig>${vsinfo['vsconfig']}</textarea></td>";
+		echo "<td><textarea name=rsconfig>${vsinfo['rsconfig']}</textarea></td>";
 		echo "<td><input type=submit value=OK></td>";
 		echo "</tr></form>\n";
 		$order = $nextorder[$order];
@@ -4098,7 +4093,7 @@ function editRSPools ()
 	$order='odd';
 	foreach ($pool_list as $pool_id => $pool_info)
 	{
-		echo "<form class=collapse_tareas method=post action='${root}process.php'>\n";
+		echo "<form method=post action='${root}process.php'>\n";
 		echo "<input type=hidden name=page value=${pageno}>\n";
 		echo "<input type=hidden name=tab value=${tabno}>\n";
 		echo "<input type=hidden name=op value=upd>\n";
@@ -4114,10 +4109,8 @@ function editRSPools ()
 		}
 		echo "</td>";
 		echo "<td class=tdleft><input type=text name=name value='${pool_info['name']}'></td>";
-		echo "<td><textarea id=vsconfig_${pool_id} name=vsconfig>${pool_info['vsconfig']}</textarea></td>";
-		echo "<td><textarea id=rsconfig_${pool_id} name=rsconfig>${pool_info['rsconfig']}</textarea></td>";
-		printResizeJS ("vsconfig_${pool_id}");
-		printResizeJS ("rsconfig_${pool_id}");
+		echo "<td><textarea name=vsconfig>${pool_info['vsconfig']}</textarea></td>";
+		echo "<td><textarea name=rsconfig>${pool_info['rsconfig']}</textarea></td>";
 		echo "<td><input type=submit value=OK></td>";
 		echo "</tr></form>\n";
 		$order = $nextorder[$order];
@@ -4211,27 +4204,6 @@ function renderRSPoolRSInServiceForm ($pool_id = 0)
 	}
 	echo "<tr><td colspan=4 align=center><input type=submit value=OK tabindex=${recno}></td></tr>";
 	echo "</table>\n</form>";
-}
-
-// Disabled at the moment.
-function printResizeJS ($elementid)
-{
-	return;
-?>
-		<script type="text/javascript">
-		new Form.Element.Resize
-		({
-			elementId: '<?php echo $elementid; ?>',
-			maxWidth: 400,
-			maxHeight: 150,
-			setTo: 'max',
-			setEvent: 'focus',
-			resetTo: 'orig',
-			resetEvent: 'blur',
-			resizeType: {}
-		});
-		</script>
-<?php
 }
 
 ?>
