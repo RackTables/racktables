@@ -279,7 +279,7 @@ http://www.cisco.com/en/US/products/hw/routers/ps274/products_tech_note09186a008
 				);
 				break;
 			case 'ssv1':
-				$words = explode (' ', $line));
+				$words = explode (' ', $line);
 				if (empty ($words[0]) or empty ($words[1]))
 					continue;
 				$ports[] = array
