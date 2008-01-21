@@ -2,8 +2,10 @@
 $stepfunc[1] = 'not_already_installed';
 $stepfunc[2] = 'platform_is_ok';
 $stepfunc[3] = 'init_config';
-$stepfunc[4] = 'init_database';
-$stepfunc[5] = 'congrats';
+$stepfunc[4] = 'init_database_static';
+$stepfunc[5] = 'init_database_dynamic';
+$stepfunc[6] = 'congrats';
+$dbxlink = NULL;
 
 if (isset ($_REQUEST['step']))
 	$step = $_REQUEST['step'];
@@ -197,14 +199,85 @@ function init_config ()
 	return TRUE;
 }
 
-function init_database ()
+function connect_to_db ()
+{
+	require ('inc/secret.php');
+	global $dbxlink;
+	try
+	{
+		$dbxlink = new PDO ($pdo_dsn, $db_username, $db_password);
+	}
+	catch (PDOException $e)
+	{
+		die ('Error connecting to the database');
+	}
+}
+
+function init_database_static ()
 {
 	echo 'Initializing the database...<br>';
+	echo '<table border=1>';
+	echo "<tr><th>file</th><th>queries</th></tr>";
 	foreach (array ('structure', 'dictbase', 'dictvendors') as $part)
 	{
-		echo $part;
+		$filename = "install/init-${part}.sql";
+		echo "<tr><td>${filename}</td>";
+		$f = fopen ("install/init-${part}.sql", 'r');
+		$longq = '';
+		if ($f === FALSE)
+		{
+			echo "Failed to open install/init-${part}.sql for reading";
+			return FALSE;
+		}
+		while (!feof ($f))
+		{
+			$line = fgets ($f);
+			if (ereg ('^--', $line))
+				continue;
+			$longq .= str_replace ("\n", '', $line);
+		}
+		fclose ($f);
+		$qlist = explode (';', $longq);
+		connect_to_db ();
+		global $dbxlink;
+		$nq = 0;
+		foreach ($qlist as $query)
+		{
+			if (empty ($query))
+				continue;
+			$nq++;
+			$dbxlink->exec ($query);
+		}
+		echo "<td>${nq}</td></tr>\n";
 	}
+	echo '</table>';
 	return TRUE;
+}
+
+function init_database_dynamic ()
+{
+	connect_to_db();
+	global $dbxlink;
+	if (!isset ($_REQUEST['password']))
+	{
+		$result = $dbxlink->query ('select count(user_id) from UserAccount where user_id = 1');
+		$row = $result->fetch (PDO::FETCH_NUM);
+		$nrecs = $row[0];
+		$result->closeCursor();
+		if (!$nrecs)
+		{
+			echo '<table border=1>';
+			echo '<caption>Administrator password not set</caption>';
+			echo '<tr><td><input type=password name=password></td></tr>';
+			echo '</table>';
+		}
+	}
+	else
+	{
+		$query = "INSERT INTO `UserAccount` (`user_id`, `user_name`, `user_enabled`, `user_password_hash`, `user_realname`)" .
+			"VALUES (1,'admin','yes',sha1(${_REQUEST['password']}),'RackTables Administrator')";
+	}
+	return FALSE;
 }
 
 function congrats ()
