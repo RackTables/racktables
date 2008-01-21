@@ -109,7 +109,6 @@ $ophandler['object']['edit']['upd'] = 'updateAttrValues';
 $ophandler['object']['portfwrd']['forwardPorts'] = 'addPortForwarding';
 $ophandler['object']['portfwrd']['delPortForwarding'] = 'delPortForwarding';
 $ophandler['object']['portfwrd']['updPortForwarding'] = 'updPortForwarding';
-$ophandler['object']['lvsconfig']['sendConfig'] = 'sendSLBConfig';
 
 $page['ipv4space']['title'] = 'IPv4 space';
 $page['ipv4space']['parent'] = 'index';
