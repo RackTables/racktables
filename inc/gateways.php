@@ -216,14 +216,16 @@ function activateSLBConfig ($object_id = 0, $configtext = '')
 		return array (array ('code' => 'error', 'message' => 'More than one IP address is assigned to this object, please configure FQDN attribute.'));
 	$hwtype = $swtype = 'unknown';
 	$endpoint = str_replace (' ', '+', $endpoints[0]);
-	$tmpfile = tmpfile();
+	$tmpfilename = tempnam ('', 'RackTables-slbconfig');
+	$tmpfile = fopen ($tmpfilename, 'wb');
 	fwrite ($tmpfile, $configtext);
+	fclose ($tmpfile);
 	$data = queryGateway
 	(
 		'slbconfig',
-		array ("connect ${endpoint} ${hwtype} ${swtype} ${remote_username}", "activate ${tmpfile}")
+		array ("connect ${endpoint} ${hwtype} ${swtype} ${remote_username}", "activate ${tmpfilename}")
 	);
-	fclose ($tmpfile);
+	unlink ($tmpfilename);
 	if ($data == NULL)
 		return array (array ('code' => 'error', 'message' => __FUNCTION__ . ': Failed to get any response from queryGateway() or the gateway died'));
 	if (strpos ($data[0], 'OK!') !== 0)
@@ -232,16 +234,10 @@ function activateSLBConfig ($object_id = 0, $configtext = '')
 		return array (array ('code' => 'error', 'message' => 'Gateway failure: mailformed reply.'));
 	// Finally we can parse the response into message array.
 	$ret = array();
-	foreach (split (';', substr ($data[1], strlen ('OK!'))) as $text)
-	{
-		if (strpos ($text, 'I!') === 0)
-			$code = 'success';
-		elseif (strpos ($text, 'W!') === 0)
-			$code = 'warning';
-		else // All improperly formatted messages must be treated as error conditions.
-			$code = 'error';
-		$ret[] = array ('code' => $code, 'message' => substr ($text, 2));
-	}
+	$codemap['ERR'] = 'error';
+	$codemap['OK'] = 'success';
+	list ($code, $text) = split ('!', $data[1]);
+	$ret[] = array ('code' => $codemap[$code], 'message' => $text);
 	return $ret;
 }
 

@@ -3645,18 +3645,19 @@ function apply_macros ($macros, $subject)
 
 function renderLVSConfig ($object_id = 0)
 {
+	global $pageno, $tabno;
 	if ($object_id <= 0)
 	{
 		showError ('Invalid object_id', __FUNCTION__);
 		return;
 	}
+	$oInfo = getObjectInfo ($object_id);
 	$lbconfig = buildLBConfig ($object_id);
-	echo '<pre>';
-	echo "#\n#\n# This configuration has been generated automatically by RackTables\n";
-	echo "# for object_id == ${object_id}\n#\n#\n\n\n";
+	$newconfig = "#\n#\n# This configuration has been generated automatically by RackTables\n";
+	$newconfig .= "# for object_id == ${object_id}\n# object name: ${oInfo['name']}\n#\n#\n\n\n";
 	foreach ($lbconfig as $vs_id => $vsinfo)
 	{
-		echo "########################################################\n" .
+		$newconfig .=  "########################################################\n" .
 			"# VS (id == ${vs_id}): " . (empty ($vsinfo['vs_name']) ? 'NO NAME' : $vsinfo['vs_name']) . "\n" .
 			"# RS pool (id == ${vsinfo['pool_id']}): " . (empty ($vsinfo['pool_name']) ? 'ANONYMOUS' : $vsinfo['pool_name']) . "\n" .
 			"########################################################\n";
@@ -3670,19 +3671,31 @@ function renderLVSConfig ($object_id = 0)
 			'%RSPOOLNAME%' => $vsinfo['pool_name']
 		);
 		$vsconfig = apply_macros ($macros, $vsinfo['vs_vsconfig'] . $vsinfo['lb_vsconfig'] . $vsinfo['pool_vsconfig']);
-		echo "virtual_server ${vsinfo['vip']} ${vsinfo['vport']} {\n";
-		echo "${vsconfig}\n";
+		$newconfig .=  "virtual_server ${vsinfo['vip']} ${vsinfo['vport']} {\n";
+		$newconfig .=  "${vsconfig}\n";
 		foreach ($vsinfo['rslist'] as $rs)
 		{
 			$macros['%RSIP%'] = $rs['rsip'];
 			$macros['%RSPORT%'] = $rs['rsport'];
 			$rsconfig = apply_macros ($macros, $vsinfo['vs_rsconfig'] . $vsinfo['lb_rsconfig'] . $vsinfo['pool_rsconfig'] . $rs['rs_rsconfig']);
-			echo "\treal_server ${rs['rsip']} ${rs['rsport']} {\n";
-			echo "\t${rsconfig}\n";
-			echo "\t}\n";
+			$newconfig .=  "\treal_server ${rs['rsip']} ${rs['rsport']} {\n";
+			$newconfig .=  "\t${rsconfig}\n";
+			$newconfig .=  "\t}\n";
 		}
-		echo "}\n\n\n";
+		$newconfig .=  "}\n\n\n";
 	}
+	if (isset ($_REQUEST['do_activate']))
+	{
+		printLog (activateSLBConfig ($object_id, html_entity_decode ($newconfig)));
+	}
+	echo "<form method=post action=${root}>";
+	echo "<input type=hidden name=page value=${pageno}>";
+	echo "<input type=hidden name=tab value=${tabno}>";
+	echo "<input type=hidden name=object_id value=${object_id}>";
+	echo "<center><input type=submit name=do_activate value='Send this configuration to the real world'></center>";
+	echo "</form>";
+	echo '<pre>';
+	echo $newconfig;
 	echo '</pre>';
 }
 
