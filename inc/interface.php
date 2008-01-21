@@ -3346,6 +3346,7 @@ function renderSNMPPortFinder ($object_id = 0)
 		$community = $_REQUEST['community'];
 		$objectInfo = getObjectInfo ($object_id);
 		$endpoints = findAllEndpoints ($object_id, $objectInfo['name']);
+		$sysName = substr (snmpget ($endpoints[0], $community, 'sysName.0'), strlen ('STRING: '));
 		$sysDescr = snmpget ($endpoints[0], $community, 'sysDescr.0');
 		// Strip the object type, it's always string here.
 		$sysDescr = substr ($sysDescr, strlen ('STRING: '));
@@ -3362,6 +3363,15 @@ function renderSNMPPortFinder ($object_id = 0)
 		$attrs = getAttrValues ($object_id);
 		// Only fill in attribute values, if they are not set.
 		// FIXME: this is hardcoded
+
+		if (empty ($attrs[3]['value']) && !empty ($sysName)) // FQDN
+		{
+			$error = commitUpdateAttrValue ($object_id, 3, $sysName);
+			if ($error == TRUE)
+				$log[] = array ('code' => 'success', 'message' => 'FQDN set to ' . $sysName);
+			else
+				$log[] = array ('code' => 'error', 'message' => 'Failed settig FQDN: ' . $error);
+		}
 
 		if (empty ($attrs[5]['value'])) // SW version
 		{
