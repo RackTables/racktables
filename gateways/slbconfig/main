@@ -4,8 +4,7 @@
 # a live load balancer. The only supported command is:
 #
 # * connect <endpoint> <hardware> <software> <username>: authorize transaction
-# * activate <filename>: call user-supplied configuration installer and remove
-#   the temp file
+# * activate <filename>: call user-supplied configuration installer
 #
 
 endpoint=
@@ -72,5 +71,4 @@ while read cmd args; do
 	esac
 done
 
-[ -f "$cfgfile" ] && rm -f "$cfgfile"
 exit 0
