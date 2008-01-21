@@ -1,19 +1,3 @@
-/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
-/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
-/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8 */;
-/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
-/*!40103 SET TIME_ZONE='+00:00' */;
-/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
-/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
-/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
-/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
-
---
--- Table structure for table `Atom`
---
-
-DROP TABLE IF EXISTS `Atom`;
 CREATE TABLE `Atom` (
   `molecule_id` int(10) unsigned default NULL,
   `rack_id` int(10) unsigned default NULL,
@@ -21,11 +5,6 @@ CREATE TABLE `Atom` (
   `atom` enum('front','interior','rear') default NULL
 ) ENGINE=MyISAM;
 
---
--- Table structure for table `Attribute`
---
-
-DROP TABLE IF EXISTS `Attribute`;
 CREATE TABLE `Attribute` (
   `attr_id` int(10) unsigned NOT NULL auto_increment,
   `attr_type` enum('string','uint','float','dict') default NULL,
@@ -34,11 +13,6 @@ CREATE TABLE `Attribute` (
   UNIQUE KEY `attr_name` (`attr_name`)
 ) ENGINE=MyISAM AUTO_INCREMENT=10000;
 
---
--- Table structure for table `AttributeMap`
---
-
-DROP TABLE IF EXISTS `AttributeMap`;
 CREATE TABLE `AttributeMap` (
   `objtype_id` int(10) unsigned NOT NULL default '1',
   `attr_id` int(10) unsigned NOT NULL default '1',
@@ -46,11 +20,6 @@ CREATE TABLE `AttributeMap` (
   UNIQUE KEY `objtype_id` (`objtype_id`,`attr_id`)
 ) ENGINE=MyISAM;
 
---
--- Table structure for table `AttributeValue`
---
-
-DROP TABLE IF EXISTS `AttributeValue`;
 CREATE TABLE `AttributeValue` (
   `object_id` int(10) unsigned default NULL,
   `attr_id` int(10) unsigned default NULL,
@@ -60,11 +29,6 @@ CREATE TABLE `AttributeValue` (
   UNIQUE KEY `object_id` (`object_id`,`attr_id`)
 ) ENGINE=MyISAM;
 
---
--- Table structure for table `Chapter`
---
-
-DROP TABLE IF EXISTS `Chapter`;
 CREATE TABLE `Chapter` (
   `chapter_no` int(10) unsigned NOT NULL auto_increment,
   `sticky` enum('yes','no') default 'no',
@@ -73,11 +37,6 @@ CREATE TABLE `Chapter` (
   UNIQUE KEY `chapter_name` (`chapter_name`)
 ) ENGINE=MyISAM AUTO_INCREMENT=10000;
 
---
--- Table structure for table `Dictionary`
---
-
-DROP TABLE IF EXISTS `Dictionary`;
 CREATE TABLE `Dictionary` (
   `chapter_no` int(10) unsigned NOT NULL,
   `dict_key` int(10) unsigned NOT NULL auto_increment,
@@ -87,11 +46,6 @@ CREATE TABLE `Dictionary` (
   UNIQUE KEY `chap_to_val` (`chapter_no`,`dict_value`)
 ) ENGINE=MyISAM AUTO_INCREMENT=50000;
 
---
--- Table structure for table `IPAddress`
---
-
-DROP TABLE IF EXISTS `IPAddress`;
 CREATE TABLE `IPAddress` (
   `ip` int(10) unsigned NOT NULL,
   `name` char(255) NOT NULL,
@@ -99,11 +53,6 @@ CREATE TABLE `IPAddress` (
   PRIMARY KEY  (`ip`)
 ) ENGINE=MyISAM;
 
---
--- Table structure for table `IPBonds`
---
-
-DROP TABLE IF EXISTS `IPBonds`;
 CREATE TABLE `IPBonds` (
   `object_id` int(10) unsigned NOT NULL,
   `ip` int(10) unsigned NOT NULL,
@@ -112,11 +61,6 @@ CREATE TABLE `IPBonds` (
   PRIMARY KEY  (`object_id`,`ip`)
 ) ENGINE=MyISAM;
 
---
--- Table structure for table `IPLoadBalancer`
---
-
-DROP TABLE IF EXISTS `IPLoadBalancer`;
 CREATE TABLE `IPLoadBalancer` (
   `object_id` int(10) unsigned default NULL,
   `rspool_id` int(10) unsigned default NULL,
@@ -126,11 +70,6 @@ CREATE TABLE `IPLoadBalancer` (
   UNIQUE KEY `LB-VS` (`object_id`,`vs_id`)
 ) ENGINE=MyISAM;
 
---
--- Table structure for table `IPRSPool`
---
-
-DROP TABLE IF EXISTS `IPRSPool`;
 CREATE TABLE `IPRSPool` (
   `id` int(10) unsigned NOT NULL auto_increment,
   `name` char(255) default NULL,
@@ -139,11 +78,6 @@ CREATE TABLE `IPRSPool` (
   PRIMARY KEY  (`id`)
 ) ENGINE=MyISAM;
 
---
--- Table structure for table `IPRanges`
---
-
-DROP TABLE IF EXISTS `IPRanges`;
 CREATE TABLE `IPRanges` (
   `id` int(10) unsigned NOT NULL auto_increment,
   `ip` int(10) unsigned NOT NULL,
@@ -152,11 +86,6 @@ CREATE TABLE `IPRanges` (
   PRIMARY KEY  (`id`)
 ) ENGINE=MyISAM;
 
---
--- Table structure for table `IPRealServer`
---
-
-DROP TABLE IF EXISTS `IPRealServer`;
 CREATE TABLE `IPRealServer` (
   `id` int(10) unsigned NOT NULL auto_increment,
   `inservice` enum('yes','no') NOT NULL default 'no',
@@ -168,11 +97,6 @@ CREATE TABLE `IPRealServer` (
   UNIQUE KEY `pool-endpoint` (`rspool_id`,`rsip`,`rsport`)
 ) ENGINE=MyISAM;
 
---
--- Table structure for table `IPVirtualService`
---
-
-DROP TABLE IF EXISTS `IPVirtualService`;
 CREATE TABLE `IPVirtualService` (
   `id` int(10) unsigned NOT NULL auto_increment,
   `vip` int(10) unsigned default NULL,
@@ -184,11 +108,6 @@ CREATE TABLE `IPVirtualService` (
   PRIMARY KEY  (`id`)
 ) ENGINE=MyISAM;
 
---
--- Table structure for table `Link`
---
-
-DROP TABLE IF EXISTS `Link`;
 CREATE TABLE `Link` (
   `porta` int(10) unsigned NOT NULL,
   `portb` int(10) unsigned NOT NULL,
@@ -197,21 +116,11 @@ CREATE TABLE `Link` (
   UNIQUE KEY `portb` (`portb`)
 ) ENGINE=MyISAM;
 
---
--- Table structure for table `Molecule`
---
-
-DROP TABLE IF EXISTS `Molecule`;
 CREATE TABLE `Molecule` (
   `id` int(10) unsigned NOT NULL auto_increment,
   PRIMARY KEY  (`id`)
 ) ENGINE=MyISAM;
 
---
--- Table structure for table `MountOperation`
---
-
-DROP TABLE IF EXISTS `MountOperation`;
 CREATE TABLE `MountOperation` (
   `id` int(10) unsigned NOT NULL auto_increment,
   `object_id` int(10) unsigned NOT NULL,
@@ -223,11 +132,6 @@ CREATE TABLE `MountOperation` (
   PRIMARY KEY  (`id`)
 ) ENGINE=MyISAM;
 
---
--- Table structure for table `Port`
---
-
-DROP TABLE IF EXISTS `Port`;
 CREATE TABLE `Port` (
   `id` int(10) unsigned NOT NULL auto_increment,
   `object_id` int(10) unsigned NOT NULL,
@@ -242,11 +146,6 @@ CREATE TABLE `Port` (
   KEY `type` (`type`)
 ) ENGINE=MyISAM;
 
---
--- Table structure for table `PortCompat`
---
-
-DROP TABLE IF EXISTS `PortCompat`;
 CREATE TABLE `PortCompat` (
   `type1` int(10) unsigned NOT NULL,
   `type2` int(10) unsigned NOT NULL,
@@ -254,11 +153,6 @@ CREATE TABLE `PortCompat` (
   KEY `type2` (`type2`)
 ) ENGINE=MyISAM;
 
---
--- Table structure for table `PortForwarding`
---
-
-DROP TABLE IF EXISTS `PortForwarding`;
 CREATE TABLE `PortForwarding` (
   `object_id` int(10) unsigned NOT NULL,
   `proto` int(11) NOT NULL,
@@ -273,11 +167,6 @@ CREATE TABLE `PortForwarding` (
   KEY `object_id` (`object_id`)
 ) ENGINE=MyISAM;
 
---
--- Table structure for table `Rack`
---
-
-DROP TABLE IF EXISTS `Rack`;
 CREATE TABLE `Rack` (
   `id` int(10) unsigned NOT NULL auto_increment,
   `name` char(255) default NULL,
@@ -289,11 +178,6 @@ CREATE TABLE `Rack` (
   PRIMARY KEY  (`id`)
 ) ENGINE=MyISAM;
 
---
--- Table structure for table `RackHistory`
---
-
-DROP TABLE IF EXISTS `RackHistory`;
 CREATE TABLE `RackHistory` (
   `id` int(10) unsigned default NULL,
   `name` char(255) default NULL,
@@ -305,11 +189,6 @@ CREATE TABLE `RackHistory` (
   `user_name` char(64) default NULL
 ) ENGINE=MyISAM;
 
---
--- Table structure for table `RackObject`
---
-
-DROP TABLE IF EXISTS `RackObject`;
 CREATE TABLE `RackObject` (
   `id` int(10) unsigned NOT NULL auto_increment,
   `name` char(255) default NULL,
@@ -326,11 +205,6 @@ CREATE TABLE `RackObject` (
   UNIQUE KEY `barcode` (`barcode`)
 ) ENGINE=MyISAM;
 
---
--- Table structure for table `RackObjectHistory`
---
-
-DROP TABLE IF EXISTS `RackObjectHistory`;
 CREATE TABLE `RackObjectHistory` (
   `id` int(10) unsigned default NULL,
   `name` char(255) default NULL,
@@ -345,11 +219,6 @@ CREATE TABLE `RackObjectHistory` (
   `user_name` char(64) default NULL
 ) ENGINE=MyISAM;
 
---
--- Table structure for table `RackSpace`
---
-
-DROP TABLE IF EXISTS `RackSpace`;
 CREATE TABLE `RackSpace` (
   `rack_id` int(10) unsigned NOT NULL default '0',
   `unit_no` int(10) unsigned NOT NULL default '0',
@@ -360,11 +229,6 @@ CREATE TABLE `RackSpace` (
   PRIMARY KEY  (`rack_id`,`unit_no`,`atom`)
 ) ENGINE=MyISAM;
 
---
--- Table structure for table `UserAccount`
---
-
-DROP TABLE IF EXISTS `UserAccount`;
 CREATE TABLE `UserAccount` (
   `user_id` int(10) unsigned NOT NULL auto_increment,
   `user_name` char(64) NOT NULL,
@@ -375,11 +239,6 @@ CREATE TABLE `UserAccount` (
   UNIQUE KEY `user_name` (`user_name`)
 ) ENGINE=MyISAM AUTO_INCREMENT=10000;
 
---
--- Table structure for table `UserPermission`
---
-
-DROP TABLE IF EXISTS `UserPermission`;
 CREATE TABLE `UserPermission` (
   `user_id` int(10) unsigned NOT NULL default '0',
   `page` char(64) NOT NULL default '%',
@@ -388,11 +247,6 @@ CREATE TABLE `UserPermission` (
   UNIQUE KEY `user_id` (`user_id`,`page`,`tab`)
 ) ENGINE=MyISAM;
 
---
--- Table structure for table `Config`
---
-
-DROP TABLE IF EXISTS `Config`;
 CREATE TABLE `Config` (
   `varname` char(32) NOT NULL,
   `varvalue` char(64) NOT NULL,
@@ -402,13 +256,3 @@ CREATE TABLE `Config` (
   `description` text,
   PRIMARY KEY  (`varname`)
 ) ENGINE=MyISAM;
-
-/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
-
-/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
-/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
-/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
-/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
-/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
