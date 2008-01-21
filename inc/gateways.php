@@ -201,4 +201,48 @@ function setSwitchVLANs ($object_id = 0, $setcmd)
 	return $ret;
 }
 
+// FIXME: shouldn't the common code be made into some helper?
+function activateSLBConfig ($object_id = 0, $configtext = '')
+{
+	global $remote_username;
+	$log = array();
+	if ($object_id <= 0 or empty ($configtext))
+		return array (array ('code' => 'error', 'message' => __FUNCTION__ . ': Invalid arguments'));
+	$objectInfo = getObjectInfo ($object_id);
+	$endpoints = findAllEndpoints ($object_id, $objectInfo['name']);
+	if (count ($endpoints) == 0)
+		return array (array ('code' => 'error', 'message' => 'Can\'t find any mean to reach current object. Please either set FQDN attribute or assign an IP address to the object.'));
+	if (count ($endpoints) > 1)
+		return array (array ('code' => 'error', 'message' => 'More than one IP address is assigned to this object, please configure FQDN attribute.'));
+	$hwtype = $swtype = 'unknown';
+	$endpoint = str_replace (' ', '+', $endpoints[0]);
+	$tmpfile = tmpfile();
+	fwrite ($tmpfile, $configtext);
+	$data = queryGateway
+	(
+		'slbconfig',
+		array ("connect ${endpoint} ${hwtype} ${swtype} ${remote_username}", "activate ${tmpfile}")
+	);
+	fclose ($tmpfile);
+	if ($data == NULL)
+		return array (array ('code' => 'error', 'message' => __FUNCTION__ . ': Failed to get any response from queryGateway() or the gateway died'));
+	if (strpos ($data[0], 'OK!') !== 0)
+		return array (array ('code' => 'error', 'message' => "Gateway failure: returned code ${data[0]}."));
+	if (count ($data) != 2)
+		return array (array ('code' => 'error', 'message' => 'Gateway failure: mailformed reply.'));
+	// Finally we can parse the response into message array.
+	$ret = array();
+	foreach (split (';', substr ($data[1], strlen ('OK!'))) as $text)
+	{
+		if (strpos ($text, 'I!') === 0)
+			$code = 'success';
+		elseif (strpos ($text, 'W!') === 0)
+			$code = 'warning';
+		else // All improperly formatted messages must be treated as error conditions.
+			$code = 'error';
+		$ret[] = array ('code' => $code, 'message' => substr ($text, 2));
+	}
+	return $ret;
+}
+
 ?>
