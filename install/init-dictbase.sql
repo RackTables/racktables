@@ -1,4 +1,3 @@
-LOCK TABLES `Attribute` WRITE;
 INSERT INTO `Attribute` (`attr_id`, `attr_type`, `attr_name`) VALUES (1,'string','OEM S/N 1');
 INSERT INTO `Attribute` (`attr_id`, `attr_type`, `attr_name`) VALUES (2,'dict','HW type');
 INSERT INTO `Attribute` (`attr_id`, `attr_type`, `attr_name`) VALUES (3,'string','FQDN');
@@ -17,9 +16,7 @@ INSERT INTO `Attribute` (`attr_id`, `attr_type`, `attr_name`) VALUES (21,'string
 INSERT INTO `Attribute` (`attr_id`, `attr_type`, `attr_name`) VALUES (22,'string','HW warranty expiration');
 INSERT INTO `Attribute` (`attr_id`, `attr_type`, `attr_name`) VALUES (24,'string','SW warranty expiration');
 INSERT INTO `Attribute` (`attr_id`, `attr_type`, `attr_name`) VALUES (25,'string','UUID');
-UNLOCK TABLES;
 
-LOCK TABLES `AttributeMap` WRITE;
 INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_no`) VALUES (4,1,0);
 INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_no`) VALUES (4,2,11);
 INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_no`) VALUES (4,3,0);
@@ -66,9 +63,7 @@ INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_no`) VALUES (12,7,
 INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_no`) VALUES (12,8,0);
 INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_no`) VALUES (12,13,0);
 INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_no`) VALUES (12,20,0);
-UNLOCK TABLES;
 
-LOCK TABLES `Chapter` WRITE;
 INSERT INTO `Chapter` (`chapter_no`, `sticky`, `chapter_name`) VALUES (11,'no','server models');
 INSERT INTO `Chapter` (`chapter_no`, `sticky`, `chapter_name`) VALUES (12,'no','switch models');
 INSERT INTO `Chapter` (`chapter_no`, `sticky`, `chapter_name`) VALUES (13,'no','server OS type');
@@ -81,9 +76,7 @@ INSERT INTO `Chapter` (`chapter_no`, `sticky`, `chapter_name`) VALUES (17,'no','
 INSERT INTO `Chapter` (`chapter_no`, `sticky`, `chapter_name`) VALUES (18,'no','disk array models');
 INSERT INTO `Chapter` (`chapter_no`, `sticky`, `chapter_name`) VALUES (19,'no','tape library models');
 INSERT INTO `Chapter` (`chapter_no`, `sticky`, `chapter_name`) VALUES (20,'yes','Protocols');
-UNLOCK TABLES;
 
-LOCK TABLES `PortCompat` WRITE;
 INSERT INTO `PortCompat` (`type1`, `type2`) VALUES (17,17);
 INSERT INTO `PortCompat` (`type1`, `type2`) VALUES (18,18);
 INSERT INTO `PortCompat` (`type1`, `type2`) VALUES (19,19);
@@ -153,9 +146,7 @@ INSERT INTO `PortCompat` (`type1`, `type2`) VALUES (39,39);
 INSERT INTO `PortCompat` (`type1`, `type2`) VALUES (40,40);
 INSERT INTO `PortCompat` (`type1`, `type2`) VALUES (41,41);
 INSERT INTO `PortCompat` (`type1`, `type2`) VALUES (439,439);
-UNLOCK TABLES;
 
-LOCK TABLES `Dictionary` WRITE;
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (1,1,'BlackBox');
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (1,2,'PDU');
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (1,3,'Shelf');
@@ -201,9 +192,7 @@ INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (20,336
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (20,337,'UDP');
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (2,439,'dry contact');
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (2,440,'unknown');
-UNLOCK TABLES;
 
-LOCK TABLES `Config` WRITE;
 INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('rtwidth_0','9','uint','no','yes','');
 INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('rtwidth_1','21','uint','no','yes','');
 INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('rtwidth_2','9','uint','no','yes','');
@@ -225,4 +214,3 @@ INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, descriptio
 INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('DEFAULT_RACK_HEIGHT','42','uint','yes','no','Default rack height');
 INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('REQUIRE_ASSET_TAG_FOR','4,7,8','string','yes','no','Require asset tag for the following object types');
 INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('DB_VERSION','0.14.9','string','no','yes','Database version.');
-UNLOCK TABLES;
