@@ -5,10 +5,15 @@
 *
 */
 
-function escapeString ($value)
+function escapeString ($value, $do_db_escape = TRUE)
 {
-	global $dbxlink;
-	return substr ($dbxlink->quote (htmlentities ($value)), 1, -1);
+	$ret = htmlentities ($value, ENT_QUOTES);
+	if ($do_db_escape)
+	{
+		global $dbxlink;
+		$ret = substr ($dbxlink->quote ($ret), 1, -1);
+	}
+	return $ret;
 }
 
 // This function returns detailed information about either all or one
@@ -2280,8 +2285,6 @@ function commitUpdateLB ($object_id = 0, $pool_id = 0, $vs_id = 0, $vsconfig = '
 	$result = $dbxlink->exec ($query);
 	if ($result === NULL)
 		return FALSE;
-	elseif ($result != 1)
-		return FALSE;
 	else
 		return TRUE;
 }
@@ -2304,8 +2307,6 @@ function commitUpdateVS ($vsid = 0, $vip = '', $vport = 0, $proto = '', $name = 
 		" where id = ${vsid} limit 1";
 	$result = $dbxlink->exec ($query);
 	if ($result === NULL)
-		return FALSE;
-	elseif ($result != 1)
 		return FALSE;
 	else
 		return TRUE;
