@@ -3686,7 +3686,7 @@ function renderLVSConfig ($object_id = 0)
 	}
 	if (isset ($_REQUEST['do_activate']))
 	{
-		printLog (activateSLBConfig ($object_id, html_entity_decode ($newconfig)));
+		printLog (activateSLBConfig ($object_id, html_entity_decode ($newconfig, ENT_QUOTES)));
 	}
 	echo "<form method=post action=${root}>";
 	echo "<input type=hidden name=page value=${pageno}>";
