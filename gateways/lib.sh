@@ -1,5 +1,10 @@
 #!/bin/sh
 
+if [ ! -s "$MYDIR/userauth.php" ]; then
+	echo "ERR!Authorization file $MYDIR/userauth.php is either missing or empty"
+	return
+fi
+
 authorized()
 {
 	local endp=$1 user=$2 action=$3 arg1=$4 arg2=$5 skip=yes cval
