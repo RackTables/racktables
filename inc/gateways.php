@@ -114,7 +114,7 @@ function getSwitchVLANs ($object_id = 0)
 	}
 	if (count ($data) != count ($commands))
 	{
-		showError ("Gateway failure: mailformed reply.", __FUNCTION__);
+		showError ("Gateway failure: malformed reply.", __FUNCTION__);
 		return NULL;
 	}
 	// Now we have VLAN list in $data[1] and port list in $data[2]. Let's sort this out.
@@ -185,7 +185,7 @@ function setSwitchVLANs ($object_id = 0, $setcmd)
 	if (strpos ($data[0], 'OK!') !== 0)
 		return array (array ('code' => 'error', 'message' => "Gateway failure: returned code ${data[0]}."));
 	if (count ($data) != 2)
-		return array (array ('code' => 'error', 'message' => 'Gateway failure: mailformed reply.'));
+		return array (array ('code' => 'error', 'message' => 'Gateway failure: malformed reply.'));
 	// Finally we can parse the response into message array.
 	$ret = array();
 	foreach (split (';', substr ($data[1], strlen ('OK!'))) as $text)
@@ -231,7 +231,7 @@ function activateSLBConfig ($object_id = 0, $configtext = '')
 	if (strpos ($data[0], 'OK!') !== 0)
 		return array (array ('code' => 'error', 'message' => "Gateway failure: returned code ${data[0]}."));
 	if (count ($data) != 2)
-		return array (array ('code' => 'error', 'message' => 'Gateway failure: mailformed reply.'));
+		return array (array ('code' => 'error', 'message' => 'Gateway failure: malformed reply.'));
 	// Finally we can parse the response into message array.
 	$ret = array();
 	$codemap['ERR'] = 'error';

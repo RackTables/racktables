@@ -3130,7 +3130,7 @@ function renderVLANMembership ($object_id = 0)
 				!isset ($_REQUEST['vlanid_' . $i]) ||
 				$_REQUEST['portname_' . $i] != $portlist[$i]['portname']
 			)
-				$log[] = array ('code' => 'error', 'message' => "Ignoring mailformed record #${i} in form submit");
+				$log[] = array ('code' => 'error', 'message' => "Ignoring malformed record #${i} in form submit");
 			elseif
 			(
 				$_REQUEST['vlanid_' . $i] == $portlist[$i]['vlanid'] ||
