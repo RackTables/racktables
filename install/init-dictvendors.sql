@@ -1,4 +1,3 @@
-LOCK TABLES `Dictionary` WRITE;
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (11,42,'noname/unknown');
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (11,43,'IBM xSeries 305');
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (11,44,'IBM xSeries 306');
@@ -398,4 +397,3 @@ INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (13,441
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (13,442,'CentOS-3');
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (13,443,'CentOS-4');
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (13,444,'CentOS-5');
-UNLOCK TABLES;
