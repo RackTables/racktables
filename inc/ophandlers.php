@@ -869,60 +869,6 @@ function useupPort ()
 		return "${root}?page=${pageno}&tab=${tabno}&object_id=${object_id}&error=" . urlencode ("Error removing reservation!");
 }
 
-// This function processes a submit from the VLAN configuration form.
-// It doesn't check any data at the moment, relying on a smart gateway.
-// It doesn't even check if the a port already belongs to the VLAN it
-// is being requested to be put into. This behaviour implies having a
-// smart enough gateway, which unconditionally fetches the current
-// configuration and then filters out 'set' requests. The gateway must
-// validate port names and VLAN numbers as well. Ouch.
-function updateVLANMembership ()
-{
-	global $root, $pageno, $tabno, $remote_username;
-	assertUIntArg ('object_id');
-	assertUIntArg ('portcount');
-	$object_id = $_REQUEST['object_id'];
-	$portcount  = $_REQUEST['portcount'];
-
-	$endpoints = findAllEndpoints ($object_id);
-	if (count ($endpoints) == 0)
-		return "${root}?page=${pageno}&tab=${tabno}&object_id=${object_id}&error=" .
-			urlencode ('Can\'t find any mean to reach current object. Please either set FQDN attribute or assign an IP address to the object.');
-	elseif (count ($endpoints) > 1)
-		return "${root}?page=${pageno}&tab=${tabno}&object_id=${object_id}&error=" .
-			urlencode ('More than one IP address is assigned to this object, please configure FQDN attribute.');
-
-// Just convert the input and feed it into the gateway.
-	$questions = array("connect ${endpoints[0]} hwtype swtype ${remote_username}");
-	for ($i = 0; $i < $portcount; $i++)
-	{
-		if (!isset ($_REQUEST["portname_${i}"]))
-			continue;
-		if (!isset ($_REQUEST["vlanid_${i}"]))
-			continue;
-		$portname = $_REQUEST["portname_${i}"];
-		$vlanid = $_REQUEST["vlanid_${i}"];
-		$questions[] = "set ${portname} ${vlanid}";
-	}
-	$data = queryGateway
-	(
-		$tabno,
-		$questions
-	);
-	$error_count = $success_count = 0;
-	foreach ($data as $reply)
-		if (strncmp ($reply, 'OK!', 3))
-			$error_count++;
-		else
-			$success_count++;
-// Generate a message depending on error counter and redirect.
-	return
-		"${root}?page=${pageno}&tab=${tabno}&object_id=${object_id}&" .
-		($error_count == 0 ? 'message' : 'error') .
-		"=" . urlencode ("${error_count} failures and ${success_count} successfull changes.");
-
-}
-
 function updateUI ()
 {
 	global $root, $pageno, $tabno;
