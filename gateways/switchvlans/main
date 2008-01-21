@@ -27,7 +27,7 @@ user=
 handler=
 CONNECTED=0
 MYDIR=`dirname $0`
-source "$MYDIR/../lib.sh"
+. "$MYDIR/../lib.sh"
 
 # Not only connect, but gather all the data at once and remember the context.
 do_connect()
