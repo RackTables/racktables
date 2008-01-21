@@ -10,6 +10,7 @@
 	update: fixed tabindex in NATv4 rules form
 	update: better dictionary editor layout
 	update: get FQDN over SNMP
+	update: accept one more multiport format
 	new feature: more information for rack view
 	new feature: rack thumbnails caching
 	new feature: rackspace and IPv4 subnets utilization indicator

@@ -278,6 +278,17 @@ http://www.cisco.com/en/US/products/hw/routers/ps274/products_tech_note09186a008
 					'label' => "${ifnumber}"
 				);
 				break;
+			case 'ssv1':
+				$words = explode (' ', $line));
+				if (empty ($words[0]) or empty ($words[1]))
+					continue;
+				$ports[] = array
+				(
+					'name' => $words[0],
+					'l2address' => $words[1],
+					'label' => ''
+				);
+				break;
 			default:
 				return
 					"${root}?page=${pageno}&tab=${tabno}&object_id=${object_id}&error=" .
