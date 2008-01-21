@@ -14,7 +14,7 @@ user=
 cfgfile=
 CONNECTED=0
 MYDIR=`dirname $0`
-source "$MYDIR/../lib.sh"
+. "$MYDIR/../lib.sh"
 
 do_connect()
 {
@@ -33,6 +33,8 @@ do_connect()
 		echo "ERR!User $user is not authorized to connect to $endpoint"
 		return
 	fi
+	CONNECTED=1
+	echo "OK!connected to $endpoint"
 }
 
 do_activate()
@@ -43,10 +45,16 @@ do_activate()
 		return
 	fi
 	if [ ! -x "$MYDIR/install" ]; then
-		echo "ERR!Missing user-supplied installer script $MYDIR/install"
+		echo "ERR!Missing or not executable user-supplied installer script $MYDIR/install"
 		return
 	fi
-	"$MYDIR/install $endpoint $hw $sw $user $cfgfile"
+	"$MYDIR/install" $endpoint $hw $sw $user $cfgfile
+	ret=$?
+	if [ $ret = 0 ]; then
+		echo "OK!Configuration has been submitted for activation successfully"
+	else
+		echo "ERR!Configuration installer returned code $ret"
+	fi
 }
 
 # main loop
