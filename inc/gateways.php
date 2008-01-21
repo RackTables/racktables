@@ -216,9 +216,9 @@ function activateSLBConfig ($object_id = 0, $configtext = '')
 		return array (array ('code' => 'error', 'message' => 'More than one IP address is assigned to this object, please configure FQDN attribute.'));
 	$hwtype = $swtype = 'unknown';
 	$endpoint = str_replace (' ', '+', $endpoints[0]);
-	$tmpfilename = tempnam ('', 'RackTables-slbconfig');
+	$tmpfilename = tempnam ('', 'RackTables-slbconfig-');
 	$tmpfile = fopen ($tmpfilename, 'wb');
-	fwrite ($tmpfile, $configtext);
+	fwrite ($tmpfile, str_replace ("\r", '', $configtext));
 	fclose ($tmpfile);
 	$data = queryGateway
 	(
