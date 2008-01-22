@@ -2050,7 +2050,9 @@ function renderIPAddressPortForwarding ($object_id=0)
 			}
 
 		echo "<tr class='$class'>";
-		echo "<td><a href='process.php?op=delPortForwarding&localip=${pf['localip']}&localport=${pf['localport']}&remoteip=${pf['remoteip']}&remoteport=${pf['remoteport']}&proto=${pf['proto_bin']}&object_id=$object_id&page=${pageno}&tab=${tabno}'><img src='${root}/pix/delete_s.gif' title='Delete port forwarding' border=0 width=16 height=16></a></td>";
+		echo "<td><a href='process.php?op=delPortForwarding&localip=${pf['localip']}&localport=${pf['localport']}&remoteip=${pf['remoteip']}&remoteport=${pf['remoteport']}&proto=${pf['proto_bin']}&object_id=$object_id&page=${pageno}&tab=${tabno}'>";
+		printImageHREF ('delete', 'Delete NAT rule');
+		echo "</a></td>";
 		echo "<td>${pf['proto']}/${name}: <a href='${root}?page=ipaddress&tab=default&ip=${pf['localip']}'>${pf['localip']}</a>:${pf['localport']}";
 		if (!empty ($pf['local_addr_name']))
 			echo ' (' . $pf['local_addr_name'] . ')';
@@ -2082,7 +2084,9 @@ function renderIPAddressPortForwarding ($object_id=0)
 
 	echo "</select>:<input type='text' name='localport' size='4' tabindex=2></td>";
 	echo "<td><input type='text' name='remoteip' id='remoteip' size='10' tabindex=3>";
-	echo "<a href='javascript:;' onclick='window.open(\"${root}/find_object_ip_helper.php\", \"findobjectip\", \"height=700, width=400, location=no, menubar=no, resizable=yes, scrollbars=no, status=no, titlebar=no, toolbar=no\");'><img src='${root}/pix/find.png' title='Find object' border=0 height=16 width=16></a>";
+	echo "<a href='javascript:;' onclick='window.open(\"${root}/find_object_ip_helper.php\", \"findobjectip\", \"height=700, width=400, location=no, menubar=no, resizable=yes, scrollbars=no, status=no, titlebar=no, toolbar=no\");'>";
+	printImageHREF ('find', 'Find object');
+	echo "</a>";
 	echo ":<input type='text' name='remoteport' size='4' tabindex=4></td><td></td>";
 	echo "<td colspan=1><input type='text' name='description' size='20' tabindex=5> <input type='submit' value='Create Forwarding' tabindex=6></td></tr>";
 	echo "</form>";
@@ -2098,7 +2102,9 @@ function renderIPAddressPortForwarding ($object_id=0)
 	{
 		echo "<tr>";
 
-		echo "<td><a href='process.php?op=delPortForwarding&localip=${pf['localip']}&localport=${pf['localport']}&remoteip=${pf['remoteip']}&remoteport=${pf['remoteport']}&proto=${pf['proto_bin']}&object_id=${pf['object_id']}&page=${pageno}&tab=${tabno}'><img src='${root}/pix/delete_s.gif' title='Delete port forwarding' border=0 width=16 height=16></a></td>";
+		echo "<td><a href='process.php?op=delPortForwarding&localip=${pf['localip']}&localport=${pf['localport']}&remoteip=${pf['remoteip']}&remoteport=${pf['remoteport']}&proto=${pf['proto_bin']}&object_id=${pf['object_id']}&page=${pageno}&tab=${tabno}'>";
+		printImageHREF ('delete', 'Delete NAT rule');
+		echo "</a></td>";
 		echo "<td>${pf['proto']}/<a href='${root}?page=ipaddress&tab=default&ip=${pf['localip']}'>${pf['localip']}</a>:${pf['localport']}</td>";
 		echo "<td class='description'><a href='${root}?page=object&tab=default&object_id=${pf['object_id']}'>${pf['object_name']}</a>";
 		echo "</td><td><a href='${root}?page=ipaddress&tab=default&ip=${pf['remoteip']}'>${pf['remoteip']}</a>:${pf['remoteport']}</td>";
@@ -2969,6 +2975,9 @@ function printImageHREF ($tag, $title = '', $do_input = FALSE, $tabindex = 0)
 	$image['notinservice']['path'] = 'pix/stop.png';
 	$image['notinservice']['width'] = 16;
 	$image['notinservice']['height'] = 16;
+	$image['find']['path'] = 'pix/find.png';
+	$image['find']['width'] = 16;
+	$image['find']['height'] = 16;
 	if (!isset ($image[$tag]))
 		$tag = 'error';
 	$img = $image[$tag];
