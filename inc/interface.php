@@ -3681,6 +3681,7 @@ function renderLVSConfig ($object_id = 0)
 		);
 		$vsconfig = apply_macros ($macros, $vsinfo['vs_vsconfig'] . $vsinfo['lb_vsconfig'] . $vsinfo['pool_vsconfig']);
 		$newconfig .=  "virtual_server ${vsinfo['vip']} ${vsinfo['vport']} {\n";
+		$newconfig .=  "\tprotocol ${vsinfo['proto']}\n";
 		$newconfig .=  "${vsconfig}\n";
 		foreach ($vsinfo['rslist'] as $rs)
 		{
