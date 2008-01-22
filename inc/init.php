@@ -46,17 +46,22 @@ catch (PDOException $e)
 	die();
 }
 
-set_magic_quotes_runtime (0);
+if (get_magic_quotes_gpc())
+	foreach ($_REQUEST as $key => $value)
+		$_REQUEST[$key] = stripslashes ($value);
+
+if (!set_magic_quotes_runtime (0))
+{
+	showError ('Failed to turn magic quotes off');
+	die;
+}
 
 // Escape any globals before we ever try to use them.
 foreach ($_REQUEST as $key => $value)
 {
 	if (gettype ($value) != 'string')
 		continue;
-#	if ($key != 'vsconfig' and $key != 'rsconfig')
-#		$_REQUEST[$key] = escapeString ($value);
-#	else
-		$_REQUEST[$key] = escapeString ($value, FALSE);
+		$_REQUEST[$key] = escapeString ($value);
 }
 
 if (isset ($_SERVER['PHP_AUTH_USER']))
