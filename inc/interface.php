@@ -3652,6 +3652,15 @@ function apply_macros ($macros, $subject)
 	return $ret;
 }
 
+// Make sure the string is always wrapped with LF characters
+function lf_wrap ($str)
+{
+	$ret = trim ($str, "\r\n");
+	if (!empty ($ret))
+		$ret .= "\n";
+	return $ret;
+}
+
 function renderLVSConfig ($object_id = 0)
 {
 	global $pageno, $tabno;
@@ -3679,7 +3688,13 @@ function renderLVSConfig ($object_id = 0)
 			'%VNAME%' =>  $vsinfo['vs_name'],
 			'%RSPOOLNAME%' => $vsinfo['pool_name']
 		);
-		$vsconfig = apply_macros ($macros, $vsinfo['vs_vsconfig'] . $vsinfo['lb_vsconfig'] . $vsinfo['pool_vsconfig']);
+		$vsconfig = apply_macros
+		(
+			$macros,
+			lf_wrap ($vsinfo['vs_vsconfig']) .
+			lf_wrap ($vsinfo['lb_vsconfig']) .
+			lf_wrap ($vsinfo['pool_vsconfig'])
+		);
 		$newconfig .=  "virtual_server ${vsinfo['vip']} ${vsinfo['vport']} {\n";
 		$newconfig .=  "\tprotocol ${vsinfo['proto']}\n";
 		$newconfig .=  "${vsconfig}\n";
@@ -3687,7 +3702,14 @@ function renderLVSConfig ($object_id = 0)
 		{
 			$macros['%RSIP%'] = $rs['rsip'];
 			$macros['%RSPORT%'] = $rs['rsport'];
-			$rsconfig = apply_macros ($macros, $vsinfo['vs_rsconfig'] . $vsinfo['lb_rsconfig'] . $vsinfo['pool_rsconfig'] . $rs['rs_rsconfig']);
+			$rsconfig = apply_macros
+			(
+				$macros,
+				lf_wrap ($vsinfo['vs_rsconfig']) .
+				lf_wrap ($vsinfo['lb_rsconfig']) .
+				lf_wrap ($vsinfo['pool_rsconfig']) .
+				lf_wrap ($rs['rs_rsconfig'])
+			);
 			$newconfig .=  "\treal_server ${rs['rsip']} ${rs['rsport']} {\n";
 			$newconfig .=  "\t${rsconfig}\n";
 			$newconfig .=  "\t}\n";
