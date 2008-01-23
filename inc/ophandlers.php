@@ -1067,7 +1067,7 @@ function updateLoadBalancer ()
 	if (!commitUpdateLB ($_REQUEST['object_id'], $pool_id, $_REQUEST['vs_id'], $_REQUEST['vsconfig'], $_REQUEST['rsconfig']))
 		return "${root}?page=${pageno}&tab=${tabno}&id=${pool_id}&error=" . urlencode ('commitUpdateLB() failed');
 	else
-		return "${root}?page=${pageno}&tab=${tabno}&id=${pool_id}&message=" . urlencode ("Real server was successfully updated");
+		return "${root}?page=${pageno}&tab=${tabno}&id=${pool_id}&message=" . urlencode ("Load balancer info was successfully updated");
 }
 
 function updateVService ()
