@@ -1126,4 +1126,22 @@ function getObjectCount ($rackData)
 	return count ($objects);
 }
 
+// Perform substitutions and return resulting string
+function apply_macros ($macros, $subject)
+{
+	$ret = $subject;
+	foreach ($macros as $search => $replace)
+		$ret = str_replace ($search, $replace, $ret);
+	return $ret;
+}
+
+// Make sure the string is always wrapped with LF characters
+function lf_wrap ($str)
+{
+	$ret = trim ($str, "\r\n");
+	if (!empty ($ret))
+		$ret .= "\n";
+	return $ret;
+}
+
 ?>

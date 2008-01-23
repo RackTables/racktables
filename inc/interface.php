@@ -3643,24 +3643,6 @@ Dictionary edit page in Configuration section.
 <?php
 }
 
-// Perform substitutions and return resulting string
-function apply_macros ($macros, $subject)
-{
-	$ret = $subject;
-	foreach ($macros as $search => $replace)
-		$ret = str_replace ($search, $replace, $ret);
-	return $ret;
-}
-
-// Make sure the string is always wrapped with LF characters
-function lf_wrap ($str)
-{
-	$ret = trim ($str, "\r\n");
-	if (!empty ($ret))
-		$ret .= "\n";
-	return $ret;
-}
-
 function renderLVSConfig ($object_id = 0)
 {
 	global $pageno, $tabno;
@@ -3688,21 +3670,21 @@ function renderLVSConfig ($object_id = 0)
 			'%VNAME%' =>  $vsinfo['vs_name'],
 			'%RSPOOLNAME%' => $vsinfo['pool_name']
 		);
-		$vsconfig = apply_macros
+		$newconfig .=  "virtual_server ${vsinfo['vip']} ${vsinfo['vport']} {\n";
+		$newconfig .=  "\tprotocol ${vsinfo['proto']}\n";
+		$newconfig .= apply_macros
 		(
 			$macros,
 			lf_wrap ($vsinfo['vs_vsconfig']) .
 			lf_wrap ($vsinfo['lb_vsconfig']) .
 			lf_wrap ($vsinfo['pool_vsconfig'])
 		);
-		$newconfig .=  "virtual_server ${vsinfo['vip']} ${vsinfo['vport']} {\n";
-		$newconfig .=  "\tprotocol ${vsinfo['proto']}\n";
-		$newconfig .=  "${vsconfig}\n";
 		foreach ($vsinfo['rslist'] as $rs)
 		{
 			$macros['%RSIP%'] = $rs['rsip'];
 			$macros['%RSPORT%'] = $rs['rsport'];
-			$rsconfig = apply_macros
+			$newconfig .=  "\treal_server ${rs['rsip']} ${rs['rsport']} {\n";
+			$newconfig .= apply_macros
 			(
 				$macros,
 				lf_wrap ($vsinfo['vs_rsconfig']) .
@@ -3710,8 +3692,6 @@ function renderLVSConfig ($object_id = 0)
 				lf_wrap ($vsinfo['pool_rsconfig']) .
 				lf_wrap ($rs['rs_rsconfig'])
 			);
-			$newconfig .=  "\treal_server ${rs['rsip']} ${rs['rsport']} {\n";
-			$newconfig .=  "\t${rsconfig}\n";
 			$newconfig .=  "\t}\n";
 		}
 		$newconfig .=  "}\n\n\n";
