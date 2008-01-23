@@ -4009,18 +4009,20 @@ function renderRSPool ($pool_id = 0)
 
 function renderVSList ()
 {
-	global $root;
+	global $root, $nextorder;
 	$vslist = getVSList();
 	echo "<table class=widetable border=0 cellpadding=10 cellspacing=0 align=center>\n";
 	echo "<tr><th>endpoint</th><th>name</th><th>VS configuration</th><th>RS configuration</th></tr>";
+	$order = 'odd';
 	foreach ($vslist as $vsid => $vsinfo)
 	{
-		echo "<tr valign=top><td class=tdleft><a href='${root}?page=vservice&id=${vsid}'>" . buildVServiceName ($vsinfo);
+		echo "<tr valign=top class=row_${order}><td class=tdleft><a href='${root}?page=vservice&id=${vsid}'>" . buildVServiceName ($vsinfo);
 		echo "</a></td>";
 		echo "<td class=tdleft>${vsinfo['name']}</td>";
 		echo "<td><pre>${vsinfo['vsconfig']}</pre></td>";
 		echo "<td><pre>${vsinfo['rsconfig']}</pre></td>";
 		echo "</tr>\n";
+		$order = $nextorder[$order];
 	}
 	echo "</table>";
 }
@@ -4094,7 +4096,7 @@ function renderVSListEditForm ()
 
 function renderRSPoolList ()
 {
-	global $root;
+	global $root, $nextorder;
 	$pool_list = getRSPoolList();
 	if ($pool_list === NULL)
 	{
@@ -4103,14 +4105,16 @@ function renderRSPoolList ()
 	}
 	echo "<table class=widetable border=0 cellpadding=10 cellspacing=0 align=center>\n";
 	echo "<tr><th>refcnt</th><th>name</th><th>VS configuration</th><th>RS configuration</th></tr>";
+	$order = 'odd';
 	foreach ($pool_list as $pool_id => $pool_info)
 	{
-		echo '<tr><td>' . ($pool_info['refcnt'] ? $pool_info['refcnt'] : '&nbsp;') . '</td>';
+		echo "<tr valign=top class=row_${order}><td>" . ($pool_info['refcnt'] ? $pool_info['refcnt'] : '&nbsp;') . '</td>';
 		echo "<td><a href='${root}?page=rspool&id=${pool_id}'>";
 		echo (empty ($pool_info['name']) ? 'ANONYMOUS' : $pool_info['name']) . '</a></td>';
 		echo "<td><pre>${pool_info['vsconfig']}</pre></td>";
 		echo "<td><pre>${pool_info['rsconfig']}</pre></td>";
 		echo "</tr>\n";
+		$order = $nextorder[$order];
 	}
 	echo "</table>";
 }
@@ -4169,14 +4173,21 @@ function editRSPools ()
 
 function renderRealServerList ()
 {
-	global $root;
+	global $root, $nextorder;
 	$rslist = getRSList ();
 	$pool_list = getRSPoolList ();
 	echo "<table class=widetable border=0 cellpadding=10 cellspacing=0 align=center>\n";
 	echo "<tr><th>RS pool</th><th>in service</th><th>real IP address</th><th>real port</th><th>RS configuration</th></tr>";
+	$order = 'even';
+	$last_pool_id = 0;
 	foreach ($rslist as $rsinfo)
 	{
-		echo "<tr valign=top><td><a href='${root}?page=rspool&id=${rsinfo['rspool_id']}'>";
+		if ($last_pool_id != $rsinfo['rspool_id'])
+		{
+			$order = $nextorder[$order];
+			$last_pool_id = $rsinfo['rspool_id'];
+		}
+		echo "<tr valign=top class=row_${order}><td><a href='${root}?page=rspool&id=${rsinfo['rspool_id']}'>";
 		echo empty ($pool_list[$rsinfo['rspool_id']]['name']) ? 'ANONYMOUS' : $pool_list[$rsinfo['rspool_id']]['name'];
 		echo '</a></td><td align=center>';
 		if ($rsinfo['inservice'] == 'yes')
@@ -4193,17 +4204,19 @@ function renderRealServerList ()
 
 function renderLBList ()
 {
-	global $root;
+	global $root, $nextorder;
 	echo "<table class=widetable border=0 cellpadding=10 cellspacing=0 align=center>\n";
 	echo "<tr><th>Object</th><th>RS pools configured</th></tr>";
 	$oicache = array();
+	$order = 'odd';
 	foreach (getLBList() as $object_id => $poolcount)
 	{
 		if (!isset ($oicache[$object_id]))
 			$oicache[$object_id] = getObjectInfo ($object_id);
-		echo "<tr valign=top><td><a href='${root}?page=object&object_id=${object_id}'>";
+		echo "<tr valign=top class=row_${order}><td><a href='${root}?page=object&object_id=${object_id}'>";
 		echo $oicache[$object_id]['dname'] . '</a></td>';
 		echo "<td>${poolcount}</td></tr>";
+		$order = $nextorder[$order];
 	}
 	echo "</table>";
 }
