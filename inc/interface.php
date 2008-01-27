@@ -2698,7 +2698,7 @@ function renderDictionaryEditor ()
 	foreach ($dict as $chapter_no => $chapter)
 	{
 		$order = 'odd';
-		echo "<tr><th>Chapter</th><th>refs</th><th>Word</th><th>&nbsp;</th></tr>\n";
+		echo "<tr><th>Chapter</th><th>&nbsp;</th><th>Word</th><th>&nbsp;</th></tr>\n";
 		$wc = count ($chapter['word']);
 		// One extra span for the new record per each chapter block.
 		echo "<tr class=row_${order}><td class=tdleft" . ($wc ? ' rowspan = ' . ($wc + 1) : '');
@@ -2712,6 +2712,7 @@ function renderDictionaryEditor ()
 		echo "<td class=tdright><input type=text name=dict_value size=32></td>";
 		echo "<td><input type=submit value='Add new'></td>";
 		echo '</tr></form>';
+		$order = $nextorder[$order];
 		foreach ($chapter['word'] as $key => $value)
 		{
 			echo "<form action='${root}process.php' method=post>";
@@ -2723,7 +2724,7 @@ function renderDictionaryEditor ()
 			echo "<tr class=row_${order}><td>";
 			// Prevent deleting words currently used somewhere.
 			if ($chapter['refcnt'][$key])
-				printImageHREF ('nodelete', 'referenced ' . $chapter['refcnt'][$key] . ' time(s)';
+				printImageHREF ('nodelete', 'referenced ' . $chapter['refcnt'][$key] . ' time(s)');
 			else
 			{
 				echo "<a href='${root}process.php?page=${pageno}&tab=${tabno}&op=del&chapter_no=${chapter['no']}&dict_key=${key}'>";
