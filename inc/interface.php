@@ -408,9 +408,16 @@ function renderEditObjectForm ($object_id)
 	foreach ($values as $record)
 	{
 		echo "<input type=hidden name=${i}_attr_id value=${record['id']}>";
-		echo "<tr><td><a href=${root}process.php?page=${pageno}&tab=${tabno}&op=del&object_id=${object_id}&attr_id=${record['id']}>";
-		printImageHREF ('delete', 'Delete value');
-		echo "</a></td>";
+		echo '<tr><td>';
+		if (!empty ($record['key']))
+		{
+			echo "<a href=${root}process.php?page=${pageno}&tab=${tabno}&op=del&object_id=${object_id}&attr_id=${record['id']}>";
+			printImageHREF ('delete', 'Delete value');
+			echo '</a>';
+		}
+		else
+			printImageHREF ('nodelete', 'Already empty');
+		echo '</td>';
 		echo "<td class=tdright>${record['name']}:</td><td class=tdleft>";
 		switch ($record['type'])
 		{
@@ -1753,16 +1760,16 @@ function renderAddNewRange ()
 		$range = getIPRange($iprange['id']);
 		$usedips = count ($range['addrlist']);
 		$totalips = ($iprange['ip_bin'] | $iprange['mask_bin_inv']) - ($iprange['ip_bin'] & $iprange['mask_bin']) + 1;
-		echo "<tr>";
+		echo "<tr><td>";
 		if ($usedips == 0)
 		{
-			echo "<td><a href='process.php?op=delRange&page=${pageno}&tab=${tabno}&id=${iprange['id']}'>";
+			echo "<a href='process.php?op=delRange&page=${pageno}&tab=${tabno}&id=${iprange['id']}'>";
 			printImageHREF ('delete', 'Delete this IP range');
-			echo "</a></td>\n";
+			echo "</a>";
 		}
 		else
-			echo "<td>&nbsp</td>";
-		echo "<td><a href='${root}?page=iprange&id=${iprange['id']}'>${iprange['ip']}/${iprange['mask']}</a></td><td>${iprange['name']}</td><td class=tdleft>";
+			printImageHREF ('nodelete', 'There are IP addresses allocated or reserved');
+		echo "</td>\n<td><a href='${root}?page=iprange&id=${iprange['id']}'>${iprange['ip']}/${iprange['mask']}</a></td><td>${iprange['name']}</td><td class=tdleft>";
 		renderProgressBar ($usedips / $totalips);
 		echo " ${usedips}/${totalips}";
 		echo "</td></tr>";
@@ -2716,7 +2723,7 @@ function renderDictionaryEditor ()
 			echo "<tr class=row_${order}><td>";
 			// Prevent deleting words currently used somewhere.
 			if ($chapter['refcnt'][$key])
-				echo $chapter['refcnt'][$key];
+				printImageHREF ('nodelete', 'referenced ' . $chapter['refcnt'][$key] . ' time(s)';
 			else
 			{
 				echo "<a href='${root}process.php?page=${pageno}&tab=${tabno}&op=del&chapter_no=${chapter['no']}&dict_key=${key}'>";
@@ -2753,8 +2760,10 @@ function renderChaptersEditor ()
 		echo "<input type=hidden name=chapter_no value='${chapter['no']}'>";
 		echo '<tr>';
 		echo '<td>';
-		if ($sticky or $wordcount > 0)
-			echo '&nbsp;';
+		if ($sticky)
+			printImageHREF ('nodelete', 'system chapter');
+		elseif ($wordcount > 0)
+			printImageHREF ('nodelete', 'contains ' . $wordcount . ' word(s)');
 		else
 		{
 			echo "<a href='${root}process.php?page=${pageno}&tab=${tabno}&op=del&chapter_no=${chapter['no']}'>";
@@ -2964,6 +2973,9 @@ function printImageHREF ($tag, $title = '', $do_input = FALSE, $tabindex = 0)
 	$image['delete']['path'] = 'pix/delete_s.gif';
 	$image['delete']['width'] = 16;
 	$image['delete']['height'] = 16;
+	$image['nodelete']['path'] = 'pix/delete_g.png';
+	$image['nodelete']['width'] = 16;
+	$image['nodelete']['height'] = 16;
 	$image['grant'] = $image['add'];
 	$image['revoke'] = $image['delete'];
 	$image['helphint']['path'] = 'pix/helphint.png';
@@ -4049,7 +4061,7 @@ function renderVSListEditForm ()
 		echo "<input type=hidden name=id value=${vsid}>\n";
 		echo "<tr valign=top class=row_${order}><td>";
 		if ($vsinfo['poolcount'])
-			echo '&nbsp;';
+			printImageHREF ('nodelete', 'there are ' . $vsinfo['poolcount'] . ' RS pools configured');
 		else
 		{
 			echo "<a href='${root}process.php?page=${pageno}&tab=${tabno}&op=del&id=${vsid}'>";
@@ -4140,7 +4152,7 @@ function editRSPools ()
 		echo "<input type=hidden name=id value=${pool_id}>\n";
 		echo "<tr valign=top class=row_${order}><td>";
 		if ($pool_info['refcnt'])
-			echo '&nbsp;';
+			printImageHREF ('nodelete', 'RS pool is used ' . $pool_info['refcnt'] . ' time(s)');
 		else
 		{
 			echo "<a href='${root}process.php?page=${pageno}&tab=${tabno}&op=del&id=${pool_id}'>";
