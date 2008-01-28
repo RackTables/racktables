@@ -1,4 +1,8 @@
 <?php
+
+// This draft doesn't do anything useful at the moment. When it is finished,
+// the README will be updated accordingly.
+
 $stepfunc[1] = 'not_already_installed';
 $stepfunc[2] = 'platform_is_ok';
 $stepfunc[3] = 'init_config';
