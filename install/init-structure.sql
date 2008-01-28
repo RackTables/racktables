@@ -225,7 +225,6 @@ CREATE TABLE `RackSpace` (
   `atom` enum('front','interior','rear') NOT NULL default 'interior',
   `state` enum('A','U','T','W') NOT NULL default 'A',
   `object_id` int(10) unsigned default NULL,
-  `problem_id` int(10) unsigned default NULL,
   PRIMARY KEY  (`rack_id`,`unit_no`,`atom`)
 ) ENGINE=MyISAM;
 
