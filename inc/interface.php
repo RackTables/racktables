@@ -45,8 +45,8 @@ function renderIndex ()
 						<?php printImageHREF ('reports'); ?></a></h1>
 					</td>
 					<td>
-						<h1><a href='<?php echo $root; ?>?page=help'>Help<br>
-						<?php printImageHREF ('help'); ?></a></h1>
+						<h1><a href='<?php echo $root; ?>?page=ipv4slb'>IPv4 SLB<br>
+						<?php printImageHREF ('ipv4slb'); ?></a></h1>
 					</td>
 				</tr>
 			</table>
@@ -1651,7 +1651,6 @@ function renderRackspaceHistory ()
 function renderAddressspace ()
 {
 	global $root, $page;
-	echo '<table border=0 class=objectview cellspacing=0 cellpadding=0><tr><td class=pcleft>';
 
 	startPortlet ('Subnets');
 	echo "<table class='widetable' border=0 cellpadding=10 cellspacing=0 align='center'>\n";
@@ -1669,8 +1668,11 @@ function renderAddressspace ()
 	}
 	echo "</table>\n";
 	finishPortlet();
+}
 
-	echo "</td>\n<td class=pcright>";
+function renderIPv4SLB ()
+{
+	global $root, $page;
 
 	startPortlet ('SLB configuration');
 	echo "<table border=0 width='100%'><tr>";
@@ -1729,8 +1731,6 @@ function renderAddressspace ()
 		echo "</table>\n";
 	}
 	finishPortlet ();
-
-	echo '</td></tr></table>';
 }
 
 function renderAddNewRange ()
@@ -2945,6 +2945,9 @@ function printImageHREF ($tag, $title = '', $do_input = FALSE, $tabindex = 0)
 	$image['ipv4space']['path'] = 'pix/addressspace.png';
 	$image['ipv4space']['width'] = 218;
 	$image['ipv4space']['height'] = 200;
+	$image['ipv4slb']['path'] = 'pix/slb.png';
+	$image['ipv4slb']['width'] = 218;
+	$image['ipv4slb']['height'] = 200;
 	$image['config']['path'] = 'pix/configuration.png';
 	$image['config']['width'] = 218;
 	$image['config']['height'] = 200;

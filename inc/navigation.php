@@ -55,8 +55,6 @@ $tabhandler['rack']['default'] = 'renderRackPage';
 $tabhandler['rack']['edit'] = 'renderEditRackForm';
 $tabhandler['rack']['design'] = 'renderRackDesign';
 $tabhandler['rack']['problems'] = 'renderRackProblems';
-$helptab['rack']['design'] = 'rackspace';
-$helptab['rack']['problems'] = 'rackspace';
 
 $page['objgroup']['title_handler'] = 'dynamic_title_objgroup';
 $page['objgroup']['handler'] = 'handler_objgroup';
@@ -85,10 +83,6 @@ $tabhandler['object']['portfwrd'] = 'renderIPAddressPortForwarding';
 $tabhandler['object']['switchvlans'] = 'renderVLANMembership';
 $tabhandler['object']['snmpportfinder'] = 'renderSNMPPortFinder';
 $tabhandler['object']['lvsconfig'] = 'renderLVSConfig';
-$helptab['object']['network'] = 'nets';
-$helptab['object']['ports'] = 'ports';
-$helptab['object']['portfwrd'] = 'nets';
-$helptab['object']['rackspace'] = 'rackspace';
 $trigger['object']['network'] = 'trigger_ipv4';
 $trigger['object']['portfwrd'] = 'trigger_natv4';
 $trigger['object']['switchvlans'] = 'trigger_switchvlans';
@@ -114,8 +108,6 @@ $page['ipv4space']['title'] = 'IPv4 space';
 $page['ipv4space']['parent'] = 'index';
 $tab['ipv4space']['default'] = 'Browse';
 $tab['ipv4space']['newrange'] = 'Subnets';
-$helptab['ipv4space']['default'] = 'nets';
-$helptab['ipv4space']['newrange'] = 'nets';
 $tabhandler['ipv4space']['default'] = 'renderAddressspace';
 $tabhandler['ipv4space']['newrange'] = 'renderAddNewRange';
 $ophandler['ipv4space']['newrange']['addRange'] = 'addNewrange';
@@ -126,8 +118,6 @@ $page['iprange']['parent'] = 'ipv4space';
 $page['iprange']['bypass'] = 'id';
 $tab['iprange']['default'] = 'Browse';
 $tab['iprange']['properties'] = 'Properties';
-$helptab['iprange']['default'] = 'nets';
-$helptab['iprange']['properties'] = 'nets';
 $tabhandler['iprange']['default'] = 'renderIPRange';
 $tabhandler['iprange']['properties'] = 'renderIPRangeProperties';
 $ophandler['iprange']['properties']['editRange'] = 'editRange';
@@ -138,9 +128,6 @@ $page['ipaddress']['bypass'] = 'ip';
 $tab['ipaddress']['default'] = 'Browse';
 $tab['ipaddress']['properties'] = 'Properties';
 $tab['ipaddress']['assignment'] = 'Allocation';
-$helptab['ipaddress']['default'] = 'nets';
-$helptab['ipaddress']['properties'] = 'nets';
-$helptab['ipaddress']['assignment'] = 'nets';
 $tabhandler['ipaddress']['default'] = 'renderIPAddress';
 $tabhandler['ipaddress']['properties'] = 'renderIPAddressProperties';
 $tabhandler['ipaddress']['assignment'] = 'renderIPAddressAssignment';
@@ -149,8 +136,12 @@ $ophandler['ipaddress']['assignment']['delIpAssignment'] = 'delIpAssignment';
 $ophandler['ipaddress']['assignment']['editBondForAddress'] = 'editIpAssignment';
 $ophandler['ipaddress']['assignment']['bindObjectToIp'] = 'addIpAssignment';
 
+$page['ipv4slb']['title'] = 'IPv4 SLB';
+$page['ipv4slb']['parent'] = 'index';
+$page['ipv4slb']['handler'] = 'renderIPv4SLB';
+
 $page['vservices']['title'] = 'Virtual services';
-$page['vservices']['parent'] = 'ipv4space';
+$page['vservices']['parent'] = 'ipv4slb';
 $tab['vservices']['default'] = 'View';
 $tab['vservices']['edit'] = 'Edit';
 $tabhandler['vservices']['default'] = 'renderVSList';
@@ -166,7 +157,7 @@ $page['vservice']['bypass_type'] = 'uint';
 $page['vservice']['handler'] = 'renderVirtualService';
 
 $page['rspools']['title'] = 'RS pools';
-$page['rspools']['parent'] = 'ipv4space';
+$page['rspools']['parent'] = 'ipv4slb';
 $tab['rspools']['default'] = 'View';
 $tab['rspools']['edit'] = 'Edit';
 $tabhandler['rspools']['default'] = 'renderRSPoolList';
@@ -197,11 +188,11 @@ $ophandler['rspool']['editlblist']['updLB'] = 'updateLoadBalancer';
 $ophandler['rspool']['rsinservice']['upd'] = 'updateRSInService';
 
 $page['rservers']['title'] = 'Real servers';
-$page['rservers']['parent'] = 'ipv4space';
+$page['rservers']['parent'] = 'ipv4slb';
 $page['rservers']['handler'] = 'renderRealServerList';
 
 $page['lbs']['title'] = 'Load balancers';
-$page['lbs']['parent'] = 'ipv4space';
+$page['lbs']['parent'] = 'ipv4slb';
 $page['lbs']['handler'] = 'renderLBList';
 
 $page['search']['title_handler'] = 'dynamic_title_search';
@@ -288,16 +279,6 @@ $tabhandler['reports']['default'] = 'renderReportSummary';
 $page['help']['title'] = 'Help';
 $page['help']['handler'] = 'renderHelpTab';
 $page['help']['parent'] = 'index';
-$tab['help']['default'] = 'Welcome';
-$tab['help']['quickstart'] = 'Quick start';
-$tab['help']['workflow'] = 'Workflow';
-$tab['help']['rackspace'] = 'Rackspace';
-$tab['help']['objects'] = 'Objects';
-$tab['help']['nets'] = 'Networking';
-$tab['help']['auth'] = '[ User accounts & permissions ]';
-$tab['help']['dict'] = '[ Dictionary ]';
-$tab['help']['ports'] = 'Ports and links';
-$tab['help']['hacking'] = '[ Hacker\'s guide ]';
 
 // This function returns array if page numbers leading to the target page
 // plus page number of target page itself. The first element is the target
