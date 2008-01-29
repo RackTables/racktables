@@ -9,11 +9,6 @@ Authentication library for RackTables.
 // username and password.
 function authenticate ()
 {
-	if (array_search (PASSWORD_HASH, hash_algos()) === FALSE)
-	{
-		showError ('Password hash not supported, authentication impossible.', __FUNCTION__);
-		die();
-	}
 	if
 	(
 		!isset ($_SERVER['PHP_AUTH_USER']) or
@@ -44,9 +39,48 @@ function authorize ()
 function authenticated ($username, $password)
 {
 	global $accounts;
-	if (!isset ($accounts[$username]['user_password_hash']))
-		return FALSE;
 	if ($accounts[$username]['user_enabled'] != 'yes')
+		return FALSE;
+	// Always authenticate the administrator locally, thus giving him a chance
+	// to fix broken installation.
+	if ($accounts[$username]['user_id'] == 1)
+		return authenticated_via_database ($username, $password);
+	switch (getConfigVar ('USER_AUTH_SRC'))
+	{
+		case 'database':
+			return authenticated_via_database ($username, $password);
+			break;
+		case 'ldap':
+			return authenticated_via_ldap ($username, $password);
+			break;
+		default:
+			showError ("Unknown user authentication source configured.", __FUNCTION__);
+			return FALSE;
+			break;
+	}
+	// and just to be sure...
+	return FALSE;
+}
+
+function authenticated_via_ldap ($username, $password)
+{
+	return FALSE;
+}
+
+function authenticated_via_database ($username, $password)
+{
+	global $accounts;
+	if (!defined ('HASH_HMAC'))
+	{
+		showError ('Fatal error: PHP hash extension is missing', __FUNCTION__);
+		die();
+	}
+	if (array_search (PASSWORD_HASH, hash_algos()) === FALSE)
+	{
+		showError ('Password hash not supported, authentication impossible.', __FUNCTION__);
+		die();
+	}
+	if (!isset ($accounts[$username]['user_password_hash']))
 		return FALSE;
 	if ($accounts[$username]['user_password_hash'] == hash (PASSWORD_HASH, $password))
 		return TRUE;
