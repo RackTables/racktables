@@ -718,9 +718,11 @@ $accounts = getUserAccounts();
 
 // Auth prompt risk being a little broken here due to config cache absence.
 $configCache = array();
-authenticate();
+// Only administrator is always authenticated locally, so reject others
+// for authenticate() to succeed.
 if ($accounts[$_SERVER['PHP_AUTH_USER']]['user_id'] != 1)
 	die ('You are not allowed to upgrade the database. Ask your RackTables administrator to do this.');
+authenticate();
 
 $dbver = getDatabaseVersion();
 echo 'Code version == ' . CODE_VERSION;
