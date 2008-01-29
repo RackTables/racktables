@@ -105,6 +105,13 @@ INSERT INTO `IPBonds` (`object_id`, `ip`, `name`, `type`) VALUES (934,180879974,
 INSERT INTO `IPBonds` (`object_id`, `ip`, `name`, `type`) VALUES (936,180879975,'','regular');
 INSERT INTO `IPBonds` (`object_id`, `ip`, `name`, `type`) VALUES (938,180879976,'','regular');
 INSERT INTO `IPBonds` (`object_id`, `ip`, `name`, `type`) VALUES (940,180879977,'','regular');
+INSERT INTO `IPBonds` (`object_id`, `ip`, `name`, `type`) VALUES (933,180879978,'','regular');
+INSERT INTO `IPBonds` (`object_id`, `ip`, `name`, `type`) VALUES (935,180879979,'','regular');
+INSERT INTO `IPBonds` (`object_id`, `ip`, `name`, `type`) VALUES (937,180879980,'','regular');
+INSERT INTO `IPBonds` (`object_id`, `ip`, `name`, `type`) VALUES (939,180879981,'','regular');
+INSERT INTO `IPBonds` (`object_id`, `ip`, `name`, `type`) VALUES (941,180879982,'','regular');
+INSERT INTO `IPBonds` (`object_id`, `ip`, `name`, `type`) VALUES (928,180879877,'','regular');
+INSERT INTO `IPBonds` (`object_id`, `ip`, `name`, `type`) VALUES (929,180879878,'','regular');
 
 INSERT INTO `IPLoadBalancer` VALUES (928,1,1,NULL,NULL);
 INSERT INTO `IPLoadBalancer` VALUES (929,1,1,NULL,NULL);
@@ -271,8 +278,8 @@ INSERT INTO `RackObject` (`id`, `name`, `label`, `barcode`, `deleted`, `objtype_
 INSERT INTO `RackObject` (`id`, `name`, `label`, `barcode`, `deleted`, `objtype_id`, `asset_no`, `has_problems`, `comment`) VALUES (925,'Tokyo server 3','tserver03',NULL,'no',4,'srv139','no',NULL);
 INSERT INTO `RackObject` (`id`, `name`, `label`, `barcode`, `deleted`, `objtype_id`, `asset_no`, `has_problems`, `comment`) VALUES (926,'Tokyo switch','tswitch',NULL,'no',8,'net385','no',NULL);
 INSERT INTO `RackObject` (`id`, `name`, `label`, `barcode`, `deleted`, `objtype_id`, `asset_no`, `has_problems`, `comment`) VALUES (927,'New-York router 2','bbrtr2b',NULL,'no',7,'net498','no',NULL);
-INSERT INTO `RackObject` (`id`, `name`, `label`, `barcode`, `deleted`, `objtype_id`, `asset_no`, `has_problems`, `comment`) VALUES (928,'New-York LB A','nylba',NULL,'no',8,'net554','no',NULL);
-INSERT INTO `RackObject` (`id`, `name`, `label`, `barcode`, `deleted`, `objtype_id`, `asset_no`, `has_problems`, `comment`) VALUES (929,'New-York LB B','nylbb',NULL,'no',8,'net555','no',NULL);
+INSERT INTO `RackObject` (`id`, `name`, `label`, `barcode`, `deleted`, `objtype_id`, `asset_no`, `has_problems`, `comment`) VALUES (928,'New-York IPVS LB A','nylba',NULL,'no',4,'net554','no',NULL);
+INSERT INTO `RackObject` (`id`, `name`, `label`, `barcode`, `deleted`, `objtype_id`, `asset_no`, `has_problems`, `comment`) VALUES (929,'New-York IPVS LB B','nylbb',NULL,'no',4,'net555','no',NULL);
 INSERT INTO `RackObject` (`id`, `name`, `label`, `barcode`, `deleted`, `objtype_id`, `asset_no`, `has_problems`, `comment`) VALUES (930,'New-York server switch A','nyswitcha',NULL,'no',8,'net084','no',NULL);
 INSERT INTO `RackObject` (`id`, `name`, `label`, `barcode`, `deleted`, `objtype_id`, `asset_no`, `has_problems`, `comment`) VALUES (931,'New-York server switch B','nyswitchb',NULL,'no',8,'net486','no',NULL);
 INSERT INTO `RackObject` (`id`, `name`, `label`, `barcode`, `deleted`, `objtype_id`, `asset_no`, `has_problems`, `comment`) VALUES (932,'New-York server 1A','nysrv1a',NULL,'no',4,'srv287','no',NULL);
