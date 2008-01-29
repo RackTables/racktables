@@ -616,6 +616,7 @@ CREATE TABLE `IPVirtualService` (
 			$query[] = "INSERT INTO `Config` VALUES ('DEFAULT_SLB_RS_PORT','','uint','yes','no','Default port of SLB real server')";
 			$query[] = "INSERT INTO `Config` VALUES ('IPV4_PERFORMERS','1,4,7,8,12,14','string','yes','no','IPv4-capable object types')";
 			$query[] = "INSERT INTO `Config` VALUES ('NATV4_PERFORMERS','4,7,8','string','yes','no','NATv4-capable object types')";
+			$query[] = "INSERT INTO `Config` VALUES ('USER_AUTH_SRC','database','string','no','no','User authentication source')";
 			$query[] = "alter table RackSpace drop column problem_id";
 			$query[] = "update Config set varvalue = '0.14.9' where varname = 'DB_VERSION'";
 			break; // --------------------------------------------

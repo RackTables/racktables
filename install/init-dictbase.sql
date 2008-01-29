@@ -213,6 +213,7 @@ INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, descriptio
 INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('IPV4_ADDRS_PER_PAGE','256','uint','no','no','IPv4 addresses per page');
 INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('DEFAULT_RACK_HEIGHT','42','uint','yes','no','Default rack height');
 INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('REQUIRE_ASSET_TAG_FOR','4,7,8','string','yes','no','Require asset tag for the following object types');
+INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('USER_AUTH_SRC','database','string','no','no','User authentication source');
 INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('DB_VERSION','0.14.9','string','no','yes','Database version.');
 
 INSERT INTO `UserPermission` (`user_id`, `page`, `tab`, `access`) VALUES (1,'%','%','yes');
