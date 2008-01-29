@@ -633,7 +633,7 @@ CREATE TABLE `IPVirtualService` (
 	}
 	$failures = array();
 	$ndots = 0;
-	echo "<pre>Executing database upgrade batch '${batchid}:\n";
+	echo "<pre>Executing database upgrade batch '${batchid}':\n";
 	foreach ($query as $q)
 	{
 		$result = $dbxlink->query ($q);
