@@ -107,6 +107,8 @@ INSERT INTO `IPBonds` (`object_id`, `ip`, `name`, `type`) VALUES (938,180879976,
 INSERT INTO `IPBonds` (`object_id`, `ip`, `name`, `type`) VALUES (940,180879977,'','regular');
 
 INSERT INTO `IPLoadBalancer` VALUES (928,1,1,NULL,NULL);
+INSERT INTO `IPLoadBalancer` VALUES (929,1,1,NULL,NULL);
+INSERT INTO `IPLoadBalancer` VALUES (929,2,2,NULL,NULL);
 
 INSERT INTO `IPRanges` (`id`, `ip`, `mask`, `name`) VALUES (96,180879616,26,'London network devices and VIPs');
 INSERT INTO `IPRanges` (`id`, `ip`, `mask`, `name`) VALUES (97,180879680,26,'London HA server farm');
@@ -122,13 +124,20 @@ INSERT INTO `IPRanges` (`id`, `ip`, `mask`, `name`) VALUES (107,180880448,26,'Mo
 
 INSERT INTO `IPRealServer` VALUES (1,'yes',180879973,80,1,NULL);
 INSERT INTO `IPRealServer` VALUES (2,'yes',180879974,80,1,NULL);
-INSERT INTO `IPRealServer` VALUES (3,'yes',180879975,80,1,NULL);
+INSERT INTO `IPRealServer` VALUES (3,'no',180879975,80,1,NULL);
 INSERT INTO `IPRealServer` VALUES (4,'yes',180879976,80,1,NULL);
 INSERT INTO `IPRealServer` VALUES (5,'yes',180879977,80,1,NULL);
+INSERT INTO `IPRealServer` VALUES (6,'no',180879978,8080,2,NULL);
+INSERT INTO `IPRealServer` VALUES (7,'yes',180879979,8080,2,NULL);
+INSERT INTO `IPRealServer` VALUES (8,'yes',180879980,8080,2,NULL);
+INSERT INTO `IPRealServer` VALUES (9,'yes',180879981,8080,2,NULL);
+INSERT INTO `IPRealServer` VALUES (10,'yes',180879982,8080,2,NULL);
 
-INSERT INTO `IPRSPool` VALUES (1,'Apache pool',NULL,NULL);
+INSERT INTO `IPRSPool` VALUES (1,'Apache servers',NULL,NULL);
+INSERT INTO `IPRSPool` VALUES (2,'Resin servers',NULL,NULL);
 
 INSERT INTO `IPVirtualService` VALUES (1,180879877,80,'TCP','virtual web','lvs_sched wlc\r\nlvs_method NAT\r\ndelay_loop 3\r\nalpha\r\nomega\r\nquorum 3\r\nhysteresis 1\r\n\r\n# this is a comment\r\n# VS name is %VNAME%\r\n#\r\n','HTTP_GET {\r\nurl {\r\npath /\r\nstatus_code 200\r\n}\r\nconnect_timeout 1\r\n}');
+INSERT INTO `IPVirtualService` VALUES (2,180879878,80,'TCP','virtual app','lvs_sched wlc\r\nlvs_method NAT\r\ndelay_loop 3\r\nalpha\r\nomega\r\nquorum 3\r\nhysteresis 1\r\n\r\n','HTTP_GET {\r\nurl {\r\npath /\r\nstatus_code 200\r\n}\r\nconnect_timeout 1\r\n}');
 
 INSERT INTO `Link` (`porta`, `portb`) VALUES (3057,3071);
 INSERT INTO `Link` (`porta`, `portb`) VALUES (3058,3084);
