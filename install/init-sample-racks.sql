@@ -100,6 +100,13 @@ INSERT INTO `IPBonds` (`object_id`, `ip`, `name`, `type`) VALUES (918,180879677,
 INSERT INTO `IPBonds` (`object_id`, `ip`, `name`, `type`) VALUES (909,180880254,'fa2/0','regular');
 INSERT INTO `IPBonds` (`object_id`, `ip`, `name`, `type`) VALUES (914,180879676,'','virtual');
 INSERT INTO `IPBonds` (`object_id`, `ip`, `name`, `type`) VALUES (913,180879676,'','virtual');
+INSERT INTO `IPBonds` (`object_id`, `ip`, `name`, `type`) VALUES (932,180879973,'','regular');
+INSERT INTO `IPBonds` (`object_id`, `ip`, `name`, `type`) VALUES (934,180879974,'','regular');
+INSERT INTO `IPBonds` (`object_id`, `ip`, `name`, `type`) VALUES (936,180879975,'','regular');
+INSERT INTO `IPBonds` (`object_id`, `ip`, `name`, `type`) VALUES (938,180879976,'','regular');
+INSERT INTO `IPBonds` (`object_id`, `ip`, `name`, `type`) VALUES (940,180879977,'','regular');
+
+INSERT INTO `IPLoadBalancer` VALUES (928,1,1,NULL,NULL);
 
 INSERT INTO `IPRanges` (`id`, `ip`, `mask`, `name`) VALUES (96,180879616,26,'London network devices and VIPs');
 INSERT INTO `IPRanges` (`id`, `ip`, `mask`, `name`) VALUES (97,180879680,26,'London HA server farm');
@@ -112,6 +119,16 @@ INSERT INTO `IPRanges` (`id`, `ip`, `mask`, `name`) VALUES (104,180879364,31,'NY
 INSERT INTO `IPRanges` (`id`, `ip`, `mask`, `name`) VALUES (105,180879366,31,'T-M P2P');
 INSERT INTO `IPRanges` (`id`, `ip`, `mask`, `name`) VALUES (106,180880384,26,'Moscow network devices');
 INSERT INTO `IPRanges` (`id`, `ip`, `mask`, `name`) VALUES (107,180880448,26,'Moscow servers');
+
+INSERT INTO `IPRealServer` VALUES (1,'yes',180879973,80,1,NULL);
+INSERT INTO `IPRealServer` VALUES (2,'yes',180879974,80,1,NULL);
+INSERT INTO `IPRealServer` VALUES (3,'yes',180879975,80,1,NULL);
+INSERT INTO `IPRealServer` VALUES (4,'yes',180879976,80,1,NULL);
+INSERT INTO `IPRealServer` VALUES (5,'yes',180879977,80,1,NULL);
+
+INSERT INTO `IPRSPool` VALUES (1,'Apache pool',NULL,NULL);
+
+INSERT INTO `IPVirtualService` VALUES (1,180879877,80,'TCP','virtual web','lvs_sched wlc\r\nlvs_method NAT\r\ndelay_loop 3\r\nalpha\r\nomega\r\nquorum 3\r\nhysteresis 1\r\n\r\n# this is a comment\r\n# VS name is %VNAME%\r\n#\r\n','HTTP_GET {\r\nurl {\r\npath /\r\nstatus_code 200\r\n}\r\nconnect_timeout 1\r\n}');
 
 INSERT INTO `Link` (`porta`, `portb`) VALUES (3057,3071);
 INSERT INTO `Link` (`porta`, `portb`) VALUES (3058,3084);
