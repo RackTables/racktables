@@ -913,6 +913,11 @@ function resetUIConfig()
 	setConfigVar ('IPV4_ADDRS_PER_PAGE','256');
 	setConfigVar ('DEFAULT_RACK_HEIGHT','42');
 	setConfigVar ('REQUIRE_ASSET_TAG_FOR','4,7,8');
+	setConfigVar ('USER_AUTH_SRC','database');
+	setConfigVar ('DEFAULT_SLB_VS_PORT','');
+	setConfigVar ('DEFAULT_SLB_RS_PORT','');
+	setConfigVar ('IPV4_PERFORMERS','1,4,7,8,12,14');
+	setConfigVar ('NATV4_PERFORMERS','4,7,8');
 	return "${root}?page=${pageno}&tab=default&message=" . urlencode ("Reset complete");
 }
 
