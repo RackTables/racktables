@@ -154,8 +154,8 @@ $page['vservice']['title_handler'] = 'dynamic_title_vservice';
 $page['vservice']['parent'] = 'vservices';
 $page['vservice']['bypass'] = 'id';
 $page['vservice']['bypass_type'] = 'uint';
-$tab['vservices']['default'] = 'View';
-$tab['vservices']['edit'] = '[Edit]';
+$tab['vservice']['default'] = 'View';
+$tab['vservice']['edit'] = '[Edit]';
 $tabhandler['vservice']['default'] = 'renderVirtualService';
 
 $page['rspools']['title'] = 'RS pools';
