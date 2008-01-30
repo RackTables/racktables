@@ -64,6 +64,14 @@ function authenticated ($username, $password)
 
 function authenticated_via_ldap ($username, $password)
 {
+	global $ldap_server, $ldap_domain;
+	if ($connect = @ldap_connect ($ldap_server))
+		if ($bind = @ldap_bind ($connect, "${username}@${ldap_domain}", $password))
+		{
+			@ldap_close ($connect);
+			return TRUE;
+		}
+	@ldap_close ($connect);
 	return FALSE;
 }
 
