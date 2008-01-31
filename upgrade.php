@@ -8,7 +8,16 @@
 // Returning an empty array means that no upgrade is necessary.
 function getDBUpgradePath ($v1, $v2)
 {
-	$versionhistory = array ('0.14.4', '0.14.5', '0.14.6', '0.14.7', '0.14.8', '0.14.9');
+	$versionhistory = array
+	(
+		'0.14.4',
+		'0.14.5',
+		'0.14.6',
+		'0.14.7',
+		'0.14.8',
+		'0.14.9',
+		'0.14.10'
+	);
 	if (!in_array ($v1, $versionhistory) || !in_array ($v2, $versionhistory))
 	{
 		showError ("An upgrade path has been requested for versions '${v1}' and '${v2}', " .
@@ -620,11 +629,15 @@ CREATE TABLE `IPVirtualService` (
 			$query[] = "alter table RackSpace drop column problem_id";
 			$query[] = "update Config set varvalue = '0.14.9' where varname = 'DB_VERSION'";
 			break; // --------------------------------------------
-#		case '0.14.10':
+		case '0.14.10':
+			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('DETECT_URLS','no','string','yes','no','Detect URLs in text fields')";
+			$query[] = "update Config set varvalue = '0.14.10' where varname = 'DB_VERSION'";
+#			break; // --------------------------------------------
+#		case '0.14.11':
 #			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('AUTO_PORTS_CONFIG','FIXME','string','yes','no','Autoports configuration')";
 #			$query[] = "alter table Rack add column left_is_front enum ('yes', 'no') not null default 'yes' after height";
 #			$query[] = "alter table Rack add column bottom_is_unit1 enum ('yes', 'no') not null default 'yes' after left_is_front";
-#			$query[] = "update Config set varvalue = '0.14.10' where varname = 'DB_VERSION'";
+#			$query[] = "update Config set varvalue = '0.14.11' where varname = 'DB_VERSION'";
 #			break; // --------------------------------------------
 		default:
 			showError ("executeUpgradeBatch () failed, because batch '${batchid}' isn't defined");
