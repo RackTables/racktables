@@ -162,6 +162,10 @@ tr.hl {
 }
 
 .trwarning {
+	background-color: #FFFF80;
+}
+
+.trerror {
 	background-color: #FF8080;
 }
 

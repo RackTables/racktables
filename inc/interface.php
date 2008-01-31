@@ -730,11 +730,11 @@ function renderRackObject ($object_id = 0)
 			$notvirtnum = countRefsOfType($addr['references'], 'virtual', 'neq');
 
 			if ($addr['address_reserved']=='yes')
-				$class='trwarning';
+				$class='trerror';
 			elseif ($addr['type']!='virtual' && $regnum>0)
-				$class='trwarning';
+				$class='trerror';
 			elseif ($addr['type']=='regular' && $sharednum>0)
-				$class='trwarning';
+				$class='trerror';
 			else 
 				$class='';
 
@@ -810,7 +810,7 @@ function renderRackObject ($object_id = 0)
 
 			foreach ($forwards['out'] as $pf)
 			{
-				$class='trwarning';
+				$class='trerrorg';
 				$name='';
 				foreach ($addresses as $addr)
 					if ($addr['ip'] == $pf['localip'])
@@ -1068,11 +1068,11 @@ function renderNetworkForObject ($object_id=0)
 		$notvirtnum = countRefsOfType($addr['references'], 'virtual', 'neq');
 
 		if ($addr['address_reserved']=='yes')
-			$class='trwarning';
+			$class='trerror';
 		elseif ($addr['type']!='virtual' && $regnum>0)
-			$class='trwarning';
+			$class='trerror';
 		elseif ($addr['type']=='regular' && $sharednum>0)
-			$class='trwarning';
+			$class='trerror';
 		else 
 			$class='';
 
@@ -1826,9 +1826,9 @@ function renderIPRange ($id)
 			
 			$addr = $range['addrlist'][$ip];
 			if ( ($numshared > 0 && $numreg > 0) || $numreg > 1 )
-				echo "<tr class='trwarning'>";
+				echo "<tr class='trerror'>";
 			elseif ( $addr['reserved'] == 'yes' and $numshared+$numreg+$numvirt > 0)
-				echo "<tr class='trwarning'>";
+				echo "<tr class='trerror'>";
 			elseif ( $addr['reserved'] == 'yes')
 				echo "<tr class='trbusy'>";
 			elseif ( $numshared > 0 || $numreg > 0)
@@ -1896,9 +1896,9 @@ function renderIPAddress ()
 
 	
 	if ( ($numshared > 0 && $numreg > 0) || $numreg > 1 )
-		$class='trwarning';
+		$class='trerror';
 	elseif ( $address['reserved'] == 'yes' and $numshared+$numreg+$numvirt > 0)
-		$class='trwarning';
+		$class='trerror';
 	else
 		$class='';
 
@@ -1968,9 +1968,9 @@ function renderIPAddressAssignment ()
 
 	
 	if ( ($numshared > 0 && $numreg > 0) || $numreg > 1 )
-		$class='trwarning';
+		$class='trerror';
 	elseif ( $address['reserved'] == 'yes' and $numshared+$numreg+$numvirt > 0)
-		$class='trwarning';
+		$class='trerror';
 	else
 		$class='';
 
@@ -2044,7 +2044,7 @@ function renderIPAddressPortForwarding ($object_id=0)
 
 	foreach ($forwards['out'] as $pf)
 	{
-		$class='trwarning';
+		$class='trerror';
 		$name='';
 		foreach ($addresses as $addr)
 			if ($addr['ip'] == $pf['localip'])
@@ -4309,10 +4309,18 @@ function renderLivePTR ($id = 0)
 		$straddr = long2ip ($ip);
 		$ptrname = gethostbyaddr ($straddr);
 		echo '<tr';
-		if (!empty ($addr['name']) and $addr['name'] != $ptrname)
-			echo ' class=trwarning';
-		elseif (!empty ($addr['name']))
-			echo ' class=trok';
+		if (empty ($addr['name']))
+		{
+			if (!empty ($ptrname))
+				echo ' class=trwarning';
+		}
+		else
+		{
+			if ($addr['name'] != $ptrname)
+				echo ' class=trerror';
+			else
+				echo ' class=trok';
+		}
 		echo "><td><a href='${root}?page=ipaddress&ip=${straddr}'>${straddr}</a></td>";
 		echo "<td>${addr['name']}</td><td>";
 		echo ($straddr == $ptrname) ? '&nbsp;' : $ptrname;
