@@ -602,7 +602,7 @@ function recordHistory ($tableName, $whereClause)
 	$result = $dbxlink->query ($query);
 	if ($result == NULL or $result->rowCount() != 1)
 	{
-		showError ("SQL query failed for table ${tableName}", __FUNCTION__);
+		showError ("SQL query '${query}' failed for table ${tableName}", __FUNCTION__);
 		return FALSE;
 	}
 	return TRUE;
