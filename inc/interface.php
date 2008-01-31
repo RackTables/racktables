@@ -570,7 +570,7 @@ function renderGridForm ($rack_id = 0, $filter, $header, $submit, $state1, $stat
 	echo "<table class=rack border=0 cellspacing=0 cellpadding=1>\n";
 	echo "<tr><th width='10%'>&nbsp;</th><th width='20%'>Front</th>";
 	echo "<th width='50%'>Interior</th><th width='20%'>Back</th></tr>\n";
-	echo "<form action='${root}?'>\n";
+	echo "<form method=post action='${root}?'>\n";
 	echo "<input type=hidden name=page value=${pageno}>\n";
 	echo "<input type=hidden name=tab value=${tabno}>\n";
 	echo "<input type=hidden name=rack_id value=${rack_id}>\n";
