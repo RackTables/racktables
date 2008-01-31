@@ -665,7 +665,7 @@ function renderRackObject ($object_id = 0)
 	if (!empty ($info['comment']))
 	{
 		startPortlet ('Comment');
-		echo '<div class=commentblock>' . $info['comment'] . '</div>';
+		echo '<div class=commentblock>' . string_insert_hrefs ($info['comment']) . '</div>';
 		finishPortlet ();
 	}
 
