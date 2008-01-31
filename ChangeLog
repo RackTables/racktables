@@ -1,6 +1,7 @@
 0.14.10
 	new feature: LDAP authentication
 	bugfix: avoid losing comment on object update
+	bugfix: sticker reset icon did not work sometimes
 0.14.9 2008-01-30
 	bugfix: upgrade to 0.14.8 broke IPv4 prefix creation
 	bugfix: more DB cleanups

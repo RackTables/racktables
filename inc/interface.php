@@ -409,7 +409,7 @@ function renderEditObjectForm ($object_id)
 	{
 		echo "<input type=hidden name=${i}_attr_id value=${record['id']}>";
 		echo '<tr><td>';
-		if (!empty ($record['key']))
+		if (!empty ($record['value']))
 		{
 			echo "<a href=${root}process.php?page=${pageno}&tab=${tabno}&op=del&object_id=${object_id}&attr_id=${record['id']}>";
 			printImageHREF ('delete', 'Delete value');
