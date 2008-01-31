@@ -118,10 +118,13 @@ $ophandler['ipv4space']['newrange']['delRange'] = 'delRange';
 $page['iprange']['title_handler'] = 'dynamic_title_iprange';
 $page['iprange']['parent'] = 'ipv4space';
 $page['iprange']['bypass'] = 'id';
+$page['iprange']['bypass_type'] = 'uint';
 $tab['iprange']['default'] = 'Browse';
 $tab['iprange']['properties'] = 'Properties';
+$tab['iprange']['liveptr'] = 'Live PTR';
 $tabhandler['iprange']['default'] = 'renderIPRange';
 $tabhandler['iprange']['properties'] = 'renderIPRangeProperties';
+$tabhandler['iprange']['liveptr'] = 'renderLivePTR';
 $ophandler['iprange']['properties']['editRange'] = 'editRange';
 
 $page['ipaddress']['title_handler'] = 'dynamic_title_ipaddress';

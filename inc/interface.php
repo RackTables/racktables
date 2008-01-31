@@ -1777,11 +1777,10 @@ function renderAddNewRange ()
 	echo "</table>";
 }
 
-function renderIPRange ()
+function renderIPRange ($id)
 {
 	global $root;
 	$maxperpage = getConfigVar ('IPV4_ADDRS_PER_PAGE');
-	$id = $_REQUEST['id'];
 	if (isset($_REQUEST['pg']))
 		$page = $_REQUEST['pg'];
 	else
@@ -1858,10 +1857,9 @@ function renderIPRange ()
 	
 }
 
-function renderIPRangeProperties ()
+function renderIPRangeProperties ($id)
 {
 	global $pageno, $tabno;
-	$id = $_REQUEST['id'];
 	showMessageOrError();
 	$range = getIPRange($id);
 	echo "<center><h1>${range['ip']}/${range['mask']}</h1></center>\n";
@@ -4269,6 +4267,53 @@ function renderRSPoolRSInServiceForm ($pool_id = 0)
 	}
 	echo "<tr><td colspan=4 align=center><input type=submit value=OK tabindex=${recno}></td></tr>";
 	echo "</table>\n</form>";
+}
+
+function renderLivePTR ($id = 0)
+{
+	if ($id == 0)
+	{
+		showError ("Invalid argument", __FUNCTION__);
+		return;
+	}
+	global $root;
+	$maxperpage = getConfigVar ('IPV4_ADDRS_PER_PAGE');
+	$range = getIPRange ($id);
+	echo "<center><h1>${range['ip']}/${range['mask']}</h1><h2>${range['name']}</h2></center>\n";
+
+	$startip = $range['ip_bin'] & $range['mask_bin'];
+	$endip = $range['ip_bin'] | $range['mask_bin_inv'];
+	$realstartip = $startip;
+	$realendip = $endip;
+	$numpages = 0;
+	if ($endip - $startip > $maxperpage)
+	{
+		$numpages = ($endip - $startip) / $maxperpage;
+		$startip = $startip + $page * $maxperpage;
+		$endip = $startip + $maxperpage - 1;
+	}
+	echo "<center>";
+	if ($numpages)
+		echo '<h3>' . long2ip ($startip) . ' ~ ' . long2ip ($endip) . '</h3>';
+	for ($i=0; $i<$numpages; $i++)
+		if ($i == $page)
+			echo "<b>$i</b> ";
+		else
+			echo "<a href='${root}?page=iprange&id=$id&pg=$i'>$i</a> ";
+	echo "</center>";
+	echo "<table class='widetable' border=0 cellspacing=0 cellpadding=5 align='center'>\n";
+	echo "<tr><th>address</th><th>current name</th><th>DNS data</th></tr>\n";
+	for ($ip = $startip; $ip <= $endip; $ip++)
+	{
+		$addr = $range['addrlist'][$ip];
+		echo "<tr><td><a href='${root}?page=ipaddress&ip=" . long2ip ($ip) . "'>" . long2ip ($ip) . "</a></td>";
+		echo "<td>${addr['name']}</td><td>";
+		$record = getPTRRecordFor (long2ip ($ip));
+		echo empty ($record) ? '&nbsp;' : $record;
+		echo "</td></tr>\n";
+	}
+	echo "</table>";
+
 }
 
 ?>
