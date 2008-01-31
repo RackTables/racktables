@@ -367,7 +367,7 @@ function renderEditObjectForm ($object_id)
 
 	echo '<td class=pcleft>';
 	startPortlet ('Static attributes');
-	echo '<form>';
+	echo '<form method=post>';
 	echo "<input type=hidden name=page value=${pageno}>";
 	echo "<input type=hidden name=tab value=${tabno}>";
 	echo "<input type=hidden name=object_id value=${object_id}>";
