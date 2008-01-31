@@ -4276,6 +4276,7 @@ function renderLivePTR ($id = 0)
 		showError ("Invalid argument", __FUNCTION__);
 		return;
 	}
+	showMessageOrError();
 	if (isset($_REQUEST['pg']))
 		$page = $_REQUEST['pg'];
 	else
@@ -4285,6 +4286,8 @@ function renderLivePTR ($id = 0)
 	$range = getIPRange ($id);
 	echo "<center><h1>${range['ip']}/${range['mask']}</h1><h2>${range['name']}</h2></center>\n";
 
+	echo "<table class=objview border=0 width='100%'><tr><td class=pcleft>";
+	startPortlet ('current records');
 	$startip = $range['ip_bin'] & $range['mask_bin'];
 	$endip = $range['ip_bin'] | $range['mask_bin_inv'];
 	$realstartip = $startip;
@@ -4316,6 +4319,7 @@ function renderLivePTR ($id = 0)
 	echo "<table class='widetable' border=0 cellspacing=0 cellpadding=5 align='center'>\n";
 	echo "<tr><th>address</th><th>current name</th><th>DNS data</th><th>import</th></tr>\n";
 	$idx = 0;
+	$cnt_match = $cnt_mismatch = $cnt_missing = 0;
 	for ($ip = $startip; $ip <= $endip; $ip++)
 	{
 		$addr = $range['addrlist'][$ip];
@@ -4331,8 +4335,11 @@ function renderLivePTR ($id = 0)
 		if (empty ($addr['name']))
 		{
 			if (!empty ($ptrname))
+			{
 				echo ' class=trwarning';
 				$print_cbox = TRUE;
+				$cnt_missing++;
+			}
 		}
 		else
 		{
@@ -4340,22 +4347,41 @@ function renderLivePTR ($id = 0)
 			{
 				echo ' class=trerror';
 				$print_cbox = TRUE;
+				$cnt_mismatch++;
 			}
 			else
+			{
 				echo ' class=trok';
+				$cnt_match++;
+			}
 		}
 		echo "><td><a href='${root}?page=ipaddress&ip=${straddr}'>${straddr}</a></td>";
 		echo "<td>${addr['name']}</td><td>";
 		echo ($straddr == $ptrname) ? '&nbsp;' : $ptrname;
 		echo "</td><td>";
 		if ($print_cbox)
-			echo "<input type=checkbox name=import_${idx}>";
+			echo "<input type=checkbox name=import_${idx} tabindex=${idx}>";
 		else
 			echo '&nbsp;';
 		echo "</td></tr>\n";
+		$idx++;
 	}
+	echo "<tr><td colspan=4 align=center><input type=submit value='Import selected records'></td></tr>";
 	echo "</table>";
 	echo "</form>";
+	finishPortlet();
+
+	echo "</td><td class=pcright>";
+
+	startPortlet ('stats');
+	echo "<table border=0 width='100%' cellspacing=0 cellpadding=2>";
+	echo "<tr class=trok><th class=tdright>Exact matches:</th><td class=tdleft>${cnt_match}</td></tr>\n";
+	echo "<tr class=trwarning><th class=tdright>Missing from DB:</th><td class=tdleft>${cnt_missing}</td></tr>\n";
+	echo "<tr class=trerror><th class=tdright>Mismatches:</th><td class=tdleft>${cnt_mismatch}</td></tr>\n";
+	echo "</table>\n";
+	finishPortlet();
+
+	echo "</td></tr></table>\n";
 }
 
 ?>

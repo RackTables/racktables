@@ -1185,17 +1185,17 @@ function importPTRData ()
 	$id = $_REQUEST['id'];
 	for ($i = 0; $i < $_REQUEST['addrcount']; $i++)
 	{
-		$inputname = "import_${idx}";
+		$inputname = "import_${i}";
 		if (!isset ($_REQUEST[$inputname]) or $_REQUEST[$inputname] != 'on')
 			continue;
 		assertIPv4Arg ("addr_${i}");
 		assertStringArg ("descr_${i}");
-		assertStringArg ("rsvd_${i}");
+		assertStringArg ("rsvd_${i}", TRUE);
+		// Non-existent addresses will not have this argument set in request.
+		$rsvd = 'no';
 		if ($_REQUEST["rsvd_${i}"] == 'yes')
 			$rsvd = 'yes';
-		else
-			$rsvd = 'no';
-		if (commitUpdateAddress ($_REQUEST["addr_${i}"], $_REQUEST["descr_${i}"], $rsvd) == '')
+		if (updateAddress ($_REQUEST["addr_${i}"], $_REQUEST["descr_${i}"], $rsvd) == '')
 			$ngood++;
 		else
 			$nbad++;

@@ -126,7 +126,7 @@ $tabhandler['iprange']['default'] = 'renderIPRange';
 $tabhandler['iprange']['properties'] = 'renderIPRangeProperties';
 $tabhandler['iprange']['liveptr'] = 'renderLivePTR';
 $ophandler['iprange']['properties']['editRange'] = 'editRange';
-$ophandler['iprange']['import'] = 'importPTRData';
+$ophandler['iprange']['liveptr']['import'] = 'importPTRData';
 
 $page['ipaddress']['title_handler'] = 'dynamic_title_ipaddress';
 $page['ipaddress']['parent'] = 'iprange';
