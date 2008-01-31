@@ -1094,11 +1094,13 @@ function getRSUforRack ($data = NULL)
 // Same for row.
 function getRSUforRackRow ($rowData = NULL)
 {
-	if ($rowData == NULL)
+	if ($rowData === NULL)
 	{
 		showError ('Invalid argument', __FUNCTION__);
 		return NULL;
 	}
+	if (!count ($rowData))
+		return 0;
 	$counter = array ('A' => 0, 'U' => 0, 'T' => 0, 'W' => 0, 'F' => 0);
 	$total_height = 0;
 	foreach (array_keys ($rowData) as $rack_id)

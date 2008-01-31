@@ -1,6 +1,7 @@
 0.14.10
 	bugfix: avoid hitting GET limit on object and rack update
 	bugfix: sticker reset icon did not work sometimes
+	bugfix: don't fail rendering an empty rack row
 	new feature: LDAP authentication
 	new feature: borrow URL detection from Mantis BTS (suggested by Joakim Kasimir)
 	new feature: Live PTR tab for DNS sync
