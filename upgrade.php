@@ -631,6 +631,8 @@ CREATE TABLE `IPVirtualService` (
 			break; // --------------------------------------------
 		case '0.14.10':
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('DETECT_URLS','no','string','yes','no','Detect URLs in text fields')";
+			$query[] = "alter table RackHistory modify column height tinyint(3) unsigned";
+			$query[] = "alter table RackHistory add column thumb_data blob after comment";
 			$query[] = "update Config set varvalue = '0.14.10' where varname = 'DB_VERSION'";
 #			break; // --------------------------------------------
 #		case '0.14.11':

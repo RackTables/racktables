@@ -183,8 +183,9 @@ CREATE TABLE `RackHistory` (
   `name` char(255) default NULL,
   `deleted` enum('yes','no') default NULL,
   `row_id` int(10) unsigned default NULL,
-  `height` int(10) unsigned default NULL,
+  `height` tinyint(3) unsigned default NULL,
   `comment` text,
+  `thumb_data` blob,
   `ctime` timestamp NOT NULL,
   `user_name` char(64) default NULL
 ) ENGINE=MyISAM;
