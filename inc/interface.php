@@ -1779,7 +1779,7 @@ function renderAddNewRange ()
 
 function renderIPRange ($id)
 {
-	global $root;
+	global $root, $pageno, $tabno;
 	$maxperpage = getConfigVar ('IPV4_ADDRS_PER_PAGE');
 	if (isset($_REQUEST['pg']))
 		$page = $_REQUEST['pg'];
@@ -1808,7 +1808,7 @@ function renderIPRange ($id)
 		if ($i == $page)
 			echo "<b>$i</b> ";
 		else
-			echo "<a href='${root}?page=iprange&id=$id&pg=$i'>$i</a> ";
+			echo "<a href='${root}?page=${pageno}&tab=${tabno}&id=$id&pg=$i'>$i</a> ";
 	}
 	echo "</center>";
 
@@ -4276,7 +4276,11 @@ function renderLivePTR ($id = 0)
 		showError ("Invalid argument", __FUNCTION__);
 		return;
 	}
-	global $root;
+	if (isset($_REQUEST['pg']))
+		$page = $_REQUEST['pg'];
+	else
+		$page=0;
+	global $root, $pageno, $tabno;
 	$maxperpage = getConfigVar ('IPV4_ADDRS_PER_PAGE');
 	$range = getIPRange ($id);
 	echo "<center><h1>${range['ip']}/${range['mask']}</h1><h2>${range['name']}</h2></center>\n";
@@ -4299,7 +4303,7 @@ function renderLivePTR ($id = 0)
 		if ($i == $page)
 			echo "<b>$i</b> ";
 		else
-			echo "<a href='${root}?page=iprange&id=$id&pg=$i'>$i</a> ";
+			echo "<a href='${root}?page=${pageno}&tab=${tabno}&id=$id&pg=$i'>$i</a> ";
 	echo "</center>";
 	echo "<table class='widetable' border=0 cellspacing=0 cellpadding=5 align='center'>\n";
 	echo "<tr><th>address</th><th>current name</th><th>DNS data</th></tr>\n";
@@ -4308,6 +4312,8 @@ function renderLivePTR ($id = 0)
 		$addr = $range['addrlist'][$ip];
 		$straddr = long2ip ($ip);
 		$ptrname = gethostbyaddr ($straddr);
+		if ($ptrname == $straddr)
+			$ptrname = '';
 		echo '<tr';
 		if (empty ($addr['name']))
 		{
