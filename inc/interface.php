@@ -4305,8 +4305,17 @@ function renderLivePTR ($id = 0)
 		else
 			echo "<a href='${root}?page=${pageno}&tab=${tabno}&id=$id&pg=$i'>$i</a> ";
 	echo "</center>";
+
+	echo "<form method=post action=${root}process.php>";
+	echo "<input type=hidden name=page value=${pageno}>\n";
+	echo "<input type=hidden name=tab value=${tabno}>\n";
+	echo "<input type=hidden name=op value=import>\n";
+	echo "<input type=hidden name=id value=${id}>\n";
+	echo '<input type=hidden name=addrcount value=' . ($endip - $startip + 1) . ">\n";
+
 	echo "<table class='widetable' border=0 cellspacing=0 cellpadding=5 align='center'>\n";
-	echo "<tr><th>address</th><th>current name</th><th>DNS data</th></tr>\n";
+	echo "<tr><th>address</th><th>current name</th><th>DNS data</th><th>import</th></tr>\n";
+	$idx = 0;
 	for ($ip = $startip; $ip <= $endip; $ip++)
 	{
 		$addr = $range['addrlist'][$ip];
@@ -4314,26 +4323,39 @@ function renderLivePTR ($id = 0)
 		$ptrname = gethostbyaddr ($straddr);
 		if ($ptrname == $straddr)
 			$ptrname = '';
+		echo "<input type=hidden name=addr_${idx} value=${straddr}>\n";
+		echo "<input type=hidden name=descr_${idx} value=${ptrname}>\n";
+		echo "<input type=hidden name=rsvd_${idx} value=${addr['reserved']}>\n";
 		echo '<tr';
+		$print_cbox = FALSE;
 		if (empty ($addr['name']))
 		{
 			if (!empty ($ptrname))
 				echo ' class=trwarning';
+				$print_cbox = TRUE;
 		}
 		else
 		{
 			if ($addr['name'] != $ptrname)
+			{
 				echo ' class=trerror';
+				$print_cbox = TRUE;
+			}
 			else
 				echo ' class=trok';
 		}
 		echo "><td><a href='${root}?page=ipaddress&ip=${straddr}'>${straddr}</a></td>";
 		echo "<td>${addr['name']}</td><td>";
 		echo ($straddr == $ptrname) ? '&nbsp;' : $ptrname;
+		echo "</td><td>";
+		if ($print_cbox)
+			echo "<input type=checkbox name=import_${idx}>";
+		else
+			echo '&nbsp;';
 		echo "</td></tr>\n";
 	}
 	echo "</table>";
-
+	echo "</form>";
 }
 
 ?>

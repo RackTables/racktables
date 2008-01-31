@@ -1176,4 +1176,34 @@ function updateRSInService ()
 		return "${root}?page=${pageno}&tab=${tabno}&id=${pool_id}&error=" . urlencode ("Encountered ${nbad} errors, (de)activated ${ngood} real servers");
 }
 
+function importPTRData ()
+{
+	global $root, $pageno, $tabno;
+	assertUIntArg ('id');
+	assertUIntArg ('addrcount');
+	$nbad = $ngood = 0;
+	$id = $_REQUEST['id'];
+	for ($i = 0; $i < $_REQUEST['addrcount']; $i++)
+	{
+		$inputname = "import_${idx}";
+		if (!isset ($_REQUEST[$inputname]) or $_REQUEST[$inputname] != 'on')
+			continue;
+		assertIPv4Arg ("addr_${i}");
+		assertStringArg ("descr_${i}");
+		assertStringArg ("rsvd_${i}");
+		if ($_REQUEST["rsvd_${i}"] == 'yes')
+			$rsvd = 'yes';
+		else
+			$rsvd = 'no';
+		if (commitUpdateAddress ($_REQUEST["addr_${i}"], $_REQUEST["descr_${i}"], $rsvd) == '')
+			$ngood++;
+		else
+			$nbad++;
+	}
+	if (!$nbad)
+		return "${root}?page=${pageno}&tab=${tabno}&id=${id}&message=" . urlencode ($ngood . " IP addresse(s) were successfully updated");
+	else
+		return "${root}?page=${pageno}&tab=${tabno}&id=${id}&error=" . urlencode ("Encountered ${nbad} errors, updated ${ngood} IP addresses");
+}
+
 ?>
