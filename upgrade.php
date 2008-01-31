@@ -634,7 +634,7 @@ CREATE TABLE `IPVirtualService` (
 			$query[] = "alter table RackHistory modify column height tinyint(3) unsigned";
 			$query[] = "alter table RackHistory add column thumb_data blob after comment";
 			$query[] = "update Config set varvalue = '0.14.10' where varname = 'DB_VERSION'";
-#			break; // --------------------------------------------
+			break; // --------------------------------------------
 #		case '0.14.11':
 #			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('AUTO_PORTS_CONFIG','FIXME','string','yes','no','Autoports configuration')";
 #			$query[] = "alter table Rack add column left_is_front enum ('yes', 'no') not null default 'yes' after height";
