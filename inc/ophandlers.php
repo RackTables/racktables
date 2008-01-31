@@ -918,6 +918,7 @@ function resetUIConfig()
 	setConfigVar ('DEFAULT_SLB_RS_PORT','');
 	setConfigVar ('IPV4_PERFORMERS','1,4,7,8,12,14');
 	setConfigVar ('NATV4_PERFORMERS','4,7,8');
+	setConfigVar ('DETECT_URLS','no');
 	return "${root}?page=${pageno}&tab=default&message=" . urlencode ("Reset complete");
 }
 
