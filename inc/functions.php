@@ -1144,4 +1144,26 @@ function lf_wrap ($str)
 	return $ret;
 }
 
+// Adopted from Mantis BTS code.
+function string_insert_hrefs ($s)
+{
+	if (getConfigVar ('DETECT_URLS') != 'yes')
+		return $s;
+	# Find any URL in a string and replace it by a clickable link
+	$s = preg_replace( '/(([[:alpha:]][-+.[:alnum:]]*):\/\/(%[[:digit:]A-Fa-f]{2}|[-_.!~*\';\/?%^\\\\:@&={\|}+$#\(\),\[\][:alnum:]])+)/se',
+		"'<a href=\"'.rtrim('\\1','.').'\">\\1</a> [<a href=\"'.rtrim('\\1','.').'\" target=\"_blank\">^</a>]'",
+		$s);
+	$s = preg_replace( '/\b' . email_regex_simple() . '\b/i',
+		'<a href="mailto:\0">\0</a>',
+		$s);
+	return $s;
+}
+
+// Idem.
+function email_regex_simple ()
+{
+	return "(([a-z0-9!#*+\/=?^_{|}~-]+(?:\.[a-z0-9!#*+\/=?^_{|}~-]+)*)" . # recipient
+	"\@((?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?))"; # @domain
+}
+
 ?>
