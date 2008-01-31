@@ -3634,7 +3634,7 @@ function renderUIResetForm()
 	echo "<input type=hidden name=page value=${pageno}>";
 	echo "<input type=hidden name=tab value=${tabno}>";
 	echo "<input type=hidden name=op value=go>";
-	echo "This button will reset user interface configuration to its defaults (except organization name): ";
+	echo "This button will reset user interface configuration to its defaults (except organization name and auth source): ";
 	echo "<input type=submit value='proceed'>";
 	echo "</form>";
 }
