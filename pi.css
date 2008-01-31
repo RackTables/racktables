@@ -157,6 +157,10 @@ tr.hl {
 	font-size: 9px;
 }
 
+.trok {
+	background-color: #80FF80;
+}
+
 .trwarning {
 	background-color: #FF8080;
 }

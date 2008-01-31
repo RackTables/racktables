@@ -4306,10 +4306,16 @@ function renderLivePTR ($id = 0)
 	for ($ip = $startip; $ip <= $endip; $ip++)
 	{
 		$addr = $range['addrlist'][$ip];
-		echo "<tr><td><a href='${root}?page=ipaddress&ip=" . long2ip ($ip) . "'>" . long2ip ($ip) . "</a></td>";
+		$straddr = long2ip ($ip);
+		$ptrname = gethostbyaddr ($straddr);
+		echo '<tr';
+		if (!empty ($addr['name']) and $addr['name'] != $ptrname)
+			echo ' class=trwarning';
+		elseif (!empty ($addr['name']))
+			echo ' class=trok';
+		echo "><td><a href='${root}?page=ipaddress&ip=${straddr}'>${straddr}</a></td>";
 		echo "<td>${addr['name']}</td><td>";
-		$record = getPTRRecordFor (long2ip ($ip));
-		echo empty ($record) ? '&nbsp;' : $record;
+		echo ($straddr == $ptrname) ? '&nbsp;' : $ptrname;
 		echo "</td></tr>\n";
 	}
 	echo "</table>";

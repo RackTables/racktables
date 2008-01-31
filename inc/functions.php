@@ -1166,9 +1166,4 @@ function email_regex_simple ()
 	"\@((?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?))"; # @domain
 }
 
-function getPTRRecordFor ()
-{
-	return '';
-}
-
 ?>
