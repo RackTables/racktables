@@ -738,7 +738,9 @@ if
 	!authenticated_via_database (escapeString ($_SERVER['PHP_AUTH_USER']), escapeString ($_SERVER['PHP_AUTH_PW']))
 )
 {
-	showError ("Return to the main page and authenticate as administrator first to complete the upgrade.");
+	header ('WWW-Authenticate: Basic realm="RackTables upgrade"');
+	header ('HTTP/1.0 401 Unauthorized');
+	showError ('You must be authenticated as an administrator to complete the upgrade.');
 	die;
 }
 
