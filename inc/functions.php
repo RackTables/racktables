@@ -378,6 +378,8 @@ function addRange ($range='', $name='', $is_bcast = FALSE)
 {
 	// $range is in x.x.x.x/x format, split into ip/mask vars
 	$rangeArray = explode('/', $range);
+	if (count ($rangeArray) != 2)
+		return "Invalid IP subnet '${range}'";
 	$ip = $rangeArray[0];
 	$mask = $rangeArray[1];
 
