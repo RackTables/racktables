@@ -9,13 +9,19 @@ function addPortForwarding ()
 {
 	global $root, $pageno, $tabno;
 
+	assertUIntArg ('object_id');
+	assertIPv4Arg ('localip');
+	assertIPv4Arg ('remoteip');
+	assertUIntArg ('localport');
+	assertUIntArg ('remoteport');
+	assertUIntArg ('proto');
+	assertStringArg ('description');
 	$object_id = $_REQUEST['object_id'];
 	$localip = $_REQUEST['localip'];
 	$remoteip = $_REQUEST['remoteip'];
 	$localport = $_REQUEST['localport'];
 	$remoteport = $_REQUEST['remoteport'];
 	$proto = $_REQUEST['proto'];
-	$mode = $_REQUEST['mode'];
 	$description = $_REQUEST['description'];
 	if (empty ($remoteport))
 		$remoteport = $localport;
@@ -44,7 +50,6 @@ function delPortForwarding ()
 	$localport = $_REQUEST['localport'];
 	$remoteport = $_REQUEST['remoteport'];
 	$proto = $_REQUEST['proto'];
-	$mode = $_REQUEST['mode'];
 
 	$retpage="${root}?page=${pageno}&tab=${tabno}&object_id=$object_id";
 

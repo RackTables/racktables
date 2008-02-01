@@ -3675,7 +3675,7 @@ Dictionary edit page in Configuration section.
 
 function renderLVSConfig ($object_id = 0)
 {
-	global $pageno, $tabno;
+	global $root, $pageno, $tabno;
 	if ($object_id <= 0)
 	{
 		showError ('Invalid object_id', __FUNCTION__);

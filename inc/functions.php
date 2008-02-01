@@ -381,6 +381,8 @@ function addRange ($range='', $name='', $is_bcast = FALSE)
 	$ip = $rangeArray[0];
 	$mask = $rangeArray[1];
 
+	if (empty ($ip) or empty ($mask))
+		return "Invalid IP subnet '${range}'";
 	$ipL = ip2long($ip);
 	$maskL = ip2long($mask);
 	if ($ipL == -1 || $ipL === FALSE)
