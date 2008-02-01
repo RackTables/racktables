@@ -717,11 +717,6 @@ catch (PDOException $e)
 	die ("Database connection failed:\n\n" . $e->getMessage());
 }
 
-if (isset ($_SERVER['PHP_AUTH_USER']))
-	$_SERVER['PHP_AUTH_USER'] = escapeString ($_SERVER['PHP_AUTH_USER']);
-if (isset ($_SERVER['PHP_AUTH_PW']))
-	$_SERVER['PHP_AUTH_PW'] = escapeString ($_SERVER['PHP_AUTH_PW']);
-
 // Now we need to be sure that the current user is the administrator.
 // The rest doesn't matter within this context.
 // We still continue to use the current authenticator though, but this will
@@ -732,13 +727,20 @@ require_once 'inc/auth.php';
 // This will not fail sanely, because getUserAccounts() depends on showError()
 $accounts = getUserAccounts();
 
-// Auth prompt risk being a little broken here due to config cache absence.
-$configCache = array();
 // Only administrator is always authenticated locally, so reject others
 // for authenticate() to succeed.
-if ($accounts[$_SERVER['PHP_AUTH_USER']]['user_id'] != 1)
-	die ('You are not allowed to upgrade the database. Ask your RackTables administrator to do this.');
-authenticate();
+
+if
+(
+	!isset ($_SERVER['PHP_AUTH_USER']) or
+	!isset ($_SERVER['PHP_AUTH_PW']) or
+	$accounts[$_SERVER['PHP_AUTH_USER']]['user_id'] != 1 or
+	!authenticated_via_database (escapeString ($_SERVER['PHP_AUTH_USER']), escapeString ($_SERVER['PHP_AUTH_PW']))
+)
+{
+	showError ("Return to the main page and authenticate as administrator first to complete the upgrade.");
+	die;
+}
 
 $dbver = getDatabaseVersion();
 echo 'Code version == ' . CODE_VERSION;
