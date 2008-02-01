@@ -919,6 +919,7 @@ function resetUIConfig()
 	setConfigVar ('IPV4_PERFORMERS','1,4,7,8,12,14');
 	setConfigVar ('NATV4_PERFORMERS','4,7,8');
 	setConfigVar ('DETECT_URLS','no');
+	setConfigVar ('RACK_PRESELECT_THRESHOLD','1');
 	return "${root}?page=${pageno}&tab=default&message=" . urlencode ("Reset complete");
 }
 

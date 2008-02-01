@@ -3,10 +3,10 @@
 	bugfix: sticker reset icon did not work sometimes
 	bugfix: don't fail rendering an empty rack row
 	bugfix: rack operations were broken in 0.14.9
-	update: always put the only rack into working copy by default
 	new feature: LDAP authentication
 	new feature: borrow URL detection from Mantis BTS (suggested by Joakim Kasimir)
 	new feature: Live PTR tab for DNS sync
+	new feature: rack population threshold for rackspace allocation
 0.14.9 2008-01-30
 	bugfix: upgrade to 0.14.8 broke IPv4 prefix creation
 	bugfix: more DB cleanups

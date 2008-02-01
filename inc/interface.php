@@ -1285,10 +1285,23 @@ function renderRackSpaceForObject ($object_id = 0)
 	echo "<td class=pcleft height='1%'>";
 	startPortlet ('Racks');
 	$allRacksData = getRacksForRow();
-	if (count ($allRacksData) == 1)
-		renderRackMultiSelect ('rackmulti[]', $allRacksData, array_keys ($allRacksData));
-	else
-		renderRackMultiSelect ('rackmulti[]', $allRacksData, array_keys ($workingRacksData));
+	if (count ($allRacksData) <= getConfigVar ('RACK_PRESELECT_THRESHOLD'))
+	{
+		foreach (array_keys ($allRacksData) as $rack_id)
+		{
+			$rackData = getRackData ($rack_id);
+			if ($rackData == NULL)
+			{
+				showError ('getRackData() failed', __FUNCTION__);
+				return NULL;
+			}
+			$workingRacksData[$rack_id] = $rackData;
+		}
+		foreach ($workingRacksData as &$rackData)
+			applyObjectMountMask ($rackData, $object_id);
+		unset ($rackData);
+	}
+	renderRackMultiSelect ('rackmulti[]', $allRacksData, array_keys ($workingRacksData));
 	echo "<br>";
 	echo "<br>";
 	finishPortlet();
