@@ -673,11 +673,14 @@ function getResidentRacksData ($object_id = 0, $fetch_rackdata = TRUE)
 	}
 	$rows = $result->fetchAll (PDO::FETCH_NUM);
 	$result->closeCursor();
-	if (!$fetch_rackdata)
-		return $rows[0];
 	$ret = array();
 	foreach ($rows as $row)
 	{
+		if (!$fetch_rackdata)
+		{
+			$ret[$row[0]] = $row[0];
+			continue;
+		}
 		$rackData = getRackData ($row[0]);
 		if ($rackData == NULL)
 		{
