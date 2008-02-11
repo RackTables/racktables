@@ -1207,9 +1207,9 @@ function importPTRData ()
 			$nbad++;
 	}
 	if (!$nbad)
-		return "${root}?page=${pageno}&tab=${tabno}&id=${id}&message=" . urlencode ($ngood . " IP addresse(s) were successfully updated");
+		return "${root}?page=${pageno}&tab=${tabno}&id=${id}&message=" . urlencode ($ngood . " IP address(es) were successfully updated");
 	else
-		return "${root}?page=${pageno}&tab=${tabno}&id=${id}&error=" . urlencode ("Encountered ${nbad} errors, updated ${ngood} IP addresses");
+		return "${root}?page=${pageno}&tab=${tabno}&id=${id}&error=" . urlencode ("Encountered ${nbad} errors, updated ${ngood} IP address(es)");
 }
 
 ?>
