@@ -17,7 +17,7 @@ function dynamic_title_iprange ()
 	{
 		case 'iprange':
 			$range = getIPRange($_REQUEST['id']);
-			return array ('name' => $range['ip'].'/'.$range['mask'], 'params' => array('id'=>$_GET['id']));
+			return array ('name' => $range['ip'].'/'.$range['mask'], 'params' => array('id'=>$_REQUEST['id']));
 			break;
 		case 'ipaddress':
 			$range = getRangeByIp($_REQUEST['ip']);
@@ -64,8 +64,8 @@ function dynamic_title_row ()
 
 function dynamic_title_rack ()
 {
-	$rack = getRackData ($_GET['rack_id']);
-	return array ('name' => $rack['name'], 'params' => array ('rack_id' => $_GET['rack_id']));
+	$rack = getRackData ($_REQUEST['rack_id']);
+	return array ('name' => $rack['name'], 'params' => array ('rack_id' => $_REQUEST['rack_id']));
 }
 
 function dynamic_title_object ()
