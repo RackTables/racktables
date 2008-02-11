@@ -48,7 +48,8 @@ catch (PDOException $e)
 
 if (get_magic_quotes_gpc())
 	foreach ($_REQUEST as $key => $value)
-		$_REQUEST[$key] = stripslashes ($value);
+		if (gettype ($value) == 'string')
+			$_REQUEST[$key] = stripslashes ($value);
 
 if (!set_magic_quotes_runtime (0))
 {
@@ -58,11 +59,8 @@ if (!set_magic_quotes_runtime (0))
 
 // Escape any globals before we ever try to use them.
 foreach ($_REQUEST as $key => $value)
-{
-	if (gettype ($value) != 'string')
-		continue;
+	if (gettype ($value) == 'string')
 		$_REQUEST[$key] = escapeString ($value);
-}
 
 if (isset ($_SERVER['PHP_AUTH_USER']))
 	$_SERVER['PHP_AUTH_USER'] = escapeString ($_SERVER['PHP_AUTH_USER']);
