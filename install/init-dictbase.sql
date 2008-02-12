@@ -63,9 +63,21 @@ INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_no`) VALUES (12,7,
 INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_no`) VALUES (12,8,0);
 INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_no`) VALUES (12,13,0);
 INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_no`) VALUES (12,20,0);
+INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_no`) VALUES (445, 1, 0);
+INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_no`) VALUES (445, 2, 21);
+INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_no`) VALUES (445, 3, 0);
+INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_no`) VALUES (445, 5, 0);
+INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_no`) VALUES (445, 14, 0);
+INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_no`) VALUES (445, 22, 0);
+INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_no`) VALUES (447, 1, 0);
+INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_no`) VALUES (447, 2, 22);
+INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_no`) VALUES (447, 3, 0);
+INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_no`) VALUES (447, 5, 0);
+INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_no`) VALUES (447, 14, 0);
+INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_no`) VALUES (447, 22, 0);
 
 INSERT INTO `Chapter` (`chapter_no`, `sticky`, `chapter_name`) VALUES (11,'no','server models');
-INSERT INTO `Chapter` (`chapter_no`, `sticky`, `chapter_name`) VALUES (12,'no','switch models');
+INSERT INTO `Chapter` (`chapter_no`, `sticky`, `chapter_name`) VALUES (12,'no','network switch models');
 INSERT INTO `Chapter` (`chapter_no`, `sticky`, `chapter_name`) VALUES (13,'no','server OS type');
 INSERT INTO `Chapter` (`chapter_no`, `sticky`, `chapter_name`) VALUES (14,'no','switch OS type');
 INSERT INTO `Chapter` (`chapter_no`, `sticky`, `chapter_name`) VALUES (1,'yes','RackObjectType');
@@ -76,6 +88,8 @@ INSERT INTO `Chapter` (`chapter_no`, `sticky`, `chapter_name`) VALUES (17,'no','
 INSERT INTO `Chapter` (`chapter_no`, `sticky`, `chapter_name`) VALUES (18,'no','disk array models');
 INSERT INTO `Chapter` (`chapter_no`, `sticky`, `chapter_name`) VALUES (19,'no','tape library models');
 INSERT INTO `Chapter` (`chapter_no`, `sticky`, `chapter_name`) VALUES (20,'yes','Protocols');
+INSERT INTO `Chapter` (`chapter_no`, `sticky`, `chapter_name`) VALUES (21,'no','KVM switch models');
+INSERT INTO `Chapter` (`chapter_no`, `sticky`, `chapter_name`) VALUES (22,'no','multiplexer models');
 
 INSERT INTO `PortCompat` (`type1`, `type2`) VALUES (17,17);
 INSERT INTO `PortCompat` (`type1`, `type2`) VALUES (18,18);
@@ -136,7 +150,6 @@ INSERT INTO `PortCompat` (`type1`, `type2`) VALUES (28,27);
 INSERT INTO `PortCompat` (`type1`, `type2`) VALUES (30,30);
 INSERT INTO `PortCompat` (`type1`, `type2`) VALUES (16,16);
 INSERT INTO `PortCompat` (`type1`, `type2`) VALUES (32,32);
-INSERT INTO `PortCompat` (`type1`, `type2`) VALUES (33,33);
 INSERT INTO `PortCompat` (`type1`, `type2`) VALUES (34,34);
 INSERT INTO `PortCompat` (`type1`, `type2`) VALUES (35,35);
 INSERT INTO `PortCompat` (`type1`, `type2`) VALUES (36,36);
@@ -146,6 +159,8 @@ INSERT INTO `PortCompat` (`type1`, `type2`) VALUES (39,39);
 INSERT INTO `PortCompat` (`type1`, `type2`) VALUES (40,40);
 INSERT INTO `PortCompat` (`type1`, `type2`) VALUES (41,41);
 INSERT INTO `PortCompat` (`type1`, `type2`) VALUES (439,439);
+INSERT INTO `PortCompat` (`type1`, `type2`) VALUES (33,446);
+INSERT INTO `PortCompat` (`type1`, `type2`) VALUES (446,33);
 
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (1,1,'BlackBox');
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (1,2,'PDU');
@@ -154,7 +169,7 @@ INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (1,4,'S
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (1,5,'DiskArray');
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (1,6,'TapeLibrary');
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (1,7,'Router');
-INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (1,8,'Switch');
+INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (1,8,'network switch');
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (1,9,'PatchPanel');
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (1,10,'CableOrganizer');
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (1,11,'Placeholder');
@@ -179,7 +194,7 @@ INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (2,29,'
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (2,30,'LC/10GBase-SR');
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (2,31,'veth (Xen bridge)');
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (2,32,'sync serial');
-INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (2,33,'KVM');
+INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (2,33,'KVM (host)');
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (2,34,'1000Base-ZX');
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (2,35,'10GBase-ER');
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (2,36,'10GBase-LR');
@@ -192,6 +207,9 @@ INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (20,336
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (20,337,'UDP');
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (2,439,'dry contact');
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (2,440,'unknown');
+INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (1,445,'KVM switch');
+INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (2,446,'KVM (console)');
+INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (1,447,'multiplexer');
 
 INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('rtwidth_0','9','uint','no','yes','');
 INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('rtwidth_1','21','uint','no','yes','');
