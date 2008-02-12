@@ -16,7 +16,8 @@ function getDBUpgradePath ($v1, $v2)
 		'0.14.7',
 		'0.14.8',
 		'0.14.9',
-		'0.14.10'
+		'0.14.10',
+		'0.14.11'
 	);
 	if (!in_array ($v1, $versionhistory) || !in_array ($v2, $versionhistory))
 	{
@@ -636,11 +637,86 @@ CREATE TABLE `IPVirtualService` (
 			$query[] = "INSERT INTO `Config` VALUES ('RACK_PRESELECT_THRESHOLD','1','uint','no','no','Rack pre-selection threshold')";
 			$query[] = "update Config set varvalue = '0.14.10' where varname = 'DB_VERSION'";
 			break; // --------------------------------------------
-#		case '0.14.11':
+		case '0.14.11':
+			$new_words = array();
+			$new_words[445] = array (1 => 'KVM switch');
+			$new_words[] = array (2 => 'KVM (console)');
+			$new_words[] = array (1 => 'multiplexer');
+			$query[] = "update Dictionary set dict_value = 'network switch' where dict_key = 8";
+			$query[] = "update Dictionary set dict_value = 'KVM (host)' where dict_key = 33";
+			$query[] = "delete from PortCompat where type1 = 33 and type2 = 33";
+			$query[] = "insert into PortCompat (type1, type2) values (33, 446)";
+			$query[] = "insert into PortCompat (type1, type2) values (446, 33)";
+			$query[] = "insert into Chapter (chapter_no, sticky, chapter_name) values (21, 'KVM switch models')";
+			$query[] = "insert into Chapter (chapter_no, sticky, chapter_name) values (22, 'multiplexer models')";
+			$query[] = "update Chapter set chapter_name = 'network switch models' where chapter_no = 12";
+			$new_words[] = array (21 => '[[Avocent DSR1021 | http://www.avocent.com/WorkArea/linkit.aspx?LinkIdentifier=id&ItemID=2418]]');
+			$new_words[] = array (21 => '[[Avocent DSR1022 | http://www.avocent.com/WorkArea/linkit.aspx?LinkIdentifier=id&ItemID=2498]]');
+			$new_words[] = array (21 => '[[Avocent DSR1024 | http://www.avocent.com/WorkArea/linkit.aspx?LinkIdentifier=id&ItemID=2588]]');
+			$new_words[] = array (21 => '[[Avocent DSR1031 | http://www.avocent.com/WorkArea/linkit.aspx?LinkIdentifier=id&ItemID=2804]]');
+			$new_words[] = array (21 => '[[Avocent DSR1020 | http://www.avocent.com/WorkArea/linkit.aspx?LinkIdentifier=id&ItemID=2340]]');
+			$new_words[] = array (21 => '[[Avocent DSR2020 | http://www.avocent.com/WorkArea/linkit.aspx?LinkIdentifier=id&ItemID=2884]]');
+			$new_words[] = array (21 => '[[Avocent DSR4020 | http://www.avocent.com/WorkArea/linkit.aspx?LinkIdentifier=id&ItemID=3100]]');
+			$new_words[] = array (21 => '[[Avocent DSR8020 | http://www.avocent.com/WorkArea/linkit.aspx?LinkIdentifier=id&ItemID=3358]]');
+			$new_words[] = array (21 => '[[Avocent DSR1030 | http://www.avocent.com/WorkArea/linkit.aspx?LinkIdentifier=id&ItemID=2726]]');
+			$new_words[] = array (21 => '[[Avocent DSR2030 | http://www.avocent.com/WorkArea/linkit.aspx?LinkIdentifier=id&ItemID=2988]]');
+			$new_words[] = array (21 => '[[Avocent DSR2035 | http://www.avocent.com/WorkArea/linkit.aspx?LinkIdentifier=id&ItemID=3050]]');
+			$new_words[] = array (21 => '[[Avocent DSR4030 | http://www.avocent.com/WorkArea/linkit.aspx?LinkIdentifier=id&ItemID=3196]]');
+			$new_words[] = array (21 => '[[Avocent DSR8030 | http://www.avocent.com/WorkArea/linkit.aspx?LinkIdentifier=id&ItemID=3472]]');
+			$new_words[] = array (21 => '[[Avocent DSR8035 | http://www.avocent.com/WorkArea/linkit.aspx?LinkIdentifier=id&ItemID=3580]]');
+			$new_words[] = array (21 => '[[Avocent AutoView 1415 | http://www.avocent.com/WorkArea/linkit.aspx?LinkIdentifier=id&ItemID=1612]]');
+			$new_words[] = array (21 => '[[Avocent AutoView 1515 | http://www.avocent.com/WorkArea/linkit.aspx?LinkIdentifier=id&ItemID=1736]]');
+			$new_words[] = array (21 => '[[Avocent AutoView 2015 | http://www.avocent.com/WorkArea/linkit.aspx?LinkIdentifier=id&ItemID=1930]]');
+			$new_words[] = array (21 => '[[Avocent AutoView 2020 | http://www.avocent.com/WorkArea/linkit.aspx?LinkIdentifier=id&ItemID=2012]]');
+			$new_words[] = array (21 => '[[Avocent AutoView 2030 | http://www.avocent.com/WorkArea/linkit.aspx?LinkIdentifier=id&ItemID=2114]]');
+			$new_words[] = array (21 => '[[Avocent AutoView 3100 | http://www.avocent.com/WorkArea/linkit.aspx?LinkIdentifier=id&ItemID=2222]]');
+			$new_words[] = array (21 => '[[Avocent AutoView 3200 | http://www.avocent.com/WorkArea/linkit.aspx?LinkIdentifier=id&ItemID=2266]]');
+			$new_words[] = array (21 => '[[Avocent SwitchView 1000 4-port | http://www.avocent.com/WorkArea/linkit.aspx?LinkIdentifier=id&ItemID=4016]]');
+			$new_words[] = array (21 => '[[Avocent SwitchView 1000 8-port | http://www.avocent.com/WorkArea/linkit.aspx?LinkIdentifier=id&ItemID=4094]]');
+			$new_words[] = array (21 => '[[Avocent SwitchView 1000 16-port | http://www.avocent.com/WorkArea/linkit.aspx?LinkIdentifier=id&ItemID=3934]]');
+			$new_words[] = array (22 => '[[Cronyx FMUX/S-4E1 | http://www.cronyx.ru/hardware/fmux-ring.html]]');
+			$new_words[] = array (22 => '[[Cronyx FMUX/S-4E1/ETS | http://www.cronyx.ru/hardware/fmux-ring.html]]');
+			$new_words[] = array (22 => '[[Cronyx FMUX/S-4E1/M | http://www.cronyx.ru/hardware/fmux-ring.html]]');
+			$new_words[] = array (22 => '[[Cronyx FMUX/S-8E1 | http://www.cronyx.ru/hardware/fmux-ring.html]]');
+			$new_words[] = array (22 => '[[Cronyx FMUX/S-8E1/ETS | http://www.cronyx.ru/hardware/fmux-ring.html]]');
+			$new_words[] = array (22 => '[[Cronyx FMUX/S-8E1/M | http://www.cronyx.ru/hardware/fmux-ring.html]]');
+			$new_words[] = array (22 => '[[Cronyx FMUX/S-16E1 | http://www.cronyx.ru/hardware/fmux-ring.html]]');
+			$new_words[] = array (22 => '[[Cronyx FMUX/S-16E1/ETS | http://www.cronyx.ru/hardware/fmux-ring.html]]');
+			$new_words[] = array (22 => '[[Cronyx FMUX/S-16E1/M | http://www.cronyx.ru/hardware/fmux-ring.html]]');
+			$new_words[] = array (22 => '[[Cronyx E1-XL/S | http://www.cronyx.ru/hardware/e1xl-s.html]]');
+			$new_words[] = array (22 => '[[Cronyx E1-DXC/S | http://www.cronyx.ru/hardware/e1dxc-s.html]]');
+			$new_words[] = array (22 => '[[Cronyx FMUX-4-E2 | http://www.cronyx.ru/hardware/fmux4-e2.html]]');
+			$new_words[] = array (22 => '[[Cronyx FMUX-4-E3 | http://www.cronyx.ru/hardware/fmux16-e3.html]]');
+			$new_words[] = array (22 => '[[Cronyx FMUX/SAT | http://www.cronyx.ru/hardware/fmux-sat.html]]');
+			$new_words[] = array (22 => '[[Cronyx E1-XL/S-IP | http://www.cronyx.ru/hardware/e1xl-ip.html]]');
+			$new_words[] = array (17 => '[[RAD FCD-IPM | http://www.rad.com/Article/0,6583,36426-E1_T1_or_Fractional_E1_T1_Modular_Access_Device_with_Integrated_Router,00.html]]');
+			$new_words[] = array (22 => '[[RAD FCD-E1M | http://www.rad.com/Article/0,6583,36723-E1_T1_Modular_Access_Multiplexer,00.html]]');
+			$new_words[] = array (22 => '[[RAD FCD-T1M | http://www.rad.com/Article/0,6583,36723-E1_T1_Modular_Access_Multiplexer,00.html]]');
+			$new_words[] = array (22 => '[[RAD FCD-155E | http://www.rad.com/Article/0,6583,36276-Ethernet_over_SDH_SONET_ADM,00.html]]');
+			$query[] = "insert into AttributeMap (objtype_id, attr_id, chapter_no) values (445, 1, 0)";
+			$query[] = "insert into AttributeMap (objtype_id, attr_id, chapter_no) values (445, 2, 21)";
+			$query[] = "insert into AttributeMap (objtype_id, attr_id, chapter_no) values (445, 3, 0)";
+			$query[] = "insert into AttributeMap (objtype_id, attr_id, chapter_no) values (445, 5, 0)";
+			$query[] = "insert into AttributeMap (objtype_id, attr_id, chapter_no) values (445, 14, 0)";
+			$query[] = "insert into AttributeMap (objtype_id, attr_id, chapter_no) values (445, 22, 0)";
+			$query[] = "insert into AttributeMap (objtype_id, attr_id, chapter_no) values (447, 1, 0)";
+			$query[] = "insert into AttributeMap (objtype_id, attr_id, chapter_no) values (447, 2, 22)";
+			$query[] = "insert into AttributeMap (objtype_id, attr_id, chapter_no) values (447, 3, 0)";
+			$query[] = "insert into AttributeMap (objtype_id, attr_id, chapter_no) values (447, 5, 0)";
+			$query[] = "insert into AttributeMap (objtype_id, attr_id, chapter_no) values (447, 14, 0)";
+			$query[] = "insert into AttributeMap (objtype_id, attr_id, chapter_no) values (447, 22, 0)";
+#			$query[] = "";
+			foreach ($new_words as $dict_key => $tmp)
+				foreach ($tmp as $chapter_no => $dict_value)
+					$query[] = 'INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) ' .
+						"VALUES (${chapter_no}, ${dict_key}, '${dict_value}')";
+			$query[] = "update Config set varvalue = '0.14.11' where varname = 'DB_VERSION'";
+			break; // --------------------------------------------
+#		case '0.14.12':
 #			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('AUTO_PORTS_CONFIG','FIXME','string','yes','no','Autoports configuration')";
 #			$query[] = "alter table Rack add column left_is_front enum ('yes', 'no') not null default 'yes' after height";
 #			$query[] = "alter table Rack add column bottom_is_unit1 enum ('yes', 'no') not null default 'yes' after left_is_front";
-#			$query[] = "update Config set varvalue = '0.14.11' where varname = 'DB_VERSION'";
+#			$query[] = "update Config set varvalue = '0.14.12' where varname = 'DB_VERSION'";
 #			break; // --------------------------------------------
 		default:
 			showError ("executeUpgradeBatch () failed, because batch '${batchid}' isn't defined");
