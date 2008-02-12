@@ -710,6 +710,7 @@ CREATE TABLE `IPVirtualService` (
 				foreach ($tmp as $chapter_no => $dict_value)
 					$query[] = 'INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) ' .
 						"VALUES (${chapter_no}, ${dict_key}, '${dict_value}')";
+			$query[] = "update Rack set thumb_data = NULL";
 			$query[] = "update Config set varvalue = '0.14.11' where varname = 'DB_VERSION'";
 			break; // --------------------------------------------
 #		case '0.14.12':
