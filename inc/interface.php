@@ -3306,7 +3306,8 @@ function renderVLANMembership ($object_id = 0)
 			foreach ($portdata as $vlanid => $addrgroup)
 				foreach ($addrgroup as $addr)
 				{
-					echo "<tr class=row_${order}><td>$portname</td><td>$vlanid</td><td>$addr</td></tr>\n";
+					echo "<tr class=row_${order}><td class=tdleft>$portname</td><td class=tdleft>$vlanid</td>";
+					echo "<td class=tdleft>$addr</td></tr>\n";
 					$order = $nextorder[$order];
 				}
 		echo '</table>';
