@@ -4351,34 +4351,31 @@ function renderLivePTR ($id = 0)
 		echo "<input type=hidden name=rsvd_${idx} value=${addr['reserved']}>\n";
 		echo '<tr';
 		$print_cbox = FALSE;
-		if (empty ($addr['name']))
+		if ($addr['name'] == $ptrname)
 		{
 			if (!empty ($ptrname))
-			{
-				echo ' class=trwarning';
-				$print_cbox = TRUE;
-				$cnt_missing++;
-			}
-		}
-		else
-		{
-			if ($addr['name'] != $ptrname)
-			{
-				echo empty ($ptrname) ? ' class=trwarning' : ' class=trerror';
-				$print_cbox = TRUE;
-				$cnt_mismatch++;
-			}
-			else
 			{
 				echo ' class=trok';
 				$cnt_match++;
 			}
 		}
-		echo "><td";
+		elseif (empty ($addr['name']) or empty ($ptrname))
+		{
+			echo ' class=trwarning';
+			$print_cbox = TRUE;
+			$cnt_missing++;
+		}
+		else
+		{
+			echo ' class=trerror';
+			$print_cbox = TRUE;
+			$cnt_mismatch++;
+		}
+		echo "><td class='tdleft";
 		if ($addr['reserved'] == 'yes')
-			echo ' class=trbusy';
-		echo "><a href='${root}?page=ipaddress&ip=${straddr}'>${straddr}</a></td>";
-		echo "<td>${addr['name']}</td><td>${ptrname}</td><td>";
+			echo ' trbusy';
+		echo "'><a href='${root}?page=ipaddress&ip=${straddr}'>${straddr}</a></td>";
+		echo "<td class=tdleft>${addr['name']}</td><td class=tdleft>${ptrname}</td><td>";
 		if ($print_cbox)
 			echo "<input type=checkbox name=import_${idx} tabindex=${idx}>";
 		else
