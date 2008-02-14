@@ -647,8 +647,8 @@ CREATE TABLE `IPVirtualService` (
 			$query[] = "delete from PortCompat where type1 = 33 and type2 = 33";
 			$query[] = "insert into PortCompat (type1, type2) values (33, 446)";
 			$query[] = "insert into PortCompat (type1, type2) values (446, 33)";
-			$query[] = "insert into Chapter (chapter_no, sticky, chapter_name) values (21, 'KVM switch models')";
-			$query[] = "insert into Chapter (chapter_no, sticky, chapter_name) values (22, 'multiplexer models')";
+			$query[] = "insert into Chapter (chapter_no, sticky, chapter_name) values (21, 'no', 'KVM switch models')";
+			$query[] = "insert into Chapter (chapter_no, sticky, chapter_name) values (22, 'no', 'multiplexer models')";
 			$query[] = "update Chapter set chapter_name = 'network switch models' where chapter_no = 12";
 			$new_words[] = array (21 => '[[Avocent DSR1021 | http://www.avocent.com/WorkArea/linkit.aspx?LinkIdentifier=id&ItemID=2418]]');
 			$new_words[] = array (21 => '[[Avocent DSR1022 | http://www.avocent.com/WorkArea/linkit.aspx?LinkIdentifier=id&ItemID=2498]]');
