@@ -2,6 +2,8 @@
 	bugfix: rackspace allocation was broken by magic_quotes fix
 	bugfix: don't generate error messages by accessing _GET array
 	bugfix: thumbs cache wasn't updated in rare cases
+	update: KVM port type has been split (see wiki page)
+	update: Avocent KVM switches, RAD and Cronyx multiplexers
 0.14.10 2008-02-01
 	bugfix: avoid hitting GET limit on object and rack update
 	bugfix: sticker reset icon did not work sometimes
