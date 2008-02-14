@@ -1416,7 +1416,7 @@ function getDict ()
 
 function getDictStats ()
 {
-	$stock_chapters = array (1, 2, 3, 11, 12, 13, 14, 16, 17, 18, 19, 20);
+	$stock_chapters = array (1, 2, 3, 11, 12, 13, 14, 16, 17, 18, 19, 20, 21, 22);
 	global $dbxlink;
 	$query =
 		"select Chapter.chapter_no, chapter_name, count(dict_key) as wc from " .
