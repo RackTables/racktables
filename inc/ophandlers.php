@@ -1195,8 +1195,8 @@ function importPTRData ()
 		if (!isset ($_REQUEST[$inputname]) or $_REQUEST[$inputname] != 'on')
 			continue;
 		assertIPv4Arg ("addr_${i}");
-		assertStringArg ("descr_${i}");
-		assertStringArg ("rsvd_${i}", TRUE);
+		assertStringArg ("descr_${i}", TRUE);
+		assertStringArg ("rsvd_${i}");
 		// Non-existent addresses will not have this argument set in request.
 		$rsvd = 'no';
 		if ($_REQUEST["rsvd_${i}"] == 'yes')

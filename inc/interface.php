@@ -4335,11 +4335,13 @@ function renderLivePTR ($id = 0)
 
 	echo "<table class='widetable' border=0 cellspacing=0 cellpadding=5 align='center'>\n";
 	echo "<tr><th>address</th><th>current name</th><th>DNS data</th><th>import</th></tr>\n";
-	$idx = 0;
+	$idx = 1;
 	$cnt_match = $cnt_mismatch = $cnt_missing = 0;
 	for ($ip = $startip; $ip <= $endip; $ip++)
 	{
-		$addr = $range['addrlist'][$ip];
+		// Find the (optional) DB name and the (optional) DNS record, then
+		// compare values and produce a table row depending on the result.
+		$addr = isset ($range['addrlist'][$ip]) ? $range['addrlist'][$ip] : array ('name' => '', 'reserved' => 'no');
 		$straddr = long2ip ($ip);
 		$ptrname = gethostbyaddr ($straddr);
 		if ($ptrname == $straddr)
@@ -4362,7 +4364,7 @@ function renderLivePTR ($id = 0)
 		{
 			if ($addr['name'] != $ptrname)
 			{
-				echo ' class=trerror';
+				echo empty ($ptrname) ? ' class=trwarning' : ' class=trerror';
 				$print_cbox = TRUE;
 				$cnt_mismatch++;
 			}
@@ -4372,10 +4374,11 @@ function renderLivePTR ($id = 0)
 				$cnt_match++;
 			}
 		}
-		echo "><td><a href='${root}?page=ipaddress&ip=${straddr}'>${straddr}</a></td>";
-		echo "<td>${addr['name']}</td><td>";
-		echo ($straddr == $ptrname) ? '&nbsp;' : $ptrname;
-		echo "</td><td>";
+		echo "><td";
+		if ($addr['reserved'] == 'yes')
+			echo ' class=trbusy';
+		echo "><a href='${root}?page=ipaddress&ip=${straddr}'>${straddr}</a></td>";
+		echo "<td>${addr['name']}</td><td>${ptrname}</td><td>";
 		if ($print_cbox)
 			echo "<input type=checkbox name=import_${idx} tabindex=${idx}>";
 		else
@@ -4393,7 +4396,7 @@ function renderLivePTR ($id = 0)
 	startPortlet ('stats');
 	echo "<table border=0 width='100%' cellspacing=0 cellpadding=2>";
 	echo "<tr class=trok><th class=tdright>Exact matches:</th><td class=tdleft>${cnt_match}</td></tr>\n";
-	echo "<tr class=trwarning><th class=tdright>Missing from DB:</th><td class=tdleft>${cnt_missing}</td></tr>\n";
+	echo "<tr class=trwarning><th class=tdright>Missing from DB/DNS:</th><td class=tdleft>${cnt_missing}</td></tr>\n";
 	echo "<tr class=trerror><th class=tdright>Mismatches:</th><td class=tdleft>${cnt_mismatch}</td></tr>\n";
 	echo "</table>\n";
 	finishPortlet();
