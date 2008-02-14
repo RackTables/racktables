@@ -3044,7 +3044,7 @@ function renderReportSummary ()
 	echo "<table>\n";
 	foreach (getDictStats() as $header => $data)
 	{
-		echo "<tr><th>${header}:</th><td>${data}</td></tr>\n";
+		echo "<tr><th class=tdright>${header}:</th><td class=tdleft>${data}</td></tr>\n";
 	}
 	echo "</table>\n";
 	finishPortlet();
