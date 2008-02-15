@@ -607,10 +607,27 @@ function getIPAddress ($ip=0)
 	$result->closeCursor();
 	unset ($result);
 
-	$query = "select id, inet_ntoa(vip) as vip, vport, proto, name from IPVirtualService where vip = inet_aton('${ip}')";
+	$query = "select id, vport, proto, name from IPVirtualService where vip = inet_aton('${ip}')";
 	$result = $dbxlink->query ($query);
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-		$ret['vslist'][] = $row;
+	{
+		$new = $row;
+		$new['vip'] = $ip;
+		$ret['vslist'][] = $new;
+	}
+	$result->closeCursor();
+	unset ($result);
+
+	$query = "select inservice, rsport, IPRSPool.id as pool_id, IPRSPool.name as poolname from " .
+		"IPRealServer inner join IPRSPool on rspool_id = IPRSPool.id " .
+		"where rsip = inet_aton('${ip}')";
+	$result = $dbxlink->query ($query);
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
+	{
+		$new = $row;
+		$new['rsip'] = $ip;
+		$ret['rslist'][] = $new;
+	}
 	$result->closeCursor();
 	unset ($result);
 

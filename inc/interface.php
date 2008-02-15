@@ -1957,11 +1957,32 @@ function renderIPAddress ()
 		{
 			echo "<tr><td class=tdleft><a href='${root}?page=vservice&id=${vsinfo['id']}'>";
 			echo buildVServiceName ($vsinfo) . "</a></td><td class=tdleft>";
-			echo $vsinfo['name'] . "</td></tr>";
+			echo $vsinfo['name'] . "</td></tr>\n";
 		}
 		echo "</table><br><br>";
 		finishPortlet();
 	}
+
+	if (count ($address['rslist']))
+	{
+		startPortlet ('Real servers (' . count ($address['rslist']) . ')');
+		echo "<table class='widetable' cesspadding=5 cellspacing=0 border=0 align='center'>\n";
+		echo "<tr><th>in service</th><th>port</th><th>RS pool</th></tr>\n";
+		foreach ($address['rslist'] as $rsinfo)
+		{
+			echo "<tr><td>";
+			if ($rsinfo['inservice'] == 'yes')
+				printImageHREF ('inservice', 'in service');
+			else
+				printImageHREF ('notinservice', 'NOT in service');
+			echo "${rsinfo['rsport']}</td><td class=tdleft><a href='${root}?page=rspool&id=${rsinfo['pool_id']}'>";
+			echo $rsinfo['poolname'] . "</a></td></tr>\n";
+		}
+		echo "</table><br><br>";
+		finishPortlet();
+	}
+
+
 //	echo "</td><td>";
 //	echo "</td></tr></table>";
 }
