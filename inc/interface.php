@@ -1688,7 +1688,7 @@ function renderAddressspace ()
 
 function renderIPv4SLB ()
 {
-	global $root, $page;
+	global $root, $page, $nextorder;
 
 	startPortlet ('SLB configuration');
 	echo "<table border=0 width='100%'><tr>";
@@ -1715,6 +1715,7 @@ function renderIPv4SLB ()
 		echo 'none configured';
 	else
 	{
+		$order = 'odd';
 		echo "<table class='widetable' border=0 cellpadding=5 cellspacing=0 align='center'>\n";
 		echo "<tr><th>VS&nbsp;&darr; LB&nbsp;&rarr;</th>";
 		foreach ($lblist as $lb_object_id)
@@ -1722,7 +1723,7 @@ function renderIPv4SLB ()
 		echo "</tr>\n";
 		foreach ($summary as $vsid => $vsdata)
 		{
-			echo "<tr><td class=tdleft><a href='$root?page=vservice&tab=default&id=${vsid}'>";
+			echo "<tr class=row_${order}><td class=tdleft><a href='$root?page=vservice&tab=default&id=${vsid}'>";
 			echo buildVServiceName ($vsdata);
 			echo '</a>';
 			if (!empty ($vsdata['name']))
@@ -1743,6 +1744,7 @@ function renderIPv4SLB ()
 				echo '</td>';
 			}
 			echo "</tr>\n";
+			$order = $nextorder[$order];
 		}
 		echo "</table>\n";
 	}
