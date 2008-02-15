@@ -1857,11 +1857,13 @@ function renderIPRange ($id)
 			echo "<td><a href='${root}?page=ipaddress&ip=${addr['ip']}'>${addr['ip']}</a></td><td>${addr['name']}</td><td>";
 			if ( $addr['reserved'] == 'yes')
 				echo "<b>Reserved;</b> ";
+			$delim = '';
 			foreach ($range['addrlist'][$ip]['references'] as $ref)
 			{
-				echo "<a href='${root}?page=object&object_id=${ref['object_id']}'>";
+				echo "${delim}<a href='${root}?page=object&object_id=${ref['object_id']}'>";
 				echo $ref['name'] . (empty ($ref['name']) ? '' : '@');
-				echo "${ref['object_name']}</a>; ";
+				echo "${ref['object_name']}</a>";
+				$delim = '; ';
 			}
 			echo "</td></tr>\n";
 		}
