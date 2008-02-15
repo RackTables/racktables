@@ -1909,46 +1909,59 @@ function renderIPAddress ()
 //	echo "<table width='100%' cesspadding=5 cellspacing=0 border=0 align='center'>";
 //	echo "<tr valign='top'><td>";
 
-	startPortlet ('Address assignment');
-	echo "<table class='widetable' cesspadding=5 cellspacing=0 border=0 align='center'>\n";
-	echo "<tr><th>Object name</th><th>Interface name</th><th>Interface type</th></tr>\n";
-
 	$numshared = countRefsOfType($address['bonds'], 'shared', 'eq');
 	$numreg = countRefsOfType($address['bonds'], 'regular', 'eq');
 	$numvirt = countRefsOfType($address['bonds'], 'virtual', 'eq');
 
-	
-	if ( ($numshared > 0 && $numreg > 0) || $numreg > 1 )
-		$class='trerror';
-	elseif ( $address['reserved'] == 'yes' and $numshared+$numreg+$numvirt > 0)
-		$class='trerror';
-	else
-		$class='';
-
-
-
-	if ($address['reserved'] == 'yes')
-		echo "<tr class='$class'><td colspan='3'><b>RESERVED</b></td></tr>";
-	foreach ($address['bonds'] as $bond)
+	if ($address['reserved'] == 'yes' or ($numshared + $numreg + $numvirt) > 0)
 	{
-		echo "<tr class='$class'><td><a href='${root}?page=object&object_id=${bond['object_id']}'>${bond['object_name']}</td><td>${bond['name']}</td><td><b>";
-		switch ($bond['type'])
-		{
-			case 'virtual':
-				echo "Virtual";
-				break;
-			case 'shared':
-				echo "Shared";
-				break;
-			case 'regular':
-				echo "Regular";
-				break;
-		}
-		echo "</b></td></tr>\n";
-	}
-	echo "</table><br><br>";
-	finishPortlet();
+		startPortlet ('Allocation');
+		echo "<table class='widetable' cesspadding=5 cellspacing=0 border=0 align='center'>\n";
+		echo "<tr><th>Object name</th><th>Interface name</th><th>Interface type</th></tr>\n";
+		if ( ($numshared > 0 && $numreg > 0) || $numreg > 1 )
+			$class='trerror';
+		elseif ( $address['reserved'] == 'yes' and $numshared+$numreg+$numvirt > 0)
+			$class='trerror';
+		else
+			$class='';
 
+		if ($address['reserved'] == 'yes')
+			echo "<tr class='$class'><td colspan='3'><b>RESERVED</b></td></tr>";
+		foreach ($address['bonds'] as $bond)
+		{
+			echo "<tr class='$class'><td><a href='${root}?page=object&object_id=${bond['object_id']}'>${bond['object_name']}</td><td>${bond['name']}</td><td><b>";
+			switch ($bond['type'])
+			{
+				case 'virtual':
+					echo "Virtual";
+					break;
+				case 'shared':
+					echo "Shared";
+					break;
+				case 'regular':
+					echo "Regular";
+					break;
+			}
+			echo "</b></td></tr>\n";
+		}
+		echo "</table><br><br>";
+		finishPortlet();
+	}
+
+	if (count ($address['vslist']))
+	{
+		startPortlet ('Virtual services (' . count ($address['vslist']) . ')');
+		echo "<table class='widetable' cesspadding=5 cellspacing=0 border=0 align='center'>\n";
+		echo "<tr><th>VS</th><th>name</th></tr>\n";
+		foreach ($address['vslist'] as $vsinfo)
+		{
+			echo "<tr><td class=tdleft><a href='${root}?page=vservice&id=${vsinfo['id']}'>";
+			echo buildVServiceName ($vsinfo) . "</a></td><td class=tdleft>";
+			echo $vsinfo['name'] . "</td></tr>";
+		}
+		echo "</table><br><br>";
+		finishPortlet();
+	}
 //	echo "</td><td>";
 //	echo "</td></tr></table>";
 }

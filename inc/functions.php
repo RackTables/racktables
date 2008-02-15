@@ -548,29 +548,36 @@ function getIPAddress ($ip=0)
 {
 	$ret = array();
 	$ret['bonds'] = array();
+	// FIXME: below two aren't neither filled in with data nor rendered (ticket:23)
 	$ret['outpf'] = array();
 	$ret['inpf'] = array();
+	$ret['vslist'] = array();
+	$ret['rslist'] = array();
 	$ret['exists'] = 0;
 	$ret['name'] = '';
 	$ret['reserved'] = 'no';
 	global $dbxlink;
-	$query1 =
+	$query =
 		"select ".
 		"name, reserved ".
 		"from IPAddress ".
 		"where ip = INET_ATON('$ip') and (reserved = 'yes' or name != '')";
-	$result1 = $dbxlink->query ($query1);
-	if ($result1 == NULL)
+	$result = $dbxlink->query ($query);
+	if ($result == NULL)
+	{
+		showError ('Query #1 failed', __FUNCTION__);
 		return NULL;
-	if ($row = $result1->fetch (PDO::FETCH_ASSOC))
+	}
+	if ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
 		$ret['exists'] = 1;
 		$ret['name'] = $row['name'];
 		$ret['reserved'] = $row['reserved'];
 	}
-	$result1->closeCursor();
+	$result->closeCursor();
+	unset ($result);
 
-	$query2 =
+	$query =
 		"select ".
 		"IPBonds.object_id as object_id, ".
 		"IPBonds.name as name, ".
@@ -582,9 +589,9 @@ function getIPAddress ($ip=0)
 		"where IPBonds.ip=INET_ATON('$ip') ".
 		"and chapter_name = 'RackObjectType' " .
 		"order by RackObject.id, IPBonds.name";
-	$result2 = $dbxlink->query ($query2);
+	$result = $dbxlink->query ($query);
 	$count=0;
-	while ($row = $result2->fetch (PDO::FETCH_ASSOC))
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
 		$ret['bonds'][$count]['object_id'] = $row['object_id'];
 		$ret['bonds'][$count]['name'] = $row['name'];
@@ -597,7 +604,15 @@ function getIPAddress ($ip=0)
 		$count++;
 		$ret['exists'] = 1;
 	}
-	$result2->closeCursor();
+	$result->closeCursor();
+	unset ($result);
+
+	$query = "select id, inet_ntoa(vip) as vip, vport, proto, name from IPVirtualService where vip = inet_aton('${ip}')";
+	$result = $dbxlink->query ($query);
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
+		$ret['vslist'][] = $row;
+	$result->closeCursor();
+	unset ($result);
 
 	return $ret;
 }
