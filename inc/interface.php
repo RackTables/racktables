@@ -1858,7 +1858,7 @@ function renderIPRange ($id)
 			$delim = '';
 			if ( $addr['reserved'] == 'yes')
 			{
-				echo "<b>Reserved;</b> ";
+				echo "<b>Reserved</b> ";
 				$delim = '; ';
 			}
 			foreach ($range['addrlist'][$ip]['references'] as $ref)
