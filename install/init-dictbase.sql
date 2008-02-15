@@ -238,7 +238,7 @@ INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, descriptio
 INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('USER_AUTH_SRC','database','string','no','no','User authentication source');
 INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('DETECT_URLS','no','string','yes','no','Detect URLs in text fields');
 INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('RACK_PRESELECT_THRESHOLD','1','uint','no','no','Rack pre-selection threshold');
-INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('DB_VERSION','0.14.10','string','no','yes','Database version.');
+INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('DB_VERSION','0.14.11','string','no','yes','Database version.');
 
 INSERT INTO `UserPermission` (`user_id`, `page`, `tab`, `access`) VALUES (1,'%','%','yes');
 INSERT INTO `UserPermission` (`user_id`, `page`, `tab`, `access`) VALUES (0,'help','%','yes');
