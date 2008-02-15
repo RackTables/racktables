@@ -738,7 +738,7 @@ function renderRackObject ($object_id = 0)
 			else 
 				$class='';
 
-			echo "<tr class='$class'><td>${addr['name']}</td><td><a href='${root}?page=ipaddress&ip=${addr['ip']}'>${addr['ip']}</a></td><td class='description'>$address_name</td><td>\n";
+			echo "<tr class='$class'><td class=tdleft>${addr['name']}</td><td class=tdleft><a href='${root}?page=ipaddress&ip=${addr['ip']}'>${addr['ip']}</a></td><td class='description'>$address_name</td><td class=tdleft>\n";
 
 			if ($addr['address_reserved']=='yes')
 				echo "<b>Reserved;</b> ";
