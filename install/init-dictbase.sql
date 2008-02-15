@@ -150,6 +150,7 @@ INSERT INTO `PortCompat` (`type1`, `type2`) VALUES (28,27);
 INSERT INTO `PortCompat` (`type1`, `type2`) VALUES (30,30);
 INSERT INTO `PortCompat` (`type1`, `type2`) VALUES (16,16);
 INSERT INTO `PortCompat` (`type1`, `type2`) VALUES (32,32);
+INSERT INTO `PortCompat` (`type1`, `type2`) VALUES (33,446);
 INSERT INTO `PortCompat` (`type1`, `type2`) VALUES (34,34);
 INSERT INTO `PortCompat` (`type1`, `type2`) VALUES (35,35);
 INSERT INTO `PortCompat` (`type1`, `type2`) VALUES (36,36);
@@ -159,7 +160,6 @@ INSERT INTO `PortCompat` (`type1`, `type2`) VALUES (39,39);
 INSERT INTO `PortCompat` (`type1`, `type2`) VALUES (40,40);
 INSERT INTO `PortCompat` (`type1`, `type2`) VALUES (41,41);
 INSERT INTO `PortCompat` (`type1`, `type2`) VALUES (439,439);
-INSERT INTO `PortCompat` (`type1`, `type2`) VALUES (33,446);
 INSERT INTO `PortCompat` (`type1`, `type2`) VALUES (446,33);
 
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (1,1,'BlackBox');
