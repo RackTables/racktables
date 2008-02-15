@@ -1967,7 +1967,7 @@ function renderIPAddress ()
 	{
 		startPortlet ('Real servers (' . count ($address['rslist']) . ')');
 		echo "<table class='widetable' cesspadding=5 cellspacing=0 border=0 align='center'>\n";
-		echo "<tr><th>in service</th><th>port</th><th>RS pool</th></tr>\n";
+		echo "<tr><th>&nbsp;</th><th>port</th><th>RS pool</th></tr>\n";
 		foreach ($address['rslist'] as $rsinfo)
 		{
 			echo "<tr><td>";
@@ -1975,7 +1975,7 @@ function renderIPAddress ()
 				printImageHREF ('inservice', 'in service');
 			else
 				printImageHREF ('notinservice', 'NOT in service');
-			echo "${rsinfo['rsport']}</td><td class=tdleft><a href='${root}?page=rspool&id=${rsinfo['pool_id']}'>";
+			echo "</td><td class=tdleft>${rsinfo['rsport']}</td><td class=tdleft><a href='${root}?page=rspool&id=${rsinfo['pool_id']}'>";
 			echo $rsinfo['poolname'] . "</a></td></tr>\n";
 		}
 		echo "</table><br><br>";
