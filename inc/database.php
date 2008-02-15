@@ -1468,6 +1468,62 @@ function getDictStats ()
 	return $ret;
 }
 
+function getIPv4Stats()
+{
+	global $dbxlink;
+	$ret = array();
+	$subject = array();
+	$subject[] = array ('q' => 'select count(id) from IPRanges', 'txt' => 'Networks');
+	$subject[] = array ('q' => 'select count(ip) from IPAddress', 'txt' => 'Addresses commented/reserved');
+	$subject[] = array ('q' => 'select count(ip) from IPBonds', 'txt' => 'Addresses allocated');
+	$subject[] = array ('q' => 'select count(*) from PortForwarding', 'txt' => 'NAT rules');
+	$subject[] = array ('q' => 'select count(id) from IPVirtualService', 'txt' => 'Virtual services');
+	$subject[] = array ('q' => 'select count(id) from IPRSPool', 'txt' => 'Real server pools');
+	$subject[] = array ('q' => 'select count(id) from IPRealServer', 'txt' => 'Real servers');
+	$subject[] = array ('q' => 'select count(distinct object_id) from IPLoadBalancer', 'txt' => 'Load balancers');
+
+	foreach ($subject as $item)
+	{
+		$result = $dbxlink->query ($item['q']);
+		if ($result == NULL)
+		{
+			showError ("SQL query '${item['q']}' failed", __FUNCTION__);
+			return NULL;
+		}
+		$row = $result->fetch (PDO::FETCH_NUM);
+		$ret[$item['txt']] = $row[0];
+		$result->closeCursor();
+		unset ($result);
+	}
+	return $ret;
+}
+
+function getRackspaceStats()
+{
+	global $dbxlink;
+	$ret = array();
+	$subject = array();
+	$subject[] = array ('q' => 'select count(*) from Dictionary where chapter_no = 3', 'txt' => 'Rack rows');
+	$subject[] = array ('q' => 'select count(*) from Rack', 'txt' => 'Racks');
+	$subject[] = array ('q' => 'select avg(height) from Rack', 'txt' => 'Average rack height');
+	$subject[] = array ('q' => 'select sum(height) from Rack', 'txt' => 'Total rack units in field');
+
+	foreach ($subject as $item)
+	{
+		$result = $dbxlink->query ($item['q']);
+		if ($result == NULL)
+		{
+			showError ("SQL query '${item['q']}' failed", __FUNCTION__);
+			return NULL;
+		}
+		$row = $result->fetch (PDO::FETCH_NUM);
+		$ret[$item['txt']] = $row[0];
+		$result->closeCursor();
+		unset ($result);
+	}
+	return $ret;
+}
+
 function commitUpdateDictionary ($chapter_no = 0, $dict_key = 0, $dict_value = '')
 {
 	if ($chapter_no <= 0 or $dict_key <= 0 or empty ($dict_value))
