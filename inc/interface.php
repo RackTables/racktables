@@ -3043,9 +3043,19 @@ function renderReportSummary ()
 	startPortlet ("Dictionary/objects stats");
 	echo "<table>\n";
 	foreach (getDictStats() as $header => $data)
-	{
 		echo "<tr><th class=tdright>${header}:</th><td class=tdleft>${data}</td></tr>\n";
-	}
+	echo "</table>\n";
+	finishPortlet();
+	startPortlet ('IPv4 stats');
+	echo "<table>\n";
+	foreach (getIPv4Stats() as $header => $data)
+		echo "<tr><th class=tdright>${header}:</th><td class=tdleft>${data}</td></tr>\n";
+	echo "</table>\n";
+	finishPortlet();
+	startPortlet ('Rackspace stats');
+	echo "<table>\n";
+	foreach (getRackspaceStats() as $header => $data)
+		echo "<tr><th class=tdright>${header}:</th><td class=tdleft>${data}</td></tr>\n";
 	echo "</table>\n";
 	finishPortlet();
 
