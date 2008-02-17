@@ -3900,7 +3900,7 @@ function renderRSPoolServerForm ($pool_id = 0)
 	showMessageOrError();
 	$poolInfo = getRSPoolInfo ($pool_id);
 
-	if (($rsc = count ($poolInfo['rslist']))
+	if (($rsc = count ($poolInfo['rslist'])))
 	{
 		startPortlet ("Manage existing (${rsc})");
 		echo "<table cellspacing=0 cellpadding=5 align=center class=cooltable>\n";
