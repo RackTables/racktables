@@ -925,6 +925,7 @@ function resetUIConfig()
 	setConfigVar ('NATV4_PERFORMERS','4,7,8');
 	setConfigVar ('DETECT_URLS','no');
 	setConfigVar ('RACK_PRESELECT_THRESHOLD','1');
+	setConfigVar ('DEFAULT_IPV4_RS_INSERVICE','no');
 	return "${root}?page=${pageno}&tab=default&message=" . urlencode ("Reset complete");
 }
 
