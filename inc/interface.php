@@ -3976,37 +3976,41 @@ function renderRSPoolLBForm ($pool_id = 0)
 	$vs_list = array ();
 	foreach (getVSList() as $vsid => $vsinfo)
 		$vs_list[$vsid] = buildVServiceName ($vsinfo) . (empty ($vsinfo['name']) ? '' : " (${vsinfo['name']})");
-	startPortlet ('Manage existing (' . count ($poolInfo['lblist']) . ')');
-	echo "<table cellspacing=0 cellpadding=5 align=center class=cooltable>\n";
-	echo "<tr><th>&nbsp;</th><th>LB</th><th>VS</th><th>VS config</th><th>RS config</th><th>&nbsp;</th></tr>\n";
-	$order = 'odd';
-	foreach ($poolInfo['lblist'] as $object_id => $vslist)
-		foreach ($vslist as $vs_id => $configs)
-		{
-			$oi = getObjectInfo ($object_id);
-			echo "<form action='${root}process.php'>";
-			echo "<input type=hidden name=page value='${pageno}'>\n";
-			echo "<input type=hidden name=tab value='${tabno}'>\n";
-			echo "<input type=hidden name=op value=updLB>";
-			echo "<input type=hidden name=pool_id value='${pool_id}'>";
-			echo "<input type=hidden name=vs_id value='${vs_id}'>";
-			echo "<input type=hidden name=object_id value='${object_id}'>";
-			echo "<tr valign=top class=row_${order}><td><a href='${root}process.php?page=${pageno}&tab=${tabno}&op=delLB&pool_id=${pool_id}&object_id=${object_id}&vs_id=${vs_id}'>";
-			printImageHREF ('delete', 'Unconfigure');
-			echo "</a></td>";
-			echo "<td class=tdleft><a href='${root}?page=object&object_id=${object_id}'>${oi['dname']}</a></td>";
-			echo "<td class=tdleft><a href='${root}?page=vservice&id=${vs_id}'>";
-			$vsinfo = getVServiceInfo ($vs_id);
-			echo buildVServiceName ($vsinfo) . '</a>';
-			if (!empty ($vsinfo['name']))
-				echo " (${vsinfo['name']})";
-			echo "<td><textarea name=vsconfig>${configs['vsconfig']}</textarea></td>";
-			echo "<td><textarea name=rsconfig>${configs['rsconfig']}</textarea></td>";
-			echo "<td><input type=submit value=OK></td></tr></form>\n";
-			$order = $nextorder[$order];
-		}
-	echo "</table>\n";
-	finishPortlet();
+
+	if (count ($poolInfo['lblist']))
+	{
+		startPortlet ('Manage existing (' . count ($poolInfo['lblist']) . ')');
+		echo "<table cellspacing=0 cellpadding=5 align=center class=cooltable>\n";
+		echo "<tr><th>&nbsp;</th><th>LB</th><th>VS</th><th>VS config</th><th>RS config</th><th>&nbsp;</th></tr>\n";
+		$order = 'odd';
+		foreach ($poolInfo['lblist'] as $object_id => $vslist)
+			foreach ($vslist as $vs_id => $configs)
+			{
+				$oi = getObjectInfo ($object_id);
+				echo "<form action='${root}process.php'>";
+				echo "<input type=hidden name=page value='${pageno}'>\n";
+				echo "<input type=hidden name=tab value='${tabno}'>\n";
+				echo "<input type=hidden name=op value=updLB>";
+				echo "<input type=hidden name=pool_id value='${pool_id}'>";
+				echo "<input type=hidden name=vs_id value='${vs_id}'>";
+				echo "<input type=hidden name=object_id value='${object_id}'>";
+				echo "<tr valign=top class=row_${order}><td><a href='${root}process.php?page=${pageno}&tab=${tabno}&op=delLB&pool_id=${pool_id}&object_id=${object_id}&vs_id=${vs_id}'>";
+				printImageHREF ('delete', 'Unconfigure');
+				echo "</a></td>";
+				echo "<td class=tdleft><a href='${root}?page=object&object_id=${object_id}'>${oi['dname']}</a></td>";
+				echo "<td class=tdleft><a href='${root}?page=vservice&id=${vs_id}'>";
+				$vsinfo = getVServiceInfo ($vs_id);
+				echo buildVServiceName ($vsinfo) . '</a>';
+				if (!empty ($vsinfo['name']))
+					echo " (${vsinfo['name']})";
+				echo "<td><textarea name=vsconfig>${configs['vsconfig']}</textarea></td>";
+				echo "<td><textarea name=rsconfig>${configs['rsconfig']}</textarea></td>";
+				echo "<td><input type=submit value=OK></td></tr></form>\n";
+				$order = $nextorder[$order];
+			}
+		echo "</table>\n";
+		finishPortlet();
+	}
 
 	startPortlet ('Add new');
 	echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
