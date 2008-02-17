@@ -2222,7 +2222,7 @@ function addRStoRSPool ($pool_id = 0, $rsip = '', $rsport = 0, $inservice = 'no'
 			'rsip' => "inet_aton('${rsip}')",
 			'rsport' => $rsport,
 			'rspool_id' => $pool_id,
-			'inservice' => ($inservice == 'yes' ? 'yes' : 'no'),
+			'inservice' => ($inservice == 'yes' ? "'yes'" : "'no'"),
 			'rsconfig' => (empty ($rsconfig) ? 'NULL' : "'${rsconfig}'")
 		)
 	);
