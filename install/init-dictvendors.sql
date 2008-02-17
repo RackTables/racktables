@@ -433,7 +433,7 @@ INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (22,480
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (22,481,'[[Cronyx E1-XL/S | http://www.cronyx.ru/hardware/e1xl-s.html]]');
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (22,482,'[[Cronyx E1-DXC/S | http://www.cronyx.ru/hardware/e1dxc-s.html]]');
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (22,483,'[[Cronyx FMUX-4-E2 | http://www.cronyx.ru/hardware/fmux4-e2.html]]');
-INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (22,484,'[[Cronyx FMUX-4-E3 | http://www.cronyx.ru/hardware/fmux16-e3.html]]');
+INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (22,484,'[[Cronyx FMUX-16-E3 | http://www.cronyx.ru/hardware/fmux16-e3.html]]');
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (22,485,'[[Cronyx FMUX/SAT | http://www.cronyx.ru/hardware/fmux-sat.html]]');
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (22,486,'[[Cronyx E1-XL/S-IP | http://www.cronyx.ru/hardware/e1xl-ip.html]]');
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (17,487,'[[RAD FCD-IPM | http://www.rad.com/Article/0,6583,36426-E1_T1_or_Fractional_E1_T1_Modular_Access_Device_with_Integrated_Router,00.html]]');
