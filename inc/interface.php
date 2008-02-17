@@ -3947,8 +3947,8 @@ function renderRSPoolServerForm ($pool_id = 0)
 		$default_port = '';
 	echo "<td><input type=text name=rsport size=5 value='${default_port}'  tabindex=2></td>";
 	echo "<td><input type=submit value='OK' tabindex=3></tr>\n";
-	echo "<tr><th colspan=3>configuration</th></tr>";
-	echo "<tr><td colspan=3><textarea name=rsconfig rows=10 cols=80 tabindex=4></textarea></td></tr>";
+	echo "<tr><th colspan=4>configuration</th></tr>";
+	echo "<tr><td colspan=4><textarea name=rsconfig rows=10 cols=80 tabindex=4></textarea></td></tr>";
 	echo "</form></table>\n";
 	finishPortlet();
 
@@ -3958,11 +3958,16 @@ function renderRSPoolServerForm ($pool_id = 0)
 	echo "<input type=hidden name=tab value='${tabno}'>\n";
 	echo "<input type=hidden name=op value=addMany>";
 	echo "<input type=hidden name=id value='${pool_id}'>";
-	echo "<table border=0 align=center>\n<tr><td>Format: ";
+	echo "<table border=0 align=center>\n<tr><td>";
+	if (getConfigVar ('DEFAULT_IPV4_RS_INSERVICE') == 'yes')
+		printImageHREF ('inservice', 'in service');
+	else
+		printImageHREF ('notinservice', 'NOT in service');
+	echo "</td><td>Format: ";
 	$formats = array ('ipvs_2' => 'ipvsadm -l -n (address and port)', 'ipvs_3' => 'ipvsadm -l -n (address, port and weight)');
 	printSelect ($formats, 'format');
 	echo "</td><td><input type=submit value=Parse></td></tr>\n";
-	echo "<tr><td colspan=2><textarea name=rawtext cols=100 rows=50></textarea></td></tr>\n";
+	echo "<tr><td colspan=3><textarea name=rawtext cols=100 rows=50></textarea></td></tr>\n";
 	echo "</table>\n";
 	finishPortlet();
 }

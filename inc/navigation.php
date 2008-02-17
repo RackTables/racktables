@@ -185,6 +185,7 @@ $tab['rspool']['edit'] = '[Edit]';
 $tab['rspool']['editlblist'] = 'Load Balancers';
 $tab['rspool']['editrslist'] = 'RS list';
 $tab['rspool']['rsinservice'] = 'RS in service';
+$trigger['rspool']['rsinservice'] = 'trigger_poolrscount';
 $tabhandler['rspool']['default'] = 'renderRSPool';
 $tabhandler['rspool']['editrslist'] = 'renderRSPoolServerForm';
 $tabhandler['rspool']['editlblist'] = 'renderRSPoolLBForm';

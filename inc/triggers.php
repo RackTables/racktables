@@ -80,4 +80,11 @@ function trigger_natv4 ()
 	return in_array ($info['objtype_id'], explode (',', getConfigVar ('NATV4_PERFORMERS')));
 }
 
+function trigger_poolrscount ()
+{
+	assertUIntArg ('id');
+	$poolInfo = getRSPoolInfo ($_REQUEST['id']);
+	return count ($poolInfo['rslist']) > 0;
+}
+
 ?>
