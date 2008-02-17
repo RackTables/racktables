@@ -17,7 +17,8 @@ function getDBUpgradePath ($v1, $v2)
 		'0.14.8',
 		'0.14.9',
 		'0.14.10',
-		'0.14.11'
+		'0.14.11',
+		'0.14.12'
 	);
 	if (!in_array ($v1, $versionhistory) || !in_array ($v2, $versionhistory))
 	{
@@ -714,7 +715,7 @@ CREATE TABLE `IPVirtualService` (
 			$query[] = "update Config set varvalue = '0.14.11' where varname = 'DB_VERSION'";
 			break; // --------------------------------------------
 		case '0.14.12':
-			$query[] = "INSERT INTO `Config` VALUES (DEFAULT_IPV4_RS_INSERVICE','no','string','no','no','Inservice status for new SLB real servers')";
+			$query[] = "INSERT INTO `Config` VALUES ('DEFAULT_IPV4_RS_INSERVICE','no','string','no','no','Inservice status for new SLB real servers')";
 			$query[] = "update Config set varvalue = '0.14.12' where varname = 'DB_VERSION'";
 			break; // --------------------------------------------
 #		case '0.14.13':
