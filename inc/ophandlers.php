@@ -938,7 +938,7 @@ function addRealServer ()
 	assertUIntArg ('rsport');
 	assertStringArg ('rsconfig', TRUE);
 	$pool_id = $_REQUEST['id'];
-	if (!addRStoRSPool ($pool_id, $_REQUEST['rsip'], $_REQUEST['rsport'], $_REQUEST['rsconfig']))
+	if (!addRStoRSPool ($pool_id, $_REQUEST['rsip'], $_REQUEST['rsport'], getConfigVar ('DEFAULT_IPV4_RS_INSERVICE'), $_REQUEST['rsconfig']))
 		return "${root}?page=${pageno}&tab=${tabno}&id=${pool_id}&error=" . urlencode ('addRStoRSPool() failed');
 	else
 		return "${root}?page=${pageno}&tab=${tabno}&id=${pool_id}&message=" . urlencode ("Real server was successfully added");
@@ -967,7 +967,7 @@ function addRealServers ()
 			case 'ipvs_2': // address and port only
 				if (!preg_match ('/^  -&gt; ([0-9\.]+):([0-9]+) /', $line, $match))
 					continue;
-				if (addRStoRSPool ($pool_id, $match[1], $match[2], ''))
+				if (addRStoRSPool ($pool_id, $match[1], $match[2], getConfigVar ('DEFAULT_IPV4_RS_INSERVICE'), ''))
 					$ngood++;
 				else
 					$nbad++;
@@ -975,7 +975,7 @@ function addRealServers ()
 			case 'ipvs_3': // address, port and weight
 				if (!preg_match ('/^  -&gt; ([0-9\.]+):([0-9]+) +[a-zA-Z]+ +([0-9]+) /', $line, $match))
 					continue;
-				if (addRStoRSPool ($pool_id, $match[1], $match[2], 'weight ' . $match[3]))
+				if (addRStoRSPool ($pool_id, $match[1], $match[2], getConfigVar ('DEFAULT_IPV4_RS_INSERVICE'), 'weight ' . $match[3]))
 					$ngood++;
 				else
 					$nbad++;

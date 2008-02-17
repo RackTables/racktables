@@ -713,11 +713,15 @@ CREATE TABLE `IPVirtualService` (
 			$query[] = "update Rack set thumb_data = NULL";
 			$query[] = "update Config set varvalue = '0.14.11' where varname = 'DB_VERSION'";
 			break; // --------------------------------------------
-#		case '0.14.12':
+		case '0.14.12':
+			$query[] = "INSERT INTO `Config` VALUES (DEFAULT_IPV4_RS_INSERVICE','no','string','no','no','Inservice status for new SLB real servers')";
+			$query[] = "update Config set varvalue = '0.14.12' where varname = 'DB_VERSION'";
+			break; // --------------------------------------------
+#		case '0.14.13':
 #			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('AUTO_PORTS_CONFIG','FIXME','string','yes','no','Autoports configuration')";
 #			$query[] = "alter table Rack add column left_is_front enum ('yes', 'no') not null default 'yes' after height";
 #			$query[] = "alter table Rack add column bottom_is_unit1 enum ('yes', 'no') not null default 'yes' after left_is_front";
-#			$query[] = "update Config set varvalue = '0.14.12' where varname = 'DB_VERSION'";
+#			$query[] = "update Config set varvalue = '0.14.13' where varname = 'DB_VERSION'";
 #			break; // --------------------------------------------
 		default:
 			showError ("executeUpgradeBatch () failed, because batch '${batchid}' isn't defined");

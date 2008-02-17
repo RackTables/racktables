@@ -3900,41 +3900,48 @@ function renderRSPoolServerForm ($pool_id = 0)
 	showMessageOrError();
 	$poolInfo = getRSPoolInfo ($pool_id);
 
-	$rsc = count ($poolInfo['rslist']);
-	startPortlet ("Manage existing (${rsc})");
-	echo "<table cellspacing=0 cellpadding=5 align=center class=cooltable>\n";
-	echo "<tr><th>&nbsp;</th><th>Address</th><th>Port</th><th>configuration</th><th>&nbsp;</th></tr>\n";
-	$order = 'odd';
-	foreach ($poolInfo['rslist'] as $rsid => $rs)
+	if (($rsc = count ($poolInfo['rslist']))
 	{
-		echo "<form action='${root}process.php'>";
-		echo "<input type=hidden name=page value='${pageno}'>\n";
-		echo "<input type=hidden name=tab value='${tabno}'>\n";
-		echo "<input type=hidden name=op value=updRS>";
-		echo "<input type=hidden name=rs_id value='${rsid}'>";
-		echo "<input type=hidden name=id value='${pool_id}'>";
-		echo "<tr valign=top class=row_${order}><td><a href='${root}process.php?page=${pageno}&tab=${tabno}";
-		echo "&op=delRS&pool_id=${pool_id}&id=${rsid}'>";
-		printImageHREF ('delete', 'Delete this real server');
-		echo "</td><td><input type=text name=rsip value='${rs['rsip']}'></td>";
-		echo "<td><input type=text name=rsport size=5 value='${rs['rsport']}'></td>";
-		echo "<td><textarea name=rsconfig>${rs['rsconfig']}</textarea></td>";
-		echo "<td><input type=submit value='OK'></td>";
-		echo "</tr></form>\n";
-		$order = $nextorder[$order];
+		startPortlet ("Manage existing (${rsc})");
+		echo "<table cellspacing=0 cellpadding=5 align=center class=cooltable>\n";
+		echo "<tr><th>&nbsp;</th><th>Address</th><th>Port</th><th>configuration</th><th>&nbsp;</th></tr>\n";
+		$order = 'odd';
+		foreach ($poolInfo['rslist'] as $rsid => $rs)
+		{
+			echo "<form action='${root}process.php'>";
+			echo "<input type=hidden name=page value='${pageno}'>\n";
+			echo "<input type=hidden name=tab value='${tabno}'>\n";
+			echo "<input type=hidden name=op value=updRS>";
+			echo "<input type=hidden name=rs_id value='${rsid}'>";
+			echo "<input type=hidden name=id value='${pool_id}'>";
+			echo "<tr valign=top class=row_${order}><td><a href='${root}process.php?page=${pageno}&tab=${tabno}";
+			echo "&op=delRS&pool_id=${pool_id}&id=${rsid}'>";
+			printImageHREF ('delete', 'Delete this real server');
+			echo "</td><td><input type=text name=rsip value='${rs['rsip']}'></td>";
+			echo "<td><input type=text name=rsport size=5 value='${rs['rsport']}'></td>";
+			echo "<td><textarea name=rsconfig>${rs['rsconfig']}</textarea></td>";
+			echo "<td><input type=submit value='OK'></td>";
+			echo "</tr></form>\n";
+			$order = $nextorder[$order];
+		}
+		echo "</table>\n";
+		finishPortlet();
 	}
-	echo "</table>\n";
-	finishPortlet();
 
 	startPortlet ('Add one');
 	echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
-	echo "<tr><th>Address</th><th>Port</th><th>&nbsp;</th></tr>\n";
+	echo "<tr><th>in service</th><th>Address</th><th>Port</th><th>&nbsp;</th></tr>\n";
 	echo "<form name=addone action='${root}process.php'>";
 	echo "<input type=hidden name=page value='${pageno}'>\n";
 	echo "<input type=hidden name=tab value='${tabno}'>\n";
 	echo "<input type=hidden name=op value=addRS>";
 	echo "<input type=hidden name=id value='${pool_id}'>";
-	echo "<tr><td><input type=text name=rsip tabindex=1></td>";
+	echo "<tr><td>";
+	if (getConfigVar ('DEFAULT_IPV4_RS_INSERVICE') == 'yes')
+		printImageHREF ('inservice', 'in service');
+	else
+		printImageHREF ('notinservice', 'NOT in service');
+	echo "</td><td><input type=text name=rsip tabindex=1></td>";
 	$default_port = getConfigVar ('DEFAULT_SLB_RS_PORT');
 	if ($default_port == 0)
 		$default_port = '';
