@@ -716,6 +716,7 @@ CREATE TABLE `IPVirtualService` (
 			break; // --------------------------------------------
 		case '0.14.12':
 			$query[] = "INSERT INTO `Config` VALUES ('DEFAULT_IPV4_RS_INSERVICE','no','string','no','no','Inservice status for new SLB real servers')";
+			$query[] = "INSERT INTO `Config` VALUES ('AUTOPORTS_CONFIG','4 = 1*33*kvm + 2*24*eth%u','string','no','no','AutoPorts configuration')";
 			$query[] = "update Config set varvalue = '0.14.12' where varname = 'DB_VERSION'";
 			$query[] = "update Dictionary set dict_value = '[[Cronyx FMUX-16-E3 | http://www.cronyx.ru/hardware/fmux16-e3.html]]' where dict_key = 484";
 			break; // --------------------------------------------

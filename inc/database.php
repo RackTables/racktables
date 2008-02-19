@@ -376,6 +376,8 @@ function commitAddObject ($new_name, $new_label, $new_barcode, $new_type_id, $ne
 	$row = $result2->fetch (PDO::FETCH_NUM);
 	$last_insert_id = $row[0];
 	$result2->closeCursor();
+	// Do AutoPorts magic
+	executeAutoPorts ($last_insert_id, $new_type_id);
 	return recordHistory ('RackObject', "id = ${last_insert_id}");
 }
 
@@ -2641,6 +2643,39 @@ function commitSetInService ($rs_id = 0, $inservice = '')
 		return FALSE;
 	else
 		return TRUE;
+}
+
+function executeAutoPorts ($object_id = 0, $type_id = 0)
+{
+	if ($object_id == 0 or $type_id == 0)
+	{
+		showError ('Invalid arguments', __FUNCTION__);
+		die;
+	}
+	$autoname
+	$typemap = explode (';', str_replace (' ', '', getConfigVar ('AUTOPORTS_CONFIG')));
+	foreach ($typemap as $equation)
+	{
+		$tmp = explode ('=', $equation);
+		if (count ($tmp) != 2)
+			continue;
+		$objtype_id = $tmp[0];
+		if ($objtype_id != $type_id)
+			continue;
+		$portlist = $tmp[1];
+		foreach (explode ('+', $portlist) as $product)
+		{
+			$tmp = explode ('*', $product);
+			if (count ($tmp) != 3)
+				continue;
+			$nports = $tmp[0];
+			$port_type = $tmp[1];
+			$format = $tmp[3];
+			for ($i = 0; $i < $nports; $i++)
+				// format string might ignore the index
+				commitAddPort ($object_id, @sprintf ($format, $i), $port_type, '', '');
+		}
+	}
 }
 
 ?>
