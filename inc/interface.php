@@ -1466,9 +1466,11 @@ function renderObjectGroupSummary ()
 	echo "</td></tr></table>\n";
 }
 
-function renderObjectGroup ($group_id = 0)
+function renderObjectGroup ()
 {
 	global $root;
+	assertUIntArg ('group_id');
+	$group_id = $_REQUEST['group_id'];
 	$summary = getObjectGroupInfo();
 	if ($summary == NULL)
 	{
