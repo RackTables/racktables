@@ -2,6 +2,7 @@
 	new feature: default value for RS inservice status
 	new feature: AutoPorts feature
 	bugfix: router HW type list was broken
+	update: Aten KVM switches and consoles
 0.14.11 2008-02-15
 	bugfix: rackspace allocation was broken by magic_quotes fix
 	bugfix: don't generate error messages by accessing _GET array
