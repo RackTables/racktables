@@ -81,29 +81,6 @@ function assertIPv4Arg ($argname, $ok_if_empty = FALSE)
 	}
 }
 
-function handler_objgroup ()
-{
-	assertUIntArg ('group_id');
-	renderObjectGroup ($_REQUEST['group_id']);
-}
-
-function handler_search ($tabno)
-{
-	renderSearchResults();
-}
-
-function handler_config ($tabno)
-{
-	switch ($tabno)
-	{
-		case 'default':
-			renderConfigMainpage();
-			break;
-		default:
-			showError ("Invalid tab '${tabno}' requested.", __FUNCTION__);
-	}
-}
-
 function handler_portmap ($tabno)
 {
 	switch ($tabno)

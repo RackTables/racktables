@@ -57,8 +57,9 @@ $tabhandler['rack']['design'] = 'renderRackDesign';
 $tabhandler['rack']['problems'] = 'renderRackProblems';
 
 $page['objgroup']['title_handler'] = 'dynamic_title_objgroup';
-$page['objgroup']['handler'] = 'handler_objgroup';
+$page['objgroup']['handler'] = 'renderObjectGroup';
 $page['objgroup']['bypass'] = 'group_id';
+$page['objgroup']['bypass_type'] = 'uint';
 $page['objgroup']['parent'] = 'objects';
 
 $page['object']['title_handler'] = 'dynamic_title_object';
@@ -208,12 +209,12 @@ $page['lbs']['parent'] = 'ipv4slb';
 $page['lbs']['handler'] = 'renderLBList';
 
 $page['search']['title_handler'] = 'dynamic_title_search';
-$page['search']['handler'] = 'handler_search';
+$page['search']['handler'] = 'renderSearchResults';
 $page['search']['parent'] = 'index';
 $page['search']['bypass'] = 'q';
 
 $page['config']['title'] = 'Configuration';
-$page['config']['handler'] = 'handler_config';
+$page['config']['handler'] = 'renderConfigMainpage';
 $page['config']['parent'] = 'index';
 
 $page['accounts']['title'] = 'Accounts';
