@@ -717,11 +717,12 @@ CREATE TABLE `IPVirtualService` (
 		case '0.14.12':
 			$query[] = "INSERT INTO `Config` VALUES ('DEFAULT_IPV4_RS_INSERVICE','no','string','no','no','Inservice status for new SLB real servers')";
 			$query[] = "INSERT INTO `Config` VALUES ('AUTOPORTS_CONFIG','4 = 1*33*kvm + 2*24*eth%u','string','no','no','AutoPorts configuration')";
-			$query[] = "update Config set varvalue = '0.14.12' where varname = 'DB_VERSION'";
+			$query[] = "alter table Dictionary modify column dict_value char(255)";
+			$query[] = "update Dictionary set dict_value = '[[RAD FCD-IPM | http://www.rad.com/Article/0,6583,36426-E1_T1_or_Fractional_E1_T1_Modular_Access_Device_with_Integrated_Router,00.html]]' where dict_key = 487";
 			$query[] = "update Dictionary set dict_value = '[[Cronyx FMUX-16-E3 | http://www.cronyx.ru/hardware/fmux16-e3.html]]' where dict_key = 484";
+			$query[] = "update Config set varvalue = '0.14.12' where varname = 'DB_VERSION'";
 			break; // --------------------------------------------
 #		case '0.14.13':
-#			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('AUTO_PORTS_CONFIG','FIXME','string','yes','no','Autoports configuration')";
 #			$query[] = "alter table Rack add column left_is_front enum ('yes', 'no') not null default 'yes' after height";
 #			$query[] = "alter table Rack add column bottom_is_unit1 enum ('yes', 'no') not null default 'yes' after left_is_front";
 #			$query[] = "update Config set varvalue = '0.14.13' where varname = 'DB_VERSION'";

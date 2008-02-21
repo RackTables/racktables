@@ -40,7 +40,7 @@ CREATE TABLE `Chapter` (
 CREATE TABLE `Dictionary` (
   `chapter_no` int(10) unsigned NOT NULL,
   `dict_key` int(10) unsigned NOT NULL auto_increment,
-  `dict_value` char(128) default NULL,
+  `dict_value` char(255) default NULL,
   PRIMARY KEY  (`dict_key`),
   UNIQUE KEY `chap_to_key` (`chapter_no`,`dict_key`),
   UNIQUE KEY `chap_to_val` (`chapter_no`,`dict_value`)
