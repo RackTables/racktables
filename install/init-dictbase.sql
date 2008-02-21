@@ -91,6 +91,7 @@ INSERT INTO `Chapter` (`chapter_no`, `sticky`, `chapter_name`) VALUES (19,'no','
 INSERT INTO `Chapter` (`chapter_no`, `sticky`, `chapter_name`) VALUES (20,'yes','Protocols');
 INSERT INTO `Chapter` (`chapter_no`, `sticky`, `chapter_name`) VALUES (21,'no','KVM switch models');
 INSERT INTO `Chapter` (`chapter_no`, `sticky`, `chapter_name`) VALUES (22,'no','multiplexer models');
+INSERT INTO `Chapter` (`chapter_no`, `sticky`, `chapter_name`) VALUES (23, 'no', 'console models');
 
 INSERT INTO `PortCompat` (`type1`, `type2`) VALUES (17,17);
 INSERT INTO `PortCompat` (`type1`, `type2`) VALUES (18,18);
