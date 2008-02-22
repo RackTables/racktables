@@ -67,7 +67,7 @@ function not_already_installed()
 	}
 	else
 	{
-		echo 'There seem to be no existing installation here.<br>';
+		echo 'There seem to be no existing installation here, I am going to setup one now.<br>';
 		return TRUE;
 	}
 }
@@ -262,7 +262,7 @@ function init_database_dynamic ()
 {
 	connect_to_db();
 	global $dbxlink;
-	if (!isset ($_REQUEST['password']))
+	if (!isset ($_REQUEST['password']) or empty ($_REQUEST['password']))
 	{
 		$result = $dbxlink->query ('select count(user_id) from UserAccount where user_id = 1');
 		$row = $result->fetch (PDO::FETCH_NUM);
@@ -275,18 +275,21 @@ function init_database_dynamic ()
 			echo '<tr><td><input type=password name=password></td></tr>';
 			echo '</table>';
 		}
+		return FALSE;
 	}
 	else
 	{
-		$query = "INSERT INTO `UserAccount` (`user_id`, `user_name`, `user_enabled`, `user_password_hash`, `user_realname`)" .
-			"VALUES (1,'admin','yes',sha1(${_REQUEST['password']}),'RackTables Administrator')";
+		$query = "INSERT INTO `UserAccount` (`user_id`, `user_name`, `user_enabled`, `user_password_hash`, `user_realname`) " .
+			"VALUES (1,'admin','yes',sha1('${_REQUEST['password']}'),'RackTables Administrator')";
+		$result = $dbxlink->exec ($query);
+		echo "Administrator password has been set successfully.<br>";
+		return TRUE;
 	}
-	return FALSE;
 }
 
 function congrats ()
 {
-	echo 'Congratulations! RackTables installation is complete. Press Next to open your main page.';
+	echo 'Congratulations! RackTables installation is complete. Press Proceed to open your main page.<br>';
 	return TRUE;
 }
 
