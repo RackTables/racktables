@@ -196,7 +196,10 @@ function init_config ()
 	fwrite ($conf, " */\n");
 	fwrite ($conf, "\$pdo_dsn = '${pdo_dsn}';\n");
 	fwrite ($conf, "\$db_username = '" . $_REQUEST['mysql_username'] . "';\n");
-	fwrite ($conf, "\$db_password = '" . $_REQUEST['mysql_password'] . "';\n");
+	fwrite ($conf, "\$db_password = '" . $_REQUEST['mysql_password'] . "';\n\n");
+	fwrite ($conf, "// This is only necessary for 'ldap' USER_AUTH_SRC\n");
+	fwrite ($conf, "\$ldap_server = 'some.server';\n");
+	fwrite ($conf, "\$ldap_domain = 'some.domain';\n");
 	fwrite ($conf, "?>\n");
 	fclose ($conf);
 	echo "The configuration file has been written successfully.<br>";
