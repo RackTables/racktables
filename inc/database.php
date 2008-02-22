@@ -1418,7 +1418,7 @@ function getDict ()
 
 function getDictStats ()
 {
-	$stock_chapters = array (1, 2, 3, 11, 12, 13, 14, 16, 17, 18, 19, 20, 21, 22);
+	$stock_chapters = array (1, 2, 3, 11, 12, 13, 14, 16, 17, 18, 19, 20, 21, 22, 23);
 	global $dbxlink;
 	$query =
 		"select Chapter.chapter_no, chapter_name, count(dict_key) as wc from " .
@@ -1519,7 +1519,7 @@ function getRackspaceStats()
 			return NULL;
 		}
 		$row = $result->fetch (PDO::FETCH_NUM);
-		$ret[$item['txt']] = $row[0];
+		$ret[$item['txt']] = empty ($row[0]) ? 0 : $row[0];
 		$result->closeCursor();
 		unset ($result);
 	}
