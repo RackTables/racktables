@@ -244,38 +244,50 @@ function init_database_static ()
 	}
 	echo 'Initializing the database...<br>';
 	echo '<table border=1>';
-	echo "<tr><th>file</th><th>queries</th></tr>";
+	echo "<tr><th>file</th><th>queries</th><th>errors</th></tr>";
+	$errlist = array();
 	foreach (array ('structure', 'dictbase', 'dictvendors') as $part)
 	{
 		$filename = "install/init-${part}.sql";
 		echo "<tr><td>${filename}</td>";
 		$f = fopen ("install/init-${part}.sql", 'r');
-		$longq = '';
 		if ($f === FALSE)
 		{
 			echo "Failed to open install/init-${part}.sql for reading";
 			return FALSE;
 		}
+		$longq = '';
 		while (!feof ($f))
 		{
 			$line = fgets ($f);
 			if (ereg ('^--', $line))
 				continue;
-			$longq .= str_replace ("\n", '', $line);
+			$longq .= $line;
 		}
 		fclose ($f);
-		$qlist = explode (';', $longq);
-		$nq = 0;
-		foreach ($qlist as $query)
+		$nq = $nerrs = 0;
+		foreach (explode (";\n", $longq) as $query)
 		{
 			if (empty ($query))
 				continue;
 			$nq++;
-			$dbxlink->exec ($query);
+			if ($dbxlink->exec ($query) === FALSE)
+			{
+				$nerrs++;
+				$errlist[] = $query;
+			}
 		}
-		echo "<td>${nq}</td></tr>\n";
+		echo "<td>${nq}</td><td>${nerrs}</td></tr>\n";
 	}
 	echo '</table>';
+	if (count ($errlist))
+	{
+		echo '<pre>The following queries failed:\n';
+		foreach ($errlist as $q)
+			echo "${q}\n\n";
+		echo '</pre>';
+		return FALSE;
+	}
 	return TRUE;
 }
 
