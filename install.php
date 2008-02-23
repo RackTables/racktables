@@ -125,6 +125,13 @@ function platform_is_ok ()
 	}
 	echo '</td></tr>';
 
+	echo '<tr><td>HTTP scheme</td>';
+	if (!empty($_SERVER['HTTPS']))
+		echo '<td class=msg_success>HTTPs';
+	else
+		echo '<td class=msg_warning>HTTP (all your passwords will be transmitted in cleartext)';
+	echo '</td></tr>';
+
 	echo "</table>\n";
 	return !$nerrs;
 }
@@ -222,6 +229,19 @@ function connect_to_db ()
 
 function init_database_static ()
 {
+	connect_to_db ();
+	global $dbxlink;
+	$result = $dbxlink->query ('show tables');
+	$tables = $result->fetchAll (PDO::FETCH_NUM);
+	$result->closeCursor();
+	unset ($result);
+	if (count ($tables))
+	{
+		echo 'Your database is already holding ' . count ($tables);
+		echo ' tables, so I will stop here and let you check it yourself.<br>';
+		echo 'There is some important data there probably.<br>';
+		return FALSE;
+	}
 	echo 'Initializing the database...<br>';
 	echo '<table border=1>';
 	echo "<tr><th>file</th><th>queries</th></tr>";
@@ -245,8 +265,6 @@ function init_database_static ()
 		}
 		fclose ($f);
 		$qlist = explode (';', $longq);
-		connect_to_db ();
-		global $dbxlink;
 		$nq = 0;
 		foreach ($qlist as $query)
 		{
@@ -292,7 +310,11 @@ function init_database_dynamic ()
 
 function congrats ()
 {
-	echo 'Congratulations! RackTables installation is complete. Press Proceed to open your main page.<br>';
+	echo 'Congratulations! RackTables installation is complete. After pressing Proceed you will ';
+	echo 'enter the system. Authenticate with <strong>admin</strong> username.<br>';
+	echo "RackTables web-site runs some <a href='http://racktables.org/trac/wiki'>wiki</a> pages ";
+	echo "and <a href='http://racktables.org/trac/report/1'>a bug tracker</a>.<br>We have also got ";
+	echo "a <a href='http://www.freelists.org/list/racktables-users'>mailing list</a> for users. Have fun.<br>";
 	return TRUE;
 }
 
