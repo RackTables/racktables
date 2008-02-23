@@ -2288,7 +2288,8 @@ function renderAddMultipleObjectsForm ()
 	for ($i = 0; $i < $max; $i++)
 	{
 		echo '<tr><td>';
-		printSelect ($typelist, "${i}_object_type_id", getConfigVar ('DEFAULT_OBJECT_TYPE'));
+		// Don't employ DEFAULT_OBJECT_TYPE to avoid creating ghost records for pre-selected empty rows.
+		printSelect ($typelist, "${i}_object_type_id", 0);
 		echo '</td>';
 		echo "<td><input type=text size=30 name=${i}_object_name";
 		if ($keepvalues and $type_id[$i] == 0)
