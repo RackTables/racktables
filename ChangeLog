@@ -1,6 +1,7 @@
 0.14.12
 	new feature: default value for RS inservice status
 	new feature: AutoPorts feature
+	new feature: HTTP installer
 	bugfix: router HW type list was broken
 	update: Aten KVM switches and consoles
 0.14.11 2008-02-15
