@@ -765,6 +765,10 @@ CREATE TABLE `IPVirtualService` (
 			$new_words[] = array (22 => '[[Tainet Mercury 3630 | http://www.tainet.net/Product/mercury.htm]]');
 			$new_words[] = array (22 => '[[Tainet Mercury 3630E | http://www.tainet.net/Product/mercury.htm]]');
 			$new_words[] = array (22 => '[[Tainet DSD-08A | http://www.tainet.net/Product/dsd08a.htm]]');
+			foreach ($new_words as $dict_key => $tmp)
+				foreach ($tmp as $chapter_no => $dict_value)
+					$query[] = 'INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) ' .
+						"VALUES (${chapter_no}, ${dict_key}, '${dict_value}')";
 			$query[] = "update Config set varvalue = '0.14.12' where varname = 'DB_VERSION'";
 			break; // --------------------------------------------
 #		case '0.14.13':
