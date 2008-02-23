@@ -269,7 +269,9 @@ function renderNewObjectForm ()
 	echo "<input type=hidden name=tab value=${tabno}>";
 	echo '<table border=0 align=center>';
 	echo "<tr><th class=tdright>Type:</th><td class=tdleft>";
-	printSelect (getObjectTypeList(), 'object_type_id');
+	$typelist = getObjectTypeList();
+	$typelist[0] = 'select type...';
+	printSelect ($typelist, 'object_type_id', getConfigVar ('DEFAULT_OBJECT_TYPE'));
 	echo "</td></tr>\n";
 	echo "<tr><th class=tdright>Common name:</th><td class=tdleft><input type=text name=object_name></td></tr>\n";
 	echo "<tr><th class=tdright>Visible label:</th><td class=tdleft><input type=text name=object_label></td></tr>\n";
@@ -2286,7 +2288,7 @@ function renderAddMultipleObjectsForm ()
 	for ($i = 0; $i < $max; $i++)
 	{
 		echo '<tr><td>';
-		printSelect ($typelist, "${i}_object_type_id", 0);
+		printSelect ($typelist, "${i}_object_type_id", getConfigVar ('DEFAULT_OBJECT_TYPE'));
 		echo '</td>';
 		echo "<td><input type=text size=30 name=${i}_object_name";
 		if ($keepvalues and $type_id[$i] == 0)
@@ -2315,7 +2317,7 @@ function renderAddMultipleObjectsForm ()
 	echo "<input type=hidden name=page value=${pageno}>";
 	echo "<input type=hidden name=tab value=${tabno}>";
 	echo 'For each line shown below create an object of type ';
-	printSelect ($typelist, "global_type_id", 0);
+	printSelect ($typelist, "global_type_id", getConfigVar ('DEFAULT_OBJECT_TYPE'));
 	echo " <input type=submit name=got_very_fast_data value='Go!'><br>\n";
 	echo "<textarea name=namelist cols=40 rows=25>\n";
 	if ($keepvalues and $global_type_id == 0)

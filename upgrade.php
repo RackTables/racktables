@@ -717,6 +717,7 @@ CREATE TABLE `IPVirtualService` (
 		case '0.14.12':
 			$query[] = "INSERT INTO `Config` VALUES ('DEFAULT_IPV4_RS_INSERVICE','no','string','no','no','Inservice status for new SLB real servers')";
 			$query[] = "INSERT INTO `Config` VALUES ('AUTOPORTS_CONFIG','4 = 1*33*kvm + 2*24*eth%u;15 = 1*446*kvm','string','yes','no','AutoPorts configuration')";
+			$query[] = "INSERT INTO `Config` VALUES ('DEFAULT_OBJECT_TYPE','4','uint','yes','no','Default object type for new objects')";
 			$query[] = "insert into Chapter (chapter_no, sticky, chapter_name) values (23, 'no', 'console models')";
 			$query[] = "INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_no`) VALUES (15, 2, 23)";
 			$query[] = "alter table Dictionary modify column dict_value char(255)";

@@ -927,6 +927,7 @@ function resetUIConfig()
 	setConfigVar ('RACK_PRESELECT_THRESHOLD','1');
 	setConfigVar ('DEFAULT_IPV4_RS_INSERVICE','no');
 	setConfigVar ('AUTOPORTS_CONFIG','4 = 1*33*kvm + 2*24*eth%u;15 = 1*446*kvm');
+	setConfigVar ('DEFAULT_OBJECT_TYPE','4');
 	return "${root}?page=${pageno}&tab=default&message=" . urlencode ("Reset complete");
 }
 

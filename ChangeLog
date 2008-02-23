@@ -2,6 +2,7 @@
 	new feature: default value for RS inservice status
 	new feature: AutoPorts feature
 	new feature: HTTP installer
+	new feature: default object type
 	bugfix: router HW type list was broken
 	update: Aten KVM switches and consoles
 	update: Tainet MUXes
