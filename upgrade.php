@@ -759,6 +759,12 @@ CREATE TABLE `IPVirtualService` (
 			$new_words[] = array (23 => '[[Aten CL1200 | http://www.aten.com/products/productItem.php?pcid=2005010513171002&psid=20060411131050002&pid=20050722165040002&layerid=subClass1]]');
 			$new_words[] = array (23 => '[[Aten ACS1208AL | http://www.aten.com/products/productItem.php?pcid=2005010513171002&psid=20060411131050002&pid=2005022413597003&layerid=subClass1]]');
 			$new_words[] = array (23 => '[[Aten ACS1216AL | http://www.aten.com/products/productItem.php?pcid=2005010513171002&psid=20060411131050002&pid=2005022413597003&layerid=subClass1]]');
+			$new_words[] = array (22 => '[[Tainet MUXpro 8216 | http://www.tainet.net/Product/muxpro820_8216.htm]]');
+			$new_words[] = array (22 => '[[Tainet Mercury 3600+ | http://www.tainet.net/Product/mercury.htm]]');
+			$new_words[] = array (22 => '[[Tainet Mercury 3820 | http://www.tainet.net/Product/mercury.htm]]');
+			$new_words[] = array (22 => '[[Tainet Mercury 3630 | http://www.tainet.net/Product/mercury.htm]]');
+			$new_words[] = array (22 => '[[Tainet Mercury 3630E | http://www.tainet.net/Product/mercury.htm]]');
+			$new_words[] = array (22 => '[[Tainet DSD-08A | http://www.tainet.net/Product/dsd08a.htm]]');
 			$query[] = "update Config set varvalue = '0.14.12' where varname = 'DB_VERSION'";
 			break; // --------------------------------------------
 #		case '0.14.13':

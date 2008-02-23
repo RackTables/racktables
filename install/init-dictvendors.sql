@@ -476,3 +476,9 @@ INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (23,523
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (23,524,'[[Aten CL1200 | http://www.aten.com/products/productItem.php?pcid=2005010513171002&psid=20060411131050002&pid=20050722165040002&layerid=subClass1]]');
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (23,525,'[[Aten ACS1208AL | http://www.aten.com/products/productItem.php?pcid=2005010513171002&psid=20060411131050002&pid=2005022413597003&layerid=subClass1]]');
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (23,526,'[[Aten ACS1216AL | http://www.aten.com/products/productItem.php?pcid=2005010513171002&psid=20060411131050002&pid=2005022413597003&layerid=subClass1]]');
+INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (22,527,'[[Tainet MUXpro 8216 | http://www.tainet.net/Product/muxpro820_8216.htm]]');
+INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (22,528,'[[Tainet Mercury 3600+ | http://www.tainet.net/Product/mercury.htm]]');
+INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (22,529,'[[Tainet Mercury 3820 | http://www.tainet.net/Product/mercury.htm]]');
+INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (22,530,'[[Tainet Mercury 3630 | http://www.tainet.net/Product/mercury.htm]]');
+INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (22,531,'[[Tainet Mercury 3630E | http://www.tainet.net/Product/mercury.htm]]');
+INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (22,532,'[[Tainet DSD-08A | http://www.tainet.net/Product/dsd08a.htm]]');
