@@ -722,7 +722,7 @@ CREATE TABLE `IPVirtualService` (
 			$query[] = "alter table Dictionary modify column dict_value char(255)";
 			$query[] = "update Dictionary set dict_value = '[[RAD FCD-IPM | http://www.rad.com/Article/0,6583,36426-E1_T1_or_Fractional_E1_T1_Modular_Access_Device_with_Integrated_Router,00.html]]' where dict_key = 487";
 			$query[] = "update Dictionary set dict_value = '[[Cronyx FMUX-16-E3 | http://www.cronyx.ru/hardware/fmux16-e3.html]]' where dict_key = 484";
-			$new_words[491] = array (21 => '[[ATEN CS78 | http://www.aten.com/products/productItem.php?pcid=20070130111936003&psid=20070130133658002&pid=20070319151852001&layerid=subClass2]]');
+			$new_words[491] = array (21 => '[[Aten CS78 | http://www.aten.com/products/productItem.php?pcid=20070130111936003&psid=20070130133658002&pid=20070319151852001&layerid=subClass2]]');
 			$new_words[] = array (21 => '[[Aten ACS1208A | http://www.aten.com/products/productItem.php?pcid=20070130111936003&psid=20070130133658002&pid=20050224111025006&layerid=subClass2]]');
 			$new_words[] = array (21 => '[[Aten ACS1216A | http://www.aten.com/products/productItem.php?pcid=20070130111936003&psid=20070130133658002&pid=20050224111953008&layerid=subClass2]]');
 			$new_words[] = array (21 => '[[Aten CS1754 | http://www.aten.com/products/productItem.php?pcid=20070130111936003&psid=20070130133658002&pid=20050217161051008&layerid=subClass2]]');
