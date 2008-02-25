@@ -489,11 +489,4 @@ INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (11,536
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (11,537,'[[HP ProLiant DL365 | http://h10010.www1.hp.com/wwpc/us/en/en/WF05a/15351-15351-3328412-241644-241475-3186080.html]]');
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (11,538,'[[HP ProLiant DL320s | http://h10010.www1.hp.com/wwpc/us/en/en/WF05a/15351-15351-3328412-241644-241475-3232017.html]]');
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (11,539,'[[HP ProLiant DL320p | http://h10010.www1.hp.com/wwpc/us/en/en/WF05a/15351-15351-3328412-241644-241475-3579703.html]]');
-INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (11,,'[[HP ProLiant ML115 | http://h10010.www1.hp.com/wwpc/us/en/en/WF05a/15351-15351-241434-241646-3328424-3330535.html]]');
-INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (11,,'[[HP ProLiant  | ]]');
-INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (11,,'[[HP ProLiant  | ]]');
-INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (11,,'[[HP ProLiant  | ]]');
-INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (11,,'[[HP ProLiant  | ]]');
-INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (11,,'[[HP ProLiant  | ]]');
-INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (11,,'[[HP ProLiant  | ]]');
-INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (11,,'[[HP ProLiant  | ]]');
+INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (11,540,'[[HP ProLiant ML115 | http://h10010.www1.hp.com/wwpc/us/en/en/WF05a/15351-15351-241434-241646-3328424-3330535.html]]');
