@@ -235,7 +235,7 @@ INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, descriptio
 INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('REQUIRE_ASSET_TAG_FOR','4,7,8','string','yes','no','Require asset tag for the following object types');
 INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('DEFAULT_SLB_VS_PORT','','uint','yes','no','Default port of SLB virtual service');
 INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('DEFAULT_SLB_RS_PORT','','uint','yes','no','Default port of SLB real server');
-INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('IPV4_PERFORMERS','1,4,7,8,12,14','string','yes','no','IPv4-capable object types');
+INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('IPV4_PERFORMERS','1,4,7,8,12,14,445,447','string','yes','no','IPv4-capable object types');
 INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('NATV4_PERFORMERS','4,7,8','string','yes','no','NATv4-capable object types');
 INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('USER_AUTH_SRC','database','string','no','no','User authentication source');
 INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('DETECT_URLS','no','string','yes','no','Detect URLs in text fields');

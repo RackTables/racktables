@@ -921,7 +921,7 @@ function resetUIConfig()
 	setConfigVar ('USER_AUTH_SRC','database');
 	setConfigVar ('DEFAULT_SLB_VS_PORT','');
 	setConfigVar ('DEFAULT_SLB_RS_PORT','');
-	setConfigVar ('IPV4_PERFORMERS','1,4,7,8,12,14');
+	setConfigVar ('IPV4_PERFORMERS','1,4,7,8,12,14,445,447');
 	setConfigVar ('NATV4_PERFORMERS','4,7,8');
 	setConfigVar ('DETECT_URLS','no');
 	setConfigVar ('RACK_PRESELECT_THRESHOLD','1');
