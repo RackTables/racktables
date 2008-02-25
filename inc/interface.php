@@ -4473,9 +4473,30 @@ function renderLivePTR ($id = 0)
 	echo "</td></tr></table>\n";
 }
 
-function renderAutoPortsForm ()
+function renderAutoPortsForm ($object_id = 0)
 {
-	dragon();
+	global $root, $pageno, $tabno;
+	if ($object_id <= 0)
+	{
+		showError ('Invalid object_id', __FUNCTION__);
+		return;
+	}
+	$info = getObjectInfo ($object_id);
+	$ptlist = readChapter ('PortType');
+	echo "<table class='widetable' border=0 cellspacing=0 cellpadding=5 align='center'>\n";
+	echo "<caption>The following ports can be quickly added:</caption>";
+	echo "<tr><th>type</th><th>name</th></tr>";
+	foreach (getAutoPorts ($info['objtype_id']) as $autoport)
+		echo "<tr><td>" . $ptlist[$autoport['type']] . "</td><td>${autoport['name']}</td></tr>";
+	echo "<form method=post action='${root}process.php'>\n";
+	echo "<input type=hidden name=page value=${pageno}>\n";
+	echo "<input type=hidden name=tab value=${tabno}>\n";
+	echo "<input type=hidden name=object_id value=${object_id}>\n";
+	echo "<input type=hidden name=op value=generate>\n";
+	echo "<tr><td colspan=2 align=center>";
+	echo "<input type=submit value='Generate'>";
+	echo "</td></tr>";
+	echo "</table>";
 }
 
 ?>

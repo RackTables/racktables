@@ -2652,8 +2652,10 @@ function executeAutoPorts ($object_id = 0, $type_id = 0)
 		showError ('Invalid arguments', __FUNCTION__);
 		die;
 	}
+	$ret = TRUE;
 	foreach (getAutoPorts ($type_id) as $autoport)
-		commitAddPort ($object_id, $autoport['name'], $autoport['type'], '', '');
+		$ret = $ret and '' == commitAddPort ($object_id, $autoport['name'], $autoport['type'], '', '');
+	return $ret;
 }
 
 ?>

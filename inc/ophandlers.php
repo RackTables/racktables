@@ -1215,4 +1215,17 @@ function importPTRData ()
 		return "${root}?page=${pageno}&tab=${tabno}&id=${id}&error=" . urlencode ("Encountered ${nbad} errors, updated ${ngood} IP address(es)");
 }
 
+function generateAutoPorts ()
+{
+	global $root, $pageno, $tabno;
+	assertUIntArg ('object_id');
+	$object_id = $_REQUEST['object_id'];
+	$info = getObjectInfo ($object_id);
+	// Navigate away in case of success, stay at the place otherwise.
+	if (executeAutoPorts ($object_id, $info['objtype_id']))
+		return "${root}?page=${pageno}&tab=ports&object_id=${object_id}&message=" . urlencode ('Generation complete');
+	else
+		return "${root}?page=${pageno}&tab=${tabno}&object_id=${object_id}&error=" . urlencode ('executeAutoPorts() failed');
+}
+
 ?>
