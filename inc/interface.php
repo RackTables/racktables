@@ -4473,4 +4473,9 @@ function renderLivePTR ($id = 0)
 	echo "</td></tr></table>\n";
 }
 
+function renderAutoPortsForm ()
+{
+	dragon();
+}
+
 ?>

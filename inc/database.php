@@ -2652,29 +2652,8 @@ function executeAutoPorts ($object_id = 0, $type_id = 0)
 		showError ('Invalid arguments', __FUNCTION__);
 		die;
 	}
-	$typemap = explode (';', str_replace (' ', '', getConfigVar ('AUTOPORTS_CONFIG')));
-	foreach ($typemap as $equation)
-	{
-		$tmp = explode ('=', $equation);
-		if (count ($tmp) != 2)
-			continue;
-		$objtype_id = $tmp[0];
-		if ($objtype_id != $type_id)
-			continue;
-		$portlist = $tmp[1];
-		foreach (explode ('+', $portlist) as $product)
-		{
-			$tmp = explode ('*', $product);
-			if (count ($tmp) != 3)
-				continue;
-			$nports = $tmp[0];
-			$port_type = $tmp[1];
-			$format = $tmp[2];
-			for ($i = 0; $i < $nports; $i++)
-				// format string might ignore the index
-				commitAddPort ($object_id, @sprintf ($format, $i), $port_type, '', '');
-		}
-	}
+	foreach (getAutoPorts ($type_id) as $autoport)
+		commitAddPort ($object_id, $autoport['name'], $autoport['type'], '', '');
 }
 
 ?>

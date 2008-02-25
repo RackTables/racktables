@@ -1204,4 +1204,34 @@ function email_regex_simple ()
 	"\@((?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?))"; # @domain
 }
 
+// Parse AUTOPORTS_CONFIG and return a list of generated pairs (port_type, port_name)
+// for the requested object_type_id.
+function getAutoPorts ($type_id)
+{
+	$ret = array();
+	$typemap = explode (';', str_replace (' ', '', getConfigVar ('AUTOPORTS_CONFIG')));
+	foreach ($typemap as $equation)
+	{
+		$tmp = explode ('=', $equation);
+		if (count ($tmp) != 2)
+			continue;
+		$objtype_id = $tmp[0];
+		if ($objtype_id != $type_id)
+			continue;
+		$portlist = $tmp[1];
+		foreach (explode ('+', $portlist) as $product)
+		{
+			$tmp = explode ('*', $product);
+			if (count ($tmp) != 3)
+				continue;
+			$nports = $tmp[0];
+			$port_type = $tmp[1];
+			$format = $tmp[2];
+			for ($i = 0; $i < $nports; $i++)
+				$ret[] = array ('type' => $port_type, 'name' => @sprintf ($format, $i));
+		}
+	}
+	return $ret;
+}
+
 ?>

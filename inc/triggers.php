@@ -87,4 +87,13 @@ function trigger_poolrscount ()
 	return count ($poolInfo['rslist']) > 0;
 }
 
+function trigger_autoports ()
+{
+	assertUIntArg ('object_id');
+	if (count (getObjectPortsAndLinks ($_REQUEST['object_id'])) != 0)
+		return FALSE;
+	$info = getObjectInfo ($_REQUEST['object_id']);
+	return count (getAutoPorts ($info['objtype_id'])) != 0;
+}
+
 ?>
