@@ -721,8 +721,6 @@ CREATE TABLE `IPVirtualService` (
 			$query[] = "insert into Chapter (chapter_no, sticky, chapter_name) values (23, 'no', 'console models')";
 			$query[] = "INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_no`) VALUES (15, 2, 23)";
 			$query[] = "alter table Dictionary modify column dict_value char(255)";
-			$query[] = "update Dictionary set dict_value = '[[RAD FCD-IPM | http://www.rad.com/Article/0,6583,36426-E1_T1_or_Fractional_E1_T1_Modular_Access_Device_with_Integrated_Router,00.html]]' where dict_key = 487";
-			$query[] = "update Dictionary set dict_value = '[[Cronyx FMUX-16-E3 | http://www.cronyx.ru/hardware/fmux16-e3.html]]' where dict_key = 484";
 			$new_words[491] = array (21 => '[[Aten CS78 | http://www.aten.com/products/productItem.php?pcid=20070130111936003&psid=20070130133658002&pid=20070319151852001&layerid=subClass2]]');
 			$new_words[] = array (21 => '[[Aten ACS1208A | http://www.aten.com/products/productItem.php?pcid=20070130111936003&psid=20070130133658002&pid=20050224111025006&layerid=subClass2]]');
 			$new_words[] = array (21 => '[[Aten ACS1216A | http://www.aten.com/products/productItem.php?pcid=20070130111936003&psid=20070130133658002&pid=20050224111953008&layerid=subClass2]]');
@@ -766,6 +764,32 @@ CREATE TABLE `IPVirtualService` (
 			$new_words[] = array (22 => '[[Tainet Mercury 3630 | http://www.tainet.net/Product/mercury.htm]]');
 			$new_words[] = array (22 => '[[Tainet Mercury 3630E | http://www.tainet.net/Product/mercury.htm]]');
 			$new_words[] = array (22 => '[[Tainet DSD-08A | http://www.tainet.net/Product/dsd08a.htm]]');
+			$new_words[] = array (11 => '[[HP ProLiant DL160 | http://h10010.www1.hp.com/wwpc/us/en/en/WF05a/15351-15351-3328412-241644-3328421-3580694.html');
+			$new_words[] = array (11 => '[[HP ProLiant DL180 | http://h10010.www1.hp.com/wwpc/us/en/en/WF05a/15351-15351-3328412-241644-3328421-3580698.html]]');
+			$new_words[] = array (11 => '[[HP ProLiant DL185 | http://h10010.www1.hp.com/wwpc/us/en/en/WF05a/15351-15351-3328412-241644-3328421-3579900.html]]');
+			$new_words[] = array (11 => '[[HP ProLiant DL365 | http://h10010.www1.hp.com/wwpc/us/en/en/WF05a/15351-15351-3328412-241644-241475-3186080.html]]');
+			$new_words[] = array (11 => '[[HP ProLiant DL320s | http://h10010.www1.hp.com/wwpc/us/en/en/WF05a/15351-15351-3328412-241644-241475-3232017.html]]');
+			$new_words[] = array (11 => '[[HP ProLiant DL320p | http://h10010.www1.hp.com/wwpc/us/en/en/WF05a/15351-15351-3328412-241644-241475-3579703.html]]');
+			$new_words[] = array (11 => '[[HP ProLiant ML115 | http://h10010.www1.hp.com/wwpc/us/en/en/WF05a/15351-15351-241434-241646-3328424-3330535.html]]');
+			$old_words = array();
+			$old_words[487] = '[[RAD FCD-IPM | http://www.rad.com/Article/0,6583,36426-E1_T1_or_Fractional_E1_T1_Modular_Access_Device_with_Integrated_Router,00.html]]';
+			$old_words[484] = '[[Cronyx FMUX-16-E3 | http://www.cronyx.ru/hardware/fmux16-e3.html]]';
+			$old_words[101] = '[[HP ProLiant DL140 | http://h10010.www1.hp.com/wwpc/us/en/en/WF05a/15351-15351-3328412-241644-3328421-1842838.html]]';
+			$old_words[102] = '[[HP ProLiant DL145 | http://h10010.www1.hp.com/wwpc/us/en/en/WF05a/15351-15351-3328412-241644-3328421-3219755.html]]';
+			$old_words[103] = '[[HP ProLiant DL320 | http://h10010.www1.hp.com/wwpc/us/en/en/WF05a/15351-15351-3328412-241644-241475-3201178.html]]';
+			$old_words[104] = '[[HP ProLiant DL360 | http://h10010.www1.hp.com/wwpc/us/en/en/WF05a/15351-15351-3328412-241644-241475-1121486.html]]';
+			$old_words[105] = '[[HP ProLiant DL380 | http://h10010.www1.hp.com/wwpc/us/en/en/WF05a/15351-15351-3328412-241644-241475-1121516.html]]';
+			$old_words[106] = '[[HP ProLiant DL385 | http://h10010.www1.hp.com/wwpc/us/en/en/WF05a/15351-15351-3328412-241644-241475-3219233.html]]';
+			$old_words[107] = '[[HP ProLiant DL580 | http://h10010.www1.hp.com/wwpc/us/en/en/WF05a/15351-15351-3328412-241644-3328422-3454575.html]]';
+			$old_words[108] = '[[HP ProLiant DL585 | http://h10010.www1.hp.com/wwpc/us/en/en/WF05a/15351-15351-3328412-241644-3328422-3219717.html]]';
+			$old_words[109] = '[[HP ProLiant ML110 | http://h10010.www1.hp.com/wwpc/us/en/en/WF05a/15351-15351-241434-241646-3328424-3577708.html]]';
+			$old_words[110] = '[[HP ProLiant ML150 | http://h10010.www1.hp.com/wwpc/us/en/en/WF05a/15351-15351-241434-241646-3328424-3580609.html]]';
+			$old_words[111] = '[[HP ProLiant ML310 | http://h10010.www1.hp.com/wwpc/us/en/en/WF05a/15351-15351-241434-241646-241477-3580655.html]]';
+			$old_words[112] = '[[HP ProLiant ML350 | http://h10010.www1.hp.com/wwpc/us/en/en/WF05a/15351-15351-241434-241646-241477-1121586.html]]';
+			$old_words[113] = '[[HP ProLiant ML370 | http://h10010.www1.hp.com/wwpc/us/en/en/WF05a/15351-15351-241434-241646-241477-1121474.html]]';
+			$old_words[114] = '[[HP ProLiant ML570 | http://h10010.www1.hp.com/wwpc/us/en/en/WF05a/15351-15351-241434-241646-3328425-1842779.html]]';
+			foreach ($old_words as $dict_key => $dict_value)
+				$query[] = 'update Dictionary set dict_value = '${dict_value}' where dict_key = ${dict_key} limit 1';
 			foreach ($new_words as $dict_key => $tmp)
 				foreach ($tmp as $chapter_no => $dict_value)
 					$query[] = 'INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) ' .

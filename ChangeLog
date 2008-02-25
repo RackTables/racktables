@@ -4,8 +4,9 @@
 	new feature: HTTP installer
 	new feature: default object type
 	bugfix: router HW type list was broken
-	update: Aten KVM switches and consoles
-	update: Tainet MUXes
+	update: added Aten KVM switches and consoles
+	update: added Tainet MUXes
+	update: updated HP servers
 0.14.11 2008-02-15
 	bugfix: rackspace allocation was broken by magic_quotes fix
 	bugfix: don't generate error messages by accessing _GET array
