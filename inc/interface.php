@@ -3480,14 +3480,23 @@ function renderSNMPPortFinder ($object_id = 0)
 				$log[] = array ('code' => 'error', 'message' => 'Failed settig SW version: ' . $error);
 		}
 
-		if (empty ($attrs[4]['value']) and substr ($IOSversion, 0, 4) == '12.2') // switch OS type
-		{
-			$error = commitUpdateAttrValue ($object_id, 4, 252);
-			if ($error == TRUE)
-				$log[] = array ('code' => 'success', 'message' => 'Switch OS type set to Cisco IOS 12.2');
-			else
-				$log[] = array ('code' => 'error', 'message' => 'Failed settig Switch OS type: ' . $error);
-		}
+		if (empty ($attrs[4]['value'])) // switch OS type
+			switch (substr ($IOSversion, 0, 4))
+			{
+				case '12.2':
+					$error = commitUpdateAttrValue ($object_id, 4, 252);
+					break;
+				case '12.1':
+					$error = commitUpdateAttrValue ($object_id, 4, 255);
+					break;
+				case '12.0':
+					$error = commitUpdateAttrValue ($object_id, 4, 254);
+					break;
+			}
+		if ($error == TRUE)
+			$log[] = array ('code' => 'success', 'message' => 'Switch OS type set to Cisco IOS ' . substr ($IOSversion, 0, 4));
+		else
+			$log[] = array ('code' => 'error', 'message' => 'Failed settig Switch OS type');
 
 		$sysObjectID = snmpget ($endpoints[0], $community, 'sysObjectID.0');
 		// Transform OID
