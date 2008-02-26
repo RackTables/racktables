@@ -1,3 +1,6 @@
+alter database character set utf8;
+set names 'utf8';
+
 CREATE TABLE `Atom` (
   `molecule_id` int(10) unsigned default NULL,
   `rack_id` int(10) unsigned default NULL,

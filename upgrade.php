@@ -794,6 +794,7 @@ CREATE TABLE `IPVirtualService` (
 				foreach ($tmp as $chapter_no => $dict_value)
 					$query[] = 'INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) ' .
 						"VALUES (${chapter_no}, ${dict_key}, '${dict_value}')";
+			$query[] = "alter database character set utf8";
 			$query[] = "update Config set varvalue = '0.14.12' where varname = 'DB_VERSION'";
 			break; // --------------------------------------------
 #		case '0.14.13':
