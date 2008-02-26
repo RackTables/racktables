@@ -3487,10 +3487,10 @@ function renderSNMPPortFinder ($object_id = 0)
 					$error = commitUpdateAttrValue ($object_id, 4, 252);
 					break;
 				case '12.1':
-					$error = commitUpdateAttrValue ($object_id, 4, 255);
+					$error = commitUpdateAttrValue ($object_id, 4, 251);
 					break;
 				case '12.0':
-					$error = commitUpdateAttrValue ($object_id, 4, 254);
+					$error = commitUpdateAttrValue ($object_id, 4, 244);
 					break;
 			}
 		if ($error == TRUE)
