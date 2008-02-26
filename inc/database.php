@@ -7,7 +7,7 @@
 
 function escapeString ($value, $do_db_escape = TRUE)
 {
-	$ret = htmlentities ($value, ENT_QUOTES);
+	$ret = htmlentities ($value, ENT_QUOTES, 'UTF-8');
 	if ($do_db_escape)
 	{
 		global $dbxlink;
@@ -399,11 +399,6 @@ function commitUpdateObject ($object_id = 0, $new_name = '', $new_label = '', $n
 	if ($result == NULL)
 	{
 		showError ("SQL query '${query}' failed", __FUNCTION__);
-		return FALSE;
-	}
-	if ($result->rowCount() != 1)
-	{
-		showError ('Error updating object information', __FUNCTION__);
 		return FALSE;
 	}
 	$result->closeCursor();
