@@ -46,6 +46,8 @@ catch (PDOException $e)
 	die();
 }
 
+$dbxlink->exec ("set names 'utf8'");
+
 if (get_magic_quotes_gpc())
 	foreach ($_REQUEST as $key => $value)
 		if (gettype ($value) == 'string')
