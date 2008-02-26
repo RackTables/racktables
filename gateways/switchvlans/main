@@ -42,7 +42,7 @@ do_connect()
 		return
 	fi
 	case "$sw" in
-		Cisco+IOS+12.0|Cisco+IOS+12.2)
+		Cisco+IOS+12.0|Cisco+IOS+12.1|Cisco+IOS+12.2)
 			handler=cisco
 		;;
 		*)
