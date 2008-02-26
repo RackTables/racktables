@@ -13,9 +13,8 @@ function addPortForwarding ()
 	assertIPv4Arg ('localip');
 	assertIPv4Arg ('remoteip');
 	assertUIntArg ('localport');
-	assertUIntArg ('remoteport');
 	assertUIntArg ('proto');
-	assertStringArg ('description');
+	assertStringArg ('description', TRUE);
 	$object_id = $_REQUEST['object_id'];
 	$localip = $_REQUEST['localip'];
 	$remoteip = $_REQUEST['remoteip'];
