@@ -223,25 +223,6 @@ textarea {
 	border-style : solid;
 	border-color : #000000;
 }
-.topright {
-	font-size : x-small;
-	color : #ffffff;
-}
-.username {
-	font-size : small;
-	font-weight : bold;
-	display : inline;
-}
-.menubar, .menubar a {
-	font-family: Verdana, arial, sans-serif;
-	font-size: 17px;
-	line-height: 20px;
-	background-color : #3c78b5;
-	color : #ffffff;
-	text-decoration : none;
-}
-.menuitem, .menuitem a {
-}
 .activemenuitem, .activemenuitem a {
 	background-color : #3c78b5;
 }
@@ -249,35 +230,10 @@ textarea {
 	text-decoration: underline;
 }
 
-.footer {
-	background-color : #fff7f2;
-	font-size : x-small;
-}
 .maintable {
 	height : 100%;
 }
-.contenttable {
-	margin-top : 100px;
-	margin-bottom : 100px;
-	border-width : 1px;
-	border-color : #000000;
-	border-style : solid;
-	background-color : #fff7f2;
-}
-.errortable {
-	margin : 1px;
-	border: 1px solid black;
-	background-color : #ff5050;
-	text-align: center;
-	font: bold 11px Verdana, sans-serif;
-}
-.confirmtable {
-	margin : 1px;
-	border: 1px solid black;
-	background-color : #5050ff;
-	text-align: center;
-	font: bold 11px Verdana, sans-serif;
-}
+
 #foldertab {
 padding: 3px 0px 3px 8px;
 margin-left: 0;
@@ -502,9 +458,3 @@ div.commentblock {
 .port_unknown {
 	background-color: #ff0000;
 }
-
-/* Collapsible Textareas classes */
-.collapse_tareas input, .collapse_tareas textarea { font: 10pt arial, sans-serif; border: 1px solid #888; }
-.collapse_tareas textarea { height: 4em; }
-.collapse_tareas textarea.compact { height: 4em !important; width: 20em !important; }
-.collapse_tareas textarea.expanded { height: 20em !important; width: 40em !important; }
