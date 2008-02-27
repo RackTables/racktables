@@ -325,45 +325,6 @@ color: black;
 
 .greynavbar {background-color: #f0f0f0; border-top: 1px solid #3c78b5; margin-top: 0px}
 
-
-/* alphabet list */
-ul#squaretab {
-margin-left: 0;
-padding-left: 0;
-white-space: nowrap;
-font: bold 8px Verdana, sans-serif;
-}
-
-#squaretab li {
-display: inline;
-list-style-type: none;
-}
-
-#squaretab a {
-padding: 2px 6px;
-border: 1px solid #3c78b5;
-}
-
-#squaretab a:link, #squaretab a:visited {
-color: #fff;
-background-color: #3c78b5;
-text-decoration: none;
-}
-
-#squaretab a:hover {
-color: #ffffff;
-background-color: #003366;
-border-color: #003366;
-text-decoration: none;
-}
-
-#squaretab li a.current {
-background: white;
-color: black;
-}
-
-
-
 .miniracks {
 	width: 100px;
 	border: 0px solid black;
