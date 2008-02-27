@@ -223,6 +223,15 @@ textarea {
 	border-style : solid;
 	border-color : #000000;
 }
+.menubar, .menubar a {
+	font-family: Verdana, arial, sans-serif;
+	font-size: 17px;
+	line-height: 20px;
+	background-color : #3c78b5;
+	color : #ffffff;
+	text-decoration : none;
+}
+
 .activemenuitem, .activemenuitem a {
 	background-color : #3c78b5;
 }
