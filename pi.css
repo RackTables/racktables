@@ -260,29 +260,59 @@ display: inline;
 padding: 3px 0.5em;
 margin-left: 3px;
 border: 1px solid #3c78b5;
-border-bottom: none;
-background: #3c78b5;
 text-decoration: none;
 }
 
-#foldertab li a:link { color: #ffffff; }
-#foldertab li a:visited { color: #ffffff; }
-
-#foldertab li a:hover {
-color: #ffffff;
+/* Standard tab, inactive. */
+#foldertab li a.std {
+border-bottom: none;
+background: #3c78b5;
+}
+#foldertab li a.std:link { color: white; }
+#foldertab li a.std:visited { color: white; }
+#foldertab li a.std:hover {
+color: white;
 background: #003366;
 border-color: #003366;
 }
 
+/* Standard tab, selected. */
 #foldertab li a.current {
 background: white;
 border-bottom: 1px solid white;
 color: black;
 }
-
 #foldertab li a.current:link { color: black; }
 #foldertab li a.current:visited { color: black; }
 #foldertab li a.current:hover {
+background: white;
+border-bottom: 1px solid white;
+color: black;
+}
+
+/* "Attention" tab, inactive. */
+#foldertab li a.stdattn {
+border-bottom: none;
+background: #ffa500;
+border-color: #ffa500;
+}
+#foldertab li a.stdattn:link { color: white; }
+#foldertab li a.stdattn:visited { color: white; }
+#foldertab li a.stdattn:hover {
+color: white;
+background: #ff8c00;
+border-color: #ff8c00;
+}
+
+/* "Attention" tab, selected. */
+#foldertab li a.currentattn {
+background: white;
+border-bottom: 1px solid white;
+color: black;
+}
+#foldertab li a.currentattn:link { color: black; }
+#foldertab li a.currentattn:visited { color: black; }
+#foldertab li a.currentattn:hover {
 background: white;
 border-bottom: 1px solid white;
 color: black;

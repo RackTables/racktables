@@ -24,6 +24,7 @@ $trigger['rackspace']['firstrow'] = 'trigger_emptyRackspace';
 $tabhandler['rackspace']['default'] = 'renderRackspace';
 $tabhandler['rackspace']['history'] = 'renderRackspaceHistory';
 $tabhandler['rackspace']['firstrow'] = 'renderFirstRowForm';
+$tabextraclass['rackspace']['firstrow'] = 'attn';
 
 $page['objects']['title'] = 'Objects';
 $page['objects']['parent'] = 'index';
@@ -87,6 +88,8 @@ $tabhandler['object']['switchvlans'] = 'renderVLANMembership';
 $tabhandler['object']['snmpportfinder'] = 'renderSNMPPortFinder';
 $tabhandler['object']['lvsconfig'] = 'renderLVSConfig';
 $tabhandler['object']['autoports'] = 'renderAutoPortsForm';
+$tabextraclass['object']['snmpportfinder'] = 'attn';
+$tabextraclass['object']['autoports'] = 'attn';
 $trigger['object']['network'] = 'trigger_ipv4';
 $trigger['object']['portfwrd'] = 'trigger_natv4';
 $trigger['object']['switchvlans'] = 'trigger_switchvlans';
@@ -360,7 +363,7 @@ function getTitle ($pageno, $tabno)
 
 function showTabs ($pageno, $tabno)
 {
-	global $tab, $root, $page, $remote_username, $trigger;
+	global $tab, $root, $page, $remote_username, $trigger, $tabextraclass;
 	if (!isset ($tab[$pageno]['default']))
 		return;
 	echo "<td><div class=greynavbar><ul id=foldertab style='margin-bottom: 0px; padding-top: 10px;'>";
@@ -376,7 +379,9 @@ function showTabs ($pageno, $tabno)
 			$trigger[$pageno][$tabidx] () != TRUE
 		)
 			continue;
-		echo '<li><a' . (($tabidx == $tabno) ? ' class=current' : '');
+		$class = ($tabidx == $tabno) ? 'current' : 'std';
+		$extra = (isset ($tabextraclass[$pageno][$tabidx])) ? $tabextraclass[$pageno][$tabidx] : '';
+		echo "<li><a class=${class}{$extra}";
 		echo " href='${root}?page=${pageno}&tab=${tabidx}";
 		if (isset ($page[$pageno]['bypass']) and isset ($_REQUEST[$page[$pageno]['bypass']]))
 		{
