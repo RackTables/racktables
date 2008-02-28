@@ -920,11 +920,11 @@ function sortObjectAddressesAndNames ($a, $b)
 	$objname_cmp = sortTokenize($a['object_name'], $b['object_name']);
 	if ($objname_cmp == 0)
 	{
-		$objname_cmp = sortTokenize($a['port_name'], $b['port_name']);
+		$name_a = (isset ($a['port_name'])) ? $a['port_name'] : '';
+		$name_b = (isset ($b['port_name'])) ? $b['port_name'] : '';
+		$objname_cmp = sortTokenize($name_a, $name_b);
 		if ($objname_cmp == 0)
-		{
 			sortTokenize($a['ip'], $b['ip']);
-		}
 		return $objname_cmp;
 	}
 	return $objname_cmp;
