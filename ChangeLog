@@ -3,6 +3,7 @@
 	new feature: AutoPorts feature
 	new feature: HTTP installer
 	new feature: default object type
+	new feature: UTF-8 support
 	bugfix: router HW type list was broken
 	update: added Aten KVM switches and consoles
 	update: added Tainet MUXes
