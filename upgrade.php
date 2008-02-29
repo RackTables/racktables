@@ -764,7 +764,7 @@ CREATE TABLE `IPVirtualService` (
 			$new_words[] = array (22 => '[[Tainet Mercury 3630 | http://www.tainet.net/Product/mercury.htm]]');
 			$new_words[] = array (22 => '[[Tainet Mercury 3630E | http://www.tainet.net/Product/mercury.htm]]');
 			$new_words[] = array (22 => '[[Tainet DSD-08A | http://www.tainet.net/Product/dsd08a.htm]]');
-			$new_words[] = array (11 => '[[HP ProLiant DL160 | http://h10010.www1.hp.com/wwpc/us/en/en/WF05a/15351-15351-3328412-241644-3328421-3580694.html');
+			$new_words[] = array (11 => '[[HP ProLiant DL160 | http://h10010.www1.hp.com/wwpc/us/en/en/WF05a/15351-15351-3328412-241644-3328421-3580694.html]]');
 			$new_words[] = array (11 => '[[HP ProLiant DL180 | http://h10010.www1.hp.com/wwpc/us/en/en/WF05a/15351-15351-3328412-241644-3328421-3580698.html]]');
 			$new_words[] = array (11 => '[[HP ProLiant DL185 | http://h10010.www1.hp.com/wwpc/us/en/en/WF05a/15351-15351-3328412-241644-3328421-3579900.html]]');
 			$new_words[] = array (11 => '[[HP ProLiant DL365 | http://h10010.www1.hp.com/wwpc/us/en/en/WF05a/15351-15351-3328412-241644-241475-3186080.html]]');
@@ -833,14 +833,14 @@ CREATE TABLE `IPVirtualService` (
 		echo "No errors!\n";
 	else
 	{
-		echo "The following queries failed:\n";
+		echo "The following queries failed:\n<font color=red>";
 		foreach ($failures as $f)
 		{
 			list ($q, $i) = $f;
 			echo "${q} // ${i}\n";
 		}
 	}
-	echo '</pre>';
+	echo '</font></pre>';
 }
 
 // ******************************************************************

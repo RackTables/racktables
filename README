@@ -62,3 +62,8 @@ procedure should be sufficient:
 3. Open the RackTables page in your browser.
 4. Follow instructions. Normally, everything should be Ok. If it
    is not so, write down the failed quieries for further investigation.
+
+Upgrading to 0.14.12
+The upgrade may show a failed query "alter database character set utf8", in
+this case the user should issue the query manually from the mysql command
+line.
