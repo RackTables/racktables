@@ -789,7 +789,7 @@ CREATE TABLE `IPVirtualService` (
 			$old_words[113] = '[[HP ProLiant ML370 | http://h10010.www1.hp.com/wwpc/us/en/en/WF05a/15351-15351-241434-241646-241477-1121474.html]]';
 			$old_words[114] = '[[HP ProLiant ML570 | http://h10010.www1.hp.com/wwpc/us/en/en/WF05a/15351-15351-241434-241646-3328425-1842779.html]]';
 			foreach ($old_words as $dict_key => $dict_value)
-				$query[] = 'update Dictionary set dict_value = '${dict_value}' where dict_key = ${dict_key} limit 1';
+				$query[] = "update Dictionary set dict_value = '${dict_value}' where dict_key = ${dict_key} limit 1";
 			foreach ($new_words as $dict_key => $tmp)
 				foreach ($tmp as $chapter_no => $dict_value)
 					$query[] = 'INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) ' .
