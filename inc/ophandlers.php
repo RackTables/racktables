@@ -982,6 +982,14 @@ function addRealServers ()
 				else
 					$nbad++;
 				break;
+			case 'ssv_2': // IP address and port
+				if (!preg_match ('/^([0-9\.]+) ([0-9]+)$/', $line, $match))
+					continue;
+				if (addRStoRSPool ($pool_id, $match[1], $match[2], getConfigVar ('DEFAULT_IPV4_RS_INSERVICE'), ''))
+					$ngood++;
+				else
+					$nbad++;
+				break;
 			default:
 				return "${root}?page=${pageno}&tab=${tabno}&id=${pool_id}&error=" . urlencode (__FUNCTION__ . ': invalid format requested');
 				break;

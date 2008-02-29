@@ -3978,7 +3978,12 @@ function renderRSPoolServerForm ($pool_id = 0)
 	else
 		printImageHREF ('notinservice', 'NOT in service');
 	echo "</td><td>Format: ";
-	$formats = array ('ipvs_2' => 'ipvsadm -l -n (address and port)', 'ipvs_3' => 'ipvsadm -l -n (address, port and weight)');
+	$formats = array
+	(
+		'ipvs_2' => 'ipvsadm -l -n (address and port)',
+		'ipvs_3' => 'ipvsadm -l -n (address, port and weight)',
+		'ssv_2' => 'SSV: &lt;IP address&gt; &lt;port&gt;'
+	);
 	printSelect ($formats, 'format');
 	echo "</td><td><input type=submit value=Parse></td></tr>\n";
 	echo "<tr><td colspan=3><textarea name=rawtext cols=100 rows=50></textarea></td></tr>\n";
