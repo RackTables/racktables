@@ -498,7 +498,7 @@ function addAddressToObject ()
 {
 	global $root, $pageno, $tabno;
 
-	assertIPv4Arg ('ip');
+	assertStringArg ('ip');
 	assertUIntArg ('object_id');
 	assertStringArg ('name', TRUE);
 	assertStringArg ('type');
