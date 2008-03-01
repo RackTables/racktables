@@ -504,11 +504,12 @@ function addAddressToObject ()
 	assertStringArg ('type');
 	// Strip masklen.
 	$ip = ereg_replace ('/[[:digit:]]+$', '', $_REQUEST['ip']);
-	$error = bindIpToObject($ip, $_REQUEST['object_id'], $_REQUEST['name'], $_REQUEST['type']);
+	$object_id = $_REQUEST['object_id'];
+	$error = bindIpToObject($ip, $object_id, $_REQUEST['name'], $_REQUEST['type']);
 	if ($error != '')
-		return "${root}?page=${pageno}&tab=${tabno}&object_id=$object_id&error=".urlencode($error);
+		return "${root}?page=${pageno}&tab=${tabno}&object_id=${object_id}&error=".urlencode($error);
 	else
-		return "${root}?page=$pageno&tab=${tabno}&object_id=$object_id&message=".
+		return "${root}?page=$pageno&tab=${tabno}&object_id=${object_id}&message=".
 			urlencode("Address ${ip} was added successfully.");
 }
 
