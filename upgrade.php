@@ -18,7 +18,8 @@ function getDBUpgradePath ($v1, $v2)
 		'0.14.9',
 		'0.14.10',
 		'0.14.11',
-		'0.14.12'
+		'0.14.12',
+		'0.14.13'
 	);
 	if (!in_array ($v1, $versionhistory) || !in_array ($v2, $versionhistory))
 	{
@@ -335,7 +336,6 @@ echo '<pre>';
 					$newkey = $data['newkey'];
 					// Even if the key doesn't change, go on to have
 					// AttributeMap regenerated completely.
-#echo "oldkey == ${oldkey} newkey == ${newkey} value == ${value}\n";
 					if ($chapter_no == 1)
 					{
 						$q4 = "select id from RackObject where objtype_id = ${oldkey}";
@@ -706,7 +706,6 @@ CREATE TABLE `IPVirtualService` (
 			$query[] = "insert into AttributeMap (objtype_id, attr_id, chapter_no) values (447, 5, 0)";
 			$query[] = "insert into AttributeMap (objtype_id, attr_id, chapter_no) values (447, 14, 0)";
 			$query[] = "insert into AttributeMap (objtype_id, attr_id, chapter_no) values (447, 22, 0)";
-#			$query[] = "";
 			foreach ($new_words as $dict_key => $tmp)
 				foreach ($tmp as $chapter_no => $dict_value)
 					$query[] = 'INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) ' .
@@ -797,10 +796,65 @@ CREATE TABLE `IPVirtualService` (
 			$query[] = "alter database character set utf8";
 			$query[] = "update Config set varvalue = '0.14.12' where varname = 'DB_VERSION'";
 			break; // --------------------------------------------
-#		case '0.14.13':
+		case '0.14.13':
+			$new_words[541] = array (12 => '[[Force10 S2410 | http://www.force10networks.com/products/s2410.asp]]');
+			$new_words[] = array (12 => '[[Force10 S50N | http://www.force10networks.com/products/s50n.asp]]');
+			$new_words[] = array (12 => '[[Force10 S50V | http://www.force10networks.com/products/s50v.asp]]');
+			$new_words[] = array (12 => '[[Force10 S25P | http://www.force10networks.com/products/s25p.asp]]');
+			$new_words[] = array (12 => '[[Force10 C150| http://www.force10networks.com/products/cseries.asp]]');
+			$new_words[] = array (12 => '[[Force10 C300| http://www.force10networks.com/products/cseries.asp]]');
+			$new_words[] = array (12 => '[[Force10 E300 | http://www.force10networks.com/products/eseries.asp]]');
+			$new_words[] = array (12 => '[[Force10 E600 | http://www.force10networks.com/products/eseries.asp]]');
+			$new_words[] = array (12 => '[[Force10 E1200 | http://www.force10networks.com/products/eseries.asp]]');
+			$new_words[] = array (12 => '[[NETGEAR JGS524F | http://www.netgear.com/Products/Switches/UnmanagedSwitches/JGS524F.aspx]]');
+			$new_words[] = array (12 => '[[NETGEAR JGS516 | http://www.netgear.com/Products/Switches/UnmanagedSwitches/JGS516.aspx]]');
+			$new_words[] = array (12 => '[[NETGEAR JFS524 | http://www.netgear.com/Products/Switches/UnmanagedSwitches/JFS524.aspx]]');
+			$new_words[] = array (12 => '[[NETGEAR JFS524F | http://www.netgear.com/Products/Switches/UnmanagedSwitches/JFS524F.aspx]]');
+			$new_words[] = array (12 => '[[NETGEAR JGS524 | http://www.netgear.com/Products/Switches/UnmanagedSwitches/JGS524.aspx]]');
+			$new_words[] = array (12 => '[[NETGEAR FS524 | http://www.netgear.com/Products/Switches/UnmanagedSwitches/FS524.aspx]]');
+			$new_words[] = array (12 => '[[NETGEAR JFS516 | http://www.netgear.com/Products/Switches/UnmanagedSwitches/JFS516.aspx]]');
+			$new_words[] = array (12 => '[[NETGEAR GSM7224R | http://www.netgear.com/Products/Switches/Layer2ManagedSwitches/GSM7224R.aspx]]');
+			$new_words[] = array (12 => '[[NETGEAR GSM7248 | http://www.netgear.com/Products/Switches/Layer2ManagedSwitches/GSM7248.aspx]]');
+			$new_words[] = array (12 => '[[NETGEAR GSM7212 | http://www.netgear.com/Products/Switches/Layer2ManagedSwitches/GSM7212.aspx]]');
+			$new_words[] = array (12 => '[[NETGEAR FSM726S | http://www.netgear.com/Products/Switches/Layer2ManagedSwitches/FSM726S.aspx]]');
+			$new_words[] = array (12 => '[[NETGEAR GSM7248R | http://www.netgear.com/Products/Switches/Layer2ManagedSwitches/GSM7248R.aspx]]');
+			$new_words[] = array (12 => '[[NETGEAR GSM7224 | http://www.netgear.com/Products/Switches/Layer2ManagedSwitches/GSM7224.aspx]]');
+			$new_words[] = array (12 => '[[NETGEAR FSM750S | http://www.netgear.com/Products/Switches/Layer2ManagedSwitches/FSM750S.aspx]]');
+			$new_words[] = array (12 => '[[NETGEAR FSM726 | http://www.netgear.com/Products/Switches/Layer2ManagedSwitches/FSM726.aspx]]');
+			$new_words[] = array (12 => '[[NETGEAR GS724TP | http://www.netgear.com/Products/Switches/SmartSwitches/GS724TP.aspx]]');
+			$new_words[] = array (12 => '[[NETGEAR GS748TS | http://www.netgear.com/Products/Switches/SmartSwitches/GS748TS.aspx]]');
+			$new_words[] = array (12 => '[[NETGEAR GS724T | http://www.netgear.com/Products/Switches/SmartSwitches/GS724T.aspx]]');
+			$new_words[] = array (12 => '[[NETGEAR FS728TP | http://www.netgear.com/Products/Switches/SmartSwitches/FS728TP.aspx]]');
+			$new_words[] = array (12 => '[[NETGEAR FS752TS | http://www.netgear.com/Products/Switches/SmartSwitches/FS752TS.aspx]]');
+			$new_words[] = array (12 => '[[NETGEAR FS728TS | http://www.netgear.com/Products/Switches/SmartSwitches/FS728TS.aspx]]');
+			$new_words[] = array (12 => '[[NETGEAR FS726T | http://www.netgear.com/Products/Switches/SmartSwitches/FS726T.aspx]]');
+			$new_words[] = array (12 => '[[NETGEAR GS748TP | http://www.netgear.com/Products/Switches/SmartSwitches/GS748TP.aspx]]');
+			$new_words[] = array (12 => '[[NETGEAR GS724TS | http://www.netgear.com/Products/Switches/SmartSwitches/GS724TS.aspx]]');
+			$new_words[] = array (12 => '[[NETGEAR GS748T | http://www.netgear.com/Products/Switches/SmartSwitches/GS748T.aspx]]');
+			$new_words[] = array (12 => '[[NETGEAR GS716T | http://www.netgear.com/Products/Switches/SmartSwitches/GS716T.aspx]]');
+			$new_words[] = array (12 => '[[NETGEAR FS752TPS | http://www.netgear.com/Products/Switches/SmartSwitches/FS752TPS.aspx]]');
+			$new_words[] = array (12 => '[[NETGEAR FS750T2 | http://www.netgear.com/Products/Switches/SmartSwitches/FS750T2.aspx]]');
+			$new_words[] = array (12 => '[[NETGEAR FS726TP | http://www.netgear.com/Products/Switches/SmartSwitches/FS726TP.aspx]]');
+			$new_words[] = array (12 => '[[NETGEAR FSM7328PS | http://www.netgear.com/Products/Switches/Layer3ManagedSwitches/FSM7328PS.aspx]]');
+			$new_words[] = array (12 => '[[NETGEAR GSM7352S | http://www.netgear.com/Products/Switches/Layer3ManagedSwitches/GSM7352S.aspx]]');
+			$new_words[] = array (12 => '[[NETGEAR GSM7324 | http://www.netgear.com/Products/Switches/Layer3ManagedSwitches/GSM7324.aspx]]');
+			$new_words[] = array (12 => '[[NETGEAR FSM7326P | http://www.netgear.com/Products/Switches/Layer3ManagedSwitches/FSM7326P.aspx]]');
+			$new_words[] = array (12 => '[[NETGEAR FSM7352PS | http://www.netgear.com/Products/Switches/Layer3ManagedSwitches/FSM7352PS.aspx]]');
+			$new_words[] = array (12 => '[[NETGEAR GSM7328FS | http://www.netgear.com/Products/Switches/Layer3ManagedSwitches/GSM7328FS.aspx]]');
+			$new_words[] = array (12 => '[[NETGEAR GSM7328S | http://www.netgear.com/Products/Switches/Layer3ManagedSwitches/GSM7328S.aspx]]');
+			$new_words[] = array (12 => '[[NETGEAR GSM7312 | http://www.netgear.com/Products/Switches/Layer3ManagedSwitches/GSM7312.aspx]]');
+			$new_words[] = array (12 => '[[NETGEAR FSM7328S | http://www.netgear.com/Products/Switches/Layer3ManagedSwitches/FSM7328S.aspx]]');
+			$new_words[] = array (12 => '[[NETGEAR FSM7352S | http://www.netgear.com/Products/Switches/Layer3ManagedSwitches/FSM7352S.aspx]]');
+			foreach ($new_words as $dict_key => $tmp)
+				foreach ($tmp as $chapter_no => $dict_value)
+					$query[] = 'INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) ' .
+						"VALUES (${chapter_no}, ${dict_key}, '${dict_value}')";
+			$query[] = "update Config set varvalue = '0.14.13' where varname = 'DB_VERSION'";
+			break; // --------------------------------------------
+#		case '0.14.14':
 #			$query[] = "alter table Rack add column left_is_front enum ('yes', 'no') not null default 'yes' after height";
 #			$query[] = "alter table Rack add column bottom_is_unit1 enum ('yes', 'no') not null default 'yes' after left_is_front";
-#			$query[] = "update Config set varvalue = '0.14.13' where varname = 'DB_VERSION'";
+#			$query[] = "update Config set varvalue = '0.14.14' where varname = 'DB_VERSION'";
 #			break; // --------------------------------------------
 		default:
 			showError ("executeUpgradeBatch () failed, because batch '${batchid}' isn't defined");
