@@ -498,19 +498,18 @@ function addAddressToObject ()
 {
 	global $root, $pageno, $tabno;
 
-	$ip = $_REQUEST['ip'];
-	$object_id = $_REQUEST['object_id'];
-	$name = $_REQUEST['name'];
-	$type = $_REQUEST['type'];
-	$error = bindIpToObject($ip, $object_id, $name, $type);
+	assertIPv4Arg ('ip');
+	assertUIntArg ('object_id');
+	assertStringArg ('name', TRUE);
+	assertStringArg ('type');
+	// Strip masklen.
+	$ip = ereg_replace ('/[[:digit:]]+$', '', $_REQUEST['ip']);
+	$error = bindIpToObject($ip, $_REQUEST['object_id'], $_REQUEST['name'], $_REQUEST['type']);
 	if ($error != '')
-	{
 		return "${root}?page=${pageno}&tab=${tabno}&object_id=$object_id&error=".urlencode($error);
-	}
 	else
-	{
-		return "${root}?page=$pageno&tab=${tabno}&object_id=$object_id&message=".urlencode("Interface successfully added");
-	}
+		return "${root}?page=$pageno&tab=${tabno}&object_id=$object_id&message=".
+			urlencode("Address ${ip} was added successfully.");
 }
 
 function createUserAccount ()
