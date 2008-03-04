@@ -135,7 +135,7 @@ do_set()
 		fi
 		echo "$portname $newvlan" >> "$REQUESTS"
 		cmembers=`grep -c ",$newvlan$" "$PORTINFO"`
-		if [ "$cmembers" = "0" ]; then
+		if [ "$cmembers" = "0" -a $newvlan -lt 4096 ]; then
 			echo "W!Port $portname seems to be the first in VLAN $newvlan at this switch." >> "$REPLIES"
 			echo "W!Check uplink/downlink configuration for proper operation." >> "$REPLIES"
 		fi
