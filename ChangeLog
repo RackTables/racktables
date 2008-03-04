@@ -1,5 +1,6 @@
 0.14.13
 	new feature: SSV format for RS import
+	new feature: complex VLAN IDs in switchvlans gateway
 	update: Force10 and NETGEAR switches
 0.14.12 2008-02-29
 	new feature: default value for RS inservice status
