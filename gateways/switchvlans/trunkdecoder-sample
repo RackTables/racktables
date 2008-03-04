@@ -1,0 +1,21 @@
+#!/bin/sh
+
+[ $# = 1 ] || exit 1
+
+case $1 in
+	6001)
+		NATIVE=100
+		;;
+	6002)
+		NATIVE=200
+		;;
+	*)
+		exit 2
+		;;
+esac
+VOICE=300
+
+echo switchport trunk native vlan $NATIVE
+echo switchport trunk allowed vlan $NATIVE,$VOICE
+echo switchport voice vlan $VOICE
+echo spanning-tree portfast trunk

@@ -9,6 +9,7 @@ COMMAND=$4
 FILE1=$5
 FILE2=$6
 FILE3=$7
+MYDIR=`dirname $0`
 
 prepare_connect_commands()
 {
@@ -43,7 +44,7 @@ prepare_connect_commands()
 			cat "$CMDS1" > "$CMDS3"
 			break
 		fi
-	done < `dirname $0`/cisco.secrets.php
+	done < "$MYDIR/cisco.secrets.php"
 	[ "$found" = "yes" ] && return
 	echo "E!connector could not find credentials for $1" >> "$FILE2"
 	exit 3
@@ -68,7 +69,15 @@ prepare_push_commands()
 			echo "E!trunking is not allowed" >> "$FILE2"
 			continue
 		fi
-		printf "int $portname\nswi access vlan $vlanid\nexit\n" >> $CMDS1
+		printf "int $portname\n" >> $CMDS1
+		if [ $vlanid -lt 4096 ]; then
+			printf "swi access vlan $vlanid\nswi mode access\n" >> $CMDS1
+		else
+			printf "descr VLAN$vlanid\n" >> $CMDS1
+			printf "swi mode trunk\nswi trunk encap dot1q\n" >> $CMDS1
+			"$MYDIR/trunkdecoder" $vlanid >> $CMDS1
+		fi
+		printf "exit\n" >> $CMDS1
 		echo "I!Port $portname@$ENDPOINT has been assigned to VLAN $vlanid" >> "$FILE2"
 	done < "$FILE1"
 	printf "end\nwri\nquit\n" >> $CMDS1
@@ -76,21 +85,38 @@ prepare_push_commands()
 
 do_fetch()
 {
+	local tmp_ifname tmp_ifdescr tmp_status tmp_vlanid
 	nc $ENDPOINT 23 < $CMDS1 > "$OUT1"
 	if fgrep -q '% Bad passwords' "$OUT1"; then
 		echo "E!password mismatch while trying to connect to $ENDPOINT" >> "$FILE2"
 		exit 4
 	fi
-	nc $ENDPOINT 23 < $CMDS2 > "$OUT2"
+	nc $ENDPOINT 23 < $CMDS2 > "$OUT2a"
 	nc $ENDPOINT 23 < $CMDS3 > "$OUT3"
 	cat "$OUT1" | fgrep ' active    ' | sed -E 's/^([[:digit:]]+)[[:space:]]+(.+)[[:space:]]+active    (.*)/\1=\2/;s/[[:space:]]+$//' > $FILE1
-	cat "$OUT2" | egrep '^(Et|Fa|Gi|Te)' | sed -E 's/^([A-Za-z/0-9]+).+(connected|notconnect|disabled|monitoring|suspended) +/\1=\2,/;s/,(trunk|([0-9]+)) .*$/,\1/;s/=(monitoring|suspended),/=connected,/' > $FILE2
+	# Add trunk data, if appropriate.
+	[ -s "$MYDIR/trunktable" ] && cat "$MYDIR/trunktable" >> $FILE1
+
+	# First extract structured info about VLAN membership, then map
+	# special descriptions into VLAN IDs.
+	cat "$OUT2a" | egrep '^(Et|Fa|Gi|Te)' | sed -E 's/^([A-Za-z/0-9]+) +(.*) +(connected|notconnect|disabled|monitoring|suspended) +/\1%\2%\3%/;s/%(trunk|([0-9]+)) .*$/%\1/;s/=(monitoring|suspended)%/=connected%/;s/ +%/%/' > $OUT2b
+	while read line; do
+		tmp_ifname=`echo $line | cut -d% -f1`
+		tmp_ifdescr=`echo $line | cut -d% -f2`
+		tmp_status=`echo $line | cut -d% -f3`
+		tmp_vlanid=`echo $line | cut -d% -f4`
+		# If the port has a description pretending to be a martian VLAN, map it onto the VLAN ID.
+		if [ -n "$tmp_ifdescr" -a -z "${tmp_ifdescr##VLAN*}" ]; then
+			tmp_vlanid=${tmp_ifdescr##VLAN}
+		fi
+		echo "$tmp_ifname=$tmp_status,$tmp_vlanid" >> $FILE2
+	done < $OUT2b
 	# FIXME
 	# Here we need to distinguish between different platforms and IOS version,
 	# cause they produce output in different formats.
 	if [ "$SW" = "Cisco+IOS+12.0" ]; then
 		cat "$OUT3" | tr -d '\r' | fgrep Dynamic | sed -E 's/ +Dynamic +([0-9]+) +(.+)/=\1@\2/;s/FastEthernet/Fa/;s/GigabitEthernet/Gi/' > "$FILE3"
-	elif [ "$SW" = "Cisco+IOS+12.2" ]; then
+	elif [ "$SW" = "Cisco+IOS+12.2" -o "$SW" = "Cisco+IOS+12.1" ]; then
 		case "$HW" in
 			Cisco+Catalyst+35*|Cisco+Catalyst+37*|Cisco+Catalyst+29*|Cisco+Catalyst+49*)
 				cat "$OUT3" | tr -d '\r' | fgrep DYNAMIC | \
@@ -111,7 +137,8 @@ remove_tempfiles()
 	[ -f "$CMDS2" ] && rm -f "$CMDS2"
 	[ -f "$CMDS3" ] && rm -f "$CMDS3"
 	[ -f "$OUT1" ] && rm -f "$OUT1"
-	[ -f "$OUT2" ] && rm -f "$OUT2"
+	[ -f "$OUT2a" ] && rm -f "$OUT2a"
+	[ -f "$OUT2b" ] && rm -f "$OUT2b"
 	[ -f "$OUT3" ] && rm -f "$OUT3"
 }
 
@@ -126,9 +153,10 @@ create_tempfiles()
 	# The following are buffers to hold the whole switch output
 	# before filtering.
 	OUT1=`mktemp /tmp/cisco.connector.XXXX`
-	OUT2=`mktemp /tmp/cisco.connector.XXXX`
+	OUT2a=`mktemp /tmp/cisco.connector.XXXX`
+	OUT2b=`mktemp /tmp/cisco.connector.XXXX`
 	OUT3=`mktemp /tmp/cisco.connector.XXXX`
-	[ -f "$CMDS1" -a -f "$CMDS2" -a -f "$CMDS3" -a -f "$OUT1" -a -f "$OUT2" -a -f "$OUT3" ] && return
+	[ -f "$CMDS1" -a -f "$CMDS2" -a -f "$CMDS3" -a -f "$OUT1" -a -f "$OUT2a" -a -f "$OUT2b" -a -f "$OUT3" ] && return
 	echo "E!connector cannot create tempfiles" >> "$FILE2"
 	remove_tempfiles
 	exit 5
