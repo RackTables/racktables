@@ -937,6 +937,17 @@ CREATE TABLE `IPVirtualService` (
 			$new_words[] = array (22 => '[[Raisecom RC805-120B | http://www.raisecom-international.com/p/RC800120.htm]]');
 			$new_words[] = array (22 => '[[Raisecom RC805-240B | http://www.raisecom-international.com/p/RC800120.htm]]');
 			$new_words[] = array (22 => '[[Raisecom RC805-480B | http://www.raisecom-international.com/p/RC800120.htm]]');
+			$new_words[] = array (2 => 'async serial (DB-9)');  // 681
+			$new_words[] = array (2 => 'async serial (DB-25)'); // 682
+			$query[] = "update Dictionary set dict_value = 'async serial (RJ-45)' where dict_key = 29";
+			$query[] = "insert into PortCompat (type1, type2) values (29, 681)";
+			$query[] = "insert into PortCompat (type1, type2) values (29, 682)";
+			$query[] = "insert into PortCompat (type1, type2) values (681, 29)";
+			$query[] = "insert into PortCompat (type1, type2) values (681, 681)";
+			$query[] = "insert into PortCompat (type1, type2) values (681, 682)";
+			$query[] = "insert into PortCompat (type1, type2) values (682, 29)";
+			$query[] = "insert into PortCompat (type1, type2) values (682, 681)";
+			$query[] = "insert into PortCompat (type1, type2) values (682, 682)";
 			foreach ($new_words as $dict_key => $tmp)
 				foreach ($tmp as $chapter_no => $dict_value)
 					$query[] = 'INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) ' .

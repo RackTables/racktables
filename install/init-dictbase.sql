@@ -141,6 +141,8 @@ INSERT INTO `PortCompat` (`type1`, `type2`) VALUES (24,18);
 INSERT INTO `PortCompat` (`type1`, `type2`) VALUES (19,24);
 INSERT INTO `PortCompat` (`type1`, `type2`) VALUES (24,19);
 INSERT INTO `PortCompat` (`type1`, `type2`) VALUES (29,29);
+INSERT INTO `PortCompat` (`type1`, `type2`) VALUES (29,681);
+INSERT INTO `PortCompat` (`type1`, `type2`) VALUES (29,682);
 INSERT INTO `PortCompat` (`type1`, `type2`) VALUES (20,21);
 INSERT INTO `PortCompat` (`type1`, `type2`) VALUES (21,20);
 INSERT INTO `PortCompat` (`type1`, `type2`) VALUES (22,23);
@@ -163,6 +165,12 @@ INSERT INTO `PortCompat` (`type1`, `type2`) VALUES (40,40);
 INSERT INTO `PortCompat` (`type1`, `type2`) VALUES (41,41);
 INSERT INTO `PortCompat` (`type1`, `type2`) VALUES (439,439);
 INSERT INTO `PortCompat` (`type1`, `type2`) VALUES (446,33);
+INSERT INTO `PortCompat` (`type1`, `type2`) VALUES (681,29);
+INSERT INTO `PortCompat` (`type1`, `type2`) VALUES (681,681);
+INSERT INTO `PortCompat` (`type1`, `type2`) VALUES (681,682);
+INSERT INTO `PortCompat` (`type1`, `type2`) VALUES (682,29);
+INSERT INTO `PortCompat` (`type1`, `type2`) VALUES (682,681);
+INSERT INTO `PortCompat` (`type1`, `type2`) VALUES (682,682);
 
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (1,1,'BlackBox');
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (1,2,'PDU');
@@ -192,7 +200,7 @@ INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (2,25,'
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (2,26,'LC/1000Base-SX');
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (2,27,'SC/1000Base-LX');
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (2,28,'LC/1000Base-LX');
-INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (2,29,'async serial');
+INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (2,29,'async serial (RJ-45)');
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (2,30,'LC/10GBase-SR');
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (2,31,'veth (Xen bridge)');
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (2,32,'sync serial');
@@ -212,6 +220,8 @@ INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (2,440,
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (1,445,'KVM switch');
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (2,446,'KVM (console)');
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (1,447,'multiplexer');
+INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (2,681,'async serial (DB-9)');
+INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (2,682,'async serial (DB-25)');
 
 INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('rtwidth_0','9','uint','no','yes','');
 INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('rtwidth_1','21','uint','no','yes','');
