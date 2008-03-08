@@ -1234,4 +1234,50 @@ function getAutoPorts ($type_id)
 	return $ret;
 }
 
+// Find if a particular tag id exists on the tree, then attach the
+// given child tag to it. If the parent tag doesn't exist, return FALSE.
+function attachChildTag (&$tree, $parent_id, $child_id, $child_info)
+{
+	foreach ($tree as $tagid => $taginfo)
+	{
+		if ($tagid == $parent_id)
+		{
+			$tree[$tagid]['kids'][$child_id] = $child_info;
+			return TRUE;
+		}
+		elseif (attachChildTag ($tree[$tagid]['kids'], $parent_id, $child_id, $child_info))
+			return TRUE;
+	}
+	return FALSE;
+}
+
+// Build a tree from the tag list and return it.
+function getTagTree ()
+{
+	$tagtree = array();
+	$taglist = getTagList();
+	while (count ($taglist) > 0)
+	{
+		$picked = FALSE;
+		foreach ($taglist as $tagid => $taginfo)
+		{
+			$taginfo['kids'] = array();
+			if ($taginfo['parent_id'] == NULL)
+			{
+				$tagtree[$tagid] = $taginfo;
+				$picked = TRUE;
+				unset ($taglist[$tagid]);
+			}
+			elseif (attachChildTag ($tagtree, $taginfo['parent_id'], $tagid, $taginfo))
+			{
+				$picked = TRUE;
+				unset ($taglist[$tagid]);
+			}
+		}
+		if (!$picked) // Only orphaned items on the list.
+			break;
+	}
+	return $tagtree;
+}
+
 ?>
