@@ -1990,6 +1990,19 @@ function useDeleteBlade ($tablename, $keyname, $keyvalue, $quotekey = TRUE)
 		return TRUE;
 }
 
+function useSelectBlade ($query, $caller = 'N/A')
+{
+	global $dbxlink;
+	$result = $dbxlink->query ($query);
+	if ($result == NULL)
+	{
+		$ei = $dbxlink->errorInfo();
+		showError ("SQL query '${query}' failed in useSelectBlade with error ${ei[1]} (${ei[2]})", $caller);
+		return NULL;
+	}
+	return $result;
+}
+
 function loadConfigCache ()
 {
 	global $dbxlink;
@@ -2651,6 +2664,23 @@ function executeAutoPorts ($object_id = 0, $type_id = 0)
 	foreach (getAutoPorts ($type_id) as $autoport)
 		$ret = $ret and '' == commitAddPort ($object_id, $autoport['name'], $autoport['type'], '', '');
 	return $ret;
+}
+
+function getObjectTags ($object_id = 0)
+{
+	$result = useSelectBlade ("select tt.id, tag from RackObject as ro inner join RackObjectTag as rot on ro.id = rot.object_id inner join TagTree as tt on rot.tag_id = tt.id");
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
+		echo '';
+}
+
+function getTagList ()
+{
+	$taglist = array();
+	$result = useSelectBlade ("select id, parent_id, tag from TagTree order by tag");
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
+		$taglist[$row['id']] = array ('tag' => $row['tag'], 'parent_id' => $row['parent_id']);
+	$result->closeCursor();
+	return $taglist;
 }
 
 ?>
