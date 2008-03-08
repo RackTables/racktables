@@ -291,6 +291,13 @@ $tabhandler['ui']['reset'] = 'renderUIResetForm';
 $ophandler['ui']['edit']['upd'] = 'updateUI';
 $ophandler['ui']['reset']['go'] = 'resetUIConfig';
 
+$page['tagtree']['title'] = 'Tag tree';
+$page['tagtree']['parent'] = 'config';
+$tab['tagtree']['default'] = 'View';
+$tab['tagtree']['edit'] = 'Change';
+$tabhandler['tagtree']['default'] = 'renderTagTree';
+$tabhandler['tagtree']['edit'] = 'renderTagTreeEditor';
+
 $page['reports']['title'] = 'Reports';
 $page['reports']['parent'] = 'index';
 $tab['reports']['default'] = 'View';
