@@ -3054,6 +3054,9 @@ function printImageHREF ($tag, $title = '', $do_input = FALSE, $tabindex = 0)
 	$image['find']['path'] = 'pix/find.png';
 	$image['find']['width'] = 16;
 	$image['find']['height'] = 16;
+	$image['spacer']['path'] = 'pix/pixel.png';
+	$image['spacer']['width'] = 16;
+	$image['spacer']['height'] = 16;
 	if (!isset ($image[$tag]))
 		$tag = 'error';
 	$img = $image[$tag];
@@ -4511,6 +4514,30 @@ function renderAutoPortsForm ($object_id = 0)
 	echo "<input type=submit value='Generate'>";
 	echo "</td></tr>";
 	echo "</table>";
+}
+
+function renderTagRow ($taginfo, $level = 0)
+{
+	echo '<tr><td>';
+	for ($i = 0; $i < $level; $i++)
+		printImageHREF ('spacer');
+	echo $taginfo['tag'] . "</td></tr>\n";
+	foreach ($taginfo['kids'] as $kid)
+		renderTagRow ($kid, $level + 1);
+}
+
+function renderTagTree ()
+{
+	$tree = getTagTree();
+	echo '<table>';
+	foreach ($tree as $taginfo)
+		renderTagRow ($taginfo);
+	echo '</table>';
+}
+
+function renderTagTreeEditor ()
+{
+	dragon();
 }
 
 ?>
