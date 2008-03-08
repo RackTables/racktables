@@ -2666,11 +2666,16 @@ function executeAutoPorts ($object_id = 0, $type_id = 0)
 	return $ret;
 }
 
+// Return only implicitly listed tags, the rest of the trail will be
+// generated/deducted later at higher levels.
 function getObjectTags ($object_id = 0)
 {
-	$result = useSelectBlade ("select tt.id, tag from RackObject as ro inner join RackObjectTag as rot on ro.id = rot.object_id inner join TagTree as tt on rot.tag_id = tt.id");
+	$ret = array();
+	$result = useSelectBlade ("select tt.id as tag_id, tag as tag_name from RackObject as ro inner join RackObjectTags as rot on ro.id = rot.object_id inner join TagTree as tt on rot.tag_id = tt.id");
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-		echo '';
+		$ret[$row['tag_id']] = $row['tag_name'];
+	$result->closeCursor();
+	return $ret;
 }
 
 function getTagList ()

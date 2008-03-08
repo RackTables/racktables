@@ -661,6 +661,18 @@ function renderRackObject ($object_id = 0)
 	foreach (getAttrValues ($object_id) as $record)
 		if (!empty ($record['value']))
 			echo "<tr><th width='50%' class=opt_attr_th>${record['name']}:</th><td class=tdleft>${record['a_value']}</td></tr>\n";
+	$tags = getObjectTags ($object_id);
+	if (count ($tags))
+	{
+		echo "<tr><th width='50%' class=tag_list_th>Tags:</th><td class=tdleft>";
+		$comma = '';
+		foreach ($tags as $tag)
+		{
+			echo $comma . $tag;
+			$comma = ', ';
+		}
+		echo "</td></tr>\n";
+	}
 	echo "</table><br>\n";
 	finishPortlet();
 
