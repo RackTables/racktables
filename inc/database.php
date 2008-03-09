@@ -20,7 +20,6 @@ function escapeString ($value, $do_db_escape = TRUE)
 // rack row depending on its argument.
 function getRackRowInfo ($rackrow_id = 0)
 {
-	global $dbxlink;
 	$query =
 		"select dict_key, dict_value, count(Rack.id) as count, " .
 		"if(isnull(sum(Rack.height)),0,sum(Rack.height)) as sum " .
@@ -28,12 +27,7 @@ function getRackRowInfo ($rackrow_id = 0)
 		"where chapter_name = 'RackRow' " .
 		($rackrow_id > 0 ? "and dict_key = ${rackrow_id} " : '') .
 		"group by dict_key order by dict_value";
-	$result = $dbxlink->query ($query);
-	if ($result == NULL)
-	{
-		showError ('SQL query failed', __FUNCTION__);
-		return NULL;
-	}
+	$result = useSelectBlade ($query);
 	$ret = array();
 	$clist = array ('dict_key', 'dict_value', 'count', 'sum');
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
@@ -55,7 +49,6 @@ function getObjectTypeList ()
 
 function getObjectList ($type_id = 0)
 {
-	global $dbxlink;
 	$query =
 		"select distinct RackObject.id as id , RackObject.name as name, dict_value as objtype_name, " .
 		"RackObject.label as label, RackObject.barcode as barcode, " .
@@ -65,12 +58,7 @@ function getObjectList ($type_id = 0)
 		"left join Rack on rack_id = Rack.id " .
 		"where objtype_id = '${type_id}' and RackObject.deleted = 'no' " .
 		"and chapter_name = 'RackObjectType' order by name";
-	$result = $dbxlink->query ($query);
-	if ($result == NULL)
-	{
-		showError ('SQL query failed', __FUNCTION__);
-		return;
-	}
+	$result = useSelectBlade ($query);
 	$ret = array();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
@@ -94,7 +82,6 @@ function getObjectList ($type_id = 0)
 
 function getRacksForRow ($row_id = 0)
 {
-	global $dbxlink;
 	$query =
 		"select Rack.id, Rack.name, height, Rack.comment, row_id, " .
 		"'yes' as left_is_front, 'yes' as bottom_is_unit1, dict_value as row_name " .
@@ -102,12 +89,7 @@ function getRacksForRow ($row_id = 0)
 		"where chapter_name = 'RackRow' and Rack.deleted = 'no' " .
 		(($row_id == 0) ? "" : "and row_id = ${row_id} ") .
 		"order by row_name, Rack.id";
-	$result = $dbxlink->query ($query);
-	if ($result == NULL)
-	{
-		showError ('SQL query failed', __FUNCTION__);
-		return;
-	}
+	$result = useSelectBlade ($query);
 	$ret = array();
 	$clist = array
 	(
@@ -139,19 +121,12 @@ function getRackData ($rack_id = 0, $silent = FALSE)
 			showError ('Invalid rack_id', __FUNCTION__);
 		return NULL;
 	}
-	global $dbxlink;
 	$query =
 		"select Rack.id, Rack.name, row_id, height, Rack.comment, " .
 		"'yes' as left_is_front, 'yes' as bottom_is_unit1, dict_value as row_name from " .
 		"Rack left join Dictionary on Rack.row_id = dict_key natural join Chapter " .
 		"where chapter_name = 'RackRow' and Rack.id='${rack_id}' and Rack.deleted = 'no' limit 1";
-	$result1 = $dbxlink->query ($query);
-	if ($result1 == NULL)
-	{
-		if ($silent == FALSE)
-			showError ("SQL query #1 failed", __FUNCTION__);
-		return NULL;
-	}
+	$result1 = useSelectBlade ($query);
 	if (($row = $result1->fetch (PDO::FETCH_ASSOC)) == NULL)
 	{
 		if ($silent == FALSE)
@@ -185,13 +160,7 @@ function getRackData ($rack_id = 0, $silent = FALSE)
 		"select unit_no, atom, state, object_id " .
 		"from RackSpace where rack_id = ${rack_id} and " .
 		"unit_no between 1 and " . $rack['height'] . " order by unit_no";
-	$result2 = $dbxlink->query ($query);
-	if ($result2 == NULL)
-	{
-		if ($silent == FALSE)
-			showError ('SQL query failure #2', __FUNCTION__);
-		return NULL;
-	}
+	$result2 = useSelectBlade ($query);
 	global $loclist;
 	while ($row = $result2->fetch (PDO::FETCH_ASSOC))
 	{
@@ -210,18 +179,11 @@ function getObjectInfo ($object_id = 0)
 		showError ('Invalid object_id', __FUNCTION__);
 		return;
 	}
-	global $dbxlink;
 	$query =
 		"select id, name, label, barcode, dict_value as objtype_name, asset_no, dict_key as objtype_id, has_problems, comment from " .
 		"RackObject inner join Dictionary on objtype_id = dict_key natural join Chapter " .
 		"where id = '${object_id}' and deleted = 'no' and chapter_name = 'RackObjectType' limit 1";
-	$result = $dbxlink->query ($query);
-	if ($result == NULL)
-	{
-		$ei = $dbxlink->errorInfo();
-		showError ("SQL query failed with error ${ei[1]} (${ei[2]})", __FUNCTION__);
-		return NULL;
-	}
+	$result = useSelectBlade ($query);
 	if (($row = $result->fetch (PDO::FETCH_ASSOC)) == NULL)
 	{
 		showError ('Query succeded, but returned no data', __FUNCTION__);
@@ -256,7 +218,6 @@ function getObjectPortsAndLinks ($object_id = 0)
 		showError ('Invalid object_id', __FUNCTION__);
 		return;
 	}
-	global $dbxlink;
 	$query =
 		"select Port.id as Port_id, ".
 		"Port.name as Port_name, ".
@@ -282,36 +243,29 @@ function getObjectPortsAndLinks ($object_id = 0)
 		"where chapter_name = 'PortType' and Port.object_id=${object_id} ".
 		"and (Port.id != RemotePort.id or RemotePort.id is null) ".
 		"order by Port_name";
-	$result = $dbxlink->query ($query);
-	if ($result == NULL)
+	$result = useSelectBlade ($query);
+	$ret=array();
+	$count=0;
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
-		return NULL;
-	}
-	else
-	{
-		$ret=array();
-		$count=0;
-		while ($row = $result->fetch (PDO::FETCH_ASSOC))
+		$ret[$count]['id'] = $row['Port_id'];
+		$ret[$count]['name'] = $row['Port_name'];
+		$ret[$count]['l2address'] = l2addressFromDatabase ($row['Port_l2address']);
+		$ret[$count]['label'] = $row['Port_label'];
+		$ret[$count]['type_id'] = $row['Port_type'];
+		$ret[$count]['type'] = $row['PortType_name'];
+		$ret[$count]['reservation_comment'] = $row['Port_reservation_comment'];
+		$ret[$count]['remote_id'] = $row['RemotePort_id'];
+		$ret[$count]['remote_name'] = htmlentities ($row['RemotePort_name'], ENT_QUOTES);
+		$ret[$count]['remote_object_id'] = $row['RemotePort_object_id'];
+		$ret[$count]['remote_object_name'] = $row['RackObject_name'];
+		// Save on displayedName() calls.
+		if (empty ($row['RackObject_name']) and !empty ($row['RemotePort_object_id']))
 		{
-			$ret[$count]['id'] = $row['Port_id'];
-			$ret[$count]['name'] = $row['Port_name'];
-			$ret[$count]['l2address'] = l2addressFromDatabase ($row['Port_l2address']);
-			$ret[$count]['label'] = $row['Port_label'];
-			$ret[$count]['type_id'] = $row['Port_type'];
-			$ret[$count]['type'] = $row['PortType_name'];
-			$ret[$count]['reservation_comment'] = $row['Port_reservation_comment'];
-			$ret[$count]['remote_id'] = $row['RemotePort_id'];
-			$ret[$count]['remote_name'] = htmlentities ($row['RemotePort_name'], ENT_QUOTES);
-			$ret[$count]['remote_object_id'] = $row['RemotePort_object_id'];
-			$ret[$count]['remote_object_name'] = $row['RackObject_name'];
-			// Save on displayedName() calls.
-			if (empty ($row['RackObject_name']) and !empty ($row['RemotePort_object_id']))
-			{
-				$oi = getObjectInfo ($row['RemotePort_object_id']);
-				$ret[$count]['remote_object_name'] = displayedName ($oi);
-			}
-			$count++;
+			$oi = getObjectInfo ($row['RemotePort_object_id']);
+			$ret[$count]['remote_object_name'] = displayedName ($oi);
 		}
+		$count++;
 	}
 	$result->closeCursor();
 	return $ret;
@@ -509,16 +463,10 @@ function getMoleculeForObject ($object_id = 0)
 		showError ("object_id == 0", __FUNCTION__);
 		return NULL;
 	}
-	global $dbxlink;
 	$query =
 		"select rack_id, unit_no, atom from RackSpace " .
 		"where state = 'T' and object_id = ${object_id} order by rack_id, unit_no, atom";
-	$result = $dbxlink->query ($query);
-	if ($result == NULL)
-	{
-		showError ("SQL query failed", __FUNCTION__);
-		return NULL;
-	}
+	$result = useSelectBlade ($query);
 	$ret = $result->fetchAll (PDO::FETCH_ASSOC);
 	$result->closeCursor();
 	return $ret;
@@ -532,16 +480,10 @@ function getMolecule ($mid = 0)
 		showError ("mid == 0", __FUNCTION__);
 		return NULL;
 	}
-	global $dbxlink;
 	$query =
 		"select rack_id, unit_no, atom from Atom " .
 		"where molecule_id=${mid}";
-	$result = $dbxlink->query ($query);
-	if ($result == NULL)
-	{
-		showError ("SQL query failed", __FUNCTION__);
-		return NULL;
-	}
+	$result = useSelectBlade ($query);
 	$ret = $result->fetchAll (PDO::FETCH_ASSOC);
 	$result->closeCursor();
 	return $ret;
@@ -607,18 +549,12 @@ function recordHistory ($tableName, $whereClause)
 
 function getRackspaceHistory ()
 {
-	global $dbxlink;
 	$query =
 		"select mo.id as mo_id, ro.id as ro_id, ro.name, mo.ctime, mo.comment, dict_value as objtype_name, user_name from " .
 		"MountOperation as mo inner join RackObject as ro on mo.object_id = ro.id " .
 		"inner join Dictionary on objtype_id = dict_key natural join Chapter " .
 		"where chapter_name = 'RackObjectType' order by ctime desc";
-	$result = $dbxlink->query ($query);
-	if ($result == NULL)
-	{
-		showError ('SQL query failed', __FUNCTION__);
-		return;
-	}
+	$result = useSelectBlade ($query);
 	$ret = $result->fetchAll(PDO::FETCH_ASSOC);
 	$result->closeCursor();
 	return $ret;
@@ -632,14 +568,8 @@ function getOperationMolecules ($op_id = 0)
 		showError ("Missing argument", __FUNCTION__);
 		return;
 	}
-	global $dbxlink;
 	$query = "select old_molecule_id, new_molecule_id from MountOperation where id = ${op_id}";
-	$result = $dbxlink->query ($query);
-	if ($result == NULL)
-	{
-		showError ("SQL query failed", __FUNCTION__);
-		return;
-	}
+	$result = useSelectBlade ($query);
 	// We expect one row.
 	$row = $result->fetch (PDO::FETCH_ASSOC);
 	if ($row == NULL)
@@ -661,13 +591,7 @@ function getResidentRacksData ($object_id = 0, $fetch_rackdata = TRUE)
 		return;
 	}
 	$query = "select distinct rack_id from RackSpace where object_id = ${object_id} order by rack_id";
-	global $dbxlink;
-	$result = $dbxlink->query ($query);
-	if ($result == NULL)
-	{
-		showError ("SQL query failed", __FUNCTION__);
-		return;
-	}
+	$result = useSelectBlade ($query);
 	$rows = $result->fetchAll (PDO::FETCH_NUM);
 	$result->closeCursor();
 	$ret = array();
@@ -698,13 +622,7 @@ function getObjectGroupInfo ($group_id = 0)
 		'where chapter_name = "RackObjectType" ' .
 		(($group_id > 0) ? "and dict_key = ${group_id} " : '') .
 		'group by dict_key';
-	global $dbxlink;
-	$result = $dbxlink->query ($query);
-	if ($result == NULL)
-	{
-		showError ('SQL query failed', __FUNCTION__);
-		return NULL;
-	}
+	$result = useSelectBlade ($query);
 	$ret = array();
 	$clist = array ('id', 'name', 'count');
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
@@ -722,18 +640,12 @@ function getObjectGroupInfo ($group_id = 0)
 // the rack required.
 function getUnmountedObjects ()
 {
-	global $dbxlink;
 	$query =
 		'select dict_value as objtype_name, dict_key as objtype_id, name, label, barcode, id, asset_no from ' .
 		'RackObject inner join Dictionary on objtype_id = dict_key natural join Chapter ' .
 		'left join RackSpace on id = object_id '.
 		'where rack_id is null and chapter_name = "RackObjectType" order by dict_value, name, label, asset_no, barcode';
-	$result = $dbxlink->query ($query);
-	if ($result == NULL)
-	{
-		showError ('SQL query failure', __FUNCTION__);
-		return NULL;
-	}
+	$result = useSelectBlade ($query);
 	$ret = array();
 	$clist = array ('id', 'name', 'label', 'barcode', 'objtype_name', 'objtype_id', 'asset_no');
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
@@ -748,17 +660,11 @@ function getUnmountedObjects ()
 
 function getProblematicObjects ()
 {
-	global $dbxlink;
 	$query =
 		'select dict_value as objtype_name, dict_key as objtype_id, name, id, asset_no from ' .
 		'RackObject inner join Dictionary on objtype_id = dict_key natural join Chapter '.
 		'where has_problems = "yes" and chapter_name = "RackObjectType" order by objtype_name, name';
-	$result = $dbxlink->query ($query);
-	if ($result == NULL)
-	{
-		showError ('SQL query failure', __FUNCTION__);
-		return NULL;
-	}
+	$result = useSelectBlade ($query);
 	$ret = array();
 	$clist = array ('id', 'name', 'objtype_name', 'objtype_id', 'asset_no');
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
@@ -826,19 +732,13 @@ function delObjectPort ($port_id)
 
 function getObjectAddressesAndNames ()
 {
-	global $dbxlink;
 	$query =
 		"select object_id as object_id, ".
 		"RackObject.name as object_name, ".
 		"IPBonds.name as name, ".
 		"INET_NTOA(ip) as ip ".
 		"from IPBonds join RackObject on id=object_id ";
-	$result = $dbxlink->query ($query);
-	if ($result == NULL)
-	{
-		showError ("SQL query failure", __FUNCTION__);
-		return NULL;
-	}
+	$result = useSelectBlade ($query);
 	$ret = array();
 	$count=0;
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
@@ -856,7 +756,6 @@ function getObjectAddressesAndNames ()
 
 function getEmptyPortsOfType ($type_id)
 {
-	global $dbxlink;
 	$query =
 		"select distinct Port.id as Port_id, ".
 		"Port.object_id as Port_object_id, ".
@@ -874,12 +773,7 @@ function getEmptyPortsOfType ($type_id)
 		"inner join PortCompat on Port.type = PortCompat.type2 ".
 		"where chapter_name = 'PortType' and PortCompat.type1 = '$type_id' and Link.porta is NULL ".
 		"and Port.reservation_comment is null order by Object_name, Port_name";
-	$result = $dbxlink->query ($query);
-	if ($result == NULL)
-	{
-		showError ("SQL query failure, type_id == ${type_id}", __FUNCTION__);
-		return NULL;
-	}
+	$result = useSelectBlade ($query);
 	$ret = array();
 	$count=0;
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
@@ -935,7 +829,6 @@ function getObjectAddresses ($object_id = 0)
 		showError ('Invalid object_id', __FUNCTION__);
 		return;
 	}
-	global $dbxlink;
 	$query =
 		"select ".
 		"IPAddress.name as IPAddress_name, ".
@@ -954,52 +847,44 @@ function getObjectAddresses ($object_id = 0)
 		"where ".
 		"IPBonds.object_id = ${object_id} ".
 		"order by IPBonds.ip, RemoteObject.name";
-	$result = $dbxlink->query ($query);
-	if ($result == NULL)
+	$result = useSelectBlade ($query);
+	$ret=array();
+	$count=0;
+	$refcount=0;
+	$prev_ip = 0;
+	// We are going to call getObjectInfo() for some rows,
+	// hence the connector must be unloaded from the
+	// current data.
+	$rows = $result->fetchAll (PDO::FETCH_ASSOC);
+	$result->closeCursor();
+	foreach ($rows as $row)
 	{
-		showError ("SQL query failed", __FUNCTION__);
-		return NULL;
-	}
-	else
-	{
-		$ret=array();
-		$count=0;
-		$refcount=0;
-		$prev_ip = 0;
-		// We are going to call getObjectInfo() for some rows,
-		// hence the connector must be unloaded from the
-		// current data.
-		$rows = $result->fetchAll (PDO::FETCH_ASSOC);
-		$result->closeCursor();
-		foreach ($rows as $row)
+		if ($prev_ip != $row['IPBonds_ip'])
 		{
-			if ($prev_ip != $row['IPBonds_ip'])
-			{
-				$count++;
-				$refcount=0;
-				$prev_ip = $row['IPBonds_ip'];
-				$ret[$count]['address_name'] = $row['IPAddress_name'];
-				$ret[$count]['address_reserved'] = $row['IPAddress_reserved'];
-				$ret[$count]['ip'] = $row['IPBonds_ip'];
-				$ret[$count]['name'] = $row['IPBonds_name'];
-				$ret[$count]['type'] = $row['IPBonds_type'];
-				$ret[$count]['references'] = array();
-			}
+			$count++;
+			$refcount=0;
+			$prev_ip = $row['IPBonds_ip'];
+			$ret[$count]['address_name'] = $row['IPAddress_name'];
+			$ret[$count]['address_reserved'] = $row['IPAddress_reserved'];
+			$ret[$count]['ip'] = $row['IPBonds_ip'];
+			$ret[$count]['name'] = $row['IPBonds_name'];
+			$ret[$count]['type'] = $row['IPBonds_type'];
+			$ret[$count]['references'] = array();
+		}
 
-			if ($row['RemoteBonds_type'])
+		if ($row['RemoteBonds_type'])
+		{
+			$ret[$count]['references'][$refcount]['type'] = $row['RemoteBonds_type'];
+			$ret[$count]['references'][$refcount]['name'] = $row['RemoteBonds_name'];
+			$ret[$count]['references'][$refcount]['object_id'] = $row['RemoteBonds_object_id'];
+			if (empty ($row['RemoteBonds_object_id']))
+				$ret[$count]['references'][$refcount]['object_name'] = $row['RemoteObject_name'];
+			else
 			{
-				$ret[$count]['references'][$refcount]['type'] = $row['RemoteBonds_type'];
-				$ret[$count]['references'][$refcount]['name'] = $row['RemoteBonds_name'];
-				$ret[$count]['references'][$refcount]['object_id'] = $row['RemoteBonds_object_id'];
-				if (empty ($row['RemoteBonds_object_id']))
-					$ret[$count]['references'][$refcount]['object_name'] = $row['RemoteObject_name'];
-				else
-				{
-					$oi = getObjectInfo ($row['RemoteBonds_object_id']);
-					$ret[$count]['references'][$refcount]['object_name'] = displayedName ($oi);
-				}
-				$refcount++;
+				$oi = getObjectInfo ($row['RemoteBonds_object_id']);
+				$ret[$count]['references'][$refcount]['object_name'] = displayedName ($oi);
 			}
+			$refcount++;
 		}
 	}
 	return $ret;
@@ -1007,7 +892,6 @@ function getObjectAddresses ($object_id = 0)
 
 function getAddressspaceList ()
 {
-	global $dbxlink;
 	$query =
 		"select ".
 		"id as IPRanges_id, ".
@@ -1016,26 +900,19 @@ function getAddressspaceList ()
 		"name as IPRanges_name ".
 		"from IPRanges ".
 		"order by ip";
-	$result = $dbxlink->query ($query);
-	if ($result == NULL)
+	$result = useSelectBlade ($query);
+	$ret=array();
+	$count=0;
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
-		return NULL;
-	}
-	else
-	{
-		$ret=array();
-		$count=0;
-		while ($row = $result->fetch (PDO::FETCH_ASSOC))
-		{
-			$ret[$count]['id'] = $row['IPRanges_id'];
-			$ret[$count]['ip'] = $row['IPRanges_ip'];
-			$ret[$count]['ip_bin'] = ip2long($row['IPRanges_ip']);
-			$ret[$count]['name'] = $row['IPRanges_name'];
-			$ret[$count]['mask'] = $row['IPRanges_mask'];
-			$ret[$count]['mask_bin'] = binMaskFromDec($row['IPRanges_mask']);
-			$ret[$count]['mask_bin_inv'] = binInvMaskFromDec($row['IPRanges_mask']);
-			$count++;
-		}
+		$ret[$count]['id'] = $row['IPRanges_id'];
+		$ret[$count]['ip'] = $row['IPRanges_ip'];
+		$ret[$count]['ip_bin'] = ip2long($row['IPRanges_ip']);
+		$ret[$count]['name'] = $row['IPRanges_name'];
+		$ret[$count]['mask'] = $row['IPRanges_mask'];
+		$ret[$count]['mask_bin'] = binMaskFromDec($row['IPRanges_mask']);
+		$ret[$count]['mask_bin_inv'] = binInvMaskFromDec($row['IPRanges_mask']);
+		$count++;
 	}
 	$result->closeCursor();
 	return $ret;
@@ -1044,7 +921,6 @@ function getAddressspaceList ()
 
 function getRangeByIp ($ip = '', $id = 0)
 {
-	global $dbxlink;
 	if ($id == 0)
 		$query =
 			"select ".
@@ -1056,27 +932,20 @@ function getRangeByIp ($ip = '', $id = 0)
 			"id, INET_NTOA(ip) as ip, mask, name ".
 			"from IPRanges where id='$id'";
 		
-	$result = $dbxlink->query ($query);
-	if ($result == NULL)
+	$result = useSelectBlade ($query);
+	$ret=array();
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
-		return NULL;
-	}
-	else
-	{
-		$ret=array();
-		while ($row = $result->fetch (PDO::FETCH_ASSOC))
+		$binmask=binMaskFromDec($row['mask']);
+		if ((ip2long($ip) & $binmask) == ip2long($row['ip']))
 		{
-			$binmask=binMaskFromDec($row['mask']);
-			if ((ip2long($ip) & $binmask) == ip2long($row['ip']))
-			{
-				$ret['id'] = $row['id'];
-				$ret['ip'] = $row['ip'];
-				$ret['ip_bin'] = ip2long($row['ip']);
-				$ret['name'] = $row['name'];
-				$ret['mask'] = $row['mask'];
-				$result->closeCursor();
-				return $ret;
-			}
+			$ret['id'] = $row['id'];
+			$ret['ip'] = $row['ip'];
+			$ret['ip_bin'] = ip2long($row['ip']);
+			$ret['name'] = $row['name'];
+			$ret['mask'] = $row['mask'];
+			$result->closeCursor();
+			return $ret;
 		}
 	}
 	$result->closeCursor();
@@ -1143,16 +1012,10 @@ function unbindIpFromObject ($ip='', $object_id=0)
 // This function returns either all or one user account. Array key is user name.
 function getUserAccounts ()
 {
-	global $dbxlink;
 	$query =
 		'select user_id, user_name, user_password_hash, user_realname, user_enabled ' .
 		'from UserAccount order by user_name';
-	$result = $dbxlink->query ($query);
-	if ($result == NULL)
-	{
-		showError ('SQL query failed', __FUNCTION__);
-		return NULL;
-	}
+	$result = useSelectBlade ($query);
 	$ret = array();
 	$clist = array ('user_id', 'user_name', 'user_realname', 'user_password_hash', 'user_enabled');
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
@@ -1165,17 +1028,11 @@ function getUserAccounts ()
 // This function returns permission array for all user accounts. Array key is user name.
 function getUserPermissions ()
 {
-	global $dbxlink;
 	$query =
 		"select UserPermission.user_id, user_name, page, tab, access from " .
 		"UserPermission natural left join UserAccount where (user_name is not null) or " .
 		"(user_name is null and UserPermission.user_id = 0) order by user_name, page, tab";
-	$result = $dbxlink->query ($query);
-	if ($result == NULL)
-	{
-		showError ('SQL query failed', __FUNCTION__);
-		return NULL;
-	}
+	$result = useSelectBlade ($query);
 	$ret = array();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
@@ -1189,16 +1046,10 @@ function getUserPermissions ()
 
 function searchByl2address ($l2addr)
 {
-	global $dbxlink;
 	$l2addr = l2addressForDatabase ($l2addr);
 	$query = "select object_id, Port.id as port_id from RackObject as ro inner join Port on ro.id = Port.object_id " .
 		"where l2address = ${l2addr}";
-	$result = $dbxlink->query ($query);
-	if ($result == NULL)
-	{
-		showError ('SQL query failed', __FUNCTION__);
-		return NULL;
-	}
+	$result = useSelectBlade ($query);
 	$rows = $result->fetchAll (PDO::FETCH_ASSOC);
 	$result->closeCursor();
 	if (count ($rows) == 0) // No results.
@@ -1212,14 +1063,8 @@ function searchByl2address ($l2addr)
 // This function returns either port ID or NULL for specified arguments.
 function getPortID ($object_id, $port_name)
 {
-	global $dbxlink;
 	$query = "select id from Port where object_id=${object_id} and name='${port_name}' limit 2";
-	$result = $dbxlink->query ($query);
-	if ($result == NULL)
-	{
-		showError ('SQL query failed', __FUNCTION__);
-		return NULL;
-	}
+	$result = useSelectBlade ($query);
 	$rows = $result->fetchAll (PDO::FETCH_NUM);
 	if (count ($rows) != 1)
 		return NULL;
@@ -1305,7 +1150,6 @@ function commitRevokePermission ($userid, $page, $tab)
 // This function returns an array of all port type pairs from PortCompat table.
 function getPortCompat ()
 {
-	global $dbxlink;
 	$query =
 		"select type1, type2, d1.dict_value as type1name, d2.dict_value as type2name from " .
 		"PortCompat as pc inner join Dictionary as d1 on pc.type1 = d1.dict_key " .
@@ -1313,12 +1157,7 @@ function getPortCompat ()
 		"inner join Chapter as c1 on d1.chapter_no = c1.chapter_no " .
 		"inner join Chapter as c2 on d2.chapter_no = c2.chapter_no " .
 		"where c1.chapter_name = 'PortType' and c2.chapter_name = 'PortType'";
-	$result = $dbxlink->query ($query);
-	if ($result == NULL)
-	{
-		showError ('SQL query failed', __FUNCTION__);
-		return NULL;
-	}
+	$result = useSelectBlade ($query);
 	$ret = $result->fetchAll (PDO::FETCH_ASSOC);
 	$result->closeCursor();
 	return $ret;
@@ -1361,16 +1200,10 @@ function addPortCompat ($type1 = 0, $type2 = 0)
 // and 'word' keys with the latter holding all the words within the chapter.
 function getDict ()
 {
-	global $dbxlink;
 	$query1 =
 		"select chapter_name, Chapter.chapter_no, dict_key, dict_value, sticky from " .
 		"Chapter natural left join Dictionary order by chapter_name, dict_value";
-	$result1 = $dbxlink->query ($query1);
-	if ($result1 == NULL)
-	{
-		showError ('SQL query #1 failed', __FUNCTION__);
-		return NULL;
-	}
+	$result1 = useSelectBlade ($query1);
 	$dict = array();
 	while ($row = $result1->fetch (PDO::FETCH_ASSOC))
 	{
@@ -1398,12 +1231,7 @@ function getDict ()
 		"inner join Dictionary as d on am.chapter_no = d.chapter_no and av.uint_value = d.dict_key " .
 		"where attr_type = 'dict' group by a.attr_id, am.chapter_no, uint_value " .
 		"order by a.attr_id, am.chapter_no, uint_value";
-	$result2 = $dbxlink->query ($query2);
-	if ($result2 == NULL)
-	{
-		showError ('SQL query #2 failed', __FUNCTION__);
-		return NULL;
-	}
+	$result2 = useSelectBlade ($query2);
 	$refcnt = array();
 	while ($row = $result2->fetch (PDO::FETCH_ASSOC))
 		$dict[$row['chapter_no']]['refcnt'][$row['uint_value']] = $row['refcnt'];
@@ -1414,16 +1242,10 @@ function getDict ()
 function getDictStats ()
 {
 	$stock_chapters = array (1, 2, 3, 11, 12, 13, 14, 16, 17, 18, 19, 20, 21, 22, 23);
-	global $dbxlink;
 	$query =
 		"select Chapter.chapter_no, chapter_name, count(dict_key) as wc from " .
 		"Chapter natural left join Dictionary group by Chapter.chapter_no";
-	$result1 = $dbxlink->query ($query);
-	if ($result1 == NULL)
-	{
-		showError ('SQL query #1 failed', __FUNCTION__);
-		return NULL;
-	}
+	$result1 = useSelectBlade ($query);
 	$tc = $tw = $uc = $uw = 0;
 	while ($row = $result1->fetch (PDO::FETCH_ASSOC))
 	{
@@ -1437,12 +1259,7 @@ function getDictStats ()
 	$result1->closeCursor();
 	$query = "select count(attr_id) as attrc from RackObject as ro left join " .
 		"AttributeValue as av on ro.id = av.object_id group by ro.id";
-	$result2 = $dbxlink->query ($query);
-	if ($result2 == NULL)
-	{
-		showError ('SQL query #2 failed', __FUNCTION__);
-		return NULL;
-	}
+	$result2 = useSelectBlade ($query);
 	$to = $ta = $so = 0;
 	while ($row = $result2->fetch (PDO::FETCH_ASSOC))
 	{
@@ -1467,7 +1284,6 @@ function getDictStats ()
 
 function getIPv4Stats()
 {
-	global $dbxlink;
 	$ret = array();
 	$subject = array();
 	$subject[] = array ('q' => 'select count(id) from IPRanges', 'txt' => 'Networks');
@@ -1481,12 +1297,7 @@ function getIPv4Stats()
 
 	foreach ($subject as $item)
 	{
-		$result = $dbxlink->query ($item['q']);
-		if ($result == NULL)
-		{
-			showError ("SQL query '${item['q']}' failed", __FUNCTION__);
-			return NULL;
-		}
+		$result = useSelectBlade ($item['q']);
 		$row = $result->fetch (PDO::FETCH_NUM);
 		$ret[$item['txt']] = $row[0];
 		$result->closeCursor();
@@ -1497,7 +1308,6 @@ function getIPv4Stats()
 
 function getRackspaceStats()
 {
-	global $dbxlink;
 	$ret = array();
 	$subject = array();
 	$subject[] = array ('q' => 'select count(*) from Dictionary where chapter_no = 3', 'txt' => 'Rack rows');
@@ -1507,12 +1317,7 @@ function getRackspaceStats()
 
 	foreach ($subject as $item)
 	{
-		$result = $dbxlink->query ($item['q']);
-		if ($result == NULL)
-		{
-			showError ("SQL query '${item['q']}' failed", __FUNCTION__);
-			return NULL;
-		}
+		$result = useSelectBlade ($item['q']);
 		$row = $result->fetch (PDO::FETCH_NUM);
 		$ret[$item['txt']] = empty ($row[0]) ? 0 : $row[0];
 		$result->closeCursor();
@@ -1637,17 +1442,10 @@ function readChapter ($chapter_name = '')
 		showError ('invalid argument', __FUNCTION__);
 		return NULL;
 	}
-	global $dbxlink;
 	$query =
 		"select dict_key, dict_value from Dictionary natural join Chapter " .
 		"where chapter_name = '${chapter_name}'";
-	$result = $dbxlink->query ($query);
-	if ($result == NULL)
-	{
-		$errorInfo = $dbxlink->errorInfo();
-		showError ("SQL query '${query}'\nwith message '${errorInfo[2]}'\nfailed for chapter_no = '${chapter_name}'", __FUNCTION__);
-		return NULL;
-	}
+	$result = useSelectBlade ($query);
 	$chapter = array();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 		$chapter[$row['dict_key']] = parseWikiLink ($row['dict_value'], 'o');
@@ -1659,7 +1457,6 @@ function readChapter ($chapter_name = '')
 
 function getAttrMap ()
 {
-	global $dbxlink;
 	$query =
 		"select a.attr_id, a.attr_type, a.attr_name, am.objtype_id, " .
 		"d.dict_value as objtype_name, am.chapter_no, c2.chapter_name from " .
@@ -1669,13 +1466,7 @@ function getAttrMap ()
 		"left join Chapter as c2 on am.chapter_no = c2.chapter_no " .
 		"where c1.chapter_name = 'RackObjectType' or c1.chapter_name is null " .
 		"order by attr_name";
-	$result = $dbxlink->query ($query);
-	if ($result == NULL)
-	{
-		$errorInfo = $dbxlink->errorInfo();
-		showError ("SQL query '${query}'\nwith message '${errorInfo[2]}'\nfailed", __FUNCTION__);
-		return NULL;
-	}
+	$result = useSelectBlade ($query);
 	$ret = array();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
@@ -1807,7 +1598,6 @@ function getAttrValues ($object_id)
 		showError ('Invalid argument', __FUNCTION__);
 		return NULL;
 	}
-	global $dbxlink;
 	$ret = array();
 	$query =
 		"select A.attr_id, A.attr_name, A.attr_type, C.chapter_name, " .
@@ -1818,13 +1608,7 @@ function getAttrValues ($object_id)
 		"left join Dictionary as D on D.dict_key = AV.uint_value and AM.chapter_no = D.chapter_no " .
 		"left join Chapter as C on AM.chapter_no = C.chapter_no " .
 		"where RO.id = ${object_id} order by A.attr_type";
-	$result = $dbxlink->query ($query);
-	if ($result == NULL)
-	{
-		$errorInfo = $dbxlink->errorInfo();
-		showError ("SQL query '${query}'\nwith message '${errorInfo[2]}'\nfailed", __FUNCTION__);
-		return NULL;
-	}
+	$result = useSelectBlade ($query);
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
 		$record = array();
@@ -2005,15 +1789,8 @@ function useSelectBlade ($query, $caller = 'N/A')
 
 function loadConfigCache ()
 {
-	global $dbxlink;
 	$query = 'SELECT varname, varvalue, vartype, is_hidden, emptyok, description FROM Config ORDER BY varname';
-	$result = $dbxlink->query ($query);
-	if ($result == NULL)
-	{
-		$errorInfo = $dbxlink->errorInfo();
-		showError ("SQL query '${query}'\nwith message '${errorInfo[2]}'\nfailed", __FUNCTION__);
-		return NULL;
-	}
+	$result = useSelectBlade ($query);
 	$cache = array();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 		$cache[$row['varname']] = $row;
@@ -2074,20 +1851,13 @@ function getDatabaseVersion ()
 // with their load balancers and other stats.
 function getSLBSummary ()
 {
-	global $dbxlink;
 	$query = 'select vs.id as vsid, inet_ntoa(vip) as vip, vport, proto, vs.name, object_id, ' .
 		'lb.rspool_id, pool.name as pool_name, count(rs.id) as rscount ' .
 		'from IPVirtualService as vs inner join IPLoadBalancer as lb on vs.id = lb.vs_id ' .
 		'inner join IPRSPool as pool on lb.rspool_id = pool.id ' .
 		'left join IPRealServer as rs on rs.rspool_id = lb.rspool_id ' .
 		'group by vs.id, object_id order by vs.vip, object_id';
-	$result = $dbxlink->query ($query);
-	if ($result == NULL)
-	{
-		$errorInfo = $dbxlink->errorInfo();
-		showError ("SQL query '${query}' failed with message '${errorInfo[2]}'", __FUNCTION__);
-		return NULL;
-	}
+	$result = useSelectBlade ($query);
 	$ret = array();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
@@ -2117,15 +1887,9 @@ function getSLBSummary ()
 // will be returned as well.
 function getVServiceInfo ($vsid = 0)
 {
-	global $dbxlink;
 	$query1 = "select inet_ntoa(vip) as vip, vport, proto, name, vsconfig, rsconfig " .
 		"from IPVirtualService where id = ${vsid}";
-	$result1 = $dbxlink->query ($query1);
-	if ($result1 == NULL)
-	{
-		showError ('SQL query #1 failed', __FUNCTION__);
-		return NULL;
-	}
+	$result1 = useSelectBlade ($query1);
 	$vsinfo = array ();
 	$row = $result1->fetch (PDO::FETCH_ASSOC);
 	if (!$row)
@@ -2138,12 +1902,7 @@ function getVServiceInfo ($vsid = 0)
 		"lb.vsconfig as lb_vsconfig, lb.rsconfig as lb_rsconfig from " .
 		"IPRSPool as pool left join IPLoadBalancer as lb on pool.id = lb.rspool_id " .
 		"where vs_id = ${vsid} order by pool.name, object_id";
-	$result2 = $dbxlink->query ($query2);
-	if ($result2 == NULL)
-	{
-		showError ('SQL query #2 failed', __FUNCTION__);
-		return NULL;
-	}
+	$result2 = useSelectBlade ($query2);
 	while ($row = $result2->fetch (PDO::FETCH_ASSOC))
 	{
 		if (!isset ($vsinfo['rspool'][$row['id']]))
@@ -2173,15 +1932,9 @@ function getVServiceInfo ($vsid = 0)
 
 function getRSPoolInfo ($id = 0)
 {
-	global $dbxlink;
 	$query1 = "select id, name, vsconfig, rsconfig from " .
 		"IPRSPool where id = ${id}";
-	$result1 = $dbxlink->query ($query1);
-	if ($result1 == NULL)
-	{
-		showError ('SQL query #1 failed', __FUNCTION__);
-		return NULL;
-	}
+	$result1 = useSelectBlade ($query1);
 	$ret = array();
 	$row = $result1->fetch (PDO::FETCH_ASSOC);
 	if (!$row)
@@ -2192,24 +1945,14 @@ function getRSPoolInfo ($id = 0)
 	$ret['lblist'] = array();
 	$ret['rslist'] = array();
 	$query2 = "select object_id, vs_id, vsconfig, rsconfig from IPLoadBalancer where rspool_id = ${id} order by object_id";
-	$result2 = $dbxlink->query ($query2);
-	if ($result2 == NULL)
-	{
-		showError ('SQL query #2 failed', __FUNCTION__);
-		return NULL;
-	}
+	$result2 = useSelectBlade ($query2);
 	while ($row = $result2->fetch (PDO::FETCH_ASSOC))
 		foreach (array ('vsconfig', 'rsconfig') as $c)
 			$ret['lblist'][$row['object_id']][$row['vs_id']][$c] = $row[$c];
 	$result2->closeCursor();
 	$query3 = "select id, inservice, inet_ntoa(rsip) as rsip, rsport, rsconfig from " .
 		"IPRealServer where rspool_id = ${id} order by IPRealServer.rsip, rsport";
-	$result3 = $dbxlink->query ($query3);
-	if ($result3 == NULL)
-	{
-		showError ('SQL query #3 failed', __FUNCTION__);
-		return NULL;
-	}
+	$result3 = useSelectBlade ($query3);
 	while ($row = $result3->fetch (PDO::FETCH_ASSOC))
 		foreach (array ('inservice', 'rsip', 'rsport', 'rsconfig') as $c)
 			$ret['rslist'][$row['id']][$c] = $row[$c];
@@ -2386,16 +2129,10 @@ function commitUpdateVS ($vsid = 0, $vip = '', $vport = 0, $proto = '', $name = 
 // Each record will be shown with its basic info plus RS pools counter.
 function getVSList ()
 {
-	global $dbxlink;
 	$query = "select vs.id, inet_ntoa(vip) as vip, vport, proto, vs.name, vs.vsconfig, vs.rsconfig, count(rspool_id) as poolcount " .
 		"from IPVirtualService as vs left join IPLoadBalancer as lb on vs.id = lb.vs_id " .
 		"group by vs.id order by vs.vip, proto, vport";
-	$result = $dbxlink->query ($query);
-	if ($result == NULL)
-	{
-		showError ('SQL query failed', __FUNCTION__);
-		return NULL;
-	}
+	$result = useSelectBlade ($query);
 	$ret = array ();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 		foreach (array ('vip', 'vport', 'proto', 'name', 'vsconfig', 'rsconfig', 'poolcount') as $cname)
@@ -2407,16 +2144,10 @@ function getVSList ()
 // Return the list of RS pool, indexed by pool id.
 function getRSPoolList ()
 {
-	global $dbxlink;
 	$query = "select pool.id, pool.name, count(rspool_id) as refcnt, pool.vsconfig, pool.rsconfig " .
 		"from IPRSPool as pool left join IPLoadBalancer as lb on pool.id = lb.rspool_id " .
 		"group by pool.id order by pool.id, name";
-	$result = $dbxlink->query ($query);
-	if ($result == NULL)
-	{
-		showError ('SQL query failed', __FUNCTION__);
-		return NULL;
-	}
+	$result = useSelectBlade ($query);
 	$ret = array ();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 		foreach (array ('name', 'refcnt', 'vsconfig', 'rsconfig') as $cname)
@@ -2427,15 +2158,9 @@ function getRSPoolList ()
 
 function loadThumbCache ($rack_id = 0)
 {
-	global $dbxlink;
 	$ret = NULL;
 	$query = "select thumb_data from Rack where id = ${rack_id} and thumb_data is not null limit 1";
-	$result = $dbxlink->query ($query);
-	if ($result == NULL)
-	{
-		showError ('SQL query failed', __FUNCTION__);
-		return NULL;
-	}
+	$result = useSelectBlade ($query);
 	$row = $result->fetch (PDO::FETCH_ASSOC);
 	if ($row)
 		$ret = base64_decode ($row['thumb_data']);
@@ -2479,7 +2204,6 @@ function getRSPoolsForObject ($object_id = 0)
 		showError ('Invalid object_id', __FUNCTION__);
 		return NULL;
 	}
-	global $dbxlink;
 	$query = 'select vs_id, inet_ntoa(vip) as vip, vport, proto, vs.name, pool.id as pool_id, ' .
 		'pool.name as pool_name, count(rsip) as rscount, lb.vsconfig, lb.rsconfig from ' .
 		'IPLoadBalancer as lb inner join IPRSPool as pool on lb.rspool_id = pool.id ' .
@@ -2487,12 +2211,7 @@ function getRSPoolsForObject ($object_id = 0)
 		'left join IPRealServer as rs on lb.rspool_id = rs.rspool_id ' .
 		"where lb.object_id = ${object_id} " .
 		'group by lb.rspool_id, lb.vs_id order by vs.vip, vport, proto, pool.name';
-	$result = $dbxlink->query ($query);
-	if ($result == NULL)
-	{
-		showError ('SQL query failed', __FUNCTION__);
-		return NULL;
-	}
+	$result = useSelectBlade ($query);
 	$ret = array ();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 		foreach (array ('vip', 'vport', 'proto', 'name', 'pool_id', 'pool_name', 'rscount', 'vsconfig', 'rsconfig') as $cname)
@@ -2554,15 +2273,9 @@ function commitUpdateRSPool ($pool_id = 0, $name = '', $vsconfig = '', $rsconfig
 
 function getRSList ()
 {
-	global $dbxlink;
 	$query = "select id, inservice, inet_ntoa(rsip) as rsip, rsport, rspool_id, rsconfig " .
 		"from IPRealServer order by rspool_id, IPRealServer.rsip, rsport";
-	$result = $dbxlink->query ($query);
-	if ($result == NULL)
-	{
-		showError ('SQL query failed', __FUNCTION__);
-		return NULL;
-	}
+	$result = useSelectBlade ($query);
 	$ret = array ();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 		foreach (array ('inservice', 'rsip', 'rsport', 'rspool_id', 'rsconfig') as $cname)
@@ -2574,15 +2287,9 @@ function getRSList ()
 // Return the list of all currently configured load balancers with their pool count.
 function getLBList ()
 {
-	global $dbxlink;
 	$query = "select object_id, count(rspool_id) as poolcount " .
 		"from IPLoadBalancer group by object_id order by object_id";
-	$result = $dbxlink->query ($query);
-	if ($result == NULL)
-	{
-		showError ('SQL query failed', __FUNCTION__);
-		return NULL;
-	}
+	$result = useSelectBlade ($query);
 	$ret = array ();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 		$ret[$row['object_id']] = $row['poolcount'];
@@ -2601,7 +2308,6 @@ function buildLBConfig ($object_id)
 		showError ('Invalid arg', __FUNCTION__);
 		return NULL;
 	}
-	global $dbxlink;
 	$ret = array();
 	$query = 'select vs_id, inet_ntoa(vip) as vip, vport, proto, vs.name as vs_name, ' .
 		'vs.vsconfig as vs_vsconfig, vs.rsconfig as vs_rsconfig, ' .
@@ -2613,12 +2319,7 @@ function buildLBConfig ($object_id)
 		'inner join IPRealServer as rs on lb.rspool_id = rs.rspool_id ' .
 		"where lb.object_id = ${object_id} and rs.inservice = 'yes' " .
 		"order by vs.vip, vport, proto, pool.name, rs.rsip, rs.rsport";
-	$result = $dbxlink->query ($query);
-	if ($result == NULL)
-	{
-		showError ('SQL query failed', __FUNCTION__);
-		return NULL;
-	}
+	$result = useSelectBlade ($query);
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
 		$vs_id = $row['vs_id'];
