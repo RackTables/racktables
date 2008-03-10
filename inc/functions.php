@@ -1351,8 +1351,31 @@ function getImplicitTags ($oldtags)
 	return $ret;
 }
 
-function loadAutoTags ()
+function loadRackObjectAutoTags()
 {
+	assertUIntArg ('object_id');
+	$object_id = $_REQUEST['object_id'];
+	$oinfo = getObjectInfo ($object_id);
+	$ret = array();
+	$ret[] = array ('tag' => '$id_' . $_REQUEST['object_id']);
+	$ret[] = array ('tag' => '$allobjects');
+	return $ret;
+}
+
+function getGlobalAutoTags()
+{
+	global $remote_username, $accounts;
+	$ret = array();
+	$user_id = 0;
+	foreach ($accounts as $a)
+		if ($a['user_name'] == $remote_username)
+		{
+			$user_id = $a['user_id'];
+			break;
+		}
+	$ret[] = array ('tag' => '$username_' . $remote_username);
+	$ret[] = array ('tag' => '$userid_' . $user_id);
+	return $ret;
 }
 
 ?>

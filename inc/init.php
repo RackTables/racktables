@@ -120,4 +120,17 @@ require_once 'inc/triggers.php';
 require_once 'inc/gateways.php';
 require_once 'inc/help.php';
 
+global $page;
+$expl_tags = array();
+$impl_tags = array();
+$auto_tags = getGlobalAutoTags();
+
+if (isset ($page[$pageno]['tagloader']))
+{
+	$expl_tags = $page[$pageno]['tagloader'] ();
+	$impl_tags = getImplicitTags ($expl_tags);
+}
+if (isset ($page[$pageno]['autotagloader']))
+	$auto_tags = array_merge ($auto_tags, $page[$pageno]['autotagloader'] ());
+
 ?>
