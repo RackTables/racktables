@@ -1280,4 +1280,79 @@ function getTagTree ()
 	return $tagtree;
 }
 
+function serializeTags ($trail)
+{
+	$comma = '';
+	$ret = '';
+	foreach ($trail as $taginfo)
+	{
+		$ret .= $comma . $taginfo['tag'];
+		$comma = ', ';
+	}
+	return $ret;
+}
+
+// a helper for expandInheritance()
+function traceTrail ($tree, $trail)
+{
+	// For each tag find its path from the root, then combine items
+	// of all paths and add them to the trail, if they aren't there yet.
+	$ret = array();
+	foreach ($tree as $taginfo1)
+	{
+		$hit = FALSE;
+		foreach ($trail as $taginfo2)
+			if ($taginfo1['id'] == $taginfo2['id'])
+			{
+				$hit = TRUE;
+				break;
+			}
+		if (count ($taginfo1['kids']) > 0)
+		{
+			$subsearch = traceTrail ($taginfo1['kids'], $trail);
+			if (count ($subsearch))
+			{
+				$hit = TRUE;
+				$ret = array_merge ($ret, $subsearch);
+			}
+		}
+		if ($hit)
+			$ret[] = $taginfo1;
+	}
+	return $ret;
+}
+
+// For each tag add all its parent tags onto the list. Don't expect anything
+// except user's tags on the trail.
+function getTrailExpansion ($trail)
+{
+	$tree = getTagTree();
+	return traceTrail ($tree, $trail);
+}
+
+// Return the list of missing implicit tags.
+function getImplicitTags ($oldtags)
+{
+	$ret = array();
+	$newtags = getTrailExpansion ($oldtags);
+	foreach ($newtags as $newtag)
+	{
+		$already_exists = FALSE;
+		foreach ($oldtags as $oldtag)
+			if ($newtag['id'] == $oldtag['id'])
+			{
+				$already_exists = TRUE;
+				break;
+			}
+		if ($already_exists)
+			continue;
+		$ret[] = $newtag;
+	}
+	return $ret;
+}
+
+function loadAutoTags ()
+{
+}
+
 ?>
