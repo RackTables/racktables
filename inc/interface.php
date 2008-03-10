@@ -4550,8 +4550,31 @@ function renderTagTreeEditor ()
 	dragon();
 }
 
+function renderTagOption ($taginfo, $level = 0)
+{
+	global $expl_tags;
+	$selected = '';
+	foreach ($expl_tags as $etaginfo)
+		if ($taginfo['id'] == $etaginfo['id'])
+		{
+			$selected = ' selected';
+			break;
+		}
+	echo '<option value=' . $taginfo['id'] . "${selected}>";
+	for ($i = 0; $i < $level; $i++)
+		echo '-- ';
+	echo $taginfo['tag'] . "</option>\n";
+	foreach ($taginfo['kids'] as $kid)
+		renderTagOption ($kid, $level + 1);
+}
+
 function renderObjectTags ()
 {
+	$tree = getTagTree();
+	echo '<select name=taglist[] multiple size=' . getConfigVar ('MAXSELSIZE') . '>';
+	foreach ($tree as $taginfo)
+		renderTagOption ($taginfo);
+	echo '</select>';
 }
 
 ?>
