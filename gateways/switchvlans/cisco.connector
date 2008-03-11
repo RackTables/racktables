@@ -72,9 +72,10 @@ prepare_push_commands()
 		printf "int $portname\n" >> $CMDS1
 		if [ $vlanid -lt 4096 ]; then
 			printf "swi access vlan $vlanid\nswi mode access\n" >> $CMDS1
+			printf "no description\n" >> $CMDS1
 		else
 			printf "descr VLAN$vlanid\n" >> $CMDS1
-			printf "swi mode trunk\nswi trunk encap dot1q\n" >> $CMDS1
+			printf "swi trunk encap dot1q\nswi mode trunk\n" >> $CMDS1
 			"$MYDIR/trunkdecoder" $vlanid >> $CMDS1
 		fi
 		printf "exit\n" >> $CMDS1
