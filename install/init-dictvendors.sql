@@ -490,7 +490,7 @@ INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (11,537
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (11,538,'[[HP ProLiant DL320s | http://h10010.www1.hp.com/wwpc/us/en/en/WF05a/15351-15351-3328412-241644-241475-3232017.html]]');
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (11,539,'[[HP ProLiant DL320p | http://h10010.www1.hp.com/wwpc/us/en/en/WF05a/15351-15351-3328412-241644-241475-3579703.html]]');
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (11,540,'[[HP ProLiant ML115 | http://h10010.www1.hp.com/wwpc/us/en/en/WF05a/15351-15351-241434-241646-3328424-3330535.html]]');
-INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (12,541,'[[Force10 S2410 | http://www.force10networks.com/products/s2410.asp]]');
+INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (12,541,'[[Force10 S2410CP | http://www.force10networks.com/products/s2410.asp]]');
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (12,542,'[[Force10 S50N | http://www.force10networks.com/products/s50n.asp]]');
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (12,543,'[[Force10 S50V | http://www.force10networks.com/products/s50v.asp]]');
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (12,544,'[[Force10 S25P | http://www.force10networks.com/products/s25p.asp]]');
@@ -630,3 +630,4 @@ INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (21,677
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (21,678,'[[Raisecom RC805-120B | http://www.raisecom-international.com/p/RC800120.htm]]');
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (21,679,'[[Raisecom RC805-240B | http://www.raisecom-international.com/p/RC800120.htm]]');
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (21,680,'[[Raisecom RC805-480B | http://www.raisecom-international.com/p/RC800120.htm]]');
+INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (12,681,'[[Force10 S2410P | http://www.force10networks.com/products/s2410.asp]]');

@@ -797,7 +797,7 @@ CREATE TABLE `IPVirtualService` (
 			$query[] = "update Config set varvalue = '0.14.12' where varname = 'DB_VERSION'";
 			break; // --------------------------------------------
 		case '0.14.13':
-			$new_words[541] = array (12 => '[[Force10 S2410 | http://www.force10networks.com/products/s2410.asp]]');
+			$new_words[541] = array (12 => '[[Force10 S2410CP | http://www.force10networks.com/products/s2410.asp]]');
 			$new_words[] = array (12 => '[[Force10 S50N | http://www.force10networks.com/products/s50n.asp]]');
 			$new_words[] = array (12 => '[[Force10 S50V | http://www.force10networks.com/products/s50v.asp]]');
 			$new_words[] = array (12 => '[[Force10 S25P | http://www.force10networks.com/products/s25p.asp]]');
@@ -939,6 +939,7 @@ CREATE TABLE `IPVirtualService` (
 			$new_words[] = array (22 => '[[Raisecom RC805-480B | http://www.raisecom-international.com/p/RC800120.htm]]');
 			$new_words[] = array (2 => 'async serial (DB-9)');  // 681
 			$new_words[] = array (2 => 'async serial (DB-25)'); // 682
+			$new_words[] = array (12 => '[[Force10 S2410P | http://www.force10networks.com/products/s2410.asp]]');
 			$query[] = "update Dictionary set dict_value = 'async serial (RJ-45)' where dict_key = 29";
 			$query[] = "insert into PortCompat (type1, type2) values (29, 681)";
 			$query[] = "insert into PortCompat (type1, type2) values (29, 682)";
