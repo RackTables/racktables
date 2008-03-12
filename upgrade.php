@@ -1,4 +1,4 @@
-<?php
+s<?php
 
 // At the moment we assume, that for any two releases we can
 // sequentally execute all batches, that separate them, and
@@ -949,6 +949,24 @@ CREATE TABLE `IPVirtualService` (
 			$query[] = "insert into PortCompat (type1, type2) values (682, 29)";
 			$query[] = "insert into PortCompat (type1, type2) values (682, 681)";
 			$query[] = "insert into PortCompat (type1, type2) values (682, 682)";
+			$query[] =
+"
+CREATE TABLE `RackObjectTags` (
+  `object_id` int(10) unsigned default NULL,
+  `tag_id` int(10) unsigned default NULL,
+  KEY `object_id` (`object_id`)
+) TYPE=MyISAM;
+";
+			$query[] =
+"
+CREATE TABLE `TagTree` (
+  `id` int(10) unsigned NOT NULL auto_increment,
+  `parent_id` int(10) unsigned default NULL,
+  `tag` char(255) default NULL,
+  PRIMARY KEY  (`id`),
+  UNIQUE KEY `tag` (`tag`)
+) TYPE=MyISAM;
+";
 			foreach ($new_words as $dict_key => $tmp)
 				foreach ($tmp as $chapter_no => $dict_value)
 					$query[] = 'INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) ' .
