@@ -96,4 +96,9 @@ function trigger_autoports ()
 	return count (getAutoPorts ($info['objtype_id'])) != 0;
 }
 
+function trigger_tags ()
+{
+	return count (getTagList()) > 0;
+}
+
 ?>

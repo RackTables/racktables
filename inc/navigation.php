@@ -101,6 +101,7 @@ $trigger['object']['snmpportfinder'] = 'trigger_snmpportfinder';
 $trigger['object']['slb'] = 'trigger_natv4';
 $trigger['object']['lvsconfig'] = 'trigger_lvsconfig';
 $trigger['object']['autoports'] = 'trigger_autoports';
+$trigger['object']['tags'] = 'trigger_tags';
 $ophandler['object']['ports']['addPort'] = 'addPortForObject';
 $ophandler['object']['ports']['delPort'] = 'delPortFromObject';
 $ophandler['object']['ports']['editPort'] = 'editPortForObject';
