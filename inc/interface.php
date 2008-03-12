@@ -1855,6 +1855,8 @@ function renderIPRange ($id)
 			$numshared = countRefsOfType($range['addrlist'][$ip]['references'], 'shared', 'eq');
 			$numreg = countRefsOfType($range['addrlist'][$ip]['references'], 'regular', 'eq');
 			$numvirt = countRefsOfType($range['addrlist'][$ip]['references'], 'virtual', 'eq');
+			$numlb = count ($range['addrlist'][$ip]['lbrefs']);
+			$numrs = count ($range['addrlist'][$ip]['rsrefs']);
 			
 			$addr = $range['addrlist'][$ip];
 			if ( ($numshared > 0 && $numreg > 0) || $numreg > 1 )
@@ -1863,13 +1865,14 @@ function renderIPRange ($id)
 				echo "<tr class='trerror'>";
 			elseif ( $addr['reserved'] == 'yes')
 				echo "<tr class='trbusy'>";
-			elseif ( $numshared > 0 || $numreg > 0)
+			elseif ( $numshared > 0 || $numreg > 0 || $numlb > 0 || $numrs > 0)
 				echo "<tr class='trbusy'>";
 			else
 				echo "<tr>";
 
 			echo "<td><a href='${root}?page=ipaddress&ip=${addr['ip']}'>${addr['ip']}</a></td><td>${addr['name']}</td><td>";
 			$delim = '';
+			$prologue = '';
 			if ( $addr['reserved'] == 'yes')
 			{
 				echo "<b>Reserved</b> ";
@@ -1880,6 +1883,33 @@ function renderIPRange ($id)
 				echo "${delim}<a href='${root}?page=object&object_id=${ref['object_id']}'>";
 				echo $ref['name'] . (empty ($ref['name']) ? '' : '@');
 				echo "${ref['object_name']}</a>";
+				$delim = '; ';
+			}
+			if ($delim != '')
+			{
+				$delim = '';
+				$prologue = '<br>';
+			}
+			foreach ($range['addrlist'][$ip]['lbrefs'] as $ref)
+			{
+				echo $prologue;
+				$prologue = '';
+				echo "${delim}<a href='${root}?page=object&object_id=${ref['object_id']}'>";
+				echo "${ref['object_name']}</a>:<a href='${root}?page=vservice&id=${ref['vs_id']}'>";
+				echo "${ref['vport']}/${ref['proto']}</a>&rarr;";
+				$delim = '; ';
+			}
+			if ($delim != '')
+			{
+				$delim = '';
+				$prologue = '<br>';
+			}
+			foreach ($range['addrlist'][$ip]['rsrefs'] as $ref)
+			{
+				echo $prologue;
+				$prologue = '';
+				echo "${delim}&rarr;${ref['rsport']}@<a href='${root}?page=rspool&id=${ref['rspool_id']}'>";
+				echo "${ref['rspool_name']}</a>";
 				$delim = '; ';
 			}
 			echo "</td></tr>\n";

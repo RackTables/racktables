@@ -463,9 +463,7 @@ function getIPRange ($id = 0)
 		"name as IPRanges_name ".
 		"from IPRanges ".
 		"where id = '$id'";
-	$result = $dbxlink->query ($query);
-	if ($result == NULL)
-		return NULL;
+	$result = useSelectBlade ($query);
 	$ret = array();
 	$row = $result->fetch (PDO::FETCH_ASSOC);
 	if ($row == NULL)
@@ -479,6 +477,7 @@ function getIPRange ($id = 0)
 	$ret['mask'] = $row['IPRanges_mask'];
 	$ret['addrlist'] = array();
 	$result->closeCursor();
+	unset ($result);
 	// We risk losing some significant bits in an unsigned 32bit integer,
 	// unless it is converted to a string.
 	$db_first = "'" . sprintf ('%u', 0x00000000 + $ret['ip_bin'] & $ret['mask_bin']) . "'";
@@ -491,10 +490,8 @@ function getIPRange ($id = 0)
 		"select INET_NTOA(ip) as ip, name, reserved from IPAddress " .
 		"where ip between ${db_first} and ${db_last} " .
 		"and (reserved = 'yes' or name != '')";
-	$ipa_res = $dbxlink->query ($query);
-	if ($ipa_res == NULL)
-		return $ret;
-	while ($row = $ipa_res->fetch (PDO::FETCH_ASSOC))
+	$result = $dbxlink->query ($query);
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
 		$ip_bin = ip2long ($row['ip']);
 		$ret['addrlist'][$ip_bin] = $row;
@@ -502,9 +499,12 @@ function getIPRange ($id = 0)
 		foreach (array ('ip', 'name', 'reserved') as $cname)
 			$tmp[$cname] = $row[$cname];
 		$tmp['references'] = array();
+		$tmp['lbrefs'] = array();
+		$tmp['rsrefs'] = array();
 		$ret['addrlist'][$ip_bin] = $tmp;
 	}
-	$ipa_res->closeCursor();
+	$result->closeCursor();
+	unset ($result);
 
 	$query =
 		"select INET_NTOA(ipb.ip) as ip, ro.id as object_id, " .
@@ -515,8 +515,8 @@ function getIPRange ($id = 0)
 		"where ip between ${db_first} and ${db_last} " .
 		"and chapter_name = 'RackObjectType'" .
 		"order by ipb.type, object_name";
-	$ipb_res = $dbxlink->query ($query);
-	while ($row = $ipb_res->fetch (PDO::FETCH_ASSOC))
+	$result = useSelectBlade ($query);
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
 		$ip_bin = ip2long ($row['ip']);
 		if (!isset ($ret['addrlist'][$ip_bin]))
@@ -526,6 +526,8 @@ function getIPRange ($id = 0)
 			$ret['addrlist'][$ip_bin]['name'] = '';
 			$ret['addrlist'][$ip_bin]['reserved'] = 'no';
 			$ret['addrlist'][$ip_bin]['references'] = array();
+			$ret['addrlist'][$ip_bin]['lbrefs'] = array();
+			$ret['addrlist'][$ip_bin]['rsrefs'] = array();
 		}
 		$tmp = array();
 		foreach (array ('object_id', 'type', 'name') as $cname)
@@ -536,7 +538,66 @@ function getIPRange ($id = 0)
 		$tmp['object_name'] = displayedName ($quasiobject);
 		$ret['addrlist'][$ip_bin]['references'][] = $tmp;
 	}
-	$ipb_res->closeCursor();
+	$result->closeCursor();
+	unset ($result);
+
+	$query = "select vs_id, inet_ntoa(vip) as ip, vport, proto, " .
+		"object_id, objtype_id, ro.name, dict_value as objtype_name from " .
+		"IPVirtualService as vs inner join IPLoadBalancer as lb on vs.id = lb.vs_id " .
+		"inner join RackObject as ro on lb.object_id = ro.id " .
+		"left join Dictionary on objtype_id=dict_key " .
+		"natural join Chapter " .
+		"where vip between ${db_first} and ${db_last} " .
+		"and chapter_name = 'RackObjectType'" .
+		"order by vport, proto, ro.name, object_id";
+	$result = useSelectBlade ($query);
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
+	{
+		$ip_bin = ip2long ($row['ip']);
+		if (!isset ($ret['addrlist'][$ip_bin]))
+		{
+			$ret['addrlist'][$ip_bin] = array();
+			$ret['addrlist'][$ip_bin]['ip'] = $row['ip'];
+			$ret['addrlist'][$ip_bin]['name'] = '';
+			$ret['addrlist'][$ip_bin]['reserved'] = 'no';
+			$ret['addrlist'][$ip_bin]['references'] = array();
+			$ret['addrlist'][$ip_bin]['lbrefs'] = array();
+			$ret['addrlist'][$ip_bin]['rsrefs'] = array();
+		}
+		$tmp = $qbject = array();
+		foreach (array ('object_id', 'vport', 'proto', 'vs_id') as $cname)
+			$tmp[$cname] = $row[$cname];
+		foreach (array ('name', 'objtype_id', 'objtype_name') as $cname)
+			$qobject[$cname] = $row[$cname];
+		$tmp['object_name'] = displayedName ($qobject);
+		$ret['addrlist'][$ip_bin]['lbrefs'][] = $tmp;
+	}
+	$result->closeCursor();
+	unset ($result);
+
+	$query = "select inet_ntoa(rsip) as ip, rsport, rspool_id, rsp.name as rspool_name from " .
+		"IPRealServer as rs inner join IPRSPool as rsp on rs.rspool_id = rsp.id " .
+		"where rsip between ${db_first} and ${db_last} " .
+		"order by ip, rsport, rspool_id";
+	$result = useSelectBlade ($query);
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
+	{
+		$ip_bin = ip2long ($row['ip']);
+		if (!isset ($ret['addrlist'][$ip_bin]))
+		{
+			$ret['addrlist'][$ip_bin] = array();
+			$ret['addrlist'][$ip_bin]['ip'] = $row['ip'];
+			$ret['addrlist'][$ip_bin]['name'] = '';
+			$ret['addrlist'][$ip_bin]['reserved'] = 'no';
+			$ret['addrlist'][$ip_bin]['references'] = array();
+			$ret['addrlist'][$ip_bin]['lbrefs'] = array();
+			$ret['addrlist'][$ip_bin]['rsrefs'] = array();
+		}
+		$tmp = array();
+		foreach (array ('rspool_id', 'rsport', 'rspool_name') as $cname)
+			$tmp[$cname] = $row[$cname];
+		$ret['addrlist'][$ip_bin]['rsrefs'][] = $tmp;
+	}
 
 	return $ret;
 }
