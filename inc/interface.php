@@ -1861,7 +1861,7 @@ function renderIPRange ($id)
 			$addr = $range['addrlist'][$ip];
 			if ( ($numshared > 0 && $numreg > 0) || $numreg > 1 )
 				echo "<tr class='trerror'>";
-			elseif ( $addr['reserved'] == 'yes' and $numshared+$numreg+$numvirt > 0)
+			elseif ( $addr['reserved'] == 'yes' and $numshared+$numreg+$numvirt+$numlb+$numrs > 0)
 				echo "<tr class='trerror'>";
 			elseif ( $addr['reserved'] == 'yes')
 				echo "<tr class='trbusy'>";
