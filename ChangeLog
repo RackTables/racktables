@@ -3,6 +3,7 @@
 	new feature: complex VLAN IDs in switchvlans gateway
 	update: Force10, NETGEAR and D-Link switches, Raisecom MUXes
 	update: async port type has been split
+	bugfix: make switchvlans gateway work on Linux
 0.14.12 2008-02-29
 	new feature: default value for RS inservice status
 	new feature: AutoPorts feature

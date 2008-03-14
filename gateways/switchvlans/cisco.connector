@@ -10,6 +10,18 @@ FILE1=$5
 FILE2=$6
 FILE3=$7
 MYDIR=`dirname $0`
+ostype=`uname -s`
+case "$ostype" in
+	Linux)
+	SEDFLAG='-r'
+	;;
+	FreeBSD)
+	SEDFLAG='-E'
+	;;
+	*)
+	exit 7
+esac
+
 
 prepare_connect_commands()
 {
@@ -94,13 +106,13 @@ do_fetch()
 	fi
 	nc $ENDPOINT 23 < $CMDS2 > "$OUT2a"
 	nc $ENDPOINT 23 < $CMDS3 > "$OUT3"
-	cat "$OUT1" | fgrep ' active    ' | sed -E 's/^([[:digit:]]+)[[:space:]]+(.+)[[:space:]]+active    (.*)/\1=\2/;s/[[:space:]]+$//' > $FILE1
+	cat "$OUT1" | fgrep ' active    ' | sed $SEDFLAG 's/^([[:digit:]]+)[[:space:]]+(.+)[[:space:]]+active    (.*)/\1=\2/;s/[[:space:]]+$//' > $FILE1
 	# Add trunk data, if appropriate.
 	[ -s "$MYDIR/trunktable" ] && cat "$MYDIR/trunktable" >> $FILE1
 
 	# First extract structured info about VLAN membership, then map
 	# special descriptions into VLAN IDs.
-	cat "$OUT2a" | egrep '^(Et|Fa|Gi|Te)' | sed -E 's/^([A-Za-z/0-9]+) +(.*) +(connected|notconnect|disabled|monitoring|suspended) +/\1~\2%\3%/;s/%(trunk|([0-9]+)) .*$/%\1/;s/=(monitoring|suspended)%/=connected%/;s/ +%/%/;s/~/%/' > $OUT2b
+	cat "$OUT2a" | egrep '^(Et|Fa|Gi|Te)' | sed $SEDFLAG 's/^([A-Za-z/0-9]+) +(.*) +(connected|notconnect|disabled|monitoring|suspended) +/\1~\2%\3%/;s/%(trunk|([0-9]+)) .*$/%\1/;s/=(monitoring|suspended)%/=connected%/;s/ +%/%/;s/~/%/' > $OUT2b
 	while read line; do
 		tmp_ifname=`echo $line | cut -d% -f1`
 		tmp_ifdescr=`echo $line | cut -d% -f2`
@@ -116,12 +128,12 @@ do_fetch()
 	# Here we need to distinguish between different platforms and IOS version,
 	# cause they produce output in different formats.
 	if [ "$SW" = "Cisco+IOS+12.0" ]; then
-		cat "$OUT3" | tr -d '\r' | fgrep Dynamic | sed -E 's/ +Dynamic +([0-9]+) +(.+)/=\1@\2/;s/FastEthernet/Fa/;s/GigabitEthernet/Gi/' > "$FILE3"
+		cat "$OUT3" | tr -d '\r' | fgrep Dynamic | sed $SEDFLAG 's/ +Dynamic +([0-9]+) +(.+)/=\1@\2/;s/FastEthernet/Fa/;s/GigabitEthernet/Gi/' > "$FILE3"
 	elif [ "$SW" = "Cisco+IOS+12.2" -o "$SW" = "Cisco+IOS+12.1" ]; then
 		case "$HW" in
 			Cisco+Catalyst+35*|Cisco+Catalyst+37*|Cisco+Catalyst+29*|Cisco+Catalyst+49*)
 				cat "$OUT3" | tr -d '\r' | fgrep DYNAMIC | \
-				sed -E 's/ +([0-9]+) +(.+)    DYNAMIC +(.+)/\2=\1@\3/;s/FastEthernet/Fa/;s/GigabitEthernet/Gi/' > "$FILE3"
+				sed $SEDFLAG 's/ +([0-9]+) +(.+)    DYNAMIC +(.+)/\2=\1@\3/;s/FastEthernet/Fa/;s/GigabitEthernet/Gi/' > "$FILE3"
 			;;
 		esac
 	fi
