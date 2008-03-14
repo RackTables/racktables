@@ -126,8 +126,8 @@ function getRackData ($rack_id = 0, $silent = FALSE)
 		"'yes' as left_is_front, 'yes' as bottom_is_unit1, dict_value as row_name from " .
 		"Rack left join Dictionary on Rack.row_id = dict_key natural join Chapter " .
 		"where chapter_name = 'RackRow' and Rack.id='${rack_id}' and Rack.deleted = 'no' limit 1";
-	$result1 = useSelectBlade ($query);
-	if (($row = $result1->fetch (PDO::FETCH_ASSOC)) == NULL)
+	$result = useSelectBlade ($query);
+	if (($row = $result->fetch (PDO::FETCH_ASSOC)) == NULL)
 	{
 		if ($silent == FALSE)
 			showError ('Query #1 succeded, but returned no data', __FUNCTION__);
@@ -148,7 +148,8 @@ function getRackData ($rack_id = 0, $silent = FALSE)
 	);
 	foreach ($clist as $cname)
 		$rack[$cname] = $row[$cname];
-	$result1->closeCursor();
+	$result->closeCursor();
+	unset ($result);
 
 	// start with default rackspace
 	for ($i = $rack['height']; $i > 0; $i--)
@@ -160,14 +161,14 @@ function getRackData ($rack_id = 0, $silent = FALSE)
 		"select unit_no, atom, state, object_id " .
 		"from RackSpace where rack_id = ${rack_id} and " .
 		"unit_no between 1 and " . $rack['height'] . " order by unit_no";
-	$result2 = useSelectBlade ($query);
+	$result = useSelectBlade ($query);
 	global $loclist;
-	while ($row = $result2->fetch (PDO::FETCH_ASSOC))
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
 		$rack[$row['unit_no']][$loclist[$row['atom']]]['state'] = $row['state'];
 		$rack[$row['unit_no']][$loclist[$row['atom']]]['object_id'] = $row['object_id'];
 	}
-	$result2->closeCursor();
+	$result->closeCursor();
 	return $rack;
 }
 
@@ -1203,9 +1204,9 @@ function getDict ()
 	$query1 =
 		"select chapter_name, Chapter.chapter_no, dict_key, dict_value, sticky from " .
 		"Chapter natural left join Dictionary order by chapter_name, dict_value";
-	$result1 = useSelectBlade ($query1);
+	$result = useSelectBlade ($query1);
 	$dict = array();
-	while ($row = $result1->fetch (PDO::FETCH_ASSOC))
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
 		$chapter_no = $row['chapter_no'];
 		if (!isset ($dict[$chapter_no]))
@@ -1221,7 +1222,8 @@ function getDict ()
 			$dict[$chapter_no]['refcnt'][$row['dict_key']] = 0;
 		}
 	}
-	$result1->closeCursor();
+	$result->closeCursor();
+	unset ($result);
 // Find the list of all assigned values of dictionary-addressed attributes, each with
 // chapter/word keyed reference counters. Use the structure to adjust reference counters
 // of the returned disctionary words.
@@ -1231,11 +1233,11 @@ function getDict ()
 		"inner join Dictionary as d on am.chapter_no = d.chapter_no and av.uint_value = d.dict_key " .
 		"where attr_type = 'dict' group by a.attr_id, am.chapter_no, uint_value " .
 		"order by a.attr_id, am.chapter_no, uint_value";
-	$result2 = useSelectBlade ($query2);
+	$result = useSelectBlade ($query2);
 	$refcnt = array();
-	while ($row = $result2->fetch (PDO::FETCH_ASSOC))
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 		$dict[$row['chapter_no']]['refcnt'][$row['uint_value']] = $row['refcnt'];
-	$result2->closeCursor();
+	$result->closeCursor();
 	return $dict;
 }
 
@@ -1245,9 +1247,9 @@ function getDictStats ()
 	$query =
 		"select Chapter.chapter_no, chapter_name, count(dict_key) as wc from " .
 		"Chapter natural left join Dictionary group by Chapter.chapter_no";
-	$result1 = useSelectBlade ($query);
+	$result = useSelectBlade ($query);
 	$tc = $tw = $uc = $uw = 0;
-	while ($row = $result1->fetch (PDO::FETCH_ASSOC))
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
 		$tc++;
 		$tw += $row['wc'];;
@@ -1256,12 +1258,13 @@ function getDictStats ()
 		$uc++;
 		$uw += $row['wc'];;
 	}
-	$result1->closeCursor();
+	$result->closeCursor();
+	unset ($result);
 	$query = "select count(attr_id) as attrc from RackObject as ro left join " .
 		"AttributeValue as av on ro.id = av.object_id group by ro.id";
-	$result2 = useSelectBlade ($query);
+	$result = useSelectBlade ($query);
 	$to = $ta = $so = 0;
-	while ($row = $result2->fetch (PDO::FETCH_ASSOC))
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
 		$to++;
 		if ($row['attrc'] != 0)
@@ -1270,7 +1273,7 @@ function getDictStats ()
 			$ta += $row['attrc'];
 		}
 	}
-	$result2->closeCursor();
+	$result->closeCursor();
 	$ret = array();
 	$ret['Total chapters in dictionary'] = $tc;
 	$ret['Total words in dictionary'] = $tw;
@@ -1889,21 +1892,22 @@ function getVServiceInfo ($vsid = 0)
 {
 	$query1 = "select inet_ntoa(vip) as vip, vport, proto, name, vsconfig, rsconfig " .
 		"from IPVirtualService where id = ${vsid}";
-	$result1 = useSelectBlade ($query1);
+	$result = useSelectBlade ($query1);
 	$vsinfo = array ();
-	$row = $result1->fetch (PDO::FETCH_ASSOC);
+	$row = $result->fetch (PDO::FETCH_ASSOC);
 	if (!$row)
 		return NULL;
 	foreach (array ('vip', 'vport', 'proto', 'name', 'vsconfig', 'rsconfig') as $cname)
 		$vsinfo[$cname] = $row[$cname];
 	$vsinfo['rspool'] = array();
-	$result1->closeCursor();
+	$result->closeCursor();
+	unset ($result);
 	$query2 = "select pool.id, name, pool.vsconfig, pool.rsconfig, object_id, " .
 		"lb.vsconfig as lb_vsconfig, lb.rsconfig as lb_rsconfig from " .
 		"IPRSPool as pool left join IPLoadBalancer as lb on pool.id = lb.rspool_id " .
 		"where vs_id = ${vsid} order by pool.name, object_id";
-	$result2 = useSelectBlade ($query2);
-	while ($row = $result2->fetch (PDO::FETCH_ASSOC))
+	$result = useSelectBlade ($query2);
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
 		if (!isset ($vsinfo['rspool'][$row['id']]))
 		{
@@ -1920,7 +1924,7 @@ function getVServiceInfo ($vsid = 0)
 			'rsconfig' => $row['lb_rsconfig']
 		);
 	}
-	$result2->closeCursor();
+	$result->closeCursor();
 	return $vsinfo;
 }
 
@@ -1934,29 +1938,31 @@ function getRSPoolInfo ($id = 0)
 {
 	$query1 = "select id, name, vsconfig, rsconfig from " .
 		"IPRSPool where id = ${id}";
-	$result1 = useSelectBlade ($query1);
+	$result = useSelectBlade ($query1);
 	$ret = array();
-	$row = $result1->fetch (PDO::FETCH_ASSOC);
+	$row = $result->fetch (PDO::FETCH_ASSOC);
 	if (!$row)
 		return NULL;
 	foreach (array ('id', 'name', 'vsconfig', 'rsconfig') as $c)
 		$ret[$c] = $row[$c];
-	$result1->closeCursor();
+	$result->closeCursor();
+	unset ($result);
 	$ret['lblist'] = array();
 	$ret['rslist'] = array();
 	$query2 = "select object_id, vs_id, vsconfig, rsconfig from IPLoadBalancer where rspool_id = ${id} order by object_id";
-	$result2 = useSelectBlade ($query2);
-	while ($row = $result2->fetch (PDO::FETCH_ASSOC))
+	$result = useSelectBlade ($query2);
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 		foreach (array ('vsconfig', 'rsconfig') as $c)
 			$ret['lblist'][$row['object_id']][$row['vs_id']][$c] = $row[$c];
-	$result2->closeCursor();
+	$result->closeCursor();
+	unset ($result);
 	$query3 = "select id, inservice, inet_ntoa(rsip) as rsip, rsport, rsconfig from " .
 		"IPRealServer where rspool_id = ${id} order by IPRealServer.rsip, rsport";
-	$result3 = useSelectBlade ($query3);
-	while ($row = $result3->fetch (PDO::FETCH_ASSOC))
+	$result = useSelectBlade ($query3);
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 		foreach (array ('inservice', 'rsip', 'rsport', 'rsconfig') as $c)
 			$ret['rslist'][$row['id']][$c] = $row[$c];
-	$result3->closeCursor();
+	$result->closeCursor();
 	return $ret;
 }
 
