@@ -1949,7 +1949,8 @@ function getRSPoolInfo ($id = 0)
 	unset ($result);
 	$ret['lblist'] = array();
 	$ret['rslist'] = array();
-	$query2 = "select object_id, vs_id, vsconfig, rsconfig from IPLoadBalancer where rspool_id = ${id} order by object_id";
+	$query2 = "select object_id, vs_id, vsconfig, rsconfig from IPLoadBalancer " .
+		"where rspool_id = ${id} order by object_id, vs_id";
 	$result = useSelectBlade ($query2);
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 		foreach (array ('vsconfig', 'rsconfig') as $c)
