@@ -64,6 +64,14 @@ function setConfigVar ($varname = '', $varvalue = '', $softfail = FALSE)
 		showError ("don't know how to handle '${varname}'", __FUNCTION__);
 		die;
 	}
+	if ($configCache[$varname]['is_hidden'] != 'no')
+	{
+		$errormsg = "'${varname}' is a system variable and cannot be changed by user.";
+		if ($softfail)
+			return $errormsg;
+		showError ($errormsg, __FUNCTION__);
+		die;
+	}
 	if (empty ($varvalue) && $configCache[$varname]['emptyok'] != 'yes')
 	{
 		$errormsg = "'${varname}' is configured to take non-empty value. Perhaps there was a reason to do so.";
