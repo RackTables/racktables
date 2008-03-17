@@ -511,13 +511,57 @@ function renderEditRackForm ($rack_id)
 // This is a helper for creators and editors.
 function printSelect ($rowList, $select_name, $selected_id = 1)
 {
-	echo "<select name=${select_name}>";
+	// First collect all data for OPTGROUPs, then ouput it and dump
+	// the rest of records as is.
+	$optgroup = array();
+	$other = array();
 	foreach ($rowList as $dict_key => $dict_value)
 	{
-		echo "<option value=${dict_key}";
-		if ($dict_key == $selected_id)
-			echo ' selected';
-		echo ">${dict_value}</option>";
+		if (strpos ($dict_value, '|') !== FALSE)
+		{
+			$tmp = explode ('|', $dict_value, 2);
+			$optgroup[$tmp[0]][$dict_key] = $tmp[1];
+		}
+		else
+			$other[$dict_key] = $dict_value;
+	}
+	echo "<select name=${select_name}>";
+	if (!count ($optgroup))
+	{
+		foreach ($other as $dict_key => $dict_value)
+		{
+			echo "<option value=${dict_key}";
+			if ($dict_key == $selected_id)
+				echo ' selected';
+			echo ">${dict_value}</option>";
+		}
+	}
+	else
+	{
+		foreach ($optgroup as $groupname => $groupdata)
+		{
+			echo "<optgroup label='${groupname}'>";
+			foreach ($groupdata as $dict_key => $dict_value)
+			{
+				echo "<option value=${dict_key}";
+				if ($dict_key == $selected_id)
+					echo ' selected';
+				echo ">${dict_value}</option>";
+			}
+			echo "</optgroup>\n";
+		}
+		if (count ($other))
+		{
+			echo "<optgroup label='other'>\n";
+			foreach ($other as $dict_key => $dict_value)
+			{
+				echo "<option value=${dict_key}";
+				if ($dict_key == $selected_id)
+					echo ' selected';
+				echo ">${dict_value}</option>";
+			}
+			echo "</optgroup>\n";
+		}
 	}
 	echo "</select>";
 }
