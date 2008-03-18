@@ -1594,7 +1594,7 @@ function commitReduceAttrMap ($attr_id = 0, $objtype_id)
 // This function returns all optional attributes for requested object
 // as an array of records. NULL is returned on error and empty array
 // is returned, if there are no attributes found.
-function getAttrValues ($object_id)
+function getAttrValues ($object_id, $strip_optgroup = FALSE)
 {
 	if ($object_id <= 0)
 	{
@@ -1623,9 +1623,12 @@ function getAttrValues ($object_id)
 			case 'uint':
 			case 'float':
 			case 'string':
+				$record['value'] = $row[$row['attr_type'] . '_value'];
+				$record['a_value'] = parseWikiLink ($record['value'], 'a');
+				break;
 			case 'dict':
-				$record['value'] = parseWikiLink ($row[$row['attr_type'] . '_value'], 'o');
-				$record['a_value'] = parseWikiLink ($row[$row['attr_type'] . '_value'], 'a');
+				$record['value'] = parseWikiLink ($row[$row['attr_type'] . '_value'], 'o', $strip_optgroup);
+				$record['a_value'] = parseWikiLink ($row[$row['attr_type'] . '_value'], 'a', $strip_optgroup);
 				$record['chapter_name'] = $row['chapter_name'];
 				$record['key'] = $row['uint_value'];
 				break;

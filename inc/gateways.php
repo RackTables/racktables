@@ -86,7 +86,7 @@ function getSwitchVLANs ($object_id = 0)
 		return NULL;
 	}
 	$hwtype = $swtype = 'unknown';
-	foreach (getAttrValues ($object_id) as $record)
+	foreach (getAttrValues ($object_id, TRUE) as $record)
 	{
 		if ($record['name'] == 'SW type' && !empty ($record['value']))
 			$swtype = str_replace (' ', '+', $record['value']);
@@ -167,7 +167,7 @@ function setSwitchVLANs ($object_id = 0, $setcmd)
 	if (count ($endpoints) > 1)
 		return array (array ('code' => 'error', 'message' => 'More than one IP address is assigned to this object, please configure FQDN attribute.'));
 	$hwtype = $swtype = 'unknown';
-	foreach (getAttrValues ($object_id) as $record)
+	foreach (getAttrValues ($object_id, TRUE) as $record)
 	{
 		if ($record['name'] == 'SW type' && !empty ($record['value']))
 			$swtype = strtr ($record['value'], ' ', '+');

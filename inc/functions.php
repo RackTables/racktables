@@ -1148,13 +1148,20 @@ function findAllEndpoints ($object_id, $fallback = '')
 // 3. [[word word word | URL]]
 // This function parses the line and returns text suitable for either A
 // (rendering <A HREF>) or O (for <OPTION>).
-function parseWikiLink ($line, $which)
+function parseWikiLink ($line, $which, $strip_optgroup = FALSE)
 {
 	if (preg_match ('/^\[\[.+\]\]$/', $line) == 0)
-		return $line;
+	{
+		if ($strip_optgroup)
+			return ereg_replace ('^.+\^', '', $line);
+		else
+			return $line;
+	}
 	$line = preg_replace ('/^\[\[(.+)\]\]$/', '$1', $line);
 	$s = explode ('|', $line);
 	$o_value = trim ($s[0]);
+	if ($strip_optgroup)
+		$o_value = ereg_replace ('^.+\^', '', $o_value);
 	$a_value = trim ($s[1]);
 	if ($which == 'a')
 		return "<a href='${a_value}'>${o_value}</a>";

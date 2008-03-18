@@ -517,9 +517,9 @@ function printSelect ($rowList, $select_name, $selected_id = 1)
 	$other = array();
 	foreach ($rowList as $dict_key => $dict_value)
 	{
-		if (strpos ($dict_value, '|') !== FALSE)
+		if (strpos ($dict_value, '^') !== FALSE)
 		{
-			$tmp = explode ('|', $dict_value, 2);
+			$tmp = explode ('^', $dict_value, 2);
 			$optgroup[$tmp[0]][$dict_key] = $tmp[1];
 		}
 		else
@@ -702,7 +702,8 @@ function renderRackObject ($object_id = 0)
 		echo "<tr><th width='50%' class=tdright>Barcode:</th><td class=tdleft>${info['barcode']}</td></tr>\n";
 	if ($info['has_problems'] == 'yes')
 		echo "<tr><td colspan=2 class=msg_error>Has problems</td></tr>\n";
-	foreach (getAttrValues ($object_id) as $record)
+	$attrs = getAttrValues ($object_id, TRUE);
+	foreach (getAttrValues ($object_id, TRUE) as $record)
 		if (!empty ($record['value']))
 			echo "<tr><th width='50%' class=opt_attr_th>${record['name']}:</th><td class=tdleft>${record['a_value']}</td></tr>\n";
 	if (count ($expl_tags))
@@ -4642,13 +4643,23 @@ function renderTagOption ($taginfo, $level = 0)
 		renderTagOption ($kid, $level + 1);
 }
 
-function renderObjectTags ()
+function renderObjectTags ($object_id)
 {
+	global $root, $pageno, $tabno;
+	showMessageOrError();
 	$tree = getTagTree();
+	startPortlet ('Tag list');
+	echo "<form method=post action='${root}process.php'>\n";
+	echo "<input type=hidden name=page value=${pageno}>\n";
+	echo "<input type=hidden name=tab value=${tabno}>\n";
+	echo "<input type=hidden name=object_id value=${object_id}>\n";
+	echo "<input type=hidden name=op value=save>\n";
 	echo '<select name=taglist[] multiple size=' . getConfigVar ('MAXSELSIZE') . '>';
 	foreach ($tree as $taginfo)
 		renderTagOption ($taginfo);
-	echo '</select>';
+	echo '</select><br>';
+	echo "<input type=submit value='Save'></form>\n";
+	finishPortlet();
 }
 
 ?>

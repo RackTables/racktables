@@ -118,6 +118,7 @@ $ophandler['object']['portfwrd']['forwardPorts'] = 'addPortForwarding';
 $ophandler['object']['portfwrd']['delPortForwarding'] = 'delPortForwarding';
 $ophandler['object']['portfwrd']['updPortForwarding'] = 'updPortForwarding';
 $ophandler['object']['autoports']['generate'] = 'generateAutoPorts';
+$ophandler['object']['tags']['save'] = 'saveObjectTags';
 
 $page['ipv4space']['title'] = 'IPv4 space';
 $page['ipv4space']['parent'] = 'index';

@@ -1235,4 +1235,22 @@ function generateAutoPorts ()
 		return "${root}?page=${pageno}&tab=${tabno}&object_id=${object_id}&error=" . urlencode ('executeAutoPorts() failed');
 }
 
+// Filter out implicit tags before storing the new tag set.
+function saveObjectTags ()
+{
+	global $root, $pageno, $tabno, $explicit_tags, $implicit_tags;
+	assertUIntArg ('object_id');
+	$object_id = $_REQUEST['object_id'];
+	return "${root}?page=${pageno}&tab=${tabno}&object_id=${object_id}&message=" . urlencode ('This is a dummy message.');
+	// FIXME: build a trail from the submitted data, minimize it;
+	// then find and handle any differences between the result
+	// and current explicit tag set (or wipe existing records and
+	// store the whole new set instead).
+	$nchanges = 0;
+	foreach ($_REQUEST['taglist'] as $tag_id)
+	{
+//		if (tagOnTrail ($explicit
+	}
+}
+
 ?>
