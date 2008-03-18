@@ -987,7 +987,8 @@ CREATE TABLE `IPVirtualService` (
 			$new_words[] = array (13 => '[[BSD^OpenBSD 4.1 | http://openbsd.org/41.html]]');
 			$new_words[] = array (13 => '[[BSD^OpenBSD 4.2 | http://openbsd.org/42.html]]');
 			$new_words[] = array (13 => '[[BSD^OpenBSD 4.3 | http://openbsd.org/43.html]]');
-			$new_words[] = array (12 => '[[Cisco^Catalyst 4900M | http://www.cisco.com/en/US/products/ps9310/index.html]]');
+			$new_words[] = array (12 => '[[Cisco Catalyst^4900M | http://www.cisco.com/en/US/products/ps9310/index.html]]');
+			$new_words[] = array (13 => '[[BSD^FreeBSD 7.x | http://www.freebsd.org/releases/7.0R/announce.html]]');
 			$query[] = "update Dictionary set dict_value = 'async serial^RJ-45' where dict_key = 29";
 			$query[] = "insert into PortCompat (type1, type2) values (29, 681)";
 			$query[] = "insert into PortCompat (type1, type2) values (29, 682)";
@@ -1015,10 +1016,105 @@ CREATE TABLE `TagTree` (
   UNIQUE KEY `tag` (`tag`)
 ) TYPE=MyISAM;
 ";
+			$old_words[43] = 'IBM xSeries^305';
+			$old_words[44] = 'IBM xSeries^306';
+			$old_words[45] = 'IBM xSeries^306m';
+			$old_words[46] = 'IBM xSeries^326m';
+			$old_words[47] = 'IBM xSeries^330';
+			$old_words[48] = 'IBM xSeries^335';
+			$old_words[54] = 'IBM xSeries^346';
+			$old_words[59] = 'IBM xSeries^326';
+			$old_words[68] = 'IBM xSeries^3250';
+			$old_words[69] = 'IBM xSeries^3455';
+			$old_words[70] = 'IBM xSeries^3550';
+			$old_words[71] = 'IBM xSeries^3650';
+			$old_words[72] = 'IBM xSeries^3655';
+			$old_words[73] = 'IBM xSeries^3650 T';
+			$old_words[74] = 'IBM xSeries^3755';
+			$old_words[75] = 'IBM xSeries^3850';
+
+			$old_words[92] = 'IBM pSeries^185';
+			$old_words[93] = 'IBM pSeries^505';
+			$old_words[94] = 'IBM pSeries^505Q';
+			$old_words[95] = 'IBM pSeries^510';
+			$old_words[96] = 'IBM pSeries^510Q';
+			$old_words[97] = 'IBM pSeries^520';
+			$old_words[98] = 'IBM pSeries^520Q';
+			$old_words[99] = 'IBM pSeries^550';
+			$old_words[100] = 'IBM pSeries^550Q';
+
+			$old_words[212] = 'Linux^RHFC1';
+			$old_words[213] = 'Linux^RHFC2';
+			$old_words[214] = 'Linux^RHFC3';
+			$old_words[215] = 'Linux^RHFC4';
+			$old_words[216] = 'Linux^RHFC5';
+			$old_words[217] = 'Linux^RHFC6';
+			$old_words[232] = 'Linux^RHF7';
+			$old_words[242] = 'Linux^RHF8';
+			$old_words[225] = 'Linux^RHEL1';
+			$old_words[226] = 'Linux^RHEL2';
+			$old_words[227] = 'Linux^RHEL3';
+			$old_words[228] = 'Linux^RHEL4';
+			$old_words[436] = 'Linux^RHEL5';
+
+			$old_words[229] = 'Linux^ALTLinux Master 2.0';
+			$old_words[230] = 'Linux^ALTLinux Master 2.2';
+			$old_words[231] = 'Linux^ALTLinux Master 2.4';
+			$old_words[243] = 'Linux^ALTLinux Master 4.0';
+			$old_words[231] = 'Linux^ALTLinux Master 2.4';
+			$old_words[422] = 'Linux^ALTLinux Server 4.0';
+			$old_words[423] = 'Linux^ALTLinux Sisyphus';
+
+			$old_words[233] = 'Linux^SLES10';
+			$old_words[424] = 'Linux^openSUSE 10.0';
+			$old_words[425] = 'Linux^openSUSE 10.1';
+			$old_words[426] = 'Linux^openSUSE 10.2';
+			$old_words[427] = 'Linux^openSUSE 10.3';
+
+			$old_words[428] = 'Linux^Ubuntu 4.10';
+			$old_words[429] = 'Linux^Ubuntu 5.04';
+			$old_words[430] = 'Linux^Ubuntu 5.10';
+			$old_words[431] = 'Linux^Ubuntu 6.06 LTS';
+			$old_words[432] = 'Linux^Ubuntu 6.10';
+			$old_words[433] = 'Linux^Ubuntu 7.04';
+			$old_words[434] = 'Linux^Ubuntu 7.10';
+			$old_words[435] = 'Linux^Ubuntu 8.04 LTS';
+
+			$old_words[418] = 'Linux^Debian 2.0 (hamm)';
+			$old_words[419] = 'Linux^Debian 2.1 (slink)';
+			$old_words[420] = 'Linux^Debian 2.2 (potato)';
+			$old_words[234] = 'Linux^Debian 3.0 (woody)';
+			$old_words[235] = 'Linux^Debian 3.1 (sarge)';
+			$old_words[421] = 'Linux^Debian 4.0 (etch)';
+
+			$old_words[236] = 'BSD^FreeBSD 1.x';
+			$old_words[237] = 'BSD^FreeBSD 2.x';
+			$old_words[238] = 'BSD^FreeBSD 3.x';
+			$old_words[239] = 'BSD^FreeBSD 4.x';
+			$old_words[240] = 'BSD^FreeBSD 5.x';
+			$old_words[241] = 'BSD^FreeBSD 6.x';
+			$old_words[732] = '[[BSD^FreeBSD 7.0 | http://www.freebsd.org/releases/7.0R/announce.html]]';
+
+			$old_words[441] = 'Linux^CentOS-2';
+			$old_words[442] = 'Linux^CentOS-3';
+			$old_words[443] = 'Linux^CentOS-4';
+			$old_words[444] = 'Linux^CentOS-5';
+
+			$old_words[218] = 'BSD^Solaris 8';
+			$old_words[219] = 'BSD^Solaris 9';
+			$old_words[220] = 'BSD^Solaris 10';
+
+			$old_words[221] = 'Windows^2000';
+			$old_words[222] = 'Windows^XP';
+			$old_words[223] = 'Windows^2003';
+			$old_words[224] = 'Windows^Vista';
+
 			foreach ($new_words as $dict_key => $tmp)
 				foreach ($tmp as $chapter_no => $dict_value)
 					$query[] = 'INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) ' .
 						"VALUES (${chapter_no}, ${dict_key}, '${dict_value}')";
+			foreach ($old_words as $dict_key => $dict_value)
+				$query[] = "update Dictionary set dict_value = '${dict_value}' where dict_key = ${dict_key} limit 1";
 			$query[] = "update Config set varvalue = '0.14.13' where varname = 'DB_VERSION'";
 			break; // --------------------------------------------
 #		case '0.14.14':
