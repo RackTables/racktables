@@ -60,7 +60,7 @@ echo "<input type=hidden name=step value='${next_step}'>\n";
 // Check if the software is already installed.
 function not_already_installed()
 {
-	include ('inc/secret.php');
+	@include ('inc/secret.php');
 	if (isset ($pdo_dsn))
 	{
 		echo 'Your configuration file exists and seems to hold necessary data already.<br>';
