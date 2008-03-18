@@ -4043,7 +4043,10 @@ function renderRSPoolServerForm ($pool_id = 0)
 		printImageHREF ('inservice', 'in service');
 	else
 		printImageHREF ('notinservice', 'NOT in service');
-	echo "</td><td><input type=text name=rsip tabindex=1></td>";
+	echo "</td><td><input type=text name=remoteip id=remoteip tabindex=1>";
+	echo "<a href='javascript:;' onclick='window.open(\"${root}find_object_ip_helper.php\", \"findobjectip\", \"height=700, width=400, location=no, menubar=no, resizable=yes, scrollbars=no, status=no, titlebar=no, toolbar=no\");'>";
+	printImageHREF ('find', 'pick address');
+	echo "</a></td>";
 	$default_port = getConfigVar ('DEFAULT_SLB_RS_PORT');
 	if ($default_port == 0)
 		$default_port = '';

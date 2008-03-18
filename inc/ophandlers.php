@@ -936,11 +936,11 @@ function addRealServer ()
 	global $root, $pageno, $tabno;
 
 	assertUIntArg ('id');
-	assertIPv4Arg ('rsip');
+	assertIPv4Arg ('remoteip');
 	assertUIntArg ('rsport');
 	assertStringArg ('rsconfig', TRUE);
 	$pool_id = $_REQUEST['id'];
-	if (!addRStoRSPool ($pool_id, $_REQUEST['rsip'], $_REQUEST['rsport'], getConfigVar ('DEFAULT_IPV4_RS_INSERVICE'), $_REQUEST['rsconfig']))
+	if (!addRStoRSPool ($pool_id, $_REQUEST['remoteip'], $_REQUEST['rsport'], getConfigVar ('DEFAULT_IPV4_RS_INSERVICE'), $_REQUEST['rsconfig']))
 		return "${root}?page=${pageno}&tab=${tabno}&id=${pool_id}&error=" . urlencode ('addRStoRSPool() failed');
 	else
 		return "${root}?page=${pageno}&tab=${tabno}&id=${pool_id}&message=" . urlencode ("Real server was successfully added");
