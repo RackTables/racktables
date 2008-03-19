@@ -178,7 +178,8 @@ CREATE TABLE `Rack` (
   `height` tinyint(3) unsigned NOT NULL default '42',
   `comment` text,
   `thumb_data` blob,
-  PRIMARY KEY  (`id`)
+  PRIMARY KEY  (`id`),
+  UNIQUE KEY `name_in_row` (`row_id`,`name`)
 ) ENGINE=MyISAM;
 
 CREATE TABLE `RackHistory` (

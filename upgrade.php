@@ -1115,6 +1115,7 @@ CREATE TABLE `TagTree` (
 						"VALUES (${chapter_no}, ${dict_key}, '${dict_value}')";
 			foreach ($old_words as $dict_key => $dict_value)
 				$query[] = "update Dictionary set dict_value = '${dict_value}' where dict_key = ${dict_key} limit 1";
+			$query[] = "alter table Rack add unique name_in_row (row_id, name)";
 			$query[] = "update Config set varvalue = '0.14.13' where varname = 'DB_VERSION'";
 			break; // --------------------------------------------
 #		case '0.14.14':
