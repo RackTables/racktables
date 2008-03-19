@@ -1199,7 +1199,7 @@ function addPortCompat ($type1 = 0, $type2 = 0)
 // This function returns the dictionary as an array of trees, each tree
 // representing a single chapter. Each element has 'id', 'name', 'sticky'
 // and 'word' keys with the latter holding all the words within the chapter.
-function getDict ()
+function getDict ($parse_links = FALSE)
 {
 	$query1 =
 		"select chapter_name, Chapter.chapter_no, dict_key, dict_value, sticky from " .
@@ -1218,7 +1218,8 @@ function getDict ()
 		}
 		if ($row['dict_key'] != NULL)
 		{
-			$dict[$chapter_no]['word'][$row['dict_key']] = $row['dict_value'];
+			$dict[$chapter_no]['word'][$row['dict_key']] = $parse_links ?
+				parseWikiLink ($row['dict_value'], 'a') : $row['dict_value'];
 			$dict[$chapter_no]['refcnt'][$row['dict_key']] = 0;
 		}
 	}

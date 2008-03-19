@@ -2805,7 +2805,7 @@ function renderRackPage ($rack_id)
 function renderDictionary ()
 {
 	global $nextorder;
-	$dict = getDict();
+	$dict = getDict (TRUE);
 	echo "<br><table class=cooltable border=0 cellpadding=5 cellspacing=0 align=center>\n";
 	foreach ($dict as $chapter_no => $chapter)
 	{
@@ -2831,7 +2831,7 @@ function renderDictionary ()
 			}
 		}
 	}
-	echo "</table>\n";
+	echo "</table>\n<br>";
 }
 
 function renderDictionaryEditor ()

@@ -2,6 +2,7 @@
 	new feature: SSV format for RS import
 	new feature: complex VLAN IDs in switchvlans gateway
 	new feature: automatic option groups
+	new feature: rendered links in dictionary view
 	update: added Force10, NETGEAR, D-Link and Extreme Networks switches,
 		Raisecom MUXes, updated Cisco routers
 	update: async port type has been split
