@@ -1241,16 +1241,22 @@ function saveObjectTags ()
 	global $root, $pageno, $tabno, $explicit_tags, $implicit_tags;
 	assertUIntArg ('object_id');
 	$object_id = $_REQUEST['object_id'];
-	return "${root}?page=${pageno}&tab=${tabno}&object_id=${object_id}&message=" . urlencode ('This is a dummy message.');
-	// FIXME: build a trail from the submitted data, minimize it;
-	// then find and handle any differences between the result
-	// and current explicit tag set (or wipe existing records and
-	// store the whole new set instead).
-	$nchanges = 0;
-	foreach ($_REQUEST['taglist'] as $tag_id)
+	// Build a trail from the submitted data, minimize it,
+	// then wipe existing records and store the new set instead.
+	useDeleteBlade ('RackObjectTags', 'object_id', $object_id);
+	$newtrail = getExplicitTagsOnly (buildTrailFromIds ($_REQUEST['taglist']));
+	$n_succeeds = $n_errors = 0;
+	foreach ($newtrail as $taginfo)
 	{
-//		if (tagOnTrail ($explicit
+		if (useInsertBlade ('RackObjectTags', array ('object_id' => $object_id, 'tag_id' => $taginfo['id'])))
+			$n_succeeds++;
+		else
+			$n_errors++;
 	}
+	if ($n_errors)
+		return "${root}?page=${pageno}&tab=${tabno}&object_id=${object_id}&error=" . urlencode ("Replaced trail with ${n_succeeds} tags, but experienced ${n_errors} errors.");
+	else
+		return "${root}?page=${pageno}&tab=${tabno}&object_id=${object_id}&message=" . urlencode ("New trail is ${n_succeeds} tags long");
 }
 
 ?>

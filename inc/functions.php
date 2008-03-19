@@ -1360,7 +1360,7 @@ function serializeTags ($trail)
 	return $ret;
 }
 
-// a helper for expandInheritance()
+// a helper for getTrailExpansion()
 function traceTrail ($tree, $trail)
 {
 	// For each tag find its path from the root, then combine items
@@ -1419,6 +1419,34 @@ function getImplicitTags ($oldtags)
 	return $ret;
 }
 
+// Minimize the trail: exclude all implicit tags and return the resulting trail.
+function getExplicitTagsOnly ($trail, $tree = NULL)
+{
+	if ($tree === NULL)
+		$tree = getTagTree();
+	$ret = array();
+	foreach ($tree as $taginfo)
+	{
+		if (isset ($taginfo['kids']))
+		{
+			$harvest = getExplicitTagsOnly ($trail, $taginfo['kids']);
+			if (count ($harvest) > 0)
+			{
+				$ret = array_merge ($ret, $harvest);
+				continue;
+			}
+		}
+		// This tag isn't implicit, test is for being explicit.
+		foreach ($trail as $testtag)
+			if ($taginfo['id'] == $testtag['id'])
+			{
+				$ret[] = $testtag;
+				break;
+			}
+	}
+	return $ret;
+}
+
 function loadRackObjectAutoTags()
 {
 	assertUIntArg ('object_id');
@@ -1443,6 +1471,17 @@ function getGlobalAutoTags()
 		}
 	$ret[] = array ('tag' => '$username_' . $remote_username);
 	$ret[] = array ('tag' => '$userid_' . $user_id);
+	return $ret;
+}
+
+// Build a tag trail from supplied tag id list and return it.
+function buildTrailFromIds ($tagidlist)
+{
+	$taglist = getTagList();
+	$ret = array();
+	foreach ($tagidlist as $tag_id)
+		if (isset ($taglist[$tag_id]))
+			$ret[] = $taglist[$tag_id];
 	return $ret;
 }
 
