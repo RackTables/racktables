@@ -3099,9 +3099,6 @@ function printImageHREF ($tag, $title = '', $do_input = FALSE, $tabindex = 0)
 	$image['reports']['path'] = 'pix/report.png';
 	$image['reports']['width'] = 218;
 	$image['reports']['height'] = 200;
-	$image['help']['path'] = 'pix/help.png';
-	$image['help']['width'] = 218;
-	$image['help']['height'] = 200;
 	$image['reserve']['path'] = 'pix/stop.png';
 	$image['reserve']['width'] = 16;
 	$image['reserve']['height'] = 16;
@@ -3127,9 +3124,6 @@ function printImageHREF ($tag, $title = '', $do_input = FALSE, $tabindex = 0)
 	$image['nodelete']['height'] = 16;
 	$image['grant'] = $image['add'];
 	$image['revoke'] = $image['delete'];
-	$image['helphint']['path'] = 'pix/helphint.png';
-	$image['helphint']['width'] = 24;
-	$image['helphint']['height'] = 24;
 	$image['inservice']['path'] = 'pix/go.png';
 	$image['inservice']['width'] = 16;
 	$image['inservice']['height'] = 16;

@@ -404,7 +404,6 @@ function showTabs ($pageno, $tabno)
 		}
 		echo "'>${tabtitle}</a></li>\n";
 	}
-	lookupHelpTopic ($pageno, $tabno);
 	echo "</ul></div></td>\n";
 }
 
