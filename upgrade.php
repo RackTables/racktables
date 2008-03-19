@@ -989,6 +989,11 @@ CREATE TABLE `IPVirtualService` (
 			$new_words[] = array (13 => '[[BSD^OpenBSD 4.3 | http://openbsd.org/43.html]]');
 			$new_words[] = array (12 => '[[Cisco Catalyst^4900M | http://www.cisco.com/en/US/products/ps9310/index.html]]');
 			$new_words[] = array (13 => '[[BSD^FreeBSD 7.x | http://www.freebsd.org/releases/7.0R/announce.html]]');
+			$new_words[] = array (13 => '[[BSD^NetBSD 2.0 | http://netbsd.org/releases/formal-2.0/]]');
+			$new_words[] = array (13 => '[[BSD^NetBSD 2.1 | http://netbsd.org/releases/formal-2.0/NetBSD-2.1.html]]');
+			$new_words[] = array (13 => '[[BSD^NetBSD 3.0 | http://netbsd.org/releases/formal-3/]]');
+			$new_words[] = array (13 => '[[BSD^NetBSD 3.1 | http://netbsd.org/releases/formal-3/NetBSD-3.1.html]]');
+			$new_words[] = array (13 => '[[BSD^NetBSD 4.0 | http://netbsd.org/releases/formal-4/NetBSD-4.0.html]]');
 			$query[] = "update Dictionary set dict_value = 'async serial^RJ-45' where dict_key = 29";
 			$query[] = "insert into PortCompat (type1, type2) values (29, 681)";
 			$query[] = "insert into PortCompat (type1, type2) values (29, 682)";
