@@ -1109,6 +1109,33 @@ CREATE TABLE `TagTree` (
 			$old_words[223] = 'Windows^2003';
 			$old_words[224] = 'Windows^Vista';
 
+			$old_words[49] = 'Sun^Ultra 10';
+			$old_words[50] = 'Sun^Enterprise 420R';
+			$old_words[51] = '[[Sun^Fire X2100 | http://www.sun.com/servers/entry/x2100/]]';
+			$old_words[52] = '[[Sun^Fire E4900 | http://www.sun.com/servers/midrange/sunfire_e4900/index.xml]]';
+			$old_words[53] = 'Sun^Netra X1';
+			$old_words[57] = 'Sun^Fire V210';
+			$old_words[58] = 'Sun^Fire V240';
+			$old_words[60] = 'Sun^Netra t1 105';
+			$old_words[61] = 'Sun^Enterprise 4500';
+			$old_words[64] = 'Sun^Ultra 5';
+			$old_words[76] = '[[Sun^Fire X4600 | http://www.sun.com/servers/x64/x4600/]]';
+			$old_words[77] = '[[Sun^Fire X4500 | http://www.sun.com/servers/x64/x4500/]]';
+			$old_words[78] = '[[Sun^Fire X4200 | http://www.sun.com/servers/entry/x4200/]]';
+			$old_words[79] = '[[Sun^Fire X4100 | http://www.sun.com/servers/entry/x4100/]]';
+			$old_words[80] = '[[Sun^Fire X2100 M2 | http://www.sun.com/servers/entry/x2100/]]';
+			$old_words[81] = '[[Sun^Fire X2200 M2 | http://www.sun.com/servers/x64/x2200/]]';
+			$old_words[82] = 'Sun^Fire V40z';
+			$old_words[83] = 'Sun^Fire V125';
+			$old_words[84] = '[[Sun^Fire V215 | http://www.sun.com/servers/entry/v215/]]';
+			$old_words[85] = '[[Sun^Fire V245 | http://www.sun.com/servers/entry/v245/]]';
+			$old_words[86] = '[[Sun^Fire V445 | http://www.sun.com/servers/entry/v445/]]';
+			$old_words[87] = 'Sun^Fire V440';
+			$old_words[88] = '[[Sun^Fire V490 | http://www.sun.com/servers/midrange/v490/]]';
+			$old_words[89] = '[[Sun^Fire V890 | http://www.sun.com/servers/midrange/v890/]]';
+			$old_words[90] = '[[Sun^Fire E2900 | http://www.sun.com/servers/midrange/sunfire_e2900/index.xml]]';
+			$old_words[91] = 'Sun^Fire V1280';
+
 			foreach ($new_words as $dict_key => $tmp)
 				foreach ($tmp as $chapter_no => $dict_value)
 					$query[] = 'INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) ' .
