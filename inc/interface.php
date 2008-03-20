@@ -4608,28 +4608,66 @@ function renderAutoPortsForm ($object_id = 0)
 	echo "</table>";
 }
 
-function renderTagRow ($taginfo, $level = 0)
+function renderTagRowForViewer ($taginfo, $level = 0)
 {
 	echo '<tr><td>';
 	for ($i = 0; $i < $level; $i++)
 		printImageHREF ('spacer');
 	echo $taginfo['tag'] . "</td></tr>\n";
 	foreach ($taginfo['kids'] as $kid)
-		renderTagRow ($kid, $level + 1);
+		renderTagRowForViewer ($kid, $level + 1);
+}
+
+function renderTagRowForEditor ($taginfo, $level = 0)
+{
+	global $root, $pageno, $tabno;
+	echo '<tr><td>';
+	// FIXME: check [supplied] refcnt for each tag
+	echo "<a href='${root}process.php?page=${pageno}&tab=${tabno}&op=destroyTag&id=${taginfo['id']}'>";
+	printImageHREF ('delete', 'Destroy tag');
+	echo "</a></td>\n<td>";
+	for ($i = 0; $i < $level; $i++)
+		printImageHREF ('spacer');
+	echo $taginfo['tag'] . "</td><td>&nbsp;</td></tr>\n";
+	foreach ($taginfo['kids'] as $kid)
+		renderTagRowForEditor ($kid, $level + 1);
 }
 
 function renderTagTree ()
 {
-	$tree = getTagTree();
 	echo '<table>';
-	foreach ($tree as $taginfo)
-		renderTagRow ($taginfo);
+	foreach (getTagTree() as $taginfo)
+	{
+		echo '<tr>';
+		renderTagRowForViewer ($taginfo);
+		echo "</tr>\n";
+	}
 	echo '</table>';
 }
 
 function renderTagTreeEditor ()
 {
-	dragon();
+	global $root, $pageno, $tabno;
+	showMessageOrError();
+	echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
+	echo "<tr><th>&nbsp;</th><th>tag</th><th>&nbsp;</th></tr>\n";
+	foreach (getTagTree() as $taginfo)
+	{
+		renderTagRowForEditor ($taginfo, TRUE);
+	}
+	echo "<form action='${root}process.php' method=post>";
+	echo "<input type=hidden name=page value='${pageno}'>";
+	echo "<input type=hidden name=tab value='${tabno}'>";
+	echo "<input type=hidden name=op value='createTag'>";
+	echo "<tr><td>";
+	printImageHREF ('grant', 'Create tag', TRUE);
+	echo '</td><td><input type=text name=tagname> under <select name=parent_id>';
+	echo "<option value=0>-- NONE --</option>\n";
+	foreach (getTagList() as $taginfo)
+		echo "<option value=${taginfo['id']}>${taginfo['tag']}</option>";
+	echo "</select></td><td>&nbsp;</td></tr>";
+	echo "</form>\n";
+	echo '</table>';
 }
 
 function renderTagOption ($taginfo, $level = 0)

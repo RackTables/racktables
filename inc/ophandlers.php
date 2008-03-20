@@ -1319,7 +1319,7 @@ function saveObjectTags ()
 	$object_id = $_REQUEST['object_id'];
 	// Build a trail from the submitted data, minimize it,
 	// then wipe existing records and store the new set instead.
-	useDeleteBlade ('RackObjectTags', 'object_id', $object_id);
+	useDeleteBlade ('RackObjectTags', 'object_id', $object_id, FALSE, TRUE);
 	$newtrail = getExplicitTagsOnly (buildTrailFromIds ($_REQUEST['taglist']));
 	$n_succeeds = $n_errors = 0;
 	foreach ($newtrail as $taginfo)
@@ -1333,6 +1333,30 @@ function saveObjectTags ()
 		return "${root}?page=${pageno}&tab=${tabno}&object_id=${object_id}&error=" . urlencode ("Replaced trail with ${n_succeeds} tags, but experienced ${n_errors} errors.");
 	else
 		return "${root}?page=${pageno}&tab=${tabno}&object_id=${object_id}&message=" . urlencode ("New trail is ${n_succeeds} tags long");
+}
+
+function destroyTag ()
+{
+	global $root, $pageno, $tabno;
+	assertUIntArg ('id');
+	if (($ret = commitDestroyTag ($_REQUEST['id'])) == '')
+		return "${root}?page=${pageno}&tab=${tabno}&message=" . urlencode ("Successfully deleted tag.");
+	else
+		return "${root}?page=${pageno}&tab=${tabno}&error=" . urlencode ("Error deleting tag: '${ret}'");
+}
+
+function createTag ()
+{
+	global $root, $pageno, $tabno;
+	assertStringArg ('tagname');
+	assertUIntArg ('parent_id', TRUE);
+	$tagname = trim ($_REQUEST['tagname']);
+	if (($parent_id = $_REQUEST['parent_id']) <= 0)
+		$parent_id = 'NULL';
+	if (($ret = commitCreateTag ($tagname, $parent_id)) == '')
+		return "${root}?page=${pageno}&tab=${tabno}&message=" . urlencode ("Created tag '${tagname}'.");
+	else
+		return "${root}?page=${pageno}&tab=${tabno}&error=" . urlencode ("Could not create tag '${tagname}' because of error '${ret}'");
 }
 
 ?>

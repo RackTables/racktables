@@ -1765,13 +1765,14 @@ function useInsertBlade ($tablename, $values)
 
 // This swiss-knife blade deletes one record from the specified table
 // using the specified key name and value.
-function useDeleteBlade ($tablename, $keyname, $keyvalue, $quotekey = TRUE)
+function useDeleteBlade ($tablename, $keyname, $keyvalue, $quotekey = TRUE, $deleteall = FALSE)
 {
 	global $dbxlink;
 	if ($quotekey == TRUE)
-		$query = "delete from ${tablename} where ${keyname}='$keyvalue' limit 1";
-	else
-		$query = "delete from ${tablename} where ${keyname}=$keyvalue limit 1";
+		$keyvalue = "'${keyvalue}'";
+	$query = "delete from ${tablename} where ${keyname}=$keyvalue";
+	if (!$deleteall)
+		$query .= ' limit 1';
 	$result = $dbxlink->exec ($query);
 	if ($result === NULL)
 		return FALSE;
@@ -2405,4 +2406,32 @@ function getTagList ()
 	return $taglist;
 }
 
+function commitCreateTag ($tagname = '', $parent_id = 0)
+{
+	if ($tagname == '' or $parent_id === 0)
+		return "Invalid args to " . __FUNCTION__;
+	$result = useInsertBlade
+	(
+		'TagTree',
+		array
+		(
+			'tag' => "'${tagname}'",
+			'parent_id' => $parent_id
+		)
+	);
+	if ($result)
+		return '';
+	else
+		return "SQL query failed in " . __FUNCTION__;
+}
+
+function commitDestroyTag ($tagid = 0)
+{
+	if ($tagid == 0)
+		return 'Invalid arg to ' . __FUNCTION__;
+	if (useDeleteBlade ('TagTree', 'id', $tagid, FALSE))
+		return '';
+	else
+		return 'useDeleteBlade() failed in ' . __FUNCTION__;
+}
 ?>

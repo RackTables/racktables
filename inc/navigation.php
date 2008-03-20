@@ -303,6 +303,9 @@ $tab['tagtree']['default'] = 'View';
 $tab['tagtree']['edit'] = 'Change';
 $tabhandler['tagtree']['default'] = 'renderTagTree';
 $tabhandler['tagtree']['edit'] = 'renderTagTreeEditor';
+$ophandler['tagtree']['edit']['destroyTag'] = 'destroyTag';
+$ophandler['tagtree']['edit']['createTag'] = 'createTag';
+$ophandler['tagtree']['edit']['updateTag'] = 'updateTag';
 
 $page['reports']['title'] = 'Reports';
 $page['reports']['parent'] = 'index';
