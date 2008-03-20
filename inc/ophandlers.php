@@ -5,6 +5,82 @@
 *
 */
 
+// This function assures that specified argument was passed
+// and is a number greater than zero.
+function assertUIntArg ($argname, $allow_zero = FALSE)
+{
+	if (!isset ($_REQUEST[$argname]))
+	{
+		showError ("Parameter '${argname}' is missing.", __FUNCTION__);
+		die();
+	}
+	if (!is_numeric ($_REQUEST[$argname]))
+	{
+		showError ("Parameter '${argname}' is not a number.", __FUNCTION__);
+		die();
+	}
+	if ($_REQUEST[$argname] < 0)
+	{
+		showError ("Parameter '${argname}' is less than zero.", __FUNCTION__);
+		die();
+	}
+	if (!$allow_zero and $_REQUEST[$argname] == 0)
+	{
+		showError ("Parameter '${argname}' is equal to zero.", __FUNCTION__);
+		die();
+	}
+}
+
+// This function assures that specified argument was passed
+// and is a non-empty string.
+function assertStringArg ($argname, $ok_if_empty = FALSE)
+{
+	if (!isset ($_REQUEST[$argname]))
+	{
+		showError ("Parameter '${argname}' is missing.", __FUNCTION__);
+		die();
+	}
+	if (!is_string ($_REQUEST[$argname]))
+	{
+		showError ("Parameter '${argname}' is not a string.", __FUNCTION__);
+		die();
+	}
+	if (!$ok_if_empty and empty ($_REQUEST[$argname]))
+	{
+		showError ("Parameter '${argname}' is an empty string.", __FUNCTION__);
+		die();
+	}
+}
+
+function assertBoolArg ($argname, $ok_if_empty = FALSE)
+{
+	if (!isset ($_REQUEST[$argname]))
+	{
+		showError ("Parameter '${argname}' is missing.", __FUNCTION__);
+		die();
+	}
+	if (!is_string ($_REQUEST[$argname]) or $_REQUEST[$argname] != 'on')
+	{
+		showError ("Parameter '${argname}' is not a string.", __FUNCTION__);
+		die();
+	}
+	if (!$ok_if_empty and empty ($_REQUEST[$argname]))
+	{
+		showError ("Parameter '${argname}' is an empty string.", __FUNCTION__);
+		die();
+	}
+}
+
+function assertIPv4Arg ($argname, $ok_if_empty = FALSE)
+{
+	assertStringArg ($argname, $ok_if_empty);
+	if (!empty ($_REQUEST[$argname]) and long2ip (ip2long ($_REQUEST[$argname])) !== $_REQUEST[$argname])
+	{
+		showError ("IPv4 address validation failed for value '" . $_REQUEST[$argname] . "'", __FUNCTION__);
+		die();
+	}
+}
+
 function addPortForwarding ()
 {
 	global $root, $pageno, $tabno;

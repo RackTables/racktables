@@ -2703,6 +2703,16 @@ function renderPermissionsEditForm ()
 	finishPortlet();
 }
 
+function renderPortMapViewer ()
+{
+	renderPortMap (FALSE);
+}
+
+function renderPortMapEditor ()
+{
+	renderPortMap (TRUE);
+}
+
 function renderPortMap ($editable = FALSE)
 {
 	global $nextorder, $root, $pageno, $tabno;

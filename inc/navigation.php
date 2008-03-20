@@ -250,10 +250,11 @@ $ophandler['perms']['edit']['revoke'] = 'revokePermission';
 $ophandler['perms']['edit']['grant'] = 'grantPermission';
 
 $page['portmap']['title'] = 'Port compatibility map';
-$page['portmap']['handler'] = 'handler_portmap';
 $page['portmap']['parent'] = 'config';
 $tab['portmap']['default'] = 'View';
 $tab['portmap']['edit'] = 'Change';
+$tabhandler['portmap']['default'] = 'renderPortMapViewer';
+$tabhandler['portmap']['edit'] = 'renderPortMapEditor';
 $ophandler['portmap']['edit']['save'] = 'savePortMap';
 
 $page['attrs']['title'] = 'Attributes';
