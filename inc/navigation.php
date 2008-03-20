@@ -7,7 +7,6 @@
 
 $page = array();
 $tab = array();
-$helptab = array();
 $trigger = array();
 $ophandler = array();
 $tabhandler = array();
@@ -308,10 +307,6 @@ $page['reports']['title'] = 'Reports';
 $page['reports']['parent'] = 'index';
 $tab['reports']['default'] = 'View';
 $tabhandler['reports']['default'] = 'renderReportSummary';
-
-$page['help']['title'] = 'Help';
-$page['help']['handler'] = 'renderHelpTab';
-$page['help']['parent'] = 'index';
 
 // This function returns array if page numbers leading to the target page
 // plus page number of target page itself. The first element is the target
