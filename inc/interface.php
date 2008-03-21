@@ -668,7 +668,7 @@ function printRefsOfType ($refs, $type, $eq)
 
 function renderRackObject ($object_id = 0)
 {
-	global $root, $expl_tags, $impl_tags;
+	global $root, $expl_tags, $impl_tags, $auto_tags;
 	if ($object_id <= 0)
 	{
 		showError ('Invalid object_id', __FUNCTION__);
@@ -706,15 +706,20 @@ function renderRackObject ($object_id = 0)
 	foreach (getAttrValues ($object_id, TRUE) as $record)
 		if (!empty ($record['value']))
 			echo "<tr><th width='50%' class=opt_attr_th>${record['name']}:</th><td class=tdleft>${record['a_value']}</td></tr>\n";
-	if (count ($expl_tags))
+	if (getConfigVar ('SHOW_EXPLICIT_TAGS') == 'yes' and count ($expl_tags))
 	{
 		echo "<tr><th width='50%' class=tag_list_th>Explicit tags:</th><td class=tdleft>";
 		echo serializeTags ($expl_tags) . "</td></tr>\n";
 	}
-	if (count ($impl_tags))
+	if (getConfigVar ('SHOW_IMPLICIT_TAGS') == 'yes' and count ($impl_tags))
 	{
 		echo "<tr><th width='50%' class=tag_list_th>Implicit tags:</th><td class=tdleft>";
 		echo serializeTags ($impl_tags) . "</td></tr>\n";
+	}
+	if (getConfigVar ('SHOW_AUTOMATIC_TAGS') == 'yes' and count ($auto_tags))
+	{
+		echo "<tr><th width='50%' class=tag_list_th>Automatic tags:</th><td class=tdleft>";
+		echo serializeTags ($auto_tags) . "</td></tr>\n";
 	}
 	echo "</table><br>\n";
 	finishPortlet();
