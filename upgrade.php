@@ -1060,7 +1060,7 @@ CREATE TABLE `IPVirtualService` (
 CREATE TABLE `RackObjectTags` (
   `object_id` int(10) unsigned default NULL,
   `tag_id` int(10) unsigned default NULL,
-  KEY `object_id` (`object_id`)
+  UNIQUE KEY `object_tag` (`object_id`,`tag_id`)
 ) TYPE=MyISAM;
 ";
 			$query[] =
