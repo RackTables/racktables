@@ -1414,7 +1414,7 @@ function getImplicitTags ($oldtags)
 			}
 		if ($already_exists)
 			continue;
-		$ret[] = $newtag;
+		$ret[] = array ('id' => $newtag['id'], 'tag' => $newtag['tag'], 'parent_id' => $newtag['parent_id']);
 	}
 	return $ret;
 }
