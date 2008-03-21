@@ -1611,7 +1611,7 @@ function getAttrValues ($object_id, $strip_optgroup = FALSE)
 		"left join AttributeValue as AV on AV.attr_id = AM.attr_id and AV.object_id = RO.id " .
 		"left join Dictionary as D on D.dict_key = AV.uint_value and AM.chapter_no = D.chapter_no " .
 		"left join Chapter as C on AM.chapter_no = C.chapter_no " .
-		"where RO.id = ${object_id} order by A.attr_type";
+		"where RO.id = ${object_id} order by A.attr_type, A.attr_name";
 	$result = useSelectBlade ($query);
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
