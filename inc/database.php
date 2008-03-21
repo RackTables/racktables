@@ -2384,7 +2384,7 @@ function executeAutoPorts ($object_id = 0, $type_id = 0)
 function loadRackObjectTags ($object_id = 0)
 {
 	$ret = array();
-	$result = useSelectBlade ("select tt.id, tag from RackObject as ro inner join RackObjectTags as rot on ro.id = rot.object_id inner join TagTree as tt on rot.tag_id = tt.id");
+	$result = useSelectBlade ("select tt.id, tag from RackObject as ro inner join RackObjectTags as rot on ro.id = rot.object_id inner join TagTree as tt on rot.tag_id = tt.id where ro.id = ${object_id}");
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 		$ret[$row['id']] = $row;
 	$result->closeCursor();

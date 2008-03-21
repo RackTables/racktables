@@ -123,9 +123,9 @@ $expl_tags = array();
 $impl_tags = array();
 $auto_tags = getGlobalAutoTags();
 
-if (isset ($page[$pageno]['tagloader']))
+if (isset ($page[$pageno]['tagloader']) and isset ($page[$pageno]['bypass']) and isset ($_REQUEST[$page[$pageno]['bypass']]))
 {
-	$expl_tags = $page[$pageno]['tagloader'] ();
+	$expl_tags = $page[$pageno]['tagloader'] ($_REQUEST[$page[$pageno]['bypass']]);
 	$impl_tags = getImplicitTags ($expl_tags);
 }
 if (isset ($page[$pageno]['autotagloader']))
