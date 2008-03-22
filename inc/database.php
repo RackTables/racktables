@@ -2406,6 +2406,11 @@ function loadIPv4PrefixTags ($id)
 	return loadEntityTags ('ipv4net', $id);
 }
 
+function loadRackTags ($id)
+{
+	return loadEntityTags ('rack', $id);
+}
+
 function getTagList ()
 {
 	$taglist = array();

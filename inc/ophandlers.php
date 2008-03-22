@@ -1348,6 +1348,11 @@ function saveIPv4PrefixTags ()
 	return saveEntityTags ('ipv4net', 'id');
 }
 
+function saveRackTags ()
+{
+	return saveEntityTags ('rack', 'rack_id');
+}
+
 function destroyTag ()
 {
 	global $root, $pageno, $tabno;

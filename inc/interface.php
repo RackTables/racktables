@@ -668,7 +668,7 @@ function printRefsOfType ($refs, $type, $eq)
 
 function renderRackObject ($object_id = 0)
 {
-	global $root, $expl_tags, $impl_tags, $auto_tags;
+	global $root;
 	if ($object_id <= 0)
 	{
 		showError ('Invalid object_id', __FUNCTION__);
@@ -706,21 +706,7 @@ function renderRackObject ($object_id = 0)
 	foreach (getAttrValues ($object_id, TRUE) as $record)
 		if (!empty ($record['value']))
 			echo "<tr><th width='50%' class=opt_attr_th>${record['name']}:</th><td class=tdleft>${record['a_value']}</td></tr>\n";
-	if (getConfigVar ('SHOW_EXPLICIT_TAGS') == 'yes' and count ($expl_tags))
-	{
-		echo "<tr><th width='50%' class=tag_list_th>Explicit tags:</th><td class=tdleft>";
-		echo serializeTags ($expl_tags) . "</td></tr>\n";
-	}
-	if (getConfigVar ('SHOW_IMPLICIT_TAGS') == 'yes' and count ($impl_tags))
-	{
-		echo "<tr><th width='50%' class=tag_list_th>Implicit tags:</th><td class=tdleft>";
-		echo serializeTags ($impl_tags) . "</td></tr>\n";
-	}
-	if (getConfigVar ('SHOW_AUTOMATIC_TAGS') == 'yes' and count ($auto_tags))
-	{
-		echo "<tr><th width='50%' class=tag_list_th>Automatic tags:</th><td class=tdleft>";
-		echo serializeTags ($auto_tags) . "</td></tr>\n";
-	}
+	printTagTRs();
 	echo "</table><br>\n";
 	finishPortlet();
 
@@ -1861,7 +1847,7 @@ function renderAddNewRange ()
 
 function renderIPRange ($id)
 {
-	global $root, $pageno, $tabno, $expl_tags, $impl_tags, $auto_tags;
+	global $root, $pageno, $tabno;
 	$maxperpage = getConfigVar ('IPV4_ADDRS_PER_PAGE');
 	if (isset($_REQUEST['pg']))
 		$page = $_REQUEST['pg'];
@@ -1880,21 +1866,7 @@ function renderIPRange ($id)
 	echo "<tr><th width='50%' class=tdright>Utilization:</th><td class=tdleft>";
 	renderProgressBar ($used/$total);
 	echo "&nbsp;${used}/${total}</td></tr>\n";
-	if (getConfigVar ('SHOW_EXPLICIT_TAGS') == 'yes' and count ($expl_tags))
-	{
-		echo "<tr><th width='50%' class=tag_list_th>Explicit tags:</th><td class=tdleft>";
-		echo serializeTags ($expl_tags) . "</td></tr>\n";
-	}
-	if (getConfigVar ('SHOW_IMPLICIT_TAGS') == 'yes' and count ($impl_tags))
-	{
-		echo "<tr><th width='50%' class=tag_list_th>Implicit tags:</th><td class=tdleft>";
-		echo serializeTags ($impl_tags) . "</td></tr>\n";
-	}
-	if (getConfigVar ('SHOW_AUTOMATIC_TAGS') == 'yes' and count ($auto_tags))
-	{
-		echo "<tr><th width='50%' class=tag_list_th>Automatic tags:</th><td class=tdleft>";
-		echo serializeTags ($auto_tags) . "</td></tr>\n";
-	}
+	printTagTRs();
 	echo "</table><br>\n";
 	finishPortlet();
 	echo "</td>\n";
@@ -2832,6 +2804,7 @@ function renderRackPage ($rack_id)
 	echo "<tr><th width='50%' class=tdright>Objects:</th><td class=tdleft>";
 	echo getObjectCount ($rackData);
 	echo "</td></tr>\n";
+	printTagTRs();
 	if (!empty ($rackData['comment']))
 		echo "<tr><th width='50%' class=tdright>Comment:</th><td class=tdleft>${rackData['comment']}</td></tr>\n";
 	echo '</table>';
@@ -4734,6 +4707,11 @@ function renderIPv4PrefixTags ($id)
 	renderEntityTags ('ipv4net', 'id', $id);
 }
 
+function renderRackTags ($id)
+{
+	renderEntityTags ('rack', 'rack_id', $id);
+}
+
 function renderEntityTags ($entity_realm = '', $bypass_name, $entity_id = 0)
 {
 	if ($entity_realm == '' or $entity_id <= 0)
@@ -4756,6 +4734,26 @@ function renderEntityTags ($entity_realm = '', $bypass_name, $entity_id = 0)
 	echo '</select><br>';
 	echo "<input type=submit value='Save'></form>\n";
 	finishPortlet();
+}
+
+function printTagTRs()
+{
+	global $expl_tags, $impl_tags, $auto_tags;
+	if (getConfigVar ('SHOW_EXPLICIT_TAGS') == 'yes' and count ($expl_tags))
+	{
+		echo "<tr><th width='50%' class=tag_list_th>Explicit tags:</th><td class=tdleft>";
+		echo serializeTags ($expl_tags) . "</td></tr>\n";
+	}
+	if (getConfigVar ('SHOW_IMPLICIT_TAGS') == 'yes' and count ($impl_tags))
+	{
+		echo "<tr><th width='50%' class=tag_list_th>Implicit tags:</th><td class=tdleft>";
+		echo serializeTags ($impl_tags) . "</td></tr>\n";
+	}
+	if (getConfigVar ('SHOW_AUTOMATIC_TAGS') == 'yes' and count ($auto_tags))
+	{
+		echo "<tr><th width='50%' class=tag_list_th>Automatic tags:</th><td class=tdleft>";
+		echo serializeTags ($auto_tags) . "</td></tr>\n";
+	}
 }
 
 ?>

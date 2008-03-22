@@ -1461,9 +1461,20 @@ function loadRackObjectAutoTags()
 function loadIPv4PrefixAutoTags()
 {
 	assertUIntArg ('id');
+	$subnet = getIPRange ($_REQUEST['id']);
 	$ret = array();
 	$ret[] = array ('tag' => '$id_' . $_REQUEST['id']);
-	$ret[] = array ('tag' => '$allipv4networks');
+	$ret[] = array ('tag' => '$allipv4nets');
+	$ret[] = array ('tag' => '$ipv4net-' . str_replace ('.', '-', $subnet['ip']) . '-' . $subnet['mask']);
+	return $ret;
+}
+
+function loadRackAutoTags()
+{
+	assertUIntArg ('rack_id');
+	$ret = array();
+	$ret[] = array ('tag' => '$id_' . $_REQUEST['rack_id']);
+	$ret[] = array ('tag' => '$allracks');
 	return $ret;
 }
 
