@@ -4712,6 +4712,16 @@ function renderRackTags ($id)
 	renderEntityTags ('rack', 'rack_id', $id);
 }
 
+function renderIPv4VSTags ($id)
+{
+	renderEntityTags ('ip4vs', 'id', $id);
+}
+
+function renderIPv4RSPoolTags ($id)
+{
+	renderEntityTags ('ip4rspool', 'id', $id);
+}
+
 function renderEntityTags ($entity_realm = '', $bypass_name, $entity_id = 0)
 {
 	if ($entity_realm == '' or $entity_id <= 0)

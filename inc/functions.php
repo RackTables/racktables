@@ -1454,7 +1454,7 @@ function loadRackObjectAutoTags()
 	$oinfo = getObjectInfo ($object_id);
 	$ret = array();
 	$ret[] = array ('tag' => '$id_' . $_REQUEST['object_id']);
-	$ret[] = array ('tag' => '$allobjects');
+	$ret[] = array ('tag' => '$any_object');
 	return $ret;
 }
 
@@ -1464,8 +1464,10 @@ function loadIPv4PrefixAutoTags()
 	$subnet = getIPRange ($_REQUEST['id']);
 	$ret = array();
 	$ret[] = array ('tag' => '$id_' . $_REQUEST['id']);
-	$ret[] = array ('tag' => '$allipv4nets');
 	$ret[] = array ('tag' => '$ipv4net-' . str_replace ('.', '-', $subnet['ip']) . '-' . $subnet['mask']);
+	// FIXME: find and list tags for all parent networks
+	$ret[] = array ('tag' => '$any_ipv4net');
+	$ret[] = array ('tag' => '$any_net');
 	return $ret;
 }
 
@@ -1474,7 +1476,38 @@ function loadRackAutoTags()
 	assertUIntArg ('rack_id');
 	$ret = array();
 	$ret[] = array ('tag' => '$id_' . $_REQUEST['rack_id']);
-	$ret[] = array ('tag' => '$allracks');
+	$ret[] = array ('tag' => '$any_rack');
+	return $ret;
+}
+
+function loadIPv4AddressAutoTags()
+{
+	assertIPv4Arg ('ip');
+	$ret = array();
+	$ret[] = array ('tag' => '$ipv4net-' . str_replace ('.', '-', $subnet['ip']) . '-32');
+	// FIXME: find and list tags for all parent networks
+	$ret[] = array ('tag' => '$any_ipv4net');
+	$ret[] = array ('tag' => '$any_net');
+	return $ret;
+}
+
+function loadIPv4VSAutoTags()
+{
+	assertUIntArg ('id');
+	$ret = array();
+	$ret[] = array ('tag' => '$id_' . $_REQUEST['id']);
+	$ret[] = array ('tag' => '$any_ipv4vs');
+	$ret[] = array ('tag' => '$any_vs');
+	return $ret;
+}
+
+function loadIPv4RSPoolAutoTags()
+{
+	assertUIntArg ('id');
+	$ret = array();
+	$ret[] = array ('tag' => '$id_' . $_REQUEST['id']);
+	$ret[] = array ('tag' => '$any_ipv4rspool');
+	$ret[] = array ('tag' => '$any_rspool');
 	return $ret;
 }
 

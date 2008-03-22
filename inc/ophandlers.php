@@ -1353,6 +1353,16 @@ function saveRackTags ()
 	return saveEntityTags ('rack', 'rack_id');
 }
 
+function saveIPv4VSTags ()
+{
+	return saveEntityTags ('ipv4vs', 'id');
+}
+
+function saveIPv4RSPoolTags ()
+{
+	return saveEntityTags ('ipv4rspool', 'id');
+}
+
 function destroyTag ()
 {
 	global $root, $pageno, $tabno;

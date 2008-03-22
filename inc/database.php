@@ -2411,6 +2411,16 @@ function loadRackTags ($id)
 	return loadEntityTags ('rack', $id);
 }
 
+function loadIPv4VSTags ($id)
+{
+	return loadEntityTags ('ipv4vs', $id);
+}
+
+function loadIPv4RSPoolTags ($id)
+{
+	return loadEntityTags ('ipv4rspool', $id);
+}
+
 function getTagList ()
 {
 	$taglist = array();
