@@ -1458,6 +1458,15 @@ function loadRackObjectAutoTags()
 	return $ret;
 }
 
+function loadIPv4PrefixAutoTags()
+{
+	assertUIntArg ('id');
+	$ret = array();
+	$ret[] = array ('tag' => '$id_' . $_REQUEST['id']);
+	$ret[] = array ('tag' => '$allipv4networks');
+	return $ret;
+}
+
 function getGlobalAutoTags()
 {
 	global $remote_username, $accounts;

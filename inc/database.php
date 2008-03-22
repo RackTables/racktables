@@ -2381,14 +2381,29 @@ function executeAutoPorts ($object_id = 0, $type_id = 0)
 
 // Return only implicitly listed tags, the rest of the trail will be
 // generated/deducted later at higher levels.
-function loadRackObjectTags ($object_id = 0)
+function loadEntityTags ($entity_realm = '', $entity_id = 0)
 {
+	if ($entity_realm == '' or $entity_id <= 0)
+	{
+		showError ('Invalid or missing arguments', __FUNCTION__);
+		return NULL;
+	}
 	$ret = array();
-	$result = useSelectBlade ("select tt.id, tag from RackObject as ro inner join RackObjectTags as rot on ro.id = rot.object_id inner join TagTree as tt on rot.tag_id = tt.id where ro.id = ${object_id}");
+	$result = useSelectBlade ("select tt.id, tag from TagStorage as ts inner join TagTree as tt on ts.tag_id = tt.id where target_realm = '${entity_realm}' and target_id = ${entity_id}");
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 		$ret[$row['id']] = $row;
 	$result->closeCursor();
 	return $ret;
+}
+
+function loadRackObjectTags ($id)
+{
+	return loadEntityTags ('object', $id);
+}
+
+function loadIPv4PrefixTags ($id)
+{
+	return loadEntityTags ('ipv4net', $id);
 }
 
 function getTagList ()
@@ -2434,4 +2449,15 @@ function commitDestroyTag ($tagid = 0)
 	else
 		return 'useDeleteBlade() failed in ' . __FUNCTION__;
 }
+
+function wipeTags ($realm, $id)
+{
+	global $dbxlink;
+	$query = "delete from TagStorage where target_realm = 'object' and target_id = ${id}";
+	$result = $dbxlink->exec ($query);
+	if ($result === NULL)
+		return FALSE;
+	return TRUE;
+}
+
 ?>

@@ -224,12 +224,6 @@ CREATE TABLE `RackObjectHistory` (
   `user_name` char(64) default NULL
 ) ENGINE=MyISAM;
 
-CREATE TABLE `RackObjectTags` (
-  `object_id` int(10) unsigned default NULL,
-  `tag_id` int(10) unsigned default NULL,
-  UNIQUE KEY `object_tag` (`object_id`,`tag_id`)
-) TYPE=MyISAM;
-
 CREATE TABLE `RackSpace` (
   `rack_id` int(10) unsigned NOT NULL default '0',
   `unit_no` int(10) unsigned NOT NULL default '0',
@@ -238,6 +232,14 @@ CREATE TABLE `RackSpace` (
   `object_id` int(10) unsigned default NULL,
   PRIMARY KEY  (`rack_id`,`unit_no`,`atom`)
 ) ENGINE=MyISAM;
+
+CREATE TABLE `TagStorage` (
+  `target_realm` enum('object','ipv4net','rack','ipv4vs','ipv4rspool') NOT NULL default 'object',
+  `target_id` int(10) unsigned NOT NULL,
+  `tag_id` int(10) unsigned default NULL,
+  UNIQUE KEY `entity_tag` (`target_realm`,`target_id`,`tag_id`),
+  KEY `target_id` (`target_id`)
+) TYPE=MyISAM;
 
 CREATE TABLE `TagTree` (
   `id` int(10) unsigned NOT NULL auto_increment,

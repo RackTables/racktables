@@ -1057,10 +1057,12 @@ CREATE TABLE `IPVirtualService` (
 			$query[] = "insert into PortCompat (type1, type2) values (682, 682)";
 			$query[] =
 "
-CREATE TABLE `RackObjectTags` (
-  `object_id` int(10) unsigned default NULL,
+CREATE TABLE `TagStorage` (
+  `target_realm` enum('object','ipv4net','rack','ipv4vs','ipv4rspool') NOT NULL default 'object',
+  `target_id` int(10) unsigned NOT NULL,
   `tag_id` int(10) unsigned default NULL,
-  UNIQUE KEY `object_tag` (`object_id`,`tag_id`)
+  UNIQUE KEY `entity_tag` (`target_realm`,`target_id`,`tag_id`),
+  KEY `target_id` (`target_id`)
 ) TYPE=MyISAM;
 ";
 			$query[] =

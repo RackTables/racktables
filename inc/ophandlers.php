@@ -1322,12 +1322,12 @@ function saveObjectTags ()
 	$object_id = $_REQUEST['object_id'];
 	// Build a trail from the submitted data, minimize it,
 	// then wipe existing records and store the new set instead.
-	useDeleteBlade ('RackObjectTags', 'object_id', $object_id, FALSE, TRUE);
+	wipeTags ('object', $object_id);
 	$newtrail = getExplicitTagsOnly (buildTrailFromIds ($_REQUEST['taglist']));
 	$n_succeeds = $n_errors = 0;
 	foreach ($newtrail as $taginfo)
 	{
-		if (useInsertBlade ('RackObjectTags', array ('object_id' => $object_id, 'tag_id' => $taginfo['id'])))
+		if (useInsertBlade ('TagStorage', array ('target_realm' => "'object'", 'target_id' => $object_id, 'tag_id' => $taginfo['id'])))
 			$n_succeeds++;
 		else
 			$n_errors++;
