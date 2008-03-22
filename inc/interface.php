@@ -1861,7 +1861,7 @@ function renderAddNewRange ()
 
 function renderIPRange ($id)
 {
-	global $root, $pageno, $tabno;
+	global $root, $pageno, $tabno, $expl_tags, $impl_tags, $auto_tags;
 	$maxperpage = getConfigVar ('IPV4_ADDRS_PER_PAGE');
 	if (isset($_REQUEST['pg']))
 		$page = $_REQUEST['pg'];
@@ -1869,8 +1869,38 @@ function renderIPRange ($id)
 		$page=0;
 
 	$range = getIPRange($id);
-	echo "<center><h1>${range['ip']}/${range['mask']}</h1><h2>${range['name']}</h2></center>\n";
+	echo "<table border=0 class=objectview cellspacing=0 cellpadding=0>";
+	echo "<tr><td colspan=2 align=center><h1>${range['ip']}/${range['mask']}</h1><h2>${range['name']}</h2></td></tr>\n";
 
+	echo "<tr><td class=pcleft width='50%'>";
+	startPortlet ('summary');
+	$total = ($range['ip_bin'] | $range['mask_bin_inv']) - ($range['ip_bin'] & $range['mask_bin']) + 1;
+	$used = count ($range['addrlist']);
+	echo "<table border=0 cellspacing=0 cellpadding=3 width='100%'>\n";
+	echo "<tr><th width='50%' class=tdright>Utilization:</th><td class=tdleft>";
+	renderProgressBar ($used/$total);
+	echo "&nbsp;${used}/${total}</td></tr>\n";
+	if (getConfigVar ('SHOW_EXPLICIT_TAGS') == 'yes' and count ($expl_tags))
+	{
+		echo "<tr><th width='50%' class=tag_list_th>Explicit tags:</th><td class=tdleft>";
+		echo serializeTags ($expl_tags) . "</td></tr>\n";
+	}
+	if (getConfigVar ('SHOW_IMPLICIT_TAGS') == 'yes' and count ($impl_tags))
+	{
+		echo "<tr><th width='50%' class=tag_list_th>Implicit tags:</th><td class=tdleft>";
+		echo serializeTags ($impl_tags) . "</td></tr>\n";
+	}
+	if (getConfigVar ('SHOW_AUTOMATIC_TAGS') == 'yes' and count ($auto_tags))
+	{
+		echo "<tr><th width='50%' class=tag_list_th>Automatic tags:</th><td class=tdleft>";
+		echo serializeTags ($auto_tags) . "</td></tr>\n";
+	}
+	echo "</table><br>\n";
+	finishPortlet();
+	echo "</td>\n";
+
+	echo "<td class=pcright>";
+	startPortlet ('details');
 	$startip = $range['ip_bin'] & $range['mask_bin'];
 	$endip = $range['ip_bin'] | $range['mask_bin_inv'];
 	$realstartip = $startip;
@@ -1971,7 +2001,8 @@ function renderIPRange ($id)
 	}
 
 	echo "</table>";
-	
+	finishPortlet();
+	echo "</td></tr></table>\n";
 }
 
 function renderIPRangeProperties ($id)
@@ -4693,8 +4724,23 @@ function renderTagOption ($taginfo, $level = 0)
 		renderTagOption ($kid, $level + 1);
 }
 
-function renderObjectTags ($object_id)
+function renderObjectTags ($id)
 {
+	renderEntityTags ('object', 'object_id', $id);
+}
+
+function renderIPv4PrefixTags ($id)
+{
+	renderEntityTags ('ipv4net', 'id', $id);
+}
+
+function renderEntityTags ($entity_realm = '', $bypass_name, $entity_id = 0)
+{
+	if ($entity_realm == '' or $entity_id <= 0)
+	{
+		showError ('Invalid or missing arguments', __FUNCTION__);
+		return;
+	}
 	global $root, $pageno, $tabno;
 	showMessageOrError();
 	$tree = getTagTree();
@@ -4702,7 +4748,7 @@ function renderObjectTags ($object_id)
 	echo "<form method=post action='${root}process.php'>\n";
 	echo "<input type=hidden name=page value=${pageno}>\n";
 	echo "<input type=hidden name=tab value=${tabno}>\n";
-	echo "<input type=hidden name=object_id value=${object_id}>\n";
+	echo "<input type=hidden name=${bypass_name} value=${entity_id}>\n";
 	echo "<input type=hidden name=op value=save>\n";
 	echo '<select name=taglist[] multiple size=' . getConfigVar ('MAXSELSIZE') . '>';
 	foreach ($tree as $taginfo)

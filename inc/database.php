@@ -2453,7 +2453,7 @@ function commitDestroyTag ($tagid = 0)
 function wipeTags ($realm, $id)
 {
 	global $dbxlink;
-	$query = "delete from TagStorage where target_realm = 'object' and target_id = ${id}";
+	$query = "delete from TagStorage where target_realm = '${realm}' and target_id = ${id}";
 	$result = $dbxlink->exec ($query);
 	if ($result === NULL)
 		return FALSE;

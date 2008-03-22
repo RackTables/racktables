@@ -1315,27 +1315,37 @@ function generateAutoPorts ()
 }
 
 // Filter out implicit tags before storing the new tag set.
-function saveObjectTags ()
+function saveEntityTags ($realm, $bypass)
 {
 	global $root, $pageno, $tabno, $explicit_tags, $implicit_tags;
-	assertUIntArg ('object_id');
-	$object_id = $_REQUEST['object_id'];
+	assertUIntArg ($bypass);
+	$entity_id = $_REQUEST[$bypass];
 	// Build a trail from the submitted data, minimize it,
 	// then wipe existing records and store the new set instead.
-	wipeTags ('object', $object_id);
+	wipeTags ($realm, $entity_id);
 	$newtrail = getExplicitTagsOnly (buildTrailFromIds ($_REQUEST['taglist']));
 	$n_succeeds = $n_errors = 0;
 	foreach ($newtrail as $taginfo)
 	{
-		if (useInsertBlade ('TagStorage', array ('target_realm' => "'object'", 'target_id' => $object_id, 'tag_id' => $taginfo['id'])))
+		if (useInsertBlade ('TagStorage', array ('target_realm' => "'${realm}'", 'target_id' => $entity_id, 'tag_id' => $taginfo['id'])))
 			$n_succeeds++;
 		else
 			$n_errors++;
 	}
 	if ($n_errors)
-		return "${root}?page=${pageno}&tab=${tabno}&object_id=${object_id}&error=" . urlencode ("Replaced trail with ${n_succeeds} tags, but experienced ${n_errors} errors.");
+		return "${root}?page=${pageno}&tab=${tabno}&${bypass}=${entity_id}&error=" . urlencode ("Replaced trail with ${n_succeeds} tags, but experienced ${n_errors} errors.");
 	else
-		return "${root}?page=${pageno}&tab=${tabno}&object_id=${object_id}&message=" . urlencode ("New trail is ${n_succeeds} tags long");
+		return "${root}?page=${pageno}&tab=${tabno}&${bypass}=${entity_id}&message=" . urlencode ("New trail is ${n_succeeds} tags long");
+}
+
+function saveObjectTags ()
+{
+	return saveEntityTags ('object', 'object_id');
+}
+
+function saveIPv4PrefixTags ()
+{
+	return saveEntityTags ('ipv4net', 'id');
 }
 
 function destroyTag ()

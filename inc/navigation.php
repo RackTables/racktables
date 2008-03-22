@@ -137,11 +137,15 @@ $page['iprange']['tagloader'] = 'loadIPv4PrefixTags';
 $tab['iprange']['default'] = 'Browse';
 $tab['iprange']['properties'] = 'Properties';
 $tab['iprange']['liveptr'] = 'Live PTR';
+$tab['iprange']['tags'] = 'Tags';
 $tabhandler['iprange']['default'] = 'renderIPRange';
 $tabhandler['iprange']['properties'] = 'renderIPRangeProperties';
 $tabhandler['iprange']['liveptr'] = 'renderLivePTR';
+$tabhandler['iprange']['tags'] = 'renderIPv4PrefixTags';
+$trigger['iprange']['tags'] = 'trigger_tags';
 $ophandler['iprange']['properties']['editRange'] = 'editRange';
 $ophandler['iprange']['liveptr']['import'] = 'importPTRData';
+$ophandler['iprange']['tags']['save'] = 'saveIPv4PrefixTags';
 
 $page['ipaddress']['title_handler'] = 'dynamic_title_ipaddress';
 $page['ipaddress']['parent'] = 'iprange';
