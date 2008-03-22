@@ -321,8 +321,7 @@ $ophandler['tagtree']['edit']['updateTag'] = 'updateTag';
 
 $page['reports']['title'] = 'Reports';
 $page['reports']['parent'] = 'index';
-$tab['reports']['default'] = 'View';
-$tabhandler['reports']['default'] = 'renderReportSummary';
+$page['reports']['handler'] = 'renderReportSummary';
 
 // This function returns array if page numbers leading to the target page
 // plus page number of target page itself. The first element is the target
