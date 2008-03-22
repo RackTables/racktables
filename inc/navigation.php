@@ -195,6 +195,7 @@ $tab['vservice']['editlblist'] = '[Load balancers]';
 $tab['vservice']['tags'] = 'Tags';
 $tabhandler['vservice']['default'] = 'renderVirtualService';
 $tabhandler['vservice']['tags'] = 'renderIPv4VSTags';
+$ophandler['vservice']['tags']['save'] = 'saveIPv4VSTags';
 $trigger['vservice']['tags'] = 'trigger_tags';
 
 $page['rspools']['title'] = 'RS pools';
@@ -234,6 +235,7 @@ $ophandler['rspool']['editlblist']['addLB'] = 'addLoadBalancer';
 $ophandler['rspool']['editlblist']['delLB'] = 'deleteLoadBalancer';
 $ophandler['rspool']['editlblist']['updLB'] = 'updateLoadBalancer';
 $ophandler['rspool']['rsinservice']['upd'] = 'updateRSInService';
+$ophandler['rspool']['tags']['save'] = 'saveIPv4RSPoolTags';
 
 $page['rservers']['title'] = 'Real servers';
 $page['rservers']['parent'] = 'ipv4slb';
