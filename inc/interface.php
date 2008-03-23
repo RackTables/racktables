@@ -1718,9 +1718,14 @@ function renderAddressspace ()
 {
 	global $root, $page;
 
+	echo "<table border=0 class=objectview>\n";
+	echo "<tr><td class=pcleft>";
+
 	startPortlet ('Subnets');
 	echo "<table class='widetable' border=0 cellpadding=10 cellspacing=0 align='center'>\n";
-	$addrspaceList = getAddressspaceList();
+	$tagfilter = isset ($_REQUEST['tagfilter']) ? $_REQUEST['tagfilter'] : array();
+	$tagfilter = complementByKids ($tagfilter);
+	$addrspaceList = getAddressspaceList ($tagfilter);
 	echo "<tr><th>Subnet</th><th>Name</th><th>Utilization</th></tr>";
 	foreach ($addrspaceList as $iprange)
 	{
@@ -1734,6 +1739,9 @@ function renderAddressspace ()
 	}
 	echo "</table>\n";
 	finishPortlet();
+	echo '</td><td class=pcright>';
+	renderTagFilterPortlet ($tagfilter);
+	echo "</td></tr></table>\n";
 }
 
 function renderIPv4SLB ()
@@ -4681,6 +4689,8 @@ function renderTagTreeEditor ()
 	echo '</table>';
 }
 
+// Output a sequence of OPTION elements, selecting those, which are present on the
+// explicit tags list.
 function renderTagOption ($taginfo, $level = 0)
 {
 	global $expl_tags;
@@ -4697,6 +4707,25 @@ function renderTagOption ($taginfo, $level = 0)
 	echo $taginfo['tag'] . "</option>\n";
 	foreach ($taginfo['kids'] as $kid)
 		renderTagOption ($kid, $level + 1);
+}
+
+// Idem, but select those, which are shown on the $_REQUEST['tagfiler'] array.
+function renderTagOptionForFilter ($taginfo, $tagfilter, $level = 0)
+{
+	echo $level;
+	$selected = '';
+	foreach ($tagfilter as $filter_id)
+		if ($taginfo['id'] == $filter_id)
+		{
+			$selected = ' selected';
+			break;
+		}
+	echo '<option value=' . $taginfo['id'] . "${selected}>";
+	for ($i = 0; $i < $level; $i++)
+		echo '-- ';
+	echo $taginfo['tag'] . "</option>\n";
+	foreach ($taginfo['kids'] as $kid)
+		renderTagOptionForFilter ($kid, $tagfilter, $level + 1);
 }
 
 function renderObjectTags ($id)
@@ -4766,6 +4795,26 @@ function printTagTRs()
 		echo "<tr><th width='50%' class=tag_list_th>Automatic tags:</th><td class=tdleft>";
 		echo serializeTags ($auto_tags) . "</td></tr>\n";
 	}
+}
+
+function renderTagFilterPortlet ($tagfilter)
+{
+	global $pageno, $tabno;
+	startPortlet ('Tag filter');
+	if (!count (($tagTree = getTagTree())))
+	{
+		echo "No tags defined";
+		return;
+	}
+	echo "<form method=get'>\n";
+	echo "<input type=hidden name=page value=${pageno}>\n";
+	echo "<input type=hidden name=tab value=${tabno}>\n";
+	echo '<select name=tagfilter[] multiple>';
+	foreach ($tagTree as $taginfo)
+		renderTagOptionForFilter ($taginfo, $tagfilter);
+	echo '</select><br>';
+	echo "<input type=submit value='Apply'></form>\n";
+	finishPortlet();
 }
 
 ?>

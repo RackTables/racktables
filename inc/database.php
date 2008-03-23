@@ -891,16 +891,29 @@ function getObjectAddresses ($object_id = 0)
 	return $ret;
 }
 
-function getAddressspaceList ()
+function getAddressspaceList ($tagfilter)
 {
+	if (!count ($tagfilter))
+		$whereclause = 'where tag_id is null';
+	else
+	{
+		$whereclause = 'where ';
+		$orclause = '';
+		foreach ($tagfilter as $tag_id)
+		{
+			$whereclause .= $orclause . 'tag_id = ' . $tag_id;
+			$orclause = ' or ';
+		}
+	}
 	$query =
 		"select ".
 		"id as IPRanges_id, ".
 		"INET_NTOA(ip) as IPRanges_ip, ".
 		"mask as IPRanges_mask, ".
 		"name as IPRanges_name ".
-		"from IPRanges ".
-		"order by ip";
+		"from IPRanges left join TagStorage on IPRanges.id = TagStorage.target_id and target_realm = 'ipv4net' " .
+		$whereclause .
+		" order by ip";
 	$result = useSelectBlade ($query);
 	$ret=array();
 	$count=0;

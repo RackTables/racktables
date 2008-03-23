@@ -1447,6 +1447,33 @@ function getExplicitTagsOnly ($trail, $tree = NULL)
 	return $ret;
 }
 
+// Maximize the trail: for each tag add all tags, for which it is direct or indirect parent.
+// Unlike other functions, this one accepts and returns a list of integer tag IDs, not
+// a list of tag structures.
+function complementByKids ($idlist, $tree = NULL, $getall = FALSE)
+{
+	if ($tree === NULL)
+		$tree = getTagTree();
+	$getallkids = $getall;
+	$ret = array();
+	foreach ($tree as $taginfo)
+	{
+		foreach ($idlist as $test_id)
+			if ($getall or $taginfo['id'] == $test_id)
+			{
+				$ret[] = $taginfo['id'];
+				// Once matched node makes all sub-nodes match, but don't make
+				// a mistake of matching every other node at the current level.
+				$getallkids = TRUE;
+				break;
+			}
+		if (isset ($taginfo['kids']))
+			$ret = array_merge ($ret, complementByKids ($idlist, $taginfo['kids'], $getallkids));
+		$getallkids = FALSE;
+	}
+	return $ret;
+}
+
 function loadRackObjectAutoTags()
 {
 	assertUIntArg ('object_id');
