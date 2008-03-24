@@ -1814,20 +1814,25 @@ function renderAddNewRange ()
 	global $root, $pageno, $tabno;
 	showMessageOrError();
 
-	echo "<center><h2>Add New</h2></center>\n";
+	startPortlet ("Add New");
 	echo "<table class='widetable' border=0 cellpadding=10 align='center'>\n";
-	echo "<tr><th>Address range</th><th>Name</th><th>C&gt;*</th><th>&nbsp;</th></tr>\n";
+	echo "<tr><th>Address range</th><th>Name</th><th>connected network</th><th>assign tags</th><th>&nbsp;</th></tr>\n";
 	echo "<form name='add_new_range' action='process.php'>\n";
 	echo "<input type=hidden name=op value=addRange>\n";
 	echo "<input type=hidden name=page value='${pageno}'>\n";
 	echo "<input type=hidden name=tab value='${tabno}'>\n";
-	echo "<tr><td class='tdcenter'><input type=text name='range' size=18 class='live-validate' tabindex=1></td>\n";
+	echo "<tr valign=top><td class='tdcenter'><input type=text name='range' size=18 class='live-validate' tabindex=1></td>\n";
 	echo "<td class='tdcenter'><input type=text name='name' size='20' tabindex=2></td>\n";
 	echo "<td class='tdcenter'><input type=checkbox name='is_bcast' tabindex=3 checked></td>\n";
-	echo "<td class='tdcenter'><input type=submit value='Add a new range' tabindex=4></td></tr>\n";
+	echo "<td>\n";
+	renderTagSelect();
+	echo "</td>\n";
+	echo "<td class='tdcenter'><input type=submit value='Add a new range' tabindex=4></td>\n";
+	echo "</td></tr>\n";
 	echo "</form></table><br><br>\n";
+	finishPortlet();
 
-	echo "<center><h2>Manage Existing</h2></center>\n";
+	startPortlet ("Manage Existing");
 	echo "<table class='widetable' border=0 cellpadding=10 align='center'>\n";
 	$addrspaceList = getAddressspaceList();
 	echo "<tr><th>&nbsp;</th><th>Address range</th><th>Name</th><th>Utilization</th></tr>";
@@ -1851,6 +1856,7 @@ function renderAddNewRange ()
 		echo "</td></tr>";
 	}
 	echo "</table>";
+	finishPortlet();
 }
 
 function renderIPRange ($id)
@@ -4815,6 +4821,19 @@ function renderTagFilterPortlet ($tagfilter)
 	echo '</select><br>';
 	echo "<input type=submit value='Apply'></form>\n";
 	finishPortlet();
+}
+
+function renderTagSelect ()
+{
+	if (!count (($tagTree = getTagTree())))
+	{
+		echo "No tags defined";
+		return;
+	}
+	echo '<select name=taglist[] multiple>';
+	foreach ($tagTree as $taginfo)
+		renderTagOption ($taginfo);
+	echo '</select><br>';
 }
 
 ?>

@@ -498,6 +498,8 @@ function addIpAssignment ()
 function addNewRange ()
 {
 	global $root, $pageno, $tabno;
+	assertStringArg ('range');
+	assertStringArg ('name');
 
 	$range = $_REQUEST['range'];
 	$name = $_REQUEST['name'];
