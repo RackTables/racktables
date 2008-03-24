@@ -115,10 +115,10 @@ function dynamic_title_rspool ()
 	switch ($pageno)
 	{
 		case 'rspool':
-			assertUIntArg ('id');
-			$poolInfo = getRSPoolInfo ($_REQUEST['id']);
+			assertUIntArg ('pool_id');
+			$poolInfo = getRSPoolInfo ($_REQUEST['pool_id']);
 			$ret['name'] = empty ($poolInfo['name']) ? 'ANONYMOUS' : $poolInfo['name'];
-			$ret['params']['id'] = $_REQUEST['id'];
+			$ret['params']['pool_id'] = $_REQUEST['pool_id'];
 			break;
 		default:
 			return NULL;

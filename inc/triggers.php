@@ -82,8 +82,8 @@ function trigger_natv4 ()
 
 function trigger_poolrscount ()
 {
-	assertUIntArg ('id');
-	$poolInfo = getRSPoolInfo ($_REQUEST['id']);
+	assertUIntArg ('pool_id');
+	$poolInfo = getRSPoolInfo ($_REQUEST['pool_id']);
 	return count ($poolInfo['rslist']) > 0;
 }
 

@@ -1532,7 +1532,7 @@ function loadIPv4RSPoolAutoTags()
 {
 	assertUIntArg ('pool_id');
 	$ret = array();
-	$ret[] = array ('tag' => '$id_' . $_REQUEST['id']);
+	$ret[] = array ('tag' => '$id_' . $_REQUEST['pool_id']);
 	$ret[] = array ('tag' => '$any_ipv4rspool');
 	$ret[] = array ('tag' => '$any_rspool');
 	return $ret;
