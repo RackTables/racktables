@@ -1020,9 +1020,9 @@ function addRealServer ()
 	assertStringArg ('rsconfig', TRUE);
 	$pool_id = $_REQUEST['id'];
 	if (!addRStoRSPool ($pool_id, $_REQUEST['remoteip'], $_REQUEST['rsport'], getConfigVar ('DEFAULT_IPV4_RS_INSERVICE'), $_REQUEST['rsconfig']))
-		return "${root}?page=${pageno}&tab=${tabno}&id=${pool_id}&error=" . urlencode ('addRStoRSPool() failed');
+		return "${root}?page=${pageno}&tab=${tabno}&pool_id=${pool_id}&error=" . urlencode ('addRStoRSPool() failed');
 	else
-		return "${root}?page=${pageno}&tab=${tabno}&id=${pool_id}&message=" . urlencode ("Real server was successfully added");
+		return "${root}?page=${pageno}&tab=${tabno}&pool_id=${pool_id}&message=" . urlencode ("Real server was successfully added");
 }
 
 // Parse textarea submitted and try adding a real server for each line.
@@ -1075,9 +1075,9 @@ function addRealServers ()
 		}
 	}
 	if ($nbad == 0 and $ngood > 0)
-		return "${root}?page=${pageno}&tab=${tabno}&id=${pool_id}&message=" . urlencode ("Successfully added ${ngood} real servers");
+		return "${root}?page=${pageno}&tab=${tabno}&pool_id=${pool_id}&message=" . urlencode ("Successfully added ${ngood} real servers");
 	else
-		return "${root}?page=${pageno}&tab=${tabno}&id=${pool_id}&error=" . urlencode ("Added ${ngood} real servers and encountered ${nbad} errors");
+		return "${root}?page=${pageno}&tab=${tabno}&pool_id=${pool_id}&error=" . urlencode ("Added ${ngood} real servers and encountered ${nbad} errors");
 }
 
 function addVService ()
@@ -1108,9 +1108,9 @@ function deleteRealServer ()
 	assertUIntArg ('id');
 	$pool_id = $_REQUEST['pool_id'];
 	if (!commitDeleteRS ($_REQUEST['id']))
-		return "${root}?page=${pageno}&tab=${tabno}&id=${pool_id}&error=" . urlencode ('commitDeleteRS() failed');
+		return "${root}?page=${pageno}&tab=${tabno}&pool_id=${pool_id}&error=" . urlencode ('commitDeleteRS() failed');
 	else
-		return "${root}?page=${pageno}&tab=${tabno}&id=${pool_id}&message=" . urlencode ("Real server was successfully deleted");
+		return "${root}?page=${pageno}&tab=${tabno}&pool_id=${pool_id}&message=" . urlencode ("Real server was successfully deleted");
 }
 
 function deleteLoadBalancer ()
@@ -1122,9 +1122,9 @@ function deleteLoadBalancer ()
 	assertUIntArg ('vs_id');
 	$pool_id = $_REQUEST['pool_id'];
 	if (!commitDeleteLB ($_REQUEST['object_id'], $pool_id, $_REQUEST['vs_id']))
-		return "${root}?page=${pageno}&tab=${tabno}&id=${pool_id}&error=" . urlencode ('commitDeleteLB() failed');
+		return "${root}?page=${pageno}&tab=${tabno}&pool_id=${pool_id}&error=" . urlencode ('commitDeleteLB() failed');
 	else
-		return "${root}?page=${pageno}&tab=${tabno}&id=${pool_id}&message=" . urlencode ("Load balancer was successfully deleted");
+		return "${root}?page=${pageno}&tab=${tabno}&pool_id=${pool_id}&message=" . urlencode ("Load balancer was successfully deleted");
 }
 
 function deleteVService ()
@@ -1150,9 +1150,9 @@ function updateRealServer ()
 	// only necessary for generating next URL
 	$pool_id = $_REQUEST['id'];
 	if (!commitUpdateRS ($_REQUEST['rs_id'], $_REQUEST['rsip'], $_REQUEST['rsport'], $_REQUEST['rsconfig']))
-		return "${root}?page=${pageno}&tab=${tabno}&id=${pool_id}&error=" . urlencode ('commitUpdateRS() failed');
+		return "${root}?page=${pageno}&tab=${tabno}&pool_id=${pool_id}&error=" . urlencode ('commitUpdateRS() failed');
 	else
-		return "${root}?page=${pageno}&tab=${tabno}&id=${pool_id}&message=" . urlencode ("Real server was successfully updated");
+		return "${root}?page=${pageno}&tab=${tabno}&pool_id=${pool_id}&message=" . urlencode ("Real server was successfully updated");
 }
 
 function updateLoadBalancer ()
@@ -1166,9 +1166,9 @@ function updateLoadBalancer ()
 	assertStringArg ('rsconfig', TRUE);
 	$pool_id = $_REQUEST['pool_id'];
 	if (!commitUpdateLB ($_REQUEST['object_id'], $pool_id, $_REQUEST['vs_id'], $_REQUEST['vsconfig'], $_REQUEST['rsconfig']))
-		return "${root}?page=${pageno}&tab=${tabno}&id=${pool_id}&error=" . urlencode ('commitUpdateLB() failed');
+		return "${root}?page=${pageno}&tab=${tabno}&pool_id=${pool_id}&error=" . urlencode ('commitUpdateLB() failed');
 	else
-		return "${root}?page=${pageno}&tab=${tabno}&id=${pool_id}&message=" . urlencode ("Load balancer info was successfully updated");
+		return "${root}?page=${pageno}&tab=${tabno}&pool_id=${pool_id}&message=" . urlencode ("Load balancer info was successfully updated");
 }
 
 function updateVService ()
@@ -1199,9 +1199,9 @@ function addLoadBalancer ()
 	assertStringArg ('rsconfig', TRUE);
 	$pool_id = $_REQUEST['pool_id'];
 	if (!addLBtoRSPool ($pool_id, $_REQUEST['object_id'], $_REQUEST['vs_id'], $_REQUEST['vsconfig'], $_REQUEST['rsconfig']))
-		return "${root}?page=${pageno}&tab=${tabno}&id=${pool_id}&error=" . urlencode ('addLBtoRSPool() failed');
+		return "${root}?page=${pageno}&tab=${tabno}&pool_id=${pool_id}&error=" . urlencode ('addLBtoRSPool() failed');
 	else
-		return "${root}?page=${pageno}&tab=${tabno}&id=${pool_id}&message=" . urlencode ("Load balancer was successfully added");
+		return "${root}?page=${pageno}&tab=${tabno}&pool_id=${pool_id}&message=" . urlencode ("Load balancer was successfully added");
 }
 
 function addRSPool ()
@@ -1221,8 +1221,8 @@ function deleteRSPool ()
 {
 	global $root, $pageno, $tabno;
 
-	assertUIntArg ('id');
-	if (!commitDeleteRSPool ($_REQUEST['id']))
+	assertUIntArg ('pool_id');
+	if (!commitDeleteRSPool ($_REQUEST['pool_id']))
 		return "${root}?page=${pageno}&tab=${tabno}&error=" . urlencode ('commitDeleteRSPool() failed');
 	else
 		return "${root}?page=${pageno}&tab=${tabno}&message=" . urlencode ("Real server pool was successfully deleted");
@@ -1232,11 +1232,11 @@ function updateRSPool ()
 {
 	global $root, $pageno, $tabno;
 
-	assertUIntArg ('id');
+	assertUIntArg ('pool_id');
 	assertStringArg ('name', TRUE);
 	assertStringArg ('vsconfig', TRUE);
 	assertStringArg ('rsconfig', TRUE);
-	if (!commitUpdateRSPool ($_REQUEST['id'], $_REQUEST['name'], $_REQUEST['vsconfig'], $_REQUEST['rsconfig']))
+	if (!commitUpdateRSPool ($_REQUEST['pool_id'], $_REQUEST['name'], $_REQUEST['vsconfig'], $_REQUEST['rsconfig']))
 		return "${root}?page=${pageno}&tab=${tabno}&error=" . urlencode ('commitUpdateRSPool() failed');
 	else
 		return "${root}?page=${pageno}&tab=${tabno}&message=" . urlencode ("Real server pool was successfully updated");
@@ -1245,9 +1245,9 @@ function updateRSPool ()
 function updateRSInService ()
 {
 	global $root, $pageno, $tabno;
-	assertUIntArg ('id');
+	assertUIntArg ('pool_id');
 	assertUIntArg ('rscount');
-	$pool_id = $_REQUEST['id'];
+	$pool_id = $_REQUEST['pool_id'];
 	$orig = getRSPoolInfo ($pool_id);
 	$nbad = $ngood = 0;
 	for ($i = 1; $i <= $_REQUEST['rscount']; $i++)
@@ -1266,9 +1266,9 @@ function updateRSInService ()
 		}
 	}
 	if (!$nbad)
-		return "${root}?page=${pageno}&tab=${tabno}&id=${pool_id}&message=" . urlencode ($ngood . " real server(s) were successfully (de)activated");
+		return "${root}?page=${pageno}&tab=${tabno}&pool_id=${pool_id}&message=" . urlencode ($ngood . " real server(s) were successfully (de)activated");
 	else
-		return "${root}?page=${pageno}&tab=${tabno}&id=${pool_id}&error=" . urlencode ("Encountered ${nbad} errors, (de)activated ${ngood} real servers");
+		return "${root}?page=${pageno}&tab=${tabno}&pool_id=${pool_id}&error=" . urlencode ("Encountered ${nbad} errors, (de)activated ${ngood} real servers");
 }
 
 function importPTRData ()
