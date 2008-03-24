@@ -762,13 +762,7 @@ function mergeSearchResults (&$objects, $terms, $fieldname)
 		$query .= "${fieldname} like '%$term%'";
 		$count++;
 	}
-	$query .= "";
-	$result = $dbxlink->query($query);
-	if ($result == NULL)
-	{
-		showError ("SQL query failed", __FUNCTION__);
-		return NULL;
-	}
+	$result = useSelectBlade ($query);
 // FIXME: this dead call was executed 4 times per 1 object search!
 //	$typeList = getObjectTypeList();
 	$clist = array ('id', 'name', 'label', 'asset_no', 'barcode', 'objtype_id', 'objtype_name');
@@ -791,7 +785,7 @@ function mergeSearchResults (&$objects, $terms, $fieldname)
 	return $objects;
 }
 
-function getSearchResults ($terms)
+function getObjectSearchResults ($terms)
 {
 	$objects = array();
 	mergeSearchResults ($objects, $terms, 'name');

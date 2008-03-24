@@ -2455,38 +2455,26 @@ function renderSearchResults ()
 		showError ('You are not authorized for viewing information about objects.', __FUNCTION__);
 		return;
 	}
+	$nhits = 0;
 	// If we search for L2 address, we can either find one or find none.
 	if
 	(
 		preg_match ('/^[0-9a-f][0-9a-f]?:[0-9a-f][0-9a-f]?:[0-9a-f][0-9a-f]?:[0-9a-f][0-9a-f]?:[0-9a-f][0-9a-f]?:[0-9a-f][0-9a-f]?$/i', $terms) or
 		preg_match ('/^[0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]$/i', $terms) or
-		preg_match ('/^[0-9a-f][0-9a-f][0-9a-f][0-9a-f].[0-9a-f][0-9a-f][0-9a-f][0-9a-f].[0-9a-f][0-9a-f][0-9a-f][0-9a-f]$/i', $terms)
+		preg_match ('/^[0-9a-f][0-9a-f][0-9a-f][0-9a-f].[0-9a-f][0-9a-f][0-9a-f][0-9a-f].[0-9a-f][0-9a-f][0-9a-f][0-9a-f]$/i', $terms) or
+		// STP bridge ID: bridge priotity + port MAC address. Cut off first 4 chars and look for MAC address.
+		preg_match ('/^[0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]$/i', $terms)
 	)
 	// Search for L2 address.
 	{
+		$terms = substr ($terms, -12);
 		$result = searchByl2address ($terms);
 		if ($result !== NULL)
 		{
-			echo "<script language='Javascript'>document.location='${root}?page=object";
-			echo "&hl_port_id=${result['port_id']}";
-			echo "&object_id=${result['object_id']}';//</script>";
+			$nhits++;
+			$lasthit = 'port';
+			$summary['port'][] = $result;
 		}
-		else
-			echo "L2 address '${terms}' not found!";
-	}
-	elseif (preg_match ('/^[0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]$/i', $terms))
-	// STP bridge ID: bridge priotity + port MAC address. Cut off first 4 chars and look for MAC address.
-	{
-		$terms = substr ($terms, 4);
-		$result = searchByl2address ($terms);
-		if ($result !== NULL)
-		{
-			echo "<script language='Javascript'>document.location='${root}?page=object";
-			echo "&hl_port_id=${result['port_id']}";
-			echo "&object_id=${result['object_id']}';//</script>";
-		}
-		else
-			echo "L2 address '${terms}' not found!";
 	}
 	elseif (preg_match ('/^[0-9][0-9]?[0-9]?\.[0-9]?[0-9]?[0-9]?\.[0-9][0-9]?[0-9]?\.[0-9]?[0-9]?[0-9]?$/i', $terms))
 	// Search for IP address.
@@ -2494,41 +2482,121 @@ function renderSearchResults ()
 		$result = getRangeByIp ($terms);
 		if ($result !== NULL)
 		{
-			echo "<script language='Javascript'>document.location='${root}?page=ipaddress";
-			echo "&ip=${terms}";
-			echo "';//</script>";
+			$nhits++;
+			$lasthit = 'ipv4address';
+			$summary['ipv4address1'][] = $terms;
 		}
-		else
-			echo "IP address '${terms}' not found!";
+	}
+	else
+	// Search for objects, addresses, networks, virtual services and RS pools by their description.
+	{
+		$tmp = getObjectSearchResults ($terms);
+		if (count ($tmp))
+		{
+			$nhits += count ($tmp);
+			$lasthit = 'object';
+			$summary['object'] = $tmp;
+		}
+		$tmp = getIPv4AddressSearchResult ($terms);
+		if (count ($tmp))
+		{
+			$nhits += count ($tmp);
+			$lasthit = 'ipv4address2';
+			$summary['ipv4address2'] = $tmp;
+		}
+		$tmp = getIPv4PrefixSearchResult ($terms);
+		if (count ($tmp))
+		{
+			$nhits += count ($tmp);
+			$lasthit = 'ipv4network';
+			$summary['ipv4network'] = $tmp;
+		}
+	}
+	if ($nhits == 0)
+		echo "<center><h2>Nothing found for '${terms}'</h2></center>";
+	elseif ($nhits == 1)
+	{
+		$record = current ($summary[$lasthit]);
+		switch ($lasthit)
+		{
+			case 'port':
+				echo "<script language='Javascript'>document.location='${root}?page=object";
+				echo "&hl_port_id=" . $record['port_id'];
+				echo "&object_id=" . $record['object_id'] . "';//</script>";
+				break;
+			case 'ipv4address1':
+				echo "<script language='Javascript'>document.location='${root}?page=ipaddress";
+				echo "&ip=${record}";
+				echo "';//</script>";
+				break;
+			case 'ipv4address2':
+				echo "<script language='Javascript'>document.location='${root}?page=ipaddress";
+				echo "&ip=${record}";
+				echo "';//</script>";
+				break;
+			case 'ipv4network':
+				echo "<script language='Javascript'>document.location='${root}?page=iprange";
+				echo "&id=${record['id']}";
+				echo "';//</script>";
+				break;
+			case 'object':
+				echo "<script language='Javascript'>document.location='${root}?page=object&object_id=${record['id']}';//</script>";
+				break;
+		}
 		return;
 	}
 	else
-	// Search for objects.
 	{
-		$objects = getSearchResults ($terms);
-		if (count ($objects) == 1)
-		{
-			$obj = current ($objects);
-			echo "<script language='Javascript'>document.location='${root}?page=object&object_id=${obj['id']}';//</script>";
-		}
-		elseif (count ($objects) > 1)
-		{
-			echo '<br><br><table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
-			echo '<tr><th>Common name</th><th>Visible label</th><th>Asset tag</th><th>barcode</th></tr>';
-			$order = 'odd';
-			global $nextorder;
-			foreach ($objects as $obj)
+		global $nextorder;
+		$order = 'odd';
+		echo "<center><h2>${nhits} result(s) found for '${terms}'</h2></center>";
+		foreach ($summary as $where => $what)
+			switch ($where)
 			{
-				echo "<tr class=row_${order}><td><a href=\"${root}?page=object&object_id=${obj['id']}\">${obj['dname']}</a></td>";
-				echo "<td>${obj['label']}</td>";
-				echo "<td>${obj['asset_no']}</td>";
-				echo "<td>${obj['barcode']}</td></tr>";
-				$order = $nextorder[$order];
+				case 'object':
+					startPortlet ('Objects');
+					echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
+					echo '<tr><th>Common name</th><th>Visible label</th><th>Asset tag</th><th>barcode</th></tr>';
+					foreach ($what as $obj)
+					{
+						echo "<tr class=row_${order}><td><a href=\"${root}?page=object&object_id=${obj['id']}\">${obj['dname']}</a></td>";
+						echo "<td>${obj['label']}</td>";
+						echo "<td>${obj['asset_no']}</td>";
+						echo "<td>${obj['barcode']}</td></tr>";
+						$order = $nextorder[$order];
+					}
+					echo '</table>';
+					finishPortlet();
+					break;
+				case 'ipv4network':
+					startPortlet ('IPv4 networks');
+					echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
+					echo '<tr><th>Network</th><th>Descritpion</th></tr>';
+					foreach ($what as $net)
+					{
+						echo "<tr class=row_${order}><td class=tdleft><a href='${root}?page=iprange&id=${net['id']}'>${net['ip']}";
+						echo '/' . $net['mask'] . '</a></td>';
+						echo "<td class=tdleft>${net['name']}</td></tr>";
+						$order = $nextorder[$order];
+					}
+					echo '</table>';
+					finishPortlet();
+					break;
+				case 'ipv4address2':
+					startPortlet ('IPv4 addresses');
+					echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
+					echo '<tr><th>Address</th><th>Descritpion</th></tr>';
+					foreach ($what as $addr)
+					{
+						echo "<tr class=row_${order}><td class=tdleft><a href='${root}?page=ipaddress&id=${addr['ip']}'>";
+						echo "${addr['ip']}</a></td>";
+						echo "<td class=tdleft>${addr['name']}</td></tr>";
+						$order = $nextorder[$order];
+					}
+					echo '</table>';
+					finishPortlet();
+					break;
 			}
-			echo '</table>';
-		}
-		else
-			echo "Object '${terms}' not found!";
 	}
 }
 

@@ -1074,6 +1074,38 @@ function searchByl2address ($l2addr)
 	return NULL;
 }
 
+function getIPv4PrefixSearchResult ($terms)
+{
+	$query = "select id, inet_ntoa(ip) as ip, mask, name from IPRanges where ";
+	$or = '';
+	foreach (explode (' ', $terms) as $term)
+	{
+		$query .= $or . "name like '%${term}%'";
+		$or = ' or ';
+	}
+	$result = useSelectBlade ($query);
+	$ret = array();
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
+		$ret[] = $row;
+	return $ret;
+}
+
+function getIPv4AddressSearchResult ($terms)
+{
+	$query = "select inet_ntoa(ip) as ip, name from IPAddress where ";
+	$or = '';
+	foreach (explode (' ', $terms) as $term)
+	{
+		$query .= $or . "name like '%${term}%'";
+		$or = ' or ';
+	}
+	$result = useSelectBlade ($query);
+	$ret = array();
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
+		$ret[] = $row;
+	return $ret;
+}
+
 // This function returns either port ID or NULL for specified arguments.
 function getPortID ($object_id, $port_name)
 {
