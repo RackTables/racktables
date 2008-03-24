@@ -1014,11 +1014,11 @@ function addRealServer ()
 {
 	global $root, $pageno, $tabno;
 
-	assertUIntArg ('id');
+	assertUIntArg ('pool_id');
 	assertIPv4Arg ('remoteip');
 	assertUIntArg ('rsport');
 	assertStringArg ('rsconfig', TRUE);
-	$pool_id = $_REQUEST['id'];
+	$pool_id = $_REQUEST['pool_id'];
 	if (!addRStoRSPool ($pool_id, $_REQUEST['remoteip'], $_REQUEST['rsport'], getConfigVar ('DEFAULT_IPV4_RS_INSERVICE'), $_REQUEST['rsconfig']))
 		return "${root}?page=${pageno}&tab=${tabno}&pool_id=${pool_id}&error=" . urlencode ('addRStoRSPool() failed');
 	else
