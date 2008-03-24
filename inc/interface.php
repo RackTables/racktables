@@ -4059,7 +4059,7 @@ function renderRSPoolServerForm ($pool_id = 0)
 	echo "<input type=hidden name=page value='${pageno}'>\n";
 	echo "<input type=hidden name=tab value='${tabno}'>\n";
 	echo "<input type=hidden name=op value=addRS>";
-	echo "<input type=hidden name=id value='${pool_id}'>";
+	echo "<input type=hidden name=pool_id value='${pool_id}'>";
 	echo "<tr><td>";
 	if (getConfigVar ('DEFAULT_IPV4_RS_INSERVICE') == 'yes')
 		printImageHREF ('inservice', 'in service');
