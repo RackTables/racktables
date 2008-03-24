@@ -210,7 +210,7 @@ $ophandler['rspools']['edit']['upd'] = 'updateRSPool';
 
 $page['rspool']['title_handler'] = 'dynamic_title_rspool';
 $page['rspool']['parent'] = 'rspools';
-$page['rspool']['bypass'] = 'id';
+$page['rspool']['bypass'] = 'pool_id';
 $page['rspool']['bypass_type'] = 'uint';
 $page['rspool']['tagloader'] = 'loadIPv4RSPoolTags';
 $page['rspool']['autotagloader'] = 'loadIPv4RSPoolAutoTags';

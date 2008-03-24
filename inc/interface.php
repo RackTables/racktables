@@ -925,7 +925,7 @@ function renderRackObject ($object_id = 0)
 			echo '</a>';
 			if (!empty ($info['name']))
 				echo " (${info['name']})";
-			echo "</td><td class=tdleft><a href='${root}?page=rspool&id=${info['pool_id']}'>";
+			echo "</td><td class=tdleft><a href='${root}?page=rspool&pool_id=${info['pool_id']}'>";
 			echo (empty ($info['pool_name']) ? 'ANONYMOUS' : $info['pool_name']);
 			echo '</a></td><td class=tdleft>' . $info['rscount'] . '</td>';
 			echo "<td class=tdleft><pre>${info['vsconfig']}</pre></td>";
@@ -1795,7 +1795,7 @@ function renderIPv4SLB ()
 				else
 				{
 					echo $vsdata['lblist'][$lb_object_id]['size'];
-					echo " (<a href='${root}?page=rspool&id=";
+					echo " (<a href='${root}?page=rspool&pool_id=";
 				       	echo $vsdata['lblist'][$lb_object_id]['id'] . "'>";
 					echo $vsdata['lblist'][$lb_object_id]['name'] . '</a>)';
 				}
@@ -1968,7 +1968,7 @@ function renderIPRange ($id)
 			{
 				echo $prologue;
 				$prologue = '';
-				echo "${delim}&rarr;${ref['rsport']}@<a href='${root}?page=rspool&id=${ref['rspool_id']}'>";
+				echo "${delim}&rarr;${ref['rsport']}@<a href='${root}?page=rspool&pool_id=${ref['rspool_id']}'>";
 				echo "${ref['rspool_name']}</a>";
 				$delim = '; ';
 			}
@@ -2080,7 +2080,7 @@ function renderIPAddress ()
 				printImageHREF ('inservice', 'in service');
 			else
 				printImageHREF ('notinservice', 'NOT in service');
-			echo "</td><td class=tdleft>${rsinfo['rsport']}</td><td class=tdleft><a href='${root}?page=rspool&id=${rsinfo['pool_id']}'>";
+			echo "</td><td class=tdleft>${rsinfo['rsport']}</td><td class=tdleft><a href='${root}?page=rspool&pool_id=${rsinfo['pool_id']}'>";
 			echo $rsinfo['poolname'] . "</a></td></tr>\n";
 		}
 		echo "</table><br><br>";
@@ -3965,7 +3965,7 @@ function renderVirtualService ()
 		echo "<tr class=row_${order}><td class=tdleft>";
 		// Pool info
 		echo '<table width=100%>';
-		echo "<tr><td colspan=2><a href='${root}?page=rspool&id=${pool_id}'>";
+		echo "<tr><td colspan=2><a href='${root}?page=rspool&pool_id=${pool_id}'>";
 		if (!empty ($poolInfo['name']))
 			echo $poolInfo['name'];
 		else
@@ -4037,7 +4037,7 @@ function renderRSPoolServerForm ($pool_id = 0)
 			echo "<input type=hidden name=tab value='${tabno}'>\n";
 			echo "<input type=hidden name=op value=updRS>";
 			echo "<input type=hidden name=rs_id value='${rsid}'>";
-			echo "<input type=hidden name=id value='${pool_id}'>";
+			echo "<input type=hidden name=pool_id value='${pool_id}'>";
 			echo "<tr valign=top class=row_${order}><td><a href='${root}process.php?page=${pageno}&tab=${tabno}";
 			echo "&op=delRS&pool_id=${pool_id}&id=${rsid}'>";
 			printImageHREF ('delete', 'Delete this real server');
@@ -4342,7 +4342,7 @@ function renderRSPoolList ()
 	foreach ($pool_list as $pool_id => $pool_info)
 	{
 		echo "<tr valign=top class=row_${order}><td>" . ($pool_info['refcnt'] ? $pool_info['refcnt'] : '&nbsp;') . '</td>';
-		echo "<td><a href='${root}?page=rspool&id=${pool_id}'>";
+		echo "<td><a href='${root}?page=rspool&pool_id=${pool_id}'>";
 		echo (empty ($pool_info['name']) ? 'ANONYMOUS' : $pool_info['name']) . '</a></td>';
 		echo "<td><pre>${pool_info['vsconfig']}</pre></td>";
 		echo "<td><pre>${pool_info['rsconfig']}</pre></td>";
@@ -4420,7 +4420,7 @@ function renderRealServerList ()
 			$order = $nextorder[$order];
 			$last_pool_id = $rsinfo['rspool_id'];
 		}
-		echo "<tr valign=top class=row_${order}><td><a href='${root}?page=rspool&id=${rsinfo['rspool_id']}'>";
+		echo "<tr valign=top class=row_${order}><td><a href='${root}?page=rspool&pool_id=${rsinfo['rspool_id']}'>";
 		echo empty ($pool_list[$rsinfo['rspool_id']]['name']) ? 'ANONYMOUS' : $pool_list[$rsinfo['rspool_id']]['name'];
 		echo '</a></td><td align=center>';
 		if ($rsinfo['inservice'] == 'yes')
@@ -4469,7 +4469,7 @@ function renderRSPoolRSInServiceForm ($pool_id = 0)
 	echo "<input type=hidden name=page value=${pageno}>\n";
 	echo "<input type=hidden name=tab value=${tabno}>\n";
 	echo "<input type=hidden name=op value=upd>\n";
-	echo "<input type=hidden name=id value=${pool_id}>\n";
+	echo "<input type=hidden name=pool_id value=${pool_id}>\n";
 	echo "<input type=hidden name=rscount value=${rscount}>\n";
 	echo "<table class=widetable border=0 cellpadding=10 cellspacing=0 align=center>\n";
 	echo "<tr><th>RS address</th><th>RS port</th><th>RS configuration</th><th>in service</th></tr>\n";
