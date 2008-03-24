@@ -894,7 +894,7 @@ function getObjectAddresses ($object_id = 0)
 function getAddressspaceList ($tagfilter = array())
 {
 	if (!count ($tagfilter))
-		$whereclause = 'where tag_id is null';
+		$whereclause = '';
 	else
 	{
 		$whereclause = 'where ';
