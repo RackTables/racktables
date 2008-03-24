@@ -906,7 +906,7 @@ function getAddressspaceList ($tagfilter = array())
 		}
 	}
 	$query =
-		"select ".
+		"select distinct ".
 		"id as IPRanges_id, ".
 		"INET_NTOA(ip) as IPRanges_ip, ".
 		"mask as IPRanges_mask, ".
