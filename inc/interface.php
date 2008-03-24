@@ -1740,7 +1740,7 @@ function renderAddressspace ()
 	echo "</table>\n";
 	finishPortlet();
 	echo '</td><td class=pcright>';
-	renderTagFilterPortlet ($tagfilter);
+	renderTagFilterPortlet ($tagfilter, 'ipv4net');
 	echo "</td></tr></table>\n";
 }
 
@@ -4716,7 +4716,7 @@ function renderTagOption ($taginfo, $level = 0)
 }
 
 // Idem, but select those, which are shown on the $_REQUEST['tagfiler'] array.
-function renderTagOptionForFilter ($taginfo, $tagfilter, $level = 0)
+function renderTagOptionForFilter ($taginfo, $tagfilter, $realm, $level = 0)
 {
 	echo $level;
 	$selected = '';
@@ -4729,9 +4729,9 @@ function renderTagOptionForFilter ($taginfo, $tagfilter, $level = 0)
 	echo '<option value=' . $taginfo['id'] . "${selected}>";
 	for ($i = 0; $i < $level; $i++)
 		echo '-- ';
-	echo $taginfo['tag'] . "</option>\n";
+	echo $taginfo['tag'] . (isset ($taginfo['refcnt'][$realm]) ? ' (' . $taginfo['refcnt'][$realm] . ')' : '') . "</option>\n";
 	foreach ($taginfo['kids'] as $kid)
-		renderTagOptionForFilter ($kid, $tagfilter, $level + 1);
+		renderTagOptionForFilter ($kid, $tagfilter, $realm, $level + 1);
 }
 
 function renderObjectTags ($id)
@@ -4803,7 +4803,7 @@ function printTagTRs()
 	}
 }
 
-function renderTagFilterPortlet ($tagfilter)
+function renderTagFilterPortlet ($tagfilter, $realm)
 {
 	global $pageno, $tabno;
 	startPortlet ('Tag filter');
@@ -4817,7 +4817,7 @@ function renderTagFilterPortlet ($tagfilter)
 	echo "<input type=hidden name=tab value=${tabno}>\n";
 	echo '<select name=tagfilter[] multiple>';
 	foreach ($tagTree as $taginfo)
-		renderTagOptionForFilter ($taginfo, $tagfilter);
+		renderTagOptionForFilter ($taginfo, $tagfilter, $realm);
 	echo '</select><br>';
 	echo "<input type=submit value='Apply'></form>\n";
 	finishPortlet();

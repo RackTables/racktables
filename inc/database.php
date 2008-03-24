@@ -2437,14 +2437,23 @@ function loadIPv4RSPoolTags ($id)
 function getTagList ()
 {
 	$taglist = array();
-	$result = useSelectBlade ("select id, parent_id, tag from TagTree order by tag");
+	$query = "select id, parent_id, tag, target_realm as realm, count(target_id) as refcnt " .
+		"from TagTree left join TagStorage on id = tag_id " .
+		"group by id, target_realm order by tag";
+	$result = useSelectBlade ($query);
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-		$taglist[$row['id']] = array
-		(
-			'id' => $row['id'],
-			'tag' => $row['tag'],
-			'parent_id' => $row['parent_id']
-		);
+	{
+		if (!isset ($taglist[$row['id']]))
+			$taglist[$row['id']] = array
+			(
+				'id' => $row['id'],
+				'tag' => $row['tag'],
+				'parent_id' => $row['parent_id'],
+				'refcnt' => array()
+			);
+		if ($row['realm'])
+			$taglist[$row['id']]['refcnt'][$row['realm']] = $row['refcnt'];
+	}
 	$result->closeCursor();
 	return $taglist;
 }
