@@ -1203,6 +1203,7 @@ CREATE TABLE `TagTree` (
 				$query[] = "update Dictionary set dict_value = '${dict_value}' where dict_key = ${dict_key} limit 1";
 			$query[] = "alter table Rack add unique name_in_row (row_id, name)";
 			$query[] = "delete from UserPermission where page = 'help'";
+			$query[] = "alter table Config change column varvalue varvalue char(255) NOT NULL";
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('SHOW_EXPLICIT_TAGS','yes','string','no','no','Show explicit tags')";
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('SHOW_IMPLICIT_TAGS','yes','string','no','no','Show implicit tags')";
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('SHOW_AUTOMATIC_TAGS','no','string','no','no','Show automatic tags')";

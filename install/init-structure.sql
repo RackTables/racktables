@@ -269,7 +269,7 @@ CREATE TABLE `UserPermission` (
 
 CREATE TABLE `Config` (
   `varname` char(32) NOT NULL,
-  `varvalue` char(64) NOT NULL,
+  `varvalue` char(255) NOT NULL,
   `vartype` enum('string','uint') NOT NULL default 'string',
   `emptyok` enum('yes','no') NOT NULL default 'no',
   `is_hidden` enum('yes','no') NOT NULL default 'yes',
