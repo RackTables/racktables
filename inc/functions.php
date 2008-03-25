@@ -374,7 +374,7 @@ function binInvMaskFromDec ($maskL)
 	return $binmask;
 }
 
-function addRange ($range='', $name='', $is_bcast = FALSE)
+function addRange ($range='', $name='', $is_bcast = FALSE, $taglist = array())
 {
 	// $range is in x.x.x.x/x format, split into ip/mask vars
 	$rangeArray = explode('/', $range);
@@ -420,9 +420,7 @@ function addRange ($range='', $name='', $is_bcast = FALSE)
 		"from IPRanges ";
 	
 
-	global $dbxlink;
-
-	$result = $dbxlink->query ($query);
+	$result = useSelectBlade ($query);
 
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
@@ -438,9 +436,17 @@ function addRange ($range='', $name='', $is_bcast = FALSE)
 			return "This subnet intersects with ".long2ip($row['ip'])."/${row['mask']}";
 	}
 	$result->closeCursor();
-	$query =
-		"insert into IPRanges set ip=".sprintf('%u', $ipL).", mask='$maskL', name='$name'";
-	$result = $dbxlink->exec ($query);
+	unset ($result);
+	$result = useInsertBlade
+	(
+		'IPRanges',
+		array
+		(
+			'ip' => sprintf ('%u', $ipL),
+			'mask' => "'${maskL}'",
+			'name' => "'${name}'"
+		)
+	);
 
 	if ($is_bcast and $maskL < 31)
 	{
@@ -449,7 +455,29 @@ function addRange ($range='', $name='', $is_bcast = FALSE)
 		updateAddress ($network_addr, 'network', 'yes');
 		updateAddress ($broadcast_addr, 'broadcast', 'yes');
 	}
-	return '';
+	if (!count ($taglist))
+		return '';
+	if (($result = useSelectBlade ('select last_insert_id()')) == NULL) 
+		return 'Query #3 failed in ' . __FUNCTION__;
+	$row = $result->fetch (PDO::FETCH_NUM);
+	$netid = $row[0];
+	$errcount = 0;
+	foreach ($taglist as $tag_id)
+		if (useInsertBlade
+		(
+			'TagStorage',
+			array
+			(
+				'target_realm' => "'ipv4net'",
+				'target_id' => $netid,
+				'tag_id' => $tag_id
+			)
+		) == FALSE)
+			$errcount++;	
+	if (!$errcount)
+		return '';
+	else
+		return "Experienced ${errcount} errors adding tags for the network";
 }
 
 function getIPRange ($id = 0)

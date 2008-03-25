@@ -503,8 +503,9 @@ function addNewRange ()
 
 	$range = $_REQUEST['range'];
 	$name = $_REQUEST['name'];
-	$is_bcast = $_REQUEST['is_bcast'];
-	$error = addRange($range, $name, $is_bcast == 'on');
+	$is_bcast = isset ($_REQUEST['is_bcast']) ? $_REQUEST['is_bcast'] : 'off';
+	$taglist = isset ($_REQUEST['taglist']) ? $_REQUEST['taglist'] : array();
+	$error = addRange($range, $name, $is_bcast == 'on', $taglist);
 	if ($error != '')
 	{
 		return "${root}?page=${pageno}&tab=${tabno}&error=".urlencode($error);
