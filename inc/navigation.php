@@ -377,7 +377,7 @@ function showPathAndSearch ($pageno)
 	echo "</td>";
 	// Search form.
 	echo "<td><table border=0 cellpadding=0 cellspacing=0><tr><td>Search:</td>";
-	echo "<form method=get action='${root}'><td>";
+	echo "<form name=search method=get action='${root}'><td>";
 	echo '<input type=hidden name=page value=search>';
 	// This input will be the first, if we don't add ports or addresses.
 	echo "<input type=text name=q size=20 tabindex=1000></td></form></tr></table></td>";
