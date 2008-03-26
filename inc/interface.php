@@ -2483,7 +2483,7 @@ function renderSearchResults ()
 		if ($result !== NULL)
 		{
 			$nhits++;
-			$lasthit = 'ipv4address';
+			$lasthit = 'ipv4address1';
 			$summary['ipv4address1'][] = $terms;
 		}
 	}
