@@ -1512,11 +1512,119 @@ function renderObjectGroupSummary ()
 	echo '</td><td class=pcright>';
 	renderProblematicObjectsPortlet();
 	echo '</td><td class=pcright>';
-	renderTagFilterPortlet ($tagfilter, 'object');
+	startPortlet ('Tag filter');
+	renderTagFilterSelect ($tagfilter, 'object');
+	finishPortlet();
+	echo "</td></tr></table>\n";
+}
+
+function renderObjectSpace ()
+{
+	global $taglist, $tagtree;
+	echo "<table border=0 class=objectview>\n";
+	echo "<tr><td class=pcleft width='50%'>";
+	startPortlet ('View all by type');
+	$groupInfo = getObjectGroupInfo();
+	if ($groupInfo === NULL)
+	{
+		showError ('getObjectGroupInfo() failed', __FUNCTION__);
+		return;
+	}
+	if (count ($groupInfo) == 0)
+		echo "No objects exist in DB";
+	else
+	{
+		echo '<div align=left><ul>';
+		foreach ($groupInfo as $gi)
+			echo "<li><a href='${root}?page=objgroup&group_id=${gi['id']}'>${gi['name']}</a> (${gi['count']})</li>";
+		echo '</ul></div>';
+	}
+	finishPortlet();
+
+	echo '</td><td class=pcright>';
+
+	startPortlet ('View all by tag');
+	if (count ($taglist) == 0)
+		echo "No tags exist in DB";
+	else
+		renderTagCloud ('object');
+	finishPortlet();
 	echo "</td></tr></table>\n";
 }
 
 function renderObjectGroup ()
+{
+	global $root, $pageno, $tabno, $nextorder, $taglist, $tagtree;
+	assertUIntArg ('group_id', TRUE);
+	$group_id = $_REQUEST['group_id'];
+	$tagfilter = isset ($_REQUEST['tagfilter']) ? $_REQUEST['tagfilter'] : array();
+	$tagfilter_str = getStringFromTrail (getExplicitTagsOnly (buildTrailFromIds ($tagfilter)));
+	$tagfilter = complementByKids ($tagfilter);
+	echo "<form>\n";
+	echo "<input type=hidden name=page value=${pageno}>\n";
+	echo "<input type=hidden name=group_id value=${group_id}>\n";
+	echo "<table border=0 class=objectview>\n";
+	echo "<tr><td class=pcleft width='25%'>";
+	startPortlet ('change type');
+	$groupInfo = getObjectGroupInfo();
+	if ($groupInfo === NULL)
+	{
+		showError ('getObjectGroupInfo() failed', __FUNCTION__);
+		return;
+	}
+	if (count ($groupInfo) == 0)
+		echo "No objects exist in DB";
+	else
+	{
+		echo '<div align=left><ul>';
+		foreach ($groupInfo as $gi)
+		{
+			echo "<li><a href='${root}?page=${pageno}&group_id=${gi['id']}&tagfilter[]=${tagfilter_str}'>";
+			echo "${gi['name']}</a> (${gi['count']})</li>";
+		}
+		echo '</ul></div>';
+	}
+	finishPortlet();
+
+	echo '</td><td class=pcleft>';
+
+	startPortlet ('Objects');
+	$objects = getObjectList ($group_id, $tagfilter);
+	if ($objects === NULL)
+	{
+		showError ('getObjectList() failed', __FUNCTION__);
+		return;
+	}
+	echo '<br><br><table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
+	echo '<tr><th>Common name</th><th>Visible label</th><th>Asset tag</th><th>Barcode</th><th>Rack</th></tr>';
+	$order = 'odd';
+	foreach ($objects as $obj)
+	{
+		echo "<tr class=row_${order}><td><a href='${root}?page=object&object_id=${obj['id']}'>${obj['dname']}</a></td>";
+		echo "<td>${obj['label']}</td>";
+		echo "<td>${obj['asset_no']}</td>";
+		echo "<td>${obj['barcode']}</td>";
+		if ($obj['rack_id'])
+			echo "<td><a href='${root}?page=rack&rack_id=${obj['rack_id']}'>${obj['Rack_name']}</a></td>";
+		else
+			echo '<td>Unmounted</td>';
+		echo '</tr>';
+		$order = $nextorder[$order];
+	}
+	echo '</table>';
+	finishPortlet();
+
+	echo "</td><td class=pcright width='25%'>";
+
+	startPortlet ('change filter');
+	renderTagFilterSelect ($tagfilter, 'object');
+	echo "<input type=submit value='Apply'>\n";
+	finishPortlet();
+	echo "</td></tr></table>\n";
+	echo '</form>';
+}
+
+function renderObjectGroup_old ()
 {
 	global $root;
 	assertUIntArg ('group_id');
@@ -4703,14 +4811,31 @@ function renderAutoPortsForm ($object_id = 0)
 	echo "</table>";
 }
 
-function renderTagRowForViewer ($taginfo, $level = 0)
+function renderTagRowForViewer ($taginfo, $realm, $level = 0)
 {
-	echo '<tr><td>';
+	echo '<tr><td align=left>';
 	for ($i = 0; $i < $level; $i++)
 		printImageHREF ('spacer');
-	echo $taginfo['tag'] . "</td></tr>\n";
+	echo $taginfo['tag'];
+	if ($realm != '' && isset ($taginfo['refcnt'][$realm]))
+		echo ' (' . $taginfo['refcnt'][$realm] . ')';
+	echo "</td></tr>\n";
 	foreach ($taginfo['kids'] as $kid)
-		renderTagRowForViewer ($kid, $level + 1);
+		renderTagRowForViewer ($kid, $realm, $level + 1);
+}
+
+function renderTagRowForCloud ($taginfo, $realm, $level = 0)
+{
+	echo '<tr><td align=left>';
+	for ($i = 0; $i < $level; $i++)
+		printImageHREF ('spacer');
+	echo "<a href='${root}?page=objgroup&group_id=0&taglist[]=${taginfo['id']}'>";
+	echo $taginfo['tag'] . '</a>';
+	if (isset ($taginfo['refcnt'][$realm]))
+		echo ' (' . $taginfo['refcnt'][$realm] . ')';
+	echo "</td></tr>\n";
+	foreach ($taginfo['kids'] as $kid)
+		renderTagRowForCloud ($kid, $realm, $level + 1);
 }
 
 function renderTagRowForEditor ($taginfo, $level = 0)
@@ -4735,7 +4860,20 @@ function renderTagTree ()
 	foreach ($tagtree as $taginfo)
 	{
 		echo '<tr>';
-		renderTagRowForViewer ($taginfo);
+		renderTagRowForViewer ($taginfo, $realm);
+		echo "</tr>\n";
+	}
+	echo '</table>';
+}
+
+function renderTagCloud ($realm = '')
+{
+	global $taglist, $tagtree;
+	echo '<table>';
+	foreach (getObjectiveTagTree ($tagtree, $realm) as $taginfo)
+	{
+		echo '<tr>';
+		renderTagRowForCloud ($taginfo, $realm);
 		echo "</tr>\n";
 	}
 	echo '</table>';
@@ -4787,6 +4925,7 @@ function renderTagOption ($taginfo, $level = 0)
 }
 
 // Idem, but select those, which are shown on the $_REQUEST['tagfiler'] array.
+// Ignore tag ids, which can't be found on the tree.
 function renderTagOptionForFilter ($taginfo, $tagfilter, $realm, $level = 0)
 {
 	echo $level;
@@ -4883,15 +5022,29 @@ function renderTagFilterPortlet ($tagfilter, $realm)
 		echo "No tags defined";
 		return;
 	}
-	echo "<form method=get'>\n";
+	echo "<form method=get>\n";
 	echo "<input type=hidden name=page value=${pageno}>\n";
 	echo "<input type=hidden name=tab value=${tabno}>\n";
 	echo '<select name=tagfilter[] multiple>';
-	foreach ($tagtree as $taginfo)
+	foreach (getObjectiveTagTree ($tagtree, $realm) as $taginfo)
 		renderTagOptionForFilter ($taginfo, $tagfilter, $realm);
 	echo '</select><br>';
 	echo "<input type=submit value='Apply'></form>\n";
 	finishPortlet();
+}
+
+function renderTagFilterSelect ($tagfilter, $realm)
+{
+	global $taglist, $tagtree;
+	if (!count ($taglist))
+	{
+		echo "No tags defined";
+		return;
+	}
+	echo '<select name=tagfilter[] multiple>';
+	foreach (getObjectiveTagTree ($tagtree, $realm) as $taginfo)
+		renderTagOptionForFilter ($taginfo, $tagfilter, $realm);
+	echo '</select><br>';
 }
 
 function renderTagSelect ()

@@ -1590,4 +1590,46 @@ function buildTrailFromIds ($tagidlist)
 	return $ret;
 }
 
+// Process a given tag tree and return only meaningful branches. The resulting
+// (sub)tree will have refcnt leaves on every last branch.
+function getObjectiveTagTree ($tree, $realm)
+{
+	$ret = array();
+	foreach ($tree as $taginfo)
+	{
+		$subsearch = array();
+		$pick = FALSE;
+		if (count ($taginfo['kids']))
+		{
+			$subsearch = getObjectiveTagTree ($taginfo['kids'], $realm);
+			$pick = count ($subsearch) > 0;
+		}
+		elseif (isset ($taginfo['refcnt'][$realm]))
+			$pick = TRUE;
+		if (!$pick)
+			continue;
+		$ret[] = array
+		(
+			'id' => $taginfo['id'],
+			'tag' => $taginfo['tag'],
+			'parent_id' => $taginfo['parent_id'],
+			'refcnt' => $taginfo['refcnt'],
+			'kids' => $subsearch
+		);
+	}
+	return $ret;
+}
+
+function getStringFromTrail ($trail)
+{
+	$str = '';
+	$comma = '';
+	foreach ($trail as $tag)
+	{
+		$str .= $comma . $tag['id'];
+		$comma = ',';
+	}
+	return $str;
+}
+
 ?>

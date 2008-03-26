@@ -30,7 +30,7 @@ $page['objects']['parent'] = 'index';
 $tab['objects']['default'] = 'View';
 $tab['objects']['newobj'] = 'Add an object';
 $tab['objects']['newmulti'] = 'Add multiple objects';
-$tabhandler['objects']['default'] = 'renderObjectGroupSummary';
+$tabhandler['objects']['default'] = 'renderObjectSpace';
 $tabhandler['objects']['newobj'] = 'renderNewObjectForm';
 $tabhandler['objects']['newmulti'] = 'renderAddMultipleObjectsForm';
 

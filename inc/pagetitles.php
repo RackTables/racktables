@@ -149,14 +149,15 @@ function dynamic_title_objgroup ()
 	{
 		case 'objgroup':
 			assertUIntArg ('group_id');
-			$groupInfo = getObjectGroupInfo ($_REQUEST['group_id']);
+			$group_id = $_REQUEST['group_id'];
+			$groupInfo = getObjectGroupInfo();
 			if ($groupInfo == NULL)
 			{
 				showError ('getObjectGroupInfo() failed', __FUNCTION__);
 				return NULL;
 			}
-			$ret['name'] = $groupInfo['name'];
-			$ret['params']['group_id'] = $groupInfo['id'];
+			$ret['name'] = $groupInfo[$group_id]['name'];
+			$ret['params']['group_id'] = $group_id;
 			break;
 		case 'object':
 			assertUIntArg ('object_id');

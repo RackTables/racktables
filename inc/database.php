@@ -47,8 +47,21 @@ function getObjectTypeList ()
 	return readChapter ('RackObjectType');
 }
 
-function getObjectList ($type_id = 0)
+function getObjectList ($type_id = 0, $tagfilter = array())
 {
+	if (!count ($tagfilter))
+		$whereclause = '';
+	else
+	{
+		$whereclause = ' and (';
+		$orclause = '';
+		foreach ($tagfilter as $tag_id)
+		{
+			$whereclause .= $orclause . 'tag_id = ' . $tag_id;
+			$orclause = ' or ';
+		}
+		$whereclause .= ') ';
+	}
 	$query =
 		"select distinct RackObject.id as id , RackObject.name as name, dict_value as objtype_name, " .
 		"RackObject.label as label, RackObject.barcode as barcode, " .
@@ -56,8 +69,10 @@ function getObjectList ($type_id = 0)
 		"((RackObject inner join Dictionary on objtype_id=dict_key natural join Chapter) " .
 		"left join RackSpace on RackObject.id = object_id) " .
 		"left join Rack on rack_id = Rack.id " .
-		"where objtype_id = '${type_id}' and RackObject.deleted = 'no' " .
-		"and chapter_name = 'RackObjectType' order by name";
+		"left join TagStorage on RackObject.id = TagStorage.target_id and target_realm = 'object' " .
+		"where objtype_id = '${type_id}' and RackObject.deleted = 'no' and chapter_name = 'RackObjectType' " .
+		$whereclause .
+		"order by name";
 	$result = useSelectBlade ($query);
 	$ret = array();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
@@ -615,25 +630,22 @@ function getResidentRacksData ($object_id = 0, $fetch_rackdata = TRUE)
 	return $ret;
 }
 
-function getObjectGroupInfo ($group_id = 0)
+function getObjectGroupInfo ()
 {
 	$query =
 		'select dict_key as id, dict_value as name, count(id) as count from ' .
 		'Dictionary natural join Chapter left join RackObject on dict_key = objtype_id ' .
 		'where chapter_name = "RackObjectType" ' .
-		(($group_id > 0) ? "and dict_key = ${group_id} " : '') .
-		'group by dict_key';
+		'group by dict_key order by dict_value';
 	$result = useSelectBlade ($query);
 	$ret = array();
 	$clist = array ('id', 'name', 'count');
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-		foreach ($clist as $dummy => $cname)
-			$ret[$row['id']][$cname] = $row[$cname];
+		if ($row['count'] > 0)
+			foreach ($clist as $dummy => $cname)
+				$ret[$row['id']][$cname] = $row[$cname];
 	$result->closeCursor();
-	if ($group_id > 0)
-		return current ($ret);
-	else
-		return $ret;
+	return $ret;
 }
 
 // This function returns objects, which have no rackspace assigned to them.
@@ -2475,7 +2487,7 @@ function getTagList ()
 	$result = useSelectBlade ($query);
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
-		if (!isset ($taglist[$row['id']]))
+		if (!isset ($ret[$row['id']]))
 			$ret[$row['id']] = array
 			(
 				'id' => $row['id'],
