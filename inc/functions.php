@@ -1501,7 +1501,7 @@ function complementByKids ($idlist, $tree = NULL, $getall = FALSE)
 
 function loadRackObjectAutoTags()
 {
-	assertUIntArg ('object_id');
+	assertUIntArg ('object_id', __FUNCTION__);
 	$object_id = $_REQUEST['object_id'];
 	$oinfo = getObjectInfo ($object_id);
 	$ret = array();
@@ -1512,7 +1512,7 @@ function loadRackObjectAutoTags()
 
 function loadIPv4PrefixAutoTags()
 {
-	assertUIntArg ('id');
+	assertUIntArg ('id', __FUNCTION__);
 	$subnet = getIPRange ($_REQUEST['id']);
 	$ret = array();
 	$ret[] = array ('tag' => '$id_' . $_REQUEST['id']);
@@ -1525,7 +1525,7 @@ function loadIPv4PrefixAutoTags()
 
 function loadRackAutoTags()
 {
-	assertUIntArg ('rack_id');
+	assertUIntArg ('rack_id', __FUNCTION__);
 	$ret = array();
 	$ret[] = array ('tag' => '$id_' . $_REQUEST['rack_id']);
 	$ret[] = array ('tag' => '$any_rack');
@@ -1534,7 +1534,7 @@ function loadRackAutoTags()
 
 function loadIPv4AddressAutoTags()
 {
-	assertIPv4Arg ('ip');
+	assertIPv4Arg ('ip', __FUNCTION__);
 	$ret = array();
 	$ret[] = array ('tag' => '$ipv4net-' . str_replace ('.', '-', $subnet['ip']) . '-32');
 	// FIXME: find and list tags for all parent networks
@@ -1545,7 +1545,7 @@ function loadIPv4AddressAutoTags()
 
 function loadIPv4VSAutoTags()
 {
-	assertUIntArg ('id');
+	assertUIntArg ('id', __FUNCTION__);
 	$ret = array();
 	$ret[] = array ('tag' => '$id_' . $_REQUEST['id']);
 	$ret[] = array ('tag' => '$any_ipv4vs');
@@ -1555,7 +1555,7 @@ function loadIPv4VSAutoTags()
 
 function loadIPv4RSPoolAutoTags()
 {
-	assertUIntArg ('pool_id');
+	assertUIntArg ('pool_id', __FUNCTION__);
 	$ret = array();
 	$ret[] = array ('tag' => '$id_' . $_REQUEST['pool_id']);
 	$ret[] = array ('tag' => '$any_ipv4rspool');

@@ -244,11 +244,11 @@ function renderNewObjectForm ()
 	if (isset ($_REQUEST['got_data']))
 	{
 		$log = array();
-		assertUIntArg ('object_type_id');
-		assertStringArg ('object_name', TRUE);
-		assertStringArg ('object_label', TRUE);
-		assertStringArg ('object_barcode', TRUE);
-		assertStringArg ('object_asset_no', TRUE);
+		assertUIntArg ('object_type_id', __FUNCTION__);
+		assertStringArg ('object_name', __FUNCTION__, TRUE);
+		assertStringArg ('object_label', __FUNCTION__, TRUE);
+		assertStringArg ('object_barcode', __FUNCTION__, TRUE);
+		assertStringArg ('object_asset_no', __FUNCTION__, TRUE);
 		$type_id = $_REQUEST['object_type_id'];
 		$name = $_REQUEST['object_name'];
 		$label = $_REQUEST['object_label'];
@@ -290,9 +290,9 @@ function renderNewRackForm ($row_id)
 	if (isset ($_REQUEST['got_data']))
 	{
 		$log = array();
-		assertStringArg ('rack_name');
-		assertUIntArg ('rack_height');
-		assertStringArg ('rack_comment', TRUE);
+		assertStringArg ('rack_name', __FUNCTION__);
+		assertUIntArg ('rack_height', __FUNCTION__);
+		assertStringArg ('rack_comment', __FUNCTION__, TRUE);
 		$name = $_REQUEST['rack_name'];
 		$height = $_REQUEST['rack_height'];
 		$comment = $_REQUEST['rack_comment'];
@@ -330,11 +330,11 @@ function renderEditObjectForm ($object_id)
 	{
 		$log = array();
 		// object_id is already verified by page handler
-		assertUIntArg ('object_type_id');
-		assertStringArg ('object_name', TRUE);
-		assertStringArg ('object_label', TRUE);
-		assertStringArg ('object_barcode', TRUE);
-		assertStringArg ('object_asset_no', TRUE);
+		assertUIntArg ('object_type_id', __FUNCTION__);
+		assertStringArg ('object_name', __FUNCTION__, TRUE);
+		assertStringArg ('object_label', __FUNCTION__, TRUE);
+		assertStringArg ('object_barcode', __FUNCTION__, TRUE);
+		assertStringArg ('object_asset_no', __FUNCTION__, TRUE);
 		$type_id = $_REQUEST['object_type_id'];
 		if (isset ($_REQUEST['object_has_problems']) and $_REQUEST['object_has_problems'] == 'on')
 			$has_problems = 'yes';
@@ -461,10 +461,10 @@ function renderEditRackForm ($rack_id)
 	if (isset ($_REQUEST['got_data']))
 	{
 		$log = array();
-		assertUIntArg ('rack_row_id');
-		assertUIntArg ('rack_height');
-		assertStringArg ('rack_name');
-		assertStringArg ('rack_comment', TRUE);
+		assertUIntArg ('rack_row_id', __FUNCTION__);
+		assertUIntArg ('rack_height', __FUNCTION__);
+		assertStringArg ('rack_name', __FUNCTION__);
+		assertStringArg ('rack_comment', __FUNCTION__, TRUE);
 		$row_id = $_REQUEST['rack_row_id'];
 		$height = $_REQUEST['rack_height'];
 		$name = $_REQUEST['rack_name'];
@@ -727,7 +727,7 @@ function renderRackObject ($object_id = 0)
 			$hl_port_id = 0;
 			if (isset ($_REQUEST['hl_port_id']))
 			{
-				assertUIntArg ('hl_port_id');
+				assertUIntArg ('hl_port_id', __FUNCTION__);
 				$hl_port_id = $_REQUEST['hl_port_id'];
 			}
 			echo "<table cellspacing=0 cellpadding='5' align='center' class='widetable'>\n";
@@ -1555,7 +1555,7 @@ function renderObjectSpace ()
 function renderObjectGroup ()
 {
 	global $root, $pageno, $tabno, $nextorder, $taglist, $tagtree;
-	assertUIntArg ('group_id', TRUE);
+	assertUIntArg ('group_id', __FUNCTION__, TRUE);
 	$group_id = $_REQUEST['group_id'];
 	$tagfilter = isset ($_REQUEST['tagfilter']) ? $_REQUEST['tagfilter'] : array();
 	$tagfilter_str = getStringFromTrail (getExplicitTagsOnly (buildTrailFromIds ($tagfilter)));
@@ -1635,7 +1635,7 @@ function renderObjectGroup ()
 function renderObjectGroup_old ()
 {
 	global $root;
-	assertUIntArg ('group_id');
+	assertUIntArg ('group_id', __FUNCTION__);
 	$group_id = $_REQUEST['group_id'];
 	$summary = getObjectGroupInfo();
 	if ($summary == NULL)
@@ -2442,11 +2442,11 @@ function renderAddMultipleObjectsForm ()
 				$log[] = array ('code' => 'error', 'message' => "Submitted form is invalid at line " . $i + 1);
 				break;
 			}
-			assertUIntArg ("${i}_object_type_id", TRUE);
-			assertStringArg ("${i}_object_name", TRUE);
-			assertStringArg ("${i}_object_label", TRUE);
-			assertStringArg ("${i}_object_asset_no", TRUE);
-			assertStringArg ("${i}_object_barcode", TRUE);
+			assertUIntArg ("${i}_object_type_id", __FUNCTION__, TRUE);
+			assertStringArg ("${i}_object_name", __FUNCTION__, TRUE);
+			assertStringArg ("${i}_object_label", __FUNCTION__, TRUE);
+			assertStringArg ("${i}_object_asset_no", __FUNCTION__, TRUE);
+			assertStringArg ("${i}_object_barcode", __FUNCTION__, TRUE);
 			$type_id[$i] = $_REQUEST["${i}_object_type_id"];
 			// Save user input for possible rendering.
 			$name[$i] = $_REQUEST["${i}_object_name"];
@@ -2466,8 +2466,8 @@ function renderAddMultipleObjectsForm ()
 	elseif (isset ($_REQUEST['got_very_fast_data']))
 	{
 		$keepvalues = TRUE;
-		assertUIntArg ('global_type_id', TRUE);
-		assertStringArg ('namelist', TRUE);
+		assertUIntArg ('global_type_id', __FUNCTION__, TRUE);
+		assertStringArg ('namelist', __FUNCTION__, TRUE);
 		$global_type_id = $_REQUEST['global_type_id'];
 		if ($global_type_id == 0)
 		{
@@ -3514,7 +3514,7 @@ function renderVLANMembership ($object_id = 0)
 		// included. The gateway is expected to filter unnecessary changes silently
 		// and to provide a list of responses with either error or success message
 		// for each of the rest.
-		assertUIntArg ('portcount');
+		assertUIntArg ('portcount', __FUNCTION__);
 		$nports = $_REQUEST['portcount'];
 		$prefix = 'set ';
 		$log = array();
@@ -3740,7 +3740,7 @@ function renderSNMPPortFinder ($object_id = 0)
 		$hwtype[626] = 147;
 		$ciscomodel[659] = 'WS-C4948-10GE (48 Ethernet 10/100/1000 ports and 2 10Gb X2 uplinks)';
 		$hwtype[659] = 377;
-		assertStringArg ('community');
+		assertStringArg ('community', __FUNCTION__);
 		$community = $_REQUEST['community'];
 		$objectInfo = getObjectInfo ($object_id);
 		$endpoints = findAllEndpoints ($object_id, $objectInfo['name']);
@@ -4110,7 +4110,7 @@ function renderLVSConfig ($object_id = 0)
 
 function renderVirtualService ()
 {
-	assertUIntArg ('id');
+	assertUIntArg ('id', __FUNCTION__);
 	$vsid = $_REQUEST['id'];
 	global $root, $nextorder;
 	if ($vsid <= 0)

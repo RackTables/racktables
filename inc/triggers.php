@@ -17,7 +17,7 @@
 // let's thinks about fixing it later.
 function trigger_switchvlans ()
 {
-	assertUIntArg ('object_id');
+	assertUIntArg ('object_id', __FUNCTION__);
 	$object_id = $_REQUEST['object_id'];
 	$object = getObjectInfo ($object_id);
 	if ($object['objtype_id'] != 8)
@@ -43,7 +43,7 @@ function trigger_switchvlans ()
 // filling the data in, we stop showing the tab.
 function trigger_snmpportfinder ()
 {
-	assertUIntArg ('object_id');
+	assertUIntArg ('object_id', __FUNCTION__);
 	$object_id = $_REQUEST['object_id'];
 	$object = getObjectInfo ($object_id);
 	if ($object['objtype_id'] != 8)
@@ -62,34 +62,34 @@ function trigger_emptyRackspace ()
 
 function trigger_lvsconfig ()
 {
-	assertUIntArg ('object_id');
+	assertUIntArg ('object_id', __FUNCTION__);
 	return count (getRSPoolsForObject ($_REQUEST['object_id'])) > 0;
 }
 
 function trigger_ipv4 ()
 {
-	assertUIntArg ('object_id');
+	assertUIntArg ('object_id', __FUNCTION__);
 	$info = getObjectInfo ($_REQUEST['object_id']);
 	return in_array ($info['objtype_id'], explode (',', getConfigVar ('IPV4_PERFORMERS')));
 }
 
 function trigger_natv4 ()
 {
-	assertUIntArg ('object_id');
+	assertUIntArg ('object_id', __FUNCTION__);
 	$info = getObjectInfo ($_REQUEST['object_id']);
 	return in_array ($info['objtype_id'], explode (',', getConfigVar ('NATV4_PERFORMERS')));
 }
 
 function trigger_poolrscount ()
 {
-	assertUIntArg ('pool_id');
+	assertUIntArg ('pool_id', __FUNCTION__);
 	$poolInfo = getRSPoolInfo ($_REQUEST['pool_id']);
 	return count ($poolInfo['rslist']) > 0;
 }
 
 function trigger_autoports ()
 {
-	assertUIntArg ('object_id');
+	assertUIntArg ('object_id', __FUNCTION__);
 	if (count (getObjectPortsAndLinks ($_REQUEST['object_id'])) != 0)
 		return FALSE;
 	$info = getObjectInfo ($_REQUEST['object_id']);

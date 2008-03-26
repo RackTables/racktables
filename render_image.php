@@ -4,7 +4,7 @@
 
 require 'inc/init.php';
 
-assertStringArg ('img');
+assertStringArg ('img', __FUNCTION__);
 switch ($_REQUEST['img'])
 {
 	case 'minirack':
@@ -12,11 +12,11 @@ switch ($_REQUEST['img'])
 		$pageno = 'rackspace';
 		$tabno = 'default';
 		authorize();
-		assertUIntArg ('rack_id');
+		assertUIntArg ('rack_id', __FUNCTION__);
 		renderRackThumb ($_REQUEST['rack_id']);
 		break;
 	case 'progressbar':
-		assertUIntArg ('done', TRUE);
+		assertUIntArg ('done', __FUNCTION__, TRUE);
 		renderProgressBarImage ($_REQUEST['done']);
 		break;
 	default:

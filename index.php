@@ -77,10 +77,10 @@ if (isset ($tabhandler[$pageno][$tabno]))
 		switch ($page[$pageno]['bypass_type'])
 		{
 			case 'uint':
-				assertUIntArg ($page[$pageno]['bypass']);
+				assertUIntArg ($page[$pageno]['bypass'], 'index');
 				break;
 			case 'uint0':
-				assertUIntArg ($page[$pageno]['bypass'], TRUE);
+				assertUIntArg ($page[$pageno]['bypass'], 'index', TRUE);
 				break;
 			default:
 				showError ("Dispatching error for bypass parameter");

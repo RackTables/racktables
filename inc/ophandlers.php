@@ -7,76 +7,76 @@
 
 // This function assures that specified argument was passed
 // and is a number greater than zero.
-function assertUIntArg ($argname, $allow_zero = FALSE)
+function assertUIntArg ($argname, $caller = 'N/A', $allow_zero = FALSE)
 {
 	if (!isset ($_REQUEST[$argname]))
 	{
-		showError ("Parameter '${argname}' is missing.", __FUNCTION__);
+		showError ("Parameter '${argname}' is missing (calling function is [${caller}]).", __FUNCTION__);
 		die();
 	}
 	if (!is_numeric ($_REQUEST[$argname]))
 	{
-		showError ("Parameter '${argname}' is not a number.", __FUNCTION__);
+		showError ("Parameter '${argname}' is not a number (calling function is [${caller}]).", __FUNCTION__);
 		die();
 	}
 	if ($_REQUEST[$argname] < 0)
 	{
-		showError ("Parameter '${argname}' is less than zero.", __FUNCTION__);
+		showError ("Parameter '${argname}' is less than zero (calling function is [${caller}]).", __FUNCTION__);
 		die();
 	}
 	if (!$allow_zero and $_REQUEST[$argname] == 0)
 	{
-		showError ("Parameter '${argname}' is equal to zero.", __FUNCTION__);
+		showError ("Parameter '${argname}' is equal to zero (calling function is [${caller}]).", __FUNCTION__);
 		die();
 	}
 }
 
 // This function assures that specified argument was passed
 // and is a non-empty string.
-function assertStringArg ($argname, $ok_if_empty = FALSE)
+function assertStringArg ($argname, $caller = 'N/A', $ok_if_empty = FALSE)
 {
 	if (!isset ($_REQUEST[$argname]))
 	{
-		showError ("Parameter '${argname}' is missing.", __FUNCTION__);
+		showError ("Parameter '${argname}' is missing (calling function is [${caller}]).", __FUNCTION__);
 		die();
 	}
 	if (!is_string ($_REQUEST[$argname]))
 	{
-		showError ("Parameter '${argname}' is not a string.", __FUNCTION__);
+		showError ("Parameter '${argname}' is not a string (calling function is [${caller}]).", __FUNCTION__);
 		die();
 	}
 	if (!$ok_if_empty and empty ($_REQUEST[$argname]))
 	{
-		showError ("Parameter '${argname}' is an empty string.", __FUNCTION__);
+		showError ("Parameter '${argname}' is an empty string (calling function is [${caller}]).", __FUNCTION__);
 		die();
 	}
 }
 
-function assertBoolArg ($argname, $ok_if_empty = FALSE)
+function assertBoolArg ($argname, $caller = 'N/A', $ok_if_empty = FALSE)
 {
 	if (!isset ($_REQUEST[$argname]))
 	{
-		showError ("Parameter '${argname}' is missing.", __FUNCTION__);
+		showError ("Parameter '${argname}' is missing (calling function is [${caller}]).", __FUNCTION__);
 		die();
 	}
 	if (!is_string ($_REQUEST[$argname]) or $_REQUEST[$argname] != 'on')
 	{
-		showError ("Parameter '${argname}' is not a string.", __FUNCTION__);
+		showError ("Parameter '${argname}' is not a string (calling function is [${caller}]).", __FUNCTION__);
 		die();
 	}
 	if (!$ok_if_empty and empty ($_REQUEST[$argname]))
 	{
-		showError ("Parameter '${argname}' is an empty string.", __FUNCTION__);
+		showError ("Parameter '${argname}' is an empty string (calling function is [${caller}]).", __FUNCTION__);
 		die();
 	}
 }
 
-function assertIPv4Arg ($argname, $ok_if_empty = FALSE)
+function assertIPv4Arg ($argname, $caller = 'N/A', $ok_if_empty = FALSE)
 {
-	assertStringArg ($argname, $ok_if_empty);
+	assertStringArg ($argname, $caller, $ok_if_empty);
 	if (!empty ($_REQUEST[$argname]) and long2ip (ip2long ($_REQUEST[$argname])) !== $_REQUEST[$argname])
 	{
-		showError ("IPv4 address validation failed for value '" . $_REQUEST[$argname] . "'", __FUNCTION__);
+		showError ("IPv4 address validation failed for value '" . $_REQUEST[$argname] . "' (calling function is [${caller}]).", __FUNCTION__);
 		die();
 	}
 }
@@ -85,12 +85,12 @@ function addPortForwarding ()
 {
 	global $root, $pageno, $tabno;
 
-	assertUIntArg ('object_id');
-	assertIPv4Arg ('localip');
-	assertIPv4Arg ('remoteip');
-	assertUIntArg ('localport');
-	assertUIntArg ('proto');
-	assertStringArg ('description', TRUE);
+	assertUIntArg ('object_id', __FUNCTION__);
+	assertIPv4Arg ('localip', __FUNCTION__);
+	assertIPv4Arg ('remoteip', __FUNCTION__);
+	assertUIntArg ('localport', __FUNCTION__);
+	assertUIntArg ('proto', __FUNCTION__);
+	assertStringArg ('description', __FUNCTION__, TRUE);
 	$object_id = $_REQUEST['object_id'];
 	$localip = $_REQUEST['localip'];
 	$remoteip = $_REQUEST['remoteip'];
@@ -194,9 +194,9 @@ function editPortForObject ()
 {
 	global $root, $pageno, $tabno;
 
-	assertUIntArg ('port_id');
-	assertUIntArg ('object_id');
-	assertStringArg ('name');
+	assertUIntArg ('port_id', __FUNCTION__);
+	assertUIntArg ('object_id', __FUNCTION__);
+	assertStringArg ('name', __FUNCTION__);
 	$port_id = $_REQUEST['port_id'];
 	$object_id = $_REQUEST['object_id'];
 	$port_name = $_REQUEST['name'];
@@ -290,10 +290,10 @@ function addMultiPorts ()
 {
 	global $root, $pageno, $tabno;
 	// Parse data.
-	assertStringArg ('format');
-	assertStringArg ('input');
-	assertUIntArg ('port_type');
-	assertUIntArg ('object_id');
+	assertStringArg ('format', __FUNCTION__);
+	assertStringArg ('input', __FUNCTION__);
+	assertUIntArg ('port_type', __FUNCTION__);
+	assertUIntArg ('object_id', __FUNCTION__);
 	$format = $_REQUEST['format'];
 	$port_type = $_REQUEST['port_type'];
 	$object_id = $_REQUEST['object_id'];
@@ -498,8 +498,8 @@ function addIpAssignment ()
 function addNewRange ()
 {
 	global $root, $pageno, $tabno;
-	assertStringArg ('range');
-	assertStringArg ('name');
+	assertStringArg ('range', __FUNCTION__);
+	assertStringArg ('name', __FUNCTION__);
 
 	$range = $_REQUEST['range'];
 	$name = $_REQUEST['name'];
@@ -577,10 +577,10 @@ function addAddressToObject ()
 {
 	global $root, $pageno, $tabno;
 
-	assertStringArg ('ip');
-	assertUIntArg ('object_id');
-	assertStringArg ('name', TRUE);
-	assertStringArg ('type');
+	assertStringArg ('ip', __FUNCTION__);
+	assertUIntArg ('object_id', __FUNCTION__);
+	assertStringArg ('name', __FUNCTION__, TRUE);
+	assertStringArg ('type', __FUNCTION__);
 	// Strip masklen.
 	$ip = ereg_replace ('/[[:digit:]]+$', '', $_REQUEST['ip']);
 	$object_id = $_REQUEST['object_id'];
@@ -595,9 +595,9 @@ function addAddressToObject ()
 function createUserAccount ()
 {
 	global $root, $pageno, $tabno;
-	assertStringArg ('username');
-	assertStringArg ('realname', TRUE);
-	assertStringArg ('password');
+	assertStringArg ('username', __FUNCTION__);
+	assertStringArg ('realname', __FUNCTION__, TRUE);
+	assertStringArg ('password', __FUNCTION__);
 	$username = $_REQUEST['username'];
 	$password = hash (PASSWORD_HASH, $_REQUEST['password']);
 	$result = commitCreateUserAccount ($username, $_REQUEST['realname'], $password);
@@ -610,10 +610,10 @@ function createUserAccount ()
 function updateUserAccount ()
 {
 	global $root, $pageno, $tabno;
-	assertUIntArg ('id');
-	assertStringArg ('username');
-	assertStringArg ('realname', TRUE);
-	assertStringArg ('password');
+	assertUIntArg ('id', __FUNCTION__);
+	assertStringArg ('username', __FUNCTION__);
+	assertStringArg ('realname', __FUNCTION__, TRUE);
+	assertStringArg ('password', __FUNCTION__);
 	// We might be asked to change username, so use user ID only.
 	$id = $_REQUEST['id'];
 	$username = $_REQUEST['username'];
@@ -637,7 +637,7 @@ function updateUserAccount ()
 function enableUserAccount ()
 {
 	global $root, $pageno, $tabno;
-	assertUIntArg ('id');
+	assertUIntArg ('id', __FUNCTION__);
 	$id = $_REQUEST['id'];
 	$result = commitEnableUserAccount ($id, 'yes');
 	if ($result == TRUE)
@@ -649,7 +649,7 @@ function enableUserAccount ()
 function disableUserAccount ()
 {
 	global $root, $pageno, $tabno;
-	assertUIntArg ('id');
+	assertUIntArg ('id', __FUNCTION__);
 	$id = $_REQUEST['id'];
 	if ($id == 1)
 		$result = FALSE;
@@ -664,9 +664,9 @@ function disableUserAccount ()
 function revokePermission ()
 {
 	global $root, $pageno, $tabno;
-	assertUIntArg ('access_userid', TRUE);
-	assertStringArg ('access_page');
-	assertStringArg ('access_tab');
+	assertUIntArg ('access_userid', __FUNCTION__, TRUE);
+	assertStringArg ('access_page', __FUNCTION__);
+	assertStringArg ('access_tab', __FUNCTION__);
 	$result = commitRevokePermission
 	(
 		$_REQUEST['access_userid'],
@@ -682,10 +682,10 @@ function revokePermission ()
 function grantPermission ()
 {
 	global $root, $pageno, $tabno;
-	assertUIntArg ('access_userid', TRUE);
-	assertStringArg ('access_page');
-	assertStringArg ('access_tab');
-	assertStringArg ('access_value');
+	assertUIntArg ('access_userid', __FUNCTION__, TRUE);
+	assertStringArg ('access_page', __FUNCTION__);
+	assertStringArg ('access_tab', __FUNCTION__);
+	assertStringArg ('access_value', __FUNCTION__);
 	$result = commitGrantPermission
 	(
 		$_REQUEST['access_userid'],
@@ -757,9 +757,9 @@ function deleteDictWord ()
 function updateDictionary ()
 {
 	global $root, $pageno, $tabno;
-	assertUIntArg ('chapter_no');
-	assertUIntArg ('dict_key');
-	assertStringArg ('dict_value');
+	assertUIntArg ('chapter_no', __FUNCTION__);
+	assertUIntArg ('dict_key', __FUNCTION__);
+	assertStringArg ('dict_value', __FUNCTION__);
 	if (commitUpdateDictionary ($_REQUEST['chapter_no'], $_REQUEST['dict_key'], $_REQUEST['dict_value']) === TRUE)
 		return "${root}?page=${pageno}&tab=${tabno}&message=" . urlencode ('Update succeeded.');
 	else
@@ -769,8 +769,8 @@ function updateDictionary ()
 function supplementDictionary ()
 {
 	global $root, $pageno, $tabno;
-	assertUIntArg ('chapter_no');
-	assertStringArg ('dict_value');
+	assertUIntArg ('chapter_no', __FUNCTION__);
+	assertStringArg ('dict_value', __FUNCTION__);
 	if (commitSupplementDictionary ($_REQUEST['chapter_no'], $_REQUEST['dict_value']) === TRUE)
 		return "${root}?page=${pageno}&tab=${tabno}&message=" . urlencode ('Supplement succeeded.');
 	else
@@ -780,8 +780,8 @@ function supplementDictionary ()
 function reduceDictionary ()
 {
 	global $root, $pageno, $tabno;
-	assertUIntArg ('chapter_no');
-	assertUIntArg ('dict_key');
+	assertUIntArg ('chapter_no', __FUNCTION__);
+	assertUIntArg ('dict_key', __FUNCTION__);
 	if (commitReduceDictionary ($_REQUEST['chapter_no'], $_REQUEST['dict_key']) === TRUE)
 		return "${root}?page=${pageno}&tab=${tabno}&message=" . urlencode ('Reduction succeeded.');
 	else
@@ -791,7 +791,7 @@ function reduceDictionary ()
 function addChapter ()
 {
 	global $root, $pageno, $tabno;
-	assertStringArg ('chapter_name');
+	assertStringArg ('chapter_name', __FUNCTION__);
 	if (commitAddChapter ($_REQUEST['chapter_name']) === TRUE)
 		return "${root}?page=${pageno}&tab=${tabno}&message=" . urlencode ('Chapter was added.');
 	else
@@ -801,8 +801,8 @@ function addChapter ()
 function updateChapter ()
 {
 	global $root, $pageno, $tabno;
-	assertUIntArg ('chapter_no');
-	assertStringArg ('chapter_name');
+	assertUIntArg ('chapter_no', __FUNCTION__);
+	assertStringArg ('chapter_name', __FUNCTION__);
 	if (commitUpdateChapter ($_REQUEST['chapter_no'], $_REQUEST['chapter_name']) === TRUE)
 		return "${root}?page=${pageno}&tab=${tabno}&message=" . urlencode ('Chapter was updated.');
 	else
@@ -812,7 +812,7 @@ function updateChapter ()
 function delChapter ()
 {
 	global $root, $pageno, $tabno;
-	assertUIntArg ('chapter_no');
+	assertUIntArg ('chapter_no', __FUNCTION__);
 	if (commitDeleteChapter ($_REQUEST['chapter_no']))
 		return "${root}?page=${pageno}&tab=${tabno}&message=" . urlencode ('Chapter was deleted.');
 	else
@@ -822,8 +822,8 @@ function delChapter ()
 function changeAttribute ()
 {
 	global $root, $pageno, $tabno;
-	assertUIntArg ('attr_id');
-	assertStringArg ('attr_name');
+	assertUIntArg ('attr_id', __FUNCTION__);
+	assertStringArg ('attr_name', __FUNCTION__);
 	if (commitUpdateAttribute ($_REQUEST['attr_id'], $_REQUEST['attr_name']))
 		return "${root}?page=${pageno}&tab=${tabno}&message=" . urlencode ('Rename successful.');
 	else
@@ -833,8 +833,8 @@ function changeAttribute ()
 function createAttribute ()
 {
 	global $root, $pageno, $tabno;
-	assertStringArg ('attr_name');
-	assertStringArg ('attr_type');
+	assertStringArg ('attr_name', __FUNCTION__);
+	assertStringArg ('attr_type', __FUNCTION__);
 	if (commitAddAttribute ($_REQUEST['attr_name'], $_REQUEST['attr_type']))
 		return "${root}?page=${pageno}&tab=${tabno}&message=" . urlencode ("Attribute '${_REQUEST['attr_name']}' created.");
 	else
@@ -844,7 +844,7 @@ function createAttribute ()
 function deleteAttribute ()
 {
 	global $root, $pageno, $tabno;
-	assertUIntArg ('attr_id');
+	assertUIntArg ('attr_id', __FUNCTION__);
 	if (commitDeleteAttribute ($_REQUEST['attr_id']))
 		return "${root}?page=${pageno}&tab=${tabno}&message=" . urlencode ('Attribute was deleted.');
 	else
@@ -854,9 +854,9 @@ function deleteAttribute ()
 function supplementAttrMap ()
 {
 	global $root, $pageno, $tabno;
-	assertUIntArg ('attr_id');
-	assertUIntArg ('objtype_id');
-	assertUIntArg ('chapter_no');
+	assertUIntArg ('attr_id', __FUNCTION__);
+	assertUIntArg ('objtype_id', __FUNCTION__);
+	assertUIntArg ('chapter_no', __FUNCTION__);
 	if (commitSupplementAttrMap ($_REQUEST['attr_id'], $_REQUEST['objtype_id'], $_REQUEST['chapter_no']) === TRUE)
 		return "${root}?page=${pageno}&tab=${tabno}&message=" . urlencode ('Supplement succeeded.');
 	else
@@ -866,8 +866,8 @@ function supplementAttrMap ()
 function reduceAttrMap ()
 {
 	global $root, $pageno, $tabno;
-	assertUIntArg ('attr_id');
-	assertUIntArg ('objtype_id');
+	assertUIntArg ('attr_id', __FUNCTION__);
+	assertUIntArg ('objtype_id', __FUNCTION__);
 	if (commitReduceAttrMap ($_REQUEST['attr_id'], $_REQUEST['objtype_id']) === TRUE)
 		return "${root}?page=${pageno}&tab=${tabno}&message=" . urlencode ('Reduction succeeded.');
 	else
@@ -877,8 +877,8 @@ function reduceAttrMap ()
 function resetAttrValue ()
 {
 	global $root, $pageno, $tabno;
-	assertUIntArg ('attr_id');
-	assertUIntArg ('object_id');
+	assertUIntArg ('attr_id', __FUNCTION__);
+	assertUIntArg ('object_id', __FUNCTION__);
 	$object_id = $_REQUEST['object_id'];
 	if (commitResetAttrValue ($object_id, $_REQUEST['attr_id']) === TRUE)
 		return "${root}?page=${pageno}&tab=${tabno}&object_id=${object_id}&message=" . urlencode ('Reset succeeded.');
@@ -889,17 +889,17 @@ function resetAttrValue ()
 function updateAttrValues ()
 {
 	global $root, $pageno, $tabno;
-	assertUIntArg ('object_id');
+	assertUIntArg ('object_id', __FUNCTION__);
 	$object_id = $_REQUEST['object_id'];
 	$oldvalues = getAttrValues ($object_id);
 
-	assertUIntArg ('num_attrs');
+	assertUIntArg ('num_attrs', __FUNCTION__);
 	$num_attrs = $_REQUEST['num_attrs'];
 	$result = array();
 
 	for ($i = 0; $i < $num_attrs; $i++)
 	{
-		assertUIntArg ("${i}_attr_id");
+		assertUIntArg ("${i}_attr_id", __FUNCTION__);
 		$attr_id = $_REQUEST["${i}_attr_id"];
 
 		// Field is empty, delete attribute and move on.
@@ -911,7 +911,7 @@ function updateAttrValues ()
 
 		// The value could be uint/float, but we don't know ATM. Let SQL
 		// server check this and complain.
-		assertStringArg ("${i}_value");
+		assertStringArg ("${i}_value", __FUNCTION__);
 		$value = $_REQUEST["${i}_value"];
 		switch ($oldvalues[$attr_id]['type'])
 		{
@@ -943,8 +943,8 @@ function updateAttrValues ()
 function useupPort ()
 {
 	global $root, $pageno, $tabno;
-	assertUIntArg ('port_id');
-	assertUIntArg ('object_id');
+	assertUIntArg ('port_id', __FUNCTION__);
+	assertUIntArg ('object_id', __FUNCTION__);
 	$object_id = $_REQUEST['object_id'];
 	if (commitUseupPort ($_REQUEST['port_id']) === TRUE)
 		return "${root}?page=${pageno}&tab=${tabno}&object_id=${object_id}&message=" . urlencode ('Reservation removed.');
@@ -957,14 +957,14 @@ function updateUI ()
 	global $root, $pageno, $tabno;
 	$oldvalues = loadConfigCache();
 
-	assertUIntArg ('num_vars');
+	assertUIntArg ('num_vars', __FUNCTION__);
 	$num_vars = $_REQUEST['num_vars'];
 	$error = '';
 
 	for ($i = 0; $i < $num_vars; $i++)
 	{
-		assertStringArg ("${i}_varname");
-		assertStringArg ("${i}_varvalue", TRUE);
+		assertStringArg ("${i}_varname", __FUNCTION__);
+		assertStringArg ("${i}_varvalue", __FUNCTION__, TRUE);
 		$varname = $_REQUEST["${i}_varname"];
 		$varvalue = $_REQUEST["${i}_varvalue"];
 
@@ -1017,10 +1017,10 @@ function addRealServer ()
 {
 	global $root, $pageno, $tabno;
 
-	assertUIntArg ('pool_id');
-	assertIPv4Arg ('remoteip');
-	assertUIntArg ('rsport');
-	assertStringArg ('rsconfig', TRUE);
+	assertUIntArg ('pool_id', __FUNCTION__);
+	assertIPv4Arg ('remoteip', __FUNCTION__);
+	assertUIntArg ('rsport', __FUNCTION__);
+	assertStringArg ('rsconfig', __FUNCTION__, TRUE);
 	$pool_id = $_REQUEST['pool_id'];
 	if (!addRStoRSPool ($pool_id, $_REQUEST['remoteip'], $_REQUEST['rsport'], getConfigVar ('DEFAULT_IPV4_RS_INSERVICE'), $_REQUEST['rsconfig']))
 		return "${root}?page=${pageno}&tab=${tabno}&pool_id=${pool_id}&error=" . urlencode ('addRStoRSPool() failed');
@@ -1033,9 +1033,9 @@ function addRealServers ()
 {
 	global $root, $pageno, $tabno;
 
-	assertUIntArg ('id');
-	assertStringArg ('format');
-	assertStringArg ('rawtext');
+	assertUIntArg ('id', __FUNCTION__);
+	assertStringArg ('format', __FUNCTION__);
+	assertStringArg ('rawtext', __FUNCTION__);
 	$pool_id = $_REQUEST['id'];
 	$rawtext = str_replace ('\r', '', $_REQUEST['rawtext']);
 	$ngood = $nbad = 0;
@@ -1087,15 +1087,15 @@ function addVService ()
 {
 	global $root, $pageno, $tabno;
 
-	assertIPv4Arg ('vip');
-	assertUIntArg ('vport');
-	assertStringArg ('proto');
+	assertIPv4Arg ('vip', __FUNCTION__);
+	assertUIntArg ('vport', __FUNCTION__);
+	assertStringArg ('proto', __FUNCTION__);
 	$proto = $_REQUEST['proto'];
 	if ($proto != 'TCP' and $proto != 'UDP')
 		return "${root}?page=${pageno}&tab=${tabno}&error=" . urlencode (__FUNCTION__ . ': invalid protocol');
-	assertStringArg ('name', TRUE);
-	assertStringArg ('vsconfig', TRUE);
-	assertStringArg ('rsconfig', TRUE);
+	assertStringArg ('name', __FUNCTION__, TRUE);
+	assertStringArg ('vsconfig', __FUNCTION__, TRUE);
+	assertStringArg ('rsconfig', __FUNCTION__, TRUE);
 	$pool_id = $_REQUEST['id'];
 	if (!commitCreateVS ($_REQUEST['vip'], $_REQUEST['vport'], $proto, $_REQUEST['name'], $_REQUEST['vsconfig'], $_REQUEST['rsconfig']))
 		return "${root}?page=${pageno}&tab=${tabno}&error=" . urlencode ('commitCreateVS() failed');
@@ -1107,8 +1107,8 @@ function deleteRealServer ()
 {
 	global $root, $pageno, $tabno;
 
-	assertUIntArg ('pool_id');
-	assertUIntArg ('id');
+	assertUIntArg ('pool_id', __FUNCTION__);
+	assertUIntArg ('id', __FUNCTION__);
 	$pool_id = $_REQUEST['pool_id'];
 	if (!commitDeleteRS ($_REQUEST['id']))
 		return "${root}?page=${pageno}&tab=${tabno}&pool_id=${pool_id}&error=" . urlencode ('commitDeleteRS() failed');
@@ -1120,9 +1120,9 @@ function deleteLoadBalancer ()
 {
 	global $root, $pageno, $tabno;
 
-	assertUIntArg ('object_id');
-	assertUIntArg ('pool_id');
-	assertUIntArg ('vs_id');
+	assertUIntArg ('object_id', __FUNCTION__);
+	assertUIntArg ('pool_id', __FUNCTION__);
+	assertUIntArg ('vs_id', __FUNCTION__);
 	$pool_id = $_REQUEST['pool_id'];
 	if (!commitDeleteLB ($_REQUEST['object_id'], $pool_id, $_REQUEST['vs_id']))
 		return "${root}?page=${pageno}&tab=${tabno}&pool_id=${pool_id}&error=" . urlencode ('commitDeleteLB() failed');
@@ -1134,7 +1134,7 @@ function deleteVService ()
 {
 	global $root, $pageno, $tabno;
 
-	assertUIntArg ('id');
+	assertUIntArg ('id', __FUNCTION__);
 	if (!commitDeleteVS ($_REQUEST['id']))
 		return "${root}?page=${pageno}&tab=${tabno}&error=" . urlencode ('commitDeleteVS() failed');
 	else
@@ -1145,11 +1145,11 @@ function updateRealServer ()
 {
 	global $root, $pageno, $tabno;
 
-	assertUIntArg ('id');
-	assertUIntArg ('rs_id');
-	assertIPv4Arg ('rsip');
-	assertUIntArg ('rsport');
-	assertStringArg ('rsconfig', TRUE);
+	assertUIntArg ('id', __FUNCTION__);
+	assertUIntArg ('rs_id', __FUNCTION__);
+	assertIPv4Arg ('rsip', __FUNCTION__);
+	assertUIntArg ('rsport', __FUNCTION__);
+	assertStringArg ('rsconfig', __FUNCTION__, TRUE);
 	// only necessary for generating next URL
 	$pool_id = $_REQUEST['id'];
 	if (!commitUpdateRS ($_REQUEST['rs_id'], $_REQUEST['rsip'], $_REQUEST['rsport'], $_REQUEST['rsconfig']))
@@ -1162,11 +1162,11 @@ function updateLoadBalancer ()
 {
 	global $root, $pageno, $tabno;
 
-	assertUIntArg ('object_id');
-	assertUIntArg ('pool_id');
-	assertUIntArg ('vs_id');
-	assertStringArg ('vsconfig', TRUE);
-	assertStringArg ('rsconfig', TRUE);
+	assertUIntArg ('object_id', __FUNCTION__);
+	assertUIntArg ('pool_id', __FUNCTION__);
+	assertUIntArg ('vs_id', __FUNCTION__);
+	assertStringArg ('vsconfig', __FUNCTION__, TRUE);
+	assertStringArg ('rsconfig', __FUNCTION__, TRUE);
 	$pool_id = $_REQUEST['pool_id'];
 	if (!commitUpdateLB ($_REQUEST['object_id'], $pool_id, $_REQUEST['vs_id'], $_REQUEST['vsconfig'], $_REQUEST['rsconfig']))
 		return "${root}?page=${pageno}&tab=${tabno}&pool_id=${pool_id}&error=" . urlencode ('commitUpdateLB() failed');
@@ -1178,13 +1178,13 @@ function updateVService ()
 {
 	global $root, $pageno, $tabno;
 
-	assertUIntArg ('id');
-	assertIPv4Arg ('vip');
-	assertUIntArg ('vport');
-	assertStringArg ('proto');
-	assertStringArg ('name', TRUE);
-	assertStringArg ('vsconfig', TRUE);
-	assertStringArg ('rsconfig', TRUE);
+	assertUIntArg ('id', __FUNCTION__);
+	assertIPv4Arg ('vip', __FUNCTION__);
+	assertUIntArg ('vport', __FUNCTION__);
+	assertStringArg ('proto', __FUNCTION__);
+	assertStringArg ('name', __FUNCTION__, TRUE);
+	assertStringArg ('vsconfig', __FUNCTION__, TRUE);
+	assertStringArg ('rsconfig', __FUNCTION__, TRUE);
 	if (!commitUpdateVS ($_REQUEST['id'], $_REQUEST['vip'], $_REQUEST['vport'], $_REQUEST['proto'], $_REQUEST['name'], $_REQUEST['vsconfig'], $_REQUEST['rsconfig']))
 		return "${root}?page=${pageno}&tab=${tabno}&error=" . urlencode ('commitUpdateVS() failed');
 	else
@@ -1195,11 +1195,11 @@ function addLoadBalancer ()
 {
 	global $root, $pageno, $tabno;
 
-	assertUIntArg ('pool_id');
-	assertUIntArg ('object_id');
-	assertUIntArg ('vs_id');
-	assertStringArg ('vsconfig', TRUE);
-	assertStringArg ('rsconfig', TRUE);
+	assertUIntArg ('pool_id', __FUNCTION__);
+	assertUIntArg ('object_id', __FUNCTION__);
+	assertUIntArg ('vs_id', __FUNCTION__);
+	assertStringArg ('vsconfig', __FUNCTION__, TRUE);
+	assertStringArg ('rsconfig', __FUNCTION__, TRUE);
 	$pool_id = $_REQUEST['pool_id'];
 	if (!addLBtoRSPool ($pool_id, $_REQUEST['object_id'], $_REQUEST['vs_id'], $_REQUEST['vsconfig'], $_REQUEST['rsconfig']))
 		return "${root}?page=${pageno}&tab=${tabno}&pool_id=${pool_id}&error=" . urlencode ('addLBtoRSPool() failed');
@@ -1211,9 +1211,9 @@ function addRSPool ()
 {
 	global $root, $pageno, $tabno;
 
-	assertStringArg ('name', TRUE);
-	assertStringArg ('vsconfig', TRUE);
-	assertStringArg ('rsconfig', TRUE);
+	assertStringArg ('name', __FUNCTION__, TRUE);
+	assertStringArg ('vsconfig', __FUNCTION__, TRUE);
+	assertStringArg ('rsconfig', __FUNCTION__, TRUE);
 	if (!commitCreateRSPool ($_REQUEST['name'], $_REQUEST['vsconfig'], $_REQUEST['rsconfig']))
 		return "${root}?page=${pageno}&tab=${tabno}&error=" . urlencode ('commitCreateRSPool() failed');
 	else
@@ -1224,7 +1224,7 @@ function deleteRSPool ()
 {
 	global $root, $pageno, $tabno;
 
-	assertUIntArg ('pool_id');
+	assertUIntArg ('pool_id', __FUNCTION__);
 	if (!commitDeleteRSPool ($_REQUEST['pool_id']))
 		return "${root}?page=${pageno}&tab=${tabno}&error=" . urlencode ('commitDeleteRSPool() failed');
 	else
@@ -1235,10 +1235,10 @@ function updateRSPool ()
 {
 	global $root, $pageno, $tabno;
 
-	assertUIntArg ('pool_id');
-	assertStringArg ('name', TRUE);
-	assertStringArg ('vsconfig', TRUE);
-	assertStringArg ('rsconfig', TRUE);
+	assertUIntArg ('pool_id', __FUNCTION__);
+	assertStringArg ('name', __FUNCTION__, TRUE);
+	assertStringArg ('vsconfig', __FUNCTION__, TRUE);
+	assertStringArg ('rsconfig', __FUNCTION__, TRUE);
 	if (!commitUpdateRSPool ($_REQUEST['pool_id'], $_REQUEST['name'], $_REQUEST['vsconfig'], $_REQUEST['rsconfig']))
 		return "${root}?page=${pageno}&tab=${tabno}&error=" . urlencode ('commitUpdateRSPool() failed');
 	else
@@ -1248,8 +1248,8 @@ function updateRSPool ()
 function updateRSInService ()
 {
 	global $root, $pageno, $tabno;
-	assertUIntArg ('pool_id');
-	assertUIntArg ('rscount');
+	assertUIntArg ('pool_id', __FUNCTION__);
+	assertUIntArg ('rscount', __FUNCTION__);
 	$pool_id = $_REQUEST['pool_id'];
 	$orig = getRSPoolInfo ($pool_id);
 	$nbad = $ngood = 0;
@@ -1277,8 +1277,8 @@ function updateRSInService ()
 function importPTRData ()
 {
 	global $root, $pageno, $tabno;
-	assertUIntArg ('id');
-	assertUIntArg ('addrcount');
+	assertUIntArg ('id', __FUNCTION__);
+	assertUIntArg ('addrcount', __FUNCTION__);
 	$nbad = $ngood = 0;
 	$id = $_REQUEST['id'];
 	for ($i = 0; $i < $_REQUEST['addrcount']; $i++)
@@ -1286,9 +1286,9 @@ function importPTRData ()
 		$inputname = "import_${i}";
 		if (!isset ($_REQUEST[$inputname]) or $_REQUEST[$inputname] != 'on')
 			continue;
-		assertIPv4Arg ("addr_${i}");
-		assertStringArg ("descr_${i}", TRUE);
-		assertStringArg ("rsvd_${i}");
+		assertIPv4Arg ("addr_${i}", __FUNCTION__);
+		assertStringArg ("descr_${i}", __FUNCTION__, TRUE);
+		assertStringArg ("rsvd_${i}", __FUNCTION__);
 		// Non-existent addresses will not have this argument set in request.
 		$rsvd = 'no';
 		if ($_REQUEST["rsvd_${i}"] == 'yes')
@@ -1307,7 +1307,7 @@ function importPTRData ()
 function generateAutoPorts ()
 {
 	global $root, $pageno, $tabno;
-	assertUIntArg ('object_id');
+	assertUIntArg ('object_id', __FUNCTION__);
 	$object_id = $_REQUEST['object_id'];
 	$info = getObjectInfo ($object_id);
 	// Navigate away in case of success, stay at the place otherwise.
@@ -1321,7 +1321,7 @@ function generateAutoPorts ()
 function saveEntityTags ($realm, $bypass)
 {
 	global $root, $pageno, $tabno, $explicit_tags, $implicit_tags;
-	assertUIntArg ($bypass);
+	assertUIntArg ($bypass, __FUNCTION__);
 	$entity_id = $_REQUEST[$bypass];
 	// Build a trail from the submitted data, minimize it,
 	// then wipe existing records and store the new set instead.
@@ -1369,7 +1369,7 @@ function saveIPv4RSPoolTags ()
 function destroyTag ()
 {
 	global $root, $pageno, $tabno;
-	assertUIntArg ('id');
+	assertUIntArg ('id', __FUNCTION__);
 	if (($ret = commitDestroyTag ($_REQUEST['id'])) == '')
 		return "${root}?page=${pageno}&tab=${tabno}&message=" . urlencode ("Successfully deleted tag.");
 	else
@@ -1379,8 +1379,8 @@ function destroyTag ()
 function createTag ()
 {
 	global $root, $pageno, $tabno;
-	assertStringArg ('tagname');
-	assertUIntArg ('parent_id', TRUE);
+	assertStringArg ('tagname', __FUNCTION__);
+	assertUIntArg ('parent_id', __FUNCTION__, TRUE);
 	$tagname = trim ($_REQUEST['tagname']);
 	if (($parent_id = $_REQUEST['parent_id']) <= 0)
 		$parent_id = 'NULL';

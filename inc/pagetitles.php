@@ -35,7 +35,7 @@ function dynamic_title_row ()
 	switch ($pageno)
 	{
 		case 'rack':
-			assertUIntArg ('rack_id');
+			assertUIntArg ('rack_id', __FUNCTION__);
 			$rack = getRackData ($_REQUEST['rack_id']);
 			if ($rack == NULL)
 			{
@@ -46,7 +46,7 @@ function dynamic_title_row ()
 			$ret['params']['row_id'] = $rack['row_id'];
 			break;
 		case 'row':
-			assertUIntArg ('row_id');
+			assertUIntArg ('row_id', __FUNCTION__);
 			$rowInfo = getRackRowInfo ($_REQUEST['row_id']);
 			if ($rowInfo == NULL)
 			{
@@ -75,7 +75,7 @@ function dynamic_title_object ()
 	switch ($pageno)
 	{
 		case 'object':
-			assertUIntArg ('object_id');
+			assertUIntArg ('object_id', __FUNCTION__);
 			$object = getObjectInfo ($_REQUEST['object_id']);
 			if ($object == NULL)
 			{
@@ -98,7 +98,7 @@ function dynamic_title_vservice ()
 	switch ($pageno)
 	{
 		case 'vservice':
-			assertUIntArg ('id');
+			assertUIntArg ('id', __FUNCTION__);
 			$ret['name'] = buildVServiceName (getVServiceInfo ($_REQUEST['id']));
 			$ret['params']['id'] = $_REQUEST['id'];
 			break;
@@ -115,7 +115,7 @@ function dynamic_title_rspool ()
 	switch ($pageno)
 	{
 		case 'rspool':
-			assertUIntArg ('pool_id');
+			assertUIntArg ('pool_id', __FUNCTION__);
 			$poolInfo = getRSPoolInfo ($_REQUEST['pool_id']);
 			$ret['name'] = empty ($poolInfo['name']) ? 'ANONYMOUS' : $poolInfo['name'];
 			$ret['params']['pool_id'] = $_REQUEST['pool_id'];
@@ -148,7 +148,7 @@ function dynamic_title_objgroup ()
 	switch ($pageno)
 	{
 		case 'objgroup':
-			assertUIntArg ('group_id', TRUE);
+			assertUIntArg ('group_id', __FUNCTION__, TRUE);
 			$group_id = $_REQUEST['group_id'];
 			$groupInfo = getObjectGroupInfo();
 			if ($groupInfo == NULL)
@@ -160,7 +160,7 @@ function dynamic_title_objgroup ()
 			$ret['params']['group_id'] = $group_id;
 			break;
 		case 'object':
-			assertUIntArg ('object_id');
+			assertUIntArg ('object_id', __FUNCTION__);
 			$objectInfo = getObjectInfo ($_REQUEST['object_id']);
 			if ($objectInfo == NULL)
 			{
