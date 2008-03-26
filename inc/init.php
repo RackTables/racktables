@@ -111,6 +111,9 @@ authenticate();
 $remote_username = $_SERVER['PHP_AUTH_USER'];
 $pageno = (isset ($_REQUEST['page'])) ? $_REQUEST['page'] : 'index';
 $tabno = (isset ($_REQUEST['tab'])) ? $_REQUEST['tab'] : 'default';
+// Order matters here.
+$taglist = getTagList();
+$tagtree = getTagTree();
 
 require_once 'inc/navigation.php';
 require_once 'inc/pagetitles.php';

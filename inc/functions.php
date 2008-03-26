@@ -1344,30 +1344,31 @@ function attachChildTag (&$tree, $parent_id, $child_id, $child_info)
 // Build a tree from the tag list and return it.
 function getTagTree ()
 {
-	$tagtree = array();
-	$taglist = getTagList();
-	while (count ($taglist) > 0)
+	global $taglist;
+	$mytaglist = $taglist;
+	$ret = array();
+	while (count ($mytaglist) > 0)
 	{
 		$picked = FALSE;
-		foreach ($taglist as $tagid => $taginfo)
+		foreach ($mytaglist as $tagid => $taginfo)
 		{
 			$taginfo['kids'] = array();
 			if ($taginfo['parent_id'] == NULL)
 			{
-				$tagtree[$tagid] = $taginfo;
+				$ret[$tagid] = $taginfo;
 				$picked = TRUE;
-				unset ($taglist[$tagid]);
+				unset ($mytaglist[$tagid]);
 			}
-			elseif (attachChildTag ($tagtree, $taginfo['parent_id'], $tagid, $taginfo))
+			elseif (attachChildTag ($ret, $taginfo['parent_id'], $tagid, $taginfo))
 			{
 				$picked = TRUE;
-				unset ($taglist[$tagid]);
+				unset ($mytaglist[$tagid]);
 			}
 		}
 		if (!$picked) // Only orphaned items on the list.
 			break;
 	}
-	return $tagtree;
+	return $ret;
 }
 
 function serializeTags ($trail)
@@ -1416,8 +1417,8 @@ function traceTrail ($tree, $trail)
 // except user's tags on the trail.
 function getTrailExpansion ($trail)
 {
-	$tree = getTagTree();
-	return traceTrail ($tree, $trail);
+	global $tagtree;
+	return traceTrail ($tagtree, $trail);
 }
 
 // Return the list of missing implicit tags.
@@ -1444,8 +1445,9 @@ function getImplicitTags ($oldtags)
 // Minimize the trail: exclude all implicit tags and return the resulting trail.
 function getExplicitTagsOnly ($trail, $tree = NULL)
 {
+	global $tagtree;
 	if ($tree === NULL)
-		$tree = getTagTree();
+		$tree = $tagtree;
 	$ret = array();
 	foreach ($tree as $taginfo)
 	{
@@ -1474,8 +1476,9 @@ function getExplicitTagsOnly ($trail, $tree = NULL)
 // a list of tag structures.
 function complementByKids ($idlist, $tree = NULL, $getall = FALSE)
 {
+	global $tagtree;
 	if ($tree === NULL)
-		$tree = getTagTree();
+		$tree = $tagtree;
 	$getallkids = $getall;
 	$ret = array();
 	foreach ($tree as $taginfo)
@@ -1579,7 +1582,7 @@ function getGlobalAutoTags()
 // Build a tag trail from supplied tag id list and return it.
 function buildTrailFromIds ($tagidlist)
 {
-	$taglist = getTagList();
+	global $taglist;
 	$ret = array();
 	foreach ($tagidlist as $tag_id)
 		if (isset ($taglist[$tag_id]))

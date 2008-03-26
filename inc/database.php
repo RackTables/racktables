@@ -2468,7 +2468,7 @@ function loadIPv4RSPoolTags ($id)
 
 function getTagList ()
 {
-	$taglist = array();
+	$ret = array();
 	$query = "select id, parent_id, tag, target_realm as realm, count(target_id) as refcnt " .
 		"from TagTree left join TagStorage on id = tag_id " .
 		"group by id, target_realm order by tag";
@@ -2476,7 +2476,7 @@ function getTagList ()
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
 		if (!isset ($taglist[$row['id']]))
-			$taglist[$row['id']] = array
+			$ret[$row['id']] = array
 			(
 				'id' => $row['id'],
 				'tag' => $row['tag'],
@@ -2484,10 +2484,10 @@ function getTagList ()
 				'refcnt' => array()
 			);
 		if ($row['realm'])
-			$taglist[$row['id']]['refcnt'][$row['realm']] = $row['refcnt'];
+			$ret[$row['id']]['refcnt'][$row['realm']] = $row['refcnt'];
 	}
 	$result->closeCursor();
-	return $taglist;
+	return $ret;
 }
 
 function commitCreateTag ($tagname = '', $parent_id = 0)

@@ -98,7 +98,8 @@ function trigger_autoports ()
 
 function trigger_tags ()
 {
-	return count (getTagList()) > 0;
+	global $taglist;
+	return count ($taglist) > 0;
 }
 
 ?>

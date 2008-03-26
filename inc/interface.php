@@ -1491,6 +1491,8 @@ function renderProblematicObjectsPortlet ()
 function renderObjectGroupSummary ()
 {
 	global $root;
+	$tagfilter = isset ($_REQUEST['tagfilter']) ? $_REQUEST['tagfilter'] : array();
+	$tagfilter = complementByKids ($tagfilter);
 	$summary = getObjectGroupInfo();
 	if ($summary === NULL)
 	{
@@ -1502,15 +1504,15 @@ function renderObjectGroupSummary ()
 
 	startPortlet ('Summary');
 	foreach ($summary as $gi)
-	{
 		echo "<a href='${root}?page=objgroup&group_id=${gi['id']}'><b>${gi['name']}</b></a> <i>(${gi['count']})</i><br>";
-	}
 	finishPortlet();
 
 	echo '</td><td class=pcright>';
 	renderUnmountedObjectsPortlet();
 	echo '</td><td class=pcright>';
 	renderProblematicObjectsPortlet();
+	echo '</td><td class=pcright>';
+	renderTagFilterPortlet ($tagfilter, 'object');
 	echo "</td></tr></table>\n";
 }
 
@@ -1850,7 +1852,9 @@ function renderAddNewRange ()
 		}
 		else
 			printImageHREF ('nodelete', 'There are IP addresses allocated or reserved');
-		echo "</td>\n<td><a href='${root}?page=iprange&id=${iprange['id']}'>${iprange['ip']}/${iprange['mask']}</a></td><td>${iprange['name']}</td><td class=tdleft>";
+		echo "</td>\n<td class=tdleft><a href='${root}?page=iprange&id=${iprange['id']}'>";
+		echo "${iprange['ip']}/${iprange['mask']}</a></td><td class=tdleft>${iprange['name']}";
+		echo "</td><td class=tdleft>";
 		renderProgressBar ($usedips / $totalips);
 		echo " ${usedips}/${totalips}";
 		echo "</td></tr>";
@@ -2302,7 +2306,7 @@ function renderIPAddressPortForwarding ($object_id=0)
 
 function renderAddMultipleObjectsForm ()
 {
-	global $pageno, $tabno, $nextorder;
+	global $root, $pageno, $tabno, $nextorder;
 
 	$type_id = array();
 	$global_type_id = 0;
@@ -2384,9 +2388,7 @@ function renderAddMultipleObjectsForm ()
 	$typelist[0] = 'select type...';
 
 	startPortlet ('Fast way');
-	echo '<form>';
-	echo "<input type=hidden name=page value=${pageno}>";
-	echo "<input type=hidden name=tab value=${tabno}>";
+	echo "<form name=fastform method=post action='${root}?page=${pageno}&tab=${tabno}'>";
 	echo '<table border=0 align=center>';
 	echo "<tr><th>Object type</th><th>Common name</th><th>Visible label</th><th>Asset tag</th><th>Barcode</th></tr>\n";
 	// If a user forgot to select object type on input, we keep his
@@ -2421,9 +2423,7 @@ function renderAddMultipleObjectsForm ()
 	finishPortlet();
 
 	startPortlet ('Very fast way');
-	echo '<form>';
-	echo "<input type=hidden name=page value=${pageno}>";
-	echo "<input type=hidden name=tab value=${tabno}>";
+	echo "<form name=veryfastform method=post action='${root}?page=${pageno}&tab=${tabno}'>";
 	echo 'For each line shown below create an object of type ';
 	printSelect ($typelist, "global_type_id", getConfigVar ('DEFAULT_OBJECT_TYPE'));
 	echo " <input type=submit name=got_very_fast_data value='Go!'><br>\n";
@@ -2660,7 +2660,9 @@ function renderAccounts ()
 	$order = 'odd';
 	foreach ($accounts as $user)
 	{
-		echo "<tr class=row_${order}><td class=tdleft>${user['user_name']}</td><td class=tdleft>${user['user_realname']}</td></li>";
+		echo "<tr class=row_${order}><td class=tdleft><div title='\$userid_${user['user_id']}'>";
+		echo "${user['user_name']}</div></td>";
+		echo "<td class=tdleft>${user['user_realname']}</td></li>";
 		$order = $nextorder[$order];
 	}
 	echo '</table>';
@@ -4728,8 +4730,9 @@ function renderTagRowForEditor ($taginfo, $level = 0)
 
 function renderTagTree ()
 {
+	global $tagtree;
 	echo '<table>';
-	foreach (getTagTree() as $taginfo)
+	foreach ($tagtree as $taginfo)
 	{
 		echo '<tr>';
 		renderTagRowForViewer ($taginfo);
@@ -4740,11 +4743,11 @@ function renderTagTree ()
 
 function renderTagTreeEditor ()
 {
-	global $root, $pageno, $tabno;
+	global $root, $pageno, $tabno, $taglist, $tagtree;
 	showMessageOrError();
 	echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
 	echo "<tr><th>&nbsp;</th><th>tag</th><th>&nbsp;</th></tr>\n";
-	foreach (getTagTree() as $taginfo)
+	foreach ($tagtree as $taginfo)
 	{
 		renderTagRowForEditor ($taginfo, TRUE);
 	}
@@ -4756,7 +4759,7 @@ function renderTagTreeEditor ()
 	printImageHREF ('grant', 'Create tag', TRUE);
 	echo '</td><td><input type=text name=tagname> under <select name=parent_id>';
 	echo "<option value=0>-- NONE --</option>\n";
-	foreach (getTagList() as $taginfo)
+	foreach ($taglist as $taginfo)
 		echo "<option value=${taginfo['id']}>${taginfo['tag']}</option>";
 	echo "</select></td><td>&nbsp;</td></tr>";
 	echo "</form>\n";
@@ -4829,6 +4832,7 @@ function renderIPv4RSPoolTags ($id)
 
 function renderEntityTags ($entity_realm = '', $bypass_name, $entity_id = 0)
 {
+	global $tagtree;
 	if ($entity_realm == '' or $entity_id <= 0)
 	{
 		showError ('Invalid or missing arguments', __FUNCTION__);
@@ -4836,7 +4840,6 @@ function renderEntityTags ($entity_realm = '', $bypass_name, $entity_id = 0)
 	}
 	global $root, $pageno, $tabno;
 	showMessageOrError();
-	$tree = getTagTree();
 	startPortlet ('Tag list');
 	echo "<form method=post action='${root}process.php'>\n";
 	echo "<input type=hidden name=page value=${pageno}>\n";
@@ -4844,7 +4847,7 @@ function renderEntityTags ($entity_realm = '', $bypass_name, $entity_id = 0)
 	echo "<input type=hidden name=${bypass_name} value=${entity_id}>\n";
 	echo "<input type=hidden name=op value=save>\n";
 	echo '<select name=taglist[] multiple size=' . getConfigVar ('MAXSELSIZE') . '>';
-	foreach ($tree as $taginfo)
+	foreach ($tagtree as $taginfo)
 		renderTagOption ($taginfo);
 	echo '</select><br>';
 	echo "<input type=submit value='Save'></form>\n";
@@ -4873,9 +4876,9 @@ function printTagTRs()
 
 function renderTagFilterPortlet ($tagfilter, $realm)
 {
-	global $pageno, $tabno;
+	global $pageno, $tabno, $taglist, $tagtree;
 	startPortlet ('Tag filter');
-	if (!count (($tagTree = getTagTree())))
+	if (!count ($taglist))
 	{
 		echo "No tags defined";
 		return;
@@ -4884,7 +4887,7 @@ function renderTagFilterPortlet ($tagfilter, $realm)
 	echo "<input type=hidden name=page value=${pageno}>\n";
 	echo "<input type=hidden name=tab value=${tabno}>\n";
 	echo '<select name=tagfilter[] multiple>';
-	foreach ($tagTree as $taginfo)
+	foreach ($tagtree as $taginfo)
 		renderTagOptionForFilter ($taginfo, $tagfilter, $realm);
 	echo '</select><br>';
 	echo "<input type=submit value='Apply'></form>\n";
@@ -4893,13 +4896,14 @@ function renderTagFilterPortlet ($tagfilter, $realm)
 
 function renderTagSelect ()
 {
-	if (!count (($tagTree = getTagTree())))
+	global $taglist, $tagtree;
+	if (!count ($taglist))
 	{
 		echo "No tags defined";
 		return;
 	}
 	echo '<select name=taglist[] multiple>';
-	foreach ($tagTree as $taginfo)
+	foreach ($tagtree as $taginfo)
 		renderTagOption ($taginfo);
 	echo '</select><br>';
 }
