@@ -148,7 +148,7 @@ function dynamic_title_objgroup ()
 	switch ($pageno)
 	{
 		case 'objgroup':
-			assertUIntArg ('group_id');
+			assertUIntArg ('group_id', TRUE);
 			$group_id = $_REQUEST['group_id'];
 			$groupInfo = getObjectGroupInfo();
 			if ($groupInfo == NULL)

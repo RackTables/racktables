@@ -79,6 +79,9 @@ if (isset ($tabhandler[$pageno][$tabno]))
 			case 'uint':
 				assertUIntArg ($page[$pageno]['bypass']);
 				break;
+			case 'uint0':
+				assertUIntArg ($page[$pageno]['bypass'], TRUE);
+				break;
 			default:
 				showError ("Dispatching error for bypass parameter");
 				break;

@@ -65,7 +65,7 @@ $ophandler['rack']['tags']['save'] = 'saveRackTags';
 $page['objgroup']['title_handler'] = 'dynamic_title_objgroup';
 $page['objgroup']['handler'] = 'renderObjectGroup';
 $page['objgroup']['bypass'] = 'group_id';
-$page['objgroup']['bypass_type'] = 'uint';
+$page['objgroup']['bypass_type'] = 'uint0';
 $page['objgroup']['parent'] = 'objects';
 
 $page['object']['title_handler'] = 'dynamic_title_object';

@@ -49,11 +49,12 @@ function getObjectTypeList ()
 
 function getObjectList ($type_id = 0, $tagfilter = array())
 {
-	if (!count ($tagfilter))
-		$whereclause = '';
-	else
+	$whereclause = '';
+	if ($type_id != 0)
+		$whereclause = " and objtype_id = '${type_id}' ";
+	if (count ($tagfilter))
 	{
-		$whereclause = ' and (';
+		$whereclause .= ' and (';
 		$orclause = '';
 		foreach ($tagfilter as $tag_id)
 		{
@@ -70,7 +71,7 @@ function getObjectList ($type_id = 0, $tagfilter = array())
 		"left join RackSpace on RackObject.id = object_id) " .
 		"left join Rack on rack_id = Rack.id " .
 		"left join TagStorage on RackObject.id = TagStorage.target_id and target_realm = 'object' " .
-		"where objtype_id = '${type_id}' and RackObject.deleted = 'no' and chapter_name = 'RackObjectType' " .
+		"where RackObject.deleted = 'no' and chapter_name = 'RackObjectType' " .
 		$whereclause .
 		"order by name";
 	$result = useSelectBlade ($query);
@@ -639,12 +640,18 @@ function getObjectGroupInfo ()
 		'group by dict_key order by dict_value';
 	$result = useSelectBlade ($query);
 	$ret = array();
+	$ret[0] = array ('id' => 0, 'name' => 'ALL types');
 	$clist = array ('id', 'name', 'count');
+	$total = 0;
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 		if ($row['count'] > 0)
+		{
+			$total += $row['count'];
 			foreach ($clist as $dummy => $cname)
 				$ret[$row['id']][$cname] = $row[$cname];
+		}
 	$result->closeCursor();
+	$ret[0]['count'] = $total;
 	return $ret;
 }
 

@@ -1520,7 +1520,7 @@ function renderObjectGroupSummary ()
 
 function renderObjectSpace ()
 {
-	global $taglist, $tagtree;
+	global $root, $taglist, $tagtree;
 	echo "<table border=0 class=objectview>\n";
 	echo "<tr><td class=pcleft width='50%'>";
 	startPortlet ('View all by type');
@@ -1580,7 +1580,15 @@ function renderObjectGroup ()
 		foreach ($groupInfo as $gi)
 		{
 			echo "<li><a href='${root}?page=${pageno}&group_id=${gi['id']}&tagfilter[]=${tagfilter_str}'>";
-			echo "${gi['name']}</a> (${gi['count']})</li>";
+			if ($gi['id'] == $group_id)
+				echo '<strong>';
+			echo "${gi['name']}</a>";
+			if ($gi['id'] == $group_id)
+				echo '</strong>';
+			echo " (${gi['count']})";
+			if ($gi['id'] == $group_id)
+				echo ' &larr;';
+			echo "</li>";
 		}
 		echo '</ul></div>';
 	}
@@ -4826,6 +4834,7 @@ function renderTagRowForViewer ($taginfo, $realm, $level = 0)
 
 function renderTagRowForCloud ($taginfo, $realm, $level = 0)
 {
+	global $root;
 	echo '<tr><td align=left>';
 	for ($i = 0; $i < $level; $i++)
 		printImageHREF ('spacer');
