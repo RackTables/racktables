@@ -4838,7 +4838,7 @@ function renderTagRowForCloud ($taginfo, $realm, $level = 0)
 	echo '<tr><td align=left>';
 	for ($i = 0; $i < $level; $i++)
 		printImageHREF ('spacer');
-	echo "<a href='${root}?page=objgroup&group_id=0&taglist[]=${taginfo['id']}'>";
+	echo "<a href='${root}?page=objgroup&group_id=0&tagfilter[]=${taginfo['id']}'>";
 	echo $taginfo['tag'] . '</a>';
 	if (isset ($taginfo['refcnt'][$realm]))
 		echo ' (' . $taginfo['refcnt'][$realm] . ')';
