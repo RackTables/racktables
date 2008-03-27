@@ -1033,10 +1033,10 @@ function addRealServers ()
 {
 	global $root, $pageno, $tabno;
 
-	assertUIntArg ('id', __FUNCTION__);
+	assertUIntArg ('pool_id', __FUNCTION__);
 	assertStringArg ('format', __FUNCTION__);
 	assertStringArg ('rawtext', __FUNCTION__);
-	$pool_id = $_REQUEST['id'];
+	$pool_id = $_REQUEST['pool_id'];
 	$rawtext = str_replace ('\r', '', $_REQUEST['rawtext']);
 	$ngood = $nbad = 0;
 	$rsconfig = '';
