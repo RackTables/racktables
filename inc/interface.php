@@ -2704,7 +2704,7 @@ function renderSearchResults ()
 					echo '<tr><th>Address</th><th>Descritpion</th></tr>';
 					foreach ($what as $addr)
 					{
-						echo "<tr class=row_${order}><td class=tdleft><a href='${root}?page=ipaddress&id=${addr['ip']}'>";
+						echo "<tr class=row_${order}><td class=tdleft><a href='${root}?page=ipaddress&ip=${addr['ip']}'>";
 						echo "${addr['ip']}</a></td>";
 						echo "<td class=tdleft>${addr['name']}</td></tr>";
 						$order = $nextorder[$order];
