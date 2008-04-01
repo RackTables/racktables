@@ -1323,10 +1323,11 @@ function saveEntityTags ($realm, $bypass)
 	global $root, $pageno, $tabno, $explicit_tags, $implicit_tags;
 	assertUIntArg ($bypass, __FUNCTION__);
 	$entity_id = $_REQUEST[$bypass];
+	$taglist = isset ($_REQUEST['taglist']) ? $_REQUEST['taglist'] : array();
 	// Build a trail from the submitted data, minimize it,
 	// then wipe existing records and store the new set instead.
 	wipeTags ($realm, $entity_id);
-	$newtrail = getExplicitTagsOnly (buildTrailFromIds ($_REQUEST['taglist']));
+	$newtrail = getExplicitTagsOnly (buildTrailFromIds ($taglist));
 	$n_succeeds = $n_errors = 0;
 	foreach ($newtrail as $taginfo)
 	{
