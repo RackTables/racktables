@@ -3788,12 +3788,12 @@ function renderSNMPPortFinder ($object_id = 0)
 		$hwtype[527] = 210;
 		$ciscomodel[561] = 'WS-C2970G-24TS (24 Ethernet 10/100/1000 ports and 4 10/100/1000 SFP uplinks)';
 		$hwtype[561] = 115;
-#		$ciscomodel[633] = 'WS-C3560-24TS (24 Ethernet 10/100 ports and 2 10/100/1000 SFP uplinks)';
-#		$hwtype[633] = 169;
+		$ciscomodel[633] = 'WS-C3560-24TS (24 Ethernet 10/100 ports and 2 10/100/1000 SFP uplinks)';
+		$hwtype[633] = 169;
 		$ciscomodel[634] = 'WS-C3560-48TS (48 Ethernet 10/100 ports and 4 10/100/1000 SFP uplinks)';
 		$hwtype[634] = 170;
-#		$ciscomodel[563] = 'WS-C3560-24PS (24 Ethernet 10/100 POE ports and 2 10/100/1000 SFP uplinks)';
-#		$hwtype[563] = 171;
+		$ciscomodel[563] = 'WS-C3560-24PS (24 Ethernet 10/100 POE ports and 2 10/100/1000 SFP uplinks)';
+		$hwtype[563] = 171;
 		$ciscomodel[564] = 'WS-C3560-48PS (48 Ethernet 10/100 POE ports and 4 10/100/1000 SFP uplinks)';
 		$hwtype[564] = 172;
 		$ciscomodel[614] = 'WS-C3560G-24PS (24 Ethernet 10/100/1000 POE ports and 4 10/100/1000 SFP uplinks)';
@@ -3953,6 +3953,27 @@ function renderSNMPPortFinder ($object_id = 0)
 				for ($i = 1; $i <= 24; $i++)
 				{
 					$label = ($i >= 21) ? "${i}" : "${i}X";
+					$error = commitAddPort ($object_id, 'gi0/' . $i, 24, $label, $ifList2["GigabitEthernet0/${i}"]['phyad']);
+					if ($error == '')
+						$newports++;
+					else
+						$log[] = array ('code' => 'error', 'message' => 'Failed to add port ' . $label . ': ' . $error);
+				}
+				break;
+			case '563': // WS-C3560-24PS
+			case '633': // WS-C3560-24TS
+				for ($i = 1; $i <= 24; $i++)
+				{
+					$label = "${i}X";
+					$error = commitAddPort ($object_id, 'fa0/' . $i, 19, $label, $ifList2["FastEthernet0/${i}"]['phyad']);
+					if ($error == '')
+						$newports++;
+					else
+						$log[] = array ('code' => 'error', 'message' => 'Failed to add port ' . $label . ': ' . $error);
+				}
+				for ($i = 1; $i <= 2; $i++)
+				{
+					$label = "${i}";
 					$error = commitAddPort ($object_id, 'gi0/' . $i, 24, $label, $ifList2["GigabitEthernet0/${i}"]['phyad']);
 					if ($error == '')
 						$newports++;
@@ -5144,6 +5165,11 @@ function renderTagSelect ()
 	foreach ($tagtree as $taginfo)
 		renderTagOption ($taginfo);
 	echo '</select><br>';
+}
+
+function renderTagRollerForRow ()
+{
+	renderTagSelect();
 }
 
 ?>
