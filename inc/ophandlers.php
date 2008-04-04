@@ -1145,13 +1145,13 @@ function updateRealServer ()
 {
 	global $root, $pageno, $tabno;
 
-	assertUIntArg ('id', __FUNCTION__);
+	assertUIntArg ('pool_id', __FUNCTION__);
 	assertUIntArg ('rs_id', __FUNCTION__);
 	assertIPv4Arg ('rsip', __FUNCTION__);
 	assertUIntArg ('rsport', __FUNCTION__);
 	assertStringArg ('rsconfig', __FUNCTION__, TRUE);
 	// only necessary for generating next URL
-	$pool_id = $_REQUEST['id'];
+	$pool_id = $_REQUEST['pool_id'];
 	if (!commitUpdateRS ($_REQUEST['rs_id'], $_REQUEST['rsip'], $_REQUEST['rsport'], $_REQUEST['rsconfig']))
 		return "${root}?page=${pageno}&tab=${tabno}&pool_id=${pool_id}&error=" . urlencode ('commitUpdateRS() failed');
 	else
