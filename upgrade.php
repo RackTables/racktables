@@ -1208,14 +1208,14 @@ CREATE TABLE `TagTree` (
 			$old_words[358] = 'Dell PowerEdge&4400';
 			$old_words[359] = 'Dell PowerEdge&2650';
 			$old_words[360] = 'Dell PowerEdge&2550';
-			$old_words[370] = 'Dell PowerEdge&750';
-			$old_words[371] = 'Dell PowerEdge&2450';
-			$old_words[372] = 'Dell PowerEdge&850';
-			$old_words[373] = 'Dell PowerEdge&1850';
-			$old_words[374] = 'Dell PowerEdge&860';
-			$old_words[375] = 'Dell PowerEdge&2900';
-			$old_words[376] = 'Dell PowerEdge&2970';
-			$old_words[377] = 'Dell PowerEdge&SC1435';
+			$old_words[361] = 'Dell PowerEdge&750';
+			$old_words[362] = 'Dell PowerEdge&2450';
+			$old_words[363] = 'Dell PowerEdge&850';
+			$old_words[364] = 'Dell PowerEdge&1850';
+			$old_words[365] = 'Dell PowerEdge&860';
+			$old_words[366] = 'Dell PowerEdge&2900';
+			$old_words[367] = 'Dell PowerEdge&2970';
+			$old_words[368] = 'Dell PowerEdge&SC1435';
 
 			foreach ($new_words as $dict_key => $tmp)
 				foreach ($tmp as $chapter_no => $dict_value)
