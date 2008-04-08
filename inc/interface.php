@@ -5129,7 +5129,7 @@ function renderTagFilterPortlet ($tagfilter, $realm)
 	startPortlet ('Tag filter');
 	if (!count ($taglist))
 	{
-		echo "No tags defined";
+		echo "No tags defined<br>";
 		return;
 	}
 	echo "<form method=get>\n";
