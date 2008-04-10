@@ -678,7 +678,7 @@ INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (13,727
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (13,728,'[[BSD^OpenBSD 4.1 | http://openbsd.org/41.html]]');
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (13,729,'[[BSD^OpenBSD 4.2 | http://openbsd.org/42.html]]');
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (13,730,'[[BSD^OpenBSD 4.3 | http://openbsd.org/43.html]]');
-INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (12,731,'[[Cisco Catalyst^4900M | http://www.cisco.com/en/US/products/ps9310/index.html]]');
+INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (12,731,'[[Cisco Catalyst&4900M | http://www.cisco.com/en/US/products/ps9310/index.html]]');
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (13,732,'[[BSD^FreeBSD 7.0 | http://www.freebsd.org/releases/7.0R/announce.html]]');
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (13,733,'[[BSD^NetBSD 2.0 | http://netbsd.org/releases/formal-2.0/]]');
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (13,734,'[[BSD^NetBSD 2.1 | http://netbsd.org/releases/formal-2.0/NetBSD-2.1.html]]');
