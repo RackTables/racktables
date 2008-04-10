@@ -169,22 +169,23 @@ function renderRack ($rack_id = 0, $hl_obj_id = 0)
 	markupObjectProblems ($rackData);
 	$prev_id = getPrevIDforRack ($rackData['row_id'], $rack_id);
 	$next_id = getNextIDforRack ($rackData['row_id'], $rack_id);
-	echo "<center>\n<h2><a href='${root}?page=row&row_id=${rackData['row_id']}'>${rackData['row_name']}</a> :";
+	echo "<center><table border=0><tr valign=middle>";
+	echo "<td><h2><a href='${root}?page=row&row_id=${rackData['row_id']}'>${rackData['row_name']}</a> :</h2></td>";
 	// FIXME: use 'bypass'?
 	if ($prev_id != NULL)
 	{
-		echo " <a href='${root}?page=rack&rack_id=${prev_id}'>";
+		echo "<td><a href='${root}?page=rack&rack_id=${prev_id}'>";
 		printImageHREF ('prev', 'previous rack');
-		echo "</a>";
+		echo "</a></td>";
 	}
-	echo " <a href='${root}?page=rack&rack_id=${rackData['id']}'>${rackData['name']}</a> ";
+	echo "<td><h2><a href='${root}?page=rack&rack_id=${rackData['id']}'>${rackData['name']}</a></h2></td>";
 	if ($next_id != NULL)
 	{
-		echo " <a href='${root}?page=rack&rack_id=${next_id}'>";
+		echo "<td><a href='${root}?page=rack&rack_id=${next_id}'>";
 		printImageHREF ('next', 'next rack');
-		echo "</a>";
+		echo "</a></td>";
 	}
-	echo "</h2>\n";
+	echo "</h2></td></tr></table>\n";
 	if ($rackData['left_is_front'] == 'yes')
 		$markup = array ('left' => 'Front', 'right' => 'Back');
 	else
@@ -422,11 +423,11 @@ function renderEditObjectForm ($object_id)
 		if (!empty ($record['value']))
 		{
 			echo "<a href=${root}process.php?page=${pageno}&tab=${tabno}&op=del&object_id=${object_id}&attr_id=${record['id']}>";
-			printImageHREF ('delete', 'Delete value');
+			printImageHREF ('clear', 'Clear value');
 			echo '</a>';
 		}
 		else
-			printImageHREF ('nodelete', 'Already empty');
+			echo '&nbsp;';
 		echo '</td>';
 		echo "<td class=tdright>${record['name']}:</td><td class=tdleft>";
 		switch ($record['type'])
@@ -1047,8 +1048,9 @@ function renderPortsForObject ($object_id = 0)
 		echo "<td><input type='submit' value='OK'></td>";
 		echo "</form></tr>\n";
 	}
-	echo "<form action='${root}process.php'><tr>";
-	echo "<td colspan=2><input type=text size=10 name=port_name tabindex=100></td>\n";
+	echo "<form action='${root}process.php'><tr><td>";
+	printImageHREF ('add', '', TRUE, 104);
+	echo "</td><td><input type=text size=8 name=port_name tabindex=100></td>\n";
 	echo "<td><input type=text size=24 name=port_label tabindex=101></td>";
 	echo "<input type=hidden name=op value=addPort>\n";
 	echo "<input type=hidden name=object_id value='${object_id}'>\n";
@@ -1066,7 +1068,7 @@ function renderPortsForObject ($object_id = 0)
 	}
 	echo "</select></td>";
 	echo "<td><input type=text name=port_l2address tabindex=103></td>\n";
-	echo "<td colspan=4><input type='submit' value='Add a new port' tabindex=104></td></tr></form>";
+	echo "<td colspan=4>&nbsp;</td></tr></form>";
 	echo "</table><br>\n";
 	finishPortlet();
 
@@ -3414,16 +3416,16 @@ function printImageHREF ($tag, $title = '', $do_input = FALSE, $tabindex = 0)
 	$image['useup']['height'] = 16;
 	$image['blockuser'] = $image['reserve'];
 	$image['unblockuser'] = $image['useup'];
-	$image['link']['path'] = 'pix/link.png';
-	$image['link']['width'] = 24;
-	$image['link']['height'] = 24;
-	$image['unlink']['path'] = 'pix/unlink.png';
-	$image['unlink']['width'] = 24;
-	$image['unlink']['height'] = 24;
+	$image['link']['path'] = 'pix/tango-network-wired.png';
+	$image['link']['width'] = 16;
+	$image['link']['height'] = 16;
+	$image['unlink']['path'] = 'pix/tango-edit-clear.png';
+	$image['unlink']['width'] = 16;
+	$image['unlink']['height'] = 16;
 	$image['add']['path'] = 'pix/tango-list-add.png';
 	$image['add']['width'] = 16;
 	$image['add']['height'] = 16;
-	$image['delete']['path'] = 'pix/delete_s.gif';
+	$image['delete']['path'] = 'pix/tango-list-remove.png';
 	$image['delete']['width'] = 16;
 	$image['delete']['height'] = 16;
 	$image['nodelete']['path'] = 'pix/delete_g.png';
@@ -3431,10 +3433,10 @@ function printImageHREF ($tag, $title = '', $do_input = FALSE, $tabindex = 0)
 	$image['nodelete']['height'] = 16;
 	$image['grant'] = $image['add'];
 	$image['revoke'] = $image['delete'];
-	$image['inservice']['path'] = 'pix/go.png';
+	$image['inservice']['path'] = 'pix/tango-emblem-system.png';
 	$image['inservice']['width'] = 16;
 	$image['inservice']['height'] = 16;
-	$image['notinservice']['path'] = 'pix/stop.png';
+	$image['notinservice']['path'] = 'pix/tango-dialog-error.png';
 	$image['notinservice']['width'] = 16;
 	$image['notinservice']['height'] = 16;
 	$image['find']['path'] = 'pix/tango-system-search.png';
@@ -3449,6 +3451,9 @@ function printImageHREF ($tag, $title = '', $do_input = FALSE, $tabindex = 0)
 	$image['prev']['path'] = 'pix/tango-go-previous.png';
 	$image['prev']['width'] = 32;
 	$image['prev']['height'] = 32;
+	$image['clear']['path'] = 'pix/tango-edit-clear.png';
+	$image['clear']['width'] = 16;
+	$image['clear']['height'] = 16;
 	if (!isset ($image[$tag]))
 		$tag = 'error';
 	$img = $image[$tag];
