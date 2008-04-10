@@ -181,7 +181,7 @@ function renderRack ($rack_id = 0, $hl_obj_id = 0)
 	if ($next_id != NULL)
 	{
 		echo " <a href='${root}?page=rack&rack_id=${next_id}'>";
-		printImageHREF ('prev', 'next rack');
+		printImageHREF ('next', 'next rack');
 		echo "</a>";
 	}
 	echo "</h2>\n";
