@@ -3412,7 +3412,7 @@ function printImageHREF ($tag, $title = '', $do_input = FALSE, $tabindex = 0)
 	$image['unlink']['path'] = 'pix/unlink.png';
 	$image['unlink']['width'] = 24;
 	$image['unlink']['height'] = 24;
-	$image['add']['path'] = 'pix/greenplus.png';
+	$image['add']['path'] = 'pix/tango-list-add.png';
 	$image['add']['width'] = 16;
 	$image['add']['height'] = 16;
 	$image['delete']['path'] = 'pix/delete_s.gif';
@@ -3429,7 +3429,7 @@ function printImageHREF ($tag, $title = '', $do_input = FALSE, $tabindex = 0)
 	$image['notinservice']['path'] = 'pix/stop.png';
 	$image['notinservice']['width'] = 16;
 	$image['notinservice']['height'] = 16;
-	$image['find']['path'] = 'pix/find.png';
+	$image['find']['path'] = 'pix/tango-system-search.png';
 	$image['find']['width'] = 16;
 	$image['find']['height'] = 16;
 	$image['spacer']['path'] = 'pix/pixel.png';
