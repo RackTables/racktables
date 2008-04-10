@@ -172,10 +172,18 @@ function renderRack ($rack_id = 0, $hl_obj_id = 0)
 	echo "<center>\n<h2><a href='${root}?page=row&row_id=${rackData['row_id']}'>${rackData['row_name']}</a> :";
 	// FIXME: use 'bypass'?
 	if ($prev_id != NULL)
-		echo " <a href='${root}?page=rack&rack_id=${prev_id}'>&lt; &lt; &lt;</a>";
-	echo " <a href='${root}?page=rack&rack_id=${rackData['id']}'>${rackData['name']}</a>";
+	{
+		echo " <a href='${root}?page=rack&rack_id=${prev_id}'>";
+		printImageHREF ('prev', 'previous rack');
+		echo "</a>";
+	}
+	echo " <a href='${root}?page=rack&rack_id=${rackData['id']}'>${rackData['name']}</a> ";
 	if ($next_id != NULL)
-		echo " <a href='${root}?page=rack&rack_id=${next_id}'>&gt; &gt; &gt;</a>";
+	{
+		echo " <a href='${root}?page=rack&rack_id=${next_id}'>";
+		printImageHREF ('prev', 'next rack');
+		echo "</a>";
+	}
 	echo "</h2>\n";
 	if ($rackData['left_is_front'] == 'yes')
 		$markup = array ('left' => 'Front', 'right' => 'Back');
@@ -3435,6 +3443,12 @@ function printImageHREF ($tag, $title = '', $do_input = FALSE, $tabindex = 0)
 	$image['spacer']['path'] = 'pix/pixel.png';
 	$image['spacer']['width'] = 16;
 	$image['spacer']['height'] = 16;
+	$image['next']['path'] = 'pix/tango-go-next.png';
+	$image['next']['width'] = 32;
+	$image['next']['height'] = 32;
+	$image['prev']['path'] = 'pix/tango-go-previous.png';
+	$image['prev']['width'] = 32;
+	$image['prev']['height'] = 32;
 	if (!isset ($image[$tag]))
 		$tag = 'error';
 	$img = $image[$tag];
