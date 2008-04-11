@@ -2203,11 +2203,24 @@ function commitUpdateVS ($vsid = 0, $vip = '', $vport = 0, $proto = '', $name = 
 
 // Return the list of virtual services, indexed by vs_id.
 // Each record will be shown with its basic info plus RS pools counter.
-function getVSList ()
+function getVSList ($tagfilter = array())
 {
+	if (!count ($tagfilter))
+		$whereclause = '';
+	else
+	{
+		$whereclause = 'where ';
+		$orclause = '';
+		foreach ($tagfilter as $tag_id)
+		{
+			$whereclause .= $orclause . 'tag_id = ' . $tag_id;
+			$orclause = ' or ';
+		}
+	}
 	$query = "select vs.id, inet_ntoa(vip) as vip, vport, proto, vs.name, vs.vsconfig, vs.rsconfig, count(rspool_id) as poolcount " .
 		"from IPVirtualService as vs left join IPLoadBalancer as lb on vs.id = lb.vs_id " .
-		"group by vs.id order by vs.vip, proto, vport";
+		"left join TagStorage on vs.id = TagStorage.target_id and target_realm = 'ipv4vs' " . 
+		"${whereclause} group by vs.id order by vs.vip, proto, vport";
 	$result = useSelectBlade ($query);
 	$ret = array ();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
