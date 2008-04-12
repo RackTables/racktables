@@ -1252,6 +1252,16 @@ CREATE TABLE `TagTree` (
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('SHOW_EXPLICIT_TAGS','yes','string','no','no','Show explicit tags')";
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('SHOW_IMPLICIT_TAGS','yes','string','no','no','Show implicit tags')";
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('SHOW_AUTOMATIC_TAGS','no','string','no','no','Show automatic tags')";
+			// Decommission the Protocols dictionary chapter.
+			$query[] = "alter table PortForwarding add column proto_new enum('TCP','UDP') not null default 'TCP' after proto";
+			$query[] = "update PortForwarding set proto_new = 'TCP' where proto = 336";
+			$query[] = "update PortForwarding set proto_new = 'UDP' where proto = 337";
+			$query[] = "alter table PortForwarding drop primary key";
+			$query[] = "alter table PortForwarding drop column proto";
+			$query[] = "alter table PortForwarding change column proto_new proto enum('TCP','UDP') not null default 'TCP'";
+			$query[] = "alter table PortForwarding add primary key (`object_id`,`proto`,`localip`,`localport`,`remoteip`,`remoteport`)";
+			$query[] = "delete from Dictionary where chapter_no = 20";
+			$query[] = "delete from Chapter where chapter_no = 20";
 			$query[] = "update Config set varvalue = '0.14.13' where varname = 'DB_VERSION'";
 			break; // --------------------------------------------
 #		case '0.14.14':

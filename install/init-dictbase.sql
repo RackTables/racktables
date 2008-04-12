@@ -88,7 +88,6 @@ INSERT INTO `Chapter` (`chapter_no`, `sticky`, `chapter_name`) VALUES (16,'no','
 INSERT INTO `Chapter` (`chapter_no`, `sticky`, `chapter_name`) VALUES (17,'no','router models');
 INSERT INTO `Chapter` (`chapter_no`, `sticky`, `chapter_name`) VALUES (18,'no','disk array models');
 INSERT INTO `Chapter` (`chapter_no`, `sticky`, `chapter_name`) VALUES (19,'no','tape library models');
-INSERT INTO `Chapter` (`chapter_no`, `sticky`, `chapter_name`) VALUES (20,'yes','Protocols');
 INSERT INTO `Chapter` (`chapter_no`, `sticky`, `chapter_name`) VALUES (21,'no','KVM switch models');
 INSERT INTO `Chapter` (`chapter_no`, `sticky`, `chapter_name`) VALUES (22,'no','multiplexer models');
 INSERT INTO `Chapter` (`chapter_no`, `sticky`, `chapter_name`) VALUES (23, 'no', 'console models');
@@ -213,8 +212,6 @@ INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (2,38,'
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (2,39,'10GBase-LX4');
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (2,40,'10GBase-CX4');
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (2,41,'10GBase-Kx');
-INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (20,336,'TCP');
-INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (20,337,'UDP');
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (2,439,'dry contact');
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (2,440,'unknown');
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (1,445,'KVM switch');

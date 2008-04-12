@@ -856,7 +856,7 @@ function renderRackObject ($object_id = 0)
 		finishPortlet();
 	}
 
-	$forwards = getObjectForwards ($object_id);
+	$forwards = getNATv4ForObject ($object_id);
 	if (count($forwards['in']) or count($forwards['out']))
 	{
 		startPortlet('NATv4');
@@ -2407,12 +2407,12 @@ function renderIPAddressAssignment ()
 
 }
 
-function renderIPAddressPortForwarding ($object_id=0)
+function renderNATv4ForObject ($object_id = 0)
 {
 	global $pageno, $tabno, $root;
 	
 	$info = getObjectInfo ($object_id);
-	$forwards = getObjectForwards ($object_id);
+	$forwards = getNATv4ForObject ($object_id);
 	$addresses = getObjectAddresses ($object_id);
 	showMessageOrError();
 	echo "<center><h2>locally performed NAT</h2></center>";
@@ -2433,7 +2433,7 @@ function renderIPAddressPortForwarding ($object_id=0)
 			}
 
 		echo "<tr class='$class'>";
-		echo "<td><a href='process.php?op=delPortForwarding&localip=${pf['localip']}&localport=${pf['localport']}&remoteip=${pf['remoteip']}&remoteport=${pf['remoteport']}&proto=${pf['proto_bin']}&object_id=$object_id&page=${pageno}&tab=${tabno}'>";
+		echo "<td><a href='process.php?op=delPortForwarding&localip=${pf['localip']}&localport=${pf['localport']}&remoteip=${pf['remoteip']}&remoteport=${pf['remoteport']}&proto=${pf['proto']}&object_id=$object_id&page=${pageno}&tab=${tabno}'>";
 		printImageHREF ('delete', 'Delete NAT rule');
 		echo "</a></td>";
 		echo "<td>${pf['proto']}/${name}: <a href='${root}?page=ipaddress&tab=default&ip=${pf['localip']}'>${pf['localip']}</a>:${pf['localport']}";
@@ -2450,7 +2450,12 @@ function renderIPAddressPortForwarding ($object_id=0)
 				echo "<a href='${root}?page=object&tab=default&object_id=${bond['object_id']}'>${bond['object_name']}(${bond['name']})</a> ";
 		elseif (!empty ($pf['remote_addr_name']))
 			echo '(' . $pf['remote_addr_name'] . ')';
-		echo "</td><form action='process.php'><input type='hidden' name='op' value='updPortForwarding'><input type=hidden name=page value='${pageno}'><input type=hidden name=tab value='${tabno}'><input type='hidden' name='object_id' value='$object_id'><input type='hidden' name='localip' value='${pf['localip']}'><input type='hidden' name='localport' value='${pf['localport']}'><input type='hidden' name='remoteip' value='${pf['remoteip']}'><input type='hidden' name='remoteport' value='${pf['remoteport']}'><input type='hidden' name='proto' value='${pf['proto_bin']}'><td class='description'><input type='text' name='description' value='${pf['description']}'> <input type='submit' value='OK'></td></form>";
+		echo "</td><form action='process.php'><input type='hidden' name='op' value='updPortForwarding'><input type=hidden name=page value='${pageno}'>";
+		echo "<input type=hidden name=tab value='${tabno}'><input type='hidden' name='object_id' value='$object_id'>";
+		echo "<input type='hidden' name='localip' value='${pf['localip']}'><input type='hidden' name='localport' value='${pf['localport']}'>";
+		echo "<input type='hidden' name='remoteip' value='${pf['remoteip']}'><input type='hidden' name='remoteport' value='${pf['remoteport']}'>";
+		echo "<input type='hidden' name='proto' value='${pf['proto']}'><td class='description'>";
+		echo "<input type='text' name='description' value='${pf['description']}'> <input type='submit' value='OK'></td></form>";
 		echo "</tr>";
 	}
 	echo "<form action='process.php'><input type='hidden' name='op' value='forwardPorts'>";
@@ -2458,7 +2463,7 @@ function renderIPAddressPortForwarding ($object_id=0)
 	echo "<input type=hidden name=page value='${pageno}'>\n";
 	echo "<input type=hidden name=tab value='${tabno}'>\n";
 	echo "<tr align='center'><td colspan=2>";
-	printSelect (readChapter ('Protocols'), 'proto');
+	printSelect (array ('TCP' => 'TCP', 'UDP' => 'UDP'), 'proto');
 	echo "<select name='localip' tabindex=1>";
 
 	foreach ($addresses as $addr)
@@ -2476,16 +2481,13 @@ function renderIPAddressPortForwarding ($object_id=0)
 
 	echo "</table><br><br>";
 
-
 	echo "<center><h2>arriving NAT connections</h2></center>";
 	echo "<table class='widetable' cesspadding=5 cellspacing=0 border=0 align='center'>\n";
 	echo "<tr><th></th><th>Source</th><th>Source objects</th><th>Target</th><th>Description</th></tr>\n";
 
 	foreach ($forwards['in'] as $pf)
 	{
-		echo "<tr>";
-
-		echo "<td><a href='process.php?op=delPortForwarding&localip=${pf['localip']}&localport=${pf['localport']}&remoteip=${pf['remoteip']}&remoteport=${pf['remoteport']}&proto=${pf['proto_bin']}&object_id=${pf['object_id']}&page=${pageno}&tab=${tabno}'>";
+		echo "<tr><td><a href='process.php?op=delPortForwarding&localip=${pf['localip']}&localport=${pf['localport']}&remoteip=${pf['remoteip']}&remoteport=${pf['remoteport']}&proto=${pf['proto']}&object_id=${pf['object_id']}&page=${pageno}&tab=${tabno}'>";
 		printImageHREF ('delete', 'Delete NAT rule');
 		echo "</a></td>";
 		echo "<td>${pf['proto']}/<a href='${root}?page=ipaddress&tab=default&ip=${pf['localip']}'>${pf['localip']}</a>:${pf['localport']}</td>";
@@ -2494,19 +2496,7 @@ function renderIPAddressPortForwarding ($object_id=0)
 		echo "<td class='description'>${pf['description']}</td></tr>";
 	}
 
-//	echo "<form action='process.php'><input type='hidden' name='op' value='forwardPorts'>";
-//	echo "<input type='hidden' name='object_id' value='$object_id'>";
-//	echo "<input type=hidden name=page value='${pageno}'>\n";
-//	echo "<input type=hidden name=tab value='${tabno}'>\n";
-//	echo "<tr align='center'><td colspan=2><select name='proto'><option value='1'>TCP</option><option value='2'>UDP</option><input type='text' name='localip' size='10'>:<input type='text' name='localport' size='4'></td><td><select name='localip'>";
-//	foreach ($addresses as $addr)
-//		echo "<option value='${addr['ip']}'>${addr['ip']}</option>";
-//
-//	echo "</select>:<input type='text' name='remoteport' size='4'></td><td><input type='text' name='description' size='20'></td><td><input type='submit' value='Create Forwarding'></td></tr>";
-//	echo "</form>";
 	echo "</table><br><br>";
-
-
 }
 
 

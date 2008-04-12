@@ -1083,17 +1083,14 @@ function updatePortForwarding($object_id, $localip, $localport, $remoteip, $remo
 	return '';
 }
 
-function getObjectForwards($object_id)
+function getNATv4ForObject ($object_id)
 {
-	global $dbxlink;
-
 	$ret = array();
 	$ret['out'] = array();
 	$ret['in'] = array();
 	$query =
 		"select ".
-		"dict_value as proto, ".
-		"proto as proto_bin, ".
+		"proto, ".
 		"INET_NTOA(localip) as localip, ".
 		"localport, ".
 		"INET_NTOA(remoteip) as remoteip, ".
@@ -1101,25 +1098,25 @@ function getObjectForwards($object_id)
 		"ipa1.name as local_addr_name, " .
 		"ipa2.name as remote_addr_name, " .
 		"description ".
-		"from PortForwarding inner join Dictionary on proto = dict_key natural join Chapter ".
+		"from PortForwarding ".
 		"left join IPAddress as ipa1 on PortForwarding.localip = ipa1.ip " .
 		"left join IPAddress as ipa2 on PortForwarding.remoteip = ipa2.ip " .
-		"where object_id='$object_id' and chapter_name = 'Protocols' ".
+		"where object_id='$object_id' ".
 		"order by localip, localport, proto, remoteip, remoteport";
-	$result2 = $dbxlink->query ($query);
+	$result = useSelectBlade ($query);
 	$count=0;
-	while ($row = $result2->fetch (PDO::FETCH_ASSOC))
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
-		foreach (array ('proto', 'proto_bin', 'localport', 'localip', 'remoteport', 'remoteip', 'description', 'local_addr_name', 'remote_addr_name') as $cname)
+		foreach (array ('proto', 'localport', 'localip', 'remoteport', 'remoteip', 'description', 'local_addr_name', 'remote_addr_name') as $cname)
 			$ret['out'][$count][$cname] = $row[$cname];
 		$count++;
 	}
-	$result2->closeCursor();
+	$result->closeCursor();
+	unset ($result);
 
 	$query =
 		"select ".
-		"dict_value as proto, ".
-		"proto as proto_bin, ".
+		"proto, ".
 		"INET_NTOA(localip) as localip, ".
 		"localport, ".
 		"INET_NTOA(remoteip) as remoteip, ".
@@ -1127,18 +1124,18 @@ function getObjectForwards($object_id)
 		"PortForwarding.object_id as object_id, ".
 		"RackObject.name as object_name, ".
 		"description ".
-		"from ((PortForwarding join IPBonds on remoteip=IPBonds.ip) join RackObject on PortForwarding.object_id=RackObject.id) inner join Dictionary on proto = dict_key natural join Chapter ".
-		"where IPBonds.object_id='$object_id' and chapter_name = 'Protocols' ".
+		"from ((PortForwarding join IPBonds on remoteip=IPBonds.ip) join RackObject on PortForwarding.object_id=RackObject.id) ".
+		"where IPBonds.object_id='$object_id' ".
 		"order by remoteip, remoteport, proto, localip, localport";
-	$result3 = $dbxlink->query ($query);
+	$result = useSelectBlade ($query);
 	$count=0;
-	while ($row = $result3->fetch (PDO::FETCH_ASSOC))
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
-		foreach (array ('proto', 'proto_bin', 'localport', 'localip', 'remoteport', 'remoteip', 'object_id', 'object_name', 'description') as $cname)
+		foreach (array ('proto', 'localport', 'localip', 'remoteport', 'remoteip', 'object_id', 'object_name', 'description') as $cname)
 			$ret['in'][$count][$cname] = $row[$cname];
 		$count++;
 	}
-	$result3->closeCursor();
+	$result->closeCursor();
 
 	return $ret;
 }

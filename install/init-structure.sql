@@ -158,7 +158,7 @@ CREATE TABLE `PortCompat` (
 
 CREATE TABLE `PortForwarding` (
   `object_id` int(10) unsigned NOT NULL,
-  `proto` int(11) NOT NULL,
+  `proto` enum('TCP','UDP') not null default 'TCP',
   `localip` int(10) unsigned NOT NULL,
   `localport` smallint(5) unsigned NOT NULL,
   `remoteip` int(10) unsigned NOT NULL,
