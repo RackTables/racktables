@@ -4680,13 +4680,13 @@ function editRSPools ()
 		echo "<input type=hidden name=page value=${pageno}>\n";
 		echo "<input type=hidden name=tab value=${tabno}>\n";
 		echo "<input type=hidden name=op value=upd>\n";
-		echo "<input type=hidden name=id value=${pool_id}>\n";
+		echo "<input type=hidden name=pool_id value=${pool_id}>\n";
 		echo "<tr valign=top class=row_${order}><td>";
 		if ($pool_info['refcnt'])
 			printImageHREF ('nodelete', 'RS pool is used ' . $pool_info['refcnt'] . ' time(s)');
 		else
 		{
-			echo "<a href='${root}process.php?page=${pageno}&tab=${tabno}&op=del&id=${pool_id}'>";
+			echo "<a href='${root}process.php?page=${pageno}&tab=${tabno}&op=del&pool_id=${pool_id}'>";
 			printImageHREF ('delete', 'delete real server pool');
 			echo '</a>';
 		}
