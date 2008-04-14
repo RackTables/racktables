@@ -5145,17 +5145,18 @@ function printTagTRs()
 function renderTagFilterPortlet ($tagfilter, $realm)
 {
 	global $pageno, $tabno, $taglist, $tagtree;
+	$objectivetags = getObjectiveTagTree ($tagtree, $realm);
 	startPortlet ('Tag filter');
-	if (!count ($taglist))
+	if (!count ($objectivetags))
 	{
-		echo "No tags defined<br>";
+		echo "None defined for current realm.<br>";
 		return;
 	}
 	echo "<form method=get>\n";
 	echo "<input type=hidden name=page value=${pageno}>\n";
 	echo "<input type=hidden name=tab value=${tabno}>\n";
 	echo '<select name=tagfilter[] multiple>';
-	foreach (getObjectiveTagTree ($tagtree, $realm) as $taginfo)
+	foreach ($objectivetags as $taginfo)
 		renderTagOptionForFilter ($taginfo, $tagfilter, $realm);
 	echo '</select><br>';
 	echo "<input type=submit value='Apply'></form>\n";
