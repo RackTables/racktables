@@ -1125,6 +1125,38 @@ function getIPv4AddressSearchResult ($terms)
 	return $ret;
 }
 
+function getIPv4RSPoolSearchResult ($terms)
+{
+	$query = "select id as pool_id, name from IPRSPool where ";
+	$or = '';
+	foreach (explode (' ', $terms) as $term)
+	{
+		$query .= $or . "name like '%${term}%'";
+		$or = ' or ';
+	}
+	$result = useSelectBlade ($query);
+	$ret = array();
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
+		$ret[] = $row;
+	return $ret;
+}
+
+function getIPv4VServiceSearchResult ($terms)
+{
+	$query = "select id, inet_ntoa(vip) as vip, vport, proto, name from IPVirtualService where ";
+	$or = '';
+	foreach (explode (' ', $terms) as $term)
+	{
+		$query .= $or . "name like '%${term}%'";
+		$or = ' or ';
+	}
+	$result = useSelectBlade ($query);
+	$ret = array();
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
+		$ret[] = $row;
+	return $ret;
+}
+
 // This function returns either port ID or NULL for specified arguments.
 function getPortID ($object_id, $port_name)
 {

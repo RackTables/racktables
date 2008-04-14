@@ -1198,6 +1198,16 @@ function buildVServiceName ($vsinfo = NULL)
 	return $vsinfo['vip'] . ':' . $vsinfo['vport'] . '/' . $vsinfo['proto'];
 }
 
+function buildRSPoolName ($rspool = NULL)
+{
+	if ($rspool == NULL)
+	{
+		showError ('NULL argument', __FUNCTION__);
+		return NULL;
+	}
+	return strlen ($rspool['name']) ? $rspool['name'] : 'ANONYMOUS pool';
+}
+
 // rackspace usage for a single rack
 // (T + W + U) / (height * 3 - A)
 function getRSUforRack ($data = NULL)

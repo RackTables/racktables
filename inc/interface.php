@@ -2707,6 +2707,20 @@ function renderSearchResults ()
 			$lasthit = 'ipv4network';
 			$summary['ipv4network'] = $tmp;
 		}
+		$tmp = getIPv4RSPoolSearchResult ($terms);
+		if (count ($tmp))
+		{
+			$nhits += count ($tmp);
+			$lasthit = 'ipv4rspool';
+			$summary['ipv4rspool'] = $tmp;
+		}
+		$tmp = getIPv4VServiceSearchResult ($terms);
+		if (count ($tmp))
+		{
+			$nhits += count ($tmp);
+			$lasthit = 'ipv4vs';
+			$summary['ipv4vs'] = $tmp;
+		}
 	}
 	if ($nhits == 0)
 		echo "<center><h2>Nothing found for '${terms}'</h2></center>";
@@ -2737,6 +2751,12 @@ function renderSearchResults ()
 				break;
 			case 'object':
 				echo "<script language='Javascript'>document.location='${root}?page=object&object_id=${record['id']}';//</script>";
+				break;
+			case 'ipv4rspool':
+				echo "<script language='Javascript'>document.location='${root}?page=rspool&pool_id=${record['pool_id']}';//</script>";
+				break;
+			case 'ipv4vs':
+				echo "<script language='Javascript'>document.location='${root}?page=vservice&id=${record['id']}';//</script>";
 				break;
 		}
 		return;
@@ -2787,6 +2807,33 @@ function renderSearchResults ()
 						echo "<tr class=row_${order}><td class=tdleft><a href='${root}?page=ipaddress&ip=${addr['ip']}'>";
 						echo "${addr['ip']}</a></td>";
 						echo "<td class=tdleft>${addr['name']}</td></tr>";
+						$order = $nextorder[$order];
+					}
+					echo '</table>';
+					finishPortlet();
+					break;
+				case 'ipv4rspool':
+					startPortlet ('RS pools');
+					echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
+					foreach ($what as $rspool)
+					{
+						echo "<tr class=row_${order}><td class=tdleft><a href='${root}?page=rspool&pool_id=${rspool['pool_id']}'>";
+						echo buildRSPoolName ($rspool);
+						echo "</a></td></tr>";
+						$order = $nextorder[$order];
+					}
+					echo '</table>';
+					finishPortlet();
+					break;
+				case 'ipv4vs':
+					startPortlet ('Virtual services');
+					echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
+					echo '<tr><th>VS</th><th>Descritpion</th></tr>';
+					foreach ($what as $vs)
+					{
+						echo "<tr class=row_${order}><td class=tdleft><a href='${root}?page=vservice&id=${vs['id']}'>";
+						echo buildVServiceName ($vs);
+						echo "</a></td><td>${vs['name']}</td></tr>";
 						$order = $nextorder[$order];
 					}
 					echo '</table>';
