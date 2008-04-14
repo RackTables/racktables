@@ -1601,7 +1601,7 @@ function getObjectiveTagTree ($tree, $realm)
 			$subsearch = getObjectiveTagTree ($taginfo['kids'], $realm);
 			$pick = count ($subsearch) > 0;
 		}
-		elseif (isset ($taginfo['refcnt'][$realm]))
+		if (isset ($taginfo['refcnt'][$realm]))
 			$pick = TRUE;
 		if (!$pick)
 			continue;
