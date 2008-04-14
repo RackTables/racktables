@@ -4642,12 +4642,17 @@ function renderVSListEditForm ()
 function renderRSPoolList ()
 {
 	global $root, $nextorder;
-	$pool_list = getRSPoolList();
+	$tagfilter = isset ($_REQUEST['tagfilter']) ? $_REQUEST['tagfilter'] : array();
+	$tagfilter = complementByKids ($tagfilter);
+	$pool_list = getRSPoolList ($tagfilter);
 	if ($pool_list === NULL)
 	{
 		showError ('getRSPoolList() failed', __FUNCTION__);
 		return;
 	}
+	echo "<table border=0 class=objectview>\n";
+	echo "<tr><td class=pcleft>";
+	startPortlet ('RS pools');
 	echo "<table class=widetable border=0 cellpadding=10 cellspacing=0 align=center>\n";
 	echo "<tr><th>refcnt</th><th>name</th><th>VS configuration</th><th>RS configuration</th></tr>";
 	$order = 'odd';
@@ -4662,6 +4667,10 @@ function renderRSPoolList ()
 		$order = $nextorder[$order];
 	}
 	echo "</table>";
+	finishPortlet ();
+	echo '</td><td class=pcright>';
+	renderTagFilterPortlet ($tagfilter, 'ipv4rspool');
+	echo '</td></tr></table>';
 }
 
 function editRSPools ()
@@ -5095,7 +5104,7 @@ function renderIPv4VSTags ($id)
 
 function renderIPv4RSPoolTags ($id)
 {
-	renderEntityTags ('ip4rspool', 'id', $id);
+	renderEntityTags ('ip4rspool', 'pool_id', $id);
 }
 
 function renderEntityTags ($entity_realm = '', $bypass_name, $entity_id = 0)

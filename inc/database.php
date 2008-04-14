@@ -2231,11 +2231,24 @@ function getVSList ($tagfilter = array())
 }
 
 // Return the list of RS pool, indexed by pool id.
-function getRSPoolList ()
+function getRSPoolList ($tagfilter = array())
 {
+	if (!count ($tagfilter))
+		$whereclause = '';
+	else
+	{
+		$whereclause = 'where ';
+		$orclause = '';
+		foreach ($tagfilter as $tag_id)
+		{
+			$whereclause .= $orclause . 'tag_id = ' . $tag_id;
+			$orclause = ' or ';
+		}
+	}
 	$query = "select pool.id, pool.name, count(rspool_id) as refcnt, pool.vsconfig, pool.rsconfig " .
 		"from IPRSPool as pool left join IPLoadBalancer as lb on pool.id = lb.rspool_id " .
-		"group by pool.id order by pool.id, name";
+		"left join TagStorage on pool.id = TagStorage.target_id and target_realm = 'ipv4rspool' " .
+		"${whereclause} group by pool.id order by pool.id, name";
 	$result = useSelectBlade ($query);
 	$ret = array ();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))

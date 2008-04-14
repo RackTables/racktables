@@ -1364,7 +1364,7 @@ function saveIPv4VSTags ()
 
 function saveIPv4RSPoolTags ()
 {
-	return saveEntityTags ('ipv4rspool', 'id');
+	return saveEntityTags ('ipv4rspool', 'pool_id');
 }
 
 function destroyTag ()
