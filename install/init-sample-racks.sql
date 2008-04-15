@@ -238,13 +238,13 @@ INSERT INTO `Port` (`id`, `object_id`, `name`, `type`, `l2address`, `reservation
 INSERT INTO `Port` (`id`, `object_id`, `name`, `type`, `l2address`, `reservation_comment`, `label`) VALUES (3125,907,'gi3/0',25,NULL,'ISP uplink','');
 INSERT INTO `Port` (`id`, `object_id`, `name`, `type`, `l2address`, `reservation_comment`, `label`) VALUES (3126,907,'gi4/0',25,NULL,NULL,'');
 
-INSERT INTO `PortForwarding` (`object_id`, `proto`, `localip`, `localport`, `remoteip`, `remoteport`, `description`) VALUES (915,336,180879675,80,180879681,80,'');
-INSERT INTO `PortForwarding` (`object_id`, `proto`, `localip`, `localport`, `remoteip`, `remoteport`, `description`) VALUES (915,336,180879675,80,180879682,80,'');
-INSERT INTO `PortForwarding` (`object_id`, `proto`, `localip`, `localport`, `remoteip`, `remoteport`, `description`) VALUES (915,336,180879675,80,180879683,80,'');
-INSERT INTO `PortForwarding` (`object_id`, `proto`, `localip`, `localport`, `remoteip`, `remoteport`, `description`) VALUES (915,337,180879676,53,180879684,53,'');
-INSERT INTO `PortForwarding` (`object_id`, `proto`, `localip`, `localport`, `remoteip`, `remoteport`, `description`) VALUES (915,337,180879676,53,180879685,53,'');
-INSERT INTO `PortForwarding` (`object_id`, `proto`, `localip`, `localport`, `remoteip`, `remoteport`, `description`) VALUES (915,336,180879677,443,180879686,443,'');
-INSERT INTO `PortForwarding` (`object_id`, `proto`, `localip`, `localport`, `remoteip`, `remoteport`, `description`) VALUES (915,336,180879677,443,180879687,443,'');
+INSERT INTO `PortForwarding` (`object_id`, `proto`, `localip`, `localport`, `remoteip`, `remoteport`, `description`) VALUES (915,'TCP',180879675,80,180879681,80,'');
+INSERT INTO `PortForwarding` (`object_id`, `proto`, `localip`, `localport`, `remoteip`, `remoteport`, `description`) VALUES (915,'TCP',180879675,80,180879682,80,'');
+INSERT INTO `PortForwarding` (`object_id`, `proto`, `localip`, `localport`, `remoteip`, `remoteport`, `description`) VALUES (915,'TCP',180879675,80,180879683,80,'');
+INSERT INTO `PortForwarding` (`object_id`, `proto`, `localip`, `localport`, `remoteip`, `remoteport`, `description`) VALUES (915,'UDP',180879676,53,180879684,53,'');
+INSERT INTO `PortForwarding` (`object_id`, `proto`, `localip`, `localport`, `remoteip`, `remoteport`, `description`) VALUES (915,'UDP',180879676,53,180879685,53,'');
+INSERT INTO `PortForwarding` (`object_id`, `proto`, `localip`, `localport`, `remoteip`, `remoteport`, `description`) VALUES (915,'TCP',180879677,443,180879686,443,'');
+INSERT INTO `PortForwarding` (`object_id`, `proto`, `localip`, `localport`, `remoteip`, `remoteport`, `description`) VALUES (915,'TCP',180879677,443,180879687,443,'');
 
 INSERT INTO `Rack` (`id`, `name`, `deleted`, `row_id`, `height`, `comment`) VALUES (40,'L01','no',50003,42,'test');
 INSERT INTO `Rack` (`id`, `name`, `deleted`, `row_id`, `height`, `comment`) VALUES (41,'L02','no',50003,12,'network equipment mini-rack');
