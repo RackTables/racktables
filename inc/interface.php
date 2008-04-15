@@ -580,6 +580,27 @@ function printSelect ($rowList, $select_name, $selected_id = 1)
 	echo "</select>";
 }
 
+// used by renderGridForm() and renderRackPage()
+function renderRackInfoPortlet ($rackData)
+{
+	startPortlet ('summary');
+	echo "<table border=0 cellspacing=0 cellpadding=3 width='100%'>\n";
+	echo "<tr><th width='50%' class=tdright>Rack row:</th><td class=tdleft>${rackData['row_name']}</td></tr>\n";
+	echo "<tr><th width='50%' class=tdright>Name:</th><td class=tdleft>${rackData['name']}</td></tr>\n";
+	echo "<tr><th width='50%' class=tdright>Height:</th><td class=tdleft>${rackData['height']}</td></tr>\n";
+	echo "<tr><th width='50%' class=tdright>Utilization:</th><td class=tdleft>";
+	renderProgressBar (getRSUforRack ($rackData));
+	echo "</td></tr>\n";
+	echo "<tr><th width='50%' class=tdright>Objects:</th><td class=tdleft>";
+	echo getObjectCount ($rackData);
+	echo "</td></tr>\n";
+	printTagTRs();
+	if (!empty ($rackData['comment']))
+		echo "<tr><th width='50%' class=tdright>Comment:</th><td class=tdleft>${rackData['comment']}</td></tr>\n";
+	echo '</table>';
+	finishPortlet();
+}
+
 // This is a universal editor of rack design/waste.
 function renderGridForm ($rack_id = 0, $filter, $header, $submit, $state1, $state2)
 {
@@ -595,14 +616,17 @@ function renderGridForm ($rack_id = 0, $filter, $header, $submit, $state1, $stat
 	}
 
 	global $root, $pageno, $tabno;
-	$filter($rackData);
+	$filter ($rackData);
 	markupObjectProblems ($rackData);
 
 	// Process form submit.
 	if (isset ($_REQUEST['do_update']))
 	{
 		$log[] = processGridForm ($rackData, $state1, $state2);
-		printLog($log);
+		printLog ($log);
+		$rackData = getRackData ($rack_id);
+		$filter ($rackData);
+		markupObjectProblems ($rackData);
 	}
 
 	// Render the result whatever it is.
@@ -612,15 +636,7 @@ function renderGridForm ($rack_id = 0, $filter, $header, $submit, $state1, $stat
 
 	// Left column with information portlet.
 	echo "<tr><td class=pcleft height='1%' width='50%'>";
-	startPortlet ('Rack information');
-	echo "<table border=0 cellspacing=0 cellpadding=3 width='100%'>\n";
-	echo "<tr><th width='50%' class=tdright>Rack name:</th><td class=tdleft>${rackData['name']}</td></tr>\n";
-	echo "<tr><th width='50%' class=tdright>Height:</th><td class=tdleft>${rackData['height']}</td></tr>\n";
-	echo "<tr><th width='50%' class=tdright>Rack row:</th><td class=tdleft>${rackData['row_name']}</td></tr>\n";
-	echo "<tr><th width='50%' class=tdright>Comment:</th><td class=tdleft>${rackData['comment']}</td></tr>\n";
-	echo "</table>\n";
-	finishPortlet();
-
+	renderRackInfoPortlet ($rackData);
 	echo "</td>\n";
 	echo "<td class=pcright>";
 
@@ -3120,22 +3136,7 @@ function renderRackPage ($rack_id)
 
 	// Left column with information.
 	echo "<td class=pcleft>";
-	startPortlet ('Rack information');
-	echo "<table border=0 cellspacing=0 cellpadding=3 width='100%'>\n";
-	echo "<tr><th width='50%' class=tdright>Rack row:</th><td class=tdleft>${rackData['row_name']}</td></tr>\n";
-	echo "<tr><th width='50%' class=tdright>Name:</th><td class=tdleft>${rackData['name']}</td></tr>\n";
-	echo "<tr><th width='50%' class=tdright>Height:</th><td class=tdleft>${rackData['height']}</td></tr>\n";
-	echo "<tr><th width='50%' class=tdright>Utilization:</th><td class=tdleft>";
-	renderProgressBar (getRSUforRack ($rackData));
-	echo "</td></tr>\n";
-	echo "<tr><th width='50%' class=tdright>Objects:</th><td class=tdleft>";
-	echo getObjectCount ($rackData);
-	echo "</td></tr>\n";
-	printTagTRs();
-	if (!empty ($rackData['comment']))
-		echo "<tr><th width='50%' class=tdright>Comment:</th><td class=tdleft>${rackData['comment']}</td></tr>\n";
-	echo '</table>';
-	finishPortlet();
+	renderRackInfoPortlet ($rackData);
 	echo '</td>';
 
 	// Right column with rendered rack.
