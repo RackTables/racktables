@@ -461,6 +461,8 @@ function addRange ($range='', $name='', $is_bcast = FALSE, $taglist = array())
 		return 'Query #3 failed in ' . __FUNCTION__;
 	$row = $result->fetch (PDO::FETCH_NUM);
 	$netid = $row[0];
+	$result->closeCursor();
+	unset ($result);
 	$errcount = 0;
 	foreach ($taglist as $tag_id)
 		if (useInsertBlade
