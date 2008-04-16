@@ -60,6 +60,7 @@ function renderIndex ()
 function renderRackspace ()
 {
 	$tagfilter = getTagFilter();
+	$tagfilter_str = getTagFilterStr();
 	echo "<table class=objview border=0 width='100%'><tr><td class=pcleft>";
 	renderTagFilterPortlet ($tagfilter, 'rack');
 	echo '</td><td class=pcright>';
@@ -71,8 +72,10 @@ function renderRackspace ()
 	$order = 'odd';
 	foreach ($rackrowList as $rackrow)
 	{
-		echo "<tr class=row_${order}><th><a href='${root}?page=row&row_id=${rackrow['dict_key']}'>${rackrow['dict_value']}</a></th>";
-		$rackList = getRacksForRow ($rackrow['dict_key'], $tagfilter);
+		echo "<tr class=row_${order}><th>";
+		echo "<a href='${root}?page=row&row_id=${rackrow['row_id']}${tagfilter_str}'>";
+		echo "${rackrow['row_name']}</a></th>";
+		$rackList = getRacksForRow ($rackrow['row_id'], $tagfilter);
 		echo "<td><table border=0 cellspacing=5><tr>";
 		foreach ($rackList as $dummy => $rack)
 		{
@@ -102,7 +105,8 @@ function renderRow ($row_id)
 		showError ('getRackRowInfo() failed', __FUNCTION__);
 		return;
 	}
-	$rackList = getRacksForRow ($row_id);
+	$tagfilter = getTagFilter();
+	$rackList = getRacksForRow ($row_id, $tagfilter);
 	// Main layout starts.
 	echo "<table border=0 class=objectview cellspacing=0 cellpadding=0>";
 
@@ -118,7 +122,7 @@ function renderRow ($row_id)
 	echo "</table><br>\n";
 	finishPortlet();
 
-	echo "</td><td class=pcright>";
+	echo "</td><td class=pcright rowspan=2>";
 
 	global $root, $nextorder;
 	$rackwidth = getConfigVar ('rtwidth_0') + getConfigVar ('rtwidth_1') + getConfigVar ('rtwidth_2');
@@ -137,7 +141,10 @@ function renderRow ($row_id)
 	}
 	echo "</tr></table>\n";
 	finishPortlet();
+	echo "</td></tr>";
 
+	echo "<tr><td class=pcleft>";
+	renderTagFilterPortlet ($tagfilter, 'rack', 'row_id', $row_id);
 	echo "</td></tr></table>";
 }
 
@@ -1521,35 +1528,6 @@ function renderProblematicObjectsPortlet ()
 	finishPortlet();
 }
 
-function renderObjectGroupSummary ()
-{
-	global $root;
-	$tagfilter = getTagFilter();
-	$summary = getObjectGroupInfo();
-	if ($summary === NULL)
-	{
-		showError ('getObjectGroupInfo() failed', __FUNCTION__);
-		return;
-	}
-	echo "<table border=0 class=objectview>\n";
-	echo "<tr><td class=pcleft width='25%'>";
-
-	startPortlet ('Summary');
-	foreach ($summary as $gi)
-		echo "<a href='${root}?page=objgroup&group_id=${gi['id']}'><b>${gi['name']}</b></a> <i>(${gi['count']})</i><br>";
-	finishPortlet();
-
-	echo '</td><td class=pcright>';
-	renderUnmountedObjectsPortlet();
-	echo '</td><td class=pcright>';
-	renderProblematicObjectsPortlet();
-	echo '</td><td class=pcright>';
-	startPortlet ('Tag filter');
-	renderTagFilterSelect ($tagfilter, 'object');
-	finishPortlet();
-	echo "</td></tr></table>\n";
-}
-
 function renderObjectSpace ()
 {
 	global $root, $taglist, $tagtree;
@@ -1589,12 +1567,8 @@ function renderObjectGroup ()
 	global $root, $pageno, $tabno, $nextorder, $taglist, $tagtree;
 	assertUIntArg ('group_id', __FUNCTION__, TRUE);
 	$group_id = $_REQUEST['group_id'];
-	$tagfilter = isset ($_REQUEST['tagfilter']) ? $_REQUEST['tagfilter'] : array();
-	$tagfilter_str = getStringFromTrail (getExplicitTagsOnly (buildTrailFromIds ($tagfilter)));
-	$tagfilter = complementByKids ($tagfilter);
-	echo "<form>\n";
-	echo "<input type=hidden name=page value=${pageno}>\n";
-	echo "<input type=hidden name=group_id value=${group_id}>\n";
+	$tagfilter = getTagFilter();
+	$tagfilter_str = getTagFilterStr ($tagfilter);
 	echo "<table border=0 class=objectview>\n";
 	echo "<tr><td class=pcleft width='25%'>";
 	startPortlet ('change type');
@@ -1611,7 +1585,7 @@ function renderObjectGroup ()
 		echo '<div align=left><ul>';
 		foreach ($groupInfo as $gi)
 		{
-			echo "<li><a href='${root}?page=${pageno}&group_id=${gi['id']}&tagfilter[]=${tagfilter_str}'>";
+			echo "<li><a href='${root}?page=${pageno}&group_id=${gi['id']}${tagfilter_str}'>";
 			if ($gi['id'] == $group_id)
 				echo '<strong>';
 			echo "${gi['name']}</a>";
@@ -1656,65 +1630,8 @@ function renderObjectGroup ()
 
 	echo "</td><td class=pcright width='25%'>";
 
-	startPortlet ('change filter');
-	renderTagFilterSelect ($tagfilter, 'object');
-	echo "<input type=submit value='Apply'>\n";
-	finishPortlet();
+	renderTagFilterPortlet ($tagfilter, 'object', 'group_id', $group_id);
 	echo "</td></tr></table>\n";
-	echo '</form>';
-}
-
-function renderObjectGroup_old ()
-{
-	global $root;
-	assertUIntArg ('group_id', __FUNCTION__);
-	$group_id = $_REQUEST['group_id'];
-	$summary = getObjectGroupInfo();
-	if ($summary == NULL)
-	{
-		showError ('getObjectGroupInfo() failed', __FUNCTION__);
-		return;
-	}
-	$objects = getObjectList ($group_id);
-	if ($objects === NULL)
-	{
-		showError ('getObjectList() failed', __FUNCTION__);
-		return;
-	}
-	echo "<table border=0 class=objectview>\n";
-	echo "<tr><td class=pcleft width='25%'>";
-
-	startPortlet ('All objects');
-	foreach ($summary as $gi)
-	{
-		echo "<a href='${root}?page=objgroup&group_id=${gi['id']}'><b>${gi['name']}</b></a> <i>(${gi['count']})</i><br>";
-	}
-	finishPortlet();
-
-	echo '</td><td class=pcright>';
-
-	startPortlet ('Object group');
-	echo '<br><br><table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
-	echo '<tr><th>Common name</th><th>Visible label</th><th>Asset tag</th><th>Barcode</th><th>Rack</th></tr>';
-	$order = 'odd';
-	global $nextorder;
-	foreach ($objects as $obj)
-	{
-		echo "<tr class=row_${order}><td><a href='${root}?page=object&object_id=${obj['id']}'>${obj['dname']}</a></td>";
-		echo "<td>${obj['label']}</td>";
-		echo "<td>${obj['asset_no']}</td>";
-		echo "<td>${obj['barcode']}</td>";
-		if ($obj['rack_id'])
-			echo "<td><a href='${root}?page=rack&rack_id=${obj['rack_id']}'>${obj['Rack_name']}</a></td>";
-		else
-			echo '<td>Unmounted</td>';
-		echo '</tr>';
-		$order = $nextorder[$order];
-	}
-	echo '</table>';
-	finishPortlet();
-
-	echo "</td></tr></table>";
 }
 
 function renderEmptyPortsSelect ($port_id, $type_id)
@@ -5198,7 +5115,8 @@ function printTagTRs()
 	}
 }
 
-function renderTagFilterPortlet ($tagfilter, $realm)
+// Output a portlet, with currently selected tags and prepare a form for update.
+function renderTagFilterPortlet ($tagfilter, $realm, $bypass_name = '', $bypass_value = '')
 {
 	global $pageno, $tabno, $taglist, $tagtree;
 	$objectivetags = getObjectiveTagTree ($tagtree, $realm);
@@ -5211,6 +5129,8 @@ function renderTagFilterPortlet ($tagfilter, $realm)
 	echo "<form method=get>\n";
 	echo "<input type=hidden name=page value=${pageno}>\n";
 	echo "<input type=hidden name=tab value=${tabno}>\n";
+	if ($bypass_name != '')
+		echo "<input type=hidden name=${bypass_name} value='${bypass_value}'>\n";
 	echo '<select name=tagfilter[] multiple>';
 	foreach ($objectivetags as $taginfo)
 		renderTagOptionForFilter ($taginfo, $tagfilter, $realm);
@@ -5219,20 +5139,7 @@ function renderTagFilterPortlet ($tagfilter, $realm)
 	finishPortlet();
 }
 
-function renderTagFilterSelect ($tagfilter, $realm)
-{
-	global $taglist, $tagtree;
-	if (!count ($taglist))
-	{
-		echo "No tags defined";
-		return;
-	}
-	echo '<select name=tagfilter[] multiple>';
-	foreach (getObjectiveTagTree ($tagtree, $realm) as $taginfo)
-		renderTagOptionForFilter ($taginfo, $tagfilter, $realm);
-	echo '</select><br>';
-}
-
+// Dump all tags in a single SELECT element.
 function renderTagSelect ()
 {
 	global $taglist, $tagtree;

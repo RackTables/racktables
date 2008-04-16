@@ -1629,20 +1629,18 @@ function getObjectiveTagTree ($tree, $realm)
 	return $ret;
 }
 
-function getStringFromTrail ($trail)
-{
-	$str = '';
-	$comma = '';
-	foreach ($trail as $tag)
-	{
-		$str .= $comma . $tag['id'];
-		$comma = ',';
-	}
-	return $str;
-}
-
 function getTagFilter ()
 {
 	return isset ($_REQUEST['tagfilter']) ? complementByKids ($_REQUEST['tagfilter']) : array();
 }
+
+function getTagFilterStr ($tagfilter = array())
+{
+	$ret = '';
+	$tagfilter = isset ($_REQUEST['tagfilter']) ? $_REQUEST['tagfilter'] : array();
+	foreach (getExplicitTagsOnly (buildTrailFromIds ($tagfilter)) as $taginfo)
+		$ret .= "&tagfilter[]=" . $taginfo['id'];
+	return $ret;
+}
+
 ?>

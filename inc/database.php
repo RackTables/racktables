@@ -20,19 +20,18 @@ function getRackspace ($tagfilter = array())
 {
 	$whereclause = getWhereClause ($tagfilter);
 	$query =
-		"select dict_key, dict_value, count(Rack.id) as count, " .
-		"if(isnull(sum(Rack.height)),0,sum(Rack.height)) as sum " .
+		"select dict_key as row_id, dict_value as row_name " .
 		"from Chapter natural join Dictionary left join Rack on Rack.row_id = dict_key " .
 		"left join TagStorage on Rack.id = TagStorage.target_id and target_realm = 'rack' " .
 		"where chapter_name = 'RackRow' " .
 		$whereclause .
-		"group by dict_key order by dict_value";
+		" order by dict_value";
 	$result = useSelectBlade ($query);
 	$ret = array();
-	$clist = array ('dict_key', 'dict_value', 'count', 'sum');
+	$clist = array ('row_id', 'row_name');
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 		foreach ($clist as $dummy => $cname)
-			$ret[$row['dict_key']][$cname] = $row[$cname];
+			$ret[$row['row_id']][$cname] = $row[$cname];
 	$result->closeCursor();
 	return $ret;
 }
