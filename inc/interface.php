@@ -59,11 +59,14 @@ function renderIndex ()
 
 function renderRackspace ()
 {
-?>
-	<table border=0 cellpadding=10 cellpadding=1>
-<?php
+	$tagfilter = isset ($_REQUEST['tagfilter']) ? $_REQUEST['tagfilter'] : array();
+	$tagfilter = complementByKids ($tagfilter);
+	echo "<table class=objview border=0 width='100%'><tr><td class=pcleft>";
+	renderTagFilterPortlet ($tagfilter, 'rack');
+	echo '</td><td class=pcright>';
+	echo '<table border=0 cellpadding=10 cellpadding=1>';
 	// generate thumb gallery
-	$rackrowList = getRackRowInfo();
+	$rackrowList = getRackspace ($tagfilter);
 	global $root, $nextorder;
 	$rackwidth = getConfigVar ('rtwidth_0') + getConfigVar ('rtwidth_1') + getConfigVar ('rtwidth_2');
 	$order = 'odd';
@@ -85,6 +88,7 @@ function renderRackspace ()
 		$order = $nextorder[$order];
 	}
 	echo "</table>\n";
+	echo "</td></tr></table>\n";
 }
 
 function renderRow ($row_id)

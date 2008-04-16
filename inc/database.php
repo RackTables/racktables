@@ -16,6 +16,27 @@ function escapeString ($value, $do_db_escape = TRUE)
 	return $ret;
 }
 
+function getRackspace ($tagfilter = array())
+{
+	$whereclause = getWhereClause ($tagfilter);
+	$query =
+		"select dict_key, dict_value, count(Rack.id) as count, " .
+		"if(isnull(sum(Rack.height)),0,sum(Rack.height)) as sum " .
+		"from Chapter natural join Dictionary left join Rack on Rack.row_id = dict_key " .
+		"left join TagStorage on Rack.id = TagStorage.target_id and target_realm = 'rack' " .
+		"where chapter_name = 'RackRow' " .
+		$whereclause .
+		"group by dict_key order by dict_value";
+	$result = useSelectBlade ($query);
+	$ret = array();
+	$clist = array ('dict_key', 'dict_value', 'count', 'sum');
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
+		foreach ($clist as $dummy => $cname)
+			$ret[$row['dict_key']][$cname] = $row[$cname];
+	$result->closeCursor();
+	return $ret;
+}
+
 // This function returns detailed information about either all or one
 // rack row depending on its argument.
 function getRackRowInfo ($rackrow_id = 0)
@@ -47,11 +68,11 @@ function getObjectTypeList ()
 	return readChapter ('RackObjectType');
 }
 
-function getObjectList ($type_id = 0, $tagfilter = array())
+// Return a part of SQL query suitable for embeding into a bigger text.
+// The returned result should list all tag IDs shown in the tag filter.
+function getWhereClause ($tagfilter = array())
 {
 	$whereclause = '';
-	if ($type_id != 0)
-		$whereclause = " and objtype_id = '${type_id}' ";
 	if (count ($tagfilter))
 	{
 		$whereclause .= ' and (';
@@ -63,6 +84,14 @@ function getObjectList ($type_id = 0, $tagfilter = array())
 		}
 		$whereclause .= ') ';
 	}
+	return $whereclause;
+}
+
+function getObjectList ($type_id = 0, $tagfilter = array())
+{
+	$whereclause = getWhereClause ($tagfilter);
+	if ($type_id != 0)
+		$whereclause .= " and objtype_id = '${type_id}' ";
 	$query =
 		"select distinct RackObject.id as id , RackObject.name as name, dict_value as objtype_name, " .
 		"RackObject.label as label, RackObject.barcode as barcode, " .
@@ -912,18 +941,7 @@ function getObjectAddresses ($object_id = 0)
 
 function getAddressspaceList ($tagfilter = array())
 {
-	if (!count ($tagfilter))
-		$whereclause = '';
-	else
-	{
-		$whereclause = 'where ';
-		$orclause = '';
-		foreach ($tagfilter as $tag_id)
-		{
-			$whereclause .= $orclause . 'tag_id = ' . $tag_id;
-			$orclause = ' or ';
-		}
-	}
+	$whereclause = getWhereClause ($tagfilter);
 	$query =
 		"select distinct ".
 		"id as IPRanges_id, ".
@@ -931,7 +949,7 @@ function getAddressspaceList ($tagfilter = array())
 		"mask as IPRanges_mask, ".
 		"name as IPRanges_name ".
 		"from IPRanges left join TagStorage on IPRanges.id = TagStorage.target_id and target_realm = 'ipv4net' " .
-		$whereclause .
+		"where true ${whereclause} " .
 		" order by ip";
 	$result = useSelectBlade ($query);
 	$ret=array();
@@ -2237,18 +2255,7 @@ function commitUpdateVS ($vsid = 0, $vip = '', $vport = 0, $proto = '', $name = 
 // Each record will be shown with its basic info plus RS pools counter.
 function getVSList ($tagfilter = array())
 {
-	if (!count ($tagfilter))
-		$whereclause = '';
-	else
-	{
-		$whereclause = 'where ';
-		$orclause = '';
-		foreach ($tagfilter as $tag_id)
-		{
-			$whereclause .= $orclause . 'tag_id = ' . $tag_id;
-			$orclause = ' or ';
-		}
-	}
+	$whereclause = getWhereClause ($tagfilter);
 	$query = "select vs.id, inet_ntoa(vip) as vip, vport, proto, vs.name, vs.vsconfig, vs.rsconfig, count(rspool_id) as poolcount " .
 		"from IPVirtualService as vs left join IPLoadBalancer as lb on vs.id = lb.vs_id " .
 		"left join TagStorage on vs.id = TagStorage.target_id and target_realm = 'ipv4vs' " . 
@@ -2265,18 +2272,7 @@ function getVSList ($tagfilter = array())
 // Return the list of RS pool, indexed by pool id.
 function getRSPoolList ($tagfilter = array())
 {
-	if (!count ($tagfilter))
-		$whereclause = '';
-	else
-	{
-		$whereclause = 'where ';
-		$orclause = '';
-		foreach ($tagfilter as $tag_id)
-		{
-			$whereclause .= $orclause . 'tag_id = ' . $tag_id;
-			$orclause = ' or ';
-		}
-	}
+	$whereclause = getWhereClause ($tagfilter);
 	$query = "select pool.id, pool.name, count(rspool_id) as refcnt, pool.vsconfig, pool.rsconfig " .
 		"from IPRSPool as pool left join IPLoadBalancer as lb on pool.id = lb.rspool_id " .
 		"left join TagStorage on pool.id = TagStorage.target_id and target_realm = 'ipv4rspool' " .
