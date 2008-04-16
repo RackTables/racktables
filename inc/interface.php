@@ -59,8 +59,7 @@ function renderIndex ()
 
 function renderRackspace ()
 {
-	$tagfilter = isset ($_REQUEST['tagfilter']) ? $_REQUEST['tagfilter'] : array();
-	$tagfilter = complementByKids ($tagfilter);
+	$tagfilter = getTagFilter();
 	echo "<table class=objview border=0 width='100%'><tr><td class=pcleft>";
 	renderTagFilterPortlet ($tagfilter, 'rack');
 	echo '</td><td class=pcright>';
@@ -73,7 +72,7 @@ function renderRackspace ()
 	foreach ($rackrowList as $rackrow)
 	{
 		echo "<tr class=row_${order}><th><a href='${root}?page=row&row_id=${rackrow['dict_key']}'>${rackrow['dict_value']}</a></th>";
-		$rackList = getRacksForRow ($rackrow['dict_key']);
+		$rackList = getRacksForRow ($rackrow['dict_key'], $tagfilter);
 		echo "<td><table border=0 cellspacing=5><tr>";
 		foreach ($rackList as $dummy => $rack)
 		{
@@ -1525,8 +1524,7 @@ function renderProblematicObjectsPortlet ()
 function renderObjectGroupSummary ()
 {
 	global $root;
-	$tagfilter = isset ($_REQUEST['tagfilter']) ? $_REQUEST['tagfilter'] : array();
-	$tagfilter = complementByKids ($tagfilter);
+	$tagfilter = getTagFilter();
 	$summary = getObjectGroupInfo();
 	if ($summary === NULL)
 	{
@@ -1875,8 +1873,7 @@ function renderAddressspace ()
 
 	startPortlet ('Subnets');
 	echo "<table class='widetable' border=0 cellpadding=10 cellspacing=0 align='center'>\n";
-	$tagfilter = isset ($_REQUEST['tagfilter']) ? $_REQUEST['tagfilter'] : array();
-	$tagfilter = complementByKids ($tagfilter);
+	$tagfilter = getTagFilter();
 	$addrspaceList = getAddressspaceList ($tagfilter);
 	echo "<tr><th>Subnet</th><th>Name</th><th>Utilization</th></tr>";
 	foreach ($addrspaceList as $iprange)
@@ -4597,8 +4594,7 @@ function renderRSPool ($pool_id = 0)
 function renderVSList ()
 {
 	global $root, $nextorder;
-	$tagfilter = isset ($_REQUEST['tagfilter']) ? $_REQUEST['tagfilter'] : array();
-	$tagfilter = complementByKids ($tagfilter);
+	$tagfilter = getTagFilter();
 	$vslist = getVSList ($tagfilter);
 	echo "<table border=0 class=objectview>\n";
 	echo "<tr><td class=pcleft>";
@@ -4694,8 +4690,7 @@ function renderVSListEditForm ()
 function renderRSPoolList ()
 {
 	global $root, $nextorder;
-	$tagfilter = isset ($_REQUEST['tagfilter']) ? $_REQUEST['tagfilter'] : array();
-	$tagfilter = complementByKids ($tagfilter);
+	$tagfilter = getTagFilter();
 	$pool_list = getRSPoolList ($tagfilter);
 	if ($pool_list === NULL)
 	{

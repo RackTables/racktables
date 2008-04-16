@@ -1641,4 +1641,8 @@ function getStringFromTrail ($trail)
 	return $str;
 }
 
+function getTagFilter ()
+{
+	return isset ($_REQUEST['tagfilter']) ? complementByKids ($_REQUEST['tagfilter']) : array();
+}
 ?>

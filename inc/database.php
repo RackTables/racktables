@@ -125,15 +125,17 @@ function getObjectList ($type_id = 0, $tagfilter = array())
 	return $ret;
 }
 
-function getRacksForRow ($row_id = 0)
+function getRacksForRow ($row_id = 0, $tagfilter = array())
 {
 	$query =
 		"select Rack.id, Rack.name, height, Rack.comment, row_id, " .
 		"'yes' as left_is_front, 'yes' as bottom_is_unit1, dict_value as row_name " .
 		"from Rack left join Dictionary on row_id = dict_key natural join Chapter " .
+		"left join TagStorage on Rack.id = TagStorage.target_id and target_realm = 'rack' " .
 		"where chapter_name = 'RackRow' and Rack.deleted = 'no' " .
 		(($row_id == 0) ? "" : "and row_id = ${row_id} ") .
-		"order by row_name, Rack.id";
+		getWhereClause ($tagfilter) .
+		" order by row_name, Rack.id";
 	$result = useSelectBlade ($query);
 	$ret = array();
 	$clist = array
