@@ -112,7 +112,7 @@ do_fetch()
 
 	# First extract structured info about VLAN membership, then map
 	# special descriptions into VLAN IDs.
-	cat "$OUT2a" | egrep '^(Et|Fa|Gi|Te)' | sed $SEDFLAG 's/^([A-Za-z/0-9]+) +(.*) +(connected|notconnect|disabled|err-disabled|monitoring|suspended) +/\1~\2%\3%/;s/%(trunk|([0-9]+)) .*$/%\1/;s/%(monitoring|suspended)%/%connected%/;s/%err-disabled%/%disabled%/;s/ +%/%/;s/~/%/' > $OUT2b
+	cat "$OUT2a" | egrep '^(Et|Fa|Gi|Te)' | sed $SEDFLAG 's/^([A-Za-z/0-9]+) +(.*) +(connected|notconnect|disabled|err-disabled|monitoring|suspended) +/\1~\2%\3%/;s/%(trunk|routed|([0-9]+)) .*$/%\1/;s/%(monitoring|suspended)%/%connected%/;s/%(err-disabled)%/%disabled%/;s/ +%/%/;s/~/%/' > $OUT2b
 	while read line; do
 		tmp_ifname=`echo $line | cut -d% -f1`
 		tmp_ifdescr=`echo $line | cut -d% -f2`

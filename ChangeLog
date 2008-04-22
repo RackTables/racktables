@@ -8,6 +8,7 @@
 	update: async port type has been split
 	update: don't allow duplicate rack names in one row
 	update: internal help system has been dropped
+	update: handle "routed" switch ports
 	bugfix: make switchvlans gateway work on Linux
 0.14.12 2008-02-29
 	new feature: default value for RS inservice status

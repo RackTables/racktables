@@ -3652,6 +3652,11 @@ function renderVLANMembership ($object_id = 0)
 			echo "<input type=hidden name=vlanid_${portno} value='trunk'>";
 			echo "<select disabled multiple='multiple' size=1><option>TRUNK</option></select>";
 		}
+		elseif ($port['vlanid'] == 'routed')
+		{
+			echo "<input type=hidden name=vlanid_${portno} value='routed'>";
+			echo "<select disabled multiple='multiple' size=1><option>ROUTED</option></select>";
+		}
 		else
 		{
 			echo "<select name=vlanid_${portno}>";
