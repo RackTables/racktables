@@ -1035,10 +1035,11 @@ function commitDeleteRange ($id = 0)
 {
 	if ($id <= 0)
 		return __FUNCTION__ . ': Invalid range ID';
-	if (useDeleteBlade ('IPRanges', 'id', $id))
-		return '';
-	else
-		return __FUNCTION__ . ': SQL query failed';
+	if (!useDeleteBlade ('IPRanges', 'id', $id, FALSE))
+		return __FUNCTION__ . ': SQL query #1 failed';
+	if (!deleteTagsForEntity ('ipv4net', $id))
+		return __FUNCTION__ . ': SQL query #2 failed';
+	return '';
 }
 
 function updateBond ($ip='', $object_id=0, $name='', $type='')
@@ -1664,7 +1665,7 @@ function commitDeleteAttribute ($attr_id = 0)
 		showError ('Invalid args', __FUNCTION__);
 		die;
 	}
-	return useDeleteBlade ('Attribute', 'attr_id', $attr_id);
+	return useDeleteBlade ('Attribute', 'attr_id', $attr_id, FALSE);
 }
 
 // FIXME: don't store garbage in chapter_no for non-dictionary types.
@@ -1891,7 +1892,7 @@ function useDeleteBlade ($tablename, $keyname, $keyvalue, $quotekey = TRUE, $del
 	$result = $dbxlink->exec ($query);
 	if ($result === NULL)
 		return FALSE;
-	elseif ($result != 1)
+	elseif (!$deleteall && $result != 1)
 		return FALSE;
 	else
 		return TRUE;
@@ -2155,14 +2156,14 @@ function commitDeleteRS ($id = 0)
 {
 	if ($id <= 0)
 		return FALSE;
-	return useDeleteBlade ('IPRealServer', 'id', $id);
+	return useDeleteBlade ('IPRealServer', 'id', $id, FALSE);
 }
 
 function commitDeleteVS ($id = 0)
 {
 	if ($id <= 0)
 		return FALSE;
-	return useDeleteBlade ('IPVirtualService', 'id', $id);
+	return useDeleteBlade ('IPVirtualService', 'id', $id, FALSE) && deleteTagsForEntity ('ipv4vs', $id);
 }
 
 function commitDeleteLB ($object_id = 0, $pool_id = 0, $vs_id = 0)
@@ -2370,14 +2371,7 @@ function commitDeleteRSPool ($pool_id = 0)
 	global $dbxlink;
 	if ($pool_id <= 0)
 		return FALSE;
-	$query = "delete from IPRSPool where id = ${pool_id} limit 1";
-	$result = $dbxlink->exec ($query);
-	if ($result === NULL)
-		return FALSE;
-	elseif ($result != 1)
-		return FALSE;
-	else
-		return TRUE;
+	return useDeleteBlade ('IPRSPool', 'id', $pool_id, FALSE) && deleteTagsForEntity ('ipv4rspool', $pool_id);
 }
 
 function commitUpdateRSPool ($pool_id = 0, $name = '', $vsconfig = '', $rsconfig = '')
@@ -2601,6 +2595,17 @@ function wipeTags ($realm, $id)
 	if ($result === NULL)
 		return FALSE;
 	return TRUE;
+}
+
+function deleteTagsForEntity ($entity_realm, $entity_id)
+{
+	global $dbxlink;
+	$query = "delete from TagStorage where target_realm = '${entity_realm}' and target_id = ${entity_id}";
+	$result = $dbxlink->exec ($query);
+	if ($result === NULL)
+		return FALSE;
+	else
+		return TRUE;
 }
 
 ?>
