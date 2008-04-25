@@ -5032,8 +5032,8 @@ function renderTagTreeEditor ()
 	echo "<input type=hidden name=tab value='${tabno}'>";
 	echo "<input type=hidden name=op value='createTag'>";
 	echo "<tr><td>";
-	printImageHREF ('grant', 'Create tag', TRUE);
-	echo '</td><td><input type=text name=tag_name></td><td><select name=parent_id>';
+	printImageHREF ('grant', 'Create tag', TRUE, 102);
+	echo '</td><td><input type=text name=tag_name tabindex=100></td><td><select name=parent_id tabindex=101>';
 	echo "<option value=0>-- NONE --</option>\n";
 	foreach ($taglist as $taginfo)
 		echo "<option value=${taginfo['id']}>${taginfo['tag']}</option>";
