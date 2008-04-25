@@ -392,6 +392,7 @@ function renderEditObjectForm ($object_id)
 	echo "<input type=hidden name=page value=${pageno}>";
 	echo "<input type=hidden name=tab value=${tabno}>";
 	echo "<input type=hidden name=object_id value=${object_id}>";
+	echo "<input type=hidden name=got_data value=1>";
 	echo '<table border=0 align=center>';
 	echo "<tr><th class=tdright>Type:</th><td class=tdleft>";
 	printSelect (getObjectTypeList(), 'object_type_id', $object['objtype_id']);
@@ -406,7 +407,9 @@ function renderEditObjectForm ($object_id)
 		echo ' checked';
 	echo "></td></tr>\n";
 	echo "<tr><td colspan=2><b>Comment:</b><br><textarea name=object_comment rows=10 cols=80>${object['comment']}</textarea></td></tr>";
-	echo "<tr><th class=submit colspan=2><input type=submit name=got_data value='Update'></td></tr>\n";
+	echo "<tr><th class=submit colspan=2>";
+	printImageHREF ('SAVE', 'Save changes', TRUE);
+	echo "</td></tr>\n";
 	echo '</form></table><br>';
 	finishPortlet();
 	echo '</td>';
@@ -456,7 +459,9 @@ function renderEditObjectForm ($object_id)
 		echo "</td></tr>\n";
 		$i++;
 	}
-	echo "<tr><td colspan=3><input type=submit value='Update'></td></tr>\n";
+	echo "<tr><td colspan=3>";
+	printImageHREF ('SAVE', 'Save changes', TRUE);
+	echo "</td></tr>\n";
 	echo "</form>";
 	echo "</table>\n";
 	finishPortlet();
@@ -1071,8 +1076,9 @@ function renderPortsForObject ($object_id = 0)
 			echo "</a> <input type=text name=reservation_comment>";
 			echo "</td>\n";
 		}
-		echo "<td><input type='submit' value='OK'></td>";
-		echo "</form></tr>\n";
+		echo "<td>";
+		printImageHREF ('save', 'Save changes', TRUE);
+		echo "</td></form></tr>\n";
 	}
 	echo "<form action='${root}process.php'><tr><td>";
 	printImageHREF ('add', '', TRUE, 104);
@@ -3421,6 +3427,9 @@ function printImageHREF ($tag, $title = '', $do_input = FALSE, $tabindex = 0)
 	$image['save']['path'] = 'pix/tango-document-save.png';
 	$image['save']['width'] = 16;
 	$image['save']['height'] = 16;
+	$image['SAVE']['path'] = 'pix/tango-document-save-big.png';
+	$image['SAVE']['width'] = 32;
+	$image['SAVE']['height'] = 32;
 	$image['create']['path'] = 'pix/tango-document-new.png';
 	$image['create']['width'] = 16;
 	$image['create']['height'] = 16;
@@ -3477,11 +3486,11 @@ function renderReportSummary ()
 
 	echo "</td><td class=pcright>\n";
 
-	startPortlet ("Here be dragons");
-	dragon();
-	dragon();
-	dragon();
-	echo 'ASCII art &copy; Daniel C. Au';
+	startPortlet ("Tag popularity");
+	echo "<table>\n";
+	foreach (getTagStats() as $header => $data)
+		echo "<tr><th class=tdright>${header}:</th><td class=tdleft>${data}</td></tr>\n";
+	echo "</table>\n";
 	finishPortlet();
 	echo "</td></tr>\n";
 	echo "</table>\n";
@@ -3489,6 +3498,7 @@ function renderReportSummary ()
 
 function dragon ()
 {
+	startPortlet ('Here be dragons');
 ?>
 <div class=dragon><pre><font color="#00ff33">
                  \||/
@@ -3505,6 +3515,7 @@ function dragon ()
 
 </font></pre></div>
 <?php
+	finishPortlet();
 }
 
 function renderUIConfig ()
@@ -4330,9 +4341,9 @@ function renderRSPoolServerForm ($pool_id = 0)
 			printImageHREF ('delete', 'Delete this real server');
 			echo "</td><td><input type=text name=rsip value='${rs['rsip']}'></td>";
 			echo "<td><input type=text name=rsport size=5 value='${rs['rsport']}'></td>";
-			echo "<td><textarea name=rsconfig>${rs['rsconfig']}</textarea></td>";
-			echo "<td><input type=submit value='OK'></td>";
-			echo "</tr></form>\n";
+			echo "<td><textarea name=rsconfig>${rs['rsconfig']}</textarea></td><td>";
+			printImageHREF ('save', 'Save changes', TRUE);
+			echo "</td></tr></form>\n";
 			$order = $nextorder[$order];
 		}
 		echo "</table>\n";
@@ -4352,16 +4363,16 @@ function renderRSPoolServerForm ($pool_id = 0)
 		printImageHREF ('inservice', 'in service');
 	else
 		printImageHREF ('notinservice', 'NOT in service');
-	echo "</td><td><input type=text name=remoteip id=remoteip tabindex=1>";
+	echo "</td><td><input type=text name=remoteip id=remoteip tabindex=1> ";
 	echo "<a href='javascript:;' onclick='window.open(\"${root}find_object_ip_helper.php\", \"findobjectip\", \"height=700, width=400, location=no, menubar=no, resizable=yes, scrollbars=no, status=no, titlebar=no, toolbar=no\");'>";
 	printImageHREF ('find', 'pick address');
 	echo "</a></td>";
 	$default_port = getConfigVar ('DEFAULT_SLB_RS_PORT');
 	if ($default_port == 0)
 		$default_port = '';
-	echo "<td><input type=text name=rsport size=5 value='${default_port}'  tabindex=2></td>";
-	echo "<td><input type=submit value='OK' tabindex=3></tr>\n";
-	echo "<tr><th colspan=4>configuration</th></tr>";
+	echo "<td><input type=text name=rsport size=5 value='${default_port}'  tabindex=2></td><td>";
+	printImageHREF ('add', 'Add new', TRUE, 3);
+	echo "</td></tr><tr><th colspan=4>configuration</th></tr>";
 	echo "<tr><td colspan=4><textarea name=rsconfig rows=10 cols=80 tabindex=4></textarea></td></tr>";
 	echo "</form></table>\n";
 	finishPortlet();
@@ -4428,8 +4439,9 @@ function renderRSPoolLBForm ($pool_id = 0)
 				if (!empty ($vsinfo['name']))
 					echo " (${vsinfo['name']})";
 				echo "<td><textarea name=vsconfig>${configs['vsconfig']}</textarea></td>";
-				echo "<td><textarea name=rsconfig>${configs['rsconfig']}</textarea></td>";
-				echo "<td><input type=submit value=OK></td></tr></form>\n";
+				echo "<td><textarea name=rsconfig>${configs['rsconfig']}</textarea></td><td>";
+				printImageHREF ('save', 'Save changes', TRUE);
+				echo "</td></tr></form>\n";
 				$order = $nextorder[$order];
 			}
 		echo "</table>\n";
@@ -4452,7 +4464,9 @@ function renderRSPoolLBForm ($pool_id = 0)
 	}
 	echo "</select> ";
 	printSelect ($vs_list, 'vs_id');
-	echo "</td><td><input type=submit value=OK tabindex=2></td></tr>\n";
+	echo "</td><td>";
+	printImageHREF ('add', 'Configure LB', TRUE, 2);
+	echo "</td></tr>\n";
 	echo "<tr><th>VS config</th><td colspan=2><textarea name=vsconfig rows=10 cols=80></textarea></td></tr>";
 	echo "<tr><th>RS config</th><td colspan=2><textarea name=rsconfig rows=10 cols=80></textarea></td></tr>";
 	echo "</form></table>\n";
@@ -4786,8 +4800,9 @@ function renderRSPoolRSInServiceForm ($pool_id = 0)
 		echo "</tr>";
 		$recno++;
 	}
-	echo "<tr><td colspan=4 align=center><input type=submit value=OK tabindex=${recno}></td></tr>";
-	echo "</table>\n</form>";
+	echo "<tr><td colspan=4 align=center>";
+	printImageHREF ('SAVE', 'Save changes', TRUE, $recno);
+	echo "</td></tr></table>\n</form>";
 }
 
 function renderLivePTR ($id = 0)
@@ -5154,7 +5169,8 @@ function renderEntityTags ($entity_realm = '', $bypass_name, $entity_id = 0)
 	foreach ($tagtree as $taginfo)
 		renderTagOption ($taginfo);
 	echo '</select><br>';
-	echo "<input type=submit value='Save'></form>\n";
+	printImageHREF ('SAVE', 'Save changes', TRUE);
+	echo "</form>\n";
 	finishPortlet();
 }
 
@@ -5219,7 +5235,27 @@ function renderTagSelect ()
 
 function renderTagRollerForRow ()
 {
-	renderTagSelect();
+	dragon();
+}
+
+function renderObjectSLB ()
+{
+	dragon();
+}
+
+function renderEditRSPool ()
+{
+	dragon();
+}
+
+function renderEditVService ()
+{
+	dragon();
+}
+
+function renderEditLBsForVService ()
+{
+	dragon();
 }
 
 function dump ($var)

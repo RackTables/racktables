@@ -1446,6 +1446,19 @@ function getRackspaceStats()
 	return $ret;
 }
 
+function getTagStats ()
+{
+	$ret = array();
+	$query = "select tag, count(tag_id) as refcnt from " .
+		"TagTree inner join TagStorage on TagTree.id = TagStorage.tag_id " .
+		"group by tag_id order by refcnt desc";
+	$result = useSelectBlade ($query);
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
+		$ret[$row['tag']] = $row['refcnt'];
+	$result->closeCursor();
+	return $ret;
+}
+
 function commitUpdateDictionary ($chapter_no = 0, $dict_key = 0, $dict_value = '')
 {
 	if ($chapter_no <= 0 or $dict_key <= 0 or empty ($dict_value))
