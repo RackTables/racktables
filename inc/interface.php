@@ -2877,18 +2877,19 @@ function renderAccountsEditForm ()
 		echo "</td>";
 		echo "<td><input type=text name=username value='${account['user_name']}' size=16></td>";
 		echo "<td><input type=text name=realname value='${account['user_realname']}' size=24></td>";
-		echo "<td><input type=password name=password value='${account['user_password_hash']}' size=64></td>";
-		echo "<td><input type='submit' value='OK'></td>";
-		echo "</form></tr>\n";
+		echo "<td><input type=password name=password value='${account['user_password_hash']}' size=64></td><td>";
+		printImageHREF ('save', 'Save changes', TRUE);
+		echo "</td></form></tr>\n";
 	}
 	echo "<form action='${root}process.php' method=post><tr>";
 	echo "<input type=hidden name=op value=createAccount>\n";
 	echo "<input type=hidden name=page value='${pageno}'>\n";
 	echo "<input type=hidden name=tab value='${tabno}'>\n";
-	echo "<td colspan=2><input type=text size=16 name=username tabindex=100></td>\n";
+	echo "<td>&nbsp;</td><td><input type=text size=16 name=username tabindex=100></td>\n";
 	echo "<td><input type=text size=24 name=realname tabindex=101></td>";
-	echo "<td><input type=password size=64 name=password tabindex=102></td>";
-	echo "<td colspan=4><input type=submit value='Create account' tabindex=103></td></tr></form>";
+	echo "<td><input type=password size=64 name=password tabindex=102></td><td>";
+	printImageHREF ('create', 'Add new account', TRUE, 103);
+	echo "</td></tr></form>";
 	echo "</table><br>\n";
 	finishPortlet();
 }
@@ -3413,6 +3414,9 @@ function printImageHREF ($tag, $title = '', $do_input = FALSE, $tabindex = 0)
 	$image['save']['path'] = 'pix/tango-document-save.png';
 	$image['save']['width'] = 16;
 	$image['save']['height'] = 16;
+	$image['create']['path'] = 'pix/tango-document-new.png';
+	$image['create']['width'] = 16;
+	$image['create']['height'] = 16;
 	if (!isset ($image[$tag]))
 		$tag = 'error';
 	$img = $image[$tag];
