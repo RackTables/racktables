@@ -1173,8 +1173,8 @@ function renderNetworkForObject ($object_id=0)
 		echo "<tr class='$class'><td><a href='process.php?op=delAddrFObj&page=${pageno}&tab=${tabno}&ip=${addr['ip']}&object_id=$object_id'>";
 		printImageHREF ('delete', 'Delete this IPv4 address');
 		echo "</a></td>";
-		echo "<td><input type='text' name='bond_name' value='${addr['name']}' size=10></td>";
-		echo "<td><a href='${root}?page=ipaddress&ip=${addr['ip']}'>${addr['ip']}</a></td>";
+		echo "<td class=tdleft><input type='text' name='bond_name' value='${addr['name']}' size=10></td>";
+		echo "<td class=tdleft><a href='${root}?page=ipaddress&ip=${addr['ip']}'>${addr['ip']}</a></td>";
 		echo "<td class='description'>$address_name</td>\n";
 		echo "<td><select name='bond_type'>";
 		foreach (array('regular'=>'Regular', 'virtual'=>'Virtual', 'shared'=>'Shared') as $n => $v)
@@ -1232,23 +1232,27 @@ function renderNetworkForObject ($object_id=0)
 			}
 		}
 
-		echo "</td><td><input type=submit value='OK'></td></form></tr>\n";
+		echo "</td><td>";
+		printImageHREF ('save', 'Save changes', TRUE);
+		echo "</td></form></tr>\n";
 	}
 
 
-	echo "<form action='${root}process.php'><tr><td colspan=2><input type='text' size='10' name='name' tabindex=100></td>\n";
+	echo "<form action='${root}process.php'><tr><td>";
+	printImageHREF ('add', 'Allocate new address', TRUE, 99);
+	echo "</td><td class=tdleft>";
+	echo "<input type='text' size='10' name='name' tabindex=100></td>\n";
 	echo "<input type=hidden name=page value='${pageno}'>\n";
 	echo "<input type=hidden name=tab value='${tabno}'>\n";
 	echo "<input type=hidden name=op value=addAddrFObj>\n";
 	echo "<input type=hidden name=object_id value='$object_id'>\n";
-
-	echo "<td><input type=text name='ip' tabindex=101>\n";
-	echo "</td><td><select name='type' tabindex=102>";
+	echo "<td class=tdleft><input type=text name='ip' tabindex=101>\n";
+	echo "</td><td>&nbsp;</td><td><select name='type' tabindex=102>";
 	echo "<option value='regular'>Regular</option>";
 	echo "<option value='virtual'>Virtual</option>";
 	echo "<option value='shared'>Shared</option>";
 	echo "</select>";
-	echo "</td><td colspan=3><input type='submit' value='Add a new interface' tabindex=103></td></tr></form>";
+	echo "</td><td colspan=2>&nbsp;</td></tr></form>";
 	echo "</table><br>\n";
 	finishPortlet();
 
@@ -2352,7 +2356,7 @@ function renderNATv4ForObject ($object_id = 0)
 	echo "<center><h2>locally performed NAT</h2></center>";
 
 	echo "<table class='widetable' cesspadding=5 cellspacing=0 border=0 align='center'>\n";
-	echo "<tr><th></th><th>Match endpoint</th><th>Translate to</th><th>Target object</th><th>Comment</th></tr>\n";
+	echo "<tr><th></th><th>Match endpoint</th><th>Translate to</th><th>Target object</th><th>Comment</th><th>&nbsp;</th></tr>\n";
 
 	foreach ($forwards['out'] as $pf)
 	{
@@ -2389,14 +2393,17 @@ function renderNATv4ForObject ($object_id = 0)
 		echo "<input type='hidden' name='localip' value='${pf['localip']}'><input type='hidden' name='localport' value='${pf['localport']}'>";
 		echo "<input type='hidden' name='remoteip' value='${pf['remoteip']}'><input type='hidden' name='remoteport' value='${pf['remoteport']}'>";
 		echo "<input type='hidden' name='proto' value='${pf['proto']}'><td class='description'>";
-		echo "<input type='text' name='description' value='${pf['description']}'> <input type='submit' value='OK'></td></form>";
-		echo "</tr>";
+		echo "<input type='text' name='description' value='${pf['description']}'></td><td>";
+		printImageHREF ('save', 'Save changes', TRUE);
+		echo "</td></form></tr>";
 	}
 	echo "<form action='process.php'><input type='hidden' name='op' value='forwardPorts'>";
 	echo "<input type='hidden' name='object_id' value='$object_id'>";
 	echo "<input type=hidden name=page value='${pageno}'>\n";
 	echo "<input type=hidden name=tab value='${tabno}'>\n";
-	echo "<tr align='center'><td colspan=2>";
+	echo "<tr align='center'><td>";
+	printImageHREF ('add', 'Add new NAT rule', TRUE);
+	echo '</td><td>';
 	printSelect (array ('TCP' => 'TCP', 'UDP' => 'UDP'), 'proto');
 	echo "<select name='localip' tabindex=1>";
 
@@ -2410,7 +2417,7 @@ function renderNATv4ForObject ($object_id = 0)
 	printImageHREF ('find', 'Find object');
 	echo "</a>";
 	echo ":<input type='text' name='remoteport' size='4' tabindex=4></td><td></td>";
-	echo "<td colspan=1><input type='text' name='description' size='20' tabindex=5> <input type='submit' value='Create Forwarding' tabindex=6></td></tr>";
+	echo "<td colspan=1><input type='text' name='description' size='20' tabindex=5></td><td>&nbsp;</td></tr>";
 	echo "</form>";
 
 	echo "</table><br><br>";
