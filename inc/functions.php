@@ -1380,6 +1380,36 @@ function getTagTree ()
 	return $ret;
 }
 
+// Build a tree from the tag list and return everything _except_ the tree.
+function getOrphanedTags ()
+{
+	global $taglist;
+	$mytaglist = $taglist;
+	$dummy = array();
+	while (count ($mytaglist) > 0)
+	{
+		$picked = FALSE;
+		foreach ($mytaglist as $tagid => $taginfo)
+		{
+			$taginfo['kids'] = array();
+			if ($taginfo['parent_id'] == NULL)
+			{
+				$dummy[$tagid] = $taginfo;
+				$picked = TRUE;
+				unset ($mytaglist[$tagid]);
+			}
+			elseif (attachChildTag ($dummy, $taginfo['parent_id'], $tagid, $taginfo))
+			{
+				$picked = TRUE;
+				unset ($mytaglist[$tagid]);
+			}
+		}
+		if (!$picked) // Only orphaned items on the list.
+			return $mytaglist;
+	}
+	return array();
+}
+
 function serializeTags ($trail)
 {
 	$comma = '';

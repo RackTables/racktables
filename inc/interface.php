@@ -3384,7 +3384,7 @@ function printImageHREF ($tag, $title = '', $do_input = FALSE, $tabindex = 0)
 	$image['delete']['path'] = 'pix/tango-list-remove.png';
 	$image['delete']['width'] = 16;
 	$image['delete']['height'] = 16;
-	$image['nodelete']['path'] = 'pix/delete_g.png';
+	$image['nodelete']['path'] = 'pix/tango-list-remove-shadow.png';
 	$image['nodelete']['width'] = 16;
 	$image['nodelete']['height'] = 16;
 	$image['grant'] = $image['add'];
@@ -3410,6 +3410,9 @@ function printImageHREF ($tag, $title = '', $do_input = FALSE, $tabindex = 0)
 	$image['clear']['path'] = 'pix/tango-edit-clear.png';
 	$image['clear']['width'] = 16;
 	$image['clear']['height'] = 16;
+	$image['save']['path'] = 'pix/tango-document-save.png';
+	$image['save']['width'] = 16;
+	$image['save']['height'] = 16;
 	if (!isset ($image[$tag]))
 		$tag = 'error';
 	$img = $image[$tag];
@@ -4917,17 +4920,15 @@ function renderAutoPortsForm ($object_id = 0)
 	echo "</table>";
 }
 
-function renderTagRowForViewer ($taginfo, $realm, $level = 0)
+function renderTagRowForViewer ($taginfo, $level = 0)
 {
 	echo '<tr><td align=left>';
 	for ($i = 0; $i < $level; $i++)
 		printImageHREF ('spacer');
 	echo $taginfo['tag'];
-	if ($realm != '' && isset ($taginfo['refcnt'][$realm]))
-		echo ' (' . $taginfo['refcnt'][$realm] . ')';
 	echo "</td></tr>\n";
 	foreach ($taginfo['kids'] as $kid)
-		renderTagRowForViewer ($kid, $realm, $level + 1);
+		renderTagRowForViewer ($kid, $level + 1);
 }
 
 function renderTagRowForCloud ($taginfo, $realm, $level = 0)
@@ -4947,15 +4948,32 @@ function renderTagRowForCloud ($taginfo, $realm, $level = 0)
 
 function renderTagRowForEditor ($taginfo, $level = 0)
 {
-	global $root, $pageno, $tabno;
+	global $root, $pageno, $tabno, $taglist;
 	echo '<tr><td>';
-	// FIXME: check [supplied] refcnt for each tag
-	echo "<a href='${root}process.php?page=${pageno}&tab=${tabno}&op=destroyTag&id=${taginfo['id']}'>";
-	printImageHREF ('delete', 'Destroy tag');
-	echo "</a></td>\n<td>";
-	for ($i = 0; $i < $level; $i++)
-		printImageHREF ('spacer');
-	echo $taginfo['tag'] . "</td><td>&nbsp;</td></tr>\n";
+	$nrefs = 0;
+	foreach ($taginfo['refcnt'] as $part)
+		$nrefs += $part;
+	if ($nrefs > 0 or count ($taginfo['kids']) > 0)
+		printImageHREF ('nodelete', "${nrefs} references, " . count ($taginfo['kids']) . ' sub-tags');
+	else
+	{
+		echo "<a href='${root}process.php?page=${pageno}&tab=${tabno}&op=destroyTag&tag_id=${taginfo['id']}'>";
+		printImageHREF ('delete', 'Delete tag');
+		echo "</a>";
+	}
+	echo "</td>\n<td>";
+	echo "<form method=post action='${root}process.php?page=${pageno}&tab=${tabno}&op=updateTag'>";
+	echo "<input type=hidden name=tag_id value=${taginfo['id']}><input type=text name=tag_name ";
+	echo "value='${taginfo['tag']}'></td><td><select name=parent_id>";
+	echo "<option value=0>-- NONE --</option>\n";
+	foreach ($taglist as $tlinfo)
+	{
+		echo "<option value=${tlinfo['id']}" . ($tlinfo['id'] == $taginfo['parent_id'] ? ' selected' : '');
+		echo ">${tlinfo['tag']}</option>";
+	}
+	echo "</select></td><td>";
+	printImageHREF ('save', 'Save changes', TRUE);
+	echo "</form></td></tr>\n";
 	foreach ($taginfo['kids'] as $kid)
 		renderTagRowForEditor ($kid, $level + 1);
 }
@@ -4963,14 +4981,14 @@ function renderTagRowForEditor ($taginfo, $level = 0)
 function renderTagTree ()
 {
 	global $tagtree;
-	echo '<table>';
+	echo '<center><table>';
 	foreach ($tagtree as $taginfo)
 	{
 		echo '<tr>';
-		renderTagRowForViewer ($taginfo, $realm);
+		renderTagRowForViewer ($taginfo);
 		echo "</tr>\n";
 	}
-	echo '</table>';
+	echo '</table></center>';
 }
 
 function renderTagCloud ($realm = '')
@@ -4990,8 +5008,10 @@ function renderTagTreeEditor ()
 {
 	global $root, $pageno, $tabno, $taglist, $tagtree;
 	showMessageOrError();
+	echo "<table class=objview border=0 width='100%'><tr><td class=pcleft>";
+	startPortlet ('tag tree');
 	echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
-	echo "<tr><th>&nbsp;</th><th>tag</th><th>&nbsp;</th></tr>\n";
+	echo "<tr><th>&nbsp;</th><th>tag</th><th>parent</th><th>&nbsp;</th></tr>\n";
 	foreach ($tagtree as $taginfo)
 	{
 		renderTagRowForEditor ($taginfo, TRUE);
@@ -5002,13 +5022,40 @@ function renderTagTreeEditor ()
 	echo "<input type=hidden name=op value='createTag'>";
 	echo "<tr><td>";
 	printImageHREF ('grant', 'Create tag', TRUE);
-	echo '</td><td><input type=text name=tagname> under <select name=parent_id>';
+	echo '</td><td><input type=text name=tag_name></td><td><select name=parent_id>';
 	echo "<option value=0>-- NONE --</option>\n";
 	foreach ($taglist as $taginfo)
 		echo "<option value=${taginfo['id']}>${taginfo['tag']}</option>";
 	echo "</select></td><td>&nbsp;</td></tr>";
 	echo "</form>\n";
 	echo '</table>';
+	finishPortlet();
+
+	echo "</td><td><td class=pcright>";
+
+	startPortlet ('fallen leaves');
+	echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
+	echo "<tr><th>tag</th><th>parent</th><th>&nbsp;</th></tr>\n";
+	foreach (getOrphanedTags() as $taginfo)
+	{
+		echo '<tr><td>';
+		echo "<form method=post action='${root}process.php?page=${pageno}&tab=${tabno}&op=updateTag'>";
+		echo "<input type=hidden name=tag_id value=${taginfo['id']}>";
+		echo "<input type=hidden name=tag_name value=${taginfo['tag']}>";
+		echo "${taginfo['tag']}</td><td><select name=parent_id>";
+		echo "<option value=0>-- NONE --</option>\n";
+		foreach ($taglist as $tlinfo)
+		{
+			echo "<option value=${tlinfo['id']}" . ($tlinfo['id'] == $taglist[$taginfo['id']]['parent_id'] ? ' selected' : '');
+			echo ">${tlinfo['tag']}</option>";
+		}
+		echo "</select></td><td>";
+		printImageHREF ('save', 'Save changes', TRUE);
+		echo "</form></td></tr>\n";
+	}
+	echo '</table>';
+	finishPortlet();
+	echo "</td></tr></table>";
 }
 
 // Output a sequence of OPTION elements, selecting those, which are present on the

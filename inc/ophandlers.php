@@ -1326,7 +1326,7 @@ function saveEntityTags ($realm, $bypass)
 	$taglist = isset ($_REQUEST['taglist']) ? $_REQUEST['taglist'] : array();
 	// Build a trail from the submitted data, minimize it,
 	// then wipe existing records and store the new set instead.
-	wipeTags ($realm, $entity_id);
+	deleteTagsForEntity ($realm, $entity_id);
 	$newtrail = getExplicitTagsOnly (buildTrailFromIds ($taglist));
 	$n_succeeds = $n_errors = 0;
 	foreach ($newtrail as $taginfo)
@@ -1370,8 +1370,8 @@ function saveIPv4RSPoolTags ()
 function destroyTag ()
 {
 	global $root, $pageno, $tabno;
-	assertUIntArg ('id', __FUNCTION__);
-	if (($ret = commitDestroyTag ($_REQUEST['id'])) == '')
+	assertUIntArg ('tag_id', __FUNCTION__);
+	if (($ret = commitDestroyTag ($_REQUEST['tag_id'])) == '')
 		return "${root}?page=${pageno}&tab=${tabno}&message=" . urlencode ("Successfully deleted tag.");
 	else
 		return "${root}?page=${pageno}&tab=${tabno}&error=" . urlencode ("Error deleting tag: '${ret}'");
@@ -1380,15 +1380,30 @@ function destroyTag ()
 function createTag ()
 {
 	global $root, $pageno, $tabno;
-	assertStringArg ('tagname', __FUNCTION__);
+	assertStringArg ('tag_name', __FUNCTION__);
 	assertUIntArg ('parent_id', __FUNCTION__, TRUE);
-	$tagname = trim ($_REQUEST['tagname']);
+	$tagname = trim ($_REQUEST['tag_name']);
 	if (($parent_id = $_REQUEST['parent_id']) <= 0)
 		$parent_id = 'NULL';
 	if (($ret = commitCreateTag ($tagname, $parent_id)) == '')
 		return "${root}?page=${pageno}&tab=${tabno}&message=" . urlencode ("Created tag '${tagname}'.");
 	else
 		return "${root}?page=${pageno}&tab=${tabno}&error=" . urlencode ("Could not create tag '${tagname}' because of error '${ret}'");
+}
+
+function updateTag ()
+{
+	global $root, $pageno, $tabno;
+	assertUIntArg ('tag_id', __FUNCTION__);
+	assertUIntArg ('parent_id', __FUNCTION__, TRUE);
+	assertStringArg ('tag_name', __FUNCTION__);
+	$tagname = trim ($_REQUEST['tag_name']);
+	if (($parent_id = $_REQUEST['parent_id']) <= 0)
+		$parent_id = 'NULL';
+	if (($ret = commitUpdateTag ($_REQUEST['tag_id'], $tagname, $parent_id)) == '')
+		return "${root}?page=${pageno}&tab=${tabno}&message=" . urlencode ("Updated tag '${tagname}'.");
+	else
+		return "${root}?page=${pageno}&tab=${tabno}&error=" . urlencode ("Could not update tag '${tagname}' because of error '${ret}'");
 }
 
 ?>

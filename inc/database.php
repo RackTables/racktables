@@ -2587,14 +2587,17 @@ function commitDestroyTag ($tagid = 0)
 		return 'useDeleteBlade() failed in ' . __FUNCTION__;
 }
 
-function wipeTags ($realm, $id)
+function commitUpdateTag ($tag_id, $tag_name, $parent_id)
 {
+	if ($parent_id == 0)
+		$parent_id = 'NULL';
 	global $dbxlink;
-	$query = "delete from TagStorage where target_realm = '${realm}' and target_id = ${id}";
+	$query = "update TagTree set tag = '${tag_name}', parent_id = ${parent_id} " .
+		"where id = ${tag_id} limit 1";
 	$result = $dbxlink->exec ($query);
 	if ($result === NULL)
-		return FALSE;
-	return TRUE;
+		return 'SQL query failed in ' . __FUNCTION__;
+	return '';
 }
 
 function deleteTagsForEntity ($entity_realm, $entity_id)
