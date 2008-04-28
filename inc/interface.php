@@ -609,7 +609,7 @@ function renderRackInfoPortlet ($rackData)
 	echo "<tr><th width='50%' class=tdright>Objects:</th><td class=tdleft>";
 	echo getObjectCount ($rackData);
 	echo "</td></tr>\n";
-	printTagTRs();
+	printTagTRs ("${root}?page=rackspace&");
 	if (!empty ($rackData['comment']))
 		echo "<tr><th width='50%' class=tdright>Comment:</th><td class=tdleft>${rackData['comment']}</td></tr>\n";
 	echo '</table>';
@@ -736,7 +736,8 @@ function renderRackObject ($object_id = 0)
 		echo "<tr><th width='50%' class=tdright>Common name:</th><td class=tdleft>${info['name']}</td></tr>\n";
 	elseif (in_array ($info['objtype_id'], explode (',', getConfigVar ('NAMEFUL_OBJTYPES'))))
 		echo "<tr><td colspan=2 class=msg_error>Common name is missing.</td></tr>\n";
-	echo "<tr><th width='50%' class=tdright>Object type:</th><td class=tdleft>${info['objtype_name']}</td></tr>\n";
+	echo "<tr><th width='50%' class=tdright>Object type:</th>";
+	echo "<td class=tdleft><a href='${root}?page=objgroup&group_id=${info['objtype_id']}'>${info['objtype_name']}</a></td></tr>\n";
 	if (!empty ($info['asset_no']))
 		echo "<tr><th width='50%' class=tdright>Asset tag:</th><td class=tdleft>${info['asset_no']}</td></tr>\n";
 	elseif (in_array ($info['objtype_id'], explode (',', getConfigVar ('REQUIRE_ASSET_TAG_FOR'))))
@@ -750,7 +751,7 @@ function renderRackObject ($object_id = 0)
 	foreach (getAttrValues ($object_id, TRUE) as $record)
 		if (!empty ($record['value']))
 			echo "<tr><th width='50%' class=opt_attr_th>${record['name']}:</th><td class=tdleft>${record['a_value']}</td></tr>\n";
-	printTagTRs();
+	printTagTRs ("${root}?page=objgroup&group_id=${info['objtype_id']}&");
 	echo "</table><br>\n";
 	finishPortlet();
 
@@ -2034,7 +2035,7 @@ function renderIPRange ($id)
 	echo "<tr><th width='50%' class=tdright>Wildcard bits:</th><td class=tdleft>";
 	echo $wildcardbylen[$range['mask']];
 	echo "</td></tr>\n";
-	printTagTRs();
+	printTagTRs ("${root}?page=ipv4space&");
 	echo "</table><br>\n";
 	finishPortlet();
 	echo "</td>\n";
@@ -4239,7 +4240,7 @@ function renderVirtualService ()
 	echo "<tr><th width='50%' class=tdright>Protocol:</th><td class=tdleft>${vsinfo['proto']}</td></tr>\n";
 	echo "<tr><th width='50%' class=tdright>Virtual IP address:</th><td class=tdleft><a href='${root}?page=ipaddress&tab=default&ip=${vsinfo['vip']}'>${vsinfo['vip']}</a></td></tr>\n";
 	echo "<tr><th width='50%' class=tdright>Virtual port:</th><td class=tdleft>${vsinfo['vport']}</td></tr>\n";
-	printTagTRs();
+	printTagTRs ("${root}?page=vservices&");
 	if (!empty ($vsinfo['vsconfig']))
 	{
 		echo "<tr><th width='50%' class=tdright>VS configuration:</th><td class=tdleft>&nbsp;</td></tr>\n";
@@ -4500,7 +4501,7 @@ function renderRSPool ($pool_id = 0)
 		echo "<tr><th width='50%' class=tdright>Pool name:</th><td class=tdleft>${poolInfo['name']}</td></tr>\n";
 	echo "<tr><th width='50%' class=tdright>Real servers:</th><td class=tdleft>" . count ($poolInfo['rslist']) . "</td></tr>\n";
 	echo "<tr><th width='50%' class=tdright>Load balancers:</th><td class=tdleft>" . count ($poolInfo['lblist']) . "</td></tr>\n";
-	printTagTRs();
+	printTagTRs ("${root}?page=rspools&");
 	echo "</table>";
 	finishPortlet();
 
@@ -5175,18 +5176,18 @@ function renderEntityTags ($entity_realm = '', $bypass_name, $entity_id = 0)
 	finishPortlet();
 }
 
-function printTagTRs()
+function printTagTRs ($baseurl = '')
 {
 	global $expl_tags, $impl_tags, $auto_tags;
 	if (getConfigVar ('SHOW_EXPLICIT_TAGS') == 'yes' and count ($expl_tags))
 	{
 		echo "<tr><th width='50%' class=tag_list_th>Explicit tags:</th><td class=tdleft>";
-		echo serializeTags ($expl_tags) . "</td></tr>\n";
+		echo serializeTags ($expl_tags, $baseurl) . "</td></tr>\n";
 	}
 	if (getConfigVar ('SHOW_IMPLICIT_TAGS') == 'yes' and count ($impl_tags))
 	{
 		echo "<tr><th width='50%' class=tag_list_th>Implicit tags:</th><td class=tdleft>";
-		echo serializeTags ($impl_tags) . "</td></tr>\n";
+		echo serializeTags ($impl_tags, $baseurl) . "</td></tr>\n";
 	}
 	if (getConfigVar ('SHOW_AUTOMATIC_TAGS') == 'yes' and count ($auto_tags))
 	{

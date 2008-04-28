@@ -1410,13 +1410,16 @@ function getOrphanedTags ()
 	return array();
 }
 
-function serializeTags ($trail)
+function serializeTags ($trail, $baseurl = '')
 {
 	$comma = '';
 	$ret = '';
 	foreach ($trail as $taginfo)
 	{
-		$ret .= $comma . $taginfo['tag'];
+		$ret .= $comma .
+			($baseurl == '' ? '' : "<a href='${baseurl}tagfilter[]=${taginfo['id']}'>") .
+			$taginfo['tag'] .
+			($baseurl == '' ? '' : '</a>');
 		$comma = ', ';
 	}
 	return $ret;
