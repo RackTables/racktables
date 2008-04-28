@@ -1670,7 +1670,6 @@ function getTagFilter ()
 function getTagFilterStr ($tagfilter = array())
 {
 	$ret = '';
-	$tagfilter = isset ($_REQUEST['tagfilter']) ? $_REQUEST['tagfilter'] : array();
 	foreach (getExplicitTagsOnly (buildTrailFromIds ($tagfilter)) as $taginfo)
 		$ret .= "&tagfilter[]=" . $taginfo['id'];
 	return $ret;

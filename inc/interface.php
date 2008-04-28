@@ -60,7 +60,7 @@ function renderIndex ()
 function renderRackspace ()
 {
 	$tagfilter = getTagFilter();
-	$tagfilter_str = getTagFilterStr();
+	$tagfilter_str = getTagFilterStr ($tagfilter);
 	echo "<table class=objview border=0 width='100%'><tr><td class=pcleft>";
 	renderTagFilterPortlet ($tagfilter, 'rack');
 	echo '</td><td class=pcright>';
