@@ -2090,7 +2090,8 @@ function renderIPRange ($id)
 			else
 				echo "<tr>";
 
-			echo "<td><a href='${root}?page=ipaddress&ip=${addr['ip']}'>${addr['ip']}</a></td><td>${addr['name']}</td><td>";
+			echo "<td class=tdleft><a href='${root}?page=ipaddress&ip=${addr['ip']}'>${addr['ip']}</a></td>";
+			echo "<td class=tdleft>${addr['name']}</td><td class=tdleft>";
 			$delim = '';
 			$prologue = '';
 			if ( $addr['reserved'] == 'yes')
