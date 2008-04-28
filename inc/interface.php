@@ -77,7 +77,7 @@ function renderRackspace ()
 		echo "${rackrow['row_name']}</a></th>";
 		$rackList = getRacksForRow ($rackrow['row_id'], $tagfilter);
 		echo "<td><table border=0 cellspacing=5><tr>";
-		foreach ($rackList as $dummy => $rack)
+		foreach ($rackList as $rack)
 		{
 			echo "<td align=center><a href='${root}?page=rack&rack_id=${rack['id']}'>";
 			echo "<img border=0 width=${rackwidth} height=";
@@ -129,7 +129,7 @@ function renderRow ($row_id)
 	$order = 'odd';
 	startPortlet ('Racks');
 	echo "<table border=0 cellspacing=5 align='center'><tr>";
-	foreach ($rackList as $dummy => $rack)
+	foreach ($rackList as $rack)
 	{
 		echo "<td align=center class=row_${order}><a href='${root}?page=rack&rack_id=${rack['id']}'>";
 		echo "<img border=0 width=" . $rackwidth * getConfigVar ('ROW_SCALE') . " height=";
@@ -1454,7 +1454,7 @@ function renderMolecule ($mdata, $object_id)
 	// sort data out
 	$rackpack = array();
 	global $loclist;
-	foreach ($mdata as $dummy => $rua)
+	foreach ($mdata as $rua)
 	{
 		$rack_id = $rua['rack_id'];
 		$unit_no = $rua['unit_no'];
@@ -1471,7 +1471,7 @@ function renderMolecule ($mdata, $object_id)
 		$rackpack[$rack_id][$unit_no][$loclist[$atom]]['object_id'] = $object_id;
 	}
 	// now we have some racks to render
-	foreach ($rackpack as $dummy => $rackData)
+	foreach ($rackpack as $rackData)
 	{
 		markAllSpans ($rackData);
 		echo "<table class=molecule cellspacing=0>\n";

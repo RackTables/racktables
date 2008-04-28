@@ -30,7 +30,7 @@ function getRackspace ($tagfilter = array())
 	$ret = array();
 	$clist = array ('row_id', 'row_name');
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-		foreach ($clist as $dummy => $cname)
+		foreach ($clist as $cname)
 			$ret[$row['row_id']][$cname] = $row[$cname];
 	$result->closeCursor();
 	return $ret;
@@ -51,7 +51,7 @@ function getRackRowInfo ($rackrow_id = 0)
 	$ret = array();
 	$clist = array ('dict_key', 'dict_value', 'count', 'sum');
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-		foreach ($clist as $dummy => $cname)
+		foreach ($clist as $cname)
 			$ret[$row['dict_key']][$cname] = $row[$cname];
 	$result->closeCursor();
 	if ($rackrow_id > 0)
@@ -558,7 +558,7 @@ function createMolecule ($molData)
 	$row = $result2->fetch (PDO::FETCH_NUM);
 	$molecule_id = $row[0];
 	$result2->closeCursor();
-	foreach ($molData as $dummy => $rua)
+	foreach ($molData as $rua)
 	{
 		$rack_id = $rua['rack_id'];
 		$unit_no = $rua['unit_no'];
@@ -677,7 +677,7 @@ function getObjectGroupInfo ()
 		if ($row['count'] > 0)
 		{
 			$total += $row['count'];
-			foreach ($clist as $dummy => $cname)
+			foreach ($clist as $cname)
 				$ret[$row['id']][$cname] = $row[$cname];
 		}
 	$result->closeCursor();
@@ -700,7 +700,7 @@ function getUnmountedObjects ()
 	$clist = array ('id', 'name', 'label', 'barcode', 'objtype_name', 'objtype_id', 'asset_no');
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
-		foreach ($clist as $dummy => $cname)
+		foreach ($clist as $cname)
 			$ret[$row['id']][$cname] = $row[$cname];
 		$ret[$row['id']]['dname'] = displayedName ($ret[$row['id']]);
 	}
@@ -719,7 +719,7 @@ function getProblematicObjects ()
 	$clist = array ('id', 'name', 'objtype_name', 'objtype_id', 'asset_no');
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
-		foreach ($clist as $dummy => $cname)
+		foreach ($clist as $cname)
 			$ret[$row['id']][$cname] = $row[$cname];
 		$ret[$row['id']]['dname'] = displayedName ($ret[$row['id']]);
 	}
@@ -1072,7 +1072,7 @@ function getUserAccounts ()
 	$ret = array();
 	$clist = array ('user_id', 'user_name', 'user_realname', 'user_password_hash', 'user_enabled');
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-		foreach ($clist as $dummy => $cname)
+		foreach ($clist as $cname)
 			$ret[$row['user_name']][$cname] = $row[$cname];
 	$result->closeCursor();
 	return $ret;
