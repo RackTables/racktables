@@ -2719,7 +2719,7 @@ function renderSearchResults ()
 			switch ($where)
 			{
 				case 'object':
-					startPortlet ('Objects');
+					startPortlet ("<a href='${root}?page=objects'>Objects</a>");
 					echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
 					echo '<tr><th>Common name</th><th>Visible label</th><th>Asset tag</th><th>barcode</th></tr>';
 					foreach ($what as $obj)
@@ -2734,7 +2734,7 @@ function renderSearchResults ()
 					finishPortlet();
 					break;
 				case 'ipv4network':
-					startPortlet ('IPv4 networks');
+					startPortlet ("<a href='${root}?page=ipv4space'>IPv4 networks</a>");
 					echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
 					echo '<tr><th>Network</th><th>Descritpion</th></tr>';
 					foreach ($what as $net)
@@ -2762,7 +2762,7 @@ function renderSearchResults ()
 					finishPortlet();
 					break;
 				case 'ipv4rspool':
-					startPortlet ('RS pools');
+					startPortlet ("<a href='${root}?page=rspools'>RS pools</a>");
 					echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
 					foreach ($what as $rspool)
 					{
@@ -2775,7 +2775,7 @@ function renderSearchResults ()
 					finishPortlet();
 					break;
 				case 'ipv4vs':
-					startPortlet ('Virtual services');
+					startPortlet ("<a href='${root}?page=vservices'>Virtual services</a>");
 					echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
 					echo '<tr><th>VS</th><th>Descritpion</th></tr>';
 					foreach ($what as $vs)
