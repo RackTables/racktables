@@ -2690,7 +2690,7 @@ function renderSearchResults ()
 				break;
 			case 'ipv4address2':
 				echo "<script language='Javascript'>document.location='${root}?page=ipaddress";
-				echo "&ip=${record}";
+				echo "&ip=${record['ip']}";
 				echo "';//</script>";
 				break;
 			case 'ipv4network':
