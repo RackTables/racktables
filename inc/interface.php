@@ -72,7 +72,7 @@ function renderRackspace ()
 	$order = 'odd';
 	foreach ($rackrowList as $rackrow)
 	{
-		echo "<tr class=row_${order}><th>";
+		echo "<tr class=row_${order}><th class=tdleft>";
 		echo "<a href='${root}?page=row&row_id=${rackrow['row_id']}${tagfilter_str}'>";
 		echo "${rackrow['row_name']}</a></th>";
 		$rackList = getRacksForRow ($rackrow['row_id'], $tagfilter);
