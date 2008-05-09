@@ -89,22 +89,25 @@ function addPortForwarding ()
 	assertIPv4Arg ('localip', __FUNCTION__);
 	assertIPv4Arg ('remoteip', __FUNCTION__);
 	assertUIntArg ('localport', __FUNCTION__);
-	assertUIntArg ('proto', __FUNCTION__);
+	assertStringArg ('proto', __FUNCTION__);
 	assertStringArg ('description', __FUNCTION__, TRUE);
 	$object_id = $_REQUEST['object_id'];
-	$localip = $_REQUEST['localip'];
-	$remoteip = $_REQUEST['remoteip'];
-	$localport = $_REQUEST['localport'];
 	$remoteport = $_REQUEST['remoteport'];
-	$proto = $_REQUEST['proto'];
-	$description = $_REQUEST['description'];
 	if (empty ($remoteport))
 		$remoteport = $localport;
 
 	$retpage="${root}?page=${pageno}&tab=${tabno}&object_id=$object_id";
 
-
-	$error=newPortForwarding($object_id, $localip, $localport, $remoteip, $remoteport, $proto, $description);
+	$error = newPortForwarding
+	(
+		$object_id,
+		$_REQUEST['localip'],
+		$_REQUEST['localport'],
+		$_REQUEST['remoteip'],
+		$remoteport,
+		$_REQUEST['proto'],
+		$_REQUEST['description']
+	);
 
 	if ($error == '')
 		return "${retpage}&message=".urlencode('Port forwarding successfully added.');

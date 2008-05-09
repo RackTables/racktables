@@ -1058,11 +1058,24 @@ function newPortForwarding($object_id, $localip, $localport, $remoteip, $remotep
 	if ( ($remoteport <= 0) or ($remoteport >= 65536) )
 		return "$remoteport: invaild port";
 
-        $query =
-                "insert into PortForwarding set object_id='$object_id', localip=INET_ATON('$localip'), remoteip=INET_ATON('$remoteip'), localport='$localport', remoteport='$remoteport', proto='$proto', description='$description'";
-        $result = $dbxlink->exec ($query);
-
-	return '';
+	$result = useInsertBlade
+	(
+		'PortForwarding',
+		array
+		(
+			'object_id' => $object_id,
+			'localip' => "INET_ATON('${localip}')",
+			'remoteip' => "INET_ATON('$remoteip')",
+			'localport' => $localport,
+			'remoteport' => $remoteport,
+			'proto' => "'${proto}'",
+			'description' => "'${description}'",
+		)
+	);
+	if ($result)
+		return '';
+	else
+		return __FUNCTION__ . ': Failed to insert the rule.';
 }
 
 function deletePortForwarding($object_id, $localip, $localport, $remoteip, $remoteport, $proto)
