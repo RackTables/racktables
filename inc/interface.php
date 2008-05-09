@@ -3383,8 +3383,8 @@ function printImageHREF ($tag, $title = '', $do_input = FALSE, $tabindex = 0)
 	$image['useup']['path'] = 'pix/tango-edit-clear.png';
 	$image['useup']['width'] = 16;
 	$image['useup']['height'] = 16;
-	$image['blockuser'] = $image['reserve'];
-	$image['unblockuser'] = $image['useup'];
+	$image['blockuser'] = $image['inservice'];
+	$image['unblockuser'] = $image['notinservice'];
 	$image['link']['path'] = 'pix/tango-network-wired.png';
 	$image['link']['width'] = 16;
 	$image['link']['height'] = 16;

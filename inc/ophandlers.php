@@ -94,7 +94,7 @@ function addPortForwarding ()
 	$object_id = $_REQUEST['object_id'];
 	$remoteport = $_REQUEST['remoteport'];
 	if (empty ($remoteport))
-		$remoteport = $localport;
+		$remoteport = $_REQUEST['localport'];
 
 	$retpage="${root}?page=${pageno}&tab=${tabno}&object_id=$object_id";
 
