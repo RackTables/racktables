@@ -3380,7 +3380,7 @@ function printImageHREF ($tag, $title = '', $do_input = FALSE, $tabindex = 0)
 	$image['reports']['path'] = 'pix/report.png';
 	$image['reports']['width'] = 218;
 	$image['reports']['height'] = 200;
-	$image['useup']['path'] = 'pix/go.png';
+	$image['useup']['path'] = 'pix/tango-edit-clear.png';
 	$image['useup']['width'] = 16;
 	$image['useup']['height'] = 16;
 	$image['blockuser'] = $image['reserve'];
