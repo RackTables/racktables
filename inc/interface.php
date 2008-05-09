@@ -598,6 +598,7 @@ function printSelect ($rowList, $select_name, $selected_id = 1)
 // used by renderGridForm() and renderRackPage()
 function renderRackInfoPortlet ($rackData)
 {
+	global $root;
 	startPortlet ('summary');
 	echo "<table border=0 cellspacing=0 cellpadding=3 width='100%'>\n";
 	echo "<tr><th width='50%' class=tdright>Rack row:</th><td class=tdleft>${rackData['row_name']}</td></tr>\n";
