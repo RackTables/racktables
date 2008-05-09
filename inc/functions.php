@@ -1174,7 +1174,7 @@ function parseWikiLink ($line, $which, $strip_optgroup = FALSE)
 	if (preg_match ('/^\[\[.+\]\]$/', $line) == 0)
 	{
 		if ($strip_optgroup)
-			return ereg_replace ('^.+\^', '', ereg_replace ('^(.+)&', '\\1 ', $line));
+			return ereg_replace ('^.+%GSKIP%', '', ereg_replace ('^(.+)%GPASS%', '\\1 ', $line));
 		else
 			return $line;
 	}
@@ -1182,7 +1182,7 @@ function parseWikiLink ($line, $which, $strip_optgroup = FALSE)
 	$s = explode ('|', $line);
 	$o_value = trim ($s[0]);
 	if ($strip_optgroup)
-		$o_value = ereg_replace ('^.+\^', '', ereg_replace ('^(.+)&', '\\1 ', $o_value));
+		$o_value = ereg_replace ('^.+%GSKIP%', '', ereg_replace ('^(.+)%GPASS%', '\\1 ', $o_value));
 	$a_value = trim ($s[1]);
 	if ($which == 'a')
 		return "<a href='${a_value}'>${o_value}</a>";

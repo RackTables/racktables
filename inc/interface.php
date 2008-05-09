@@ -541,14 +541,14 @@ function printSelect ($rowList, $select_name, $selected_id = 1)
 	$other = array();
 	foreach ($rowList as $dict_key => $dict_value)
 	{
-		if (strpos ($dict_value, '^') !== FALSE)
+		if (strpos ($dict_value, '%GSKIP%') !== FALSE)
 		{
-			$tmp = explode ('^', $dict_value, 2);
+			$tmp = explode ('%GSKIP%', $dict_value, 2);
 			$optgroup[$tmp[0]][$dict_key] = $tmp[1];
 		}
-		elseif (strpos ($dict_value, '&') !== FALSE)
+		elseif (strpos ($dict_value, '%GPASS%') !== FALSE)
 		{
-			$tmp = explode ('&', $dict_value, 2);
+			$tmp = explode ('%GPASS%', $dict_value, 2);
 			$optgroup[$tmp[0]][$dict_key] = $tmp[1];
 		}
 		else
