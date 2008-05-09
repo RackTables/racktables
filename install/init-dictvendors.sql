@@ -737,3 +737,4 @@ INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (12,786
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (12,787,'[[3Com%GPASS%8807 | http://www.3com.com/products/en_US/detail.jsp?tab=features&sku=3C17502A&pathtype=purchase]]');
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (12,788,'[[3Com%GPASS%8810 | http://www.3com.com/products/en_US/detail.jsp?tab=features&sku=3C17501A&pathtype=purchase]]');
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (12,789,'[[3Com%GPASS%8814 | http://www.3com.com/products/en_US/detail.jsp?tab=features&sku=3C17500A&pathtype=purchase]]');
+INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (13,790,'Linux%GSKIP%RHF9');

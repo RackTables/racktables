@@ -1046,6 +1046,7 @@ CREATE TABLE `IPVirtualService` (
 			$new_words[] = array (12 => '[[3Com%GPASS%8807 | http://www.3com.com/products/en_US/detail.jsp?tab=features&sku=3C17502A&pathtype=purchase]]');
 			$new_words[] = array (12 => '[[3Com%GPASS%8810 | http://www.3com.com/products/en_US/detail.jsp?tab=features&sku=3C17501A&pathtype=purchase]]');
 			$new_words[] = array (12 => '[[3Com%GPASS%8814 | http://www.3com.com/products/en_US/detail.jsp?tab=features&sku=3C17500A&pathtype=purchase]]');
+			$new_words[] = array (13 => 'Linux%GSKIP%RHF9');
 			$query[] = "insert into PortCompat (type1, type2) values (29, 681)";
 			$query[] = "insert into PortCompat (type1, type2) values (29, 682)";
 			$query[] = "insert into PortCompat (type1, type2) values (681, 29)";
