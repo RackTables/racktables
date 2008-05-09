@@ -2867,7 +2867,7 @@ function renderAccountsEditForm ()
 	startPortlet ('User accounts');
 	showMessageOrError();
 	echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
-	echo "<tr><th>op</th><th>Username</th><th>Real name</th><th>Password</th><th>&nbsp;</th></tr>\n";
+	echo "<tr><th>status (click to change)</th><th>Username</th><th>Real name</th><th>Password</th><th>&nbsp;</th></tr>\n";
 	foreach ($accounts as $account)
 	{
 		echo "<form action='${root}process.php'>";
