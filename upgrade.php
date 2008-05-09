@@ -19,7 +19,7 @@ function getDBUpgradePath ($v1, $v2)
 		'0.14.10',
 		'0.14.11',
 		'0.14.12',
-		'0.14.13'
+		'0.15.0'
 	);
 	if (!in_array ($v1, $versionhistory) || !in_array ($v2, $versionhistory))
 	{
@@ -796,7 +796,7 @@ CREATE TABLE `IPVirtualService` (
 			$query[] = "alter database character set utf8";
 			$query[] = "update Config set varvalue = '0.14.12' where varname = 'DB_VERSION'";
 			break; // --------------------------------------------
-		case '0.14.13':
+		case '0.15.0':
 			$new_words[541] = array (12 => '[[Force10%GPASS%S2410CP | http://www.force10networks.com/products/s2410.asp]]');
 			$new_words[] = array (12 => '[[Force10%GPASS%S50N | http://www.force10networks.com/products/s50n.asp]]');
 			$new_words[] = array (12 => '[[Force10%GPASS%S50V | http://www.force10networks.com/products/s50v.asp]]');
@@ -1258,7 +1258,7 @@ CREATE TABLE `TagTree` (
 			$query[] = "alter table PortForwarding add primary key (`object_id`,`proto`,`localip`,`localport`,`remoteip`,`remoteport`)";
 			$query[] = "delete from Dictionary where chapter_no = 20";
 			$query[] = "delete from Chapter where chapter_no = 20";
-			$query[] = "update Config set varvalue = '0.14.13' where varname = 'DB_VERSION'";
+			$query[] = "update Config set varvalue = '0.15.0' where varname = 'DB_VERSION'";
 			break; // --------------------------------------------
 #		case '0.14.14':
 #			$query[] = "alter table Rack add column left_is_front enum ('yes', 'no') not null default 'yes' after height";
