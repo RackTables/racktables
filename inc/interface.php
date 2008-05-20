@@ -3831,8 +3831,10 @@ function renderSNMPPortFinder ($object_id = 0)
 		$endpoints = findAllEndpoints ($object_id, $objectInfo['name']);
 		$sysName = substr (snmpget ($endpoints[0], $community, 'sysName.0'), strlen ('STRING: '));
 		$sysDescr = snmpget ($endpoints[0], $community, 'sysDescr.0');
+		$sysChassi = snmpget ($endpoints[0], $community, '1.3.6.1.4.1.9.3.6.3.0');
 		// Strip the object type, it's always string here.
 		$sysDescr = substr ($sysDescr, strlen ('STRING: '));
+		$sysChassi = str_replace ('"', '', substr ($sysChassi, strlen ('STRING: ')));
 		if (strpos ($sysDescr, 'Cisco IOS Software') === 0 or strpos ($sysDescr, 'Cisco Internetwork Operating System Software') === 0)
 			$log[] = array ('code' => 'success', 'message' => 'Seems to be a Cisco box');
 		else
@@ -3864,6 +3866,15 @@ function renderSNMPPortFinder ($object_id = 0)
 				$log[] = array ('code' => 'success', 'message' => 'SW version set to ' . $IOSversion);
 			else
 				$log[] = array ('code' => 'error', 'message' => 'Failed settig SW version: ' . $error);
+		}
+
+		if (empty ($attrs[1]['value']) and strlen ($sysChassi) > 0) // OEM Serial #1
+		{
+			$error = commitUpdateAttrValue ($object_id, 1, $sysChassi);
+			if ($error == TRUE)
+				$log[] = array ('code' => 'success', 'message' => 'OEM S/N 1 set to ' . $sysChassi);
+			else
+				$log[] = array ('code' => 'error', 'message' => 'Failed settig OEM S/N 1: ' . $error);
 		}
 
 		if (empty ($attrs[4]['value'])) // switch OS type
