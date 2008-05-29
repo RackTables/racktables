@@ -36,6 +36,8 @@ function doSNMPmining ($object_id, $community)
 		502 => '4506 (6-slot system)',
 		626 => 'WS-C4948 (48 Ethernet 10/100/1000 ports and 4 10/100/1000 SFP uplinks)',
 		659 => 'WS-C4948-10GE (48 Ethernet 10/100/1000 ports and 2 10Gb X2 uplinks)',
+		428 => 'WS-C2950G-24 (24 Ethernet 10/100 ports and 2 1000 GBIC uplinks)',
+		429 => 'WS-C2950G-48 (48 Ethernet 10/100 ports and 2 1000 GBIC uplinks)',
 	);
 	$hwtype = array
 	(
@@ -57,7 +59,9 @@ function doSNMPmining ($object_id, $community)
 		59 => 156,
 		502 => 156,
 		626 => 147,
-		659 => 377
+		659 => 377,
+		428 => 389,
+		429 => 390,
 	);
 
 	$objectInfo = getObjectInfo ($object_id);
@@ -67,14 +71,14 @@ function doSNMPmining ($object_id, $community)
 	$sysChassi = snmpget ($endpoints[0], $community, '1.3.6.1.4.1.9.3.6.3.0');
 	// Strip the object type, it's always string here.
 	$sysDescr = substr ($sysDescr, strlen ('STRING: '));
+	$IOSversion = ereg_replace ('^.*, Version ([^ ]+), .*$', '\\1', $sysDescr);
 	$sysChassi = str_replace ('"', '', substr ($sysChassi, strlen ('STRING: ')));
 	if (strpos ($sysDescr, 'Cisco IOS Software') === 0 or strpos ($sysDescr, 'Cisco Internetwork Operating System Software') === 0)
 		$log[] = array ('code' => 'success', 'message' => 'Seems to be a Cisco box');
 	else
 	{
 		$log[] = array ('code' => 'error', 'message' => 'No idea how to handle ' . $sysDescr);
-		printLog ($log);
-		return;
+		return $log;
 	}
 
 	// It's a Cisco box. Go on.
@@ -91,9 +95,8 @@ function doSNMPmining ($object_id, $community)
 			$log[] = array ('code' => 'error', 'message' => 'Failed settig FQDN: ' . $error);
 	}
 
-	if (empty ($attrs[5]['value'])) // SW version
+	if (empty ($attrs[5]['value']) and strlen ($IOSversion) > 0) // SW version
 	{
-		$IOSversion = ereg_replace ('^.*, Version ([^ ]+), .*$', '\\1', $sysDescr);
 		$error = commitUpdateAttrValue ($object_id, 5, $IOSversion);
 		if ($error == TRUE)
 			$log[] = array ('code' => 'success', 'message' => 'SW version set to ' . $IOSversion);
@@ -111,6 +114,7 @@ function doSNMPmining ($object_id, $community)
 	}
 
 	if (empty ($attrs[4]['value'])) // switch OS type
+	{
 		switch (substr ($IOSversion, 0, 4))
 		{
 			case '12.2':
@@ -122,11 +126,16 @@ function doSNMPmining ($object_id, $community)
 			case '12.0':
 				$error = commitUpdateAttrValue ($object_id, 4, 244);
 				break;
+			default:
+				$log[] = array ('code' => 'error', 'message' => "Unknown IOS version ${IOSversion}");
+				$error = TRUE;
+				break;
 		}
-	if ($error == TRUE)
-		$log[] = array ('code' => 'success', 'message' => 'Switch OS type set to Cisco IOS ' . substr ($IOSversion, 0, 4));
-	else
-		$log[] = array ('code' => 'error', 'message' => 'Failed settig Switch OS type');
+		if ($error == TRUE)
+			$log[] = array ('code' => 'success', 'message' => 'Switch OS type set to Cisco IOS ' . substr ($IOSversion, 0, 4));
+		else
+			$log[] = array ('code' => 'error', 'message' => 'Failed setting Switch OS type');
+	}
 
 	$sysObjectID = snmpget ($endpoints[0], $community, 'sysObjectID.0');
 	// Transform OID
@@ -134,8 +143,7 @@ function doSNMPmining ($object_id, $community)
 	if (!isset ($ciscomodel[$sysObjectID]))
 	{
 		$log[] = array ('code' => 'error', 'message' => 'Could not guess exact HW model!');
-		printLog ($log);
-		return;
+		return $log;
 	}
 	$log[] = array ('code' => 'success', 'message' => 'HW is ' . $ciscomodel[$sysObjectID]);
 	if (empty ($attrs[2]['value']) and isset ($hwtype[$sysObjectID])) // switch HW type
@@ -215,7 +223,28 @@ function doSNMPmining ($object_id, $community)
 			break;
 		case '563': // WS-C3560-24PS
 		case '633': // WS-C3560-24TS
+		case '428': // WS-C2950G-24
 			for ($i = 1; $i <= 24; $i++)
+			{
+				$label = "${i}X";
+				$error = commitAddPort ($object_id, 'fa0/' . $i, 19, $label, $ifList2["FastEthernet0/${i}"]['phyad']);
+				if ($error == '')
+					$newports++;
+				else
+					$log[] = array ('code' => 'error', 'message' => 'Failed to add port ' . $label . ': ' . $error);
+			}
+			for ($i = 1; $i <= 2; $i++)
+			{
+				$label = "${i}";
+				$error = commitAddPort ($object_id, 'gi0/' . $i, 24, $label, $ifList2["GigabitEthernet0/${i}"]['phyad']);
+				if ($error == '')
+					$newports++;
+				else
+					$log[] = array ('code' => 'error', 'message' => 'Failed to add port ' . $label . ': ' . $error);
+			}
+			break;
+		case '429': // WS-C2950G-48
+			for ($i = 1; $i <= 48; $i++)
 			{
 				$label = "${i}X";
 				$error = commitAddPort ($object_id, 'fa0/' . $i, 19, $label, $ifList2["FastEthernet0/${i}"]['phyad']);
@@ -259,7 +288,6 @@ function doSNMPmining ($object_id, $community)
 		case '615': // WS-C3560G-24TS
 		case '527': // WS-C2970G-24T
 		case '561': // WS-C2970G-24TS
-		case '428': // WS-C2950G-24
 			for ($i = 1; $i <= 24; $i++)
 			{
 				$label = "${i}X";
@@ -272,7 +300,6 @@ function doSNMPmining ($object_id, $community)
 			break;
 		case '616': // WS-C3560G-48PS
 		case '617': // WS-C3560G-48TS
-		case '429': // WS-C2950G-48
 			for ($i = 1; $i <= 48; $i++)
 			{
 				$label = "${i}X";

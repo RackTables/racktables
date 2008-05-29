@@ -2610,6 +2610,8 @@ function renderSearchResults ()
 	)
 	// Search for L2 address.
 	{
+		$terms = str_replace ('.', '', $terms);
+		$terms = str_replace (':', '', $terms);
 		$terms = substr ($terms, -12);
 		$result = searchByl2address ($terms);
 		if ($result !== NULL)
@@ -3771,7 +3773,7 @@ function renderSNMPPortFinder ($object_id = 0)
 	if (isset ($_REQUEST['do_scan']))
 	{
 		assertStringArg ('community', __FUNCTION__);
-		printLog (doSNMPmining ($object_id, $_REQUEST['community']);
+		printLog (doSNMPmining ($object_id, $_REQUEST['community']));
 		return;
 	}
 	echo "<form method=post>\n";
