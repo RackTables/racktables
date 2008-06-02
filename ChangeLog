@@ -1,6 +1,7 @@
 0.15.1
 	bugfix: fix auth headers in upgrade script (broken in 0.15.0)
 	new feature: fetch switch serial number via SNMP (by killsystem)
+	new feature: adding multiple racks
 0.15.0 2008-05-10
 	new feature: tags
 	new feature: automatic option groups

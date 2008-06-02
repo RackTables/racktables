@@ -304,27 +304,47 @@ function renderNewObjectForm ()
 function renderNewRackForm ($row_id)
 {
 	global $pageno, $tabno;
+	$log = array();
 
 	// Look for current submit.
 	if (isset ($_REQUEST['got_data']))
 	{
-		$log = array();
 		assertStringArg ('rack_name', __FUNCTION__);
 		assertUIntArg ('rack_height', __FUNCTION__);
 		assertStringArg ('rack_comment', __FUNCTION__, TRUE);
 		$name = $_REQUEST['rack_name'];
-		$height = $_REQUEST['rack_height'];
-		$comment = $_REQUEST['rack_comment'];
 
-		if (commitAddRack ($name, $height, $row_id, $comment) === TRUE)
+		if (commitAddRack ($name, $_REQUEST['rack_height'], $row_id, $_REQUEST['rack_comment']) === TRUE)
 			$log[] = array ('code' => 'success', 'message' => "Added new rack '${name}'");
 		else
-			$log[] = array ('code' => 'error', 'message' => __FUNCTION__ . 'commitAddRack() failed');
-		printLog ($log);
+			$log[] = array ('code' => 'error', 'message' => __FUNCTION__ . ': commitAddRack() failed');
 	}
+	elseif (isset ($_REQUEST['got_mdata']))
+	{
+		assertUIntArg ('rack_height', __FUNCTION__);
+		assertStringArg ('rack_names', __FUNCTION__, TRUE);
+		// copy-and-paste from renderAddMultipleObjectsForm()
+		$names1 = explode ('\n', $_REQUEST['rack_names']);
+		$names2 = array();
+		foreach ($names1 as $line)
+		{
+			$parts = explode ('\r', $line);
+			reset ($parts);
+			if (empty ($parts[0]))
+				continue;
+			else
+				$names2[] = rtrim ($parts[0]);
+		}
+		foreach ($names2 as $cname)
+			if (commitAddRack ($cname, $_REQUEST['rack_height'], $row_id, '') === TRUE)
+				$log[] = array ('code' => 'success', 'message' => "Added new rack '${cname}'");
+			else
+				$log[] = array ('code' => 'error', 'message' => __FUNCTION__ . ': commitAddRack() failed');
+	}
+	printLog ($log);
 
 	// Render a form for the next.
-	startPortlet ('Rack attributes');
+	startPortlet ('Add one');
 	echo '<form>';
 	echo "<input type=hidden name=page value=${pageno}>";
 	echo "<input type=hidden name=tab value=${tabno}>";
@@ -333,10 +353,25 @@ function renderNewRackForm ($row_id)
 	$defh = getConfigVar ('DEFAULT_RACK_HEIGHT');
 	if ($defh == 0)
 		$defh = '';
-	echo "<tr><th class=tdright>Name (required):</th><td class=tdleft><input type=text name=rack_name tabindex=1></td></tr>\n";
-	echo "<tr><th class=tdright>Height in units (required):</th><td class=tdleft><input type=text name=rack_height tabindex=2 value='${defh}'></td></tr>\n";
+	echo "<tr><th class=tdright>Rack name (*):</th><td class=tdleft><input type=text name=rack_name tabindex=1></td></tr>\n";
+	echo "<tr><th class=tdright>Height in units (*):</th><td class=tdleft><input type=text name=rack_height tabindex=2 value='${defh}'></td></tr>\n";
 	echo "<tr><th class=tdright>Comment:</th><td class=tdleft><input type=text name=rack_comment tabindex=3></td></tr>\n";
-	echo "<tr><td class=submit colspan=2><input type=submit name=got_data value='Create'></td></tr>\n";
+	echo "<tr><td class=submit colspan=2><input type=submit name=got_data value='Add'></td></tr>\n";
+	echo '</form></table>';
+	finishPortlet();
+
+	startPortlet ('Add many');
+	echo '<form>';
+	echo "<input type=hidden name=page value=${pageno}>";
+	echo "<input type=hidden name=tab value=${tabno}>";
+	echo "<input type=hidden name=row_id value=${row_id}>";
+	echo '<table border=0 align=center>';
+	$defh = getConfigVar ('DEFAULT_RACK_HEIGHT');
+	if ($defh == 0)
+		$defh = '';
+	echo "<tr><th class=tdright>Height in units (*):</th><td class=tdleft><input type=text name=rack_height value='${defh}'></td></tr>\n";
+	echo "<tr><th class=tdright>Rack names (*):</th><td class=tdleft><textarea name=rack_names cols=40 rows=25></textarea></td></tr>\n";
+	echo "<tr><td class=submit colspan=2><input type=submit name=got_mdata value='Add'></td></tr>\n";
 	echo '</form></table>';
 	finishPortlet();
 }
