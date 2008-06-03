@@ -28,11 +28,9 @@ $tabextraclass['rackspace']['firstrow'] = 'attn';
 $page['objects']['title'] = 'Objects';
 $page['objects']['parent'] = 'index';
 $tab['objects']['default'] = 'View';
-$tab['objects']['newobj'] = 'Add an object';
-$tab['objects']['newmulti'] = 'Add multiple objects';
+$tab['objects']['addmore'] = 'Add more';
 $tabhandler['objects']['default'] = 'renderObjectSpace';
-$tabhandler['objects']['newobj'] = 'renderNewObjectForm';
-$tabhandler['objects']['newmulti'] = 'renderAddMultipleObjectsForm';
+$tabhandler['objects']['addmore'] = 'renderAddMultipleObjectsForm';
 
 $page['row']['title_handler'] = 'dynamic_title_row';
 $page['row']['bypass'] = 'row_id';

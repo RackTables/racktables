@@ -255,52 +255,6 @@ function renderRack ($rack_id = 0, $hl_obj_id = 0)
 	echo "</table></center>\n";
 }
 
-function renderNewObjectForm ()
-{
-	global $pageno, $tabno;
-
-	// Look for current submit.
-	if (isset ($_REQUEST['got_data']))
-	{
-		$log = array();
-		assertUIntArg ('object_type_id', __FUNCTION__);
-		assertStringArg ('object_name', __FUNCTION__, TRUE);
-		assertStringArg ('object_label', __FUNCTION__, TRUE);
-		assertStringArg ('object_barcode', __FUNCTION__, TRUE);
-		assertStringArg ('object_asset_no', __FUNCTION__, TRUE);
-		$type_id = $_REQUEST['object_type_id'];
-		$name = $_REQUEST['object_name'];
-		$label = $_REQUEST['object_label'];
-		$asset_no = $_REQUEST['object_asset_no'];
-		$barcode = $_REQUEST['object_barcode'];
-
-		if (commitAddObject ($name, $label, $barcode, $type_id, $asset_no) === TRUE)
-			$log[] = array ('code' => 'success', 'message' => "Added new object '${name}'");
-		else
-			$log[] = array ('code' => 'error', 'message' => __FUNCTION__ . ': commitAddObject() failed');
-		printLog ($log);
-	}
-
-	// Render a form for the next.
-	startPortlet ('Object attributes');
-	echo '<form>';
-	echo "<input type=hidden name=page value=${pageno}>";
-	echo "<input type=hidden name=tab value=${tabno}>";
-	echo '<table border=0 align=center>';
-	echo "<tr><th class=tdright>Type:</th><td class=tdleft>";
-	$typelist = getObjectTypeList();
-	$typelist[0] = 'select type...';
-	printSelect ($typelist, 'object_type_id', getConfigVar ('DEFAULT_OBJECT_TYPE'));
-	echo "</td></tr>\n";
-	echo "<tr><th class=tdright>Common name:</th><td class=tdleft><input type=text name=object_name></td></tr>\n";
-	echo "<tr><th class=tdright>Visible label:</th><td class=tdleft><input type=text name=object_label></td></tr>\n";
-	echo "<tr><th class=tdright>Asset tag:</th><td class=tdleft><input type=text name=object_asset_no></td></tr>\n";
-	echo "<tr><th class=tdright>Barcode:</th><td class=tdleft><input type=text name=object_barcode></td></tr>\n";
-	echo "<tr><td class=submit colspan=2><input type=submit name=got_data value='Create'></td></tr>\n";
-	echo '</form></table>';
-	finishPortlet();
-}
-
 function renderNewRackForm ($row_id)
 {
 	global $pageno, $tabno;
@@ -2489,7 +2443,6 @@ function renderNATv4ForObject ($object_id = 0)
 	echo "</table><br><br>";
 }
 
-
 function renderAddMultipleObjectsForm ()
 {
 	global $root, $pageno, $tabno, $nextorder;
@@ -2573,7 +2526,7 @@ function renderAddMultipleObjectsForm ()
 	$typelist = getObjectTypeList();
 	$typelist[0] = 'select type...';
 
-	startPortlet ('Fast way');
+	startPortlet ('Distinct types');
 	echo "<form name=fastform method=post action='${root}?page=${pageno}&tab=${tabno}'>";
 	echo '<table border=0 align=center>';
 	echo "<tr><th>Object type</th><th>Common name</th><th>Visible label</th><th>Asset tag</th><th>Barcode</th></tr>\n";
@@ -2604,13 +2557,13 @@ function renderAddMultipleObjectsForm ()
 		echo "></td>";
 		echo "</tr>\n";
 	}
-	echo "<tr><td class=submit colspan=5><input type=submit name=got_fast_data value='Create'></td></tr>\n";
+	echo "<tr><td class=submit colspan=5><input type=submit name=got_fast_data value='Go!'></td></tr>\n";
 	echo "</form></table>\n";
 	finishPortlet();
 
-	startPortlet ('Very fast way');
+	startPortlet ('Same type');
 	echo "<form name=veryfastform method=post action='${root}?page=${pageno}&tab=${tabno}'>";
-	echo 'For each line shown below create an object of type ';
+	echo 'For each line below create an object of type ';
 	printSelect ($typelist, "global_type_id", getConfigVar ('DEFAULT_OBJECT_TYPE'));
 	echo " <input type=submit name=got_very_fast_data value='Go!'><br>\n";
 	echo "<textarea name=namelist cols=40 rows=25>\n";
