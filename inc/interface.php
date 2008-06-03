@@ -265,18 +265,18 @@ function renderNewRackForm ($row_id)
 	if (isset ($_REQUEST['got_data']))
 	{
 		assertStringArg ('rack_name', __FUNCTION__);
-		assertUIntArg ('rack_height', __FUNCTION__);
+		assertUIntArg ('rack_height1', __FUNCTION__);
 		assertStringArg ('rack_comment', __FUNCTION__, TRUE);
 		$name = $_REQUEST['rack_name'];
 
-		if (commitAddRack ($name, $_REQUEST['rack_height'], $row_id, $_REQUEST['rack_comment'], $taglist) === TRUE)
+		if (commitAddRack ($name, $_REQUEST['rack_height1'], $row_id, $_REQUEST['rack_comment'], $taglist) === TRUE)
 			$log[] = array ('code' => 'success', 'message' => "Added new rack '${name}'");
 		else
 			$log[] = array ('code' => 'error', 'message' => __FUNCTION__ . ': commitAddRack() failed');
 	}
 	elseif (isset ($_REQUEST['got_mdata']))
 	{
-		assertUIntArg ('rack_height', __FUNCTION__);
+		assertUIntArg ('rack_height2', __FUNCTION__);
 		assertStringArg ('rack_names', __FUNCTION__, TRUE);
 		// copy-and-paste from renderAddMultipleObjectsForm()
 		$names1 = explode ('\n', $_REQUEST['rack_names']);
@@ -291,7 +291,7 @@ function renderNewRackForm ($row_id)
 				$names2[] = rtrim ($parts[0]);
 		}
 		foreach ($names2 as $cname)
-			if (commitAddRack ($cname, $_REQUEST['rack_height'], $row_id, '', $taglist) === TRUE)
+			if (commitAddRack ($cname, $_REQUEST['rack_height2'], $row_id, '', $taglist) === TRUE)
 				$log[] = array ('code' => 'success', 'message' => "Added new rack '${cname}'");
 			else
 				$log[] = array ('code' => 'error', 'message' => __FUNCTION__ . ': commitAddRack() failed');
@@ -310,7 +310,7 @@ function renderNewRackForm ($row_id)
 	if ($defh == 0)
 		$defh = '';
 	echo "<tr><th class=tdright>Rack name (*):</th><td class=tdleft><input type=text name=rack_name tabindex=1></td></tr>\n";
-	echo "<tr><th class=tdright>Height in units (*):</th><td class=tdleft><input type=text name=rack_height tabindex=2 value='${defh}'></td></tr>\n";
+	echo "<tr><th class=tdright>Height in units (*):</th><td class=tdleft><input type=text name=rack_height1 tabindex=2 value='${defh}'></td></tr>\n";
 	echo "<tr><th class=tdright>Comment:</th><td class=tdleft><input type=text name=rack_comment tabindex=3></td></tr>\n";
 	echo "<tr><td class=submit colspan=2><input type=submit name=got_data value='Add'></td></tr>\n";
 	echo '</table>';
@@ -329,7 +329,7 @@ function renderNewRackForm ($row_id)
 	$defh = getConfigVar ('DEFAULT_RACK_HEIGHT');
 	if ($defh == 0)
 		$defh = '';
-	echo "<tr><th class=tdright>Height in units (*):</th><td class=tdleft><input type=text name=rack_height value='${defh}'></td></tr>\n";
+	echo "<tr><th class=tdright>Height in units (*):</th><td class=tdleft><input type=text name=rack_height2 value='${defh}'></td></tr>\n";
 	echo "<tr><th class=tdright>Rack names (*):</th><td class=tdleft><textarea name=rack_names cols=40 rows=25></textarea></td></tr>\n";
 	echo "<tr><td class=submit colspan=2><input type=submit name=got_mdata value='Add'></td></tr>\n";
 	echo '</form></table>';
