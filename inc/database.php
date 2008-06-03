@@ -318,28 +318,48 @@ function getObjectPortsAndLinks ($object_id = 0)
 	return $ret;
 }
 
-function commitAddRack ($name, $height, $row_id, $comment)
+function commitAddRack ($name, $height, $row_id, $comment, $taglist)
 {
-	global $dbxlink;
-	$query = "insert into Rack(row_id, name, height, comment) values('${row_id}', '${name}', '${height}', '${comment}')";
-	$result1 = $dbxlink->query ($query);
-	if ($result1 == NULL)
+	$result = useInsertBlade
+	(
+		'Rack',
+		array
+		(
+			'row_id' => $row_id,
+			'name' => "'${name}'",
+			'height' =>  $height,
+			'comment' => "'${comment}'"
+		)
+	);
+	if ($result == NULL)
 	{
-		showError ('SQL query failed', __FUNCTION__);
+		showError ('useInsertBlade() failed', __FUNCTION__);
 		return FALSE;
 	}
-	// last_insert_id() is MySQL-specific
-	$query = 'select last_insert_id()';
-	$result2 = $dbxlink->query ($query);
-	if ($result2 == NULL)
+
+	if (($result = useSelectBlade ('select last_insert_id()')) == NULL) 
 	{
-		showError ('Cannot get last ID', __FUNCTION__);
+		showError ('Query #2 failed', __FUNCTION__);
 		return FALSE;
 	}
 	// we always have a row
-	$row = $result2->fetch (PDO::FETCH_NUM);
+	$row = $result->fetch (PDO::FETCH_NUM);
 	$last_insert_id = $row[0];
-	$result2->closeCursor();
+	$result->closeCursor();
+	foreach ($taglist as $tag_id)
+		if (useInsertBlade
+		(
+			'TagStorage',
+			array
+			(
+				'target_realm' => "'rack'",
+				'target_id' => $last_insert_id,
+				'tag_id' => $tag_id
+			)
+		) == FALSE)
+			$errcount++;	
+	if ($errcount)
+		showError ("Experienced ${errcount} errors adding tags for the rack");
 	return recordHistory ('Rack', "id = ${last_insert_id}");
 }
 
