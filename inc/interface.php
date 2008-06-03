@@ -808,6 +808,12 @@ function renderRackObject ($object_id = 0)
 		startPortlet ('IPv4 addresses');
 		echo "<table cellspacing=0 cellpadding='5' align='center' class='widetable'>\n";
 		echo "<tr><th>Interface name</th><th>IP Address</th><th>Description</th><th>Misc</th></tr>\n";
+		$hl_ipv4_addr = '';
+		if (isset ($_REQUEST['hl_ipv4_addr']))
+		{
+			assertIPv4Arg ('hl_ipv4_addr', __FUNCTION__);
+			$hl_ipv4_addr = $_REQUEST['hl_ipv4_addr'];
+		}
 		foreach ($addresses as $addr)
 		{
 			if (strlen($addr['address_name'])>40)
@@ -820,16 +826,17 @@ function renderRackObject ($object_id = 0)
 			$regnum = countRefsOfType($addr['references'], 'regular', 'eq');
 			$notvirtnum = countRefsOfType($addr['references'], 'virtual', 'neq');
 
+			echo "<tr";
 			if ($addr['address_reserved']=='yes')
-				$class='trerror';
+				echo ' class=trerror';
 			elseif ($addr['type']!='virtual' && $regnum>0)
-				$class='trerror';
+				echo ' class=trerror';
 			elseif ($addr['type']=='regular' && $sharednum>0)
-				$class='trerror';
-			else 
-				$class='';
+				echo ' class=trerror';
 
-			echo "<tr class='$class'><td class=tdleft>${addr['name']}</td><td class=tdleft><a href='${root}?page=ipaddress&ip=${addr['ip']}'>${addr['ip']}</a></td><td class='description'>$address_name</td><td class=tdleft>\n";
+			if ($hl_ipv4_addr == $addr['ip'])
+				echo ' class=port_highlight';
+			echo "><td class=tdleft>${addr['name']}</td><td class=tdleft><a href='${root}?page=ipaddress&ip=${addr['ip']}'>${addr['ip']}</a></td><td class='description'>$address_name</td><td class=tdleft>\n";
 
 			if ($addr['address_reserved']=='yes')
 				echo "<b>Reserved;</b> ";
@@ -2097,7 +2104,8 @@ function renderIPRange ($id)
 			}
 			foreach ($range['addrlist'][$ip]['references'] as $ref)
 			{
-				echo "${delim}<a href='${root}?page=object&object_id=${ref['object_id']}'>";
+				echo "${delim}<a href='${root}?page=object&object_id=${ref['object_id']}";
+				echo "&hl_ipv4_addr=${addr['ip']}'>";
 				echo $ref['name'] . (empty ($ref['name']) ? '' : '@');
 				echo "${ref['object_name']}</a>";
 				$delim = '; ';
@@ -2191,7 +2199,8 @@ function renderIPAddress ()
 			echo "<tr class='$class'><td colspan='3'><b>RESERVED</b></td></tr>";
 		foreach ($address['bonds'] as $bond)
 		{
-			echo "<tr class='$class'><td><a href='${root}?page=object&object_id=${bond['object_id']}'>${bond['object_name']}</td><td>${bond['name']}</td><td><b>";
+			echo "<tr class='$class'><td><a href='${root}?page=object&object_id=${bond['object_id']}";
+			echo "&hl_ipv4_addr=${ip}'>${bond['object_name']}</td><td>${bond['name']}</td><td><b>";
 			switch ($bond['type'])
 			{
 				case 'virtual':
@@ -2308,7 +2317,7 @@ function renderIPAddressAssignment ()
 		echo "<td><a href='process.php?op=delIPv4Allocation&page=${pageno}&tab=${tabno}&ip=$ip&object_id=${bond['object_id']}'>";
 		printImageHREF ('delete', 'Unallocate address');
 		echo "</a></td>";
-		echo "<td><a href='${root}?page=object&object_id=${bond['object_id']}'>${bond['object_name']}</td>";
+		echo "<td><a href='${root}?page=object&object_id=${bond['object_id']}&hl_ipv4_addr=${ip}'>${bond['object_name']}</td>";
 		echo "<td><input type='text' name='bond_name' value='${bond['name']}' size=10></td>";
 		echo "<td><select name='bond_type'>";
 		switch ($bond['type'])
