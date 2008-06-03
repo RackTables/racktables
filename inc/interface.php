@@ -4578,7 +4578,7 @@ function renderLivePTR ($id = 0)
 			$cnt_mismatch++;
 		}
 		echo "><td class='tdleft";
-		if ($addr['reserved'] == 'yes' or count ($range['addrlist'][$ip]['references']))
+		if ($addr['reserved'] == 'yes' or (isset ($range['addrlist'][$ip]) and count ($range['addrlist'][$ip]['references'])))
 			echo ' trbusy';
 		echo "'><a href='${root}?page=ipaddress&ip=${straddr}'>${straddr}</a></td>";
 		echo "<td class=tdleft>${addr['name']}</td><td class=tdleft>${ptrname}</td><td>";
