@@ -19,7 +19,8 @@ function getDBUpgradePath ($v1, $v2)
 		'0.14.10',
 		'0.14.11',
 		'0.14.12',
-		'0.15.0'
+		'0.15.0',
+		'0.15.1'
 	);
 	if (!in_array ($v1, $versionhistory) || !in_array ($v2, $versionhistory))
 	{
@@ -1260,6 +1261,9 @@ CREATE TABLE `TagTree` (
 			$query[] = "delete from Chapter where chapter_no = 20";
 			$query[] = "update Config set varvalue = '0.15.0' where varname = 'DB_VERSION'";
 			break; // --------------------------------------------
+		case '0.15.1':
+			$query[] = "INSERT INTO `Config` VALUES ('IPV4_AUTO_RELEASE','1','uint','no','no','Auto-release IPv4 addresses on allocation')";
+			break;
 #		case '0.14.14':
 #			$query[] = "alter table Rack add column left_is_front enum ('yes', 'no') not null default 'yes' after height";
 #			$query[] = "alter table Rack add column bottom_is_unit1 enum ('yes', 'no') not null default 'yes' after left_is_front";
