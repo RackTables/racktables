@@ -1169,10 +1169,10 @@ function renderNetworkForObject ($object_id=0)
 		echo "<form action='process.php'>";
 		echo "<input type=hidden name=page value='${pageno}'>\n";
 		echo "<input type=hidden name=tab value='${tabno}'>\n";
-		echo "<input type=hidden name=op value=editAddressFromObject>";
+		echo "<input type=hidden name=op value=updIPv4Allocation>";
 		echo "<input type=hidden name=object_id value='$object_id'>";
 		echo "<input type=hidden name=ip value='${addr['ip']}'>";
-		echo "<tr class='$class'><td><a href='process.php?op=delAddrFObj&page=${pageno}&tab=${tabno}&ip=${addr['ip']}&object_id=$object_id'>";
+		echo "<tr class='$class'><td><a href='process.php?op=delIPv4Allocation&page=${pageno}&tab=${tabno}&ip=${addr['ip']}&object_id=$object_id'>";
 		printImageHREF ('delete', 'Delete this IPv4 address');
 		echo "</a></td>";
 		echo "<td class=tdleft><input type='text' name='bond_name' value='${addr['name']}' size=10></td>";
@@ -1243,13 +1243,13 @@ function renderNetworkForObject ($object_id=0)
 	echo "<form action='${root}process.php'><tr><td>";
 	printImageHREF ('add', 'Allocate new address', TRUE, 99);
 	echo "</td><td class=tdleft>";
-	echo "<input type='text' size='10' name='name' tabindex=100></td>\n";
+	echo "<input type='text' size='10' name='bond_name' tabindex=100></td>\n";
 	echo "<input type=hidden name=page value='${pageno}'>\n";
 	echo "<input type=hidden name=tab value='${tabno}'>\n";
-	echo "<input type=hidden name=op value=addAddrFObj>\n";
+	echo "<input type=hidden name=op value=addIPv4Allocation>\n";
 	echo "<input type=hidden name=object_id value='$object_id'>\n";
 	echo "<td class=tdleft><input type=text name='ip' tabindex=101>\n";
-	echo "</td><td>&nbsp;</td><td><select name='type' tabindex=102>";
+	echo "</td><td>&nbsp;</td><td><select name='bond_type' tabindex=102>";
 	echo "<option value='regular'>Regular</option>";
 	echo "<option value='virtual'>Virtual</option>";
 	echo "<option value='shared'>Shared</option>";
@@ -2279,7 +2279,7 @@ function renderIPAddressAssignment ()
 
 
 	echo "<table class='widetable' cesspadding=5 cellspacing=0 border=0 align='center'>\n";
-	echo "<tr><th>&nbsp;</th><th>Object name</th><th>Interface name</th><th>Interface type</th><th>&nbsp;</th></tr>\n";
+	echo "<tr><th>&nbsp;</th><th>object name</th><th>object interface</th><th>allocation type</th><th>&nbsp;</th></tr>\n";
 
 	$numshared = countRefsOfType($address['bonds'], 'shared', 'eq');
 	$numreg = countRefsOfType($address['bonds'], 'regular', 'eq');
@@ -2300,12 +2300,12 @@ function renderIPAddressAssignment ()
 	foreach ($address['bonds'] as $bond)
 	{
 		echo "<tr class='$class'><form action='process.php'>";
-		echo "<input type=hidden name=op value='editBondForAddress'>";
+		echo "<input type=hidden name=op value='updIPv4Allocation'>";
 		echo "<input type=hidden name=page value='${pageno}'>";
 		echo "<input type=hidden name=tab value='${tabno}'>";
 		echo "<input type=hidden name=ip value='$ip'>";
 		echo "<input type=hidden name=object_id value='${bond['object_id']}'>";
-		echo "<td><a href='process.php?op=delIpAssignment&page=${pageno}&tab=${tabno}&ip=$ip&object_id=${bond['object_id']}'>";
+		echo "<td><a href='process.php?op=delIPv4Allocation&page=${pageno}&tab=${tabno}&ip=$ip&object_id=${bond['object_id']}'>";
 		printImageHREF ('delete', 'Unallocate address');
 		echo "</a></td>";
 		echo "<td><a href='${root}?page=object&object_id=${bond['object_id']}'>${bond['object_name']}</td>";
@@ -2329,13 +2329,17 @@ function renderIPAddressAssignment ()
 				echo "<option value='shared'>Shared</option>";
 				break;
 		}
-		echo "</select></td><td><input type='submit' value='OK'></td></form></tr>\n";
+		echo "</select></td><td>";
+		printImageHREF ('save', 'Save changes', TRUE);
+		echo "</td></form></tr>\n";
 	}
-	echo "<form action='process.php'><input type='hidden' name='op' value='bindObjectToIp'>";
+	echo "<form action='process.php'><input type='hidden' name='op' value='addIPv4Allocation'>";
 	echo "<input type=hidden name=page value='${pageno}'>\n";
 	echo "<input type=hidden name=tab value='${tabno}'>\n";
 	echo "<input type='hidden' name='ip' value='$ip'>";
-	echo "<td colspan=2><select name='object_id'>";
+	echo "<td>";
+	printImageHREF ('add', 'new allocation', TRUE);
+	echo "</td><td><select name='object_id'>";
 
 	foreach (explode (',', getConfigVar ('IPV4_PERFORMERS')) as $type) 
 		foreach (getObjectList ($type) as $object)
@@ -2343,7 +2347,7 @@ function renderIPAddressAssignment ()
 
 	echo "</select></td><td><input type='text' name='bond_name' value='' size=10></td>";
 	echo "<td><select name='bond_type'><option value='regular'>Regular</option><option value='virtual'>Virtual</option><option value='shared'>Shared</option></select></td>";
-	echo "<td><input type='submit' value='Assign address'></td></form></tr>";
+	echo "<td>&nbsp;</td></form></tr>";
 	echo "</table><br><br>";
 
 }

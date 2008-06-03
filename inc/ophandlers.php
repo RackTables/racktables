@@ -406,96 +406,65 @@ http://www.cisco.com/en/US/products/hw/routers/ps274/products_tech_note09186a008
 		urlencode("Added ${added_count} ports, updated ${updated_count} ports, encountered ${error_count} errors.");
 }
 
-function editAddressFromObject ()
+function updIPv4Allocation ()
 {
-	global $root;
+	global $root, $pageno, $tabno, $page;
+	assertIPv4Arg ('ip', __FUNCTION__);
+	assertUIntArg ('object_id', __FUNCTION__);
+	assertStringArg ('bond_name', __FUNCTION__, TRUE);
+	assertStringArg ('bond_type', __FUNCTION__);
 
-	$ip = $_REQUEST['ip'];
-	$object_id = $_REQUEST['object_id'];
-	$name = $_REQUEST['bond_name'];
-	$type = $_REQUEST['bond_type'];
-	$error = updateBond($ip, $object_id, $name, $type);
+	$error = updateBond ($_REQUEST['ip'], $_REQUEST['object_id'], $_REQUEST['bond_name'], $_REQUEST['bond_type']);
+	$bpname = $page[$pageno]['bypass'];
+	$baseurl = "${root}?page=${pageno}&tab=${tabno}&${bpname}=" . $_REQUEST[$bpname];
 	if ($error != '')
-	{
-		return "${root}?page=object&tab=network&object_id=$object_id&error=".urlencode($error);
-	}
+		return "${baseurl}&error=" . urlencode ($error);
 	else
-	{
-		return "${root}?page=object&tab=network&object_id=$object_id&message=".urlencode("Interface successfully updated");
-	}
+		return "${baseurl}&message=" . urlencode ("allocation updated");
 }
 
-function delAddressFromObject ()
+function delIPv4Allocation ()
 {
-	global $root;
+	global $root, $pageno, $tabno, $page;
+	assertIPv4Arg ('ip', __FUNCTION__);
+	assertUIntArg ('object_id', __FUNCTION__);
 
-	$ip = $_REQUEST['ip'];
-	$object_id = $_REQUEST['object_id'];
-	$error = unbindIpFromObject($ip, $object_id);
+	$error = unbindIpFromObject ($_REQUEST['ip'], $_REQUEST['object_id']);
+	$bpname = $page[$pageno]['bypass'];
+	$baseurl = "${root}?page=${pageno}&tab=${tabno}&${bpname}=" . $_REQUEST[$bpname];
 	if ($error != '')
-	{
-		return "${root}?page=object&tab=network&object_id=$object_id&error=".urlencode($error);
-	}
+		return "${baseurl}&error=" . urlencode ($error);
 	else
-	{
-		return "${root}?page=object&tab=network&object_id=$object_id&message=".urlencode("Interface successfully deleted");
-	}
+		return "${baseurl}&message=" . urlencode ("deallocated");
 }
 
-function delIpAssignment ()
+function addIPv4Allocation ()
 {
-	global $root;
+	global $root, $pageno, $tabno, $page;
 
-	$ip = $_REQUEST['ip'];
-	$object_id = $_REQUEST['object_id'];
-	$error = unbindIpFromObject($ip, $object_id);
+	assertIPv4Arg ('ip', __FUNCTION__);
+	assertUIntArg ('object_id', __FUNCTION__);
+	assertStringArg ('bond_name', __FUNCTION__, TRUE);
+	assertStringArg ('bond_type', __FUNCTION__);
+	// Strip masklen.
+	$ip = ereg_replace ('/[[:digit:]]+$', '', $_REQUEST['ip']);
+	$error = bindIpToObject ($ip, $_REQUEST['object_id'], $_REQUEST['bond_name'], $_REQUEST['bond_type']);
+	$address = getIPAddress ($ip);
+	if ($address['exists'] and ($address['reserved'] == 'yes' or strlen ($address['name']) > 0))
+	{
+		$release = getConfigVar ('IPV4_AUTO_RELEASE');
+		if ($release >= 1)
+			$address['reserved'] = 'no';
+		if ($release >= 2)
+			$address['name'] = '';
+		updateAddress ($ip, $address['name'], $address['reserved']);
+	}
+	$bpname = $page[$pageno]['bypass'];
+	$baseurl = "${root}?page=${pageno}&tab=${tabno}&${bpname}=" . $_REQUEST[$bpname];
 	if ($error != '')
-	{
-		return "${root}?page=ipaddress&tab=assignment&ip=$ip&error=".urlencode($error);
-	}
+		return "${baseurl}&error=" . urlencode ($error);
 	else
-	{
-		return "${root}?page=ipaddress&tab=assignment&ip=$ip&message=".urlencode("Interface successfully deleted");
-	}
-}
-
-function editIpAssignment ()
-{
-	global $root;
-
-	$ip = $_REQUEST['ip'];
-	$object_id = $_REQUEST['object_id'];
-	$name = $_REQUEST['bond_name'];
-	$type = $_REQUEST['bond_type'];
-	$error = updateBond($ip, $object_id, $name, $type);
-
-	if ($error != '')
-	{
-		return "${root}?page=ipaddress&tab=assignment&ip=$ip&error=".urlencode($error);
-	}
-	else
-	{
-		return "${root}?page=ipaddress&tab=assignment&ip=$ip&message=".urlencode("Interface successfully updated");
-	}
-}
-
-function addIpAssignment ()
-{
-	global $root;
-
-	$ip = $_REQUEST['ip'];
-	$object_id = $_REQUEST['object_id'];
-	$name = $_REQUEST['bond_name'];
-	$type = $_REQUEST['bond_type'];
-	$error = bindIpToObject($ip, $object_id, $name, $type);
-	if ($error != '')
-	{
-		return "${root}?page=ipaddress&tab=assignment&ip=$ip&error=".urlencode($error);
-	}
-	else
-	{
-		return "${root}?page=ipaddress&tab=assignment&ip=$ip&message=".urlencode("Interface successfully added");
-	}
+		return "${baseurl}&message=" . urlencode ("allocated");
 }
 
 function addNewRange ()
@@ -574,25 +543,6 @@ function editAddress ()
 		return "${root}?page=${pageno}&tab=${tabno}&ip=$ip&message=".urlencode("Address updated");
 	}
 
-}
-
-function addAddressToObject ()
-{
-	global $root, $pageno, $tabno;
-
-	assertStringArg ('ip', __FUNCTION__);
-	assertUIntArg ('object_id', __FUNCTION__);
-	assertStringArg ('name', __FUNCTION__, TRUE);
-	assertStringArg ('type', __FUNCTION__);
-	// Strip masklen.
-	$ip = ereg_replace ('/[[:digit:]]+$', '', $_REQUEST['ip']);
-	$object_id = $_REQUEST['object_id'];
-	$error = bindIpToObject($ip, $object_id, $_REQUEST['name'], $_REQUEST['type']);
-	if ($error != '')
-		return "${root}?page=${pageno}&tab=${tabno}&object_id=${object_id}&error=".urlencode($error);
-	else
-		return "${root}?page=$pageno&tab=${tabno}&object_id=${object_id}&message=".
-			urlencode("Address ${ip} was added successfully.");
 }
 
 function createUserAccount ()

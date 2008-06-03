@@ -635,7 +635,7 @@ function getIPRange ($id = 0)
 // Don't require any records in IPAddress, but if there is one,
 // merge the data between getting allocation list. Collect enough data
 // to call displayedName() ourselves.
-function getIPAddress ($ip=0)
+function getIPAddress ($ip = 0)
 {
 	$ret = array();
 	$ret['bonds'] = array();
@@ -647,18 +647,12 @@ function getIPAddress ($ip=0)
 	$ret['exists'] = 0;
 	$ret['name'] = '';
 	$ret['reserved'] = 'no';
-	global $dbxlink;
 	$query =
 		"select ".
 		"name, reserved ".
 		"from IPAddress ".
 		"where ip = INET_ATON('$ip') and (reserved = 'yes' or name != '')";
-	$result = $dbxlink->query ($query);
-	if ($result == NULL)
-	{
-		showError ('Query #1 failed', __FUNCTION__);
-		return NULL;
-	}
+	$result = useSelectBlade ($query);
 	if ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
 		$ret['exists'] = 1;
@@ -680,7 +674,7 @@ function getIPAddress ($ip=0)
 		"where IPBonds.ip=INET_ATON('$ip') ".
 		"and chapter_name = 'RackObjectType' " .
 		"order by RackObject.id, IPBonds.name";
-	$result = $dbxlink->query ($query);
+	$result = useSelectBlade ($query);
 	$count=0;
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
@@ -699,7 +693,7 @@ function getIPAddress ($ip=0)
 	unset ($result);
 
 	$query = "select id, vport, proto, name from IPVirtualService where vip = inet_aton('${ip}')";
-	$result = $dbxlink->query ($query);
+	$result = useSelectBlade ($query);
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
 		$new = $row;
@@ -712,7 +706,7 @@ function getIPAddress ($ip=0)
 	$query = "select inservice, rsport, IPRSPool.id as pool_id, IPRSPool.name as poolname from " .
 		"IPRealServer inner join IPRSPool on rspool_id = IPRSPool.id " .
 		"where rsip = inet_aton('${ip}')";
-	$result = $dbxlink->query ($query);
+	$result = useSelectBlade ($query);
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
 		$new = $row;
@@ -725,11 +719,11 @@ function getIPAddress ($ip=0)
 	return $ret;
 }
 	
-function bindIpToObject ($ip='', $object_id=0, $name='', $type='')
+function bindIpToObject ($ip = '', $object_id = 0, $name = '', $type = '')
 {
 	global $dbxlink;
 
-	$range = getRangeByIp($ip);
+	$range = getRangeByIp ($ip);
 	if (!$range)
 		return 'Non-existant ip address. Try adding IP range first';
 
@@ -744,7 +738,7 @@ function bindIpToObject ($ip='', $object_id=0, $name='', $type='')
 			'type' => "'${type}'"
 		)
 	);
-	return $result ? '' : 'useInsertBlade() failed in bindIpToObject()';
+	return $result ? '' : (__FUNCTION__ . '(): useInsertBlade() failed');
 }
 
 // This function looks up 'has_problems' flag for 'T' atoms

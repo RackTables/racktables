@@ -839,7 +839,6 @@ function getObjectAddressesAndNames ()
 	return $ret;
 }
 
-
 function getEmptyPortsOfType ($type_id)
 {
 	$query =
@@ -1047,13 +1046,12 @@ function updateRange ($id=0, $name='')
 		"update IPRanges set name='$name' where id='$id'";
 	$result = $dbxlink->exec ($query);
 	return '';
-	
 }
 
 // This function is actually used not only to update, but also to create records,
 // that's why ON DUPLICATE KEY UPDATE was replaced by DELETE-INSERT pair
 // (MySQL 4.0 workaround).
-function updateAddress ($ip=0, $name='', $reserved='no')
+function updateAddress ($ip = 0, $name = '', $reserved = 'no')
 {
 	// DELETE may safely fail.
 	$r = useDeleteBlade ('IPAddress', 'ip', "INET_ATON('${ip}')", FALSE);
@@ -1063,7 +1061,7 @@ function updateAddress ($ip=0, $name='', $reserved='no')
 	if (useInsertBlade ('IPAddress', array ('name' => "'${name}'", 'reserved' => "'${reserved}'", 'ip' => "INET_ATON('${ip}')")))
 		return '';
 	else
-		return 'useInsertBlade() failed in updateAddress()';
+		return __FUNCTION__ . '(): useInsertBlade() failed';
 }
 
 // FIXME: This function doesn't wipe relevant records from IPAddress table.
