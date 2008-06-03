@@ -2456,6 +2456,7 @@ function renderAddMultipleObjectsForm ()
 	// Look for current submit.
 	if (isset ($_REQUEST['got_fast_data']))
 	{
+		$taglist = isset ($_REQUEST['taglist']) ? $_REQUEST['taglist'] : array();
 		$keepvalues = TRUE;
 		$max = getConfigVar ('MASSCOUNT');
 		for ($i = 0; $i < $max; $i++)
@@ -2477,10 +2478,10 @@ function renderAddMultipleObjectsForm ()
 			$asset_no[$i] = $_REQUEST["${i}_object_asset_no"];
 			$barcode[$i] = $_REQUEST["${i}_object_barcode"];
 
-			// It's better to skip silently than printing a notice.
+			// It's better to skip silently, than to print a notice.
 			if ($type_id[$i] == 0)
 				continue;
-			if (commitAddObject ($name[$i], $label[$i], $barcode[$i], $type_id[$i], $asset_no[$i]) === TRUE)
+			if (commitAddObject ($name[$i], $label[$i], $barcode[$i], $type_id[$i], $asset_no[$i], $taglist) === TRUE)
 				$log[] = array ('code' => 'success', 'message' => "Added new object '${name[$i]}'");
 			else
 				$log[] = array ('code' => 'error', 'message' => __FUNCTION__ . ': commitAddObject() failed');
@@ -2488,6 +2489,7 @@ function renderAddMultipleObjectsForm ()
 	}
 	elseif (isset ($_REQUEST['got_very_fast_data']))
 	{
+		$taglist = isset ($_REQUEST['taglist']) ? $_REQUEST['taglist'] : array();
 		$keepvalues = TRUE;
 		assertUIntArg ('global_type_id', __FUNCTION__, TRUE);
 		assertStringArg ('namelist', __FUNCTION__, TRUE);
@@ -2514,7 +2516,7 @@ function renderAddMultipleObjectsForm ()
 					$names2[] = rtrim ($parts[0]);
 			}
 			foreach ($names2 as $cname)
-				if (commitAddObject ($cname, '', '', $global_type_id, '') === TRUE)
+				if (commitAddObject ($cname, '', '', $global_type_id, '', $taglist) === TRUE)
 					$log[] = array ('code' => 'success', 'message' => "Added new object '${cname}'");
 				else
 					$log[] = array ('code' => 'error', 'message' => "Could not add '${cname}'");
@@ -2526,13 +2528,14 @@ function renderAddMultipleObjectsForm ()
 	$typelist = getObjectTypeList();
 	$typelist[0] = 'select type...';
 
-	startPortlet ('Distinct types');
+	startPortlet ('Distinct types, same tags');
+	$max = getConfigVar ('MASSCOUNT');
 	echo "<form name=fastform method=post action='${root}?page=${pageno}&tab=${tabno}'>";
 	echo '<table border=0 align=center>';
-	echo "<tr><th>Object type</th><th>Common name</th><th>Visible label</th><th>Asset tag</th><th>Barcode</th></tr>\n";
+	echo "<tr><th>Object type</th><th>Common name</th><th>Visible label</th>";
+	echo "<th>Asset tag</th><th>Barcode</th><th>Tags</th></tr>\n";
 	// If a user forgot to select object type on input, we keep his
 	// previous input in the form.
-	$max = getConfigVar ('MASSCOUNT');
 	for ($i = 0; $i < $max; $i++)
 	{
 		echo '<tr><td>';
@@ -2540,36 +2543,48 @@ function renderAddMultipleObjectsForm ()
 		printSelect ($typelist, "${i}_object_type_id", 0);
 		echo '</td>';
 		echo "<td><input type=text size=30 name=${i}_object_name";
-		if ($keepvalues and $type_id[$i] == 0)
+		if ($keepvalues and isset ($name[$i]) and (!isset ($type_id[$i]) or $type_id[$i] == 0))
 			echo " value='${name[$i]}'";
 		echo "></td>";
 		echo "<td><input type=text size=30 name=${i}_object_label";
-		if ($keepvalues and $type_id[$i] == 0)
+		if ($keepvalues and isset ($label[$i]) and (!isset ($type_id[$i]) or $type_id[$i] == 0))
 			echo " value='${label[$i]}'";
 		echo "></td>";
 		echo "<td><input type=text size=20 name=${i}_object_asset_no";
-		if ($keepvalues and $type_id[$i] == 0)
+		if ($keepvalues and isset ($asset_no[$i]) and (!isset ($type_id[$i]) or $type_id[$i] == 0))
 			echo " value='${asset_no[$i]}'";
 		echo "></td>";
 		echo "<td><input type=text size=10 name=${i}_object_barcode";
-		if ($keepvalues and $type_id[$i] == 0)
+		if ($keepvalues and isset ($barcode[$i]) and (!isset ($type_id[$i]) or $type_id[$i] == 0))
 			echo " value='${barcode[$i]}'";
 		echo "></td>";
+		if ($i == 0)
+		{
+			echo "<td valign=top rowspan=${max}>";
+			renderTagSelect();
+			echo "</td>\n";
+		}
 		echo "</tr>\n";
 	}
 	echo "<tr><td class=submit colspan=5><input type=submit name=got_fast_data value='Go!'></td></tr>\n";
 	echo "</form></table>\n";
 	finishPortlet();
 
-	startPortlet ('Same type');
+	startPortlet ('Same type, same tags');
 	echo "<form name=veryfastform method=post action='${root}?page=${pageno}&tab=${tabno}'>";
-	echo 'For each line below create an object of type ';
-	printSelect ($typelist, "global_type_id", getConfigVar ('DEFAULT_OBJECT_TYPE'));
-	echo " <input type=submit name=got_very_fast_data value='Go!'><br>\n";
-	echo "<textarea name=namelist cols=40 rows=25>\n";
+	echo "<table border=0 align=center><tr><th>names</th><th>type</th></tr>";
+	echo "<tr><td rowspan=3><textarea name=namelist cols=40 rows=25>\n";
 	if ($keepvalues and $global_type_id == 0)
 		echo $_REQUEST['namelist'];
-	echo "</textarea></form>\n";
+	echo "</textarea></td><td valign=top>";
+	printSelect ($typelist, "global_type_id", getConfigVar ('DEFAULT_OBJECT_TYPE'));
+	echo "</td></tr>";
+	echo "<tr><th>Tags</th></tr>";
+	echo "<tr><td valign=top>";
+	renderTagSelect();
+	echo "</td></tr>";
+	echo "<tr><td colspan=2><input type=submit name=got_very_fast_data value='Go!'></td></tr></table>\n";
+	echo "</form>\n";
 	finishPortlet();
 }
 

@@ -346,6 +346,7 @@ function commitAddRack ($name, $height, $row_id, $comment, $taglist)
 	$row = $result->fetch (PDO::FETCH_NUM);
 	$last_insert_id = $row[0];
 	$result->closeCursor();
+	$errcount = 0;
 	foreach ($taglist as $tag_id)
 		if (useInsertBlade
 		(
@@ -363,30 +364,29 @@ function commitAddRack ($name, $height, $row_id, $comment, $taglist)
 	return recordHistory ('Rack', "id = ${last_insert_id}");
 }
 
-function commitAddObject ($new_name, $new_label, $new_barcode, $new_type_id, $new_asset_no)
+function commitAddObject ($new_name, $new_label, $new_barcode, $new_type_id, $new_asset_no, $taglist = array())
 {
 	global $dbxlink;
-	// Maintain UNIQUE INDEX for common names and asset tags.
-	$new_asset_no = empty ($new_asset_no) ? 'NULL' : "'${new_asset_no}'";
-	$new_barcode = empty ($new_barcode) ? 'NULL' : "'${new_barcode}'";
-	$new_name = empty ($new_name) ? 'NULL' : "'${new_name}'";
-	$query =
-		"insert into RackObject(name, label, barcode, objtype_id, asset_no) " .
-		"values(${new_name}, '${new_label}', ${new_barcode}, '${new_type_id}', ${new_asset_no})";
-	$result1 = $dbxlink->query ($query);
+	// Maintain UNIQUE INDEX for common names and asset tags by
+	// filtering out empty strings (not NULLs).
+	$result1 = useInsertBlade
+	(
+		'RackObject',
+		array
+		(
+			'name' => empty ($new_name) ? 'NULL' : "'${new_name}'",
+			'label' => "'${new_label}'",
+			'barcode' => empty ($new_barcode) ? 'NULL' : "'${new_barcode}'",
+			'objtype_id' => $new_type_id,
+			'asset_no' => empty ($new_asset_no) ? 'NULL' : "'${new_asset_no}'"
+		)
+	);
 	if ($result1 == NULL)
 	{
-		$errorInfo = $dbxlink->errorInfo();
-		showError ("SQL query '${query}' failed: ${errorInfo[2]}", __FUNCTION__);
-		die;
-	}
-	if ($result1->rowCount() != 1)
-	{
-		showError ('Adding new object failed', __FUNCTION__);
+		showError ("SQL query #1 failed", __FUNCTION__);
 		return FALSE;
 	}
-	$query = 'select last_insert_id()';
-	$result2 = $dbxlink->query ($query);
+	$result2 = useSelectBlade ('select last_insert_id()');
 	if ($result2 == NULL)
 	{
 		$errorInfo = $dbxlink->errorInfo();
@@ -399,6 +399,22 @@ function commitAddObject ($new_name, $new_label, $new_barcode, $new_type_id, $ne
 	$result2->closeCursor();
 	// Do AutoPorts magic
 	executeAutoPorts ($last_insert_id, $new_type_id);
+	// Now tags...
+	$errcount = 0;
+	foreach ($taglist as $tag_id)
+		if (useInsertBlade
+		(
+			'TagStorage',
+			array
+			(
+				'target_realm' => "'object'",
+				'target_id' => $last_insert_id,
+				'tag_id' => $tag_id
+			)
+		) == FALSE)
+			$errcount++;	
+	if ($errcount)
+		showError ("Experienced ${errcount} errors adding tags for the object");
 	return recordHistory ('RackObject', "id = ${last_insert_id}");
 }
 
