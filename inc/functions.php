@@ -637,16 +637,17 @@ function getIPRange ($id = 0)
 // to call displayedName() ourselves.
 function getIPAddress ($ip = 0)
 {
-	$ret = array();
-	$ret['bonds'] = array();
-	// FIXME: below two aren't neither filled in with data nor rendered (ticket:23)
-	$ret['outpf'] = array();
-	$ret['inpf'] = array();
-	$ret['vslist'] = array();
-	$ret['rslist'] = array();
-	$ret['exists'] = 0;
-	$ret['name'] = '';
-	$ret['reserved'] = 'no';
+	$ret = array
+	(
+		'bonds' => array(),
+		'outpf' => array(),
+		'inpf' => array(),
+		'vslist' => array(),
+		'rslist' => array(),
+		'exists' => 0,
+		'name' => '',
+		'reserved' => 'no'
+	);
 	$query =
 		"select ".
 		"name, reserved ".
@@ -675,7 +676,7 @@ function getIPAddress ($ip = 0)
 		"and chapter_name = 'RackObjectType' " .
 		"order by RackObject.id, IPBonds.name";
 	$result = useSelectBlade ($query);
-	$count=0;
+	$count = 0;
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
 		$ret['bonds'][$count]['object_id'] = $row['object_id'];
@@ -716,13 +717,25 @@ function getIPAddress ($ip = 0)
 	$result->closeCursor();
 	unset ($result);
 
-	$query = "select object_id, proto, localport, remoteip, remoteport, description from PortForwarding where localip = ";
+	$query =
+		"select ".
+		"proto, ".
+		"INET_NTOA(localip) as localip, ".
+		"localport, ".
+		"remoteport, ".
+		"PortForwarding.object_id as object_id, ".
+		"RackObject.name as object_name, ".
+		"description ".
+		"from ((PortForwarding join IPBonds on remoteip=IPBonds.ip) join RackObject on PortForwarding.object_id=RackObject.id) ".
+		"where remoteip = inet_aton ('${ip}') ".
+		"order by remoteip, remoteport, proto, localip, localport";
 	$result = useSelectBlade ($query);
+	$count = 0;
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
-		$new = $row;
-		$new['rsip'] = $ip;
-		$ret['inpf'][] = $new;
+		foreach (array ('proto', 'localport', 'localip', 'remoteip', 'object_id', 'object_name', 'description') as $cname)
+			$ret['inpf'][$count][$cname] = $row[$cname];
+		$count++;
 	}
 	$result->closeCursor();
 	unset ($result);
