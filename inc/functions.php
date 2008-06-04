@@ -716,6 +716,17 @@ function getIPAddress ($ip = 0)
 	$result->closeCursor();
 	unset ($result);
 
+	$query = "select object_id, proto, localport, remoteip, remoteport, description from PortForwarding where localip = ";
+	$result = useSelectBlade ($query);
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
+	{
+		$new = $row;
+		$new['rsip'] = $ip;
+		$ret['inpf'][] = $new;
+	}
+	$result->closeCursor();
+	unset ($result);
+
 	return $ret;
 }
 	
@@ -1548,7 +1559,7 @@ function complementByKids ($idlist, $tree = NULL, $getall = FALSE)
 	return $ret;
 }
 
-function loadRackObjectAutoTags()
+function loadRackObjectAutoTags ()
 {
 	assertUIntArg ('object_id', __FUNCTION__);
 	$object_id = $_REQUEST['object_id'];
@@ -1559,20 +1570,38 @@ function loadRackObjectAutoTags()
 	return $ret;
 }
 
-function loadIPv4PrefixAutoTags()
+// Common code for both prefix and address tag listers.
+function getIPv4PrefixTags ($prefix)
 {
-	assertUIntArg ('id', __FUNCTION__);
-	$subnet = getIPRange ($_REQUEST['id']);
 	$ret = array();
-	$ret[] = array ('tag' => '$id_' . $_REQUEST['id']);
-	$ret[] = array ('tag' => '$ipv4net-' . str_replace ('.', '-', $subnet['ip']) . '-' . $subnet['mask']);
+	$ret[] = array ('tag' => '$ipv4net-' . str_replace ('.', '-', $prefix['ip']) . '-' . $prefix['mask']);
 	// FIXME: find and list tags for all parent networks
 	$ret[] = array ('tag' => '$any_ipv4net');
 	$ret[] = array ('tag' => '$any_net');
 	return $ret;
 }
 
-function loadRackAutoTags()
+function loadIPv4PrefixAutoTags ()
+{
+	assertUIntArg ('id', __FUNCTION__);
+	return array_merge
+	(
+		array (array ('tag' => '$id_' . $_REQUEST['id'])),
+		getIPv4PrefixTags (getIPRange ($_REQUEST['id']))
+	);
+}
+
+function loadIPv4AddressAutoTags ()
+{
+	assertIPv4Arg ('ip', __FUNCTION__);
+	return array_merge
+	(
+		array (array ('tag' => '$ipv4net-' . str_replace ('.', '-', $_REQUEST['ip']) . '-32')),
+		getIPv4PrefixTags (getRangeByIP ($_REQUEST['ip']))
+	);
+}
+
+function loadRackAutoTags ()
 {
 	assertUIntArg ('rack_id', __FUNCTION__);
 	$ret = array();
@@ -1581,18 +1610,7 @@ function loadRackAutoTags()
 	return $ret;
 }
 
-function loadIPv4AddressAutoTags()
-{
-	assertIPv4Arg ('ip', __FUNCTION__);
-	$ret = array();
-	$ret[] = array ('tag' => '$ipv4net-' . str_replace ('.', '-', $subnet['ip']) . '-32');
-	// FIXME: find and list tags for all parent networks
-	$ret[] = array ('tag' => '$any_ipv4net');
-	$ret[] = array ('tag' => '$any_net');
-	return $ret;
-}
-
-function loadIPv4VSAutoTags()
+function loadIPv4VSAutoTags ()
 {
 	assertUIntArg ('id', __FUNCTION__);
 	$ret = array();
@@ -1602,7 +1620,7 @@ function loadIPv4VSAutoTags()
 	return $ret;
 }
 
-function loadIPv4RSPoolAutoTags()
+function loadIPv4RSPoolAutoTags ()
 {
 	assertUIntArg ('pool_id', __FUNCTION__);
 	$ret = array();
@@ -1612,7 +1630,7 @@ function loadIPv4RSPoolAutoTags()
 	return $ret;
 }
 
-function getGlobalAutoTags()
+function getGlobalAutoTags ()
 {
 	global $remote_username, $accounts;
 	$ret = array();

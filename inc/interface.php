@@ -2170,22 +2170,34 @@ function renderIPAddress ()
 {
 	global $root;
 	$ip = $_REQUEST['ip'];
-	$address = getIPAddress($ip);
-	echo "<center><h1>$ip</h1>";
+	$address = getIPAddress ($ip);
+dump($address);
+	echo "<table border=0 class=objectview cellspacing=0 cellpadding=0>";
+	echo "<tr><td colspan=2 align=center><h1>${ip}</h1></td></tr>\n";
 	if ($address['exists'] == 1)
-		echo "<h2>${address['name']}</h2>";
-	echo "</center>\n";
+		echo "<tr><td colspan=2 align=center><h2>${address['name']}</h2></td></tr>\n";
 
-//	echo "<table width='100%' cesspadding=5 cellspacing=0 border=0 align='center'>";
-//	echo "<tr valign='top'><td>";
+	echo "<tr><td class=pcleft>";
+	startPortlet ('summary');
+	echo "<table border=0 cellspacing=0 cellpadding=3 width='100%'>\n";
+	echo "<tr><th width='50%' class=tdright>Allocations:</th><td class=tdleft>" . count ($address['bonds']) . "</td></tr>\n";
+	echo "<tr><th width='50%' class=tdright>Originated NAT connections:</th><td class=tdleft>" . count ($address['outpf']) . "</td></tr>\n";
+	echo "<tr><th width='50%' class=tdright>Arriving NAT connections:</th><td class=tdleft>" . count ($address['inpf']) . "</td></tr>\n";
+	echo "<tr><th width='50%' class=tdright>SLB virtual services:</th><td class=tdleft>" . count ($address['vslist']) . "</td></tr>\n";
+	echo "<tr><th width='50%' class=tdright>SLB real servers:</th><td class=tdleft>" . count ($address['rslist']) . "</td></tr>\n";
+	printTagTRs();
+	echo "</table><br>\n";
+	finishPortlet();
+	echo "</td>\n";
 
+	echo "<td class=pcright>";
 	$numshared = countRefsOfType($address['bonds'], 'shared', 'eq');
 	$numreg = countRefsOfType($address['bonds'], 'regular', 'eq');
 	$numvirt = countRefsOfType($address['bonds'], 'virtual', 'eq');
 
 	if ($address['reserved'] == 'yes' or ($numshared + $numreg + $numvirt) > 0)
 	{
-		startPortlet ('Allocation');
+		startPortlet ('Allocations');
 		echo "<table class='widetable' cesspadding=5 cellspacing=0 border=0 align='center'>\n";
 		echo "<tr><th>Object name</th><th>Interface name</th><th>Interface type</th></tr>\n";
 		if ( ($numshared > 0 && $numreg > 0) || $numreg > 1 )
@@ -2253,9 +2265,13 @@ function renderIPAddress ()
 		finishPortlet();
 	}
 
-
-//	echo "</td><td>";
-//	echo "</td></tr></table>";
+	if (count ($address['outpf']))
+	{
+		startPortlet ('originating NAT rules');
+		finishPortlet();
+	}
+	echo "</td></tr>";
+	echo "</table>\n";
 }
 
 function renderIPAddressProperties ()
