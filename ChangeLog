@@ -1,9 +1,9 @@
-0.15.1
+0.15.1 2008-06-05
 	bugfix: fix auth headers in upgrade script (broken in 0.15.0)
 	new feature: fetch switch serial number via SNMP (by killsystem)
 	new feature: adding multiple racks
 	new feature: IP address reservation release on allocation
-	updates: user interface cleanups
+	updates: user interface cleanups and improvements
 0.15.0 2008-05-10
 	new feature: tags
 	new feature: automatic option groups
