@@ -718,31 +718,30 @@ function getIPAddress ($ip = 0)
 	unset ($result);
 
 	$query =
-		"select ".
-		"proto, ".
-		"INET_NTOA(localip) as localip, ".
-		"localport, ".
-		"remoteport, ".
-		"PortForwarding.object_id as object_id, ".
-		"RackObject.name as object_name, ".
-		"description ".
-		"from ((PortForwarding join IPBonds on remoteip=IPBonds.ip) join RackObject on PortForwarding.object_id=RackObject.id) ".
-		"where remoteip = inet_aton ('${ip}') ".
-		"order by remoteip, remoteport, proto, localip, localport";
-	$result = useSelectBlade ($query);
-	$count = 0;
+		"select " .
+		"proto, " .
+		"INET_NTOA(localip) as localip, " .
+		"localport, " .
+		"INET_NTOA(remoteip) as remoteip, " .
+		"remoteport, " .
+		"description " .
+		"from PortForwarding " .
+		"where remoteip = inet_aton('${ip}') or localip = inet_aton('${ip}') " .
+		"order by localip, localport, remoteip, remoteport, proto";
+	$result = useSelectBlade ($query, __FUNCTION__);
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
-		foreach (array ('proto', 'localport', 'localip', 'remoteip', 'object_id', 'object_name', 'description') as $cname)
-			$ret['inpf'][$count][$cname] = $row[$cname];
-		$count++;
+		if ($row['remoteip'] == $ip)
+			$ret['inpf'][] = $row;
+		if ($row['localip'] == $ip)
+			$ret['outpf'][] = $row;
 	}
 	$result->closeCursor();
 	unset ($result);
 
 	return $ret;
 }
-	
+
 function bindIpToObject ($ip = '', $object_id = 0, $name = '', $type = '')
 {
 	global $dbxlink;
@@ -814,7 +813,7 @@ function mergeSearchResults (&$objects, $terms, $fieldname)
 // FIXME: this dead call was executed 4 times per 1 object search!
 //	$typeList = getObjectTypeList();
 	$clist = array ('id', 'name', 'label', 'asset_no', 'barcode', 'objtype_id', 'objtype_name');
-	while ($row = $result->fetch(PDO::FETCH_ASSOC))
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
 		foreach ($clist as $cname)
 			$object[$cname] = $row[$cname];

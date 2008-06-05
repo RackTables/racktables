@@ -903,7 +903,7 @@ function renderRackObject ($object_id = 0)
 
 			echo "<h3>locally performed NAT</h3>";
 
-			echo "<table class='widetable' cesspadding=5 cellspacing=0 border=0 align='center'>\n";
+			echo "<table class='widetable' cellpadding=5 cellspacing=0 border=0 align='center'>\n";
 			echo "<tr><th>Proto</th><th>Match endpoint</th><th>Translate to</th><th>Target object</th><th>Rule comment</th></tr>\n";
 
 			foreach ($forwards['out'] as $pf)
@@ -943,7 +943,7 @@ function renderRackObject ($object_id = 0)
 		{
 			echo "<h3>arriving NAT connections</h3>";
 
-			echo "<table class='widetable' cesspadding=5 cellspacing=0 border=0 align='center'>\n";
+			echo "<table class='widetable' cellpadding=5 cellspacing=0 border=0 align='center'>\n";
 			echo "<tr><th>Matched endpoint</th><th>Source object</th><th>Translated to</th><th>Rule comment</th></tr>\n";
 
 			foreach ($forwards['in'] as $pf)
@@ -2171,7 +2171,6 @@ function renderIPAddress ()
 	global $root;
 	$ip = $_REQUEST['ip'];
 	$address = getIPAddress ($ip);
-dump($address);
 	echo "<table border=0 class=objectview cellspacing=0 cellpadding=0>";
 	echo "<tr><td colspan=2 align=center><h1>${ip}</h1></td></tr>\n";
 	if ($address['exists'] == 1)
@@ -2198,7 +2197,7 @@ dump($address);
 	if ($address['reserved'] == 'yes' or ($numshared + $numreg + $numvirt) > 0)
 	{
 		startPortlet ('Allocations');
-		echo "<table class='widetable' cesspadding=5 cellspacing=0 border=0 align='center'>\n";
+		echo "<table class='widetable' cellpadding=5 cellspacing=0 border=0 align='center'>\n";
 		echo "<tr><th>Object name</th><th>Interface name</th><th>Interface type</th></tr>\n";
 		if ( ($numshared > 0 && $numreg > 0) || $numreg > 1 )
 			$class='trerror';
@@ -2234,7 +2233,7 @@ dump($address);
 	if (count ($address['vslist']))
 	{
 		startPortlet ('Virtual services (' . count ($address['vslist']) . ')');
-		echo "<table class='widetable' cesspadding=5 cellspacing=0 border=0 align='center'>\n";
+		echo "<table class='widetable' cellpadding=5 cellspacing=0 border=0 align='center'>\n";
 		echo "<tr><th>VS</th><th>name</th></tr>\n";
 		foreach ($address['vslist'] as $vsinfo)
 		{
@@ -2249,7 +2248,7 @@ dump($address);
 	if (count ($address['rslist']))
 	{
 		startPortlet ('Real servers (' . count ($address['rslist']) . ')');
-		echo "<table class='widetable' cesspadding=5 cellspacing=0 border=0 align='center'>\n";
+		echo "<table class='widetable' cellpadding=5 cellspacing=0 border=0 align='center'>\n";
 		echo "<tr><th>&nbsp;</th><th>port</th><th>RS pool</th></tr>\n";
 		foreach ($address['rslist'] as $rsinfo)
 		{
@@ -2267,9 +2266,26 @@ dump($address);
 
 	if (count ($address['outpf']))
 	{
-		startPortlet ('originating NAT rules');
+		startPortlet ('departing NAT rules');
+		echo "<table class='widetable' cellpadding=5 cellspacing=0 border=0 align='center'>\n";
+		echo "<tr><th>proto</th><th>from</th><th>to</th><th>comment</th></tr>\n";
+		foreach ($address['outpf'] as $rule)
+			echo "<tr><td>${rule['proto']}</td><td>${rule['localip']}:${rule['localport']}</td><td>${rule['remoteip']}:${rule['localport']}</td><td>${rule['description']}</td></tr>";
+		echo "</table>";
 		finishPortlet();
 	}
+
+	if (count ($address['inpf']))
+	{
+		startPortlet ('arriving NAT rules');
+		echo "<table class='widetable' cellpadding=5 cellspacing=0 border=0 align='center'>\n";
+		echo "<tr><th>proto</th><th>from</th><th>to</th><th>comment</th></tr>\n";
+		foreach ($address['inpf'] as $rule)
+			echo "<tr><td>${rule['proto']}</td><td>${rule['localip']}:${rule['localport']}</td><td>${rule['remoteip']}:${rule['localport']}</td><td>${rule['description']}</td></tr>";
+		echo "</table>";
+		finishPortlet();
+	}
+
 	echo "</td></tr>";
 	echo "</table>\n";
 }
@@ -2303,7 +2319,7 @@ function renderIPAddressAssignment ()
 	echo "<center><h1>$ip</h1></center>\n";
 
 
-	echo "<table class='widetable' cesspadding=5 cellspacing=0 border=0 align='center'>\n";
+	echo "<table class='widetable' cellpadding=5 cellspacing=0 border=0 align='center'>\n";
 	echo "<tr><th>&nbsp;</th><th>object name</th><th>object interface</th><th>allocation type</th><th>&nbsp;</th></tr>\n";
 
 	$numshared = countRefsOfType($address['bonds'], 'shared', 'eq');
@@ -2387,7 +2403,7 @@ function renderNATv4ForObject ($object_id = 0)
 	showMessageOrError();
 	echo "<center><h2>locally performed NAT</h2></center>";
 
-	echo "<table class='widetable' cesspadding=5 cellspacing=0 border=0 align='center'>\n";
+	echo "<table class='widetable' cellpadding=5 cellspacing=0 border=0 align='center'>\n";
 	echo "<tr><th></th><th>Match endpoint</th><th>Translate to</th><th>Target object</th><th>Comment</th><th>&nbsp;</th></tr>\n";
 
 	foreach ($forwards['out'] as $pf)
@@ -2455,7 +2471,7 @@ function renderNATv4ForObject ($object_id = 0)
 	echo "</table><br><br>";
 
 	echo "<center><h2>arriving NAT connections</h2></center>";
-	echo "<table class='widetable' cesspadding=5 cellspacing=0 border=0 align='center'>\n";
+	echo "<table class='widetable' cellpadding=5 cellspacing=0 border=0 align='center'>\n";
 	echo "<tr><th></th><th>Source</th><th>Source objects</th><th>Target</th><th>Description</th></tr>\n";
 
 	foreach ($forwards['in'] as $pf)

@@ -230,10 +230,10 @@ function getObjectInfo ($object_id = 0)
 		"select id, name, label, barcode, dict_value as objtype_name, asset_no, dict_key as objtype_id, has_problems, comment from " .
 		"RackObject inner join Dictionary on objtype_id = dict_key natural join Chapter " .
 		"where id = '${object_id}' and deleted = 'no' and chapter_name = 'RackObjectType' limit 1";
-	$result = useSelectBlade ($query);
+	$result = useSelectBlade ($query, __FUNCTION__);
 	if (($row = $result->fetch (PDO::FETCH_ASSOC)) == NULL)
 	{
-		showError ('Query succeded, but returned no data', __FUNCTION__);
+		showError ('Query succeeded, but returned no data', __FUNCTION__);
 		$ret = NULL;
 	}
 	else
@@ -250,6 +250,7 @@ function getObjectInfo ($object_id = 0)
 		$ret['comment'] = $row['comment'];
 	}
 	$result->closeCursor();
+	unset ($result);
 	return $ret;
 }
 
@@ -1952,7 +1953,7 @@ function useSelectBlade ($query, $caller = 'N/A')
 	if ($result == NULL)
 	{
 		$ei = $dbxlink->errorInfo();
-		showError ("SQL query '${query}' failed in useSelectBlade with error ${ei[1]} (${ei[2]})", $caller);
+		showError ("SQL query '${query}'\n failed in useSelectBlade with error ${ei[1]} (${ei[2]})", $caller);
 		return NULL;
 	}
 	return $result;
