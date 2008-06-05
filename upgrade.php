@@ -1263,12 +1263,8 @@ CREATE TABLE `TagTree` (
 			break; // --------------------------------------------
 		case '0.15.1':
 			$query[] = "INSERT INTO `Config` VALUES ('IPV4_AUTO_RELEASE','1','uint','no','no','Auto-release IPv4 addresses on allocation')";
+			$query[] = "update Config set varvalue = '0.15.1' where varname = 'DB_VERSION'";
 			break;
-#		case '0.14.14':
-#			$query[] = "alter table Rack add column left_is_front enum ('yes', 'no') not null default 'yes' after height";
-#			$query[] = "alter table Rack add column bottom_is_unit1 enum ('yes', 'no') not null default 'yes' after left_is_front";
-#			$query[] = "update Config set varvalue = '0.14.14' where varname = 'DB_VERSION'";
-#			break; // --------------------------------------------
 		default:
 			showError ("executeUpgradeBatch () failed, because batch '${batchid}' isn't defined");
 			die;
