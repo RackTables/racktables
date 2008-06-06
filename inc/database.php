@@ -36,28 +36,20 @@ function getRackspace ($tagfilter = array())
 	return $ret;
 }
 
-// This function returns detailed information about either all or one
-// rack row depending on its argument.
-function getRackRowInfo ($rackrow_id = 0)
+// Return detailed information about one rack row.
+function getRackRowInfo ($rackrow_id)
 {
 	$query =
-		"select dict_key, dict_value, count(Rack.id) as count, " .
+		"select dict_key as id, dict_value as name, count(Rack.id) as count, " .
 		"if(isnull(sum(Rack.height)),0,sum(Rack.height)) as sum " .
 		"from Chapter natural join Dictionary left join Rack on Rack.row_id = dict_key " .
-		"where chapter_name = 'RackRow' " .
-		($rackrow_id > 0 ? "and dict_key = ${rackrow_id} " : '') .
-		"group by dict_key order by dict_value";
+		"where chapter_name = 'RackRow' and dict_key = ${rackrow_id} " .
+		"group by dict_key";
 	$result = useSelectBlade ($query);
-	$ret = array();
-	$clist = array ('dict_key', 'dict_value', 'count', 'sum');
-	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-		foreach ($clist as $cname)
-			$ret[$row['dict_key']][$cname] = $row[$cname];
-	$result->closeCursor();
-	if ($rackrow_id > 0)
-		return current ($ret);
+	if ($row = $result->fetch (PDO::FETCH_ASSOC))
+		return $row;
 	else
-		return $ret;
+		return NULL;
 }
 
 // This function returns id->name map for all object types. The map is used

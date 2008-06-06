@@ -53,7 +53,7 @@ function dynamic_title_row ()
 				showError ('getRackRowInfo() failed', __FUNCTION__);
 				return NULL;
 			}
-			$ret['name'] = $rowInfo['dict_value'];
+			$ret['name'] = $rowInfo['name'];
 			$ret['params']['row_id'] = $_REQUEST['row_id'];
 			break;
 		default:

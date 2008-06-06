@@ -112,7 +112,7 @@ function renderRow ($row_id)
 
 	// Left portlet with row information.
 	echo "<tr><td class=pcleft>";
-	startPortlet ($rowInfo['dict_value']);
+	startPortlet ($rowInfo['name']);
 	echo "<table border=0 cellspacing=0 cellpadding=3 width='100%'>\n";
 	echo "<tr><th width='50%' class=tdright>Racks:</th><td class=tdleft>${rowInfo['count']}</td></tr>\n";
 	echo "<tr><th width='50%' class=tdright>Units:</th><td class=tdleft>${rowInfo['sum']}</td></tr>\n";
