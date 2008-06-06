@@ -38,10 +38,11 @@ $page['row']['bypass_type'] = 'uint';
 $page['row']['parent'] = 'rackspace';
 $tab['row']['default'] = 'View';
 $tab['row']['newrack'] = 'Add new rack';
-$tab['row']['tagroller'] = '[Tag roller]';
+$tab['row']['tagroller'] = 'Tag roller';
 $tabhandler['row']['default'] = 'renderRow';
 $tabhandler['row']['newrack'] = 'renderNewRackForm';
 $tabhandler['row']['tagroller'] = 'renderTagRollerForRow';
+$ophandler['row']['tagroller']['rollTags'] = 'rollTags';
 
 $page['rack']['title_handler'] = 'dynamic_title_rack';
 $page['rack']['bypass'] = 'rack_id';

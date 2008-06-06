@@ -4965,9 +4965,26 @@ function renderTagSelect ()
 	echo '</select><br>';
 }
 
-function renderTagRollerForRow ()
+function renderTagRollerForRow ($row_id)
 {
-	dragon();
+	global $root, $pageno, $tabno;
+	$a = rand (1, 20);
+	$b = rand (1, 20);
+	$sum = $a + $b;
+	showMessageOrError();
+	echo "<form method=post action='${root}process.php?page=${pageno}&tab=${tabno}&op=rollTags'>";
+	echo "<input type=hidden name=row_id value='${row_id}'>";
+	echo "<input type=hidden name=realsum value='${sum}'>";
+	echo "<table border=1 align=center>";
+	echo "<tr><td colspan=2>This special tool allows assigning tags to physical contents (racks <s>and contained objects</s>) of the current ";
+	echo "rack row.<br>The tag(s) selected below will be ";
+	echo "appended to already assigned tag(s) of each particular entity. </td></tr>";
+	echo "<tr><th>Tags</th><td>";
+	renderTagSelect();
+	echo "</td></tr>";
+	echo "<tr><th>Control question: the sum of ${a} and ${b}</th><td><input type=text name=sum></td></tr>";
+	echo "<tr><td colspan=2 align=center><input type=submit value='Go!'></td></tr>";
+	echo "</table>";
 }
 
 function renderObjectSLB ()

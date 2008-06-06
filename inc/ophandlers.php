@@ -1284,12 +1284,10 @@ function saveEntityTags ($realm, $bypass)
 	$newtrail = getExplicitTagsOnly (buildTrailFromIds ($taglist));
 	$n_succeeds = $n_errors = 0;
 	foreach ($newtrail as $taginfo)
-	{
-		if (useInsertBlade ('TagStorage', array ('target_realm' => "'${realm}'", 'target_id' => $entity_id, 'tag_id' => $taginfo['id'])))
+		if (addTagForEntity ($realm, $entity_id, $taginfo['id']))
 			$n_succeeds++;
 		else
 			$n_errors++;
-	}
 	if ($n_errors)
 		return "${root}?page=${pageno}&tab=${tabno}&${bypass}=${entity_id}&error=" . urlencode ("Replaced trail with ${n_succeeds} tags, but experienced ${n_errors} errors.");
 	else
@@ -1358,6 +1356,32 @@ function updateTag ()
 		return "${root}?page=${pageno}&tab=${tabno}&message=" . urlencode ("Updated tag '${tagname}'.");
 	else
 		return "${root}?page=${pageno}&tab=${tabno}&error=" . urlencode ("Could not update tag '${tagname}' because of error '${ret}'");
+}
+
+function rollTags ()
+{
+	global $root, $pageno, $tabno;
+	assertUIntArg ('row_id', __FUNCTION__);
+	assertStringArg ('sum', __FUNCTION__, TRUE);
+	assertUIntArg ('realsum', __FUNCTION__);
+	$row_id = $_REQUEST['row_id'];
+	if ($_REQUEST['sum'] != $_REQUEST['realsum'])
+		return "${root}?page=${pageno}&tab=${tabno}&row_id=${row_id}&error=" . urlencode ("test failed");
+	$racks = getRacksForRow ($row_id);
+	// Each time addTagForEntity() fails we assume it was just because of already existing record in its way.
+	$newtags = isset ($_REQUEST['taglist']) ? $_REQUEST['taglist'] : array();
+	$tagstack = getExplicitTagsOnly (buildTrailFromIds ($newtags));
+	$ndupes = $nnew = 0;
+	foreach ($tagstack as $taginfo)
+		foreach ($racks as $rackInfo)
+		{
+			if (addTagForEntity ('rack', $rackInfo['id'], $taginfo['id']))
+				$nnew++;
+			else
+				$ndupes++;
+			// FIXME: do something likewise for all object inside current rack
+		}
+	return "${root}?page=${pageno}&tab=${tabno}&row_id=${row_id}&message=" . urlencode ("${nnew} new records done, ${ndupes} already existed");
 }
 
 ?>

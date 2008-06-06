@@ -2651,4 +2651,18 @@ function deleteTagsForEntity ($entity_realm, $entity_id)
 		return TRUE;
 }
 
+function addTagForEntity ($realm, $entity_id, $tag_id)
+{
+	return useInsertBlade
+	(
+		'TagStorage',
+		array
+		(
+			'target_realm' => "'${realm}'",
+			'target_id' => $entity_id,
+			'tag_id' => $tag_id,
+		)
+	);
+}
+
 ?>
