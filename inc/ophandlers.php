@@ -962,6 +962,7 @@ function resetUIConfig()
 	setConfigVar ('SHOW_IMPLICIT_TAGS','yes');
 	setConfigVar ('SHOW_AUTOMATIC_TAGS','no');
 	setConfigVar ('DEFAULT_OBJECT_TYPE','4');
+	setConfigVar ('IPV4_AUTO_RELEASE','1');
 	return "${root}?page=${pageno}&tab=default&message=" . urlencode ("Reset complete");
 }
 
