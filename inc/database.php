@@ -26,7 +26,7 @@ function getRackspace ($tagfilter = array())
 		"where chapter_name = 'RackRow' " .
 		$whereclause .
 		" order by dict_value";
-	$result = useSelectBlade ($query);
+	$result = useSelectBlade ($query, __FUNCTION__);
 	$ret = array();
 	$clist = array ('row_id', 'row_name');
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
@@ -45,7 +45,7 @@ function getRackRowInfo ($rackrow_id)
 		"from Chapter natural join Dictionary left join Rack on Rack.row_id = dict_key " .
 		"where chapter_name = 'RackRow' and dict_key = ${rackrow_id} " .
 		"group by dict_key";
-	$result = useSelectBlade ($query);
+	$result = useSelectBlade ($query, __FUNCTION__);
 	if ($row = $result->fetch (PDO::FETCH_ASSOC))
 		return $row;
 	else
@@ -94,7 +94,7 @@ function getObjectList ($type_id = 0, $tagfilter = array())
 		"where RackObject.deleted = 'no' and chapter_name = 'RackObjectType' " .
 		$whereclause .
 		"order by name";
-	$result = useSelectBlade ($query);
+	$result = useSelectBlade ($query, __FUNCTION__);
 	$ret = array();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
@@ -127,7 +127,7 @@ function getRacksForRow ($row_id = 0, $tagfilter = array())
 		(($row_id == 0) ? "" : "and row_id = ${row_id} ") .
 		getWhereClause ($tagfilter) .
 		" order by row_name, Rack.id";
-	$result = useSelectBlade ($query);
+	$result = useSelectBlade ($query, __FUNCTION__);
 	$ret = array();
 	$clist = array
 	(
@@ -164,7 +164,7 @@ function getRackData ($rack_id = 0, $silent = FALSE)
 		"'yes' as left_is_front, 'yes' as bottom_is_unit1, dict_value as row_name from " .
 		"Rack left join Dictionary on Rack.row_id = dict_key natural join Chapter " .
 		"where chapter_name = 'RackRow' and Rack.id='${rack_id}' and Rack.deleted = 'no' limit 1";
-	$result = useSelectBlade ($query);
+	$result = useSelectBlade ($query, __FUNCTION__);
 	if (($row = $result->fetch (PDO::FETCH_ASSOC)) == NULL)
 	{
 		if ($silent == FALSE)
@@ -199,7 +199,7 @@ function getRackData ($rack_id = 0, $silent = FALSE)
 		"select unit_no, atom, state, object_id " .
 		"from RackSpace where rack_id = ${rack_id} and " .
 		"unit_no between 1 and " . $rack['height'] . " order by unit_no";
-	$result = useSelectBlade ($query);
+	$result = useSelectBlade ($query, __FUNCTION__);
 	global $loclist;
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
@@ -283,7 +283,7 @@ function getObjectPortsAndLinks ($object_id = 0)
 		"where chapter_name = 'PortType' and Port.object_id=${object_id} ".
 		"and (Port.id != RemotePort.id or RemotePort.id is null) ".
 		"order by Port_name";
-	$result = useSelectBlade ($query);
+	$result = useSelectBlade ($query, __FUNCTION__);
 	$ret=array();
 	$count=0;
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
@@ -330,7 +330,7 @@ function commitAddRack ($name, $height, $row_id, $comment, $taglist)
 		return FALSE;
 	}
 
-	if (($result = useSelectBlade ('select last_insert_id()')) == NULL) 
+	if (($result = useSelectBlade ('select last_insert_id()', __FUNCTION__)) == NULL) 
 	{
 		showError ('Query #2 failed', __FUNCTION__);
 		return FALSE;
@@ -370,7 +370,7 @@ function commitAddObject ($new_name, $new_label, $new_barcode, $new_type_id, $ne
 		showError ("SQL query #1 failed", __FUNCTION__);
 		return FALSE;
 	}
-	$result2 = useSelectBlade ('select last_insert_id()');
+	$result2 = useSelectBlade ('select last_insert_id()', __FUNCTION__);
 	if ($result2 == NULL)
 	{
 		$errorInfo = $dbxlink->errorInfo();
@@ -524,7 +524,7 @@ function getMoleculeForObject ($object_id = 0)
 	$query =
 		"select rack_id, unit_no, atom from RackSpace " .
 		"where state = 'T' and object_id = ${object_id} order by rack_id, unit_no, atom";
-	$result = useSelectBlade ($query);
+	$result = useSelectBlade ($query, __FUNCTION__);
 	$ret = $result->fetchAll (PDO::FETCH_ASSOC);
 	$result->closeCursor();
 	return $ret;
@@ -541,7 +541,7 @@ function getMolecule ($mid = 0)
 	$query =
 		"select rack_id, unit_no, atom from Atom " .
 		"where molecule_id=${mid}";
-	$result = useSelectBlade ($query);
+	$result = useSelectBlade ($query, __FUNCTION__);
 	$ret = $result->fetchAll (PDO::FETCH_ASSOC);
 	$result->closeCursor();
 	return $ret;
@@ -612,7 +612,7 @@ function getRackspaceHistory ()
 		"MountOperation as mo inner join RackObject as ro on mo.object_id = ro.id " .
 		"inner join Dictionary on objtype_id = dict_key natural join Chapter " .
 		"where chapter_name = 'RackObjectType' order by ctime desc";
-	$result = useSelectBlade ($query);
+	$result = useSelectBlade ($query, __FUNCTION__);
 	$ret = $result->fetchAll(PDO::FETCH_ASSOC);
 	$result->closeCursor();
 	return $ret;
@@ -627,7 +627,7 @@ function getOperationMolecules ($op_id = 0)
 		return;
 	}
 	$query = "select old_molecule_id, new_molecule_id from MountOperation where id = ${op_id}";
-	$result = useSelectBlade ($query);
+	$result = useSelectBlade ($query, __FUNCTION__);
 	// We expect one row.
 	$row = $result->fetch (PDO::FETCH_ASSOC);
 	if ($row == NULL)
@@ -649,7 +649,7 @@ function getResidentRacksData ($object_id = 0, $fetch_rackdata = TRUE)
 		return;
 	}
 	$query = "select distinct rack_id from RackSpace where object_id = ${object_id} order by rack_id";
-	$result = useSelectBlade ($query);
+	$result = useSelectBlade ($query, __FUNCTION__);
 	$rows = $result->fetchAll (PDO::FETCH_NUM);
 	$result->closeCursor();
 	$ret = array();
@@ -679,7 +679,7 @@ function getObjectGroupInfo ()
 		'Dictionary natural join Chapter left join RackObject on dict_key = objtype_id ' .
 		'where chapter_name = "RackObjectType" ' .
 		'group by dict_key order by dict_value';
-	$result = useSelectBlade ($query);
+	$result = useSelectBlade ($query, __FUNCTION__);
 	$ret = array();
 	$ret[0] = array ('id' => 0, 'name' => 'ALL types');
 	$clist = array ('id', 'name', 'count');
@@ -706,7 +706,7 @@ function getUnmountedObjects ()
 		'RackObject inner join Dictionary on objtype_id = dict_key natural join Chapter ' .
 		'left join RackSpace on id = object_id '.
 		'where rack_id is null and chapter_name = "RackObjectType" order by dict_value, name, label, asset_no, barcode';
-	$result = useSelectBlade ($query);
+	$result = useSelectBlade ($query, __FUNCTION__);
 	$ret = array();
 	$clist = array ('id', 'name', 'label', 'barcode', 'objtype_name', 'objtype_id', 'asset_no');
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
@@ -725,7 +725,7 @@ function getProblematicObjects ()
 		'select dict_value as objtype_name, dict_key as objtype_id, name, id, asset_no from ' .
 		'RackObject inner join Dictionary on objtype_id = dict_key natural join Chapter '.
 		'where has_problems = "yes" and chapter_name = "RackObjectType" order by objtype_name, name';
-	$result = useSelectBlade ($query);
+	$result = useSelectBlade ($query, __FUNCTION__);
 	$ret = array();
 	$clist = array ('id', 'name', 'objtype_name', 'objtype_id', 'asset_no');
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
@@ -799,7 +799,7 @@ function getObjectAddressesAndNames ()
 		"IPBonds.name as name, ".
 		"INET_NTOA(ip) as ip ".
 		"from IPBonds join RackObject on id=object_id ";
-	$result = useSelectBlade ($query);
+	$result = useSelectBlade ($query, __FUNCTION__);
 	$ret = array();
 	$count=0;
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
@@ -833,7 +833,7 @@ function getEmptyPortsOfType ($type_id)
 		"inner join PortCompat on Port.type = PortCompat.type2 ".
 		"where chapter_name = 'PortType' and PortCompat.type1 = '$type_id' and Link.porta is NULL ".
 		"and Port.reservation_comment is null order by Object_name, Port_name";
-	$result = useSelectBlade ($query);
+	$result = useSelectBlade ($query, __FUNCTION__);
 	$ret = array();
 	$count=0;
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
@@ -907,7 +907,7 @@ function getObjectAddresses ($object_id = 0)
 		"where ".
 		"IPBonds.object_id = ${object_id} ".
 		"order by IPBonds.ip, RemoteObject.name";
-	$result = useSelectBlade ($query);
+	$result = useSelectBlade ($query, __FUNCTION__);
 	$ret=array();
 	$count=0;
 	$refcount=0;
@@ -962,7 +962,7 @@ function getAddressspaceList ($tagfilter = array())
 		"from IPRanges left join TagStorage on IPRanges.id = TagStorage.target_id and target_realm = 'ipv4net' " .
 		"where true ${whereclause} " .
 		" order by ip";
-	$result = useSelectBlade ($query);
+	$result = useSelectBlade ($query, __FUNCTION__);
 	$ret=array();
 	$count=0;
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
@@ -994,7 +994,7 @@ function getRangeByIp ($ip = '', $id = 0)
 			"id, INET_NTOA(ip) as ip, mask, name ".
 			"from IPRanges where id='$id'";
 		
-	$result = useSelectBlade ($query);
+	$result = useSelectBlade ($query, __FUNCTION__);
 	$ret=array();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
@@ -1065,7 +1065,7 @@ function getUserAccounts ()
 	$query =
 		'select user_id, user_name, user_password_hash, user_realname, user_enabled ' .
 		'from UserAccount order by user_name';
-	$result = useSelectBlade ($query);
+	$result = useSelectBlade ($query, __FUNCTION__);
 	$ret = array();
 	$clist = array ('user_id', 'user_name', 'user_realname', 'user_password_hash', 'user_enabled');
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
@@ -1082,7 +1082,7 @@ function getUserPermissions ()
 		"select UserPermission.user_id, user_name, page, tab, access from " .
 		"UserPermission natural left join UserAccount where (user_name is not null) or " .
 		"(user_name is null and UserPermission.user_id = 0) order by user_name, page, tab";
-	$result = useSelectBlade ($query);
+	$result = useSelectBlade ($query, __FUNCTION__);
 	$ret = array();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
@@ -1099,7 +1099,7 @@ function searchByl2address ($l2addr)
 	$l2addr = l2addressForDatabase ($l2addr);
 	$query = "select object_id, Port.id as port_id from RackObject as ro inner join Port on ro.id = Port.object_id " .
 		"where l2address = ${l2addr}";
-	$result = useSelectBlade ($query);
+	$result = useSelectBlade ($query, __FUNCTION__);
 	$rows = $result->fetchAll (PDO::FETCH_ASSOC);
 	$result->closeCursor();
 	if (count ($rows) == 0) // No results.
@@ -1119,7 +1119,7 @@ function getIPv4PrefixSearchResult ($terms)
 		$query .= $or . "name like '%${term}%'";
 		$or = ' or ';
 	}
-	$result = useSelectBlade ($query);
+	$result = useSelectBlade ($query, __FUNCTION__);
 	$ret = array();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 		$ret[] = $row;
@@ -1135,7 +1135,7 @@ function getIPv4AddressSearchResult ($terms)
 		$query .= $or . "name like '%${term}%'";
 		$or = ' or ';
 	}
-	$result = useSelectBlade ($query);
+	$result = useSelectBlade ($query, __FUNCTION__);
 	$ret = array();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 		$ret[] = $row;
@@ -1151,7 +1151,7 @@ function getIPv4RSPoolSearchResult ($terms)
 		$query .= $or . "name like '%${term}%'";
 		$or = ' or ';
 	}
-	$result = useSelectBlade ($query);
+	$result = useSelectBlade ($query, __FUNCTION__);
 	$ret = array();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 		$ret[] = $row;
@@ -1167,7 +1167,7 @@ function getIPv4VServiceSearchResult ($terms)
 		$query .= $or . "name like '%${term}%'";
 		$or = ' or ';
 	}
-	$result = useSelectBlade ($query);
+	$result = useSelectBlade ($query, __FUNCTION__);
 	$ret = array();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 		$ret[] = $row;
@@ -1178,7 +1178,7 @@ function getIPv4VServiceSearchResult ($terms)
 function getPortID ($object_id, $port_name)
 {
 	$query = "select id from Port where object_id=${object_id} and name='${port_name}' limit 2";
-	$result = useSelectBlade ($query);
+	$result = useSelectBlade ($query, __FUNCTION__);
 	$rows = $result->fetchAll (PDO::FETCH_NUM);
 	if (count ($rows) != 1)
 		return NULL;
@@ -1271,7 +1271,7 @@ function getPortCompat ()
 		"inner join Chapter as c1 on d1.chapter_no = c1.chapter_no " .
 		"inner join Chapter as c2 on d2.chapter_no = c2.chapter_no " .
 		"where c1.chapter_name = 'PortType' and c2.chapter_name = 'PortType'";
-	$result = useSelectBlade ($query);
+	$result = useSelectBlade ($query, __FUNCTION__);
 	$ret = $result->fetchAll (PDO::FETCH_ASSOC);
 	$result->closeCursor();
 	return $ret;
@@ -1317,7 +1317,7 @@ function getDict ($parse_links = FALSE)
 	$query1 =
 		"select chapter_name, Chapter.chapter_no, dict_key, dict_value, sticky from " .
 		"Chapter natural left join Dictionary order by chapter_name, dict_value";
-	$result = useSelectBlade ($query1);
+	$result = useSelectBlade ($query1, __FUNCTION__);
 	$dict = array();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
@@ -1347,7 +1347,7 @@ function getDict ($parse_links = FALSE)
 		"inner join Dictionary as d on am.chapter_no = d.chapter_no and av.uint_value = d.dict_key " .
 		"where attr_type = 'dict' group by a.attr_id, am.chapter_no, uint_value " .
 		"order by a.attr_id, am.chapter_no, uint_value";
-	$result = useSelectBlade ($query2);
+	$result = useSelectBlade ($query2, __FUNCTION__);
 	$refcnt = array();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 		$dict[$row['chapter_no']]['refcnt'][$row['uint_value']] = $row['refcnt'];
@@ -1361,7 +1361,7 @@ function getDictStats ()
 	$query =
 		"select Chapter.chapter_no, chapter_name, count(dict_key) as wc from " .
 		"Chapter natural left join Dictionary group by Chapter.chapter_no";
-	$result = useSelectBlade ($query);
+	$result = useSelectBlade ($query, __FUNCTION__);
 	$tc = $tw = $uc = $uw = 0;
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
@@ -1376,7 +1376,7 @@ function getDictStats ()
 	unset ($result);
 	$query = "select count(attr_id) as attrc from RackObject as ro left join " .
 		"AttributeValue as av on ro.id = av.object_id group by ro.id";
-	$result = useSelectBlade ($query);
+	$result = useSelectBlade ($query, __FUNCTION__);
 	$to = $ta = $so = 0;
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
@@ -1414,7 +1414,7 @@ function getIPv4Stats()
 
 	foreach ($subject as $item)
 	{
-		$result = useSelectBlade ($item['q']);
+		$result = useSelectBlade ($item['q'], __FUNCTION__);
 		$row = $result->fetch (PDO::FETCH_NUM);
 		$ret[$item['txt']] = $row[0];
 		$result->closeCursor();
@@ -1434,7 +1434,7 @@ function getRackspaceStats()
 
 	foreach ($subject as $item)
 	{
-		$result = useSelectBlade ($item['q']);
+		$result = useSelectBlade ($item['q'], __FUNCTION__);
 		$row = $result->fetch (PDO::FETCH_NUM);
 		$ret[$item['txt']] = empty ($row[0]) ? 0 : $row[0];
 		$result->closeCursor();
@@ -1449,7 +1449,7 @@ function getTagStats ()
 	$query = "select tag, count(tag_id) as refcnt from " .
 		"TagTree inner join TagStorage on TagTree.id = TagStorage.tag_id " .
 		"group by tag_id order by refcnt desc";
-	$result = useSelectBlade ($query);
+	$result = useSelectBlade ($query, __FUNCTION__);
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 		$ret[$row['tag']] = $row['refcnt'];
 	$result->closeCursor();
@@ -1575,7 +1575,7 @@ function readChapter ($chapter_name = '')
 	$query =
 		"select dict_key, dict_value from Dictionary natural join Chapter " .
 		"where chapter_name = '${chapter_name}'";
-	$result = useSelectBlade ($query);
+	$result = useSelectBlade ($query, __FUNCTION__);
 	$chapter = array();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 		$chapter[$row['dict_key']] = parseWikiLink ($row['dict_value'], 'o');
@@ -1596,7 +1596,7 @@ function getAttrMap ()
 		"left join Chapter as c2 on am.chapter_no = c2.chapter_no " .
 		"where c1.chapter_name = 'RackObjectType' or c1.chapter_name is null " .
 		"order by attr_name";
-	$result = useSelectBlade ($query);
+	$result = useSelectBlade ($query, __FUNCTION__);
 	$ret = array();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
@@ -1738,7 +1738,7 @@ function getAttrValues ($object_id, $strip_optgroup = FALSE)
 		"left join Dictionary as D on D.dict_key = AV.uint_value and AM.chapter_no = D.chapter_no " .
 		"left join Chapter as C on AM.chapter_no = C.chapter_no " .
 		"where RO.id = ${object_id} order by A.attr_type, A.attr_name";
-	$result = useSelectBlade ($query);
+	$result = useSelectBlade ($query, __FUNCTION__);
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
 		$record = array();
@@ -1924,7 +1924,7 @@ function useSelectBlade ($query, $caller = 'N/A')
 function loadConfigCache ()
 {
 	$query = 'SELECT varname, varvalue, vartype, is_hidden, emptyok, description FROM Config ORDER BY varname';
-	$result = useSelectBlade ($query);
+	$result = useSelectBlade ($query, __FUNCTION__);
 	$cache = array();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 		$cache[$row['varname']] = $row;
@@ -1991,7 +1991,7 @@ function getSLBSummary ()
 		'inner join IPRSPool as pool on lb.rspool_id = pool.id ' .
 		'left join IPRealServer as rs on rs.rspool_id = lb.rspool_id ' .
 		'group by vs.id, object_id order by vs.vip, object_id';
-	$result = useSelectBlade ($query);
+	$result = useSelectBlade ($query, __FUNCTION__);
 	$ret = array();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
@@ -2023,7 +2023,7 @@ function getVServiceInfo ($vsid = 0)
 {
 	$query1 = "select inet_ntoa(vip) as vip, vport, proto, name, vsconfig, rsconfig " .
 		"from IPVirtualService where id = ${vsid}";
-	$result = useSelectBlade ($query1);
+	$result = useSelectBlade ($query1, __FUNCTION__);
 	$vsinfo = array ();
 	$row = $result->fetch (PDO::FETCH_ASSOC);
 	if (!$row)
@@ -2037,7 +2037,7 @@ function getVServiceInfo ($vsid = 0)
 		"lb.vsconfig as lb_vsconfig, lb.rsconfig as lb_rsconfig from " .
 		"IPRSPool as pool left join IPLoadBalancer as lb on pool.id = lb.rspool_id " .
 		"where vs_id = ${vsid} order by pool.name, object_id";
-	$result = useSelectBlade ($query2);
+	$result = useSelectBlade ($query2, __FUNCTION__);
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
 		if (!isset ($vsinfo['rspool'][$row['id']]))
@@ -2069,7 +2069,7 @@ function getRSPoolInfo ($id = 0)
 {
 	$query1 = "select id, name, vsconfig, rsconfig from " .
 		"IPRSPool where id = ${id}";
-	$result = useSelectBlade ($query1);
+	$result = useSelectBlade ($query1, __FUNCTION__);
 	$ret = array();
 	$row = $result->fetch (PDO::FETCH_ASSOC);
 	if (!$row)
@@ -2082,7 +2082,7 @@ function getRSPoolInfo ($id = 0)
 	$ret['rslist'] = array();
 	$query2 = "select object_id, vs_id, vsconfig, rsconfig from IPLoadBalancer " .
 		"where rspool_id = ${id} order by object_id, vs_id";
-	$result = useSelectBlade ($query2);
+	$result = useSelectBlade ($query2, __FUNCTION__);
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 		foreach (array ('vsconfig', 'rsconfig') as $c)
 			$ret['lblist'][$row['object_id']][$row['vs_id']][$c] = $row[$c];
@@ -2090,7 +2090,7 @@ function getRSPoolInfo ($id = 0)
 	unset ($result);
 	$query3 = "select id, inservice, inet_ntoa(rsip) as rsip, rsport, rsconfig from " .
 		"IPRealServer where rspool_id = ${id} order by IPRealServer.rsip, rsport";
-	$result = useSelectBlade ($query3);
+	$result = useSelectBlade ($query3, __FUNCTION__);
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 		foreach (array ('inservice', 'rsip', 'rsport', 'rsconfig') as $c)
 			$ret['rslist'][$row['id']][$c] = $row[$c];
@@ -2272,7 +2272,7 @@ function getVSList ($tagfilter = array())
 		"from IPVirtualService as vs left join IPLoadBalancer as lb on vs.id = lb.vs_id " .
 		"left join TagStorage on vs.id = TagStorage.target_id and target_realm = 'ipv4vs' " . 
 		"where true ${whereclause} group by vs.id order by vs.vip, proto, vport";
-	$result = useSelectBlade ($query);
+	$result = useSelectBlade ($query, __FUNCTION__);
 	$ret = array ();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 		foreach (array ('vip', 'vport', 'proto', 'name', 'vsconfig', 'rsconfig', 'poolcount') as $cname)
@@ -2289,7 +2289,7 @@ function getRSPoolList ($tagfilter = array())
 		"from IPRSPool as pool left join IPLoadBalancer as lb on pool.id = lb.rspool_id " .
 		"left join TagStorage on pool.id = TagStorage.target_id and target_realm = 'ipv4rspool' " .
 		"where true ${whereclause} group by pool.id order by pool.id, name";
-	$result = useSelectBlade ($query);
+	$result = useSelectBlade ($query, __FUNCTION__);
 	$ret = array ();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 		foreach (array ('name', 'refcnt', 'vsconfig', 'rsconfig') as $cname)
@@ -2302,7 +2302,7 @@ function loadThumbCache ($rack_id = 0)
 {
 	$ret = NULL;
 	$query = "select thumb_data from Rack where id = ${rack_id} and thumb_data is not null limit 1";
-	$result = useSelectBlade ($query);
+	$result = useSelectBlade ($query, __FUNCTION__);
 	$row = $result->fetch (PDO::FETCH_ASSOC);
 	if ($row)
 		$ret = base64_decode ($row['thumb_data']);
@@ -2353,7 +2353,7 @@ function getRSPoolsForObject ($object_id = 0)
 		'left join IPRealServer as rs on lb.rspool_id = rs.rspool_id ' .
 		"where lb.object_id = ${object_id} " .
 		'group by lb.rspool_id, lb.vs_id order by vs.vip, vport, proto, pool.name';
-	$result = useSelectBlade ($query);
+	$result = useSelectBlade ($query, __FUNCTION__);
 	$ret = array ();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 		foreach (array ('vip', 'vport', 'proto', 'name', 'pool_id', 'pool_name', 'rscount', 'vsconfig', 'rsconfig') as $cname)
@@ -2410,7 +2410,7 @@ function getRSList ()
 {
 	$query = "select id, inservice, inet_ntoa(rsip) as rsip, rsport, rspool_id, rsconfig " .
 		"from IPRealServer order by rspool_id, IPRealServer.rsip, rsport";
-	$result = useSelectBlade ($query);
+	$result = useSelectBlade ($query, __FUNCTION__);
 	$ret = array ();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 		foreach (array ('inservice', 'rsip', 'rsport', 'rspool_id', 'rsconfig') as $cname)
@@ -2424,7 +2424,7 @@ function getLBList ()
 {
 	$query = "select object_id, count(rspool_id) as poolcount " .
 		"from IPLoadBalancer group by object_id order by object_id";
-	$result = useSelectBlade ($query);
+	$result = useSelectBlade ($query, __FUNCTION__);
 	$ret = array ();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 		$ret[$row['object_id']] = $row['poolcount'];
@@ -2454,7 +2454,7 @@ function buildLBConfig ($object_id)
 		'inner join IPRealServer as rs on lb.rspool_id = rs.rspool_id ' .
 		"where lb.object_id = ${object_id} and rs.inservice = 'yes' " .
 		"order by vs.vip, vport, proto, pool.name, rs.rsip, rs.rsport";
-	$result = useSelectBlade ($query);
+	$result = useSelectBlade ($query, __FUNCTION__);
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
 		$vs_id = $row['vs_id'];
@@ -2512,7 +2512,7 @@ function loadEntityTags ($entity_realm = '', $entity_id = 0)
 		return NULL;
 	}
 	$ret = array();
-	$result = useSelectBlade ("select tt.id, tag from TagStorage as ts inner join TagTree as tt on ts.tag_id = tt.id where target_realm = '${entity_realm}' and target_id = ${entity_id}");
+	$result = useSelectBlade ("select tt.id, tag from TagStorage as ts inner join TagTree as tt on ts.tag_id = tt.id where target_realm = '${entity_realm}' and target_id = ${entity_id}", __FUNCTION__);
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 		$ret[$row['id']] = $row;
 	$result->closeCursor();
@@ -2550,7 +2550,7 @@ function getTagList ()
 	$query = "select id, parent_id, tag, target_realm as realm, count(target_id) as refcnt " .
 		"from TagTree left join TagStorage on id = tag_id " .
 		"group by id, target_realm order by tag";
-	$result = useSelectBlade ($query);
+	$result = useSelectBlade ($query, __FUNCTION__);
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
 		if (!isset ($ret[$row['id']]))
@@ -2680,7 +2680,7 @@ function createIPv4Prefix ($range = '', $name = '', $is_bcast = FALSE, $taglist 
 		"id, ip, mask, name ".
 		"from IPRanges ";
 
-	$result = useSelectBlade ($query);
+	$result = useSelectBlade ($query, __FUNCTION__);
 
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
@@ -2713,7 +2713,7 @@ function createIPv4Prefix ($range = '', $name = '', $is_bcast = FALSE, $taglist 
 	}
 	if (!count ($taglist))
 		return '';
-	if (($result = useSelectBlade ('select last_insert_id()')) == NULL) 
+	if (($result = useSelectBlade ('select last_insert_id()', __FUNCTION__)) == NULL) 
 		return 'Query #3 failed in ' . __FUNCTION__;
 	$row = $result->fetch (PDO::FETCH_NUM);
 	$last_insert_id = $row[0];

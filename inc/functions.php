@@ -385,7 +385,7 @@ function getIPRange ($id = 0)
 		"name as IPRanges_name ".
 		"from IPRanges ".
 		"where id = '$id'";
-	$result = useSelectBlade ($query);
+	$result = useSelectBlade ($query, __FUNCTION__);
 	$ret = array();
 	$row = $result->fetch (PDO::FETCH_ASSOC);
 	if ($row == NULL)
@@ -437,7 +437,7 @@ function getIPRange ($id = 0)
 		"where ip between ${db_first} and ${db_last} " .
 		"and chapter_name = 'RackObjectType'" .
 		"order by ipb.type, object_name";
-	$result = useSelectBlade ($query);
+	$result = useSelectBlade ($query, __FUNCTION__);
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
 		$ip_bin = ip2long ($row['ip']);
@@ -472,7 +472,7 @@ function getIPRange ($id = 0)
 		"where vip between ${db_first} and ${db_last} " .
 		"and chapter_name = 'RackObjectType'" .
 		"order by vport, proto, ro.name, object_id";
-	$result = useSelectBlade ($query);
+	$result = useSelectBlade ($query, __FUNCTION__);
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
 		$ip_bin = ip2long ($row['ip']);
@@ -501,7 +501,7 @@ function getIPRange ($id = 0)
 		"IPRealServer as rs inner join IPRSPool as rsp on rs.rspool_id = rsp.id " .
 		"where rsip between ${db_first} and ${db_last} " .
 		"order by ip, rsport, rspool_id";
-	$result = useSelectBlade ($query);
+	$result = useSelectBlade ($query, __FUNCTION__);
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
 		$ip_bin = ip2long ($row['ip']);
@@ -545,7 +545,7 @@ function getIPAddress ($ip = 0)
 		"name, reserved ".
 		"from IPAddress ".
 		"where ip = INET_ATON('$ip') and (reserved = 'yes' or name != '')";
-	$result = useSelectBlade ($query);
+	$result = useSelectBlade ($query, __FUNCTION__);
 	if ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
 		$ret['exists'] = 1;
@@ -567,7 +567,7 @@ function getIPAddress ($ip = 0)
 		"where IPBonds.ip=INET_ATON('$ip') ".
 		"and chapter_name = 'RackObjectType' " .
 		"order by RackObject.id, IPBonds.name";
-	$result = useSelectBlade ($query);
+	$result = useSelectBlade ($query, __FUNCTION__);
 	$count = 0;
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
@@ -586,7 +586,7 @@ function getIPAddress ($ip = 0)
 	unset ($result);
 
 	$query = "select id, vport, proto, name from IPVirtualService where vip = inet_aton('${ip}')";
-	$result = useSelectBlade ($query);
+	$result = useSelectBlade ($query, __FUNCTION__);
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
 		$new = $row;
@@ -599,7 +599,7 @@ function getIPAddress ($ip = 0)
 	$query = "select inservice, rsport, IPRSPool.id as pool_id, IPRSPool.name as poolname from " .
 		"IPRealServer inner join IPRSPool on rspool_id = IPRSPool.id " .
 		"where rsip = inet_aton('${ip}')";
-	$result = useSelectBlade ($query);
+	$result = useSelectBlade ($query, __FUNCTION__);
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
 		$new = $row;
@@ -701,7 +701,7 @@ function mergeSearchResults (&$objects, $terms, $fieldname)
 		$query .= "${fieldname} like '%$term%'";
 		$count++;
 	}
-	$result = useSelectBlade ($query);
+	$result = useSelectBlade ($query, __FUNCTION__);
 // FIXME: this dead call was executed 4 times per 1 object search!
 //	$typeList = getObjectTypeList();
 	$clist = array ('id', 'name', 'label', 'asset_no', 'barcode', 'objtype_id', 'objtype_name');
@@ -1027,7 +1027,7 @@ function getNATv4ForObject ($object_id)
 		"left join IPAddress as ipa2 on PortForwarding.remoteip = ipa2.ip " .
 		"where object_id='$object_id' ".
 		"order by localip, localport, proto, remoteip, remoteport";
-	$result = useSelectBlade ($query);
+	$result = useSelectBlade ($query, __FUNCTION__);
 	$count=0;
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
@@ -1051,7 +1051,7 @@ function getNATv4ForObject ($object_id)
 		"from ((PortForwarding join IPBonds on remoteip=IPBonds.ip) join RackObject on PortForwarding.object_id=RackObject.id) ".
 		"where IPBonds.object_id='$object_id' ".
 		"order by remoteip, remoteport, proto, localip, localport";
-	$result = useSelectBlade ($query);
+	$result = useSelectBlade ($query, __FUNCTION__);
 	$count=0;
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
