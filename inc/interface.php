@@ -2496,13 +2496,13 @@ function renderAddMultipleObjectsForm ()
 	$global_type_id = 0;
 	$name = array();
 	$asset_no = array();
-	$keepvalues = FALSE;
+	$keepvalues1 = $keepvalues2 = FALSE;
 	$log = array();
 	// Look for current submit.
 	if (isset ($_REQUEST['got_fast_data']))
 	{
 		$taglist = isset ($_REQUEST['taglist']) ? $_REQUEST['taglist'] : array();
-		$keepvalues = TRUE;
+		$keepvalues1 = TRUE;
 		$max = getConfigVar ('MASSCOUNT');
 		for ($i = 0; $i < $max; $i++)
 		{
@@ -2535,7 +2535,7 @@ function renderAddMultipleObjectsForm ()
 	elseif (isset ($_REQUEST['got_very_fast_data']))
 	{
 		$taglist = isset ($_REQUEST['taglist']) ? $_REQUEST['taglist'] : array();
-		$keepvalues = TRUE;
+		$keepvalues2 = TRUE;
 		assertUIntArg ('global_type_id', __FUNCTION__, TRUE);
 		assertStringArg ('namelist', __FUNCTION__, TRUE);
 		$global_type_id = $_REQUEST['global_type_id'];
@@ -2588,19 +2588,19 @@ function renderAddMultipleObjectsForm ()
 		printSelect ($typelist, "${i}_object_type_id", 0);
 		echo '</td>';
 		echo "<td><input type=text size=30 name=${i}_object_name";
-		if ($keepvalues and isset ($name[$i]) and (!isset ($type_id[$i]) or $type_id[$i] == 0))
+		if ($keepvalues1 and isset ($name[$i]) and (!isset ($type_id[$i]) or $type_id[$i] == 0))
 			echo " value='${name[$i]}'";
 		echo "></td>";
 		echo "<td><input type=text size=30 name=${i}_object_label";
-		if ($keepvalues and isset ($label[$i]) and (!isset ($type_id[$i]) or $type_id[$i] == 0))
+		if ($keepvalues1 and isset ($label[$i]) and (!isset ($type_id[$i]) or $type_id[$i] == 0))
 			echo " value='${label[$i]}'";
 		echo "></td>";
 		echo "<td><input type=text size=20 name=${i}_object_asset_no";
-		if ($keepvalues and isset ($asset_no[$i]) and (!isset ($type_id[$i]) or $type_id[$i] == 0))
+		if ($keepvalues1 and isset ($asset_no[$i]) and (!isset ($type_id[$i]) or $type_id[$i] == 0))
 			echo " value='${asset_no[$i]}'";
 		echo "></td>";
 		echo "<td><input type=text size=10 name=${i}_object_barcode";
-		if ($keepvalues and isset ($barcode[$i]) and (!isset ($type_id[$i]) or $type_id[$i] == 0))
+		if ($keepvalues1 and isset ($barcode[$i]) and (!isset ($type_id[$i]) or $type_id[$i] == 0))
 			echo " value='${barcode[$i]}'";
 		echo "></td>";
 		if ($i == 0)
@@ -2619,7 +2619,7 @@ function renderAddMultipleObjectsForm ()
 	echo "<form name=veryfastform method=post action='${root}?page=${pageno}&tab=${tabno}'>";
 	echo "<table border=0 align=center><tr><th>names</th><th>type</th></tr>";
 	echo "<tr><td rowspan=3><textarea name=namelist cols=40 rows=25>\n";
-	if ($keepvalues and $global_type_id == 0)
+	if ($keepvalues2 and $global_type_id == 0)
 		echo $_REQUEST['namelist'];
 	echo "</textarea></td><td valign=top>";
 	printSelect ($typelist, "global_type_id", getConfigVar ('DEFAULT_OBJECT_TYPE'));
