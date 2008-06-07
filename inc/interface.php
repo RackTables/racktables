@@ -1897,7 +1897,7 @@ function renderAddNewRange ()
 	echo "<table class='widetable' border=0 cellpadding=10 align='center'>\n";
 	echo "<tr><th>Address range</th><th>Name</th><th>connected network</th><th>assign tags</th><th>&nbsp;</th></tr>\n";
 	echo "<form name='add_new_range' action='process.php'>\n";
-	echo "<input type=hidden name=op value=addRange>\n";
+	echo "<input type=hidden name=op value=addIPv4Prefix>\n";
 	echo "<input type=hidden name=page value='${pageno}'>\n";
 	echo "<input type=hidden name=tab value='${tabno}'>\n";
 	echo "<tr valign=top><td class='tdcenter'><input type=text name='range' size=18 class='live-validate' tabindex=1></td>\n";
@@ -1923,7 +1923,7 @@ function renderAddNewRange ()
 		echo "<tr><td>";
 		if ($usedips == 0)
 		{
-			echo "<a href='process.php?op=delRange&page=${pageno}&tab=${tabno}&id=${iprange['id']}'>";
+			echo "<a href='process.php?op=delIPv4Prefix&page=${pageno}&tab=${tabno}&id=${iprange['id']}'>";
 			printImageHREF ('delete', 'Delete this IP range');
 			echo "</a>";
 		}

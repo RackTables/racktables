@@ -341,16 +341,7 @@ function commitAddRack ($name, $height, $row_id, $comment, $taglist)
 	$result->closeCursor();
 	$errcount = 0;
 	foreach ($taglist as $tag_id)
-		if (useInsertBlade
-		(
-			'TagStorage',
-			array
-			(
-				'target_realm' => "'rack'",
-				'target_id' => $last_insert_id,
-				'tag_id' => $tag_id
-			)
-		) == FALSE)
+		if (addTagForEntity ('rack', $last_insert_id, $tag_id) == FALSE)
 			$errcount++;	
 	if ($errcount)
 		showError ("Experienced ${errcount} errors adding tags for the rack");
@@ -395,17 +386,8 @@ function commitAddObject ($new_name, $new_label, $new_barcode, $new_type_id, $ne
 	// Now tags...
 	$errcount = 0;
 	foreach ($taglist as $tag_id)
-		if (useInsertBlade
-		(
-			'TagStorage',
-			array
-			(
-				'target_realm' => "'object'",
-				'target_id' => $last_insert_id,
-				'tag_id' => $tag_id
-			)
-		) == FALSE)
-			$errcount++;	
+		if (addTagForEntity ('object', $last_insert_id, $tag_id) == FALSE)
+			$errcount++;
 	if ($errcount)
 		showError ("Experienced ${errcount} errors adding tags for the object");
 	return recordHistory ('RackObject', "id = ${last_insert_id}");
@@ -1055,18 +1037,6 @@ function updateAddress ($ip = 0, $name = '', $reserved = 'no')
 		return '';
 	else
 		return __FUNCTION__ . '(): useInsertBlade() failed';
-}
-
-// FIXME: This function doesn't wipe relevant records from IPAddress table.
-function commitDeleteRange ($id = 0)
-{
-	if ($id <= 0)
-		return __FUNCTION__ . ': Invalid range ID';
-	if (!useDeleteBlade ('IPRanges', 'id', $id, FALSE))
-		return __FUNCTION__ . ': SQL query #1 failed';
-	if (!deleteTagsForEntity ('ipv4net', $id))
-		return __FUNCTION__ . ': SQL query #2 failed';
-	return '';
 }
 
 function updateBond ($ip='', $object_id=0, $name='', $type='')
@@ -2663,6 +2633,112 @@ function addTagForEntity ($realm, $entity_id, $tag_id)
 			'tag_id' => $tag_id,
 		)
 	);
+}
+
+function createIPv4Prefix ($range = '', $name = '', $is_bcast = FALSE, $taglist = array())
+{
+	// $range is in x.x.x.x/x format, split into ip/mask vars
+	$rangeArray = explode('/', $range);
+	if (count ($rangeArray) != 2)
+		return "Invalid IPv4 prefix '${range}'";
+	$ip = $rangeArray[0];
+	$mask = $rangeArray[1];
+
+	if (empty ($ip) or empty ($mask))
+		return "Invalid IPv4 prefix '${range}'";
+	$ipL = ip2long($ip);
+	$maskL = ip2long($mask);
+	if ($ipL == -1 || $ipL === FALSE)
+		return 'Bad IPv4 address';
+	if ($mask < 32 && $mask > 0)
+		$maskL = $mask;
+	else
+	{
+		$maskB = decbin($maskL);
+		if (strlen($maskB)!=32)
+			return 'Invalid netmask';
+		$ones=0;
+		$zeroes=FALSE;
+		foreach( str_split ($maskB) as $digit)
+		{
+			if ($digit == '0')
+				$zeroes = TRUE;
+			if ($digit == '1')
+			{
+				$ones++;
+				if ($zeroes == TRUE)
+					return 'Invalid netmask';
+			}
+		}
+		$maskL = $ones;
+	}
+	$binmask = binMaskFromDec($maskL);
+	$ipL = $ipL & $binmask;
+
+	$query =
+		"select ".
+		"id, ip, mask, name ".
+		"from IPRanges ";
+
+	$result = useSelectBlade ($query);
+
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
+	{
+		$otherip = $row['ip'];
+		$othermask = binMaskFromDec($row['mask']);
+		if (($otherip & $othermask) == ($ipL & $othermask))
+			return "This subnet intersects with ".long2ip($row['ip'])."/${row['mask']}";
+		if (($otherip & $binmask) == ($ipL & $binmask))
+			return "This subnet intersects with ".long2ip($row['ip'])."/${row['mask']}";
+	}
+	$result->closeCursor();
+	unset ($result);
+	$result = useInsertBlade
+	(
+		'IPRanges',
+		array
+		(
+			'ip' => sprintf ('%u', $ipL),
+			'mask' => "'${maskL}'",
+			'name' => "'${name}'"
+		)
+	);
+
+	if ($is_bcast and $maskL < 31)
+	{
+		$network_addr = long2ip ($ipL);
+		$broadcast_addr = long2ip ($ipL | binInvMaskFromDec ($maskL));
+		updateAddress ($network_addr, 'network', 'yes');
+		updateAddress ($broadcast_addr, 'broadcast', 'yes');
+	}
+	if (!count ($taglist))
+		return '';
+	if (($result = useSelectBlade ('select last_insert_id()')) == NULL) 
+		return 'Query #3 failed in ' . __FUNCTION__;
+	$row = $result->fetch (PDO::FETCH_NUM);
+	$last_insert_id = $row[0];
+	$result->closeCursor();
+	unset ($result);
+	$errcount = 0;
+	foreach ($taglist as $tag_id)
+		if (addTagForEntity ('ipv4net', $last_insert_id, $tag_id) == FALSE)
+			$errcount++;	
+	if (!$errcount)
+		return '';
+	else
+		return "Experienced ${errcount} errors adding tags for the IPv4 prefix";
+}
+
+// FIXME: This function doesn't wipe relevant records from IPAddress table.
+function destroyIPv4Prefix ($id = 0)
+{
+	if ($id <= 0)
+		return __FUNCTION__ . ': Invalid IPv4 prefix ID';
+	if (!useDeleteBlade ('IPRanges', 'id', $id, FALSE))
+		return __FUNCTION__ . ': SQL query #1 failed';
+	if (!deleteTagsForEntity ('ipv4net', $id))
+		return __FUNCTION__ . ': SQL query #2 failed';
+	return '';
 }
 
 ?>

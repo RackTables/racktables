@@ -467,25 +467,31 @@ function addIPv4Allocation ()
 		return "${baseurl}&message=" . urlencode ("allocated");
 }
 
-function addNewRange ()
+function addIPv4Prefix ()
 {
 	global $root, $pageno, $tabno;
 	assertStringArg ('range', __FUNCTION__);
 	assertStringArg ('name', __FUNCTION__);
 
-	$range = $_REQUEST['range'];
-	$name = $_REQUEST['name'];
 	$is_bcast = isset ($_REQUEST['is_bcast']) ? $_REQUEST['is_bcast'] : 'off';
 	$taglist = isset ($_REQUEST['taglist']) ? $_REQUEST['taglist'] : array();
-	$error = addRange($range, $name, $is_bcast == 'on', $taglist);
+	$error = createIPv4Prefix ($_REQUEST['range'], $_REQUEST['name'], $is_bcast == 'on', $taglist);
 	if ($error != '')
-	{
-		return "${root}?page=${pageno}&tab=${tabno}&error=".urlencode($error);
-	}
+		return "${root}?page=${pageno}&tab=${tabno}&error=" . urlencode ($error);
 	else
-	{
-		return "${root}?page=${pageno}&tab=${tabno}&message=".urlencode("Range successfully added");
-	}
+		return "${root}?page=${pageno}&tab=${tabno}&message=" . urlencode ("IPv4 prefix successfully added");
+}
+
+function delIPv4Prefix ()
+{
+	global $root, $pageno, $tabno;
+
+	assertUIntArg ('id');
+	$error = destroyIPv4Prefix ($_REQUEST['id']);
+	if ($error != '')
+		return "${root}?page=${pageno}&tab=${tabno}&error=" . urlencode ($error);
+	else
+		return "${root}?page=${pageno}&tab=${tabno}&message=" . urlencode ("IPv4 prefix deleted");
 }
 
 function editRange ()
@@ -502,23 +508,6 @@ function editRange ()
 	else
 	{
 		return "${root}?page=${pageno}&tab=${tabno}&id=$id&message=".urlencode("Range updated");
-	}
-
-}
-
-function delRange ()
-{
-	global $root, $pageno, $tabno;
-
-	$id = $_REQUEST['id'];
-	$error = commitDeleteRange ($id);
-	if ($error != '')
-	{
-		return "${root}?page=${pageno}&tab=${tabno}&error=".urlencode($error);
-	}
-	else
-	{
-		return "${root}?page=${pageno}&tab=${tabno}&message=".urlencode("Range deleted");
 	}
 
 }

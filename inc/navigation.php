@@ -133,8 +133,8 @@ $tab['ipv4space']['default'] = 'Browse';
 $tab['ipv4space']['newrange'] = 'Manage';
 $tabhandler['ipv4space']['default'] = 'renderAddressspace';
 $tabhandler['ipv4space']['newrange'] = 'renderAddNewRange';
-$ophandler['ipv4space']['newrange']['addRange'] = 'addNewrange';
-$ophandler['ipv4space']['newrange']['delRange'] = 'delRange';
+$ophandler['ipv4space']['newrange']['addIPv4Prefix'] = 'addIPv4Prefix';
+$ophandler['ipv4space']['newrange']['delIPv4Prefix'] = 'delIPv4Prefix';
 
 $page['iprange']['title_handler'] = 'dynamic_title_iprange';
 $page['iprange']['parent'] = 'ipv4space';
