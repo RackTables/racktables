@@ -1348,7 +1348,6 @@ function getDict ($parse_links = FALSE)
 		"where attr_type = 'dict' group by a.attr_id, am.chapter_no, uint_value " .
 		"order by a.attr_id, am.chapter_no, uint_value";
 	$result = useSelectBlade ($query2, __FUNCTION__);
-	$refcnt = array();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 		$dict[$row['chapter_no']]['refcnt'][$row['uint_value']] = $row['refcnt'];
 	$result->closeCursor();

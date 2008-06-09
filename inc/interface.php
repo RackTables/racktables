@@ -3497,6 +3497,7 @@ function printImageHREF ($tag, $title = '', $do_input = FALSE, $tabindex = 0)
 			"src='${root}${img['path']}' " .
 			"border=0 " .
 			($tabindex ? '' : "tabindex=${tabindex}") .
+			(empty ($title) ? '' : " title='${title}'") . // JT: Add title to input hrefs too
 			">";
 	else
 		echo
