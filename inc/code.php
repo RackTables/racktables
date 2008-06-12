@@ -221,23 +221,26 @@ function syntReduce_BOOLCONST (&$stack)
 }
 
 // Parse the given lexems stream into a list of RackCode sentences. Each such
-// sentence is a syntax tree, suitable for tag sequence evaluation. It may
-// contain all of the lexems plus the following syntax contructs:
-// SYNT_NOT
-// SYNT_EXPRESSION
-// SYNT_DEFINITION
-// SYNT_GRANT
-// SYNT_SENTENCE
-// SYNT_CODE
+// sentence is a syntax tree, suitable for tag sequence evaluation. It will
+// contain all of the input lexems framed into a parse tree built from the
+// following nodes:
+// SYNT_NOT (1 argument, SYNT_EXPR)
+// SYNT_BOOLOP (2 arguments of type SYNT_EXPR)
+// SYNT_EXPR (1 argument, different types)
+// SYNT_DEF (2 arguments: subject and definition)
+// SYNT_GRANT (2 arguments: decision and condition)
+// SYNT_CODESENTENCE (either a grant or a definition)
+// SYNT_CODETEXT (sequence of sentences)
 function getSentencesFromLexems ($lexems)
 {
-	$ret = array(); // This is going to be the tree.
 	$stack = array(); // subject to array_push() and array_pop()
 	$done = 0; // $lexems[$done] is the next item in the tape
 	$todo = count ($lexems);
 
-	// Perform shift-reduce parsing.
-	while ($done < $todo)
+	// Perform shift-reduce processing. The "accept" actions occurs with an
+	// empty input tape and the stack holding only one symbol (the start
+	// symbol, SYNT_CODETEXT).
+	while (TRUE)
 	{
 		$stacktop = $stacksecondtop = $stackthirdtop = array ('type' => 'null');
 		$stacksize = count ($stack);
@@ -248,9 +251,15 @@ function getSentencesFromLexems ($lexems)
 			// correct sentence base on the stack and some "and {something}" items
 			// on the input tape, hence let's detect this specific case and insist
 			// on "shift" action to make EXPR parsing hungry one.
-			if ($stacktop['type'] == 'SYNT_EXPR' and $lexems[$done]['type'] == 'LEX_BOOLOP')
+			if
+			(
+				$stacktop['type'] == 'SYNT_EXPR' and
+				($done < $todo) and 
+				$lexems[$done]['type'] == 'LEX_BOOLOP'
+			)
 			{
 				// shift!
+				echo 'shi[f]t!]';
 				array_push ($stack, $stacktop);
 				array_push ($stack, $lexems[$done++]);
 				continue;
@@ -266,6 +275,27 @@ function getSentencesFromLexems ($lexems)
 				array_push ($stack, $stacksecondtop);
 			}
 			array_push ($stack, $stacktop);
+			// First detect definition start to save the predicate from being reduced into
+			// expression.
+			if
+			(
+				$stacktop['type'] == 'LEX_PREDICATE' and
+				$stacksecondtop['type'] == 'LEX_DEFINE'
+			)
+			{
+				array_pop ($stack);
+				array_pop ($stack);
+				array_push
+				(
+					$stack,
+					array
+					(
+						'type' => 'SYNT_DEFINE',
+						'load' => $stacktop['load']
+					)
+				);
+				continue;
+			}
 			// Try "replace" action only on a non-empty stack.
 			// If a handle is found for reversing a production rule, do it and start a new
 			// cycle instead of advancing further on rule list. This will preserve rule priority
@@ -277,6 +307,7 @@ function getSentencesFromLexems ($lexems)
 				$stacktop['type'] == 'LEX_PREDICATE'
 			)
 			{
+				// reduce!
 				array_pop ($stack);
 				array_push
 				(
@@ -295,6 +326,7 @@ function getSentencesFromLexems ($lexems)
 				$stacksecondtop['type'] == 'LEX_NOT'
 			)
 			{
+				// reduce!
 				array_pop ($stack);
 				array_pop ($stack);
 				array_push
@@ -319,6 +351,7 @@ function getSentencesFromLexems ($lexems)
 				$stackthirdtop['type'] == 'LEX_LBRACE'
 			)
 			{
+				// reduce!
 				array_pop ($stack);
 				array_pop ($stack);
 				array_pop ($stack);
@@ -336,6 +369,7 @@ function getSentencesFromLexems ($lexems)
 				$stackthirdtop['type'] == 'SYNT_EXPR'
 			)
 			{
+				// reduce!
 				array_pop ($stack);
 				array_pop ($stack);
 				array_pop ($stack);
@@ -356,11 +390,119 @@ function getSentencesFromLexems ($lexems)
 				);
 				continue;
 			}
+			if
+			(
+				$stacktop['type'] == 'SYNT_EXPR' and
+				$stacksecondtop['type'] == 'LEX_DECISION'
+			)
+			{
+				// reduce!
+				array_pop ($stack);
+				array_pop ($stack);
+				array_push
+				(
+					$stack,
+					array
+					(
+						'type' => 'SYNT_GRANT',
+						'decision' => $stacksecondtop['load'],
+						'condition' => $stacktop
+					)
+				);
+				continue;
+			}
+			if
+			(
+				$stacktop['type'] == 'SYNT_EXPR' and
+				$stacksecondtop['type'] == 'SYNT_DEFINE'
+			)
+			{
+				// reduce!
+				array_pop ($stack);
+				array_pop ($stack);
+				array_push
+				(
+					$stack,
+					array
+					(
+						'type' => 'SYNT_DEFINITION',
+						'term' => $stacksecondtop,
+						'definition' => $stacktop
+					)
+				);
+				continue;
+			}
+			if
+			(
+				$stacktop['type'] == 'SYNT_GRANT' or
+				$stacktop['type'] == 'SYNT_DEFINITION'
+			)
+			{
+				// reduce!
+				array_pop ($stack);
+				array_push
+				(
+					$stack,
+					array
+					(
+						'type' => 'SYNT_CODESENTENCE',
+						'load' => $stacktop
+					)
+				);
+				continue;
+			}
+			if
+			(
+				$stacktop['type'] == 'SYNT_CODESENTENCE' and
+				$stacksecondtop['type'] == 'SYNT_CODETEXT'
+			)
+			{
+				// reduce!
+				array_pop ($stack);
+				array_pop ($stack);
+				$stacksecondtop['load'][] = $stacktop;
+				array_push
+				(
+					$stack,
+					$stacksecondtop
+				);
+				continue;
+			}
+			if
+			(
+				$stacktop['type'] == 'SYNT_CODESENTENCE'
+			)
+			{
+				// reduce!
+				array_pop ($stack);
+				$stacksecondtop['log'][] = $stacktop;
+				array_push
+				(
+					$stack,
+					array
+					(
+						'type' => 'SYNT_CODETEXT',
+						'load' => array ($stacktop)
+					)
+				);
+				continue;
+			}
 		}
-		// We are here because of either an empty stack or none reduction succeeded. Shift!
-		array_push ($stack, $lexems[$done++]);
+		// The fact we execute here means, that no reduction or early shift
+		// has been done. The only way to enter another iteration is to "shift"
+		// more, if possible. If the tape is empty, we are facing the
+		// "accept"/"reject" dilemma. The only possible way to "accept" is to
+		// have sole starting nonterminal on the stack (SYNT_CODETEXT).
+		if ($done < $todo)
+		{
+			array_push ($stack, $lexems[$done++]);
+			continue;
+		}
+		// The moment of truth.
+		if (count ($stack) == 1 and $stack[0]['type'] == 'SYNT_CODETEXT')
+			return $stack[0];
+		return NULL;
 	}
-	return $stack;
 }
 
 ?>
