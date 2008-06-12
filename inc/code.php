@@ -143,7 +143,10 @@ function getLexemsFromRackCode ($text)
 				switch (TRUE)
 				{
 					case ($char == '}'):
-						$ret[] = array ('type' => 'LEX_TAG', 'load' => rtrim ($buffer));
+						$buffer = rtrim ($buffer);
+						if (!preg_match ('/^[a-zA-Z0-9]$/', substr ($buffer, -1)))
+							abortLex1 ($state, $text, $i);
+						$ret[] = array ('type' => 'LEX_TAG', 'load' => $buffer);
 						$newstate = 'ESOTSM';
 						break;
 					case (preg_match ('/^[a-zA-Z0-9 _-]$/', $char)):
@@ -171,7 +174,10 @@ function getLexemsFromRackCode ($text)
 				switch (TRUE)
 				{
 					case ($char == ']'):
-						$ret[] = array ('type' => 'LEX_PREDICATE', 'load' => rtrim ($buffer));
+						$buffer = rtrim ($buffer);
+						if (!preg_match ('/^[a-zA-Z0-9]$/', substr ($buffer, -1)))
+							abortLex1 ($state, $text, $i);
+						$ret[] = array ('type' => 'LEX_PREDICATE', 'load' => $buffer);
 						$newstate = 'ESOTSM';
 						break;
 					case (preg_match ('/^[a-zA-Z0-9 _-]$/', $char)):
@@ -224,10 +230,11 @@ function syntReduce_BOOLCONST (&$stack)
 // sentence is a syntax tree, suitable for tag sequence evaluation. It will
 // contain all of the input lexems framed into a parse tree built from the
 // following nodes:
-// SYNT_NOT (1 argument, SYNT_EXPR)
-// SYNT_BOOLOP (2 arguments of type SYNT_EXPR)
+// SYNT_NOT (1 argument, holding SYNT_EXPR)
+// SYNT_BOOLOP (2 arguments, each holding SYNT_EXPR)
 // SYNT_EXPR (1 argument, different types)
-// SYNT_DEF (2 arguments: subject and definition)
+// SYNT_DEFINE (keyword with 1 term)
+// SYNT_DEFINITION (2 arguments: term and definition)
 // SYNT_GRANT (2 arguments: decision and condition)
 // SYNT_CODESENTENCE (either a grant or a definition)
 // SYNT_CODETEXT (sequence of sentences)
@@ -259,7 +266,6 @@ function getSentencesFromLexems ($lexems)
 			)
 			{
 				// shift!
-				echo 'shi[f]t!]';
 				array_push ($stack, $stacktop);
 				array_push ($stack, $lexems[$done++]);
 				continue;
