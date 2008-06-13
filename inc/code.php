@@ -1,6 +1,6 @@
 <?php
 /*
- * This file implement lexical scanner and syntax analyzer for the RackCode
+ * This file implements lexical scanner and syntax analyzer for the RackCode
  * access configuration language.
  *
  * The language consists of the following lexems:
@@ -15,9 +15,23 @@
  * LEX_PREDICATE
  * LEX_BOOLOP
  *
- * Comments last from the first # to the end of the line and are filtered out
- * automatically.
  */
+
+// Evaluation function table. The functions below process a lexical/syntax node
+// of given type and return boolean value. SYNT_EXPRESSION is missing from this
+// list, because the places, where eval_expression() should be called, are all
+// defined. Each function is passed three arguments: the evaluated item; list
+// of tags, against which we evaluate the whole code; predicates table.
+// The latter changes as the top-level processor meets new definitions on its
+// way down the code list.
+$evalfunc = array
+(
+	'LEX_BOOLCONST' => 'eval_boolconst',
+	'SYNT_NOTEXPR' => 'eval_notexpr',
+	'SYNT_BOOLOP' => 'eval_boolop',
+	'LEX_TAG' => 'eval_tag',
+	'LEX_PREDICATE' => 'eval_predicate',
+);
 
 // Complain about martian char.
 function abortLex1 ($state, $text, $pos)
@@ -206,38 +220,20 @@ function getLexemsFromRackCode ($text)
 	return $ret;
 }
 
-function syntReduce_BOOLCONST (&$stack)
-{
-	if (count ($stack) < 1)
-		return FALSE;
-	$top = array_pop ($stack);
-	if ($top['type'] == 'LEX_BOOLCONST')
-	{
-		$s = array
-		(
-			'type' => 'SYNT_EXPRESSION',
-			'kids' => array ($top)
-		);
-		array_push ($stack, $s);
-		return TRUE;
-	}
-	// No luck, push it back.
-	array_push ($stack, $top);
-	return FALSE;
-}
-
 // Parse the given lexems stream into a list of RackCode sentences. Each such
-// sentence is a syntax tree, suitable for tag sequence evaluation. It will
-// contain all of the input lexems framed into a parse tree built from the
-// following nodes:
+// sentence is a syntax tree, suitable for tag sequence evaluation. The final
+// parse tree may contain the following nodes:
+// LEX_TAG
+// LEX_PREDICATE
+// LEX_BOOLCONST
 // SYNT_NOT (1 argument, holding SYNT_EXPR)
 // SYNT_BOOLOP (2 arguments, each holding SYNT_EXPR)
-// SYNT_EXPR (1 argument, different types)
-// SYNT_DEFINE (keyword with 1 term)
 // SYNT_DEFINITION (2 arguments: term and definition)
 // SYNT_GRANT (2 arguments: decision and condition)
-// SYNT_CODESENTENCE (either a grant or a definition)
 // SYNT_CODETEXT (sequence of sentences)
+//
+// After parsing the input successfully a list of SYNT_GRANT and SYNT_DEFINITION
+// trees is returned.
 function getSentencesFromLexems ($lexems)
 {
 	$stack = array(); // subject to array_push() and array_pop()
@@ -344,7 +340,7 @@ function getSentencesFromLexems ($lexems)
 						'load' => array
 						(
 							'type' => 'SYNT_NOTEXPR',
-							'arg' => $stacktop
+							'load' => $stacktop['load']
 						)
 					)
 				);
@@ -389,8 +385,8 @@ function getSentencesFromLexems ($lexems)
 						(
 							'type' => 'SYNT_BOOLOP',
 							'subtype' => $stacksecondtop['load'],
-							'left' => $stackthirdtop,
-							'right' => $stacktop
+							'left' => $stackthirdtop['load'],
+							'right' => $stacktop['load']
 						)
 					)
 				);
@@ -412,7 +408,7 @@ function getSentencesFromLexems ($lexems)
 					(
 						'type' => 'SYNT_GRANT',
 						'decision' => $stacksecondtop['load'],
-						'condition' => $stacktop
+						'condition' => $stacktop['load']
 					)
 				);
 				continue;
@@ -432,7 +428,7 @@ function getSentencesFromLexems ($lexems)
 					array
 					(
 						'type' => 'SYNT_DEFINITION',
-						'term' => $stacksecondtop,
+						'term' => $stacksecondtop['load'],
 						'definition' => $stacktop
 					)
 				);
@@ -440,26 +436,7 @@ function getSentencesFromLexems ($lexems)
 			}
 			if
 			(
-				$stacktop['type'] == 'SYNT_GRANT' or
-				$stacktop['type'] == 'SYNT_DEFINITION'
-			)
-			{
-				// reduce!
-				array_pop ($stack);
-				array_push
-				(
-					$stack,
-					array
-					(
-						'type' => 'SYNT_CODESENTENCE',
-						'load' => $stacktop
-					)
-				);
-				continue;
-			}
-			if
-			(
-				$stacktop['type'] == 'SYNT_CODESENTENCE' and
+				($stacktop['type'] == 'SYNT_GRANT' or $stacktop['type'] == 'SYNT_DEFINITION') and
 				$stacksecondtop['type'] == 'SYNT_CODETEXT'
 			)
 			{
@@ -476,12 +453,12 @@ function getSentencesFromLexems ($lexems)
 			}
 			if
 			(
-				$stacktop['type'] == 'SYNT_CODESENTENCE'
+				$stacktop['type'] == 'SYNT_GRANT' or
+				$stacktop['type'] == 'SYNT_DEFINITION'
 			)
 			{
 				// reduce!
 				array_pop ($stack);
-				$stacksecondtop['log'][] = $stacktop;
 				array_push
 				(
 					$stack,
@@ -506,9 +483,103 @@ function getSentencesFromLexems ($lexems)
 		}
 		// The moment of truth.
 		if (count ($stack) == 1 and $stack[0]['type'] == 'SYNT_CODETEXT')
-			return $stack[0];
+			return $stack[0]['load'];
 		return NULL;
 	}
+}
+
+// Evaluate a boolean constant.
+ function eval_boolconst ($const, $tagchain, $ptable)
+{
+	switch ($const['load'])
+	{
+		case 'true':
+			return TRUE;
+		case 'false':
+			return FALSE;
+		default:
+			showError ("Could not parse a boolean constant with value '${const['load']}'");
+			break;
+	}
+}
+
+function eval_expression ($expr, $tagchain, $ptable)
+{
+}
+
+function eval_notexpr ($notexpr, $tagchain, $ptable)
+{
+	return !eval_expression ($notexpr['load']);
+}
+
+function eval_boolop ($boolop, $tagchain, $ptable)
+{
+	$leftresult = eval_expression ($boolop['left']);
+	switch ($boolop['subtype'])
+	{
+		case 'or':
+			if ($leftresult)
+				return TRUE; // early success
+			return eval_expression ($boolop['right']);
+		case 'and':
+			if (!$leftresult)
+				return FALSE; // early failure
+			return eval_expression ($boolop['right']);
+		default:
+			showError ("Cannot evaluate boolean operation '${boolop['subtype']}'");
+			return;
+	}
+}
+
+// Return true, if given tag is present on the tag chain.
+function eval_tag ($tag, $tagchain, $ptable)
+{
+	foreach ($tagchain as $tagInfo)
+		if ($tag['load'] == $tagInfo['tag'])
+			return TRUE;
+	return FALSE;
+}
+
+// Find given predicate in the symbol table and evaluate it.
+function eval_predicate ($tag, $tagchain, $ptable)
+{
+	$pname = $predicate['load'];
+	if (!isset ($ptable[$pname]))
+	{
+		showError ("Predicate '${pname}' is referenced before declaration");
+		return;
+	}
+	return eval_expression ($ptable[$pname]);
+}
+
+function gotClearanceForTagChain ($code, $tagchain)
+{
+	$ptable = array();
+	foreach ($code as $sentence)
+	{
+		switch ($sentence['type'])
+		{
+			case 'SYNT_DEFINITION':
+				$ptable[$sentence['term']] = $sentence['definition'];
+				break;
+			case 'SYNT_GRANT':
+				if (eval_expression ($sentence['condition'], $tagchain, $ptable))
+					switch ($sentence['decision'])
+					{
+						case 'allow':
+							return TRUE;
+						case 'deny':
+							return FALSE;
+						default:
+							showError ("Condition match for unknown grant decision '${sentence['decision']}'");
+							break;
+					}
+			default:
+				showError ("Can't process sentence of unknown type '${sentence['type']}'");
+				break;
+		}
+	}
+	return FALSE;
 }
 
 ?>
