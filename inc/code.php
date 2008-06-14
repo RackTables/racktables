@@ -17,22 +17,6 @@
  *
  */
 
-// Evaluation function table. The functions below process a lexical/syntax node
-// of given type and return boolean value. SYNT_EXPRESSION is missing from this
-// list, because the places, where eval_expression() should be called, are all
-// defined. Each function is passed three arguments: the evaluated item; list
-// of tags, against which we evaluate the whole code; predicates table.
-// The latter changes as the top-level processor meets new definitions on its
-// way down the code list.
-$evalfunc = array
-(
-	'LEX_BOOLCONST' => 'eval_boolconst',
-	'SYNT_NOTEXPR' => 'eval_notexpr',
-	'SYNT_BOOLOP' => 'eval_boolop',
-	'LEX_TAG' => 'eval_tag',
-	'LEX_PREDICATE' => 'eval_predicate',
-);
-
 // Complain about martian char.
 function abortLex1 ($state, $text, $pos)
 {
@@ -429,7 +413,7 @@ function getSentencesFromLexems ($lexems)
 					(
 						'type' => 'SYNT_DEFINITION',
 						'term' => $stacksecondtop['load'],
-						'definition' => $stacktop
+						'definition' => $stacktop['load']
 					)
 				);
 				continue;
@@ -488,74 +472,63 @@ function getSentencesFromLexems ($lexems)
 	}
 }
 
-// Evaluate a boolean constant.
- function eval_boolconst ($const, $tagchain, $ptable)
+function eval_expression ($expr, $tagchain, $ptable)
 {
-	switch ($const['load'])
+	switch ($expr['type'])
 	{
-		case 'true':
-			return TRUE;
-		case 'false':
+		case 'LEX_TAG': // Return true, if given tag is present on the tag chain.
+			foreach ($tagchain as $tagInfo)
+				if ($expr['load'] == $tagInfo['tag'])
+					return TRUE;
 			return FALSE;
+		case 'LEX_PREDICATE': // Find given predicate in the symbol table and evaluate it.
+			$pname = $expr['load'];
+			if (!isset ($ptable[$pname]))
+			{
+				showError ("Predicate '${pname}' is referenced before declaration");
+				return;
+			}
+			return eval_expression ($ptable[$pname], $tagchain, $ptable);
+		case 'BOOLCONST': // Evaluate a boolean constant.
+			switch ($expr['load'])
+			{
+				case 'true':
+					return TRUE;
+				case 'false':
+					return FALSE;
+				default:
+					showError ("Could not parse a boolean constant with value '${expr['load']}'");
+					return; // should failure be harder?
+			}
+		case 'SYNT_NOTEXPR':
+			return !eval_expression ($expr['load'], $tagchain, $ptable);
+		case 'SYNT_BOOLOP':
+			$leftresult = eval_expression ($expr['left'], $tagchain, $ptable);
+			switch ($expr['subtype'])
+			{
+				case 'or':
+					if ($leftresult)
+						return TRUE; // early success
+					return eval_expression ($expr['right'], $tagchain, $ptable);
+				case 'and':
+					if (!$leftresult)
+						return FALSE; // early failure
+					return eval_expression ($expr['right'], $tagchain, $ptable);
+				default:
+					showError ("Cannot evaluate unknown boolean operation '${boolop['subtype']}'");
+					return;
+			}
 		default:
-			showError ("Could not parse a boolean constant with value '${const['load']}'");
+			showError ("Evaluation error, cannot process expression type '${expr['type']}'");
 			break;
 	}
 }
 
-function eval_expression ($expr, $tagchain, $ptable)
+function gotClearanceForTagChain ($tagchain)
 {
-}
-
-function eval_notexpr ($notexpr, $tagchain, $ptable)
-{
-	return !eval_expression ($notexpr['load']);
-}
-
-function eval_boolop ($boolop, $tagchain, $ptable)
-{
-	$leftresult = eval_expression ($boolop['left']);
-	switch ($boolop['subtype'])
-	{
-		case 'or':
-			if ($leftresult)
-				return TRUE; // early success
-			return eval_expression ($boolop['right']);
-		case 'and':
-			if (!$leftresult)
-				return FALSE; // early failure
-			return eval_expression ($boolop['right']);
-		default:
-			showError ("Cannot evaluate boolean operation '${boolop['subtype']}'");
-			return;
-	}
-}
-
-// Return true, if given tag is present on the tag chain.
-function eval_tag ($tag, $tagchain, $ptable)
-{
-	foreach ($tagchain as $tagInfo)
-		if ($tag['load'] == $tagInfo['tag'])
-			return TRUE;
-	return FALSE;
-}
-
-// Find given predicate in the symbol table and evaluate it.
-function eval_predicate ($tag, $tagchain, $ptable)
-{
-	$pname = $predicate['load'];
-	if (!isset ($ptable[$pname]))
-	{
-		showError ("Predicate '${pname}' is referenced before declaration");
-		return;
-	}
-	return eval_expression ($ptable[$pname]);
-}
-
-function gotClearanceForTagChain ($code, $tagchain)
-{
+	global $rackCode;
 	$ptable = array();
-	foreach ($code as $sentence)
+	foreach ($rackCode as $sentence)
 	{
 		switch ($sentence['type'])
 		{
@@ -574,12 +547,21 @@ function gotClearanceForTagChain ($code, $tagchain)
 							showError ("Condition match for unknown grant decision '${sentence['decision']}'");
 							break;
 					}
+				break;
 			default:
 				showError ("Can't process sentence of unknown type '${sentence['type']}'");
 				break;
 		}
 	}
 	return FALSE;
+}
+
+function getRackCode ()
+{
+	// FIXME: handle errors and display a message with an option to reset RackCode text
+	// FIXME: perform semantical analysis to prove the tree be reference-wise error
+	// free regardless of evaluation order
+	return getSentencesFromLexems (getLexemsFromRackCode (getLongText ('RackCode')));
 }
 
 ?>

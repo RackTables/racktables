@@ -88,6 +88,9 @@ if (!count ($configCache))
 	die();
 }
 
+require_once 'inc/code.php';
+$rackCode = getRackCode();
+
 // Now init authentication.
 
 require_once 'inc/auth.php';

@@ -2740,4 +2740,17 @@ function destroyIPv4Prefix ($id = 0)
 	return '';
 }
 
+// FIXME: this is a dummy function
+function getLongText ($textname)
+{
+	$text = '
+	define [admin] {$userid_1}
+deny [admin] and {$page_object} and {$id_915}
+allow {$page_object} and {$id_915}
+allow {$page_object} and {$id_917}
+allow {$page_useraccount} and {$tab_password}
+';
+	return $text;
+}
+
 ?>

@@ -337,6 +337,10 @@ $ophandler['tagtree']['edit']['destroyTag'] = 'destroyTag';
 $ophandler['tagtree']['edit']['createTag'] = 'createTag';
 $ophandler['tagtree']['edit']['updateTag'] = 'updateTag';
 
+$page['rackcode']['title'] = '[RackCode]';
+$page['rackcode']['parent'] = 'config';
+$page['rackcode']['handler'] = 'renderRackCodeViewer';
+
 $page['reports']['title'] = 'Reports';
 $page['reports']['parent'] = 'index';
 $page['reports']['handler'] = 'renderReportSummary';

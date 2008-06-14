@@ -750,6 +750,8 @@ function renderRackObject ($object_id = 0)
 		if (!empty ($record['value']))
 			echo "<tr><th width='50%' class=opt_attr_th>${record['name']}:</th><td class=tdleft>${record['a_value']}</td></tr>\n";
 	printTagTRs ("${root}?page=objgroup&group_id=${info['objtype_id']}&");
+	global $verdict;
+	echo "<tr><th width='50%' class=tdright>RackCode verdict:</th><td class=tdleft>${verdict}</td></tr>\n";
 	echo "</table><br>\n";
 	finishPortlet();
 
@@ -5013,6 +5015,18 @@ function dump ($var)
 	echo '<pre>';
 	print_r ($var);
 	echo '</pre>';
+}
+
+function renderRackCodeViewer ()
+{
+	global $rackCode;
+	$text = getLongText ('RackCode');
+	startPortlet ('RackCode');
+	dump ($text);
+	finishPortlet();
+	startPortlet ('parse tree');
+	dump ($rackCode);
+	finishPortlet();
 }
 
 ?>

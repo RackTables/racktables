@@ -27,7 +27,11 @@ function authenticate ()
 // Show error unless the user is allowed access here.
 function authorize ()
 {
-	global $remote_username, $pageno, $tabno;
+	global $remote_username, $pageno, $tabno, $expl_tags, $impl_tags, $auto_tags, $verdict;
+	if (gotClearanceForTagChain (array_merge ($expl_tags, $impl_tags, $auto_tags)))
+		$verdict = 'yes';
+	else
+		$verdict = 'no';
 	if (!authorized ($remote_username, $pageno, $tabno))
 	{
 		showError ("User '${remote_username}' is not allowed to access here.");
