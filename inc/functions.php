@@ -1461,7 +1461,7 @@ function loadIPv4RSPoolAutoTags ()
 
 function getGlobalAutoTags ()
 {
-	global $remote_username, $accounts;
+	global $remote_username, $accounts, $pageno, $tabno;
 	$ret = array();
 	$user_id = 0;
 	foreach ($accounts as $a)
@@ -1472,6 +1472,8 @@ function getGlobalAutoTags ()
 		}
 	$ret[] = array ('tag' => '$username_' . $remote_username);
 	$ret[] = array ('tag' => '$userid_' . $user_id);
+	$ret[] = array ('tag' => '$page_' . $pageno);
+	$ret[] = array ('tag' => '$tab_' . $tabno);
 	return $ret;
 }
 
