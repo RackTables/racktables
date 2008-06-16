@@ -96,8 +96,7 @@ $rackCode = getRackCode();
 require_once 'inc/auth.php';
 // Load access database once.
 $accounts = getUserAccounts();
-$perms = getUserPermissions();
-if ($accounts === NULL or $perms === NULL)
+if ($accounts === NULL)
 {
 	showError ('Failed to initialize access database.');
 	die();
@@ -108,8 +107,6 @@ authenticate();
 // Authentication passed.
 // Note that we don't perform autorization here, so each 1st level page
 // has to do it in its way, e.g. to call authorize().
-
-
 
 $remote_username = $_SERVER['PHP_AUTH_USER'];
 $pageno = (isset ($_REQUEST['page'])) ? $_REQUEST['page'] : 'index';
@@ -128,7 +125,9 @@ require_once 'inc/snmp.php';
 global $page;
 $expl_tags = array();
 $impl_tags = array();
-$auto_tags = getGlobalAutoTags();
+$auto_tags = getUserAutoTags();
+$auto_tags[] = array ('tag' => '$page_' . $pageno);
+$auto_tags[] = array ('tag' => '$tab_' . $tabno);
 
 if (isset ($page[$pageno]['tagloader']) and isset ($page[$pageno]['bypass']) and isset ($_REQUEST[$page[$pageno]['bypass']]))
 {
