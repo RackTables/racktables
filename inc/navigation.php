@@ -61,7 +61,7 @@ $tabhandler['rack']['design'] = 'renderRackDesign';
 $tabhandler['rack']['problems'] = 'renderRackProblems';
 $tabhandler['rack']['tags'] = 'renderRackTags';
 $trigger['rack']['tags'] = 'trigger_tags';
-$ophandler['rack']['tags']['save'] = 'saveRackTags';
+$ophandler['rack']['tags']['saveTags'] = 'saveRackTags';
 
 $page['objgroup']['title_handler'] = 'dynamic_title_objgroup';
 $page['objgroup']['handler'] = 'renderObjectGroup';
@@ -125,7 +125,7 @@ $ophandler['object']['portfwrd']['forwardPorts'] = 'addPortForwarding';
 $ophandler['object']['portfwrd']['delPortForwarding'] = 'delPortForwarding';
 $ophandler['object']['portfwrd']['updPortForwarding'] = 'updPortForwarding';
 $ophandler['object']['autoports']['generate'] = 'generateAutoPorts';
-$ophandler['object']['tags']['save'] = 'saveObjectTags';
+$ophandler['object']['tags']['saveTags'] = 'saveObjectTags';
 
 $page['ipv4space']['title'] = 'IPv4 space';
 $page['ipv4space']['parent'] = 'index';
@@ -153,7 +153,7 @@ $tabhandler['iprange']['tags'] = 'renderIPv4PrefixTags';
 $trigger['iprange']['tags'] = 'trigger_tags';
 $ophandler['iprange']['properties']['editRange'] = 'editRange';
 $ophandler['iprange']['liveptr']['import'] = 'importPTRData';
-$ophandler['iprange']['tags']['save'] = 'saveIPv4PrefixTags';
+$ophandler['iprange']['tags']['saveTags'] = 'saveIPv4PrefixTags';
 
 $page['ipaddress']['title_handler'] = 'dynamic_title_ipaddress';
 $page['ipaddress']['parent'] = 'iprange';
@@ -199,7 +199,7 @@ $tabhandler['vservice']['default'] = 'renderVirtualService';
 $tabhandler['vservice']['edit'] = 'renderEditVService';
 $tabhandler['vservice']['editlblist'] = 'renderEditLBsForVService';
 $tabhandler['vservice']['tags'] = 'renderIPv4VSTags';
-$ophandler['vservice']['tags']['save'] = 'saveIPv4VSTags';
+$ophandler['vservice']['tags']['saveTags'] = 'saveIPv4VSTags';
 $trigger['vservice']['tags'] = 'trigger_tags';
 
 $page['rspools']['title'] = 'RS pools';
@@ -240,7 +240,7 @@ $ophandler['rspool']['editlblist']['addLB'] = 'addLoadBalancer';
 $ophandler['rspool']['editlblist']['delLB'] = 'deleteLoadBalancer';
 $ophandler['rspool']['editlblist']['updLB'] = 'updateLoadBalancer';
 $ophandler['rspool']['rsinservice']['upd'] = 'updateRSInService';
-$ophandler['rspool']['tags']['save'] = 'saveIPv4RSPoolTags';
+$ophandler['rspool']['tags']['saveTags'] = 'saveIPv4RSPoolTags';
 
 $page['rservers']['title'] = 'Real servers';
 $page['rservers']['parent'] = 'ipv4slb';
@@ -259,25 +259,38 @@ $page['config']['title'] = 'Configuration';
 $page['config']['handler'] = 'renderConfigMainpage';
 $page['config']['parent'] = 'index';
 
-$page['accounts']['title'] = 'Accounts';
-$page['accounts']['parent'] = 'config';
-$tab['accounts']['default'] = 'View';
-$tab['accounts']['edit'] = 'Change';
-$tabhandler['accounts']['default'] = 'renderAccounts';
-$tabhandler['accounts']['edit'] = 'renderAccountsEditForm';
-$ophandler['accounts']['edit']['updateAccount'] = 'updateUserAccount';
-$ophandler['accounts']['edit']['createAccount'] = 'createUserAccount';
-$ophandler['accounts']['edit']['disableAccount'] = 'disableUserAccount';
-$ophandler['accounts']['edit']['enableAccount'] = 'enableUserAccount';
+$page['userlist']['title'] = 'Users';
+$page['userlist']['parent'] = 'config';
+$tab['userlist']['default'] = 'View';
+$tab['userlist']['edit'] = 'Edit';
+$tabhandler['userlist']['default'] = 'renderUserList';
+$tabhandler['userlist']['edit'] = 'renderUserListEditor';
+$ophandler['userlist']['edit']['updateUser'] = 'updateUser';
+$ophandler['userlist']['edit']['createUser'] = 'createUser';
+$ophandler['userlist']['edit']['disableUser'] = 'disableUser';
+$ophandler['userlist']['edit']['enableUser'] = 'enableUser';
+
+$page['user']['title_handler'] = 'dynamic_title_user';
+$page['user']['parent'] = 'userlist';
+$page['user']['bypass'] = 'user_id';
+$page['user']['bypass_type'] = 'uint';
+$page['user']['tagloader'] = 'loadUserTags';
+$tab['user']['default'] = 'View';
+$tab['user']['password'] = 'Change password';
+$tab['user']['tags'] = 'Tags';
+$tabhandler['user']['default'] = 'renderUser';
+$tabhandler['user']['password'] = 'renderUserPasswordEditor';
+$tabhandler['user']['tags'] = 'renderUserTags';
+$ophandler['user']['tags']['saveTags'] = 'saveUserTags';
+$ophandler['user']['password']['changePassword'] = 'changePassword';
 
 $page['perms']['title'] = 'Permissions';
 $page['perms']['parent'] = 'config';
 $tab['perms']['default'] = 'View';
-$tab['perms']['edit'] = 'Change';
-$tabhandler['perms']['default'] = 'renderPermissions';
-$tabhandler['perms']['edit'] = 'renderPermissionsEditForm';
-$ophandler['perms']['edit']['revoke'] = 'revokePermission';
-$ophandler['perms']['edit']['grant'] = 'grantPermission';
+$tab['perms']['edit'] = 'Edit';
+$tabhandler['perms']['default'] = 'renderRackCodeViewer';
+$tabhandler['perms']['edit'] = 'renderRackCodeEditor';
+$ophandler['perms']['edit']['saveRackCode'] = 'saveRackCode';
 
 $page['portmap']['title'] = 'Port compatibility map';
 $page['portmap']['parent'] = 'config';
@@ -336,10 +349,6 @@ $tabhandler['tagtree']['edit'] = 'renderTagTreeEditor';
 $ophandler['tagtree']['edit']['destroyTag'] = 'destroyTag';
 $ophandler['tagtree']['edit']['createTag'] = 'createTag';
 $ophandler['tagtree']['edit']['updateTag'] = 'updateTag';
-
-$page['rackcode']['title'] = '[RackCode]';
-$page['rackcode']['parent'] = 'config';
-$page['rackcode']['handler'] = 'renderRackCodeViewer';
 
 $page['reports']['title'] = 'Reports';
 $page['reports']['parent'] = 'index';
@@ -415,7 +424,7 @@ function showTabs ($pageno, $tabno)
 	foreach ($tab[$pageno] as $tabidx => $tabtitle)
 	{
 		// Hide forbidden tabs.
-		if (authorized ($remote_username, $pageno, $tabidx) == FALSE)
+		if (!probeLocation ($pageno, $tabidx))
 			continue;
 		// Dynamic tabs should only be shown in certain cases (trigger exists and returns true).
 		if
@@ -450,7 +459,7 @@ function getDirectChildPages ($pageno)
 		(
 			isset ($cpage['parent']) and
 			$cpage['parent'] == $pageno and
-			authorized ($remote_username, $cpageno, 'default') == TRUE
+			probeLocation ($cpageno, 'default') == TRUE
 		)
 			$children[$cpageno] = $cpage;
 	return $children;
