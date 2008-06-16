@@ -867,7 +867,6 @@ function linkPorts ($porta, $portb)
 	$result = $dbxlink->exec ($query1);
 	$result = $dbxlink->exec ($query2);
 	return '';
-	
 }
 
 function unlinkPort ($port)
@@ -877,7 +876,6 @@ function unlinkPort ($port)
 		"delete from Link where porta='$port' or portb='$port'";
 	$result = $dbxlink->exec ($query);
 	return '';
-	
 }
 
 // FIXME: after falling back to using existing getObjectInfo we don't
@@ -1060,36 +1058,21 @@ function unbindIpFromObject ($ip='', $object_id=0)
 }
 
 // This function returns either all or one user account. Array key is user name.
-function getUserAccounts ()
+function getUserAccounts ($tagfilter = array())
 {
+	$whereclause = getWhereClause ($tagfilter);
 	$query =
 		'select user_id, user_name, user_password_hash, user_realname, user_enabled ' .
-		'from UserAccount order by user_name';
+		'from UserAccount left join TagStorage ' .
+		"on UserAccount.user_id = TagStorage.target_id and target_realm = 'user' " .
+		"where true ${whereclause} " .
+		'order by user_name';
 	$result = useSelectBlade ($query, __FUNCTION__);
 	$ret = array();
 	$clist = array ('user_id', 'user_name', 'user_realname', 'user_password_hash', 'user_enabled');
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 		foreach ($clist as $cname)
 			$ret[$row['user_name']][$cname] = $row[$cname];
-	$result->closeCursor();
-	return $ret;
-}
-
-// This function returns permission array for all user accounts. Array key is user name.
-function getUserPermissions ()
-{
-	$query =
-		"select UserPermission.user_id, user_name, page, tab, access from " .
-		"UserPermission natural left join UserAccount where (user_name is not null) or " .
-		"(user_name is null and UserPermission.user_id = 0) order by user_name, page, tab";
-	$result = useSelectBlade ($query, __FUNCTION__);
-	$ret = array();
-	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-	{
-		if ($row['user_id'] == 0)
-			$row['user_name'] = '%';
-		$ret[$row['user_name']][$row['page']][$row['tab']] = $row['access'];
-	}
 	$result->closeCursor();
 	return $ret;
 }
@@ -1222,36 +1205,6 @@ function commitEnableUserAccount ($id, $new_enabled_value)
 	$query =
 		"update UserAccount set user_enabled = '${new_enabled_value}' " .
 		"where user_id = ${id} limit 1";
-	$result = $dbxlink->query ($query);
-	if ($result == NULL)
-	{
-		showError ('SQL query failed', __FUNCTION__);
-		die;
-	}
-	return TRUE;
-}
-
-function commitGrantPermission ($userid, $page, $tab, $value)
-{
-	return useInsertBlade
-	(
-		'UserPermission',
-		array
-		(
-			'user_id' => $userid,
-			'page' => "'${page}'",
-			'tab' => "'${tab}'",
-			'access' => "'${value}'"
-		)
-	);
-}
-
-function commitRevokePermission ($userid, $page, $tab)
-{
-	global $dbxlink;
-	$query =
-		"delete from UserPermission where user_id = '${userid}' and page = '${page}' " .
-		"and tab = '$tab' limit 1";
 	$result = $dbxlink->query ($query);
 	if ($result == NULL)
 	{
@@ -2543,6 +2496,11 @@ function loadIPv4RSPoolTags ($id)
 	return loadEntityTags ('ipv4rspool', $id);
 }
 
+function loadUserTags ($user_id)
+{
+	return loadEntityTags ('user', $user_id);
+}
+
 function getTagList ()
 {
 	$ret = array();
@@ -2740,17 +2698,35 @@ function destroyIPv4Prefix ($id = 0)
 	return '';
 }
 
-// FIXME: this is a dummy function
-function getLongText ($textname)
+function loadScript ($name)
 {
-	$text = '
-	define [admin] {$userid_1}
-deny [admin] and {$page_object} and {$id_915}
-allow {$page_object} and {$id_915}
-allow {$page_object} and {$id_917}
-allow {$page_useraccount} and {$tab_password}
-';
-	return $text;
+	$result = useSelectBlade ("select script_text from Script where script_name = '${name}'");
+	$row = $result->fetch (PDO::FETCH_NUM);
+	return $row[0];
+}
+
+function saveScript ($name, $text)
+{
+	if (empty ($name))
+	{
+		showError ('Invalid argument');
+		return FALSE;
+	}
+	return useDeleteBlade ('Script', 'script_name', $name, TRUE) && useInsertBlade
+	(
+		'Script',
+		array
+		(
+			'script_name' => "'${name}'",
+			'script_text' => "'${text}'"
+		)
+	);
+}
+
+function saveUserPassword ($user_id, $newp)
+{
+	$newhash = hash (PASSWORD_HASH, $newp);
+	$query = "update UserAccount set user_password_hash = ${newhash} where user_id = ${user_id} limit 1";
 }
 
 ?>
