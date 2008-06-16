@@ -534,7 +534,7 @@ function editAddress ()
 
 }
 
-function createUserAccount ()
+function createUser ()
 {
 	global $root, $pageno, $tabno;
 	assertStringArg ('username', __FUNCTION__);
@@ -549,15 +549,15 @@ function createUserAccount ()
 		return "${root}?page=${pageno}&tab=${tabno}&error=" . urlencode ("Error creating user account ${username}.");
 }
 
-function updateUserAccount ()
+function updateUser ()
 {
 	global $root, $pageno, $tabno;
-	assertUIntArg ('id', __FUNCTION__);
+	assertUIntArg ('user_id', __FUNCTION__);
 	assertStringArg ('username', __FUNCTION__);
 	assertStringArg ('realname', __FUNCTION__, TRUE);
 	assertStringArg ('password', __FUNCTION__);
 	// We might be asked to change username, so use user ID only.
-	$id = $_REQUEST['id'];
+	$id = $_REQUEST['user_id'];
 	$username = $_REQUEST['username'];
 	$new_password = $_REQUEST['password'];
 	$old_hash = getHashByID ($id);
@@ -569,30 +569,28 @@ function updateUserAccount ()
 	// Update user password only if provided password is not the same as current password hash.
 	if ($new_password != $old_hash)
 		$new_password = hash (PASSWORD_HASH, $new_password);
-	$result = commitUpdateUserAccount ($_REQUEST['id'], $username, $_REQUEST['realname'], $new_password);
+	$result = commitUpdateUserAccount ($id, $username, $_REQUEST['realname'], $new_password);
 	if ($result == TRUE)
 		return "${root}?page=${pageno}&tab=${tabno}&message=" . urlencode ("User account ${username} updated.");
 	else
 		return "${root}?page=${pageno}&tab=${tabno}&error=" . urlencode ("Error updating user account ${username}.");
 }
 
-function enableUserAccount ()
+function enableUser ()
 {
 	global $root, $pageno, $tabno;
-	assertUIntArg ('id', __FUNCTION__);
-	$id = $_REQUEST['id'];
-	$result = commitEnableUserAccount ($id, 'yes');
-	if ($result == TRUE)
+	assertUIntArg ('user_id', __FUNCTION__);
+	if (commitEnableUserAccount ($_REQUEST['user_id'], 'yes') == TRUE)
 		return "${root}?page=${pageno}&tab=${tabno}&message=" . urlencode ("User account enabled.");
 	else
 		return "${root}?page=${pageno}&tab=${tabno}&error=" . urlencode ("Error enabling user account.");
 }
 
-function disableUserAccount ()
+function disableUser ()
 {
 	global $root, $pageno, $tabno;
-	assertUIntArg ('id', __FUNCTION__);
-	$id = $_REQUEST['id'];
+	assertUIntArg ('user_id', __FUNCTION__);
+	$id = $_REQUEST['user_id'];
 	if ($id == 1)
 		$result = FALSE;
 	else
@@ -601,44 +599,6 @@ function disableUserAccount ()
 		return "${root}?page=${pageno}&tab=${tabno}&message=" . urlencode ("User account disabled.");
 	else
 		return "${root}?page=${pageno}&tab=${tabno}&error=" . urlencode ("Error disabling user account.");
-}
-
-function revokePermission ()
-{
-	global $root, $pageno, $tabno;
-	assertUIntArg ('access_userid', __FUNCTION__, TRUE);
-	assertStringArg ('access_page', __FUNCTION__);
-	assertStringArg ('access_tab', __FUNCTION__);
-	$result = commitRevokePermission
-	(
-		$_REQUEST['access_userid'],
-		$_REQUEST['access_page'],
-		$_REQUEST['access_tab']
-	);
-	if ($result == TRUE)
-		return "${root}?page=${pageno}&tab=${tabno}&message=" . urlencode ("Revoke successfull.");
-	else
-		return "${root}?page=${pageno}&tab=${tabno}&error=" . urlencode ("Error revoking permission.");
-}
-
-function grantPermission ()
-{
-	global $root, $pageno, $tabno;
-	assertUIntArg ('access_userid', __FUNCTION__, TRUE);
-	assertStringArg ('access_page', __FUNCTION__);
-	assertStringArg ('access_tab', __FUNCTION__);
-	assertStringArg ('access_value', __FUNCTION__);
-	$result = commitGrantPermission
-	(
-		$_REQUEST['access_userid'],
-		$_REQUEST['access_page'],
-		$_REQUEST['access_tab'],
-		$_REQUEST['access_value']
-	);
-	if ($result == TRUE)
-		return "${root}?page=${pageno}&tab=${tabno}&message=" . urlencode ("Grant successfull.");
-	else
-		return "${root}?page=${pageno}&tab=${tabno}&error=" . urlencode ("Error granting permission.");
 }
 
 // This function find differences in users's submit and PortCompat table
@@ -1280,7 +1240,7 @@ function saveEntityTags ($realm, $bypass)
 	if ($n_errors)
 		return "${root}?page=${pageno}&tab=${tabno}&${bypass}=${entity_id}&error=" . urlencode ("Replaced trail with ${n_succeeds} tags, but experienced ${n_errors} errors.");
 	else
-		return "${root}?page=${pageno}&tab=${tabno}&${bypass}=${entity_id}&message=" . urlencode ("New trail is ${n_succeeds} tags long");
+		return "${root}?page=${pageno}&tab=${tabno}&${bypass}=${entity_id}&message=" . urlencode ("New chain is ${n_succeeds} tags long");
 }
 
 function saveObjectTags ()
@@ -1306,6 +1266,11 @@ function saveIPv4VSTags ()
 function saveIPv4RSPoolTags ()
 {
 	return saveEntityTags ('ipv4rspool', 'pool_id');
+}
+
+function saveUserTags ()
+{
+	return saveEntityTags ('user', 'user_id');
 }
 
 function destroyTag ()
@@ -1371,6 +1336,38 @@ function rollTags ()
 			// FIXME: do something likewise for all object inside current rack
 		}
 	return "${root}?page=${pageno}&tab=${tabno}&row_id=${row_id}&message=" . urlencode ("${nnew} new records done, ${ndupes} already existed");
+}
+
+function changePassword ()
+{
+	assertUIntArg ('user_id');
+	$user_id = $_REQUEST['user_id'];
+	$username = getUsernameByID ($user_id);
+	global $accounts, $root, $pageno, $tabno, $remote_username;
+	if ($accounts[$remote_username]['user_id'] != 1)
+	{
+		assertStringArg ('oldpassword');
+		if ($accounts[$username]['user_password_hash'] != $_REQUEST['oldpassword'])
+			return "${root}?page=${pageno}&tab=${tabno}&user_id=${user_id}&error=" . urlencode ('Old password doesn\'t match!');
+	}
+	assertStringArg ('newpassword1');
+	assertStringArg ('newpassword2');
+	if ($_REQUEST['newpassword1'] != $_REQUEST['newpassword2'])
+		return "${root}?page=${pageno}&tab=${tabno}&user_id=${user_id}&error=" . urlencode ('New passwords don\'t match!');
+	if (commitUpdateUserAccount ($user_id, $accounts[$username]['user_name'], $accounts[$username]['user_realname'], hash (PASSWORD_HASH, $_REQUEST['newpassword1'])))
+		return "${root}?page=${pageno}&tab=${tabno}&user_id=${user_id}&message=" . urlencode ('Password changed successfully.');
+	else
+		return "${root}?page=${pageno}&tab=${tabno}&user_id=${user_id}&error=" . urlencode ('DB update failed');
+}
+
+function saveRackCode ()
+{
+	global $root, $pageno, $tabno;
+	assertStringArg ('rackcode');
+	if (saveScript ('RackCode', $_REQUEST['rackcode']))
+		return "${root}?page=${pageno}&tab=${tabno}&message=" . urlencode ('Saved successfully.');
+	else
+		return "${root}?page=${pageno}&tab=${tabno}&error=" . urlencode ('Save failed.');
 }
 
 ?>
