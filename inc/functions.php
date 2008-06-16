@@ -1459,21 +1459,12 @@ function loadIPv4RSPoolAutoTags ()
 	return $ret;
 }
 
-function getGlobalAutoTags ()
+function getUserAutoTags ()
 {
-	global $remote_username, $accounts, $pageno, $tabno;
+	global $remote_username, $accounts;
 	$ret = array();
-	$user_id = 0;
-	foreach ($accounts as $a)
-		if ($a['user_name'] == $remote_username)
-		{
-			$user_id = $a['user_id'];
-			break;
-		}
 	$ret[] = array ('tag' => '$username_' . $remote_username);
-	$ret[] = array ('tag' => '$userid_' . $user_id);
-	$ret[] = array ('tag' => '$page_' . $pageno);
-	$ret[] = array ('tag' => '$tab_' . $tabno);
+	$ret[] = array ('tag' => '$userid_' . $accounts[$remote_username]['user_id']);
 	return $ret;
 }
 
