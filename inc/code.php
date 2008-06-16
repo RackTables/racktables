@@ -20,7 +20,7 @@
 // Complain about martian char.
 function abortLex1 ($state, $text, $pos)
 {
-	echo "Error! Could not parse the following text (current state is '${state}'): ";
+	echo "Error! Could not parse char with code " . ord (substr ($text, $pos + 1, 1)) . " (current state is '${state}'): ";
 	echo substr ($text, 0, $pos);
 	echo '<font color = red>-&gt;' . $text{$pos} . '&lt;-</font>';
 	echo substr ($text, $pos + 1);
@@ -73,7 +73,7 @@ function getLexemsFromRackCode ($text)
 						$newstate = 'reading word';
 						$buffer = $char;
 						break;
-					case (preg_match ('/^[ \t\n]$/', $char)):
+					case (preg_match ('/^[ \t\n\r]$/', $char)):
 						// nom-nom...
 						break;
 					case ($char == '{'):
@@ -126,7 +126,7 @@ function getLexemsFromRackCode ($text)
 			case 'reading tag 1':
 				switch (TRUE)
 				{
-					case (preg_match ('/^[ \t\n]$/', $char)):
+					case (preg_match ('/^[ \t\n\r]$/', $char)):
 						// nom-nom...
 						break;
 					case (preg_match ('/^[a-zA-Z\$]$/', $char)):
@@ -157,7 +157,7 @@ function getLexemsFromRackCode ($text)
 			case 'reading predicate 1':
 				switch (TRUE)
 				{
-					case (preg_match ('/^[ \t\n]$/', $char)):
+					case (preg_match ('/^[ \t\n\r]$/', $char)):
 						// nom-nom...
 						break;
 					case (preg_match ('/^[a-zA-Z]$/', $char)):
@@ -561,7 +561,7 @@ function getRackCode ()
 	// FIXME: handle errors and display a message with an option to reset RackCode text
 	// FIXME: perform semantical analysis to prove the tree be reference-wise error
 	// free regardless of evaluation order
-	return getSentencesFromLexems (getLexemsFromRackCode (getLongText ('RackCode')));
+	return getSentencesFromLexems (getLexemsFromRackCode (loadScript ('RackCode')));
 }
 
 ?>
