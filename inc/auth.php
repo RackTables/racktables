@@ -25,25 +25,34 @@ function authenticate ()
 }
 
 // Show error unless the user is allowed access here.
-function authorize ()
+function authorize ($subject = array())
 {
-	global $remote_username, $pageno, $tabno, $expl_tags, $impl_tags, $auto_tags, $verdict;
-	if (gotClearanceForTagChain (array_merge ($expl_tags, $impl_tags, $auto_tags)))
-		$verdict = 'yes';
+	global $remote_username, $expl_tags, $impl_tags, $auto_tags;
+	if (!count ($subject))
+		$subject = array_merge ($expl_tags, $impl_tags, $auto_tags);
+	if (gotClearanceForTagChain ($subject))
+		return TRUE;
 	else
-		$verdict = 'no';
-	if (!authorized ($remote_username, $pageno, $tabno))
 	{
 		showError ("User '${remote_username}' is not allowed to access here.");
 		die();
 	}
 }
 
+// A yay/nay replacement for authorized() function.
+function probeLocation ($p = 'index', $t = 'default')
+{
+	$authz_ctx = getUserAutoTags();
+	$authz_ctx[] = array ('tag' => '$page_' . $p);
+	$authz_ctx[] = array ('tag' => '$tab_' . $t);
+	return gotClearanceForTagChain ($authz_ctx);
+}
+
 // This function returns TRUE, if username and password are valid.
 function authenticated ($username, $password)
 {
 	global $accounts;
-	if ($accounts[$username]['user_enabled'] != 'yes')
+	if (!isset ($accounts[$username]) or $accounts[$username]['user_enabled'] != 'yes')
 		return FALSE;
 	// Always authenticate the administrator locally, thus giving him a chance
 	// to fix broken installation.
@@ -99,26 +108,6 @@ function authenticated_via_database ($username, $password)
 	return FALSE;
 }
 
-// This function returns TRUE, if specified user has access to the
-// page and tab.
-function authorized ($username, $pageno, $tabno)
-{
-	global $perms;
-	// Deny access by default, then accumulate all corrections from database.
-	// Order of nested cycles is important here!
-	// '%' as page or tab name has a special value and means "any".
-	// 0 as user_id means "any user".
-	$answer = 'no';
-	foreach (array ('%', $username) as $u)
-		foreach (array ('%', $tabno) as $t)
-			foreach (array ('%', $pageno) as $p)
-				if (isset ($perms[$u][$p][$t]))
-					$answer = $perms[$u][$p][$t];
-	if ($answer == 'yes')
-		return TRUE;
-	return FALSE;
-}
-
 // This function returns password hash for given user ID.
 function getHashByID ($user_id = 0)
 {
@@ -131,6 +120,22 @@ function getHashByID ($user_id = 0)
 	foreach ($accounts as $account)
 		if ($account['user_id'] == $user_id)
 			return $account['user_password_hash'];
+	return NULL;
+}
+
+// Likewise.
+function getUsernameByID ($user_id = 0)
+{
+	if ($user_id <= 0)
+	{
+		showError ('Invalid user_id', __FUNCTION__);
+		return NULL;
+	}
+	global $accounts;
+	foreach ($accounts as $account)
+		if ($account['user_id'] == $user_id)
+			return $account['user_name'];
+	showError ("User with ID '${user_id}' not found!");
 	return NULL;
 }
 
