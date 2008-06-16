@@ -40,6 +40,16 @@ CREATE TABLE `Chapter` (
   UNIQUE KEY `chapter_name` (`chapter_name`)
 ) ENGINE=MyISAM AUTO_INCREMENT=10000;
 
+CREATE TABLE `Config` (
+  `varname` char(32) NOT NULL,
+  `varvalue` char(255) NOT NULL,
+  `vartype` enum('string','uint') NOT NULL default 'string',
+  `emptyok` enum('yes','no') NOT NULL default 'no',
+  `is_hidden` enum('yes','no') NOT NULL default 'yes',
+  `description` text,
+  PRIMARY KEY  (`varname`)
+) ENGINE=MyISAM;
+
 CREATE TABLE `Dictionary` (
   `chapter_no` int(10) unsigned NOT NULL,
   `dict_key` int(10) unsigned NOT NULL auto_increment,
@@ -233,10 +243,16 @@ CREATE TABLE `RackSpace` (
   PRIMARY KEY  (`rack_id`,`unit_no`,`atom`)
 ) ENGINE=MyISAM;
 
+CREATE TABLE `Script` (
+  `script_name` char(64) NOT NULL,
+  `script_text` text,
+  PRIMARY KEY  (`script_name`)
+) TYPE=MyISAM;
+
 CREATE TABLE `TagStorage` (
-  `target_realm` enum('object','ipv4net','rack','ipv4vs','ipv4rspool') NOT NULL default 'object',
+  `target_realm` enum('object','ipv4net','rack','ipv4vs','ipv4rspool','user') NOT NULL default 'object',
   `target_id` int(10) unsigned NOT NULL,
-  `tag_id` int(10) unsigned default NULL,
+  `tag_id` int(10) unsigned NOT NULL,
   UNIQUE KEY `entity_tag` (`target_realm`,`target_id`,`tag_id`),
   KEY `target_id` (`target_id`)
 ) TYPE=MyISAM;
@@ -258,21 +274,3 @@ CREATE TABLE `UserAccount` (
   PRIMARY KEY  (`user_id`),
   UNIQUE KEY `user_name` (`user_name`)
 ) ENGINE=MyISAM AUTO_INCREMENT=10000;
-
-CREATE TABLE `UserPermission` (
-  `user_id` int(10) unsigned NOT NULL default '0',
-  `page` char(64) NOT NULL default '%',
-  `tab` char(64) NOT NULL default '%',
-  `access` enum('yes','no') NOT NULL default 'no',
-  UNIQUE KEY `user_id` (`user_id`,`page`,`tab`)
-) ENGINE=MyISAM;
-
-CREATE TABLE `Config` (
-  `varname` char(32) NOT NULL,
-  `varvalue` char(255) NOT NULL,
-  `vartype` enum('string','uint') NOT NULL default 'string',
-  `emptyok` enum('yes','no') NOT NULL default 'no',
-  `is_hidden` enum('yes','no') NOT NULL default 'yes',
-  `description` text,
-  PRIMARY KEY  (`varname`)
-) ENGINE=MyISAM;
