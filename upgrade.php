@@ -20,7 +20,8 @@ function getDBUpgradePath ($v1, $v2)
 		'0.14.11',
 		'0.14.12',
 		'0.15.0',
-		'0.15.1'
+		'0.15.1',
+		'0.16.0',
 	);
 	if (!in_array ($v1, $versionhistory) || !in_array ($v2, $versionhistory))
 	{
@@ -1264,6 +1265,37 @@ CREATE TABLE `TagTree` (
 		case '0.15.1':
 			$query[] = "INSERT INTO `Config` VALUES ('IPV4_AUTO_RELEASE','1','uint','no','no','Auto-release IPv4 addresses on allocation')";
 			$query[] = "update Config set varvalue = '0.15.1' where varname = 'DB_VERSION'";
+			break;
+		case '0.16.0':
+			$query[] = 'alter table TagStorage modify column tag_id int(10) unsigned not null;';
+			$query[] = "alter table TagStorage modify column target_realm enum('object','ipv4net','rack','ipv4vs','ipv4rspool','user');";
+			$query[] = "delete from UserPermission where page = 'objects' and tab = 'newobj'";
+			$query[] = "update UserPermission set tab = 'addmore' where page = 'objects' and tab = 'newmulti'";
+			$query[] = "update UserPermission set page = 'userlist' where page = 'accounts'";
+			$query[] = "create table Script (script_name char(64) not null primary key, script_text text)";
+			// Do the same getUserPermissions() does, but without the function.
+			// We need to generate more specific rules first, otherwise they will
+			// never work.
+			$tq =
+				"select UserPermission.user_id, user_name, page, tab, access from " .
+				"UserPermission natural left join UserAccount where (user_name is not null) or " .
+				"(user_name is null and UserPermission.user_id = 0) order by user_name desc, page desc, tab desc";
+			$tr = $dbxlink->query ($tq);
+			$code = $nl = '';
+			while ($row = $tr->fetch (PDO::FETCH_ASSOC))
+			{
+				$rule = $row['access'] == 'yes' ? 'allow' : 'deny';
+				$rule .= $row['user_id'] == 0 ? '' : " {\$username_${row['user_name']}}";
+				$rule .= $row['page'] == '%' ? '' : " {\$page_${row['page']}}";
+				$rule .= $row['tab'] == '%' ? '' : " {\$tab_${row['tab']}}";
+				if ($rule == 'allow' or $rule == 'deny')
+					continue;
+				$code .= "${rule}${nl}";
+				$nl = "\n";
+			}
+			$query[] = "insert into Script (script_name, script_text) values ('RackCode', '${code}')";
+			$query[] = 'drop table UserPermission';
+			$query[] = "update Config set varvalue = '0.16.0' where varname = 'DB_VERSION'";\
 			break;
 		default:
 			showError ("executeUpgradeBatch () failed, because batch '${batchid}' isn't defined");
