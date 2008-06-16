@@ -750,8 +750,6 @@ function renderRackObject ($object_id = 0)
 		if (!empty ($record['value']))
 			echo "<tr><th width='50%' class=opt_attr_th>${record['name']}:</th><td class=tdleft>${record['a_value']}</td></tr>\n";
 	printTagTRs ("${root}?page=objgroup&group_id=${info['objtype_id']}&");
-	global $verdict;
-	echo "<tr><th width='50%' class=tdright>RackCode verdict:</th><td class=tdleft>${verdict}</td></tr>\n";
 	echo "</table><br>\n";
 	finishPortlet();
 
@@ -2651,7 +2649,7 @@ function renderSearchResults ()
 		showError ('Search string cannot be empty.', __FUNCTION__);
 		return;
 	}
-	if (!authorized ($remote_username, 'object', 'default'))
+	if (!probeLocation ('object', 'default'))
 	{
 		showError ('You are not authorized for viewing information about objects.', __FUNCTION__);
 		return;
@@ -2883,43 +2881,31 @@ function renderAtomGrid ($data)
 	}
 }
 
-function renderPermissions ()
+function renderUserList ()
 {
-	startPortlet ('User permissions');
-	echo "<table class=cooltable border=0 cellpadding=5 cellspacing=0 align=center>\n";
-	echo "<tr><th>Username</th><th>Page</th><th>Tab</th><th>Access</th></tr>";
-	global $perms, $nextorder;
-	$order = 'odd';
-	foreach ($perms as $username => $pages)
-		foreach ($pages as $page => $tabs)
-			foreach ($tabs as $tab => $access)
-			{
-				echo "<tr class=row_${order}><td class=tdleft>$username</td><td>$page</td><td>$tab</td><td>$access</td></tr>\n";
-				$order = $nextorder[$order];
-			}
-	echo "</table>\n";
-	finishPortlet();
-}
-
-function renderAccounts ()
-{
-	global $nextorder, $accounts;
+	global $nextorder, $accounts, $root;
+	echo "<table border=0 class=objectview>\n";
+	echo "<tr><td class=pcleft>";
 	startPortlet ('User accounts');
 	echo "<table class=cooltable border=0 cellpadding=5 cellspacing=0 align=center>\n";
 	echo "<tr><th class=tdleft>Username</th><th class=tdleft>Real name</th></tr>";
 	$order = 'odd';
-	foreach ($accounts as $user)
+	$tagfilter = getTagFilter();
+	foreach (getUserAccounts ($tagfilter) as $user)
 	{
-		echo "<tr class=row_${order}><td class=tdleft><div title='\$userid_${user['user_id']}'>";
-		echo "${user['user_name']}</div></td>";
+		echo "<tr class=row_${order}><td class=tdleft><a href='${root}?page=user&user_id=${user['user_id']}'>";
+		echo "${user['user_name']}</a></td>";
 		echo "<td class=tdleft>${user['user_realname']}</td></li>";
 		$order = $nextorder[$order];
 	}
 	echo '</table>';
 	finishPortlet();
+	echo '</td><td class=pcright>';
+	renderTagFilterPortlet ($tagfilter, 'user');
+	echo "</td></tr></table>\n";
 }
 
-function renderAccountsEditForm ()
+function renderUserListEditor ()
 {
 	global $root, $pageno, $tabno, $accounts;
 	startPortlet ('User accounts');
@@ -2929,20 +2915,20 @@ function renderAccountsEditForm ()
 	foreach ($accounts as $account)
 	{
 		echo "<form action='${root}process.php'>";
-		echo "<input type=hidden name=op value=updateAccount>";
+		echo "<input type=hidden name=op value=updateUser>";
 		echo "<input type=hidden name=page value='${pageno}'>\n";
 		echo "<input type=hidden name=tab value='${tabno}'>\n";
-		echo "<input type=hidden name=id value='${account['user_id']}'><tr>";
+		echo "<input type=hidden name=user_id value='${account['user_id']}'><tr>";
 		echo "<td>";
 		if ($account['user_enabled'] == 'yes' && $account['user_id'] != 1)
 		{
-			echo "<a href='${root}process.php?op=disableAccount&page=${pageno}&tab=${tabno}&id=${account['user_id']}'>";
+			echo "<a href='${root}process.php?op=disableUser&page=${pageno}&tab=${tabno}&user_id=${account['user_id']}'>";
 			printImageHREF ('blockuser', 'disable account');
 			echo "</a>\n";
 		}
 		if ($account['user_enabled'] == 'no' && $account['user_id'] != 1)
 		{
-			echo "<a href='${root}process.php?op=enableAccount&page=${pageno}&tab=${tabno}&id=${account['user_id']}'>";
+			echo "<a href='${root}process.php?op=enableUser&page=${pageno}&tab=${tabno}&user_id=${account['user_id']}'>";
 			printImageHREF ('unblockuser', 'enable account');
 			echo "</a>\n";
 		}
@@ -2955,7 +2941,7 @@ function renderAccountsEditForm ()
 		echo "</td></form></tr>\n";
 	}
 	echo "<form action='${root}process.php' method=post><tr>";
-	echo "<input type=hidden name=op value=createAccount>\n";
+	echo "<input type=hidden name=op value=createUser>\n";
 	echo "<input type=hidden name=page value='${pageno}'>\n";
 	echo "<input type=hidden name=tab value='${tabno}'>\n";
 	echo "<td>&nbsp;</td><td><input type=text size=16 name=username tabindex=100></td>\n";
@@ -2995,55 +2981,6 @@ function printPagesTree ()
 			printChildrenAsOptions ($croot);
 		}
 	echo '</pre>';
-}
-
-function renderPermissionsEditForm ()
-{
-	global $root, $pageno, $tabno, $perms, $accounts;
-	startPortlet ('User permissions');
-	showMessageOrError();
-	echo "<table cellspacing=0 cellpadding='5' align='center' class='widetable'>\n";
-	echo "<tr><th>&nbsp;</th><th>Username</th><th>Page</th><th>Tab</th><th>Access</th></tr>\n";
-	foreach ($perms as $username => $pages)
-		foreach ($pages as $access_page => $tabs)
-			foreach ($tabs as $access_tab => $access)
-			{
-				echo "<td>";
-				if ($username != '%')
-					$userid = $accounts[$username]['user_id'];
-				else
-					$userid = 0;
-				echo "<a href='${root}process.php?op=revoke&page=${pageno}&tab=${tabno}&access_userid=${userid}&access_page=${access_page}&access_tab=${access_tab}'>";
-				printImageHREF ('revoke', 'Revoke permission');
-				echo "</a></td>";
-				echo "<td>${username}</td>";
-				echo "<td>${access_page}</td>";
-				echo "<td>${access_tab}</td>";
-				echo "<td>${access}</td>";
-				echo "</tr>\n";
-			}
-	echo "<form action='${root}process.php' method=post><tr>";
-	echo "<input type=hidden name=op value=grant>\n";
-	echo "<input type=hidden name=page value='${pageno}'>\n";
-	echo "<input type=hidden name=tab value='${tabno}'>\n";
-	// FIXME: border=0 doesn't work here for unknown reason
-	echo "<td>";
-	printImageHREF ('grant', '', TRUE, 103);
-	echo "</td>";
-	echo "<td><select name=access_userid>";
-	echo "<option value=0>ANY</option>";
-	foreach ($accounts as $account)
-		echo "<option value=${account['user_id']}>${account['user_name']}</option>";
-	echo "</select></td>\n";
-	echo "<td><select name=access_page>";
-	echo "<option value='%'>ANY</option>";
-	printPagesTree();
-	echo "</select></td>";
-	echo "<td><input type=text size=16 name=access_tab tabindex=102 value=default></td>";
-	echo "<td><input type=radio name=access_value value=no checked>no <input type=radio name=access_value value=yes>yes</td>";
-	echo "</tr></form>";
-	echo "</table><br>\n";
-	finishPortlet();
 }
 
 function renderPortMapViewer ()
@@ -4861,30 +4798,35 @@ function renderTagOptionForFilter ($taginfo, $tagfilter, $realm, $level = 0)
 
 function renderObjectTags ($id)
 {
-	renderEntityTags ('object', 'object_id', $id);
+	renderEntityTagChainEditor ('object', 'object_id', $id);
 }
 
 function renderIPv4PrefixTags ($id)
 {
-	renderEntityTags ('ipv4net', 'id', $id);
+	renderEntityTagChainEditor ('ipv4net', 'id', $id);
 }
 
 function renderRackTags ($id)
 {
-	renderEntityTags ('rack', 'rack_id', $id);
+	renderEntityTagChainEditor ('rack', 'rack_id', $id);
 }
 
 function renderIPv4VSTags ($id)
 {
-	renderEntityTags ('ip4vs', 'id', $id);
+	renderEntityTagChainEditor ('ip4vs', 'id', $id);
 }
 
 function renderIPv4RSPoolTags ($id)
 {
-	renderEntityTags ('ip4rspool', 'pool_id', $id);
+	renderEntityTagChainEditor ('ip4rspool', 'pool_id', $id);
 }
 
-function renderEntityTags ($entity_realm = '', $bypass_name, $entity_id = 0)
+function renderUserTags ($id)
+{
+	renderEntityTagChainEditor ('user', 'user_id', $id);
+}
+
+function renderEntityTagChainEditor ($entity_realm = '', $bypass_name, $entity_id = 0)
 {
 	global $tagtree;
 	if ($entity_realm == '' or $entity_id <= 0)
@@ -4899,7 +4841,7 @@ function renderEntityTags ($entity_realm = '', $bypass_name, $entity_id = 0)
 	echo "<input type=hidden name=page value=${pageno}>\n";
 	echo "<input type=hidden name=tab value=${tabno}>\n";
 	echo "<input type=hidden name=${bypass_name} value=${entity_id}>\n";
-	echo "<input type=hidden name=op value=save>\n";
+	echo "<input type=hidden name=op value=saveTags>\n";
 	echo '<select name=taglist[] multiple size=' . getConfigVar ('MAXSELSIZE') . '>';
 	foreach ($tagtree as $taginfo)
 		renderTagOption ($taginfo);
@@ -4987,7 +4929,7 @@ function renderTagRollerForRow ($row_id)
 	echo "</td></tr>";
 	echo "<tr><th>Control question: the sum of ${a} and ${b}</th><td><input type=text name=sum></td></tr>";
 	echo "<tr><td colspan=2 align=center><input type=submit value='Go!'></td></tr>";
-	echo "</table>";
+	echo "</table></form>";
 }
 
 function renderObjectSLB ()
@@ -5019,14 +4961,48 @@ function dump ($var)
 
 function renderRackCodeViewer ()
 {
-	global $rackCode;
-	$text = getLongText ('RackCode');
-	startPortlet ('RackCode');
+	$text = loadScript ('RackCode');
 	dump ($text);
-	finishPortlet();
-	startPortlet ('parse tree');
-	dump ($rackCode);
-	finishPortlet();
+}
+
+function renderRackCodeEditor ()
+{
+	global $root, $pageno, $tabno;
+	$text = loadScript ('RackCode');
+	showMessageOrError();
+	echo "<form method=post action='${root}process.php?page=${pageno}&tab=${tabno}&op=saveRackCode'>";
+	echo '<table border=0 align=center>';
+	echo "<tr><td><textarea rows=25 cols=80 name=rackcode>" . $text . "</textarea></td></tr>\n";
+	echo "<tr><td align=center><input type=submit value='save'></td></tr>";
+	echo '</table>';
+	echo "</form>";
+}
+
+function renderUser ($user_id)
+{
+	global $accounts, $root;
+	$username = getUsernameByID ($user_id);
+	echo '<table border=0 align=center>';
+	echo "<tr><th class=tdright>Account name:</th><td>${username}</td></tr>";
+	echo '<tr><th class=tdright>Real name:</th><td>' . $accounts[$username]['user_realname'] . '</td></tr>';
+	echo '<tr><th class=tdright>Account enabled:</th><td>' . $accounts[$username]['user_enabled'] . '</td></tr>';
+	printTagTRs ("${root}?page=userlist&");
+	echo '</table>';
+}
+
+function renderUserPasswordEditor ($user_id)
+{
+	global $root, $pageno, $tabno, $remote_username, $accounts;
+	showMessageOrError();
+	echo "<form method=post action='${root}process.php?page=${pageno}&tab=${tabno}&op=changePassword'>";
+	echo "<input type=hidden name=user_id value='${user_id}'>";
+	echo '<table border=0 align=center>';
+	if ($accounts[$remote_username]['user_id'] != 1)
+		echo "<tr><th class=tdright>Current password (*):</th><td><input type=password name=oldpassword tabindex=1></td></tr>";
+	echo "<tr><th class=tdright>New password (*):</th><td><input type=password name=newpassword1 tabindex=2></td></tr>";
+	echo "<tr><th class=tdright>New password again (*):</th><td><input type=password name=newpassword2 tabindex=3></td></tr>";
+	echo "<tr><td colspan=2 align=center><input type=submit value='Change' tabindex=4></td></tr>";
+	echo '</table></form>';
 }
 
 ?>
