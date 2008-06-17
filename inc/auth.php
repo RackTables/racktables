@@ -54,12 +54,12 @@ function permitted ($p = NULL, $t = NULL, $o = NULL)
 	return gotClearanceForTagChain ($subject);
 }
 
-function accessiblePath ($p, $t)
+function accessibleSubpage ($p)
 {
 	global $user_tags;
 	$subject = $user_tags;
 	$subject[] = array ('tag' => '$page_' . $p);
-	$subject[] = array ('tag' => '$tab_' . $t);
+	$subject[] = array ('tag' => '$tab_default');
 	return gotClearanceForTagChain ($subject);
 }
 

@@ -425,7 +425,7 @@ function showTabs ($pageno, $tabno)
 	foreach ($tab[$pageno] as $tabidx => $tabtitle)
 	{
 		// Hide forbidden tabs.
-		if (!accessiblePath ($pageno, $tabidx))
+		if (!permitted ($pageno, $tabidx))
 			continue;
 		// Dynamic tabs should only be shown in certain cases (trigger exists and returns true).
 		if
@@ -460,7 +460,7 @@ function getDirectChildPages ($pageno)
 		(
 			isset ($cpage['parent']) and
 			$cpage['parent'] == $pageno and
-			accessiblePath ($cpageno, 'default') == TRUE
+			accessibleSubpage ($cpageno) == TRUE
 		)
 			$children[$cpageno] = $cpage;
 	return $children;
