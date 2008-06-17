@@ -1,22 +1,22 @@
 <?php
 
-// This page outputs PNG rack thumbnail.
-
 require 'inc/init.php';
 
-assertStringArg ('img', __FUNCTION__);
+assertStringArg ('img', 'render_image');
 switch ($_REQUEST['img'])
 {
-	case 'minirack':
-		// Thumbnails are rendered in security context of rackspace.
-		$pageno = 'rackspace';
+	case 'minirack': // rack security context
+		assertUIntArg ('rack_id', 'render_image');
+		$pageno = 'rack';
 		$tabno = 'default';
-		authorize();
-		assertUIntArg ('rack_id', __FUNCTION__);
-		renderRackThumb ($_REQUEST['rack_id']);
+		fixContext();
+		if (!permitted())
+			renderAccessDeniedImage();
+		else
+			renderRackThumb ($_REQUEST['rack_id']);
 		break;
-	case 'progressbar':
-		assertUIntArg ('done', __FUNCTION__, TRUE);
+	case 'progressbar': // no security context
+		assertUIntArg ('done', 'render_image', TRUE);
 		renderProgressBarImage ($_REQUEST['done']);
 		break;
 	default:
@@ -28,6 +28,14 @@ function renderError ()
 {
 	// A hardcoded value is worth of saving lots of code here.
 	$img = imagecreatefrompng ('pix/error.png');
+	header("Content-type: image/png");
+	imagepng ($img);
+	imagedestroy ($img);
+}
+
+function renderAccessDeniedImage ()
+{
+	$img = imagecreatefrompng ('pix/pixel.png');
 	header("Content-type: image/png");
 	imagepng ($img);
 	imagedestroy ($img);

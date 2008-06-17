@@ -408,44 +408,40 @@ http://www.cisco.com/en/US/products/hw/routers/ps274/products_tech_note09186a008
 
 function updIPv4Allocation ()
 {
-	global $root, $pageno, $tabno, $page;
+	global $pageno, $tabno;
 	assertIPv4Arg ('ip', __FUNCTION__);
 	assertUIntArg ('object_id', __FUNCTION__);
 	assertStringArg ('bond_name', __FUNCTION__, TRUE);
 	assertStringArg ('bond_type', __FUNCTION__);
 
 	$error = updateBond ($_REQUEST['ip'], $_REQUEST['object_id'], $_REQUEST['bond_name'], $_REQUEST['bond_type']);
-	$bpname = $page[$pageno]['bypass'];
-	$baseurl = "${root}?page=${pageno}&tab=${tabno}&${bpname}=" . $_REQUEST[$bpname];
 	if ($error != '')
-		return "${baseurl}&error=" . urlencode ($error);
+		return buildRedirectURL ($pageno, $tabno, 'error', $error);
 	else
-		return "${baseurl}&message=" . urlencode ("allocation updated");
+		return buildRedirectURL ($pageno, $tabno, 'message', 'allocation updated');
 }
 
 function delIPv4Allocation ()
 {
-	global $root, $pageno, $tabno, $page;
+	global $pageno, $tabno;
 	assertIPv4Arg ('ip', __FUNCTION__);
 	assertUIntArg ('object_id', __FUNCTION__);
 
 	$error = unbindIpFromObject ($_REQUEST['ip'], $_REQUEST['object_id']);
-	$bpname = $page[$pageno]['bypass'];
-	$baseurl = "${root}?page=${pageno}&tab=${tabno}&${bpname}=" . $_REQUEST[$bpname];
 	if ($error != '')
-		return "${baseurl}&error=" . urlencode ($error);
+		return buildRedirectURL ($pageno, $tabno, 'error', $error);
 	else
-		return "${baseurl}&message=" . urlencode ("deallocated");
+		return buildRedirectURL ($pageno, $tabno, 'message', 'deallocated');
 }
 
 function addIPv4Allocation ()
 {
-	global $root, $pageno, $tabno, $page;
-
+	global $pageno, $tabno;
 	assertIPv4Arg ('ip', __FUNCTION__);
 	assertUIntArg ('object_id', __FUNCTION__);
 	assertStringArg ('bond_name', __FUNCTION__, TRUE);
 	assertStringArg ('bond_type', __FUNCTION__);
+
 	// Strip masklen.
 	$ip = ereg_replace ('/[[:digit:]]+$', '', $_REQUEST['ip']);
 	$error = bindIpToObject ($ip, $_REQUEST['object_id'], $_REQUEST['bond_name'], $_REQUEST['bond_type']);
@@ -459,12 +455,10 @@ function addIPv4Allocation ()
 			$address['name'] = '';
 		updateAddress ($ip, $address['name'], $address['reserved']);
 	}
-	$bpname = $page[$pageno]['bypass'];
-	$baseurl = "${root}?page=${pageno}&tab=${tabno}&${bpname}=" . $_REQUEST[$bpname];
 	if ($error != '')
-		return "${baseurl}&error=" . urlencode ($error);
+		return buildRedirectURL ($pageno, $tabno, 'error', $error);
 	else
-		return "${baseurl}&message=" . urlencode ("allocated");
+		return buildRedirectURL ($pageno, $tabno, 'message', 'allocated');
 }
 
 function addIPv4Prefix ()
@@ -486,7 +480,7 @@ function delIPv4Prefix ()
 {
 	global $root, $pageno, $tabno;
 
-	assertUIntArg ('id');
+	assertUIntArg ('id', __FUNCTION__);
 	$error = destroyIPv4Prefix ($_REQUEST['id']);
 	if ($error != '')
 		return "${root}?page=${pageno}&tab=${tabno}&error=" . urlencode ($error);
@@ -496,42 +490,32 @@ function delIPv4Prefix ()
 
 function editRange ()
 {
-	global $root, $pageno, $tabno;
+	global $pageno, $tabno;
+	assertUIntArg ('id', __FUNCTION__);
+	assertStringArg ('name', __FUNCTION__);
 
-	$id = $_REQUEST['id'];
-	$name = $_REQUEST['name'];
-	$error = updateRange($id, $name);
+	$error = updateRange ($_REQUEST['id'], $_REQUEST['name']);
 	if ($error != '')
-	{
-		return "${root}?page=${pageno}&tab=${tabno}&id=$id&error=".urlencode($error);
-	}
+		return buildRedirectURL ($pageno, $tabno, 'error', $error);
 	else
-	{
-		return "${root}?page=${pageno}&tab=${tabno}&id=$id&message=".urlencode("Range updated");
-	}
-
+		return buildRedirectURL ($pageno, $tabno, 'message', 'IPv4 prefix updated');
 }
 
 function editAddress ()
 {
-	global $root, $pageno, $tabno;
+	global $pageno, $tabno;
+	assertIPv4Arg ('ip', __FUNCTION__);
+	assertStringArg ('name', __FUNCTION__, TRUE);
 
-	$ip = $_REQUEST['ip'];
-	$name = $_REQUEST['name'];
 	if (isset ($_REQUEST['reserved']))
 		$reserved = $_REQUEST['reserved'];
 	else
 		$reserved = 'off';
-	$error = updateAddress($ip, $name, $reserved=='on'?'yes':'no');
+	$error = updateAddress ($_REQUEST['ip'], $_REQUEST['name'], $reserved == 'on' ? 'yes' : 'no');
 	if ($error != '')
-	{
-		return "${root}?page=${pageno}&tab=${tabno}&ip=$ip&error=".urlencode($error);
-	}
+		return buildRedirectURL ($pageno, $tabno, 'error', $error);
 	else
-	{
-		return "${root}?page=${pageno}&tab=${tabno}&ip=$ip&message=".urlencode("Address updated");
-	}
-
+		return buildRedirectURL ($pageno, $tabno, 'message', 'IPv4 address updated');
 }
 
 function createUser ()

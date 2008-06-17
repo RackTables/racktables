@@ -2,7 +2,7 @@
 /*
 *
 * This file performs RackTables initialisation. After you include it
-* from 1st-level page, don't forget to call authorize(). This is done
+* from 1st-level page, don't forget to call fixContext(). This is done
 * to allow reloading of pageno and tabno variables. pageno and tabno
 * together form security context.
 *
@@ -111,6 +111,7 @@ authenticate();
 $remote_username = $_SERVER['PHP_AUTH_USER'];
 $pageno = (isset ($_REQUEST['page'])) ? $_REQUEST['page'] : 'index';
 $tabno = (isset ($_REQUEST['tab'])) ? $_REQUEST['tab'] : 'default';
+$op = (isset ($_REQUEST['op'])) ? $_REQUEST['op'] : '';
 // Order matters here.
 $taglist = getTagList();
 $tagtree = getTagTree();
@@ -122,19 +123,12 @@ require_once 'inc/triggers.php';
 require_once 'inc/gateways.php';
 require_once 'inc/snmp.php';
 
-global $page;
+// These will be filled in by fixContext()
+$auto_tags = array();
 $expl_tags = array();
 $impl_tags = array();
-$auto_tags = getUserAutoTags();
-$auto_tags[] = array ('tag' => '$page_' . $pageno);
-$auto_tags[] = array ('tag' => '$tab_' . $tabno);
-
-if (isset ($page[$pageno]['tagloader']) and isset ($page[$pageno]['bypass']) and isset ($_REQUEST[$page[$pageno]['bypass']]))
-{
-	$expl_tags = $page[$pageno]['tagloader'] ($_REQUEST[$page[$pageno]['bypass']]);
-	$impl_tags = getImplicitTags ($expl_tags);
-}
-if (isset ($page[$pageno]['autotagloader']))
-	$auto_tags = array_merge ($auto_tags, $page[$pageno]['autotagloader'] ());
+// and this will remain constant
+$user_tags = loadUserTags ($accounts[$remote_username]['user_id']);
+$user_tags = array_merge ($user_tags, getImplicitTags ($user_tags), getUserAutoTags());
 
 ?>

@@ -2649,7 +2649,7 @@ function renderSearchResults ()
 		showError ('Search string cannot be empty.', __FUNCTION__);
 		return;
 	}
-	if (!probeLocation ('object', 'default'))
+	if (!accessiblePath ('objects', 'default'))
 	{
 		showError ('You are not authorized for viewing information about objects.', __FUNCTION__);
 		return;
@@ -4520,7 +4520,7 @@ function renderLivePTR ($id = 0)
 	echo "<form method=post action=${root}process.php>";
 	echo "<input type=hidden name=page value=${pageno}>\n";
 	echo "<input type=hidden name=tab value=${tabno}>\n";
-	echo "<input type=hidden name=op value=import>\n";
+	echo "<input type=hidden name=op value=importPTRData>\n";
 	echo "<input type=hidden name=id value=${id}>\n";
 	echo '<input type=hidden name=addrcount value=' . ($endip - $startip + 1) . ">\n";
 
@@ -5003,6 +5003,24 @@ function renderUserPasswordEditor ($user_id)
 	echo "<tr><th class=tdright>New password again (*):</th><td><input type=password name=newpassword2 tabindex=3></td></tr>";
 	echo "<tr><td colspan=2 align=center><input type=submit value='Change' tabindex=4></td></tr>";
 	echo '</table></form>';
+}
+
+function renderAccessDenied ()
+{
+	global $user_tags, $auto_tags, $expl_tags, $impl_tags, $pageno, $tabno;
+	echo "<table border=1 cellspacing=0 cellpadding=3 width='50%' align=center>\n";
+	echo '<tr><th colspan=2><h3>access denied</h3></th></tr>';
+	echo "<tr><th width='50%' class=tag_list_th>Explicit tags:</th><td class=tdleft>";
+	echo serializeTags ($expl_tags) . "</td></tr>\n";
+	echo "<tr><th width='50%' class=tag_list_th>Implicit tags:</th><td class=tdleft>";
+	echo serializeTags ($impl_tags) . "</td></tr>\n";
+	echo "<tr><th width='50%' class=tag_list_th>Automatic tags:</th><td class=tdleft>";
+	echo serializeTags ($auto_tags) . "</td></tr>\n";
+	echo "<tr><th width='50%' class=tag_list_th>User tags:</th><td class=tdleft>";
+	echo serializeTags ($user_tags) . "</td></tr>\n";
+	echo "<tr><th width='50%' class=tag_list_th>Requested page:</th><td class=tdleft>${pageno}</td></tr>\n";
+	echo "<tr><th width='50%' class=tag_list_th>Requested tab:</th><td class=tdleft>${tabno}</td></tr>\n";
+	echo "</table>\n";
 }
 
 ?>

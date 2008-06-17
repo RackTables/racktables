@@ -1394,7 +1394,7 @@ function loadRackObjectAutoTags ()
 	$object_id = $_REQUEST['object_id'];
 	$oinfo = getObjectInfo ($object_id);
 	$ret = array();
-	$ret[] = array ('tag' => '$id_' . $_REQUEST['object_id']);
+	$ret[] = array ('tag' => '$objectid_' . $_REQUEST['object_id']);
 	$ret[] = array ('tag' => '$any_object');
 	return $ret;
 }
@@ -1403,9 +1403,9 @@ function loadRackObjectAutoTags ()
 function getIPv4PrefixTags ($prefix)
 {
 	$ret = array();
-	$ret[] = array ('tag' => '$ipv4net-' . str_replace ('.', '-', $prefix['ip']) . '-' . $prefix['mask']);
-	// FIXME: find and list tags for all parent networks
-	$ret[] = array ('tag' => '$any_ipv4net');
+	$ret[] = array ('tag' => '$ip4net-' . str_replace ('.', '-', $prefix['ip']) . '-' . $prefix['mask']);
+	// FIXME: find and list tags for all parent networks?
+	$ret[] = array ('tag' => '$any_ip4net');
 	$ret[] = array ('tag' => '$any_net');
 	return $ret;
 }
@@ -1415,7 +1415,7 @@ function loadIPv4PrefixAutoTags ()
 	assertUIntArg ('id', __FUNCTION__);
 	return array_merge
 	(
-		array (array ('tag' => '$id_' . $_REQUEST['id'])),
+		array (array ('tag' => '$ip4netid_' . $_REQUEST['id'])),
 		getIPv4PrefixTags (getIPRange ($_REQUEST['id']))
 	);
 }
@@ -1425,7 +1425,7 @@ function loadIPv4AddressAutoTags ()
 	assertIPv4Arg ('ip', __FUNCTION__);
 	return array_merge
 	(
-		array (array ('tag' => '$ipv4net-' . str_replace ('.', '-', $_REQUEST['ip']) . '-32')),
+		array (array ('tag' => '$ip4net-' . str_replace ('.', '-', $_REQUEST['ip']) . '-32')),
 		getIPv4PrefixTags (getRangeByIP ($_REQUEST['ip']))
 	);
 }
@@ -1434,7 +1434,7 @@ function loadRackAutoTags ()
 {
 	assertUIntArg ('rack_id', __FUNCTION__);
 	$ret = array();
-	$ret[] = array ('tag' => '$id_' . $_REQUEST['rack_id']);
+	$ret[] = array ('tag' => '$rackid_' . $_REQUEST['rack_id']);
 	$ret[] = array ('tag' => '$any_rack');
 	return $ret;
 }
@@ -1457,6 +1457,23 @@ function loadIPv4RSPoolAutoTags ()
 	$ret[] = array ('tag' => '$any_ipv4rspool');
 	$ret[] = array ('tag' => '$any_rspool');
 	return $ret;
+}
+
+function fixContext ()
+{
+	global $pageno, $tabno, $auto_tags, $expl_tags, $impl_tags, $page;
+	if (isset ($page[$pageno]['autotagloader']))
+		$auto_tags = $page[$pageno]['autotagloader'] ();
+	if
+	(
+		isset ($page[$pageno]['tagloader']) and
+		isset ($page[$pageno]['bypass']) and
+		isset ($_REQUEST[$page[$pageno]['bypass']])
+	)
+	{
+		$expl_tags = $page[$pageno]['tagloader'] ($_REQUEST[$page[$pageno]['bypass']]);
+		$impl_tags = getImplicitTags ($expl_tags);
+	}
 }
 
 function getUserAutoTags ()
@@ -1520,6 +1537,16 @@ function getTagFilterStr ($tagfilter = array())
 	foreach (getExplicitTagsOnly (buildTrailFromIds ($tagfilter)) as $taginfo)
 		$ret .= "&tagfilter[]=" . $taginfo['id'];
 	return $ret;
+}
+
+function buildRedirectURL ($pageno, $tabno, $what, $text)
+{
+	global $root, $page;
+	$url = "${root}?page=${pageno}&tab=${tabno}";
+	if (isset ($page[$pageno]['bypass']))
+		$url .= '&' . $page[$pageno]['bypass'] . '=' . $_REQUEST[$page[$pageno]['bypass']];
+	$url .= "&${what}=" . urlencode ($text);
+	return $url;
 }
 
 ?>

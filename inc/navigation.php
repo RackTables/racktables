@@ -152,7 +152,7 @@ $tabhandler['iprange']['liveptr'] = 'renderLivePTR';
 $tabhandler['iprange']['tags'] = 'renderIPv4PrefixTags';
 $trigger['iprange']['tags'] = 'trigger_tags';
 $ophandler['iprange']['properties']['editRange'] = 'editRange';
-$ophandler['iprange']['liveptr']['import'] = 'importPTRData';
+$ophandler['iprange']['liveptr']['importPTRData'] = 'importPTRData';
 $ophandler['iprange']['tags']['saveTags'] = 'saveIPv4PrefixTags';
 
 $page['ipaddress']['title_handler'] = 'dynamic_title_ipaddress';
@@ -275,6 +275,7 @@ $page['user']['parent'] = 'userlist';
 $page['user']['bypass'] = 'user_id';
 $page['user']['bypass_type'] = 'uint';
 $page['user']['tagloader'] = 'loadUserTags';
+$page['user']['autotagloader'] = 'getUserAutoTags';
 $tab['user']['default'] = 'View';
 $tab['user']['password'] = 'Change password';
 $tab['user']['tags'] = 'Tags';
@@ -424,7 +425,7 @@ function showTabs ($pageno, $tabno)
 	foreach ($tab[$pageno] as $tabidx => $tabtitle)
 	{
 		// Hide forbidden tabs.
-		if (!probeLocation ($pageno, $tabidx))
+		if (!accessiblePath ($pageno, $tabidx))
 			continue;
 		// Dynamic tabs should only be shown in certain cases (trigger exists and returns true).
 		if
@@ -459,7 +460,7 @@ function getDirectChildPages ($pageno)
 		(
 			isset ($cpage['parent']) and
 			$cpage['parent'] == $pageno and
-			probeLocation ($cpageno, 'default') == TRUE
+			accessiblePath ($cpageno, 'default') == TRUE
 		)
 			$children[$cpageno] = $cpage;
 	return $children;

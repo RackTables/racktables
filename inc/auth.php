@@ -24,28 +24,43 @@ function authenticate ()
 	}
 }
 
-// Show error unless the user is allowed access here.
-function authorize ($subject = array())
+// Merge accumulated tags into a single chain, add location-specific
+// autotags and try getting access clearance. Page and tab are mandatory,
+// operation is optional.
+function permitted ($p = NULL, $t = NULL, $o = NULL)
 {
-	global $remote_username, $expl_tags, $impl_tags, $auto_tags;
-	if (!count ($subject))
-		$subject = array_merge ($expl_tags, $impl_tags, $auto_tags);
-	if (gotClearanceForTagChain ($subject))
-		return TRUE;
-	else
-	{
-		showError ("User '${remote_username}' is not allowed to access here.");
-		die();
-	}
+	global $pageno, $tabno, $op;
+	global
+		$user_tags,
+		$auto_tags,
+		$expl_tags,
+		$impl_tags;
+
+	if ($p === NULL)
+		$p = $pageno;
+	if ($t === NULL)
+		$t = $tabno;
+	$subject = array_merge
+	(
+		$user_tags,
+		$auto_tags,
+		$expl_tags,
+		$impl_tags
+	);
+	$subject[] = array ('tag' => '$page_' . $p);
+	$subject[] = array ('tag' => '$tab_' . $t);
+	if ($o === NULL and isset ($op))
+		$subject[] = array ('tag' => '$op_' . $op);
+	return gotClearanceForTagChain ($subject);
 }
 
-// A yay/nay replacement for authorized() function.
-function probeLocation ($p = 'index', $t = 'default')
+function accessiblePath ($p, $t)
 {
-	$authz_ctx = getUserAutoTags();
-	$authz_ctx[] = array ('tag' => '$page_' . $p);
-	$authz_ctx[] = array ('tag' => '$tab_' . $t);
-	return gotClearanceForTagChain ($authz_ctx);
+	global $user_tags;
+	$subject = $user_tags;
+	$subject[] = array ('tag' => '$page_' . $p);
+	$subject[] = array ('tag' => '$tab_' . $t);
+	return gotClearanceForTagChain ($subject);
 }
 
 // This function returns TRUE, if username and password are valid.
