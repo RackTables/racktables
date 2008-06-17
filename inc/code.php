@@ -199,7 +199,7 @@ function getLexemsFromRackCode ($text)
 		endswitch;
 		$state = $newstate;
 	endfor;
-	if ($state != 'ESOTSM')
+	if ($state != 'ESOTSM' and $state != 'skipping comment')
 		abortLex3 ($state);
 	return $ret;
 }
@@ -562,6 +562,48 @@ function getRackCode ()
 	// FIXME: perform semantical analysis to prove the tree be reference-wise error
 	// free regardless of evaluation order
 	return getSentencesFromLexems (getLexemsFromRackCode (loadScript ('RackCode')));
+}
+
+// Return true, if the given expression can be evaluated against the given
+// predicate list.
+function valid_expression ($plist, $expr)
+{
+	switch ($expr['type'])
+	{
+		case 'BOOLCONST':
+		case 'LEX_TAG':
+			return TRUE;
+		case 'LEX_PREDICATE':
+			return in_array ($expr['load'], $plist);
+		case 'SYNT_NOTEXPR':
+			return valid_expression ($plist, $expr['load']);
+		case 'SYNT_BOOLOP':
+			return valid_expression ($plist, $expr['left']) and valid_expression ($plist, $expr['right']);
+		default:
+			showError ("Validation error, cannot process expression type '${expr['type']}'");
+			break;
+	}
+}
+
+function valid_rackcode ($code)
+{
+	$predicatelist = array();
+	foreach ($code as $sentence)
+		switch ($sentence['type'])
+		{
+			case 'SYNT_DEFINITION':
+				if (!valid_expression ($predicatelist, $sentence['definition']))
+					return FALSE;
+				$predicatelist[] = $sentence['term'];
+				break;
+			case 'SYNT_GRANT':
+				if (!valid_expression ($predicatelist, $sentence['condition']))
+					return FALSE;
+				break;
+			default:
+				return FALSE;
+		}
+	return TRUE;
 }
 
 ?>
