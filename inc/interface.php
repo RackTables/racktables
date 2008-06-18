@@ -2649,7 +2649,7 @@ function renderSearchResults ()
 		showError ('Search string cannot be empty.', __FUNCTION__);
 		return;
 	}
-	if (!accessiblePath ('objects', 'default'))
+	if (!permitted ('objects', 'default'))
 	{
 		showError ('You are not authorized for viewing information about objects.', __FUNCTION__);
 		return;
