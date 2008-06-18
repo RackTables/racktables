@@ -1281,17 +1281,26 @@ CREATE TABLE `TagTree` (
 				"UserPermission natural left join UserAccount where (user_name is not null) or " .
 				"(user_name is null and UserPermission.user_id = 0) order by user_name desc, page desc, tab desc";
 			$tr = $dbxlink->query ($tq);
-			$code = $nl = '';
+			$code = '';
 			while ($row = $tr->fetch (PDO::FETCH_ASSOC))
 			{
+				$conjunction = '';
 				$rule = $row['access'] == 'yes' ? 'allow' : 'deny';
-				$rule .= $row['user_id'] == 0 ? '' : " {\$username_${row['user_name']}}";
-				$rule .= $row['page'] == '%' ? '' : " {\$page_${row['page']}}";
-				$rule .= $row['tab'] == '%' ? '' : " {\$tab_${row['tab']}}";
+				if ($row['user_id'] != 0)
+				{
+					$rule .= " {\$username_${row['user_name']}}";
+					$conjunction = 'and ';
+				}
+				if ($row['page'] != '%')
+				{
+					$rule .= " ${conjunction}{\$page_${row['page']}}";
+					$conjunction = 'and ';
+				}
+				if ($row['tab'] != '%')
+					$rule .= " ${conjunction}{\$tab_${row['tab']}}";
 				if ($rule == 'allow' or $rule == 'deny')
 					continue;
-				$code .= "${rule}${nl}";
-				$nl = "\n";
+				$code .= "${rule}\n";
 			}
 			$query[] = "insert into Script (script_name, script_text) values ('RackCode', '${code}')";
 			$query[] = 'drop table UserPermission';
