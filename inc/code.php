@@ -485,11 +485,11 @@ function eval_expression ($expr, $tagchain, $ptable)
 			$pname = $expr['load'];
 			if (!isset ($ptable[$pname]))
 			{
-				showError ("Predicate '${pname}' is referenced before declaration");
+				showError ("Predicate '${pname}' is referenced before declaration", __FUNCTION__);
 				return;
 			}
 			return eval_expression ($ptable[$pname], $tagchain, $ptable);
-		case 'BOOLCONST': // Evaluate a boolean constant.
+		case 'LEX_BOOLCONST': // Evaluate a boolean constant.
 			switch ($expr['load'])
 			{
 				case 'true':
@@ -497,7 +497,7 @@ function eval_expression ($expr, $tagchain, $ptable)
 				case 'false':
 					return FALSE;
 				default:
-					showError ("Could not parse a boolean constant with value '${expr['load']}'");
+					showError ("Could not parse a boolean constant with value '${expr['load']}'", __FUNCTION__);
 					return; // should failure be harder?
 			}
 		case 'SYNT_NOTEXPR':
@@ -519,7 +519,7 @@ function eval_expression ($expr, $tagchain, $ptable)
 					return;
 			}
 		default:
-			showError ("Evaluation error, cannot process expression type '${expr['type']}'");
+			showError ("Evaluation error, cannot process expression type '${expr['type']}'", __FUNCTION__);
 			break;
 	}
 }
@@ -544,12 +544,12 @@ function gotClearanceForTagChain ($tagchain)
 						case 'deny':
 							return FALSE;
 						default:
-							showError ("Condition match for unknown grant decision '${sentence['decision']}'");
+							showError ("Condition match for unknown grant decision '${sentence['decision']}'", __FUNCTION__);
 							break;
 					}
 				break;
 			default:
-				showError ("Can't process sentence of unknown type '${sentence['type']}'");
+				showError ("Can't process sentence of unknown type '${sentence['type']}'", __FUNCTION__);
 				break;
 		}
 	}
@@ -561,7 +561,8 @@ function getRackCode ()
 	// FIXME: handle errors and display a message with an option to reset RackCode text
 	// FIXME: perform semantical analysis to prove the tree be reference-wise error
 	// free regardless of evaluation order
-	return getSentencesFromLexems (getLexemsFromRackCode (loadScript ('RackCode')));
+	$text = str_replace ("\r", '', loadScript ('RackCode')) . "\n";
+	return getSentencesFromLexems (getLexemsFromRackCode ($text));
 }
 
 // Return true, if the given expression can be evaluated against the given
@@ -570,7 +571,7 @@ function valid_expression ($plist, $expr)
 {
 	switch ($expr['type'])
 	{
-		case 'BOOLCONST':
+		case 'LEX_BOOLCONST':
 		case 'LEX_TAG':
 			return TRUE;
 		case 'LEX_PREDICATE':
@@ -580,7 +581,7 @@ function valid_expression ($plist, $expr)
 		case 'SYNT_BOOLOP':
 			return valid_expression ($plist, $expr['left']) and valid_expression ($plist, $expr['right']);
 		default:
-			showError ("Validation error, cannot process expression type '${expr['type']}'");
+			showError ("Validation error, cannot process expression type '${expr['type']}'", __FUNCTION__);
 			break;
 	}
 }
