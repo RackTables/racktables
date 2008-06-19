@@ -4925,7 +4925,7 @@ function renderRackCodeEditor ()
 	showMessageOrError();
 	echo "<form method=post action='${root}process.php?page=${pageno}&tab=${tabno}&op=saveRackCode'>";
 	echo '<table border=0 align=center>';
-	echo "<tr><td><textarea rows=25 cols=80 name=rackcode>" . $text . "</textarea></td></tr>\n";
+	echo "<tr><td><textarea rows=50 cols=80 name=rackcode>" . $text . "</textarea></td></tr>\n";
 	echo "<tr><td align=center><input type=submit value='save'></td></tr>";
 	echo '</table>';
 	echo "</form>";
