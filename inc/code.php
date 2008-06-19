@@ -20,10 +20,10 @@
 // Complain about martian char.
 function abortLex1 ($state, $text, $pos)
 {
-	echo "Error! Could not parse char with code " . ord (substr ($text, $pos + 1, 1)) . " (current state is '${state}'): ";
-	echo substr ($text, 0, $pos);
-	echo '<font color = red>-&gt;' . $text{$pos} . '&lt;-</font>';
-	echo substr ($text, $pos + 1);
+	echo "Error! Could not parse char with code " . ord (mb_substr ($text, $pos, 1)) . " (current state is '${state}'): ";
+	echo mb_substr ($text, 0, $pos);
+	echo '<font color = red>-&gt;' . mb_substr ($text, $pos, 1) . '&lt;-</font>';
+	echo mb_substr ($text, $pos + 1);
 	die;
 }
 
@@ -51,10 +51,10 @@ function abortSynt ($lexname)
 function getLexemsFromRackCode ($text)
 {
 	$ret = array();
-	$textlen = strlen ($text);
+	$textlen = mb_strlen ($text);
 	$state = "ESOTSM";
 	for ($i = 0; $i < $textlen; $i++) :
-		$char = $text{$i};
+		$char = mb_substr ($text, $i, 1);
 		$newstate = $state;
 		switch ($state) :
 			case 'ESOTSM':
@@ -69,7 +69,7 @@ function getLexemsFromRackCode ($text)
 					case ($char == '#'):
 						$newstate = 'skipping comment';
 						break;
-					case (preg_match ('/^[a-zA-Z]$/', $char)):
+					case (mb_ereg ('[[:alpha:]]', $char) > 0):
 						$newstate = 'reading word';
 						$buffer = $char;
 						break;
@@ -89,7 +89,7 @@ function getLexemsFromRackCode ($text)
 			case 'reading word':
 				switch (TRUE)
 				{
-					case (preg_match ('/^[a-zA-Z]$/', $char)):
+					case (mb_ereg ('[[:alpha:]]', $char) > 0):
 						$buffer .= $char;
 						break;
 					case (preg_match ('/^[ \t\n]$/', $char)):
@@ -129,7 +129,7 @@ function getLexemsFromRackCode ($text)
 					case (preg_match ('/^[ \t\n\r]$/', $char)):
 						// nom-nom...
 						break;
-					case (preg_match ('/^[a-zA-Z\$]$/', $char)):
+					case (mb_ereg ('[[:alpha:]\$]', $char) > 0):
 						$buffer = $char;
 						$newstate = 'reading tag 2';
 						break;
@@ -142,12 +142,12 @@ function getLexemsFromRackCode ($text)
 				{
 					case ($char == '}'):
 						$buffer = rtrim ($buffer);
-						if (!preg_match ('/^[a-zA-Z0-9]$/', substr ($buffer, -1)))
+						if (mb_ereg ('[[:alnum:]]', mb_substr ($buffer, -1)) == 0)
 							abortLex1 ($state, $text, $i);
 						$ret[] = array ('type' => 'LEX_TAG', 'load' => $buffer);
 						$newstate = 'ESOTSM';
 						break;
-					case (preg_match ('/^[a-zA-Z0-9 _-]$/', $char)):
+					case (mb_ereg ('[[:alnum:] _-]', $char) > 0):
 						$buffer .= $char;
 						break;
 					default:
@@ -160,7 +160,7 @@ function getLexemsFromRackCode ($text)
 					case (preg_match ('/^[ \t\n\r]$/', $char)):
 						// nom-nom...
 						break;
-					case (preg_match ('/^[a-zA-Z]$/', $char)):
+					case (mb_ereg ('[[:alpha:]]', $char) > 0):
 						$buffer = $char;
 						$newstate = 'reading predicate 2';
 						break;
@@ -173,12 +173,12 @@ function getLexemsFromRackCode ($text)
 				{
 					case ($char == ']'):
 						$buffer = rtrim ($buffer);
-						if (!preg_match ('/^[a-zA-Z0-9]$/', substr ($buffer, -1)))
+						if (mb_ereg ('[[:alnum:]]', mb_substr ($buffer, -1)) == 0)
 							abortLex1 ($state, $text, $i);
 						$ret[] = array ('type' => 'LEX_PREDICATE', 'load' => $buffer);
 						$newstate = 'ESOTSM';
 						break;
-					case (preg_match ('/^[a-zA-Z0-9 _-]$/', $char)):
+					case (mb_ereg ('[[:alnum:] _-]', $char) > 0):
 						$buffer .= $char;
 						break;
 					default:
@@ -186,7 +186,7 @@ function getLexemsFromRackCode ($text)
 				}
 				break;
 			case 'skipping comment':
-				switch ($text{$i})
+				switch ($char)
 				{
 					case "\n":
 						$newstate = 'ESOTSM';
