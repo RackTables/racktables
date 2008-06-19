@@ -48,8 +48,7 @@ function trigger_snmpportfinder ()
 	$object = getObjectInfo ($object_id);
 	if ($object['objtype_id'] != 8)
 		return FALSE;
-	$tails = getObjectPortsAndLinks ($object_id);
-	if (count ($tails))
+	if (!objectIsPortless ($_REQUEST['object_id']))
 		return FALSE;
 	return TRUE;
 }
@@ -90,7 +89,7 @@ function trigger_poolrscount ()
 function trigger_autoports ()
 {
 	assertUIntArg ('object_id', __FUNCTION__);
-	if (count (getObjectPortsAndLinks ($_REQUEST['object_id'])) != 0)
+	if (!objectIsPortless ($_REQUEST['object_id']))
 		return FALSE;
 	$info = getObjectInfo ($_REQUEST['object_id']);
 	return count (getAutoPorts ($info['objtype_id'])) != 0;

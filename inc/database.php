@@ -2729,4 +2729,23 @@ function saveUserPassword ($user_id, $newp)
 	$query = "update UserAccount set user_password_hash = ${newhash} where user_id = ${user_id} limit 1";
 }
 
+function objectIsPortless ($id = 0)
+{
+	if ($id <= 0)
+	{
+		showError ('Invalid argument', __FUNCTION__);
+		return;
+	}
+	if (($result = useSelectBlade ("select count(id) from Port where object_id = ${id}", __FUNCTION__)) == NULL) 
+	{
+		showError ('SQL query failed', __FUNCTION__);
+		return;
+	}
+	$row = $result->fetch (PDO::FETCH_NUM);
+	$count = $row[0];
+	$result->closeCursor();
+	unset ($result);
+	return $count === 0;
+}
+
 ?>
