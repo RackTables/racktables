@@ -1270,7 +1270,8 @@ CREATE TABLE `TagTree` (
 			$query[] = 'alter table TagStorage modify column tag_id int(10) unsigned not null;';
 			$query[] = "alter table TagStorage modify column target_realm enum('object','ipv4net','rack','ipv4vs','ipv4rspool','user');";
 			$query[] = "delete from UserPermission where page = 'objects' and tab = 'newobj'";
-			$query[] = "update UserPermission set tab = 'addmore' where page = 'objects' and tab = 'newmulti'";
+			$query[] = "update UserPermission set tab = 'addmore' where page = 'objects' and (tab = 'newmulti' or tab = 'newobj')";
+			$query[] = "update UserPermission set tab = 'livevlans' where tab = 'switchvlans'";
 			$query[] = "update UserPermission set page = 'userlist' where page = 'accounts'";
 			$query[] = "create table Script (script_name char(64) not null primary key, script_text text)";
 			// Do the same getUserPermissions() does, but without the function.
