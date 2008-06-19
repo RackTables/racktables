@@ -626,6 +626,7 @@ function mergeSearchResults (&$objects, $terms, $fieldname)
 		$query .= "${fieldname} like '%$term%'";
 		$count++;
 	}
+	$query .= " order by ${fieldname}";
 	$result = useSelectBlade ($query, __FUNCTION__);
 // FIXME: this dead call was executed 4 times per 1 object search!
 //	$typeList = getObjectTypeList();
