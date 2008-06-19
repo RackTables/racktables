@@ -1539,14 +1539,28 @@ function getTagFilterStr ($tagfilter = array())
 	return $ret;
 }
 
-function buildRedirectURL ($pageno, $tabno, $what, $text)
+function buildWideRedirectURL ($log, $p = NULL, $t = NULL)
 {
-	global $root, $page;
+	global $root, $page, $pageno, $tabno;
+	if ($p === NULL)
+		$p = $pageno;
+	if ($t === NULL)
+		$t = $tabno;
 	$url = "${root}?page=${pageno}&tab=${tabno}";
 	if (isset ($page[$pageno]['bypass']))
 		$url .= '&' . $page[$pageno]['bypass'] . '=' . $_REQUEST[$page[$pageno]['bypass']];
-	$url .= "&${what}=" . urlencode ($text);
+	$url .= "&log=" . base64_encode (serialize ($log));
 	return $url;
+}
+
+function buildRedirectURL_OK ($text, $p = NULL, $t = NULL)
+{
+	return buildWideRedirectURL (array (array ('code' => 'success', 'message' => $text)), $p, $t);
+}
+
+function buildRedirectURL_ERR ($text, $p = NULL, $t = NULL)
+{
+	return buildWideRedirectURL (array (array ('code' => 'error', 'message' => $text)), $p, $t);
 }
 
 ?>

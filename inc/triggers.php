@@ -15,7 +15,7 @@
 // software.
 // FIXME: That's a bit of hardcoding at the moment, but
 // let's thinks about fixing it later.
-function trigger_switchvlans ()
+function trigger_livevlans ()
 {
 	assertUIntArg ('object_id', __FUNCTION__);
 	$object_id = $_REQUEST['object_id'];

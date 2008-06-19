@@ -416,9 +416,9 @@ function updIPv4Allocation ()
 
 	$error = updateBond ($_REQUEST['ip'], $_REQUEST['object_id'], $_REQUEST['bond_name'], $_REQUEST['bond_type']);
 	if ($error != '')
-		return buildRedirectURL ($pageno, $tabno, 'error', $error);
+		return buildRedirectURL_ERR ($error);
 	else
-		return buildRedirectURL ($pageno, $tabno, 'message', 'allocation updated');
+		return buildRedirectURL_OK ('allocation updated');
 }
 
 function delIPv4Allocation ()
@@ -429,9 +429,9 @@ function delIPv4Allocation ()
 
 	$error = unbindIpFromObject ($_REQUEST['ip'], $_REQUEST['object_id']);
 	if ($error != '')
-		return buildRedirectURL ($pageno, $tabno, 'error', $error);
+		return buildRedirectURL_ERR ($error);
 	else
-		return buildRedirectURL ($pageno, $tabno, 'message', 'deallocated');
+		return buildRedirectURL_OK ('deallocated');
 }
 
 function addIPv4Allocation ()
@@ -456,9 +456,9 @@ function addIPv4Allocation ()
 		updateAddress ($ip, $address['name'], $address['reserved']);
 	}
 	if ($error != '')
-		return buildRedirectURL ($pageno, $tabno, 'error', $error);
+		return buildRedirectURL_ERR ($error);
 	else
-		return buildRedirectURL ($pageno, $tabno, 'message', 'allocated');
+		return buildRedirectURL_OK ('allocated');
 }
 
 function addIPv4Prefix ()
@@ -496,9 +496,9 @@ function editRange ()
 
 	$error = updateRange ($_REQUEST['id'], $_REQUEST['name']);
 	if ($error != '')
-		return buildRedirectURL ($pageno, $tabno, 'error', $error);
+		return buildRedirectURL_ERR ($error);
 	else
-		return buildRedirectURL ($pageno, $tabno, 'message', 'IPv4 prefix updated');
+		return buildRedirectURL_OK ('IPv4 prefix updated');
 }
 
 function editAddress ()
@@ -513,9 +513,9 @@ function editAddress ()
 		$reserved = 'off';
 	$error = updateAddress ($_REQUEST['ip'], $_REQUEST['name'], $reserved == 'on' ? 'yes' : 'no');
 	if ($error != '')
-		return buildRedirectURL ($pageno, $tabno, 'error', $error);
+		return buildRedirectURL_ERR ($error);
 	else
-		return buildRedirectURL ($pageno, $tabno, 'message', 'IPv4 address updated');
+		return buildRedirectURL_OK ('IPv4 address updated');
 }
 
 function createUser ()
@@ -1356,6 +1356,63 @@ function saveRackCode ()
 		return "${root}?page=${pageno}&tab=${tabno}&message=" . urlencode ('Saved successfully.');
 	else
 		return "${root}?page=${pageno}&tab=${tabno}&error=" . urlencode ('Save failed.');
+}
+
+// This handler's context is pre-built, but not authorized. It is assumed, that the
+// handler will take existing context and before each commit check authorization
+// on the base chain plus necessary context added.
+function setPortVLAN ()
+{
+	assertUIntArg ('portcount', __FUNCTION__);
+	$data = getSwitchVLANs ($_REQUEST['object_id']);
+	if ($data === NULL)
+		return buildRedirectURL_ERR ('getSwitchVLANs() failed');
+	list ($vlanlist, $portlist) = $data;
+	// Here we just build up 1 set command for the gateway with all of the ports
+	// included. The gateway is expected to filter unnecessary changes silently
+	// and to provide a list of responses with either error or success message
+	// for each of the rest.
+	$nports = $_REQUEST['portcount'];
+	$prefix = 'set ';
+	$log = array();
+	$setcmd = '';
+	for ($i = 0; $i < $nports; $i++)
+		if
+		(
+			!isset ($_REQUEST['portname_' . $i]) ||
+			!isset ($_REQUEST['vlanid_' . $i]) ||
+			$_REQUEST['portname_' . $i] != $portlist[$i]['portname']
+		)
+			$log[] = array ('code' => 'error', 'message' => "Ignoring malformed record #${i} in form submit");
+		elseif
+		(
+			$_REQUEST['vlanid_' . $i] == $portlist[$i]['vlanid'] ||
+			$portlist[$i]['vlaind'] == 'TRUNK'
+		)
+			continue;
+		else
+		{
+			$portname = $_REQUEST['portname_' . $i];
+			$oldvlanid = $portlist[$i]['vlanid'];
+			$newvlanid = $_REQUEST['vlanid_' . $i];
+			// Finish the security context and evaluate it.
+			$annex = array();
+			$annex[] = array ('tag' => '$fromvlan_' . $oldvlanid);
+			$annex[] = array ('tag' => '$tovlan_' . $newvlanid);
+			if (!permitted (NULL, NULL, NULL, $annex))
+			{
+				$log[] = array ('code' => 'error', 'message' => "Permission denied moving port ${portname} from VLAN${oldvlanid} to VLAN${newvlanid}");
+				continue;
+			}
+			$setcmd .= $prefix . $portname . '=' . $newvlanid;
+			$prefix = ';';
+		}
+	// Feed the gateway and interpret its (non)response.
+	if ($setcmd != '')
+		$log = array_merge ($log, setSwitchVLANs ($_REQUEST['object_id'], $setcmd));
+	else
+		$log[] = array ('code' => 'warning', 'message' => 'nothing happened...');
+	return buildWideRedirectURL ($log);
 }
 
 ?>

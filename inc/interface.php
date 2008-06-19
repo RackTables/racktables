@@ -1016,10 +1016,12 @@ function renderRackMultiSelect ($sname, $racks, $selected)
 
 function showMessageOrError ()
 {
-	if (isset($_REQUEST['message']))
+	if (isset ($_REQUEST['message']))
 		echo "<div class=msg_success>${_REQUEST['message']}</div>";
-	if (isset($_REQUEST['error']))
+	elseif (isset ($_REQUEST['error']))
 		echo "<div class=msg_error>${_REQUEST['error']}</div>";
+	elseif (isset ($_REQUEST['log']))
+		printLog (unserialize (base64_decode ($_REQUEST['log'])));
 }
 
 // This function renders a form for port edition.
@@ -3569,69 +3571,20 @@ function renderUIConfigEditForm ()
 function renderVLANMembership ($object_id = 0)
 {
 	global $root, $pageno, $tabno, $remote_username;
-	if ($object_id <= 0)
-	{
-		showError ('Invalid object_id', __FUNCTION__);
-		return;
-	}
-
-	// Handle probable pending submit.
-	if (isset ($_REQUEST['portcount']))
-	{
-		$data = getSwitchVLANs ($object_id);
-		if ($data === NULL)
-		{
-			showError ('getSwitchVLANs() failed during submit processing', __FUNCTION__);
-			return;
-		}
-		list ($vlanlist, $portlist) = $data;
-		// Here we just build up 1 set command for the gateway with all of the ports
-		// included. The gateway is expected to filter unnecessary changes silently
-		// and to provide a list of responses with either error or success message
-		// for each of the rest.
-		assertUIntArg ('portcount', __FUNCTION__);
-		$nports = $_REQUEST['portcount'];
-		$prefix = 'set ';
-		$log = array();
-		$setcmd = '';
-		for ($i = 0; $i < $nports; $i++)
-			if
-			(
-				!isset ($_REQUEST['portname_' . $i]) ||
-				!isset ($_REQUEST['vlanid_' . $i]) ||
-				$_REQUEST['portname_' . $i] != $portlist[$i]['portname']
-			)
-				$log[] = array ('code' => 'error', 'message' => "Ignoring malformed record #${i} in form submit");
-			elseif
-			(
-				$_REQUEST['vlanid_' . $i] == $portlist[$i]['vlanid'] ||
-				$portlist[$i]['vlaind'] == 'TRUNK'
-			)
-				continue;
-			else
-			{
-				$setcmd .= $prefix . $_REQUEST['portname_' . $i] . '=' . $_REQUEST['vlanid_' . $i];
-				$prefix = ';';
-			}
-		printLog ($log);
-		// Feed the gateway and interpret its (non)response.
-		if ($setcmd != '')
-			printLog (setSwitchVLANs ($object_id, $setcmd));
-	}
-
-	// Reload and render.
+	showMessageOrError();
 	$data = getSwitchVLANs ($object_id);
 	if ($data === NULL)
+	{
+		showError ('getSwitchVLANs() returned NULL', __FUNCTION__);
 		return;
+	}
 	list ($vlanlist, $portlist, $maclist) = $data;
 
 	echo '<table border=0 width="100%"><tr><td colspan=3>';
 
 	startPortlet ('Current status');
 	echo "<table class=widetable cellspacing=3 cellpadding=5 align=center width='100%'><tr>";
-	echo "<form method=post>";
-	echo "<input type=hidden name=page value='${pageno}'>";
-	echo "<input type=hidden name=tab value='${tabno}'>";
+	echo "<form method=post action='${root}process.php?page=${pageno}&tab=${tabno}&op=setPortVLAN'>";
 	echo "<input type=hidden name=object_id value=${object_id}>";
 	$portcount = count ($portlist);
 	echo "<input type=hidden name=portcount value=" . $portcount . ">\n";

@@ -10,10 +10,10 @@ if (empty ($op) or !isset ($ophandler[$pageno][$tabno][$op]))
 }
 
 // We have a chance to handle an error before starting HTTP header.
-$location =
-	permitted() ?
-	$ophandler[$pageno][$tabno][$op]() :
-	buildRedirectURL ($pageno, $tabno, 'error', 'Operation not permitted!');
+if (!isset ($delayauth[$pageno][$tabno][$op]) and !permitted())
+	$location = buildRedirectURL_ERR ('Operation not permitted!');
+else
+	$location = $ophandler[$pageno][$tabno][$op]();
 header ("Location: " . $location);
 
 ?>

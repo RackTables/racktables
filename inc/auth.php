@@ -27,7 +27,7 @@ function authenticate ()
 // Merge accumulated tags into a single chain, add location-specific
 // autotags and try getting access clearance. Page and tab are mandatory,
 // operation is optional.
-function permitted ($p = NULL, $t = NULL, $o = NULL)
+function permitted ($p = NULL, $t = NULL, $o = NULL, $annex = array())
 {
 	global $pageno, $tabno, $op;
 	global
@@ -45,7 +45,8 @@ function permitted ($p = NULL, $t = NULL, $o = NULL)
 		$user_tags,
 		$auto_tags,
 		$expl_tags,
-		$impl_tags
+		$impl_tags,
+		$annex
 	);
 	$subject[] = array ('tag' => '$page_' . $p);
 	$subject[] = array ('tag' => '$tab_' . $t);
