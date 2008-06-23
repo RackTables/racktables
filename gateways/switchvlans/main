@@ -27,7 +27,6 @@ user=
 handler=
 CONNECTED=0
 MYDIR=`dirname $0`
-. "$MYDIR/../lib.sh"
 
 # Not only connect, but gather all the data at once and remember the context.
 do_connect()
@@ -50,12 +49,6 @@ do_connect()
 			return
 		;;
 	esac
-
-	# authorize user, look for "connect" privilege
-	if ! authorized $endpoint $user connect; then
-		echo "ERR!User $user is not authorized to connect to $endpoint"
-		return
-	fi
 
 	# prepare temp files
 	PORTINFO=`mktemp /tmp/racktables.XXXX`
@@ -128,11 +121,6 @@ do_set()
 			continue
 		fi
 		[ "$curvlan" = "$newvlan" ] && continue
-		# Authorize user for each change.
-		if ! authorized $endpoint $user change $curvlan $newvlan; then
-			echo "E!User $user is not authorized to assign port $portname@$endpoint from VLAN $curvlan to VLAN $newvlan" >> "$REPLIES"
-			continue
-		fi
 		echo "$portname $newvlan" >> "$REQUESTS"
 		cmembers=`grep -c ",$newvlan$" "$PORTINFO"`
 		if [ "$cmembers" = "0" -a $newvlan -lt 4096 ]; then

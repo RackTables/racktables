@@ -14,7 +14,6 @@ user=
 cfgfile=
 CONNECTED=0
 MYDIR=`dirname $0`
-. "$MYDIR/../lib.sh"
 
 do_connect()
 {
@@ -28,11 +27,6 @@ do_connect()
 		return
 	fi
 
-	# authorize user, look for "connect" privilege
-	if ! authorized $endpoint $user connect; then
-		echo "ERR!User $user is not authorized to connect to $endpoint"
-		return
-	fi
 	CONNECTED=1
 	echo "OK!connected to $endpoint"
 }
