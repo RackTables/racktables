@@ -20,31 +20,29 @@
 // Complain about martian char.
 function abortLex1 ($state, $text, $pos)
 {
-	echo "Error! Could not parse char with code " . ord (mb_substr ($text, $pos, 1)) . " (current state is '${state}'): ";
-	echo mb_substr ($text, 0, $pos);
-	echo '<font color = red>-&gt;' . mb_substr ($text, $pos, 1) . '&lt;-</font>';
-	echo mb_substr ($text, $pos + 1);
-	die;
+	$message = "invalid char with code " . ord (mb_substr ($text, $pos, 1));
+	$message .= " at position ${pos} (FSM state is '${state}')";
+	return array ('result' => 'NAK', 'load' => $message);
 }
 
 // Complain about martian keyword.
-function abortLex2 ($state, $word)
+function abortLex2 ($word)
 {
-	echo "Error! Could not parse word (current state is '${state}'): '${word}'.";
-	die;
+	return array
+	(
+		'result' => 'NAK',
+		'load' => "could not parse keyword '${word}'"
+	);
 }
 
 // Complain about wrong FSM state.
 function abortLex3 ($state)
 {
-	echo "Error! Lexical scanner final state is still '${state}' after scanning the last char.";
-	die;
-}
-
-function abortSynt ($lexname)
-{
-	echo "Error! Unknown lexeme '${lexname}'.";
-	die;
+	return array
+	(
+		'result' => 'NAK',
+		'load' => "FSM state is still '${state}' at end of input"
+	);
 }
 
 // Produce a list of lexems from the given text. Possible lexems are:
@@ -70,7 +68,7 @@ function getLexemsFromRackCode ($text)
 						$newstate = 'skipping comment';
 						break;
 					case (mb_ereg ('[[:alpha:]]', $char) > 0):
-						$newstate = 'reading word';
+						$newstate = 'reading keyword';
 						$buffer = $char;
 						break;
 					case (preg_match ('/^[ \t\n\r]$/', $char)):
@@ -83,10 +81,10 @@ function getLexemsFromRackCode ($text)
 						$newstate = 'reading predicate 1';
 						break;
 					default:
-						abortLex1 ($state, $text, $i);
+						return abortLex1 ($state, $text, $i);
 				}
 				break;
-			case 'reading word':
+			case 'reading keyword':
 				switch (TRUE)
 				{
 					case (mb_ereg ('[[:alpha:]]', $char) > 0):
@@ -115,12 +113,12 @@ function getLexemsFromRackCode ($text)
 								$ret[] = array ('type' => 'LEX_BOOLCONST', 'load' => $buffer);
 								break;
 							default:
-								abortLex2 ($state, $buffer);
+								return abortLex2 ($buffer);
 						}
 						$newstate = 'ESOTSM';
 						break;
 					default:
-						abortLex1 ($state, $text, $i);
+						return abortLex1 ($state, $text, $i);
 				}
 				break;
 			case 'reading tag 1':
@@ -134,7 +132,7 @@ function getLexemsFromRackCode ($text)
 						$newstate = 'reading tag 2';
 						break;
 					default:
-						abortLex1 ($state, $text, $i);
+						return abortLex1 ($state, $text, $i);
 				}
 				break;
 			case 'reading tag 2':
@@ -143,7 +141,7 @@ function getLexemsFromRackCode ($text)
 					case ($char == '}'):
 						$buffer = rtrim ($buffer);
 						if (mb_ereg ('[[:alnum:]]', mb_substr ($buffer, -1)) == 0)
-							abortLex1 ($state, $text, $i);
+							return abortLex1 ($state, $text, $i);
 						$ret[] = array ('type' => 'LEX_TAG', 'load' => $buffer);
 						$newstate = 'ESOTSM';
 						break;
@@ -151,7 +149,7 @@ function getLexemsFromRackCode ($text)
 						$buffer .= $char;
 						break;
 					default:
-						abortLex1 ($state, $text, $i);
+						return abortLex1 ($state, $text, $i);
 				}
 				break;
 			case 'reading predicate 1':
@@ -165,7 +163,7 @@ function getLexemsFromRackCode ($text)
 						$newstate = 'reading predicate 2';
 						break;
 					default:
-						abortLex1 ($state, $text, $i);
+						return abortLex1 ($state, $text, $i);
 				}
 				break;
 			case 'reading predicate 2':
@@ -174,7 +172,7 @@ function getLexemsFromRackCode ($text)
 					case ($char == ']'):
 						$buffer = rtrim ($buffer);
 						if (mb_ereg ('[[:alnum:]]', mb_substr ($buffer, -1)) == 0)
-							abortLex1 ($state, $text, $i);
+							return abortLex1 ($state, $text, $i);
 						$ret[] = array ('type' => 'LEX_PREDICATE', 'load' => $buffer);
 						$newstate = 'ESOTSM';
 						break;
@@ -182,7 +180,7 @@ function getLexemsFromRackCode ($text)
 						$buffer .= $char;
 						break;
 					default:
-						abortLex1 ($state, $text, $i);
+						return abortLex1 ($state, $text, $i);
 				}
 				break;
 			case 'skipping comment':
@@ -200,8 +198,8 @@ function getLexemsFromRackCode ($text)
 		$state = $newstate;
 	endfor;
 	if ($state != 'ESOTSM' and $state != 'skipping comment')
-		abortLex3 ($state);
-	return $ret;
+		return abortLex3 ($state);
+	return array ('result' => 'ACK', 'load' => $ret);
 }
 
 // Parse the given lexems stream into a list of RackCode sentences. Each such
@@ -467,8 +465,8 @@ function getSentencesFromLexems ($lexems)
 		}
 		// The moment of truth.
 		if (count ($stack) == 1 and $stack[0]['type'] == 'SYNT_CODETEXT')
-			return $stack[0]['load'];
-		return NULL;
+			return array ('result' => 'ACK', 'load' => $stack[0]['load']);
+		return array ('result' => 'NAK', 'load' => 'Syntax error!');
 	}
 }
 
@@ -556,18 +554,27 @@ function gotClearanceForTagChain ($tagchain)
 	return FALSE;
 }
 
-function getRackCode ()
+function getRackCode ($text)
 {
-	// FIXME: handle errors and display a message with an option to reset RackCode text
-	// FIXME: perform semantical analysis to prove the tree be reference-wise error
-	// free regardless of evaluation order
-	$text = str_replace ("\r", '', loadScript ('RackCode')) . "\n";
-	return getSentencesFromLexems (getLexemsFromRackCode ($text));
+	if (!mb_strlen ($text))
+		return array ('result' => 'NAK', 'load' => 'The RackCode text was found empty in ' . __FUNCTION__);
+	$text = str_replace ("\r", '', $text) . "\n";
+	$lex = getLexemsFromRackCode ($text);
+	if ($lex['result'] != 'ACK')
+		return $lex;
+	$synt = getSentencesFromLexems ($lex['load']);
+	if ($synt['result'] != 'ACK')
+		return $synt;
+	// An empty sentence list is semantically valid, yet senseless,
+	// so checking intermediate result once more won't hurt.
+	if (!count ($synt['load']))
+		return array ('result' => 'NAK', 'load' => 'Empty parse tree found in ' . __FUNCTION__);
+	return semanticFilter ($synt['load']);
 }
 
 // Return true, if the given expression can be evaluated against the given
 // predicate list.
-function valid_expression ($plist, $expr)
+function valid_predrefs ($plist, $expr)
 {
 	switch ($expr['type'])
 	{
@@ -577,34 +584,33 @@ function valid_expression ($plist, $expr)
 		case 'LEX_PREDICATE':
 			return in_array ($expr['load'], $plist);
 		case 'SYNT_NOTEXPR':
-			return valid_expression ($plist, $expr['load']);
+			return valid_predrefs ($plist, $expr['load']);
 		case 'SYNT_BOOLOP':
-			return valid_expression ($plist, $expr['left']) and valid_expression ($plist, $expr['right']);
+			return valid_predrefs ($plist, $expr['left']) and valid_predrefs ($plist, $expr['right']);
 		default:
-			showError ("Validation error, cannot process expression type '${expr['type']}'", __FUNCTION__);
-			break;
+			return FALSE;
 	}
 }
 
-function valid_rackcode ($code)
+function semanticFilter ($code)
 {
 	$predicatelist = array();
 	foreach ($code as $sentence)
 		switch ($sentence['type'])
 		{
 			case 'SYNT_DEFINITION':
-				if (!valid_expression ($predicatelist, $sentence['definition']))
-					return FALSE;
+				if (!valid_predrefs ($predicatelist, $sentence['definition']))
+					return array ('result' => 'NAK', 'load' => 'cannot dereference definition sentence');
 				$predicatelist[] = $sentence['term'];
 				break;
 			case 'SYNT_GRANT':
-				if (!valid_expression ($predicatelist, $sentence['condition']))
-					return FALSE;
+				if (!valid_predrefs ($predicatelist, $sentence['condition']))
+					return array ('result' => 'NAK', 'load' => 'cannot dereference grant sentence');
 				break;
 			default:
-				return FALSE;
+				return array ('result' => 'NAK', 'load' => 'unknown sentence type');
 		}
-	return TRUE;
+	return array ('result' => 'ACK', 'load' => $code);
 }
 
 ?>

@@ -1350,9 +1350,10 @@ function saveRackCode ()
 	assertStringArg ('rackcode');
 	// For the test to succeed, unescape LFs, strip CRs.
 	$newcode = str_replace ('\r', '', str_replace ('\n', "\n", $_REQUEST['rackcode']));
-	if (!valid_rackcode (getSentencesFromLexems (getLexemsFromRackCode ($newcode))))
-		return "${root}?page=${pageno}&tab=${tabno}&error=" . urlencode ('Verification failed.');
-	if (saveScript ('RackCode', $_REQUEST['rackcode']))
+	$parseTree = getRackCode ($newcode);
+	if ($parseTree['result'] != 'ACK')
+		return "${root}?page=${pageno}&tab=${tabno}&error=" . urlencode ('Verification failed: ' . $parseTree['load']);
+	if (saveScript ('RackCode', $newcode))
 		return "${root}?page=${pageno}&tab=${tabno}&message=" . urlencode ('Saved successfully.');
 	else
 		return "${root}?page=${pageno}&tab=${tabno}&error=" . urlencode ('Save failed.');

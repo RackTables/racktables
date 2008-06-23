@@ -90,7 +90,16 @@ if (!count ($configCache))
 }
 
 require_once 'inc/code.php';
-$rackCode = getRackCode();
+// Depending on the 'result' value the 'load' carries either the
+// parse tree or error message.
+$rackCode = getRackCode (loadScript ('RackCode'));
+if ($rackCode['result'] != 'ACK')
+{
+	// FIXME: display a message with an option to reset RackCode text
+	showError ('Could not load the RackCode due to error: ' . $rackCode['load'], __FUNCTION__);
+	die;
+}
+$rackCode = $rackCode['load'];
 
 // Now init authentication.
 
