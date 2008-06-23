@@ -2728,6 +2728,13 @@ function renderSearchResults ()
 			$lasthit = 'ipv4vs';
 			$summary['ipv4vs'] = $tmp;
 		}
+		$tmp = getAccountSearchResult ($terms);
+		if (count ($tmp))
+		{
+			$nhits += count ($tmp);
+			$lasthit = 'user';
+			$summary['user'] = $tmp;
+		}
 	}
 	if ($nhits == 0)
 		echo "<center><h2>Nothing found for '${terms}'</h2></center>";
@@ -2764,6 +2771,9 @@ function renderSearchResults ()
 				break;
 			case 'ipv4vs':
 				echo "<script language='Javascript'>document.location='${root}?page=vservice&id=${record['id']}';//</script>";
+				break;
+			case 'user':
+				echo "<script language='Javascript'>document.location='${root}?page=user&user_id=${record['user_id']}';//</script>";
 				break;
 		}
 		return;
@@ -2840,7 +2850,21 @@ function renderSearchResults ()
 					{
 						echo "<tr class=row_${order}><td class=tdleft><a href='${root}?page=vservice&id=${vs['id']}'>";
 						echo buildVServiceName ($vs);
-						echo "</a></td><td>${vs['name']}</td></tr>";
+						echo "</a></td><td class=tdleft>${vs['name']}</td></tr>";
+						$order = $nextorder[$order];
+					}
+					echo '</table>';
+					finishPortlet();
+					break;
+				case 'user':
+					startPortlet ("<a href='${root}?page=userlist'>Users</a>");
+					echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
+					echo '<tr><th>username</th><th>realname</th></tr>';
+					foreach ($what as $item)
+					{
+						echo "<tr class=row_${order}><td class=tdleft><a href='${root}?page=user&user_id=${item['user_id']}'>";
+						echo $item['user_name'];
+						echo "</a></td><td class=tdleft>${item['user_realname']}</td></tr>";
 						$order = $nextorder[$order];
 					}
 					echo '</table>';

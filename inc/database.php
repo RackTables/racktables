@@ -1157,6 +1157,43 @@ function getIPv4VServiceSearchResult ($terms)
 	return $ret;
 }
 
+function getAccountSearchResult ($terms)
+{
+	return getSearchResultByField
+	(
+		'UserAccount',
+		array ('user_id', 'user_name', 'user_realname'),
+		'user_name',
+		$terms,
+		'user_name'
+	);
+}
+
+function getSearchResultByField ($tname, $rcolumns, $scolumn, $terms, $ocolumn = '')
+{
+	$pfx = '';
+	$query = 'select ';
+	foreach ($rcolumns as $col)
+	{
+		$query .= $pfx . $col;
+		$pfx = ', ';
+	}
+	$pfx = '';
+	$query .= " from ${tname} where ";
+	foreach (explode (' ', $terms) as $term)
+	{
+		$query .= $pfx . "${scolumn} like '%${term}%'";
+		$pfx = ' or ';
+	}
+	if ($ocolumn != '')
+		$query .= " order by ${ocolumn}";
+	$result = useSelectBlade ($query, __FUNCTION__);
+	$ret = array();
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
+		$ret[] = $row;
+	return $ret;
+}
+
 // This function returns either port ID or NULL for specified arguments.
 function getPortID ($object_id, $port_name)
 {
