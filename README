@@ -22,10 +22,12 @@ Fedora 8: yum install mysql-server mysql
 ALTLinux Compact 3.0: apt-get install MySQL-server MySQL-client
 ALTLinux Desktop 4.0: apt-get install MySQL-server 
 
-For web-frontend you must have Apache and PHP 5 with PDO extension:
+For web-frontend you must have Apache and PHP 5 with PDO and multibyte
+extensions:
 Fedora Core 6: # yum install httpd php php-mysql php-pdo php-gd
 Fedora 8: yum install httpd php php-mysql php-pdo php-gd php-snmp
-
+ALTLinux Server 4.0: apt-get install apache2-httpd-prefork php5-gd2 \
+php5-pdo_mysql php5-pdo apache2-mod_php5 php5-mbstring
 
 II. Prepare the server.
 1. Unpack the tarball and make it web-accessible, e.g. http://yourcompany.com/racktables
@@ -80,7 +82,25 @@ procedure should be sufficient:
 *                                                     *
 *******************************************************
 
-Upgrading to 0.14.12
+*** Upgrading to 0.14.12 ***
+
 The upgrade may show a failed query "alter database character set utf8", in
 this case the user should issue the query manually from the mysql command
 line.
+
+*** Upgrading to 0.16.0 ***
+
+This release features a completely new authorization system, RackCode,
+which brings the tags feature (introduced in 0.15.0) to its full potential.
+The old-style user permissions are converted during upgrade automatically,
+but the result may appear not what you would expect. Review the RackCode
+after upgrade (Main page -> Configuration -> Permissions) and adjust,
+if necessary.
+
+Another important change is a new dependency on "multibyte string" PHP
+extension. Normally one should get it working before starting the upgrade,
+this is typically achieved by installing a particular PHP RPM from the
+standard package repository (and restarting Apache after that):
+
+Fedora: yum install php-mbstring
+ALTLinux: apt-get install php5-mbstring

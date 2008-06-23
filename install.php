@@ -133,6 +133,25 @@ function platform_is_ok ()
 		echo '<td class=msg_warning>HTTP (all your passwords will be transmitted in cleartext)';
 	echo '</td></tr>';
 
+	echo '<tr><td>Multibyte string extension</td>';
+	if (defined ('MB_CASE_LOWER'))
+		echo '<td class=msg_success>Ok';
+	else
+	{
+		echo '<td class=msg_error>not found';
+		$nerrs++;
+	}
+	echo '</td></tr>';
+
+	echo '<tr><td>LDAP extension</td>';
+	if (defined ('LDAP_OPT_DEREF'))
+		echo '<td class=msg_success>Ok';
+	else
+	{
+		echo '<td class=msg_warning>not found, LDAP authentication will not work';
+	}
+	echo '</td></tr>';
+
 	echo "</table>\n";
 	return !$nerrs;
 }
