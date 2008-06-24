@@ -1309,7 +1309,7 @@ CREATE TABLE `TagTree` (
 			}
 			$query[] = "insert into Script (script_name, script_text) values ('RackCode', '${code}')";
 			$query[] = 'drop table UserPermission';
-			$query[] = "update Config set varvalue = '0.16.0' where varname = 'DB_VERSION'";\
+			$query[] = "update Config set varvalue = '0.16.0' where varname = 'DB_VERSION'";
 			break;
 		default:
 			showError ("executeUpgradeBatch () failed, because batch '${batchid}' isn't defined");
