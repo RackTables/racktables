@@ -1267,6 +1267,10 @@ CREATE TABLE `TagTree` (
 			$query[] = "update Config set varvalue = '0.15.1' where varname = 'DB_VERSION'";
 			break;
 		case '0.16.0':
+			if (!defined ('MB_CASE_LOWER'))
+			{
+				die ('<b>Cannot upgrade due to multibyte extension not present. See the README for details.</b>');
+			}
 			$query[] = 'alter table TagStorage modify column tag_id int(10) unsigned not null;';
 			$query[] = "alter table TagStorage modify column target_realm enum('object','ipv4net','rack','ipv4vs','ipv4rspool','user');";
 			$query[] = "delete from UserPermission where page = 'objects' and tab = 'newobj'";
@@ -1410,8 +1414,8 @@ if
 }
 
 $dbver = getDatabaseVersion();
-echo 'Code version == ' . CODE_VERSION;
-echo '<br>Database version == ' . $dbver;
+echo 'Code version == ' . CODE_VERSION . '<br>';
+echo 'Database version == ' . $dbver . '<br>';
 if ($dbver == CODE_VERSION)
 {
 	die ("<p align=justify>Your database seems to be up-to-date. " .

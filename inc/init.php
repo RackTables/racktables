@@ -47,7 +47,6 @@ catch (PDOException $e)
 }
 
 $dbxlink->exec ("set names 'utf8'");
-mb_internal_encoding ("UTF-8");
 
 if (get_magic_quotes_gpc())
 	foreach ($_REQUEST as $key => $value)
@@ -82,6 +81,7 @@ if ($dbver != CODE_VERSION)
 	die;
 }
 
+mb_internal_encoding ("UTF-8");
 $configCache = loadConfigCache();
 if (!count ($configCache))
 {
