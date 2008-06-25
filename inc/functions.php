@@ -1568,7 +1568,7 @@ function buildRedirectURL_ERR ($text, $p = NULL, $t = NULL)
 
 function validTagName ($s)
 {
-	return 1 == mb_ereg ('^[[:alnum:]]([ _-]?[[:alnum:]])*$', $s);
+	return 1 == mb_ereg (TAGNAME_REGEXP, $s);
 }
 
 ?>

@@ -81,7 +81,11 @@ if ($dbver != CODE_VERSION)
 	die;
 }
 
-mb_internal_encoding ("UTF-8");
+if (!mb_internal_encoding ('UTF-8') or !mb_regex_encoding ('UTF-8'))
+{
+	showError ('Failed setting multibyte string encoding to UTF-8');
+	die;
+}
 $configCache = loadConfigCache();
 if (!count ($configCache))
 {
