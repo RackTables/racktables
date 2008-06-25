@@ -1273,6 +1273,8 @@ function createTag ()
 	assertStringArg ('tag_name', __FUNCTION__);
 	assertUIntArg ('parent_id', __FUNCTION__, TRUE);
 	$tagname = trim ($_REQUEST['tag_name']);
+	if (!validTagName ($tagname))
+		return buildRedirectURL_ERR ("Invalid tag name '${tagname}'");
 	if (($parent_id = $_REQUEST['parent_id']) <= 0)
 		$parent_id = 'NULL';
 	if (($ret = commitCreateTag ($tagname, $parent_id)) == '')
@@ -1288,6 +1290,8 @@ function updateTag ()
 	assertUIntArg ('parent_id', __FUNCTION__, TRUE);
 	assertStringArg ('tag_name', __FUNCTION__);
 	$tagname = trim ($_REQUEST['tag_name']);
+	if (!validTagName ($tagname))
+		return buildRedirectURL_ERR ("Invalid tag name '${tagname}'");
 	if (($parent_id = $_REQUEST['parent_id']) <= 0)
 		$parent_id = 'NULL';
 	if (($ret = commitUpdateTag ($_REQUEST['tag_id'], $tagname, $parent_id)) == '')

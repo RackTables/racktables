@@ -1564,4 +1564,9 @@ function buildRedirectURL_ERR ($text, $p = NULL, $t = NULL)
 	return buildWideRedirectURL (array (array ('code' => 'error', 'message' => $text)), $p, $t);
 }
 
+function validTagName ($s)
+{
+	return 1 == mb_ereg ('^[[:alnum:]]([ _-]?[[:alnum:]])*$', $s);
+}
+
 ?>
