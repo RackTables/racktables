@@ -1211,20 +1211,20 @@ function saveEntityTags ($realm, $bypass)
 	assertUIntArg ($bypass, __FUNCTION__);
 	$entity_id = $_REQUEST[$bypass];
 	$taglist = isset ($_REQUEST['taglist']) ? $_REQUEST['taglist'] : array();
-	// Build a trail from the submitted data, minimize it,
+	// Build a chain from the submitted data, minimize it,
 	// then wipe existing records and store the new set instead.
 	deleteTagsForEntity ($realm, $entity_id);
-	$newtrail = getExplicitTagsOnly (buildTrailFromIds ($taglist));
+	$newchain = getExplicitTagsOnly (buildTagChainFromIds ($taglist));
 	$n_succeeds = $n_errors = 0;
-	foreach ($newtrail as $taginfo)
+	foreach ($newchain as $taginfo)
 		if (addTagForEntity ($realm, $entity_id, $taginfo['id']))
 			$n_succeeds++;
 		else
 			$n_errors++;
 	if ($n_errors)
-		return "${root}?page=${pageno}&tab=${tabno}&${bypass}=${entity_id}&error=" . urlencode ("Replaced trail with ${n_succeeds} tags, but experienced ${n_errors} errors.");
+		return buildRedirectURL_ERR ("Tried chaining ${n_succeeds} tags, but experienced ${n_errors} errors.");
 	else
-		return "${root}?page=${pageno}&tab=${tabno}&${bypass}=${entity_id}&message=" . urlencode ("New chain is ${n_succeeds} tags long");
+		return buildRedirectURL_OK ("Chained ${n_succeeds} tags");
 }
 
 function saveObjectTags ()
@@ -1312,7 +1312,7 @@ function rollTags ()
 	$racks = getRacksForRow ($row_id);
 	// Each time addTagForEntity() fails we assume it was just because of already existing record in its way.
 	$newtags = isset ($_REQUEST['taglist']) ? $_REQUEST['taglist'] : array();
-	$tagstack = getExplicitTagsOnly (buildTrailFromIds ($newtags));
+	$tagstack = getExplicitTagsOnly (buildTagChainFromIds ($newtags));
 	$ndupes = $nnew = 0;
 	foreach ($tagstack as $taginfo)
 		foreach ($racks as $rackInfo)

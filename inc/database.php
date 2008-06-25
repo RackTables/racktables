@@ -2491,7 +2491,7 @@ function executeAutoPorts ($object_id = 0, $type_id = 0)
 	return $ret;
 }
 
-// Return only implicitly listed tags, the rest of the trail will be
+// Return only implicitly listed tags, the rest of the chain will be
 // generated/deducted later at higher levels.
 function loadEntityTags ($entity_realm = '', $entity_id = 0)
 {

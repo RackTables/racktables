@@ -1258,11 +1258,11 @@ function getOrphanedTags ()
 	return array();
 }
 
-function serializeTags ($trail, $baseurl = '')
+function serializeTags ($chain, $baseurl = '')
 {
 	$comma = '';
 	$ret = '';
-	foreach ($trail as $taginfo)
+	foreach ($chain as $taginfo)
 	{
 		$ret .= $comma .
 			($baseurl == '' ? '' : "<a href='${baseurl}tagfilter[]=${taginfo['id']}'>") .
@@ -1273,16 +1273,16 @@ function serializeTags ($trail, $baseurl = '')
 	return $ret;
 }
 
-// a helper for getTrailExpansion()
-function traceTrail ($tree, $trail)
+// a helper for getTagChainExpansion()
+function traceTagChain ($tree, $chain)
 {
 	// For each tag find its path from the root, then combine items
-	// of all paths and add them to the trail, if they aren't there yet.
+	// of all paths and add them to the chain, if they aren't there yet.
 	$ret = array();
 	foreach ($tree as $taginfo1)
 	{
 		$hit = FALSE;
-		foreach ($trail as $taginfo2)
+		foreach ($chain as $taginfo2)
 			if ($taginfo1['id'] == $taginfo2['id'])
 			{
 				$hit = TRUE;
@@ -1290,7 +1290,7 @@ function traceTrail ($tree, $trail)
 			}
 		if (count ($taginfo1['kids']) > 0)
 		{
-			$subsearch = traceTrail ($taginfo1['kids'], $trail);
+			$subsearch = traceTagChain ($taginfo1['kids'], $chain);
 			if (count ($subsearch))
 			{
 				$hit = TRUE;
@@ -1304,18 +1304,18 @@ function traceTrail ($tree, $trail)
 }
 
 // For each tag add all its parent tags onto the list. Don't expect anything
-// except user's tags on the trail.
-function getTrailExpansion ($trail)
+// except user's tags on the chain.
+function getTagChainExpansion ($chain)
 {
 	global $tagtree;
-	return traceTrail ($tagtree, $trail);
+	return traceTagChain ($tagtree, $chain);
 }
 
 // Return the list of missing implicit tags.
 function getImplicitTags ($oldtags)
 {
 	$ret = array();
-	$newtags = getTrailExpansion ($oldtags);
+	$newtags = getTagChainExpansion ($oldtags);
 	foreach ($newtags as $newtag)
 	{
 		$already_exists = FALSE;
@@ -1332,8 +1332,8 @@ function getImplicitTags ($oldtags)
 	return $ret;
 }
 
-// Minimize the trail: exclude all implicit tags and return the resulting trail.
-function getExplicitTagsOnly ($trail, $tree = NULL)
+// Minimize the chain: exclude all implicit tags and return the result.
+function getExplicitTagsOnly ($chain, $tree = NULL)
 {
 	global $tagtree;
 	if ($tree === NULL)
@@ -1343,7 +1343,7 @@ function getExplicitTagsOnly ($trail, $tree = NULL)
 	{
 		if (isset ($taginfo['kids']))
 		{
-			$harvest = getExplicitTagsOnly ($trail, $taginfo['kids']);
+			$harvest = getExplicitTagsOnly ($chain, $taginfo['kids']);
 			if (count ($harvest) > 0)
 			{
 				$ret = array_merge ($ret, $harvest);
@@ -1351,7 +1351,7 @@ function getExplicitTagsOnly ($trail, $tree = NULL)
 			}
 		}
 		// This tag isn't implicit, test is for being explicit.
-		foreach ($trail as $testtag)
+		foreach ($chain as $testtag)
 			if ($taginfo['id'] == $testtag['id'])
 			{
 				$ret[] = $testtag;
@@ -1361,7 +1361,7 @@ function getExplicitTagsOnly ($trail, $tree = NULL)
 	return $ret;
 }
 
-// Maximize the trail: for each tag add all tags, for which it is direct or indirect parent.
+// Maximize the chain: for each tag add all tags, for which it is direct or indirect parent.
 // Unlike other functions, this one accepts and returns a list of integer tag IDs, not
 // a list of tag structures.
 function complementByKids ($idlist, $tree = NULL, $getall = FALSE)
@@ -1488,8 +1488,8 @@ function getUserAutoTags ()
 	return $ret;
 }
 
-// Build a tag trail from supplied tag id list and return it.
-function buildTrailFromIds ($tagidlist)
+// Build a tag chain from supplied tag id list and return it.
+function buildTagChainFromIds ($tagidlist)
 {
 	global $taglist;
 	$ret = array();
@@ -1537,7 +1537,7 @@ function getTagFilter ()
 function getTagFilterStr ($tagfilter = array())
 {
 	$ret = '';
-	foreach (getExplicitTagsOnly (buildTrailFromIds ($tagfilter)) as $taginfo)
+	foreach (getExplicitTagsOnly (buildTagChainFromIds ($tagfilter)) as $taginfo)
 		$ret .= "&tagfilter[]=" . $taginfo['id'];
 	return $ret;
 }
