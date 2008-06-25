@@ -1566,9 +1566,13 @@ function buildRedirectURL_ERR ($text, $p = NULL, $t = NULL)
 	return buildWideRedirectURL (array (array ('code' => 'error', 'message' => $text)), $p, $t);
 }
 
-function validTagName ($s)
+function validTagName ($s, $allow_autotag = FALSE)
 {
-	return 1 == mb_ereg (TAGNAME_REGEXP, $s);
+	if (1 == mb_ereg (TAGNAME_REGEXP, $s))
+		return TRUE;
+	if ($allow_autotag and 1 == mb_ereg (AUTOTAGNAME_REGEXP, $s))
+		return TRUE;
+	return FALSE;
 }
 
 ?>

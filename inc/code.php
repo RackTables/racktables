@@ -18,7 +18,7 @@
  */
 
 // Complain about martian char.
-function abortLex1 ($state, $text, $pos)
+function lexError1 ($state, $text, $pos)
 {
 	$message = "invalid char with code " . ord (mb_substr ($text, $pos, 1));
 	$message .= " at position ${pos} (FSM state is '${state}')";
@@ -26,7 +26,7 @@ function abortLex1 ($state, $text, $pos)
 }
 
 // Complain about martian keyword.
-function abortLex2 ($word)
+function lexError2 ($word)
 {
 	return array
 	(
@@ -36,12 +36,21 @@ function abortLex2 ($word)
 }
 
 // Complain about wrong FSM state.
-function abortLex3 ($state)
+function lexError3 ($state)
 {
 	return array
 	(
 		'result' => 'NAK',
 		'load' => "FSM state is still '${state}' at end of input"
+	);
+}
+
+function lexError4 ($s)
+{
+	return array
+	(
+		'result' => 'NAK',
+		'load' => "Invalid tag or predicate name '${s}'"
 	);
 }
 
@@ -81,7 +90,7 @@ function getLexemsFromRackCode ($text)
 						$newstate = 'reading predicate 1';
 						break;
 					default:
-						return abortLex1 ($state, $text, $i);
+						return lexError1 ($state, $text, $i);
 				}
 				break;
 			case 'reading keyword':
@@ -113,12 +122,12 @@ function getLexemsFromRackCode ($text)
 								$ret[] = array ('type' => 'LEX_BOOLCONST', 'load' => $buffer);
 								break;
 							default:
-								return abortLex2 ($buffer);
+								return lexError2 ($buffer);
 						}
 						$newstate = 'ESOTSM';
 						break;
 					default:
-						return abortLex1 ($state, $text, $i);
+						return lexError1 ($state, $text, $i);
 				}
 				break;
 			case 'reading tag 1':
@@ -127,12 +136,12 @@ function getLexemsFromRackCode ($text)
 					case (preg_match ('/^[ \t\n\r]$/', $char)):
 						// nom-nom...
 						break;
-					case (mb_ereg ('[[:alpha:]\$]', $char) > 0):
+					case (mb_ereg ('[[:alnum:]\$]', $char) > 0):
 						$buffer = $char;
 						$newstate = 'reading tag 2';
 						break;
 					default:
-						return abortLex1 ($state, $text, $i);
+						return lexError1 ($state, $text, $i);
 				}
 				break;
 			case 'reading tag 2':
@@ -140,16 +149,16 @@ function getLexemsFromRackCode ($text)
 				{
 					case ($char == '}'):
 						$buffer = rtrim ($buffer);
-						if (mb_ereg ('[[:alnum:]]', mb_substr ($buffer, -1)) == 0)
-							return abortLex1 ($state, $text, $i);
+						if (!validTagName ($buffer, TRUE))
+							return lexError4 ($buffer);
 						$ret[] = array ('type' => 'LEX_TAG', 'load' => $buffer);
 						$newstate = 'ESOTSM';
 						break;
-					case (mb_ereg ('[[:alnum:] _-]', $char) > 0):
+					case (mb_ereg ('[[:alnum:]\. _-]', $char) > 0):
 						$buffer .= $char;
 						break;
 					default:
-						return abortLex1 ($state, $text, $i);
+						return lexError1 ($state, $text, $i);
 				}
 				break;
 			case 'reading predicate 1':
@@ -158,12 +167,12 @@ function getLexemsFromRackCode ($text)
 					case (preg_match ('/^[ \t\n\r]$/', $char)):
 						// nom-nom...
 						break;
-					case (mb_ereg ('[[:alpha:]]', $char) > 0):
+					case (mb_ereg ('[[:alnum:]]', $char) > 0):
 						$buffer = $char;
 						$newstate = 'reading predicate 2';
 						break;
 					default:
-						return abortLex1 ($state, $text, $i);
+						return lexError1 ($state, $text, $i);
 				}
 				break;
 			case 'reading predicate 2':
@@ -171,16 +180,16 @@ function getLexemsFromRackCode ($text)
 				{
 					case ($char == ']'):
 						$buffer = rtrim ($buffer);
-						if (mb_ereg ('[[:alnum:]]', mb_substr ($buffer, -1)) == 0)
-							return abortLex1 ($state, $text, $i);
+						if (!validTagName ($buffer))
+							return lexError4 ($buffer);
 						$ret[] = array ('type' => 'LEX_PREDICATE', 'load' => $buffer);
 						$newstate = 'ESOTSM';
 						break;
-					case (mb_ereg ('[[:alnum:] _-]', $char) > 0):
+					case (mb_ereg ('[[:alnum:]\. _-]', $char) > 0):
 						$buffer .= $char;
 						break;
 					default:
-						return abortLex1 ($state, $text, $i);
+						return lexError1 ($state, $text, $i);
 				}
 				break;
 			case 'skipping comment':
@@ -198,7 +207,7 @@ function getLexemsFromRackCode ($text)
 		$state = $newstate;
 	endfor;
 	if ($state != 'ESOTSM' and $state != 'skipping comment')
-		return abortLex3 ($state);
+		return lexError3 ($state);
 	return array ('result' => 'ACK', 'load' => $ret);
 }
 
