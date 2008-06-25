@@ -572,23 +572,27 @@ function getRackCode ($text)
 	return semanticFilter ($synt['load']);
 }
 
-// Return true, if the given expression can be evaluated against the given
-// predicate list.
-function valid_predrefs ($plist, $expr)
+// Return NULL, if the given expression can be evaluated against the given
+// predicate list. Return the name of the first show stopper otherwise.
+function firstUnrefPredicate ($plist, $expr)
 {
 	switch ($expr['type'])
 	{
 		case 'LEX_BOOLCONST':
 		case 'LEX_TAG':
-			return TRUE;
+			return NULL;
 		case 'LEX_PREDICATE':
-			return in_array ($expr['load'], $plist);
+			return in_array ($expr['load'], $plist) ? NULL : $expr['load'];
 		case 'SYNT_NOTEXPR':
-			return valid_predrefs ($plist, $expr['load']);
+			return firstUnrefPredicate ($plist, $expr['load']);
 		case 'SYNT_BOOLOP':
-			return valid_predrefs ($plist, $expr['left']) and valid_predrefs ($plist, $expr['right']);
+			if (($tmp = firstUnrefPredicate ($plist, $expr['left'])) !== NULL)
+				return $tmp;
+			if (($tmp = firstUnrefPredicate ($plist, $expr['right'])) !== NULL)
+				return $tmp;
+			return NULL;
 		default:
-			return FALSE;
+			return NULL;
 	}
 }
 
@@ -599,13 +603,23 @@ function semanticFilter ($code)
 		switch ($sentence['type'])
 		{
 			case 'SYNT_DEFINITION':
-				if (!valid_predrefs ($predicatelist, $sentence['definition']))
-					return array ('result' => 'NAK', 'load' => 'cannot dereference definition sentence');
+				$up = firstUnrefPredicate ($predicatelist, $sentence['definition']);
+				if ($up !== NULL)
+					return array
+					(
+						'result' => 'NAK',
+						'load' => "definition [${sentence['term']}] uses unknown predicate [${up}]"
+					);
 				$predicatelist[] = $sentence['term'];
 				break;
 			case 'SYNT_GRANT':
-				if (!valid_predrefs ($predicatelist, $sentence['condition']))
-					return array ('result' => 'NAK', 'load' => 'cannot dereference grant sentence');
+				$up = firstUnrefPredicate ($predicatelist, $sentence['condition']);
+				if ($up !== NULL)
+					return array
+					(
+						'result' => 'NAK',
+						'load' => "grant sentence uses unknown predicate [${up}]"
+					);
 				break;
 			default:
 				return array ('result' => 'NAK', 'load' => 'unknown sentence type');
