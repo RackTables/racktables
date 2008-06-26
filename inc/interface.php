@@ -1618,7 +1618,7 @@ function renderObjectGroup ()
 	echo '</td><td class=pcleft>';
 
 	startPortlet ('Objects');
-	$objects = getObjectList ($group_id, $tagfilter);
+	$objects = getObjectList ($group_id, $tagfilter, getTFMode());
 	if ($objects === NULL)
 	{
 		showError ('getObjectList() failed', __FUNCTION__);
@@ -1806,7 +1806,7 @@ function renderAddressspace ()
 	startPortlet ('Subnets');
 	echo "<table class='widetable' border=0 cellpadding=10 cellspacing=0 align='center'>\n";
 	$tagfilter = getTagFilter();
-	$addrspaceList = getAddressspaceList ($tagfilter);
+	$addrspaceList = getAddressspaceList ($tagfilter, getTFMode());
 	echo "<tr><th>Subnet</th><th>Name</th><th>Utilization</th></tr>";
 	foreach ($addrspaceList as $iprange)
 	{
@@ -2917,7 +2917,7 @@ function renderUserList ()
 	echo "<tr><th class=tdleft>Username</th><th class=tdleft>Real name</th></tr>";
 	$order = 'odd';
 	$tagfilter = getTagFilter();
-	foreach (getUserAccounts ($tagfilter) as $user)
+	foreach (getUserAccounts ($tagfilter, getTFMode()) as $user)
 	{
 		echo "<tr class=row_${order}><td class=tdleft><a href='${root}?page=user&user_id=${user['user_id']}'>";
 		echo "${user['user_name']}</a></td>";
@@ -4194,7 +4194,7 @@ function renderVSList ()
 {
 	global $root, $nextorder;
 	$tagfilter = getTagFilter();
-	$vslist = getVSList ($tagfilter);
+	$vslist = getVSList ($tagfilter, getTFMode());
 	echo "<table border=0 class=objectview>\n";
 	echo "<tr><td class=pcleft>";
 
@@ -4290,7 +4290,7 @@ function renderRSPoolList ()
 {
 	global $root, $nextorder;
 	$tagfilter = getTagFilter();
-	$pool_list = getRSPoolList ($tagfilter);
+	$pool_list = getRSPoolList ($tagfilter, getTFMode());
 	if ($pool_list === NULL)
 	{
 		showError ('getRSPoolList() failed', __FUNCTION__);
@@ -4848,7 +4848,15 @@ function printTagTRs ($baseurl = '')
 	}
 }
 
-// Output a portlet, with currently selected tags and prepare a form for update.
+// Detect, filter and return requested tag filter mode: either 'and' or 'or'.
+function getTFMode ()
+{
+	if (isset ($_REQUEST['tfmode']) and $_REQUEST['tfmode'] == 'all')
+		return 'all';
+	return 'any';
+}
+
+// Output a portlet with currently selected tags and prepare a form for update.
 function renderTagFilterPortlet ($tagfilter, $realm, $bypass_name = '', $bypass_value = '')
 {
 	global $pageno, $tabno, $taglist, $tagtree;
@@ -4868,6 +4876,9 @@ function renderTagFilterPortlet ($tagfilter, $realm, $bypass_name = '', $bypass_
 	foreach ($objectivetags as $taginfo)
 		renderTagOptionForFilter ($taginfo, $tagfilter, $realm);
 	echo '</select><br>';
+	$tfmode = getTFMode();
+	echo '<input type=radio name=tfmode value=all' . ($tfmode == 'all' ? ' checked' : '') . '>all ';
+	echo '<input type=radio name=tfmode value=any' . ($tfmode == 'any' ? ' checked' : '') . '>any ';
 	echo "<input type=submit value='Apply'></form>\n";
 	finishPortlet();
 }

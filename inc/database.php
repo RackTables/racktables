@@ -16,9 +16,9 @@ function escapeString ($value, $do_db_escape = TRUE)
 	return $ret;
 }
 
-function getRackspace ($tagfilter = array())
+function getRackspace ($tagfilter = array(), $tfmode = 'any')
 {
-	$whereclause = getWhereClause ($tagfilter);
+	$whereclause = getWhereClause ($tagfilter, $tfmode);
 	$query =
 		"select dict_key as row_id, dict_value as row_name " .
 		"from Chapter natural join Dictionary left join Rack on Rack.row_id = dict_key " .
@@ -61,26 +61,26 @@ function getObjectTypeList ()
 
 // Return a part of SQL query suitable for embeding into a bigger text.
 // The returned result should list all tag IDs shown in the tag filter.
-function getWhereClause ($tagfilter = array())
+function getWhereClause ($tagfilter = array(), $tfmode = 'any')
 {
 	$whereclause = '';
 	if (count ($tagfilter))
 	{
 		$whereclause .= ' and (';
-		$orclause = '';
+		$conj = '';
 		foreach ($tagfilter as $tag_id)
 		{
-			$whereclause .= $orclause . 'tag_id = ' . $tag_id;
-			$orclause = ' or ';
+			$whereclause .= $conj . 'tag_id = ' . $tag_id;
+			$conj = ($tfmode == 'any' ? ' or ' : ' and ');
 		}
 		$whereclause .= ') ';
 	}
 	return $whereclause;
 }
 
-function getObjectList ($type_id = 0, $tagfilter = array())
+function getObjectList ($type_id = 0, $tagfilter = array(), $tfmode = 'any')
 {
-	$whereclause = getWhereClause ($tagfilter);
+	$whereclause = getWhereClause ($tagfilter, $tfmode);
 	if ($type_id != 0)
 		$whereclause .= " and objtype_id = '${type_id}' ";
 	$query =
@@ -116,7 +116,7 @@ function getObjectList ($type_id = 0, $tagfilter = array())
 	return $ret;
 }
 
-function getRacksForRow ($row_id = 0, $tagfilter = array())
+function getRacksForRow ($row_id = 0, $tagfilter = array(), $tfmode = 'any')
 {
 	$query =
 		"select Rack.id, Rack.name, height, Rack.comment, row_id, " .
@@ -125,7 +125,7 @@ function getRacksForRow ($row_id = 0, $tagfilter = array())
 		"left join TagStorage on Rack.id = TagStorage.target_id and target_realm = 'rack' " .
 		"where chapter_name = 'RackRow' and Rack.deleted = 'no' " .
 		(($row_id == 0) ? "" : "and row_id = ${row_id} ") .
-		getWhereClause ($tagfilter) .
+		getWhereClause ($tagfilter, $tfmode) .
 		" order by row_name, Rack.id";
 	$result = useSelectBlade ($query, __FUNCTION__);
 	$ret = array();
@@ -948,9 +948,9 @@ function getObjectAddresses ($object_id = 0)
 	return $ret;
 }
 
-function getAddressspaceList ($tagfilter = array())
+function getAddressspaceList ($tagfilter = array(), $tfmode = 'any')
 {
-	$whereclause = getWhereClause ($tagfilter);
+	$whereclause = getWhereClause ($tagfilter, $tfmode);
 	$query =
 		"select distinct ".
 		"id as IPRanges_id, ".
@@ -1058,9 +1058,9 @@ function unbindIpFromObject ($ip='', $object_id=0)
 }
 
 // This function returns either all or one user account. Array key is user name.
-function getUserAccounts ($tagfilter = array())
+function getUserAccounts ($tagfilter = array(), $tfmode = 'any')
 {
-	$whereclause = getWhereClause ($tagfilter);
+	$whereclause = getWhereClause ($tagfilter, $tfmode);
 	$query =
 		'select user_id, user_name, user_password_hash, user_realname, user_enabled ' .
 		'from UserAccount left join TagStorage ' .
@@ -2254,9 +2254,9 @@ function commitUpdateVS ($vsid = 0, $vip = '', $vport = 0, $proto = '', $name = 
 
 // Return the list of virtual services, indexed by vs_id.
 // Each record will be shown with its basic info plus RS pools counter.
-function getVSList ($tagfilter = array())
+function getVSList ($tagfilter = array(), $tfmode = 'any')
 {
-	$whereclause = getWhereClause ($tagfilter);
+	$whereclause = getWhereClause ($tagfilter, $tfmode);
 	$query = "select vs.id, inet_ntoa(vip) as vip, vport, proto, vs.name, vs.vsconfig, vs.rsconfig, count(rspool_id) as poolcount " .
 		"from IPVirtualService as vs left join IPLoadBalancer as lb on vs.id = lb.vs_id " .
 		"left join TagStorage on vs.id = TagStorage.target_id and target_realm = 'ipv4vs' " . 
@@ -2271,9 +2271,9 @@ function getVSList ($tagfilter = array())
 }
 
 // Return the list of RS pool, indexed by pool id.
-function getRSPoolList ($tagfilter = array())
+function getRSPoolList ($tagfilter = array(), $tfmode = 'any')
 {
-	$whereclause = getWhereClause ($tagfilter);
+	$whereclause = getWhereClause ($tagfilter, $tfmode);
 	$query = "select pool.id, pool.name, count(rspool_id) as refcnt, pool.vsconfig, pool.rsconfig " .
 		"from IPRSPool as pool left join IPLoadBalancer as lb on pool.id = lb.rspool_id " .
 		"left join TagStorage on pool.id = TagStorage.target_id and target_realm = 'ipv4rspool' " .
