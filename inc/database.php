@@ -78,8 +78,42 @@ function getWhereClause ($tagfilter = array(), $tfmode = 'any')
 	return $whereclause;
 }
 
+// Return a simple object list w/o related information.
+function getNarrowObjectList ($type_id = 0)
+{
+	$ret = array();
+	if (!$type_id)
+	{
+		showError ('Invalid argument', __FUNCTION__);
+		return $ret;
+	}
+	// object type id is known and constant, but it's Ok to have this standard overhead
+	$query =
+		"select RackObject.id as id, RackObject.name as name, dict_value as objtype_name, " .
+		"objtype_id from " .
+		"RackObject inner join Dictionary on objtype_id=dict_key natural join Chapter " .
+		"where RackObject.deleted = 'no' and chapter_name = 'RackObjectType' " .
+		"and objtype_id = ${type_id} " .
+		"order by name";
+	$result = useSelectBlade ($query, __FUNCTION__);
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
+	{
+		foreach (array (
+			'id',
+			'name',
+			'objtype_name',
+			'objtype_id'
+			) as $cname)
+			$ret[$row['id']][$cname] = $row[$cname];
+		$ret[$row['id']]['dname'] = displayedName ($ret[$row['id']]);
+	}
+	return $ret;
+}
+
+// Return a filtered, detailed object list.
 function getObjectList ($type_id = 0, $tagfilter = array(), $tfmode = 'any')
 {
+echo 'DEBUG1';
 	$whereclause = getWhereClause ($tagfilter, $tfmode);
 	if ($type_id != 0)
 		$whereclause .= " and objtype_id = '${type_id}' ";

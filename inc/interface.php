@@ -2385,7 +2385,7 @@ function renderIPAddressAssignment ()
 	echo "</td><td><select name='object_id'>";
 
 	foreach (explode (',', getConfigVar ('IPV4_PERFORMERS')) as $type) 
-		foreach (getObjectList ($type) as $object)
+		foreach (getNarrowObjectList ($type) as $object)
 			echo "<option value='${object['id']}'>${object['dname']}</option>";
 
 	echo "</select></td><td><input type='text' name='bond_name' value='' size=10></td>";
@@ -4106,11 +4106,8 @@ function renderRSPoolLBForm ($pool_id = 0)
 	echo "<input type=hidden name=pool_id value='${pool_id}'>";
 	echo "<tr valign=top><th>LB / VS</th><td class=tdleft><select name='object_id' tabindex=1>";
 	foreach (explode (',', getConfigVar ('NATV4_PERFORMERS')) as $type)
-	{
-		$objects = getObjectList ($type);
-		foreach ($objects as $object)
+		foreach (getNarrowObjectList ($type) as $object)
 			echo "<option value='${object['id']}'>${object['dname']}</option>";
-	}
 	echo "</select> ";
 	printSelect ($vs_list, 'vs_id');
 	echo "</td><td>";
