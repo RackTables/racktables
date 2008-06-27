@@ -430,12 +430,15 @@ function showTabs ($pageno, $tabno)
 		if (!permitted ($pageno, $tabidx))
 			continue;
 		// Dynamic tabs should only be shown in certain cases (trigger exists and returns true).
-		if
-		(
-			isset ($trigger[$pageno][$tabidx]) &&
-			$trigger[$pageno][$tabidx] () != TRUE
-		)
-			continue;
+		if (isset ($trigger[$pageno][$tabidx]))
+		{
+//			$t1 = microtime (TRUE);
+			$ok = $trigger[$pageno][$tabidx] ();
+//			$t2 = microtime (TRUE);
+//			echo 'DEBUG: ' . $trigger[$pageno][$tabidx] . ': ' . sprintf ('%0.4f', $t2 - $t1) . '<br>';
+			if (!$ok)
+				continue;
+		}
 		$class = ($tabidx == $tabno) ? 'current' : 'std';
 		$extra = (isset ($tabextraclass[$pageno][$tabidx])) ? $tabextraclass[$pageno][$tabidx] : '';
 		echo "<li><a class=${class}{$extra}";
