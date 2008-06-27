@@ -4808,9 +4808,9 @@ function renderEntityTagChainEditor ($entity_realm = '', $bypass_name, $entity_i
 		showError ('Invalid or missing arguments', __FUNCTION__);
 		return;
 	}
-	global $root, $pageno, $tabno;
+	global $root, $pageno, $tabno, $expl_tags;
 	showMessageOrError();
-	startPortlet ('Tag list');
+	startPortlet ('Tag list (' . count ($expl_tags) . ')');
 	echo "<form method=post action='${root}process.php'>\n";
 	echo "<input type=hidden name=page value=${pageno}>\n";
 	echo "<input type=hidden name=tab value=${tabno}>\n";

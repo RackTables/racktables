@@ -11,6 +11,7 @@ function doSNMPmining ($object_id, $community)
 // 3560: http://cisco.com/en/US/products/hw/switches/ps5528/products_data_sheet09186a00801f3d7f.html
 // 3750: http://cisco.com/en/US/products/hw/switches/ps5023/products_data_sheet09186a008016136f.html
 
+	// Cisco sysObjectID to model (not product number, i.e. image code is missing) decoder
 	$ciscomodel = array
 	(
 		283 => 'WS-C6509-E (9-slot system)',
@@ -38,7 +39,9 @@ function doSNMPmining ($object_id, $community)
 		659 => 'WS-C4948-10GE (48 Ethernet 10/100/1000 ports and 2 10Gb X2 uplinks)',
 		428 => 'WS-C2950G-24 (24 Ethernet 10/100 ports and 2 1000 GBIC uplinks)',
 		429 => 'WS-C2950G-48 (48 Ethernet 10/100 ports and 2 1000 GBIC uplinks)',
+		559 => 'WS-C2950T-48 (48 Ethernet 10/100 ports and 2 10/100/1000 uplinks)',
 	);
+	// Cisco sysObjectID to Dictionary dict_key map
 	$hwtype = array
 	(
 		283 => 148,
@@ -62,6 +65,7 @@ function doSNMPmining ($object_id, $community)
 		659 => 377,
 		428 => 389,
 		429 => 390,
+		559 => 387,
 	);
 
 	$objectInfo = getObjectInfo ($object_id);
@@ -244,6 +248,7 @@ function doSNMPmining ($object_id, $community)
 			}
 			break;
 		case '429': // WS-C2950G-48
+		case '559': // WS-C2950T-48
 			for ($i = 1; $i <= 48; $i++)
 			{
 				$label = "${i}X";
