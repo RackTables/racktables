@@ -4300,11 +4300,11 @@ function renderRSPoolList ()
 	$order = 'odd';
 	foreach ($pool_list as $pool_id => $pool_info)
 	{
-		echo "<tr valign=top class=row_${order}><td>" . ($pool_info['refcnt'] ? $pool_info['refcnt'] : '&nbsp;') . '</td>';
-		echo "<td><a href='${root}?page=rspool&pool_id=${pool_id}'>";
+		echo "<tr valign=top class=row_${order}><td class=tdleft>" . ($pool_info['refcnt'] ? $pool_info['refcnt'] : '&nbsp;') . '</td>';
+		echo "<td class=tdleft><a href='${root}?page=rspool&pool_id=${pool_id}'>";
 		echo (empty ($pool_info['name']) ? 'ANONYMOUS' : $pool_info['name']) . '</a></td>';
-		echo "<td><pre>${pool_info['vsconfig']}</pre></td>";
-		echo "<td><pre>${pool_info['rsconfig']}</pre></td>";
+		echo "<td class=tdleft><pre>${pool_info['vsconfig']}</pre></td>";
+		echo "<td class=tdleft><pre>${pool_info['rsconfig']}</pre></td>";
 		echo "</tr>\n";
 		$order = $nextorder[$order];
 	}
