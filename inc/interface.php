@@ -1831,7 +1831,7 @@ function renderIPv4SLB ()
 
 	startPortlet ('SLB configuration');
 	echo "<table border=0 width='100%'><tr>";
-	foreach (array ('vservices', 'rspools', 'rservers', 'lbs') as $pno)
+	foreach (array ('ipv4vslist', 'rspools', 'rservers', 'lbs') as $pno)
 		echo "<td><h3><a href='${root}?page=${pno}'>" . $page[$pno]['title'] . "</a></h3></td>";
 	echo '</tr></table>';
 	finishPortlet();
@@ -2840,7 +2840,7 @@ function renderSearchResults ()
 					finishPortlet();
 					break;
 				case 'ipv4vs':
-					startPortlet ("<a href='${root}?page=vservices'>Virtual services</a>");
+					startPortlet ("<a href='${root}?page=ipv4vslist'>Virtual services</a>");
 					echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
 					echo '<tr><th>VS</th><th>Descritpion</th></tr>';
 					foreach ($what as $vs)
@@ -3884,7 +3884,7 @@ function renderVirtualService ()
 	echo "<tr><th width='50%' class=tdright>Protocol:</th><td class=tdleft>${vsinfo['proto']}</td></tr>\n";
 	echo "<tr><th width='50%' class=tdright>Virtual IP address:</th><td class=tdleft><a href='${root}?page=ipaddress&tab=default&ip=${vsinfo['vip']}'>${vsinfo['vip']}</a></td></tr>\n";
 	echo "<tr><th width='50%' class=tdright>Virtual port:</th><td class=tdleft>${vsinfo['vport']}</td></tr>\n";
-	printTagTRs ("${root}?page=vservices&");
+	printTagTRs ("${root}?page=ipv4vslist&");
 	if (!empty ($vsinfo['vsconfig']))
 	{
 		echo "<tr><th width='50%' class=tdright>VS configuration:</th><td class=tdleft>&nbsp;</td></tr>\n";
@@ -4192,7 +4192,7 @@ function renderVSList ()
 	echo "<table border=0 class=objectview>\n";
 	echo "<tr><td class=pcleft>";
 
-	startPortlet ('Virtual services');
+	startPortlet ('Virtual services (' . count ($vslist) . ')');
 	echo "<table class=widetable border=0 cellpadding=10 cellspacing=0 align=center>\n";
 	echo "<tr><th>endpoint</th><th>name</th><th>VS configuration</th><th>RS configuration</th></tr>";
 	$order = 'odd';
@@ -4217,14 +4217,38 @@ function renderVSListEditForm ()
 {
 	global $root, $pageno, $tabno, $nextorder;
 	showMessageOrError();
+	$protocols = array ('TCP' => 'TCP', 'UDP' => 'UDP');
 
-	startPortlet ('Manage existing');
+	startPortlet ('Add new');
+	echo "<form method=post action='${root}process.php'>\n";
+	echo "<input type=hidden name=page value=${pageno}>\n";
+	echo "<input type=hidden name=tab value=${tabno}>\n";
+	echo "<input type=hidden name=op value=add>\n";
+	echo "<table class=widetable border=0 cellpadding=10 cellspacing=0 align=center>\n";
+	echo "<tr><th>&nbsp;</th><th>VIP</th><th>port</th><th>proto</th><th>name</th><th>&nbsp;</th></tr>";
+	echo "<tr valign=top><td>&nbsp;</td>";
+	echo "<td><input type=text name=vip tabindex=1></td>";
+	$default_port = getConfigVar ('DEFAULT_SLB_VS_PORT');
+	if ($default_port == 0)
+		$default_port = '';
+	echo "<td><input type=text name=vport size=5 value='${default_port}' tabindex=2></td><td>";
+	printSelect ($protocols, 'proto', 'TCP');
+	echo "</td>";
+	echo "<td><input type=text name=name tabindex=4></td>";
+	echo "<td rowspan=3 valign=middle><input type=submit value=OK tabindex=5></td></tr>";
+	echo "<tr><th>VS configuration</th><td colspan=4 class=tdleft><textarea name=vsconfig rows=10 cols=80></textarea></td></tr>";
+	echo "<tr><th>RS configuration</th><td colspan=4 class=tdleft><textarea name=rsconfig rows=10 cols=80></textarea></td></tr>";
+	echo "</table>";
+	echo "</form>\n";
+	finishPortlet();
+
+	$vslist = getVSList();
+	startPortlet ('Manage existing (' . count ($vslist) . ')');
 	echo "<table class=cooltable border=0 cellpadding=10 cellspacing=0 align=center>\n";
 	echo "<tr><th>&nbsp;</th><th>VIP</th><th>port</th><th>proto</th><th>name</th>";
 	echo "<th>VS configuration</th><th>RS configuration</th><th></th></tr>";
-	$protocols = array ('TCP' => 'TCP', 'UDP' => 'UDP');
 	$order = 'odd';
-	foreach (getVSList() as $vsid => $vsinfo)
+	foreach ($vslist as $vsid => $vsinfo)
 	{
 		echo "<form method=post action='${root}process.php'>\n";
 		echo "<input type=hidden name=page value=${pageno}>\n";
@@ -4253,30 +4277,6 @@ function renderVSListEditForm ()
 		$order = $nextorder[$order];
 	}
 	echo "</table>";
-	finishPortlet();
-
-	startPortlet ('Add new');
-	echo "<form method=post action='${root}process.php'>\n";
-	echo "<input type=hidden name=page value=${pageno}>\n";
-	echo "<input type=hidden name=tab value=${tabno}>\n";
-	echo "<input type=hidden name=op value=add>\n";
-	echo "<input type=hidden name=id value=${vsid}>\n";
-	echo "<table class=widetable border=0 cellpadding=10 cellspacing=0 align=center>\n";
-	echo "<tr><th>&nbsp;</th><th>VIP</th><th>port</th><th>proto</th><th>name</th><th>&nbsp;</th></tr>";
-	echo "<tr valign=top><td>&nbsp;</td>";
-	echo "<td><input type=text name=vip tabindex=1></td>";
-	$default_port = getConfigVar ('DEFAULT_SLB_VS_PORT');
-	if ($default_port == 0)
-		$default_port = '';
-	echo "<td><input type=text name=vport size=5 value='${default_port}' tabindex=2></td><td>";
-	printSelect ($protocols, 'proto', 'TCP');
-	echo "</td>";
-	echo "<td><input type=text name=name tabindex=4></td>";
-	echo "<td rowspan=3 valign=middle><input type=submit value=OK tabindex=5></td></tr>";
-	echo "<tr><th>VS configuration</th><td colspan=4 class=tdleft><textarea name=vsconfig rows=10 cols=80></textarea></td></tr>";
-	echo "<tr><th>RS configuration</th><td colspan=4 class=tdleft><textarea name=rsconfig rows=10 cols=80></textarea></td></tr>";
-	echo "</table>";
-	echo "</form>\n";
 	finishPortlet();
 }
 
