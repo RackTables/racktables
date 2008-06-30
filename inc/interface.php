@@ -4928,9 +4928,27 @@ function renderEditRSPool ()
 	dragon();
 }
 
-function renderEditVService ()
+function renderEditVService ($vsid)
 {
-	dragon();
+	global $pageno, $tabno;
+	showMessageOrError();
+	$protocols = array ('TCP' => 'TCP', 'UDP' => 'UDP');
+	$vsinfo = getVServiceInfo ($vsid);
+	echo "<form method=post action='${root}process.php?page=${pageno}&tab=${tabno}&op=updIPv4VS'>\n";
+	echo "<input type=hidden name=id value=${vsid}>\n";
+	echo '<table border=0 align=center>';
+	echo "<tr><th class=tdright>VIP:</th><td class=tdleft><input type=text name=vip value='${vsinfo['vip']}'></td></tr>\n";
+	echo "<tr><th class=tdright>port:</th><td class=tdleft><input type=text name=vport value='${vsinfo['vport']}'></td></tr>\n";
+	echo "<tr><th class=tdright>proto:</th><td class=tdleft>";
+		printSelect ($protocols, 'proto', $vsinfo['proto']);
+		echo "</td></tr>\n";
+	echo "<tr><th class=tdright>name:</th><td class=tdleft><input type=text name=name value='${vsinfo['name']}'></td></tr>\n";
+	echo "<tr><th class=tdright>VS config:</th><td class=tdleft><textarea name=vsconfig rows=20 cols=80>${vsinfo['vsconfig']}</textarea></td></tr>\n";
+	echo "<tr><th class=tdright>RS config:</th><td class=tdleft><textarea name=rsconfig rows=20 cols=80>${vsinfo['rsconfig']}</textarea></td></tr>\n";
+	echo "<tr><th class=submit colspan=2>";
+	printImageHREF ('SAVE', 'Save changes', TRUE);
+	echo "</td></tr>\n";
+	echo "</table></form>\n";
 }
 
 function renderEditLBsForVService ()

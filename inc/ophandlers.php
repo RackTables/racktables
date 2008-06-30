@@ -1073,9 +1073,9 @@ function updateVService ()
 	assertStringArg ('vsconfig', __FUNCTION__, TRUE);
 	assertStringArg ('rsconfig', __FUNCTION__, TRUE);
 	if (!commitUpdateVS ($_REQUEST['id'], $_REQUEST['vip'], $_REQUEST['vport'], $_REQUEST['proto'], $_REQUEST['name'], $_REQUEST['vsconfig'], $_REQUEST['rsconfig']))
-		return "${root}?page=${pageno}&tab=${tabno}&error=" . urlencode ('commitUpdateVS() failed');
+		return buildRedirectURL_ERR ('commitUpdateVS() failed');
 	else
-		return "${root}?page=${pageno}&tab=${tabno}&message=" . urlencode ("Virtual service was successfully updated");
+		return buildRedirectURL_OK ('Virtual service was successfully updated');
 }
 
 function addLoadBalancer ()

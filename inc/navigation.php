@@ -194,7 +194,7 @@ $page['ipv4vs']['bypass_type'] = 'uint';
 $page['ipv4vs']['tagloader'] = 'loadIPv4VSTags';
 $page['ipv4vs']['autotagloader'] = 'loadIPv4VSAutoTags';
 $tab['ipv4vs']['default'] = 'View';
-$tab['ipv4vs']['edit'] = '[Edit]';
+$tab['ipv4vs']['edit'] = 'Edit';
 $tab['ipv4vs']['editlblist'] = '[Load balancers]';
 $tab['ipv4vs']['tags'] = 'Tags';
 $tabhandler['ipv4vs']['default'] = 'renderVirtualService';
@@ -202,6 +202,7 @@ $tabhandler['ipv4vs']['edit'] = 'renderEditVService';
 $tabhandler['ipv4vs']['editlblist'] = 'renderEditLBsForVService';
 $tabhandler['ipv4vs']['tags'] = 'renderIPv4VSTags';
 $ophandler['ipv4vs']['tags']['saveTags'] = 'saveIPv4VSTags';
+$ophandler['ipv4vs']['edit']['updIPv4VS'] = 'updateVService';
 $trigger['ipv4vs']['tags'] = 'trigger_tags';
 
 $page['ipv4rsplist']['title'] = 'RS pools';
