@@ -1003,13 +1003,24 @@ function renderRackObject ($object_id = 0)
 
 function renderRackMultiSelect ($sname, $racks, $selected)
 {
-	echo "<select name=${sname} multiple size=" . getConfigVar ('MAXSELSIZE') . " onchange='getElementById(\"racks\").submit()'>\n";
+	// Transform the given flat list into a list of groups, each representing a rack row.
+	$rdata = array();
 	foreach ($racks as $rack)
+		if (!isset ($rdata[$rack['row_name']]))
+			$rdata[$rack['row_name']] = array ($rack['id'] => $rack['name']);
+		else
+			$rdata[$rack['row_name']][$rack['id']] = $rack['name'];
+	echo "<select name=${sname} multiple size=" . getConfigVar ('MAXSELSIZE') . " onchange='getElementById(\"racks\").submit()'>\n";
+	foreach ($rdata as $optgroup => $racklist)
 	{
-		echo "<option value=${rack['id']}";
-		if (!(array_search ($rack['id'], $selected) === FALSE))
-			echo ' selected';
-		echo">${rack['row_name']}: ${rack['name']}</option>\n";
+		echo "<optgroup label='${optgroup}'>";
+		foreach ($racklist as $rack_id => $rack_name)
+		{
+			echo "<option value=${rack_id}";
+			if (!(array_search ($rack_id, $selected) === FALSE))
+				echo ' selected';
+			echo">${rack_name}</option>\n";
+		}
 	}
 	echo "</select>\n";
 }
