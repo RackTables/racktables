@@ -2073,9 +2073,10 @@ function renderIPRange ($id)
 	echo "<tr><th>Address</th><th>Name</th><th>Allocation</th></tr>\n";
 
 
-	for($ip = $startip; $ip<=$endip; $ip++)
-	{
-		if (isset ($range['addrlist'][$ip]))
+	for ($ip = $startip; $ip<=$endip; $ip++)
+		if (!isset ($range['addrlist'][$ip]))
+			echo "<tr><td class=tdleft><a href='${root}?page=ipaddress&ip=".long2ip($ip)."'>".long2ip($ip)."</a></td><td>&nbsp;</td><td>&nbsp;</td></tr>\n";
+		else
 		{
 			$numshared = countRefsOfType($range['addrlist'][$ip]['references'], 'shared', 'eq');
 			$numreg = countRefsOfType($range['addrlist'][$ip]['references'], 'regular', 'eq');
@@ -2141,11 +2142,7 @@ function renderIPRange ($id)
 			}
 			echo "</td></tr>\n";
 		}
-		else
-		{
-			echo "<tr><td><a href='${root}?page=ipaddress&ip=".long2ip($ip)."'>".long2ip($ip)."</a></td><td>&nbsp;</td><td>&nbsp;</td></tr>\n";
-		}
-	}
+	// end of iteration
 
 	echo "</table>";
 	finishPortlet();
