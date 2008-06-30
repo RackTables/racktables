@@ -1831,7 +1831,7 @@ function renderIPv4SLB ()
 
 	startPortlet ('SLB configuration');
 	echo "<table border=0 width='100%'><tr>";
-	foreach (array ('ipv4vslist', 'rspools', 'rservers', 'lbs') as $pno)
+	foreach (array ('ipv4vslist', 'ipv4rsplist', 'rservers', 'lbs') as $pno)
 		echo "<td><h3><a href='${root}?page=${pno}'>" . $page[$pno]['title'] . "</a></h3></td>";
 	echo '</tr></table>';
 	finishPortlet();
@@ -2827,7 +2827,7 @@ function renderSearchResults ()
 					finishPortlet();
 					break;
 				case 'ipv4rspool':
-					startPortlet ("<a href='${root}?page=rspools'>RS pools</a>");
+					startPortlet ("<a href='${root}?page=ipv4rsplist'>RS pools</a>");
 					echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
 					foreach ($what as $rspool)
 					{
@@ -4142,7 +4142,7 @@ function renderRSPool ($pool_id = 0)
 		echo "<tr><th width='50%' class=tdright>Pool name:</th><td class=tdleft>${poolInfo['name']}</td></tr>\n";
 	echo "<tr><th width='50%' class=tdright>Real servers:</th><td class=tdleft>" . count ($poolInfo['rslist']) . "</td></tr>\n";
 	echo "<tr><th width='50%' class=tdright>Load balancers:</th><td class=tdleft>" . count ($poolInfo['lblist']) . "</td></tr>\n";
-	printTagTRs ("${root}?page=rspools&");
+	printTagTRs ("${root}?page=ipv4rsplist&");
 	echo "</table>";
 	finishPortlet();
 
@@ -4243,6 +4243,8 @@ function renderVSListEditForm ()
 	finishPortlet();
 
 	$vslist = getVSList();
+	if (!count ($vslist))
+		return;
 	startPortlet ('Manage existing (' . count ($vslist) . ')');
 	echo "<table class=cooltable border=0 cellpadding=10 cellspacing=0 align=center>\n";
 	echo "<tr><th>&nbsp;</th><th>VIP</th><th>port</th><th>proto</th><th>name</th>";
@@ -4292,7 +4294,7 @@ function renderRSPoolList ()
 	}
 	echo "<table border=0 class=objectview>\n";
 	echo "<tr><td class=pcleft>";
-	startPortlet ('RS pools');
+	startPortlet ('RS pools (' . count ($pool_list) . ')');
 	echo "<table class=widetable border=0 cellpadding=10 cellspacing=0 align=center>\n";
 	echo "<tr><th>refcnt</th><th>name</th><th>VS configuration</th><th>RS configuration</th></tr>";
 	$order = 'odd';
@@ -4317,9 +4319,25 @@ function editRSPools ()
 {
 	global $root, $pageno, $tabno, $nextorder;
 	showMessageOrError();
-	$pool_list = getRSPoolList();
 
-	startPortlet ('Manage existing');
+	startPortlet ('Add new');
+	echo "<form method=post action='${root}process.php'>\n";
+	echo "<input type=hidden name=page value=${pageno}>\n";
+	echo "<input type=hidden name=tab value=${tabno}>\n";
+	echo "<input type=hidden name=op value=add>\n";
+	echo "<table class=widetable border=0 cellpadding=10 cellspacing=0 align=center>\n";
+	echo "<tr><th>name</th>";
+	echo "<td><input type=text name=name tabindex=1></td>";
+	echo "<td><input type=submit tabindex=1 value=OK></td></tr>";
+	echo "<tr><th>VS configuration</th><td colspan=2><textarea name=vsconfig rows=10 cols=80></textarea></td></tr>";
+	echo "<tr><th>RS configuration</th><td colspan=2><textarea name=rsconfig rows=10 cols=80></textarea></td></tr>";
+	echo "</table></form>";
+	finishPortlet();
+
+	$pool_list = getRSPoolList();
+	if (!count ($pool_list))
+		return;
+	startPortlet ('Manage existing (' . count ($pool_list) . ')');
 	echo "<table class=cooltable border=0 cellpadding=10 cellspacing=0 align=center>\n";
 	echo "<tr><th>&nbsp;</th><th>name</th><th>VS configuration</th><th>RS configuration</th><th>&nbsp;</th></tr>";
 	$order='odd';
@@ -4348,20 +4366,6 @@ function editRSPools ()
 		$order = $nextorder[$order];
 	}
 	echo "</table>";
-	finishPortlet();
-
-	startPortlet ('Add new');
-	echo "<form method=post action='${root}process.php'>\n";
-	echo "<input type=hidden name=page value=${pageno}>\n";
-	echo "<input type=hidden name=tab value=${tabno}>\n";
-	echo "<input type=hidden name=op value=add>\n";
-	echo "<table class=widetable border=0 cellpadding=10 cellspacing=0 align=center>\n";
-	echo "<tr><th>name</th>";
-	echo "<td><input type=text name=name tabindex=1></td>";
-	echo "<td><input type=submit tabindex=1 value=OK></td></tr>";
-	echo "<tr><th>VS configuration</th><td colspan=2><textarea name=vsconfig rows=10 cols=80></textarea></td></tr>";
-	echo "<tr><th>RS configuration</th><td colspan=2><textarea name=rsconfig rows=10 cols=80></textarea></td></tr>";
-	echo "</table></form>";
 	finishPortlet();
 }
 
