@@ -28,6 +28,39 @@ handler=
 CONNECTED=0
 MYDIR=`dirname $0`
 
+decode_error()
+{
+	case "$1" in
+		0)
+			echo -n 'success'
+		;;
+		1)
+			echo -n 'internal error 1'
+		;;
+		2)
+			echo -n 'internal error 2'
+		;;
+		3)
+			echo -n 'password not found'
+		;;
+		4)
+			echo -n 'invalid password'
+		;;
+		5)
+			echo -n 'cannot create temporary files'
+		;;
+		6)
+			echo -n 'invalid command'
+		;;
+		7)
+			echo -n 'unknown host OS'
+		;;
+		*)
+			echo -n 'unknown error'
+		;;
+	esac
+}
+
 # Not only connect, but gather all the data at once and remember the context.
 do_connect()
 {
@@ -76,7 +109,9 @@ do_connect()
 		CONNECTED=1
 		echo "OK!connected to $endpoint";
 	else
-		echo "ERR!Cannot connect to $endpoint, connector returned code $ret"
+		echo -n "ERR!Cannot connect to $endpoint ("
+		decode_error $ret
+		echo ')'
 	fi
 }
 

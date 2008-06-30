@@ -109,7 +109,7 @@ function getSwitchVLANs ($object_id = 0)
 	}
 	if (strpos ($data[0], 'OK!') !== 0)
 	{
-		showError ("Gateway failure: returned code ${data[0]}.", __FUNCTION__);
+		showError ("Gateway failure: ${data[0]}.", __FUNCTION__);
 		return NULL;
 	}
 	if (count ($data) != count ($commands))
