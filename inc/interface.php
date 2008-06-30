@@ -970,7 +970,7 @@ function renderRackObject ($object_id = 0)
 		echo "<tr><th>VS</th><th>RS pool</th><th>RS</th><th>VS config</th><th>RS config</th></tr>\n";
 		foreach ($pools as $vs_id => $info)
 		{
-			echo "<tr valign=top><td class=tdleft><a href='${root}?page=vservice&id=${vs_id}'>";
+			echo "<tr valign=top><td class=tdleft><a href='${root}?page=ipv4vs&id=${vs_id}'>";
 			echo buildVServiceName ($info);
 			echo '</a>';
 			if (!empty ($info['name']))
@@ -1862,7 +1862,7 @@ function renderIPv4SLB ()
 		echo "</tr>\n";
 		foreach ($summary as $vsid => $vsdata)
 		{
-			echo "<tr class=row_${order}><td class=tdleft><a href='$root?page=vservice&tab=default&id=${vsid}'>";
+			echo "<tr class=row_${order}><td class=tdleft><a href='$root?page=ipv4vs&tab=default&id=${vsid}'>";
 			echo buildVServiceName ($vsdata);
 			echo '</a>';
 			if (!empty ($vsdata['name']))
@@ -2123,7 +2123,7 @@ function renderIPRange ($id)
 				echo $prologue;
 				$prologue = '';
 				echo "${delim}<a href='${root}?page=object&object_id=${ref['object_id']}'>";
-				echo "${ref['object_name']}</a>:<a href='${root}?page=vservice&id=${ref['vs_id']}'>";
+				echo "${ref['object_name']}</a>:<a href='${root}?page=ipv4vs&id=${ref['vs_id']}'>";
 				echo "${ref['vport']}/${ref['proto']}</a>&rarr;";
 				$delim = '; ';
 			}
@@ -2236,7 +2236,7 @@ function renderIPAddress ()
 		echo "<tr><th>VS</th><th>name</th></tr>\n";
 		foreach ($address['vslist'] as $vsinfo)
 		{
-			echo "<tr><td class=tdleft><a href='${root}?page=vservice&id=${vsinfo['id']}'>";
+			echo "<tr><td class=tdleft><a href='${root}?page=ipv4vs&id=${vsinfo['id']}'>";
 			echo buildVServiceName ($vsinfo) . "</a></td><td class=tdleft>";
 			echo $vsinfo['name'] . "</td></tr>\n";
 		}
@@ -2767,7 +2767,7 @@ function renderSearchResults ()
 				echo "<script language='Javascript'>document.location='${root}?page=rspool&pool_id=${record['pool_id']}';//</script>";
 				break;
 			case 'ipv4vs':
-				echo "<script language='Javascript'>document.location='${root}?page=vservice&id=${record['id']}';//</script>";
+				echo "<script language='Javascript'>document.location='${root}?page=ipv4vs&id=${record['id']}';//</script>";
 				break;
 			case 'user':
 				echo "<script language='Javascript'>document.location='${root}?page=user&user_id=${record['user_id']}';//</script>";
@@ -2845,7 +2845,7 @@ function renderSearchResults ()
 					echo '<tr><th>VS</th><th>Descritpion</th></tr>';
 					foreach ($what as $vs)
 					{
-						echo "<tr class=row_${order}><td class=tdleft><a href='${root}?page=vservice&id=${vs['id']}'>";
+						echo "<tr class=row_${order}><td class=tdleft><a href='${root}?page=ipv4vs&id=${vs['id']}'>";
 						echo buildVServiceName ($vs);
 						echo "</a></td><td class=tdleft>${vs['name']}</td></tr>";
 						$order = $nextorder[$order];
@@ -4079,7 +4079,7 @@ function renderRSPoolLBForm ($pool_id = 0)
 				printImageHREF ('delete', 'Unconfigure');
 				echo "</a></td>";
 				echo "<td class=tdleft><a href='${root}?page=object&object_id=${object_id}'>${oi['dname']}</a></td>";
-				echo "<td class=tdleft><a href='${root}?page=vservice&id=${vs_id}'>";
+				echo "<td class=tdleft><a href='${root}?page=ipv4vs&id=${vs_id}'>";
 				$vsinfo = getVServiceInfo ($vs_id);
 				echo buildVServiceName ($vsinfo) . '</a>';
 				if (!empty ($vsinfo['name']))
@@ -4154,7 +4154,7 @@ function renderRSPool ($pool_id = 0)
 	{
 		$oi = getObjectInfo ($object_id);
 		$vi = getVServiceInfo ($vs_id);
-		echo "<tr valign=top><td class=tdleft><a href='${root}?page=vservice&id=${vs_id}'>";
+		echo "<tr valign=top><td class=tdleft><a href='${root}?page=ipv4vs&id=${vs_id}'>";
 		echo buildVServiceName ($vi);
 		echo "</a></td><td class=tdleft><a href='${root}?page=object&object_id=${object_id}'>${oi['dname']}</a></td>";
 		echo "<td class=tdleft><pre>${configs['vsconfig']}</pre></td>";
@@ -4198,7 +4198,7 @@ function renderVSList ()
 	$order = 'odd';
 	foreach ($vslist as $vsid => $vsinfo)
 	{
-		echo "<tr align=left valign=top class=row_${order}><td class=tdleft><a href='${root}?page=vservice&id=${vsid}'>" . buildVServiceName ($vsinfo);
+		echo "<tr align=left valign=top class=row_${order}><td class=tdleft><a href='${root}?page=ipv4vs&id=${vsid}'>" . buildVServiceName ($vsinfo);
 		echo "</a></td>";
 		echo "<td class=tdleft>${vsinfo['name']}</td>";
 		echo "<td><pre>${vsinfo['vsconfig']}</pre></td>";

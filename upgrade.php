@@ -1277,6 +1277,9 @@ CREATE TABLE `TagTree` (
 			$query[] = "update UserPermission set tab = 'addmore' where page = 'objects' and (tab = 'newmulti' or tab = 'newobj')";
 			$query[] = "update UserPermission set tab = 'livevlans' where tab = 'switchvlans'";
 			$query[] = "update UserPermission set page = 'userlist' where page = 'accounts'";
+			$query[] = "update UserPermission set page = 'ipv4rsplist' where page = 'rspools'";
+			$query[] = "update UserPermission set page = 'ipv4vslist' where page = 'vservices'";
+			$query[] = "update UserPermission set page = 'ipv4vs' where page = 'vservice'";
 			$query[] = "create table Script (script_name char(64) not null primary key, script_text text)";
 			// Do the same getUserPermissions() does, but without the function.
 			// We need to generate more specific rules first, otherwise they will
