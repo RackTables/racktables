@@ -4995,9 +4995,21 @@ function renderObjectSLB ()
 	dragon();
 }
 
-function renderEditRSPool ()
+function renderEditRSPool ($pool_id)
 {
-	dragon();
+	global $pageno, $tabno;
+	showMessageOrError();
+	$poolinfo = getRSPoolInfo ($pool_id);
+	echo "<form method=post action='${root}process.php?page=${pageno}&tab=${tabno}&op=updIPv4RSP'>\n";
+	echo "<input type=hidden name=pool_id value=${pool_id}>\n";
+	echo '<table border=0 align=center>';
+	echo "<tr><th class=tdright>name:</th><td class=tdleft><input type=text name=name value='${poolinfo['name']}'></td></tr>\n";
+	echo "<tr><th class=tdright>VS config:</th><td class=tdleft><textarea name=vsconfig rows=20 cols=80>${poolinfo['vsconfig']}</textarea></td></tr>\n";
+	echo "<tr><th class=tdright>RS config:</th><td class=tdleft><textarea name=rsconfig rows=20 cols=80>${poolinfo['rsconfig']}</textarea></td></tr>\n";
+	echo "<tr><th class=submit colspan=2>";
+	printImageHREF ('SAVE', 'Save changes', TRUE);
+	echo "</td></tr>\n";
+	echo "</table></form>\n";
 }
 
 function renderEditVService ($vsid)

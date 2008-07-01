@@ -224,7 +224,7 @@ $page['ipv4rsp']['bypass_type'] = 'uint';
 $page['ipv4rsp']['tagloader'] = 'loadIPv4RSPoolTags';
 $page['ipv4rsp']['autotagloader'] = 'loadIPv4RSPoolAutoTags';
 $tab['ipv4rsp']['default'] = 'View';
-$tab['ipv4rsp']['edit'] = '[Edit]';
+$tab['ipv4rsp']['edit'] = 'Edit';
 $tab['ipv4rsp']['editlblist'] = 'Load Balancers';
 $tab['ipv4rsp']['editrslist'] = 'RS list';
 $tab['ipv4rsp']['rsinservice'] = 'RS in service';
@@ -246,6 +246,7 @@ $ophandler['ipv4rsp']['editlblist']['delLB'] = 'deleteLoadBalancer';
 $ophandler['ipv4rsp']['editlblist']['updLB'] = 'updateLoadBalancer';
 $ophandler['ipv4rsp']['rsinservice']['upd'] = 'updateRSInService';
 $ophandler['ipv4rsp']['tags']['saveTags'] = 'saveIPv4RSPoolTags';
+$ophandler['ipv4rsp']['edit']['updIPv4RSP'] = 'updateRSPool';
 
 $page['rservers']['title'] = 'Real servers';
 $page['rservers']['parent'] = 'ipv4slb';

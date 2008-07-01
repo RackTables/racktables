@@ -1124,9 +1124,9 @@ function updateRSPool ()
 	assertStringArg ('vsconfig', __FUNCTION__, TRUE);
 	assertStringArg ('rsconfig', __FUNCTION__, TRUE);
 	if (!commitUpdateRSPool ($_REQUEST['pool_id'], $_REQUEST['name'], $_REQUEST['vsconfig'], $_REQUEST['rsconfig']))
-		return "${root}?page=${pageno}&tab=${tabno}&error=" . urlencode ('commitUpdateRSPool() failed');
+		return buildRedirectURL_ERR ('commitUpdateRSPool() failed');
 	else
-		return "${root}?page=${pageno}&tab=${tabno}&message=" . urlencode ("Real server pool was successfully updated");
+		return buildRedirectURL_OK ('Real server pool was successfully updated');
 }
 
 function updateRSInService ()
