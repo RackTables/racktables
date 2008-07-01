@@ -1010,11 +1010,10 @@ function deleteLoadBalancer ()
 	assertUIntArg ('object_id', __FUNCTION__);
 	assertUIntArg ('pool_id', __FUNCTION__);
 	assertUIntArg ('vs_id', __FUNCTION__);
-	$pool_id = $_REQUEST['pool_id'];
-	if (!commitDeleteLB ($_REQUEST['object_id'], $pool_id, $_REQUEST['vs_id']))
-		return "${root}?page=${pageno}&tab=${tabno}&pool_id=${pool_id}&error=" . urlencode ('commitDeleteLB() failed');
+	if (!commitDeleteLB ($_REQUEST['object_id'], $_REQUEST['pool_id'], $_REQUEST['vs_id']))
+		return buildRedirectURL_ERR ('commitDeleteLB() failed');
 	else
-		return "${root}?page=${pageno}&tab=${tabno}&pool_id=${pool_id}&message=" . urlencode ("Load balancer was successfully deleted");
+		return buildRedirectURL_OK ('Load balancer was successfully deleted');
 }
 
 function deleteVService ()
@@ -1054,11 +1053,10 @@ function updateLoadBalancer ()
 	assertUIntArg ('vs_id', __FUNCTION__);
 	assertStringArg ('vsconfig', __FUNCTION__, TRUE);
 	assertStringArg ('rsconfig', __FUNCTION__, TRUE);
-	$pool_id = $_REQUEST['pool_id'];
-	if (!commitUpdateLB ($_REQUEST['object_id'], $pool_id, $_REQUEST['vs_id'], $_REQUEST['vsconfig'], $_REQUEST['rsconfig']))
-		return "${root}?page=${pageno}&tab=${tabno}&pool_id=${pool_id}&error=" . urlencode ('commitUpdateLB() failed');
+	if (!commitUpdateLB ($_REQUEST['object_id'], $_REQUEST['pool_id'], $_REQUEST['vs_id'], $_REQUEST['vsconfig'], $_REQUEST['rsconfig']))
+		return buildRedirectURL_ERR ('commitUpdateLB() failed');
 	else
-		return "${root}?page=${pageno}&tab=${tabno}&pool_id=${pool_id}&message=" . urlencode ("Load balancer info was successfully updated");
+		return buildRedirectURL_OK ('Load balancer info was successfully updated');
 }
 
 function updateVService ()
@@ -1087,11 +1085,10 @@ function addLoadBalancer ()
 	assertUIntArg ('vs_id', __FUNCTION__);
 	assertStringArg ('vsconfig', __FUNCTION__, TRUE);
 	assertStringArg ('rsconfig', __FUNCTION__, TRUE);
-	$pool_id = $_REQUEST['pool_id'];
-	if (!addLBtoRSPool ($pool_id, $_REQUEST['object_id'], $_REQUEST['vs_id'], $_REQUEST['vsconfig'], $_REQUEST['rsconfig']))
-		return "${root}?page=${pageno}&tab=${tabno}&pool_id=${pool_id}&error=" . urlencode ('addLBtoRSPool() failed');
+	if (!addLBtoRSPool ($_REQUEST['pool_id'], $_REQUEST['object_id'], $_REQUEST['vs_id'], $_REQUEST['vsconfig'], $_REQUEST['rsconfig']))
+		return buildRedirectURL_ERR ('addLBtoRSPool() failed');
 	else
-		return "${root}?page=${pageno}&tab=${tabno}&pool_id=${pool_id}&message=" . urlencode ("Load balancer was successfully added");
+		return buildRedirectURL_OK ('Load balancer was successfully added');
 }
 
 function addRSPool ()

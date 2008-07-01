@@ -1444,9 +1444,9 @@ function loadRackAutoTags ()
 
 function loadIPv4VSAutoTags ()
 {
-	assertUIntArg ('id', __FUNCTION__);
+	assertUIntArg ('vs_id', __FUNCTION__);
 	$ret = array();
-	$ret[] = array ('tag' => '$id_' . $_REQUEST['id']);
+	$ret[] = array ('tag' => '$id_' . $_REQUEST['vs_id']);
 	$ret[] = array ('tag' => '$any_ipv4vs');
 	$ret[] = array ('tag' => '$any_vs');
 	return $ret;

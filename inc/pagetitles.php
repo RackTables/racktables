@@ -98,9 +98,9 @@ function dynamic_title_vservice ()
 	switch ($pageno)
 	{
 		case 'ipv4vs':
-			assertUIntArg ('id', __FUNCTION__);
-			$ret['name'] = buildVServiceName (getVServiceInfo ($_REQUEST['id']));
-			$ret['params']['id'] = $_REQUEST['id'];
+			assertUIntArg ('vs_id', __FUNCTION__);
+			$ret['name'] = buildVServiceName (getVServiceInfo ($_REQUEST['vs_id']));
+			$ret['params']['vs_id'] = $_REQUEST['vs_id'];
 			break;
 		default:
 			return NULL;
