@@ -101,4 +101,9 @@ function trigger_tags ()
 	return count ($taglist) > 0;
 }
 
+function trigger_passwdchange ()
+{
+	return getConfigVar ('USER_AUTH_SRC') == 'database';
+}
+
 ?>

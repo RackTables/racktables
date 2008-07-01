@@ -362,10 +362,12 @@ $ophandler['tagtree']['edit']['updateTag'] = 'updateTag';
 $page['myaccount']['title'] = 'My account';
 $page['myaccount']['parent'] = 'config';
 $tab['myaccount']['default'] = 'Info';
-$tab['myaccount']['mypassword'] = 'Password';
-$tab['myaccount']['myrealname'] = 'Real name';
+$tab['myaccount']['mypassword'] = 'Password change';
+$tab['myaccount']['myrealname'] = '[Real name change]';
+$trigger['myaccount']['mypassword'] = 'trigger_passwdchange';
 $tabhandler['myaccount']['default'] = 'renderMyAccount';
 $tabhandler['myaccount']['mypassword'] = 'renderMyPasswordEditor';
+$tabhandler['myaccount']['myrealname'] = 'dragon';
 $ophandler['myaccount']['mypassword']['changeMyPassword'] = 'changeMyPassword';
 
 $page['reports']['title'] = 'Reports';

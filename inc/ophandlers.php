@@ -1328,14 +1328,14 @@ function changeMyPassword ()
 	global $accounts, $root, $pageno, $tabno, $remote_username;
 	if (getConfigVar ('USER_AUTH_SRC') != 'database')
 		return buildRedirectURL_ERR ('Can only change password under DB authentication.');
-	assertStringArg ('oldpassword');
-	assertStringArg ('newpassword1');
-	assertStringArg ('newpassword2');
-	if ($accounts[$remote_username]['user_password_hash'] != $_REQUEST['oldpassword'])
+	assertStringArg ('oldpassword', __FUNCTION__);
+	assertStringArg ('newpassword1', __FUNCTION__);
+	assertStringArg ('newpassword2', __FUNCTION__);
+	if ($accounts[$remote_username]['user_password_hash'] != hash (PASSWORD_HASH, $_REQUEST['oldpassword']))
 		return buildRedirectURL_ERR ('Old password doesn\'t match.');
 	if ($_REQUEST['newpassword1'] != $_REQUEST['newpassword2'])
 		return buildRedirectURL_ERR ('New passwords don\'t match.');
-	if (commitUpdateUserAccount ($accounts[$remote_username]['user_id'], $accounts[$remote_username]['user_name'], $accounts[$username]['user_realname'], hash (PASSWORD_HASH, $_REQUEST['newpassword1'])))
+	if (commitUpdateUserAccount ($accounts[$remote_username]['user_id'], $accounts[$remote_username]['user_name'], $accounts[$remote_username]['user_realname'], hash (PASSWORD_HASH, $_REQUEST['newpassword1'])))
 		return buildRedirectURL_OK ('Password changed successfully.');
 	else
 		return buildRedirectURL_ERR ('Password change failed.');

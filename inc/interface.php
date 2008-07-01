@@ -3468,6 +3468,9 @@ function printImageHREF ($tag, $title = '', $do_input = FALSE, $tabindex = 0)
 	$image['create']['path'] = 'pix/tango-document-new.png';
 	$image['create']['width'] = 16;
 	$image['create']['height'] = 16;
+	$image['DENIED']['path'] = 'pix/tango-dialog-error-big.png';
+	$image['DENIED']['width'] = 32;
+	$image['DENIED']['height'] = 32;
 	if (!isset ($image[$tag]))
 		$tag = 'error';
 	$img = $image[$tag];
@@ -5154,18 +5157,31 @@ function renderAccessDenied ()
 {
 	global $user_tags, $auto_tags, $expl_tags, $impl_tags, $pageno, $tabno;
 	echo "<table border=1 cellspacing=0 cellpadding=3 width='50%' align=center>\n";
-	echo '<tr><th colspan=2><h3>access denied</h3></th></tr>';
+	echo '<tr><th colspan=2><h3>';
+	printImageHREF ('DENIED');
+	echo ' access denied ';
+	printImageHREF ('DENIED');
+	echo '</h3></th></tr>';
 	echo "<tr><th width='50%' class=tag_list_th>Explicit tags:</th><td class=tdleft>";
-	echo serializeTags ($expl_tags) . "</td></tr>\n";
+	echo serializeTags ($expl_tags) . "&nbsp;</td></tr>\n";
 	echo "<tr><th width='50%' class=tag_list_th>Implicit tags:</th><td class=tdleft>";
-	echo serializeTags ($impl_tags) . "</td></tr>\n";
+	echo serializeTags ($impl_tags) . "&nbsp;</td></tr>\n";
 	echo "<tr><th width='50%' class=tag_list_th>Automatic tags:</th><td class=tdleft>";
-	echo serializeTags ($auto_tags) . "</td></tr>\n";
+	echo serializeTags ($auto_tags) . "&nbsp;</td></tr>\n";
 	echo "<tr><th width='50%' class=tag_list_th>User tags:</th><td class=tdleft>";
-	echo serializeTags ($user_tags) . "</td></tr>\n";
+	echo serializeTags ($user_tags) . "&nbsp;</td></tr>\n";
 	echo "<tr><th width='50%' class=tag_list_th>Requested page:</th><td class=tdleft>${pageno}</td></tr>\n";
 	echo "<tr><th width='50%' class=tag_list_th>Requested tab:</th><td class=tdleft>${tabno}</td></tr>\n";
 	echo "</table>\n";
+}
+
+function renderMyAccount ()
+{
+	global $remote_username, $accounts;
+	echo "<table border=0 class=objectview cellspacing=0 cellpadding=0 width='50%'>";
+	echo "<tr><td colspan=2 align=center><h1>${remote_username}</h1></td></tr>\n";
+	echo "<tr><td colspan=2 align=center><h2>" . $accounts[$remote_username]['user_realname'] . "</h2></td></tr>\n";
+	echo "</table>";
 }
 
 ?>
