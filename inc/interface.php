@@ -2176,10 +2176,9 @@ function renderIPRangeProperties ($id)
 
 }
 
-function renderIPAddress ()
+function renderIPAddress ($ip)
 {
 	global $root;
-	$ip = $_REQUEST['ip'];
 	$address = getIPAddress ($ip);
 	echo "<table border=0 class=objectview cellspacing=0 cellpadding=0>";
 	echo "<tr><td colspan=2 align=center><h1>${ip}</h1></td></tr>\n";
@@ -2300,13 +2299,13 @@ function renderIPAddress ()
 	echo "</table>\n";
 }
 
-function renderIPAddressProperties ()
+function renderIPAddressProperties ($ip)
 {
-	global $pageno, $tabno;
-	$ip = $_REQUEST['ip'];
+	global $pageno, $tabno, $root;
 	showMessageOrError();
 	$address = getIPAddress($ip);
 	echo "<center><h1>$ip</h1></center>\n";
+	startPortlet ('update');
 	echo "<table border=0 cellpadding=10 cellpadding=1 align='center'>\n";
 	echo "<form action='process.php'><input type=hidden name=op value=editAddress>";
 	echo "<input type=hidden name=page value='${pageno}'>\n";
@@ -2316,13 +2315,21 @@ function renderIPAddressProperties ()
 	echo "<td class='tdright'>Reserved:</td><td class='tdleft'><input type=checkbox name=reserved size=20 ".($address['exists']==1?(($address['reserved']=='yes')?'checked':''):'')."></tr>";
 	echo "<tr><td colspan=2 class='tdcenter'><input type=submit value='Update address'></td></form></tr>";
 	echo "</table>\n";
-
+	finishPortlet();
+	if (empty ($address['name']) and $address['reserved'] == 'no')
+		return;
+	startPortlet ('release');
+	echo "<form action='${root}process.php?page=${pageno}&tab=${tabno}&op=editAddress' method=post>";
+	echo "<input type=hidden name=ip value='${ip}'>";
+	echo "<input type=hidden name=name value=''>";
+	echo "<input type=hidden name=reserved value=''>";
+	echo "<input type=submit value='release'></form>";
+	finishPortlet();
 }
 
-function renderIPAddressAssignment ()
+function renderIPAddressAssignment ($ip)
 {
 	global $pageno, $tabno, $root;
-	$ip = $_REQUEST['ip'];
 	$address = getIPAddress($ip);
 
 	showMessageOrError();

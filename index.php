@@ -88,6 +88,9 @@ if (isset ($tabhandler[$pageno][$tabno]))
 			case 'uint0':
 				assertUIntArg ($page[$pageno]['bypass'], 'index', TRUE);
 				break;
+			case 'inet4':
+				assertIPv4Arg ($page[$pageno]['bypass'], 'index');
+				break;
 			default:
 				showError ("Dispatching error for bypass parameter");
 				break;
