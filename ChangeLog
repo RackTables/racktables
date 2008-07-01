@@ -2,7 +2,8 @@
 	new feature: tag roller
 	new feature: taggable user accounts
 	new feature: RackCode configuration
-	new feature: account password changer
+	new feature: "my account" page
+	update: page layout fixes and improvements
 0.15.1 2008-06-05
 	bugfix: fix auth headers in upgrade script (broken in 0.15.0)
 	new feature: fetch switch serial number via SNMP (by killsystem)

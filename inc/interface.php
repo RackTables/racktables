@@ -5137,15 +5137,13 @@ function renderUser ($user_id)
 	echo '</table>';
 }
 
-function renderUserPasswordEditor ($user_id)
+function renderMyPasswordEditor ()
 {
 	global $root, $pageno, $tabno, $remote_username, $accounts;
 	showMessageOrError();
-	echo "<form method=post action='${root}process.php?page=${pageno}&tab=${tabno}&op=changePassword'>";
-	echo "<input type=hidden name=user_id value='${user_id}'>";
+	echo "<form method=post action='${root}process.php?page=${pageno}&tab=${tabno}&op=changeMyPassword'>";
 	echo '<table border=0 align=center>';
-	if ($accounts[$remote_username]['user_id'] != 1)
-		echo "<tr><th class=tdright>Current password (*):</th><td><input type=password name=oldpassword tabindex=1></td></tr>";
+	echo "<tr><th class=tdright>Current password (*):</th><td><input type=password name=oldpassword tabindex=1></td></tr>";
 	echo "<tr><th class=tdright>New password (*):</th><td><input type=password name=newpassword1 tabindex=2></td></tr>";
 	echo "<tr><th class=tdright>New password again (*):</th><td><input type=password name=newpassword2 tabindex=3></td></tr>";
 	echo "<tr><td colspan=2 align=center><input type=submit value='Change' tabindex=4></td></tr>";

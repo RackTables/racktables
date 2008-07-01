@@ -288,13 +288,10 @@ $page['user']['bypass_type'] = 'uint';
 $page['user']['tagloader'] = 'loadUserTags';
 $page['user']['autotagloader'] = 'getUserAutoTags';
 $tab['user']['default'] = 'View';
-$tab['user']['password'] = 'Change password';
 $tab['user']['tags'] = 'Tags';
 $tabhandler['user']['default'] = 'renderUser';
-$tabhandler['user']['password'] = 'renderUserPasswordEditor';
 $tabhandler['user']['tags'] = 'renderUserTags';
 $ophandler['user']['tags']['saveTags'] = 'saveUserTags';
-$ophandler['user']['password']['changePassword'] = 'changePassword';
 
 $page['perms']['title'] = 'Permissions';
 $page['perms']['parent'] = 'config';
@@ -361,6 +358,15 @@ $tabhandler['tagtree']['edit'] = 'renderTagTreeEditor';
 $ophandler['tagtree']['edit']['destroyTag'] = 'destroyTag';
 $ophandler['tagtree']['edit']['createTag'] = 'createTag';
 $ophandler['tagtree']['edit']['updateTag'] = 'updateTag';
+
+$page['myaccount']['title'] = 'My account';
+$page['myaccount']['parent'] = 'config';
+$tab['myaccount']['default'] = 'Info';
+$tab['myaccount']['mypassword'] = 'Password';
+$tab['myaccount']['myrealname'] = 'Real name';
+$tabhandler['myaccount']['default'] = 'renderMyAccount';
+$tabhandler['myaccount']['mypassword'] = 'renderMyPasswordEditor';
+$ophandler['myaccount']['mypassword']['changeMyPassword'] = 'changeMyPassword';
 
 $page['reports']['title'] = 'Reports';
 $page['reports']['parent'] = 'index';

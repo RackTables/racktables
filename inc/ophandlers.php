@@ -1323,26 +1323,22 @@ function rollTags ()
 	return "${root}?page=${pageno}&tab=${tabno}&row_id=${row_id}&message=" . urlencode ("${nnew} new records done, ${ndupes} already existed");
 }
 
-function changePassword ()
+function changeMyPassword ()
 {
-	assertUIntArg ('user_id');
-	$user_id = $_REQUEST['user_id'];
-	$username = getUsernameByID ($user_id);
 	global $accounts, $root, $pageno, $tabno, $remote_username;
-	if ($accounts[$remote_username]['user_id'] != 1)
-	{
-		assertStringArg ('oldpassword');
-		if ($accounts[$username]['user_password_hash'] != $_REQUEST['oldpassword'])
-			return "${root}?page=${pageno}&tab=${tabno}&user_id=${user_id}&error=" . urlencode ('Old password doesn\'t match!');
-	}
+	if (getConfigVar ('USER_AUTH_SRC') != 'database')
+		return buildRedirectURL_ERR ('Can only change password under DB authentication.');
+	assertStringArg ('oldpassword');
 	assertStringArg ('newpassword1');
 	assertStringArg ('newpassword2');
+	if ($accounts[$remote_username]['user_password_hash'] != $_REQUEST['oldpassword'])
+		return buildRedirectURL_ERR ('Old password doesn\'t match.');
 	if ($_REQUEST['newpassword1'] != $_REQUEST['newpassword2'])
-		return "${root}?page=${pageno}&tab=${tabno}&user_id=${user_id}&error=" . urlencode ('New passwords don\'t match!');
-	if (commitUpdateUserAccount ($user_id, $accounts[$username]['user_name'], $accounts[$username]['user_realname'], hash (PASSWORD_HASH, $_REQUEST['newpassword1'])))
-		return "${root}?page=${pageno}&tab=${tabno}&user_id=${user_id}&message=" . urlencode ('Password changed successfully.');
+		return buildRedirectURL_ERR ('New passwords don\'t match.');
+	if (commitUpdateUserAccount ($accounts[$remote_username]['user_id'], $accounts[$remote_username]['user_name'], $accounts[$username]['user_realname'], hash (PASSWORD_HASH, $_REQUEST['newpassword1'])))
+		return buildRedirectURL_OK ('Password changed successfully.');
 	else
-		return "${root}?page=${pageno}&tab=${tabno}&user_id=${user_id}&error=" . urlencode ('DB update failed');
+		return buildRedirectURL_ERR ('Password change failed.');
 }
 
 function saveRackCode ()
