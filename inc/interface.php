@@ -975,7 +975,7 @@ function renderRackObject ($object_id = 0)
 			echo '</a>';
 			if (!empty ($info['name']))
 				echo " (${info['name']})";
-			echo "</td><td class=tdleft><a href='${root}?page=rspool&pool_id=${info['pool_id']}'>";
+			echo "</td><td class=tdleft><a href='${root}?page=ipv4rsp&pool_id=${info['pool_id']}'>";
 			echo (empty ($info['pool_name']) ? 'ANONYMOUS' : $info['pool_name']);
 			echo '</a></td><td class=tdleft>' . $info['rscount'] . '</td>';
 			echo "<td class=tdleft><pre>${info['vsconfig']}</pre></td>";
@@ -1887,7 +1887,7 @@ function renderIPv4SLB ()
 				else
 				{
 					echo $vsdata['lblist'][$lb_object_id]['size'];
-					echo " (<a href='${root}?page=rspool&pool_id=";
+					echo " (<a href='${root}?page=ipv4rsp&pool_id=";
 				       	echo $vsdata['lblist'][$lb_object_id]['id'] . "'>";
 					echo $vsdata['lblist'][$lb_object_id]['name'] . '</a>)';
 				}
@@ -2147,7 +2147,7 @@ function renderIPRange ($id)
 			{
 				echo $prologue;
 				$prologue = '';
-				echo "${delim}&rarr;${ref['rsport']}@<a href='${root}?page=rspool&pool_id=${ref['rspool_id']}'>";
+				echo "${delim}&rarr;${ref['rsport']}@<a href='${root}?page=ipv4rsp&pool_id=${ref['rspool_id']}'>";
 				echo "${ref['rspool_name']}</a>";
 				$delim = '; ';
 			}
@@ -2267,7 +2267,7 @@ function renderIPAddress ()
 				printImageHREF ('inservice', 'in service');
 			else
 				printImageHREF ('notinservice', 'NOT in service');
-			echo "</td><td class=tdleft>${rsinfo['rsport']}</td><td class=tdleft><a href='${root}?page=rspool&pool_id=${rsinfo['pool_id']}'>";
+			echo "</td><td class=tdleft>${rsinfo['rsport']}</td><td class=tdleft><a href='${root}?page=ipv4rsp&pool_id=${rsinfo['pool_id']}'>";
 			echo $rsinfo['poolname'] . "</a></td></tr>\n";
 		}
 		echo "</table><br><br>";
@@ -2775,7 +2775,7 @@ function renderSearchResults ()
 				echo "<script language='Javascript'>document.location='${root}?page=object&object_id=${record['id']}';//</script>";
 				break;
 			case 'ipv4rspool':
-				echo "<script language='Javascript'>document.location='${root}?page=rspool&pool_id=${record['pool_id']}';//</script>";
+				echo "<script language='Javascript'>document.location='${root}?page=ipv4rsp&pool_id=${record['pool_id']}';//</script>";
 				break;
 			case 'ipv4vs':
 				echo "<script language='Javascript'>document.location='${root}?page=ipv4vs&vs_id=${record['id']}';//</script>";
@@ -2842,7 +2842,7 @@ function renderSearchResults ()
 					echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
 					foreach ($what as $rspool)
 					{
-						echo "<tr class=row_${order}><td class=tdleft><a href='${root}?page=rspool&pool_id=${rspool['pool_id']}'>";
+						echo "<tr class=row_${order}><td class=tdleft><a href='${root}?page=ipv4rsp&pool_id=${rspool['pool_id']}'>";
 						echo buildRSPoolName ($rspool);
 						echo "</a></td></tr>";
 						$order = $nextorder[$order];
@@ -3918,7 +3918,7 @@ function renderVirtualService ($vsid)
 		echo "<tr class=row_${order}><td class=tdleft>";
 		// Pool info
 		echo '<table width=100%>';
-		echo "<tr><td colspan=2><a href='${root}?page=rspool&pool_id=${pool_id}'>";
+		echo "<tr><td colspan=2><a href='${root}?page=ipv4rsp&pool_id=${pool_id}'>";
 		if (!empty ($poolInfo['name']))
 			echo $poolInfo['name'];
 		else
@@ -4152,7 +4152,7 @@ function renderVServiceLBForm ($vs_id = 0)
 				printImageHREF ('delete', 'Unconfigure');
 				echo "</a></td>";
 				echo "<td class=tdleft><a href='${root}?page=object&object_id=${object_id}'>${oi['dname']}</a></td>";
-				echo "<td class=tdleft><a href='${root}?page=rspool&pool_id=${pool_id}'>${rspinfo['name']}</a></td>";
+				echo "<td class=tdleft><a href='${root}?page=ipv4rsp&pool_id=${pool_id}'>${rspinfo['name']}</a></td>";
 				echo "<td><textarea name=vsconfig>${configs['vsconfig']}</textarea></td>";
 				echo "<td><textarea name=rsconfig>${configs['rsconfig']}</textarea></td><td>";
 				printImageHREF ('save', 'Save changes', TRUE);
@@ -4373,7 +4373,7 @@ function renderRSPoolList ()
 	foreach ($pool_list as $pool_id => $pool_info)
 	{
 		echo "<tr valign=top class=row_${order}><td class=tdleft>" . ($pool_info['refcnt'] ? $pool_info['refcnt'] : '&nbsp;') . '</td>';
-		echo "<td class=tdleft><a href='${root}?page=rspool&pool_id=${pool_id}'>";
+		echo "<td class=tdleft><a href='${root}?page=ipv4rsp&pool_id=${pool_id}'>";
 		echo (empty ($pool_info['name']) ? 'ANONYMOUS' : $pool_info['name']) . '</a></td>';
 		echo "<td class=tdleft><pre>${pool_info['vsconfig']}</pre></td>";
 		echo "<td class=tdleft><pre>${pool_info['rsconfig']}</pre></td>";
@@ -4457,7 +4457,7 @@ function renderRealServerList ()
 			$order = $nextorder[$order];
 			$last_pool_id = $rsinfo['rspool_id'];
 		}
-		echo "<tr valign=top class=row_${order}><td><a href='${root}?page=rspool&pool_id=${rsinfo['rspool_id']}'>";
+		echo "<tr valign=top class=row_${order}><td><a href='${root}?page=ipv4rsp&pool_id=${rsinfo['rspool_id']}'>";
 		echo empty ($pool_list[$rsinfo['rspool_id']]['name']) ? 'ANONYMOUS' : $pool_list[$rsinfo['rspool_id']]['name'];
 		echo '</a></td><td align=center>';
 		if ($rsinfo['inservice'] == 'yes')

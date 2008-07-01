@@ -1395,7 +1395,7 @@ function loadRackObjectAutoTags ()
 	$object_id = $_REQUEST['object_id'];
 	$oinfo = getObjectInfo ($object_id);
 	$ret = array();
-	$ret[] = array ('tag' => '$objectid_' . $object_id);
+	$ret[] = array ('tag' => '$id_' . $object_id);
 	$ret[] = array ('tag' => '$any_object');
 	if (validTagName ($oinfo['name']))
 		$ret[] = array ('tag' => '$cn_' . $oinfo['name']);
@@ -1446,7 +1446,7 @@ function loadIPv4VSAutoTags ()
 {
 	assertUIntArg ('vs_id', __FUNCTION__);
 	$ret = array();
-	$ret[] = array ('tag' => '$id_' . $_REQUEST['vs_id']);
+	$ret[] = array ('tag' => '$ipv4vsid_' . $_REQUEST['vs_id']);
 	$ret[] = array ('tag' => '$any_ipv4vs');
 	$ret[] = array ('tag' => '$any_vs');
 	return $ret;
@@ -1456,9 +1456,9 @@ function loadIPv4RSPoolAutoTags ()
 {
 	assertUIntArg ('pool_id', __FUNCTION__);
 	$ret = array();
-	$ret[] = array ('tag' => '$id_' . $_REQUEST['pool_id']);
-	$ret[] = array ('tag' => '$any_ipv4rspool');
-	$ret[] = array ('tag' => '$any_rspool');
+	$ret[] = array ('tag' => '$ipv4rspid_' . $_REQUEST['pool_id']);
+	$ret[] = array ('tag' => '$any_ipv4rsp');
+	$ret[] = array ('tag' => '$any_rsp');
 	return $ret;
 }
 

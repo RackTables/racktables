@@ -114,7 +114,7 @@ function dynamic_title_rspool ()
 	$ret = array();
 	switch ($pageno)
 	{
-		case 'rspool':
+		case 'ipv4rsp':
 			assertUIntArg ('pool_id', __FUNCTION__);
 			$poolInfo = getRSPoolInfo ($_REQUEST['pool_id']);
 			$ret['name'] = empty ($poolInfo['name']) ? 'ANONYMOUS' : $poolInfo['name'];
