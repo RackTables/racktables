@@ -113,7 +113,6 @@ function getNarrowObjectList ($type_id = 0)
 // Return a filtered, detailed object list.
 function getObjectList ($type_id = 0, $tagfilter = array(), $tfmode = 'any')
 {
-echo 'DEBUG1';
 	$whereclause = getWhereClause ($tagfilter);
 	if ($type_id != 0)
 		$whereclause .= " and objtype_id = '${type_id}' ";

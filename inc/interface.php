@@ -4885,9 +4885,9 @@ function renderTagFilterPortlet ($tagfilter, $realm, $bypass_name = '', $bypass_
 	foreach ($objectivetags as $taginfo)
 		renderTagOptionForFilter ($taginfo, $tagfilter, $realm);
 	echo '</select><br>';
-	$tfmode = getTFMode();
-	echo '<input type=radio name=tfmode value=all' . ($tfmode == 'all' ? ' checked' : '') . '>all ';
-	echo '<input type=radio name=tfmode value=any' . ($tfmode == 'any' ? ' checked' : '') . '>any ';
+//	$tfmode = getTFMode();
+//	echo '<input type=radio name=tfmode value=all' . ($tfmode == 'all' ? ' checked' : '') . '>all ';
+//	echo '<input type=radio name=tfmode value=any' . ($tfmode == 'any' ? ' checked' : '') . '>any ';
 	echo "<input type=submit value='Apply'></form>\n";
 	finishPortlet();
 }
