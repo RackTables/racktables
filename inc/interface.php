@@ -4990,9 +4990,66 @@ function renderTagRollerForRow ($row_id)
 	echo "</table></form>";
 }
 
-function renderObjectSLB ()
+function renderObjectSLB ($object_id)
 {
-	dragon();
+	global $root, $pageno, $tabno, $nextorder;
+	showMessageOrError();
+	$vslist = getRSPoolsForObject ($object_id);
+
+	if (count ($vslist))
+	{
+		startPortlet ('Manage existing (' . count ($vslist) . ')');
+		echo "<table cellspacing=0 cellpadding=5 align=center class=cooltable>\n";
+		echo "<tr><th>&nbsp;</th><th>VS</th><th>RS pool</th><th>VS config</th><th>RS config</th><th>&nbsp;</th></tr>\n";
+		$order = 'odd';
+		foreach ($vslist as $vs_id => $vsinfo)
+		{
+			echo "<form action='${root}process.php' method=post>";
+			echo "<input type=hidden name=page value='${pageno}'>\n";
+			echo "<input type=hidden name=tab value='${tabno}'>\n";
+			echo "<input type=hidden name=op value=updLB>";
+			echo "<input type=hidden name=pool_id value='${vsinfo['pool_id']}'>";
+			echo "<input type=hidden name=vs_id value='${vs_id}'>";
+			echo "<input type=hidden name=object_id value='${object_id}'>";
+			echo "<tr valign=top class=row_${order}><td><a href='${root}process.php?page=${pageno}&tab=${tabno}&op=delLB&pool_id=${vsinfo['pool_id']}&object_id=${object_id}&vs_id=${vs_id}'>";
+			printImageHREF ('delete', 'Unconfigure');
+			echo "</a></td>";
+			echo "<td class=tdleft><a href='${root}?page=ipv4vs&vs_id=${vs_id}'>";
+			echo buildVServiceName ($vsinfo) . "</a></td>";
+			echo "<td class=tdleft><a href='${root}?page=ipv4rsp&pool_id=${pool_id}'>${rspinfo['name']}</a></td>";
+			echo "<td><textarea name=vsconfig>${vsinfo['vsconfig']}</textarea></td>";
+			echo "<td><textarea name=rsconfig>${vsinfo['rsconfig']}</textarea></td><td>";
+			printImageHREF ('save', 'Save changes', TRUE);
+			echo "</td></tr></form>\n";
+			$order = $nextorder[$order];
+		}
+		echo "</table>\n";
+		finishPortlet();
+	}
+
+	$vs_list = $rsplist = array();
+	foreach (getVSList() as $vsid => $vsinfo)
+		$vs_list[$vsid] = buildVServiceName ($vsinfo) . (empty ($vsinfo['name']) ? '' : " (${vsinfo['name']})");
+	foreach (getRSPoolList() as $pool_id => $poolInfo)
+		$rsplist[$pool_id] = $poolInfo['name'];
+	startPortlet ('Add new');
+	echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
+	echo "<form action='${root}process.php' method=post>";
+	echo "<input type=hidden name=page value='${pageno}'>\n";
+	echo "<input type=hidden name=tab value='${tabno}'>\n";
+	echo "<input type=hidden name=op value=addLB>";
+	echo "<input type=hidden name=object_id value='${object_id}'>";
+	echo "<tr valign=top><th>RS pool / VS</th><td class=tdleft>";
+	printSelect ($rsplist, 'pool_id');
+	echo "</td><td>";
+	printSelect ($vs_list, 'vs_id');
+	echo "</td><td>";
+	printImageHREF ('add', 'Configure LB', TRUE, 2);
+	echo "</td></tr>\n";
+	echo "<tr><th>VS config</th><td colspan=2><textarea name=vsconfig rows=10 cols=80></textarea></td></tr>";
+	echo "<tr><th>RS config</th><td colspan=2><textarea name=rsconfig rows=10 cols=80></textarea></td></tr>";
+	echo "</form></table>\n";
+	finishPortlet();
 }
 
 function renderEditRSPool ($pool_id)
