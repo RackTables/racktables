@@ -4276,13 +4276,12 @@ function renderVSList ()
 
 	startPortlet ('Virtual services (' . count ($vslist) . ')');
 	echo "<table class=widetable border=0 cellpadding=10 cellspacing=0 align=center>\n";
-	echo "<tr><th>endpoint</th><th>name</th><th>VS configuration</th><th>RS configuration</th></tr>";
+	echo "<tr><th>endpoint/name</th><th>VS configuration</th><th>RS configuration</th></tr>";
 	$order = 'odd';
 	foreach ($vslist as $vsid => $vsinfo)
 	{
 		echo "<tr align=left valign=top class=row_${order}><td class=tdleft><a href='${root}?page=ipv4vs&vs_id=${vsid}'>" . buildVServiceName ($vsinfo);
-		echo "</a></td>";
-		echo "<td class=tdleft>${vsinfo['name']}</td>";
+		echo "</a><br>${vsinfo['name']}</td>";
 		echo "<td><pre>${vsinfo['vsconfig']}</pre></td>";
 		echo "<td><pre>${vsinfo['rsconfig']}</pre></td>";
 		echo "</tr>\n";
@@ -4338,13 +4337,13 @@ function renderVSListEditForm ()
 		echo "<input type=hidden name=page value=${pageno}>\n";
 		echo "<input type=hidden name=tab value=${tabno}>\n";
 		echo "<input type=hidden name=op value=upd>\n";
-		echo "<input type=hidden name=id value=${vsid}>\n";
+		echo "<input type=hidden name=vs_id value=${vsid}>\n";
 		echo "<tr valign=top class=row_${order}><td>";
 		if ($vsinfo['poolcount'])
 			printImageHREF ('nodelete', 'there are ' . $vsinfo['poolcount'] . ' RS pools configured');
 		else
 		{
-			echo "<a href='${root}process.php?page=${pageno}&tab=${tabno}&op=del&id=${vsid}'>";
+			echo "<a href='${root}process.php?page=${pageno}&tab=${tabno}&op=del&vs_id=${vsid}'>";
 			printImageHREF ('delete', 'delete virtual service');
 			echo '</a>';
 		}

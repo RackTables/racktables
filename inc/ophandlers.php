@@ -1018,13 +1018,11 @@ function deleteLoadBalancer ()
 
 function deleteVService ()
 {
-	global $root, $pageno, $tabno;
-
-	assertUIntArg ('id', __FUNCTION__);
-	if (!commitDeleteVS ($_REQUEST['id']))
-		return "${root}?page=${pageno}&tab=${tabno}&error=" . urlencode ('commitDeleteVS() failed');
+	assertUIntArg ('vs_id', __FUNCTION__);
+	if (!commitDeleteVS ($_REQUEST['vs_id']))
+		return buildRedirectURL_ERR ('commitDeleteVS() failed');
 	else
-		return "${root}?page=${pageno}&tab=${tabno}&message=" . urlencode ("Virtual service was successfully deleted");
+		return buildRedirectURL_OK ('Virtual service was successfully deleted');
 }
 
 function updateRealServer ()
@@ -1061,16 +1059,14 @@ function updateLoadBalancer ()
 
 function updateVService ()
 {
-	global $root, $pageno, $tabno;
-
-	assertUIntArg ('id', __FUNCTION__);
+	assertUIntArg ('vs_id', __FUNCTION__);
 	assertIPv4Arg ('vip', __FUNCTION__);
 	assertUIntArg ('vport', __FUNCTION__);
 	assertStringArg ('proto', __FUNCTION__);
 	assertStringArg ('name', __FUNCTION__, TRUE);
 	assertStringArg ('vsconfig', __FUNCTION__, TRUE);
 	assertStringArg ('rsconfig', __FUNCTION__, TRUE);
-	if (!commitUpdateVS ($_REQUEST['id'], $_REQUEST['vip'], $_REQUEST['vport'], $_REQUEST['proto'], $_REQUEST['name'], $_REQUEST['vsconfig'], $_REQUEST['rsconfig']))
+	if (!commitUpdateVS ($_REQUEST['vs_id'], $_REQUEST['vip'], $_REQUEST['vport'], $_REQUEST['proto'], $_REQUEST['name'], $_REQUEST['vsconfig'], $_REQUEST['rsconfig']))
 		return buildRedirectURL_ERR ('commitUpdateVS() failed');
 	else
 		return buildRedirectURL_OK ('Virtual service was successfully updated');

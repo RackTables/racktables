@@ -206,6 +206,7 @@ $tabhandler['ipv4vs']['default'] = 'renderVirtualService';
 $tabhandler['ipv4vs']['edit'] = 'renderEditVService';
 $tabhandler['ipv4vs']['editlblist'] = 'renderVServiceLBForm';
 $tabhandler['ipv4vs']['tags'] = 'renderIPv4VSTags';
+$ophandler['ipv4vs']['edit']['updIPv4VS'] = 'updateVService';
 $ophandler['ipv4vs']['tags']['saveTags'] = 'saveIPv4VSTags';
 $ophandler['ipv4vs']['editlblist']['addLB'] = 'addLoadBalancer';
 $ophandler['ipv4vs']['editlblist']['delLB'] = 'deleteLoadBalancer';
