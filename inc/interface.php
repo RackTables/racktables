@@ -4869,7 +4869,7 @@ function renderRackTags ($id)
 
 function renderIPv4VSTags ($id)
 {
-	renderEntityTagChainEditor ('ip4vs', 'id', $id);
+	renderEntityTagChainEditor ('ip4vs', 'vs_id', $id);
 }
 
 function renderIPv4RSPoolTags ($id)

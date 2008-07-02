@@ -1237,7 +1237,7 @@ function saveRackTags ()
 
 function saveIPv4VSTags ()
 {
-	return saveEntityTags ('ipv4vs', 'id');
+	return saveEntityTags ('ipv4vs', 'vs_id');
 }
 
 function saveIPv4RSPoolTags ()
