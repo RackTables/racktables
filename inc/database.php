@@ -2310,7 +2310,7 @@ function getRSPoolList ($tagfilter = array(), $tfmode = 'any')
 	$query = "select pool.id, pool.name, count(rspool_id) as refcnt, pool.vsconfig, pool.rsconfig " .
 		"from IPRSPool as pool left join IPLoadBalancer as lb on pool.id = lb.rspool_id " .
 		"left join TagStorage on pool.id = TagStorage.target_id and target_realm = 'ipv4rspool' " .
-		"where true ${whereclause} group by pool.id order by pool.id, name";
+		"where true ${whereclause} group by pool.id order by pool.name, pool.id";
 	$result = useSelectBlade ($query, __FUNCTION__);
 	$ret = array ();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
