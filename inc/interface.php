@@ -711,7 +711,7 @@ function printRefsOfType ($refs, $type, $eq)
 
 function renderRackObject ($object_id = 0)
 {
-	global $root;
+	global $root, $nextorder;
 	if ($object_id <= 0)
 	{
 		showError ('Invalid object_id', __FUNCTION__);
@@ -965,22 +965,24 @@ function renderRackObject ($object_id = 0)
 	$pools = getRSPoolsForObject ($object_id);
 	if (count ($pools))
 	{
+		$order = 'odd';
 		startPortlet ('Real server pools');
 		echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
 		echo "<tr><th>VS</th><th>RS pool</th><th>RS</th><th>VS config</th><th>RS config</th></tr>\n";
 		foreach ($pools as $vs_id => $info)
 		{
-			echo "<tr valign=top><td class=tdleft><a href='${root}?page=ipv4vs&vs_id=${vs_id}'>";
+			echo "<tr valign=top class=row_${order}><td class=tdleft><a href='${root}?page=ipv4vs&vs_id=${vs_id}'>";
 			echo buildVServiceName ($info);
 			echo '</a>';
 			if (!empty ($info['name']))
-				echo " (${info['name']})";
+				echo "<br>${info['name']}";
 			echo "</td><td class=tdleft><a href='${root}?page=ipv4rsp&pool_id=${info['pool_id']}'>";
 			echo (empty ($info['pool_name']) ? 'ANONYMOUS' : $info['pool_name']);
 			echo '</a></td><td class=tdleft>' . $info['rscount'] . '</td>';
 			echo "<td class=tdleft><pre>${info['vsconfig']}</pre></td>";
 			echo "<td class=tdleft><pre>${info['rsconfig']}</pre></td>";
 			echo "</tr>\n";
+			$order = $nextorder[$order];
 		}
 		echo "</table>\n";
 		finishPortlet();
@@ -1877,7 +1879,7 @@ function renderIPv4SLB ()
 			echo buildVServiceName ($vsdata);
 			echo '</a>';
 			if (!empty ($vsdata['name']))
-				echo " (${vsdata['name']})";
+				echo "<br>${vsdata['name']}";
 			echo "</td>";
 			foreach ($lblist as $lb_object_id)
 			{
