@@ -2818,4 +2818,14 @@ function objectIsPortless ($id = 0)
 	return $count === '0';
 }
 
+function tagExistsInDatabase ($tname)
+{
+	$result = useSelectBlade ("select count(*) from TagTree where lower(tag) = lower('${tname}')");
+	$row = $result->fetch (PDO::FETCH_NUM);
+	$count = $row[0];
+	$result->closeCursor();
+	unset ($result);
+	return $count !== '0';
+}
+
 ?>

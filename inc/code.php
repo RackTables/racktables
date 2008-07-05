@@ -154,7 +154,7 @@ function getLexemsFromRackCode ($text)
 						$ret[] = array ('type' => 'LEX_TAG', 'load' => $buffer);
 						$newstate = 'ESOTSM';
 						break;
-					case (mb_ereg ('[[:alnum:]\. _-]', $char) > 0):
+					case (mb_ereg ('[[:alnum:]\. _-~]', $char) > 0):
 						$buffer .= $char;
 						break;
 					default:
@@ -185,7 +185,7 @@ function getLexemsFromRackCode ($text)
 						$ret[] = array ('type' => 'LEX_PREDICATE', 'load' => $buffer);
 						$newstate = 'ESOTSM';
 						break;
-					case (mb_ereg ('[[:alnum:]\. _-]', $char) > 0):
+					case (mb_ereg ('[[:alnum:]\. _-~]', $char) > 0):
 						$buffer .= $char;
 						break;
 					default:

@@ -1268,6 +1268,8 @@ function createTag ()
 	$tagname = trim ($_REQUEST['tag_name']);
 	if (!validTagName ($tagname))
 		return buildRedirectURL_ERR ("Invalid tag name '${tagname}'");
+	if (tagExistsInDatabase ($tagname))
+		return buildRedirectURL_ERR ("Tag '${tagname}' (or similar name) already exists");
 	if (($parent_id = $_REQUEST['parent_id']) <= 0)
 		$parent_id = 'NULL';
 	if (($ret = commitCreateTag ($tagname, $parent_id)) == '')
