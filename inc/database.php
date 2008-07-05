@@ -2534,7 +2534,11 @@ function loadEntityTags ($entity_realm = '', $entity_id = 0)
 		return NULL;
 	}
 	$ret = array();
-	$result = useSelectBlade ("select tt.id, tag from TagStorage as ts inner join TagTree as tt on ts.tag_id = tt.id where target_realm = '${entity_realm}' and target_id = ${entity_id}", __FUNCTION__);
+	$query = "select tt.id, tag from " .
+		"TagStorage as ts inner join TagTree as tt on ts.tag_id = tt.id " .
+		"where target_realm = '${entity_realm}' and target_id = ${entity_id} " .
+		"order by tt.tag";
+	$result = useSelectBlade ($query, __FUNCTION__);
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 		$ret[$row['id']] = $row;
 	$result->closeCursor();
