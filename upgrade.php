@@ -1290,7 +1290,7 @@ CREATE TABLE `TagTree` (
 				"UserPermission natural left join UserAccount where (user_name is not null) or " .
 				"(user_name is null and UserPermission.user_id = 0) order by user_name desc, page desc, tab desc";
 			$tr = $dbxlink->query ($tq);
-			$code = '';
+			$code = "allow {$userid_1}\n";
 			while ($row = $tr->fetch (PDO::FETCH_ASSOC))
 			{
 				$conjunction = '';
