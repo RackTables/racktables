@@ -1462,9 +1462,32 @@ function loadIPv4RSPoolAutoTags ()
 	return $ret;
 }
 
+// If the page-tab-op triplet is final, make $expl_tags and $impl_tags
+// hold all appropriate (explicit and implicit) tags respectively.
+// Otherwise some limited redirection is necessary (only page and tab
+// names are preserved, ophandler name change isn't handled).
 function fixContext ()
 {
 	global $pageno, $tabno, $auto_tags, $expl_tags, $impl_tags, $page;
+
+	$pmap = array
+	(
+		'accounts' => 'userlist',
+		'rspools' => 'ipv4rsplist',
+		'rspool' => 'ipv4rsp',
+		'vservices' => 'ipv4vslist',
+		'vservice' => 'ipv4vs',
+	);
+	$tmap = array();
+	$tmap['objects']['newmulti'] = 'addmore';
+	$tmap['objects']['newobj'] = 'addmore';
+	$tmap['object']['switchvlans'] = 'livevlans';
+	$tmap['object']['slb'] = 'editrspvs';
+	if (isset ($pmap[$pageno]))
+		redirectUser ($pmap[$pageno], $tabno);
+	if (isset ($tmap[$pageno][$tabno]))
+		redirectUser ($pageno, $tmap[$pageno][$tabno]);
+
 	if (isset ($page[$pageno]['autotagloader']))
 		$auto_tags = $page[$pageno]['autotagloader'] ();
 	if
@@ -1573,6 +1596,16 @@ function validTagName ($s, $allow_autotag = FALSE)
 	if ($allow_autotag and 1 == mb_ereg (AUTOTAGNAME_REGEXP, $s))
 		return TRUE;
 	return FALSE;
+}
+
+function redirectUser ($p, $t)
+{
+	global $page, $root;
+	$l = "{$root}?page=${p}&tab=${t}";
+	if (isset ($page[$p]['bypass']) and isset ($_REQUEST[$page[$p]['bypass']]))
+		$l .= '&' . $page[$p]['bypass'] . '=' . $_REQUEST[$page[$p]['bypass']];
+	header ("Location: " . $l);
+	die;
 }
 
 ?>
