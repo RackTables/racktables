@@ -1299,7 +1299,7 @@ CREATE TABLE `TagTree` (
 				"UserPermission natural left join UserAccount where (user_name is not null) or " .
 				"(user_name is null and UserPermission.user_id = 0) order by user_id desc, page desc, tab desc";
 			$tr = $dbxlink->query ($tq);
-			$code = "allow {$userid_1}\ndeny true\n";
+			$code = "allow {\$userid_1}\ndeny true\n";
 			// copied and pasted from fixContext()
 			$pmap = array
 			(
