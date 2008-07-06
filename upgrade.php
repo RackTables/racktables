@@ -53,12 +53,12 @@ function printReleaseNotes ($batchid)
 	switch ($batchid)
 	{
 		case '0.16.0':
-			echo "<font color=red><strong>Release notes</strong></font>";
+			echo "<font color=red><strong>Release notes</strong></font><br>";
 			echo 'The user permission records of this system have been automatically converted ';
 			echo 'to switch to the new RackCode authorization system. To prevent possible data ';
 			echo 'leak, the second line of the automatically created configuration bans everything ';
 			echo '(and the first allows everything to you, the administrator). The whole config can ';
-			echo "be reviewed on the Permissions page (under Configuration). Sorry for the inconvenience.\n";
+			echo "be reviewed on the Permissions page (under Configuration). Sorry for the inconvenience.<br><br>\n";
 			break;
 		default:
 			break;
