@@ -4,7 +4,8 @@
 * This file performs RackTables initialisation. After you include it
 * from 1st-level page, don't forget to call fixContext(). This is done
 * to allow reloading of pageno and tabno variables. pageno and tabno
-* together form security context.
+* together participate in forming security context by generating
+* related autotags.
 *
 */
 
