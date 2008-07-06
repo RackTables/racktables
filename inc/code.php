@@ -20,8 +20,8 @@
 // Complain about martian char.
 function lexError1 ($state, $text, $pos)
 {
-	$message = "invalid char with code " . ord (mb_substr ($text, $pos, 1));
-	$message .= " at position ${pos} (FSM state is '${state}')";
+	$message = "invalid char with code " . ord (mb_substr ($text, $pos, 1)) . ' (';
+	$message .= mb_substr ($text, $pos, 1) . ") at position ${pos} (FSM state is '${state}')";
 	return array ('result' => 'NAK', 'load' => $message);
 }
 
@@ -154,7 +154,7 @@ function getLexemsFromRackCode ($text)
 						$ret[] = array ('type' => 'LEX_TAG', 'load' => $buffer);
 						$newstate = 'ESOTSM';
 						break;
-					case (mb_ereg ('[[:alnum:]\. _-~]', $char) > 0):
+					case (mb_ereg ('[[:alnum:]\. _~-]', $char) > 0):
 						$buffer .= $char;
 						break;
 					default:
@@ -185,7 +185,7 @@ function getLexemsFromRackCode ($text)
 						$ret[] = array ('type' => 'LEX_PREDICATE', 'load' => $buffer);
 						$newstate = 'ESOTSM';
 						break;
-					case (mb_ereg ('[[:alnum:]\. _-~]', $char) > 0):
+					case (mb_ereg ('[[:alnum:]\. _~-]', $char) > 0):
 						$buffer .= $char;
 						break;
 					default:

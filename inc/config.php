@@ -17,8 +17,8 @@ define ('CODE_VERSION', '0.16.0');
 // in the database. I think, we are happy with this one forever.
 define ('PASSWORD_HASH', 'sha1');
 
-define ('TAGNAME_REGEXP', '^[[:alnum:]]([\. _-~]?[[:alnum:]])*$');
-define ('AUTOTAGNAME_REGEXP', '^\$[[:alnum:]]([\. _-~]?[[:alnum:]])*$');
+define ('TAGNAME_REGEXP', '^[[:alnum:]]([\. _~-]?[[:alnum:]])*$');
+define ('AUTOTAGNAME_REGEXP', '^\$[[:alnum:]]([\. _~-]?[[:alnum:]])*$');
 
 function getConfigVar ($varname = '')
 {
