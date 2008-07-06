@@ -1424,8 +1424,24 @@ catch (PDOException $e)
 // will have to dig into the DB for the user accounts.
 require_once 'inc/auth.php';
 
-// This will not fail sanely, because getUserAccounts() depends on showError()
-$accounts = getUserAccounts();
+// 1. This didn't fail sanely, because getUserAccounts() depended on showError()
+// 2. getUserAccounts() doesn't work for old DBs since 0.16.0. Let's have own
+// copy until it breaks too.
+
+function getUserAccounts_local ()
+{
+	global $dbxlink;
+	$query = 'select user_id, user_name, user_password_hash from UserAccount order by user_name';
+	if (($result = $dbxlink->query ($query)) == NULL)
+		die ('SQL query failed in ' . __FUNCTION__);
+	$ret = array();
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
+		foreach (array ('user_id', 'user_name', 'user_password_hash') as $cname)
+			$ret[$row['user_name']][$cname] = $row[$cname];
+	return $ret;
+}
+
+$accounts = getUserAccounts_local();
 
 // Only administrator is always authenticated locally, so reject others
 // for authenticate() to succeed.
