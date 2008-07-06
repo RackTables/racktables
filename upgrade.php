@@ -48,6 +48,22 @@ function getDBUpgradePath ($v1, $v2)
 	return $path;
 }
 
+function printReleaseNotes ($batchid)
+{
+	switch ($batchid)
+	{
+		case '0.16.0':
+			echo 'The user permission records of this system have been automatically converted ';
+			echo 'to switch to the new RackCode authorization system. To prevent possible data ';
+			echo 'leak, the second line of the automatically created configuration bans everything ';
+			echo '(and the first allows everything to you, the administrator). The whole config can ';
+			echo "be reviewed on the Permissions page (under Configuration). Sorry for the inconvenience.\n";
+			break;
+		default:
+			break;
+	}
+}
+
 // Upgrade batches are name exactly as the release where they first appear.
 // That simple, but seems sufficient for beginning.
 function executeUpgradeBatch ($batchid)
@@ -1273,14 +1289,6 @@ CREATE TABLE `TagTree` (
 			}
 			$query[] = 'alter table TagStorage modify column tag_id int(10) unsigned not null;';
 			$query[] = "alter table TagStorage modify column target_realm enum('object','ipv4net','rack','ipv4vs','ipv4rspool','user');";
-			$query[] = "delete from UserPermission where page = 'objects' and tab = 'newobj'";
-			$query[] = "update UserPermission set tab = 'addmore' where page = 'objects' and (tab = 'newmulti' or tab = 'newobj')";
-			$query[] = "update UserPermission set tab = 'livevlans' where tab = 'switchvlans'";
-			$query[] = "update UserPermission set page = 'userlist' where page = 'accounts'";
-			$query[] = "update UserPermission set page = 'ipv4rsplist' where page = 'rspools'";
-			$query[] = "update UserPermission set page = 'ipv4vslist' where page = 'vservices'";
-			$query[] = "update UserPermission set page = 'ipv4vs' where page = 'vservice'";
-			$query[] = "update UserPermission set page = 'ipv4rsp' where page = 'rspool'";
 			$query[] = "create table Script (script_name char(64) not null primary key, script_text text)";
 			// Do the same getUserPermissions() does, but without the function.
 			// We need to generate more specific rules first, otherwise they will
@@ -1288,11 +1296,29 @@ CREATE TABLE `TagTree` (
 			$tq =
 				"select UserPermission.user_id, user_name, page, tab, access from " .
 				"UserPermission natural left join UserAccount where (user_name is not null) or " .
-				"(user_name is null and UserPermission.user_id = 0) order by user_name desc, page desc, tab desc";
+				"(user_name is null and UserPermission.user_id = 0) order by user_id desc, page desc, tab desc";
 			$tr = $dbxlink->query ($tq);
-			$code = "allow {$userid_1}\n";
+			$code = "allow {$userid_1}\ndeny true\n";
+			// copied and pasted from fixContext()
+			$pmap = array
+			(
+				'accounts' => 'userlist',
+				'rspools' => 'ipv4rsplist',
+				'rspool' => 'ipv4rsp',
+				'vservices' => 'ipv4vslist',
+				'vservice' => 'ipv4vs',
+			);
+			$tmap = array();
+			$tmap['objects']['newmulti'] = 'addmore';
+			$tmap['objects']['newobj'] = 'addmore';
+			$tmap['object']['switchvlans'] = 'livevlans';
+			$tmap['object']['slb'] = 'editrspvs';
 			while ($row = $tr->fetch (PDO::FETCH_ASSOC))
 			{
+				// map, if appropriate
+				$row['page'] = isset ($pmap[$row['page']]) ? $pmap[$row['page']] : $row['page'];
+				$row['tab'] = isset ($tmap[$row['page']][$row['tab']]) ? $tmap[$row['page']][$row['tab']] : $row['tab'];
+				// build a rule
 				$conjunction = '';
 				$rule = $row['access'] == 'yes' ? 'allow' : 'deny';
 				if ($row['user_id'] != 0)
@@ -1418,17 +1444,20 @@ if
 }
 
 $dbver = getDatabaseVersion();
-echo 'Code version == ' . CODE_VERSION . '<br>';
-echo 'Database version == ' . $dbver . '<br>';
+echo 'Code version: ' . CODE_VERSION . '<br>';
+echo 'Database version: ' . $dbver . '<br>';
 if ($dbver == CODE_VERSION)
 {
-	die ("<p align=justify>Your database seems to be up-to-date. " .
-		"Now the best thing to do would be to follow to the <a href='${root}'>main page</a> " .
-		"and explore your data. Have a nice day.</p>");
+	die ("<p align=justify>No action is necessary. " .
+		"Proceed to the <a href='${root}'>main page</a>, " .
+		"check your data and have a nice day.</p>");
 }
 
 foreach (getDBUpgradePath ($dbver, CODE_VERSION) as $batchid)
+{
 	executeUpgradeBatch ($batchid);
+	printReleaseNotes ($batchid);
+}
 
 echo '<br>Database version == ' . getDatabaseVersion();
 echo "<p align=justify>Your database seems to be up-to-date. " .
