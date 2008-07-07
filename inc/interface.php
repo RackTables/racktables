@@ -68,7 +68,7 @@ function renderRackspace ()
 	// generate thumb gallery
 	$rackrowList = getRackspace ($tagfilter);
 	global $root, $nextorder;
-	$rackwidth = getConfigVar ('rtwidth_0') + getConfigVar ('rtwidth_1') + getConfigVar ('rtwidth_2');
+	$rackwidth = getRackImageWidth();
 	$order = 'odd';
 	foreach ($rackrowList as $rackrow)
 	{
@@ -81,7 +81,7 @@ function renderRackspace ()
 		{
 			echo "<td align=center><a href='${root}?page=rack&rack_id=${rack['id']}'>";
 			echo "<img border=0 width=${rackwidth} height=";
-			echo 3 + 3 + $rack['height'] * 2;
+			echo getRackImageHeight ($rack['height']);
 			echo " title='${rack['height']} units'";
 			echo "src='render_image.php?img=minirack&rack_id=${rack['id']}'>";
 			echo "<br>${rack['name']}</a></td>";
@@ -93,7 +93,7 @@ function renderRackspace ()
 	echo "</td></tr></table>\n";
 }
 
-function renderRow ($row_id)
+function renderRow ($row_id = 0)
 {
 	if ($row_id == 0)
 	{
@@ -125,15 +125,14 @@ function renderRow ($row_id)
 	echo "</td><td class=pcright rowspan=2>";
 
 	global $root, $nextorder;
-	$rackwidth = getConfigVar ('rtwidth_0') + getConfigVar ('rtwidth_1') + getConfigVar ('rtwidth_2');
+	$rackwidth = getRackImageWidth() * getConfigVar ('ROW_SCALE');
 	$order = 'odd';
 	startPortlet ('Racks');
 	echo "<table border=0 cellspacing=5 align='center'><tr>";
 	foreach ($rackList as $rack)
 	{
 		echo "<td align=center class=row_${order}><a href='${root}?page=rack&rack_id=${rack['id']}'>";
-		echo "<img border=0 width=" . $rackwidth * getConfigVar ('ROW_SCALE') . " height=";
-		echo (3 + 3 + $rack['height'] * 2) * getConfigVar ('ROW_SCALE');
+		echo "<img border=0 width=${rackwidth} height=" . (getRackImageHeight ($rack['height']) * getConfigVar ('ROW_SCALE'));
 		echo " title='${rack['height']} units'";
 		echo "src='render_image.php?img=minirack&rack_id=${rack['id']}'>";
 		echo "<br>${rack['name']}</a></td>";

@@ -74,7 +74,7 @@ function renderRackThumb ($rack_id = 0)
 }
 
 // Output a binary string containing the PNG minirack.
-function generateMiniRack ($rack_id)
+function generateMiniRack ($rack_id = 0)
 {
 	if (($rackData = getRackData ($rack_id, TRUE)) == NULL)
 	{
@@ -89,6 +89,7 @@ function generateMiniRack ($rack_id)
 		1 => getConfigVar ('rtwidth_1'),
 		2 => getConfigVar ('rtwidth_2')
 	);
+	$rtdepth = 9;
 	$offset[0] = 3;
 	$offset[1] = 3 + $rtwidth[0];
 	$offset[2] = 3 + $rtwidth[0] + $rtwidth[1];
@@ -100,10 +101,12 @@ function generateMiniRack ($rack_id)
 	$color = array();
 	foreach (array ('F', 'A', 'U', 'T', 'Th', 'Tw', 'Thw') as $statecode)
 		$color[$statecode] = colorFromHex ($img, getConfigVar ('color_' . $statecode));
-	imagerectangle ($img, 0, 0, $totalwidth - 1, $totalheight - 1, colorFromHex ($img, '000000'));
-	imagerectangle ($img, 1, 1, $totalwidth - 2, $totalheight - 2, colorFromHex ($img, 'c0c0c0'));
-	imagerectangle ($img, 2, 2, $totalwidth - 3, $totalheight - 3, colorFromHex ($img, '000000'));
-	for ($unit_no = $rackData['height']; $unit_no > 0; $unit_no--)
+	$color['black'] = colorFromHex ($img, '000000');
+	$color['gray'] = colorFromHex ($img, 'c0c0c0');
+	imagerectangle ($img, 0, 0, $totalwidth - 1, $totalheight - 1, $color['black']);
+	imagerectangle ($img, 1, 1, $totalwidth - 2, $totalheight - 2, $color['gray']);
+	imagerectangle ($img, 2, 2, $totalwidth - 3, $totalheight - 3, $color['black']);
+	for ($unit_no = 1; $unit_no <= $rackData['height']; $unit_no++)
 	{
 		for ($locidx = 0; $locidx < 3; $locidx++)
 		{

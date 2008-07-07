@@ -1633,4 +1633,14 @@ function getRackCodeStats ()
 	return $ret;
 }
 
+function getRackImageWidth ()
+{
+	return 3 + getConfigVar ('rtwidth_0') + getConfigVar ('rtwidth_1') + getConfigVar ('rtwidth_2') + 3;
+}
+
+function getRackImageHeight ($units)
+{
+	return 3 + 3 + $units * 2;
+}
+
 ?>
