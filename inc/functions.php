@@ -1495,6 +1495,8 @@ function fixContext ()
 	$tmap['objects']['newobj'] = 'addmore';
 	$tmap['object']['switchvlans'] = 'livevlans';
 	$tmap['object']['slb'] = 'editrspvs';
+	$tmap['object']['portfwrd'] = 'nat4';
+	$tmap['object']['network'] = 'ipv4';
 	if (isset ($pmap[$pageno]))
 		redirectUser ($pmap[$pageno], $tabno);
 	if (isset ($tmap[$pageno][$tabno]))

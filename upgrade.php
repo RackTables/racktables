@@ -1314,6 +1314,8 @@ CREATE TABLE `TagTree` (
 			$tmap['objects']['newobj'] = 'addmore';
 			$tmap['object']['switchvlans'] = 'livevlans';
 			$tmap['object']['slb'] = 'editrspvs';
+			$tmap['object']['portfwrd'] = 'nat4';
+			$tmap['object']['network'] = 'ipv4';
 			while ($row = $tr->fetch (PDO::FETCH_ASSOC))
 			{
 				// map, if appropriate

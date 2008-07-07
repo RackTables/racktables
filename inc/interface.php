@@ -768,7 +768,7 @@ function renderRackObject ($object_id = 0)
 	{
 		startPortlet ('IPv4 addresses');
 		echo "<table cellspacing=0 cellpadding='5' align='center' class='widetable'>\n";
-		echo "<tr><th>Interface name</th><th>IP Address</th><th>Description</th><th>Misc</th></tr>\n";
+		echo "<tr><th>OS interface</th><th>IP address</th><th>description</th><th>misc</th></tr>\n";
 		$hl_ipv4_addr = '';
 		if (isset ($_REQUEST['hl_ipv4_addr']))
 		{
@@ -1114,7 +1114,7 @@ function renderPortsForObject ($object_id = 0)
 	finishPortlet();
 }
 
-function renderNetworkForObject ($object_id=0)
+function renderIPv4ForObject ($object_id = 0)
 {
 	global $root, $pageno, $tabno;
 	if ($object_id <= 0)
@@ -1123,11 +1123,11 @@ function renderNetworkForObject ($object_id=0)
 		return;
 	}
 	showMessageOrError();
-	startPortlet ('Network Addresses');
+	startPortlet ('Allocations');
 	$addresses = getObjectAddresses ($object_id);
 	usort($addresses, 'sortAddresses');
 	echo "<table cellspacing=0 cellpadding='5' align='center' class='widetable'>\n";
-	echo "<tr><th>&nbsp;</th><th>Interface name</th><th>IP Address</th><th>Description</th><th>Type</th><th>Misc</th><th>&nbsp</th></tr>\n";
+	echo "<tr><th>&nbsp;</th><th>OS interface</th><th>IP address</th><th>description</th><th>type</th><th>misc</th><th>&nbsp</th></tr>\n";
 	foreach ($addresses as $addr)
 	{
 		if (strlen($addr['address_name'])>40)
@@ -1149,13 +1149,13 @@ function renderNetworkForObject ($object_id=0)
 		else 
 			$class='';
 
-		echo "<form action='process.php'>";
+		echo "<form action='${root}process.php'>";
 		echo "<input type=hidden name=page value='${pageno}'>\n";
 		echo "<input type=hidden name=tab value='${tabno}'>\n";
 		echo "<input type=hidden name=op value=updIPv4Allocation>";
 		echo "<input type=hidden name=object_id value='$object_id'>";
 		echo "<input type=hidden name=ip value='${addr['ip']}'>";
-		echo "<tr class='$class'><td><a href='process.php?op=delIPv4Allocation&page=${pageno}&tab=${tabno}&ip=${addr['ip']}&object_id=$object_id'>";
+		echo "<tr class='$class'><td><a href='${root}process.php?op=delIPv4Allocation&page=${pageno}&tab=${tabno}&ip=${addr['ip']}&object_id=$object_id'>";
 		printImageHREF ('delete', 'Delete this IPv4 address');
 		echo "</a></td>";
 		echo "<td class=tdleft><input type='text' name='bond_name' value='${addr['name']}' size=10></td>";
@@ -1872,7 +1872,7 @@ function renderAddNewRange ()
 	startPortlet ("Add New");
 	echo "<table class='widetable' border=0 cellpadding=10 align='center'>\n";
 	echo "<tr><th>Address range</th><th>Name</th><th>connected network</th><th>assign tags</th><th>&nbsp;</th></tr>\n";
-	echo "<form name='add_new_range' action='process.php'>\n";
+	echo "<form name='add_new_range' action='${root}process.php'>\n";
 	echo "<input type=hidden name=op value=addIPv4Prefix>\n";
 	echo "<input type=hidden name=page value='${pageno}'>\n";
 	echo "<input type=hidden name=tab value='${tabno}'>\n";
@@ -1899,7 +1899,7 @@ function renderAddNewRange ()
 		echo "<tr><td>";
 		if ($usedips == 0)
 		{
-			echo "<a href='process.php?op=delIPv4Prefix&page=${pageno}&tab=${tabno}&id=${iprange['id']}'>";
+			echo "<a href='${root}process.php?op=delIPv4Prefix&page=${pageno}&tab=${tabno}&id=${iprange['id']}'>";
 			printImageHREF ('delete', 'Delete this IP range');
 			echo "</a>";
 		}
@@ -2125,12 +2125,12 @@ function renderIPRange ($id)
 
 function renderIPRangeProperties ($id)
 {
-	global $pageno, $tabno;
+	global $root, $pageno, $tabno;
 	showMessageOrError();
 	$range = getIPRange($id);
 	echo "<center><h1>${range['ip']}/${range['mask']}</h1></center>\n";
 	echo "<table border=0 cellpadding=10 cellpadding=1 align='center'>\n";
-	echo "<form action='process.php'><input type=hidden name=op value=editRange>";
+	echo "<form action='${root}process.php'><input type=hidden name=op value=editRange>";
 	echo "<input type=hidden name=page value='${pageno}'>\n";
 	echo "<input type=hidden name=tab value='${tabno}'>\n";
 	echo "<input type=hidden name=id value='${id}'>";
@@ -2270,7 +2270,7 @@ function renderIPAddressProperties ($ip)
 	echo "<center><h1>$ip</h1></center>\n";
 	startPortlet ('update');
 	echo "<table border=0 cellpadding=10 cellpadding=1 align='center'>\n";
-	echo "<form action='process.php'><input type=hidden name=op value=editAddress>";
+	echo "<form action='${root}process.php'><input type=hidden name=op value=editAddress>";
 	echo "<input type=hidden name=page value='${pageno}'>\n";
 	echo "<input type=hidden name=tab value='${tabno}'>\n";
 	echo "<input type=hidden name=ip value='${ip}'>";
@@ -2320,13 +2320,13 @@ function renderIPAddressAssignment ($ip)
 		echo "<tr class='$class'><td colspan='5'><b>RESERVED</b></td></tr>";
 	foreach ($address['bonds'] as $bond)
 	{
-		echo "<tr class='$class'><form action='process.php'>";
+		echo "<tr class='$class'><form action='${root}process.php'>";
 		echo "<input type=hidden name=op value='updIPv4Allocation'>";
 		echo "<input type=hidden name=page value='${pageno}'>";
 		echo "<input type=hidden name=tab value='${tabno}'>";
 		echo "<input type=hidden name=ip value='$ip'>";
 		echo "<input type=hidden name=object_id value='${bond['object_id']}'>";
-		echo "<td><a href='process.php?op=delIPv4Allocation&page=${pageno}&tab=${tabno}&ip=$ip&object_id=${bond['object_id']}'>";
+		echo "<td><a href='${root}process.php?op=delIPv4Allocation&page=${pageno}&tab=${tabno}&ip=$ip&object_id=${bond['object_id']}'>";
 		printImageHREF ('delete', 'Unallocate address');
 		echo "</a></td>";
 		echo "<td><a href='${root}?page=object&object_id=${bond['object_id']}&hl_ipv4_addr=${ip}'>${bond['object_name']}</td>";
@@ -2354,7 +2354,7 @@ function renderIPAddressAssignment ($ip)
 		printImageHREF ('save', 'Save changes', TRUE);
 		echo "</td></form></tr>\n";
 	}
-	echo "<form action='process.php'><input type='hidden' name='op' value='addIPv4Allocation'>";
+	echo "<form action='${root}process.php'><input type='hidden' name='op' value='addIPv4Allocation'>";
 	echo "<input type=hidden name=page value='${pageno}'>\n";
 	echo "<input type=hidden name=tab value='${tabno}'>\n";
 	echo "<input type='hidden' name='ip' value='$ip'>";
@@ -2399,7 +2399,7 @@ function renderNATv4ForObject ($object_id = 0)
 			}
 
 		echo "<tr class='$class'>";
-		echo "<td><a href='process.php?op=delPortForwarding&localip=${pf['localip']}&localport=${pf['localport']}&remoteip=${pf['remoteip']}&remoteport=${pf['remoteport']}&proto=${pf['proto']}&object_id=$object_id&page=${pageno}&tab=${tabno}'>";
+		echo "<td><a href='${root}process.php?op=delNATv4Rule&localip=${pf['localip']}&localport=${pf['localport']}&remoteip=${pf['remoteip']}&remoteport=${pf['remoteport']}&proto=${pf['proto']}&object_id=$object_id&page=${pageno}&tab=${tabno}'>";
 		printImageHREF ('delete', 'Delete NAT rule');
 		echo "</a></td>";
 		echo "<td>${pf['proto']}/${name}: <a href='${root}?page=ipaddress&tab=default&ip=${pf['localip']}'>${pf['localip']}</a>:${pf['localport']}";
@@ -2416,7 +2416,7 @@ function renderNATv4ForObject ($object_id = 0)
 				echo "<a href='${root}?page=object&tab=default&object_id=${bond['object_id']}'>${bond['object_name']}(${bond['name']})</a> ";
 		elseif (!empty ($pf['remote_addr_name']))
 			echo '(' . $pf['remote_addr_name'] . ')';
-		echo "</td><form action='process.php'><input type='hidden' name='op' value='updPortForwarding'><input type=hidden name=page value='${pageno}'>";
+		echo "</td><form action='${root}process.php'><input type=hidden name=op value=updNATv4Rule><input type=hidden name=page value='${pageno}'>";
 		echo "<input type=hidden name=tab value='${tabno}'><input type='hidden' name='object_id' value='$object_id'>";
 		echo "<input type='hidden' name='localip' value='${pf['localip']}'><input type='hidden' name='localport' value='${pf['localport']}'>";
 		echo "<input type='hidden' name='remoteip' value='${pf['remoteip']}'><input type='hidden' name='remoteport' value='${pf['remoteport']}'>";
@@ -2425,7 +2425,7 @@ function renderNATv4ForObject ($object_id = 0)
 		printImageHREF ('save', 'Save changes', TRUE);
 		echo "</td></form></tr>";
 	}
-	echo "<form action='process.php'><input type='hidden' name='op' value='forwardPorts'>";
+	echo "<form action='${root}process.php'><input type='hidden' name=op value=addNATv4Rule>";
 	echo "<input type='hidden' name='object_id' value='$object_id'>";
 	echo "<input type=hidden name=page value='${pageno}'>\n";
 	echo "<input type=hidden name=tab value='${tabno}'>\n";
@@ -2456,7 +2456,7 @@ function renderNATv4ForObject ($object_id = 0)
 
 	foreach ($forwards['in'] as $pf)
 	{
-		echo "<tr><td><a href='process.php?op=delPortForwarding&localip=${pf['localip']}&localport=${pf['localport']}&remoteip=${pf['remoteip']}&remoteport=${pf['remoteport']}&proto=${pf['proto']}&object_id=${pf['object_id']}&page=${pageno}&tab=${tabno}'>";
+		echo "<tr><td><a href='${root}process.php?op=delNATv4Rule&localip=${pf['localip']}&localport=${pf['localport']}&remoteip=${pf['remoteip']}&remoteport=${pf['remoteport']}&proto=${pf['proto']}&object_id=${pf['object_id']}&page=${pageno}&tab=${tabno}'>";
 		printImageHREF ('delete', 'Delete NAT rule');
 		echo "</a></td>";
 		echo "<td>${pf['proto']}/<a href='${root}?page=ipaddress&tab=default&ip=${pf['localip']}'>${pf['localip']}</a>:${pf['localport']}</td>";
