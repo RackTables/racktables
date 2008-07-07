@@ -83,24 +83,19 @@ function assertIPv4Arg ($argname, $caller = 'N/A', $ok_if_empty = FALSE)
 
 function addPortForwarding ()
 {
-	global $root, $pageno, $tabno;
-
 	assertUIntArg ('object_id', __FUNCTION__);
 	assertIPv4Arg ('localip', __FUNCTION__);
 	assertIPv4Arg ('remoteip', __FUNCTION__);
 	assertUIntArg ('localport', __FUNCTION__);
 	assertStringArg ('proto', __FUNCTION__);
 	assertStringArg ('description', __FUNCTION__, TRUE);
-	$object_id = $_REQUEST['object_id'];
-	$remoteport = $_REQUEST['remoteport'];
+	$remoteport = isset ($_REQUEST['remoteport']) ? $_REQUEST['remoteport'] : '';
 	if (empty ($remoteport))
 		$remoteport = $_REQUEST['localport'];
 
-	$retpage="${root}?page=${pageno}&tab=${tabno}&object_id=$object_id";
-
 	$error = newPortForwarding
 	(
-		$object_id,
+		$_REQUEST['object_id'],
 		$_REQUEST['localip'],
 		$_REQUEST['localport'],
 		$_REQUEST['remoteip'],
@@ -110,189 +105,136 @@ function addPortForwarding ()
 	);
 
 	if ($error == '')
-		return "${retpage}&message=".urlencode('Port forwarding successfully added.');
+		return buildRedirectURL_OK ('NATv4 rule was successfully added.');
 	else
-	{
-		return "${retpage}&error=".urlencode($error);
-	}
-	
+		return buildRedirectURL_ERR ($error);
 }
 
 function delPortForwarding ()
 {
-	global $root, $pageno, $tabno;
+	assertUIntArg ('object_id', __FUNCTION__);
+	assertIPv4Arg ('localip', __FUNCTION__);
+	assertIPv4Arg ('remoteip', __FUNCTION__);
+	assertUIntArg ('localport', __FUNCTION__);
+	assertUIntArg ('remoteport', __FUNCTION__);
+	assertStringArg ('proto', __FUNCTION__);
 
-	$object_id = $_REQUEST['object_id'];
-	$localip = $_REQUEST['localip'];
-	$remoteip = $_REQUEST['remoteip'];
-	$localport = $_REQUEST['localport'];
-	$remoteport = $_REQUEST['remoteport'];
-	$proto = $_REQUEST['proto'];
-
-	$retpage="${root}?page=${pageno}&tab=${tabno}&object_id=$object_id";
-
-	$error=deletePortForwarding($object_id, $localip, $localport, $remoteip, $remoteport, $proto);
+	$error = deletePortForwarding
+	(
+		$_REQUEST['object_id'],
+		$_REQUEST['localip'],
+		$_REQUEST['localport'],
+		$_REQUEST['remoteip'],
+		$_REQUEST['remoteport'],
+		$_REQUEST['proto']
+	);
 	if ($error == '')
-		return "${retpage}&message=".urlencode('Port forwarding successfully deleted.');
+		return buildRedirectURL_OK ('NATv4 rule was successfully deleted.');
 	else
-	{
-		return "${retpage}&error=".urlencode($error);
-	}
-	
+		return buildRedirectURL_ERR ($error);
 }
 
 function updPortForwarding ()
 {
-	global $root, $pageno, $tabno;
+	assertUIntArg ('object_id', __FUNCTION__);
+	assertIPv4Arg ('localip', __FUNCTION__);
+	assertIPv4Arg ('remoteip', __FUNCTION__);
+	assertUIntArg ('localport', __FUNCTION__);
+	assertUIntArg ('remoteport', __FUNCTION__);
+	assertStringArg ('proto', __FUNCTION__);
+	assertStringArg ('description', __FUNCTION__);
 
-	$object_id = $_REQUEST['object_id'];
-	$localip = $_REQUEST['localip'];
-	$remoteip = $_REQUEST['remoteip'];
-	$localport = $_REQUEST['localport'];
-	$remoteport = $_REQUEST['remoteport'];
-	$proto = $_REQUEST['proto'];
-	$description = $_REQUEST['description'];
-
-	$retpage="${root}?page=${pageno}&tab=${tabno}&object_id=$object_id";
-
-	$error=updatePortForwarding($object_id, $localip, $localport, $remoteip, $remoteport, $proto, $description);
+	$error = updatePortForwarding
+	(
+		$_REQUEST['object_id'],
+		$_REQUEST['localip'],
+		$_REQUEST['localport'],
+		$_REQUEST['remoteip'],
+		$_REQUEST['remoteport'],
+		$_REQUEST['proto'],
+		$_REQUEST['description']
+	);
 	if ($error == '')
-		return "${retpage}&message=".urlencode('Port forwarding successfully updated.');
+		return buildRedirectURL_OK ('NATv4 rule was successfully updated');
 	else
-	{
-		return "${retpage}&error=".urlencode($error);
-	}
-	
+		return buildRedirectURL_ERR ($error);
 }
 
 function addPortForObject ()
 {
-	global $root, $pageno, $tabno;
-
-	$object_id = $_REQUEST['object_id'];
-	$port_name = $_REQUEST['port_name'];
-	$port_l2address = $_REQUEST['port_l2address'];
-	$port_label = $_REQUEST['port_label'];
-	$port_type_id = $_REQUEST['port_type_id'];
-
-
-	if ($port_name == '')
-		return "${root}?page=${pageno}&tab=${tabno}&object_id=${object_id}&error=".urlencode('Port name cannot be empty');
+	assertUIntArg ('object_id', __FUNCTION__);
+	assertStringArg ('port_name', __FUNCTION__, TRUE);
+	if (empty ($_REQUEST['port_name']))
+		return buildRedirectURL_ERR ('Port name cannot be empty');
+	$error = commitAddPort ($_REQUEST['object_id'], $_REQUEST['port_name'], $_REQUEST['port_type_id'], $_REQUEST['port_label'], $_REQUEST['port_l2address']);
+	if ($error != '')
+		return buildRedirectURL_ERR ($error);
 	else
-	{
-		$error = commitAddPort ($object_id, $port_name, $port_type_id, $port_label, $port_l2address);
-		if ($error != '')
-		{
-			return "${root}?page=${pageno}&tab=${tabno}&object_id=${object_id}&error=".urlencode($error);
-		}
-		else
-		{
-			return "${root}?page=${pageno}&tab=${tabno}&object_id=${object_id}&message=".urlencode("Port $port_name added successfully");
-		}
-	}
-	
+		return buildRedirectURL_OK ("Port ${_REQUEST['port_name']} added successfully");
 }
 
 function editPortForObject ()
 {
-	global $root, $pageno, $tabno;
-
 	assertUIntArg ('port_id', __FUNCTION__);
-	assertUIntArg ('object_id', __FUNCTION__);
-	assertStringArg ('name', __FUNCTION__);
-	$port_id = $_REQUEST['port_id'];
-	$object_id = $_REQUEST['object_id'];
-	$port_name = $_REQUEST['name'];
-	$port_l2address = $_REQUEST['l2address'];
-	$port_label = $_REQUEST['label'];
+	assertStringArg ('name', __FUNCTION__, TRUE);
+	if (empty ($_REQUEST['name']))
+		return buildRedirectURL_ERR ('Port name cannot be empty');
+
 	if (isset ($_REQUEST['reservation_comment']) and !empty ($_REQUEST['reservation_comment']))
 		$port_rc = '"' . $_REQUEST['reservation_comment'] . '"';
 	else
 		$port_rc = 'NULL';
-
-	if ($port_name == '')
-		return "${root}?page=${pageno}&tab=${tabno}&object_id=${object_id}&error=".urlencode('Port name cannot be empty');
+	$error = commitUpdatePort ($_REQUEST['port_id'], $_REQUEST['name'], $_REQUEST['label'], $_REQUEST['l2address'], $port_rc);
+	if ($error != '')
+		return buildRedirectURL_ERR ($error);
 	else
-	{
-		$error = commitUpdatePort ($port_id, $port_name, $port_label, $port_l2address, $port_rc);
-		if ($error != '')
-		{
-			return "${root}?page=${pageno}&tab=${tabno}&object_id=${object_id}&error=".urlencode($error);
-		}
-		else
-		{
-			return "${root}?page=${pageno}&tab=${tabno}&object_id=${object_id}&message=".urlencode("Port $port_name updated successfully");
-		}
-	}
-	
+		return buildRedirectURL_OK ("Port ${port_name} was updated successfully");
 }
 
 function delPortFromObject ()
 {
-	global $root, $pageno, $tabno;
-
-	$port_id = $_REQUEST['port_id'];
+	assertUIntArg ('port_id', __FUNCTION__);
 	$port_name = $_REQUEST['port_name'];
-	$object_id = $_REQUEST['object_id'];
-	$error = delObjectPort($port_id);
+	$error = delObjectPort ($_REQUEST['port_id']);
 
 	if ($error != '')
-	{
-		return "${root}?page=${pageno}&tab=${tabno}&object_id=${object_id}&error=".urlencode($error);
-	}
+		return buildRedirectURL_ERR ($error);
 	else
-	{
-		return "${root}?page=${pageno}&tab=${tabno}&object_id=${object_id}&message=".urlencode("Port $port_name deleted successfully");
-	}
+		return buildRedirectURL_OK ("Port ${port_name} deleted successfully");
 }
 
 function linkPortForObject ()
 {
-	global $root, $pageno, $tabno;
-
-	$port_id = $_REQUEST['port_id'];
-	$remote_port_id = $_REQUEST['remote_port_id'];
+	assertUIntArg ('port_id', __FUNCTION__);
+	assertUIntArg ('remote_port_id', __FUNCTION__);
 	$object_id = $_REQUEST['object_id'];
 	$port_name = $_REQUEST['port_name'];
 	$remote_port_name = $_REQUEST['remote_port_name'];
 	$remote_object_name = $_REQUEST['remote_object_name'];
 
-	$error = linkPorts($port_id, $remote_port_id);
+	$error = linkPorts ($_REQUEST['port_id'], $_REQUEST['remote_port_id']);
 	if ($error != '')
-	{
-		return "${root}?page=${pageno}&tab=${tabno}&object_id=${object_id}&error=".urlencode($error);
-	}
+		return buildRedirectURL_ERR ($error);
 	else
-	{
-		return "${root}?page=${pageno}&tab=${tabno}&object_id=${object_id}&message=".urlencode("Port $port_name successfully linked with port $remote_port_name at object $remote_object_name");
-	}
+		return buildRedirectURL_OK ("Port $port_name successfully linked with port $remote_port_name at object $remote_object_name");
 }
 
 function unlinkPortForObject ()
 {
-	global $root, $pageno, $tabno;
-
-	$port_id = $_REQUEST['port_id'];
-	$object_id = $_REQUEST['object_id'];
+	assertUIntArg ('port_id', __FUNCTION__);
 	$port_name = $_REQUEST['port_name'];
 	$remote_port_name = $_REQUEST['remote_port_name'];
 	$remote_object_name = $_REQUEST['remote_object_name'];
 
-	$error = unlinkPort($port_id);
+	$error = unlinkPort ($_REQUEST['port_id']);
 	if ($error != '')
-	{
-		return "${root}?page=${pageno}&tab=${tabno}&object_id=${object_id}&error=".urlencode($error);
-	}
+		return buildRedirectURL_ERR ($error);
 	else
-	{
-		return "${root}?page=${pageno}&tab=${tabno}&object_id=${object_id}&message=".urlencode("Port $port_name successfully unlinked from port $remote_port_name at object $remote_object_name");
-	}
+		return buildRedirectURL_OK ("Port ${port_name} successfully unlinked from port $remote_port_name at object $remote_object_name");
 }
 
 function addMultiPorts ()
 {
-	global $root, $pageno, $tabno;
-	// Parse data.
 	assertStringArg ('format', __FUNCTION__);
 	assertStringArg ('input', __FUNCTION__);
 	assertUIntArg ('port_type', __FUNCTION__);
@@ -373,9 +315,7 @@ http://www.cisco.com/en/US/products/hw/routers/ps274/products_tech_note09186a008
 				);
 				break;
 			default:
-				return
-					"${root}?page=${pageno}&tab=${tabno}&object_id=${object_id}&error=" .
-					urlencode('Cannot process submitted data: unknown format code.');
+				return buildRedirectURL_ERR ('Cannot process submitted data: unknown format code.');
 				break;
 		}
 	}
@@ -401,14 +341,11 @@ http://www.cisco.com/en/US/products/hw/routers/ps274/products_tech_note09186a008
 				$error_count++;
 		}
 	}
-	return
-		"${root}?page=${pageno}&tab=${tabno}&object_id=${object_id}&message=" .
-		urlencode("Added ${added_count} ports, updated ${updated_count} ports, encountered ${error_count} errors.");
+	return buildRedirectURL_OK ("Added ${added_count} ports, updated ${updated_count} ports, encountered ${error_count} errors.");
 }
 
 function updIPv4Allocation ()
 {
-	global $pageno, $tabno;
 	assertIPv4Arg ('ip', __FUNCTION__);
 	assertUIntArg ('object_id', __FUNCTION__);
 	assertStringArg ('bond_name', __FUNCTION__, TRUE);
@@ -423,7 +360,6 @@ function updIPv4Allocation ()
 
 function delIPv4Allocation ()
 {
-	global $pageno, $tabno;
 	assertIPv4Arg ('ip', __FUNCTION__);
 	assertUIntArg ('object_id', __FUNCTION__);
 
@@ -436,7 +372,6 @@ function delIPv4Allocation ()
 
 function addIPv4Allocation ()
 {
-	global $pageno, $tabno;
 	assertIPv4Arg ('ip', __FUNCTION__);
 	assertUIntArg ('object_id', __FUNCTION__);
 	assertStringArg ('bond_name', __FUNCTION__, TRUE);
@@ -463,7 +398,6 @@ function addIPv4Allocation ()
 
 function addIPv4Prefix ()
 {
-	global $root, $pageno, $tabno;
 	assertStringArg ('range', __FUNCTION__);
 	assertStringArg ('name', __FUNCTION__);
 
@@ -471,26 +405,23 @@ function addIPv4Prefix ()
 	$taglist = isset ($_REQUEST['taglist']) ? $_REQUEST['taglist'] : array();
 	$error = createIPv4Prefix ($_REQUEST['range'], $_REQUEST['name'], $is_bcast == 'on', $taglist);
 	if ($error != '')
-		return "${root}?page=${pageno}&tab=${tabno}&error=" . urlencode ($error);
+		return buildRedirectURL_ERR ($error);
 	else
-		return "${root}?page=${pageno}&tab=${tabno}&message=" . urlencode ("IPv4 prefix successfully added");
+		return buildRedirectURL_OK ('IPv4 prefix successfully added');
 }
 
 function delIPv4Prefix ()
 {
-	global $root, $pageno, $tabno;
-
 	assertUIntArg ('id', __FUNCTION__);
 	$error = destroyIPv4Prefix ($_REQUEST['id']);
 	if ($error != '')
-		return "${root}?page=${pageno}&tab=${tabno}&error=" . urlencode ($error);
+		return buildRedirectURL_ERR ($error);
 	else
-		return "${root}?page=${pageno}&tab=${tabno}&message=" . urlencode ("IPv4 prefix deleted");
+		return buildRedirectURL_OK ('IPv4 prefix deleted');
 }
 
 function editRange ()
 {
-	global $pageno, $tabno;
 	assertUIntArg ('id', __FUNCTION__);
 	assertStringArg ('name', __FUNCTION__);
 
@@ -503,7 +434,6 @@ function editRange ()
 
 function editAddress ()
 {
-	global $pageno, $tabno;
 	assertIPv4Arg ('ip', __FUNCTION__);
 	assertStringArg ('name', __FUNCTION__, TRUE);
 
@@ -520,7 +450,6 @@ function editAddress ()
 
 function createUser ()
 {
-	global $root, $pageno, $tabno;
 	assertStringArg ('username', __FUNCTION__);
 	assertStringArg ('realname', __FUNCTION__, TRUE);
 	assertStringArg ('password', __FUNCTION__);
@@ -528,68 +457,58 @@ function createUser ()
 	$password = hash (PASSWORD_HASH, $_REQUEST['password']);
 	$result = commitCreateUserAccount ($username, $_REQUEST['realname'], $password);
 	if ($result == TRUE)
-		return "${root}?page=${pageno}&tab=${tabno}&message=" . urlencode ("User account ${username} created.");
+		return buildRedirectURL_OK ("User account ${username} created.");
 	else
-		return "${root}?page=${pageno}&tab=${tabno}&error=" . urlencode ("Error creating user account ${username}.");
+		return buildRedirectURL_ERR ("Error creating user account ${username}.");
 }
 
 function updateUser ()
 {
-	global $root, $pageno, $tabno;
 	assertUIntArg ('user_id', __FUNCTION__);
 	assertStringArg ('username', __FUNCTION__);
 	assertStringArg ('realname', __FUNCTION__, TRUE);
 	assertStringArg ('password', __FUNCTION__);
-	// We might be asked to change username, so use user ID only.
-	$id = $_REQUEST['user_id'];
 	$username = $_REQUEST['username'];
 	$new_password = $_REQUEST['password'];
-	$old_hash = getHashByID ($id);
+	$old_hash = getHashByID ($_REQUEST['user_id']);
 	if ($old_hash == NULL)
-	{
-		showError ('getHashByID() failed', __FUNCTION__);
-		return;
-	}
+		return buildRedirectURL_ERR ('getHashByID() failed');
 	// Update user password only if provided password is not the same as current password hash.
 	if ($new_password != $old_hash)
 		$new_password = hash (PASSWORD_HASH, $new_password);
-	$result = commitUpdateUserAccount ($id, $username, $_REQUEST['realname'], $new_password);
+	$result = commitUpdateUserAccount ($_REQUEST['user_id'], $username, $_REQUEST['realname'], $new_password);
 	if ($result == TRUE)
-		return "${root}?page=${pageno}&tab=${tabno}&message=" . urlencode ("User account ${username} updated.");
+		return buildRedirectURL_OK ("User account ${username} updated.");
 	else
-		return "${root}?page=${pageno}&tab=${tabno}&error=" . urlencode ("Error updating user account ${username}.");
+		return buildRedirectURL_ERR ("Error updating user account ${username}.");
 }
 
 function enableUser ()
 {
-	global $root, $pageno, $tabno;
 	assertUIntArg ('user_id', __FUNCTION__);
 	if (commitEnableUserAccount ($_REQUEST['user_id'], 'yes') == TRUE)
-		return "${root}?page=${pageno}&tab=${tabno}&message=" . urlencode ("User account enabled.");
+		return buildRedirectURL_OK ('User account enabled.');
 	else
-		return "${root}?page=${pageno}&tab=${tabno}&error=" . urlencode ("Error enabling user account.");
+		return buildRedirectURL_ERR ('Error enabling user account.');
 }
 
 function disableUser ()
 {
-	global $root, $pageno, $tabno;
 	assertUIntArg ('user_id', __FUNCTION__);
-	$id = $_REQUEST['user_id'];
-	if ($id == 1)
+	if ($_REQUEST['user_id'] == 1)
 		$result = FALSE;
 	else
-		$result = commitEnableUserAccount ($id, 'no');
+		$result = commitEnableUserAccount ($_REQUEST['user_id'], 'no');
 	if ($result == TRUE)
-		return "${root}?page=${pageno}&tab=${tabno}&message=" . urlencode ("User account disabled.");
+		return buildRedirectURL_OK ('User account disabled.');
 	else
-		return "${root}?page=${pageno}&tab=${tabno}&error=" . urlencode ("Error disabling user account.");
+		return buildRedirectURL_ERR ('Error disabling user account.');
 }
 
 // This function find differences in users's submit and PortCompat table
 // and modifies database accordingly.
 function savePortMap ()
 {
-	global $root, $pageno, $tabno;
 	$ptlist = getPortTypes();
 	$oldCompat = getPortCompat();
 	$newCompat = array();
@@ -626,138 +545,119 @@ function savePortMap ()
 						showError ('oldCompatTable is invalid', __FUNCTION__);
 						break;
 				}
-	return
-		"${root}?page=${pageno}&tab=${tabno}&" .
-		($error_count == 0 ? 'message' : 'error') .
-		"=" . urlencode ("${error_count} failures and ${success_count} successfull changes.");
-}
-
-function deleteDictWord ()
-{
-	global $root, $pageno, $tabno;
-	return
-		"${root}?page=${pageno}&tab=${tabno}&" .
-		"error=" . urlencode ('Dragon ate this word!');
+	if ($error_count == 0)
+		return buildRedirectURL_OK ("${error_count} failures and ${success_count} successfull changes.");
+	else
+		return buildRedirectURL_ERR ("${error_count} failures and ${success_count} successfull changes.");
 }
 
 function updateDictionary ()
 {
-	global $root, $pageno, $tabno;
 	assertUIntArg ('chapter_no', __FUNCTION__);
 	assertUIntArg ('dict_key', __FUNCTION__);
 	assertStringArg ('dict_value', __FUNCTION__);
 	if (commitUpdateDictionary ($_REQUEST['chapter_no'], $_REQUEST['dict_key'], $_REQUEST['dict_value']) === TRUE)
-		return "${root}?page=${pageno}&tab=${tabno}&message=" . urlencode ('Update succeeded.');
+		return buildRedirectURL_OK ('Update succeeded.');
 	else
-		return "${root}?page=${pageno}&tab=${tabno}&error=" . urlencode ("Update failed!");
+		return buildRedirectURL_ERR ('Update failed!');
 }
 
 function supplementDictionary ()
 {
-	global $root, $pageno, $tabno;
 	assertUIntArg ('chapter_no', __FUNCTION__);
 	assertStringArg ('dict_value', __FUNCTION__);
 	if (commitSupplementDictionary ($_REQUEST['chapter_no'], $_REQUEST['dict_value']) === TRUE)
-		return "${root}?page=${pageno}&tab=${tabno}&message=" . urlencode ('Supplement succeeded.');
+		return buildRedirectURL_OK ('Supplement succeeded.');
 	else
-		return "${root}?page=${pageno}&tab=${tabno}&error=" . urlencode ("Supplement failed!");
+		return buildRedirectURL_ERR ('Supplement failed!');
 }
 
 function reduceDictionary ()
 {
-	global $root, $pageno, $tabno;
 	assertUIntArg ('chapter_no', __FUNCTION__);
 	assertUIntArg ('dict_key', __FUNCTION__);
 	if (commitReduceDictionary ($_REQUEST['chapter_no'], $_REQUEST['dict_key']) === TRUE)
-		return "${root}?page=${pageno}&tab=${tabno}&message=" . urlencode ('Reduction succeeded.');
+		return buildRedirectURL_OK ('Reduction succeeded.');
 	else
-		return "${root}?page=${pageno}&tab=${tabno}&error=" . urlencode ("Reduction failed!");
+		return buildRedirectURL_ERR ('Reduction failed!');
 }
 
 function addChapter ()
 {
-	global $root, $pageno, $tabno;
 	assertStringArg ('chapter_name', __FUNCTION__);
 	if (commitAddChapter ($_REQUEST['chapter_name']) === TRUE)
-		return "${root}?page=${pageno}&tab=${tabno}&message=" . urlencode ('Chapter was added.');
+		return buildRedirectURL_OK ('Chapter was added.');
 	else
-		return "${root}?page=${pageno}&tab=${tabno}&error=" . urlencode ('Error adding chapter.');
+		return buildRedirectURL_ERR ('Error adding chapter.');
 }
 
 function updateChapter ()
 {
-	global $root, $pageno, $tabno;
 	assertUIntArg ('chapter_no', __FUNCTION__);
 	assertStringArg ('chapter_name', __FUNCTION__);
 	if (commitUpdateChapter ($_REQUEST['chapter_no'], $_REQUEST['chapter_name']) === TRUE)
-		return "${root}?page=${pageno}&tab=${tabno}&message=" . urlencode ('Chapter was updated.');
+		return buildRedirectURL_OK ('Chapter was updated.');
 	else
-		return "${root}?page=${pageno}&tab=${tabno}&error=" . urlencode ('Error updating chapter.');
+		return buildRedirectURL_ERR ('Error updating chapter.');
 }
 
 function delChapter ()
 {
-	global $root, $pageno, $tabno;
 	assertUIntArg ('chapter_no', __FUNCTION__);
 	if (commitDeleteChapter ($_REQUEST['chapter_no']))
-		return "${root}?page=${pageno}&tab=${tabno}&message=" . urlencode ('Chapter was deleted.');
+		return buildRedirectURL_OK ('Chapter was deleted.');
 	else
-		return "${root}?page=${pageno}&tab=${tabno}&error=" . urlencode ('Error deleting chapter.');
+		return buildRedirectURL_ERR ('Error deleting chapter.');
 }
 
 function changeAttribute ()
 {
-	global $root, $pageno, $tabno;
 	assertUIntArg ('attr_id', __FUNCTION__);
 	assertStringArg ('attr_name', __FUNCTION__);
 	if (commitUpdateAttribute ($_REQUEST['attr_id'], $_REQUEST['attr_name']))
-		return "${root}?page=${pageno}&tab=${tabno}&message=" . urlencode ('Rename successful.');
+		return buildRedirectURL_OK ('Rename successful.');
 	else
-		return "${root}?page=${pageno}&tab=${tabno}&error=" . urlencode ('Error renaming attribute.');
+		return buildRedirectURL_ERR ('Error renaming attribute.');
 }
 
 function createAttribute ()
 {
-	global $root, $pageno, $tabno;
 	assertStringArg ('attr_name', __FUNCTION__);
 	assertStringArg ('attr_type', __FUNCTION__);
 	if (commitAddAttribute ($_REQUEST['attr_name'], $_REQUEST['attr_type']))
-		return "${root}?page=${pageno}&tab=${tabno}&message=" . urlencode ("Attribute '${_REQUEST['attr_name']}' created.");
+		return buildRedirectURL_OK ("Attribute '${_REQUEST['attr_name']}' created.");
 	else
-		return "${root}?page=${pageno}&tab=${tabno}&error=" . urlencode ('Error creating attribute.');
+		return buildRedirectURL_ERR ('Error creating attribute.');
 }
 
 function deleteAttribute ()
 {
-	global $root, $pageno, $tabno;
 	assertUIntArg ('attr_id', __FUNCTION__);
 	if (commitDeleteAttribute ($_REQUEST['attr_id']))
-		return "${root}?page=${pageno}&tab=${tabno}&message=" . urlencode ('Attribute was deleted.');
+		return buildRedirectURL_OK ('Attribute was deleted.');
 	else
-		return "${root}?page=${pageno}&tab=${tabno}&error=" . urlencode ('Error deleting attribute.');
+		return buildRedirectURL_ERR ('Error deleting attribute.');
 }
 
 function supplementAttrMap ()
 {
-	global $root, $pageno, $tabno;
 	assertUIntArg ('attr_id', __FUNCTION__);
 	assertUIntArg ('objtype_id', __FUNCTION__);
 	assertUIntArg ('chapter_no', __FUNCTION__);
 	if (commitSupplementAttrMap ($_REQUEST['attr_id'], $_REQUEST['objtype_id'], $_REQUEST['chapter_no']) === TRUE)
-		return "${root}?page=${pageno}&tab=${tabno}&message=" . urlencode ('Supplement succeeded.');
+		return buildRedirectURL_OK ('Supplement succeeded.');
 	else
-		return "${root}?page=${pageno}&tab=${tabno}&error=" . urlencode ("Supplement failed!");
+		return buildRedirectURL_ERR ('Supplement failed!');
 }
 
 function reduceAttrMap ()
 {
-	global $root, $pageno, $tabno;
 	assertUIntArg ('attr_id', __FUNCTION__);
 	assertUIntArg ('objtype_id', __FUNCTION__);
 	if (commitReduceAttrMap ($_REQUEST['attr_id'], $_REQUEST['objtype_id']) === TRUE)
-		return "${root}?page=${pageno}&tab=${tabno}&message=" . urlencode ('Reduction succeeded.');
+		return buildRedirectURL_OK ('Reduction succeeded.');
 	else
-		return "${root}?page=${pageno}&tab=${tabno}&error=" . urlencode ("Reduction failed!");
+		return buildRedirectURL_ERR ("Reduction failed!");
 }
 
 function clearSticker ()
@@ -802,16 +702,12 @@ function updateObject ()
 
 function updateStickers ()
 {
-	global $root, $pageno, $tabno;
 	assertUIntArg ('object_id', __FUNCTION__);
-	$object_id = $_REQUEST['object_id'];
 	$oldvalues = getAttrValues ($object_id);
-
-	assertUIntArg ('num_attrs', __FUNCTION__);
 	$num_attrs = $_REQUEST['num_attrs'];
 	$result = array();
 
-	for ($i = 0; $i < $num_attrs; $i++)
+	for ($i = 0; $i < $_REQUEST['num_attrs']; $i++)
 	{
 		assertUIntArg ("${i}_attr_id", __FUNCTION__);
 		$attr_id = $_REQUEST["${i}_attr_id"];
@@ -819,7 +715,7 @@ function updateStickers ()
 		// Field is empty, delete attribute and move on.
 		if (empty($_REQUEST["${i}_value"]))
 		{
-			commitResetAttrValue ($object_id, $attr_id);
+			commitResetAttrValue ($_REQUEST['object_id'], $attr_id);
 			continue;
 		}
 
@@ -845,37 +741,30 @@ function updateStickers ()
 			continue;
 
 		// Note if the queries succeed or not, it determines which page they see.
-		$result[] = commitUpdateAttrValue ($object_id, $attr_id, $value);
+		$result[] = commitUpdateAttrValue ($_REQUEST['object_id'], $attr_id, $value);
 	}
 
-	if (in_array(false, $result))
-		return "${root}?page=${pageno}&tab=${tabno}&object_id=${object_id}&error=" . urlencode ("Update failed!");
+	if (in_array (FALSE, $result))
+		return buildRedirectURL_ERR ('One or more update(s) failed!');
 
-	return "${root}?page=${pageno}&tab=${tabno}&object_id=${object_id}&message=" . urlencode ('Update succeeded.');
+	return buildRedirectURL_OK ('Update(s) succeeded.');
 }
 
 function useupPort ()
 {
-	global $root, $pageno, $tabno;
 	assertUIntArg ('port_id', __FUNCTION__);
-	assertUIntArg ('object_id', __FUNCTION__);
-	$object_id = $_REQUEST['object_id'];
 	if (commitUseupPort ($_REQUEST['port_id']) === TRUE)
-		return "${root}?page=${pageno}&tab=${tabno}&object_id=${object_id}&message=" . urlencode ('Reservation removed.');
+		return buildRedirectURL_OK ('Reservation removed.');
 	else
-		return "${root}?page=${pageno}&tab=${tabno}&object_id=${object_id}&error=" . urlencode ("Error removing reservation!");
+		return buildRedirectURL_ERR ('Error removing reservation!');
 }
 
 function updateUI ()
 {
-	global $root, $pageno, $tabno;
-	$oldvalues = loadConfigCache();
-
 	assertUIntArg ('num_vars', __FUNCTION__);
-	$num_vars = $_REQUEST['num_vars'];
 	$error = '';
 
-	for ($i = 0; $i < $num_vars; $i++)
+	for ($i = 0; $i < $_REQUEST['num_vars']; $i++)
 	{
 		assertStringArg ("${i}_varname", __FUNCTION__);
 		assertStringArg ("${i}_varvalue", __FUNCTION__, TRUE);
@@ -893,14 +782,13 @@ function updateUI ()
 	}
 
 	if ($error != '')
-		return "${root}?page=${pageno}&tab=${tabno}&error=" . urlencode ("Update failed with error: " . $error);
+		return buildRedirectURL_ERR ('Update failed with error: ' . $error);
 
-	return "${root}?page=${pageno}&tab=${tabno}&message=" . urlencode ("Update succeeded.");
+	return buildRedirectURL_OK ('Update succeeded.');
 }
 
 function resetUIConfig()
 {
-	global $root, $pageno, $tabno;
 	setConfigVar ('default_port_type','24');
 	setConfigVar ('MASSCOUNT','15');
 	setConfigVar ('MAXSELSIZE','30');
@@ -924,34 +812,34 @@ function resetUIConfig()
 	setConfigVar ('SHOW_AUTOMATIC_TAGS','no');
 	setConfigVar ('DEFAULT_OBJECT_TYPE','4');
 	setConfigVar ('IPV4_AUTO_RELEASE','1');
-	return "${root}?page=${pageno}&tab=default&message=" . urlencode ("Reset complete");
+	return buildRedirectURL_OK ('Reset complete');
 }
 
 // Add single record.
 function addRealServer ()
 {
-	global $root, $pageno, $tabno;
-
 	assertUIntArg ('pool_id', __FUNCTION__);
 	assertIPv4Arg ('remoteip', __FUNCTION__);
 	assertUIntArg ('rsport', __FUNCTION__);
 	assertStringArg ('rsconfig', __FUNCTION__, TRUE);
-	$pool_id = $_REQUEST['pool_id'];
-	if (!addRStoRSPool ($pool_id, $_REQUEST['remoteip'], $_REQUEST['rsport'], getConfigVar ('DEFAULT_IPV4_RS_INSERVICE'), $_REQUEST['rsconfig']))
-		return "${root}?page=${pageno}&tab=${tabno}&pool_id=${pool_id}&error=" . urlencode ('addRStoRSPool() failed');
+	if (!addRStoRSPool (
+		$_REQUEST['pool_id'],
+		$_REQUEST['remoteip'],
+		$_REQUEST['rsport'],
+		getConfigVar ('DEFAULT_IPV4_RS_INSERVICE'),
+		$_REQUEST['rsconfig']
+	))
+		return buildRedirectURL_ERR ('addRStoRSPool() failed');
 	else
-		return "${root}?page=${pageno}&tab=${tabno}&pool_id=${pool_id}&message=" . urlencode ("Real server was successfully added");
+		return buildRedirectURL_OK ('Real server was successfully added');
 }
 
 // Parse textarea submitted and try adding a real server for each line.
 function addRealServers ()
 {
-	global $root, $pageno, $tabno;
-
 	assertUIntArg ('pool_id', __FUNCTION__);
 	assertStringArg ('format', __FUNCTION__);
 	assertStringArg ('rawtext', __FUNCTION__);
-	$pool_id = $_REQUEST['pool_id'];
 	$rawtext = str_replace ('\r', '', $_REQUEST['rawtext']);
 	$ngood = $nbad = 0;
 	$rsconfig = '';
@@ -966,7 +854,7 @@ function addRealServers ()
 			case 'ipvs_2': // address and port only
 				if (!preg_match ('/^  -&gt; ([0-9\.]+):([0-9]+) /', $line, $match))
 					continue;
-				if (addRStoRSPool ($pool_id, $match[1], $match[2], getConfigVar ('DEFAULT_IPV4_RS_INSERVICE'), ''))
+				if (addRStoRSPool ($_REQUEST['pool_id'], $match[1], $match[2], getConfigVar ('DEFAULT_IPV4_RS_INSERVICE'), ''))
 					$ngood++;
 				else
 					$nbad++;
@@ -974,7 +862,7 @@ function addRealServers ()
 			case 'ipvs_3': // address, port and weight
 				if (!preg_match ('/^  -&gt; ([0-9\.]+):([0-9]+) +[a-zA-Z]+ +([0-9]+) /', $line, $match))
 					continue;
-				if (addRStoRSPool ($pool_id, $match[1], $match[2], getConfigVar ('DEFAULT_IPV4_RS_INSERVICE'), 'weight ' . $match[3]))
+				if (addRStoRSPool ($_REQUEST['pool_id'], $match[1], $match[2], getConfigVar ('DEFAULT_IPV4_RS_INSERVICE'), 'weight ' . $match[3]))
 					$ngood++;
 				else
 					$nbad++;
@@ -982,63 +870,64 @@ function addRealServers ()
 			case 'ssv_2': // IP address and port
 				if (!preg_match ('/^([0-9\.]+) ([0-9]+)$/', $line, $match))
 					continue;
-				if (addRStoRSPool ($pool_id, $match[1], $match[2], getConfigVar ('DEFAULT_IPV4_RS_INSERVICE'), ''))
+				if (addRStoRSPool ($_REQUEST['pool_id'], $match[1], $match[2], getConfigVar ('DEFAULT_IPV4_RS_INSERVICE'), ''))
 					$ngood++;
 				else
 					$nbad++;
 				break;
 			default:
-				return "${root}?page=${pageno}&tab=${tabno}&id=${pool_id}&error=" . urlencode (__FUNCTION__ . ': invalid format requested');
+				return buildRedirectURL_ERR (__FUNCTION__ . ': invalid format requested');
 				break;
 		}
 	}
 	if ($nbad == 0 and $ngood > 0)
-		return "${root}?page=${pageno}&tab=${tabno}&pool_id=${pool_id}&message=" . urlencode ("Successfully added ${ngood} real servers");
+		return buildRedirectURL_OK ("Successfully added ${ngood} real servers");
 	else
-		return "${root}?page=${pageno}&tab=${tabno}&pool_id=${pool_id}&error=" . urlencode ("Added ${ngood} real servers and encountered ${nbad} errors");
+		return buildRedirectURL_ERR ("Added ${ngood} real servers and encountered ${nbad} errors");
 }
 
 function addVService ()
 {
-	global $root, $pageno, $tabno;
-
 	assertIPv4Arg ('vip', __FUNCTION__);
 	assertUIntArg ('vport', __FUNCTION__);
 	assertStringArg ('proto', __FUNCTION__);
-	$proto = $_REQUEST['proto'];
-	if ($proto != 'TCP' and $proto != 'UDP')
-		return "${root}?page=${pageno}&tab=${tabno}&error=" . urlencode (__FUNCTION__ . ': invalid protocol');
+	if ($_REQUEST['proto'] != 'TCP' and $_REQUEST['proto'] != 'UDP')
+		return buildRedirectURL_ERR (__FUNCTION__ . ': invalid protocol');
 	assertStringArg ('name', __FUNCTION__, TRUE);
 	assertStringArg ('vsconfig', __FUNCTION__, TRUE);
 	assertStringArg ('rsconfig', __FUNCTION__, TRUE);
-	$pool_id = $_REQUEST['id'];
-	if (!commitCreateVS ($_REQUEST['vip'], $_REQUEST['vport'], $proto, $_REQUEST['name'], $_REQUEST['vsconfig'], $_REQUEST['rsconfig']))
-		return "${root}?page=${pageno}&tab=${tabno}&error=" . urlencode ('commitCreateVS() failed');
+	if (!commitCreateVS (
+		$_REQUEST['vip'],
+		$_REQUEST['vport'],
+		$proto,
+		$_REQUEST['name'],
+		$_REQUEST['vsconfig'],
+		$_REQUEST['rsconfig']
+	))
+		return buildRedirectURL_ERR ('commitCreateVS() failed');
 	else
-		return "${root}?page=${pageno}&tab=${tabno}&message=" . urlencode ("Virtual service was successfully created");
+		return buildRedirectURL_OK ('Virtual service was successfully created');
 }
 
 function deleteRealServer ()
 {
-	global $root, $pageno, $tabno;
-
-	assertUIntArg ('pool_id', __FUNCTION__);
 	assertUIntArg ('id', __FUNCTION__);
-	$pool_id = $_REQUEST['pool_id'];
 	if (!commitDeleteRS ($_REQUEST['id']))
-		return "${root}?page=${pageno}&tab=${tabno}&pool_id=${pool_id}&error=" . urlencode ('commitDeleteRS() failed');
+		return buildRedirectURL_ERR ('commitDeleteRS() failed');
 	else
-		return "${root}?page=${pageno}&tab=${tabno}&pool_id=${pool_id}&message=" . urlencode ("Real server was successfully deleted");
+		return buildRedirectURL_OK ('Real server was successfully deleted');
 }
 
 function deleteLoadBalancer ()
 {
-	global $root, $pageno, $tabno;
-
 	assertUIntArg ('object_id', __FUNCTION__);
 	assertUIntArg ('pool_id', __FUNCTION__);
 	assertUIntArg ('vs_id', __FUNCTION__);
-	if (!commitDeleteLB ($_REQUEST['object_id'], $_REQUEST['pool_id'], $_REQUEST['vs_id']))
+	if (!commitDeleteLB (
+		$_REQUEST['object_id'],
+		$_REQUEST['pool_id'],
+		$_REQUEST['vs_id']
+	))
 		return buildRedirectURL_ERR ('commitDeleteLB() failed');
 	else
 		return buildRedirectURL_OK ('Load balancer was successfully deleted');
@@ -1055,31 +944,35 @@ function deleteVService ()
 
 function updateRealServer ()
 {
-	global $root, $pageno, $tabno;
-
-	assertUIntArg ('pool_id', __FUNCTION__);
 	assertUIntArg ('rs_id', __FUNCTION__);
 	assertIPv4Arg ('rsip', __FUNCTION__);
 	assertUIntArg ('rsport', __FUNCTION__);
 	assertStringArg ('rsconfig', __FUNCTION__, TRUE);
-	// only necessary for generating next URL
-	$pool_id = $_REQUEST['pool_id'];
-	if (!commitUpdateRS ($_REQUEST['rs_id'], $_REQUEST['rsip'], $_REQUEST['rsport'], $_REQUEST['rsconfig']))
-		return "${root}?page=${pageno}&tab=${tabno}&pool_id=${pool_id}&error=" . urlencode ('commitUpdateRS() failed');
+	if (!commitUpdateRS (
+		$_REQUEST['rs_id'],
+		$_REQUEST['rsip'],
+		$_REQUEST['rsport'],
+		$_REQUEST['rsconfig']
+	))
+		return buildRedirectURL_ERR ('commitUpdateRS() failed');
 	else
-		return "${root}?page=${pageno}&tab=${tabno}&pool_id=${pool_id}&message=" . urlencode ("Real server was successfully updated");
+		return buildRedirectURL_OK ('Real server was successfully updated');
 }
 
 function updateLoadBalancer ()
 {
-	global $root, $pageno, $tabno;
-
 	assertUIntArg ('object_id', __FUNCTION__);
 	assertUIntArg ('pool_id', __FUNCTION__);
 	assertUIntArg ('vs_id', __FUNCTION__);
 	assertStringArg ('vsconfig', __FUNCTION__, TRUE);
 	assertStringArg ('rsconfig', __FUNCTION__, TRUE);
-	if (!commitUpdateLB ($_REQUEST['object_id'], $_REQUEST['pool_id'], $_REQUEST['vs_id'], $_REQUEST['vsconfig'], $_REQUEST['rsconfig']))
+	if (!commitUpdateLB (
+		$_REQUEST['object_id'],
+		$_REQUEST['pool_id'],
+		$_REQUEST['vs_id'],
+		$_REQUEST['vsconfig'],
+		$_REQUEST['rsconfig']
+	))
 		return buildRedirectURL_ERR ('commitUpdateLB() failed');
 	else
 		return buildRedirectURL_OK ('Load balancer info was successfully updated');
@@ -1094,7 +987,15 @@ function updateVService ()
 	assertStringArg ('name', __FUNCTION__, TRUE);
 	assertStringArg ('vsconfig', __FUNCTION__, TRUE);
 	assertStringArg ('rsconfig', __FUNCTION__, TRUE);
-	if (!commitUpdateVS ($_REQUEST['vs_id'], $_REQUEST['vip'], $_REQUEST['vport'], $_REQUEST['proto'], $_REQUEST['name'], $_REQUEST['vsconfig'], $_REQUEST['rsconfig']))
+	if (!commitUpdateVS (
+		$_REQUEST['vs_id'],
+		$_REQUEST['vip'],
+		$_REQUEST['vport'],
+		$_REQUEST['proto'],
+		$_REQUEST['name'],
+		$_REQUEST['vsconfig'],
+		$_REQUEST['rsconfig']
+	))
 		return buildRedirectURL_ERR ('commitUpdateVS() failed');
 	else
 		return buildRedirectURL_OK ('Virtual service was successfully updated');
@@ -1102,14 +1003,18 @@ function updateVService ()
 
 function addLoadBalancer ()
 {
-	global $root, $pageno, $tabno;
-
 	assertUIntArg ('pool_id', __FUNCTION__);
 	assertUIntArg ('object_id', __FUNCTION__);
 	assertUIntArg ('vs_id', __FUNCTION__);
 	assertStringArg ('vsconfig', __FUNCTION__, TRUE);
 	assertStringArg ('rsconfig', __FUNCTION__, TRUE);
-	if (!addLBtoRSPool ($_REQUEST['pool_id'], $_REQUEST['object_id'], $_REQUEST['vs_id'], $_REQUEST['vsconfig'], $_REQUEST['rsconfig']))
+	if (!addLBtoRSPool (
+		$_REQUEST['pool_id'],
+		$_REQUEST['object_id'],
+		$_REQUEST['vs_id'],
+		$_REQUEST['vsconfig'],
+		$_REQUEST['rsconfig']
+	))
 		return buildRedirectURL_ERR ('addLBtoRSPool() failed');
 	else
 		return buildRedirectURL_OK ('Load balancer was successfully added');
@@ -1117,32 +1022,30 @@ function addLoadBalancer ()
 
 function addRSPool ()
 {
-	global $root, $pageno, $tabno;
-
 	assertStringArg ('name', __FUNCTION__, TRUE);
 	assertStringArg ('vsconfig', __FUNCTION__, TRUE);
 	assertStringArg ('rsconfig', __FUNCTION__, TRUE);
-	if (!commitCreateRSPool ($_REQUEST['name'], $_REQUEST['vsconfig'], $_REQUEST['rsconfig']))
-		return "${root}?page=${pageno}&tab=${tabno}&error=" . urlencode ('commitCreateRSPool() failed');
+	if (!commitCreateRSPool (
+		$_REQUEST['name'],
+		$_REQUEST['vsconfig'],
+		$_REQUEST['rsconfig']
+	))
+		return buildRedirectURL_ERR ('commitCreateRSPool() failed');
 	else
-		return "${root}?page=${pageno}&tab=${tabno}&message=" . urlencode ("Real server pool was successfully created");
+		return buildRedirectURL_OK ('RS pool was successfully created');
 }
 
 function deleteRSPool ()
 {
-	global $root, $pageno, $tabno;
-
 	assertUIntArg ('pool_id', __FUNCTION__);
 	if (!commitDeleteRSPool ($_REQUEST['pool_id']))
-		return "${root}?page=${pageno}&tab=${tabno}&error=" . urlencode ('commitDeleteRSPool() failed');
+		return buildRedirectURL_ERR ('commitDeleteRSPool() failed');
 	else
-		return "${root}?page=${pageno}&tab=${tabno}&message=" . urlencode ("Real server pool was successfully deleted");
+		return buildRedirectURL_OK ('RS pool was successfully deleted');
 }
 
 function updateRSPool ()
 {
-	global $root, $pageno, $tabno;
-
 	assertUIntArg ('pool_id', __FUNCTION__);
 	assertStringArg ('name', __FUNCTION__, TRUE);
 	assertStringArg ('vsconfig', __FUNCTION__, TRUE);
@@ -1150,13 +1053,11 @@ function updateRSPool ()
 	if (!commitUpdateRSPool ($_REQUEST['pool_id'], $_REQUEST['name'], $_REQUEST['vsconfig'], $_REQUEST['rsconfig']))
 		return buildRedirectURL_ERR ('commitUpdateRSPool() failed');
 	else
-		return buildRedirectURL_OK ('Real server pool was successfully updated');
+		return buildRedirectURL_OK ('RS pool was successfully updated');
 }
 
 function updateRSInService ()
 {
-	global $root, $pageno, $tabno;
-	assertUIntArg ('pool_id', __FUNCTION__);
 	assertUIntArg ('rscount', __FUNCTION__);
 	$pool_id = $_REQUEST['pool_id'];
 	$orig = getRSPoolInfo ($pool_id);
@@ -1177,18 +1078,15 @@ function updateRSInService ()
 		}
 	}
 	if (!$nbad)
-		return "${root}?page=${pageno}&tab=${tabno}&pool_id=${pool_id}&message=" . urlencode ($ngood . " real server(s) were successfully (de)activated");
+		return buildRedirectURL_OK ($ngood . " real server(s) were successfully (de)activated");
 	else
-		return "${root}?page=${pageno}&tab=${tabno}&pool_id=${pool_id}&error=" . urlencode ("Encountered ${nbad} errors, (de)activated ${ngood} real servers");
+		return buildRedirectURL_ERR ("Encountered ${nbad} errors, (de)activated ${ngood} real servers");
 }
 
 function importPTRData ()
 {
-	global $root, $pageno, $tabno;
-	assertUIntArg ('id', __FUNCTION__);
 	assertUIntArg ('addrcount', __FUNCTION__);
 	$nbad = $ngood = 0;
-	$id = $_REQUEST['id'];
 	for ($i = 0; $i < $_REQUEST['addrcount']; $i++)
 	{
 		$inputname = "import_${i}";
@@ -1207,28 +1105,27 @@ function importPTRData ()
 			$nbad++;
 	}
 	if (!$nbad)
-		return "${root}?page=${pageno}&tab=${tabno}&id=${id}&message=" . urlencode ($ngood . " IP address(es) were successfully updated");
+		return buildRedirectURL_OK ($ngood . " IP address(es) were successfully updated");
 	else
-		return "${root}?page=${pageno}&tab=${tabno}&id=${id}&error=" . urlencode ("Encountered ${nbad} errors, updated ${ngood} IP address(es)");
+		return buildRedirectURL_ERR ("Encountered ${nbad} errors, updated ${ngood} IP address(es)");
 }
 
 function generateAutoPorts ()
 {
-	global $root, $pageno, $tabno;
+	global $pageno;
 	assertUIntArg ('object_id', __FUNCTION__);
-	$object_id = $_REQUEST['object_id'];
-	$info = getObjectInfo ($object_id);
+	$info = getObjectInfo ($_REQUEST['object_id']);
 	// Navigate away in case of success, stay at the place otherwise.
-	if (executeAutoPorts ($object_id, $info['objtype_id']))
-		return "${root}?page=${pageno}&tab=ports&object_id=${object_id}&message=" . urlencode ('Generation complete');
+	if (executeAutoPorts ($_REQUEST['object_id'], $info['objtype_id']))
+		return buildRedirectURL_OK ('Generation complete', $pageno, 'ports');
 	else
-		return "${root}?page=${pageno}&tab=${tabno}&object_id=${object_id}&error=" . urlencode ('executeAutoPorts() failed');
+		return buildRedirectURL_ERR ('executeAutoPorts() failed');
 }
 
 // Filter out implicit tags before storing the new tag set.
 function saveEntityTags ($realm, $bypass)
 {
-	global $root, $pageno, $tabno, $explicit_tags, $implicit_tags;
+	global $explicit_tags, $implicit_tags;
 	assertUIntArg ($bypass, __FUNCTION__);
 	$entity_id = $_REQUEST[$bypass];
 	$taglist = isset ($_REQUEST['taglist']) ? $_REQUEST['taglist'] : array();
@@ -1280,17 +1177,15 @@ function saveUserTags ()
 
 function destroyTag ()
 {
-	global $root, $pageno, $tabno;
 	assertUIntArg ('tag_id', __FUNCTION__);
 	if (($ret = commitDestroyTag ($_REQUEST['tag_id'])) == '')
-		return "${root}?page=${pageno}&tab=${tabno}&message=" . urlencode ("Successfully deleted tag.");
+		return buildRedirectURL_OK ('Successfully deleted tag.');
 	else
-		return "${root}?page=${pageno}&tab=${tabno}&error=" . urlencode ("Error deleting tag: '${ret}'");
+		return buildRedirectURL_ERR ("Error deleting tag: '${ret}'");
 }
 
 function createTag ()
 {
-	global $root, $pageno, $tabno;
 	assertStringArg ('tag_name', __FUNCTION__);
 	assertUIntArg ('parent_id', __FUNCTION__, TRUE);
 	$tagname = trim ($_REQUEST['tag_name']);
@@ -1301,14 +1196,13 @@ function createTag ()
 	if (($parent_id = $_REQUEST['parent_id']) <= 0)
 		$parent_id = 'NULL';
 	if (($ret = commitCreateTag ($tagname, $parent_id)) == '')
-		return "${root}?page=${pageno}&tab=${tabno}&message=" . urlencode ("Created tag '${tagname}'.");
+		return buildRedirectURL_OK ("Created tag '${tagname}'.");
 	else
-		return "${root}?page=${pageno}&tab=${tabno}&error=" . urlencode ("Could not create tag '${tagname}' because of error '${ret}'");
+		return buildRedirectURL_ERR ("Could not create tag '${tagname}' because of error '${ret}'");
 }
 
 function updateTag ()
 {
-	global $root, $pageno, $tabno;
 	assertUIntArg ('tag_id', __FUNCTION__);
 	assertUIntArg ('parent_id', __FUNCTION__, TRUE);
 	assertStringArg ('tag_name', __FUNCTION__);
@@ -1318,20 +1212,19 @@ function updateTag ()
 	if (($parent_id = $_REQUEST['parent_id']) <= 0)
 		$parent_id = 'NULL';
 	if (($ret = commitUpdateTag ($_REQUEST['tag_id'], $tagname, $parent_id)) == '')
-		return "${root}?page=${pageno}&tab=${tabno}&message=" . urlencode ("Updated tag '${tagname}'.");
+		return buildRedirectURL_OK ("Updated tag '${tagname}'.");
 	else
-		return "${root}?page=${pageno}&tab=${tabno}&error=" . urlencode ("Could not update tag '${tagname}' because of error '${ret}'");
+		return buildRedirectURL_ERR ("Could not update tag '${tagname}' because of error '${ret}'");
 }
 
 function rollTags ()
 {
-	global $root, $pageno, $tabno;
 	assertUIntArg ('row_id', __FUNCTION__);
 	assertStringArg ('sum', __FUNCTION__, TRUE);
 	assertUIntArg ('realsum', __FUNCTION__);
 	$row_id = $_REQUEST['row_id'];
 	if ($_REQUEST['sum'] != $_REQUEST['realsum'])
-		return "${root}?page=${pageno}&tab=${tabno}&row_id=${row_id}&error=" . urlencode ("test failed");
+		return buildRedirectURL_ERR ('Turing test failed');
 	$racks = getRacksForRow ($row_id);
 	// Each time addTagForEntity() fails we assume it was just because of already existing record in its way.
 	$newtags = isset ($_REQUEST['taglist']) ? $_REQUEST['taglist'] : array();
@@ -1346,12 +1239,12 @@ function rollTags ()
 				$ndupes++;
 			// FIXME: do something likewise for all object inside current rack
 		}
-	return "${root}?page=${pageno}&tab=${tabno}&row_id=${row_id}&message=" . urlencode ("${nnew} new records done, ${ndupes} already existed");
+	return buildRedirectURL_OK ("${nnew} new records done, ${ndupes} already existed");
 }
 
 function changeMyPassword ()
 {
-	global $accounts, $root, $pageno, $tabno, $remote_username;
+	global $accounts, $remote_username;
 	if (getConfigVar ('USER_AUTH_SRC') != 'database')
 		return buildRedirectURL_ERR ('Can only change password under DB authentication.');
 	assertStringArg ('oldpassword', __FUNCTION__);
@@ -1369,17 +1262,16 @@ function changeMyPassword ()
 
 function saveRackCode ()
 {
-	global $root, $pageno, $tabno;
 	assertStringArg ('rackcode');
 	// For the test to succeed, unescape LFs, strip CRs.
 	$newcode = str_replace ('\r', '', str_replace ('\n', "\n", $_REQUEST['rackcode']));
 	$parseTree = getRackCode ($newcode);
 	if ($parseTree['result'] != 'ACK')
-		return "${root}?page=${pageno}&tab=${tabno}&error=" . urlencode ('Verification failed: ' . $parseTree['load']);
+		return buildRedirectURL_ERR ('Verification failed: ' . $parseTree['load']);
 	if (saveScript ('RackCode', $newcode))
-		return "${root}?page=${pageno}&tab=${tabno}&message=" . urlencode ('Saved successfully.');
+		return buildRedirectURL_OK ('Saved successfully.');
 	else
-		return "${root}?page=${pageno}&tab=${tabno}&error=" . urlencode ('Save failed.');
+		return buildRedirectURL_ERR ('Save failed.');
 }
 
 // This handler's context is pre-built, but not authorized. It is assumed, that the
