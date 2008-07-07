@@ -1389,6 +1389,18 @@ function complementByKids ($idlist, $tree = NULL, $getall = FALSE)
 	return $ret;
 }
 
+function getUserAutoTags ($username = NULL)
+{
+	global $remote_username, $accounts;
+	if ($username == NULL)
+		$username = $remote_username;
+	$ret = array();
+	$ret[] = array ('tag' => '$username_' . $username);
+	if (isset ($accounts[$username]['user_id']))
+		$ret[] = array ('tag' => '$userid_' . $accounts[$username]['user_id']);
+	return $ret;
+}
+
 function loadRackObjectAutoTags ()
 {
 	assertUIntArg ('object_id', __FUNCTION__);
@@ -1500,15 +1512,6 @@ function fixContext ()
 		$expl_tags = $page[$pageno]['tagloader'] ($_REQUEST[$page[$pageno]['bypass']]);
 		$impl_tags = getImplicitTags ($expl_tags);
 	}
-}
-
-function getUserAutoTags ()
-{
-	global $remote_username, $accounts;
-	$ret = array();
-	$ret[] = array ('tag' => '$username_' . $remote_username);
-	$ret[] = array ('tag' => '$userid_' . $accounts[$remote_username]['user_id']);
-	return $ret;
 }
 
 // Build a tag chain from supplied tag id list and return it.

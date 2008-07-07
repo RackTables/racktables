@@ -5094,13 +5094,37 @@ function renderRackCodeEditor ()
 
 function renderUser ($user_id)
 {
-	global $accounts, $root;
+	global $accounts, $expl_tags, $impl_tags;
 	$username = getUsernameByID ($user_id);
 	echo '<table border=0 align=center>';
 	echo "<tr><th class=tdright>Account name:</th><td>${username}</td></tr>";
 	echo '<tr><th class=tdright>Real name:</th><td>' . $accounts[$username]['user_realname'] . '</td></tr>';
-	echo '<tr><th class=tdright>Account enabled:</th><td>' . $accounts[$username]['user_enabled'] . '</td></tr>';
-	printTagTRs ("${root}?page=userlist&");
+	echo '<tr><th class=tdright>Enabled:</th><td>';
+	// This is weird, some other image titles have to be used.
+	if ($accounts[$username]['user_enabled'] == 'yes')
+		printImageHREF ('blockuser', 'enabled');
+	else
+		printImageHREF ('unblockuser', 'disabled');
+	echo '</td></tr>';
+	// Using printTagTRs() is inappropriate here, because autotags will be filled with current user's
+	// data, not the viewed one.
+//	printTagTRs ("${root}?page=userlist&");
+	if (getConfigVar ('SHOW_EXPLICIT_TAGS') == 'yes' and count ($expl_tags))
+	{
+		echo "<tr><th width='50%' class=tag_list_th>Explicit tags:</th><td class=tdleft>";
+		echo serializeTags ($expl_tags, $baseurl) . "</td></tr>\n";
+	}
+	if (getConfigVar ('SHOW_IMPLICIT_TAGS') == 'yes' and count ($impl_tags))
+	{
+		echo "<tr><th width='50%' class=tag_list_th>Implicit tags:</th><td class=tdleft>";
+		echo serializeTags ($impl_tags, $baseurl) . "</td></tr>\n";
+	}
+	$target_auto_tags = getUserAutoTags ($username);
+	if (getConfigVar ('SHOW_AUTOMATIC_TAGS') == 'yes' and count ($target_auto_tags))
+	{
+		echo "<tr><th width='50%' class=tag_list_th>Automatic tags:</th><td class=tdleft>";
+		echo serializeTags ($target_auto_tags) . "</td></tr>\n";
+	}
 	echo '</table>';
 }
 
