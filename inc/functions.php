@@ -1611,4 +1611,24 @@ function redirectUser ($p, $t)
 	die;
 }
 
+function getRackCodeStats ()
+{
+	global $rackCode;
+	$defc = $grantc = 0;
+	foreach ($rackCode as $s)
+		switch ($s['type'])
+		{
+			case 'SYNT_DEFINITION':
+				$defc++;
+				break;
+			case 'SYNT_GRANT':
+				$grantc++;
+				break;
+			default:
+				break;
+		}
+	$ret = array ('Definition sentences' => $defc, 'Grant sentences' => $grantc);
+	return $ret;
+}
+
 ?>
