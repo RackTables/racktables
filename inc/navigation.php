@@ -10,6 +10,8 @@ $tab = array();
 $trigger = array();
 $ophandler = array();
 $tabhandler = array();
+$tabextraclass = array();
+$delayauth = array();
 
 $page['index']['title'] = 'Main page';
 $page['index']['handler'] = 'renderIndex';
