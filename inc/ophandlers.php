@@ -760,19 +760,47 @@ function reduceAttrMap ()
 		return "${root}?page=${pageno}&tab=${tabno}&error=" . urlencode ("Reduction failed!");
 }
 
-function resetAttrValue ()
+function clearSticker ()
 {
-	global $root, $pageno, $tabno;
 	assertUIntArg ('attr_id', __FUNCTION__);
 	assertUIntArg ('object_id', __FUNCTION__);
-	$object_id = $_REQUEST['object_id'];
-	if (commitResetAttrValue ($object_id, $_REQUEST['attr_id']) === TRUE)
-		return "${root}?page=${pageno}&tab=${tabno}&object_id=${object_id}&message=" . urlencode ('Reset succeeded.');
+	if (commitResetAttrValue ($_REQUEST['object_id'], $_REQUEST['attr_id']) === TRUE)
+		return buildRedirectURL_OK ('Reset succeeded.');
 	else
-		return "${root}?page=${pageno}&tab=${tabno}&object_id=${object_id}&error=" . urlencode ("Reset failed!");
+		return buildRedirectURL_ERR ('Reset failed!');
 }
 
-function updateAttrValues ()
+function updateObject ()
+{
+	assertUIntArg ('object_id', __FUNCTION__);
+	assertUIntArg ('object_type_id', __FUNCTION__);
+	assertStringArg ('object_name', __FUNCTION__, TRUE);
+	assertStringArg ('object_label', __FUNCTION__, TRUE);
+	assertStringArg ('object_barcode', __FUNCTION__, TRUE);
+	assertStringArg ('object_asset_no', __FUNCTION__, TRUE);
+	if (isset ($_REQUEST['object_has_problems']) and $_REQUEST['object_has_problems'] == 'on')
+		$has_problems = 'yes';
+	else
+		$has_problems = 'no';
+
+	if (commitUpdateObject (
+		$_REQUEST['object_id'],
+		$_REQUEST['object_name'],
+		$_REQUEST['object_label'],
+		$_REQUEST['object_barcode'],
+		$_REQUEST['object_type_id'],
+		$has_problems,
+		$_REQUEST['object_asset_no'],
+		$_REQUEST['object_comment']
+	) !== TRUE)
+		return buildRedirectURL_ERR ('commitUpdateObject() failed');
+	// Invalidate thumb cache of all racks objects could occupy.
+	foreach (getResidentRacksData ($_REQUEST['object_id'], FALSE) as $rack_id)
+		resetThumbCache ($rack_id);
+	return buildRedirectURL_OK ('Update done');
+}
+
+function updateStickers ()
 {
 	global $root, $pageno, $tabno;
 	assertUIntArg ('object_id', __FUNCTION__);

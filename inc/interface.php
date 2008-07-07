@@ -341,60 +341,25 @@ function renderNewRackForm ($row_id)
 function renderEditObjectForm ($object_id)
 {
 	showMessageOrError();
-	// Handle submit.
-	if (isset ($_REQUEST['got_data']))
-	{
-		$log = array();
-		// object_id is already verified by page handler
-		assertUIntArg ('object_type_id', __FUNCTION__);
-		assertStringArg ('object_name', __FUNCTION__, TRUE);
-		assertStringArg ('object_label', __FUNCTION__, TRUE);
-		assertStringArg ('object_barcode', __FUNCTION__, TRUE);
-		assertStringArg ('object_asset_no', __FUNCTION__, TRUE);
-		$type_id = $_REQUEST['object_type_id'];
-		if (isset ($_REQUEST['object_has_problems']) and $_REQUEST['object_has_problems'] == 'on')
-			$has_problems = 'yes';
-		else
-			$has_problems = 'no';
-		$name = $_REQUEST['object_name'];
-		$label = $_REQUEST['object_label'];
-		$barcode = $_REQUEST['object_barcode'];
-		$asset_no = $_REQUEST['object_asset_no'];
-		$comment = $_REQUEST['object_comment'];
 
-		if (commitUpdateObject ($object_id, $name, $label, $barcode, $type_id, $has_problems, $asset_no, $comment) === TRUE)
-			$log[] = array ('code' => 'success', 'message' => "Updated object '${name}'");
-		else
-			$log[] = array ('code' => 'error', 'message' => __FUNCTION__ . ': commitUpdateObject() failed');
-		// Invalidate thumb cache of all racks objects could occupy.
-		foreach (getResidentRacksData ($object_id, FALSE) as $rack_id)
-			resetThumbCache ($rack_id);
-		printLog ($log);
-	}
-
-	global $pageno, $tabno;
+	global $pageno, $tabno, $root;
 	$object = getObjectInfo ($object_id);
 	if ($object == NULL)
 	{
 		showError ('getObjectInfo() failed', __FUNCTION__);
 		return;
 	}
-
-	// Render a form for the next submit;
 	echo '<table border=0 width=100%><tr>';
 
 	echo '<td class=pcleft>';
 	startPortlet ('Static attributes');
-	echo '<form method=post>';
-	echo "<input type=hidden name=page value=${pageno}>";
-	echo "<input type=hidden name=tab value=${tabno}>";
+	echo "<form method=post action='${root}process.php?page=${pageno}&tab=${tabno}&op=update'>";
 	echo "<input type=hidden name=object_id value=${object_id}>";
-	echo "<input type=hidden name=got_data value=1>";
 	echo '<table border=0 align=center>';
 	echo "<tr><th class=tdright>Type:</th><td class=tdleft>";
 	printSelect (getObjectTypeList(), 'object_type_id', $object['objtype_id']);
 	echo "</td></tr>\n";
-	// Common attributes.
+	// baseline info
 	echo "<tr><th class=tdright>Common name:</th><td class=tdleft><input type=text name=object_name value='${object['name']}'></td></tr>\n";
 	echo "<tr><th class=tdright>Visible label:</th><td class=tdleft><input type=text name=object_label value='${object['label']}'></td></tr>\n";
 	echo "<tr><th class=tdright>Asset tag:</th><td class=tdleft><input type=text name=object_asset_no value='${object['asset_no']}'></td></tr>\n";
@@ -411,17 +376,13 @@ function renderEditObjectForm ($object_id)
 	finishPortlet();
 	echo '</td>';
 	
-	// Optional attributes.
+	// stickers
 	echo '<td class=pcright>';
 	startPortlet ('Optional attributes');
 	$values = getAttrValues ($object_id);
-	global $root;
 	echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
 	echo "<tr><th>&nbsp;</th><th>Attribute</th><th>Value</th><th>&nbsp;</th></tr>\n";
-	echo "<form method=post action='${root}process.php'>\n";
-	echo "<input type=hidden name=page value=${pageno}>\n";
-	echo "<input type=hidden name=tab value=${tabno}>\n";
-	echo "<input type=hidden name=op value=upd>\n";
+	echo "<form method=post action='${root}process.php?page=${pageno}&tab=${tabno}&op=updateStickers'>\n";
 	echo "<input type=hidden name=object_id value=${object_id}>\n";
 	echo '<input type=hidden name=num_attrs value=' . count($values) . ">\n";
 
@@ -432,7 +393,7 @@ function renderEditObjectForm ($object_id)
 		echo '<tr><td>';
 		if (!empty ($record['value']))
 		{
-			echo "<a href=${root}process.php?page=${pageno}&tab=${tabno}&op=del&object_id=${object_id}&attr_id=${record['id']}>";
+			echo "<a href='${root}process.php?page=${pageno}&tab=${tabno}&op=clearSticker&object_id=${object_id}&attr_id=${record['id']}'>";
 			printImageHREF ('clear', 'Clear value');
 			echo '</a>';
 		}
