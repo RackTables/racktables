@@ -3,7 +3,7 @@
 	// This is our context.
 	$pageno = 'objects';
 	$tabno = 'default';
-	fixContext()
+	fixContext();
 	if (!permitted())
 	{
 		renderAccessDenied();
