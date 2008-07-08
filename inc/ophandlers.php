@@ -703,8 +703,8 @@ function updateObject ()
 function updateStickers ()
 {
 	assertUIntArg ('object_id', __FUNCTION__);
-	$oldvalues = getAttrValues ($object_id);
-	$num_attrs = $_REQUEST['num_attrs'];
+	assertUIntArg ('num_attrs', __FUNCTION__);
+	$oldvalues = getAttrValues ($_REQUEST['object_id']);
 	$result = array();
 
 	for ($i = 0; $i < $_REQUEST['num_attrs']; $i++)
