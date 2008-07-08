@@ -738,3 +738,7 @@ INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (12,787
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (12,788,'[[3Com%GPASS%8810 | http://www.3com.com/products/en_US/detail.jsp?tab=features&sku=3C17501A&pathtype=purchase]]');
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (12,789,'[[3Com%GPASS%8814 | http://www.3com.com/products/en_US/detail.jsp?tab=features&sku=3C17500A&pathtype=purchase]]');
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (13,790,'Linux%GSKIP%RHF9');
+INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (13,791,'[[Linux%GSKIP%openSUSE 11.0 | http://en.opensuse.org/OpenSUSE_11.0]]');
+INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (11,792,'[[SGI%GPASS%Altix XE250 | http://www.sgi.com/products/servers/altix/xe/configs.html]]');
+INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (11,793,'[[SGI%GPASS%Altix XE310 | http://www.sgi.com/products/servers/altix/xe/configs.html]]');
+INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (11,794,'[[SGI%GPASS%Altix XE320 | http://www.sgi.com/products/servers/altix/xe/configs.html]]');

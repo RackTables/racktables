@@ -4,6 +4,7 @@
 	new feature: RackCode configuration
 	new feature: "my account" page
 	update: page layout fixes and improvements
+	update: dictionary updates
 0.15.1 2008-06-05
 	bugfix: fix auth headers in upgrade script (broken in 0.15.0)
 	new feature: fetch switch serial number via SNMP (by killsystem)

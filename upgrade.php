@@ -1342,6 +1342,14 @@ CREATE TABLE `TagTree` (
 			}
 			$query[] = "insert into Script (script_name, script_text) values ('RackCode', '${code}')";
 			$query[] = 'drop table UserPermission';
+			$new_words[791] = array (13 => '[[Linux%GSKIP%openSUSE 11.0 | http://en.opensuse.org/OpenSUSE_11.0]]');
+			$new_words[] = array (11 => '[[SGI%GPASS%Altix XE250 | http://www.sgi.com/products/servers/altix/xe/configs.html]]');
+			$new_words[] = array (11 => '[[SGI%GPASS%Altix XE310 | http://www.sgi.com/products/servers/altix/xe/configs.html]]');
+			$new_words[] = array (11 => '[[SGI%GPASS%Altix XE320 | http://www.sgi.com/products/servers/altix/xe/configs.html]]');
+			foreach ($new_words as $dict_key => $tmp)
+				foreach ($tmp as $chapter_no => $dict_value)
+					$query[] = 'INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) ' .
+						"VALUES (${chapter_no}, ${dict_key}, '${dict_value}')";
 			$query[] = "update Config set varvalue = '0.16.0' where varname = 'DB_VERSION'";
 			break;
 		default:
