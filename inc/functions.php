@@ -1577,9 +1577,9 @@ function buildWideRedirectURL ($log, $p = NULL, $t = NULL)
 		$p = $pageno;
 	if ($t === NULL)
 		$t = $tabno;
-	$url = "${root}?page=${pageno}&tab=${tabno}";
-	if (isset ($page[$pageno]['bypass']))
-		$url .= '&' . $page[$pageno]['bypass'] . '=' . $_REQUEST[$page[$pageno]['bypass']];
+	$url = "${root}?page=${p}&tab=${t}";
+	if (isset ($page[$p]['bypass']))
+		$url .= '&' . $page[$p]['bypass'] . '=' . $_REQUEST[$page[$p]['bypass']];
 	$url .= "&log=" . urlencode (base64_encode (serialize ($log)));
 	return $url;
 }

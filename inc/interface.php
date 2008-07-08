@@ -4624,6 +4624,9 @@ function renderAutoPortsForm ($object_id = 0)
 		showError ('Invalid object_id', __FUNCTION__);
 		return;
 	}
+	// If the below call has any data to display, the non-default redirection from the generator
+	// has failed. Don't ignore the message log anyway.
+	showMessageOrError();
 	$info = getObjectInfo ($object_id);
 	$ptlist = readChapter ('PortType');
 	echo "<table class='widetable' border=0 cellspacing=0 cellpadding=5 align='center'>\n";
