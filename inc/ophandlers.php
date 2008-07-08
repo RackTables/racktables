@@ -899,7 +899,7 @@ function addVService ()
 	if (!commitCreateVS (
 		$_REQUEST['vip'],
 		$_REQUEST['vport'],
-		$proto,
+		$_REQUEST['proto'],
 		$_REQUEST['name'],
 		$_REQUEST['vsconfig'],
 		$_REQUEST['rsconfig']
