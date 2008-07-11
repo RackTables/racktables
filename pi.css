@@ -218,6 +218,10 @@ input {
 }
 input [type="text"] {
 }
+input.icon {
+	background-color : transparent;
+	border-width: 0px;
+}
 textarea {
 	background-color : #f0f0f0;
 	border-width : 1px;

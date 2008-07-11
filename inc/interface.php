@@ -3430,6 +3430,9 @@ function printImageHREF ($tag, $title = '', $do_input = FALSE, $tabindex = 0)
 	$image['create']['path'] = 'pix/tango-document-new.png';
 	$image['create']['width'] = 16;
 	$image['create']['height'] = 16;
+	$image['CREATE']['path'] = 'pix/tango-document-new-big.png';
+	$image['CREATE']['width'] = 32;
+	$image['CREATE']['height'] = 32;
 	$image['DENIED']['path'] = 'pix/tango-dialog-error-big.png';
 	$image['DENIED']['width'] = 32;
 	$image['DENIED']['height'] = 32;
@@ -3438,7 +3441,7 @@ function printImageHREF ($tag, $title = '', $do_input = FALSE, $tabindex = 0)
 	$img = $image[$tag];
 	if ($do_input == TRUE)
 		echo
-			"<input type=image name=submit " .
+			"<input type=image name=submit class=icon " .
 			"src='${root}${img['path']}' " .
 			"border=0 " .
 			($tabindex ? '' : "tabindex=${tabindex}") .
@@ -4283,10 +4286,13 @@ function renderVSListEditForm ()
 	echo "<td><input type=text name=vport size=5 value='${default_port}' tabindex=2></td><td>";
 	printSelect ($protocols, 'proto', 'TCP');
 	echo "</td>";
-	echo "<td><input type=text name=name tabindex=4></td>";
-	echo "<td rowspan=3 valign=middle><input type=submit value=OK tabindex=5></td></tr>";
-	echo "<tr><th>VS configuration</th><td colspan=4 class=tdleft><textarea name=vsconfig rows=10 cols=80></textarea></td></tr>";
-	echo "<tr><th>RS configuration</th><td colspan=4 class=tdleft><textarea name=rsconfig rows=10 cols=80></textarea></td></tr>";
+	echo "<td><input type=text name=name tabindex=4></td><td>";
+	printImageHREF ('CREATE', 'create virtual service', TRUE);
+	echo "</td></tr><tr><th>VS configuration</th><td colspan=4 class=tdleft><textarea name=vsconfig rows=10 cols=80></textarea></td>\n";
+	echo "<td rowspan=2><h3>assign tags</h3>";
+	renderTagSelect();
+	echo "</td></tr>";
+	echo "<tr><th>RS configuration</th><td colspan=4 class=tdleft><textarea name=rsconfig rows=10 cols=80></textarea></td></tr>\n";
 	echo "</table>";
 	echo "</form>\n";
 	finishPortlet();
@@ -4322,9 +4328,9 @@ function renderVSListEditForm ()
 		echo "</td>";
 		echo "<td class=tdleft><input type=text name=name value='${vsinfo['name']}'></td>";
 		echo "<td><textarea name=vsconfig>${vsinfo['vsconfig']}</textarea></td>";
-		echo "<td><textarea name=rsconfig>${vsinfo['rsconfig']}</textarea></td>";
-		echo "<td><input type=submit value=OK></td>";
-		echo "</tr></form>\n";
+		echo "<td><textarea name=rsconfig>${vsinfo['rsconfig']}</textarea></td><td>";
+		printImageHREF ('save', 'save changes', TRUE);
+		echo "</td></tr></form>\n";
 		$order = $nextorder[$order];
 	}
 	echo "</table>";
@@ -4376,10 +4382,13 @@ function editRSPools ()
 	echo "<input type=hidden name=op value=add>\n";
 	echo "<table class=widetable border=0 cellpadding=10 cellspacing=0 align=center>\n";
 	echo "<tr><th>name</th>";
-	echo "<td><input type=text name=name tabindex=1></td>";
-	echo "<td><input type=submit tabindex=1 value=OK></td></tr>";
-	echo "<tr><th>VS configuration</th><td colspan=2><textarea name=vsconfig rows=10 cols=80></textarea></td></tr>";
-	echo "<tr><th>RS configuration</th><td colspan=2><textarea name=rsconfig rows=10 cols=80></textarea></td></tr>";
+	echo "<td class=tdleft><input type=text name=name tabindex=1></td><td>";
+	printImageHREF ('CREATE', 'create real server pool', TRUE);
+	echo "</td></tr><tr><th>VS configuration</th><td><textarea name=vsconfig rows=10 cols=80></textarea></td>";
+	echo "<td rowspan=2><h3>assign tags</h3>";
+	renderTagSelect();
+	echo "</td></tr>";
+	echo "<tr><th>RS configuration</th><td><textarea name=rsconfig rows=10 cols=80></textarea></td></tr>";
 	echo "</table></form>";
 	finishPortlet();
 
@@ -4409,9 +4418,9 @@ function editRSPools ()
 		echo "</td>";
 		echo "<td class=tdleft><input type=text name=name value='${pool_info['name']}'></td>";
 		echo "<td><textarea name=vsconfig>${pool_info['vsconfig']}</textarea></td>";
-		echo "<td><textarea name=rsconfig>${pool_info['rsconfig']}</textarea></td>";
-		echo "<td><input type=submit value=OK></td>";
-		echo "</tr></form>\n";
+		echo "<td><textarea name=rsconfig>${pool_info['rsconfig']}</textarea></td><td>";
+		printImageHREF ('save', 'save changes', TRUE);
+		echo "</td></tr></form>\n";
 		$order = $nextorder[$order];
 	}
 	echo "</table>";

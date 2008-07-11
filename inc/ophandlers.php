@@ -896,15 +896,18 @@ function addVService ()
 	assertStringArg ('name', __FUNCTION__, TRUE);
 	assertStringArg ('vsconfig', __FUNCTION__, TRUE);
 	assertStringArg ('rsconfig', __FUNCTION__, TRUE);
-	if (!commitCreateVS (
+	$error = commitCreateVS
+	(
 		$_REQUEST['vip'],
 		$_REQUEST['vport'],
 		$_REQUEST['proto'],
 		$_REQUEST['name'],
 		$_REQUEST['vsconfig'],
-		$_REQUEST['rsconfig']
-	))
-		return buildRedirectURL_ERR ('commitCreateVS() failed');
+		$_REQUEST['rsconfig'],
+		isset ($_REQUEST['taglist']) ? $_REQUEST['taglist'] : array()
+	);
+	if ($error != '')
+		return buildRedirectURL_ERR ($error);
 	else
 		return buildRedirectURL_OK ('Virtual service was successfully created');
 }
@@ -1025,12 +1028,15 @@ function addRSPool ()
 	assertStringArg ('name', __FUNCTION__, TRUE);
 	assertStringArg ('vsconfig', __FUNCTION__, TRUE);
 	assertStringArg ('rsconfig', __FUNCTION__, TRUE);
-	if (!commitCreateRSPool (
+	$error = commitCreateRSPool
+	(
 		$_REQUEST['name'],
 		$_REQUEST['vsconfig'],
-		$_REQUEST['rsconfig']
-	))
-		return buildRedirectURL_ERR ('commitCreateRSPool() failed');
+		$_REQUEST['rsconfig'],
+		isset ($_REQUEST['taglist']) ? $_REQUEST['taglist'] : array()
+	);
+	if ($error != '')
+		return buildRedirectURL_ERR ($error);
 	else
 		return buildRedirectURL_OK ('RS pool was successfully created');
 }

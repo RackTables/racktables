@@ -362,23 +362,8 @@ function commitAddRack ($name, $height, $row_id, $comment, $taglist)
 		showError ('useInsertBlade() failed', __FUNCTION__);
 		return FALSE;
 	}
-
-	if (($result = useSelectBlade ('select last_insert_id()', __FUNCTION__)) == NULL) 
-	{
-		showError ('Query #2 failed', __FUNCTION__);
-		return FALSE;
-	}
-	// we always have a row
-	$row = $result->fetch (PDO::FETCH_NUM);
-	$last_insert_id = $row[0];
-	$result->closeCursor();
-	$errcount = 0;
-	foreach ($taglist as $tag_id)
-		if (addTagForEntity ('rack', $last_insert_id, $tag_id) == FALSE)
-			$errcount++;	
-	if ($errcount)
-		showError ("Experienced ${errcount} errors adding tags for the rack");
-	return recordHistory ('Rack', "id = ${last_insert_id}");
+	$last_insert_id = lastInsertID();
+	return (addTagsForLastRecord ('rack', $taglist, $last_insert_id) == '') and recordHistory ('Rack', "id = ${last_insert_id}");
 }
 
 function commitAddObject ($new_name, $new_label, $new_barcode, $new_type_id, $new_asset_no, $taglist = array())
@@ -403,26 +388,16 @@ function commitAddObject ($new_name, $new_label, $new_barcode, $new_type_id, $ne
 		showError ("SQL query #1 failed", __FUNCTION__);
 		return FALSE;
 	}
-	$result2 = useSelectBlade ('select last_insert_id()', __FUNCTION__);
-	if ($result2 == NULL)
-	{
-		$errorInfo = $dbxlink->errorInfo();
-		showError ("SQL query '${query}' failed: ${errorInfo[2]}", __FUNCTION__);
-		die;
-	}
-	// we always have a row
-	$row = $result2->fetch (PDO::FETCH_NUM);
-	$last_insert_id = $row[0];
-	$result2->closeCursor();
+	$last_insert_id = lastInsertID();
 	// Do AutoPorts magic
 	executeAutoPorts ($last_insert_id, $new_type_id);
 	// Now tags...
-	$errcount = 0;
-	foreach ($taglist as $tag_id)
-		if (addTagForEntity ('object', $last_insert_id, $tag_id) == FALSE)
-			$errcount++;
-	if ($errcount)
-		showError ("Experienced ${errcount} errors adding tags for the object");
+	$error = addTagsForLastRecord ('object', $taglist, $last_insert_id);
+	if ($error != '')
+	{
+		showError ("Error adding tags for the object: ${error}");
+		return FALSE;
+	}
 	return recordHistory ('RackObject', "id = ${last_insert_id}");
 }
 
@@ -580,6 +555,18 @@ function getMolecule ($mid = 0)
 	return $ret;
 }
 
+// returns exactly what is's named after
+function lastInsertID ()
+{
+	if (NULL == ($result = useSelectBlade ('select last_insert_id()', __FUNCTION__)))
+	{
+		showError ('SQL query failed!', __FUNCTION__);
+		die;
+	}
+	$row = $result->fetch (PDO::FETCH_NUM);
+	return $row[0];
+}
+
 // This function creates a new record in Molecule and number of linked
 // R-U-A records in Atom.
 function createMolecule ($molData)
@@ -592,16 +579,7 @@ function createMolecule ($molData)
 		showError ('Error inserting into Molecule', __FUNCTION__);
 		return NULL;
 	}
-	$query = 'select last_insert_id()';
-	$result2 = $dbxlink->query ($query);
-	if ($result2 == NULL)
-	{
-		showError ('Cannot get last ID.', __FUNCTION__);
-		return NULL;
-	}
-	$row = $result2->fetch (PDO::FETCH_NUM);
-	$molecule_id = $row[0];
-	$result2->closeCursor();
+	$molecule_id = lastInsertID();
 	foreach ($molData as $rua)
 	{
 		$rack_id = $rua['rack_id'];
@@ -2141,14 +2119,11 @@ function addRStoRSPool ($pool_id = 0, $rsip = '', $rsport = 0, $inservice = 'no'
 	);
 }
 
-function commitCreateVS ($vip = '', $vport = 0, $proto = '', $name = '', $vsconfig, $rsconfig)
+function commitCreateVS ($vip = '', $vport = 0, $proto = '', $name = '', $vsconfig, $rsconfig, $taglist = array())
 {
 	if (empty ($vip) or $vport <= 0 or empty ($proto))
-	{
-		showError ('Invalid arguments', __FUNCTION__);
-		die;
-	}
-	return useInsertBlade
+		return __FUNCTION__ . ': invalid arguments';
+	if (!useInsertBlade
 	(
 		'IPVirtualService',
 		array
@@ -2160,7 +2135,9 @@ function commitCreateVS ($vip = '', $vport = 0, $proto = '', $name = '', $vsconf
 			'vsconfig' => (empty ($vsconfig) ? 'NULL' : "'${vsconfig}'"),
 			'rsconfig' => (empty ($rsconfig) ? 'NULL' : "'${rsconfig}'")
 		)
-	);
+	))
+		return __FUNCTION__ . ': SQL insertion failed';
+	return addTagsForLastRecord ('ipv4vs', $taglist);
 }
 
 function addLBtoRSPool ($pool_id = 0, $object_id = 0, $vs_id = 0, $vsconfig = '', $rsconfig = '')
@@ -2384,9 +2361,11 @@ function getRSPoolsForObject ($object_id = 0)
 	return $ret;
 }
 
-function commitCreateRSPool ($name = '', $vsconfig = '', $rsconfig = '')
+function commitCreateRSPool ($name = '', $vsconfig = '', $rsconfig = '', $taglist = array())
 {
-	return useInsertBlade
+	if (empty ($name))
+		return __FUNCTION__ . ': invalid arguments';
+	if (!useInsertBlade
 	(
 		'IPRSPool',
 		array
@@ -2395,7 +2374,9 @@ function commitCreateRSPool ($name = '', $vsconfig = '', $rsconfig = '')
 			'vsconfig' => (empty ($vsconfig) ? 'NULL' : "'${vsconfig}'"),
 			'rsconfig' => (empty ($rsconfig) ? 'NULL' : "'${rsconfig}'")
 		)
-	);
+	))
+		return __FUNCTION__ . ': SQL insertion failed';
+	return addTagsForLastRecord ('ipv4rspool', $taglist);
 }
 
 function commitDeleteRSPool ($pool_id = 0)
@@ -2666,6 +2647,22 @@ function addTagForEntity ($realm, $entity_id, $tag_id)
 	);
 }
 
+function addTagsForLastRecord ($realm, $taglist, $last_insert_id = 0)
+{
+	if (!count ($taglist))
+		return '';
+	if (!$last_insert_id)
+		$last_insert_id = lastInsertID();
+	$errcount = 0;
+	foreach ($taglist as $tag_id)
+		if (addTagForEntity ($realm, $last_insert_id, $tag_id) == FALSE)
+			$errcount++;	
+	if (!$errcount)
+		return '';
+	else
+		return "Experienced ${errcount} errors adding tags in realm '${realm}' for entity ID == ${last_insert_id}";
+}
+
 function createIPv4Prefix ($range = '', $name = '', $is_bcast = FALSE, $taglist = array())
 {
 	// $range is in x.x.x.x/x format, split into ip/mask vars
@@ -2742,22 +2739,7 @@ function createIPv4Prefix ($range = '', $name = '', $is_bcast = FALSE, $taglist 
 		updateAddress ($network_addr, 'network', 'yes');
 		updateAddress ($broadcast_addr, 'broadcast', 'yes');
 	}
-	if (!count ($taglist))
-		return '';
-	if (($result = useSelectBlade ('select last_insert_id()', __FUNCTION__)) == NULL) 
-		return 'Query #3 failed in ' . __FUNCTION__;
-	$row = $result->fetch (PDO::FETCH_NUM);
-	$last_insert_id = $row[0];
-	$result->closeCursor();
-	unset ($result);
-	$errcount = 0;
-	foreach ($taglist as $tag_id)
-		if (addTagForEntity ('ipv4net', $last_insert_id, $tag_id) == FALSE)
-			$errcount++;	
-	if (!$errcount)
-		return '';
-	else
-		return "Experienced ${errcount} errors adding tags for the IPv4 prefix";
+	return addTagsForLastRecord ('ipv4net', $taglist);
 }
 
 // FIXME: This function doesn't wipe relevant records from IPAddress table.
