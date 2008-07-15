@@ -25,7 +25,7 @@ ALTLinux Desktop 4.0: apt-get install MySQL-server
 For web-frontend you must have Apache and PHP 5 with PDO and multibyte
 extensions:
 Fedora Core 6: # yum install httpd php php-mysql php-pdo php-gd
-Fedora 8: yum install httpd php php-mysql php-pdo php-gd php-snmp
+Fedora 8: yum install httpd php php-mysql php-pdo php-gd php-snmp php-mbstring
 ALTLinux Server 4.0: apt-get install apache2-httpd-prefork php5-gd2 \
 php5-pdo_mysql php5-pdo apache2-mod_php5 php5-mbstring
 
