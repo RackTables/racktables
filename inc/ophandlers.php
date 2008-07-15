@@ -170,7 +170,7 @@ function addPortForObject ()
 	if ($error != '')
 		return buildRedirectURL_ERR ($error);
 	else
-		return buildRedirectURL_OK ("Port ${_REQUEST['port_name']} added successfully");
+		return buildRedirectURL_OK ("Port ${_REQUEST['port_name']} was added successfully");
 }
 
 function editPortForObject ()
@@ -188,7 +188,7 @@ function editPortForObject ()
 	if ($error != '')
 		return buildRedirectURL_ERR ($error);
 	else
-		return buildRedirectURL_OK ("Port ${port_name} was updated successfully");
+		return buildRedirectURL_OK ("Port ${_REQUEST['name']} was updated successfully");
 }
 
 function delPortFromObject ()
@@ -200,7 +200,7 @@ function delPortFromObject ()
 	if ($error != '')
 		return buildRedirectURL_ERR ($error);
 	else
-		return buildRedirectURL_OK ("Port ${port_name} deleted successfully");
+		return buildRedirectURL_OK ("Port ${_REQUEST['port_name']} was deleted successfully");
 }
 
 function linkPortForObject ()
@@ -222,15 +222,12 @@ function linkPortForObject ()
 function unlinkPortForObject ()
 {
 	assertUIntArg ('port_id', __FUNCTION__);
-	$port_name = $_REQUEST['port_name'];
-	$remote_port_name = $_REQUEST['remote_port_name'];
-	$remote_object_name = $_REQUEST['remote_object_name'];
 
 	$error = unlinkPort ($_REQUEST['port_id']);
 	if ($error != '')
 		return buildRedirectURL_ERR ($error);
 	else
-		return buildRedirectURL_OK ("Port ${port_name} successfully unlinked from port $remote_port_name at object $remote_object_name");
+		return buildRedirectURL_OK ("Port ${_REQUEST['port_name']} was successfully unlinked from ${_REQUEST['remote_port_name']}@${_REQUEST['remote_object_name']}");
 }
 
 function addMultiPorts ()
