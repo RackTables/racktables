@@ -7,7 +7,7 @@
 
 function escapeString ($value, $do_db_escape = TRUE)
 {
-	$ret = htmlentities ($value, ENT_QUOTES, 'UTF-8');
+	$ret = htmlspecialchars ($value, ENT_QUOTES, 'UTF-8');
 	if ($do_db_escape)
 	{
 		global $dbxlink;
