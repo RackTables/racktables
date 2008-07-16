@@ -54,12 +54,17 @@ function printReleaseNotes ($batchid)
 	switch ($batchid)
 	{
 		case '0.16.0':
-			echo "<font color=red><strong>Release notes</strong></font><br>";
+			echo "<font color=red><strong>Release notes for ${batchid}</strong></font><br>";
 			echo 'The user permission records of this system have been automatically converted ';
 			echo 'to switch to the new RackCode authorization system. To prevent possible data ';
 			echo 'leak, the second line of the automatically created configuration bans everything ';
 			echo '(and the first allows everything to you, the administrator). The whole config can ';
 			echo "be reviewed on the Permissions page (under Configuration). Sorry for the inconvenience.<br><br>\n";
+			break;
+		case '0.16.1':
+			echo "<font color=red><strong>Release notes for ${batchid}</strong></font><br>";
+			echo 'This release fixes a missing UNIQUE key in the database. However, this fix may sometimes fail, ';
+			echo 'if the DB contains duplicate records. If you see a failed ADD UNIQUE query, the only solution is to delete the duplicates manually.';
 			break;
 		default:
 			break;
@@ -1356,6 +1361,7 @@ CREATE TABLE `TagTree` (
 		case '0.16.1':
 			$query[] = 'alter table Script modify column script_text longtext';
 			$query[] = "update Config set varvalue = '0.16.1' where varname = 'DB_VERSION'";
+			$query[] = 'alter table IPVirtualService ADD UNIQUE endpoint (vip, vport, proto)';
 			break;
 		default:
 			showError ("executeUpgradeBatch () failed, because batch '${batchid}' isn't defined");
