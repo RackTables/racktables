@@ -176,6 +176,7 @@ function addPortForObject ()
 function editPortForObject ()
 {
 	assertUIntArg ('port_id', __FUNCTION__);
+	// tolerate empty value now to produce custom informative message later
 	assertStringArg ('name', __FUNCTION__, TRUE);
 	if (empty ($_REQUEST['name']))
 		return buildRedirectURL_ERR ('Port name cannot be empty');

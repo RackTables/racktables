@@ -775,7 +775,10 @@ function commitAddPort ($object_id = 0, $port_name, $port_type_id, $port_label, 
 		return 'SQL query failed';
 }
 
-function commitUpdatePort ($port_id, $port_name, $port_label, $port_l2address, $port_reservation_comment)
+// The fifth argument may be either explicit 'NULL' or some (already quoted by the upper layer)
+// string value. In case it is omitted, we just assign it its current value.
+// It would be nice to simplify this semantics later.
+function commitUpdatePort ($port_id, $port_name, $port_label, $port_l2address, $port_reservation_comment = 'reservation_comment')
 {
 	global $dbxlink;
 	$port_l2address = l2addressForDatabase ($port_l2address);
