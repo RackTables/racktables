@@ -22,6 +22,7 @@ function getDBUpgradePath ($v1, $v2)
 		'0.15.0',
 		'0.15.1',
 		'0.16.0',
+		'0.16.1',
 	);
 	if (!in_array ($v1, $versionhistory) || !in_array ($v2, $versionhistory))
 	{
@@ -1351,6 +1352,10 @@ CREATE TABLE `TagTree` (
 					$query[] = 'INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) ' .
 						"VALUES (${chapter_no}, ${dict_key}, '${dict_value}')";
 			$query[] = "update Config set varvalue = '0.16.0' where varname = 'DB_VERSION'";
+			break;
+		case '0.16.1':
+			$query[] = 'alter table Script modify column script_text longtext';
+			$query[] = "update Config set varvalue = '0.16.1' where varname = 'DB_VERSION'";
 			break;
 		default:
 			showError ("executeUpgradeBatch () failed, because batch '${batchid}' isn't defined");

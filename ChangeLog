@@ -1,7 +1,9 @@
 0.16.1
 	new feature: allow pre-selected tags for newly added virtual services and RS pools
+	new feature: cache RackCode parse tree for better performance
 	bugfix: don't escape Greek letters to enable them in tag names
 	bugfix: port manager messages were incorrect
+	update: adjusted database for bigger texts
 0.16.0 2008-07-09
 	new feature: tag roller
 	new feature: taggable user accounts

@@ -245,7 +245,7 @@ CREATE TABLE `RackSpace` (
 
 CREATE TABLE `Script` (
   `script_name` char(64) NOT NULL,
-  `script_text` text,
+  `script_text` longtext,
   PRIMARY KEY  (`script_name`)
 ) TYPE=MyISAM;
 

@@ -95,9 +95,33 @@ if (!count ($configCache))
 }
 
 require_once 'inc/code.php';
+$rackCodeCache = loadScript ('RackCodeCache');
+if ($rackCodeCache == NULL or empty ($rackCodeCache))
+{
+//	$t1 = microtime (TRUE);
+	$rackCode = getRackCode (loadScript ('RackCode'));
+//	$t2 = microtime (TRUE);
+//	echo 'DEBUG: parsed RackCode tree from scratch in ' . ($t2 - $t1) . ' second(s)<br>';
+	saveScript ('RackCodeCache', base64_encode (serialize ($rackCode)));
+}
+else
+{
+//	$t1 = microtime (TRUE);
+	$rackCode = unserialize (base64_decode ($rackCodeCache));
+//	$t2 = microtime (TRUE);
+//	echo 'DEBUG: loaded RackCode cache in ' . ($t2 - $t1) . ' second(s)<br>';
+	if ($rackCode === FALSE) // invalid cache
+	{
+		saveScript ('RackCodeCache', '');
+//		$t1 = microtime (TRUE);
+		$rackCode = getRackCode (loadScript ('RackCode'));
+//		$t2 = microtime (TRUE);
+//		echo 'DEBUG: discarded RackCode cache and parsed tree from scratch in ' . ($t2 - $t1) . ' second(s)<br>';
+	}
+}
+
 // Depending on the 'result' value the 'load' carries either the
 // parse tree or error message.
-$rackCode = getRackCode (loadScript ('RackCode'));
 if ($rackCode['result'] != 'ACK')
 {
 	// FIXME: display a message with an option to reset RackCode text

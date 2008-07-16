@@ -1271,6 +1271,7 @@ function saveRackCode ()
 	$parseTree = getRackCode ($newcode);
 	if ($parseTree['result'] != 'ACK')
 		return buildRedirectURL_ERR ('Verification failed: ' . $parseTree['load']);
+	saveScript ('RackCodeCache', '');
 	if (saveScript ('RackCode', $newcode))
 		return buildRedirectURL_OK ('Saved successfully.');
 	else

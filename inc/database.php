@@ -2758,7 +2758,10 @@ function loadScript ($name)
 {
 	$result = useSelectBlade ("select script_text from Script where script_name = '${name}'");
 	$row = $result->fetch (PDO::FETCH_NUM);
-	return $row[0];
+	if ($row !== FALSE)
+		return $row[0];
+	else
+		return NULL;
 }
 
 function saveScript ($name, $text)
@@ -2768,7 +2771,9 @@ function saveScript ($name, $text)
 		showError ('Invalid argument');
 		return FALSE;
 	}
-	return useDeleteBlade ('Script', 'script_name', $name, TRUE) && useInsertBlade
+	// delete regardless of existence
+	useDeleteBlade ('Script', 'script_name', $name, TRUE);
+	return useInsertBlade
 	(
 		'Script',
 		array
