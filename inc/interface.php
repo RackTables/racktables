@@ -695,7 +695,7 @@ function renderRackObject ($object_id = 0)
 	elseif (in_array ($info['objtype_id'], explode (',', getConfigVar ('NAMEFUL_OBJTYPES'))))
 		echo "<tr><td colspan=2 class=msg_error>Common name is missing.</td></tr>\n";
 	echo "<tr><th width='50%' class=tdright>Object type:</th>";
-	echo "<td class=tdleft><a href='${root}?page=objgroup&group_id=${info['objtype_id']}'>${info['objtype_name']}</a></td></tr>\n";
+	echo "<td class=tdleft><a href='${root}?page=objgroup&group_id=${info['objtype_id']}&hl_object_id=${object_id}'>${info['objtype_name']}</a></td></tr>\n";
 	if (!empty ($info['asset_no']))
 		echo "<tr><th width='50%' class=tdright>Asset tag:</th><td class=tdleft>${info['asset_no']}</td></tr>\n";
 	elseif (in_array ($info['objtype_id'], explode (',', getConfigVar ('REQUIRE_ASSET_TAG_FOR'))))
@@ -745,7 +745,7 @@ function renderRackObject ($object_id = 0)
 				echo "<td>${port['l2address']}</td>";
 				if ($port['remote_object_id'])
 				{
-					echo "<td><a href='${root}?page=object&object_id=${port['remote_object_id']}'>${port['remote_object_name']}</a></td>";
+					echo "<td><a href='${root}?page=object&object_id=${port['remote_object_id']}&hl_port_id=${port['remote_id']}'>${port['remote_object_name']}</a></td>";
 					echo "<td>${port['remote_name']}</td>";
 				}
 				elseif (!empty ($port['reservation_comment']))
@@ -796,7 +796,9 @@ function renderRackObject ($object_id = 0)
 
 			if ($hl_ipv4_addr == $addr['ip'])
 				echo ' class=port_highlight';
-			echo "><td class=tdleft>${addr['name']}</td><td class=tdleft><a href='${root}?page=ipaddress&ip=${addr['ip']}'>${addr['ip']}</a></td><td class='description'>$address_name</td><td class=tdleft>\n";
+			echo "><td class=tdleft>${addr['name']}</td><td class=tdleft>";
+			echo "<a href='${root}?page=ipaddress&ip=${addr['ip']}&hl_object_id=${object_id}'>";
+			echo "${addr['ip']}</a></td><td class='description'>$address_name</td><td class=tdleft>\n";
 
 			if ($addr['address_reserved']=='yes')
 				echo "<b>Reserved;</b> ";
@@ -1602,14 +1604,18 @@ function renderObjectGroup ()
 	$order = 'odd';
 	foreach ($objects as $obj)
 	{
-		echo "<tr class=row_${order}><td><a href='${root}?page=object&object_id=${obj['id']}'>${obj['dname']}</a></td>";
-		echo "<td>${obj['label']}</td>";
-		echo "<td>${obj['asset_no']}</td>";
-		echo "<td>${obj['barcode']}</td>";
-		if ($obj['rack_id'])
-			echo "<td><a href='${root}?page=rack&rack_id=${obj['rack_id']}'>${obj['Rack_name']}</a></td>";
+		if (isset ($_REQUEST['hl_object_id']) and $_REQUEST['hl_object_id'] == $obj['id'])
+			$secondclass = 'tdleft port_highlight';
 		else
-			echo '<td>Unmounted</td>';
+			$secondclass = 'tdleft';
+		echo "<tr class=row_${order}><td class='${secondclass}'><a href='${root}?page=object&object_id=${obj['id']}'>${obj['dname']}</a></td>";
+		echo "<td class='${secondclass}'>${obj['label']}</td>";
+		echo "<td class='${secondclass}'>${obj['asset_no']}</td>";
+		echo "<td class='${secondclass}'>${obj['barcode']}</td>";
+		if ($obj['rack_id'])
+			echo "<td class='${secondclass}'><a href='${root}?page=rack&rack_id=${obj['rack_id']}'>${obj['Rack_name']}</a></td>";
+		else
+			echo "<td class='${secondclass}'>Unmounted</td>";
 		echo '</tr>';
 		$order = $nextorder[$order];
 	}
@@ -2070,7 +2076,11 @@ function renderIPRange ($id)
 				echo "<tr>";
 
 			echo "<td class=tdleft><a href='${root}?page=ipaddress&ip=${addr['ip']}'>${addr['ip']}</a></td>";
-			echo "<td class=tdleft>${addr['name']}</td><td class=tdleft>";
+			if (isset ($_REQUEST['hl_ipv4_addr']) and $_REQUEST['hl_ipv4_addr'] == $addr['ip'])
+				$secondstyle = 'tdleft port_highlight';
+			else
+				$secondstyle = 'tdleft';
+			echo "<td class='${secondstyle}'>${addr['name']}</td><td class='${secondstyle}'>";
 			$delim = '';
 			$prologue = '';
 			if ( $addr['reserved'] == 'yes')
@@ -2167,7 +2177,7 @@ function renderIPAddress ($ip)
 
 	if ($address['reserved'] == 'yes' or ($numshared + $numreg + $numvirt) > 0)
 	{
-		startPortlet ('Allocations');
+		startPortlet ('allocations');
 		echo "<table class='widetable' cellpadding=5 cellspacing=0 border=0 align='center'>\n";
 		echo "<tr><th>Object name</th><th>Interface name</th><th>Interface type</th></tr>\n";
 		if ( ($numshared > 0 && $numreg > 0) || $numreg > 1 )
@@ -2181,8 +2191,12 @@ function renderIPAddress ($ip)
 			echo "<tr class='$class'><td colspan='3'><b>RESERVED</b></td></tr>";
 		foreach ($address['bonds'] as $bond)
 		{
-			echo "<tr class='$class'><td><a href='${root}?page=object&object_id=${bond['object_id']}";
-			echo "&hl_ipv4_addr=${ip}'>${bond['object_name']}</td><td>${bond['name']}</td><td><b>";
+			if (isset ($_REQUEST['hl_object_id']) and $_REQUEST['hl_object_id'] == $bond['object_id'])
+				$secondclass = 'tdleft port_highlight';
+			else
+				$secondclass = 'tdleft';
+			echo "<tr class='$class'><td class=tdleft><a href='${root}?page=object&object_id=${bond['object_id']}";
+			echo "&hl_ipv4_addr=${ip}'>${bond['object_name']}</td><td class='${secondclass}'>${bond['name']}</td><td class='${secondclass}'><b>";
 			switch ($bond['type'])
 			{
 				case 'virtual':

@@ -125,7 +125,7 @@ td.pcright {
 	border-top: 1px solid black;
 }
 
-tr.port_highlight {
+tr.port_highlight, td.port_highlight {
 	background-color: lime;
 }
 
