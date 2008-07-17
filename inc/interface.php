@@ -2064,7 +2064,7 @@ function renderIPRange ($id)
 				echo "<tr class='trerror'>";
 			elseif ( $addr['reserved'] == 'yes')
 				echo "<tr class='trbusy'>";
-			elseif ( $numshared > 0 || $numreg > 0 || $numlb > 0 || $numrs > 0)
+			elseif ($numshared + $numreg + $numvirt + $numlb + $numrs > 0)
 				echo "<tr class='trbusy'>";
 			else
 				echo "<tr>";
