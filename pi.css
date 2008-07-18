@@ -502,3 +502,11 @@ div.commentblock {
 .port_unknown {
 	background-color: #ff0000;
 }
+
+td.portmap_highlight_even {
+	background-color: #00F000;
+}
+
+td.portmap_highlight_odd {
+	background-color: #00FF00;
+}

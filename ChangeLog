@@ -4,6 +4,8 @@
 	bugfix: don't escape Greek letters to enable them in tag names
 	bugfix: port manager messages were incorrect
 	update: adjusted database for bigger texts
+	update: better "origin" highlighting for browsing
+	update: merged Petr Kohts' highlight patch
 0.16.0 2008-07-09
 	new feature: tag roller
 	new feature: taggable user accounts

@@ -3038,7 +3038,8 @@ function renderPortMap ($editable = FALSE)
 		echo "<tr class=row_${order}><th class=vert_th style='border-bottom: 0px;'>from $name1</th>";
 		foreach ($ptlist as $type2 => $name2)
 		{
-			echo '<td><input type=checkbox' . ($editable ? " name=atom_${type1}_${type2}" : ' disabled');
+			echo '<td' . (!$editable && $pctable[$type1][$type2] ? " class=portmap_highlight_$order" : '') . '>';
+			echo '<input type=checkbox' . ($editable ? " name=atom_${type1}_${type2}" : ' disabled');
 			echo ($pctable[$type1][$type2] ? ' checked' : '') . '></td>';
 		}
 		echo "</tr>\n";
