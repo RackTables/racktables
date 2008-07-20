@@ -4700,7 +4700,9 @@ function renderTagRowForCloud ($taginfo, $realm, $level = 0)
 function renderTagRowForEditor ($taginfo, $level = 0)
 {
 	global $root, $pageno, $tabno, $taglist;
-	echo '<tr><td>';
+	echo '<tr><td class=tdleft>';
+	for ($i = 0; $i < $level; $i++)
+		printImageHREF ('spacer');
 	$nrefs = 0;
 	foreach ($taginfo['refcnt'] as $part)
 		$nrefs += $part;
@@ -4764,14 +4766,12 @@ function renderTagTreeEditor ()
 	echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
 	echo "<tr><th>&nbsp;</th><th>tag</th><th>parent</th><th>&nbsp;</th></tr>\n";
 	foreach ($tagtree as $taginfo)
-	{
-		renderTagRowForEditor ($taginfo, TRUE);
-	}
+		renderTagRowForEditor ($taginfo);
 	echo "<form action='${root}process.php' method=post>";
 	echo "<input type=hidden name=page value='${pageno}'>";
 	echo "<input type=hidden name=tab value='${tabno}'>";
 	echo "<input type=hidden name=op value='createTag'>";
-	echo "<tr><td>";
+	echo "<tr><td class=tdleft>";
 	printImageHREF ('grant', 'Create tag', TRUE, 102);
 	echo '</td><td><input type=text name=tag_name tabindex=100></td><td><select name=parent_id tabindex=101>';
 	echo "<option value=0>-- NONE --</option>\n";
