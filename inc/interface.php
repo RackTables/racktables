@@ -1244,10 +1244,135 @@ function renderIPv4ForObject ($object_id = 0)
 
 }
 
+// Log structure versions:
+// 1: the whole structure is a list of code-message pairs
+// 2 and later: there's a "v" field set, which indicates the version
+// 2: there's a "m" list set to hold message code and optional arguments
 function printLog ($log)
 {
-	foreach ($log as $record)
-		echo "<div class=msg_${record['code']}>${record['message']}</div>";
+	switch (TRUE)
+	{
+		case !isset ($log['v']):
+			foreach ($log as $key => $record)
+				if ($key != 'v')
+					echo "<div class=msg_${record['code']}>${record['message']}</div>";
+			break;
+		case $log['v'] == 2:
+			$msginfo = array
+			(
+				1 => array ('code' => 'success', 'format' => '%u new records done, %u already existed'),
+				2 => array ('code' => 'success', 'format' => 'NATv4 rule was successfully added.'),
+				3 => array ('code' => 'success', 'format' => 'NATv4 rule was successfully deleted.'),
+				4 => array ('code' => 'success', 'format' => 'NATv4 rule was successfully updated'),
+				5 => array ('code' => 'success', 'format' => 'Port %s was added successfully'),
+				6 => array ('code' => 'success', 'format' => 'Port %s was updated successfully'),
+				7 => array ('code' => 'success', 'format' => 'Port %s was deleted successfully'),
+				8 => array ('code' => 'success', 'format' => 'Port %s successfully linked with port %s at object %s'),
+				9 => array ('code' => 'success', 'format' => 'Port %s was successfully unlinked from %s@%s'),
+				10 => array ('code' => 'success', 'format' => 'Added %u ports, updated %u ports, encountered %u errors.'),
+				11 => array ('code' => 'success', 'format' => 'Reservation removed.'),
+				12 => array ('code' => 'success', 'format' => 'allocation updated'),
+				13 => array ('code' => 'success', 'format' => 'allocated'),
+				14 => array ('code' => 'success', 'format' => 'deallocated'),
+				15 => array ('code' => 'success', 'format' => 'Reset succeeded.'),
+				16 => array ('code' => 'success', 'format' => 'Update done'),
+				17 => array ('code' => 'success', 'format' => 'Update(s) succeeded.'),
+				18 => array ('code' => 'success', 'format' => 'Load balancer was successfully added'),
+				19 => array ('code' => 'success', 'format' => 'Load balancer was successfully deleted'),
+				20 => array ('code' => 'success', 'format' => 'Load balancer info was successfully updated'),
+				21 => array ('code' => 'success', 'format' => 'Generation complete'),
+				22 => array ('code' => 'success', 'format' => 'Chained %u tags'),
+				23 => array ('code' => 'success', 'format' => 'IPv4 prefix successfully added'),
+				24 => array ('code' => 'success', 'format' => 'IPv4 prefix deleted'),
+				25 => array ('code' => 'success', 'format' => 'IPv4 prefix updated'),
+				26 => array ('code' => 'success', 'format' => '%u IP address(es) were successfully updated'),
+				27 => array ('code' => 'success', 'format' => 'IPv4 address updated'),
+				28 => array ('code' => 'success', 'format' => 'Virtual service was successfully created'),
+				29 => array ('code' => 'success', 'format' => 'Virtual service was successfully deleted'),
+				30 => array ('code' => 'success', 'format' => 'Virtual service was successfully updated'),
+				31 => array ('code' => 'success', 'format' => 'RS pool was successfully created'),
+				32 => array ('code' => 'success', 'format' => 'RS pool was successfully deleted'),
+				33 => array ('code' => 'success', 'format' => 'RS pool was successfully updated'),
+				34 => array ('code' => 'success', 'format' => 'Real server was successfully added'),
+				35 => array ('code' => 'success', 'format' => 'Real server was successfully deleted'),
+				36 => array ('code' => 'success', 'format' => 'Real server was successfully updated'),
+				37 => array ('code' => 'success', 'format' => 'Successfully added %u real servers'),
+				38 => array ('code' => 'success', 'format' => '%u real server(s) were successfully (de)activated'),
+				39 => array ('code' => 'success', 'format' => 'User account %s updated.'),
+				40 => array ('code' => 'success', 'format' => 'User account %s created.'),
+				41 => array ('code' => 'success', 'format' => 'User account disabled.'),
+				42 => array ('code' => 'success', 'format' => 'User account enabled.'),
+				43 => array ('code' => 'success', 'format' => 'Saved successfully.'),
+				44 => array ('code' => 'success', 'format' => '%s failures and %s successfull changes.'),
+				45 => array ('code' => 'success', 'format' => "Attribute '%s' created."),
+				46 => array ('code' => 'success', 'format' => 'Rename successful.'),
+				47 => array ('code' => 'success', 'format' => 'Attribute was deleted.'),
+				48 => array ('code' => 'success', 'format' => 'Supplement succeeded.'),
+				49 => array ('code' => 'success', 'format' => 'Reduction succeeded.'),
+				50 => array ('code' => 'success', 'format' => 'Reduction succeeded.'),
+				51 => array ('code' => 'success', 'format' => 'Update succeeded.'),
+				52 => array ('code' => 'success', 'format' => 'Supplement succeeded.'),
+				53 => array ('code' => 'success', 'format' => 'Chapter was deleted.'),
+				54 => array ('code' => 'success', 'format' => 'Chapter was updated.'),
+				55 => array ('code' => 'success', 'format' => 'Chapter was added.'),
+				56 => array ('code' => 'success', 'format' => 'Update succeeded.'),
+				57 => array ('code' => 'success', 'format' => 'Reset complete'),
+				58 => array ('code' => 'success', 'format' => "Successfully deleted tag ."),
+				59 => array ('code' => 'success', 'format' => "Created tag '%s'."),
+				60 => array ('code' => 'success', 'format' => "Updated tag '%s'."),
+				61 => array ('code' => 'success', 'format' => 'Password changed successfully.')
+			);
+			// Handle the arguments. Is there any better way to do it?
+			foreach ($log['m'] as $record)
+			{
+				if (isset ($record['a']))
+					switch (count ($record['a']))
+					{
+						case 1:
+							$msgtext = sprintf
+							(
+								$msginfo[$record['c']]['format'],
+								$record['a'][0]
+							);
+							break;
+						case 2:
+							$msgtext = sprintf
+							(
+								$msginfo[$record['c']]['format'],
+								$record['a'][0],
+								$record['a'][1]
+							);
+							break;
+						case 3:
+							$msgtext = sprintf
+							(
+								$msginfo[$record['c']]['format'],
+								$record['a'][0],
+								$record['a'][1],
+								$record['a'][2]
+							);
+							break;
+						case 4:
+						default:
+							$msgtext = sprintf
+							(
+								$msginfo[$record['c']]['format'],
+								$record['a'][0],
+								$record['a'][1],
+								$record['a'][2],
+								$record['a'][3]
+							);
+							break;
+					}
+				else
+					$msgtext = $msginfo[$record['c']]['format'];
+				echo '<div class=msg_' . $msginfo[$record['c']]['code'] . ">${msgtext}</div>";
+			}
+			break;
+		default:
+			echo '<div class=msg_error>' . __FUNCTION__ . ': internal error</div>';
+			break;
+	}
 }
 
 /*

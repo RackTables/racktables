@@ -1570,28 +1570,36 @@ function getTagFilterStr ($tagfilter = array())
 	return $ret;
 }
 
-function buildWideRedirectURL ($log, $p = NULL, $t = NULL)
+function buildWideRedirectURL ($log, $nextpage = NULL, $nexttab = NULL)
 {
 	global $root, $page, $pageno, $tabno;
-	if ($p === NULL)
-		$p = $pageno;
-	if ($t === NULL)
-		$t = $tabno;
-	$url = "${root}?page=${p}&tab=${t}";
-	if (isset ($page[$p]['bypass']))
-		$url .= '&' . $page[$p]['bypass'] . '=' . $_REQUEST[$page[$p]['bypass']];
+	if ($nextpage === NULL)
+		$nextpage = $pageno;
+	if ($nexttab === NULL)
+		$nexttab = $tabno;
+	$url = "${root}?page=${nextpage}&tab=${nexttab}";
+	if (isset ($page[$nextpage]['bypass']))
+		$url .= '&' . $page[$nextpage]['bypass'] . '=' . $_REQUEST[$page[$nextpage]['bypass']];
 	$url .= "&log=" . urlencode (base64_encode (serialize ($log)));
 	return $url;
 }
 
-function buildRedirectURL_OK ($text, $p = NULL, $t = NULL)
+function buildRedirectURL_OK ($args = array(), $nextpage = NULL, $nexttab = NULL)
 {
-	return buildWideRedirectURL (array (array ('code' => 'success', 'message' => $text)), $p, $t);
+	global $msgcode, $pageno, $tabno, $op;
+	if ($nextpage === NULL)
+		$nextpage = $pageno;
+	if ($nexttab === NULL)
+		$nexttab = $tabno;
+	$code = $msgcode[$pageno][$tabno][$op]['OK'];
+	$log = array ('v' => 2);
+	$log['m'][] = count ($args) ? array ('c' => $code, 'a' => $args) : array ('c' => $code);
+	return buildWideRedirectURL ($log, $nextpage, $nexttab);
 }
 
-function buildRedirectURL_ERR ($text, $p = NULL, $t = NULL)
+function buildRedirectURL_ERR ($text, $nextpage = NULL, $nexttab = NULL)
 {
-	return buildWideRedirectURL (array (array ('code' => 'error', 'message' => $text)), $p, $t);
+	return buildWideRedirectURL (array (array ('code' => 'error', 'message' => $text)), $nextpage, $nexttab);
 }
 
 function validTagName ($s, $allow_autotag = FALSE)
