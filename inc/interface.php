@@ -1253,13 +1253,15 @@ function printLog ($log)
 	switch (TRUE)
 	{
 		case !isset ($log['v']):
+		case $log['v'] == 1:
 			foreach ($log as $key => $record)
-				if ($key != 'v')
+				if ($key !== 'v')
 					echo "<div class=msg_${record['code']}>${record['message']}</div>";
 			break;
 		case $log['v'] == 2:
 			$msginfo = array
 			(
+				0 => array ('code' => 'success', 'format' => 'Success: %s'),
 				1 => array ('code' => 'success', 'format' => '%u new records done, %u already existed'),
 				2 => array ('code' => 'success', 'format' => 'NATv4 rule was successfully added.'),
 				3 => array ('code' => 'success', 'format' => 'NATv4 rule was successfully deleted.'),
@@ -1320,7 +1322,64 @@ function printLog ($log)
 				58 => array ('code' => 'success', 'format' => "Successfully deleted tag ."),
 				59 => array ('code' => 'success', 'format' => "Created tag '%s'."),
 				60 => array ('code' => 'success', 'format' => "Updated tag '%s'."),
-				61 => array ('code' => 'success', 'format' => 'Password changed successfully.')
+				61 => array ('code' => 'success', 'format' => 'Password changed successfully.'),
+				100 => array ('code' => 'error', 'format' => 'Generic error: %s'),
+				101 => array ('code' => 'error', 'format' => 'Port name cannot be empty'),
+				102 => array ('code' => 'error', 'format' => "Error creating user account '%s'"),
+				103 => array ('code' => 'error', 'format' => 'getHashByID() failed'),
+				104 => array ('code' => 'error', 'format' => "Error updating user account '%s'"),
+				105 => array ('code' => 'error', 'format' => 'Error enabling user account.'),
+				106 => array ('code' => 'error', 'format' => 'Error disabling user account.'),
+				107 => array ('code' => 'error', 'format' => 'Admin account cannot be disabled'),
+				108 => array ('code' => 'error', 'format' => '%u failures and %u successfull changes.'),
+				109 => array ('code' => 'error', 'format' => 'Update failed!'),
+				110 => array ('code' => 'error', 'format' => 'Supplement failed!'),
+				111 => array ('code' => 'error', 'format' => 'Reduction failed!'),
+				112 => array ('code' => 'error', 'format' => 'Error adding chapter.'),
+				113 => array ('code' => 'error', 'format' => 'Error updating chapter.'),
+				114 => array ('code' => 'error', 'format' => 'Error deleting chapter.'),
+				115 => array ('code' => 'error', 'format' => 'Error renaming attribute.'),
+				116 => array ('code' => 'error', 'format' => 'Error creating attribute.'),
+				117 => array ('code' => 'error', 'format' => 'Error deleting attribute.'),
+				118 => array ('code' => 'error', 'format' => 'Supplement failed!'),
+				119 => array ('code' => 'error', 'format' => 'Reduction failed!'),
+				120 => array ('code' => 'error', 'format' => 'Reset failed!'),
+				121 => array ('code' => 'error', 'format' => 'commitUpdateObject() failed'),
+				122 => array ('code' => 'error', 'format' => 'One or more update(s) failed!'),
+				123 => array ('code' => 'error', 'format' => 'Cannot process submitted data: unknown format code.'),
+				124 => array ('code' => 'error', 'format' => 'Error removing reservation!'),
+				125 => array ('code' => 'error', 'format' => "Update failed with error: '%s'"),
+				126 => array ('code' => 'error', 'format' => 'addRStoRSPool() failed'),
+				127 => array ('code' => 'error', 'format' => 'Added %u real servers and encountered %u errors'),
+				128 => array ('code' => 'error', 'format' => 'commitDeleteRS() failed'),
+				129 => array ('code' => 'error', 'format' => 'commitDeleteLB() failed'),
+				130 => array ('code' => 'error', 'format' => 'commitDeleteVS() failed'),
+				131 => array ('code' => 'error', 'format' => 'invalid format requested'),
+				132 => array ('code' => 'error', 'format' => 'invalid protocol'),
+				133 => array ('code' => 'error', 'format' => 'commitUpdateRS() failed'),
+				134 => array ('code' => 'error', 'format' => 'commitUpdateLB() failed'),
+				135 => array ('code' => 'error', 'format' => 'commitUpdateVS() failed'),
+				136 => array ('code' => 'error', 'format' => 'addLBtoRSPool() failed'),
+				137 => array ('code' => 'error', 'format' => 'addLBtoRSPool() failed'),
+				138 => array ('code' => 'error', 'format' => 'commitDeleteRSPool() failed'),
+				139 => array ('code' => 'error', 'format' => 'commitUpdateRSPool() failed'),
+				140 => array ('code' => 'error', 'format' => 'Encountered %u errors, (de)activated %u real servers'),
+				141 => array ('code' => 'error', 'format' => 'Encountered %u errors, updated %u IP address(es)'),
+				142 => array ('code' => 'error', 'format' => 'executeAutoPorts() failed'),
+				143 => array ('code' => 'error', 'format' => 'Tried chaining %u tags, but experienced %u errors.'),
+				144 => array ('code' => 'error', 'format' => "Error deleting tag: '%s'"),
+				145 => array ('code' => 'error', 'format' => "Invalid tag name '%s'"),
+				146 => array ('code' => 'error', 'format' => "Tag '%s' (or similar name) already exists"),
+				147 => array ('code' => 'error', 'format' => "Could not create tag '%s' because of error '%s'"),
+				148 => array ('code' => 'error', 'format' => "Could not update tag '%s' because of error '%s'"),
+				149 => array ('code' => 'error', 'format' => 'Turing test failed'),
+				150 => array ('code' => 'error', 'format' => 'Can only change password under DB authentication.'),
+				151 => array ('code' => 'error', 'format' => 'Old password doesn\'t match.'),
+				152 => array ('code' => 'error', 'format' => 'New passwords don\'t match.'),
+				153 => array ('code' => 'error', 'format' => 'Password change failed.'),
+				154 => array ('code' => 'error', 'format' => "Verification error: %s"),
+				155 => array ('code' => 'error', 'format' => 'Save failed.'),
+				156 => array ('code' => 'error', 'format' => 'getSwitchVLANs() failed'),
 			);
 			// Handle the arguments. Is there any better way to do it?
 			foreach ($log['m'] as $record)

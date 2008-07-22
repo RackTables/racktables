@@ -1584,22 +1584,17 @@ function buildWideRedirectURL ($log, $nextpage = NULL, $nexttab = NULL)
 	return $url;
 }
 
-function buildRedirectURL_OK ($args = array(), $nextpage = NULL, $nexttab = NULL)
+function buildRedirectURL ($status, $args = array(), $nextpage = NULL, $nexttab = NULL)
 {
 	global $msgcode, $pageno, $tabno, $op;
 	if ($nextpage === NULL)
 		$nextpage = $pageno;
 	if ($nexttab === NULL)
 		$nexttab = $tabno;
-	$code = $msgcode[$pageno][$tabno][$op]['OK'];
+	$code = $msgcode[$pageno][$tabno][$op][$status];
 	$log = array ('v' => 2);
 	$log['m'][] = count ($args) ? array ('c' => $code, 'a' => $args) : array ('c' => $code);
 	return buildWideRedirectURL ($log, $nextpage, $nexttab);
-}
-
-function buildRedirectURL_ERR ($text, $nextpage = NULL, $nexttab = NULL)
-{
-	return buildWideRedirectURL (array (array ('code' => 'error', 'message' => $text)), $nextpage, $nexttab);
 }
 
 function validTagName ($s, $allow_autotag = FALSE)

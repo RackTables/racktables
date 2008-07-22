@@ -3,6 +3,7 @@
 	new feature: cache RackCode parse tree for better performance
 	bugfix: don't escape Greek letters to enable them in tag names
 	bugfix: port manager messages were incorrect
+	bugfix: shorten URLs to enable longer message logs
 	update: adjusted database for bigger texts
 	update: better "origin" highlighting for browsing
 	update: merged Petr Kohts' highlight patch
