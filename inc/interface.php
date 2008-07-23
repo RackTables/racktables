@@ -1380,6 +1380,7 @@ function printLog ($log)
 				154 => array ('code' => 'error', 'format' => "Verification error: %s"),
 				155 => array ('code' => 'error', 'format' => 'Save failed.'),
 				156 => array ('code' => 'error', 'format' => 'getSwitchVLANs() failed'),
+				157 => array ('code' => 'error', 'format' => 'operation not permitted'),
 			);
 			// Handle the arguments. Is there any better way to do it?
 			foreach ($log['m'] as $record)
