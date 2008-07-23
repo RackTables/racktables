@@ -159,13 +159,13 @@ function setSwitchVLANs ($object_id = 0, $setcmd)
 	global $remote_username;
 	$log = array();
 	if ($object_id <= 0)
-		return array (array ('code' => 'error', 'message' => __FUNCTION__ . ': Invalid object_id'));
+		return array (array ('c' => 160)); // invalid arguments
 	$objectInfo = getObjectInfo ($object_id);
 	$endpoints = findAllEndpoints ($object_id, $objectInfo['name']);
 	if (count ($endpoints) == 0)
-		return array (array ('code' => 'error', 'message' => 'Can\'t find any mean to reach current object. Please either set FQDN attribute or assign an IP address to the object.'));
+		return array (array ('c' => 161)); // endpoint not found
 	if (count ($endpoints) > 1)
-		return array (array ('code' => 'error', 'message' => 'More than one IP address is assigned to this object, please configure FQDN attribute.'));
+		return array (array ('c' => 162)); // can't pick an address
 	$hwtype = $swtype = 'unknown';
 	foreach (getAttrValues ($object_id, TRUE) as $record)
 	{
@@ -181,22 +181,25 @@ function setSwitchVLANs ($object_id = 0, $setcmd)
 		array ("connect ${endpoint} ${hwtype} ${swtype} ${remote_username}", $setcmd)
 	);
 	if ($data == NULL)
-		return array (array ('code' => 'error', 'message' => __FUNCTION__ . ': Failed to get any response from queryGateway() or the gateway died'));
+		return array (array ('c' => 163)); // unknown gateway failure
 	if (strpos ($data[0], 'OK!') !== 0)
-		return array (array ('code' => 'error', 'message' => "Gateway failure: returned code ${data[0]}."));
+		return array (array ('c' => 164, 'a' => array ($data[0]))); // gateway failure
 	if (count ($data) != 2)
-		return array (array ('code' => 'error', 'message' => 'Gateway failure: malformed reply.'));
+		return array (array ('c' => 165)); // protocol violation
 	// Finally we can parse the response into message array.
 	$ret = array();
 	foreach (split (';', substr ($data[1], strlen ('OK!'))) as $text)
 	{
-		if (strpos ($text, 'I!') === 0)
-			$code = 'success';
+		if (strpos ($text, 'C!') === 0)
+		{
+		}
+		elseif (strpos ($text, 'I!') === 0)
+			$code = 62;
 		elseif (strpos ($text, 'W!') === 0)
-			$code = 'warning';
+			$code = 202;
 		else // All improperly formatted messages must be treated as error conditions.
-			$code = 'error';
-		$ret[] = array ('code' => $code, 'message' => substr ($text, 2));
+			$code = 166;
+		$ret[] = array ('c' => $code, 'a' => array (substr ($text, 2)));
 	}
 	return $ret;
 }
@@ -207,13 +210,13 @@ function activateSLBConfig ($object_id = 0, $configtext = '')
 	global $remote_username;
 	$log = array();
 	if ($object_id <= 0 or empty ($configtext))
-		return array (array ('code' => 'error', 'message' => __FUNCTION__ . ': Invalid arguments'));
+		return array (array ('c' => 160)); // invalid arguments
 	$objectInfo = getObjectInfo ($object_id);
 	$endpoints = findAllEndpoints ($object_id, $objectInfo['name']);
 	if (count ($endpoints) == 0)
-		return array (array ('code' => 'error', 'message' => 'Can\'t find any mean to reach current object. Please either set FQDN attribute or assign an IP address to the object.'));
+		return array (array ('c' => 161)); // endpoint not found
 	if (count ($endpoints) > 1)
-		return array (array ('code' => 'error', 'message' => 'More than one IP address is assigned to this object, please configure FQDN attribute.'));
+		return array (array ('c' => 162)); // can't pick an address
 	$hwtype = $swtype = 'unknown';
 	$endpoint = str_replace (' ', '+', $endpoints[0]);
 	$tmpfilename = tempnam ('', 'RackTables-slbconfig-');
@@ -227,17 +230,17 @@ function activateSLBConfig ($object_id = 0, $configtext = '')
 	);
 	unlink ($tmpfilename);
 	if ($data == NULL)
-		return array (array ('code' => 'error', 'message' => __FUNCTION__ . ': Failed to get any response from queryGateway() or the gateway died'));
+		return array (array ('c' => 163)); // unknown gateway failure
 	if (strpos ($data[0], 'OK!') !== 0)
-		return array (array ('code' => 'error', 'message' => "Gateway failure: returned code ${data[0]}."));
+		return array (array ('c' => 164, 'a' => array ($data[0]))); // gateway failure
 	if (count ($data) != 2)
-		return array (array ('code' => 'error', 'message' => 'Gateway failure: malformed reply.'));
+		return array (array ('c' => 165)); // protocol violation
 	// Finally we can parse the response into message array.
 	$ret = array();
-	$codemap['ERR'] = 'error';
-	$codemap['OK'] = 'success';
+	$codemap['ERR'] = 166;
+	$codemap['OK'] = 62;
 	list ($code, $text) = split ('!', $data[1]);
-	$ret[] = array ('code' => $codemap[$code], 'message' => $text);
+	$ret[] = array ('c' => $codemap[$code], 'a' => array ($text));
 	return $ret;
 }
 

@@ -1294,7 +1294,7 @@ function setPortVLAN ()
 	// for each of the rest.
 	$nports = $_REQUEST['portcount'];
 	$prefix = 'set ';
-	$log = array ('v' => 1);
+	$log = array ('v' => 2);
 	$setcmd = '';
 	for ($i = 0; $i < $nports; $i++)
 		if
@@ -1303,7 +1303,7 @@ function setPortVLAN ()
 			!isset ($_REQUEST['vlanid_' . $i]) ||
 			$_REQUEST['portname_' . $i] != $portlist[$i]['portname']
 		)
-			$log[] = array ('code' => 'error', 'message' => "Ignoring malformed record #${i} in form submit");
+			$log['m'][] = array ('c' => 158, 'a' => array ($i));
 		elseif
 		(
 			$_REQUEST['vlanid_' . $i] == $portlist[$i]['vlanid'] ||
@@ -1321,7 +1321,7 @@ function setPortVLAN ()
 			$annex[] = array ('tag' => '$tovlan_' . $newvlanid);
 			if (!permitted (NULL, NULL, NULL, $annex))
 			{
-				$log[] = array ('code' => 'error', 'message' => "Permission denied moving port ${portname} from VLAN${oldvlanid} to VLAN${newvlanid}");
+				$log['m'][] = array ('c' => 159, 'a' => array ($portname, $oldvlanid, $newvlanid));
 				continue;
 			}
 			$setcmd .= $prefix . $portname . '=' . $newvlanid;
@@ -1329,9 +1329,9 @@ function setPortVLAN ()
 		}
 	// Feed the gateway and interpret its (non)response.
 	if ($setcmd != '')
-		$log = array_merge ($log, setSwitchVLANs ($_REQUEST['object_id'], $setcmd));
+		$log['m'] = array_merge ($log, setSwitchVLANs ($_REQUEST['object_id'], $setcmd));
 	else
-		$log[] = array ('code' => 'warning', 'message' => 'nothing happened...');
+		$log['m'][] = array ('c' => 201);
 	return buildWideRedirectURL ($log);
 }
 

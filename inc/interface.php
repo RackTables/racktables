@@ -1323,6 +1323,7 @@ function printLog ($log)
 				59 => array ('code' => 'success', 'format' => "Created tag '%s'."),
 				60 => array ('code' => 'success', 'format' => "Updated tag '%s'."),
 				61 => array ('code' => 'success', 'format' => 'Password changed successfully.'),
+				62 => array ('code' => 'success', 'format' => 'gw: %s'),
 				100 => array ('code' => 'error', 'format' => 'Generic error: %s'),
 				101 => array ('code' => 'error', 'format' => 'Port name cannot be empty'),
 				102 => array ('code' => 'error', 'format' => "Error creating user account '%s'"),
@@ -1381,6 +1382,18 @@ function printLog ($log)
 				155 => array ('code' => 'error', 'format' => 'Save failed.'),
 				156 => array ('code' => 'error', 'format' => 'getSwitchVLANs() failed'),
 				157 => array ('code' => 'error', 'format' => 'operation not permitted'),
+				158 => array ('code' => 'error', 'format' => 'Ignoring malformed record #%u in form submit'),
+				159 => array ('code' => 'error', 'format' => 'Permission denied moving port %s from VLAN%u to VLAN%u'),
+				160 => array ('code' => 'error', 'format' => 'Invalid arguments'),
+				161 => array ('code' => 'error', 'format' => 'Endpoint not found. Please either set FQDN attribute or assign an IP address to the object.'),
+				162 => array ('code' => 'error', 'format' => 'More than one IP address is assigned to this object, please configure FQDN attribute.'),
+				163 => array ('code' => 'error', 'format' => 'Failed to get any response from queryGateway() or the gateway died'),
+				164 => array ('code' => 'error', 'format' => 'Gateway failure: returned code %u.'),
+				165 => array ('code' => 'error', 'format' => 'Gateway failure: malformed reply.'),
+				166 => array ('code' => 'error', 'format' => 'gw: %s'),
+				200 => array ('code' => 'warning', 'format' => 'generic warning: %s'),
+				201 => array ('code' => 'warning', 'format' => 'nothing happened...'),
+				202 => array ('code' => 'warning', 'format' => 'gw: %s'),
 			);
 			// Handle the arguments. Is there any better way to do it?
 			foreach ($log['m'] as $record)
