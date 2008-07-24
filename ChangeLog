@@ -1,6 +1,7 @@
 0.16.1
 	new feature: allow pre-selected tags for newly added virtual services and RS pools
 	new feature: cache RackCode parse tree for better performance
+	new feature: tag names in the IPv4 address space
 	bugfix: don't escape Greek letters to enable them in tag names
 	bugfix: port manager messages were incorrect
 	bugfix: shorten URLs to enable longer message logs

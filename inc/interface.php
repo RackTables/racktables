@@ -1975,25 +1975,32 @@ function renderRackspaceHistory ()
 
 function renderAddressspace ()
 {
-	global $root, $page;
+	global $root;
 
 	echo "<table border=0 class=objectview>\n";
 	echo "<tr><td class=pcleft>";
 
-	startPortlet ('Subnets');
-	echo "<table class='widetable' border=0 cellpadding=10 cellspacing=0 align='center'>\n";
+	startPortlet ('Networks');
+	echo "<table class='widetable' border=0 cellpadding=5 cellspacing=0 align='center'>\n";
 	$tagfilter = getTagFilter();
 	$addrspaceList = getAddressspaceList ($tagfilter, getTFMode());
-	echo "<tr><th>Subnet</th><th>Name</th><th>Utilization</th></tr>";
+	echo "<tr><th>prefix</th><th>name/tags</th><th>utilization</th></tr>\n";
 	foreach ($addrspaceList as $iprange)
 	{
 		$range = getIPRange ($iprange['id']);
+		$prefixtags = loadIPv4PrefixTags ($iprange['id']);
 		$total = ($iprange['ip_bin'] | $iprange['mask_bin_inv']) - ($iprange['ip_bin'] & $iprange['mask_bin']) + 1;
 		$used = count ($range['addrlist']);
-		echo "<tr><td class=tdleft><a href='${root}?page=iprange&id=${iprange['id']}'>${iprange['ip']}/${iprange['mask']}</a></td>";
-		echo "<td class=tdleft>${iprange['name']}</td><td class=tdleft>";
+		echo "<tr valign=top><td class=tdleft><a href='${root}?page=iprange&id=${iprange['id']}'>${iprange['ip']}/${iprange['mask']}</a></td>";
+		echo "<td class=tdleft>${iprange['name']}";
+		if (count ($prefixtags))
+		{
+			echo "<br>";
+			echo serializeTags ($prefixtags, "${root}?page=ipv4space&");
+		}
+		echo "</td><td class=tdcenter>";
 		renderProgressBar ($used/$total);
-		echo " ${used}/${total}</td></tr>";
+		echo "<br><small>${used}/${total}</small></td></tr>";
 	}
 	echo "</table>\n";
 	finishPortlet();
@@ -2072,9 +2079,9 @@ function renderAddNewRange ()
 	global $root, $pageno, $tabno;
 	showMessageOrError();
 
-	startPortlet ("Add New");
+	startPortlet ("Add new");
 	echo "<table class='widetable' border=0 cellpadding=10 align='center'>\n";
-	echo "<tr><th>Address range</th><th>Name</th><th>connected network</th><th>assign tags</th><th>&nbsp;</th></tr>\n";
+	echo "<tr><th>prefix</th><th>name</th><th>connected network</th><th>assign tags</th><th>&nbsp;</th></tr>\n";
 	echo "<form name='add_new_range' action='${root}process.php'>\n";
 	echo "<input type=hidden name=op value=addIPv4Prefix>\n";
 	echo "<input type=hidden name=page value='${pageno}'>\n";
@@ -2084,22 +2091,22 @@ function renderAddNewRange ()
 	echo "<td class='tdcenter'><input type=checkbox name='is_bcast' tabindex=3 checked></td>\n";
 	echo "<td>\n";
 	renderTagSelect();
-	echo "</td>\n";
-	echo "<td class='tdcenter'><input type=submit value='Add a new range' tabindex=4></td>\n";
+	echo "</td><td class=tdcenter>";
+	printImageHREF ('CREATE', 'Add a new network', TRUE, 4);
 	echo "</td></tr>\n";
 	echo "</form></table><br><br>\n";
 	finishPortlet();
 
-	startPortlet ("Manage Existing");
-	echo "<table class='widetable' border=0 cellpadding=10 align='center'>\n";
+	startPortlet ("Manage existing");
+	echo "<table class='widetable' border=0 cellpadding=5 cellspacing=0 align='center'>\n";
 	$addrspaceList = getAddressspaceList();
-	echo "<tr><th>&nbsp;</th><th>Address range</th><th>Name</th><th>Utilization</th></tr>";
+	echo "<tr><th>&nbsp;</th><th>prefix</th><th>name</th><th>utilization</th></tr>";
 	foreach ($addrspaceList as $iprange)
 	{
 		$range = getIPRange($iprange['id']);
 		$usedips = count ($range['addrlist']);
 		$totalips = ($iprange['ip_bin'] | $iprange['mask_bin_inv']) - ($iprange['ip_bin'] & $iprange['mask_bin']) + 1;
-		echo "<tr><td>";
+		echo "<tr valign=top><td>";
 		if ($usedips == 0)
 		{
 			echo "<a href='${root}process.php?op=delIPv4Prefix&page=${pageno}&tab=${tabno}&id=${iprange['id']}'>";
@@ -2110,10 +2117,9 @@ function renderAddNewRange ()
 			printImageHREF ('nodelete', 'There are IP addresses allocated or reserved');
 		echo "</td>\n<td class=tdleft><a href='${root}?page=iprange&id=${iprange['id']}'>";
 		echo "${iprange['ip']}/${iprange['mask']}</a></td><td class=tdleft>${iprange['name']}";
-		echo "</td><td class=tdleft>";
+		echo "</td><td class=tdcenter>";
 		renderProgressBar ($usedips / $totalips);
-		echo " ${usedips}/${totalips}";
-		echo "</td></tr>";
+		echo "<br><small>${usedips}/${totalips}</small></td></tr>\n";
 	}
 	echo "</table>";
 	finishPortlet();
