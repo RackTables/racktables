@@ -1242,7 +1242,7 @@ function rollTags ()
 				$ndupes++;
 			// FIXME: do something likewise for all object inside current rack
 		}
-	return buildRedirectURL ('OK');
+	return buildRedirectURL ('OK', array ($nnew, $ndupes));
 }
 
 function changeMyPassword ()
