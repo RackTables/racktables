@@ -3001,12 +3001,19 @@ function renderSearchResults ()
 				case 'ipv4network':
 					startPortlet ("<a href='${root}?page=ipv4space'>IPv4 networks</a>");
 					echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
-					echo '<tr><th>Network</th><th>Descritpion</th></tr>';
+					echo '<tr><th>network</th><th>name/tags</th></tr>';
 					foreach ($what as $net)
 					{
-						echo "<tr class=row_${order}><td class=tdleft><a href='${root}?page=iprange&id=${net['id']}'>${net['ip']}";
+						$prefixtags = loadIPv4PrefixTags ($net['id']);
+						echo "<tr class=row_${order} valign=top><td class=tdleft><a href='${root}?page=iprange&id=${net['id']}'>${net['ip']}";
 						echo '/' . $net['mask'] . '</a></td>';
-						echo "<td class=tdleft>${net['name']}</td></tr>";
+						echo "<td class=tdleft>${net['name']}";
+						if (count ($prefixtags))
+						{
+							echo "<br>";
+							echo serializeTags ($prefixtags, "${root}?page=ipv4space&");
+						}
+						echo "</td></tr>";
 						$order = $nextorder[$order];
 					}
 					echo '</table>';
