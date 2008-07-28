@@ -1294,7 +1294,7 @@ function setPortVLAN ()
 	// for each of the rest.
 	$nports = $_REQUEST['portcount'];
 	$prefix = 'set ';
-	$log = array ('v' => 2);
+	$log = array ('v' => 2, 'm' => array());
 	$setcmd = '';
 	for ($i = 0; $i < $nports; $i++)
 		if
