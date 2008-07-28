@@ -148,24 +148,24 @@ do_set()
 		newvlan=`echo $setexpr | cut -s -d'=' -f2`
 		curvlan=`egrep "^$portname=" $PORTINFO | cut -s -d'=' -f2 | cut -d',' -f2`
 		if [ -z "$curvlan" ]; then
-			echo "E!Could not find port $portname" >> "$REPLIES"
+			echo "C!167!$portname" >> "$REPLIES"
 			continue
 		fi
 		if [ "$curvlan" = "trunk" ]; then
-			echo "E!Port $portname is a trunk" >> "$REPLIES"
+			echo "C!168!$portname" >> "$REPLIES"
 			continue
 		fi
 		[ "$curvlan" = "$newvlan" ] && continue
 		echo "$portname $newvlan" >> "$REQUESTS"
 		cmembers=`grep -c ",$newvlan$" "$PORTINFO"`
 		if [ "$cmembers" = "0" -a $newvlan -lt 4096 ]; then
-			echo "W!Port $portname seems to be the first in VLAN $newvlan at this switch." >> "$REPLIES"
-			echo "W!Check uplink/downlink configuration for proper operation." >> "$REPLIES"
+			echo "C!203!$portname!$newvlan" >> "$REPLIES"
+			echo "C!204" >> "$REPLIES"
 		fi
 	done
-	nr=`egrep -c '^E!.' "$REPLIES"`
+	nr=`egrep -c '^C!1.' "$REPLIES"`
 	if [ "$nr" -ge 1 ]; then
-		echo "W!$nr change request(s) have been ignored" >> "$REPLIES"
+		echo "C!205!$nr" >> "$REPLIES"
 	fi
 
 	nq=`egrep -c '^.' "$REQUESTS"`
@@ -175,10 +175,10 @@ do_set()
 		local ret=$?
 
 		if [ $ret != 0 ]; then
-			echo "ERR!Failed to configure $endpoint, connector returned code $ret"
+			echo "C!169!$endpoint!$ret"
 			return
 		fi
-		echo "I!$nq change request(s) have been processed" >> "$REPLIES"
+		echo "C!63!$nq" >> "$REPLIES"
 	fi
 	echo -n 'OK!'
 	local SEMICOLON=

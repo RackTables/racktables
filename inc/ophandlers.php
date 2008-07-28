@@ -1329,7 +1329,7 @@ function setPortVLAN ()
 		}
 	// Feed the gateway and interpret its (non)response.
 	if ($setcmd != '')
-		$log['m'] = array_merge ($log, setSwitchVLANs ($_REQUEST['object_id'], $setcmd));
+		$log['m'] = array_merge ($log['m'], setSwitchVLANs ($_REQUEST['object_id'], $setcmd));
 	else
 		$log['m'][] = array ('c' => 201);
 	return buildWideRedirectURL ($log);

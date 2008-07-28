@@ -91,7 +91,7 @@ prepare_push_commands()
 			"$MYDIR/trunkdecoder" $vlanid >> $CMDS1
 		fi
 		printf "exit\n" >> $CMDS1
-		echo "I!Port $portname@$ENDPOINT has been assigned to VLAN $vlanid" >> "$FILE2"
+		echo "C!64!$portname!$ENDPOINT!$vlanid" >> "$FILE2"
 	done < "$FILE1"
 	printf "end\nwri\nquit\n" >> $CMDS1
 }

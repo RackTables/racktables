@@ -1324,6 +1324,9 @@ function printLog ($log)
 				60 => array ('code' => 'success', 'format' => "Updated tag '%s'."),
 				61 => array ('code' => 'success', 'format' => 'Password changed successfully.'),
 				62 => array ('code' => 'success', 'format' => 'gw: %s'),
+				63 => array ('code' => 'success', 'format' => '%u change request(s) have been processed'),
+				64 => array ('code' => 'success', 'format' => 'Port %s@%s has been assigned to VLAN %u'),
+
 				100 => array ('code' => 'error', 'format' => 'Generic error: %s'),
 				101 => array ('code' => 'error', 'format' => 'Port name cannot be empty'),
 				102 => array ('code' => 'error', 'format' => "Error creating user account '%s'"),
@@ -1391,9 +1394,16 @@ function printLog ($log)
 				164 => array ('code' => 'error', 'format' => 'Gateway failure: returned code %u.'),
 				165 => array ('code' => 'error', 'format' => 'Gateway failure: malformed reply.'),
 				166 => array ('code' => 'error', 'format' => 'gw: %s'),
+				167 => array ('code' => 'error', 'format' => 'Could not find port %s'),
+				168 => array ('code' => 'error', 'format' => 'Port %s is a trunk'),
+				169 => array ('code' => 'error', 'format' => 'Failed to configure %s, connector returned code %u'),
+
 				200 => array ('code' => 'warning', 'format' => 'generic warning: %s'),
 				201 => array ('code' => 'warning', 'format' => 'nothing happened...'),
 				202 => array ('code' => 'warning', 'format' => 'gw: %s'),
+				203 => array ('code' => 'warning', 'format' => 'Port %s seems to be the first in VLAN %u at this switch.'),
+				204 => array ('code' => 'warning', 'format' => 'Check uplink/downlink configuration for proper operation.'),
+				205 => array ('code' => 'warning', 'format' => '%u change request(s) have been ignored'),
 			);
 			// Handle the arguments. Is there any better way to do it?
 			foreach ($log['m'] as $record)

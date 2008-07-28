@@ -157,15 +157,14 @@ function getSwitchVLANs ($object_id = 0)
 function setSwitchVLANs ($object_id = 0, $setcmd)
 {
 	global $remote_username;
-	$log = array();
 	if ($object_id <= 0)
-		return array (array ('c' => 160)); // invalid arguments
+		return oneLiner (160); // invalid arguments
 	$objectInfo = getObjectInfo ($object_id);
 	$endpoints = findAllEndpoints ($object_id, $objectInfo['name']);
 	if (count ($endpoints) == 0)
-		return array (array ('c' => 161)); // endpoint not found
+		return oneLiner (161); // endpoint not found
 	if (count ($endpoints) > 1)
-		return array (array ('c' => 162)); // can't pick an address
+		return oneLiner (162); // can't pick an address
 	$hwtype = $swtype = 'unknown';
 	foreach (getAttrValues ($object_id, TRUE) as $record)
 	{
@@ -181,27 +180,30 @@ function setSwitchVLANs ($object_id = 0, $setcmd)
 		array ("connect ${endpoint} ${hwtype} ${swtype} ${remote_username}", $setcmd)
 	);
 	if ($data == NULL)
-		return array (array ('c' => 163)); // unknown gateway failure
+		return oneLiner (163); // unknown gateway failure
 	if (strpos ($data[0], 'OK!') !== 0)
-		return array (array ('c' => 164, 'a' => array ($data[0]))); // gateway failure
+		return oneLiner (164, array ($data[0])); // gateway failure
 	if (count ($data) != 2)
-		return array (array ('c' => 165)); // protocol violation
+		return oneLiner (165); // protocol violation
 	// Finally we can parse the response into message array.
-	$ret = array();
+	$log_m = array();
 	foreach (split (';', substr ($data[1], strlen ('OK!'))) as $text)
 	{
 		if (strpos ($text, 'C!') === 0)
 		{
+			$tmp = split ('!', $text);
+			array_shift ($tmp);
+			$code = array_shift ($tmp);
+			$log_m[] = count ($tmp) ? array ('c' => $code, 'a' => $tmp) : array ('c' => $code); // gateway-encoded message
 		}
 		elseif (strpos ($text, 'I!') === 0)
-			$code = 62;
+			$log_m[] = array ('c' => 62, 'a' => array (substr ($text, 2))); // generic gateway success
 		elseif (strpos ($text, 'W!') === 0)
-			$code = 202;
+			$log_m[] = array ('c' => 202, 'a' => array (substr ($text, 2))); // generic gateway warning
 		else // All improperly formatted messages must be treated as error conditions.
-			$code = 166;
-		$ret[] = array ('c' => $code, 'a' => array (substr ($text, 2)));
+			$log_m[] = array ('c' => 166, 'a' => array (substr ($text, 2))); // generic gateway error
 	}
-	return $ret;
+	return $log_m;
 }
 
 // FIXME: shouldn't the common code be made into some helper?
