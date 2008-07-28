@@ -5,6 +5,7 @@
 	bugfix: don't escape Greek letters to enable them in tag names
 	bugfix: port manager messages were incorrect
 	bugfix: shorten URLs to enable longer message logs
+	bugfix: added missing index to database
 	update: adjusted database for bigger texts
 	update: better "origin" highlighting for browsing
 	update: merged Petr Kohts' highlight patch
