@@ -1335,4 +1335,12 @@ function setPortVLAN ()
 	return buildWideRedirectURL ($log);
 }
 
+function submitSLBConfig ()
+{
+	assertUIntArg ('object_id', __FUNCTION__);
+	$newconfig = buildLVSConfig ($_REQUEST['object_id']);
+	$msglog = activateSLBConfig ($_REQUEST['object_id'], html_entity_decode ($newconfig, ENT_QUOTES, 'UTF-8'));
+	return buildWideRedirectURL ($msglog);
+}
+
 ?>

@@ -208,15 +208,14 @@ function setSwitchVLANs ($object_id = 0, $setcmd)
 function activateSLBConfig ($object_id = 0, $configtext = '')
 {
 	global $remote_username;
-	$log = array();
 	if ($object_id <= 0 or empty ($configtext))
-		return array (array ('c' => 160)); // invalid arguments
+		return oneLiner (160); // invalid arguments
 	$objectInfo = getObjectInfo ($object_id);
 	$endpoints = findAllEndpoints ($object_id, $objectInfo['name']);
 	if (count ($endpoints) == 0)
-		return array (array ('c' => 161)); // endpoint not found
+		return oneLiner (161); // endpoint not found
 	if (count ($endpoints) > 1)
-		return array (array ('c' => 162)); // can't pick an address
+		return oneLiner (162); // can't pick an address
 	$hwtype = $swtype = 'unknown';
 	$endpoint = str_replace (' ', '+', $endpoints[0]);
 	$tmpfilename = tempnam ('', 'RackTables-slbconfig-');
@@ -230,18 +229,18 @@ function activateSLBConfig ($object_id = 0, $configtext = '')
 	);
 	unlink ($tmpfilename);
 	if ($data == NULL)
-		return array (array ('c' => 163)); // unknown gateway failure
+		return oneLiner (163); // unknown gateway failure
 	if (strpos ($data[0], 'OK!') !== 0)
-		return array (array ('c' => 164, 'a' => array ($data[0]))); // gateway failure
+		return oneLiner (164, array ($data[0])); // gateway failure
 	if (count ($data) != 2)
-		return array (array ('c' => 165)); // protocol violation
+		return oneLiner (165); // protocol violation
 	// Finally we can parse the response into message array.
-	$ret = array();
-	$codemap['ERR'] = 166;
-	$codemap['OK'] = 62;
+	$log = array ('v' => 2);
+	$codemap['ERR'] = 166; // generic gateway error
+	$codemap['OK'] = 62; // generic gateway success
 	list ($code, $text) = split ('!', $data[1]);
-	$ret[] = array ('c' => $codemap[$code], 'a' => array ($text));
-	return $ret;
+	$log['m'][] = array ('c' => $codemap[$code], 'a' => array ($text));
+	return $log;
 }
 
 ?>

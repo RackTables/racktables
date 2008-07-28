@@ -2442,7 +2442,7 @@ function getLBList ()
 // attached (each with vsconfig/rsconfig in turn), each with the list of
 // virtual services terminating the pool. Each pool also lists all real
 // servers with rsconfig.
-function buildLBConfig ($object_id)
+function getSLBConfig ($object_id)
 {
 	if ($object_id <= 0)
 	{

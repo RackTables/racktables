@@ -137,6 +137,7 @@ $ophandler['object']['tags']['saveTags'] = 'saveObjectTags';
 $ophandler['object']['editrspvs']['addLB'] = 'addLoadBalancer';
 $ophandler['object']['editrspvs']['delLB'] = 'deleteLoadBalancer';
 $ophandler['object']['editrspvs']['updLB'] = 'updateLoadBalancer';
+$ophandler['object']['lvsconfig']['submitSLBConfig'] = 'submitSLBConfig';
 $delayauth['object']['livevlans']['setPortVLAN'] = TRUE;
 $msgcode['object']['nat4']['addNATv4Rule']['OK'] = 2;
 $msgcode['object']['nat4']['addNATv4Rule']['ERR'] = 100;

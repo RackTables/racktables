@@ -1111,15 +1111,6 @@ function getObjectCount ($rackData)
 	return count ($objects);
 }
 
-// Perform substitutions and return resulting string
-function apply_macros ($macros, $subject)
-{
-	$ret = $subject;
-	foreach ($macros as $search => $replace)
-		$ret = str_replace ($search, $replace, $ret);
-	return $ret;
-}
-
 // Make sure the string is always wrapped with LF characters
 function lf_wrap ($str)
 {
@@ -1591,10 +1582,15 @@ function buildRedirectURL ($status, $args = array(), $nextpage = NULL, $nexttab 
 		$nextpage = $pageno;
 	if ($nexttab === NULL)
 		$nexttab = $tabno;
-	$code = $msgcode[$pageno][$tabno][$op][$status];
-	$log = array ('v' => 2);
-	$log['m'][] = count ($args) ? array ('c' => $code, 'a' => $args) : array ('c' => $code);
-	return buildWideRedirectURL ($log, $nextpage, $nexttab);
+	return buildWideRedirectURL (oneLiner ($msgcode[$pageno][$tabno][$op][$status], $args), $nextpage, $nexttab);
+}
+
+// Return a message log consisting of only one message.
+function oneLiner ($code, $args = array())
+{
+	$ret = array ('v' => 2);
+	$ret['m'][] = count ($args) ? array ('c' => $code, 'a' => $args) : array ('c' => $code);
+	return $ret;
 }
 
 function validTagName ($s, $allow_autotag = FALSE)
@@ -1644,6 +1640,76 @@ function getRackImageWidth ()
 function getRackImageHeight ($units)
 {
 	return 3 + 3 + $units * 2;
+}
+
+// Perform substitutions and return resulting string
+// used solely by buildLVSConfig()
+function apply_macros ($macros, $subject)
+{
+	$ret = $subject;
+	foreach ($macros as $search => $replace)
+		$ret = str_replace ($search, $replace, $ret);
+	return $ret;
+}
+
+function buildLVSConfig ($object_id = 0)
+{
+	if ($object_id <= 0)
+	{
+		showError ('Invalid argument', __FUNCTION__);
+		return;
+	}
+	$oInfo = getObjectInfo ($object_id);
+	$lbconfig = getSLBConfig ($object_id);
+	if ($lbconfig === NULL)
+	{
+		showError ('getSLBConfig() failed', __FUNCTION__);
+		return;
+	}
+	$newconfig = "#\n#\n# This configuration has been generated automatically by RackTables\n";
+	$newconfig .= "# for object_id == ${object_id}\n# object name: ${oInfo['name']}\n#\n#\n\n\n";
+	foreach ($lbconfig as $vs_id => $vsinfo)
+	{
+		$newconfig .=  "########################################################\n" .
+			"# VS (id == ${vs_id}): " . (empty ($vsinfo['vs_name']) ? 'NO NAME' : $vsinfo['vs_name']) . "\n" .
+			"# RS pool (id == ${vsinfo['pool_id']}): " . (empty ($vsinfo['pool_name']) ? 'ANONYMOUS' : $vsinfo['pool_name']) . "\n" .
+			"########################################################\n";
+		# The order of inheritance is: VS -> LB -> pool [ -> RS ]
+		$macros = array
+		(
+			'%VIP%' => $vsinfo['vip'],
+			'%VPORT%' => $vsinfo['vport'],
+			'%PROTO%' => $vsinfo['proto'],
+			'%VNAME%' =>  $vsinfo['vs_name'],
+			'%RSPOOLNAME%' => $vsinfo['pool_name']
+		);
+		$newconfig .=  "virtual_server ${vsinfo['vip']} ${vsinfo['vport']} {\n";
+		$newconfig .=  "\tprotocol ${vsinfo['proto']}\n";
+		$newconfig .= apply_macros
+		(
+			$macros,
+			lf_wrap ($vsinfo['vs_vsconfig']) .
+			lf_wrap ($vsinfo['lb_vsconfig']) .
+			lf_wrap ($vsinfo['pool_vsconfig'])
+		);
+		foreach ($vsinfo['rslist'] as $rs)
+		{
+			$macros['%RSIP%'] = $rs['rsip'];
+			$macros['%RSPORT%'] = $rs['rsport'];
+			$newconfig .=  "\treal_server ${rs['rsip']} ${rs['rsport']} {\n";
+			$newconfig .= apply_macros
+			(
+				$macros,
+				lf_wrap ($vsinfo['vs_rsconfig']) .
+				lf_wrap ($vsinfo['lb_rsconfig']) .
+				lf_wrap ($vsinfo['pool_rsconfig']) .
+				lf_wrap ($rs['rs_rsconfig'])
+			);
+			$newconfig .=  "\t}\n";
+		}
+		$newconfig .=  "}\n\n\n";
+	}
+	return $newconfig;
 }
 
 ?>

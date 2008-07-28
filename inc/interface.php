@@ -4014,69 +4014,20 @@ Dictionary edit page in Configuration section.
 
 function renderLVSConfig ($object_id = 0)
 {
+	showMessageOrError();
 	global $root, $pageno, $tabno;
 	if ($object_id <= 0)
 	{
-		showError ('Invalid object_id', __FUNCTION__);
+		showError ('Invalid argument', __FUNCTION__);
 		return;
 	}
-	$oInfo = getObjectInfo ($object_id);
-	$lbconfig = buildLBConfig ($object_id);
-	$newconfig = "#\n#\n# This configuration has been generated automatically by RackTables\n";
-	$newconfig .= "# for object_id == ${object_id}\n# object name: ${oInfo['name']}\n#\n#\n\n\n";
-	foreach ($lbconfig as $vs_id => $vsinfo)
-	{
-		$newconfig .=  "########################################################\n" .
-			"# VS (id == ${vs_id}): " . (empty ($vsinfo['vs_name']) ? 'NO NAME' : $vsinfo['vs_name']) . "\n" .
-			"# RS pool (id == ${vsinfo['pool_id']}): " . (empty ($vsinfo['pool_name']) ? 'ANONYMOUS' : $vsinfo['pool_name']) . "\n" .
-			"########################################################\n";
-		# The order of inheritance is: VS -> LB -> pool [ -> RS ]
-		$macros = array
-		(
-			'%VIP%' => $vsinfo['vip'],
-			'%VPORT%' => $vsinfo['vport'],
-			'%PROTO%' => $vsinfo['proto'],
-			'%VNAME%' =>  $vsinfo['vs_name'],
-			'%RSPOOLNAME%' => $vsinfo['pool_name']
-		);
-		$newconfig .=  "virtual_server ${vsinfo['vip']} ${vsinfo['vport']} {\n";
-		$newconfig .=  "\tprotocol ${vsinfo['proto']}\n";
-		$newconfig .= apply_macros
-		(
-			$macros,
-			lf_wrap ($vsinfo['vs_vsconfig']) .
-			lf_wrap ($vsinfo['lb_vsconfig']) .
-			lf_wrap ($vsinfo['pool_vsconfig'])
-		);
-		foreach ($vsinfo['rslist'] as $rs)
-		{
-			$macros['%RSIP%'] = $rs['rsip'];
-			$macros['%RSPORT%'] = $rs['rsport'];
-			$newconfig .=  "\treal_server ${rs['rsip']} ${rs['rsport']} {\n";
-			$newconfig .= apply_macros
-			(
-				$macros,
-				lf_wrap ($vsinfo['vs_rsconfig']) .
-				lf_wrap ($vsinfo['lb_rsconfig']) .
-				lf_wrap ($vsinfo['pool_rsconfig']) .
-				lf_wrap ($rs['rs_rsconfig'])
-			);
-			$newconfig .=  "\t}\n";
-		}
-		$newconfig .=  "}\n\n\n";
-	}
-	if (isset ($_REQUEST['do_activate']))
-	{
-		printLog (activateSLBConfig ($object_id, html_entity_decode ($newconfig, ENT_QUOTES, 'UTF-8')));
-	}
-	echo "<form method=post action=${root}>";
-	echo "<input type=hidden name=page value=${pageno}>";
-	echo "<input type=hidden name=tab value=${tabno}>";
+	echo '<br>';
+	echo "<form method=post action='${root}process.php?page=${pageno}&tab=${tabno}&op=submitSLBConfig'>";
 	echo "<input type=hidden name=object_id value=${object_id}>";
-	echo "<center><input type=submit name=do_activate value='Send this configuration to the real world'></center>";
+	echo "<center><input type=submit value='Submit for activation'></center>";
 	echo "</form>";
 	echo '<pre>';
-	echo $newconfig;
+	echo buildLVSConfig ($object_id);
 	echo '</pre>';
 }
 
