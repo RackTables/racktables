@@ -27,7 +27,7 @@ function getDBUpgradePath ($v1, $v2)
 	if (!in_array ($v1, $versionhistory) || !in_array ($v2, $versionhistory))
 	{
 		showError ("An upgrade path has been requested for versions '${v1}' and '${v2}', " .
-		  "and at least one of those isn't known to me.");
+		  "and at least one of those isn't known to me.", __FILE__);
 		die;
 	}
 	$skip = TRUE;
@@ -1367,11 +1367,13 @@ CREATE TABLE `TagTree` (
 			break;
 		case '0.16.1':
 			$query[] = 'alter table Script modify column script_text longtext';
-			$query[] = "update Config set varvalue = '0.16.1' where varname = 'DB_VERSION'";
 			$query[] = 'alter table IPVirtualService ADD UNIQUE endpoint (vip, vport, proto)';
+			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('SHOW_LAST_TAB','no','string','yes','no','Remember last tab shown for each page')";
+			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('COOKIE_TTL','1209600','uint','yes','no','Cookies lifetime in seconds')";
+			$query[] = "update Config set varvalue = '0.16.1' where varname = 'DB_VERSION'";
 			break;
 		default:
-			showError ("executeUpgradeBatch () failed, because batch '${batchid}' isn't defined");
+			showError ("executeUpgradeBatch () failed, because batch '${batchid}' isn't defined", __FILE__);
 			die;
 			break;
 	}
@@ -1484,7 +1486,7 @@ if
 {
 	header ('WWW-Authenticate: Basic realm="RackTables upgrade"');
 	header ('HTTP/1.0 401 Unauthorized');
-	showError ('You must be authenticated as an administrator to complete the upgrade.');
+	showError ('You must be authenticated as an administrator to complete the upgrade.', __FILE__);
 	die;
 }
 

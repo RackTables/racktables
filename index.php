@@ -8,6 +8,8 @@ if (!permitted())
 	renderAccessDenied();
 	die;
 }
+// Only store the tab name after clearance is got. Any failure is unhandleable.
+setcookie ('RTLT-' . $pageno, $tabno, time() + getConfigVar ('COOKIE_TTL'));
 
 echo '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">'."\n";
 echo '<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">'."\n";
@@ -92,7 +94,7 @@ if (isset ($tabhandler[$pageno][$tabno]))
 				assertIPv4Arg ($page[$pageno]['bypass'], 'index');
 				break;
 			default:
-				showError ("Dispatching error for bypass parameter");
+				showError ('Dispatching error for bypass parameter', __FILE__);
 				break;
 		}
 		$tabhandler[$pageno][$tabno] ($_REQUEST[$page[$pageno]['bypass']]);
@@ -103,7 +105,7 @@ if (isset ($tabhandler[$pageno][$tabno]))
 elseif (isset ($page[$pageno]['handler']))
 	$page[$pageno]['handler'] ($tabno);
 else
-	showError ("Failed to find handler for page '${pageno}', tab '${tabno}'");
+	showError ("Failed to find handler for page '${pageno}', tab '${tabno}'", __FILE__);
 ?>
 	</td>
 	</tr>

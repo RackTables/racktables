@@ -31,7 +31,8 @@ else
 	(
 		"Database connection parameters are read from inc/secret.php file, " .
 		"which cannot be found.\nYou probably need to complete the installation " .
-		"procedure by following <a href='${root}install.php'>this link</a>."
+		"procedure by following <a href='${root}install.php'>this link</a>.",
+		__FILE__
 	);
 	die;
 }
@@ -43,7 +44,7 @@ try
 }
 catch (PDOException $e)
 {
-	showError ("Database connection failed:\n\n" . $e->getMessage());
+	showError ("Database connection failed:\n\n" . $e->getMessage(), __FILE__);
 	die();
 }
 
@@ -56,7 +57,7 @@ if (get_magic_quotes_gpc())
 
 if (!set_magic_quotes_runtime (0))
 {
-	showError ('Failed to turn magic quotes off');
+	showError ('Failed to turn magic quotes off', __FILE__);
 	die;
 }
 
@@ -84,13 +85,13 @@ if ($dbver != CODE_VERSION)
 
 if (!mb_internal_encoding ('UTF-8') or !mb_regex_encoding ('UTF-8'))
 {
-	showError ('Failed setting multibyte string encoding to UTF-8');
+	showError ('Failed setting multibyte string encoding to UTF-8', __FILE__);
 	die;
 }
 $configCache = loadConfigCache();
 if (!count ($configCache))
 {
-	showError ('Failed to load configuration from the database.');
+	showError ('Failed to load configuration from the database.', __FILE__);
 	die();
 }
 
@@ -125,7 +126,7 @@ else
 if ($rackCode['result'] != 'ACK')
 {
 	// FIXME: display a message with an option to reset RackCode text
-	showError ('Could not load the RackCode due to error: ' . $rackCode['load'], __FUNCTION__);
+	showError ('Could not load the RackCode due to error: ' . $rackCode['load'], __FILE__);
 	die;
 }
 $rackCode = $rackCode['load'];
@@ -137,7 +138,7 @@ require_once 'inc/auth.php';
 $accounts = getUserAccounts();
 if ($accounts === NULL)
 {
-	showError ('Failed to initialize access database.');
+	showError ('Failed to initialize access database.', __FILE__);
 	die();
 }
 
@@ -149,8 +150,17 @@ authenticate();
 
 $remote_username = $_SERVER['PHP_AUTH_USER'];
 $pageno = (isset ($_REQUEST['page'])) ? $_REQUEST['page'] : 'index';
-$tabno = (isset ($_REQUEST['tab'])) ? $_REQUEST['tab'] : 'default';
+// Special handling of tab number to substitute the "last" index where applicable.
+// Always show explicitly requested tab, substitute the last used name in case
+// it is awailable, fall back to the default one.
+if (isset ($_REQUEST['tab']))
+	$tabno = $_REQUEST['tab'];
+elseif (getConfigVar ('SHOW_LAST_TAB') == 'yes' and isset ($_COOKIE['RTLT-' . $pageno]))
+	$tabno = $_COOKIE['RTLT-' . $pageno];
+else
+	$tabno = 'default';
 $op = (isset ($_REQUEST['op'])) ? $_REQUEST['op'] : '';
+
 // Order matters here.
 $taglist = getTagList();
 $tagtree = getTagTree();

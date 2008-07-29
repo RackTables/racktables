@@ -150,7 +150,7 @@ function renderRow ($row_id = 0)
 function showError ($info = '', $funcname = 'N/A')
 {
 	global $root;
-	echo "<div class=msg_error>An error has occured in function [${funcname}]. ";
+	echo "<div class=msg_error>An error has occured in [${funcname}]. ";
 	if (empty ($info))
 		echo 'No additional information is available.';
 	else

@@ -5,7 +5,7 @@ fixContext();
 
 if (empty ($op) or !isset ($ophandler[$pageno][$tabno][$op]))
 {
-	showError ("Invalid request in operation broker: page '${pageno}', tab '${tabno}', op '${op}'");
+	showError ("Invalid request in operation broker: page '${pageno}', tab '${tabno}', op '${op}'", __FILE__);
 	die();
 }
 
