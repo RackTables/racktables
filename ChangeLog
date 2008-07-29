@@ -1,5 +1,5 @@
-0.16.1
-	new feature: allow pre-selected tags for newly added virtual services and RS pools
+0.16.1 2008-07-30
+	new feature: pre-assigned tags for new VS and RS pools records
 	new feature: cache RackCode parse tree for better performance
 	new feature: display tags inline for IPv4 and SLB data
 	new feature: optionally remember the last tab for each page
@@ -10,6 +10,7 @@
 	update: adjusted database for bigger texts
 	update: better "origin" highlighting for browsing
 	update: merged Petr Kohts' highlight patch
+	update: better tags in demo data
 0.16.0 2008-07-09
 	new feature: tag roller
 	new feature: taggable user accounts

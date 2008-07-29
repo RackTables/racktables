@@ -64,14 +64,16 @@ function printReleaseNotes ($batchid)
 		case '0.16.1':
 			echo "<font color=red><strong>Release notes for ${batchid}</strong></font><br>";
 			echo 'This release fixes a missing UNIQUE key in the database. However, this fix may sometimes fail, ';
-			echo 'if the table contains duplicate records. If you see a failed ADD UNIQUE query above, the only solution is to delete the duplicates manually.';
-			echo 'To do this, open a MySQL console and issue the failed query again:<br>';
-			echo 'mysql&gt; alter table IPVirtualService ADD UNIQUE endpoint (vip, vport, proto);<br>';
+			echo 'if the table contains duplicate records. If the 0.16.0-0.16.1 upgrade batch completed without errors, ';
+			echo 'no action needs to be taken. If you see a failed ADD UNIQUE query during upgrade, the only solution is to delete the duplicates manually. ';
+			echo 'To do this, open a MySQL console and issue the failed query again:<br><br>';
+			echo 'mysql&gt; alter table IPVirtualService ADD UNIQUE endpoint (vip, vport, proto);<br><br>';
 			echo 'The IP address of the duplicate VS will be known from the &quot;Duplicate entry&quot; message. For example,';
-			echo " to decode &quot;Duplicate entry '180879877-80-TCP' for key 2&quot;, issue:<br>";
-			echo 'mysql&gt; select inet_ntoa(180879877);<br>';
-			echo 'You would need to get rid of the duplicates accurately one by one, repeating the ADD UNIQUE ';
-			echo 'query until it succeeds.';
+			echo " to decode &quot;Duplicate entry '180879877-80-TCP' for key 2&quot; error message, issue:<br><br>";
+			echo 'mysql&gt; select inet_ntoa(180879877);<br><br>';
+			echo 'Then go to "virtual services" web-interface page and adjust the data as ';
+			echo 'necessary. You would need to get rid of the duplicates accurately one by one, repeating the ADD UNIQUE ';
+			echo 'query until it succeeds.<br><br>';
 			break;
 		default:
 			break;
