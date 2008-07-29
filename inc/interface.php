@@ -1985,7 +1985,7 @@ function renderRackspaceHistory ()
 
 function renderAddressspace ()
 {
-	global $root;
+	global $root, $pageno;
 
 	echo "<table border=0 class=objectview>\n";
 	echo "<tr><td class=pcleft>";
@@ -2006,7 +2006,7 @@ function renderAddressspace ()
 		if (count ($prefixtags))
 		{
 			echo "<br>";
-			echo serializeTags ($prefixtags, "${root}?page=ipv4space&");
+			echo serializeTags ($prefixtags, "${root}?page=${pageno}&");
 		}
 		echo "</td><td class=tdcenter>";
 		renderProgressBar ($used/$total);
@@ -4428,7 +4428,7 @@ function renderRSPool ($pool_id = 0)
 
 function renderVSList ()
 {
-	global $root, $nextorder;
+	global $root, $pageno, $nextorder;
 	$tagfilter = getTagFilter();
 	$vslist = getVSList ($tagfilter, getTFMode());
 	echo "<table border=0 class=objectview>\n";
@@ -4436,13 +4436,19 @@ function renderVSList ()
 
 	startPortlet ('Virtual services (' . count ($vslist) . ')');
 	echo "<table class=widetable border=0 cellpadding=10 cellspacing=0 align=center>\n";
-	echo "<tr><th>endpoint/name</th><th>VS configuration</th><th>RS configuration</th></tr>";
+	echo "<tr><th>endpoint, name, tags</th><th>VS configuration</th><th>RS configuration</th></tr>";
 	$order = 'odd';
 	foreach ($vslist as $vsid => $vsinfo)
 	{
+		$vstags = loadIPv4VSTags ($vsid);
 		echo "<tr align=left valign=top class=row_${order}><td class=tdleft><a href='${root}?page=ipv4vs&vs_id=${vsid}'>" . buildVServiceName ($vsinfo);
-		echo "</a><br>${vsinfo['name']}</td>";
-		echo "<td><pre>${vsinfo['vsconfig']}</pre></td>";
+		echo "</a><br>${vsinfo['name']}";
+		if (count ($vstags))
+		{
+			echo '<br>';
+			echo serializeTags ($vstags, "${root}?page=${pageno}&");
+		}
+		echo "</td><td><pre>${vsinfo['vsconfig']}</pre></td>";
 		echo "<td><pre>${vsinfo['rsconfig']}</pre></td>";
 		echo "</tr>\n";
 		$order = $nextorder[$order];
@@ -4528,7 +4534,7 @@ function renderVSListEditForm ()
 
 function renderRSPoolList ()
 {
-	global $root, $nextorder;
+	global $root, $pageno, $nextorder;
 	$tagfilter = getTagFilter();
 	$pool_list = getRSPoolList ($tagfilter, getTFMode());
 	if ($pool_list === NULL)
@@ -4540,14 +4546,20 @@ function renderRSPoolList ()
 	echo "<tr><td class=pcleft>";
 	startPortlet ('RS pools (' . count ($pool_list) . ')');
 	echo "<table class=widetable border=0 cellpadding=10 cellspacing=0 align=center>\n";
-	echo "<tr><th>refcnt</th><th>name</th><th>VS configuration</th><th>RS configuration</th></tr>";
+	echo "<tr><th>name, refcnt, tags</th><th>VS configuration</th><th>RS configuration</th></tr>";
 	$order = 'odd';
 	foreach ($pool_list as $pool_id => $pool_info)
 	{
-		echo "<tr valign=top class=row_${order}><td class=tdleft>" . ($pool_info['refcnt'] ? $pool_info['refcnt'] : '&nbsp;') . '</td>';
-		echo "<td class=tdleft><a href='${root}?page=ipv4rsp&pool_id=${pool_id}'>";
-		echo (empty ($pool_info['name']) ? 'ANONYMOUS' : $pool_info['name']) . '</a></td>';
-		echo "<td class=tdleft><pre>${pool_info['vsconfig']}</pre></td>";
+		$pooltags = loadIPv4RSPoolTags ($pool_id);
+		echo "<tr valign=top class=row_${order}><td class=tdleft>";
+		echo "<a href='${root}?page=ipv4rsp&pool_id=${pool_id}'>" . (empty ($pool_info['name']) ? 'ANONYMOUS' : $pool_info['name']) . '</a>';
+		echo ($pool_info['refcnt'] ? ", ${pool_info['refcnt']}" : '');
+		if (count ($pooltags))
+		{
+			echo '<br>';
+			echo serializeTags ($pooltags, "${root}?page=${pageno}&");
+		}
+		echo "</td><td class=tdleft><pre>${pool_info['vsconfig']}</pre></td>";
 		echo "<td class=tdleft><pre>${pool_info['rsconfig']}</pre></td>";
 		echo "</tr>\n";
 		$order = $nextorder[$order];

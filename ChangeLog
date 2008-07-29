@@ -1,7 +1,7 @@
 0.16.1
 	new feature: allow pre-selected tags for newly added virtual services and RS pools
 	new feature: cache RackCode parse tree for better performance
-	new feature: tag names in the IPv4 address space
+	new feature: display tags inline for IPv4 and SLB data
 	new feature: optionally remember the last tab for each page
 	bugfix: don't escape Greek letters to enable them in tag names
 	bugfix: port manager messages were incorrect
