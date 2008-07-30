@@ -1397,6 +1397,7 @@ function printLog ($log)
 				167 => array ('code' => 'error', 'format' => 'Could not find port %s'),
 				168 => array ('code' => 'error', 'format' => 'Port %s is a trunk'),
 				169 => array ('code' => 'error', 'format' => 'Failed to configure %s, connector returned code %u'),
+				170 => array ('code' => 'error', 'format' => 'There is no network for IP address "%s"'),
 
 				200 => array ('code' => 'warning', 'format' => 'generic warning: %s'),
 				201 => array ('code' => 'warning', 'format' => 'nothing happened...'),
@@ -1408,6 +1409,11 @@ function printLog ($log)
 			// Handle the arguments. Is there any better way to do it?
 			foreach ($log['m'] as $record)
 			{
+				if (!isset ($record['c']) or !isset ($msginfo[$record['c']]))
+				{
+					echo '<div class=msg_neutral>(this message was lost)</div>';
+					continue;
+				}
 				if (isset ($record['a']))
 					switch (count ($record['a']))
 					{
@@ -5246,7 +5252,7 @@ function renderObjectSLB ($object_id)
 
 function renderEditRSPool ($pool_id)
 {
-	global $pageno, $tabno;
+	global $root, $pageno, $tabno;
 	showMessageOrError();
 	$poolinfo = getRSPoolInfo ($pool_id);
 	echo "<form method=post action='${root}process.php?page=${pageno}&tab=${tabno}&op=updIPv4RSP'>\n";
@@ -5263,7 +5269,7 @@ function renderEditRSPool ($pool_id)
 
 function renderEditVService ($vsid)
 {
-	global $pageno, $tabno;
+	global $root, $pageno, $tabno;
 	showMessageOrError();
 	$protocols = array ('TCP' => 'TCP', 'UDP' => 'UDP');
 	$vsinfo = getVServiceInfo ($vsid);

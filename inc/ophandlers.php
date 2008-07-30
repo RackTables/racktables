@@ -378,7 +378,12 @@ function addIPv4Allocation ()
 
 	// Strip masklen.
 	$ip = ereg_replace ('/[[:digit:]]+$', '', $_REQUEST['ip']);
+	if  (NULL == getRangeByIp ($ip))
+		return buildRedirectURL ('ERR1', array ($ip));
+	
 	$error = bindIpToObject ($ip, $_REQUEST['object_id'], $_REQUEST['bond_name'], $_REQUEST['bond_type']);
+	if ($error != '')
+		return buildRedirectURL ('ERR2', array ($error));
 	$address = getIPAddress ($ip);
 	if ($address['exists'] and ($address['reserved'] == 'yes' or strlen ($address['name']) > 0))
 	{
@@ -389,10 +394,7 @@ function addIPv4Allocation ()
 			$address['name'] = '';
 		updateAddress ($ip, $address['name'], $address['reserved']);
 	}
-	if ($error != '')
-		return buildRedirectURL ('ERR', array ($error));
-	else
-		return buildRedirectURL ('OK');
+	return buildRedirectURL ('OK');
 }
 
 function addIPv4Prefix ()

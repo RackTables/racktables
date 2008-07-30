@@ -78,28 +78,27 @@ td.pcright {
 	text-align: center;
 }
 
-.msg_error, .msg_success, .msg_warning, .msg_200, .msg_300, .msg_500 {
+.msg_error, .msg_success, .msg_warning, .msg_neutral, .msg_200, .msg_300, .msg_500 {
 	text-align: left;
 	border: 1px solid;
 	padding: 2px;
 	margin: 5px;
+	text-align: center;
 }
 
 .msg_error, .msg_500 {
 	background-color: #ffa0a0;
 	border-color: red;
 	font-weight: bold;
-	text-align: center;
 }
 
 .msg_success, .msg_200 {
 	background-color: #a0ffa0;
 	border-color: green;
 	font-weight: bold;
-	text-align: center;
 }
 
-.msg_300 {
+.msg_300, .msg_neutral {
 	background-color: #c0c0c0;
 	border-color: black;
 }
@@ -108,7 +107,6 @@ td.pcright {
 	background-color: #ff9966;
 	border-color: #ff3300;
 	font-weight: bold;
-	text-align: center;
 }
 
 .opt_attr_th {

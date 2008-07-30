@@ -67,7 +67,6 @@ $tabhandler['rack']['problems'] = 'renderRackProblems';
 $tabhandler['rack']['tags'] = 'renderRackTags';
 $trigger['rack']['tags'] = 'trigger_tags';
 $ophandler['rack']['tags']['saveTags'] = 'saveRackTags';
-$msgcode['rack']['tags']['saveTags'] = $msgcode['object']['tags']['saveTags'];
 
 $page['objgroup']['title_handler'] = 'dynamic_title_objgroup';
 $page['objgroup']['handler'] = 'renderObjectGroup';
@@ -164,7 +163,8 @@ $msgcode['object']['ports']['useup']['ERR'] = 124;
 $msgcode['object']['ipv4']['updIPv4Allocation']['OK'] = 12;
 $msgcode['object']['ipv4']['updIPv4Allocation']['ERR'] = 100;
 $msgcode['object']['ipv4']['addIPv4Allocation']['OK'] = 13;
-$msgcode['object']['ipv4']['addIPv4Allocation']['ERR'] = 100;
+$msgcode['object']['ipv4']['addIPv4Allocation']['ERR1'] = 170;
+$msgcode['object']['ipv4']['addIPv4Allocation']['ERR2'] = 100;
 $msgcode['object']['ipv4']['delIPv4Allocation']['OK'] = 14;
 $msgcode['object']['ipv4']['delIPv4Allocation']['ERR'] = 100;
 $msgcode['object']['edit']['clearSticker']['OK'] = 15;
@@ -184,6 +184,14 @@ $msgcode['object']['autoports']['generate']['ERR'] = 142;
 $msgcode['object']['tags']['saveTags']['OK'] = 22;
 $msgcode['object']['tags']['saveTags']['ERR'] = 143;
 $msgcode['object']['livevlans']['setPortVLAN']['ERR1'] = 156;
+$msgcode['rack']['tags']['saveTags'] = $msgcode['object']['tags']['saveTags'];
+$msgcode['iprange']['tags']['saveTags'] = $msgcode['object']['tags']['saveTags'];
+$msgcode['ipv4vs']['tags']['saveTags'] = $msgcode['object']['tags']['saveTags'];
+$msgcode['ipv4rsp']['tags']['saveTags'] = $msgcode['object']['tags']['saveTags'];
+$msgcode['user']['tags']['saveTags'] = $msgcode['object']['tags']['saveTags'];
+$msgcode['ipv4vs']['editlblist'] = $msgcode['object']['editrspvs'];
+$msgcode['ipv4rsp']['editlblist'] = $msgcode['object']['editrspvs'];
+$msgcode['ipaddress']['assignment'] = $msgcode['object']['ipv4'];
 
 $page['ipv4space']['title'] = 'IPv4 space';
 $page['ipv4space']['parent'] = 'index';
@@ -220,7 +228,6 @@ $msgcode['iprange']['properties']['editRange']['OK'] = 25;
 $msgcode['iprange']['properties']['editRange']['ERR'] = 100;
 $msgcode['iprange']['liveptr']['importPTRData']['OK'] = 26;
 $msgcode['iprange']['liveptr']['importPTRData']['ERR'] = 141;
-$msgcode['iprange']['tags']['saveTags'] = $msgcode['object']['tags']['saveTags'];
 
 $page['ipaddress']['title_handler'] = 'dynamic_title_ipaddress';
 $page['ipaddress']['parent'] = 'iprange';
@@ -262,6 +269,7 @@ $msgcode['ipv4vslist']['edit']['del']['OK'] = 29;
 $msgcode['ipv4vslist']['edit']['del']['ERR'] = 130;
 $msgcode['ipv4vslist']['edit']['upd']['OK'] = 30;
 $msgcode['ipv4vslist']['edit']['upd']['ERR'] = 135;
+$msgcode['ipv4vs']['edit']['updIPv4VS'] = $msgcode['ipv4vslist']['edit']['upd'];
 
 $page['ipv4vs']['title_handler'] = 'dynamic_title_vservice';
 $page['ipv4vs']['parent'] = 'ipv4vslist';
@@ -283,8 +291,6 @@ $ophandler['ipv4vs']['editlblist']['addLB'] = 'addLoadBalancer';
 $ophandler['ipv4vs']['editlblist']['delLB'] = 'deleteLoadBalancer';
 $ophandler['ipv4vs']['editlblist']['updLB'] = 'updateLoadBalancer';
 $trigger['ipv4vs']['tags'] = 'trigger_tags';
-$msgcode['ipv4vs']['editlblist'] = $msgcode['object']['editrspvs'];
-$msgcode['ipv4vs']['tags']['saveTags'] = $msgcode['object']['tags']['saveTags'];
 
 $page['ipv4rsplist']['title'] = 'RS pools';
 $page['ipv4rsplist']['parent'] = 'ipv4slb';
@@ -301,6 +307,7 @@ $msgcode['ipv4rsplist']['edit']['del']['OK'] = 32;
 $msgcode['ipv4rsplist']['edit']['del']['ERR'] = 138;
 $msgcode['ipv4rsplist']['edit']['upd']['OK'] = 33;
 $msgcode['ipv4rsplist']['edit']['upd']['ERR'] = 139;
+$msgcode['ipv4rsp']['edit']['updIPv4RSP'] = $msgcode['ipv4rsplist']['edit']['upd'];
 
 $page['ipv4rsp']['title_handler'] = 'dynamic_title_rspool';
 $page['ipv4rsp']['parent'] = 'ipv4rsplist';
@@ -341,11 +348,8 @@ $msgcode['ipv4rsp']['editrslist']['updRS']['ERR'] = 133;
 $msgcode['ipv4rsp']['editrslist']['addMany']['OK'] = 37;
 $msgcode['ipv4rsp']['editrslist']['addMany']['ERR1'] = 131;
 $msgcode['ipv4rsp']['editrslist']['addMany']['ERR2'] = 127;
-$msgcode['ipv4rsp']['editlblist'] = $msgcode['object']['editrspvs'];
-$msgcode['ipv4rsp']['edit']['updIPv4RSP'] = $msgcode['ipv4rsplist']['edit']['upd'];
 $msgcode['ipv4rsp']['rsinservice']['upd']['OK'] = 38;
 $msgcode['ipv4rsp']['rsinservice']['upd']['ERR'] = 140;
-$msgcode['ipv4rsp']['tags']['saveTags'] = $msgcode['object']['tags']['saveTags'];
 
 $page['rservers']['title'] = 'Real servers';
 $page['rservers']['parent'] = 'ipv4slb';
@@ -396,7 +400,6 @@ $tab['user']['tags'] = 'Tags';
 $tabhandler['user']['default'] = 'renderUser';
 $tabhandler['user']['tags'] = 'renderUserTags';
 $ophandler['user']['tags']['saveTags'] = 'saveUserTags';
-$msgcode['user']['tags']['saveTags'] = $msgcode['object']['tags']['saveTags'];
 
 $page['perms']['title'] = 'Permissions';
 $page['perms']['parent'] = 'config';
