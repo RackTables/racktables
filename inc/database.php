@@ -805,7 +805,7 @@ function delObjectPort ($port_id)
 	return '';
 }
 
-function getObjectAddressesAndNames ()
+function getAllIPv4Allocations ()
 {
 	$query =
 		"select object_id as object_id, ".
@@ -892,8 +892,8 @@ function unlinkPort ($port)
 	return '';
 }
 
-// FIXME: after falling back to using existing getObjectInfo we don't
-// need that large query. Shrink it some later.
+// Return a list of IPv4 allocations for the object. Each address will list
+// all other objects, to which it is allocated (except the current object).
 function getObjectAddresses ($object_id = 0)
 {
 	if ($object_id == 0)
@@ -910,23 +910,20 @@ function getObjectAddresses ($object_id = 0)
 		"IPBonds.type as IPBonds_type, ".
 		"RemoteBonds.name as RemoteBonds_name, ".
 		"RemoteBonds.type as RemoteBonds_type, ".
-		"RemoteBonds.object_id as RemoteBonds_object_id, ".
-		"RemoteObject.name as RemoteObject_name from IPBonds " .
+		"RemoteBonds.object_id as RemoteBonds_object_id ".
+		"from IPBonds " .
 		"left join IPBonds as RemoteBonds on IPBonds.ip=RemoteBonds.ip " .
 			"and IPBonds.object_id!=RemoteBonds.object_id " .
 		"left join IPAddress on IPBonds.ip=IPAddress.ip " .
-		"left join RackObject as RemoteObject on RemoteBonds.object_id=RemoteObject.id ".
 		"where ".
 		"IPBonds.object_id = ${object_id} ".
-		"order by IPBonds.ip, RemoteObject.name";
+		"order by IPBonds.ip, RemoteBonds.object_id";
 	$result = useSelectBlade ($query, __FUNCTION__);
 	$ret=array();
 	$count=0;
 	$refcount=0;
 	$prev_ip = 0;
-	// We are going to call getObjectInfo() for some rows,
-	// hence the connector must be unloaded from the
-	// current data.
+	// Free the DB connection to enable subqueries.
 	$rows = $result->fetchAll (PDO::FETCH_ASSOC);
 	$result->closeCursor();
 	foreach ($rows as $row)
@@ -950,7 +947,7 @@ function getObjectAddresses ($object_id = 0)
 			$ret[$count]['references'][$refcount]['name'] = $row['RemoteBonds_name'];
 			$ret[$count]['references'][$refcount]['object_id'] = $row['RemoteBonds_object_id'];
 			if (empty ($row['RemoteBonds_object_id']))
-				$ret[$count]['references'][$refcount]['object_name'] = $row['RemoteObject_name'];
+				$ret[$count]['references'][$refcount]['object_name'] = '';
 			else
 			{
 				$oi = getObjectInfo ($row['RemoteBonds_object_id']);

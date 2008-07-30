@@ -1848,9 +1848,9 @@ function renderEmptyPortsSelect ($port_id, $type_id)
 	}
 }
 
-function renderObjectAddressesAndNames ()
+function renderAllIPv4Allocations ()
 {
-	$addresses = getObjectAddressesAndNames();
+	$addresses = getAllIPv4Allocations();
 	usort($addresses, 'sortObjectAddressesAndNames');
 	foreach ($addresses as $address)
 	{

@@ -3,7 +3,7 @@
 	// This is our context.
 	$pageno = 'objects';
 	$tabno = 'default';
-	fixContext()
+	fixContext();
 	if (!permitted())
 	{
 		renderAccessDenied();
@@ -26,7 +26,7 @@ echo "<link rel=icon href='" . getFaviconURL() . "' type='image/x-icon' />";
 <h2>Choose a port:</h2><br><br>
 <input type=hidden id='ip'>
 <select size="30" id="addresses">
-<?php renderObjectAddressesAndNames (); ?>
+<?php renderAllIPv4Allocations(); ?>
 </select><br><br>
 <input type='submit' value='Proceed' onclick='if (getElementById("ip")!="") { opener.document.getElementById("remoteip").value=getElementById("ip").value; window.close();}'>
 </div>
