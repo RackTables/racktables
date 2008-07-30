@@ -70,7 +70,7 @@ CREATE TABLE `IPBonds` (
   `object_id` int(10) unsigned NOT NULL,
   `ip` int(10) unsigned NOT NULL,
   `name` char(255) NOT NULL,
-  `type` enum('regular','shared','virtual') default NULL,
+  `type` enum('regular','shared','virtual','router') default NULL,
   PRIMARY KEY  (`object_id`,`ip`)
 ) ENGINE=MyISAM;
 

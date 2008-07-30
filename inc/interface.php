@@ -9,6 +9,23 @@
 $nextorder['odd'] = 'even';
 $nextorder['even'] = 'odd';
 
+// address allocation type
+$aat = array
+(
+	'regular' => 'Connected',
+	'virtual' => 'Loopback',
+	'shared' => 'Shared',
+	'router' => 'Router',
+);
+// address allocation code
+$aac = array
+(
+	'regular' => '',
+	'virtual' => '<strong>L</strong>',
+	'shared' => '<strong>S</strong>',
+	'router' => '<strong>R</strong>',
+);
+
 // Main menu.
 function renderIndex ()
 {
@@ -671,7 +688,7 @@ function printRefsOfType ($refs, $type, $eq)
 
 function renderRackObject ($object_id = 0)
 {
-	global $root, $nextorder;
+	global $root, $nextorder, $aac;
 	if ($object_id <= 0)
 	{
 		showError ('Invalid object_id', __FUNCTION__);
@@ -803,52 +820,54 @@ function renderRackObject ($object_id = 0)
 			if ($addr['address_reserved']=='yes')
 				echo "<b>Reserved;</b> ";
 
-			if ($addr['type'] == 'virtual')
+			echo $aac[$addr['type']];
+			switch ($addr['type'])
 			{
-				echo "<b>V</b>";
-				if ($notvirtnum > 0)
-				{
-					echo " Owners: ";
-					printRefsOfType($addr['references'], 'virtual', 'neq');
-				}
+				case 'virtual':
+					if ($notvirtnum > 0)
+					{
+						echo " Owners: ";
+						printRefsOfType($addr['references'], 'virtual', 'neq');
+					}
+					break;
+				case 'router':
+					break;
+				case 'shared':
+					if ($sharednum > 0)
+					{
+						echo " Peers: ";
+						printRefsOfType($addr['references'], 'shared', 'eq');
+						echo ";";
+					}
+					if ($virtnum > 0)
+					{
+						echo " Virtuals: ";
+						printRefsOfType($addr['references'], 'virtual', 'eq');
+						echo ";";
+					}
+					if ($regnum > 0)
+					{
+						echo " Collisions: ";
+						printRefsOfType($addr['references'], 'regular', 'eq');
+					}
+					break;
+				case 'regular':
+					if ($virtnum > 0)
+					{
+						echo " Virtuals: ";
+						printRefsOfType($addr['references'], 'virtual', 'eq');
+						echo ";";
+					}
+					if ($notvirtnum > 0)
+					{
+						echo " Collisions: ";
+						printRefsOfType($addr['references'], 'virtual', 'neq');
+					}
+					break;
+				default:
+					echo __FUNCTION__ . '(): internal error! ';
+					break;
 			}
-			elseif ($addr['type'] == 'shared')
-			{
-				echo "<b>S</b>";
-				if ($sharednum > 0)
-				{
-					echo " Peers: ";
-					printRefsOfType($addr['references'], 'shared', 'eq');
-					echo ";";
-				}
-				if ($virtnum > 0)
-				{
-					echo " Virtuals: ";
-					printRefsOfType($addr['references'], 'virtual', 'eq');
-					echo ";";
-				}
-				if ($regnum > 0)
-				{
-					echo " Collisions: ";
-					printRefsOfType($addr['references'], 'regular', 'eq');
-				}
-				
-			}
-			else
-			{
-				if ($virtnum > 0)
-				{
-					echo " Virtuals: ";
-					printRefsOfType($addr['references'], 'virtual', 'eq');
-					echo ";";
-				}
-				if ($notvirtnum > 0)
-				{
-					echo " Collisions: ";
-					printRefsOfType($addr['references'], 'virtual', 'neq');
-				}
-			}
-
 			echo "</td></tr>\n";
 		}
 		echo "</table><br>\n";
@@ -1117,7 +1136,7 @@ function renderPortsForObject ($object_id = 0)
 
 function renderIPv4ForObject ($object_id = 0)
 {
-	global $root, $pageno, $tabno;
+	global $root, $pageno, $tabno, $aat;
 	if ($object_id <= 0)
 	{
 		showError ('Invalid object_id', __FUNCTION__);
@@ -1161,15 +1180,8 @@ function renderIPv4ForObject ($object_id = 0)
 		echo "</a></td>";
 		echo "<td class=tdleft><input type='text' name='bond_name' value='${addr['name']}' size=10></td>";
 		echo "<td class=tdleft><a href='${root}?page=ipaddress&ip=${addr['ip']}'>${addr['ip']}</a></td>";
-		echo "<td class='description'>$address_name</td>\n";
-		echo "<td><select name='bond_type'>";
-		foreach (array('regular'=>'Regular', 'virtual'=>'Virtual', 'shared'=>'Shared') as $n => $v)
-		{
-			echo "<option value='$n'";
-			if ($addr['type'] == $n)
-				echo " selected";
-			echo ">$v</option>";
-		}
+		echo "<td class='description'>$address_name</td>\n<td>";
+		printSelect ($aat, 'bond_type', $addr['type']);
 		echo "</td><td>";
 		if ($addr['address_reserved']=='yes')
 			echo "<b>Reserved</b>; ";
@@ -1233,11 +1245,8 @@ function renderIPv4ForObject ($object_id = 0)
 	echo "<input type=hidden name=op value=addIPv4Allocation>\n";
 	echo "<input type=hidden name=object_id value='$object_id'>\n";
 	echo "<td class=tdleft><input type=text name='ip' tabindex=101>\n";
-	echo "</td><td>&nbsp;</td><td><select name='bond_type' tabindex=102>";
-	echo "<option value='regular'>Regular</option>";
-	echo "<option value='virtual'>Virtual</option>";
-	echo "<option value='shared'>Shared</option>";
-	echo "</select>";
+	echo "</td><td>&nbsp;</td><td>";
+	printSelect ($aat, 'bond_type');
 	echo "</td><td colspan=2>&nbsp;</td></tr></form>";
 	echo "</table><br>\n";
 	finishPortlet();
@@ -2372,7 +2381,7 @@ function renderIPRangeProperties ($id)
 
 function renderIPAddress ($ip)
 {
-	global $root;
+	global $root, $aat;
 	$address = getIPAddress ($ip);
 	echo "<table border=0 class=objectview cellspacing=0 cellpadding=0>";
 	echo "<tr><td colspan=2 align=center><h1>${ip}</h1></td></tr>\n";
@@ -2396,15 +2405,17 @@ function renderIPAddress ($ip)
 	$numshared = countRefsOfType($address['bonds'], 'shared', 'eq');
 	$numreg = countRefsOfType($address['bonds'], 'regular', 'eq');
 	$numvirt = countRefsOfType($address['bonds'], 'virtual', 'eq');
+	$numrouters = countRefsOfType ($address['bonds'], 'router', 'eq');
+	$allocs_total = $numshared + $numreg + $numvirt + $numrouters;
 
-	if ($address['reserved'] == 'yes' or ($numshared + $numreg + $numvirt) > 0)
+	if ($address['reserved'] == 'yes' or $allocs_total > 0)
 	{
 		startPortlet ('allocations');
 		echo "<table class='widetable' cellpadding=5 cellspacing=0 border=0 align='center'>\n";
 		echo "<tr><th>Object name</th><th>Interface name</th><th>Interface type</th></tr>\n";
-		if ( ($numshared > 0 && $numreg > 0) || $numreg > 1 )
+		if (($numshared > 0 && $numreg > 0) || $numreg > 1)
 			$class='trerror';
-		elseif ( $address['reserved'] == 'yes' and $numshared+$numreg+$numvirt > 0)
+		elseif ($address['reserved'] == 'yes' and $allocs_total > 0)
 			$class='trerror';
 		else
 			$class='';
@@ -2418,20 +2429,9 @@ function renderIPAddress ($ip)
 			else
 				$secondclass = 'tdleft';
 			echo "<tr class='$class'><td class=tdleft><a href='${root}?page=object&object_id=${bond['object_id']}";
-			echo "&hl_ipv4_addr=${ip}'>${bond['object_name']}</td><td class='${secondclass}'>${bond['name']}</td><td class='${secondclass}'><b>";
-			switch ($bond['type'])
-			{
-				case 'virtual':
-					echo "Virtual";
-					break;
-				case 'shared':
-					echo "Shared";
-					break;
-				case 'regular':
-					echo "Regular";
-					break;
-			}
-			echo "</b></td></tr>\n";
+			echo "&hl_ipv4_addr=${ip}'>${bond['object_name']}</td><td class='${secondclass}'>${bond['name']}</td><td class='${secondclass}'><strong>";
+			echo $aat[$bond['type']];
+			echo "</strong></td></tr>\n";
 		}
 		echo "</table><br><br>";
 		finishPortlet();
@@ -2527,7 +2527,7 @@ function renderIPAddressProperties ($ip)
 
 function renderIPAddressAssignment ($ip)
 {
-	global $pageno, $tabno, $root;
+	global $pageno, $tabno, $root, $aat;
 	$address = getIPAddress($ip);
 
 	showMessageOrError();
@@ -2565,27 +2565,9 @@ function renderIPAddressAssignment ($ip)
 		printImageHREF ('delete', 'Unallocate address');
 		echo "</a></td>";
 		echo "<td><a href='${root}?page=object&object_id=${bond['object_id']}&hl_ipv4_addr=${ip}'>${bond['object_name']}</td>";
-		echo "<td><input type='text' name='bond_name' value='${bond['name']}' size=10></td>";
-		echo "<td><select name='bond_type'>";
-		switch ($bond['type'])
-		{
-			case 'virtual':
-				echo "<option value='regular'>Regular</option>";
-				echo "<option value='virtual' selected>Virtual</option>";
-				echo "<option value='shared'>Shared</option>";
-				break;
-			case 'shared':
-				echo "<option value='regular'>Regular</option>";
-				echo "<option value='virtual'>Virtual</option>";
-				echo "<option value='shared' selected>Shared</option>";
-				break;
-			case 'regular':
-				echo "<option value='regular' selected>Regular</option>";
-				echo "<option value='virtual'>Virtual</option>";
-				echo "<option value='shared'>Shared</option>";
-				break;
-		}
-		echo "</select></td><td>";
+		echo "<td><input type='text' name='bond_name' value='${bond['name']}' size=10></td><td>";
+		printSelect ($aat, 'bond_type', $bond['type']);
+		echo "</td><td>";
 		printImageHREF ('save', 'Save changes', TRUE);
 		echo "</td></form></tr>\n";
 	}
@@ -2601,9 +2583,9 @@ function renderIPAddressAssignment ($ip)
 		foreach (getNarrowObjectList ($type) as $object)
 			echo "<option value='${object['id']}'>${object['dname']}</option>";
 
-	echo "</select></td><td><input type='text' name='bond_name' value='' size=10></td>";
-	echo "<td><select name='bond_type'><option value='regular'>Regular</option><option value='virtual'>Virtual</option><option value='shared'>Shared</option></select></td>";
-	echo "<td>&nbsp;</td></form></tr>";
+	echo "</select></td><td><input type='text' name='bond_name' value='' size=10></td><td>";
+	printSelect ($aat, 'bond_type');
+	echo "</td><td>&nbsp;</td></form></tr>";
 	echo "</table><br><br>";
 
 }

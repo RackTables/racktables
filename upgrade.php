@@ -23,6 +23,7 @@ function getDBUpgradePath ($v1, $v2)
 		'0.15.1',
 		'0.16.0',
 		'0.16.1',
+		'0.16.2',
 	);
 	if (!in_array ($v1, $versionhistory) || !in_array ($v2, $versionhistory))
 	{
@@ -1373,6 +1374,10 @@ CREATE TABLE `TagTree` (
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('SHOW_LAST_TAB','no','string','yes','no','Remember last tab shown for each page')";
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('COOKIE_TTL','1209600','uint','yes','no','Cookies lifetime in seconds')";
 			$query[] = "update Config set varvalue = '0.16.1' where varname = 'DB_VERSION'";
+			break;
+		case '0.16.2':
+			$query[] = "alter table IPBonds modify column type enum('regular','shared','virtual','router')";
+			$query[] = "update Config set varvalue = '0.16.2' where varname = 'DB_VERSION'";
 			break;
 		default:
 			showError ("executeUpgradeBatch () failed, because batch '${batchid}' isn't defined", __FILE__);

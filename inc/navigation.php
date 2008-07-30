@@ -559,7 +559,7 @@ function showPathAndSearch ($pageno)
 			$title = $page[$no]['title_handler']($no);
 		else
 			$title['name'] = '[N/A]';
-		echo ": <a href='${root}?page=${no}";
+		echo ": <a href='${root}?page=${no}&tab=default";
 		foreach ($title['params'] as $param_name => $param_value)
 			echo "&${param_name}=${param_value}";
 		echo "'>" . $title['name'] . "</a>";

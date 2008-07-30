@@ -1,5 +1,6 @@
 0.16.2
 	bugfix: IP address picker was broken
+	bugfix: more message processing fixes
 0.16.1 2008-07-30
 	new feature: pre-assigned tags for new VS and RS pools records
 	new feature: cache RackCode parse tree for better performance
