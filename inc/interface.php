@@ -1394,7 +1394,7 @@ function printLog ($log)
 				161 => array ('code' => 'error', 'format' => 'Endpoint not found. Please either set FQDN attribute or assign an IP address to the object.'),
 				162 => array ('code' => 'error', 'format' => 'More than one IP address is assigned to this object, please configure FQDN attribute.'),
 				163 => array ('code' => 'error', 'format' => 'Failed to get any response from queryGateway() or the gateway died'),
-				164 => array ('code' => 'error', 'format' => 'Gateway failure: returned code %u.'),
+				164 => array ('code' => 'error', 'format' => 'Gateway failure: %s.'),
 				165 => array ('code' => 'error', 'format' => 'Gateway failure: malformed reply.'),
 				166 => array ('code' => 'error', 'format' => 'gw: %s'),
 				167 => array ('code' => 'error', 'format' => 'Could not find port %s'),
@@ -3985,6 +3985,25 @@ function renderLVSConfig ($object_id = 0)
 	echo "</form>";
 	echo '<pre>';
 	echo buildLVSConfig ($object_id);
+	echo '</pre>';
+}
+
+function renderRouterConfig ($object_id = 0)
+{
+	showMessageOrError();
+	global $root, $pageno, $tabno;
+	if ($object_id <= 0)
+	{
+		showError ('Invalid argument', __FUNCTION__);
+		return;
+	}
+	echo '<br>';
+	echo "<form method=post action='${root}process.php?page=${pageno}&tab=${tabno}&op=submitRouterConfig'>";
+	echo "<input type=hidden name=object_id value=${object_id}>";
+	echo "<center><input type=submit value='Submit for activation'></center>";
+	echo "</form>";
+	echo '<pre>';
+	echo buildRouterConfig ($object_id);
 	echo '</pre>';
 }
 

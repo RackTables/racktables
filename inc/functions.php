@@ -1430,6 +1430,17 @@ function buildLVSConfig ($object_id = 0)
 	return $newconfig;
 }
 
+function buildRouterConfig ($object_id = 0)
+{
+	if ($object_id <= 0)
+	{
+		showError ('Invalid argument', __FUNCTION__);
+		return;
+	}
+	$newconfig = 'dummy text';
+	return $newconfig;
+}
+
 // Indicate occupation state of each IP address: none, ordinary or problematic.
 function markupIPv4AddrList (&$addrlist)
 {
