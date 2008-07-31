@@ -16,7 +16,7 @@ function dynamic_title_iprange ()
 	switch ($pageno)
 	{
 		case 'iprange':
-			$range = getIPRange($_REQUEST['id']);
+			$range = getIPv4NetworkInfo ($_REQUEST['id']);
 			return array ('name' => $range['ip'].'/'.$range['mask'], 'params' => array('id'=>$_REQUEST['id']));
 			break;
 		case 'ipaddress':

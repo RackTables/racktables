@@ -889,7 +889,7 @@ function renderRackObject ($object_id = 0)
 
 			foreach ($forwards['out'] as $pf)
 			{
-				$class='trerrorg';
+				$class='trerror';
 				$name='';
 				foreach ($addresses as $addr)
 					if ($addr['ip'] == $pf['localip'])
@@ -898,46 +898,33 @@ function renderRackObject ($object_id = 0)
 						$name=$addr['name'];
 						break;
 					}
-
 				echo "<tr class='$class'>";
-
 				echo "<td>${pf['proto']}</td><td class=tdleft>${name}: <a href='${root}?page=ipaddress&tab=default&ip=${pf['localip']}'>${pf['localip']}</a>:${pf['localport']}</td>";
-
 				echo "<td class=tdleft><a href='${root}?page=ipaddress&tab=default&ip=${pf['remoteip']}'>${pf['remoteip']}</a>:${pf['remoteport']}</td>";
-
-				$address=getIPAddress($pf['remoteip']);
-
+				$address = getIPv4Address ($pf['remoteip']);
 				echo "<td class='description'>";
-				if (count ($address['bonds']))
-					foreach($address['bonds'] as $bond)
+				if (count ($address['allocs']))
+					foreach($address['allocs'] as $bond)
 						echo "<a href='${root}?page=object&tab=default&object_id=${bond['object_id']}'>${bond['object_name']}(${bond['name']})</a> ";
 				elseif (!empty ($pf['remote_addr_name']))
 					echo '(' . $pf['remote_addr_name'] . ')';
-
-				echo "</td><td class='description'>${pf['description']}</td>";
-
-				echo "</tr>";
+				echo "</td><td class='description'>${pf['description']}</td></tr>";
 			}
 			echo "</table><br><br>";
 		}
 		if (count($forwards['in']))
 		{
 			echo "<h3>arriving NAT connections</h3>";
-
 			echo "<table class='widetable' cellpadding=5 cellspacing=0 border=0 align='center'>\n";
 			echo "<tr><th>Matched endpoint</th><th>Source object</th><th>Translated to</th><th>Rule comment</th></tr>\n";
-
 			foreach ($forwards['in'] as $pf)
 			{
 				echo "<tr>";
 				echo "<td>${pf['proto']}/<a href='${root}?page=ipaddress&tab=default&ip=${pf['localip']}'>${pf['localip']}</a>:${pf['localport']}</td>";
-
 				echo "<td class='description'><a href='${root}?page=object&tab=default&object_id=${pf['object_id']}'>${pf['object_name']}</a>";
-
 				echo "</td><td><a href='${root}?page=ipaddress&tab=default&ip=${pf['remoteip']}'>${pf['remoteip']}</a>:${pf['remoteport']}</td>";
 				echo "<td class='description'>${pf['description']}</td></tr>";
 			}
-
 			echo "</table><br><br>";
 		}
 		finishPortlet();
@@ -2012,12 +1999,12 @@ function renderAddressspace ()
 	echo "<tr><th>prefix</th><th>name/tags</th><th>utilization</th></tr>\n";
 	foreach ($addrspaceList as $iprange)
 	{
-		$range = getIPRange ($iprange['id']);
+		$netdata = getIPv4Network ($iprange['id']);
 		$prefixtags = loadIPv4PrefixTags ($iprange['id']);
-		$total = ($iprange['ip_bin'] | $iprange['mask_bin_inv']) - ($iprange['ip_bin'] & $iprange['mask_bin']) + 1;
-		$used = count ($range['addrlist']);
-		echo "<tr valign=top><td class=tdleft><a href='${root}?page=iprange&id=${iprange['id']}'>${iprange['ip']}/${iprange['mask']}</a></td>";
-		echo "<td class=tdleft>${iprange['name']}";
+		$total = ($netdata['ip_bin'] | $netdata['mask_bin_inv']) - ($netdata['ip_bin'] & $netdata['mask_bin']) + 1;
+		$used = count ($netdata['addrlist']);
+		echo "<tr valign=top><td class=tdleft><a href='${root}?page=iprange&id=${iprange['id']}'>${iprange['ip']}/${netdata['mask']}</a></td>";
+		echo "<td class=tdleft>${netdata['name']}";
 		if (count ($prefixtags))
 		{
 			echo "<br>";
@@ -2128,9 +2115,9 @@ function renderAddNewRange ()
 	echo "<tr><th>&nbsp;</th><th>prefix</th><th>name</th><th>utilization</th></tr>";
 	foreach ($addrspaceList as $iprange)
 	{
-		$range = getIPRange($iprange['id']);
-		$usedips = count ($range['addrlist']);
-		$totalips = ($iprange['ip_bin'] | $iprange['mask_bin_inv']) - ($iprange['ip_bin'] & $iprange['mask_bin']) + 1;
+		$netdata = getIPv4Network ($iprange['id']);
+		$usedips = count ($netdata['addrlist']);
+		$totalips = ($netdata['ip_bin'] | $netdata['mask_bin_inv']) - ($netdata['ip_bin'] & $netdata['mask_bin']) + 1;
 		echo "<tr valign=top><td>";
 		if ($usedips == 0)
 		{
@@ -2141,7 +2128,7 @@ function renderAddNewRange ()
 		else
 			printImageHREF ('nodelete', 'There are IP addresses allocated or reserved');
 		echo "</td>\n<td class=tdleft><a href='${root}?page=iprange&id=${iprange['id']}'>";
-		echo "${iprange['ip']}/${iprange['mask']}</a></td><td class=tdleft>${iprange['name']}";
+		echo "${netdata['ip']}/${netdata['mask']}</a></td><td class=tdleft>${netdata['name']}";
 		echo "</td><td class=tdcenter>";
 		renderProgressBar ($usedips / $totalips);
 		echo "<br><small>${usedips}/${totalips}</small></td></tr>\n";
@@ -2348,19 +2335,21 @@ function renderIPRange ($id)
 	echo "</td></tr></table>\n";
 }
 
-function renderIPRangeProperties ($id)
+function renderIPv4NetworkProperties ($id)
 {
 	global $root, $pageno, $tabno;
 	showMessageOrError();
-	$range = getIPRange($id);
-	echo "<center><h1>${range['ip']}/${range['mask']}</h1></center>\n";
+	$netdata = getIPv4NetworkInfo ($id);
+	echo "<center><h1>${netdata['ip']}/${netdata['mask']}</h1></center>\n";
 	echo "<table border=0 cellpadding=10 cellpadding=1 align='center'>\n";
 	echo "<form action='${root}process.php'><input type=hidden name=op value=editRange>";
 	echo "<input type=hidden name=page value='${pageno}'>\n";
 	echo "<input type=hidden name=tab value='${tabno}'>\n";
 	echo "<input type=hidden name=id value='${id}'>";
-	echo "<tr><td class='tdright'>Name:</td><td class='tdleft'><input type=text name=name size=20 value='${range['name']}'></tr><tr><td colspan=2 class='tdcenter'><input type=submit value='Update range'></td></form></tr>";
-	echo "</table>\n";
+	echo "<tr><td class='tdright'>Name:</td><td class='tdleft'><input type=text name=name size=20 value='${netdata['name']}'></tr>";
+	echo "<tr><td colspan=2 class=tdcenter>";
+	printImageHREF ('SAVE', 'Save changes', TRUE);
+	echo "</td></form></tr></table>\n";
 
 }
 
@@ -2487,8 +2476,9 @@ function renderIPv4AddressProperties ($dottedquad)
 	echo "<tr><td class='tdright'>Name:</td><td class='tdleft'><input type=text name=name size=20 value='${address['name']}'></tr>";
 	echo "<td class='tdright'>Reserved:</td><td class='tdleft'><input type=checkbox name=reserved size=20 ";
 	echo ($address['reserved']=='yes') ? 'checked' : '';
-	echo "></tr><tr><td colspan=2 class='tdcenter'><input type=submit value='Update address'></td></form></tr>";
-	echo "</table>\n";
+	echo "></tr><tr><td colspan=2 class='tdcenter'>";
+	printImageHREF ('SAVE', 'Save changes', TRUE);
+	echo "</td></form></tr></table>\n";
 	finishPortlet();
 	if (empty ($address['name']) and $address['reserved'] == 'no')
 		return;
@@ -2586,11 +2576,11 @@ function renderNATv4ForObject ($object_id = 0)
 		echo "</td>";
 		echo "<td><a href='${root}?page=ipaddress&tab=default&ip=${pf['remoteip']}'>${pf['remoteip']}</a>:${pf['remoteport']}</td>";
 
-		$address=getIPAddress($pf['remoteip']);
+		$address = getIPv4Address ($pf['remoteip']);
 
 		echo "<td class='description'>";
-		if (count ($address['bonds']))
-			foreach($address['bonds'] as $bond)
+		if (count ($address['allocs']))
+			foreach ($address['allocs'] as $bond)
 				echo "<a href='${root}?page=object&tab=default&object_id=${bond['object_id']}'>${bond['object_name']}(${bond['name']})</a> ";
 		elseif (!empty ($pf['remote_addr_name']))
 			echo '(' . $pf['remote_addr_name'] . ')';
@@ -4674,7 +4664,7 @@ function renderLivePTR ($id = 0)
 		$page=0;
 	global $root, $pageno, $tabno;
 	$maxperpage = getConfigVar ('IPV4_ADDRS_PER_PAGE');
-	$range = getIPRange ($id);
+	$range = getIPv4Network ($id);
 	echo "<center><h1>${range['ip']}/${range['mask']}</h1><h2>${range['name']}</h2></center>\n";
 
 	echo "<table class=objview border=0 width='100%'><tr><td class=pcleft>";
@@ -4768,7 +4758,8 @@ function renderLivePTR ($id = 0)
 	echo "<table border=0 width='100%' cellspacing=0 cellpadding=2>";
 	echo "<tr class=trok><th class=tdright>Exact matches:</th><td class=tdleft>${cnt_match}</td></tr>\n";
 	echo "<tr class=trwarning><th class=tdright>Missing from DB/DNS:</th><td class=tdleft>${cnt_missing}</td></tr>\n";
-	echo "<tr class=trerror><th class=tdright>Mismatches:</th><td class=tdleft>${cnt_mismatch}</td></tr>\n";
+	if ($cnt_mismatch)
+		echo "<tr class=trerror><th class=tdright>Mismatches:</th><td class=tdleft>${cnt_mismatch}</td></tr>\n";
 	echo "</table>\n";
 	finishPortlet();
 

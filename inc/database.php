@@ -959,8 +959,7 @@ function getObjectAddresses ($object_id = 0)
 	return $ret;
 }
 
-// Don't require any records in database, but if there are any,
-// merge all available data in one structure.
+// FIXME: unused function
 function getIPAddress ($ip = 0)
 {
 	$ret = array
@@ -1334,6 +1333,7 @@ function getAddressspaceList ($tagfilter = array(), $tfmode = 'any')
 
 }
 
+// FIXME: unused function
 function getIPRange ($id = 0)
 {
 	global $dbxlink;

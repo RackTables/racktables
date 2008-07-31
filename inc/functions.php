@@ -1140,7 +1140,7 @@ function loadIPv4PrefixAutoTags ()
 	return array_merge
 	(
 		array (array ('tag' => '$ip4netid_' . $_REQUEST['id'])),
-		getIPv4PrefixTags (getIPRange ($_REQUEST['id']))
+		getIPv4PrefixTags (getIPv4NetworkInfo ($_REQUEST['id']))
 	);
 }
 

@@ -384,8 +384,8 @@ function addIPv4Allocation ()
 	$error = bindIpToObject ($ip, $_REQUEST['object_id'], $_REQUEST['bond_name'], $_REQUEST['bond_type']);
 	if ($error != '')
 		return buildRedirectURL ('ERR2', array ($error));
-	$address = getIPAddress ($ip);
-	if ($address['exists'] and ($address['reserved'] == 'yes' or strlen ($address['name']) > 0))
+	$address = getIPv4Address ($ip);
+	if ($address['reserved'] == 'yes' or !empty ($address['name']))
 	{
 		$release = getConfigVar ('IPV4_AUTO_RELEASE');
 		if ($release >= 1)
