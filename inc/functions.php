@@ -1430,4 +1430,27 @@ function buildLVSConfig ($object_id = 0)
 	return $newconfig;
 }
 
+// Indicate occupation state of each IP address: none, ordinary or problematic.
+function markupIPv4AddrList (&$addrlist)
+{
+	foreach (array_keys ($addrlist) as $ip_bin)
+	{
+		$singlealloc = 0;
+		$nvirtual = countRefsOfType ($addrlist[$ip_bin]['allocs'], 'shared', 'eq');
+		$nloopback = countRefsOfType ($addrlist[$ip_bin]['allocs'], 'virtual', 'eq');
+		$nconnected = countRefsOfType ($addrlist[$ip_bin]['allocs'], 'regular', 'eq');
+		$nrouter = countRefsOfType ($addrlist[$ip_bin]['allocs'], 'router', 'eq');
+		$nsl = ($nvirtual + $nloopback > 0) ? 1 : 0;
+		$nrsv = ($addrlist[$ip_bin]['reserved'] == 'yes') ? 1 : 0;
+		$nrealms = $nrsv + $nsl + $nconnected + $nrouter;
+		
+		if ($nrealms == 1)
+			$addrlist[$ip_bin]['class'] = 'trbusy';
+		elseif ($nrealms > 1)
+			$addrlist[$ip_bin]['class'] = 'trerror';
+		else
+			$addrlist[$ip_bin]['class'] = '';
+	}
+}
+
 ?>

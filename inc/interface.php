@@ -2229,7 +2229,7 @@ function renderIPRange ($id)
 	else
 		$page=0;
 
-	$range = getIPRange($id);
+	$range = getIPv4Network ($id);
 	echo "<table border=0 class=objectview cellspacing=0 cellpadding=0>";
 	echo "<tr><td colspan=2 align=center><h1>${range['ip']}/${range['mask']}</h1><h2>${range['name']}</h2></td></tr>\n";
 
@@ -2292,23 +2292,8 @@ function renderIPRange ($id)
 			echo "</a></td><td class='${secondstyle}'>&nbsp;</td><td class='${secondstyle}'>&nbsp;</td></tr>\n";
 			continue;
 		}
-		$numshared = countRefsOfType ($range['addrlist'][$ip]['references'], 'shared', 'eq');
-		$numreg = countRefsOfType ($range['addrlist'][$ip]['references'], 'regular', 'eq');
-		$numvirt = countRefsOfType ($range['addrlist'][$ip]['references'], 'virtual', 'eq');
-		$numlb = count ($range['addrlist'][$ip]['lbrefs']);
-		$numrs = count ($range['addrlist'][$ip]['rsrefs']);
-
 		$addr = $range['addrlist'][$ip];
-		if ( ($numshared > 0 && $numreg > 0) || $numreg > 1 )
-			echo "<tr class='trerror'>";
-		elseif ( $addr['reserved'] == 'yes' and $numshared+$numreg+$numvirt+$numlb+$numrs > 0)
-			echo "<tr class='trerror'>";
-		elseif ( $addr['reserved'] == 'yes')
-			echo "<tr class='trbusy'>";
-		elseif ($numshared + $numreg + $numvirt + $numlb + $numrs > 0)
-			echo "<tr class='trbusy'>";
-		else
-			echo "<tr>";
+		echo "<tr class='${addr['class']}'>";
 
 		echo "<td class=tdleft><a href='${root}?page=ipaddress&ip=${addr['ip']}'>${addr['ip']}</a></td>";
 		echo "<td class='${secondstyle}'>${addr['name']}</td><td class='${secondstyle}'>";
@@ -2316,10 +2301,10 @@ function renderIPRange ($id)
 		$prologue = '';
 		if ( $addr['reserved'] == 'yes')
 		{
-			echo "<b>Reserved</b> ";
+			echo "<strong>RESERVED</strong> ";
 			$delim = '; ';
 		}
-		foreach ($range['addrlist'][$ip]['references'] as $ref)
+		foreach ($range['addrlist'][$ip]['allocs'] as $ref)
 		{
 			echo "${delim}<a href='${root}?page=object&object_id=${ref['object_id']}";
 			echo "&hl_ipv4_addr=${addr['ip']}'>";
@@ -2332,7 +2317,7 @@ function renderIPRange ($id)
 			$delim = '';
 			$prologue = '<br>';
 		}
-		foreach ($range['addrlist'][$ip]['lbrefs'] as $ref)
+		foreach ($range['addrlist'][$ip]['lblist'] as $ref)
 		{
 			echo $prologue;
 			$prologue = '';
@@ -2346,7 +2331,7 @@ function renderIPRange ($id)
 			$delim = '';
 			$prologue = '<br>';
 		}
-		foreach ($range['addrlist'][$ip]['rsrefs'] as $ref)
+		foreach ($range['addrlist'][$ip]['rslist'] as $ref)
 		{
 			echo $prologue;
 			$prologue = '';
@@ -2379,13 +2364,13 @@ function renderIPRangeProperties ($id)
 
 }
 
-function renderIPAddress ($ip)
+function renderIPv4Address ($dottedquad)
 {
 	global $root, $aat;
-	$address = getIPAddress ($ip);
+	$address = getIPv4Address ($dottedquad);
 	echo "<table border=0 class=objectview cellspacing=0 cellpadding=0>";
-	echo "<tr><td colspan=2 align=center><h1>${ip}</h1></td></tr>\n";
-	if ($address['exists'] == 1)
+	echo "<tr><td colspan=2 align=center><h1>${dottedquad}</h1></td></tr>\n";
+	if (!empty ($address['name']))
 		echo "<tr><td colspan=2 align=center><h2>${address['name']}</h2></td></tr>\n";
 
 	echo "<tr><td class=pcleft>";
@@ -2402,34 +2387,24 @@ function renderIPAddress ($ip)
 	echo "</td>\n";
 
 	echo "<td class=pcright>";
-	$numshared = countRefsOfType($address['bonds'], 'shared', 'eq');
-	$numreg = countRefsOfType($address['bonds'], 'regular', 'eq');
-	$numvirt = countRefsOfType($address['bonds'], 'virtual', 'eq');
-	$numrouters = countRefsOfType ($address['bonds'], 'router', 'eq');
-	$allocs_total = $numshared + $numreg + $numvirt + $numrouters;
 
-	if ($address['reserved'] == 'yes' or $allocs_total > 0)
+	if (!empty ($address['class']))
 	{
 		startPortlet ('allocations');
-		echo "<table class='widetable' cellpadding=5 cellspacing=0 border=0 align='center'>\n";
-		echo "<tr><th>Object name</th><th>Interface name</th><th>Interface type</th></tr>\n";
-		if (($numshared > 0 && $numreg > 0) || $numreg > 1)
-			$class='trerror';
-		elseif ($address['reserved'] == 'yes' and $allocs_total > 0)
-			$class='trerror';
-		else
-			$class='';
-
+		echo "<table class='widetable' cellpadding=5 cellspacing=0 border=0 align='center' width='100%'>\n";
+		echo "<tr><th>object</th><th>OS interface</th><th>allocation type</th></tr>\n";
+		$class = $address['class'];
+		// render all allocation records for this address the same way
 		if ($address['reserved'] == 'yes')
-			echo "<tr class='$class'><td colspan='3'><b>RESERVED</b></td></tr>";
-		foreach ($address['bonds'] as $bond)
+			echo "<tr class='${class}'><td colspan=2>&nbsp;</td><td class=tdleft><strong>RESERVED</strong></td></tr>";
+		foreach ($address['allocs'] as $bond)
 		{
 			if (isset ($_REQUEST['hl_object_id']) and $_REQUEST['hl_object_id'] == $bond['object_id'])
 				$secondclass = 'tdleft port_highlight';
 			else
 				$secondclass = 'tdleft';
 			echo "<tr class='$class'><td class=tdleft><a href='${root}?page=object&object_id=${bond['object_id']}";
-			echo "&hl_ipv4_addr=${ip}'>${bond['object_name']}</td><td class='${secondclass}'>${bond['name']}</td><td class='${secondclass}'><strong>";
+			echo "&hl_ipv4_addr=${dottedquad}'>${bond['object_name']}</td><td class='${secondclass}'>${bond['name']}</td><td class='${secondclass}'><strong>";
 			echo $aat[$bond['type']];
 			echo "</strong></td></tr>\n";
 		}
@@ -2437,14 +2412,14 @@ function renderIPAddress ($ip)
 		finishPortlet();
 	}
 
-	if (count ($address['vslist']))
+	if (count ($address['lblist']))
 	{
-		startPortlet ('Virtual services (' . count ($address['vslist']) . ')');
-		echo "<table class='widetable' cellpadding=5 cellspacing=0 border=0 align='center'>\n";
+		startPortlet ('Virtual services (' . count ($address['lblist']) . ')');
+		echo "<table class='widetable' cellpadding=5 cellspacing=0 border=0 align='center' width='100%'>\n";
 		echo "<tr><th>VS</th><th>name</th></tr>\n";
-		foreach ($address['vslist'] as $vsinfo)
+		foreach ($address['lblist'] as $vsinfo)
 		{
-			echo "<tr><td class=tdleft><a href='${root}?page=ipv4vs&vs_id=${vsinfo['id']}'>";
+			echo "<tr><td class=tdleft><a href='${root}?page=ipv4vs&vs_id=${vsinfo['vs_id']}'>";
 			echo buildVServiceName ($vsinfo) . "</a></td><td class=tdleft>";
 			echo $vsinfo['name'] . "</td></tr>\n";
 		}
@@ -2455,7 +2430,7 @@ function renderIPAddress ($ip)
 	if (count ($address['rslist']))
 	{
 		startPortlet ('Real servers (' . count ($address['rslist']) . ')');
-		echo "<table class='widetable' cellpadding=5 cellspacing=0 border=0 align='center'>\n";
+		echo "<table class='widetable' cellpadding=5 cellspacing=0 border=0 align='center' width='100%'>\n";
 		echo "<tr><th>&nbsp;</th><th>port</th><th>RS pool</th></tr>\n";
 		foreach ($address['rslist'] as $rsinfo)
 		{
@@ -2464,8 +2439,8 @@ function renderIPAddress ($ip)
 				printImageHREF ('inservice', 'in service');
 			else
 				printImageHREF ('notinservice', 'NOT in service');
-			echo "</td><td class=tdleft>${rsinfo['rsport']}</td><td class=tdleft><a href='${root}?page=ipv4rsp&pool_id=${rsinfo['pool_id']}'>";
-			echo $rsinfo['poolname'] . "</a></td></tr>\n";
+			echo "</td><td class=tdleft>${rsinfo['rsport']}</td><td class=tdleft><a href='${root}?page=ipv4rsp&pool_id=${rsinfo['rspool_id']}'>";
+			echo $rsinfo['rspool_name'] . "</a></td></tr>\n";
 		}
 		echo "</table><br><br>";
 		finishPortlet();
@@ -2474,7 +2449,7 @@ function renderIPAddress ($ip)
 	if (count ($address['outpf']))
 	{
 		startPortlet ('departing NAT rules');
-		echo "<table class='widetable' cellpadding=5 cellspacing=0 border=0 align='center'>\n";
+		echo "<table class='widetable' cellpadding=5 cellspacing=0 border=0 align='center' width='100%'>\n";
 		echo "<tr><th>proto</th><th>from</th><th>to</th><th>comment</th></tr>\n";
 		foreach ($address['outpf'] as $rule)
 			echo "<tr><td>${rule['proto']}</td><td>${rule['localip']}:${rule['localport']}</td><td>${rule['remoteip']}:${rule['localport']}</td><td>${rule['description']}</td></tr>";
@@ -2485,7 +2460,7 @@ function renderIPAddress ($ip)
 	if (count ($address['inpf']))
 	{
 		startPortlet ('arriving NAT rules');
-		echo "<table class='widetable' cellpadding=5 cellspacing=0 border=0 align='center'>\n";
+		echo "<table class='widetable' cellpadding=5 cellspacing=0 border=0 align='center' width='100%'>\n";
 		echo "<tr><th>proto</th><th>from</th><th>to</th><th>comment</th></tr>\n";
 		foreach ($address['inpf'] as $rule)
 			echo "<tr><td>${rule['proto']}</td><td>${rule['localip']}:${rule['localport']}</td><td>${rule['remoteip']}:${rule['localport']}</td><td>${rule['description']}</td></tr>";
@@ -2497,74 +2472,60 @@ function renderIPAddress ($ip)
 	echo "</table>\n";
 }
 
-function renderIPAddressProperties ($ip)
+function renderIPv4AddressProperties ($dottedquad)
 {
 	global $pageno, $tabno, $root;
 	showMessageOrError();
-	$address = getIPAddress($ip);
-	echo "<center><h1>$ip</h1></center>\n";
+	$address = getIPv4Address ($dottedquad);
+	echo "<center><h1>$dottedquad</h1></center>\n";
 	startPortlet ('update');
 	echo "<table border=0 cellpadding=10 cellpadding=1 align='center'>\n";
 	echo "<form action='${root}process.php'><input type=hidden name=op value=editAddress>";
 	echo "<input type=hidden name=page value='${pageno}'>\n";
 	echo "<input type=hidden name=tab value='${tabno}'>\n";
-	echo "<input type=hidden name=ip value='${ip}'>";
-	echo "<tr><td class='tdright'>Name:</td><td class='tdleft'><input type=text name=name size=20 value='".($address['exists']==1?$address['name']:'')."'></tr>";
-	echo "<td class='tdright'>Reserved:</td><td class='tdleft'><input type=checkbox name=reserved size=20 ".($address['exists']==1?(($address['reserved']=='yes')?'checked':''):'')."></tr>";
-	echo "<tr><td colspan=2 class='tdcenter'><input type=submit value='Update address'></td></form></tr>";
+	echo "<input type=hidden name=ip value='${dottedquad}'>";
+	echo "<tr><td class='tdright'>Name:</td><td class='tdleft'><input type=text name=name size=20 value='${address['name']}'></tr>";
+	echo "<td class='tdright'>Reserved:</td><td class='tdleft'><input type=checkbox name=reserved size=20 ";
+	echo ($address['reserved']=='yes') ? 'checked' : '';
+	echo "></tr><tr><td colspan=2 class='tdcenter'><input type=submit value='Update address'></td></form></tr>";
 	echo "</table>\n";
 	finishPortlet();
 	if (empty ($address['name']) and $address['reserved'] == 'no')
 		return;
 	startPortlet ('release');
 	echo "<form action='${root}process.php?page=${pageno}&tab=${tabno}&op=editAddress' method=post>";
-	echo "<input type=hidden name=ip value='${ip}'>";
+	echo "<input type=hidden name=ip value='${dottedquad}'>";
 	echo "<input type=hidden name=name value=''>";
 	echo "<input type=hidden name=reserved value=''>";
 	echo "<input type=submit value='release'></form>";
 	finishPortlet();
 }
 
-function renderIPAddressAssignment ($ip)
+function renderIPv4AddressAllocations ($dottedquad)
 {
-	global $pageno, $tabno, $root, $aat;
-	$address = getIPAddress($ip);
-
 	showMessageOrError();
-	echo "<center><h1>$ip</h1></center>\n";
+	global $pageno, $tabno, $root, $aat;
 
-
+	$address = getIPv4Address ($dottedquad);
+	$class = $address['class'];
+	echo "<center><h1>${dottedquad}</h1></center>\n";
 	echo "<table class='widetable' cellpadding=5 cellspacing=0 border=0 align='center'>\n";
-	echo "<tr><th>&nbsp;</th><th>object name</th><th>object interface</th><th>allocation type</th><th>&nbsp;</th></tr>\n";
-
-	$numshared = countRefsOfType($address['bonds'], 'shared', 'eq');
-	$numreg = countRefsOfType($address['bonds'], 'regular', 'eq');
-	$numvirt = countRefsOfType($address['bonds'], 'virtual', 'eq');
-
-	
-	if ( ($numshared > 0 && $numreg > 0) || $numreg > 1 )
-		$class='trerror';
-	elseif ( $address['reserved'] == 'yes' and $numshared+$numreg+$numvirt > 0)
-		$class='trerror';
-	else
-		$class='';
-
-
+	echo "<tr><th>&nbsp;</th><th>object</th><th>OS interface</th><th>allocation type</th><th>&nbsp;</th></tr>\n";
 
 	if ($address['reserved'] == 'yes')
-		echo "<tr class='$class'><td colspan='5'><b>RESERVED</b></td></tr>";
-	foreach ($address['bonds'] as $bond)
+		echo "<tr class='${class}'><td colspan=3>&nbsp;</td><td class=tdleft><strong>RESERVED</strong></td><td>&nbsp;</td></tr>";
+	foreach ($address['allocs'] as $bond)
 	{
 		echo "<tr class='$class'><form action='${root}process.php'>";
 		echo "<input type=hidden name=op value='updIPv4Allocation'>";
 		echo "<input type=hidden name=page value='${pageno}'>";
 		echo "<input type=hidden name=tab value='${tabno}'>";
-		echo "<input type=hidden name=ip value='$ip'>";
+		echo "<input type=hidden name=ip value='$dottedquad'>";
 		echo "<input type=hidden name=object_id value='${bond['object_id']}'>";
-		echo "<td><a href='${root}process.php?op=delIPv4Allocation&page=${pageno}&tab=${tabno}&ip=$ip&object_id=${bond['object_id']}'>";
+		echo "<td><a href='${root}process.php?op=delIPv4Allocation&page=${pageno}&tab=${tabno}&ip=${dottedquad}&object_id=${bond['object_id']}'>";
 		printImageHREF ('delete', 'Unallocate address');
 		echo "</a></td>";
-		echo "<td><a href='${root}?page=object&object_id=${bond['object_id']}&hl_ipv4_addr=${ip}'>${bond['object_name']}</td>";
+		echo "<td><a href='${root}?page=object&object_id=${bond['object_id']}&hl_ipv4_addr=${dottedquad}'>${bond['object_name']}</td>";
 		echo "<td><input type='text' name='bond_name' value='${bond['name']}' size=10></td><td>";
 		printSelect ($aat, 'bond_type', $bond['type']);
 		echo "</td><td>";
@@ -2574,7 +2535,7 @@ function renderIPAddressAssignment ($ip)
 	echo "<form action='${root}process.php'><input type='hidden' name='op' value='addIPv4Allocation'>";
 	echo "<input type=hidden name=page value='${pageno}'>\n";
 	echo "<input type=hidden name=tab value='${tabno}'>\n";
-	echo "<input type='hidden' name='ip' value='$ip'>";
+	echo "<input type='hidden' name='ip' value='${dottedquad}'>";
 	echo "<td>";
 	printImageHREF ('add', 'new allocation', TRUE);
 	echo "</td><td><select name='object_id'>";
@@ -4785,8 +4746,8 @@ function renderLivePTR ($id = 0)
 			$cnt_mismatch++;
 		}
 		echo "><td class='tdleft";
-		if ($addr['reserved'] == 'yes' or (isset ($range['addrlist'][$ip]) and count ($range['addrlist'][$ip]['references'])))
-			echo ' trbusy';
+		if (!empty ($range['addrlist'][$ip]['class']))
+			echo ' ' . $range['addrlist'][$ip]['class'];
 		echo "'><a href='${root}?page=ipaddress&ip=${straddr}'>${straddr}</a></td>";
 		echo "<td class=tdleft>${addr['name']}</td><td class=tdleft>${ptrname}</td><td>";
 		if ($print_cbox)

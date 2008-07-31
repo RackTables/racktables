@@ -1067,9 +1067,9 @@ function getIPAddress ($ip = 0)
 
 // Check the range requested for meaningful IPv4 records, build them
 // into a list and return. Return an empty list if nothing matched.
-// Both arguments are expected in uint32 form. The resulting list
+// Both arguments are expected in signed int32 form. The resulting list
 // is keyed by uint32 form of each IP address, items aren't sorted.
-function scanIPv4Space ($db_first, $db_last)
+function scanIPv4Space ($i32_first, $i32_last)
 {
 	$ret = array();
 	$addrtemplate = array
@@ -1081,27 +1081,33 @@ function scanIPv4Space ($db_first, $db_last)
 		'inpf' => array(),
 		'vslist' => array(),
 		'rslist' => array(),
-		'references' => array(),
+		'allocs' => array(),
 		'lblist' => array()
 	);
 	$dnamechache = array();
 
+	$db_first = sprintf ('%u', 0x00000000 + $i32_first);
+	$db_last = sprintf ('%u', 0x00000000 + $i32_last);
 	// 1. collect labels and reservations
-	$query = "select INET_NTOA(ipb.ip) as ip, ip as ip_bin, name, reserved from IPAddress ".
-		"where ip between ${firstaddr} and ${lastaddr} and (reserved = 'yes' or name != '')";
+	$query = "select INET_NTOA(ip) as ip, name, reserved from IPAddress ".
+		"where ip between ${db_first} and ${db_last} and (reserved = 'yes' or name != '')";
 	$result = useSelectBlade ($query, __FUNCTION__);
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
-		if (!isset ($ret[$row['ip_bin']]))
-			$ret[$row['ip_bin']] = $addrtemplate;
-		$ret[$row['ip_bin']]['name'] = $row['name'];
-		$ret[$row['ip_bin']]['reserved'] = $row['reserved'];
+		$ip_bin = ip2long ($row['ip']);
+		if (!isset ($ret[$ip_bin]))
+		{
+			$ret[$ip_bin] = $addrtemplate;
+			$ret[$ip_bin]['ip'] = $row['ip'];
+		}
+		$ret[$ip_bin]['name'] = $row['name'];
+		$ret[$ip_bin]['reserved'] = $row['reserved'];
 	}
 	unset ($result);
 
 	// 2. check for allocations
 	$query =
-		"select INET_NTOA(ipb.ip) as ip, ip as ip_bin, ro.id as object_id, " .
+		"select INET_NTOA(ipb.ip) as ip, ro.id as object_id, " .
 		"ro.name as object_name, ipb.name, ipb.type, objtype_id, " .
 		"dict_value as objtype_name from " .
 		"IPBonds as ipb inner join RackObject as ro on ipb.object_id = ro.id " .
@@ -1112,8 +1118,12 @@ function scanIPv4Space ($db_first, $db_last)
 	$result = useSelectBlade ($query, __FUNCTION__);
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
-		if (!isset ($ret[$row['ip_bin']]))
-			$ret[$row['ip_bin']] = $addrtemplate;
+		$ip_bin = ip2long ($row['ip']);
+		if (!isset ($ret[$ip_bin]))
+		{
+			$ret[$ip_bin] = $addrtemplate;
+			$ret[$ip_bin]['ip'] = $row['ip'];
+		}
 		if (!isset ($dnamecache[$row['object_id']]))
 		{
 			$quasiobject['name'] = $row['object_name'];
@@ -1125,12 +1135,12 @@ function scanIPv4Space ($db_first, $db_last)
 		foreach (array ('object_id', 'type', 'name') as $cname)
 			$tmp[$cname] = $row[$cname];
 		$tmp['object_name'] = $dnamecache[$row['object_id']];
-		$ret[$row['ip_bin']]['references'][] = $tmp;
+		$ret[$ip_bin]['allocs'][] = $tmp;
 	}
 	unset ($result);
 
 	// 3. look for virtual services and related LB 
-	$query = "select vs_id, inet_ntoa(vip) as ip, vip as ip_bin, vport, proto, " .
+	$query = "select vs_id, inet_ntoa(vip) as ip, vport, proto, vs.name, " .
 		"object_id, objtype_id, ro.name as object_name, dict_value as objtype_name from " .
 		"IPVirtualService as vs inner join IPLoadBalancer as lb on vs.id = lb.vs_id " .
 		"inner join RackObject as ro on lb.object_id = ro.id " .
@@ -1142,8 +1152,12 @@ function scanIPv4Space ($db_first, $db_last)
 	$result = useSelectBlade ($query, __FUNCTION__);
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
-		if (!isset ($ret[$row['ip_bin']]))
-			$ret[$row['ip_bin']] = $addrtemplate;
+		$ip_bin = ip2long ($row['ip']);
+		if (!isset ($ret[$ip_bin]))
+		{
+			$ret[$ip_bin] = $addrtemplate;
+			$ret[$ip_bin]['ip'] = $row['ip'];
+		}
 		if (!isset ($dnamecache[$row['object_id']]))
 		{
 			$quasiobject['name'] = $row['object_name'];
@@ -1152,27 +1166,32 @@ function scanIPv4Space ($db_first, $db_last)
 			$dnamecache[$row['object_id']] = displayedName ($quasiobject);
 		}
 		$tmp = array();
-		foreach (array ('object_id', 'vport', 'proto', 'vs_id') as $cname)
+		foreach (array ('object_id', 'vport', 'proto', 'vs_id', 'name') as $cname)
 			$tmp[$cname] = $row[$cname];
 		$tmp['object_name'] = $dnamecache[$row['object_id']];
-		$ret[$row['ip_bin']]['lblist'][] = $tmp;
+		$tmp['vip'] = $row['ip'];
+		$ret[$ip_bin]['lblist'][] = $tmp;
 	}
 	unset ($result);
 
 	// 4. don't forget about real servers along with pools
-	$query = "select inet_ntoa(rsip) as ip, rsip as ip_bin, inservice, rsport, rspool_id, rsp.name as rspool_name from " .
+	$query = "select inet_ntoa(rsip) as ip, inservice, rsport, rspool_id, rsp.name as rspool_name from " .
 		"IPRealServer as rs inner join IPRSPool as rsp on rs.rspool_id = rsp.id " .
 		"where rsip between ${db_first} and ${db_last} " .
 		"order by ip, rsport, rspool_id";
 	$result = useSelectBlade ($query, __FUNCTION__);
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
-		if (!isset ($ret[$row['ip_bin']]))
-			$ret[$row['ip_bin']] = $addrtemplate;
+		$ip_bin = ip2long ($row['ip']);
+		if (!isset ($ret[$ip_bin]))
+		{
+			$ret[$ip_bin] = $addrtemplate;
+			$ret[$ip_bin]['ip'] = $row['ip'];
+		}
 		$tmp = array();
 		foreach (array ('rspool_id', 'rsport', 'rspool_name', 'inservice') as $cname)
 			$tmp[$cname] = $row[$cname];
-		$ret[$row['ip_bin']]['rslist'][] = $tmp;
+		$ret[$ip_bin]['rslist'][] = $tmp;
 	}
 	unset ($result);
 
@@ -1192,21 +1211,39 @@ function scanIPv4Space ($db_first, $db_last)
 	$result = useSelectBlade ($query, __FUNCTION__);
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
-		if (!isset ($ret[$row['ip']]))
-			$ret[$row['ip']] = $addrtemplate;
+		$remoteip_bin = ip2long ($row['remoteip']);
+		$localip_bin = ip2long ($row['localip']);
+		if ($i32_first <= $remoteip_bin and $remoteip_bin <= $i32_last)
+		{
+			if (!isset ($ret[$remoteip_bin]))
+			{
+				$ret[$remoteip_bin] = $addrtemplate;
+				$ret[$remoteip_bin]['ip'] = $row['remoteip'];
+			}
+			$ret[$remoteip_bin]['inpf'][] = $row;
+		}
+		if ($i32_first <= $localip_bin and $localip_bin <= $i32_last)
+		{
+			if (!isset ($ret[$localip_bin]))
+			{
+				$ret[$localip_bin] = $addrtemplate;
+				$ret[$localip_bin]['ip'] = $row['localip'];
+			}
+			$ret[$localip_bin]['outpf'][] = $row;
+		}
 	}
 	return $ret;
 }
 
 // Return summary data about an IPv4 prefix, if it exists, or NULL otherwise.
-function getIPv4PrefixInfo ($id = 0)
+function getIPv4NetworkInfo ($id = 0)
 {
 	if ($id <= 0)
 	{
 		showError ('Invalid arg', __FUNCTION__);
 		return NULL;
 	}
-	$query = "select INET_NTOA(ip) as ip, ip as ip_bin, mask, name ".
+	$query = "select INET_NTOA(ip) as ip, mask, name ".
 		"from IPRanges where id = $id";
 	$result = useSelectBlade ($query, __FUNCTION__);
 	$ret = $result->fetch (PDO::FETCH_ASSOC);
@@ -1214,6 +1251,7 @@ function getIPv4PrefixInfo ($id = 0)
 		return NULL;
 	unset ($result);
 	$ret['id'] = $id;
+	$ret['ip_bin'] = ip2long ($ret['ip']);
 	$ret['mask_bin'] = binMaskFromDec ($ret['mask']);
 	$ret['mask_bin_inv'] = binInvMaskFromDec ($ret['mask']);
 	$ret['db_first'] = sprintf ('%u', 0x00000000 + $ret['ip_bin'] & $ret['mask_bin']);
@@ -1221,15 +1259,32 @@ function getIPv4PrefixInfo ($id = 0)
 	return $ret;
 }
 
-function getIPv4Prefix ($id = 0)
+function getIPv4Network ($id = 0)
 {
-	$ret = getIPv4PrefixInfo ($id);
+	$ret = getIPv4NetworkInfo ($id);
 	if (!$ret)
 	{
 		showError ('Record not found', __FUNCTION__);
 		return NULL;
 	}
 	$ret['addrlist'] = scanIPv4Space ($ret['db_first'], $ret['db_last']);
+	markupIPv4AddrList ($ret['addrlist']);
+	return $ret;
+}
+
+function getIPv4Address ($dottedquad = '')
+{
+	if ($dottedquad == '')
+	{
+		showError ('Invalid arg', __FUNCTION__);
+		return NULL;
+	}
+	$i32 = ip2long ($dottedquad); // signed 32 bit
+	$scanres = scanIPv4Space ($i32, $i32);
+	if (!isset ($scanres[$i32]))
+		return NULL;
+	markupIPv4AddrList ($scanres);
+	return $scanres[$i32];
 }
 
 function bindIpToObject ($ip = '', $object_id = 0, $name = '', $type = '')
