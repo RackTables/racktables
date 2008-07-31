@@ -17,13 +17,20 @@ $aat = array
 	'shared' => 'Shared',
 	'router' => 'Router',
 );
-// address allocation code
+// address allocation code, IPv4 addresses and objects view
 $aac = array
 (
 	'regular' => '',
 	'virtual' => '<strong>L</strong>',
 	'shared' => '<strong>S</strong>',
 	'router' => '<strong>R</strong>',
+);
+// address allocation code, IPv4 networks view
+$aac2 = array
+(
+	'regular' => '',
+	'virtual' => '<strong>L:</strong>',
+	'router' => '<strong>R:</strong>',
 );
 
 // Main menu.
@@ -2137,9 +2144,9 @@ function renderAddNewRange ()
 	finishPortlet();
 }
 
-function renderIPRange ($id)
+function renderIPv4Network ($id)
 {
-	global $root, $pageno, $tabno;
+	global $root, $pageno, $tabno, $aac2;
 	$netmaskbylen = array
 	(
 		32 => '255.255.255.255',
@@ -2264,7 +2271,7 @@ function renderIPRange ($id)
 	}
 	echo "</center>";
 
-	echo "<table class='widetable' border=0 cellspacing=0 cellpadding=5 align='center'>\n";
+	echo "<table class='widetable' border=0 cellspacing=0 cellpadding=5 align='center' width='100%'>\n";
 	echo "<tr><th>Address</th><th>Name</th><th>Allocation</th></tr>\n";
 
 
@@ -2293,7 +2300,8 @@ function renderIPRange ($id)
 		}
 		foreach ($range['addrlist'][$ip]['allocs'] as $ref)
 		{
-			echo "${delim}<a href='${root}?page=object&object_id=${ref['object_id']}";
+			echo $delim . $aac2[$ref['type']];
+			echo "<a href='${root}?page=object&object_id=${ref['object_id']}";
 			echo "&hl_ipv4_addr=${addr['ip']}'>";
 			echo $ref['name'] . (empty ($ref['name']) ? '' : '@');
 			echo "${ref['object_name']}</a>";
