@@ -20,7 +20,7 @@ function dynamic_title_iprange ()
 			return array ('name' => $range['ip'].'/'.$range['mask'], 'params' => array('id'=>$_REQUEST['id']));
 			break;
 		case 'ipaddress':
-			$range = getRangeByIp($_REQUEST['ip']);
+			$range = getIPv4NetworkInfo (getIPv4AddressNetworkId ($_REQUEST['ip']));
 			return array
 			(
 				'name' => $range['ip'] . '/' . $range['mask'],

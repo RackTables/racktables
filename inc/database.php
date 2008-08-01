@@ -1484,36 +1484,16 @@ function getIPRange ($id = 0)
 	return $ret;
 }
 
-function getRangeByIp ($ip = '', $id = 0)
+// Return the id of the smallest IPv4 network containing the given IPv4 address
+// or NULL, if nothing was found.
+function getIPv4AddressNetworkId ($dottedquad)
 {
-	if ($id == 0)
-		$query =
-			"select ".
-			"id, INET_NTOA(ip) as ip, mask, name ".
-			"from IPRanges ";
-	else
-		$query =
-			"select ".
-			"id, INET_NTOA(ip) as ip, mask, name ".
-			"from IPRanges where id='$id'";
-		
+	$query = 'select id from IPRanges where ' .
+		"inet_aton('${dottedquad}') & (4294967295 >> (32 - mask)) << (32 - mask) = ip " .
+		'order by mask desc limit 1';
 	$result = useSelectBlade ($query, __FUNCTION__);
-	$ret=array();
-	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-	{
-		$binmask=binMaskFromDec($row['mask']);
-		if ((ip2long($ip) & $binmask) == ip2long($row['ip']))
-		{
-			$ret['id'] = $row['id'];
-			$ret['ip'] = $row['ip'];
-			$ret['ip_bin'] = ip2long($row['ip']);
-			$ret['name'] = $row['name'];
-			$ret['mask'] = $row['mask'];
-			$result->closeCursor();
-			return $ret;
-		}
-	}
-	$result->closeCursor();
+	if ($row = $result->fetch (PDO::FETCH_ASSOC))
+		return $row['id'];
 	return NULL;
 }
 

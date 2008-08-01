@@ -2836,8 +2836,7 @@ function renderSearchResults ()
 	elseif (preg_match ('/^[0-9][0-9]?[0-9]?\.[0-9]?[0-9]?[0-9]?\.[0-9][0-9]?[0-9]?\.[0-9]?[0-9]?[0-9]?$/i', $terms))
 	// Search for IP address.
 	{
-		$result = getRangeByIp ($terms);
-		if ($result !== NULL)
+		if (NULL !== getIPv4AddressNetworkId ($terms))
 		{
 			$nhits++;
 			$lasthit = 'ipv4address1';

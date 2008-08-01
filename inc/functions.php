@@ -269,34 +269,86 @@ function mergeGridFormToRack (&$rackData)
 		}
 }
 
+// netmask conversion from length to number
 function binMaskFromDec ($maskL)
 {
-	$binmask=0;
-	for ($i=0; $i<$maskL; $i++)
-	{
-		$binmask*=2;
-		$binmask+=1;
-	}
-	for ($i=$maskL; $i<32; $i++)
-	{
-		$binmask*=2;
-	}
-	return $binmask;
+	$map_straight = array (
+		0  => 0x00000000,
+		1  => 0x80000000,
+		2  => 0xc0000000,
+		3  => 0xe0000000,
+		4  => 0xf0000000,
+		5  => 0xf8000000,
+		6  => 0xfc000000,
+		7  => 0xfe000000,
+		8  => 0xff000000,
+		9  => 0xff800000,
+		10 => 0xffc00000,
+		11 => 0xffe00000,
+		12 => 0xfff00000,
+		13 => 0xfff80000,
+		14 => 0xfffc0000,
+		15 => 0xfffe0000,
+		16 => 0xffff0000,
+		17 => 0xffff8000,
+		18 => 0xffffc000,
+		19 => 0xffffe000,
+		20 => 0xfffff000,
+		21 => 0xfffff800,
+		22 => 0xfffffc00,
+		23 => 0xfffffe00,
+		24 => 0xffffff00,
+		25 => 0xffffff80,
+		26 => 0xffffffc0,
+		27 => 0xffffffe0,
+		28 => 0xfffffff0,
+		29 => 0xfffffff8,
+		30 => 0xfffffffc,
+		31 => 0xfffffffe,
+		32 => 0xffffffff,
+	);
+	return $map_straight[$maskL];
 }
 
+// complementary value
 function binInvMaskFromDec ($maskL)
 {
-	$binmask=0;
-	for ($i=0; $i<$maskL; $i++)
-	{
-		$binmask*=2;
-	}
-	for ($i=$maskL; $i<32; $i++)
-	{
-		$binmask*=2;
-		$binmask+=1;
-	}
-	return $binmask;
+	$map_compl = array (
+		0  => 0xffffffff,
+		1  => 0x7fffffff,
+		2  => 0x3fffffff,
+		3  => 0x1fffffff,
+		4  => 0x0fffffff,
+		5  => 0x07ffffff,
+		6  => 0x03ffffff,
+		7  => 0x01ffffff,
+		8  => 0x00ffffff,
+		9  => 0x007fffff,
+		10 => 0x003fffff,
+		11 => 0x001fffff,
+		12 => 0x000fffff,
+		13 => 0x0007ffff,
+		14 => 0x0003ffff,
+		15 => 0x0001ffff,
+		16 => 0x0000ffff,
+		17 => 0x00007fff,
+		18 => 0x00003fff,
+		19 => 0x00001fff,
+		20 => 0x00000fff,
+		21 => 0x000007ff,
+		22 => 0x000003ff,
+		23 => 0x000001ff,
+		24 => 0x000000ff,
+		25 => 0x0000007f,
+		26 => 0x0000003f,
+		27 => 0x0000001f,
+		28 => 0x0000000f,
+		29 => 0x00000007,
+		30 => 0x00000003,
+		31 => 0x00000001,
+		32 => 0x00000000,
+	);
+	return $map_compl[$maskL];
 }
 
 // This function looks up 'has_problems' flag for 'T' atoms
@@ -595,19 +647,12 @@ function buildPortCompatMatrixFromList ($portTypeList, $portCompatList)
 
 function newPortForwarding($object_id, $localip, $localport, $remoteip, $remoteport, $proto, $description)
 {
-	global $dbxlink;
-
-	$range = getRangeByIp($localip);
-	if (!$range)
+	if (NULL === getIPv4AddressNetworkId ($localip))
 		return "$localip: Non existant ip";
-	
-	$range = getRangeByIp($remoteip);
-	if (!$range)
+	if (NULL === getIPv4AddressNetworkId ($localip))
 		return "$remoteip: Non existant ip";
-	
 	if ( ($localport <= 0) or ($localport >= 65536) )
 		return "$localport: invaild port";
-
 	if ( ($remoteport <= 0) or ($remoteport >= 65536) )
 		return "$remoteport: invaild port";
 
@@ -1124,10 +1169,11 @@ function loadRackObjectAutoTags ()
 }
 
 // Common code for both prefix and address tag listers.
-function getIPv4PrefixTags ($prefix)
+function getIPv4PrefixTags ($netid)
 {
+	$netinfo = getIPv4NetworkInfo ($netid);
 	$ret = array();
-	$ret[] = array ('tag' => '$ip4net-' . str_replace ('.', '-', $prefix['ip']) . '-' . $prefix['mask']);
+	$ret[] = array ('tag' => '$ip4net-' . str_replace ('.', '-', $netinfo['ip']) . '-' . $netinfo['mask']);
 	// FIXME: find and list tags for all parent networks?
 	$ret[] = array ('tag' => '$any_ip4net');
 	$ret[] = array ('tag' => '$any_net');
@@ -1140,7 +1186,7 @@ function loadIPv4PrefixAutoTags ()
 	return array_merge
 	(
 		array (array ('tag' => '$ip4netid_' . $_REQUEST['id'])),
-		getIPv4PrefixTags (getIPv4NetworkInfo ($_REQUEST['id']))
+		getIPv4PrefixTags ($_REQUEST['id'])
 	);
 }
 
@@ -1150,7 +1196,7 @@ function loadIPv4AddressAutoTags ()
 	return array_merge
 	(
 		array (array ('tag' => '$ip4net-' . str_replace ('.', '-', $_REQUEST['ip']) . '-32')),
-		getIPv4PrefixTags (getRangeByIP ($_REQUEST['ip']))
+		getIPv4PrefixTags (getIPv4AddressNetworkId ($_REQUEST['ip']))
 	);
 }
 
@@ -1437,7 +1483,23 @@ function buildRouterConfig ($object_id = 0)
 		showError ('Invalid argument', __FUNCTION__);
 		return;
 	}
-	$newconfig = 'dummy text';
+	$newconfig = "# RackTables asset dump version 0\n";
+	$alloclist = getObjectAddresses ($object_id);
+//	dump($alloclist);
+	$gwcount = 0;
+	foreach ($alloclist as $alloc)
+		if ($alloc['type'] == 'router')
+		{
+			$netinfo = getIPv4Network (getIPv4AddressNetworkId ($alloc['ip']));
+			$newconfig .= sprintf
+			(
+				"%s %s /%u 0x%08x\n",
+				$alloc['name'],
+				$alloc['ip'],
+				$netinfo['mask'],
+				$netinfo['mask_bin']
+			);
+		}
 	return $newconfig;
 }
 

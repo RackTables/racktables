@@ -378,7 +378,7 @@ function addIPv4Allocation ()
 
 	// Strip masklen.
 	$ip = ereg_replace ('/[[:digit:]]+$', '', $_REQUEST['ip']);
-	if  (NULL == getRangeByIp ($ip))
+	if  (NULL === getIPv4AddressNetworkId ($ip))
 		return buildRedirectURL ('ERR1', array ($ip));
 	
 	$error = bindIpToObject ($ip, $_REQUEST['object_id'], $_REQUEST['bond_name'], $_REQUEST['bond_type']);

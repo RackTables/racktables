@@ -266,7 +266,7 @@ function activateRouterConfig ($object_id = 0, $configtext = '')
 	$data = queryGateway
 	(
 		'rtrconfig',
-		array ("submit ${endpoint} ${remote_username} ${tmpfilename}")
+		array ("submit ${remote_username} ${endpoint} ${tmpfilename}")
 	);
 	unlink ($tmpfilename);
 	if ($data == NULL)
