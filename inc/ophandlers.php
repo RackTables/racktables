@@ -406,7 +406,7 @@ function addIPv4Prefix ()
 	$taglist = isset ($_REQUEST['taglist']) ? $_REQUEST['taglist'] : array();
 	$error = createIPv4Prefix ($_REQUEST['range'], $_REQUEST['name'], $is_bcast == 'on', $taglist);
 	if ($error != '')
-		return buildRedirectURL ('ERR', $error);
+		return buildRedirectURL ('ERR', array ($error));
 	else
 		return buildRedirectURL ('OK');
 }
@@ -416,7 +416,7 @@ function delIPv4Prefix ()
 	assertUIntArg ('id', __FUNCTION__);
 	$error = destroyIPv4Prefix ($_REQUEST['id']);
 	if ($error != '')
-		return buildRedirectURL ('ERR', $error);
+		return buildRedirectURL ('ERR', array ($error));
 	else
 		return buildRedirectURL ('OK');
 }
