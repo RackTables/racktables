@@ -171,10 +171,14 @@ function renderRow ($row_id = 0)
 	echo "</td></tr></table>";
 }
 
-function showError ($info = '', $funcname = 'N/A')
+function showError ($info = '', $location = 'N/A')
 {
 	global $root;
-	echo "<div class=msg_error>An error has occured in [${funcname}]. ";
+	if (preg_match ('/\.php$/', $location))
+		$location = basename ($location);
+	elseif ($location != 'N/A')
+		$location = $location . '()';
+	echo "<div class=msg_error>An error has occured in [${location}]. ";
 	if (empty ($info))
 		echo 'No additional information is available.';
 	else
