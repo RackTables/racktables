@@ -811,7 +811,8 @@ function renderRackObject ($object_id = 0)
 
 			$virtnum = countRefsOfType($addr['references'], 'virtual', 'eq');
 			$sharednum = countRefsOfType($addr['references'], 'shared', 'eq');
-			$regnum = countRefsOfType($addr['references'], 'regular', 'eq');
+			$regnum = countRefsOfType($addr['references'], 'regular', 'eq') +
+				countRefsOfType($addr['references'], 'router', 'eq');
 			$notvirtnum = countRefsOfType($addr['references'], 'virtual', 'neq');
 
 			echo "<tr";
