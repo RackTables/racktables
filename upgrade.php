@@ -1377,6 +1377,7 @@ CREATE TABLE `TagTree` (
 			break;
 		case '0.16.2':
 			$query[] = "alter table IPBonds modify column type enum('regular','shared','virtual','router')";
+			$query[] = "update Dictionary set dict_value = 'spacer' where dict_key = 11";
 			$query[] = "update Config set varvalue = '0.16.2' where varname = 'DB_VERSION'";
 			break;
 		default:
