@@ -380,8 +380,7 @@ function renderEditObjectForm ($object_id)
 
 	echo '<td class=pcleft>';
 	startPortlet ('Static attributes');
-	echo "<form method=post action='${root}process.php?page=${pageno}&tab=${tabno}&op=update'>";
-	echo "<input type=hidden name=object_id value=${object_id}>";
+	printOpFormIntro ('update');
 	echo '<table border=0 align=center>';
 	echo "<tr><th class=tdright>Type:</th><td class=tdleft>";
 	printSelect (getObjectTypeList(), 'object_type_id', $object['objtype_id']);
@@ -409,8 +408,7 @@ function renderEditObjectForm ($object_id)
 	$values = getAttrValues ($object_id);
 	echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
 	echo "<tr><th>&nbsp;</th><th>Attribute</th><th>Value</th><th>&nbsp;</th></tr>\n";
-	echo "<form method=post action='${root}process.php?page=${pageno}&tab=${tabno}&op=updateStickers'>\n";
-	echo "<input type=hidden name=object_id value=${object_id}>\n";
+	printOpFormIntro ('updateStickers');
 	echo '<input type=hidden name=num_attrs value=' . count($values) . ">\n";
 
 	$i = 0;
@@ -5403,6 +5401,18 @@ function renderMyAccount ()
 	echo "<tr><td colspan=2 align=center><h1>${remote_username}</h1></td></tr>\n";
 	echo "<tr><td colspan=2 align=center><h2>" . $accounts[$remote_username]['user_realname'] . "</h2></td></tr>\n";
 	echo "</table>";
+}
+
+// Print common operation form prologue, include bypass argument, if
+// appropriate, and some extra hidden inputs, if requested.
+function printOpFormIntro ($opname, $extra = array())
+{
+	global $root, $pageno, $tabno, $page;
+	echo "<form method=post action='${root}process.php?page=${pageno}&tab=${tabno}&op=${opname}'>\n";
+	if (isset ($page[$pageno]['bypass']) and isset ($_REQUEST[$page[$pageno]['bypass']]))
+		$extra[$page[$pageno]['bypass']] = $_REQUEST[$page[$pageno]['bypass']];
+	foreach ($extra as $inputname => $inputvalue)
+		echo "<input type=hidden name=${inputname} value=${inputvalue}>\n";
 }
 
 ?>
