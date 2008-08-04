@@ -1493,11 +1493,10 @@ function buildRouterConfig ($object_id = 0)
 			$netinfo = getIPv4Network (getIPv4AddressNetworkId ($alloc['ip']));
 			$newconfig .= sprintf
 			(
-				"%s %s /%u 0x%08x\n",
+				"%s %s/%u\n",
 				$alloc['name'],
 				$alloc['ip'],
-				$netinfo['mask'],
-				$netinfo['mask_bin']
+				$netinfo['mask']
 			);
 		}
 	return $newconfig;
@@ -1524,6 +1523,23 @@ function markupIPv4AddrList (&$addrlist)
 		else
 			$addrlist[$ip_bin]['class'] = '';
 	}
+}
+
+// Scan the given address list (returned by scanIPv4Space) and return a list of all routers found.
+function findRouters ($addrlist)
+{
+	$ret = array();
+	foreach ($addrlist as $addr)
+		foreach ($addr['allocs'] as $alloc)
+			if ($alloc['type'] == 'router')
+				$ret[] = array
+				(
+					'id' => $alloc['object_id'],
+					'iface' => $alloc['name'],
+					'dname' => $alloc['object_name'],
+					'addr' => $addr['ip']
+				);
+	return $ret;
 }
 
 ?>

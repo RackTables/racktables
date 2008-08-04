@@ -421,7 +421,7 @@ function delIPv4Prefix ()
 		return buildRedirectURL ('OK');
 }
 
-function editRange ()
+function updIPv4Prefix ()
 {
 	assertUIntArg ('id', __FUNCTION__);
 	assertStringArg ('name', __FUNCTION__);

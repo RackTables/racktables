@@ -140,7 +140,7 @@ function renderRow ($row_id = 0)
 	echo "<table border=0 cellspacing=0 cellpadding=3 width='100%'>\n";
 	echo "<tr><th width='50%' class=tdright>Racks:</th><td class=tdleft>${rowInfo['count']}</td></tr>\n";
 	echo "<tr><th width='50%' class=tdright>Units:</th><td class=tdleft>${rowInfo['sum']}</td></tr>\n";
-	echo "<tr><th width='50%' class=tdright>Utilization:</th><td class=tdleft>";
+	echo "<tr><th width='50%' class=tdright>%% used:</th><td class=tdleft>";
 	renderProgressBar (getRSUforRackRow ($rackList));
 	echo "</td></tr>\n";
 	echo "</table><br>\n";
@@ -589,7 +589,7 @@ function renderRackInfoPortlet ($rackData)
 	echo "<tr><th width='50%' class=tdright>Rack row:</th><td class=tdleft>${rackData['row_name']}</td></tr>\n";
 	echo "<tr><th width='50%' class=tdright>Name:</th><td class=tdleft>${rackData['name']}</td></tr>\n";
 	echo "<tr><th width='50%' class=tdright>Height:</th><td class=tdleft>${rackData['height']}</td></tr>\n";
-	echo "<tr><th width='50%' class=tdright>Utilization:</th><td class=tdleft>";
+	echo "<tr><th width='50%' class=tdright>%% used:</th><td class=tdleft>";
 	renderProgressBar (getRSUforRack ($rackData));
 	echo "</td></tr>\n";
 	echo "<tr><th width='50%' class=tdright>Objects:</th><td class=tdleft>";
@@ -1997,18 +1997,18 @@ function renderRackspaceHistory ()
 	
 }
 
-function renderAddressspace ()
+function renderIPv4Space ()
 {
 	global $root, $pageno;
 
 	echo "<table border=0 class=objectview>\n";
 	echo "<tr><td class=pcleft>";
 
-	startPortlet ('Networks');
-	echo "<table class='widetable' border=0 cellpadding=5 cellspacing=0 align='center'>\n";
 	$tagfilter = getTagFilter();
 	$addrspaceList = getAddressspaceList ($tagfilter, getTFMode());
-	echo "<tr><th>prefix</th><th>name/tags</th><th>utilization</th></tr>\n";
+	startPortlet ('networks (' . count ($addrspaceList) . ')');
+	echo "<table class='widetable' border=0 cellpadding=5 cellspacing=0 align='center'>\n";
+	echo "<tr><th>prefix</th><th>name/tags</th><th>%% used</th><th>routed by</th></tr>\n";
 	foreach ($addrspaceList as $iprange)
 	{
 		$netdata = getIPv4Network ($iprange['id']);
@@ -2024,7 +2024,15 @@ function renderAddressspace ()
 		}
 		echo "</td><td class=tdcenter>";
 		renderProgressBar ($used/$total);
-		echo "<br><small>${used}/${total}</small></td></tr>";
+		echo "<br><small>${used}/${total}</small></td><td>";
+		$newline = '';
+		foreach (findRouters ($netdata['addrlist']) as $router)
+		{
+			echo $newline . "<a href='${root}?page=object&object_id=${router['id']}&hl_ipv4_addr=${router['addr']}'>";
+			echo (empty ($router['iface']) ? '' : $router['iface'] . '@') . $router['dname'] . '</a>';
+			$newline = '<br>';
+		}
+		echo "</td></tr>";
 	}
 	echo "</table>\n";
 	finishPortlet();
@@ -2098,55 +2106,61 @@ function renderIPv4SLB ()
 	finishPortlet ();
 }
 
-function renderAddNewRange ()
+function renderIPv4SpaceEditor ()
 {
 	global $root, $pageno, $tabno;
 	showMessageOrError();
 
 	startPortlet ("Add new");
-	echo "<table class='widetable' border=0 cellpadding=10 align='center'>\n";
-	echo "<tr><th>prefix</th><th>name</th><th>connected network</th><th>assign tags</th><th>&nbsp;</th></tr>\n";
-	echo "<form name='add_new_range' action='${root}process.php'>\n";
+	echo '<table border=0 cellpadding=10 align=center>';
+	echo "<form method=post name='add_new_range' action='${root}process.php'>\n";
 	echo "<input type=hidden name=op value=addIPv4Prefix>\n";
 	echo "<input type=hidden name=page value='${pageno}'>\n";
 	echo "<input type=hidden name=tab value='${tabno}'>\n";
-	echo "<tr valign=top><td class='tdcenter'><input type=text name='range' size=18 class='live-validate' tabindex=1></td>\n";
-	echo "<td class='tdcenter'><input type=text name='name' size='20' tabindex=2></td>\n";
-	echo "<td class='tdcenter'><input type=checkbox name='is_bcast' tabindex=3 checked></td>\n";
-	echo "<td>\n";
+	// tags column
+	echo '<tr><td rowspan=4><h3>assign tags</h3>';
 	renderTagSelect();
-	echo "</td><td class=tdcenter>";
+	echo '</td>';
+	// inputs column
+	echo "<th class=tdright>prefix</th><td class=tdleft><input type=text name='range' size=18 class='live-validate' tabindex=1></td>";
+	echo "<tr><th class=tdright>name</th><td class=tdleft><input type=text name='name' size='20' tabindex=2></td></tr>";
+	echo "<tr><th class=tdright>connected network</th><td class=tdleft><input type=checkbox name='is_bcast' tabindex=3 checked></td></tr>";
+	echo "<tr><td colspan=2>";
 	printImageHREF ('CREATE', 'Add a new network', TRUE, 4);
-	echo "</td></tr>\n";
+	echo '</td></tr>';
 	echo "</form></table><br><br>\n";
 	finishPortlet();
 
-	startPortlet ("Manage existing");
-	echo "<table class='widetable' border=0 cellpadding=5 cellspacing=0 align='center'>\n";
 	$addrspaceList = getAddressspaceList();
-	echo "<tr><th>&nbsp;</th><th>prefix</th><th>name</th><th>utilization</th></tr>";
-	foreach ($addrspaceList as $iprange)
+	if (count ($addrspaceList))
 	{
-		$netdata = getIPv4Network ($iprange['id']);
-		$usedips = count ($netdata['addrlist']);
-		$totalips = ($netdata['ip_bin'] | $netdata['mask_bin_inv']) - ($netdata['ip_bin'] & $netdata['mask_bin']) + 1;
-		echo "<tr valign=top><td>";
-		if ($usedips == 0)
+		startPortlet ('Manage existing (' . count ($addrspaceList) . ')');
+		echo "<table class='widetable' border=0 cellpadding=5 cellspacing=0 align='center'>\n";
+		echo "<tr><th>&nbsp;</th><th>prefix</th><th>name</th><th>&nbsp;</th></tr>";
+		foreach ($addrspaceList as $iprange)
 		{
-			echo "<a href='${root}process.php?op=delIPv4Prefix&page=${pageno}&tab=${tabno}&id=${iprange['id']}'>";
-			printImageHREF ('delete', 'Delete this IP range');
-			echo "</a>";
+			$netdata = getIPv4Network ($iprange['id']);
+			$usedips = count ($netdata['addrlist']);
+			$totalips = ($netdata['ip_bin'] | $netdata['mask_bin_inv']) - ($netdata['ip_bin'] & $netdata['mask_bin']) + 1;
+			echo "<form method=post action='${root}process.php?page=${pageno}&tab=${tabno}&op=updIPv4Prefix&id=${iprange['id']}'>";
+			echo '<tr valign=top><td>';
+			if ($usedips == 0)
+			{
+				echo "<a href='${root}process.php?op=delIPv4Prefix&page=${pageno}&tab=${tabno}&id=${iprange['id']}'>";
+				printImageHREF ('delete', 'Delete this IP range');
+				echo "</a>";
+			}
+			else
+				printImageHREF ('nodelete', 'There are IP addresses allocated or reserved');
+			echo "</td>\n<td class=tdleft>${netdata['ip']}/${netdata['mask']}</td>";
+			echo "<td><input type=text name=name size=40 value='${netdata['name']}'>";
+			echo "</td><td>";
+			printImageHREF ('save', 'Save changes', TRUE);
+			echo "</td></tr></form>\n";
 		}
-		else
-			printImageHREF ('nodelete', 'There are IP addresses allocated or reserved');
-		echo "</td>\n<td class=tdleft><a href='${root}?page=iprange&id=${iprange['id']}'>";
-		echo "${netdata['ip']}/${netdata['mask']}</a></td><td class=tdleft>${netdata['name']}";
-		echo "</td><td class=tdcenter>";
-		renderProgressBar ($usedips / $totalips);
-		echo "<br><small>${usedips}/${totalips}</small></td></tr>\n";
+		echo "</table>";
+		finishPortlet();
 	}
-	echo "</table>";
-	finishPortlet();
 }
 
 function renderIPv4Network ($id)
@@ -2237,15 +2251,36 @@ function renderIPv4Network ($id)
 	$total = ($range['ip_bin'] | $range['mask_bin_inv']) - ($range['ip_bin'] & $range['mask_bin']) + 1;
 	$used = count ($range['addrlist']);
 	echo "<table border=0 cellspacing=0 cellpadding=3 width='100%'>\n";
-	echo "<tr><th width='50%' class=tdright>Utilization:</th><td class=tdleft>";
+
+	echo "<tr><th width='50%' class=tdright>%% used:</th><td class=tdleft>";
 	renderProgressBar ($used/$total);
 	echo "&nbsp;${used}/${total}</td></tr>\n";
+
 	echo "<tr><th width='50%' class=tdright>Netmask:</th><td class=tdleft>";
 	echo $netmaskbylen[$range['mask']];
 	echo "</td></tr>\n";
+
 	echo "<tr><th width='50%' class=tdright>Wildcard bits:</th><td class=tdleft>";
 	echo $wildcardbylen[$range['mask']];
 	echo "</td></tr>\n";
+
+	$rtrs = findRouters ($range['addrlist']);
+	if (count ($rtrs))
+	{
+		$rtrclass = 'tdleft';
+		foreach ($rtrs as $rtr)
+			if ($range['addrlist'][ip2long ($rtr['addr'])]['class'] == 'trerror')
+				$rtrclass = 'tdleft trerror';
+		echo "<tr><th width='50%' class=tdright>Routed by:</th><td class='${rtrclass}'>";
+		$comma = '';
+		foreach ($rtrs as $rtr)
+		{
+			echo $comma . $rtr['addr'];
+			$comma = ', ';
+		}
+		echo "</td></tr>\n";
+	}
+
 	printTagTRs ("${root}?page=ipv4space&");
 	echo "</table><br>\n";
 	finishPortlet();
@@ -2378,10 +2413,10 @@ function renderIPv4Address ($dottedquad)
 	echo "<tr><td class=pcleft>";
 	startPortlet ('summary');
 	echo "<table border=0 cellspacing=0 cellpadding=3 width='100%'>\n";
-	echo "<tr><th width='50%' class=tdright>Allocations:</th><td class=tdleft>" . count ($address['bonds']) . "</td></tr>\n";
+	echo "<tr><th width='50%' class=tdright>Allocations:</th><td class=tdleft>" . count ($address['allocs']) . "</td></tr>\n";
 	echo "<tr><th width='50%' class=tdright>Originated NAT connections:</th><td class=tdleft>" . count ($address['outpf']) . "</td></tr>\n";
 	echo "<tr><th width='50%' class=tdright>Arriving NAT connections:</th><td class=tdleft>" . count ($address['inpf']) . "</td></tr>\n";
-	echo "<tr><th width='50%' class=tdright>SLB virtual services:</th><td class=tdleft>" . count ($address['vslist']) . "</td></tr>\n";
+	echo "<tr><th width='50%' class=tdright>SLB virtual services:</th><td class=tdleft>" . count ($address['lblist']) . "</td></tr>\n";
 	echo "<tr><th width='50%' class=tdright>SLB real servers:</th><td class=tdleft>" . count ($address['rslist']) . "</td></tr>\n";
 	printTagTRs();
 	echo "</table><br>\n";
