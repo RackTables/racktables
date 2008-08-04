@@ -51,7 +51,10 @@ function permitted ($p = NULL, $t = NULL, $o = NULL, $annex = array())
 	$subject[] = array ('tag' => '$page_' . $p);
 	$subject[] = array ('tag' => '$tab_' . $t);
 	if ($o === NULL and isset ($op))
+	{
 		$subject[] = array ('tag' => '$op_' . $op);
+		$subject[] = array ('tag' => '$any_op');
+	}
 	return gotClearanceForTagChain ($subject);
 }
 
