@@ -1162,6 +1162,7 @@ function loadRackObjectAutoTags ()
 	$oinfo = getObjectInfo ($object_id);
 	$ret = array();
 	$ret[] = array ('tag' => '$id_' . $object_id);
+	$ret[] = array ('tag' => '$typeid_' . $oinfo['objtype_id']);
 	$ret[] = array ('tag' => '$any_object');
 	if (validTagName ($oinfo['name']))
 		$ret[] = array ('tag' => '$cn_' . $oinfo['name']);
