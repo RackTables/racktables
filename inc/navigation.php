@@ -46,8 +46,12 @@ $tabhandler['row']['default'] = 'renderRow';
 $tabhandler['row']['newrack'] = 'renderNewRackForm';
 $tabhandler['row']['tagroller'] = 'renderTagRollerForRow';
 $ophandler['row']['tagroller']['rollTags'] = 'rollTags';
+$ophandler['row']['newrack']['addRack'] = 'addRack';
 $msgcode['row']['tagroller']['rollTags']['OK'] = 1;
 $msgcode['row']['tagroller']['rollTags']['ERR'] = 149;
+$msgcode['row']['newrack']['addRack']['OK'] = 65;
+$msgcode['row']['newrack']['addRack']['ERR1'] = 171;
+$msgcode['row']['newrack']['addRack']['ERR2'] = 172;
 
 $page['rack']['title_handler'] = 'dynamic_title_rack';
 $page['rack']['bypass'] = 'rack_id';

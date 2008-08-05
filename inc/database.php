@@ -344,8 +344,10 @@ function getObjectPortsAndLinks ($object_id = 0)
 	return $ret;
 }
 
-function commitAddRack ($name, $height, $row_id, $comment, $taglist)
+function commitAddRack ($name, $height = 0, $row_id = 0, $comment, $taglist)
 {
+	if ($row_id <= 0 or $height <= 0 or empty ($name))
+		return FALSE;
 	$result = useInsertBlade
 	(
 		'Rack',

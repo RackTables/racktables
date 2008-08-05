@@ -1358,6 +1358,13 @@ function oneLiner ($code, $args = array())
 	return $ret;
 }
 
+// Return mesage code by status code.
+function getMessageCode ($status)
+{
+	global $pageno, $tabno, $op, $msgcode;
+	return $msgcode[$pageno][$tabno][$op][$status];
+}
+
 function validTagName ($s, $allow_autotag = FALSE)
 {
 	if (1 == mb_ereg (TAGNAME_REGEXP, $s))

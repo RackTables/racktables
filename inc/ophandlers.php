@@ -1347,4 +1347,48 @@ function submitSLBConfig ()
 	return buildWideRedirectURL ($msglog);
 }
 
+function addRack ()
+{
+	assertUIntArg ('row_id', __FUNCTION__);
+	$taglist = isset ($_REQUEST['taglist']) ? $_REQUEST['taglist'] : array();
+	if (isset ($_REQUEST['got_data']))
+	{
+		assertStringArg ('rack_name', __FUNCTION__);
+		assertUIntArg ('rack_height1', __FUNCTION__);
+		assertStringArg ('rack_comment', __FUNCTION__, TRUE);
+
+		if (commitAddRack ($_REQUEST['rack_name'], $_REQUEST['rack_height1'], $_REQUEST['row_id'], $_REQUEST['rack_comment'], $taglist) === TRUE)
+			return buildRedirectURL ('OK', array ($_REQUEST['rack_name']));
+		else
+			return buildRedirectURL ('ERR1', array ($_REQUEST['rack_name']));
+	}
+	elseif (isset ($_REQUEST['got_mdata']))
+	{
+		assertUIntArg ('rack_height2', __FUNCTION__);
+		assertStringArg ('rack_names', __FUNCTION__, TRUE);
+		$log = array ('v' => 2);
+		// copy-and-paste from renderAddMultipleObjectsForm()
+		$names1 = explode ('\n', $_REQUEST['rack_names']);
+		$names2 = array();
+		foreach ($names1 as $line)
+		{
+			$parts = explode ('\r', $line);
+			reset ($parts);
+			if (empty ($parts[0]))
+				continue;
+			else
+				$names2[] = rtrim ($parts[0]);
+		}
+		foreach ($names2 as $cname)
+			if (commitAddRack ($cname, $_REQUEST['rack_height2'], $_REQUEST['row_id'], '', $taglist) === TRUE)
+				$log['m'][] = array ('c' => getMessageCode ('OK'), 'a' => array ($cname));
+			else
+				$log['m'][] = array ('c' => getMessageCode ('ERR1'), 'a' => array ($cname));
+		return buildWideRedirectURL ($log);
+	}
+	else
+		return buildRedirectURL ('ERR2');
+	printLog ($log);
+}
+
 ?>

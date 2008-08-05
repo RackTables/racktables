@@ -284,54 +284,11 @@ function renderRack ($rack_id = 0, $hl_obj_id = 0)
 
 function renderNewRackForm ($row_id)
 {
-	global $pageno, $tabno;
-	$log = array();
-	$taglist = isset ($_REQUEST['taglist']) ? $_REQUEST['taglist'] : array();
-
-	// Look for current submit.
-	if (isset ($_REQUEST['got_data']))
-	{
-		assertStringArg ('rack_name', __FUNCTION__);
-		assertUIntArg ('rack_height1', __FUNCTION__);
-		assertStringArg ('rack_comment', __FUNCTION__, TRUE);
-		$name = $_REQUEST['rack_name'];
-
-		if (commitAddRack ($name, $_REQUEST['rack_height1'], $row_id, $_REQUEST['rack_comment'], $taglist) === TRUE)
-			$log[] = array ('code' => 'success', 'message' => "Added new rack '${name}'");
-		else
-			$log[] = array ('code' => 'error', 'message' => __FUNCTION__ . ': commitAddRack() failed');
-	}
-	elseif (isset ($_REQUEST['got_mdata']))
-	{
-		assertUIntArg ('rack_height2', __FUNCTION__);
-		assertStringArg ('rack_names', __FUNCTION__, TRUE);
-		// copy-and-paste from renderAddMultipleObjectsForm()
-		$names1 = explode ('\n', $_REQUEST['rack_names']);
-		$names2 = array();
-		foreach ($names1 as $line)
-		{
-			$parts = explode ('\r', $line);
-			reset ($parts);
-			if (empty ($parts[0]))
-				continue;
-			else
-				$names2[] = rtrim ($parts[0]);
-		}
-		foreach ($names2 as $cname)
-			if (commitAddRack ($cname, $_REQUEST['rack_height2'], $row_id, '', $taglist) === TRUE)
-				$log[] = array ('code' => 'success', 'message' => "Added new rack '${cname}'");
-			else
-				$log[] = array ('code' => 'error', 'message' => __FUNCTION__ . ': commitAddRack() failed');
-	}
-	printLog ($log);
-
+	showMessageOrError();
 	echo "<table border=0 width='100%'><tr><td valign=top>";
-	// Render a form for the next.
+
 	startPortlet ('Add one');
-	echo '<form>';
-	echo "<input type=hidden name=page value=${pageno}>";
-	echo "<input type=hidden name=tab value=${tabno}>";
-	echo "<input type=hidden name=row_id value=${row_id}>";
+	printOpFormIntro ('addRack', array ('got_data' => 'TRUE'));
 	echo '<table border=0 align=center>';
 	$defh = getConfigVar ('DEFAULT_RACK_HEIGHT');
 	if ($defh == 0)
@@ -339,30 +296,35 @@ function renderNewRackForm ($row_id)
 	echo "<tr><th class=tdright>Rack name (*):</th><td class=tdleft><input type=text name=rack_name tabindex=1></td></tr>\n";
 	echo "<tr><th class=tdright>Height in units (*):</th><td class=tdleft><input type=text name=rack_height1 tabindex=2 value='${defh}'></td></tr>\n";
 	echo "<tr><th class=tdright>Comment:</th><td class=tdleft><input type=text name=rack_comment tabindex=3></td></tr>\n";
-	echo "<tr><td class=submit colspan=2><input type=submit name=got_data value='Add'></td></tr>\n";
-	echo '</table>';
+	echo "<tr><td class=submit colspan=2>";
+	printImageHREF ('CREATE', 'Add', TRUE);
+	echo "</td></tr></table></form>";
 	finishPortlet();
-	echo '</td>';
 
-	echo '<td rowspan=2 valign=top>';
+	echo '</td><td rowspan=2 valign=top>';
+
 	startPortlet ('Pre-assigned tags');
 	renderTagSelect();
 	finishPortlet();
+
 	echo '</td></tr>';
 
 	echo '<tr><td valign=top>';
 	startPortlet ('Add many');
+	printOpFormIntro ('addRack', array ('got_mdata' => 'TRUE'));
 	echo '<table border=0 align=center>';
 	$defh = getConfigVar ('DEFAULT_RACK_HEIGHT');
 	if ($defh == 0)
 		$defh = '';
 	echo "<tr><th class=tdright>Height in units (*):</th><td class=tdleft><input type=text name=rack_height2 value='${defh}'></td></tr>\n";
 	echo "<tr><th class=tdright>Rack names (*):</th><td class=tdleft><textarea name=rack_names cols=40 rows=25></textarea></td></tr>\n";
-	echo "<tr><td class=submit colspan=2><input type=submit name=got_mdata value='Add'></td></tr>\n";
+	echo "<tr><td class=submit colspan=2>";
+	printImageHREF ('CREATE', 'Add', TRUE);
+	echo "</td></tr>\n";
 	echo '</form></table>';
 	finishPortlet();
-	echo '</td></tr>';
-	echo '</table>';
+
+	echo '</td></tr></table>';
 }
 
 function renderEditObjectForm ($object_id)
@@ -1332,6 +1294,7 @@ function printLog ($log)
 				62 => array ('code' => 'success', 'format' => 'gw: %s'),
 				63 => array ('code' => 'success', 'format' => '%u change request(s) have been processed'),
 				64 => array ('code' => 'success', 'format' => 'Port %s@%s has been assigned to VLAN %u'),
+				65 => array ('code' => 'success', 'format' => "Added new rack '%s'"),
 
 				100 => array ('code' => 'error', 'format' => 'Generic error: %s'),
 				101 => array ('code' => 'error', 'format' => 'Port name cannot be empty'),
@@ -1404,6 +1367,8 @@ function printLog ($log)
 				168 => array ('code' => 'error', 'format' => 'Port %s is a trunk'),
 				169 => array ('code' => 'error', 'format' => 'Failed to configure %s, connector returned code %u'),
 				170 => array ('code' => 'error', 'format' => 'There is no network for IP address "%s"'),
+				171 => array ('code' => 'error', 'format' => "Failed creating rack '%s'. Already exists in this row?"),
+				172 => array ('code' => 'error', 'format' => 'Malformed request'),
 
 				200 => array ('code' => 'warning', 'format' => 'generic warning: %s'),
 				201 => array ('code' => 'warning', 'format' => 'nothing happened...'),
