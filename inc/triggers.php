@@ -106,16 +106,4 @@ function trigger_passwdchange ()
 	return getConfigVar ('USER_AUTH_SRC') == 'database';
 }
 
-// There's a sense to export router configuration, 
-function trigger_rtrconfig ()
-{
-	assertUIntArg ('object_id', __FUNCTION__);
-	$alloclist = getObjectAddresses ($_REQUEST['object_id']);
-	$gwcount = 0;
-	foreach ($alloclist as $alloc)
-		if ($alloc['type'] == 'router')
-			$gwcount++;
-	return $gwcount > 0;
-}
-
 ?>

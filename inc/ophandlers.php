@@ -1347,11 +1347,4 @@ function submitSLBConfig ()
 	return buildWideRedirectURL ($msglog);
 }
 
-function submitRouterConfig ()
-{
-	assertUIntArg ('object_id', __FUNCTION__);
-	$msglog = activateRouterConfig ($_REQUEST['object_id'], buildRouterConfig ($_REQUEST['object_id']));
-	return buildWideRedirectURL ($msglog);
-}
-
 ?>

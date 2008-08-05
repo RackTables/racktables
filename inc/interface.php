@@ -4025,25 +4025,6 @@ function renderLVSConfig ($object_id = 0)
 	echo '</pre>';
 }
 
-function renderRouterConfig ($object_id = 0)
-{
-	showMessageOrError();
-	global $root, $pageno, $tabno;
-	if ($object_id <= 0)
-	{
-		showError ('Invalid argument', __FUNCTION__);
-		return;
-	}
-	echo '<br>';
-	echo "<form method=post action='${root}process.php?page=${pageno}&tab=${tabno}&op=submitRouterConfig'>";
-	echo "<input type=hidden name=object_id value=${object_id}>";
-	echo "<center><input type=submit value='Submit for activation'></center>";
-	echo "</form>";
-	echo '<pre>';
-	echo buildRouterConfig ($object_id);
-	echo '</pre>';
-}
-
 function renderVirtualService ($vsid)
 {
 	global $root, $nextorder;

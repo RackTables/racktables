@@ -246,10 +246,12 @@ function activateSLBConfig ($object_id = 0, $configtext = '')
 }
 
 // FIXME: copied and pasted too
-function activateRouterConfig ($object_id = 0, $configtext = '')
+// Drop a file off RackTables platform. The gateway will catch the file and pass it to the given
+// installer script.
+function gwSendFile ($object_id = 0, $handlername, $filetext = '')
 {
 	global $remote_username;
-	if ($object_id <= 0 or empty ($configtext))
+	if ($object_id <= 0 or empty ($handlername))
 		return oneLiner (160); // invalid arguments
 	$objectInfo = getObjectInfo ($object_id);
 	$endpoints = findAllEndpoints ($object_id, $objectInfo['name']);
@@ -257,16 +259,15 @@ function activateRouterConfig ($object_id = 0, $configtext = '')
 		return oneLiner (161); // endpoint not found
 	if (count ($endpoints) > 1)
 		return oneLiner (162); // can't pick an address
-	$hwtype = $swtype = 'unknown';
 	$endpoint = str_replace (' ', '+', $endpoints[0]);
-	$tmpfilename = tempnam ('', 'RackTables-rtrconfig-');
+	$tmpfilename = tempnam ('', 'RackTables-sendfile-');
 	$tmpfile = fopen ($tmpfilename, 'wb');
-	fwrite ($tmpfile, str_replace ("\r", '', $configtext));
+	fwrite ($tmpfile, $filetext);
 	fclose ($tmpfile);
 	$data = queryGateway
 	(
-		'rtrconfig',
-		array ("submit ${remote_username} ${endpoint} ${tmpfilename}")
+		'sendfile',
+		array ("submit ${remote_username} ${endpoint} ${handlername} ${tmpfilename}")
 	);
 	unlink ($tmpfilename);
 	if ($data == NULL)

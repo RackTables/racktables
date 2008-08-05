@@ -1,0 +1,59 @@
+#!/bin/sh
+
+# This is a RackTables gateway for arbitrary file export. File contents doesn't
+# matter here and will only be somehow sent to the remote host for further
+# processing.
+#
+# The only supported command is:
+#
+# * submit <username> <endpoint> <handler name> <data file name>: send the file
+#
+# Handler name can be any string used to distinguish different file processors.
+# The temporary file will be passed to a script in current directory, if it exists.
+# Script name is "<handlername>.install"
+
+user=
+endpoint=
+cfgfile=
+MYDIR=`dirname $0`
+
+do_submit()
+{
+	user=`echo $args | cut -s -d' ' -f1`
+	endpoint=`echo $args | cut -s -d' ' -f2`
+	handler=`echo $args | cut -s -d' ' -f3`
+	cfgfile=`echo $args | cut -s -d' ' -f4`
+	# sanity checks
+	if [ -z "$user" -o -z "$endpoint" -o -z "$handler" -o -z "$cfgfile" ]; then
+		echo 'ERR!invalid arguments'
+		return
+	fi
+	if [ ! -s "$cfgfile" ]; then
+		echo "ERR!File $cfgfile is either missing or empty."
+		return
+	fi
+	if [ ! -x "$MYDIR/$handler.install" ]; then
+		echo "ERR!Cannot execute $MYDIR/$handler.install"
+		return
+	fi
+	"$MYDIR/$handler.install" $user $endpoint $cfgfile
+	ret=$?
+	if [ $ret = 0 ]; then
+		echo "OK!File sent successfully"
+	else
+		echo "ERR!File handler returned code $ret"
+	fi
+}
+
+# main loop
+while read cmd args; do
+	case $cmd in
+		submit)
+			do_submit $args
+			;;
+		*)
+			echo "ERR!unknown command $cmd"
+	esac
+done
+
+exit 0

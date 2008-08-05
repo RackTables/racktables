@@ -1476,32 +1476,6 @@ function buildLVSConfig ($object_id = 0)
 	return $newconfig;
 }
 
-function buildRouterConfig ($object_id = 0)
-{
-	if ($object_id <= 0)
-	{
-		showError ('Invalid argument', __FUNCTION__);
-		return;
-	}
-	$newconfig = "# RackTables asset dump version 0\n";
-	$alloclist = getObjectAddresses ($object_id);
-//	dump($alloclist);
-	$gwcount = 0;
-	foreach ($alloclist as $alloc)
-		if ($alloc['type'] == 'router')
-		{
-			$netinfo = getIPv4Network (getIPv4AddressNetworkId ($alloc['ip']));
-			$newconfig .= sprintf
-			(
-				"%s %s/%u\n",
-				$alloc['name'],
-				$alloc['ip'],
-				$netinfo['mask']
-			);
-		}
-	return $newconfig;
-}
-
 // Indicate occupation state of each IP address: none, ordinary or problematic.
 function markupIPv4AddrList (&$addrlist)
 {

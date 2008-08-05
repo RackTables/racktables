@@ -171,6 +171,8 @@ require_once 'inc/ophandlers.php';
 require_once 'inc/triggers.php';
 require_once 'inc/gateways.php';
 require_once 'inc/snmp.php';
+if (file_exists ('inc/local.php'))
+	require_once 'inc/local.php';
 
 // These will be filled in by fixContext()
 $auto_tags = array();
