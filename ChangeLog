@@ -3,6 +3,7 @@
 	bugfix: more message processing fixes
 	new feature: "router" addresses allocations
 	new feature: router configuration exporter
+	update: 3 more switches in SNMP code by Walery Wysotsky
 0.16.1 2008-07-30
 	new feature: pre-assigned tags for new VS and RS pools records
 	new feature: cache RackCode parse tree for better performance
