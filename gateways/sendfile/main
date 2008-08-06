@@ -28,8 +28,8 @@ do_submit()
 		echo 'ERR!invalid arguments'
 		return
 	fi
-	if [ ! -s "$cfgfile" ]; then
-		echo "ERR!File $cfgfile is either missing or empty."
+	if [ ! -f "$cfgfile" ]; then
+		echo "ERR!File $cfgfile is missing."
 		return
 	fi
 	if [ ! -x "$MYDIR/$handler.install" ]; then

@@ -767,7 +767,7 @@ function renderRackObject ($object_id = 0)
 			if (strlen($addr['address_name'])>40)
 				$address_name = substr($addr['address_name'],0,38).'...';
 			else
-				$address_name = $addr['address_name'];
+				$address_name = empty ($addr['address_name']) ? '&nbsp;' : $addr['address_name'];
 
 			$virtnum = countRefsOfType($addr['references'], 'virtual', 'eq');
 			$sharednum = countRefsOfType($addr['references'], 'shared', 'eq');
@@ -783,11 +783,19 @@ function renderRackObject ($object_id = 0)
 			elseif ($addr['type']=='regular' && $sharednum>0)
 				echo ' class=trerror';
 
+			$netid = getIPv4AddressNetworkId ($addr['ip']);
+			if (NULL === ($netid = getIPv4AddressNetworkId ($addr['ip'])))
+				$suffix = '/??';
+			else
+			{
+				$netinfo = getIPv4NetworkInfo ($netid);
+				$suffix = '/' . $netinfo['mask'];
+			}
 			if ($hl_ipv4_addr == $addr['ip'])
 				echo ' class=port_highlight';
 			echo "><td class=tdleft>${addr['name']}</td><td class=tdleft>";
 			echo "<a href='${root}?page=ipaddress&ip=${addr['ip']}&hl_object_id=${object_id}'>";
-			echo "${addr['ip']}</a></td><td class='description'>$address_name</td><td class=tdleft>\n";
+			echo "${addr['ip']}</a><small>${suffix}</small></td><td class='description'>$address_name</td><td class=tdleft>\n";
 
 			if ($addr['address_reserved']=='yes')
 				echo "<b>Reserved;</b> ";
@@ -4808,9 +4816,10 @@ function renderAutoPortsForm ($object_id = 0)
 function renderTagRowForViewer ($taginfo, $level = 0)
 {
 	echo '<tr><td align=left>';
+	echo '<div title="id = ' . $taginfo['id'] . '">';
 	for ($i = 0; $i < $level; $i++)
 		printImageHREF ('spacer');
-	echo $taginfo['tag'];
+	echo $taginfo['tag'] . '</div>';
 	echo "</td></tr>\n";
 	foreach ($taginfo['kids'] as $kid)
 		renderTagRowForViewer ($kid, $level + 1);
