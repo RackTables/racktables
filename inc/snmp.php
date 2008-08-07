@@ -2,6 +2,7 @@
 
 function doSNMPmining ($object_id, $community)
 {
+	// FIXME: switch to message log version 2
 	$log = array();
 // IDs: http://cisco.com/en/US/products/sw/cscowork/ps2064/products_device_support_table09186a0080803bb4.html
 // 2950: http://www.cisco.com/en/US/products/hw/switches/ps628/prod_models_home.html

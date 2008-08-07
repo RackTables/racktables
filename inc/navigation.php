@@ -70,6 +70,7 @@ $tabhandler['rack']['design'] = 'renderRackDesign';
 $tabhandler['rack']['problems'] = 'renderRackProblems';
 $tabhandler['rack']['tags'] = 'renderRackTags';
 $trigger['rack']['tags'] = 'trigger_tags';
+$ophandler['rack']['edit']['updateRack'] = 'updateRack';
 $ophandler['rack']['tags']['saveTags'] = 'saveRackTags';
 
 $page['objgroup']['title_handler'] = 'dynamic_title_objgroup';
@@ -141,6 +142,7 @@ $ophandler['object']['editrspvs']['addLB'] = 'addLoadBalancer';
 $ophandler['object']['editrspvs']['delLB'] = 'deleteLoadBalancer';
 $ophandler['object']['editrspvs']['updLB'] = 'updateLoadBalancer';
 $ophandler['object']['lvsconfig']['submitSLBConfig'] = 'submitSLBConfig';
+$ophandler['object']['snmpportfinder']['querySNMPData'] = 'querySNMPData';
 $delayauth['object']['livevlans']['setPortVLAN'] = TRUE;
 $msgcode['object']['nat4']['addNATv4Rule']['OK'] = 2;
 $msgcode['object']['nat4']['addNATv4Rule']['ERR'] = 100;

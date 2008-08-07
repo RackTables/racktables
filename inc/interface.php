@@ -33,6 +33,91 @@ $aac2 = array
 	'router' => '<strong>R:</strong>',
 );
 
+// Let's have it here, so extensions can add their own images.
+$image = array();
+$image['error']['path'] = 'pix/error.png';
+$image['error']['width'] = 76;
+$image['error']['height'] = 17;
+$image['logo']['path'] = 'pix/defaultlogo.png';
+$image['logo']['width'] = 210;
+$image['logo']['height'] = 40;
+$image['rackspace']['path'] = 'pix/racks.png';
+$image['rackspace']['width'] = 218;
+$image['rackspace']['height'] = 200;
+$image['objects']['path'] = 'pix/server.png';
+$image['objects']['width'] = 218;
+$image['objects']['height'] = 200;
+$image['ipv4space']['path'] = 'pix/addressspace.png';
+$image['ipv4space']['width'] = 218;
+$image['ipv4space']['height'] = 200;
+$image['ipv4slb']['path'] = 'pix/slb.png';
+$image['ipv4slb']['width'] = 218;
+$image['ipv4slb']['height'] = 200;
+$image['config']['path'] = 'pix/configuration.png';
+$image['config']['width'] = 218;
+$image['config']['height'] = 200;
+$image['reports']['path'] = 'pix/report.png';
+$image['reports']['width'] = 218;
+$image['reports']['height'] = 200;
+$image['useup']['path'] = 'pix/tango-edit-clear.png';
+$image['useup']['width'] = 16;
+$image['useup']['height'] = 16;
+$image['link']['path'] = 'pix/tango-network-wired.png';
+$image['link']['width'] = 16;
+$image['link']['height'] = 16;
+$image['unlink']['path'] = 'pix/tango-edit-clear.png';
+$image['unlink']['width'] = 16;
+$image['unlink']['height'] = 16;
+$image['add']['path'] = 'pix/tango-list-add.png';
+$image['add']['width'] = 16;
+$image['add']['height'] = 16;
+$image['delete']['path'] = 'pix/tango-list-remove.png';
+$image['delete']['width'] = 16;
+$image['delete']['height'] = 16;
+$image['nodelete']['path'] = 'pix/tango-list-remove-shadow.png';
+$image['nodelete']['width'] = 16;
+$image['nodelete']['height'] = 16;
+$image['grant'] = $image['add'];
+$image['revoke'] = $image['delete'];
+$image['inservice']['path'] = 'pix/tango-emblem-system.png';
+$image['inservice']['width'] = 16;
+$image['inservice']['height'] = 16;
+$image['notinservice']['path'] = 'pix/tango-dialog-error.png';
+$image['notinservice']['width'] = 16;
+$image['notinservice']['height'] = 16;
+$image['blockuser'] = $image['inservice'];
+$image['unblockuser'] = $image['notinservice'];
+$image['find']['path'] = 'pix/tango-system-search.png';
+$image['find']['width'] = 16;
+$image['find']['height'] = 16;
+$image['spacer']['path'] = 'pix/pixel.png';
+$image['spacer']['width'] = 16;
+$image['spacer']['height'] = 16;
+$image['next']['path'] = 'pix/tango-go-next.png';
+$image['next']['width'] = 32;
+$image['next']['height'] = 32;
+$image['prev']['path'] = 'pix/tango-go-previous.png';
+$image['prev']['width'] = 32;
+$image['prev']['height'] = 32;
+$image['clear']['path'] = 'pix/tango-edit-clear.png';
+$image['clear']['width'] = 16;
+$image['clear']['height'] = 16;
+$image['save']['path'] = 'pix/tango-document-save.png';
+$image['save']['width'] = 16;
+$image['save']['height'] = 16;
+$image['SAVE']['path'] = 'pix/tango-document-save-big.png';
+$image['SAVE']['width'] = 32;
+$image['SAVE']['height'] = 32;
+$image['create']['path'] = 'pix/tango-document-new.png';
+$image['create']['width'] = 16;
+$image['create']['height'] = 16;
+$image['CREATE']['path'] = 'pix/tango-document-new-big.png';
+$image['CREATE']['width'] = 32;
+$image['CREATE']['height'] = 32;
+$image['DENIED']['path'] = 'pix/tango-dialog-error-big.png';
+$image['DENIED']['width'] = 32;
+$image['DENIED']['height'] = 32;
+
 // Main menu.
 function renderIndex ()
 {
@@ -426,27 +511,6 @@ function renderEditObjectForm ($object_id)
 // This is a clone of renderEditObjectForm().
 function renderEditRackForm ($rack_id)
 {
-	// Handle submit.
-	if (isset ($_REQUEST['got_data']))
-	{
-		$log = array();
-		assertUIntArg ('rack_row_id', __FUNCTION__);
-		assertUIntArg ('rack_height', __FUNCTION__);
-		assertStringArg ('rack_name', __FUNCTION__);
-		assertStringArg ('rack_comment', __FUNCTION__, TRUE);
-		$row_id = $_REQUEST['rack_row_id'];
-		$height = $_REQUEST['rack_height'];
-		$name = $_REQUEST['rack_name'];
-		$comment = $_REQUEST['rack_comment'];
-
-		if (commitUpdateRack ($rack_id, $name, $height, $row_id, $comment) === TRUE)
-			$log[] = array ('code' => 'success', 'message' => "Updated rack '${name}'");
-		else
-			$log[] = array ('code' => 'error', 'message' => __FUNCTION__ . ': commitUpdateRack() failed');
-		resetThumbCache ($rack_id);
-		printLog ($log);
-	}
-
 	global $pageno, $tabno;
 	$rack = getRackData ($rack_id);
 	if ($rack == NULL)
@@ -457,10 +521,7 @@ function renderEditRackForm ($rack_id)
 
 	// Render a form for the next.
 	startPortlet ('Rack attributes');
-	echo '<form>';
-	echo "<input type=hidden name=page value=${pageno}>";
-	echo "<input type=hidden name=tab value=${tabno}>";
-	echo "<input type=hidden name=rack_id value=${rack_id}>";
+	printOpFormIntro ('updateRack');
 	echo '<table border=0 align=center>';
 	echo "<tr><th class=tdright>Rack row:</th><td class=tdleft>";
 	printSelect (readChapter ('RackRow'), 'rack_row_id', $rack['row_id']);
@@ -468,7 +529,9 @@ function renderEditRackForm ($rack_id)
 	echo "<tr><th class=tdright>Name (required):</th><td class=tdleft><input type=text name=rack_name value='${rack['name']}'></td></tr>\n";
 	echo "<tr><th class=tdright>Height (required):</th><td class=tdleft><input type=text name=rack_height value='${rack['height']}'></td></tr>\n";
 	echo "<tr><th class=tdright>Comment:</th><td class=tdleft><input type=text name=rack_comment value='${rack['comment']}'></td></tr>\n";
-	echo "<tr><td class=submit colspan=2><input type=submit name=got_data value='Update'></td></tr>\n";
+	echo "<tr><td class=submit colspan=2>";
+	printImageHREF ('SAVE', 'Save changes', TRUE);
+	echo "</td></tr>\n";
 	echo '</form></table><br>';
 	finishPortlet();
 	
@@ -563,6 +626,7 @@ function renderRackInfoPortlet ($rackData)
 }
 
 // This is a universal editor of rack design/waste.
+// FIXME: switch to using printOpFormIntro()
 function renderGridForm ($rack_id = 0, $filter, $header, $submit, $state1, $state2)
 {
 	if ($rack_id == 0)
@@ -937,7 +1001,7 @@ function renderRackObject ($object_id = 0)
 	}
 	echo "</td>\n";
 
-	// After left column we have (surprise!) right column with rackspace portled only.
+	// After left column we have (surprise!) right column with rackspace portlet only.
 	echo "<td class=pcright>";
 	// rackspace portlet
 	startPortlet ('Rackspace allocation');
@@ -1003,12 +1067,7 @@ function renderPortsForObject ($object_id = 0)
 	echo "<th>Rem. object</th><th>Rem. port</th><th>(Un)link or (un)reserve</th><th>&nbsp;</th></tr>\n";
 	foreach ($ports as $port)
 	{
-		echo "<form action='${root}process.php'>";
-		echo "<input type=hidden name=op value=editPort>";
-		echo "<input type=hidden name=page value='${pageno}'>\n";
-		echo "<input type=hidden name=tab value='${tabno}'>\n";
-		echo "<input type=hidden name=port_id value='${port['id']}'>";
-		echo "<input type=hidden name=object_id value='$object_id'>\n";
+		printOpFormIntro ('editPort', array ('port_id' => $port['id']));
 		echo "<tr><td><a href='${root}process.php?op=delPort&page=${pageno}&tab=${tabno}&port_id=${port['id']}&object_id=$object_id&port_name=${port['name']}'>";
 		printImageHREF ('delete', 'Unlink and Delete this port');
 		echo "</a></td>\n";
@@ -1049,14 +1108,11 @@ function renderPortsForObject ($object_id = 0)
 		printImageHREF ('save', 'Save changes', TRUE);
 		echo "</td></form></tr>\n";
 	}
-	echo "<form action='${root}process.php'><tr><td>";
+	printOpFormIntro ('addPort');
+	echo "<tr><td>";
 	printImageHREF ('add', '', TRUE, 104);
 	echo "</td><td><input type=text size=8 name=port_name tabindex=100></td>\n";
 	echo "<td><input type=text size=24 name=port_label tabindex=101></td>";
-	echo "<input type=hidden name=op value=addPort>\n";
-	echo "<input type=hidden name=object_id value='${object_id}'>\n";
-	echo "<input type=hidden name=page value='${pageno}'>\n";
-	echo "<input type=hidden name=tab value='${tabno}'>\n";
 	echo "<td><select name='port_type_id' tabindex=102>\n";
 	$types = getPortTypes();
 	$default_port_type = getConfigVar ('default_port_type');
@@ -1074,11 +1130,7 @@ function renderPortsForObject ($object_id = 0)
 	finishPortlet();
 
 	startPortlet ('Add/update multiple ports');
-	echo "<form action=${root}process.php method=post>";
-	echo "<input type=hidden name=page value='${pageno}'>\n";
-	echo "<input type=hidden name=tab value='${tabno}'>\n";
-	echo "<input type=hidden name=object_id value='${object_id}'>\n";
-	echo "<input type=hidden name=op value=addMultiPorts>";
+	printOpFormIntro ('addMultiPorts');
 	echo 'Format: <select name=format>';
 	echo '<option value=c3600asy>Cisco 3600 async: sh line | inc TTY</option>';
 	echo '<option value=fiwg selected>Foundry ServerIron/FastIron WorkGroup/Edge: sh int br</option>';
@@ -1136,12 +1188,7 @@ function renderIPv4ForObject ($object_id = 0)
 		else 
 			$class='';
 
-		echo "<form action='${root}process.php'>";
-		echo "<input type=hidden name=page value='${pageno}'>\n";
-		echo "<input type=hidden name=tab value='${tabno}'>\n";
-		echo "<input type=hidden name=op value=updIPv4Allocation>";
-		echo "<input type=hidden name=object_id value='$object_id'>";
-		echo "<input type=hidden name=ip value='${addr['ip']}'>";
+		printOpFormIntro ('updIPv4Allocation', array ('ip' => $addr['ip']));
 		echo "<tr class='$class'><td><a href='${root}process.php?op=delIPv4Allocation&page=${pageno}&tab=${tabno}&ip=${addr['ip']}&object_id=$object_id'>";
 		printImageHREF ('delete', 'Delete this IPv4 address');
 		echo "</a></td>";
@@ -1202,20 +1249,15 @@ function renderIPv4ForObject ($object_id = 0)
 		echo "</td></form></tr>\n";
 	}
 
-
-	echo "<form action='${root}process.php'><tr><td>";
+	printOpFormIntro ('addIPv4Allocation');
+	echo "<tr><td>";
 	printImageHREF ('add', 'Allocate new address', TRUE, 99);
-	echo "</td><td class=tdleft>";
-	echo "<input type='text' size='10' name='bond_name' tabindex=100></td>\n";
-	echo "<input type=hidden name=page value='${pageno}'>\n";
-	echo "<input type=hidden name=tab value='${tabno}'>\n";
-	echo "<input type=hidden name=op value=addIPv4Allocation>\n";
-	echo "<input type=hidden name=object_id value='$object_id'>\n";
-	echo "<td class=tdleft><input type=text name='ip' tabindex=101>\n";
-	echo "</td><td>&nbsp;</td><td>";
+	echo "</td>";
+	echo "<td class=tdleft><input type='text' size='10' name='bond_name' tabindex=100></td>\n";
+	echo "<td class=tdleft><input type=text name='ip' tabindex=101></td>\n";
+	echo "<td>&nbsp;</td><td>";
 	printSelect ($aat, 'bond_type');
-	echo "</td><td colspan=2>&nbsp;</td></tr></form>";
-	echo "</table><br>\n";
+	echo "</td><td colspan=2>&nbsp;</td></tr></form></table><br>\n";
 	finishPortlet();
 
 }
@@ -1452,6 +1494,7 @@ and either delete them before unmounting or refuse to unmount the object.
 */
 
 // We extensively use $_REQUEST in the function.
+// FIXME: move related code into ophandler
 function renderRackSpaceForObject ($object_id = 0)
 {
 	if ($object_id <= 0)
@@ -2064,7 +2107,7 @@ function renderIPv4SLB ()
 				{
 					echo $vsdata['lblist'][$lb_object_id]['size'];
 					echo " (<a href='${root}?page=ipv4rsp&pool_id=";
-				       	echo $vsdata['lblist'][$lb_object_id]['id'] . "'>";
+					echo $vsdata['lblist'][$lb_object_id]['id'] . "'>";
 					echo $vsdata['lblist'][$lb_object_id]['name'] . '</a>)';
 				}
 				echo '</td>';
@@ -2084,6 +2127,8 @@ function renderIPv4SpaceEditor ()
 
 	startPortlet ("Add new");
 	echo '<table border=0 cellpadding=10 align=center>';
+	// This form requires a name, so JavaScript validator can find it.
+	// No printOpFormIntro() hence
 	echo "<form method=post name='add_new_range' action='${root}process.php'>\n";
 	echo "<input type=hidden name=op value=addIPv4Prefix>\n";
 	echo "<input type=hidden name=page value='${pageno}'>\n";
@@ -2356,15 +2401,11 @@ function renderIPv4Network ($id)
 
 function renderIPv4NetworkProperties ($id)
 {
-	global $root, $pageno, $tabno;
 	showMessageOrError();
 	$netdata = getIPv4NetworkInfo ($id);
 	echo "<center><h1>${netdata['ip']}/${netdata['mask']}</h1></center>\n";
 	echo "<table border=0 cellpadding=10 cellpadding=1 align='center'>\n";
-	echo "<form action='${root}process.php'><input type=hidden name=op value=editRange>";
-	echo "<input type=hidden name=page value='${pageno}'>\n";
-	echo "<input type=hidden name=tab value='${tabno}'>\n";
-	echo "<input type=hidden name=id value='${id}'>";
+	printOpFormIntro ('editRange');
 	echo "<tr><td class='tdright'>Name:</td><td class='tdleft'><input type=text name=name size=20 value='${netdata['name']}'></tr>";
 	echo "<tr><td colspan=2 class=tdcenter>";
 	printImageHREF ('SAVE', 'Save changes', TRUE);
@@ -2482,16 +2523,13 @@ function renderIPv4Address ($dottedquad)
 
 function renderIPv4AddressProperties ($dottedquad)
 {
-	global $pageno, $tabno, $root;
 	showMessageOrError();
 	$address = getIPv4Address ($dottedquad);
 	echo "<center><h1>$dottedquad</h1></center>\n";
+
 	startPortlet ('update');
 	echo "<table border=0 cellpadding=10 cellpadding=1 align='center'>\n";
-	echo "<form action='${root}process.php'><input type=hidden name=op value=editAddress>";
-	echo "<input type=hidden name=page value='${pageno}'>\n";
-	echo "<input type=hidden name=tab value='${tabno}'>\n";
-	echo "<input type=hidden name=ip value='${dottedquad}'>";
+	printOpFormIntro ('editAddress');
 	echo "<tr><td class='tdright'>Name:</td><td class='tdleft'><input type=text name=name size=20 value='${address['name']}'></tr>";
 	echo "<td class='tdright'>Reserved:</td><td class='tdleft'><input type=checkbox name=reserved size=20 ";
 	echo ($address['reserved']=='yes') ? 'checked' : '';
@@ -2501,11 +2539,9 @@ function renderIPv4AddressProperties ($dottedquad)
 	finishPortlet();
 	if (empty ($address['name']) and $address['reserved'] == 'no')
 		return;
+
 	startPortlet ('release');
-	echo "<form action='${root}process.php?page=${pageno}&tab=${tabno}&op=editAddress' method=post>";
-	echo "<input type=hidden name=ip value='${dottedquad}'>";
-	echo "<input type=hidden name=name value=''>";
-	echo "<input type=hidden name=reserved value=''>";
+	printOpFormIntro ('editAddress', array ('name' => '', 'reserved' => ''));
 	echo "<input type=submit value='release'></form>";
 	finishPortlet();
 }
@@ -2525,12 +2561,8 @@ function renderIPv4AddressAllocations ($dottedquad)
 		echo "<tr class='${class}'><td colspan=3>&nbsp;</td><td class=tdleft><strong>RESERVED</strong></td><td>&nbsp;</td></tr>";
 	foreach ($address['allocs'] as $bond)
 	{
-		echo "<tr class='$class'><form action='${root}process.php'>";
-		echo "<input type=hidden name=op value='updIPv4Allocation'>";
-		echo "<input type=hidden name=page value='${pageno}'>";
-		echo "<input type=hidden name=tab value='${tabno}'>";
-		echo "<input type=hidden name=ip value='$dottedquad'>";
-		echo "<input type=hidden name=object_id value='${bond['object_id']}'>";
+		echo "<tr class='$class'>";
+		printOpFormIntro ('updIPv4Allocation', array ('object_id' => $bond['object_id']));
 		echo "<td><a href='${root}process.php?op=delIPv4Allocation&page=${pageno}&tab=${tabno}&ip=${dottedquad}&object_id=${bond['object_id']}'>";
 		printImageHREF ('delete', 'Unallocate address');
 		echo "</a></td>";
@@ -2541,10 +2573,7 @@ function renderIPv4AddressAllocations ($dottedquad)
 		printImageHREF ('save', 'Save changes', TRUE);
 		echo "</td></form></tr>\n";
 	}
-	echo "<form action='${root}process.php'><input type='hidden' name='op' value='addIPv4Allocation'>";
-	echo "<input type=hidden name=page value='${pageno}'>\n";
-	echo "<input type=hidden name=tab value='${tabno}'>\n";
-	echo "<input type='hidden' name='ip' value='${dottedquad}'>";
+	printOpFormIntro ('addIPv4Allocation');
 	echo "<td>";
 	printImageHREF ('add', 'new allocation', TRUE);
 	echo "</td><td><select name='object_id'>";
@@ -2603,19 +2632,24 @@ function renderNATv4ForObject ($object_id = 0)
 				echo "<a href='${root}?page=object&tab=default&object_id=${bond['object_id']}'>${bond['object_name']}(${bond['name']})</a> ";
 		elseif (!empty ($pf['remote_addr_name']))
 			echo '(' . $pf['remote_addr_name'] . ')';
-		echo "</td><form action='${root}process.php'><input type=hidden name=op value=updNATv4Rule><input type=hidden name=page value='${pageno}'>";
-		echo "<input type=hidden name=tab value='${tabno}'><input type='hidden' name='object_id' value='$object_id'>";
-		echo "<input type='hidden' name='localip' value='${pf['localip']}'><input type='hidden' name='localport' value='${pf['localport']}'>";
-		echo "<input type='hidden' name='remoteip' value='${pf['remoteip']}'><input type='hidden' name='remoteport' value='${pf['remoteport']}'>";
-		echo "<input type='hidden' name='proto' value='${pf['proto']}'><td class='description'>";
+		printOpFormIntro
+		(
+			'updNATv4Rule',
+			array
+			(
+				'localip' => $pf['localip'],
+				'localport' => $pf['localport'],
+				'remoteip' => $pf['remoteip'],
+				'remoteport' => $pf['remoteport'],
+				'proto' => $pf['proto']
+			)
+		);
+		echo "</td><td class='description'>";
 		echo "<input type='text' name='description' value='${pf['description']}'></td><td>";
 		printImageHREF ('save', 'Save changes', TRUE);
 		echo "</td></form></tr>";
 	}
-	echo "<form action='${root}process.php'><input type='hidden' name=op value=addNATv4Rule>";
-	echo "<input type='hidden' name='object_id' value='$object_id'>";
-	echo "<input type=hidden name=page value='${pageno}'>\n";
-	echo "<input type=hidden name=tab value='${tabno}'>\n";
+	printOpFormIntro ('addNATv4Rule');
 	echo "<tr align='center'><td>";
 	printImageHREF ('add', 'Add new NAT rule', TRUE);
 	echo '</td><td>';
@@ -2655,6 +2689,7 @@ function renderNATv4ForObject ($object_id = 0)
 	echo "</table><br><br>";
 }
 
+// FIXME: move related code away into ophandler(s)
 function renderAddMultipleObjectsForm ()
 {
 	global $root, $pageno, $tabno, $nextorder;
@@ -2804,7 +2839,8 @@ function printGreeting ()
 {
 	global $remote_username, $accounts, $root;
 	$account = $accounts[$remote_username];
-	echo "Hello, ${account['user_realname']}. This is RackTables " . CODE_VERSION . ". Click <a href='${root}?logout'>here</a> to logout.";
+	$person = empty ($account['user_realname']) ? $account['user_name'] : $account['user_realname'];
+	echo "Hello, ${person}. This is RackTables " . CODE_VERSION . ". Click <a href='${root}?logout'>here</a> to logout.";
 }
 
 function renderSearchResults ()
@@ -3111,12 +3147,8 @@ function renderUserListEditor ()
 	echo "<tr><th>status (click to change)</th><th>Username</th><th>Real name</th><th>Password</th><th>&nbsp;</th></tr>\n";
 	foreach ($accounts as $account)
 	{
-		echo "<form action='${root}process.php'>";
-		echo "<input type=hidden name=op value=updateUser>";
-		echo "<input type=hidden name=page value='${pageno}'>\n";
-		echo "<input type=hidden name=tab value='${tabno}'>\n";
-		echo "<input type=hidden name=user_id value='${account['user_id']}'><tr>";
-		echo "<td>";
+		printOpFormIntro ('updateUser', array ('user_id' => $account['user_id']));
+		echo "<tr><td>";
 		if ($account['user_enabled'] == 'yes' && $account['user_id'] != 1)
 		{
 			echo "<a href='${root}process.php?op=disableUser&page=${pageno}&tab=${tabno}&user_id=${account['user_id']}'>";
@@ -3137,10 +3169,7 @@ function renderUserListEditor ()
 		printImageHREF ('save', 'Save changes', TRUE);
 		echo "</td></form></tr>\n";
 	}
-	echo "<form action='${root}process.php' method=post><tr>";
-	echo "<input type=hidden name=op value=createUser>\n";
-	echo "<input type=hidden name=page value='${pageno}'>\n";
-	echo "<input type=hidden name=tab value='${tabno}'>\n";
+	printOpFormIntro ('createUser');
 	echo "<td>&nbsp;</td><td><input type=text size=16 name=username tabindex=100></td>\n";
 	echo "<td><input type=text size=24 name=realname tabindex=101></td>";
 	echo "<td><input type=password size=64 name=password tabindex=102></td><td>";
@@ -3148,36 +3177,6 @@ function renderUserListEditor ()
 	echo "</td></tr></form>";
 	echo "</table><br>\n";
 	finishPortlet();
-}
-
-function printChildrenAsOptions ($root, $depth = 0)
-{
-	echo "<option value=${root['title']}>";
-	if ($depth == 0)
-		echo '* ';
-	for ($i = 0; $i < $depth; $i++)
-		echo '-- ';
-	echo $root['title'];
-	echo "</option>\n";
-	foreach ($root['kids'] as $kid)
-		printChildrenAsOptions ($kid, $depth + 1);
-}
-
-// 1. Find all parentless pages.
-// 2. For each of them recursively find all children.
-// 3. Output the tree with recursion tree display.
-function printPagesTree ()
-{
-	global $page;
-	echo '<pre>';
-	foreach ($page as $ctitle => $cpage)
-		if (!isset ($cpage['parent']))
-		{
-			$croot['title'] = $ctitle;
-			$croot['kids'] = getAllChildPages ($ctitle);
-			printChildrenAsOptions ($croot);
-		}
-	echo '</pre>';
 }
 
 function renderPortMapViewer ()
@@ -3199,12 +3198,7 @@ function renderPortMap ($editable = FALSE)
 	$pclist = getPortCompat();
 	$pctable = buildPortCompatMatrixFromList ($ptlist, $pclist);
 	if ($editable)
-	{
-		echo "<form method=post action='${root}process.php'>";
-		echo "<input type=hidden name=page value='${pageno}'>";
-		echo "<input type=hidden name=tab value='${tabno}'>";
-		echo "<input type=hidden name=op value=save>";
-	}
+		printOpFormIntro ('save');
 	echo "<table class=cooltable border=0 cellpadding=5 cellspacing=0 align=center>\n";
 	echo "<tr><th class=vert_th>&nbsp;</th>";
 	foreach ($ptlist as $name2)
@@ -3228,7 +3222,7 @@ function renderPortMap ($editable = FALSE)
 	echo '</table><br>';
 	if ($editable)
 	{
-		echo "<input type=submit value='Save changes'>";
+		printImageHREF ('SAVE', 'Save changes', TRUE);
 		echo "</form>";
 	}
 	finishPortlet();
@@ -3251,7 +3245,7 @@ function renderRackPage ($rack_id)
 {
 	if ($rack_id == 0)
 	{
-		showError ('Invalid rack_id', __FUNCTION__);
+		showError ('Invalid argument', __FUNCTION__);
 		return;
 	}
 	if (($rackData = getRackData ($rack_id)) == NULL)
@@ -3322,24 +3316,17 @@ function renderDictionaryEditor ()
 		// One extra span for the new record per each chapter block.
 		echo "<tr class=row_${order}><td class=tdleft" . ($wc ? ' rowspan = ' . ($wc + 1) : '');
 		echo "><div title='number=${chapter_no}'>${chapter['name']} (${wc} records)</div></td>";
-		echo "<form action='${root}process.php' method=post>";
-		echo "<input type=hidden name=page value='${pageno}'>";
-		echo "<input type=hidden name=tab value='${tabno}'>";
-		echo "<input type=hidden name=op value=add>";
-		echo "<input type=hidden name=chapter_no value='${chapter['no']}'>";
-		echo "<td>&nbsp;</td>";
+		printOpFormIntro ('add', array ('chapter_no' => $chapter['no']));
+		echo "<td>";
+		printImageHREF ('add', 'Add new', TRUE);
+		echo "</td>";
 		echo "<td class=tdright><input type=text name=dict_value size=32></td>";
-		echo "<td><input type=submit value='Add new'></td>";
+		echo "<td>&nbsp;</td>";
 		echo '</tr></form>';
 		$order = $nextorder[$order];
 		foreach ($chapter['word'] as $key => $value)
 		{
-			echo "<form action='${root}process.php' method=post>";
-			echo "<input type=hidden name=page value='${pageno}'>";
-			echo "<input type=hidden name=tab value='${tabno}'>";
-			echo "<input type=hidden name=op value='upd'>";
-			echo "<input type=hidden name=chapter_no value='${chapter['no']}'>";
-			echo "<input type=hidden name=dict_key value='${key}'>";
+			printOpFormIntro ('upd', array ('chapter_no' => $chapter['no'], 'dict_key' => $key));
 			echo "<tr class=row_${order}><td>";
 			// Prevent deleting words currently used somewhere.
 			if ($chapter['refcnt'][$key])
@@ -3351,9 +3338,9 @@ function renderDictionaryEditor ()
 				echo "</a>";
 			}
 			echo '</td>';
-			echo "<td class=tdright><input type=text name=dict_value size=32 value='${value}'></td>";
-			echo "<td><input type=submit value=OK></td>";
-			echo "</tr></form>\n";
+			echo "<td class=tdright><input type=text name=dict_value size=32 value='${value}'></td><td>";
+			printImageHREF ('save', 'Save changes', TRUE);
+			echo "</td></tr></form>\n";
 			$order = $nextorder[$order];
 		} // foreach ($chapter['word']
 	} // foreach ($dict
@@ -3373,11 +3360,7 @@ function renderChaptersEditor ()
 	{
 		$wordcount = count ($chapter['word']);
 		$sticky = $chapter['sticky'];
-		echo "<form action='${root}process.php' method=post>";
-		echo "<input type=hidden name=page value='${pageno}'>";
-		echo "<input type=hidden name=tab value='${tabno}'>";
-		echo "<input type=hidden name=op value=upd>";
-		echo "<input type=hidden name=chapter_no value='${chapter['no']}'>";
+		printOpFormIntro ('upd', array ('chapter_no' => $chapter['no']));
 		echo '<tr>';
 		echo '<td>';
 		if ($sticky)
@@ -3396,16 +3379,13 @@ function renderChaptersEditor ()
 		if ($sticky)
 			echo '&nbsp;';
 		else
-			echo "<input type=submit value='OK'>";
+			printImageHREF ('save', 'Save changes', TRUE);
 		echo '</td></tr>';
 		echo '</form>';
 	}
-	echo "<form action='${root}process.php' method=post>";
-	echo "<input type=hidden name=page value='${pageno}'>";
-	echo "<input type=hidden name=tab value='${tabno}'>";
-	echo "<input type=hidden name=op value=add>";
+	printOpFormIntro ('add');
 	echo '<tr><td>';
-	printImageHREF ('add', '', TRUE);
+	printImageHREF ('add', 'Add new', TRUE);
 	echo "</td><td colspan=3><input type=text name=chapter_name></td>";
 	echo '</tr>';
 	echo '</form>';
@@ -3452,11 +3432,7 @@ function renderEditAttributesForm ()
 	echo '<tr><th>&nbsp;</th><th>Name</th><th>Type</th><th>&nbsp;</th></tr>';
 	foreach ($attrMap as $attr)
 	{
-		echo "<form action='${root}process.php' method=post>";
-		echo "<input type=hidden name=page value='${pageno}'>";
-		echo "<input type=hidden name=tab value='${tabno}'>";
-		echo "<input type=hidden name=op value=upd>";
-		echo "<input type=hidden name=attr_id value='${attr['id']}'>";
+		printOpFormIntro ('upd', array ('attr_id' => $attr['id']));
 		echo '<tr>';
 		echo "<td><a href='${root}process.php?page=${pageno}&tab=${tabno}&op=del&attr_id=${attr['id']}'>";
 		printImageHREF ('delete', 'Remove attribute');
@@ -3467,10 +3443,7 @@ function renderEditAttributesForm ()
 		echo '</tr>';
 		echo '</form>';
 	}
-	echo "<form action='${root}process.php' method=post>";
-	echo "<input type=hidden name=page value='${pageno}'>";
-	echo "<input type=hidden name=tab value='${tabno}'>";
-	echo "<input type=hidden name=op value=add>";
+	printOpFormIntro ('add');
 	echo '<tr><td>';
 	printImageHREF ('add', '', TRUE);
 	echo "</td><td><input type=text name=attr_name></td>";
@@ -3517,10 +3490,7 @@ function renderEditAttrMapForm ()
 			echo "</td></tr>\n";
 		}
 	}
-	echo "<form action='${root}process.php' method=post>";
-	echo "<input type=hidden name=page value='${pageno}'>";
-	echo "<input type=hidden name=tab value='${tabno}'>";
-	echo "<input type=hidden name=op value=add>";
+	printOpFormIntro ('add');
 	echo '<tr><td>';
 	printImageHREF ('add', '', TRUE);
 	echo "</td><td><select name=attr_id>";
@@ -3548,89 +3518,7 @@ function renderEditAttrMapForm ()
 
 function printImageHREF ($tag, $title = '', $do_input = FALSE, $tabindex = 0)
 {
-	global $root;
-	$image['error']['path'] = 'pix/error.png';
-	$image['error']['width'] = 76;
-	$image['error']['height'] = 17;
-	$image['logo']['path'] = 'pix/defaultlogo.png';
-	$image['logo']['width'] = 210;
-	$image['logo']['height'] = 40;
-	$image['rackspace']['path'] = 'pix/racks.png';
-	$image['rackspace']['width'] = 218;
-	$image['rackspace']['height'] = 200;
-	$image['objects']['path'] = 'pix/server.png';
-	$image['objects']['width'] = 218;
-	$image['objects']['height'] = 200;
-	$image['ipv4space']['path'] = 'pix/addressspace.png';
-	$image['ipv4space']['width'] = 218;
-	$image['ipv4space']['height'] = 200;
-	$image['ipv4slb']['path'] = 'pix/slb.png';
-	$image['ipv4slb']['width'] = 218;
-	$image['ipv4slb']['height'] = 200;
-	$image['config']['path'] = 'pix/configuration.png';
-	$image['config']['width'] = 218;
-	$image['config']['height'] = 200;
-	$image['reports']['path'] = 'pix/report.png';
-	$image['reports']['width'] = 218;
-	$image['reports']['height'] = 200;
-	$image['useup']['path'] = 'pix/tango-edit-clear.png';
-	$image['useup']['width'] = 16;
-	$image['useup']['height'] = 16;
-	$image['link']['path'] = 'pix/tango-network-wired.png';
-	$image['link']['width'] = 16;
-	$image['link']['height'] = 16;
-	$image['unlink']['path'] = 'pix/tango-edit-clear.png';
-	$image['unlink']['width'] = 16;
-	$image['unlink']['height'] = 16;
-	$image['add']['path'] = 'pix/tango-list-add.png';
-	$image['add']['width'] = 16;
-	$image['add']['height'] = 16;
-	$image['delete']['path'] = 'pix/tango-list-remove.png';
-	$image['delete']['width'] = 16;
-	$image['delete']['height'] = 16;
-	$image['nodelete']['path'] = 'pix/tango-list-remove-shadow.png';
-	$image['nodelete']['width'] = 16;
-	$image['nodelete']['height'] = 16;
-	$image['grant'] = $image['add'];
-	$image['revoke'] = $image['delete'];
-	$image['inservice']['path'] = 'pix/tango-emblem-system.png';
-	$image['inservice']['width'] = 16;
-	$image['inservice']['height'] = 16;
-	$image['notinservice']['path'] = 'pix/tango-dialog-error.png';
-	$image['notinservice']['width'] = 16;
-	$image['notinservice']['height'] = 16;
-	$image['blockuser'] = $image['inservice'];
-	$image['unblockuser'] = $image['notinservice'];
-	$image['find']['path'] = 'pix/tango-system-search.png';
-	$image['find']['width'] = 16;
-	$image['find']['height'] = 16;
-	$image['spacer']['path'] = 'pix/pixel.png';
-	$image['spacer']['width'] = 16;
-	$image['spacer']['height'] = 16;
-	$image['next']['path'] = 'pix/tango-go-next.png';
-	$image['next']['width'] = 32;
-	$image['next']['height'] = 32;
-	$image['prev']['path'] = 'pix/tango-go-previous.png';
-	$image['prev']['width'] = 32;
-	$image['prev']['height'] = 32;
-	$image['clear']['path'] = 'pix/tango-edit-clear.png';
-	$image['clear']['width'] = 16;
-	$image['clear']['height'] = 16;
-	$image['save']['path'] = 'pix/tango-document-save.png';
-	$image['save']['width'] = 16;
-	$image['save']['height'] = 16;
-	$image['SAVE']['path'] = 'pix/tango-document-save-big.png';
-	$image['SAVE']['width'] = 32;
-	$image['SAVE']['height'] = 32;
-	$image['create']['path'] = 'pix/tango-document-new.png';
-	$image['create']['width'] = 16;
-	$image['create']['height'] = 16;
-	$image['CREATE']['path'] = 'pix/tango-document-new-big.png';
-	$image['CREATE']['width'] = 32;
-	$image['CREATE']['height'] = 32;
-	$image['DENIED']['path'] = 'pix/tango-dialog-error-big.png';
-	$image['DENIED']['width'] = 32;
-	$image['DENIED']['height'] = 32;
+	global $root, $image;
 	if (!isset ($image[$tag]))
 		$tag = 'error';
 	$img = $image[$tag];
@@ -3660,6 +3548,7 @@ function getFaviconURL ()
 	return $root . 'pix/racktables.ico';
 }
 
+// FIXME: stack the report sections somehow, so they can register themselves.
 function renderReportSummary ()
 {
 	echo "<table width='100%'>\n";
@@ -3746,16 +3635,13 @@ function renderUIConfig ()
 
 function renderUIConfigEditForm ()
 {
-	global $root, $pageno, $tabno, $configCache;
+	global $configCache;
 	showMessageOrError();
 	startPortlet ('Current configuration');
 	echo "<table cellspacing=0 cellpadding=5 align=center class=widetable width='50%'>\n";
 	echo "<tr><th class=tdleft>Option</th>";
 	echo "<th class=tdleft>Value</th></tr>";
-	echo "<form action='${root}process.php'>";
-	echo "<input type=hidden name=op value='upd'>";
-	echo "<input type=hidden name=page value='${pageno}'>\n";
-	echo "<input type=hidden name=tab value='${tabno}'>\n";
+	printOpFormIntro ('upd');
 
 	$i = 0;
 	foreach ($configCache as $v)
@@ -3769,7 +3655,9 @@ function renderUIConfigEditForm ()
 		$i++;
 	}
 	echo "<input type=hidden name=num_vars value=${i}>\n";
-	echo "<tr><td colspan=2><input type=submit value='Save changes'></td></tr>";
+	echo "<tr><td colspan=2>";
+	printImageHREF ('SAVE', 'Save changes', TRUE);
+	echo "</td></tr>";
 	echo "</form>";
 	finishPortlet();
 }
@@ -3778,7 +3666,6 @@ function renderUIConfigEditForm ()
 // renders a form suitable for submit. Ah, and it does submit processing as well.
 function renderVLANMembership ($object_id = 0)
 {
-	global $root, $pageno, $tabno, $remote_username;
 	showMessageOrError();
 	$data = getSwitchVLANs ($object_id);
 	if ($data === NULL)
@@ -3792,8 +3679,7 @@ function renderVLANMembership ($object_id = 0)
 
 	startPortlet ('Current status');
 	echo "<table class=widetable cellspacing=3 cellpadding=5 align=center width='100%'><tr>";
-	echo "<form method=post action='${root}process.php?page=${pageno}&tab=${tabno}&op=setPortVLAN'>";
-	echo "<input type=hidden name=object_id value=${object_id}>";
+	printOpFormIntro ('setPortVLAN');
 	$portcount = count ($portlist);
 	echo "<input type=hidden name=portcount value=" . $portcount . ">\n";
 	$portno = 0;
@@ -3916,44 +3802,30 @@ function renderVLANMembership ($object_id = 0)
 	echo '</td></tr></table>';
 }
 
-// This snippet either renders a form inviting the user to start SNMP query
-// on the current device or displays the result of the scan.
 function renderSNMPPortFinder ($object_id = 0)
 {
-	global $pageno, $tabno;
 	if ($object_id <= 0)
 	{
-		showError ('Invalid object_id', __FUNCTION__);
+		showError ('Invalid argument', __FUNCTION__);
 		return;
 	}
 // FIXME: check if SNMP PHP extension is available!
-	if (isset ($_REQUEST['do_scan']))
-	{
-		assertStringArg ('community', __FUNCTION__);
-		printLog (doSNMPmining ($object_id, $_REQUEST['community']));
-		return;
-	}
-	echo "<form method=post>\n";
-	echo "<input type=hidden name=pageno value='${pageno}'>\n";
-	echo "<input type=hidden name=tabno value='${pageno}'>\n";
+	printOpFormIntro ('querySNMPData');
 ?>
 <p align=center>
-This switch has no ports listed, that's why you see this form. If you supply SNMP community,
-I can try atomatic data harvesting on the switch. As soon as at least one relevant port is found,
+This asset has no ports listed, that's why you see this form. If you supply SNMP community,
+I can try automatic data harvesting on the asset. As soon as at least one port is added,
 this tab will not be seen any more. Good luck.<br>
 <input type=text name=community value='public'>
 <input type=submit name='do_scan' value='Go!'> 
+</form>
 </p>
 <?php
 }
 
 function renderUIResetForm()
 {
-	global $root, $pageno, $tabno;
-	echo "<form method=post action='${root}process.php'>";
-	echo "<input type=hidden name=page value=${pageno}>";
-	echo "<input type=hidden name=tab value=${tabno}>";
-	echo "<input type=hidden name=op value=go>";
+	printOpFormIntro ('go');
 	echo "This button will reset user interface configuration to its defaults (except organization name and auth source): ";
 	echo "<input type=submit value='proceed'>";
 	echo "</form>";
@@ -3961,7 +3833,7 @@ function renderUIResetForm()
 
 function renderFirstRowForm ()
 {
-	global $root, $pageno, $tabno;
+	global $root;
 	echo "<form action='${root}process.php'>\n";
 	echo "<input type=hidden name=page value=dict>\n";
 	echo "<input type=hidden name=tab value=edit>\n";
@@ -3974,7 +3846,8 @@ just fill in the name. All the subsequent rack rows will have to be added from t
 Dictionary edit page in Configuration section.
 <br>
 <input type=text name=dict_value value='my server room'>
-<input type=submit value='OK'> 
+<input type=submit value='OK'>
+</form>
 </p>
 <?php
 }
@@ -3982,15 +3855,13 @@ Dictionary edit page in Configuration section.
 function renderLVSConfig ($object_id = 0)
 {
 	showMessageOrError();
-	global $root, $pageno, $tabno;
 	if ($object_id <= 0)
 	{
 		showError ('Invalid argument', __FUNCTION__);
 		return;
 	}
 	echo '<br>';
-	echo "<form method=post action='${root}process.php?page=${pageno}&tab=${tabno}&op=submitSLBConfig'>";
-	echo "<input type=hidden name=object_id value=${object_id}>";
+	printOpFormIntro ('submitSLBConfig');
 	echo "<center><input type=submit value='Submit for activation'></center>";
 	echo "</form>";
 	echo '<pre>';
@@ -4003,7 +3874,7 @@ function renderVirtualService ($vsid)
 	global $root, $nextorder;
 	if ($vsid <= 0)
 	{
-		showError ('Invalid vsid', __FUNCTION__);
+		showError ('Invalid argument', __FUNCTION__);
 		return;
 	}
 	$vsinfo = getVServiceInfo ($vsid);
@@ -4112,12 +3983,7 @@ function renderRSPoolServerForm ($pool_id = 0)
 		$order = 'odd';
 		foreach ($poolInfo['rslist'] as $rsid => $rs)
 		{
-			echo "<form action='${root}process.php'>";
-			echo "<input type=hidden name=page value='${pageno}'>\n";
-			echo "<input type=hidden name=tab value='${tabno}'>\n";
-			echo "<input type=hidden name=op value=updRS>";
-			echo "<input type=hidden name=rs_id value='${rsid}'>";
-			echo "<input type=hidden name=pool_id value='${pool_id}'>";
+			printOpFormIntro ('updRS', array ('rs_id' => $rsid));
 			echo "<tr valign=top class=row_${order}><td><a href='${root}process.php?page=${pageno}&tab=${tabno}";
 			echo "&op=delRS&pool_id=${pool_id}&id=${rsid}'>";
 			printImageHREF ('delete', 'Delete this real server');
@@ -4135,11 +4001,7 @@ function renderRSPoolServerForm ($pool_id = 0)
 	startPortlet ('Add one');
 	echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
 	echo "<tr><th>in service</th><th>Address</th><th>Port</th><th>&nbsp;</th></tr>\n";
-	echo "<form name=addone action='${root}process.php'>";
-	echo "<input type=hidden name=page value='${pageno}'>\n";
-	echo "<input type=hidden name=tab value='${tabno}'>\n";
-	echo "<input type=hidden name=op value=addRS>";
-	echo "<input type=hidden name=pool_id value='${pool_id}'>";
+	printOpFormIntro ('addRS');
 	echo "<tr><td>";
 	if (getConfigVar ('DEFAULT_IPV4_RS_INSERVICE') == 'yes')
 		printImageHREF ('inservice', 'in service');
@@ -4160,11 +4022,7 @@ function renderRSPoolServerForm ($pool_id = 0)
 	finishPortlet();
 
 	startPortlet ('Add many');
-	echo "<form name=addmany action='${root}process.php'>";
-	echo "<input type=hidden name=page value='${pageno}'>\n";
-	echo "<input type=hidden name=tab value='${tabno}'>\n";
-	echo "<input type=hidden name=op value=addMany>";
-	echo "<input type=hidden name=pool_id value='${pool_id}'>";
+	printOpFormIntro ('addMany');
 	echo "<table border=0 align=center>\n<tr><td>";
 	if (getConfigVar ('DEFAULT_IPV4_RS_INSERVICE') == 'yes')
 		printImageHREF ('inservice', 'in service');
@@ -4204,13 +4062,7 @@ function renderRSPoolLBForm ($pool_id = 0)
 			foreach ($vslist as $vs_id => $configs)
 			{
 				$oi = getObjectInfo ($object_id);
-				echo "<form action='${root}process.php' method=post>";
-				echo "<input type=hidden name=page value='${pageno}'>\n";
-				echo "<input type=hidden name=tab value='${tabno}'>\n";
-				echo "<input type=hidden name=op value=updLB>";
-				echo "<input type=hidden name=pool_id value='${pool_id}'>";
-				echo "<input type=hidden name=vs_id value='${vs_id}'>";
-				echo "<input type=hidden name=object_id value='${object_id}'>";
+				printOpFormIntro ('updLB', array ('vs_id' => $vs_id, 'object_id' => $object_id));
 				echo "<tr valign=top class=row_${order}><td><a href='${root}process.php?page=${pageno}&tab=${tabno}&op=delLB&pool_id=${pool_id}&object_id=${object_id}&vs_id=${vs_id}'>";
 				printImageHREF ('delete', 'Unconfigure');
 				echo "</a></td>";
@@ -4232,11 +4084,7 @@ function renderRSPoolLBForm ($pool_id = 0)
 
 	startPortlet ('Add new');
 	echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
-	echo "<form action='${root}process.php' method=post>";
-	echo "<input type=hidden name=page value='${pageno}'>\n";
-	echo "<input type=hidden name=tab value='${tabno}'>\n";
-	echo "<input type=hidden name=op value=addLB>";
-	echo "<input type=hidden name=pool_id value='${pool_id}'>";
+	printOpFormIntro ('addLB');
 	echo "<tr valign=top><th>LB / VS</th><td class=tdleft><select name='object_id' tabindex=1>";
 	foreach (explode (',', getConfigVar ('NATV4_PERFORMERS')) as $type)
 		foreach (getNarrowObjectList ($type) as $object)
@@ -4268,13 +4116,7 @@ function renderVServiceLBForm ($vs_id = 0)
 			foreach ($rspinfo['lblist'] as $object_id => $configs)
 			{
 				$oi = getObjectInfo ($object_id);
-				echo "<form action='${root}process.php' method=post>";
-				echo "<input type=hidden name=page value='${pageno}'>\n";
-				echo "<input type=hidden name=tab value='${tabno}'>\n";
-				echo "<input type=hidden name=op value=updLB>";
-				echo "<input type=hidden name=pool_id value='${pool_id}'>";
-				echo "<input type=hidden name=vs_id value='${vs_id}'>";
-				echo "<input type=hidden name=object_id value='${object_id}'>";
+				printOpFormIntro ('updLB', array ('pool_id' => $pool_id, 'object_id' => $object_id));
 				echo "<tr valign=top class=row_${order}><td><a href='${root}process.php?page=${pageno}&tab=${tabno}&op=delLB&pool_id=${pool_id}&object_id=${object_id}&vs_id=${vs_id}'>";
 				printImageHREF ('delete', 'Unconfigure');
 				echo "</a></td>";
@@ -4295,11 +4137,7 @@ function renderVServiceLBForm ($vs_id = 0)
 		$rsplist[$pool_id] = $poolInfo['name'];
 	startPortlet ('Add new');
 	echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
-	echo "<form action='${root}process.php' method=post>";
-	echo "<input type=hidden name=page value='${pageno}'>\n";
-	echo "<input type=hidden name=tab value='${tabno}'>\n";
-	echo "<input type=hidden name=op value=addLB>";
-	echo "<input type=hidden name=vs_id value='${vs_id}'>";
+	printOpFormIntro ('addLB');
 	echo "<tr valign=top><th>LB / RS pool</th><td class=tdleft><select name='object_id' tabindex=1>";
 	foreach (explode (',', getConfigVar ('NATV4_PERFORMERS')) as $type)
 		foreach (getNarrowObjectList ($type) as $object)
@@ -4424,10 +4262,7 @@ function renderVSListEditForm ()
 	$protocols = array ('TCP' => 'TCP', 'UDP' => 'UDP');
 
 	startPortlet ('Add new');
-	echo "<form method=post action='${root}process.php'>\n";
-	echo "<input type=hidden name=page value=${pageno}>\n";
-	echo "<input type=hidden name=tab value=${tabno}>\n";
-	echo "<input type=hidden name=op value=add>\n";
+	printOpFormIntro ('add');
 	echo "<table class=widetable border=0 cellpadding=10 cellspacing=0 align=center>\n";
 	echo "<tr><th>&nbsp;</th><th>VIP</th><th>port</th><th>proto</th><th>name</th><th>&nbsp;</th></tr>";
 	echo "<tr valign=top><td>&nbsp;</td>";
@@ -4459,11 +4294,7 @@ function renderVSListEditForm ()
 	$order = 'odd';
 	foreach ($vslist as $vsid => $vsinfo)
 	{
-		echo "<form method=post action='${root}process.php'>\n";
-		echo "<input type=hidden name=page value=${pageno}>\n";
-		echo "<input type=hidden name=tab value=${tabno}>\n";
-		echo "<input type=hidden name=op value=upd>\n";
-		echo "<input type=hidden name=vs_id value=${vsid}>\n";
+		printOpFormIntro ('upd', array ('vs_id' => $vsid));
 		echo "<tr valign=top class=row_${order}><td>";
 		if ($vsinfo['poolcount'])
 			printImageHREF ('nodelete', 'there are ' . $vsinfo['poolcount'] . ' RS pools configured');
@@ -4534,10 +4365,7 @@ function editRSPools ()
 	showMessageOrError();
 
 	startPortlet ('Add new');
-	echo "<form method=post action='${root}process.php'>\n";
-	echo "<input type=hidden name=page value=${pageno}>\n";
-	echo "<input type=hidden name=tab value=${tabno}>\n";
-	echo "<input type=hidden name=op value=add>\n";
+	printOpFormIntro ('add');
 	echo "<table class=widetable border=0 cellpadding=10 cellspacing=0 align=center>\n";
 	echo "<tr><th>name</th>";
 	echo "<td class=tdleft><input type=text name=name tabindex=1></td><td>";
@@ -4559,11 +4387,7 @@ function editRSPools ()
 	$order='odd';
 	foreach ($pool_list as $pool_id => $pool_info)
 	{
-		echo "<form method=post action='${root}process.php'>\n";
-		echo "<input type=hidden name=page value=${pageno}>\n";
-		echo "<input type=hidden name=tab value=${tabno}>\n";
-		echo "<input type=hidden name=op value=upd>\n";
-		echo "<input type=hidden name=pool_id value=${pool_id}>\n";
+		printOpFormIntro ('upd', array ('pool_id' => $pool_id));
 		echo "<tr valign=top class=row_${order}><td>";
 		if ($pool_info['refcnt'])
 			printImageHREF ('nodelete', 'RS pool is used ' . $pool_info['refcnt'] . ' time(s)');
@@ -4637,7 +4461,6 @@ function renderLBList ()
 
 function renderRSPoolRSInServiceForm ($pool_id = 0)
 {
-	global $root, $pageno, $tabno;
 	if ($pool_id <= 0)
 	{
 		showError ('Invalid pool_id', __FUNCTION__);
@@ -4645,13 +4468,7 @@ function renderRSPoolRSInServiceForm ($pool_id = 0)
 	}
 	showMessageOrError();
 	$poolInfo = getRSPoolInfo ($pool_id);
-	$rscount = count ($poolInfo['rslist']);
-	echo "<form method=post action='${root}process.php'>\n";
-	echo "<input type=hidden name=page value=${pageno}>\n";
-	echo "<input type=hidden name=tab value=${tabno}>\n";
-	echo "<input type=hidden name=op value=upd>\n";
-	echo "<input type=hidden name=pool_id value=${pool_id}>\n";
-	echo "<input type=hidden name=rscount value=${rscount}>\n";
+	printOpFormIntro ('upd', array ('rscount' => count ($poolInfo['rslist'])));
 	echo "<table class=widetable border=0 cellpadding=10 cellspacing=0 align=center>\n";
 	echo "<tr><th>RS address</th><th>RS port</th><th>RS configuration</th><th>in service</th></tr>\n";
 	$recno = 1;
@@ -4708,12 +4525,8 @@ function renderLivePTR ($id = 0)
 			echo "<a href='${root}?page=${pageno}&tab=${tabno}&id=$id&pg=$i'>$i</a> ";
 	echo "</center>";
 
-	echo "<form method=post action=${root}process.php>";
-	echo "<input type=hidden name=page value=${pageno}>\n";
-	echo "<input type=hidden name=tab value=${tabno}>\n";
-	echo "<input type=hidden name=op value=importPTRData>\n";
-	echo "<input type=hidden name=id value=${id}>\n";
-	echo '<input type=hidden name=addrcount value=' . ($endip - $startip + 1) . ">\n";
+	// FIXME: address counter could be calculated incorrectly in some cases
+	printOpFormIntro ('importPTRData', array ('addrcount' => ($endip - $startip + 1)));
 
 	echo "<table class='widetable' border=0 cellspacing=0 cellpadding=5 align='center'>\n";
 	echo "<tr><th>address</th><th>current name</th><th>DNS data</th><th>import</th></tr>\n";
@@ -4786,7 +4599,6 @@ function renderLivePTR ($id = 0)
 
 function renderAutoPortsForm ($object_id = 0)
 {
-	global $root, $pageno, $tabno;
 	if ($object_id <= 0)
 	{
 		showError ('Invalid object_id', __FUNCTION__);
@@ -4802,15 +4614,11 @@ function renderAutoPortsForm ($object_id = 0)
 	echo "<tr><th>type</th><th>name</th></tr>";
 	foreach (getAutoPorts ($info['objtype_id']) as $autoport)
 		echo "<tr><td>" . $ptlist[$autoport['type']] . "</td><td>${autoport['name']}</td></tr>";
-	echo "<form method=post action='${root}process.php'>\n";
-	echo "<input type=hidden name=page value=${pageno}>\n";
-	echo "<input type=hidden name=tab value=${tabno}>\n";
-	echo "<input type=hidden name=object_id value=${object_id}>\n";
-	echo "<input type=hidden name=op value=generate>\n";
+	printOpFormIntro ('generate');
 	echo "<tr><td colspan=2 align=center>";
 	echo "<input type=submit value='Generate'>";
 	echo "</td></tr>";
-	echo "</table>";
+	echo "</table></form>";
 }
 
 function renderTagRowForViewer ($taginfo, $level = 0)
@@ -4825,6 +4633,7 @@ function renderTagRowForViewer ($taginfo, $level = 0)
 		renderTagRowForViewer ($kid, $level + 1);
 }
 
+// FIXME: generated hyperlink must depend on the realm given
 function renderTagRowForCloud ($taginfo, $realm, $level = 0)
 {
 	global $root;
@@ -4858,8 +4667,8 @@ function renderTagRowForEditor ($taginfo, $level = 0)
 		echo "</a>";
 	}
 	echo "</td>\n<td>";
-	echo "<form method=post action='${root}process.php?page=${pageno}&tab=${tabno}&op=updateTag'>";
-	echo "<input type=hidden name=tag_id value=${taginfo['id']}><input type=text name=tag_name ";
+	printOpFormIntro ('updateTag', array ('tag_id' => $taginfo['id']));
+	echo "<input type=text name=tag_name ";
 	echo "value='${taginfo['tag']}'></td><td><select name=parent_id>";
 	echo "<option value=0>-- NONE --</option>\n";
 	foreach ($taglist as $tlinfo)
@@ -4902,7 +4711,7 @@ function renderTagCloud ($realm = '')
 
 function renderTagTreeEditor ()
 {
-	global $root, $pageno, $tabno, $taglist, $tagtree;
+	global $taglist, $tagtree;
 	showMessageOrError();
 	echo "<table class=objview border=0 width='100%'><tr><td class=pcleft>";
 	startPortlet ('tag tree');
@@ -4910,10 +4719,7 @@ function renderTagTreeEditor ()
 	echo "<tr><th>&nbsp;</th><th>tag</th><th>parent</th><th>&nbsp;</th></tr>\n";
 	foreach ($tagtree as $taginfo)
 		renderTagRowForEditor ($taginfo);
-	echo "<form action='${root}process.php' method=post>";
-	echo "<input type=hidden name=page value='${pageno}'>";
-	echo "<input type=hidden name=tab value='${tabno}'>";
-	echo "<input type=hidden name=op value='createTag'>";
+	printOpFormIntro ('createTag');
 	echo "<tr><td class=tdleft>";
 	printImageHREF ('grant', 'Create tag', TRUE, 102);
 	echo '</td><td><input type=text name=tag_name tabindex=100></td><td><select name=parent_id tabindex=101>';
@@ -4933,9 +4739,7 @@ function renderTagTreeEditor ()
 	foreach (getOrphanedTags() as $taginfo)
 	{
 		echo '<tr><td>';
-		echo "<form method=post action='${root}process.php?page=${pageno}&tab=${tabno}&op=updateTag'>";
-		echo "<input type=hidden name=tag_id value=${taginfo['id']}>";
-		echo "<input type=hidden name=tag_name value=${taginfo['tag']}>";
+		printOpFormIntro ('updateTag', array ('tag_id' => $taginfo['id'], 'tag_name' => $taginfo['tag']));
 		echo "${taginfo['tag']}</td><td><select name=parent_id>";
 		echo "<option value=0>-- NONE --</option>\n";
 		foreach ($taglist as $tlinfo)
@@ -4976,7 +4780,6 @@ function renderTagOption ($taginfo, $level = 0)
 // Ignore tag ids, which can't be found on the tree.
 function renderTagOptionForFilter ($taginfo, $tagfilter, $realm, $level = 0)
 {
-	echo $level;
 	$selected = '';
 	foreach ($tagfilter as $filter_id)
 		if ($taginfo['id'] == $filter_id)
@@ -5033,11 +4836,7 @@ function renderEntityTagChainEditor ($entity_realm = '', $bypass_name, $entity_i
 	global $root, $pageno, $tabno, $expl_tags;
 	showMessageOrError();
 	startPortlet ('Tag list (' . count ($expl_tags) . ')');
-	echo "<form method=post action='${root}process.php'>\n";
-	echo "<input type=hidden name=page value=${pageno}>\n";
-	echo "<input type=hidden name=tab value=${tabno}>\n";
-	echo "<input type=hidden name=${bypass_name} value=${entity_id}>\n";
-	echo "<input type=hidden name=op value=saveTags>\n";
+	printOpFormIntro ('saveTags', array ($bypass_name => $entity_id));
 	echo '<select name=taglist[] multiple size=' . getConfigVar ('MAXSELSIZE') . '>';
 	foreach ($tagtree as $taginfo)
 		renderTagOption ($taginfo);
@@ -5119,14 +4918,11 @@ function renderTagSelect ()
 
 function renderTagRollerForRow ($row_id)
 {
-	global $root, $pageno, $tabno;
 	$a = rand (1, 20);
 	$b = rand (1, 20);
 	$sum = $a + $b;
 	showMessageOrError();
-	echo "<form method=post action='${root}process.php?page=${pageno}&tab=${tabno}&op=rollTags'>";
-	echo "<input type=hidden name=row_id value='${row_id}'>";
-	echo "<input type=hidden name=realsum value='${sum}'>";
+	printOpFormIntro ('rollTags', array ('realsum' => $sum));
 	echo "<table border=1 align=center>";
 	echo "<tr><td colspan=2>This special tool allows assigning tags to physical contents (racks <s>and contained objects</s>) of the current ";
 	echo "rack row.<br>The tag(s) selected below will be ";
@@ -5151,11 +4947,7 @@ function renderObjectSLB ($object_id)
 
 	startPortlet ('Add new');
 	echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
-	echo "<form action='${root}process.php' method=post>";
-	echo "<input type=hidden name=page value='${pageno}'>\n";
-	echo "<input type=hidden name=tab value='${tabno}'>\n";
-	echo "<input type=hidden name=op value=addLB>";
-	echo "<input type=hidden name=object_id value='${object_id}'>";
+	printOpFormIntro ('addLB');
 	echo "<tr valign=top><th>VS / RS pool</th><td class=tdleft>";
 	printSelect ($vs_list, 'vs_id');
 	echo "</td><td>";
@@ -5177,13 +4969,7 @@ function renderObjectSLB ($object_id)
 		$order = 'odd';
 		foreach ($myvslist as $vs_id => $vsinfo)
 		{
-			echo "<form action='${root}process.php' method=post>";
-			echo "<input type=hidden name=page value='${pageno}'>\n";
-			echo "<input type=hidden name=tab value='${tabno}'>\n";
-			echo "<input type=hidden name=op value=updLB>";
-			echo "<input type=hidden name=pool_id value='${vsinfo['pool_id']}'>";
-			echo "<input type=hidden name=vs_id value='${vs_id}'>";
-			echo "<input type=hidden name=object_id value='${object_id}'>";
+			printOpFormIntro ('updLB', array ('vs_id' => $vs_id, 'pool_id' => $vsinfo['pool_id']));
 			echo "<tr valign=top class=row_${order}><td><a href='${root}process.php?page=${pageno}&tab=${tabno}&op=delLB&pool_id=${vsinfo['pool_id']}&object_id=${object_id}&vs_id=${vs_id}'>";
 			printImageHREF ('delete', 'Unconfigure');
 			echo "</a></td>";
@@ -5205,11 +4991,9 @@ function renderObjectSLB ($object_id)
 
 function renderEditRSPool ($pool_id)
 {
-	global $root, $pageno, $tabno;
 	showMessageOrError();
 	$poolinfo = getRSPoolInfo ($pool_id);
-	echo "<form method=post action='${root}process.php?page=${pageno}&tab=${tabno}&op=updIPv4RSP'>\n";
-	echo "<input type=hidden name=pool_id value=${pool_id}>\n";
+	printOpFormIntro ('updIPv4RSP');
 	echo '<table border=0 align=center>';
 	echo "<tr><th class=tdright>name:</th><td class=tdleft><input type=text name=name value='${poolinfo['name']}'></td></tr>\n";
 	echo "<tr><th class=tdright>VS config:</th><td class=tdleft><textarea name=vsconfig rows=20 cols=80>${poolinfo['vsconfig']}</textarea></td></tr>\n";
@@ -5222,18 +5006,15 @@ function renderEditRSPool ($pool_id)
 
 function renderEditVService ($vsid)
 {
-	global $root, $pageno, $tabno;
 	showMessageOrError();
-	$protocols = array ('TCP' => 'TCP', 'UDP' => 'UDP');
 	$vsinfo = getVServiceInfo ($vsid);
-	echo "<form method=post action='${root}process.php?page=${pageno}&tab=${tabno}&op=updIPv4VS'>\n";
-	echo "<input type=hidden name=vs_id value=${vsid}>\n";
+	printOpFormIntro ('updIPv4VS');
 	echo '<table border=0 align=center>';
 	echo "<tr><th class=tdright>VIP:</th><td class=tdleft><input type=text name=vip value='${vsinfo['vip']}'></td></tr>\n";
 	echo "<tr><th class=tdright>port:</th><td class=tdleft><input type=text name=vport value='${vsinfo['vport']}'></td></tr>\n";
 	echo "<tr><th class=tdright>proto:</th><td class=tdleft>";
-		printSelect ($protocols, 'proto', $vsinfo['proto']);
-		echo "</td></tr>\n";
+	printSelect (array ('TCP' => 'TCP', 'UDP' => 'UDP'), 'proto', $vsinfo['proto']);
+	echo "</td></tr>\n";
 	echo "<tr><th class=tdright>name:</th><td class=tdleft><input type=text name=name value='${vsinfo['name']}'></td></tr>\n";
 	echo "<tr><th class=tdright>VS config:</th><td class=tdleft><textarea name=vsconfig rows=20 cols=80>${vsinfo['vsconfig']}</textarea></td></tr>\n";
 	echo "<tr><th class=tdright>RS config:</th><td class=tdleft><textarea name=rsconfig rows=20 cols=80>${vsinfo['rsconfig']}</textarea></td></tr>\n";
@@ -5258,10 +5039,9 @@ function renderRackCodeViewer ()
 
 function renderRackCodeEditor ()
 {
-	global $root, $pageno, $tabno;
 	$text = loadScript ('RackCode');
 	showMessageOrError();
-	echo "<form method=post action='${root}process.php?page=${pageno}&tab=${tabno}&op=saveRackCode'>";
+	printOpFormIntro ('saveRackCode');
 	echo '<table border=0 align=center>';
 	echo "<tr><td><textarea rows=50 cols=80 name=rackcode>" . $text . "</textarea></td></tr>\n";
 	echo "<tr><td align=center><input type=submit value='save'></td></tr>";
@@ -5307,9 +5087,8 @@ function renderUser ($user_id)
 
 function renderMyPasswordEditor ()
 {
-	global $root, $pageno, $tabno, $remote_username, $accounts;
 	showMessageOrError();
-	echo "<form method=post action='${root}process.php?page=${pageno}&tab=${tabno}&op=changeMyPassword'>";
+	printOpFormIntro ('changeMyPassword');
 	echo '<table border=0 align=center>';
 	echo "<tr><th class=tdright>Current password (*):</th><td><input type=password name=oldpassword tabindex=1></td></tr>";
 	echo "<tr><th class=tdright>New password (*):</th><td><input type=password name=newpassword1 tabindex=2></td></tr>";

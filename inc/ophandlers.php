@@ -1391,4 +1391,30 @@ function addRack ()
 	printLog ($log);
 }
 
+// FIXME: switch to message log v2
+function updateRack ()
+{
+	$log = array ('v' => 1);
+	assertUIntArg ('rack_id', __FUNCTION__);
+	assertUIntArg ('rack_row_id', __FUNCTION__);
+	assertUIntArg ('rack_height', __FUNCTION__);
+	assertStringArg ('rack_name', __FUNCTION__);
+	assertStringArg ('rack_comment', __FUNCTION__, TRUE);
+	$name = $_REQUEST['rack_name'];
+
+	if (commitUpdateRack ($_REQUEST['rack_id'], $name, $_REQUEST['rack_height'], $_REQUEST['rack_row_id'], $_REQUEST['rack_comment']) === TRUE)
+		$log[] = array ('code' => 'success', 'message' => "Updated rack '${name}'");
+	else
+		$log[] = array ('code' => 'error', 'message' => __FUNCTION__ . ': commitUpdateRack() failed');
+	resetThumbCache ($_REQUEST['rack_id']);
+	return buildWideRedirectURL ($log);
+}
+
+function querySNMPData ()
+{
+	assertUIntArg ('object_id', __FUNCTION__);
+	assertStringArg ('community', __FUNCTION__);
+	return buildWideRedirectURL ((doSNMPmining ($_REQUEST['object_id'], $_REQUEST['community'])));
+}
+
 ?>

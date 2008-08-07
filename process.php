@@ -20,7 +20,13 @@ if (!isset ($delayauth[$pageno][$tabno][$op]) and !permitted())
 	$location = buildWideRedirectURL ($errlog);
 }
 else
+{
 	$location = $ophandler[$pageno][$tabno][$op]();
+	if (empty ($location))
+	{
+		showError ('Operation handler failed to return its status', __FILE__);
+	}
+}
 header ("Location: " . $location);
 
 ?>
