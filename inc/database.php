@@ -961,14 +961,10 @@ function getObjectAddresses ($object_id = 0)
 	return $ret;
 }
 
-// Check the range requested for meaningful IPv4 records, build them
-// into a list and return. Return an empty list if nothing matched.
-// Both arguments are expected in signed int32 form. The resulting list
-// is keyed by uint32 form of each IP address, items aren't sorted.
-function scanIPv4Space ($i32_first, $i32_last)
+// Return minimal IPv4 address, optionally with "ip" key set, if requested.
+function constructIPv4Address ($dottedquad = NULL)
 {
-	$ret = array();
-	$addrtemplate = array
+	$ret = array
 	(
 		'name' => '',
 		'reserved' => 'no',
@@ -978,6 +974,18 @@ function scanIPv4Space ($i32_first, $i32_last)
 		'allocs' => array(),
 		'lblist' => array()
 	);
+	if ($dottedquad != NULL)
+		$ret['ip'] = $dottedquad;
+	return $ret;
+}
+
+// Check the range requested for meaningful IPv4 records, build them
+// into a list and return. Return an empty list if nothing matched.
+// Both arguments are expected in signed int32 form. The resulting list
+// is keyed by uint32 form of each IP address, items aren't sorted.
+function scanIPv4Space ($i32_first, $i32_last)
+{
+	$ret = array();
 	$dnamechache = array();
 
 	$db_first = sprintf ('%u', 0x00000000 + $i32_first);
@@ -990,10 +998,7 @@ function scanIPv4Space ($i32_first, $i32_last)
 	{
 		$ip_bin = ip2long ($row['ip']);
 		if (!isset ($ret[$ip_bin]))
-		{
-			$ret[$ip_bin] = $addrtemplate;
-			$ret[$ip_bin]['ip'] = $row['ip'];
-		}
+			$ret[$ip_bin] = constructIPv4Address ($row['ip']);
 		$ret[$ip_bin]['name'] = $row['name'];
 		$ret[$ip_bin]['reserved'] = $row['reserved'];
 	}
@@ -1014,10 +1019,7 @@ function scanIPv4Space ($i32_first, $i32_last)
 	{
 		$ip_bin = ip2long ($row['ip']);
 		if (!isset ($ret[$ip_bin]))
-		{
-			$ret[$ip_bin] = $addrtemplate;
-			$ret[$ip_bin]['ip'] = $row['ip'];
-		}
+			$ret[$ip_bin] = constructIPv4Address ($row['ip']);
 		if (!isset ($dnamecache[$row['object_id']]))
 		{
 			$quasiobject['name'] = $row['object_name'];
@@ -1047,11 +1049,7 @@ function scanIPv4Space ($i32_first, $i32_last)
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
 		$ip_bin = ip2long ($row['ip']);
-		if (!isset ($ret[$ip_bin]))
-		{
-			$ret[$ip_bin] = $addrtemplate;
-			$ret[$ip_bin]['ip'] = $row['ip'];
-		}
+			$ret[$ip_bin] = constructIPv4Address ($row['ip']);
 		if (!isset ($dnamecache[$row['object_id']]))
 		{
 			$quasiobject['name'] = $row['object_name'];
@@ -1078,10 +1076,7 @@ function scanIPv4Space ($i32_first, $i32_last)
 	{
 		$ip_bin = ip2long ($row['ip']);
 		if (!isset ($ret[$ip_bin]))
-		{
-			$ret[$ip_bin] = $addrtemplate;
-			$ret[$ip_bin]['ip'] = $row['ip'];
-		}
+			$ret[$ip_bin] = constructIPv4Address ($row['ip']);
 		$tmp = array();
 		foreach (array ('rspool_id', 'rsport', 'rspool_name', 'inservice') as $cname)
 			$tmp[$cname] = $row[$cname];
@@ -1110,19 +1105,13 @@ function scanIPv4Space ($i32_first, $i32_last)
 		if ($i32_first <= $remoteip_bin and $remoteip_bin <= $i32_last)
 		{
 			if (!isset ($ret[$remoteip_bin]))
-			{
-				$ret[$remoteip_bin] = $addrtemplate;
-				$ret[$remoteip_bin]['ip'] = $row['remoteip'];
-			}
+				$ret[$remoteip_bin] = constructIPv4Address ($row['remoteip']);
 			$ret[$remoteip_bin]['inpf'][] = $row;
 		}
 		if ($i32_first <= $localip_bin and $localip_bin <= $i32_last)
 		{
 			if (!isset ($ret[$localip_bin]))
-			{
-				$ret[$localip_bin] = $addrtemplate;
-				$ret[$localip_bin]['ip'] = $row['localip'];
-			}
+				$ret[$localip_bin] = constructIPv4Address ($row['localip']);
 			$ret[$localip_bin]['outpf'][] = $row;
 		}
 	}
@@ -1176,7 +1165,7 @@ function getIPv4Address ($dottedquad = '')
 	$i32 = ip2long ($dottedquad); // signed 32 bit
 	$scanres = scanIPv4Space ($i32, $i32);
 	if (!isset ($scanres[$i32]))
-		return NULL;
+		return constructIPv4Address ($dottedquad);
 	markupIPv4AddrList ($scanres);
 	return $scanres[$i32];
 }
