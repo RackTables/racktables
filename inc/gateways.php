@@ -264,23 +264,27 @@ function gwSendFile ($object_id = 0, $handlername, $filetext = '')
 	$tmpfile = fopen ($tmpfilename, 'wb');
 	fwrite ($tmpfile, $filetext);
 	fclose ($tmpfile);
-	$data = queryGateway
+	$outputlines = queryGateway
 	(
 		'sendfile',
 		array ("submit ${remote_username} ${endpoint} ${handlername} ${tmpfilename}")
 	);
 	unlink ($tmpfilename);
-	if ($data == NULL)
+	if ($outputlines == NULL)
 		return oneLiner (163); // unknown gateway failure
-	if (strpos ($data[0], 'OK!') !== 0)
-		return oneLiner (164, array ($data[0])); // gateway failure
-	if (count ($data) != 2)
+	if (count ($outputlines) != 1)
 		return oneLiner (165); // protocol violation
+	if (strpos ($outputlines[0], 'OK!') !== 0)
+		return oneLiner (164, array ($outputlines[0])); // gateway failure
+	// Being here means having 'OK!' in the response.
+	return oneLiner (66, array (substr ($outputlines[0], strlen ('OK!')))); // file sent Ok
+
+
+
 	// Finally we can parse the response into message array.
 	$log = array ('v' => 2);
-	$codemap['ERR'] = 166; // generic gateway error
-	$codemap['OK'] = 62; // generic gateway success
-	list ($code, $text) = split ('!', $data[1]);
+	$codemap['OK'] = 66; // sendfile done
+	list ($code, $text) = split ('!', $outputlines[0]);
 	$log['m'][] = array ('c' => $codemap[$code], 'a' => array ($text));
 	return $log;
 }
