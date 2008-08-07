@@ -277,7 +277,7 @@ function gwSendFile ($object_id = 0, $handlername, $filetext = '')
 	if (strpos ($outputlines[0], 'OK!') !== 0)
 		return oneLiner (164, array ($outputlines[0])); // gateway failure
 	// Being here means having 'OK!' in the response.
-	return oneLiner (66, array (substr ($outputlines[0], strlen ('OK!')))); // file sent Ok
+	return oneLiner (66, array ($handlername)); // ignore provided "Ok" text, generate our own one
 
 
 

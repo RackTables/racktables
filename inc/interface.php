@@ -1345,7 +1345,7 @@ function printLog ($log)
 				63 => array ('code' => 'success', 'format' => '%u change request(s) have been processed'),
 				64 => array ('code' => 'success', 'format' => 'Port %s@%s has been assigned to VLAN %u'),
 				65 => array ('code' => 'success', 'format' => "Added new rack '%s'"),
-				66 => array ('code' => 'success', 'format' => "File sent Ok"),
+				66 => array ('code' => 'success', 'format' => "File sent Ok via handler '%s'"),
 
 				100 => array ('code' => 'error', 'format' => 'Generic error: %s'),
 				101 => array ('code' => 'error', 'format' => 'Port name cannot be empty'),

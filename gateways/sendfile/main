@@ -39,7 +39,7 @@ do_submit()
 	"$MYDIR/$handler.install" $user $endpoint $cfgfile
 	ret=$?
 	if [ $ret = 0 ]; then
-		echo "OK!File sent successfully"
+		echo "OK!"
 	else
 		echo "ERR!File handler returned code $ret"
 	fi
