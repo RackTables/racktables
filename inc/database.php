@@ -901,13 +901,12 @@ function getObjectIPv4Allocations ($object_id = 0)
 		"where object_id = ${object_id} " .
 		'order by ip';
 	$result = useSelectBlade ($query, __FUNCTION__);
+	// don't spawn a sub-query with unfetched buffer, it may fail
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-		$ret[] = array
-		(
-			'osif' => $row['osif'],
-			'type' => $row['type'],
-			'addrinfo' => getIPv4Address ($row['dottedquad'])
-		);
+		$ret[$row['dottedquad']] = array ('osif' => $row['osif'], 'type' => $row['type']);
+	unset ($result);
+	foreach (array_keys ($ret) as $dottedquad)
+		$ret[$dottedquad]['addrinfo'] = getIPv4Address ($dottedquad);
 	return $ret;
 }
 

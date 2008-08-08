@@ -763,11 +763,10 @@ function findAllEndpoints ($object_id, $fallback = '')
 	foreach ($values as $record)
 		if ($record['name'] == 'FQDN' && !empty ($record['value']))
 			return array ($record['value']);
-	$addresses = getObjectAddresses ($object_id);
 	$regular = array();
-	foreach ($addresses as $idx => $address)
-		if ($address['type'] == 'regular')
-			$regular[] = $address['ip'];
+	foreach (getObjectIPv4Allocations ($object_id) as $dottedquad => $alloc)
+		if ($alloc['type'] == 'regular')
+			$regular[] = $dottedquad;
 	if (!count ($regular) && !empty ($fallback))
 		return array ($fallback);
 	return $regular;

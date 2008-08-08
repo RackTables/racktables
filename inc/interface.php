@@ -813,8 +813,7 @@ function renderRackObject ($object_id = 0)
 		}
 		finishPortlet();
 	}
-//	$addresses = getObjectAddresses ($object_id);
-//	usort($addresses, 'sortAddresses');
+
 	$alloclist = getObjectIPv4Allocations ($object_id);
 	if (count ($alloclist))
 	{
@@ -827,13 +826,12 @@ function renderRackObject ($object_id = 0)
 			assertIPv4Arg ('hl_ipv4_addr', __FUNCTION__);
 			$hl_ipv4_addr = $_REQUEST['hl_ipv4_addr'];
 		}
-		foreach ($alloclist as $alloc)
+		foreach ($alloclist as $dottedquad => $alloc)
 		{
-		dump ($addr);
 			$address_name = niftyString ($alloc['addrinfo']['name']);
 			$class = $alloc['addrinfo']['class'];
-			$secondclass = ($hl_ipv4_addr == $alloc['addrinfo']['ip']) ? 'tdleft port_highlight' : 'tdleft';
-			if (NULL === ($netid = getIPv4AddressNetworkId ($alloc['addrinfo']['ip'])))
+			$secondclass = ($hl_ipv4_addr == $dottedquad) ? 'tdleft port_highlight' : 'tdleft';
+			if (NULL === ($netid = getIPv4AddressNetworkId ($dottedquad)))
 				$suffix = '/??';
 			else
 			{
@@ -841,16 +839,15 @@ function renderRackObject ($object_id = 0)
 				$suffix = '/' . $netinfo['mask'];
 			}
 			echo "<tr class='${class}'><td class=tdleft>${alloc['osif']}</td><td class='${secondclass}'>";
-			echo "<a href='${root}?page=ipaddress&ip=" . $alloc['addrinfo']['ip'] . "&hl_object_id=${object_id}'>";
-			echo $alloc['addrinfo']['ip'];
+			echo "<a href='${root}?page=ipaddress&ip=" . $dottedquad . "&hl_object_id=${object_id}'>";
+			echo $dottedquad;
 			echo "</a><small>${suffix}</small>" . $aac[$alloc['type']];
 			echo "</td><td class='${secondclass} description'>$address_name</td>";
 			echo "<td class='${secondclass}'>\n";
-
 			$prefix = '';
 			if ($addr['reserved'] == 'yes')
 			{
-				echo $prefix . '<strong>RRESERVED</strong>';
+				echo $prefix . '<strong>RESERVED</strong>';
 				$prefix = '; ';
 			}
 			foreach ($alloc['addrinfo']['allocs'] as $allocpeer)
@@ -861,7 +858,6 @@ function renderRackObject ($object_id = 0)
 				if (!empty ($allocpeer['osif']))
 					echo $allocpeer['osif'] . '@';
 				echo $allocpeer['object_name'] . '</a>';
-				
 				$prefix = '; ';
 			}
 			echo "</td></tr>\n";
@@ -1115,87 +1111,38 @@ function renderIPv4ForObject ($object_id = 0)
 	}
 	showMessageOrError();
 	startPortlet ('Allocations');
-	$addresses = getObjectAddresses ($object_id);
-	usort($addresses, 'sortAddresses');
+	$alloclist = getObjectIPv4Allocations ($object_id);
 	echo "<table cellspacing=0 cellpadding='5' align='center' class='widetable'>\n";
 	echo "<tr><th>&nbsp;</th><th>OS interface</th><th>IP address</th><th>description</th><th>type</th><th>misc</th><th>&nbsp</th></tr>\n";
-	foreach ($addresses as $addr)
+	foreach ($alloclist as $dottedquad => $alloc)
 	{
-		if (strlen($addr['address_name'])>40)
-			$address_name = substr($addr['address_name'],0,38).'...';
-		else
-			$address_name = $addr['address_name'];
-
-		$virtnum = countRefsOfType($addr['references'], 'virtual', 'eq');
-		$sharednum = countRefsOfType($addr['references'], 'shared', 'eq');
-		$regnum = countRefsOfType($addr['references'], 'regular', 'eq');
-		$notvirtnum = countRefsOfType($addr['references'], 'virtual', 'neq');
-
-		if ($addr['address_reserved']=='yes')
-			$class='trerror';
-		elseif ($addr['type']!='virtual' && $regnum>0)
-			$class='trerror';
-		elseif ($addr['type']=='regular' && $sharednum>0)
-			$class='trerror';
-		else 
-			$class='';
-
-		printOpFormIntro ('updIPv4Allocation', array ('ip' => $addr['ip']));
-		echo "<tr class='$class'><td><a href='${root}process.php?op=delIPv4Allocation&page=${pageno}&tab=${tabno}&ip=${addr['ip']}&object_id=$object_id'>";
+		$address_name = niftyString ($alloc['addrinfo']['name']);
+		$class = $alloc['addrinfo']['class'];
+		printOpFormIntro ('updIPv4Allocation', array ('ip' => $dottedquad));
+		echo "<tr class='$class'><td><a href='${root}process.php?op=delIPv4Allocation&page=${pageno}&tab=${tabno}&ip=${dottedquad}&object_id=$object_id'>";
 		printImageHREF ('delete', 'Delete this IPv4 address');
 		echo "</a></td>";
-		echo "<td class=tdleft><input type='text' name='bond_name' value='${addr['name']}' size=10></td>";
-		echo "<td class=tdleft><a href='${root}?page=ipaddress&ip=${addr['ip']}'>${addr['ip']}</a></td>";
+		echo "<td class=tdleft><input type='text' name='bond_name' value='${alloc['osif']}' size=10></td>";
+		echo "<td class=tdleft><a href='${root}?page=ipaddress&ip=${dottedquad}'>${dottedquad}</a></td>";
 		echo "<td class='description'>$address_name</td>\n<td>";
-		printSelect ($aat, 'bond_type', $addr['type']);
+		printSelect ($aat, 'bond_type', $alloc['type']);
 		echo "</td><td>";
-		if ($addr['address_reserved']=='yes')
-			echo "<b>Reserved</b>; ";
-
-		if ($addr['type'] == 'virtual')
+		$prefix = '';
+		if ($addr['reserved'] == 'yes')
 		{
-			if ($notvirtnum > 0)
-			{
-				echo " Owners: ";
-				printRefsOfType($addr['references'], 'virtual', 'neq');
-			}
+			echo $prefix . '<strong>RESERVED</strong>';
+			$prefix = '; ';
 		}
-		elseif ($addr['type'] == 'shared')
+		foreach ($alloc['addrinfo']['allocs'] as $allocpeer)
 		{
-			if ($sharednum > 0)
-			{
-				echo " Peers: ";
-				printRefsOfType($addr['references'], 'shared', 'eq');
-				echo ";";
-			}
-			if ($virtnum > 0)
-			{
-				echo " Virtuals: ";
-				printRefsOfType($addr['references'], 'virtual', 'eq');
-				echo ";";
-			}
-			if ($regnum > 0)
-			{
-				echo " Collisions: ";
-				printRefsOfType($addr['references'], 'regular', 'eq');
-			}
-			
+			if ($allocpeer['object_id'] == $object_id)
+				continue;
+			echo $prefix . "<a href='${root}?page=object&object_id=${allocpeer['object_id']}'>";
+			if (!empty ($allocpeer['osif']))
+				echo $allocpeer['osif'] . '@';
+			echo $allocpeer['object_name'] . '</a>';
+			$prefix = '; ';
 		}
-		else
-		{
-			if ($virtnum > 0)
-			{
-				echo " Virtuals: ";
-				printRefsOfType($addr['references'], 'virtual', 'eq');
-				echo ";";
-			}
-			if ($notvirtnum > 0)
-			{
-				echo " Collisions: ";
-				printRefsOfType($addr['references'], 'virtual', 'neq');
-			}
-		}
-
 		echo "</td><td>";
 		printImageHREF ('save', 'Save changes', TRUE);
 		echo "</td></form></tr>\n";
@@ -2542,6 +2489,7 @@ function renderIPv4AddressAllocations ($dottedquad)
 
 }
 
+// FIXME: use allocation list, get rid of getObjectAddresses()
 function renderNATv4ForObject ($object_id = 0)
 {
 	global $pageno, $tabno, $root;
@@ -2549,6 +2497,7 @@ function renderNATv4ForObject ($object_id = 0)
 	$info = getObjectInfo ($object_id);
 	$forwards = getNATv4ForObject ($object_id);
 	$addresses = getObjectAddresses ($object_id);
+//	$alloclist = getObjectIPv4Allocations ($object_id);
 	showMessageOrError();
 	echo "<center><h2>locally performed NAT</h2></center>";
 
