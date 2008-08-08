@@ -740,7 +740,7 @@ function renderRackObject ($object_id = 0)
 	echo "<tr><td colspan=2 align=center><h1>${info['dname']}</h1></td></tr>\n";
 	// left column with uknown number of portlets
 	echo "<tr><td class=pcleft>";
-	startPortlet ('Object information');
+	startPortlet ('summary');
 	echo "<table border=0 cellspacing=0 cellpadding=3 width='100%'>\n";
 	if (!empty ($info['name']))
 		echo "<tr><th width='50%' class=tdright>Common name:</th><td class=tdleft>${info['name']}</td></tr>\n";
@@ -775,7 +775,7 @@ function renderRackObject ($object_id = 0)
 	$ports = getObjectPortsAndLinks ($object_id);
 	if (count ($ports))
 	{
-		startPortlet ('Ports and links');
+		startPortlet ('ports and links');
 		usort($ports, 'sortByName');
 		if ($ports)
 		{
@@ -813,9 +813,10 @@ function renderRackObject ($object_id = 0)
 		}
 		finishPortlet();
 	}
-	$addresses = getObjectAddresses ($object_id);
-	usort($addresses, 'sortAddresses');
-	if (count ($addresses))
+//	$addresses = getObjectAddresses ($object_id);
+//	usort($addresses, 'sortAddresses');
+	$alloclist = getObjectIPv4Allocations ($object_id);
+	if (count ($alloclist))
 	{
 		startPortlet ('IPv4 addresses');
 		echo "<table cellspacing=0 cellpadding='5' align='center' class='widetable'>\n";
@@ -826,91 +827,42 @@ function renderRackObject ($object_id = 0)
 			assertIPv4Arg ('hl_ipv4_addr', __FUNCTION__);
 			$hl_ipv4_addr = $_REQUEST['hl_ipv4_addr'];
 		}
-		foreach ($addresses as $addr)
+		foreach ($alloclist as $alloc)
 		{
-			if (strlen($addr['address_name'])>40)
-				$address_name = substr($addr['address_name'],0,38).'...';
-			else
-				$address_name = empty ($addr['address_name']) ? '&nbsp;' : $addr['address_name'];
-
-			$virtnum = countRefsOfType($addr['references'], 'virtual', 'eq');
-			$sharednum = countRefsOfType($addr['references'], 'shared', 'eq');
-			$regnum = countRefsOfType($addr['references'], 'regular', 'eq') +
-				countRefsOfType($addr['references'], 'router', 'eq');
-			$notvirtnum = countRefsOfType($addr['references'], 'virtual', 'neq');
-
-			echo "<tr";
-			if ($addr['address_reserved']=='yes')
-				echo ' class=trerror';
-			elseif ($addr['type']!='virtual' && $regnum>0)
-				echo ' class=trerror';
-			elseif ($addr['type']=='regular' && $sharednum>0)
-				echo ' class=trerror';
-
-			$netid = getIPv4AddressNetworkId ($addr['ip']);
-			if (NULL === ($netid = getIPv4AddressNetworkId ($addr['ip'])))
+		dump ($addr);
+			$address_name = niftyString ($alloc['addrinfo']['name']);
+			$class = $alloc['addrinfo']['class'];
+			$secondclass = ($hl_ipv4_addr == $alloc['addrinfo']['ip']) ? 'tdleft port_highlight' : 'tdleft';
+			if (NULL === ($netid = getIPv4AddressNetworkId ($alloc['addrinfo']['ip'])))
 				$suffix = '/??';
 			else
 			{
 				$netinfo = getIPv4NetworkInfo ($netid);
 				$suffix = '/' . $netinfo['mask'];
 			}
-			if ($hl_ipv4_addr == $addr['ip'])
-				echo ' class=port_highlight';
-			echo "><td class=tdleft>${addr['name']}</td><td class=tdleft>";
-			echo "<a href='${root}?page=ipaddress&ip=${addr['ip']}&hl_object_id=${object_id}'>";
-			echo "${addr['ip']}</a><small>${suffix}</small></td><td class='description'>$address_name</td><td class=tdleft>\n";
+			echo "<tr class='${class}'><td class=tdleft>${alloc['osif']}</td><td class='${secondclass}'>";
+			echo "<a href='${root}?page=ipaddress&ip=" . $alloc['addrinfo']['ip'] . "&hl_object_id=${object_id}'>";
+			echo $alloc['addrinfo']['ip'];
+			echo "</a><small>${suffix}</small>" . $aac[$alloc['type']];
+			echo "</td><td class='${secondclass} description'>$address_name</td>";
+			echo "<td class='${secondclass}'>\n";
 
-			if ($addr['address_reserved']=='yes')
-				echo "<b>Reserved;</b> ";
-
-			echo $aac[$addr['type']];
-			switch ($addr['type'])
+			$prefix = '';
+			if ($addr['reserved'] == 'yes')
 			{
-				case 'virtual':
-					if ($notvirtnum > 0)
-					{
-						echo " Owners: ";
-						printRefsOfType($addr['references'], 'virtual', 'neq');
-					}
-					break;
-				case 'router':
-					break;
-				case 'shared':
-					if ($sharednum > 0)
-					{
-						echo " Peers: ";
-						printRefsOfType($addr['references'], 'shared', 'eq');
-						echo ";";
-					}
-					if ($virtnum > 0)
-					{
-						echo " Virtuals: ";
-						printRefsOfType($addr['references'], 'virtual', 'eq');
-						echo ";";
-					}
-					if ($regnum > 0)
-					{
-						echo " Collisions: ";
-						printRefsOfType($addr['references'], 'regular', 'eq');
-					}
-					break;
-				case 'regular':
-					if ($virtnum > 0)
-					{
-						echo " Virtuals: ";
-						printRefsOfType($addr['references'], 'virtual', 'eq');
-						echo ";";
-					}
-					if ($notvirtnum > 0)
-					{
-						echo " Collisions: ";
-						printRefsOfType($addr['references'], 'virtual', 'neq');
-					}
-					break;
-				default:
-					echo __FUNCTION__ . '(): internal error! ';
-					break;
+				echo $prefix . '<strong>RRESERVED</strong>';
+				$prefix = '; ';
+			}
+			foreach ($alloc['addrinfo']['allocs'] as $allocpeer)
+			{
+				if ($allocpeer['object_id'] == $object_id)
+					continue;
+				echo $prefix . "<a href='${root}?page=object&object_id=${allocpeer['object_id']}'>";
+				if (!empty ($allocpeer['osif']))
+					echo $allocpeer['osif'] . '@';
+				echo $allocpeer['object_name'] . '</a>';
+				
+				$prefix = '; ';
 			}
 			echo "</td></tr>\n";
 		}
@@ -1004,7 +956,7 @@ function renderRackObject ($object_id = 0)
 	// After left column we have (surprise!) right column with rackspace portlet only.
 	echo "<td class=pcright>";
 	// rackspace portlet
-	startPortlet ('Rackspace allocation');
+	startPortlet ('rackspace allocation');
 	// FIXME: now we call getRackData() twice
 	$racks = getResidentRacksData ($object_id);
 	foreach ($racks as $rackData)
@@ -5148,6 +5100,18 @@ function printOpFormIntro ($opname, $extra = array())
 		$extra[$page[$pageno]['bypass']] = $_REQUEST[$page[$pageno]['bypass']];
 	foreach ($extra as $inputname => $inputvalue)
 		echo "<input type=hidden name=${inputname} value=${inputvalue}>\n";
+}
+
+// This is a two-way formating function:
+// 1. Replace empty strings with nbsp.
+// 2. Cut strings, which are too long, and append "cut here" indicator.
+function niftyString ($string, $maxlen = 20)
+{
+	$cutind = '[&hellip;]'; // length is 3
+	if (empty ($string))
+		return '&nbsp;';
+	if (strlen ($string) > $maxlen)
+		return substr ($string, 0, $maxlen - 3) . $cutind;
 }
 
 ?>

@@ -894,6 +894,23 @@ function unlinkPort ($port)
 	return '';
 }
 
+function getObjectIPv4Allocations ($object_id = 0)
+{
+	$ret = array();
+	$query = 'select name as osif, type, inet_ntoa(ip) as dottedquad from IPBonds ' .
+		"where object_id = ${object_id} " .
+		'order by ip';
+	$result = useSelectBlade ($query, __FUNCTION__);
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
+		$ret[] = array
+		(
+			'osif' => $row['osif'],
+			'type' => $row['type'],
+			'addrinfo' => getIPv4Address ($row['dottedquad'])
+		);
+	return $ret;
+}
+
 // Return a list of IPv4 allocations for the object. Each address will list
 // all other objects, to which it is allocated (except the current object).
 function getObjectAddresses ($object_id = 0)
