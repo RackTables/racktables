@@ -894,6 +894,9 @@ function unlinkPort ($port)
 	return '';
 }
 
+// Return all IPv4 addresses allocated to the objects. Attach detailed
+// info about address to each alocation records. Index result by dotted-quad
+// address.
 function getObjectIPv4Allocations ($object_id = 0)
 {
 	$ret = array();
@@ -907,73 +910,6 @@ function getObjectIPv4Allocations ($object_id = 0)
 	unset ($result);
 	foreach (array_keys ($ret) as $dottedquad)
 		$ret[$dottedquad]['addrinfo'] = getIPv4Address ($dottedquad);
-	return $ret;
-}
-
-// Return a list of IPv4 allocations for the object. Each address will list
-// all other objects, to which it is allocated (except the current object).
-function getObjectAddresses ($object_id = 0)
-{
-	if ($object_id == 0)
-	{
-		showError ('Invalid object_id', __FUNCTION__);
-		return;
-	}
-	$query =
-		"select ".
-		"IPAddress.name as IPAddress_name, ".
-		"IPAddress.reserved as IPAddress_reserved, ".
-		"IPBonds.name as IPBonds_name, ".
-		"INET_NTOA(IPBonds.ip) as IPBonds_ip, ".
-		"IPBonds.type as IPBonds_type, ".
-		"RemoteBonds.name as RemoteBonds_name, ".
-		"RemoteBonds.type as RemoteBonds_type, ".
-		"RemoteBonds.object_id as RemoteBonds_object_id ".
-		"from IPBonds " .
-		"left join IPBonds as RemoteBonds on IPBonds.ip=RemoteBonds.ip " .
-			"and IPBonds.object_id!=RemoteBonds.object_id " .
-		"left join IPAddress on IPBonds.ip=IPAddress.ip " .
-		"where ".
-		"IPBonds.object_id = ${object_id} ".
-		"order by IPBonds.ip, RemoteBonds.object_id";
-	$result = useSelectBlade ($query, __FUNCTION__);
-	$ret=array();
-	$count=0;
-	$refcount=0;
-	$prev_ip = 0;
-	// Free the DB connection to enable subqueries.
-	$rows = $result->fetchAll (PDO::FETCH_ASSOC);
-	$result->closeCursor();
-	foreach ($rows as $row)
-	{
-		if ($prev_ip != $row['IPBonds_ip'])
-		{
-			$count++;
-			$refcount=0;
-			$prev_ip = $row['IPBonds_ip'];
-			$ret[$count]['address_name'] = $row['IPAddress_name'];
-			$ret[$count]['address_reserved'] = $row['IPAddress_reserved'];
-			$ret[$count]['ip'] = $row['IPBonds_ip'];
-			$ret[$count]['name'] = $row['IPBonds_name'];
-			$ret[$count]['type'] = $row['IPBonds_type'];
-			$ret[$count]['references'] = array();
-		}
-
-		if ($row['RemoteBonds_type'])
-		{
-			$ret[$count]['references'][$refcount]['type'] = $row['RemoteBonds_type'];
-			$ret[$count]['references'][$refcount]['name'] = $row['RemoteBonds_name'];
-			$ret[$count]['references'][$refcount]['object_id'] = $row['RemoteBonds_object_id'];
-			if (empty ($row['RemoteBonds_object_id']))
-				$ret[$count]['references'][$refcount]['object_name'] = '';
-			else
-			{
-				$oi = getObjectInfo ($row['RemoteBonds_object_id']);
-				$ret[$count]['references'][$refcount]['object_name'] = displayedName ($oi);
-			}
-			$refcount++;
-		}
-	}
 	return $ret;
 }
 

@@ -845,7 +845,7 @@ function renderRackObject ($object_id = 0)
 			echo "</td><td class='${secondclass} description'>$address_name</td>";
 			echo "<td class='${secondclass}'>\n";
 			$prefix = '';
-			if ($addr['reserved'] == 'yes')
+			if ($alloc['addrinfo']['reserved'] == 'yes')
 			{
 				echo $prefix . '<strong>RESERVED</strong>';
 				$prefix = '; ';
@@ -881,17 +881,15 @@ function renderRackObject ($object_id = 0)
 
 			foreach ($forwards['out'] as $pf)
 			{
-				$class='trerror';
-				$name='';
-				foreach ($addresses as $addr)
-					if ($addr['ip'] == $pf['localip'])
-					{
-						$class='';
-						$name=$addr['name'];
-						break;
-					}
+				$class = 'trerror';
+				$osif = '';
+				if (isset ($alloclist [$pf['localip']]))
+				{
+					$class = $alloclist [$pf['localip']]['addrinfo']['class'];
+					$osif = $alloclist [$pf['localip']]['osif'] . ': ';
+				}
 				echo "<tr class='$class'>";
-				echo "<td>${pf['proto']}</td><td class=tdleft>${name}: <a href='${root}?page=ipaddress&tab=default&ip=${pf['localip']}'>${pf['localip']}</a>:${pf['localport']}</td>";
+				echo "<td>${pf['proto']}</td><td class=tdleft>${osif}<a href='${root}?page=ipaddress&tab=default&ip=${pf['localip']}'>${pf['localip']}</a>:${pf['localport']}</td>";
 				echo "<td class=tdleft><a href='${root}?page=ipaddress&tab=default&ip=${pf['remoteip']}'>${pf['remoteip']}</a>:${pf['remoteport']}</td>";
 				$address = getIPv4Address ($pf['remoteip']);
 				echo "<td class='description'>";
@@ -2489,15 +2487,13 @@ function renderIPv4AddressAllocations ($dottedquad)
 
 }
 
-// FIXME: use allocation list, get rid of getObjectAddresses()
 function renderNATv4ForObject ($object_id = 0)
 {
 	global $pageno, $tabno, $root;
 	
 	$info = getObjectInfo ($object_id);
 	$forwards = getNATv4ForObject ($object_id);
-	$addresses = getObjectAddresses ($object_id);
-//	$alloclist = getObjectIPv4Allocations ($object_id);
+	$alloclist = getObjectIPv4Allocations ($object_id);
 	showMessageOrError();
 	echo "<center><h2>locally performed NAT</h2></center>";
 
@@ -2506,21 +2502,19 @@ function renderNATv4ForObject ($object_id = 0)
 
 	foreach ($forwards['out'] as $pf)
 	{
-		$class='trerror';
-		$name='';
-		foreach ($addresses as $addr)
-			if ($addr['ip'] == $pf['localip'])
-			{
-				$class='';
-				$name = $addr['name'];
-				break;
-			}
+		$class = 'trerror';
+		$osif = '';
+		if (isset ($alloclist [$pf['localip']]))
+		{
+			$class = $alloclist [$pf['localip']]['addrinfo']['class'];
+			$osif = $alloclist [$pf['localip']]['osif'] . ': ';
+		}
 
 		echo "<tr class='$class'>";
 		echo "<td><a href='${root}process.php?op=delNATv4Rule&localip=${pf['localip']}&localport=${pf['localport']}&remoteip=${pf['remoteip']}&remoteport=${pf['remoteport']}&proto=${pf['proto']}&object_id=$object_id&page=${pageno}&tab=${tabno}'>";
 		printImageHREF ('delete', 'Delete NAT rule');
 		echo "</a></td>";
-		echo "<td>${pf['proto']}/${name}: <a href='${root}?page=ipaddress&tab=default&ip=${pf['localip']}'>${pf['localip']}</a>:${pf['localport']}";
+		echo "<td>${pf['proto']}/${osif}<a href='${root}?page=ipaddress&tab=default&ip=${pf['localip']}'>${pf['localip']}</a>:${pf['localport']}";
 		if (!empty ($pf['local_addr_name']))
 			echo ' (' . $pf['local_addr_name'] . ')';
 		echo "</td>";
@@ -2558,9 +2552,12 @@ function renderNATv4ForObject ($object_id = 0)
 	printSelect (array ('TCP' => 'TCP', 'UDP' => 'UDP'), 'proto');
 	echo "<select name='localip' tabindex=1>";
 
-	foreach ($addresses as $addr)
-		echo "<option value='${addr['ip']}'>" . (empty ($addr['name']) ? '' : "${addr['name']}: ") .
-			"${addr['ip']}" . (empty ($addr['address_name']) ? '' : " (${addr['address_name']})") . "</option>";
+	foreach ($alloclist as $dottedquad => $alloc)
+	{
+		$name = empty ($alloc['addrinfo']['name']) ? '' : (' (' . niftyString ($alloc['addrinfo']['name']) . ')');
+		$osif = empty ($alloc['osif']) ? '' : ($alloc['osif'] . ': ');
+		echo "<option value='${dottedquad}'>${osif}${dottedquad}${name}</option>";
+	}
 
 	echo "</select>:<input type='text' name='localport' size='4' tabindex=2></td>";
 	echo "<td><input type='text' name='remoteip' id='remoteip' size='10' tabindex=3>";
@@ -5061,6 +5058,7 @@ function niftyString ($string, $maxlen = 20)
 		return '&nbsp;';
 	if (strlen ($string) > $maxlen)
 		return substr ($string, 0, $maxlen - 3) . $cutind;
+	return $string;
 }
 
 ?>
