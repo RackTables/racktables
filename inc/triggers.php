@@ -106,4 +106,10 @@ function trigger_passwdchange ()
 	return getConfigVar ('USER_AUTH_SRC') == 'database';
 }
 
+function trigger_localreports ()
+{
+	global $localreports;
+	return count ($localreports) > 0;
+}
+
 ?>

@@ -210,6 +210,10 @@ $ophandler['ipv4space']['newrange']['delIPv4Prefix'] = 'delIPv4Prefix';
 $ophandler['ipv4space']['newrange']['updIPv4Prefix'] = 'updIPv4Prefix';
 $msgcode['ipv4space']['newrange']['addIPv4Prefix']['OK'] = 23;
 $msgcode['ipv4space']['newrange']['addIPv4Prefix']['ERR'] = 100;
+$msgcode['ipv4space']['newrange']['addIPv4Prefix']['ERR1'] = 173;
+$msgcode['ipv4space']['newrange']['addIPv4Prefix']['ERR2'] = 174;
+$msgcode['ipv4space']['newrange']['addIPv4Prefix']['ERR3'] = 175;
+$msgcode['ipv4space']['newrange']['addIPv4Prefix']['ERR4'] = 176;
 $msgcode['ipv4space']['newrange']['delIPv4Prefix']['OK'] = 24;
 $msgcode['ipv4space']['newrange']['delIPv4Prefix']['ERR'] = 100;
 
@@ -532,7 +536,11 @@ $msgcode['myaccount']['mypassword']['changeMyPassword']['ERR4'] = 153;
 
 $page['reports']['title'] = 'Reports';
 $page['reports']['parent'] = 'index';
-$page['reports']['handler'] = 'renderReportSummary';
+$tab['reports']['default'] = 'System';
+$tab['reports']['local'] = 'Local';
+$trigger['reports']['local'] = 'trigger_localreports';
+$tabhandler['reports']['default'] = 'renderSystemReports';
+$tabhandler['reports']['local'] = 'renderLocalReports';
 
 // This function returns array if page numbers leading to the target page
 // plus page number of target page itself. The first element is the target

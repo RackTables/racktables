@@ -118,6 +118,10 @@ $image['DENIED']['path'] = 'pix/tango-dialog-error-big.png';
 $image['DENIED']['width'] = 32;
 $image['DENIED']['height'] = 32;
 
+// This may be populated later onsite, report rendering function will use it.
+// See the $systemreport for structure.
+$localreports = array();
+
 // Main menu.
 function renderIndex ()
 {
@@ -1317,6 +1321,10 @@ function printLog ($log)
 				170 => array ('code' => 'error', 'format' => 'There is no network for IP address "%s"'),
 				171 => array ('code' => 'error', 'format' => "Failed creating rack '%s'. Already exists in this row?"),
 				172 => array ('code' => 'error', 'format' => 'Malformed request'),
+				173 => array ('code' => 'error', 'format' => "Invalid IPv4 prefix '%s'"),
+				174 => array ('code' => 'error', 'format' => 'Bad IPv4 address'),
+				175 => array ('code' => 'error', 'format' => 'Invalid netmask'),
+				176 => array ('code' => 'error', 'format' => 'This network already exists'),
 
 				200 => array ('code' => 'warning', 'format' => 'generic warning: %s'),
 				201 => array ('code' => 'warning', 'format' => 'nothing happened...'),
@@ -3448,44 +3456,72 @@ function getFaviconURL ()
 }
 
 // FIXME: stack the report sections somehow, so they can register themselves.
-function renderReportSummary ()
+function renderSystemReports ()
 {
-	echo "<table width='100%'>\n";
-	echo "<tr><td class=pcleft>\n";
-	startPortlet ("Dictionary/objects");
-	echo "<table>\n";
-	foreach (getDictStats() as $header => $data)
-		echo "<tr><th class=tdright>${header}:</th><td class=tdleft>${data}</td></tr>\n";
-	echo "</table>\n";
-	finishPortlet();
-	startPortlet ('IPv4');
-	echo "<table>\n";
-	foreach (getIPv4Stats() as $header => $data)
-		echo "<tr><th class=tdright>${header}:</th><td class=tdleft>${data}</td></tr>\n";
-	echo "</table>\n";
-	finishPortlet();
-	startPortlet ('Rackspace');
-	echo "<table>\n";
-	foreach (getRackspaceStats() as $header => $data)
-		echo "<tr><th class=tdright>${header}:</th><td class=tdleft>${data}</td></tr>\n";
-	echo "</table>\n";
-	finishPortlet();
-	startPortlet ('RackCode');
-	echo "<table>\n";
-	foreach (getRackCodeStats() as $header => $data)
-		echo "<tr><th class=tdright>${header}:</th><td class=tdleft>${data}</td></tr>\n";
-	echo "</table>\n";
-	finishPortlet();
+	$systemreports = array
+	(
+		array
+		(
+			'title' => 'Dictionary/objects',
+			'type' => 'counters',
+			'func' => 'getDictStats'
+		),
+		array
+		(
+			'title' => 'IPv4',
+			'type' => 'counters',
+			'func' => 'getIPv4Stats'
+		),
+		array
+		(
+			'title' => 'Rackspace',
+			'type' => 'counters',
+			'func' => 'getRackspaceStats'
+		),
+		array
+		(
+			'title' => 'RackCode',
+			'type' => 'counters',
+			'func' => 'getRackCodeStats'
+		),
+		array
+		(
+			'title' => 'Tag popularity',
+			'type' => 'counters',
+			'func' => 'getTagStats'
+		),
+	);
+	renderReports ($systemreports);
+}
 
-	echo "</td><td class=pcright>\n";
+function renderLocalReports ()
+{
+	global $localreports;
+	renderReport ($localreports);
+}
 
-	startPortlet ("Tag popularity");
-	echo "<table>\n";
-	foreach (getTagStats() as $header => $data)
-		echo "<tr><th class=tdright>${header}:</th><td class=tdleft>${data}</td></tr>\n";
-	echo "</table>\n";
-	finishPortlet();
-	echo "</td></tr>\n";
+function renderReports ($what)
+{
+	if (!count ($what))
+		return;
+	echo "<table align=center>\n";
+	foreach ($what as $item)
+	{
+		echo "<tr><th colspan=2><h3>${item['title']}</h3></th></tr>\n";
+		switch ($item['type'])
+		{
+			case 'counters':
+				foreach ($item['func'] () as $header => $data)
+					echo "<tr><td class=tdright>${header}:</td><td class=tdleft>${data}</td></tr>\n";
+				break;
+			case 'custom':
+				$item['func'] ();
+				break;
+			default:
+				showError ('Internal data error', __FUNCTION__);
+		}
+		echo "<tr><td colspan=2><hr></td></tr>\n";
+	}
 	echo "</table>\n";
 }
 
