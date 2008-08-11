@@ -3497,7 +3497,7 @@ function renderSystemReports ()
 function renderLocalReports ()
 {
 	global $localreports;
-	renderReport ($localreports);
+	renderReports ($localreports);
 }
 
 function renderReports ($what)
