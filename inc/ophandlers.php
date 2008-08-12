@@ -813,6 +813,7 @@ function resetUIConfig()
 	setConfigVar ('IPV4_AUTO_RELEASE','1');
 	setConfigVar ('SHOW_LAST_TAB', 'no');
 	setConfigVar ('COOKIE_TTL', '1209600');
+	setConfigVar ('DECODE_IPV4_ADDR', 'yes');
 	return buildRedirectURL ('OK');
 }
 
@@ -1414,7 +1415,7 @@ function querySNMPData ()
 {
 	assertUIntArg ('object_id', __FUNCTION__);
 	assertStringArg ('community', __FUNCTION__);
-	return buildWideRedirectURL ((doSNMPmining ($_REQUEST['object_id'], $_REQUEST['community'])));
+	return buildWideRedirectURL (doSNMPmining ($_REQUEST['object_id'], $_REQUEST['community']));
 }
 
 ?>

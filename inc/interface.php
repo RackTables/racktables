@@ -823,7 +823,10 @@ function renderRackObject ($object_id = 0)
 	{
 		startPortlet ('IPv4 addresses');
 		echo "<table cellspacing=0 cellpadding='5' align='center' class='widetable'>\n";
-		echo "<tr><th>OS interface</th><th>IP address</th><th>description</th><th>misc</th></tr>\n";
+		if (getConfigVar ('DECODE_IPV4_ADDR') == 'yes')
+			echo "<tr><th>OS interface</th><th>IP address</th><th>network</th><th>routed by</th><th>peers</th></tr>\n";
+		else
+			echo "<tr><th>OS interface</th><th>IP address</th><th>peers</th></tr>\n";
 		$hl_ipv4_addr = '';
 		if (isset ($_REQUEST['hl_ipv4_addr']))
 		{
@@ -835,18 +838,57 @@ function renderRackObject ($object_id = 0)
 			$address_name = niftyString ($alloc['addrinfo']['name']);
 			$class = $alloc['addrinfo']['class'];
 			$secondclass = ($hl_ipv4_addr == $dottedquad) ? 'tdleft port_highlight' : 'tdleft';
-			if (NULL === ($netid = getIPv4AddressNetworkId ($dottedquad)))
-				$suffix = '/??';
-			else
+			$netid = getIPv4AddressNetworkId ($dottedquad);
+			echo "<tr class='${class}' valign=top><td class=tdleft>${alloc['osif']}</td><td class='${secondclass}'>";
+			echo "<a href='${root}?page=ipaddress&ip=" . $dottedquad . "&hl_object_id=${object_id}'>${dottedquad}</a>";
+			if (getConfigVar ('DECODE_IPV4_ADDR') != 'yes')
 			{
-				$netinfo = getIPv4NetworkInfo ($netid);
-				$suffix = '/' . $netinfo['mask'];
+				if (NULL === $netid)
+					$suffix = '/??';
+				else
+				{
+					$netinfo = getIPv4NetworkInfo ($netid);
+					echo '<small>/' . $netinfo['mask'] . '</small>';
+				}
 			}
-			echo "<tr class='${class}'><td class=tdleft>${alloc['osif']}</td><td class='${secondclass}'>";
-			echo "<a href='${root}?page=ipaddress&ip=" . $dottedquad . "&hl_object_id=${object_id}'>";
-			echo $dottedquad;
-			echo "</a><small>${suffix}</small>" . $aac[$alloc['type']];
-			echo "</td><td class='${secondclass} description'>$address_name</td>";
+			echo ' ' . $aac[$alloc['type']];
+			if (!empty ($alloc['addrinfo']['name']))
+				echo '(' . niftyString ($alloc['addrinfo']['name']) . ')';
+			echo '</td>';
+			if (getConfigVar ('DECODE_IPV4_ADDR') == 'yes')
+			{
+				echo "<td class='${secondclass}'>";
+				if (NULL === $netid)
+					echo '?';
+				else
+				{
+					$netinfo = getIPv4NetworkInfo ($netid);
+					echo "<a href='${root}?page=iprange&id=${netinfo['id']}&hl_ipv4_addr=${dottedquad}'>";
+					echo $netinfo['ip'] . '/' . $netinfo['mask'] . '</a>';
+					if (!empty ($netinfo['name']))
+						echo ' (' . $netinfo['name'] . ')';
+					$nettags = loadIPv4PrefixTags ($netid);
+					if (count ($nettags))
+						echo '<br><small>' . serializeTags ($nettags, "${root}?page=ipv4space&") . '</small>';
+				}
+				echo "</td><td class='${secondclass}'>";
+				// FIXME: These cals are really heavy, replace them with a more appropriate dedicated function.
+				$netdata = getIPv4Network ($netid);
+				$newline = '';
+				foreach (findRouters ($netdata['addrlist']) as $router)
+				{
+					if ($router['id'] == $object_id)
+						continue;
+					echo $newline . $router['addr'] . ", <a href='${root}?page=object&object_id=${router['id']}&hl_ipv4_addr=${router['addr']}'>";
+					echo (empty ($router['iface']) ? '' : $router['iface'] . '@') . $router['dname'] . '</a>';
+					$routertags = loadRackObjectTags ($router['id']);
+					if (count ($routertags))
+						echo '<br><small>' . serializeTags ($routertags, "${root}?page=objects&") . '</small>';
+					$newline = '<br>';
+				}
+				echo '</td>';
+			}
+			// peers
 			echo "<td class='${secondclass}'>\n";
 			$prefix = '';
 			if ($alloc['addrinfo']['reserved'] == 'yes')
@@ -4771,6 +4813,7 @@ function renderEntityTagChainEditor ($entity_realm = '', $bypass_name, $entity_i
 	global $root, $pageno, $tabno, $expl_tags;
 	showMessageOrError();
 	startPortlet ('Tag list (' . count ($expl_tags) . ')');
+	echo '<h3>hold Ctrl to select more, than one</h3>';
 	printOpFormIntro ('saveTags', array ($bypass_name => $entity_id));
 	echo '<select name=taglist[] multiple size=' . getConfigVar ('MAXSELSIZE') . '>';
 	foreach ($tagtree as $taginfo)
