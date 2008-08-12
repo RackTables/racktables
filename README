@@ -16,16 +16,29 @@ Authors: <info/=@=/racktables.org>
 
 I. Dependencies.
 
-For database you must have a MySQL server installation version 4.x or 5.x:
-Fedora 8/9: yum install mysql-server mysql
-ALTLinux Compact 3.0: apt-get install MySQL-server MySQL-client
-ALTLinux Desktop 4.0: apt-get install MySQL-server 
+For database you must have a MySQL server installation
+version 4.x or 5.x. It is a good idea to make it use UTF-8
+by default.
+
+* Fedora 8/9: yum install mysql-server mysql
+put "default-character-set=utf8" into /etc/my.cnf
+
+* ALTLinux Desktop 4.0: apt-get install MySQL-server 
+put "CHSET=utf8" into /etc/sysconfig/mysqld
+
+*openSUSE 11.0: YaST -> Software -> software management -> Web and LAMP server -> mysql
+put "default-character-set=utf8" into /etc/my.cnf
 
 For web-frontend you must have Apache and PHP 5 with PDO and multibyte
 extensions:
-Fedora 8/9: yum install httpd php php-mysql php-pdo php-gd php-snmp php-mbstring
-ALTLinux Server 4.0: apt-get install apache2-httpd-prefork php5-gd2 \
+
+* Fedora 8/9: yum install httpd php php-mysql php-pdo php-gd php-snmp php-mbstring
+
+* ALTLinux Server 4.0: apt-get install apache2-httpd-prefork php5-gd2 \
 php5-pdo_mysql php5-pdo apache2-mod_php5 php5-mbstring
+
+* openSUSE 11.0: use YaST to apache2-mod_php5, php5-gd, php5-mbstring, php5-mysql,
+php2-snmp and php5-ldap
 
 II. Prepare the server.
 1. Unpack the tarball and make it web-accessible, e.g. http://yourcompany.com/racktables
