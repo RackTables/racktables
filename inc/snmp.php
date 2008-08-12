@@ -183,10 +183,24 @@ function doSNMPmining ($object_id, $community)
 	}
 	foreach ($ifPhysAddress as $key => $val)
 	{
+		$val = trim ($val);
 		list ($dummy, $ifIndex) = explode ('.', $key);
-		list ($dummy, $addr) = explode (':', $val);
-		$addr = str_replace (' ', '', $addr);
-		$ifList1[$ifIndex]['phyad'] = $addr;
+		// NET-SNMP may return MAC addresses in one of two (?) formats depending on
+		// DISPLAY-HINT internal database. The best we can do about it is to accept both.
+		// Bug originally reported by Walery Wysotsky against openSUSE 11.0.
+		if (preg_match ('/^string: /i', $val)) // STRING: x:yy:z:xx:y:zz
+		{
+			list ($dummy, $val) = explode (' ', $val);
+			$addrbytes = explode (':', $val);
+			foreach ($addrbytes as $bidx => $bytestr)
+				if (strlen ($bytestr) == 1)
+					$addrbytes[$bidx] = '0' . $bytestr;
+		}
+		elseif (preg_match ('/^hex-string: /i', $val)) // Hex-STRING: xx yy zz xx yy zz
+			$addrbytes = explode (' ', substr ($val, -17));
+		else
+			continue; // martian format
+		$ifList1[$ifIndex]['phyad'] = implode ('', $addrbytes);
 	}
 	// ...and then reverse it inside out to make description the key.
 	$ifList2 = array();
