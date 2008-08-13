@@ -5172,7 +5172,7 @@ function printRoutersTD ($rlist, &$tagcache = array())
 		if (count ($tagcache[$rtr['id']]))
 		{
 			echo '<br><small>';
-			echo serializeTags ($tagcache[$rtr['id']], "${root}?page=objects&tab=default&");
+			echo serializeTags ($tagcache[$rtr['id']], "${root}?page=objgroup&group_id=0&tab=default&");
 			echo '</small>';
 		}
 		$delim = '<br>';
