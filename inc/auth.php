@@ -96,13 +96,34 @@ function authenticated ($username, $password)
 
 function authenticated_via_ldap ($username, $password)
 {
-	global $ldap_server, $ldap_domain;
+	global $ldap_server, $ldap_domain, $ldap_search_dn, $ldap_search_attr;
 	if ($connect = @ldap_connect ($ldap_server))
-		if ($bind = @ldap_bind ($connect, "${username}@${ldap_domain}", $password))
+	{
+		if
+		(
+			!isset ($ldap_search_dn) or
+			!isset ($ldap_search_attr) or
+			empty ($ldap_search_dn) or
+			empty ($ldap_search_attr)
+		)
+			$user_name = $username . "@" . $ldap_domain;
+		else
+		{
+			$results = @ldap_search ($connect, $ldap_search_dn, "(${ldap_search_attr}=${username})", array("dn"));
+			if (@ldap_count_entries ($connect, $results) != 1)
+			{
+				@ldap_close ($connect);
+				return FALSE;
+			}
+			$info = @ldap_get_entries($connect,$results);
+			$user_name = $info[0]['dn'];
+		}
+		if ($bind = @ldap_bind ($connect, $user_name, $password))
 		{
 			@ldap_close ($connect);
 			return TRUE;
 		}
+	}
 	@ldap_close ($connect);
 	return FALSE;
 }

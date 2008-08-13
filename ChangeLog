@@ -4,7 +4,7 @@
 	bugfix: work around some NET-SNMP builds (reported by Walery Wysotsky)
 	new feature: "router" addresses allocations
 	new feature: support for local extensions
-	new feature: IPv4 networks hierarchy
+	new feature: LDAP username to UID mapping by Walery Wysotsky
 	update: 3 more switches in SNMP code by Walery Wysotsky
 0.16.1 2008-07-30
 	new feature: pre-assigned tags for new VS and RS pools records
