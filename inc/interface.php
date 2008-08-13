@@ -1968,9 +1968,13 @@ function renderIPv4Space ()
 
 	$tagfilter = getTagFilter();
 	$addrspaceList = getAddressspaceList ($tagfilter, getTFMode());
+	$tagcache = array();
 	startPortlet ('networks (' . count ($addrspaceList) . ')');
 	echo "<table class='widetable' border=0 cellpadding=5 cellspacing=0 align='center'>\n";
-	echo "<tr><th>prefix</th><th>name/tags</th><th>%% used</th><th>routed by</th></tr>\n";
+	echo "<tr><th>prefix</th><th>name/tags</th><th>%% used</th>";
+	if (getConfigVar ('DECODE_IPV4_ADDR') == 'yes')
+		echo "<th>routed by</th>";
+	echo "</tr>\n";
 	foreach ($addrspaceList as $iprange)
 	{
 		$netdata = getIPv4Network ($iprange['id']);
@@ -1986,15 +1990,10 @@ function renderIPv4Space ()
 		}
 		echo "</td><td class=tdcenter>";
 		renderProgressBar ($used/$total);
-		echo "<br><small>${used}/${total}</small></td><td>";
-		$newline = '';
-		foreach (findRouters ($netdata['addrlist']) as $router)
-		{
-			echo $newline . "<a href='${root}?page=object&object_id=${router['id']}&hl_ipv4_addr=${router['addr']}'>";
-			echo (empty ($router['iface']) ? '' : $router['iface'] . '@') . $router['dname'] . '</a>';
-			$newline = '<br>';
-		}
-		echo "</td></tr>";
+		echo "<br><small>${used}/${total}</small></td>";
+		if (getConfigVar ('DECODE_IPV4_ADDR') == 'yes')
+			printRoutersTD (findRouters ($netdata['addrlist']), $tagcache);
+		echo "</tr>";
 	}
 	echo "</table>\n";
 	finishPortlet();
@@ -2228,21 +2227,11 @@ function renderIPv4Network ($id)
 	echo $wildcardbylen[$range['mask']];
 	echo "</td></tr>\n";
 
-	$rtrs = findRouters ($range['addrlist']);
-	if (count ($rtrs))
+	if (getConfigVar ('DECODE_IPV4_ADDR') == 'yes')
 	{
-		$rtrclass = 'tdleft';
-		foreach ($rtrs as $rtr)
-			if ($range['addrlist'][ip2long ($rtr['addr'])]['class'] == 'trerror')
-				$rtrclass = 'tdleft trerror';
-		echo "<tr><th width='50%' class=tdright>Routed by:</th><td class='${rtrclass}'>";
-		$comma = '';
-		foreach ($rtrs as $rtr)
-		{
-			echo $comma . $rtr['addr'];
-			$comma = ', ';
-		}
-		echo "</td></tr>\n";
+		echo "<tr><th width='50%' class=tdright>Routed by:</th>";
+		printRoutersTD (findRouters ($range['addrlist']));
+		echo "</tr>\n";
 	}
 
 	printTagTRs ("${root}?page=ipv4space&");
@@ -5140,6 +5129,43 @@ function niftyString ($string, $maxlen = 20)
 	if (strlen ($string) > $maxlen)
 		return substr ($string, 0, $maxlen - 3) . $cutind;
 	return $string;
+}
+
+// Iterate over what findRouters() returned and output some text suitable for a TD element.
+// Providing a quasi-static (external) tag cache is advised for calling functions.
+function printRoutersTD ($rlist, &$tagcache = array())
+{
+	global $root;
+	$delim = '';
+	$rtrclass = 'tdleft';
+	foreach ($rlist as $rtr)
+	{
+		$tmp = getIPv4Address ($rtr['addr']);
+		if ($tmp['class'] == 'trerror')
+		{
+			$rtrclass = 'tdleft trerror';
+			break;
+		}
+	}
+	echo "<td class='${rtrclass}'>";
+	foreach ($rlist as $rtr)
+	{
+		echo $delim . $rtr['addr'] . ' ';
+		echo "<a href='${root}?page=object&object_id=${rtr['id']}&hl_ipv4_addr=${rtr['addr']}'>";
+		if (!empty ($rtr['iface']))
+			echo $rtr['iface'] . '@';
+		echo $rtr['dname'] . '</a>';
+		if (!isset ($tagcache[$rtr['id']]))
+			$tagcache[$rtr['id']] = loadRackObjectTags ($rtr['id']);
+		if (count ($tagcache[$rtr['id']]))
+		{
+			echo '<br><small>';
+			echo serializeTags ($tagcache[$rtr['id']], "${root}?page=objects&tab=default&");
+			echo '</small>';
+		}
+		$delim = '<br>';
+	}
+	echo '</td>';
 }
 
 ?>
