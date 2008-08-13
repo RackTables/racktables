@@ -851,7 +851,7 @@ function renderRackObject ($object_id = 0)
 					echo '<small>/' . $netinfo['mask'] . '</small>';
 				}
 			}
-			echo ' ' . $aac[$alloc['type']];
+			echo '&nbsp;' . $aac[$alloc['type']];
 			if (!empty ($alloc['addrinfo']['name']))
 				echo '(' . niftyString ($alloc['addrinfo']['name']) . ')';
 			echo '</td>';
@@ -869,7 +869,7 @@ function renderRackObject ($object_id = 0)
 						echo ' (' . $netinfo['name'] . ')';
 					$nettags = loadIPv4PrefixTags ($netid);
 					if (count ($nettags))
-						echo '<br><small>' . serializeTags ($nettags, "${root}?page=ipv4space&") . '</small>';
+						echo '<br><small>' . serializeTags ($nettags, "${root}?page=ipv4space&tab=default&") . '</small>';
 				}
 				echo "</td><td class='${secondclass}'>";
 				// FIXME: These cals are really heavy, replace them with a more appropriate dedicated function.
@@ -883,7 +883,7 @@ function renderRackObject ($object_id = 0)
 					echo (empty ($router['iface']) ? '' : $router['iface'] . '@') . $router['dname'] . '</a>';
 					$routertags = loadRackObjectTags ($router['id']);
 					if (count ($routertags))
-						echo '<br><small>' . serializeTags ($routertags, "${root}?page=objects&") . '</small>';
+						echo '<br><small>' . serializeTags ($routertags, "${root}?page=objects&tab=default&") . '</small>';
 					$newline = '<br>';
 				}
 				echo '</td>';
@@ -1982,7 +1982,7 @@ function renderIPv4Space ()
 		if (count ($prefixtags))
 		{
 			echo "<br>";
-			echo serializeTags ($prefixtags, "${root}?page=${pageno}&");
+			echo serializeTags ($prefixtags, "${root}?page=${pageno}&tab=default&");
 		}
 		echo "</td><td class=tdcenter>";
 		renderProgressBar ($used/$total);
@@ -2963,7 +2963,7 @@ function renderSearchResults ()
 						if (count ($prefixtags))
 						{
 							echo "<br>";
-							echo serializeTags ($prefixtags, "${root}?page=ipv4space&");
+							echo serializeTags ($prefixtags, "${root}?page=ipv4space&tab=default&");
 						}
 						echo "</td></tr>";
 						$order = $nextorder[$order];
@@ -4218,7 +4218,7 @@ function renderVSList ()
 		if (count ($vstags))
 		{
 			echo '<br>';
-			echo serializeTags ($vstags, "${root}?page=${pageno}&");
+			echo serializeTags ($vstags, "${root}?page=${pageno}&tab=default&");
 		}
 		echo "</td><td><pre>${vsinfo['vsconfig']}</pre></td>";
 		echo "<td><pre>${vsinfo['rsconfig']}</pre></td>";
@@ -4322,7 +4322,7 @@ function renderRSPoolList ()
 		if (count ($pooltags))
 		{
 			echo '<br>';
-			echo serializeTags ($pooltags, "${root}?page=${pageno}&");
+			echo serializeTags ($pooltags, "${root}?page=${pageno}&tab=default&");
 		}
 		echo "</td><td class=tdleft><pre>${pool_info['vsconfig']}</pre></td>";
 		echo "<td class=tdleft><pre>${pool_info['rsconfig']}</pre></td>";
