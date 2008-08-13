@@ -1001,6 +1001,7 @@ function scanIPv4Space ($i32_first, $i32_last)
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
 		$ip_bin = ip2long ($row['ip']);
+		if (!isset ($ret[$ip_bin]))
 			$ret[$ip_bin] = constructIPv4Address ($row['ip']);
 		if (!isset ($dnamecache[$row['object_id']]))
 		{

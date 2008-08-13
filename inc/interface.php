@@ -2227,10 +2227,11 @@ function renderIPv4Network ($id)
 	echo $wildcardbylen[$range['mask']];
 	echo "</td></tr>\n";
 
-	if (getConfigVar ('DECODE_IPV4_ADDR') == 'yes')
+	$routers = findRouters ($range['addrlist']);
+	if (getConfigVar ('DECODE_IPV4_ADDR') == 'yes' and count ($routers))
 	{
 		echo "<tr><th width='50%' class=tdright>Routed by:</th>";
-		printRoutersTD (findRouters ($range['addrlist']));
+		printRoutersTD ($routers);
 		echo "</tr>\n";
 	}
 
@@ -2398,6 +2399,8 @@ function renderIPv4Address ($dottedquad)
 		finishPortlet();
 	}
 
+	// FIXME: The returned list is structured differently, than we expect it to be. One of the sides
+	// must be fixed.
 	if (count ($address['lblist']))
 	{
 		startPortlet ('Virtual services (' . count ($address['lblist']) . ')');
@@ -2824,8 +2827,8 @@ function renderSearchResults ()
 		if (NULL !== getIPv4AddressNetworkId ($terms))
 		{
 			$nhits++;
-			$lasthit = 'ipv4address1';
-			$summary['ipv4address1'][] = $terms;
+			$lasthit = 'ipv4addressbydq';
+			$summary['ipv4addressbydq'][] = $terms;
 		}
 	}
 	else
@@ -2842,8 +2845,8 @@ function renderSearchResults ()
 		if (count ($tmp))
 		{
 			$nhits += count ($tmp);
-			$lasthit = 'ipv4address2';
-			$summary['ipv4address2'] = $tmp;
+			$lasthit = 'ipv4addressbydescr';
+			$summary['ipv4addressbydescr'] = $tmp;
 		}
 		$tmp = getIPv4PrefixSearchResult ($terms);
 		if (count ($tmp))
@@ -2886,15 +2889,19 @@ function renderSearchResults ()
 				echo "&hl_port_id=" . $record['port_id'];
 				echo "&object_id=" . $record['object_id'] . "';//</script>";
 				break;
-			case 'ipv4address1':
-				echo "<script language='Javascript'>document.location='${root}?page=ipaddress";
-				echo "&ip=${record}";
-				echo "';//</script>";
+			case 'ipv4addressbydq':
+				$parentnet = getIPv4AddressNetworkId ($record);
+				if ($parentnet !== NULL)
+					echo "<script language='Javascript'>document.location='${root}?page=iprange&id=${parentnet}&hl_ipv4_addr=${record}';//</script>";
+				else
+					echo "<script language='Javascript'>document.location='${root}?page=ipaddress&ip=${record}';//</script>";
 				break;
-			case 'ipv4address2':
-				echo "<script language='Javascript'>document.location='${root}?page=ipaddress";
-				echo "&ip=${record['ip']}";
-				echo "';//</script>";
+			case 'ipv4addressbydescr':
+				$parentnet = getIPv4AddressNetworkId ($record['ip']);
+				if ($parentnet !== NULL)
+					echo "<script language='Javascript'>document.location='${root}?page=iprange&id=${parentnet}&hl_ipv4_addr=${record['ip']}';//</script>";
+				else
+					echo "<script language='Javascript'>document.location='${root}?page=ipaddress&ip=${record['ip']}';//</script>";
 				break;
 			case 'ipv4network':
 				echo "<script language='Javascript'>document.location='${root}?page=iprange";
@@ -2960,14 +2967,19 @@ function renderSearchResults ()
 					echo '</table>';
 					finishPortlet();
 					break;
-				case 'ipv4address2':
+				case 'ipv4addressbydescr':
 					startPortlet ('IPv4 addresses');
 					echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
+					// FIXME: address, parent network, routers (if extended view is enabled)
 					echo '<tr><th>Address</th><th>Descritpion</th></tr>';
 					foreach ($what as $addr)
 					{
-						echo "<tr class=row_${order}><td class=tdleft><a href='${root}?page=ipaddress&ip=${addr['ip']}'>";
-						echo "${addr['ip']}</a></td>";
+						echo "<tr class=row_${order}><td class=tdleft>";
+						$parentnet = getIPv4AddressNetworkId ($addr['ip']);
+						if ($parentnet !== NULL)
+							echo "<a href='${root}?page=iprange&id=${parentnet}&hl_ipv4_addr=${addr['ip']}'>${addr['ip']}</a></td>";
+						else
+							echo "<a href='${root}?page=ipaddress&ip=${addr['ip']}'>${addr['ip']}</a></td>";
 						echo "<td class=tdleft>${addr['name']}</td></tr>";
 						$order = $nextorder[$order];
 					}
