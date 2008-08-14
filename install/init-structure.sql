@@ -241,7 +241,8 @@ CREATE TABLE `RackSpace` (
   `atom` enum('front','interior','rear') NOT NULL default 'interior',
   `state` enum('A','U','T','W') NOT NULL default 'A',
   `object_id` int(10) unsigned default NULL,
-  PRIMARY KEY  (`rack_id`,`unit_no`,`atom`)
+  PRIMARY KEY  (`rack_id`,`unit_no`,`atom`),
+  KEY `RackSpace_object_id` (`object_id`)
 ) ENGINE=MyISAM;
 
 CREATE TABLE `Script` (

@@ -6,6 +6,7 @@
 	new feature: support for local extensions
 	new feature: LDAP username to UID mapping by Walery Wysotsky
 	update: 3 more switches in SNMP code by Walery Wysotsky
+	update: added a missing DB index
 0.16.1 2008-07-30
 	new feature: pre-assigned tags for new VS and RS pools records
 	new feature: cache RackCode parse tree for better performance

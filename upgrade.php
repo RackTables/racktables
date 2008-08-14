@@ -1379,6 +1379,7 @@ CREATE TABLE `TagTree` (
 			$query[] = "alter table IPBonds modify column type enum('regular','shared','virtual','router')";
 			$query[] = "update Dictionary set dict_value = 'spacer' where dict_key = 11";
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('DECODE_IPV4_ADDR','yes','string','no','no','Display parent network info for IPv4 addresses')";
+			$query[] = "ALTER TABLE RackSpace ADD KEY `RackSpace_object_id` (`object_id`)";
 			$query[] = "update Config set varvalue = '0.16.2' where varname = 'DB_VERSION'";
 			break;
 		default:
