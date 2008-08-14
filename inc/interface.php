@@ -620,7 +620,7 @@ function renderRackInfoPortlet ($rackData)
 	renderProgressBar (getRSUforRack ($rackData));
 	echo "</td></tr>\n";
 	echo "<tr><th width='50%' class=tdright>Objects:</th><td class=tdleft>";
-	echo getObjectCount ($rackData);
+	echo count (stuffInRackspace ($rackData));
 	echo "</td></tr>\n";
 	printTagTRs ("${root}?page=rackspace&");
 	if (!empty ($rackData['comment']))
@@ -1289,6 +1289,7 @@ function printLog ($log)
 				64 => array ('code' => 'success', 'format' => 'Port %s@%s has been assigned to VLAN %u'),
 				65 => array ('code' => 'success', 'format' => "Added new rack '%s'"),
 				66 => array ('code' => 'success', 'format' => "File sent Ok via handler '%s'"),
+				67 => array ('code' => 'success', 'format' => "Tag rolling done, %u objects involved"),
 
 				100 => array ('code' => 'error', 'format' => 'Generic error: %s'),
 				101 => array ('code' => 'error', 'format' => 'Port name cannot be empty'),
@@ -4739,13 +4740,7 @@ function renderTagTreeEditor ()
 function renderTagOption ($taginfo, $level = 0)
 {
 	global $expl_tags;
-	$selected = '';
-	foreach ($expl_tags as $etaginfo)
-		if ($taginfo['id'] == $etaginfo['id'])
-		{
-			$selected = ' selected';
-			break;
-		}
+	$selected = tagOnChain ($taginfo, $expl_tags) ? ' selected' : '';
 	echo '<option value=' . $taginfo['id'] . "${selected}>";
 	for ($i = 0; $i < $level; $i++)
 		echo '-- ';
@@ -4758,13 +4753,7 @@ function renderTagOption ($taginfo, $level = 0)
 // Ignore tag ids, which can't be found on the tree.
 function renderTagOptionForFilter ($taginfo, $tagfilter, $realm, $level = 0)
 {
-	$selected = '';
-	foreach ($tagfilter as $filter_id)
-		if ($taginfo['id'] == $filter_id)
-		{
-			$selected = ' selected';
-			break;
-		}
+	$selected = tagOnIdList ($taginfo, $tagfilter) ?' selected' : '';
 	echo '<option value=' . $taginfo['id'] . "${selected}>";
 	for ($i = 0; $i < $level; $i++)
 		echo '-- ';
@@ -4903,7 +4892,7 @@ function renderTagRollerForRow ($row_id)
 	showMessageOrError();
 	printOpFormIntro ('rollTags', array ('realsum' => $sum));
 	echo "<table border=1 align=center>";
-	echo "<tr><td colspan=2>This special tool allows assigning tags to physical contents (racks <s>and contained objects</s>) of the current ";
+	echo "<tr><td colspan=2>This special tool allows assigning tags to physical contents (racks <strong>and all contained objects</strong>) of the current ";
 	echo "rack row.<br>The tag(s) selected below will be ";
 	echo "appended to already assigned tag(s) of each particular entity. </td></tr>";
 	echo "<tr><th>Tags</th><td>";

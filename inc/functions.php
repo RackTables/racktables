@@ -859,7 +859,8 @@ function getRSUforRackRow ($rowData = NULL)
 	return ($counter['T'] + $counter['W'] + $counter['U']) / ($counter['T'] + $counter['W'] + $counter['U'] + $counter['F']);
 }
 
-function getObjectCount ($rackData)
+// Return a list of object IDs, which can be found in the given rackspace block.
+function stuffInRackspace ($rackData)
 {
 	$objects = array();
 	for ($i = $rackData['height']; $i > 0; $i--)
@@ -870,7 +871,7 @@ function getObjectCount ($rackData)
 				!in_array ($rackData[$i][$locidx]['object_id'], $objects)
 			)
 				$objects[] = $rackData[$i][$locidx]['object_id'];
-	return count ($objects);
+	return $objects;
 }
 
 // Make sure the string is always wrapped with LF characters
@@ -1142,18 +1143,6 @@ function complementByKids ($idlist, $tree = NULL, $getall = FALSE)
 	return $ret;
 }
 
-// Take a list of user-supplied tag IDs to build a list of valid taginfo
-// records indexed by tag IDs (tag chain).
-function tagChainFromIdList ($tagidlist)
-{
-	global $taglist;
-	$ret = array();
-	foreach (array_unique ($tagidlist) as $tagid)
-		if (isset ($taglist[$tagid]))
-			$ret[$tagid] = $taglist[$tagid];
-	return $ret;
-}
-
 function getUserAutoTags ($username = NULL)
 {
 	global $remote_username, $accounts;
@@ -1241,6 +1230,42 @@ function loadIPv4RSPoolAutoTags ()
 	return $ret;
 }
 
+// Check, if the given tag is present on the chain (will only work
+// for regular tags with tag ID set.
+function tagOnChain ($taginfo, $tagchain)
+{
+	if (!isset ($taginfo['id']))
+		return FALSE;
+	foreach ($tagchain as $test)
+		if ($test['id'] == $taginfo['id'])
+			return TRUE;
+	return FALSE;
+}
+
+// Idem, but use ID list instead of chain.
+function tagOnIdList ($taginfo, $tagidlist)
+{
+	if (!isset ($taginfo['id']))
+		return FALSE;
+	foreach ($tagidlist as $tagid)
+		if ($test['id'] == $tagid)
+			return TRUE;
+	return FALSE;
+}
+
+// Return TRUE, if two tags chains differ (order of tags doesn't matter).
+// Assume, that neither of the lists contains duplicates.
+// FIXME: a faster, than O(x^2) method is possible for this calculation.
+function tagChainCmp ($chain1, $chain2)
+{
+	if (count ($chain1) != count ($chain2))
+		return TRUE;
+	foreach ($chain1 as $taginfo1)
+		if (!tagOnChain ($taginfo1, $chain2))
+			return TRUE;
+	return FALSE;
+}
+
 // If the page-tab-op triplet is final, make $expl_tags and $impl_tags
 // hold all appropriate (explicit and implicit) tags respectively.
 // Otherwise some limited redirection is necessary (only page and tab
@@ -1283,12 +1308,13 @@ function fixContext ()
 	}
 }
 
-// Build a tag chain from supplied tag id list and return it.
+// Take a list of user-supplied tag IDs to build a list of valid taginfo
+// records indexed by tag IDs (tag chain).
 function buildTagChainFromIds ($tagidlist)
 {
 	global $taglist;
 	$ret = array();
-	foreach ($tagidlist as $tag_id)
+	foreach (array_unique ($tagidlist) as $tag_id)
 		if (isset ($taglist[$tag_id]))
 			$ret[] = $taglist[$tag_id];
 	return $ret;

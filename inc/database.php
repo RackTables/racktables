@@ -2811,13 +2811,30 @@ function addTagForEntity ($realm, $entity_id, $tag_id)
 }
 
 // Add records into TagStorage, if this makes sense (IOW, they don't appear
-// on the implicit list already). If this happened, remove any other records,
-// which could shift to the "implicit" side of the chain. This will make sure,
+// on the implicit list already). Then remove any other records, which
+// appear on the "implicit" side of the chain. This will make sure,
 // that both the tag base is still minimal and all requested tags appear on
 // the resulting tag chain.
-function appendTagsForEntity ($realm, $entity_id, $tagidlist)
+// Return TRUE, if any changes were committed.
+function rebuildTagChainForEntity ($realm, $entity_id, $extrachain = array())
 {
-	return;
+	// Put the current explicit sub-chain into a buffer and merge all tags from
+	// the extra chain, which aren't there yet.
+	$newchain = $oldchain = loadEntityTags ($realm, $entity_id);
+	foreach ($extrachain as $extratag)
+		if (!tagOnChain ($extratag, $newchain))
+			$newchain[] = $extratag;
+	// Then minimize the working buffer and check if it differs from the original
+	// chain we started with. If it is so, save the work and signal the upper layer.
+	$newchain = getExplicitTagsOnly ($newchain);
+	if (tagChainCmp ($oldchain, $newchain))
+	{
+		deleteTagsForEntity ($realm, $entity_id);
+		foreach ($newchain as $taginfo)
+			addTagForEntity ($realm, $entity_id, $taginfo['id']);
+		return TRUE;
+	}
+	return FALSE;
 }
 
 // Presume, that the target record has no tags attached.
@@ -2828,7 +2845,7 @@ function produceTagsForLastRecord ($realm, $tagidlist, $last_insert_id = 0)
 	if (!$last_insert_id)
 		$last_insert_id = lastInsertID();
 	$errcount = 0;
-	foreach (getExplicitTagsOnly (tagChainFromIdList ($tagidlist)) as $taginfo)
+	foreach (getExplicitTagsOnly (buildTagChainFromIds ($tagidlist)) as $taginfo)
 		if (addTagForEntity ($realm, $last_insert_id, $taginfo['id']) == FALSE)
 			$errcount++;	
 	if (!$errcount)

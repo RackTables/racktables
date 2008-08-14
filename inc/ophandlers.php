@@ -1230,24 +1230,25 @@ function rollTags ()
 	assertUIntArg ('row_id', __FUNCTION__);
 	assertStringArg ('sum', __FUNCTION__, TRUE);
 	assertUIntArg ('realsum', __FUNCTION__);
-	$row_id = $_REQUEST['row_id'];
 	if ($_REQUEST['sum'] != $_REQUEST['realsum'])
 		return buildRedirectURL ('ERR');
-	$racks = getRacksForRow ($row_id);
-	// Each time addTagForEntity() fails we assume it was just because of already existing record in its way.
-	$newtags = isset ($_REQUEST['taglist']) ? $_REQUEST['taglist'] : array();
-	$tagstack = getExplicitTagsOnly (buildTagChainFromIds ($newtags));
-	$ndupes = $nnew = 0;
-	foreach ($tagstack as $taginfo)
-		foreach ($racks as $rackInfo)
-		{
-			if (addTagForEntity ('rack', $rackInfo['id'], $taginfo['id']))
-				$nnew++;
-			else
-				$ndupes++;
-			// FIXME: do something likewise for all object inside current rack
-		}
-	return buildRedirectURL ('OK', array ($nnew, $ndupes));
+	// Even if the user requested an empty tag list, don't bail out, but process existing
+	// tag chains with "zero" extra. This will make sure, that the stuff processed will
+	// have its chains refined to "normal" form.
+	$extratags = isset ($_REQUEST['taglist']) ? $_REQUEST['taglist'] : array();
+	$n_ok = 0;
+	// Minimizing the extra chain early, so that tag rebuilder doesn't have to
+	// filter out the same tag again and again. It will have own noise to cancel.
+	$extrachain = getExplicitTagsOnly (buildTagChainFromIds ($extratags));
+	foreach (getRacksForRow ($_REQUEST['row_id']) as $rackInfo)
+	{
+		if (rebuildTagChainForEntity ('rack', $rackInfo['id'], $extrachain))
+			$n_ok++;
+		foreach (stuffInRackspace (getRackData ($rackInfo['id'])) as $object_id)
+			if (rebuildTagChainForEntity ('object', $object_id, $extrachain))
+				$n_ok++;
+	}
+	return buildRedirectURL ('OK', array ($n_ok));
 }
 
 function changeMyPassword ()
