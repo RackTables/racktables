@@ -1142,6 +1142,18 @@ function complementByKids ($idlist, $tree = NULL, $getall = FALSE)
 	return $ret;
 }
 
+// Take a list of user-supplied tag IDs to build a list of valid taginfo
+// records indexed by tag IDs (tag chain).
+function tagChainFromList ($tagidlist)
+{
+	global $taglist;
+	$ret = array();
+	foreach (array_unique ($tagidlist) as $tagid)
+		if (isset ($taglist[$tagid]))
+			$ret[$tagid] = $taglist[$tagid];
+	return $ret;
+}
+
 function getUserAutoTags ($username = NULL)
 {
 	global $remote_username, $accounts;

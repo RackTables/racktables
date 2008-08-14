@@ -365,7 +365,7 @@ function commitAddRack ($name, $height = 0, $row_id = 0, $comment, $taglist)
 		return FALSE;
 	}
 	$last_insert_id = lastInsertID();
-	return (addTagsForLastRecord ('rack', $taglist, $last_insert_id) == '') and recordHistory ('Rack', "id = ${last_insert_id}");
+	return (produceTagsForLastRecord ('rack', $taglist, $last_insert_id) == '') and recordHistory ('Rack', "id = ${last_insert_id}");
 }
 
 function commitAddObject ($new_name, $new_label, $new_barcode, $new_type_id, $new_asset_no, $taglist = array())
@@ -394,7 +394,7 @@ function commitAddObject ($new_name, $new_label, $new_barcode, $new_type_id, $ne
 	// Do AutoPorts magic
 	executeAutoPorts ($last_insert_id, $new_type_id);
 	// Now tags...
-	$error = addTagsForLastRecord ('object', $taglist, $last_insert_id);
+	$error = produceTagsForLastRecord ('object', $taglist, $last_insert_id);
 	if ($error != '')
 	{
 		showError ("Error adding tags for the object: ${error}");
@@ -2297,7 +2297,7 @@ function commitCreateVS ($vip = '', $vport = 0, $proto = '', $name = '', $vsconf
 		)
 	))
 		return __FUNCTION__ . ': SQL insertion failed';
-	return addTagsForLastRecord ('ipv4vs', $taglist);
+	return produceTagsForLastRecord ('ipv4vs', $taglist);
 }
 
 function addLBtoRSPool ($pool_id = 0, $object_id = 0, $vs_id = 0, $vsconfig = '', $rsconfig = '')
@@ -2536,7 +2536,7 @@ function commitCreateRSPool ($name = '', $vsconfig = '', $rsconfig = '', $taglis
 		)
 	))
 		return __FUNCTION__ . ': SQL insertion failed';
-	return addTagsForLastRecord ('ipv4rspool', $taglist);
+	return produceTagsForLastRecord ('ipv4rspool', $taglist);
 }
 
 function commitDeleteRSPool ($pool_id = 0)
@@ -2667,6 +2667,7 @@ function executeAutoPorts ($object_id = 0, $type_id = 0)
 
 // Return only implicitly listed tags, the rest of the chain will be
 // generated/deducted later at higher levels.
+// Result is a chain: taginfo list, indexed by tag id.
 function loadEntityTags ($entity_realm = '', $entity_id = 0)
 {
 	if ($entity_realm == '' or $entity_id <= 0)
@@ -2716,6 +2717,7 @@ function loadUserTags ($user_id)
 	return loadEntityTags ('user', $user_id);
 }
 
+// Return a tag chain with all DB tags on it.
 function getTagList ()
 {
 	$ret = array();
@@ -2793,6 +2795,7 @@ function deleteTagsForEntity ($entity_realm, $entity_id)
 		return TRUE;
 }
 
+// Push a record into TagStorage unconditionally.
 function addTagForEntity ($realm, $entity_id, $tag_id)
 {
 	return useInsertBlade
@@ -2807,14 +2810,25 @@ function addTagForEntity ($realm, $entity_id, $tag_id)
 	);
 }
 
-function addTagsForLastRecord ($realm, $taglist, $last_insert_id = 0)
+// Add records into TagStorage, if this makes sense (IOW, they don't appear
+// on the implicit list already). If this happened, remove any other records,
+// which could shift to the "implicit" side of the chain. This will make sure,
+// that both the tag base is still minimal and all requested tags appear on
+// the resulting tag chain.
+function appendTagsForEntity ($realm, $entity_id, $tagidlist)
 {
-	if (!count ($taglist))
+	return;
+}
+
+// Presume, that the target record has no tags attached.
+function produceTagsForLastRecord ($realm, $tagidlist, $last_insert_id = 0)
+{
+	if (!count ($tagidlist))
 		return '';
 	if (!$last_insert_id)
 		$last_insert_id = lastInsertID();
 	$errcount = 0;
-	foreach ($taglist as $tag_id)
+	foreach (array_keys (getExplicitTagsOnly (getChainFromList ($tagidlist))) as $tag_id)
 		if (addTagForEntity ($realm, $last_insert_id, $tag_id) == FALSE)
 			$errcount++;	
 	if (!$errcount)
@@ -2899,7 +2913,7 @@ function createIPv4Prefix ($range = '', $name = '', $is_bcast = FALSE, $taglist 
 		updateAddress ($network_addr, 'network', 'yes');
 		updateAddress ($broadcast_addr, 'broadcast', 'yes');
 	}
-	return addTagsForLastRecord ('ipv4net', $taglist);
+	return produceTagsForLastRecord ('ipv4net', $taglist);
 }
 
 // FIXME: This function doesn't wipe relevant records from IPAddress table.
