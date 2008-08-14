@@ -1198,7 +1198,7 @@ function updateRange ($id=0, $name='')
 function updateAddress ($ip = 0, $name = '', $reserved = 'no')
 {
 	// DELETE may safely fail.
-	$r = useDeleteBlade ('IPAddress', 'ip', "INET_ATON('${ip}')", FALSE);
+	$r = useDeleteBlade ('IPAddress', 'ip', "INET_ATON('${ip}')");
 	// INSERT may appear not necessary.
 	if ($name == '' and $reserved == 'no')
 		return '';
@@ -1835,7 +1835,7 @@ function commitDeleteAttribute ($attr_id = 0)
 		showError ('Invalid args', __FUNCTION__);
 		die;
 	}
-	return useDeleteBlade ('Attribute', 'attr_id', $attr_id, FALSE);
+	return useDeleteBlade ('Attribute', 'attr_id', $attr_id);
 }
 
 // FIXME: don't store garbage in chapter_no for non-dictionary types.
@@ -2051,21 +2051,10 @@ function useInsertBlade ($tablename, $values)
 
 // This swiss-knife blade deletes one record from the specified table
 // using the specified key name and value.
-function useDeleteBlade ($tablename, $keyname, $keyvalue, $quotekey = TRUE, $deleteall = FALSE)
+function useDeleteBlade ($tablename, $keyname, $keyvalue)
 {
 	global $dbxlink;
-	if ($quotekey == TRUE)
-		$keyvalue = "'${keyvalue}'";
-	$query = "delete from ${tablename} where ${keyname}=$keyvalue";
-	if (!$deleteall)
-		$query .= ' limit 1';
-	$result = $dbxlink->exec ($query);
-	if ($result === NULL)
-		return FALSE;
-	elseif (!$deleteall && $result != 1)
-		return FALSE;
-	else
-		return TRUE;
+	return 1 === $dbxlink->exec ("delete from ${tablename} where ${keyname}=${keyvalue} limit 1");
 }
 
 function useSelectBlade ($query, $caller = 'N/A')
@@ -2325,14 +2314,14 @@ function commitDeleteRS ($id = 0)
 {
 	if ($id <= 0)
 		return FALSE;
-	return useDeleteBlade ('IPRealServer', 'id', $id, FALSE);
+	return useDeleteBlade ('IPRealServer', 'id', $id);
 }
 
 function commitDeleteVS ($id = 0)
 {
 	if ($id <= 0)
 		return FALSE;
-	return useDeleteBlade ('IPVirtualService', 'id', $id, FALSE) && deleteTagsForEntity ('ipv4vs', $id);
+	return useDeleteBlade ('IPVirtualService', 'id', $id) && deleteTagsForEntity ('ipv4vs', $id);
 }
 
 function commitDeleteLB ($object_id = 0, $pool_id = 0, $vs_id = 0)
@@ -2544,7 +2533,7 @@ function commitDeleteRSPool ($pool_id = 0)
 	global $dbxlink;
 	if ($pool_id <= 0)
 		return FALSE;
-	return useDeleteBlade ('IPRSPool', 'id', $pool_id, FALSE) && deleteTagsForEntity ('ipv4rspool', $pool_id);
+	return useDeleteBlade ('IPRSPool', 'id', $pool_id) && deleteTagsForEntity ('ipv4rspool', $pool_id);
 }
 
 function commitUpdateRSPool ($pool_id = 0, $name = '', $vsconfig = '', $rsconfig = '')
@@ -2765,7 +2754,7 @@ function commitDestroyTag ($tagid = 0)
 {
 	if ($tagid == 0)
 		return 'Invalid arg to ' . __FUNCTION__;
-	if (useDeleteBlade ('TagTree', 'id', $tagid, FALSE))
+	if (useDeleteBlade ('TagTree', 'id', $tagid))
 		return '';
 	else
 		return 'useDeleteBlade() failed in ' . __FUNCTION__;
@@ -2938,7 +2927,7 @@ function destroyIPv4Prefix ($id = 0)
 {
 	if ($id <= 0)
 		return __FUNCTION__ . ': Invalid IPv4 prefix ID';
-	if (!useDeleteBlade ('IPRanges', 'id', $id, FALSE))
+	if (!useDeleteBlade ('IPRanges', 'id', $id))
 		return __FUNCTION__ . ': SQL query #1 failed';
 	if (!deleteTagsForEntity ('ipv4net', $id))
 		return __FUNCTION__ . ': SQL query #2 failed';
@@ -2963,7 +2952,7 @@ function saveScript ($name, $text)
 		return FALSE;
 	}
 	// delete regardless of existence
-	useDeleteBlade ('Script', 'script_name', $name, TRUE);
+	useDeleteBlade ('Script', 'script_name', "'${name}'");
 	return useInsertBlade
 	(
 		'Script',

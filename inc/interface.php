@@ -3389,9 +3389,9 @@ function renderEditAttributesForm ()
 		printImageHREF ('delete', 'Remove attribute');
 		echo '</a></td>';
 		echo "<td><input type=text name=attr_name value='${attr['name']}'></td>";
-		echo "<td>${attr['type']}</td>";
-		echo "<td><input type=submit value='OK'></td>";
-		echo '</tr>';
+		echo "<td class=tdleft>${attr['type']}</td><td>";
+		printImageHREF ('save', 'Save changes', TRUE);
+		echo '</td></tr>';
 		echo '</form>';
 	}
 	printOpFormIntro ('add');
@@ -3822,10 +3822,10 @@ function renderFirstRowForm ()
 <p align=center>
 Your rackspace seems to be empty, and this form will create your first rack row,
 just fill in the name. All the subsequent rack rows will have to be added from the
-Dictionary edit page in Configuration section.
+Dictionary edit page in Configuration section (you will be redirected right there).
 <br>
-<input type=text name=dict_value value='my server room'>
-<input type=submit value='OK'>
+<input type=text name=dict_value value='my server room'><br>
+<?php printImageHREF ('CREATE', 'Add record', TRUE); ?>
 </form>
 </p>
 <?php
