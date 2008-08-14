@@ -1248,7 +1248,7 @@ function tagOnIdList ($taginfo, $tagidlist)
 	if (!isset ($taginfo['id']))
 		return FALSE;
 	foreach ($tagidlist as $tagid)
-		if ($test['id'] == $tagid)
+		if ($taginfo['id'] == $tagid)
 			return TRUE;
 	return FALSE;
 }

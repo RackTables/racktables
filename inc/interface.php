@@ -102,6 +102,9 @@ $image['prev']['height'] = 32;
 $image['clear']['path'] = 'pix/tango-edit-clear.png';
 $image['clear']['width'] = 16;
 $image['clear']['height'] = 16;
+$image['CLEAR']['path'] = 'pix/tango-edit-clear-big.png';
+$image['CLEAR']['width'] = 32;
+$image['CLEAR']['height'] = 32;
 $image['save']['path'] = 'pix/tango-document-save.png';
 $image['save']['width'] = 16;
 $image['save']['height'] = 16;
@@ -4794,23 +4797,26 @@ function renderUserTags ($id)
 
 function renderEntityTagChainEditor ($entity_realm = '', $bypass_name, $entity_id = 0)
 {
-	global $tagtree;
+	global $tagtree, $expl_tags;
 	if ($entity_realm == '' or $entity_id <= 0)
 	{
 		showError ('Invalid or missing arguments', __FUNCTION__);
 		return;
 	}
-	global $root, $pageno, $tabno, $expl_tags;
 	showMessageOrError();
 	startPortlet ('Tag list (' . count ($expl_tags) . ')');
-	echo '<h3>hold Ctrl to select more, than one</h3>';
+	echo '<table border=0 align=center>';
+	echo '<tr><td colspan=2><h3>hold Ctrl to select more, than one</h3></td></tr>';
 	printOpFormIntro ('saveTags', array ($bypass_name => $entity_id));
-	echo '<select name=taglist[] multiple size=' . getConfigVar ('MAXSELSIZE') . '>';
+	echo '<tr><td colspan=2><select name=taglist[] multiple size=' . getConfigVar ('MAXSELSIZE') . '>';
 	foreach ($tagtree as $taginfo)
 		renderTagOption ($taginfo);
-	echo '</select><br>';
+	echo '</select></td></tr><tr><td>';
 	printImageHREF ('SAVE', 'Save changes', TRUE);
-	echo "</form>\n";
+	echo "</form></td><td>";
+	printOpFormIntro ('saveTags', array ($bypass_name => $entity_id, 'taglist[]' => ''));
+	printImageHREF ('CLEAR', 'Reset all tags', TRUE);
+	echo '</form></td></tr></table>';
 	finishPortlet();
 }
 
@@ -4853,19 +4859,32 @@ function renderTagFilterPortlet ($tagfilter, $realm, $bypass_name = '', $bypass_
 		echo "None defined for current realm.<br>";
 		return;
 	}
+	echo '<table border=0 align=center>';
+
 	echo "<form method=get>\n";
 	echo "<input type=hidden name=page value=${pageno}>\n";
 	echo "<input type=hidden name=tab value=${tabno}>\n";
 	if ($bypass_name != '')
 		echo "<input type=hidden name=${bypass_name} value='${bypass_value}'>\n";
-	echo '<select name=tagfilter[] multiple>';
+	echo '<tr><td colspan=2><select name=tagfilter[] multiple>';
 	foreach ($objectivetags as $taginfo)
 		renderTagOptionForFilter ($taginfo, $tagfilter, $realm);
-	echo '</select><br>';
+	echo '</select></td></tr><tr><td>';
 //	$tfmode = getTFMode();
 //	echo '<input type=radio name=tfmode value=all' . ($tfmode == 'all' ? ' checked' : '') . '>all ';
 //	echo '<input type=radio name=tfmode value=any' . ($tfmode == 'any' ? ' checked' : '') . '>any ';
-	echo "<input type=submit value='Apply'></form>\n";
+	printImageHREF ('save', 'apply', TRUE);
+	echo "</form></td><td>";
+
+	// "reset"
+	echo "<form method=get>\n";
+	echo "<input type=hidden name=page value=${pageno}>\n";
+	echo "<input type=hidden name=tab value=${tabno}>\n";
+	if ($bypass_name != '')
+		echo "<input type=hidden name=${bypass_name} value='${bypass_value}'>\n";
+	echo "<input type=hidden name=tagfilter[] value=''>";
+	printImageHREF ('clear', 'reset', TRUE);
+	echo '</form></td></tr></table>';
 	finishPortlet();
 }
 
