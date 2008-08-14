@@ -2828,8 +2828,8 @@ function produceTagsForLastRecord ($realm, $tagidlist, $last_insert_id = 0)
 	if (!$last_insert_id)
 		$last_insert_id = lastInsertID();
 	$errcount = 0;
-	foreach (array_keys (getExplicitTagsOnly (getChainFromList ($tagidlist))) as $tag_id)
-		if (addTagForEntity ($realm, $last_insert_id, $tag_id) == FALSE)
+	foreach (getExplicitTagsOnly (tagChainFromIdList ($tagidlist)) as $taginfo)
+		if (addTagForEntity ($realm, $last_insert_id, $taginfo['id']) == FALSE)
 			$errcount++;	
 	if (!$errcount)
 		return '';
