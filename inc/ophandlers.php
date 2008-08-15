@@ -1139,7 +1139,7 @@ function saveEntityTags ($realm, $bypass)
 	$taglist = isset ($_REQUEST['taglist']) ? $_REQUEST['taglist'] : array();
 	// Build a chain from the submitted data, minimize it,
 	// then wipe existing records and store the new set instead.
-	deleteTagsForEntity ($realm, $entity_id);
+	destroyTagsForEntity ($realm, $entity_id);
 	$newchain = getExplicitTagsOnly (buildTagChainFromIds ($taglist));
 	$n_succeeds = $n_errors = 0;
 	foreach ($newchain as $taginfo)

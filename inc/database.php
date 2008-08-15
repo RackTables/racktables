@@ -2321,7 +2321,7 @@ function commitDeleteVS ($id = 0)
 {
 	if ($id <= 0)
 		return FALSE;
-	return useDeleteBlade ('IPVirtualService', 'id', $id) && deleteTagsForEntity ('ipv4vs', $id);
+	return useDeleteBlade ('IPVirtualService', 'id', $id) && destroyTagsForEntity ('ipv4vs', $id);
 }
 
 function commitDeleteLB ($object_id = 0, $pool_id = 0, $vs_id = 0)
@@ -2533,7 +2533,7 @@ function commitDeleteRSPool ($pool_id = 0)
 	global $dbxlink;
 	if ($pool_id <= 0)
 		return FALSE;
-	return useDeleteBlade ('IPRSPool', 'id', $pool_id) && deleteTagsForEntity ('ipv4rspool', $pool_id);
+	return useDeleteBlade ('IPRSPool', 'id', $pool_id) && destroyTagsForEntity ('ipv4rspool', $pool_id);
 }
 
 function commitUpdateRSPool ($pool_id = 0, $name = '', $vsconfig = '', $rsconfig = '')
@@ -2773,10 +2773,23 @@ function commitUpdateTag ($tag_id, $tag_name, $parent_id)
 	return '';
 }
 
-function deleteTagsForEntity ($entity_realm, $entity_id)
+// Drop the whole chain stored.
+function destroyTagsForEntity ($entity_realm, $entity_id)
 {
 	global $dbxlink;
 	$query = "delete from TagStorage where target_realm = '${entity_realm}' and target_id = ${entity_id}";
+	$result = $dbxlink->exec ($query);
+	if ($result === NULL)
+		return FALSE;
+	else
+		return TRUE;
+}
+
+// Drop only one record. This operation doesn't involve retossing other tags, unlike when adding.
+function deleteTagForEntity ($entity_realm, $entity_id, $tag_id)
+{
+	global $dbxlink;
+	$query = "delete from TagStorage where target_realm = '${entity_realm}' and target_id = ${entity_id} and tag_id = ${tag_id}";
 	$result = $dbxlink->exec ($query);
 	if ($result === NULL)
 		return FALSE;
@@ -2818,7 +2831,7 @@ function rebuildTagChainForEntity ($realm, $entity_id, $extrachain = array())
 	$newchain = getExplicitTagsOnly ($newchain);
 	if (tagChainCmp ($oldchain, $newchain))
 	{
-		deleteTagsForEntity ($realm, $entity_id);
+		destroyTagsForEntity ($realm, $entity_id);
 		foreach ($newchain as $taginfo)
 			addTagForEntity ($realm, $entity_id, $taginfo['id']);
 		return TRUE;
@@ -2929,7 +2942,7 @@ function destroyIPv4Prefix ($id = 0)
 		return __FUNCTION__ . ': Invalid IPv4 prefix ID';
 	if (!useDeleteBlade ('IPRanges', 'id', $id))
 		return __FUNCTION__ . ': SQL query #1 failed';
-	if (!deleteTagsForEntity ('ipv4net', $id))
+	if (!destroyTagsForEntity ('ipv4net', $id))
 		return __FUNCTION__ . ': SQL query #2 failed';
 	return '';
 }
