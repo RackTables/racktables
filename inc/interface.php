@@ -827,7 +827,7 @@ function renderRackObject ($object_id = 0)
 		startPortlet ('IPv4 addresses');
 		echo "<table cellspacing=0 cellpadding='5' align='center' class='widetable'>\n";
 		if (getConfigVar ('DECODE_IPV4_ADDR') == 'yes')
-			echo "<tr><th>OS interface</th><th>IP address</th><th>network</th><th>routed by</th><th>peers</th></tr>\n";
+			echo "<tr><th>OS interface</th><th>IP address</th><th colspan=2>network</th><th>routed by</th><th>peers</th></tr>\n";
 		else
 			echo "<tr><th>OS interface</th><th>IP address</th><th>peers</th></tr>\n";
 		$hl_ipv4_addr = '';
@@ -842,6 +842,7 @@ function renderRackObject ($object_id = 0)
 			$class = $alloc['addrinfo']['class'];
 			$secondclass = ($hl_ipv4_addr == $dottedquad) ? 'tdleft port_highlight' : 'tdleft';
 			$netid = getIPv4AddressNetworkId ($dottedquad);
+			$netinfo = getIPv4NetworkInfo ($netid);
 			echo "<tr class='${class}' valign=top><td class=tdleft>${alloc['osif']}</td><td class='${secondclass}'>";
 			echo "<a href='${root}?page=ipaddress&ip=" . $dottedquad . "&hl_object_id=${object_id}'>${dottedquad}</a>";
 			if (getConfigVar ('DECODE_IPV4_ADDR') != 'yes')
@@ -849,10 +850,7 @@ function renderRackObject ($object_id = 0)
 				if (NULL === $netid)
 					$suffix = '/??';
 				else
-				{
-					$netinfo = getIPv4NetworkInfo ($netid);
 					echo '<small>/' . $netinfo['mask'] . '</small>';
-				}
 			}
 			echo '&nbsp;' . $aac[$alloc['type']];
 			if (!empty ($alloc['addrinfo']['name']))
@@ -860,21 +858,11 @@ function renderRackObject ($object_id = 0)
 			echo '</td>';
 			if (getConfigVar ('DECODE_IPV4_ADDR') == 'yes')
 			{
-				echo "<td class='${secondclass}'>";
 				if (NULL === $netid)
-					echo '?';
+					echo '<td colspan=2>?</td>';
 				else
-				{
-					$netinfo = getIPv4NetworkInfo ($netid);
-					echo "<a href='${root}?page=iprange&id=${netinfo['id']}&hl_ipv4_addr=${dottedquad}'>";
-					echo $netinfo['ip'] . '/' . $netinfo['mask'] . '</a>';
-					if (!empty ($netinfo['name']))
-						echo ' (' . $netinfo['name'] . ')';
-					$nettags = loadIPv4PrefixTags ($netid);
-					if (count ($nettags))
-						echo '<br><small>' . serializeTags ($nettags, "${root}?page=ipv4space&tab=default&") . '</small>';
-				}
-				echo "</td><td class='${secondclass}'>";
+					printIPv4NetInfoTDs ($netinfo);
+				echo "<td class='${secondclass}'>";
 				// FIXME: These cals are really heavy, replace them with a more appropriate dedicated function.
 				$netdata = getIPv4Network ($netid);
 				$newline = '';
@@ -1984,17 +1972,11 @@ function renderIPv4Space ()
 	foreach ($addrspaceList as $iprange)
 	{
 		$netdata = getIPv4Network ($iprange['id']);
-		$prefixtags = loadIPv4PrefixTags ($iprange['id']);
 		$total = ($netdata['ip_bin'] | $netdata['mask_bin_inv']) - ($netdata['ip_bin'] & $netdata['mask_bin']) + 1;
 		$used = count ($netdata['addrlist']);
-		echo "<tr valign=top><td class=tdleft><a href='${root}?page=iprange&id=${iprange['id']}'>${iprange['ip']}/${netdata['mask']}</a></td>";
-		echo "<td class=tdleft>${netdata['name']}";
-		if (count ($prefixtags))
-		{
-			echo "<br>";
-			echo serializeTags ($prefixtags, "${root}?page=${pageno}&tab=default&");
-		}
-		echo "</td><td class=tdcenter>";
+		echo "<tr valign=top>";
+		printIPv4NetInfoTDs ($netdata);
+		echo "<td class=tdcenter>";
 		renderProgressBar ($used/$total);
 		echo "<br><small>${used}/${total}</small></td>";
 		if (getConfigVar ('DECODE_IPV4_ADDR') == 'yes')
@@ -2956,18 +2938,11 @@ function renderSearchResults ()
 					startPortlet ("<a href='${root}?page=ipv4space'>IPv4 networks</a>");
 					echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
 					echo '<tr><th>network</th><th>name/tags</th></tr>';
-					foreach ($what as $net)
+					foreach ($what as $netinfo)
 					{
-						$prefixtags = loadIPv4PrefixTags ($net['id']);
-						echo "<tr class=row_${order} valign=top><td class=tdleft><a href='${root}?page=iprange&id=${net['id']}'>${net['ip']}";
-						echo '/' . $net['mask'] . '</a></td>';
-						echo "<td class=tdleft>${net['name']}";
-						if (count ($prefixtags))
-						{
-							echo "<br>";
-							echo serializeTags ($prefixtags, "${root}?page=ipv4space&tab=default&");
-						}
-						echo "</td></tr>";
+						echo "<tr class=row_${order} valign=top>";
+						printIPv4NetInfoTDs ($netinfo);
+						echo "</tr>\n";
 						$order = $nextorder[$order];
 					}
 					echo '</table>';
@@ -5143,13 +5118,13 @@ function printOpFormIntro ($opname, $extra = array())
 // This is a two-way formating function:
 // 1. Replace empty strings with nbsp.
 // 2. Cut strings, which are too long, and append "cut here" indicator.
-function niftyString ($string, $maxlen = 20)
+function niftyString ($string, $maxlen = 30)
 {
-	$cutind = '[&hellip;]'; // length is 3
+	$cutind = '&hellip;'; // length is 1
 	if (empty ($string))
 		return '&nbsp;';
-	if (strlen ($string) > $maxlen)
-		return substr ($string, 0, $maxlen - 3) . $cutind;
+	if (mb_strlen ($string) > $maxlen)
+		return mb_substr ($string, 0, $maxlen - 1) . $cutind;
 	return $string;
 }
 
@@ -5185,9 +5160,21 @@ function printRoutersTD ($rlist, &$tagcache = array())
 			echo serializeTags ($tagcache[$rtr['id']], "${root}?page=objgroup&group_id=0&tab=default&");
 			echo '</small>';
 		}
-		$delim = '<br>';
+		$delim = '<br><hr>';
 	}
 	echo '</td>';
+}
+
+// Same as for routers, but produce two TD cells to lay the content out better.
+function printIPv4NetInfoTDs ($netinfo, $tdclass = 'tdleft')
+{
+	global $root;
+	$tags = loadIPv4PrefixTags ($netinfo['id']);
+	echo "<td class=${tdclass}><a href='${root}?page=iprange&id=${netinfo['id']}'>${netinfo['ip']}/${netinfo['mask']}</a></td>";
+	echo "<td class=${tdclass}>" . niftyString ($netinfo['name']);
+	if (count ($tags))
+		echo '<br><small>' . serializeTags ($tags, "${root}?page=ipv4space&tab=default&") . '</small>';
+	echo "</td>";
 }
 
 ?>
