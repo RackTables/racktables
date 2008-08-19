@@ -1117,7 +1117,7 @@ function getExplicitTagsOnly ($chain, $tree = NULL)
 
 // Maximize the chain: for each tag add all tags, for which it is direct or indirect parent.
 // Unlike other functions, this one accepts and returns a list of integer tag IDs, not
-// a list of tag structures.
+// a list of tag structures. Same structure (tag ID list) is returned after processing.
 function complementByKids ($idlist, $tree = NULL, $getall = FALSE)
 {
 	global $tagtree;
