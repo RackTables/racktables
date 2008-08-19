@@ -1091,6 +1091,8 @@ function updateRSInService ()
 		return buildRedirectURL ('ERR', array ($nbad, $ngood));
 }
 
+// FIXME: check, that each submitted address belongs to the prefix we
+// are operating on.
 function importPTRData ()
 {
 	assertUIntArg ('addrcount', __FUNCTION__);
