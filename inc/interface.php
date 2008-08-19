@@ -518,7 +518,8 @@ function renderEditObjectForm ($object_id)
 // This is a clone of renderEditObjectForm().
 function renderEditRackForm ($rack_id)
 {
-	global $pageno, $tabno;
+	showMessageOrError();
+	global $pageno;
 	$rack = getRackData ($rack_id);
 	if ($rack == NULL)
 	{
@@ -526,7 +527,6 @@ function renderEditRackForm ($rack_id)
 		return;
 	}
 
-	// Render a form for the next.
 	startPortlet ('Rack attributes');
 	printOpFormIntro ('updateRack');
 	echo '<table border=0 align=center>';
@@ -1293,6 +1293,7 @@ function printLog ($log)
 				65 => array ('code' => 'success', 'format' => "Added new rack '%s'"),
 				66 => array ('code' => 'success', 'format' => "File sent Ok via handler '%s'"),
 				67 => array ('code' => 'success', 'format' => "Tag rolling done, %u objects involved"),
+				68 => array ('code' => 'success', 'format' => "Updated rack '%s'"),
 
 				100 => array ('code' => 'error', 'format' => 'Generic error: %s'),
 				101 => array ('code' => 'error', 'format' => 'Port name cannot be empty'),
@@ -1371,6 +1372,7 @@ function printLog ($log)
 				174 => array ('code' => 'error', 'format' => 'Bad IPv4 address'),
 				175 => array ('code' => 'error', 'format' => 'Invalid netmask'),
 				176 => array ('code' => 'error', 'format' => 'This network already exists'),
+				177 => array ('code' => 'error', 'format' => 'commitUpdateRack() failed'),
 
 				200 => array ('code' => 'warning', 'format' => 'generic warning: %s'),
 				201 => array ('code' => 'warning', 'format' => 'nothing happened...'),

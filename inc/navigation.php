@@ -72,6 +72,8 @@ $tabhandler['rack']['tags'] = 'renderRackTags';
 $trigger['rack']['tags'] = 'trigger_tags';
 $ophandler['rack']['edit']['updateRack'] = 'updateRack';
 $ophandler['rack']['tags']['saveTags'] = 'saveRackTags';
+$msgcode['rack']['edit']['updateRack']['OK'] = 68;
+$msgcode['rack']['edit']['updateRack']['ERR'] = 177;
 
 $page['objgroup']['title_handler'] = 'dynamic_title_objgroup';
 $page['objgroup']['handler'] = 'renderObjectGroup';
