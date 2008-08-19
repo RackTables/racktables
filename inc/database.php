@@ -2656,7 +2656,7 @@ function executeAutoPorts ($object_id = 0, $type_id = 0)
 
 // Return only implicitly listed tags, the rest of the chain will be
 // generated/deducted later at higher levels.
-// Result is a chain: taginfo list, indexed by tag id.
+// Result is a chain: randomly indexed taginfo list.
 function loadEntityTags ($entity_realm = '', $entity_id = 0)
 {
 	if ($entity_realm == '' or $entity_id <= 0)
@@ -2673,7 +2673,7 @@ function loadEntityTags ($entity_realm = '', $entity_id = 0)
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 		$ret[$row['id']] = $row;
 	$result->closeCursor();
-	return $ret;
+	return getExplicitTagsOnly ($ret);
 }
 
 function loadRackObjectTags ($id)
