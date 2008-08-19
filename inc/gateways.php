@@ -206,46 +206,6 @@ function setSwitchVLANs ($object_id = 0, $setcmd)
 	return $log_m;
 }
 
-// FIXME: shouldn't the common code be made into some helper?
-function activateSLBConfig ($object_id = 0, $configtext = '')
-{
-	global $remote_username;
-	if ($object_id <= 0 or empty ($configtext))
-		return oneLiner (160); // invalid arguments
-	$objectInfo = getObjectInfo ($object_id);
-	$endpoints = findAllEndpoints ($object_id, $objectInfo['name']);
-	if (count ($endpoints) == 0)
-		return oneLiner (161); // endpoint not found
-	if (count ($endpoints) > 1)
-		return oneLiner (162); // can't pick an address
-	$hwtype = $swtype = 'unknown';
-	$endpoint = str_replace (' ', '+', $endpoints[0]);
-	$tmpfilename = tempnam ('', 'RackTables-slbconfig-');
-	$tmpfile = fopen ($tmpfilename, 'wb');
-	fwrite ($tmpfile, str_replace ("\r", '', $configtext));
-	fclose ($tmpfile);
-	$data = queryGateway
-	(
-		'slbconfig',
-		array ("connect ${endpoint} ${hwtype} ${swtype} ${remote_username}", "activate ${tmpfilename}")
-	);
-	unlink ($tmpfilename);
-	if ($data == NULL)
-		return oneLiner (163); // unknown gateway failure
-	if (strpos ($data[0], 'OK!') !== 0)
-		return oneLiner (164, array ($data[0])); // gateway failure
-	if (count ($data) != 2)
-		return oneLiner (165); // protocol violation
-	// Finally we can parse the response into message array.
-	$log = array ('v' => 2);
-	$codemap['ERR'] = 166; // generic gateway error
-	$codemap['OK'] = 62; // generic gateway success
-	list ($code, $text) = split ('!', $data[1]);
-	$log['m'][] = array ('c' => $codemap[$code], 'a' => array ($text));
-	return $log;
-}
-
-// FIXME: copied and pasted too
 // Drop a file off RackTables platform. The gateway will catch the file and pass it to the given
 // installer script.
 function gwSendFile ($object_id = 0, $handlername, $filetext = '')

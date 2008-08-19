@@ -1518,7 +1518,8 @@ function buildLVSConfig ($object_id = 0)
 		}
 		$newconfig .=  "}\n\n\n";
 	}
-	return $newconfig;
+	// FIXME: deal somehow with Mac-styled text, the below replacement will screw it up
+	return str_replace ("\r", '', $newconfig);
 }
 
 // Indicate occupation state of each IP address: none, ordinary or problematic.
