@@ -68,8 +68,6 @@ foreach ($_REQUEST as $key => $value)
 
 if (isset ($_SERVER['PHP_AUTH_USER']))
 	$_SERVER['PHP_AUTH_USER'] = escapeString ($_SERVER['PHP_AUTH_USER']);
-if (isset ($_SERVER['PHP_AUTH_PW']))
-	$_SERVER['PHP_AUTH_PW'] = escapeString ($_SERVER['PHP_AUTH_PW']);
 
 $dbver = getDatabaseVersion();
 if ($dbver != CODE_VERSION)

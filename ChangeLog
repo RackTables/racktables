@@ -2,6 +2,7 @@
 	bugfix: IP address picker was broken
 	bugfix: more message processing fixes
 	bugfix: work around some NET-SNMP builds (reported by Walery Wysotsky)
+	bugfix: don't escape user password any more
 	new feature: "router" addresses allocations
 	new feature: support for local extensions
 	new feature: LDAP username to UID mapping by Walery Wysotsky
