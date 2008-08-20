@@ -1208,7 +1208,7 @@ function createTag ()
 	if (($ret = commitCreateTag ($tagname, $parent_id)) == '')
 		return buildRedirectURL ('OK', array ($tagname));
 	else
-		return buildRedirectURL ('ERR', array ($tagname, $ret));
+		return buildRedirectURL ('ERR3', array ($tagname, $ret));
 }
 
 function updateTag ()
@@ -1218,13 +1218,13 @@ function updateTag ()
 	assertStringArg ('tag_name', __FUNCTION__);
 	$tagname = trim ($_REQUEST['tag_name']);
 	if (!validTagName ($tagname))
-		return buildRedirectURL ('ERR');
+		return buildRedirectURL ('ERR1', array ($tagname));
 	if (($parent_id = $_REQUEST['parent_id']) <= 0)
 		$parent_id = 'NULL';
 	if (($ret = commitUpdateTag ($_REQUEST['tag_id'], $tagname, $parent_id)) == '')
 		return buildRedirectURL ('OK', array ($tagname));
 	else
-		return buildRedirectURL ('ERR', array ($tagname, $ret));
+		return buildRedirectURL ('ERR2', array ($tagname, $ret));
 }
 
 function rollTags ()
