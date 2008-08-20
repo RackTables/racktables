@@ -377,7 +377,6 @@ function renderRack ($rack_id = 0, $hl_obj_id = 0)
 function renderNewRackForm ($row_id)
 {
 	showMessageOrError();
-	echo "<table border=0 width='100%'><tr><td valign=top>";
 
 	startPortlet ('Add one');
 	printOpFormIntro ('addRack', array ('got_data' => 'TRUE'));
@@ -385,7 +384,10 @@ function renderNewRackForm ($row_id)
 	$defh = getConfigVar ('DEFAULT_RACK_HEIGHT');
 	if ($defh == 0)
 		$defh = '';
-	echo "<tr><th class=tdright>Rack name (*):</th><td class=tdleft><input type=text name=rack_name tabindex=1></td></tr>\n";
+	echo "<tr><th class=tdright>Rack name (*):</th><td class=tdleft><input type=text name=rack_name tabindex=1></td>";
+	echo "<td rowspan=4>Assign tags:<br>";
+	renderTagSelect();
+	echo "</td></tr>\n";
 	echo "<tr><th class=tdright>Height in units (*):</th><td class=tdleft><input type=text name=rack_height1 tabindex=2 value='${defh}'></td></tr>\n";
 	echo "<tr><th class=tdright>Comment:</th><td class=tdleft><input type=text name=rack_comment tabindex=3></td></tr>\n";
 	echo "<tr><td class=submit colspan=2>";
@@ -393,30 +395,21 @@ function renderNewRackForm ($row_id)
 	echo "</td></tr></table></form>";
 	finishPortlet();
 
-	echo '</td><td rowspan=2 valign=top>';
-
-	startPortlet ('Pre-assigned tags');
-	renderTagSelect();
-	finishPortlet();
-
-	echo '</td></tr>';
-
-	echo '<tr><td valign=top>';
 	startPortlet ('Add many');
 	printOpFormIntro ('addRack', array ('got_mdata' => 'TRUE'));
 	echo '<table border=0 align=center>';
 	$defh = getConfigVar ('DEFAULT_RACK_HEIGHT');
 	if ($defh == 0)
 		$defh = '';
-	echo "<tr><th class=tdright>Height in units (*):</th><td class=tdleft><input type=text name=rack_height2 value='${defh}'></td></tr>\n";
+	echo "<tr><th class=tdright>Height in units (*):</th><td class=tdleft><input type=text name=rack_height2 value='${defh}'></td>";
+	echo "<td rowspan=3 valign=top>Assign tags:<br>";
+	renderTagSelect();
+	echo "</td></tr>\n";
 	echo "<tr><th class=tdright>Rack names (*):</th><td class=tdleft><textarea name=rack_names cols=40 rows=25></textarea></td></tr>\n";
 	echo "<tr><td class=submit colspan=2>";
 	printImageHREF ('CREATE', 'Add', TRUE);
-	echo "</td></tr>\n";
 	echo '</form></table>';
 	finishPortlet();
-
-	echo '</td></tr></table>';
 }
 
 function renderEditObjectForm ($object_id)
