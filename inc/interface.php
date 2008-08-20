@@ -3503,9 +3503,9 @@ function renderSystemReports ()
 		),
 		array
 		(
-			'title' => 'Tag popularity',
-			'type' => 'counters',
-			'func' => 'getTagStats'
+			'title' => 'Tags top-50',
+			'type' => 'custom',
+			'func' => 'renderTagStats'
 		),
 	);
 	renderReports ($systemreports);
@@ -3532,7 +3532,9 @@ function renderReports ($what)
 					echo "<tr><td class=tdright>${header}:</td><td class=tdleft>${data}</td></tr>\n";
 				break;
 			case 'custom':
+				echo "<tr><td colspan=2>";
 				$item['func'] ();
+				echo "</td></tr>\n";
 				break;
 			default:
 				showError ('Internal data error', __FUNCTION__);

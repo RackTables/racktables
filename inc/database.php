@@ -1603,17 +1603,46 @@ function getRackspaceStats()
 	return $ret;
 }
 
-function getTagStats ()
+function renderTagStats ()
 {
-	$ret = array();
-	$query = "select tag, count(tag_id) as refcnt from " .
+	global $taglist, $root;
+	$query = "select id, tag, count(tag_id) as refcnt from " .
 		"TagTree inner join TagStorage on TagTree.id = TagStorage.tag_id " .
-		"group by tag_id order by refcnt desc";
+		"group by tag_id order by refcnt desc limit 50";
+	// The same data is already present in pre-loaded tag list, but not in
+	// the form we need. So let's ask the DB server for cooked top list and
+	// use the cooked tag list to break it down.
 	$result = useSelectBlade ($query, __FUNCTION__);
-	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-		$ret[$row['tag']] = $row['refcnt'];
-	$result->closeCursor();
-	return $ret;
+	$refc = $result->fetchAll (PDO::FETCH_ASSOC);
+	echo '<table border=1><tr><th>tag</th><th>total</th><th>objects</th><th>IPv4 nets</th><th>racks</th>';
+	echo '<th>IPv4 VS</th><th>IPv4 RS pools</th><th>users</th></tr>';
+	$pagebyrealm = array
+	(
+		'object' => 'objgroup&group_id=0',
+		'ipv4net' => 'ipv4space&tab=default',
+		'rack' => 'rackspace&tab=default',
+		'ipv4vs' => 'ipv4vslist&tab=default',
+		'ipv4rspool' => 'ipv4rsplist&tab=default',
+		'user' => 'userlist&tab=default'
+	);
+	foreach ($refc as $ref)
+	{
+		echo "<tr><td>${ref['tag']}</td><td>${ref['refcnt']}</td>";
+		foreach (array ('object', 'ipv4net', 'rack', 'ipv4vs', 'ipv4rspool', 'user') as $realm)
+		{
+			echo '<td>';
+			if (!isset ($taglist[$ref['id']]['refcnt'][$realm]))
+				echo '&nbsp;';
+			else
+			{
+				echo "<a href='${root}?page=" . $pagebyrealm[$realm] . "&tagfilter[]=${ref['id']}'>";
+				echo $taglist[$ref['id']]['refcnt'][$realm] . '</a>';
+			}
+			echo '</td>';
+		}
+		echo '</tr>';
+	}
+	echo '</table>';
 }
 
 function commitUpdateDictionary ($chapter_no = 0, $dict_key = 0, $dict_value = '')
