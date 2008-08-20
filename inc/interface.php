@@ -1163,7 +1163,7 @@ function renderIPv4ForObject ($object_id = 0)
 		printSelect ($aat, 'bond_type', $alloc['type']);
 		echo "</td><td>";
 		$prefix = '';
-		if ($addr['reserved'] == 'yes')
+		if ($alloc['addrinfo']['reserved'] == 'yes')
 		{
 			echo $prefix . '<strong>RESERVED</strong>';
 			$prefix = '; ';
