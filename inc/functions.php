@@ -1356,14 +1356,14 @@ function markupIPv4AddrList (&$addrlist)
 	{
 		$refc = array
 		(
-			'shared' => 0,
-			'virtual' => 0,
-			'regular' => 0,
-			'router' => 0
+			'shared' => 0,  // virtual
+			'virtual' => 0, // loopback
+			'regular' => 0, // connected host
+			'router' => 0   // connected gateway
 		);
 		foreach ($addrlist[$ip_bin]['allocs'] as $a)
 			$refc[$a['type']]++;
-		$nvirtloopback = ($refc['shared'] + $refc['loopback'] > 0) ? 1 : 0; // modulus of virtual + shared
+		$nvirtloopback = ($refc['shared'] + $refc['virtual'] > 0) ? 1 : 0; // modulus of virtual + shared
 		$nreserved = ($addrlist[$ip_bin]['reserved'] == 'yes') ? 1 : 0; // only one reservation is possible ever
 		$nrealms = $nreserved + $nvirtloopback + $refc['regular'] + $refc['router']; // latter two are connected and router allocations
 		
