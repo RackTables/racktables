@@ -378,48 +378,6 @@ function search_cmpObj ($a, $b)
 	return ($a['score'] > $b['score'] ? -1 : 1);
 }
 
-// This function performs search and then calculates score for each result.
-// Given previous search results in $objects argument, it adds new results
-// to the array and updates score for existing results, if it is greater than
-// existing score.
-function mergeSearchResults (&$objects, $terms, $fieldname)
-{
-	global $dbxlink;
-	$query =
-		"select name, label, asset_no, barcode, ro.id, dict_key as objtype_id, " .
-		"dict_value as objtype_name, asset_no from RackObject as ro inner join Dictionary " .
-		"on objtype_id = dict_key natural join Chapter where chapter_name = 'RackObjectType' and ";
-	$count = 0;
-	foreach (explode (' ', $terms) as $term)
-	{
-		if ($count) $query .= ' or ';
-		$query .= "${fieldname} like '%$term%'";
-		$count++;
-	}
-	$query .= " order by ${fieldname}";
-	$result = useSelectBlade ($query, __FUNCTION__);
-// FIXME: this dead call was executed 4 times per 1 object search!
-//	$typeList = getObjectTypeList();
-	$clist = array ('id', 'name', 'label', 'asset_no', 'barcode', 'objtype_id', 'objtype_name');
-	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-	{
-		foreach ($clist as $cname)
-			$object[$cname] = $row[$cname];
-		$object['score'] = 0;
-		$object['dname'] = displayedName ($object);
-		unset ($object['objtype_id']);
-		foreach (explode (' ', $terms) as $term)
-			if (strstr ($object['name'], $term))
-				$object['score'] += 1;
-		unset ($object['name']);
-		if (!isset ($objects[$row['id']]))
-			$objects[$row['id']] = $object;
-		elseif ($objects[$row['id']]['score'] < $object['score'])
-			$objects[$row['id']]['score'] = $object['score'];
-	}
-	return $objects;
-}
-
 function getObjectSearchResults ($terms)
 {
 	$objects = array();
@@ -574,27 +532,6 @@ function sortRacks ($a, $b)
 	return sortTokenize($a['row_name'] . ': ' . $a['name'], $b['row_name'] . ': ' . $b['name']);
 }
 
-function eq ($a, $b)
-{
-	return $a==$b;
-}
-
-function neq ($a, $b)
-{
-	return $a!=$b;
-}
-
-function countRefsOfType ($refs, $type, $eq)
-{
-	$count=0;
-	foreach ($refs as $ref)
-	{
-		if ($eq($ref['type'], $type))
-			$count++;
-	}
-	return $count;
-}
-
 function sortEmptyPorts ($a, $b)
 {
 	$objname_cmp = sortTokenize($a['Object_name'], $b['Object_name']);
@@ -620,8 +557,6 @@ function sortObjectAddressesAndNames ($a, $b)
 	return $objname_cmp;
 }
 
-
-
 function sortAddresses ($a, $b)
 {
 	$name_cmp = sortTokenize($a['name'], $b['name']);
@@ -643,114 +578,6 @@ function buildPortCompatMatrixFromList ($portTypeList, $portCompatList)
 	foreach ($portCompatList as $pair)
 		$matrix[$pair['type1']][$pair['type2']] = TRUE;
 	return $matrix;
-}
-
-function newPortForwarding($object_id, $localip, $localport, $remoteip, $remoteport, $proto, $description)
-{
-	if (NULL === getIPv4AddressNetworkId ($localip))
-		return "$localip: Non existant ip";
-	if (NULL === getIPv4AddressNetworkId ($localip))
-		return "$remoteip: Non existant ip";
-	if ( ($localport <= 0) or ($localport >= 65536) )
-		return "$localport: invaild port";
-	if ( ($remoteport <= 0) or ($remoteport >= 65536) )
-		return "$remoteport: invaild port";
-
-	$result = useInsertBlade
-	(
-		'PortForwarding',
-		array
-		(
-			'object_id' => $object_id,
-			'localip' => "INET_ATON('${localip}')",
-			'remoteip' => "INET_ATON('$remoteip')",
-			'localport' => $localport,
-			'remoteport' => $remoteport,
-			'proto' => "'${proto}'",
-			'description' => "'${description}'",
-		)
-	);
-	if ($result)
-		return '';
-	else
-		return __FUNCTION__ . ': Failed to insert the rule.';
-}
-
-function deletePortForwarding($object_id, $localip, $localport, $remoteip, $remoteport, $proto)
-{
-	global $dbxlink;
-
-	$query =
-		"delete from PortForwarding where object_id='$object_id' and localip=INET_ATON('$localip') and remoteip=INET_ATON('$remoteip') and localport='$localport' and remoteport='$remoteport' and proto='$proto'";
-	$result = $dbxlink->exec ($query);
-	return '';
-}
-
-function updatePortForwarding($object_id, $localip, $localport, $remoteip, $remoteport, $proto, $description)
-{
-	global $dbxlink;
-
-	$query =
-		"update PortForwarding set description='$description' where object_id='$object_id' and localip=INET_ATON('$localip') and remoteip=INET_ATON('$remoteip') and localport='$localport' and remoteport='$remoteport' and proto='$proto'";
-	$result = $dbxlink->exec ($query);
-	return '';
-}
-
-function getNATv4ForObject ($object_id)
-{
-	$ret = array();
-	$ret['out'] = array();
-	$ret['in'] = array();
-	$query =
-		"select ".
-		"proto, ".
-		"INET_NTOA(localip) as localip, ".
-		"localport, ".
-		"INET_NTOA(remoteip) as remoteip, ".
-		"remoteport, ".
-		"ipa1.name as local_addr_name, " .
-		"ipa2.name as remote_addr_name, " .
-		"description ".
-		"from PortForwarding ".
-		"left join IPAddress as ipa1 on PortForwarding.localip = ipa1.ip " .
-		"left join IPAddress as ipa2 on PortForwarding.remoteip = ipa2.ip " .
-		"where object_id='$object_id' ".
-		"order by localip, localport, proto, remoteip, remoteport";
-	$result = useSelectBlade ($query, __FUNCTION__);
-	$count=0;
-	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-	{
-		foreach (array ('proto', 'localport', 'localip', 'remoteport', 'remoteip', 'description', 'local_addr_name', 'remote_addr_name') as $cname)
-			$ret['out'][$count][$cname] = $row[$cname];
-		$count++;
-	}
-	$result->closeCursor();
-	unset ($result);
-
-	$query =
-		"select ".
-		"proto, ".
-		"INET_NTOA(localip) as localip, ".
-		"localport, ".
-		"INET_NTOA(remoteip) as remoteip, ".
-		"remoteport, ".
-		"PortForwarding.object_id as object_id, ".
-		"RackObject.name as object_name, ".
-		"description ".
-		"from ((PortForwarding join IPBonds on remoteip=IPBonds.ip) join RackObject on PortForwarding.object_id=RackObject.id) ".
-		"where IPBonds.object_id='$object_id' ".
-		"order by remoteip, remoteport, proto, localip, localport";
-	$result = useSelectBlade ($query, __FUNCTION__);
-	$count=0;
-	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-	{
-		foreach (array ('proto', 'localport', 'localip', 'remoteport', 'remoteip', 'object_id', 'object_name', 'description') as $cname)
-			$ret['in'][$count][$cname] = $row[$cname];
-		$count++;
-	}
-	$result->closeCursor();
-
-	return $ret;
 }
 
 // This function returns an array of single element of object's FQDN attribute,
@@ -1527,14 +1354,18 @@ function markupIPv4AddrList (&$addrlist)
 {
 	foreach (array_keys ($addrlist) as $ip_bin)
 	{
-		$singlealloc = 0;
-		$nvirtual = countRefsOfType ($addrlist[$ip_bin]['allocs'], 'shared', 'eq');
-		$nloopback = countRefsOfType ($addrlist[$ip_bin]['allocs'], 'virtual', 'eq');
-		$nconnected = countRefsOfType ($addrlist[$ip_bin]['allocs'], 'regular', 'eq');
-		$nrouter = countRefsOfType ($addrlist[$ip_bin]['allocs'], 'router', 'eq');
-		$nsl = ($nvirtual + $nloopback > 0) ? 1 : 0;
-		$nrsv = ($addrlist[$ip_bin]['reserved'] == 'yes') ? 1 : 0;
-		$nrealms = $nrsv + $nsl + $nconnected + $nrouter;
+		$refc = array
+		(
+			'shared' => 0,
+			'virtual' => 0,
+			'regular' => 0,
+			'router' => 0
+		);
+		foreach ($addrlist[$ip_bin]['allocs'] as $a)
+			$refc[$a['type']]++;
+		$nvirtloopback = ($refc['shared'] + $refc['loopback'] > 0) ? 1 : 0; // modulus of virtual + shared
+		$nreserved = ($addrlist[$ip_bin]['reserved'] == 'yes') ? 1 : 0; // only one reservation is possible ever
+		$nrealms = $nreserved + $nvirtloopback + $refc['regular'] + $refc['router']; // latter two are connected and router allocations
 		
 		if ($nrealms == 1)
 			$addrlist[$ip_bin]['class'] = 'trbusy';
