@@ -6,6 +6,7 @@
 	new feature: "router" addresses allocations
 	new feature: support for local extensions
 	new feature: LDAP username to UID mapping by Walery Wysotsky
+	new feature: extended IPv4 view mode (enabled by default)
 	update: 3 more switches in SNMP code by Walery Wysotsky
 	update: added a missing DB index
 	update: "slbconfig" gateway has been replaced by "sendfile"

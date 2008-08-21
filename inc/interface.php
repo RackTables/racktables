@@ -819,7 +819,7 @@ function renderRackObject ($object_id = 0)
 	{
 		startPortlet ('IPv4 addresses');
 		echo "<table cellspacing=0 cellpadding='5' align='center' class='widetable'>\n";
-		if (getConfigVar ('DECODE_IPV4_ADDR') == 'yes')
+		if (getConfigVar ('EXT_IPV4_VIEW') == 'yes')
 			echo "<tr><th>OS interface</th><th>IP address</th><th colspan=2>network</th><th>routed by</th><th>peers</th></tr>\n";
 		else
 			echo "<tr><th>OS interface</th><th>IP address</th><th>peers</th></tr>\n";
@@ -838,7 +838,7 @@ function renderRackObject ($object_id = 0)
 			$netinfo = getIPv4NetworkInfo ($netid);
 			echo "<tr class='${class}' valign=top><td class=tdleft>${alloc['osif']}</td><td class='${secondclass}'>";
 			echo "<a href='${root}?page=ipaddress&ip=" . $dottedquad . "&hl_object_id=${object_id}'>${dottedquad}</a>";
-			if (getConfigVar ('DECODE_IPV4_ADDR') != 'yes')
+			if (getConfigVar ('EXT_IPV4_VIEW') != 'yes')
 			{
 				if (NULL === $netid)
 					$suffix = '/??';
@@ -849,7 +849,7 @@ function renderRackObject ($object_id = 0)
 			if (!empty ($alloc['addrinfo']['name']))
 				echo '(' . niftyString ($alloc['addrinfo']['name']) . ')';
 			echo '</td>';
-			if (getConfigVar ('DECODE_IPV4_ADDR') == 'yes')
+			if (getConfigVar ('EXT_IPV4_VIEW') == 'yes')
 			{
 				if (NULL === $netid)
 					echo '<td colspan=2>?</td>';
@@ -1959,7 +1959,7 @@ function renderIPv4Space ()
 	startPortlet ('networks (' . count ($addrspaceList) . ')');
 	echo "<table class='widetable' border=0 cellpadding=5 cellspacing=0 align='center'>\n";
 	echo "<tr><th>prefix</th><th>name/tags</th><th>%% used</th>";
-	if (getConfigVar ('DECODE_IPV4_ADDR') == 'yes')
+	if (getConfigVar ('EXT_IPV4_VIEW') == 'yes')
 		echo "<th>routed by</th>";
 	echo "</tr>\n";
 	foreach ($addrspaceList as $iprange)
@@ -1972,7 +1972,7 @@ function renderIPv4Space ()
 		echo "<td class=tdcenter>";
 		renderProgressBar ($used/$total);
 		echo "<br><small>${used}/${total}</small></td>";
-		if (getConfigVar ('DECODE_IPV4_ADDR') == 'yes')
+		if (getConfigVar ('EXT_IPV4_VIEW') == 'yes')
 			printRoutersTD (findRouters ($netdata['addrlist']), $tagcache);
 		echo "</tr>";
 	}
@@ -2209,7 +2209,7 @@ function renderIPv4Network ($id)
 	echo "</td></tr>\n";
 
 	$routers = findRouters ($range['addrlist']);
-	if (getConfigVar ('DECODE_IPV4_ADDR') == 'yes' and count ($routers))
+	if (getConfigVar ('EXT_IPV4_VIEW') == 'yes' and count ($routers))
 	{
 		echo "<tr><th width='50%' class=tdright>Routed by:</th>";
 		printRoutersTD ($routers);
