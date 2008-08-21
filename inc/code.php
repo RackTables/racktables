@@ -18,39 +18,41 @@
  */
 
 // Complain about martian char.
-function lexError1 ($state, $text, $pos)
-{
-	$message = "invalid char with code " . ord (mb_substr ($text, $pos, 1)) . ' (';
-	$message .= mb_substr ($text, $pos, 1) . ") at position ${pos} (FSM state is '${state}')";
-	return array ('result' => 'NAK', 'load' => $message);
-}
-
-// Complain about martian keyword.
-function lexError2 ($word)
+function lexError1 ($state, $text, $pos, $ln = 'N/A')
 {
 	return array
 	(
 		'result' => 'NAK',
-		'load' => "could not parse keyword '${word}'"
+		'load' => "Invalid character '" . mb_substr ($text, $pos, 1) . "' near line ${ln}"
+	);
+}
+
+// Complain about martian keyword.
+function lexError2 ($word, $ln = 'N/A')
+{
+	return array
+	(
+		'result' => 'NAK',
+		'load' => "Invalid keyword '${word}' near line ${ln}"
 	);
 }
 
 // Complain about wrong FSM state.
-function lexError3 ($state)
+function lexError3 ($state, $ln = 'N/A')
 {
 	return array
 	(
 		'result' => 'NAK',
-		'load' => "FSM state is still '${state}' at end of input"
+		'load' => "Lexical error during '${state}' near line ${ln}"
 	);
 }
 
-function lexError4 ($s)
+function lexError4 ($s, $ln = 'N/A')
 {
 	return array
 	(
 		'result' => 'NAK',
-		'load' => "Invalid tag or predicate name '${s}'"
+		'load' => "Invalid name '${s}' near line ${ln}"
 	);
 }
 
@@ -59,6 +61,7 @@ function getLexemsFromRackCode ($text)
 {
 	$ret = array();
 	$textlen = mb_strlen ($text);
+	$lineno = 1;
 	$state = "ESOTSM";
 	for ($i = 0; $i < $textlen; $i++) :
 		$char = mb_substr ($text, $i, 1);
@@ -68,10 +71,10 @@ function getLexemsFromRackCode ($text)
 				switch (TRUE)
 				{
 					case ($char == '('):
-						$ret[] = array ('type' => 'LEX_LBRACE');
+						$ret[] = array ('type' => 'LEX_LBRACE', 'lineno' => $lineno);
 						break;
 					case ($char == ')'):
-						$ret[] = array ('type' => 'LEX_RBRACE');
+						$ret[] = array ('type' => 'LEX_RBRACE', 'lineno' => $lineno);
 						break;
 					case ($char == '#'):
 						$newstate = 'skipping comment';
@@ -80,7 +83,11 @@ function getLexemsFromRackCode ($text)
 						$newstate = 'reading keyword';
 						$buffer = $char;
 						break;
-					case (preg_match ('/^[ \t\n\r]$/', $char)):
+					case ($char == "\r"): // FIXME: this should never happen
+					case ($char == "\n"):
+						$lineno++; // fall through
+					case ($char == " "):
+					case ($char == "\t"):
 						// nom-nom...
 						break;
 					case ($char == '{'):
@@ -90,7 +97,7 @@ function getLexemsFromRackCode ($text)
 						$newstate = 'reading predicate 1';
 						break;
 					default:
-						return lexError1 ($state, $text, $i);
+						return lexError1 ($state, $text, $i, $lineno);
 				}
 				break;
 			case 'reading keyword':
@@ -99,41 +106,48 @@ function getLexemsFromRackCode ($text)
 					case (mb_ereg ('[[:alpha:]]', $char) > 0):
 						$buffer .= $char;
 						break;
-					case (preg_match ('/^[ \t\n]$/', $char)):
+					case ($char == "\n"):
+						$lineno++; // fall through
+					case ($char == " "):
+					case ($char == "\t"):
 						// got a word, sort it out
 						switch ($buffer)
 						{
 							case 'allow':
 							case 'deny':
-								$ret[] = array ('type' => 'LEX_DECISION', 'load' => $buffer);
+								$ret[] = array ('type' => 'LEX_DECISION', 'load' => $buffer, 'lineno' => $lineno);
 								break;
 							case 'define':
-								$ret[] = array ('type' => 'LEX_DEFINE');
+								$ret[] = array ('type' => 'LEX_DEFINE', 'lineno' => $lineno);
 								break;
 							case 'and':
 							case 'or':
-								$ret[] = array ('type' => 'LEX_BOOLOP', 'load' => $buffer);
+								$ret[] = array ('type' => 'LEX_BOOLOP', 'load' => $buffer, 'lineno' => $lineno);
 								break;
 							case 'not':
-								$ret[] = array ('type' => 'LEX_NOT');
+								$ret[] = array ('type' => 'LEX_NOT', 'lineno' => $lineno);
 								break;
 							case 'false':
 							case 'true':
-								$ret[] = array ('type' => 'LEX_BOOLCONST', 'load' => $buffer);
+								$ret[] = array ('type' => 'LEX_BOOLCONST', 'load' => $buffer, 'lineno' => $lineno);
 								break;
 							default:
-								return lexError2 ($buffer);
+								return lexError2 ($buffer, $lineno);
 						}
 						$newstate = 'ESOTSM';
 						break;
 					default:
-						return lexError1 ($state, $text, $i);
+						return lexError1 ($state, $text, $i, $lineno);
 				}
 				break;
 			case 'reading tag 1':
 				switch (TRUE)
 				{
-					case (preg_match ('/^[ \t\n\r]$/', $char)):
+					case ($char == "\n"):
+					case ($char == "\r"): // FIXME: is this really expected?
+						$lineno++; // fall through
+					case ($char == " "):
+					case ($char == "\t"):
 						// nom-nom...
 						break;
 					case (mb_ereg ('[[:alnum:]\$]', $char) > 0):
@@ -141,7 +155,7 @@ function getLexemsFromRackCode ($text)
 						$newstate = 'reading tag 2';
 						break;
 					default:
-						return lexError1 ($state, $text, $i);
+						return lexError1 ($state, $text, $i, $lineno);
 				}
 				break;
 			case 'reading tag 2':
@@ -150,15 +164,15 @@ function getLexemsFromRackCode ($text)
 					case ($char == '}'):
 						$buffer = rtrim ($buffer);
 						if (!validTagName ($buffer, TRUE))
-							return lexError4 ($buffer);
-						$ret[] = array ('type' => 'LEX_TAG', 'load' => $buffer);
+							return lexError4 ($buffer, $lineno);
+						$ret[] = array ('type' => 'LEX_TAG', 'load' => $buffer, 'lineno' => $lineno);
 						$newstate = 'ESOTSM';
 						break;
 					case (mb_ereg ('[[:alnum:]\. _~-]', $char) > 0):
 						$buffer .= $char;
 						break;
 					default:
-						return lexError1 ($state, $text, $i);
+						return lexError1 ($state, $text, $i, $lineno);
 				}
 				break;
 			case 'reading predicate 1':
@@ -172,7 +186,7 @@ function getLexemsFromRackCode ($text)
 						$newstate = 'reading predicate 2';
 						break;
 					default:
-						return lexError1 ($state, $text, $i);
+						return lexError1 ($state, $text, $i, $lineno);
 				}
 				break;
 			case 'reading predicate 2':
@@ -181,21 +195,22 @@ function getLexemsFromRackCode ($text)
 					case ($char == ']'):
 						$buffer = rtrim ($buffer);
 						if (!validTagName ($buffer))
-							return lexError4 ($buffer);
-						$ret[] = array ('type' => 'LEX_PREDICATE', 'load' => $buffer);
+							return lexError4 ($buffer, $lineno);
+						$ret[] = array ('type' => 'LEX_PREDICATE', 'load' => $buffer, 'lineno' => $lineno);
 						$newstate = 'ESOTSM';
 						break;
 					case (mb_ereg ('[[:alnum:]\. _~-]', $char) > 0):
 						$buffer .= $char;
 						break;
 					default:
-						return lexError1 ($state, $text, $i);
+						return lexError1 ($state, $text, $i, $lineno);
 				}
 				break;
 			case 'skipping comment':
 				switch ($char)
 				{
 					case "\n":
+						$lineno++;
 						$newstate = 'ESOTSM';
 					default: // eat char, nom-nom...
 						break;
@@ -207,7 +222,7 @@ function getLexemsFromRackCode ($text)
 		$state = $newstate;
 	endfor;
 	if ($state != 'ESOTSM' and $state != 'skipping comment')
-		return lexError3 ($state);
+		return lexError3 ($state, $lineno);
 	return array ('result' => 'ACK', 'load' => $ret);
 }
 
@@ -217,7 +232,7 @@ function getLexemsFromRackCode ($text)
 // LEX_TAG
 // LEX_PREDICATE
 // LEX_BOOLCONST
-// SYNT_NOT (1 argument, holding SYNT_EXPR)
+// SYNT_NOTEXPR (1 argument, holding SYNT_EXPR)
 // SYNT_BOOLOP (2 arguments, each holding SYNT_EXPR)
 // SYNT_DEFINITION (2 arguments: term and definition)
 // SYNT_GRANT (2 arguments: decision and condition)
@@ -233,7 +248,10 @@ function getSentencesFromLexems ($lexems)
 
 	// Perform shift-reduce processing. The "accept" actions occurs with an
 	// empty input tape and the stack holding only one symbol (the start
-	// symbol, SYNT_CODETEXT).
+	// symbol, SYNT_CODETEXT). When reducing, set the "line number" of
+	// the reduction result to the line number of the "latest" item of the
+	// reduction base (the one on the stack top). This will help locating
+	// parse errors, if any.
 	while (TRUE)
 	{
 		$stacktop = $stacksecondtop = $stackthirdtop = array ('type' => 'null');
@@ -276,6 +294,7 @@ function getSentencesFromLexems ($lexems)
 				$stacksecondtop['type'] == 'LEX_DEFINE'
 			)
 			{
+				// reduce!
 				array_pop ($stack);
 				array_pop ($stack);
 				array_push
@@ -284,6 +303,7 @@ function getSentencesFromLexems ($lexems)
 					array
 					(
 						'type' => 'SYNT_DEFINE',
+						'lineno' => $stacktop['lineno'],
 						'load' => $stacktop['load']
 					)
 				);
@@ -308,6 +328,7 @@ function getSentencesFromLexems ($lexems)
 					array
 					(
 						'type' => 'SYNT_EXPR',
+						'lineno' => $stacktop['lineno'],
 						'load' => $stacktop
 					)
 				);
@@ -328,6 +349,7 @@ function getSentencesFromLexems ($lexems)
 					array
 					(
 						'type' => 'SYNT_EXPR',
+						'lineno' => $stacktop['lineno'],
 						'load' => array
 						(
 							'type' => 'SYNT_NOTEXPR',
@@ -348,6 +370,7 @@ function getSentencesFromLexems ($lexems)
 				array_pop ($stack);
 				array_pop ($stack);
 				array_pop ($stack);
+				$stacksecondtop['lineno'] = $stacktop['lineno'];
 				array_push
 				(
 					$stack,
@@ -372,6 +395,7 @@ function getSentencesFromLexems ($lexems)
 					array
 					(
 						'type' => 'SYNT_EXPR',
+						'lineno' => $stacktop['lineno'],
 						'load' => array
 						(
 							'type' => 'SYNT_BOOLOP',
@@ -398,6 +422,7 @@ function getSentencesFromLexems ($lexems)
 					array
 					(
 						'type' => 'SYNT_GRANT',
+						'lineno' => $stacktop['lineno'],
 						'decision' => $stacksecondtop['load'],
 						'condition' => $stacktop['load']
 					)
@@ -419,6 +444,7 @@ function getSentencesFromLexems ($lexems)
 					array
 					(
 						'type' => 'SYNT_DEFINITION',
+						'lineno' => $stacktop['lineno'],
 						'term' => $stacksecondtop['load'],
 						'definition' => $stacktop['load']
 					)
@@ -435,6 +461,7 @@ function getSentencesFromLexems ($lexems)
 				array_pop ($stack);
 				array_pop ($stack);
 				$stacksecondtop['load'][] = $stacktop;
+				$stacksecondtop['lineno'] = $stacktop['lineno'];
 				array_push
 				(
 					$stack,
@@ -456,6 +483,7 @@ function getSentencesFromLexems ($lexems)
 					array
 					(
 						'type' => 'SYNT_CODETEXT',
+						'lineno' => $stacktop['lineno'],
 						'load' => array ($stacktop)
 					)
 				);
@@ -475,7 +503,11 @@ function getSentencesFromLexems ($lexems)
 		// The moment of truth.
 		if (count ($stack) == 1 and $stack[0]['type'] == 'SYNT_CODETEXT')
 			return array ('result' => 'ACK', 'load' => $stack[0]['load']);
-		return array ('result' => 'NAK', 'load' => 'Syntax error!');
+		// No luck. Prepare to complain.
+		if ($lineno = locateSyntaxError ($stack))
+			return array ('result' => 'NAK', 'load' => 'Syntax error near line ' . $lineno);
+		// HCF
+		return array ('result' => 'NAK', 'load' => 'Syntax error: empty text');
 	}
 }
 
@@ -634,6 +666,24 @@ function semanticFilter ($code)
 				return array ('result' => 'NAK', 'load' => 'unknown sentence type');
 		}
 	return array ('result' => 'ACK', 'load' => $code);
+}
+
+// Accept a stack and figure out the cause of it not being parsed into a tree.
+// Return the line number or zero.
+function locateSyntaxError ($stack)
+{
+	// The first SYNT_CODETEXT node, if is present, holds stuff already
+	// successfully processed. Its line counter shows, where the last reduction
+	// took place (it _might_ be the same line, which causes the syntax error).
+	// The next node (it's very likely to exist) should have its line counter
+	// pointing to the place, where the first (of 1 or more) error is located.
+	if (isset ($stack[0]['type']) and $stack[0]['type'] == 'SYNT_CODETEXT')
+		unset ($stack[0]);
+	foreach ($stack as $node)
+		// Satisfy with the first line number met.
+		if (isset ($node['lineno']))
+			return $node['lineno'];
+	return 0;
 }
 
 ?>
