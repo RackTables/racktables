@@ -508,3 +508,11 @@ td.portmap_highlight_even {
 td.portmap_highlight_odd {
 	background-color: #00FF00;
 }
+
+.validation-error {
+	border:2px solid red;
+}
+
+.validation-success {
+	border:2px solid green;
+}

@@ -28,24 +28,9 @@ foreach (array ('F', 'A', 'U', 'T', 'Th', 'Tw', 'Thw') as $statecode)
 	echo "}\n\n";
 }
 ?>
-.validation-error {
-	border:1px solid red;
-}
-
-.validation-success {
-	border:1px solid green;
-}
 	</style>
 	<script language='javascript' type='text/javascript' src='js/live_validation.js'></script>
 	<script language='javascript' type='text/javascript' src='js/codepress/codepress.js'></script>
-	<script type="text/javascript">
-	function init() {
-		document.add_new_range.range.setAttribute('match', "^\\d\\d?\\d?\\.\\d\\d?\\d?\\.\\d\\d?\\d?\\.\\d\\d?\\d?\\/\\d\\d?$");
-
-		Validate.init();
-	}
-	window.onload=init;
-	</script>
 	</head>
 <body>
  <table border=0 cellpadding=0 cellspacing=0 width='100%' height='100%' class=maintable>

@@ -1,5 +1,9 @@
 0.16.3
 	new feature: tell line number for lexical and syntax errors
+	new feature: CodePress editor enables line numbers and syntax
+		highlightling for RackCode editing
+	bugfix: tags are now properly displayed for users
+	bugfix: the JavaScript error isn't generated any more (fix by Aaron)
 0.16.2 2008-08-21
 	bugfix: IP address picker was broken
 	bugfix: more message processing fixes

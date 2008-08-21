@@ -2053,6 +2053,18 @@ function renderIPv4SpaceEditor ()
 	global $root, $pageno, $tabno;
 	showMessageOrError();
 
+	// IPv4 validator
+?>
+	<script type="text/javascript">
+	function init() {
+		document.add_new_range.range.setAttribute('match', "^\\d\\d?\\d?\\.\\d\\d?\\d?\\.\\d\\d?\\d?\\.\\d\\d?\\d?\\/\\d\\d?$");
+
+		Validate.init();
+	}
+	window.onload=init;
+	</script>
+<?php
+
 	startPortlet ("Add new");
 	echo '<table border=0 cellpadding=10 align=center>';
 	// This form requires a name, so JavaScript validator can find it.
