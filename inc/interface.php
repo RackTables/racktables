@@ -5002,7 +5002,7 @@ function renderRackCodeEditor ()
 	showMessageOrError();
 	printOpFormIntro ('saveRackCode');
 	echo '<table border=0 align=center>';
-	echo "<tr><td><textarea rows=40 cols=100 name=rackcode id=RCTA class='codepress text'>";
+	echo "<tr><td><textarea rows=40 cols=100 name=rackcode id=RCTA class='codepress rackcode'>";
 	echo $text . "</textarea></td></tr>\n";
 	echo "<tr><td align=center>";
 	echo "<input type='submit' value='Proceed' onclick='RCTA.toggleEditor();'>";

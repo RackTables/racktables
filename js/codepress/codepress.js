@@ -112,7 +112,8 @@ CodePress.languages = {
 	php : 'PHP', 
 	text : 'Text', 
 	sql : 'SQL',
-	vbscript : 'VBScript'
+	vbscript : 'VBScript',
+	rackcode : 'RackCode'
 }
 
 
