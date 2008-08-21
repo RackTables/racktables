@@ -3040,7 +3040,7 @@ function renderAtomGrid ($data)
 
 function renderUserList ()
 {
-	global $nextorder, $accounts, $root;
+	global $nextorder, $accounts, $root, $pageno;
 	echo "<table border=0 class=objectview>\n";
 	echo "<tr><td class=pcleft>";
 	startPortlet ('User accounts');
@@ -3050,9 +3050,12 @@ function renderUserList ()
 	$tagfilter = getTagFilter();
 	foreach (getUserAccounts ($tagfilter, getTFMode()) as $user)
 	{
-		echo "<tr class=row_${order}><td class=tdleft><a href='${root}?page=user&user_id=${user['user_id']}'>";
-		echo "${user['user_name']}</a></td>";
-		echo "<td class=tdleft>${user['user_realname']}</td></li>";
+		echo "<tr class=row_${order} valign=top><td class=tdleft><a href='${root}?page=user&user_id=${user['user_id']}'>";
+		echo "${user['user_name']}</a>";
+		$usertags = loadUserTags ($user['user_id']);
+		if (count ($usertags))
+			echo '<br><small>' . serializeTags ($usertags, "${root}?page=${pageno}&tab=default&") . '</small>';
+		echo "</td><td class=tdleft>${user['user_realname']}</td></li>";
 		$order = $nextorder[$order];
 	}
 	echo '</table>';
@@ -5005,7 +5008,7 @@ function renderRackCodeEditor ()
 	echo "<tr><td><textarea rows=40 cols=100 name=rackcode id=RCTA class='codepress rackcode'>";
 	echo $text . "</textarea></td></tr>\n";
 	echo "<tr><td align=center>";
-	echo "<input type='submit' value='Proceed' onclick='RCTA.toggleEditor();'>";
+	echo "<input type='submit' value='Save' onclick='RCTA.toggleEditor();'>";
 //	printImageHREF ('SAVE', 'Save changes', TRUE);
 	echo "</td></tr>";
 	echo '</table>';
@@ -5029,6 +5032,7 @@ function renderUser ($user_id)
 	// Using printTagTRs() is inappropriate here, because autotags will be filled with current user's
 	// data, not the viewed one.
 //	printTagTRs ("${root}?page=userlist&");
+	$baseurl = "${root}?page=userlist&tab=default&";
 	if (getConfigVar ('SHOW_EXPLICIT_TAGS') == 'yes' and count ($expl_tags))
 	{
 		echo "<tr><th width='50%' class=tag_list_th>Explicit tags:</th><td class=tdleft>";
