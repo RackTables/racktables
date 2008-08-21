@@ -1,15 +1,23 @@
-0.16.2
+0.16.2 2008-08-21
 	bugfix: IP address picker was broken
 	bugfix: more message processing fixes
 	bugfix: work around some NET-SNMP builds (reported by Walery Wysotsky)
-	bugfix: don't escape user password any more
+	bugfix: some characters in password could break user access
+	bugfix: pre-assigned tags didn't work for racks
+	bugfix: tag roller could produce incorrect tag chains sometimes
 	new feature: "router" addresses allocations
-	new feature: support for local extensions
+	new feature: support for local extensions and reports
 	new feature: LDAP username to UID mapping by Walery Wysotsky
 	new feature: extended IPv4 view mode (enabled by default)
+	new feature: tag roller now processes objects in racks too
+	new feature: start cutting off excessively long strings on the generated pages
 	update: 3 more switches in SNMP code by Walery Wysotsky
-	update: added a missing DB index
+	update: added a missing DB index (Aaron Dummer's advice)
 	update: "slbconfig" gateway has been replaced by "sendfile"
+	update: more detailed tag report
+	update: "virtual" addresses are now "loopback" and "regular" became "connected"
+	update: "placeholders" are now "spacers"
+	update: more records were put into the demo data
 0.16.1 2008-07-30
 	new feature: pre-assigned tags for new VS and RS pools records
 	new feature: cache RackCode parse tree for better performance
