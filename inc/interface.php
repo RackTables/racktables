@@ -854,7 +854,7 @@ function renderRackObject ($object_id = 0)
 				if (NULL === $netid)
 					echo '<td colspan=2>?</td>';
 				else
-					printIPv4NetInfoTDs ($netinfo);
+					printIPv4NetInfoTDs ($netinfo, $secondclass);
 				echo "<td class='${secondclass}'>";
 				// FIXME: These cals are really heavy, replace them with a more appropriate dedicated function.
 				$netdata = getIPv4Network ($netid);
@@ -5165,8 +5165,8 @@ function printIPv4NetInfoTDs ($netinfo, $tdclass = 'tdleft')
 {
 	global $root;
 	$tags = loadIPv4PrefixTags ($netinfo['id']);
-	echo "<td class=${tdclass}><a href='${root}?page=iprange&id=${netinfo['id']}'>${netinfo['ip']}/${netinfo['mask']}</a></td>";
-	echo "<td class=${tdclass}>" . niftyString ($netinfo['name']);
+	echo "<td class='${tdclass}'><a href='${root}?page=iprange&id=${netinfo['id']}'>${netinfo['ip']}/${netinfo['mask']}</a></td>";
+	echo "<td class='${tdclass}'>" . niftyString ($netinfo['name']);
 	if (count ($tags))
 		echo '<br><small>' . serializeTags ($tags, "${root}?page=ipv4space&tab=default&") . '</small>';
 	echo "</td>";
