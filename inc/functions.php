@@ -1330,6 +1330,8 @@ function buildLVSConfig ($object_id = 0)
 		);
 		foreach ($vsinfo['rslist'] as $rs)
 		{
+			if (empty ($rs['rsport']))
+				$rs['rsport'] = $vsinfo['vport'];
 			$macros['%RSIP%'] = $rs['rsip'];
 			$macros['%RSPORT%'] = $rs['rsport'];
 			$newconfig .=  "\treal_server ${rs['rsip']} ${rs['rsport']} {\n";

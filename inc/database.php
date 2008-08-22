@@ -2278,11 +2278,13 @@ function getRSPoolInfo ($id = 0)
 
 function addRStoRSPool ($pool_id = 0, $rsip = '', $rsport = 0, $inservice = 'no', $rsconfig = '')
 {
-	if ($pool_id <= 0 or $rsport <= 0)
+	if ($pool_id <= 0)
 	{
 		showError ('Invalid arguments', __FUNCTION__);
 		die;
 	}
+	if (empty ($rsport) or $rsport == 0)
+		$rsport = 'NULL';
 	return useInsertBlade
 	(
 		'IPRealServer',
@@ -2371,7 +2373,7 @@ function commitDeleteLB ($object_id = 0, $pool_id = 0, $vs_id = 0)
 
 function commitUpdateRS ($rsid = 0, $rsip = '', $rsport = 0, $rsconfig = '')
 {
-	if ($rsid <= 0 or $rsport <= 0)
+	if ($rsid <= 0)
 	{
 		showError ('Invalid args', __FUNCTION__);
 		die;
@@ -2381,6 +2383,8 @@ function commitUpdateRS ($rsid = 0, $rsip = '', $rsport = 0, $rsconfig = '')
 		showError ("Invalid IP address '${rsip}'", __FUNCTION__);
 		die;
 	}
+	if (empty ($rsport) or $rsport == 0)
+		$rsport = 'NULL';
 	global $dbxlink;
 	$query =
 		"update IPRealServer set rsip = inet_aton('${rsip}'), rsport = ${rsport}, rsconfig = " .

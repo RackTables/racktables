@@ -822,7 +822,7 @@ function addRealServer ()
 {
 	assertUIntArg ('pool_id', __FUNCTION__);
 	assertIPv4Arg ('remoteip', __FUNCTION__);
-	assertUIntArg ('rsport', __FUNCTION__);
+	assertStringArg ('rsport', __FUNCTION__, TRUE);
 	assertStringArg ('rsconfig', __FUNCTION__, TRUE);
 	if (!addRStoRSPool (
 		$_REQUEST['pool_id'],
@@ -951,7 +951,7 @@ function updateRealServer ()
 {
 	assertUIntArg ('rs_id', __FUNCTION__);
 	assertIPv4Arg ('rsip', __FUNCTION__);
-	assertUIntArg ('rsport', __FUNCTION__);
+	assertStringArg ('rsport', __FUNCTION__, TRUE);
 	assertStringArg ('rsconfig', __FUNCTION__, TRUE);
 	if (!commitUpdateRS (
 		$_REQUEST['rs_id'],

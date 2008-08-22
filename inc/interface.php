@@ -2034,9 +2034,9 @@ function renderIPv4SLB ()
 				else
 				{
 					echo $vsdata['lblist'][$lb_object_id]['size'];
-					echo " (<a href='${root}?page=ipv4rsp&pool_id=";
-					echo $vsdata['lblist'][$lb_object_id]['id'] . "'>";
-					echo $vsdata['lblist'][$lb_object_id]['name'] . '</a>)';
+//					echo " (<a href='${root}?page=ipv4rsp&pool_id=";
+//					echo $vsdata['lblist'][$lb_object_id]['id'] . "'>";
+//					echo $vsdata['lblist'][$lb_object_id]['name'] . '</a>)';
 				}
 				echo '</td>';
 			}
@@ -2885,14 +2885,14 @@ function renderSearchResults ()
 			case 'ipv4addressbydq':
 				$parentnet = getIPv4AddressNetworkId ($record);
 				if ($parentnet !== NULL)
-					echo "<script language='Javascript'>document.location='${root}?page=iprange&id=${parentnet}&hl_ipv4_addr=${record}';//</script>";
+					echo "<script language='Javascript'>document.location='${root}?page=iprange&tab=default&id=${parentnet}&hl_ipv4_addr=${record}';//</script>";
 				else
 					echo "<script language='Javascript'>document.location='${root}?page=ipaddress&ip=${record}';//</script>";
 				break;
 			case 'ipv4addressbydescr':
 				$parentnet = getIPv4AddressNetworkId ($record['ip']);
 				if ($parentnet !== NULL)
-					echo "<script language='Javascript'>document.location='${root}?page=iprange&id=${parentnet}&hl_ipv4_addr=${record['ip']}';//</script>";
+					echo "<script language='Javascript'>document.location='${root}?page=iprange&tab=default&id=${parentnet}&hl_ipv4_addr=${record['ip']}';//</script>";
 				else
 					echo "<script language='Javascript'>document.location='${root}?page=ipaddress&ip=${record['ip']}';//</script>";
 				break;
