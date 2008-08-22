@@ -3773,6 +3773,7 @@ function renderVLANMembership ($object_id = 0)
 
 function renderSNMPPortFinder ($object_id = 0)
 {
+	showMessageOrError();
 	if ($object_id <= 0)
 	{
 		showError ('Invalid argument', __FUNCTION__);
