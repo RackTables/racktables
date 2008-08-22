@@ -1395,4 +1395,20 @@ function findRouters ($addrlist)
 	return $ret;
 }
 
+// Assist in tag chain sorting.
+function taginfoCmp ($tagA, $tagB)
+{
+	return $tagA['ci'] - $tagB['ci'];
+}
+
+// Modify the given tag tree so, that each level's items are sorted alphabetically.
+function sortTagTree (&$tree)
+{
+	usort ($tree, 'taginfoCmp');
+	// Don't make a mistake of directly iterating over the items of current level, because this way
+	// the sorting will be performed on a _copy_ if each item, not the item itself.
+	foreach (array_keys ($tree) as $tagid)
+		sortTagTree ($tree[$tagid]['kids']);
+}
+
 ?>

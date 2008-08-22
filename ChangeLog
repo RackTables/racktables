@@ -4,6 +4,7 @@
 		highlightling for RackCode editing
 	bugfix: tags are now properly displayed for users
 	bugfix: the JavaScript error isn't generated any more (fix by Aaron)
+	bugfix: tag tree is now always correctly sorted
 0.16.2 2008-08-21
 	bugfix: IP address picker was broken
 	bugfix: more message processing fixes

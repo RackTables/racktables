@@ -162,6 +162,7 @@ $op = (isset ($_REQUEST['op'])) ? $_REQUEST['op'] : '';
 // Order matters here.
 $taglist = getTagList();
 $tagtree = getTagTree();
+sortTagTree ($tagtree);
 
 require_once 'inc/navigation.php';
 require_once 'inc/pagetitles.php';

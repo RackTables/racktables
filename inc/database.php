@@ -2747,6 +2747,8 @@ function getTagList ()
 		"from TagTree left join TagStorage on id = tag_id " .
 		"group by id, target_realm order by tag";
 	$result = useSelectBlade ($query, __FUNCTION__);
+	$ci = 0; // Collation index. The resulting rows are ordered according to default collation,
+	// which is utf8_general_ci for UTF-8.
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
 		if (!isset ($ret[$row['id']]))
@@ -2754,6 +2756,7 @@ function getTagList ()
 			(
 				'id' => $row['id'],
 				'tag' => $row['tag'],
+				'ci' => $ci++,
 				'parent_id' => $row['parent_id'],
 				'refcnt' => array()
 			);
