@@ -1559,7 +1559,7 @@ function getDictStats ()
 	return $ret;
 }
 
-function getIPv4Stats()
+function getIPv4Stats ()
 {
 	$ret = array();
 	$subject = array();
@@ -1583,7 +1583,7 @@ function getIPv4Stats()
 	return $ret;
 }
 
-function getRackspaceStats()
+function getRackspaceStats ()
 {
 	$ret = array();
 	$subject = array();
@@ -1644,6 +1644,23 @@ function renderTagStats ()
 	}
 	echo '</table>';
 }
+
+/*
+
+The following allows figuring out records in TagStorage, which refer to non-existing entities:
+
+mysql> select target_id from TagStorage left join IPRanges on target_id = id where target_realm = 'ipv4net' and id is null;
+mysql> select target_id from TagStorage left join RackObject on target_id = id where target_realm = 'object' and id is null;
+mysql> select target_id from TagStorage left join Rack on target_id = id where target_realm = 'rack' and id is null;
+mysql> select target_id from TagStorage left join IPVirtualService on target_id = id where target_realm = 'ipv4vs' and id is null;
+mysql> select target_id from TagStorage left join IPRSPool on target_id = id where target_realm = 'ipv4rspool' and id is null;
+mysql> select target_id from TagStorage left join UserAccount on target_id = user_id where target_realm = 'user' and user_id is null;
+
+Accordingly, these are the records, which refer to non-existent tags:
+
+mysql> select tag_id from TagStorage left join TagTree on tag_id = id where id is null;
+
+*/
 
 function commitUpdateDictionary ($chapter_no = 0, $dict_key = 0, $dict_value = '')
 {
