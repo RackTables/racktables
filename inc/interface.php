@@ -4840,6 +4840,8 @@ function getTFMode ()
 function renderTagFilterPortlet ($tagfilter, $realm, $bypass_name = '', $bypass_value = '')
 {
 	global $pageno, $tabno, $taglist, $tagtree;
+	// Temporary hack, needs to be reviewed later.
+	$tagfilter = isset ($_REQUEST['tagfilter']) ? $_REQUEST['tagfilter'] : array();
 	$objectivetags = getObjectiveTagTree ($tagtree, $realm);
 	startPortlet ('Tag filter');
 	if (!count ($objectivetags))
@@ -4849,6 +4851,8 @@ function renderTagFilterPortlet ($tagfilter, $realm, $bypass_name = '', $bypass_
 	}
 	echo '<table border=0 align=center>';
 
+	if (count ($tagfilter))
+		echo '<h3>(' . serializeTags (buildTagChainFromIds ($tagfilter)) . ')</h3>';
 	echo "<form method=get>\n";
 	echo "<input type=hidden name=page value=${pageno}>\n";
 	echo "<input type=hidden name=tab value=${tabno}>\n";
@@ -4856,7 +4860,7 @@ function renderTagFilterPortlet ($tagfilter, $realm, $bypass_name = '', $bypass_
 		echo "<input type=hidden name=${bypass_name} value='${bypass_value}'>\n";
 	echo '<tr><td colspan=2><select name=tagfilter[] multiple>';
 	foreach ($objectivetags as $taginfo)
-		renderTagOptionForFilter ($taginfo, $tagfilter, $realm);
+		renderTagOptionForFilter ($taginfo, complementByKids ($tagfilter), $realm);
 	echo '</select></td></tr><tr><td>';
 //	$tfmode = getTFMode();
 //	echo '<input type=radio name=tfmode value=all' . ($tfmode == 'all' ? ' checked' : '') . '>all ';
@@ -4870,7 +4874,6 @@ function renderTagFilterPortlet ($tagfilter, $realm, $bypass_name = '', $bypass_
 	echo "<input type=hidden name=tab value=${tabno}>\n";
 	if ($bypass_name != '')
 		echo "<input type=hidden name=${bypass_name} value='${bypass_value}'>\n";
-	echo "<input type=hidden name=tagfilter[] value=''>";
 	printImageHREF ('clear', 'reset', TRUE);
 	echo '</form></td></tr></table>';
 	finishPortlet();
