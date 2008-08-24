@@ -4792,9 +4792,11 @@ function renderEntityTagChainEditor ($entity_realm = '', $bypass_name, $entity_i
 		return;
 	}
 	showMessageOrError();
-	startPortlet ('Tag list (' . count ($expl_tags) . ')');
+	startPortlet ('Tag list');
+	if (count ($expl_tags))
+		echo '<h3>(' . serializeTags ($expl_tags) . ')</h3>';
 	echo '<table border=0 align=center>';
-	echo '<tr><td colspan=2><h3>hold Ctrl to select more, than one</h3></td></tr>';
+	echo '<tr><td colspan=2><h4>hold Ctrl to select more, than one</h4></td></tr>';
 	printOpFormIntro ('saveTags', array ($bypass_name => $entity_id));
 	echo '<tr><td colspan=2><select name=taglist[] multiple size=' . getConfigVar ('MAXSELSIZE') . '>';
 	foreach ($tagtree as $taginfo)
