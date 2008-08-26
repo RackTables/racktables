@@ -1141,18 +1141,57 @@ function renderIPv4ForObject ($object_id = 0)
 	startPortlet ('Allocations');
 	$alloclist = getObjectIPv4Allocations ($object_id);
 	echo "<table cellspacing=0 cellpadding='5' align='center' class='widetable'>\n";
-	echo "<tr><th>&nbsp;</th><th>OS interface</th><th>IP address</th><th>description</th><th>type</th><th>misc</th><th>&nbsp</th></tr>\n";
+	echo '<tr><th>&nbsp;</th><th>OS interface</th><th>IP address</th>';
+	if (getConfigVar ('EXT_IPV4_VIEW') == 'yes')
+		echo '<th colspan=2>network</th><th>routed by</th>';
+	echo '<th>type</th><th>misc</th><th>&nbsp</th></tr>';
 	foreach ($alloclist as $dottedquad => $alloc)
 	{
-		$address_name = niftyString ($alloc['addrinfo']['name']);
 		$class = $alloc['addrinfo']['class'];
+		$netid = getIPv4AddressNetworkId ($dottedquad);
+		$netinfo = getIPv4NetworkInfo ($netid);
 		printOpFormIntro ('updIPv4Allocation', array ('ip' => $dottedquad));
-		echo "<tr class='$class'><td><a href='${root}process.php?op=delIPv4Allocation&page=${pageno}&tab=${tabno}&ip=${dottedquad}&object_id=$object_id'>";
+		echo "<tr class='$class' valign=top><td><a href='${root}process.php?op=delIPv4Allocation&page=${pageno}&tab=${tabno}&ip=${dottedquad}&object_id=$object_id'>";
 		printImageHREF ('delete', 'Delete this IPv4 address');
 		echo "</a></td>";
 		echo "<td class=tdleft><input type='text' name='bond_name' value='${alloc['osif']}' size=10></td>";
-		echo "<td class=tdleft><a href='${root}?page=ipaddress&ip=${dottedquad}'>${dottedquad}</a></td>";
-		echo "<td class='description'>$address_name</td>\n<td>";
+		echo "<td class=tdleft><a href='${root}?page=ipaddress&ip=${dottedquad}'>${dottedquad}</a>";
+		if (getConfigVar ('EXT_IPV4_VIEW') != 'yes')
+		{
+			if (NULL === $netid)
+				$suffix = '/??';
+			else
+				echo '<small>/' . $netinfo['mask'] . '</small>';
+		}
+		echo '&nbsp;' . $aac[$alloc['type']];
+		if (!empty ($alloc['addrinfo']['name']))
+			echo '(' . niftyString ($alloc['addrinfo']['name']) . ')';
+		echo '</td>';
+		// FIXME: this a copy-and-paste from renderRackObject()
+		if (getConfigVar ('EXT_IPV4_VIEW') == 'yes')
+		{
+			if (NULL === $netid)
+				echo '<td colspan=2>?</td>';
+			else
+				printIPv4NetInfoTDs ($netinfo);
+			echo "<td class='${secondclass}'>";
+			// FIXME: These cals are really heavy, replace them with a more appropriate dedicated function.
+			$netdata = getIPv4Network ($netid);
+			$newline = '';
+			foreach (findRouters ($netdata['addrlist']) as $router)
+			{
+				if ($router['id'] == $object_id)
+					continue;
+				echo $newline . $router['addr'] . ", <a href='${root}?page=object&object_id=${router['id']}&hl_ipv4_addr=${router['addr']}'>";
+				echo (empty ($router['iface']) ? '' : $router['iface'] . '@') . $router['dname'] . '</a>';
+				$routertags = loadRackObjectTags ($router['id']);
+				if (count ($routertags))
+					echo '<br><small>' . serializeTags ($routertags, "${root}?page=objects&tab=default&") . '</small>';
+				$newline = '<br>';
+			}
+			echo '</td>';
+		}
+		echo '<td>';
 		printSelect ($aat, 'bond_type', $alloc['type']);
 		echo "</td><td>";
 		$prefix = '';
@@ -1182,7 +1221,7 @@ function renderIPv4ForObject ($object_id = 0)
 	echo "</td>";
 	echo "<td class=tdleft><input type='text' size='10' name='bond_name' tabindex=100></td>\n";
 	echo "<td class=tdleft><input type=text name='ip' tabindex=101></td>\n";
-	echo "<td>&nbsp;</td><td>";
+	echo "<td colspan=3>&nbsp;</td><td>";
 	printSelect ($aat, 'bond_type');
 	echo "</td><td colspan=2>&nbsp;</td></tr></form></table><br>\n";
 	finishPortlet();
