@@ -2434,7 +2434,7 @@ function renderIPv4Address ($dottedquad)
 		echo "<table class='widetable' cellpadding=5 cellspacing=0 border=0 align='center' width='100%'>\n";
 		echo "<tr><th>proto</th><th>from</th><th>to</th><th>comment</th></tr>\n";
 		foreach ($address['outpf'] as $rule)
-			echo "<tr><td>${rule['proto']}</td><td>${rule['localip']}:${rule['localport']}</td><td>${rule['remoteip']}:${rule['localport']}</td><td>${rule['description']}</td></tr>";
+			echo "<tr><td>${rule['proto']}</td><td>${rule['localip']}:${rule['localport']}</td><td>${rule['remoteip']}:${rule['remoteport']}</td><td>${rule['description']}</td></tr>";
 		echo "</table>";
 		finishPortlet();
 	}
@@ -2445,7 +2445,7 @@ function renderIPv4Address ($dottedquad)
 		echo "<table class='widetable' cellpadding=5 cellspacing=0 border=0 align='center' width='100%'>\n";
 		echo "<tr><th>proto</th><th>from</th><th>to</th><th>comment</th></tr>\n";
 		foreach ($address['inpf'] as $rule)
-			echo "<tr><td>${rule['proto']}</td><td>${rule['localip']}:${rule['localport']}</td><td>${rule['remoteip']}:${rule['localport']}</td><td>${rule['description']}</td></tr>";
+			echo "<tr><td>${rule['proto']}</td><td>${rule['localip']}:${rule['localport']}</td><td>${rule['remoteip']}:${rule['remoteport']}</td><td>${rule['description']}</td></tr>";
 		echo "</table>";
 		finishPortlet();
 	}
