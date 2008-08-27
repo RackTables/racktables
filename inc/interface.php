@@ -4040,11 +4040,12 @@ function renderRSPoolServerForm ($pool_id = 0)
 	echo "</td><td>Format: ";
 	$formats = array
 	(
+		'ssv_1' => 'SSV: &lt;IP address&gt;',
+		'ssv_2' => 'SSV: &lt;IP address&gt; &lt;port&gt;',
 		'ipvs_2' => 'ipvsadm -l -n (address and port)',
 		'ipvs_3' => 'ipvsadm -l -n (address, port and weight)',
-		'ssv_2' => 'SSV: &lt;IP address&gt; &lt;port&gt;'
 	);
-	printSelect ($formats, 'format');
+	printSelect ($formats, 'format', 'ssv_1');
 	echo "</td><td><input type=submit value=Parse></td></tr>\n";
 	echo "<tr><td colspan=3><textarea name=rawtext cols=100 rows=50></textarea></td></tr>\n";
 	echo "</table>\n";

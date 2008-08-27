@@ -2,6 +2,7 @@
 	new feature: tell line number for lexical and syntax errors
 	new feature: CodePress editor enables line numbers and syntax
 		highlightling for RackCode editing
+	new feature: one more input format for RS manager
 	bugfix: tags are now properly displayed for users
 	bugfix: the JavaScript error isn't generated any more (fix by Aaron)
 	bugfix: tag tree is now always correctly sorted

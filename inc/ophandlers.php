@@ -877,6 +877,14 @@ function addRealServers ()
 				else
 					$nbad++;
 				break;
+			case 'ssv_1': // IP address
+				if (!preg_match ('/^([0-9\.]+)$/', $line, $match))
+					continue;
+				if (addRStoRSPool ($_REQUEST['pool_id'], $match[1], 0, getConfigVar ('DEFAULT_IPV4_RS_INSERVICE'), ''))
+					$ngood++;
+				else
+					$nbad++;
+				break;
 			default:
 				return buildRedirectURL ('ERR1');
 				break;
