@@ -5176,14 +5176,15 @@ function printOpFormIntro ($opname, $extra = array())
 
 // This is a two-way formating function:
 // 1. Replace empty strings with nbsp.
-// 2. Cut strings, which are too long, and append "cut here" indicator.
+// 2. Cut strings, which are too long, append "cut here" indicator and provide a mouse hint.
 function niftyString ($string, $maxlen = 30)
 {
 	$cutind = '&hellip;'; // length is 1
 	if (empty ($string))
 		return '&nbsp;';
 	if (mb_strlen ($string) > $maxlen)
-		return mb_substr ($string, 0, $maxlen - 1) . $cutind;
+		return "<div title='" . htmlspecialchars ($string, ENT_QUOTES, 'UTF-8') . "'>" .
+			mb_substr ($string, 0, $maxlen - 1) . $cutind . '</div>';
 	return $string;
 }
 
