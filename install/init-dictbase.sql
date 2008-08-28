@@ -256,7 +256,7 @@ INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, descriptio
 INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('IPV4_AUTO_RELEASE','1','uint','no','no','Auto-release IPv4 addresses on allocation');
 INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('SHOW_LAST_TAB','no','string','yes','no','Remember last tab shown for each page');
 INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('COOKIE_TTL','1209600','uint','yes','no','Cookies lifetime in seconds');
-INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('EXT_IPV4_VIEW','yes','string','no','no','Display parent network info for IPv4 addresses');
+INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('EXT_IPV4_VIEW','yes','string','no','no','Extended IPv4 view');
 INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('DB_VERSION','0.16.2','string','no','yes','Database version.');
 
 INSERT INTO `Script` VALUES ('RackCode','allow {$userid_1}');

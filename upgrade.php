@@ -24,6 +24,7 @@ function getDBUpgradePath ($v1, $v2)
 		'0.16.0',
 		'0.16.1',
 		'0.16.2',
+		'0.16.3',
 	);
 	if (!in_array ($v1, $versionhistory) || !in_array ($v2, $versionhistory))
 	{
@@ -1381,6 +1382,39 @@ CREATE TABLE `TagTree` (
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('EXT_IPV4_VIEW','yes','string','no','no','Display parent network info for IPv4 addresses')";
 			$query[] = "ALTER TABLE RackSpace ADD KEY `RackSpace_object_id` (`object_id`)";
 			$query[] = "update Config set varvalue = '0.16.2' where varname = 'DB_VERSION'";
+			break;
+		case '0.16.3':
+			// The network table list used to allow duplicate "prefix-masklen" pairs, which was a bad idea.
+			// The code, which verified each new network to be "unique", didn't work for "upper" IPv4 space.
+			// To enable the relevant index now, it is necessary to process all ghost networks, which could
+			// be accumulated over the time, and move all tags assigned to them to the "master" record, which
+			// we recognize to be the one with the lowest ID.
+			$q = 'select ip, mask, count(*) as c from IPRanges group by ip, mask having c > 1';
+			$r = $dbxlink->query ($q);
+			// Let's hope there's not many dupes, cause sub-queries won't work.
+			$dupes = $r->fetchAll (PDO::FETCH_ASSOC);
+			unset ($r);
+			foreach ($dupes as $d)
+			{
+				$firstid = 0;
+				$q = "select id from IPRanges where ip = ${d['ip']} and mask = ${d['mask']} order by id";
+				$r = $dbxlink->query ($q);
+				while ($row = $r->fetch (PDO::FETCH_ASSOC))
+				{
+					if (!$firstid)
+					{
+						$firstid = $row['id'];
+						continue;
+					}
+					// Rewrite tags, but don't rebuild the chains. Let regular code sort it out.
+					$query[] = "update TagStorage set target_id = ${firstid} where target_id = ${row['id']} and target_realm = 'ipv4net'";
+					$query[] = "delete from IPRanges where id = ${row['id']}";
+				}
+				unset ($r);
+			}
+			$query[] = 'alter table IPRanges add unique `base-len` (`ip`, `mask`)';
+			$query[] = "update Config set description = 'Extended IPv4 view' where varname = 'EXT_IPV4_VIEW'";
+			$query[] = "update Config set varvalue = '0.16.3' where varname = 'DB_VERSION'";
 			break;
 		default:
 			showError ("executeUpgradeBatch () failed, because batch '${batchid}' isn't defined", __FILE__);
