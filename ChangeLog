@@ -8,6 +8,7 @@
 	bugfix: tag tree is now always correctly sorted
 	bugfix: fix a typo in NAT rules displaying code (pointed out by Piotr Nowacki)
 	bugfix: error message was broken in the installer (reported by Thomas Thep)
+	bugfix: IPv4 network check sometimes failed to detect duplicate networks
 0.16.2 2008-08-21
 	bugfix: IP address picker was broken
 	bugfix: more message processing fixes

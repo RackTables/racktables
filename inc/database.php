@@ -2951,19 +2951,17 @@ function createIPv4Prefix ($range = '', $name = '', $is_bcast = FALSE, $taglist 
 
 	$query =
 		"select ".
-		"id, ip, mask, name ".
-		"from IPRanges ";
+		"id, INET_NTOA(ip) as dottedquad, mask, name ".
+		"from IPRanges";
 
 	$result = useSelectBlade ($query, __FUNCTION__);
 
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
-		$otherip = $row['ip'];
-		$othermask = binMaskFromDec($row['mask']);
-		if (($otherip & $othermask) == ($ipL & $othermask))
-			return "This subnet intersects with ".long2ip($row['ip'])."/${row['mask']}";
-		if (($otherip & $binmask) == ($ipL & $binmask))
-			return "This subnet intersects with ".long2ip($row['ip'])."/${row['mask']}";
+		$otherip = ip2long ($row['dottedquad']);
+		$othermask = binMaskFromDec ($row['mask']);
+		if (($otherip & $othermask) == ($ipL & $othermask) or ($otherip & $binmask) == ($ipL & $binmask))
+			return "This subnet intersects with ${row['dottedquad']}/${row['mask']}";
 	}
 	$result->closeCursor();
 	unset ($result);
