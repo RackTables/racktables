@@ -539,9 +539,11 @@ $msgcode['myaccount']['mypassword']['changeMyPassword']['ERR4'] = 153;
 $page['reports']['title'] = 'Reports';
 $page['reports']['parent'] = 'index';
 $tab['reports']['default'] = 'System';
+$tab['reports']['rackcode'] = 'RackCode';
 $tab['reports']['local'] = 'Local';
 $trigger['reports']['local'] = 'trigger_localreports';
 $tabhandler['reports']['default'] = 'renderSystemReports';
+$tabhandler['reports']['rackcode'] = 'renderRackCodeReports';
 $tabhandler['reports']['local'] = 'renderLocalReports';
 
 // This function returns array if page numbers leading to the target page

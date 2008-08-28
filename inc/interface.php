@@ -3571,6 +3571,20 @@ function renderLocalReports ()
 	renderReports ($localreports);
 }
 
+function renderRackCodeReports ()
+{
+	$rcr = array
+	(
+		array
+		(
+			'title' => 'Warnings',
+			'type' => 'counters',
+			'func' => 'getRackCodeWarnings'
+		),
+	);
+	renderReports ($rcr);
+}
+
 function renderReports ($what)
 {
 	if (!count ($what))

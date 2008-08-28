@@ -686,4 +686,10 @@ function locateSyntaxError ($stack)
 	return 0;
 }
 
+function getRackCodeWarnings ($code)
+{
+	$ret = array ('message 0' => 'this is a dummy message');
+	return $ret;
+}
+
 ?>
