@@ -3060,12 +3060,14 @@ function recordExists ($id = 0, $realm = 'object')
 	$table = array
 	(
 		'object' => 'RackObject',
-		'ipv4net' => 'IPRanges'
+		'ipv4net' => 'IPRanges',
+		'user' => 'UserAccount',
 	);
 	$idcol = array
 	(
 		'object' => 'id',
-		'ipv4net' => 'id'
+		'ipv4net' => 'id',
+		'user' => 'user_id',
 	);
 	$query = 'select count(*) from ' . $table[$realm] . ' where ' . $idcol[$realm] . ' = ' . $id;
 	if (($result = useSelectBlade ($query, __FUNCTION__)) == NULL) 

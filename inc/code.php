@@ -774,7 +774,28 @@ function findAutoTagWarnings ($expr)
 					(
 						'header' => 'line ' . $expr['lineno'],
 						'class' => 'warning',
-						'text' => "IPv4 network with ID '${recid}' does not exist"
+						'text' => "IPv4 network with ID '${recid}' does not exist."
+					));
+				case (mb_ereg_match ('^\$userid_', $expr['load'])):
+					$recid = mb_ereg_replace ('^\$userid_', '', $expr['load']);
+					if (recordExists ($recid, 'user'))
+						return array();
+					return array (array
+					(
+						'header' => 'line ' . $expr['lineno'],
+						'class' => 'warning',
+						'text' => "User account with ID '${recid}' does not exist."
+					));
+				case (mb_ereg_match ('^\$username_', $expr['load'])):
+					global $accounts;
+					$recid = mb_ereg_replace ('^\$username_', '', $expr['load']);
+					if (isset ($accounts[$recid]))
+						return array();
+					return array (array
+					(
+						'header' => 'line ' . $expr['lineno'],
+						'class' => 'warning',
+						'text' => "User account with name '${recid}' does not exist."
 					));
 				default:
 					return array();
