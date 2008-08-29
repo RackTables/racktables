@@ -3551,12 +3551,6 @@ function renderSystemReports ()
 		),
 		array
 		(
-			'title' => 'RackCode',
-			'type' => 'counters',
-			'func' => 'getRackCodeStats'
-		),
-		array
-		(
 			'title' => 'Tags top-50',
 			'type' => 'custom',
 			'func' => 'renderTagStats'
@@ -3577,8 +3571,14 @@ function renderRackCodeReports ()
 	(
 		array
 		(
-			'title' => 'Warnings',
+			'title' => 'Stats',
 			'type' => 'counters',
+			'func' => 'getRackCodeStats'
+		),
+		array
+		(
+			'title' => 'Warnings',
+			'type' => 'messages',
 			'func' => 'getRackCodeWarnings'
 		),
 	);
@@ -3598,6 +3598,10 @@ function renderReports ($what)
 			case 'counters':
 				foreach ($item['func'] () as $header => $data)
 					echo "<tr><td class=tdright>${header}:</td><td class=tdleft>${data}</td></tr>\n";
+				break;
+			case 'messages':
+				foreach ($item['func'] () as $msg)
+					echo "<tr class='msg_${msg['class']}'><td class=tdright>${msg['header']}:</td><td class=tdleft>${msg['text']}</td></tr>\n";
 				break;
 			case 'custom':
 				echo "<tr><td colspan=2>";
@@ -4737,7 +4741,31 @@ function renderTagTreeEditor ()
 {
 	global $taglist, $tagtree;
 	showMessageOrError();
-	echo "<table class=objview border=0 width='100%'><tr><td class=pcleft>";
+
+	$otags = getOrphanedTags();
+	if (count ($otags))
+	{
+		startPortlet ('fallen leaves');
+		echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
+		echo "<tr><th>tag</th><th>parent</th><th>&nbsp;</th></tr>\n";
+		foreach ($otags as $taginfo)
+		{
+			printOpFormIntro ('updateTag', array ('tag_id' => $taginfo['id'], 'tag_name' => $taginfo['tag']));
+			echo "<tr><td>${taginfo['tag']}</td><td><select name=parent_id>";
+			echo "<option value=0>-- NONE --</option>\n";
+			foreach ($taglist as $tlinfo)
+			{
+				echo "<option value=${tlinfo['id']}" . ($tlinfo['id'] == $taglist[$taginfo['id']]['parent_id'] ? ' selected' : '');
+				echo ">${tlinfo['tag']}</option>";
+			}
+			echo "</select></td><td>";
+			printImageHREF ('save', 'Save changes', TRUE);
+			echo "</form></td></tr>\n";
+		}
+		echo '</table>';
+		finishPortlet();
+	}
+
 	startPortlet ('tag tree');
 	echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
 	echo "<tr><th>&nbsp;</th><th>tag</th><th>parent</th><th>&nbsp;</th></tr>\n";
@@ -4754,30 +4782,6 @@ function renderTagTreeEditor ()
 	echo "</form>\n";
 	echo '</table>';
 	finishPortlet();
-
-	echo "</td><td><td class=pcright>";
-
-	startPortlet ('fallen leaves');
-	echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
-	echo "<tr><th>tag</th><th>parent</th><th>&nbsp;</th></tr>\n";
-	foreach (getOrphanedTags() as $taginfo)
-	{
-		echo '<tr><td>';
-		printOpFormIntro ('updateTag', array ('tag_id' => $taginfo['id'], 'tag_name' => $taginfo['tag']));
-		echo "${taginfo['tag']}</td><td><select name=parent_id>";
-		echo "<option value=0>-- NONE --</option>\n";
-		foreach ($taglist as $tlinfo)
-		{
-			echo "<option value=${tlinfo['id']}" . ($tlinfo['id'] == $taglist[$taginfo['id']]['parent_id'] ? ' selected' : '');
-			echo ">${tlinfo['tag']}</option>";
-		}
-		echo "</select></td><td>";
-		printImageHREF ('save', 'Save changes', TRUE);
-		echo "</form></td></tr>\n";
-	}
-	echo '</table>';
-	finishPortlet();
-	echo "</td></tr></table>";
 }
 
 // Output a sequence of OPTION elements, selecting those, which are present on the

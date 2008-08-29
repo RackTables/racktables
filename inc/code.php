@@ -686,10 +686,87 @@ function locateSyntaxError ($stack)
 	return 0;
 }
 
-function getRackCodeWarnings ($code)
+function getRackCodeWarnings ()
 {
-	$ret = array ('message 0' => 'this is a dummy message');
+	$ret = array();
+	global $rackCode;
+	// autotags
+	foreach ($rackCode as $sentence)
+		switch ($sentence['type'])
+		{
+			case 'SYNT_DEFINITION':
+				$ret = array_merge ($ret, findAutoTagWarnings ($sentence['definition']));
+				break;
+			case 'SYNT_GRANT':
+				$ret = array_merge ($ret, findAutoTagWarnings ($sentence['condition']));
+				break;
+			default:
+				$ret[] = array
+				(
+					'header' => 'internal error',
+					'class' => 'error',
+					'text' => "Skipped sentence of unknown type '${sentence['type']}'"
+				);
+		}
+	$nwarnings = count ($ret);
+	$ret[] = array
+	(
+		'header' => 'summary',
+		'class' => $nwarnings ? 'error' : 'success',
+		'text' => "Analysis complete, ${nwarnings} issues discovered."
+	);
 	return $ret;
+}
+
+function findAutoTagWarnings ($expr)
+{
+	switch ($expr['type'])
+	{
+		case 'LEX_BOOLCONST':
+		case 'LEX_PREDICATE':
+			return array();
+		case 'LEX_TAG':
+			switch (TRUE)
+			{
+				case (mb_ereg_match ('^\$id_', $expr['load'])):
+					$recid = mb_ereg_replace ('^\$id_', '', $expr['load']);
+					if (recordExists ($recid, 'object'))
+						return array();
+					return array (array
+					(
+						'header' => 'Line ' . $expr['lineno'],
+						'class' => 'warning',
+						'text' => "An object with ID '${recid}' does not exist"
+					));
+				case (mb_ereg_match ('^\$ipv4netid_', $expr['load'])):
+					$recid = mb_ereg_replace ('^\$ipv4netid_', '', $expr['load']);
+					if (recordExists ($recid, 'ipv4net'))
+						return array();
+					return array (array
+					(
+						'header' => 'Line ' . $expr['lineno'],
+						'class' => 'warning',
+						'text' => "IPv4 network with ID '${recid}' does not exist"
+					));
+				default:
+					return array();
+			}
+		case 'SYNT_NOTEXPR':
+			return findAutoTagWarnings ($expr['load']);
+		case 'SYNT_BOOLOP':
+			return array_merge
+			(
+				findAutoTagWarnings ($expr['left']),
+				findAutoTagWarnings ($expr['right'])
+			);
+		default:
+			return array (array
+			(
+				'header' => 'internal error',
+				'class' => 'error',
+				'text' => "Skipped expression of unknown type '${type['type']}'"
+			));
+	}
 }
 
 ?>

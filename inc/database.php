@@ -3053,6 +3053,33 @@ function objectIsPortless ($id = 0)
 	return $count === '0';
 }
 
+function recordExists ($id = 0, $realm = 'object')
+{
+	if ($id <= 0)
+		return FALSE;
+	$table = array
+	(
+		'object' => 'RackObject',
+		'ipv4net' => 'IPRanges'
+	);
+	$idcol = array
+	(
+		'object' => 'id',
+		'ipv4net' => 'id'
+	);
+	$query = 'select count(*) from ' . $table[$realm] . ' where ' . $idcol[$realm] . ' = ' . $id;
+	if (($result = useSelectBlade ($query, __FUNCTION__)) == NULL) 
+	{
+		showError ('SQL query failed', __FUNCTION__);
+		return FALSE;
+	}
+	$row = $result->fetch (PDO::FETCH_NUM);
+	$count = $row[0];
+	$result->closeCursor();
+	unset ($result);
+	return $count === '1';
+}
+
 function tagExistsInDatabase ($tname)
 {
 	$result = useSelectBlade ("select count(*) from TagTree where lower(tag) = lower('${tname}')");
