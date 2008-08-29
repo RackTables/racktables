@@ -708,6 +708,33 @@ function getRackCodeWarnings ()
 					'text' => "Skipped sentence of unknown type '${sentence['type']}'"
 				);
 		}
+	// predicates
+	$plist = array();
+	foreach ($rackCode as $sentence)
+		if ($sentence['type'] == 'SYNT_DEFINITION')
+			$plist[$sentence['term']] = $sentence['lineno'];
+	foreach ($plist as $pname => $lineno)
+	{
+		foreach ($rackCode as $sentence)
+			switch ($sentence['type'])
+			{
+				case 'SYNT_DEFINITION':
+					if (referencedPredicate ($pname, $sentence['definition']))
+						continue 3; // clear, next term
+					break;
+				case 'SYNT_GRANT':
+					if (referencedPredicate ($pname, $sentence['condition']))
+						continue 3; // idem
+					break;
+			}
+		$ret[] = array
+		(
+			'header' => 'line ' . $lineno,
+			'class' => 'warning',
+			'text' => "Predicate '${pname}' is defined, but never used."
+		);
+	}
+	// bail out
 	$nwarnings = count ($ret);
 	$ret[] = array
 	(
@@ -718,6 +745,7 @@ function getRackCodeWarnings ()
 	return $ret;
 }
 
+// Scan the given expression and return any issues found about its autotags.
 function findAutoTagWarnings ($expr)
 {
 	switch ($expr['type'])
@@ -734,9 +762,9 @@ function findAutoTagWarnings ($expr)
 						return array();
 					return array (array
 					(
-						'header' => 'Line ' . $expr['lineno'],
+						'header' => 'line ' . $expr['lineno'],
 						'class' => 'warning',
-						'text' => "An object with ID '${recid}' does not exist"
+						'text' => "An object with ID '${recid}' does not exist."
 					));
 				case (mb_ereg_match ('^\$ipv4netid_', $expr['load'])):
 					$recid = mb_ereg_replace ('^\$ipv4netid_', '', $expr['load']);
@@ -744,7 +772,7 @@ function findAutoTagWarnings ($expr)
 						return array();
 					return array (array
 					(
-						'header' => 'Line ' . $expr['lineno'],
+						'header' => 'line ' . $expr['lineno'],
 						'class' => 'warning',
 						'text' => "IPv4 network with ID '${recid}' does not exist"
 					));
@@ -766,6 +794,25 @@ function findAutoTagWarnings ($expr)
 				'class' => 'error',
 				'text' => "Skipped expression of unknown type '${type['type']}'"
 			));
+	}
+}
+
+// Return true, if the expression makes use of the predicate given.
+function referencedPredicate ($pname, $expr)
+{
+	switch ($expr['type'])
+	{
+		case 'LEX_BOOLCONST':
+		case 'LEX_TAG':
+			return FALSE;
+		case 'LEX_PREDICATE':
+			return $pname == $expr['load'];
+		case 'SYNT_NOTEXPR':
+			return referencedPredicate ($pname, $expr['load']);
+		case 'SYNT_BOOLOP':
+			return referencedPredicate ($pname, $expr['left']) or referencedPredicate ($pname, $expr['right']);
+		default: // This is actually an internal error.
+			return FALSE;
 	}
 }
 
