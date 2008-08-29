@@ -1141,9 +1141,25 @@ function generateAutoPorts ()
 }
 
 // Filter out implicit tags before storing the new tag set.
-function saveEntityTags ($realm, $bypass)
+function saveEntityTags ()
 {
-	global $explicit_tags, $implicit_tags;
+	$page2realm = array
+	(
+		'object' => 'object',
+		'iprange' => 'ipv4net',
+		'rack' => 'rack',
+		'ipv4vs' => 'ipv4vs',
+		'ipv4rsp' => 'ipv4rspool',
+		'user' => 'user'
+	);
+	global $explicit_tags, $implicit_tags, $page, $pageno;
+	if (!isset ($page2realm[$pageno]) or !isset ($page[$pageno]['bypass']))
+	{
+		showError ('Internal error', __FUNCTION__);
+		die;
+	}
+	$realm = $page2realm[$pageno];
+	$bypass = $page[$pageno]['bypass'];
 	assertUIntArg ($bypass, __FUNCTION__);
 	$entity_id = $_REQUEST[$bypass];
 	$taglist = isset ($_REQUEST['taglist']) ? $_REQUEST['taglist'] : array();
@@ -1161,36 +1177,6 @@ function saveEntityTags ($realm, $bypass)
 		return buildRedirectURL ('ERR', array ($n_succeeds, $n_errors));
 	else
 		return buildRedirectURL ('OK', array ($n_succeeds));
-}
-
-function saveObjectTags ()
-{
-	return saveEntityTags ('object', 'object_id');
-}
-
-function saveIPv4PrefixTags ()
-{
-	return saveEntityTags ('ipv4net', 'id');
-}
-
-function saveRackTags ()
-{
-	return saveEntityTags ('rack', 'rack_id');
-}
-
-function saveIPv4VSTags ()
-{
-	return saveEntityTags ('ipv4vs', 'vs_id');
-}
-
-function saveIPv4RSPoolTags ()
-{
-	return saveEntityTags ('ipv4rspool', 'pool_id');
-}
-
-function saveUserTags ()
-{
-	return saveEntityTags ('user', 'user_id');
 }
 
 function destroyTag ()

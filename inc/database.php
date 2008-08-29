@@ -2851,8 +2851,10 @@ function deleteTagForEntity ($entity_realm, $entity_id, $tag_id)
 }
 
 // Push a record into TagStorage unconditionally.
-function addTagForEntity ($realm, $entity_id, $tag_id)
+function addTagForEntity ($realm = '', $entity_id, $tag_id)
 {
+	if (empty ($realm))
+		return FALSE;
 	return useInsertBlade
 	(
 		'TagStorage',
