@@ -752,6 +752,29 @@ function getRackCodeWarnings ()
 			'text' => "Predicate '${pname}' is defined, but never used."
 		);
 	}
+	// expressions
+	foreach ($rackCode as $sentence)
+		switch (invariantExpression ($sentence))
+		{
+			case 'always true':
+				$ret[] = array
+				(
+					'header' => 'line ' . $sentence['lineno'],
+					'class' => 'warning',
+					'text' => "Expression is always true."
+				);
+				break;
+			case 'always false':
+				$ret[] = array
+				(
+					'header' => 'line ' . $sentence['lineno'],
+					'class' => 'warning',
+					'text' => "Expression is always false."
+				);
+				break;
+			default:
+				break;
+		}
 	// bail out
 	$nwarnings = count ($ret);
 	$ret[] = array
@@ -892,6 +915,46 @@ function referencedPredicate ($pname, $expr)
 			return referencedPredicate ($pname, $expr['left']) or referencedPredicate ($pname, $expr['right']);
 		default: // This is actually an internal error.
 			return FALSE;
+	}
+}
+
+// Return 'always true', 'always false' or any other verdict.
+function invariantExpression ($expr)
+{
+	$self = __FUNCTION__;
+	switch ($expr['type'])
+	{
+		case 'SYNT_GRANT':
+			return $self ($expr['condition']);
+		case 'SYNT_DEFINITION':
+			return $self ($expr['definition']);
+		case 'LEX_BOOLCONST':
+			if ($expr['load'] == 'true')
+				return 'always true';
+			return 'always false';
+		case 'LEX_TAG':
+		case 'LEX_PREDICATE':
+			return 'sometimes something';
+		case 'SYNT_NOTEXPR':
+			return $self ($expr['load']);
+		case 'SYNT_BOOLOP':
+			$leftanswer = $self ($expr['left']);
+			$rightanswer = $self ($expr['right']);
+			// "true or anything" is always true and thus const
+			if ($expr['subtype'] == 'or' and ($leftanswer == 'always true' or $rightanswer == 'always true'))
+				return 'always true';
+			// "false and anything" is always false and thus const
+			if ($expr['subtype'] == 'and' and ($leftanswer == 'always false' or $rightanswer == 'always false'))
+				return 'always false';
+			// "true and true" is true
+			if ($expr['subtype'] == 'and' and ($leftanswer == 'always true' and $rightanswer == 'always true'))
+				return 'always true';
+			// "false or false" is false
+			if ($expr['subtype'] == 'or' and ($leftanswer == 'always false' and $rightanswer == 'always false'))
+				return 'always false';
+			return '';
+		default: // This is actually an internal error.
+			break;
 	}
 }
 
