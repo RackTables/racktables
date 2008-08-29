@@ -775,6 +775,34 @@ function getRackCodeWarnings ()
 			default:
 				break;
 		}
+	// Duplicates. Use the same hash function we used to.
+	$fpcache = array ('SYNT_DEFINITION' => array(), 'SYNT_GRANT' => array());
+	foreach ($rackCode as $sentence)
+		switch ($sentence['type'])
+		{
+			case 'SYNT_DEFINITION':
+				$fp = hash (PASSWORD_HASH, serialize (effectiveValue ($sentence['definition'])));
+				if (isset ($fpcache[$sentence['type']][$fp]))
+					$ret[] = array
+					(
+						'header' => 'line ' . $sentence['lineno'],
+						'class' => 'warning',
+						'text' => 'Effective definition equals that at line ' . $fpcache[$sentence['type']][$fp]
+					);
+				$fpcache[$sentence['type']][$fp] = $sentence['lineno'];
+				break;
+			case 'SYNT_GRANT':
+				$fp = hash (PASSWORD_HASH, serialize (effectiveValue ($sentence['condition'])));
+				if (isset ($fpcache[$sentence['type']][$fp]))
+					$ret[] = array
+					(
+						'header' => 'line ' . $sentence['lineno'],
+						'class' => 'warning',
+						'text' => 'Effective condition equals that at line ' . $fpcache[$sentence['type']][$fp]
+					);
+				$fpcache[$sentence['type']][$fp] = $sentence['lineno'];
+				break;
+		}
 	// bail out
 	$nwarnings = count ($ret);
 	$ret[] = array
@@ -956,6 +984,14 @@ function invariantExpression ($expr)
 		default: // This is actually an internal error.
 			break;
 	}
+}
+
+// FIXME: First do line number stripping, otherwise hashes will always differ even
+// for the obviously equivalent expressions. In some longer term mean transform the
+// expression into minimalistic and ordered form.
+function effectiveValue ($expr)
+{
+	return $expr;
 }
 
 ?>
