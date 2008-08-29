@@ -690,6 +690,24 @@ function getRackCodeWarnings ()
 {
 	$ret = array();
 	global $rackCode;
+	// tags
+	foreach ($rackCode as $sentence)
+		switch ($sentence['type'])
+		{
+			case 'SYNT_DEFINITION':
+				$ret = array_merge ($ret, findTagWarnings ($sentence['definition']));
+				break;
+			case 'SYNT_GRANT':
+				$ret = array_merge ($ret, findTagWarnings ($sentence['condition']));
+				break;
+			default:
+				$ret[] = array
+				(
+					'header' => 'internal error',
+					'class' => 'error',
+					'text' => "Skipped sentence of unknown type '${sentence['type']}'"
+				);
+		}
 	// autotags
 	foreach ($rackCode as $sentence)
 		switch ($sentence['type'])
@@ -813,7 +831,47 @@ function findAutoTagWarnings ($expr)
 			(
 				'header' => 'internal error',
 				'class' => 'error',
-				'text' => "Skipped expression of unknown type '${type['type']}'"
+				'text' => "Skipped expression of unknown type '${expr['type']}'"
+			));
+	}
+}
+
+// Idem WRT tags.
+function findTagWarnings ($expr)
+{
+	global $taglist;
+	switch ($expr['type'])
+	{
+		case 'LEX_BOOLCONST':
+		case 'LEX_PREDICATE':
+			return array();
+		case 'LEX_TAG':
+			// Only verify stuff, that has passed through the saving handler.
+			if (!mb_ereg_match (TAGNAME_REGEXP, $expr['load']))
+				return array();
+			foreach ($taglist as $taginfo)
+				if ($taginfo['tag'] == $expr['load'])
+					return array();
+			return array (array
+			(
+				'header' => 'line ' . $expr['lineno'],
+				'class' => 'warning',
+				'text' => "Tag '${expr['load']}' does not exist."
+			));
+		case 'SYNT_NOTEXPR':
+			return findTagWarnings ($expr['load']);
+		case 'SYNT_BOOLOP':
+			return array_merge
+			(
+				findTagWarnings ($expr['left']),
+				findTagWarnings ($expr['right'])
+			);
+		default:
+			return array (array
+			(
+				'header' => 'internal error',
+				'class' => 'error',
+				'text' => "Skipped expression of unknown type '${expr['type']}'"
 			));
 	}
 }
