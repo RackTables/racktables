@@ -77,6 +77,11 @@ function printReleaseNotes ($batchid)
 			echo 'necessary. You would need to get rid of the duplicates accurately one by one, repeating the ADD UNIQUE ';
 			echo 'query until it succeeds.<br><br>';
 			break;
+		case '0.16.3':
+			echo "<font color=red><strong>Release notes for ${batchid}</strong></font><br>";
+			echo 'This release fixes a missing UNIQUE KEY in a table. The upgrade script may find it necessary first to transform some records.<br>';
+			echo 'Because of this it is normal to see several "update TagStorage ... Duplicate entry" failed queries during the upgrade.<br>';
+			break;
 		default:
 			break;
 	}
@@ -1407,7 +1412,9 @@ CREATE TABLE `TagTree` (
 						continue;
 					}
 					// Rewrite tags, but don't rebuild the chains. Let regular code sort it out.
+					// One of the next two queries will fail.
 					$query[] = "update TagStorage set target_id = ${firstid} where target_id = ${row['id']} and target_realm = 'ipv4net'";
+					$query[] = "delete from TagStorage where target_id = ${row['id']} and target_realm = 'ipv4net'";
 					$query[] = "delete from IPRanges where id = ${row['id']}";
 				}
 				unset ($r);
