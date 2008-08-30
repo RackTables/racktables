@@ -5072,7 +5072,14 @@ function dump ($var)
 function renderRackCodeViewer ()
 {
 	$text = loadScript ('RackCode');
-	dump ($text);
+	echo '<table width="100%" border=0>';
+	$lineno = 1;
+	foreach (explode ("\n", $text) as $line)
+	{
+		echo "<tr><td class=tdright><a name=line${lineno}>${lineno}</td>";
+		echo "<td class=tdleft>${line}</td></tr>";
+		$lineno++;
+	}
 }
 
 function renderRackCodeEditor ()

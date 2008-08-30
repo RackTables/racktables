@@ -686,6 +686,12 @@ function locateSyntaxError ($stack)
 	return 0;
 }
 
+function refRCLineno ($ln)
+{
+	global $root;
+	return "<a href='${root}?page=perms&tab=default#line${ln}'>line ${ln}</a>";
+}
+
 function getRackCodeWarnings ()
 {
 	$ret = array();
@@ -747,7 +753,7 @@ function getRackCodeWarnings ()
 			}
 		$ret[] = array
 		(
-			'header' => 'line ' . $lineno,
+			'header' => refRCLineno ($lineno),
 			'class' => 'warning',
 			'text' => "Predicate '${pname}' is defined, but never used."
 		);
@@ -759,7 +765,7 @@ function getRackCodeWarnings ()
 			case 'always true':
 				$ret[] = array
 				(
-					'header' => 'line ' . $sentence['lineno'],
+					'header' => refRCLineno ($sentence['lineno']),
 					'class' => 'warning',
 					'text' => "Expression is always true."
 				);
@@ -767,7 +773,7 @@ function getRackCodeWarnings ()
 			case 'always false':
 				$ret[] = array
 				(
-					'header' => 'line ' . $sentence['lineno'],
+					'header' => refRCLineno ($sentence['lineno']),
 					'class' => 'warning',
 					'text' => "Expression is always false."
 				);
@@ -785,7 +791,7 @@ function getRackCodeWarnings ()
 				if (isset ($fpcache[$sentence['type']][$fp]))
 					$ret[] = array
 					(
-						'header' => 'line ' . $sentence['lineno'],
+						'header' => refRCLineno ($sentence['lineno']),
 						'class' => 'warning',
 						'text' => 'Effective definition equals that at line ' . $fpcache[$sentence['type']][$fp]
 					);
@@ -796,7 +802,7 @@ function getRackCodeWarnings ()
 				if (isset ($fpcache[$sentence['type']][$fp]))
 					$ret[] = array
 					(
-						'header' => 'line ' . $sentence['lineno'],
+						'header' => refRCLineno ($sentence['lineno']),
 						'class' => 'warning',
 						'text' => 'Effective condition equals that at line ' . $fpcache[$sentence['type']][$fp]
 					);
@@ -831,7 +837,7 @@ function findAutoTagWarnings ($expr)
 						return array();
 					return array (array
 					(
-						'header' => 'line ' . $expr['lineno'],
+						'header' => refRCLineno ($expr['lineno']),
 						'class' => 'warning',
 						'text' => "An object with ID '${recid}' does not exist."
 					));
@@ -841,7 +847,7 @@ function findAutoTagWarnings ($expr)
 						return array();
 					return array (array
 					(
-						'header' => 'line ' . $expr['lineno'],
+						'header' => refRCLineno ($expr['lineno']),
 						'class' => 'warning',
 						'text' => "IPv4 network with ID '${recid}' does not exist."
 					));
@@ -851,7 +857,7 @@ function findAutoTagWarnings ($expr)
 						return array();
 					return array (array
 					(
-						'header' => 'line ' . $expr['lineno'],
+						'header' => refRCLineno ($expr['lineno']),
 						'class' => 'warning',
 						'text' => "User account with ID '${recid}' does not exist."
 					));
@@ -862,7 +868,7 @@ function findAutoTagWarnings ($expr)
 						return array();
 					return array (array
 					(
-						'header' => 'line ' . $expr['lineno'],
+						'header' => refRCLineno ($expr['lineno']),
 						'class' => 'warning',
 						'text' => "User account with name '${recid}' does not exist."
 					));
@@ -905,7 +911,7 @@ function findTagWarnings ($expr)
 					return array();
 			return array (array
 			(
-				'header' => 'line ' . $expr['lineno'],
+				'header' => refRCLineno ($expr['lineno']),
 				'class' => 'warning',
 				'text' => "Tag '${expr['load']}' does not exist."
 			));
