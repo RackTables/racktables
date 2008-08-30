@@ -110,6 +110,7 @@ function getLexemsFromRackCode ($text)
 						$lineno++; // fall through
 					case ($char == " "):
 					case ($char == "\t"):
+					case ($char == ')'): // this will be handled below
 						// got a word, sort it out
 						switch ($buffer)
 						{
@@ -134,6 +135,8 @@ function getLexemsFromRackCode ($text)
 							default:
 								return lexError2 ($buffer, $lineno);
 						}
+						if ($char == ')')
+							$ret[] = array ('type' => 'LEX_RBRACE', 'lineno' => $lineno);
 						$newstate = 'ESOTSM';
 						break;
 					default:
