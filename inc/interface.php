@@ -2011,14 +2011,12 @@ function renderIPv4SpaceRecords ($tree, $level = 0, &$tagcache = array())
 
 function renderIPv4Space ()
 {
-	global $root, $pageno;
-
-	echo "<table border=0 class=objectview>\n";
-	echo "<tr><td class=pcleft>";
-
 	$tagfilter = getTagFilter();
 	$tree = treeFromList (getIPv4NetworkList ($tagfilter, getTFMode()));
 	sortTree ($tree, 'IPv4NetworkCmp');
+
+	echo "<table border=0 class=objectview>\n";
+	echo "<tr><td class=pcleft>";
 	// FIXME: the counter is wrong
 	startPortlet ('networks (' . count ($tree) . ')');
 	echo "<table class='widetable' border=0 cellpadding=5 cellspacing=0 align='center'>\n";
