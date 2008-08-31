@@ -1407,14 +1407,23 @@ function taginfoCmp ($tagA, $tagB)
 	return $tagA['ci'] - $tagB['ci'];
 }
 
-// Modify the given tag tree so, that each level's items are sorted alphabetically.
-function sortTagTree (&$tree)
+// Compare networks. When sorting a tree, the records on the list will have
+// distinct base IP addresses.
+function IPv4NetworkCmp ($netA, $netB)
 {
-	usort ($tree, 'taginfoCmp');
+	return $netA['db_first'] - $netB['db_first'];
+}
+
+// Modify the given tag tree so, that each level's items are sorted alphabetically.
+function sortTree (&$tree, $sortfunc = '')
+{
+	if (empty ($sortfunc))
+		return;
+	usort ($tree, $sortfunc);
 	// Don't make a mistake of directly iterating over the items of current level, because this way
 	// the sorting will be performed on a _copy_ if each item, not the item itself.
 	foreach (array_keys ($tree) as $tagid)
-		sortTagTree ($tree[$tagid]['kids']);
+		sortTree ($tree[$tagid]['kids'], $sortfunc);
 }
 
 ?>

@@ -2017,14 +2017,16 @@ function renderIPv4Space ()
 	echo "<tr><td class=pcleft>";
 
 	$tagfilter = getTagFilter();
-	$addrspaceList = treeFromList (getIPv4NetworkList ($tagfilter, getTFMode()));
-	startPortlet ('networks (' . count ($addrspaceList) . ')');
+	$tree = treeFromList (getIPv4NetworkList ($tagfilter, getTFMode()));
+	sortTree ($tree, 'IPv4NetworkCmp');
+	// FIXME: the counter is wrong
+	startPortlet ('networks (' . count ($tree) . ')');
 	echo "<table class='widetable' border=0 cellpadding=5 cellspacing=0 align='center'>\n";
 	echo "<tr><th>prefix</th><th>name/tags</th><th>%% used</th>";
 	if (getConfigVar ('EXT_IPV4_VIEW') == 'yes')
 		echo "<th>routed by</th>";
 	echo "</tr>\n";
-	renderIPv4SpaceRecords ($addrspaceList);
+	renderIPv4SpaceRecords ($tree);
 	echo "</table>\n";
 	finishPortlet();
 	echo '</td><td class=pcright>';
@@ -5222,8 +5224,8 @@ function niftyString ($string, $maxlen = 30)
 	if (empty ($string))
 		return '&nbsp;';
 	if (mb_strlen ($string) > $maxlen)
-		return "<div title='" . htmlspecialchars ($string, ENT_QUOTES, 'UTF-8') . "'>" .
-			mb_substr ($string, 0, $maxlen - 1) . $cutind . '</div>';
+		return "<span title='" . htmlspecialchars ($string, ENT_QUOTES, 'UTF-8') . "'>" .
+			mb_substr ($string, 0, $maxlen - 1) . $cutind . '</span>';
 	return $string;
 }
 
