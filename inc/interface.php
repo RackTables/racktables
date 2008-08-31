@@ -93,6 +93,10 @@ $image['find']['height'] = 16;
 $image['spacer']['path'] = 'pix/pixel.png';
 $image['spacer']['width'] = 16;
 $image['spacer']['height'] = 16;
+$image['verge']['path'] = 'pix/pixel.png';
+//$image['verge']['path'] = 'pix/verge.png';
+$image['verge']['width'] = 16;
+$image['verge']['height'] = 16;
 $image['next']['path'] = 'pix/tango-go-next.png';
 $image['next']['width'] = 32;
 $image['next']['height'] = 32;
@@ -1985,6 +1989,26 @@ function renderRackspaceHistory ()
 	
 }
 
+function renderIPv4SpaceRecords ($tree, $level = 0, &$tagcache = array())
+{
+	$self = __FUNCTION__;
+	foreach ($tree as $item)
+	{
+		$netdata = getIPv4Network ($item['id']);
+		$total = ($netdata['ip_bin'] | $netdata['mask_bin_inv']) - ($netdata['ip_bin'] & $netdata['mask_bin']) + 1;
+		$used = count ($netdata['addrlist']);
+		echo "<tr valign=top>";
+		printIPv4NetInfoTDs ($netdata, 'tdleft', $level);
+		echo "<td class=tdcenter>";
+		renderProgressBar ($used/$total);
+		echo "<br><small>${used}/${total}</small></td>";
+		if (getConfigVar ('EXT_IPV4_VIEW') == 'yes')
+			printRoutersTD (findRouters ($netdata['addrlist']), $tagcache);
+		echo "</tr>";
+		$self ($item['kids'], $level + 1, $tagcache);
+	}
+}
+
 function renderIPv4Space ()
 {
 	global $root, $pageno;
@@ -1993,28 +2017,14 @@ function renderIPv4Space ()
 	echo "<tr><td class=pcleft>";
 
 	$tagfilter = getTagFilter();
-	$addrspaceList = getAddressspaceList ($tagfilter, getTFMode());
-	$tagcache = array();
+	$addrspaceList = treeFromList (getIPv4NetworkList ($tagfilter, getTFMode()));
 	startPortlet ('networks (' . count ($addrspaceList) . ')');
 	echo "<table class='widetable' border=0 cellpadding=5 cellspacing=0 align='center'>\n";
 	echo "<tr><th>prefix</th><th>name/tags</th><th>%% used</th>";
 	if (getConfigVar ('EXT_IPV4_VIEW') == 'yes')
 		echo "<th>routed by</th>";
 	echo "</tr>\n";
-	foreach ($addrspaceList as $iprange)
-	{
-		$netdata = getIPv4Network ($iprange['id']);
-		$total = ($netdata['ip_bin'] | $netdata['mask_bin_inv']) - ($netdata['ip_bin'] & $netdata['mask_bin']) + 1;
-		$used = count ($netdata['addrlist']);
-		echo "<tr valign=top>";
-		printIPv4NetInfoTDs ($netdata);
-		echo "<td class=tdcenter>";
-		renderProgressBar ($used/$total);
-		echo "<br><small>${used}/${total}</small></td>";
-		if (getConfigVar ('EXT_IPV4_VIEW') == 'yes')
-			printRoutersTD (findRouters ($netdata['addrlist']), $tagcache);
-		echo "</tr>";
-	}
+	renderIPv4SpaceRecords ($addrspaceList);
 	echo "</table>\n";
 	finishPortlet();
 	echo '</td><td class=pcright>';
@@ -4653,8 +4663,10 @@ function renderTagRowForViewer ($taginfo, $level = 0)
 {
 	echo '<tr><td align=left>';
 	echo '<div title="id = ' . $taginfo['id'] . '">';
-	for ($i = 0; $i < $level; $i++)
+	for ($i = 0; $i < $level - 1; $i++)
 		printImageHREF ('spacer');
+	if ($level)
+		printImageHREF ('verge');
 	echo $taginfo['tag'] . '</div>';
 	echo "</td></tr>\n";
 	foreach ($taginfo['kids'] as $kid)
@@ -4666,8 +4678,10 @@ function renderTagRowForCloud ($taginfo, $realm, $level = 0)
 {
 	global $root;
 	echo '<tr><td align=left>';
-	for ($i = 0; $i < $level; $i++)
+	for ($i = 0; $i < $level - 1; $i++)
 		printImageHREF ('spacer');
+	if ($level)
+		printImageHREF ('verge');
 	echo "<a href='${root}?page=objgroup&group_id=0&tagfilter[]=${taginfo['id']}'>";
 	echo $taginfo['tag'] . '</a>';
 	if (isset ($taginfo['refcnt'][$realm]))
@@ -5251,11 +5265,16 @@ function printRoutersTD ($rlist, &$tagcache = array())
 }
 
 // Same as for routers, but produce two TD cells to lay the content out better.
-function printIPv4NetInfoTDs ($netinfo, $tdclass = 'tdleft')
+function printIPv4NetInfoTDs ($netinfo, $tdclass = 'tdleft', $indent = 0)
 {
 	global $root;
 	$tags = loadIPv4PrefixTags ($netinfo['id']);
-	echo "<td class='${tdclass}'><a href='${root}?page=iprange&id=${netinfo['id']}'>${netinfo['ip']}/${netinfo['mask']}</a></td>";
+	echo "<td class='${tdclass}'>";
+	for ($i = 0; $i < $indent - 1; $i++)
+		printImageHREF ('spacer');
+	if ($indent)
+		printImageHREF ('verge');
+	echo "<a href='${root}?page=iprange&id=${netinfo['id']}'>${netinfo['ip']}/${netinfo['mask']}</a></td>";
 	echo "<td class='${tdclass}'>" . niftyString ($netinfo['name']);
 	if (count ($tags))
 		echo '<br><small>' . serializeTags ($tags, "${root}?page=ipv4space&tab=default&") . '</small>';

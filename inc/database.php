@@ -1092,6 +1092,7 @@ function getIPv4NetworkInfo ($id = 0)
 	$ret['mask_bin_inv'] = binInvMaskFromDec ($ret['mask']);
 	$ret['db_first'] = sprintf ('%u', 0x00000000 + $ret['ip_bin'] & $ret['mask_bin']);
 	$ret['db_last'] = sprintf ('%u', 0x00000000 + $ret['ip_bin'] | ($ret['mask_bin_inv']));
+	$ret['parent_id'] = getIPv4AddressNetworkId ($ret['ip'], $ret['mask']);
 	return $ret;
 }
 
@@ -1139,6 +1140,31 @@ function bindIpToObject ($ip = '', $object_id = 0, $name = '', $type = '')
 	return $result ? '' : (__FUNCTION__ . '(): useInsertBlade() failed');
 }
 
+function getIPv4NetworkList ($tagfilter = array(), $tfmode = 'any')
+{
+	$whereclause = getWhereClause ($tagfilter);
+	$query =
+		"select distinct id ".
+		"from IPRanges left join TagStorage on id = target_id and target_realm = 'ipv4net' " .
+		"where true ${whereclause} order by ip";
+	$result = useSelectBlade ($query, __FUNCTION__);
+	$ret = array();
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
+		$ret[$row['id']] = NULL;
+	unset ($result);
+	$keys = array_keys ($ret);
+	foreach ($keys as $netid)
+	{
+		$ret[$netid] = getIPv4NetworkInfo ($netid);
+		if ($ret[$netid]['parent_id'] and !in_array ($ret[$netid]['parent_id'], $keys))
+		{
+			$ret[$netid]['real_parent_id'] = $ret[$netid]['parent_id'];
+			$ret[$netid]['parent_id'] = NULL;
+		}
+	}
+	return $ret;
+}
+
 function getAddressspaceList ($tagfilter = array(), $tfmode = 'any')
 {
 	$whereclause = getWhereClause ($tagfilter);
@@ -1171,11 +1197,14 @@ function getAddressspaceList ($tagfilter = array(), $tfmode = 'any')
 }
 
 // Return the id of the smallest IPv4 network containing the given IPv4 address
-// or NULL, if nothing was found.
-function getIPv4AddressNetworkId ($dottedquad)
+// or NULL, if nothing was found. When finding the covering network for
+// another network, it is important to filter out matched records with longer
+// masks (they aren't going to be the right pick).
+function getIPv4AddressNetworkId ($dottedquad, $masklen = 32)
 {
 	$query = 'select id from IPRanges where ' .
 		"inet_aton('${dottedquad}') & (4294967295 >> (32 - mask)) << (32 - mask) = ip " .
+		"and mask < ${masklen} " .
 		'order by mask desc limit 1';
 	$result = useSelectBlade ($query, __FUNCTION__);
 	if ($row = $result->fetch (PDO::FETCH_ASSOC))
@@ -2950,7 +2979,7 @@ function createIPv4Prefix ($range = '', $name = '', $is_bcast = FALSE, $taglist 
 	}
 	$binmask = binMaskFromDec($maskL);
 	$ipL = $ipL & $binmask;
-
+/*
 	$query =
 		"select ".
 		"id, INET_NTOA(ip) as dottedquad, mask, name ".
@@ -2967,6 +2996,7 @@ function createIPv4Prefix ($range = '', $name = '', $is_bcast = FALSE, $taglist 
 	}
 	$result->closeCursor();
 	unset ($result);
+*/
 	$result = useInsertBlade
 	(
 		'IPRanges',

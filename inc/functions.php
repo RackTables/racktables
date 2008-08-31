@@ -779,11 +779,17 @@ function attachChildTag (&$tree, $parent_id, $child_id, $child_info)
 	return FALSE;
 }
 
-// Build a tree from the tag list and return it.
 function getTagTree ()
 {
 	global $taglist;
-	$mytaglist = $taglist;
+	return treeFromList ($taglist);
+}
+
+// Build a tree from the item list and return it. Input and output data is
+// indexed by item id (nested items in output are recursively stored in 'kids'
+// key, which is in turn indexed by id.
+function treeFromList ($mytaglist)
+{
 	$ret = array();
 	while (count ($mytaglist) > 0)
 	{
