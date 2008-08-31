@@ -1420,6 +1420,7 @@ CREATE TABLE `TagTree` (
 				unset ($r);
 			}
 			$query[] = 'alter table IPRanges add unique `base-len` (`ip`, `mask`)';
+			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('TREE_THRESHOLD','25','uint','yes','no','Tree view auto-collapse threshold')";
 			$query[] = "update Config set description = 'Extended IPv4 view' where varname = 'EXT_IPV4_VIEW'";
 			$query[] = "update Config set varvalue = '0.16.3' where varname = 'DB_VERSION'";
 			break;

@@ -814,6 +814,7 @@ function resetUIConfig()
 	setConfigVar ('SHOW_LAST_TAB', 'no');
 	setConfigVar ('COOKIE_TTL', '1209600');
 	setConfigVar ('EXT_IPV4_VIEW', 'yes');
+	setConfigVar ('TREE_THRESHOLD', '25');
 	return buildRedirectURL ('OK');
 }
 
