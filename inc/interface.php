@@ -93,10 +93,24 @@ $image['find']['height'] = 16;
 $image['spacer']['path'] = 'pix/pixel.png';
 $image['spacer']['width'] = 16;
 $image['spacer']['height'] = 16;
-$image['verge']['path'] = 'pix/pixel.png';
-//$image['verge']['path'] = 'pix/verge.png';
-$image['verge']['width'] = 16;
-$image['verge']['height'] = 16;
+$image['MP']['path'] = 'pix/midst-plus.png';
+$image['MP']['width'] = 16;
+$image['MP']['height'] = 16;
+$image['MM']['path'] = 'pix/midst-minus.png';
+$image['MM']['width'] = 16;
+$image['MM']['height'] = 16;
+$image['LP']['path'] = 'pix/last-plus.png';
+$image['LP']['width'] = 16;
+$image['LP']['height'] = 16;
+$image['LM']['path'] = 'pix/last-minus.png';
+$image['LM']['width'] = 16;
+$image['LM']['height'] = 16;
+$image['MT']['path'] = 'pix/midst-terminal.png';
+$image['MT']['width'] = 16;
+$image['MT']['height'] = 16;
+$image['LT']['path'] = 'pix/last-terminal.png';
+$image['LT']['width'] = 16;
+$image['LT']['height'] = 16;
 $image['next']['path'] = 'pix/tango-go-next.png';
 $image['next']['width'] = 32;
 $image['next']['height'] = 32;
@@ -1989,30 +2003,33 @@ function renderRackspaceHistory ()
 	
 }
 
-function renderIPv4SpaceRecords ($tree, $level = 0, &$tagcache = array())
+function renderIPv4SpaceRecords ($tree, $itemc, $level = 0, &$tagcache = array())
 {
 	$self = __FUNCTION__;
+	$c = 1;
 	foreach ($tree as $item)
 	{
 		$netdata = getIPv4Network ($item['id']);
 		$total = ($netdata['ip_bin'] | $netdata['mask_bin_inv']) - ($netdata['ip_bin'] & $netdata['mask_bin']) + 1;
 		$used = count ($netdata['addrlist']);
 		echo "<tr valign=top>";
-		printIPv4NetInfoTDs ($netdata, 'tdleft', $level);
+		$verge = ($c == $itemc ? 'L' : 'M') . ($item['kidc'] ? 'M' : 'T');
+		printIPv4NetInfoTDs ($netdata, 'tdleft', $level, $verge);
 		echo "<td class=tdcenter>";
 		renderProgressBar ($used/$total);
 		echo "<br><small>${used}/${total}</small></td>";
 		if (getConfigVar ('EXT_IPV4_VIEW') == 'yes')
 			printRoutersTD (findRouters ($netdata['addrlist']), $tagcache);
 		echo "</tr>";
-		$self ($item['kids'], $level + 1, $tagcache);
+		$self ($item['kids'], $item['kidc'], $level + 1, $tagcache);
+		$c++;
 	}
 }
 
 function renderIPv4Space ()
 {
 	$tagfilter = getTagFilter();
-	$tree = treeFromList (getIPv4NetworkList ($tagfilter, getTFMode()));
+	$tree = treeFromList (getIPv4NetworkList ($tagfilter, getTFMode()), getConfigVar ('TREE_THRESHOLD'));
 	sortTree ($tree, 'IPv4NetworkCmp');
 
 	echo "<table border=0 class=objectview>\n";
@@ -2024,7 +2041,7 @@ function renderIPv4Space ()
 	if (getConfigVar ('EXT_IPV4_VIEW') == 'yes')
 		echo "<th>routed by</th>";
 	echo "</tr>\n";
-	renderIPv4SpaceRecords ($tree);
+	renderIPv4SpaceRecords ($tree, count ($tree));
 	echo "</table>\n";
 	finishPortlet();
 	echo '</td><td class=pcright>';
@@ -5265,7 +5282,7 @@ function printRoutersTD ($rlist, &$tagcache = array())
 }
 
 // Same as for routers, but produce two TD cells to lay the content out better.
-function printIPv4NetInfoTDs ($netinfo, $tdclass = 'tdleft', $indent = 0)
+function printIPv4NetInfoTDs ($netinfo, $tdclass = 'tdleft', $indent = 0, $verge = 'spacer')
 {
 	global $root;
 	$tags = loadIPv4PrefixTags ($netinfo['id']);
@@ -5273,7 +5290,7 @@ function printIPv4NetInfoTDs ($netinfo, $tdclass = 'tdleft', $indent = 0)
 	for ($i = 0; $i < $indent - 1; $i++)
 		printImageHREF ('spacer');
 	if ($indent)
-		printImageHREF ('verge');
+		printImageHREF ($verge);
 	echo "<a href='${root}?page=iprange&id=${netinfo['id']}'>${netinfo['ip']}/${netinfo['mask']}</a></td>";
 	echo "<td class='${tdclass}'>" . niftyString ($netinfo['name']);
 	if (count ($tags))

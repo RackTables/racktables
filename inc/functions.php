@@ -764,31 +764,32 @@ function getAutoPorts ($type_id)
 
 // Find if a particular tag id exists on the tree, then attach the
 // given child tag to it. If the parent tag doesn't exist, return FALSE.
-function attachChildTag (&$tree, $parent_id, $child_id, $child_info)
+function attachChildTag (&$tree, $parent_id, $child_id, $child_info, $threshold = 0)
 {
+	$self = __FUNCTION__;
 	foreach ($tree as $tagid => $taginfo)
 	{
 		if ($tagid == $parent_id)
 		{
-			$tree[$tagid]['kids'][$child_id] = $child_info;
+			if (!$threshold or ($threshold and $tree[$tagid]['kidc'] + 1 < $threshold))
+				$tree[$tagid]['kids'][$child_id] = $child_info;
+			// Reset the list only once.
+			if (++$tree[$tagid]['kidc'] == $threshold)
+				$tree[$tagid]['kids'] = array();
 			return TRUE;
 		}
-		elseif (attachChildTag ($tree[$tagid]['kids'], $parent_id, $child_id, $child_info))
+		elseif ($self ($tree[$tagid]['kids'], $parent_id, $child_id, $child_info, $threshold))
 			return TRUE;
 	}
 	return FALSE;
 }
 
-function getTagTree ()
-{
-	global $taglist;
-	return treeFromList ($taglist);
-}
-
 // Build a tree from the item list and return it. Input and output data is
 // indexed by item id (nested items in output are recursively stored in 'kids'
-// key, which is in turn indexed by id.
-function treeFromList ($mytaglist)
+// key, which is in turn indexed by id. Functions, which are ready to handle
+// tree collapsion/expansion themselves, may request non-zero threshold value
+// for smaller resulting tree.
+function treeFromList ($mytaglist, $threshold = 0)
 {
 	$ret = array();
 	while (count ($mytaglist) > 0)
@@ -796,6 +797,7 @@ function treeFromList ($mytaglist)
 		$picked = FALSE;
 		foreach ($mytaglist as $tagid => $taginfo)
 		{
+			$taginfo['kidc'] = 0;
 			$taginfo['kids'] = array();
 			if ($taginfo['parent_id'] == NULL)
 			{
@@ -803,7 +805,7 @@ function treeFromList ($mytaglist)
 				$picked = TRUE;
 				unset ($mytaglist[$tagid]);
 			}
-			elseif (attachChildTag ($ret, $taginfo['parent_id'], $tagid, $taginfo))
+			elseif (attachChildTag ($ret, $taginfo['parent_id'], $tagid, $taginfo, $threshold))
 			{
 				$picked = TRUE;
 				unset ($mytaglist[$tagid]);
@@ -863,6 +865,7 @@ function serializeTags ($chain, $baseurl = '')
 // a helper for getTagChainExpansion()
 function traceTagChain ($tree, $chain)
 {
+	$self = __FUNCTION__;
 	// For each tag find its path from the root, then combine items
 	// of all paths and add them to the chain, if they aren't there yet.
 	$ret = array();
@@ -877,7 +880,7 @@ function traceTagChain ($tree, $chain)
 			}
 		if (count ($taginfo1['kids']) > 0)
 		{
-			$subsearch = traceTagChain ($taginfo1['kids'], $chain);
+			$subsearch = $self ($taginfo1['kids'], $chain);
 			if (count ($subsearch))
 			{
 				$hit = TRUE;
@@ -922,6 +925,7 @@ function getImplicitTags ($oldtags)
 // Minimize the chain: exclude all implicit tags and return the result.
 function getExplicitTagsOnly ($chain, $tree = NULL)
 {
+	$self = __FUNCTION__;
 	global $tagtree;
 	if ($tree === NULL)
 		$tree = $tagtree;
@@ -930,7 +934,7 @@ function getExplicitTagsOnly ($chain, $tree = NULL)
 	{
 		if (isset ($taginfo['kids']))
 		{
-			$harvest = getExplicitTagsOnly ($chain, $taginfo['kids']);
+			$harvest = $self ($chain, $taginfo['kids']);
 			if (count ($harvest) > 0)
 			{
 				$ret = array_merge ($ret, $harvest);
@@ -953,6 +957,7 @@ function getExplicitTagsOnly ($chain, $tree = NULL)
 // a list of tag structures. Same structure (tag ID list) is returned after processing.
 function complementByKids ($idlist, $tree = NULL, $getall = FALSE)
 {
+	$self = __FUNCTION__;
 	global $tagtree;
 	if ($tree === NULL)
 		$tree = $tagtree;
@@ -970,7 +975,7 @@ function complementByKids ($idlist, $tree = NULL, $getall = FALSE)
 				break;
 			}
 		if (isset ($taginfo['kids']))
-			$ret = array_merge ($ret, complementByKids ($idlist, $taginfo['kids'], $getallkids));
+			$ret = array_merge ($ret, $self ($idlist, $taginfo['kids'], $getallkids));
 		$getallkids = FALSE;
 	}
 	return $ret;
@@ -1157,6 +1162,7 @@ function buildTagChainFromIds ($tagidlist)
 // (sub)tree will have refcnt leaves on every last branch.
 function getObjectiveTagTree ($tree, $realm)
 {
+	$self = __FUNCTION__;
 	$ret = array();
 	foreach ($tree as $taginfo)
 	{
@@ -1164,7 +1170,7 @@ function getObjectiveTagTree ($tree, $realm)
 		$pick = FALSE;
 		if (count ($taginfo['kids']))
 		{
-			$subsearch = getObjectiveTagTree ($taginfo['kids'], $realm);
+			$subsearch = $self ($taginfo['kids'], $realm);
 			$pick = count ($subsearch) > 0;
 		}
 		if (isset ($taginfo['refcnt'][$realm]))
@@ -1427,11 +1433,12 @@ function sortTree (&$tree, $sortfunc = '')
 {
 	if (empty ($sortfunc))
 		return;
+	$self = __FUNCTION__;
 	usort ($tree, $sortfunc);
 	// Don't make a mistake of directly iterating over the items of current level, because this way
 	// the sorting will be performed on a _copy_ if each item, not the item itself.
 	foreach (array_keys ($tree) as $tagid)
-		sortTree ($tree[$tagid]['kids'], $sortfunc);
+		$self ($tree[$tagid]['kids'], $sortfunc);
 }
 
 ?>

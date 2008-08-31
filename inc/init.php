@@ -159,9 +159,8 @@ else
 	$tabno = 'default';
 $op = (isset ($_REQUEST['op'])) ? $_REQUEST['op'] : '';
 
-// Order matters here.
 $taglist = getTagList();
-$tagtree = getTagTree();
+$tagtree = treeFromList ($taglist);
 sortTree ($tagtree, 'taginfoCmp');
 
 require_once 'inc/navigation.php';
