@@ -4680,10 +4680,8 @@ function renderTagRowForViewer ($taginfo, $level = 0)
 {
 	echo '<tr><td align=left>';
 	echo '<div title="id = ' . $taginfo['id'] . '">';
-	for ($i = 0; $i < $level - 1; $i++)
+	for ($i = 0; $i < $level; $i++)
 		printImageHREF ('spacer');
-	if ($level)
-		printImageHREF ('verge');
 	echo $taginfo['tag'] . '</div>';
 	echo "</td></tr>\n";
 	foreach ($taginfo['kids'] as $kid)
@@ -4695,10 +4693,8 @@ function renderTagRowForCloud ($taginfo, $realm, $level = 0)
 {
 	global $root;
 	echo '<tr><td align=left>';
-	for ($i = 0; $i < $level - 1; $i++)
+	for ($i = 0; $i < $level; $i++)
 		printImageHREF ('spacer');
-	if ($level)
-		printImageHREF ('verge');
 	echo "<a href='${root}?page=objgroup&group_id=0&tagfilter[]=${taginfo['id']}'>";
 	echo $taginfo['tag'] . '</a>';
 	if (isset ($taginfo['refcnt'][$realm]))
