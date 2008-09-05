@@ -1433,4 +1433,86 @@ function sortTree (&$tree, $sortfunc = '')
 		$self ($tree[$tagid]['kids'], $sortfunc);
 }
 
+function iptree_fill (&$netdata)
+{
+	if (!isset ($netdata['kids']) or empty ($netdata['kids']))
+		return;
+	// If we relly have nested prefixes, they must fit into the tree.
+	$worktree = array
+	(
+		'ip_bin' => $netdata['ip_bin'],
+		'mask' => $netdata['mask']
+	);
+	foreach ($netdata['kids'] as $pfx)
+		iptree_embed ($worktree, $pfx);
+	$netdata['kids'] = iptree_construct ($worktree);
+	$netdata['kidc'] = count ($netdata['kids']);
+}
+
+function iptree_construct ($node)
+{
+	$self = __FUNCTION__;
+
+	if (!isset ($node['right']))
+	{
+		if (!isset ($node['ip']))
+		{
+			$node['ip'] = long2ip ($node['ip_bin']);
+			$node['kids'] = array();
+			$node['name'] = '';
+		}
+		return array ($node);
+	}
+	else
+		return array_merge ($self ($node['left']), $self ($node['right']));
+}
+
+function iptree_embed (&$node, $pfx)
+{
+	$self = __FUNCTION__;
+
+	// hit?
+	if ($node['ip_bin'] == $pfx['ip_bin'] and $node['mask'] == $pfx['mask'])
+	{
+		$node = $pfx;
+		return;
+	}
+	if ($node['mask'] == $pfx['mask'])
+	{
+		showError ('Internal error, the recurring loop lost control', __FUNCTION__);
+		die;
+	}
+
+	// split?
+	if (!isset ($node['right']))
+	{
+		$node['right']['mask'] = $node['left']['mask'] = $node['mask'] + 1;
+		$node['left']['ip_bin'] = $node['ip_bin'];
+		$node['right']['ip_bin'] = $node['ip_bin'] + binInvMaskFromDec ($node['mask'] + 1) + 1;
+	}
+
+	// repeat!
+	if (($node['left']['ip_bin'] & binMaskFromDec ($node['left']['mask'])) == ($pfx['ip_bin'] & binMaskFromDec ($node['left']['mask'])))
+		$self ($node['left'], $pfx);
+	elseif (($node['right']['ip_bin'] & binMaskFromDec ($node['right']['mask'])) == ($pfx['ip_bin'] & binMaskFromDec ($node['left']['mask'])))
+		$self ($node['right'], $pfx);
+	else
+	{
+		showError ('Internal error, cannot decide between left and right', __FUNCTION__);
+		die;
+	}
+}
+
+function treeApplyFunc (&$tree, $func)
+{
+	if (empty ($func))
+		return;
+	$self = __FUNCTION__;
+	foreach (array_keys ($tree) as $key)
+	{
+		$func ($tree[$key]);
+		$self ($tree[$key]['kids'], $func);
+	}
+}
+
 ?>
