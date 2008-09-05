@@ -2044,14 +2044,17 @@ function renderIPv4SpaceRecords ($tree, $todo, $level = 0, &$tagcache = array())
 function renderIPv4Space ()
 {
 	$tagfilter = getTagFilter();
-	$tree = treeFromList (getIPv4NetworkList ($tagfilter, getTFMode()), getConfigVar ('TREE_THRESHOLD'));
+	$netlist = getIPv4NetworkList ($tagfilter, getTFMode());
+	$netcount = count ($netlist);
+	$tree = treeFromList ($netlist, getConfigVar ('TREE_THRESHOLD'));
+	unset ($netlist);
 	sortTree ($tree, 'IPv4NetworkCmp');
 	treeApplyFunc ($tree, 'iptree_fill');
 
 	echo "<table border=0 class=objectview>\n";
 	echo "<tr><td class=pcleft>";
 	// FIXME: the counter is wrong
-	startPortlet ('networks (' . count ($tree) . ')');
+	startPortlet ("networks (${netcount})");
 	echo "<table class='widetable' border=0 cellpadding=5 cellspacing=0 align='center'>\n";
 	echo "<tr><th>prefix</th><th>name/tags</th><th>%% used</th>";
 	if (getConfigVar ('EXT_IPV4_VIEW') == 'yes')
