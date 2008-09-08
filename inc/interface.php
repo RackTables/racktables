@@ -2172,7 +2172,7 @@ function renderIPv4SpaceEditor ()
 	echo "</form></table><br><br>\n";
 	finishPortlet();
 
-	$addrspaceList = getAddressspaceList();
+	$addrspaceList = getIPv4NetworkList();
 	if (count ($addrspaceList))
 	{
 		startPortlet ('Manage existing (' . count ($addrspaceList) . ')');

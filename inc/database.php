@@ -1071,6 +1071,16 @@ function scanIPv4Space ($i32_first, $i32_last)
 	return $ret;
 }
 
+// a wrapper for the above
+function scanIPv4Spans ($spanlist)
+{
+	$ret = array();
+	foreach ($spanlist as $span)
+		foreach (scanIPv4Space ($span['u32_first'], $span['u32_last']) as $key => $val)
+			$ret[$key] = $val;
+	return $ret;
+}
+
 // Return summary data about an IPv4 prefix, if it exists, or NULL otherwise.
 function getIPv4NetworkInfo ($id = 0)
 {
@@ -1163,37 +1173,6 @@ function getIPv4NetworkList ($tagfilter = array(), $tfmode = 'any')
 		}
 	}
 	return $ret;
-}
-
-function getAddressspaceList ($tagfilter = array(), $tfmode = 'any')
-{
-	$whereclause = getWhereClause ($tagfilter);
-	$query =
-		"select distinct ".
-		"id as IPRanges_id, ".
-		"INET_NTOA(ip) as IPRanges_ip, ".
-		"mask as IPRanges_mask, ".
-		"name as IPRanges_name ".
-		"from IPRanges left join TagStorage on IPRanges.id = TagStorage.target_id and target_realm = 'ipv4net' " .
-		"where true ${whereclause} " .
-		" order by ip";
-	$result = useSelectBlade ($query, __FUNCTION__);
-	$ret=array();
-	$count=0;
-	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-	{
-		$ret[$count]['id'] = $row['IPRanges_id'];
-		$ret[$count]['ip'] = $row['IPRanges_ip'];
-		$ret[$count]['ip_bin'] = ip2long($row['IPRanges_ip']);
-		$ret[$count]['name'] = $row['IPRanges_name'];
-		$ret[$count]['mask'] = $row['IPRanges_mask'];
-		$ret[$count]['mask_bin'] = binMaskFromDec($row['IPRanges_mask']);
-		$ret[$count]['mask_bin_inv'] = binInvMaskFromDec($row['IPRanges_mask']);
-		$count++;
-	}
-	$result->closeCursor();
-	return $ret;
-
 }
 
 // Return the id of the smallest IPv4 network containing the given IPv4 address
@@ -2979,24 +2958,6 @@ function createIPv4Prefix ($range = '', $name = '', $is_bcast = FALSE, $taglist 
 	}
 	$binmask = binMaskFromDec($maskL);
 	$ipL = $ipL & $binmask;
-/*
-	$query =
-		"select ".
-		"id, INET_NTOA(ip) as dottedquad, mask, name ".
-		"from IPRanges";
-
-	$result = useSelectBlade ($query, __FUNCTION__);
-
-	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-	{
-		$otherip = ip2long ($row['dottedquad']);
-		$othermask = binMaskFromDec ($row['mask']);
-		if (($otherip & $othermask) == ($ipL & $othermask) or ($otherip & $binmask) == ($ipL & $binmask))
-			return "This subnet intersects with ${row['dottedquad']}/${row['mask']}";
-	}
-	$result->closeCursor();
-	unset ($result);
-*/
 	$result = useInsertBlade
 	(
 		'IPRanges',
