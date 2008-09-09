@@ -1516,20 +1516,29 @@ function treeApplyFunc (&$tree, $func)
 }
 
 
-// Find node's own addresses. These are all addresses, which belong to the current prefix
-// exclusively.
-function countOwnIPv4Addresses (&$ipv4node)
+function countOwnIPv4Addresses (&$node)
 {
-	if (empty ($ipv4node['kids']))
-		$ipv4node['addrc'] = count (scanIPv4Space ($ipv4node['db_first'], $ipv4node['db_last']));
+	$toscan = array();
+	if (empty ($node['kids']))
+		$toscan[] = $node;
 	else
-	{
-		$toscan = array();
-		foreach ($ipv4node['kids'] as $nested)
+		foreach ($node['kids'] as $nested)
 			if (!isset ($nested['id'])) // spare
-				$toscan[] = array ('u32_first' => $nested['db_first'], 'u32_last' => $nested['db_last']);
-		$ipv4node['addrc'] = count (scanIPv4Spans ($toscan));
-	}
+				$toscan[] = $nested;
+	$node['addrc'] = count (scanIPv4Spans ($toscan));
+}
+
+function loadOwnIPv4Addresses (&$node)
+{
+	$toscan = array();
+	if (empty ($node['kids']))
+		$toscan[] = $node;
+	else
+		foreach ($node['kids'] as $nested)
+			if (!isset ($nested['id'])) // spare
+				$toscan[] = $nested;
+	$node['addrlist'] = scanIPv4Spans ($toscan);
+	$node['addrc'] = count ($node['addrlist']);
 }
 
 ?>

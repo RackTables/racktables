@@ -1076,7 +1076,7 @@ function scanIPv4Spans ($spanlist)
 {
 	$ret = array();
 	foreach ($spanlist as $span)
-		foreach (scanIPv4Space ($span['u32_first'], $span['u32_last']) as $key => $val)
+		foreach (scanIPv4Space ($span['db_first'], $span['db_last']) as $key => $val)
 			$ret[$key] = $val;
 	return $ret;
 }
@@ -1106,17 +1106,10 @@ function getIPv4NetworkInfo ($id = 0)
 	return $ret;
 }
 
-function getIPv4Network ($id = 0)
+function loadIPv4AddrList (&$netinfo)
 {
-	$ret = getIPv4NetworkInfo ($id);
-	if (!$ret)
-	{
-		showError ('Record not found', __FUNCTION__);
-		return NULL;
-	}
-	$ret['addrlist'] = scanIPv4Space ($ret['db_first'], $ret['db_last']);
-	markupIPv4AddrList ($ret['addrlist']);
-	return $ret;
+	loadOwnIPv4Addresses ($netinfo);
+	markupIPv4AddrList ($netinfo['addrlist']);
 }
 
 function getIPv4Address ($dottedquad = '')

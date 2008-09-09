@@ -854,6 +854,7 @@ function renderRackObject ($object_id = 0)
 			$secondclass = ($hl_ipv4_addr == $dottedquad) ? 'tdleft port_highlight' : 'tdleft';
 			$netid = getIPv4AddressNetworkId ($dottedquad);
 			$netinfo = getIPv4NetworkInfo ($netid);
+			loadIPv4AddrList ($netinfo);
 			echo "<tr class='${class}' valign=top><td class=tdleft>${alloc['osif']}</td><td class='${secondclass}'>";
 			echo "<a href='${root}?page=ipaddress&ip=" . $dottedquad . "&hl_object_id=${object_id}'>${dottedquad}</a>";
 			if (getConfigVar ('EXT_IPV4_VIEW') != 'yes')
@@ -875,9 +876,8 @@ function renderRackObject ($object_id = 0)
 					printIPv4NetInfoTDs ($netinfo, $secondclass);
 				echo "<td class='${secondclass}'>";
 				// FIXME: These cals are really heavy, replace them with a more appropriate dedicated function.
-				$netdata = getIPv4Network ($netid);
 				$newline = '';
-				foreach (findRouters ($netdata['addrlist']) as $router)
+				foreach (findRouters ($netinfo['addrlist']) as $router)
 				{
 					if ($router['id'] == $object_id)
 						continue;
@@ -1168,6 +1168,7 @@ function renderIPv4ForObject ($object_id = 0)
 		$class = $alloc['addrinfo']['class'];
 		$netid = getIPv4AddressNetworkId ($dottedquad);
 		$netinfo = getIPv4NetworkInfo ($netid);
+		loadIPv4AddrList ($netinfo);
 		printOpFormIntro ('updIPv4Allocation', array ('ip' => $dottedquad));
 		echo "<tr class='$class' valign=top><td><a href='${root}process.php?op=delIPv4Allocation&page=${pageno}&tab=${tabno}&ip=${dottedquad}&object_id=$object_id'>";
 		printImageHREF ('delete', 'Delete this IPv4 address');
@@ -1194,9 +1195,8 @@ function renderIPv4ForObject ($object_id = 0)
 				printIPv4NetInfoTDs ($netinfo);
 			echo "<td class='${secondclass}'>";
 			// FIXME: These cals are really heavy, replace them with a more appropriate dedicated function.
-			$netdata = getIPv4Network ($netid);
 			$newline = '';
-			foreach (findRouters ($netdata['addrlist']) as $router)
+			foreach (findRouters ($netinfo['addrlist']) as $router)
 			{
 				if ($router['id'] == $object_id)
 					continue;
@@ -2009,26 +2009,25 @@ function renderIPv4SpaceRecords ($tree, $todo, $level = 0, &$tagcache = array())
 	$doing = 1;
 	foreach ($tree as $item)
 	{
+		$total = binInvMaskFromDec ($item['mask']) + 1;
 		if (isset ($item['id']))
 		{
-			$netdata = getIPv4Network ($item['id']);
-			$total = ($netdata['ip_bin'] | $netdata['mask_bin_inv']) - ($netdata['ip_bin'] & $netdata['mask_bin']) + 1;
-			$used = count ($netdata['addrlist']);
+			loadIPv4AddrList ($item);
+			$used = $item['addrc'];
 			echo "<tr valign=top>";
 			$verge = ($doing == $todo ? 'L' : 'M') . ($item['kidc'] ? 'M' : 'T');
-			printIPv4NetInfoTDs ($netdata, 'tdleft', $level, $verge);
+			printIPv4NetInfoTDs ($item, 'tdleft', $level, $verge);
 			echo "<td class=tdcenter>";
 			renderProgressBar ($used/$total);
 			echo "<br><small>${used}/${total}</small></td>";
 			if (getConfigVar ('EXT_IPV4_VIEW') == 'yes')
-				printRoutersTD (findRouters ($netdata['addrlist']), $tagcache);
+				printRoutersTD (findRouters ($item['addrlist']), $tagcache);
 			echo "</tr>";
 			$self ($item['kids'], $item['kidc'], $level + 1, $tagcache);
 		}
 		else
 		{
 			$used = 0;
-			$total = binInvMaskFromDec ($item['mask']) + 1;
 			echo "<tr valign=top>";
 			$verge = ($doing == $todo ? 'L' : 'M') . 'T';
 			printIPv4NetInfoTDs ($item, 'tdleft', $level, $verge);
@@ -2180,9 +2179,10 @@ function renderIPv4SpaceEditor ()
 		echo "<tr><th>&nbsp;</th><th>prefix</th><th>name</th><th>&nbsp;</th></tr>";
 		foreach ($addrspaceList as $iprange)
 		{
-			$netdata = getIPv4Network ($iprange['id']);
+			$netdata = getIPv4NetworkInfo ($iprange['id']);
+			loadIPv4AddrList ($netdata);
 			$usedips = count ($netdata['addrlist']);
-			$totalips = ($netdata['ip_bin'] | $netdata['mask_bin_inv']) - ($netdata['ip_bin'] & $netdata['mask_bin']) + 1;
+			$totalips = binInvMaskFromDec ($netdata['mask']) + 1;
 			echo "<form method=post action='${root}process.php?page=${pageno}&tab=${tabno}&op=updIPv4Prefix&id=${iprange['id']}'>";
 			echo '<tr valign=top><td>';
 			if ($usedips == 0)
@@ -2283,7 +2283,8 @@ function renderIPv4Network ($id)
 	else
 		$page=0;
 
-	$range = getIPv4Network ($id);
+	$range = getIPv4NetworkInfo ($id);
+	loadIPv4AddrList ($range);
 	echo "<table border=0 class=objectview cellspacing=0 cellpadding=0>";
 	echo "<tr><td colspan=2 align=center><h1>${range['ip']}/${range['mask']}</h1><h2>${range['name']}</h2></td></tr>\n";
 
@@ -2426,7 +2427,6 @@ function renderIPv4NetworkProperties ($id)
 	echo "<tr><td colspan=2 class=tdcenter>";
 	printImageHREF ('SAVE', 'Save changes', TRUE);
 	echo "</td></form></tr></table>\n";
-
 }
 
 function renderIPv4Address ($dottedquad)
@@ -4573,7 +4573,8 @@ function renderLivePTR ($id = 0)
 		$page=0;
 	global $root, $pageno, $tabno;
 	$maxperpage = getConfigVar ('IPV4_ADDRS_PER_PAGE');
-	$range = getIPv4Network ($id);
+	$range = getIPv4NetworkInfo ($id);
+	loadIPv4AddrList ($range);
 	echo "<center><h1>${range['ip']}/${range['mask']}</h1><h2>${range['name']}</h2></center>\n";
 
 	echo "<table class=objview border=0 width='100%'><tr><td class=pcleft>";
