@@ -138,6 +138,9 @@ $image['CREATE']['height'] = 32;
 $image['DENIED']['path'] = 'pix/tango-dialog-error-big.png';
 $image['DENIED']['width'] = 32;
 $image['DENIED']['height'] = 32;
+$image['apply']['path'] = 'pix/tango-emblem-system.png';
+$image['apply']['width'] = 16;
+$image['apply']['height'] = 16;
 
 // This may be populated later onsite, report rendering function will use it.
 // See the $systemreport for structure.
@@ -4972,7 +4975,7 @@ function renderTagFilterPortlet ($tagfilter, $realm, $bypass_name = '', $bypass_
 //	$tfmode = getTFMode();
 //	echo '<input type=radio name=tfmode value=all' . ($tfmode == 'all' ? ' checked' : '') . '>all ';
 //	echo '<input type=radio name=tfmode value=any' . ($tfmode == 'any' ? ' checked' : '') . '>any ';
-	printImageHREF ('save', 'apply', TRUE);
+	printImageHREF ('apply', 'Apply filter', TRUE);
 	echo "</form></td><td>";
 
 	// "reset"
