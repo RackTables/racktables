@@ -1459,6 +1459,7 @@ function iptree_construct ($node)
 		{
 			$node['ip'] = long2ip ($node['ip_bin']);
 			$node['kids'] = array();
+			$node['kidc'] = 0;
 			$node['name'] = '';
 		}
 		return array ($node);
@@ -1546,6 +1547,41 @@ function loadOwnIPv4Addresses (&$node)
 				$toscan[] = $nested;
 	$node['addrlist'] = scanIPv4Spans ($toscan);
 	$node['addrc'] = count ($node['addrlist']);
+}
+
+function prepareIPv4Tree ($netlist, $expanded_id = 0)
+{
+	$tree = treeFromList ($netlist); // medium call
+	sortTree ($tree, 'IPv4NetworkCmp');
+	treeApplyFunc ($tree, 'iptree_fill');
+	// complement the tree before markup to make the spare networks have "symbol" set
+	iptree_markup_collapsion ($tree, 2, $expanded_id); //getConfigVar ('TREE_THRESHOLD')
+	treeApplyFunc ($tree, 'countOwnIPv4Addresses'); // long call
+	return $tree;
+}
+
+// Check all items of the tree recursively, until the requested target id is
+// found. Mark all items leading to this item as "expanded", collapsing all
+// the rest, which exceed the given threshold (if the threshold is given).
+function iptree_markup_collapsion (&$tree, $threshold = 1024, $target = 0)
+{
+	$self = __FUNCTION__;
+	$ret = FALSE;
+	foreach (array_keys ($tree) as $key)
+	{
+		$here = ($target and $tree[$key]['id'] == $target);
+		$below = $self ($tree[$key]['kids'], $threshold, $target);
+		if (!$tree[$key]['kidc']) // terminal node
+			$tree[$key]['symbol'] = 'spacer';
+		elseif ($tree[$key]['kidc'] < $threshold)
+			$tree[$key]['symbol'] = 'node-expanded-static';
+		elseif ($here or $below)
+			$tree[$key]['symbol'] = 'node-expanded';
+		else
+			$tree[$key]['symbol'] = 'node-collapsed';
+		$ret = ($ret or $here or $below); // parentheses are necessary for this to be computed correctly
+	}
+	return $ret;
 }
 
 ?>

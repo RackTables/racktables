@@ -129,6 +129,9 @@ $image['node-collapsed']['height'] = 16;
 $image['node-expanded']['path'] = 'pix/node-expanded.png';
 $image['node-expanded']['width'] = 16;
 $image['node-expanded']['height'] = 16;
+$image['node-expanded-static']['path'] = 'pix/node-expanded-static.png';
+$image['node-expanded-static']['width'] = 16;
+$image['node-expanded-static']['height'] = 16;
 
 // This may be populated later onsite, report rendering function will use it.
 // See the $systemreport for structure.
@@ -1993,70 +1996,66 @@ function renderRackspaceHistory ()
 	echo '</td></tr></table>';
 }
 
-function renderIPv4SpaceRecords ($tree, $todo, $level = 1, &$tagcache = array())
+function renderIPv4SpaceRecords ($tree, &$tagcache, $baseurl, $level = 1)
 {
 	$self = __FUNCTION__;
-	$doing = 1;
-	$expanded_id = 0;
 	foreach ($tree as $item)
 	{
 		$total = $item['addrt'];
-		if (!$item['kidc'])
-			$symbol = 'spacer';
-		elseif (getConfigVar ('TREE_THRESHOLD') > 0 and $item['kidc'] >= getConfigVar ('TREE_THRESHOLD') and $item['id'] != $expanded_id)
-			$symbol = 'node-collapsed';
-		else
-			$symbol = 'node-expanded';
 		if (isset ($item['id']))
 		{
 			loadIPv4AddrList ($item);
 			$used = $item['addrc'];
+			if ($item['symbol'] == 'node-collapsed')
+				$expandurl = "${baseurl}&eid=" . $item['id'];
+			elseif ($item['symbol'] == 'node-expanded')
+				$expandurl = "${baseurl}&eid=" . $item['parent_id'];
+			else
+				$expandurl = '';
 			echo "<tr valign=top>";
-			printIPv4NetInfoTDs ($item, 'tdleft', $level, $symbol);
+			printIPv4NetInfoTDs ($item, 'tdleft', $level, $item['symbol'], $expandurl);
 			echo "<td class=tdcenter>";
 			renderProgressBar ($total ? $used/$total : 0);
 			echo "<br><small>${used}/${total}</small></td>";
 			if (getConfigVar ('EXT_IPV4_VIEW') == 'yes')
 				printRoutersTD (findRouters ($item['addrlist']), $tagcache);
 			echo "</tr>";
-			if ($symbol == 'node-expanded')
-				$self ($item['kids'], $item['kidc'], $level + 1, $tagcache);
+			if ($item['symbol'] == 'node-expanded' or $item['symbol'] == 'node-expanded-static')
+				$self ($item['kids'], $tagcache, $baseurl, $level + 1);
 		}
 		else
 		{
 			$used = 0;
 			echo "<tr valign=top>";
-			printIPv4NetInfoTDs ($item, 'tdleft sparenetwork', $level, $symbol);
+			printIPv4NetInfoTDs ($item, 'tdleft sparenetwork', $level, $item['symbol']);
 			echo "<td class=tdcenter>";
-			renderProgressBar ($used/$total);
+			renderProgressBar ($used/$total, 'sparenetwork');
 			echo "<br><small>${used}/${total}</small></td>";
 			echo "<td>&nbsp;</td></tr>";
 		}
-		$doing++;
 	}
 }
 
 function renderIPv4Space ()
 {
+	global $root, $pageno, $tabno;
 	$tagfilter = getTagFilter();
 	$netlist = getIPv4NetworkList ($tagfilter, getTFMode());
 	$netcount = count ($netlist);
-	$tree = treeFromList ($netlist, getConfigVar ('TREE_THRESHOLD'));
+	$tree = prepareIPv4Tree ($netlist, isset ($_REQUEST['eid']) ? $_REQUEST['eid'] : 0);
 	unset ($netlist);
-	sortTree ($tree, 'IPv4NetworkCmp');
-	treeApplyFunc ($tree, 'iptree_fill');
-	treeApplyFunc ($tree, 'countOwnIPv4Addresses');
 
 	echo "<table border=0 class=objectview>\n";
 	echo "<tr><td class=pcleft>";
-	// FIXME: the counter is wrong
 	startPortlet ("networks (${netcount})");
 	echo "<table class='widetable' border=0 cellpadding=5 cellspacing=0 align='center'>\n";
 	echo "<tr><th>prefix</th><th>name/tags</th><th>%% used</th>";
 	if (getConfigVar ('EXT_IPV4_VIEW') == 'yes')
 		echo "<th>routed by</th>";
 	echo "</tr>\n";
-	renderIPv4SpaceRecords ($tree, count ($tree));
+	$tagcache = array();
+	$baseurl = "${root}?page=${pageno}&tab=${tabno}&tagfilter[]=" . getTagFilterStr();
+	renderIPv4SpaceRecords ($tree, $tagcache, $baseurl);
 	echo "</table>\n";
 	finishPortlet();
 	echo '</td><td class=pcright>';
@@ -4027,11 +4026,12 @@ function renderVirtualService ($vsid)
 	echo '</tr><table>';
 }
 
-function renderProgressBar ($percentage = 0)
+function renderProgressBar ($percentage = 0, $theme = '')
 {
 	global $root;
 	$done = ((int) ($percentage * 100));
-	echo "<img width=100 height=10 border=0 title='${done}%' src='${root}render_image.php?img=progressbar&done=${done}'>";
+	echo "<img width=100 height=10 border=0 title='${done}%' src='${root}render_image.php?img=progressbar&done=${done}";
+	echo (empty ($theme) ? '' : "&theme=${theme}") . "'>";
 }
 
 function renderRSPoolServerForm ($pool_id = 0)
@@ -5295,7 +5295,7 @@ function printRoutersTD ($rlist, &$tagcache = array())
 }
 
 // Same as for routers, but produce two TD cells to lay the content out better.
-function printIPv4NetInfoTDs ($netinfo, $tdclass = 'tdleft', $indent = 0, $verge = 'spacer')
+function printIPv4NetInfoTDs ($netinfo, $tdclass = 'tdleft', $indent = 0, $symbol = 'spacer', $symbolurl = '')
 {
 	global $root;
 	$tags = isset ($netinfo['id']) ? loadIPv4PrefixTags ($netinfo['id']) : array();
@@ -5303,7 +5303,13 @@ function printIPv4NetInfoTDs ($netinfo, $tdclass = 'tdleft', $indent = 0, $verge
 	for ($i = 0; $i < $indent - 1; $i++)
 		printImageHREF ('spacer');
 	if ($indent)
-		printImageHREF ($verge);
+	{
+		if (!empty ($symbolurl))
+			echo "<a href='${symbolurl}'>";
+		printImageHREF ($symbol, $symbolurl);
+		if (!empty ($symbolurl))
+			echo '</a>';
+	}
 	if (isset ($netinfo['id']))
 		echo "<a href='${root}?page=iprange&id=${netinfo['id']}'>";
 	echo "${netinfo['ip']}/${netinfo['mask']}";

@@ -131,8 +131,17 @@ function generateMiniRack ($rack_id = 0)
 function renderProgressBarImage ($done)
 {
 	$img = @imagecreatetruecolor (100, 10);
-	$color['T'] = colorFromHex ($img, getConfigVar ('color_T'));
-	$color['F'] = colorFromHex ($img, getConfigVar ('color_F'));
+	switch (isset ($_REQUEST['theme']) ? $_REQUEST['theme'] : 'rackspace')
+	{
+		case 'sparenetwork':
+			$color['T'] = colorFromHex ($img, '808080');
+			$color['F'] = colorFromHex ($img, 'c0c0c0');
+			break;
+		case 'rackspace': // teal
+		default:
+			$color['T'] = colorFromHex ($img, getConfigVar ('color_T'));
+			$color['F'] = colorFromHex ($img, getConfigVar ('color_F'));
+	}
 	imagefilledrectangle ($img, 0, 0, $done, 10, $color['T']);
 	imagefilledrectangle ($img, $done, 0, 100, 10, $color['F']);
 	header("Content-type: image/png");
