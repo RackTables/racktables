@@ -516,3 +516,7 @@ td.portmap_highlight_odd {
 .validation-success {
 	border:2px solid green;
 }
+
+.sparenetwork {
+	color: silver;
+}

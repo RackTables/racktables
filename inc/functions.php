@@ -1519,12 +1519,19 @@ function treeApplyFunc (&$tree, $func)
 function countOwnIPv4Addresses (&$node)
 {
 	$toscan = array();
+	$node['addrt'] = 0;
 	if (empty ($node['kids']))
+	{
 		$toscan[] = $node;
+		$node['addrt'] = binInvMaskFromDec ($node['mask']) + 1;
+	}
 	else
 		foreach ($node['kids'] as $nested)
 			if (!isset ($nested['id'])) // spare
+			{
 				$toscan[] = $nested;
+				$node['addrt'] += binInvMaskFromDec ($nested['mask']) + 1;
+			}
 	$node['addrc'] = count (scanIPv4Spans ($toscan));
 }
 

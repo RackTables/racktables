@@ -93,24 +93,6 @@ $image['find']['height'] = 16;
 $image['spacer']['path'] = 'pix/pixel.png';
 $image['spacer']['width'] = 16;
 $image['spacer']['height'] = 16;
-$image['MP']['path'] = 'pix/midst-plus.png';
-$image['MP']['width'] = 16;
-$image['MP']['height'] = 16;
-$image['MM']['path'] = 'pix/midst-minus.png';
-$image['MM']['width'] = 16;
-$image['MM']['height'] = 16;
-$image['LP']['path'] = 'pix/last-plus.png';
-$image['LP']['width'] = 16;
-$image['LP']['height'] = 16;
-$image['LM']['path'] = 'pix/last-minus.png';
-$image['LM']['width'] = 16;
-$image['LM']['height'] = 16;
-$image['MT']['path'] = 'pix/midst-terminal.png';
-$image['MT']['width'] = 16;
-$image['MT']['height'] = 16;
-$image['LT']['path'] = 'pix/last-terminal.png';
-$image['LT']['width'] = 16;
-$image['LT']['height'] = 16;
 $image['next']['path'] = 'pix/tango-go-next.png';
 $image['next']['width'] = 32;
 $image['next']['height'] = 32;
@@ -141,6 +123,12 @@ $image['DENIED']['height'] = 32;
 $image['apply']['path'] = 'pix/tango-emblem-system.png';
 $image['apply']['width'] = 16;
 $image['apply']['height'] = 16;
+$image['node-collapsed']['path'] = 'pix/node-collapsed.png';
+$image['node-collapsed']['width'] = 16;
+$image['node-collapsed']['height'] = 16;
+$image['node-expanded']['path'] = 'pix/node-expanded.png';
+$image['node-expanded']['width'] = 16;
+$image['node-expanded']['height'] = 16;
 
 // This may be populated later onsite, report rendering function will use it.
 // See the $systemreport for structure.
@@ -1979,9 +1967,9 @@ function renderRackspaceHistory ()
 	else
 		echo "nothing";
 	finishPortlet();
-	
+
 	echo '</td></tr><tr><td colspan=2>';
-	
+
 	// Bottom portlet with list
 
 	startPortlet ('Rackspace allocation history');
@@ -2001,39 +1989,44 @@ function renderRackspaceHistory ()
 	}
 	echo "</table>\n";
 	finishPortlet();
-	
+
 	echo '</td></tr></table>';
-	
 }
 
-function renderIPv4SpaceRecords ($tree, $todo, $level = 0, &$tagcache = array())
+function renderIPv4SpaceRecords ($tree, $todo, $level = 1, &$tagcache = array())
 {
 	$self = __FUNCTION__;
 	$doing = 1;
+	$expanded_id = 0;
 	foreach ($tree as $item)
 	{
-		$total = binInvMaskFromDec ($item['mask']) + 1;
+		$total = $item['addrt'];
+		if (!$item['kidc'])
+			$symbol = 'spacer';
+		elseif (getConfigVar ('TREE_THRESHOLD') > 0 and $item['kidc'] >= getConfigVar ('TREE_THRESHOLD') and $item['id'] != $expanded_id)
+			$symbol = 'node-collapsed';
+		else
+			$symbol = 'node-expanded';
 		if (isset ($item['id']))
 		{
 			loadIPv4AddrList ($item);
 			$used = $item['addrc'];
 			echo "<tr valign=top>";
-			$verge = ($doing == $todo ? 'L' : 'M') . ($item['kidc'] ? 'M' : 'T');
-			printIPv4NetInfoTDs ($item, 'tdleft', $level, $verge);
+			printIPv4NetInfoTDs ($item, 'tdleft', $level, $symbol);
 			echo "<td class=tdcenter>";
-			renderProgressBar ($used/$total);
+			renderProgressBar ($total ? $used/$total : 0);
 			echo "<br><small>${used}/${total}</small></td>";
 			if (getConfigVar ('EXT_IPV4_VIEW') == 'yes')
 				printRoutersTD (findRouters ($item['addrlist']), $tagcache);
 			echo "</tr>";
-			$self ($item['kids'], $item['kidc'], $level + 1, $tagcache);
+			if ($symbol == 'node-expanded')
+				$self ($item['kids'], $item['kidc'], $level + 1, $tagcache);
 		}
 		else
 		{
 			$used = 0;
 			echo "<tr valign=top>";
-			$verge = ($doing == $todo ? 'L' : 'M') . 'T';
-			printIPv4NetInfoTDs ($item, 'tdleft', $level, $verge);
+			printIPv4NetInfoTDs ($item, 'tdleft sparenetwork', $level, $symbol);
 			echo "<td class=tdcenter>";
 			renderProgressBar ($used/$total);
 			echo "<br><small>${used}/${total}</small></td>";
@@ -2052,6 +2045,7 @@ function renderIPv4Space ()
 	unset ($netlist);
 	sortTree ($tree, 'IPv4NetworkCmp');
 	treeApplyFunc ($tree, 'iptree_fill');
+	treeApplyFunc ($tree, 'countOwnIPv4Addresses');
 
 	echo "<table border=0 class=objectview>\n";
 	echo "<tr><td class=pcleft>";
