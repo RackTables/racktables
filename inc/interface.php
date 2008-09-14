@@ -4944,8 +4944,6 @@ function getTFMode ()
 function renderTagFilterPortlet ($tagfilter, $realm, $bypass_name = '', $bypass_value = '')
 {
 	global $pageno, $tabno, $taglist, $tagtree;
-	// Temporary hack, needs to be reviewed later.
-	$tagfilter = isset ($_REQUEST['tagfilter']) ? $_REQUEST['tagfilter'] : array();
 	$objectivetags = getObjectiveTagTree ($tagtree, $realm);
 	startPortlet ('Tag filter');
 	if (!count ($objectivetags))
