@@ -1174,6 +1174,22 @@ function getIPv4NetworkList ($tagfilter = array(), $tfmode = 'any')
 // masks (they aren't going to be the right pick).
 function getIPv4AddressNetworkId ($dottedquad, $masklen = 32)
 {
+// N.B. To perform the same for IPv6 address and networks, some pre-requisites
+// are necessary and a different query. IPv6 addresses are 128 bit long, which
+// is too much for both PHP and MySQL data types. These values must be split
+// into 4 32-byte long parts (b_u32_0, b_u32_1, b_u32_2, b_u32_3).
+// Then each network must have its 128-bit netmask split same way and either
+// stored right in its record or JOINed from decoder and accessible as m_u32_0,
+// m_u32_1, m_u32_2, m_u32_3. After that the query to pick the smallest network
+// covering the given address would look as follows:
+// $query = 'select id from IPv6Network as n where ' .
+// "(${b_u32_0} & n.m_u32_0 = n.b_u32_0) and " .
+// "(${b_u32_1} & n.m_u32_1 = n.b_u32_1) and " .
+// "(${b_u32_2} & n.m_u32_2 = n.b_u32_2) and " .
+// "(${b_u32_3} & n.m_u32_3 = n.b_u32_3) and " .
+// "mask < ${masklen} " .
+// 'order by mask desc limit 1';
+
 	$query = 'select id from IPRanges where ' .
 		"inet_aton('${dottedquad}') & (4294967295 >> (32 - mask)) << (32 - mask) = ip " .
 		"and mask < ${masklen} " .
