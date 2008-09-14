@@ -59,15 +59,9 @@ $image['config']['height'] = 200;
 $image['reports']['path'] = 'pix/report.png';
 $image['reports']['width'] = 218;
 $image['reports']['height'] = 200;
-$image['useup']['path'] = 'pix/tango-edit-clear.png';
-$image['useup']['width'] = 16;
-$image['useup']['height'] = 16;
 $image['link']['path'] = 'pix/tango-network-wired.png';
 $image['link']['width'] = 16;
 $image['link']['height'] = 16;
-$image['unlink']['path'] = 'pix/tango-edit-clear.png';
-$image['unlink']['width'] = 16;
-$image['unlink']['height'] = 16;
 $image['add']['path'] = 'pix/tango-list-add.png';
 $image['add']['width'] = 16;
 $image['add']['height'] = 16;
@@ -77,8 +71,6 @@ $image['delete']['height'] = 16;
 $image['nodelete']['path'] = 'pix/tango-list-remove-shadow.png';
 $image['nodelete']['width'] = 16;
 $image['nodelete']['height'] = 16;
-$image['grant'] = $image['add'];
-$image['revoke'] = $image['delete'];
 $image['inservice']['path'] = 'pix/tango-emblem-system.png';
 $image['inservice']['width'] = 16;
 $image['inservice']['height'] = 16;
@@ -1070,7 +1062,7 @@ function renderPortsForObject ($object_id = 0)
 			echo "<td><a href='${root}process.php?op=unlinkPort&page=${pageno}&tab=${tabno}&port_id=${port['id']}&object_id=$object_id&port_name=";
 			echo urlencode ($port['name']);
 			echo "&remote_port_name=${port['remote_name']}&remote_object_name=${port['remote_object_name']}'>";
-			printImageHREF ('unlink', 'Unlink this port');
+			printImageHREF ('clear', 'Unlink this port');
 			echo "</a></td>";
 		}
 		elseif (!empty ($port['reservation_comment']))
@@ -1078,7 +1070,7 @@ function renderPortsForObject ($object_id = 0)
 			echo "<td><b>Reserved;</b></td>";
 			echo "<td><input type=text name=reservation_comment value='${port['reservation_comment']}'></td>";
 			echo "<td><a href='${root}process.php?op=useup&page=${pageno}&tab=${tabno}&port_id=${port['id']}&object_id=${object_id}'>";
-			printImageHREF ('useup', 'Use up this port');
+			printImageHREF ('clear', 'Use up this port');
 			echo "</a></td>";
 		}
 		else
@@ -4817,7 +4809,7 @@ function renderTagTreeEditor ()
 		renderTagRowForEditor ($taginfo);
 	printOpFormIntro ('createTag');
 	echo "<tr><td class=tdleft>";
-	printImageHREF ('grant', 'Create tag', TRUE, 102);
+	printImageHREF ('add', 'Create tag', TRUE, 102);
 	echo '</td><td><input type=text name=tag_name tabindex=100></td><td><select name=parent_id tabindex=101>';
 	echo "<option value=0>-- NONE --</option>\n";
 	foreach ($taglist as $taginfo)
