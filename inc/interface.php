@@ -2046,7 +2046,7 @@ function renderIPv4Space ()
 		echo "<th>routed by</th>";
 	echo "</tr>\n";
 	$tagcache = array();
-	$baseurl = "${root}?page=${pageno}&tab=${tabno}&tagfilter[]=" . getTagFilterStr();
+	$baseurl = "${root}?page=${pageno}&tab=${tabno}" . getTagFilterStr ($tagfilter);
 	renderIPv4SpaceRecords ($tree, $tagcache, $baseurl);
 	echo "</table>\n";
 	finishPortlet();
@@ -2152,7 +2152,7 @@ function renderIPv4SpaceEditor ()
 	// inputs column
 	echo "<th class=tdright>prefix</th><td class=tdleft><input type=text name='range' size=18 class='live-validate' tabindex=1></td>";
 	echo "<tr><th class=tdright>name</th><td class=tdleft><input type=text name='name' size='20' tabindex=2></td></tr>";
-	echo "<tr><th class=tdright>connected network</th><td class=tdleft><input type=checkbox name='is_bcast' tabindex=3 checked></td></tr>";
+	echo "<tr><th class=tdright>connected network</th><td class=tdleft><input type=checkbox name='is_bcast' tabindex=3></td></tr>";
 	echo "<tr><td colspan=2>";
 	printImageHREF ('CREATE', 'Add a new network', TRUE, 4);
 	echo '</td></tr>';
@@ -2160,29 +2160,19 @@ function renderIPv4SpaceEditor ()
 	finishPortlet();
 
 	$addrspaceList = getIPv4NetworkList();
-	if (count ($addrspaceList))
+	$netcount = count ($addrspaceList);
+	if ($netcount)
 	{
-		startPortlet ('Manage existing (' . count ($addrspaceList) . ')');
+		startPortlet ("Manage existing (${netcount})");
 		echo "<table class='widetable' border=0 cellpadding=5 cellspacing=0 align='center'>\n";
 		echo "<tr><th>&nbsp;</th><th>prefix</th><th>name</th><th>&nbsp;</th></tr>";
-		foreach ($addrspaceList as $iprange)
+		foreach ($addrspaceList as $netinfo)
 		{
-			$netdata = getIPv4NetworkInfo ($iprange['id']);
-			loadIPv4AddrList ($netdata);
-			$usedips = count ($netdata['addrlist']);
-			$totalips = binInvMaskFromDec ($netdata['mask']) + 1;
-			echo "<form method=post action='${root}process.php?page=${pageno}&tab=${tabno}&op=updIPv4Prefix&id=${iprange['id']}'>";
-			echo '<tr valign=top><td>';
-			if ($usedips == 0)
-			{
-				echo "<a href='${root}process.php?op=delIPv4Prefix&page=${pageno}&tab=${tabno}&id=${iprange['id']}'>";
-				printImageHREF ('delete', 'Delete this IP range');
-				echo "</a>";
-			}
-			else
-				printImageHREF ('nodelete', 'There are IP addresses allocated or reserved');
-			echo "</td>\n<td class=tdleft>${netdata['ip']}/${netdata['mask']}</td>";
-			echo "<td><input type=text name=name size=40 value='${netdata['name']}'>";
+			echo "<form method=post action='${root}process.php?page=${pageno}&tab=${tabno}&op=updIPv4Prefix&id=${netinfo['id']}'>";
+			echo "<tr valign=top><td><a href='${root}process.php?op=delIPv4Prefix&page=${pageno}&tab=${tabno}&id=${netinfo['id']}'>";
+			printImageHREF ('delete', 'Delete this IP range');
+			echo "</a></td>\n<td class=tdleft>${netinfo['ip']}/${netinfo['mask']}</td>";
+			echo "<td><input type=text name=name size=40 value='${netinfo['name']}'>";
 			echo "</td><td>";
 			printImageHREF ('save', 'Save changes', TRUE);
 			echo "</td></tr></form>\n";
