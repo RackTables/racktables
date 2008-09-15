@@ -1106,12 +1106,6 @@ function getIPv4NetworkInfo ($id = 0)
 	return $ret;
 }
 
-function loadIPv4AddrList (&$netinfo)
-{
-	loadOwnIPv4Addresses ($netinfo);
-	markupIPv4AddrList ($netinfo['addrlist']);
-}
-
 function getIPv4Address ($dottedquad = '')
 {
 	if ($dottedquad == '')

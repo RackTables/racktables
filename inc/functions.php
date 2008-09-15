@@ -1437,7 +1437,7 @@ function iptree_fill (&$netdata)
 {
 	if (!isset ($netdata['kids']) or empty ($netdata['kids']))
 		return;
-	// If we relly have nested prefixes, they must fit into the tree.
+	// If we really have nested prefixes, they must fit into the tree.
 	$worktree = array
 	(
 		'ip_bin' => $netdata['ip_bin'],
@@ -1487,9 +1487,16 @@ function iptree_embed (&$node, $pfx)
 	// split?
 	if (!isset ($node['right']))
 	{
-		$node['right']['mask'] = $node['left']['mask'] = $node['mask'] + 1;
+		// Fill in db_first/db_last to make it possible to run scanIPv4Space() on the node.
+		$node['left']['mask'] = $node['mask'] + 1;
 		$node['left']['ip_bin'] = $node['ip_bin'];
+		$node['left']['db_first'] = sprintf ('%u', $node['left']['ip_bin']);
+		$node['left']['db_last'] = sprintf ('%u', $node['left']['ip_bin'] | binInvMaskFromDec ($node['left']['mask']));
+
+		$node['right']['mask'] = $node['mask'] + 1;
 		$node['right']['ip_bin'] = $node['ip_bin'] + binInvMaskFromDec ($node['mask'] + 1) + 1;
+		$node['right']['db_first'] = sprintf ('%u', $node['right']['ip_bin']);
+		$node['right']['db_last'] = sprintf ('%u', $node['right']['ip_bin'] | binInvMaskFromDec ($node['right']['mask']));
 	}
 
 	// repeat!
@@ -1516,6 +1523,11 @@ function treeApplyFunc (&$tree, $func)
 	}
 }
 
+function loadIPv4AddrList (&$netinfo)
+{
+	loadOwnIPv4Addresses ($netinfo);
+	markupIPv4AddrList ($netinfo['addrlist']);
+}
 
 function countOwnIPv4Addresses (&$node)
 {

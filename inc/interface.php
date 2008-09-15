@@ -1994,10 +1994,10 @@ function renderIPv4SpaceRecords ($tree, &$tagcache, $baseurl, $level = 1)
 	foreach ($tree as $item)
 	{
 		$total = $item['addrt'];
+		loadIPv4AddrList ($item); // necessary to compute router list and address counter
+		$used = $item['addrc'];
 		if (isset ($item['id']))
 		{
-			loadIPv4AddrList ($item);
-			$used = $item['addrc'];
 			if ($item['symbol'] == 'node-collapsed')
 				$expandurl = "${baseurl}&eid=" . $item['id'];
 			elseif ($item['symbol'] == 'node-expanded')
@@ -2017,7 +2017,6 @@ function renderIPv4SpaceRecords ($tree, &$tagcache, $baseurl, $level = 1)
 		}
 		else
 		{
-			$used = 0;
 			echo "<tr valign=top>";
 			printIPv4NetInfoTDs ($item, 'tdleft sparenetwork', $level, $item['symbol']);
 			echo "<td class=tdcenter>";
