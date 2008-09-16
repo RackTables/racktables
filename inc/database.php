@@ -3238,4 +3238,8 @@ function mergeSearchResults (&$objects, $terms, $fieldname)
 	return $objects;
 }
 
+function getLostIPv4Addresses ()
+{
+}
+
 ?>

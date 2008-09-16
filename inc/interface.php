@@ -124,6 +124,9 @@ $image['node-expanded']['height'] = 16;
 $image['node-expanded-static']['path'] = 'pix/node-expanded-static.png';
 $image['node-expanded-static']['width'] = 16;
 $image['node-expanded-static']['height'] = 16;
+$image['dragons']['path'] = 'pix/mitsudragon.png';
+$image['dragons']['width'] = 125;
+$image['dragons']['height'] = 21;
 
 // This may be populated later onsite, report rendering function will use it.
 // See the $systemreport for structure.
@@ -1149,6 +1152,17 @@ function renderIPv4ForObject ($object_id = 0)
 	if (getConfigVar ('EXT_IPV4_VIEW') == 'yes')
 		echo '<th colspan=2>network</th><th>routed by</th>';
 	echo '<th>type</th><th>misc</th><th>&nbsp</th></tr>';
+
+	printOpFormIntro ('addIPv4Allocation');
+	echo "<tr><td>";
+	printImageHREF ('add', 'Allocate new address', TRUE, 99);
+	echo "</td>";
+	echo "<td class=tdleft><input type='text' size='10' name='bond_name' tabindex=100></td>\n";
+	echo "<td class=tdleft><input type=text name='ip' tabindex=101></td>\n";
+	echo "<td colspan=3>&nbsp;</td><td>";
+	printSelect ($aat, 'bond_type');
+	echo "</td><td colspan=2>&nbsp;</td></tr></form>";
+
 	foreach ($alloclist as $dottedquad => $alloc)
 	{
 		$class = $alloc['addrinfo']['class'];
@@ -1219,15 +1233,7 @@ function renderIPv4ForObject ($object_id = 0)
 		echo "</td></form></tr>\n";
 	}
 
-	printOpFormIntro ('addIPv4Allocation');
-	echo "<tr><td>";
-	printImageHREF ('add', 'Allocate new address', TRUE, 99);
-	echo "</td>";
-	echo "<td class=tdleft><input type='text' size='10' name='bond_name' tabindex=100></td>\n";
-	echo "<td class=tdleft><input type=text name='ip' tabindex=101></td>\n";
-	echo "<td colspan=3>&nbsp;</td><td>";
-	printSelect ($aat, 'bond_type');
-	echo "</td><td colspan=2>&nbsp;</td></tr></form></table><br>\n";
+	echo "</table><br>\n";
 	finishPortlet();
 
 }
@@ -3549,22 +3555,15 @@ function getFaviconURL ()
 	return $root . 'pix/racktables.ico';
 }
 
-// FIXME: stack the report sections somehow, so they can register themselves.
 function renderSystemReports ()
 {
-	$systemreports = array
+	$tmp = array
 	(
 		array
 		(
 			'title' => 'Dictionary/objects',
 			'type' => 'counters',
 			'func' => 'getDictStats'
-		),
-		array
-		(
-			'title' => 'IPv4',
-			'type' => 'counters',
-			'func' => 'getIPv4Stats'
 		),
 		array
 		(
@@ -3579,7 +3578,7 @@ function renderSystemReports ()
 			'func' => 'renderTagStats'
 		),
 	);
-	renderReports ($systemreports);
+	renderReports ($tmp);
 }
 
 function renderLocalReports ()
@@ -3590,7 +3589,7 @@ function renderLocalReports ()
 
 function renderRackCodeReports ()
 {
-	$rcr = array
+	$tmp = array
 	(
 		array
 		(
@@ -3605,7 +3604,27 @@ function renderRackCodeReports ()
 			'func' => 'getRackCodeWarnings'
 		),
 	);
-	renderReports ($rcr);
+	renderReports ($tmp);
+}
+
+function renderIPv4Reports ()
+{
+	$tmp = array
+	(
+		array
+		(
+			'title' => 'Stats',
+			'type' => 'counters',
+			'func' => 'getIPv4Stats'
+		),
+		array
+		(
+			'title' => 'Lost addresses',
+			'type' => 'custom',
+			'func' => 'getLostIPv4Addresses'
+		),
+	);
+	renderReports ($tmp);
 }
 
 function renderReports ($what)
@@ -5232,7 +5251,7 @@ function niftyString ($string, $maxlen = 30)
 		return '&nbsp;';
 	if (mb_strlen ($string) > $maxlen)
 		return "<span title='" . htmlspecialchars ($string, ENT_QUOTES, 'UTF-8') . "'>" .
-			mb_substr ($string, 0, $maxlen - 1) . $cutind . '</span>';
+			str_replace (' ', '&nbsp;', str_replace ("\t", ' ', mb_substr ($string, 0, $maxlen - 1))) . $cutind . '</span>';
 	return $string;
 }
 
@@ -5294,9 +5313,15 @@ function printIPv4NetInfoTDs ($netinfo, $tdclass = 'tdleft', $indent = 0, $symbo
 	echo "${netinfo['ip']}/${netinfo['mask']}";
 	if (isset ($netinfo['id']))
 		echo '</a>';
-	echo "</td><td class='${tdclass}'>" . niftyString ($netinfo['name']);
-	if (count ($tags))
-		echo '<br><small>' . serializeTags ($tags, "${root}?page=ipv4space&tab=default&") . '</small>';
+	echo "</td><td class='${tdclass}'>";
+	if (!isset ($netinfo['id']))
+		printImageHREF ('dragons');
+	else
+	{
+		echo niftyString ($netinfo['name']);
+		if (count ($tags))
+			echo '<br><small>' . serializeTags ($tags, "${root}?page=ipv4space&tab=default&") . '</small>';
+	}
 	echo "</td>";
 }
 

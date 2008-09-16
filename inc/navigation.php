@@ -540,10 +540,12 @@ $page['reports']['title'] = 'Reports';
 $page['reports']['parent'] = 'index';
 $tab['reports']['default'] = 'System';
 $tab['reports']['rackcode'] = 'RackCode';
+$tab['reports']['ipv4'] = 'IPv4';
 $tab['reports']['local'] = 'Local';
 $trigger['reports']['local'] = 'trigger_localreports';
 $tabhandler['reports']['default'] = 'renderSystemReports';
 $tabhandler['reports']['rackcode'] = 'renderRackCodeReports';
+$tabhandler['reports']['ipv4'] = 'renderIPv4Reports';
 $tabhandler['reports']['local'] = 'renderLocalReports';
 
 // This function returns array if page numbers leading to the target page
