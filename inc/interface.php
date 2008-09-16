@@ -4695,11 +4695,13 @@ function renderAutoPortsForm ($object_id = 0)
 
 function renderTagRowForViewer ($taginfo, $level = 0)
 {
-	echo '<tr><td align=left>';
-	echo '<div title="id = ' . $taginfo['id'] . '">';
-	for ($i = 0; $i < $level; $i++)
+	echo "<tr><td align=left style='padding-left: " . ($level * 16) . "px;'>";
+	if (count ($taginfo['kids']))
+		printImageHREF ('node-expanded-static');
+	else
 		printImageHREF ('spacer');
-	echo $taginfo['tag'] . '</div>';
+	echo '<span title="id = ' . $taginfo['id'] . '">';
+	echo $taginfo['tag'] . '</span>';
 	echo "</td></tr>\n";
 	foreach ($taginfo['kids'] as $kid)
 		renderTagRowForViewer ($kid, $level + 1);
@@ -4724,8 +4726,10 @@ function renderTagRowForCloud ($taginfo, $realm, $level = 0)
 function renderTagRowForEditor ($taginfo, $level = 0)
 {
 	global $root, $pageno, $tabno, $taglist;
-	echo '<tr><td class=tdleft>';
-	for ($i = 0; $i < $level; $i++)
+	echo "<tr><td align=left style='padding-left: " . ($level * 16) . "px;'>";
+	if (count ($taginfo['kids']))
+		printImageHREF ('node-expanded-static');
+	else
 		printImageHREF ('spacer');
 	$nrefs = 0;
 	foreach ($taginfo['refcnt'] as $part)
@@ -5297,9 +5301,7 @@ function printIPv4NetInfoTDs ($netinfo, $tdclass = 'tdleft', $indent = 0, $symbo
 {
 	global $root;
 	$tags = isset ($netinfo['id']) ? loadIPv4PrefixTags ($netinfo['id']) : array();
-	echo "<td class='${tdclass}'>";
-	for ($i = 0; $i < $indent - 1; $i++)
-		printImageHREF ('spacer');
+	echo "<td class='${tdclass}' style='padding-left: " . ($indent * 16) . "px;'>";
 	if ($indent)
 	{
 		if (!empty ($symbolurl))
