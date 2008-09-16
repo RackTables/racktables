@@ -5301,8 +5301,13 @@ function printIPv4NetInfoTDs ($netinfo, $tdclass = 'tdleft', $indent = 0, $symbo
 {
 	global $root;
 	$tags = isset ($netinfo['id']) ? loadIPv4PrefixTags ($netinfo['id']) : array();
+	if ($symbol == 'spacer')
+	{
+		$indent++;
+		$symbol = '';
+	}
 	echo "<td class='${tdclass}' style='padding-left: " . ($indent * 16) . "px;'>";
-	if ($indent)
+	if (!empty ($symbol))
 	{
 		if (!empty ($symbolurl))
 			echo "<a href='${symbolurl}'>";
