@@ -1511,7 +1511,7 @@ function iptree_embed (&$node, $pfx)
 	}
 }
 
-function treeApplyFunc (&$tree, $func)
+function treeApplyFunc (&$tree, $func, $stopfunc = '')
 {
 	if (empty ($func))
 		return;
@@ -1519,6 +1519,8 @@ function treeApplyFunc (&$tree, $func)
 	foreach (array_keys ($tree) as $key)
 	{
 		$func ($tree[$key]);
+		if (!empty ($stopfunc) and $stopfunc ($tree[$key]))
+			continue;
 		$self ($tree[$key]['kids'], $func);
 	}
 }
@@ -1548,6 +1550,11 @@ function countOwnIPv4Addresses (&$node)
 	$node['addrc'] = count (scanIPv4Spans ($toscan));
 }
 
+function nodeIsCollapsed ($node)
+{
+	return $node['symbol'] == 'node-collapsed';
+}
+
 function loadOwnIPv4Addresses (&$node)
 {
 	$toscan = array();
@@ -1565,10 +1572,11 @@ function prepareIPv4Tree ($netlist, $expanded_id = 0)
 {
 	$tree = treeFromList ($netlist); // medium call
 	sortTree ($tree, 'IPv4NetworkCmp');
-	treeApplyFunc ($tree, 'iptree_fill');
 	// complement the tree before markup to make the spare networks have "symbol" set
-	iptree_markup_collapsion ($tree, 2, $expanded_id); //getConfigVar ('TREE_THRESHOLD')
-	treeApplyFunc ($tree, 'countOwnIPv4Addresses'); // long call
+	treeApplyFunc ($tree, 'iptree_fill');
+	iptree_markup_collapsion ($tree, getConfigVar ('TREE_THRESHOLD'), $expanded_id);
+	// count addresses after the markup to skip computation for hidden tree nodes
+	treeApplyFunc ($tree, 'countOwnIPv4Addresses', 'nodeIsCollapsed');
 	return $tree;
 }
 
