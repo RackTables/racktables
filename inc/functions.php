@@ -767,7 +767,7 @@ function getAutoPorts ($type_id)
 function attachChildTag (&$tree, $parent_id, $child_id, $child_info, $threshold = 0)
 {
 	$self = __FUNCTION__;
-	foreach ($tree as $tagid => $taginfo)
+	foreach (array_keys ($tree) as $tagid)
 	{
 		if ($tagid == $parent_id)
 		{
@@ -1589,7 +1589,7 @@ function iptree_markup_collapsion (&$tree, $threshold = 1024, $target = 0)
 	$ret = FALSE;
 	foreach (array_keys ($tree) as $key)
 	{
-		$here = ($target and $tree[$key]['id'] == $target);
+		$here = ($target and isset ($tree[$key]['id']) and $tree[$key]['id'] == $target);
 		$below = $self ($tree[$key]['kids'], $threshold, $target);
 		if (!$tree[$key]['kidc']) // terminal node
 			$tree[$key]['symbol'] = 'spacer';
