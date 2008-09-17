@@ -378,7 +378,7 @@ function addIPv4Allocation ()
 
 	// Strip masklen.
 	$ip = ereg_replace ('/[[:digit:]]+$', '', $_REQUEST['ip']);
-	if  (NULL === getIPv4AddressNetworkId ($ip))
+	if  (getConfigVar ('IPV4_JAYWALK') != 'yes' and NULL === getIPv4AddressNetworkId ($ip))
 		return buildRedirectURL ('ERR1', array ($ip));
 	
 	$error = bindIpToObject ($ip, $_REQUEST['object_id'], $_REQUEST['bond_name'], $_REQUEST['bond_type']);
@@ -815,6 +815,7 @@ function resetUIConfig()
 	setConfigVar ('COOKIE_TTL', '1209600');
 	setConfigVar ('EXT_IPV4_VIEW', 'yes');
 	setConfigVar ('TREE_THRESHOLD', '25');
+	setConfigVar ('IPV4_JAYWALK', 'no');
 	return buildRedirectURL ('OK');
 }
 
