@@ -625,7 +625,7 @@ function renderRackInfoPortlet ($rackData)
 	echo "<tr><th width='50%' class=tdright>Objects:</th><td class=tdleft>";
 	echo count (stuffInRackspace ($rackData));
 	echo "</td></tr>\n";
-	printTagTRs ("${root}?page=rackspace&");
+	printTagTRs ("${root}?page=rackspace&tab=default&");
 	if (!empty ($rackData['comment']))
 		echo "<tr><th width='50%' class=tdright>Comment:</th><td class=tdleft>${rackData['comment']}</td></tr>\n";
 	echo '</table>';
@@ -768,7 +768,7 @@ function renderRackObject ($object_id = 0)
 	foreach (getAttrValues ($object_id, TRUE) as $record)
 		if (!empty ($record['value']))
 			echo "<tr><th width='50%' class=opt_attr_th>${record['name']}:</th><td class=tdleft>${record['a_value']}</td></tr>\n";
-	printTagTRs ("${root}?page=objgroup&group_id=${info['objtype_id']}&");
+	printTagTRs ("${root}?page=objgroup&tab=default&group_id=${info['objtype_id']}&");
 	echo "</table><br>\n";
 	finishPortlet();
 
@@ -1994,7 +1994,7 @@ function renderRackspaceHistory ()
 	echo '</td></tr></table>';
 }
 
-function renderIPv4SpaceRecords ($tree, &$tagcache, $baseurl, $level = 1)
+function renderIPv4SpaceRecords ($tree, &$tagcache, $baseurl, $target = 0, $level = 1)
 {
 	$self = __FUNCTION__;
 	foreach ($tree as $item)
@@ -2005,21 +2005,23 @@ function renderIPv4SpaceRecords ($tree, &$tagcache, $baseurl, $level = 1)
 		if (isset ($item['id']))
 		{
 			if ($item['symbol'] == 'node-collapsed')
-				$expandurl = "${baseurl}&eid=" . $item['id'];
+				$expandurl = "${baseurl}&eid=" . $item['id'] . "#netid" . $item['id'];
 			elseif ($item['symbol'] == 'node-expanded')
-				$expandurl = "${baseurl}&eid=" . $item['parent_id'];
+				$expandurl = $baseurl . ($item['parent_id'] ? "&eid=${item['parent_id']}#netid${item['parent_id']}" : '');
 			else
 				$expandurl = '';
 			echo "<tr valign=top>";
 			printIPv4NetInfoTDs ($item, 'tdleft', $level, $item['symbol'], $expandurl);
 			echo "<td class=tdcenter>";
+			if ($target == $item['id'])
+				echo "<a name=netid${target}></a>";
 			renderProgressBar ($total ? $used/$total : 0);
 			echo "<br><small>${used}/${total}</small></td>";
 			if (getConfigVar ('EXT_IPV4_VIEW') == 'yes')
 				printRoutersTD (findRouters ($item['addrlist']), $tagcache);
 			echo "</tr>";
 			if ($item['symbol'] == 'node-expanded' or $item['symbol'] == 'node-expanded-static')
-				$self ($item['kids'], $tagcache, $baseurl, $level + 1);
+				$self ($item['kids'], $tagcache, $baseurl, $target, $level + 1);
 		}
 		else
 		{
@@ -2052,7 +2054,7 @@ function renderIPv4Space ()
 	echo "</tr>\n";
 	$tagcache = array();
 	$baseurl = "${root}?page=${pageno}&tab=${tabno}" . getTagFilterStr ($tagfilter);
-	renderIPv4SpaceRecords ($tree, $tagcache, $baseurl);
+	renderIPv4SpaceRecords ($tree, $tagcache, $baseurl, isset ($_REQUEST['eid']) ? $_REQUEST['eid'] : 0);
 	echo "</table>\n";
 	finishPortlet();
 	echo '</td><td class=pcright>';
@@ -2297,7 +2299,7 @@ function renderIPv4Network ($id)
 		echo "</tr>\n";
 	}
 
-	printTagTRs ("${root}?page=ipv4space&");
+	printTagTRs ("${root}?page=ipv4space&tab=default&");
 	echo "</table><br>\n";
 	finishPortlet();
 	echo "</td>\n";
@@ -3960,7 +3962,7 @@ function renderVirtualService ($vsid)
 	echo "<tr><th width='50%' class=tdright>Protocol:</th><td class=tdleft>${vsinfo['proto']}</td></tr>\n";
 	echo "<tr><th width='50%' class=tdright>Virtual IP address:</th><td class=tdleft><a href='${root}?page=ipaddress&tab=default&ip=${vsinfo['vip']}'>${vsinfo['vip']}</a></td></tr>\n";
 	echo "<tr><th width='50%' class=tdright>Virtual port:</th><td class=tdleft>${vsinfo['vport']}</td></tr>\n";
-	printTagTRs ("${root}?page=ipv4vslist&");
+	printTagTRs ("${root}?page=ipv4vslist&tab=default&");
 	if (!empty ($vsinfo['vsconfig']))
 	{
 		echo "<tr><th width='50%' class=tdright>VS configuration:</th><td class=tdleft>&nbsp;</td></tr>\n";
@@ -4250,7 +4252,7 @@ function renderRSPool ($pool_id = 0)
 		echo "<tr><th width='50%' class=tdright>Pool name:</th><td class=tdleft>${poolInfo['name']}</td></tr>\n";
 	echo "<tr><th width='50%' class=tdright>Real servers:</th><td class=tdleft>" . count ($poolInfo['rslist']) . "</td></tr>\n";
 	echo "<tr><th width='50%' class=tdright>Load balancers:</th><td class=tdleft>" . count ($poolInfo['lblist']) . "</td></tr>\n";
-	printTagTRs ("${root}?page=ipv4rsplist&");
+	printTagTRs ("${root}?page=ipv4rsplist&tab=default&");
 	echo "</table>";
 	finishPortlet();
 
@@ -5122,7 +5124,7 @@ function renderRackCodeViewer ()
 	$lineno = 1;
 	foreach (explode ("\n", $text) as $line)
 	{
-		echo "<tr><td class=tdright><a name=line${lineno}>${lineno}</td>";
+		echo "<tr><td class=tdright><a name=line${lineno}>${lineno}</a></td>";
 		echo "<td class=tdleft>${line}</td></tr>";
 		$lineno++;
 	}
