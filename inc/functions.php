@@ -1537,17 +1537,17 @@ function countOwnIPv4Addresses (&$node)
 	$node['addrt'] = 0;
 	if (empty ($node['kids']))
 	{
-		$toscan[] = $node;
+		$toscan[] = array ('i32_first' => $node['db_first'], 'i32_last' => $node['db_last']);
 		$node['addrt'] = binInvMaskFromDec ($node['mask']) + 1;
 	}
 	else
 		foreach ($node['kids'] as $nested)
 			if (!isset ($nested['id'])) // spare
 			{
-				$toscan[] = $nested;
+				$toscan[] = array ('i32_first' => $nested['db_first'], 'i32_last' => $nested['db_last']);
 				$node['addrt'] += binInvMaskFromDec ($nested['mask']) + 1;
 			}
-	$node['addrc'] = count (scanIPv4Spans ($toscan));
+	$node['addrc'] = count (scanIPv4Space ($toscan));
 }
 
 function nodeIsCollapsed ($node)
@@ -1559,12 +1559,12 @@ function loadOwnIPv4Addresses (&$node)
 {
 	$toscan = array();
 	if (empty ($node['kids']))
-		$toscan[] = $node;
+		$toscan[] = array ('i32_first' => $node['db_first'], 'i32_last' => $node['db_last']);
 	else
 		foreach ($node['kids'] as $nested)
 			if (!isset ($nested['id'])) // spare
-				$toscan[] = $nested;
-	$node['addrlist'] = scanIPv4Spans ($toscan);
+				$toscan[] = array ('i32_first' => $nested['db_first'], 'i32_last' => $nested['db_last']);
+	$node['addrlist'] = scanIPv4Space ($toscan);
 	$node['addrc'] = count ($node['addrlist']);
 }
 

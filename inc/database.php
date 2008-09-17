@@ -935,16 +935,45 @@ function constructIPv4Address ($dottedquad = NULL)
 // into a list and return. Return an empty list if nothing matched.
 // Both arguments are expected in signed int32 form. The resulting list
 // is keyed by uint32 form of each IP address, items aren't sorted.
-function scanIPv4Space ($i32_first, $i32_last)
+// LATER: accept a list of pairs and build WHERE sub-expression accordingly
+function scanIPv4Space ($pairlist)
 {
 	$ret = array();
+	if (!count ($pairlist)) // this is normal for a network completely divided into smaller parts
+		return $ret;;
 	$dnamechache = array();
+	// FIXME: this is a copy-and-paste prototype
+	$or = '';
+	$whereexpr1 = '(';
+	$whereexpr2 = '(';
+	$whereexpr3 = '(';
+	$whereexpr4 = '(';
+	$whereexpr5a = '(';
+	$whereexpr5b = '(';
+	foreach ($pairlist as $tmp)
+	{
+		$db_first = sprintf ('%u', 0x00000000 + $tmp['i32_first']);
+		$db_last = sprintf ('%u', 0x00000000 + $tmp['i32_last']);
+		$whereexpr1 .= $or . "ip between ${db_first} and ${db_last}";
+		$whereexpr2 .= $or . "ip between ${db_first} and ${db_last}";
+		$whereexpr3 .= $or . "vip between ${db_first} and ${db_last}";
+		$whereexpr4 .= $or . "rsip between ${db_first} and ${db_last}";
+		$whereexpr5a .= $or . "remoteip between ${db_first} and ${db_last}";
+		$whereexpr5b .= $or . "localip between ${db_first} and ${db_last}";
+		$or = ' or ';
+	}
+	$whereexpr1 .= ')';
+	$whereexpr2 .= ')';
+	$whereexpr3 .= ')';
+	$whereexpr4 .= ')';
+	$whereexpr5a .= ')';
+	$whereexpr5b .= ')';
 
 	$db_first = sprintf ('%u', 0x00000000 + $i32_first);
 	$db_last = sprintf ('%u', 0x00000000 + $i32_last);
 	// 1. collect labels and reservations
 	$query = "select INET_NTOA(ip) as ip, name, reserved from IPAddress ".
-		"where ip between ${db_first} and ${db_last} and (reserved = 'yes' or name != '')";
+		"where ${whereexpr1} and (reserved = 'yes' or name != '')";
 	$result = useSelectBlade ($query, __FUNCTION__);
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
@@ -963,7 +992,7 @@ function scanIPv4Space ($i32_first, $i32_last)
 		"dict_value as objtype_name from " .
 		"IPBonds as ipb inner join RackObject as ro on ipb.object_id = ro.id " .
 		"left join Dictionary on objtype_id=dict_key natural join Chapter " .
-		"where ip between ${db_first} and ${db_last} " .
+		"where ${whereexpr2} " .
 		"and chapter_name = 'RackObjectType'" .
 		"order by ipb.type, object_name";
 	$result = useSelectBlade ($query, __FUNCTION__);
@@ -994,7 +1023,7 @@ function scanIPv4Space ($i32_first, $i32_last)
 		"inner join RackObject as ro on lb.object_id = ro.id " .
 		"left join Dictionary on objtype_id=dict_key " .
 		"natural join Chapter " .
-		"where vip between ${db_first} and ${db_last} " .
+		"where ${whereexpr3} " .
 		"and chapter_name = 'RackObjectType'" .
 		"order by vport, proto, ro.name, object_id";
 	$result = useSelectBlade ($query, __FUNCTION__);
@@ -1022,7 +1051,7 @@ function scanIPv4Space ($i32_first, $i32_last)
 	// 4. don't forget about real servers along with pools
 	$query = "select inet_ntoa(rsip) as ip, inservice, rsport, rspool_id, rsp.name as rspool_name from " .
 		"IPRealServer as rs inner join IPRSPool as rsp on rs.rspool_id = rsp.id " .
-		"where rsip between ${db_first} and ${db_last} " .
+		"where ${whereexpr4} " .
 		"order by ip, rsport, rspool_id";
 	$result = useSelectBlade ($query, __FUNCTION__);
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
@@ -1047,8 +1076,8 @@ function scanIPv4Space ($i32_first, $i32_last)
 		"remoteport, " .
 		"description " .
 		"from PortForwarding " .
-		"where remoteip between ${db_first} and ${db_last} or " .
-		"localip between ${db_first} and ${db_last} " .
+		"where ${whereexpr5a} or " .
+		"${whereexpr5b} " .
 		"order by localip, localport, remoteip, remoteport, proto";
 	$result = useSelectBlade ($query, __FUNCTION__);
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
@@ -1068,16 +1097,6 @@ function scanIPv4Space ($i32_first, $i32_last)
 			$ret[$localip_bin]['outpf'][] = $row;
 		}
 	}
-	return $ret;
-}
-
-// a wrapper for the above
-function scanIPv4Spans ($spanlist)
-{
-	$ret = array();
-	foreach ($spanlist as $span)
-		foreach (scanIPv4Space ($span['db_first'], $span['db_last']) as $key => $val)
-			$ret[$key] = $val;
 	return $ret;
 }
 
@@ -1114,7 +1133,7 @@ function getIPv4Address ($dottedquad = '')
 		return NULL;
 	}
 	$i32 = ip2long ($dottedquad); // signed 32 bit
-	$scanres = scanIPv4Space ($i32, $i32);
+	$scanres = scanIPv4Space (array (array ('i32_first' => $i32, 'i32_last' => $i32)));
 	if (!isset ($scanres[$i32]))
 		return constructIPv4Address ($dottedquad);
 	markupIPv4AddrList ($scanres);
@@ -3240,6 +3259,7 @@ function mergeSearchResults (&$objects, $terms, $fieldname)
 
 function getLostIPv4Addresses ()
 {
+	dragon();
 }
 
 ?>
