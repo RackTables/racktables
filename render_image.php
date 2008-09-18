@@ -33,14 +33,6 @@ function renderError ()
 	imagedestroy ($img);
 }
 
-function renderAccessDeniedImage ()
-{
-	$img = imagecreatefrompng ('pix/pixel.png');
-	header("Content-type: image/png");
-	imagepng ($img);
-	imagedestroy ($img);
-}
-
 // Having a local caching array speeds things up. A little.
 function colorFromHex ($image, $hex)
 {
@@ -144,6 +136,15 @@ function renderProgressBarImage ($done)
 	}
 	imagefilledrectangle ($img, 0, 0, $done, 10, $color['T']);
 	imagefilledrectangle ($img, $done, 0, 100, 10, $color['F']);
+	header("Content-type: image/png");
+	imagepng ($img);
+	imagedestroy ($img);
+}
+
+function renderAccessDeniedImage ()
+{
+	$img = @imagecreatetruecolor (1, 1);
+	imagefilledrectangle ($img, 0, 0, 1, 1, colorFromHex ($img, '000000'));
 	header("Content-type: image/png");
 	imagepng ($img);
 	imagedestroy ($img);

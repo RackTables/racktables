@@ -1417,7 +1417,16 @@ function taginfoCmp ($tagA, $tagB)
 // distinct base IP addresses.
 function IPv4NetworkCmp ($netA, $netB)
 {
-	return bccomp ("${netA['db_first']}", "${netB['db_first']}");
+//	return bccomp ("${netA['db_first']}", "${netB['db_first']}");
+	// There's a problem just substracting one u32 integer from another,
+	// because the result may happen big enough to become a negative i32
+	// integer itself (PHP tries to cast everything it sees to signed int)
+	if ($netA['db_first'] > $netB['db_first'])
+		return 1;
+	elseif ($netA['db_first'] < $netB['db_first'])
+		return -1;
+	else
+		return 0;
 }
 
 // Modify the given tag tree so, that each level's items are sorted alphabetically.

@@ -82,9 +82,6 @@ $image['unblockuser'] = $image['notinservice'];
 $image['find']['path'] = 'pix/tango-system-search.png';
 $image['find']['width'] = 16;
 $image['find']['height'] = 16;
-$image['spacer']['path'] = 'pix/pixel.png';
-$image['spacer']['width'] = 16;
-$image['spacer']['height'] = 16;
 $image['next']['path'] = 'pix/tango-go-next.png';
 $image['next']['width'] = 32;
 $image['next']['height'] = 32;
@@ -4697,11 +4694,11 @@ function renderAutoPortsForm ($object_id = 0)
 
 function renderTagRowForViewer ($taginfo, $level = 0)
 {
+	if (!count ($taginfo['kids']))
+		$level++; // Shift instead of placing a spacer. This won't impact any nested nodes.
 	echo "<tr><td align=left style='padding-left: " . ($level * 16) . "px;'>";
 	if (count ($taginfo['kids']))
 		printImageHREF ('node-expanded-static');
-	else
-		printImageHREF ('spacer');
 	echo '<span title="id = ' . $taginfo['id'] . '">';
 	echo $taginfo['tag'] . '</span>';
 	echo "</td></tr>\n";
@@ -4713,9 +4710,7 @@ function renderTagRowForViewer ($taginfo, $level = 0)
 function renderTagRowForCloud ($taginfo, $realm, $level = 0)
 {
 	global $root;
-	echo '<tr><td align=left>';
-	for ($i = 0; $i < $level; $i++)
-		printImageHREF ('spacer');
+	echo "<tr><td align=left style='padding-left: " . ($level * 16) . "px;'>";
 	echo "<a href='${root}?page=objgroup&group_id=0&tagfilter[]=${taginfo['id']}'>";
 	echo $taginfo['tag'] . '</a>';
 	if (isset ($taginfo['refcnt'][$realm]))
@@ -4728,11 +4723,11 @@ function renderTagRowForCloud ($taginfo, $realm, $level = 0)
 function renderTagRowForEditor ($taginfo, $level = 0)
 {
 	global $root, $pageno, $tabno, $taglist;
+	if (!count ($taginfo['kids']))
+		$level++; // Idem
 	echo "<tr><td align=left style='padding-left: " . ($level * 16) . "px;'>";
 	if (count ($taginfo['kids']))
 		printImageHREF ('node-expanded-static');
-	else
-		printImageHREF ('spacer');
 	$nrefs = 0;
 	foreach ($taginfo['refcnt'] as $part)
 		$nrefs += $part;

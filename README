@@ -143,6 +143,3 @@ This release fixes a missing UNIQUE KEY in a table. The upgrade script may
 find it necessary first to transform some records. Because of this it is
 normal to see several "update TagStorage ... Duplicate entry" failed queries
 during the upgrade.
-
-In addition, RackTables requires two more PHP extensions, which are often already
-present on most systems. These are BC Math and zlib.
