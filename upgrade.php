@@ -1422,7 +1422,7 @@ CREATE TABLE `TagTree` (
 			$query[] = 'alter table IPRanges add unique `base-len` (`ip`, `mask`)';
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('TREE_THRESHOLD','25','uint','yes','no','Tree view auto-collapse threshold')";
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('IPV4_JAYWALK','no','string','no','no','Enable IPv4 address allocations w/o covering network')";
-			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('ADDNEW_AT_TOP','no','string','no','no','Render \"add new\" line at top of the list')";
+			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('ADDNEW_AT_TOP','yes','string','no','no','Render \"add new\" line at top of the list')";
 			$query[] = "update Config set description = 'Extended IPv4 view' where varname = 'EXT_IPV4_VIEW'";
 			$query[] = "update Config set varvalue = '0.16.3' where varname = 'DB_VERSION'";
 			break;

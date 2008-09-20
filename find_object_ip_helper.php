@@ -23,7 +23,7 @@ echo "<link rel=icon href='" . getFaviconURL() . "' type='image/x-icon' />";
 <body style="height: 100%;">
 <form action="javascript:;">
 <div style="background-color: #f0f0f0; border: 1px solid #3c78b5; padding: 10px; height: 100%; text-align: center; margin: 5px;">
-<h2>Choose a port:</h2><br><br>
+<h2>Pick address:</h2><br><br>
 <input type=hidden id='ip'>
 <select size="30" id="addresses">
 <?php renderAllIPv4Allocations(); ?>

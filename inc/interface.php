@@ -1036,7 +1036,7 @@ function renderPortsForObject ($object_id = 0)
 	{
 		printOpFormIntro ('addPort');
 		echo "<tr><td>";
-		printImageHREF ('add', '', TRUE, 104);
+		printImageHREF ('add', 'add a port', TRUE, 104);
 		echo "</td><td><input type=text size=8 name=port_name tabindex=100></td>\n";
 		echo "<td><input type=text size=24 name=port_label tabindex=101></td>";
 		$types = getPortTypes();
@@ -1052,7 +1052,9 @@ function renderPortsForObject ($object_id = 0)
 		}
 		echo "</select></td>";
 		echo "<td><input type=text name=port_l2address tabindex=103></td>\n";
-		echo "<td colspan=4>&nbsp;</td></tr></form>";
+		echo "<td colspan=3>&nbsp;</td><td>";
+		printImageHREF ('add', 'add a port', TRUE, 104);
+		echo "</td></tr></form>";
 	}
 	global $root, $pageno, $tabno;
 	if ($object_id <= 0)
@@ -1148,13 +1150,15 @@ function renderIPv4ForObject ($object_id = 0)
 		global $aat;
 		printOpFormIntro ('addIPv4Allocation');
 		echo "<tr><td>";
-		printImageHREF ('add', 'Allocate new address', TRUE, 99);
+		printImageHREF ('add', 'allocate', TRUE, 99);
 		echo "</td>";
 		echo "<td class=tdleft><input type='text' size='10' name='bond_name' tabindex=100></td>\n";
 		echo "<td class=tdleft><input type=text name='ip' tabindex=101></td>\n";
 		echo "<td colspan=3>&nbsp;</td><td>";
 		printSelect ($aat, 'bond_type');
-		echo "</td><td colspan=2>&nbsp;</td></tr></form>";
+		echo "</td><td>&nbsp;</td><td>";
+		printImageHREF ('add', 'allocate', TRUE, 99);
+		echo "</td></tr></form>";
 	}
 	global $root, $pageno, $tabno, $aat;
 	if ($object_id <= 0)
@@ -2569,7 +2573,7 @@ function renderIPv4AddressAllocations ($dottedquad)
 		global $aat;
 		printOpFormIntro ('addIPv4Allocation');
 		echo "<tr><td>";
-		printImageHREF ('add', 'new allocation', TRUE);
+		printImageHREF ('add', 'allocate', TRUE);
 		echo "</td><td><select name='object_id'>";
 
 		foreach (explode (',', getConfigVar ('IPV4_PERFORMERS')) as $type) 
@@ -2578,7 +2582,9 @@ function renderIPv4AddressAllocations ($dottedquad)
 
 		echo "</select></td><td><input type='text' name='bond_name' value='' size=10></td><td>";
 		printSelect ($aat, 'bond_type');
-		echo "</td><td>&nbsp;</td></form></tr>";
+		echo "</td><td>";
+		printImageHREF ('add', 'allocate', TRUE);
+		echo "</td></form></tr>";
 	}
 	global $pageno, $tabno, $root, $aat;
 
@@ -2614,6 +2620,33 @@ function renderIPv4AddressAllocations ($dottedquad)
 
 function renderNATv4ForObject ($object_id = 0)
 {
+	function printNewItemTR ($alloclist)
+	{
+		global $root;
+		printOpFormIntro ('addNATv4Rule');
+		echo "<tr align='center'><td>";
+		printImageHREF ('add', 'Add new NAT rule', TRUE);
+		echo '</td><td>';
+		printSelect (array ('TCP' => 'TCP', 'UDP' => 'UDP'), 'proto');
+		echo "<select name='localip' tabindex=1>";
+
+		foreach ($alloclist as $dottedquad => $alloc)
+		{
+			$name = empty ($alloc['addrinfo']['name']) ? '' : (' (' . niftyString ($alloc['addrinfo']['name']) . ')');
+			$osif = empty ($alloc['osif']) ? '' : ($alloc['osif'] . ': ');
+			echo "<option value='${dottedquad}'>${osif}${dottedquad}${name}</option>";
+		}
+
+		echo "</select>:<input type='text' name='localport' size='4' tabindex=2></td>";
+		echo "<td><input type='text' name='remoteip' id='remoteip' size='10' tabindex=3>";
+		echo "<a href='javascript:;' onclick='window.open(\"${root}/find_object_ip_helper.php\", \"findobjectip\", \"height=700, width=400, location=no, menubar=no, resizable=yes, scrollbars=no, status=no, titlebar=no, toolbar=no\");'>";
+		printImageHREF ('find', 'Find object');
+		echo "</a>";
+		echo ":<input type='text' name='remoteport' size='4' tabindex=4></td><td></td>";
+		echo "<td colspan=1><input type='text' name='description' size='20' tabindex=5></td><td>";
+		printImageHREF ('add', 'Add new NAT rule', TRUE);
+		echo "</td></tr></form>";
+	}
 	global $pageno, $tabno, $root;
 	
 	$info = getObjectInfo ($object_id);
@@ -2625,6 +2658,8 @@ function renderNATv4ForObject ($object_id = 0)
 	echo "<table class='widetable' cellpadding=5 cellspacing=0 border=0 align='center'>\n";
 	echo "<tr><th></th><th>Match endpoint</th><th>Translate to</th><th>Target object</th><th>Comment</th><th>&nbsp;</th></tr>\n";
 
+	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
+		printNewItemTR ($alloclist);
 	foreach ($forwards['out'] as $pf)
 	{
 		$class = 'trerror';
@@ -2670,28 +2705,8 @@ function renderNATv4ForObject ($object_id = 0)
 		printImageHREF ('save', 'Save changes', TRUE);
 		echo "</td></form></tr>";
 	}
-	printOpFormIntro ('addNATv4Rule');
-	echo "<tr align='center'><td>";
-	printImageHREF ('add', 'Add new NAT rule', TRUE);
-	echo '</td><td>';
-	printSelect (array ('TCP' => 'TCP', 'UDP' => 'UDP'), 'proto');
-	echo "<select name='localip' tabindex=1>";
-
-	foreach ($alloclist as $dottedquad => $alloc)
-	{
-		$name = empty ($alloc['addrinfo']['name']) ? '' : (' (' . niftyString ($alloc['addrinfo']['name']) . ')');
-		$osif = empty ($alloc['osif']) ? '' : ($alloc['osif'] . ': ');
-		echo "<option value='${dottedquad}'>${osif}${dottedquad}${name}</option>";
-	}
-
-	echo "</select>:<input type='text' name='localport' size='4' tabindex=2></td>";
-	echo "<td><input type='text' name='remoteip' id='remoteip' size='10' tabindex=3>";
-	echo "<a href='javascript:;' onclick='window.open(\"${root}/find_object_ip_helper.php\", \"findobjectip\", \"height=700, width=400, location=no, menubar=no, resizable=yes, scrollbars=no, status=no, titlebar=no, toolbar=no\");'>";
-	printImageHREF ('find', 'Find object');
-	echo "</a>";
-	echo ":<input type='text' name='remoteport' size='4' tabindex=4></td><td></td>";
-	echo "<td colspan=1><input type='text' name='description' size='20' tabindex=5></td><td>&nbsp;</td></tr>";
-	echo "</form>";
+	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')
+		printNewItemTR ($alloclist);
 
 	echo "</table><br><br>";
 
@@ -2861,9 +2876,11 @@ function renderAddMultipleObjectsForm ()
 
 function printGreeting ()
 {
-	global $remote_username, $accounts, $root;
+	global $root, $remote_username, $accounts, $root;
 	$account = $accounts[$remote_username];
-	$person = empty ($account['user_realname']) ? $account['user_name'] : $account['user_realname'];
+	$person = "<a href='${root}?page=myaccount&tab=default'>";
+	$person .= empty ($account['user_realname']) ? $account['user_name'] : $account['user_realname'];
+	$person .= '</a>';
 	echo "Hello, ${person}. This is RackTables " . CODE_VERSION . ". Click <a href='${root}?logout'>here</a> to logout.";
 }
 
@@ -3209,7 +3226,7 @@ function renderUserListEditor ()
 		printImageHREF ('save', 'Save changes', TRUE);
 		echo "</td></form></tr>\n";
 	}
-	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
+	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')
 		printNewItemTR();
 	echo "</table><br>\n";
 	finishPortlet();
@@ -3392,16 +3409,16 @@ function renderChaptersEditor ()
 		printOpFormIntro ('add');
 		echo '<tr><td>';
 		printImageHREF ('add', 'Add new', TRUE);
-		echo "</td><td colspan=3><input type=text name=chapter_name></td>";
-		echo '</tr>';
-		echo '</form>';
+		echo "</td><td><input type=text name=chapter_name tabindex=100></td><td>&nbsp;</td><td>";
+		printImageHREF ('add', 'Add new', TRUE);
+		echo '</td></tr></form>';
 	}
 	global $root, $pageno, $tabno;
 	showMessageOrError();
 	$dict = getDict();
 	echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
 	echo '<tr><th>&nbsp;</th><th>Chapter name</th><th>Words</th><th>&nbsp;</th></tr>';
-	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')
+	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
 		printNewItemTR();
 	foreach ($dict as $chapter)
 	{
@@ -3471,16 +3488,16 @@ function renderEditAttributesForm ()
 	{
 		printOpFormIntro ('add');
 		echo '<tr><td>';
-		printImageHREF ('add', '', TRUE);
+		printImageHREF ('add', 'Create attribute', TRUE);
 		echo "</td><td><input type=text name=attr_name></td>";
 		echo '<td><select name=attr_type>';
 		echo '<option value=uint>uint</option>';
 		echo '<option value=float>float</option>';
 		echo '<option value=string>string</option>';
 		echo '<option value=dict>dict</option>';
-		echo '</select></td>';
-		echo '</tr>';
-		echo '</form>';
+		echo '</select></td><td>';
+		printImageHREF ('add', 'Create attribute', TRUE);
+		echo '</td></tr></form>';
 	}
 	global $root, $pageno, $tabno;
 	$attrMap = getAttrMap();
@@ -4845,8 +4862,9 @@ function renderTagTreeEditor ()
 		echo "<option value=0>-- NONE --</option>\n";
 		foreach ($taglist as $taginfo)
 			echo "<option value=${taginfo['id']}>${taginfo['tag']}</option>";
-		echo "</select></td><td>&nbsp;</td></tr>";
-		echo "</form>\n";
+		echo "</select></td><td>";
+		printImageHREF ('add', 'Create tag', TRUE, 102);
+		echo "</td></tr></form>\n";
 	}
 	global $taglist, $tagtree;
 	showMessageOrError();
