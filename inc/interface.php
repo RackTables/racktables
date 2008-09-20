@@ -1032,6 +1032,28 @@ function showMessageOrError ()
 // This function renders a form for port edition.
 function renderPortsForObject ($object_id = 0)
 {
+	function printNewItemTR ()
+	{
+		printOpFormIntro ('addPort');
+		echo "<tr><td>";
+		printImageHREF ('add', '', TRUE, 104);
+		echo "</td><td><input type=text size=8 name=port_name tabindex=100></td>\n";
+		echo "<td><input type=text size=24 name=port_label tabindex=101></td>";
+		$types = getPortTypes();
+		$default_port_type = getConfigVar ('default_port_type');
+		// FIXME: isn't this a perfect time for printSelect()?
+		echo "<td><select name='port_type_id' tabindex=102>\n";
+		foreach ($types as $typeid => $typename)
+		{
+			echo "<option value='${typeid}'";
+			if ($typeid == $default_port_type)
+				echo " selected";
+			echo ">${typename}</option>\n";
+		}
+		echo "</select></td>";
+		echo "<td><input type=text name=port_l2address tabindex=103></td>\n";
+		echo "<td colspan=4>&nbsp;</td></tr></form>";
+	}
 	global $root, $pageno, $tabno;
 	if ($object_id <= 0)
 	{
@@ -1045,6 +1067,8 @@ function renderPortsForObject ($object_id = 0)
 	echo "<table cellspacing=0 cellpadding='5' align='center' class='widetable'>\n";
 	echo "<tr><th>&nbsp;</th><th>Local name</th><th>Visible label</th><th>Port type</th><th>L2 address</th>";
 	echo "<th>Rem. object</th><th>Rem. port</th><th>(Un)link or (un)reserve</th><th>&nbsp;</th></tr>\n";
+	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
+		printNewItemTR();
 	foreach ($ports as $port)
 	{
 		printOpFormIntro ('editPort', array ('port_id' => $port['id']));
@@ -1088,24 +1112,8 @@ function renderPortsForObject ($object_id = 0)
 		printImageHREF ('save', 'Save changes', TRUE);
 		echo "</td></form></tr>\n";
 	}
-	printOpFormIntro ('addPort');
-	echo "<tr><td>";
-	printImageHREF ('add', '', TRUE, 104);
-	echo "</td><td><input type=text size=8 name=port_name tabindex=100></td>\n";
-	echo "<td><input type=text size=24 name=port_label tabindex=101></td>";
-	echo "<td><select name='port_type_id' tabindex=102>\n";
-	$types = getPortTypes();
-	$default_port_type = getConfigVar ('default_port_type');
-	foreach ($types as $typeid => $typename)
-	{
-		echo "<option value='${typeid}'";
-		if ($typeid == $default_port_type)
-			echo " selected";
-		echo ">${typename}</option>\n";
-	}
-	echo "</select></td>";
-	echo "<td><input type=text name=port_l2address tabindex=103></td>\n";
-	echo "<td colspan=4>&nbsp;</td></tr></form>";
+	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')
+		printNewItemTR();
 	echo "</table><br>\n";
 	finishPortlet();
 
@@ -1135,6 +1143,19 @@ function renderPortsForObject ($object_id = 0)
 
 function renderIPv4ForObject ($object_id = 0)
 {
+	function printNewItemTR ()
+	{
+		global $aat;
+		printOpFormIntro ('addIPv4Allocation');
+		echo "<tr><td>";
+		printImageHREF ('add', 'Allocate new address', TRUE, 99);
+		echo "</td>";
+		echo "<td class=tdleft><input type='text' size='10' name='bond_name' tabindex=100></td>\n";
+		echo "<td class=tdleft><input type=text name='ip' tabindex=101></td>\n";
+		echo "<td colspan=3>&nbsp;</td><td>";
+		printSelect ($aat, 'bond_type');
+		echo "</td><td colspan=2>&nbsp;</td></tr></form>";
+	}
 	global $root, $pageno, $tabno, $aat;
 	if ($object_id <= 0)
 	{
@@ -1150,16 +1171,8 @@ function renderIPv4ForObject ($object_id = 0)
 		echo '<th colspan=2>network</th><th>routed by</th>';
 	echo '<th>type</th><th>misc</th><th>&nbsp</th></tr>';
 
-	printOpFormIntro ('addIPv4Allocation');
-	echo "<tr><td>";
-	printImageHREF ('add', 'Allocate new address', TRUE, 99);
-	echo "</td>";
-	echo "<td class=tdleft><input type='text' size='10' name='bond_name' tabindex=100></td>\n";
-	echo "<td class=tdleft><input type=text name='ip' tabindex=101></td>\n";
-	echo "<td colspan=3>&nbsp;</td><td>";
-	printSelect ($aat, 'bond_type');
-	echo "</td><td colspan=2>&nbsp;</td></tr></form>";
-
+	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
+		printNewItemTR();
 	foreach ($alloclist as $dottedquad => $alloc)
 	{
 		$class = $alloc['addrinfo']['class'];
@@ -1229,6 +1242,8 @@ function renderIPv4ForObject ($object_id = 0)
 		printImageHREF ('save', 'Save changes', TRUE);
 		echo "</td></form></tr>\n";
 	}
+	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')
+		printNewItemTR();
 
 	echo "</table><br>\n";
 	finishPortlet();
@@ -2549,6 +2564,22 @@ function renderIPv4AddressProperties ($dottedquad)
 function renderIPv4AddressAllocations ($dottedquad)
 {
 	showMessageOrError();
+	function printNewItemTR ()
+	{
+		global $aat;
+		printOpFormIntro ('addIPv4Allocation');
+		echo "<tr><td>";
+		printImageHREF ('add', 'new allocation', TRUE);
+		echo "</td><td><select name='object_id'>";
+
+		foreach (explode (',', getConfigVar ('IPV4_PERFORMERS')) as $type) 
+			foreach (getNarrowObjectList ($type) as $object)
+				echo "<option value='${object['id']}'>${object['dname']}</option>";
+
+		echo "</select></td><td><input type='text' name='bond_name' value='' size=10></td><td>";
+		printSelect ($aat, 'bond_type');
+		echo "</td><td>&nbsp;</td></form></tr>";
+	}
 	global $pageno, $tabno, $root, $aat;
 
 	$address = getIPv4Address ($dottedquad);
@@ -2559,6 +2590,8 @@ function renderIPv4AddressAllocations ($dottedquad)
 
 	if ($address['reserved'] == 'yes')
 		echo "<tr class='${class}'><td colspan=3>&nbsp;</td><td class=tdleft><strong>RESERVED</strong></td><td>&nbsp;</td></tr>";
+	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
+		printNewItemTR();
 	foreach ($address['allocs'] as $bond)
 	{
 		echo "<tr class='$class'>";
@@ -2573,18 +2606,8 @@ function renderIPv4AddressAllocations ($dottedquad)
 		printImageHREF ('save', 'Save changes', TRUE);
 		echo "</td></form></tr>\n";
 	}
-	printOpFormIntro ('addIPv4Allocation');
-	echo "<td>";
-	printImageHREF ('add', 'new allocation', TRUE);
-	echo "</td><td><select name='object_id'>";
-
-	foreach (explode (',', getConfigVar ('IPV4_PERFORMERS')) as $type) 
-		foreach (getNarrowObjectList ($type) as $object)
-			echo "<option value='${object['id']}'>${object['dname']}</option>";
-
-	echo "</select></td><td><input type='text' name='bond_name' value='' size=10></td><td>";
-	printSelect ($aat, 'bond_type');
-	echo "</td><td>&nbsp;</td></form></tr>";
+	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')
+		printNewItemTR();
 	echo "</table><br><br>";
 
 }
@@ -3146,11 +3169,22 @@ function renderUserList ()
 
 function renderUserListEditor ()
 {
+	function printNewItemTR ()
+	{
+		printOpFormIntro ('createUser');
+		echo "<tr><td>&nbsp;</td><td><input type=text size=16 name=username tabindex=100></td>\n";
+		echo "<td><input type=text size=24 name=realname tabindex=101></td>";
+		echo "<td><input type=password size=64 name=password tabindex=102></td><td>";
+		printImageHREF ('create', 'Add new account', TRUE, 103);
+		echo "</td></tr></form>";
+	}
 	global $root, $pageno, $tabno, $accounts;
 	startPortlet ('User accounts');
 	showMessageOrError();
 	echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
 	echo "<tr><th>status (click to change)</th><th>Username</th><th>Real name</th><th>Password</th><th>&nbsp;</th></tr>\n";
+	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
+		printNewItemTR();
 	foreach ($accounts as $account)
 	{
 		printOpFormIntro ('updateUser', array ('user_id' => $account['user_id']));
@@ -3175,12 +3209,8 @@ function renderUserListEditor ()
 		printImageHREF ('save', 'Save changes', TRUE);
 		echo "</td></form></tr>\n";
 	}
-	printOpFormIntro ('createUser');
-	echo "<td>&nbsp;</td><td><input type=text size=16 name=username tabindex=100></td>\n";
-	echo "<td><input type=text size=24 name=realname tabindex=101></td>";
-	echo "<td><input type=password size=64 name=password tabindex=102></td><td>";
-	printImageHREF ('create', 'Add new account', TRUE, 103);
-	echo "</td></tr></form>";
+	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
+		printNewItemTR();
 	echo "</table><br>\n";
 	finishPortlet();
 }
@@ -3357,11 +3387,22 @@ function renderDictionaryEditor ()
 // to delete a non-empty chapter.
 function renderChaptersEditor ()
 {
+	function printNewItemTR ()
+	{
+		printOpFormIntro ('add');
+		echo '<tr><td>';
+		printImageHREF ('add', 'Add new', TRUE);
+		echo "</td><td colspan=3><input type=text name=chapter_name></td>";
+		echo '</tr>';
+		echo '</form>';
+	}
 	global $root, $pageno, $tabno;
 	showMessageOrError();
 	$dict = getDict();
 	echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
 	echo '<tr><th>&nbsp;</th><th>Chapter name</th><th>Words</th><th>&nbsp;</th></tr>';
+	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')
+		printNewItemTR();
 	foreach ($dict as $chapter)
 	{
 		$wordcount = count ($chapter['word']);
@@ -3389,12 +3430,8 @@ function renderChaptersEditor ()
 		echo '</td></tr>';
 		echo '</form>';
 	}
-	printOpFormIntro ('add');
-	echo '<tr><td>';
-	printImageHREF ('add', 'Add new', TRUE);
-	echo "</td><td colspan=3><input type=text name=chapter_name></td>";
-	echo '</tr>';
-	echo '</form>';
+	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')
+		printNewItemTR();
 	echo "</table>\n";
 }
 
@@ -3430,12 +3467,29 @@ function renderAttributes ()
 
 function renderEditAttributesForm ()
 {
+	function printNewItemTR ()
+	{
+		printOpFormIntro ('add');
+		echo '<tr><td>';
+		printImageHREF ('add', '', TRUE);
+		echo "</td><td><input type=text name=attr_name></td>";
+		echo '<td><select name=attr_type>';
+		echo '<option value=uint>uint</option>';
+		echo '<option value=float>float</option>';
+		echo '<option value=string>string</option>';
+		echo '<option value=dict>dict</option>';
+		echo '</select></td>';
+		echo '</tr>';
+		echo '</form>';
+	}
 	global $root, $pageno, $tabno;
 	$attrMap = getAttrMap();
 	showMessageOrError();
 	startPortlet ('Optional attributes');
 	echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
 	echo '<tr><th>&nbsp;</th><th>Name</th><th>Type</th><th>&nbsp;</th></tr>';
+	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
+		printNewItemTR();
 	foreach ($attrMap as $attr)
 	{
 		printOpFormIntro ('upd', array ('attr_id' => $attr['id']));
@@ -3449,30 +3503,47 @@ function renderEditAttributesForm ()
 		echo '</td></tr>';
 		echo '</form>';
 	}
-	printOpFormIntro ('add');
-	echo '<tr><td>';
-	printImageHREF ('add', '', TRUE);
-	echo "</td><td><input type=text name=attr_name></td>";
-	echo '<td><select name=attr_type>';
-	echo '<option value=uint>uint</option>';
-	echo '<option value=float>float</option>';
-	echo '<option value=string>string</option>';
-	echo '<option value=dict>dict</option>';
-	echo '</select></td>';
-	echo '</tr>';
-	echo '</form>';
+	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')
+		printNewItemTR();
 	echo "</table>\n";
 	finishPortlet();
 }
 
 function renderEditAttrMapForm ()
 {
+	function printNewItemTR ($attrMap)
+	{
+		printOpFormIntro ('add');
+		echo '<tr><td>';
+		printImageHREF ('add', '', TRUE);
+		echo "</td><td><select name=attr_id>";
+		$shortType['uint'] = 'U';
+		$shortType['float'] = 'F';
+		$shortType['string'] = 'S';
+		$shortType['dict'] = 'D';
+		foreach ($attrMap as $attr)
+			echo "<option value=${attr['id']}>[" . $shortType[$attr['type']] . "] ${attr['name']}</option>";
+		echo "</select></td>";
+		echo '<td>';
+		printSelect (getObjectTypeList(), 'objtype_id');
+		echo '</td>';
+		$dict = getDict();
+		echo '<td><select name=chapter_no>';
+		foreach ($dict as $chapter)
+			if (!$chapter['sticky'])
+				echo "<option value='${chapter['no']}'>${chapter['name']}</option>";
+		echo '</select></td>';
+		echo '</tr>';
+		echo '</form>';
+	}
 	global $root, $pageno, $tabno;
 	$attrMap = getAttrMap();
 	showMessageOrError();
 	startPortlet ('Attribute map');
 	echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
 	echo '<tr><th>&nbsp;</th><th>Attribute name</th><th>Object type</th><th>Dictionary chapter</th></tr>';
+	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
+		printNewItemTR ($attrMap);
 	foreach ($attrMap as $attr)
 	{
 		if (count ($attr['application']) == 0)
@@ -3496,28 +3567,8 @@ function renderEditAttrMapForm ()
 			echo "</td></tr>\n";
 		}
 	}
-	printOpFormIntro ('add');
-	echo '<tr><td>';
-	printImageHREF ('add', '', TRUE);
-	echo "</td><td><select name=attr_id>";
-	$shortType['uint'] = 'U';
-	$shortType['float'] = 'F';
-	$shortType['string'] = 'S';
-	$shortType['dict'] = 'D';
-	foreach ($attrMap as $attr)
-		echo "<option value=${attr['id']}>[" . $shortType[$attr['type']] . "] ${attr['name']}</option>";
-	echo "</select></td>";
-	echo '<td>';
-	printSelect (getObjectTypeList(), 'objtype_id');
-	echo '</td>';
-	$dict = getDict();
-	echo '<td><select name=chapter_no>';
-	foreach ($dict as $chapter)
-		if (!$chapter['sticky'])
-			echo "<option value='${chapter['no']}'>${chapter['name']}</option>";
-	echo '</select></td>';
-	echo '</tr>';
-	echo '</form>';
+	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')
+		printNewItemTR ($attrMap);
 	echo "</table>\n";
 	finishPortlet();
 }
@@ -4784,6 +4835,19 @@ function renderTagCloud ($realm = '')
 
 function renderTagTreeEditor ()
 {
+	function printNewItemTR ()
+	{
+		global $taglist;
+		printOpFormIntro ('createTag');
+		echo "<tr><td class=tdleft>";
+		printImageHREF ('add', 'Create tag', TRUE, 102);
+		echo '</td><td><input type=text name=tag_name tabindex=100></td><td><select name=parent_id tabindex=101>';
+		echo "<option value=0>-- NONE --</option>\n";
+		foreach ($taglist as $taginfo)
+			echo "<option value=${taginfo['id']}>${taginfo['tag']}</option>";
+		echo "</select></td><td>&nbsp;</td></tr>";
+		echo "</form>\n";
+	}
 	global $taglist, $tagtree;
 	showMessageOrError();
 
@@ -4814,17 +4878,12 @@ function renderTagTreeEditor ()
 	startPortlet ('tag tree');
 	echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
 	echo "<tr><th>&nbsp;</th><th>tag</th><th>parent</th><th>&nbsp;</th></tr>\n";
+	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
+		printNewItemTR();
 	foreach ($tagtree as $taginfo)
 		renderTagRowForEditor ($taginfo);
-	printOpFormIntro ('createTag');
-	echo "<tr><td class=tdleft>";
-	printImageHREF ('add', 'Create tag', TRUE, 102);
-	echo '</td><td><input type=text name=tag_name tabindex=100></td><td><select name=parent_id tabindex=101>';
-	echo "<option value=0>-- NONE --</option>\n";
-	foreach ($taglist as $taginfo)
-		echo "<option value=${taginfo['id']}>${taginfo['tag']}</option>";
-	echo "</select></td><td>&nbsp;</td></tr>";
-	echo "</form>\n";
+	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')
+		printNewItemTR();
 	echo '</table>';
 	finishPortlet();
 }

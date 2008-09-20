@@ -816,6 +816,7 @@ function resetUIConfig()
 	setConfigVar ('EXT_IPV4_VIEW', 'yes');
 	setConfigVar ('TREE_THRESHOLD', '25');
 	setConfigVar ('IPV4_JAYWALK', 'no');
+	setConfigVar ('ADDNEW_AT_TOP', 'no');
 	return buildRedirectURL ('OK');
 }
 
