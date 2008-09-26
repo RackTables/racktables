@@ -1135,6 +1135,7 @@ function getIPv4Address ($dottedquad = '')
 	$i32 = ip2long ($dottedquad); // signed 32 bit
 	$scanres = scanIPv4Space (array (array ('i32_first' => $i32, 'i32_last' => $i32)));
 	if (!isset ($scanres[$i32]))
+		//$scanres[$i32] = constructIPv4Address ($dottedquad); // XXX: this should be verified to not break things
 		return constructIPv4Address ($dottedquad);
 	markupIPv4AddrList ($scanres);
 	return $scanres[$i32];

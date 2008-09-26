@@ -5038,7 +5038,7 @@ function renderTagFilterPortlet ($tagfilter, $realm, $bypass_name = '', $bypass_
 	echo "<input type=hidden name=tab value=${tabno}>\n";
 	if ($bypass_name != '')
 		echo "<input type=hidden name=${bypass_name} value='${bypass_value}'>\n";
-	echo '<tr><td colspan=2><select name=tagfilter[] multiple>';
+	echo '<tr><td colspan=2><select name=tagfilter[] multiple size=' . getConfigVar ('MAXSELSIZE') . '>';
 	foreach ($objectivetags as $taginfo)
 		renderTagOptionForFilter ($taginfo, complementByKids ($tagfilter), $realm);
 	echo '</select></td></tr><tr><td>';
@@ -5068,7 +5068,7 @@ function renderTagSelect ()
 		echo "No tags defined";
 		return;
 	}
-	echo '<select name=taglist[] multiple>';
+	echo '<select name=taglist[] multiple size=' . getConfigVar ('MAXSELSIZE') . '>';
 	foreach ($tagtree as $taginfo)
 		renderTagOption ($taginfo);
 	echo '</select><br>';
@@ -5396,7 +5396,7 @@ function printIPv4NetInfoTDs ($netinfo, $tdclass = 'tdleft', $indent = 0, $symbo
 		echo '</a>';
 	echo "</td><td class='${tdclass}'>";
 	if (!isset ($netinfo['id']))
-		printImageHREF ('dragons');
+		printImageHREF ('dragons', 'Here be dragons.');
 	else
 	{
 		echo niftyString ($netinfo['name']);

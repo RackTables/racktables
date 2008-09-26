@@ -25,7 +25,7 @@ echo "<link rel=icon href='" . getFaviconURL() . "' type='image/x-icon' />";
 <div style="background-color: #f0f0f0; border: 1px solid #3c78b5; padding: 10px; height: 100%; text-align: center; margin: 5px;">
 <h2>Pick address:</h2><br><br>
 <input type=hidden id='ip'>
-<select size="30" id="addresses">
+<select size=<?php echo getConfigVar ('MAXSELSIZE'); ?> id="addresses">
 <?php renderAllIPv4Allocations(); ?>
 </select><br><br>
 <input type='submit' value='Proceed' onclick='if (getElementById("ip")!="") { opener.document.getElementById("remoteip").value=getElementById("ip").value; window.close();}'>

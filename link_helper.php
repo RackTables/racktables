@@ -26,7 +26,7 @@ echo "<link rel=icon href='" . getFaviconURL() . "' type='image/x-icon' />";
 <h2>Choose a port:</h2><br><br>
 <input type=hidden id='remote_port_name'>
 <input type=hidden id='remote_object_name'>
-<select size="30" id="ports">
+<select size=<?php echo getConfigVar ('MAXSELSIZE'); ?> id="ports">
 <?php
 	$type_id = $_REQUEST['type'];
 	$port_id = $_REQUEST['port'];
