@@ -862,10 +862,16 @@ function serializeTags ($chain, $baseurl = '')
 	return $ret;
 }
 
-// a helper for getTagChainExpansion()
-function traceTagChain ($tree, $chain)
+// For each tag add all its parent tags onto the list. Don't expect anything
+// except user's tags on the chain.
+function getTagChainExpansion ($chain, $tree = NULL)
 {
 	$self = __FUNCTION__;
+	if ($tree === NULL)
+	{
+		global $tagtree;
+		$tree = $tagtree;
+	}
 	// For each tag find its path from the root, then combine items
 	// of all paths and add them to the chain, if they aren't there yet.
 	$ret = array();
@@ -880,7 +886,7 @@ function traceTagChain ($tree, $chain)
 			}
 		if (count ($taginfo1['kids']) > 0)
 		{
-			$subsearch = $self ($taginfo1['kids'], $chain);
+			$subsearch = $self ($chain, $taginfo1['kids']);
 			if (count ($subsearch))
 			{
 				$hit = TRUE;
@@ -891,14 +897,6 @@ function traceTagChain ($tree, $chain)
 			$ret[] = $taginfo1;
 	}
 	return $ret;
-}
-
-// For each tag add all its parent tags onto the list. Don't expect anything
-// except user's tags on the chain.
-function getTagChainExpansion ($chain)
-{
-	global $tagtree;
-	return traceTagChain ($tagtree, $chain);
 }
 
 // Return the list of missing implicit tags.
@@ -1520,7 +1518,7 @@ function iptree_embed (&$node, $pfx)
 	}
 }
 
-function treeApplyFunc (&$tree, $func, $stopfunc = '')
+function treeApplyFunc (&$tree, $func = '', $stopfunc = '')
 {
 	if (empty ($func))
 		return;
@@ -1611,6 +1609,28 @@ function iptree_markup_collapsion (&$tree, $threshold = 1024, $target = 0)
 		$ret = ($ret or $here or $below); // parentheses are necessary for this to be computed correctly
 	}
 	return $ret;
+}
+
+// Get a tree and target entity ID on it. Return the list of IDs, which make the path
+// from the target entity to tree root. If such a path exists, it will consist of at
+// least the target ID. Otherwise an empty list will be returned. The "list" is a randomly
+// indexed array of values.
+function traceEntity ($tree, $target_id)
+{
+	$self = __FUNCTION__;
+	foreach ($tree as $node)
+	{
+		if ($node['id'] == $target_id) // here!
+			return array ($target_id);
+		$subtrace = $self ($node['kids'], $target_id); // below?
+		if (count ($subtrace))
+		{
+			array_push ($subtrace, $node['id']);
+			return $subtrace;
+		}
+		// next...
+	}
+	return array();
 }
 
 ?>
