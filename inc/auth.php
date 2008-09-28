@@ -55,6 +55,31 @@ function permitted ($p = NULL, $t = NULL, $o = NULL, $annex = array())
 		$subject[] = array ('tag' => '$op_' . $op);
 		$subject[] = array ('tag' => '$any_op');
 	}
+	// XXX: The solution below is only appropriate for a corner case of a more universal
+	// problem: to make the decision for an entity belonging to a cascade of nested
+	// containers. Each container being an entity itself, it may have own tags (explicit
+	// and implicit accordingly). There's a fixed set of rules (RackCode) with each rule
+	// being able to evaluate any built and given context and produce either a decision
+	// or a lack of decision.
+	// There are several levels of context for the target entity, at least one for entities
+	// belonging directly to the tree root. Each level's context is a union of given
+	// container's tags and the tags of the contained entities.
+	// The universal problem originates from the fact, that certain rules may change
+	// their product as context level changes, thus forcing some final decision (but not
+	// adding a lack of it). With rule code being principles and context cascade being
+	// circumstances, there are two uttermost approaches or moralities.
+	//
+	// Fundamentalism: principles over circumstances. When a rule doesn't produce any
+	// decision, go on to the next rule. When all rules are evaluated, go on to the next
+	// security context level.
+	//
+	// Opportunism: circumstances over principles. With a lack of decision, work with the
+	// same rule, trying to evaluate it against the next level (and next, and next...),
+	// until all levels are tried. Only then go on to the next rule.
+	//
+	// With the above being simple discrete algorythms, I believe, that they very reliably
+	// replicate human behavior. This gives a vast ground for further research, so I would
+	// only note, that the morale used in RackTables is "principles first".
 	return gotClearanceForTagChain ($subject);
 }
 
