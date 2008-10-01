@@ -1298,7 +1298,7 @@ CREATE TABLE `TagTree` (
 				die ('<b>Cannot upgrade due to multibyte extension not present. See the README for details.</b>');
 			}
 			$query[] = 'alter table TagStorage modify column tag_id int(10) unsigned not null;';
-			$query[] = "alter table TagStorage modify column target_realm enum('object','ipv4net','rack','ipv4vs','ipv4rspool','user');";
+			$query[] = "alter table TagStorage modify column target_realm enum('object','ipv4net','rack','ipv4vs','ipv4rspool','user') NOT NULL default 'object'";
 			$query[] = "create table Script (script_name char(64) not null primary key, script_text text)";
 			// Do the same getUserPermissions() does, but without the function.
 			// We need to generate more specific rules first, otherwise they will
@@ -1407,6 +1407,8 @@ CREATE TABLE `TagTree` (
 			}
 			$query[] = 'alter table IPRanges add unique `base-len` (`ip`, `mask`)';
 			$query[] = 'alter table IPVirtualService drop key `endpoint`';
+			// fix the default value (only seen when upgrading from pre-0.16.0)
+			$query[] = "alter table TagStorage modify column target_realm enum('object','ipv4net','rack','ipv4vs','ipv4rspool','user') NOT NULL default 'object'";
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('TREE_THRESHOLD','25','uint','yes','no','Tree view auto-collapse threshold')";
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('IPV4_JAYWALK','no','string','no','no','Enable IPv4 address allocations w/o covering network')";
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('ADDNEW_AT_TOP','yes','string','no','no','Render \"add new\" line at top of the list')";
