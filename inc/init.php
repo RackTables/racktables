@@ -34,7 +34,7 @@ else
 		"procedure by following <a href='${root}install.php'>this link</a>.",
 		__FILE__
 	);
-	die;
+	exit (1);
 }
 
 // Now try to connect...
@@ -45,7 +45,7 @@ try
 catch (PDOException $e)
 {
 	showError ("Database connection failed:\n\n" . $e->getMessage(), __FILE__);
-	die();
+	exit (1);
 }
 
 $dbxlink->exec ("set names 'utf8'");
@@ -58,7 +58,7 @@ if (get_magic_quotes_gpc())
 if (!set_magic_quotes_runtime (0))
 {
 	showError ('Failed to turn magic quotes off', __FILE__);
-	die;
+	exit (1);
 }
 
 // Escape any globals before we ever try to use them.
@@ -78,44 +78,35 @@ if ($dbver != CODE_VERSION)
 		'either authenticated or shown any page until the upgrade is ' .
 		"finished. Follow <a href='${root}upgrade.php'>this link</a> and " .
 		'authenticate as administrator to finish the upgrade.</p>';
-	die;
+	exit (1);
 }
 
 if (!mb_internal_encoding ('UTF-8') or !mb_regex_encoding ('UTF-8'))
 {
 	showError ('Failed setting multibyte string encoding to UTF-8', __FILE__);
-	die;
+	exit (1);
 }
 $configCache = loadConfigCache();
 if (!count ($configCache))
 {
 	showError ('Failed to load configuration from the database.', __FILE__);
-	die();
+	exit (1);
 }
 
 require_once 'inc/code.php';
 $rackCodeCache = loadScript ('RackCodeCache');
 if ($rackCodeCache == NULL or empty ($rackCodeCache))
 {
-//	$t1 = microtime (TRUE);
 	$rackCode = getRackCode (loadScript ('RackCode'));
-//	$t2 = microtime (TRUE);
-//	echo 'DEBUG: parsed RackCode tree from scratch in ' . ($t2 - $t1) . ' second(s)<br>';
 	saveScript ('RackCodeCache', base64_encode (serialize ($rackCode)));
 }
 else
 {
-//	$t1 = microtime (TRUE);
 	$rackCode = unserialize (base64_decode ($rackCodeCache));
-//	$t2 = microtime (TRUE);
-//	echo 'DEBUG: loaded RackCode cache in ' . ($t2 - $t1) . ' second(s)<br>';
 	if ($rackCode === FALSE) // invalid cache
 	{
 		saveScript ('RackCodeCache', '');
-//		$t1 = microtime (TRUE);
 		$rackCode = getRackCode (loadScript ('RackCode'));
-//		$t2 = microtime (TRUE);
-//		echo 'DEBUG: discarded RackCode cache and parsed tree from scratch in ' . ($t2 - $t1) . ' second(s)<br>';
 	}
 }
 
@@ -125,7 +116,7 @@ if ($rackCode['result'] != 'ACK')
 {
 	// FIXME: display a message with an option to reset RackCode text
 	showError ('Could not load the RackCode due to error: ' . $rackCode['load'], __FILE__);
-	die;
+	exit (1);
 }
 $rackCode = $rackCode['load'];
 
@@ -137,7 +128,7 @@ $accounts = getUserAccounts();
 if ($accounts === NULL)
 {
 	showError ('Failed to initialize access database.', __FILE__);
-	die();
+	exit (1);
 }
 
 authenticate();
