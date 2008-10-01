@@ -63,24 +63,11 @@ function printReleaseNotes ($batchid)
 			echo '(and the first allows everything to you, the administrator). The whole config can ';
 			echo "be reviewed on the Permissions page (under Configuration). Sorry for the inconvenience.<br><br>\n";
 			break;
-		case '0.16.1':
-			echo "<font color=red><strong>Release notes for ${batchid}</strong></font><br>";
-			echo 'This release fixes a missing UNIQUE key in the database. However, this fix may sometimes fail, ';
-			echo 'if the table contains duplicate records. If the 0.16.0-0.16.1 upgrade batch completed without errors, ';
-			echo 'no action needs to be taken. If you see a failed ADD UNIQUE query during upgrade, the only solution is to delete the duplicates manually. ';
-			echo 'To do this, open a MySQL console and issue the failed query again:<br><br>';
-			echo 'mysql&gt; alter table IPVirtualService ADD UNIQUE endpoint (vip, vport, proto);<br><br>';
-			echo 'The IP address of the duplicate VS will be known from the &quot;Duplicate entry&quot; message. For example,';
-			echo " to decode &quot;Duplicate entry '180879877-80-TCP' for key 2&quot; error message, issue:<br><br>";
-			echo 'mysql&gt; select inet_ntoa(180879877);<br><br>';
-			echo 'Then go to "virtual services" web-interface page and adjust the data as ';
-			echo 'necessary. You would need to get rid of the duplicates accurately one by one, repeating the ADD UNIQUE ';
-			echo 'query until it succeeds.<br><br>';
-			break;
 		case '0.16.3':
 			echo "<font color=red><strong>Release notes for ${batchid}</strong></font><br>";
 			echo 'This release fixes a missing UNIQUE KEY in a table. The upgrade script may find it necessary first to transform some records.<br>';
 			echo 'Because of this it is normal to see several "update TagStorage ... Duplicate entry" failed queries during the upgrade.<br>';
+			echo 'Additionally, it is normal to see " Can\'t DROP \'endpoint\'" message during upgrade<br>';
 			break;
 		default:
 			break;
@@ -1376,7 +1363,6 @@ CREATE TABLE `TagTree` (
 			break;
 		case '0.16.1':
 			$query[] = 'alter table Script modify column script_text longtext';
-			$query[] = 'alter table IPVirtualService ADD UNIQUE endpoint (vip, vport, proto)';
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('SHOW_LAST_TAB','no','string','yes','no','Remember last tab shown for each page')";
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('COOKIE_TTL','1209600','uint','yes','no','Cookies lifetime in seconds')";
 			$query[] = "update Config set varvalue = '0.16.1' where varname = 'DB_VERSION'";
@@ -1420,6 +1406,7 @@ CREATE TABLE `TagTree` (
 				unset ($r);
 			}
 			$query[] = 'alter table IPRanges add unique `base-len` (`ip`, `mask`)';
+			$query[] = 'alter table IPVirtualService drop key `endpoint`';
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('TREE_THRESHOLD','25','uint','yes','no','Tree view auto-collapse threshold')";
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('IPV4_JAYWALK','no','string','no','no','Enable IPv4 address allocations w/o covering network')";
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('ADDNEW_AT_TOP','yes','string','no','no','Render \"add new\" line at top of the list')";

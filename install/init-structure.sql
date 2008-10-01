@@ -119,8 +119,7 @@ CREATE TABLE `IPVirtualService` (
   `name` char(255) default NULL,
   `vsconfig` text,
   `rsconfig` text,
-  PRIMARY KEY  (`id`),
-  UNIQUE KEY `endpoint` (`vip`,`vport`,`proto`)
+  PRIMARY KEY  (`id`)
 ) ENGINE=MyISAM;
 
 CREATE TABLE `Link` (

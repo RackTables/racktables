@@ -116,27 +116,6 @@ standard package repository (and restarting Apache after that):
 Fedora: yum install php-mbstring
 ALTLinux: apt-get install php5-mbstring
 
-*** Upgrading to 0.16.1 ***
-
-This release fixes a missing UNIQUE key in the database. However, this fix
-may sometimes fail, if the table contains duplicate records. If the
-0.16.0-0.16.1 upgrade batch completed without errors, no action needs to be
-taken. If you see a failed ADD UNIQUE query during upgrade, the only solution
-is to delete the duplicates manually. To do this, open a MySQL console and
-issue the failed query again:
-
-mysql> alter table IPVirtualService ADD UNIQUE endpoint (vip, vport, proto);
-
-The IP address of the duplicate VS will be known from the "Duplicate entry"
-message. For example, to decode "Duplicate entry '180879877-80-TCP' for key
-2" error message, issue:
-
-mysql> select inet_ntoa(180879877);
-
-Then go to "virtual services" web-interface page and adjust the data as
-necessary. You would need to get rid of the duplicates accurately one by
-one, repeating the ADD UNIQUE query until it succeeds.
-
 *** Upgrading to 0.16.3 ***
 
 This release fixes a missing UNIQUE KEY in a table. The upgrade script may

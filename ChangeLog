@@ -4,6 +4,7 @@
 		highlightling for RackCode editing
 	new feature: one more input format for RS manager
 	new feature: standalone RackCode report with warnings
+	new feature: unified IPv4 address tree
 	bugfix: tags are now properly displayed for users
 	bugfix: the JavaScript error isn't generated any more (fix by Aaron)
 	bugfix: tag tree is now always correctly sorted
@@ -11,6 +12,7 @@
 	bugfix: error message was broken in the installer (reported by Thomas Thep)
 	bugfix: IPv4 network check sometimes failed to detect duplicate networks
 	bugfix: lexical scanner could mistakenly fail in some rare cases
+	bugfix: drop DB index mistakenly introduced in 0.16.1
 0.16.2 2008-08-21
 	bugfix: IP address picker was broken
 	bugfix: more message processing fixes
