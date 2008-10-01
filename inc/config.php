@@ -11,7 +11,7 @@
 
 
 // Current code version is subject to change with each new release.
-define ('CODE_VERSION', '0.16.2');
+define ('CODE_VERSION', '0.16.3');
 
 // The name of hash used to store account password hashes
 // in the database. I think, we are happy with this one forever.

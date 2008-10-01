@@ -260,6 +260,6 @@ INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, descriptio
 INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('TREE_THRESHOLD','25','uint','yes','no','Tree view auto-collapse threshold');
 INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('IPV4_JAYWALK','no','string','no','no','Enable IPv4 address allocations w/o covering network');
 INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('ADDNEW_AT_TOP','yes','string','no','no','Render "add new" line at top of the list');
-INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('DB_VERSION','0.16.2','string','no','yes','Database version.');
+INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('DB_VERSION','0.16.3','string','no','yes','Database version.');
 
 INSERT INTO `Script` VALUES ('RackCode','allow {$userid_1}');
