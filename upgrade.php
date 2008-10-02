@@ -1407,7 +1407,7 @@ CREATE TABLE `TagTree` (
 			}
 			$query[] = 'alter table IPRanges add unique `base-len` (`ip`, `mask`)';
 			$query[] = 'alter table IPVirtualService drop key `endpoint`';
-			// fix the default value (only seen when upgrading from pre-0.16.0)
+			// fix the default value (only seen when upgrading from pre-0.16.0 to pre-0.16.3)
 			$query[] = "alter table TagStorage modify column target_realm enum('object','ipv4net','rack','ipv4vs','ipv4rspool','user') NOT NULL default 'object'";
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('TREE_THRESHOLD','25','uint','yes','no','Tree view auto-collapse threshold')";
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('IPV4_JAYWALK','no','string','no','no','Enable IPv4 address allocations w/o covering network')";

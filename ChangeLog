@@ -1,4 +1,4 @@
-0.16.3
+0.16.3 2008-10-02
 	new feature: tell line number for lexical and syntax errors
 	new feature: CodePress editor enables line numbers and syntax
 		highlightling for RackCode editing
