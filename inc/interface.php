@@ -4127,7 +4127,7 @@ function renderRSPoolServerForm ($pool_id = 0)
 			echo "</td><td><input type=text name=rsip value='${rs['rsip']}'></td>";
 			echo "<td><input type=text name=rsport size=5 value='${rs['rsport']}'></td>";
 			echo "<td><textarea name=rsconfig>${rs['rsconfig']}</textarea></td><td>";
-			printImageHREF ('save', 'Save changes', TRUE);
+			printImageHREF ('SAVE', 'Save changes', TRUE);
 			echo "</td></tr></form>\n";
 			$order = $nextorder[$order];
 		}
@@ -4212,7 +4212,7 @@ function renderRSPoolLBForm ($pool_id = 0)
 					echo " (${vsinfo['name']})";
 				echo "</td><td><textarea name=vsconfig>${configs['vsconfig']}</textarea></td>";
 				echo "<td><textarea name=rsconfig>${configs['rsconfig']}</textarea></td><td>";
-				printImageHREF ('save', 'Save changes', TRUE);
+				printImageHREF ('SAVE', 'Save changes', TRUE);
 				echo "</td></tr></form>\n";
 				$order = $nextorder[$order];
 			}
@@ -4262,7 +4262,7 @@ function renderVServiceLBForm ($vs_id = 0)
 				echo "<td class=tdleft><a href='${root}?page=ipv4rsp&pool_id=${pool_id}'>${rspinfo['name']}</a></td>";
 				echo "<td><textarea name=vsconfig>${configs['vsconfig']}</textarea></td>";
 				echo "<td><textarea name=rsconfig>${configs['rsconfig']}</textarea></td><td>";
-				printImageHREF ('save', 'Save changes', TRUE);
+				printImageHREF ('SAVE', 'Save changes', TRUE);
 				echo "</td></tr></form>\n";
 				$order = $nextorder[$order];
 			}
@@ -4460,7 +4460,7 @@ function renderVSListEditForm ()
 		echo "<td class=tdleft><input type=text name=name value='${vsinfo['name']}'></td>";
 		echo "<td><textarea name=vsconfig>${vsinfo['vsconfig']}</textarea></td>";
 		echo "<td><textarea name=rsconfig>${vsinfo['rsconfig']}</textarea></td><td>";
-		printImageHREF ('save', 'save changes', TRUE);
+		printImageHREF ('SAVE', 'save changes', TRUE);
 		echo "</td></tr></form>\n";
 		$order = $nextorder[$order];
 	}
@@ -5148,7 +5148,7 @@ function renderObjectSLB ($object_id)
 			echo "</td><td class=tdleft>" . $rsplist[$vsinfo['pool_id']] . "</td>";
 			echo "<td><textarea name=vsconfig>${vsinfo['vsconfig']}</textarea></td>";
 			echo "<td><textarea name=rsconfig>${vsinfo['rsconfig']}</textarea></td><td>";
-			printImageHREF ('save', 'Save changes', TRUE);
+			printImageHREF ('SAVE', 'Save changes', TRUE);
 			echo "</td></tr></form>\n";
 			$order = $nextorder[$order];
 		}
