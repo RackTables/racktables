@@ -4318,6 +4318,16 @@ function renderRSPool ($pool_id = 0)
 	echo "<tr><th width='50%' class=tdright>Real servers:</th><td class=tdleft>" . count ($poolInfo['rslist']) . "</td></tr>\n";
 	echo "<tr><th width='50%' class=tdright>Load balancers:</th><td class=tdleft>" . count ($poolInfo['lblist']) . "</td></tr>\n";
 	printTagTRs ("${root}?page=ipv4rsplist&tab=default&");
+	if (!empty ($poolInfo['vsconfig']))
+	{
+		echo "<tr><th width='50%' class=tdright>VS configuration:</th><td class=tdleft>&nbsp;</td></tr>\n";
+		echo "<tr><td class=tdleft colspan=2><pre>${poolInfo['vsconfig']}</pre></td></tr>\n";
+	}
+	if (!empty ($poolInfo['rsconfig']))
+	{
+		echo "<tr><th width='50%' class=tdright>RS configuration:</th><td class=tdleft>&nbsp;</td></tr>\n";
+		echo "<tr><td class=tdleft colspan=2><pre>${poolInfo['rsconfig']}</pre></td></tr>\n";
+	}
 	echo "</table>";
 	finishPortlet();
 
