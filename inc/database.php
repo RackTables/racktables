@@ -969,8 +969,6 @@ function scanIPv4Space ($pairlist)
 	$whereexpr5a .= ')';
 	$whereexpr5b .= ')';
 
-	$db_first = sprintf ('%u', 0x00000000 + $i32_first);
-	$db_last = sprintf ('%u', 0x00000000 + $i32_last);
 	// 1. collect labels and reservations
 	$query = "select INET_NTOA(ip) as ip, name, reserved from IPAddress ".
 		"where ${whereexpr1} and (reserved = 'yes' or name != '')";
