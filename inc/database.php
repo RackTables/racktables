@@ -1359,7 +1359,7 @@ function getIPv4VServiceSearchResult ($terms)
 
 function getAccountSearchResult ($terms)
 {
-	return getSearchResultByField
+	$byUsername = getSearchResultByField
 	(
 		'UserAccount',
 		array ('user_id', 'user_name', 'user_realname'),
@@ -1367,6 +1367,23 @@ function getAccountSearchResult ($terms)
 		$terms,
 		'user_name'
 	);
+	$byRealname = getSearchResultByField
+	(
+		'UserAccount',
+		array ('user_id', 'user_name', 'user_realname'),
+		'user_realname',
+		$terms,
+		'user_name'
+	);
+	// Filter out dupes.
+	foreach ($byUsername as $res1)
+		foreach (array_keys ($byRealname) as $key2)
+			if ($res1['user_id'] == $byRealname[$key2]['user_id'])
+			{
+				unset ($byRealname[$key2]);
+				continue 2;
+			}
+	return array_merge ($byUsername, $byRealname);
 }
 
 function getSearchResultByField ($tname, $rcolumns, $scolumn, $terms, $ocolumn = '')

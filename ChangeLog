@@ -1,5 +1,6 @@
 0.16.4
 	bugfix: display VS/RS config block in RS pool view
+	update: enable user search by real name
 0.16.3 2008-10-02
 	new feature: tell line number for lexical and syntax errors
 	new feature: CodePress editor enables line numbers and syntax
