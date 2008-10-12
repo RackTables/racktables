@@ -3601,7 +3601,7 @@ function printImageHREF ($tag, $title = '', $do_input = FALSE, $tabindex = 0)
 			"<input type=image name=submit class=icon " .
 			"src='${root}${img['path']}' " .
 			"border=0 " .
-			($tabindex ? '' : "tabindex=${tabindex}") .
+			($tabindex ? "tabindex=${tabindex}" : '') .
 			(empty ($title) ? '' : " title='${title}'") . // JT: Add title to input hrefs too
 			">";
 	else
@@ -5178,16 +5178,16 @@ function renderEditVService ($vsid)
 	$vsinfo = getVServiceInfo ($vsid);
 	printOpFormIntro ('updIPv4VS');
 	echo '<table border=0 align=center>';
-	echo "<tr><th class=tdright>VIP:</th><td class=tdleft><input type=text name=vip value='${vsinfo['vip']}'></td></tr>\n";
-	echo "<tr><th class=tdright>port:</th><td class=tdleft><input type=text name=vport value='${vsinfo['vport']}'></td></tr>\n";
+	echo "<tr><th class=tdright>VIP:</th><td class=tdleft><input tabindex=1 type=text name=vip value='${vsinfo['vip']}'></td></tr>\n";
+	echo "<tr><th class=tdright>port:</th><td class=tdleft><input tabindex=2 type=text name=vport value='${vsinfo['vport']}'></td></tr>\n";
 	echo "<tr><th class=tdright>proto:</th><td class=tdleft>";
 	printSelect (array ('TCP' => 'TCP', 'UDP' => 'UDP'), 'proto', $vsinfo['proto']);
 	echo "</td></tr>\n";
-	echo "<tr><th class=tdright>name:</th><td class=tdleft><input type=text name=name value='${vsinfo['name']}'></td></tr>\n";
-	echo "<tr><th class=tdright>VS config:</th><td class=tdleft><textarea name=vsconfig rows=20 cols=80>${vsinfo['vsconfig']}</textarea></td></tr>\n";
-	echo "<tr><th class=tdright>RS config:</th><td class=tdleft><textarea name=rsconfig rows=20 cols=80>${vsinfo['rsconfig']}</textarea></td></tr>\n";
+	echo "<tr><th class=tdright>name:</th><td class=tdleft><input tabindex=4 type=text name=name value='${vsinfo['name']}'></td></tr>\n";
+	echo "<tr><th class=tdright>VS config:</th><td class=tdleft><textarea tabindex=5 name=vsconfig rows=20 cols=80>${vsinfo['vsconfig']}</textarea></td></tr>\n";
+	echo "<tr><th class=tdright>RS config:</th><td class=tdleft><textarea tabindex=6 name=rsconfig rows=20 cols=80>${vsinfo['rsconfig']}</textarea></td></tr>\n";
 	echo "<tr><th class=submit colspan=2>";
-	printImageHREF ('SAVE', 'Save changes', TRUE);
+	printImageHREF ('SAVE', 'Save changes', TRUE, 7);
 	echo "</td></tr>\n";
 	echo "</table></form>\n";
 }
