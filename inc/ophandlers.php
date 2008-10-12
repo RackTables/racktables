@@ -400,7 +400,7 @@ function addIPv4Allocation ()
 function addIPv4Prefix ()
 {
 	assertStringArg ('range', __FUNCTION__);
-	assertStringArg ('name', __FUNCTION__);
+	assertStringArg ('name', __FUNCTION__, TRUE);
 
 	$is_bcast = isset ($_REQUEST['is_bcast']) ? $_REQUEST['is_bcast'] : 'off';
 	$taglist = isset ($_REQUEST['taglist']) ? $_REQUEST['taglist'] : array();
@@ -424,7 +424,7 @@ function delIPv4Prefix ()
 function updIPv4Prefix ()
 {
 	assertUIntArg ('id', __FUNCTION__);
-	assertStringArg ('name', __FUNCTION__);
+	assertStringArg ('name', __FUNCTION__, TRUE);
 
 	$error = updateRange ($_REQUEST['id'], $_REQUEST['name']);
 	if ($error != '')
