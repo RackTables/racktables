@@ -1074,27 +1074,38 @@ function scanIPv4Space ($pairlist)
 		"remoteport, " .
 		"description " .
 		"from PortForwarding " .
-		"where ${whereexpr5a} or " .
-		"${whereexpr5b} " .
+		"where ${whereexpr5a} " .
 		"order by localip, localport, remoteip, remoteport, proto";
 	$result = useSelectBlade ($query, __FUNCTION__);
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
 		$remoteip_bin = ip2long ($row['remoteip']);
-		$localip_bin = ip2long ($row['localip']);
-		if ($i32_first <= $remoteip_bin and $remoteip_bin <= $i32_last)
-		{
-			if (!isset ($ret[$remoteip_bin]))
-				$ret[$remoteip_bin] = constructIPv4Address ($row['remoteip']);
-			$ret[$remoteip_bin]['inpf'][] = $row;
-		}
-		if ($i32_first <= $localip_bin and $localip_bin <= $i32_last)
-		{
-			if (!isset ($ret[$localip_bin]))
-				$ret[$localip_bin] = constructIPv4Address ($row['localip']);
-			$ret[$localip_bin]['outpf'][] = $row;
-		}
+		if (!isset ($ret[$remoteip_bin]))
+			$ret[$remoteip_bin] = constructIPv4Address ($row['remoteip']);
+		$ret[$remoteip_bin]['inpf'][] = $row;
 	}
+	unset ($result);
+	// 5. add NAT rules, part 2
+	$query =
+		"select " .
+		"proto, " .
+		"INET_NTOA(localip) as localip, " .
+		"localport, " .
+		"INET_NTOA(remoteip) as remoteip, " .
+		"remoteport, " .
+		"description " .
+		"from PortForwarding " .
+		"where ${whereexpr5b} " .
+		"order by localip, localport, remoteip, remoteport, proto";
+	$result = useSelectBlade ($query, __FUNCTION__);
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
+	{
+		$localip_bin = ip2long ($row['localip']);
+		if (!isset ($ret[$localip_bin]))
+			$ret[$localip_bin] = constructIPv4Address ($row['localip']);
+		$ret[$localip_bin]['outpf'][] = $row;
+	}
+	unset ($result);
 	return $ret;
 }
 

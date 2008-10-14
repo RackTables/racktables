@@ -1,6 +1,7 @@
 0.16.4
 	bugfix: display VS/RS config block in RS pool view
 	bugfix: fix a minor, but long-standing tabindex issue in forms
+	bugfix: NAT rules were not displayed for IP address
 	update: enable user search by real name
 	update: allow empty names for IPv4 networks
 0.16.3 2008-10-02
