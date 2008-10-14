@@ -2454,7 +2454,7 @@ function renderIPv4Address ($dottedquad)
 
 	echo "<td class=pcright>";
 
-	if (!empty ($address['class']))
+	if (isset ($address['class']))
 	{
 		startPortlet ('allocations');
 		echo "<table class='widetable' cellpadding=5 cellspacing=0 border=0 align='center' width='100%'>\n";
@@ -2589,33 +2589,36 @@ function renderIPv4AddressAllocations ($dottedquad)
 	global $pageno, $tabno, $root, $aat;
 
 	$address = getIPv4Address ($dottedquad);
-	$class = $address['class'];
+
 	echo "<center><h1>${dottedquad}</h1></center>\n";
 	echo "<table class='widetable' cellpadding=5 cellspacing=0 border=0 align='center'>\n";
 	echo "<tr><th>&nbsp;</th><th>object</th><th>OS interface</th><th>allocation type</th><th>&nbsp;</th></tr>\n";
 
-	if ($address['reserved'] == 'yes')
-		echo "<tr class='${class}'><td colspan=3>&nbsp;</td><td class=tdleft><strong>RESERVED</strong></td><td>&nbsp;</td></tr>";
 	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
 		printNewItemTR();
-	foreach ($address['allocs'] as $bond)
+	if (isset ($address['class']))
 	{
-		echo "<tr class='$class'>";
-		printOpFormIntro ('updIPv4Allocation', array ('object_id' => $bond['object_id']));
-		echo "<td><a href='${root}process.php?op=delIPv4Allocation&page=${pageno}&tab=${tabno}&ip=${dottedquad}&object_id=${bond['object_id']}'>";
-		printImageHREF ('delete', 'Unallocate address');
-		echo "</a></td>";
-		echo "<td><a href='${root}?page=object&object_id=${bond['object_id']}&hl_ipv4_addr=${dottedquad}'>${bond['object_name']}</td>";
-		echo "<td><input type='text' name='bond_name' value='${bond['name']}' size=10></td><td>";
-		printSelect ($aat, 'bond_type', $bond['type']);
-		echo "</td><td>";
-		printImageHREF ('save', 'Save changes', TRUE);
-		echo "</td></form></tr>\n";
+		$class = $address['class'];
+		if ($address['reserved'] == 'yes')
+			echo "<tr class='${class}'><td colspan=3>&nbsp;</td><td class=tdleft><strong>RESERVED</strong></td><td>&nbsp;</td></tr>";
+		foreach ($address['allocs'] as $bond)
+		{
+			echo "<tr class='$class'>";
+			printOpFormIntro ('updIPv4Allocation', array ('object_id' => $bond['object_id']));
+			echo "<td><a href='${root}process.php?op=delIPv4Allocation&page=${pageno}&tab=${tabno}&ip=${dottedquad}&object_id=${bond['object_id']}'>";
+			printImageHREF ('delete', 'Unallocate address');
+			echo "</a></td>";
+			echo "<td><a href='${root}?page=object&object_id=${bond['object_id']}&hl_ipv4_addr=${dottedquad}'>${bond['object_name']}</td>";
+			echo "<td><input type='text' name='bond_name' value='${bond['name']}' size=10></td><td>";
+			printSelect ($aat, 'bond_type', $bond['type']);
+			echo "</td><td>";
+			printImageHREF ('save', 'Save changes', TRUE);
+			echo "</td></form></tr>\n";
+		}
 	}
 	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')
 		printNewItemTR();
 	echo "</table><br><br>";
-
 }
 
 function renderNATv4ForObject ($object_id = 0)
