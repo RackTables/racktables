@@ -25,6 +25,7 @@ function getDBUpgradePath ($v1, $v2)
 		'0.16.1',
 		'0.16.2',
 		'0.16.3',
+		'0.16.4',
 	);
 	if (!in_array ($v1, $versionhistory) || !in_array ($v2, $versionhistory))
 	{
@@ -1414,6 +1415,10 @@ CREATE TABLE `TagTree` (
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('ADDNEW_AT_TOP','yes','string','no','no','Render \"add new\" line at top of the list')";
 			$query[] = "update Config set description = 'Extended IPv4 view' where varname = 'EXT_IPV4_VIEW'";
 			$query[] = "update Config set varvalue = '0.16.3' where varname = 'DB_VERSION'";
+			break;
+		case '0.16.4':
+			$query[] = "INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (12,795,'[[Cisco%GPASS%Catalyst 3032-DEL | http://www.cisco.com/en/US/products/ps8772/index.html]]')";
+			$query[] = "update Config set varvalue = '0.16.4' where varname = 'DB_VERSION'";
 			break;
 		default:
 			showError ("executeUpgradeBatch () failed, because batch '${batchid}' isn't defined", __FILE__);

@@ -15,6 +15,7 @@ function doSNMPmining ($object_id, $community)
 	// Cisco sysObjectID to model (not product number, i.e. image code is missing) decoder
 	$ciscomodel = array
 	(
+		278 => 'WS-C3548-XL (48 Ethernet 10/100 ports and 2 10/100/1000 uplinks)',
 		283 => 'WS-C6509-E (9-slot system)',
 #		694 => 'WS-C2960-24TC-L (24 Ethernet 10/100 ports and 2 dual-purpose uplinks)',
 #		695 => 'WS-C2960-48TC-L (48 Ethernet 10/100 ports and 2 dual-purpose uplinks)',
@@ -28,11 +29,12 @@ function doSNMPmining ($object_id, $community)
 		634 => 'WS-C3560-48TS (48 Ethernet 10/100 ports and 4 10/100/1000 SFP uplinks)',
 		563 => 'WS-C3560-24PS (24 Ethernet 10/100 POE ports and 2 10/100/1000 SFP uplinks)',
 		564 => 'WS-C3560-48PS (48 Ethernet 10/100 POE ports and 4 10/100/1000 SFP uplinks)',
-		516 => 'WS-C3750-48PS (48 Ethernet 10/100 POE ports and 4 10/100/1000 SFP uplinks)',
+		516 => 'WS-C3750-XXPS (24 or 48 Ethernet 10/100 POE ports and 4 10/100/1000 SFP uplinks)',
 		614 => 'WS-C3560G-24PS (24 Ethernet 10/100/1000 POE ports and 4 10/100/1000 SFP uplinks)',
 		615 => 'WS-C3560G-24TS (24 Ethernet 10/100/1000 ports and 4 10/100/1000 SFP uplinks)',
 		616 => 'WS-C3560G-48PS (48 Ethernet 10/100/1000 POE ports and 4 10/100/1000 SFP uplinks)',
 		617 => 'WS-C3560G-48TS (48 Ethernet 10/100/1000 ports and 4 10/100/1000 SFP uplinks)',
+		624 => 'WS-C3750G-24TS (24 Ethernet 10/100/1000 ports and 4 10/100/1000 SFP uplinks)',
 		58 => 'WS-C4503 (3-slot system)',
 		503 => '4503 (3-slot system)',
 		59 => 'WS-C4506 (6-slot system)',
@@ -42,10 +44,12 @@ function doSNMPmining ($object_id, $community)
 		428 => 'WS-C2950G-24 (24 Ethernet 10/100 ports and 2 1000 GBIC uplinks)',
 		429 => 'WS-C2950G-48 (48 Ethernet 10/100 ports and 2 1000 GBIC uplinks)',
 		559 => 'WS-C2950T-48 (48 Ethernet 10/100 ports and 2 10/100/1000 uplinks)',
+		920 => 'WS-CBS3032-DEL-F (16 Ethernet 10/100/1000 and up to 8 10/100/1000 uplinks)',
 	);
 	// Cisco sysObjectID to Dictionary dict_key map
 	$hwtype = array
 	(
+		278 => 395,
 		283 => 148,
 		696 => 167,
 		697 => 166,
@@ -59,6 +63,7 @@ function doSNMPmining ($object_id, $community)
 		615 => 173,
 		616 => 176,
 		617 => 174,
+		624 => 143,
 		58 => 145,
 		503 => 145,
 		59 => 156,
@@ -71,6 +76,15 @@ function doSNMPmining ($object_id, $community)
 		516 => 179,
 		716 => 164,
 		717 => 162,
+		920 => 795,
+	);
+	// Cisco portType to Dictionary dict_key map
+	$porttype = array
+	(
+		18 => 19,  // 10/100BaseT      => RJ-45/100Base-T
+		28 => 25,  // 1000BaseSX       => SC/1000Base-SX
+		31 => 440, // No Transceiver   => unknown
+		61 => 24,  // 10/100/1000BaseT => RJ-45/1000Base-T
 	);
 
 	$objectInfo = getObjectInfo ($object_id);
@@ -232,6 +246,7 @@ function doSNMPmining ($object_id, $community)
 					$log[] = array ('code' => 'error', 'message' => 'Failed to add port ' . $label . ': ' . $error);
 			}
 			break;
+		case '624': // WS-C3750-24TS
 		case '696': // WS-C2960G-24TC-L
 			// Quite similar to the above.
 			for ($i = 1; $i <= 24; $i++)
@@ -289,24 +304,43 @@ function doSNMPmining ($object_id, $community)
 					$log[] = array ('code' => 'error', 'message' => 'Failed to add port ' . $label . ': ' . $error);
 			}
 			break;
-		case '516': // WS-C3750-48PS
-			for ($i = 1; $i <= 48; $i++)
+		case '516': // WS-C3750G-24TS OR WS-C3750-48PS
+			// FIXME: only handles 2 models of 3750, make it handle all of them
+			// see if it has 24 or 48 ports
+			$numports = substr (snmpget ($endpoints[0], $community, '.1.3.6.1.4.1.9.5.1.3.1.1.14.1'), strlen('INTEGER: '));
+
+			if ($numports == 28) // has 24 ports (+4 SFP) meaning it's a WS-C3750G-24TS
 			{
-				$label = "${i}X";
-				$error = commitAddPort ($object_id, 'fa1/0/' . $i, 19, $label, $ifList2["FastEthernet1/0/${i}"]['phyad']);
-				if ($error == '')
-					$newports++;
-				else
-					$log[] = array ('code' => 'error', 'message' => 'Failed to add port ' . $label . ': ' . $error);
+				for ($i = 1; $i <= 28; $i++)
+				{
+					$label = "${i}";
+					$error = commitAddPort ($object_id, 'gi1/0/' . $i, 24, $label, $ifList2["GigabitEthernet1/0/${i}"]['phyad']);
+					if ($error == '')
+						$newports++;
+					else
+						$log[] = array ('code' => 'error', 'message' => 'Failed to add port ' . $label . ': ' . $error);
+				}
 			}
-			for ($i = 1; $i <= 4; $i++)
+			elseif ($numports == 52) // has 48 ports (+4 SFP) meaning it's a WS-C3750-48PS
 			{
-				$label = "${i}";
-				$error = commitAddPort ($object_id, 'gi1/0/' . $i, 24, $label, $ifList2["GigabitEthernet1/0/${i}"]['phyad']);
-				if ($error == '')
-					$newports++;
-				else
-					$log[] = array ('code' => 'error', 'message' => 'Failed to add port ' . $label . ': ' . $error);
+				for ($i = 1; $i <= 48; $i++)
+				{
+					$label = "${i}X";
+					$error = commitAddPort ($object_id, 'fa1/0/' . $i, 19, $label, $ifList2["FastEthernet1/0/${i}"]['phyad']);
+					if ($error == '')
+						$newports++;
+					else
+						$log[] = array ('code' => 'error', 'message' => 'Failed to add port ' . $label . ': ' . $error);
+				}
+				for ($i = 1; $i <= 4; $i++)
+				{
+					$label = "${i}";
+					$error = commitAddPort ($object_id, 'gi1/0/' . $i, 24, $label, $ifList2["GigabitEthernet1/0/${i}"]['phyad']);
+					if ($error == '')
+						$newports++;
+					else
+						$log[] = array ('code' => 'error', 'message' => 'Failed to add port ' . $label . ': ' . $error);
+				}
 			}
 			break;
 		case '564': // WS-C3560-48PS
@@ -368,42 +402,101 @@ function doSNMPmining ($object_id, $community)
 					$log[] = array ('code' => 'error', 'message' => 'Failed to add port ' . $label . ': ' . $error);
 			}
 			break;
-	// For modular devices we don't iterate over all possible port names,
-	// but use the first list to pick everything that looks legitimate
-	// for this hardware. It would be correct to fetch the list of modules
-	// installed to generate lists of ports, but who is going to implement
-	// this?
-		case '503': // 4503
-		case '58': // WS-C4503
-		case '502': // 4506
-		case '59': // WS-C4506
+	// For modular devices we issue a separate SNMP query to determine port type,
+	// then extract blade & port numbers from the results.
+		case '58':  // WS-C4503
+		case '503': // WS-C4503
+		case '59':  // WS-C4506
+		case '502': // WS-C4506
 		case '283': // WS-C6509-E
-			foreach ($ifList1 as $port)
+			// get slot #, port # and port type using Cisco's MIB
+			$portType = snmpwalkoid ($endpoints[0], $community, '.1.3.6.1.4.1.9.5.1.4.1.1.5');
+			$ifList = array();
+			$i = 0;
+			foreach ($portType as $key => $val)
 			{
-				if ($port['type'] != 'ethernet-csmacd(6)')
-					continue;
-				// Copper Fa/Gi harvesting is relatively simple, while 10Gig ports can
-				// have random samples of transciever units.
-				if (strpos ($port['descr'], 'FastEthernet') === 0) // Fa
+				// slot = $portIndex[8]
+				// port = $portIndex[9]
+				$portIndex = explode('.', $key);
+				$ifList[$i]['slotno'] = $portIndex[8];
+				$ifList[$i]['portno'] = $portIndex[9];
+
+				// note the Cisco port type and corresponding RackTables port type
+				list ($dummy, $cptype) = explode (' ', $val);
+				$ifList[$i]['cptype'] = $cptype;
+				if (array_key_exists($cptype, $porttype))
+					$ifList[$i]['ptype'] = $porttype[$cptype];
+				else
+					$ifList[$i]['ptype'] = null;
+				$i++;
+			}
+
+			// use Cisco's ifIndex attribute to map Cisco table to standard SNMP table
+			$ifIndex  = snmpwalkoid ($endpoints[0], $community, '.1.3.6.1.4.1.9.5.1.4.1.1.11');
+			$i = 0;
+			foreach ($ifIndex as $val)
+			{
+				if (is_null($ifList[$i]['ptype']))
 				{
-					$prefix = 'fa';
-					$ptype = 19; // RJ-45/100Base-TX
-					list ($slotno, $portno) = explode ('/', substr ($port['descr'], strlen ('FastEthernet')));
+					$log[] = array ('code' => 'error', 'message' => 'Unknown port type: ' . $ifList[$i]['cptype']);
+				} else {
+					switch ($ifList[$i]['ptype'])
+					{
+						case 19: // fast eth
+							$prefix = 'fa';
+							break;
+						case 28: // 1000base-sx
+						case 61: // gig eth
+							$prefix = 'gi';
+							break;
+						default: // unknown, default to gig eth
+							$prefix = 'gi';
+					}
+					$pname = "{$prefix}{$ifList[$i]['slotno']}/{$ifList[$i]['portno']}";
+					$label = "slot {$ifList[$i]['slotno']} port {$ifList[$i]['portno']}";
+					list($dummy, $index) = explode(' ', $val);
+
+					// if l2address already exists in DB, nullify value so new row gets added without error
+					if (!is_null(searchByl2address($ifList1[$index]['phyad']))) $ifList1[$index]['phyad'] = null;
+					
+					$error = commitAddPort ($object_id, $pname, $ifList[$i]['ptype'], $label, $ifList1[$index]['phyad']);
+					if ($error == '')
+						$newports++;
+					else
+						$log[] = array ('code' => 'error', 'message' => 'Failed to add port ' . $pname . ': ' . $error);
 				}
-				elseif (strpos ($port['descr'], 'GigabitEthernet') === 0) // Gi
-				{
-					$prefix = 'gi';
-					$ptype = 24; // RJ-45/1000Base-T
-					list ($slotno, $portno) = explode ('/', substr ($port['descr'], strlen ('GigabitEthernet')));
-				}
-				else continue;
-				$label = "slot ${slotno} port ${portno}";
-				$pname = "${prefix}${slotno}/${portno}";
-				$error = commitAddPort ($object_id, $pname, $ptype, $label, $port['phyad']);
+				$i++;
+			}
+			break;
+		case '278': // WS-C3548-XL
+			for ($i = 1; $i <= 48; $i++)
+			{
+				$label = "${i}X";
+				$error = commitAddPort ($object_id, 'fa0/' . $i, 19, $label, $ifList2["FastEthernet0/${i}"]['phyad']);
 				if ($error == '')
 					$newports++;
 				else
-					$log[] = array ('code' => 'error', 'message' => 'Failed to add port ' . $pname . ': ' . $error);
+					$log[] = array ('code' => 'error', 'message' => 'Failed to add port ' . $label . ': ' . $error);
+			}
+			for ($i = 1; $i <= 2; $i++)
+			{
+				$label = "${i}";
+				$error = commitAddPort ($object_id, 'gi0/' . $i, 24, $label, $ifList2["GigabitEthernet0/${i}"]['phyad']);
+				if ($error == '')
+					$newports++;
+				else
+					$log[] = array ('code' => 'error', 'message' => 'Failed to add port ' . $label . ': ' . $error);
+			}
+			break;
+		case '920': // WS-CBS3032-DEL-F
+			for ($i = 1; $i <= 24; $i++)
+			{
+				$label = "${i}";
+				$error = commitAddPort ($object_id, 'gi0/' . $i, 24, $label, $ifList2["GigabitEthernet0/${i}"]['phyad']);
+				if ($error == '')
+					$newports++;
+				else
+					$log[] = array ('code' => 'error', 'message' => 'Failed to add port ' . $label . ': ' . $error);
 			}
 			break;
 		default:
