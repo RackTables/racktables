@@ -545,7 +545,7 @@ function renderEditRackForm ($rack_id)
 }
 
 // This is a helper for creators and editors.
-function printSelect ($rowList, $select_name, $selected_id = 1)
+function printSelect ($rowList, $select_name, $selected_id = NULL, $tabindex = NULL)
 {
 	// First collect all data for OPTGROUPs, then ouput it and dump
 	// the rest of records as is.
@@ -566,13 +566,13 @@ function printSelect ($rowList, $select_name, $selected_id = 1)
 		else
 			$other[$dict_key] = $dict_value;
 	}
-	echo "<select name=${select_name}>";
+	echo "<select name=${select_name}" . ($tabindex ? " tabindex=${tabindex}" : '') . '>';
 	if (!count ($optgroup))
 	{
 		foreach ($other as $dict_key => $dict_value)
 		{
 			echo "<option value=${dict_key}";
-			if ($dict_key == $selected_id)
+			if ($dict_key === $selected_id)
 				echo ' selected';
 			echo ">${dict_value}</option>";
 		}
@@ -585,7 +585,7 @@ function printSelect ($rowList, $select_name, $selected_id = 1)
 			foreach ($groupdata as $dict_key => $dict_value)
 			{
 				echo "<option value=${dict_key}";
-				if ($dict_key == $selected_id)
+				if ($dict_key === $selected_id)
 					echo ' selected';
 				echo ">${dict_value}</option>";
 			}
@@ -597,7 +597,7 @@ function printSelect ($rowList, $select_name, $selected_id = 1)
 			foreach ($other as $dict_key => $dict_value)
 			{
 				echo "<option value=${dict_key}";
-				if ($dict_key == $selected_id)
+				if ($dict_key === $selected_id)
 					echo ' selected';
 				echo ">${dict_value}</option>";
 			}
@@ -4231,12 +4231,12 @@ function renderRSPoolLBForm ($pool_id = 0)
 		foreach (getNarrowObjectList ($type) as $object)
 			echo "<option value='${object['id']}'>${object['dname']}</option>";
 	echo "</select> ";
-	printSelect ($vs_list, 'vs_id');
+	printSelect ($vs_list, 'vs_id', NULL, 2);
 	echo "</td><td>";
-	printImageHREF ('add', 'Configure LB', TRUE, 2);
+	printImageHREF ('add', 'Configure LB', TRUE, 5);
 	echo "</td></tr>\n";
-	echo "<tr><th>VS config</th><td colspan=2><textarea name=vsconfig rows=10 cols=80></textarea></td></tr>";
-	echo "<tr><th>RS config</th><td colspan=2><textarea name=rsconfig rows=10 cols=80></textarea></td></tr>";
+	echo "<tr><th>VS config</th><td colspan=2><textarea tabindex=3 name=vsconfig rows=10 cols=80></textarea></td></tr>";
+	echo "<tr><th>RS config</th><td colspan=2><textarea tabindex=4 name=rsconfig rows=10 cols=80></textarea></td></tr>";
 	echo "</form></table>\n";
 	finishPortlet();
 }
@@ -4284,12 +4284,12 @@ function renderVServiceLBForm ($vs_id = 0)
 		foreach (getNarrowObjectList ($type) as $object)
 			echo "<option value='${object['id']}'>${object['dname']}</option>";
 	echo "</select> ";
-	printSelect ($rsplist, 'pool_id');
+	printSelect ($rsplist, 'pool_id', NULL, 2);
 	echo "</td><td>";
-	printImageHREF ('add', 'Configure LB', TRUE, 2);
+	printImageHREF ('add', 'Configure LB', TRUE, 5);
 	echo "</td></tr>\n";
-	echo "<tr><th>VS config</th><td colspan=2><textarea name=vsconfig rows=10 cols=80></textarea></td></tr>";
-	echo "<tr><th>RS config</th><td colspan=2><textarea name=rsconfig rows=10 cols=80></textarea></td></tr>";
+	echo "<tr><th>VS config</th><td colspan=2><textarea tabindex=3 name=vsconfig rows=10 cols=80></textarea></td></tr>";
+	echo "<tr><th>RS config</th><td colspan=2><textarea tabindex=4 name=rsconfig rows=10 cols=80></textarea></td></tr>";
 	echo "</form></table>\n";
 	finishPortlet();
 }
@@ -5120,14 +5120,14 @@ function renderObjectSLB ($object_id)
 	echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
 	printOpFormIntro ('addLB');
 	echo "<tr valign=top><th>VS / RS pool</th><td class=tdleft>";
-	printSelect ($vs_list, 'vs_id');
+	printSelect ($vs_list, 'vs_id', NULL, 1);
 	echo "</td><td>";
-	printSelect ($rsplist, 'pool_id');
+	printSelect ($rsplist, 'pool_id', NULL, 2);
 	echo "</td><td>";
-	printImageHREF ('add', 'Configure LB', TRUE, 2);
+	printImageHREF ('add', 'Configure LB', TRUE, 5);
 	echo "</td></tr>\n";
-	echo "<tr><th>VS config</th><td colspan=2><textarea name=vsconfig rows=10 cols=80></textarea></td></tr>";
-	echo "<tr><th>RS config</th><td colspan=2><textarea name=rsconfig rows=10 cols=80></textarea></td></tr>";
+	echo "<tr><th>VS config</th><td colspan=2><textarea tabindex=3 name=vsconfig rows=10 cols=80></textarea></td></tr>";
+	echo "<tr><th>RS config</th><td colspan=2><textarea tabindex=4 name=rsconfig rows=10 cols=80></textarea></td></tr>";
 	echo "</form></table>\n";
 	finishPortlet();
 
