@@ -1828,8 +1828,8 @@ function renderObjectGroup ()
 
 	echo '</td><td class=pcleft>';
 
-	startPortlet ('Objects');
 	$objects = getObjectList ($group_id, $tagfilter, getTFMode());
+	startPortlet ('Objects (' . count ($objects) . ')');
 	if ($objects === NULL)
 	{
 		showError ('getObjectList() failed', __FUNCTION__);
