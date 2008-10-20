@@ -3073,7 +3073,7 @@ function renderSearchResults ()
 						echo "<tr class=row_${order}><td class=tdleft>";
 						$parentnet = getIPv4AddressNetworkId ($addr['ip']);
 						if ($parentnet !== NULL)
-							echo "<a href='${root}?page=iprange&id=${parentnet}&hl_ipv4_addr=${addr['ip']}'>${addr['ip']}</a></td>";
+							echo "<a href='${root}?page=iprange&tab=default&id=${parentnet}&hl_ipv4_addr=${addr['ip']}'>${addr['ip']}</a></td>";
 						else
 							echo "<a href='${root}?page=ipaddress&ip=${addr['ip']}'>${addr['ip']}</a></td>";
 						echo "<td class=tdleft>${addr['name']}</td></tr>";
