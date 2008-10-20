@@ -6,6 +6,7 @@
 	update: enable user search by real name
 	update: allow empty names for IPv4 networks
 	update: refactor snmp.php to support Cisco 3032, 3750, 4506 switches (by Aaron, w/data & testing from Luis Fernando Lacayo and Ray Robertson)
+    update: add SNMP discovery support for Cisco 2950-24 (patch by Russ, ticket 177)
 0.16.3 2008-10-02
 	new feature: tell line number for lexical and syntax errors
 	new feature: CodePress editor enables line numbers and syntax
