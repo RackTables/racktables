@@ -52,6 +52,7 @@ function doSNMPmining ($object_id, $community)
 	(
 		278 => 395,
 		283 => 148,
+		324 => 380,
 		696 => 167,
 		697 => 166,
 		527 => 210,
