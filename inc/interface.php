@@ -572,7 +572,7 @@ function printSelect ($rowList, $select_name, $selected_id = NULL, $tabindex = N
 		foreach ($other as $dict_key => $dict_value)
 		{
 			echo "<option value=${dict_key}";
-			if ($dict_key === $selected_id)
+			if ($dict_key == $selected_id)
 				echo ' selected';
 			echo ">${dict_value}</option>";
 		}
@@ -585,7 +585,7 @@ function printSelect ($rowList, $select_name, $selected_id = NULL, $tabindex = N
 			foreach ($groupdata as $dict_key => $dict_value)
 			{
 				echo "<option value=${dict_key}";
-				if ($dict_key === $selected_id)
+				if ($dict_key == $selected_id)
 					echo ' selected';
 				echo ">${dict_value}</option>";
 			}
@@ -597,7 +597,7 @@ function printSelect ($rowList, $select_name, $selected_id = NULL, $tabindex = N
 			foreach ($other as $dict_key => $dict_value)
 			{
 				echo "<option value=${dict_key}";
-				if ($dict_key === $selected_id)
+				if ($dict_key == $selected_id)
 					echo ' selected';
 				echo ">${dict_value}</option>";
 			}
