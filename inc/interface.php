@@ -1844,8 +1844,11 @@ function renderObjectGroup ()
 			$secondclass = 'tdleft port_highlight';
 		else
 			$secondclass = 'tdleft';
-		echo "<tr class=row_${order}><td class='${secondclass}'><a href='${root}?page=object&object_id=${obj['id']}'>${obj['dname']}</a></td>";
-		echo "<td class='${secondclass}'>${obj['label']}</td>";
+		$tags = loadRackObjectTags ($obj['id']);
+		echo "<tr class=row_${order} valign=top><td class='${secondclass}'><a href='${root}?page=object&object_id=${obj['id']}'><strong>${obj['dname']}</strong></a>";
+		if (count ($tags))
+			echo '<br><small>' . serializeTags ($tags, "${root}?page=${pageno}&tab=default&group_id=${group_id}&") . '</small>';
+		echo "</td><td class='${secondclass}'>${obj['label']}</td>";
 		echo "<td class='${secondclass}'>${obj['asset_no']}</td>";
 		echo "<td class='${secondclass}'>${obj['barcode']}</td>";
 		if ($obj['rack_id'])
@@ -3040,8 +3043,11 @@ function renderSearchResults ()
 					echo '<tr><th>Common name</th><th>Visible label</th><th>Asset tag</th><th>barcode</th></tr>';
 					foreach ($what as $obj)
 					{
-						echo "<tr class=row_${order}><td><a href=\"${root}?page=object&object_id=${obj['id']}\">${obj['dname']}</a></td>";
-						echo "<td>${obj['label']}</td>";
+						$tags = loadRackObjectTags ($obj['id']);
+						echo "<tr class=row_${order} valign=top><td class=tdleft><a href=\"${root}?page=object&object_id=${obj['id']}\">${obj['dname']}</a>";
+						if (count ($tags))
+							echo '<br><small>' . serializeTags ($tags) . '</small>';
+						echo "</td><td>${obj['label']}</td>";
 						echo "<td>${obj['asset_no']}</td>";
 						echo "<td>${obj['barcode']}</td></tr>";
 						$order = $nextorder[$order];
