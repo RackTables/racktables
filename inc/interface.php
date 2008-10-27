@@ -1036,7 +1036,7 @@ function renderPortsForObject ($object_id = 0)
 	{
 		printOpFormIntro ('addPort');
 		echo "<tr><td>";
-		printImageHREF ('add', 'add a port', TRUE, 104);
+		printImageHREF ('add', 'add a port', TRUE);
 		echo "</td><td><input type=text size=8 name=port_name tabindex=100></td>\n";
 		echo "<td><input type=text size=24 name=port_label tabindex=101></td>";
 		$types = getPortTypes();
@@ -1150,14 +1150,14 @@ function renderIPv4ForObject ($object_id = 0)
 		global $aat;
 		printOpFormIntro ('addIPv4Allocation');
 		echo "<tr><td>";
-		printImageHREF ('add', 'allocate', TRUE, 99);
+		printImageHREF ('add', 'allocate', TRUE);
 		echo "</td>";
 		echo "<td class=tdleft><input type='text' size='10' name='bond_name' tabindex=100></td>\n";
 		echo "<td class=tdleft><input type=text name='ip' tabindex=101></td>\n";
 		echo "<td colspan=3>&nbsp;</td><td>";
-		printSelect ($aat, 'bond_type');
+		printSelect ($aat, 'bond_type', NULL, 102);
 		echo "</td><td>&nbsp;</td><td>";
-		printImageHREF ('add', 'allocate', TRUE, 99);
+		printImageHREF ('add', 'allocate', TRUE, 103);
 		echo "</td></tr></form>";
 	}
 	global $root, $pageno, $tabno, $aat;
@@ -2577,16 +2577,16 @@ function renderIPv4AddressAllocations ($dottedquad)
 		printOpFormIntro ('addIPv4Allocation');
 		echo "<tr><td>";
 		printImageHREF ('add', 'allocate', TRUE);
-		echo "</td><td><select name='object_id'>";
+		echo "</td><td><select name='object_id' tabindex=100>";
 
 		foreach (explode (',', getConfigVar ('IPV4_PERFORMERS')) as $type) 
 			foreach (getNarrowObjectList ($type) as $object)
 				echo "<option value='${object['id']}'>${object['dname']}</option>";
 
-		echo "</select></td><td><input type='text' name='bond_name' value='' size=10></td><td>";
-		printSelect ($aat, 'bond_type');
+		echo "</select></td><td><input type=text tabindex=101 name=bond_name size=10></td><td>";
+		printSelect ($aat, 'bond_type', NULL, 102);
 		echo "</td><td>";
-		printImageHREF ('add', 'allocate', TRUE);
+		printImageHREF ('add', 'allocate', TRUE, 103);
 		echo "</td></form></tr>";
 	}
 	global $pageno, $tabno, $root, $aat;
@@ -2650,7 +2650,7 @@ function renderNATv4ForObject ($object_id = 0)
 		echo "</a>";
 		echo ":<input type='text' name='remoteport' size='4' tabindex=4></td><td></td>";
 		echo "<td colspan=1><input type='text' name='description' size='20' tabindex=5></td><td>";
-		printImageHREF ('add', 'Add new NAT rule', TRUE);
+		printImageHREF ('add', 'Add new NAT rule', TRUE, 6);
 		echo "</td></tr></form>";
 	}
 	global $pageno, $tabno, $root;
@@ -3419,7 +3419,7 @@ function renderChaptersEditor ()
 		echo '<tr><td>';
 		printImageHREF ('add', 'Add new', TRUE);
 		echo "</td><td><input type=text name=chapter_name tabindex=100></td><td>&nbsp;</td><td>";
-		printImageHREF ('add', 'Add new', TRUE);
+		printImageHREF ('add', 'Add new', TRUE, 101);
 		echo '</td></tr></form>';
 	}
 	global $root, $pageno, $tabno;
@@ -3498,14 +3498,14 @@ function renderEditAttributesForm ()
 		printOpFormIntro ('add');
 		echo '<tr><td>';
 		printImageHREF ('add', 'Create attribute', TRUE);
-		echo "</td><td><input type=text name=attr_name></td>";
-		echo '<td><select name=attr_type>';
+		echo "</td><td><input type=text tabindex=100 name=attr_name></td>";
+		echo '<td><select name=attr_type tabindex=101>';
 		echo '<option value=uint>uint</option>';
 		echo '<option value=float>float</option>';
 		echo '<option value=string>string</option>';
 		echo '<option value=dict>dict</option>';
 		echo '</select></td><td>';
-		printImageHREF ('add', 'Create attribute', TRUE);
+		printImageHREF ('add', 'Create attribute', TRUE, 102);
 		echo '</td></tr></form>';
 	}
 	global $root, $pageno, $tabno;
@@ -3542,7 +3542,7 @@ function renderEditAttrMapForm ()
 		printOpFormIntro ('add');
 		echo '<tr><td>';
 		printImageHREF ('add', '', TRUE);
-		echo "</td><td><select name=attr_id>";
+		echo "</td><td><select name=attr_id tabindex=100>";
 		$shortType['uint'] = 'U';
 		$shortType['float'] = 'F';
 		$shortType['string'] = 'S';
@@ -3551,15 +3551,16 @@ function renderEditAttrMapForm ()
 			echo "<option value=${attr['id']}>[" . $shortType[$attr['type']] . "] ${attr['name']}</option>";
 		echo "</select></td>";
 		echo '<td>';
-		printSelect (getObjectTypeList(), 'objtype_id');
+		printSelect (getObjectTypeList(), 'objtype_id', NULL, 101);
 		echo '</td>';
 		$dict = getDict();
-		echo '<td><select name=chapter_no>';
+		echo '<td><select name=chapter_no tabindex=102>';
 		foreach ($dict as $chapter)
 			if (!$chapter['sticky'])
 				echo "<option value='${chapter['no']}'>${chapter['name']}</option>";
-		echo '</select></td>';
-		echo '</tr>';
+		echo '</select></td><td>';
+		printImageHREF ('add', '', TRUE, 103);
+		echo '</td></tr>';
 		echo '</form>';
 	}
 	global $root, $pageno, $tabno;
@@ -3567,7 +3568,7 @@ function renderEditAttrMapForm ()
 	showMessageOrError();
 	startPortlet ('Attribute map');
 	echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
-	echo '<tr><th>&nbsp;</th><th>Attribute name</th><th>Object type</th><th>Dictionary chapter</th></tr>';
+	echo '<tr><th>&nbsp;</th><th>Attribute name</th><th>Object type</th><th>Dictionary chapter</th><th>&nbsp;</th></tr>';
 	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
 		printNewItemTR ($attrMap);
 	foreach ($attrMap as $attr)
@@ -4876,7 +4877,7 @@ function renderTagTreeEditor ()
 		global $taglist;
 		printOpFormIntro ('createTag');
 		echo "<tr><td class=tdleft>";
-		printImageHREF ('add', 'Create tag', TRUE, 102);
+		printImageHREF ('add', 'Create tag', TRUE);
 		echo '</td><td><input type=text name=tag_name tabindex=100></td><td><select name=parent_id tabindex=101>';
 		echo "<option value=0>-- NONE --</option>\n";
 		foreach ($taglist as $taginfo)
