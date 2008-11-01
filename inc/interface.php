@@ -2306,6 +2306,10 @@ function renderIPv4Network ($id)
 	echo $netmaskbylen[$range['mask']];
 	echo "</td></tr>\n";
 
+	echo "<tr><th width='50%' class=tdright>Netmask:</th><td class=tdleft>";
+	printf ('0x%08X', binMaskFromDec ($range['mask']));
+	echo "</td></tr>\n";
+
 	echo "<tr><th width='50%' class=tdright>Wildcard bits:</th><td class=tdleft>";
 	echo $wildcardbylen[$range['mask']];
 	echo "</td></tr>\n";
