@@ -2302,6 +2302,33 @@ function renderIPv4Network ($id)
 	renderProgressBar ($used/$total);
 	echo "&nbsp;${used}/${total}</td></tr>\n";
 
+	if (getConfigVar ('EXT_IPV4_VIEW') == 'yes')
+	{
+		$ipv4netlist = getIPv4NetworkList (array(), getTFMode());
+		$ipv4tree = treeFromList ($ipv4netlist);
+		$backtrace = array_reverse (traceEntity ($ipv4tree, $id));
+		$arrows = count ($backtrace) - 1;
+		foreach ($backtrace as $ancestorid)
+		{
+			$ainfo = getIPv4NetworkInfo ($ancestorid);
+			if ($ancestorid == $id)
+			{
+				echo "<tr><th width='50%' class=tdright>&rarr;</th>";
+				echo "<td class=tdleft>${ainfo['ip']}/${ainfo['mask']}</td></tr>";
+			}
+			else
+			{
+				echo "<tr><th width='50%' class=tdright>";
+				for ($i = 0; $i < $arrows; $i++)
+					echo '&uarr;';
+				$arrows--;
+				echo "</th><td class=tdleft><a href='${root}?page=${pageno}&tab=${tabno}&id=${ainfo['id']}'>${ainfo['ip']}/${ainfo['mask']}</a></td></tr>";
+			}
+		}
+		// FIXME: get and display nested networks
+		// $theitem = pickLeaf ($ipv4tree, $id);
+	}
+
 	echo "<tr><th width='50%' class=tdright>Netmask:</th><td class=tdleft>";
 	echo $netmaskbylen[$range['mask']];
 	echo "</td></tr>\n";
