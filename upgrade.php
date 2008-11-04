@@ -1418,6 +1418,7 @@ CREATE TABLE `TagTree` (
 			break;
 		case '0.16.4':
 			$query[] = "INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (12,795,'[[Cisco%GPASS%Catalyst 3032-DEL | http://www.cisco.com/en/US/products/ps8772/index.html]]')";
+			$query[] = "INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (13,796,'Linux%GSKIP%Ubuntu 8.10')";
 			$query[] = "update Config set varvalue = '0.16.4' where varname = 'DB_VERSION'";
 			break;
 		default:
