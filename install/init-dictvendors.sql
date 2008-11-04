@@ -744,3 +744,4 @@ INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (11,793
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (11,794,'[[SGI%GPASS%Altix XE320 | http://www.sgi.com/products/servers/altix/xe/configs.html]]');
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (12,795,'[[Cisco%GPASS%Catalyst 3032-DEL | http://www.cisco.com/en/US/products/ps8772/index.html]]');
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (13,796,'Linux%GSKIP%Ubuntu 8.10');
+INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (13,797,'[[BSD%GSKIP%OpenBSD 4.4 | http://openbsd.org/44.html]]');
