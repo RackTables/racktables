@@ -1417,27 +1417,6 @@ CREATE TABLE `TagTree` (
 			$query[] = "update Config set varvalue = '0.16.3' where varname = 'DB_VERSION'";
 			break;
 		case '0.16.4':
-			// change char columns to varchar
-			$query[] = "ALTER TABLE `Attribute` CHANGE COLUMN `attr_name` `attr_name` varchar(64) default NULL";
-			$query[] = "ALTER TABLE `AttributeValue` CHANGE COLUMN `string_value` `string_value` varchar(128) default NULL";
-			$query[] = "ALTER TABLE `Chapter` CHANGE COLUMN `chapter_name` `chapter_name` varchar(128) NOT NULL";
-			$query[] = "ALTER TABLE `Config` CHANGE COLUMN `varname` `varname` varchar(32) NOT NULL, CHANGE COLUMN `varvalue` `varvalue` varchar(255) NOT NULL";
-			$query[] = "ALTER TABLE `Dictionary` CHANGE COLUMN `dict_value` `dict_value` varchar(255) default NULL";
-			$query[] = "ALTER TABLE `IPAddress` CHANGE COLUMN `name` `name` varchar(255) NOT NULL";
-			$query[] = "ALTER TABLE `IPBonds` CHANGE COLUMN `name` `name` varchar(255) NOT NULL";
-			$query[] = "ALTER TABLE `IPRSPool` CHANGE COLUMN `name` `name` varchar(255) default NULL";
-			$query[] = "ALTER TABLE `IPRanges` CHANGE COLUMN `name` `name` varchar(255) default NULL";
-			$query[] = "ALTER TABLE `IPVirtualService` CHANGE COLUMN `name` `name` varchar(255) default NULL";
-			$query[] = "ALTER TABLE `MountOperation` CHANGE COLUMN `user_name` `user_name` varchar(64) default NULL";
-			$query[] = "ALTER TABLE `Port` CHANGE COLUMN `name` `name` varchar(255) NOT NULL, CHANGE COLUMN `l2address` `l2address` varchar(64) default NULL, CHANGE COLUMN `reservation_comment` `reservation_comment` varchar(255) default NULL, CHANGE COLUMN `label` `label` varchar(255) default NULL";
-			$query[] = "ALTER TABLE `PortForwarding` CHANGE COLUMN `description` `description` varchar(255) default NULL";
-			$query[] = "ALTER TABLE `Rack` CHANGE COLUMN `name` `name` varchar(255) default NULL";
-			$query[] = "ALTER TABLE `RackHistory` CHANGE COLUMN `name` `name` varchar(255) default NULL, CHANGE COLUMN `user_name` `user_name` varchar(64) default NULL";
-			$query[] = "ALTER TABLE `RackObject` CHANGE COLUMN `name` `name` varchar(255) default NULL, CHANGE COLUMN `label` `label` varchar(255) default NULL, CHANGE COLUMN `barcode` `barcode` varchar(16) default NULL, CHANGE COLUMN `asset_no` `asset_no` varchar(64) default NULL";
-			$query[] = "ALTER TABLE `RackObjectHistory` CHANGE COLUMN `name` `name` varchar(255) default NULL, CHANGE COLUMN `label` `label` varchar(255) default NULL, CHANGE COLUMN `barcode` `barcode` varchar(16) default NULL, CHANGE COLUMN `asset_no` `asset_no` varchar(64) default NULL, CHANGE COLUMN `user_name` `user_name` varchar(64) default NULL";
-			$query[] = "ALTER TABLE `Script` CHANGE COLUMN `script_name` `script_name` varchar(64) NOT NULL";
-			$query[] = "ALTER TABLE `TagTree` CHANGE COLUMN `tag` `tag` varchar(255) default NULL";
-			$query[] = "ALTER TABLE `UserAccount` CHANGE COLUMN `user_name` `user_name` varchar(64) default NULL, CHANGE COLUMN `user_password_hash` `user_password_hash` varchar(128) default NULL, CHANGE COLUMN `user_realname` `user_realname` varchar(64) default NULL";
 			$query[] = "INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (12,795,'[[Cisco%GPASS%Catalyst 3032-DEL | http://www.cisco.com/en/US/products/ps8772/index.html]]')";
 			$query[] = "update Config set varvalue = '0.16.4' where varname = 'DB_VERSION'";
 			break;

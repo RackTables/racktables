@@ -11,7 +11,7 @@ CREATE TABLE `Atom` (
 CREATE TABLE `Attribute` (
   `attr_id` int(10) unsigned NOT NULL auto_increment,
   `attr_type` enum('string','uint','float','dict') default NULL,
-  `attr_name` varchar(64) default NULL,
+  `attr_name` char(64) default NULL,
   PRIMARY KEY  (`attr_id`),
   UNIQUE KEY `attr_name` (`attr_name`)
 ) ENGINE=MyISAM AUTO_INCREMENT=10000;
@@ -26,7 +26,7 @@ CREATE TABLE `AttributeMap` (
 CREATE TABLE `AttributeValue` (
   `object_id` int(10) unsigned default NULL,
   `attr_id` int(10) unsigned default NULL,
-  `string_value` varchar(128) default NULL,
+  `string_value` char(128) default NULL,
   `uint_value` int(10) unsigned default NULL,
   `float_value` float default NULL,
   UNIQUE KEY `object_id` (`object_id`,`attr_id`)
@@ -35,14 +35,14 @@ CREATE TABLE `AttributeValue` (
 CREATE TABLE `Chapter` (
   `chapter_no` int(10) unsigned NOT NULL auto_increment,
   `sticky` enum('yes','no') default 'no',
-  `chapter_name` varchar(128) NOT NULL,
+  `chapter_name` char(128) NOT NULL,
   PRIMARY KEY  (`chapter_no`),
   UNIQUE KEY `chapter_name` (`chapter_name`)
 ) ENGINE=MyISAM AUTO_INCREMENT=10000;
 
 CREATE TABLE `Config` (
-  `varname` varchar(32) NOT NULL,
-  `varvalue` varchar(255) NOT NULL,
+  `varname` char(32) NOT NULL,
+  `varvalue` char(255) NOT NULL,
   `vartype` enum('string','uint') NOT NULL default 'string',
   `emptyok` enum('yes','no') NOT NULL default 'no',
   `is_hidden` enum('yes','no') NOT NULL default 'yes',
@@ -53,7 +53,7 @@ CREATE TABLE `Config` (
 CREATE TABLE `Dictionary` (
   `chapter_no` int(10) unsigned NOT NULL,
   `dict_key` int(10) unsigned NOT NULL auto_increment,
-  `dict_value` varchar(255) default NULL,
+  `dict_value` char(255) default NULL,
   PRIMARY KEY  (`dict_key`),
   UNIQUE KEY `chap_to_key` (`chapter_no`,`dict_key`),
   UNIQUE KEY `chap_to_val` (`chapter_no`,`dict_value`)
@@ -61,7 +61,7 @@ CREATE TABLE `Dictionary` (
 
 CREATE TABLE `IPAddress` (
   `ip` int(10) unsigned NOT NULL,
-  `name` varchar(255) NOT NULL,
+  `name` char(255) NOT NULL,
   `reserved` enum('yes','no') default NULL,
   PRIMARY KEY  (`ip`)
 ) ENGINE=MyISAM;
@@ -69,7 +69,7 @@ CREATE TABLE `IPAddress` (
 CREATE TABLE `IPBonds` (
   `object_id` int(10) unsigned NOT NULL,
   `ip` int(10) unsigned NOT NULL,
-  `name` varchar(255) NOT NULL,
+  `name` char(255) NOT NULL,
   `type` enum('regular','shared','virtual','router') default NULL,
   PRIMARY KEY  (`object_id`,`ip`)
 ) ENGINE=MyISAM;
@@ -85,7 +85,7 @@ CREATE TABLE `IPLoadBalancer` (
 
 CREATE TABLE `IPRSPool` (
   `id` int(10) unsigned NOT NULL auto_increment,
-  `name` varchar(255) default NULL,
+  `name` char(255) default NULL,
   `vsconfig` text,
   `rsconfig` text,
   PRIMARY KEY  (`id`)
@@ -95,7 +95,7 @@ CREATE TABLE `IPRanges` (
   `id` int(10) unsigned NOT NULL auto_increment,
   `ip` int(10) unsigned NOT NULL,
   `mask` int(10) unsigned NOT NULL,
-  `name` varchar(255) default NULL,
+  `name` char(255) default NULL,
   PRIMARY KEY  (`id`),
   UNIQUE KEY `base-len` (`ip`,`mask`)
 ) ENGINE=MyISAM;
@@ -116,7 +116,7 @@ CREATE TABLE `IPVirtualService` (
   `vip` int(10) unsigned default NULL,
   `vport` smallint(5) unsigned default NULL,
   `proto` enum('TCP','UDP') NOT NULL default 'TCP',
-  `name` varchar(255) default NULL,
+  `name` char(255) default NULL,
   `vsconfig` text,
   `rsconfig` text,
   PRIMARY KEY  (`id`)
@@ -139,7 +139,7 @@ CREATE TABLE `MountOperation` (
   `id` int(10) unsigned NOT NULL auto_increment,
   `object_id` int(10) unsigned NOT NULL,
   `ctime` timestamp NOT NULL,
-  `user_name` varchar(64) default NULL,
+  `user_name` char(64) default NULL,
   `old_molecule_id` int(10) unsigned default NULL,
   `new_molecule_id` int(10) unsigned default NULL,
   `comment` text,
@@ -149,11 +149,11 @@ CREATE TABLE `MountOperation` (
 CREATE TABLE `Port` (
   `id` int(10) unsigned NOT NULL auto_increment,
   `object_id` int(10) unsigned NOT NULL,
-  `name` varchar(255) NOT NULL,
+  `name` char(255) NOT NULL,
   `type` int(10) unsigned NOT NULL,
-  `l2address` varchar(64) default NULL,
-  `reservation_comment` varchar(255) default NULL,
-  `label` varchar(255) default NULL,
+  `l2address` char(64) default NULL,
+  `reservation_comment` char(255) default NULL,
+  `label` char(255) default NULL,
   PRIMARY KEY  (`id`),
   UNIQUE KEY `object_id` (`object_id`,`name`),
   UNIQUE KEY `l2address` (`l2address`),
@@ -174,7 +174,7 @@ CREATE TABLE `PortForwarding` (
   `localport` smallint(5) unsigned NOT NULL,
   `remoteip` int(10) unsigned NOT NULL,
   `remoteport` smallint(5) unsigned NOT NULL,
-  `description` varchar(255) default NULL,
+  `description` char(255) default NULL,
   PRIMARY KEY  (`object_id`,`proto`,`localip`,`localport`,`remoteip`,`remoteport`),
   KEY `localip` (`localip`),
   KEY `remoteip` (`remoteip`),
@@ -183,7 +183,7 @@ CREATE TABLE `PortForwarding` (
 
 CREATE TABLE `Rack` (
   `id` int(10) unsigned NOT NULL auto_increment,
-  `name` varchar(255) default NULL,
+  `name` char(255) default NULL,
   `deleted` enum('yes','no') NOT NULL default 'no',
   `row_id` int(10) unsigned NOT NULL default '1',
   `height` tinyint(3) unsigned NOT NULL default '42',
@@ -195,24 +195,24 @@ CREATE TABLE `Rack` (
 
 CREATE TABLE `RackHistory` (
   `id` int(10) unsigned default NULL,
-  `name` varchar(255) default NULL,
+  `name` char(255) default NULL,
   `deleted` enum('yes','no') default NULL,
   `row_id` int(10) unsigned default NULL,
   `height` tinyint(3) unsigned default NULL,
   `comment` text,
   `thumb_data` blob,
   `ctime` timestamp NOT NULL,
-  `user_name` varchar(64) default NULL
+  `user_name` char(64) default NULL
 ) ENGINE=MyISAM;
 
 CREATE TABLE `RackObject` (
   `id` int(10) unsigned NOT NULL auto_increment,
-  `name` varchar(255) default NULL,
-  `label` varchar(255) default NULL,
-  `barcode` varchar(16) default NULL,
+  `name` char(255) default NULL,
+  `label` char(255) default NULL,
+  `barcode` char(16) default NULL,
   `deleted` enum('yes','no') NOT NULL default 'no',
   `objtype_id` int(10) unsigned NOT NULL default '1',
-  `asset_no` varchar(64) default NULL,
+  `asset_no` char(64) default NULL,
   `has_problems` enum('yes','no') NOT NULL default 'no',
   `comment` text,
   PRIMARY KEY  (`id`),
@@ -223,16 +223,16 @@ CREATE TABLE `RackObject` (
 
 CREATE TABLE `RackObjectHistory` (
   `id` int(10) unsigned default NULL,
-  `name` varchar(255) default NULL,
-  `label` varchar(255) default NULL,
-  `barcode` varchar(16) default NULL,
+  `name` char(255) default NULL,
+  `label` char(255) default NULL,
+  `barcode` char(16) default NULL,
   `deleted` enum('yes','no') default NULL,
   `objtype_id` int(10) unsigned default NULL,
-  `asset_no` varchar(64) default NULL,
+  `asset_no` char(64) default NULL,
   `has_problems` enum('yes','no') NOT NULL default 'no',
   `comment` text,
   `ctime` timestamp NOT NULL,
-  `user_name` varchar(64) default NULL
+  `user_name` char(64) default NULL
 ) ENGINE=MyISAM;
 
 CREATE TABLE `RackSpace` (
@@ -246,7 +246,7 @@ CREATE TABLE `RackSpace` (
 ) ENGINE=MyISAM;
 
 CREATE TABLE `Script` (
-  `script_name` varchar(64) NOT NULL,
+  `script_name` char(64) NOT NULL,
   `script_text` longtext,
   PRIMARY KEY  (`script_name`)
 ) TYPE=MyISAM;
@@ -262,17 +262,17 @@ CREATE TABLE `TagStorage` (
 CREATE TABLE `TagTree` (
   `id` int(10) unsigned NOT NULL auto_increment,
   `parent_id` int(10) unsigned default NULL,
-  `tag` varchar(255) default NULL,
+  `tag` char(255) default NULL,
   PRIMARY KEY  (`id`),
   UNIQUE KEY `tag` (`tag`)
 ) TYPE=MyISAM;
 
 CREATE TABLE `UserAccount` (
   `user_id` int(10) unsigned NOT NULL auto_increment,
-  `user_name` varchar(64) NOT NULL,
+  `user_name` char(64) NOT NULL,
   `user_enabled` enum('yes','no') NOT NULL default 'no',
-  `user_password_hash` varchar(128) default NULL,
-  `user_realname` varchar(64) default NULL,
+  `user_password_hash` char(128) default NULL,
+  `user_realname` char(64) default NULL,
   PRIMARY KEY  (`user_id`),
   UNIQUE KEY `user_name` (`user_name`)
 ) ENGINE=MyISAM AUTO_INCREMENT=10000;
