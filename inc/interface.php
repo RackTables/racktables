@@ -852,7 +852,7 @@ function renderRackObject ($object_id = 0)
 			}
 			echo '&nbsp;' . $aac[$alloc['type']];
 			if (!empty ($alloc['addrinfo']['name']))
-				echo '(' . niftyString ($alloc['addrinfo']['name']) . ')';
+				echo ' (' . niftyString ($alloc['addrinfo']['name']) . ')';
 			echo '</td>';
 			if (getConfigVar ('EXT_IPV4_VIEW') == 'yes')
 			{
@@ -1034,13 +1034,12 @@ function renderPortsForObject ($object_id = 0)
 {
 	function printNewItemTR ()
 	{
+		global $types, $default_port_type;
 		printOpFormIntro ('addPort');
 		echo "<tr><td>";
 		printImageHREF ('add', 'add a port', TRUE);
 		echo "</td><td><input type=text size=8 name=port_name tabindex=100></td>\n";
 		echo "<td><input type=text size=24 name=port_label tabindex=101></td>";
-		$types = getPortTypes();
-		$default_port_type = getConfigVar ('default_port_type');
 		// FIXME: isn't this a perfect time for printSelect()?
 		echo "<td><select name='port_type_id' tabindex=102>\n";
 		foreach ($types as $typeid => $typename)
@@ -1064,6 +1063,8 @@ function renderPortsForObject ($object_id = 0)
 	}
 	showMessageOrError();
 	startPortlet ('Ports and interfaces');
+	$types = getPortTypes();
+	$default_port_type = getConfigVar ('default_port_type');
 	$ports = getObjectPortsAndLinks ($object_id);
 	usort($ports, 'sortByName');
 	echo "<table cellspacing=0 cellpadding='5' align='center' class='widetable'>\n";
@@ -1196,9 +1197,8 @@ function renderIPv4ForObject ($object_id = 0)
 			else
 				echo '<small>/' . $netinfo['mask'] . '</small>';
 		}
-		echo '&nbsp;' . $aac[$alloc['type']];
 		if (!empty ($alloc['addrinfo']['name']))
-			echo '(' . niftyString ($alloc['addrinfo']['name']) . ')';
+			echo ' (' . niftyString ($alloc['addrinfo']['name']) . ')';
 		echo '</td>';
 		// FIXME: this a copy-and-paste from renderRackObject()
 		if (getConfigVar ('EXT_IPV4_VIEW') == 'yes')
@@ -1207,7 +1207,7 @@ function renderIPv4ForObject ($object_id = 0)
 				echo '<td colspan=2>?</td>';
 			else
 				printIPv4NetInfoTDs ($netinfo);
-			echo "<td class='${secondclass}'>";
+			echo "<td class=tdleft>";
 			// FIXME: These cals are really heavy, replace them with a more appropriate dedicated function.
 			$newline = '';
 			foreach (findRouters ($netinfo['addrlist']) as $router)
