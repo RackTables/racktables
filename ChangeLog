@@ -1,6 +1,6 @@
 0.17.0
 	update: display row name when listing objects. closes ticket 16 (by Aaron)
-
+	bugfix: show error message if snmp module isn't loaded.  closes ticket 43 (by Aaron)
 0.16.4 2008-11-04
 	bugfix: display VS/RS config block in RS pool view
 	bugfix: resolve tabindex issues in many forms

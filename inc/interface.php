@@ -3966,18 +3966,21 @@ function renderSNMPPortFinder ($object_id = 0)
 		showError ('Invalid argument', __FUNCTION__);
 		return;
 	}
-// FIXME: check if SNMP PHP extension is available!
 	printOpFormIntro ('querySNMPData');
-?>
-<p align=center>
-This asset has no ports listed, that's why you see this form. If you supply SNMP community,
-I can try automatic data harvesting on the asset. As soon as at least one port is added,
-this tab will not be seen any more. Good luck.<br>
-<input type=text name=community value='public'>
-<input type=submit name='do_scan' value='Go!'> 
-</form>
-</p>
-<?php
+	if (!extension_loaded ('snmp'))
+	{
+		echo "<div class=msg_error>The PHP SNMP extension is not loaded.  Cannot continue.</div>";
+	}
+	else
+	{
+		echo "<p align=center>
+This object has no ports listed, that's why you see this form. If you supply a SNMP community,
+I can try to automatically harvest the data. As soon as at least one port is added,
+this tab will not be seen any more. Good luck.<br>\n";
+		echo "<input type=text name=community value='public'>\n";
+		echo "<input type=submit name='do_scan' value='Go!'> \n";
+		echo "</form></p>\n";
+	}
 }
 
 function renderUIResetForm()
