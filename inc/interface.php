@@ -852,7 +852,7 @@ function renderRackObject ($object_id = 0)
 			}
 			echo '&nbsp;' . $aac[$alloc['type']];
 			if (!empty ($alloc['addrinfo']['name']))
-				echo '(' . niftyString ($alloc['addrinfo']['name']) . ')';
+				echo ' (' . niftyString ($alloc['addrinfo']['name']) . ')';
 			echo '</td>';
 			if (getConfigVar ('EXT_IPV4_VIEW') == 'yes')
 			{
@@ -1038,19 +1038,8 @@ function renderPortsForObject ($object_id = 0)
 		echo "<tr><td>";
 		printImageHREF ('add', 'add a port', TRUE);
 		echo "</td><td><input type=text size=8 name=port_name tabindex=100></td>\n";
-		echo "<td><input type=text size=24 name=port_label tabindex=101></td>";
-		$types = getPortTypes();
-		$default_port_type = getConfigVar ('default_port_type');
-		// FIXME: isn't this a perfect time for printSelect()?
-		echo "<td><select name='port_type_id' tabindex=102>\n";
-		foreach ($types as $typeid => $typename)
-		{
-			echo "<option value='${typeid}'";
-			if ($typeid == $default_port_type)
-				echo " selected";
-			echo ">${typename}</option>\n";
-		}
-		echo "</select></td>";
+		echo "<td><input type=text size=24 name=port_label tabindex=101></td><td>";
+		printSelect (getPortTypes(), 'port_type_id', getConfigVar ('default_port_type'), 102);
 		echo "<td><input type=text name=port_l2address tabindex=103></td>\n";
 		echo "<td colspan=3>&nbsp;</td><td>";
 		printImageHREF ('add', 'add a port', TRUE, 104);
@@ -1128,15 +1117,7 @@ function renderPortsForObject ($object_id = 0)
 	echo '<option value=ssv1>SSV:&lt;interface name&gt; &lt;MAC address&gt;</option>';
 	echo "</select>";
 	echo 'Default port type: ';
-	echo "<select name=port_type>\n";
-	foreach ($types as $typeid => $typename)
-	{
-		echo "<option value='${typeid}'";
-		if ($typeid == $default_port_type)
-			echo " selected";
-		echo ">${typename}</option>\n";
-	}
-	echo "</select>";
+	printSelect (getPortTypes(), 'port_type', getConfigVar ('default_port_type'), 102);
 	echo "<input type=submit value='Parse output'><br>\n";
 	echo "<textarea name=input cols=100 rows=50></textarea><br>\n";
 	echo '</form>';
@@ -1196,9 +1177,8 @@ function renderIPv4ForObject ($object_id = 0)
 			else
 				echo '<small>/' . $netinfo['mask'] . '</small>';
 		}
-		echo '&nbsp;' . $aac[$alloc['type']];
 		if (!empty ($alloc['addrinfo']['name']))
-			echo '(' . niftyString ($alloc['addrinfo']['name']) . ')';
+			echo ' (' . niftyString ($alloc['addrinfo']['name']) . ')';
 		echo '</td>';
 		// FIXME: this a copy-and-paste from renderRackObject()
 		if (getConfigVar ('EXT_IPV4_VIEW') == 'yes')
@@ -1207,7 +1187,7 @@ function renderIPv4ForObject ($object_id = 0)
 				echo '<td colspan=2>?</td>';
 			else
 				printIPv4NetInfoTDs ($netinfo);
-			echo "<td class='${secondclass}'>";
+			echo "<td class=tdleft>";
 			// FIXME: These cals are really heavy, replace them with a more appropriate dedicated function.
 			$newline = '';
 			foreach (findRouters ($netinfo['addrlist']) as $router)

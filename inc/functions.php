@@ -828,6 +828,7 @@ function getOrphanedTags ()
 		$picked = FALSE;
 		foreach ($mytaglist as $tagid => $taginfo)
 		{
+			$taginfo['kidc'] = 0;
 			$taginfo['kids'] = array();
 			if ($taginfo['parent_id'] == NULL)
 			{
