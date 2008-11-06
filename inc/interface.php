@@ -1816,7 +1816,7 @@ function renderObjectGroup ()
 		return;
 	}
 	echo '<br><br><table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
-	echo '<tr><th>Common name</th><th>Visible label</th><th>Asset tag</th><th>Barcode</th><th>Rack</th></tr>';
+	echo '<tr><th>Common name</th><th>Visible label</th><th>Asset tag</th><th>Barcode</th><th>Row/Rack</th></tr>';
 	$order = 'odd';
 	foreach ($objects as $obj)
 	{
@@ -1832,7 +1832,7 @@ function renderObjectGroup ()
 		echo "<td class='${secondclass}'>${obj['asset_no']}</td>";
 		echo "<td class='${secondclass}'>${obj['barcode']}</td>";
 		if ($obj['rack_id'])
-			echo "<td class='${secondclass}'><a href='${root}?page=rack&rack_id=${obj['rack_id']}'>${obj['Rack_name']}</a></td>";
+			echo "<td class='${secondclass}'><a href='${root}?page=row&row_id=${obj['row_id']}'>${obj['Row_name']}</a>/<a href='${root}?page=rack&rack_id=${obj['rack_id']}'>${obj['Rack_name']}</a></td>";
 		else
 			echo "<td class='${secondclass}'>Unmounted</td>";
 		echo '</tr>';

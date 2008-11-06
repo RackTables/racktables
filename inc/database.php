@@ -119,8 +119,9 @@ function getObjectList ($type_id = 0, $tagfilter = array(), $tfmode = 'any')
 	$query =
 		"select distinct RackObject.id as id , RackObject.name as name, dict_value as objtype_name, " .
 		"RackObject.label as label, RackObject.barcode as barcode, " .
-		"dict_key as objtype_id, asset_no, rack_id, Rack.name as Rack_name from " .
-		"((RackObject inner join Dictionary on objtype_id=dict_key natural join Chapter) " .
+		"dict_key as objtype_id, asset_no, rack_id, Rack.name as Rack_name, Rack.row_id, " .
+		"(SELECT dict_value FROM Dictionary WHERE dict_key = Rack.row_id) AS Row_name " .
+		"from ((RackObject inner join Dictionary on objtype_id=dict_key natural join Chapter) " .
 		"left join RackSpace on RackObject.id = object_id) " .
 		"left join Rack on rack_id = Rack.id " .
 		"left join TagStorage on RackObject.id = TagStorage.target_id and target_realm = 'object' " .
@@ -140,7 +141,9 @@ function getObjectList ($type_id = 0, $tagfilter = array(), $tfmode = 'any')
 			'objtype_id',
 			'asset_no',
 			'rack_id',
-			'Rack_name'
+			'Rack_name',
+			'row_id',
+			'Row_name'
 			) as $cname)
 			$ret[$row['id']][$cname] = $row[$cname];
 		$ret[$row['id']]['dname'] = displayedName ($ret[$row['id']]);
