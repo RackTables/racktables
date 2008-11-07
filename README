@@ -122,3 +122,11 @@ This release fixes a missing UNIQUE KEY in a table. The upgrade script may
 find it necessary first to transform some records. Because of this it is
 normal to see several "update TagStorage ... Duplicate entry" failed queries
 during the upgrade.
+
+*** Upgrading to 0.17.0 ***
+
+This release requires presence of release 0.16.4 or 0.16.5. To upgrade from
+older releases, first download a copy of RackTables-0.16.4 and use it to
+upgrade your installation to version 0.16.4. Then follow the usual procedure
+to finish the upgrade to 0.17.0.
+
