@@ -83,7 +83,6 @@ function getLexemsFromRackCode ($text)
 						$newstate = 'reading keyword';
 						$buffer = $char;
 						break;
-					case ($char == "\r"): // FIXME: this should never happen
 					case ($char == "\n"):
 						$lineno++; // fall through
 					case ($char == " "):
@@ -147,7 +146,6 @@ function getLexemsFromRackCode ($text)
 				switch (TRUE)
 				{
 					case ($char == "\n"):
-					case ($char == "\r"): // FIXME: is this really expected?
 						$lineno++; // fall through
 					case ($char == " "):
 					case ($char == "\t"):
@@ -181,7 +179,7 @@ function getLexemsFromRackCode ($text)
 			case 'reading predicate 1':
 				switch (TRUE)
 				{
-					case (preg_match ('/^[ \t\n\r]$/', $char)):
+					case (preg_match ('/^[ \t\n]$/', $char)):
 						// nom-nom...
 						break;
 					case (mb_ereg ('[[:alnum:]]', $char) > 0):
