@@ -1,5 +1,6 @@
 0.16.5
 	bugfix: suppress several meaningless PHP warnings
+	bugfix: better handle IPv4 addresses w/o a covering prefix
 0.16.4 2008-11-04
 	bugfix: display VS/RS config block in RS pool view
 	bugfix: resolve tabindex issues in many forms

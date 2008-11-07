@@ -839,17 +839,18 @@ function renderRackObject ($object_id = 0)
 			$class = $alloc['addrinfo']['class'];
 			$secondclass = ($hl_ipv4_addr == $dottedquad) ? 'tdleft port_highlight' : 'tdleft';
 			$netid = getIPv4AddressNetworkId ($dottedquad);
-			$netinfo = getIPv4NetworkInfo ($netid);
-			loadIPv4AddrList ($netinfo);
-			echo "<tr class='${class}' valign=top><td class=tdleft>${alloc['osif']}</td><td class='${secondclass}'>";
-			echo "<a href='${root}?page=ipaddress&ip=" . $dottedquad . "&hl_object_id=${object_id}'>${dottedquad}</a>";
-			if (getConfigVar ('EXT_IPV4_VIEW') != 'yes')
+			if (NULL !== $netid)
 			{
-				if (NULL === $netid)
-					$suffix = '/??';
-				else
-					echo '<small>/' . $netinfo['mask'] . '</small>';
+				$netinfo = getIPv4NetworkInfo ($netid);
+				loadIPv4AddrList ($netinfo);
 			}
+			echo "<tr class='${class}' valign=top><td class=tdleft>${alloc['osif']}</td><td class='${secondclass}'>";
+			if (NULL !== $netid)
+				echo "<a href='${root}?page=ipaddress&ip=" . $dottedquad . "&hl_object_id=${object_id}'>${dottedquad}</a>";
+			else
+				echo $dottedquad;
+			if (getConfigVar ('EXT_IPV4_VIEW') != 'yes')
+				echo '<small>/' . (NULL === $netid ? '??' : $netinfo['mask']) . '</small>';
 			echo '&nbsp;' . $aac[$alloc['type']];
 			if (!empty ($alloc['addrinfo']['name']))
 				echo ' (' . niftyString ($alloc['addrinfo']['name']) . ')';
@@ -857,24 +858,26 @@ function renderRackObject ($object_id = 0)
 			if (getConfigVar ('EXT_IPV4_VIEW') == 'yes')
 			{
 				if (NULL === $netid)
-					echo '<td colspan=2>?</td>';
+					echo '<td colspan=2>N/A</td><td>&nbsp;</td>';
 				else
-					printIPv4NetInfoTDs ($netinfo, $secondclass);
-				echo "<td class='${secondclass}'>";
-				// FIXME: These cals are really heavy, replace them with a more appropriate dedicated function.
-				$newline = '';
-				foreach (findRouters ($netinfo['addrlist']) as $router)
 				{
-					if ($router['id'] == $object_id)
-						continue;
-					echo $newline . $router['addr'] . ", <a href='${root}?page=object&object_id=${router['id']}&hl_ipv4_addr=${router['addr']}'>";
-					echo (empty ($router['iface']) ? '' : $router['iface'] . '@') . $router['dname'] . '</a>';
-					$routertags = loadRackObjectTags ($router['id']);
-					if (count ($routertags))
-						echo '<br><small>' . serializeTags ($routertags, "${root}?page=objects&tab=default&") . '</small>';
-					$newline = '<br>';
+					printIPv4NetInfoTDs ($netinfo, $secondclass);
+					echo "<td class='${secondclass}'>";
+					// FIXME: These calls are really heavy, replace them with a more appropriate dedicated function.
+					$newline = '';
+					foreach (findRouters ($netinfo['addrlist']) as $router)
+					{
+						if ($router['id'] == $object_id)
+							continue;
+						echo $newline . $router['addr'] . ", <a href='${root}?page=object&object_id=${router['id']}&hl_ipv4_addr=${router['addr']}'>";
+						echo (empty ($router['iface']) ? '' : $router['iface'] . '@') . $router['dname'] . '</a>';
+						$routertags = loadRackObjectTags ($router['id']);
+						if (count ($routertags))
+							echo '<br><small>' . serializeTags ($routertags, "${root}?page=objects&tab=default&") . '</small>';
+						$newline = '<br>';
+					}
+					echo '</td>';
 				}
-				echo '</td>';
 			}
 			// peers
 			echo "<td class='${secondclass}'>\n";
@@ -1162,21 +1165,22 @@ function renderIPv4ForObject ($object_id = 0)
 	{
 		$class = $alloc['addrinfo']['class'];
 		$netid = getIPv4AddressNetworkId ($dottedquad);
-		$netinfo = getIPv4NetworkInfo ($netid);
-		loadIPv4AddrList ($netinfo);
+		if (NULL !== $netid)
+		{
+			$netinfo = getIPv4NetworkInfo ($netid);
+			loadIPv4AddrList ($netinfo);
+		}
 		printOpFormIntro ('updIPv4Allocation', array ('ip' => $dottedquad));
 		echo "<tr class='$class' valign=top><td><a href='${root}process.php?op=delIPv4Allocation&page=${pageno}&tab=${tabno}&ip=${dottedquad}&object_id=$object_id'>";
 		printImageHREF ('delete', 'Delete this IPv4 address');
 		echo "</a></td>";
-		echo "<td class=tdleft><input type='text' name='bond_name' value='${alloc['osif']}' size=10></td>";
-		echo "<td class=tdleft><a href='${root}?page=ipaddress&ip=${dottedquad}'>${dottedquad}</a>";
+		echo "<td class=tdleft><input type='text' name='bond_name' value='${alloc['osif']}' size=10></td><td class=tdleft>";
+		if (NULL !== $netid)
+			echo "<a href='${root}?page=ipaddress&ip=${dottedquad}'>${dottedquad}</a>";
+		else
+			echo $dottedquad;
 		if (getConfigVar ('EXT_IPV4_VIEW') != 'yes')
-		{
-			if (NULL === $netid)
-				$suffix = '/??';
-			else
-				echo '<small>/' . $netinfo['mask'] . '</small>';
-		}
+			echo '<small>/' . (NULL === $netid ? '??' : $netinfo['mask']) . '</small>';
 		if (!empty ($alloc['addrinfo']['name']))
 			echo ' (' . niftyString ($alloc['addrinfo']['name']) . ')';
 		echo '</td>';
@@ -1184,24 +1188,26 @@ function renderIPv4ForObject ($object_id = 0)
 		if (getConfigVar ('EXT_IPV4_VIEW') == 'yes')
 		{
 			if (NULL === $netid)
-				echo '<td colspan=2>?</td>';
+				echo '<td colspan=2>N/A</td><td>&nbsp;</td>';
 			else
-				printIPv4NetInfoTDs ($netinfo);
-			echo "<td class=tdleft>";
-			// FIXME: These cals are really heavy, replace them with a more appropriate dedicated function.
-			$newline = '';
-			foreach (findRouters ($netinfo['addrlist']) as $router)
 			{
-				if ($router['id'] == $object_id)
-					continue;
-				echo $newline . $router['addr'] . ", <a href='${root}?page=object&object_id=${router['id']}&hl_ipv4_addr=${router['addr']}'>";
-				echo (empty ($router['iface']) ? '' : $router['iface'] . '@') . $router['dname'] . '</a>';
-				$routertags = loadRackObjectTags ($router['id']);
-				if (count ($routertags))
-					echo '<br><small>' . serializeTags ($routertags, "${root}?page=objects&tab=default&") . '</small>';
-				$newline = '<br>';
+				printIPv4NetInfoTDs ($netinfo);
+				echo "<td class=tdleft>";
+				// FIXME: These calls are really heavy, replace them with a more appropriate dedicated function.
+				$newline = '';
+				foreach (findRouters ($netinfo['addrlist']) as $router)
+				{
+					if ($router['id'] == $object_id)
+						continue;
+					echo $newline . $router['addr'] . ", <a href='${root}?page=object&object_id=${router['id']}&hl_ipv4_addr=${router['addr']}'>";
+					echo (empty ($router['iface']) ? '' : $router['iface'] . '@') . $router['dname'] . '</a>';
+					$routertags = loadRackObjectTags ($router['id']);
+					if (count ($routertags))
+						echo '<br><small>' . serializeTags ($routertags, "${root}?page=objects&tab=default&") . '</small>';
+					$newline = '<br>';
+				}
+				echo '</td>';
 			}
-			echo '</td>';
 		}
 		echo '<td>';
 		printSelect ($aat, 'bond_type', $alloc['type']);
