@@ -233,6 +233,36 @@ function renderRackspace ()
 	echo "</td></tr></table>\n";
 }
 
+function renderRackspaceRowEditor ()
+{
+	function printNewItemTR ()
+	{
+		printOpFormIntro ('addRow');
+		echo "<tr><td><input type=text name=name tabindex=100></td><td>";
+		printImageHREF ('create', 'Add new row', TRUE, 101);
+		echo "</td></tr></form>";
+	}
+	global $root, $pageno, $tabno;
+	startPortlet ('Rows');
+	showMessageOrError();
+	echo "<table border=0 cellspacing=0 cellpadding=5 align=center class=widetable>\n";
+	echo "<tr><th>Name</th></tr>\n";
+	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
+		printNewItemTR();
+	$rackrowList = getRackspace ();
+	foreach ($rackrowList as $rackrow)
+	{
+		printOpFormIntro ('updateRow', array ('row_id' => $rackrow['row_id']));
+		echo "<tr><td><input type=text name=name value='${rackrow['row_name']}'></td><td>";
+		printImageHREF ('save', 'Save changes', TRUE);
+		echo "</td></form></tr>\n";
+	}
+	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')
+		printNewItemTR();
+	echo "</table><br>\n";
+	finishPortlet();
+}
+
 function renderRow ($row_id = 0)
 {
 	if ($row_id == 0)
@@ -1353,6 +1383,8 @@ function printLog ($log)
 				71 => array ('code' => 'success', 'format' => 'File %s was linked successfully'),
 				72 => array ('code' => 'success', 'format' => 'File %s was unlinked successfully'),
 				73 => array ('code' => 'success', 'format' => 'File %s was deleted successfully'),
+				74 => array ('code' => 'success', 'format' => 'Row %s was added successfully'),				
+				75 => array ('code' => 'success', 'format' => 'Row %s was updated successfully'),	
 
 				100 => array ('code' => 'error', 'format' => 'Generic error: %s'),
 				101 => array ('code' => 'error', 'format' => 'Port name cannot be empty'),
@@ -4049,27 +4081,6 @@ function renderUIResetForm()
 	echo "This button will reset user interface configuration to its defaults (except organization name and auth source): ";
 	echo "<input type=submit value='proceed'>";
 	echo "</form>";
-}
-
-function renderFirstRowForm ()
-{
-	global $root;
-	echo "<form action='${root}process.php'>\n";
-	echo "<input type=hidden name=page value=dict>\n";
-	echo "<input type=hidden name=tab value=edit>\n";
-	echo "<input type=hidden name=op value=add>\n";
-	echo "<input type=hidden name=chapter_no value=3>\n";
-?>
-<p align=center>
-Your rackspace seems to be empty, and this form will create your first rack row,
-just fill in the name. All the subsequent rack rows will have to be added from the
-Dictionary edit page in Configuration section (you will be redirected right there).
-<br>
-<input type=text name=dict_value value='my server room'><br>
-<?php printImageHREF ('CREATE', 'Add record', TRUE); ?>
-</form>
-</p>
-<?php
 }
 
 function renderLVSConfig ($object_id = 0)

@@ -1349,6 +1349,27 @@ function submitSLBConfig ()
 	return buildWideRedirectURL ($msglog);
 }
 
+function addRow ()
+{
+	assertStringArg ('name', __FUNCTION__);
+
+	if (commitSupplementDictionary (3, $_REQUEST['name']) === TRUE)
+		return buildRedirectURL ('OK', array ($_REQUEST['name']));
+	else
+		return buildRedirectURL ('ERR', array ($_REQUEST['name']));
+}
+
+function updateRow ()
+{
+	assertUIntArg ('row_id', __FUNCTION__);
+	assertStringArg ('name', __FUNCTION__);
+
+	if (TRUE === commitUpdateDictionary (3, $_REQUEST['row_id'], $_REQUEST['name']))
+		return buildRedirectURL ('OK', array ($_REQUEST['name']));
+	else
+		return buildRedirectURL ('ERR', array ($_REQUEST['name']));
+}
+
 function addRack ()
 {
 	assertUIntArg ('row_id', __FUNCTION__);
