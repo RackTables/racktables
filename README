@@ -17,8 +17,8 @@ Authors: <info/=@=/racktables.org>
 I. Dependencies.
 
 For database you must have a MySQL server installation
-version 4.x or 5.x. It is a good idea to make it use UTF-8
-by default.
+version 4.x or 5.x. InnoDB support must be enabled.
+It is a good idea to make it use UTF-8 by default.
 
 * Fedora 8/9: yum install mysql-server mysql
 put "default-character-set=utf8" into /etc/my.cnf
@@ -43,7 +43,7 @@ php2-snmp and php5-ldap
 II. Prepare the server.
 1. Unpack the tarball and make it web-accessible, e.g. http://yourcompany.com/racktables
 or http://racktables.mysite.org.
-2. mysql> create database_name; grant all privileges on database_name.* to XXX@YYY identified by 'ZZZ';
+2. mysql> create database database_name; grant all privileges on database_name.* to XXX@YYY identified by 'ZZZ';
 
 
 There are two mutually exclusive ways to install RackTables, they are described as III-A and III-B.
@@ -125,8 +125,14 @@ during the upgrade.
 
 *** Upgrading to 0.17.0 ***
 
-This release requires presence of release 0.16.4 or 0.16.5. To upgrade from
-older releases, first download a copy of RackTables-0.16.4 and use it to
-upgrade your installation to version 0.16.4. Then follow the usual procedure
-to finish the upgrade to 0.17.0.
+This release is the first to take advantage of the foreign key support 
+provided by the InnoDB storage engine in MySQL.  The installer and 
+upgrader scripts check for InnoDB support and cannot complete without it.
+If you have trouble, the first step is to make sure the 'skip-innodb'
+option in my.cnf is commented out.
 
+Another change is the addition of support for file uploads.  Files are stored
+in the database.  There are several settings in php.ini which you may need to modify:
+    file_uploads        - needs to be On
+    upload_max_filesize - max size for uploaded files
+    post_max_size       - max size of all form data submitted via POST (including files)                 

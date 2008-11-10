@@ -214,6 +214,15 @@ function init_config ()
 		echo '</table>';
 		return FALSE;
 	}
+
+	// Make sure InnoDB is supported
+	require_once 'inc/database.php';
+	if (!isInnoDBSupported ($dbxlink))
+	{
+		echo 'Error: InnoDB support is disabled.  See the README for details.';
+		return FALSE;
+	}
+
 	$conf = fopen ('inc/secret.php', 'w+');
 	if ($conf === FALSE)
 	{

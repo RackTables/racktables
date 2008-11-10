@@ -59,6 +59,29 @@ CREATE TABLE `Dictionary` (
   UNIQUE KEY `chap_to_val` (`chapter_no`,`dict_value`)
 ) ENGINE=MyISAM AUTO_INCREMENT=50000;
 
+CREATE TABLE `File` (
+  `id` int(10) unsigned NOT NULL auto_increment,
+  `name` char(255) NOT NULL,
+  `type` char(255) NOT NULL,
+  `size` int(10) unsigned NOT NULL,
+  `ctime` datetime NOT NULL,
+  `mtime` datetime NOT NULL,
+  `atime` datetime NOT NULL,
+  `contents` longblob NOT NULL,
+  `comment` text,
+  PRIMARY KEY  (`id`)
+) ENGINE=InnoDB;
+
+CREATE TABLE `FileLink` (
+  `id` int(10) unsigned NOT NULL auto_increment,
+  `file_id` int(10) unsigned NOT NULL,
+  `entity_type` enum('ipv4net','ipv4rspool','ipv4vs','object','rack','user') NOT NULL default 'object',
+  `entity_id` int(10) NOT NULL,
+  PRIMARY KEY  (`id`),
+  KEY `FileLink-file_id` (`file_id`),
+  CONSTRAINT `FileLink-File_fkey` FOREIGN KEY (`file_id`) REFERENCES `File` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB;
+
 CREATE TABLE `IPAddress` (
   `ip` int(10) unsigned NOT NULL,
   `name` char(255) NOT NULL,
@@ -252,7 +275,7 @@ CREATE TABLE `Script` (
 ) TYPE=MyISAM;
 
 CREATE TABLE `TagStorage` (
-  `target_realm` enum('object','ipv4net','rack','ipv4vs','ipv4rspool','user') NOT NULL default 'object',
+  `target_realm` enum('file','ipv4net','ipv4vs','ipv4rspool','object','rack','user') NOT NULL default 'object',
   `target_id` int(10) unsigned NOT NULL,
   `tag_id` int(10) unsigned NOT NULL,
   UNIQUE KEY `entity_tag` (`target_realm`,`target_id`,`tag_id`),

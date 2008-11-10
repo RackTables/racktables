@@ -79,6 +79,9 @@ if (isset ($tabhandler[$pageno][$tabno]))
 			case 'inet4':
 				assertIPv4Arg ($page[$pageno]['bypass'], 'index');
 				break;
+			case 'string':
+				assertStringArg ($page[$pageno]['bypass'], 'index');
+				break;
 			default:
 				showError ('Dispatching error for bypass parameter', __FILE__);
 				break;

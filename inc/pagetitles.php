@@ -10,12 +10,12 @@ function dynamic_title_ipaddress ()
 	return array ('name' => $_REQUEST['ip'], 'params' => array ('ip' => $_REQUEST['ip']));
 }
 
-function dynamic_title_iprange ()
+function dynamic_title_ipv4net ()
 {
 	global $pageno;
 	switch ($pageno)
 	{
-		case 'iprange':
+		case 'ipv4net':
 			$range = getIPv4NetworkInfo ($_REQUEST['id']);
 			return array ('name' => $range['ip'].'/'.$range['mask'], 'params' => array('id'=>$_REQUEST['id']));
 			break;
@@ -192,6 +192,23 @@ function dynamic_title_user ()
 		'name' => "User '" . $accounts[getUsernameByID ($_REQUEST['user_id'])]['user_name'] . "'",
 		'params' => array ('user_id' => $_REQUEST['user_id'])
 	);
+}
+
+function dynamic_title_file ()
+{
+	global $pageno;
+	$ret = array();
+	switch ($pageno)
+	{
+		case 'filesbylink':
+			assertStringArg ('entity_type', __FUNCTION__);
+			$ret['name'] = $_REQUEST['entity_type'];
+			$ret['params']['entity_type'] = $_REQUEST['entity_type'];
+			break;
+		default:
+			return NULL;
+	}
+	return $ret;
 }
 
 ?>

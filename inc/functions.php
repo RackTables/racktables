@@ -1007,6 +1007,15 @@ function loadRackObjectAutoTags ()
 }
 
 // Common code for both prefix and address tag listers.
+function loadFileAutoTags ()
+{
+	assertUIntArg ('file_id', __FUNCTION__);
+	$ret = array();
+	$ret[] = array ('tag' => '$fileid_' . $_REQUEST['file_id']);
+	$ret[] = array ('tag' => '$any_file');
+	return $ret;
+}
+
 function getIPv4PrefixTags ($netid)
 {
 	$netinfo = getIPv4NetworkInfo ($netid);
@@ -1632,6 +1641,99 @@ function traceEntity ($tree, $target_id)
 		// next...
 	}
 	return array();
+}
+
+// Convert entity name to human-readable value
+function formatEntityName ($name) {
+	switch ($name)
+	{
+		case 'ipv4net':
+			return 'IPv4 Network';
+		case 'ipv4rspool':
+			return 'IPv4 RS Pool';
+		case 'ipv4vs':
+			return 'IPv4 Virtual Service';
+		case 'object':
+			return 'Object';
+		case 'rack':
+			return 'Rack';
+		case 'user':
+			return 'User';
+	}
+	return 'invalid';
+}
+
+// Take a MySQL or other generic timestamp and make it prettier
+function formatTimestamp ($timestamp) {
+	return date('n/j/y g:iA', strtotime($timestamp));
+}
+
+// Display hrefs for all of a file's parents
+function serializeFileLinks ($links)
+{
+	global $root;
+
+	$comma = '';
+	$ret = '';
+	foreach ($links as $link_id => $li)
+	{
+		switch ($li['entity_type'])
+		{
+			case 'ipv4net':
+				$params = "page=ipv4net&id=";
+				break;
+			case 'ipv4rspool':
+				$params = "page=ipv4rspool&pool_id=";
+				break;
+			case 'ipv4vs':
+				$params = "page=ipv4vs&vs_id=";
+				break;
+			case 'object':
+				$params = "page=object&object_id=";
+				break;
+			case 'rack':
+				$params = "page=rack&rack_id=";
+				break;
+			case 'user':
+				$params = "page=user&user_id=";
+				break;
+		}
+		$ret .= sprintf("%s<a href='%s?%s%s'>%s</a>", $comma, $root, $params, $li['entity_id'], $li['name']);
+		$comma = ', ';
+	}
+
+	return $ret;
+}
+
+// Convert filesize to appropriate unit and make it human-readable
+function formatFileSize ($bytes) {
+	// bytes
+	if($bytes < 1024) // bytes
+		return "${bytes} bytes";
+
+	// kilobytes
+	if ($bytes < 1024000)
+		return sprintf ("%.1fk", round (($bytes / 1024), 1));
+	
+	// megabytes
+	return sprintf ("%.1f MB", round (($bytes / 1024000), 1));
+}
+
+// Reverse of formatFileSize, it converts human-readable value to bytes
+function convertToBytes ($value) {
+	$value = trim($value);
+	$last = strtolower($value[strlen($value)-1]);
+	switch ($last) 
+	{
+		case 'g':
+			$value *= 1024;
+		case 'm':
+			$value *= 1024;
+		case 'k':
+			$value *= 1024;
+	}
+
+	return $value;
 }
 
 ?>

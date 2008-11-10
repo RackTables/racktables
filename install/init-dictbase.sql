@@ -63,19 +63,19 @@ INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_no`) VALUES (12,7,
 INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_no`) VALUES (12,8,0);
 INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_no`) VALUES (12,13,0);
 INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_no`) VALUES (12,20,0);
-INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_no`) VALUES (445, 1, 0);
-INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_no`) VALUES (445, 2, 21);
-INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_no`) VALUES (445, 3, 0);
-INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_no`) VALUES (445, 5, 0);
-INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_no`) VALUES (445, 14, 0);
-INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_no`) VALUES (445, 22, 0);
-INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_no`) VALUES (447, 1, 0);
-INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_no`) VALUES (447, 2, 22);
-INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_no`) VALUES (447, 3, 0);
-INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_no`) VALUES (447, 5, 0);
-INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_no`) VALUES (447, 14, 0);
-INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_no`) VALUES (447, 22, 0);
-INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_no`) VALUES (15, 2, 23);
+INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_no`) VALUES (445,1,0);
+INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_no`) VALUES (445,2,21);
+INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_no`) VALUES (445,3,0);
+INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_no`) VALUES (445,5,0);
+INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_no`) VALUES (445,14,0);
+INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_no`) VALUES (445,22,0);
+INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_no`) VALUES (447,1,0);
+INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_no`) VALUES (447,2,22);
+INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_no`) VALUES (447,3,0);
+INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_no`) VALUES (447,5,0);
+INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_no`) VALUES (447,14,0);
+INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_no`) VALUES (447,22,0);
+INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_no`) VALUES (15,2,23);
 
 INSERT INTO `Chapter` (`chapter_no`, `sticky`, `chapter_name`) VALUES (11,'no','server models');
 INSERT INTO `Chapter` (`chapter_no`, `sticky`, `chapter_name`) VALUES (12,'no','network switch models');
@@ -90,7 +90,7 @@ INSERT INTO `Chapter` (`chapter_no`, `sticky`, `chapter_name`) VALUES (18,'no','
 INSERT INTO `Chapter` (`chapter_no`, `sticky`, `chapter_name`) VALUES (19,'no','tape library models');
 INSERT INTO `Chapter` (`chapter_no`, `sticky`, `chapter_name`) VALUES (21,'no','KVM switch models');
 INSERT INTO `Chapter` (`chapter_no`, `sticky`, `chapter_name`) VALUES (22,'no','multiplexer models');
-INSERT INTO `Chapter` (`chapter_no`, `sticky`, `chapter_name`) VALUES (23, 'no', 'console models');
+INSERT INTO `Chapter` (`chapter_no`, `sticky`, `chapter_name`) VALUES (23,'no','console models');
 
 INSERT INTO `PortCompat` (`type1`, `type2`) VALUES (17,17);
 INSERT INTO `PortCompat` (`type1`, `type2`) VALUES (18,18);
@@ -260,6 +260,6 @@ INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, descriptio
 INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('TREE_THRESHOLD','25','uint','yes','no','Tree view auto-collapse threshold');
 INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('IPV4_JAYWALK','no','string','no','no','Enable IPv4 address allocations w/o covering network');
 INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('ADDNEW_AT_TOP','yes','string','no','no','Render "add new" line at top of the list');
-INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('DB_VERSION','0.16.4','string','no','yes','Database version.');
+INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('DB_VERSION','0.17.0','string','no','yes','Database version.');
 
 INSERT INTO `Script` VALUES ('RackCode','allow {$userid_1}');

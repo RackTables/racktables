@@ -1148,11 +1148,12 @@ function saveEntityTags ()
 {
 	$page2realm = array
 	(
-		'object' => 'object',
-		'iprange' => 'ipv4net',
-		'rack' => 'rack',
+		'file' => 'file',
+		'ipv4net' => 'ipv4net',
+		'ipv4rs' => 'ipv4rspool',
 		'ipv4vs' => 'ipv4vs',
-		'ipv4rsp' => 'ipv4rspool',
+		'object' => 'object',
+		'rack' => 'rack',
 		'user' => 'user'
 	);
 	global $explicit_tags, $implicit_tags, $page, $pageno;
@@ -1411,6 +1412,96 @@ function querySNMPData ()
 	assertUIntArg ('object_id', __FUNCTION__);
 	assertStringArg ('community', __FUNCTION__);
 	return buildWideRedirectURL (doSNMPmining ($_REQUEST['object_id'], $_REQUEST['community']));
+}
+
+// File-related functions
+function addFileWithoutLink ()
+{
+	assertStringArg ('comment', __FUNCTION__, TRUE);
+
+	// Make sure the file can be uploaded
+	if (get_cfg_var('file_uploads') != 1)
+		return buildRedirectURL ('ERR', array ("file uploads not allowed, change 'file_uploads' parameter in php.ini"));
+
+	$fp = fopen($_FILES['file']['tmp_name'], 'rb');
+	$error = commitAddFile ($_FILES['file']['name'], $_FILES['file']['type'], $_FILES['file']['size'], $fp, $_REQUEST['comment']);
+
+	if ($error != '')
+		return buildRedirectURL ('ERR', array ($error));
+
+	return buildRedirectURL ('OK', array ($_FILES['file']['name']));
+}
+
+function addFileToEntity ()
+{
+	assertStringArg ('entity_type', __FUNCTION__);
+	assertUIntArg ('entity_id', __FUNCTION__);
+	assertStringArg ('comment', __FUNCTION__, TRUE);
+	if (empty ($_REQUEST['entity_type']) || empty ($_REQUEST['entity_id']))
+		return buildRedirectURL ('ERR');
+
+	// Make sure the file can be uploaded
+	if (get_cfg_var('file_uploads') != 1)
+		return buildRedirectURL ('ERR', array ("file uploads not allowed, change 'file_uploads' parameter in php.ini"));
+
+	$fp = fopen($_FILES['file']['tmp_name'], 'rb');
+	$error = commitAddFile ($_FILES['file']['name'], $_FILES['file']['type'], $_FILES['file']['size'], $fp, $_REQUEST['comment']);
+	if ($error != '')
+		return buildRedirectURL ('ERR', array ($error));
+
+	$file_id = lastInsertID();
+	$error = commitLinkFile ($file_id, $_REQUEST['entity_type'], $_REQUEST['entity_id']);	
+	if ($error != '')
+		return buildRedirectURL ('ERR', array ($error));
+
+	return buildRedirectURL ('OK', array ($_FILES['file']['name']));
+}
+
+function linkFileToEntity ()
+{
+	assertUIntArg ('entity_id', __FUNCTION__);
+	assertUIntArg ('file_id', __FUNCTION__);
+	assertStringArg ('file_name', __FUNCTION__);
+
+	$error = commitLinkFile ($_REQUEST['file_id'], $_REQUEST['entity_type'], $_REQUEST['entity_id']);
+	if ($error != '')
+		return buildRedirectURL ('ERR', array ($error));
+
+	return buildRedirectURL ('OK', array ($_REQUEST['file_name']));
+}
+
+function updateFile ()
+{
+	assertUIntArg ('file_id', __FUNCTION__);
+	assertStringArg ('name', __FUNCTION__);
+	assertStringArg ('comment', __FUNCTION__, TRUE);
+	$error = commitUpdateFile ($_REQUEST['file_id'], $_REQUEST['comment']);
+	if ($error != '')
+		return buildRedirectURL ('ERR', array ($error));
+
+	return buildRedirectURL ('OK', array ($_REQUEST['name']));
+}
+
+function unlinkFile ()
+{
+	assertUIntArg ('link_id', __FUNCTION__);
+	$error = commitUnlinkFile ($_REQUEST['link_id']);
+
+	if ($error != '')
+		return buildRedirectURL ('ERR', array ($error));
+
+	return buildRedirectURL ('OK', array ($_REQUEST['name']));
+}
+
+function deleteFile ()
+{
+	assertUIntArg ('file_id', __FUNCTION__);
+	$error = commitDeleteFile ($_REQUEST['file_id']);
+
+	if ($error != '')
+		return buildRedirectURL ('ERR', array ($error));
+
+	return buildRedirectURL ('OK', array ($_REQUEST['name']));
 }
 
 ?>

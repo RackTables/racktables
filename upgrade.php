@@ -56,7 +56,36 @@ function executeUpgradeBatch ($batchid)
 	switch ($batchid)
 	{
 		case '0.17.0':
-			$query[] = "update Config set varvalue = '0.17.0' where varname = 'DB_VERSION'";
+			// create tables for storing files (requires InnoDB support)
+			if (!isInnoDBSupported ())
+			{
+				die ('<b>Cannot upgrade because InnoDB tables are not supported by your MySQL server. See the README for details.</b>');
+			}
+			$query[] = "
+CREATE TABLE `File` (
+  `id` int(10) unsigned NOT NULL auto_increment,
+  `name` char(255) NOT NULL,
+  `type` char(255) NOT NULL,
+  `size` int(10) unsigned NOT NULL,
+  `ctime` datetime NOT NULL,
+  `mtime` datetime NOT NULL,
+  `atime` datetime NOT NULL,
+  `contents` longblob NOT NULL,
+  `comment` text,
+  PRIMARY KEY  (`id`)
+) ENGINE=InnoDB";
+			$query[] = "
+CREATE TABLE `FileLink` (
+  `id` int(10) unsigned NOT NULL auto_increment,
+  `file_id` int(10) unsigned NOT NULL,
+  `entity_type` enum('ipv4net','ipv4rspool','ipv4vs','object','rack','user') NOT NULL default 'object',
+  `entity_id` int(10) NOT NULL,
+  PRIMARY KEY  (`id`),
+  KEY `FileLink-file_id` (`file_id`),
+  CONSTRAINT `FileLink-File_fkey` FOREIGN KEY (`file_id`) REFERENCES `File` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB";
+			$query[] = "ALTER TABLE TagStorage MODIFY COLUMN target_realm enum('file','ipv4net','ipv4rspool','ipv4vs','object','rack','user') NOT NULL default 'object'";
+			$query[] = "UPDATE Config SET varvalue = '0.17.0' WHERE varname = 'DB_VERSION'";
 			break;
 		default:
 			showError ("executeUpgradeBatch () failed, because batch '${batchid}' isn't defined", __FILE__);

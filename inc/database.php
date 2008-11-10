@@ -5,6 +5,23 @@
 *
 */
 
+function isInnoDBSupported ($dbh = FALSE) {
+	global $dbxlink;
+
+	// sometimes db handle isn't available globally, must be passed
+	if (!$dbxlink)
+		$dbxlink = $dbh;
+
+	// create a temp table
+	$dbxlink->query("CREATE TABLE `innodb_test` (`id` int) ENGINE=InnoDB");
+	$row = $dbxlink->query("SHOW TABLE STATUS LIKE 'innodb_test'")->fetch(PDO::FETCH_ASSOC);
+	$dbxlink->query("DROP TABLE `innodb_test`");
+	if ($row['Engine'] == 'InnoDB')
+		return TRUE;
+
+	return FALSE;
+}
+
 function escapeString ($value, $do_db_escape = TRUE)
 {
 	$ret = htmlspecialchars ($value, ENT_QUOTES, 'UTF-8');
@@ -1400,6 +1417,35 @@ function getAccountSearchResult ($terms)
 	return array_merge ($byUsername, $byRealname);
 }
 
+function getFileSearchResult ($terms)
+{
+	$byFilename = getSearchResultByField
+	(
+		'File',
+		array ('id', 'name', 'comment'),
+		'name',
+		$terms,
+		'name'
+	);
+	$byComment = getSearchResultByField
+	(
+		'File',
+		array ('id', 'name', 'comment'),
+		'comment',
+		$terms,
+		'name'
+	);
+	// Filter out dupes.
+	foreach ($byFilename as $res1)
+		foreach (array_keys ($byComment) as $key2)
+			if ($res1['id'] == $byComment[$key2]['id'])
+			{
+				unset ($byComment[$key2]);
+				continue 2;
+			}
+	return array_merge ($byFilename, $byComment);
+}
+
 function getSearchResultByField ($tname, $rcolumns, $scolumn, $terms, $ocolumn = '')
 {
 	$pfx = '';
@@ -1678,17 +1724,18 @@ function renderTagStats ()
 	echo '<th>IPv4 VS</th><th>IPv4 RS pools</th><th>users</th></tr>';
 	$pagebyrealm = array
 	(
-		'object' => 'objgroup&group_id=0',
+		'file' => 'filesbylink&entity_type=all',
 		'ipv4net' => 'ipv4space&tab=default',
-		'rack' => 'rackspace&tab=default',
 		'ipv4vs' => 'ipv4vslist&tab=default',
 		'ipv4rspool' => 'ipv4rsplist&tab=default',
+		'object' => 'objgroup&group_id=0',
+		'rack' => 'rackspace&tab=default',
 		'user' => 'userlist&tab=default'
 	);
 	foreach ($refc as $ref)
 	{
 		echo "<tr><td>${ref['tag']}</td><td>${ref['refcnt']}</td>";
-		foreach (array ('object', 'ipv4net', 'rack', 'ipv4vs', 'ipv4rspool', 'user') as $realm)
+		foreach (array ('file', 'ipv4net', 'ipv4rspool', 'ipv4vs', 'object', 'rack', 'user') as $realm)
 		{
 			echo '<td>';
 			if (!isset ($taglist[$ref['id']]['refcnt'][$realm]))
@@ -1709,6 +1756,7 @@ function renderTagStats ()
 
 The following allows figuring out records in TagStorage, which refer to non-existing entities:
 
+mysql> select target_id from TagStorage left join Files on target_id = id where target_realm = 'file' and id is null;
 mysql> select target_id from TagStorage left join IPRanges on target_id = id where target_realm = 'ipv4net' and id is null;
 mysql> select target_id from TagStorage left join RackObject on target_id = id where target_realm = 'object' and id is null;
 mysql> select target_id from TagStorage left join Rack on target_id = id where target_realm = 'rack' and id is null;
@@ -2787,6 +2835,11 @@ function loadEntityTags ($entity_realm = '', $entity_id = 0)
 	return getExplicitTagsOnly ($ret);
 }
 
+function loadFileTags ($id)
+{
+	return loadEntityTags ('file', $id);
+}
+
 function loadRackObjectTags ($id)
 {
 	return loadEntityTags ('object', $id);
@@ -3291,6 +3344,393 @@ function mergeSearchResults (&$objects, $terms, $fieldname)
 function getLostIPv4Addresses ()
 {
 	dragon();
+}
+
+// File-related functions
+function getAllFiles ()
+{
+	$query = "SELECT id, name, type, size, ctime, mtime, atime, comment FROM File ORDER BY name";
+	$result = useSelectBlade ($query, __FUNCTION__);
+	$ret=array();
+	$count=0;
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
+	{
+		$ret[$count]['id'] = $row['id'];
+		$ret[$count]['name'] = $row['name'];
+		$ret[$count]['type'] = $row['type'];
+		$ret[$count]['size'] = $row['size'];
+		$ret[$count]['ctime'] = $row['ctime'];
+		$ret[$count]['mtime'] = $row['mtime'];
+		$ret[$count]['atime'] = $row['atime'];
+		$ret[$count]['comment'] = $row['comment'];
+		$count++;
+	}
+	$result->closeCursor();
+	return $ret;
+}
+
+// Return a list of files which are not linked to the specified record
+function getAllUnlinkedFiles ($entity_type = NULL, $entity_id = 0)
+{
+	if ($entity_type == NULL || $entity_id == 0)
+	{
+		showError ('Invalid parameters', __FUNCTION__);
+		return NULL;
+	}
+	global $dbxlink;
+	$sql =
+		'SELECT id, name, type, size, ctime, mtime, atime, comment FROM File ' .
+		'WHERE id NOT IN (SELECT file_id FROM FileLink WHERE entity_type = ? AND entity_id = ?) ' .
+		'ORDER BY name';
+	$query = $dbxlink->prepare($sql);
+	$query->bindParam(1, $entity_type);
+	$query->bindParam(2, $entity_id);
+	$query->execute();
+	$ret=array();
+	$count=0;
+	while ($row = $query->fetch (PDO::FETCH_ASSOC))
+	{
+		$ret[$count]['id'] = $row['id'];
+		$ret[$count]['name'] = $row['name'];
+		$ret[$count]['type'] = $row['type'];
+		$ret[$count]['size'] = $row['size'];
+		$ret[$count]['ctime'] = $row['ctime'];
+		$ret[$count]['mtime'] = $row['mtime'];
+		$ret[$count]['atime'] = $row['atime'];
+		$ret[$count]['comment'] = $row['comment'];
+		$count++;
+	}
+	return $ret;
+}
+
+// Return a filtered, detailed file list.  Used on the main Files listing page.
+function getFileList ($entity_type = NULL, $tagfilter = array(), $tfmode = 'any')
+{
+	$whereclause = getWhereClause ($tagfilter);
+
+	if ($entity_type == 'no_links')
+		$whereclause .= 'AND File.id NOT IN (SELECT file_id FROM FileLink) ';
+	elseif ($entity_type != 'all')
+		$whereclause .= "AND entity_type = '${entity_type}' ";
+
+	$query =
+		'SELECT File.id, name, type, size, ctime, mtime, atime, comment ' .
+		'FROM File ' .
+		'LEFT JOIN FileLink ' .
+		'ON File.id = FileLink.file_id ' .
+		'LEFT JOIN TagStorage ' .
+		"ON File.id = TagStorage.target_id AND target_realm = 'file' " .
+		'WHERE size >= 0 ' .
+		$whereclause .
+		'ORDER BY name';
+
+	$result = useSelectBlade ($query, __FUNCTION__);
+	$ret = array();
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
+	{
+		foreach (array (
+			'id',
+			'name',
+			'type',
+			'size',
+			'ctime',
+			'mtime',
+			'atime',
+			'comment'
+			) as $cname)
+			$ret[$row['id']][$cname] = $row[$cname];
+	}
+	$result->closeCursor();
+	return $ret;
+}
+
+function getFilesOfEntity ($entity_type = NULL, $entity_id = 0)
+{
+	if ($entity_type == NULL || $entity_id == 0)
+	{
+		showError ('Invalid parameters', __FUNCTION__);
+		return NULL;
+	}
+	global $dbxlink;
+	$sql =
+		'SELECT FileLink.file_id, FileLink.id AS link_id, name, type, size, ctime, mtime, atime, comment ' .
+		'FROM FileLink LEFT JOIN File ON FileLink.file_id = File.id ' .
+		'WHERE FileLink.entity_type = ? AND FileLink.entity_id = ? ORDER BY name';
+	$query  = $dbxlink->prepare($sql);
+	$query->bindParam(1, $entity_type);
+	$query->bindParam(2, $entity_id);
+	$query->execute();
+	$ret = array();
+	while ($row = $query->fetch (PDO::FETCH_ASSOC))
+		$ret[$row['file_id']] = array (
+			'link_id' => $row['link_id'],
+			'name' => $row['name'],
+			'type' => $row['type'],
+			'size' => $row['size'],
+			'ctime' => $row['ctime'],
+			'mtime' => $row['mtime'],
+			'atime' => $row['atime'],
+			'comment' => $row['comment'],
+		);
+	return $ret;
+}
+
+function getFile ($file_id = 0)
+{
+	if ($file_id == 0)
+	{
+		showError ('Invalid file_id', __FUNCTION__);
+		return NULL;
+	}
+	global $dbxlink;
+	$query = $dbxlink->prepare('SELECT * FROM File WHERE id = ?');
+	$query->bindParam(1, $file_id);
+	$query->execute();
+	if (($row = $query->fetch (PDO::FETCH_ASSOC)) == NULL)
+	{
+		showError ('Query succeeded, but returned no data', __FUNCTION__);
+		$ret = NULL;
+	}
+	else
+	{
+		$ret = array();
+		$ret['id'] = $row['id'];
+		$ret['name'] = $row['name'];
+		$ret['type'] = $row['type'];
+		$ret['size'] = $row['size'];
+		$ret['ctime'] = $row['ctime'];
+		$ret['mtime'] = $row['mtime'];
+		$ret['atime'] = $row['atime'];
+		$ret['contents'] = $row['contents'];
+		$ret['comment'] = $row['comment'];
+
+		// Someone accessed this file,date('YmdHis'); update atime
+		$q_atime = $dbxlink->prepare('UPDATE File SET atime = ? WHERE id = ?');
+		$q_atime->bindParam(1, date('YmdHis'));
+		$q_atime->bindParam(2, $file_id);
+		$q_atime->execute();
+	}
+	unset ($query);
+	return $ret;
+}
+
+function getFileInfo ($file_id = 0)
+{
+	if ($file_id == 0)
+	{
+		showError ('Invalid file_id', __FUNCTION__);
+		return NULL;
+	}
+	global $dbxlink;
+	$query = $dbxlink->prepare('SELECT id, name, type, size, ctime, mtime, atime, comment FROM File WHERE id = ?');
+	$query->bindParam(1, $file_id);
+	$query->execute();
+	if (($row = $query->fetch (PDO::FETCH_ASSOC)) == NULL)
+	{
+		showError ('Query succeeded, but returned no data', __FUNCTION__);
+		$ret = NULL;
+	}
+	else
+	{
+		$ret = array();
+		$ret['id'] = $row['id'];
+		$ret['name'] = $row['name'];
+		$ret['type'] = $row['type'];
+		$ret['size'] = $row['size'];
+		$ret['ctime'] = $row['ctime'];
+		$ret['mtime'] = $row['mtime'];
+		$ret['atime'] = $row['atime'];
+		$ret['comment'] = $row['comment'];
+	}
+	unset ($query);
+	return $ret;
+}
+
+function getFileLinks ($file_id = 0)
+{
+	if ($file_id <= 0)
+	{
+		showError ('Invalid file_id', __FUNCTION__);
+		return NULL;
+	}
+
+	global $dbxlink;
+	$query = $dbxlink->prepare('SELECT * FROM FileLink WHERE file_id = ?');
+	$query->bindParam(1, $file_id);
+	$query->execute();
+	$ret = array();
+	while ($row = $query->fetch (PDO::FETCH_ASSOC))
+	{
+		// get info of the parent
+		switch ($row['entity_type'])
+		{
+			case 'ipv4net':
+				$page = 'ipv4net';
+				$id_name = 'id';
+				$parent = getIPv4NetworkInfo($row['entity_id']);
+				$name = sprintf("%s (%s/%s)", $parent['name'], $parent['ip'], $parent['mask']);
+				break;
+			case 'ipv4rspool':
+				$page = 'ipv4rsp';
+				$id_name = 'pool_id';
+				$parent = getRSPoolInfo($row['entity_id']);
+				$name = $parent['name'];
+				break;
+			case 'ipv4vs':
+				$page = 'ipv4vs';
+				$id_name = 'vs_id';
+				$parent = getVServiceInfo($row['entity_id']);
+				$name = $parent['name'];
+				break;
+			case 'object':
+				$page = 'object';
+				$id_name = 'object_id';
+				$parent = getObjectInfo($row['entity_id']);
+				$name = $parent['name'];
+				break;
+			case 'rack':
+				$page = 'rack';
+				$id_name = 'rack_id';
+				$parent = getRackData($row['entity_id']);
+				$name = $parent['name'];
+				break;
+			case 'user':
+				$page = 'user';
+				$id_name = 'user_id';
+				global $accounts;
+				foreach ($accounts as $account)
+					if ($account['user_id'] == $row['entity_id'])
+						$name = $account['user_name'];
+				break;
+		}
+
+		$ret[$row['id']] = array(
+				'page' => $page,
+				'id_name' => $id_name,
+				'entity_type' => $row['entity_type'],
+				'entity_id' => $row['entity_id'],
+				'name' => $name
+		);
+	}
+	return $ret;
+}
+
+// Return list of possible file parents along with the number of children.
+// Used on main Files listing page.
+function getFileLinkInfo ()
+{
+	global $dbxlink;
+	$query = 'SELECT entity_type, COUNT(*) AS count FROM FileLink GROUP BY entity_type';
+
+	$result = useSelectBlade ($query, __FUNCTION__);
+	$ret = array();
+	$ret[0] = array ('entity_type' => 'all', 'name' => 'ALL files');
+	$clist = array ('entity_type', 'name', 'count');
+	$total = 0;
+	$i=2;
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
+		if ($row['count'] > 0)
+		{
+			$total += $row['count'];
+			$row['name'] = formatEntityName ($row['entity_type']);
+			foreach ($clist as $cname)
+				$ret[$i][$cname] = $row[$cname];
+				$i++;
+		}
+	$result->closeCursor();
+
+	// Find number of files without any linkage
+	$linkless_sql =
+		'SELECT COUNT(*) ' .
+		'FROM File ' .
+		'WHERE id NOT IN (SELECT file_id FROM FileLink)';
+	$q_linkless = useSelectBlade ($linkless_sql, __FUNCTION__);
+	$ret[1] = array ('entity_type' => 'no_links', 'name' => 'Files w/no links', 'count' => $q_linkless->fetchColumn ());
+	$q_linkless->closeCursor();
+
+	// Find total number of files
+	$total_sql = 'SELECT COUNT(*) FROM File';
+	$q_total = useSelectBlade ($total_sql, __FUNCTION__);
+	$ret[0]['count'] = $q_total->fetchColumn ();
+	$q_total->closeCursor();
+
+	ksort($ret);
+	return $ret;
+}
+
+function commitAddFile ($name, $type, $size, $contents, $comment)
+{
+	$now = date('YmdHis');
+
+	global $dbxlink;
+	$query  = $dbxlink->prepare('INSERT INTO File (name, type, size, ctime, mtime, atime, contents, comment) VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
+	$query->bindParam(1, $name);
+	$query->bindParam(2, $type);
+	$query->bindParam(3, $size);
+	$query->bindParam(4, $now);
+	$query->bindParam(5, $now);
+	$query->bindParam(6, $now);
+	$query->bindParam(7, $contents, PDO::PARAM_LOB);
+	$query->bindParam(8, $comment);
+
+	$result = $query->execute();
+
+
+	if ($result)
+		return '';
+	else
+		return 'commitAddFile: SQL query failed';
+}
+
+function commitLinkFile ($file_id, $parent_type, $parent_id)
+{
+	global $dbxlink;
+	$query  = $dbxlink->prepare('INSERT INTO FileLink (file_id, entity_type, entity_id) VALUES (?, ?, ?)');
+	$query->bindParam(1, $file_id);
+	$query->bindParam(2, $parent_type);
+	$query->bindParam(3, $parent_id);
+
+	$result = $query->execute();
+
+	if ($result)
+		return '';
+	else
+		return 'commitLinkFile: SQL query failed';
+}
+
+function commitUpdateFile ($file_id = 0, $new_comment = '')
+{
+	if ($file_id == 0)
+	{
+		showError ('Not all required args are present.', __FUNCTION__);
+		return FALSE;
+	}
+	global $dbxlink;
+	$query = $dbxlink->prepare('UPDATE File SET comment = ? WHERE id = ?');
+	$query->bindParam(1, $new_comment);
+	$query->bindParam(2, $file_id);
+
+	$result = $query->execute();
+	if (!$result)
+	{
+		showError ('commitUpdateFile: SQL query failed', __FUNCTION__);
+		return FALSE;
+	}
+	return '';
+}
+
+function commitUnlinkFile ($link_id)
+{
+	if (useDeleteBlade ('FileLink', 'id', $link_id) != TRUE)
+		return __FUNCTION__ . ': useDeleteBlade() failed';
+	return '';
+}
+
+function commitDeleteFile ($file_id)
+{
+	if (useDeleteBlade ('File', 'id', $file_id) != TRUE)
+		return __FUNCTION__ . ': useDeleteBlade() failed';
+	return '';
 }
 
 ?>

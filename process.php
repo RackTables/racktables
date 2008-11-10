@@ -1,6 +1,12 @@
 <?php
 
 require 'inc/init.php';
+
+// FIXME: find a better way to handle this error
+if ($_REQUEST['op'] == 'addFile' && !isset($_FILES['file']['error'])) {
+	showError ("File upload error, it's size probably exceeds upload_max_filesize directive in php.ini");
+	die;
+}
 fixContext();
 
 if (empty ($op) or !isset ($ophandler[$pageno][$tabno][$op]))
