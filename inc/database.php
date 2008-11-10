@@ -3571,7 +3571,7 @@ function getFileLinks ($file_id = 0)
 				$name = sprintf("%s (%s/%s)", $parent['name'], $parent['ip'], $parent['mask']);
 				break;
 			case 'ipv4rspool':
-				$page = 'ipv4rsp';
+				$page = 'ipv4rspool';
 				$id_name = 'pool_id';
 				$parent = getRSPoolInfo($row['entity_id']);
 				$name = $parent['name'];

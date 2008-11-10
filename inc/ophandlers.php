@@ -1150,7 +1150,7 @@ function saveEntityTags ()
 	(
 		'file' => 'file',
 		'ipv4net' => 'ipv4net',
-		'ipv4rs' => 'ipv4rspool',
+		'ipv4rspool' => 'ipv4rspool',
 		'ipv4vs' => 'ipv4vs',
 		'object' => 'object',
 		'rack' => 'rack',
