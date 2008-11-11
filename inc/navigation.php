@@ -671,7 +671,7 @@ $page['filesbylink']['bypass_type'] = 'string';
 $page['filesbylink']['parent'] = 'files';
 $ophandler['filesbylink']['default']['deleteFile'] = 'deleteFile';
 
-$page['file']['title'] = 'File';
+$page['file']['title_handler'] = 'dynamic_title_file';
 $page['file']['bypass'] = 'file_id';
 $page['file']['bypass_type'] = 'uint';
 $page['file']['parent'] = 'files';

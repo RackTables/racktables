@@ -200,6 +200,17 @@ function dynamic_title_file ()
 	$ret = array();
 	switch ($pageno)
 	{
+		case 'file':
+			assertUIntArg ('file_id', __FUNCTION__);
+			$file = getFileInfo ($_REQUEST['file_id']);
+			if ($file == NULL)
+			{
+				showError ('getFileInfo() failed', __FUNCTION__);
+				return NULL;
+			}
+			$ret['name'] = $file['name'];
+			$ret['params']['file_id'] = $_REQUEST['file_id'];
+			break;
 		case 'filesbylink':
 			assertStringArg ('entity_type', __FUNCTION__);
 			$ret['name'] = $_REQUEST['entity_type'];
