@@ -155,14 +155,6 @@ function renderIndex ()
 						<?php printImageHREF ('objects'); ?></a></h1>
 					</td>
 					<td>
-						<h1><a href='<?php echo $root; ?>?page=reports'>Reports<br>
-						<?php printImageHREF ('reports'); ?></a></h1>
-					</td>
-				</tr>
-			</table>
-			<table width='100%' cellspacing=0 cellpadding=30 class=mainmenu border=0>
-				<tr>
-					<td>
 						<h1><a href='<?php echo $root; ?>?page=ipv4space'>IPv4 space<br>
 						<?php printImageHREF ('ipv4space'); ?></a></h1>
 					</td>
@@ -170,24 +162,21 @@ function renderIndex ()
 						<h1><a href='<?php echo $root; ?>?page=files'>Files<br>
 						<?php printImageHREF ('files'); ?></a></h1>
 					</td>
+				</tr>
+				<tr>
 					<td>
 						<h1><a href='<?php echo $root; ?>?page=config'>Configuration<br>
 						<?php printImageHREF ('config'); ?></a></h1>
 					</td>
-				</tr>
-			</table>
-			<table width='100%' cellspacing=0 cellpadding=30 class=mainmenu border=0>
-				<tr>
+					<td>
+						<h1><a href='<?php echo $root; ?>?page=reports'>Reports<br>
+						<?php printImageHREF ('reports'); ?></a></h1>
+					</td>
 					<td>
 						<h1><a href='<?php echo $root; ?>?page=ipv4slb'>IPv4 SLB<br>
 						<?php printImageHREF ('ipv4slb'); ?></a></h1>
 					</td>
-					<td>
-						<img src=<?php echo $root; ?>pix/filler.png border=0>
-					</td>
-					<td>
-						<img src=<?php echo $root; ?>pix/filler.png border=0>
-					</td>
+					<td>&nbsp;</td>
 				</tr>
 			</table>
 			</div>
