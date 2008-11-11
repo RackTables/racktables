@@ -3511,7 +3511,6 @@ function getFile ($file_id = 0)
 		$q_atime->bindParam(2, $file_id);
 		$q_atime->execute();
 	}
-	unset ($query);
 	return $ret;
 }
 
@@ -3542,8 +3541,8 @@ function getFileInfo ($file_id = 0)
 		$ret['mtime'] = $row['mtime'];
 		$ret['atime'] = $row['atime'];
 		$ret['comment'] = $row['comment'];
+		$query->closeCursor();
 	}
-	unset ($query);
 	return $ret;
 }
 
@@ -3559,8 +3558,9 @@ function getFileLinks ($file_id = 0)
 	$query = $dbxlink->prepare('SELECT * FROM FileLink WHERE file_id = ?');
 	$query->bindParam(1, $file_id);
 	$query->execute();
+	$rows = $query->fetchAll (PDO::FETCH_ASSOC);
 	$ret = array();
-	while ($row = $query->fetch (PDO::FETCH_ASSOC))
+	foreach ($rows as $row)
 	{
 		// get info of the parent
 		switch ($row['entity_type'])
