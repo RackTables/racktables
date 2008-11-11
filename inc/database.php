@@ -3503,6 +3503,7 @@ function getFile ($file_id = 0)
 		$ret['atime'] = $row['atime'];
 		$ret['contents'] = $row['contents'];
 		$ret['comment'] = $row['comment'];
+		$query->closeCursor();
 
 		// Someone accessed this file,date('YmdHis'); update atime
 		$q_atime = $dbxlink->prepare('UPDATE File SET atime = ? WHERE id = ?');

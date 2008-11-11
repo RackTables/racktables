@@ -5646,6 +5646,7 @@ function renderFilesForEntity ($entity_type = NULL, $id_name = NULL, $entity_id 
 
 	function printNewItemTR ($entity_type, $entity_id)
 	{
+		global $root;
 		printOpFormIntro ('addFile', array ('entity_type' => $entity_type, 'entity_id' => $entity_id, 'MAX_FILE_SIZE' => convertToBytes(get_cfg_var('upload_max_filesize'))), TRUE);
 		echo "<tr><td>";
 		printImageHREF ('add', 'Upload file', TRUE, 99);
@@ -5672,7 +5673,7 @@ function renderFilesForEntity ($entity_type = NULL, $id_name = NULL, $entity_id 
 	foreach ($filelist as $file_id => $file)
 	{
 		printOpFormIntro ('updateFile', array ('file_id' => $file_id, 'link_id' => $file['link_id'], 'name' => $file['name']));
-		echo "<tr class='$class' valign=top><td><a href='${root}process.php?op=deleteFile&page=${pageno}&tab=${tabno}&file_id=${file_id}&${id_name}=${entity_id}&name=${file['name']}'>";
+		echo "<tr valign=top><td><a href='${root}process.php?op=deleteFile&page=${pageno}&tab=${tabno}&file_id=${file_id}&${id_name}=${entity_id}&name=${file['name']}'>";
 		printImageHREF ('delete', 'Unlink and delete file');
 		echo '</a></td>';
 		printf("<td class='tdleft'><a href='%/?page=file&file_id=%s'><strong>%s</strong></a>", $root, $file_id, $file['name']);
@@ -5728,10 +5729,10 @@ function printOpFormIntro ($opname, $extra = array(), $upload = FALSE)
 {
 	global $root, $pageno, $tabno, $page;
 
+	echo "<form method=post action='${root}process.php?page=${pageno}&tab=${tabno}&op=${opname}'";
 	if ($upload)
-		$enctype = " enctype='multipart/form-data'";
-
-	echo "<form method=post action='${root}process.php?page=${pageno}&tab=${tabno}&op=${opname}'${enctype}>\n";
+		echo " enctype='multipart/form-data'";
+	echo ">\n";
 	if (isset ($page[$pageno]['bypass']) and isset ($_REQUEST[$page[$pageno]['bypass']]))
 		$extra[$page[$pageno]['bypass']] = $_REQUEST[$page[$pageno]['bypass']];
 	foreach ($extra as $inputname => $inputvalue)
