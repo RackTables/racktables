@@ -1112,7 +1112,17 @@ function renderPortsForObject ($object_id = 0)
 		echo "</a></td>\n";
 		echo "<td><input type=text name=name value='${port['name']}' size=8></td>";
 		echo "<td><input type=text name=label value='${port['label']}' size=24></td>";
-		echo "<td>${port['type']}</td>\n";
+		if (!$port['remote_object_id'])
+		{
+			echo "<td>";
+			printSelect (getPortTypes(), 'port_type_id', $port['type_id']);
+			echo "</td>";
+		}
+		else
+		{
+			echo "<input type=hidden name=port_type_id value='${port['type_id']}'>";
+			echo "<td>${port['type']}</td>\n";
+		}
 		echo "<td><input type=text name=l2address value='${port['l2address']}'></td>\n";
 		if ($port['remote_object_id'])
 		{
