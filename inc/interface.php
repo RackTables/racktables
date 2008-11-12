@@ -2052,6 +2052,10 @@ function renderIPv4SpaceRecords ($tree, &$tagcache, $baseurl, $target = 0, $leve
 	$self = __FUNCTION__;
 	foreach ($tree as $item)
 	{
+		$item['mask_bin'] = binMaskFromDec ($item['mask']);
+		$item['mask_bin_inv'] = binInvMaskFromDec ($item['mask']);
+		$item['db_first'] = sprintf ('%u', 0x00000000 + $item['ip_bin'] & $item['mask_bin']);
+		$item['db_last'] = sprintf ('%u', 0x00000000 + $item['ip_bin'] | ($item['mask_bin_inv']));
 		$total = $item['addrt'];
 		loadIPv4AddrList ($item); // necessary to compute router list and address counter
 		$used = $item['addrc'];
@@ -2095,7 +2099,6 @@ function renderIPv4Space ()
 	$netlist = getIPv4NetworkList ($tagfilter, getTFMode());
 	$netcount = count ($netlist);
 	$tree = prepareIPv4Tree ($netlist, isset ($_REQUEST['eid']) ? $_REQUEST['eid'] : 0);
-	unset ($netlist);
 
 	echo "<table border=0 class=objectview>\n";
 	echo "<tr><td class=pcleft>";
@@ -2338,27 +2341,27 @@ function renderIPv4Network ($id)
 
 	if (getConfigVar ('EXT_IPV4_VIEW') == 'yes')
 	{
-		$ipv4netlist = getIPv4NetworkList (array(), getTFMode());
-		$ipv4tree = treeFromList ($ipv4netlist);
-		$backtrace = array_reverse (traceEntity ($ipv4tree, $id));
-		$arrows = count ($backtrace) - 1;
-		foreach ($backtrace as $ancestorid)
+		// Build a backtrace from all parent networks.
+		$clen = $range['mask'];
+		$backtrace = array();
+		while (NULL !== ($upperid = getIPv4AddressNetworkId ($range['ip'], $clen)))
+		{
+			$upperinfo = getIPv4NetworkInfo ($upperid);
+			$clen = $upperinfo['mask'];
+			$backtrace[] = $upperid;
+		}
+		$arrows = count ($backtrace);
+		foreach (array_reverse ($backtrace) as $ancestorid)
 		{
 			$ainfo = getIPv4NetworkInfo ($ancestorid);
-			if ($ancestorid == $id)
-			{
-				echo "<tr><th width='50%' class=tdright>&rarr;</th>";
-				echo "<td class=tdleft>${ainfo['ip']}/${ainfo['mask']}</td></tr>";
-			}
-			else
-			{
-				echo "<tr><th width='50%' class=tdright>";
-				for ($i = 0; $i < $arrows; $i++)
-					echo '&uarr;';
-				$arrows--;
-				echo "</th><td class=tdleft><a href='${root}?page=${pageno}&tab=${tabno}&id=${ainfo['id']}'>${ainfo['ip']}/${ainfo['mask']}</a></td></tr>";
-			}
+			echo "<tr><th width='50%' class=tdright>";
+			for ($i = 0; $i < $arrows; $i++)
+				echo '&uarr;';
+			$arrows--;
+			echo "</th><td class=tdleft><a href='${root}?page=${pageno}&tab=${tabno}&id=${ainfo['id']}'>${ainfo['ip']}/${ainfo['mask']}</a></td></tr>";
 		}
+		echo "<tr><th width='50%' class=tdright>&rarr;</th>";
+		echo "<td class=tdleft>${range['ip']}/${range['mask']}</td></tr>";
 		// FIXME: get and display nested networks
 		// $theitem = pickLeaf ($ipv4tree, $id);
 	}

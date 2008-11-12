@@ -1423,18 +1423,39 @@ function taginfoCmp ($tagA, $tagB)
 
 // Compare networks. When sorting a tree, the records on the list will have
 // distinct base IP addresses.
+// "The comparison function must return an integer less than, equal to, or greater
+// than zero if the first argument is considered to be respectively less than,
+// equal to, or greater than the second." (c) PHP manual
 function IPv4NetworkCmp ($netA, $netB)
 {
-//	return bccomp ("${netA['db_first']}", "${netB['db_first']}");
 	// There's a problem just substracting one u32 integer from another,
 	// because the result may happen big enough to become a negative i32
 	// integer itself (PHP tries to cast everything it sees to signed int)
-	if ($netA['db_first'] > $netB['db_first'])
-		return 1;
-	elseif ($netA['db_first'] < $netB['db_first'])
-		return -1;
-	else
+	// The comparison below must treat positive and negative values of both
+	// arguments.
+	// Equal values give instant decision regardless of their [equal] sign.
+	if ($netA['ip_bin'] == $netB['ip_bin'])
 		return 0;
+	// Same-signed values compete arithmetically within one of i32 contiguous ranges:
+	// 0x00000001~0x7fffffff 1~2147483647
+	// 0 doesn't have any sign, and network 0.0.0.0 isn't allowed
+	// 0x80000000~0xffffffff -2147483648~-1
+	$signA = $netA['ip_bin'] / abs ($netA['ip_bin']);
+	$signB = $netB['ip_bin'] / abs ($netB['ip_bin']);
+	if ($signA == $signB)
+	{
+		if ($netA['ip_bin'] > $netB['ip_bin'])
+			return 1;
+		else
+			return -1;
+	}
+	else // With only one of two values being negative, it... wins!
+	{
+		if ($netA['ip_bin'] < $netB['ip_bin'])
+			return 1;
+		else
+			return -1;
+	}
 }
 
 // Modify the given tag tree so, that each level's items are sorted alphabetically.

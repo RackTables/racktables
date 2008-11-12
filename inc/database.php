@@ -1150,7 +1150,6 @@ function getIPv4NetworkInfo ($id = 0)
 	$ret['mask_bin_inv'] = binInvMaskFromDec ($ret['mask']);
 	$ret['db_first'] = sprintf ('%u', 0x00000000 + $ret['ip_bin'] & $ret['mask_bin']);
 	$ret['db_last'] = sprintf ('%u', 0x00000000 + $ret['ip_bin'] | ($ret['mask_bin_inv']));
-	$ret['parent_id'] = getIPv4AddressNetworkId ($ret['ip'], $ret['mask']);
 	return $ret;
 }
 
@@ -1186,22 +1185,29 @@ function bindIpToObject ($ip = '', $object_id = 0, $name = '', $type = '')
 	return $result ? '' : (__FUNCTION__ . '(): useInsertBlade() failed');
 }
 
+// Collect data necessary to build a tree. Calling functions should care about
+// setting the rest of data.
 function getIPv4NetworkList ($tagfilter = array(), $tfmode = 'any')
 {
 	$whereclause = getWhereClause ($tagfilter);
 	$query =
-		"select distinct id ".
+		"select distinct id, INET_NTOA(ip) as ip, mask, name " .
 		"from IPRanges left join TagStorage on id = target_id and target_realm = 'ipv4net' " .
-		"where true ${whereclause} order by ip";
+		"where true ${whereclause} order by IPRanges.ip";
 	$result = useSelectBlade ($query, __FUNCTION__);
 	$ret = array();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-		$ret[$row['id']] = NULL;
-	unset ($result);
+	{
+		// parent_id is for treeFromList()
+		$row['parent_id'] = getIPv4AddressNetworkId ($row['ip'], $row['mask']);
+		// ip_bin and mask are used by iptree_fill()
+		$row['ip_bin'] = ip2long ($row['ip']);
+		$ret[$row['id']] = $row;
+	}
+	// After all the keys are known we can update parent_id appropriately.
 	$keys = array_keys ($ret);
 	foreach ($keys as $netid)
 	{
-		$ret[$netid] = getIPv4NetworkInfo ($netid);
 		if ($ret[$netid]['parent_id'] and !in_array ($ret[$netid]['parent_id'], $keys))
 		{
 			$ret[$netid]['real_parent_id'] = $ret[$netid]['parent_id'];
