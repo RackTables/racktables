@@ -1573,6 +1573,10 @@ function countOwnIPv4Addresses (&$node)
 {
 	$toscan = array();
 	$node['addrt'] = 0;
+	$node['mask_bin'] = binMaskFromDec ($node['mask']);
+	$node['mask_bin_inv'] = binInvMaskFromDec ($node['mask']);
+	$node['db_first'] = sprintf ('%u', 0x00000000 + $node['ip_bin'] & $node['mask_bin']);
+	$node['db_last'] = sprintf ('%u', 0x00000000 + $node['ip_bin'] | ($node['mask_bin_inv']));
 	if (empty ($node['kids']))
 	{
 		$toscan[] = array ('i32_first' => $node['db_first'], 'i32_last' => $node['db_last']);
@@ -1585,6 +1589,8 @@ function countOwnIPv4Addresses (&$node)
 				$toscan[] = array ('i32_first' => $nested['db_first'], 'i32_last' => $nested['db_last']);
 				$node['addrt'] += binInvMaskFromDec ($nested['mask']) + 1;
 			}
+	// Don't do anything more, because the displaying function will load the addresses anyway.
+	return;
 	$node['addrc'] = count (scanIPv4Space ($toscan));
 }
 

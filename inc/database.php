@@ -1198,16 +1198,17 @@ function getIPv4NetworkList ($tagfilter = array(), $tfmode = 'any')
 	$ret = array();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
-		// parent_id is for treeFromList()
-		$row['parent_id'] = getIPv4AddressNetworkId ($row['ip'], $row['mask']);
 		// ip_bin and mask are used by iptree_fill()
 		$row['ip_bin'] = ip2long ($row['ip']);
 		$ret[$row['id']] = $row;
 	}
-	// After all the keys are known we can update parent_id appropriately.
+	// After all the keys are known we can update parent_id appropriately. Also we don't
+	// run two queries in parallel this way.
 	$keys = array_keys ($ret);
 	foreach ($keys as $netid)
 	{
+		// parent_id is for treeFromList()
+		$ret[$netid]['parent_id'] = getIPv4AddressNetworkId ($ret[$netid]['ip'], $ret[$netid]['mask']);
 		if ($ret[$netid]['parent_id'] and !in_array ($ret[$netid]['parent_id'], $keys))
 		{
 			$ret[$netid]['real_parent_id'] = $ret[$netid]['parent_id'];

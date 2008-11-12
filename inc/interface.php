@@ -2052,10 +2052,6 @@ function renderIPv4SpaceRecords ($tree, &$tagcache, $baseurl, $target = 0, $leve
 	$self = __FUNCTION__;
 	foreach ($tree as $item)
 	{
-		$item['mask_bin'] = binMaskFromDec ($item['mask']);
-		$item['mask_bin_inv'] = binInvMaskFromDec ($item['mask']);
-		$item['db_first'] = sprintf ('%u', 0x00000000 + $item['ip_bin'] & $item['mask_bin']);
-		$item['db_last'] = sprintf ('%u', 0x00000000 + $item['ip_bin'] | ($item['mask_bin_inv']));
 		$total = $item['addrt'];
 		loadIPv4AddrList ($item); // necessary to compute router list and address counter
 		$used = $item['addrc'];
