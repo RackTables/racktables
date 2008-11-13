@@ -672,6 +672,7 @@ function clearSticker ()
 
 function updateObject ()
 {
+	assertUIntArg ('num_attrs', __FUNCTION__);
 	assertUIntArg ('object_id', __FUNCTION__);
 	assertUIntArg ('object_type_id', __FUNCTION__);
 	assertStringArg ('object_name', __FUNCTION__, TRUE);
@@ -694,19 +695,10 @@ function updateObject ()
 		$_REQUEST['object_comment']
 	) !== TRUE)
 		return buildRedirectURL ('ERR');
-	// Invalidate thumb cache of all racks objects could occupy.
-	foreach (getResidentRacksData ($_REQUEST['object_id'], FALSE) as $rack_id)
-		resetThumbCache ($rack_id);
-	return buildRedirectURL ('OK');
-}
 
-function updateStickers ()
-{
-	assertUIntArg ('object_id', __FUNCTION__);
-	assertUIntArg ('num_attrs', __FUNCTION__);
+	// Update optional attributes
 	$oldvalues = getAttrValues ($_REQUEST['object_id']);
 	$result = array();
-
 	for ($i = 0; $i < $_REQUEST['num_attrs']; $i++)
 	{
 		assertUIntArg ("${i}_attr_id", __FUNCTION__);
@@ -743,9 +735,12 @@ function updateStickers ()
 		// Note if the queries succeed or not, it determines which page they see.
 		$result[] = commitUpdateAttrValue ($_REQUEST['object_id'], $attr_id, $value);
 	}
-
 	if (in_array (FALSE, $result))
 		return buildRedirectURL ('ERR');
+
+	// Invalidate thumb cache of all racks objects could occupy.
+	foreach (getResidentRacksData ($_REQUEST['object_id'], FALSE) as $rack_id)
+		resetThumbCache ($rack_id);
 
 	return buildRedirectURL ('OK');
 }

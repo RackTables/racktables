@@ -466,12 +466,13 @@ function renderEditObjectForm ($object_id)
 		showError ('getObjectInfo() failed', __FUNCTION__);
 		return;
 	}
-	echo '<table border=0 width=100%><tr>';
-
-	echo '<td class=pcleft>';
-	startPortlet ('Static attributes');
+	startPortlet ();
 	printOpFormIntro ('update');
+	echo '<table border=0 width=100%><tr><td class=pcleft>';
+
+	// static attributes
 	echo '<table border=0 align=center>';
+	echo "<tr><th colspan=2><h2>Static attributes</h2></th></tr>";
 	echo "<tr><th class=tdright>Type:</th><td class=tdleft>";
 	printSelect (getObjectTypeList(), 'object_type_id', $object['objtype_id']);
 	echo "</td></tr>\n";
@@ -485,22 +486,16 @@ function renderEditObjectForm ($object_id)
 		echo ' checked';
 	echo "></td></tr>\n";
 	echo "<tr><td colspan=2><b>Comment:</b><br><textarea name=object_comment rows=10 cols=80>${object['comment']}</textarea></td></tr>";
-	echo "<tr><th class=submit colspan=2>";
-	printImageHREF ('SAVE', 'Save changes', TRUE);
-	echo "</td></tr>\n";
-	echo '</form></table><br>';
-	finishPortlet();
-	echo '</td>';
-	
-	// stickers
-	echo '<td class=pcright>';
-	startPortlet ('Optional attributes');
-	$values = getAttrValues ($object_id);
-	echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
-	echo "<tr><th>&nbsp;</th><th>Attribute</th><th>Value</th><th>&nbsp;</th></tr>\n";
-	printOpFormIntro ('updateStickers');
-	echo '<input type=hidden name=num_attrs value=' . count($values) . ">\n";
+	echo '</table>';
 
+	echo '</td><td class=pcright>';
+	
+	// optional attributes
+	$values = getAttrValues ($object_id);
+	echo "<table border=0 cellspacing=0 cellpadding=5 align=center class=widetable>\n";
+	echo "<tr><th colspan=3><h2>Optional attributes</h2></th></tr>";
+	echo "<tr><th>&nbsp;</th><th>Attribute</th><th>Value</th></tr>\n";
+	echo '<input type=hidden name=num_attrs value=' . count($values) . ">\n";
 	$i = 0;
 	foreach ($values as $record)
 	{
@@ -532,23 +527,18 @@ function renderEditObjectForm ($object_id)
 		echo "</td></tr>\n";
 		$i++;
 	}
-	echo "<tr><td colspan=3>";
+	echo "</table></td></tr>\n";
+
+	echo "<tr><th class=submit colspan=2>";
 	printImageHREF ('SAVE', 'Save changes', TRUE);
-	echo "</td></tr>\n";
-	echo "</form>";
-	echo "</table>\n";
+	echo "</form></th></tr></table>\n";
 	finishPortlet();
-	echo '</td>';
 
-	echo '</tr><tr>';
-
-	echo '<td colspan=2>';
+	echo '<table border=0 width=100%><tr><td>';
 	startPortlet ('history');
 	renderHistory ($pageno, $object_id);
 	finishPortlet();
-	echo '</td>';
-
-	echo '</tr></table>';
+	echo '</td></tr></table>';
 }
 
 // This is a clone of renderEditObjectForm().
