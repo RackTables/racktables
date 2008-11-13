@@ -3,10 +3,10 @@
 	update: display row name when listing objects. closes ticket 16 (by Aaron)
 	update: ability to manage rows from the Rackspace page in addition to the Dictionary (by Aaron)
 	update: IPv4 calculations were optimized for better speed
-    update: allow port type to be changed if it isn't linked.  closes ticket 137 (by Aaron)
+	update: allow port type to be changed if it isn't linked.  closes ticket 137 (by Aaron)
 	update: add network security chapter and dictionary entries.  closes ticket 148 (by Aaron)
-    update: add HP and Juniper dictionary entries.  closes tickets 145 and 165 (by Aaron)
-    update: combined two forms on object properties page into one.  closes ticket 36 (by Aaron)
+	update: add HP and Juniper dictionary entries.  closes tickets 145 and 165 (by Aaron)
+	update: combined two forms on object properties page into one.  closes ticket 36 (by Aaron)
 	bugfix: show error message if snmp module isn't loaded.  closes ticket 43 (by Aaron)
 0.16.4 2008-11-04
 	bugfix: display VS/RS config block in RS pool view
