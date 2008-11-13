@@ -492,42 +492,46 @@ function renderEditObjectForm ($object_id)
 	
 	// optional attributes
 	$values = getAttrValues ($object_id);
-	echo "<table border=0 cellspacing=0 cellpadding=5 align=center class=widetable>\n";
-	echo "<tr><th colspan=3><h2>Optional attributes</h2></th></tr>";
-	echo "<tr><th>&nbsp;</th><th>Attribute</th><th>Value</th></tr>\n";
-	echo '<input type=hidden name=num_attrs value=' . count($values) . ">\n";
-	$i = 0;
-	foreach ($values as $record)
+	if (count($values) > 0)
 	{
-		echo "<input type=hidden name=${i}_attr_id value=${record['id']}>";
-		echo '<tr><td>';
-		if (!empty ($record['value']))
+		echo "<table border=0 cellspacing=0 cellpadding=5 align=center class=widetable>\n";
+		echo "<tr><th colspan=3><h2>Optional attributes</h2></th></tr>";
+		echo "<tr><th>&nbsp;</th><th>Attribute</th><th>Value</th></tr>\n";
+		echo '<input type=hidden name=num_attrs value=' . count($values) . ">\n";
+		$i = 0;
+		foreach ($values as $record)
 		{
-			echo "<a href='${root}process.php?page=${pageno}&tab=${tabno}&op=clearSticker&object_id=${object_id}&attr_id=${record['id']}'>";
-			printImageHREF ('clear', 'Clear value');
-			echo '</a>';
+			echo "<input type=hidden name=${i}_attr_id value=${record['id']}>";
+			echo '<tr><td>';
+			if (!empty ($record['value']))
+			{
+				echo "<a href='${root}process.php?page=${pageno}&tab=${tabno}&op=clearSticker&object_id=${object_id}&attr_id=${record['id']}'>";
+				printImageHREF ('clear', 'Clear value');
+				echo '</a>';
+			}
+			else
+				echo '&nbsp;';
+			echo '</td>';
+			echo "<td class=tdright>${record['name']}:</td><td class=tdleft>";
+			switch ($record['type'])
+			{
+				case 'uint':
+				case 'float':
+				case 'string':
+					echo "<input type=text name=${i}_value value='${record['value']}'>";
+					break;
+				case 'dict':
+					$chapter = readChapter ($record['chapter_name']);
+					$chapter[0] = '-- NOT SET --';
+					printSelect ($chapter, "${i}_value", $record['key']);
+					break;
+			}
+			echo "</td></tr>\n";
+			$i++;
 		}
-		else
-			echo '&nbsp;';
-		echo '</td>';
-		echo "<td class=tdright>${record['name']}:</td><td class=tdleft>";
-		switch ($record['type'])
-		{
-			case 'uint':
-			case 'float':
-			case 'string':
-				echo "<input type=text name=${i}_value value='${record['value']}'>";
-				break;
-			case 'dict':
-				$chapter = readChapter ($record['chapter_name']);
-				$chapter[0] = '-- NOT SET --';
-				printSelect ($chapter, "${i}_value", $record['key']);
-				break;
-		}
-		echo "</td></tr>\n";
-		$i++;
+		echo "</table>";
 	}
-	echo "</table></td></tr>\n";
+	echo "</td></tr>\n";
 
 	echo "<tr><th class=submit colspan=2>";
 	printImageHREF ('SAVE', 'Save changes', TRUE);
