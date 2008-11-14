@@ -1728,7 +1728,7 @@ function renderTagStats ()
 	$result = useSelectBlade ($query, __FUNCTION__);
 	$refc = $result->fetchAll (PDO::FETCH_ASSOC);
 	echo '<table border=1><tr><th>tag</th><th>total</th><th>objects</th><th>IPv4 nets</th><th>racks</th>';
-	echo '<th>IPv4 VS</th><th>IPv4 RS pools</th><th>users</th></tr>';
+	echo '<th>IPv4 VS</th><th>IPv4 RS pools</th><th>users</th><th>files</th></tr>';
 	$pagebyrealm = array
 	(
 		'file' => 'filesbylink&entity_type=all',
@@ -1742,7 +1742,7 @@ function renderTagStats ()
 	foreach ($refc as $ref)
 	{
 		echo "<tr><td>${ref['tag']}</td><td>${ref['refcnt']}</td>";
-		foreach (array ('file', 'ipv4net', 'ipv4rspool', 'ipv4vs', 'object', 'rack', 'user') as $realm)
+		foreach (array ('object', 'ipv4net', 'rack', 'ipv4vs', 'ipv4rspool', 'user', 'file') as $realm)
 		{
 			echo '<td>';
 			if (!isset ($taglist[$ref['id']]['refcnt'][$realm]))
