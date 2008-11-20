@@ -521,14 +521,9 @@ td.portmap_highlight_odd {
 	color: silver;
 }
 
-tr.slbconf th {
+th.slbconf {
 	width: 50%;
 	text-align: right;
-}
-
-tr.slbconf td {
-	text-align: left;
-	white-space: pre;
 }
 
 td.slbconf {
@@ -540,10 +535,25 @@ table.slbcell {
 	border: 1px;
 	border-style: outset;
 	width: 100%;
+	height: 100%;
+	empty-cells: hide;
 }
 
 table.slbcell td {
 	border-top: 0px;
 	text-align: center;
 }
+
+table.vscell {
+	empty-cells: show;
+}
+
+table.vscell td {
+	text-align: left;
+}
+
+td.dashed {
+	border: 1px dashed gray;
+}
+
 

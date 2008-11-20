@@ -130,6 +130,9 @@ $image['LB']['height'] = 32;
 $image['RS pool']['path'] = 'pix/serverpool.png';
 $image['RS pool']['width'] = 48;
 $image['RS pool']['height'] = 16;
+$image['VS']['path'] = 'pix/servicesign.png';
+$image['VS']['width'] = 39;
+$image['VS']['height'] = 62;
 
 // This may be populated later onsite, report rendering function will use it.
 // See the $systemreport for structure.
@@ -972,11 +975,8 @@ function renderRackObject ($object_id = 0)
 		echo "<tr><th>VS</th><th>RS pool</th><th>RS</th><th>VS config</th><th>RS config</th></tr>\n";
 		foreach ($pools as $vs_id => $info)
 		{
-			echo "<tr valign=top class=row_${order}><td class=tdleft><a href='${root}?page=ipv4vs&vs_id=${vs_id}'>";
-			echo buildVServiceName ($info);
-			echo '</a>';
-			if (!empty ($info['name']))
-				echo "<br>${info['name']}";
+			echo "<tr valign=top class=row_${order}><td class=tdleft>";
+			renderVSCell ($vs_id);
 			echo "</td><td class=tdleft>";
 			renderRSPoolCell ($info['pool_id'], $info['pool_name']);
 			echo '</td><td class=tdleft>' . $info['rscount'] . '</td>';
@@ -4062,13 +4062,13 @@ function renderVirtualService ($vsid)
 	printTagTRs ("${root}?page=ipv4vslist&tab=default&");
 	if (!empty ($vsinfo['vsconfig']))
 	{
-		echo "<tr class=slbconf><th>VS configuration:</th><td>&nbsp;</td></tr>";
-		echo "<tr class=slbconf><td colspan=2>${vsinfo['vsconfig']}</td></tr>\n";
+		echo "<tr><th class=slbconf>VS configuration:</th><td>&nbsp;</td></tr>";
+		echo "<tr><td colspan=2 class='dashed slbconf'>${vsinfo['vsconfig']}</td></tr>\n";
 	}
 	if (!empty ($vsinfo['rsconfig']))
 	{
-		echo "<tr class=slbconf><th>RS configuration:</th><td class=tdleft>&nbsp;</td></tr>\n";
-		echo "<tr class=slbconf><td colspan=2>${vsinfo['rsconfig']}</td></tr>\n";
+		echo "<tr><th class=slbconf>RS configuration:</th><td class=tdleft>&nbsp;</td></tr>\n";
+		echo "<tr><td colspan=2 class='dashed slbconf'>${vsinfo['rsconfig']}</td></tr>\n";
 	}
 	echo "</table>\n";
 	finishPortlet ();
@@ -4088,9 +4088,9 @@ function renderVirtualService ($vsid)
 		renderRSPoolCell ($pool_id, $poolInfo['name']);
 		echo "</td></tr>";
 		if (!empty ($poolInfo['vsconfig']))
-			echo "<tr class=slbconf><th>VS config</th><td>${poolInfo['vsconfig']}</td></tr>";
+			echo "<tr><th>VS config</th><td class='dashed slbconf'>${poolInfo['vsconfig']}</td></tr>";
 		if (!empty ($poolInfo['rsconfig']))
-			echo "<tr class=slbconf><th>RS config</th><td>${poolInfo['rsconfig']}</td></tr>";
+			echo "<tr><th>RS config</th><td class='dashed slbconf'>${poolInfo['rsconfig']}</td></tr>";
 		echo '</table>';
 		echo '</td><td>';
 		// LB list
@@ -4105,9 +4105,9 @@ function renderVirtualService ($vsid)
 				renderLBCell ($object_id);
 				echo '</td></tr>';
 				if (!empty ($lbInfo['vsconfig']))
-					echo "<tr class=slbconf><th>VS config</th><td>${lbInfo['vsconfig']}</td></tr>";
+					echo "<tr><th>VS config</th><td class='dashed slbconf'>${lbInfo['vsconfig']}</td></tr>";
 				if (!empty ($lbInfo['rsconfig']))
-					echo "<tr class=slbconf><th>RS config</th><td>${lbInfo['rsconfig']}</td></tr>";
+					echo "<tr><th>RS config</th><td class='dashed slbconf'>${lbInfo['rsconfig']}</td></tr>";
 			}
 			echo '</table>';
 		}
@@ -4339,7 +4339,7 @@ function renderRSPool ($pool_id = 0)
 		echo "<tr><td colspan=2 align=center><h1>{$poolInfo['name']}</h1></td></tr>";
 	echo "<tr><td class=pcleft>\n";
 
-	startPortlet ('Configuration');
+	startPortlet ('Summary');
 	echo "<table border=0 cellspacing=0 cellpadding=3 width='100%'>\n";
 	if (!empty ($poolInfo['name']))
 		echo "<tr><th width='50%' class=tdright>Pool name:</th><td class=tdleft>${poolInfo['name']}</td></tr>\n";
@@ -4348,13 +4348,13 @@ function renderRSPool ($pool_id = 0)
 	printTagTRs ("${root}?page=ipv4rsplist&tab=default&");
 	if (!empty ($poolInfo['vsconfig']))
 	{
-		echo "<tr class=slbconf><th>VS configuration:</th><td>&nbsp;</td></tr>\n";
-		echo "<tr class=slbconf><td colspan=2>${poolInfo['vsconfig']}</td></tr>\n";
+		echo "<tr><th width='50%' class=tdright>VS configuration:</th><td>&nbsp;</td></tr>\n";
+		echo "<tr><td colspan=2 class='dashed slbconf'>${poolInfo['vsconfig']}</td></tr>\n";
 	}
 	if (!empty ($poolInfo['rsconfig']))
 	{
-		echo "<tr class=slbconf><th>RS configuration:</th><td>&nbsp;</td></tr>\n";
-		echo "<tr class=slbconf><td colspan=2>${poolInfo['rsconfig']}</td></tr>\n";
+		echo "<tr><th width='50%' class=tdright>RS configuration:</th><td>&nbsp;</td></tr>\n";
+		echo "<tr><td colspan=2 class='dashed slbconf'>${poolInfo['rsconfig']}</td></tr>\n";
 	}
 	echo "</table>";
 	finishPortlet();
@@ -4366,10 +4366,9 @@ function renderRSPool ($pool_id = 0)
 	foreach ($poolInfo['lblist'] as $object_id => $vslist)
 		foreach ($vslist as $vs_id => $configs)
 	{
-		$vi = getVServiceInfo ($vs_id);
 		echo "<tr valign=top class=row_${order}><td class=tdleft><a href='${root}?page=ipv4vs&vs_id=${vs_id}'>";
-		echo buildVServiceName ($vi);
-		echo "</a></td><td>";
+		renderVSCell ($vs_id);
+		echo "</td><td>";
 		renderLBCell ($object_id);
 		echo "</td><td class=slbconf>${configs['vsconfig']}</td>";
 		echo "<td class=slbconf>${configs['rsconfig']}</td></tr>\n";
@@ -5470,6 +5469,23 @@ function renderRSPoolCell ($pool_id, $pool_name)
 	echo "</td></tr><tr><td><small>";
 	echo serializeTags (loadIPv4RSPoolTags ($pool_id));
 	echo "</small></td></tr></table>";
+}
+
+function renderVSCell ($vs_id)
+{
+	global $root;
+	$oinfo = getVServiceInfo ($vs_id);
+	echo "<table class='slbcell vscell'><tr><td rowspan=3>";
+	printImageHREF ('VS');
+	echo "</td><td>";
+	echo "<a href='${root}?page=ipv4vs&vs_id=${vs_id}'>";
+	echo buildVServiceName ($oinfo);
+	echo "</a></td></tr><tr><td>";
+	echo $oinfo['name'];
+	echo '</td></tr><tr><td>';
+	$tags = loadIPv4VSTags ($vs_id);
+	echo count ($tags) ? ("<small>" . serializeTags ($tags) . "</small>") : '&nbsp;';
+	echo "</td></tr></table>";
 }
 
 ?>
