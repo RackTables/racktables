@@ -2103,17 +2103,19 @@ function renderIPv4SLB ()
 	{
 		$order = 'odd';
 		echo "<table class='widetable' border=0 cellpadding=5 cellspacing=0 align='center'>\n";
-		echo "<tr><th>VS&nbsp;&darr; LB&nbsp;&rarr;</th>";
+		echo "<tr valign=top><td>&nbsp;</td>";
 		foreach ($lblist as $lb_object_id)
-			echo "<th><a href='${root}?page=object&tab=default&object_id=${lb_object_id}'>" . $lbdname[$lb_object_id]  . "</a></th>";
+		{
+			#echo "<th><a href='${root}?page=object&tab=default&object_id=${lb_object_id}'>" . $lbdname[$lb_object_id]  . "</a></th>";
+			echo '<td>';
+			renderLBCell ($lb_object_id);
+			echo '</td>';
+		}
 		echo "</tr>\n";
 		foreach ($summary as $vsid => $vsdata)
 		{
-			echo "<tr class=row_${order}><td class=tdleft><a href='$root?page=ipv4vs&tab=default&vs_id=${vsid}'>";
-			echo buildVServiceName ($vsdata);
-			echo '</a>';
-			if (!empty ($vsdata['name']))
-				echo "<br>${vsdata['name']}";
+			echo "<tr class=row_${order}><td class=tdleft>";
+			renderVSCell ($vsid);
 			echo "</td>";
 			foreach ($lblist as $lb_object_id)
 			{
@@ -4412,16 +4414,10 @@ function renderVSList ()
 	$order = 'odd';
 	foreach ($vslist as $vsid => $vsinfo)
 	{
-		$vstags = loadIPv4VSTags ($vsid);
-		echo "<tr align=left valign=top class=row_${order}><td class=tdleft><a href='${root}?page=ipv4vs&vs_id=${vsid}'>" . buildVServiceName ($vsinfo);
-		echo "</a><br>${vsinfo['name']}";
-		if (count ($vstags))
-		{
-			echo '<br>';
-			echo serializeTags ($vstags, "${root}?page=${pageno}&tab=default&");
-		}
-		echo "</td><td><pre>${vsinfo['vsconfig']}</pre></td>";
-		echo "<td><pre>${vsinfo['rsconfig']}</pre></td>";
+		echo "<tr align=left valign=top class=row_${order}><td class=tdleft>";
+		renderVSCell ($vsid);
+		echo "</td><td class=slbconf>${vsinfo['vsconfig']}</td>";
+		echo "<td class=slbconf>${vsinfo['rsconfig']}</td>";
 		echo "</tr>\n";
 		$order = $nextorder[$order];
 	}
