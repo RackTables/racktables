@@ -4229,17 +4229,14 @@ function renderRSPoolLBForm ($pool_id = 0)
 		foreach ($poolInfo['lblist'] as $object_id => $vslist)
 			foreach ($vslist as $vs_id => $configs)
 			{
-				$oi = getObjectInfo ($object_id);
 				printOpFormIntro ('updLB', array ('vs_id' => $vs_id, 'object_id' => $object_id));
 				echo "<tr valign=top class=row_${order}><td><a href='${root}process.php?page=${pageno}&tab=${tabno}&op=delLB&pool_id=${pool_id}&object_id=${object_id}&vs_id=${vs_id}'>";
 				printImageHREF ('delete', 'Unconfigure');
 				echo "</a></td>";
-				echo "<td class=tdleft><a href='${root}?page=object&object_id=${object_id}'>${oi['dname']}</a></td>";
-				echo "<td class=tdleft><a href='${root}?page=ipv4vs&vs_id=${vs_id}'>";
-				$vsinfo = getVServiceInfo ($vs_id);
-				echo buildVServiceName ($vsinfo) . '</a>';
-				if (!empty ($vsinfo['name']))
-					echo " (${vsinfo['name']})";
+				echo "<td class=tdleft>";
+				renderLBCell ($object_id);
+				echo "</td><td class=tdleft>";
+				renderVSCell ($vs_id);
 				echo "</td><td><textarea name=vsconfig>${configs['vsconfig']}</textarea></td>";
 				echo "<td><textarea name=rsconfig>${configs['rsconfig']}</textarea></td><td>";
 				printImageHREF ('SAVE', 'Save changes', TRUE);
@@ -4283,14 +4280,15 @@ function renderVServiceLBForm ($vs_id = 0)
 		foreach ($vsinfo['rspool'] as $pool_id => $rspinfo)
 			foreach ($rspinfo['lblist'] as $object_id => $configs)
 			{
-				$oi = getObjectInfo ($object_id);
 				printOpFormIntro ('updLB', array ('pool_id' => $pool_id, 'object_id' => $object_id));
 				echo "<tr valign=top class=row_${order}><td><a href='${root}process.php?page=${pageno}&tab=${tabno}&op=delLB&pool_id=${pool_id}&object_id=${object_id}&vs_id=${vs_id}'>";
 				printImageHREF ('delete', 'Unconfigure');
 				echo "</a></td>";
-				echo "<td class=tdleft><a href='${root}?page=object&object_id=${object_id}'>${oi['dname']}</a></td>";
-				echo "<td class=tdleft><a href='${root}?page=ipv4rsp&pool_id=${pool_id}'>${rspinfo['name']}</a></td>";
-				echo "<td><textarea name=vsconfig>${configs['vsconfig']}</textarea></td>";
+				echo "<td class=tdleft>";
+				renderLBCell ($object_id);
+				echo "</td><td class=tdleft>";
+				renderRSPoolCell ($pool_id, $rspinfo['name']);
+				echo "</td><td><textarea name=vsconfig>${configs['vsconfig']}</textarea></td>";
 				echo "<td><textarea name=rsconfig>${configs['rsconfig']}</textarea></td><td>";
 				printImageHREF ('SAVE', 'Save changes', TRUE);
 				echo "</td></tr></form>\n";
@@ -5166,12 +5164,11 @@ function renderObjectSLB ($object_id)
 			echo "<tr valign=top class=row_${order}><td><a href='${root}process.php?page=${pageno}&tab=${tabno}&op=delLB&pool_id=${vsinfo['pool_id']}&object_id=${object_id}&vs_id=${vs_id}'>";
 			printImageHREF ('delete', 'Unconfigure');
 			echo "</a></td>";
-			echo "</td><td class=tdleft><a href='${root}?page=ipv4vs&vs_id=${vs_id}'>";
-			echo buildVServiceName ($vsinfo) . "</a>";
-			if (!empty ($vsinfo['name']))
-				echo '<br>' . $vsinfo['name'];
-			echo "</td><td class=tdleft>" . $rsplist[$vsinfo['pool_id']] . "</td>";
-			echo "<td><textarea name=vsconfig>${vsinfo['vsconfig']}</textarea></td>";
+			echo "</td><td class=tdleft>";
+			renderVSCell ($vs_id);
+			echo "</td><td class=tdleft>";
+			renderRSPoolCell ($vsinfo['pool_id'], $rsplist[$vsinfo['pool_id']]);
+			echo "</td><td><textarea name=vsconfig>${vsinfo['vsconfig']}</textarea></td>";
 			echo "<td><textarea name=rsconfig>${vsinfo['rsconfig']}</textarea></td><td>";
 			printImageHREF ('SAVE', 'Save changes', TRUE);
 			echo "</td></tr></form>\n";
