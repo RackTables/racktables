@@ -5842,7 +5842,7 @@ function renderRSPoolCell ($pool_id, $pool_name)
 {
 	global $root;
 	echo "<table class=slbcell><tr><td>";
-	echo "<a href='${root}?page=ipv4rsp&pool_id=${pool_id}'>";
+	echo "<a href='${root}?page=ipv4rspool&pool_id=${pool_id}'>";
 	echo empty ($pool_name) ? "ANONYMOUS pool [${pool_id}]" : $pool_name;
 	echo "</a></td></tr><tr><td>";
 	printImageHREF ('RS pool');
