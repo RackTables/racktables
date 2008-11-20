@@ -520,3 +520,40 @@ td.portmap_highlight_odd {
 .sparenetwork {
 	color: silver;
 }
+
+th.slbconf {
+	width: 50%;
+	text-align: right;
+}
+
+td.slbconf {
+	text-align: left;
+	white-space: pre;
+}
+
+table.slbcell {
+	border: 1px;
+	border-style: outset;
+	width: 100%;
+	height: 100%;
+	empty-cells: hide;
+}
+
+table.slbcell td {
+	border-top: 0px;
+	text-align: center;
+}
+
+table.vscell {
+	empty-cells: show;
+}
+
+table.vscell td {
+	text-align: left;
+}
+
+td.dashed {
+	border: 1px dashed gray;
+}
+
+
