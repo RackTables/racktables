@@ -3081,6 +3081,8 @@ function createIPv4Prefix ($range = '', $name = '', $is_bcast = FALSE, $taglist 
 			'name' => "'${name}'"
 		)
 	);
+	if ($result != TRUE)
+		return "Could not add ${range} (already exists?).";
 
 	if ($is_bcast and $maskL < 31)
 	{

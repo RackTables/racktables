@@ -8,6 +8,7 @@
 	update: add HP and Juniper dictionary entries.  closes tickets 145 and 165 (by Aaron)
 	update: combined two forms on object properties page into one.  closes tickets 36 and 87 (by Aaron)
 	bugfix: show error message if snmp module isn't loaded.  closes ticket 43 (by Aaron)
+	bugfix: show error message for duplicate IPv4 network record
 0.16.4 2008-11-04
 	bugfix: display VS/RS config block in RS pool view
 	bugfix: resolve tabindex issues in many forms
