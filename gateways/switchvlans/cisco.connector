@@ -47,7 +47,9 @@ prepare_connect_commands()
 			# Don't be too smart at the moment, just be able to handle
 			# the known-good case ;-)
 
-			echo $line | cut -s -d' ' -f6 > $CMDS1
+			username=`echo $line | cut -s -d' ' -f5`
+			[ "$username" != "-" ] && echo $username > $CMDS1
+			echo $line | cut -s -d' ' -f6 >> $CMDS1
 			echo en >> $CMDS1
 			echo $line | cut -s -d' ' -f7 >> $CMDS1
 			# same for ports
