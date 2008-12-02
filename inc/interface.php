@@ -139,6 +139,9 @@ $image['RS pool']['height'] = 16;
 $image['VS']['path'] = 'pix/servicesign.png';
 $image['VS']['width'] = 39;
 $image['VS']['height'] = 62;
+$image['router']['path'] = 'pix/router.png';
+$image['router']['width'] = 32;
+$image['router']['height'] = 32;
 
 // This may be populated later onsite, report rendering function will use it.
 // See the $systemreport for structure.
@@ -906,21 +909,12 @@ function renderRackObject ($object_id = 0)
 				else
 				{
 					printIPv4NetInfoTDs ($netinfo, $secondclass);
-					echo "<td class='${secondclass}'>";
-					// FIXME: These calls are really heavy, replace them with a more appropriate dedicated function.
-					$newline = '';
+					// filter out self-allocation
+					$other_routers = array();
 					foreach (findRouters ($netinfo['addrlist']) as $router)
-					{
-						if ($router['id'] == $object_id)
-							continue;
-						echo $newline . $router['addr'] . ", <a href='${root}?page=object&object_id=${router['id']}&hl_ipv4_addr=${router['addr']}'>";
-						echo (empty ($router['iface']) ? '' : $router['iface'] . '@') . $router['dname'] . '</a>';
-						$routertags = loadRackObjectTags ($router['id']);
-						if (count ($routertags))
-							echo '<br><small>' . serializeTags ($routertags, "${root}?page=objects&tab=default&") . '</small>';
-						$newline = '<br>';
-					}
-					echo '</td>';
+						if ($router['id'] != $object_id)
+							$other_routers[] = $router;
+					printRoutersTD ($other_routers);
 				}
 			}
 			// peers
@@ -5753,11 +5747,9 @@ function niftyString ($string, $maxlen = 30)
 }
 
 // Iterate over what findRouters() returned and output some text suitable for a TD element.
-// Providing a quasi-static (external) tag cache is advised for calling functions.
-function printRoutersTD ($rlist, &$tagcache = array())
+function printRoutersTD ($rlist)
 {
 	global $root;
-	$delim = '';
 	$rtrclass = 'tdleft';
 	foreach ($rlist as $rtr)
 	{
@@ -5770,22 +5762,7 @@ function printRoutersTD ($rlist, &$tagcache = array())
 	}
 	echo "<td class='${rtrclass}'>";
 	foreach ($rlist as $rtr)
-	{
-		echo $delim . $rtr['addr'] . ' ';
-		echo "<a href='${root}?page=object&object_id=${rtr['id']}&hl_ipv4_addr=${rtr['addr']}'>";
-		if (!empty ($rtr['iface']))
-			echo $rtr['iface'] . '@';
-		echo $rtr['dname'] . '</a>';
-		if (!isset ($tagcache[$rtr['id']]))
-			$tagcache[$rtr['id']] = loadRackObjectTags ($rtr['id']);
-		if (count ($tagcache[$rtr['id']]))
-		{
-			echo '<br><small>';
-			echo serializeTags ($tagcache[$rtr['id']], "${root}?page=objgroup&group_id=0&tab=default&");
-			echo '</small>';
-		}
-		$delim = '<br><hr>';
-	}
+		renderRouterCell ($rtr['addr'], $rtr['iface'], $rtr['id'], $rtr['dname']);
 	echo '</td>';
 }
 
@@ -5866,6 +5843,21 @@ function renderVSCell ($vs_id)
 	$tags = loadIPv4VSTags ($vs_id);
 	echo count ($tags) ? ("<small>" . serializeTags ($tags) . "</small>") : '&nbsp;';
 	echo "</td></tr></table>";
+}
+
+function renderRouterCell ($dottedquad, $ifname, $object_id, $object_dname)
+{
+	global $root;
+	echo "<table class=slbcell><tr><td rowspan=3>${dottedquad}";
+	if (!empty ($ifname))
+		echo '@' . $ifname;
+	echo "</td>";
+	echo "<td><a href='${root}?page=object&object_id=${object_id}&hl_ipv4_addr=${dottedquad}'><strong>${object_dname}</strong></a></td>";
+	echo "</td></tr><tr><td>";
+	printImageHREF ('router');
+	echo "</td></tr><tr><td><small>";
+	echo serializeTags (loadRackObjectTags ($object_id));
+	echo "</small></td></tr></table>";
 }
 
 ?>
