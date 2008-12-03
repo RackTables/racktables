@@ -2098,19 +2098,31 @@ function renderIPv4Space ()
 	$tagfilter = getTagFilter();
 	$netlist = getIPv4NetworkList ($tagfilter, getTFMode());
 	$netcount = count ($netlist);
-	$tree = prepareIPv4Tree ($netlist, isset ($_REQUEST['eid']) ? $_REQUEST['eid'] : 0);
+	// expand request can take either natural values or "ALL". Zero means no expanding.
+	$eid = isset ($_REQUEST['eid']) ? $_REQUEST['eid'] : 0;
+	$tree = prepareIPv4Tree ($netlist, $eid);
 
 	echo "<table border=0 class=objectview>\n";
 	echo "<tr><td class=pcleft>";
 	startPortlet ("networks (${netcount})");
-	echo "<table class='widetable' border=0 cellpadding=5 cellspacing=0 align='center'>\n";
+	echo '<h4>';
+	if ($eid === 0)
+		echo 'auto-collapsing at threshold ' . getConfigVar ('TREE_THRESHOLD') . " (<a href='${root}?page=${pageno}&tab=${tabno}&eid=ALL'>expand all</a>)";
+	elseif ($eid === 'ALL')
+		echo "expanding all (<a href='${root}?page=${pageno}&tab=${tabno}'>auto-collapse</a>)";
+	else
+	{
+		$netinfo = getIPv4NetworkInfo ($eid);
+		echo "expanding ${netinfo['ip']}/${netinfo['mask']} (<a href='${root}?page=${pageno}&tab=${tabno}'>auto-collapse</a> / <a href='${root}?page=${pageno}&tab=${tabno}&eid=ALL'>expand&nbsp;all</a>)"; 
+	}
+	echo "</h4><table class='widetable' border=0 cellpadding=5 cellspacing=0 align='center'>\n";
 	echo "<tr><th>prefix</th><th>name/tags</th><th>%% used</th>";
 	if (getConfigVar ('EXT_IPV4_VIEW') == 'yes')
 		echo "<th>routed by</th>";
 	echo "</tr>\n";
 	$tagcache = array();
 	$baseurl = "${root}?page=${pageno}&tab=${tabno}" . getTagFilterStr ($tagfilter);
-	renderIPv4SpaceRecords ($tree, $tagcache, $baseurl, isset ($_REQUEST['eid']) ? $_REQUEST['eid'] : 0);
+	renderIPv4SpaceRecords ($tree, $tagcache, $baseurl, $eid);
 	echo "</table>\n";
 	finishPortlet();
 	echo '</td><td class=pcright>';

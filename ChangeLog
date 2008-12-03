@@ -10,6 +10,7 @@
 	bugfix: show error message if snmp module isn't loaded.  closes ticket 43 (by Aaron)
 	bugfix: show error message for duplicate IPv4 network record
 	update: enable username handling in Cisco switch connector
+	new feature: IPv4 tree expand/collapse switch
 0.16.4 2008-11-04
 	bugfix: display VS/RS config block in RS pool view
 	bugfix: resolve tabindex issues in many forms

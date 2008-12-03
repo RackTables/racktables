@@ -1633,7 +1633,7 @@ function iptree_markup_collapsion (&$tree, $threshold = 1024, $target = 0)
 	$ret = FALSE;
 	foreach (array_keys ($tree) as $key)
 	{
-		$here = ($target and isset ($tree[$key]['id']) and $tree[$key]['id'] == $target);
+		$here = ($target === 'ALL' or ($target > 0 and isset ($tree[$key]['id']) and $tree[$key]['id'] == $target));
 		$below = $self ($tree[$key]['kids'], $threshold, $target);
 		if (!$tree[$key]['kidc']) // terminal node
 			$tree[$key]['symbol'] = 'spacer';
