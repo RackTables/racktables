@@ -1424,7 +1424,7 @@ CREATE TABLE `TagTree` (
 			$query[] = "update Config set varvalue = '0.16.4' where varname = 'DB_VERSION'";
 			break;
 		case '0.16.5':
-			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('IPV4_TREE_COUNT_USAGE','yes','string','no','no','Count address usage in IPv4 tree')";
+			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('IPV4_TREE_SHOW_USAGE','yes','string','no','no','Show address usage in IPv4 tree')";
 			$query[] = "update Config set varvalue = '0.16.5' where varname = 'DB_VERSION'";
 			break;
 		default:
