@@ -26,6 +26,7 @@ function getDBUpgradePath ($v1, $v2)
 		'0.16.2',
 		'0.16.3',
 		'0.16.4',
+		'0.16.5',
 	);
 	if (!in_array ($v1, $versionhistory) || !in_array ($v2, $versionhistory))
 	{
@@ -1421,6 +1422,10 @@ CREATE TABLE `TagTree` (
 			$query[] = "INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (13,796,'Linux%GSKIP%Ubuntu 8.10')";
 			$query[] = "INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (13,797,'[[BSD%GSKIP%OpenBSD 4.4 | http://openbsd.org/44.html]]')";
 			$query[] = "update Config set varvalue = '0.16.4' where varname = 'DB_VERSION'";
+			break;
+		case '0.16.5':
+			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('IPV4_TREE_COUNT_USAGE','yes','string','no','no','Count address usage in IPv4 tree')";
+			$query[] = "update Config set varvalue = '0.16.5' where varname = 'DB_VERSION'";
 			break;
 		default:
 			showError ("executeUpgradeBatch () failed, because batch '${batchid}' isn't defined", __FILE__);
