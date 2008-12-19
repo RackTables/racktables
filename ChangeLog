@@ -3,6 +3,7 @@
 	bugfix: better handle IPv4 addresses w/o a covering prefix
 	bugfix: show error message for duplicate IPv4 network record
 	update: IPv4 calculations were optimized for better speed
+	update: resolved performance issue for systems with many L2 ports
 	update: enable username handling in Cisco switch connector
 	new feature: IPv4 tree expand/collapse switch
 0.16.4 2008-11-04
