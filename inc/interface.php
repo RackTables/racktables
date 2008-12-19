@@ -2976,14 +2976,25 @@ function renderSearchResults ()
 			$summary['port'][] = $result;
 		}
 	}
-	elseif (preg_match ('/^[0-9][0-9]?[0-9]?\.[0-9]?[0-9]?[0-9]?\.[0-9][0-9]?[0-9]?\.[0-9]?[0-9]?[0-9]?$/i', $terms))
-	// Search for IP address.
+	elseif (preg_match ('/^[0-9][0-9]?[0-9]?\.[0-9]?[0-9]?[0-9]?\.[0-9][0-9]?[0-9]?\.[0-9][0-9]?[0-9]?$/i', $terms))
+	// Search for IPv4 address.
 	{
 		if (NULL !== getIPv4AddressNetworkId ($terms))
 		{
 			$nhits++;
 			$lasthit = 'ipv4addressbydq';
 			$summary['ipv4addressbydq'][] = $terms;
+		}
+	}
+	elseif (preg_match ('/^[0-9][0-9]?[0-9]?\.[0-9]?[0-9]?[0-9]?\.[0-9][0-9]?[0-9]?\.[0-9][0-9]?[0-9]?\/[0-9][0-9]?$/i', $terms))
+	// Search for IPv4 network
+	{
+		list ($base, $len) = explode ('/', $terms);
+		if (NULL !== ($tmp = getIPv4AddressNetworkId ($base, $len + 1)))
+		{
+			$nhits++;
+			$lasthit = 'ipv4network';
+			$summary['ipv4network'][] = getIPv4NetworkInfo ($tmp);
 		}
 	}
 	else
