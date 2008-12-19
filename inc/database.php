@@ -311,56 +311,60 @@ function getObjectPortsAndLinks ($object_id = 0)
 		showError ('Invalid object_id', __FUNCTION__);
 		return;
 	}
-	$query =
-		"select Port.id as Port_id, ".
-		"Port.name as Port_name, ".
-		"Port.label as Port_label, ".
-		"Port.l2address as Port_l2address, ".
-		"Port.type as Port_type, ".
-		"Port.reservation_comment as Port_reservation_comment, " .
-		"dict_value as PortType_name, ".
-		"RemotePort.id as RemotePort_id, ".
-		"RemotePort.name as RemotePort_name, ".
-		"RemotePort.object_id as RemotePort_object_id, ".
-		"RackObject.name as RackObject_name ".
-		"from (".
-			"(".
-				"(".
-					"Port inner join Dictionary on Port.type = dict_key natural join Chapter".
-				") ".
-				"left join Link on Port.id=Link.porta or Port.id=Link.portb ".
-			") ".
-			"left join Port as RemotePort on Link.portb=RemotePort.id or Link.porta=RemotePort.id ".
-		") ".
-		"left join RackObject on RemotePort.object_id=RackObject.id ".
-		"where chapter_name = 'PortType' and Port.object_id=${object_id} ".
-		"and (Port.id != RemotePort.id or RemotePort.id is null) ".
-		"order by Port_name";
+	// prepare decoder
+	$ptd = readChapter ('PortType');
+	$query = "select id, name, label, l2address, type as type_id, reservation_comment from Port where object_id = ${object_id}";
+	// list and decode all ports of the current object
 	$result = useSelectBlade ($query, __FUNCTION__);
 	$ret=array();
-	$count=0;
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
-		$ret[$count]['id'] = $row['Port_id'];
-		$ret[$count]['name'] = $row['Port_name'];
-		$ret[$count]['l2address'] = l2addressFromDatabase ($row['Port_l2address']);
-		$ret[$count]['label'] = $row['Port_label'];
-		$ret[$count]['type_id'] = $row['Port_type'];
-		$ret[$count]['type'] = $row['PortType_name'];
-		$ret[$count]['reservation_comment'] = $row['Port_reservation_comment'];
-		$ret[$count]['remote_id'] = $row['RemotePort_id'];
-		$ret[$count]['remote_name'] = htmlentities ($row['RemotePort_name'], ENT_QUOTES);
-		$ret[$count]['remote_object_id'] = $row['RemotePort_object_id'];
-		$ret[$count]['remote_object_name'] = $row['RackObject_name'];
-		// Save on displayedName() calls.
-		if (empty ($row['RackObject_name']) and !empty ($row['RemotePort_object_id']))
-		{
-			$oi = getObjectInfo ($row['RemotePort_object_id']);
-			$ret[$count]['remote_object_name'] = displayedName ($oi);
-		}
-		$count++;
+		$row['type'] = $ptd[$row['type_id']];
+		$row['l2address'] = l2addressFromDatabase ($row['l2address']);
+		$row['remote_id'] = NULL;
+		$row['remote_name'] = NULL;
+		$row['remote_object_id'] = NULL;
+		$row['remote_object_name'] = NULL;
+		$ret[] = $row;
 	}
-	$result->closeCursor();
+	unset ($result);
+	// now find and decode remote ends for all locally terminated connections
+	foreach (array_keys ($ret) as $tmpkey)
+	{
+		$portid = $ret[$tmpkey]['id'];
+		$remote_id = NULL;
+		$query = "select porta, portb from Link where porta = {$portid} or portb = ${portid}";
+		$result = useSelectBlade ($query, __FUNCTION__);
+		if ($row = $result->fetch (PDO::FETCH_ASSOC))
+		{
+			if ($portid != $row['porta'])
+				$remote_id = $row['porta'];
+			elseif ($portid != $row['portb'])
+				$remote_id = $row['portb'];
+		}
+		unset ($result);
+		if ($remote_id) // there's a remote end here
+		{
+			$query = "select Port.name as port_name, Port.type as port_type, object_id, RackObject.name as object_name " .
+				"from Port left join RackObject on Port.object_id = RackObject.id " .
+				"where Port.id = ${remote_id}";
+			$result = useSelectBlade ($query, __FUNCTION__);
+			if ($row = $result->fetch (PDO::FETCH_ASSOC))
+			{
+				$ret[$tmpkey]['remote_name'] = $row['port_name'];
+				$ret[$tmpkey]['remote_object_id'] = $row['object_id'];
+				$ret[$tmpkey]['remote_object_name'] = $row['object_name'];
+			}
+			$ret[$tmpkey]['remote_id'] = $remote_id;
+			unset ($result);
+			// only call displayedName() when necessary
+			if (empty ($ret[$tmpkey]['remote_object_name']) and !empty ($ret[$tmpkey]['remote_object_id']))
+			{
+				$oi = getObjectInfo ($ret[$tmpkey]['remote_object_id']);
+				$ret[$tmpkey]['remote_object_name'] = displayedName ($oi);
+			}
+		}
+	}
 	return $ret;
 }
 
