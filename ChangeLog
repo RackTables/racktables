@@ -1,11 +1,13 @@
-0.16.5
+0.16.5 2008-12-23
 	bugfix: suppress several meaningless PHP warnings
 	bugfix: better handle IPv4 addresses w/o a covering prefix
 	bugfix: show error message for duplicate IPv4 network record
 	update: IPv4 calculations were optimized for better speed
 	update: resolved performance issue for systems with many L2 ports
 	update: enable username handling in Cisco switch connector
+	update: introduce icons for routers and SLB
 	new feature: IPv4 tree expand/collapse switch
+	new feature: IPV4_TREE_SHOW_USAGE option controls IPv4 performance
 0.16.4 2008-11-04
 	bugfix: display VS/RS config block in RS pool view
 	bugfix: resolve tabindex issues in many forms
