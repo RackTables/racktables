@@ -2057,8 +2057,16 @@ function renderIPv4SpaceRecords ($tree, &$tagcache, $baseurl, $target = 0, $leve
 	foreach ($tree as $item)
 	{
 		$total = $item['addrt'];
-		loadIPv4AddrList ($item); // necessary to compute router list and address counter
-		$used = $item['addrc'];
+		if (getConfigVar ('IPV4_TREE_SHOW_USAGE') == 'yes')
+		{
+			loadIPv4AddrList ($item); // necessary to compute router list and address counter
+			$used = $item['addrc'];
+		}
+		else
+		{
+			$item['addrlist'] = array();
+			$item['addrc'] = 0;
+		}
 		if (isset ($item['id']))
 		{
 			if ($item['symbol'] == 'node-collapsed')
@@ -2072,8 +2080,14 @@ function renderIPv4SpaceRecords ($tree, &$tagcache, $baseurl, $target = 0, $leve
 			echo "<td class=tdcenter>";
 			if ($target == $item['id'])
 				echo "<a name=netid${target}></a>";
-			renderProgressBar ($total ? $used/$total : 0);
-			echo "<br><small>${used}/${total}</small></td>";
+			if (getConfigVar ('IPV4_TREE_SHOW_USAGE') == 'yes')
+			{
+				renderProgressBar ($total ? $used/$total : 0);
+				echo "<br><small>${used}/${total}</small>";
+			}
+			else
+				echo "<small>${total}</small>";
+			echo "</td>";
 			if (getConfigVar ('EXT_IPV4_VIEW') == 'yes')
 				printRoutersTD (findRouters ($item['addrlist']), $tagcache);
 			echo "</tr>";
@@ -2085,9 +2099,14 @@ function renderIPv4SpaceRecords ($tree, &$tagcache, $baseurl, $target = 0, $leve
 			echo "<tr valign=top>";
 			printIPv4NetInfoTDs ($item, 'tdleft sparenetwork', $level, $item['symbol']);
 			echo "<td class=tdcenter>";
-			renderProgressBar ($used/$total, 'sparenetwork');
-			echo "<br><small>${used}/${total}</small></td>";
-			echo "<td>&nbsp;</td></tr>";
+			if (getConfigVar ('IPV4_TREE_SHOW_USAGE') == 'yes')
+			{
+				renderProgressBar ($used/$total, 'sparenetwork');
+				echo "<br><small>${used}/${total}</small>";
+			}
+			else
+				echo "<small>${total}</small>";
+			echo "</td><td>&nbsp;</td></tr>";
 		}
 	}
 }
@@ -2116,7 +2135,7 @@ function renderIPv4Space ()
 		echo "expanding ${netinfo['ip']}/${netinfo['mask']} (<a href='${root}?page=${pageno}&tab=${tabno}'>auto-collapse</a> / <a href='${root}?page=${pageno}&tab=${tabno}&eid=ALL'>expand&nbsp;all</a>)"; 
 	}
 	echo "</h4><table class='widetable' border=0 cellpadding=5 cellspacing=0 align='center'>\n";
-	echo "<tr><th>prefix</th><th>name/tags</th><th>%% used</th>";
+	echo "<tr><th>prefix</th><th>name/tags</th><th>capacity</th>";
 	if (getConfigVar ('EXT_IPV4_VIEW') == 'yes')
 		echo "<th>routed by</th>";
 	echo "</tr>\n";
@@ -3011,14 +3030,25 @@ function renderSearchResults ()
 			$summary['port'][] = $result;
 		}
 	}
-	elseif (preg_match ('/^[0-9][0-9]?[0-9]?\.[0-9]?[0-9]?[0-9]?\.[0-9][0-9]?[0-9]?\.[0-9]?[0-9]?[0-9]?$/i', $terms))
-	// Search for IP address.
+	elseif (preg_match ('/^[0-9][0-9]?[0-9]?\.[0-9]?[0-9]?[0-9]?\.[0-9][0-9]?[0-9]?\.[0-9][0-9]?[0-9]?$/i', $terms))
+	// Search for IPv4 address.
 	{
 		if (NULL !== getIPv4AddressNetworkId ($terms))
 		{
 			$nhits++;
 			$lasthit = 'ipv4addressbydq';
 			$summary['ipv4addressbydq'][] = $terms;
+		}
+	}
+	elseif (preg_match ('/^[0-9][0-9]?[0-9]?\.[0-9]?[0-9]?[0-9]?\.[0-9][0-9]?[0-9]?\.[0-9][0-9]?[0-9]?\/[0-9][0-9]?$/i', $terms))
+	// Search for IPv4 network
+	{
+		list ($base, $len) = explode ('/', $terms);
+		if (NULL !== ($tmp = getIPv4AddressNetworkId ($base, $len + 1)))
+		{
+			$nhits++;
+			$lasthit = 'ipv4network';
+			$summary['ipv4network'][] = getIPv4NetworkInfo ($tmp);
 		}
 	}
 	else
@@ -5288,9 +5318,9 @@ function renderEditVService ($vsid)
 
 function dump ($var)
 {
-	echo '<pre>';
+	echo '<div align=left><pre>';
 	print_r ($var);
-	echo '</pre>';
+	echo '</pre></div>';
 }
 
 function renderRackCodeViewer ()

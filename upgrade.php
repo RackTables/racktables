@@ -11,6 +11,7 @@ function getDBUpgradePath ($v1, $v2)
 	$versionhistory = array
 	(
 		'0.16.4',
+		'0.16.5',
 		'0.17.0',
 	);
 	if (!in_array ($v1, $versionhistory) || !in_array ($v2, $versionhistory))
@@ -55,6 +56,10 @@ function executeUpgradeBatch ($batchid)
 	global $dbxlink;
 	switch ($batchid)
 	{
+		case '0.16.5':
+			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('IPV4_TREE_SHOW_USAGE','yes','string','no','no','Show address usage in IPv4 tree')";
+			$query[] = "update Config set varvalue = '0.16.5' where varname = 'DB_VERSION'";
+			break;
 		case '0.17.0':
 			// create tables for storing files (requires InnoDB support)
 			if (!isInnoDBSupported ())
