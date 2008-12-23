@@ -1,6 +1,7 @@
 0.17.0
 	new feature: file attachments (by Aaron)
 	new feature: IPv4 tree expand/collapse switch
+	new feature: IPV4_TREE_SHOW_USAGE option controls IPv4 performance
 	update: display row name when listing objects. closes ticket 16 (by Aaron)
 	update: ability to manage rows from the Rackspace page in addition to the Dictionary (by Aaron)
 	update: IPv4 calculations were optimized for better speed
@@ -10,6 +11,7 @@
 	update: combined two forms on object properties page into one.  closes tickets 36 and 87 (by Aaron)
 	update: resolved performance issue for systems with many L2 ports
 	update: enable username handling in Cisco switch connector
+	update: introduce icons for routers and SLB
 	bugfix: show error message if snmp module isn't loaded.  closes ticket 43 (by Aaron)
 	bugfix: show error message for duplicate IPv4 network record
 0.16.4 2008-11-04
