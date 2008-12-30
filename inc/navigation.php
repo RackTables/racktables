@@ -38,6 +38,9 @@ $tab['objects']['default'] = 'View';
 $tab['objects']['addmore'] = 'Add more';
 $tabhandler['objects']['default'] = 'renderObjectSpace';
 $tabhandler['objects']['addmore'] = 'renderAddMultipleObjectsForm';
+$ophandler['objects']['default']['deleteObject'] = 'deleteObject';
+$msgcode['objects']['default']['deleteObject']['OK'] = 76;
+$msgcode['objects']['default']['deleteObject']['ERR'] = 100;
 
 $page['row']['title_handler'] = 'dynamic_title_row';
 $page['row']['bypass'] = 'row_id';
@@ -101,6 +104,9 @@ $page['objgroup']['handler'] = 'renderObjectGroup';
 $page['objgroup']['bypass'] = 'group_id';
 $page['objgroup']['bypass_type'] = 'uint0';
 $page['objgroup']['parent'] = 'objects';
+$ophandler['objgroup']['default']['deleteObject'] = 'deleteObject';
+$msgcode['objgroup']['default']['deleteObject']['OK'] = 76;
+$msgcode['objgroup']['default']['deleteObject']['ERR'] = 100;
 
 $page['object']['title_handler'] = 'dynamic_title_object';
 $page['object']['bypass'] = 'object_id';

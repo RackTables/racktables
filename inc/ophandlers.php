@@ -745,6 +745,17 @@ function updateObject ()
 	return buildRedirectURL ('OK');
 }
 
+function deleteObject ()
+{
+	assertUIntArg ('object_id', __FUNCTION__);
+	$error = commitDeleteObject ($_REQUEST['object_id']);
+
+	if ($error != '')
+		return buildRedirectURL ('ERR', array ($error));
+
+	return buildRedirectURL ('OK', array ($_REQUEST['name']));
+}
+
 function useupPort ()
 {
 	assertUIntArg ('port_id', __FUNCTION__);
