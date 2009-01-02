@@ -460,19 +460,19 @@ function commitDeleteObject ($object_id = 0)
 		die;
 	}
 	global $dbxlink;
-	$dbxlink->query("DELETE FROM AttributeValue WHERE object_id = {$object_id}");
-	$dbxlink->query("DELETE FROM File WHERE id IN (SELECT file_id FROM FileLink WHERE entity_id = 'object' AND entity_id = {$object_id})");
-	$dbxlink->query("DELETE FROM IPLoadBalancer WHERE object_id = {$object_id}");
-	$dbxlink->query("DELETE FROM IPBonds WHERE object_id = {$object_id}");
-	$dbxlink->query("DELETE FROM Port WHERE object_id = {$object_id}");
-	$dbxlink->query("DELETE FROM PortForwarding WHERE object_id = {$object_id}");
-	$dbxlink->query("DELETE FROM RackSpace WHERE object_id = {$object_id}");
-	$dbxlink->query("DELETE FROM TagStorage WHERE target_realm = 'object' and target_id = {$object_id}");
-	$dbxlink->query("DELETE FROM Atom WHERE molecule_id IN (SELECT new_molecule_id FROM MountOperation WHERE object_id = {$object_id})");
-	$dbxlink->query("DELETE FROM Molecule WHERE id IN (SELECT new_molecule_id FROM MountOperation WHERE object_id = {$object_id})");
-	$dbxlink->query("DELETE FROM MountOperation WHERE object_id = {$object_id}");
-	$dbxlink->query("DELETE FROM RackObjectHistory WHERE id = {$object_id}");
-	$dbxlink->query("DELETE FROM RackObject WHERE id = {$object_id}");
+	$dbxlink->query("DELETE FROM AttributeValue WHERE object_id = ${object_id}");
+	$dbxlink->query("DELETE FROM File WHERE id IN (SELECT file_id FROM FileLink WHERE entity_id = 'object' AND entity_id = ${object_id})");
+	$dbxlink->query("DELETE FROM IPLoadBalancer WHERE object_id = ${object_id}");
+	$dbxlink->query("DELETE FROM IPBonds WHERE object_id = ${object_id}");
+	$dbxlink->query("DELETE FROM Port WHERE object_id = ${object_id}");
+	$dbxlink->query("DELETE FROM PortForwarding WHERE object_id = ${object_id}");
+	$dbxlink->query("DELETE FROM RackSpace WHERE object_id = ${object_id}");
+	$dbxlink->query("DELETE FROM TagStorage WHERE target_realm = 'object' and target_id = ${object_id}");
+	$dbxlink->query("DELETE FROM Atom WHERE molecule_id IN (SELECT new_molecule_id FROM MountOperation WHERE object_id = ${object_id})");
+	$dbxlink->query("DELETE FROM Molecule WHERE id IN (SELECT new_molecule_id FROM MountOperation WHERE object_id = ${object_id})");
+	$dbxlink->query("DELETE FROM MountOperation WHERE object_id = ${object_id}");
+	$dbxlink->query("DELETE FROM RackObjectHistory WHERE id = ${object_id}");
+	$dbxlink->query("DELETE FROM RackObject WHERE id = ${object_id}");
 
 	return '';
 }
