@@ -1,5 +1,15 @@
 <?php
 
+$relnotes = array
+(
+	'0.17.0' => "<font color=red><strong>Release notes for ${batchid}</strong></font><br>" .
+		"Another change is the addition of support for file uploads.  Files are stored<br>" .
+		"in the database.  There are several settings in php.ini which you may need to modify:<br>" .
+		"    file_uploads        - needs to be On<br>" .
+		"    upload_max_filesize - max size for uploaded files<br>" .
+		"    post_max_size       - max size of all form data submitted via POST (including files)<br>",
+);
+
 // At the moment we assume, that for any two releases we can
 // sequentally execute all batches, that separate them, and
 // nothing will break. If this changes one day, the function
@@ -12,6 +22,7 @@ function getDBUpgradePath ($v1, $v2)
 	(
 		'0.16.4',
 		'0.16.5',
+		'0.16.6',
 		'0.17.0',
 	);
 	if (!in_array ($v1, $versionhistory) || !in_array ($v2, $versionhistory))
@@ -39,17 +50,8 @@ function getDBUpgradePath ($v1, $v2)
 	return $path;
 }
 
-function printReleaseNotes ($batchid)
-{
-	switch ($batchid)
-	{
-		default:
-			break;
-	}
-}
-
-// Upgrade batches are name exactly as the release where they first appear.
-// That simple, but seems sufficient for beginning.
+// Upgrade batches are named exactly as the release where they first appear.
+// That is simple, but seems sufficient for beginning.
 function executeUpgradeBatch ($batchid)
 {
 	$query = array();
@@ -60,6 +62,9 @@ function executeUpgradeBatch ($batchid)
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('IPV4_TREE_SHOW_USAGE','yes','string','no','no','Show address usage in IPv4 tree')";
 			$query[] = "update Config set varvalue = '0.16.5' where varname = 'DB_VERSION'";
 			break;
+		case '0.16.6':
+			$query[] = "update Config set varvalue = '0.16.6' where varname = 'DB_VERSION'";
+			break;
 		case '0.17.0':
 			// create tables for storing files (requires InnoDB support)
 			if (!isInnoDBSupported ())
@@ -67,8 +72,10 @@ function executeUpgradeBatch ($batchid)
 				showError ("Cannot upgrade because InnoDB tables are not supported by your MySQL server. See the README for details.", __FILE__);
 				die;
 			}
-			// Many dictionary changes were made... remove all dictvendor entries and install fresh
-			$query[] = "DELETE FROM Dictionary WHERE chapter_no BETWEEN 11 AND 23";
+			// Many dictionary changes were made... remove all dictvendor entries and install fresh.
+			// Take care not to erase locally added records. 0.16.x ends with max key 797
+			$query[] = 'DELETE FROM Dictionary WHERE ((chapter_no BETWEEN 11 AND 14) or (chapter_no BETWEEN 16 AND 19) ' .
+				'or (chapter_no BETWEEN 21 AND 24)) and dict_key <= 797';
 			$f = fopen ("install/init-dictvendors.sql", 'r');
 			if ($f === FALSE)
 			{
@@ -265,7 +272,8 @@ if ($dbver == CODE_VERSION)
 foreach (getDBUpgradePath ($dbver, CODE_VERSION) as $batchid)
 {
 	executeUpgradeBatch ($batchid);
-	printReleaseNotes ($batchid);
+	if (isset ($relnotes[$batchid]))
+		echo $relnotes[$batchid];
 }
 
 echo '<br>Database version == ' . getDatabaseVersion();
