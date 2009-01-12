@@ -26,7 +26,7 @@ put "default-character-set=utf8" into /etc/my.cnf
 * ALTLinux Desktop 4.0: apt-get install MySQL-server 
 put "CHSET=utf8" into /etc/sysconfig/mysqld
 
-*openSUSE 11.0: YaST -> Software -> software management -> Web and LAMP server -> mysql
+* openSUSE 11.0: YaST -> Software -> software management -> Web and LAMP server -> mysql
 put "default-character-set=utf8" into /etc/my.cnf
 
 For web-frontend you must have Apache and PHP 5 with PDO and multibyte
@@ -125,8 +125,8 @@ during the upgrade.
 
 *** Upgrading to 0.17.0 ***
 
-This release is the first to take advantage of the foreign key support 
-provided by the InnoDB storage engine in MySQL.  The installer and 
+This release is the first to take advantage of the foreign key support
+provided by the InnoDB storage engine in MySQL.  The installer and
 upgrader scripts check for InnoDB support and cannot complete without it.
 If you have trouble, the first step is to make sure the 'skip-innodb'
 option in my.cnf is commented out.
@@ -135,4 +135,5 @@ Another change is the addition of support for file uploads.  Files are stored
 in the database.  There are several settings in php.ini which you may need to modify:
     file_uploads        - needs to be On
     upload_max_filesize - max size for uploaded files
-    post_max_size       - max size of all form data submitted via POST (including files)                 
+    post_max_size       - max size of all form data submitted via POST (including files)
+
