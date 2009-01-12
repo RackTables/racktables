@@ -5361,7 +5361,7 @@ function renderRackCodeEditor ()
 
 function renderUser ($user_id)
 {
-	global $accounts, $expl_tags, $impl_tags;
+	global $accounts, $expl_tags, $impl_tags, $root;
 	$username = getUsernameByID ($user_id);
 
 	startPortlet ('summary');
