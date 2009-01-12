@@ -1,3 +1,6 @@
+0.16.6 2009-01-12
+	bugfix: it was possible to access the system as any existing
+		LDAP user w/o his password (reported by Igor Shishkin)
 0.16.5 2008-12-23
 	bugfix: suppress several meaningless PHP warnings
 	bugfix: better handle IPv4 addresses w/o a covering prefix

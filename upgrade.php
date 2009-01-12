@@ -27,6 +27,7 @@ function getDBUpgradePath ($v1, $v2)
 		'0.16.3',
 		'0.16.4',
 		'0.16.5',
+		'0.16.6',
 	);
 	if (!in_array ($v1, $versionhistory) || !in_array ($v2, $versionhistory))
 	{
@@ -1426,6 +1427,9 @@ CREATE TABLE `TagTree` (
 		case '0.16.5':
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('IPV4_TREE_SHOW_USAGE','yes','string','no','no','Show address usage in IPv4 tree')";
 			$query[] = "update Config set varvalue = '0.16.5' where varname = 'DB_VERSION'";
+			break;
+		case '0.16.6':
+			$query[] = "update Config set varvalue = '0.16.6' where varname = 'DB_VERSION'";
 			break;
 		default:
 			showError ("executeUpgradeBatch () failed, because batch '${batchid}' isn't defined", __FILE__);
