@@ -6,13 +6,17 @@ Authentication library for RackTables.
 */
 
 // This function ensures that we don't continue without a legitimate
-// username and password.
+// username and password (also make sure, that both are present, this
+// is especially useful for LDAP auth code to not deceive itself with
+// anonymous binding).
 function authenticate ()
 {
 	if
 	(
 		!isset ($_SERVER['PHP_AUTH_USER']) or
+		!strlen ($_SERVER['PHP_AUTH_USER']) or
 		!isset ($_SERVER['PHP_AUTH_PW']) or
+		!strlen ($_SERVER['PHP_AUTH_PW']) or
 		!authenticated ($_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW']) or
 		isset ($_REQUEST['logout'])
 	)
