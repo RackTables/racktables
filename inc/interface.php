@@ -30,6 +30,7 @@ $aac2 = array
 (
 	'regular' => '',
 	'virtual' => '<strong>L:</strong>',
+	'shared' => '<strong>S:</strong>',
 	'router' => '<strong>R:</strong>',
 );
 
