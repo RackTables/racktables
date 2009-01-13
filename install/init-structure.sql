@@ -82,14 +82,14 @@ CREATE TABLE `FileLink` (
   CONSTRAINT `FileLink-File_fkey` FOREIGN KEY (`file_id`) REFERENCES `File` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB;
 
-CREATE TABLE `IPAddress` (
+CREATE TABLE `IPv4Address` (
   `ip` int(10) unsigned NOT NULL,
   `name` char(255) NOT NULL,
   `reserved` enum('yes','no') default NULL,
   PRIMARY KEY  (`ip`)
 ) ENGINE=MyISAM;
 
-CREATE TABLE `IPBonds` (
+CREATE TABLE `IPv4Allocation` (
   `object_id` int(10) unsigned NOT NULL,
   `ip` int(10) unsigned NOT NULL,
   `name` char(255) NOT NULL,
@@ -97,7 +97,7 @@ CREATE TABLE `IPBonds` (
   PRIMARY KEY  (`object_id`,`ip`)
 ) ENGINE=MyISAM;
 
-CREATE TABLE `IPLoadBalancer` (
+CREATE TABLE `IPv4LB` (
   `object_id` int(10) unsigned default NULL,
   `rspool_id` int(10) unsigned default NULL,
   `vs_id` int(10) unsigned default NULL,
@@ -106,7 +106,7 @@ CREATE TABLE `IPLoadBalancer` (
   UNIQUE KEY `LB-VS` (`object_id`,`vs_id`)
 ) ENGINE=MyISAM;
 
-CREATE TABLE `IPRSPool` (
+CREATE TABLE `IPv4RSPool` (
   `id` int(10) unsigned NOT NULL auto_increment,
   `name` char(255) default NULL,
   `vsconfig` text,
@@ -114,7 +114,7 @@ CREATE TABLE `IPRSPool` (
   PRIMARY KEY  (`id`)
 ) ENGINE=MyISAM;
 
-CREATE TABLE `IPRanges` (
+CREATE TABLE `IPv4Network` (
   `id` int(10) unsigned NOT NULL auto_increment,
   `ip` int(10) unsigned NOT NULL,
   `mask` int(10) unsigned NOT NULL,
@@ -123,7 +123,7 @@ CREATE TABLE `IPRanges` (
   UNIQUE KEY `base-len` (`ip`,`mask`)
 ) ENGINE=MyISAM;
 
-CREATE TABLE `IPRealServer` (
+CREATE TABLE `IPv4RS` (
   `id` int(10) unsigned NOT NULL auto_increment,
   `inservice` enum('yes','no') NOT NULL default 'no',
   `rsip` int(10) unsigned default NULL,
@@ -134,7 +134,7 @@ CREATE TABLE `IPRealServer` (
   UNIQUE KEY `pool-endpoint` (`rspool_id`,`rsip`,`rsport`)
 ) ENGINE=MyISAM;
 
-CREATE TABLE `IPVirtualService` (
+CREATE TABLE `IPv4VS` (
   `id` int(10) unsigned NOT NULL auto_increment,
   `vip` int(10) unsigned default NULL,
   `vport` smallint(5) unsigned default NULL,
@@ -190,7 +190,7 @@ CREATE TABLE `PortCompat` (
   KEY `type2` (`type2`)
 ) ENGINE=MyISAM;
 
-CREATE TABLE `PortForwarding` (
+CREATE TABLE `IPv4NAT` (
   `object_id` int(10) unsigned NOT NULL,
   `proto` enum('TCP','UDP') not null default 'TCP',
   `localip` int(10) unsigned NOT NULL,

@@ -139,6 +139,14 @@ CREATE TABLE `FileLink` (
 			$query[] = "INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_no`) VALUES (798,22,0)";
 			$query[] = "INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_no`) VALUES (798,24,0)";
 			$query[] = "UPDATE Dictionary SET dict_value = 'Network switch' WHERE dict_key = 8";
+			$query[] = 'alter table IPBonds rename to IPv4Allocation';
+			$query[] = 'alter table PortForwarding rename to IPv4NAT';
+			$query[] = 'alter table IPRanges rename to IPv4Network';
+			$query[] = 'alter table IPAddress rename to IPv4Address';
+			$query[] = 'alter table IPLoadBalancer rename to IPv4LB';
+			$query[] = 'alter table IPRSpool rename to IPv4RSPool';
+			$query[] = 'alter table IPRealServer rename to IPv4RS';
+			$query[] = 'alter table IPVirtualServer rename to IPv4VS';
 			$query[] = "UPDATE Config SET varvalue = '0.17.0' WHERE varname = 'DB_VERSION'";
 			break;
 		default:

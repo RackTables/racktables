@@ -462,10 +462,10 @@ function commitDeleteObject ($object_id = 0)
 	global $dbxlink;
 	$dbxlink->query("DELETE FROM AttributeValue WHERE object_id = ${object_id}");
 	$dbxlink->query("DELETE FROM File WHERE id IN (SELECT file_id FROM FileLink WHERE entity_id = 'object' AND entity_id = ${object_id})");
-	$dbxlink->query("DELETE FROM IPLoadBalancer WHERE object_id = ${object_id}");
-	$dbxlink->query("DELETE FROM IPBonds WHERE object_id = ${object_id}");
+	$dbxlink->query("DELETE FROM IPv4LB WHERE object_id = ${object_id}");
+	$dbxlink->query("DELETE FROM IPv4Allocation WHERE object_id = ${object_id}");
 	$dbxlink->query("DELETE FROM Port WHERE object_id = ${object_id}");
-	$dbxlink->query("DELETE FROM PortForwarding WHERE object_id = ${object_id}");
+	$dbxlink->query("DELETE FROM IPv4NAT WHERE object_id = ${object_id}");
 	$dbxlink->query("DELETE FROM RackSpace WHERE object_id = ${object_id}");
 	$dbxlink->query("DELETE FROM TagStorage WHERE target_realm = 'object' and target_id = ${object_id}");
 	$dbxlink->query("DELETE FROM Atom WHERE molecule_id IN (SELECT new_molecule_id FROM MountOperation WHERE object_id = ${object_id})");
@@ -862,9 +862,9 @@ function getAllIPv4Allocations ()
 	$query =
 		"select object_id as object_id, ".
 		"RackObject.name as object_name, ".
-		"IPBonds.name as name, ".
+		"IPv4Allocation.name as name, ".
 		"INET_NTOA(ip) as ip ".
-		"from IPBonds join RackObject on id=object_id ";
+		"from IPv4Allocation join RackObject on id=object_id ";
 	$result = useSelectBlade ($query, __FUNCTION__);
 	$ret = array();
 	$count=0;
@@ -950,7 +950,7 @@ function unlinkPort ($port)
 function getObjectIPv4Allocations ($object_id = 0)
 {
 	$ret = array();
-	$query = 'select name as osif, type, inet_ntoa(ip) as dottedquad from IPBonds ' .
+	$query = 'select name as osif, type, inet_ntoa(ip) as dottedquad from IPv4Allocation ' .
 		"where object_id = ${object_id} " .
 		'order by ip';
 	$result = useSelectBlade ($query, __FUNCTION__);
@@ -1020,7 +1020,7 @@ function scanIPv4Space ($pairlist)
 	$whereexpr5b .= ')';
 
 	// 1. collect labels and reservations
-	$query = "select INET_NTOA(ip) as ip, name, reserved from IPAddress ".
+	$query = "select INET_NTOA(ip) as ip, name, reserved from IPv4Address ".
 		"where ${whereexpr1} and (reserved = 'yes' or name != '')";
 	$result = useSelectBlade ($query, __FUNCTION__);
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
@@ -1038,7 +1038,7 @@ function scanIPv4Space ($pairlist)
 		"select INET_NTOA(ipb.ip) as ip, ro.id as object_id, " .
 		"ro.name as object_name, ipb.name, ipb.type, objtype_id, " .
 		"dict_value as objtype_name from " .
-		"IPBonds as ipb inner join RackObject as ro on ipb.object_id = ro.id " .
+		"IPv4Allocation as ipb inner join RackObject as ro on ipb.object_id = ro.id " .
 		"left join Dictionary on objtype_id=dict_key natural join Chapter " .
 		"where ${whereexpr2} " .
 		"and chapter_name = 'RackObjectType'" .
@@ -1067,7 +1067,7 @@ function scanIPv4Space ($pairlist)
 	// 3. look for virtual services and related LB 
 	$query = "select vs_id, inet_ntoa(vip) as ip, vport, proto, vs.name, " .
 		"object_id, objtype_id, ro.name as object_name, dict_value as objtype_name from " .
-		"IPVirtualService as vs inner join IPLoadBalancer as lb on vs.id = lb.vs_id " .
+		"IPv4VS as vs inner join IPv4LB as lb on vs.id = lb.vs_id " .
 		"inner join RackObject as ro on lb.object_id = ro.id " .
 		"left join Dictionary on objtype_id=dict_key " .
 		"natural join Chapter " .
@@ -1098,7 +1098,7 @@ function scanIPv4Space ($pairlist)
 
 	// 4. don't forget about real servers along with pools
 	$query = "select inet_ntoa(rsip) as ip, inservice, rsport, rspool_id, rsp.name as rspool_name from " .
-		"IPRealServer as rs inner join IPRSPool as rsp on rs.rspool_id = rsp.id " .
+		"IPv4RS as rs inner join IPv4RSPool as rsp on rs.rspool_id = rsp.id " .
 		"where ${whereexpr4} " .
 		"order by ip, rsport, rspool_id";
 	$result = useSelectBlade ($query, __FUNCTION__);
@@ -1123,7 +1123,7 @@ function scanIPv4Space ($pairlist)
 		"INET_NTOA(remoteip) as remoteip, " .
 		"remoteport, " .
 		"description " .
-		"from PortForwarding " .
+		"from IPv4NAT " .
 		"where ${whereexpr5a} " .
 		"order by localip, localport, remoteip, remoteport, proto";
 	$result = useSelectBlade ($query, __FUNCTION__);
@@ -1144,7 +1144,7 @@ function scanIPv4Space ($pairlist)
 		"INET_NTOA(remoteip) as remoteip, " .
 		"remoteport, " .
 		"description " .
-		"from PortForwarding " .
+		"from IPv4NAT " .
 		"where ${whereexpr5b} " .
 		"order by localip, localport, remoteip, remoteport, proto";
 	$result = useSelectBlade ($query, __FUNCTION__);
@@ -1168,7 +1168,7 @@ function getIPv4NetworkInfo ($id = 0)
 		return NULL;
 	}
 	$query = "select INET_NTOA(ip) as ip, mask, name ".
-		"from IPRanges where id = $id";
+		"from IPv4Network where id = $id";
 	$result = useSelectBlade ($query, __FUNCTION__);
 	$ret = $result->fetch (PDO::FETCH_ASSOC);
 	if ($ret == NULL)
@@ -1203,7 +1203,7 @@ function bindIpToObject ($ip = '', $object_id = 0, $name = '', $type = '')
 {
 	$result = useInsertBlade
 	(
-		'IPBonds',
+		'IPv4Allocation',
 		array
 		(
 			'ip' => "INET_ATON('$ip')",
@@ -1222,8 +1222,8 @@ function getIPv4NetworkList ($tagfilter = array(), $tfmode = 'any')
 	$whereclause = getWhereClause ($tagfilter);
 	$query =
 		"select distinct id, INET_NTOA(ip) as ip, mask, name " .
-		"from IPRanges left join TagStorage on id = target_id and target_realm = 'ipv4net' " .
-		"where true ${whereclause} order by IPRanges.ip";
+		"from IPv4Network left join TagStorage on id = target_id and target_realm = 'ipv4net' " .
+		"where true ${whereclause} order by IPv4Network.ip";
 	$result = useSelectBlade ($query, __FUNCTION__);
 	$ret = array();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
@@ -1270,7 +1270,7 @@ function getIPv4AddressNetworkId ($dottedquad, $masklen = 32)
 // "mask < ${masklen} " .
 // 'order by mask desc limit 1';
 
-	$query = 'select id from IPRanges where ' .
+	$query = 'select id from IPv4Network where ' .
 		"inet_aton('${dottedquad}') & (4294967295 >> (32 - mask)) << (32 - mask) = ip " .
 		"and mask < ${masklen} " .
 		'order by mask desc limit 1';
@@ -1284,7 +1284,7 @@ function updateRange ($id=0, $name='')
 {
 	global $dbxlink;
 	$query =
-		"update IPRanges set name='$name' where id='$id'";
+		"update IPv4Network set name='$name' where id='$id'";
 	$result = $dbxlink->exec ($query);
 	return '';
 }
@@ -1295,11 +1295,11 @@ function updateRange ($id=0, $name='')
 function updateAddress ($ip = 0, $name = '', $reserved = 'no')
 {
 	// DELETE may safely fail.
-	$r = useDeleteBlade ('IPAddress', 'ip', "INET_ATON('${ip}')");
+	$r = useDeleteBlade ('IPv4Address', 'ip', "INET_ATON('${ip}')");
 	// INSERT may appear not necessary.
 	if ($name == '' and $reserved == 'no')
 		return '';
-	if (useInsertBlade ('IPAddress', array ('name' => "'${name}'", 'reserved' => "'${reserved}'", 'ip' => "INET_ATON('${ip}')")))
+	if (useInsertBlade ('IPv4Address', array ('name' => "'${name}'", 'reserved' => "'${reserved}'", 'ip' => "INET_ATON('${ip}')")))
 		return '';
 	else
 		return __FUNCTION__ . '(): useInsertBlade() failed';
@@ -1310,7 +1310,7 @@ function updateBond ($ip='', $object_id=0, $name='', $type='')
 	global $dbxlink;
 
 	$query =
-		"update IPBonds set name='$name', type='$type' where ip=INET_ATON('$ip') and object_id='$object_id'";
+		"update IPv4Allocation set name='$name', type='$type' where ip=INET_ATON('$ip') and object_id='$object_id'";
 	$result = $dbxlink->exec ($query);
 	return '';
 }
@@ -1320,7 +1320,7 @@ function unbindIpFromObject ($ip='', $object_id=0)
 	global $dbxlink;
 
 	$query =
-		"delete from IPBonds where ip=INET_ATON('$ip') and object_id='$object_id'";
+		"delete from IPv4Allocation where ip=INET_ATON('$ip') and object_id='$object_id'";
 	$result = $dbxlink->exec ($query);
 	return '';
 }
@@ -1363,7 +1363,7 @@ function searchByl2address ($l2addr)
 
 function getIPv4PrefixSearchResult ($terms)
 {
-	$query = "select id, inet_ntoa(ip) as ip, mask, name from IPRanges where ";
+	$query = "select id, inet_ntoa(ip) as ip, mask, name from IPv4Network where ";
 	$or = '';
 	foreach (explode (' ', $terms) as $term)
 	{
@@ -1379,7 +1379,7 @@ function getIPv4PrefixSearchResult ($terms)
 
 function getIPv4AddressSearchResult ($terms)
 {
-	$query = "select inet_ntoa(ip) as ip, name from IPAddress where ";
+	$query = "select inet_ntoa(ip) as ip, name from IPv4Address where ";
 	$or = '';
 	foreach (explode (' ', $terms) as $term)
 	{
@@ -1395,7 +1395,7 @@ function getIPv4AddressSearchResult ($terms)
 
 function getIPv4RSPoolSearchResult ($terms)
 {
-	$query = "select id as pool_id, name from IPRSPool where ";
+	$query = "select id as pool_id, name from IPv4RSPool where ";
 	$or = '';
 	foreach (explode (' ', $terms) as $term)
 	{
@@ -1411,7 +1411,7 @@ function getIPv4RSPoolSearchResult ($terms)
 
 function getIPv4VServiceSearchResult ($terms)
 {
-	$query = "select id, inet_ntoa(vip) as vip, vport, proto, name from IPVirtualService where ";
+	$query = "select id, inet_ntoa(vip) as vip, vport, proto, name from IPv4VS where ";
 	$or = '';
 	foreach (explode (' ', $terms) as $term)
 	{
@@ -1706,14 +1706,14 @@ function getIPv4Stats ()
 {
 	$ret = array();
 	$subject = array();
-	$subject[] = array ('q' => 'select count(id) from IPRanges', 'txt' => 'Networks');
-	$subject[] = array ('q' => 'select count(ip) from IPAddress', 'txt' => 'Addresses commented/reserved');
-	$subject[] = array ('q' => 'select count(ip) from IPBonds', 'txt' => 'Addresses allocated');
-	$subject[] = array ('q' => 'select count(*) from PortForwarding', 'txt' => 'NAT rules');
-	$subject[] = array ('q' => 'select count(id) from IPVirtualService', 'txt' => 'Virtual services');
-	$subject[] = array ('q' => 'select count(id) from IPRSPool', 'txt' => 'Real server pools');
-	$subject[] = array ('q' => 'select count(id) from IPRealServer', 'txt' => 'Real servers');
-	$subject[] = array ('q' => 'select count(distinct object_id) from IPLoadBalancer', 'txt' => 'Load balancers');
+	$subject[] = array ('q' => 'select count(id) from IPv4Network', 'txt' => 'Networks');
+	$subject[] = array ('q' => 'select count(ip) from IPv4Address', 'txt' => 'Addresses commented/reserved');
+	$subject[] = array ('q' => 'select count(ip) from IPv4Allocation', 'txt' => 'Addresses allocated');
+	$subject[] = array ('q' => 'select count(*) from IPv4NAT', 'txt' => 'NAT rules');
+	$subject[] = array ('q' => 'select count(id) from IPv4VS', 'txt' => 'Virtual services');
+	$subject[] = array ('q' => 'select count(id) from IPv4RSPool', 'txt' => 'Real server pools');
+	$subject[] = array ('q' => 'select count(id) from IPv4RS', 'txt' => 'Real servers');
+	$subject[] = array ('q' => 'select count(distinct object_id) from IPv4LB', 'txt' => 'Load balancers');
 
 	foreach ($subject as $item)
 	{
@@ -1794,11 +1794,11 @@ function renderTagStats ()
 The following allows figuring out records in TagStorage, which refer to non-existing entities:
 
 mysql> select target_id from TagStorage left join Files on target_id = id where target_realm = 'file' and id is null;
-mysql> select target_id from TagStorage left join IPRanges on target_id = id where target_realm = 'ipv4net' and id is null;
+mysql> select target_id from TagStorage left join IPv4Network on target_id = id where target_realm = 'ipv4net' and id is null;
 mysql> select target_id from TagStorage left join RackObject on target_id = id where target_realm = 'object' and id is null;
 mysql> select target_id from TagStorage left join Rack on target_id = id where target_realm = 'rack' and id is null;
-mysql> select target_id from TagStorage left join IPVirtualService on target_id = id where target_realm = 'ipv4vs' and id is null;
-mysql> select target_id from TagStorage left join IPRSPool on target_id = id where target_realm = 'ipv4rspool' and id is null;
+mysql> select target_id from TagStorage left join IPv4VS on target_id = id where target_realm = 'ipv4vs' and id is null;
+mysql> select target_id from TagStorage left join IPv4RSPool on target_id = id where target_realm = 'ipv4rspool' and id is null;
 mysql> select target_id from TagStorage left join UserAccount on target_id = user_id where target_realm = 'user' and user_id is null;
 
 Accordingly, these are the records, which refer to non-existent tags:
@@ -2327,9 +2327,9 @@ function getSLBSummary ()
 {
 	$query = 'select vs.id as vsid, inet_ntoa(vip) as vip, vport, proto, vs.name, object_id, ' .
 		'lb.rspool_id, pool.name as pool_name, count(rs.id) as rscount ' .
-		'from IPVirtualService as vs inner join IPLoadBalancer as lb on vs.id = lb.vs_id ' .
-		'inner join IPRSPool as pool on lb.rspool_id = pool.id ' .
-		'left join IPRealServer as rs on rs.rspool_id = lb.rspool_id ' .
+		'from IPv4VS as vs inner join IPv4LB as lb on vs.id = lb.vs_id ' .
+		'inner join IPv4RSPool as pool on lb.rspool_id = pool.id ' .
+		'left join IPv4RS as rs on rs.rspool_id = lb.rspool_id ' .
 		'group by vs.id, object_id order by vs.vip, object_id';
 	$result = useSelectBlade ($query, __FUNCTION__);
 	$ret = array();
@@ -2362,7 +2362,7 @@ function getSLBSummary ()
 function getVServiceInfo ($vsid = 0)
 {
 	$query1 = "select inet_ntoa(vip) as vip, vport, proto, name, vsconfig, rsconfig " .
-		"from IPVirtualService where id = ${vsid}";
+		"from IPv4VS where id = ${vsid}";
 	$result = useSelectBlade ($query1, __FUNCTION__);
 	$vsinfo = array ();
 	$row = $result->fetch (PDO::FETCH_ASSOC);
@@ -2375,7 +2375,7 @@ function getVServiceInfo ($vsid = 0)
 	unset ($result);
 	$query2 = "select pool.id, name, pool.vsconfig, pool.rsconfig, object_id, " .
 		"lb.vsconfig as lb_vsconfig, lb.rsconfig as lb_rsconfig from " .
-		"IPRSPool as pool left join IPLoadBalancer as lb on pool.id = lb.rspool_id " .
+		"IPv4RSPool as pool left join IPv4LB as lb on pool.id = lb.rspool_id " .
 		"where vs_id = ${vsid} order by pool.name, object_id";
 	$result = useSelectBlade ($query2, __FUNCTION__);
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
@@ -2408,7 +2408,7 @@ function getVServiceInfo ($vsid = 0)
 function getRSPoolInfo ($id = 0)
 {
 	$query1 = "select id, name, vsconfig, rsconfig from " .
-		"IPRSPool where id = ${id}";
+		"IPv4RSPool where id = ${id}";
 	$result = useSelectBlade ($query1, __FUNCTION__);
 	$ret = array();
 	$row = $result->fetch (PDO::FETCH_ASSOC);
@@ -2421,7 +2421,7 @@ function getRSPoolInfo ($id = 0)
 	$ret['lblist'] = array();
 	$ret['rslist'] = array();
 	$query2 = "select object_id, vs_id, lb.vsconfig, lb.rsconfig from " .
-		"IPLoadBalancer as lb inner join IPVirtualService as vs on lb.vs_id = vs.id " .
+		"IPv4LB as lb inner join IPv4VS as vs on lb.vs_id = vs.id " .
 		"where rspool_id = ${id} order by object_id, vip, vport";
 	$result = useSelectBlade ($query2, __FUNCTION__);
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
@@ -2430,7 +2430,7 @@ function getRSPoolInfo ($id = 0)
 	$result->closeCursor();
 	unset ($result);
 	$query3 = "select id, inservice, inet_ntoa(rsip) as rsip, rsport, rsconfig from " .
-		"IPRealServer where rspool_id = ${id} order by IPRealServer.rsip, rsport";
+		"IPv4RS where rspool_id = ${id} order by IPv4RS.rsip, rsport";
 	$result = useSelectBlade ($query3, __FUNCTION__);
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 		foreach (array ('inservice', 'rsip', 'rsport', 'rsconfig') as $c)
@@ -2450,7 +2450,7 @@ function addRStoRSPool ($pool_id = 0, $rsip = '', $rsport = 0, $inservice = 'no'
 		$rsport = 'NULL';
 	return useInsertBlade
 	(
-		'IPRealServer',
+		'IPv4RS',
 		array
 		(
 			'rsip' => "inet_aton('${rsip}')",
@@ -2468,7 +2468,7 @@ function commitCreateVS ($vip = '', $vport = 0, $proto = '', $name = '', $vsconf
 		return __FUNCTION__ . ': invalid arguments';
 	if (!useInsertBlade
 	(
-		'IPVirtualService',
+		'IPv4VS',
 		array
 		(
 			'vip' => "inet_aton('${vip}')",
@@ -2492,7 +2492,7 @@ function addLBtoRSPool ($pool_id = 0, $object_id = 0, $vs_id = 0, $vsconfig = ''
 	}
 	return useInsertBlade
 	(
-		'IPLoadBalancer',
+		'IPv4LB',
 		array
 		(
 			'object_id' => $object_id,
@@ -2508,14 +2508,14 @@ function commitDeleteRS ($id = 0)
 {
 	if ($id <= 0)
 		return FALSE;
-	return useDeleteBlade ('IPRealServer', 'id', $id);
+	return useDeleteBlade ('IPv4RS', 'id', $id);
 }
 
 function commitDeleteVS ($id = 0)
 {
 	if ($id <= 0)
 		return FALSE;
-	return useDeleteBlade ('IPVirtualService', 'id', $id) && destroyTagsForEntity ('ipv4vs', $id);
+	return useDeleteBlade ('IPv4VS', 'id', $id) && destroyTagsForEntity ('ipv4vs', $id);
 }
 
 function commitDeleteLB ($object_id = 0, $pool_id = 0, $vs_id = 0)
@@ -2523,7 +2523,7 @@ function commitDeleteLB ($object_id = 0, $pool_id = 0, $vs_id = 0)
 	global $dbxlink;
 	if ($object_id <= 0 or $pool_id <= 0 or $vs_id <= 0)
 		return FALSE;
-	$query = "delete from IPLoadBalancer where object_id = ${object_id} and " .
+	$query = "delete from IPv4LB where object_id = ${object_id} and " .
 		"rspool_id = ${pool_id} and vs_id = ${vs_id} limit 1";
 	$result = $dbxlink->exec ($query);
 	if ($result === NULL)
@@ -2550,7 +2550,7 @@ function commitUpdateRS ($rsid = 0, $rsip = '', $rsport = 0, $rsconfig = '')
 		$rsport = 'NULL';
 	global $dbxlink;
 	$query =
-		"update IPRealServer set rsip = inet_aton('${rsip}'), rsport = ${rsport}, rsconfig = " .
+		"update IPv4RS set rsip = inet_aton('${rsip}'), rsport = ${rsport}, rsconfig = " .
 		(empty ($rsconfig) ? 'NULL' : "'${rsconfig}'") .
 		" where id = ${rsid} limit 1";
 	$result = $dbxlink->query ($query);
@@ -2571,7 +2571,7 @@ function commitUpdateLB ($object_id = 0, $pool_id = 0, $vs_id = 0, $vsconfig = '
 	}
 	global $dbxlink;
 	$query =
-		"update IPLoadBalancer set vsconfig = " .
+		"update IPv4LB set vsconfig = " .
 		(empty ($vsconfig) ? 'NULL' : "'${vsconfig}'") .
 		', rsconfig = ' .
 		(empty ($rsconfig) ? 'NULL' : "'${rsconfig}'") .
@@ -2592,7 +2592,7 @@ function commitUpdateVS ($vsid = 0, $vip = '', $vport = 0, $proto = '', $name = 
 		die;
 	}
 	global $dbxlink;
-	$query = "update IPVirtualService set " .
+	$query = "update IPv4VS set " .
 		"vip = inet_aton('${vip}'), " .
 		"vport = ${vport}, " .
 		"proto = '${proto}', " .
@@ -2613,7 +2613,7 @@ function getVSList ($tagfilter = array(), $tfmode = 'any')
 {
 	$whereclause = getWhereClause ($tagfilter);
 	$query = "select vs.id, inet_ntoa(vip) as vip, vport, proto, vs.name, vs.vsconfig, vs.rsconfig, count(rspool_id) as poolcount " .
-		"from IPVirtualService as vs left join IPLoadBalancer as lb on vs.id = lb.vs_id " .
+		"from IPv4VS as vs left join IPv4LB as lb on vs.id = lb.vs_id " .
 		"left join TagStorage on vs.id = TagStorage.target_id and target_realm = 'ipv4vs' " . 
 		"where true ${whereclause} group by vs.id order by vs.vip, proto, vport";
 	$result = useSelectBlade ($query, __FUNCTION__);
@@ -2630,7 +2630,7 @@ function getRSPoolList ($tagfilter = array(), $tfmode = 'any')
 {
 	$whereclause = getWhereClause ($tagfilter);
 	$query = "select pool.id, pool.name, count(rspool_id) as refcnt, pool.vsconfig, pool.rsconfig " .
-		"from IPRSPool as pool left join IPLoadBalancer as lb on pool.id = lb.rspool_id " .
+		"from IPv4RSPool as pool left join IPv4LB as lb on pool.id = lb.rspool_id " .
 		"left join TagStorage on pool.id = TagStorage.target_id and target_realm = 'ipv4rspool' " .
 		"where true ${whereclause} group by pool.id order by pool.name, pool.id";
 	$result = useSelectBlade ($query, __FUNCTION__);
@@ -2680,7 +2680,7 @@ function resetThumbCache ($rack_id = 0)
 }
 
 // Return the list of attached RS pools for the given object. As long as we have
-// the LB-VS UNIQUE in IPLoadBalancer table, it is Ok to key returned records
+// the LB-VS UNIQUE in IPv4LB table, it is Ok to key returned records
 // by vs_id, because there will be only one RS pool listed for each VS of the
 // current object.
 function getRSPoolsForObject ($object_id = 0)
@@ -2692,9 +2692,9 @@ function getRSPoolsForObject ($object_id = 0)
 	}
 	$query = 'select vs_id, inet_ntoa(vip) as vip, vport, proto, vs.name, pool.id as pool_id, ' .
 		'pool.name as pool_name, count(rsip) as rscount, lb.vsconfig, lb.rsconfig from ' .
-		'IPLoadBalancer as lb inner join IPRSPool as pool on lb.rspool_id = pool.id ' .
-		'inner join IPVirtualService as vs on lb.vs_id = vs.id ' .
-		'left join IPRealServer as rs on lb.rspool_id = rs.rspool_id ' .
+		'IPv4LB as lb inner join IPv4RSPool as pool on lb.rspool_id = pool.id ' .
+		'inner join IPv4VS as vs on lb.vs_id = vs.id ' .
+		'left join IPv4RS as rs on lb.rspool_id = rs.rspool_id ' .
 		"where lb.object_id = ${object_id} " .
 		'group by lb.rspool_id, lb.vs_id order by vs.vip, vport, proto, pool.name';
 	$result = useSelectBlade ($query, __FUNCTION__);
@@ -2712,7 +2712,7 @@ function commitCreateRSPool ($name = '', $vsconfig = '', $rsconfig = '', $taglis
 		return __FUNCTION__ . ': invalid arguments';
 	if (!useInsertBlade
 	(
-		'IPRSPool',
+		'IPv4RSPool',
 		array
 		(
 			'name' => (empty ($name) ? 'NULL' : "'${name}'"),
@@ -2729,7 +2729,7 @@ function commitDeleteRSPool ($pool_id = 0)
 	global $dbxlink;
 	if ($pool_id <= 0)
 		return FALSE;
-	return useDeleteBlade ('IPRSPool', 'id', $pool_id) && destroyTagsForEntity ('ipv4rspool', $pool_id);
+	return useDeleteBlade ('IPv4RSPool', 'id', $pool_id) && destroyTagsForEntity ('ipv4rspool', $pool_id);
 }
 
 function commitUpdateRSPool ($pool_id = 0, $name = '', $vsconfig = '', $rsconfig = '')
@@ -2740,7 +2740,7 @@ function commitUpdateRSPool ($pool_id = 0, $name = '', $vsconfig = '', $rsconfig
 		die;
 	}
 	global $dbxlink;
-	$query = "update IPRSPool set " .
+	$query = "update IPv4RSPool set " .
 		'name = ' . (empty ($name) ? 'NULL,' : "'${name}', ") .
 		'vsconfig = ' . (empty ($vsconfig) ? 'NULL,' : "'${vsconfig}', ") .
 		'rsconfig = ' . (empty ($rsconfig) ? 'NULL' : "'${rsconfig}'") .
@@ -2757,7 +2757,7 @@ function commitUpdateRSPool ($pool_id = 0, $name = '', $vsconfig = '', $rsconfig
 function getRSList ()
 {
 	$query = "select id, inservice, inet_ntoa(rsip) as rsip, rsport, rspool_id, rsconfig " .
-		"from IPRealServer order by rspool_id, IPRealServer.rsip, rsport";
+		"from IPv4RS order by rspool_id, IPv4RS.rsip, rsport";
 	$result = useSelectBlade ($query, __FUNCTION__);
 	$ret = array ();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
@@ -2771,7 +2771,7 @@ function getRSList ()
 function getLBList ()
 {
 	$query = "select object_id, count(rspool_id) as poolcount " .
-		"from IPLoadBalancer group by object_id order by object_id";
+		"from IPv4LB group by object_id order by object_id";
 	$result = useSelectBlade ($query, __FUNCTION__);
 	$ret = array ();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
@@ -2797,9 +2797,9 @@ function getSLBConfig ($object_id)
 		'lb.vsconfig as lb_vsconfig, lb.rsconfig as lb_rsconfig, pool.id as pool_id, pool.name as pool_name, ' .
 		'pool.vsconfig as pool_vsconfig, pool.rsconfig as pool_rsconfig, ' .
 		'rs.id as rs_id, inet_ntoa(rsip) as rsip, rsport, rs.rsconfig as rs_rsconfig from ' .
-		'IPLoadBalancer as lb inner join IPRSPool as pool on lb.rspool_id = pool.id ' .
-		'inner join IPVirtualService as vs on lb.vs_id = vs.id ' .
-		'inner join IPRealServer as rs on lb.rspool_id = rs.rspool_id ' .
+		'IPv4LB as lb inner join IPv4RSPool as pool on lb.rspool_id = pool.id ' .
+		'inner join IPv4VS as vs on lb.vs_id = vs.id ' .
+		'inner join IPv4RS as rs on lb.rspool_id = rs.rspool_id ' .
 		"where lb.object_id = ${object_id} and rs.inservice = 'yes' " .
 		"order by vs.vip, vport, proto, pool.name, rs.rsip, rs.rsport";
 	$result = useSelectBlade ($query, __FUNCTION__);
@@ -2827,7 +2827,7 @@ function commitSetInService ($rs_id = 0, $inservice = '')
 		return NULL;
 	}
 	global $dbxlink;
-	$query = "update IPRealServer set inservice = '${inservice}' where id = ${rs_id} limit 1";
+	$query = "update IPv4RS set inservice = '${inservice}' where id = ${rs_id} limit 1";
 	$result = $dbxlink->exec ($query);
 	if ($result === NULL)
 		return FALSE;
@@ -3103,7 +3103,7 @@ function createIPv4Prefix ($range = '', $name = '', $is_bcast = FALSE, $taglist 
 	$ipL = $ipL & $binmask;
 	$result = useInsertBlade
 	(
-		'IPRanges',
+		'IPv4Network',
 		array
 		(
 			'ip' => sprintf ('%u', $ipL),
@@ -3124,12 +3124,12 @@ function createIPv4Prefix ($range = '', $name = '', $is_bcast = FALSE, $taglist 
 	return produceTagsForLastRecord ('ipv4net', $taglist);
 }
 
-// FIXME: This function doesn't wipe relevant records from IPAddress table.
+// FIXME: This function doesn't wipe relevant records from IPv4Address table.
 function destroyIPv4Prefix ($id = 0)
 {
 	if ($id <= 0)
 		return __FUNCTION__ . ': Invalid IPv4 prefix ID';
-	if (!useDeleteBlade ('IPRanges', 'id', $id))
+	if (!useDeleteBlade ('IPv4Network', 'id', $id))
 		return __FUNCTION__ . ': SQL query #1 failed';
 	if (!destroyTagsForEntity ('ipv4net', $id))
 		return __FUNCTION__ . ': SQL query #2 failed';
@@ -3198,7 +3198,7 @@ function recordExists ($id = 0, $realm = 'object')
 	$table = array
 	(
 		'object' => 'RackObject',
-		'ipv4net' => 'IPRanges',
+		'ipv4net' => 'IPv4Network',
 		'user' => 'UserAccount',
 	);
 	$idcol = array
@@ -3243,7 +3243,7 @@ function newPortForwarding ($object_id, $localip, $localport, $remoteip, $remote
 
 	$result = useInsertBlade
 	(
-		'PortForwarding',
+		'IPv4NAT',
 		array
 		(
 			'object_id' => $object_id,
@@ -3266,7 +3266,7 @@ function deletePortForwarding ($object_id, $localip, $localport, $remoteip, $rem
 	global $dbxlink;
 
 	$query =
-		"delete from PortForwarding where object_id='$object_id' and localip=INET_ATON('$localip') and remoteip=INET_ATON('$remoteip') and localport='$localport' and remoteport='$remoteport' and proto='$proto'";
+		"delete from IPv4NAT where object_id='$object_id' and localip=INET_ATON('$localip') and remoteip=INET_ATON('$remoteip') and localport='$localport' and remoteport='$remoteport' and proto='$proto'";
 	$result = $dbxlink->exec ($query);
 	return '';
 }
@@ -3276,7 +3276,7 @@ function updatePortForwarding ($object_id, $localip, $localport, $remoteip, $rem
 	global $dbxlink;
 
 	$query =
-		"update PortForwarding set description='$description' where object_id='$object_id' and localip=INET_ATON('$localip') and remoteip=INET_ATON('$remoteip') and localport='$localport' and remoteport='$remoteport' and proto='$proto'";
+		"update IPv4NAT set description='$description' where object_id='$object_id' and localip=INET_ATON('$localip') and remoteip=INET_ATON('$remoteip') and localport='$localport' and remoteport='$remoteport' and proto='$proto'";
 	$result = $dbxlink->exec ($query);
 	return '';
 }
@@ -3296,9 +3296,9 @@ function getNATv4ForObject ($object_id)
 		"ipa1.name as local_addr_name, " .
 		"ipa2.name as remote_addr_name, " .
 		"description ".
-		"from PortForwarding ".
-		"left join IPAddress as ipa1 on PortForwarding.localip = ipa1.ip " .
-		"left join IPAddress as ipa2 on PortForwarding.remoteip = ipa2.ip " .
+		"from IPv4NAT ".
+		"left join IPv4Address as ipa1 on IPv4NAT.localip = ipa1.ip " .
+		"left join IPv4Address as ipa2 on IPv4NAT.remoteip = ipa2.ip " .
 		"where object_id='$object_id' ".
 		"order by localip, localport, proto, remoteip, remoteport";
 	$result = useSelectBlade ($query, __FUNCTION__);
@@ -3319,11 +3319,11 @@ function getNATv4ForObject ($object_id)
 		"localport, ".
 		"INET_NTOA(remoteip) as remoteip, ".
 		"remoteport, ".
-		"PortForwarding.object_id as object_id, ".
+		"IPv4NAT.object_id as object_id, ".
 		"RackObject.name as object_name, ".
 		"description ".
-		"from ((PortForwarding join IPBonds on remoteip=IPBonds.ip) join RackObject on PortForwarding.object_id=RackObject.id) ".
-		"where IPBonds.object_id='$object_id' ".
+		"from ((IPv4NAT join IPv4Allocation on remoteip=IPv4Allocation.ip) join RackObject on IPv4NAT.object_id=RackObject.id) ".
+		"where IPv4Allocation.object_id='$object_id' ".
 		"order by remoteip, remoteport, proto, localip, localport";
 	$result = useSelectBlade ($query, __FUNCTION__);
 	$count=0;
