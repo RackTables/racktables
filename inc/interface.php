@@ -146,6 +146,9 @@ $image['VS']['height'] = 62;
 $image['router']['path'] = 'pix/router.png';
 $image['router']['width'] = 32;
 $image['router']['height'] = 32;
+$image['LINK']['path'] = 'pix/tango-emblem-symbolic-link-big.png';
+$image['LINK']['width'] = 32;
+$image['LINK']['height'] = 32;
 
 // This may be populated later onsite, report rendering function will use it.
 // See the $systemreport for structure.
@@ -5709,7 +5712,7 @@ function renderFilesForEntity ($entity_type = NULL, $id_name = NULL, $entity_id 
 		startPortlet ('Use existing');
 		printOpFormIntro ('linkFile');
 		printSelect ($files, 'file_id');
-		printImageHREF ('ADD', 'Link file', TRUE);
+		printImageHREF ('LINK', 'Link file', TRUE);
 		finishPortlet();
 	}
 
