@@ -1488,15 +1488,29 @@ function addFileToEntity ()
 
 function linkFileToEntity ()
 {
-	assertUIntArg ('entity_id', __FUNCTION__);
 	assertUIntArg ('file_id', __FUNCTION__);
-	assertStringArg ('file_name', __FUNCTION__);
+	$etype_by_pageno = array // this 1:1 mapping may change later
+	(
+		'ipv4net' => 'ipv4net',
+		'ipv4rspool' => 'ipv4rspool',
+		'ipv4vs' => 'ipv4vs',
+		'object' => 'object',
+		'rack' => 'rack',
+		'user' => 'user',
+	);
+	global $page, $pageno;
+	$entity_type = $etype_by_pageno[$pageno];
+	$bypass_name = $page[$pageno]['bypass'];
+	assertUIntArg ($bypass_name, __FUNCTION__);
 
-	$error = commitLinkFile ($_REQUEST['file_id'], $_REQUEST['entity_type'], $_REQUEST['entity_id']);
+	$fi = getFileInfo ($_REQUEST['file_id']);
+	if ($fi === NULL)
+		return buildRedirectURL ('ERR1'); // file not found
+	$error = commitLinkFile ($_REQUEST['file_id'], $entity_type, $_REQUEST[$bypass_name]);
 	if ($error != '')
-		return buildRedirectURL ('ERR', array ($error));
+		return buildRedirectURL ('ERR2', array ($error)); // linking failed
 
-	return buildRedirectURL ('OK', array ($_REQUEST['file_name']));
+	return buildRedirectURL ('OK', array ($fi['name']));
 }
 
 function updateFile ()

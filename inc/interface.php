@@ -1463,6 +1463,7 @@ function printLog ($log)
 				175 => array ('code' => 'error', 'format' => 'Invalid netmask'),
 				176 => array ('code' => 'error', 'format' => 'This network already exists'),
 				177 => array ('code' => 'error', 'format' => 'commitUpdateRack() failed'),
+				178 => array ('code' => 'error', 'format' => 'file not found'),
 
 				200 => array ('code' => 'warning', 'format' => 'generic warning: %s'),
 				201 => array ('code' => 'warning', 'format' => 'nothing happened...'),
@@ -5690,56 +5691,55 @@ function renderFilesForEntity ($entity_type = NULL, $id_name = NULL, $entity_id 
 		return;
 	}
 
-	function printNewItemTR ($entity_type, $entity_id)
-	{
-		global $root;
-		printOpFormIntro ('addFile', array ('entity_type' => $entity_type, 'entity_id' => $entity_id, 'MAX_FILE_SIZE' => convertToBytes(get_cfg_var('upload_max_filesize'))), TRUE);
-		echo "<tr><td>";
-		printImageHREF ('add', 'Upload file', TRUE, 99);
-		echo "</td>";
-		echo "<td class=tdleft><input type='file' size='10' name='file' tabindex=100></td>\n";
-		echo "<td class=tdleft><input type='text' size='15' name='comment' tabindex=101></td>\n";
-		echo "<td></td>\n";
-		echo "<td><a href='javascript:;' onclick='window.open(\"${root}file_link_helper.php?entity_type=$entity_type&entity_id=$entity_id";
-		echo "\",\"findlink\",\"height=700, width=400, location=no, menubar=no, resizable=yes, scrollbars=no, status=no, titlebar=no, toolbar=no\");'>";
-		printImageHREF ('link', 'Link an existing file');
-		echo "</a> &nbsp;&nbsp;";
-		printImageHREF ('add', 'Upload file', TRUE, 99);
-		echo "</td></tr></form>";
-	}
-
 	showMessageOrError();
-	startPortlet ('Files');
-	$filelist = getFilesOfEntity ($entity_type, $entity_id);
-	echo "<table border=0 cellspacing=0 cellpadding='5' align='center' class='widetable'>\n";
-	echo "<tr><th>&nbsp;</th><th>Name</th><th>Comment</th><th>Size</th><th>Actions</th></tr>\n";
-
-	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
-		printNewItemTR($entity_type, $entity_id);
-	foreach ($filelist as $file_id => $file)
-	{
-		printOpFormIntro ('updateFile', array ('file_id' => $file_id, 'link_id' => $file['link_id'], 'name' => $file['name']));
-		echo "<tr valign=top><td><a href='${root}process.php?op=deleteFile&page=${pageno}&tab=${tabno}&file_id=${file_id}&${id_name}=${entity_id}&name=${file['name']}'>";
-		printImageHREF ('delete', 'Unlink and delete file');
-		echo '</a></td>';
-		printf("<td class='tdleft'><a href='%/?page=file&file_id=%s'><strong>%s</strong></a>", $root, $file_id, $file['name']);
-		echo "<td class=tdleft><input type='text' name='comment' value='${file['comment']}' size=15></td>";
-		printf("<td class=tdleft>%s</td>", formatFileSize($file['size']));
-		echo "<td><a href='${root}download.php?file_id=${file_id}'>";
-		printImageHREF ('download', 'Download file');
-		echo '</a> ';
-		echo "<a href='${root}process.php?op=unlinkFile&page=${pageno}&tab=${tabno}&link_id=${file['link_id']}&${id_name}=${entity_id}&name=${file['name']}'>";
-		printImageHREF ('clear', 'Unlink file');
-		echo '</a> ';
-		printImageHREF ('save', 'Save changes', TRUE);
-		echo "</td></form></tr>\n";
-	}
-	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')
-		printNewItemTR($entity_type, $entity_id);
-
+	startPortlet ('Upload new');
+	echo "<table border=0 cellspacing=0 cellpadding='5' align='center'>\n";
+	printOpFormIntro ('addFile', array ('entity_type' => $entity_type, 'entity_id' => $entity_id, 'MAX_FILE_SIZE' => convertToBytes(get_cfg_var('upload_max_filesize'))), TRUE);
+	echo "<tr>";
+	echo "<td class=tdleft><input type='file' size='10' name='file' tabindex=100></td>\n";
+	echo "<td class=tdleft><input type='text' size='15' name='comment' tabindex=101></td><td>\n";
+	printImageHREF ('CREATE', 'Upload file', TRUE, 99);
+	echo "</td></tr></form>";
 	echo "</table><br>\n";
 	finishPortlet();
 
+	$files = getAllUnlinkedFiles ($entity_type, $entity_id);
+	if (count ($files))
+	{
+		startPortlet ('Use existing');
+		printOpFormIntro ('linkFile');
+		printSelect ($files, 'file_id');
+		printImageHREF ('ADD', 'Link file', TRUE);
+		finishPortlet();
+	}
+
+	$filelist = getFilesOfEntity ($entity_type, $entity_id);
+	if (count ($filelist))
+	{
+		startPortlet ('Manage linked');
+		echo "<table border=0 cellspacing=0 cellpadding='5' align='center' class='widetable'>\n";
+		echo "<tr><th>&nbsp;</th><th>Name</th><th>Comment</th><th>Size</th><th>Actions</th></tr>\n";
+		foreach ($filelist as $file_id => $file)
+		{
+			printOpFormIntro ('updateFile', array ('file_id' => $file_id, 'link_id' => $file['link_id'], 'name' => $file['name']));
+			echo "<tr valign=top><td><a href='${root}process.php?op=deleteFile&page=${pageno}&tab=${tabno}&file_id=${file_id}&${id_name}=${entity_id}&name=${file['name']}'>";
+			printImageHREF ('delete', 'Unlink and delete file');
+			echo '</a></td>';
+			printf("<td class='tdleft'><a href='%/?page=file&file_id=%s'><strong>%s</strong></a>", $root, $file_id, $file['name']);
+			echo "<td class=tdleft><input type='text' name='comment' value='${file['comment']}' size=15></td>";
+			printf("<td class=tdleft>%s</td>", formatFileSize($file['size']));
+			echo "<td><a href='${root}download.php?file_id=${file_id}'>";
+			printImageHREF ('download', 'Download file');
+			echo '</a> ';
+			echo "<a href='${root}process.php?op=unlinkFile&page=${pageno}&tab=${tabno}&link_id=${file['link_id']}&${id_name}=${entity_id}&name=${file['name']}'>";
+			printImageHREF ('clear', 'Unlink file');
+			echo '</a> ';
+			printImageHREF ('save', 'Save changes', TRUE);
+			echo "</td></form></tr>\n";
+		}
+		echo "</table><br>\n";
+		finishPortlet();
+	}
 }
 
 // Set of wrapper functions to reduce duplicate code

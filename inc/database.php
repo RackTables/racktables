@@ -3408,7 +3408,8 @@ function getAllFiles ()
 	return $ret;
 }
 
-// Return a list of files which are not linked to the specified record
+// Return a list of files which are not linked to the specified record. This list
+// will be used by printSelect().
 function getAllUnlinkedFiles ($entity_type = NULL, $entity_id = 0)
 {
 	if ($entity_type == NULL || $entity_id == 0)
@@ -3418,27 +3419,16 @@ function getAllUnlinkedFiles ($entity_type = NULL, $entity_id = 0)
 	}
 	global $dbxlink;
 	$sql =
-		'SELECT id, name, type, size, ctime, mtime, atime, comment FROM File ' .
+		'SELECT id, name FROM File ' .
 		'WHERE id NOT IN (SELECT file_id FROM FileLink WHERE entity_type = ? AND entity_id = ?) ' .
-		'ORDER BY name';
+		'ORDER BY name, id';
 	$query = $dbxlink->prepare($sql);
 	$query->bindParam(1, $entity_type);
 	$query->bindParam(2, $entity_id);
 	$query->execute();
 	$ret=array();
-	$count=0;
 	while ($row = $query->fetch (PDO::FETCH_ASSOC))
-	{
-		$ret[$count]['id'] = $row['id'];
-		$ret[$count]['name'] = $row['name'];
-		$ret[$count]['type'] = $row['type'];
-		$ret[$count]['size'] = $row['size'];
-		$ret[$count]['ctime'] = $row['ctime'];
-		$ret[$count]['mtime'] = $row['mtime'];
-		$ret[$count]['atime'] = $row['atime'];
-		$ret[$count]['comment'] = $row['comment'];
-		$count++;
-	}
+		$ret[$row['id']] = $row['name'];
 	return $ret;
 }
 
