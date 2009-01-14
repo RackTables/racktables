@@ -2,12 +2,11 @@
 
 $relnotes = array
 (
-	'0.17.0' => "<font color=red><strong>Release notes for ${batchid}</strong></font><br>" .
-		"Another change is the addition of support for file uploads.  Files are stored<br>" .
+	'0.17.0' => "Another change is the addition of support for file uploads.  Files are stored<br>" .
 		"in the database.  There are several settings in php.ini which you may need to modify:<br>" .
-		"    file_uploads        - needs to be On<br>" .
-		"    upload_max_filesize - max size for uploaded files<br>" .
-		"    post_max_size       - max size of all form data submitted via POST (including files)<br>",
+		"<ul><li>file_uploads        - needs to be On</li>" .
+		"<li>upload_max_filesize - max size for uploaded files</li>" .
+		"<li>post_max_size       - max size of all form data submitted via POST (including files)</li></ul>",
 );
 
 // At the moment we assume, that for any two releases we can
@@ -16,6 +15,7 @@ $relnotes = array
 // below will have to generate smarter upgrade paths, while
 // the upper layer will remain the same.
 // Returning an empty array means that no upgrade is necessary.
+// Returning NULL indicates an error.
 function getDBUpgradePath ($v1, $v2)
 {
 	$versionhistory = array
@@ -25,20 +25,15 @@ function getDBUpgradePath ($v1, $v2)
 		'0.16.6',
 		'0.17.0',
 	);
-	if (!in_array ($v1, $versionhistory) || !in_array ($v2, $versionhistory))
-	{
-		showError ("An upgrade path has been requested for versions '${v1}' and '${v2}', " .
-		  "and at least one of those isn't known to me.", __FILE__);
-		die;
-	}
 	$skip = TRUE;
-	$path = array();
+	$path = NULL;
 	// Now collect all versions > $v1 and <= $v2
 	foreach ($versionhistory as $v)
 	{
-		if ($v == $v1)
+		if ($skip and $v == $v1)
 		{
 			$skip = FALSE;
+			$path = array();
 			continue;
 		}
 		if ($skip)
@@ -144,9 +139,9 @@ CREATE TABLE `FileLink` (
 			$query[] = 'alter table IPRanges rename to IPv4Network';
 			$query[] = 'alter table IPAddress rename to IPv4Address';
 			$query[] = 'alter table IPLoadBalancer rename to IPv4LB';
-			$query[] = 'alter table IPRSpool rename to IPv4RSPool';
+			$query[] = 'alter table IPRSPool rename to IPv4RSPool';
 			$query[] = 'alter table IPRealServer rename to IPv4RS';
-			$query[] = 'alter table IPVirtualServer rename to IPv4VS';
+			$query[] = 'alter table IPVirtualService rename to IPv4VS';
 			$query[] = "UPDATE Config SET varvalue = '0.17.0' WHERE varname = 'DB_VERSION'";
 			break;
 		default:
@@ -155,39 +150,29 @@ CREATE TABLE `FileLink` (
 			break;
 	}
 	$failures = array();
-	$ndots = 0;
-	echo "<pre>Executing database upgrade batch '${batchid}':\n";
+	echo "<tr><th>Executing batch '${batchid}'</th><td>";
 	foreach ($query as $q)
 	{
 		$result = $dbxlink->query ($q);
-		if ($result != NULL)
-			echo '.';
-		else
+		if ($result == NULL)
 		{
-			echo '!';
 			$errorInfo = $dbxlink->errorInfo();
 			$failures[] = array ($q, $errorInfo[2]);
 		}
-		if (++$ndots == 50)
-		{
-			echo "\n";
-			flush();
-			$ndots = 0;
-		}
 	}
-	echo '<br>';
 	if (!count ($failures))
-		echo "No errors!\n";
+		echo "<strong><font color=green>done</font></strong>";
 	else
 	{
-		echo "The following queries failed:\n<font color=red>";
+		echo "<strong><font color=red>The following queries failed:</font></strong><br><pre>";
 		foreach ($failures as $f)
 		{
 			list ($q, $i) = $f;
-			echo "${q} // ${i}\n";
+			echo "${q} -- ${i}\n";
 		}
+		echo "</pre>";
 	}
-	echo '</font></pre>';
+	echo '</td></tr>';
 }
 
 // ******************************************************************
@@ -268,25 +253,31 @@ if
 }
 
 $dbver = getDatabaseVersion();
-echo 'Code version: ' . CODE_VERSION . '<br>';
-echo 'Database version: ' . $dbver . '<br>';
-if ($dbver == CODE_VERSION)
-{
-	die ("<p align=justify>No action is necessary. " .
-		"Proceed to the <a href='${root}'>main page</a>, " .
-		"check your data and have a nice day.</p>");
-}
+echo '<table border=1>';
+echo "<tr><th>Current status</th><td>Data version: ${dbver}<br>Code version: " . CODE_VERSION . "</td></tr>\n";
 
-foreach (getDBUpgradePath ($dbver, CODE_VERSION) as $batchid)
+$path = getDBUpgradePath ($dbver, CODE_VERSION);
+if ($path === NULL)
 {
-	executeUpgradeBatch ($batchid);
-	if (isset ($relnotes[$batchid]))
-		echo $relnotes[$batchid];
+	echo "<tr><th>Upgrade path</th><td><font color=red>not found</font></td></tr>\n";
+	echo "<tr><th>Summary</th><td>Check README for more information.</td></tr>\n";
 }
-
-echo '<br>Database version == ' . getDatabaseVersion();
-echo "<p align=justify>Your database seems to be up-to-date. " .
-	"Now the best thing to do would be to follow to the <a href='${root}'>main page</a> " .
-	"and explore your data. Have a nice day.</p>";
+else
+{
+	if (!count ($path))
+		echo "<tr><th>Summary</th><td>Come back later.</td></tr>\n";
+	else
+	{
+		echo "<tr><th>Upgrade path</th><td>${dbver} &rarr; " . implode (' &rarr; ', $path) . "</td></tr>\n";
+		foreach ($path as $batchid)
+		{
+			executeUpgradeBatch ($batchid);
+			if (isset ($relnotes[$batchid]))
+				echo "<tr><th>Release notes for ${batchid}</th><td>" . $relnotes[$batchid] . "</td></tr>\n";
+		}
+		echo "<tr><th>Summary</th><td>Upgrade complete, it is Ok to <a href='${root}'>enter</a> the system.</td></tr>\n";
+	}
+}
+echo '</table>';
 
 ?>
