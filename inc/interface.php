@@ -72,6 +72,9 @@ $image['link']['height'] = 16;
 $image['add']['path'] = 'pix/tango-list-add.png';
 $image['add']['width'] = 16;
 $image['add']['height'] = 16;
+$image['ADD']['path'] = 'pix/tango-list-add-big.png';
+$image['ADD']['width'] = 32;
+$image['ADD']['height'] = 32;
 $image['delete']['path'] = 'pix/tango-list-remove.png';
 $image['delete']['width'] = 16;
 $image['delete']['height'] = 16;
@@ -5782,7 +5785,7 @@ function printOpFormIntro ($opname, $extra = array(), $upload = FALSE)
 		echo "<input type=hidden name=${inputname} value=${inputvalue}>\n";
 }
 
-// This is a two-way formating function:
+// This is a dual-purpose formating function:
 // 1. Replace empty strings with nbsp.
 // 2. Cut strings, which are too long, append "cut here" indicator and provide a mouse hint.
 function niftyString ($string, $maxlen = 30)
