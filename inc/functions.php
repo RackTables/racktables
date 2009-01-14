@@ -1226,12 +1226,12 @@ function buildWideRedirectURL ($log, $nextpage = NULL, $nexttab = NULL)
 
 function buildRedirectURL ($status, $args = array(), $nextpage = NULL, $nexttab = NULL)
 {
-	global $msgcode, $pageno, $tabno, $op;
+	global $pageno, $tabno;
 	if ($nextpage === NULL)
 		$nextpage = $pageno;
 	if ($nexttab === NULL)
 		$nexttab = $tabno;
-	return buildWideRedirectURL (oneLiner ($msgcode[$pageno][$tabno][$op][$status], $args), $nextpage, $nexttab);
+	return buildWideRedirectURL (oneLiner (getMessageCode ($status), $args), $nextpage, $nexttab);
 }
 
 // Return a message log consisting of only one message.
