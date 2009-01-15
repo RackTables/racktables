@@ -878,3 +878,5 @@ INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (17,928
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (17,929,'[[Juniper%GPASS%T640 | http://www.juniper.net/products_and_services/t_series_core_platforms/index.html]]');
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (17,930,'[[Juniper%GPASS%T1600 | http://www.juniper.net/products_and_services/t_series_core_platforms/index.html]]');
 INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (17,931,'[[Juniper%GPASS%TX Matrix | http://www.juniper.net/products_and_services/t_series_core_platforms/index.html]]');
+INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (13,932,'[[Linux%GSKIP%RHF10 | http://docs.fedoraproject.org/release-notes/f10/]]');
+INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (13,933,'[[Linux%GSKIP%openSUSE 11.1 | http://en.opensuse.org/OpenSUSE_11.1]]');
