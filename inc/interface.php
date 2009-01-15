@@ -152,6 +152,9 @@ $image['LINK']['height'] = 32;
 $image['favorite']['path'] = 'pix/tango-emblem-favorite.png';
 $image['favorite']['width'] = 16;
 $image['favorite']['height'] = 16;
+$image['computer']['path'] = 'pix/tango-computer.png';
+$image['computer']['width'] = 16;
+$image['computer']['height'] = 16;
 
 // This may be populated later onsite, report rendering function will use it.
 // See the $systemreport for structure.
