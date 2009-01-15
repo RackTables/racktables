@@ -476,16 +476,6 @@ function doubleLink (&$array)
 	}
 }
 
-// After applying usort() to a rack list we will lose original array keys.
-// This function restores the keys so they are equal to rack IDs.
-function restoreRackIDs ($racks)
-{
-	$ret = array();
-	foreach ($racks as $rack)
-		$ret[$rack['id']] = $rack;
-	return $ret;
-}
-
 function sortTokenize ($a, $b)
 {
 	$aold='';
@@ -530,11 +520,6 @@ function sortTokenize ($a, $b)
 function sortByName ($a, $b)
 {
 	return sortTokenize($a['name'], $b['name']);
-}
-
-function sortRacks ($a, $b)
-{
-	return sortTokenize($a['row_name'] . ': ' . $a['name'], $b['row_name'] . ': ' . $b['name']);
 }
 
 function sortEmptyPorts ($a, $b)

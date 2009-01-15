@@ -178,7 +178,7 @@ function getRacksForRow ($row_id = 0, $tagfilter = array(), $tfmode = 'any')
 		"where chapter_name = 'RackRow' and Rack.deleted = 'no' " .
 		(($row_id == 0) ? "" : "and row_id = ${row_id} ") .
 		getWhereClause ($tagfilter) .
-		" order by row_name, Rack.id";
+		" order by row_name, Rack.name";
 	$result = useSelectBlade ($query, __FUNCTION__);
 	$ret = array();
 	$clist = array
@@ -194,8 +194,6 @@ function getRacksForRow ($row_id = 0, $tagfilter = array(), $tfmode = 'any')
 		foreach ($clist as $cname)
 			$ret[$row['id']][$cname] = $row[$cname];
 	$result->closeCursor();
-	usort ($ret, 'sortRacks');
-	$ret = restoreRackIDs ($ret);
 	return $ret;
 }
 
