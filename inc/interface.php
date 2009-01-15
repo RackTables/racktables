@@ -3496,7 +3496,7 @@ function renderDictionary ()
 	foreach ($dict as $chapter_no => $chapter)
 	{
 		$order = 'odd';
-		echo "<tr><th>Chapter</th><th>refs</th><th>Word</th></tr>\n";
+		echo "<tr><th>Chapter</th><th>status</th><th>Word</th></tr>\n";
 		$wc = count ($chapter['word']);
 		echo "<tr class=row_${order}><td class=tdleft" . ($wc ? " rowspan = ${wc}" : '');
 		echo "><div title='number=${chapter_no}'>${chapter['name']} (${wc} records)</div></td>";
@@ -3511,8 +3511,12 @@ function renderDictionary ()
 					echo "<tr class=row_${order}>";
 				else
 					$chap_start = FALSE;
-				echo '<td>' . ($chapter['refcnt'][$key] ? $chapter['refcnt'][$key] : '&nbsp;') . '</td>';
-				echo "<td><div title='key=${key}'>${value}</div></td></tr>\n";
+				echo '<td>';
+				printImageHREF (($key <= MAX_DICT_KEY) ? 'computer' : 'favorite');
+				echo '&nbsp;';
+				if ($chapter['refcnt'][$key])
+					echo $chapter['refcnt'][$key];
+				echo "</td><td><div title='key=${key}'>${value}</div></td></tr>\n";
 				$order = $nextorder[$order];
 			}
 		}
