@@ -149,6 +149,9 @@ $image['router']['height'] = 32;
 $image['LINK']['path'] = 'pix/tango-emblem-symbolic-link-big.png';
 $image['LINK']['width'] = 32;
 $image['LINK']['height'] = 32;
+$image['favorite']['path'] = 'pix/tango-emblem-favorite.png';
+$image['favorite']['width'] = 16;
+$image['favorite']['height'] = 16;
 
 // This may be populated later onsite, report rendering function will use it.
 // See the $systemreport for structure.
