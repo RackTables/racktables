@@ -172,8 +172,7 @@ function getObjectList ($type_id = 0, $tagfilter = array(), $tfmode = 'any')
 function getRacksForRow ($row_id = 0, $tagfilter = array(), $tfmode = 'any')
 {
 	$query =
-		"select Rack.id, Rack.name, height, Rack.comment, row_id, " .
-		"'yes' as left_is_front, 'yes' as bottom_is_unit1, dict_value as row_name " .
+		"select Rack.id, Rack.name, height, Rack.comment, row_id, dict_value as row_name " .
 		"from Rack left join Dictionary on row_id = dict_key natural join Chapter " .
 		"left join TagStorage on Rack.id = TagStorage.target_id and target_realm = 'rack' " .
 		"where chapter_name = 'RackRow' and Rack.deleted = 'no' " .
@@ -189,8 +188,6 @@ function getRacksForRow ($row_id = 0, $tagfilter = array(), $tfmode = 'any')
 		'height',
 		'comment',
 		'row_id',
-		'left_is_front',
-		'bottom_is_unit1',
 		'row_name'
 	);
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
@@ -213,8 +210,7 @@ function getRackData ($rack_id = 0, $silent = FALSE)
 		return NULL;
 	}
 	$query =
-		"select Rack.id, Rack.name, row_id, height, Rack.comment, " .
-		"'yes' as left_is_front, 'yes' as bottom_is_unit1, dict_value as row_name from " .
+		"select Rack.id, Rack.name, row_id, height, Rack.comment, dict_value as row_name from " .
 		"Rack left join Dictionary on Rack.row_id = dict_key natural join Chapter " .
 		"where chapter_name = 'RackRow' and Rack.id='${rack_id}' and Rack.deleted = 'no' limit 1";
 	$result = useSelectBlade ($query, __FUNCTION__);
@@ -233,8 +229,6 @@ function getRackData ($rack_id = 0, $silent = FALSE)
 		'height',
 		'comment',
 		'row_id',
-		'left_is_front',
-		'bottom_is_unit1',
 		'row_name'
 	);
 	foreach ($clist as $cname)

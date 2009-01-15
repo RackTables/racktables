@@ -377,16 +377,12 @@ function renderRack ($rack_id = 0, $hl_obj_id = 0)
 		echo "</a></td>";
 	}
 	echo "</h2></td></tr></table>\n";
-	if ($rackData['left_is_front'] == 'yes')
-		$markup = array ('left' => 'Front', 'right' => 'Back');
-	else
-		$markup = array ('left' => 'Back', 'right' => 'Front');
 	echo "<table class=rack border=0 cellspacing=0 cellpadding=1>\n";
-	echo "<tr><th width='10%'>&nbsp;</th><th width='20%'>${markup['left']}</th>";
-	echo "<th width='50%'>Interior</th><th width='20%'>${markup['right']}</th></tr>\n";
+	echo "<tr><th width='10%'>&nbsp;</th><th width='20%'>Front</th>";
+	echo "<th width='50%'>Interior</th><th width='20%'>Back</th></tr>\n";
 	for ($i = $rackData['height']; $i > 0; $i--)
 	{
-		echo '<tr><th>' . ($rackData['bottom_is_unit1'] == 'yes' ? $i : $rackData['height'] - $i + 1) . '</th>';
+		echo "<tr><th>${i}</th>";
 		for ($locidx = 0; $locidx < 3; $locidx++)
 		{
 			if (isset ($rackData[$i][$locidx]['skipped']))
