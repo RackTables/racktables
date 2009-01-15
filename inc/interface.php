@@ -3026,11 +3026,11 @@ function renderSearchResults ()
 	// If we search for L2 address, we can either find one or find none.
 	if
 	(
-		preg_match ('/^[0-9a-f][0-9a-f]?:[0-9a-f][0-9a-f]?:[0-9a-f][0-9a-f]?:[0-9a-f][0-9a-f]?:[0-9a-f][0-9a-f]?:[0-9a-f][0-9a-f]?$/i', $terms) or
-		preg_match ('/^[0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]$/i', $terms) or
-		preg_match ('/^[0-9a-f][0-9a-f][0-9a-f][0-9a-f].[0-9a-f][0-9a-f][0-9a-f][0-9a-f].[0-9a-f][0-9a-f][0-9a-f][0-9a-f]$/i', $terms) or
-		// STP bridge ID: bridge priotity + port MAC address. Cut off first 4 chars and look for MAC address.
-		preg_match ('/^[0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]$/i', $terms)
+		preg_match (RE_L2_IFCFG, $terms) or
+		preg_match (RE_L2_SOLID, $terms) or
+		preg_match (RE_L2_CISCO, $terms) or
+		// Foundry STP bridge ID: bridge priotity + port MAC address. Cut off first 4 chars and look for MAC address.
+		preg_match (RE_L2_FDRYSTP, $terms)
 	)
 	// Search for L2 address.
 	{
@@ -3045,7 +3045,7 @@ function renderSearchResults ()
 			$summary['port'][] = $result;
 		}
 	}
-	elseif (preg_match ('/^[0-9][0-9]?[0-9]?\.[0-9]?[0-9]?[0-9]?\.[0-9][0-9]?[0-9]?\.[0-9][0-9]?[0-9]?$/i', $terms))
+	elseif (preg_match (RE_IP4_ADDR, $terms))
 	// Search for IPv4 address.
 	{
 		if (NULL !== getIPv4AddressNetworkId ($terms))
@@ -3055,7 +3055,7 @@ function renderSearchResults ()
 			$summary['ipv4addressbydq'][] = $terms;
 		}
 	}
-	elseif (preg_match ('/^[0-9][0-9]?[0-9]?\.[0-9]?[0-9]?[0-9]?\.[0-9][0-9]?[0-9]?\.[0-9][0-9]?[0-9]?\/[0-9][0-9]?$/i', $terms))
+	elseif (preg_match (RE_IP4_NET, $terms))
 	// Search for IPv4 network
 	{
 		list ($base, $len) = explode ('/', $terms);
@@ -5673,9 +5673,9 @@ function renderFilesPortlet ($entity_type = NULL, $entity_id = 0)
 		echo "<tr><th>Name</th><th>Size</th><th>Comment</th><th>Actions</th></tr>\n";
 		foreach ($files as $file_id => $file)
 		{
-			printf("<td><a href='%/?page=file&file_id=%s'><strong>%s</strong></a></td>", $root, $file_id, $file['name']);
-			printf("<td>%s</td>", formatFileSize($file['size']));
-			echo "<td>${file['comment']}</td>";
+			printf("<td class=tdleft><a href='%/?page=file&file_id=%s'><strong>%s</strong></a></td>", $root, $file_id, $file['name']);
+			printf("<td class=tdleft>%s</td>", formatFileSize($file['size']));
+			echo "<td class=tdleft>${file['comment']}</td>";
 			echo "<td><a href='${root}download.php?file_id=${file_id}'>";
 			printImageHREF ('download', 'Download file');
 			echo '</a></td></tr>';
@@ -5701,7 +5701,7 @@ function renderFilesForEntity ($entity_type = NULL, $id_name = NULL, $entity_id 
 	echo "<tr>";
 	echo "<td class=tdleft><input type='file' size='10' name='file' tabindex=100></td>\n";
 	echo "<td class=tdleft><input type='text' size='15' name='comment' tabindex=101></td><td>\n";
-	printImageHREF ('CREATE', 'Upload file', TRUE, 99);
+	printImageHREF ('CREATE', 'Upload file', TRUE, 102);
 	echo "</td></tr></form>";
 	echo "</table><br>\n";
 	finishPortlet();
@@ -5711,8 +5711,13 @@ function renderFilesForEntity ($entity_type = NULL, $id_name = NULL, $entity_id 
 	{
 		startPortlet ('Use existing');
 		printOpFormIntro ('linkFile');
+	echo "<table border=0 cellspacing=0 cellpadding='5' align='center'>\n";
+		echo '<tr><td class=tdleft>';
 		printSelect ($files, 'file_id');
+		echo '</td><td class=tdleft>';
 		printImageHREF ('LINK', 'Link file', TRUE);
+		echo '</td></tr></table>';
+		echo "</form>\n";
 		finishPortlet();
 	}
 

@@ -393,20 +393,25 @@ function getObjectSearchResults ($terms)
 // This function removes all colons and dots from a string.
 function l2addressForDatabase ($string)
 {
-	if (empty ($string))
-		return 'NULL';
-	$pieces = explode (':', $string);
-	// This workaround is for SunOS ifconfig.
-	foreach ($pieces as &$byte)
-		if (strlen ($byte) == 1)
-			$byte = '0' . $byte;
-	// And this workaround is for PHP.
-	unset ($byte);
-	$string = implode ('', $pieces);
-	$pieces = explode ('.', $string);
-	$string = implode ('', $pieces);
 	$string = strtoupper ($string);
-	return "'$string'";
+	switch (TRUE)
+	{
+		case ($string == '' or preg_match (RE_L2_SOLID, $string)):
+			return $string;
+		case (preg_match (RE_L2_IFCFG, $string)):
+			$pieces = explode (':', $string);
+			// This workaround is for SunOS ifconfig.
+			foreach ($pieces as &$byte)
+				if (strlen ($byte) == 1)
+					$byte = '0' . $byte;
+			// And this workaround is for PHP.
+			unset ($byte);
+			return implode ('', $pieces);
+		case (preg_match (RE_L2_CISCO, $string)):
+			return implode ('', explode ('.', $string));
+		default:
+			return NULL;
+	}
 }
 
 function l2addressFromDatabase ($string)

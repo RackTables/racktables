@@ -808,7 +808,8 @@ function commitAddPort ($object_id = 0, $port_name, $port_type_id, $port_label, 
 		showError ('Invalid object_id', __FUNCTION__);
 		return;
 	}
-	$port_l2address = l2addressForDatabase ($port_l2address);
+	if (NULL === ($db_l2address = l2addressForDatabase ($port_l2address)))
+		return "Invalid L2 address ${port_l2address}";
 	$result = useInsertBlade
 	(
 		'Port',
@@ -818,7 +819,7 @@ function commitAddPort ($object_id = 0, $port_name, $port_type_id, $port_label, 
 			'object_id' => "'${object_id}'",
 			'label' => "'${port_label}'",
 			'type' => "'${port_type_id}'",
-			'l2address' => "${port_l2address}"
+			'l2address' => "'${db_l2address}'"
 		)
 	);
 	if ($result)
@@ -833,10 +834,11 @@ function commitAddPort ($object_id = 0, $port_name, $port_type_id, $port_label, 
 function commitUpdatePort ($port_id, $port_name, $port_type_id, $port_label, $port_l2address, $port_reservation_comment = 'reservation_comment')
 {
 	global $dbxlink;
-	$port_l2address = l2addressForDatabase ($port_l2address);
+	if (NULL === ($db_l2address = l2addressForDatabase ($port_l2address)))
+		return "Invalid L2 address ${port_l2address}";
 	$query =
 		"update Port set name='$port_name', type=$port_type_id, label='$port_label', " .
-		"reservation_comment = ${port_reservation_comment}, l2address=${port_l2address} " .
+		"reservation_comment = ${port_reservation_comment}, l2address='${db_l2address}' " .
 		"where id='$port_id'";
 	$result = $dbxlink->exec ($query);
 	if ($result == 1)
@@ -1345,11 +1347,12 @@ function getUserAccounts ($tagfilter = array(), $tfmode = 'any')
 	return $ret;
 }
 
-function searchByl2address ($l2addr)
+function searchByl2address ($port_l2address)
 {
-	$l2addr = l2addressForDatabase ($l2addr);
+	if (NULL === ($db_l2address = l2addressForDatabase ($port_l2address)))
+		return NULL; // Don't complain, other searches may return own data.
 	$query = "select object_id, Port.id as port_id from RackObject as ro inner join Port on ro.id = Port.object_id " .
-		"where l2address = ${l2addr}";
+		"where l2address = '${db_l2address}'";
 	$result = useSelectBlade ($query, __FUNCTION__);
 	$rows = $result->fetchAll (PDO::FETCH_ASSOC);
 	$result->closeCursor();
