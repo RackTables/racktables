@@ -13,4 +13,8 @@ $db_password = 'password';
 $ldap_server = 'some.server';
 $ldap_domain = 'some.domain';
 
+// See http://racktables.org/trac/wiki/RackTablesLdapAuth for detailed explanation.
+#$ldap_search_dn = 'ou=people,O=YourCompany';
+$ldap_search_attr = 'uid';
+
 ?>
