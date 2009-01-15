@@ -109,14 +109,12 @@ td.pcright {
 	font-weight: bold;
 }
 
-.opt_attr_th {
+span.sticker {
 	background-color: #ffffa0;
-	text-align: right;
 }
 
-.tag_list_th {
+span.tagheader {
 	background-color: #a0ffa0;
-	text-align: right;
 }
 
 .widetable td {

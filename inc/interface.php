@@ -812,7 +812,7 @@ function renderRackObject ($object_id = 0)
 		echo "<tr><td colspan=2 class=msg_error>Has problems</td></tr>\n";
 	foreach (getAttrValues ($object_id, TRUE) as $record)
 		if (!empty ($record['value']))
-			echo "<tr><th width='50%' class=opt_attr_th>${record['name']}:</th><td class=tdleft>${record['a_value']}</td></tr>\n";
+			echo "<tr><th width='50%' class=tdright><span class=sticker>${record['name']}</span>:</th><td class=tdleft>${record['a_value']}</td></tr>\n";
 	printTagTRs ("${root}?page=objgroup&tab=default&group_id=${info['objtype_id']}&");
 	echo "<tr><th width='50%' class=tdright>Actions:</th><td class=tdleft><a href='${root}process.php?op=deleteObject&page=objects&tab=default&object_id=${object_id}&name=${info['name']}' onclick=\"javascript:return confirm('Are you sure you want to delete the object?')\">Delete object</a></td></tr>\n";
 	echo "</table><br>\n";
@@ -5141,17 +5141,17 @@ function printTagTRs ($baseurl = '')
 	global $expl_tags, $impl_tags, $auto_tags;
 	if (getConfigVar ('SHOW_EXPLICIT_TAGS') == 'yes' and count ($expl_tags))
 	{
-		echo "<tr><th width='50%' class=tag_list_th>Explicit tags:</th><td class=tdleft>";
+		echo "<tr><th width='50%' class=tdright><span class=tagheader>Explicit tags</span>:</th><td class=tdleft>";
 		echo serializeTags ($expl_tags, $baseurl) . "</td></tr>\n";
 	}
 	if (getConfigVar ('SHOW_IMPLICIT_TAGS') == 'yes' and count ($impl_tags))
 	{
-		echo "<tr><th width='50%' class=tag_list_th>Implicit tags:</th><td class=tdleft>";
+		echo "<tr><th width='50%' class=tdright>Implicit tags:</th><td class=tdleft>";
 		echo serializeTags ($impl_tags, $baseurl) . "</td></tr>\n";
 	}
 	if (getConfigVar ('SHOW_AUTOMATIC_TAGS') == 'yes' and count ($auto_tags))
 	{
-		echo "<tr><th width='50%' class=tag_list_th>Automatic tags:</th><td class=tdleft>";
+		echo "<tr><th width='50%' class=tdright>Automatic tags:</th><td class=tdleft>";
 		echo serializeTags ($auto_tags) . "</td></tr>\n";
 	}
 }
@@ -5370,9 +5370,9 @@ function renderUser ($user_id)
 
 	startPortlet ('summary');
 	echo '<table border=0 align=center>';
-	echo "<tr><th class=tdright>Account name:</th><td>${username}</td></tr>";
-	echo '<tr><th class=tdright>Real name:</th><td>' . $accounts[$username]['user_realname'] . '</td></tr>';
-	echo '<tr><th class=tdright>Enabled:</th><td>';
+	echo "<tr><th class=tdright>Account name:</th><td class=tdleft>${username}</td></tr>";
+	echo '<tr><th class=tdright>Real name:</th><td class=tdleft>' . $accounts[$username]['user_realname'] . '</td></tr>';
+	echo '<tr><th class=tdright>Enabled:</th><td class=tdleft>';
 	// This is weird, some other image titles have to be used.
 	if ($accounts[$username]['user_enabled'] == 'yes')
 		printImageHREF ('blockuser', 'enabled');
@@ -5385,18 +5385,18 @@ function renderUser ($user_id)
 	$baseurl = "${root}?page=userlist&tab=default&";
 	if (getConfigVar ('SHOW_EXPLICIT_TAGS') == 'yes' and count ($expl_tags))
 	{
-		echo "<tr><th width='50%' class=tag_list_th>Explicit tags:</th><td class=tdleft>";
+		echo "<tr><th width='50%' class=tdright><span class=tagheader>Explicit tags</span>:</th><td class=tdleft>";
 		echo serializeTags ($expl_tags, $baseurl) . "</td></tr>\n";
 	}
 	if (getConfigVar ('SHOW_IMPLICIT_TAGS') == 'yes' and count ($impl_tags))
 	{
-		echo "<tr><th width='50%' class=tag_list_th>Implicit tags:</th><td class=tdleft>";
+		echo "<tr><th width='50%' class=tdright><span class=tagheader>Implicit tags</span>:</th><td class=tdleft>";
 		echo serializeTags ($impl_tags, $baseurl) . "</td></tr>\n";
 	}
 	$target_auto_tags = getUserAutoTags ($username);
 	if (getConfigVar ('SHOW_AUTOMATIC_TAGS') == 'yes' and count ($target_auto_tags))
 	{
-		echo "<tr><th width='50%' class=tag_list_th>Automatic tags:</th><td class=tdleft>";
+		echo "<tr><th width='50%' class=tdright><span class=tagheader>Automatic tags</span>:</th><td class=tdleft>";
 		echo serializeTags ($target_auto_tags) . "</td></tr>\n";
 	}
 	echo '</table>';
@@ -5434,16 +5434,16 @@ function renderAccessDenied ()
 	echo ' access denied ';
 	printImageHREF ('DENIED');
 	echo '</h3></th></tr>';
-	echo "<tr><th width='50%' class=tag_list_th>Explicit tags:</th><td class=tdleft>";
+	echo "<tr><th width='50%' class=tdright><span class=tagheader>Explicit tags</span>:</th><td class=tdleft>";
 	echo serializeTags ($expl_tags) . "&nbsp;</td></tr>\n";
-	echo "<tr><th width='50%' class=tag_list_th>Implicit tags:</th><td class=tdleft>";
+	echo "<tr><th width='50%' class=tdright><span class=tagheader>Implicit tags</span>:</th><td class=tdleft>";
 	echo serializeTags ($impl_tags) . "&nbsp;</td></tr>\n";
-	echo "<tr><th width='50%' class=tag_list_th>Automatic tags:</th><td class=tdleft>";
+	echo "<tr><th width='50%' class=tdright><span class=tagheader>Automatic tags</span>:</th><td class=tdleft>";
 	echo serializeTags ($auto_tags) . "&nbsp;</td></tr>\n";
-	echo "<tr><th width='50%' class=tag_list_th>This user tags:</th><td class=tdleft>";
+	echo "<tr><th width='50%' class=tdright><span class=tagheader>This user tags</span>:</th><td class=tdleft>";
 	echo serializeTags ($user_tags) . "&nbsp;</td></tr>\n";
-	echo "<tr><th width='50%' class=tag_list_th>Requested page:</th><td class=tdleft>${pageno}</td></tr>\n";
-	echo "<tr><th width='50%' class=tag_list_th>Requested tab:</th><td class=tdleft>${tabno}</td></tr>\n";
+	echo "<tr><th width='50%' class=tdright>Requested page:</th><td class=tdleft>${pageno}</td></tr>\n";
+	echo "<tr><th width='50%' class=tdright>Requested tab:</th><td class=tdleft>${tabno}</td></tr>\n";
 	echo "</table>\n";
 	echo "</body></html>";
 }
