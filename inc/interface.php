@@ -3533,36 +3533,47 @@ function renderDictionaryEditor ()
 	foreach ($dict as $chapter_no => $chapter)
 	{
 		$order = 'odd';
-		echo "<tr><th>Chapter</th><th>&nbsp;</th><th>Word</th><th>&nbsp;</th></tr>\n";
+		echo "<tr><th>Chapter</th><th>&nbsp;</th><th>&nbsp;</th><th>Word</th><th>&nbsp;</th></tr>\n";
 		$wc = count ($chapter['word']);
 		// One extra span for the new record per each chapter block.
 		echo "<tr class=row_${order}><td class=tdleft" . ($wc ? ' rowspan = ' . ($wc + 1) : '');
 		echo "><div title='number=${chapter_no}'>${chapter['name']} (${wc} records)</div></td>";
 		printOpFormIntro ('add', array ('chapter_no' => $chapter['no']));
-		echo "<td>";
+		echo "<td>&nbsp;</td><td>";
 		printImageHREF ('add', 'Add new', TRUE);
 		echo "</td>";
-		echo "<td class=tdright><input type=text name=dict_value size=32></td>";
+		echo "<td class=tdleft><input type=text name=dict_value size=32></td>";
 		echo "<td>&nbsp;</td>";
 		echo '</tr></form>';
 		$order = $nextorder[$order];
 		foreach ($chapter['word'] as $key => $value)
 		{
-			printOpFormIntro ('upd', array ('chapter_no' => $chapter['no'], 'dict_key' => $key));
 			echo "<tr class=row_${order}><td>";
-			// Prevent deleting words currently used somewhere.
-			if ($chapter['refcnt'][$key])
-				printImageHREF ('nodelete', 'referenced ' . $chapter['refcnt'][$key] . ' time(s)');
+			// Show plain row for stock records, render a form for user's ones.
+			if ($key <= MAX_DICT_KEY)
+			{
+				printImageHREF ('computer');
+				echo "</td><td>&nbsp;</td><td>${value}</td><td>&nbsp;</td></tr>";
+			}
 			else
 			{
-				echo "<a href='${root}process.php?page=${pageno}&tab=${tabno}&op=del&chapter_no=${chapter['no']}&dict_key=${key}'>";
-				printImageHREF ('delete', 'Delete word');
-				echo "</a>";
+				printOpFormIntro ('upd', array ('chapter_no' => $chapter['no'], 'dict_key' => $key));
+				printImageHREF ('favorite');
+				echo "<td>";
+				// Prevent deleting words currently used somewhere.
+				if ($chapter['refcnt'][$key])
+					printImageHREF ('nodelete', 'referenced ' . $chapter['refcnt'][$key] . ' time(s)');
+				else
+				{
+					echo "<a href='${root}process.php?page=${pageno}&tab=${tabno}&op=del&chapter_no=${chapter['no']}&dict_key=${key}'>";
+					printImageHREF ('delete', 'Delete word');
+					echo "</a>";
+				}
+				echo '</td>';
+				echo "<td class=tdright><input type=text name=dict_value size=64 value='${value}'></td><td>";
+				printImageHREF ('save', 'Save changes', TRUE);
+				echo "</td></tr></form>\n";
 			}
-			echo '</td>';
-			echo "<td class=tdright><input type=text name=dict_value size=32 value='${value}'></td><td>";
-			printImageHREF ('save', 'Save changes', TRUE);
-			echo "</td></tr></form>\n";
 			$order = $nextorder[$order];
 		} // foreach ($chapter['word']
 	} // foreach ($dict

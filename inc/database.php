@@ -1630,7 +1630,7 @@ function getDict ($parse_links = FALSE)
 		}
 		if ($row['dict_key'] != NULL)
 		{
-			$dict[$chapter_no]['word'][$row['dict_key']] = $parse_links ?
+			$dict[$chapter_no]['word'][$row['dict_key']] = ($parse_links or $row['dict_key'] <= MAX_DICT_KEY) ?
 				parseWikiLink ($row['dict_value'], 'a') : $row['dict_value'];
 			$dict[$chapter_no]['refcnt'][$row['dict_key']] = 0;
 		}
