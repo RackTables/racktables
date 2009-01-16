@@ -68,6 +68,8 @@ foreach ($_REQUEST as $key => $value)
 
 if (isset ($_SERVER['PHP_AUTH_USER']))
 	$_SERVER['PHP_AUTH_USER'] = escapeString ($_SERVER['PHP_AUTH_USER']);
+if (isset ($_SERVER['REMOTE_USER']))
+	$_SERVER['REMOTE_USER'] = escapeString ($_SERVER['REMOTE_USER']);
 
 $dbver = getDatabaseVersion();
 if ($dbver != CODE_VERSION)
@@ -131,13 +133,13 @@ if ($accounts === NULL)
 	exit (1);
 }
 
+// The call below also initializes $remote_username
 authenticate();
 
 // Authentication passed.
 // Note that we don't perform autorization here, so each 1st level page
 // has to do it in its way, e.g. to call authorize().
 
-$remote_username = $_SERVER['PHP_AUTH_USER'];
 $pageno = (isset ($_REQUEST['page'])) ? $_REQUEST['page'] : 'index';
 // Special handling of tab number to substitute the "last" index where applicable.
 // Always show explicitly requested tab, substitute the last used name in case

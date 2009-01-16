@@ -11,21 +11,73 @@ Authentication library for RackTables.
 // anonymous binding).
 function authenticate ()
 {
-	if
-	(
-		!isset ($_SERVER['PHP_AUTH_USER']) or
-		!strlen ($_SERVER['PHP_AUTH_USER']) or
-		!isset ($_SERVER['PHP_AUTH_PW']) or
-		!strlen ($_SERVER['PHP_AUTH_PW']) or
-		!authenticated ($_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW']) or
-		isset ($_REQUEST['logout'])
-	)
+	global $remote_username, $accounts;
+	$require_valid_user = TRUE; // Should go into Config table.
+	if (isset ($_REQUEST['logout']))
+		dieWith401();
+	switch (getConfigVar ('USER_AUTH_SRC'))
 	{
-		header ('WWW-Authenticate: Basic realm="' . getConfigVar ('enterprise') . ' RackTables access"');
-		header ('HTTP/1.0 401 Unauthorized');
-		showError ('This system requires authentication. You should use a username and a password.');
-		die();
+		case 'database':
+		case 'ldap':
+			if
+			(
+				!isset ($_SERVER['PHP_AUTH_USER']) or
+				!strlen ($_SERVER['PHP_AUTH_USER']) or
+				!isset ($_SERVER['PHP_AUTH_PW']) or
+				!strlen ($_SERVER['PHP_AUTH_PW'])
+			)
+				dieWith401();
+			$remote_username = $_SERVER['PHP_AUTH_USER'];
+			break;
+		case 'httpd':
+			if
+			(
+				!isset ($_SERVER['REMOTE_USER']) or
+				!strlen ($_SERVER['REMOTE_USER'])
+			)
+			{
+				showError ('System misconfiguration. The web-server didn\'t authenticate the user, although ought to do.');
+				die;
+			}
+			$remote_username = $_SERVER['REMOTE_USER'];
+			break;
+		default:
+			showError ('Invalid authentication source!', __FUNCTION__);
+			die;
 	}
+	if ($require_valid_user and !isset ($accounts[$remote_username]))
+		dieWith401();
+	if (isset ($accounts[$remote_username]) and $accounts[$remote_username]['user_enabled'] != 'yes')
+		dieWith401();
+	switch (TRUE)
+	{
+		// Just trust the server, because the password isn't known.
+		case ('httpd' == getConfigVar ('USER_AUTH_SRC')):
+			if (authenticated_via_httpd ($remote_username))
+				return;
+			break;
+		// When using LDAP, leave a mean to fix things. Admin user is always authenticated locally.
+		case ('database' == getConfigVar ('USER_AUTH_SRC') or $accounts[$remote_username]['user_id'] == 1):
+			if (authenticated_via_database ($remote_username, $_SERVER['PHP_AUTH_PW']))
+				return;
+			break;
+		case ('ldap' == getConfigVar ('USER_AUTH_SRC')):
+			if (authenticated_via_ldap ($remote_username, $_SERVER['PHP_AUTH_PW']))
+				return;
+			break;
+		default:
+			showError ('Invalid authentication source!', __FUNCTION__);
+			die;
+	}
+	dieWith401();
+}
+
+function dieWith401 ()
+{
+	header ('WWW-Authenticate: Basic realm="' . getConfigVar ('enterprise') . ' RackTables access"');
+	header ('HTTP/1.0 401 Unauthorized');
+	showError ('This system requires authentication. You should use a username and a password.');
+	die();
 }
 
 // Merge accumulated tags into a single chain, add location-specific
@@ -96,33 +148,6 @@ function accessibleSubpage ($p)
 	return gotClearanceForTagChain ($subject);
 }
 
-// This function returns TRUE, if username and password are valid.
-function authenticated ($username, $password)
-{
-	global $accounts;
-	if (!isset ($accounts[$username]) or $accounts[$username]['user_enabled'] != 'yes')
-		return FALSE;
-	// Always authenticate the administrator locally, thus giving him a chance
-	// to fix broken installation.
-	if ($accounts[$username]['user_id'] == 1)
-		return authenticated_via_database ($username, $password);
-	switch (getConfigVar ('USER_AUTH_SRC'))
-	{
-		case 'database':
-			return authenticated_via_database ($username, $password);
-			break;
-		case 'ldap':
-			return authenticated_via_ldap ($username, $password);
-			break;
-		default:
-			showError ("Unknown user authentication source configured.", __FUNCTION__);
-			return FALSE;
-			break;
-	}
-	// and just to be sure...
-	return FALSE;
-}
-
 function authenticated_via_ldap ($username, $password)
 {
 	global $ldap_server, $ldap_domain, $ldap_search_dn, $ldap_search_attr;
@@ -175,6 +200,14 @@ function authenticated_via_database ($username, $password)
 	if ($accounts[$username]['user_password_hash'] == hash (PASSWORD_HASH, $password))
 		return TRUE;
 	return FALSE;
+}
+
+function authenticated_via_httpd ($username)
+{
+	// Reaching here means, that .htaccess authentication passed.
+	// Let's make sure, that user exists in the database, and give clearance.
+	global $accounts;
+	return isset ($accounts[$username]);
 }
 
 // This function returns password hash for given user ID.

@@ -3,6 +3,7 @@
 	new feature: IPv4 tree expand/collapse switch
 	new feature: IPV4_TREE_SHOW_USAGE option controls IPv4 performance
 	new feature: ability to delete objects (by Aaron)
+	new feature: external "httpd" user authentication
 	update: display row name when listing objects. closes ticket 16 (by Aaron)
 	update: ability to manage rows from the Rackspace page in addition to the Dictionary (by Aaron)
 	update: IPv4 calculations were optimized for better speed
