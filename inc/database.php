@@ -3629,6 +3629,10 @@ function getFileLinks ($file_id = 0)
 				break;
 		}
 
+		// name needs to have some value for hrefs to work
+        if (empty($name))
+			$name = sprintf("[Unnamed %s]", formatEntityName($row['entity_type']));
+
 		$ret[$row['id']] = array(
 				'page' => $page,
 				'id_name' => $id_name,
