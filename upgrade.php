@@ -114,6 +114,7 @@ CREATE TABLE `FileLink` (
   `entity_type` enum('ipv4net','ipv4rspool','ipv4vs','object','rack','user') NOT NULL default 'object',
   `entity_id` int(10) NOT NULL,
   PRIMARY KEY  (`id`),
+  UNIQUE KEY `FileLink-unique` (`file_id`,`entity_type`,`entity_id`),
   KEY `FileLink-file_id` (`file_id`),
   CONSTRAINT `FileLink-File_fkey` FOREIGN KEY (`file_id`) REFERENCES `File` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB";
