@@ -39,7 +39,7 @@ function getRackspace ($tagfilter = array(), $tfmode = 'any')
 	$query =
 		"select dict_key as row_id, dict_value as row_name " .
 		"from Chapter natural join Dictionary left join Rack on Rack.row_id = dict_key " .
-		"left join TagStorage on Rack.id = TagStorage.target_id and target_realm = 'rack' " .
+		"left join TagStorage on Rack.id = TagStorage.entity_id and entity_realm = 'rack' " .
 		"where chapter_name = 'RackRow' " .
 		$whereclause .
 		" order by dict_value";
@@ -141,7 +141,7 @@ function getObjectList ($type_id = 0, $tagfilter = array(), $tfmode = 'any')
 		"from ((RackObject inner join Dictionary on objtype_id=dict_key natural join Chapter) " .
 		"left join RackSpace on RackObject.id = object_id) " .
 		"left join Rack on rack_id = Rack.id " .
-		"left join TagStorage on RackObject.id = TagStorage.target_id and target_realm = 'object' " .
+		"left join TagStorage on RackObject.id = TagStorage.entity_id and entity_realm = 'object' " .
 		"where RackObject.deleted = 'no' and chapter_name = 'RackObjectType' " .
 		$whereclause .
 		"order by name";
@@ -174,7 +174,7 @@ function getRacksForRow ($row_id = 0, $tagfilter = array(), $tfmode = 'any')
 	$query =
 		"select Rack.id, Rack.name, height, Rack.comment, row_id, dict_value as row_name " .
 		"from Rack left join Dictionary on row_id = dict_key natural join Chapter " .
-		"left join TagStorage on Rack.id = TagStorage.target_id and target_realm = 'rack' " .
+		"left join TagStorage on Rack.id = TagStorage.entity_id and entity_realm = 'rack' " .
 		"where chapter_name = 'RackRow' and Rack.deleted = 'no' " .
 		(($row_id == 0) ? "" : "and row_id = ${row_id} ") .
 		getWhereClause ($tagfilter) .
@@ -459,7 +459,7 @@ function commitDeleteObject ($object_id = 0)
 	$dbxlink->query("DELETE FROM Port WHERE object_id = ${object_id}");
 	$dbxlink->query("DELETE FROM IPv4NAT WHERE object_id = ${object_id}");
 	$dbxlink->query("DELETE FROM RackSpace WHERE object_id = ${object_id}");
-	$dbxlink->query("DELETE FROM TagStorage WHERE target_realm = 'object' and target_id = ${object_id}");
+	$dbxlink->query("DELETE FROM TagStorage WHERE entity_realm = 'object' and entity_id = ${object_id}");
 	$dbxlink->query("DELETE FROM Atom WHERE molecule_id IN (SELECT new_molecule_id FROM MountOperation WHERE object_id = ${object_id})");
 	$dbxlink->query("DELETE FROM Molecule WHERE id IN (SELECT new_molecule_id FROM MountOperation WHERE object_id = ${object_id})");
 	$dbxlink->query("DELETE FROM MountOperation WHERE object_id = ${object_id}");
@@ -1216,7 +1216,7 @@ function getIPv4NetworkList ($tagfilter = array(), $tfmode = 'any')
 	$whereclause = getWhereClause ($tagfilter);
 	$query =
 		"select distinct id, INET_NTOA(ip) as ip, mask, name " .
-		"from IPv4Network left join TagStorage on id = target_id and target_realm = 'ipv4net' " .
+		"from IPv4Network left join TagStorage on id = entity_id and entity_realm = 'ipv4net' " .
 		"where true ${whereclause} order by IPv4Network.ip";
 	$result = useSelectBlade ($query, __FUNCTION__);
 	$ret = array();
@@ -1326,7 +1326,7 @@ function getUserAccounts ($tagfilter = array(), $tfmode = 'any')
 	$query =
 		'select user_id, user_name, user_password_hash, user_realname, user_enabled ' .
 		'from UserAccount left join TagStorage ' .
-		"on UserAccount.user_id = TagStorage.target_id and target_realm = 'user' " .
+		"on UserAccount.user_id = TagStorage.entity_id and entity_realm = 'user' " .
 		"where true ${whereclause} " .
 		'order by user_name';
 	$result = useSelectBlade ($query, __FUNCTION__);
@@ -1788,13 +1788,13 @@ function renderTagStats ()
 
 The following allows figuring out records in TagStorage, which refer to non-existing entities:
 
-mysql> select target_id from TagStorage left join Files on target_id = id where target_realm = 'file' and id is null;
-mysql> select target_id from TagStorage left join IPv4Network on target_id = id where target_realm = 'ipv4net' and id is null;
-mysql> select target_id from TagStorage left join RackObject on target_id = id where target_realm = 'object' and id is null;
-mysql> select target_id from TagStorage left join Rack on target_id = id where target_realm = 'rack' and id is null;
-mysql> select target_id from TagStorage left join IPv4VS on target_id = id where target_realm = 'ipv4vs' and id is null;
-mysql> select target_id from TagStorage left join IPv4RSPool on target_id = id where target_realm = 'ipv4rspool' and id is null;
-mysql> select target_id from TagStorage left join UserAccount on target_id = user_id where target_realm = 'user' and user_id is null;
+mysql> select entity_id from TagStorage left join Files on entity_id = id where entity_realm = 'file' and id is null;
+mysql> select entity_id from TagStorage left join IPv4Network on entity_id = id where entity_realm = 'ipv4net' and id is null;
+mysql> select entity_id from TagStorage left join RackObject on entity_id = id where entity_realm = 'object' and id is null;
+mysql> select entity_id from TagStorage left join Rack on entity_id = id where entity_realm = 'rack' and id is null;
+mysql> select entity_id from TagStorage left join IPv4VS on entity_id = id where entity_realm = 'ipv4vs' and id is null;
+mysql> select entity_id from TagStorage left join IPv4RSPool on entity_id = id where entity_realm = 'ipv4rspool' and id is null;
+mysql> select entity_id from TagStorage left join UserAccount on entity_id = user_id where entity_realm = 'user' and user_id is null;
 
 Accordingly, these are the records, which refer to non-existent tags:
 
@@ -2609,7 +2609,7 @@ function getVSList ($tagfilter = array(), $tfmode = 'any')
 	$whereclause = getWhereClause ($tagfilter);
 	$query = "select vs.id, inet_ntoa(vip) as vip, vport, proto, vs.name, vs.vsconfig, vs.rsconfig, count(rspool_id) as poolcount " .
 		"from IPv4VS as vs left join IPv4LB as lb on vs.id = lb.vs_id " .
-		"left join TagStorage on vs.id = TagStorage.target_id and target_realm = 'ipv4vs' " . 
+		"left join TagStorage on vs.id = TagStorage.entity_id and entity_realm = 'ipv4vs' " . 
 		"where true ${whereclause} group by vs.id order by vs.vip, proto, vport";
 	$result = useSelectBlade ($query, __FUNCTION__);
 	$ret = array ();
@@ -2626,7 +2626,7 @@ function getRSPoolList ($tagfilter = array(), $tfmode = 'any')
 	$whereclause = getWhereClause ($tagfilter);
 	$query = "select pool.id, pool.name, count(rspool_id) as refcnt, pool.vsconfig, pool.rsconfig " .
 		"from IPv4RSPool as pool left join IPv4LB as lb on pool.id = lb.rspool_id " .
-		"left join TagStorage on pool.id = TagStorage.target_id and target_realm = 'ipv4rspool' " .
+		"left join TagStorage on pool.id = TagStorage.entity_id and entity_realm = 'ipv4rspool' " .
 		"where true ${whereclause} group by pool.id order by pool.name, pool.id";
 	$result = useSelectBlade ($query, __FUNCTION__);
 	$ret = array ();
@@ -2858,7 +2858,7 @@ function loadEntityTags ($entity_realm = '', $entity_id = 0)
 	$ret = array();
 	$query = "select tt.id, tag from " .
 		"TagStorage as ts inner join TagTree as tt on ts.tag_id = tt.id " .
-		"where target_realm = '${entity_realm}' and target_id = ${entity_id} " .
+		"where entity_realm = '${entity_realm}' and entity_id = ${entity_id} " .
 		"order by tt.tag";
 	$result = useSelectBlade ($query, __FUNCTION__);
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
@@ -2906,9 +2906,9 @@ function loadUserTags ($user_id)
 function getTagList ()
 {
 	$ret = array();
-	$query = "select id, parent_id, tag, target_realm as realm, count(target_id) as refcnt " .
+	$query = "select id, parent_id, tag, entity_realm as realm, count(entity_id) as refcnt " .
 		"from TagTree left join TagStorage on id = tag_id " .
-		"group by id, target_realm order by tag";
+		"group by id, entity_realm order by tag";
 	$result = useSelectBlade ($query, __FUNCTION__);
 	$ci = 0; // Collation index. The resulting rows are ordered according to default collation,
 	// which is utf8_general_ci for UTF-8.
@@ -2976,7 +2976,7 @@ function commitUpdateTag ($tag_id, $tag_name, $parent_id)
 function destroyTagsForEntity ($entity_realm, $entity_id)
 {
 	global $dbxlink;
-	$query = "delete from TagStorage where target_realm = '${entity_realm}' and target_id = ${entity_id}";
+	$query = "delete from TagStorage where entity_realm = '${entity_realm}' and entity_id = ${entity_id}";
 	$result = $dbxlink->exec ($query);
 	if ($result === NULL)
 		return FALSE;
@@ -2988,7 +2988,7 @@ function destroyTagsForEntity ($entity_realm, $entity_id)
 function deleteTagForEntity ($entity_realm, $entity_id, $tag_id)
 {
 	global $dbxlink;
-	$query = "delete from TagStorage where target_realm = '${entity_realm}' and target_id = ${entity_id} and tag_id = ${tag_id}";
+	$query = "delete from TagStorage where entity_realm = '${entity_realm}' and entity_id = ${entity_id} and tag_id = ${tag_id}";
 	$result = $dbxlink->exec ($query);
 	if ($result === NULL)
 		return FALSE;
@@ -3006,8 +3006,8 @@ function addTagForEntity ($realm = '', $entity_id, $tag_id)
 		'TagStorage',
 		array
 		(
-			'target_realm' => "'${realm}'",
-			'target_id' => $entity_id,
+			'entity_realm' => "'${realm}'",
+			'entity_id' => $entity_id,
 			'tag_id' => $tag_id,
 		)
 	);
@@ -3443,7 +3443,7 @@ function getFileList ($entity_type = NULL, $tagfilter = array(), $tfmode = 'any'
 		'LEFT JOIN FileLink ' .
 		'ON File.id = FileLink.file_id ' .
 		'LEFT JOIN TagStorage ' .
-		"ON File.id = TagStorage.target_id AND target_realm = 'file' " .
+		"ON File.id = TagStorage.entity_id AND entity_realm = 'file' " .
 		'WHERE size >= 0 ' .
 		$whereclause .
 		'ORDER BY name';

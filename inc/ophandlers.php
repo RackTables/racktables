@@ -804,7 +804,6 @@ function resetUIConfig()
 	setConfigVar ('IPV4_ADDRS_PER_PAGE','256');
 	setConfigVar ('DEFAULT_RACK_HEIGHT','42');
 	setConfigVar ('REQUIRE_ASSET_TAG_FOR','4,7,8');
-	setConfigVar ('USER_AUTH_SRC','database');
 	setConfigVar ('DEFAULT_SLB_VS_PORT','');
 	setConfigVar ('DEFAULT_SLB_RS_PORT','');
 	setConfigVar ('IPV4_PERFORMERS','1,4,7,8,12,14,445,447');
@@ -1262,7 +1261,7 @@ function rollTags ()
 function changeMyPassword ()
 {
 	global $accounts, $remote_username;
-	if (getConfigVar ('USER_AUTH_SRC') != 'database')
+	if (USER_AUTH_SRC != 'database')
 		return buildRedirectURL (__FUNCTION__, 'ERR1');
 	assertStringArg ('oldpassword', __FUNCTION__);
 	assertStringArg ('newpassword1', __FUNCTION__);

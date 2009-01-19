@@ -15,7 +15,7 @@ function authenticate ()
 	$require_valid_user = TRUE; // Should go into Config table.
 	if (isset ($_REQUEST['logout']))
 		dieWith401();
-	switch (getConfigVar ('USER_AUTH_SRC'))
+	switch (USER_AUTH_SRC)
 	{
 		case 'database':
 		case 'ldap':
@@ -52,16 +52,16 @@ function authenticate ()
 	switch (TRUE)
 	{
 		// Just trust the server, because the password isn't known.
-		case ('httpd' == getConfigVar ('USER_AUTH_SRC')):
+		case ('httpd' == USER_AUTH_SRC):
 			if (authenticated_via_httpd ($remote_username))
 				return;
 			break;
 		// When using LDAP, leave a mean to fix things. Admin user is always authenticated locally.
-		case ('database' == getConfigVar ('USER_AUTH_SRC') or $accounts[$remote_username]['user_id'] == 1):
+		case ('database' == USER_AUTH_SRC or $accounts[$remote_username]['user_id'] == 1):
 			if (authenticated_via_database ($remote_username, $_SERVER['PHP_AUTH_PW']))
 				return;
 			break;
-		case ('ldap' == getConfigVar ('USER_AUTH_SRC')):
+		case ('ldap' == USER_AUTH_SRC):
 			if (authenticated_via_ldap ($remote_username, $_SERVER['PHP_AUTH_PW']))
 				return;
 			break;

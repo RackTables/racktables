@@ -25,6 +25,8 @@ function getDBUpgradePath ($v1, $v2)
 		'0.16.6',
 		'0.17.0',
 	);
+	if (!in_array ($v1, $versionhistory) or !in_array ($v2, $versionhistory))
+		return NULL;
 	$skip = TRUE;
 	$path = NULL;
 	// Now collect all versions > $v1 and <= $v2
@@ -143,6 +145,13 @@ CREATE TABLE `FileLink` (
 			$query[] = 'alter table IPRSPool rename to IPv4RSPool';
 			$query[] = 'alter table IPRealServer rename to IPv4RS';
 			$query[] = 'alter table IPVirtualService rename to IPv4VS';
+			$query[] = "alter table TagStorage change column target_realm entity_realm enum('file','ipv4net','ipv4vs','ipv4rspool','object','rack','user') NOT NULL default 'object'";
+			$query[] = 'alter table TagStorage change column target_id entity_id int(10) unsigned NOT NULL';
+			$query[] = 'alter table TagStorage drop key entity_tag';
+			$query[] = 'alter table TagStorage drop key target_id';
+			$query[] = 'alter table TagStorage add UNIQUE KEY `entity_tag` (`entity_realm`,`entity_id`,`tag_id`)';
+			$query[] = 'alter table TagStorage add KEY `entity_id` (`entity_id`)';
+			$query[] = "delete from Config where varname = 'USER_AUTH_SRC' limit 1";
 			$query[] = "UPDATE Config SET varvalue = '0.17.0' WHERE varname = 'DB_VERSION'";
 			break;
 		default:
@@ -212,45 +221,50 @@ catch (PDOException $e)
 
 // Now we need to be sure that the current user is the administrator.
 // The rest doesn't matter within this context.
-// We still continue to use the current authenticator though, but this will
-// last only till the UserAccounts remains the same. After that this file
-// will have to dig into the DB for the user accounts.
-require_once 'inc/auth.php';
 
-// 1. This didn't fail sanely, because getUserAccounts() depended on showError()
-// 2. getUserAccounts() doesn't work for old DBs since 0.16.0. Let's have own
-// copy until it breaks too.
-
-function getUserAccounts_local ()
+function authenticate_admin ($username, $password)
 {
-	global $dbxlink;
-	$query = 'select user_id, user_name, user_password_hash from UserAccount order by user_name';
+	$hash = hash (PASSWORD_HASH, $password);
+	$query = "select count(*) from UserAccount where user_id = 1 and user_name = '${username}' and user_password_hash = '${hash}'";
 	if (($result = $dbxlink->query ($query)) == NULL)
 		die ('SQL query failed in ' . __FUNCTION__);
-	$ret = array();
-	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-		foreach (array ('user_id', 'user_name', 'user_password_hash') as $cname)
-			$ret[$row['user_name']][$cname] = $row[$cname];
-	return $ret;
+	$rows = $result->fetchAll (PDO::FETCH_NUM);
+	return $row[0][0] == 1;
 }
 
-$accounts = getUserAccounts_local();
-
-// Only administrator is always authenticated locally, so reject others
-// for authenticate() to succeed.
-
-if
-(
-	!isset ($_SERVER['PHP_AUTH_USER']) or
-	!isset ($_SERVER['PHP_AUTH_PW']) or
-	$accounts[$_SERVER['PHP_AUTH_USER']]['user_id'] != 1 or
-	!authenticated_via_database (escapeString ($_SERVER['PHP_AUTH_USER']), escapeString ($_SERVER['PHP_AUTH_PW']))
-)
+switch (USER_AUTH_SRC)
 {
-	header ('WWW-Authenticate: Basic realm="RackTables upgrade"');
-	header ('HTTP/1.0 401 Unauthorized');
-	showError ('You must be authenticated as an administrator to complete the upgrade.', __FILE__);
-	die;
+	case 'database':
+	case 'ldap': // authenticate against DB as well
+		if
+		(
+			!isset ($_SERVER['PHP_AUTH_USER']) or
+			!strlen ($_SERVER['PHP_AUTH_USER']) or
+			!isset ($_SERVER['PHP_AUTH_PW']) or
+			!strlen ($_SERVER['PHP_AUTH_PW']) or
+			!authenticate_admin (escapeString ($_SERVER['PHP_AUTH_USER']), escapeString ($_SERVER['PHP_AUTH_PW']))
+		)
+		{
+			header ('WWW-Authenticate: Basic realm="RackTables upgrade"');
+			header ('HTTP/1.0 401 Unauthorized');
+			showError ('You must be authenticated as an administrator to complete the upgrade.', __FILE__);
+			die;
+		}
+		break; // cleared
+	case 'httpd':
+		if
+		(
+			!isset ($_SERVER['REMOTE_USER']) or
+			!strlen ($_SERVER['REMOTE_USER'])
+		)
+		{
+			showError ('System misconfiguration. The web-server didn\'t authenticate the user, although ought to do.');
+			die;
+		}
+		break; // cleared
+	default:
+		showError ('USER_AUTH_SRC misconfiguration', __FILE__);
+		die;
 }
 
 $dbver = getDatabaseVersion();

@@ -103,7 +103,7 @@ function trigger_tags ()
 
 function trigger_passwdchange ()
 {
-	return getConfigVar ('USER_AUTH_SRC') == 'database';
+	return USER_AUTH_SRC == 'database';
 }
 
 function trigger_localreports ()

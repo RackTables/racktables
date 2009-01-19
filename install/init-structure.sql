@@ -275,11 +275,11 @@ CREATE TABLE `Script` (
 ) TYPE=MyISAM;
 
 CREATE TABLE `TagStorage` (
-  `target_realm` enum('file','ipv4net','ipv4vs','ipv4rspool','object','rack','user') NOT NULL default 'object',
-  `target_id` int(10) unsigned NOT NULL,
+  `entity_realm` enum('file','ipv4net','ipv4vs','ipv4rspool','object','rack','user') NOT NULL default 'object',
+  `entity_id` int(10) unsigned NOT NULL,
   `tag_id` int(10) unsigned NOT NULL,
-  UNIQUE KEY `entity_tag` (`target_realm`,`target_id`,`tag_id`),
-  KEY `target_id` (`target_id`)
+  UNIQUE KEY `entity_tag` (`entity_realm`,`entity_id`,`tag_id`),
+  KEY `entity_id` (`entity_id`)
 ) TYPE=MyISAM;
 
 CREATE TABLE `TagTree` (

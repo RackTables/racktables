@@ -258,7 +258,6 @@ INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, descriptio
 INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('DEFAULT_SLB_RS_PORT','','uint','yes','no','Default port of SLB real server');
 INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('IPV4_PERFORMERS','1,4,7,8,12,14,445,447','string','yes','no','IPv4-capable object types');
 INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('NATV4_PERFORMERS','4,7,8','string','yes','no','NATv4-capable object types');
-INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('USER_AUTH_SRC','database','string','no','no','User authentication source');
 INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('DETECT_URLS','no','string','yes','no','Detect URLs in text fields');
 INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('RACK_PRESELECT_THRESHOLD','1','uint','no','no','Rack pre-selection threshold');
 INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('DEFAULT_IPV4_RS_INSERVICE','no','string','no','no','Inservice status for new SLB real servers');
