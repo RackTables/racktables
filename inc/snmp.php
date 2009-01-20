@@ -93,7 +93,10 @@ function doSNMPmining ($object_id, $community)
 	$endpoints = findAllEndpoints ($object_id, $objectInfo['name']);
 	$sysName = substr (snmpget ($endpoints[0], $community, 'sysName.0'), strlen ('STRING: '));
 	$sysDescr = snmpget ($endpoints[0], $community, 'sysDescr.0');
-	$sysChassi = snmpget ($endpoints[0], $community, '1.3.6.1.4.1.9.3.6.3.0');
+	// Don't generate error for agents other than IOS.
+	$sysChassi = @snmpget ($endpoints[0], $community, '1.3.6.1.4.1.9.3.6.3.0');
+	if ($sysChassi === FALSE or $sysChassi == NULL)
+		$sysChassi = '';
 	// Strip the object type, it's always string here.
 	$sysDescr = substr ($sysDescr, strlen ('STRING: '));
 	$IOSversion = ereg_replace ('^.*, Version ([^ ]+), .*$', '\\1', $sysDescr);
