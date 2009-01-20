@@ -79,6 +79,7 @@ CREATE TABLE `FileLink` (
   `entity_id` int(10) NOT NULL,
   PRIMARY KEY  (`id`),
   KEY `FileLink-file_id` (`file_id`),
+  UNIQUE KEY `FileLink-unique` (`file_id`,`entity_type`,`entity_id`),
   CONSTRAINT `FileLink-File_fkey` FOREIGN KEY (`file_id`) REFERENCES `File` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB;
 
