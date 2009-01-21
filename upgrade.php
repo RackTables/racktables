@@ -2,7 +2,11 @@
 
 $relnotes = array
 (
-	'0.17.0' => "Another change is the addition of support for file uploads.  Files are stored<br>" .
+	'0.17.0' => "This release requires more options to secret.php. Add the " .
+		"following into inc/secret.php:<br>" .
+		"\$user_auth_src = 'database';<br>$require_valid_user = TRUE;<br>" .
+		"(and adjust to your needs, if necessary)<br>" .
+		"Another change is the addition of support for file uploads.  Files are stored<br>" .
 		"in the database.  There are several settings in php.ini which you may need to modify:<br>" .
 		"<ul><li>file_uploads        - needs to be On</li>" .
 		"<li>upload_max_filesize - max size for uploaded files</li>" .
@@ -233,7 +237,7 @@ function authenticate_admin ($username, $password)
 	return $rows[0][0] == 1;
 }
 
-switch (USER_AUTH_SRC)
+switch ($user_auth_src)
 {
 	case 'database':
 	case 'ldap': // authenticate against DB as well
@@ -264,7 +268,7 @@ switch (USER_AUTH_SRC)
 		}
 		break; // cleared
 	default:
-		showError ('USER_AUTH_SRC misconfiguration', __FILE__);
+		showError ('authentication source misconfiguration', __FILE__);
 		die;
 }
 

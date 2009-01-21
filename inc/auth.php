@@ -8,14 +8,27 @@ Authentication library for RackTables.
 // This function ensures that we don't continue without a legitimate
 // username and password (also make sure, that both are present, this
 // is especially useful for LDAP auth code to not deceive itself with
-// anonymous binding).
+// anonymous binding). It also initializes $remote_username and $accounts.
+// Fatal errors are followed by exit (1) to aid in script debugging.
 function authenticate ()
 {
-	global $remote_username, $accounts;
-	$require_valid_user = TRUE; // Should go into Config table.
+	global $remote_username, $accounts, $user_auth_src, $require_valid_user, $script_mode;
+	if (!isset ($user_auth_src) or !isset ($require_valid_user))
+	{
+		showError ('secret.php misconfiguration: either user_auth_src or require_valid_user are missing', __FUNCTION__);
+		exit (1);
+	}
+	$accounts = getUserAccounts();
+	if ($accounts === NULL)
+	{
+		showError ('Failed to initialize access database.', __FUNCTION__);
+		exit (1);
+	}
+	if (isset ($script_mode) and $script_mode === TRUE)
+		return;
 	if (isset ($_REQUEST['logout']))
-		dieWith401();
-	switch (USER_AUTH_SRC)
+		dieWith401(); // Reset browser credentials cache.
+	switch ($user_auth_src)
 	{
 		case 'database':
 		case 'ldap':
@@ -52,16 +65,16 @@ function authenticate ()
 	switch (TRUE)
 	{
 		// Just trust the server, because the password isn't known.
-		case ('httpd' == USER_AUTH_SRC):
+		case ('httpd' == $user_auth_src):
 			if (authenticated_via_httpd ($remote_username))
 				return;
 			break;
 		// When using LDAP, leave a mean to fix things. Admin user is always authenticated locally.
-		case ('database' == USER_AUTH_SRC or $accounts[$remote_username]['user_id'] == 1):
+		case ('database' == $user_auth_src or $accounts[$remote_username]['user_id'] == 1):
 			if (authenticated_via_database ($remote_username, $_SERVER['PHP_AUTH_PW']))
 				return;
 			break;
-		case ('ldap' == USER_AUTH_SRC):
+		case ('ldap' == $user_auth_src):
 			if (authenticated_via_ldap ($remote_username, $_SERVER['PHP_AUTH_PW']))
 				return;
 			break;

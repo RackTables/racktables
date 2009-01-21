@@ -235,9 +235,14 @@ function init_config ()
 	fwrite ($conf, "\$pdo_dsn = '${pdo_dsn}';\n");
 	fwrite ($conf, "\$db_username = '" . $_REQUEST['mysql_username'] . "';\n");
 	fwrite ($conf, "\$db_password = '" . $_REQUEST['mysql_password'] . "';\n\n");
-	fwrite ($conf, "// This is only necessary for 'ldap' USER_AUTH_SRC\n");
+	fwrite ($conf, "// More info http://racktables.org/trac/wiki/RackTablesUserAuthentication\n");
+	fwrite ($conf, "\$user_auth_src = 'database';\n");
+	fwrite ($conf, "\$require_valid_user = TRUE;\n\n");
+	fwrite ($conf, "// This is only necessary for 'ldap' authentication source\n");
 	fwrite ($conf, "\$ldap_server = 'some.server';\n");
-	fwrite ($conf, "\$ldap_domain = 'some.domain';\n");
+	fwrite ($conf, "\$ldap_domain = 'some.domain';\n\n");
+	fwrite ($conf, "#\$ldap_search_dn = 'ou=people,O=YourCompany';\n");
+	fwrite ($conf, "\$ldap_search_attr = 'uid';\n");
 	fwrite ($conf, "?>\n");
 	fclose ($conf);
 	echo "The configuration file has been written successfully.<br>";

@@ -1260,8 +1260,8 @@ function rollTags ()
 
 function changeMyPassword ()
 {
-	global $accounts, $remote_username;
-	if (USER_AUTH_SRC != 'database')
+	global $accounts, $remote_username, $user_auth_src;
+	if ($user_auth_src != 'database')
 		return buildRedirectURL (__FUNCTION__, 'ERR1');
 	assertStringArg ('oldpassword', __FUNCTION__);
 	assertStringArg ('newpassword1', __FUNCTION__);

@@ -103,7 +103,8 @@ function trigger_tags ()
 
 function trigger_passwdchange ()
 {
-	return USER_AUTH_SRC == 'database';
+	global $user_auth_src;
+	return $user_auth_src == 'database';
 }
 
 function trigger_localreports ()

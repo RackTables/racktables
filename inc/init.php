@@ -3,7 +3,7 @@
 *
 * This file performs RackTables initialisation. After you include it
 * from 1st-level page, don't forget to call fixContext(). This is done
-* to allow reloading of pageno and tabno variables. pageno and tabno
+* to enable override of of pageno and tabno variables. pageno and tabno
 * together participate in forming security context by generating
 * related autotags.
 *
@@ -95,7 +95,7 @@ if (!count ($configCache))
 	exit (1);
 }
 
-require_once 'inc/code.php';
+require_once 'inc/code.php'; // for getRackCode()
 $rackCodeCache = loadScript ('RackCodeCache');
 if ($rackCodeCache == NULL or empty ($rackCodeCache))
 {
@@ -122,20 +122,8 @@ if ($rackCode['result'] != 'ACK')
 }
 $rackCode = $rackCode['load'];
 
-// Now init authentication.
-
 require_once 'inc/auth.php';
-// Load access database once.
-$accounts = getUserAccounts();
-if ($accounts === NULL)
-{
-	showError ('Failed to initialize access database.', __FILE__);
-	exit (1);
-}
-
-// The call below also initializes $remote_username
 authenticate();
-
 // Authentication passed.
 // Note that we don't perform autorization here, so each 1st level page
 // has to do it in its way, e.g. to call authorize().

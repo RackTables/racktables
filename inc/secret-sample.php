@@ -9,11 +9,11 @@ $pdo_dsn = 'mysql:host=localhost;dbname=racktables';
 $db_username = 'username';
 $db_password = 'password';
 
-// User authentication source: 'database', 'ldap', 'httpd'.
-// See http://racktables.org/trac/wiki/RackTablesUserAuthentication for detailed explanation.
-define ('USER_AUTH_SRC', 'database');
+// More info: http://racktables.org/trac/wiki/RackTablesUserAuthentication
+$user_auth_src = 'database';
+$require_valid_user = TRUE;
 
-// This is only necessary for 'ldap' USER_AUTH_SRC
+// This is only necessary for 'ldap' authentication source
 $ldap_server = 'some.server';
 $ldap_domain = 'some.domain';
 
