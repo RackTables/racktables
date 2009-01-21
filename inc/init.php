@@ -158,7 +158,12 @@ $auto_tags = array();
 $expl_tags = array();
 $impl_tags = array();
 // and this will remain constant
-$user_tags = loadUserTags ($accounts[$remote_username]['user_id']);
-$user_tags = array_merge ($user_tags, getImplicitTags ($user_tags), getUserAutoTags());
+if (isset ($script_mode) and $script_mode === TRUE)
+	$user_tags = array();
+else
+{
+	$user_tags = loadUserTags ($accounts[$remote_username]['user_id']);
+	$user_tags = array_merge ($user_tags, getImplicitTags ($user_tags), getUserAutoTags());
+}
 
 ?>
