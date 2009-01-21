@@ -78,6 +78,9 @@ $image['ADD']['height'] = 32;
 $image['delete']['path'] = 'pix/tango-list-remove.png';
 $image['delete']['width'] = 16;
 $image['delete']['height'] = 16;
+$image['DESTROY']['path'] = 'pix/tango-edit-delete.png';
+$image['DESTROY']['width'] = 32;
+$image['DESTROY']['height'] = 32;
 $image['nodelete']['path'] = 'pix/tango-list-remove-shadow.png';
 $image['nodelete']['width'] = 16;
 $image['nodelete']['height'] = 16;
@@ -5728,7 +5731,7 @@ function renderFilesForEntity ($entity_type = NULL, $id_name = NULL, $entity_id 
 	{
 		startPortlet ('Use existing');
 		printOpFormIntro ('linkFile');
-	echo "<table border=0 cellspacing=0 cellpadding='5' align='center'>\n";
+		echo "<table border=0 cellspacing=0 cellpadding='5' align='center'>\n";
 		echo '<tr><td class=tdleft>';
 		printSelect ($files, 'file_id');
 		echo '</td><td class=tdleft>';
@@ -5748,7 +5751,7 @@ function renderFilesForEntity ($entity_type = NULL, $id_name = NULL, $entity_id 
 		{
 			printOpFormIntro ('updateFile', array ('file_id' => $file_id, 'link_id' => $file['link_id'], 'name' => $file['name']));
 			echo "<tr valign=top><td><a href='${root}process.php?op=deleteFile&page=${pageno}&tab=${tabno}&file_id=${file_id}&${id_name}=${entity_id}&name=${file['name']}'>";
-			printImageHREF ('delete', 'Unlink and delete file');
+			printImageHREF ('DESTROY', 'Unlink and delete file');
 			echo '</a></td>';
 			printf("<td class='tdleft'><a href='%/?page=file&file_id=%s'><strong>%s</strong></a>", $root, $file_id, $file['name']);
 			echo "<td class=tdleft><input type='text' name='comment' value='${file['comment']}' size=15></td>";
