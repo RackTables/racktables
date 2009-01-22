@@ -5694,7 +5694,7 @@ function renderFilesPortlet ($entity_type = NULL, $entity_id = 0)
 					if ($file['size'] < getConfigVar ('PREVIEW_TEXT_MAXCHARS'))
 					{
 						$file = getFile($file_id);
-						echo '<tr><td colspan=4><textarea rows=' . getConfigVar ('PREVIEW_TEXT_ROWS');
+						echo '<tr><td colspan=4><textarea readonly rows=' . getConfigVar ('PREVIEW_TEXT_ROWS');
 						echo ' cols=' . getConfigVar ('PREVIEW_TEXT_COLS') . '>';
 						echo $file['contents'];
 						echo '</textarea></td></tr>';
