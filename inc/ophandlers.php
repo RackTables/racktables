@@ -824,6 +824,10 @@ function resetUIConfig()
 	setConfigVar ('IPV4_JAYWALK', 'no');
 	setConfigVar ('ADDNEW_AT_TOP', 'yes');
 	setConfigVar ('IPV4_TREE_SHOW_USAGE', 'yes');
+	setConfigVar ('PREVIEW_TEXT_MAXCHARS', '10240');
+	setConfigVar ('PREVIEW_TEXT_ROWS', '25');
+	setConfigVar ('PREVIEW_TEXT_COLS', '80');
+	setConfigVar ('PREVIEW_IMAGE_MAXPXS', '320');
 	return buildRedirectURL (__FUNCTION__, 'OK');
 }
 

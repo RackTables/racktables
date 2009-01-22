@@ -2,11 +2,11 @@
 
 require 'inc/init.php';
 
-assertStringArg ('img', 'render_image');
+assertStringArg ('img', __FILE__);
 switch ($_REQUEST['img'])
 {
 	case 'minirack': // rack security context
-		assertUIntArg ('rack_id', 'render_image');
+		assertUIntArg ('rack_id', __FILE__);
 		$pageno = 'rack';
 		$tabno = 'default';
 		fixContext();
@@ -16,8 +16,19 @@ switch ($_REQUEST['img'])
 			renderRackThumb ($_REQUEST['rack_id']);
 		break;
 	case 'progressbar': // no security context
-		assertUIntArg ('done', 'render_image', TRUE);
+		assertUIntArg ('done', __FILE__, TRUE);
 		renderProgressBarImage ($_REQUEST['done']);
+		break;
+	case 'view': // file security context
+	case 'preview':
+		assertUIntArg ('file_id', __FILE__);
+		$pageno = 'file';
+		$tabno = 'default';
+		fixContext();
+		if (!permitted())
+			renderAccessDeniedImage();
+		else
+			renderFilePreview ($_REQUEST['file_id']);
 		break;
 	default:
 		renderError();
@@ -148,6 +159,29 @@ function renderAccessDeniedImage ()
 	header("Content-type: image/png");
 	imagepng ($img);
 	imagedestroy ($img);
+}
+
+function renderFilePreview ($file_id = 0)
+{
+	$file = getFile ($file_id);
+	$image = imagecreatefromstring ($file['contents']);
+	$width = imagesx ($image);
+	$height = imagesy ($image);
+	if ($_REQUEST['img'] == 'preview' and ($width > getConfigVar ('PREVIEW_IMAGE_MAXPXS') or $height > getConfigVar ('PREVIEW_IMAGE_MAXPXS')))
+	{
+		// TODO: cache thumbs for faster page generation
+		$ratio = getConfigVar ('PREVIEW_IMAGE_MAXPXS') / max ($width, $height);
+		$newwidth = $width * $ratio;
+		$newheight = $height * $ratio;
+		$resampled = imagecreatetruecolor ($newwidth, $newheight);
+		imagecopyresampled ($resampled, $image, 0, 0, 0, 0, $newwidth, $newheight, $width, $height);
+		imagedestroy ($image);
+		$image = $resampled;
+		unset ($resampled);
+	}
+	header("Content-type: image/png"); // don't announce content-length, it may have changed after resampling
+	imagepng ($image);
+	imagedestroy ($image);
 }
 
 ?>

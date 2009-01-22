@@ -5688,7 +5688,7 @@ function renderFilesPortlet ($entity_type = NULL, $entity_id = 0)
 	$files = getFilesOfEntity ($entity_type, $entity_id);
 	if (count ($files))
 	{
-		startPortlet ('files');
+		startPortlet ('files (' . count ($files) . ')');
 		echo "<table cellspacing=0 cellpadding='5' align='center' class='widetable'>\n";
 		echo "<tr><th>Name</th><th>Size</th><th>Comment</th><th>Actions</th></tr>\n";
 		foreach ($files as $file_id => $file)
@@ -5699,6 +5699,43 @@ function renderFilesPortlet ($entity_type = NULL, $entity_id = 0)
 			echo "<td><a href='${root}download.php?file_id=${file_id}'>";
 			printImageHREF ('download', 'Download file');
 			echo '</a></td></tr>';
+			switch ($file['type'])
+			{
+				// "These types will be automatically detected if your build of PHP supports them: JPEG, PNG, GIF, WBMP, and GD2."
+				case 'image/jpeg':
+				case 'image/png':
+				case 'image/gif':
+				case 'image/vnd.wap.wbmp':
+					$file = getFile ($file_id);
+					$image = imagecreatefromstring ($file['contents']);
+					$width = imagesx ($image);
+					$height = imagesy ($image);
+					if ($width < getConfigVar ('PREVIEW_IMAGE_MAXPXS') and $height < getConfigVar ('PREVIEW_IMAGE_MAXPXS'))
+						$resampled = FALSE;
+					else
+					{
+						$ratio = getConfigVar ('PREVIEW_IMAGE_MAXPXS') / max ($width, $height);
+						$width = $width * $ratio;
+						$height = $height * $ratio;
+						$resampled = TRUE;
+					}
+					echo '<tr><td colspan=4>' . ($resampled ? "<a href='${root}render_image.php?img=view&file_id=${file_id}'>" : '');
+					echo "<img width=${width} height=${height} src='${root}render_image.php?img=preview&file_id=${file_id}'>";
+					echo ($resampled ? '</a>' : '') . '</td></tr>';
+					break;
+				case 'text/plain':
+					if ($file['size'] < getConfigVar ('PREVIEW_TEXT_MAXCHARS'))
+					{
+						$file = getFile($file_id);
+						echo '<tr><td colspan=4><textarea rows=' . getConfigVar ('PREVIEW_TEXT_ROWS');
+						echo ' cols=' . getConfigVar ('PREVIEW_TEXT_COLS') . '>';
+						echo $file['contents'];
+						echo '</textarea></td></tr>';
+					}
+					break;
+				default:
+					break;
+			}
 		}
 		echo "</table><br>\n";
 		finishPortlet();
