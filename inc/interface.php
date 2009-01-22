@@ -5076,13 +5076,26 @@ function renderTagTreeEditor ()
 function renderTagOption ($taginfo, $level = 0)
 {
 	global $expl_tags;
+	$self = __FUNCTION__;
 	$selected = tagOnChain ($taginfo, $expl_tags) ? ' selected' : '';
 	echo '<option value=' . $taginfo['id'] . "${selected}>";
 	for ($i = 0; $i < $level; $i++)
 		echo '-- ';
 	echo $taginfo['tag'] . "</option>\n";
 	foreach ($taginfo['kids'] as $kid)
-		renderTagOption ($kid, $level + 1);
+		$self ($kid, $level + 1);
+}
+
+function renderTagCheckbox ($taginfo, $level = 0)
+{
+	global $expl_tags;
+	$self = __FUNCTION__;
+	$selected = tagOnChain ($taginfo, $expl_tags) ? ' checked' : '';
+	echo "<tr><td colspan=2 align=left style='padding-left: " . ($level * 16) . "px;'>";
+	echo '<input type=checkbox name=taglist[] value=' . $taginfo['id'] . "${selected}>";
+	echo $taginfo['tag'] . "</td></tr>\n";
+	foreach ($taginfo['kids'] as $kid)
+		$self ($kid, $level + 1);
 }
 
 // Idem, but select those, which are shown on the $_REQUEST['tagfiler'] array.
@@ -5113,14 +5126,12 @@ function renderEntityTags ($entity_id = 0)
 	if (count ($expl_tags))
 		echo '<h3>(' . serializeTags ($expl_tags) . ')</h3>';
 	echo '<table border=0 align=center>';
-	echo '<tr><td colspan=2><h4>hold Ctrl to select more, than one</h4></td></tr>';
 	printOpFormIntro ('saveTags', array ($bypass_name => $entity_id));
-	echo '<tr><td colspan=2><select name=taglist[] multiple size=' . getConfigVar ('MAXSELSIZE') . '>';
 	foreach ($tagtree as $taginfo)
-		renderTagOption ($taginfo);
-	echo '</select></td></tr><tr><td>';
+		renderTagCheckbox ($taginfo);
+	echo '<tr><td class=tdleft>';
 	printImageHREF ('SAVE', 'Save changes', TRUE);
-	echo "</form></td><td>";
+	echo "</form></td><td class=tdright>";
 	printOpFormIntro ('saveTags', array ($bypass_name => $entity_id, 'taglist[]' => ''));
 	printImageHREF ('CLEAR', 'Reset all tags', TRUE);
 	echo '</form></td></tr></table>';
@@ -5785,7 +5796,7 @@ function printOpFormIntro ($opname, $extra = array(), $upload = FALSE)
 {
 	global $root, $pageno, $tabno, $page;
 
-	echo "<form method=post action='${root}process.php?page=${pageno}&tab=${tabno}&op=${opname}'";
+	echo "<form method=post name=${opname} action='${root}process.php?page=${pageno}&tab=${tabno}&op=${opname}'";
 	if ($upload)
 		echo " enctype='multipart/form-data'";
 	echo ">\n";

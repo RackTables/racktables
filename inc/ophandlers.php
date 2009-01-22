@@ -1157,23 +1157,13 @@ function generateAutoPorts ()
 // Filter out implicit tags before storing the new tag set.
 function saveEntityTags ()
 {
-	$page2realm = array
-	(
-		'file' => 'file',
-		'ipv4net' => 'ipv4net',
-		'ipv4rspool' => 'ipv4rspool',
-		'ipv4vs' => 'ipv4vs',
-		'object' => 'object',
-		'rack' => 'rack',
-		'user' => 'user'
-	);
-	global $explicit_tags, $implicit_tags, $page, $pageno;
-	if (!isset ($page2realm[$pageno]) or !isset ($page[$pageno]['bypass']))
+	global $explicit_tags, $implicit_tags, $page, $pageno, $etype_by_pageno;
+	if (!isset ($etype_by_pageno[$pageno]) or !isset ($page[$pageno]['bypass']))
 	{
 		showError ('Internal error', __FUNCTION__);
 		die;
 	}
-	$realm = $page2realm[$pageno];
+	$realm = $etype_by_pageno[$pageno];
 	$bypass = $page[$pageno]['bypass'];
 	assertUIntArg ($bypass, __FUNCTION__);
 	$entity_id = $_REQUEST[$bypass];
