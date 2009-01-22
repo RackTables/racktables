@@ -5098,50 +5098,17 @@ function renderTagOptionForFilter ($taginfo, $tagfilter, $realm, $level = 0)
 		renderTagOptionForFilter ($kid, $tagfilter, $realm, $level + 1);
 }
 
-function renderFileTags ($id)
+function renderEntityTags ($entity_id = 0)
 {
-	renderEntityTagChainEditor ('file', 'file_id', $id);
-}
-
-function renderObjectTags ($id)
-{
-	renderEntityTagChainEditor ('object', 'object_id', $id);
-}
-
-function renderIPv4PrefixTags ($id)
-{
-	renderEntityTagChainEditor ('ipv4net', 'id', $id);
-}
-
-function renderRackTags ($id)
-{
-	renderEntityTagChainEditor ('rack', 'rack_id', $id);
-}
-
-function renderIPv4VSTags ($id)
-{
-	renderEntityTagChainEditor ('ip4vs', 'vs_id', $id);
-}
-
-function renderIPv4RSPoolTags ($id)
-{
-	renderEntityTagChainEditor ('ip4rspool', 'pool_id', $id);
-}
-
-function renderUserTags ($id)
-{
-	renderEntityTagChainEditor ('user', 'user_id', $id);
-}
-
-function renderEntityTagChainEditor ($entity_realm = '', $bypass_name, $entity_id = 0)
-{
-	global $tagtree, $expl_tags;
+	global $tagtree, $expl_tags, $pageno, $page, $etype_by_pageno;
 	if ($entity_realm == '' or $entity_id <= 0)
 	{
 		showError ('Invalid or missing arguments', __FUNCTION__);
 		return;
 	}
 	showMessageOrError();
+	$entity_realm = $etype_by_pageno[$pageno];
+	$bypass_name = $page[$pageno]['bypass'];
 	startPortlet ('Tag list');
 	if (count ($expl_tags))
 		echo '<h3>(' . serializeTags ($expl_tags) . ')</h3>';
@@ -5742,16 +5709,20 @@ function renderFilesPortlet ($entity_type = NULL, $entity_id = 0)
 	}
 }
 
-function renderFilesForEntity ($entity_type = NULL, $id_name = NULL, $entity_id = 0)
+function renderFilesForEntity ($entity_id = 0)
 {
-	global $root, $pageno, $tabno;
-	if ($entity_type == NULL || $id_name == NULL || $entity_id <= 0)
+	global $root, $page, $pageno, $tabno, $etype_by_pageno;
+	if ($entity_id <= 0)
 	{
 		showError ('Invalid entity info', __FUNCTION__);
 		return;
 	}
 
 	showMessageOrError();
+	// Now derive entity_type and bypass_name from pageno.
+	$entity_type = $etype_by_pageno[$pageno];
+	$id_name = $page[$pageno]['bypass'];
+	
 	startPortlet ('Upload new');
 	echo "<table border=0 cellspacing=0 cellpadding='5' align='center'>\n";
 	printOpFormIntro ('addFile', array ('entity_type' => $entity_type, 'entity_id' => $entity_id, 'MAX_FILE_SIZE' => convertToBytes(get_cfg_var('upload_max_filesize'))), TRUE);
@@ -5805,32 +5776,6 @@ function renderFilesForEntity ($entity_type = NULL, $id_name = NULL, $entity_id 
 		echo "</table><br>\n";
 		finishPortlet();
 	}
-}
-
-// Set of wrapper functions to reduce duplicate code
-// No data validation, that is done by renderFilesForEntity ()
-function renderFilesForObject ($object_id) {
-	renderFilesForEntity('object', 'object_id', $object_id);
-}
-
-function renderFilesForIPv4Network ($range_id) {
-	renderFilesForEntity('ipv4net', 'id', $range_id);
-}
-
-function renderFilesForRack ($rack_id) {
-	renderFilesForEntity('rack', 'rack_id', $rack_id);
-}
-
-function renderFilesForRSPool ($pool_id) {
-	renderFilesForEntity('ipv4rspool', 'pool_id', $pool_id);
-}
-
-function renderFilesForVService ($vs_id) {
-	renderFilesForEntity('ipv4vs', 'vs_id', $vs_id);
-}
-
-function renderFilesForUser ($user_id) {
-	renderFilesForEntity('user', 'user_id', $user_id);
 }
 
 // Print common operation form prologue, include bypass argument, if

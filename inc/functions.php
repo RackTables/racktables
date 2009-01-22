@@ -24,6 +24,18 @@ $templateWidth[3] = 1;
 $templateWidth[4] = 1;
 $templateWidth[5] = 1;
 
+// Entity type by page number mapping is 1:1 atm, but may change later.
+$etype_by_pageno = array
+(
+	'ipv4net' => 'ipv4net',
+	'ipv4rspool' => 'ipv4rspool',
+	'ipv4vs' => 'ipv4vs',
+	'object' => 'object',
+	'rack' => 'rack',
+	'user' => 'user',
+	'file' => 'file',
+);
+
 // Objects of some types should be explicitly shown as
 // anonymous (labelless). This function is a single place where the
 // decision about displayed name is made.

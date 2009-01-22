@@ -1492,16 +1492,7 @@ function addFileToEntity ()
 function linkFileToEntity ()
 {
 	assertUIntArg ('file_id', __FUNCTION__);
-	$etype_by_pageno = array // this 1:1 mapping may change later
-	(
-		'ipv4net' => 'ipv4net',
-		'ipv4rspool' => 'ipv4rspool',
-		'ipv4vs' => 'ipv4vs',
-		'object' => 'object',
-		'rack' => 'rack',
-		'user' => 'user',
-	);
-	global $page, $pageno;
+	global $page, $pageno, $etype_by_pageno;
 	$entity_type = $etype_by_pageno[$pageno];
 	$bypass_name = $page[$pageno]['bypass'];
 	assertUIntArg ($bypass_name, __FUNCTION__);
