@@ -5101,7 +5101,7 @@ function renderTagOptionForFilter ($taginfo, $tagfilter, $realm, $level = 0)
 function renderEntityTags ($entity_id = 0)
 {
 	global $tagtree, $expl_tags, $pageno, $page, $etype_by_pageno;
-	if ($entity_realm == '' or $entity_id <= 0)
+	if ($entity_id <= 0)
 	{
 		showError ('Invalid or missing arguments', __FUNCTION__);
 		return;
