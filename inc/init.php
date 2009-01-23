@@ -164,7 +164,11 @@ else
 {
 	$user_tags = getUserAutoTags();
 	if (isset ($accounts[$remote_username]))
-		$user_tags = array_merge ($user_tags, getImplicitTags (loadUserTags ($accounts[$remote_username]['user_id'])));
+	{
+		$tbase = loadUserTags ($accounts[$remote_username]['user_id']);
+		$textra = getImplicitTags ($tbase); 
+		$user_tags = array_merge ($user_tags, $tbase, $textra);
+	}
 }
 
 ?>
