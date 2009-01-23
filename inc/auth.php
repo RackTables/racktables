@@ -12,7 +12,7 @@ Authentication library for RackTables.
 // Fatal errors are followed by exit (1) to aid in script debugging.
 function authenticate ()
 {
-	global $remote_username, $accounts, $user_auth_src, $require_valid_user, $script_mode;
+	global $remote_username, $remote_displayname, $accounts, $user_auth_src, $require_valid_user, $script_mode;
 	if (!isset ($user_auth_src) or !isset ($require_valid_user))
 	{
 		showError ('secret.php misconfiguration: either user_auth_src or require_valid_user are missing', __FUNCTION__);
@@ -62,21 +62,34 @@ function authenticate ()
 		dieWith401();
 	if (isset ($accounts[$remote_username]) and $accounts[$remote_username]['user_enabled'] != 'yes')
 		dieWith401();
+	$remote_displayname = $remote_username;
 	switch (TRUE)
 	{
 		// Just trust the server, because the password isn't known.
 		case ('httpd' == $user_auth_src):
 			if (authenticated_via_httpd ($remote_username))
+			{
+				$remote_displayname = "EXT: ${remote_username}";
 				return;
+			}
 			break;
 		// When using LDAP, leave a mean to fix things. Admin user is always authenticated locally.
 		case ('database' == $user_auth_src or $accounts[$remote_username]['user_id'] == 1):
 			if (authenticated_via_database ($remote_username, $_SERVER['PHP_AUTH_PW']))
+			{
+				if (!empty ($accounts[$remote_username]['user_realname']))
+					$remote_displayname = $accounts[$remote_username]['user_realname'];
 				return;
+			}
 			break;
 		case ('ldap' == $user_auth_src):
+			// Call below also sets $remote_displayname.
 			if (authenticated_via_ldap ($remote_username, $_SERVER['PHP_AUTH_PW']))
+			{
+				if (!empty ($accounts[$remote_username]['user_realname']))
+					$remote_displayname = $accounts[$remote_username]['user_realname'];
 				return;
+			}
 			break;
 		default:
 			showError ('Invalid authentication source!', __FUNCTION__);
@@ -164,17 +177,18 @@ function accessibleSubpage ($p)
 function authenticated_via_ldap ($username, $password)
 {
 	global $ldap_server, $ldap_domain, $ldap_search_dn, $ldap_search_attr;
+	global $remote_username, $remote_displayname, $ldap_displayname_attrs;
 	if ($connect = @ldap_connect ($ldap_server))
 	{
-		if
+		if (isset ($ldap_domain) and !empty ($ldap_domain))
+			$auth_user_name = $username . "@" . $ldap_domain;
+		elseif
 		(
-			!isset ($ldap_search_dn) or
-			!isset ($ldap_search_attr) or
-			empty ($ldap_search_dn) or
-			empty ($ldap_search_attr)
+			isset ($ldap_search_dn) and
+			!empty ($ldap_search_dn) and
+			isset ($ldap_search_attr) and
+			!empty ($ldap_search_attr)
 		)
-			$user_name = $username . "@" . $ldap_domain;
-		else
 		{
 			$results = @ldap_search ($connect, $ldap_search_dn, "(${ldap_search_attr}=${username})", array("dn"));
 			if (@ldap_count_entries ($connect, $results) != 1)
@@ -182,11 +196,43 @@ function authenticated_via_ldap ($username, $password)
 				@ldap_close ($connect);
 				return FALSE;
 			}
-			$info = @ldap_get_entries($connect,$results);
-			$user_name = $info[0]['dn'];
+			$info = @ldap_get_entries ($connect, $results);
+			ldap_free_result ($results);
+			$auth_user_name = $info[0]['dn'];
 		}
-		if ($bind = @ldap_bind ($connect, $user_name, $password))
+		else
 		{
+			showError ('LDAP misconfiguration. Cannon build username for authentication.', __FUNCTION__);
+			die;
+		}
+		if ($bind = @ldap_bind ($connect, $auth_user_name, $password))
+		{
+			// Some servers deny anonymous search, thus search only after binding.
+			// Displayed name only makes sense for authenticated users anyway.
+			if
+			(
+				isset ($ldap_displayname_attrs) and
+				count ($ldap_displayname_attrs) and
+				isset ($ldap_search_dn) and
+				!empty ($ldap_search_dn) and
+				isset ($ldap_search_attr) and
+				!empty ($ldap_search_attr)
+			)
+			{
+				$results = @ldap_search ($connect, $ldap_search_dn, "(${ldap_search_attr}=${username})", $ldap_displayname_attrs);
+				if (@ldap_count_entries ($connect, $results) == 1 or TRUE)
+				{
+					$info = @ldap_get_entries ($connect, $results);
+					ldap_free_result ($results);
+					$remote_displayname = '';
+					$space = '';
+					foreach ($ldap_displayname_attrs as $attr)
+					{
+						$remote_displayname .= $space . $info[0][$attr][0];
+						$space = ' ';
+					}
+				}
+			}
 			@ldap_close ($connect);
 			return TRUE;
 		}

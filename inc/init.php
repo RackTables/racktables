@@ -162,8 +162,9 @@ if (isset ($script_mode) and $script_mode === TRUE)
 	$user_tags = array();
 else
 {
-	$user_tags = loadUserTags ($accounts[$remote_username]['user_id']);
-	$user_tags = array_merge ($user_tags, getImplicitTags ($user_tags), getUserAutoTags());
+	$user_tags = getUserAutoTags();
+	if (isset ($accounts[$remote_username]))
+		$user_tags = array_merge ($user_tags, getImplicitTags (loadUserTags ($accounts[$remote_username]['user_id'])));
 }
 
 ?>

@@ -3005,12 +3005,10 @@ function renderAddMultipleObjectsForm ()
 
 function printGreeting ()
 {
-	global $root, $remote_username, $accounts, $root;
-	$account = $accounts[$remote_username];
-	$person = "<a href='${root}?page=myaccount&tab=default'>";
-	$person .= empty ($account['user_realname']) ? $account['user_name'] : $account['user_realname'];
-	$person .= '</a>';
-	echo "Hello, ${person}. This is RackTables " . CODE_VERSION . ". Click <a href='${root}?logout'>here</a> to logout.";
+	global $root, $remote_username, $remote_displayname;
+	echo "Hello, <a href='${root}?page=myaccount&tab=default'>${remote_displayname}</a>. This is RackTables " .
+		CODE_VERSION .
+		". Click <a href='${root}?logout'>here</a> to logout.";
 }
 
 function renderSearchResults ()
