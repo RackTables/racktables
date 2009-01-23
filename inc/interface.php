@@ -78,7 +78,13 @@ $image['ADD']['height'] = 32;
 $image['delete']['path'] = 'pix/tango-list-remove.png';
 $image['delete']['width'] = 16;
 $image['delete']['height'] = 16;
-$image['DESTROY']['path'] = 'pix/tango-edit-delete.png';
+$image['destroy']['path'] = 'pix/tango-edit-delete.png';
+$image['destroy']['width'] = 16;
+$image['destroy']['height'] = 16;
+$image['nodestroy']['path'] = 'pix/tango-edit-delete-gray.png';
+$image['nodestroy']['width'] = 16;
+$image['nodestroy']['height'] = 16;
+$image['DESTROY']['path'] = 'pix/tango-edit-delete-big.png';
 $image['DESTROY']['width'] = 32;
 $image['DESTROY']['height'] = 32;
 $image['nodelete']['path'] = 'pix/tango-list-remove-shadow.png';
@@ -4963,11 +4969,11 @@ function renderTagRowForEditor ($taginfo, $level = 0)
 	foreach ($taginfo['refcnt'] as $part)
 		$nrefs += $part;
 	if ($nrefs > 0 or count ($taginfo['kids']) > 0)
-		printImageHREF ('nodelete', "${nrefs} references, " . count ($taginfo['kids']) . ' sub-tags');
+		printImageHREF ('nodestroy', "${nrefs} references, " . count ($taginfo['kids']) . ' sub-tags');
 	else
 	{
 		echo "<a href='${root}process.php?page=${pageno}&tab=${tabno}&op=destroyTag&tag_id=${taginfo['id']}'>";
-		printImageHREF ('delete', 'Delete tag');
+		printImageHREF ('destroy', 'Delete tag');
 		echo "</a>";
 	}
 	echo "</td>\n<td>";
