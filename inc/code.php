@@ -363,6 +363,7 @@ function getSentencesFromLexems ($lexems)
 			{
 				// reduce!
 				array_pop ($stack);
+				array_pop ($stack);
 				array_push
 				(
 					$stack,
@@ -382,6 +383,7 @@ function getSentencesFromLexems ($lexems)
 			)
 			{
 				// reduce!
+				array_pop ($stack);
 				array_pop ($stack);
 				array_push
 				(
