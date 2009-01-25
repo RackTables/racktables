@@ -14,6 +14,11 @@
  * LEX_TAG
  * LEX_PREDICATE
  * LEX_BOOLOP
+ * LEX_CONTEXT
+ * LEX_CLEAR
+ * LEX_INSERT
+ * LEX_REMOVE
+ * LEX_ON
  *
  */
 
@@ -131,6 +136,21 @@ function getLexemsFromRackCode ($text)
 							case 'true':
 								$ret[] = array ('type' => 'LEX_BOOLCONST', 'load' => $buffer, 'lineno' => $lineno);
 								break;
+							case 'context':
+								$ret[] = array ('type' => 'LEX_CONTEXT', 'lineno' => $lineno);
+								break;
+							case 'clear':
+								$ret[] = array ('type' => 'LEX_CLEAR', 'lineno' => $lineno);
+								break;
+							case 'insert':
+								$ret[] = array ('type' => 'LEX_INSERT', 'lineno' => $lineno);
+								break;
+							case 'remove':
+								$ret[] = array ('type' => 'LEX_REMOVE', 'lineno' => $lineno);
+								break;
+							case 'on':
+								$ret[] = array ('type' => 'LEX_ON', 'lineno' => $lineno);
+								break;
 							default:
 								return lexError2 ($buffer, $lineno);
 						}
@@ -237,6 +257,7 @@ function getLexemsFromRackCode ($text)
 // SYNT_BOOLOP (2 arguments, each holding SYNT_EXPR)
 // SYNT_DEFINITION (2 arguments: term and definition)
 // SYNT_GRANT (2 arguments: decision and condition)
+// SYNT_ADJUSTMENT (context modifier with action(s) and condition)
 // SYNT_CODETEXT (sequence of sentences)
 //
 // After parsing the input successfully a list of SYNT_GRANT and SYNT_DEFINITION
@@ -255,7 +276,7 @@ function getSentencesFromLexems ($lexems)
 	// parse errors, if any.
 	while (TRUE)
 	{
-		$stacktop = $stacksecondtop = $stackthirdtop = array ('type' => 'null');
+		$stacktop = $stacksecondtop = $stackthirdtop = $stackfourthtop = array ('type' => 'null');
 		$stacksize = count ($stack);
 		if ($stacksize >= 1)
 		{
@@ -282,6 +303,11 @@ function getSentencesFromLexems ($lexems)
 				if ($stacksize >= 3)
 				{
 					$stackthirdtop = array_pop ($stack);
+					if ($stacksize >= 4)
+					{
+						$stackfourthtop = array_pop ($stack);
+						array_push ($stack, $stackfourthtop);
+					}
 					array_push ($stack, $stackthirdtop);
 				}
 				array_push ($stack, $stacksecondtop);
@@ -306,6 +332,105 @@ function getSentencesFromLexems ($lexems)
 						'type' => 'SYNT_DEFINE',
 						'lineno' => $stacktop['lineno'],
 						'load' => $stacktop['load']
+					)
+				);
+				continue;
+			}
+			if
+			(
+				$stacktop['type'] == 'LEX_CLEAR'
+			)
+			{
+				// reduce!
+				array_pop ($stack);
+				array_push
+				(
+					$stack,
+					array
+					(
+						'type' => 'SYNT_CTXMOD',
+						'lineno' => $stacktop['lineno'],
+						'load' => array ('op' => 'clear')
+					)
+				);
+				continue;
+			}
+			if
+			(
+				$stacktop['type'] == 'LEX_TAG' and
+				$stacksecondtop['type'] == 'LEX_INSERT'
+			)
+			{
+				// reduce!
+				array_pop ($stack);
+				array_push
+				(
+					$stack,
+					array
+					(
+						'type' => 'SYNT_CTXMOD',
+						'lineno' => $stacktop['lineno'],
+						'load' => array ('op' => 'insert', 'tag' => $stacktop['load'])
+					)
+				);
+				continue;
+			}
+			if
+			(
+				$stacktop['type'] == 'LEX_TAG' and
+				$stacksecondtop['type'] == 'LEX_REMOVE'
+			)
+			{
+				// reduce!
+				array_pop ($stack);
+				array_push
+				(
+					$stack,
+					array
+					(
+						'type' => 'SYNT_CTXMOD',
+						'lineno' => $stacktop['lineno'],
+						'load' => array ('op' => 'remove', 'tag' => $stacktop['load'])
+					)
+				);
+				continue;
+			}
+			if
+			(
+				$stacktop['type'] == 'SYNT_CTXMOD' and
+				$stacksecondtop['type'] == 'SYNT_CTXMODLIST'
+			)
+			{
+				// reduce!
+				array_pop ($stack);
+				array_pop ($stack);
+				array_push
+				(
+					$stack,
+					array
+					(
+						'type' => 'SYNT_CTXMODLIST',
+						'lineno' => $stacktop['lineno'],
+						'load' => array_merge ($stacksecondtop['load'], $stacktop['load'])
+					)
+				);
+				continue;
+			}
+			if
+			(
+				$stacktop['type'] == 'SYNT_CTXMOD'
+			)
+			{
+				// reduce!
+				array_pop ($stack);
+				array_push
+				(
+					$stack,
+					array
+					(
+						'type' => 'SYNT_CTXMODLIST',
+						'lineno' => $stacktop['lineno'],
+						'load' => array_merge ($stacktop['load'])
 					)
 				);
 				continue;
@@ -454,7 +579,33 @@ function getSentencesFromLexems ($lexems)
 			}
 			if
 			(
-				($stacktop['type'] == 'SYNT_GRANT' or $stacktop['type'] == 'SYNT_DEFINITION') and
+				$stacktop['type'] == 'SYNT_EXPR' and
+				$stacksecondtop['type'] == 'LEX_ON' and
+				$stackthirdtop['type'] == 'SYNT_CTXMODLIST' and
+				$stackfourthtop['type'] == 'LEX_CONTEXT'
+			)
+			{
+				// reduce!
+				array_pop ($stack);
+				array_pop ($stack);
+				array_pop ($stack);
+				array_pop ($stack);
+				array_push
+				(
+					$stack,
+					array
+					(
+						'type' => 'SYNT_ADJUSTMENT',
+						'lineno' => $stacktop['lineno'],
+						'modlist' => $stackthirdtop['load'],
+						'condition' => $stacktop['load']
+					)
+				);
+				continue;
+			}
+			if
+			(
+				($stacktop['type'] == 'SYNT_GRANT' or $stacktop['type'] == 'SYNT_DEFINITION' or $stacktop['type'] == 'SYNT_ADJUSTMENT') and
 				$stacksecondtop['type'] == 'SYNT_CODETEXT'
 			)
 			{
@@ -473,7 +624,8 @@ function getSentencesFromLexems ($lexems)
 			if
 			(
 				$stacktop['type'] == 'SYNT_GRANT' or
-				$stacktop['type'] == 'SYNT_DEFINITION'
+				$stacktop['type'] == 'SYNT_DEFINITION' or
+				$stacktop['type'] == 'SYNT_ADJUSTMENT'
 			)
 			{
 				// reduce!
@@ -588,6 +740,9 @@ function gotClearanceForTagChain ($tagchain)
 							break;
 					}
 				break;
+			case 'SYNT_ADJUSTMENT':
+				// do nothing yet
+				break;
 			default:
 				showError ("Can't process sentence of unknown type '${sentence['type']}'", __FUNCTION__);
 				break;
@@ -663,6 +818,17 @@ function semanticFilter ($code)
 						'load' => "grant sentence uses unknown predicate [${up}]"
 					);
 				break;
+			case 'SYNT_ADJUSTMENT':
+				// Only condition part gets tested, because it's normal to set (or even to unset)
+				// something, that's not set.
+				$up = firstUnrefPredicate ($predicatelist, $sentence['condition']);
+				if ($up !== NULL)
+					return array
+					(
+						'result' => 'NAK',
+						'load' => "adjustment sentence uses unknown predicate [${up}]"
+					);
+				break;
 			default:
 				return array ('result' => 'NAK', 'load' => 'unknown sentence type');
 		}
@@ -705,6 +871,7 @@ function getRackCodeWarnings ()
 				$ret = array_merge ($ret, findTagWarnings ($sentence['definition']));
 				break;
 			case 'SYNT_GRANT':
+			case 'SYNT_ADJUSTMENT':
 				$ret = array_merge ($ret, findTagWarnings ($sentence['condition']));
 				break;
 			default:
@@ -723,6 +890,7 @@ function getRackCodeWarnings ()
 				$ret = array_merge ($ret, findAutoTagWarnings ($sentence['definition']));
 				break;
 			case 'SYNT_GRANT':
+			case 'SYNT_ADJUSTMENT':
 				$ret = array_merge ($ret, findAutoTagWarnings ($sentence['condition']));
 				break;
 			default:
@@ -748,6 +916,7 @@ function getRackCodeWarnings ()
 						continue 3; // clear, next term
 					break;
 				case 'SYNT_GRANT':
+				case 'SYNT_ADJUSTMENT':
 					if (referencedPredicate ($pname, $sentence['condition']))
 						continue 3; // idem
 					break;
