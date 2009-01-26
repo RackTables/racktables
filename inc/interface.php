@@ -515,6 +515,7 @@ function renderEditObjectForm ($object_id)
 	if ($object['has_problems'] == 'yes')
 		echo ' checked';
 	echo "></td></tr>\n";
+	echo "<tr><th class=tdright>Actions:</th><td class=tdleft><a href='${root}process.php?op=deleteObject&page=objects&tab=default&object_id=${object_id}&name=${object['name']}' onclick=\"javascript:return confirm('Are you sure you want to delete the object?')\">Delete object</a></td></tr>\n";
 	echo "<tr><td colspan=2><b>Comment:</b><br><textarea name=object_comment rows=10 cols=80>${object['comment']}</textarea></td></tr>";
 	echo '</table>';
 
@@ -829,7 +830,6 @@ function renderRackObject ($object_id = 0)
 		if (!empty ($record['value']))
 			echo "<tr><th width='50%' class=tdright><span class=sticker>${record['name']}</span>:</th><td class=tdleft>${record['a_value']}</td></tr>\n";
 	printTagTRs ("${root}?page=objgroup&tab=default&group_id=${info['objtype_id']}&");
-	echo "<tr><th width='50%' class=tdright>Actions:</th><td class=tdleft><a href='${root}process.php?op=deleteObject&page=objects&tab=default&object_id=${object_id}&name=${info['name']}' onclick=\"javascript:return confirm('Are you sure you want to delete the object?')\">Delete object</a></td></tr>\n";
 	echo "</table><br>\n";
 	finishPortlet();
 
@@ -1897,7 +1897,7 @@ function renderObjectGroup ()
 		return;
 	}
 	echo '<br><br><table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
-	echo '<tr><th>Common name</th><th>Visible label</th><th>Asset tag</th><th>Barcode</th><th>Row/Rack</th><th></th></tr>';
+	echo '<tr><th>Common name</th><th>Visible label</th><th>Asset tag</th><th>Barcode</th><th>Row/Rack</th></tr>';
 	$order = 'odd';
 	foreach ($objects as $obj)
 	{
@@ -1916,9 +1916,6 @@ function renderObjectGroup ()
 			echo "<td class='${secondclass}'><a href='${root}?page=row&row_id=${obj['row_id']}'>${obj['Row_name']}</a>/<a href='${root}?page=rack&rack_id=${obj['rack_id']}'>${obj['Rack_name']}</a></td>";
 		else
 			echo "<td class='${secondclass}'>Unmounted</td>";
-		echo "<td class='${secondclass}'><a href='${root}process.php?op=deleteObject&page=${pageno}&tab=${tabno}&group_id=${group_id}&object_id=${obj['id']}&name=${obj['dname']}' onclick=\"javascript:return confirm('Are you sure you want to delete the object: ${obj['dname']}?')\">";
-		printImageHREF ('delete', 'Delete object', TRUE);
-		echo "</a></td>";
 		echo '</tr>';
 		$order = $nextorder[$order];
 	}
