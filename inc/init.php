@@ -123,7 +123,8 @@ if ($rackCode['result'] != 'ACK')
 $rackCode = $rackCode['load'];
 
 require_once 'inc/auth.php';
-authenticate();
+$auto_tags = array();
+authenticate(); // sometimes this generates autotags
 // Authentication passed.
 // Note that we don't perform autorization here, so each 1st level page
 // has to do it in its way, e.g. to call authorize().
@@ -154,7 +155,6 @@ if (file_exists ('inc/local.php'))
 	require_once 'inc/local.php';
 
 // These will be filled in by fixContext()
-$auto_tags = array();
 $expl_tags = array();
 $impl_tags = array();
 // and this will remain constant

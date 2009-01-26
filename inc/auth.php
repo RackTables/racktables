@@ -219,7 +219,13 @@ function authenticated_via_ldap ($username, $password)
 				!empty ($ldap_search_attr)
 			)
 			{
-				$results = @ldap_search ($connect, $ldap_search_dn, "(${ldap_search_attr}=${username})", $ldap_displayname_attrs);
+				$results = @ldap_search
+				(
+					$connect,
+					$ldap_search_dn,
+					"(${ldap_search_attr}=${username})",
+					array_merge (array ('memberof'), $ldap_displayname_attrs)
+				);
 				if (@ldap_count_entries ($connect, $results) == 1 or TRUE)
 				{
 					$info = @ldap_get_entries ($connect, $results);
@@ -230,6 +236,21 @@ function authenticated_via_ldap ($username, $password)
 					{
 						$remote_displayname .= $space . $info[0][$attr][0];
 						$space = ' ';
+					}
+					// Pull group membership, if any was returned.
+					if (isset ($info[0]['memberof']))
+					{
+						global $auto_tags;
+						for ($i = 0; $i < $info[0]['memberof']['count']; $i++)
+							foreach (explode (',', $info[0]['memberof'][$i]) as $pair)
+							{
+								list ($attr_name, $attr_value) = explode ('=', $pair);
+								if ($attr_name == 'CN')
+								{
+									$auto_tags[] = array ('tag' => "\$lgcn_${attr_value}");
+									break;
+								}
+							}
 					}
 				}
 			}

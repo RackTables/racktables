@@ -1143,7 +1143,7 @@ function fixContext ()
 		redirectUser ($pageno, $tmap[$pageno][$tabno]);
 
 	if (isset ($page[$pageno]['autotagloader']))
-		$auto_tags = $page[$pageno]['autotagloader'] ();
+		$auto_tags = array_merge ($auto_tags, $page[$pageno]['autotagloader'] ());
 	if
 	(
 		isset ($page[$pageno]['tagloader']) and
