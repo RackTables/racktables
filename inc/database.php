@@ -3711,13 +3711,13 @@ function commitAddFile ($name, $type, $size, $contents, $comment)
 		return 'commitAddFile: SQL query failed';
 }
 
-function commitLinkFile ($file_id, $parent_type, $parent_id)
+function commitLinkFile ($file_id, $entity_type, $entity_id)
 {
 	global $dbxlink;
 	$query  = $dbxlink->prepare('INSERT INTO FileLink (file_id, entity_type, entity_id) VALUES (?, ?, ?)');
 	$query->bindParam(1, $file_id);
-	$query->bindParam(2, $parent_type);
-	$query->bindParam(3, $parent_id);
+	$query->bindParam(2, $entity_type);
+	$query->bindParam(3, $entity_id);
 
 	$result = $query->execute();
 

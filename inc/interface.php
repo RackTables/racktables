@@ -5629,7 +5629,7 @@ function renderFilesByLink ()
 		printf("<td class='tdleft'><a href='%/?page=file&file_id=%s'><strong>%s</strong></a>", $root, $file['id'], $file['name']);
 		$tags = loadEntityTags ('file', $file['id']);
 		if (count ($tags))
-			echo '<br><small>' . serializeTags ($tags, "${root}?page=${pageno}&tab=default&parent_id=${parent_id}&") . '</small>';
+			echo '<br><small>' . serializeTags ($tags, "${root}?page=${pageno}&tab=default&entity_type=${entity_type}&") . '</small>';
 		printf("</td><td class='tdleft'>%s</td>", $file['comment']);
 		printf("<td class='tdleft'>%s</td>", formatFileSize($file['size']));
 		printf("<td class='tdleft'>%s</td>", formatTimestamp($file['ctime']));
