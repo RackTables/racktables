@@ -286,6 +286,7 @@ CREATE TABLE `TagStorage` (
 CREATE TABLE `TagTree` (
   `id` int(10) unsigned NOT NULL auto_increment,
   `parent_id` int(10) unsigned default NULL,
+  `valid_realm` set('file','ipv4net','ipv4vs','ipv4rspool','object','rack','user') NOT NULL default 'file,ipv4net,ipv4vs,ipv4rspool,object,rack,user',
   `tag` char(255) default NULL,
   PRIMARY KEY  (`id`),
   UNIQUE KEY `tag` (`tag`)
