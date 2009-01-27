@@ -7,6 +7,15 @@ if (empty($_REQUEST['file_id']))
 	die();
 }
 
+$pageno = 'file';
+$tabno = 'default';
+fixContext();
+if (!permitted())
+{
+	showError ("Permission denied", __FILE__);
+	die();
+}
+
 $file = getFile($_REQUEST['file_id']);
 if ($file != NULL) 
 {
