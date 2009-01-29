@@ -554,4 +554,7 @@ td.dashed {
 	border: 1px dashed gray;
 }
 
-
+div.tagselector {
+	overflow: scroll;
+	max-height: 400px;
+}

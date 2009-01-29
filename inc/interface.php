@@ -5023,13 +5023,13 @@ function renderTagTreeEditor ()
 		global $taglist;
 		printOpFormIntro ('createTag');
 		echo "<tr><td class=tdleft>";
-		printImageHREF ('add', 'Create tag', TRUE);
+		printImageHREF ('create', 'Create tag', TRUE);
 		echo '</td><td><input type=text name=tag_name tabindex=100></td><td><select name=parent_id tabindex=101>';
 		echo "<option value=0>-- NONE --</option>\n";
 		foreach ($taglist as $taginfo)
 			echo "<option value=${taginfo['id']}>${taginfo['tag']}</option>";
 		echo "</select></td><td>";
-		printImageHREF ('add', 'Create tag', TRUE, 102);
+		printImageHREF ('create', 'Create tag', TRUE, 102);
 		echo "</td></tr></form>\n";
 	}
 	global $taglist, $tagtree;
@@ -5093,7 +5093,7 @@ function renderTagCheckbox ($taginfo, $level = 0)
 	$self = __FUNCTION__;
 	$selected = tagOnChain ($taginfo, $expl_tags) ? ' checked' : '';
 	echo "<tr><td colspan=2 align=left style='padding-left: " . ($level * 16) . "px;'>";
-	echo '<input type=checkbox name=taglist[] value=' . $taginfo['id'] . "${selected}>";
+	echo '<input type=checkbox name=taglist[] value=' . $taginfo['id'] . "${selected}> ";
 	echo $taginfo['tag'] . "</td></tr>\n";
 	foreach ($taginfo['kids'] as $kid)
 		$self ($kid, $level + 1);
@@ -5217,10 +5217,10 @@ function renderTagSelect ()
 		echo "No tags defined";
 		return;
 	}
-	echo '<select name=taglist[] multiple size=' . getConfigVar ('MAXSELSIZE') . '>';
+	echo '<div class=tagselector><table border=0 align=center>';
 	foreach ($tagtree as $taginfo)
-		renderTagOption ($taginfo);
-	echo '</select><br>';
+		renderTagCheckbox ($taginfo);
+	echo '</table></div>';
 }
 
 function renderTagRollerForRow ($row_id)
