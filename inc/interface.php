@@ -3035,6 +3035,7 @@ function renderSearchResults ()
 		preg_match (RE_L2_IFCFG, $terms) or
 		preg_match (RE_L2_SOLID, $terms) or
 		preg_match (RE_L2_CISCO, $terms) or
+		preg_match (RE_L2_IPCFG, $terms) or
 		// Foundry STP bridge ID: bridge priotity + port MAC address. Cut off first 4 chars and look for MAC address.
 		preg_match (RE_L2_FDRYSTP, $terms)
 	)
@@ -3042,6 +3043,7 @@ function renderSearchResults ()
 	{
 		$terms = str_replace ('.', '', $terms);
 		$terms = str_replace (':', '', $terms);
+		$terms = str_replace ('-', '', $terms);
 		$terms = substr ($terms, -12);
 		$result = searchByl2address ($terms);
 		if ($result !== NULL)

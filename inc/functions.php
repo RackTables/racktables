@@ -421,6 +421,8 @@ function l2addressForDatabase ($string)
 			return implode ('', $pieces);
 		case (preg_match (RE_L2_CISCO, $string)):
 			return implode ('', explode ('.', $string));
+		case (preg_match (RE_L2_IPCFG, $string)):
+			return implode ('', explode ('-', $string));
 		default:
 			return NULL;
 	}
