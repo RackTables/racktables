@@ -85,13 +85,11 @@ prepare_push_commands()
 		fi
 		printf "int $portname\n" >> $CMDS1
 		if [ $vlanid -lt 4096 ]; then
-			printf "swi access vlan $vlanid\nswi mode access\n" >> $CMDS1
 			printf "no description\n" >> $CMDS1
 		else
 			printf "descr VLAN$vlanid\n" >> $CMDS1
-			printf "swi trunk encap dot1q\nswi mode trunk\n" >> $CMDS1
-			"$MYDIR/trunkdecoder" $vlanid >> $CMDS1
 		fi
+		"$MYDIR/vlandecoder" $vlanid >> $CMDS1
 		printf "exit\n" >> $CMDS1
 		echo "C!64!$portname!$ENDPOINT!$vlanid" >> "$FILE2"
 	done < "$FILE1"
@@ -110,7 +108,7 @@ do_fetch()
 	nc $ENDPOINT 23 < $CMDS3 > "$OUT3"
 	cat "$OUT1" | fgrep ' active    ' | sed $SEDFLAG 's/^([[:digit:]]+)[[:space:]]+(.+)[[:space:]]+active    (.*)/\1=\2/;s/[[:space:]]+$//' > $FILE1
 	# Add trunk data, if appropriate.
-	[ -s "$MYDIR/trunktable" ] && cat "$MYDIR/trunktable" >> $FILE1
+	[ -s "$MYDIR/vlantable" ] && cat "$MYDIR/vlantable" >> $FILE1
 
 	# First extract structured info about VLAN membership, then map
 	# special descriptions into VLAN IDs.
