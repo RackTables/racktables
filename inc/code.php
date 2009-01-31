@@ -413,7 +413,7 @@ function getSentencesFromLexems ($lexems)
 					(
 						'type' => 'SYNT_CTXMODLIST',
 						'lineno' => $stacktop['lineno'],
-						'load' => array_merge ($stacksecondtop['load'], $stacktop['load'])
+						'load' => array_merge ($stacksecondtop['load'], array ($stacktop['load']))
 					)
 				);
 				continue;
@@ -718,9 +718,33 @@ function eval_expression ($expr, $tagchain, $ptable)
 	}
 }
 
-function gotClearanceForTagChain ($tagchain)
+// Do adjustment: execute request list, return TRUE on any changes done.
+function processAdjustmentSentence ($modlist, &$chain)
 {
-	global $rackCode;
+	$ret = FALSE;
+	foreach ($modlist as $mod)
+		switch ($mod['op'])
+		{
+			case 'insert':
+				break;
+			case 'remove':
+				break;
+			case 'clear':
+				$ret = TRUE;
+				break;
+			default: // HCF
+				showError ('Internal error', __FUNCTION__);
+				die;
+		}
+	return $ret;
+}
+
+// The argument doesn't include explicit and implicit tags. This allows us to derive implicit chain
+// each time we modify the given argument (and work with the modified copy from now on).
+// After the work is done the global $impl_tags is silently modified
+function gotClearanceForTagChain ($const_base)
+{
+	global $rackCode, $expl_tags, $impl_tags;
 	$ptable = array();
 	foreach ($rackCode as $sentence)
 	{
@@ -730,7 +754,7 @@ function gotClearanceForTagChain ($tagchain)
 				$ptable[$sentence['term']] = $sentence['definition'];
 				break;
 			case 'SYNT_GRANT':
-				if (eval_expression ($sentence['condition'], $tagchain, $ptable))
+				if (eval_expression ($sentence['condition'], array_merge ($const_base, $expl_tags, $impl_tags), $ptable))
 					switch ($sentence['decision'])
 					{
 						case 'allow':
@@ -743,7 +767,12 @@ function gotClearanceForTagChain ($tagchain)
 					}
 				break;
 			case 'SYNT_ADJUSTMENT':
-				// do nothing yet
+				if
+				(
+					eval_expression ($sentence['condition'], array_merge ($const_base, $expl_tags, $impl_tags), $ptable) and
+					processAdjustmentSentence ($sentence['modlist'], $expl_tags)
+				) // recalculate implicit chain only after actual change, not just on matched condition
+					$impl_tags = getImplicitTags ($expl_tags); // recalculate
 				break;
 			default:
 				showError ("Can't process sentence of unknown type '${sentence['type']}'", __FUNCTION__);

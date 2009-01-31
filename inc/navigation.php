@@ -732,8 +732,7 @@ function getDirectChildPages ($pageno)
 		if
 		(
 			isset ($cpage['parent']) and
-			$cpage['parent'] == $pageno and
-			accessibleSubpage ($cpageno) == TRUE
+			$cpage['parent'] == $pageno
 		)
 			$children[$cpageno] = $cpage;
 	return $children;

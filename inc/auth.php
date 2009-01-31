@@ -112,29 +112,26 @@ function permitted ($p = NULL, $t = NULL, $o = NULL, $annex = array())
 	global $pageno, $tabno, $op;
 	global
 		$user_tags,
-		$auto_tags,
-		$expl_tags,
-		$impl_tags;
+		$auto_tags;
 
 	if ($p === NULL)
 		$p = $pageno;
 	if ($t === NULL)
 		$t = $tabno;
+	$my_auto_tags = $auto_tags;
+	$my_auto_tags[] = array ('tag' => '$page_' . $p);
+	$my_auto_tags[] = array ('tag' => '$tab_' . $t);
+	if ($o === NULL and isset ($op))
+	{
+		$my_auto_tags[] = array ('tag' => '$op_' . $op);
+		$my_auto_tags[] = array ('tag' => '$any_op');
+	}
 	$subject = array_merge
 	(
 		$user_tags,
-		$auto_tags,
-		$expl_tags,
-		$impl_tags,
+		$my_auto_tags,
 		$annex
 	);
-	$subject[] = array ('tag' => '$page_' . $p);
-	$subject[] = array ('tag' => '$tab_' . $t);
-	if ($o === NULL and isset ($op))
-	{
-		$subject[] = array ('tag' => '$op_' . $op);
-		$subject[] = array ('tag' => '$any_op');
-	}
 	// XXX: The solution below is only appropriate for a corner case of a more universal
 	// problem: to make the decision for an entity belonging to a cascade of nested
 	// containers. Each container being an entity itself, it may have own tags (explicit
@@ -160,15 +157,6 @@ function permitted ($p = NULL, $t = NULL, $o = NULL, $annex = array())
 	// With the above being simple discrete algorythms, I believe, that they very reliably
 	// replicate human behavior. This gives a vast ground for further research, so I would
 	// only note, that the morale used in RackTables is "principles first".
-	return gotClearanceForTagChain ($subject);
-}
-
-function accessibleSubpage ($p)
-{
-	global $user_tags;
-	$subject = $user_tags;
-	$subject[] = array ('tag' => '$page_' . $p);
-	$subject[] = array ('tag' => '$tab_default');
 	return gotClearanceForTagChain ($subject);
 }
 
