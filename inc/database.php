@@ -1545,21 +1545,6 @@ function commitUpdateUserAccount ($id, $new_username, $new_realname, $new_passwo
 	return TRUE;
 }
 
-function commitEnableUserAccount ($id, $new_enabled_value)
-{
-	global $dbxlink;
-	$query =
-		"update UserAccount set user_enabled = '${new_enabled_value}' " .
-		"where user_id = ${id} limit 1";
-	$result = $dbxlink->query ($query);
-	if ($result == NULL)
-	{
-		showError ('SQL query failed', __FUNCTION__);
-		die;
-	}
-	return TRUE;
-}
-
 // This function returns an array of all port type pairs from PortCompat table.
 function getPortCompat ()
 {

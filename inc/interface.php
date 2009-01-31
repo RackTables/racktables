@@ -96,8 +96,6 @@ $image['inservice']['height'] = 16;
 $image['notinservice']['path'] = 'pix/tango-dialog-error.png';
 $image['notinservice']['width'] = 16;
 $image['notinservice']['height'] = 16;
-$image['blockuser'] = $image['inservice'];
-$image['unblockuser'] = $image['notinservice'];
 $image['find']['path'] = 'pix/tango-system-search.png';
 $image['find']['width'] = 16;
 $image['find']['height'] = 16;
@@ -1362,8 +1360,8 @@ function printLog ($log)
 				38 => array ('code' => 'success', 'format' => '%u real server(s) were successfully (de)activated'),
 				39 => array ('code' => 'success', 'format' => 'User account %s updated.'),
 				40 => array ('code' => 'success', 'format' => 'User account %s created.'),
-				41 => array ('code' => 'success', 'format' => 'User account disabled.'),
-				42 => array ('code' => 'success', 'format' => 'User account enabled.'),
+// ...
+// ...
 				43 => array ('code' => 'success', 'format' => 'Saved successfully.'),
 				44 => array ('code' => 'success', 'format' => '%s failures and %s successfull changes.'),
 				45 => array ('code' => 'success', 'format' => "Attribute '%s' created."),
@@ -1404,9 +1402,9 @@ function printLog ($log)
 				102 => array ('code' => 'error', 'format' => "Error creating user account '%s'"),
 				103 => array ('code' => 'error', 'format' => 'getHashByID() failed'),
 				104 => array ('code' => 'error', 'format' => "Error updating user account '%s'"),
-				105 => array ('code' => 'error', 'format' => 'Error enabling user account.'),
-				106 => array ('code' => 'error', 'format' => 'Error disabling user account.'),
-				107 => array ('code' => 'error', 'format' => 'Admin account cannot be disabled'),
+// ...
+// ...
+// ...
 				108 => array ('code' => 'error', 'format' => '%u failures and %u successfull changes.'),
 				109 => array ('code' => 'error', 'format' => 'Update failed!'),
 				110 => array ('code' => 'error', 'format' => 'Supplement failed!'),
@@ -3359,7 +3357,7 @@ function renderUserListEditor ()
 	function printNewItemTR ()
 	{
 		printOpFormIntro ('createUser');
-		echo "<tr><td>&nbsp;</td><td><input type=text size=16 name=username tabindex=100></td>\n";
+		echo "<tr><td><input type=text size=16 name=username tabindex=100></td>\n";
 		echo "<td><input type=text size=24 name=realname tabindex=101></td>";
 		echo "<td><input type=password size=64 name=password tabindex=102></td><td>";
 		printImageHREF ('create', 'Add new account', TRUE, 103);
@@ -3369,28 +3367,13 @@ function renderUserListEditor ()
 	startPortlet ('User accounts');
 	showMessageOrError();
 	echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
-	echo "<tr><th>status (click to change)</th><th>Username</th><th>Real name</th><th>Password</th><th>&nbsp;</th></tr>\n";
+	echo "<tr><th>Username</th><th>Real name</th><th>Password</th><th>&nbsp;</th></tr>\n";
 	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
 		printNewItemTR();
 	foreach ($accounts as $account)
 	{
 		printOpFormIntro ('updateUser', array ('user_id' => $account['user_id']));
-		echo "<tr><td>";
-		if ($account['user_enabled'] == 'yes' && $account['user_id'] != 1)
-		{
-			echo "<a href='${root}process.php?op=disableUser&page=${pageno}&tab=${tabno}&user_id=${account['user_id']}'>";
-			printImageHREF ('blockuser', 'disable account');
-			echo "</a>\n";
-		}
-		if ($account['user_enabled'] == 'no' && $account['user_id'] != 1)
-		{
-			echo "<a href='${root}process.php?op=enableUser&page=${pageno}&tab=${tabno}&user_id=${account['user_id']}'>";
-			printImageHREF ('unblockuser', 'enable account');
-			echo "</a>\n";
-		}
-		// Otherwise skip icon.
-		echo "</td>";
-		echo "<td><input type=text name=username value='${account['user_name']}' size=16></td>";
+		echo "<tr><td><input type=text name=username value='${account['user_name']}' size=16></td>";
 		echo "<td><input type=text name=realname value='${account['user_realname']}' size=24></td>";
 		echo "<td><input type=password name=password value='${account['user_password_hash']}' size=64></td><td>";
 		printImageHREF ('save', 'Save changes', TRUE);
@@ -5392,13 +5375,6 @@ function renderUser ($user_id)
 	echo '<table border=0 align=center>';
 	echo "<tr><th class=tdright>Account name:</th><td class=tdleft>${username}</td></tr>";
 	echo '<tr><th class=tdright>Real name:</th><td class=tdleft>' . $accounts[$username]['user_realname'] . '</td></tr>';
-	echo '<tr><th class=tdright>Enabled:</th><td class=tdleft>';
-	// This is weird, some other image titles have to be used.
-	if ($accounts[$username]['user_enabled'] == 'yes')
-		printImageHREF ('blockuser', 'enabled');
-	else
-		printImageHREF ('unblockuser', 'disabled');
-	echo '</td></tr>';
 	// Using printTagTRs() is inappropriate here, because autotags will be filled with current user's
 	// data, not the viewed one.
 //	printTagTRs ("${root}?page=userlist&");

@@ -295,7 +295,6 @@ CREATE TABLE `TagTree` (
 CREATE TABLE `UserAccount` (
   `user_id` int(10) unsigned NOT NULL auto_increment,
   `user_name` char(64) NOT NULL,
-  `user_enabled` enum('yes','no') NOT NULL default 'no',
   `user_password_hash` char(128) default NULL,
   `user_realname` char(64) default NULL,
   PRIMARY KEY  (`user_id`),

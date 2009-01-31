@@ -60,8 +60,6 @@ function authenticate ()
 	}
 	if ($require_valid_user and !isset ($accounts[$remote_username]))
 		dieWith401();
-	if (isset ($accounts[$remote_username]) and $accounts[$remote_username]['user_enabled'] != 'yes')
-		dieWith401();
 	$remote_displayname = $remote_username;
 	switch (TRUE)
 	{

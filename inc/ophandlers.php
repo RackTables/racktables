@@ -485,26 +485,6 @@ function updateUser ()
 		return buildRedirectURL (__FUNCTION__, 'ERR2', array ($username));
 }
 
-function enableUser ()
-{
-	assertUIntArg ('user_id', __FUNCTION__);
-	if (commitEnableUserAccount ($_REQUEST['user_id'], 'yes') == TRUE)
-		return buildRedirectURL (__FUNCTION__, 'OK');
-	else
-		return buildRedirectURL (__FUNCTION__, 'ERR');
-}
-
-function disableUser ()
-{
-	assertUIntArg ('user_id', __FUNCTION__);
-	if ($_REQUEST['user_id'] == 1)
-		return buildRedirectURL (__FUNCTION__, 'ERR1');
-	if (commitEnableUserAccount ($_REQUEST['user_id'], 'no'))
-		return buildRedirectURL (__FUNCTION__, 'OK');
-	else
-		return buildRedirectURL (__FUNCTION__, 'ERR2');
-}
-
 // This function find differences in users's submit and PortCompat table
 // and modifies database accordingly.
 function savePortMap ()

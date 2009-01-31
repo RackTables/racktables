@@ -348,8 +348,8 @@ function init_database_dynamic ()
 	}
 	else
 	{
-		$query = "INSERT INTO `UserAccount` (`user_id`, `user_name`, `user_enabled`, `user_password_hash`, `user_realname`) " .
-			"VALUES (1,'admin','yes',sha1('${_REQUEST['password']}'),'RackTables Administrator')";
+		$query = "INSERT INTO `UserAccount` (`user_id`, `user_name`, `user_password_hash`, `user_realname`) " .
+			"VALUES (1,'admin',sha1('${_REQUEST['password']}'),'RackTables Administrator')";
 		$result = $dbxlink->exec ($query);
 		echo "Administrator password has been set successfully.<br>";
 		return TRUE;
