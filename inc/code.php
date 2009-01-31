@@ -432,7 +432,7 @@ function getSentencesFromLexems ($lexems)
 					(
 						'type' => 'SYNT_CTXMODLIST',
 						'lineno' => $stacktop['lineno'],
-						'load' => array_merge ($stacktop['load'])
+						'load' => array ($stacktop['load'])
 					)
 				);
 				continue;
@@ -718,25 +718,42 @@ function eval_expression ($expr, $tagchain, $ptable)
 	}
 }
 
-// Do adjustment: execute request list, return TRUE on any changes done.
+// Process a context adjustment request, update given chain accordingly,
+// return TRUE on any changes done.
+// The request is a sequence of clear/insert/remove requests exactly as cooked
+// for each SYNT_CTXMODLIST node.
 function processAdjustmentSentence ($modlist, &$chain)
 {
-	$ret = FALSE;
+	global $rackCode;
+	$didChanges = FALSE;
 	foreach ($modlist as $mod)
 		switch ($mod['op'])
 		{
 			case 'insert':
+				foreach ($chain as $etag)
+					if ($etag['tag'] == $mod['tag']) // already there, next request
+						break 2;
+				$chain[] = array ('tag' => $mod['tag']);
+				$didChanges = TRUE;
 				break;
 			case 'remove':
+				foreach ($chain as $key => $etag)
+					if ($etag['tag'] == $mod['tag']) // drop first match and return
+					{
+						unset ($chain[$key]);
+						$didChanges = TRUE;
+						break 2;
+					}
 				break;
 			case 'clear':
-				$ret = TRUE;
+				$chain = array();
+				$didChanges = TRUE;
 				break;
 			default: // HCF
 				showError ('Internal error', __FUNCTION__);
 				die;
 		}
-	return $ret;
+	return $didChanges;
 }
 
 // The argument doesn't include explicit and implicit tags. This allows us to derive implicit chain

@@ -1158,41 +1158,6 @@ function fixContext ()
 	}
 }
 
-// Process a context adjustment request, update implicit tag chain accordingly.
-// The request is a sequence of clear/insert/remove requests exactly as cooked
-// for each SYNT_CTXMODLIST piece.
-function adjustContext ($modlist)
-{
-	global $expl_tags, $impl_tags;
-	$didChanges = FALSE;
-	foreach ($modlist as $mod)
-		switch ($mod['op'])
-		{
-			case 'clear':
-				$expl_tags = array();
-				$didChanges = TRUE;
-				break;
-			case 'insert':
-				foreach ($expl_tags as $etag)
-					if ($etag['tag'] == $mod['load']) // already on the chain
-						break 2;
-				$expl_tags[] = array ('tag' => $mod['load']);
-				$didChanges = TRUE;
-				break;
-			case 'remove':
-				foreach ($expl_tags as $key => $etag)
-					if ($etag['tag'] == $mod['load']) // drop first and return
-					{
-						unset ($expl_tags[$key]);
-						$didChanges = TRUE;
-						break 2;
-					}
-				break;
-		}
-	if ($didChanges)
-		$impl_tags = getImplicitTags ($expl_tags);
-}
-
 // Take a list of user-supplied tag IDs to build a list of valid taginfo
 // records indexed by tag IDs (tag chain).
 function buildTagChainFromIds ($tagidlist)
