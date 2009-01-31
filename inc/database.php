@@ -3762,4 +3762,13 @@ function commitDeleteFile ($file_id)
 	return '';
 }
 
+function getChapterList ()
+{
+	$ret = array();
+	$result = useSelectBlade ('select chapter_no, chapter_name from Chapter order by chapter_name');
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
+		$ret[$row['chapter_no']] = $row['chapter_name'];
+	return $ret;
+}
+
 ?>

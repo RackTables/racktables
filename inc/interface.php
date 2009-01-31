@@ -3496,62 +3496,74 @@ function renderRackPage ($rack_id)
 
 function renderDictionary ()
 {
-	global $nextorder;
+	global $root, $nextorder;
 	$dict = getDict (TRUE);
-	echo "<br><table class=cooltable border=0 cellpadding=5 cellspacing=0 align=center>\n";
+	echo '<ul>';
 	foreach ($dict as $chapter_no => $chapter)
 	{
-		$order = 'odd';
-		echo "<tr><th>Chapter</th><th>status</th><th>Word</th></tr>\n";
 		$wc = count ($chapter['word']);
-		echo "<tr class=row_${order}><td class=tdleft" . ($wc ? " rowspan = ${wc}" : '');
-		echo "><div title='number=${chapter_no}'>${chapter['name']} (${wc} records)</div></td>";
-		if (!$wc)
-			echo "<td colspan=2>none</td>";
-		else
-		{
-			$chap_start = TRUE;
-			foreach ($chapter['word'] as $key => $value)
-			{
-				if (!$chap_start)
-					echo "<tr class=row_${order}>";
-				else
-					$chap_start = FALSE;
-				echo '<td>';
-				printImageHREF (($key <= MAX_DICT_KEY) ? 'computer' : 'favorite');
-				echo '&nbsp;';
-				if ($chapter['refcnt'][$key])
-					echo $chapter['refcnt'][$key];
-				echo "</td><td><div title='key=${key}'>${value}</div></td></tr>\n";
-				$order = $nextorder[$order];
-			}
-		}
+		echo "<li><a href='${root}?page=chapter&chapter_no=${chapter_no}'>${chapter['name']}</a>";
+		echo " (${wc} records)</li>";
 	}
-	echo "</table>\n<br>";
+	echo '</ul>';
 }
 
-function renderDictionaryEditor ()
+function renderChapter ($tgt_chapter_no)
+{
+	global $nextorder;
+	foreach (getDict (TRUE) as $chapter_no => $chapter)
+	{
+		if ($chapter_no != $tgt_chapter_no)
+			continue;
+		$wc = count ($chapter['word']);
+		if (!$wc)
+		{
+			echo "<center><h2>(no records)</h2></center>";
+			break;
+		}
+		echo "<br><table class=cooltable border=0 cellpadding=5 cellspacing=0 align=center>\n";
+		echo "<tr><th colspan=3>${wc} record(s)</th></tr>\n";
+		echo "<tr><th>Origin</th><th>Refcnt</th><th>Word</th></tr>\n";
+		$order = 'odd';
+		foreach ($chapter['word'] as $key => $value)
+		{
+			echo "<tr class=row_${order}><td>";
+			printImageHREF (($key <= MAX_DICT_KEY) ? 'computer' : 'favorite');
+			echo '</td><td>';
+			if ($chapter['refcnt'][$key])
+				echo $chapter['refcnt'][$key];
+			echo "</td><td><div title='key=${key}'>${value}</div></td></tr>\n";
+			$order = $nextorder[$order];
+		}
+		echo "</table>\n<br>";
+		break;
+	}
+}
+
+function renderChapterEditor ($tgt_chapter_no)
 {
 	global $root, $pageno, $tabno, $nextorder;
+	function printNewItemTR ()
+	{
+		printOpFormIntro ('add');
+		echo '<tr><td>&nbsp;</td><td>';
+		printImageHREF ('add', 'Add new', TRUE);
+		echo "</td>";
+		echo "<td class=tdleft><input type=text name=dict_value size=32></td><td>";
+		printImageHREF ('add', 'Add new', TRUE);
+		echo '</td></tr></form>';
+	}
 	$dict = getDict();
 	showMessageOrError();
 	echo "<br><table class=cooltable border=0 cellpadding=5 cellspacing=0 align=center>\n";
 	foreach ($dict as $chapter_no => $chapter)
 	{
+		if ($chapter_no != $tgt_chapter_no)
+			continue;
 		$order = 'odd';
-		echo "<tr><th>Chapter</th><th>&nbsp;</th><th>&nbsp;</th><th>Word</th><th>&nbsp;</th></tr>\n";
-		$wc = count ($chapter['word']);
-		// One extra span for the new record per each chapter block.
-		echo "<tr class=row_${order}><td class=tdleft" . ($wc ? ' rowspan = ' . ($wc + 1) : '');
-		echo "><div title='number=${chapter_no}'>${chapter['name']} (${wc} records)</div></td>";
-		printOpFormIntro ('add', array ('chapter_no' => $chapter['no']));
-		echo "<td>&nbsp;</td><td>";
-		printImageHREF ('add', 'Add new', TRUE);
-		echo "</td>";
-		echo "<td class=tdleft><input type=text name=dict_value size=32></td>";
-		echo "<td>&nbsp;</td>";
-		echo '</tr></form>';
-		$order = $nextorder[$order];
+		echo "<tr><th>Origin</th><th>&nbsp;</th><th>Word</th><th>&nbsp;</th></tr>\n";
+		if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
+			printNewItemTR();
 		foreach ($chapter['word'] as $key => $value)
 		{
 			echo "<tr class=row_${order}><td>";
@@ -3563,9 +3575,9 @@ function renderDictionaryEditor ()
 			}
 			else
 			{
-				printOpFormIntro ('upd', array ('chapter_no' => $chapter['no'], 'dict_key' => $key));
+				printOpFormIntro ('upd', array ('dict_key' => $key));
 				printImageHREF ('favorite');
-				echo "<td>";
+				echo "</td><td>";
 				// Prevent deleting words currently used somewhere.
 				if ($chapter['refcnt'][$key])
 					printImageHREF ('nodelete', 'referenced ' . $chapter['refcnt'][$key] . ' time(s)');
@@ -3582,8 +3594,11 @@ function renderDictionaryEditor ()
 			}
 			$order = $nextorder[$order];
 		} // foreach ($chapter['word']
+		if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')
+			printNewItemTR();
+		echo "</table>\n";
+		break;
 	} // foreach ($dict
-	echo "</table>\n";
 }
 
 // We don't allow to rename/delete a sticky chapter and we don't allow

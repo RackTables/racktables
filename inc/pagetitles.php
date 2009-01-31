@@ -222,4 +222,16 @@ function dynamic_title_file ()
 	return $ret;
 }
 
+function dynamic_title_chapter ()
+{
+	$chapters = getChapterList();
+	$chapter_no = $_REQUEST['chapter_no'];
+	$chapter_name = isset ($chapters[$chapter_no]) ? $chapters[$chapter_no] : 'N/A';
+	return array
+	(
+		'name' => "Chapter '${chapter_name}'",
+		'params' => array ('chapter_no' => $chapter_no)
+	);
+}
+
 ?>

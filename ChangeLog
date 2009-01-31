@@ -14,6 +14,7 @@
 	update: resolved performance issue for systems with many L2 ports
 	update: enable username handling in Cisco switch connector
 	update: introduce icons for routers and SLB
+	update: display and edit the dictionary chapter by chapter (ticket:151)
 	bugfix: show error message if snmp module isn't loaded.  closes ticket 43 (by Aaron)
 	bugfix: show error message for duplicate IPv4 network record
 	bugfix: it was possible to access the system as any existing
