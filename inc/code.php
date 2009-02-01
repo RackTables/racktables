@@ -733,7 +733,10 @@ function processAdjustmentSentence ($modlist, &$chain)
 				foreach ($chain as $etag)
 					if ($etag['tag'] == $mod['tag']) // already there, next request
 						break 2;
-				$chain[] = array ('tag' => $mod['tag']);
+				$search = getTagByName ($mod['tag']);
+				if ($search === NULL) // skip martians silently
+					break;
+				$chain[] = $search;
 				$didChanges = TRUE;
 				break;
 			case 'remove':

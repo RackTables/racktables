@@ -154,20 +154,17 @@ require_once 'inc/snmp.php';
 if (file_exists ('inc/local.php'))
 	require_once 'inc/local.php';
 
-// These will be filled in by fixContext()
+// These will be extended later by fixContext()
 $expl_tags = array();
 $impl_tags = array();
-// and this will remain constant
-if (isset ($script_mode) and $script_mode === TRUE)
-	$user_tags = array();
-else
+if (!isset ($script_mode) or $script_mode !== TRUE)
 {
-	$user_tags = getUserAutoTags();
+	$auto_tags = array_merge ($auto_tags, getUserAutoTags());
 	if (isset ($accounts[$remote_username]))
 	{
 		$tbase = loadUserTags ($accounts[$remote_username]['user_id']);
-		$textra = getImplicitTags ($tbase); 
-		$user_tags = array_merge ($user_tags, $tbase, $textra);
+		$expl_tags = array_merge ($expl_tags, $tbase);
+		$impl_tags = getImplicitTags ($tbase); 
 	}
 }
 

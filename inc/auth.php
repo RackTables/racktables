@@ -110,9 +110,7 @@ function dieWith401 ()
 function permitted ($p = NULL, $t = NULL, $o = NULL, $annex = array())
 {
 	global $pageno, $tabno, $op;
-	global
-		$user_tags,
-		$auto_tags;
+	global $auto_tags;
 
 	if ($p === NULL)
 		$p = $pageno;
@@ -128,7 +126,6 @@ function permitted ($p = NULL, $t = NULL, $o = NULL, $annex = array())
 	}
 	$subject = array_merge
 	(
-		$user_tags,
 		$my_auto_tags,
 		$annex
 	);

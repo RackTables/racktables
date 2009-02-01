@@ -1201,6 +1201,16 @@ function getObjectiveTagTree ($tree, $realm)
 	return $ret;
 }
 
+// Get taginfo record by tag name, return NULL, if record doesn't exist.
+function getTagByName ($target_name)
+{
+	global $taglist;
+	foreach ($taglist as $taginfo)
+		if ($taginfo['tag'] == $target_name)
+			return $taginfo;
+	return NULL;
+}
+
 function getTagFilter ()
 {
 	return isset ($_REQUEST['tagfilter']) ? complementByKids ($_REQUEST['tagfilter']) : array();

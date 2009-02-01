@@ -5423,7 +5423,7 @@ function renderAccessDenied ()
 	echo "<link rel=icon href='" . getFaviconURL() . "' type='image/x-icon' />";
 	echo "<link rel=icon href='" . getFaviconURL() . "' type='image/x-icon' />";
 	echo "</head><body>";
-	global $root, $user_tags, $auto_tags, $expl_tags, $impl_tags, $pageno, $tabno;
+	global $root, $auto_tags, $expl_tags, $impl_tags, $pageno, $tabno;
 	echo "<table border=1 cellspacing=0 cellpadding=3 width='50%' align=center>\n";
 	echo '<tr><th colspan=2><h3>';
 	printImageHREF ('DENIED');
@@ -5436,8 +5436,6 @@ function renderAccessDenied ()
 	echo serializeTags ($impl_tags) . "&nbsp;</td></tr>\n";
 	echo "<tr><th width='50%' class=tdright><span class=tagheader>Automatic tags</span>:</th><td class=tdleft>";
 	echo serializeTags ($auto_tags) . "&nbsp;</td></tr>\n";
-	echo "<tr><th width='50%' class=tdright><span class=tagheader>This user tags</span>:</th><td class=tdleft>";
-	echo serializeTags ($user_tags) . "&nbsp;</td></tr>\n";
 	echo "<tr><th width='50%' class=tdright>Requested page:</th><td class=tdleft>${pageno}</td></tr>\n";
 	echo "<tr><th width='50%' class=tdright>Requested tab:</th><td class=tdleft>${tabno}</td></tr>\n";
 	echo "<tr><td colspan=2 align=center>Click <a href='${root}?logout'>here</a> to logout.</td></tr>\n";
