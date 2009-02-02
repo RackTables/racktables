@@ -1153,8 +1153,8 @@ function fixContext ()
 		isset ($_REQUEST[$page[$pageno]['bypass']])
 	)
 	{
-		$expl_tags = array_merge ($expl_tags, $page[$pageno]['tagloader'] ($_REQUEST[$page[$pageno]['bypass']]));
-		$impl_tags = array_merge ($impl_tags, getImplicitTags ($expl_tags));
+		$expl_tags = mergeTagChains ($expl_tags, $page[$pageno]['tagloader'] ($_REQUEST[$page[$pageno]['bypass']]));
+		$impl_tags = mergeTagChains ($impl_tags, getImplicitTags ($expl_tags));
 	}
 }
 
@@ -1209,6 +1209,20 @@ function getTagByName ($target_name)
 		if ($taginfo['tag'] == $target_name)
 			return $taginfo;
 	return NULL;
+}
+
+// Merge two chains, filtering dupes out. Return the resulting superset.
+function mergeTagChains ($chainA, $chainB)
+{
+	// $ret = $chainA;
+	// Reindex by tag id in any case.
+	$ret = array();
+	foreach ($chainA as $tag)
+		$ret[$tag['id']] = $tag;
+	foreach ($chainB as $tag)
+		if (!isset ($ret[$tag['id']]))
+			$ret[$tag['id']] = $tag;
+	return $ret;
 }
 
 function getTagFilter ()
