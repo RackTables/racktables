@@ -1153,8 +1153,8 @@ function fixContext ()
 		isset ($_REQUEST[$page[$pageno]['bypass']])
 	)
 	{
-		$expl_tags = $page[$pageno]['tagloader'] ($_REQUEST[$page[$pageno]['bypass']]);
-		$impl_tags = getImplicitTags ($expl_tags);
+		$expl_tags = array_merge ($expl_tags, $page[$pageno]['tagloader'] ($_REQUEST[$page[$pageno]['bypass']]));
+		$impl_tags = array_merge ($impl_tags, getImplicitTags ($expl_tags));
 	}
 }
 
