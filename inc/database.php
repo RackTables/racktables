@@ -3515,7 +3515,7 @@ function getFile ($file_id = 0)
 		$ret['comment'] = $row['comment'];
 		$query->closeCursor();
 
-		// Someone accessed this file,date('YmdHis'); update atime
+		// Someone accessed this file, update atime
 		$q_atime = $dbxlink->prepare('UPDATE File SET atime = ? WHERE id = ?');
 		$q_atime->bindParam(1, date('YmdHis'));
 		$q_atime->bindParam(2, $file_id);
