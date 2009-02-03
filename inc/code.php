@@ -371,7 +371,7 @@ function getSentencesFromLexems ($lexems)
 					(
 						'type' => 'SYNT_CTXMOD',
 						'lineno' => $stacktop['lineno'],
-						'load' => array ('op' => 'insert', 'tag' => $stacktop['load'])
+						'load' => array ('op' => 'insert', 'tag' => $stacktop['load'], 'lineno' => $stacktop['lineno'])
 					)
 				);
 				continue;
@@ -392,7 +392,7 @@ function getSentencesFromLexems ($lexems)
 					(
 						'type' => 'SYNT_CTXMOD',
 						'lineno' => $stacktop['lineno'],
-						'load' => array ('op' => 'remove', 'tag' => $stacktop['load'])
+						'load' => array ('op' => 'remove', 'tag' => $stacktop['load'], 'lineno' => $stacktop['lineno'])
 					)
 				);
 				continue;
@@ -921,8 +921,11 @@ function getRackCodeWarnings ()
 			case 'SYNT_DEFINITION':
 				$ret = array_merge ($ret, findTagWarnings ($sentence['definition']));
 				break;
-			case 'SYNT_GRANT':
 			case 'SYNT_ADJUSTMENT':
+				$ret = array_merge ($ret, findTagWarnings ($sentence['condition']));
+				$ret = array_merge ($ret, findCtxModWarnings ($sentence['modlist']));
+				break;
+			case 'SYNT_GRANT':
 				$ret = array_merge ($ret, findTagWarnings ($sentence['condition']));
 				break;
 			default:
@@ -1117,7 +1120,6 @@ function findAutoTagWarnings ($expr)
 // Idem WRT tags.
 function findTagWarnings ($expr)
 {
-	global $taglist;
 	switch ($expr['type'])
 	{
 		case 'LEX_BOOLCONST':
@@ -1127,9 +1129,8 @@ function findTagWarnings ($expr)
 			// Only verify stuff, that has passed through the saving handler.
 			if (!mb_ereg_match (TAGNAME_REGEXP, $expr['load']))
 				return array();
-			foreach ($taglist as $taginfo)
-				if ($taginfo['tag'] == $expr['load'])
-					return array();
+			if (getTagByName ($expr['load']) !== NULL)
+				return array();
 			return array (array
 			(
 				'header' => refRCLineno ($expr['lineno']),
@@ -1152,6 +1153,21 @@ function findTagWarnings ($expr)
 				'text' => "Skipped expression of unknown type '${expr['type']}'"
 			));
 	}
+}
+
+// Check context modifiers, warn about those, which try referencing non-existent tags.
+function findCtxModWarnings ($modlist)
+{
+	$ret = array();
+	foreach ($modlist as $mod)
+		if (($mod['op'] == 'insert' or $mod['op'] == 'remove') and NULL === getTagByName ($mod['tag']))
+			$ret[] = array
+			(
+				'header' => refRCLineno ($mod['lineno']),
+				'class' => 'warning',
+				'text' => "Tag '${mod['tag']}' does not exist."
+			);
+	return $ret;
 }
 
 // Return true, if the expression makes use of the predicate given.
