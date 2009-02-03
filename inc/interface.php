@@ -5546,18 +5546,16 @@ function renderFileUploadForm ()
 	global $aat, $root, $pageno, $tabno, $nextorder;
 
 	showMessageOrError();
-	startPortlet ('Files');
+	startPortlet ('Upload new');
 	echo "<table border=0 cellspacing=0 cellpadding='5' align='center' class='widetable'>\n";
-	echo "<tr><th>&nbsp;</th><th>File</th><th>Comment</th><th></th></tr>\n";
+	echo "<tr><th>File</th><th>Comment</th><th></th></tr>\n";
 
 	printOpFormIntro ('addFile', array ('MAX_FILE_SIZE' => convertToBytes(get_cfg_var('upload_max_filesize'))), TRUE);
-	echo "<tr><td>";
-	printImageHREF ('add', 'Upload file', TRUE, 99);
-	echo "</td>";
+	echo "<tr>";
 	echo "<td class=tdleft><input type='file' size='10' name='file' tabindex=100></td>\n";
 	echo "<td class=tdleft><input type='text' size='15' name='comment' tabindex=101></td>\n";
 	echo '<td>';
-	printImageHREF ('add', 'Upload file', TRUE, 99);
+	printImageHREF ('CREATE', 'Upload file', TRUE, 102);
 	echo '</td></tr></form>';
 	echo "</table><br>\n";
 	finishPortlet();
@@ -5728,7 +5726,8 @@ function renderFilesForEntity ($entity_id = 0)
 	$id_name = $page[$pageno]['bypass'];
 	
 	startPortlet ('Upload new');
-	echo "<table border=0 cellspacing=0 cellpadding='5' align='center'>\n";
+	echo "<table border=0 cellspacing=0 cellpadding='5' align='center' class='widetable'>\n";
+	echo "<tr><th>File</th><th>Comment</th></tr>\n";
 	printOpFormIntro ('addFile', array ('entity_type' => $entity_type, 'entity_id' => $entity_id, 'MAX_FILE_SIZE' => convertToBytes(get_cfg_var('upload_max_filesize'))), TRUE);
 	echo "<tr>";
 	echo "<td class=tdleft><input type='file' size='10' name='file' tabindex=100></td>\n";
