@@ -811,7 +811,7 @@ function commitAddPort ($object_id = 0, $port_name, $port_type_id, $port_label, 
 			'object_id' => "'${object_id}'",
 			'label' => "'${port_label}'",
 			'type' => "'${port_type_id}'",
-			'l2address' => "'${db_l2address}'"
+			'l2address' => ($db_l2address === '') ? 'NULL' : "'${db_l2address}'"
 		)
 	);
 	if ($result)
@@ -830,8 +830,9 @@ function commitUpdatePort ($port_id, $port_name, $port_type_id, $port_label, $po
 		return "Invalid L2 address ${port_l2address}";
 	$query =
 		"update Port set name='$port_name', type=$port_type_id, label='$port_label', " .
-		"reservation_comment = ${port_reservation_comment}, l2address='${db_l2address}' " .
-		"where id='$port_id'";
+		"reservation_comment = ${port_reservation_comment}, l2address=" .
+		(($db_l2address === '') ? 'NULL' : "'${db_l2address}'") .
+		" where id='$port_id'";
 	$result = $dbxlink->exec ($query);
 	if ($result == 1)
 		return '';
