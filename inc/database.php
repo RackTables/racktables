@@ -1324,14 +1324,14 @@ function getUserAccounts ($tagfilter = array(), $tfmode = 'any')
 {
 	$whereclause = getWhereClause ($tagfilter);
 	$query =
-		'select user_id, user_name, user_password_hash, user_realname, user_enabled ' .
+		'select user_id, user_name, user_password_hash, user_realname ' .
 		'from UserAccount left join TagStorage ' .
 		"on UserAccount.user_id = TagStorage.entity_id and entity_realm = 'user' " .
 		"where true ${whereclause} " .
 		'order by user_name';
 	$result = useSelectBlade ($query, __FUNCTION__);
 	$ret = array();
-	$clist = array ('user_id', 'user_name', 'user_realname', 'user_password_hash', 'user_enabled');
+	$clist = array ('user_id', 'user_name', 'user_realname', 'user_password_hash');
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 		foreach ($clist as $cname)
 			$ret[$row['user_name']][$cname] = $row[$cname];
