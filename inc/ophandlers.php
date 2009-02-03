@@ -1477,6 +1477,22 @@ function linkFileToEntity ()
 	return buildRedirectURL (__FUNCTION__, 'OK', array ($fi['name']));
 }
 
+function replaceFile ()
+{
+	assertUIntArg ('file_id', __FUNCTION__);
+
+	// Make sure the file can be uploaded
+	if (get_cfg_var('file_uploads') != 1)
+		return buildRedirectURL (__FUNCTION__, 'ERR', array ("file uploads not allowed, change 'file_uploads' parameter in php.ini"));
+
+	$fp = fopen($_FILES['file']['tmp_name'], 'rb');
+	$error = commitReplaceFile ($_REQUEST['file_id'], $_FILES['file']['size'], $fp);
+	if ($error != '')
+		return buildRedirectURL (__FUNCTION__, 'ERR', array ($error));
+
+	return buildRedirectURL (__FUNCTION__, 'OK', array ($_REQUEST['name']));
+}
+
 function updateFile ()
 {
 	assertUIntArg ('file_id', __FUNCTION__);

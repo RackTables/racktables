@@ -3713,6 +3713,31 @@ function commitLinkFile ($file_id, $entity_type, $entity_id)
 		return 'commitLinkFile: SQL query failed';
 }
 
+function commitReplaceFile ($file_id = 0, $size, $contents)
+{
+	if ($file_id == 0)
+	{
+		showError ('Not all required args are present.', __FUNCTION__);
+		return FALSE;
+	}
+	$now = date('YmdHis');
+
+	global $dbxlink;
+	$query = $dbxlink->prepare('UPDATE File SET size= ?, mtime = ?, contents = ? WHERE id = ?');
+	$query->bindParam(1, $size);
+	$query->bindParam(2, $now);
+	$query->bindParam(3, $contents, PDO::PARAM_LOB);
+	$query->bindParam(4, $file_id);
+
+	$result = $query->execute();
+	if (!$result)
+	{
+		showError ('commitReplaceFile: SQL query failed', __FUNCTION__);
+		return FALSE;
+	}
+	return '';
+}
+
 function commitUpdateFile ($file_id = 0, $new_comment = '')
 {
 	if ($file_id == 0)

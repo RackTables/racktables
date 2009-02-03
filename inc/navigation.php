@@ -623,6 +623,7 @@ $tab['file']['tags'] = 'Tags';
 $trigger['file']['tags'] = 'trigger_tags';
 $tabhandler['file']['tags'] = 'renderEntityTags';
 $tabhandler['file']['default'] = 'renderFile';
+$ophandler['file']['default']['replaceFile'] = 'replaceFile';
 $ophandler['file']['tags']['saveTags'] = 'saveEntityTags';
 
 // This function returns array if page numbers leading to the target page

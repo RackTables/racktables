@@ -5509,6 +5509,18 @@ function renderFile ($file_id = 0)
 	printf("<td class=tdleft>%s</td></tr>", formatTimestamp($file['mtime']));
 	echo "<tr><th width='50%' class=tdright>Accessed:</th>";
 	printf("<td class=tdleft>%s</td></tr>", formatTimestamp($file['atime']));
+
+	echo "<tr><th width='50%' class=tdright>Download file:</th>";
+	echo "<td class=tdleft><a href='${root}download.php?file_id=${file_id}'>";
+	printImageHREF ('download', 'Download file');
+	echo "</a></td></tr>\n";
+
+	echo "<tr><th width='50%' class=tdright>Upload replacement:</th>";
+	printOpFormIntro ('replaceFile', array ('MAX_FILE_SIZE' => convertToBytes(get_cfg_var('upload_max_filesize'))), TRUE);
+	echo "<td class=tdleft><input type='file' size='10' name='file' tabindex=100>&nbsp;\n";
+	printImageHREF ('save', 'Save changes', TRUE, 101);
+	echo "</form></td></tr>\n";
+
 	printTagTRs ("${root}?page=files&tab=default&");
 	echo "</table><br>\n";
 	finishPortlet();
@@ -5727,7 +5739,7 @@ function renderFilesForEntity ($entity_id = 0)
 	
 	startPortlet ('Upload new');
 	echo "<table border=0 cellspacing=0 cellpadding='5' align='center' class='widetable'>\n";
-	echo "<tr><th>File</th><th>Comment</th></tr>\n";
+	echo "<tr><th>File</th><th>Comment</th><th></th></tr>\n";
 	printOpFormIntro ('addFile', array ('entity_type' => $entity_type, 'entity_id' => $entity_id, 'MAX_FILE_SIZE' => convertToBytes(get_cfg_var('upload_max_filesize'))), TRUE);
 	echo "<tr>";
 	echo "<td class=tdleft><input type='file' size='10' name='file' tabindex=100></td>\n";
