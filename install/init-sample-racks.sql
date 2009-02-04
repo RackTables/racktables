@@ -143,9 +143,9 @@ INSERT INTO `IPv4Allocation` VALUES (927,180879998,'','shared');
 INSERT INTO `IPv4Allocation` VALUES (908,180880446,'fa1/0','router');
 INSERT INTO `IPv4Allocation` VALUES (961,180880385,'','regular');
 
-INSERT INTO `IPv4LoadBalancer` VALUES (928,1,1,NULL,NULL);
-INSERT INTO `IPv4LoadBalancer` VALUES (929,1,1,NULL,NULL);
-INSERT INTO `IPv4LoadBalancer` VALUES (929,2,2,NULL,NULL);
+INSERT INTO `IPv4LB` VALUES (928,1,1,NULL,NULL);
+INSERT INTO `IPv4LB` VALUES (929,1,1,NULL,NULL);
+INSERT INTO `IPv4LB` VALUES (929,2,2,NULL,NULL);
 
 INSERT INTO `IPv4Network` (`id`, `ip`, `mask`, `name`) VALUES (96,180879616,26,'London network devices and VIPs');
 INSERT INTO `IPv4Network` (`id`, `ip`, `mask`, `name`) VALUES (97,180879680,26,'London HA server farm');
