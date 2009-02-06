@@ -650,6 +650,64 @@ function clearSticker ()
 		return buildRedirectURL (__FUNCTION__, 'ERR');
 }
 
+function updateObjectAllocation ()
+{
+	assertUIntArg ('object_id', __FUNCTION__);
+
+	$is_submit = isset ($_REQUEST['got_atoms']);
+	$is_update = isset ($_REQUEST['rackmulti'][0]);
+
+	error_log(print_r($_REQUEST,1));
+	error_log(print_r($_REQUEST,1));
+
+	if ($is_submit)
+	{
+		$object_id = $_REQUEST['object_id'];
+		$workingRacksData = getResidentRacksData ($object_id);
+		if ($workingRacksData === NULL)
+		{
+			print_r ($workingRacksData);
+			showError ('getResidentRacksData() failed', __FUNCTION__);
+			return;
+		}
+		foreach ($_REQUEST['rackmulti'] as $cand_id)
+		{
+			if (!isset ($workingRacksData[$cand_id]))
+			{
+				$rackData = getRackData ($cand_id);
+				if ($rackData == NULL)
+				{
+					showError ('getRackData() failed', __FUNCTION__);
+					return;
+				}
+				$workingRacksData[$cand_id] = $rackData;
+			}
+		}
+		foreach ($workingRacksData as &$rackData)
+			applyObjectMountMask ($rackData, $object_id);
+
+		$oldMolecule = getMoleculeForObject ($object_id);
+		$worldchanged = FALSE;
+		$log = array();
+		foreach ($workingRacksData as $rack_id => $rackData)
+		{
+			$logrecord = processGridForm ($rackData, 'F', 'T', $object_id);
+			$log[] = $logrecord;
+		}
+		return buildWideRedirectURL($log);
+		
+	}
+	else
+	{
+		unset($_REQUEST['page']);
+		unset($_REQUEST['tab']);
+		unset($_REQUEST['op']);
+		return buildWideRedirectURL('', NULL, NULL, $_REQUEST);
+	}
+
+}
+
+
 function updateObject ()
 {
 	assertUIntArg ('num_attrs', __FUNCTION__);
@@ -1408,6 +1466,36 @@ function updateRack ()
 	else
 		return buildRedirectURL (__FUNCTION__, 'ERR');
 }
+
+function updateRackDesign ()
+{
+	assertUIntArg ('rack_id', __FUNCTION__);
+	if (($rackData = getRackData ($_REQUEST['rack_id'])) == NULL)
+	{
+		showError ('getRackData() failed', __FUNCTION__);
+		return;
+	}
+	applyRackDesignMask($rackData);
+	markupObjectProblems ($rackData);
+	$response = processGridForm ($rackData, 'A', 'F');
+	return buildWideRedirectURL ($response);
+}
+
+function updateRackProblems ()
+{
+	assertUIntArg ('rack_id', __FUNCTION__);
+	if (($rackData = getRackData ($_REQUEST['rack_id'])) == NULL)
+	{
+		showError ('getRackData() failed', __FUNCTION__);
+		return;
+	}
+	applyRackProblemMask($rackData);
+	markupObjectProblems ($rackData);
+	$response = processGridForm ($rackData, 'F', 'U');
+	return buildWideRedirectURL ($response);
+}
+
+
 
 function querySNMPData ()
 {

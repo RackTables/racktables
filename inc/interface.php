@@ -179,33 +179,33 @@ function renderIndex ()
 			<table width='100%' cellspacing=0 cellpadding=30 class=mainmenu border=0>
 				<tr>
 					<td>
-						<h1><a href='<?php echo $root; ?>?page=rackspace'>Rackspace<br>
+						<h1><a href='<?php echo makeHref(array('page'=>'rackspace')) ?>'>Rackspace<br>
 						<?php printImageHREF ('rackspace'); ?></a></h1>
 					</td>
 					<td>
-						<h1><a href='<?php echo $root; ?>?page=objects'>Objects<br>
+						<h1><a href='<?php echo makeHref(array('page'=>'objects')) ?>'>Objects<br>
 						<?php printImageHREF ('objects'); ?></a></h1>
 					</td>
 					<td>
-						<h1><a href='<?php echo $root; ?>?page=ipv4space'>IPv4 space<br>
+						<h1><a href='<?php echo makeHref(array('page'=>'ipv4space')) ?>'>IPv4 space<br>
 						<?php printImageHREF ('ipv4space'); ?></a></h1>
 					</td>
 					<td>
-						<h1><a href='<?php echo $root; ?>?page=files'>Files<br>
+						<h1><a href='<?php echo makeHref(array('page'=>'files')) ?>'>Files<br>
 						<?php printImageHREF ('files'); ?></a></h1>
 					</td>
 				</tr>
 				<tr>
 					<td>
-						<h1><a href='<?php echo $root; ?>?page=config'>Configuration<br>
+						<h1><a href='<?php echo makeHref(array('page'=>'config')) ?>'>Configuration<br>
 						<?php printImageHREF ('config'); ?></a></h1>
 					</td>
 					<td>
-						<h1><a href='<?php echo $root; ?>?page=reports'>Reports<br>
+						<h1><a href='<?php echo makeHref(array('page'=>'reports')) ?>'>Reports<br>
 						<?php printImageHREF ('reports'); ?></a></h1>
 					</td>
 					<td>
-						<h1><a href='<?php echo $root; ?>?page=ipv4slb'>IPv4 SLB<br>
+						<h1><a href='<?php echo makeHref(array('page'=>'ipv4slb')) ?>'>IPv4 SLB<br>
 						<?php printImageHREF ('ipv4slb'); ?></a></h1>
 					</td>
 					<td>&nbsp;</td>
@@ -228,19 +228,19 @@ function renderRackspace ()
 	echo '<table border=0 cellpadding=10 cellpadding=1>';
 	// generate thumb gallery
 	$rackrowList = getRackspace ($tagfilter);
-	global $root, $nextorder;
+	global $nextorder;
 	$rackwidth = getRackImageWidth();
 	$order = 'odd';
 	foreach ($rackrowList as $rackrow)
 	{
 		echo "<tr class=row_${order}><th class=tdleft>";
-		echo "<a href='${root}?page=row&row_id=${rackrow['row_id']}${tagfilter_str}'>";
+		echo "<a href='".makeHref(array('page'=>'row', 'row_id'=>$rackrow['row_id']))."${tagfilter_str}'>";
 		echo "${rackrow['row_name']}</a></th>";
 		$rackList = getRacksForRow ($rackrow['row_id'], $tagfilter);
 		echo "<td><table border=0 cellspacing=5><tr>";
 		foreach ($rackList as $rack)
 		{
-			echo "<td align=center><a href='${root}?page=rack&rack_id=${rack['id']}'>";
+			echo "<td align=center><a href='".makeHref(array('page'=>'rack', 'rack_id'=>$rack['id']))."'>";
 			echo "<img border=0 width=${rackwidth} height=";
 			echo getRackImageHeight ($rack['height']);
 			echo " title='${rack['height']} units'";
@@ -263,7 +263,7 @@ function renderRackspaceRowEditor ()
 		printImageHREF ('create', 'Add new row', TRUE, 101);
 		echo "</td></tr></form>";
 	}
-	global $root, $pageno, $tabno;
+	global $pageno, $tabno;
 	startPortlet ('Rows');
 	showMessageOrError();
 	echo "<table border=0 cellspacing=0 cellpadding=5 align=center class=widetable>\n";
@@ -305,8 +305,8 @@ function renderRow ($row_id = 0)
 	echo "<tr><td class=pcleft>";
 	startPortlet ($rowInfo['name']);
 	echo "<table border=0 cellspacing=0 cellpadding=3 width='100%'>\n";
-	echo "<tr><th width='50%' class=tdright>Racks:</th><td class=tdleft>${rowInfo['count']}</td></tr>\n";
-	echo "<tr><th width='50%' class=tdright>Units:</th><td class=tdleft>${rowInfo['sum']}</td></tr>\n";
+	echo "<tr><th width='50%' class=tdright>Racks:</th><td class=tdleft>${rowInfo['rackCount']}</td></tr>\n";
+	echo "<tr><th width='50%' class=tdright>Units:</th><td class=tdleft>${rowInfo['sumHeight']}</td></tr>\n";
 	echo "<tr><th width='50%' class=tdright>%% used:</th><td class=tdleft>";
 	renderProgressBar (getRSUforRackRow ($rackList));
 	echo "</td></tr>\n";
@@ -315,14 +315,14 @@ function renderRow ($row_id = 0)
 
 	echo "</td><td class=pcright rowspan=2>";
 
-	global $root, $nextorder;
+	global $nextorder;
 	$rackwidth = getRackImageWidth() * getConfigVar ('ROW_SCALE');
 	$order = 'odd';
 	startPortlet ('Racks');
 	echo "<table border=0 cellspacing=5 align='center'><tr>";
 	foreach ($rackList as $rack)
 	{
-		echo "<td align=center class=row_${order}><a href='${root}?page=rack&rack_id=${rack['id']}'>";
+		echo "<td align=center class=row_${order}><a href='".makeHref(array('page'=>'rack', 'rack_id'=>$rack['id']))."'>";
 		echo "<img border=0 width=${rackwidth} height=" . (getRackImageHeight ($rack['height']) * getConfigVar ('ROW_SCALE'));
 		echo " title='${rack['height']} units'";
 		echo "src='render_image.php?img=minirack&rack_id=${rack['id']}'>";
@@ -340,7 +340,6 @@ function renderRow ($row_id = 0)
 
 function showError ($info = '', $location = 'N/A')
 {
-	global $root;
 	if (preg_match ('/\.php$/', $location))
 		$location = basename ($location);
 	elseif ($location != 'N/A')
@@ -350,7 +349,7 @@ function showError ($info = '', $location = 'N/A')
 		echo 'No additional information is available.';
 	else
 		echo "Additional information:<br><p>\n<pre>\n${info}\n</pre></p>";
-	echo "Go back or try starting from <a href='${root}'>index page</a>.<br></div>\n";
+	echo "Go back or try starting from <a href='".makeHref()."'>index page</a>.<br></div>\n";
 }
 
 // This function renders rack as HTML table.
@@ -366,7 +365,7 @@ function renderRack ($rack_id = 0, $hl_obj_id = 0)
 		showError ('getRackData() failed', __FUNCTION__);
 		return;
 	}
-	global $root, $pageno, $tabno;
+	global $pageno, $tabno;
 	markAllSpans ($rackData);
 	if ($hl_obj_id > 0)
 		highlightObject ($rackData, $hl_obj_id);
@@ -374,18 +373,18 @@ function renderRack ($rack_id = 0, $hl_obj_id = 0)
 	$prev_id = getPrevIDforRack ($rackData['row_id'], $rack_id);
 	$next_id = getNextIDforRack ($rackData['row_id'], $rack_id);
 	echo "<center><table border=0><tr valign=middle>";
-	echo "<td><h2><a href='${root}?page=row&row_id=${rackData['row_id']}'>${rackData['row_name']}</a> :</h2></td>";
+	echo "<td><h2><a href='".makeHref(array('page'=>'row', 'row_id'=>$rackData['row_id']))."'>${rackData['row_name']}</a> :</h2></td>";
 	// FIXME: use 'bypass'?
 	if ($prev_id != NULL)
 	{
-		echo "<td><a href='${root}?page=rack&rack_id=${prev_id}'>";
+		echo "<td><a href='".makeHref(array('page'=>'rack', 'rack_id'=>$prev_id))."'>";
 		printImageHREF ('prev', 'previous rack');
 		echo "</a></td>";
 	}
-	echo "<td><h2><a href='${root}?page=rack&rack_id=${rackData['id']}'>${rackData['name']}</a></h2></td>";
+	echo "<td><h2><a href='".makeHref(array('page'=>'rack', 'rack_id'=>$rackData['id']))."'>${rackData['name']}</a></h2></td>";
 	if ($next_id != NULL)
 	{
-		echo "<td><a href='${root}?page=rack&rack_id=${next_id}'>";
+		echo "<td><a href='".makeHref(array('page'=>'rack', 'rack_id'=>$next_id))."'>";
 		printImageHREF ('next', 'next rack');
 		echo "</a></td>";
 	}
@@ -423,7 +422,7 @@ function renderRack ($rack_id = 0, $hl_obj_id = 0)
 					else
 						$suffix = "'>";
 					echo $prefix . $suffix;
-					echo "<a href='${root}?page=object&object_id=${objectData['id']}'>${objectData['dname']}</a></div>";
+					echo "<a href='".makeHref(array('page'=>'object', 'object_id'=>$objectData['id']))."'>${objectData['dname']}</a></div>";
 					break;
 				case 'A':
 					echo '<div title="This rackspace does not exist">&nbsp;</div>';
@@ -487,7 +486,7 @@ function renderEditObjectForm ($object_id)
 {
 	showMessageOrError();
 
-	global $pageno, $tabno, $root;
+	global $pageno, $tabno;
 	$object = getObjectInfo ($object_id);
 	if ($object == NULL)
 	{
@@ -508,12 +507,13 @@ function renderEditObjectForm ($object_id)
 	echo "<tr><th class=tdright>Common name:</th><td class=tdleft><input type=text name=object_name value='${object['name']}'></td></tr>\n";
 	echo "<tr><th class=tdright>Visible label:</th><td class=tdleft><input type=text name=object_label value='${object['label']}'></td></tr>\n";
 	echo "<tr><th class=tdright>Asset tag:</th><td class=tdleft><input type=text name=object_asset_no value='${object['asset_no']}'></td></tr>\n";
-	echo "<tr><th class=tdright>Barcode:</th><td class=tdleft><input type=text name=object_barcode value='${object['barcode']}'></td></tr>\n";
-	echo "<tr><th class=tdright>Has problems:</th><td class=tdleft><input type=checkbox name=object_has_problems";
+	/*echo "<tr><th class=tdright>Has problems:</th><td class=tdleft><input type=checkbox name=object_has_problems";
 	if ($object['has_problems'] == 'yes')
 		echo ' checked';
-	echo "></td></tr>\n";
-	echo "<tr><th class=tdright>Actions:</th><td class=tdleft><a href='${root}process.php?op=deleteObject&page=objects&tab=default&object_id=${object_id}&name=${object['name']}' onclick=\"javascript:return confirm('Are you sure you want to delete the object?')\">Delete object</a></td></tr>\n";
+	echo "></td></tr>\n";*/
+	echo "<tr><th class=tdright>Actions:</th><td class=tdleft><a href='".
+		makeHrefProcess(array('op'=>'deleteObject', 'page'=>'objects', 'tab'=>'default', 'object_id'=>$object_id, 'name'=>$object['name'])).
+		"' onclick=\"javascript:return confirm('Are you sure you want to delete the object?')\">Delete object</a></td></tr>\n";
 	echo "<tr><td colspan=2><b>Comment:</b><br><textarea name=object_comment rows=10 cols=80>${object['comment']}</textarea></td></tr>";
 	echo '</table>';
 
@@ -534,7 +534,7 @@ function renderEditObjectForm ($object_id)
 			echo '<tr><td>';
 			if (!empty ($record['value']))
 			{
-				echo "<a href='${root}process.php?page=${pageno}&tab=${tabno}&op=clearSticker&object_id=${object_id}&attr_id=${record['id']}'>";
+				echo "<a href='".makeHrefProcess(array('op'=>'clearSticker', 'object_id'=>$object_id, 'attr_id'=>$record['id']))."'>";
 				printImageHREF ('clear', 'Clear value');
 				echo '</a>';
 			}
@@ -590,7 +590,7 @@ function renderEditRackForm ($rack_id)
 	printOpFormIntro ('updateRack');
 	echo '<table border=0 align=center>';
 	echo "<tr><th class=tdright>Rack row:</th><td class=tdleft>";
-	printSelect (readChapter ('RackRow'), 'rack_row_id', $rack['row_id']);
+	printSelect (getRackRows(), 'rack_row_id', $rack['row_id']);
 	echo "</td></tr>\n";
 	echo "<tr><th class=tdright>Name (required):</th><td class=tdleft><input type=text name=rack_name value='${rack['name']}'></td></tr>\n";
 	echo "<tr><th class=tdright>Height (required):</th><td class=tdleft><input type=text name=rack_height value='${rack['height']}'></td></tr>\n";
@@ -672,7 +672,6 @@ function printSelect ($rowList, $select_name, $selected_id = NULL, $tabindex = N
 // used by renderGridForm() and renderRackPage()
 function renderRackInfoPortlet ($rackData)
 {
-	global $root;
 	startPortlet ('summary');
 	echo "<table border=0 cellspacing=0 cellpadding=3 width='100%'>\n";
 	echo "<tr><th width='50%' class=tdright>Rack row:</th><td class=tdleft>${rackData['row_name']}</td></tr>\n";
@@ -684,7 +683,7 @@ function renderRackInfoPortlet ($rackData)
 	echo "<tr><th width='50%' class=tdright>Objects:</th><td class=tdleft>";
 	echo count (stuffInRackspace ($rackData));
 	echo "</td></tr>\n";
-	printTagTRs ("${root}?page=rackspace&tab=default&");
+	printTagTRs (makeHref(array('page'=>'rackspace', 'tab'=>'default'))."&");
 	if (!empty ($rackData['comment']))
 		echo "<tr><th width='50%' class=tdright>Comment:</th><td class=tdleft>${rackData['comment']}</td></tr>\n";
 	echo '</table>';
@@ -706,19 +705,9 @@ function renderGridForm ($rack_id = 0, $filter, $header, $submit, $state1, $stat
 		return;
 	}
 
-	global $root, $pageno, $tabno;
+	global $pageno, $tabno;
 	$filter ($rackData);
 	markupObjectProblems ($rackData);
-
-	// Process form submit.
-	if (isset ($_REQUEST['do_update']))
-	{
-		$log[] = processGridForm ($rackData, $state1, $state2);
-		printLog ($log);
-		$rackData = getRackData ($rack_id);
-		$filter ($rackData);
-		markupObjectProblems ($rackData);
-	}
 
 	// Render the result whatever it is.
 	// Main layout.
@@ -737,10 +726,7 @@ function renderGridForm ($rack_id = 0, $filter, $header, $submit, $state1, $stat
 	echo "<table class=rack border=0 cellspacing=0 cellpadding=1>\n";
 	echo "<tr><th width='10%'>&nbsp;</th><th width='20%'>Front</th>";
 	echo "<th width='50%'>Interior</th><th width='20%'>Back</th></tr>\n";
-	echo "<form method=post action='${root}?'>\n";
-	echo "<input type=hidden name=page value=${pageno}>\n";
-	echo "<input type=hidden name=tab value=${tabno}>\n";
-	echo "<input type=hidden name=rack_id value=${rack_id}>\n";
+	printOpFormIntro ('updateRack');
 	markupAtomGrid ($rackData, $state2);
 	renderAtomGrid ($rackData);
 	echo "</table></center>\n";
@@ -771,14 +757,13 @@ function finishPortlet ()
 
 function printRefsOfType ($refs, $type, $eq)
 {
-	global $root;
 	$gotone=0;
 	foreach ($refs as $ref)
 	{
 		if ($eq($ref['type'], $type))
 		{
 			if ($gotone) echo ', ';
-			echo "<a href='${root}?page=object&object_id=${ref['object_id']}'>";
+			echo "<a href='".makeHref(array('page'=>'object', 'object_id'=>$ref['object_id']))."'>";
 			if (!empty ($ref['name']))
 				echo $ref['name'] . '@';
 			echo "${ref['object_name']}</a>";
@@ -789,7 +774,7 @@ function printRefsOfType ($refs, $type, $eq)
 
 function renderRackObject ($object_id = 0)
 {
-	global $root, $nextorder, $aac;
+	global $nextorder, $aac;
 	if ($object_id <= 0)
 	{
 		showError ('Invalid object_id', __FUNCTION__);
@@ -813,7 +798,7 @@ function renderRackObject ($object_id = 0)
 	elseif (in_array ($info['objtype_id'], explode (',', getConfigVar ('NAMEFUL_OBJTYPES'))))
 		echo "<tr><td colspan=2 class=msg_error>Common name is missing.</td></tr>\n";
 	echo "<tr><th width='50%' class=tdright>Object type:</th>";
-	echo "<td class=tdleft><a href='${root}?page=objgroup&group_id=${info['objtype_id']}&hl_object_id=${object_id}'>${info['objtype_name']}</a></td></tr>\n";
+	echo "<td class=tdleft><a href='".makeHref(array('page'=>'objgroup', 'group_id'=>$info['objtype_id'], 'hl_object_id'=>$object_id))."'>${info['objtype_name']}</a></td></tr>\n";
 	if (!empty ($info['asset_no']))
 		echo "<tr><th width='50%' class=tdright>Asset tag:</th><td class=tdleft>${info['asset_no']}</td></tr>\n";
 	elseif (in_array ($info['objtype_id'], explode (',', getConfigVar ('REQUIRE_ASSET_TAG_FOR'))))
@@ -827,7 +812,7 @@ function renderRackObject ($object_id = 0)
 	foreach (getAttrValues ($object_id, TRUE) as $record)
 		if (!empty ($record['value']))
 			echo "<tr><th width='50%' class=tdright><span class=sticker>${record['name']}</span>:</th><td class=tdleft>${record['a_value']}</td></tr>\n";
-	printTagTRs ("${root}?page=objgroup&tab=default&group_id=${info['objtype_id']}&");
+	printTagTRs (makeHref(array('page'=>'objgroup', 'tab'=>'default', 'group_id'=>$info['objtype_id']))."&");
 	echo "</table><br>\n";
 	finishPortlet();
 
@@ -865,7 +850,7 @@ function renderRackObject ($object_id = 0)
 				echo "<td>${port['l2address']}</td>";
 				if ($port['remote_object_id'])
 				{
-					echo "<td><a href='${root}?page=object&object_id=${port['remote_object_id']}&hl_port_id=${port['remote_id']}'>${port['remote_object_name']}</a></td>";
+					echo "<td><a href='".makeHref(array('page'=>'object', 'object_id'=>$port['remote_object_id'], 'hl_port_id'=>$port['remote_id']))."'>${port['remote_object_name']}</a></td>";
 					echo "<td>${port['remote_name']}</td>";
 				}
 				elseif (!empty ($port['reservation_comment']))
@@ -910,7 +895,7 @@ function renderRackObject ($object_id = 0)
 			}
 			echo "<tr class='${class}' valign=top><td class=tdleft>${alloc['osif']}</td><td class='${secondclass}'>";
 			if (NULL !== $netid)
-				echo "<a href='${root}?page=ipaddress&ip=" . $dottedquad . "&hl_object_id=${object_id}'>${dottedquad}</a>";
+				echo "<a href='".makeHref(array('page'=>'ipaddress', 'ip'=>$dottedquad, 'hl_object_id'=>$object_id))."'>${dottedquad}</a>";
 			else
 				echo $dottedquad;
 			if (getConfigVar ('EXT_IPV4_VIEW') != 'yes')
@@ -946,7 +931,7 @@ function renderRackObject ($object_id = 0)
 			{
 				if ($allocpeer['object_id'] == $object_id)
 					continue;
-				echo $prefix . "<a href='${root}?page=object&object_id=${allocpeer['object_id']}'>";
+				echo $prefix . "<a href='".makeHref(array('page'=>'object', 'object_id'=>$allocpeer['object_id']))."'>";
 				if (!empty ($allocpeer['osif']))
 					echo $allocpeer['osif'] . '@';
 				echo $allocpeer['object_name'] . '</a>';
@@ -981,13 +966,13 @@ function renderRackObject ($object_id = 0)
 					$osif = $alloclist [$pf['localip']]['osif'] . ': ';
 				}
 				echo "<tr class='$class'>";
-				echo "<td>${pf['proto']}</td><td class=tdleft>${osif}<a href='${root}?page=ipaddress&tab=default&ip=${pf['localip']}'>${pf['localip']}</a>:${pf['localport']}</td>";
-				echo "<td class=tdleft><a href='${root}?page=ipaddress&tab=default&ip=${pf['remoteip']}'>${pf['remoteip']}</a>:${pf['remoteport']}</td>";
+				echo "<td>${pf['proto']}</td><td class=tdleft>${osif}<a href='".makeHref(array('page'=>'ipaddress', 'tab'=>'default', 'ip'=>$pf['localip']))."'>${pf['localip']}</a>:${pf['localport']}</td>";
+				echo "<td class=tdleft><a href='".makeHref(array('page'=>'ipaddress', 'tab'=>'default', 'ip'=>$pf['remoteip']))."'>${pf['remoteip']}</a>:${pf['remoteport']}</td>";
 				$address = getIPv4Address ($pf['remoteip']);
 				echo "<td class='description'>";
 				if (count ($address['allocs']))
 					foreach($address['allocs'] as $bond)
-						echo "<a href='${root}?page=object&tab=default&object_id=${bond['object_id']}'>${bond['object_name']}(${bond['name']})</a> ";
+						echo "<a href='".makeHref(array('page'=>'object', 'tab'=>'default', 'object_id'=>$bond['object_id']))."'>${bond['object_name']}(${bond['name']})</a> ";
 				elseif (!empty ($pf['remote_addr_name']))
 					echo '(' . $pf['remote_addr_name'] . ')';
 				echo "</td><td class='description'>${pf['description']}</td></tr>";
@@ -1002,9 +987,9 @@ function renderRackObject ($object_id = 0)
 			foreach ($forwards['in'] as $pf)
 			{
 				echo "<tr>";
-				echo "<td>${pf['proto']}/<a href='${root}?page=ipaddress&tab=default&ip=${pf['localip']}'>${pf['localip']}</a>:${pf['localport']}</td>";
-				echo "<td class='description'><a href='${root}?page=object&tab=default&object_id=${pf['object_id']}'>${pf['object_name']}</a>";
-				echo "</td><td><a href='${root}?page=ipaddress&tab=default&ip=${pf['remoteip']}'>${pf['remoteip']}</a>:${pf['remoteport']}</td>";
+				echo "<td>${pf['proto']}/<a href='".makeHref(array('page'=>'ipaddress', 'tab'=>'default', 'ip'=>$pf['localip']))."'>${pf['localip']}</a>:${pf['localport']}</td>";
+				echo "<td class='description'><a href='".makeHref(array('page'=>'object', 'tab'=>'default', 'object_id'=>$pf['object_id']))."'>${pf['object_name']}</a>";
+				echo "</td><td><a href='".makeHref(array('page'=>'ipaddress', 'tab'=>'default', 'ip'=>$pf['remoteip']))."'>${pf['remoteip']}</a>:${pf['remoteport']}</td>";
 				echo "<td class='description'>${pf['description']}</td></tr>";
 			}
 			echo "</table><br><br>";
@@ -1059,7 +1044,7 @@ function renderRackMultiSelect ($sname, $racks, $selected)
 			$rdata[$rack['row_name']] = array ($rack['id'] => $rack['name']);
 		else
 			$rdata[$rack['row_name']][$rack['id']] = $rack['name'];
-	echo "<select name=${sname} multiple size=" . getConfigVar ('MAXSELSIZE') . " onchange='getElementById(\"racks\").submit()'>\n";
+	echo "<select name=${sname} multiple size=" . getConfigVar ('MAXSELSIZE') . " onchange='getElementsByName(\"updateObjectAllocation\")[0].submit()'>\n";
 	foreach ($rdata as $optgroup => $racklist)
 	{
 		echo "<optgroup label='${optgroup}'>";
@@ -1100,7 +1085,7 @@ function renderPortsForObject ($object_id = 0)
 		printImageHREF ('add', 'add a port', TRUE, 104);
 		echo "</td></tr></form>";
 	}
-	global $root, $pageno, $tabno;
+	global $pageno, $tabno;
 	if ($object_id <= 0)
 	{
 		showError ('Invalid object_id', __FUNCTION__);
@@ -1118,7 +1103,7 @@ function renderPortsForObject ($object_id = 0)
 	foreach ($ports as $port)
 	{
 		printOpFormIntro ('editPort', array ('port_id' => $port['id']));
-		echo "<tr><td><a href='${root}process.php?op=delPort&page=${pageno}&tab=${tabno}&port_id=${port['id']}&object_id=$object_id&port_name=${port['name']}'>";
+		echo "<tr><td><a href='".makeHrefProcess(array('op'=>'delport', 'port_id'=>$port['id'], 'object_id'=>$object_id, 'port_name'=>$port['name']))."'>";
 		printImageHREF ('delete', 'Unlink and Delete this port');
 		echo "</a></td>\n";
 		echo "<td><input type=text name=name value='${port['name']}' size=8></td>";
@@ -1137,11 +1122,17 @@ function renderPortsForObject ($object_id = 0)
 		echo "<td><input type=text name=l2address value='${port['l2address']}'></td>\n";
 		if ($port['remote_object_id'])
 		{
-			echo "<td><a href='${root}?page=object&object_id=${port['remote_object_id']}'>${port['remote_object_name']}</a></td>";
+			echo "<td><a href='".makeHref(array('page'=>'object', 'object_id'=>$port['remote_object_id']))."'>${port['remote_object_name']}</a></td>";
 			echo "<td>${port['remote_name']}</td>";
-			echo "<td><a href='${root}process.php?op=unlinkPort&page=${pageno}&tab=${tabno}&port_id=${port['id']}&object_id=$object_id&port_name=";
-			echo urlencode ($port['name']);
-			echo "&remote_port_name=${port['remote_name']}&remote_object_name=${port['remote_object_name']}'>";
+			echo "<td><a href='".
+				makeHrefProcess(array(
+					'op'=>'unlinkPort', 
+					'port_id'=>$port['id'], 
+					'object_id'=>$object_id, 
+					'port_name'=>$port['name'], 
+					'remote_port_name'=>$port['remote_name'], 
+					'remote_object_name'=>$port['remote_object_name'])).
+			"'>";
 			printImageHREF ('clear', 'Unlink this port');
 			echo "</a></td>";
 		}
@@ -1149,7 +1140,12 @@ function renderPortsForObject ($object_id = 0)
 		{
 			echo "<td><b>Reserved;</b></td>";
 			echo "<td><input type=text name=reservation_comment value='${port['reservation_comment']}'></td>";
-			echo "<td><a href='${root}process.php?op=useup&page=${pageno}&tab=${tabno}&port_id=${port['id']}&object_id=${object_id}'>";
+			echo "<td><a href='".
+				makeHrefProcess(array(
+					'op'=>'useup',
+					'port_id'=>$port['id'], 
+					'object_id'=>$object_id)).
+			"'>";
 			printImageHREF ('clear', 'Use up this port');
 			echo "</a></td>";
 		}
@@ -1157,9 +1153,7 @@ function renderPortsForObject ($object_id = 0)
 		{
 			echo "<td>&nbsp;</td><td>&nbsp;</td>";
 			echo "<td>";
-			echo "<a href='javascript:;' onclick='window.open(\"${root}port_link_helper.php?port=${port['id']}&type=${port['type_id']}&object_id=$object_id&port_name=";
-			echo urlencode ($port['name']);
-			echo "\",\"findlink\",\"height=700, width=400, location=no, menubar=no, resizable=yes, scrollbars=no, status=no, titlebar=no, toolbar=no\");'>";
+			echo "<a href='javascript:;' onclick='window.open(\"".makeHrefPortLinkHelper(array('port'=>$port['id'], 'type'=>$port['type_id'], 'object_id'=>$object_id, 'port_name'=>$port['name']))."\",\"findlink\",\"height=700, width=400, location=no, menubar=no, resizable=yes, scrollbars=no, status=no, titlebar=no, toolbar=no\");'>";
 			printImageHREF ('link', 'Link this port');
 			echo "</a> <input type=text name=reservation_comment>";
 			echo "</td>\n";
@@ -1206,7 +1200,7 @@ function renderIPv4ForObject ($object_id = 0)
 		printImageHREF ('add', 'allocate', TRUE, 103);
 		echo "</td></tr></form>";
 	}
-	global $root, $pageno, $tabno, $aat;
+	global $pageno, $tabno, $aat;
 	if ($object_id <= 0)
 	{
 		showError ('Invalid object_id', __FUNCTION__);
@@ -1233,12 +1227,12 @@ function renderIPv4ForObject ($object_id = 0)
 			loadIPv4AddrList ($netinfo);
 		}
 		printOpFormIntro ('updIPv4Allocation', array ('ip' => $dottedquad));
-		echo "<tr class='$class' valign=top><td><a href='${root}process.php?op=delIPv4Allocation&page=${pageno}&tab=${tabno}&ip=${dottedquad}&object_id=$object_id'>";
+		echo "<tr class='$class' valign=top><td><a href='".makeHrefProcess(array('op'=>'delIPv4Allocation', 'ip'=>$dottedquad, 'object_id'=>$object_id))."'>";
 		printImageHREF ('delete', 'Delete this IPv4 address');
 		echo "</a></td>";
 		echo "<td class=tdleft><input type='text' name='bond_name' value='${alloc['osif']}' size=10></td><td class=tdleft>";
 		if (NULL !== $netid)
-			echo "<a href='${root}?page=ipaddress&ip=${dottedquad}'>${dottedquad}</a>";
+			echo "<a href='".makeHref(array('page'=>'ipaddress', 'ip'=>$dottedquad))."'>${dottedquad}</a>";
 		else
 			echo $dottedquad;
 		if (getConfigVar ('EXT_IPV4_VIEW') != 'yes')
@@ -1261,11 +1255,11 @@ function renderIPv4ForObject ($object_id = 0)
 				{
 					if ($router['id'] == $object_id)
 						continue;
-					echo $newline . $router['addr'] . ", <a href='${root}?page=object&object_id=${router['id']}&hl_ipv4_addr=${router['addr']}'>";
+					echo $newline . $router['addr'] . ", <a href='".makeHref(array('page'=>'object', 'object_id'=>$router['id'], 'hl_ipv4_addr'=>$router['addr']))."'>";
 					echo (empty ($router['iface']) ? '' : $router['iface'] . '@') . $router['dname'] . '</a>';
 					$routertags = loadRackObjectTags ($router['id']);
 					if (count ($routertags))
-						echo '<br><small>' . serializeTags ($routertags, "${root}?page=objects&tab=default&") . '</small>';
+						echo '<br><small>' . serializeTags ($routertags, makeHref(array('page'=>'objects', 'tab'=>'default'))."&") . '</small>';
 					$newline = '<br>';
 				}
 				echo '</td>';
@@ -1284,7 +1278,7 @@ function renderIPv4ForObject ($object_id = 0)
 		{
 			if ($allocpeer['object_id'] == $object_id)
 				continue;
-			echo $prefix . "<a href='${root}?page=object&object_id=${allocpeer['object_id']}'>";
+			echo $prefix . "<a href='".makeHref(array('page'=>'object', 'object_id'=>$allocpeer['object_id']))."'>";
 			if (!empty ($allocpeer['osif']))
 				echo $allocpeer['osif'] . '@';
 			echo $allocpeer['object_name'] . '</a>';
@@ -1599,56 +1593,11 @@ function renderRackSpaceForObject ($object_id = 0)
 	// Now we workaround an old caveat: http://bugs.php.net/bug.php?id=37410
 	unset ($rackData);
 
-	// Here we process form submit by trying to save all submitted info to database.
-	if ($is_submit)
-	{
-		$oldMolecule = getMoleculeForObject ($object_id);
-		$worldchanged = FALSE;
-		$log = array();
-		foreach ($workingRacksData as $rack_id => $rackData)
-		{
-			$logrecord = processGridForm ($rackData, 'F', 'T', $object_id);
-			$log[] = $logrecord;
-			if ($logrecord['code'] != 300)
-			{
-				$worldchanged = TRUE;
-				// Reload our working copy after form processing.
-				$rackData = getRackData ($rack_id);
-				if ($rackData == NULL)
-					$log[] = array ('code' => 500, 'message' => 'Working copy update failed in ', __FUNCTION__);
-				applyObjectMountMask ($rackData, $object_id);
-				$workingRacksData[$rack_id] = $rackData;
-			}
-		}
-		if ($worldchanged)
-		{
-			// Log a record.
-			$newMolecule = getMoleculeForObject ($object_id);
-			$oc = count ($oldMolecule);
-			$nc = count ($newMolecule);
-			$omid = $oc ? createMolecule ($oldMolecule) : 'NULL';
-			$nmid = $nc ? createMolecule ($newMolecule) : 'NULL';
-			global $remote_username;
-			$comment = empty ($_REQUEST['comment']) ? 'NULL' : "'${_REQUEST['comment']}'";
-			$query =
-				"insert into MountOperation(object_id, old_molecule_id, new_molecule_id, user_name, comment) " .
-				"values (${object_id}, ${omid}, ${nmid}, '${remote_username}', ${comment})";
-			global $dbxlink;
-			$result = $dbxlink->query ($query);
-			if ($result == NULL)
-				$log[] = array ('code' => 'error', 'message' => 'SQL query failed during history logging.');
-			else
-				$log[] = array ('code' => 'success', 'message' => 'History logged.');
-		}
-		printLog ($log);
-	}
-
 	// This is the time for rendering.
-	global $root, $pageno, $tabno;
-	echo "<form id='racks' action='${root}'>";
-	echo "<input type=hidden name=page value='${pageno}'>\n";
-	echo "<input type=hidden name=tab value='${tabno}'>\n";
-	echo "<input type=hidden name=object_id value='${object_id}'>\n";
+	global $pageno, $tabno;
+
+	printOpFormIntro ('updateObjectAllocation');
+
 	// Main layout starts.
 	echo "<table border=0 class=objectview cellspacing=0 cellpadding=0><tr>";
 
@@ -1772,16 +1721,16 @@ function renderUnmountedObjectsPortlet ()
 		showError ('getUnmountedObjects() failed', __FUNCTION__);
 		return;
 	}
-	global $root, $nextorder;
+	global $nextorder;
 	$order = 'odd';
 	echo '<br><br><table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
-	echo '<tr><th>Common name</th><th>Visible label</th><th>Asset number</th><th>Barcode</th></tr>';
+	echo '<tr><th>Common name</th><th>Visible label</th><th>Asset number</th></tr>';
 	foreach ($objs as $obj)
 	{
-		echo "<tr class=row_${order}><td><a href='${root}?page=object&object_id=${obj['id']}'>${obj['dname']}</a></td>";
+		echo "<tr class=row_${order}><td><a href='".makeHref(array('page'=>'object', 'object_id'=>$obj['id']))."'>${obj['dname']}</a></td>";
 		echo "<td>${obj['label']}</td>";
 		echo "<td>${obj['asset_no']}</td>";
-		echo "<td>${obj['barcode']}</td></tr>";
+		echo "</tr>";
 		$order = $nextorder[$order];
 	}
 	echo "</table><br>\n";
@@ -1797,14 +1746,14 @@ function renderProblematicObjectsPortlet ()
 		showError ('getProblematicObjects() failed', __FUNCTION__);
 		return;
 	}
-	global $root, $nextorder;
+	global $nextorder;
 	$order = 'odd';
 	echo '<br><br><table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
 	echo '<tr><th>Type</th><th>Common name</th></tr>';
 	foreach ($objs as $obj)
 	{
 		echo "<tr class=row_${order}><td>${obj['objtype_name']}</td>";
-		echo "<td><a href='${root}?page=object&object_id=${obj['id']}'>${obj['dname']}</a></tr>";
+		echo "<td><a href='".makeHref(array('page'=>'object', 'object_id'=>$obj['id']))."'>${obj['dname']}</a></tr>";
 		$order = $nextorder[$order];
 	}
 	echo "</table><br>\n";
@@ -1813,7 +1762,7 @@ function renderProblematicObjectsPortlet ()
 
 function renderObjectSpace ()
 {
-	global $root, $taglist, $tagtree;
+	global $taglist, $tagtree;
 	showMessageOrError();
 	echo "<table border=0 class=objectview>\n";
 	echo "<tr><td class=pcleft width='50%'>";
@@ -1830,7 +1779,7 @@ function renderObjectSpace ()
 	{
 		echo '<div align=left><ul>';
 		foreach ($groupInfo as $gi)
-			echo "<li><a href='${root}?page=objgroup&group_id=${gi['id']}'>${gi['name']}</a> (${gi['count']})</li>";
+			echo "<li><a href='".makeHref(array('page'=>'objgroup', 'group_id'=>$gi['id']))."'>${gi['name']}</a> (${gi['count']})</li>";
 		echo '</ul></div>';
 	}
 	finishPortlet();
@@ -1848,7 +1797,7 @@ function renderObjectSpace ()
 
 function renderObjectGroup ()
 {
-	global $root, $pageno, $tabno, $nextorder, $taglist, $tagtree;
+	global $pageno, $tabno, $nextorder, $taglist, $tagtree;
 	showMessageOrError();
 	assertUIntArg ('group_id', __FUNCTION__, TRUE);
 	$group_id = $_REQUEST['group_id'];
@@ -1870,7 +1819,7 @@ function renderObjectGroup ()
 		echo '<div align=left><ul>';
 		foreach ($groupInfo as $gi)
 		{
-			echo "<li><a href='${root}?page=${pageno}&group_id=${gi['id']}${tagfilter_str}'>";
+			echo "<li><a href='".makeHref(array('page'=>$pageno, 'group_id'=>$gi['id']))."${tagfilter_str}'>";
 			if ($gi['id'] == $group_id)
 				echo '<strong>';
 			echo "${gi['name']}</a>";
@@ -1895,7 +1844,7 @@ function renderObjectGroup ()
 		return;
 	}
 	echo '<br><br><table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
-	echo '<tr><th>Common name</th><th>Visible label</th><th>Asset tag</th><th>Barcode</th><th>Row/Rack</th></tr>';
+	echo '<tr><th>Common name</th><th>Visible label</th><th>Asset tag</th><th>Row/Rack</th><th></th></tr>';
 	$order = 'odd';
 	foreach ($objects as $obj)
 	{
@@ -1904,14 +1853,13 @@ function renderObjectGroup ()
 		else
 			$secondclass = 'tdleft';
 		$tags = loadRackObjectTags ($obj['id']);
-		echo "<tr class=row_${order} valign=top><td class='${secondclass}'><a href='${root}?page=object&object_id=${obj['id']}'><strong>${obj['dname']}</strong></a>";
+		echo "<tr class=row_${order} valign=top><td class='${secondclass}'><a href='".makeHref(array('page'=>'object', 'object_id'=>$obj['id']))."'><strong>${obj['dname']}</strong></a>";
 		if (count ($tags))
-			echo '<br><small>' . serializeTags ($tags, "${root}?page=${pageno}&tab=default&group_id=${group_id}&") . '</small>';
+			echo '<br><small>' . serializeTags ($tags, makeHref(array('page'=>$pageno, 'tab'=>'default', 'group_id'=>$group_id))."&") . '</small>';
 		echo "</td><td class='${secondclass}'>${obj['label']}</td>";
 		echo "<td class='${secondclass}'>${obj['asset_no']}</td>";
-		echo "<td class='${secondclass}'>${obj['barcode']}</td>";
 		if ($obj['rack_id'])
-			echo "<td class='${secondclass}'><a href='${root}?page=row&row_id=${obj['row_id']}'>${obj['Row_name']}</a>/<a href='${root}?page=rack&rack_id=${obj['rack_id']}'>${obj['Rack_name']}</a></td>";
+			echo "<td class='${secondclass}'><a href='".makeHref(array('page'=>'row', 'row_id'=>$obj['row_id']))."'>${obj['Row_name']}</a>/<a href='".makeHref(array('page'=>'rack', 'rack_id'=>$obj['rack_id']))."'>${obj['Rack_name']}</a></td>";
 		else
 			echo "<td class='${secondclass}'>Unmounted</td>";
 		echo '</tr>';
@@ -1969,10 +1917,10 @@ function renderHistory ($object_type, $object_id)
 			break;
 		case 'object':
 			$query =
-				"select ctime, user_name, name, label, barcode, asset_no, deleted, has_problems, dict_value, comment " .
+				"select ctime, user_name, name, label, asset_no, deleted, has_problems, dict_value, comment " .
 				"from RackObjectHistory inner join Dictionary on objtype_id = dict_key natural join Chapter " .
 				"where chapter_name = 'RackObjectType' and id=${object_id} order by ctime";
-			$header = '<tr><th>change time</th><th>author</th><th>common name</th><th>visible label</th><th>barcode</th><th>asset no</th><th>is deleted?</th><th>has problems?</th><th>object type</th><th>comment</th></tr>';
+			$header = '<tr><th>change time</th><th>author</th><th>common name</th><th>visible label</th><th>asset no</th><th>is deleted?</th><th>has problems?</th><th>object type</th><th>comment</th></tr>';
 			$extra = 9;
 			break;
 		default:
@@ -2003,7 +1951,7 @@ function renderHistory ($object_type, $object_id)
 
 function renderRackspaceHistory ()
 {
-	global $root, $nextorder, $pageno, $tabno;
+	global $nextorder, $pageno, $tabno;
 	$order = 'odd';
 	$history = getRackspaceHistory();
 	// Show the last operation by default.
@@ -2060,7 +2008,7 @@ function renderRackspaceHistory ()
 			$class = 'hl';
 		else
 			$class = "row_${order}";
-		echo "<tr class=${class}><td><a href='${root}?page=${pageno}&tab=${tabno}&op_id=${row['mo_id']}'>${row['ctime']}</a></td>";
+		echo "<tr class=${class}><td><a href='".makeHref(array('page'=>$pageno, 'tab'=>$tabno, 'op_id'=>$row['mo_id']))."'>${row['ctime']}</a></td>";
 		echo "<td>${row['user_name']}</td>";
 		echo "<td>${row['ro_id']}</td><td>${row['objtype_name']}</td><td>${row['name']}</td><td>${row['comment']}</td>\n";
 		echo "</tr>\n";
@@ -2134,9 +2082,11 @@ function renderIPv4SpaceRecords ($tree, &$tagcache, $baseurl, $target = 0, $leve
 
 function renderIPv4Space ()
 {
-	global $root, $pageno, $tabno;
+	global $pageno, $tabno;
 	$tagfilter = getTagFilter();
 	$netlist = getIPv4NetworkList ($tagfilter, getTFMode());
+
+
 	$netcount = count ($netlist);
 	// expand request can take either natural values or "ALL". Zero means no expanding.
 	$eid = isset ($_REQUEST['eid']) ? $_REQUEST['eid'] : 0;
@@ -2147,13 +2097,13 @@ function renderIPv4Space ()
 	startPortlet ("networks (${netcount})");
 	echo '<h4>';
 	if ($eid === 0)
-		echo 'auto-collapsing at threshold ' . getConfigVar ('TREE_THRESHOLD') . " (<a href='${root}?page=${pageno}&tab=${tabno}&eid=ALL'>expand all</a>)";
+		echo 'auto-collapsing at threshold ' . getConfigVar ('TREE_THRESHOLD') . " (<a href='".makeHref(array('page'=>$pageno, 'tab'=>$tabno, 'eid'=>'ALL'))."'>expand all</a>)";
 	elseif ($eid === 'ALL')
-		echo "expanding all (<a href='${root}?page=${pageno}&tab=${tabno}'>auto-collapse</a>)";
+		echo "expanding all (<a href='".makeHref(array('page'=>$pageno, 'tab'=>$tabno))."'>auto-collapse</a>)";
 	else
 	{
 		$netinfo = getIPv4NetworkInfo ($eid);
-		echo "expanding ${netinfo['ip']}/${netinfo['mask']} (<a href='${root}?page=${pageno}&tab=${tabno}'>auto-collapse</a> / <a href='${root}?page=${pageno}&tab=${tabno}&eid=ALL'>expand&nbsp;all</a>)"; 
+		echo "expanding ${netinfo['ip']}/${netinfo['mask']} (<a href='".makeHref(array('page'=>$pageno, 'tab'=>$tabno))."'>auto-collapse</a> / <a href='".makeHref(array('page'=>$pageno, 'tab'=>$tabno, 'eid'=>'ALL'))."'>expand&nbsp;all</a>)"; 
 	}
 	echo "</h4><table class='widetable' border=0 cellpadding=5 cellspacing=0 align='center'>\n";
 	echo "<tr><th>prefix</th><th>name/tags</th><th>capacity</th>";
@@ -2161,7 +2111,7 @@ function renderIPv4Space ()
 		echo "<th>routed by</th>";
 	echo "</tr>\n";
 	$tagcache = array();
-	$baseurl = "${root}?page=${pageno}&tab=${tabno}" . getTagFilterStr ($tagfilter);
+	$baseurl = makeHref(array('page'=>$pageno, 'tab'=>$tabno)) . getTagFilterStr ($tagfilter);
 	renderIPv4SpaceRecords ($tree, $tagcache, $baseurl, $eid);
 	echo "</table>\n";
 	finishPortlet();
@@ -2172,12 +2122,12 @@ function renderIPv4Space ()
 
 function renderIPv4SLB ()
 {
-	global $root, $page, $nextorder;
+	global $page, $nextorder;
 
 	startPortlet ('SLB configuration');
 	echo "<table border=0 width='100%'><tr>";
 	foreach (array ('ipv4vslist', 'ipv4rsplist', 'rservers', 'lbs') as $pno)
-		echo "<td><h3><a href='${root}?page=${pno}'>" . $page[$pno]['title'] . "</a></h3></td>";
+		echo "<td><h3><a href='".makeHref(array('page'=>$pno))."'>" . $page[$pno]['title'] . "</a></h3></td>";
 	echo '</tr></table>';
 	finishPortlet();
 
@@ -2204,7 +2154,7 @@ function renderIPv4SLB ()
 		echo "<tr valign=top><td>&nbsp;</td>";
 		foreach ($lblist as $lb_object_id)
 		{
-			#echo "<th><a href='${root}?page=object&tab=default&object_id=${lb_object_id}'>" . $lbdname[$lb_object_id]  . "</a></th>";
+			#echo "<th><a href='".makeHref(array('page'=>'object', 'tab'=>'default', 'object_id'=>$lb_object_id))."'>" . $lbdname[$lb_object_id]  . "</a></th>";
 			echo '<td>';
 			renderLBCell ($lb_object_id);
 			echo '</td>';
@@ -2223,8 +2173,7 @@ function renderIPv4SLB ()
 				else
 				{
 					echo $vsdata['lblist'][$lb_object_id]['size'];
-//					echo " (<a href='${root}?page=ipv4rspool&pool_id=";
-//					echo $vsdata['lblist'][$lb_object_id]['id'] . "'>";
+//					echo " (<a href='".makeHref(array('page'=>'ipv4rspool', 'pool_id'=>$vsdata['lblist'][$lb_object_id]['id'])). "'>";
 //					echo $vsdata['lblist'][$lb_object_id]['name'] . '</a>)';
 				}
 				echo '</td>';
@@ -2239,7 +2188,7 @@ function renderIPv4SLB ()
 
 function renderIPv4SpaceEditor ()
 {
-	global $root, $pageno, $tabno;
+	global $pageno, $tabno;
 	showMessageOrError();
 
 	// IPv4 validator
@@ -2258,10 +2207,8 @@ function renderIPv4SpaceEditor ()
 	echo '<table border=0 cellpadding=10 align=center>';
 	// This form requires a name, so JavaScript validator can find it.
 	// No printOpFormIntro() hence
-	echo "<form method=post name='add_new_range' action='${root}process.php'>\n";
+	echo "<form method=post name='add_new_range' action='".makeHrefProcess()."'>\n";
 	echo "<input type=hidden name=op value=addIPv4Prefix>\n";
-	echo "<input type=hidden name=page value='${pageno}'>\n";
-	echo "<input type=hidden name=tab value='${tabno}'>\n";
 	// tags column
 	echo '<tr><td rowspan=4><h3>assign tags</h3>';
 	renderTagSelect();
@@ -2285,8 +2232,8 @@ function renderIPv4SpaceEditor ()
 		echo "<tr><th>&nbsp;</th><th>prefix</th><th>name</th><th>&nbsp;</th></tr>";
 		foreach ($addrspaceList as $netinfo)
 		{
-			echo "<form method=post action='${root}process.php?page=${pageno}&tab=${tabno}&op=updIPv4Prefix&id=${netinfo['id']}'>";
-			echo "<tr valign=top><td><a href='${root}process.php?op=delIPv4Prefix&page=${pageno}&tab=${tabno}&id=${netinfo['id']}'>";
+			echo "<form method=post action='".makeHrefProcess(array($op=>'updIPv4Prefix', 'id'=>$netinfo['id']))."'>";
+			echo "<tr valign=top><td><a href='".makeHrefProcess(array('op'=>'delIPv4Prefix', 'id'=>$netinfo['id']))."'>";
 			printImageHREF ('delete', 'Delete this IP range');
 			echo "</a></td>\n<td class=tdleft>${netinfo['ip']}/${netinfo['mask']}</td>";
 			echo "<td><input type=text name=name size=40 value='${netinfo['name']}'>";
@@ -2301,7 +2248,7 @@ function renderIPv4SpaceEditor ()
 
 function renderIPv4Network ($id)
 {
-	global $root, $pageno, $tabno, $aac2;
+	global $pageno, $tabno, $aac2;
 	$netmaskbylen = array
 	(
 		32 => '255.255.255.255',
@@ -2412,7 +2359,7 @@ function renderIPv4Network ($id)
 			for ($i = 0; $i < $arrows; $i++)
 				echo '&uarr;';
 			$arrows--;
-			echo "</th><td class=tdleft><a href='${root}?page=${pageno}&tab=${tabno}&id=${ainfo['id']}'>${ainfo['ip']}/${ainfo['mask']}</a></td></tr>";
+			echo "</th><td class=tdleft><a href='".makeHref(array('page'=>$pageno, 'tab'=>$tabno, 'id'=>$ainfo['id']))."'>${ainfo['ip']}/${ainfo['mask']}</a></td></tr>";
 		}
 		echo "<tr><th width='50%' class=tdright>&rarr;</th>";
 		echo "<td class=tdleft>${range['ip']}/${range['mask']}</td></tr>";
@@ -2440,7 +2387,7 @@ function renderIPv4Network ($id)
 		echo "</tr>\n";
 	}
 
-	printTagTRs ("${root}?page=ipv4space&tab=default&");
+	printTagTRs (makeHref(array('page'=>'ipv4space', 'tab'=>'default'))."&");
 	echo "</table><br>\n";
 	finishPortlet();
 
@@ -2468,7 +2415,7 @@ function renderIPv4Network ($id)
 		if ($i == $page)
 			echo "<b>$i</b> ";
 		else
-			echo "<a href='${root}?page=${pageno}&tab=${tabno}&id=$id&pg=$i'>$i</a> ";
+			echo "<a href='".makeHref(array('page'=>$pageno, 'tab'=>$tabno, 'id'=>$id, 'pg'=>$i))."'>$i</a> ";
 	}
 	echo "</center>";
 
@@ -2483,14 +2430,14 @@ function renderIPv4Network ($id)
 			$secondstyle = 'tdleft';
 		if (!isset ($range['addrlist'][$ip]))
 		{
-			echo "<tr><td class=tdleft><a href='${root}?page=ipaddress&ip=" . long2ip ($ip) . "'>" . long2ip ($ip);
+			echo "<tr><td class=tdleft><a href='".makeHref(array('page'=>'ipaddress', 'ip'=>ip_long2quad($ip)))."'>" . ip_long2quad($ip);
 			echo "</a></td><td class='${secondstyle}'>&nbsp;</td><td class='${secondstyle}'>&nbsp;</td></tr>\n";
 			continue;
 		}
 		$addr = $range['addrlist'][$ip];
 		echo "<tr class='${addr['class']}'>";
 
-		echo "<td class=tdleft><a href='${root}?page=ipaddress&ip=${addr['ip']}'>${addr['ip']}</a></td>";
+		echo "<td class=tdleft><a href='".makeHref(array('page'=>'ipaddress', 'ip'=>$addr['ip']))."'>${addr['ip']}</a></td>";
 		echo "<td class='${secondstyle}'>${addr['name']}</td><td class='${secondstyle}'>";
 		$delim = '';
 		$prologue = '';
@@ -2502,8 +2449,7 @@ function renderIPv4Network ($id)
 		foreach ($range['addrlist'][$ip]['allocs'] as $ref)
 		{
 			echo $delim . $aac2[$ref['type']];
-			echo "<a href='${root}?page=object&object_id=${ref['object_id']}";
-			echo "&hl_ipv4_addr=${addr['ip']}'>";
+			echo "<a href='".makeHref(array('page'=>'object', 'object_id'=>$ref['object_id'], 'hl_ipv4_addr'=>$addr['ip']))."'>";
 			echo $ref['name'] . (empty ($ref['name']) ? '' : '@');
 			echo "${ref['object_name']}</a>";
 			$delim = '; ';
@@ -2517,8 +2463,8 @@ function renderIPv4Network ($id)
 		{
 			echo $prologue;
 			$prologue = '';
-			echo "${delim}<a href='${root}?page=object&object_id=${ref['object_id']}'>";
-			echo "${ref['object_name']}</a>:<a href='${root}?page=ipv4vs&vs_id=${ref['vs_id']}'>";
+			echo "${delim}<a href='".makeHref(array('page'=>'object', 'object_id'=>$ref['object_id']))."'>";
+			echo "${ref['object_name']}</a>:<a href='".makeHref(array('page'=>'ipv4vs', 'vs_id'=>$ref['vs_id']))."'>";
 			echo "${ref['vport']}/${ref['proto']}</a>&rarr;";
 			$delim = '; ';
 		}
@@ -2531,7 +2477,7 @@ function renderIPv4Network ($id)
 		{
 			echo $prologue;
 			$prologue = '';
-			echo "${delim}&rarr;${ref['rsport']}@<a href='${root}?page=ipv4rspool&pool_id=${ref['rspool_id']}'>";
+			echo "${delim}&rarr;${ref['rsport']}@<a href='".makeHref(array('page'=>'ipv4rspool', 'pool_id'=>$ref['rspool_id']))."'>";
 			echo "${ref['rspool_name']}</a>";
 			$delim = '; ';
 		}
@@ -2559,7 +2505,7 @@ function renderIPv4NetworkProperties ($id)
 
 function renderIPv4Address ($dottedquad)
 {
-	global $root, $aat;
+	global $aat;
 	$address = getIPv4Address ($dottedquad);
 	echo "<table border=0 class=objectview cellspacing=0 cellpadding=0>";
 	echo "<tr><td colspan=2 align=center><h1>${dottedquad}</h1></td></tr>\n";
@@ -2596,8 +2542,7 @@ function renderIPv4Address ($dottedquad)
 				$secondclass = 'tdleft port_highlight';
 			else
 				$secondclass = 'tdleft';
-			echo "<tr class='$class'><td class=tdleft><a href='${root}?page=object&object_id=${bond['object_id']}";
-			echo "&hl_ipv4_addr=${dottedquad}'>${bond['object_name']}</td><td class='${secondclass}'>${bond['name']}</td><td class='${secondclass}'><strong>";
+			echo "<tr class='$class'><td class=tdleft><a href='".makeHref(array('page'=>'object', 'object_id'=>$bond['object_id'], 'hl_ipv4_addr'=>$dottedquad))."'>${bond['object_name']}</td><td class='${secondclass}'>${bond['name']}</td><td class='${secondclass}'><strong>";
 			echo $aat[$bond['type']];
 			echo "</strong></td></tr>\n";
 		}
@@ -2614,7 +2559,7 @@ function renderIPv4Address ($dottedquad)
 		echo "<tr><th>VS</th><th>name</th></tr>\n";
 		foreach ($address['lblist'] as $vsinfo)
 		{
-			echo "<tr><td class=tdleft><a href='${root}?page=ipv4vs&vs_id=${vsinfo['vs_id']}'>";
+			echo "<tr><td class=tdleft><a href='".makeHref(array('page'=>'ipv4vs', 'vs_id'=>$vsinfo['vs_id']))."'>";
 			echo buildVServiceName ($vsinfo) . "</a></td><td class=tdleft>";
 			echo $vsinfo['name'] . "</td></tr>\n";
 		}
@@ -2634,7 +2579,7 @@ function renderIPv4Address ($dottedquad)
 				printImageHREF ('inservice', 'in service');
 			else
 				printImageHREF ('notinservice', 'NOT in service');
-			echo "</td><td class=tdleft>${rsinfo['rsport']}</td><td class=tdleft><a href='${root}?page=ipv4rspool&pool_id=${rsinfo['rspool_id']}'>";
+			echo "</td><td class=tdleft>${rsinfo['rsport']}</td><td class=tdleft><a href='".makeHref(array('page'=>'ipv4rspool', 'pool_id'=>$rsinfo['rspool_id']))."'>";
 			echo $rsinfo['rspool_name'] . "</a></td></tr>\n";
 		}
 		echo "</table><br><br>";
@@ -2713,7 +2658,7 @@ function renderIPv4AddressAllocations ($dottedquad)
 		printImageHREF ('add', 'allocate', TRUE, 103);
 		echo "</td></form></tr>";
 	}
-	global $pageno, $tabno, $root, $aat;
+	global $pageno, $tabno, $aat;
 
 	$address = getIPv4Address ($dottedquad);
 
@@ -2732,10 +2677,10 @@ function renderIPv4AddressAllocations ($dottedquad)
 		{
 			echo "<tr class='$class'>";
 			printOpFormIntro ('updIPv4Allocation', array ('object_id' => $bond['object_id']));
-			echo "<td><a href='${root}process.php?op=delIPv4Allocation&page=${pageno}&tab=${tabno}&ip=${dottedquad}&object_id=${bond['object_id']}'>";
+			echo "<td><a href='".makeHrefProcess(array('op'=>'delIPv4Allocation', 'ip'=>$dottedquad, 'object_id'=>$bond['object_id']))."'>";
 			printImageHREF ('delete', 'Unallocate address');
 			echo "</a></td>";
-			echo "<td><a href='${root}?page=object&object_id=${bond['object_id']}&hl_ipv4_addr=${dottedquad}'>${bond['object_name']}</td>";
+			echo "<td><a href='".makeHref(array('page'=>'object', 'object_id'=>$bond['object_id'], 'hl_ipv4_addr'=>$dottedquad))."'>${bond['object_name']}</td>";
 			echo "<td><input type='text' name='bond_name' value='${bond['name']}' size=10></td><td>";
 			printSelect ($aat, 'bond_type', $bond['type']);
 			echo "</td><td>";
@@ -2752,7 +2697,6 @@ function renderNATv4ForObject ($object_id = 0)
 {
 	function printNewItemTR ($alloclist)
 	{
-		global $root;
 		printOpFormIntro ('addNATv4Rule');
 		echo "<tr align='center'><td>";
 		printImageHREF ('add', 'Add new NAT rule', TRUE);
@@ -2777,7 +2721,7 @@ function renderNATv4ForObject ($object_id = 0)
 		printImageHREF ('add', 'Add new NAT rule', TRUE, 6);
 		echo "</td></tr></form>";
 	}
-	global $pageno, $tabno, $root;
+	global $pageno, $tabno;
 	
 	$info = getObjectInfo ($object_id);
 	$forwards = getNATv4ForObject ($object_id);
@@ -2801,21 +2745,30 @@ function renderNATv4ForObject ($object_id = 0)
 		}
 
 		echo "<tr class='$class'>";
-		echo "<td><a href='${root}process.php?op=delNATv4Rule&localip=${pf['localip']}&localport=${pf['localport']}&remoteip=${pf['remoteip']}&remoteport=${pf['remoteport']}&proto=${pf['proto']}&object_id=$object_id&page=${pageno}&tab=${tabno}'>";
+		echo "<td><a href='".
+			makeHrefProcess(array(
+				'op'=>'delNATv4Rule', 
+				'localip'=>$pf['localip'],
+				'localport'=>$pf['localport'],
+				'remoteip'=>$pf['remoteip'],
+				'remoteport'=>$pf['remoteport'],
+				'proto'=>$pf['proto'], 
+				'object_id'=>$object_id)).
+		"'>";
 		printImageHREF ('delete', 'Delete NAT rule');
 		echo "</a></td>";
-		echo "<td>${pf['proto']}/${osif}<a href='${root}?page=ipaddress&tab=default&ip=${pf['localip']}'>${pf['localip']}</a>:${pf['localport']}";
+		echo "<td>${pf['proto']}/${osif}<a href='".makeHref(array('page'=>'ipaddress', 'tab'=>'default', 'ip'=>$pf['localip']))."'>${pf['localip']}</a>:${pf['localport']}";
 		if (!empty ($pf['local_addr_name']))
 			echo ' (' . $pf['local_addr_name'] . ')';
 		echo "</td>";
-		echo "<td><a href='${root}?page=ipaddress&tab=default&ip=${pf['remoteip']}'>${pf['remoteip']}</a>:${pf['remoteport']}</td>";
+		echo "<td><a href='".makeHref(array('page'=>'ipaddress', 'tab'=>'default', 'ip'=>$pf['remoteip']))."'>${pf['remoteip']}</a>:${pf['remoteport']}</td>";
 
 		$address = getIPv4Address ($pf['remoteip']);
 
 		echo "<td class='description'>";
 		if (count ($address['allocs']))
 			foreach ($address['allocs'] as $bond)
-				echo "<a href='${root}?page=object&tab=default&object_id=${bond['object_id']}'>${bond['object_name']}(${bond['name']})</a> ";
+				echo "<a href='".makeHref(array('page'=>'object', 'tab'=>'default', 'object_id'=>$bond['object_id']))."'>${bond['object_name']}(${bond['name']})</a> ";
 		elseif (!empty ($pf['remote_addr_name']))
 			echo '(' . $pf['remote_addr_name'] . ')';
 		printOpFormIntro
@@ -2846,12 +2799,22 @@ function renderNATv4ForObject ($object_id = 0)
 
 	foreach ($forwards['in'] as $pf)
 	{
-		echo "<tr><td><a href='${root}process.php?op=delNATv4Rule&localip=${pf['localip']}&localport=${pf['localport']}&remoteip=${pf['remoteip']}&remoteport=${pf['remoteport']}&proto=${pf['proto']}&object_id=${pf['object_id']}&page=${pageno}&tab=${tabno}'>";
+		echo "<tr><td><a href='".
+			makeHrefProcess(array(
+				'op'=>'delNATv4Rule',
+				'localip'=>$pf['localip'],
+				'localport'=>$pf['localport'],
+				'remoteip'=>$pf['remoteip'],
+				'remoteport'=>$pf['remoteport'],
+				'proto'=>$pf['proto'],
+				'object_id'=>$pf['object_id']
+				)).
+		"'>";
 		printImageHREF ('delete', 'Delete NAT rule');
 		echo "</a></td>";
-		echo "<td>${pf['proto']}/<a href='${root}?page=ipaddress&tab=default&ip=${pf['localip']}'>${pf['localip']}</a>:${pf['localport']}</td>";
-		echo "<td class='description'><a href='${root}?page=object&tab=default&object_id=${pf['object_id']}'>${pf['object_name']}</a>";
-		echo "</td><td><a href='${root}?page=ipaddress&tab=default&ip=${pf['remoteip']}'>${pf['remoteip']}</a>:${pf['remoteport']}</td>";
+		echo "<td>${pf['proto']}/<a href='".makeHref(array('page'=>'ipaddress', 'tab'=>'default', 'ip'=>$pf['localip']))."'>${pf['localip']}</a>:${pf['localport']}</td>";
+		echo "<td class='description'><a href='".makeHref(array('page'=>'object', 'tab'=>'default', 'object_id'=>$pf['object_id']))."'>${pf['object_name']}</a>";
+		echo "</td><td><a href='".makeHref(array('page'=>'ipaddress', 'tab'=>'default', 'ip'=>$pf['remoteip']))."'>${pf['remoteip']}</a>:${pf['remoteport']}</td>";
 		echo "<td class='description'>${pf['description']}</td></tr>";
 	}
 
@@ -3397,7 +3360,7 @@ function renderPortMapEditor ()
 
 function renderPortMap ($editable = FALSE)
 {
-	global $nextorder, $root, $pageno, $tabno;
+	global $nextorder, $pageno, $tabno;
 	showMessageOrError();
 	startPortlet ("Port compatibility map");
 	$ptlist = getPortTypes();
@@ -3479,13 +3442,13 @@ function renderRackPage ($rack_id)
 
 function renderDictionary ()
 {
-	global $root, $nextorder;
+	global $nextorder;
 	$dict = getDict (TRUE);
 	echo '<ul>';
 	foreach ($dict as $chapter_no => $chapter)
 	{
 		$wc = count ($chapter['word']);
-		echo "<li><a href='${root}?page=chapter&chapter_no=${chapter_no}'>${chapter['name']}</a>";
+		echo "<li><a href='".makeHref(array('page'=>'chapter', 'chapter_no'=>$chapter_no))."'>${chapter['name']}</a>";
 		echo " (${wc} records)</li>";
 	}
 	echo '</ul>';
@@ -3525,7 +3488,7 @@ function renderChapter ($tgt_chapter_no)
 
 function renderChapterEditor ($tgt_chapter_no)
 {
-	global $root, $pageno, $tabno, $nextorder;
+	global $pageno, $tabno, $nextorder;
 	function printNewItemTR ()
 	{
 		printOpFormIntro ('add');
@@ -3566,7 +3529,7 @@ function renderChapterEditor ($tgt_chapter_no)
 					printImageHREF ('nodelete', 'referenced ' . $chapter['refcnt'][$key] . ' time(s)');
 				else
 				{
-					echo "<a href='${root}process.php?page=${pageno}&tab=${tabno}&op=del&chapter_no=${chapter['no']}&dict_key=${key}'>";
+					echo "<a href='".makeHrefProcess(array('op'=>'del', 'chapter_no'=>$chapter_no, 'dict_key'=>$key))."'>";
 					printImageHREF ('delete', 'Delete word');
 					echo "</a>";
 				}
@@ -3597,7 +3560,7 @@ function renderChaptersEditor ()
 		printImageHREF ('add', 'Add new', TRUE, 101);
 		echo '</td></tr></form>';
 	}
-	global $root, $pageno, $tabno;
+	global $pageno, $tabno;
 	showMessageOrError();
 	$dict = getDict();
 	echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
@@ -3617,7 +3580,7 @@ function renderChaptersEditor ()
 			printImageHREF ('nodelete', 'contains ' . $wordcount . ' word(s)');
 		else
 		{
-			echo "<a href='${root}process.php?page=${pageno}&tab=${tabno}&op=del&chapter_no=${chapter['no']}'>";
+			echo "<a href='".makeHrefProcess(array('op'=>'del', 'chapter_no'=>$chapter['no']))."'>";
 			printImageHREF ('delete', 'Remove chapter');
 			echo "</a>";
 		}
@@ -3683,7 +3646,7 @@ function renderEditAttributesForm ()
 		printImageHREF ('add', 'Create attribute', TRUE, 102);
 		echo '</td></tr></form>';
 	}
-	global $root, $pageno, $tabno;
+	global $pageno, $tabno;
 	$attrMap = getAttrMap();
 	showMessageOrError();
 	startPortlet ('Optional attributes');
@@ -3695,7 +3658,7 @@ function renderEditAttributesForm ()
 	{
 		printOpFormIntro ('upd', array ('attr_id' => $attr['id']));
 		echo '<tr>';
-		echo "<td><a href='${root}process.php?page=${pageno}&tab=${tabno}&op=del&attr_id=${attr['id']}'>";
+		echo "<td><a href='".makeHrefProcess(array('op'=>'del', 'attr_id'=>$attr['id']))."'>";
 		printImageHREF ('delete', 'Remove attribute');
 		echo '</a></td>';
 		echo "<td><input type=text name=attr_name value='${attr['name']}'></td>";
@@ -3738,7 +3701,7 @@ function renderEditAttrMapForm ()
 		echo '</td></tr>';
 		echo '</form>';
 	}
-	global $root, $pageno, $tabno;
+	global $pageno, $tabno;
 	$attrMap = getAttrMap();
 	showMessageOrError();
 	startPortlet ('Attribute map');
@@ -3754,8 +3717,7 @@ function renderEditAttrMapForm ()
 		{
 			echo '<tr>';
 			echo '<td>';
-			echo "<a href='${root}process.php?page=${pageno}&tab=${tabno}&op=del&";
-			echo "attr_id=${attr['id']}&objtype_id=${app['objtype_id']}'>";
+			echo "<a href='".makeHrefProcess(array('op'=>'del', 'attr_id'=>$attr['id'], 'objtype_id'=>$app['objtype_id']))."'>";
 			printImageHREF ('delete', 'Remove mapping');
 			echo "</a>";
 			echo '</td>';
@@ -4174,7 +4136,7 @@ function renderLVSConfig ($object_id = 0)
 
 function renderVirtualService ($vsid)
 {
-	global $root, $nextorder;
+	global $nextorder;
 	if ($vsid <= 0)
 	{
 		showError ('Invalid argument', __FUNCTION__);
@@ -4192,9 +4154,9 @@ function renderVirtualService ($vsid)
 	if (!empty ($vsinfo['name']))
 		echo "<tr><th width='50%' class=tdright>Name:</th><td class=tdleft>${vsinfo['name']}</td></tr>\n";
 	echo "<tr><th width='50%' class=tdright>Protocol:</th><td class=tdleft>${vsinfo['proto']}</td></tr>\n";
-	echo "<tr><th width='50%' class=tdright>Virtual IP address:</th><td class=tdleft><a href='${root}?page=ipaddress&tab=default&ip=${vsinfo['vip']}'>${vsinfo['vip']}</a></td></tr>\n";
+	echo "<tr><th width='50%' class=tdright>Virtual IP address:</th><td class=tdleft><a href='".makeHref(array('page'=>'ipaddress', 'tab'=>'default', 'ip'=>$vsinfo['vid']))."'>${vsinfo['vip']}</a></td></tr>\n";
 	echo "<tr><th width='50%' class=tdright>Virtual port:</th><td class=tdleft>${vsinfo['vport']}</td></tr>\n";
-	printTagTRs ("${root}?page=ipv4vslist&tab=default&");
+	printTagTRs (makeHref(array('page'=>'ipv4vslist', 'tab'=>'default'))."&");
 	if (!empty ($vsinfo['vsconfig']))
 	{
 		echo "<tr><th class=slbconf>VS configuration:</th><td>&nbsp;</td></tr>";
@@ -4266,7 +4228,7 @@ function renderProgressBar ($percentage = 0, $theme = '')
 
 function renderRSPoolServerForm ($pool_id = 0)
 {
-	global $root, $pageno, $tabno, $nextorder;
+	global $pageno, $tabno, $nextorder;
 	if ($pool_id <= 0)
 	{
 		showError ('Invalid pool_id', __FUNCTION__);
@@ -4284,8 +4246,7 @@ function renderRSPoolServerForm ($pool_id = 0)
 		foreach ($poolInfo['rslist'] as $rsid => $rs)
 		{
 			printOpFormIntro ('updRS', array ('rs_id' => $rsid));
-			echo "<tr valign=top class=row_${order}><td><a href='${root}process.php?page=${pageno}&tab=${tabno}";
-			echo "&op=delRS&pool_id=${pool_id}&id=${rsid}'>";
+			echo "<tr valign=top class=row_${order}><td><a href='".makeHrefProcess(array('op'=>'delRS', 'pool_id'=>$pool_id, 'id'=>$rsid))."'>";
 			printImageHREF ('delete', 'Delete this real server');
 			echo "</td><td><input type=text name=rsip value='${rs['rsip']}'></td>";
 			echo "<td><input type=text name=rsport size=5 value='${rs['rsport']}'></td>";
@@ -4345,7 +4306,7 @@ function renderRSPoolServerForm ($pool_id = 0)
 
 function renderRSPoolLBForm ($pool_id = 0)
 {
-	global $root, $pageno, $tabno, $nextorder;
+	global $pageno, $tabno, $nextorder;
 	showMessageOrError();
 
 	$poolInfo = getRSPoolInfo ($pool_id);
@@ -4363,7 +4324,7 @@ function renderRSPoolLBForm ($pool_id = 0)
 			foreach ($vslist as $vs_id => $configs)
 			{
 				printOpFormIntro ('updLB', array ('vs_id' => $vs_id, 'object_id' => $object_id));
-				echo "<tr valign=top class=row_${order}><td><a href='${root}process.php?page=${pageno}&tab=${tabno}&op=delLB&pool_id=${pool_id}&object_id=${object_id}&vs_id=${vs_id}'>";
+				echo "<tr valign=top class=row_${order}><td><a href='".makeHrefProcess(array('op'=>'delLB', 'pool_id'=>$pool_id, 'object_id'=>$object_id, 'vs_id'=>$vs_id))."'>";
 				printImageHREF ('delete', 'Unconfigure');
 				echo "</a></td>";
 				echo "<td class=tdleft>";
@@ -4400,7 +4361,7 @@ function renderRSPoolLBForm ($pool_id = 0)
 
 function renderVServiceLBForm ($vs_id = 0)
 {
-	global $root, $pageno, $tabno, $nextorder;
+	global $pageno, $tabno, $nextorder;
 	showMessageOrError();
 	$vsinfo = getVServiceInfo ($vs_id);
 
@@ -4414,7 +4375,7 @@ function renderVServiceLBForm ($vs_id = 0)
 			foreach ($rspinfo['lblist'] as $object_id => $configs)
 			{
 				printOpFormIntro ('updLB', array ('pool_id' => $pool_id, 'object_id' => $object_id));
-				echo "<tr valign=top class=row_${order}><td><a href='${root}process.php?page=${pageno}&tab=${tabno}&op=delLB&pool_id=${pool_id}&object_id=${object_id}&vs_id=${vs_id}'>";
+				echo "<tr valign=top class=row_${order}><td><a href='".makeHrefProcess(array('op'=>'delLB', 'pool_id'=>$pool_id, 'object_id'=>$object_id, 'vs_id'=>$vs_id))."'>";
 				printImageHREF ('delete', 'Unconfigure');
 				echo "</a></td>";
 				echo "<td class=tdleft>";
@@ -4454,7 +4415,7 @@ function renderVServiceLBForm ($vs_id = 0)
 
 function renderRSPool ($pool_id = 0)
 {
-	global $root, $nextorder;
+	global $nextorder;
 	if ($pool_id <= 0)
 	{
 		showError ('Invalid pool_id', __FUNCTION__);
@@ -4478,7 +4439,7 @@ function renderRSPool ($pool_id = 0)
 		echo "<tr><th width='50%' class=tdright>Pool name:</th><td class=tdleft>${poolInfo['name']}</td></tr>\n";
 	echo "<tr><th width='50%' class=tdright>Real servers:</th><td class=tdleft>" . count ($poolInfo['rslist']) . "</td></tr>\n";
 	echo "<tr><th width='50%' class=tdright>Load balancers:</th><td class=tdleft>" . count ($poolInfo['lblist']) . "</td></tr>\n";
-	printTagTRs ("${root}?page=ipv4rsplist&tab=default&");
+	printTagTRs (makeHref(array('page'=>'ipv4rsplist', 'tab'=>'default'))."&");
 	if (!empty ($poolInfo['vsconfig']))
 	{
 		echo "<tr><th width='50%' class=tdright>VS configuration:</th><td>&nbsp;</td></tr>\n";
@@ -4499,7 +4460,7 @@ function renderRSPool ($pool_id = 0)
 	foreach ($poolInfo['lblist'] as $object_id => $vslist)
 		foreach ($vslist as $vs_id => $configs)
 	{
-		echo "<tr valign=top class=row_${order}><td class=tdleft><a href='${root}?page=ipv4vs&vs_id=${vs_id}'>";
+		echo "<tr valign=top class=row_${order}><td class=tdleft><a href='".makeHref(array('page'=>'ipv4vs', 'vs_id'=>$vs_id))."'>";
 		renderVSCell ($vs_id);
 		echo "</td><td>";
 		renderLBCell ($object_id);
@@ -4522,7 +4483,7 @@ function renderRSPool ($pool_id = 0)
 			printImageHREF ('inservice', 'in service');
 		else
 			printImageHREF ('notinservice', 'NOT in service');
-		echo "</td><td class=tdleft><a href='${root}?page=ipaddress&ip=${rs['rsip']}'>${rs['rsip']}</a></td>";
+		echo "</td><td class=tdleft><a href='".makeHref(array('page'=>'ipaddress', 'ip'=>$rs['rsip']))."'>${rs['rsip']}</a></td>";
 		echo "<td class=tdleft>${rs['rsport']}</td><td class=slbconf>${rs['rsconfig']}</td></tr>\n";
 	}
 	echo "</table>\n";
@@ -4533,7 +4494,7 @@ function renderRSPool ($pool_id = 0)
 
 function renderVSList ()
 {
-	global $root, $pageno, $nextorder;
+	global $pageno, $nextorder;
 	$tagfilter = getTagFilter();
 	$vslist = getVSList ($tagfilter, getTFMode());
 	echo "<table border=0 class=objectview>\n";
@@ -4561,7 +4522,7 @@ function renderVSList ()
 
 function renderVSListEditForm ()
 {
-	global $root, $pageno, $tabno, $nextorder;
+	global $pageno, $tabno, $nextorder;
 	showMessageOrError();
 	$protocols = array ('TCP' => 'TCP', 'UDP' => 'UDP');
 
@@ -4604,7 +4565,7 @@ function renderVSListEditForm ()
 			printImageHREF ('nodelete', 'there are ' . $vsinfo['poolcount'] . ' RS pools configured');
 		else
 		{
-			echo "<a href='${root}process.php?page=${pageno}&tab=${tabno}&op=del&vs_id=${vsid}'>";
+			echo "<a href='".makeHrefProcess(array('op'=>'del', 'vs_id'=>$vsid))."'>";
 			printImageHREF ('delete', 'delete virtual service');
 			echo '</a>';
 		}
@@ -4626,7 +4587,7 @@ function renderVSListEditForm ()
 
 function renderRSPoolList ()
 {
-	global $root, $pageno, $nextorder;
+	global $pageno, $nextorder;
 	$tagfilter = getTagFilter();
 	$pool_list = getRSPoolList ($tagfilter, getTFMode());
 	if ($pool_list === NULL)
@@ -4644,12 +4605,12 @@ function renderRSPoolList ()
 	{
 		$pooltags = loadIPv4RSPoolTags ($pool_id);
 		echo "<tr valign=top class=row_${order}><td class=tdleft>";
-		echo "<a href='${root}?page=ipv4rspool&pool_id=${pool_id}'>" . (empty ($pool_info['name']) ? 'ANONYMOUS' : $pool_info['name']) . '</a>';
+		echo "<a href='".makeHref(array('page'=>'ipv4rspool', 'pool_id'=>$pool_id))."'>" . (empty ($pool_info['name']) ? 'ANONYMOUS' : $pool_info['name']) . '</a>';
 		echo ($pool_info['refcnt'] ? ", ${pool_info['refcnt']}" : '');
 		if (count ($pooltags))
 		{
 			echo '<br>';
-			echo serializeTags ($pooltags, "${root}?page=${pageno}&tab=default&");
+			echo serializeTags ($pooltags, makeHref(array('page'=>$pageno, 'tab'=>'default'))."&");
 		}
 		echo "</td><td class=tdleft><pre>${pool_info['vsconfig']}</pre></td>";
 		echo "<td class=tdleft><pre>${pool_info['rsconfig']}</pre></td>";
@@ -4665,7 +4626,7 @@ function renderRSPoolList ()
 
 function editRSPools ()
 {
-	global $root, $pageno, $tabno, $nextorder;
+	global $pageno, $tabno, $nextorder;
 	showMessageOrError();
 
 	startPortlet ('Add new');
@@ -4697,7 +4658,7 @@ function editRSPools ()
 			printImageHREF ('nodelete', 'RS pool is used ' . $pool_info['refcnt'] . ' time(s)');
 		else
 		{
-			echo "<a href='${root}process.php?page=${pageno}&tab=${tabno}&op=del&pool_id=${pool_id}'>";
+			echo "<a href='".makeHrefProcess(array('op'=>'del', 'pool_id'=>$pool_id))."'>";
 			printImageHREF ('delete', 'delete real server pool');
 			echo '</a>';
 		}
@@ -4715,7 +4676,7 @@ function editRSPools ()
 
 function renderRealServerList ()
 {
-	global $root, $nextorder;
+	global $nextorder;
 	$rslist = getRSList ();
 	$pool_list = getRSPoolList ();
 	echo "<table class=widetable border=0 cellpadding=10 cellspacing=0 align=center>\n";
@@ -4729,14 +4690,14 @@ function renderRealServerList ()
 			$order = $nextorder[$order];
 			$last_pool_id = $rsinfo['rspool_id'];
 		}
-		echo "<tr valign=top class=row_${order}><td><a href='${root}?page=ipv4rspool&pool_id=${rsinfo['rspool_id']}'>";
+		echo "<tr valign=top class=row_${order}><td><a href='".makeHref(array('page'=>'ipv4rspool', 'pool_id'=>$rsinfo['rspool_id']))."'>";
 		echo empty ($pool_list[$rsinfo['rspool_id']]['name']) ? 'ANONYMOUS' : $pool_list[$rsinfo['rspool_id']]['name'];
 		echo '</a></td><td align=center>';
 		if ($rsinfo['inservice'] == 'yes')
 			printImageHREF ('inservice', 'in service');
 		else
 			printImageHREF ('notinservice', 'NOT in service');
-		echo "</td><td><a href='${root}?page=ipaddress&ip=${rsinfo['rsip']}'>${rsinfo['rsip']}</a></td>";
+		echo "</td><td><a href='".makeHref(array('page'=>'ipaddress', 'ip'=>$rsinfo['rsip']))."'>${rsinfo['rsip']}</a></td>";
 		echo "<td>${rsinfo['rsport']}</td>";
 		echo "<td><pre>${rsinfo['rsconfig']}</pre></td>";
 		echo "</tr>\n";
@@ -4746,7 +4707,7 @@ function renderRealServerList ()
 
 function renderLBList ()
 {
-	global $root, $nextorder;
+	global $nextorder;
 	echo "<table class=widetable border=0 cellpadding=10 cellspacing=0 align=center>\n";
 	echo "<tr><th>Object</th><th>RS pools configured</th></tr>";
 	$oicache = array();
@@ -4755,7 +4716,7 @@ function renderLBList ()
 	{
 		if (!isset ($oicache[$object_id]))
 			$oicache[$object_id] = getObjectInfo ($object_id);
-		echo "<tr valign=top class=row_${order}><td><a href='${root}?page=object&object_id=${object_id}'>";
+		echo "<tr valign=top class=row_${order}><td><a href='".makeHref(array('page'=>'object', 'object_id'=>$object_id))."'>";
 		echo $oicache[$object_id]['dname'] . '</a></td>';
 		echo "<td>${poolcount}</td></tr>";
 		$order = $nextorder[$order];
@@ -4801,7 +4762,7 @@ function renderLivePTR ($id = 0)
 		$page = $_REQUEST['pg'];
 	else
 		$page=0;
-	global $root, $pageno, $tabno;
+	global $pageno, $tabno;
 	$maxperpage = getConfigVar ('IPV4_ADDRS_PER_PAGE');
 	$range = getIPv4NetworkInfo ($id);
 	loadIPv4AddrList ($range);
@@ -4827,7 +4788,7 @@ function renderLivePTR ($id = 0)
 		if ($i == $page)
 			echo "<b>$i</b> ";
 		else
-			echo "<a href='${root}?page=${pageno}&tab=${tabno}&id=$id&pg=$i'>$i</a> ";
+			echo "<a href='".makeHref(array('page'=>$pageno, 'tab'=>$tabno, 'id'=>$id, 'pg'=>$i))."'>$i</a> ";
 	echo "</center>";
 
 	// FIXME: address counter could be calculated incorrectly in some cases
@@ -4874,7 +4835,7 @@ function renderLivePTR ($id = 0)
 		echo "><td class='tdleft";
 		if (!empty ($range['addrlist'][$ip]['class']))
 			echo ' ' . $range['addrlist'][$ip]['class'];
-		echo "'><a href='${root}?page=ipaddress&ip=${straddr}'>${straddr}</a></td>";
+		echo "'><a href='".makeHref(array('page'=>'ipaddress', 'ip'=>$straddr))."'>${straddr}</a></td>";
 		echo "<td class=tdleft>${addr['name']}</td><td class=tdleft>${ptrname}</td><td>";
 		if ($print_cbox)
 			echo "<input type=checkbox name=import_${idx} tabindex=${idx}>";
@@ -4943,9 +4904,8 @@ function renderTagRowForViewer ($taginfo, $level = 0)
 // FIXME: generated hyperlink must depend on the realm given
 function renderTagRowForCloud ($taginfo, $realm, $level = 0)
 {
-	global $root;
 	echo "<tr><td align=left style='padding-left: " . ($level * 16) . "px;'>";
-	echo "<a href='${root}?page=objgroup&group_id=0&tagfilter[]=${taginfo['id']}'>";
+	echo "<a href='".makeHref(array('page'=>'objgroup', 'group_id'=>0, 'tagfilter[]'=>$taginfo['id']))."'>";
 	echo $taginfo['tag'] . '</a>';
 	if (isset ($taginfo['refcnt'][$realm]))
 		echo ' (' . $taginfo['refcnt'][$realm] . ')';
@@ -4956,7 +4916,7 @@ function renderTagRowForCloud ($taginfo, $realm, $level = 0)
 
 function renderTagRowForEditor ($taginfo, $level = 0)
 {
-	global $root, $pageno, $tabno, $taglist;
+	global $pageno, $tabno, $taglist;
 	if (!count ($taginfo['kids']))
 		$level++; // Idem
 	echo "<tr><td align=left style='padding-left: " . ($level * 16) . "px;'>";
@@ -4969,7 +4929,7 @@ function renderTagRowForEditor ($taginfo, $level = 0)
 		printImageHREF ('nodestroy', "${nrefs} references, " . count ($taginfo['kids']) . ' sub-tags');
 	else
 	{
-		echo "<a href='${root}process.php?page=${pageno}&tab=${tabno}&op=destroyTag&tag_id=${taginfo['id']}'>";
+		echo "<a href='".makeHrefProcess(array('op'=>'destroyTag', 'tag_id'=>$taginfo['id']))."'>";
 		printImageHREF ('destroy', 'Delete tag');
 		echo "</a>";
 	}
@@ -5244,7 +5204,7 @@ function renderTagRollerForRow ($row_id)
 
 function renderObjectSLB ($object_id)
 {
-	global $root, $pageno, $tabno, $nextorder;
+	global $pageno, $tabno, $nextorder;
 	showMessageOrError();
 	$vs_list = $rsplist = array();
 	foreach (getVSList() as $vsid => $vsinfo)
@@ -5277,7 +5237,7 @@ function renderObjectSLB ($object_id)
 		foreach ($myvslist as $vs_id => $vsinfo)
 		{
 			printOpFormIntro ('updLB', array ('vs_id' => $vs_id, 'pool_id' => $vsinfo['pool_id']));
-			echo "<tr valign=top class=row_${order}><td><a href='${root}process.php?page=${pageno}&tab=${tabno}&op=delLB&pool_id=${vsinfo['pool_id']}&object_id=${object_id}&vs_id=${vs_id}'>";
+			echo "<tr valign=top class=row_${order}><td><a href='".makeHrefProcess(array('op'=>'delLB', 'pool_id'=>$vsinfo['pool_id'], 'object_id'=>$object_id, 'vs_id'=>$vs_id))."'>";
 			printImageHREF ('delete', 'Unconfigure');
 			echo "</a></td>";
 			echo "</td><td class=tdleft>";
@@ -5368,7 +5328,7 @@ function renderRackCodeEditor ()
 
 function renderUser ($user_id)
 {
-	global $accounts, $expl_tags, $impl_tags, $root;
+	global $accounts, $expl_tags, $impl_tags;
 	$username = getUsernameByID ($user_id);
 
 	startPortlet ('summary');
@@ -5377,8 +5337,7 @@ function renderUser ($user_id)
 	echo '<tr><th class=tdright>Real name:</th><td class=tdleft>' . $accounts[$username]['user_realname'] . '</td></tr>';
 	// Using printTagTRs() is inappropriate here, because autotags will be filled with current user's
 	// data, not the viewed one.
-//	printTagTRs ("${root}?page=userlist&");
-	$baseurl = "${root}?page=userlist&tab=default&";
+	$baseurl = makeHref(array('page'=>'userlist', 'tab'=>'default'))."&";
 	if (getConfigVar ('SHOW_EXPLICIT_TAGS') == 'yes' and count ($expl_tags))
 	{
 		echo "<tr><th width='50%' class=tdright><span class=tagheader>Explicit tags</span>:</th><td class=tdleft>";
@@ -5455,7 +5414,7 @@ function renderMyAccount ()
 // File-related functions
 function renderFileSpace ()
 {
-	global $root, $taglist, $tagtree;
+	global $taglist, $tagtree;
 	echo "<table border=0 class=objectview>\n";
 	echo "<tr><td class=pcleft width='50%'>";
 	startPortlet ('View all by link');
@@ -5471,7 +5430,7 @@ function renderFileSpace ()
 	{
 		echo '<div align=left><ul>';
 		foreach ($linkInfo as $li)
-			echo "<li><a href='${root}?page=filesbylink&entity_type=${li['entity_type']}'>${li['name']}</a> (${li['count']})</li>";
+			echo "<li><a href='".makeHref(array('page'=>'filesbylink', 'entity_type'=>$li['entity_type']))."'>${li['name']}</a> (${li['count']})</li>";
 		echo '</ul></div>';
 	}
 	finishPortlet();
@@ -5482,7 +5441,7 @@ function renderFileSpace ()
 
 function renderFile ($file_id = 0)
 {
-	global $root, $nextorder, $aac;
+	global $nextorder, $aac;
 	if ($file_id <= 0)
 	{
 		showError ('Invalid file_id', __FUNCTION__);
@@ -5521,7 +5480,7 @@ function renderFile ($file_id = 0)
 	printImageHREF ('save', 'Save changes', TRUE, 101);
 	echo "</form></td></tr>\n";
 
-	printTagTRs ("${root}?page=files&tab=default&");
+	printTagTRs (makeHref(array('page'=>'files', 'tab'=>'default'))."&");
 	echo "</table><br>\n";
 	finishPortlet();
 
@@ -5542,7 +5501,7 @@ function renderFile ($file_id = 0)
 		foreach ($links as $link)
 		{
 			echo "<tr><td>${link['entity_type']}</td>";
-			echo "<td><a href='${root}?page=${link['page']}&${link['id_name']}=${link['entity_id']}'>${link['name']}</a></td>";
+			echo "<td><a href='".makeHref(array('page'=>$link['page'], $link['id_name']=>$link['entity_id']))."'>${link['name']}</a></td>";
 			echo "</tr>\n";
 		}
 		echo "</table><br>\n";
@@ -5555,7 +5514,7 @@ function renderFile ($file_id = 0)
 // Used for uploading a parentless file
 function renderFileUploadForm ()
 {
-	global $aat, $root, $pageno, $tabno, $nextorder;
+	global $aat, $pageno, $tabno, $nextorder;
 
 	showMessageOrError();
 	startPortlet ('Upload new');
@@ -5575,7 +5534,7 @@ function renderFileUploadForm ()
 
 function renderFilesByLink ()
 {
-	global $root, $pageno, $tabno, $nextorder, $taglist, $tagtree;
+	global $pageno, $tabno, $nextorder, $taglist, $tagtree;
 	assertStringArg ('entity_type', __FUNCTION__, TRUE);
 	$entity_type = $_REQUEST['entity_type'];
 	$tagfilter = getTagFilter();
@@ -5597,7 +5556,7 @@ function renderFilesByLink ()
 		echo '<div align=left><ul>';
 		foreach ($linkInfo as $li)
 		{
-			echo "<li><a href='${root}?page=${pageno}&entity_type=${li['entity_type']}${tagfilter_str}'>";
+			echo "<li><a href='".makeHref(array('page'=>$pageno, 'entity_type'=>$li['entity_type']))."${tagfilter_str}'>";
 			if ($li['entity_type'] == $entity_type)
 				echo '<strong>';
 			echo "${li['name']}</a>";
@@ -5627,13 +5586,12 @@ function renderFilesByLink ()
 	foreach ($files as $file)
 	{
 		printf("<tr class=row_%s valign=top>", $order);
-		printf("<td class='tdleft'><a href='%/?page=file&file_id=%s'><strong>%s</strong></a>", $root, $file['id'], $file['name']);
+		echo "<td class='tdleft'><a href='".makeHref(array('page'=>'file', 'file_id'=>$file['id']))."'><strong>${file['name']}</strong></a>";
 		$tags = loadEntityTags ('file', $file['id']);
 		if (count ($tags))
-			echo '<br><small>' . serializeTags ($tags, "${root}?page=${pageno}&tab=default&entity_type=${entity_type}&") . '</small>';
+			echo '<br><small>' . serializeTags ($tags, makeHref(array('page'=>$pageno, 'tab'=>'default', 'entity_type'=>$entity_type))."&") . '</small>';
 		printf("</td><td class='tdleft'>%s</td>", $file['comment']);
 		printf("<td class='tdleft'>%s</td>", formatFileSize($file['size']));
-		printf("<td class='tdleft'>%s</td>", formatTimestamp($file['ctime']));
 		echo "<td class='tdleft'>";
 		$links = getFileLinks($file['id']);
 		if (count ($links))
@@ -5642,7 +5600,7 @@ function renderFilesByLink ()
 		echo "<td><a href='${root}download.php?file_id=${file['id']}'>";
 		printImageHREF ('download', 'Download file');
 		echo '</a> ';
-		echo "<a href='${root}process.php?op=deleteFile&page=${pageno}&tab=${tabno}&file_id=${file['id']}&entity_type=${entity_type}'>";
+		echo "<a href='".makeHrefProcess(array('op'=>'deleteFile', 'file_id'=>$file['id'], 'entity_type'=>$entity_type))."'>";
 		printImageHREF ('delete', 'Delete file');
 		echo '</a></td>';
 		echo "</tr>\n";
@@ -5674,7 +5632,7 @@ function renderFilesPortlet ($entity_type = NULL, $entity_id = 0)
 		echo "<tr><th>Name</th><th>Size</th><th>Comment</th><th>Actions</th></tr>\n";
 		foreach ($files as $file_id => $file)
 		{
-			printf("<td class=tdleft><a href='%/?page=file&file_id=%s'><strong>%s</strong></a></td>", $root, $file_id, $file['name']);
+			echo "<td class='tdleft'><a href='".makeHref(array('page'=>'file', 'file_id'=>$file_id))."'><strong>${file['name']}</strong></a></td>";
 			printf("<td class=tdleft>%s</td>", formatFileSize($file['size']));
 			echo "<td class=tdleft>${file['comment']}</td>";
 			echo "<td><a href='${root}download.php?file_id=${file_id}'>";
@@ -5773,16 +5731,16 @@ function renderFilesForEntity ($entity_id = 0)
 		foreach ($filelist as $file_id => $file)
 		{
 			printOpFormIntro ('updateFile', array ('file_id' => $file_id, 'link_id' => $file['link_id'], 'name' => $file['name']));
-			echo "<tr valign=top><td><a href='${root}process.php?op=deleteFile&page=${pageno}&tab=${tabno}&file_id=${file_id}&${id_name}=${entity_id}&name=${file['name']}'>";
+			echo "<tr valign=top><td><a href='".makeHrefProcess(array('op'=>'deleteFile', 'file_id'=>$file_id, $id_name=>$entity_id, 'name'=>$file['name']))."'>";
 			printImageHREF ('DESTROY', 'Unlink and delete file');
 			echo '</a></td>';
-			printf("<td class='tdleft'><a href='%/?page=file&file_id=%s'><strong>%s</strong></a>", $root, $file_id, $file['name']);
+			echo "<td class='tdleft'><a href='".makeHref(array('page'=>'file', 'file_id'=>$file_id))."'><strong>${file['name']}</strong></a>";
 			echo "<td class=tdleft><input type='text' name='comment' value='${file['comment']}' size=15></td>";
 			printf("<td class=tdleft>%s</td>", formatFileSize($file['size']));
 			echo "<td><a href='${root}download.php?file_id=${file_id}'>";
 			printImageHREF ('download', 'Download file');
 			echo '</a> ';
-			echo "<a href='${root}process.php?op=unlinkFile&page=${pageno}&tab=${tabno}&link_id=${file['link_id']}&${id_name}=${entity_id}&name=${file['name']}'>";
+			echo "<a href='".makeHrefProcess(array('op'=>'unlinkFile', 'link_id'=>$file['link_id'], $id_name=>$entity_id, 'name'=>$file['name']))."'>";
 			printImageHREF ('clear', 'Unlink file');
 			echo '</a> ';
 			printImageHREF ('save', 'Save changes', TRUE);

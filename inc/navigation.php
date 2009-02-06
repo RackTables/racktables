@@ -79,6 +79,8 @@ $tabhandler['rack']['problems'] = 'renderRackProblems';
 $tabhandler['rack']['tags'] = 'renderEntityTags';
 $tabhandler['rack']['files'] = 'renderFilesForEntity';
 $trigger['rack']['tags'] = 'trigger_tags';
+$ophandler['rack']['design']['updateRack'] = 'updateRackDesign';
+$ophandler['rack']['problems']['updateRack'] = 'updateRackProblems';
 $ophandler['rack']['edit']['updateRack'] = 'updateRack';
 $ophandler['rack']['tags']['saveTags'] = 'saveEntityTags';
 $ophandler['rack']['files']['addFile'] = 'addFileToEntity';
@@ -149,6 +151,7 @@ $trigger['object']['editrspvs'] = 'trigger_natv4';
 $trigger['object']['lvsconfig'] = 'trigger_lvsconfig';
 $trigger['object']['autoports'] = 'trigger_autoports';
 $trigger['object']['tags'] = 'trigger_tags';
+$ophandler['object']['rackspace']['updateObjectAllocation'] = 'updateObjectAllocation';
 $ophandler['object']['ports']['addPort'] = 'addPortForObject';
 $ophandler['object']['ports']['delPort'] = 'delPortFromObject';
 $ophandler['object']['ports']['editPort'] = 'editPortForObject';
@@ -623,7 +626,6 @@ $tab['file']['tags'] = 'Tags';
 $trigger['file']['tags'] = 'trigger_tags';
 $tabhandler['file']['tags'] = 'renderEntityTags';
 $tabhandler['file']['default'] = 'renderFile';
-$ophandler['file']['default']['replaceFile'] = 'replaceFile';
 $ophandler['file']['tags']['saveTags'] = 'saveEntityTags';
 
 // This function returns array if page numbers leading to the target page
@@ -701,10 +703,7 @@ function showTabs ($pageno, $tabno)
 		// Dynamic tabs should only be shown in certain cases (trigger exists and returns true).
 		if (isset ($trigger[$pageno][$tabidx]))
 		{
-//			$t1 = microtime (TRUE);
 			$ok = $trigger[$pageno][$tabidx] ();
-//			$t2 = microtime (TRUE);
-//			echo 'DEBUG: ' . $trigger[$pageno][$tabidx] . ': ' . sprintf ('%0.4f', $t2 - $t1) . '<br>';
 			if (!$ok)
 				continue;
 		}

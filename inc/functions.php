@@ -1238,7 +1238,7 @@ function getTagFilterStr ($tagfilter = array())
 	return $ret;
 }
 
-function buildWideRedirectURL ($log, $nextpage = NULL, $nexttab = NULL)
+function buildWideRedirectURL ($log, $nextpage = NULL, $nexttab = NULL, $moreArgs = array())
 {
 	global $root, $page, $pageno, $tabno;
 	if ($nextpage === NULL)
@@ -1249,6 +1249,21 @@ function buildWideRedirectURL ($log, $nextpage = NULL, $nexttab = NULL)
 	if (isset ($page[$nextpage]['bypass']))
 		$url .= '&' . $page[$nextpage]['bypass'] . '=' . $_REQUEST[$page[$nextpage]['bypass']];
 	$url .= "&log=" . urlencode (base64_encode (serialize ($log)));
+	if (count($moreArgs)>0)
+	{
+		foreach($moreArgs as $arg=>$value)
+		{
+			if (gettype($value) == 'array')
+			{
+				foreach ($value as $v)
+				{
+					$url .= '&'.urlencode($arg.'[]').'='.urlencode($v);
+				}
+			}
+			else
+				$url .= '&'.urlencode($arg).'='.urlencode($value);
+		}
+	}
 	return $url;
 }
 
@@ -1790,5 +1805,79 @@ function convertToBytes ($value) {
 
 	return $value;
 }
+
+function ip_quad2long ($ip)
+{
+      return sprintf("%u", ip2long($ip));
+}
+
+function ip_long2quad ($quad)
+{
+      return long2ip($quad);
+}
+
+function makeHref($params = array())
+{
+	global $head_revision, $numeric_revision, $root;
+	$ret = $root.'?';
+	$first = true;
+	if (!isset($params['r']) and ($numeric_revision != $head_revision))
+	{
+		$params['r'] = $numeric_revision;
+	}
+	foreach($params as $key=>$value)
+	{
+		if (!$first)
+			$ret.='&';
+		$ret .= urlencode($key).'='.urlencode($value);
+		$first = false;
+	}
+	return $ret;
+}
+
+function makeHrefProcess($params = array())
+{
+	global $head_revision, $numeric_revision, $root, $pageno, $tabno;
+	$ret = $root.'process.php'.'?';
+	$first = true;
+	if ($numeric_revision != $head_revision)
+	{
+		error_log("Can't make a process link when not in head revision");
+		die();
+	}
+	if (!isset($params['pageno']))
+		$params['pageno'] = $pageno;
+	if (!isset($params['tabno']))
+		$params['tabno'] = $tabno;
+	foreach($params as $key=>$value)
+	{
+		if (!$first)
+			$ret.='&';
+		$ret .= urlencode($key).'='.urlencode($value);
+		$first = false;
+	}
+	return $ret;
+}
+
+function makeHrefPortLinkHelper($params = array())
+{
+	global $head_revision, $numeric_revision, $root;
+	$ret = $root.'port_link_helper.php'.'?';
+	$first = true;
+	if ($numeric_revision != $head_revision)
+	{
+		error_log("Can't make a process link when not in head revision");
+		die();
+	}
+	foreach($params as $key=>$value)
+	{
+		if (!$first)
+			$ret.='&';
+		$ret .= urlencode($key).'='.urlencode($value);
+		$first = false;
+	}
+	return $ret;
+}
+
 
 ?>
