@@ -5762,12 +5762,12 @@ function renderFilesForEntity ($entity_id = 0)
 			echo "<td class=tdleft>${file['comment']}</td>";
 			printf("<td class=tdleft>%s</td>", formatFileSize($file['size']));
 			echo "<td><a href='${root}download.php?file_id=${file_id}'>";
-			printImageHREF ('download', 'Download file');
+			printImageHREF ('DOWNLOAD', 'Download file');
 			echo '</a> ';
 			echo "<a href='".makeHrefProcess(array('op'=>'unlinkFile', 'link_id'=>$file['link_id'], $id_name=>$entity_id, 'name'=>$file['name']))."'>";
-			printImageHREF ('clear', 'Unlink file');
+			printImageHREF ('CLEAR', 'Unlink file');
 			echo '</a> ';
-			printImageHREF ('save', 'Save changes', TRUE);
+			printImageHREF ('SAVE', 'Save changes', TRUE);
 			echo "</td></form></tr>\n";
 		}
 		echo "</table><br>\n";
