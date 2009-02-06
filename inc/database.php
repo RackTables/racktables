@@ -3473,6 +3473,7 @@ function getFilesOfEntity ($entity_type = NULL, $entity_id = 0)
 	$ret = array();
 	while ($row = $query->fetch (PDO::FETCH_ASSOC))
 		$ret[$row['file_id']] = array (
+			'file_id' => $row['file_id'],
 			'link_id' => $row['link_id'],
 			'name' => $row['name'],
 			'type' => $row['type'],
@@ -3738,7 +3739,7 @@ function commitReplaceFile ($file_id = 0, $size, $contents)
 	return '';
 }
 
-function commitUpdateFile ($file_id = 0, $new_comment = '')
+function commitUpdateFile ($file_id = 0, $new_name = '', $new_comment = '')
 {
 	if ($file_id == 0)
 	{
@@ -3746,16 +3747,14 @@ function commitUpdateFile ($file_id = 0, $new_comment = '')
 		return FALSE;
 	}
 	global $dbxlink;
-	$query = $dbxlink->prepare('UPDATE File SET comment = ? WHERE id = ?');
-	$query->bindParam(1, $new_comment);
-	$query->bindParam(2, $file_id);
+	$query = $dbxlink->prepare('UPDATE File SET name = ?, comment = ? WHERE id = ?');
+	$query->bindParam(1, $new_name);
+	$query->bindParam(2, $new_comment);
+	$query->bindParam(3, $file_id);
 
 	$result = $query->execute();
 	if (!$result)
-	{
-		showError ('commitUpdateFile: SQL query failed', __FUNCTION__);
-		return FALSE;
-	}
+		return 'SQL query failed in ' . __FUNCTION__;
 	return '';
 }
 

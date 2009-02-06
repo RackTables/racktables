@@ -5514,6 +5514,26 @@ function renderFile ($file_id = 0)
 	echo "</table>\n";
 }
 
+function renderFileProperties ($file_id = 0)
+{
+	global $root;
+	$file = getFileInfo ($file_id);
+	if ($file === NULL)
+	{
+		showError ('getFileInfo() failed', __FUNCTION__);
+		return;
+	}
+	showMessageOrError();
+	echo '<table border=0 align=center>';
+	printOpFormIntro ('updateFile');
+	echo "<tr><th class=tdright>MIME-type:</th><td class=tdleft>${file['type']}</td></tr>";
+	echo "<tr><th class=tdright>Filename:</th><td class=tdleft><input tabindex=100 type=text name=name value='${file['name']}'></td></tr>\n";
+	echo "<tr><th class=tdright>Comment:</th><td class=tdleft><input tabindex=101 type=text name=comment value='${file['comment']}'></td></tr>\n";
+	echo "<tr><th class=submit colspan=2>";
+	printImageHREF ('SAVE', 'Save changes', TRUE, 102);
+	echo '</th></tr></form></table>';
+}
+
 // Used for uploading a parentless file
 function renderFileUploadForm ()
 {
@@ -5635,8 +5655,9 @@ function renderFilesPortlet ($entity_type = NULL, $entity_id = 0)
 		echo "<tr><th>Name</th><th>Size</th><th>Comment</th><th>Actions</th></tr>\n";
 		foreach ($files as $file_id => $file)
 		{
-			echo "<td class='tdleft'><a href='".makeHref(array('page'=>'file', 'file_id'=>$file_id))."'><strong>${file['name']}</strong></a></td>";
-			printf("<td class=tdleft>%s</td>", formatFileSize($file['size']));
+			echo '<td class=tdleft>';
+			renderFileCell ($file);
+			printf("</td><td class=tdleft>%s</td>", formatFileSize($file['size']));
 			echo "<td class=tdleft>${file['comment']}</td>";
 			echo "<td><a href='${root}download.php?file_id=${file_id}'>";
 			printImageHREF ('download', 'Download file');
@@ -5733,12 +5754,12 @@ function renderFilesForEntity ($entity_id = 0)
 		echo "<tr><th>&nbsp;</th><th>Name</th><th>Comment</th><th>Size</th><th>Actions</th></tr>\n";
 		foreach ($filelist as $file_id => $file)
 		{
-			printOpFormIntro ('updateFile', array ('file_id' => $file_id, 'link_id' => $file['link_id'], 'name' => $file['name']));
 			echo "<tr valign=top><td><a href='".makeHrefProcess(array('op'=>'deleteFile', 'file_id'=>$file_id, $id_name=>$entity_id, 'name'=>$file['name']))."'>";
 			printImageHREF ('DESTROY', 'Unlink and delete file');
-			echo '</a></td>';
-			echo "<td class='tdleft'><a href='".makeHref(array('page'=>'file', 'file_id'=>$file_id))."'><strong>${file['name']}</strong></a>";
-			echo "<td class=tdleft><input type='text' name='comment' value='${file['comment']}' size=15></td>";
+			echo '</a></td><td class=tdleft>';
+			//printf("<a href='%/?page=file&file_id=%s'><strong>%s</strong></a>", $root, $file_id, $file['name']);
+			renderFileCell ($file);;
+			echo "<td class=tdleft>${file['comment']}</td>";
 			printf("<td class=tdleft>%s</td>", formatFileSize($file['size']));
 			echo "<td><a href='${root}download.php?file_id=${file_id}'>";
 			printImageHREF ('download', 'Download file');
@@ -5897,6 +5918,15 @@ function renderRouterCell ($dottedquad, $ifname, $object_id, $object_dname)
 	echo "</td></tr><tr><td><small>";
 	echo serializeTags (loadRackObjectTags ($object_id));
 	echo "</small></td></tr></table>";
+}
+
+function renderFileCell ($fileinfo)
+{
+	global $root;
+	printf("<a href='${root}?page=file&file_id=%s'><strong>%s</strong></a>", $fileinfo['file_id'], niftyString ($fileinfo['name']));
+	echo '<br><small>';
+	echo serializeTags (loadFileTags ($fileinfo['file_id']));
+	echo "</small>";
 }
 
 ?>

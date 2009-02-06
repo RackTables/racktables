@@ -1586,7 +1586,7 @@ function updateFile ()
 	assertUIntArg ('file_id', __FUNCTION__);
 	assertStringArg ('name', __FUNCTION__);
 	assertStringArg ('comment', __FUNCTION__, TRUE);
-	$error = commitUpdateFile ($_REQUEST['file_id'], $_REQUEST['comment']);
+	$error = commitUpdateFile ($_REQUEST['file_id'], $_REQUEST['name'], $_REQUEST['comment']);
 	if ($error != '')
 		return buildRedirectURL (__FUNCTION__, 'ERR', array ($error));
 
