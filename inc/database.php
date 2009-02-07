@@ -750,7 +750,7 @@ function getResidentRacksData ($object_id = 0, $fetch_rackdata = TRUE)
 function getObjectGroupInfo ()
 {
 	$query =
-		'select dict_key as id, dict_value as name, count(id) as count from ' .
+		'select dict_key as id, dict_value as name, count(dict_key) as count from ' .
 		'Dictionary join Chapter on Chapter.id = Dictionary.chapter_id left join RackObject on dict_key = objtype_id ' .
 		'where Chapter.name = "RackObjectType" ' .
 		'group by dict_key order by dict_value';
