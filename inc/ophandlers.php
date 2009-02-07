@@ -1392,7 +1392,7 @@ function addRow ()
 {
 	assertStringArg ('name', __FUNCTION__);
 
-	if (commitSupplementDictionary (3, $_REQUEST['name']) === TRUE)
+	if (commitAddRow ($_REQUEST['name']) === TRUE)
 		return buildRedirectURL (__FUNCTION__, 'OK', array ($_REQUEST['name']));
 	else
 		return buildRedirectURL (__FUNCTION__, 'ERR', array ($_REQUEST['name']));
@@ -1403,7 +1403,7 @@ function updateRow ()
 	assertUIntArg ('row_id', __FUNCTION__);
 	assertStringArg ('name', __FUNCTION__);
 
-	if (TRUE === commitUpdateDictionary (3, $_REQUEST['row_id'], $_REQUEST['name']))
+	if (TRUE === commitUpdateRow ($_REQUEST['row_id'], $_REQUEST['name']))
 		return buildRedirectURL (__FUNCTION__, 'OK', array ($_REQUEST['name']));
 	else
 		return buildRedirectURL (__FUNCTION__, 'ERR', array ($_REQUEST['name']));

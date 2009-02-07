@@ -37,12 +37,12 @@ function getRackspace ($tagfilter = array(), $tfmode = 'any')
 {
 	$whereclause = getWhereClause ($tagfilter);
 	$query =
-		"select dict_key as row_id, dict_value as row_name " .
-		"from Chapter natural join Dictionary left join Rack on Rack.row_id = dict_key " .
+		"select RackRow.id as row_id, RackRow.name as row_name " .
+		"from RackRow left join Rack on Rack.row_id = RackRow.id " .
 		"left join TagStorage on Rack.id = TagStorage.entity_id and entity_realm = 'rack' " .
-		"where chapter_name = 'RackRow' " .
+		"where 1=1 " .
 		$whereclause .
-		" order by dict_value";
+		" order by RackRow.name";
 	$result = useSelectBlade ($query, __FUNCTION__);
 	$ret = array();
 	$clist = array ('row_id', 'row_name');
@@ -57,16 +57,36 @@ function getRackspace ($tagfilter = array(), $tfmode = 'any')
 function getRackRowInfo ($rackrow_id)
 {
 	$query =
-		"select dict_key as id, dict_value as name, count(Rack.id) as count, " .
+		"select RackRow.id as id, RackRow.name as name, count(Rack.id) as count, " .
 		"if(isnull(sum(Rack.height)),0,sum(Rack.height)) as sum " .
-		"from Chapter natural join Dictionary left join Rack on Rack.row_id = dict_key " .
-		"where chapter_name = 'RackRow' and dict_key = ${rackrow_id} " .
+		"from RackRow left join Rack on Rack.row_id = RackRow.id " .
+		" " .
 		"group by dict_key";
 	$result = useSelectBlade ($query, __FUNCTION__);
 	if ($row = $result->fetch (PDO::FETCH_ASSOC))
 		return $row;
 	else
 		return NULL;
+}
+
+function commitAddRow($rackrow_name)
+{
+	useInsertBlade('RackRow', array('name'=>"'$rackrow_name'"));
+	return TRUE;
+}
+
+function commitUpdateRow($rackrow_id, $rackrow_name)
+{
+	global $dbxlink;
+	$query = "update RackRow set name = '${rackrow_name}' where id=${rackrow_id}";
+	$result = $dbxlink->query ($query);
+	if ($result == NULL)
+	{
+		showError ("SQL query '${query}' failed", __FUNCTION__);
+		return FALSE;
+	}
+	$result->closeCursor();
+	return TRUE;
 }
 
 // This function returns id->name map for all object types. The map is used
@@ -108,8 +128,8 @@ function getNarrowObjectList ($type_id = 0)
 	$query =
 		"select RackObject.id as id, RackObject.name as name, dict_value as objtype_name, " .
 		"objtype_id from " .
-		"RackObject inner join Dictionary on objtype_id=dict_key natural join Chapter " .
-		"where RackObject.deleted = 'no' and chapter_name = 'RackObjectType' " .
+		"RackObject inner join Dictionary on objtype_id=dict_key join Chapter on Chapter.id = Dictionary.chapter_id " .
+		"where RackObject.deleted = 'no' and Chapter.name = 'RackObjectType' " .
 		"and objtype_id = ${type_id} " .
 		"order by name";
 	$result = useSelectBlade ($query, __FUNCTION__);
@@ -138,11 +158,11 @@ function getObjectList ($type_id = 0, $tagfilter = array(), $tfmode = 'any')
 		"RackObject.label as label, RackObject.barcode as barcode, " .
 		"dict_key as objtype_id, asset_no, rack_id, Rack.name as Rack_name, Rack.row_id, " .
 		"(SELECT dict_value FROM Dictionary WHERE dict_key = Rack.row_id) AS Row_name " .
-		"from ((RackObject inner join Dictionary on objtype_id=dict_key natural join Chapter) " .
+		"from ((RackObject inner join Dictionary on objtype_id=dict_key join Chapter on Chapter.id = Dictionary.chapter_id) " .
 		"left join RackSpace on RackObject.id = object_id) " .
 		"left join Rack on rack_id = Rack.id " .
 		"left join TagStorage on RackObject.id = TagStorage.entity_id and entity_realm = 'object' " .
-		"where RackObject.deleted = 'no' and chapter_name = 'RackObjectType' " .
+		"where RackObject.deleted = 'no' and Chapter.name = 'RackObjectType' " .
 		$whereclause .
 		"order by name";
 	$result = useSelectBlade ($query, __FUNCTION__);
@@ -172,10 +192,10 @@ function getObjectList ($type_id = 0, $tagfilter = array(), $tfmode = 'any')
 function getRacksForRow ($row_id = 0, $tagfilter = array(), $tfmode = 'any')
 {
 	$query =
-		"select Rack.id, Rack.name, height, Rack.comment, row_id, dict_value as row_name " .
-		"from Rack left join Dictionary on row_id = dict_key natural join Chapter " .
+		"select Rack.id, Rack.name, height, Rack.comment, row_id, RackRow.name as row_name " .
+		"from Rack left join RackRow on Rack.row_id = RackRow.id " .
 		"left join TagStorage on Rack.id = TagStorage.entity_id and entity_realm = 'rack' " .
-		"where chapter_name = 'RackRow' and Rack.deleted = 'no' " .
+		"where  Rack.deleted = 'no' " .
 		(($row_id == 0) ? "" : "and row_id = ${row_id} ") .
 		getWhereClause ($tagfilter) .
 		" order by row_name, Rack.name";
@@ -208,9 +228,9 @@ function getRackData ($rack_id = 0, $silent = FALSE)
 		return NULL;
 	}
 	$query =
-		"select Rack.id, Rack.name, row_id, height, Rack.comment, dict_value as row_name from " .
-		"Rack left join Dictionary on Rack.row_id = dict_key natural join Chapter " .
-		"where chapter_name = 'RackRow' and Rack.id='${rack_id}' and Rack.deleted = 'no' limit 1";
+		"select Rack.id, Rack.name, row_id, height, Rack.comment, RackRow.name as row_name from " .
+		"Rack left join RackRow on Rack.row_id = RackRow.id  " .
+		"where  Rack.id='${rack_id}' and Rack.deleted = 'no' limit 1";
 	$result = useSelectBlade ($query, __FUNCTION__);
 	if (($row = $result->fetch (PDO::FETCH_ASSOC)) == NULL)
 	{
@@ -265,8 +285,8 @@ function getObjectInfo ($object_id = 0)
 	}
 	$query =
 		"select id, name, label, barcode, dict_value as objtype_name, asset_no, dict_key as objtype_id, has_problems, comment from " .
-		"RackObject inner join Dictionary on objtype_id = dict_key natural join Chapter " .
-		"where id = '${object_id}' and deleted = 'no' and chapter_name = 'RackObjectType' limit 1";
+		"RackObject inner join Dictionary on objtype_id = dict_key join Chapter on Chapter.id = Dictionary.chapter_id " .
+		"where id = '${object_id}' and deleted = 'no' and Chapter.name = 'RackObjectType' limit 1";
 	$result = useSelectBlade ($query, __FUNCTION__);
 	if (($row = $result->fetch (PDO::FETCH_ASSOC)) == NULL)
 	{
@@ -665,8 +685,8 @@ function getRackspaceHistory ()
 	$query =
 		"select mo.id as mo_id, ro.id as ro_id, ro.name, mo.ctime, mo.comment, dict_value as objtype_name, user_name from " .
 		"MountOperation as mo inner join RackObject as ro on mo.object_id = ro.id " .
-		"inner join Dictionary on objtype_id = dict_key natural join Chapter " .
-		"where chapter_name = 'RackObjectType' order by ctime desc";
+		"inner join Dictionary on objtype_id = dict_key join Chapter on Chapter.id = Dictionary.chapter_id " .
+		"where Chapter.name = 'RackObjectType' order by ctime desc";
 	$result = useSelectBlade ($query, __FUNCTION__);
 	$ret = $result->fetchAll(PDO::FETCH_ASSOC);
 	$result->closeCursor();
@@ -731,8 +751,8 @@ function getObjectGroupInfo ()
 {
 	$query =
 		'select dict_key as id, dict_value as name, count(id) as count from ' .
-		'Dictionary natural join Chapter left join RackObject on dict_key = objtype_id ' .
-		'where chapter_name = "RackObjectType" ' .
+		'Dictionary join Chapter on Chapter.id = Dictionary.chapter_id left join RackObject on dict_key = objtype_id ' .
+		'where Chapter.name = "RackObjectType" ' .
 		'group by dict_key order by dict_value';
 	$result = useSelectBlade ($query, __FUNCTION__);
 	$ret = array();
@@ -758,9 +778,9 @@ function getUnmountedObjects ()
 {
 	$query =
 		'select dict_value as objtype_name, dict_key as objtype_id, name, label, barcode, id, asset_no from ' .
-		'RackObject inner join Dictionary on objtype_id = dict_key natural join Chapter ' .
+		'RackObject inner join Dictionary on objtype_id = dict_key join Chapter on Chapter.id = Dictionary.chapter_id ' .
 		'left join RackSpace on id = object_id '.
-		'where rack_id is null and chapter_name = "RackObjectType" order by dict_value, name, label, asset_no, barcode';
+		'where rack_id is null and Chapter.name = "RackObjectType" order by dict_value, name, label, asset_no, barcode';
 	$result = useSelectBlade ($query, __FUNCTION__);
 	$ret = array();
 	$clist = array ('id', 'name', 'label', 'barcode', 'objtype_name', 'objtype_id', 'asset_no');
@@ -778,8 +798,8 @@ function getProblematicObjects ()
 {
 	$query =
 		'select dict_value as objtype_name, dict_key as objtype_id, name, id, asset_no from ' .
-		'RackObject inner join Dictionary on objtype_id = dict_key natural join Chapter '.
-		'where has_problems = "yes" and chapter_name = "RackObjectType" order by objtype_name, name';
+		'RackObject inner join Dictionary on objtype_id = dict_key join Chapter on Chapter.id = Dictionary.chapter_id '.
+		'where has_problems = "yes" and Chapter.name = "RackObjectType" order by objtype_name, name';
 	$result = useSelectBlade ($query, __FUNCTION__);
 	$ret = array();
 	$clist = array ('id', 'name', 'objtype_name', 'objtype_id', 'asset_no');
@@ -886,13 +906,13 @@ function getEmptyPortsOfType ($type_id)
 		"dict_value as Port_type_name ".
 		"from ( ".
 		"	( ".
-		"		Port inner join Dictionary on Port.type = dict_key natural join Chapter ".
+		"		Port inner join Dictionary on Port.type = dict_key join Chapter on Chapter.id = Dictionary.chapter_id ".
 		"	) ".
 		" 	join RackObject on Port.object_id = RackObject.id ".
 		") ".
 		"left join Link on Port.id=Link.porta or Port.id=Link.portb ".
 		"inner join PortCompat on Port.type = PortCompat.type2 ".
-		"where chapter_name = 'PortType' and PortCompat.type1 = '$type_id' and Link.porta is NULL ".
+		"where Chapter.name = 'PortType' and PortCompat.type1 = '$type_id' and Link.porta is NULL ".
 		"and Port.reservation_comment is null order by Object_name, Port_name";
 	$result = useSelectBlade ($query, __FUNCTION__);
 	$ret = array();
@@ -1034,9 +1054,9 @@ function scanIPv4Space ($pairlist)
 		"ro.name as object_name, ipb.name, ipb.type, objtype_id, " .
 		"dict_value as objtype_name from " .
 		"IPv4Allocation as ipb inner join RackObject as ro on ipb.object_id = ro.id " .
-		"left join Dictionary on objtype_id=dict_key natural join Chapter " .
+		"left join Dictionary on objtype_id=dict_key join Chapter on Chapter.id = Dictionary.chapter_id " .
 		"where ${whereexpr2} " .
-		"and chapter_name = 'RackObjectType'" .
+		"and Chapter.name = 'RackObjectType'" .
 		"order by ipb.type, object_name";
 	$result = useSelectBlade ($query, __FUNCTION__);
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
@@ -1065,9 +1085,9 @@ function scanIPv4Space ($pairlist)
 		"IPv4VS as vs inner join IPv4LB as lb on vs.id = lb.vs_id " .
 		"inner join RackObject as ro on lb.object_id = ro.id " .
 		"left join Dictionary on objtype_id=dict_key " .
-		"natural join Chapter " .
+		"join Chapter on Chapter.id = Dictionary.chapter_id " .
 		"where ${whereexpr3} " .
-		"and chapter_name = 'RackObjectType'" .
+		"and Chapter.name = 'RackObjectType'" .
 		"order by vport, proto, ro.name, object_id";
 	$result = useSelectBlade ($query, __FUNCTION__);
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
@@ -1553,9 +1573,9 @@ function getPortCompat ()
 		"select type1, type2, d1.dict_value as type1name, d2.dict_value as type2name from " .
 		"PortCompat as pc inner join Dictionary as d1 on pc.type1 = d1.dict_key " .
 		"inner join Dictionary as d2 on pc.type2 = d2.dict_key " .
-		"inner join Chapter as c1 on d1.chapter_no = c1.chapter_no " .
-		"inner join Chapter as c2 on d2.chapter_no = c2.chapter_no " .
-		"where c1.chapter_name = 'PortType' and c2.chapter_name = 'PortType'";
+		"inner join Chapter as c1 on d1.chapter_id = c1.id " .
+		"inner join Chapter as c2 on d2.chapter_id = c2.id " .
+		"where c1.name = 'PortType' and c2.name = 'PortType'";
 	$result = useSelectBlade ($query, __FUNCTION__);
 	$ret = $result->fetchAll (PDO::FETCH_ASSOC);
 	$result->closeCursor();
@@ -1600,8 +1620,8 @@ function addPortCompat ($type1 = 0, $type2 = 0)
 function getDict ($parse_links = FALSE)
 {
 	$query1 =
-		"select chapter_name, Chapter.chapter_no, dict_key, dict_value, sticky from " .
-		"Chapter natural left join Dictionary order by chapter_name, dict_value";
+		"select Chapter.name as chapter_name, Chapter.id as chapter_no, dict_key, dict_value, sticky from " .
+		"Chapter natural left join Dictionary order by Chapter.name, dict_value";
 	$result = useSelectBlade ($query1, __FUNCTION__);
 	$dict = array();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
@@ -1626,12 +1646,12 @@ function getDict ($parse_links = FALSE)
 // Find the list of all assigned values of dictionary-addressed attributes, each with
 // chapter/word keyed reference counters. Use the structure to adjust reference counters
 // of the returned disctionary words.
-	$query2 = "select a.attr_id, am.chapter_no, uint_value, count(object_id) as refcnt " .
-		"from Attribute as a inner join AttributeMap as am on a.attr_id = am.attr_id " .
-		"inner join AttributeValue as av on a.attr_id = av.attr_id " .
-		"inner join Dictionary as d on am.chapter_no = d.chapter_no and av.uint_value = d.dict_key " .
-		"where attr_type = 'dict' group by a.attr_id, am.chapter_no, uint_value " .
-		"order by a.attr_id, am.chapter_no, uint_value";
+	$query2 = "select a.id as attr_id, am.chapter_id as chapter_no, uint_value, count(object_id) as refcnt " .
+		"from Attribute as a inner join AttributeMap as am on a.id = am.attr_id " .
+		"inner join AttributeValue as av on a.id = av.attr_id " .
+		"inner join Dictionary as d on am.chapter_id = d.chapter_id and av.uint_value = d.dict_key " .
+		"where a.type = 'dict' group by a.id, am.chapter_id, uint_value " .
+		"order by a.id, am.chapter_id, uint_value";
 	$result = useSelectBlade ($query2, __FUNCTION__);
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 		$dict[$row['chapter_no']]['refcnt'][$row['uint_value']] = $row['refcnt'];
@@ -1641,10 +1661,10 @@ function getDict ($parse_links = FALSE)
 
 function getDictStats ()
 {
-	$stock_chapters = array (1, 2, 3, 11, 12, 13, 14, 16, 17, 18, 19, 20, 21, 22, 23);
+	$stock_chapters = array (1, 2, 11, 12, 13, 14, 16, 17, 18, 19, 20, 21, 22, 23);
 	$query =
-		"select Chapter.chapter_no, chapter_name, count(dict_key) as wc from " .
-		"Chapter natural left join Dictionary group by Chapter.chapter_no";
+		"select Chapter.id as chapter_no, Chapter.name as chapter_name, count(dict_key) as wc from " .
+		"Chapter natural left join Dictionary group by Chapter.id";
 	$result = useSelectBlade ($query, __FUNCTION__);
 	$tc = $tw = $uc = $uw = 0;
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
@@ -1658,7 +1678,7 @@ function getDictStats ()
 	}
 	$result->closeCursor();
 	unset ($result);
-	$query = "select count(attr_id) as attrc from RackObject as ro left join " .
+	$query = "select count(id) as attrc from RackObject as ro left join " .
 		"AttributeValue as av on ro.id = av.object_id group by ro.id";
 	$result = useSelectBlade ($query, __FUNCTION__);
 	$to = $ta = $so = 0;
@@ -1711,7 +1731,7 @@ function getRackspaceStats ()
 {
 	$ret = array();
 	$subject = array();
-	$subject[] = array ('q' => 'select count(*) from Dictionary where chapter_no = 3', 'txt' => 'Rack rows');
+	$subject[] = array ('q' => 'select count(*) from RackRow', 'txt' => 'Rack rows');
 	$subject[] = array ('q' => 'select count(*) from Rack', 'txt' => 'Racks');
 	$subject[] = array ('q' => 'select avg(height) from Rack', 'txt' => 'Average rack height');
 	$subject[] = array ('q' => 'select sum(height) from Rack', 'txt' => 'Total rack units in field');
@@ -1797,7 +1817,7 @@ function commitUpdateDictionary ($chapter_no = 0, $dict_key = 0, $dict_value = '
 	}
 	global $dbxlink;
 	$query =
-		"update Dictionary set dict_value = '${dict_value}' where chapter_no=${chapter_no} " .
+		"update Dictionary set dict_value = '${dict_value}' where chapter_id=${chapter_no} " .
 		"and dict_key=${dict_key} limit 1";
 	$result = $dbxlink->query ($query);
 	if ($result == NULL)
@@ -1818,7 +1838,7 @@ function commitSupplementDictionary ($chapter_no = 0, $dict_value = '')
 	return useInsertBlade
 	(
 		'Dictionary',
-		array ('chapter_no' => $chapter_no, 'dict_value' => "'${dict_value}'")
+		array ('chapter_id' => $chapter_no, 'dict_value' => "'${dict_value}'")
 	);
 }
 
@@ -1831,7 +1851,7 @@ function commitReduceDictionary ($chapter_no = 0, $dict_key = 0)
 	}
 	global $dbxlink;
 	$query =
-		"delete from Dictionary where chapter_no=${chapter_no} " .
+		"delete from Dictionary where chapter_id=${chapter_no} " .
 		"and dict_key=${dict_key} limit 1";
 	$result = $dbxlink->query ($query);
 	if ($result == NULL)
@@ -1852,7 +1872,7 @@ function commitAddChapter ($chapter_name = '')
 	return useInsertBlade
 	(
 		'Chapter',
-		array ('chapter_name' => "'${chapter_name}'")
+		array ('name' => "'${chapter_name}'")
 	);
 }
 
@@ -1865,7 +1885,7 @@ function commitUpdateChapter ($chapter_no = 0, $chapter_name = '')
 	}
 	global $dbxlink;
 	$query =
-		"update Chapter set chapter_name = '${chapter_name}' where chapter_no = ${chapter_no} " .
+		"update Chapter set name = '${chapter_name}' where id = ${chapter_no} " .
 		"and sticky = 'no' limit 1";
 	$result = $dbxlink->query ($query);
 	if ($result == NULL)
@@ -1885,7 +1905,7 @@ function commitDeleteChapter ($chapter_no = 0)
 	}
 	global $dbxlink;
 	$query =
-		"delete from Chapter where chapter_no = ${chapter_no} and sticky = 'no' limit 1";
+		"delete from Chapter where id = ${chapter_no} and sticky = 'no' limit 1";
 	$result = $dbxlink->query ($query);
 	if ($result == NULL)
 	{
@@ -1905,8 +1925,8 @@ function readChapter ($chapter_name = '')
 		return NULL;
 	}
 	$query =
-		"select dict_key, dict_value from Dictionary natural join Chapter " .
-		"where chapter_name = '${chapter_name}'";
+		"select dict_key, dict_value from Dictionary join Chapter on Chapter.id = Dictionary.chapter_id " .
+		"where Chapter.name = '${chapter_name}'";
 	$result = useSelectBlade ($query, __FUNCTION__);
 	$chapter = array();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
@@ -1920,14 +1940,14 @@ function readChapter ($chapter_name = '')
 function getAttrMap ()
 {
 	$query =
-		"select a.attr_id, a.attr_type, a.attr_name, am.objtype_id, " .
-		"d.dict_value as objtype_name, am.chapter_no, c2.chapter_name from " .
-		"Attribute as a natural left join AttributeMap as am " .
+		"select a.id as attr_id, a.type as attr_type, a.name as attr_name, am.objtype_id, " .
+		"d.dict_value as objtype_name, am.chapter_id, c2.name as chapter_name from " .
+		"Attribute as a left join AttributeMap as am on a.id = am.attr_id " .
 		"left join Dictionary as d on am.objtype_id = d.dict_key " .
-		"left join Chapter as c1 on d.chapter_no = c1.chapter_no " .
-		"left join Chapter as c2 on am.chapter_no = c2.chapter_no " .
-		"where c1.chapter_name = 'RackObjectType' or c1.chapter_name is null " .
-		"order by attr_name";
+		"left join Chapter as c1 on d.chapter_id = c1.id " .
+		"left join Chapter as c2 on am.chapter_id = c2.chapter_id " .
+		"where c1.name = 'RackObjectType' or c1.name is null " .
+		"order by a.name";
 	$result = useSelectBlade ($query, __FUNCTION__);
 	$ret = array();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
@@ -1964,8 +1984,8 @@ function commitUpdateAttribute ($attr_id = 0, $attr_name = '')
 	}
 	global $dbxlink;
 	$query =
-		"update Attribute set attr_name = '${attr_name}' " .
-		"where attr_id = ${attr_id} limit 1";
+		"update Attribute set name = '${attr_name}' " .
+		"where id = ${attr_id} limit 1";
 	$result = $dbxlink->query ($query);
 	if ($result == NULL)
 	{
@@ -1996,7 +2016,7 @@ function commitAddAttribute ($attr_name = '', $attr_type = '')
 	return useInsertBlade
 	(
 		'Attribute',
-		array ('attr_name' => "'${attr_name}'", 'attr_type' => "'${attr_type}'")
+		array ('name' => "'${attr_name}'", 'type' => "'${attr_type}'")
 	);
 }
 
@@ -2007,7 +2027,7 @@ function commitDeleteAttribute ($attr_id = 0)
 		showError ('Invalid args', __FUNCTION__);
 		die;
 	}
-	return useDeleteBlade ('Attribute', 'attr_id', $attr_id);
+	return useDeleteBlade ('Attribute', 'id', $attr_id);
 }
 
 // FIXME: don't store garbage in chapter_no for non-dictionary types.
@@ -2025,7 +2045,7 @@ function commitSupplementAttrMap ($attr_id = 0, $objtype_id = 0, $chapter_no = 0
 		(
 			'attr_id' => $attr_id,
 			'objtype_id' => $objtype_id,
-			'chapter_no' => $chapter_no
+			'chapter_id' => $chapter_no
 		)
 	);
 }
@@ -2062,14 +2082,14 @@ function getAttrValues ($object_id, $strip_optgroup = FALSE)
 	}
 	$ret = array();
 	$query =
-		"select A.attr_id, A.attr_name, A.attr_type, C.chapter_name, " .
+		"select A.id as attr_id, A.name as attr_name, A.type as attr_type, C.name as chapter_name, " .
 		"AV.uint_value, AV.float_value, AV.string_value, D.dict_value from " .
 		"RackObject as RO inner join AttributeMap as AM on RO.objtype_id = AM.objtype_id " .
-		"inner join Attribute as A using (attr_id) " .
+		"inner join Attribute as A on AM.attr_id = A.id " .
 		"left join AttributeValue as AV on AV.attr_id = AM.attr_id and AV.object_id = RO.id " .
-		"left join Dictionary as D on D.dict_key = AV.uint_value and AM.chapter_no = D.chapter_no " .
-		"left join Chapter as C on AM.chapter_no = C.chapter_no " .
-		"where RO.id = ${object_id} order by A.attr_type, A.attr_name";
+		"left join Dictionary as D on D.dict_key = AV.uint_value and AM.chapter_id = D.chapter_id " .
+		"left join Chapter as C on AM.chapter_id = C.id " .
+		"where RO.id = ${object_id} order by A.type, A.name";
 	$result = useSelectBlade ($query, __FUNCTION__);
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
@@ -2130,7 +2150,7 @@ function commitUpdateAttrValue ($object_id = 0, $attr_id = 0, $value = '')
 	if (empty ($value))
 		return commitResetAttrValue ($object_id, $attr_id);
 	global $dbxlink;
-	$query1 = "select attr_type from Attribute where attr_id = ${attr_id}";
+	$query1 = "select type as attr_type from Attribute where id = ${attr_id}";
 	$result = $dbxlink->query ($query1);
 	if ($result == NULL)
 	{
@@ -3329,7 +3349,7 @@ function mergeSearchResults (&$objects, $terms, $fieldname)
 	$query =
 		"select name, label, asset_no, barcode, ro.id, dict_key as objtype_id, " .
 		"dict_value as objtype_name, asset_no from RackObject as ro inner join Dictionary " .
-		"on objtype_id = dict_key natural join Chapter where chapter_name = 'RackObjectType' and ";
+		"on objtype_id = dict_key join Chapter on Chapter.id = Dictionary.chapter_id where Chapter.name = 'RackObjectType' and ";
 	$count = 0;
 	foreach (explode (' ', $terms) as $term)
 	{
@@ -3775,7 +3795,7 @@ function commitDeleteFile ($file_id)
 function getChapterList ()
 {
 	$ret = array();
-	$result = useSelectBlade ('select chapter_no, chapter_name from Chapter order by chapter_name');
+	$result = useSelectBlade ('select id as chapter_no, name as chapter_name from Chapter order by Chapter.name');
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 		$ret[$row['chapter_no']] = $row['chapter_name'];
 	return $ret;

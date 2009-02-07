@@ -46,10 +46,10 @@ INSERT INTO `AttributeValue` VALUES (960,4,NULL,791,NULL);
 INSERT INTO `AttributeValue` VALUES (961,2,NULL,755,NULL);
 INSERT INTO `AttributeValue` VALUES (962,2,NULL,470,NULL);
 
-INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (3,50000,'Moscow');
-INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (3,50001,'Tokyo');
-INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (3,50002,'New-York');
-INSERT INTO `Dictionary` (`chapter_no`, `dict_key`, `dict_value`) VALUES (3,50003,'London');
+INSERT INTO `RackRow` (`id`, `name`) VALUES (50000,'Moscow');
+INSERT INTO `RackRow` (`id`, `name`) VALUES (50001,'Tokyo');
+INSERT INTO `RackRow` (`id`, `name`) VALUES (50002,'New-York');
+INSERT INTO `RackRow` (`id`, `name`) VALUES (50003,'London');
 
 INSERT INTO `IPv4Address` VALUES (180879678,'default gw','no');
 INSERT INTO `IPv4Address` VALUES (180879617,'',NULL);

@@ -9,17 +9,17 @@ CREATE TABLE `Atom` (
 ) ENGINE=MyISAM;
 
 CREATE TABLE `Attribute` (
-  `attr_id` int(10) unsigned NOT NULL auto_increment,
-  `attr_type` enum('string','uint','float','dict') default NULL,
-  `attr_name` char(64) default NULL,
-  PRIMARY KEY  (`attr_id`),
-  UNIQUE KEY `attr_name` (`attr_name`)
+  `id` int(10) unsigned NOT NULL auto_increment,
+  `type` enum('string','uint','float','dict') default NULL,
+  `name` char(64) default NULL,
+  PRIMARY KEY  (`id`),
+  UNIQUE KEY `name` (`name`)
 ) ENGINE=MyISAM AUTO_INCREMENT=10000;
 
 CREATE TABLE `AttributeMap` (
   `objtype_id` int(10) unsigned NOT NULL default '1',
   `attr_id` int(10) unsigned NOT NULL default '1',
-  `chapter_no` int(10) unsigned NOT NULL,
+  `chapter_id` int(10) unsigned NOT NULL,
   UNIQUE KEY `objtype_id` (`objtype_id`,`attr_id`)
 ) ENGINE=MyISAM;
 
@@ -33,11 +33,11 @@ CREATE TABLE `AttributeValue` (
 ) ENGINE=MyISAM;
 
 CREATE TABLE `Chapter` (
-  `chapter_no` int(10) unsigned NOT NULL auto_increment,
+  `id` int(10) unsigned NOT NULL auto_increment,
   `sticky` enum('yes','no') default 'no',
-  `chapter_name` char(128) NOT NULL,
-  PRIMARY KEY  (`chapter_no`),
-  UNIQUE KEY `chapter_name` (`chapter_name`)
+  `name` char(128) NOT NULL,
+  PRIMARY KEY  (`id`),
+  UNIQUE KEY `name` (`name`)
 ) ENGINE=MyISAM AUTO_INCREMENT=10000;
 
 CREATE TABLE `Config` (
@@ -51,12 +51,12 @@ CREATE TABLE `Config` (
 ) ENGINE=MyISAM;
 
 CREATE TABLE `Dictionary` (
-  `chapter_no` int(10) unsigned NOT NULL,
+  `chapter_id` int(10) unsigned NOT NULL,
   `dict_key` int(10) unsigned NOT NULL auto_increment,
   `dict_value` char(255) default NULL,
   PRIMARY KEY  (`dict_key`),
-  UNIQUE KEY `chap_to_key` (`chapter_no`,`dict_key`),
-  UNIQUE KEY `chap_to_val` (`chapter_no`,`dict_value`)
+  UNIQUE KEY `chap_to_key` (`chapter_id`,`dict_key`),
+  UNIQUE KEY `chap_to_val` (`chapter_id`,`dict_value`)
 ) ENGINE=MyISAM AUTO_INCREMENT=50000;
 
 CREATE TABLE `File` (
@@ -203,6 +203,12 @@ CREATE TABLE `IPv4NAT` (
   KEY `localip` (`localip`),
   KEY `remoteip` (`remoteip`),
   KEY `object_id` (`object_id`)
+) ENGINE=MyISAM;
+
+CREATE TABLE `RackRow` (
+  `id` int(10) unsigned NOT NULL auto_increment,
+  `name` char(255) NOT NULL,
+  PRIMARY KEY  (`id`)
 ) ENGINE=MyISAM;
 
 CREATE TABLE `Rack` (

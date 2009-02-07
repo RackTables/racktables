@@ -5444,7 +5444,7 @@ function renderFileSpace ()
 
 function renderFile ($file_id = 0)
 {
-	global $nextorder, $aac;
+	global $nextorder, $aac, $root;
 	if ($file_id <= 0)
 	{
 		showError ('Invalid file_id', __FUNCTION__);
@@ -5557,7 +5557,7 @@ function renderFileUploadForm ()
 
 function renderFilesByLink ()
 {
-	global $pageno, $tabno, $nextorder, $taglist, $tagtree;
+	global $pageno, $tabno, $nextorder, $taglist, $tagtree, $root;
 	assertStringArg ('entity_type', __FUNCTION__, TRUE);
 	$entity_type = $_REQUEST['entity_type'];
 	$tagfilter = getTagFilter();

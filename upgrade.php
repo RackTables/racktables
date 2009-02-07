@@ -163,6 +163,26 @@ CREATE TABLE `FileLink` (
 			$query[] = "alter table TagTree add column valid_realm set('file','ipv4net','ipv4vs','ipv4rspool','object','rack','user') not null default 'file,ipv4net,ipv4vs,ipv4rspool,object,rack,user' after parent_id";
 			$query[] = "alter table UserAccount drop column user_enabled";
 			$query[] = "UPDATE Config SET varvalue = '0.17.0' WHERE varname = 'DB_VERSION'";
+			$query[] = "alter table Chapter change chapter_no id int(10) unsigned NOT NULL auto_increment";
+			$query[] = "alter table Chapter change chapter_name name char(128) NOT NULL";
+			$query[] = "alter table Chapter drop key chapter_name";
+			$query[] = "alter table Chapter add UNIQUE KEY name (name)";
+			$query[] = "alter table Attribute change attr_id id int(10) unsigned NOT NULL auto_increment";
+			$query[] = "alter table Attribute change attr_type type enum('string','uint','float','dict') default NULL";
+			$query[] = "alter table Attribute change attr_name name char(64) default NULL";
+			$query[] = "alter table Attribute drop key attr_name";
+			$query[] = "alter table Attribute add UNIQUE KEY name (name)";
+			$query[] = "alter table AttributeMap change chapter_no chapter_id int(10) unsigned NOT NULL";
+			$query[] = "alter table Dictionary change chapter_no chapter_id int(10) unsigned NOT NULL";
+			$query[] = "CREATE TABLE RackRow ( id int(10) unsigned NOT NULL auto_increment, name char(255) NOT NULL, PRIMARY KEY  (`id`) ) ENGINE=MyISAM";
+
+			$result = $dbxlink->query ("select dict_key, dict_value from Dictionary where chapter_id = 3");
+			while($result->fetch(PDO::FETCH_NUM))
+			{
+				$query[] = "insert into RackRow set id=${row[0]}, name='${row[1]}'";
+			}
+			$query[] = "delete from Dictionary where chapter_id = 3");
+			
 			break;
 		default:
 			showError ("executeUpgradeBatch () failed, because batch '${batchid}' isn't defined", __FILE__);
