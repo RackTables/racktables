@@ -12,6 +12,7 @@
  * LEX_BOOLCONST
  * LEX_NOT
  * LEX_TAG
+ * LEX_AUTOTAG
  * LEX_PREDICATE
  * LEX_BOOLOP
  * LEX_CONTEXT
@@ -186,7 +187,7 @@ function getLexemsFromRackCode ($text)
 						$buffer = rtrim ($buffer);
 						if (!validTagName ($buffer, TRUE))
 							return lexError4 ($buffer, $lineno);
-						$ret[] = array ('type' => 'LEX_TAG', 'load' => $buffer, 'lineno' => $lineno);
+						$ret[] = array ('type' => ($buffer[0] == '$' ? 'LEX_AUTOTAG' : 'LEX_TAG'), 'load' => $buffer, 'lineno' => $lineno);
 						$newstate = 'ESOTSM';
 						break;
 					case (mb_ereg ('[[:alnum:]\. _~-]', $char) > 0):
@@ -251,6 +252,7 @@ function getLexemsFromRackCode ($text)
 // sentence is a syntax tree, suitable for tag sequence evaluation. The final
 // parse tree may contain the following nodes:
 // LEX_TAG
+// LEX_AUTOTAG
 // LEX_PREDICATE
 // LEX_BOOLCONST
 // SYNT_NOTEXPR (1 argument, holding SYNT_EXPR)
@@ -445,6 +447,7 @@ function getSentencesFromLexems ($lexems)
 			(
 				$stacktop['type'] == 'LEX_BOOLCONST' or
 				$stacktop['type'] == 'LEX_TAG' or
+				$stacktop['type'] == 'LEX_AUTOTAG' or
 				$stacktop['type'] == 'LEX_PREDICATE'
 			)
 			{
@@ -670,7 +673,9 @@ function eval_expression ($expr, $tagchain, $ptable)
 {
 	switch ($expr['type'])
 	{
-		case 'LEX_TAG': // Return true, if given tag is present on the tag chain.
+		// Return true, if given tag is present on the tag chain.
+		case 'LEX_TAG':
+		case 'LEX_AUTOTAG':
 			foreach ($tagchain as $tagInfo)
 				if ($expr['load'] == $tagInfo['tag'])
 					return TRUE;
@@ -828,6 +833,7 @@ function firstUnrefPredicate ($plist, $expr)
 	{
 		case 'LEX_BOOLCONST':
 		case 'LEX_TAG':
+		case 'LEX_AUTOTAG':
 			return NULL;
 		case 'LEX_PREDICATE':
 			return in_array ($expr['load'], $plist) ? NULL : $expr['load'];
@@ -1051,8 +1057,9 @@ function findAutoTagWarnings ($expr)
 	{
 		case 'LEX_BOOLCONST':
 		case 'LEX_PREDICATE':
-			return array();
 		case 'LEX_TAG':
+			return array();
+		case 'LEX_AUTOTAG':
 			switch (TRUE)
 			{
 				case (mb_ereg_match ('^\$id_', $expr['load'])):
@@ -1124,11 +1131,9 @@ function findTagWarnings ($expr)
 	{
 		case 'LEX_BOOLCONST':
 		case 'LEX_PREDICATE':
+		case 'LEX_AUTOTAG':
 			return array();
 		case 'LEX_TAG':
-			// Only verify stuff, that has passed through the saving handler.
-			if (!mb_ereg_match (TAGNAME_REGEXP, $expr['load']))
-				return array();
 			if (getTagByName ($expr['load']) !== NULL)
 				return array();
 			return array (array
@@ -1177,6 +1182,7 @@ function referencedPredicate ($pname, $expr)
 	{
 		case 'LEX_BOOLCONST':
 		case 'LEX_TAG':
+		case 'LEX_AUTOTAG':
 			return FALSE;
 		case 'LEX_PREDICATE':
 			return $pname == $expr['load'];
@@ -1204,6 +1210,7 @@ function invariantExpression ($expr)
 				return 'always true';
 			return 'always false';
 		case 'LEX_TAG':
+		case 'LEX_AUTOTAG':
 		case 'LEX_PREDICATE':
 			return 'sometimes something';
 		case 'SYNT_NOTEXPR':
