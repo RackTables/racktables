@@ -61,7 +61,7 @@ function getRackRowInfo ($rackrow_id)
 		"if(isnull(sum(Rack.height)),0,sum(Rack.height)) as sum " .
 		"from RackRow left join Rack on Rack.row_id = RackRow.id " .
 		" " .
-		"group by dict_key";
+		"group by RackRow.id";
 	$result = useSelectBlade ($query, __FUNCTION__);
 	if ($row = $result->fetch (PDO::FETCH_ASSOC))
 		return $row;
@@ -284,9 +284,9 @@ function getObjectInfo ($object_id = 0)
 		return;
 	}
 	$query =
-		"select id, name, label, barcode, dict_value as objtype_name, asset_no, dict_key as objtype_id, has_problems, comment from " .
+		"select RackObject.id as id, RackObject.name as name, label, barcode, dict_value as objtype_name, asset_no, dict_key as objtype_id, has_problems, comment from " .
 		"RackObject inner join Dictionary on objtype_id = dict_key join Chapter on Chapter.id = Dictionary.chapter_id " .
-		"where id = '${object_id}' and deleted = 'no' and Chapter.name = 'RackObjectType' limit 1";
+		"where RackObject.id = '${object_id}' and RackObject.deleted = 'no' and Chapter.name = 'RackObjectType' limit 1";
 	$result = useSelectBlade ($query, __FUNCTION__);
 	if (($row = $result->fetch (PDO::FETCH_ASSOC)) == NULL)
 	{
