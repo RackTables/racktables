@@ -751,7 +751,7 @@ function getObjectGroupInfo ()
 {
 	$query =
 		'select dict_key as id, dict_value as name, count(dict_key) as count from ' .
-		'Dictionary join Chapter on Chapter.id = Dictionary.chapter_id left join RackObject on dict_key = objtype_id ' .
+		'Dictionary join Chapter on Chapter.id = Dictionary.chapter_id join RackObject on dict_key = objtype_id ' .
 		'where Chapter.name = "RackObjectType" ' .
 		'group by dict_key order by dict_value';
 	$result = useSelectBlade ($query, __FUNCTION__);
