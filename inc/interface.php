@@ -2698,8 +2698,10 @@ function renderIPv4AddressAllocations ($dottedquad)
 
 function renderNATv4ForObject ($object_id = 0)
 {
+	global $root;
 	function printNewItemTR ($alloclist)
 	{
+		global $root;
 		printOpFormIntro ('addNATv4Rule');
 		echo "<tr align='center'><td>";
 		printImageHREF ('add', 'Add new NAT rule', TRUE);
