@@ -1913,16 +1913,16 @@ function renderHistory ($object_type, $object_id)
 			$query =
 				"select ctime, user_name, rh.name, rh.deleted, d.dict_value as name, rh.height, rh.comment " .
 				"from RackHistory as rh left join Dictionary as d on rh.row_id = d.dict_key " .
-				"natural join Chapter " .
-				"where chapter_name = 'RackRow' and rh.id = ${object_id} order by ctime";
+				"join Chapter on Dictionary.chapter_id = Chapter.id " .
+				"where Chapter.name = 'RackRow' and rh.id = ${object_id} order by ctime";
 			$header = '<tr><th>change time</th><th>author</th><th>rack name</th><th>is deleted?</th><th>rack row name</th><th>rack height</th><th>rack comment</th></tr>';
 			$extra = 6;
 			break;
 		case 'object':
 			$query =
-				"select ctime, user_name, name, label, asset_no, deleted, has_problems, dict_value, comment " .
-				"from RackObjectHistory inner join Dictionary on objtype_id = dict_key natural join Chapter " .
-				"where chapter_name = 'RackObjectType' and id=${object_id} order by ctime";
+				"select ctime, user_name, RackObjectHistory.name as name, label, asset_no, deleted, has_problems, dict_value, comment " .
+				"from RackObjectHistory inner join Dictionary on objtype_id = dict_key join Chapter on Dictionary.chapter_id = Chapter.id " .
+				"where Chapter.name = 'RackObjectType' and RackObjectHistory.id=${object_id} order by ctime";
 			$header = '<tr><th>change time</th><th>author</th><th>common name</th><th>visible label</th><th>asset no</th><th>is deleted?</th><th>has problems?</th><th>object type</th><th>comment</th></tr>';
 			$extra = 9;
 			break;
