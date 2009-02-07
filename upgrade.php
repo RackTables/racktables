@@ -10,7 +10,11 @@ $relnotes = array
 		"in the database.  There are several settings in php.ini which you may need to modify:<br>" .
 		"<ul><li>file_uploads        - needs to be On</li>" .
 		"<li>upload_max_filesize - max size for uploaded files</li>" .
-		"<li>post_max_size       - max size of all form data submitted via POST (including files)</li></ul>",
+		"<li>post_max_size       - max size of all form data submitted via POST (including files)</li></ul><br>" .
+		"User accounts used to have 'enabled' flag, which allowed individual blocking and<br>" .
+		"unblocking of each. This flag was dropped in favor of existing mean of access<br>" .
+		"setup (RackCode). An unconditional denying rule is automatically added into RackCode<br>" .
+		"for such blocked account, so the effective security policy remains the same.<br>",
 );
 
 // At the moment we assume, that for any two releases we can
@@ -161,6 +165,11 @@ CREATE TABLE `FileLink` (
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('PREVIEW_TEXT_COLS','80','uint','yes','no','Columns for text file preview')";
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('PREVIEW_IMAGE_MAXPXS','320','uint','yes','no','Max pixels per axis for image file preview')";
 			$query[] = "alter table TagTree add column valid_realm set('file','ipv4net','ipv4vs','ipv4rspool','object','rack','user') not null default 'file,ipv4net,ipv4vs,ipv4rspool,object,rack,user' after parent_id";
+			$result = $dbxlink->query ("select user_id, user_name, user_realname from UserAccount where user_enabled = 'no'");
+			while ($row = $result->fetch (PDO::FETCH_ASSOC))
+				$query[] = "update Script set script_text = concat('deny {\$userid_${row['user_id']}} # ${row['user_name']} (${row['user_realname']})\n', script_text) where script_name = 'RackCode'";
+			$query[] = "update Script set script_text = NULL where script_name = 'RackCodeCache'";
+			unset ($result);
 			$query[] = "alter table UserAccount drop column user_enabled";
 			$query[] = "UPDATE Config SET varvalue = '0.17.0' WHERE varname = 'DB_VERSION'";
 			$query[] = "alter table Chapter change chapter_no id int(10) unsigned NOT NULL auto_increment";
