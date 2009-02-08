@@ -185,12 +185,12 @@ CREATE TABLE `FileLink` (
 			$query[] = "alter table Dictionary change chapter_no chapter_id int(10) unsigned NOT NULL";
 			$query[] = "CREATE TABLE RackRow ( id int(10) unsigned NOT NULL auto_increment, name char(255) NOT NULL, PRIMARY KEY  (`id`) ) ENGINE=MyISAM";
 
-			$result = $dbxlink->query ("select dict_key, dict_value from Dictionary where chapter_id = 3");
-			while($result->fetch(PDO::FETCH_NUM))
+			$result = $dbxlink->query ("select dict_key, dict_value from Dictionary where chapter_no = 3");
+			while($row = $result->fetch(PDO::FETCH_NUM))
 			{
 				$query[] = "insert into RackRow set id=${row[0]}, name='${row[1]}'";
 			}
-			$query[] = "delete from Dictionary where chapter_id = 3");
+			$query[] = "delete from Dictionary where chapter_no = 3";
 			
 			break;
 		default:

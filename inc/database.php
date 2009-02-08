@@ -89,6 +89,23 @@ function commitUpdateRow($rackrow_id, $rackrow_name)
 	return TRUE;
 }
 
+function commitDeleteRow($rackrow_id)
+{
+	global $dbxlink;
+	$query = "delete from RackRow where id=${rackrow_id}";
+	$result = $dbxlink->query ($query);
+	if ($result == NULL)
+	{
+		showError ("SQL query '${query}' failed", __FUNCTION__);
+		return FALSE;
+	}
+	$result->closeCursor();
+	return TRUE;
+}
+
+
+
+
 // This function returns id->name map for all object types. The map is used
 // to build <select> input for objects.
 function getObjectTypeList ()

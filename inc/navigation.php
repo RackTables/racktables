@@ -27,10 +27,13 @@ $tabhandler['rackspace']['edit'] = 'renderRackspaceRowEditor';
 $tabhandler['rackspace']['history'] = 'renderRackspaceHistory';
 $ophandler['rackspace']['edit']['addRow'] = 'addRow';
 $ophandler['rackspace']['edit']['updateRow'] = 'updateRow';
+$ophandler['rackspace']['edit']['delete'] = 'deleteRow';
 $msgcode['addRow']['OK'] = 74;
 $msgcode['addRow']['ERR'] = 100;
 $msgcode['updateRow']['OK'] = 75;
 $msgcode['updateRow']['ERR'] = 100;
+$msgcode['deleteRow']['OK'] = 206;
+$msgcode['deleteRow']['ERR'] = 100;
 
 $page['objects']['title'] = 'Objects';
 $page['objects']['parent'] = 'index';

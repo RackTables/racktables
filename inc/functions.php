@@ -1845,10 +1845,10 @@ function makeHrefProcess($params = array())
 		error_log("Can't make a process link when not in head revision");
 		die();
 	}
-	if (!isset($params['pageno']))
-		$params['pageno'] = $pageno;
-	if (!isset($params['tabno']))
-		$params['tabno'] = $tabno;
+	if (!isset($params['page']))
+		$params['page'] = $pageno;
+	if (!isset($params['tab']))
+		$params['tab'] = $tabno;
 	foreach($params as $key=>$value)
 	{
 		if (!$first)

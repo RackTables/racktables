@@ -264,7 +264,7 @@ function renderRackspaceRowEditor ()
 		printOpFormIntro ('addRow');
 		echo "<tr><td><input type=text name=name tabindex=100></td><td>";
 		printImageHREF ('create', 'Add new row', TRUE, 101);
-		echo "</td></tr></form>";
+		echo "</td><td></td></tr></form>";
 	}
 	global $pageno, $tabno;
 	startPortlet ('Rows');
@@ -279,7 +279,9 @@ function renderRackspaceRowEditor ()
 		printOpFormIntro ('updateRow', array ('row_id' => $rackrow['row_id']));
 		echo "<tr><td><input type=text name=name value='${rackrow['row_name']}'></td><td>";
 		printImageHREF ('save', 'Save changes', TRUE);
-		echo "</td></form></tr>\n";
+		echo "</td></form><td><a href=\"".makeHrefProcess(array('op'=>'delete', 'row_id'=>$rackrow['row_id'], 'name'=>$rackrow['row_name']))."\">";
+		printImageHREF ('delete', 'Delete row');
+		echo "</a></td></tr>\n";
 	}
 	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')
 		printNewItemTR();
@@ -1480,6 +1482,7 @@ function printLog ($log)
 				203 => array ('code' => 'warning', 'format' => 'Port %s seems to be the first in VLAN %u at this switch.'),
 				204 => array ('code' => 'warning', 'format' => 'Check uplink/downlink configuration for proper operation.'),
 				205 => array ('code' => 'warning', 'format' => '%u change request(s) have been ignored'),
+				206 => array ('code' => 'success', 'format' => 'Row %s was deleted successfully'),
 			);
 			// Handle the arguments. Is there any better way to do it?
 			foreach ($log['m'] as $record)
