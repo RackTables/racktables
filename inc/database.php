@@ -1651,7 +1651,7 @@ function getDict ($parse_links = FALSE)
 {
 	$query1 =
 		"select Chapter.name as chapter_name, Chapter.id as chapter_no, dict_key, dict_value, sticky from " .
-		"Chapter natural left join Dictionary order by Chapter.name, dict_value";
+		"Chapter left join Dictionary on Chapter.id = Dictionary.chapter_id order by Chapter.name, dict_value";
 	$result = useSelectBlade ($query1, __FUNCTION__);
 	$dict = array();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
@@ -1694,7 +1694,7 @@ function getDictStats ()
 	$stock_chapters = array (1, 2, 11, 12, 13, 14, 16, 17, 18, 19, 20, 21, 22, 23);
 	$query =
 		"select Chapter.id as chapter_no, Chapter.name as chapter_name, count(dict_key) as wc from " .
-		"Chapter natural left join Dictionary group by Chapter.id";
+		"Chapter left join Dictionary on Chapter.id = Dictionary.chapter_id group by Chapter.id";
 	$result = useSelectBlade ($query, __FUNCTION__);
 	$tc = $tw = $uc = $uw = 0;
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
