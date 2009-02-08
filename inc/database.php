@@ -37,15 +37,15 @@ function getRackspace ($tagfilter = array(), $tfmode = 'any')
 {
 	$whereclause = getWhereClause ($tagfilter);
 	$query =
-		"select RackRow.id as row_id, RackRow.name as row_name " .
+		"select RackRow.id as row_id, RackRow.name as row_name, count(Rack.id) as count " .
 		"from RackRow left join Rack on Rack.row_id = RackRow.id " .
 		"left join TagStorage on Rack.id = TagStorage.entity_id and entity_realm = 'rack' " .
 		"where 1=1 " .
 		$whereclause .
-		" order by RackRow.name";
+		" group by RackRow.id order by RackRow.name";
 	$result = useSelectBlade ($query, __FUNCTION__);
 	$ret = array();
-	$clist = array ('row_id', 'row_name');
+	$clist = array ('row_id', 'row_name', 'count');
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 		foreach ($clist as $cname)
 			$ret[$row['row_id']][$cname] = $row[$cname];
@@ -92,9 +92,22 @@ function commitUpdateRow($rackrow_id, $rackrow_name)
 function commitDeleteRow($rackrow_id)
 {
 	global $dbxlink;
-	$query = "delete from RackRow where id=${rackrow_id}";
+	$query = "select count(*) from Rack where row_id=${rackrow_id}";
 	$result = $dbxlink->query ($query);
-	if ($result == NULL)
+	if (($result!=NULL) && ($row = $result->fetch(PDO::FETCH_NUM)) )
+	{
+		if ($row[0] == 0)
+		{
+			$query = "delete from RackRow where id=${rackrow_id}";
+			$result = $dbxlink->query ($query);
+			if ($result == NULL)
+			{
+				showError ("SQL query '${query}' failed", __FUNCTION__);
+				return FALSE;
+			}
+		}
+	}
+	else
 	{
 		showError ("SQL query '${query}' failed", __FUNCTION__);
 		return FALSE;

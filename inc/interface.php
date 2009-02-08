@@ -279,9 +279,14 @@ function renderRackspaceRowEditor ()
 		printOpFormIntro ('updateRow', array ('row_id' => $rackrow['row_id']));
 		echo "<tr><td><input type=text name=name value='${rackrow['row_name']}'></td><td>";
 		printImageHREF ('save', 'Save changes', TRUE);
-		echo "</td></form><td><a href=\"".makeHrefProcess(array('op'=>'delete', 'row_id'=>$rackrow['row_id'], 'name'=>$rackrow['row_name']))."\">";
-		printImageHREF ('delete', 'Delete row');
-		echo "</a></td></tr>\n";
+		echo "</td></form><td>";
+		if ($rackrow['count'] == 0)
+		{
+			echo "<a href=\"".makeHrefProcess(array('op'=>'delete', 'row_id'=>$rackrow['row_id'], 'name'=>$rackrow['row_name']))."\">";
+			printImageHREF ('delete', 'Delete row');
+			echo "</a>";
+		}
+		echo "</td></tr>\n";
 	}
 	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')
 		printNewItemTR();
@@ -310,8 +315,8 @@ function renderRow ($row_id = 0)
 	echo "<tr><td class=pcleft>";
 	startPortlet ($rowInfo['name']);
 	echo "<table border=0 cellspacing=0 cellpadding=3 width='100%'>\n";
-	echo "<tr><th width='50%' class=tdright>Racks:</th><td class=tdleft>${rowInfo['rackCount']}</td></tr>\n";
-	echo "<tr><th width='50%' class=tdright>Units:</th><td class=tdleft>${rowInfo['sumHeight']}</td></tr>\n";
+	echo "<tr><th width='50%' class=tdright>Racks:</th><td class=tdleft>${rowInfo['count']}</td></tr>\n";
+	echo "<tr><th width='50%' class=tdright>Units:</th><td class=tdleft>${rowInfo['sum']}</td></tr>\n";
 	echo "<tr><th width='50%' class=tdright>%% used:</th><td class=tdleft>";
 	renderProgressBar (getRSUforRackRow ($rackList));
 	echo "</td></tr>\n";
