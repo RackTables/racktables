@@ -5673,13 +5673,13 @@ function renderFilesPortlet ($entity_type = NULL, $entity_id = 0)
 		startPortlet ('files (' . count ($files) . ')');
 		echo "<table cellspacing=0 cellpadding='5' align='center' class='widetable'>\n";
 		echo "<tr><th>Name</th><th>Size</th><th>Comment</th><th>Actions</th></tr>\n";
-		foreach ($files as $file_id => $file)
+		foreach ($files as $file)
 		{
 			echo '<td class=tdleft>';
 			renderFileCell ($file);
 			printf("</td><td class=tdleft>%s</td>", formatFileSize($file['size']));
 			echo "<td class=tdleft>${file['comment']}</td>";
-			echo "<td><a href='${root}download.php?file_id=${file_id}'>";
+			echo "<td><a href='${root}download.php?file_id=${file['id']}'>";
 			printImageHREF ('download', 'Download file');
 			echo '</a></td></tr>';
 			if ('' != ($pcode = getFilePreviewCode ($file)))
@@ -5908,9 +5908,9 @@ function renderRouterCell ($dottedquad, $ifname, $object_id, $object_dname)
 function renderFileCell ($fileinfo)
 {
 	global $root;
-	printf("<a href='${root}?page=file&file_id=%s'><strong>%s</strong></a>", $fileinfo['file_id'], niftyString ($fileinfo['name']));
+	printf("<a href='${root}?page=file&file_id=%s'><strong>%s</strong></a>", $fileinfo['id'], niftyString ($fileinfo['name']));
 	echo '<br><small>';
-	echo serializeTags (loadFileTags ($fileinfo['file_id']));
+	echo serializeTags (loadFileTags ($fileinfo['id']));
 	echo "</small>";
 }
 

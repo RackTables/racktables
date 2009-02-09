@@ -3523,7 +3523,7 @@ function getFilesOfEntity ($entity_type = NULL, $entity_id = 0)
 	$ret = array();
 	while ($row = $query->fetch (PDO::FETCH_ASSOC))
 		$ret[$row['file_id']] = array (
-			'file_id' => $row['file_id'],
+			'id' => $row['file_id'],
 			'link_id' => $row['link_id'],
 			'name' => $row['name'],
 			'type' => $row['type'],
