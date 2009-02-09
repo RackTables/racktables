@@ -517,10 +517,11 @@ function renderEditObjectForm ($object_id)
 	echo "<tr><th class=tdright>Common name:</th><td class=tdleft><input type=text name=object_name value='${object['name']}'></td></tr>\n";
 	echo "<tr><th class=tdright>Visible label:</th><td class=tdleft><input type=text name=object_label value='${object['label']}'></td></tr>\n";
 	echo "<tr><th class=tdright>Asset tag:</th><td class=tdleft><input type=text name=object_asset_no value='${object['asset_no']}'></td></tr>\n";
-	/*echo "<tr><th class=tdright>Has problems:</th><td class=tdleft><input type=checkbox name=object_has_problems";
+	echo "<tr><th class=tdright>Barcode:</th><td class=tdleft><input type=text name=object_barcode value='${object['barcode']}'></td></tr>\n";
+	echo "<tr><th class=tdright>Has problems:</th><td class=tdleft><input type=checkbox name=object_has_problems";
 	if ($object['has_problems'] == 'yes')
 		echo ' checked';
-	echo "></td></tr>\n";*/
+	echo "></td></tr>\n";
 	echo "<tr><th class=tdright>Actions:</th><td class=tdleft><a href='".
 		makeHrefProcess(array('op'=>'deleteObject', 'page'=>'objects', 'tab'=>'default', 'object_id'=>$object_id, 'name'=>$object['name'])).
 		"' onclick=\"javascript:return confirm('Are you sure you want to delete the object?')\">Delete object</a></td></tr>\n";
@@ -1735,12 +1736,13 @@ function renderUnmountedObjectsPortlet ()
 	global $nextorder;
 	$order = 'odd';
 	echo '<br><br><table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
-	echo '<tr><th>Common name</th><th>Visible label</th><th>Asset number</th></tr>';
+	echo '<tr><th>Common name</th><th>Visible label</th><th>Asset number</th><th>Barcode</th></tr>';
 	foreach ($objs as $obj)
 	{
 		echo "<tr class=row_${order}><td><a href='".makeHref(array('page'=>'object', 'object_id'=>$obj['id']))."'>${obj['dname']}</a></td>";
 		echo "<td>${obj['label']}</td>";
 		echo "<td>${obj['asset_no']}</td>";
+		echo "<td>${obj['barcode']}</td>";
 		echo "</tr>";
 		$order = $nextorder[$order];
 	}
@@ -1855,7 +1857,7 @@ function renderObjectGroup ()
 		return;
 	}
 	echo '<br><br><table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
-	echo '<tr><th>Common name</th><th>Visible label</th><th>Asset tag</th><th>Row/Rack</th><th></th></tr>';
+	echo '<tr><th>Common name</th><th>Visible label</th><th>Asset tag</th><th>Barcode</th><th>Row/Rack</th><th></th></tr>';
 	$order = 'odd';
 	foreach ($objects as $obj)
 	{
@@ -1869,6 +1871,7 @@ function renderObjectGroup ()
 			echo '<br><small>' . serializeTags ($tags, makeHref(array('page'=>$pageno, 'tab'=>'default', 'group_id'=>$group_id))."&") . '</small>';
 		echo "</td><td class='${secondclass}'>${obj['label']}</td>";
 		echo "<td class='${secondclass}'>${obj['asset_no']}</td>";
+		echo "<td class='${secondclass}'>${obj['barcode']}</td>";
 		if ($obj['rack_id'])
 			echo "<td class='${secondclass}'><a href='".makeHref(array('page'=>'row', 'row_id'=>$obj['row_id']))."'>${obj['Row_name']}</a>/<a href='".makeHref(array('page'=>'rack', 'rack_id'=>$obj['rack_id']))."'>${obj['Rack_name']}</a></td>";
 		else
@@ -1928,10 +1931,10 @@ function renderHistory ($object_type, $object_id)
 			break;
 		case 'object':
 			$query =
-				"select ctime, user_name, RackObjectHistory.name as name, label, asset_no, deleted, has_problems, dict_value, comment " .
+				"select ctime, user_name, RackObjectHistory.name as name, label, barcode, asset_no, deleted, has_problems, dict_value, comment " .
 				"from RackObjectHistory inner join Dictionary on objtype_id = dict_key join Chapter on Dictionary.chapter_id = Chapter.id " .
 				"where Chapter.name = 'RackObjectType' and RackObjectHistory.id=${object_id} order by ctime";
-			$header = '<tr><th>change time</th><th>author</th><th>common name</th><th>visible label</th><th>asset no</th><th>is deleted?</th><th>has problems?</th><th>object type</th><th>comment</th></tr>';
+			$header = '<tr><th>change time</th><th>author</th><th>common name</th><th>visible label</th><th>barcode</th><th>asset no</th><th>is deleted?</th><th>has problems?</th><th>object type</th><th>comment</th></tr>';
 			$extra = 9;
 			break;
 		default:

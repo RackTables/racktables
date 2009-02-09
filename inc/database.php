@@ -187,7 +187,7 @@ function getObjectList ($type_id = 0, $tagfilter = array(), $tfmode = 'any')
 		"select distinct RackObject.id as id , RackObject.name as name, dict_value as objtype_name, " .
 		"RackObject.label as label, RackObject.barcode as barcode, " .
 		"dict_key as objtype_id, asset_no, rack_id, Rack.name as Rack_name, Rack.row_id, " .
-		"(SELECT dict_value FROM Dictionary WHERE dict_key = Rack.row_id) AS Row_name " .
+		"(SELECT name from RackRow where id = Rack.row_id) AS Row_name " .
 		"from ((RackObject inner join Dictionary on objtype_id=dict_key join Chapter on Chapter.id = Dictionary.chapter_id) " .
 		"left join RackSpace on RackObject.id = object_id) " .
 		"left join Rack on rack_id = Rack.id " .

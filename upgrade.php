@@ -77,10 +77,22 @@ function executeUpgradeBatch ($batchid)
 				showError ("Cannot upgrade because InnoDB tables are not supported by your MySQL server. See the README for details.", __FILE__);
 				die;
 			}
+
+			$query[] = "alter table Chapter change chapter_no id int(10) unsigned NOT NULL auto_increment";
+			$query[] = "alter table Chapter change chapter_name name char(128) NOT NULL";
+			$query[] = "alter table Chapter drop key chapter_name";
+			$query[] = "alter table Chapter add UNIQUE KEY name (name)";
+			$query[] = "alter table Attribute change attr_id id int(10) unsigned NOT NULL auto_increment";
+			$query[] = "alter table Attribute change attr_type type enum('string','uint','float','dict') default NULL";
+			$query[] = "alter table Attribute change attr_name name char(64) default NULL";
+			$query[] = "alter table Attribute drop key attr_name";
+			$query[] = "alter table Attribute add UNIQUE KEY name (name)";
+			$query[] = "alter table AttributeMap change chapter_no chapter_id int(10) unsigned NOT NULL";
+			$query[] = "alter table Dictionary change chapter_no chapter_id int(10) unsigned NOT NULL";
 			// Many dictionary changes were made... remove all dictvendor entries and install fresh.
 			// Take care not to erase locally added records. 0.16.x ends with max key 797
-			$query[] = 'DELETE FROM Dictionary WHERE ((chapter_no BETWEEN 11 AND 14) or (chapter_no BETWEEN 16 AND 19) ' .
-				'or (chapter_no BETWEEN 21 AND 24)) and dict_key <= 797';
+			$query[] = 'DELETE FROM Dictionary WHERE ((chapter_id BETWEEN 11 AND 14) or (chapter_id BETWEEN 16 AND 19) ' .
+				'or (chapter_id BETWEEN 21 AND 24)) and dict_key <= 797';
 			$f = fopen ("install/init-dictvendors.sql", 'r');
 			if ($f === FALSE)
 			{
@@ -131,19 +143,19 @@ CREATE TABLE `FileLink` (
 			$query[] = "ALTER TABLE TagStorage MODIFY COLUMN target_realm enum('file','ipv4net','ipv4rspool','ipv4vs','object','rack','user') NOT NULL default 'object'";
 
 			// add network security as an object type
-			$query[] = "INSERT INTO `Chapter` (`chapter_no`, `sticky`, `chapter_name`) VALUES (24,'no','network security models')";
-			$query[] = "INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_no`) VALUES (798,1,0)";
-			$query[] = "INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_no`) VALUES (798,2,24)";
-			$query[] = "INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_no`) VALUES (798,3,0)";
-			$query[] = "INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_no`) VALUES (798,5,0)";
-			$query[] = "INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_no`) VALUES (798,14,0)";
-			$query[] = "INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_no`) VALUES (798,16,0)";
-			$query[] = "INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_no`) VALUES (798,17,0)";
-			$query[] = "INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_no`) VALUES (798,18,0)";
-			$query[] = "INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_no`) VALUES (798,20,0)";
-			$query[] = "INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_no`) VALUES (798,21,0)";
-			$query[] = "INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_no`) VALUES (798,22,0)";
-			$query[] = "INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_no`) VALUES (798,24,0)";
+			$query[] = "INSERT INTO `Chapter` (`id`, `sticky`, `name`) VALUES (24,'no','network security models')";
+			$query[] = "INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_id`) VALUES (798,1,0)";
+			$query[] = "INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_id`) VALUES (798,2,24)";
+			$query[] = "INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_id`) VALUES (798,3,0)";
+			$query[] = "INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_id`) VALUES (798,5,0)";
+			$query[] = "INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_id`) VALUES (798,14,0)";
+			$query[] = "INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_id`) VALUES (798,16,0)";
+			$query[] = "INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_id`) VALUES (798,17,0)";
+			$query[] = "INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_id`) VALUES (798,18,0)";
+			$query[] = "INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_id`) VALUES (798,20,0)";
+			$query[] = "INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_id`) VALUES (798,21,0)";
+			$query[] = "INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_id`) VALUES (798,22,0)";
+			$query[] = "INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_id`) VALUES (798,24,0)";
 			$query[] = "UPDATE Dictionary SET dict_value = 'Network switch' WHERE dict_key = 8";
 			$query[] = 'alter table IPBonds rename to IPv4Allocation';
 			$query[] = 'alter table PortForwarding rename to IPv4NAT';
@@ -171,18 +183,7 @@ CREATE TABLE `FileLink` (
 			$query[] = "update Script set script_text = NULL where script_name = 'RackCodeCache'";
 			unset ($result);
 			$query[] = "alter table UserAccount drop column user_enabled";
-			$query[] = "UPDATE Config SET varvalue = '0.17.0' WHERE varname = 'DB_VERSION'";
-			$query[] = "alter table Chapter change chapter_no id int(10) unsigned NOT NULL auto_increment";
-			$query[] = "alter table Chapter change chapter_name name char(128) NOT NULL";
-			$query[] = "alter table Chapter drop key chapter_name";
-			$query[] = "alter table Chapter add UNIQUE KEY name (name)";
-			$query[] = "alter table Attribute change attr_id id int(10) unsigned NOT NULL auto_increment";
-			$query[] = "alter table Attribute change attr_type type enum('string','uint','float','dict') default NULL";
-			$query[] = "alter table Attribute change attr_name name char(64) default NULL";
-			$query[] = "alter table Attribute drop key attr_name";
-			$query[] = "alter table Attribute add UNIQUE KEY name (name)";
-			$query[] = "alter table AttributeMap change chapter_no chapter_id int(10) unsigned NOT NULL";
-			$query[] = "alter table Dictionary change chapter_no chapter_id int(10) unsigned NOT NULL";
+
 			$query[] = "CREATE TABLE RackRow ( id int(10) unsigned NOT NULL auto_increment, name char(255) NOT NULL, PRIMARY KEY  (`id`) ) ENGINE=MyISAM";
 
 			$result = $dbxlink->query ("select dict_key, dict_value from Dictionary where chapter_no = 3");
@@ -190,8 +191,10 @@ CREATE TABLE `FileLink` (
 			{
 				$query[] = "insert into RackRow set id=${row[0]}, name='${row[1]}'";
 			}
-			$query[] = "delete from Dictionary where chapter_no = 3";
+			$query[] = "delete from Dictionary where chapter_id = 3";
 			
+			$query[] = "UPDATE Config SET varvalue = '0.17.0' WHERE varname = 'DB_VERSION'";
+
 			break;
 		default:
 			showError ("executeUpgradeBatch () failed, because batch '${batchid}' isn't defined", __FILE__);
