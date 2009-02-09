@@ -1324,6 +1324,7 @@ function printLog ($log)
 		case $log['v'] == 2:
 			$msginfo = array
 			(
+// records 0~99 with success messages
 				0 => array ('code' => 'success', 'format' => 'Success: %s'),
 				1 => array ('code' => 'success', 'format' => '%u new records done, %u already existed'),
 				2 => array ('code' => 'success', 'format' => 'NATv4 rule was successfully added.'),
@@ -1401,7 +1402,10 @@ function printLog ($log)
 				74 => array ('code' => 'success', 'format' => 'Row %s was added successfully'),
 				75 => array ('code' => 'success', 'format' => 'Row %s was updated successfully'),
 				76 => array ('code' => 'success', 'format' => 'Object %s was deleted successfully'),
+				77 => array ('code' => 'success', 'format' => 'Row %s was deleted successfully'),
+				78 => array ('code' => 'success', 'format' => 'File %s saved Ok'),
 
+// records 100~199 with fatal error messages
 				100 => array ('code' => 'error', 'format' => 'Generic error: %s'),
 				101 => array ('code' => 'error', 'format' => 'Port name cannot be empty'),
 				102 => array ('code' => 'error', 'format' => "Error creating user account '%s'"),
@@ -1481,14 +1485,15 @@ function printLog ($log)
 				176 => array ('code' => 'error', 'format' => 'This network already exists'),
 				177 => array ('code' => 'error', 'format' => 'commitUpdateRack() failed'),
 				178 => array ('code' => 'error', 'format' => 'file not found'),
+				179 => array ('code' => 'error', 'format' => 'Error saving file, all changes lost!'),
 
+// records 200~299 with warnings
 				200 => array ('code' => 'warning', 'format' => 'generic warning: %s'),
 				201 => array ('code' => 'warning', 'format' => 'nothing happened...'),
 				202 => array ('code' => 'warning', 'format' => 'gw: %s'),
 				203 => array ('code' => 'warning', 'format' => 'Port %s seems to be the first in VLAN %u at this switch.'),
 				204 => array ('code' => 'warning', 'format' => 'Check uplink/downlink configuration for proper operation.'),
 				205 => array ('code' => 'warning', 'format' => '%u change request(s) have been ignored'),
-				206 => array ('code' => 'success', 'format' => 'Row %s was deleted successfully'),
 			);
 			// Handle the arguments. Is there any better way to do it?
 			foreach ($log['m'] as $record)
@@ -5959,4 +5964,17 @@ function getFilePreviewCode ($file)
 	}
 	return $ret;
 }
+
+function renderTextEditor ($file_id)
+{
+	showMessageOrError();
+	$fullInfo = getFile ($file_id);
+	printOpFormIntro ('updateFileText');
+	echo '<table border=0 align=center>';
+	echo '<tr><td><textarea rows=25 cols=120 name=file_text tabindex=101>' . $fullInfo['contents'] . '</textarea></td></tr>';
+	echo "<tr><td class=submit>";
+	printImageHREF ('SAVE', 'Save changes', TRUE, 102);
+	echo "</td></tr>\n</table></form>\n";
+}
+
 ?>

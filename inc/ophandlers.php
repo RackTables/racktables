@@ -1627,4 +1627,16 @@ function deleteFile ()
 	return buildRedirectURL (__FUNCTION__, 'OK', array ($_REQUEST['name']));
 }
 
+function updateFileText ()
+{
+	assertUIntArg ('file_id', __FUNCTION__);
+	assertStringArg ('file_text', __FUNCTION__, TRUE); // it's Ok to save empty
+	$shortInfo = getFileInfo ($_REQUEST['file_id']);
+	// Is this bytes or chars?
+	$error = commitUpdateFileText ($_REQUEST['file_id'], $_REQUEST['file_text']);
+	if ($error == '')
+		return buildRedirectURL (__FUNCTION__, 'OK', array ($shortInfo['name']));
+	return buildRedirectURL (__FUNCTION__, 'ERR', array ($error));
+}
+
 ?>

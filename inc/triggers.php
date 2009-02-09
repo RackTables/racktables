@@ -113,4 +113,11 @@ function trigger_localreports ()
 	return count ($localreports) > 0;
 }
 
+function trigger_file_editText ()
+{
+	assertUIntArg ('file_id', __FUNCTION__);
+	$fileInfo = getFileInfo ($_REQUEST['file_id']);
+	return ($fileInfo['type'] == 'text/plain');
+}
+
 ?>

@@ -32,7 +32,7 @@ $msgcode['addRow']['OK'] = 74;
 $msgcode['addRow']['ERR'] = 100;
 $msgcode['updateRow']['OK'] = 75;
 $msgcode['updateRow']['ERR'] = 100;
-$msgcode['deleteRow']['OK'] = 206;
+$msgcode['deleteRow']['OK'] = 77;
 $msgcode['deleteRow']['ERR'] = 100;
 
 $page['objects']['title'] = 'Objects';
@@ -621,13 +621,19 @@ $page['file']['autotagloader'] = 'loadFileAutoTags';
 $tab['file']['default'] = 'View';
 $tab['file']['edit'] = 'Properties';
 $tab['file']['tags'] = 'Tags';
+$tab['file']['editText'] = 'Edit text';
 $trigger['file']['tags'] = 'trigger_tags';
+$trigger['file']['editText'] = 'trigger_file_editText';
 $tabhandler['file']['default'] = 'renderFile';
 $tabhandler['file']['edit'] = 'renderFileProperties';
 $tabhandler['file']['tags'] = 'renderEntityTags';
+$tabhandler['file']['editText'] = 'renderTextEditor';
 $ophandler['file']['default']['replaceFile'] = 'replaceFile';
 $ophandler['file']['edit']['updateFile'] = 'updateFile';
 $ophandler['file']['tags']['saveTags'] = 'saveEntityTags';
+$ophandler['file']['editText']['updateFileText'] = 'updateFileText';
+$msgcode['updateFileText']['OK'] = 78;
+$msgcode['updateFileText']['ERR'] = 179;
 
 // This function returns array if page numbers leading to the target page
 // plus page number of target page itself. The first element is the target

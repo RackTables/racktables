@@ -3808,6 +3808,17 @@ function commitUpdateFile ($file_id = 0, $new_name = '', $new_comment = '')
 	return '';
 }
 
+// This is a temporary copy of commitReplaceFile() to work around escaping issues.
+function commitUpdateFileText ($file_id = 0, $newtext = '')
+{
+	if ($file_id <= 0)
+		return 'Invalid key in ' . __FUNCTION__;
+
+	global $dbxlink;
+	$query = "UPDATE File SET mtime = NOW(), contents = '${newtext}', size = LENGTH(contents) WHERE id = ${file_id} limit 1";
+	return (FALSE === $dbxlink->exec ($query)) ? ('SQL query failed in ' . __FUNCTION__) : '';
+}
+
 function commitUnlinkFile ($link_id)
 {
 	if (useDeleteBlade ('FileLink', 'id', $link_id) != TRUE)
