@@ -3377,14 +3377,14 @@ function mergeSearchResults (&$objects, $terms, $fieldname)
 {
 	global $dbxlink;
 	$query =
-		"select name, label, asset_no, barcode, ro.id, dict_key as objtype_id, " .
+		"select ro.name, label, asset_no, barcode, ro.id, dict_key as objtype_id, " .
 		"dict_value as objtype_name, asset_no from RackObject as ro inner join Dictionary " .
 		"on objtype_id = dict_key join Chapter on Chapter.id = Dictionary.chapter_id where Chapter.name = 'RackObjectType' and ";
 	$count = 0;
 	foreach (explode (' ', $terms) as $term)
 	{
 		if ($count) $query .= ' or ';
-		$query .= "${fieldname} like '%$term%'";
+		$query .= "ro.${fieldname} like '%$term%'";
 		$count++;
 	}
 	$query .= " order by ${fieldname}";
