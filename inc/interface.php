@@ -5497,15 +5497,13 @@ function renderFile ($file_id = 0)
 	echo "</form></td></tr>\n";
 
 	printTagTRs (makeHref(array('page'=>'files', 'tab'=>'default'))."&");
-	echo "</table><br>\n";
-	finishPortlet();
-
 	if (!empty ($file['comment']))
 	{
-		startPortlet ('comment');
-		echo '<div class=commentblock>' . string_insert_hrefs ($file['comment']) . '</div>';
-		finishPortlet ();
+		echo '<tr><th class=slbconf>Comment:</th><td>&nbsp;</td></tr>';
+		echo '<tr><td colspan=2 class="dashed slbconf">' . string_insert_hrefs ($file['comment']) . '</td></tr>';
 	}
+	echo "</table><br>\n";
+	finishPortlet();
 
 	$links = getFileLinks ($file_id);
 	if (count ($links))
@@ -5523,6 +5521,15 @@ function renderFile ($file_id = 0)
 		echo "</table><br>\n";
 		finishPortlet();
 	}
+
+	if ('' != ($pcode = getFilePreviewCode ($file)))
+	{
+		echo "</td><td class=pcright>";
+		startPortlet ('preview');
+		echo $pcode;
+		finishPortlet();
+	}
+
 	echo "</td></tr>";
 	echo "</table>\n";
 }
@@ -5541,7 +5548,7 @@ function renderFileProperties ($file_id = 0)
 	printOpFormIntro ('updateFile');
 	echo "<tr><th class=tdright>MIME-type:</th><td class=tdleft>${file['type']}</td></tr>";
 	echo "<tr><th class=tdright>Filename:</th><td class=tdleft><input tabindex=100 type=text name=name value='${file['name']}'></td></tr>\n";
-	echo "<tr><th class=tdright>Comment:</th><td class=tdleft><input tabindex=101 type=text name=comment value='${file['comment']}'></td></tr>\n";
+	echo "<tr><th class=tdright>Comment:</th><td class=tdleft><textarea tabindex=101 name=comment rows=10 cols=80>${file['comment']}</textarea></td></tr>\n";
 	echo "<tr><th class=submit colspan=2>";
 	printImageHREF ('SAVE', 'Save changes', TRUE, 102);
 	echo '</th></tr></form></table>';
@@ -5675,43 +5682,8 @@ function renderFilesPortlet ($entity_type = NULL, $entity_id = 0)
 			echo "<td><a href='${root}download.php?file_id=${file_id}'>";
 			printImageHREF ('download', 'Download file');
 			echo '</a></td></tr>';
-			switch ($file['type'])
-			{
-				// "These types will be automatically detected if your build of PHP supports them: JPEG, PNG, GIF, WBMP, and GD2."
-				case 'image/jpeg':
-				case 'image/png':
-				case 'image/gif':
-				case 'image/vnd.wap.wbmp':
-					$file = getFile ($file_id);
-					$image = imagecreatefromstring ($file['contents']);
-					$width = imagesx ($image);
-					$height = imagesy ($image);
-					if ($width < getConfigVar ('PREVIEW_IMAGE_MAXPXS') and $height < getConfigVar ('PREVIEW_IMAGE_MAXPXS'))
-						$resampled = FALSE;
-					else
-					{
-						$ratio = getConfigVar ('PREVIEW_IMAGE_MAXPXS') / max ($width, $height);
-						$width = $width * $ratio;
-						$height = $height * $ratio;
-						$resampled = TRUE;
-					}
-					echo '<tr><td colspan=4>' . ($resampled ? "<a href='${root}render_image.php?img=view&file_id=${file_id}'>" : '');
-					echo "<img width=${width} height=${height} src='${root}render_image.php?img=preview&file_id=${file_id}'>";
-					echo ($resampled ? '</a>' : '') . '</td></tr>';
-					break;
-				case 'text/plain':
-					if ($file['size'] < getConfigVar ('PREVIEW_TEXT_MAXCHARS'))
-					{
-						$file = getFile($file_id);
-						echo '<tr><td colspan=4><textarea readonly rows=' . getConfigVar ('PREVIEW_TEXT_ROWS');
-						echo ' cols=' . getConfigVar ('PREVIEW_TEXT_COLS') . '>';
-						echo $file['contents'];
-						echo '</textarea></td></tr>';
-					}
-					break;
-				default:
-					break;
-			}
+			if ('' != ($pcode = getFilePreviewCode ($file)))
+				echo "<tr><td colspan=4>${pcode}</td></tr>\n";
 		}
 		echo "</table><br>\n";
 		finishPortlet();
@@ -5942,4 +5914,49 @@ function renderFileCell ($fileinfo)
 	echo "</small>";
 }
 
+// Return HTML code necessary to show a preview of the file give. Return an empty string,
+// if a preview cannot be shown
+function getFilePreviewCode ($file)
+{
+	$ret = '';
+	switch ($file['type'])
+	{
+		// "These types will be automatically detected if your build of PHP supports them: JPEG, PNG, GIF, WBMP, and GD2."
+		case 'image/jpeg':
+		case 'image/png':
+		case 'image/gif':
+			$file = getFile ($file['id']);
+			$image = imagecreatefromstring ($file['contents']);
+			$width = imagesx ($image);
+			$height = imagesy ($image);
+			if ($width < getConfigVar ('PREVIEW_IMAGE_MAXPXS') and $height < getConfigVar ('PREVIEW_IMAGE_MAXPXS'))
+				$resampled = FALSE;
+			else
+			{
+				$ratio = getConfigVar ('PREVIEW_IMAGE_MAXPXS') / max ($width, $height);
+				$width = $width * $ratio;
+				$height = $height * $ratio;
+				$resampled = TRUE;
+			}
+			if ($resampled)
+				$ret .= "<a href='${root}render_image.php?img=view&file_id=${file['id']}'>";
+			$ret .= "<img width=${width} height=${height} src='${root}render_image.php?img=preview&file_id=${file['id']}'>";
+			if ($resampled)
+				$ret .= '</a>';
+			break;
+		case 'text/plain':
+			if ($file['size'] < getConfigVar ('PREVIEW_TEXT_MAXCHARS'))
+			{
+				$file = getFile ($file['id']);
+				$ret .= '<textarea readonly rows=' . getConfigVar ('PREVIEW_TEXT_ROWS');
+				$ret .= ' cols=' . getConfigVar ('PREVIEW_TEXT_COLS') . '>';
+				$ret .= $file['contents'];
+				$ret .= '</textarea>';
+			}
+			break;
+		default:
+			break;
+	}
+	return $ret;
+}
 ?>
