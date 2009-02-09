@@ -5567,7 +5567,7 @@ function renderFileUploadForm ()
 	printOpFormIntro ('addFile', array ('MAX_FILE_SIZE' => convertToBytes(get_cfg_var('upload_max_filesize'))), TRUE);
 	echo "<tr>";
 	echo "<td class=tdleft><input type='file' size='10' name='file' tabindex=100></td>\n";
-	echo "<td class=tdleft><input type='text' size='15' name='comment' tabindex=101></td>\n";
+	echo "<td class=tdleft><textarea tabindex=101 name=comment rows=10 cols=80></textarea></td>\n";
 	echo '<td>';
 	printImageHREF ('CREATE', 'Upload file', TRUE, 102);
 	echo '</td></tr></form>';
@@ -5710,7 +5710,7 @@ function renderFilesForEntity ($entity_id = 0)
 	printOpFormIntro ('addFile', array ('entity_type' => $entity_type, 'entity_id' => $entity_id, 'MAX_FILE_SIZE' => convertToBytes(get_cfg_var('upload_max_filesize'))), TRUE);
 	echo "<tr>";
 	echo "<td class=tdleft><input type='file' size='10' name='file' tabindex=100></td>\n";
-	echo "<td class=tdleft><input type='text' size='15' name='comment' tabindex=101></td><td>\n";
+	echo "<td class=tdleft><textarea tabindex=101 name=comment rows=10 cols=80></textarea></td><td>\n";
 	printImageHREF ('CREATE', 'Upload file', TRUE, 102);
 	echo "</td></tr></form>";
 	echo "</table><br>\n";
