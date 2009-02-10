@@ -228,7 +228,7 @@ function authenticated_via_ldap ($username, $password)
 							foreach (explode (',', $info[0]['memberof'][$i]) as $pair)
 							{
 								list ($attr_name, $attr_value) = explode ('=', $pair);
-								if ($attr_name == 'CN')
+								if ($attr_name == 'CN' and validTagName ("\$lgcn_${attr_value}", TRUE))
 								{
 									$auto_tags[] = array ('tag' => "\$lgcn_${attr_value}");
 									break;
