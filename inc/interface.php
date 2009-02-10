@@ -1164,7 +1164,7 @@ function renderPortsForObject ($object_id = 0)
 		{
 			echo "<td>&nbsp;</td><td>&nbsp;</td>";
 			echo "<td>";
-			echo "<a href='javascript:;' onclick='window.open(\"".makeHrefPortLinkHelper(array('port'=>$port['id'], 'type'=>$port['type_id'], 'object_id'=>$object_id, 'port_name'=>$port['name']))."\",\"findlink\",\"height=700, width=400, location=no, menubar=no, resizable=yes, scrollbars=no, status=no, titlebar=no, toolbar=no\");'>";
+			echo "<a href='javascript:;' onclick='window.open(\"".makeHrefForHelper('portlist', array('port'=>$port['id'], 'type'=>$port['type_id'], 'object_id'=>$object_id, 'port_name'=>$port['name']))."\",\"findlink\",\"height=700, width=400, location=no, menubar=no, resizable=yes, scrollbars=no, status=no, titlebar=no, toolbar=no\");'>";
 			printImageHREF ('link', 'Link this port');
 			echo "</a> <input type=text name=reservation_comment>";
 			echo "</td>\n";
@@ -2734,7 +2734,8 @@ function renderNATv4ForObject ($object_id = 0)
 
 		echo "</select>:<input type='text' name='localport' size='4' tabindex=2></td>";
 		echo "<td><input type='text' name='remoteip' id='remoteip' size='10' tabindex=3>";
-		echo "<a href='javascript:;' onclick='window.open(\"${root}/find_object_ip_helper.php\", \"findobjectip\", \"height=700, width=400, location=no, menubar=no, resizable=yes, scrollbars=no, status=no, titlebar=no, toolbar=no\");'>";
+		echo "<a href='javascript:;' onclick='window.open(\"" . makeHrefForHelper ('inet4list');
+		echo "\", \"findobjectip\", \"height=700, width=400, location=no, menubar=no, resizable=yes, scrollbars=no, status=no, titlebar=no, toolbar=no\");'>";
 		printImageHREF ('find', 'Find object');
 		echo "</a>";
 		echo ":<input type='text' name='remoteport' size='4' tabindex=4></td><td></td>";
@@ -4290,7 +4291,8 @@ function renderRSPoolServerForm ($pool_id = 0)
 	else
 		printImageHREF ('notinservice', 'NOT in service');
 	echo "</td><td><input type=text name=remoteip id=remoteip tabindex=1> ";
-	echo "<a href='javascript:;' onclick='window.open(\"${root}find_object_ip_helper.php\", \"findobjectip\", \"height=700, width=400, location=no, menubar=no, resizable=yes, scrollbars=no, status=no, titlebar=no, toolbar=no\");'>";
+	echo "<a href='javascript:;' onclick='window.open(\"" . makeHrefForHelper ('inet4list');
+	echo "\", \"findobjectip\", \"height=700, width=400, location=no, menubar=no, resizable=yes, scrollbars=no, status=no, titlebar=no, toolbar=no\");'>";
 	printImageHREF ('find', 'pick address');
 	echo "</a></td>";
 	$default_port = getConfigVar ('DEFAULT_SLB_RS_PORT');

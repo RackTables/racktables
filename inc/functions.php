@@ -1859,25 +1859,18 @@ function makeHrefProcess($params = array())
 	return $ret;
 }
 
-function makeHrefPortLinkHelper($params = array())
+function makeHrefForHelper ($helper_name, $params = array())
 {
 	global $head_revision, $numeric_revision, $root;
-	$ret = $root.'port_link_helper.php'.'?';
-	$first = true;
+	$ret = $root.'port_link_helper.php'.'?helper='.$helper_name;
 	if ($numeric_revision != $head_revision)
 	{
 		error_log("Can't make a process link when not in head revision");
 		die();
 	}
 	foreach($params as $key=>$value)
-	{
-		if (!$first)
-			$ret.='&';
-		$ret .= urlencode($key).'='.urlencode($value);
-		$first = false;
-	}
+		$ret .= '&'.urlencode($key).'='.urlencode($value);
 	return $ret;
 }
-
 
 ?>
