@@ -1089,7 +1089,6 @@ function showMessageOrError ()
 {
 	if (isset ($_SESSION['log']))
 	{
-		error_log(print_r($_SESSION['log'],1));
 		printLog ($_SESSION['log']);
 		unset($_SESSION['log']);
 	}
