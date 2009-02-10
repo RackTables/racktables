@@ -1072,11 +1072,7 @@ function renderRackMultiSelect ($sname, $racks, $selected)
 
 function showMessageOrError ()
 {
-	if (isset ($_REQUEST['message']))
-		echo "<div class=msg_success>${_REQUEST['message']}</div>";
-	elseif (isset ($_REQUEST['error']))
-		echo "<div class=msg_error>${_REQUEST['error']}</div>";
-	elseif (isset ($_SESSION['log']))
+	if (isset ($_SESSION['log']))
 	{
 		error_log(print_r($_SESSION['log'],1));
 		printLog ($_SESSION['log']);
