@@ -1975,7 +1975,7 @@ function getAttrMap ()
 		"Attribute as a left join AttributeMap as am on a.id = am.attr_id " .
 		"left join Dictionary as d on am.objtype_id = d.dict_key " .
 		"left join Chapter as c1 on d.chapter_id = c1.id " .
-		"left join Chapter as c2 on am.chapter_id = c2.chapter_id " .
+		"left join Chapter as c2 on am.chapter_id = c2.id " .
 		"where c1.name = 'RackObjectType' or c1.name is null " .
 		"order by a.name";
 	$result = useSelectBlade ($query, __FUNCTION__);
