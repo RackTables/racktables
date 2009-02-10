@@ -129,6 +129,10 @@ authenticate(); // sometimes this generates autotags
 // Note that we don't perform autorization here, so each 1st level page
 // has to do it in its way, e.g. to call authorize().
 
+
+session_start();
+
+
 $pageno = (isset ($_REQUEST['page'])) ? $_REQUEST['page'] : 'index';
 // Special handling of tab number to substitute the "last" index where applicable.
 // Always show explicitly requested tab, substitute the last used name in case

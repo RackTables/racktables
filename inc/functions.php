@@ -1248,7 +1248,7 @@ function buildWideRedirectURL ($log, $nextpage = NULL, $nexttab = NULL, $moreArg
 	$url = "${root}?page=${nextpage}&tab=${nexttab}";
 	if (isset ($page[$nextpage]['bypass']))
 		$url .= '&' . $page[$nextpage]['bypass'] . '=' . $_REQUEST[$page[$nextpage]['bypass']];
-	$url .= "&log=" . urlencode (base64_encode (serialize ($log)));
+
 	if (count($moreArgs)>0)
 	{
 		foreach($moreArgs as $arg=>$value)
@@ -1264,6 +1264,8 @@ function buildWideRedirectURL ($log, $nextpage = NULL, $nexttab = NULL, $moreArg
 				$url .= '&'.urlencode($arg).'='.urlencode($value);
 		}
 	}
+
+	$_SESSION['log'] = $log;
 	return $url;
 }
 
