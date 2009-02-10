@@ -87,6 +87,7 @@ $trigger['rack']['tags'] = 'trigger_tags';
 $ophandler['rack']['design']['updateRack'] = 'updateRackDesign';
 $ophandler['rack']['problems']['updateRack'] = 'updateRackProblems';
 $ophandler['rack']['edit']['updateRack'] = 'updateRack';
+$ophandler['rack']['edit']['deleteRack'] = 'deleteRack';
 $ophandler['rack']['tags']['saveTags'] = 'saveEntityTags';
 $ophandler['rack']['files']['addFile'] = 'addFileToEntity';
 $ophandler['rack']['files']['linkFile'] = 'linkFileToEntity';
@@ -228,6 +229,9 @@ $msgcode['generateAutoPorts']['ERR'] = 142;
 $msgcode['setPortVLAN']['ERR1'] = 156;
 $msgcode['saveEntityTags']['OK'] = 22;
 $msgcode['saveEntityTags']['ERR'] = 143;
+$msgcode['deleteRack']['OK'] = 79;
+$msgcode['deleteRack']['ERR'] = 100;
+$msgcode['deleteRack']['ERR1'] = 206;
 
 $page['ipv4space']['title'] = 'IPv4 space';
 $page['ipv4space']['parent'] = 'index';

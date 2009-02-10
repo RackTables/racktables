@@ -233,6 +233,7 @@ function renderRackspace ()
 {
 	$tagfilter = getTagFilter();
 	$tagfilter_str = getTagFilterStr ($tagfilter);
+	showMessageOrError();
 	echo "<table class=objview border=0 width='100%'><tr><td class=pcleft>";
 	renderTagFilterPortlet ($tagfilter, 'rack');
 	echo '</td><td class=pcright>';
@@ -614,6 +615,12 @@ function renderEditRackForm ($rack_id)
 	echo "<tr><th class=tdright>Name (required):</th><td class=tdleft><input type=text name=rack_name value='${rack['name']}'></td></tr>\n";
 	echo "<tr><th class=tdright>Height (required):</th><td class=tdleft><input type=text name=rack_height value='${rack['height']}'></td></tr>\n";
 	echo "<tr><th class=tdright>Comment:</th><td class=tdleft><input type=text name=rack_comment value='${rack['comment']}'></td></tr>\n";
+	if (count ($rack['mountedObjects']) == 0)
+	{
+		echo "<tr><th class=tdright>Actions:</th><td class=tdleft><a href='".
+        	        makeHrefProcess(array('op'=>'deleteRack', 'rack_id'=>$rack_id)).
+                	"' onclick=\"javascript:return confirm('Are you sure you want to delete the rack?')\">Delete rack</a></td></tr>\n";
+	}
 	echo "<tr><td class=submit colspan=2>";
 	printImageHREF ('SAVE', 'Save changes', TRUE);
 	echo "</td></tr>\n";
@@ -1412,6 +1419,7 @@ function printLog ($log)
 				76 => array ('code' => 'success', 'format' => 'Object %s was deleted successfully'),
 				77 => array ('code' => 'success', 'format' => 'Row %s was deleted successfully'),
 				78 => array ('code' => 'success', 'format' => 'File %s saved Ok'),
+				79 => array ('code' => 'success', 'format' => 'Rack %s was deleted successfully'),
 
 // records 100~199 with fatal error messages
 				100 => array ('code' => 'error', 'format' => 'Generic error: %s'),
@@ -1502,6 +1510,7 @@ function printLog ($log)
 				203 => array ('code' => 'warning', 'format' => 'Port %s seems to be the first in VLAN %u at this switch.'),
 				204 => array ('code' => 'warning', 'format' => 'Check uplink/downlink configuration for proper operation.'),
 				205 => array ('code' => 'warning', 'format' => '%u change request(s) have been ignored'),
+				206 => array ('code' => 'warning', 'format' => 'Rack is not empty'),
 			);
 			// Handle the arguments. Is there any better way to do it?
 			foreach ($log['m'] as $record)

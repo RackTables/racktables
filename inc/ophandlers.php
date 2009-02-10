@@ -1539,6 +1539,30 @@ function addRack ()
 		return buildRedirectURL (__FUNCTION__, 'ERR2');
 }
 
+function deleteRack ()
+{
+	assertUIntArg ('rack_id', __FUNCTION__);
+	$rack_id = $_REQUEST['rack_id'];
+	$rackData = getRackData ($rack_id);
+	if ($rackData == NULL)
+	{
+		showError ('getRackData() failed', __FUNCTION__);
+		return;
+	}
+	if (count ($rackData['mountedObjects']) == 0)
+	{
+		resetThumbCache ($rack_id);
+		if (TRUE === commitDeleteRack ($rack_id))
+			return buildRedirectURL (__FUNCTION__, 'OK', array ($rackData['name']), 'rackspace', 'default');
+		else
+			return buildRedirectURL (__FUNCTION__, 'ERR', array(), 'rackspace', 'default');
+	}
+	else
+	{
+		return buildRedirectURL (__FUNCTION__, 'ERR1');
+	}
+}
+
 function updateRack ()
 {
 	assertUIntArg ('rack_id', __FUNCTION__);

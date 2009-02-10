@@ -275,7 +275,7 @@ function getRackData ($rack_id = 0, $silent = FALSE)
 	$query =
 		"select Rack.id, Rack.name, row_id, height, Rack.comment, RackRow.name as row_name from " .
 		"Rack left join RackRow on Rack.row_id = RackRow.id  " .
-		"where  Rack.id='${rack_id}' and Rack.deleted = 'no' limit 1";
+		"where  Rack.id='${rack_id}' and Rack.deleted = 'no'";
 	$result = useSelectBlade ($query, __FUNCTION__);
 	if (($row = $result->fetch (PDO::FETCH_ASSOC)) == NULL)
 	{
@@ -311,11 +311,15 @@ function getRackData ($rack_id = 0, $silent = FALSE)
 		"unit_no between 1 and " . $rack['height'] . " order by unit_no";
 	$result = useSelectBlade ($query, __FUNCTION__);
 	global $loclist;
+	$mounted_objects = array();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
 		$rack[$row['unit_no']][$loclist[$row['atom']]]['state'] = $row['state'];
 		$rack[$row['unit_no']][$loclist[$row['atom']]]['object_id'] = $row['object_id'];
+		if ($row['state'] == 'T' and $row['object_id']!=NULL)
+			$mounted_objects[$row['object_id']] = TRUE;
 	}
+	$rack['mountedObjects'] = array_keys($mounted_objects);
 	$result->closeCursor();
 	return $rack;
 }
@@ -532,6 +536,20 @@ function commitDeleteObject ($object_id = 0)
 	$dbxlink->query("DELETE FROM RackObject WHERE id = ${object_id}");
 
 	return '';
+}
+
+function commitDeleteRack($rack_id)
+{
+	global $dbxlink;
+	$query = "delete from RackSpace where rack_id = '${rack_id}'";
+	$dbxlink->query ($query);
+	$query = "delete from TagStorage where entity_realm='rack' and entity_id='${rack_id}'";
+	$dbxlink->query ($query);
+	$query = "delete from RackHistory where id = '${rack_id}'";
+	$dbxlink->query ($query);
+	$query = "delete from Rack where id = '${rack_id}'";
+	$dbxlink->query ($query);
+	return TRUE;
 }
 
 function commitUpdateRack ($rack_id, $new_name, $new_height, $new_row_id, $new_comment)
