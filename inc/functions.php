@@ -1862,7 +1862,7 @@ function makeHrefProcess($params = array())
 function makeHrefForHelper ($helper_name, $params = array())
 {
 	global $head_revision, $numeric_revision, $root;
-	$ret = $root.'port_link_helper.php'.'?helper='.$helper_name;
+	$ret = $root.'popup.php'.'?helper='.$helper_name;
 	if ($numeric_revision != $head_revision)
 	{
 		error_log("Can't make a process link when not in head revision");
