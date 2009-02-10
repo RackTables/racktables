@@ -1,5 +1,5 @@
 b {color:#7F0055;font-weight:bold;font-style:normal;} /* keywords */
-i {color:gray;font-weight:normal;} /* comments */
+i, i b, i u, i s, i em {color:gray;font-weight:normal;} /* comments */
 u {color:green;font-weight:bold;}
 s {color:red;font-weight:bold;}
 em {color:green;font-weight:normal;}
