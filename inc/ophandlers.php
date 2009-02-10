@@ -657,9 +657,6 @@ function updateObjectAllocation ()
 	$is_submit = isset ($_REQUEST['got_atoms']);
 	$is_update = isset ($_REQUEST['rackmulti'][0]);
 
-	error_log(print_r($_REQUEST,1));
-	error_log(print_r($_REQUEST,1));
-
 	if ($is_submit)
 	{
 		$object_id = $_REQUEST['object_id'];
@@ -702,7 +699,7 @@ function updateObjectAllocation ()
 		unset($_REQUEST['page']);
 		unset($_REQUEST['tab']);
 		unset($_REQUEST['op']);
-		return buildWideRedirectURL('', NULL, NULL, $_REQUEST);
+		return buildWideRedirectURL(array(), NULL, NULL, $_REQUEST);
 	}
 
 }
@@ -1490,7 +1487,7 @@ function updateRackDesign ()
 	applyRackDesignMask($rackData);
 	markupObjectProblems ($rackData);
 	$response = processGridForm ($rackData, 'A', 'F');
-	return buildWideRedirectURL ($response);
+	return buildWideRedirectURL (array($response));
 }
 
 function updateRackProblems ()
@@ -1504,7 +1501,7 @@ function updateRackProblems ()
 	applyRackProblemMask($rackData);
 	markupObjectProblems ($rackData);
 	$response = processGridForm ($rackData, 'F', 'U');
-	return buildWideRedirectURL ($response);
+	return buildWideRedirectURL (array($response));
 }
 
 

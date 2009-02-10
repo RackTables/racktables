@@ -715,7 +715,7 @@ function renderGridForm ($rack_id = 0, $filter, $header, $submit, $state1, $stat
 		showError ('getRackData() failed', __FUNCTION__);
 		return;
 	}
-
+	showMessageOrError();
 	global $pageno, $tabno;
 	$filter ($rackData);
 	markupObjectProblems ($rackData);
@@ -1613,6 +1613,8 @@ function renderRackSpaceForObject ($object_id = 0)
 	// This is the time for rendering.
 	global $pageno, $tabno;
 
+	showMessageOrError();
+
 	printOpFormIntro ('updateObjectAllocation');
 
 	// Main layout starts.
@@ -1927,10 +1929,9 @@ function renderHistory ($object_type, $object_id)
 			break;
 		case 'rack':
 			$query =
-				"select ctime, user_name, rh.name, rh.deleted, d.dict_value as name, rh.height, rh.comment " .
-				"from RackHistory as rh left join Dictionary as d on rh.row_id = d.dict_key " .
-				"join Chapter on Dictionary.chapter_id = Chapter.id " .
-				"where Chapter.name = 'RackRow' and rh.id = ${object_id} order by ctime";
+				"select ctime, user_name, rh.name, rh.deleted, rr.name as name, rh.height, rh.comment " .
+				"from RackHistory as rh left join RackRow as rr on rh.row_id = rr.id " .
+				"where rh.id = ${object_id} order by ctime";
 			$header = '<tr><th>change time</th><th>author</th><th>rack name</th><th>is deleted?</th><th>rack row name</th><th>rack height</th><th>rack comment</th></tr>';
 			$extra = 6;
 			break;

@@ -69,6 +69,21 @@ function getRackRowInfo ($rackrow_id)
 		return NULL;
 }
 
+
+function getRackRows ()
+{
+	$query = "select id, name from RackRow ";
+	$result = useSelectBlade ($query, __FUNCTION__);
+	$rows = array();
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
+		$rows[$row['id']] = parseWikiLink ($row['name'], 'o');
+	$result->closeCursor();
+	asort ($rows);
+	return $rows;
+}
+
+
+
 function commitAddRow($rackrow_name)
 {
 	useInsertBlade('RackRow', array('name'=>"'$rackrow_name'"));
