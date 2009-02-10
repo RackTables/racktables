@@ -2862,77 +2862,7 @@ function renderAddMultipleObjectsForm ()
 	$name = array();
 	$asset_no = array();
 	$keepvalues1 = $keepvalues2 = FALSE;
-	$log = array();
-	// Look for current submit.
-	if (isset ($_REQUEST['got_fast_data']))
-	{
-		$taglist = isset ($_REQUEST['taglist']) ? $_REQUEST['taglist'] : array();
-		$keepvalues1 = TRUE;
-		$max = getConfigVar ('MASSCOUNT');
-		for ($i = 0; $i < $max; $i++)
-		{
-			if (!isset ($_REQUEST["${i}_object_type_id"]))
-			{
-				$log[] = array ('code' => 'error', 'message' => "Submitted form is invalid at line " . $i + 1);
-				break;
-			}
-			assertUIntArg ("${i}_object_type_id", __FUNCTION__, TRUE);
-			assertStringArg ("${i}_object_name", __FUNCTION__, TRUE);
-			assertStringArg ("${i}_object_label", __FUNCTION__, TRUE);
-			assertStringArg ("${i}_object_asset_no", __FUNCTION__, TRUE);
-			assertStringArg ("${i}_object_barcode", __FUNCTION__, TRUE);
-			$type_id[$i] = $_REQUEST["${i}_object_type_id"];
-			// Save user input for possible rendering.
-			$name[$i] = $_REQUEST["${i}_object_name"];
-			$label[$i] = $_REQUEST["${i}_object_label"];
-			$asset_no[$i] = $_REQUEST["${i}_object_asset_no"];
-			$barcode[$i] = $_REQUEST["${i}_object_barcode"];
-
-			// It's better to skip silently, than to print a notice.
-			if ($type_id[$i] == 0)
-				continue;
-			if (commitAddObject ($name[$i], $label[$i], $barcode[$i], $type_id[$i], $asset_no[$i], $taglist) === TRUE)
-				$log[] = array ('code' => 'success', 'message' => "Added new object '${name[$i]}'");
-			else
-				$log[] = array ('code' => 'error', 'message' => __FUNCTION__ . ': commitAddObject() failed');
-		}
-	}
-	elseif (isset ($_REQUEST['got_very_fast_data']))
-	{
-		$taglist = isset ($_REQUEST['taglist']) ? $_REQUEST['taglist'] : array();
-		$keepvalues2 = TRUE;
-		assertUIntArg ('global_type_id', __FUNCTION__, TRUE);
-		assertStringArg ('namelist', __FUNCTION__, TRUE);
-		$global_type_id = $_REQUEST['global_type_id'];
-		if ($global_type_id == 0)
-		{
-			if (!empty ($_REQUEST['namelist']))
-				$log[] = array ('code' => 'error', 'message' => 'Object type is not selected, check the form below');
-			else
-				$log[] = array ('code' => 'error', 'message' => 'Empty form has been ignored. Cheers.');
-		}
-		else
-		{
-			// The name extractor below was stolen from ophandlers.php:addMultiPorts()
-			$names1 = explode ('\n', $_REQUEST['namelist']);
-			$names2 = array();
-			foreach ($names1 as $line)
-			{
-				$parts = explode ('\r', $line);
-				reset ($parts);
-				if (empty ($parts[0]))
-					continue;
-				else
-					$names2[] = rtrim ($parts[0]);
-			}
-			foreach ($names2 as $cname)
-				if (commitAddObject ($cname, '', '', $global_type_id, '', $taglist) === TRUE)
-					$log[] = array ('code' => 'success', 'message' => "Added new object '${cname}'");
-				else
-					$log[] = array ('code' => 'error', 'message' => "Could not add '${cname}'");
-		}
-	}
-	printLog ($log);
+	showMessageOrError();
 
 	// Render a form for the next.
 	$typelist = getObjectTypeList();
@@ -2940,7 +2870,7 @@ function renderAddMultipleObjectsForm ()
 
 	startPortlet ('Distinct types, same tags');
 	$max = getConfigVar ('MASSCOUNT');
-	echo "<form name=fastform method=post action='${root}?page=${pageno}&tab=${tabno}'>";
+	printOpFormIntro ('addObjects');
 	echo '<table border=0 align=center>';
 	echo "<tr><th>Object type</th><th>Common name</th><th>Visible label</th>";
 	echo "<th>Asset tag</th><th>Barcode</th><th>Tags</th></tr>\n";
@@ -2981,7 +2911,7 @@ function renderAddMultipleObjectsForm ()
 	finishPortlet();
 
 	startPortlet ('Same type, same tags');
-	echo "<form name=veryfastform method=post action='${root}?page=${pageno}&tab=${tabno}'>";
+	printOpFormIntro ('addLotOfObjects');
 	echo "<table border=0 align=center><tr><th>names</th><th>type</th></tr>";
 	echo "<tr><td rowspan=3><textarea name=namelist cols=40 rows=25>\n";
 	if ($keepvalues2 and $global_type_id == 0)
