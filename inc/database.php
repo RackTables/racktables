@@ -3804,18 +3804,19 @@ function commitReplaceFile ($file_id = 0, $size, $contents)
 	return '';
 }
 
-function commitUpdateFile ($file_id = 0, $new_name = '', $new_comment = '')
+function commitUpdateFile ($file_id = 0, $new_name = '', $new_type = '', $new_comment = '')
 {
-	if ($file_id == 0)
+	if ($file_id <= 0 or empty ($new_name) or empty ($new_type))
 	{
 		showError ('Not all required args are present.', __FUNCTION__);
 		return FALSE;
 	}
 	global $dbxlink;
-	$query = $dbxlink->prepare('UPDATE File SET name = ?, comment = ? WHERE id = ?');
+	$query = $dbxlink->prepare('UPDATE File SET name = ?, type = ?, comment = ? WHERE id = ?');
 	$query->bindParam(1, $new_name);
-	$query->bindParam(2, $new_comment);
-	$query->bindParam(3, $file_id);
+	$query->bindParam(2, $new_type);
+	$query->bindParam(3, $new_comment);
+	$query->bindParam(4, $file_id);
 
 	$result = $query->execute();
 	if (!$result)

@@ -113,6 +113,7 @@ CodePress.languages = {
 	text : 'Text', 
 	sql : 'SQL',
 	vbscript : 'VBScript',
+	ipfw : 'ipfw',
 	rackcode : 'RackCode'
 }
 

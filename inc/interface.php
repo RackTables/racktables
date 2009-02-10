@@ -169,6 +169,14 @@ $image['computer']['height'] = 16;
 // This may be populated later onsite, report rendering function will use it.
 // See the $systemreport for structure.
 $localreports = array();
+$CodePressMap = array
+(
+	'sql' => 'sql',
+	'php' => 'php',
+	'html' => 'html',
+	'css' => 'css',
+	'js' => 'javascript',
+);
 
 // Main menu.
 function renderIndex ()
@@ -5554,9 +5562,9 @@ function renderFileProperties ($file_id = 0)
 	showMessageOrError();
 	echo '<table border=0 align=center>';
 	printOpFormIntro ('updateFile');
-	echo "<tr><th class=tdright>MIME-type:</th><td class=tdleft>${file['type']}</td></tr>";
-	echo "<tr><th class=tdright>Filename:</th><td class=tdleft><input tabindex=100 type=text name=name value='${file['name']}'></td></tr>\n";
-	echo "<tr><th class=tdright>Comment:</th><td class=tdleft><textarea tabindex=101 name=comment rows=10 cols=80>${file['comment']}</textarea></td></tr>\n";
+	echo "<tr><th class=tdright>MIME-type:</th><td class=tdleft><input tabindex=101 type=text name=file_type value='${file['type']}'></td></tr>";
+	echo "<tr><th class=tdright>Filename:</th><td class=tdleft><input tabindex=102 type=text name=file_name value='${file['name']}'></td></tr>\n";
+	echo "<tr><th class=tdright>Comment:</th><td class=tdleft><textarea tabindex=103 name=file_comment rows=10 cols=80>${file['comment']}</textarea></td></tr>\n";
 	echo "<tr><th class=submit colspan=2>";
 	printImageHREF ('SAVE', 'Save changes', TRUE, 102);
 	echo '</th></tr></form></table>';
@@ -5970,13 +5978,19 @@ function getFilePreviewCode ($file)
 
 function renderTextEditor ($file_id)
 {
+	global $CodePressMap;
 	showMessageOrError();
 	$fullInfo = getFile ($file_id);
 	printOpFormIntro ('updateFileText');
+	preg_match('/.+\.([^.]*)$/', $fullInfo['name'], $matches); # get file extension
+	if (isset ($matches[1]) && isset ($CodePressMap[$matches[1]]))
+		$syntax = $CodePressMap[$matches[1]];
+	else
+		$syntax = "text";
 	echo '<table border=0 align=center>';
-	echo '<tr><td><textarea rows=25 cols=120 name=file_text tabindex=101>' . $fullInfo['contents'] . '</textarea></td></tr>';
-	echo "<tr><td class=submit>";
-	printImageHREF ('SAVE', 'Save changes', TRUE, 102);
+	echo "<tr><td><textarea rows=45 cols=180 id=file_text name=file_text tabindex=101 class='codepress " . $syntax . "'>";
+	echo $fullInfo['contents'] . '</textarea></td></tr>';
+	echo "<tr><td class=submit><input type=submit value='Save' onclick='file_text.toggleEditor();'>";
 	echo "</td></tr>\n</table></form>\n";
 }
 

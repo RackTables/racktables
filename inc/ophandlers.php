@@ -1593,9 +1593,10 @@ function replaceFile ()
 function updateFile ()
 {
 	assertUIntArg ('file_id', __FUNCTION__);
-	assertStringArg ('name', __FUNCTION__);
-	assertStringArg ('comment', __FUNCTION__, TRUE);
-	$error = commitUpdateFile ($_REQUEST['file_id'], $_REQUEST['name'], $_REQUEST['comment']);
+	assertStringArg ('file_name', __FUNCTION__);
+	assertStringArg ('file_type', __FUNCTION__);
+	assertStringArg ('file_comment', __FUNCTION__, TRUE);
+	$error = commitUpdateFile ($_REQUEST['file_id'], $_REQUEST['file_name'], $_REQUEST['file_type'], $_REQUEST['file_comment']);
 	if ($error != '')
 		return buildRedirectURL (__FUNCTION__, 'ERR', array ($error));
 
