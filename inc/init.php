@@ -139,8 +139,8 @@ $pageno = (isset ($_REQUEST['page'])) ? $_REQUEST['page'] : 'index';
 // it is awailable, fall back to the default one.
 if (isset ($_REQUEST['tab']))
 	$tabno = $_REQUEST['tab'];
-elseif (getConfigVar ('SHOW_LAST_TAB') == 'yes' and isset ($_COOKIE['RTLT-' . $pageno]))
-	$tabno = $_COOKIE['RTLT-' . $pageno];
+elseif (getConfigVar ('SHOW_LAST_TAB') == 'yes' and isset ($_SESSION['RTLT'][$pageno]))
+	$tabno = $_SESSION['RTLT'][$pageno];
 else
 	$tabno = 'default';
 $op = (isset ($_REQUEST['op'])) ? $_REQUEST['op'] : '';

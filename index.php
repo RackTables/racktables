@@ -9,7 +9,7 @@ if (!permitted())
 	die;
 }
 // Only store the tab name after clearance is got. Any failure is unhandleable.
-setcookie ('RTLT-' . $pageno, $tabno, time() + getConfigVar ('COOKIE_TTL'));
+$_SESSION['RTLT'][$pageno] = $tabno;
 
 echo '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">'."\n";
 echo '<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">'."\n";
