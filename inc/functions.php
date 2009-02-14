@@ -1122,7 +1122,15 @@ function tagChainCmp ($chain1, $chain2)
 // names are preserved, ophandler name change isn't handled).
 function fixContext ()
 {
-	global $pageno, $tabno, $auto_tags, $expl_tags, $impl_tags, $page;
+	global
+		$pageno,
+		$tabno,
+		$auto_tags,
+		$expl_tags,
+		$impl_tags,
+		$target_given_tags,
+		$user_given_tags,
+		$page;
 
 	$pmap = array
 	(
@@ -1152,10 +1160,11 @@ function fixContext ()
 		isset ($page[$pageno]['bypass']) and
 		isset ($_REQUEST[$page[$pageno]['bypass']])
 	)
-	{
-		$expl_tags = mergeTagChains ($expl_tags, $page[$pageno]['tagloader'] ($_REQUEST[$page[$pageno]['bypass']]));
-		$impl_tags = mergeTagChains ($impl_tags, getImplicitTags ($expl_tags));
-	}
+		$target_given_tags = $page[$pageno]['tagloader'] ($_REQUEST[$page[$pageno]['bypass']]);
+	// Explicit and implicit chains should be normally empty at this point, so
+	// overwrite the contents anyway.
+	$expl_tags = mergeTagChains ($user_given_tags, $target_given_tags);
+	$impl_tags = getImplicitTags ($expl_tags);
 }
 
 // Take a list of user-supplied tag IDs to build a list of valid taginfo

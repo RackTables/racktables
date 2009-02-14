@@ -124,10 +124,10 @@ $rackCode = $rackCode['load'];
 
 require_once 'inc/auth.php';
 $auto_tags = array();
-authenticate(); // sometimes this generates autotags
+authenticate(); // sometimes this generates autotags, but never --- given tags
 // Authentication passed.
 // Note that we don't perform autorization here, so each 1st level page
-// has to do it in its way, e.g. to call authorize().
+// has to do it in its way, e.g. by calling authorize() after fixContext().
 
 if (!isset ($script_mode) or $script_mode !== TRUE)
 	session_start();
@@ -158,18 +158,18 @@ require_once 'inc/snmp.php';
 if (file_exists ('inc/local.php'))
 	require_once 'inc/local.php';
 
-// These will be extended later by fixContext()
+// These will be filled in by fixContext()
 $expl_tags = array();
 $impl_tags = array();
+// Initial chain for the current target.
+$target_given_tags = array();
+// Initial chain for the current user.
+$user_given_tags = array();
 if (!isset ($script_mode) or $script_mode !== TRUE)
 {
 	$auto_tags = array_merge ($auto_tags, getUserAutoTags());
 	if (isset ($accounts[$remote_username]))
-	{
-		$tbase = loadUserTags ($accounts[$remote_username]['user_id']);
-		$expl_tags = array_merge ($expl_tags, $tbase);
-		$impl_tags = getImplicitTags ($tbase); 
-	}
+		$user_given_tags = loadUserTags ($accounts[$remote_username]['user_id']);
 }
 
 ?>

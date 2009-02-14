@@ -5003,12 +5003,12 @@ function renderTagTreeEditor ()
 }
 
 // Output a sequence of OPTION elements, selecting those, which are present on the
-// explicit tags list.
+// given (not effective) explicit tags list.
 function renderTagOption ($taginfo, $level = 0)
 {
-	global $expl_tags;
+	global $target_given_tags;
 	$self = __FUNCTION__;
-	$selected = tagOnChain ($taginfo, $expl_tags) ? ' selected' : '';
+	$selected = tagOnChain ($taginfo, $target_given_tags) ? ' selected' : '';
 	echo '<option value=' . $taginfo['id'] . "${selected}>";
 	for ($i = 0; $i < $level; $i++)
 		echo '-- ';
@@ -5019,9 +5019,9 @@ function renderTagOption ($taginfo, $level = 0)
 
 function renderTagCheckbox ($taginfo, $level = 0)
 {
-	global $expl_tags;
+	global $target_given_tags;
 	$self = __FUNCTION__;
-	$selected = tagOnChain ($taginfo, $expl_tags) ? ' checked' : '';
+	$selected = tagOnChain ($taginfo, $target_given_tags) ? ' checked' : '';
 	echo "<tr><td colspan=2 align=left style='padding-left: " . ($level * 16) . "px;'>";
 	echo '<input type=checkbox name=taglist[] value=' . $taginfo['id'] . "${selected}> ";
 	echo $taginfo['tag'] . "</td></tr>\n";
@@ -5044,7 +5044,7 @@ function renderTagOptionForFilter ($taginfo, $tagfilter, $realm, $level = 0)
 
 function renderEntityTags ($entity_id = 0)
 {
-	global $tagtree, $expl_tags, $pageno, $page, $etype_by_pageno;
+	global $tagtree, $target_given_tags, $pageno, $page, $etype_by_pageno;
 	if ($entity_id <= 0)
 	{
 		showError ('Invalid or missing arguments', __FUNCTION__);
@@ -5054,8 +5054,8 @@ function renderEntityTags ($entity_id = 0)
 	$entity_realm = $etype_by_pageno[$pageno];
 	$bypass_name = $page[$pageno]['bypass'];
 	startPortlet ('Tag list');
-	if (count ($expl_tags))
-		echo '<h3>(' . serializeTags ($expl_tags) . ')</h3>';
+	if (count ($target_given_tags))
+		echo '<h3>(' . serializeTags ($target_given_tags) . ')</h3>';
 	echo '<table border=0 align=center>';
 	printOpFormIntro ('saveTags', array ($bypass_name => $entity_id));
 	foreach ($tagtree as $taginfo)
@@ -5071,15 +5071,20 @@ function renderEntityTags ($entity_id = 0)
 
 function printTagTRs ($baseurl = '')
 {
-	global $expl_tags, $impl_tags, $auto_tags;
+	global $expl_tags, $impl_tags, $auto_tags, $target_given_tags;
+	if (getConfigVar ('SHOW_EXPLICIT_TAGS') == 'yes' and count ($target_given_tags))
+	{
+		echo "<tr><th width='50%' class=tdright><span class=tagheader>Given explicit tags</span>:</th><td class=tdleft>";
+		echo serializeTags ($target_given_tags, $baseurl) . "</td></tr>\n";
+	}
 	if (getConfigVar ('SHOW_EXPLICIT_TAGS') == 'yes' and count ($expl_tags))
 	{
-		echo "<tr><th width='50%' class=tdright><span class=tagheader>Explicit tags</span>:</th><td class=tdleft>";
+		echo "<tr><th width='50%' class=tdright><span class=tagheader>Effective explicit tags</span>:</th><td class=tdleft>";
 		echo serializeTags ($expl_tags, $baseurl) . "</td></tr>\n";
 	}
 	if (getConfigVar ('SHOW_IMPLICIT_TAGS') == 'yes' and count ($impl_tags))
 	{
-		echo "<tr><th width='50%' class=tdright>Implicit tags:</th><td class=tdleft>";
+		echo "<tr><th width='50%' class=tdright>Effective implicit tags:</th><td class=tdleft>";
 		echo serializeTags ($impl_tags, $baseurl) . "</td></tr>\n";
 	}
 	if (getConfigVar ('SHOW_AUTOMATIC_TAGS') == 'yes' and count ($auto_tags))
@@ -5298,7 +5303,7 @@ function renderRackCodeEditor ()
 
 function renderUser ($user_id)
 {
-	global $accounts, $expl_tags, $impl_tags;
+	global $accounts, $target_given_tags;
 	$username = getUsernameByID ($user_id);
 
 	startPortlet ('summary');
@@ -5306,17 +5311,19 @@ function renderUser ($user_id)
 	echo "<tr><th class=tdright>Account name:</th><td class=tdleft>${username}</td></tr>";
 	echo '<tr><th class=tdright>Real name:</th><td class=tdleft>' . $accounts[$username]['user_realname'] . '</td></tr>';
 	// Using printTagTRs() is inappropriate here, because autotags will be filled with current user's
-	// data, not the viewed one.
+	// data, not the viewed one. Another special reason is that the displayed user's given tags are in
+	// the "target" chain.
 	$baseurl = makeHref(array('page'=>'userlist', 'tab'=>'default'))."&";
-	if (getConfigVar ('SHOW_EXPLICIT_TAGS') == 'yes' and count ($expl_tags))
+	if (getConfigVar ('SHOW_EXPLICIT_TAGS') == 'yes' and count ($target_given_tags))
 	{
-		echo "<tr><th width='50%' class=tdright><span class=tagheader>Explicit tags</span>:</th><td class=tdleft>";
-		echo serializeTags ($expl_tags, $baseurl) . "</td></tr>\n";
+		echo "<tr><th width='50%' class=tdright><span class=tagheader>Given explicit tags</span>:</th><td class=tdleft>";
+		echo serializeTags ($target_given_tags, $baseurl) . "</td></tr>\n";
 	}
-	if (getConfigVar ('SHOW_IMPLICIT_TAGS') == 'yes' and count ($impl_tags))
+	$target_shadow = getImplicitTags ($target_given_tags);
+	if (getConfigVar ('SHOW_IMPLICIT_TAGS') == 'yes' and count ($target_shadow))
 	{
-		echo "<tr><th width='50%' class=tdright><span class=tagheader>Implicit tags</span>:</th><td class=tdleft>";
-		echo serializeTags ($impl_tags, $baseurl) . "</td></tr>\n";
+		echo "<tr><th width='50%' class=tdright><span class=tagheader>Given implicit tags</span>:</th><td class=tdleft>";
+		echo serializeTags ($target_shadow, $baseurl) . "</td></tr>\n";
 	}
 	$target_auto_tags = getUserAutoTags ($username);
 	if (getConfigVar ('SHOW_AUTOMATIC_TAGS') == 'yes' and count ($target_auto_tags))
@@ -5352,16 +5359,25 @@ function renderAccessDenied ()
 	echo "<link rel=icon href='" . getFaviconURL() . "' type='image/x-icon' />";
 	echo "<link rel=icon href='" . getFaviconURL() . "' type='image/x-icon' />";
 	echo "</head><body>";
-	global $root, $auto_tags, $expl_tags, $impl_tags, $pageno, $tabno;
+	global $root, $pageno, $tabno,
+		$user_given_tags,
+		$target_given_tags,
+		$auto_tags,
+		$expl_tags,
+		$impl_tags;
 	echo "<table border=1 cellspacing=0 cellpadding=3 width='50%' align=center>\n";
 	echo '<tr><th colspan=2><h3>';
 	printImageHREF ('DENIED');
 	echo ' access denied ';
 	printImageHREF ('DENIED');
 	echo '</h3></th></tr>';
-	echo "<tr><th width='50%' class=tdright><span class=tagheader>Explicit tags</span>:</th><td class=tdleft>";
+	echo "<tr><th width='50%' class=tdright><span class=tagheader>User given tags</span>:</th><td class=tdleft>";
+	echo serializeTags ($user_given_tags) . "&nbsp;</td></tr>\n";
+	echo "<tr><th width='50%' class=tdright><span class=tagheader>Target given tags</span>:</th><td class=tdleft>";
+	echo serializeTags ($target_given_tags) . "&nbsp;</td></tr>\n";
+	echo "<tr><th width='50%' class=tdright><span class=tagheader>Effective explicit tags</span>:</th><td class=tdleft>";
 	echo serializeTags ($expl_tags) . "&nbsp;</td></tr>\n";
-	echo "<tr><th width='50%' class=tdright><span class=tagheader>Implicit tags</span>:</th><td class=tdleft>";
+	echo "<tr><th width='50%' class=tdright><span class=tagheader>Effective implicit tags</span>:</th><td class=tdleft>";
 	echo serializeTags ($impl_tags) . "&nbsp;</td></tr>\n";
 	echo "<tr><th width='50%' class=tdright><span class=tagheader>Automatic tags</span>:</th><td class=tdleft>";
 	echo serializeTags ($auto_tags) . "&nbsp;</td></tr>\n";
