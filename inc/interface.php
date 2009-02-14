@@ -1142,7 +1142,7 @@ function renderPortsForObject ($object_id = 0)
 		else
 		{
 			echo "<input type=hidden name=port_type_id value='${port['type_id']}'>";
-			echo "<td>${port['type']}</td>\n";
+			echo "<td class=tdleft>${port['type']}</td>\n";
 		}
 		echo "<td><input type=text name=l2address value='${port['l2address']}'></td>\n";
 		if ($port['remote_object_id'])
@@ -1194,16 +1194,16 @@ function renderPortsForObject ($object_id = 0)
 
 	startPortlet ('Add/update multiple ports');
 	printOpFormIntro ('addMultiPorts');
-	echo 'Format: <select name=format>';
+	echo 'Format: <select name=format tabindex=201>';
 	echo '<option value=c3600asy>Cisco 3600 async: sh line | inc TTY</option>';
 	echo '<option value=fiwg selected>Foundry ServerIron/FastIron WorkGroup/Edge: sh int br</option>';
 	echo '<option value=fisxii>Foundry FastIron SuperX/II4000: sh int br</option>';
 	echo '<option value=ssv1>SSV:&lt;interface name&gt; &lt;MAC address&gt;</option>';
 	echo "</select>";
 	echo 'Default port type: ';
-	printSelect (getPortTypes(), 'port_type', getConfigVar ('default_port_type'), 102);
-	echo "<input type=submit value='Parse output'><br>\n";
-	echo "<textarea name=input cols=100 rows=50></textarea><br>\n";
+	printSelect (getPortTypes(), 'port_type', getConfigVar ('default_port_type'), 202);
+	echo "<input type=submit value='Parse output' tabindex=204><br>\n";
+	echo "<textarea name=input cols=100 rows=50 tabindex=203></textarea><br>\n";
 	echo '</form>';
 	finishPortlet();
 }
