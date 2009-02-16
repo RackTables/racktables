@@ -5712,24 +5712,22 @@ function renderFilesForEntity ($entity_id = 0)
 	{
 		startPortlet ('Manage linked');
 		echo "<table border=0 cellspacing=0 cellpadding='5' align='center' class='widetable'>\n";
-		echo "<tr><th>&nbsp;</th><th>Name</th><th>Comment</th><th>Size</th><th>Actions</th></tr>\n";
+		echo "<tr><th>File</th><th>Comment</th><th>Size</th><th>Actions</th></tr>\n";
 		foreach ($filelist as $file_id => $file)
 		{
-			echo "<tr valign=top><td><a href='".makeHrefProcess(array('op'=>'deleteFile', 'file_id'=>$file_id, $id_name=>$entity_id, 'name'=>$file['name']))."'>";
-			printImageHREF ('DESTROY', 'Unlink and delete file');
-			echo '</a></td><td class=tdleft>';
-			//printf("<a href='%/?page=file&file_id=%s'><strong>%s</strong></a>", $root, $file_id, $file['name']);
-			renderFileCell ($file);;
-			echo "<td class=tdleft>${file['comment']}</td>";
-			printf("<td class=tdleft>%s</td>", formatFileSize($file['size']));
-			echo "<td><a href='${root}download.php?file_id=${file_id}'>";
-			printImageHREF ('DOWNLOAD', 'Download file');
-			echo '</a> ';
+			echo "<tr valign=top><td class=tdleft>";
+			renderFileCell ($file);
+			echo "</td><td class=tdleft>${file['comment']}</td><td class=tdleft><a href='${root}download.php?file_id=${file_id}'>";
+			printImageHREF ('download', 'Download file');
+			echo '</a>&nbsp;';
+			echo formatFileSize ($file['size']);
+			echo '</td><td class=tdleft>';
 			echo "<a href='".makeHrefProcess(array('op'=>'unlinkFile', 'link_id'=>$file['link_id'], $id_name=>$entity_id, 'name'=>$file['name']))."'>";
 			printImageHREF ('CUT', 'Unlink file');
 			echo '</a> ';
-			printImageHREF ('SAVE', 'Save changes', TRUE);
-			echo "</td></form></tr>\n";
+			echo "<a href='".makeHrefProcess(array('op'=>'deleteFile', 'file_id'=>$file_id, $id_name=>$entity_id, 'name'=>$file['name']))."'>";
+			printImageHREF ('DESTROY', 'Unlink and delete file');
+			echo "</a></td></form></tr>\n";
 		}
 		echo "</table><br>\n";
 		finishPortlet();
