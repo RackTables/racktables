@@ -69,9 +69,15 @@ $image['download']['height'] = 16;
 $image['DOWNLOAD']['path'] = 'pix/download-big.png';
 $image['DOWNLOAD']['width'] = 32;
 $image['DOWNLOAD']['height'] = 32;
-$image['link']['path'] = 'pix/tango-network-wired.png';
-$image['link']['width'] = 16;
-$image['link']['height'] = 16;
+$image['plug']['path'] = 'pix/tango-network-wired.png';
+$image['plug']['width'] = 16;
+$image['plug']['height'] = 16;
+$image['cut']['path'] = 'pix/tango-edit-cut-16x16.png';
+$image['cut']['width'] = 16;
+$image['cut']['height'] = 16;
+$image['CUT']['path'] = 'pix/tango-edit-cut-32x32.png';
+$image['CUT']['width'] = 32;
+$image['CUT']['height'] = 32;
 $image['add']['path'] = 'pix/tango-list-add.png';
 $image['add']['width'] = 16;
 $image['add']['height'] = 16;
@@ -1158,7 +1164,7 @@ function renderPortsForObject ($object_id = 0)
 					'remote_port_name'=>$port['remote_name'], 
 					'remote_object_name'=>$port['remote_object_name'])).
 			"'>";
-			printImageHREF ('clear', 'Unlink this port');
+			printImageHREF ('cut', 'Unlink this port');
 			echo "</a></td>";
 		}
 		elseif (!empty ($port['reservation_comment']))
@@ -1179,7 +1185,7 @@ function renderPortsForObject ($object_id = 0)
 			echo "<td>&nbsp;</td><td>&nbsp;</td>";
 			echo "<td>";
 			echo "<a href='javascript:;' onclick='window.open(\"".makeHrefForHelper('portlist', array('port'=>$port['id'], 'type'=>$port['type_id'], 'object_id'=>$object_id, 'port_name'=>$port['name']))."\",\"findlink\",\"height=700, width=400, location=no, menubar=no, resizable=yes, scrollbars=no, status=no, titlebar=no, toolbar=no\");'>";
-			printImageHREF ('link', 'Link this port');
+			printImageHREF ('plug', 'Link this port');
 			echo "</a> <input type=text name=reservation_comment>";
 			echo "</td>\n";
 		}
@@ -5720,7 +5726,7 @@ function renderFilesForEntity ($entity_id = 0)
 			printImageHREF ('DOWNLOAD', 'Download file');
 			echo '</a> ';
 			echo "<a href='".makeHrefProcess(array('op'=>'unlinkFile', 'link_id'=>$file['link_id'], $id_name=>$entity_id, 'name'=>$file['name']))."'>";
-			printImageHREF ('CLEAR', 'Unlink file');
+			printImageHREF ('CUT', 'Unlink file');
 			echo '</a> ';
 			printImageHREF ('SAVE', 'Save changes', TRUE);
 			echo "</td></form></tr>\n";
