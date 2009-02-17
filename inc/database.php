@@ -2029,7 +2029,7 @@ function getAttrMap ()
 		$application['objtype_name'] = $row['objtype_name'];
 		if ($row['attr_type'] == 'dict')
 		{
-			$application['chapter_no'] = $row['chapter_no'];
+			$application['chapter_no'] = $row['chapter_id'];
 			$application['chapter_name'] = $row['chapter_name'];
 		}
 		$ret[$attr_id]['application'][] = $application;
