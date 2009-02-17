@@ -5296,11 +5296,39 @@ function renderRackCodeEditor ()
 	$text = loadScript ('RackCode');
 	showMessageOrError();
 	printOpFormIntro ('saveRackCode');
+	echo <<<ENDJAVASCRIPT
+<script type="text/javascript">
+function verify()
+{
+	$.ajax({
+		type: "GET",
+		url: "ajax.php",
+		data: "ac=verifyCode&code="+RCTA.getCode(),
+		success: function (data)
+		{
+			arr = data.split("\\n");
+			if (arr[0] == "ACK")
+			{
+				$("#SaveChanges")[0].disabled = "";
+			}
+			else
+			{
+				$("#SaveChanges")[0].disabled = "disabled";
+				$("#ShowMessage")[0].innerHTML = arr[1];
+			}
+		}
+	});
+}
+</script>
+ENDJAVASCRIPT;
+
 	echo '<table border=0 align=center>';
 	echo "<tr><td><textarea rows=40 cols=100 name=rackcode id=RCTA class='codepress rackcode'>";
 	echo $text . "</textarea></td></tr>\n";
 	echo "<tr><td align=center>";
-	echo "<input type='submit' value='Save' onclick='RCTA.toggleEditor();'>";
+	echo "<input type='submit' value='Save' disabled='disabled' id='SaveChanges' onclick='RCTA.toggleEditor();'>";
+	echo "<input type='button' value='Verify' onclick='verify();'>";
+	echo '<div id="ShowMessage"></div>';
 //	printImageHREF ('SAVE', 'Save changes', TRUE);
 	echo "</td></tr>";
 	echo '</table>';
