@@ -71,3 +71,9 @@ and is distributed under GNU LGPL license.
 
 RackTables includes a modified dragon image, which is available free for
 personal and business use from medievalresources.com
+
+----------------------8<----------------------8<----------------------
+
+RackTables is shipped with an exact copy of jQuery JavaScript Library v1.3.1
+(http://jquery.com/), which is dual licensed under the MIT and GPL licenses.
+jQuery is copyright (c) 2009 John Resig.
