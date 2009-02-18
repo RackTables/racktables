@@ -2279,18 +2279,36 @@ function renderIPv4SpaceEditor ()
 	finishPortlet();
 
 	$addrspaceList = getIPv4NetworkList();
-	$netcount = count ($addrspaceList);
-	if ($netcount)
+	if (count ($addrspaceList))
 	{
-		startPortlet ("Manage existing (${netcount})");
+		startPortlet ('Manage existing (' . count ($addrspaceList) . ')');
 		echo "<table class='widetable' border=0 cellpadding=5 cellspacing=0 align='center'>\n";
 		echo "<tr><th>&nbsp;</th><th>prefix</th><th>name</th><th>&nbsp;</th></tr>";
 		foreach ($addrspaceList as $netinfo)
 		{
 			echo "<form method=post action='".makeHrefProcess(array('op'=>'updIPv4Prefix', 'id'=>$netinfo['id']))."'>";
-			echo "<tr valign=top><td><a href='".makeHrefProcess(array('op'=>'delIPv4Prefix', 'id'=>$netinfo['id']))."'>";
-			printImageHREF ('delete', 'Delete this IP range');
-			echo "</a></td>\n<td class=tdleft>${netinfo['ip']}/${netinfo['mask']}</td>";
+			echo "<tr valign=top><td>";
+			if (getConfigVar ('IPV4_JAYWALK') == 'yes')
+			{
+				echo "<a href='".makeHrefProcess(array('op'=>'delIPv4Prefix', 'id'=>$netinfo['id']))."'>";
+				printImageHREF ('destroy', 'Delete this prefix');
+				echo "</a>";
+			}
+			else // only render clickable image for empty networks
+			{
+				$netdata = getIPv4NetworkInfo ($netinfo['id']);
+				loadIPv4AddrList ($netdata);
+				if (count ($netdata['addrlist']))
+					printImageHREF ('nodestroy', 'There are ' . count ($netdata['addrlist']) . ' allocations inside');
+				else
+				{
+					echo "<a href='".makeHrefProcess(array('op'=>'delIPv4Prefix', 'id'=>$netinfo['id']))."'>";
+					printImageHREF ('destroy', 'Delete this prefix');
+					echo "</a>";
+				}
+
+			}
+			echo "</td>\n<td class=tdleft>${netinfo['ip']}/${netinfo['mask']}</td>";
 			echo "<td><input type=text name=name size=40 value='${netinfo['name']}'>";
 			echo "</td><td>";
 			printImageHREF ('save', 'Save changes', TRUE);
