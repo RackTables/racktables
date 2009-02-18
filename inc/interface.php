@@ -162,15 +162,27 @@ $image['VS']['height'] = 62;
 $image['router']['path'] = 'pix/router.png';
 $image['router']['width'] = 32;
 $image['router']['height'] = 32;
-$image['LINK']['path'] = 'pix/tango-emblem-symbolic-link-big.png';
-$image['LINK']['width'] = 32;
-$image['LINK']['height'] = 32;
+$image['ATTACH']['path'] = 'pix/crystal-attach-32x32.png';
+$image['ATTACH']['width'] = 32;
+$image['ATTACH']['height'] = 32;
 $image['favorite']['path'] = 'pix/tango-emblem-favorite.png';
 $image['favorite']['width'] = 16;
 $image['favorite']['height'] = 16;
 $image['computer']['path'] = 'pix/tango-computer.png';
 $image['computer']['width'] = 16;
 $image['computer']['height'] = 16;
+$image['empty file']['path'] = 'pix/crystal-file-empty-32x32.png';
+$image['empty file']['width'] = 32;
+$image['empty file']['height'] = 32;
+$image['text file']['path'] = 'pix/crystal-file-text-32x32.png';
+$image['text file']['width'] = 32;
+$image['text file']['height'] = 32;
+$image['image file']['path'] = 'pix/crystal-file-image-32x32.png';
+$image['image file']['width'] = 32;
+$image['image file']['height'] = 32;
+$image['NET']['path'] = 'pix/crystal-network-32x32.png';
+$image['NET']['width'] = 32;
+$image['NET']['height'] = 32;
 
 // This may be populated later onsite, report rendering function will use it.
 // See the $systemreport for structure.
@@ -905,7 +917,7 @@ function renderRackObject ($object_id = 0)
 		startPortlet ('IPv4 addresses');
 		echo "<table cellspacing=0 cellpadding='5' align='center' class='widetable'>\n";
 		if (getConfigVar ('EXT_IPV4_VIEW') == 'yes')
-			echo "<tr><th>OS interface</th><th>IP address</th><th colspan=2>network</th><th>routed by</th><th>peers</th></tr>\n";
+			echo "<tr><th>OS interface</th><th>IP address</th><th>network</th><th>routed by</th><th>peers</th></tr>\n";
 		else
 			echo "<tr><th>OS interface</th><th>IP address</th><th>peers</th></tr>\n";
 		$hl_ipv4_addr = '';
@@ -939,16 +951,21 @@ function renderRackObject ($object_id = 0)
 			if (getConfigVar ('EXT_IPV4_VIEW') == 'yes')
 			{
 				if (NULL === $netid)
-					echo '<td colspan=2>N/A</td><td>&nbsp;</td>';
+					echo '<td class=sparenetwork>N/A</td><td class=sparenetwork>N/A</td>';
 				else
 				{
-					printIPv4NetInfoTDs ($netinfo, $secondclass);
+					echo "<td class='${secondclass}'>";
+					renderIPv4NetCell ($netinfo);
+					echo "</td>";
 					// filter out self-allocation
 					$other_routers = array();
 					foreach (findRouters ($netinfo['addrlist']) as $router)
 						if ($router['id'] != $object_id)
 							$other_routers[] = $router;
-					printRoutersTD ($other_routers);
+					if (count ($other_routers))
+						printRoutersTD ($other_routers);
+					else
+						echo "<td class='${secondclass}'>&nbsp;</td>";
 				}
 			}
 			// peers
@@ -1225,7 +1242,7 @@ function renderIPv4ForObject ($object_id = 0)
 		echo "</td>";
 		echo "<td class=tdleft><input type='text' size='10' name='bond_name' tabindex=100></td>\n";
 		echo "<td class=tdleft><input type=text name='ip' tabindex=101></td>\n";
-		echo "<td colspan=3>&nbsp;</td><td>";
+		echo "<td colspan=2>&nbsp;</td><td>";
 		printSelect ($aat, 'bond_type', NULL, 102);
 		echo "</td><td>&nbsp;</td><td>";
 		printImageHREF ('add', 'allocate', TRUE, 103);
@@ -1243,7 +1260,7 @@ function renderIPv4ForObject ($object_id = 0)
 	echo "<table cellspacing=0 cellpadding='5' align='center' class='widetable'>\n";
 	echo '<tr><th>&nbsp;</th><th>OS interface</th><th>IP address</th>';
 	if (getConfigVar ('EXT_IPV4_VIEW') == 'yes')
-		echo '<th colspan=2>network</th><th>routed by</th>';
+		echo '<th>network</th><th>routed by</th>';
 	echo '<th>type</th><th>misc</th><th>&nbsp</th></tr>';
 
 	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
@@ -1275,25 +1292,21 @@ function renderIPv4ForObject ($object_id = 0)
 		if (getConfigVar ('EXT_IPV4_VIEW') == 'yes')
 		{
 			if (NULL === $netid)
-				echo '<td colspan=2>N/A</td><td>&nbsp;</td>';
+				echo '<td class=sparenetwork>N/A</td><td class=sparenetwork>N/A</td>';
 			else
 			{
-				printIPv4NetInfoTDs ($netinfo);
-				echo "<td class=tdleft>";
-				// FIXME: These calls are really heavy, replace them with a more appropriate dedicated function.
-				$newline = '';
-				foreach (findRouters ($netinfo['addrlist']) as $router)
-				{
-					if ($router['id'] == $object_id)
-						continue;
-					echo $newline . $router['addr'] . ", <a href='".makeHref(array('page'=>'object', 'object_id'=>$router['id'], 'hl_ipv4_addr'=>$router['addr']))."'>";
-					echo (empty ($router['iface']) ? '' : $router['iface'] . '@') . $router['dname'] . '</a>';
-					$routertags = loadRackObjectTags ($router['id']);
-					if (count ($routertags))
-						echo '<br><small>' . serializeTags ($routertags, makeHref(array('page'=>'objects', 'tab'=>'default'))."&") . '</small>';
-					$newline = '<br>';
-				}
+				echo '<td>';
+				renderIPv4NetCell ($netinfo);
 				echo '</td>';
+				// filter out self-allocation
+				$other_routers = array();
+				foreach (findRouters ($netinfo['addrlist']) as $router)
+					if ($router['id'] != $object_id)
+						$other_routers[] = $router;
+				if (count ($other_routers))
+					printRoutersTD ($other_routers);
+				else
+					echo "<td>&nbsp;</td>";
 			}
 		}
 		echo '<td>';
@@ -2274,7 +2287,7 @@ function renderIPv4SpaceEditor ()
 		echo "<tr><th>&nbsp;</th><th>prefix</th><th>name</th><th>&nbsp;</th></tr>";
 		foreach ($addrspaceList as $netinfo)
 		{
-			echo "<form method=post action='".makeHrefProcess(array($op=>'updIPv4Prefix', 'id'=>$netinfo['id']))."'>";
+			echo "<form method=post action='".makeHrefProcess(array('op'=>'updIPv4Prefix', 'id'=>$netinfo['id']))."'>";
 			echo "<tr valign=top><td><a href='".makeHrefProcess(array('op'=>'delIPv4Prefix', 'id'=>$netinfo['id']))."'>";
 			printImageHREF ('delete', 'Delete this IP range');
 			echo "</a></td>\n<td class=tdleft>${netinfo['ip']}/${netinfo['mask']}</td>";
@@ -2952,7 +2965,7 @@ function printGreeting ()
 
 function renderSearchResults ()
 {
-	global $remote_username, $root;
+	global $root;
 	$terms = trim ($_REQUEST['q']);
 	if (empty ($terms))
 	{
@@ -3141,12 +3154,11 @@ function renderSearchResults ()
 				case 'ipv4network':
 					startPortlet ("<a href='${root}?page=ipv4space'>IPv4 networks</a>");
 					echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
-					echo '<tr><th>Network</th><th>Name/tags</th></tr>';
 					foreach ($what as $netinfo)
 					{
-						echo "<tr class=row_${order} valign=top>";
-						printIPv4NetInfoTDs ($netinfo);
-						echo "</tr>\n";
+						echo "<tr class=row_${order} valign=top><td>";
+						renderIPv4NetCell ($netinfo);
+						echo "</td></tr>\n";
 						$order = $nextorder[$order];
 					}
 					echo '</table>';
@@ -5512,15 +5524,23 @@ function renderFile ($file_id = 0)
 	$links = getFileLinks ($file_id);
 	if (count ($links))
 	{
-		startPortlet ('Links');
-		///usort($ports, 'sortByName');
+		startPortlet ('Links (' . count ($links) . ')');
 		echo "<table cellspacing=0 cellpadding='5' align='center' class='widetable'>\n";
-		echo "<tr><th>Linked to</th><th>Name</th></tr>\n";
 		foreach ($links as $link)
 		{
-			echo "<tr><td>${link['entity_type']}</td>";
-			echo "<td><a href='".makeHref(array('page'=>$link['page'], $link['id_name']=>$link['entity_id']))."'>${link['name']}</a></td>";
-			echo "</tr>\n";
+			echo '<tr><td class=tdleft>';
+			switch ($link['entity_type'])
+			{
+				case 'ipv4net':
+					renderIPv4NetCell (getIPv4NetworkInfo ($link['entity_id']));
+					break;
+				default:
+					echo formatEntityName ($link['entity_type']) . ': ';
+					echo "<a href='" . makeHref(array('page'=>$link['page'], $link['id_name']=>$link['entity_id']));
+					echo "'>${link['name']}</a>";
+					break;
+			}
+			echo '</td></tr>';
 		}
 		echo "</table><br>\n";
 		finishPortlet();
@@ -5628,29 +5648,17 @@ function renderFilesByLink ()
 		return;
 	}
 	echo '<br><br><table cellpadding=5 cellspacing=0 align=center class=cooltable>';
-	echo '<tr><th>Name</th><th>Comment</th><th>Size</th><th>Created</th><th>Linked to</th><th>Actions</th></tr>';
+	echo '<tr><th>File</th><th>Linked to</th></tr>';
 	$order = 'odd';
 	foreach ($files as $file)
 	{
-		printf("<tr class=row_%s valign=top>", $order);
-		echo "<td class='tdleft'><a href='".makeHref(array('page'=>'file', 'file_id'=>$file['id']))."'><strong>${file['name']}</strong></a>";
-		$tags = loadEntityTags ('file', $file['id']);
-		if (count ($tags))
-			echo '<br><small>' . serializeTags ($tags, makeHref(array('page'=>$pageno, 'tab'=>'default', 'entity_type'=>$entity_type))."&") . '</small>';
-		printf("</td><td class='tdleft'>%s</td>", $file['comment']);
-		printf("<td class='tdleft'>%s</td>", formatFileSize($file['size']));
-		echo "<td class='tdleft'>";
+		printf("<tr class=row_%s valign=top><td class=tdleft>", $order);
+		renderFileCell ($file);
+		echo "</td><td class='tdleft'>";
 		$links = getFileLinks($file['id']);
 		if (count ($links))
 			printf("<small>%s</small>", serializeFileLinks($links));
-		echo '</td>';
-		echo "<td><a href='${root}download.php?file_id=${file['id']}'>";
-		printImageHREF ('download', 'Download file');
-		echo '</a> ';
-		echo "<a href='".makeHrefProcess(array('op'=>'deleteFile', 'file_id'=>$file['id'], 'entity_type'=>$entity_type))."'>";
-		printImageHREF ('delete', 'Delete file');
-		echo '</a></td>';
-		echo "</tr>\n";
+		echo "</td></tr>\n";
 		$order = $nextorder[$order];
 	}
 	echo '</table>';
@@ -5676,18 +5684,14 @@ function renderFilesPortlet ($entity_type = NULL, $entity_id = 0)
 	{
 		startPortlet ('files (' . count ($files) . ')');
 		echo "<table cellspacing=0 cellpadding='5' align='center' class='widetable'>\n";
-		echo "<tr><th>Name</th><th>Size</th><th>Comment</th><th>Actions</th></tr>\n";
+		echo "<tr><th>File</th><th>Comment</th></tr>\n";
 		foreach ($files as $file)
 		{
-			echo '<td class=tdleft>';
+			echo "<tr><td class=tdleft>";
 			renderFileCell ($file);
-			printf("</td><td class=tdleft>%s</td>", formatFileSize($file['size']));
-			echo "<td class=tdleft>${file['comment']}</td>";
-			echo "<td><a href='${root}download.php?file_id=${file['id']}'>";
-			printImageHREF ('download', 'Download file');
-			echo '</a></td></tr>';
+			echo "</td><td class=tdleft>${file['comment']}</td></tr>";
 			if ('' != ($pcode = getFilePreviewCode ($file)))
-				echo "<tr><td colspan=4>${pcode}</td></tr>\n";
+				echo "<tr><td colspan=2>${pcode}</td></tr>\n";
 		}
 		echo "</table><br>\n";
 		finishPortlet();
@@ -5729,7 +5733,7 @@ function renderFilesForEntity ($entity_id = 0)
 		echo '<tr><td class=tdleft>';
 		printSelect ($files, 'file_id');
 		echo '</td><td class=tdleft>';
-		printImageHREF ('LINK', 'Link file', TRUE);
+		printImageHREF ('ATTACH', 'Link file', TRUE);
 		echo '</td></tr></table>';
 		echo "</form>\n";
 		finishPortlet();
@@ -5740,22 +5744,17 @@ function renderFilesForEntity ($entity_id = 0)
 	{
 		startPortlet ('Manage linked');
 		echo "<table border=0 cellspacing=0 cellpadding='5' align='center' class='widetable'>\n";
-		echo "<tr><th>File</th><th>Comment</th><th>Size</th><th>Actions</th></tr>\n";
+		echo "<tr><th>File</th><th>Comment</th><th>Actions</th></tr>\n";
 		foreach ($filelist as $file_id => $file)
 		{
 			echo "<tr valign=top><td class=tdleft>";
 			renderFileCell ($file);
-			echo "</td><td class=tdleft>${file['comment']}</td><td class=tdleft><a href='${root}download.php?file_id=${file_id}'>";
-			printImageHREF ('download', 'Download file');
-			echo '</a>&nbsp;';
-			echo formatFileSize ($file['size']);
-			echo '</td><td class=tdleft>';
+			echo "</td><td class=tdleft>${file['comment']}</td><td class=tdleft>";
 			echo "<a href='".makeHrefProcess(array('op'=>'unlinkFile', 'link_id'=>$file['link_id'], $id_name=>$entity_id, 'name'=>$file['name']))."'>";
 			printImageHREF ('CUT', 'Unlink file');
-			echo '</a> ';
-			echo "<a href='".makeHrefProcess(array('op'=>'deleteFile', 'file_id'=>$file_id, $id_name=>$entity_id, 'name'=>$file['name']))."'>";
+			echo "</a> <a href='".makeHrefProcess(array('op'=>'deleteFile', 'file_id'=>$file_id, $id_name=>$entity_id, 'name'=>$file['name']))."'>";
 			printImageHREF ('DESTROY', 'Unlink and delete file');
-			echo "</a></td></form></tr>\n";
+			echo "</a></td></tr>\n";
 		}
 		echo "</table><br>\n";
 		finishPortlet();
@@ -5849,6 +5848,23 @@ function printIPv4NetInfoTDs ($netinfo, $tdclass = 'tdleft', $indent = 0, $symbo
 	echo "</td>";
 }
 
+function renderIPv4NetCell ($netinfo)
+{
+	global $root;
+	echo "<table class='slbcell vscell'><tr><td rowspan=3 width='5%'>";
+	printImageHREF ('NET');
+	echo '</td>';
+	echo "<td><a href='${root}?page=ipv4net&id=${netinfo['id']}'>${netinfo['ip']}/${netinfo['mask']}</a></td></tr>";
+	if (strlen ($netinfo['name']))
+		echo "<tr><td><strong>" . niftyString ($netinfo['name']) . "</strong></td></tr>";
+	else
+		echo "<tr><td class=sparenetwork>no name</td></tr>";
+	echo '<td>';
+	$tags = loadIPv4PrefixTags ($netinfo['id']);
+	echo count ($tags) ? ("<small>" . serializeTags ($tags) . "</small>") : '&nbsp;';
+	echo "</td></tr></table>";
+}
+
 function renderLBCell ($object_id)
 {
 	global $root;
@@ -5910,16 +5926,38 @@ function renderRouterCell ($dottedquad, $ifname, $object_id, $object_dname)
 function renderFileCell ($fileinfo)
 {
 	global $root;
-	printf("<a href='${root}?page=file&file_id=%s'><strong>%s</strong></a>", $fileinfo['id'], niftyString ($fileinfo['name']));
-	echo '<br><small>';
-	echo serializeTags (loadFileTags ($fileinfo['id']));
-	echo "</small>";
+	echo "<table class='slbcell vscell'><tr><td rowspan=3>";
+	switch ($fileinfo['type'])
+	{
+		case 'text/plain':
+			printImageHREF ('text file');
+			break;
+		case 'image/jpeg':
+		case 'image/png':
+		case 'image/gif':
+			printImageHREF ('image file');
+			break;
+		default:
+			printImageHREF ('empty file');
+			break;
+	}
+	echo "</td><td>";
+	printf ("<a href='${root}?page=file&file_id=%s'><strong>%s</strong></a>", $fileinfo['id'], niftyString ($fileinfo['name']));
+	echo "</td></tr><tr><td>";
+	$tags = loadFileTags ($fileinfo['id']);
+	echo count ($tags) ? ("<small>" . serializeTags ($tags) . "</small>") : '&nbsp;';
+	echo "</td></tr><tr><td><a href='${root}download.php?file_id=${fileinfo['id']}'>";
+	printImageHREF ('download', 'Download file');
+	echo '</a>&nbsp;';
+	echo formatFileSize ($fileinfo['size']);
+	echo "</td></tr></table>";
 }
 
 // Return HTML code necessary to show a preview of the file give. Return an empty string,
 // if a preview cannot be shown
 function getFilePreviewCode ($file)
 {
+	global $root;
 	$ret = '';
 	switch ($file['type'])
 	{

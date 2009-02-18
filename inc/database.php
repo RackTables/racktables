@@ -3649,7 +3649,7 @@ function getFileLinks ($file_id = 0)
 	}
 
 	global $dbxlink;
-	$query = $dbxlink->prepare('SELECT * FROM FileLink WHERE file_id = ?');
+	$query = $dbxlink->prepare('SELECT * FROM FileLink WHERE file_id = ? ORDER BY entity_id');
 	$query->bindParam(1, $file_id);
 	$query->execute();
 	$rows = $query->fetchAll (PDO::FETCH_ASSOC);
