@@ -183,6 +183,9 @@ $image['image file']['height'] = 32;
 $image['NET']['path'] = 'pix/crystal-network-32x32.png';
 $image['NET']['width'] = 32;
 $image['NET']['height'] = 32;
+$image['USER']['path'] = 'pix/crystal-edit-user-32x32.png';
+$image['USER']['width'] = 32;
+$image['USER']['height'] = 32;
 
 // This may be populated later onsite, report rendering function will use it.
 // See the $systemreport for structure.
@@ -3231,12 +3234,11 @@ function renderSearchResults ()
 				case 'user':
 					startPortlet ("<a href='${root}?page=userlist'>Users</a>");
 					echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
-					echo '<tr><th>Username</th><th>Real Name</th></tr>';
 					foreach ($what as $item)
 					{
-						echo "<tr class=row_${order}><td class=tdleft><a href='${root}?page=user&user_id=${item['user_id']}'>";
-						echo $item['user_name'];
-						echo "</a></td><td class=tdleft>${item['user_realname']}</td></tr>";
+						echo "<tr class=row_${order}><td class=tdleft>";
+						renderUserCell ($item);
+						echo "</td></tr>";
 						$order = $nextorder[$order];
 					}
 					echo '</table>';
@@ -5544,11 +5546,19 @@ function renderFile ($file_id = 0)
 	{
 		startPortlet ('Links (' . count ($links) . ')');
 		echo "<table cellspacing=0 cellpadding='5' align='center' class='widetable'>\n";
+		global $accounts;
 		foreach ($links as $link)
 		{
 			echo '<tr><td class=tdleft>';
 			switch ($link['entity_type'])
 			{
+				case 'user':
+					$username = getUsernameByID ($link['entity_id']);
+					if (NULL === $username or !isset ($accounts[$username]))
+						echo "Internal error: user id ${link['entity_id']} not found";
+					else
+						renderUserCell ($accounts[$username]);
+					break;
 				case 'ipv4net':
 					renderIPv4NetCell (getIPv4NetworkInfo ($link['entity_id']));
 					break;
@@ -5705,7 +5715,7 @@ function renderFilesPortlet ($entity_type = NULL, $entity_id = 0)
 		echo "<tr><th>File</th><th>Comment</th></tr>\n";
 		foreach ($files as $file)
 		{
-			echo "<tr><td class=tdleft>";
+			echo "<tr valign=top><td class=tdleft>";
 			renderFileCell ($file);
 			echo "</td><td class=tdleft>${file['comment']}</td></tr>";
 			if ('' != ($pcode = getFilePreviewCode ($file)))
@@ -5883,6 +5893,23 @@ function renderIPv4NetCell ($netinfo)
 	echo "</td></tr></table>";
 }
 
+function renderUserCell ($account)
+{
+	global $root;
+	echo "<table class='slbcell vscell'><tr><td rowspan=3 width='5%'>";
+	printImageHREF ('USER');
+	echo '</td>';
+	echo "<td><a href='${root}?page=user&user_id=${account['user_id']}'>${account['user_name']}</a></td></tr>";
+	if (strlen ($account['user_realname']))
+		echo "<tr><td><strong>" . niftyString ($account['user_realname']) . "</strong></td></tr>";
+	else
+		echo "<tr><td class=sparenetwork>no name</td></tr>";
+	echo '<td>';
+	$tags = loadUserTags ($account['user_id']);
+	echo count ($tags) ? ("<small>" . serializeTags ($tags) . "</small>") : '&nbsp;';
+	echo "</td></tr></table>";
+}
+
 function renderLBCell ($object_id)
 {
 	global $root;
@@ -5944,7 +5971,7 @@ function renderRouterCell ($dottedquad, $ifname, $object_id, $object_dname)
 function renderFileCell ($fileinfo)
 {
 	global $root;
-	echo "<table class='slbcell vscell'><tr><td rowspan=3>";
+	echo "<table class='slbcell vscell'><tr><td rowspan=3 width='5%'>";
 	switch ($fileinfo['type'])
 	{
 		case 'text/plain':
