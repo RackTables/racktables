@@ -5330,10 +5330,11 @@ function renderRackCodeEditor ()
 	printOpFormIntro ('saveRackCode');
 	echo <<<ENDJAVASCRIPT
 <script type="text/javascript">
+var prevCode = '';
 function verify()
 {
 	$.ajax({
-		type: "GET",
+		type: "POST",
 		url: "ajax.php",
 		data: "ac=verifyCode&code="+RCTA.getCode(),
 		success: function (data)
@@ -5342,15 +5343,33 @@ function verify()
 			if (arr[0] == "ACK")
 			{
 				$("#SaveChanges")[0].disabled = "";
+				$("#ShowMessage")[0].innerHTML = "Code verification OK, don't forget to save the code";
+				$("#ShowMessage")[0].className = "msg_success";
 			}
 			else
 			{
 				$("#SaveChanges")[0].disabled = "disabled";
 				$("#ShowMessage")[0].innerHTML = arr[1];
+				$("#ShowMessage")[0].className = "msg_warning";
 			}
+			prevCode = RCTA.getCode();
 		}
 	});
 }
+
+
+function invalidate()
+{
+	if (prevCode != RCTA.getCode())
+	{
+		prevCode = RCTA.getCode();
+		$("#SaveChanges")[0].disabled = "disabled";
+		$("#ShowMessage")[0].innerHTML = "";
+		$("#ShowMessage")[0].className = "";
+	}
+}
+
+setInterval(invalidate, 1000);
 </script>
 ENDJAVASCRIPT;
 
@@ -5358,9 +5377,9 @@ ENDJAVASCRIPT;
 	echo "<tr><td><textarea rows=40 cols=100 name=rackcode id=RCTA class='codepress rackcode'>";
 	echo $text . "</textarea></td></tr>\n";
 	echo "<tr><td align=center>";
-	echo "<input type='submit' value='Save' disabled='disabled' id='SaveChanges' onclick='RCTA.toggleEditor();'>";
-	echo "<input type='button' value='Verify' onclick='verify();'>";
 	echo '<div id="ShowMessage"></div>';
+	echo "<input type='button' value='Verify' onclick='verify();'>";
+	echo "<input type='submit' value='Save' disabled='disabled' id='SaveChanges' onclick='RCTA.toggleEditor();'>";
 //	printImageHREF ('SAVE', 'Save changes', TRUE);
 	echo "</td></tr>";
 	echo '</table>';

@@ -1,7 +1,8 @@
 <?php
 
+$_REQUEST['page'] = 'perms';
+$_REQUEST['tab'] = 'edit';
 require 'inc/init.php';
-
 fixContext();
 
 // We have a chance to handle an error before starting HTTP header.
@@ -12,15 +13,15 @@ if (!permitted())
 		'v' => 2,
 		'm' => array (0 => array ('c' => 157)) // operation not permitted
 	);
-	$location = buildWideRedirectURL ($errlog);
-	header ("Location: " . $location);
+	echo "NAK\nPermission denied";
 	exit();
 }
 
-switch ($_GET['ac'])
+switch ($_REQUEST['ac'])
 {
 	case 'verifyCode':
-		$code = $_REQUEST['code'];
+		$code = str_replace ('\r', '', str_replace ('\n', "\n", $_REQUEST['code']));
+		error_log($code);
 		$result = getRackCode($code);
 		if ($result['result'] == 'ACK')
 			echo 'ACK';
