@@ -140,9 +140,22 @@ $pageno = (isset ($_REQUEST['page'])) ? $_REQUEST['page'] : 'index';
 if (isset ($_REQUEST['tab']))
 	$tabno = $_REQUEST['tab'];
 elseif (getConfigVar ('SHOW_LAST_TAB') == 'yes' and isset ($_SESSION['RTLT'][$pageno]))
+{
 	$tabno = $_SESSION['RTLT'][$pageno];
+	$url = "${root}?page=$pageno&tab=$tabno";
+	foreach ($_GET as $name=>$value)
+	{
+		if ($name == 'page' or $name == 'tab') continue;
+		$url .= '&'.urlencode($name).'='.urlencode($value);
+	}
+	header('Location: '.$url);
+	exit();
+}
 else
 	$tabno = 'default';
+
+
+
 $op = (isset ($_REQUEST['op'])) ? $_REQUEST['op'] : '';
 
 $taglist = getTagList();
