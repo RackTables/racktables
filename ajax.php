@@ -21,7 +21,6 @@ switch ($_REQUEST['ac'])
 {
 	case 'verifyCode':
 		$code = str_replace ('\r', '', str_replace ('\n', "\n", $_REQUEST['code']));
-		error_log($code);
 		$result = getRackCode($code);
 		if ($result['result'] == 'ACK')
 			echo 'ACK';
