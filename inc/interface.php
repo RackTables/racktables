@@ -3209,9 +3209,9 @@ function renderSearchResults ()
 					echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
 					foreach ($what as $rspool)
 					{
-						echo "<tr class=row_${order}><td class=tdleft><a href='${root}?page=ipv4rspool&pool_id=${rspool['pool_id']}'>";
-						echo buildRSPoolName ($rspool);
-						echo "</a></td></tr>";
+						echo "<tr class=row_${order}><td class=tdleft>";
+						renderRSPoolCell ($rspool['pool_id'], $rspool['name']);
+						echo "</td></tr>";
 						$order = $nextorder[$order];
 					}
 					echo '</table>';
@@ -5946,7 +5946,7 @@ function renderRSPoolCell ($pool_id, $pool_name)
 	global $root;
 	echo "<table class=slbcell><tr><td>";
 	echo "<a href='${root}?page=ipv4rspool&pool_id=${pool_id}'>";
-	echo empty ($pool_name) ? "ANONYMOUS pool [${pool_id}]" : $pool_name;
+	echo empty ($pool_name) ? "ANONYMOUS pool [${pool_id}]" : niftyString ($pool_name);
 	echo "</a></td></tr><tr><td>";
 	printImageHREF ('RS pool');
 	echo "</td></tr><tr><td><small>";
