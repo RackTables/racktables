@@ -2425,14 +2425,14 @@ function getSLBSummary ()
 // will be returned as well.
 function getVServiceInfo ($vsid = 0)
 {
-	$query1 = "select inet_ntoa(vip) as vip, vport, proto, name, vsconfig, rsconfig " .
+	$query1 = "select id, inet_ntoa(vip) as vip, vport, proto, name, vsconfig, rsconfig " .
 		"from IPv4VS where id = ${vsid}";
 	$result = useSelectBlade ($query1, __FUNCTION__);
 	$vsinfo = array ();
 	$row = $result->fetch (PDO::FETCH_ASSOC);
 	if (!$row)
 		return NULL;
-	foreach (array ('vip', 'vport', 'proto', 'name', 'vsconfig', 'rsconfig') as $cname)
+	foreach (array ('id', 'vip', 'vport', 'proto', 'name', 'vsconfig', 'rsconfig') as $cname)
 		$vsinfo[$cname] = $row[$cname];
 	$vsinfo['rspool'] = array();
 	$result->closeCursor();

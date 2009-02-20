@@ -1053,7 +1053,7 @@ function renderRackObject ($object_id = 0)
 	if (count ($pools))
 	{
 		$order = 'odd';
-		startPortlet ('Real server pools');
+		startPortlet ('Real server pools (' . count ($pools) . ')');
 		echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
 		echo "<tr><th>VS</th><th>RS pool</th><th>RS</th><th>VS config</th><th>RS config</th></tr>\n";
 		foreach ($pools as $vs_id => $info)
@@ -3220,12 +3220,11 @@ function renderSearchResults ()
 				case 'ipv4vs':
 					startPortlet ("<a href='${root}?page=ipv4vslist'>Virtual services</a>");
 					echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
-					echo '<tr><th>VS</th><th>Description</th></tr>';
-					foreach ($what as $vs)
+					foreach ($what as $vsinfo)
 					{
-						echo "<tr class=row_${order}><td class=tdleft><a href='${root}?page=ipv4vs&vs_id=${vs['id']}'>";
-						echo buildVServiceName ($vs);
-						echo "</a></td><td class=tdleft>${vs['name']}</td></tr>";
+						echo "<tr class=row_${order}><td class=tdleft>";
+						renderIPv4VSCell ($vsinfo);
+						echo "</td></tr>";
 						$order = $nextorder[$order];
 					}
 					echo '</table>';
@@ -5955,19 +5954,24 @@ function renderRSPoolCell ($pool_id, $pool_name)
 	echo "</small></td></tr></table>";
 }
 
+// FIXME: migrate to renderIPv4VSCell()
 function renderVSCell ($vs_id)
 {
+	renderIPv4VSCell (getVServiceInfo ($vs_id));
+}
+
+function renderIPv4VSCell ($vsinfo)
+{
 	global $root;
-	$oinfo = getVServiceInfo ($vs_id);
-	echo "<table class='slbcell vscell'><tr><td rowspan=3>";
+	echo "<table class='slbcell vscell'><tr><td rowspan=3 width='5%'>";
 	printImageHREF ('VS');
 	echo "</td><td>";
-	echo "<a href='${root}?page=ipv4vs&vs_id=${vs_id}'>";
-	echo buildVServiceName ($oinfo);
+	echo "<a href='${root}?page=ipv4vs&vs_id=${vsinfo['id']}'>";
+	echo buildVServiceName ($vsinfo);
 	echo "</a></td></tr><tr><td>";
-	echo $oinfo['name'];
+	echo $vsinfo['name'];
 	echo '</td></tr><tr><td>';
-	$tags = loadIPv4VSTags ($vs_id);
+	$tags = loadIPv4VSTags ($vsinfo['id']);
 	echo count ($tags) ? ("<small>" . serializeTags ($tags) . "</small>") : '&nbsp;';
 	echo "</td></tr></table>";
 }
