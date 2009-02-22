@@ -1,8 +1,8 @@
 <?php
 
+require 'inc/init.php';
 $_REQUEST['page'] = 'perms';
 $_REQUEST['tab'] = 'edit';
-require 'inc/init.php';
 fixContext();
 
 // We have a chance to handle an error before starting HTTP header.

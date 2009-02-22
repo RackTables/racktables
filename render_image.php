@@ -1,8 +1,5 @@
 <?php
 
-$_REQUEST['page'] = 'rackspace';
-$_REQUEST['tab'] = 'default';
-
 require 'inc/init.php';
 
 assertStringArg ('img', __FILE__);

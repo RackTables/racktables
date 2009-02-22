@@ -137,9 +137,10 @@ $pageno = (isset ($_REQUEST['page'])) ? $_REQUEST['page'] : 'index';
 // Special handling of tab number to substitute the "last" index where applicable.
 // Always show explicitly requested tab, substitute the last used name in case
 // it is awailable, fall back to the default one.
+
 if (isset ($_REQUEST['tab']))
 	$tabno = $_REQUEST['tab'];
-elseif (getConfigVar ('SHOW_LAST_TAB') == 'yes' and isset ($_SESSION['RTLT'][$pageno]))
+elseif (basename($_SERVER['PHP_SELF']) == 'index.php' and getConfigVar ('SHOW_LAST_TAB') == 'yes' and isset ($_SESSION['RTLT'][$pageno]))
 {
 	$tabno = $_SESSION['RTLT'][$pageno];
 	$url = "${root}?page=$pageno&tab=$tabno";
