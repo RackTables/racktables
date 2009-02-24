@@ -3301,17 +3301,13 @@ function renderUserList ()
 	echo "<tr><td class=pcleft>";
 	startPortlet ('User accounts');
 	echo "<table class=cooltable border=0 cellpadding=5 cellspacing=0 align=center>\n";
-	echo "<tr><th class=tdleft>Username</th><th class=tdleft>Real name</th></tr>";
 	$order = 'odd';
 	$tagfilter = getTagFilter();
 	foreach (getUserAccounts ($tagfilter, getTFMode()) as $user)
 	{
-		echo "<tr class=row_${order} valign=top><td class=tdleft><a href='${root}?page=user&user_id=${user['user_id']}'>";
-		echo "${user['user_name']}</a>";
-		$usertags = loadUserTags ($user['user_id']);
-		if (count ($usertags))
-			echo '<br><small>' . serializeTags ($usertags, "${root}?page=${pageno}&tab=default&") . '</small>';
-		echo "</td><td class=tdleft>${user['user_realname']}</td></li>";
+		echo "<tr class=row_${order}><td>";
+		renderUserCell ($user);
+		echo "</td></tr>\n";
 		$order = $nextorder[$order];
 	}
 	echo '</table>';
