@@ -147,7 +147,11 @@ elseif (basename($_SERVER['PHP_SELF']) == 'index.php' and getConfigVar ('SHOW_LA
 	foreach ($_GET as $name=>$value)
 	{
 		if ($name == 'page' or $name == 'tab') continue;
-		$url .= '&'.urlencode($name).'='.urlencode($value);
+		if (gettype($value) == 'array')
+			foreach($value as $v)
+				$url .= '&'.urlencode($name.'[]').'='.urlencode($v);
+		else
+			$url .= '&'.urlencode($name).'='.urlencode($value);
 	}
 	header('Location: '.$url);
 	exit();

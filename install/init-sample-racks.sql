@@ -1,3 +1,5 @@
+set names 'utf8';
+
 INSERT INTO `AttributeValue` VALUES (905,2,NULL,269,NULL);
 INSERT INTO `AttributeValue` VALUES (906,2,NULL,165,NULL);
 INSERT INTO `AttributeValue` VALUES (915,2,NULL,118,NULL);
