@@ -18,6 +18,7 @@ function doSNMPmining ($object_id, $community)
 		278 => 'WS-C3548-XL (48 Ethernet 10/100 ports and 2 10/100/1000 uplinks)',
 		283 => 'WS-C6509-E (9-slot system)',
 		324 => 'WS-C2950-24 (24 Ethernet 10/100 ports)',
+		325 => 'WS-C2950C-24 (24 Ethernet 10/100 ports and 2 100FX uplinks)',
 #		694 => 'WS-C2960-24TC-L (24 Ethernet 10/100 ports and 2 dual-purpose uplinks)',
 #		695 => 'WS-C2960-48TC-L (48 Ethernet 10/100 ports and 2 dual-purpose uplinks)',
 		696 => 'WS-C2960G-24TC-L (20 Ethernet 10/100/1000 ports and 4 dual-purpose uplinks)',
@@ -53,6 +54,7 @@ function doSNMPmining ($object_id, $community)
 		278 => 395,
 		283 => 148,
 		324 => 380,
+		325 => 382,
 		696 => 167,
 		697 => 166,
 		527 => 210,
@@ -245,6 +247,17 @@ function doSNMPmining ($object_id, $community)
 			{
 				$label = ($i >= 45) ? "${i}" : "${i}X";
 				$error = commitAddPort ($object_id, 'gi0/' . $i, 24, $label, $ifList2["GigabitEthernet0/${i}"]['phyad']);
+				if ($error == '')
+					$newports++;
+				else
+					$log[] = array ('code' => 'error', 'message' => 'Failed to add port ' . $label . ': ' . $error);
+			}
+			break;
+		case '325': // WS-C2950C-24
+			for ($i = 1; $i <= 26; $i++)
+			{
+				$label = "${i}X"; 
+				$error = commitAddPort ($object_id, 'fa0/' . $i, 24, $label, $ifList2["FastEthernet0/${i}"]['phyad']);
 				if ($error == '')
 					$newports++;
 				else
