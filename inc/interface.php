@@ -1154,7 +1154,7 @@ function renderPortsForObject ($object_id = 0)
 	foreach ($ports as $port)
 	{
 		printOpFormIntro ('editPort', array ('port_id' => $port['id']));
-		echo "<tr><td><a href='".makeHrefProcess(array('op'=>'delport', 'port_id'=>$port['id'], 'object_id'=>$object_id, 'port_name'=>$port['name']))."'>";
+		echo "<tr><td><a href='".makeHrefProcess(array('op'=>'delPort', 'port_id'=>$port['id'], 'object_id'=>$object_id, 'port_name'=>$port['name']))."'>";
 		printImageHREF ('delete', 'Unlink and Delete this port');
 		echo "</a></td>\n";
 		echo "<td><input type=text name=name value='${port['name']}' size=8></td>";
