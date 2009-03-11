@@ -5817,7 +5817,7 @@ function printOpFormIntro ($opname, $extra = array(), $upload = FALSE)
 	if (isset ($page[$pageno]['bypass']) and isset ($_REQUEST[$page[$pageno]['bypass']]))
 		$extra[$page[$pageno]['bypass']] = $_REQUEST[$page[$pageno]['bypass']];
 	foreach ($extra as $inputname => $inputvalue)
-		echo "<input type=hidden name=${inputname} value=${inputvalue}>\n";
+		echo "<input type=hidden name=${inputname} value='${inputvalue}'>\n";
 }
 
 // This is a dual-purpose formating function:
