@@ -68,7 +68,7 @@ prepare_fetch_commands()
 {
 	printf 'term len 0\nshow vlan brief\nquit\n' >> $CMDS1
 	printf 'term len 0\nshow int status\nquit\n' >> $CMDS2
-	printf 'term len 0\nshow mac-address-table dynamic\nquit\n' >> $CMDS3
+	printf 'term len 0\nshow mac-address-table\nquit\n' >> $CMDS3
 }
 
 prepare_push_commands()
@@ -132,8 +132,8 @@ do_fetch()
 	elif [ "$SW" = "Cisco+IOS+12.2" -o "$SW" = "Cisco+IOS+12.1" ]; then
 		case "$HW" in
 			Cisco+Catalyst+35*|Cisco+Catalyst+37*|Cisco+Catalyst+29*)
-				cat "$OUT3" | tr -d '\r' | fgrep DYNAMIC | \
-				sed $SEDFLAG 's/ +([0-9]+) +(.+)    DYNAMIC +(.+)/\2=\1@\3/;s/FastEthernet/Fa/;s/GigabitEthernet/Gi/' > "$FILE3"
+				cat "$OUT3" | tr -d '\r' | egrep 'STATIC|DYNAMIC' | \
+				sed $SEDFLAG 's/ +([0-9]+|All) +(.+)    (DYNAMIC|STATIC) +(.+)/\2=\1@\4/;s/FastEthernet/Fa/;s/GigabitEthernet/Gi/' > "$FILE3"
 			;;
 			Cisco+Catalyst+49*)
 				cat "$OUT3" | tr -d '\r' | fgrep dynamic | \
