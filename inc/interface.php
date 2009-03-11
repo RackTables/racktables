@@ -1522,7 +1522,8 @@ function printLog ($log)
 				176 => array ('code' => 'error', 'format' => 'This network already exists'),
 				177 => array ('code' => 'error', 'format' => 'commitUpdateRack() failed'),
 				178 => array ('code' => 'error', 'format' => 'file not found'),
-				179 => array ('code' => 'error', 'format' => 'Error saving file, all changes lost!'),
+				179 => array ('code' => 'error', 'format' => 'Declining outdated text. Re-edit the file for consistency.'),
+				180 => array ('code' => 'error', 'format' => 'Error saving file, all changes lost!'),
 
 // records 200~299 with warnings
 				200 => array ('code' => 'warning', 'format' => 'generic warning: %s'),
@@ -6069,7 +6070,7 @@ function renderTextEditor ($file_id)
 	global $CodePressMap;
 	showMessageOrError();
 	$fullInfo = getFile ($file_id);
-	printOpFormIntro ('updateFileText');
+	printOpFormIntro ('updateFileText', array ('mtime_copy' => $fullInfo['mtime']));
 	preg_match('/.+\.([^.]*)$/', $fullInfo['name'], $matches); # get file extension
 	if (isset ($matches[1]) && isset ($CodePressMap[$matches[1]]))
 		$syntax = $CodePressMap[$matches[1]];

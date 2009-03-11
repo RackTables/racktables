@@ -639,7 +639,8 @@ $ophandler['file']['edit']['updateFile'] = 'updateFile';
 $ophandler['file']['tags']['saveTags'] = 'saveEntityTags';
 $ophandler['file']['editText']['updateFileText'] = 'updateFileText';
 $msgcode['updateFileText']['OK'] = 78;
-$msgcode['updateFileText']['ERR'] = 179;
+$msgcode['updateFileText']['ERR1'] = 179;
+$msgcode['updateFileText']['ERR2'] = 180;
 
 // This function returns array if page numbers leading to the target page
 // plus page number of target page itself. The first element is the target

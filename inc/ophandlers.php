@@ -1730,13 +1730,15 @@ function deleteFile ()
 function updateFileText ()
 {
 	assertUIntArg ('file_id', __FUNCTION__);
+	assertStringArg ('mtime_copy', __FUNCTION__);
 	assertStringArg ('file_text', __FUNCTION__, TRUE); // it's Ok to save empty
 	$shortInfo = getFileInfo ($_REQUEST['file_id']);
-	// Is this bytes or chars?
+	if ($shortInfo['mtime'] != $_REQUEST['mtime_copy'])
+		return buildRedirectURL (__FUNCTION__, 'ERR1');
 	$error = commitUpdateFileText ($_REQUEST['file_id'], $_REQUEST['file_text']);
 	if ($error == '')
 		return buildRedirectURL (__FUNCTION__, 'OK', array ($shortInfo['name']));
-	return buildRedirectURL (__FUNCTION__, 'ERR', array ($error));
+	return buildRedirectURL (__FUNCTION__, 'ERR2');
 }
 
 ?>
