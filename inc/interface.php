@@ -3247,12 +3247,11 @@ function renderSearchResults ()
 				case 'file':
 					startPortlet ("<a href='${root}?page=files'>Files</a>");
 					echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
-					echo '<tr><th>Name</th><th>Comment</th></tr>';
 					foreach ($what as $item)
 					{
-						echo "<tr class=row_${order}><td class=tdleft><a href='${root}?page=file&file_id=${item['id']}'>";
-						echo $item['name'];
-						echo "</a></td><td class=tdleft>${item['comment']}</td></tr>";
+						echo "<tr class=row_${order}><td class=tdleft>";
+						renderFileCell ($item);
+						echo "</td></tr>";
 						$order = $nextorder[$order];
 					}
 					echo '</table>';
