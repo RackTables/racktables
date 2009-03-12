@@ -1538,7 +1538,7 @@ function getFileSearchResult ($terms)
 	$byFilename = getSearchResultByField
 	(
 		'File',
-		array ('id', 'name', 'comment'),
+		array ('id', 'name', 'comment', 'type', 'size'),
 		'name',
 		$terms,
 		'name'
@@ -1546,7 +1546,7 @@ function getFileSearchResult ($terms)
 	$byComment = getSearchResultByField
 	(
 		'File',
-		array ('id', 'name', 'comment'),
+		array ('id', 'name', 'comment', 'type', 'size'),
 		'comment',
 		$terms,
 		'name'
