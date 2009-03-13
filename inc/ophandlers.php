@@ -1528,11 +1528,12 @@ function addRack ()
 			else
 				$names2[] = rtrim ($parts[0]);
 		}
+		global $msgcode;
 		foreach ($names2 as $cname)
 			if (commitAddRack ($cname, $_REQUEST['rack_height2'], $_REQUEST['row_id'], '', $taglist) === TRUE)
-				$log['m'][] = array ('c' => getMessageCode (__FUNCTION__, 'OK'), 'a' => array ($cname));
+				$log['m'][] = array ('c' => $msgcode[__FUNCTION__]['OK'], 'a' => array ($cname));
 			else
-				$log['m'][] = array ('c' => getMessageCode (__FUNCTION__, 'ERR1'), 'a' => array ($cname));
+				$log['m'][] = array ('c' => $msgcode[__FUNCTION__]['ERR1'], 'a' => array ($cname));
 		return buildWideRedirectURL ($log);
 	}
 	else

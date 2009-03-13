@@ -1270,12 +1270,12 @@ function buildWideRedirectURL ($log, $nextpage = NULL, $nexttab = NULL, $moreArg
 
 function buildRedirectURL ($callfunc, $status, $args = array(), $nextpage = NULL, $nexttab = NULL)
 {
-	global $pageno, $tabno;
+	global $pageno, $tabno, $msgcode;
 	if ($nextpage === NULL)
 		$nextpage = $pageno;
 	if ($nexttab === NULL)
 		$nexttab = $tabno;
-	return buildWideRedirectURL (oneLiner (getMessageCode ($callfunc, $status), $args), $nextpage, $nexttab);
+	return buildWideRedirectURL (oneLiner ($msgcode[$callfunc][$status], $args), $nextpage, $nexttab);
 }
 
 // Return a message log consisting of only one message.
@@ -1284,13 +1284,6 @@ function oneLiner ($code, $args = array())
 	$ret = array ('v' => 2);
 	$ret['m'][] = count ($args) ? array ('c' => $code, 'a' => $args) : array ('c' => $code);
 	return $ret;
-}
-
-// Return mesage code by status code.
-function getMessageCode ($callfunc, $status)
-{
-	global $msgcode;
-	return $msgcode[$callfunc][$status];
 }
 
 function validTagName ($s, $allow_autotag = FALSE)
