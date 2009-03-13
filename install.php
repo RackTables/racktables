@@ -1,7 +1,8 @@
 <?php
 
-// This draft doesn't do anything useful at the moment. When it is finished,
-// the README will be updated accordingly.
+// This script is intended for execution through a web-browser, e.g.:
+// https://example.com/racktables/install.php
+// See README file for more information.
 
 $stepfunc[1] = 'not_already_installed';
 $stepfunc[2] = 'platform_is_ok';

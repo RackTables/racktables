@@ -14,7 +14,7 @@ Authors: <info/=@=/racktables.org>
 *                                                     *
 *******************************************************
 
-I. Dependencies.
+I. Install dependencies.
 
 For database you must have a MySQL server installation
 version 4.x or 5.x. InnoDB support must be enabled.
@@ -40,52 +40,35 @@ php5-pdo_mysql php5-pdo apache2-mod_php5 php5-mbstring
 * openSUSE 11.0: use YaST to apache2-mod_php5, php5-gd, php5-mbstring, php5-mysql,
 php2-snmp and php5-ldap
 
-II. Prepare the server.
+
+II. Prepare the files and database.
 1. Unpack the tarball and make it web-accessible, e.g. http://yourcompany.com/racktables
 or http://racktables.mysite.org.
 2. mysql> create database database_name; grant all privileges on database_name.* to XXX@YYY identified by 'ZZZ';
 
 
-There are two mutually exclusive ways to install RackTables, they are described as III-A and III-B.
-
-
-III-A. HTTP installation (starting with 0.14.12 release)
+III. Finish the installation.
 Open your RackTables URL and follow the instructions. In a suitable
 environment everything should take a minute or so.
-
-
-III-B. Manual installation.
-1. Edit install/init-auth.sql and change admin password
-
-2. Init database.
-mysql> use database_name;
-mysql> source install/init-structure.sql
-mysql> source install/init-auth.sql
-$ rm -f install/init-auth.sql
-mysql> source install/init-dictbase.sql
-mysql> source install/init-dictvendors.sql
-
-3. Edit inc/secret.php
-
-4. $ rm -f install/init-auth.sql
-(Just to be sure you did.)
 
 *******************************************************
 *                                                     *
 *              UPGRADING RACKTABLES                   *
 *                                                     *
 *******************************************************
-RackTables now provides an automatic database upgrade feature.
-If you already have a working installation, the following
-procedure should be sufficient:
+RackTables (since 0.14.6) provides an automatic database upgrade feature.
+If you already have a working installation, the following procedure
+should be sufficient:
 
 0. BACKUP YOUR DATABASE
-1. Remove all existing files except inc/secret.php and gateways'
-   configuration (in the gateways directory).
+1. Remove all existing files except inc/secret.php, gateways'
+   configuration (in the gateways directory) and local mod (inc/local.php).
 2. Unpack the new tarball into the place.
-3. Open the RackTables page in your browser.
-4. Follow instructions. Normally, everything should be Ok. If it
-   is not so, write down the failed quieries for further investigation.
+3. Open the RackTables page in your browser. The software detects version
+   mismatch and displays a message telling to log in as admin to finish
+   the upgrade.
+4. Do that. Normally, everything should be Ok. If there are
+   errors displayed, copy and send them to us for review.
 
 *******************************************************
 *                                                     *

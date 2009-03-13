@@ -17,6 +17,7 @@
 	update: display and edit the dictionary chapter by chapter (ticket:151)
 	update: 'enabled' user acount flag was dropped
 	update: switchvlans gateway has been changed
+	update: RackTables installation is now done only through install.php
 	bugfix: show error message if snmp module isn't loaded.  closes ticket 43 (by Aaron)
 	bugfix: show error message for duplicate IPv4 network record
 	bugfix: it was possible to access the system as any existing
