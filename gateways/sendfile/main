@@ -19,10 +19,10 @@ MYDIR=`dirname $0`
 
 do_submit()
 {
-	user=`echo $args | cut -s -d' ' -f1`
-	endpoint=`echo $args | cut -s -d' ' -f2`
-	handler=`echo $args | cut -s -d' ' -f3`
-	cfgfile=`echo $args | cut -s -d' ' -f4`
+	user=$1
+	endpoint=$2
+	handler=$3
+	cfgfile=$4
 	# sanity checks
 	if [ -z "$user" -o -z "$endpoint" -o -z "$handler" -o -z "$cfgfile" ]; then
 		echo 'ERR!invalid arguments'
@@ -36,20 +36,20 @@ do_submit()
 		echo "ERR!Cannot execute $MYDIR/$handler.install"
 		return
 	fi
-	"$MYDIR/$handler.install" $user $endpoint $cfgfile
+	"$MYDIR/$handler.install" "$user" "$endpoint" "$cfgfile"
 	ret=$?
 	if [ $ret = 0 ]; then
 		echo "OK!"
 	else
-		echo "ERR!File handler returned code $ret"
+		echo "ERR!File handler '$handler' returned code $ret"
 	fi
 }
 
 # main loop
-while read cmd args; do
+while read cmd arg1 arg2 arg3 arg4; do
 	case $cmd in
 		submit)
-			do_submit $args
+			do_submit "$arg1" "$arg2" "$arg3" "$arg4"
 			;;
 		*)
 			echo "ERR!unknown command $cmd"

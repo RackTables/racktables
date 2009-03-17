@@ -1867,4 +1867,51 @@ function makeHrefForHelper ($helper_name, $params = array())
 	return $ret;
 }
 
+// Process the given list of records to build data suitable for printNiftySelect()
+// (like it was formerly executed by printSelect()). Screen out vendors according
+// to VENDOR_SIEVE, if object type ID is provided. However, the OPTGROUP with already
+// selected OPTION is protected from being screened.
+function cookOptgroups ($recordList, $object_type_id = 0, $existing_value = 0)
+{
+	$ret = array();
+	// Always keep "other" OPTGROUP at the SELECT bottom.
+	$therest = array();
+	foreach ($recordList as $dict_key => $dict_value)
+		if (strpos ($dict_value, '%GSKIP%') !== FALSE)
+		{
+			$tmp = explode ('%GSKIP%', $dict_value, 2);
+			$ret[$tmp[0]][$dict_key] = $tmp[1];
+		}
+		elseif (strpos ($dict_value, '%GPASS%') !== FALSE)
+		{
+			$tmp = explode ('%GPASS%', $dict_value, 2);
+			$ret[$tmp[0]][$dict_key] = $tmp[1];
+		}
+		else
+			$therest[$dict_key] = $dict_value;
+	if ($object_type_id != 0)
+	{
+		$screenlist = array();
+		foreach (explode (';', getConfigVar ('VENDOR_SIEVE')) as $sieve)
+			if (FALSE !== mb_ereg ("^([^@]+)(@${object_type_id})?\$", trim ($sieve), $regs))
+				$screenlist[] = $regs[1];
+		foreach (array_keys ($ret) as $vendor)
+			if (in_array ($vendor, $screenlist))
+			{
+				$ok_to_screen = TRUE;
+				if ($existing_value)
+					foreach (array_keys ($ret[$vendor]) as $recordkey)
+						if ($recordkey == $existing_value)
+						{
+							$ok_to_screen = FALSE;
+							break;
+						}
+				if ($ok_to_screen)
+					unset ($ret[$vendor]);
+			}
+	}
+	$ret['other'] = $therest;
+	return $ret;
+}
+
 ?>

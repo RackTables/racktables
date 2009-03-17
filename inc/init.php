@@ -61,7 +61,8 @@ if (!set_magic_quotes_runtime (0))
 	exit (1);
 }
 
-// Escape any globals before we ever try to use them.
+// Escape any globals before we ever try to use them, but keep a copy of originals.
+$sic = $_REQUEST;
 foreach ($_REQUEST as $key => $value)
 	if (gettype ($value) == 'string')
 		$_REQUEST[$key] = escapeString ($value);

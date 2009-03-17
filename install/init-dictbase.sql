@@ -278,6 +278,7 @@ INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, descriptio
 INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('PREVIEW_TEXT_ROWS','25','uint','yes','no','Rows for text file preview');
 INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('PREVIEW_TEXT_COLS','80','uint','yes','no','Columns for text file preview');
 INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('PREVIEW_IMAGE_MAXPXS','320','uint','yes','no','Max pixels per axis for image file preview');
+INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('VENDOR_SIEVE','','string','yes','no','Vendor sieve configuration');
 INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('DB_VERSION','0.17.0','string','no','yes','Database version.');
 
 INSERT INTO `Script` VALUES ('RackCode','allow {$userid_1}');

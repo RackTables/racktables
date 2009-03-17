@@ -120,6 +120,9 @@ $image['clear']['height'] = 16;
 $image['CLEAR']['path'] = 'pix/tango-edit-clear-big.png';
 $image['CLEAR']['width'] = 32;
 $image['CLEAR']['height'] = 32;
+$image['CLEAR gray']['path'] = 'pix/tango-edit-clear-gray-32x32.png';
+$image['CLEAR gray']['width'] = 32;
+$image['CLEAR gray']['height'] = 32;
 $image['save']['path'] = 'pix/tango-document-save.png';
 $image['save']['width'] = 16;
 $image['save']['height'] = 16;
@@ -593,7 +596,8 @@ function renderEditObjectForm ($object_id)
 				case 'dict':
 					$chapter = readChapter ($record['chapter_name']);
 					$chapter[0] = '-- NOT SET --';
-					printSelect ($chapter, "${i}_value", $record['key']);
+					$chapter = cookOptgroups ($chapter, $object['objtype_id'], $record['key']);
+					printNiftySelect ($chapter, "${i}_value", $record['key']);
 					break;
 			}
 			echo "</td></tr>\n";
@@ -654,64 +658,32 @@ function renderEditRackForm ($rack_id)
 }
 
 // This is a helper for creators and editors.
-function printSelect ($rowList, $select_name, $selected_id = NULL, $tabindex = NULL)
+// Input array keys are OPTION VALUEs and input array values are OPTION text.
+function printSelect ($optionList, $select_name, $selected_id = NULL, $tabindex = NULL)
 {
-	// First collect all data for OPTGROUPs, then ouput it and dump
-	// the rest of records as is.
-	$optgroup = array();
-	$other = array();
-	foreach ($rowList as $dict_key => $dict_value)
+	echo "<select name=${select_name}" . ($tabindex ? " tabindex=${tabindex}" : '') . '>';
+	foreach ($optionList as $dict_key => $dict_value)
+		echo "<option value=${dict_key}" . ($dict_key == $selected_id ? ' selected' : '') . ">${dict_value}</option>";
+	echo "</select>";
+}
+
+// Input is a cooked list of OPTGROUPs, each with own sub-list of OPTIONs in the same
+// format as printSelect() expects.
+function printNiftySelect ($groupList, $select_name, $selected_id = NULL, $tabindex = NULL)
+{
+	// special treatment for ungrouped data
+	if (count ($groupList) == 1 and isset ($groupList['other']))
 	{
-		if (strpos ($dict_value, '%GSKIP%') !== FALSE)
-		{
-			$tmp = explode ('%GSKIP%', $dict_value, 2);
-			$optgroup[$tmp[0]][$dict_key] = $tmp[1];
-		}
-		elseif (strpos ($dict_value, '%GPASS%') !== FALSE)
-		{
-			$tmp = explode ('%GPASS%', $dict_value, 2);
-			$optgroup[$tmp[0]][$dict_key] = $tmp[1];
-		}
-		else
-			$other[$dict_key] = $dict_value;
+		printSelect ($groupList['other'], $select_name, $selected_id, $tabindex);
+		return;
 	}
 	echo "<select name=${select_name}" . ($tabindex ? " tabindex=${tabindex}" : '') . '>';
-	if (!count ($optgroup))
+	foreach ($groupList as $groupname => $groupdata)
 	{
-		foreach ($other as $dict_key => $dict_value)
-		{
-			echo "<option value=${dict_key}";
-			if ($dict_key == $selected_id)
-				echo ' selected';
-			echo ">${dict_value}</option>";
-		}
-	}
-	else
-	{
-		foreach ($optgroup as $groupname => $groupdata)
-		{
-			echo "<optgroup label='${groupname}'>";
-			foreach ($groupdata as $dict_key => $dict_value)
-			{
-				echo "<option value=${dict_key}";
-				if ($dict_key == $selected_id)
-					echo ' selected';
-				echo ">${dict_value}</option>";
-			}
-			echo "</optgroup>\n";
-		}
-		if (count ($other))
-		{
-			echo "<optgroup label='other'>\n";
-			foreach ($other as $dict_key => $dict_value)
-			{
-				echo "<option value=${dict_key}";
-				if ($dict_key == $selected_id)
-					echo ' selected';
-				echo ">${dict_value}</option>";
-			}
-			echo "</optgroup>\n";
-		}
+		echo "<optgroup label='${groupname}'>";
+		foreach ($groupdata as $dict_key => $dict_value)
+			echo "<option value=${dict_key}" . ($dict_key == $selected_id ? ' selected' : '') . ">${dict_value}</option>";
+		echo "</optgroup>\n";
 	}
 	echo "</select>";
 }
@@ -2706,16 +2678,18 @@ function renderIPv4AddressProperties ($dottedquad)
 	echo "<tr><td class='tdright'>Name:</td><td class='tdleft'><input type=text name=name size=20 value='${address['name']}'></tr>";
 	echo "<td class='tdright'>Reserved:</td><td class='tdleft'><input type=checkbox name=reserved size=20 ";
 	echo ($address['reserved']=='yes') ? 'checked' : '';
-	echo "></tr><tr><td colspan=2 class='tdcenter'>";
+	echo "></tr><tr><td class=tdleft>";
 	printImageHREF ('SAVE', 'Save changes', TRUE);
-	echo "</td></form></tr></table>\n";
-	finishPortlet();
+	echo "</td></form><td class=tdright>";
 	if (empty ($address['name']) and $address['reserved'] == 'no')
-		return;
-
-	startPortlet ('release');
-	printOpFormIntro ('editAddress', array ('name' => '', 'reserved' => ''));
-	echo "<input type=submit value='release'></form>";
+		printImageHREF ('CLEAR gray');
+	else
+	{
+		printOpFormIntro ('editAddress', array ('name' => '', 'reserved' => ''));
+		printImageHREF ('CLEAR', 'Release', TRUE);
+		echo "</form>";
+	}
+	echo "</td></tr></table>\n";
 	finishPortlet();
 }
 
@@ -3502,8 +3476,8 @@ function renderChapterEditor ($tgt_chapter_no)
 		echo '<tr><td>&nbsp;</td><td>';
 		printImageHREF ('add', 'Add new', TRUE);
 		echo "</td>";
-		echo "<td class=tdleft><input type=text name=dict_value size=32></td><td>";
-		printImageHREF ('add', 'Add new', TRUE);
+		echo "<td class=tdleft><input type=text name=dict_value size=32 tabindex=100></td><td>";
+		printImageHREF ('add', 'Add new', TRUE, 101);
 		echo '</td></tr></form>';
 	}
 	$dict = getDict();
@@ -5082,7 +5056,7 @@ function renderTagOptionForFilter ($taginfo, $tagfilter, $realm, $level = 0)
 
 function renderEntityTags ($entity_id = 0)
 {
-	global $tagtree, $target_given_tags, $pageno, $page, $etype_by_pageno;
+	global $tagtree, $target_given_tags, $pageno, $page, $etype_by_pageno, $target_given_tags;
 	if ($entity_id <= 0)
 	{
 		showError ('Invalid or missing arguments', __FUNCTION__);
@@ -5101,8 +5075,13 @@ function renderEntityTags ($entity_id = 0)
 	echo '<tr><td class=tdleft>';
 	printImageHREF ('SAVE', 'Save changes', TRUE);
 	echo "</form></td><td class=tdright>";
-	printOpFormIntro ('saveTags', array ($bypass_name => $entity_id, 'taglist[]' => ''));
-	printImageHREF ('CLEAR', 'Reset all tags', TRUE);
+	if (!count ($target_given_tags))
+		printImageHREF ('CLEAR gray');
+	else
+	{
+		printOpFormIntro ('saveTags', array ($bypass_name => $entity_id, 'taglist[]' => ''));
+		printImageHREF ('CLEAR', 'Reset all tags', TRUE);
+	}
 	echo '</form></td></tr></table>';
 	finishPortlet();
 }

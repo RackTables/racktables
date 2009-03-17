@@ -208,22 +208,15 @@ function setSwitchVLANs ($object_id = 0, $setcmd)
 
 // Drop a file off RackTables platform. The gateway will catch the file and pass it to the given
 // installer script.
-function gwSendFile ($object_id = 0, $handlername, $filetext = '')
+// Return a 
+function gwSendFile ($endpoint, $handlername, $filetext = '')
 {
 	global $remote_username;
-	if ($object_id <= 0 or empty ($handlername))
-		return oneLiner (160); // invalid arguments
-	$objectInfo = getObjectInfo ($object_id);
-	$endpoints = findAllEndpoints ($object_id, $objectInfo['name']);
-	if (count ($endpoints) == 0)
-		return oneLiner (161); // endpoint not found
-	if (count ($endpoints) > 1)
-		return oneLiner (162); // can't pick an address
-	$endpoint = str_replace (' ', '+', $endpoints[0]);
 	$tmpfilename = tempnam ('', 'RackTables-sendfile-');
 	$tmpfile = fopen ($tmpfilename, 'wb');
 	fwrite ($tmpfile, $filetext);
 	fclose ($tmpfile);
+	$endpoint = str_replace (' ', '\ ', $endpoint); // the gateway dispatcher uses read (1) to assign arguments
 	$outputlines = queryGateway
 	(
 		'sendfile',
@@ -237,16 +230,22 @@ function gwSendFile ($object_id = 0, $handlername, $filetext = '')
 	if (strpos ($outputlines[0], 'OK!') !== 0)
 		return oneLiner (164, array ($outputlines[0])); // gateway failure
 	// Being here means having 'OK!' in the response.
-	return oneLiner (66, array ($handlername)); // ignore provided "Ok" text, generate our own one
+	return oneLiner (66, array ($handlername)); // ignore provided "Ok" text
+}
 
-
-
-	// Finally we can parse the response into message array.
-	$log = array ('v' => 2);
-	$codemap['OK'] = 66; // sendfile done
-	list ($code, $text) = split ('!', $outputlines[0]);
-	$log['m'][] = array ('c' => $codemap[$code], 'a' => array ($text));
-	return $log;
+function gwSendFileToObject ($object_id = 0, $handlername, $filetext = '')
+{
+	global $remote_username;
+	if ($object_id <= 0 or empty ($handlername))
+		return oneLiner (160); // invalid arguments
+	$objectInfo = getObjectInfo ($object_id);
+	$endpoints = findAllEndpoints ($object_id, $objectInfo['name']);
+	if (count ($endpoints) == 0)
+		return oneLiner (161); // endpoint not found
+	if (count ($endpoints) > 1)
+		return oneLiner (162); // can't pick an address
+	$endpoint = str_replace (' ', '+', $endpoints[0]);
+	return gwSendFile ($endpoint, $handlername, $filetext);
 }
 
 ?>
