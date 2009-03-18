@@ -6060,7 +6060,7 @@ function renderTextEditor ($file_id)
 	else
 		$syntax = "text";
 	echo '<table border=0 align=center>';
-	echo "<tr><td><textarea rows=45 cols=180 id=file_text name=file_text tabindex=101 class='codepress " . $syntax . "'>";
+	echo "<tr><td><textarea rows=45 cols=180 id=file_text name=file_text tabindex=101 class='codepress " . $syntax . "'>\n";
 	echo $fullInfo['contents'] . '</textarea></td></tr>';
 	echo "<tr><td class=submit><input type=submit value='Save' onclick='file_text.toggleEditor();'>";
 	echo "</td></tr>\n</table></form>\n";
