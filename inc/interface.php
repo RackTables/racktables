@@ -5504,12 +5504,12 @@ function renderFile ($file_id = 0)
 		return;
 	}
 	echo "<table border=0 class=objectview cellspacing=0 cellpadding=0>";
-	echo "<tr><td colspan=2 align=center><h1>${file['name']}</h1></td></tr>\n";
+	echo "<tr><td colspan=2 align=center><h1>" . htmlspecialchars ($file['name']) . "</h1></td></tr>\n";
 	echo "<tr><td class=pcleft>";
 	startPortlet ('summary');
 	echo "<table border=0 cellspacing=0 cellpadding=3 width='100%'>\n";
 	echo "<tr><th width='50%' class=tdright>Type:</th>";
-	printf("<td class=tdleft>%s</td></tr>", $file['type']);
+	printf("<td class=tdleft>%s</td></tr>", htmlspecialchars ($file['type']));
 	echo "<tr><th width='50%' class=tdright>Size:</th>";
 	printf("<td class=tdleft>%s</td></tr>", formatFileSize($file['size']));
 	echo "<tr><th width='50%' class=tdright>Created:</th>";
@@ -5534,7 +5534,7 @@ function renderFile ($file_id = 0)
 	if (!empty ($file['comment']))
 	{
 		echo '<tr><th class=slbconf>Comment:</th><td>&nbsp;</td></tr>';
-		echo '<tr><td colspan=2 class="dashed slbconf">' . string_insert_hrefs ($file['comment']) . '</td></tr>';
+		echo '<tr><td colspan=2 class="dashed slbconf">' . string_insert_hrefs (htmlspecialchars ($file['comment'])) . '</td></tr>';
 	}
 	echo "</table><br>\n";
 	finishPortlet();
@@ -5596,9 +5596,12 @@ function renderFileProperties ($file_id = 0)
 	showMessageOrError();
 	echo '<table border=0 align=center>';
 	printOpFormIntro ('updateFile');
-	echo "<tr><th class=tdright>MIME-type:</th><td class=tdleft><input tabindex=101 type=text name=file_type value='${file['type']}'></td></tr>";
-	echo "<tr><th class=tdright>Filename:</th><td class=tdleft><input tabindex=102 type=text name=file_name value='${file['name']}'></td></tr>\n";
-	echo "<tr><th class=tdright>Comment:</th><td class=tdleft><textarea tabindex=103 name=file_comment rows=10 cols=80>${file['comment']}</textarea></td></tr>\n";
+	echo "<tr><th class=tdright>MIME-type:</th><td class=tdleft><input tabindex=101 type=text name=file_type value='";
+	echo htmlspecialchars ($file['type']) . "'></td></tr>";
+	echo "<tr><th class=tdright>Filename:</th><td class=tdleft><input tabindex=102 type=text name=file_name value='";
+	echo htmlspecialchars ($file['name']) . "'></td></tr>\n";
+	echo "<tr><th class=tdright>Comment:</th><td class=tdleft><textarea tabindex=103 name=file_comment rows=10 cols=80>\n";
+	echo htmlspecialchars ($file['comment']) . "</textarea></td></tr>\n";
 	echo "<tr><th class=submit colspan=2>";
 	printImageHREF ('SAVE', 'Save changes', TRUE, 102);
 	echo '</th></tr></form></table>';
@@ -5778,7 +5781,7 @@ function renderFilesForEntity ($entity_id = 0)
 			echo "</td><td class=tdleft>${file['comment']}</td><td class=tdleft>";
 			echo "<a href='".makeHrefProcess(array('op'=>'unlinkFile', 'link_id'=>$file['link_id'], $id_name=>$entity_id, 'name'=>$file['name']))."'>";
 			printImageHREF ('CUT', 'Unlink file');
-			echo "</a> <a href='".makeHrefProcess(array('op'=>'deleteFile', 'file_id'=>$file_id, $id_name=>$entity_id, 'name'=>$file['name']))."'>";
+			echo "</a> <a href='".makeHrefProcess(array('op'=>'deleteFile', 'file_id'=>$file_id, $id_name=>$entity_id))."'>";
 			printImageHREF ('DESTROY', 'Unlink and delete file');
 			echo "</a></td></tr>\n";
 		}
@@ -6038,7 +6041,7 @@ function getFilePreviewCode ($file)
 				$file = getFile ($file['id']);
 				$ret .= '<textarea readonly rows=' . getConfigVar ('PREVIEW_TEXT_ROWS');
 				$ret .= ' cols=' . getConfigVar ('PREVIEW_TEXT_COLS') . '>';
-				$ret .= $file['contents'];
+				$ret .= htmlspecialchars ($file['contents']);
 				$ret .= '</textarea>';
 			}
 			break;
@@ -6061,7 +6064,7 @@ function renderTextEditor ($file_id)
 		$syntax = "text";
 	echo '<table border=0 align=center>';
 	echo "<tr><td><textarea rows=45 cols=180 id=file_text name=file_text tabindex=101 class='codepress " . $syntax . "'>\n";
-	echo $fullInfo['contents'] . '</textarea></td></tr>';
+	echo htmlspecialchars ($fullInfo['contents']) . '</textarea></td></tr>';
 	echo "<tr><td class=submit><input type=submit value='Save' onclick='file_text.toggleEditor();'>";
 	echo "</td></tr>\n</table></form>\n";
 }

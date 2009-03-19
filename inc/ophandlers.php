@@ -1692,7 +1692,8 @@ function replaceFile ()
 		return buildRedirectURL (__FUNCTION__, 'ERR', array ("file uploads not allowed, change 'file_uploads' parameter in php.ini"));
 
 	$fp = fopen($_FILES['file']['tmp_name'], 'rb');
-	$error = commitReplaceFile ($_REQUEST['file_id'], $_FILES['file']['size'], $fp);
+	global $sic;
+	$error = commitReplaceFile ($sic['file_id'], $fp);
 	if ($error != '')
 		return buildRedirectURL (__FUNCTION__, 'ERR', array ($error));
 
@@ -1728,12 +1729,13 @@ function unlinkFile ()
 function deleteFile ()
 {
 	assertUIntArg ('file_id', __FUNCTION__);
+	$shortInfo = getFileInfo ($_REQUEST['file_id']);
 	$error = commitDeleteFile ($_REQUEST['file_id']);
 
 	if ($error != '')
 		return buildRedirectURL (__FUNCTION__, 'ERR', array ($error));
 
-	return buildRedirectURL (__FUNCTION__, 'OK', array ($_REQUEST['name']));
+	return buildRedirectURL (__FUNCTION__, 'OK', array (htmlspecialchars ($shortInfo['name'])));
 }
 
 function updateFileText ()
@@ -1744,9 +1746,10 @@ function updateFileText ()
 	$shortInfo = getFileInfo ($_REQUEST['file_id']);
 	if ($shortInfo['mtime'] != $_REQUEST['mtime_copy'])
 		return buildRedirectURL (__FUNCTION__, 'ERR1');
-	$error = commitUpdateFileText ($_REQUEST['file_id'], $_REQUEST['file_text']);
+	global $sic;
+	$error = commitReplaceFile ($sic['file_id'], $sic['file_text']);
 	if ($error == '')
-		return buildRedirectURL (__FUNCTION__, 'OK', array ($shortInfo['name']));
+		return buildRedirectURL (__FUNCTION__, 'OK', array (htmlspecialchars ($shortInfo['name'])));
 	return buildRedirectURL (__FUNCTION__, 'ERR2');
 }
 

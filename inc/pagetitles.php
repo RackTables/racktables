@@ -208,7 +208,7 @@ function dynamic_title_file ()
 				showError ('getFileInfo() failed', __FUNCTION__);
 				return NULL;
 			}
-			$ret['name'] = $file['name'];
+			$ret['name'] = htmlspecialchars ($file['name']);
 			$ret['params']['file_id'] = $_REQUEST['file_id'];
 			break;
 		case 'filesbylink':

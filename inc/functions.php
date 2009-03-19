@@ -1914,4 +1914,9 @@ function cookOptgroups ($recordList, $object_type_id = 0, $existing_value = 0)
 	return $ret;
 }
 
+function dos2unix ($text)
+{
+	return str_replace ("\r\n", "\n", $text);
+}
+
 ?>

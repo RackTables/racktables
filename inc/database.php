@@ -3797,21 +3797,18 @@ function commitLinkFile ($file_id, $entity_type, $entity_id)
 		return 'commitLinkFile: SQL query failed';
 }
 
-function commitReplaceFile ($file_id = 0, $size, $contents)
+function commitReplaceFile ($file_id = 0, $contents)
 {
 	if ($file_id == 0)
 	{
 		showError ('Not all required args are present.', __FUNCTION__);
 		return FALSE;
 	}
-	$now = date('YmdHis');
 
 	global $dbxlink;
-	$query = $dbxlink->prepare('UPDATE File SET size= ?, mtime = ?, contents = ? WHERE id = ?');
-	$query->bindParam(1, $size);
-	$query->bindParam(2, $now);
-	$query->bindParam(3, $contents, PDO::PARAM_LOB);
-	$query->bindParam(4, $file_id);
+	$query = $dbxlink->prepare('UPDATE File SET mtime = NOW(), contents = ?, size = LENGTH(contents) WHERE id = ?');
+	$query->bindParam(1, $contents, PDO::PARAM_LOB);
+	$query->bindParam(2, $file_id);
 
 	$result = $query->execute();
 	if (!$result)
@@ -3840,17 +3837,6 @@ function commitUpdateFile ($file_id = 0, $new_name = '', $new_type = '', $new_co
 	if (!$result)
 		return 'SQL query failed in ' . __FUNCTION__;
 	return '';
-}
-
-// This is a temporary copy of commitReplaceFile() to work around escaping issues.
-function commitUpdateFileText ($file_id = 0, $newtext = '')
-{
-	if ($file_id <= 0)
-		return 'Invalid key in ' . __FUNCTION__;
-
-	global $dbxlink;
-	$query = "UPDATE File SET mtime = NOW(), contents = '${newtext}', size = LENGTH(contents) WHERE id = ${file_id} limit 1";
-	return (FALSE === $dbxlink->exec ($query)) ? ('SQL query failed in ' . __FUNCTION__) : '';
 }
 
 function commitUnlinkFile ($link_id)
