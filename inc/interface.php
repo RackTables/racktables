@@ -202,6 +202,14 @@ $CodePressMap = array
 	'js' => 'javascript',
 );
 
+$attrtypes = array
+(
+	'uint' => '[U] unsigned integer',
+	'float' => '[F] floating point',
+	'string' => '[S] string',
+	'dict' => '[D] dictionary record'
+);
+
 // Main menu.
 function renderIndex ()
 {
@@ -2702,13 +2710,9 @@ function renderIPv4AddressAllocations ($dottedquad)
 		printOpFormIntro ('addIPv4Allocation');
 		echo "<tr><td>";
 		printImageHREF ('add', 'allocate', TRUE);
-		echo "</td><td><select name='object_id' tabindex=100>";
-
-		foreach (explode (',', getConfigVar ('IPV4_PERFORMERS')) as $type) 
-			foreach (getNarrowObjectList ($type) as $object)
-				echo "<option value='${object['id']}'>${object['dname']}</option>";
-
-		echo "</select></td><td><input type=text tabindex=101 name=bond_name size=10></td><td>";
+		echo "</td><td>";
+		printSelect (getNarrowObjectList (explode (',', getConfigVar ('IPV4_PERFORMERS'))), 'object_id', NULL, 100);
+		echo "</td><td><input type=text tabindex=101 name=bond_name size=10></td><td>";
 		printSelect ($aat, 'bond_type', NULL, 102);
 		echo "</td><td>";
 		printImageHREF ('add', 'allocate', TRUE, 103);
@@ -3582,7 +3586,7 @@ function renderChaptersEditor ()
 
 function renderAttributes ()
 {
-	global $nextorder;
+	global $nextorder, $attrtypes;
 	$attrMap = getAttrMap();
 	startPortlet ('Optional attributes');
 	echo "<table class=cooltable border=0 cellpadding=5 cellspacing=0 align=center>\n";
@@ -3592,7 +3596,7 @@ function renderAttributes ()
 	{
 		echo "<tr class=row_${order}>";
 		echo "<td class=tdleft>${attr['name']}</td>";
-		echo "<td class=tdleft>${attr['type']}</td>";
+		echo "<td class=tdleft>" . $attrtypes[$attr['type']] . "</td>";
 		echo '<td class=tdleft>';
 		if (count ($attr['application']) == 0)
 			echo '&nbsp;';
@@ -3617,13 +3621,10 @@ function renderEditAttributesForm ()
 		printOpFormIntro ('add');
 		echo '<tr><td>';
 		printImageHREF ('add', 'Create attribute', TRUE);
-		echo "</td><td><input type=text tabindex=100 name=attr_name></td>";
-		echo '<td><select name=attr_type tabindex=101>';
-		echo '<option value=uint>uint</option>';
-		echo '<option value=float>float</option>';
-		echo '<option value=string>string</option>';
-		echo '<option value=dict>dict</option>';
-		echo '</select></td><td>';
+		echo "</td><td><input type=text tabindex=100 name=attr_name></td><td>";
+		global $attrtypes;
+		printSelect ($attrtypes, 'attr_type', NULL, 101);
+		echo '</td><td>';
 		printImageHREF ('add', 'Create attribute', TRUE, 102);
 		echo '</td></tr></form>';
 	}
@@ -4326,11 +4327,8 @@ function renderRSPoolLBForm ($pool_id = 0)
 	startPortlet ('Add new');
 	echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
 	printOpFormIntro ('addLB');
-	echo "<tr valign=top><th>LB / VS</th><td class=tdleft><select name='object_id' tabindex=1>";
-	foreach (explode (',', getConfigVar ('NATV4_PERFORMERS')) as $type)
-		foreach (getNarrowObjectList ($type) as $object)
-			echo "<option value='${object['id']}'>${object['dname']}</option>";
-	echo "</select> ";
+	echo "<tr valign=top><th>LB / VS</th><td class=tdleft>";
+	printSelect (getNarrowObjectList (explode (',', getConfigVar ('NATV4_PERFORMERS'))), 'object_id', NULL, 1);
 	printSelect ($vs_list, 'vs_id', NULL, 2);
 	echo "</td><td>";
 	printImageHREF ('add', 'Configure LB', TRUE, 5);
@@ -4380,11 +4378,8 @@ function renderVServiceLBForm ($vs_id = 0)
 	startPortlet ('Add new');
 	echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
 	printOpFormIntro ('addLB');
-	echo "<tr valign=top><th>LB / RS pool</th><td class=tdleft><select name='object_id' tabindex=1>";
-	foreach (explode (',', getConfigVar ('NATV4_PERFORMERS')) as $type)
-		foreach (getNarrowObjectList ($type) as $object)
-			echo "<option value='${object['id']}'>${object['dname']}</option>";
-	echo "</select> ";
+	echo "<tr valign=top><th>LB / RS pool</th><td class=tdleft>";
+	printSelect (getNarrowObjectList (explode (',', getConfigVar ('NATV4_PERFORMERS'))), 'object_id', NULL, 1);
 	printSelect ($rsplist, 'pool_id', NULL, 2);
 	echo "</td><td>";
 	printImageHREF ('add', 'Configure LB', TRUE, 5);
