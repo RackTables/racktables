@@ -1888,7 +1888,7 @@ function renderObjectGroup ()
 		return;
 	}
 	echo '<br><br><table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
-	echo '<tr><th>Common name</th><th>Visible label</th><th>Asset tag</th><th>Barcode</th><th>Row/Rack</th><th></th></tr>';
+	echo '<tr><th>Common name</th><th>Visible label</th><th>Asset tag</th><th>Barcode</th><th>Row/Rack</th></tr>';
 	$order = 'odd';
 	foreach ($objects as $obj)
 	{
@@ -2758,7 +2758,6 @@ function renderNATv4ForObject ($object_id = 0)
 	global $root;
 	function printNewItemTR ($alloclist)
 	{
-		global $root;
 		printOpFormIntro ('addNATv4Rule');
 		echo "<tr align='center'><td>";
 		printImageHREF ('add', 'Add new NAT rule', TRUE);
