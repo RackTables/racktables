@@ -3853,4 +3853,15 @@ function getChapterList ()
 	return $ret;
 }
 
+// Return file id by file name. There may be more, than one record in the database,
+// so return only the first one, until it is fixed by appropriate UNIQUE key.
+function findFileByName ($filename)
+{
+	$result = useSelectBlade ("select id from File where name = '${filename}' limit 1"); 
+	if ($row = $result->fetch (PDO::FETCH_ASSOC))
+		return $row['id'];
+	else
+		return NULL;
+}
+
 ?>
