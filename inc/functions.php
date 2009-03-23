@@ -1278,10 +1278,20 @@ function buildRedirectURL ($callfunc, $status, $args = array(), $nextpage = NULL
 	return buildWideRedirectURL (oneLiner ($msgcode[$callfunc][$status], $args), $nextpage, $nexttab);
 }
 
+// Return an empty message log.
+function emptyLog ()
+{
+	return array
+	(
+		'v' => 2,
+		'm' => array()
+	);
+}
+
 // Return a message log consisting of only one message.
 function oneLiner ($code, $args = array())
 {
-	$ret = array ('v' => 2);
+	$ret = emptyLog();
 	$ret['m'][] = count ($args) ? array ('c' => $code, 'a' => $args) : array ('c' => $code);
 	return $ret;
 }

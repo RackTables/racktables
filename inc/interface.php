@@ -1504,6 +1504,8 @@ function printLog ($log)
 				178 => array ('code' => 'error', 'format' => 'file not found'),
 				179 => array ('code' => 'error', 'format' => 'Declining outdated text. Re-edit the file for consistency.'),
 				180 => array ('code' => 'error', 'format' => 'Error saving file, all changes lost!'),
+				181 => array ('code' => 'error', 'format' => "file uploads not allowed, change 'file_uploads' parameter in php.ini"),
+				182 => array ('code' => 'error', 'format' => 'SQL query failed: %s'),
 
 // records 200~299 with warnings
 				200 => array ('code' => 'warning', 'format' => 'generic warning: %s'),
@@ -1513,6 +1515,7 @@ function printLog ($log)
 				204 => array ('code' => 'warning', 'format' => 'Check uplink/downlink configuration for proper operation.'),
 				205 => array ('code' => 'warning', 'format' => '%u change request(s) have been ignored'),
 				206 => array ('code' => 'warning', 'format' => 'Rack is not empty'),
+				207 => array ('code' => 'warning', 'format' => 'Ignored empty request'),
 			);
 			// Handle the arguments. Is there any better way to do it?
 			foreach ($log['m'] as $record)
@@ -5505,24 +5508,15 @@ function renderFile ($file_id = 0)
 	echo "<tr><th width='50%' class=tdright>Type:</th>";
 	printf("<td class=tdleft>%s</td></tr>", htmlspecialchars ($file['type']));
 	echo "<tr><th width='50%' class=tdright>Size:</th>";
-	printf("<td class=tdleft>%s</td></tr>", formatFileSize($file['size']));
+	echo "<td class=tdleft><a href='${root}download.php?file_id=${file_id}'>";
+	printImageHREF ('download', 'Download file');
+	printf("</a>&nbsp;%s</td></tr>", formatFileSize($file['size']));
 	echo "<tr><th width='50%' class=tdright>Created:</th>";
 	printf("<td class=tdleft>%s</td></tr>", formatTimestamp($file['ctime']));
 	echo "<tr><th width='50%' class=tdright>Modified:</th>";
 	printf("<td class=tdleft>%s</td></tr>", formatTimestamp($file['mtime']));
 	echo "<tr><th width='50%' class=tdright>Accessed:</th>";
 	printf("<td class=tdleft>%s</td></tr>", formatTimestamp($file['atime']));
-
-	echo "<tr><th width='50%' class=tdright>Download file:</th>";
-	echo "<td class=tdleft><a href='${root}download.php?file_id=${file_id}'>";
-	printImageHREF ('download', 'Download file');
-	echo "</a></td></tr>\n";
-
-	echo "<tr><th width='50%' class=tdright>Upload replacement:</th>";
-	printOpFormIntro ('replaceFile', array ('MAX_FILE_SIZE' => convertToBytes(get_cfg_var('upload_max_filesize'))), TRUE);
-	echo "<td class=tdleft><input type='file' size='10' name='file' tabindex=100>&nbsp;\n";
-	printImageHREF ('save', 'Save changes', TRUE, 101);
-	echo "</form></td></tr>\n";
 
 	printTagTRs (makeHref(array('page'=>'files', 'tab'=>'default'))."&");
 	if (!empty ($file['comment']))
@@ -5576,6 +5570,17 @@ function renderFile ($file_id = 0)
 
 	echo "</td></tr>";
 	echo "</table>\n";
+}
+
+function renderFileReuploader ()
+{
+	showMessageOrError();
+	startPortlet ('Replace existing contents');
+	printOpFormIntro ('replaceFile', array ('MAX_FILE_SIZE' => convertToBytes(get_cfg_var('upload_max_filesize'))), TRUE);
+	echo "<input type=file size=10 name=file tabindex=100>&nbsp;\n";
+	printImageHREF ('save', 'Save changes', TRUE, 101);
+	echo "</form>\n";
+	finishPortlet();
 }
 
 function renderFileProperties ($file_id = 0)

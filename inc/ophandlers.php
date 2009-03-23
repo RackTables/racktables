@@ -1420,7 +1420,7 @@ function setPortVLAN ()
 	// for each of the rest.
 	$nports = $_REQUEST['portcount'];
 	$prefix = 'set ';
-	$log = array ('v' => 2, 'm' => array());
+	$log = emptyLog();
 	$setcmd = '';
 	for ($i = 0; $i < $nports; $i++)
 		if
@@ -1521,7 +1521,7 @@ function addRack ()
 	{
 		assertUIntArg ('rack_height2', __FUNCTION__);
 		assertStringArg ('rack_names', __FUNCTION__, TRUE);
-		$log = array ('v' => 2);
+		$log = emptyLog();
 		// copy-and-paste from renderAddMultipleObjectsForm()
 		$names1 = explode ('\n', $_REQUEST['rack_names']);
 		$names2 = array();
@@ -1685,19 +1685,22 @@ function linkFileToEntity ()
 
 function replaceFile ()
 {
+	global $sic;
 	assertUIntArg ('file_id', __FUNCTION__);
 
 	// Make sure the file can be uploaded
 	if (get_cfg_var('file_uploads') != 1)
-		return buildRedirectURL (__FUNCTION__, 'ERR', array ("file uploads not allowed, change 'file_uploads' parameter in php.ini"));
+		return buildRedirectURL (__FUNCTION__, 'ERR1');
+	$shortInfo = getFileInfo ($sic['file_id']);
 
 	$fp = fopen($_FILES['file']['tmp_name'], 'rb');
-	global $sic;
+	if ($fp === FALSE)
+		return buildRedirectURL (__FUNCTION__, 'ERR2');
 	$error = commitReplaceFile ($sic['file_id'], $fp);
 	if ($error != '')
-		return buildRedirectURL (__FUNCTION__, 'ERR', array ($error));
+		return buildRedirectURL (__FUNCTION__, 'ERR3', array ($error));
 
-	return buildRedirectURL (__FUNCTION__, 'OK', array ($_REQUEST['name']));
+	return buildRedirectURL (__FUNCTION__, 'OK', array (htmlspecialchars ($shortInfo['name'])));
 }
 
 function updateFile ()
