@@ -2425,10 +2425,14 @@ function renderIPv4Network ($id)
 			for ($i = 0; $i < $arrows; $i++)
 				echo '&uarr;';
 			$arrows--;
-			echo "</th><td class=tdleft><a href='".makeHref(array('page'=>$pageno, 'tab'=>$tabno, 'id'=>$ainfo['id']))."'>${ainfo['ip']}/${ainfo['mask']}</a></td></tr>";
+			echo "</th><td class=tdleft>";
+			renderIPv4NetCell ($ainfo);
+			echo "</td></tr>";
 		}
 		echo "<tr><th width='50%' class=tdright>&rarr;</th>";
-		echo "<td class=tdleft>${range['ip']}/${range['mask']}</td></tr>";
+		echo "<td class=tdleft>";
+		renderIPv4NetCell ($range);
+		echo "</td></tr>";
 		// FIXME: get and display nested networks
 		// $theitem = pickLeaf ($ipv4tree, $id);
 	}
