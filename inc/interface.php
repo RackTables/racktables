@@ -308,8 +308,8 @@ function renderRackspaceRowEditor ()
 		echo "</td><td></td></tr></form>";
 	}
 	global $pageno, $tabno;
-	startPortlet ('Rows');
 	showMessageOrError();
+	startPortlet ('Rows');
 	echo "<table border=0 cellspacing=0 cellpadding=5 align=center class=widetable>\n";
 	echo "<tr><th>Name</th></tr>\n";
 	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
