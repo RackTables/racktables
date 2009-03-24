@@ -1306,10 +1306,13 @@ function saveEntityTags ()
 function destroyTag ()
 {
 	assertUIntArg ('tag_id', __FUNCTION__);
+	global $taglist;
+	if (!isset ($taglist[$_REQUEST['tag_id']]))
+		return buildRedirectURL (__FUNCTION__, 'ERR1', array ($_REQUEST['tag_id']));
 	if (($ret = commitDestroyTag ($_REQUEST['tag_id'])) == '')
-		return buildRedirectURL (__FUNCTION__, 'OK');
+		return buildRedirectURL (__FUNCTION__, 'OK', array ($taglist[$_REQUEST['tag_id']]['tag']));
 	else
-		return buildRedirectURL (__FUNCTION__, 'ERR');
+		return buildRedirectURL (__FUNCTION__, 'ERR2');
 }
 
 function createTag ()

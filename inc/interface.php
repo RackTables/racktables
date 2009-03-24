@@ -1399,7 +1399,7 @@ function printLog ($log)
 				55 => array ('code' => 'success', 'format' => 'Chapter was added.'),
 				56 => array ('code' => 'success', 'format' => 'Update succeeded.'),
 				57 => array ('code' => 'success', 'format' => 'Reset complete'),
-				58 => array ('code' => 'success', 'format' => "Successfully deleted tag ."),
+				58 => array ('code' => 'success', 'format' => "Deleted tag '%s'."),
 				59 => array ('code' => 'success', 'format' => "Created tag '%s'."),
 				60 => array ('code' => 'success', 'format' => "Updated tag '%s'."),
 				61 => array ('code' => 'success', 'format' => 'Password changed successfully.'),
@@ -1506,6 +1506,7 @@ function printLog ($log)
 				180 => array ('code' => 'error', 'format' => 'Error saving file, all changes lost!'),
 				181 => array ('code' => 'error', 'format' => "file uploads not allowed, change 'file_uploads' parameter in php.ini"),
 				182 => array ('code' => 'error', 'format' => 'SQL query failed: %s'),
+				183 => array ('code' => 'error', 'format' => "Tag id '%s' does not exist."),
 
 // records 200~299 with warnings
 				200 => array ('code' => 'warning', 'format' => 'generic warning: %s'),
