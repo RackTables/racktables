@@ -233,6 +233,29 @@ function gwSendFile ($endpoint, $handlername, $filetext = '')
 	return oneLiner (66, array ($handlername)); // ignore provided "Ok" text
 }
 
+// Query something through a gateway and get some text in return. Return that text.
+function gwRecvFile ($endpoint, $handlername, &$output)
+{
+	global $remote_username;
+	$tmpfilename = tempnam ('', 'RackTables-sendfile-');
+	$endpoint = str_replace (' ', '\ ', $endpoint); // the gateway dispatcher uses read (1) to assign arguments
+	$outputlines = queryGateway
+	(
+		'sendfile',
+		array ("submit ${remote_username} ${endpoint} ${handlername} ${tmpfilename}")
+	);
+	$output = file_get_contents ($tmpfilename);
+	unlink ($tmpfilename);
+	if ($outputlines == NULL)
+		return oneLiner (163); // unknown gateway failure
+	if (count ($outputlines) != 1)
+		return oneLiner (165); // protocol violation
+	if (strpos ($outputlines[0], 'OK!') !== 0)
+		return oneLiner (164, array ($outputlines[0])); // gateway failure
+	// Being here means having 'OK!' in the response.
+	return oneLiner (66, array ($handlername)); // ignore provided "Ok" text
+}
+
 function gwSendFileToObject ($object_id = 0, $handlername, $filetext = '')
 {
 	global $remote_username;
@@ -246,6 +269,21 @@ function gwSendFileToObject ($object_id = 0, $handlername, $filetext = '')
 		return oneLiner (162); // can't pick an address
 	$endpoint = str_replace (' ', '+', $endpoints[0]);
 	return gwSendFile ($endpoint, $handlername, $filetext);
+}
+
+function gwRecvFileFromObject ($object_id = 0, $handlername, &$output)
+{
+	global $remote_username;
+	if ($object_id <= 0 or empty ($handlername))
+		return oneLiner (160); // invalid arguments
+	$objectInfo = getObjectInfo ($object_id);
+	$endpoints = findAllEndpoints ($object_id, $objectInfo['name']);
+	if (count ($endpoints) == 0)
+		return oneLiner (161); // endpoint not found
+	if (count ($endpoints) > 1)
+		return oneLiner (162); // can't pick an address
+	$endpoint = str_replace (' ', '+', $endpoints[0]);
+	return gwRecvFile ($endpoint, $handlername, $output);
 }
 
 ?>

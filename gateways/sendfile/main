@@ -41,7 +41,7 @@ do_submit()
 	if [ $ret = 0 ]; then
 		echo "OK!"
 	else
-		echo "ERR!File handler '$handler' returned code $ret"
+		echo "ERR!Main dispatcher: handler '$handler' returned code $ret"
 	fi
 }
 
