@@ -6,7 +6,7 @@
 #
 # The only supported command is:
 #
-# * submit <username> <endpoint> <handler name> <data file name>: send the file
+# * submit <username> <endpoint> <handler name> [filename1] [filename2] [...] 
 #
 # Handler name can be any string used to distinguish different file processors.
 # The temporary file will be passed to a script in current directory, if it exists.
@@ -22,21 +22,24 @@ do_submit()
 	user=$1
 	endpoint=$2
 	handler=$3
-	cfgfile=$4
+	# 0 or more files
+	files=$4
 	# sanity checks
-	if [ -z "$user" -o -z "$endpoint" -o -z "$handler" -o -z "$cfgfile" ]; then
+	if [ -z "$user" -o -z "$endpoint" -o -z "$handler" ]; then
 		echo 'ERR!invalid arguments'
 		return
 	fi
-	if [ ! -f "$cfgfile" ]; then
-		echo "ERR!File $cfgfile is missing."
-		return
-	fi
+	for cfgfile in $files; do
+		if [ ! -f "$cfgfile" ]; then
+			echo "ERR!File $cfgfile is missing."
+			return
+		fi
+	done
 	if [ ! -x "$MYDIR/$handler.install" ]; then
 		echo "ERR!Cannot execute $MYDIR/$handler.install"
 		return
 	fi
-	"$MYDIR/$handler.install" "$user" "$endpoint" "$cfgfile"
+	"$MYDIR/$handler.install" "$user" "$endpoint" $files
 	ret=$?
 	if [ $ret = 0 ]; then
 		echo "OK!"

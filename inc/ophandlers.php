@@ -1468,7 +1468,7 @@ function submitSLBConfig ()
 {
 	assertUIntArg ('object_id', __FUNCTION__);
 	$newconfig = buildLVSConfig ($_REQUEST['object_id']);
-	$msglog = gwSendFileToObject ($_REQUEST['object_id'], 'slbconfig', html_entity_decode ($newconfig, ENT_QUOTES, 'UTF-8'));
+	$msglog = gwSendFileToObject ($_REQUEST['object_id'], 'slbconfig', array (html_entity_decode ($newconfig, ENT_QUOTES, 'UTF-8')));
 	return buildWideRedirectURL ($msglog);
 }
 
