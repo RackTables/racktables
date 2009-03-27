@@ -5681,7 +5681,7 @@ function renderFilesByLink ()
 		return;
 	}
 	echo '<br><br><table cellpadding=5 cellspacing=0 align=center class=cooltable>';
-	echo '<tr><th>File</th><th>Linked to</th></tr>';
+	echo '<tr><th>File</th><th>Linked to</th><th>Actions</th></tr>';
 	$order = 'odd';
 	foreach ($files as $file)
 	{
@@ -5691,7 +5691,11 @@ function renderFilesByLink ()
 		$links = getFileLinks($file['id']);
 		if (count ($links))
 			printf("<small>%s</small>", serializeFileLinks($links));
-		echo "</td></tr>\n";
+		echo "</td><td class=tdleft>";
+		echo "<a href='".makeHrefProcess(array('op'=>'deleteFile', 'file_id'=>$file['id'], 'entity_type'=>$entity_type)).
+			"' onclick=\"javascript:return confirm('Are you sure you want to delete the file?')\">";
+		printImageHREF ('DESTROY', 'Delete file');
+		echo "</a></td></tr>\n";
 		$order = $nextorder[$order];
 	}
 	echo '</table>';
@@ -5785,7 +5789,8 @@ function renderFilesForEntity ($entity_id = 0)
 			echo "</td><td class=tdleft>${file['comment']}</td><td class=tdleft>";
 			echo "<a href='".makeHrefProcess(array('op'=>'unlinkFile', 'link_id'=>$file['link_id'], $id_name=>$entity_id, 'name'=>$file['name']))."'>";
 			printImageHREF ('CUT', 'Unlink file');
-			echo "</a> <a href='".makeHrefProcess(array('op'=>'deleteFile', 'file_id'=>$file_id, $id_name=>$entity_id))."'>";
+			echo "<a href='".makeHrefProcess(array('op'=>'deleteFile', 'file_id'=>$file['id'], $id_name=>$entity_id)).
+				"' onclick=\"javascript:return confirm('Are you sure you want to delete the file?')\">";
 			printImageHREF ('DESTROY', 'Unlink and delete file');
 			echo "</a></td></tr>\n";
 		}
