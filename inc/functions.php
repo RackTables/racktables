@@ -1907,10 +1907,21 @@ function dos2unix ($text)
 // Return a new list with the items, for which the expression returned TRUE.
 function filterEntityList ($list_in, $realm, $expression)
 {
-	$list_out = array();
+	global $rackCode;
+	$list_out = $ptable = array();
+	foreach ($rackCode as $sentence)
+		if ($sentence['type'] == 'SYNT_DEFINITION')
+			$ptable[$sentence['term']] = $sentence['definition'];
+	// Now we have predicate table filled in with the latest definitions of each
+	// particular predicate met. This isn't as chik, as on-the-fly predicate
+	// overloading during allow/deny scan, but quite sufficient for this task.
 	foreach ($list_in as $item_key => $item_value)
 	{
-		if (TRUE)
+		$item_explicit_tags = loadEntityTags ($realm, $item_key);
+		$item_implicit_tags = getImplicitTags ($item_explicit_tags);
+		$item_autotags = generateEntityAutoTags ($realm, $item_key);
+		$item_tagchain = array_merge ($item_explicit_tags, $item_implicit_tags, $item_autotags);
+		if (eval_expression ($expression, $item_tagchain, $ptable))
 			$list_out[$item_key] = $item_value;
 	}
 	return $list_out;
