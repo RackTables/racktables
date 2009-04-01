@@ -119,7 +119,7 @@ function permitted ($p = NULL, $t = NULL, $o = NULL, $annex = array())
 	$my_auto_tags = $auto_tags;
 	$my_auto_tags[] = array ('tag' => '$page_' . $p);
 	$my_auto_tags[] = array ('tag' => '$tab_' . $t);
-	if ($o === NULL and isset ($op))
+	if ($o === NULL and !empty ($op)) // $op can be set to empty string
 	{
 		$my_auto_tags[] = array ('tag' => '$op_' . $op);
 		$my_auto_tags[] = array ('tag' => '$any_op');
