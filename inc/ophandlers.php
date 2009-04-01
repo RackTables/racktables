@@ -936,7 +936,6 @@ function resetUIConfig()
 	setConfigVar ('DEFAULT_OBJECT_TYPE','4');
 	setConfigVar ('IPV4_AUTO_RELEASE','1');
 	setConfigVar ('SHOW_LAST_TAB', 'no');
-	setConfigVar ('COOKIE_TTL', '1209600');
 	setConfigVar ('EXT_IPV4_VIEW', 'yes');
 	setConfigVar ('TREE_THRESHOLD', '25');
 	setConfigVar ('IPV4_JAYWALK', 'no');
