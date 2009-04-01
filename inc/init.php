@@ -189,9 +189,9 @@ $target_given_tags = array();
 $user_given_tags = array();
 if (!isset ($script_mode) or $script_mode !== TRUE)
 {
-	$auto_tags = array_merge ($auto_tags, getUserAutoTags());
+	$auto_tags = array_merge ($auto_tags, generateEntityAutoTags ('user', $remote_username));
 	if (isset ($accounts[$remote_username]))
-		$user_given_tags = loadUserTags ($accounts[$remote_username]['user_id']);
+		$user_given_tags = loadEntityTags ('user', $accounts[$remote_username]['user_id']);
 }
 
 ?>

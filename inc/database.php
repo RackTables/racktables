@@ -2910,12 +2910,9 @@ function executeAutoPorts ($object_id = 0, $type_id = 0)
 // Result is a chain: randomly indexed taginfo list.
 function loadEntityTags ($entity_realm = '', $entity_id = 0)
 {
-	if ($entity_realm == '' or $entity_id <= 0)
-	{
-		showError ('Invalid or missing arguments', __FUNCTION__);
-		return NULL;
-	}
 	$ret = array();
+	if (!in_array ($entity_realm, array ('file', 'ipv4net', 'ipv4vs', 'ipv4rspool', 'object', 'rack', 'user')))
+		return $ret;
 	$query = "select tt.id, tag from " .
 		"TagStorage as ts inner join TagTree as tt on ts.tag_id = tt.id " .
 		"where entity_realm = '${entity_realm}' and entity_id = ${entity_id} " .
@@ -2925,41 +2922,6 @@ function loadEntityTags ($entity_realm = '', $entity_id = 0)
 		$ret[$row['id']] = $row;
 	$result->closeCursor();
 	return getExplicitTagsOnly ($ret);
-}
-
-function loadFileTags ($id)
-{
-	return loadEntityTags ('file', $id);
-}
-
-function loadRackObjectTags ($id)
-{
-	return loadEntityTags ('object', $id);
-}
-
-function loadIPv4PrefixTags ($id)
-{
-	return loadEntityTags ('ipv4net', $id);
-}
-
-function loadRackTags ($id)
-{
-	return loadEntityTags ('rack', $id);
-}
-
-function loadIPv4VSTags ($id)
-{
-	return loadEntityTags ('ipv4vs', $id);
-}
-
-function loadIPv4RSPoolTags ($id)
-{
-	return loadEntityTags ('ipv4rspool', $id);
-}
-
-function loadUserTags ($user_id)
-{
-	return loadEntityTags ('user', $user_id);
 }
 
 // Return a tag chain with all DB tags on it.

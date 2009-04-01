@@ -1900,7 +1900,7 @@ function renderObjectGroup ()
 			$secondclass = 'tdleft port_highlight';
 		else
 			$secondclass = 'tdleft';
-		$tags = loadRackObjectTags ($obj['id']);
+		$tags = loadEntityTags ('object', $obj['id']);
 		echo "<tr class=row_${order} valign=top><td class='${secondclass}'><a href='".makeHref(array('page'=>'object', 'object_id'=>$obj['id']))."'><strong>${obj['dname']}</strong></a>";
 		if (count ($tags))
 			echo '<br><small>' . serializeTags ($tags, makeHref(array('page'=>$pageno, 'tab'=>'default', 'group_id'=>$group_id))."&") . '</small>';
@@ -3151,7 +3151,7 @@ function renderSearchResults ()
 					echo '<tr><th>Common name</th><th>Visible label</th><th>Asset tag</th><th>Barcode</th></tr>';
 					foreach ($what as $obj)
 					{
-						$tags = loadRackObjectTags ($obj['id']);
+						$tags = loadEntityTags ('object', $obj['id']);
 						echo "<tr class=row_${order} valign=top><td class=tdleft><a href=\"${root}?page=object&object_id=${obj['id']}\">${obj['dname']}</a>";
 						if (count ($tags))
 							echo '<br><small>' . serializeTags ($tags) . '</small>';
@@ -4587,7 +4587,7 @@ function renderRSPoolList ()
 	$order = 'odd';
 	foreach ($pool_list as $pool_id => $pool_info)
 	{
-		$pooltags = loadIPv4RSPoolTags ($pool_id);
+		$pooltags = loadEntityTags ('ipv4rspool', $pool_id);
 		echo "<tr valign=top class=row_${order}><td class=tdleft>";
 		echo "<a href='".makeHref(array('page'=>'ipv4rspool', 'pool_id'=>$pool_id))."'>" . (empty ($pool_info['name']) ? 'ANONYMOUS' : $pool_info['name']) . '</a>';
 		echo ($pool_info['refcnt'] ? ", ${pool_info['refcnt']}" : '');
@@ -5391,7 +5391,7 @@ function renderUser ($user_id)
 		echo "<tr><th width='50%' class=tdright><span class=tagheader>Given implicit tags</span>:</th><td class=tdleft>";
 		echo serializeTags ($target_shadow, $baseurl) . "</td></tr>\n";
 	}
-	$target_auto_tags = getUserAutoTags ($username);
+	$target_auto_tags = generateEntityAutoTags ('user', $username);
 	if (getConfigVar ('SHOW_AUTOMATIC_TAGS') == 'yes' and count ($target_auto_tags))
 	{
 		echo "<tr><th width='50%' class=tdright><span class=tagheader>Automatic tags</span>:</th><td class=tdleft>";
@@ -5854,7 +5854,7 @@ function printRoutersTD ($rlist)
 function printIPv4NetInfoTDs ($netinfo, $tdclass = 'tdleft', $indent = 0, $symbol = 'spacer', $symbolurl = '')
 {
 	global $root;
-	$tags = isset ($netinfo['id']) ? loadIPv4PrefixTags ($netinfo['id']) : array();
+	$tags = isset ($netinfo['id']) ? loadEntityTags ('ipv4net', $netinfo['id']) : array();
 	if ($symbol == 'spacer')
 	{
 		$indent++;
@@ -5898,7 +5898,7 @@ function renderIPv4NetCell ($netinfo)
 	else
 		echo "<tr><td class=sparenetwork>no name</td></tr>";
 	echo '<td>';
-	$tags = loadIPv4PrefixTags ($netinfo['id']);
+	$tags = loadEntityTags ('ipv4net', $netinfo['id']);
 	echo count ($tags) ? ("<small>" . serializeTags ($tags) . "</small>") : '&nbsp;';
 	echo "</td></tr></table>";
 }
@@ -5915,7 +5915,7 @@ function renderUserCell ($account)
 	else
 		echo "<tr><td class=sparenetwork>no name</td></tr>";
 	echo '<td>';
-	$tags = loadUserTags ($account['user_id']);
+	$tags = loadEntityTags ('user', $account['user_id']);
 	echo count ($tags) ? ("<small>" . serializeTags ($tags) . "</small>") : '&nbsp;';
 	echo "</td></tr></table>";
 }
@@ -5929,7 +5929,7 @@ function renderLBCell ($object_id)
 	echo "</td></tr><tr><td>";
 	printImageHREF ('LB');
 	echo "</td></tr><tr><td><small>";
-	echo serializeTags (loadRackObjectTags ($object_id));
+	echo serializeTags (loadEntityTags ('object', $object_id));
 	echo "</small></td></tr></table>";
 }
 
@@ -5942,7 +5942,7 @@ function renderRSPoolCell ($pool_id, $pool_name)
 	echo "</a></td></tr><tr><td>";
 	printImageHREF ('RS pool');
 	echo "</td></tr><tr><td><small>";
-	echo serializeTags (loadIPv4RSPoolTags ($pool_id));
+	echo serializeTags (loadEntityTags ('ipv4rspool', $pool_id));
 	echo "</small></td></tr></table>";
 }
 
@@ -5963,7 +5963,7 @@ function renderIPv4VSCell ($vsinfo)
 	echo "</a></td></tr><tr><td>";
 	echo $vsinfo['name'];
 	echo '</td></tr><tr><td>';
-	$tags = loadIPv4VSTags ($vsinfo['id']);
+	$tags = loadEntityTags ('ipv4vs', $vsinfo['id']);
 	echo count ($tags) ? ("<small>" . serializeTags ($tags) . "</small>") : '&nbsp;';
 	echo "</td></tr></table>";
 }
@@ -5979,7 +5979,7 @@ function renderRouterCell ($dottedquad, $ifname, $object_id, $object_dname)
 	echo "</td></tr><tr><td>";
 	printImageHREF ('router');
 	echo "</td></tr><tr><td><small>";
-	echo serializeTags (loadRackObjectTags ($object_id));
+	echo serializeTags (loadEntityTags ('object', $object_id));
 	echo "</small></td></tr></table>";
 }
 
@@ -6004,7 +6004,7 @@ function renderFileCell ($fileinfo)
 	echo "</td><td>";
 	printf ("<a href='${root}?page=file&file_id=%s'><strong>%s</strong></a>", $fileinfo['id'], niftyString ($fileinfo['name']));
 	echo "</td></tr><tr><td>";
-	$tags = loadFileTags ($fileinfo['id']);
+	$tags = loadEntityTags ('file', $fileinfo['id']);
 	echo count ($tags) ? ("<small>" . serializeTags ($tags) . "</small>") : '&nbsp;';
 	echo "</td></tr><tr><td><a href='${root}download.php?file_id=${fileinfo['id']}'>";
 	printImageHREF ('download', 'Download file');

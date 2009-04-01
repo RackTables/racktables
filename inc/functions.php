@@ -974,99 +974,63 @@ function complementByKids ($idlist, $tree = NULL, $getall = FALSE)
 	return $ret;
 }
 
-function getUserAutoTags ($username = NULL)
+// Universal autotags generator, a complementing function for loadEntityTags().
+// An important extension is that 'ipaddress' quasi-realm is also handled.
+// Bypass key isn't strictly typed, but interpreted depending on the realm.
+function generateEntityAutoTags ($entity_realm = '', $bypass_value = '')
 {
-	global $remote_username, $accounts;
-	if ($username == NULL)
-		$username = $remote_username;
 	$ret = array();
-	$ret[] = array ('tag' => '$username_' . $username);
-	if (isset ($accounts[$username]['user_id']))
-		$ret[] = array ('tag' => '$userid_' . $accounts[$username]['user_id']);
-	return $ret;
-}
-
-function loadRackObjectAutoTags ()
-{
-	assertUIntArg ('object_id', __FUNCTION__);
-	$object_id = $_REQUEST['object_id'];
-	$oinfo = getObjectInfo ($object_id);
-	$ret = array();
-	$ret[] = array ('tag' => '$id_' . $object_id);
-	$ret[] = array ('tag' => '$typeid_' . $oinfo['objtype_id']);
-	$ret[] = array ('tag' => '$any_object');
-	if (validTagName ($oinfo['name']))
-		$ret[] = array ('tag' => '$cn_' . $oinfo['name']);
-	return $ret;
-}
-
-// Common code for both prefix and address tag listers.
-function loadFileAutoTags ()
-{
-	assertUIntArg ('file_id', __FUNCTION__);
-	$ret = array();
-	$ret[] = array ('tag' => '$fileid_' . $_REQUEST['file_id']);
-	$ret[] = array ('tag' => '$any_file');
-	return $ret;
-}
-
-function getIPv4PrefixTags ($netid)
-{
-	$netinfo = getIPv4NetworkInfo ($netid);
-	$ret = array();
-	$ret[] = array ('tag' => '$ip4net-' . str_replace ('.', '-', $netinfo['ip']) . '-' . $netinfo['mask']);
-	// FIXME: find and list tags for all parent networks?
-	$ret[] = array ('tag' => '$any_ip4net');
-	$ret[] = array ('tag' => '$any_net');
-	return $ret;
-}
-
-function loadIPv4PrefixAutoTags ()
-{
-	assertUIntArg ('id', __FUNCTION__);
-	return array_merge
-	(
-		array (array ('tag' => '$ip4netid_' . $_REQUEST['id'])),
-		getIPv4PrefixTags ($_REQUEST['id'])
-	);
-}
-
-function loadIPv4AddressAutoTags ()
-{
-	assertIPv4Arg ('ip', __FUNCTION__);
-	return array_merge
-	(
-		array (array ('tag' => '$ip4net-' . str_replace ('.', '-', $_REQUEST['ip']) . '-32')),
-		getIPv4PrefixTags (getIPv4AddressNetworkId ($_REQUEST['ip']))
-	);
-}
-
-function loadRackAutoTags ()
-{
-	assertUIntArg ('rack_id', __FUNCTION__);
-	$ret = array();
-	$ret[] = array ('tag' => '$rackid_' . $_REQUEST['rack_id']);
-	$ret[] = array ('tag' => '$any_rack');
-	return $ret;
-}
-
-function loadIPv4VSAutoTags ()
-{
-	assertUIntArg ('vs_id', __FUNCTION__);
-	$ret = array();
-	$ret[] = array ('tag' => '$ipv4vsid_' . $_REQUEST['vs_id']);
-	$ret[] = array ('tag' => '$any_ipv4vs');
-	$ret[] = array ('tag' => '$any_vs');
-	return $ret;
-}
-
-function loadIPv4RSPoolAutoTags ()
-{
-	assertUIntArg ('pool_id', __FUNCTION__);
-	$ret = array();
-	$ret[] = array ('tag' => '$ipv4rspid_' . $_REQUEST['pool_id']);
-	$ret[] = array ('tag' => '$any_ipv4rsp');
-	$ret[] = array ('tag' => '$any_rsp');
+	switch ($entity_realm)
+	{
+		case 'rack':
+			$ret[] = array ('tag' => '$rackid_' . $bypass_value);
+			$ret[] = array ('tag' => '$any_rack');
+			break;
+		case 'object':
+			$oinfo = getObjectInfo ($bypass_value);
+			$ret[] = array ('tag' => '$id_' . $bypass_value);
+			$ret[] = array ('tag' => '$typeid_' . $oinfo['objtype_id']);
+			$ret[] = array ('tag' => '$any_object');
+			if (validTagName ($oinfo['name']))
+				$ret[] = array ('tag' => '$cn_' . $oinfo['name']);
+			break;
+		case 'ipv4net':
+			$netinfo = getIPv4NetworkInfo ($bypass_value);
+			$ret[] = array ('tag' => '$ip4netid_' . $bypass_value);
+			$ret[] = array ('tag' => '$ip4net-' . str_replace ('.', '-', $netinfo['ip']) . '-' . $netinfo['mask']);
+			$ret[] = array ('tag' => '$any_ip4net');
+			$ret[] = array ('tag' => '$any_net');
+			break;
+		case 'ipaddress':
+			$netinfo = getIPv4NetworkInfo (getIPv4AddressNetworkId ($bypass_value));
+			$ret[] = array ('tag' => '$ip4net-' . str_replace ('.', '-', $bypass_value) . '-32');
+			$ret[] = array ('tag' => '$ip4net-' . str_replace ('.', '-', $netinfo['ip']) . '-' . $netinfo['mask']);
+			$ret[] = array ('tag' => '$any_ip4net');
+			$ret[] = array ('tag' => '$any_net');
+			break;
+		case 'ipv4vs':
+			$ret[] = array ('tag' => '$ipv4vsid_' . $bypass_value);
+			$ret[] = array ('tag' => '$any_ipv4vs');
+			$ret[] = array ('tag' => '$any_vs');
+			break;
+		case 'ipv4rspool':
+			$ret[] = array ('tag' => '$ipv4rspid_' . $bypass_value);
+			$ret[] = array ('tag' => '$any_ipv4rsp');
+			$ret[] = array ('tag' => '$any_rsp');
+			break;
+		case 'user':
+			global $accounts;
+			$ret[] = array ('tag' => '$username_' . $bypass_value);
+			if (isset ($accounts[$bypass_value]['user_id']))
+				$ret[] = array ('tag' => '$userid_' . $accounts[$bypass_value]['user_id']);
+			break;
+		case 'file':
+			$ret[] = array ('tag' => '$fileid_' . $bypass_value);
+			$ret[] = array ('tag' => '$any_file');
+			break;
+		default:
+			break;
+	}
 	return $ret;
 }
 
@@ -1142,15 +1106,25 @@ function fixContext ()
 	if (isset ($tmap[$pageno][$tabno]))
 		redirectUser ($pageno, $tmap[$pageno][$tabno]);
 
-	if (isset ($page[$pageno]['autotagloader']))
-		$auto_tags = array_merge ($auto_tags, $page[$pageno]['autotagloader'] ());
+	// Don't reset autochain, because auth procedures could push stuff there in.
+	// Another important point is to ignore 'user' realm, so we don't infuse effective
+	// context with autotags of the displayed account and don't try using uint
+	// bypass, where string is expected.
 	if
 	(
-		isset ($page[$pageno]['tagloader']) and
+		$pageno != 'user' and
 		isset ($page[$pageno]['bypass']) and
 		isset ($_REQUEST[$page[$pageno]['bypass']])
 	)
-		$target_given_tags = $page[$pageno]['tagloader'] ($_REQUEST[$page[$pageno]['bypass']]);
+		$auto_tags = array_merge ($auto_tags, generateEntityAutoTags ($pageno, $_REQUEST[$page[$pageno]['bypass']]));
+	if
+	(
+		isset ($page[$pageno]['bypass']) and
+		isset ($page[$pageno]['bypass_type']) and
+		$page[$pageno]['bypass_type'] == 'uint' and
+		isset ($_REQUEST[$page[$pageno]['bypass']])
+	)
+		$target_given_tags = loadEntityTags ($pageno, $_REQUEST[$page[$pageno]['bypass']]);
 	// Explicit and implicit chains should be normally empty at this point, so
 	// overwrite the contents anyway.
 	$expl_tags = mergeTagChains ($user_given_tags, $target_given_tags);
@@ -1927,6 +1901,19 @@ function cookOptgroups ($recordList, $object_type_id = 0, $existing_value = 0)
 function dos2unix ($text)
 {
 	return str_replace ("\r\n", "\n", $text);
+}
+
+// Take a list of records and filter against given RackCode expression.
+// Return a new list with the items, for which the expression returned TRUE.
+function filterEntityList ($list_in, $realm, $expression)
+{
+	$list_out = array();
+	foreach ($list_in as $item_key => $item_value)
+	{
+		if (TRUE)
+			$list_out[$item_key] = $item_value;
+	}
+	return $list_out;
 }
 
 ?>
