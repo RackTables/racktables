@@ -268,7 +268,7 @@ function spotPayload ($text, $reqtype = 'SYNT_CODETEXT')
 	if ($lineno = locateSyntaxError ($stack))
 		return array ('result' => 'NAK', 'load' => "Syntax error for type '${reqtype}' near line ${lineno}");
 	// HCF!
-	return array ('result' => 'NAK', 'load' => "Syntax error for type '${reqtype}': empty text");
+	return array ('result' => 'NAK', 'load' => "Syntax error for type '${reqtype}', line number unknown");
 }
 
 // Parse the given lexems stream into a list of RackCode sentences. Each such
@@ -847,7 +847,7 @@ function getRackCode ($text)
 	if (!mb_strlen ($text))
 		return array ('result' => 'NAK', 'load' => 'The RackCode text was found empty in ' . __FUNCTION__);
 	$text = str_replace ("\r", '', $text) . "\n";
-	$synt = spotPayload ($text, 'SYNT_RACKCODE');
+	$synt = spotPayload ($text, 'SYNT_CODETEXT');
 	if ($synt['result'] != 'ACK')
 		return $synt;
 	// An empty sentence list is semantically valid, yet senseless,
