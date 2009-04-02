@@ -1885,6 +1885,8 @@ function renderObjectGroup ()
 	echo '</td><td class=pcleft>';
 
 	$objects = getObjectList ($group_id, $tagfilter, getTFMode());
+	if (isset ($_REQUEST['pfilter']))
+		$objects = filterEntityList ($objects, 'object', interpretPredicate ($_REQUEST['pfilter']));
 	startPortlet ('Objects (' . count ($objects) . ')');
 	if ($objects === NULL)
 	{
@@ -5126,7 +5128,7 @@ function renderTagFilterPortlet ($tagfilter, $realm, $bypass_name = '', $bypass_
 {
 	global $pageno, $tabno, $taglist, $tagtree;
 	$objectivetags = getObjectiveTagTree ($tagtree, $realm);
-	startPortlet ('Tag filter');
+	startPortlet ('T-filter');
 	if (!count ($objectivetags))
 	{
 		echo "None defined for current realm.<br>";
@@ -5151,6 +5153,34 @@ function renderTagFilterPortlet ($tagfilter, $realm, $bypass_name = '', $bypass_
 	printImageHREF ('apply', 'Apply filter', TRUE);
 	echo "</form></td><td>";
 
+	// "reset"
+	echo "<form method=get>\n";
+	echo "<input type=hidden name=page value=${pageno}>\n";
+	echo "<input type=hidden name=tab value=${tabno}>\n";
+	if ($bypass_name != '')
+		echo "<input type=hidden name=${bypass_name} value='${bypass_value}'>\n";
+	printImageHREF ('clear', 'reset', TRUE);
+	echo '</form></td></tr></table>';
+	finishPortlet();
+	global $rackCode;
+	// underscore cannot start predicate name
+	$options = array ('_' => '-- NOT SET --');
+	foreach (array_keys (buildPredicateTable ($rackCode)) as $predicatename)
+		$options[$predicatename] = "[${predicatename}]";
+	if (!count ($options))
+		return;
+	startPortlet ('P-filter');
+	echo "<form method=get>\n";
+	echo "<input type=hidden name=page value=${pageno}>\n";
+	echo "<input type=hidden name=tab value=${tabno}>\n";
+	if ($bypass_name != '')
+		echo "<input type=hidden name=${bypass_name} value='${bypass_value}'>\n";
+	echo '<table border=0 align=center>';
+	echo '<tr><td colspan=2>';
+	printSelect ($options, 'pfilter', isset ($_REQUEST['pfilter']) ? $_REQUEST['pfilter'] : NULL);
+	echo '</td></tr><tr><td>';
+	printImageHREF ('apply', 'Apply filter', TRUE);
+	echo "</form></td><td>";
 	// "reset"
 	echo "<form method=get>\n";
 	echo "<input type=hidden name=page value=${pageno}>\n";

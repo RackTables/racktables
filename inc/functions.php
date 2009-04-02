@@ -1920,6 +1920,8 @@ function buildPredicateTable ($parsetree)
 // empty list, if there was an error.
 function filterEntityList ($list_in, $realm, $expression = array())
 {
+	if ($expression === NULL)
+		return array();
 	if (!count ($expression))
 		return $list_in;
 	global $rackCode;
@@ -1959,6 +1961,21 @@ function getIPv4LBList()
 			return array();
 		$ret = filterEntityList ($ret, 'object', $filter['load']);
 	}
+	return $ret;
+}
+
+// If the requested predicate exists, return its [last] definition.
+// Otherwise return NULL (to signal filterEntityList() about error).
+// Also detect "not set" option selected.
+function interpretPredicate ($pname)
+{
+	if ($pname == '_')
+		return array();
+	global $rackCode;
+	$ret = NULL;
+	foreach ($rackCode as $sentence)
+		if ($sentence['type'] == 'SYNT_DEFINITION' and $sentence['term'] == $pname)
+			$ret = $sentence['definition'];
 	return $ret;
 }
 
