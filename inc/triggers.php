@@ -53,10 +53,10 @@ function trigger_snmpportfinder ()
 	return TRUE;
 }
 
-// Output "click me" in an empty rackspace.
+// Show "click me" teaser in an empty rackspace.
 function trigger_emptyRackspace ()
 {
-	return (count (readChapter ('RackRow')) == 0);
+	return (count (getRackRows()) == 0);
 }
 
 function trigger_lvsconfig ()
