@@ -671,7 +671,7 @@ function printSelect ($optionList, $select_name, $selected_id = NULL, $tabindex 
 {
 	echo "<select name=${select_name}" . ($tabindex ? " tabindex=${tabindex}" : '') . '>';
 	foreach ($optionList as $dict_key => $dict_value)
-		echo "<option value=${dict_key}" . ($dict_key == $selected_id ? ' selected' : '') . ">${dict_value}</option>";
+		echo "<option value='${dict_key}'" . ($dict_key == $selected_id ? ' selected' : '') . ">${dict_value}</option>";
 	echo "</select>";
 }
 
@@ -690,7 +690,7 @@ function printNiftySelect ($groupList, $select_name, $selected_id = NULL, $tabin
 	{
 		echo "<optgroup label='${groupname}'>";
 		foreach ($groupdata as $dict_key => $dict_value)
-			echo "<option value=${dict_key}" . ($dict_key == $selected_id ? ' selected' : '') . ">${dict_value}</option>";
+			echo "<option value='${dict_key}'" . ($dict_key == $selected_id ? ' selected' : '') . ">${dict_value}</option>";
 		echo "</optgroup>\n";
 	}
 	echo "</select>";
