@@ -946,6 +946,7 @@ function resetUIConfig()
 	setConfigVar ('PREVIEW_TEXT_COLS', '80');
 	setConfigVar ('PREVIEW_IMAGE_MAXPXS', '320');
 	setConfigVar ('VENDOR_SIEVE', '');
+	setConfigVar ('IPV4LB_LISTSRC', '');
 	return buildRedirectURL (__FUNCTION__, 'OK');
 }
 
