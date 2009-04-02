@@ -993,6 +993,8 @@ function generateEntityAutoTags ($entity_realm = '', $bypass_value = '')
 			$ret[] = array ('tag' => '$any_object');
 			if (validTagName ($oinfo['name']))
 				$ret[] = array ('tag' => '$cn_' . $oinfo['name']);
+			if (!count (getResidentRacksData ($bypass_value, FALSE)))
+				$ret[] = array ('tag' => '$unmounted');
 			break;
 		case 'ipv4net':
 			$netinfo = getIPv4NetworkInfo ($bypass_value);
@@ -1292,7 +1294,7 @@ function redirectUser ($p, $t)
 function getRackCodeStats ()
 {
 	global $rackCode;
-	$defc = $grantc = 0;
+	$defc = $grantc = $modc = 0;
 	foreach ($rackCode as $s)
 		switch ($s['type'])
 		{
@@ -1302,10 +1304,18 @@ function getRackCodeStats ()
 			case 'SYNT_GRANT':
 				$grantc++;
 				break;
+			case 'SYNT_CTXMOD':
+				$modc++;
+				break;
 			default:
 				break;
 		}
-	$ret = array ('Definition sentences' => $defc, 'Grant sentences' => $grantc);
+	$ret = array
+	(
+		'Definition sentences' => $defc,
+		'Grant sentences' => $grantc,
+		'Context mod sentences' => $modc
+	);
 	return $ret;
 }
 
