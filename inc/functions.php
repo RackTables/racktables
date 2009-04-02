@@ -1903,28 +1903,63 @@ function dos2unix ($text)
 	return str_replace ("\r\n", "\n", $text);
 }
 
-// Take a list of records and filter against given RackCode expression.
-// Return a new list with the items, for which the expression returned TRUE.
-function filterEntityList ($list_in, $realm, $expression)
+function buildPredicateTable ($parsetree)
 {
-	global $rackCode;
-	$list_out = $ptable = array();
-	foreach ($rackCode as $sentence)
+	$ret = array();
+	foreach ($parsetree as $sentence)
 		if ($sentence['type'] == 'SYNT_DEFINITION')
-			$ptable[$sentence['term']] = $sentence['definition'];
+			$ret[$sentence['term']] = $sentence['definition'];
 	// Now we have predicate table filled in with the latest definitions of each
 	// particular predicate met. This isn't as chik, as on-the-fly predicate
 	// overloading during allow/deny scan, but quite sufficient for this task.
+	return $ret;
+}
+
+// Take a list of records and filter against given RackCode expression. Return
+// the original list intact, if there was no filter requested, but return an
+// empty list, if there was an error.
+function filterEntityList ($list_in, $realm, $expression = array())
+{
+	if (!count ($expression))
+		return $list_in;
+	global $rackCode;
+	$list_out = array();
 	foreach ($list_in as $item_key => $item_value)
-	{
-		$item_explicit_tags = loadEntityTags ($realm, $item_key);
-		$item_implicit_tags = getImplicitTags ($item_explicit_tags);
-		$item_autotags = generateEntityAutoTags ($realm, $item_key);
-		$item_tagchain = array_merge ($item_explicit_tags, $item_implicit_tags, $item_autotags);
-		if (eval_expression ($expression, $item_tagchain, $ptable))
+		if (TRUE === judgeEntity ($realm, $item_key, $expression, buildPredicateTable ($rackCode)))
 			$list_out[$item_key] = $item_value;
-	}
 	return $list_out;
+}
+
+// Tell, if the given expression is true for the given entity.
+function judgeEntity ($realm, $id, $expression, $ptable)
+{
+	$item_explicit_tags = loadEntityTags ($realm, $id);
+	return eval_expression
+	(
+		$expression,
+		array_merge
+		(
+			$item_explicit_tags,
+			getImplicitTags ($item_explicit_tags),
+			generateEntityAutoTags ($realm, $id)
+		),
+		$ptable,
+		TRUE
+	);
+}
+
+function getIPv4LBList()
+{
+	$ret = getNarrowObjectList (array_keys (readChapter ('RackObjectType')));
+	$filtertext = getConfigVar ('IPV4LB_LISTSRC');
+	if (strlen ($filtertext))
+	{
+		$filter = spotPayload ($filtertext, 'SYNT_EXPR');
+		if ($filter['result'] != 'ACK')
+			return array();
+		$ret = filterEntityList ($ret, 'object', $filter['load']);
+	}
+	return $ret;
 }
 
 ?>

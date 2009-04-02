@@ -3,24 +3,6 @@
  * This file implements lexical scanner and syntax analyzer for the RackCode
  * access configuration language.
  *
- * The language consists of the following lexems:
- *
- * LEX_LBRACE
- * LEX_RBRACE
- * LEX_DECISION
- * LEX_DEFINE
- * LEX_BOOLCONST
- * LEX_NOT
- * LEX_TAG
- * LEX_AUTOTAG
- * LEX_PREDICATE
- * LEX_BOOLOP
- * LEX_CONTEXT
- * LEX_CLEAR
- * LEX_INSERT
- * LEX_REMOVE
- * LEX_ON
- *
  */
 
 // Complain about martian char.
@@ -49,7 +31,7 @@ function lexError3 ($state, $ln = 'N/A')
 	return array
 	(
 		'result' => 'NAK',
-		'load' => "Lexical error during '${state}' near line ${ln}"
+		'load' => "Lexical error in scanner state '${state}' near line ${ln}"
 	);
 }
 
@@ -62,10 +44,31 @@ function lexError4 ($s, $ln = 'N/A')
 	);
 }
 
-// Produce a list of lexems from the given text. Possible lexems are:
-function getLexemsFromRackCode ($text)
+/* Produce a list of lexems from the given text. Possible lexems are:
+ *
+ * LEX_LBRACE
+ * LEX_RBRACE
+ * LEX_DECISION
+ * LEX_DEFINE
+ * LEX_BOOLCONST
+ * LEX_NOT
+ * LEX_TAG
+ * LEX_AUTOTAG
+ * LEX_PREDICATE
+ * LEX_BOOLOP
+ * LEX_CONTEXT
+ * LEX_CLEAR
+ * LEX_INSERT
+ * LEX_REMOVE
+ * LEX_ON
+ *
+ */
+function getLexemsFromRawText ($text)
 {
 	$ret = array();
+	// Add a mock character to aid in synchronization with otherwise correct,
+	// but short or odd-terminated final lines.
+	$text .= ' ';
 	$textlen = mb_strlen ($text);
 	$lineno = 1;
 	$state = "ESOTSM";
@@ -248,6 +251,26 @@ function getLexemsFromRackCode ($text)
 	return array ('result' => 'ACK', 'load' => $ret);
 }
 
+// Take a parse tree and figure out if it is a valid payload or not.
+// Depending on that return either NULL or an array filled with the load
+// of that expression.
+function spotPayload ($text, $reqtype = 'SYNT_CODETEXT')
+{
+	$lex = getLexemsFromRawText ($text);
+	if ($lex['result'] != 'ACK')
+		return $lex;
+	$stack = getParseTreeFromLexems ($lex['load']);
+	// The only possible way to "accept" is to have sole starting
+	// nonterminal on the stack (and it must be of the requested class).
+	if (count ($stack) == 1 and $stack[0]['type'] == $reqtype)
+		return array ('result' => 'ACK', 'load' => $stack[0]['load']);
+	// No luck. Prepare to complain.
+	if ($lineno = locateSyntaxError ($stack))
+		return array ('result' => 'NAK', 'load' => "Syntax error for type '${reqtype}' near line ${lineno}");
+	// HCF!
+	return array ('result' => 'NAK', 'load' => "Syntax error for type '${reqtype}': empty text");
+}
+
 // Parse the given lexems stream into a list of RackCode sentences. Each such
 // sentence is a syntax tree, suitable for tag sequence evaluation. The final
 // parse tree may contain the following nodes:
@@ -264,7 +287,11 @@ function getLexemsFromRackCode ($text)
 //
 // After parsing the input successfully a list of SYNT_GRANT and SYNT_DEFINITION
 // trees is returned.
-function getSentencesFromLexems ($lexems)
+//
+// P.S. The above is true for input, which is a complete and correct RackCode text.
+// Other inputs may produce different combinations of lex/synt structures. Calling
+// function must check the parse tree itself.
+function getParseTreeFromLexems ($lexems)
 {
 	$stack = array(); // subject to array_push() and array_pop()
 	$done = 0; // $lexems[$done] is the next item in the tape
@@ -650,26 +677,21 @@ function getSentencesFromLexems ($lexems)
 		}
 		// The fact we execute here means, that no reduction or early shift
 		// has been done. The only way to enter another iteration is to "shift"
-		// more, if possible. If the tape is empty, we are facing the
-		// "accept"/"reject" dilemma. The only possible way to "accept" is to
-		// have sole starting nonterminal on the stack (SYNT_CODETEXT).
+		// more, if possible. If shifting isn't possible due to empty input tape,
+		// we are facing the final "accept"/"reject" dilemma. In this case our
+		// work is done here, so return the whole stack to the calling function
+		// to decide depending on what it is expecting.
 		if ($done < $todo)
 		{
 			array_push ($stack, $lexems[$done++]);
 			continue;
 		}
 		// The moment of truth.
-		if (count ($stack) == 1 and $stack[0]['type'] == 'SYNT_CODETEXT')
-			return array ('result' => 'ACK', 'load' => $stack[0]['load']);
-		// No luck. Prepare to complain.
-		if ($lineno = locateSyntaxError ($stack))
-			return array ('result' => 'NAK', 'load' => 'Syntax error near line ' . $lineno);
-		// HCF
-		return array ('result' => 'NAK', 'load' => 'Syntax error: empty text');
+		return $stack;
 	}
 }
 
-function eval_expression ($expr, $tagchain, $ptable)
+function eval_expression ($expr, $tagchain, $ptable, $silent = FALSE)
 {
 	switch ($expr['type'])
 	{
@@ -684,8 +706,9 @@ function eval_expression ($expr, $tagchain, $ptable)
 			$pname = $expr['load'];
 			if (!isset ($ptable[$pname]))
 			{
-				showError ("Predicate '${pname}' is referenced before declaration", __FUNCTION__);
-				return;
+				if (!$silent)
+					showError ("Predicate '${pname}' is referenced before declaration", __FUNCTION__);
+				return NULL;
 			}
 			return eval_expression ($ptable[$pname], $tagchain, $ptable);
 		case 'LEX_BOOLCONST': // Evaluate a boolean constant.
@@ -696,11 +719,18 @@ function eval_expression ($expr, $tagchain, $ptable)
 				case 'false':
 					return FALSE;
 				default:
-					showError ("Could not parse a boolean constant with value '${expr['load']}'", __FUNCTION__);
-					return; // should failure be harder?
+					if (!$silent)
+						showError ("Could not parse a boolean constant with value '${expr['load']}'", __FUNCTION__);
+					return NULL; // should failure be harder?
 			}
 		case 'SYNT_NOTEXPR':
-			return !eval_expression ($expr['load'], $tagchain, $ptable);
+			$tmp = eval_expression ($expr['load'], $tagchain, $ptable);
+			if ($tmp === TRUE)
+				return FALSE;
+			elseif ($tmp === FALSE)
+				return TRUE;
+			else
+				return $tmp;
 		case 'SYNT_BOOLOP':
 			$leftresult = eval_expression ($expr['left'], $tagchain, $ptable);
 			switch ($expr['subtype'])
@@ -714,11 +744,14 @@ function eval_expression ($expr, $tagchain, $ptable)
 						return FALSE; // early failure
 					return eval_expression ($expr['right'], $tagchain, $ptable);
 				default:
-					showError ("Cannot evaluate unknown boolean operation '${boolop['subtype']}'");
-					return;
+					if (!$silent)
+						showError ("Cannot evaluate unknown boolean operation '${boolop['subtype']}'");
+					return NULL;
 			}
 		default:
-			showError ("Evaluation error, cannot process expression type '${expr['type']}'", __FUNCTION__);
+			if (!$silent)
+				showError ("Evaluation error, cannot process expression type '${expr['type']}'", __FUNCTION__);
+			return NULL;
 			break;
 	}
 }
@@ -807,15 +840,14 @@ function gotClearanceForTagChain ($const_base)
 	return FALSE;
 }
 
+// Top-level wrapper for most of the code in this file. Get a text, return a parse tree
+// (or error message).
 function getRackCode ($text)
 {
 	if (!mb_strlen ($text))
 		return array ('result' => 'NAK', 'load' => 'The RackCode text was found empty in ' . __FUNCTION__);
 	$text = str_replace ("\r", '', $text) . "\n";
-	$lex = getLexemsFromRackCode ($text);
-	if ($lex['result'] != 'ACK')
-		return $lex;
-	$synt = getSentencesFromLexems ($lex['load']);
+	$synt = spotPayload ($text, 'SYNT_RACKCODE');
 	if ($synt['result'] != 'ACK')
 		return $synt;
 	// An empty sentence list is semantically valid, yet senseless,

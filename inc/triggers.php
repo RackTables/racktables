@@ -59,10 +59,18 @@ function trigger_emptyRackspace ()
 	return (count (getRackRows()) == 0);
 }
 
-function trigger_lvsconfig ()
+function trigger_isloadbalancer ()
 {
 	assertUIntArg ('object_id', __FUNCTION__);
-	return count (getRSPoolsForObject ($_REQUEST['object_id'])) > 0;
+	// Compile the same text, which was used for making the decision.
+	$filtertext = getConfigVar ('IPV4LB_LISTSRC');
+	if (!strlen ($filtertext))
+		return TRUE; // no restriction, always show the tab
+	$filter = spotPayload ($filtertext, 'SYNT_EXPR');
+	if ($filter['result'] != 'ACK')
+		return FALSE; // filter set, but cannot be used
+	global $rackCode;
+	return judgeEntity ('object', $_REQUEST['object_id'], $filter['load'], buildPredicateTable ($rackCode));
 }
 
 function trigger_ipv4 ()

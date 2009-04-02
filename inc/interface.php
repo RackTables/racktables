@@ -4335,7 +4335,7 @@ function renderRSPoolLBForm ($pool_id = 0)
 	echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
 	printOpFormIntro ('addLB');
 	echo "<tr valign=top><th>LB / VS</th><td class=tdleft>";
-	printSelect (getNarrowObjectList (explode (',', getConfigVar ('NATV4_PERFORMERS'))), 'object_id', NULL, 1);
+	printSelect (getIPv4LBList(), 'object_id', NULL, 1);
 	printSelect ($vs_list, 'vs_id', NULL, 2);
 	echo "</td><td>";
 	printImageHREF ('add', 'Configure LB', TRUE, 5);
@@ -4386,7 +4386,7 @@ function renderVServiceLBForm ($vs_id = 0)
 	echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
 	printOpFormIntro ('addLB');
 	echo "<tr valign=top><th>LB / RS pool</th><td class=tdleft>";
-	printSelect (getNarrowObjectList (explode (',', getConfigVar ('NATV4_PERFORMERS'))), 'object_id', NULL, 1);
+	printSelect (getIPv4LBList(), 'object_id', NULL, 1);
 	printSelect ($rsplist, 'pool_id', NULL, 2);
 	echo "</td><td>";
 	printImageHREF ('add', 'Configure LB', TRUE, 5);
