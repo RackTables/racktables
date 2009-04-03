@@ -1265,7 +1265,7 @@ function generateAutoPorts ()
 {
 	global $pageno;
 	assertUIntArg ('object_id', __FUNCTION__);
-	$info = getObjectInfo ($_REQUEST['object_id']);
+	$info = getObjectInfo ($_REQUEST['object_id'], FALSE);
 	// Navigate away in case of success, stay at the place otherwise.
 	if (executeAutoPorts ($_REQUEST['object_id'], $info['objtype_id']))
 		return buildRedirectURL (__FUNCTION__, 'OK', array(), $pageno, 'ports');

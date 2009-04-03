@@ -169,7 +169,7 @@ function dynamic_title_objgroup ()
 			break;
 		case 'object':
 			assertUIntArg ('object_id', __FUNCTION__);
-			$objectInfo = getObjectInfo ($_REQUEST['object_id']);
+			$objectInfo = getObjectInfo ($_REQUEST['object_id'], FALSE);
 			if ($objectInfo == NULL)
 			{
 				showError ('getObjectInfo() failed', __FUNCTION__);

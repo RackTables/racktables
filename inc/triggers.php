@@ -19,7 +19,7 @@ function trigger_livevlans ()
 {
 	assertUIntArg ('object_id', __FUNCTION__);
 	$object_id = $_REQUEST['object_id'];
-	$object = getObjectInfo ($object_id);
+	$object = getObjectInfo ($object_id, FALSE);
 	if ($object['objtype_id'] != 8)
 		return FALSE;
 	$values = getAttrValues ($object_id);
@@ -89,7 +89,7 @@ function trigger_autoports ()
 	assertUIntArg ('object_id', __FUNCTION__);
 	if (!objectIsPortless ($_REQUEST['object_id']))
 		return FALSE;
-	$info = getObjectInfo ($_REQUEST['object_id']);
+	$info = getObjectInfo ($_REQUEST['object_id'], FALSE);
 	return count (getAutoPorts ($info['objtype_id'])) != 0;
 }
 

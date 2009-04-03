@@ -125,6 +125,12 @@ if ($rackCode['result'] != 'ACK')
 	exit (1);
 }
 $rackCode = $rackCode['load'];
+// Only call buildPredicateTable() once and save the result, because it will remain
+// constant during one execution for constraints processing.
+$pTable = buildPredicateTable ($rackCode);
+// Constraints parse trees aren't cached in the database, so the least to keep
+// things running is to maintain application cache for them.
+$parseCache = array();
 
 require_once 'inc/auth.php';
 $auto_tags = array();

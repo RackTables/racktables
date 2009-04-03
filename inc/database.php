@@ -323,7 +323,7 @@ function getRackData ($rack_id = 0, $silent = FALSE)
 }
 
 // This is a popular helper.
-function getObjectInfo ($object_id = 0)
+function getObjectInfo ($object_id = 0, $set_dname = TRUE)
 {
 	if ($object_id == 0)
 	{
@@ -350,7 +350,8 @@ function getObjectInfo ($object_id = 0)
 		$ret['objtype_id'] = $row['objtype_id'];
 		$ret['has_problems'] = $row['has_problems'];
 		$ret['asset_no'] = $row['asset_no'];
-		$ret['dname'] = displayedName ($ret);
+		if ($set_dname)
+			$ret['dname'] = displayedName ($ret);
 		$ret['comment'] = $row['comment'];
 	}
 	$result->closeCursor();
@@ -420,7 +421,7 @@ function getObjectPortsAndLinks ($object_id = 0)
 			if (empty ($ret[$tmpkey]['remote_object_name']) and !empty ($ret[$tmpkey]['remote_object_id']))
 			{
 				$oi = getObjectInfo ($ret[$tmpkey]['remote_object_id']);
-				$ret[$tmpkey]['remote_object_name'] = displayedName ($oi);
+				$ret[$tmpkey]['remote_object_name'] = $oi['dname'];
 			}
 		}
 	}
@@ -1127,6 +1128,7 @@ function scanIPv4Space ($pairlist)
 			$ret[$ip_bin] = constructIPv4Address ($row['ip']);
 		if (!isset ($dnamecache[$row['object_id']]))
 		{
+			$quasiobject['id'] = $row['object_id'];
 			$quasiobject['name'] = $row['object_name'];
 			$quasiobject['objtype_id'] = $row['objtype_id'];
 			$quasiobject['objtype_name'] = $row['objtype_name'];
@@ -3641,7 +3643,7 @@ function getFileLinks ($file_id = 0)
 				$page = 'object';
 				$id_name = 'object_id';
 				$parent = getObjectInfo($row['entity_id']);
-				$name = $parent['name'];
+				$name = $parent['dname'];
 				break;
 			case 'rack':
 				$page = 'rack';

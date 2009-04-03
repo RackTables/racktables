@@ -373,7 +373,7 @@ function markupObjectProblems (&$rackData)
 		for ($locidx = 0; $locidx < 3; $locidx++)
 			if ($rackData[$i][$locidx]['state'] == 'T')
 			{
-				$object = getObjectInfo ($rackData[$i][$locidx]['object_id']);
+				$object = getObjectInfo ($rackData[$i][$locidx]['object_id'], FALSE);
 				if ($object['has_problems'] == 'yes')
 				{
 					// Object can be already highlighted.
@@ -987,11 +987,11 @@ function generateEntityAutoTags ($entity_realm = '', $bypass_value = '')
 			$ret[] = array ('tag' => '$any_rack');
 			break;
 		case 'object':
-			$oinfo = getObjectInfo ($bypass_value);
+			$oinfo = getObjectInfo ($bypass_value, FALSE);
 			$ret[] = array ('tag' => '$id_' . $bypass_value);
 			$ret[] = array ('tag' => '$typeid_' . $oinfo['objtype_id']);
 			$ret[] = array ('tag' => '$any_object');
-			if (validTagName ($oinfo['name']))
+			if (validTagName ('$cn_' . $oinfo['name']))
 				$ret[] = array ('tag' => '$cn_' . $oinfo['name']);
 			if (!count (getResidentRacksData ($bypass_value, FALSE)))
 				$ret[] = array ('tag' => '$unmounted');
@@ -1346,7 +1346,7 @@ function buildLVSConfig ($object_id = 0)
 		showError ('Invalid argument', __FUNCTION__);
 		return;
 	}
-	$oInfo = getObjectInfo ($object_id);
+	$oInfo = getObjectInfo ($object_id, FALSE);
 	$lbconfig = getSLBConfig ($object_id);
 	if ($lbconfig === NULL)
 	{
@@ -1937,15 +1937,16 @@ function filterEntityList ($list_in, $realm, $expression = array())
 	global $rackCode;
 	$list_out = array();
 	foreach ($list_in as $item_key => $item_value)
-		if (TRUE === judgeEntity ($realm, $item_key, $expression, buildPredicateTable ($rackCode)))
+		if (TRUE === judgeEntity ($realm, $item_key, $expression))
 			$list_out[$item_key] = $item_value;
 	return $list_out;
 }
 
 // Tell, if the given expression is true for the given entity.
-function judgeEntity ($realm, $id, $expression, $ptable)
+function judgeEntity ($realm, $id, $expression)
 {
 	$item_explicit_tags = loadEntityTags ($realm, $id);
+	global $pTable;
 	return eval_expression
 	(
 		$expression,
@@ -1955,7 +1956,7 @@ function judgeEntity ($realm, $id, $expression, $ptable)
 			getImplicitTags ($item_explicit_tags),
 			generateEntityAutoTags ($realm, $id)
 		),
-		$ptable,
+		$pTable,
 		TRUE
 	);
 }
@@ -1975,18 +1976,19 @@ function interpretPredicate ($pname)
 	return $ret;
 }
 
-// Tell, if a constraint from config option permits giben record.
+// Tell, if a constraint from config option permits given record.
 function considerConfiguredConstraint ($entity_realm, $entity_id, $varname)
 {
-	// Compile the same text, which was used for making the decision.
-	$filtertext = getConfigVar ($varname);
-	if (!strlen ($filtertext))
+	if (!strlen (getConfigVar ($varname)))
 		return TRUE; // no restriction
-	$filter = spotPayload ($filtertext, 'SYNT_EXPR');
-	if ($filter['result'] != 'ACK')
-		return FALSE; // constraint set, but cannot be used
-	global $rackCode;
-	return judgeEntity ($entity_realm, $entity_id, $filter['load'], buildPredicateTable ($rackCode));
+	global $parseCache;
+	if (!isset ($parseCache[$varname]))
+		// getConfigVar() doesn't re-read the value from DB because of its
+		// own cache, so there is no race condition here between two calls.
+		$parseCache[$varname] = spotPayload (getConfigVar ($varname), 'SYNT_EXPR');
+	if ($parseCache[$varname]['result'] != 'ACK')
+		return FALSE; // constraint set, but cannot be used due to compilation error
+	return judgeEntity ($entity_realm, $entity_id, $parseCache[$varname]['load']);
 }
 
 ?>
