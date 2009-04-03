@@ -68,6 +68,9 @@ function trigger_isloadbalancer ()
 function trigger_ipv4 ()
 {
 	assertUIntArg ('object_id', __FUNCTION__);
+	if (count (getObjectIPv4Allocations ($_REQUEST['object_id'])))
+		return TRUE;
+	// Only hide the tab, if there are no addresses allocated.
 	return considerConfiguredConstraint ('object', $_REQUEST['object_id'], 'IPV4OBJ_LISTSRC');
 }
 
