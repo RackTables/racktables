@@ -325,37 +325,20 @@ function getRackData ($rack_id = 0, $silent = FALSE)
 // This is a popular helper.
 function getObjectInfo ($object_id = 0, $set_dname = TRUE)
 {
-	if ($object_id == 0)
-	{
-		showError ('Invalid object_id', __FUNCTION__);
-		return;
-	}
 	$query =
 		"select RackObject.id as id, RackObject.name as name, label, barcode, dict_value as objtype_name, asset_no, dict_key as objtype_id, has_problems, comment from " .
 		"RackObject inner join Dictionary on objtype_id = dict_key join Chapter on Chapter.id = Dictionary.chapter_id " .
 		"where RackObject.id = '${object_id}' and RackObject.deleted = 'no' and Chapter.name = 'RackObjectType' limit 1";
 	$result = useSelectBlade ($query, __FUNCTION__);
-	if (($row = $result->fetch (PDO::FETCH_ASSOC)) == NULL)
+	if (($ret = $result->fetch (PDO::FETCH_ASSOC)) == NULL)
 	{
 		showError ('Query succeeded, but returned no data', __FUNCTION__);
-		$ret = NULL;
-	}
-	else
-	{
-		$ret['id'] = $row['id'];
-		$ret['name'] = $row['name'];
-		$ret['label'] = $row['label'];
-		$ret['barcode'] = $row['barcode'];
-		$ret['objtype_name'] = $row['objtype_name'];
-		$ret['objtype_id'] = $row['objtype_id'];
-		$ret['has_problems'] = $row['has_problems'];
-		$ret['asset_no'] = $row['asset_no'];
-		if ($set_dname)
-			$ret['dname'] = displayedName ($ret);
-		$ret['comment'] = $row['comment'];
+		return NULL;
 	}
 	$result->closeCursor();
-	unset ($result);
+	// It's safe now to run subsequent queries.
+	if ($set_dname)
+		$ret['dname'] = displayedName ($ret);
 	return $ret;
 }
 
