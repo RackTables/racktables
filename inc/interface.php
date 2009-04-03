@@ -4103,7 +4103,7 @@ this tab will not be seen any more. Good luck.<br>\n";
 function renderUIResetForm()
 {
 	printOpFormIntro ('go');
-	echo "This button will reset user interface configuration to its defaults (except organization name and auth source): ";
+	echo "This button will reset user interface configuration to its defaults (except organization name): ";
 	echo "<input type=submit value='proceed'>";
 	echo "</form>";
 }
