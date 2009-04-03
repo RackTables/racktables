@@ -62,29 +62,19 @@ function trigger_emptyRackspace ()
 function trigger_isloadbalancer ()
 {
 	assertUIntArg ('object_id', __FUNCTION__);
-	// Compile the same text, which was used for making the decision.
-	$filtertext = getConfigVar ('IPV4LB_LISTSRC');
-	if (!strlen ($filtertext))
-		return TRUE; // no restriction, always show the tab
-	$filter = spotPayload ($filtertext, 'SYNT_EXPR');
-	if ($filter['result'] != 'ACK')
-		return FALSE; // filter set, but cannot be used
-	global $rackCode;
-	return judgeEntity ('object', $_REQUEST['object_id'], $filter['load'], buildPredicateTable ($rackCode));
+	return considerConfiguredConstraint ('object', $_REQUEST['object_id'], 'IPV4LB_LISTSRC');
 }
 
 function trigger_ipv4 ()
 {
 	assertUIntArg ('object_id', __FUNCTION__);
-	$info = getObjectInfo ($_REQUEST['object_id']);
-	return in_array ($info['objtype_id'], explode (',', getConfigVar ('IPV4_PERFORMERS')));
+	return considerConfiguredConstraint ('object', $_REQUEST['object_id'], 'IPV4OBJ_LISTSRC');
 }
 
 function trigger_natv4 ()
 {
 	assertUIntArg ('object_id', __FUNCTION__);
-	$info = getObjectInfo ($_REQUEST['object_id']);
-	return in_array ($info['objtype_id'], explode (',', getConfigVar ('NATV4_PERFORMERS')));
+	return considerConfiguredConstraint ('object', $_REQUEST['object_id'], 'IPV4NAT_LISTSRC');
 }
 
 function trigger_poolrscount ()

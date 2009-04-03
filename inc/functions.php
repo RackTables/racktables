@@ -43,7 +43,7 @@ function displayedName ($objectData)
 {
 	if ($objectData['name'] != '')
 		return $objectData['name'];
-	elseif (in_array ($objectData['objtype_id'], explode (',', getConfigVar ('NAMEFUL_OBJTYPES'))))
+	elseif (considerConfiguredConstraint ('object', $objectData['id'], 'NAMEWARN_LISTSRC'))
 		return "ANONYMOUS " . $objectData['objtype_name'];
 	else
 		return "[${objectData['objtype_name']}]";
@@ -1960,20 +1960,6 @@ function judgeEntity ($realm, $id, $expression, $ptable)
 	);
 }
 
-function getIPv4LBList()
-{
-	$ret = getNarrowObjectList (array_keys (readChapter ('RackObjectType')));
-	$filtertext = getConfigVar ('IPV4LB_LISTSRC');
-	if (strlen ($filtertext))
-	{
-		$filter = spotPayload ($filtertext, 'SYNT_EXPR');
-		if ($filter['result'] != 'ACK')
-			return array();
-		$ret = filterEntityList ($ret, 'object', $filter['load']);
-	}
-	return $ret;
-}
-
 // If the requested predicate exists, return its [last] definition.
 // Otherwise return NULL (to signal filterEntityList() about error).
 // Also detect "not set" option selected.
@@ -1987,6 +1973,20 @@ function interpretPredicate ($pname)
 		if ($sentence['type'] == 'SYNT_DEFINITION' and $sentence['term'] == $pname)
 			$ret = $sentence['definition'];
 	return $ret;
+}
+
+// Tell, if a constraint from config option permits giben record.
+function considerConfiguredConstraint ($entity_realm, $entity_id, $varname)
+{
+	// Compile the same text, which was used for making the decision.
+	$filtertext = getConfigVar ($varname);
+	if (!strlen ($filtertext))
+		return TRUE; // no restriction
+	$filter = spotPayload ($filtertext, 'SYNT_EXPR');
+	if ($filter['result'] != 'ACK')
+		return FALSE; // constraint set, but cannot be used
+	global $rackCode;
+	return judgeEntity ($entity_realm, $entity_id, $filter['load'], buildPredicateTable ($rackCode));
 }
 
 ?>

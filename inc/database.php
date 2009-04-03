@@ -161,24 +161,31 @@ function getWhereClause ($tagfilter = array())
 }
 
 // Return a simple object list w/o related information, so that the returned value
-// can be directly used by printSelect().
-function getNarrowObjectList ($typeList = array())
+// can be directly used by printSelect(). An optional argument is the name of config
+// option with constraint in RackCode.
+function getNarrowObjectList ($varname = '')
 {
 	$ret = array();
 	global $dbxlink;
-	foreach ($typeList as $type_id)
+	$query =
+		"select RackObject.id as id, RackObject.name as name, dict_value as objtype_name, " .
+		"objtype_id from " .
+		"RackObject inner join Dictionary on objtype_id=dict_key join Chapter on Chapter.id = Dictionary.chapter_id " .
+		"where RackObject.deleted = 'no' and Chapter.name = 'RackObjectType' " .
+		"order by objtype_id, name";
+	$result = useSelectBlade ($query, __FUNCTION__);
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
+		$ret[$row['id']] = displayedName ($row);
+	if (strlen ($varname))
 	{
-		$type_id = $dbxlink->quote (trim ($type_id));
-		$query =
-			"select RackObject.id as id, RackObject.name as name, dict_value as objtype_name, " .
-			"objtype_id from " .
-			"RackObject inner join Dictionary on objtype_id=dict_key join Chapter on Chapter.id = Dictionary.chapter_id " .
-			"where RackObject.deleted = 'no' and Chapter.name = 'RackObjectType' " .
-			"and objtype_id = ${type_id} " .
-			"order by name";
-		$result = useSelectBlade ($query, __FUNCTION__);
-		while ($row = $result->fetch (PDO::FETCH_ASSOC))
-			$ret[$row['id']] = displayedName ($row);
+		$filtertext = getConfigVar ('IPV4LB_LISTSRC');
+		if (strlen ($filtertext))
+		{
+			$filter = spotPayload ($filtertext, 'SYNT_EXPR');
+			if ($filter['result'] != 'ACK')
+				return array();
+			$ret = filterEntityList ($ret, 'object', $filter['load']);
+		}
 	}
 	return $ret;
 }

@@ -916,16 +916,12 @@ function resetUIConfig()
 	setConfigVar ('default_port_type','24');
 	setConfigVar ('MASSCOUNT','15');
 	setConfigVar ('MAXSELSIZE','30');
-	setConfigVar ('NAMEFUL_OBJTYPES','4,7,8');
 	setConfigVar ('ROW_SCALE','2');
 	setConfigVar ('PORTS_PER_ROW','12');
 	setConfigVar ('IPV4_ADDRS_PER_PAGE','256');
 	setConfigVar ('DEFAULT_RACK_HEIGHT','42');
-	setConfigVar ('REQUIRE_ASSET_TAG_FOR','4,7,8');
 	setConfigVar ('DEFAULT_SLB_VS_PORT','');
 	setConfigVar ('DEFAULT_SLB_RS_PORT','');
-	setConfigVar ('IPV4_PERFORMERS','1,4,7,8,12,14,445,447');
-	setConfigVar ('NATV4_PERFORMERS','4,7,8');
 	setConfigVar ('DETECT_URLS','no');
 	setConfigVar ('RACK_PRESELECT_THRESHOLD','1');
 	setConfigVar ('DEFAULT_IPV4_RS_INSERVICE','no');
@@ -946,7 +942,11 @@ function resetUIConfig()
 	setConfigVar ('PREVIEW_TEXT_COLS', '80');
 	setConfigVar ('PREVIEW_IMAGE_MAXPXS', '320');
 	setConfigVar ('VENDOR_SIEVE', '');
-	setConfigVar ('IPV4LB_LISTSRC', '');
+	setConfigVar ('IPV4LB_LISTSRC', '{$objtype_4}');
+	setConfigVar ('IPV4OBJ_LISTSRC','{$objtype_4} or {$objtype_7} or {$objtype_8} or {$objtype_12} or {$objtype_445} or {$objtype_447}');
+	setConfigVar ('IPV4NAT_LISTSRC','{$objtype_4} or {$objtype_7} or {$objtype_8}');
+	setConfigVar ('ASSETWARN_LISTSRC','{$objtype_4} or {$objtype_7} or {$objtype_8}');
+	setConfigVar ('NAMEWARN_LISTSRC','{$objtype_4} or {$objtype_7} or {$objtype_8}');
 	return buildRedirectURL (__FUNCTION__, 'OK');
 }
 

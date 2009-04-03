@@ -822,13 +822,13 @@ function renderRackObject ($object_id = 0)
 	echo "<table border=0 cellspacing=0 cellpadding=3 width='100%'>\n";
 	if (!empty ($info['name']))
 		echo "<tr><th width='50%' class=tdright>Common name:</th><td class=tdleft>${info['name']}</td></tr>\n";
-	elseif (in_array ($info['objtype_id'], explode (',', getConfigVar ('NAMEFUL_OBJTYPES'))))
+	elseif (considerConfiguredConstraint ('object', $object_id, 'NAMEWARN_LISTSRC'))
 		echo "<tr><td colspan=2 class=msg_error>Common name is missing.</td></tr>\n";
 	echo "<tr><th width='50%' class=tdright>Object type:</th>";
 	echo "<td class=tdleft><a href='".makeHref(array('page'=>'objgroup', 'group_id'=>$info['objtype_id'], 'hl_object_id'=>$object_id))."'>${info['objtype_name']}</a></td></tr>\n";
 	if (!empty ($info['asset_no']))
 		echo "<tr><th width='50%' class=tdright>Asset tag:</th><td class=tdleft>${info['asset_no']}</td></tr>\n";
-	elseif (in_array ($info['objtype_id'], explode (',', getConfigVar ('REQUIRE_ASSET_TAG_FOR'))))
+	elseif (considerConfiguredConstraint ('object', $object_id, 'ASSETWARN_LISTSRC'))
 		echo "<tr><td colspan=2 class=msg_error>Asset tag is missing.</td></tr>\n";
 	if (!empty ($info['label']))
 		echo "<tr><th width='50%' class=tdright>Visible label:</th><td class=tdleft>${info['label']}</td></tr>\n";
@@ -2721,7 +2721,7 @@ function renderIPv4AddressAllocations ($dottedquad)
 		echo "<tr><td>";
 		printImageHREF ('add', 'allocate', TRUE);
 		echo "</td><td>";
-		printSelect (getNarrowObjectList (explode (',', getConfigVar ('IPV4_PERFORMERS'))), 'object_id', NULL, 100);
+		printSelect (getNarrowObjectList ('IPV4OBJ_LISTSRC'), 'object_id', NULL, 100);
 		echo "</td><td><input type=text tabindex=101 name=bond_name size=10></td><td>";
 		printSelect ($aat, 'bond_type', NULL, 102);
 		echo "</td><td>";
@@ -4337,7 +4337,7 @@ function renderRSPoolLBForm ($pool_id = 0)
 	echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
 	printOpFormIntro ('addLB');
 	echo "<tr valign=top><th>LB / VS</th><td class=tdleft>";
-	printSelect (getIPv4LBList(), 'object_id', NULL, 1);
+	printSelect (getNarrowObjectList ('IPV4LB_LISTSRC'), 'object_id', NULL, 1);
 	printSelect ($vs_list, 'vs_id', NULL, 2);
 	echo "</td><td>";
 	printImageHREF ('add', 'Configure LB', TRUE, 5);
@@ -4388,7 +4388,7 @@ function renderVServiceLBForm ($vs_id = 0)
 	echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
 	printOpFormIntro ('addLB');
 	echo "<tr valign=top><th>LB / RS pool</th><td class=tdleft>";
-	printSelect (getIPv4LBList(), 'object_id', NULL, 1);
+	printSelect (getNarrowObjectList ('IPV4LB_LISTSRC'), 'object_id', NULL, 1);
 	printSelect ($rsplist, 'pool_id', NULL, 2);
 	echo "</td><td>";
 	printImageHREF ('add', 'Configure LB', TRUE, 5);
