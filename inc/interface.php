@@ -1057,10 +1057,8 @@ function renderRackObject ($object_id = 0)
 	echo "<td class=pcright>";
 	// rackspace portlet
 	startPortlet ('rackspace allocation');
-	// FIXME: now we call getRackData() twice
-	$racks = getResidentRacksData ($object_id);
-	foreach ($racks as $rackData)
-		renderRack ($rackData['id'], $object_id);
+	foreach (getResidentRacksData ($object_id, FALSE) as $rack_id)
+		renderRack ($rack_id, $object_id);
 	echo '<br>';
 	finishPortlet();
 	echo "</td></tr>";
