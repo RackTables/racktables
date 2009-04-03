@@ -942,11 +942,11 @@ function resetUIConfig()
 	setConfigVar ('PREVIEW_TEXT_COLS', '80');
 	setConfigVar ('PREVIEW_IMAGE_MAXPXS', '320');
 	setConfigVar ('VENDOR_SIEVE', '');
-	setConfigVar ('IPV4LB_LISTSRC', '{$objtype_4}');
-	setConfigVar ('IPV4OBJ_LISTSRC','{$objtype_4} or {$objtype_7} or {$objtype_8} or {$objtype_12} or {$objtype_445} or {$objtype_447}');
-	setConfigVar ('IPV4NAT_LISTSRC','{$objtype_4} or {$objtype_7} or {$objtype_8}');
-	setConfigVar ('ASSETWARN_LISTSRC','{$objtype_4} or {$objtype_7} or {$objtype_8}');
-	setConfigVar ('NAMEWARN_LISTSRC','{$objtype_4} or {$objtype_7} or {$objtype_8}');
+	setConfigVar ('IPV4LB_LISTSRC', '{$typeid_4}');
+	setConfigVar ('IPV4OBJ_LISTSRC','{$typeid_4} or {$typeid_7} or {$typeid_8} or {$typeid_12} or {$typeid_445} or {$typeid_447}');
+	setConfigVar ('IPV4NAT_LISTSRC','{$typeid_4} or {$typeid_7} or {$typeid_8}');
+	setConfigVar ('ASSETWARN_LISTSRC','{$typeid_4} or {$typeid_7} or {$typeid_8}');
+	setConfigVar ('NAMEWARN_LISTSRC','{$typeid_4} or {$typeid_7} or {$typeid_8}');
 	return buildRedirectURL (__FUNCTION__, 'OK');
 }
 
