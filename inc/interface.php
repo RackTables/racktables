@@ -751,8 +751,10 @@ function renderGridForm ($rack_id = 0, $filter, $header, $submit, $state1, $stat
 	startPortlet ($header);
 	echo "<center>\n";
 	echo "<table class=rack border=0 cellspacing=0 cellpadding=1>\n";
-	echo "<tr><th width='10%'>&nbsp;</th><th width='20%'>Front</th>";
-	echo "<th width='50%'>Interior</th><th width='20%'>Back</th></tr>\n";
+	echo "<tr><th width='10%'>&nbsp;</th>";
+	echo "<th width='20%'><a href='javascript:;' onclick=\"toggleColumnOfAtoms('${rack_id}', '0', ${rackData['height']})\">Front</a></th>";
+	echo "<th width='50%'><a href='javascript:;' onclick=\"toggleColumnOfAtoms('${rack_id}', '1', ${rackData['height']})\">Interior</a></th>";
+	echo "<th width='20%'><a href='javascript:;' onclick=\"toggleColumnOfAtoms('${rack_id}', '2', ${rackData['height']})\">Back</a></th></tr>\n";
 	printOpFormIntro ('updateRack');
 	markupAtomGrid ($rackData, $state2);
 	renderAtomGrid ($rackData);
@@ -1698,11 +1700,15 @@ function renderRackSpaceForObject ($object_id = 0)
 		echo "<td valign=top>";
 		echo "<center>\n<h2>${rackData['name']}</h2>\n";
 		echo "<table class=rack border=0 cellspacing=0 cellpadding=1>\n";
-		echo "<tr><th width='10%'>&nbsp;</th><th width='20%'>Front</th>";
-		echo "<th width='50%'>Interior</th><th width='20%'>Back</th></tr>\n";
+		echo "<tr><th width='10%'>&nbsp;</th>";
+		echo "<th width='20%'><a href='javascript:;' onclick=\"toggleColumnOfAtoms('${rack_id}', '0', ${rackData['height']})\">Front</a></th>";
+		echo "<th width='50%'><a href='javascript:;' onclick=\"toggleColumnOfAtoms('${rack_id}', '1', ${rackData['height']})\">Interior</a></th>";
+		echo "<th width='20%'><a href='javascript:;' onclick=\"toggleColumnOfAtoms('${rack_id}', '2', ${rackData['height']})\">Back</a></th></tr>\n";
 		renderAtomGrid ($rackData);
-		echo "<tr><th width='10%'>&nbsp;</th><th width='20%'>Front</th>";
-		echo "<th width='50%'>Interior</th><th width='20%'>Back</th></tr>\n";
+		echo "<tr><th width='10%'>&nbsp;</th>";
+		echo "<th width='20%'><a href='javascript:;' onclick=\"toggleColumnOfAtoms('${rack_id}', '0', ${rackData['height']})\">Front</a></th>";
+		echo "<th width='50%'><a href='javascript:;' onclick=\"toggleColumnOfAtoms('${rack_id}', '1', ${rackData['height']})\">Interior</a></th>";
+		echo "<th width='20%'><a href='javascript:;' onclick=\"toggleColumnOfAtoms('${rack_id}', '2', ${rackData['height']})\">Back</a></th></tr>\n";
 		echo "</table></center>\n";
 		echo '</td>';
 	}
@@ -3266,18 +3272,19 @@ function renderAtomGrid ($data)
 	$rack_id = $data['id'];
 	for ($unit_no = $data['height']; $unit_no > 0; $unit_no--)
 	{
-		echo "<tr><th>${unit_no}</th>";
+		echo "<tr><th><a href='javascript:;' onclick=\"toggleRowOfAtoms('${rack_id}','${unit_no}')\">${unit_no}</a></th>";
 		for ($locidx = 0; $locidx < 3; $locidx++)
 		{
+			$name = "atom_${rack_id}_${unit_no}_${locidx}";
 			$state = $data[$unit_no][$locidx]['state'];
 			echo "<td class=state_${state}";
 			if (isset ($data[$unit_no][$locidx]['hl']))
 				echo $data[$unit_no][$locidx]['hl'];
 			echo ">";
 			if (!($data[$unit_no][$locidx]['enabled'] === TRUE))
-				echo '<input type=checkbox disabled>';
+				echo "<input type=checkbox id=${name} disabled>";
 			else
-				echo "<input type=checkbox" . $data[$unit_no][$locidx]['checked'] . " name=atom_${rack_id}_${unit_no}_${locidx}>";
+				echo "<input type=checkbox" . $data[$unit_no][$locidx]['checked'] . " name=${name} id=${name}>";
 			echo '</td>';
 		}
 		echo "</tr>\n";
