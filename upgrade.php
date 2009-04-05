@@ -127,7 +127,8 @@ CREATE TABLE `File` (
   `atime` datetime NOT NULL,
   `contents` longblob NOT NULL,
   `comment` text,
-  PRIMARY KEY  (`id`)
+  PRIMARY KEY  (`id`),
+  UNIQUE KEY `name` (`name`)
 ) ENGINE=InnoDB";
 			$query[] = "
 CREATE TABLE `FileLink` (

@@ -3722,6 +3722,8 @@ function commitAddFile ($name, $type, $size, $contents, $comment)
 
 	if ($result)
 		return '';
+	elseif ($query->errorCode = 23000)
+		return "commitAddFile: File named '${name}' already exists";
 	else
 		return 'commitAddFile: SQL query failed';
 }
