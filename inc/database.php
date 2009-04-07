@@ -176,16 +176,14 @@ function getNarrowObjectList ($varname = '')
 	$result = useSelectBlade ($query, __FUNCTION__);
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 		$ret[$row['id']] = displayedName ($row);
-	if (strlen ($varname))
+	if (strlen ($varname) and strlen (getConfigVar ($varname)))
 	{
-		$filtertext = getConfigVar ('IPV4LB_LISTSRC');
-		if (strlen ($filtertext))
-		{
-			$filter = spotPayload ($filtertext, 'SYNT_EXPR');
-			if ($filter['result'] != 'ACK')
-				return array();
-			$ret = filterEntityList ($ret, 'object', $filter['load']);
-		}
+		global $parseCache;
+		if (!isset ($parseCache[$varname]))
+			$parseCache[$varname] = spotPayload (getConfigVar ($varname), 'SYNT_EXPR');
+		if ($parseCache[$varname]['result'] != 'ACK')
+			return array();
+		$ret = filterEntityList ($ret, 'object', $parseCache[$varname]['load']);
 	}
 	return $ret;
 }
