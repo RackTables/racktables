@@ -1272,6 +1272,14 @@ function oneLiner ($code, $args = array())
 	return $ret;
 }
 
+// Merge message payload from two message logs given and return the result.
+function mergeLogs ($log1, $log2)
+{
+	$ret = emptyLog();
+	$ret['m'] = array_merge ($log1['m'], $log2['m']);
+	return $ret;
+}
+
 function validTagName ($s, $allow_autotag = FALSE)
 {
 	if (1 == mb_ereg (TAGNAME_REGEXP, $s))
