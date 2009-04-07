@@ -1341,7 +1341,7 @@ function printLog ($log)
 			$msginfo = array
 			(
 // records 0~99 with success messages
-				0 => array ('code' => 'success', 'format' => 'Success: %s'),
+				0 => array ('code' => 'success', 'format' => '%s'),
 				1 => array ('code' => 'success', 'format' => '%u new records done, %u already existed'),
 				2 => array ('code' => 'success', 'format' => 'NATv4 rule was successfully added.'),
 				3 => array ('code' => 'success', 'format' => 'NATv4 rule was successfully deleted.'),
@@ -1423,7 +1423,7 @@ function printLog ($log)
 				79 => array ('code' => 'success', 'format' => 'Rack %s was deleted successfully'),
 
 // records 100~199 with fatal error messages
-				100 => array ('code' => 'error', 'format' => 'Generic error: %s'),
+				100 => array ('code' => 'error', 'format' => '%s'),
 				101 => array ('code' => 'error', 'format' => 'Port name cannot be empty'),
 				102 => array ('code' => 'error', 'format' => "Error creating user account '%s'"),
 				103 => array ('code' => 'error', 'format' => 'getHashByID() failed'),
@@ -1509,7 +1509,7 @@ function printLog ($log)
 				183 => array ('code' => 'error', 'format' => "Tag id '%s' does not exist."),
 
 // records 200~299 with warnings
-				200 => array ('code' => 'warning', 'format' => 'generic warning: %s'),
+				200 => array ('code' => 'warning', 'format' => '%s'),
 				201 => array ('code' => 'warning', 'format' => 'nothing happened...'),
 				202 => array ('code' => 'warning', 'format' => 'gw: %s'),
 				203 => array ('code' => 'warning', 'format' => 'Port %s seems to be the first in VLAN %u at this switch.'),
