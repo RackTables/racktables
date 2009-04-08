@@ -4795,6 +4795,7 @@ function renderLivePTR ($id = 0)
 	echo "<table class='widetable' border=0 cellspacing=0 cellpadding=5 align='center'>\n";
 	echo "<tr><th>address</th><th>current name</th><th>DNS data</th><th>import</th></tr>\n";
 	$idx = 1;
+	$box_counter = 1;
 	$cnt_match = $cnt_mismatch = $cnt_missing = 0;
 	for ($ip = $startip; $ip <= $endip; $ip++)
 	{
@@ -4836,13 +4837,15 @@ function renderLivePTR ($id = 0)
 		echo "'><a href='".makeHref(array('page'=>'ipaddress', 'ip'=>$straddr))."'>${straddr}</a></td>";
 		echo "<td class=tdleft>${addr['name']}</td><td class=tdleft>${ptrname}</td><td>";
 		if ($print_cbox)
-			echo "<input type=checkbox name=import_${idx} tabindex=${idx}>";
+			echo "<input type=checkbox name=import_${idx} tabindex=${idx} id=atom_1_" . $box_counter++ . "_1>";
 		else
 			echo '&nbsp;';
 		echo "</td></tr>\n";
 		$idx++;
 	}
-	echo "<tr><td colspan=4 align=center><input type=submit value='Import selected records'></td></tr>";
+	echo "<tr><td colspan=3 align=center><input type=submit value='Import selected records'></td><td>";
+	echo --$box_counter ? "<a href='javascript:;' onclick=\"toggleColumnOfAtoms(1, 1, ${box_counter})\">(toggle selection)</a>" : '&nbsp;';
+	echo "</td></tr>";
 	echo "</table>";
 	echo "</form>";
 	finishPortlet();
