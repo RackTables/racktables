@@ -3553,14 +3553,20 @@ function renderChaptersEditor ()
 	{
 		printOpFormIntro ('add');
 		echo '<tr><td>';
-		printImageHREF ('add', 'Add new', TRUE);
+		printImageHREF ('create', 'Add new', TRUE);
 		echo "</td><td><input type=text name=chapter_name tabindex=100></td><td>&nbsp;</td><td>";
-		printImageHREF ('add', 'Add new', TRUE, 101);
+		printImageHREF ('create', 'Add new', TRUE, 101);
 		echo '</td></tr></form>';
 	}
 	global $pageno, $tabno;
 	showMessageOrError();
 	$dict = getDict();
+	foreach (array_keys ($dict) as $chapter_no)
+		$dict[$chapter_no]['mapped'] = FALSE;
+	foreach (getAttrMap() as $attrinfo)
+		if ($attrinfo['type'] == 'dict')
+			foreach ($attrinfo['application'] as $app)
+				$dict[$app['chapter_no']]['mapped'] = TRUE;
 	echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
 	echo '<tr><th>&nbsp;</th><th>Chapter name</th><th>Words</th><th>&nbsp;</th></tr>';
 	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
@@ -3573,13 +3579,15 @@ function renderChaptersEditor ()
 		echo '<tr>';
 		echo '<td>';
 		if ($sticky)
-			printImageHREF ('nodelete', 'system chapter');
+			printImageHREF ('nodestroy', 'system chapter');
 		elseif ($wordcount > 0)
-			printImageHREF ('nodelete', 'contains ' . $wordcount . ' word(s)');
+			printImageHREF ('nodestroy', 'contains ' . $wordcount . ' word(s)');
+		elseif ($chapter['mapped'])
+			printImageHREF ('nodestroy', 'used in attribute map');
 		else
 		{
 			echo "<a href='".makeHrefProcess(array('op'=>'del', 'chapter_no'=>$chapter['no']))."'>";
-			printImageHREF ('delete', 'Remove chapter');
+			printImageHREF ('destroy', 'Remove chapter');
 			echo "</a>";
 		}
 		echo '</td>';
