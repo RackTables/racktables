@@ -209,24 +209,10 @@ function getObjectList ($type_id = 0, $tagfilter = array(), $tfmode = 'any')
 	$result = useSelectBlade ($query, __FUNCTION__);
 	$ret = array();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-	{
-		foreach (array (
-			'id',
-			'name',
-			'label',
-			'barcode',
-			'objtype_name',
-			'objtype_id',
-			'asset_no',
-			'rack_id',
-			'Rack_name',
-			'row_id',
-			'Row_name'
-			) as $cname)
-			$ret[$row['id']][$cname] = $row[$cname];
-		$ret[$row['id']]['dname'] = displayedName ($ret[$row['id']]);
-	}
+		$ret[$row['id']] = $row;
 	$result->closeCursor();
+	foreach (array_keys ($ret) as $key)
+		$ret[$key]['dname'] = displayedName ($ret[$key]);
 	return $ret;
 }
 
