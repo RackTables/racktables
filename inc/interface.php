@@ -507,7 +507,7 @@ function renderNewRackForm ($row_id)
 		$defh = '';
 	echo "<tr><th class=tdright>Rack name (*):</th><td class=tdleft><input type=text name=rack_name tabindex=1></td>";
 	echo "<td rowspan=4>Assign tags:<br>";
-	renderTagSelect();
+	renderNewEntityTags();
 	echo "</td></tr>\n";
 	echo "<tr><th class=tdright>Height in units (*):</th><td class=tdleft><input type=text name=rack_height1 tabindex=2 value='${defh}'></td></tr>\n";
 	echo "<tr><th class=tdright>Comment:</th><td class=tdleft><input type=text name=rack_comment tabindex=3></td></tr>\n";
@@ -524,7 +524,7 @@ function renderNewRackForm ($row_id)
 		$defh = '';
 	echo "<tr><th class=tdright>Height in units (*):</th><td class=tdleft><input type=text name=rack_height2 value='${defh}'></td>";
 	echo "<td rowspan=3 valign=top>Assign tags:<br>";
-	renderTagSelect();
+	renderNewEntityTags();
 	echo "</td></tr>\n";
 	echo "<tr><th class=tdright>Rack names (*):</th><td class=tdleft><textarea name=rack_names cols=40 rows=25></textarea></td></tr>\n";
 	echo "<tr><td class=submit colspan=2>";
@@ -2265,7 +2265,7 @@ function renderIPv4SpaceEditor ()
 	echo "<input type=hidden name=op value=addIPv4Prefix>\n";
 	// tags column
 	echo '<tr><td rowspan=4><h3>assign tags</h3>';
-	renderTagSelect();
+	renderNewEntityTags();
 	echo '</td>';
 	// inputs column
 	echo "<th class=tdright>prefix</th><td class=tdleft><input type=text name='range' size=18 class='live-validate' tabindex=1></td>";
@@ -2897,7 +2897,6 @@ function renderNATv4ForObject ($object_id = 0)
 	echo "</table><br><br>";
 }
 
-// FIXME: move related code away into ophandler(s)
 function renderAddMultipleObjectsForm ()
 {
 	global $root, $pageno, $tabno, $nextorder;
@@ -2946,7 +2945,7 @@ function renderAddMultipleObjectsForm ()
 		if ($i == 0)
 		{
 			echo "<td valign=top rowspan=${max}>";
-			renderTagSelect();
+			renderNewEntityTags();
 			echo "</td>\n";
 		}
 		echo "</tr>\n";
@@ -2966,7 +2965,7 @@ function renderAddMultipleObjectsForm ()
 	echo "</td></tr>";
 	echo "<tr><th>Tags</th></tr>";
 	echo "<tr><td valign=top>";
-	renderTagSelect();
+	renderNewEntityTags();
 	echo "</td></tr>";
 	echo "<tr><td colspan=2><input type=submit name=got_very_fast_data value='Go!'></td></tr></table>\n";
 	echo "</form>\n";
@@ -4533,7 +4532,7 @@ function renderVSListEditForm ()
 	printImageHREF ('CREATE', 'create virtual service', TRUE);
 	echo "</td></tr><tr><th>VS configuration</th><td colspan=4 class=tdleft><textarea name=vsconfig rows=10 cols=80></textarea></td>\n";
 	echo "<td rowspan=2><h3>assign tags</h3>";
-	renderTagSelect();
+	renderNewEntityTags();
 	echo "</td></tr>";
 	echo "<tr><th>RS configuration</th><td colspan=4 class=tdleft><textarea name=rsconfig rows=10 cols=80></textarea></td></tr>\n";
 	echo "</table>";
@@ -4628,7 +4627,7 @@ function editRSPools ()
 	printImageHREF ('CREATE', 'create real server pool', TRUE);
 	echo "</td></tr><tr><th>VS configuration</th><td><textarea name=vsconfig rows=10 cols=80></textarea></td>";
 	echo "<td rowspan=2><h3>assign tags</h3>";
-	renderTagSelect();
+	renderNewEntityTags();
 	echo "</td></tr>";
 	echo "<tr><th>RS configuration</th><td><textarea name=rsconfig rows=10 cols=80></textarea></td></tr>";
 	echo "</table></form>";
@@ -5023,44 +5022,15 @@ function renderTagTreeEditor ()
 	finishPortlet();
 }
 
-// Output a sequence of OPTION elements, selecting those, which are present on the
-// given (not effective) explicit tags list.
-function renderTagOption ($taginfo, $level = 0)
+function renderTagCheckbox ($inputname, $preselect, $taginfo, $level = 0)
 {
-	global $target_given_tags;
 	$self = __FUNCTION__;
-	$selected = tagOnChain ($taginfo, $target_given_tags) ? ' selected' : '';
-	echo '<option value=' . $taginfo['id'] . "${selected}>";
-	for ($i = 0; $i < $level; $i++)
-		echo '-- ';
-	echo $taginfo['tag'] . "</option>\n";
-	foreach ($taginfo['kids'] as $kid)
-		$self ($kid, $level + 1);
-}
-
-function renderTagCheckbox ($taginfo, $level = 0)
-{
-	global $target_given_tags;
-	$self = __FUNCTION__;
-	$selected = tagOnChain ($taginfo, $target_given_tags) ? ' checked' : '';
+	$selected = tagOnChain ($taginfo, $preselect) ? ' checked' : '';
 	echo "<tr><td colspan=2 align=left style='padding-left: " . ($level * 16) . "px;'>";
-	echo '<input type=checkbox name=taglist[] value=' . $taginfo['id'] . "${selected}> ";
+	echo "<input type=checkbox name='${inputname}[]' value='${taginfo['id']}'${selected}> ";
 	echo $taginfo['tag'] . "</td></tr>\n";
 	foreach ($taginfo['kids'] as $kid)
-		$self ($kid, $level + 1);
-}
-
-// Idem, but select those, which are shown on the $_REQUEST['tagfiler'] array.
-// Ignore tag ids, which can't be found on the tree.
-function renderTagOptionForFilter ($taginfo, $tagfilter, $realm, $level = 0)
-{
-	$selected = tagOnIdList ($taginfo, $tagfilter) ?' selected' : '';
-	echo '<option value=' . $taginfo['id'] . "${selected}>";
-	for ($i = 0; $i < $level; $i++)
-		echo '-- ';
-	echo $taginfo['tag'] . (isset ($taginfo['refcnt'][$realm]) ? ' (' . $taginfo['refcnt'][$realm] . ')' : '') . "</option>\n";
-	foreach ($taginfo['kids'] as $kid)
-		renderTagOptionForFilter ($kid, $tagfilter, $realm, $level + 1);
+		$self ($inputname, $preselect, $kid, $level + 1);
 }
 
 function renderEntityTags ($entity_id = 0)
@@ -5078,9 +5048,10 @@ function renderEntityTags ($entity_id = 0)
 	if (count ($target_given_tags))
 		echo '<h3>(' . serializeTags ($target_given_tags) . ')</h3>';
 	echo '<table border=0 align=center>';
-	printOpFormIntro ('saveTags', array ($bypass_name => $entity_id));
+	printOpFormIntro ('saveTags');
+	// Show a tree of tags with preselection, which matches current chain.
 	foreach ($tagtree as $taginfo)
-		renderTagCheckbox ($taginfo);
+		renderTagCheckbox ('taglist', $target_given_tags, $taginfo);
 	echo '<tr><td class=tdleft>';
 	printImageHREF ('SAVE', 'Save changes', TRUE);
 	echo "</form></td><td class=tdright>";
@@ -5088,10 +5059,11 @@ function renderEntityTags ($entity_id = 0)
 		printImageHREF ('CLEAR gray');
 	else
 	{
-		printOpFormIntro ('saveTags', array ($bypass_name => $entity_id, 'taglist[]' => ''));
+		printOpFormIntro ('saveTags', array ('taglist[]' => ''));
 		printImageHREF ('CLEAR', 'Reset all tags', TRUE);
+		echo '</form>';
 	}
-	echo '</form></td></tr></table>';
+	echo '</td></tr></table>';
 	finishPortlet();
 }
 
@@ -5136,7 +5108,8 @@ function renderTagFilterPortlet ($tagfilter, $realm, $bypass_name = '', $bypass_
 	startPortlet ('T-filter');
 	if (!count ($objectivetags))
 	{
-		echo "None defined for current realm.<br>";
+		echo "None used in current realm.<br>";
+		finishPortlet();
 		return;
 	}
 	echo '<table border=0 align=center>';
@@ -5148,10 +5121,11 @@ function renderTagFilterPortlet ($tagfilter, $realm, $bypass_name = '', $bypass_
 	echo "<input type=hidden name=tab value=${tabno}>\n";
 	if ($bypass_name != '')
 		echo "<input type=hidden name=${bypass_name} value='${bypass_value}'>\n";
-	echo '<tr><td colspan=2><select name=tagfilter[] multiple size=' . getConfigVar ('MAXSELSIZE') . '>';
+	echo '<tr><td colspan=2>';
+	// Show a tree of tags, pre-select according to currently requested list filter.
 	foreach ($objectivetags as $taginfo)
-		renderTagOptionForFilter ($taginfo, complementByKids ($tagfilter), $realm);
-	echo '</select></td></tr><tr><td>';
+		renderTagCheckbox ('tagfilter', buildTagChainFromIds ($tagfilter), $taginfo);
+	echo '</td></tr><tr><td>';
 //	$tfmode = getTFMode();
 //	echo '<input type=radio name=tfmode value=all' . ($tfmode == 'all' ? ' checked' : '') . '>all ';
 //	echo '<input type=radio name=tfmode value=any' . ($tfmode == 'any' ? ' checked' : '') . '>any ';
@@ -5198,7 +5172,7 @@ function renderTagFilterPortlet ($tagfilter, $realm, $bypass_name = '', $bypass_
 }
 
 // Dump all tags in a single SELECT element.
-function renderTagSelect ()
+function renderNewEntityTags ()
 {
 	global $taglist, $tagtree;
 	if (!count ($taglist))
@@ -5208,7 +5182,7 @@ function renderTagSelect ()
 	}
 	echo '<div class=tagselector><table border=0 align=center>';
 	foreach ($tagtree as $taginfo)
-		renderTagCheckbox ($taginfo);
+		renderTagCheckbox ('taglist', array(), $taginfo);
 	echo '</table></div>';
 }
 
@@ -5224,7 +5198,7 @@ function renderTagRollerForRow ($row_id)
 	echo "rack row.<br>The tag(s) selected below will be ";
 	echo "appended to already assigned tag(s) of each particular entity. </td></tr>";
 	echo "<tr><th>Tags</th><td>";
-	renderTagSelect();
+	renderNewEntityTags();
 	echo "</td></tr>";
 	echo "<tr><th>Control question: the sum of ${a} and ${b}</th><td><input type=text name=sum></td></tr>";
 	echo "<tr><td colspan=2 align=center><input type=submit value='Go!'></td></tr>";

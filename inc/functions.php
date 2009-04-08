@@ -1086,6 +1086,7 @@ function fixContext ()
 		$impl_tags,
 		$target_given_tags,
 		$user_given_tags,
+		$etype_by_pageno,
 		$page;
 
 	$pmap = array
@@ -1118,7 +1119,7 @@ function fixContext ()
 		isset ($page[$pageno]['bypass']) and
 		isset ($_REQUEST[$page[$pageno]['bypass']])
 	)
-		$auto_tags = array_merge ($auto_tags, generateEntityAutoTags ($pageno, $_REQUEST[$page[$pageno]['bypass']]));
+		$auto_tags = array_merge ($auto_tags, generateEntityAutoTags ($etype_by_pageno[$pageno], $_REQUEST[$page[$pageno]['bypass']]));
 	if
 	(
 		isset ($page[$pageno]['bypass']) and
