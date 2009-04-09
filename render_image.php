@@ -85,13 +85,7 @@ function generateMiniRack ($rack_id = 0)
 		return;
 	}
 	markupObjectProblems ($rackData);
-	// Cache in a local array, because we are going to use those values often.
-	$rtwidth = array
-	(
-		0 => getConfigVar ('rtwidth_0'),
-		1 => getConfigVar ('rtwidth_1'),
-		2 => getConfigVar ('rtwidth_2')
-	);
+	global $rtwidth;
 	$rtdepth = 9;
 	$offset[0] = 3;
 	$offset[1] = 3 + $rtwidth[0];

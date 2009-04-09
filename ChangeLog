@@ -24,6 +24,7 @@
 	update: RackTables installation is now done only through install.php
 	update: records for F5 hardware
 	update: don't require HASH extension any more
+	update: rack thumb dimensions aren't configured any more
 	bugfix: show error message if snmp module isn't loaded.  closes ticket 43 (by Aaron)
 	bugfix: show error message for duplicate IPv4 network record
 	bugfix: it was possible to access the system as any existing

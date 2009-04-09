@@ -234,9 +234,6 @@ INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (2,681,
 INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (2,682,'async serial (DB-25)');
 INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (1,798,'Network security');
 
-INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('rtwidth_0','9','uint','no','yes','');
-INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('rtwidth_1','21','uint','no','yes','');
-INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('rtwidth_2','9','uint','no','yes','');
 INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('color_F','8fbfbf','string','no','yes','HSV: 180-25-75. Free atoms, they are available for allocation to objects.');
 INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('color_A','bfbfbf','string','no','yes','HSV: 0-0-75. Absent atoms.');
 INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('color_U','bf8f8f','string','no','yes','HSV: 0-25-75. Unusable atoms. Some problems keep them from being free.');

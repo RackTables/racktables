@@ -172,8 +172,6 @@ CREATE TABLE `FileLink` (
 			$query[] = 'alter table TagStorage drop key target_id';
 			$query[] = 'alter table TagStorage add UNIQUE KEY `entity_tag` (`entity_realm`,`entity_id`,`tag_id`)';
 			$query[] = 'alter table TagStorage add KEY `entity_id` (`entity_id`)';
-			$query[] = "delete from Config where varname = 'USER_AUTH_SRC' limit 1";
-			$query[] = "delete from Config where varname = 'COOKIE_TTL' limit 1";
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('PREVIEW_TEXT_MAXCHARS','10240','uint','yes','no','Max chars for text file preview')";
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('PREVIEW_TEXT_ROWS','25','uint','yes','no','Rows for text file preview')";
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('PREVIEW_TEXT_COLS','80','uint','yes','no','Columns for text file preview')";
@@ -184,6 +182,11 @@ CREATE TABLE `FileLink` (
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('IPV4NAT_LISTSRC','{$typeid_4} or {$typeid_7} or {$typeid_8}','string','yes','no','List source: IPv4 NAT performers')";
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('ASSETWARN_LISTSRC','{$typeid_4} or {$typeid_7} or {$typeid_8}','string','yes','no','List source: object, for which asset tag should be set')";
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('NAMEWARN_LISTSRC','{$typeid_4} or {$typeid_7} or {$typeid_8}','string','yes','no','List source: object, for which common name should be set')";
+			$query[] = "delete from Config where varname = 'USER_AUTH_SRC'";
+			$query[] = "delete from Config where varname = 'COOKIE_TTL'";
+			$query[] = "delete from Config where varname = 'rtwidth_0'";
+			$query[] = "delete from Config where varname = 'rtwidth_1'";
+			$query[] = "delete from Config where varname = 'rtwidth_2'";
 			$query[] = "delete from Config where varname = 'NAMEFUL_OBJTYPES'";
 			$query[] = "delete from Config where varname = 'REQUIRE_ASSET_TAG_FOR'";
 			$query[] = "delete from Config where varname = 'IPV4_PERFORMERS'";
