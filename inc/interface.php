@@ -311,31 +311,35 @@ function renderRackspaceRowEditor ()
 	function printNewItemTR ()
 	{
 		printOpFormIntro ('addRow');
-		echo "<tr><td><input type=text name=name tabindex=100></td><td>";
+		echo "<tr><td>";
+		printImageHREF ('create', 'Add new row', TRUE);
+		echo "</td><td><input type=text name=name tabindex=100></td><td>";
 		printImageHREF ('create', 'Add new row', TRUE, 101);
-		echo "</td><td></td></tr></form>";
+		echo "</td></tr></form>";
 	}
 	global $pageno, $tabno;
 	showMessageOrError();
 	startPortlet ('Rows');
 	echo "<table border=0 cellspacing=0 cellpadding=5 align=center class=widetable>\n";
-	echo "<tr><th>Name</th></tr>\n";
+	echo "<tr><th>&nbsp;</th><th>Name</th><th>&nbsp;</th></tr>\n";
 	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
 		printNewItemTR();
 	$rackrowList = getRackspace ();
 	foreach ($rackrowList as $rackrow)
 	{
-		printOpFormIntro ('updateRow', array ('row_id' => $rackrow['row_id']));
-		echo "<tr><td><input type=text name=name value='${rackrow['row_name']}'></td><td>";
-		printImageHREF ('save', 'Save changes', TRUE);
-		echo "</td></form><td>";
-		if ($rackrow['count'] == 0)
+		echo "<tr><td>";
+		if ($rackrow['count'])
+			printImageHREF ('nodestroy', $rackrow['count'] . ' racks');
+		else
 		{
-			echo "<a href=\"".makeHrefProcess(array('op'=>'delete', 'row_id'=>$rackrow['row_id'], 'name'=>$rackrow['row_name']))."\">";
-			printImageHREF ('delete', 'Delete row');
+			echo "<a href=\"".makeHrefProcess(array('op'=>'delete', 'row_id'=>$rackrow['row_id']))."\">";
+			printImageHREF ('destroy', 'Delete row');
 			echo "</a>";
 		}
-		echo "</td></tr>\n";
+		printOpFormIntro ('updateRow', array ('row_id' => $rackrow['row_id']));
+		echo "</td><td><input type=text name=name value='${rackrow['row_name']}'></td><td>";
+		printImageHREF ('save', 'Save changes', TRUE);
+		echo "</form></td></tr>\n";
 	}
 	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')
 		printNewItemTR();
@@ -1418,17 +1422,17 @@ function printLog ($log)
 				66 => array ('code' => 'success', 'format' => "File sent Ok via handler '%s'"),
 				67 => array ('code' => 'success', 'format' => "Tag rolling done, %u objects involved"),
 				68 => array ('code' => 'success', 'format' => "Updated rack '%s'"),
-				69 => array ('code' => 'success', 'format' => 'File %s was added successfully'),
-				70 => array ('code' => 'success', 'format' => 'File %s was updated successfully'),
-				71 => array ('code' => 'success', 'format' => 'File %s was linked successfully'),
-				72 => array ('code' => 'success', 'format' => 'File %s was unlinked successfully'),
-				73 => array ('code' => 'success', 'format' => 'File %s was deleted successfully'),
-				74 => array ('code' => 'success', 'format' => 'Row %s was added successfully'),
-				75 => array ('code' => 'success', 'format' => 'Row %s was updated successfully'),
-				76 => array ('code' => 'success', 'format' => 'Object %s was deleted successfully'),
-				77 => array ('code' => 'success', 'format' => 'Row %s was deleted successfully'),
-				78 => array ('code' => 'success', 'format' => 'File %s saved Ok'),
-				79 => array ('code' => 'success', 'format' => 'Rack %s was deleted successfully'),
+				69 => array ('code' => 'success', 'format' => 'File "%s" was added successfully'),
+				70 => array ('code' => 'success', 'format' => 'File "%s" was updated successfully'),
+				71 => array ('code' => 'success', 'format' => 'File "%s" was linked successfully'),
+				72 => array ('code' => 'success', 'format' => 'File "%s" was unlinked successfully'),
+				73 => array ('code' => 'success', 'format' => 'File "%s" was deleted successfully'),
+				74 => array ('code' => 'success', 'format' => 'Row "%s" was added successfully'),
+				75 => array ('code' => 'success', 'format' => 'Row "%s" was updated successfully'),
+				76 => array ('code' => 'success', 'format' => 'Object "%s" was deleted successfully'),
+				77 => array ('code' => 'success', 'format' => 'Row "%s" was deleted successfully'),
+				78 => array ('code' => 'success', 'format' => 'File "%s" saved Ok'),
+				79 => array ('code' => 'success', 'format' => 'Rack "%s" was deleted successfully'),
 
 // records 100~199 with fatal error messages
 				100 => array ('code' => 'error', 'format' => '%s'),

@@ -1496,14 +1496,13 @@ function updateRow ()
 function deleteRow ()
 {
 	assertUIntArg ('row_id', __FUNCTION__);
+	$rowinfo = getRackRowInfo ($_REQUEST['row_id']);
 
 	if (TRUE === commitDeleteRow ($_REQUEST['row_id']))
-		return buildRedirectURL (__FUNCTION__, 'OK', array ($_REQUEST['name']));
+		return buildRedirectURL (__FUNCTION__, 'OK', array ($rowinfo['name']));
 	else
-		return buildRedirectURL (__FUNCTION__, 'ERR', array ($_REQUEST['name']));
+		return buildRedirectURL (__FUNCTION__, 'ERR', array ($rowinfo['name']));
 }
-
-
 
 function addRack ()
 {
