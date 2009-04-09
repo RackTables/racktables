@@ -248,19 +248,14 @@ function authenticated_via_ldap ($username, $password)
 function authenticated_via_database ($username, $password)
 {
 	global $accounts;
-	if (!defined ('HASH_HMAC'))
+	if (!function_exists ('sha1'))
 	{
-		showError ('Fatal error: PHP hash extension is missing', __FUNCTION__);
-		die();
-	}
-	if (array_search (PASSWORD_HASH, hash_algos()) === FALSE)
-	{
-		showError ('Password hash not supported, authentication impossible.', __FUNCTION__);
+		showError ('Fatal error: PHP sha1() function is missing', __FUNCTION__);
 		die();
 	}
 	if (!isset ($accounts[$username]['user_password_hash']))
 		return FALSE;
-	if ($accounts[$username]['user_password_hash'] == hash (PASSWORD_HASH, $password))
+	if ($accounts[$username]['user_password_hash'] == sha1 ($password))
 		return TRUE;
 	return FALSE;
 }

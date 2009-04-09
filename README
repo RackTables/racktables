@@ -38,7 +38,7 @@ extensions:
 php5-pdo_mysql php5-pdo apache2-mod_php5 php5-mbstring
 
 * openSUSE 11.0: use YaST to apache2-mod_php5, php5-gd, php5-mbstring, php5-mysql,
-php2-snmp and php5-ldap
+php5-snmp and php5-ldap
 
 
 II. Prepare the files and database.

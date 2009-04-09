@@ -279,7 +279,7 @@ catch (PDOException $e)
 function authenticate_admin ($username, $password)
 {
 	global $dbxlink;
-	$hash = hash (PASSWORD_HASH, $password);
+	$hash = sha1 ($password);
 	$query = "select count(*) from UserAccount where user_id = 1 and user_name = '${username}' and user_password_hash = '${hash}'";
 	if (($result = $dbxlink->query ($query)) == NULL)
 		die ('SQL query failed in ' . __FUNCTION__);

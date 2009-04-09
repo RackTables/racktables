@@ -100,8 +100,8 @@ function platform_is_ok ()
 	}
 	echo '</td></tr>';
 
-	echo '<tr><td>hash functions</td>';
-	if (function_exists ('hash_algos'))
+	echo '<tr><td>hash function</td>';
+	if (function_exists ('sha1'))
 		echo '<td class=msg_success>Ok';
 	else
 	{
@@ -349,8 +349,10 @@ function init_database_dynamic ()
 	}
 	else
 	{
+		// Never send cleartext password over the wire.
+		$hash = sha1 ($_REQUEST['password']);
 		$query = "INSERT INTO `UserAccount` (`user_id`, `user_name`, `user_password_hash`, `user_realname`) " .
-			"VALUES (1,'admin',sha1('${_REQUEST['password']}'),'RackTables Administrator')";
+			"VALUES (1,'admin','${hash}','RackTables Administrator')";
 		$result = $dbxlink->exec ($query);
 		echo "Administrator password has been set successfully.<br>";
 		return TRUE;

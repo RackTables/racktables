@@ -3171,7 +3171,7 @@ function saveScript ($name, $text)
 
 function saveUserPassword ($user_id, $newp)
 {
-	$newhash = hash (PASSWORD_HASH, $newp);
+	$newhash = sha1 ($newp);
 	$query = "update UserAccount set user_password_hash = ${newhash} where user_id = ${user_id} limit 1";
 }
 
