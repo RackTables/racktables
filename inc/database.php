@@ -526,10 +526,20 @@ function commitUpdateRack ($rack_id, $new_name, $new_height, $new_row_id, $new_c
 		return FALSE;
 	}
 	global $dbxlink;
-	$query = "update Rack set name='${new_name}', height='${new_height}', comment='${new_comment}', row_id=${new_row_id} " .
+
+	// Can't shrink a rack if rows being deleted contain mounted objects
+	$check_sql = "SELECT COUNT(*) AS count FROM RackSpace WHERE rack_id = '${rack_id}' AND unit_no > '{$new_height}'";
+	$check_result = $dbxlink->query($check_sql);
+	$check_row = $check_result->fetch (PDO::FETCH_ASSOC);
+	if ($check_row['count'] > 0) {
+		showError ('Cannot shrink rack, objects are still mounted there', __FUNCTION__);
+		return FALSE;
+	}
+
+	$update_sql = "update Rack set name='${new_name}', height='${new_height}', comment='${new_comment}', row_id=${new_row_id} " .
 		"where id='${rack_id}' limit 1";
-	$result1 = $dbxlink->query ($query);
-	if ($result1->rowCount() != 1)
+	$update_result = $dbxlink->query ($update_sql);
+	if ($update_result->rowCount() != 1)
 	{
 		showError ('Error updating rack information', __FUNCTION__);
 		return FALSE;
