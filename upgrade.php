@@ -2,8 +2,8 @@
 
 $relnotes = array
 (
-	'0.17.0' => "This release requires more options to secret.php. Add the " .
-		"following into inc/secret.php:<br><br>" .
+	'0.17.0' => "This release requires changes to the configuration file. " .
+		"Move inc/secret.php to local/secret.php and add the following to the file:<br><br>" .
 		"\$user_auth_src = 'database';<br>\$require_valid_user = TRUE;<br><br>" .
 		"(and adjust to your needs, if necessary)<br>" .
 		"Another change is the addition of support for file uploads.  Files are stored<br>" .
@@ -257,12 +257,12 @@ require_once 'inc/interface.php';
 
 require_once 'inc/config.php';
 require_once 'inc/database.php';
-if (file_exists ('inc/secret.php'))
-	require_once 'inc/secret.php';
+if (file_exists ('local/secret.php'))
+	require_once 'local/secret.php';
 else
-	die ("Database connection parameters are read from inc/secret.php file, " .
-		"which cannot be found.\nCopy provided inc/secret-sample.php to " .
-		"inc/secret.php and modify to your setup.\n\nThen reload the page.");
+	die ("Database connection parameters are read from local/secret.php file, " .
+		"which cannot be found.\nCopy provided config/secret-sample.php to " .
+		"local/secret.php and modify to your setup.\n\nThen reload the page.");
 
 try
 {
