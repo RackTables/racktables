@@ -1978,12 +1978,10 @@ function interpretPredicate ($pname)
 {
 	if ($pname == '_')
 		return array();
-	global $rackCode;
-	$ret = NULL;
-	foreach ($rackCode as $sentence)
-		if ($sentence['type'] == 'SYNT_DEFINITION' and $sentence['term'] == $pname)
-			$ret = $sentence['definition'];
-	return $ret;
+	global $pTable;
+	if (isset ($pTable[$pname]))
+		return $pTable[$pname];
+	return NULL;
 }
 
 // Tell, if a constraint from config option permits given record.
