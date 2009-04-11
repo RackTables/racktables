@@ -216,6 +216,81 @@ function getObjectList ($type_id = 0, $tagfilter = array(), $tfmode = 'any')
 	return $ret;
 }
 
+// For a given realm return a list of entity records, each with
+// enough information for judgeEntityRecord() to execute.
+function listEntities ($realm)
+{
+	switch ($realm)
+	{
+	case 'object':
+		$table = 'RackObject';
+		$columns = array ('id', 'name', 'objtype_id');
+		$keycolumn = 'id';
+		break;
+	default:
+		showError ('invalid arg', __FUNCTION__);
+		break;
+	}
+	$query = 'select tag_id';
+	foreach ($columns as $column)
+		$query .= ", ${table}.${column}";
+	$query .= " from ${table} left join TagStorage on entity_realm = '${realm}' and entity_id = ${table}.${keycolumn}";
+	$query .= " order by ${table}.${keycolumn}, tag_id";
+	$result = useSelectBlade ($query, __FUNCTION__);
+	$ret = array();
+	global $taglist;
+	// Index returned result by the value of key column.
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
+	{
+		$entity_id = $row[$keycolumn];
+		// Init the first record anyway, but store tag only if there is one.
+		if (!isset ($ret[$entity_id]))
+		{
+			$ret[$entity_id] = array ('realm' => $realm, 'etags' => array());
+			foreach ($columns as $column)
+				$ret[$entity_id][$column] = $row[$column];
+			if ($row['tag_id'] != NULL && isset ($taglist[$row['tag_id']]))
+				$ret[$entity_id]['etags'][] = array
+				(
+					'id' => $row['tag_id'],
+					'tag' => $taglist[$row['tag_id']]['tag'],
+					'parent_id' => $taglist[$row['tag_id']]['parent_id'],
+				);
+		}
+		else
+			// Meeting existing key later is always more tags on existing list.
+			$ret[$entity_id]['etags'][] = array
+			(
+				'id' => $row['tag_id'],
+				'tag' => $taglist[$row['tag_id']]['tag'],
+				'parent_id' => $taglist[$row['tag_id']]['parent_id'],
+			);
+	}
+	foreach (array_keys ($ret) as $entity_id)
+	{
+		$ret[$entity_id]['itags'] = getImplicitTags ($ret[$entity_id]['etags']);
+		$ret[$entity_id]['atags'] = generateEntityAutoTags ($realm, $entity_id);
+	}
+	return $ret;
+}
+
+// This function can be used with array_walk().
+function loadFullEntityInfo (&$record, $dummy = NULL)
+{
+	$record['test'] = __FUNCTION__ . ' was here';
+	switch ($record['realm'])
+	{
+	case 'object':
+		$record['ports'] = getObjectPortsAndLinks ($record['id']);
+		$record['ipv4'] = getObjectIPv4Allocations ($record['id']);
+		$record['nat4'] = getNATv4ForObject ($record['id']);
+		$record['ipv4rspools'] = getRSPoolsForObject ($record['id']);
+		$record['files'] = getFilesOfEntity ($record['realm'], $record['id']);
+		break;
+	default:
+	}
+}
+
 function getRacksForRow ($row_id = 0, $tagfilter = array(), $tfmode = 'any')
 {
 	$query =

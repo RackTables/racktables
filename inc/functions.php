@@ -1952,6 +1952,20 @@ function filterEntityList ($list_in, $realm, $expression = array())
 	return $list_out;
 }
 
+function filterEntityRecordList ($list_in, $expression = array())
+{
+	if ($expression === NULL)
+		return array();
+	if (!count ($expression))
+		return $list_in;
+	global $rackCode;
+	$list_out = array();
+	foreach ($list_in as $item_key => $item_value)
+		if (TRUE === judgeEntityRecord ($item_value, $expression))
+			$list_out[$item_key] = $item_value;
+	return $list_out;
+}
+
 // Tell, if the given expression is true for the given entity.
 function judgeEntity ($realm, $id, $expression)
 {
@@ -1965,6 +1979,24 @@ function judgeEntity ($realm, $id, $expression)
 			$item_explicit_tags,
 			getImplicitTags ($item_explicit_tags),
 			generateEntityAutoTags ($realm, $id)
+		),
+		$pTable,
+		TRUE
+	);
+}
+
+// Idem, but use complete record instead of key.
+function judgeEntityRecord ($record, $expression)
+{
+	global $pTable;
+	return eval_expression
+	(
+		$expression,
+		array_merge
+		(
+			$record['etags'],
+			$record['itags'],
+			$record['atags']
 		),
 		$pTable,
 		TRUE
