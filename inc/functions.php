@@ -812,6 +812,8 @@ function treeFromList ($mytaglist, $threshold = 0)
 }
 
 // Build a tree from the tag list and return everything _except_ the tree.
+// IOW, return taginfo items, which have parent_id set and pointing outside
+// of the "normal" tree, which originates from the root.
 function getOrphanedTags ()
 {
 	global $taglist;
@@ -1212,6 +1214,24 @@ function getTagFilterStr ($tagfilter = array())
 	foreach (getExplicitTagsOnly (buildTagChainFromIds ($tagfilter)) as $taginfo)
 		$ret .= "&tagfilter[]=" . $taginfo['id'];
 	return $ret;
+}
+
+// Generate RackCode expression according to provided tag filter.
+function buildCellFilter ()
+{
+	if (!isset ($_REQUEST['tagfilter']) or !is_array ($_REQUEST['tagfilter']))
+		return array();
+	$ret = array();
+	$or = $text = '';
+	global $taglist;
+	foreach ($_REQUEST['tagfilter'] as $req_id)
+		if (isset ($taglist[$req_id]))
+		{
+			$text .= $or . '{' . $taglist[$req_id]['tag'] . '}';
+			$or = ' or ';
+		}
+	$expr = spotPayload ($text, 'SYNT_EXPR');
+	return $expr['load'];
 }
 
 function buildWideRedirectURL ($log, $nextpage = NULL, $nexttab = NULL, $moreArgs = array())
@@ -1655,6 +1675,13 @@ function loadOwnIPv4Addresses (&$node)
 
 function prepareIPv4Tree ($netlist, $expanded_id = 0)
 {
+	// treeFromList() requires parent_id to be correct for an item to get onto the tree,
+	// so perform necessary pre-processing to make orphans belong to root. This trick
+	// was earlier performed by getIPv4NetworkList().
+	$netids = array_keys ($netlist);
+	foreach ($netids as $cid)
+		if (!in_array ($netlist[$cid]['parent_id'], $netids))
+			$netlist[$cid]['parent_id'] = NULL;
 	$tree = treeFromList ($netlist); // medium call
 	sortTree ($tree, 'IPv4NetworkCmp');
 	// complement the tree before markup to make the spare networks have "symbol" set
@@ -1944,7 +1971,6 @@ function filterEntityList ($list_in, $realm, $expression = array())
 		return array();
 	if (!count ($expression))
 		return $list_in;
-	global $rackCode;
 	$list_out = array();
 	foreach ($list_in as $item_key => $item_value)
 		if (TRUE === judgeEntity ($realm, $item_key, $expression))
@@ -1952,16 +1978,15 @@ function filterEntityList ($list_in, $realm, $expression = array())
 	return $list_out;
 }
 
-function filterEntityRecordList ($list_in, $expression = array())
+function filterCellList ($list_in, $expression = array())
 {
 	if ($expression === NULL)
 		return array();
 	if (!count ($expression))
 		return $list_in;
-	global $rackCode;
 	$list_out = array();
 	foreach ($list_in as $item_key => $item_value)
-		if (TRUE === judgeEntityRecord ($item_value, $expression))
+		if (TRUE === judgeCell ($item_value, $expression))
 			$list_out[$item_key] = $item_value;
 	return $list_out;
 }
@@ -1986,7 +2011,7 @@ function judgeEntity ($realm, $id, $expression)
 }
 
 // Idem, but use complete record instead of key.
-function judgeEntityRecord ($record, $expression)
+function judgeCell ($cell, $expression)
 {
 	global $pTable;
 	return eval_expression
@@ -1994,9 +2019,9 @@ function judgeEntityRecord ($record, $expression)
 		$expression,
 		array_merge
 		(
-			$record['etags'],
-			$record['itags'],
-			$record['atags']
+			$cell['etags'],
+			$cell['itags'],
+			$cell['atags']
 		),
 		$pTable,
 		TRUE

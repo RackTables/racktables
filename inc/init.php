@@ -132,6 +132,10 @@ $pTable = buildPredicateTable ($rackCode);
 // things running is to maintain application cache for them.
 $parseCache = array();
 
+$taglist = getTagList();
+$tagtree = treeFromList ($taglist);
+sortTree ($tagtree, 'taginfoCmp');
+
 require_once 'inc/auth.php';
 $auto_tags = array();
 authenticate(); // sometimes this generates autotags, but never --- given tags
@@ -169,13 +173,7 @@ elseif (basename($_SERVER['PHP_SELF']) == 'index.php' and getConfigVar ('SHOW_LA
 else
 	$tabno = 'default';
 
-
-
 $op = (isset ($_REQUEST['op'])) ? $_REQUEST['op'] : '';
-
-$taglist = getTagList();
-$tagtree = treeFromList ($taglist);
-sortTree ($tagtree, 'taginfoCmp');
 
 require_once 'inc/navigation.php';
 require_once 'inc/pagetitles.php';

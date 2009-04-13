@@ -1901,8 +1901,6 @@ function renderObjectGroup ()
 	echo '</td><td class=pcleft>';
 
 	$objects = getObjectList ($group_id, $tagfilter, getTFMode());
-	if (isset ($_REQUEST['pfilter']))
-		$objects = filterEntityList ($objects, 'object', interpretPredicate ($_REQUEST['pfilter']));
 	startPortlet ('Objects (' . count ($objects) . ')');
 	if ($objects === NULL)
 	{
@@ -2150,8 +2148,8 @@ function renderIPv4Space ()
 {
 	global $pageno, $tabno;
 	$tagfilter = getTagFilter();
-	$netlist = getIPv4NetworkList ($tagfilter, getTFMode());
-
+	$netlist = filterCellList (listCells ('ipv4net'), buildCellFilter());
+	array_walk ($netlist, 'amplifyCell');
 
 	$netcount = count ($netlist);
 	// expand request can take either natural values or "ALL". Zero means no expanding.
@@ -2289,7 +2287,8 @@ function renderIPv4SpaceEditor ()
 	echo "</form></table><br><br>\n";
 	finishPortlet();
 
-	$addrspaceList = getIPv4NetworkList();
+	$addrspaceList = listCells ('ipv4net');
+	array_walk ($addrspaceList, 'amplifyCell');
 	if (count ($addrspaceList))
 	{
 		startPortlet ('Manage existing (' . count ($addrspaceList) . ')');
@@ -3244,7 +3243,7 @@ function renderSearchResults ()
 					foreach ($what as $item)
 					{
 						echo "<tr class=row_${order}><td class=tdleft>";
-						renderUserCell ($item);
+						renderCell ($item);
 						echo "</td></tr>";
 						$order = $nextorder[$order];
 					}
@@ -3302,27 +3301,36 @@ function renderAtomGrid ($data)
 	}
 }
 
-function renderUserList ()
+function renderCellList ($realm = NULL, $title = 'list')
 {
-	global $nextorder, $accounts, $root, $pageno;
+	if ($realm === NULL)
+	{
+		global $pageno;
+		$realm = $pageno;
+	}
+	global $nextorder;
 	echo "<table border=0 class=objectview>\n";
 	echo "<tr><td class=pcleft>";
-	startPortlet ('User accounts');
+	startPortlet ($title);
 	echo "<table class=cooltable border=0 cellpadding=5 cellspacing=0 align=center>\n";
 	$order = 'odd';
-	$tagfilter = getTagFilter();
-	foreach (getUserAccounts ($tagfilter, getTFMode()) as $user)
+	foreach (filterCellList (listCells ($realm), buildCellFilter()) as $cell)
 	{
 		echo "<tr class=row_${order}><td>";
-		renderUserCell ($user);
+		renderCell ($cell);
 		echo "</td></tr>\n";
 		$order = $nextorder[$order];
 	}
 	echo '</table>';
 	finishPortlet();
 	echo '</td><td class=pcright>';
-	renderTagFilterPortlet ($tagfilter, 'user');
+	renderTagFilterPortlet (getTagFilter(), $realm);
 	echo "</td></tr></table>\n";
+}
+
+function renderUserList ()
+{
+	renderCellList ('user', 'User accounts');
 }
 
 function renderUserListEditor ()
@@ -5580,7 +5588,7 @@ function renderFile ($file_id = 0)
 					if (NULL === $username or !isset ($accounts[$username]))
 						echo "Internal error: user id ${link['entity_id']} not found";
 					else
-						renderUserCell ($accounts[$username]);
+						renderCell ($accounts[$username]);
 					break;
 				case 'ipv4net':
 					renderIPv4NetCell (getIPv4NetworkInfo ($link['entity_id']));
@@ -5935,6 +5943,19 @@ function renderIPv4NetCell ($netinfo)
 	echo "</td></tr></table>";
 }
 
+function renderCell ($cell)
+{
+	switch ($cell['realm'])
+	{
+	case 'user':
+		renderUserCell ($cell);
+		break;
+	default:
+		showError ('odd data', __FUNCTION__);
+		break;
+	}
+}
+
 function renderUserCell ($account)
 {
 	global $root;
@@ -5947,8 +5968,9 @@ function renderUserCell ($account)
 	else
 		echo "<tr><td class=sparenetwork>no name</td></tr>";
 	echo '<td>';
-	$tags = loadEntityTags ('user', $account['user_id']);
-	echo count ($tags) ? ("<small>" . serializeTags ($tags) . "</small>") : '&nbsp;';
+	if (!isset ($account['etags']))
+		$account['etags'] = loadEntityTags ('user', $account['user_id']);
+	echo count ($account['etags']) ? ("<small>" . serializeTags ($account['etags']) . "</small>") : '&nbsp;';
 	echo "</td></tr></table>";
 }
 

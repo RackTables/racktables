@@ -18,12 +18,17 @@ function authenticate ()
 		showError ('secret.php misconfiguration: either user_auth_src or require_valid_user are missing', __FUNCTION__);
 		exit (1);
 	}
-	$accounts = getUserAccounts();
-	if ($accounts === NULL)
+	// This reindexing is necessary after switching to listCells(), which
+	// returns list indexed by id (while many other functions expect the
+	// user list to be indexed by username).
+	if (NULL === ($tmplist = listCells ('user')))
 	{
 		showError ('Failed to initialize access database.', __FUNCTION__);
 		exit (1);
 	}
+	$accounts = array();
+	foreach ($tmplist as $tmpval)
+		$accounts[$tmpval['user_name']] = $tmpval;
 	if (isset ($script_mode) and $script_mode === TRUE)
 		return;
 	if (isset ($_REQUEST['logout']))
