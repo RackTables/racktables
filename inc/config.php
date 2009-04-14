@@ -12,7 +12,7 @@
 
 // Current code version is subject to change with each new release.
 define ('CODE_VERSION', '0.17.0');
-define ('MAX_DICT_KEY', 962);
+define ('MAX_DICT_KEY', 964);
 
 define ('TAGNAME_REGEXP', '^[[:alnum:]]([\. _~-]?[[:alnum:]])*$');
 define ('AUTOTAGNAME_REGEXP', '^\$[[:alnum:]]([\. _~-]?[[:alnum:]])*$');

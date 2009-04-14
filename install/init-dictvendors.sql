@@ -913,3 +913,5 @@ INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (12,959
 INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (12,960,'[[Cisco%GPASS%Nexus 5020 | http://cisco.com/en/US/products/ps9710/index.html]]');
 INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (12,961,'[[Cisco%GPASS%Nexus 7010 | http://cisco.com/en/US/products/ps9512/index.html]]');
 INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (12,962,'[[Cisco%GPASS%Nexus 7018 | http://cisco.com/en/US/products/ps10098/index.html]]');
+INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (14,963,'Cisco NX-OS 4.0');
+INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (14,964,'Cisco NX-OS 4.1');
