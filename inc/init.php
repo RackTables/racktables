@@ -9,10 +9,16 @@
 *
 */
 
-$root = (empty($_SERVER['HTTPS'])?'http':'https').
-	'://'.
-	(isset($_SERVER['HTTP_HOST'])?$_SERVER['HTTP_HOST']:($_SERVER['SERVER_NAME'].($_SERVER['SERVER_PORT']=='80'?'':$_SERVER['SERVER_PORT']))).
-	dirname($_SERVER['PHP_SELF']);
+// "Note that when using ISAPI with IIS, the value will be 'off' if the
+// request was not made through the HTTPS protocol."
+$root = (empty($_SERVER['HTTPS']) or $_SERVER['HTTPS'] == 'off') ? 'http://' : 'https://';
+$root .= isset ($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : ($_SERVER['SERVER_NAME'].($_SERVER['SERVER_PORT']=='80'?'':$_SERVER['SERVER_PORT']));
+// "Since PHP 4.3.0, you will often get a slash or a dot back from
+// dirname() in situations where the older functionality would have given
+// you the empty string."
+// "On Windows, both slash (/) and backslash (\) are used as directory
+// separator character."
+$root .= strtr (dirname ($_SERVER['PHP_SELF']), '\\', '/');
 if (substr ($root, -1) != '/')
 	$root .= '/';
 

@@ -29,6 +29,7 @@
 	bugfix: show error message for duplicate IPv4 network record
 	bugfix: it was possible to access the system as any existing
 		LDAP user w/o his password (reported by Igor Shishkin)
+	bugfix: fixed IIS-specific issues with accessing via HTTP or from docroot (reported by Sean Brown)
 0.16.4 2008-11-04
 	bugfix: display VS/RS config block in RS pool view
 	bugfix: resolve tabindex issues in many forms

@@ -248,10 +248,9 @@ CREATE TABLE `FileLink` (
 //
 // ******************************************************************
 
-$root = (empty($_SERVER['HTTPS'])?'http':'https').
-	'://'.
-	(isset($_SERVER['HTTP_HOST'])?$_SERVER['HTTP_HOST']:($_SERVER['SERVER_NAME'].($_SERVER['SERVER_PORT']=='80'?'':$_SERVER['SERVER_PORT']))).
-	dirname($_SERVER['PHP_SELF']);
+$root = (empty($_SERVER['HTTPS']) or $_SERVER['HTTPS'] == 'off') ? 'http://' : 'https://';
+$root .= isset ($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : ($_SERVER['SERVER_NAME'].($_SERVER['SERVER_PORT']=='80'?'':$_SERVER['SERVER_PORT']));
+$root .= strtr (dirname ($_SERVER['PHP_SELF']), '\\', '/');
 if (substr ($root, -1) != '/')
 	$root .= '/';
 

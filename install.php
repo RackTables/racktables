@@ -128,7 +128,7 @@ function platform_is_ok ()
 	echo '</td></tr>';
 
 	echo '<tr><td>HTTP scheme</td>';
-	if (!empty($_SERVER['HTTPS']))
+	if (!empty($_SERVER['HTTPS']) and $_SERVER['HTTPS'] != 'off')
 		echo '<td class=msg_success>HTTPs';
 	else
 		echo '<td class=msg_warning>HTTP (all your passwords will be transmitted in cleartext)';
