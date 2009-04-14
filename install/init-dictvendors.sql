@@ -908,3 +908,8 @@ INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (13,954
 INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (11,955,'SGI%GPASS%Altix XE270');
 INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (11,956,'SGI%GPASS%Altix XE340');
 INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (11,957,'SGI%GPASS%Altix XE500');
+INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (12,958,'[[Cisco%GPASS%Nexus 2148T | http://cisco.com/en/US/products/ps10118/index.html]]');
+INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (12,959,'[[Cisco%GPASS%Nexus 5010 | http://cisco.com/en/US/products/ps9711/index.html]]');
+INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (12,960,'[[Cisco%GPASS%Nexus 5020 | http://cisco.com/en/US/products/ps9710/index.html]]');
+INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (12,961,'[[Cisco%GPASS%Nexus 7010 | http://cisco.com/en/US/products/ps9512/index.html]]');
+INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (12,962,'[[Cisco%GPASS%Nexus 7018 | http://cisco.com/en/US/products/ps10098/index.html]]');
