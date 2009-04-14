@@ -743,9 +743,9 @@ INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (12,788
 INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (12,789,'[[3Com%GPASS%8814 | http://www.3com.com/products/en_US/detail.jsp?tab=features&sku=3C17500A&pathtype=purchase]]');
 INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (13,790,'Linux%GSKIP%RHF9');
 INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (13,791,'[[Linux%GSKIP%openSUSE 11.0 | http://en.opensuse.org/OpenSUSE_11.0]]');
-INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (11,792,'[[SGI%GPASS%Altix XE250 | http://www.sgi.com/products/servers/altix/xe/configs.html]]');
-INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (11,793,'[[SGI%GPASS%Altix XE310 | http://www.sgi.com/products/servers/altix/xe/configs.html]]');
-INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (11,794,'[[SGI%GPASS%Altix XE320 | http://www.sgi.com/products/servers/altix/xe/configs.html]]');
+INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (11,792,'SGI%GPASS%Altix XE250');
+INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (11,793,'SGI%GPASS%Altix XE310');
+INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (11,794,'SGI%GPASS%Altix XE320');
 INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (12,795,'[[Cisco%GPASS%Catalyst 3032-DEL | http://www.cisco.com/en/US/products/ps8772/index.html]]');
 INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (13,796,'Linux%GSKIP%Ubuntu 8.10');
 INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (13,797,'[[BSD%GSKIP%OpenBSD 4.4 | http://openbsd.org/44.html]]');
@@ -905,3 +905,6 @@ INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (24,951
 INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (24,952,'[[F5%GPASS%FirePass 4100 | http://www.f5.com/pdf/products/firepass-hardware-ds.pdf]]');
 INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (24,953,'[[F5%GPASS%FirePass 4300 | http://www.f5.com/pdf/products/firepass-hardware-ds.pdf]]');
 INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (13,954,'[[Linux%GSKIP%Debian 5.0 (lenny) | http://debian.org/releases/lenny/]]');
+INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (11,955,'SGI%GPASS%Altix XE270');
+INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (11,956,'SGI%GPASS%Altix XE340');
+INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (11,957,'SGI%GPASS%Altix XE500');
