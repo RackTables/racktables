@@ -756,26 +756,29 @@ function getAutoPorts ($type_id)
 	return $ret;
 }
 
-// Find if a particular tag id exists on the tree, then attach the
-// given child tag to it. If the parent tag doesn't exist, return FALSE.
-function attachChildTag (&$tree, $parent_id, $child_id, $child_info, $threshold = 0)
+// Use pre-served trace to traverse the tree, then place given node where it belongs.
+function pokeNode (&$tree, $trace, $key, $value, $threshold = 0)
 {
-	$self = __FUNCTION__;
-	foreach (array_keys ($tree) as $tagid)
+	// This function needs the trace to be followed FIFO-way. The fastest
+	// way to do so is to use array_push() for putting values into the
+	// list and array_shift() for getting them out. This exposed up to 11%
+	// performance gain compared to other patterns of array_push/array_unshift/
+	// array_reverse/array_pop/array_shift conjunction.
+	$myid = array_shift ($trace);
+	if (!count ($trace)) // reached the target
 	{
-		if ($tagid == $parent_id)
-		{
-			if (!$threshold or ($threshold and $tree[$tagid]['kidc'] + 1 < $threshold))
-				$tree[$tagid]['kids'][$child_id] = $child_info;
-			// Reset the list only once.
-			if (++$tree[$tagid]['kidc'] == $threshold)
-				$tree[$tagid]['kids'] = array();
-			return TRUE;
-		}
-		elseif ($self ($tree[$tagid]['kids'], $parent_id, $child_id, $child_info, $threshold))
-			return TRUE;
+		if (!$threshold or ($threshold and $tree[$myid]['kidc'] + 1 < $threshold))
+			$tree[$myid]['kids'][$key] = $value;
+		// Reset accumulated records once, when the limit is reached, not each time
+		// after that.
+		if (++$tree[$myid]['kidc'] == $threshold)
+			$tree[$myid]['kids'] = array();
 	}
-	return FALSE;
+	else // not yet
+	{
+		$self = __FUNCTION__;
+		$self ($tree[$myid]['kids'], $trace, $key, $value, $threshold);
+	}
 }
 
 // Build a tree from the item list and return it. Input and output data is
@@ -783,32 +786,52 @@ function attachChildTag (&$tree, $parent_id, $child_id, $child_info, $threshold 
 // key, which is in turn indexed by id. Functions, which are ready to handle
 // tree collapsion/expansion themselves, may request non-zero threshold value
 // for smaller resulting tree.
-function treeFromList ($mytaglist, $threshold = 0)
+function treeFromList ($nodelist, $threshold = 0, $return_main_payload = TRUE)
 {
-	$ret = array();
-	while (count ($mytaglist) > 0)
+	$tree = array();
+	// Array equivalent of traceEntity() function.
+	$trace = array();
+	// set kidc and kids only once
+	foreach (array_keys ($nodelist) as $nodeid)
 	{
-		$picked = FALSE;
-		foreach ($mytaglist as $tagid => $taginfo)
+		$nodelist[$nodeid]['kidc'] = 0;
+		$nodelist[$nodeid]['kids'] = array();
+	}
+	do
+	{
+		$nextpass = FALSE;
+		foreach (array_keys ($nodelist) as $nodeid)
 		{
-			$taginfo['kidc'] = 0;
-			$taginfo['kids'] = array();
-			if ($taginfo['parent_id'] == NULL)
+			// When adding a node to the working tree, book another
+			// iteration, because the new item could make a way for
+			// others onto the tree. Also remove any item added from
+			// the input list, so iteration base shrinks.
+			// First check if we can assign directly.
+			if ($nodelist[$nodeid]['parent_id'] == NULL)
 			{
-				$ret[$tagid] = $taginfo;
-				$picked = TRUE;
-				unset ($mytaglist[$tagid]);
+				$tree[$nodeid] = $nodelist[$nodeid];
+				$trace[$nodeid] = array(); // Trace to root node is empty
+				unset ($nodelist[$nodeid]);
+				$nextpass = TRUE;
 			}
-			elseif (attachChildTag ($ret, $taginfo['parent_id'], $tagid, $taginfo, $threshold))
+			// Now look if it fits somewhere on already built tree.
+			elseif (isset ($trace[$nodelist[$nodeid]['parent_id']]))
 			{
-				$picked = TRUE;
-				unset ($mytaglist[$tagid]);
+				// Trace to a node is a trace to its parent plus parent id.
+				$trace[$nodeid] = $trace[$nodelist[$nodeid]['parent_id']];
+				$trace[$nodeid][] = $nodelist[$nodeid]['parent_id'];
+				pokeNode ($tree, $trace[$nodeid], $nodeid, $nodelist[$nodeid], $threshold);
+				// path to any other node is made of all parent nodes plus the added node itself
+				unset ($nodelist[$nodeid]);
+				$nextpass = TRUE;
 			}
 		}
-		if (!$picked) // Only orphaned items on the list.
-			break;
 	}
-	return $ret;
+	while ($nextpass);
+	if ($return_main_payload)
+		return $tree;
+	else
+		return $nodelist;
 }
 
 // Build a tree from the tag list and return everything _except_ the tree.
@@ -817,31 +840,7 @@ function treeFromList ($mytaglist, $threshold = 0)
 function getOrphanedTags ()
 {
 	global $taglist;
-	$mytaglist = $taglist;
-	$dummy = array();
-	while (count ($mytaglist) > 0)
-	{
-		$picked = FALSE;
-		foreach ($mytaglist as $tagid => $taginfo)
-		{
-			$taginfo['kidc'] = 0;
-			$taginfo['kids'] = array();
-			if ($taginfo['parent_id'] == NULL)
-			{
-				$dummy[$tagid] = $taginfo;
-				$picked = TRUE;
-				unset ($mytaglist[$tagid]);
-			}
-			elseif (attachChildTag ($dummy, $taginfo['parent_id'], $tagid, $taginfo))
-			{
-				$picked = TRUE;
-				unset ($mytaglist[$tagid]);
-			}
-		}
-		if (!$picked) // Only orphaned items on the list.
-			return $mytaglist;
-	}
-	return array();
+	return treeFromList ($taglist, 0, FALSE);
 }
 
 function serializeTags ($chain, $baseurl = '')
@@ -1714,28 +1713,6 @@ function iptree_markup_collapsion (&$tree, $threshold = 1024, $target = 0)
 		$ret = ($ret or $here or $below); // parentheses are necessary for this to be computed correctly
 	}
 	return $ret;
-}
-
-// Get a tree and target entity ID on it. Return the list of IDs, which make the path
-// from the target entity to tree root. If such a path exists, it will consist of at
-// least the target ID. Otherwise an empty list will be returned. The "list" is a randomly
-// indexed array of values.
-function traceEntity ($tree, $target_id)
-{
-	$self = __FUNCTION__;
-	foreach ($tree as $node)
-	{
-		if ($node['id'] == $target_id) // here!
-			return array ($target_id);
-		$subtrace = $self ($node['kids'], $target_id); // below?
-		if (count ($subtrace))
-		{
-			array_push ($subtrace, $node['id']);
-			return $subtrace;
-		}
-		// next...
-	}
-	return array();
 }
 
 // Convert entity name to human-readable value
