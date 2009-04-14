@@ -1,3 +1,7 @@
+-- This file is intentionally kept in traditional INSERT syntax
+-- (1 query = 1 row) to make it easier to spot failures during
+-- upgrades, if there are any.
+
 INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (11,42,'noname/unknown');
 INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (11,43,'IBM xSeries%GPASS%305');
 INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (11,44,'IBM xSeries%GPASS%306');
@@ -190,8 +194,8 @@ INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (13,230
 INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (13,231,'Linux%GSKIP%ALTLinux Master 2.4');
 INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (13,232,'Linux%GSKIP%RHF7');
 INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (13,233,'Linux%GSKIP%SLES10');
-INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (13,234,'Linux%GSKIP%Debian 3.0 (woody)');
-INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (13,235,'Linux%GSKIP%Debian 3.1 (sarge)');
+INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (13,234,'[[Linux%GSKIP%Debian 3.0 (woody) | http://debian.org/releases/woody/]]');
+INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (13,235,'[[Linux%GSKIP%Debian 3.1 (sarge) | http://debian.org/releases/sarge/]]');
 INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (13,236,'BSD%GSKIP%FreeBSD 1.x');
 INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (13,237,'BSD%GSKIP%FreeBSD 2.x');
 INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (13,238,'BSD%GSKIP%FreeBSD 3.x');
@@ -372,10 +376,10 @@ INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (12,414
 INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (12,415,'Foundry%GPASS%NetIron M2404F');
 INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (12,416,'Foundry%GPASS%NetIron M2404C');
 INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (17,417,'Foundry%GPASS%BigIron RX-32');
-INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (13,418,'Linux%GSKIP%Debian 2.0 (hamm)');
-INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (13,419,'Linux%GSKIP%Debian 2.1 (slink)');
-INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (13,420,'Linux%GSKIP%Debian 2.2 (potato)');
-INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (13,421,'Linux%GSKIP%Debian 4.0 (etch)');
+INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (13,418,'[[Linux%GSKIP%Debian 2.0 (hamm) | http://debian.org/releases/hamm/]]');
+INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (13,419,'[[Linux%GSKIP%Debian 2.1 (slink) | http://debian.org/releases/slink/]]');
+INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (13,420,'[[Linux%GSKIP%Debian 2.2 (potato) | http://debian.org/releases/potato/]]');
+INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (13,421,'[[Linux%GSKIP%Debian 4.0 (etch) | http://debian.org/releases/etch/]]');
 INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (13,422,'Linux%GSKIP%ALTLinux Server 4.0');
 INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (13,423,'Linux%GSKIP%ALTLinux Sisyphus');
 INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (13,424,'Linux%GSKIP%openSUSE 10.0');
@@ -880,24 +884,24 @@ INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (17,930
 INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (17,931,'[[Juniper%GPASS%TX Matrix | http://www.juniper.net/products_and_services/t_series_core_platforms/index.html]]');
 INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (13,932,'[[Linux%GSKIP%RHF10 | http://docs.fedoraproject.org/release-notes/f10/]]');
 INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (13,933,'[[Linux%GSKIP%openSUSE 11.1 | http://en.opensuse.org/OpenSUSE_11.1]]');
-INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES
-(12,934,'[[F5%GPASS%BIG-IP WebAccelerator 4500 | http://www.f5.com/pdf/products/big-ip-webaccelerator-ds.pdf]]'),
-(12,935,'[[F5%GPASS%VIPRION | http://www.f5.com/pdf/products/viprion-overview-ds.pdf]]'),
-(12,936,'[[F5%GPASS%BIG-IP 1500 | http://www.f5.com/pdf/products/big-ip-platforms-2007-ds.pdf]]'),
-(12,937,'[[F5%GPASS%BIG-IP 1600 | http://www.f5.com/pdf/products/big-ip-platforms-ds.pdf]]'),
-(12,938,'[[F5%GPASS%BIG-IP 3400 | http://www.f5.com/pdf/products/big-ip-platforms-2007-ds.pdf]]'),
-(12,939,'[[F5%GPASS%BIG-IP 3600 | http://www.f5.com/pdf/products/big-ip-platforms-ds.pdf]]'),
-(12,940,'[[F5%GPASS%BIG-IP 6400 | http://www.f5.com/pdf/products/big-ip-platforms-2007-ds.pdf]]'),
-(12,941,'[[F5%GPASS%BIG-IP 6800 | http://www.f5.com/pdf/products/big-ip-platforms-2007-ds.pdf]]'),
-(12,942,'[[F5%GPASS%BIG-IP 6900 | http://www.f5.com/pdf/products/big-ip-platforms-ds.pdf]]'),
-(12,943,'[[F5%GPASS%BIG-IP 8400 | http://www.f5.com/pdf/products/big-ip-platforms-ds.pdf]]'),
-(12,944,'[[F5%GPASS%BIG-IP 8800 | http://www.f5.com/pdf/products/big-ip-platforms-ds.pdf]]'),
-(12,945,'[[F5%GPASS%ARX 500 | http://www.f5.com/pdf/products/arx-series-ds.pdf]]'),
-(12,946,'[[F5%GPASS%ARX 1000 | http://www.f5.com/pdf/products/arx-series-ds.pdf]]'),
-(12,947,'[[F5%GPASS%ARX 4000 | http://www.f5.com/pdf/products/arx-series-ds.pdf]]'),
-(12,948,'[[F5%GPASS%ARX 6000 | http://www.f5.com/pdf/products/arx-series-ds.pdf]]'),
-(17,949,'[[F5%GPASS%WANJet 300 | http://www.f5.com/pdf/products/wanjet-hardware-ds.pdf]]'),
-(17,950,'[[F5%GPASS%WANJet 500 | http://www.f5.com/pdf/products/wanjet-hardware-ds.pdf]]'),
-(24,951,'[[F5%GPASS%FirePass 1200 | http://www.f5.com/pdf/products/firepass-hardware-ds.pdf]]'),
-(24,952,'[[F5%GPASS%FirePass 4100 | http://www.f5.com/pdf/products/firepass-hardware-ds.pdf]]'),
-(24,953,'[[F5%GPASS%FirePass 4300 | http://www.f5.com/pdf/products/firepass-hardware-ds.pdf]]');
+INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (12,934,'[[F5%GPASS%BIG-IP WebAccelerator 4500 | http://www.f5.com/pdf/products/big-ip-webaccelerator-ds.pdf]]');
+INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (12,935,'[[F5%GPASS%VIPRION | http://www.f5.com/pdf/products/viprion-overview-ds.pdf]]');
+INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (12,936,'[[F5%GPASS%BIG-IP 1500 | http://www.f5.com/pdf/products/big-ip-platforms-2007-ds.pdf]]');
+INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (12,937,'[[F5%GPASS%BIG-IP 1600 | http://www.f5.com/pdf/products/big-ip-platforms-ds.pdf]]');
+INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (12,938,'[[F5%GPASS%BIG-IP 3400 | http://www.f5.com/pdf/products/big-ip-platforms-2007-ds.pdf]]');
+INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (12,939,'[[F5%GPASS%BIG-IP 3600 | http://www.f5.com/pdf/products/big-ip-platforms-ds.pdf]]');
+INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (12,940,'[[F5%GPASS%BIG-IP 6400 | http://www.f5.com/pdf/products/big-ip-platforms-2007-ds.pdf]]');
+INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (12,941,'[[F5%GPASS%BIG-IP 6800 | http://www.f5.com/pdf/products/big-ip-platforms-2007-ds.pdf]]');
+INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (12,942,'[[F5%GPASS%BIG-IP 6900 | http://www.f5.com/pdf/products/big-ip-platforms-ds.pdf]]');
+INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (12,943,'[[F5%GPASS%BIG-IP 8400 | http://www.f5.com/pdf/products/big-ip-platforms-ds.pdf]]');
+INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (12,944,'[[F5%GPASS%BIG-IP 8800 | http://www.f5.com/pdf/products/big-ip-platforms-ds.pdf]]');
+INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (12,945,'[[F5%GPASS%ARX 500 | http://www.f5.com/pdf/products/arx-series-ds.pdf]]');
+INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (12,946,'[[F5%GPASS%ARX 1000 | http://www.f5.com/pdf/products/arx-series-ds.pdf]]');
+INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (12,947,'[[F5%GPASS%ARX 4000 | http://www.f5.com/pdf/products/arx-series-ds.pdf]]');
+INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (12,948,'[[F5%GPASS%ARX 6000 | http://www.f5.com/pdf/products/arx-series-ds.pdf]]');
+INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (17,949,'[[F5%GPASS%WANJet 300 | http://www.f5.com/pdf/products/wanjet-hardware-ds.pdf]]');
+INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (17,950,'[[F5%GPASS%WANJet 500 | http://www.f5.com/pdf/products/wanjet-hardware-ds.pdf]]');
+INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (24,951,'[[F5%GPASS%FirePass 1200 | http://www.f5.com/pdf/products/firepass-hardware-ds.pdf]]');
+INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (24,952,'[[F5%GPASS%FirePass 4100 | http://www.f5.com/pdf/products/firepass-hardware-ds.pdf]]');
+INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (24,953,'[[F5%GPASS%FirePass 4300 | http://www.f5.com/pdf/products/firepass-hardware-ds.pdf]]');
+INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (13,954,'[[Linux%GSKIP%Debian 5.0 (lenny) | http://debian.org/releases/lenny/]]');
