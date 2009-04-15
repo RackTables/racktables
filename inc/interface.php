@@ -2913,49 +2913,26 @@ function renderNATv4ForObject ($object_id = 0)
 
 function renderAddMultipleObjectsForm ()
 {
-	global $root, $pageno, $tabno, $nextorder;
-
-	$type_id = array();
-	$global_type_id = 0;
-	$name = array();
-	$asset_no = array();
-	$keepvalues1 = $keepvalues2 = FALSE;
-	showMessageOrError();
-
-	// Render a form for the next.
 	$typelist = getObjectTypeList();
 	$typelist[0] = 'select type...';
+	$max = getConfigVar ('MASSCOUNT');
+	$tabindex = 100;
 
 	startPortlet ('Distinct types, same tags');
-	$max = getConfigVar ('MASSCOUNT');
 	printOpFormIntro ('addObjects');
 	echo '<table border=0 align=center>';
 	echo "<tr><th>Object type</th><th>Common name</th><th>Visible label</th>";
 	echo "<th>Asset tag</th><th>Barcode</th><th>Tags</th></tr>\n";
-	// If a user forgot to select object type on input, we keep his
-	// previous input in the form.
 	for ($i = 0; $i < $max; $i++)
 	{
 		echo '<tr><td>';
 		// Don't employ DEFAULT_OBJECT_TYPE to avoid creating ghost records for pre-selected empty rows.
-		printSelect ($typelist, "${i}_object_type_id", 0);
+		printSelect ($typelist, "${i}_object_type_id", 0, $tabindex);
 		echo '</td>';
-		echo "<td><input type=text size=30 name=${i}_object_name";
-		if ($keepvalues1 and isset ($name[$i]) and (!isset ($type_id[$i]) or $type_id[$i] == 0))
-			echo " value='${name[$i]}'";
-		echo "></td>";
-		echo "<td><input type=text size=30 name=${i}_object_label";
-		if ($keepvalues1 and isset ($label[$i]) and (!isset ($type_id[$i]) or $type_id[$i] == 0))
-			echo " value='${label[$i]}'";
-		echo "></td>";
-		echo "<td><input type=text size=20 name=${i}_object_asset_no";
-		if ($keepvalues1 and isset ($asset_no[$i]) and (!isset ($type_id[$i]) or $type_id[$i] == 0))
-			echo " value='${asset_no[$i]}'";
-		echo "></td>";
-		echo "<td><input type=text size=10 name=${i}_object_barcode";
-		if ($keepvalues1 and isset ($barcode[$i]) and (!isset ($type_id[$i]) or $type_id[$i] == 0))
-			echo " value='${barcode[$i]}'";
-		echo "></td>";
+		echo "<td><input type=text size=30 name=${i}_object_name tabindex=${tabindex}></td>";
+		echo "<td><input type=text size=30 name=${i}_object_label tabindex=${tabindex}></td>";
+		echo "<td><input type=text size=20 name=${i}_object_asset_no tabindex=${tabindex}></td>";
+		echo "<td><input type=text size=10 name=${i}_object_barcode tabindex=${tabindex}></td>";
 		if ($i == 0)
 		{
 			echo "<td valign=top rowspan=${max}>";
@@ -2963,6 +2940,7 @@ function renderAddMultipleObjectsForm ()
 			echo "</td>\n";
 		}
 		echo "</tr>\n";
+		$tabindex++;
 	}
 	echo "<tr><td class=submit colspan=5><input type=submit name=got_fast_data value='Go!'></td></tr>\n";
 	echo "</form></table>\n";
@@ -2972,8 +2950,6 @@ function renderAddMultipleObjectsForm ()
 	printOpFormIntro ('addLotOfObjects');
 	echo "<table border=0 align=center><tr><th>names</th><th>type</th></tr>";
 	echo "<tr><td rowspan=3><textarea name=namelist cols=40 rows=25>\n";
-	if ($keepvalues2 and $global_type_id == 0)
-		echo $_REQUEST['namelist'];
 	echo "</textarea></td><td valign=top>";
 	printSelect ($typelist, "global_type_id", getConfigVar ('DEFAULT_OBJECT_TYPE'));
 	echo "</td></tr>";
