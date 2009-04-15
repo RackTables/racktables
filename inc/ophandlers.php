@@ -795,7 +795,7 @@ function addMultipleObjects()
 	{
 		if (!isset ($_REQUEST["${i}_object_type_id"]))
 		{
-			$log['m'][] = array ('code' => 'error', 'message' => "Submitted form is invalid at line " . $i + 1);
+			$log = mergeLogs ($log, oneLiner (184, array ($i + 1)));
 			break;
 		}
 		assertUIntArg ("${i}_object_type_id", __FUNCTION__, TRUE);
@@ -817,11 +817,10 @@ function addMultipleObjects()
 			$_REQUEST["${i}_object_asset_no"],
 			$taglist
 		) === TRUE)
-			$log['m'][] = array ('code' => 'success', 'message' => "Added new object '${name}'");
+			$log = mergeLogs ($log, oneLiner (80, array ($name)));
 		else
-			$log['m'][] = array ('code' => 'error', 'message' => __FUNCTION__ . ': commitAddObject() failed');
+			$log = mergeLogs ($log, oneLiner (185, array ($name)));
 	}
-
 	return buildWideRedirectURL ($log);
 }
 
@@ -833,7 +832,7 @@ function addLotOfObjects()
 	assertStringArg ('namelist', __FUNCTION__, TRUE);
 	$global_type_id = $_REQUEST['global_type_id'];
 	if ($global_type_id == 0 or empty ($_REQUEST['namelist']))
-		$log['m'][] = array ('code' => 'warning', 'message' => 'Incomplete form has been ignored. Cheers.');
+		$log = mergeLogs ($log, oneLiner (186));
 	else
 	{
 		// The name extractor below was stolen from ophandlers.php:addMultiPorts()
@@ -848,11 +847,11 @@ function addLotOfObjects()
 			else
 				$names2[] = rtrim ($parts[0]);
 		}
-		foreach ($names2 as $cname)
-			if (commitAddObject ($cname, '', '', $global_type_id, '', $taglist) === TRUE)
-				$log['m'][] = array ('code' => 'success', 'message' => "Added new object '${cname}'");
+		foreach ($names2 as $name)
+			if (commitAddObject ($name, '', '', $global_type_id, '', $taglist) === TRUE)
+				$log = mergeLogs ($log, oneLiner (80, array ($name)));
 			else
-				$log['m'][] = array ('code' => 'error', 'message' => "Could not add '${cname}'");
+				$log = mergeLogs ($log, oneLiner (185, array ($name)));
 	}
 	return buildWideRedirectURL ($log);
 }

@@ -855,7 +855,7 @@ function renderRackObject ($object_id = 0)
 		echo "<tr><td colspan=2 class=msg_error>Has problems</td></tr>\n";
 	foreach (getAttrValues ($object_id, TRUE) as $record)
 		if (!empty ($record['value']))
-			echo "<tr><th width='50%' class=tdright><span class=sticker>${record['name']}</span>:</th><td class=tdleft>${record['a_value']}</td></tr>\n";
+			echo "<tr><th width='50%' class=sticker>${record['name']}:</th><td class=sticker>${record['a_value']}</td></tr>\n";
 	printTagTRs (makeHref(array('page'=>'objgroup', 'tab'=>'default', 'group_id'=>$info['objtype_id']))."&");
 	echo "</table><br>\n";
 	finishPortlet();
@@ -1436,6 +1436,7 @@ function printLog ($log)
 				77 => array ('code' => 'success', 'format' => 'Row "%s" was deleted successfully'),
 				78 => array ('code' => 'success', 'format' => 'File "%s" saved Ok'),
 				79 => array ('code' => 'success', 'format' => 'Rack "%s" was deleted successfully'),
+				80 => array ('code' => 'success', 'format' => "Added new object '%s'"),
 
 // records 100~199 with fatal error messages
 				100 => array ('code' => 'error', 'format' => '%s'),
@@ -1522,6 +1523,9 @@ function printLog ($log)
 				181 => array ('code' => 'error', 'format' => "file uploads not allowed, change 'file_uploads' parameter in php.ini"),
 				182 => array ('code' => 'error', 'format' => 'SQL query failed: %s'),
 				183 => array ('code' => 'error', 'format' => "Tag id '%s' does not exist."),
+				184 => array ('code' => 'error', 'format' => 'Submitted form is invalid at line %u'),
+				185 => array ('code' => 'error', 'format' => "Failed to add object '%s'"),
+				186 => array ('code' => 'error', 'format' => 'Incomplete form has been ignored. Cheers.'),
 
 // records 200~299 with warnings
 				200 => array ('code' => 'warning', 'format' => '%s'),
@@ -1532,6 +1536,7 @@ function printLog ($log)
 				205 => array ('code' => 'warning', 'format' => '%u change request(s) have been ignored'),
 				206 => array ('code' => 'warning', 'format' => 'Rack is not empty'),
 				207 => array ('code' => 'warning', 'format' => 'Ignored empty request'),
+
 			);
 			// Handle the arguments. Is there any better way to do it?
 			foreach ($log['m'] as $record)
@@ -2913,6 +2918,7 @@ function renderNATv4ForObject ($object_id = 0)
 
 function renderAddMultipleObjectsForm ()
 {
+	showMessageOrError();
 	$typelist = getObjectTypeList();
 	$typelist[0] = 'select type...';
 	$max = getConfigVar ('MASSCOUNT');
@@ -5093,22 +5099,22 @@ function printTagTRs ($baseurl = '')
 	global $expl_tags, $impl_tags, $auto_tags, $target_given_tags;
 	if (getConfigVar ('SHOW_EXPLICIT_TAGS') == 'yes' and count ($target_given_tags))
 	{
-		echo "<tr><th width='50%' class=tdright><span class=tagheader>Given explicit tags</span>:</th><td class=tdleft>";
+		echo "<tr><th width='50%' class=tagchain>Given explicit tags:</th><td class=tagchain>";
 		echo serializeTags ($target_given_tags, $baseurl) . "</td></tr>\n";
 	}
 	if (getConfigVar ('SHOW_EXPLICIT_TAGS') == 'yes' and count ($expl_tags))
 	{
-		echo "<tr><th width='50%' class=tdright><span class=tagheader>Effective explicit tags</span>:</th><td class=tdleft>";
+		echo "<tr><th width='50%' class=tagchain>Effective explicit tags:</th><td class=tagchain>";
 		echo serializeTags ($expl_tags, $baseurl) . "</td></tr>\n";
 	}
 	if (getConfigVar ('SHOW_IMPLICIT_TAGS') == 'yes' and count ($impl_tags))
 	{
-		echo "<tr><th width='50%' class=tdright>Effective implicit tags:</th><td class=tdleft>";
+		echo "<tr><th width='50%' class=tagchain>Effective implicit tags:</th><td class=tagchain>";
 		echo serializeTags ($impl_tags, $baseurl) . "</td></tr>\n";
 	}
 	if (getConfigVar ('SHOW_AUTOMATIC_TAGS') == 'yes' and count ($auto_tags))
 	{
-		echo "<tr><th width='50%' class=tdright>Automatic tags:</th><td class=tdleft>";
+		echo "<tr><th width='50%' class=tagchain>Automatic tags:</th><td class=tagchain>";
 		echo serializeTags ($auto_tags) . "</td></tr>\n";
 	}
 }
@@ -5412,19 +5418,19 @@ function renderUser ($user_id)
 	$baseurl = makeHref(array('page'=>'userlist', 'tab'=>'default'))."&";
 	if (getConfigVar ('SHOW_EXPLICIT_TAGS') == 'yes' and count ($target_given_tags))
 	{
-		echo "<tr><th width='50%' class=tdright><span class=tagheader>Given explicit tags</span>:</th><td class=tdleft>";
+		echo "<tr><th width='50%' class=tagchain>Given explicit tags:</th><td class=tagchain>";
 		echo serializeTags ($target_given_tags, $baseurl) . "</td></tr>\n";
 	}
 	$target_shadow = getImplicitTags ($target_given_tags);
 	if (getConfigVar ('SHOW_IMPLICIT_TAGS') == 'yes' and count ($target_shadow))
 	{
-		echo "<tr><th width='50%' class=tdright><span class=tagheader>Given implicit tags</span>:</th><td class=tdleft>";
+		echo "<tr><th width='50%' class=tagchain>Given implicit tags:</th><td class=tagchain>";
 		echo serializeTags ($target_shadow, $baseurl) . "</td></tr>\n";
 	}
 	$target_auto_tags = generateEntityAutoTags ('user', $username);
 	if (getConfigVar ('SHOW_AUTOMATIC_TAGS') == 'yes' and count ($target_auto_tags))
 	{
-		echo "<tr><th width='50%' class=tdright><span class=tagheader>Automatic tags</span>:</th><td class=tdleft>";
+		echo "<tr><th width='50%' class=tagchain>Automatic tags:</th><td class=tagchain>";
 		echo serializeTags ($target_auto_tags) . "</td></tr>\n";
 	}
 	echo '</table>';
@@ -5466,15 +5472,15 @@ function renderAccessDenied ()
 	echo ' access denied ';
 	printImageHREF ('DENIED');
 	echo '</h3></th></tr>';
-	echo "<tr><th width='50%' class=tdright><span class=tagheader>User given tags</span>:</th><td class=tdleft>";
+	echo "<tr><th width='50%' class=tagchain>User given tags:</th><td class=tagchain>";
 	echo serializeTags ($user_given_tags) . "&nbsp;</td></tr>\n";
-	echo "<tr><th width='50%' class=tdright><span class=tagheader>Target given tags</span>:</th><td class=tdleft>";
+	echo "<tr><th width='50%' class=tagchain>Target given tags:</th><td class=tagchain>";
 	echo serializeTags ($target_given_tags) . "&nbsp;</td></tr>\n";
-	echo "<tr><th width='50%' class=tdright><span class=tagheader>Effective explicit tags</span>:</th><td class=tdleft>";
+	echo "<tr><th width='50%' class=tagchain>Effective explicit tags:</th><td class=tagchain>";
 	echo serializeTags ($expl_tags) . "&nbsp;</td></tr>\n";
-	echo "<tr><th width='50%' class=tdright><span class=tagheader>Effective implicit tags</span>:</th><td class=tdleft>";
+	echo "<tr><th width='50%' class=tagchain>Effective implicit tags:</th><td class=tagchain>";
 	echo serializeTags ($impl_tags) . "&nbsp;</td></tr>\n";
-	echo "<tr><th width='50%' class=tdright><span class=tagheader>Automatic tags</span>:</th><td class=tdleft>";
+	echo "<tr><th width='50%' class=tagchain>Automatic tags:</th><td class=tagchain>";
 	echo serializeTags ($auto_tags) . "&nbsp;</td></tr>\n";
 	echo "<tr><th width='50%' class=tdright>Requested page:</th><td class=tdleft>${pageno}</td></tr>\n";
 	echo "<tr><th width='50%' class=tdright>Requested tab:</th><td class=tdleft>${tabno}</td></tr>\n";

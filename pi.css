@@ -109,12 +109,22 @@ td.pcright {
 	font-weight: bold;
 }
 
-span.sticker {
-	background-color: #ffffa0;
+th.tagchain {
+	background-color: #a0ffa0;
+	text-align: right;
 }
 
-span.tagheader {
-	background-color: #a0ffa0;
+td.tagchain {
+	text-align: left;
+}
+
+th.sticker {
+	background-color: #ffffa0;
+	text-align: right;
+}
+
+td.sticker {
+	text-align: left;
 }
 
 .widetable td {
