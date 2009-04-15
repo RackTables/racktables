@@ -5642,7 +5642,7 @@ function renderFileBrowser ()
 	renderCellList ('file', 'Files', TRUE);
 }
 
-// Like renderFilesByLink, but with the option to delete files
+// Like renderFileBrowser(), but with the option to delete files
 function renderFileManager ()
 {
 	global $pageno, $tabno, $nextorder, $root;
@@ -5737,7 +5737,7 @@ function renderFilesForEntity ($entity_id = 0)
 	$entity_type = $etype_by_pageno[$pageno];
 	$id_name = $page[$pageno]['bypass'];
 	
-	startPortlet ('Upload new');
+	startPortlet ('Upload and link new');
 	echo "<table border=0 cellspacing=0 cellpadding='5' align='center' class='widetable'>\n";
 	echo "<tr><th>File</th><th>Comment</th><th></th></tr>\n";
 	printOpFormIntro ('addFile', array ('entity_type' => $entity_type, 'entity_id' => $entity_id, 'MAX_FILE_SIZE' => convertToBytes(get_cfg_var('upload_max_filesize'))), TRUE);
@@ -5752,7 +5752,7 @@ function renderFilesForEntity ($entity_id = 0)
 	$files = getAllUnlinkedFiles ($entity_type, $entity_id);
 	if (count ($files))
 	{
-		startPortlet ('Use existing');
+		startPortlet ('Link existing (' . count ($files) . ')');
 		printOpFormIntro ('linkFile');
 		echo "<table border=0 cellspacing=0 cellpadding='5' align='center'>\n";
 		echo '<tr><td class=tdleft>';
@@ -5767,19 +5767,16 @@ function renderFilesForEntity ($entity_id = 0)
 	$filelist = getFilesOfEntity ($entity_type, $entity_id);
 	if (count ($filelist))
 	{
-		startPortlet ('Manage linked');
+		startPortlet ('Manage linked (' . count ($filelist) . ')');
 		echo "<table border=0 cellspacing=0 cellpadding='5' align='center' class='widetable'>\n";
-		echo "<tr><th>File</th><th>Comment</th><th>Actions</th></tr>\n";
+		echo "<tr><th>File</th><th>Comment</th><th>Unlink</th></tr>\n";
 		foreach ($filelist as $file_id => $file)
 		{
 			echo "<tr valign=top><td class=tdleft>";
 			renderFileCell ($file);
-			echo "</td><td class=tdleft>${file['comment']}</td><td class=tdleft>";
+			echo "</td><td class=tdleft>${file['comment']}</td><td class=tdcenter>";
 			echo "<a href='".makeHrefProcess(array('op'=>'unlinkFile', 'link_id'=>$file['link_id'], $id_name=>$entity_id, 'name'=>$file['name']))."'>";
 			printImageHREF ('CUT', 'Unlink file');
-			echo "<a href='".makeHrefProcess(array('op'=>'deleteFile', 'file_id'=>$file['id'], $id_name=>$entity_id)).
-				"' onclick=\"javascript:return confirm('Are you sure you want to delete the file?')\">";
-			printImageHREF ('DESTROY', 'Unlink and delete file');
 			echo "</a></td></tr>\n";
 		}
 		echo "</table><br>\n";
