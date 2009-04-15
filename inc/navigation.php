@@ -591,20 +591,14 @@ $tabhandler['reports']['local'] = 'renderLocalReports';
 
 $page['files']['title'] = 'Files';
 $page['files']['parent'] = 'index';
-$tab['files']['default'] = 'View';
-$tab['files']['addmore'] = 'Upload';
-$tabhandler['files']['default'] = 'renderFileSpace';
-$tabhandler['files']['addmore'] = 'renderFileUploadForm';
-$ophandler['files']['addmore']['addFile'] = 'addFileWithoutLink';
+$tab['files']['default'] = 'Browse';
+$tab['files']['manage'] = 'Manage';
+$tabhandler['files']['default'] = 'renderFileBrowser';
+$tabhandler['files']['manage'] = 'renderFileManager';
+$ophandler['files']['manage']['addFile'] = 'addFileWithoutLink';
+$ophandler['files']['manage']['unlinkFile'] = 'unlinkFile';
 $msgcode['addFileWithoutLink']['OK'] = 69;
 $msgcode['addFileWithoutLink']['ERR'] = 100;
-
-$page['filesbylink']['title_handler'] = 'dynamic_title_file';
-$page['filesbylink']['handler'] = 'renderFilesByLink'; //renderObjectGroup
-$page['filesbylink']['bypass'] = 'entity_type';
-$page['filesbylink']['bypass_type'] = 'string';
-$page['filesbylink']['parent'] = 'files';
-$ophandler['filesbylink']['default']['deleteFile'] = 'deleteFile';
 
 $page['file']['title_handler'] = 'dynamic_title_file';
 $page['file']['bypass'] = 'file_id';

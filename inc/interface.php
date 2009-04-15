@@ -93,6 +93,9 @@ $image['destroy']['height'] = 16;
 $image['nodestroy']['path'] = 'pix/tango-user-trash-16x16-gray.png';
 $image['nodestroy']['width'] = 16;
 $image['nodestroy']['height'] = 16;
+$image['NODESTROY']['path'] = 'pix/tango-user-trash-32x32-gray.png';
+$image['NODESTROY']['width'] = 32;
+$image['NODESTROY']['height'] = 32;
 $image['DESTROY']['path'] = 'pix/tango-user-trash-32x32.png';
 $image['DESTROY']['width'] = 32;
 $image['DESTROY']['height'] = 32;
@@ -1425,7 +1428,7 @@ function printLog ($log)
 				69 => array ('code' => 'success', 'format' => 'File "%s" was added successfully'),
 				70 => array ('code' => 'success', 'format' => 'File "%s" was updated successfully'),
 				71 => array ('code' => 'success', 'format' => 'File "%s" was linked successfully'),
-				72 => array ('code' => 'success', 'format' => 'File "%s" was unlinked successfully'),
+				72 => array ('code' => 'success', 'format' => 'File was unlinked successfully'),
 				73 => array ('code' => 'success', 'format' => 'File "%s" was deleted successfully'),
 				74 => array ('code' => 'success', 'format' => 'Row "%s" was added successfully'),
 				75 => array ('code' => 'success', 'format' => 'Row "%s" was updated successfully'),
@@ -3301,7 +3304,7 @@ function renderAtomGrid ($data)
 	}
 }
 
-function renderCellList ($realm = NULL, $title = 'list')
+function renderCellList ($realm = NULL, $title = 'list', $do_amplify = FALSE)
 {
 	if ($realm === NULL)
 	{
@@ -3314,7 +3317,10 @@ function renderCellList ($realm = NULL, $title = 'list')
 	startPortlet ($title);
 	echo "<table class=cooltable border=0 cellpadding=5 cellspacing=0 align=center>\n";
 	$order = 'odd';
-	foreach (filterCellList (listCells ($realm), buildCellFilter()) as $cell)
+	$celllist = filterCellList (listCells ($realm), buildCellFilter());
+	if ($do_amplify)
+		array_walk ($celllist, 'amplifyCell');
+	foreach ($celllist as $cell)
 	{
 		echo "<tr class=row_${order}><td>";
 		renderCell ($cell);
@@ -3762,12 +3768,17 @@ function renderEditAttrMapForm ()
 
 function printImageHREF ($tag, $title = '', $do_input = FALSE, $tabindex = 0)
 {
+	echo getImageHREF ($tag, $title, $do_input, $tabindex);
+}
+
+function getImageHREF ($tag, $title = '', $do_input = FALSE, $tabindex = 0)
+{
 	global $root, $image;
 	if (!isset ($image[$tag]))
 		$tag = 'error';
 	$img = $image[$tag];
 	if ($do_input == TRUE)
-		echo
+		return
 			"<input type=image name=submit class=icon " .
 			"src='${root}${img['path']}' " .
 			"border=0 " .
@@ -3775,7 +3786,7 @@ function printImageHREF ($tag, $title = '', $do_input = FALSE, $tabindex = 0)
 			(empty ($title) ? '' : " title='${title}'") . // JT: Add title to input hrefs too
 			">";
 	else
-		echo
+		return
 			"<img " .
 			"src='${root}${img['path']}' " .
 			"width=${img['width']} " .
@@ -4910,6 +4921,7 @@ function renderAutoPortsForm ($object_id = 0)
 
 function renderTagRowForViewer ($taginfo, $level = 0)
 {
+	$self = __FUNCTION__;
 	if (!count ($taginfo['kids']))
 		$level++; // Shift instead of placing a spacer. This won't impact any nested nodes.
 	echo "<tr><td align=left style='padding-left: " . ($level * 16) . "px;'>";
@@ -4919,12 +4931,13 @@ function renderTagRowForViewer ($taginfo, $level = 0)
 	echo $taginfo['tag'] . '</span>';
 	echo "</td></tr>\n";
 	foreach ($taginfo['kids'] as $kid)
-		renderTagRowForViewer ($kid, $level + 1);
+		$self ($kid, $level + 1);
 }
 
 // FIXME: generated hyperlink must depend on the realm given
 function renderTagRowForCloud ($taginfo, $realm, $level = 0)
 {
+	$self = __FUNCTION__;
 	echo "<tr><td align=left style='padding-left: " . ($level * 16) . "px;'>";
 	echo "<a href='".makeHref(array('page'=>'objgroup', 'group_id'=>0, 'tagfilter[]'=>$taginfo['id']))."'>";
 	echo $taginfo['tag'] . '</a>';
@@ -4932,11 +4945,12 @@ function renderTagRowForCloud ($taginfo, $realm, $level = 0)
 		echo ' (' . $taginfo['refcnt'][$realm] . ')';
 	echo "</td></tr>\n";
 	foreach ($taginfo['kids'] as $kid)
-		renderTagRowForCloud ($kid, $realm, $level + 1);
+		$self ($kid, $realm, $level + 1);
 }
 
 function renderTagRowForEditor ($taginfo, $level = 0)
 {
+	$self = __FUNCTION__;
 	global $pageno, $tabno, $taglist;
 	if (!count ($taginfo['kids']))
 		$level++; // Idem
@@ -4968,7 +4982,7 @@ function renderTagRowForEditor ($taginfo, $level = 0)
 	printImageHREF ('save', 'Save changes', TRUE);
 	echo "</form></td></tr>\n";
 	foreach ($taginfo['kids'] as $kid)
-		renderTagRowForEditor ($kid, $level + 1);
+		$self ($kid, $level + 1);
 }
 
 function renderTagTree ()
@@ -5503,33 +5517,6 @@ function renderMyAccount ()
 }
 
 // File-related functions
-function renderFileSpace ()
-{
-	global $taglist, $tagtree;
-	echo "<table border=0 class=objectview>\n";
-	echo "<tr><td class=pcleft width='50%'>";
-	startPortlet ('View all by link');
-	$linkInfo = getFileLinkInfo();
-	if ($linkInfo === NULL)
-	{
-		showError ('getFileLinkInfo() failed', __FUNCTION__);
-		return;
-	}
-	if (count ($linkInfo) == 0)
-		echo "No files exist in DB";
-	else
-	{
-		echo '<div align=left><ul>';
-		foreach ($linkInfo as $li)
-			echo "<li><a href='".makeHref(array('page'=>'filesbylink', 'entity_type'=>$li['entity_type']))."'>${li['name']}</a> (${li['count']})</li>";
-		echo '</ul></div>';
-	}
-	finishPortlet();
-	echo '</td><td class=pcright>';
-	renderTagFilterPortlet (getTagFilter(), 'file');
-	echo "</td></tr></table>\n";
-}
-
 function renderFile ($file_id = 0)
 {
 	global $nextorder, $aac, $root;
@@ -5650,16 +5637,21 @@ function renderFileProperties ($file_id = 0)
 	echo '</th></tr></form></table>';
 }
 
-// Used for uploading a parentless file
-function renderFileUploadForm ()
+function renderFileBrowser ()
 {
-	global $aat, $pageno, $tabno, $nextorder;
+	renderCellList ('file', 'Files', TRUE);
+}
 
+// Like renderFilesByLink, but with the option to delete files
+function renderFileManager ()
+{
+	global $pageno, $tabno, $nextorder, $root;
 	showMessageOrError();
+
+	// Used for uploading a parentless file
 	startPortlet ('Upload new');
 	echo "<table border=0 cellspacing=0 cellpadding='5' align='center' class='widetable'>\n";
 	echo "<tr><th>File</th><th>Comment</th><th></th></tr>\n";
-
 	printOpFormIntro ('addFile', array ('MAX_FILE_SIZE' => convertToBytes(get_cfg_var('upload_max_filesize'))), TRUE);
 	echo "<tr>";
 	echo "<td class=tdleft><input type='file' size='10' name='file' tabindex=100></td>\n";
@@ -5669,81 +5661,38 @@ function renderFileUploadForm ()
 	echo '</td></tr></form>';
 	echo "</table><br>\n";
 	finishPortlet();
-}
 
-function renderFilesByLink ()
-{
-	global $pageno, $tabno, $nextorder, $taglist, $tagtree, $root;
-	assertStringArg ('entity_type', __FUNCTION__, TRUE);
-	$entity_type = $_REQUEST['entity_type'];
-	$tagfilter = getTagFilter();
-	$tagfilter_str = getTagFilterStr ($tagfilter);
-	echo "<table border=0 class=objectview>\n";
-	echo "<tr><td class=pcleft width='25%'>";
-
-	startPortlet ('change type');
-	$linkInfo = getFileLinkInfo();
-	if ($linkInfo === NULL)
-	{
-		showError ('getFileLinkInfo() failed', __FUNCTION__);
+	$files = listCells ('file');
+	if (!count ($files))
 		return;
-	}
-	if (count ($linkInfo) == 0)
-		echo 'No files exist in DB';
-	else
-	{
-		echo '<div align=left><ul>';
-		foreach ($linkInfo as $li)
-		{
-			echo "<li><a href='".makeHref(array('page'=>$pageno, 'entity_type'=>$li['entity_type']))."${tagfilter_str}'>";
-			if ($li['entity_type'] == $entity_type)
-				echo '<strong>';
-			echo "${li['name']}</a>";
-			if ($li['entity_type'] == $entity_type)
-				echo '</strong>';
-			echo " (${li['count']})";
-			if ($li['entity_type'] == $entity_type)
-				echo ' &larr;';
-			echo "</li>";
-		}
-		echo '</ul></div>';
-	}
-	finishPortlet();
 
-	echo '</td><td class=pcleft>';
-
-	$files = getFileList ($entity_type, $tagfilter, getTFMode());
-	startPortlet ('Files (' . count ($files) . ')');
-	if ($files === NULL)
-	{
-		showError ('getFileList() failed', __FUNCTION__);
-		return;
-	}
-	echo '<br><br><table cellpadding=5 cellspacing=0 align=center class=cooltable>';
-	echo '<tr><th>File</th><th>Linked to</th><th>Actions</th></tr>';
+	startPortlet ('Manage existing (' . count ($files) . ')');
 	$order = 'odd';
+	echo '<table cellpadding=5 cellspacing=0 align=center class=cooltable>';
+	echo '<tr><th>File</th><th>Unlink</th><th>Destroy</th></tr>';
 	foreach ($files as $file)
 	{
 		printf("<tr class=row_%s valign=top><td class=tdleft>", $order);
-		renderFileCell ($file);
-		echo "</td><td class='tdleft'>";
-		$links = getFileLinks($file['id']);
-		if (count ($links))
-			printf("<small>%s</small>", serializeFileLinks($links));
-		echo "</td><td class=tdleft>";
-		echo "<a href='".makeHrefProcess(array('op'=>'deleteFile', 'file_id'=>$file['id'], 'entity_type'=>$entity_type)).
-			"' onclick=\"javascript:return confirm('Are you sure you want to delete the file?')\">";
-		printImageHREF ('DESTROY', 'Delete file');
-		echo "</a></td></tr>\n";
+		renderCell ($file);
+		// Don't load links data earlier to enable special processing.
+		amplifyCell ($file);
+		echo '</td><td class=tdleft>';
+		echo serializeFileLinks ($file['links'], TRUE);
+		echo '</td><td class=tdcenter>';
+		if (count ($file['links']))
+			printImageHREF ('NODESTROY', 'References (' . count ($file['links']) . ')');
+		else
+		{
+			echo "<a href='".makeHrefProcess(array('op'=>'deleteFile', 'file_id'=>$file['id'])).
+				"' onclick=\"javascript:return confirm('Are you sure you want to delete the file?')\">";
+			printImageHREF ('DESTROY', 'Delete file');
+			echo "</a>";
+		}
+		echo "</td></tr>\n";
 		$order = $nextorder[$order];
 	}
 	echo '</table>';
 	finishPortlet();
-
-	echo "</td><td class=pcright width='25%'>";
-
-	renderTagFilterPortlet ($tagfilter, 'file', 'entity_type', $entity_type);
-	echo "</td></tr></table>\n";
 }
 
 function renderFilesPortlet ($entity_type = NULL, $entity_id = 0)
@@ -5949,6 +5898,9 @@ function renderCell ($cell)
 	case 'user':
 		renderUserCell ($cell);
 		break;
+	case 'file':
+		renderFileCell ($cell);
+		break;
 	default:
 		showError ('odd data', __FUNCTION__);
 		break;
@@ -6056,9 +6008,13 @@ function renderFileCell ($fileinfo)
 	}
 	echo "</td><td>";
 	printf ("<a href='${root}?page=file&file_id=%s'><strong>%s</strong></a>", $fileinfo['id'], niftyString ($fileinfo['name']));
+	echo "</td><td rowspan=3 valign=top>";
+	if (isset ($fileinfo['links']) and count ($fileinfo['links']))
+		printf ("<small>%s</small>", serializeFileLinks ($fileinfo['links']));
 	echo "</td></tr><tr><td>";
-	$tags = loadEntityTags ('file', $fileinfo['id']);
-	echo count ($tags) ? ("<small>" . serializeTags ($tags) . "</small>") : '&nbsp;';
+	if (!isset ($fileinfo['etags']))
+		$fileinfo['etags'] = loadEntityTags ('file', $fileinfo['id']);
+	echo count ($fileinfo['etags']) ? ("<small>" . serializeTags ($fileinfo['etags']) . "</small>") : '&nbsp;';
 	echo "</td></tr><tr><td><a href='${root}download.php?file_id=${fileinfo['id']}'>";
 	printImageHREF ('download', 'Download file');
 	echo '</a>&nbsp;';

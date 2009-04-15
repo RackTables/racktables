@@ -211,7 +211,7 @@ function dynamic_title_file ()
 			$ret['name'] = htmlspecialchars ($file['name']);
 			$ret['params']['file_id'] = $_REQUEST['file_id'];
 			break;
-		case 'filesbylink':
+		case 'files':
 			assertStringArg ('entity_type', __FUNCTION__);
 			$ret['name'] = $_REQUEST['entity_type'];
 			$ret['params']['entity_type'] = $_REQUEST['entity_type'];

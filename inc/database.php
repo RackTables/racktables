@@ -254,6 +254,21 @@ function listCells ($realm)
 		);
 		$keycolumn = 'id';
 		break;
+	case 'file':
+		$table = 'File';
+		$columns = array
+		(
+			'id' => 'id',
+			'name' => 'name',
+			'type' => 'type',
+			'size' => 'size',
+			'ctime' => 'ctime',
+			'mtime' => 'mtime',
+			'atime' => 'atime',
+			'comment' => 'comment',
+		);
+		$keycolumn = 'id';
+		break;
 	default:
 		showError ('invalid arg', __FUNCTION__);
 		return NULL;
@@ -318,6 +333,9 @@ function amplifyCell (&$record, $dummy = NULL)
 	case 'ipv4net':
 		$record['ip_bin'] = ip2long ($record['ip']);
 		$record['parent_id'] = getIPv4AddressNetworkId ($record['ip'], $record['mask']);
+		break;
+	case 'file':
+		$record['links'] = getFileLinks ($record['id']);
 		break;
 	default:
 	}
@@ -1860,7 +1878,7 @@ function renderTagStats ()
 	echo '<th>IPv4 VS</th><th>IPv4 RS pools</th><th>users</th><th>files</th></tr>';
 	$pagebyrealm = array
 	(
-		'file' => 'filesbylink&entity_type=all',
+		'file' => 'files&entity_type=all',
 		'ipv4net' => 'ipv4space&tab=default',
 		'ipv4vs' => 'ipv4vslist&tab=default',
 		'ipv4rspool' => 'ipv4rsplist&tab=default',
@@ -3646,7 +3664,7 @@ function getFileLinks ($file_id = 0)
 	}
 
 	global $dbxlink;
-	$query = $dbxlink->prepare('SELECT * FROM FileLink WHERE file_id = ? ORDER BY entity_id');
+	$query = $dbxlink->prepare('SELECT * FROM FileLink WHERE file_id = ? ORDER BY entity_type, entity_id');
 	$query->bindParam(1, $file_id);
 	$query->execute();
 	$rows = $query->fetchAll (PDO::FETCH_ASSOC);

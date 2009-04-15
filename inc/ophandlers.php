@@ -1728,7 +1728,7 @@ function unlinkFile ()
 	if ($error != '')
 		return buildRedirectURL (__FUNCTION__, 'ERR', array ($error));
 
-	return buildRedirectURL (__FUNCTION__, 'OK', array ($_REQUEST['name']));
+	return buildRedirectURL (__FUNCTION__, 'OK');
 }
 
 function deleteFile ()

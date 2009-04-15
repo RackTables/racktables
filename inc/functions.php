@@ -1740,8 +1740,9 @@ function formatTimestamp ($timestamp) {
 	return date('n/j/y g:iA', strtotime($timestamp));
 }
 
-// Display hrefs for all of a file's parents
-function serializeFileLinks ($links)
+// Display hrefs for all of a file's parents. If scissors are requested,
+// prepend cutting button to each of them.
+function serializeFileLinks ($links, $scissors = FALSE)
 {
 	global $root;
 
@@ -1770,10 +1771,15 @@ function serializeFileLinks ($links)
 				$params = "page=user&user_id=";
 				break;
 		}
-		$ret .= sprintf("%s<a href='%s?%s%s'>%s</a>", $comma, $root, $params, $li['entity_id'], $li['name']);
-		$comma = ', ';
+		$ret .= $comma;
+		if ($scissors)
+		{
+			$ret .= "<a href='" . makeHrefProcess(array('op'=>'unlinkFile', 'link_id'=>$link_id)) . "'";
+			$ret .= getImageHREF ('cut') . '</a> ';
+		}
+		$ret .= sprintf("<a href='%s?%s%s'>%s</a>", $root, $params, $li['entity_id'], $li['name']);
+		$comma = '<br>';
 	}
-
 	return $ret;
 }
 
