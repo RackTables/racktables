@@ -5463,7 +5463,6 @@ function renderAccessDenied ()
 	echo '<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />';
 	echo "<link rel=stylesheet type='text/css' href=pi.css />\n";
 	echo "<link rel=icon href='" . getFaviconURL() . "' type='image/x-icon' />";
-	echo "<link rel=icon href='" . getFaviconURL() . "' type='image/x-icon' />";
 	echo "</head><body>";
 	global $root, $pageno, $tabno,
 		$user_given_tags,
