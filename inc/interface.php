@@ -552,7 +552,7 @@ function renderEditObjectForm ($object_id)
 {
 	showMessageOrError();
 
-	global $pageno, $tabno;
+	global $pageno;
 	$object = getObjectInfo ($object_id);
 	if ($object == NULL)
 	{
@@ -561,38 +561,22 @@ function renderEditObjectForm ($object_id)
 	}
 	startPortlet ();
 	printOpFormIntro ('update');
-	echo '<table border=0 width=100%><tr><td class=pcleft>';
 
 	// static attributes
-	echo '<table border=0 align=center>';
-	echo "<tr><th colspan=2><h2>Static attributes</h2></th></tr>";
-	echo "<tr><th class=tdright>Type:</th><td class=tdleft>";
+	echo '<table border=0 cellspacing=0 cellpadding=3 align=center>';
+	echo "<tr><td>&nbsp;</td><th colspan=2><h2>Attributes</h2></th></tr>";
+	echo "<tr><td>&nbsp;</td><th class=tdright>Type:</th><td class=tdleft>";
 	printSelect (getObjectTypeList(), 'object_type_id', $object['objtype_id']);
 	echo "</td></tr>\n";
 	// baseline info
-	echo "<tr><th class=tdright>Common name:</th><td class=tdleft><input type=text name=object_name value='${object['name']}'></td></tr>\n";
-	echo "<tr><th class=tdright>Visible label:</th><td class=tdleft><input type=text name=object_label value='${object['label']}'></td></tr>\n";
-	echo "<tr><th class=tdright>Asset tag:</th><td class=tdleft><input type=text name=object_asset_no value='${object['asset_no']}'></td></tr>\n";
-	echo "<tr><th class=tdright>Barcode:</th><td class=tdleft><input type=text name=object_barcode value='${object['barcode']}'></td></tr>\n";
-	echo "<tr><th class=tdright>Has problems:</th><td class=tdleft><input type=checkbox name=object_has_problems";
-	if ($object['has_problems'] == 'yes')
-		echo ' checked';
-	echo "></td></tr>\n";
-	echo "<tr><th class=tdright>Actions:</th><td class=tdleft><a href='".
-		makeHrefProcess(array('op'=>'deleteObject', 'page'=>'objects', 'tab'=>'default', 'object_id'=>$object_id, 'name'=>$object['name'])).
-		"' onclick=\"javascript:return confirm('Are you sure you want to delete the object?')\">Delete object</a></td></tr>\n";
-	echo "<tr><td colspan=2><b>Comment:</b><br><textarea name=object_comment rows=10 cols=80>${object['comment']}</textarea></td></tr>";
-	echo '</table>';
-
-	echo '</td><td class=pcright>';
-	
+	echo "<tr><td>&nbsp;</td><th class=tdright>Common name:</th><td class=tdleft><input type=text name=object_name value='${object['name']}'></td></tr>\n";
+	echo "<tr><td>&nbsp;</td><th class=tdright>Visible label:</th><td class=tdleft><input type=text name=object_label value='${object['label']}'></td></tr>\n";
+	echo "<tr><td>&nbsp;</td><th class=tdright>Asset tag:</th><td class=tdleft><input type=text name=object_asset_no value='${object['asset_no']}'></td></tr>\n";
+	echo "<tr><td>&nbsp;</td><th class=tdright>Barcode:</th><td class=tdleft><input type=text name=object_barcode value='${object['barcode']}'></td></tr>\n";
 	// optional attributes
 	$values = getAttrValues ($object_id);
 	if (count($values) > 0)
 	{
-		echo "<table border=0 cellspacing=0 cellpadding=5 align=center class=widetable>\n";
-		echo "<tr><th colspan=3><h2>Optional attributes</h2></th></tr>";
-		echo "<tr><th>&nbsp;</th><th>Attribute</th><th>Value</th></tr>\n";
 		echo '<input type=hidden name=num_attrs value=' . count($values) . ">\n";
 		$i = 0;
 		foreach ($values as $record)
@@ -608,7 +592,7 @@ function renderEditObjectForm ($object_id)
 			else
 				echo '&nbsp;';
 			echo '</td>';
-			echo "<td class=tdright>${record['name']}:</td><td class=tdleft>";
+			echo "<th class=sticker>${record['name']}:</th><td class=tdleft>";
 			switch ($record['type'])
 			{
 				case 'uint':
@@ -626,11 +610,17 @@ function renderEditObjectForm ($object_id)
 			echo "</td></tr>\n";
 			$i++;
 		}
-		echo "</table>";
 	}
-	echo "</td></tr>\n";
+	echo "<tr><td>&nbsp;</td><th class=tdright>Has problems:</th><td class=tdleft><input type=checkbox name=object_has_problems";
+	if ($object['has_problems'] == 'yes')
+		echo ' checked';
+	echo "></td></tr>\n";
+	echo "<tr><td>&nbsp;</td><th class=tdright>Actions:</th><td class=tdleft><a href='".
+		makeHrefProcess(array('op'=>'deleteObject', 'page'=>'objects', 'tab'=>'default', 'object_id'=>$object_id, 'name'=>$object['name'])).
+		"' onclick=\"javascript:return confirm('Are you sure you want to delete the object?')\">Delete object</a></td></tr>\n";
+	echo "<tr><td colspan=3><b>Comment:</b><br><textarea name=object_comment rows=10 cols=80>${object['comment']}</textarea></td></tr>";
 
-	echo "<tr><th class=submit colspan=2>";
+	echo "<tr><th class=submit colspan=3>";
 	printImageHREF ('SAVE', 'Save changes', TRUE);
 	echo "</form></th></tr></table>\n";
 	finishPortlet();
@@ -5052,8 +5042,17 @@ function renderTagTreeEditor ()
 function renderTagCheckbox ($inputname, $preselect, $taginfo, $level = 0)
 {
 	$self = __FUNCTION__;
-	$selected = tagOnChain ($taginfo, $preselect) ? ' checked' : '';
-	echo "<tr><td colspan=2 align=left style='padding-left: " . ($level * 16) . "px;'>";
+	if (tagOnChain ($taginfo, $preselect))
+	{
+		$selected = ' checked';
+		$class = 'seltagbox';
+	}
+	else
+	{
+		$selected = '';
+		$class = 'tagbox';
+	}
+	echo "<tr><td colspan=2 class=${class} style='padding-left: " . ($level * 16) . "px;'>";
 	echo "<input type=checkbox name='${inputname}[]' value='${taginfo['id']}'${selected}> ";
 	echo $taginfo['tag'] . "</td></tr>\n";
 	foreach ($taginfo['kids'] as $kid)
@@ -5074,7 +5073,7 @@ function renderEntityTags ($entity_id = 0)
 	startPortlet ('Tag list');
 	if (count ($target_given_tags))
 		echo '<h3>(' . serializeTags ($target_given_tags) . ')</h3>';
-	echo '<table border=0 align=center>';
+	echo '<table border=0 cellspacing=0 cellpadding=3 align=center>';
 	printOpFormIntro ('saveTags');
 	// Show a tree of tags with preselection, which matches current chain.
 	foreach ($tagtree as $taginfo)

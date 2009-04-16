@@ -123,6 +123,15 @@ th.sticker {
 	text-align: right;
 }
 
+td.tagbox {
+	text-align: left;
+}
+
+td.seltagbox {
+	text-align: left;
+	background-color: #a0ffa0;
+}
+
 td.sticker {
 	text-align: left;
 }
