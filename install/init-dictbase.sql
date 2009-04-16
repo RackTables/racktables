@@ -93,7 +93,10 @@ INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_id`) VALUES
 (798,20,0),
 (798,21,0),
 (798,22,0),
-(798,24,0);
+(798,24,0),
+(965,1,0),
+(965,3,0),
+(965,2,25);
 
 INSERT INTO `Chapter` (`id`, `sticky`, `name`) VALUES
 (11,'no','server models'),
@@ -110,7 +113,8 @@ INSERT INTO `Chapter` (`id`, `sticky`, `name`) VALUES
 (21,'no','KVM switch models'),
 (22,'no','multiplexer models'),
 (23,'no','console models'),
-(24,'no','network security models');
+(24,'no','network security models'),
+(25,'no','wireless models');
 
 INSERT INTO `PortCompat` (`type1`, `type2`) VALUES
 (17,17),
@@ -241,7 +245,8 @@ INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES
 (1,447,'multiplexer'),
 (2,681,'async serial (DB-9)'),
 (2,682,'async serial (DB-25)'),
-(1,798,'Network security');
+(1,798,'Network security'),
+(1,965,'Wireless');
 
 INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES
 ('color_F','8fbfbf','string','no','yes','HSV: 180-25-75. Free atoms, they are available for allocation to objects.'),

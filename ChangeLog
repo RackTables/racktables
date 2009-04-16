@@ -7,6 +7,7 @@
 	new feature: validator in RackCode editor
 	new feature: vendor sieve for stickers
 	new feature: RackCode expressions as source for load balancer lists
+	new feature: wireless hardware in dictionary
 	update: display row name when listing objects. closes ticket 16 (by Aaron)
 	update: ability to manage rows from the Rackspace page in addition to the Dictionary (by Aaron)
 	update: IPv4 calculations were optimized for better speed
