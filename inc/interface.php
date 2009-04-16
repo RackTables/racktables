@@ -5071,8 +5071,6 @@ function renderEntityTags ($entity_id = 0)
 	$entity_realm = $etype_by_pageno[$pageno];
 	$bypass_name = $page[$pageno]['bypass'];
 	startPortlet ('Tag list');
-	if (count ($target_given_tags))
-		echo '<h3>(' . serializeTags ($target_given_tags) . ')</h3>';
 	echo '<table border=0 cellspacing=0 cellpadding=3 align=center>';
 	printOpFormIntro ('saveTags');
 	// Show a tree of tags with preselection, which matches current chain.
@@ -5100,11 +5098,10 @@ function printTagTRs ($baseurl = '')
 	{
 		echo "<tr><th width='50%' class=tagchain>Given explicit tags:</th><td class=tagchain>";
 		echo serializeTags ($target_given_tags, $baseurl) . "</td></tr>\n";
-	}
-	if (getConfigVar ('SHOW_EXPLICIT_TAGS') == 'yes' and count ($expl_tags))
-	{
-		echo "<tr><th width='50%' class=tagchain>Effective explicit tags:</th><td class=tagchain>";
-		echo serializeTags ($expl_tags, $baseurl) . "</td></tr>\n";
+		// only display "effective" line, when if differs
+		if (tagChainCmp ($target_given_tags, $expl_tags))
+			echo "<tr><th width='50%' class=tagchain>Effective explicit tags:</th><td class=tagchain>" .
+				serializeTags ($expl_tags, $baseurl) . "</td></tr>\n";
 	}
 	if (getConfigVar ('SHOW_IMPLICIT_TAGS') == 'yes' and count ($impl_tags))
 	{
@@ -5131,7 +5128,7 @@ function renderTagFilterPortlet ($tagfilter, $realm, $bypass_name = '', $bypass_
 {
 	global $pageno, $tabno, $taglist, $tagtree;
 	$objectivetags = getObjectiveTagTree ($tagtree, $realm);
-	startPortlet ('T-filter');
+	startPortlet ('filter');
 	if (!count ($objectivetags))
 	{
 		echo "None used in current realm.<br>";
@@ -5140,8 +5137,6 @@ function renderTagFilterPortlet ($tagfilter, $realm, $bypass_name = '', $bypass_
 	}
 	echo '<table border=0 align=center>';
 
-	if (count ($tagfilter))
-		echo '<h3>(' . serializeTags (buildTagChainFromIds ($tagfilter)) . ')</h3>';
 	echo "<form method=get>\n";
 	echo "<input type=hidden name=page value=${pageno}>\n";
 	echo "<input type=hidden name=tab value=${tabno}>\n";
