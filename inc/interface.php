@@ -285,25 +285,36 @@ function renderRackspace ()
 	$rackrowList = getRackspace ($tagfilter);
 	global $nextorder;
 	$rackwidth = getRackImageWidth();
+	// Zero value effectively disables the limit.
+	$maxPerRow = getConfigVar ('RACKS_PER_ROW');
 	$order = 'odd';
 	foreach ($rackrowList as $rackrow)
 	{
-		echo "<tr class=row_${order}><th class=tdleft>";
-		echo "<a href='".makeHref(array('page'=>'row', 'row_id'=>$rackrow['row_id']))."${tagfilter_str}'>";
-		echo "${rackrow['row_name']}</a></th>";
 		$rackList = getRacksForRow ($rackrow['row_id'], $tagfilter);
-		echo "<td><table border=0 cellspacing=5><tr>";
+		$rackListIdx = 0;
 		foreach ($rackList as $rack)
 		{
+			if ($rackListIdx % $maxPerRow == 0)
+			{
+				if ($rackListIdx > 0)
+					echo '</tr></table></tr>';
+				echo "<tr class=row_${order}><th class=tdleft>";
+				echo "<a href='".makeHref(array('page'=>'row', 'row_id'=>$rackrow['row_id']))."${tagfilter_str}'>";
+				echo "${rackrow['row_name']}</a>";
+				if ($rackListIdx > 0)
+					echo ' (continued)';
+				echo "</th><td><table border=0 cellspacing=5><tr>";
+				$order = $nextorder[$order];
+			}
 			echo "<td align=center><a href='".makeHref(array('page'=>'rack', 'rack_id'=>$rack['id']))."'>";
 			echo "<img border=0 width=${rackwidth} height=";
 			echo getRackImageHeight ($rack['height']);
 			echo " title='${rack['height']} units'";
 			echo "src='render_image.php?img=minirack&rack_id=${rack['id']}'>";
 			echo "<br>${rack['name']}</a></td>";
+			$rackListIdx++;
 		}
 		echo "</tr></table></tr>\n";
-		$order = $nextorder[$order];
 	}
 	echo "</table>\n";
 	echo "</td></tr></table>\n";
@@ -383,17 +394,27 @@ function renderRow ($row_id = 0)
 
 	global $nextorder;
 	$rackwidth = getRackImageWidth() * getConfigVar ('ROW_SCALE');
+	// Maximum number of racks per row is proportionally less, but at least 1.
+	$maxPerRow = max (floor (getConfigVar ('RACKS_PER_ROW') / getConfigVar ('ROW_SCALE')), 1);
+	$rackListIdx = 0;
 	$order = 'odd';
 	startPortlet ('Racks');
 	echo "<table border=0 cellspacing=5 align='center'><tr>";
 	foreach ($rackList as $rack)
 	{
+		if ($rackListIdx % $maxPerRow == 0)
+		{
+			if ($rackListIdx > 0)
+				echo '</tr>';
+			echo '<tr>';
+		}
 		echo "<td align=center class=row_${order}><a href='".makeHref(array('page'=>'rack', 'rack_id'=>$rack['id']))."'>";
 		echo "<img border=0 width=${rackwidth} height=" . (getRackImageHeight ($rack['height']) * getConfigVar ('ROW_SCALE'));
 		echo " title='${rack['height']} units'";
 		echo "src='render_image.php?img=minirack&rack_id=${rack['id']}'>";
 		echo "<br>${rack['name']}</a></td>";
 		$order = $nextorder[$order];
+		$rackListIdx++;
 	}
 	echo "</tr></table>\n";
 	finishPortlet();

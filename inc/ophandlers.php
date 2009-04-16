@@ -940,6 +940,7 @@ function resetUIConfig()
 	setConfigVar ('IPV4NAT_LISTSRC','{$typeid_4} or {$typeid_7} or {$typeid_8}');
 	setConfigVar ('ASSETWARN_LISTSRC','{$typeid_4} or {$typeid_7} or {$typeid_8}');
 	setConfigVar ('NAMEWARN_LISTSRC','{$typeid_4} or {$typeid_7} or {$typeid_8}');
+	setConfigVar ('RACKS_PER_ROW','12');
 	return buildRedirectURL (__FUNCTION__, 'OK');
 }
 
