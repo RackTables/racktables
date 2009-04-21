@@ -48,6 +48,10 @@ function doSNMPmining ($object_id, $community)
 		559 => 'WS-C2950T-48 (48 Ethernet 10/100 ports and 2 10/100/1000 uplinks)',
 		920 => 'WS-CBS3032-DEL-F (16 Ethernet 10/100/1000 and up to 8 10/100/1000 uplinks)',
 		719 => 'N5K-C5020 (40-ports system)',
+		// FIXME: the following two origin at a different OID, so a complete form should be
+		// used at a latter point to avoid value clashes.
+		36 => 'HP J8164A (24 Ethernet 10/100 ports and 2 100/1000 uplinks)',
+		35 => 'HP J8165A (48  Ethernet 10/100 ports and 2 100/1000 uplinks)',
 	);
 	// Cisco sysObjectID to Dictionary dict_key map
 	$hwtype = array
@@ -83,6 +87,8 @@ function doSNMPmining ($object_id, $community)
 		717 => 162,
 		920 => 795,
 		719 => 960,
+		36 => 865,
+		35 => 867,
 	);
 	// Cisco portType to Dictionary dict_key map
 	$porttype = array
@@ -101,17 +107,34 @@ function doSNMPmining ($object_id, $community)
 	$sysChassi = @snmpget ($endpoints[0], $community, '1.3.6.1.4.1.9.3.6.3.0');
 	if ($sysChassi === FALSE or $sysChassi == NULL)
 		$sysChassi = '';
+	else
+		$sysChassi = str_replace ('"', '', substr ($sysChassi, strlen ('STRING: ')));
 	// Strip the object type, it's always string here.
 	$sysDescr = substr ($sysDescr, strlen ('STRING: '));
 	if (FALSE !== ereg ('^(Cisco )?IOS .+$', $sysDescr))
+	{
 		$swfamily = 'IOS';
+		$swversion = ereg_replace ('^.*, Version ([^ ]+), .*$', '\\1', $sysDescr);
+		$swrelease = ereg_replace ('^([[:digit:]]+\.[[:digit:]]+)[^[:digit:]].*', '\\1', $swversion);
+	}
 	elseif (FALSE !== ereg ('^Cisco NX-OS.+$', $sysDescr))
+	{
 		$swfamily = 'NX-OS';
+		$swversion = ereg_replace ('^.*, Version ([^ ]+), .*$', '\\1', $sysDescr);
+		$swrelease = ereg_replace ('^([[:digit:]]+\.[[:digit:]]+)[^[:digit:]].*', '\\1', $swversion);
+	}
+	elseif
+	(
+		FALSE !== ereg ('^HP [[:alnum:]]+ ProCurve Switch', $sysDescr) or
+		FALSE !== ereg ('^ProCurve [[:alnum:]]+ Switch', $sysDescr)
+	)
+	{
+		$swfamily = 'HP';
+		$swversion = ereg_replace ('^.* revision ([^ ]+), .*$', '\\1', $sysDescr);
+		$swrelease = 'HP';
+	}
 	else
 		$log[] = array ('code' => 'error', 'message' => 'No idea how to handle ' . $sysDescr);
-	$swversion = ereg_replace ('^.*, Version ([^ ]+), .*$', '\\1', $sysDescr);
-	$swrelease = ereg_replace ('^([[:digit:]]+\.[[:digit:]]+)[^[:digit:]].*', '\\1', $swversion);
-	$sysChassi = str_replace ('"', '', substr ($sysChassi, strlen ('STRING: ')));
 	$attrs = getAttrValues ($object_id);
 	// Only fill in attribute values, if they are not set.
 	// FIXME: this is hardcoded
@@ -162,6 +185,8 @@ function doSNMPmining ($object_id, $community)
 			case 'NX-OS-4.1':
 				$error = commitUpdateAttrValue ($object_id, 4, 964);
 				break;
+			case 'HP-HP': // do nothing
+				break;
 			default:
 				$log[] = array ('code' => 'error', 'message' => "Unknown SW version ${swversion}");
 				$error = TRUE;
@@ -175,7 +200,7 @@ function doSNMPmining ($object_id, $community)
 
 	$sysObjectID = snmpget ($endpoints[0], $community, 'sysObjectID.0');
 	// Transform OID
-	$sysObjectID = ereg_replace ('^.*(enterprises\.9\.1\.|enterprises\.9\.12\.3\.1\.3\.)([[:digit:]]+)$', '\\2', $sysObjectID);
+	$sysObjectID = ereg_replace ('^.*(enterprises\.9\.1\.|enterprises\.9\.12\.3\.1\.3\.|enterprises.11.2.3.7.11.)([[:digit:]]+)$', '\\2', $sysObjectID);
 	if (!isset ($ciscomodel[$sysObjectID]))
 	{
 		$log[] = array ('code' => 'error', 'message' => 'Could not guess exact HW model!');
@@ -535,6 +560,24 @@ function doSNMPmining ($object_id, $community)
 			}
 			break;
 		case '719':
+			break;
+		case '35':
+			$n100 = 48;
+			// fall through
+		case '36':
+			if ($sysObjectID == '36')
+				$n100 = 24;
+			$n1000 = 2;
+			for ($i = 1; $i <= $n100; $i++)
+				if ('' == ($error = commitAddPort ($object_id, $i, 19, $i, $ifList2[$i]['phyad'])))
+					$newports++;
+				else
+					$log[] = array ('code' => 'error', 'message' => "Failed to add port ${i}: " . $error);
+			for ($i = $n100 + 1; $i <= $n100 + $n1000; $i++)
+				if ('' == ($error = commitAddPort ($object_id, $i, 24, $i, $ifList2[$i]['phyad'])))
+					$newports++;
+				else
+					$log[] = array ('code' => 'error', 'message' => "Failed to add port ${i}: " . $error);
 			break;
 		default:
 			$log[] = array ('code' => 'error', 'message' => "Unexpected sysObjectID '${sysObjectID}'");
