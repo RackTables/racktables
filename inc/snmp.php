@@ -166,7 +166,7 @@ function doSNMPmining ($object_id, $community)
 			$log[] = array ('code' => 'error', 'message' => 'Failed settig OEM S/N 1: ' . $error);
 	}
 
-	if (empty ($attrs[4]['value'])) // switch OS type
+	if (empty ($attrs[4]['value']) and $swfamily != 'HP') // switch OS type
 	{
 		switch ($swfamily . '-' . $swrelease)
 		{
@@ -184,8 +184,6 @@ function doSNMPmining ($object_id, $community)
 				break;
 			case 'NX-OS-4.1':
 				$error = commitUpdateAttrValue ($object_id, 4, 964);
-				break;
-			case 'HP-HP': // do nothing
 				break;
 			default:
 				$log[] = array ('code' => 'error', 'message' => "Unknown SW version ${swversion}");
