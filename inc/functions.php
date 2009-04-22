@@ -34,6 +34,7 @@ $etype_by_pageno = array
 	'rack' => 'rack',
 	'user' => 'user',
 	'file' => 'file',
+	'ipaddress' => 'ipaddress',
 );
 
 // Objects of some types should be explicitly shown as
@@ -1117,6 +1118,7 @@ function fixContext ()
 	if
 	(
 		$pageno != 'user' and
+		isset ($etype_by_pageno[$pageno]) and
 		isset ($page[$pageno]['bypass']) and
 		isset ($_REQUEST[$page[$pageno]['bypass']])
 	)
