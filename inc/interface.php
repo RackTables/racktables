@@ -1537,6 +1537,7 @@ function printLog ($log)
 				184 => array ('code' => 'error', 'format' => 'Submitted form is invalid at line %u'),
 				185 => array ('code' => 'error', 'format' => "Failed to add object '%s'"),
 				186 => array ('code' => 'error', 'format' => 'Incomplete form has been ignored. Cheers.'),
+				187 => array ('code' => 'error', 'format' => "Internal error in function '%s'"),
 
 // records 200~299 with warnings
 				200 => array ('code' => 'warning', 'format' => '%s'),
@@ -5082,14 +5083,13 @@ function renderTagCheckbox ($inputname, $preselect, $taginfo, $level = 0)
 
 function renderEntityTags ($entity_id = 0)
 {
-	global $tagtree, $target_given_tags, $pageno, $page, $etype_by_pageno, $target_given_tags;
+	global $tagtree, $target_given_tags, $pageno, $page, $target_given_tags;
 	if ($entity_id <= 0)
 	{
 		showError ('Invalid or missing arguments', __FUNCTION__);
 		return;
 	}
 	showMessageOrError();
-	$entity_realm = $etype_by_pageno[$pageno];
 	$bypass_name = $page[$pageno]['bypass'];
 	startPortlet ('Tag list');
 	echo '<table border=0 cellspacing=0 cellpadding=3 align=center>';
@@ -5604,7 +5604,7 @@ function renderFileReuploader ()
 {
 	showMessageOrError();
 	startPortlet ('Replace existing contents');
-	printOpFormIntro ('replaceFile', array ('MAX_FILE_SIZE' => convertToBytes(get_cfg_var('upload_max_filesize'))), TRUE);
+	printOpFormIntro ('replaceFile', array (), TRUE);
 	echo "<input type=file size=10 name=file tabindex=100>&nbsp;\n";
 	printImageHREF ('save', 'Save changes', TRUE, 101);
 	echo "</form>\n";
@@ -5649,7 +5649,7 @@ function renderFileManager ()
 	startPortlet ('Upload new');
 	echo "<table border=0 cellspacing=0 cellpadding='5' align='center' class='widetable'>\n";
 	echo "<tr><th>File</th><th>Comment</th><th></th></tr>\n";
-	printOpFormIntro ('addFile', array ('MAX_FILE_SIZE' => convertToBytes(get_cfg_var('upload_max_filesize'))), TRUE);
+	printOpFormIntro ('addFile', array (), TRUE);
 	echo "<tr>";
 	echo "<td class=tdleft><input type='file' size='10' name='file' tabindex=100></td>\n";
 	echo "<td class=tdleft><textarea tabindex=101 name=comment rows=10 cols=80></textarea></td>\n";
@@ -5722,7 +5722,7 @@ function renderFilesPortlet ($entity_type = NULL, $entity_id = 0)
 
 function renderFilesForEntity ($entity_id = 0)
 {
-	global $root, $page, $pageno, $tabno, $etype_by_pageno;
+	global $page, $pageno, $etype_by_pageno;
 	if ($entity_id <= 0)
 	{
 		showError ('Invalid entity info', __FUNCTION__);
@@ -5737,7 +5737,7 @@ function renderFilesForEntity ($entity_id = 0)
 	startPortlet ('Upload and link new');
 	echo "<table border=0 cellspacing=0 cellpadding='5' align='center' class='widetable'>\n";
 	echo "<tr><th>File</th><th>Comment</th><th></th></tr>\n";
-	printOpFormIntro ('addFile', array ('entity_type' => $entity_type, 'entity_id' => $entity_id, 'MAX_FILE_SIZE' => convertToBytes(get_cfg_var('upload_max_filesize'))), TRUE);
+	printOpFormIntro ('addFile', array (), TRUE);
 	echo "<tr>";
 	echo "<td class=tdleft><input type='file' size='10' name='file' tabindex=100></td>\n";
 	echo "<td class=tdleft><textarea tabindex=101 name=comment rows=10 cols=80></textarea></td><td>\n";
@@ -5772,7 +5772,7 @@ function renderFilesForEntity ($entity_id = 0)
 			echo "<tr valign=top><td class=tdleft>";
 			renderFileCell ($file);
 			echo "</td><td class=tdleft>${file['comment']}</td><td class=tdcenter>";
-			echo "<a href='".makeHrefProcess(array('op'=>'unlinkFile', 'link_id'=>$file['link_id'], $id_name=>$entity_id, 'name'=>$file['name']))."'>";
+			echo "<a href='".makeHrefProcess(array('op'=>'unlinkFile', 'link_id'=>$file['link_id'], $id_name=>$entity_id))."'>";
 			printImageHREF ('CUT', 'Unlink file');
 			echo "</a></td></tr>\n";
 		}

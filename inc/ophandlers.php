@@ -1272,10 +1272,7 @@ function saveEntityTags ()
 {
 	global $explicit_tags, $implicit_tags, $page, $pageno, $etype_by_pageno;
 	if (!isset ($etype_by_pageno[$pageno]) or !isset ($page[$pageno]['bypass']))
-	{
-		showError ('Internal error', __FUNCTION__);
-		die;
-	}
+		return buildRedirectURL (__FUNCTION__, 'ERR2', array (__FUNCTION__));
 	$realm = $etype_by_pageno[$pageno];
 	$bypass = $page[$pageno]['bypass'];
 	assertUIntArg ($bypass, __FUNCTION__);
@@ -1292,7 +1289,7 @@ function saveEntityTags ()
 		else
 			$n_errors++;
 	if ($n_errors)
-		return buildRedirectURL (__FUNCTION__, 'ERR', array ($n_succeeds, $n_errors));
+		return buildRedirectURL (__FUNCTION__, 'ERR1', array ($n_succeeds, $n_errors));
 	else
 		return buildRedirectURL (__FUNCTION__, 'OK', array ($n_succeeds));
 }
@@ -1638,25 +1635,27 @@ function addFileWithoutLink ()
 
 function addFileToEntity ()
 {
-	assertStringArg ('entity_type', __FUNCTION__);
-	assertUIntArg ('entity_id', __FUNCTION__);
+	global $page, $pageno, $etype_by_pageno;
+	if (!isset ($etype_by_pageno[$pageno]) or !isset ($page[$pageno]['bypass']))
+		return buildRedirectURL (__FUNCTION__, 'ERR1', array (__FUNCTION__));
+	$realm = $etype_by_pageno[$pageno];
+	$bypass = $page[$pageno]['bypass'];
+	assertUIntArg ($bypass, __FUNCTION__);
+	$entity_id = $_REQUEST[$bypass];
 	assertStringArg ('comment', __FUNCTION__, TRUE);
-	if (empty ($_REQUEST['entity_type']) || empty ($_REQUEST['entity_id']))
-		return buildRedirectURL (__FUNCTION__, 'ERR');
 
 	// Make sure the file can be uploaded
 	if (get_cfg_var('file_uploads') != 1)
-		return buildRedirectURL (__FUNCTION__, 'ERR', array ("file uploads not allowed, change 'file_uploads' parameter in php.ini"));
+		return buildRedirectURL (__FUNCTION__, 'ERR2');
 
 	$fp = fopen($_FILES['file']['tmp_name'], 'rb');
 	$error = commitAddFile ($_FILES['file']['name'], $_FILES['file']['type'], $_FILES['file']['size'], $fp, $_REQUEST['comment']);
 	if ($error != '')
-		return buildRedirectURL (__FUNCTION__, 'ERR', array ($error));
+		return buildRedirectURL (__FUNCTION__, 'ERR3', array ($error));
 
-	$file_id = lastInsertID();
-	$error = commitLinkFile ($file_id, $_REQUEST['entity_type'], $_REQUEST['entity_id']);	
+	$error = commitLinkFile (lastInsertID(), $realm, $entity_id);	
 	if ($error != '')
-		return buildRedirectURL (__FUNCTION__, 'ERR', array ($error));
+		return buildRedirectURL (__FUNCTION__, 'ERR3', array ($error));
 
 	return buildRedirectURL (__FUNCTION__, 'OK', array ($_FILES['file']['name']));
 }
