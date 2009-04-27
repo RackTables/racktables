@@ -3298,7 +3298,7 @@ function renderAtomGrid ($data)
 	}
 }
 
-function renderCellList ($realm = NULL, $title = 'list', $do_amplify = FALSE)
+function renderCellList ($realm = NULL, $title = 'items', $do_amplify = FALSE)
 {
 	if ($realm === NULL)
 	{
@@ -3306,14 +3306,14 @@ function renderCellList ($realm = NULL, $title = 'list', $do_amplify = FALSE)
 		$realm = $pageno;
 	}
 	global $nextorder;
-	echo "<table border=0 class=objectview>\n";
-	echo "<tr><td class=pcleft>";
-	startPortlet ($title);
-	echo "<table class=cooltable border=0 cellpadding=5 cellspacing=0 align=center>\n";
 	$order = 'odd';
 	$celllist = filterCellList (listCells ($realm), buildCellFilter());
 	if ($do_amplify)
 		array_walk ($celllist, 'amplifyCell');
+	echo "<table border=0 class=objectview>\n";
+	echo "<tr><td class=pcleft>";
+	startPortlet ($title . '(' . count ($celllist) . ')');
+	echo "<table class=cooltable border=0 cellpadding=5 cellspacing=0 align=center>\n";
 	foreach ($celllist as $cell)
 	{
 		echo "<tr class=row_${order}><td>";
