@@ -3892,4 +3892,53 @@ function findFileByName ($filename)
 	return NULL;
 }
 
+function acquireLDAPCache ($form_username, $password_hash, $expiry = 0)
+{
+	global $dbxlink;
+	$dbxlink->beginTransaction();
+	$query = "select now() - first_success as success_age, now() - last_retry as retry_age, displayed_name, memberof " .
+		"from LDAPCache where presented_username = '${form_username}' and successful_hash = '${password_hash}' " .
+		"having success_age < ${expiry} for update";
+	$result = useSelectBlade ($query);
+	if ($row = $result->fetch (PDO::FETCH_ASSOC))
+	{
+		$row['memberof'] = unserialize (base64_decode ($row['memberof']));
+		return $row;
+	}
+	return NULL;
+}
+
+function releaseLDAPCache ()
+{
+	global $dbxlink;
+	$dbxlink->commit();
+}
+
+// This actually changes only last_retry.
+function touchLDAPCacheRecord ($form_username)
+{
+	global $dbxlink;
+	$query = "update LDAPCache set last_retry = NOW() where presented_username = '${form_username}'";
+	$dbxlink->exec ($query);
+}
+
+function replaceLDAPCacheRecord ($form_username, $password_hash, $dname, $memberof)
+{
+	deleteLDAPCacheRecord ($form_username);
+	useInsertBlade ('LDAPCache',
+		array
+		(
+			'presented_username' => "'${form_username}'",
+			'successful_hash' => "'${password_hash}'",
+			'displayed_name' => "'${dname}'",
+			'memberof' => "'" . base64_encode (serialize ($memberof)) . "'"
+		)
+	);
+}
+
+function deleteLDAPCacheRecord ($form_username)
+{
+	return useDeleteBlade ('LDAPCache', 'presented_username', "'${form_username}'");
+}
+
 ?>

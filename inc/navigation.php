@@ -414,7 +414,7 @@ $page['config']['title'] = 'Configuration';
 $page['config']['handler'] = 'renderConfigMainpage';
 $page['config']['parent'] = 'index';
 
-$page['userlist']['title'] = 'Users';
+$page['userlist']['title'] = 'Local users';
 $page['userlist']['parent'] = 'config';
 $tab['userlist']['default'] = 'View';
 $tab['userlist']['edit'] = 'Edit';

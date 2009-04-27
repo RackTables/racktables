@@ -208,6 +208,17 @@ CREATE TABLE `FileLink` (
 				$query[] = "insert into RackRow set id=${row[0]}, name='${row[1]}'";
 			}
 			$query[] = "delete from Dictionary where chapter_id = 3";
+			$query[] = "
+CREATE TABLE `LDAPCache` (
+  `presented_username` char(64) NOT NULL,
+  `successful_hash` char(40) NOT NULL,
+  `first_success` timestamp NOT NULL default CURRENT_TIMESTAMP,
+  `last_retry` timestamp NOT NULL default '0000-00-00 00:00:00',
+  `displayed_name` char(128) default NULL,
+  `memberof` text,
+  UNIQUE KEY `presented_username` (`presented_username`),
+  KEY `scanidx` (`presented_username`,`successful_hash`)
+) ENGINE=InnoDB;";
 			
 			$query[] = "UPDATE Config SET varvalue = '0.17.0' WHERE varname = 'DB_VERSION'";
 

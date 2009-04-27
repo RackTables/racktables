@@ -9,6 +9,7 @@
 	new feature: RackCode expressions as source for load balancer lists
 	new feature: wireless hardware in dictionary
 	new feature: "racks per row" option (by Frank Brodbeck)
+	new feature: LDAP cache
 	update: display row name when listing objects. closes ticket 16 (by Aaron)
 	update: ability to manage rows from the Rackspace page in addition to the Dictionary (by Aaron)
 	update: IPv4 calculations were optimized for better speed

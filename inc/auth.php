@@ -71,10 +71,7 @@ function authenticate ()
 		// Just trust the server, because the password isn't known.
 		case ('httpd' == $user_auth_src):
 			if (authenticated_via_httpd ($remote_username))
-			{
-				$remote_displayname = "EXT: ${remote_username}";
 				return;
-			}
 			break;
 		// When using LDAP, leave a mean to fix things. Admin user is always authenticated locally.
 		case ('database' == $user_auth_src or $accounts[$remote_username]['user_id'] == 1):
@@ -164,90 +161,178 @@ function permitted ($p = NULL, $t = NULL, $o = NULL, $annex = array())
 
 function authenticated_via_ldap ($username, $password)
 {
-	global $ldap_server, $ldap_domain, $ldap_search_dn, $ldap_search_attr;
-	global $remote_username, $remote_displayname, $ldap_displayname_attrs;
-	if ($connect = @ldap_connect ($ldap_server))
+	global
+		$ldap_cache_refresh, // read
+		$ldap_cache_retry, // read
+		$ldap_cache_expiry, // read
+		$remote_displayname, // set
+		$auto_tags; // set
+
+	$oldinfo = acquireLDAPCache ($username, sha1 ($password), $ldap_cache_expiry);
+	// Remember to have releaseLDAPCache() called before any return statement.
+	if ($oldinfo === NULL) // cache miss
 	{
-		if (isset ($ldap_domain) and !empty ($ldap_domain))
-			$auth_user_name = $username . "@" . $ldap_domain;
-		elseif
-		(
-			isset ($ldap_search_dn) and
-			!empty ($ldap_search_dn) and
-			isset ($ldap_search_attr) and
-			!empty ($ldap_search_attr)
-		)
+		// On cache miss execute complete procedure and return the result. In case
+		// of successful authentication put a record into cache.
+		$newinfo = queryLDAPServer ($username, $password);
+		if ($newinfo['result'] == 'ACK')
 		{
-			$results = @ldap_search ($connect, $ldap_search_dn, "(${ldap_search_attr}=${username})", array("dn"));
-			if (@ldap_count_entries ($connect, $results) != 1)
-			{
-				@ldap_close ($connect);
-				return FALSE;
-			}
-			$info = @ldap_get_entries ($connect, $results);
-			ldap_free_result ($results);
-			$auth_user_name = $info[0]['dn'];
+			$remote_displayname = $newinfo['displayed_name'];
+			foreach ($newinfo['memberof'] as $autotag)
+				$auto_tags[] = array ('tag' => $autotag);
+			replaceLDAPCacheRecord ($username, sha1 ($password), $newinfo['displayed_name'], $newinfo['memberof']);
 		}
-		else
+		releaseLDAPCache();
+		return $newinfo['result'] == 'ACK';
+	}
+	// There are two confidence levels of cache hits: "certain" and "uncertain". In either case
+	// expect authentication success, unless it's well-timed to perform a retry,
+	// which may sometimes bring a NAK decision.
+	if ($oldinfo['success_age'] < $ldap_cache_refresh or $oldinfo['retry_age'] < $ldap_cache_retry)
+	{
+		releaseLDAPCache();
+		$remote_displayname = $oldinfo['displayed_name'];
+		foreach ($oldinfo['memberof'] as $autotag)
+			$auto_tags[] = array ('tag' => $autotag);
+		return TRUE;
+	}
+	// Either refresh threshold or retry threshold reached.
+	$newinfo = queryLDAPServer ($username, $password);
+	switch ($newinfo['result'])
+	{
+	case 'ACK': // refresh existing record
+		$remote_displayname = $newinfo['displayed_name'];
+		foreach ($newinfo['memberof'] as $autotag)
+			$auto_tags[] = array ('tag' => $autotag);
+		replaceLDAPCacheRecord ($username, sha1 ($password), $newinfo['displayed_name'], $newinfo['memberof']);
+		releaseLDAPCache();
+		return TRUE;
+	case 'NAK': // The record isn't valid any more.
+		deleteLDAPCacheRecord ($username);
+		releaseLDAPCache();
+		return FALSE;
+	case 'CAN': // retry failed, do nothing, use old value till next retry
+		$remote_displayname = $oldinfo['displayed_name'];
+		foreach ($oldinfo['memberof'] as $autotag)
+			$auto_tags[] = array ('tag' => $autotag);
+		touchLDAPCacheRecord ($username);
+		releaseLDAPCache();
+		return TRUE;
+	default:
+		showError ('Internal error during LDAP cache dispatching', __FUNCTION__);
+		die;
+	}
+	// This is never reached.
+	return FALSE;
+}
+
+// Attempt a server conversation and return an array describing the outcome:
+//
+// 'result' => 'CAN' : connect (or search) failed completely
+//
+// 'result' => 'NAK' : server replied and denied access (or search returned odd data)
+//
+// 'result' => 'ACK' : server replied and cleared access, there were no search errors
+// 'displayed_name' : a string built according to ldap_displayname_attrs option
+// 'memberof' => filtered list of all LDAP groups the user belongs to
+//
+function queryLDAPServer ($username, $password)
+{
+	global $ldap_server, $ldap_domain, $ldap_search_dn, $ldap_search_attr;
+	global
+		$ldap_server,
+		$ldap_domain,
+		$ldap_search_dn,
+		$ldap_search_attr,
+		$ldap_displayname_attrs;
+
+	$connect = @ldap_connect ($ldap_server);
+	if ($connect === FALSE)
+		return array ('result' => 'CAN');
+
+	// Decide on the username we will actually authenticate for.
+	if (isset ($ldap_domain) and !empty ($ldap_domain))
+		$auth_user_name = $username . "@" . $ldap_domain;
+	elseif
+	(
+		isset ($ldap_search_dn) and
+		!empty ($ldap_search_dn) and
+		isset ($ldap_search_attr) and
+		!empty ($ldap_search_attr)
+	)
+	{
+		$results = @ldap_search ($connect, $ldap_search_dn, "(${ldap_search_attr}=${username})", array("dn"));
+		if ($results === FALSE)
+			return array ('result' => 'CAN');
+		if (@ldap_count_entries ($connect, $results) != 1)
 		{
-			showError ('LDAP misconfiguration. Cannon build username for authentication.', __FUNCTION__);
-			die;
-		}
-		if ($bind = @ldap_bind ($connect, $auth_user_name, $password))
-		{
-			// Some servers deny anonymous search, thus search only after binding.
-			// Displayed name only makes sense for authenticated users anyway.
-			if
-			(
-				isset ($ldap_displayname_attrs) and
-				count ($ldap_displayname_attrs) and
-				isset ($ldap_search_dn) and
-				!empty ($ldap_search_dn) and
-				isset ($ldap_search_attr) and
-				!empty ($ldap_search_attr)
-			)
-			{
-				$results = @ldap_search
-				(
-					$connect,
-					$ldap_search_dn,
-					"(${ldap_search_attr}=${username})",
-					array_merge (array ('memberof'), $ldap_displayname_attrs)
-				);
-				if (@ldap_count_entries ($connect, $results) == 1 or TRUE)
-				{
-					$info = @ldap_get_entries ($connect, $results);
-					ldap_free_result ($results);
-					$remote_displayname = '';
-					$space = '';
-					foreach ($ldap_displayname_attrs as $attr)
-					{
-						$remote_displayname .= $space . $info[0][$attr][0];
-						$space = ' ';
-					}
-					// Pull group membership, if any was returned.
-					if (isset ($info[0]['memberof']))
-					{
-						global $auto_tags;
-						for ($i = 0; $i < $info[0]['memberof']['count']; $i++)
-							foreach (explode (',', $info[0]['memberof'][$i]) as $pair)
-							{
-								list ($attr_name, $attr_value) = explode ('=', $pair);
-								if ($attr_name == 'CN' and validTagName ("\$lgcn_${attr_value}", TRUE))
-								{
-									$auto_tags[] = array ('tag' => "\$lgcn_${attr_value}");
-									break;
-								}
-							}
-					}
-				}
-			}
 			@ldap_close ($connect);
-			return TRUE;
+			return array ('result' => 'NAK');
 		}
+		$info = @ldap_get_entries ($connect, $results);
+		ldap_free_result ($results);
+		$auth_user_name = $info[0]['dn'];
+	}
+	else
+	{
+		showError ('LDAP misconfiguration. Cannon build username for authentication.', __FUNCTION__);
+		die;
+	}
+	$bind = @ldap_bind ($connect, $auth_user_name, $password);
+	if ($bind === FALSE)
+		switch (ldap_errno ($connect))
+		{
+		case 49: // LDAP_INVALID_CREDENTIALS
+			return array ('result' => 'NAK');
+		default:
+			return array ('result' => 'CAN');
+		}
+	// preliminary decision may change during searching
+	$ret = array ('result' => 'ACK', 'displayed_name' => '', 'memberof' => array());
+	// Some servers deny anonymous search, thus search (if requested) only after binding.
+	// Displayed name only makes sense for authenticated users anyway.
+	if
+	(
+		isset ($ldap_displayname_attrs) and
+		count ($ldap_displayname_attrs) and
+		isset ($ldap_search_dn) and
+		!empty ($ldap_search_dn) and
+		isset ($ldap_search_attr) and
+		!empty ($ldap_search_attr)
+	)
+	{
+		$results = @ldap_search
+		(
+			$connect,
+			$ldap_search_dn,
+			"(${ldap_search_attr}=${username})",
+			array_merge (array ('memberof'), $ldap_displayname_attrs)
+		);
+		if (@ldap_count_entries ($connect, $results) != 1)
+		{
+			@ldap_close ($connect);
+			return array ('result' => 'NAK');
+		}
+		$info = @ldap_get_entries ($connect, $results);
+		ldap_free_result ($results);
+		$space = '';
+		foreach ($ldap_displayname_attrs as $attr)
+		{
+			$ret['displayed_name'] .= $space . $info[0][$attr][0];
+			$space = ' ';
+		}
+		// Pull group membership, if any was returned.
+		if (isset ($info[0]['memberof']))
+			for ($i = 0; $i < $info[0]['memberof']['count']; $i++)
+				foreach (explode (',', $info[0]['memberof'][$i]) as $pair)
+				{
+					list ($attr_name, $attr_value) = explode ('=', $pair);
+					if ($attr_name == 'CN' and validTagName ('$lgcn_' . $attr_value, TRUE))
+						$ret['memberof'][] = '$lgcn_' . $attr_value;
+				}
 	}
 	@ldap_close ($connect);
-	return FALSE;
+	return $ret;
 }
 
 function authenticated_via_database ($username, $password)

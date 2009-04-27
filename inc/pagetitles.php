@@ -189,7 +189,7 @@ function dynamic_title_user ()
 	global $accounts;
 	return array
 	(
-		'name' => "User '" . $accounts[getUsernameByID ($_REQUEST['user_id'])]['user_name'] . "'",
+		'name' => "Local user '" . $accounts[getUsernameByID ($_REQUEST['user_id'])]['user_name'] . "'",
 		'params' => array ('user_id' => $_REQUEST['user_id'])
 	);
 }
