@@ -161,14 +161,15 @@ function permitted ($p = NULL, $t = NULL, $o = NULL, $annex = array())
 
 function authenticated_via_ldap ($username, $password)
 {
-	global
-		$ldap_cache_refresh, // read
-		$ldap_cache_retry, // read
-		$ldap_cache_expiry, // read
-		$remote_displayname, // set
-		$auto_tags; // set
+	global $LDAP_options, $remote_displayname, $auto_tags;
 
-	$oldinfo = acquireLDAPCache ($username, sha1 ($password), $ldap_cache_expiry);
+	// Destroy the cache each time config changes.
+	if (sha1 (serialize ($LDAP_options)) != loadScript ('LDAPConfigHash'))
+	{
+		discardLDAPCache();
+		saveScript ('LDAPConfigHash', sha1 (serialize ($LDAP_options)));
+	}
+	$oldinfo = acquireLDAPCache ($username, sha1 ($password), $LDAP_options['cache_expiry']);
 	// Remember to have releaseLDAPCache() called before any return statement.
 	if ($oldinfo === NULL) // cache miss
 	{
@@ -188,7 +189,7 @@ function authenticated_via_ldap ($username, $password)
 	// There are two confidence levels of cache hits: "certain" and "uncertain". In either case
 	// expect authentication success, unless it's well-timed to perform a retry,
 	// which may sometimes bring a NAK decision.
-	if ($oldinfo['success_age'] < $ldap_cache_refresh or $oldinfo['retry_age'] < $ldap_cache_retry)
+	if ($oldinfo['success_age'] < $LDAP_options['cache_refresh'] or $oldinfo['retry_age'] < $LDAP_options['cache_retry'])
 	{
 		releaseLDAPCache();
 		$remote_displayname = $oldinfo['displayed_name'];
@@ -233,35 +234,29 @@ function authenticated_via_ldap ($username, $password)
 // 'result' => 'NAK' : server replied and denied access (or search returned odd data)
 //
 // 'result' => 'ACK' : server replied and cleared access, there were no search errors
-// 'displayed_name' : a string built according to ldap_displayname_attrs option
+// 'displayed_name' : a string built according to LDAP displayname_attrs option
 // 'memberof' => filtered list of all LDAP groups the user belongs to
 //
 function queryLDAPServer ($username, $password)
 {
-	global $ldap_server, $ldap_domain, $ldap_search_dn, $ldap_search_attr;
-	global
-		$ldap_server,
-		$ldap_domain,
-		$ldap_search_dn,
-		$ldap_search_attr,
-		$ldap_displayname_attrs;
+	global $LDAP_options;
 
-	$connect = @ldap_connect ($ldap_server);
+	$connect = @ldap_connect ($LDAP_options['server']);
 	if ($connect === FALSE)
 		return array ('result' => 'CAN');
 
 	// Decide on the username we will actually authenticate for.
-	if (isset ($ldap_domain) and !empty ($ldap_domain))
-		$auth_user_name = $username . "@" . $ldap_domain;
+	if (isset ($LDAP_options['domain']) and !empty ($LDAP_options['domain']))
+		$auth_user_name = $username . "@" . $LDAP_options['domain'];
 	elseif
 	(
-		isset ($ldap_search_dn) and
-		!empty ($ldap_search_dn) and
-		isset ($ldap_search_attr) and
-		!empty ($ldap_search_attr)
+		isset ($LDAP_options['search_dn']) and
+		!empty ($LDAP_options['search_dn']) and
+		isset ($LDAP_options['search_attr']) and
+		!empty ($LDAP_options['search_attr'])
 	)
 	{
-		$results = @ldap_search ($connect, $ldap_search_dn, "(${ldap_search_attr}=${username})", array("dn"));
+		$results = @ldap_search ($connect, $LDAP_options['search_dn'], '(' . $LDAP_options['search_attr'] . "=${username})", array("dn"));
 		if ($results === FALSE)
 			return array ('result' => 'CAN');
 		if (@ldap_count_entries ($connect, $results) != 1)
@@ -293,20 +288,20 @@ function queryLDAPServer ($username, $password)
 	// Displayed name only makes sense for authenticated users anyway.
 	if
 	(
-		isset ($ldap_displayname_attrs) and
-		count ($ldap_displayname_attrs) and
-		isset ($ldap_search_dn) and
-		!empty ($ldap_search_dn) and
-		isset ($ldap_search_attr) and
-		!empty ($ldap_search_attr)
+		isset ($LDAP_options['displayname_attrs']) and
+		count ($LDAP_options['displayname_attrs']) and
+		isset ($LDAP_options['search_dn']) and
+		!empty ($LDAP_options['search_dn']) and
+		isset ($LDAP_options['search_attr']) and
+		!empty ($LDAP_options['search_attr'])
 	)
 	{
 		$results = @ldap_search
 		(
 			$connect,
-			$ldap_search_dn,
-			"(${ldap_search_attr}=${username})",
-			array_merge (array ('memberof'), $ldap_displayname_attrs)
+			$LDAP_options['search_dn'],
+			'(' . $LDAP_options['search_attr'] . "=${username})",
+			array_merge (array ('memberof'), explode (' ', $LDAP_options['displayname_attrs']))
 		);
 		if (@ldap_count_entries ($connect, $results) != 1)
 		{
@@ -316,7 +311,7 @@ function queryLDAPServer ($username, $password)
 		$info = @ldap_get_entries ($connect, $results);
 		ldap_free_result ($results);
 		$space = '';
-		foreach ($ldap_displayname_attrs as $attr)
+		foreach (explode (' ', $LDAP_options['displayname_attrs']) as $attr)
 		{
 			$ret['displayed_name'] .= $space . $info[0][$attr][0];
 			$space = ' ';

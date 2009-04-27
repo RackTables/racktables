@@ -3941,4 +3941,10 @@ function deleteLDAPCacheRecord ($form_username)
 	return useDeleteBlade ('LDAPCache', 'presented_username', "'${form_username}'");
 }
 
+function discardLDAPCache ()
+{
+	global $dbxlink;
+	$dbxlink->exec ('TRUNCATE TABLE LDAPCache');
+}
+
 ?>
