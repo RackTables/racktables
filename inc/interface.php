@@ -2160,7 +2160,8 @@ function renderIPv4Space ()
 {
 	global $pageno, $tabno;
 	$tagfilter = getTagFilter();
-	$netlist = filterCellList (listCells ('ipv4net'), buildCellFilter());
+	$cellfilter = getCellFilter();
+	$netlist = filterCellList (listCells ('ipv4net'), $cellfilter['expression']);
 	array_walk ($netlist, 'amplifyCell');
 
 	$netcount = count ($netlist);
@@ -3296,7 +3297,8 @@ function renderCellList ($realm = NULL, $title = 'items', $do_amplify = FALSE)
 	}
 	global $nextorder;
 	$order = 'odd';
-	$celllist = filterCellList (listCells ($realm), buildCellFilter());
+	$cellfilter = getCellFilter();
+	$celllist = filterCellList (listCells ($realm), $cellfilter['expression']);
 	if ($do_amplify)
 		array_walk ($celllist, 'amplifyCell');
 	echo "<table border=0 class=objectview>\n";
@@ -3313,7 +3315,10 @@ function renderCellList ($realm = NULL, $title = 'items', $do_amplify = FALSE)
 	echo '</table>';
 	finishPortlet();
 	echo '</td><td class=pcright>';
-	renderTagFilterPortlet (getTagFilter(), $realm);
+	if ($realm == 'file')
+		renderCellFilterPortlet ($cellfilter, $realm);
+	else
+		renderTagFilterPortlet (getTagFilter(), $realm);
 	echo "</td></tr></table>\n";
 }
 
@@ -5047,6 +5052,24 @@ function renderTagTreeEditor ()
 	finishPortlet();
 }
 
+// FIXME: merge this code with renderTagCheckBox()
+function renderPredicateCheckbox ($inputname, $preselect, $predicatename)
+{
+	if (in_array ($predicatename, $preselect))
+	{
+		$selected = ' checked';
+		$class = 'seltagbox';
+	}
+	else
+	{
+		$selected = '';
+		$class = 'tagbox';
+	}
+	echo "<tr><td colspan=2 class=${class}>";
+	echo "<input type=checkbox name='${inputname}[]' value='${predicatename}'${selected}> ";
+	echo $predicatename . "</td></tr>\n";
+}
+
 function renderTagCheckbox ($inputname, $preselect, $taginfo, $level = 0)
 {
 	$self = __FUNCTION__;
@@ -5154,9 +5177,6 @@ function renderTagFilterPortlet ($tagfilter, $realm, $bypass_name = '', $bypass_
 	foreach ($objectivetags as $taginfo)
 		renderTagCheckbox ('tagfilter', buildTagChainFromIds ($tagfilter), $taginfo);
 	echo '</td></tr><tr><td>';
-//	$tfmode = getTFMode();
-//	echo '<input type=radio name=tfmode value=all' . ($tfmode == 'all' ? ' checked' : '') . '>all ';
-//	echo '<input type=radio name=tfmode value=any' . ($tfmode == 'any' ? ' checked' : '') . '>any ';
 	printImageHREF ('apply', 'Apply filter', TRUE);
 	echo "</form></td><td>";
 
@@ -5169,33 +5189,58 @@ function renderTagFilterPortlet ($tagfilter, $realm, $bypass_name = '', $bypass_
 	printImageHREF ('clear', 'reset', TRUE);
 	echo '</form></td></tr></table>';
 	finishPortlet();
-	global $rackCode;
-	// underscore cannot start predicate name
-	$options = array ('_' => '-- NOT SET --');
-	foreach (array_keys (buildPredicateTable ($rackCode)) as $predicatename)
-		$options[$predicatename] = "[${predicatename}]";
-	if (!count ($options))
-		return;
-	startPortlet ('P-filter');
-	echo "<form method=get>\n";
-	echo "<input type=hidden name=page value=${pageno}>\n";
-	echo "<input type=hidden name=tab value=${tabno}>\n";
-	if ($bypass_name != '')
-		echo "<input type=hidden name=${bypass_name} value='${bypass_value}'>\n";
-	echo '<table border=0 align=center>';
-	echo '<tr><td colspan=2>';
-	printSelect ($options, 'pfilter', isset ($_REQUEST['pfilter']) ? $_REQUEST['pfilter'] : NULL);
-	echo '</td></tr><tr><td>';
-	printImageHREF ('apply', 'Apply filter', TRUE);
-	echo "</form></td><td>";
-	// "reset"
-	echo "<form method=get>\n";
-	echo "<input type=hidden name=page value=${pageno}>\n";
-	echo "<input type=hidden name=tab value=${tabno}>\n";
-	if ($bypass_name != '')
-		echo "<input type=hidden name=${bypass_name} value='${bypass_value}'>\n";
-	printImageHREF ('clear', 'reset', TRUE);
-	echo '</form></td></tr></table>';
+}
+
+// This one is going to replace the tag filter.
+function renderCellFilterPortlet ($preselect, $realm, $bypass_name = '', $bypass_value = '')
+{
+	$cfv = 2;
+	global $pageno, $tabno, $taglist, $tagtree;
+	startPortlet ('filter');
+	switch ($cfv)
+	{
+	case 1:
+	case 2:
+		$objectivetags = getObjectiveTagTree ($tagtree, $realm);
+		if (!count ($objectivetags))
+		{
+			echo "None used in current realm.<br>";
+			break;
+		}
+		echo "<form method=get>\n";
+		echo "<input type=hidden name=page value=${pageno}>\n";
+		echo "<input type=hidden name=tab value=${tabno}>\n";
+		echo "<input type=hidden name=cfv value=${cfv}>\n";
+		if ($bypass_name != '')
+			echo "<input type=hidden name=${bypass_name} value='${bypass_value}'>\n";
+		echo '<table border=0 align=center>';
+		echo '<tr><td colspan=2>';
+		// Show a tree of tags, pre-select according to currently requested list filter.
+		foreach ($objectivetags as $taginfo)
+			renderTagCheckbox ('tagfilter', buildTagChainFromIds ($preselect['tagidlist']), $taginfo);
+		if ($cfv == 2)
+		{
+			global $pTable;
+			foreach (array_keys ($pTable) as $predicatename)
+				renderPredicateCheckbox ('cfp', $preselect['pnamelist'], $predicatename);
+		}
+		echo '</td></tr><tr><td>';
+		printImageHREF ('apply', 'Apply filter', TRUE);
+		echo "</form></td><td>";
+
+		// "reset"
+		echo "<form method=get>\n";
+		echo "<input type=hidden name=page value=${pageno}>\n";
+		echo "<input type=hidden name=tab value=${tabno}>\n";
+		echo "<input type=hidden name=cfv value=${cfv}>\n";
+		if ($bypass_name != '')
+			echo "<input type=hidden name=${bypass_name} value='${bypass_value}'>\n";
+		printImageHREF ('clear', 'reset', TRUE);
+		echo '</td></tr></table></form>';
+		break;
+	case 3:
+		break;
+	}
 	finishPortlet();
 }
 

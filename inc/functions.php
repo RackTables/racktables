@@ -1236,6 +1236,78 @@ function buildCellFilter ()
 	return $expr['load'];
 }
 
+function getCellFilter ()
+{
+	$boolop = '';
+	if (!isset ($_REQUEST['cfv']) or $_REQUEST['cfv'] == 1 or $_REQUEST['cfv'] == 2)
+	{
+		$ret = array
+		(
+			'version' => 1,
+			'tagidlist' => array(),
+			'tnamelist' => array(),
+			'text' => '',
+			'expression' => array()	
+		);
+		global $taglist;
+		// Both tags and predicates, which don't exist, should be
+		// handled somehow. Discard them silently for now.
+		if (isset ($_REQUEST['tagfilter']) and is_array ($_REQUEST['tagfilter']))
+			foreach ($_REQUEST['tagfilter'] as $req_id)
+				if (isset ($taglist[$req_id]))
+				{
+					$ret['tagidlist'][] = $req_id;
+					$ret['tnamelist'][] = $taglist[$req_id]['tag'];
+					$ret['text'] .= $boolop . '{' . $taglist[$req_id]['tag'] . '}';
+					$boolop = ' or ';
+				}
+		if ($_REQUEST['cfv'] == 2)
+		{
+			$ret['version'] = 2;
+			$ret['pnamelist'] = array();
+			global $pTable;
+			if (isset ($_REQUEST['cfp']) and is_array ($_REQUEST['cfp']))
+				foreach ($_REQUEST['cfp'] as $req_name)
+					if (isset ($pTable[$req_name]))
+					{
+						$ret['pnamelist'][] = $req_name;
+						$ret['text'] .= $boolop . '[' . $req_name . ']';
+						$boolop = ' or ';
+					}
+		}
+		if (!empty ($ret['text']))
+		{
+			$parse = spotPayload ($ret['text'], 'SYNT_EXPR');
+			$ret['expression'] = $parse['load'];
+		}
+		return $ret;
+	}
+	elseif ($_REQUEST['cfv'] == 3)
+	{
+		$ret = array
+		(
+			'version' => 3,
+			'text' => '',
+			'expression' => array()	
+		);
+		if (isset ($_REQUEST['cfe']))
+		{
+			$parse = spotPayload ($_REQUEST['cfe'], 'SYNT_EXPR');
+			if ($parse['result'] == 'ACK')
+			{
+				$ret['text'] = $_REQUEST['cfe'];
+				$ret['expression'] = $parse['load'];
+			}
+		}
+		return $ret;
+	}
+	else
+	{
+		showError ('Cannot dispatch cell list filter data', __FUNCTION__);
+		return NULL;
+	}
+}
+
 function buildWideRedirectURL ($log, $nextpage = NULL, $nexttab = NULL, $moreArgs = array())
 {
 	global $root, $page, $pageno, $tabno;
