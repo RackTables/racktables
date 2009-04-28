@@ -3939,10 +3939,12 @@ function deleteLDAPCacheRecord ($form_username)
 	return useDeleteBlade ('LDAPCache', 'presented_username', "'${form_username}'");
 }
 
-function discardLDAPCache ()
+// Age all records older, than cache_expiry seconds, and all records made in future.
+// Calling this function w/o argument purges the whole LDAP cache.
+function discardLDAPCache ($maxage = 0)
 {
 	global $dbxlink;
-	$dbxlink->exec ('TRUNCATE TABLE LDAPCache');
+	$dbxlink->exec ('DELETE from LDAPCache WHERE NOW() - first_success >= ${maxage} or NOW() < first_success');
 }
 
 function getUserIDByUsername ($username)

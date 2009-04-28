@@ -177,6 +177,8 @@ function authenticated_via_ldap ($username, $password)
 			replaceLDAPCacheRecord ($username, sha1 ($password), $newinfo['displayed_name'], $newinfo['memberof']);
 		}
 		releaseLDAPCache();
+		// Do cache maintenence each time fresh data is stored.
+		discardLDAPCache ($LDAP_options['cache_expiry']);
 		return $newinfo['result'] == 'ACK';
 	}
 	// There are two confidence levels of cache hits: "certain" and "uncertain". In either case
@@ -332,9 +334,7 @@ function authenticated_via_database ($username, $password)
 		showError ('Cannot load user data', __FUNCTION__);
 		die();
 	}
-	if ($userinfo['user_password_hash'] == sha1 ($password))
-		return TRUE;
-	return FALSE;
+	return $userinfo['user_password_hash'] == sha1 ($password);
 }
 
 ?>
