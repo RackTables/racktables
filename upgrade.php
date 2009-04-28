@@ -4,14 +4,14 @@ $relnotes = array
 (
 	'0.17.0' => "This release requires changes to the configuration file. " .
 		"Move inc/secret.php to local/secret.php and add the following to the file:<br><br>" .
-		"\$user_auth_src = 'database';<br>\$require_valid_user = TRUE;<br><br>" .
+		"\$user_auth_src = 'database';<br>\$require_local_account = TRUE;<br><br>" .
 		"(and adjust to your needs, if necessary)<br>" .
 		"Another change is the addition of support for file uploads.  Files are stored<br>" .
 		"in the database.  There are several settings in php.ini which you may need to modify:<br>" .
 		"<ul><li>file_uploads        - needs to be On</li>" .
 		"<li>upload_max_filesize - max size for uploaded files</li>" .
 		"<li>post_max_size       - max size of all form data submitted via POST (including files)</li></ul><br>" .
-		"User accounts used to have 'enabled' flag, which allowed individual blocking and<br>" .
+		"Local user accounts used to have 'enabled' flag, which allowed individual blocking and<br>" .
 		"unblocking of each. This flag was dropped in favor of existing mean of access<br>" .
 		"setup (RackCode). An unconditional denying rule is automatically added into RackCode<br>" .
 		"for such blocked account, so the effective security policy remains the same.<br>",

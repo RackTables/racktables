@@ -11,7 +11,7 @@ $db_password = 'password';
 
 // More info: http://racktables.org/trac/wiki/RackTablesUserAuthentication
 $user_auth_src = 'database';
-$require_valid_user = TRUE;
+$require_local_account = TRUE;
 
 // This is only necessary for 'ldap' authentication source
 $LDAP_options = array

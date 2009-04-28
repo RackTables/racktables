@@ -224,7 +224,6 @@ $rtwidth = array
 // Main menu.
 function renderIndex ()
 {
-	global $root;
 ?>
 <table border=0 cellpadding=0 cellspacing=0 width='100%'>
 	<tr>
@@ -331,7 +330,6 @@ function renderRackspaceRowEditor ()
 		printImageHREF ('create', 'Add new row', TRUE, 101);
 		echo "</td></tr></form>";
 	}
-	global $pageno, $tabno;
 	showMessageOrError();
 	startPortlet ('Rows');
 	echo "<table border=0 cellspacing=0 cellpadding=5 align=center class=widetable>\n";
@@ -452,7 +450,6 @@ function renderRack ($rack_id = 0, $hl_obj_id = 0)
 		showError ('getRackData() failed', __FUNCTION__);
 		return;
 	}
-	global $pageno, $tabno;
 	markAllSpans ($rackData);
 	if ($hl_obj_id > 0)
 		highlightObject ($rackData, $hl_obj_id);
@@ -758,7 +755,6 @@ function renderGridForm ($rack_id = 0, $filter, $header, $submit, $state1, $stat
 		return;
 	}
 	showMessageOrError();
-	global $pageno, $tabno;
 	$filter ($rackData);
 	markupObjectProblems ($rackData);
 
@@ -1142,7 +1138,6 @@ function renderPortsForObject ($object_id = 0)
 		printImageHREF ('add', 'add a port', TRUE, 104);
 		echo "</td></tr></form>";
 	}
-	global $pageno, $tabno;
 	if ($object_id <= 0)
 	{
 		showError ('Invalid object_id', __FUNCTION__);
@@ -1257,7 +1252,7 @@ function renderIPv4ForObject ($object_id = 0)
 		printImageHREF ('add', 'allocate', TRUE, 103);
 		echo "</td></tr></form>";
 	}
-	global $pageno, $tabno, $aat;
+	global $aat;
 	if ($object_id <= 0)
 	{
 		showError ('Invalid object_id', __FUNCTION__);
@@ -1453,7 +1448,7 @@ function printLog ($log)
 				100 => array ('code' => 'error', 'format' => '%s'),
 				101 => array ('code' => 'error', 'format' => 'Port name cannot be empty'),
 				102 => array ('code' => 'error', 'format' => "Error creating user account '%s'"),
-				103 => array ('code' => 'error', 'format' => 'getHashByID() failed'),
+				103 => array ('code' => 'error', 'format' => 'User not found!'),
 				104 => array ('code' => 'error', 'format' => "Error updating user account '%s'"),
 // ...
 // ...
@@ -1671,10 +1666,7 @@ function renderRackSpaceForObject ($object_id = 0)
 	unset ($rackData);
 
 	// This is the time for rendering.
-	global $pageno, $tabno;
-
 	showMessageOrError();
-
 
 	// Main layout starts.
 	echo "<table border=0 class=objectview cellspacing=0 cellpadding=0><tr>";
@@ -1881,7 +1873,7 @@ function renderObjectSpace ()
 
 function renderObjectGroup ()
 {
-	global $pageno, $tabno, $nextorder, $taglist, $tagtree;
+	global $pageno, $nextorder, $taglist, $tagtree;
 	showMessageOrError();
 	assertUIntArg ('group_id', __FUNCTION__, TRUE);
 	$group_id = $_REQUEST['group_id'];
@@ -2272,7 +2264,6 @@ function renderIPv4SLB ()
 
 function renderIPv4SpaceEditor ()
 {
-	global $pageno, $tabno;
 	showMessageOrError();
 
 	// IPv4 validator
@@ -2763,7 +2754,7 @@ function renderIPv4AddressAllocations ($dottedquad)
 		printImageHREF ('add', 'allocate', TRUE, 103);
 		echo "</td></form></tr>";
 	}
-	global $pageno, $tabno, $aat;
+	global $aat;
 
 	$address = getIPv4Address ($dottedquad);
 
@@ -2800,7 +2791,6 @@ function renderIPv4AddressAllocations ($dottedquad)
 
 function renderNATv4ForObject ($object_id = 0)
 {
-	global $root;
 	function printNewItemTR ($alloclist)
 	{
 		printOpFormIntro ('addNATv4Rule');
@@ -2828,7 +2818,6 @@ function renderNATv4ForObject ($object_id = 0)
 		printImageHREF ('add', 'Add new NAT rule', TRUE, 6);
 		echo "</td></tr></form>";
 	}
-	global $pageno, $tabno;
 	
 	$info = getObjectInfo ($object_id);
 	$forwards = getNATv4ForObject ($object_id);
@@ -3344,8 +3333,8 @@ function renderUserListEditor ()
 		printImageHREF ('create', 'Add new account', TRUE, 103);
 		echo "</td></tr></form>";
 	}
-	global $root, $pageno, $tabno, $accounts;
-	startPortlet ('User accounts');
+	$accounts = listCells ('user');
+	startPortlet ('User accounts (' . count ($accounts) . ')');
 	showMessageOrError();
 	echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
 	echo "<tr><th>Username</th><th>Real name</th><th>Password</th><th>&nbsp;</th></tr>\n";
@@ -3378,7 +3367,7 @@ function renderPortMapEditor ()
 
 function renderPortMap ($editable = FALSE)
 {
-	global $nextorder, $pageno, $tabno;
+	global $nextorder;
 	showMessageOrError();
 	startPortlet ("Port compatibility map");
 	$ptlist = getPortTypes();
@@ -3506,7 +3495,7 @@ function renderChapter ($tgt_chapter_no)
 
 function renderChapterEditor ($tgt_chapter_no)
 {
-	global $pageno, $tabno, $nextorder;
+	global $nextorder;
 	function printNewItemTR ()
 	{
 		printOpFormIntro ('add');
@@ -3578,7 +3567,6 @@ function renderChaptersEditor ()
 		printImageHREF ('create', 'Add new', TRUE, 101);
 		echo '</td></tr></form>';
 	}
-	global $pageno, $tabno;
 	showMessageOrError();
 	$dict = getDict();
 	foreach (array_keys ($dict) as $chapter_no)
@@ -3669,7 +3657,6 @@ function renderEditAttributesForm ()
 		printImageHREF ('add', 'Create attribute', TRUE, 102);
 		echo '</td></tr></form>';
 	}
-	global $pageno, $tabno;
 	$attrMap = getAttrMap();
 	showMessageOrError();
 	startPortlet ('Optional attributes');
@@ -3724,7 +3711,6 @@ function renderEditAttrMapForm ()
 		echo '</td></tr>';
 		echo '</form>';
 	}
-	global $pageno, $tabno;
 	$attrMap = getAttrMap();
 	showMessageOrError();
 	startPortlet ('Attribute map');
@@ -4256,7 +4242,7 @@ function renderProgressBar ($percentage = 0, $theme = '')
 
 function renderRSPoolServerForm ($pool_id = 0)
 {
-	global $pageno, $tabno, $nextorder;
+	global $nextorder;
 	if ($pool_id <= 0)
 	{
 		showError ('Invalid pool_id', __FUNCTION__);
@@ -4335,7 +4321,7 @@ function renderRSPoolServerForm ($pool_id = 0)
 
 function renderRSPoolLBForm ($pool_id = 0)
 {
-	global $pageno, $tabno, $nextorder;
+	global $nextorder;
 	showMessageOrError();
 
 	$poolInfo = getRSPoolInfo ($pool_id);
@@ -4387,7 +4373,7 @@ function renderRSPoolLBForm ($pool_id = 0)
 
 function renderVServiceLBForm ($vs_id = 0)
 {
-	global $pageno, $tabno, $nextorder;
+	global $nextorder;
 	showMessageOrError();
 	$vsinfo = getVServiceInfo ($vs_id);
 
@@ -4517,7 +4503,7 @@ function renderRSPool ($pool_id = 0)
 
 function renderVSList ()
 {
-	global $pageno, $nextorder;
+	global $nextorder;
 	$tagfilter = getTagFilter();
 	$vslist = getVSList ($tagfilter, getTFMode());
 	echo "<table border=0 class=objectview>\n";
@@ -4545,7 +4531,7 @@ function renderVSList ()
 
 function renderVSListEditForm ()
 {
-	global $pageno, $tabno, $nextorder;
+	global $nextorder;
 	showMessageOrError();
 	$protocols = array ('TCP' => 'TCP', 'UDP' => 'UDP');
 
@@ -4649,7 +4635,7 @@ function renderRSPoolList ()
 
 function editRSPools ()
 {
-	global $pageno, $tabno, $nextorder;
+	global $nextorder;
 	showMessageOrError();
 
 	startPortlet ('Add new');
@@ -4945,7 +4931,7 @@ function renderTagRowForCloud ($taginfo, $realm, $level = 0)
 function renderTagRowForEditor ($taginfo, $level = 0)
 {
 	$self = __FUNCTION__;
-	global $pageno, $tabno, $taglist;
+	global $taglist;
 	if (!count ($taginfo['kids']))
 		$level++; // Idem
 	echo "<tr><td align=left style='padding-left: " . ($level * 16) . "px;'>";
@@ -5249,7 +5235,7 @@ function renderTagRollerForRow ($row_id)
 
 function renderObjectSLB ($object_id)
 {
-	global $pageno, $tabno, $nextorder;
+	global $nextorder;
 	showMessageOrError();
 	$vs_list = $rsplist = array();
 	foreach (getVSList() as $vsid => $vsinfo)
@@ -5420,13 +5406,13 @@ ENDJAVASCRIPT;
 
 function renderUser ($user_id)
 {
-	global $accounts, $target_given_tags;
-	$username = getUsernameByID ($user_id);
+	global $target_given_tags;
+	$userinfo = getUserInfo ($user_id);
 
 	startPortlet ('summary');
 	echo '<table border=0 align=center>';
-	echo "<tr><th class=tdright>Account name:</th><td class=tdleft>${username}</td></tr>";
-	echo '<tr><th class=tdright>Real name:</th><td class=tdleft>' . $accounts[$username]['user_realname'] . '</td></tr>';
+	echo "<tr><th class=tdright>Account name:</th><td class=tdleft>${userinfo['user_name']}</td></tr>";
+	echo '<tr><th class=tdright>Real name:</th><td class=tdleft>' . $userinfo['user_realname'] . '</td></tr>';
 	// Using printTagTRs() is inappropriate here, because autotags will be filled with current user's
 	// data, not the viewed one. Another special reason is that the displayed user's given tags are in
 	// the "target" chain.
@@ -5442,7 +5428,7 @@ function renderUser ($user_id)
 		echo "<tr><th width='50%' class=tagchain>Given implicit tags:</th><td class=tagchain>";
 		echo serializeTags ($target_shadow, $baseurl) . "</td></tr>\n";
 	}
-	$target_auto_tags = generateEntityAutoTags ('user', $username);
+	$target_auto_tags = generateEntityAutoTags ('user', $userinfo['user_name']);
 	if (getConfigVar ('SHOW_AUTOMATIC_TAGS') == 'yes' and count ($target_auto_tags))
 	{
 		echo "<tr><th width='50%' class=tagchain>Automatic tags:</th><td class=tagchain>";
@@ -5506,10 +5492,10 @@ function renderAccessDenied ()
 
 function renderMyAccount ()
 {
-	global $remote_username, $accounts;
+	global $remote_username, $remote_displayname;
 	echo "<table border=0 class=objectview cellspacing=0 cellpadding=0 width='50%'>";
 	echo "<tr><td colspan=2 align=center><h1>${remote_username}</h1></td></tr>\n";
-	echo "<tr><td colspan=2 align=center><h2>" . $accounts[$remote_username]['user_realname'] . "</h2></td></tr>\n";
+	echo "<tr><td colspan=2 align=center><h2>${remote_displayname}</h2></td></tr>\n";
 	echo "</table>";
 }
 
@@ -5560,18 +5546,16 @@ function renderFile ($file_id = 0)
 	{
 		startPortlet ('Links (' . count ($links) . ')');
 		echo "<table cellspacing=0 cellpadding='5' align='center' class='widetable'>\n";
-		global $accounts;
 		foreach ($links as $link)
 		{
 			echo '<tr><td class=tdleft>';
 			switch ($link['entity_type'])
 			{
 				case 'user':
-					$username = getUsernameByID ($link['entity_id']);
-					if (NULL === $username or !isset ($accounts[$username]))
+					if (NULL === ($userinfo = getUserInfo ($link['entity_id'])))
 						echo "Internal error: user id ${link['entity_id']} not found";
 					else
-						renderCell ($accounts[$username]);
+						renderCell ($userinfo);
 					break;
 				case 'ipv4net':
 					renderIPv4NetCell (getIPv4NetworkInfo ($link['entity_id']));
@@ -5613,7 +5597,6 @@ function renderFileReuploader ()
 
 function renderFileProperties ($file_id = 0)
 {
-	global $root;
 	$file = getFileInfo ($file_id);
 	if ($file === NULL)
 	{
@@ -5642,7 +5625,7 @@ function renderFileBrowser ()
 // Like renderFileBrowser(), but with the option to delete files
 function renderFileManager ()
 {
-	global $pageno, $tabno, $nextorder, $root;
+	global $nextorder;
 	showMessageOrError();
 
 	// Used for uploading a parentless file
@@ -5694,7 +5677,6 @@ function renderFileManager ()
 
 function renderFilesPortlet ($entity_type = NULL, $entity_id = 0)
 {
-	global $root;
 	if ($entity_type == NULL || $entity_id <= 0)
 	{
 		showError ('Invalid entity info', __FUNCTION__);
@@ -5815,7 +5797,6 @@ function niftyString ($string, $maxlen = 30)
 // Iterate over what findRouters() returned and output some text suitable for a TD element.
 function printRoutersTD ($rlist)
 {
-	global $root;
 	$rtrclass = 'tdleft';
 	foreach ($rlist as $rtr)
 	{

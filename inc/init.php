@@ -144,14 +144,17 @@ sortTree ($tagtree, 'taginfoCmp');
 
 require_once 'inc/auth.php';
 $auto_tags = array();
-authenticate(); // sometimes this generates autotags, but never --- given tags
-// Authentication passed.
-// Note that we don't perform autorization here, so each 1st level page
-// has to do it in its way, e.g. by calling authorize() after fixContext().
+// Initial chain for the current user.
+$user_given_tags = array();
 
 if (!isset ($script_mode) or $script_mode !== TRUE)
+{
+	authenticate(); // this call always generates autotags and somethimes --- given tags
+	// Authentication passed.
+	// Note that we don't perform autorization here, so each 1st level page
+	// has to do it in its way, e.g. by calling authorize() after fixContext().
 	session_start();
-
+}
 
 $pageno = (isset ($_REQUEST['page'])) ? $_REQUEST['page'] : 'index';
 // Special handling of tab number to substitute the "last" index where applicable.
@@ -195,13 +198,5 @@ $expl_tags = array();
 $impl_tags = array();
 // Initial chain for the current target.
 $target_given_tags = array();
-// Initial chain for the current user.
-$user_given_tags = array();
-if (!isset ($script_mode) or $script_mode !== TRUE)
-{
-	$auto_tags = array_merge ($auto_tags, generateEntityAutoTags ('user', $remote_username));
-	if (isset ($accounts[$remote_username]))
-		$user_given_tags = loadEntityTags ('user', $accounts[$remote_username]['user_id']);
-}
 
 ?>

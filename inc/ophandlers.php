@@ -472,11 +472,10 @@ function updateUser ()
 	assertStringArg ('password', __FUNCTION__);
 	$username = $_REQUEST['username'];
 	$new_password = $_REQUEST['password'];
-	$old_hash = getHashByID ($_REQUEST['user_id']);
-	if ($old_hash == NULL)
+	if (NULL == ($userinfo = getUserInfo ($_REQUEST['user_id'])))
 		return buildRedirectURL (__FUNCTION__, 'ERR1');
 	// Update user password only if provided password is not the same as current password hash.
-	if ($new_password != $old_hash)
+	if ($new_password != $userinfo['user_password_hash'])
 		$new_password = sha1 ($new_password);
 	$result = commitUpdateUserAccount ($_REQUEST['user_id'], $username, $_REQUEST['realname'], $new_password);
 	if ($result == TRUE)
@@ -1367,17 +1366,19 @@ function rollTags ()
 
 function changeMyPassword ()
 {
-	global $accounts, $remote_username, $user_auth_src;
+	global $remote_username, $user_auth_src;
 	if ($user_auth_src != 'database')
 		return buildRedirectURL (__FUNCTION__, 'ERR1');
 	assertStringArg ('oldpassword', __FUNCTION__);
 	assertStringArg ('newpassword1', __FUNCTION__);
 	assertStringArg ('newpassword2', __FUNCTION__);
-	if ($accounts[$remote_username]['user_password_hash'] != sha1 ($_REQUEST['oldpassword']))
+	$remote_userid = getUserIDByUsername ($remote_username);
+	$userinfo = getUserInfo ($remote_userid);
+	if ($userinfo['user_password_hash'] != sha1 ($_REQUEST['oldpassword']))
 		return buildRedirectURL (__FUNCTION__, 'ERR2');
 	if ($_REQUEST['newpassword1'] != $_REQUEST['newpassword2'])
 		return buildRedirectURL (__FUNCTION__, 'ERR3');
-	if (commitUpdateUserAccount ($accounts[$remote_username]['user_id'], $accounts[$remote_username]['user_name'], $accounts[$remote_username]['user_realname'], sha1 ($_REQUEST['newpassword1'])))
+	if (commitUpdateUserAccount ($remote_userid, $userinfo['user_name'], $userinfo['user_realname'], sha1 ($_REQUEST['newpassword1'])))
 		return buildRedirectURL (__FUNCTION__, 'OK');
 	else
 		return buildRedirectURL (__FUNCTION__, 'ERR4');

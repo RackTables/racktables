@@ -8,29 +8,22 @@ Authentication library for RackTables.
 // This function ensures that we don't continue without a legitimate
 // username and password (also make sure, that both are present, this
 // is especially useful for LDAP auth code to not deceive itself with
-// anonymous binding). It also initializes $remote_username and $accounts.
+// anonymous binding). It also initializes $remote_* and $*_tags vars.
 // Fatal errors are followed by exit (1) to aid in script debugging.
 function authenticate ()
 {
-	global $remote_username, $remote_displayname, $accounts, $user_auth_src, $require_valid_user, $script_mode;
-	if (!isset ($user_auth_src) or !isset ($require_valid_user))
+	global
+		$remote_username,
+		$remote_displayname,
+		$auto_tags,
+		$user_given_tags,
+		$user_auth_src,
+		$require_local_account;
+	if (!isset ($user_auth_src) or !isset ($require_local_account))
 	{
-		showError ('secret.php misconfiguration: either user_auth_src or require_valid_user are missing', __FUNCTION__);
+		showError ('secret.php misconfiguration: either user_auth_src or require_local_account are missing', __FUNCTION__);
 		exit (1);
 	}
-	// This reindexing is necessary after switching to listCells(), which
-	// returns list indexed by id (while many other functions expect the
-	// user list to be indexed by username).
-	if (NULL === ($tmplist = listCells ('user')))
-	{
-		showError ('Failed to initialize access database.', __FUNCTION__);
-		exit (1);
-	}
-	$accounts = array();
-	foreach ($tmplist as $tmpval)
-		$accounts[$tmpval['user_name']] = $tmpval;
-	if (isset ($script_mode) and $script_mode === TRUE)
-		return;
 	if (isset ($_REQUEST['logout']))
 		dieWith401(); // Reset browser credentials cache.
 	switch ($user_auth_src)
@@ -63,33 +56,33 @@ function authenticate ()
 			showError ('Invalid authentication source!', __FUNCTION__);
 			die;
 	}
-	if ($require_valid_user and !isset ($accounts[$remote_username]))
-		dieWith401();
+	// Fallback value.
 	$remote_displayname = $remote_username;
+	if (NULL !== ($remote_userid = getUserIDByUsername ($remote_username)))
+	{
+		$user_given_tags = loadEntityTags ('user', $remote_userid);
+		// Always set $remote_displayname, if a local account exists and has one.
+		// This can be overloaded from LDAP later though.
+		$userinfo = getUserInfo ($remote_userid);
+		if (!empty ($userinfo['user_realname']))
+			$remote_displayname = $userinfo['user_realname'];
+	}
+	elseif ($require_local_account)
+		dieWith401();
+	$auto_tags = array_merge ($auto_tags, generateEntityAutoTags ('user', $remote_username));
 	switch (TRUE)
 	{
 		// Just trust the server, because the password isn't known.
 		case ('httpd' == $user_auth_src):
-			if (authenticated_via_httpd ($remote_username))
-				return;
-			break;
+			return;
 		// When using LDAP, leave a mean to fix things. Admin user is always authenticated locally.
-		case ('database' == $user_auth_src or $accounts[$remote_username]['user_id'] == 1):
+		case ('database' == $user_auth_src or $remote_userid == 1):
 			if (authenticated_via_database ($remote_username, $_SERVER['PHP_AUTH_PW']))
-			{
-				if (!empty ($accounts[$remote_username]['user_realname']))
-					$remote_displayname = $accounts[$remote_username]['user_realname'];
 				return;
-			}
 			break;
 		case ('ldap' == $user_auth_src):
-			// Call below also sets $remote_displayname.
 			if (authenticated_via_ldap ($remote_username, $_SERVER['PHP_AUTH_PW']))
-			{
-				if (!empty ($accounts[$remote_username]['user_realname']))
-					$remote_displayname = $accounts[$remote_username]['user_realname'];
 				return;
-			}
 			break;
 		default:
 			showError ('Invalid authentication source!', __FUNCTION__);
@@ -332,56 +325,16 @@ function queryLDAPServer ($username, $password)
 
 function authenticated_via_database ($username, $password)
 {
-	global $accounts;
-	if (!function_exists ('sha1'))
+	if (NULL === ($userid = getUserIDByUsername ($username))) // user not found
+		return FALSE;
+	if (NULL === ($userinfo = getUserInfo ($userid))) // user found, DB error
 	{
-		showError ('Fatal error: PHP sha1() function is missing', __FUNCTION__);
+		showError ('Cannot load user data', __FUNCTION__);
 		die();
 	}
-	if (!isset ($accounts[$username]['user_password_hash']))
-		return FALSE;
-	if ($accounts[$username]['user_password_hash'] == sha1 ($password))
+	if ($userinfo['user_password_hash'] == sha1 ($password))
 		return TRUE;
 	return FALSE;
-}
-
-function authenticated_via_httpd ($username)
-{
-	// Reaching here means, that .htaccess authentication passed.
-	// Let's make sure, that user exists in the database, and give clearance.
-	global $accounts;
-	return isset ($accounts[$username]);
-}
-
-// This function returns password hash for given user ID.
-function getHashByID ($user_id = 0)
-{
-	if ($user_id <= 0)
-	{
-		showError ('Invalid user_id', __FUNCTION__);
-		return NULL;
-	}
-	global $accounts;
-	foreach ($accounts as $account)
-		if ($account['user_id'] == $user_id)
-			return $account['user_password_hash'];
-	return NULL;
-}
-
-// Likewise.
-function getUsernameByID ($user_id = 0)
-{
-	if ($user_id <= 0)
-	{
-		showError ('Invalid user_id', __FUNCTION__);
-		return NULL;
-	}
-	global $accounts;
-	foreach ($accounts as $account)
-		if ($account['user_id'] == $user_id)
-			return $account['user_name'];
-	showError ("User with ID '${user_id}' not found!");
-	return NULL;
 }
 
 ?>

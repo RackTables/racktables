@@ -1023,10 +1023,11 @@ function generateEntityAutoTags ($entity_realm = '', $bypass_value = '')
 			$ret[] = array ('tag' => '$any_rsp');
 			break;
 		case 'user':
-			global $accounts;
+			// {$username_XXX} autotag is generated always, but {$userid_XXX}
+			// appears only for accounts, which exist in local database.
 			$ret[] = array ('tag' => '$username_' . $bypass_value);
-			if (isset ($accounts[$bypass_value]['user_id']))
-				$ret[] = array ('tag' => '$userid_' . $accounts[$bypass_value]['user_id']);
+			if (NULL !== ($userid = getUserIDByUsername ($bypass_value)))
+				$ret[] = array ('tag' => '$userid_' . $userid);
 			break;
 		case 'file':
 			$ret[] = array ('tag' => '$fileid_' . $bypass_value);

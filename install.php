@@ -238,7 +238,7 @@ function init_config ()
 	fwrite ($conf, "\$db_password = '" . $_REQUEST['mysql_password'] . "';\n\n");
 	fwrite ($conf, "// More info http://racktables.org/trac/wiki/RackTablesUserAuthentication\n");
 	fwrite ($conf, "\$user_auth_src = 'database';\n");
-	fwrite ($conf, "\$require_valid_user = TRUE;\n\n");
+	fwrite ($conf, "\$require_local_account = TRUE;\n\n");
 	fwrite ($conf, "// This is only necessary for 'ldap' authentication source\n");
 	fwrite ($conf, "\$ldap_server = 'some.server';\n");
 	fwrite ($conf, "\$ldap_domain = 'some.domain';\n\n");

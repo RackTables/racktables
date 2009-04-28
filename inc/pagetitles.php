@@ -186,10 +186,10 @@ function dynamic_title_objgroup ()
 
 function dynamic_title_user ()
 {
-	global $accounts;
+	$userinfo = getUserInfo ($_REQUEST['user_id']);
 	return array
 	(
-		'name' => "Local user '" . $accounts[getUsernameByID ($_REQUEST['user_id'])]['user_name'] . "'",
+		'name' => "Local user '" . $userinfo['user_name'] . "'",
 		'params' => array ('user_id' => $_REQUEST['user_id'])
 	);
 }

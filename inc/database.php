@@ -3707,10 +3707,8 @@ function getFileLinks ($file_id = 0)
 			case 'user':
 				$page = 'user';
 				$id_name = 'user_id';
-				global $accounts;
-				foreach ($accounts as $account)
-					if ($account['user_id'] == $row['entity_id'])
-						$name = $account['user_name'];
+				$userinfo = getUserInfo ($row['entity_id']);
+				$name = $userinfo['user_name'];
 				break;
 		}
 
@@ -3945,6 +3943,32 @@ function discardLDAPCache ()
 {
 	global $dbxlink;
 	$dbxlink->exec ('TRUNCATE TABLE LDAPCache');
+}
+
+function getUserIDByUsername ($username)
+{
+	$query = "select user_id from UserAccount where user_name = '${username}'";
+	if (($result = useSelectBlade ($query, __FUNCTION__)) == NULL) 
+	{
+		showError ('SQL query failed', __FUNCTION__);
+		die;
+	}
+	if ($row = $result->fetch (PDO::FETCH_ASSOC))
+		return $row['user_id'];
+	return NULL;
+}
+
+function getUserInfo ($user_id)
+{
+	$query = "select 'user' as realm, user_id, user_name, user_password_hash, user_realname from UserAccount where user_id = ${user_id}";
+	if (($result = useSelectBlade ($query, __FUNCTION__)) == NULL)
+	{
+		showError ('SQL query failed', __FUNCTION__);
+		die;
+	}
+	if ($row = $result->fetch (PDO::FETCH_ASSOC))
+		return $row;
+	return NULL;
 }
 
 ?>
