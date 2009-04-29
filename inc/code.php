@@ -1126,6 +1126,7 @@ function findAutoTagWarnings ($expr)
 				case (mb_ereg_match ('^\$typeid_[[:digit:]]+$', $expr['load'])): // FIXME: check value validity
 				case (mb_ereg_match ('^\$cn_.+$', $expr['load'])): // FIXME: check name validity and asset existence
 				case (mb_ereg_match ('^\$lgcn_.+$', $expr['load'])): // FIXME: check name validity
+				case (mb_ereg_match ('^\$unmounted$', $expr['load'])):
 					return array();
 				default:
 					return array (array

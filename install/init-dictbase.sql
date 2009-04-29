@@ -293,6 +293,8 @@ INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, descriptio
 ('NAMEWARN_LISTSRC','{$typeid_4} or {$typeid_7} or {$typeid_8}','string','yes','no','List source: object, for which common name should be set'),
 ('RACKS_PER_ROW','12','unit','yes','no','Racks per row'),
 ('FILTER_PREDICATE_SIEVE','','string','yes','no','Predicate sieve regex(7)'),
+('DEFAULT_FILTER_FORMAT','2','string','no','no','Default list filter format'),
+('DEFAULT_FILTER_BOOLOP','or','string','no','no','Default list filter boolean operation (or/and)'),
 ('DB_VERSION','0.17.0','string','no','yes','Database version.');
 
 INSERT INTO `Script` VALUES ('RackCode','allow {$userid_1}');
