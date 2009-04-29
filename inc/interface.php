@@ -806,23 +806,6 @@ function finishPortlet ()
 	echo "</div>\n";
 }
 
-function printRefsOfType ($refs, $type, $eq)
-{
-	$gotone=0;
-	foreach ($refs as $ref)
-	{
-		if ($eq($ref['type'], $type))
-		{
-			if ($gotone) echo ', ';
-			echo "<a href='".makeHref(array('page'=>'object', 'object_id'=>$ref['object_id']))."'>";
-			if (!empty ($ref['name']))
-				echo $ref['name'] . '@';
-			echo "${ref['object_name']}</a>";
-			$gotone=1;
-		}
-	}
-}
-
 function renderRackObject ($object_id = 0)
 {
 	global $nextorder, $aac;
@@ -1491,9 +1474,9 @@ function printLog ($log)
 				143 => array ('code' => 'error', 'format' => 'Tried chaining %u tags, but experienced %u errors.'),
 				144 => array ('code' => 'error', 'format' => "Error deleting tag: '%s'"),
 				145 => array ('code' => 'error', 'format' => "Invalid tag name '%s'"),
-				146 => array ('code' => 'error', 'format' => "Tag '%s' (or similar name) already exists"),
-				147 => array ('code' => 'error', 'format' => "Could not create tag '%s' because of error '%s'"),
-				148 => array ('code' => 'error', 'format' => "Could not update tag '%s' because of error '%s'"),
+// ...
+				147 => array ('code' => 'error', 'format' => "Could not create tag '%s': %s"),
+				148 => array ('code' => 'error', 'format' => "Could not update tag '%s': %s"),
 				149 => array ('code' => 'error', 'format' => 'Turing test failed'),
 				150 => array ('code' => 'error', 'format' => 'Can only change password under DB authentication.'),
 				151 => array ('code' => 'error', 'format' => 'Old password doesn\'t match.'),
@@ -1787,55 +1770,6 @@ function renderMolecule ($mdata, $object_id)
 	}
 }
 
-function renderUnmountedObjectsPortlet ()
-{
-	startPortlet ('Unmounted objects');
-	$objs = getUnmountedObjects();
-	if ($objs === NULL)
-	{
-		showError ('getUnmountedObjects() failed', __FUNCTION__);
-		return;
-	}
-	global $nextorder;
-	$order = 'odd';
-	echo '<br><br><table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
-	echo '<tr><th>Common name</th><th>Visible label</th><th>Asset number</th><th>Barcode</th></tr>';
-	foreach ($objs as $obj)
-	{
-		echo "<tr class=row_${order}><td><a href='".makeHref(array('page'=>'object', 'object_id'=>$obj['id']))."'>${obj['dname']}</a></td>";
-		echo "<td>${obj['label']}</td>";
-		echo "<td>${obj['asset_no']}</td>";
-		echo "<td>${obj['barcode']}</td>";
-		echo "</tr>";
-		$order = $nextorder[$order];
-	}
-	echo "</table><br>\n";
-	finishPortlet();
-}
-
-function renderProblematicObjectsPortlet ()
-{
-	startPortlet ('Problematic objects');
-	$objs = getProblematicObjects();
-	if ($objs === NULL)
-	{
-		showError ('getProblematicObjects() failed', __FUNCTION__);
-		return;
-	}
-	global $nextorder;
-	$order = 'odd';
-	echo '<br><br><table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
-	echo '<tr><th>Type</th><th>Common name</th></tr>';
-	foreach ($objs as $obj)
-	{
-		echo "<tr class=row_${order}><td>${obj['objtype_name']}</td>";
-		echo "<td><a href='".makeHref(array('page'=>'object', 'object_id'=>$obj['id']))."'>${obj['dname']}</a></tr>";
-		$order = $nextorder[$order];
-	}
-	echo "</table><br>\n";
-	finishPortlet();
-}
-
 function renderObjectSpace ()
 {
 	global $taglist, $tagtree;
@@ -1873,7 +1807,7 @@ function renderObjectSpace ()
 
 function renderObjectGroup ()
 {
-	global $pageno, $nextorder, $taglist, $tagtree;
+	global $pageno, $nextorder;
 	showMessageOrError();
 	assertUIntArg ('group_id', __FUNCTION__, TRUE);
 	$group_id = $_REQUEST['group_id'];
@@ -1912,7 +1846,7 @@ function renderObjectGroup ()
 
 	echo '</td><td class=pcleft>';
 
-	$objects = getObjectList ($group_id, $tagfilter, getTFMode());
+	$objects = getObjectList ($group_id, $tagfilter);
 	startPortlet ('Objects (' . count ($objects) . ')');
 	if ($objects === NULL)
 	{
@@ -3303,7 +3237,7 @@ function renderCellList ($realm = NULL, $title = 'items', $do_amplify = FALSE)
 		array_walk ($celllist, 'amplifyCell');
 	echo "<table border=0 class=objectview>\n";
 	echo "<tr><td class=pcleft>";
-	startPortlet ($title . '(' . count ($celllist) . ')');
+	startPortlet ($title . ' (' . count ($celllist) . ')');
 	echo "<table class=cooltable border=0 cellpadding=5 cellspacing=0 align=center>\n";
 	foreach ($celllist as $cell)
 	{
@@ -3315,10 +3249,7 @@ function renderCellList ($realm = NULL, $title = 'items', $do_amplify = FALSE)
 	echo '</table>';
 	finishPortlet();
 	echo '</td><td class=pcright>';
-	if ($realm == 'file')
-		renderCellFilterPortlet ($cellfilter, $realm);
-	else
-		renderTagFilterPortlet (getTagFilter(), $realm);
+	renderCellFilterPortlet ($cellfilter, $realm);
 	echo "</td></tr></table>\n";
 }
 
@@ -4510,7 +4441,7 @@ function renderVSList ()
 {
 	global $nextorder;
 	$tagfilter = getTagFilter();
-	$vslist = getVSList ($tagfilter, getTFMode());
+	$vslist = getVSList ($tagfilter);
 	echo "<table border=0 class=objectview>\n";
 	echo "<tr><td class=pcleft>";
 
@@ -4603,7 +4534,7 @@ function renderRSPoolList ()
 {
 	global $pageno, $nextorder;
 	$tagfilter = getTagFilter();
-	$pool_list = getRSPoolList ($tagfilter, getTFMode());
+	$pool_list = getRSPoolList ($tagfilter);
 	if ($pool_list === NULL)
 	{
 		showError ('getRSPoolList() failed', __FUNCTION__);
@@ -5052,24 +4983,6 @@ function renderTagTreeEditor ()
 	finishPortlet();
 }
 
-// FIXME: merge this code with renderTagCheckBox()
-function renderPredicateCheckbox ($inputname, $preselect, $predicatename)
-{
-	if (in_array ($predicatename, $preselect))
-	{
-		$selected = ' checked';
-		$class = 'seltagbox';
-	}
-	else
-	{
-		$selected = '';
-		$class = 'tagbox';
-	}
-	echo "<tr><td colspan=2 class=${class}>";
-	echo "<input type=checkbox name='${inputname}[]' value='${predicatename}'${selected}> ";
-	echo $predicatename . "</td></tr>\n";
-}
-
 function renderTagCheckbox ($inputname, $preselect, $taginfo, $level = 0)
 {
 	$self = __FUNCTION__;
@@ -5145,14 +5058,6 @@ function printTagTRs ($baseurl = '')
 	}
 }
 
-// Detect, filter and return requested tag filter mode: either 'and' or 'or'.
-function getTFMode ()
-{
-	if (isset ($_REQUEST['tfmode']) and $_REQUEST['tfmode'] == 'all')
-		return 'all';
-	return 'any';
-}
-
 // Output a portlet with currently selected tags and prepare a form for update.
 function renderTagFilterPortlet ($tagfilter, $realm, $bypass_name = '', $bypass_value = '')
 {
@@ -5221,9 +5126,24 @@ function renderCellFilterPortlet ($preselect, $realm, $bypass_name = '', $bypass
 		if ($cfv == 2)
 		{
 			global $pTable;
-			foreach (array_keys ($pTable) as $predicatename)
-				renderPredicateCheckbox ('cfp', $preselect['pnamelist'], $predicatename);
+			$myPredicates = array();
+			$psieve = getConfigVar ('FILTER_PREDICATE_SIEVE');
+			// Repack matching predicates in a way, which tagOnChain() understands.
+			foreach (array_keys ($pTable) as $pname)
+				if (mb_ereg_match ($psieve, $pname))
+					$myPredicates[] = array ('id' => $pname, 'tag' => $pname, 'kids' => array());
+			if (count ($myPredicates))
+			{
+				// Repack preselect likewise.
+				$myPreselect = array();
+				foreach ($preselect['pnamelist'] as $pname)
+					$myPreselect[] = array ('id' => $pname);
+				echo '<tr><td colspan=2 class=tagbox><hr></td></tr>';
+				foreach ($myPredicates as $pinfo)
+					renderTagCheckbox ('cfp', $myPreselect, $pinfo);
+			}
 		}
+		echo '<tr><td colspan=2 class=tagbox><hr></td></tr>';
 		echo '</td></tr><tr><td>';
 		printImageHREF ('apply', 'Apply filter', TRUE);
 		echo "</form></td><td>";

@@ -940,6 +940,7 @@ function resetUIConfig()
 	setConfigVar ('ASSETWARN_LISTSRC','{$typeid_4} or {$typeid_7} or {$typeid_8}');
 	setConfigVar ('NAMEWARN_LISTSRC','{$typeid_4} or {$typeid_7} or {$typeid_8}');
 	setConfigVar ('RACKS_PER_ROW','12');
+	setConfigVar ('FILTER_PREDICATE_SIEVE','');
 	return buildRedirectURL (__FUNCTION__, 'OK');
 }
 
@@ -1312,8 +1313,6 @@ function createTag ()
 	$tagname = trim ($_REQUEST['tag_name']);
 	if (!validTagName ($tagname))
 		return buildRedirectURL (__FUNCTION__, 'ERR1', array ($tagname));
-	if (tagExistsInDatabase ($tagname))
-		return buildRedirectURL (__FUNCTION__, 'ERR2', array ($tagname));
 	if (($parent_id = $_REQUEST['parent_id']) <= 0)
 		$parent_id = 'NULL';
 	if (($ret = commitCreateTag ($tagname, $parent_id)) == '')
@@ -1334,8 +1333,9 @@ function updateTag ()
 		$parent_id = 'NULL';
 	if (($ret = commitUpdateTag ($_REQUEST['tag_id'], $tagname, $parent_id)) == '')
 		return buildRedirectURL (__FUNCTION__, 'OK', array ($tagname));
-	else
-		return buildRedirectURL (__FUNCTION__, 'ERR2', array ($tagname, $ret));
+	// Use old name in the message, cause update failed.
+	global $taglist;
+	return buildRedirectURL (__FUNCTION__, 'ERR2', array ($taglist[$_REQUEST['tag_id']]['tag'], $ret));
 }
 
 function rollTags ()

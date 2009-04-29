@@ -292,6 +292,7 @@ INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, descriptio
 ('ASSETWARN_LISTSRC','{$typeid_4} or {$typeid_7} or {$typeid_8}','string','yes','no','List source: object, for which asset tag should be set'),
 ('NAMEWARN_LISTSRC','{$typeid_4} or {$typeid_7} or {$typeid_8}','string','yes','no','List source: object, for which common name should be set'),
 ('RACKS_PER_ROW','12','unit','yes','no','Racks per row'),
+('FILTER_PREDICATE_SIEVE','','string','yes','no','Predicate sieve regex(7)'),
 ('DB_VERSION','0.17.0','string','no','yes','Database version.');
 
 INSERT INTO `Script` VALUES ('RackCode','allow {$userid_1}');

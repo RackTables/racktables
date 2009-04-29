@@ -33,7 +33,7 @@ function escapeString ($value, $do_db_escape = TRUE)
 	return $ret;
 }
 
-function getRackspace ($tagfilter = array(), $tfmode = 'any')
+function getRackspace ($tagfilter = array())
 {
 	$whereclause = getWhereClause ($tagfilter);
 	$query =
@@ -69,7 +69,6 @@ function getRackRowInfo ($rackrow_id)
 		return NULL;
 }
 
-
 function getRackRows ()
 {
 	$query = "select id, name from RackRow ";
@@ -82,12 +81,9 @@ function getRackRows ()
 	return $rows;
 }
 
-
-
 function commitAddRow($rackrow_name)
 {
-	useInsertBlade('RackRow', array('name'=>"'$rackrow_name'"));
-	return TRUE;
+	return useInsertBlade('RackRow', array('name'=>"'$rackrow_name'"));
 }
 
 function commitUpdateRow($rackrow_id, $rackrow_name)
@@ -130,9 +126,6 @@ function commitDeleteRow($rackrow_id)
 	$result->closeCursor();
 	return TRUE;
 }
-
-
-
 
 // This function returns id->name map for all object types. The map is used
 // to build <select> input for objects.
@@ -189,7 +182,7 @@ function getNarrowObjectList ($varname = '')
 }
 
 // Return a filtered, detailed object list.
-function getObjectList ($type_id = 0, $tagfilter = array(), $tfmode = 'any')
+function getObjectList ($type_id = 0, $tagfilter = array())
 {
 	$whereclause = getWhereClause ($tagfilter);
 	if ($type_id != 0)
@@ -341,7 +334,7 @@ function amplifyCell (&$record, $dummy = NULL)
 	}
 }
 
-function getRacksForRow ($row_id = 0, $tagfilter = array(), $tfmode = 'any')
+function getRacksForRow ($row_id = 0, $tagfilter = array())
 {
 	$query =
 		"select Rack.id, Rack.name, height, Rack.comment, row_id, RackRow.name as row_name " .
@@ -932,48 +925,6 @@ function getObjectGroupInfo ()
 		}
 	$result->closeCursor();
 	$ret[0]['count'] = $total;
-	return $ret;
-}
-
-// This function returns objects, which have no rackspace assigned to them.
-// Additionally it keeps rack_id parameter, so we can silently pre-select
-// the rack required.
-function getUnmountedObjects ()
-{
-	$query =
-		'select dict_value as objtype_name, dict_key as objtype_id, name, label, barcode, id, asset_no from ' .
-		'RackObject inner join Dictionary on objtype_id = dict_key join Chapter on Chapter.id = Dictionary.chapter_id ' .
-		'left join RackSpace on id = object_id '.
-		'where rack_id is null and Chapter.name = "RackObjectType" order by dict_value, name, label, asset_no, barcode';
-	$result = useSelectBlade ($query, __FUNCTION__);
-	$ret = array();
-	$clist = array ('id', 'name', 'label', 'barcode', 'objtype_name', 'objtype_id', 'asset_no');
-	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-	{
-		foreach ($clist as $cname)
-			$ret[$row['id']][$cname] = $row[$cname];
-		$ret[$row['id']]['dname'] = displayedName ($ret[$row['id']]);
-	}
-	$result->closeCursor();
-	return $ret;
-}
-
-function getProblematicObjects ()
-{
-	$query =
-		'select dict_value as objtype_name, dict_key as objtype_id, name, id, asset_no from ' .
-		'RackObject inner join Dictionary on objtype_id = dict_key join Chapter on Chapter.id = Dictionary.chapter_id '.
-		'where has_problems = "yes" and Chapter.name = "RackObjectType" order by objtype_name, name';
-	$result = useSelectBlade ($query, __FUNCTION__);
-	$ret = array();
-	$clist = array ('id', 'name', 'objtype_name', 'objtype_id', 'asset_no');
-	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-	{
-		foreach ($clist as $cname)
-			$ret[$row['id']][$cname] = $row[$cname];
-		$ret[$row['id']]['dname'] = displayedName ($ret[$row['id']]);
-	}
-	$result->closeCursor();
 	return $ret;
 }
 
@@ -1777,7 +1728,7 @@ function getDict ($parse_links = FALSE)
 
 function getDictStats ()
 {
-	$stock_chapters = array (1, 2, 11, 12, 13, 14, 16, 17, 18, 19, 20, 21, 22, 23);
+	$stock_chapters = array (1, 2, 11, 12, 13, 14, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25);
 	$query =
 		"select Chapter.id as chapter_no, Chapter.name as chapter_name, count(dict_key) as wc from " .
 		"Chapter left join Dictionary on Chapter.id = Dictionary.chapter_id group by Chapter.id";
@@ -2726,7 +2677,7 @@ function commitUpdateVS ($vsid = 0, $vip = '', $vport = 0, $proto = '', $name = 
 
 // Return the list of virtual services, indexed by vs_id.
 // Each record will be shown with its basic info plus RS pools counter.
-function getVSList ($tagfilter = array(), $tfmode = 'any')
+function getVSList ($tagfilter = array())
 {
 	$whereclause = getWhereClause ($tagfilter);
 	$query = "select vs.id, inet_ntoa(vip) as vip, vport, proto, vs.name, vs.vsconfig, vs.rsconfig, count(rspool_id) as poolcount " .
@@ -2743,7 +2694,7 @@ function getVSList ($tagfilter = array(), $tfmode = 'any')
 }
 
 // Return the list of RS pool, indexed by pool id.
-function getRSPoolList ($tagfilter = array(), $tfmode = 'any')
+function getRSPoolList ($tagfilter = array())
 {
 	$whereclause = getWhereClause ($tagfilter);
 	$query = "select pool.id, pool.name, count(rspool_id) as refcnt, pool.vsconfig, pool.rsconfig " .
@@ -3027,8 +2978,11 @@ function commitCreateTag ($tagname = '', $parent_id = 0)
 			'parent_id' => $parent_id
 		)
 	);
+	global $dbxlink;
 	if ($result)
 		return '';
+	elseif ($dbxlink->errorCode() == 23000)
+		return "name '${tag_name}' is already used";
 	else
 		return "SQL query failed in " . __FUNCTION__;
 }
@@ -3051,9 +3005,12 @@ function commitUpdateTag ($tag_id, $tag_name, $parent_id)
 	$query = "update TagTree set tag = '${tag_name}', parent_id = ${parent_id} " .
 		"where id = ${tag_id} limit 1";
 	$result = $dbxlink->exec ($query);
-	if ($result === NULL)
+	if ($result !== FALSE)
+		return '';
+	elseif ($dbxlink->errorCode() == 23000)
+		return "name '${tag_name}' is already used";
+	else
 		return 'SQL query failed in ' . __FUNCTION__;
-	return '';
 }
 
 // Drop the whole chain stored.
@@ -3299,16 +3256,6 @@ function recordExists ($id = 0, $realm = 'object')
 	return $count === '1';
 }
 
-function tagExistsInDatabase ($tname)
-{
-	$result = useSelectBlade ("select count(*) from TagTree where lower(tag) = lower('${tname}')");
-	$row = $result->fetch (PDO::FETCH_NUM);
-	$count = $row[0];
-	$result->closeCursor();
-	unset ($result);
-	return $count !== '0';
-}
-
 function newPortForwarding ($object_id, $localip, $localport, $remoteip, $remoteport, $proto, $description)
 {
 	if (NULL === getIPv4AddressNetworkId ($localip))
@@ -3437,8 +3384,6 @@ function mergeSearchResults (&$objects, $terms, $fieldname)
 	}
 	$query .= " order by ${fieldname}";
 	$result = useSelectBlade ($query, __FUNCTION__);
-// FIXME: this dead call was executed 4 times per 1 object search!
-//	$typeList = getObjectTypeList();
 	$clist = array ('id', 'name', 'label', 'asset_no', 'barcode', 'objtype_id', 'objtype_name');
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
@@ -3464,29 +3409,6 @@ function getLostIPv4Addresses ()
 	dragon();
 }
 
-// File-related functions
-function getAllFiles ()
-{
-	$query = "SELECT id, name, type, size, ctime, mtime, atime, comment FROM File ORDER BY name";
-	$result = useSelectBlade ($query, __FUNCTION__);
-	$ret=array();
-	$count=0;
-	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-	{
-		$ret[$count]['id'] = $row['id'];
-		$ret[$count]['name'] = $row['name'];
-		$ret[$count]['type'] = $row['type'];
-		$ret[$count]['size'] = $row['size'];
-		$ret[$count]['ctime'] = $row['ctime'];
-		$ret[$count]['mtime'] = $row['mtime'];
-		$ret[$count]['atime'] = $row['atime'];
-		$ret[$count]['comment'] = $row['comment'];
-		$count++;
-	}
-	$result->closeCursor();
-	return $ret;
-}
-
 // Return a list of files which are not linked to the specified record. This list
 // will be used by printSelect().
 function getAllUnlinkedFiles ($entity_type = NULL, $entity_id = 0)
@@ -3508,47 +3430,6 @@ function getAllUnlinkedFiles ($entity_type = NULL, $entity_id = 0)
 	$ret=array();
 	while ($row = $query->fetch (PDO::FETCH_ASSOC))
 		$ret[$row['id']] = $row['name'];
-	return $ret;
-}
-
-// Return a filtered, detailed file list.  Used on the main Files listing page.
-function getFileList ($entity_type = NULL, $tagfilter = array(), $tfmode = 'any')
-{
-	$whereclause = getWhereClause ($tagfilter);
-
-	if ($entity_type == 'no_links')
-		$whereclause .= 'AND File.id NOT IN (SELECT file_id FROM FileLink) ';
-	elseif ($entity_type != 'all')
-		$whereclause .= "AND entity_type = '${entity_type}' ";
-
-	$query =
-		'SELECT File.id, name, type, size, ctime, mtime, atime, comment ' .
-		'FROM File ' .
-		'LEFT JOIN FileLink ' .
-		'ON File.id = FileLink.file_id ' .
-		'LEFT JOIN TagStorage ' .
-		"ON File.id = TagStorage.entity_id AND entity_realm = 'file' " .
-		'WHERE size >= 0 ' .
-		$whereclause .
-		'ORDER BY name';
-
-	$result = useSelectBlade ($query, __FUNCTION__);
-	$ret = array();
-	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-	{
-		foreach (array (
-			'id',
-			'name',
-			'type',
-			'size',
-			'ctime',
-			'mtime',
-			'atime',
-			'comment'
-			) as $cname)
-			$ret[$row['id']][$cname] = $row[$cname];
-	}
-	$result->closeCursor();
 	return $ret;
 }
 
@@ -3790,7 +3671,7 @@ function commitAddFile ($name, $type, $size, $contents, $comment)
 
 	if ($result)
 		return '';
-	elseif ($query->errorCode = 23000)
+	elseif ($query->errorCode() == 23000)
 		return "commitAddFile: File named '${name}' already exists";
 	else
 		return 'commitAddFile: SQL query failed';

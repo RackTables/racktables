@@ -550,7 +550,6 @@ $msgcode['destroyTag']['ERR1'] = 183;
 $msgcode['destroyTag']['ERR2'] = 144;
 $msgcode['createTag']['OK'] = 59;
 $msgcode['createTag']['ERR1'] = 145;
-$msgcode['createTag']['ERR2'] = 146;
 $msgcode['createTag']['ERR3'] = 147;
 $msgcode['updateTag']['OK'] = 60;
 $msgcode['updateTag']['ERR1'] = 145;

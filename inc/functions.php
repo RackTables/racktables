@@ -1246,6 +1246,7 @@ function getCellFilter ()
 			'version' => 1,
 			'tagidlist' => array(),
 			'tnamelist' => array(),
+			'pnamelist' => array(),
 			'text' => '',
 			'expression' => array()	
 		);
@@ -1264,7 +1265,6 @@ function getCellFilter ()
 		if ($_REQUEST['cfv'] == 2)
 		{
 			$ret['version'] = 2;
-			$ret['pnamelist'] = array();
 			global $pTable;
 			if (isset ($_REQUEST['cfp']) and is_array ($_REQUEST['cfp']))
 				foreach ($_REQUEST['cfp'] as $req_name)
