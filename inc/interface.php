@@ -1897,14 +1897,52 @@ function renderEmptyPortsSelect ($port_id, $type_id)
 	}
 }
 
-function renderAllIPv4Allocations ()
+function renderDepot ()
 {
-	$addresses = getAllIPv4Allocations();
-	usort($addresses, 'sortObjectAddressesAndNames');
-	foreach ($addresses as $address)
+	global $pageno, $nextorder;
+	showMessageOrError();
+	$cellfilter = getCellFilter();
+	$objects = filterCellList (listCells ('object'), $cellfilter['expression']);
+
+	echo "<table border=0 class=objectview>\n";
+	echo "<tr><td class=pcleft>";
+
+	startPortlet ('Objects (' . count ($objects) . ')');
+	if ($objects === NULL)
 	{
-		echo "<option value='${address['ip']}' onclick='getElementById(\"ip\").value=\"${address['ip']}\";'>${address['object_name']} ${address['name']} ${address['ip']}</option>\n";
+		showError ('getObjectList() failed', __FUNCTION__);
+		return;
 	}
+	echo '<br><br><table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
+	echo '<tr><th>Common name</th><th>Visible label</th><th>Asset tag</th><th>Barcode</th><th>Row/Rack</th></tr>';
+	$order = 'odd';
+	foreach ($objects as $obj)
+	{
+		if (isset ($_REQUEST['hl_object_id']) and $_REQUEST['hl_object_id'] == $obj['id'])
+			$secondclass = 'tdleft port_highlight';
+		else
+			$secondclass = 'tdleft';
+		$tags = loadEntityTags ('object', $obj['id']);
+		echo "<tr class=row_${order} valign=top><td class='${secondclass}'><a href='".makeHref(array('page'=>'object', 'object_id'=>$obj['id']))."'><strong>${obj['dname']}</strong></a>";
+		if (count ($tags))
+			echo '<br><small>' . serializeTags ($tags, makeHref(array('page'=>$pageno, 'tab'=>'default')) . '&') . '</small>';
+		echo "</td><td class='${secondclass}'>${obj['label']}</td>";
+		echo "<td class='${secondclass}'>${obj['asset_no']}</td>";
+		echo "<td class='${secondclass}'>${obj['barcode']}</td>";
+		if ($obj['rack_id'])
+			echo "<td class='${secondclass}'><a href='".makeHref(array('page'=>'row', 'row_id'=>$obj['row_id']))."'>${obj['Row_name']}</a>/<a href='".makeHref(array('page'=>'rack', 'rack_id'=>$obj['rack_id']))."'>${obj['Rack_name']}</a></td>";
+		else
+			echo "<td class='${secondclass}'>Unmounted</td>";
+		echo '</tr>';
+		$order = $nextorder[$order];
+	}
+	echo '</table>';
+	finishPortlet();
+
+	echo "</td><td class=pcright width='25%'>";
+
+	renderCellFilterPortlet ($cellfilter, 'object');
+	echo "</td></tr></table>\n";
 }
 
 // History viewer for history-enabled simple dictionaries.
@@ -5098,36 +5136,43 @@ function renderTagFilterPortlet ($tagfilter, $realm, $bypass_name = '', $bypass_
 // This one is going to replace the tag filter.
 function renderCellFilterPortlet ($preselect, $realm, $bypass_name = '', $bypass_value = '')
 {
-	$cfv = $preselect['version'];
 	global $pageno, $tabno, $taglist, $tagtree;
 	startPortlet ('filter');
 	echo "<form method=get>\n";
-	echo "<input type=hidden name=page value=${pageno}>\n";
-	echo "<input type=hidden name=tab value=${tabno}>\n";
-	echo "<input type=hidden name=cfv value=${cfv}>\n";
-	if ($bypass_name != '')
-		echo "<input type=hidden name=${bypass_name} value='${bypass_value}'>\n";
 	echo '<table border=0 align=center>';
-	switch ($cfv)
+	$ruler = "<tr><td colspan=2 class=tagbox><hr></td></tr>\n";
+	$hr = '';
+	// and/or block
+	if (getConfigVar ('FILTER_SUGGEST_ANDOR') == 'yes' or strlen ($preselect['andor']))
 	{
-	case 1:
-		$objectivetags = getObjectiveTagTree ($tagtree, $realm);
-		if (!count ($objectivetags))
-		{
-			echo "None used in current realm.<br>";
-			break;
-		}
+		echo $hr;
+		$hr = $ruler;
+		$andor = strlen ($preselect['andor']) ? $preselect['andor'] : getConfigVar ('FILTER_DEFAULT_ANDOR');
+		echo '<tr><td class=tagbox><input type=radio name=andor value=and';
+		echo ($andor == 'and' ? ' checked' : '') . '>and</input></td>';
+		echo '<td class=tagbox><input type=radio name=andor value=or';
+		echo ($andor == 'or' ? ' checked' : '') . '>or</input></td>';
+		echo "</td></tr>";
+	}
+	// tags block
+	if (getConfigVar ('FILTER_SUGGEST_TAGS') == 'yes' or count ($preselect['tagidlist']))
+	{
+		echo $hr;
+		$hr = $ruler;
 		// Show a tree of tags, pre-select according to currently requested list filter.
-		foreach ($objectivetags as $taginfo)
-			renderTagCheckbox ('tagfilter', buildTagChainFromIds ($preselect['tagidlist']), $taginfo);
-		break;
-	case 2:
+		global $tagtree;
 		$objectivetags = getObjectiveTagTree ($tagtree, $realm);
 		if (!count ($objectivetags))
 			echo "<tr><td colspan=2 class='tagbox sparenetwork'>(nothing is tagged yet)</td></tr>";
 		else
 			foreach ($objectivetags as $taginfo)
 				renderTagCheckbox ('cft', buildTagChainFromIds ($preselect['tagidlist']), $taginfo);
+	}
+	// predicates block
+	if (getConfigVar ('FILTER_SUGGEST_PREDICATES') == 'yes' or count ($preselect['pnamelist']))
+	{
+		echo $hr;
+		$hr = $ruler;
 		global $pTable;
 		$myPredicates = array();
 		$psieve = getConfigVar ('FILTER_PREDICATE_SIEVE');
@@ -5135,7 +5180,9 @@ function renderCellFilterPortlet ($preselect, $realm, $bypass_name = '', $bypass
 		foreach (array_keys ($pTable) as $pname)
 			if (mb_ereg_match ($psieve, $pname))
 				$myPredicates[] = array ('id' => $pname, 'tag' => $pname, 'kids' => array());
-		if (count ($myPredicates))
+		if (!count ($myPredicates))
+			echo "<tr><td colspan=2 class='tagbox sparenetwork'>(no predicates to show)</td></tr>";
+		else
 		{
 			// Repack preselect likewise.
 			$myPreselect = array();
@@ -5145,34 +5192,37 @@ function renderCellFilterPortlet ($preselect, $realm, $bypass_name = '', $bypass
 			foreach ($myPredicates as $pinfo)
 				renderTagCheckbox ('cfp', $myPreselect, $pinfo);
 		}
-		break;
-	case 3:
-		dragon();
-		break;
-	default:
-		showError ('Format version error', __FUNCTION__);
-		break;
 	}
-	echo "<input type=hidden name=page value=${pageno}>\n";
-	echo "<input type=hidden name=tab value=${tabno}>\n";
-	echo "<input type=hidden name=cfv value=${cfv}>\n";
-	if ($bypass_name != '')
-		echo "<input type=hidden name=${bypass_name} value='${bypass_value}'>\n";
-	echo '<tr><td colspan=2 class=tagbox><hr></td></tr>';
-	// "apply"
-	echo '</td></tr><tr><td>';
-	printImageHREF ('apply', 'Apply filter', TRUE);
-	echo "</form></td><td>";
-
-	// "reset"
-	echo "<form method=get>\n";
-	echo "<input type=hidden name=page value=${pageno}>\n";
-	echo "<input type=hidden name=tab value=${tabno}>\n";
-	echo "<input type=hidden name=cfv value=${cfv}>\n";
-	if ($bypass_name != '')
-		echo "<input type=hidden name=${bypass_name} value='${bypass_value}'>\n";
-	printImageHREF ('clear', 'reset', TRUE);
-	echo '</form></td></tr></table>';
+	// extra code
+	if (getConfigVar ('FILTER_SUGGEST_EXTRA') == 'yes' or strlen ($preselect['extratext']))
+	{
+		echo $hr;
+		$hr = $ruler;
+		echo "<tr><td colspan=2><textarea name=cfe>\n" . $preselect['extratext'];
+		echo "</textarea></td></tr>\n";
+	}
+	// submit block
+	{
+		echo $hr;
+		$hr = $ruler;
+		// "apply"
+		echo '<tr><td>';
+		echo "<input type=hidden name=page value=${pageno}>\n";
+		echo "<input type=hidden name=tab value=${tabno}>\n";
+		if ($bypass_name != '')
+			echo "<input type=hidden name=${bypass_name} value='${bypass_value}'>\n";
+		printImageHREF ('apply', 'Apply filter', TRUE);
+		echo "</form></td><td>";
+		// "reset"
+		echo "<form method=get>\n";
+		echo "<input type=hidden name=page value=${pageno}>\n";
+		echo "<input type=hidden name=tab value=${tabno}>\n";
+		if ($bypass_name != '')
+			echo "<input type=hidden name=${bypass_name} value='${bypass_value}'>\n";
+		printImageHREF ('clear', 'reset', TRUE);
+		echo '</form></td></tr>';
+	}
+	echo '</table>';
 	finishPortlet();
 }
 

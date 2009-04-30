@@ -52,6 +52,11 @@
 			echo '<input type=hidden id=ip>';
 			echo '<select size=' . getConfigVar ('MAXSELSIZE') . ' id=addresses>';
 			renderAllIPv4Allocations();
+			$addresses = getAllIPv4Allocations();
+			usort ($addresses, 'sortObjectAddressesAndNames');
+			foreach ($addresses as $address)
+				echo "<option value='${address['ip']}' onclick='getElementById(\"ip\").value=\"${address['ip']}\";'>" .
+					"${address['object_name']} ${address['name']} ${address['ip']}</option>\n";
 			echo '</select><br><br>';
 			echo "<input type=submit value='Proceed' onclick='".
 			"if (getElementById(\"ip\")!=\"\") {".

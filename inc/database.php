@@ -221,7 +221,15 @@ function listCells ($realm)
 		(
 			'id' => 'id',
 			'name' => 'name',
-			'objtype_id' => 'objtype_id'
+			'label' => 'label',
+			'barcode' => 'barcode',
+			'asset_no' => 'asset_no',
+			'objtype_id' => 'objtype_id',
+			'rack_id' => '(select rack_id from RackSpace where object_id = id order by rack_id asc limit 1)',
+			'Rack_name' => '(select name from Rack where id = rack_id)',
+			'row_id' => '(select row_id from Rack where id = rack_id)',
+			'Row_name' => '(select name from RackRow where id = row_id)',
+			'objtype_name' => '(select dict_value from Dictionary where dict_key = objtype_id)',
 		);
 		$keycolumn = 'id';
 		break;
@@ -303,10 +311,19 @@ function listCells ($realm)
 				'parent_id' => $taglist[$row['tag_id']]['parent_id'],
 			);
 	}
+	// Add necessary finish to the list before returning it.
 	foreach (array_keys ($ret) as $entity_id)
 	{
 		$ret[$entity_id]['itags'] = getImplicitTags ($ret[$entity_id]['etags']);
 		$ret[$entity_id]['atags'] = generateEntityAutoTags ($realm, $entity_id);
+		switch ($realm)
+		{
+		case 'object':
+			$ret[$entity_id]['dname'] = displayedName ($ret[$entity_id]);
+			break;
+		default:
+			break;
+		}
 	}
 	return $ret;
 }

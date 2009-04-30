@@ -47,6 +47,22 @@ $ophandler['objects']['default']['deleteObject'] = 'deleteObject';
 $msgcode['deleteObject']['OK'] = 76;
 $msgcode['deleteObject']['ERR'] = 100;
 
+$page['depot'] = array
+(
+	'parent' => 'index',
+	'title' => 'Depot',
+);
+$tab['depot'] = array
+(
+	'default' => 'Browse',
+	'addmore' => 'Add more',
+);
+$tabhandler['depot'] = array
+(
+	'default' => 'renderDepot',
+	'addmore' => 'renderAddMultipleObjectsForm',
+);
+
 $page['row']['title_handler'] = 'dynamic_title_row';
 $page['row']['bypass'] = 'row_id';
 $page['row']['bypass_type'] = 'uint';

@@ -941,8 +941,11 @@ function resetUIConfig()
 	setConfigVar ('NAMEWARN_LISTSRC','{$typeid_4} or {$typeid_7} or {$typeid_8}');
 	setConfigVar ('RACKS_PER_ROW','12');
 	setConfigVar ('FILTER_PREDICATE_SIEVE','');
-	setConfigVar ('DEFAULT_FILTER_FORMAT','2');
-	setConfigVar ('DEFAULT_FILTER_BOOLOP','or');
+	setConfigVar ('FILTER_DEFAULT_ANDOR','or');
+	setConfigVar ('FILTER_SUGGEST_ANDOR','yes');
+	setConfigVar ('FILTER_SUGGEST_TAGS','yes');
+	setConfigVar ('FILTER_SUGGEST_PREDICATES','yes');
+	setConfigVar ('FILTER_SUGGEST_EXTRA','no');
 	return buildRedirectURL (__FUNCTION__, 'OK');
 }
 
