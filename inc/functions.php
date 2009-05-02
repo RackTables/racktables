@@ -1099,6 +1099,8 @@ function fixContext ()
 		'rspool' => 'ipv4rsp',
 		'vservices' => 'ipv4vslist',
 		'vservice' => 'ipv4vs',
+		'objects' => 'depot',
+		'objgroup' => 'depot',
 	);
 	$tmap = array();
 	$tmap['objects']['newmulti'] = 'addmore';

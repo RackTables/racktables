@@ -858,12 +858,15 @@ function addLotOfObjects()
 function deleteObject ()
 {
 	assertUIntArg ('object_id', __FUNCTION__);
+	if (NULL === ($oinfo = getObjectInfo ($_REQUEST['object_id'])))
+		return buildRedirectURL (__FUNCTION__, 'ERR', array ('object not found'));
+
 	$error = commitDeleteObject ($_REQUEST['object_id']);
 
 	if ($error != '')
 		return buildRedirectURL (__FUNCTION__, 'ERR', array ($error));
 
-	return buildRedirectURL (__FUNCTION__, 'OK', array ($_REQUEST['name']));
+	return buildRedirectURL (__FUNCTION__, 'OK', array ($oinfo['dname']));
 }
 
 function useupPort ()

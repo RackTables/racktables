@@ -634,7 +634,7 @@ function renderEditObjectForm ($object_id)
 		echo ' checked';
 	echo "></td></tr>\n";
 	echo "<tr><td>&nbsp;</td><th class=tdright>Actions:</th><td class=tdleft><a href='".
-		makeHrefProcess(array('op'=>'deleteObject', 'page'=>'objects', 'tab'=>'default', 'object_id'=>$object_id, 'name'=>$object['name'])).
+		makeHrefProcess(array('op'=>'deleteObject', 'page'=>'depot', 'tab'=>'default', 'object_id'=>$object_id)).
 		"' onclick=\"javascript:return confirm('Are you sure you want to delete the object?')\">Delete object</a></td></tr>\n";
 	echo "<tr><td colspan=3><b>Comment:</b><br><textarea name=object_comment rows=10 cols=80>${object['comment']}</textarea></td></tr>";
 
@@ -2860,7 +2860,7 @@ function renderSearchResults ()
 		showError ('Search string cannot be empty.', __FUNCTION__);
 		return;
 	}
-	if (!permitted ('objects', 'default'))
+	if (!permitted ('depot', 'default'))
 	{
 		showError ('You are not authorized for viewing information about objects.', __FUNCTION__);
 		return;
@@ -3022,7 +3022,7 @@ function renderSearchResults ()
 			switch ($where)
 			{
 				case 'object':
-					startPortlet ("<a href='${root}?page=objects'>Objects</a>");
+					startPortlet ("<a href='${root}?page=depot'>Objects</a>");
 					echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
 					echo '<tr><th>Common name</th><th>Visible label</th><th>Asset tag</th><th>Barcode</th></tr>';
 					foreach ($what as $obj)
@@ -5063,7 +5063,6 @@ function renderCellFilterPortlet ($preselect, $realm, $bypass_name = '', $bypass
 			$myPreselect = array();
 			foreach ($preselect['pnamelist'] as $pname)
 				$myPreselect[] = array ('id' => $pname);
-			echo '<tr><td colspan=2 class=tagbox><hr></td></tr>';
 			foreach ($myPredicates as $pinfo)
 				renderTagCheckbox ('cfp', $myPreselect, $pinfo);
 		}
