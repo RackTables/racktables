@@ -5023,11 +5023,14 @@ function renderCellFilterPortlet ($preselect, $realm, $bypass_name = '', $bypass
 		echo $hr;
 		$hr = $ruler;
 		$andor = strlen ($preselect['andor']) ? $preselect['andor'] : getConfigVar ('FILTER_DEFAULT_ANDOR');
-		echo '<tr><td class=tagbox><input type=radio name=andor value=and';
-		echo ($andor == 'and' ? ' checked' : '') . '>and</input></td>';
-		echo '<td class=tagbox><input type=radio name=andor value=or';
-		echo ($andor == 'or' ? ' checked' : '') . '>or</input></td>';
-		echo "</td></tr>";
+		echo '<tr>';
+		foreach (array ('and', 'or') as $boolop)
+		{
+			$class = $andor == $boolop ? 'seltagbox' : 'tagbox';
+			$checked = $andor == $boolop ? ' checked' : '';
+			echo "<td class=${class}><input type=radio name=andor value=${boolop}";
+			echo $checked . ">${boolop}</input></td>";
+		}
 	}
 	// tags block
 	if (getConfigVar ('FILTER_SUGGEST_TAGS') == 'yes' or count ($preselect['tagidlist']))
@@ -5072,7 +5075,8 @@ function renderCellFilterPortlet ($preselect, $realm, $bypass_name = '', $bypass
 	{
 		echo $hr;
 		$hr = $ruler;
-		echo "<tr><td colspan=2><textarea name=cfe>\n" . $preselect['extratext'];
+		$class = isset ($preselect['extraclass']) ? 'class=' . $preselect['extraclass'] : '';
+		echo "<tr><td colspan=2><textarea name=cfe ${class}>\n" . $preselect['extratext'];
 		echo "</textarea></td></tr>\n";
 	}
 	// submit block

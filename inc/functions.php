@@ -1277,7 +1277,7 @@ function getCellFilter ()
 			}
 	}
 	if (isset ($_REQUEST['cfe']))
-		$ret['extratext'] = $_REQUEST['cfe'];
+		$ret['extratext'] = trim ($_REQUEST['cfe']);
 	$finaltext = array();
 	if (strlen ($ret['text']))
 		$finaltext[] = '(' . $ret['text'] . ')';
@@ -1288,6 +1288,11 @@ function getCellFilter ()
 	{
 		$parse = spotPayload ($finaltext, 'SYNT_EXPR');
 		$ret['expression'] = $parse['result'] == 'ACK' ? $parse['load'] : NULL;
+		// It's not quite fair enough to put the blame of the whole text onto
+		// non-empty "extra" portion of it, but it's the only user-generated portion
+		// of it, thus the most probable cause of parse error.
+		if (strlen ($ret['extratext']))
+			$ret['extraclass'] = $parse['result'] == 'ACK' ? 'validation-success' : 'validation-error';
 	}
 	return $ret;
 }
