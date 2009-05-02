@@ -236,7 +236,7 @@ function renderIndex ()
 						<?php printImageHREF ('rackspace'); ?></a></h1>
 					</td>
 					<td>
-						<h1><a href='<?php echo makeHref(array('page'=>'objects')) ?>'>Objects<br>
+						<h1><a href='<?php echo makeHref(array('page'=>'depot')) ?>'>Objects<br>
 						<?php printImageHREF ('objects'); ?></a></h1>
 					</td>
 					<td>
@@ -831,8 +831,13 @@ function renderRackObject ($object_id = 0)
 		echo "<tr><th width='50%' class=tdright>Common name:</th><td class=tdleft>${info['name']}</td></tr>\n";
 	elseif (considerConfiguredConstraint ('object', $object_id, 'NAMEWARN_LISTSRC'))
 		echo "<tr><td colspan=2 class=msg_error>Common name is missing.</td></tr>\n";
-	echo "<tr><th width='50%' class=tdright>Object type:</th>";
-	echo "<td class=tdleft><a href='".makeHref(array('page'=>'objgroup', 'group_id'=>$info['objtype_id'], 'hl_object_id'=>$object_id))."'>${info['objtype_name']}</a></td></tr>\n";
+	echo "<tr><th width='50%' class=tdright>Object type:</th><td class=tdleft><a href='";
+	echo makeHref (array (
+		'page' => 'depot',
+		'tab' => 'default',
+		'cfe' => '{$typeid_' . $info['objtype_id'] . '}'
+	));
+	echo "'>${info['objtype_name']}</a></td></tr>\n";
 	if (!empty ($info['asset_no']))
 		echo "<tr><th width='50%' class=tdright>Asset tag:</th><td class=tdleft>${info['asset_no']}</td></tr>\n";
 	elseif (considerConfiguredConstraint ('object', $object_id, 'ASSETWARN_LISTSRC'))
@@ -846,7 +851,19 @@ function renderRackObject ($object_id = 0)
 	foreach (getAttrValues ($object_id, TRUE) as $record)
 		if (!empty ($record['value']))
 			echo "<tr><th width='50%' class=sticker>${record['name']}:</th><td class=sticker>${record['a_value']}</td></tr>\n";
-	printTagTRs (makeHref(array('page'=>'objgroup', 'tab'=>'default', 'group_id'=>$info['objtype_id']))."&");
+	printTagTRs
+	(
+		makeHref
+		(
+			array
+			(
+				'page'=>'depot',
+				'tab'=>'default',
+				'andor' => 'and',
+				'cfe'=>'{$typeid_' . $info['objtype_id'] . '}'
+			)
+		)."&"
+	);
 	echo "</table><br>\n";
 	finishPortlet();
 
@@ -1768,121 +1785,6 @@ function renderMolecule ($mdata, $object_id)
 		}
 		echo "</table>\n";
 	}
-}
-
-function renderObjectSpace ()
-{
-	global $taglist, $tagtree;
-	showMessageOrError();
-	echo "<table border=0 class=objectview>\n";
-	echo "<tr><td class=pcleft width='50%'>";
-	startPortlet ('View all by type');
-	$groupInfo = getObjectGroupInfo();
-	if ($groupInfo === NULL)
-	{
-		showError ('getObjectGroupInfo() failed', __FUNCTION__);
-		return;
-	}
-	if (count ($groupInfo) == 0)
-		echo "No objects exist in DB";
-	else
-	{
-		echo '<div align=left><ul>';
-		foreach ($groupInfo as $gi)
-			echo "<li><a href='".makeHref(array('page'=>'objgroup', 'group_id'=>$gi['id']))."'>${gi['name']}</a> (${gi['count']})</li>";
-		echo '</ul></div>';
-	}
-	finishPortlet();
-
-	echo '</td><td class=pcright>';
-
-	startPortlet ('View all by tag');
-	if (count ($taglist) == 0)
-		echo "No tags exist in DB";
-	else
-		renderTagCloud ('object');
-	finishPortlet();
-	echo "</td></tr></table>\n";
-}
-
-function renderObjectGroup ()
-{
-	global $pageno, $nextorder;
-	showMessageOrError();
-	assertUIntArg ('group_id', __FUNCTION__, TRUE);
-	$group_id = $_REQUEST['group_id'];
-	$tagfilter = getTagFilter();
-	$tagfilter_str = getTagFilterStr ($tagfilter);
-	echo "<table border=0 class=objectview>\n";
-	echo "<tr><td class=pcleft width='25%'>";
-	startPortlet ('change type');
-	$groupInfo = getObjectGroupInfo();
-	if ($groupInfo === NULL)
-	{
-		showError ('getObjectGroupInfo() failed', __FUNCTION__);
-		return;
-	}
-	if (count ($groupInfo) == 0)
-		echo "No objects exist in DB";
-	else
-	{
-		echo '<div align=left><ul>';
-		foreach ($groupInfo as $gi)
-		{
-			echo "<li><a href='".makeHref(array('page'=>$pageno, 'group_id'=>$gi['id']))."${tagfilter_str}'>";
-			if ($gi['id'] == $group_id)
-				echo '<strong>';
-			echo "${gi['name']}</a>";
-			if ($gi['id'] == $group_id)
-				echo '</strong>';
-			echo " (${gi['count']})";
-			if ($gi['id'] == $group_id)
-				echo ' &larr;';
-			echo "</li>";
-		}
-		echo '</ul></div>';
-	}
-	finishPortlet();
-
-	echo '</td><td class=pcleft>';
-
-	$objects = getObjectList ($group_id, $tagfilter);
-	startPortlet ('Objects (' . count ($objects) . ')');
-	if ($objects === NULL)
-	{
-		showError ('getObjectList() failed', __FUNCTION__);
-		return;
-	}
-	echo '<br><br><table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
-	echo '<tr><th>Common name</th><th>Visible label</th><th>Asset tag</th><th>Barcode</th><th>Row/Rack</th></tr>';
-	$order = 'odd';
-	foreach ($objects as $obj)
-	{
-		if (isset ($_REQUEST['hl_object_id']) and $_REQUEST['hl_object_id'] == $obj['id'])
-			$secondclass = 'tdleft port_highlight';
-		else
-			$secondclass = 'tdleft';
-		$tags = loadEntityTags ('object', $obj['id']);
-		echo "<tr class=row_${order} valign=top><td class='${secondclass}'><a href='".makeHref(array('page'=>'object', 'object_id'=>$obj['id']))."'><strong>${obj['dname']}</strong></a>";
-		if (count ($tags))
-			echo '<br><small>' . serializeTags ($tags, makeHref(array('page'=>$pageno, 'tab'=>'default', 'group_id'=>$group_id))."&") . '</small>';
-		echo "</td><td class='${secondclass}'>${obj['label']}</td>";
-		echo "<td class='${secondclass}'>${obj['asset_no']}</td>";
-		echo "<td class='${secondclass}'>${obj['barcode']}</td>";
-		if ($obj['rack_id'])
-			echo "<td class='${secondclass}'><a href='".makeHref(array('page'=>'row', 'row_id'=>$obj['row_id']))."'>${obj['Row_name']}</a>/<a href='".makeHref(array('page'=>'rack', 'rack_id'=>$obj['rack_id']))."'>${obj['Rack_name']}</a></td>";
-		else
-			echo "<td class='${secondclass}'>Unmounted</td>";
-		echo '</tr>';
-		$order = $nextorder[$order];
-	}
-	echo '</table>';
-	finishPortlet();
-
-	echo "</td><td class=pcright width='25%'>";
-
-	renderTagFilterPortlet ($tagfilter, 'object', 'group_id', $group_id);
-	echo "</td></tr></table>\n";
 }
 
 function renderEmptyPortsSelect ($port_id, $type_id)
@@ -4887,20 +4789,6 @@ function renderTagRowForViewer ($taginfo, $level = 0)
 		$self ($kid, $level + 1);
 }
 
-// FIXME: generated hyperlink must depend on the realm given
-function renderTagRowForCloud ($taginfo, $realm, $level = 0)
-{
-	$self = __FUNCTION__;
-	echo "<tr><td align=left style='padding-left: " . ($level * 16) . "px;'>";
-	echo "<a href='".makeHref(array('page'=>'objgroup', 'group_id'=>0, 'tagfilter[]'=>$taginfo['id']))."'>";
-	echo $taginfo['tag'] . '</a>';
-	if (isset ($taginfo['refcnt'][$realm]))
-		echo ' (' . $taginfo['refcnt'][$realm] . ')';
-	echo "</td></tr>\n";
-	foreach ($taginfo['kids'] as $kid)
-		$self ($kid, $realm, $level + 1);
-}
-
 function renderTagRowForEditor ($taginfo, $level = 0)
 {
 	$self = __FUNCTION__;
@@ -4949,19 +4837,6 @@ function renderTagTree ()
 		echo "</tr>\n";
 	}
 	echo '</table></center>';
-}
-
-function renderTagCloud ($realm = '')
-{
-	global $taglist, $tagtree;
-	echo '<table>';
-	foreach (getObjectiveTagTree ($tagtree, $realm) as $taginfo)
-	{
-		echo '<tr>';
-		renderTagRowForCloud ($taginfo, $realm);
-		echo "</tr>\n";
-	}
-	echo '</table>';
 }
 
 function renderTagTreeEditor ()

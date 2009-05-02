@@ -149,41 +149,6 @@ function dynamic_title_search ()
 	return $ret;
 }
 
-function dynamic_title_objgroup ()
-{
-	global $pageno;
-	$ret = array();
-	switch ($pageno)
-	{
-		case 'objgroup':
-			assertUIntArg ('group_id', __FUNCTION__, TRUE);
-			$group_id = $_REQUEST['group_id'];
-			$groupInfo = getObjectGroupInfo();
-			if ($groupInfo == NULL)
-			{
-				showError ('getObjectGroupInfo() failed', __FUNCTION__);
-				return NULL;
-			}
-			$ret['name'] = $groupInfo[$group_id]['name'];
-			$ret['params']['group_id'] = $group_id;
-			break;
-		case 'object':
-			assertUIntArg ('object_id', __FUNCTION__);
-			$objectInfo = getObjectInfo ($_REQUEST['object_id'], FALSE);
-			if ($objectInfo == NULL)
-			{
-				showError ('getObjectInfo() failed', __FUNCTION__);
-				return NULL;
-			}
-			$ret['name'] = $objectInfo['objtype_name'];
-			$ret['params']['group_id'] = $objectInfo['objtype_id'];
-			break;
-		default:
-			return NULL;
-	}
-	return $ret;
-}
-
 function dynamic_title_user ()
 {
 	$userinfo = getUserInfo ($_REQUEST['user_id']);

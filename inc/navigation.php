@@ -35,33 +35,17 @@ $msgcode['updateRow']['ERR'] = 100;
 $msgcode['deleteRow']['OK'] = 77;
 $msgcode['deleteRow']['ERR'] = 100;
 
-$page['objects']['title'] = 'Objects';
-$page['objects']['parent'] = 'index';
-$tab['objects']['default'] = 'View';
-$tab['objects']['addmore'] = 'Add more';
-$tabhandler['objects']['default'] = 'renderObjectSpace';
-$tabhandler['objects']['addmore'] = 'renderAddMultipleObjectsForm';
-$ophandler['objects']['addmore']['addObjects'] = 'addMultipleObjects';
-$ophandler['objects']['addmore']['addLotOfObjects'] = 'addLotOfObjects';
-$ophandler['objects']['default']['deleteObject'] = 'deleteObject';
+$page['depot']['parent'] = 'index';
+$page['depot']['title'] = 'Objects';
+$tab['depot']['default'] = 'Browse';
+$tab['depot']['addmore'] = 'Add more';
+$tabhandler['depot']['default'] = 'renderDepot';
+$tabhandler['depot']['addmore'] = 'renderAddMultipleObjectsForm';
+$ophandler['depot']['addmore']['addObjects'] = 'addMultipleObjects';
+$ophandler['depot']['addmore']['addLotOfObjects'] = 'addLotOfObjects';
+$ophandler['depot']['default']['deleteObject'] = 'deleteObject';
 $msgcode['deleteObject']['OK'] = 76;
 $msgcode['deleteObject']['ERR'] = 100;
-
-$page['depot'] = array
-(
-	'parent' => 'index',
-	'title' => 'Depot',
-);
-$tab['depot'] = array
-(
-	'default' => 'Browse',
-	'addmore' => 'Add more',
-);
-$tabhandler['depot'] = array
-(
-	'default' => 'renderDepot',
-	'addmore' => 'renderAddMultipleObjectsForm',
-);
 
 $page['row']['title_handler'] = 'dynamic_title_row';
 $page['row']['bypass'] = 'row_id';
@@ -120,17 +104,10 @@ $msgcode['linkFileToEntity']['ERR2'] = 100;
 $msgcode['unlinkFile']['OK'] = 72;
 $msgcode['unlinkFile']['ERR'] = 182;
 
-$page['objgroup']['title_handler'] = 'dynamic_title_objgroup';
-$page['objgroup']['handler'] = 'renderObjectGroup';
-$page['objgroup']['bypass'] = 'group_id';
-$page['objgroup']['bypass_type'] = 'uint0';
-$page['objgroup']['parent'] = 'objects';
-$ophandler['objgroup']['default']['deleteObject'] = 'deleteObject';
-
 $page['object']['title_handler'] = 'dynamic_title_object';
 $page['object']['bypass'] = 'object_id';
 $page['object']['bypass_type'] = 'uint';
-$page['object']['parent'] = 'objgroup';
+$page['object']['parent'] = 'depot';
 $tab['object']['default'] = 'View';
 $tab['object']['edit'] = 'Properties';
 $tab['object']['rackspace'] = 'Rackspace';
