@@ -1812,7 +1812,7 @@ function renderDepot ()
 	startPortlet ('Objects (' . count ($objects) . ')');
 	if ($objects === NULL)
 	{
-		showError ('getObjectList() failed', __FUNCTION__);
+		showError ('Fatal error retrieving object list', __FUNCTION__);
 		return;
 	}
 	echo '<br><br><table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';

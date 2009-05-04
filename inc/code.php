@@ -1110,9 +1110,9 @@ function findAutoTagWarnings ($expr)
 						'class' => 'warning',
 						'text' => "Local user account '${recid}' does not exist."
 					));
-				case (mb_ereg_match ('^\$page_[[:alpha:]]+$', $expr['load'])):
-				case (mb_ereg_match ('^\$tab_[[:alpha:]]+$', $expr['load'])):
-				case (mb_ereg_match ('^\$op_[[:alpha:]]+$', $expr['load'])):
+				case (mb_ereg_match ('^\$page_[[:alnum:]]+$', $expr['load'])):
+				case (mb_ereg_match ('^\$tab_[[:alnum:]]+$', $expr['load'])):
+				case (mb_ereg_match ('^\$op_[[:alnum:]]+$', $expr['load'])):
 				case (mb_ereg_match ('^\$any_op$', $expr['load'])):
 				case (mb_ereg_match ('^\$any_rack$', $expr['load'])):
 				case (mb_ereg_match ('^\$any_object$', $expr['load'])):
@@ -1126,6 +1126,8 @@ function findAutoTagWarnings ($expr)
 				case (mb_ereg_match ('^\$typeid_[[:digit:]]+$', $expr['load'])): // FIXME: check value validity
 				case (mb_ereg_match ('^\$cn_.+$', $expr['load'])): // FIXME: check name validity and asset existence
 				case (mb_ereg_match ('^\$lgcn_.+$', $expr['load'])): // FIXME: check name validity
+				case (mb_ereg_match ('^\$fromvlan_[[:digit:]]+$', $expr['load'])):
+				case (mb_ereg_match ('^\$tovlan_[[:digit:]]+$', $expr['load'])):
 				case (mb_ereg_match ('^\$unmounted$', $expr['load'])):
 					return array();
 				default:
