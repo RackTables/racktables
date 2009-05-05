@@ -241,7 +241,7 @@ function listCells ($realm)
 			'user_id' => 'user_id',
 			'user_name' => 'user_name',
 			'user_password_hash' => 'user_password_hash',
-			'user_realname' => 'user_realname'
+			'user_realname' => 'user_realname',
 		);
 		$keycolumn = 'user_id';
 		$ordcolumns = array ('user_name');
@@ -253,7 +253,7 @@ function listCells ($realm)
 			'id' => 'id',
 			'ip' => 'INET_NTOA(IPv4Network.ip)',
 			'mask' => 'mask',
-			'name' => 'name'
+			'name' => 'name',
 		);
 		$keycolumn = 'id';
 		$ordcolumns = array ('ip', 'mask');
@@ -273,6 +273,23 @@ function listCells ($realm)
 		);
 		$keycolumn = 'id';
 		$ordcolumns = array ('name');
+		break;
+	case 'ipv4vs':
+		$table = 'IPv4VS';
+		$columns = array
+		(
+			'id' => 'id',
+			'vip' => 'INET_NTOA(vip)',
+			'vport' => 'vport',
+			'proto' => 'proto',
+			'name' => 'name',
+			'vsconfig' => 'vsconfig',
+			'rsconfig' => 'rsconfig',
+			'poolcount' => '(select count(vs_id) from IPv4LB where vs_id = id)',
+			'dname' => 'CONCAT_WS("/", CONCAT_WS(":", INET_NTOA(vip), vport), proto)',
+		);
+		$keycolumn = 'id';
+		$ordcolumns = array ('vip', 'proto', 'vport');
 		break;
 	default:
 		showError ('invalid arg', __FUNCTION__);
@@ -2675,24 +2692,6 @@ function commitUpdateVS ($vsid = 0, $vip = '', $vport = 0, $proto = '', $name = 
 		return TRUE;
 }
 
-// Return the list of virtual services, indexed by vs_id.
-// Each record will be shown with its basic info plus RS pools counter.
-function getVSList ($tagfilter = array())
-{
-	$whereclause = getWhereClause ($tagfilter);
-	$query = "select vs.id, inet_ntoa(vip) as vip, vport, proto, vs.name, vs.vsconfig, vs.rsconfig, count(rspool_id) as poolcount " .
-		"from IPv4VS as vs left join IPv4LB as lb on vs.id = lb.vs_id " .
-		"left join TagStorage on vs.id = TagStorage.entity_id and entity_realm = 'ipv4vs' " . 
-		"where true ${whereclause} group by vs.id order by vs.vip, proto, vport";
-	$result = useSelectBlade ($query, __FUNCTION__);
-	$ret = array ();
-	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-		foreach (array ('vip', 'vport', 'proto', 'name', 'vsconfig', 'rsconfig', 'poolcount') as $cname)
-			$ret[$row['id']][$cname] = $row[$cname];
-	$result->closeCursor();
-	return $ret;
-}
-
 // Return the list of RS pool, indexed by pool id.
 function getRSPoolList ($tagfilter = array())
 {
@@ -3825,7 +3824,7 @@ function deleteLDAPCacheRecord ($form_username)
 function discardLDAPCache ($maxage = 0)
 {
 	global $dbxlink;
-	$dbxlink->exec ('DELETE from LDAPCache WHERE NOW() - first_success >= ${maxage} or NOW() < first_success');
+	$dbxlink->exec ("DELETE from LDAPCache WHERE NOW() - first_success >= ${maxage} or NOW() < first_success");
 }
 
 function getUserIDByUsername ($username)

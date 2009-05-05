@@ -2118,6 +2118,7 @@ function scanRealmByText ($realm = NULL, $ftext = '')
 	case 'user':
 	case 'ipv4net':
 	case 'file':
+	case 'ipv4vs':
 		if (!strlen ($ftext = trim ($ftext)))
 			$fexpr = array();
 		else
@@ -2133,4 +2134,13 @@ function scanRealmByText ($realm = NULL, $ftext = '')
 	}
 
 }
+
+function getIPv4VSOptions ()
+{
+	$ret = array();
+	foreach (listCells ('ipv4vs') as $vsid => $vsinfo)
+		$ret[$vsid] = $vsinfo['dname'] . (empty ($vsinfo['name']) ? '' : " (${vsinfo['name']})");
+	return $ret;
+}
+
 ?>

@@ -4200,9 +4200,6 @@ function renderRSPoolLBForm ($pool_id = 0)
 	showMessageOrError();
 
 	$poolInfo = getRSPoolInfo ($pool_id);
-	$vs_list = array ();
-	foreach (getVSList() as $vsid => $vsinfo)
-		$vs_list[$vsid] = buildVServiceName ($vsinfo) . (empty ($vsinfo['name']) ? '' : " (${vsinfo['name']})");
 
 	if (count ($poolInfo['lblist']))
 	{
@@ -4236,7 +4233,7 @@ function renderRSPoolLBForm ($pool_id = 0)
 	printOpFormIntro ('addLB');
 	echo "<tr valign=top><th>LB / VS</th><td class=tdleft>";
 	printSelect (getNarrowObjectList ('IPV4LB_LISTSRC'), 'object_id', NULL, 1);
-	printSelect ($vs_list, 'vs_id', NULL, 2);
+	printSelect (getIPv4VSOptions(), 'vs_id', NULL, 2);
 	echo "</td><td>";
 	printImageHREF ('add', 'Configure LB', TRUE, 5);
 	echo "</td></tr>\n";
@@ -4378,30 +4375,7 @@ function renderRSPool ($pool_id = 0)
 
 function renderVSList ()
 {
-	global $nextorder;
-	$tagfilter = getTagFilter();
-	$vslist = getVSList ($tagfilter);
-	echo "<table border=0 class=objectview>\n";
-	echo "<tr><td class=pcleft>";
-
-	startPortlet ('Virtual services (' . count ($vslist) . ')');
-	echo "<table class=widetable border=0 cellpadding=10 cellspacing=0 align=center>\n";
-	echo "<tr><th>endpoint, name, tags</th><th>VS configuration</th><th>RS configuration</th></tr>";
-	$order = 'odd';
-	foreach ($vslist as $vsid => $vsinfo)
-	{
-		echo "<tr align=left valign=top class=row_${order}><td class=tdleft>";
-		renderVSCell ($vsid);
-		echo "</td><td class=slbconf>${vsinfo['vsconfig']}</td>";
-		echo "<td class=slbconf>${vsinfo['rsconfig']}</td>";
-		echo "</tr>\n";
-		$order = $nextorder[$order];
-	}
-	echo "</table>";
-	finishPortlet();
-	echo '</td><td class=pcright>';
-	renderTagFilterPortlet ($tagfilter, 'ipv4vs');
-	echo '</td></tr></table>';
+	renderCellList ('ipv4vs', 'Virtual services');
 }
 
 function renderVSListEditForm ()
@@ -4433,7 +4407,7 @@ function renderVSListEditForm ()
 	echo "</form>\n";
 	finishPortlet();
 
-	$vslist = getVSList();
+	$vslist = listCells ('ipv4vs');
 	if (!count ($vslist))
 		return;
 	startPortlet ('Manage existing (' . count ($vslist) . ')');
@@ -5142,9 +5116,7 @@ function renderObjectSLB ($object_id)
 {
 	global $nextorder;
 	showMessageOrError();
-	$vs_list = $rsplist = array();
-	foreach (getVSList() as $vsid => $vsinfo)
-		$vs_list[$vsid] = buildVServiceName ($vsinfo) . (empty ($vsinfo['name']) ? '' : " (${vsinfo['name']})");
+	$rsplist = array();
 	foreach (getRSPoolList() as $pool_id => $poolInfo)
 		$rsplist[$pool_id] = $poolInfo['name'];
 
@@ -5152,7 +5124,7 @@ function renderObjectSLB ($object_id)
 	echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
 	printOpFormIntro ('addLB');
 	echo "<tr valign=top><th>VS / RS pool</th><td class=tdleft>";
-	printSelect ($vs_list, 'vs_id', NULL, 1);
+	printSelect (getIPv4VSOptions(), 'vs_id', NULL, 1);
 	echo "</td><td>";
 	printSelect ($rsplist, 'pool_id', NULL, 2);
 	echo "</td><td>";
@@ -5781,6 +5753,9 @@ function renderCell ($cell)
 	case 'file':
 		renderFileCell ($cell);
 		break;
+	case 'ipv4vs':
+		renderIPv4VSCell ($cell);
+		break;
 	default:
 		showError ('odd data', __FUNCTION__);
 		break;
@@ -5844,8 +5819,10 @@ function renderIPv4VSCell ($vsinfo)
 	printImageHREF ('VS');
 	echo "</td><td>";
 	echo "<a href='${root}?page=ipv4vs&vs_id=${vsinfo['id']}'>";
-	echo buildVServiceName ($vsinfo);
-	echo "</a></td></tr><tr><td>";
+	// FIXME: this is a workaround
+	if (!isset ($vsinfo['dname']))
+		$vsinfo['dname'] = buildVServiceName ($vsinfo);
+	echo $vsinfo['dname'] . "</a></td></tr><tr><td>";
 	echo $vsinfo['name'];
 	echo '</td></tr><tr><td>';
 	$tags = loadEntityTags ('ipv4vs', $vsinfo['id']);
