@@ -291,6 +291,20 @@ function listCells ($realm)
 		$keycolumn = 'id';
 		$ordcolumns = array ('vip', 'proto', 'vport');
 		break;
+	case 'ipv4rspool':
+		$table = 'IPv4RSPool';
+		$columns = array
+		(
+			'id' => 'id',
+			'name' => 'name',
+			'refcnt' => '(select count(rspool_id) from IPv4LB where rspool_id = id)',
+			'rscount' => '(select count(rspool_id) from IPv4RS where rspool_id = IPv4RSPool.id)',
+			'vsconfig' => 'vsconfig',
+			'rsconfig' => 'rsconfig',
+		);
+		$keycolumn = 'id';
+		$ordcolumns = array ('name', 'id');
+		break;
 	default:
 		showError ('invalid arg', __FUNCTION__);
 		return NULL;
@@ -2690,23 +2704,6 @@ function commitUpdateVS ($vsid = 0, $vip = '', $vport = 0, $proto = '', $name = 
 		return FALSE;
 	else
 		return TRUE;
-}
-
-// Return the list of RS pool, indexed by pool id.
-function getRSPoolList ($tagfilter = array())
-{
-	$whereclause = getWhereClause ($tagfilter);
-	$query = "select pool.id, pool.name, count(rspool_id) as refcnt, pool.vsconfig, pool.rsconfig " .
-		"from IPv4RSPool as pool left join IPv4LB as lb on pool.id = lb.rspool_id " .
-		"left join TagStorage on pool.id = TagStorage.entity_id and entity_realm = 'ipv4rspool' " .
-		"where true ${whereclause} group by pool.id order by pool.name, pool.id";
-	$result = useSelectBlade ($query, __FUNCTION__);
-	$ret = array ();
-	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-		foreach (array ('name', 'refcnt', 'vsconfig', 'rsconfig') as $cname)
-			$ret[$row['id']][$cname] = $row[$cname];
-	$result->closeCursor();
-	return $ret;
 }
 
 function loadThumbCache ($rack_id = 0)

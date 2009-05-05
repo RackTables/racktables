@@ -4276,15 +4276,12 @@ function renderVServiceLBForm ($vs_id = 0)
 		finishPortlet();
 	}
 
-	$rsplist = array();
-	foreach (getRSPoolList() as $pool_id => $poolInfo)
-		$rsplist[$pool_id] = $poolInfo['name'];
 	startPortlet ('Add new');
 	echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
 	printOpFormIntro ('addLB');
 	echo "<tr valign=top><th>LB / RS pool</th><td class=tdleft>";
 	printSelect (getNarrowObjectList ('IPV4LB_LISTSRC'), 'object_id', NULL, 1);
-	printSelect ($rsplist, 'pool_id', NULL, 2);
+	printSelect (getIPv4RSPoolOptions(), 'pool_id', NULL, 2);
 	echo "</td><td>";
 	printImageHREF ('add', 'Configure LB', TRUE, 5);
 	echo "</td></tr>\n";
@@ -4445,41 +4442,7 @@ function renderVSListEditForm ()
 
 function renderRSPoolList ()
 {
-	global $pageno, $nextorder;
-	$tagfilter = getTagFilter();
-	$pool_list = getRSPoolList ($tagfilter);
-	if ($pool_list === NULL)
-	{
-		showError ('getRSPoolList() failed', __FUNCTION__);
-		return;
-	}
-	echo "<table border=0 class=objectview>\n";
-	echo "<tr><td class=pcleft>";
-	startPortlet ('RS pools (' . count ($pool_list) . ')');
-	echo "<table class=widetable border=0 cellpadding=10 cellspacing=0 align=center>\n";
-	echo "<tr><th>name, refcnt, tags</th><th>VS configuration</th><th>RS configuration</th></tr>";
-	$order = 'odd';
-	foreach ($pool_list as $pool_id => $pool_info)
-	{
-		$pooltags = loadEntityTags ('ipv4rspool', $pool_id);
-		echo "<tr valign=top class=row_${order}><td class=tdleft>";
-		echo "<a href='".makeHref(array('page'=>'ipv4rspool', 'pool_id'=>$pool_id))."'>" . (empty ($pool_info['name']) ? 'ANONYMOUS' : $pool_info['name']) . '</a>';
-		echo ($pool_info['refcnt'] ? ", ${pool_info['refcnt']}" : '');
-		if (count ($pooltags))
-		{
-			echo '<br>';
-			echo serializeTags ($pooltags, makeHref(array('page'=>$pageno, 'tab'=>'default'))."&");
-		}
-		echo "</td><td class=tdleft><pre>${pool_info['vsconfig']}</pre></td>";
-		echo "<td class=tdleft><pre>${pool_info['rsconfig']}</pre></td>";
-		echo "</tr>\n";
-		$order = $nextorder[$order];
-	}
-	echo "</table>";
-	finishPortlet ();
-	echo '</td><td class=pcright>';
-	renderTagFilterPortlet ($tagfilter, 'ipv4rspool');
-	echo '</td></tr></table>';
+	renderCellList ('ipv4rspool', 'RS pools');
 }
 
 function editRSPools ()
@@ -4501,7 +4464,7 @@ function editRSPools ()
 	echo "</table></form>";
 	finishPortlet();
 
-	$pool_list = getRSPoolList();
+	$pool_list = listCells ('ipv4rspool');
 	if (!count ($pool_list))
 		return;
 	startPortlet ('Manage existing (' . count ($pool_list) . ')');
@@ -4512,7 +4475,7 @@ function editRSPools ()
 	{
 		printOpFormIntro ('upd', array ('pool_id' => $pool_id));
 		echo "<tr valign=top class=row_${order}><td>";
-		if ($pool_info['refcnt'])
+		if ($pool_info['refcnt'] or $pool_info['rscount'])
 			printImageHREF ('nodelete', 'RS pool is used ' . $pool_info['refcnt'] . ' time(s)');
 		else
 		{
@@ -4536,7 +4499,7 @@ function renderRealServerList ()
 {
 	global $nextorder;
 	$rslist = getRSList ();
-	$pool_list = getRSPoolList ();
+	$pool_list = listCells ('ipv4rspool');
 	echo "<table class=widetable border=0 cellpadding=10 cellspacing=0 align=center>\n";
 	echo "<tr><th>RS pool</th><th>in service</th><th>real IP address</th><th>real port</th><th>RS configuration</th></tr>";
 	$order = 'even';
@@ -5116,9 +5079,8 @@ function renderObjectSLB ($object_id)
 {
 	global $nextorder;
 	showMessageOrError();
-	$rsplist = array();
-	foreach (getRSPoolList() as $pool_id => $poolInfo)
-		$rsplist[$pool_id] = $poolInfo['name'];
+	// Keep the list in a variable to assist in decoding pool name below.
+	$rsplist = getIPv4RSPoolOptions();
 
 	startPortlet ('Add new');
 	echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
@@ -5755,6 +5717,9 @@ function renderCell ($cell)
 		break;
 	case 'ipv4vs':
 		renderIPv4VSCell ($cell);
+		break;
+	case 'ipv4rspool':
+		renderRSPoolCell ($cell['id'], $cell['name']);
 		break;
 	default:
 		showError ('odd data', __FUNCTION__);
