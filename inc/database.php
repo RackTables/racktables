@@ -232,6 +232,7 @@ function listCells ($realm)
 			'objtype_name' => '(select dict_value from Dictionary where dict_key = objtype_id)',
 		);
 		$keycolumn = 'id';
+		$ordcolumns = array ('name');
 		break;
 	case 'user':
 		$table= 'UserAccount';
@@ -243,6 +244,7 @@ function listCells ($realm)
 			'user_realname' => 'user_realname'
 		);
 		$keycolumn = 'user_id';
+		$ordcolumns = array ('user_name');
 		break;
 	case 'ipv4net':
 		$table = 'IPv4Network';
@@ -254,6 +256,7 @@ function listCells ($realm)
 			'name' => 'name'
 		);
 		$keycolumn = 'id';
+		$ordcolumns = array ('ip', 'mask');
 		break;
 	case 'file':
 		$table = 'File';
@@ -269,6 +272,7 @@ function listCells ($realm)
 			'comment' => 'comment',
 		);
 		$keycolumn = 'id';
+		$ordcolumns = array ('name');
 		break;
 	default:
 		showError ('invalid arg', __FUNCTION__);
@@ -279,7 +283,10 @@ function listCells ($realm)
 		// Automatically prepend table name to each single column, but leave all others intact.
 		$query .= ', ' . ($alias == $expression ? "${table}.${alias}" : "${expression} as ${alias}");
 	$query .= " from ${table} left join TagStorage on entity_realm = '${realm}' and entity_id = ${table}.${keycolumn}";
-	$query .= " order by ${table}.${keycolumn}, tag_id";
+	$query .= " order by ";
+	foreach ($ordcolumns as $oc)
+		$query .= "${table}.${oc}, ";
+	$query .= " tag_id";
 	$result = useSelectBlade ($query, __FUNCTION__);
 	$ret = array();
 	global $taglist;
