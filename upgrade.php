@@ -225,7 +225,7 @@ CREATE TABLE `LDAPCache` (
   UNIQUE KEY `presented_username` (`presented_username`),
   KEY `scanidx` (`presented_username`,`successful_hash`)
 ) ENGINE=InnoDB;";
-			
+			$query[] = "alter table UserAccount modify column user_password_hash char(40) NULL";
 			$query[] = "UPDATE Config SET varvalue = '0.17.0' WHERE varname = 'DB_VERSION'";
 
 			break;
