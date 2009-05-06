@@ -5612,11 +5612,11 @@ function printOpFormIntro ($opname, $extra = array(), $upload = FALSE)
 	echo "<form method=post name=${opname} action='${root}process.php?page=${pageno}&tab=${tabno}&op=${opname}'";
 	if ($upload)
 		echo " enctype='multipart/form-data'";
-	echo ">\n";
+	echo ">";
 	if (isset ($page[$pageno]['bypass']) and isset ($_REQUEST[$page[$pageno]['bypass']]))
 		$extra[$page[$pageno]['bypass']] = $_REQUEST[$page[$pageno]['bypass']];
 	foreach ($extra as $inputname => $inputvalue)
-		echo "<input type=hidden name=${inputname} value='${inputvalue}'>\n";
+		echo "<input type=hidden name=${inputname} value='${inputvalue}'>";
 }
 
 // This is a dual-purpose formating function:
