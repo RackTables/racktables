@@ -1297,47 +1297,6 @@ function getCellFilter ()
 	return $ret;
 }
 
-function buildWideRedirectURL ($log, $nextpage = NULL, $nexttab = NULL, $moreArgs = array())
-{
-	global $root, $page, $pageno, $tabno;
-	if ($nextpage === NULL)
-		$nextpage = $pageno;
-	if ($nexttab === NULL)
-		$nexttab = $tabno;
-	$url = "${root}?page=${nextpage}&tab=${nexttab}";
-	if (isset ($page[$nextpage]['bypass']))
-		$url .= '&' . $page[$nextpage]['bypass'] . '=' . $_REQUEST[$page[$nextpage]['bypass']];
-
-	if (count($moreArgs)>0)
-	{
-		foreach($moreArgs as $arg=>$value)
-		{
-			if (gettype($value) == 'array')
-			{
-				foreach ($value as $v)
-				{
-					$url .= '&'.urlencode($arg.'[]').'='.urlencode($v);
-				}
-			}
-			else
-				$url .= '&'.urlencode($arg).'='.urlencode($value);
-		}
-	}
-
-	$_SESSION['log'] = $log;
-	return $url;
-}
-
-function buildRedirectURL ($callfunc, $status, $args = array(), $nextpage = NULL, $nexttab = NULL)
-{
-	global $pageno, $tabno, $msgcode;
-	if ($nextpage === NULL)
-		$nextpage = $pageno;
-	if ($nexttab === NULL)
-		$nexttab = $tabno;
-	return buildWideRedirectURL (oneLiner ($msgcode[$callfunc][$status], $args), $nextpage, $nexttab);
-}
-
 // Return an empty message log.
 function emptyLog ()
 {

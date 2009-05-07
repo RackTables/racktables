@@ -1,5 +1,7 @@
 <?php
 
+// Include init after ophandlers, not before, so local.php can redefine things later.
+require 'inc/ophandlers.php';
 require 'inc/init.php';
 
 // FIXME: find a better way to handle this error
