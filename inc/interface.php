@@ -336,20 +336,19 @@ function renderRackspaceRowEditor ()
 	echo "<tr><th>&nbsp;</th><th>Name</th><th>&nbsp;</th></tr>\n";
 	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
 		printNewItemTR();
-	$rackrowList = getRackspace ();
-	foreach ($rackrowList as $rackrow)
+	foreach (getRackRows() as $row_id => $row_name)
 	{
 		echo "<tr><td>";
-		if ($rackrow['count'])
+		if (count (getRacksForRow ($row_id)))
 			printImageHREF ('nodestroy', $rackrow['count'] . ' racks');
 		else
 		{
-			echo "<a href=\"".makeHrefProcess(array('op'=>'delete', 'row_id'=>$rackrow['row_id']))."\">";
+			echo "<a href=\"".makeHrefProcess(array('op'=>'delete', 'row_id'=>$row_id))."\">";
 			printImageHREF ('destroy', 'Delete row');
 			echo "</a>";
 		}
-		printOpFormIntro ('updateRow', array ('row_id' => $rackrow['row_id']));
-		echo "</td><td><input type=text name=name value='${rackrow['row_name']}'></td><td>";
+		printOpFormIntro ('updateRow', array ('row_id' => $row_id));
+		echo "</td><td><input type=text name=name value='${row_name}'></td><td>";
 		printImageHREF ('save', 'Save changes', TRUE);
 		echo "</form></td></tr>\n";
 	}
