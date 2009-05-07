@@ -292,28 +292,29 @@ function renderRackspace ()
 		if (!count ($rackList) and count ($tagfilter))
 			continue;
 		$rackListIdx = 0;
-		foreach ($rackList as $rack)
-		{
-			if ($rackListIdx % $maxPerRow == 0)
+		echo "<tr class=row_${order}><th class=tdleft>";
+		echo "<a href='".makeHref(array('page'=>'row', 'row_id'=>$row_id))."${tagfilter_str}'>";
+		echo "${row_name}</a></th><td><table border=0 cellspacing=5><tr>";
+		if (!count ($rackList))
+			echo "<td>(empty row)</td>";
+		else
+			foreach ($rackList as $rack)
 			{
-				if ($rackListIdx > 0)
+				if ($rackListIdx > 0 and $maxPerRow > 0 and $rackListIdx % $maxPerRow == 0)
+				{
 					echo '</tr></table></tr>';
-				echo "<tr class=row_${order}><th class=tdleft>";
-				echo "<a href='".makeHref(array('page'=>'row', 'row_id'=>$row_id))."${tagfilter_str}'>";
-				echo "${row_name}</a>";
-				if ($rackListIdx > 0)
-					echo ' (continued)';
-				echo "</th><td><table border=0 cellspacing=5><tr>";
-				$order = $nextorder[$order];
+					echo "<tr class=row_${order}><th class=tdleft>${row_name} (continued)";
+					echo "</th><td><table border=0 cellspacing=5><tr>";
+					$order = $nextorder[$order];
+				}
+				echo "<td align=center><a href='".makeHref(array('page'=>'rack', 'rack_id'=>$rack['id']))."'>";
+				echo "<img border=0 width=${rackwidth} height=";
+				echo getRackImageHeight ($rack['height']);
+				echo " title='${rack['height']} units'";
+				echo "src='render_image.php?img=minirack&rack_id=${rack['id']}'>";
+				echo "<br>${rack['name']}</a></td>";
+				$rackListIdx++;
 			}
-			echo "<td align=center><a href='".makeHref(array('page'=>'rack', 'rack_id'=>$rack['id']))."'>";
-			echo "<img border=0 width=${rackwidth} height=";
-			echo getRackImageHeight ($rack['height']);
-			echo " title='${rack['height']} units'";
-			echo "src='render_image.php?img=minirack&rack_id=${rack['id']}'>";
-			echo "<br>${rack['name']}</a></td>";
-			$rackListIdx++;
-		}
 		echo "</tr></table></tr>\n";
 	}
 	echo "</table>\n";
@@ -387,8 +388,9 @@ function renderRow ($row_id = 0)
 	echo "</td></tr>\n";
 	echo "</table><br>\n";
 	finishPortlet();
+	renderTagFilterPortlet ($tagfilter, 'rack', 'row_id', $row_id);
 
-	echo "</td><td class=pcright rowspan=2>";
+	echo "</td><td class=pcright>";
 
 	global $nextorder;
 	$rackwidth = getRackImageWidth() * getConfigVar ('ROW_SCALE');
@@ -416,10 +418,6 @@ function renderRow ($row_id = 0)
 	}
 	echo "</tr></table>\n";
 	finishPortlet();
-	echo "</td></tr>";
-
-	echo "<tr><td class=pcleft>";
-	renderTagFilterPortlet ($tagfilter, 'rack', 'row_id', $row_id);
 	echo "</td></tr></table>";
 }
 
