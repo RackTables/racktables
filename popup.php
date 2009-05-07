@@ -9,7 +9,7 @@
 	// This is our context.
 	$pageno = 'objects';
 	$tabno = 'default';
-	echo '<title>' . getTitle ($pageno, $tabno) . "</title>\n";
+	echo '<title>' . getTitle ($pageno) . "</title>\n";
 	echo "<link rel=stylesheet type='text/css' href=pi.css />\n";
 	echo "<link rel=icon href='" . getFaviconURL() . "' type='image/x-icon' />";
 	echo '</head><body style="height: 100%;">';

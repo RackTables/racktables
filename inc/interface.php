@@ -3278,16 +3278,16 @@ function renderPortMap ($editable = FALSE)
 	finishPortlet();
 }
 
+// Find direct sub-pages and dump as a list.
+// FIXME: assume all config kids to have static titles at the moment,
+// but use some proper abstract function later.
 function renderConfigMainpage ()
 {
-	global $pageno, $root;
-	$children = getDirectChildPages ($pageno);
+	global $pageno, $page, $root;
 	echo '<ul>';
-	// FIXME: assume all config kids to have static titles at the moment,
-	// but use some proper abstract function later.
-	foreach ($children as $cpageno => $child)
-		echo "<li><a href='${root}?page=${cpageno}'>" . $child['title'] . "</li>\n";
-	echo '';
+	foreach ($page as $cpageno => $cpage)
+		if (isset ($cpage['parent']) and $cpage['parent'] == $pageno)
+			echo "<li><a href='${root}?page=${cpageno}'>" . $cpage['title'] . "</li>\n";
 	echo '</ul>';
 }
 
@@ -5906,6 +5906,276 @@ function renderTextEditor ($file_id)
 	echo htmlspecialchars ($fullInfo['contents']) . '</textarea></td></tr>';
 	echo "<tr><td class=submit><input type=submit value='Save' onclick='file_text.toggleEditor();'>";
 	echo "</td></tr>\n</table></form>\n";
+}
+
+function showPathAndSearch ($pageno)
+{
+	// This function returns array of page numbers leading to the target page
+	// plus page number of target page itself. The first element is the target
+	// page number and the last element is the index page number.
+	function getPath ($targetno)
+	{
+		$self = __FUNCTION__;
+		global $page;
+		$path = array();
+		// Recursion breaks at first parentless page.
+		if (!isset ($page[$targetno]['parent']))
+			$path = array ($targetno);
+		else
+		{
+			$path = $self ($page[$targetno]['parent']);
+			$path[] = $targetno;
+		}
+		return $path;
+	}
+	global $root, $page;
+	// Path.
+	echo "<td class=activemenuitem width='99%'>" . getConfigVar ('enterprise');
+	$path = getPath ($pageno);
+	foreach ($path as $no)
+	{
+		if (isset ($page[$no]['title']))
+			$title = array
+			(
+				'name' => $page[$no]['title'],
+				'params' => array()
+			);
+		else
+			$title = dynamic_title_decoder ($no);
+		echo ": <a href='${root}?page=${no}&tab=default";
+		foreach ($title['params'] as $param_name => $param_value)
+			echo "&${param_name}=${param_value}";
+		echo "'>" . $title['name'] . "</a>";
+	}
+	echo "</td>";
+	// Search form.
+	echo "<td><table border=0 cellpadding=0 cellspacing=0><tr><td>Search:</td>";
+	echo "<form name=search method=get action='${root}'><td>";
+	echo '<input type=hidden name=page value=search>';
+	// This input will be the first, if we don't add ports or addresses.
+	echo "<input type=text name=q size=20 tabindex=1000></td></form></tr></table></td>";
+}
+
+function getTitle ($pageno)
+{
+	global $page;
+	if (isset ($page[$pageno]['title']))
+		return $page[$pageno]['title'];
+	$tmp = dynamic_title_decoder ($pageno);
+	return $tmp['name'];
+}
+
+function showTabs ($pageno, $tabno)
+{
+	global $tab, $root, $page, $trigger, $tabextraclass;
+	if (!isset ($tab[$pageno]['default']))
+		return;
+	echo "<td><div class=greynavbar><ul id=foldertab style='margin-bottom: 0px; padding-top: 10px;'>";
+	foreach ($tab[$pageno] as $tabidx => $tabtitle)
+	{
+		// Hide forbidden tabs.
+		if (!permitted ($pageno, $tabidx))
+			continue;
+		// Dynamic tabs should only be shown in certain cases (trigger exists and returns true).
+		if (isset ($trigger[$pageno][$tabidx]))
+		{
+			$ok = $trigger[$pageno][$tabidx] ();
+			if (!$ok)
+				continue;
+		}
+		$class = ($tabidx == $tabno) ? 'current' : 'std';
+		$extra = (isset ($tabextraclass[$pageno][$tabidx])) ? $tabextraclass[$pageno][$tabidx] : '';
+		echo "<li><a class=${class}{$extra}";
+		echo " href='${root}?page=${pageno}&tab=${tabidx}";
+		if (isset ($page[$pageno]['bypass']) and isset ($_REQUEST[$page[$pageno]['bypass']]))
+		{
+			$bpname = $page[$pageno]['bypass'];
+			$bpval = $_REQUEST[$bpname];
+			echo "&${bpname}=${bpval}";
+		}
+		echo "'>${tabtitle}</a></li>\n";
+	}
+	echo "</ul></div></td>\n";
+}
+
+// Arg is path page number, which can be different from the primary page number,
+// for example title for 'ipv4net' can be requested to build navigation path for
+// both IPv4 network and IPv4 address. Another such page number is 'row', which
+// fires for both row and its racks. Use pageno for decision in such cases.
+function dynamic_title_decoder ($path_position)
+{
+	switch ($path_position)
+	{
+	case 'index':
+		return array
+		(
+			'name' => '/' . getConfigVar ('enterprise'),
+			'params' => array()
+		);
+	case 'chapter':
+		assertUIntArg ('chapter_no', __FUNCTION__);
+		$chapters = getChapterList();
+		$chapter_no = $_REQUEST['chapter_no'];
+		$chapter_name = isset ($chapters[$chapter_no]) ? $chapters[$chapter_no] : 'N/A';
+		return array
+		(
+			'name' => "Chapter '${chapter_name}'",
+			'params' => array ('chapter_no' => $chapter_no)
+		);
+	case 'user':
+		assertUIntArg ('user_id', __FUNCTION__);
+		$userinfo = getUserInfo ($_REQUEST['user_id']);
+		return array
+		(
+			'name' => "Local user '" . $userinfo['user_name'] . "'",
+			'params' => array ('user_id' => $_REQUEST['user_id'])
+		);
+	case 'ipv4rspool':
+		assertUIntArg ('pool_id', __FUNCTION__);
+		$poolInfo = getRSPoolInfo ($_REQUEST['pool_id']);
+		return array
+		(
+			'name' => empty ($poolInfo['name']) ? 'ANONYMOUS' : $poolInfo['name'],
+			'params' => array ('pool_id' => $_REQUEST['pool_id'])
+		);
+	case 'ipv4vs':
+		assertUIntArg ('vs_id', __FUNCTION__);
+		return array
+		(
+			'name' => buildVServiceName (getVServiceInfo ($_REQUEST['vs_id'])),
+			'params' => array ('vs_id' => $_REQUEST['vs_id'])
+		);
+	case 'object':
+		assertUIntArg ('object_id', __FUNCTION__);
+		$object = getObjectInfo ($_REQUEST['object_id']);
+		if ($object == NULL)
+			return array
+			(
+				'name' => __FUNCTION__ . '() failure',
+				'params' => array()
+			);
+		return array
+		(
+			'name' => $object['dname'],
+			'params' => array ('object_id' => $_REQUEST['object_id'])
+		);
+	case 'rack':
+		assertUIntArg ('rack_id', __FUNCTION__);
+		$rack = getRackData ($_REQUEST['rack_id']);
+		return array
+		(
+			'name' => $rack['name'],
+			'params' => array ('rack_id' => $_REQUEST['rack_id'])
+		);
+	case 'search':
+		if (isset ($_REQUEST['q']))
+			return array
+			(
+				'name' => "search results for '${_REQUEST['q']}'",
+				'params' => array ('q' => $_REQUEST['q'])
+			);
+		else
+			return array
+			(
+				'name' => 'search results',
+				'params' => array()
+			);
+	case 'file':
+		assertUIntArg ('file_id', __FUNCTION__);
+		$file = getFileInfo ($_REQUEST['file_id']);
+		if ($file == NULL)
+			return array
+			(
+				'name' => __FUNCTION__ . '() failure',
+				'params' => array()
+			);
+		return array
+		(
+			'name' => htmlspecialchars ($file['name']),
+			'params' => array ('file_id' => $_REQUEST['file_id'])
+		);
+	case 'ipaddress':
+		assertIPv4Arg ('ip', __FUNCTION__);
+		return array
+		(
+			'name' => $_REQUEST['ip'],
+			'params' => array ('ip' => $_REQUEST['ip'])
+		);
+	case 'ipv4net':
+		global $pageno;
+		switch ($pageno)
+		{
+		case 'ipv4net':
+			assertUIntArg ('id', __FUNCTION__);
+			$range = getIPv4NetworkInfo ($_REQUEST['id']);
+			return array
+			(
+				'name' => $range['ip'] . '/' . $range['mask'],
+				'params' => array ('id' => $_REQUEST['id'])
+			);
+		case 'ipaddress':
+			assertIPv4Arg ('ip', __FUNCTION__);
+			$range = getIPv4NetworkInfo (getIPv4AddressNetworkId ($_REQUEST['ip']));
+			return array
+			(
+				'name' => $range['ip'] . '/' . $range['mask'],
+				'params' => array
+				(
+					'id' => $range['id'],
+					'hl_ipv4_addr' => $_REQUEST['ip']
+				)
+			);
+		default:
+			return array
+			(
+				'name' => __FUNCTION__ . '() failure',
+				'params' => array()
+			);
+		}
+	case 'row':
+		global $pageno;
+		switch ($pageno)
+		{
+		case 'rack':
+			assertUIntArg ('rack_id', __FUNCTION__);
+			$rack = getRackData ($_REQUEST['rack_id']);
+			if ($rack == NULL)
+			{
+				showError ('getRackData() failed', __FUNCTION__);
+				return NULL;
+			}
+			return array
+			(
+				'name' => $rack['row_name'],
+				'params' => array ('row_id' => $rack['row_id'])
+			);
+		case 'row':
+			assertUIntArg ('row_id', __FUNCTION__);
+			$rowInfo = getRackRowInfo ($_REQUEST['row_id']);
+			if ($rowInfo == NULL)
+			{
+				showError ('getRackRowInfo() failed', __FUNCTION__);
+				return NULL;
+			}
+			return array
+			(
+				'name' => $rowInfo['name'],
+				'params' => array ('row_id' => $_REQUEST['row_id'])
+			);
+		default:
+			return array
+			(
+				'name' => __FUNCTION__ . '() failure',
+				'params' => array()
+			);
+		}
+	default:
+		return array
+		(
+			'name' => __FUNCTION__ . '() failure',
+			'params' => array()
+		);
+	}
 }
 
 ?>

@@ -47,7 +47,6 @@ $ophandler['depot']['default']['deleteObject'] = 'deleteObject';
 $msgcode['deleteObject']['OK'] = 76;
 $msgcode['deleteObject']['ERR'] = 100;
 
-$page['row']['title_handler'] = 'dynamic_title_row';
 $page['row']['bypass'] = 'row_id';
 $page['row']['bypass_type'] = 'uint';
 $page['row']['parent'] = 'rackspace';
@@ -65,7 +64,6 @@ $msgcode['addRack']['OK'] = 65;
 $msgcode['addRack']['ERR1'] = 171;
 $msgcode['addRack']['ERR2'] = 172;
 
-$page['rack']['title_handler'] = 'dynamic_title_rack';
 $page['rack']['bypass'] = 'rack_id';
 $page['rack']['bypass_type'] = 'uint';
 $page['rack']['parent'] = 'row';
@@ -104,7 +102,6 @@ $msgcode['linkFileToEntity']['ERR2'] = 100;
 $msgcode['unlinkFile']['OK'] = 72;
 $msgcode['unlinkFile']['ERR'] = 182;
 
-$page['object']['title_handler'] = 'dynamic_title_object';
 $page['object']['bypass'] = 'object_id';
 $page['object']['bypass_type'] = 'uint';
 $page['object']['parent'] = 'depot';
@@ -239,7 +236,6 @@ $msgcode['addIPv4Prefix']['ERR4'] = 176;
 $msgcode['delIPv4Prefix']['OK'] = 24;
 $msgcode['delIPv4Prefix']['ERR'] = 100;
 
-$page['ipv4net']['title_handler'] = 'dynamic_title_ipv4net';
 $page['ipv4net']['parent'] = 'ipv4space';
 $page['ipv4net']['bypass'] = 'id';
 $page['ipv4net']['bypass_type'] = 'uint';
@@ -265,7 +261,6 @@ $msgcode['updIPv4Prefix']['ERR'] = 100;
 $msgcode['importPTRData']['OK'] = 26;
 $msgcode['importPTRData']['ERR'] = 141;
 
-$page['ipaddress']['title_handler'] = 'dynamic_title_ipaddress';
 $page['ipaddress']['parent'] = 'ipv4net';
 $page['ipaddress']['bypass'] = 'ip';
 $page['ipaddress']['bypass_type'] = 'inet4';
@@ -305,7 +300,6 @@ $msgcode['deleteVService']['ERR'] = 130;
 $msgcode['updateVService']['OK'] = 30;
 $msgcode['updateVService']['ERR'] = 135;
 
-$page['ipv4vs']['title_handler'] = 'dynamic_title_vservice';
 $page['ipv4vs']['parent'] = 'ipv4vslist';
 $page['ipv4vs']['bypass'] = 'vs_id';
 $page['ipv4vs']['bypass_type'] = 'uint';
@@ -345,7 +339,6 @@ $msgcode['deleteRSPool']['ERR'] = 138;
 $msgcode['updateRSPool']['OK'] = 33;
 $msgcode['updateRSPool']['ERR'] = 139;
 
-$page['ipv4rspool']['title_handler'] = 'dynamic_title_rspool';
 $page['ipv4rspool']['parent'] = 'ipv4rsplist';
 $page['ipv4rspool']['bypass'] = 'pool_id';
 $page['ipv4rspool']['bypass_type'] = 'uint';
@@ -398,7 +391,6 @@ $page['lbs']['title'] = 'Load balancers';
 $page['lbs']['parent'] = 'ipv4slb';
 $page['lbs']['handler'] = 'renderLBList';
 
-$page['search']['title_handler'] = 'dynamic_title_search';
 $page['search']['handler'] = 'renderSearchResults';
 $page['search']['parent'] = 'index';
 $page['search']['bypass'] = 'q';
@@ -421,7 +413,6 @@ $msgcode['updateUser']['ERR1'] = 104;
 $msgcode['createUser']['OK'] = 40;
 $msgcode['createUser']['ERR'] = 102;
 
-$page['user']['title_handler'] = 'dynamic_title_user';
 $page['user']['parent'] = 'userlist';
 $page['user']['bypass'] = 'user_id';
 $page['user']['bypass_type'] = 'uint';
@@ -497,7 +488,6 @@ $msgcode['updateChapter']['ERR'] = 113;
 $msgcode['addChapter']['OK'] = 55;
 $msgcode['addChapter']['ERR'] = 112;
 
-$page['chapter']['title_handler'] = 'dynamic_title_chapter';
 $page['chapter']['parent'] = 'dict';
 $page['chapter']['bypass'] = 'chapter_no';
 $page['chapter']['bypass_type'] = 'uint';
@@ -590,7 +580,6 @@ $msgcode['addFileWithoutLink']['ERR'] = 100;
 $msgcode['deleteFile']['OK'] = 73;
 $msgcode['deleteFile']['ERR'] = 100;
 
-$page['file']['title_handler'] = 'dynamic_title_file';
 $page['file']['bypass'] = 'file_id';
 $page['file']['bypass_type'] = 'uint';
 $page['file']['parent'] = 'files';
@@ -617,129 +606,5 @@ $msgcode['replaceFile']['ERR3'] = 182;
 $msgcode['updateFileText']['OK'] = 78;
 $msgcode['updateFileText']['ERR1'] = 179;
 $msgcode['updateFileText']['ERR2'] = 180;
-
-// This function returns array if page numbers leading to the target page
-// plus page number of target page itself. The first element is the target
-// page number and the last element is the index page number.
-function getPath ($targetno)
-{
-	global $page;
-	$path = array();
-	// Recursion breaks at first parentless page.
-	if (!isset ($page[$targetno]['parent']))
-		$path = array ($targetno);
-	else
-	{
-		$path = getPath ($page[$targetno]['parent']);
-		$path[] = $targetno;
-	}
-	return $path;
-}
-
-function showPathAndSearch ($pageno)
-{
-	global $root, $page;
-	// Path.
-	echo "<td class=activemenuitem width='99%'>" . getConfigVar ('enterprise');
-	$path = getPath ($pageno);
-	foreach ($path as $no)
-	{
-		$title['params'] = array();
-		if (isset ($page[$no]['title']))
-			$title['name'] = $page[$no]['title'];
-		elseif (isset ($page[$no]['title_handler']))
-			$title = $page[$no]['title_handler']($no);
-		else
-			$title['name'] = '[N/A]';
-		echo ": <a href='${root}?page=${no}&tab=default";
-		foreach ($title['params'] as $param_name => $param_value)
-			echo "&${param_name}=${param_value}";
-		echo "'>" . $title['name'] . "</a>";
-	}
-	echo "</td>";
-	// Search form.
-	echo "<td><table border=0 cellpadding=0 cellspacing=0><tr><td>Search:</td>";
-	echo "<form name=search method=get action='${root}'><td>";
-	echo '<input type=hidden name=page value=search>';
-	// This input will be the first, if we don't add ports or addresses.
-	echo "<input type=text name=q size=20 tabindex=1000></td></form></tr></table></td>";
-}
-
-function getTitle ($pageno, $tabno)
-{
-	global $page;
-	if (isset ($page[$pageno]['title']))
-		return $page[$pageno]['title'];
-	elseif (isset ($page[$pageno]['title_handler']))
-	{
-		$tmp = $page[$pageno]['title_handler']($pageno);
-		return $tmp['name'];
-	}
-	else
-		return getConfigVar ('enterprise');
-}
-
-function showTabs ($pageno, $tabno)
-{
-	global $tab, $root, $page, $remote_username, $trigger, $tabextraclass;
-	if (!isset ($tab[$pageno]['default']))
-		return;
-	echo "<td><div class=greynavbar><ul id=foldertab style='margin-bottom: 0px; padding-top: 10px;'>";
-	foreach ($tab[$pageno] as $tabidx => $tabtitle)
-	{
-		// Hide forbidden tabs.
-		if (!permitted ($pageno, $tabidx))
-			continue;
-		// Dynamic tabs should only be shown in certain cases (trigger exists and returns true).
-		if (isset ($trigger[$pageno][$tabidx]))
-		{
-			$ok = $trigger[$pageno][$tabidx] ();
-			if (!$ok)
-				continue;
-		}
-		$class = ($tabidx == $tabno) ? 'current' : 'std';
-		$extra = (isset ($tabextraclass[$pageno][$tabidx])) ? $tabextraclass[$pageno][$tabidx] : '';
-		echo "<li><a class=${class}{$extra}";
-		echo " href='${root}?page=${pageno}&tab=${tabidx}";
-		if (isset ($page[$pageno]['bypass']) and isset ($_REQUEST[$page[$pageno]['bypass']]))
-		{
-			$bpname = $page[$pageno]['bypass'];
-			$bpval = $_REQUEST[$bpname];
-			echo "&${bpname}=${bpval}";
-		}
-		echo "'>${tabtitle}</a></li>\n";
-	}
-	echo "</ul></div></td>\n";
-}
-
-// This function returns pages, which are direct children of the requested
-// page and are accessible by the current user.
-function getDirectChildPages ($pageno)
-{
-	global $page, $remote_username;
-	$children = array();
-	foreach ($page as $cpageno => $cpage)
-		if
-		(
-			isset ($cpage['parent']) and
-			$cpage['parent'] == $pageno
-		)
-			$children[$cpageno] = $cpage;
-	return $children;
-}
-
-function getAllChildPages ($parent)
-{
-	global $page;
-	// Array pointer is global, so if we don't create local copies of
-	// the global array, we can't advance any more after nested call
-	// of getAllChildPages returns.
-	$mypage = $page;
-	$mykids = array();
-	foreach ($mypage as $ctitle => $cpage)
-		if (isset ($cpage['parent']) and $cpage['parent'] == $parent)
-			$mykids[] = array ('title' => $ctitle, 'kids' => getAllChildPages ($ctitle));
-	return $mykids;
-}
 
 ?>
