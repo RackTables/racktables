@@ -114,25 +114,6 @@ function getObjectTypeList ()
 	return readChapter ('RackObjectType');
 }
 
-// Return a part of SQL query suitable for embeding into a bigger text.
-// The returned result should list all tag IDs shown in the tag filter.
-function getWhereClause ($tagfilter = array())
-{
-	$whereclause = '';
-	if (count ($tagfilter))
-	{
-		$whereclause .= ' and (';
-		$conj = '';
-		foreach ($tagfilter as $tag_id)
-		{
-			$whereclause .= $conj . 'tag_id = ' . $tag_id;
-			$conj = ' or ';
-		}
-		$whereclause .= ') ';
-	}
-	return $whereclause;
-}
-
 // Return a simple object list w/o related information, so that the returned value
 // can be directly used by printSelect(). An optional argument is the name of config
 // option with constraint in RackCode.
@@ -161,37 +142,9 @@ function getNarrowObjectList ($varname = '')
 	return $ret;
 }
 
-// Return a filtered, detailed object list.
-function getObjectList ($type_id = 0, $tagfilter = array())
-{
-	$whereclause = getWhereClause ($tagfilter);
-	if ($type_id != 0)
-		$whereclause .= " and objtype_id = '${type_id}' ";
-	$query =
-		"select distinct RackObject.id as id , RackObject.name as name, dict_value as objtype_name, " .
-		"RackObject.label as label, RackObject.barcode as barcode, " .
-		"dict_key as objtype_id, asset_no, rack_id, Rack.name as Rack_name, Rack.row_id, " .
-		"(SELECT name from RackRow where id = Rack.row_id) AS Row_name " .
-		"from ((RackObject inner join Dictionary on objtype_id=dict_key join Chapter on Chapter.id = Dictionary.chapter_id) " .
-		"left join RackSpace on RackObject.id = object_id) " .
-		"left join Rack on rack_id = Rack.id " .
-		"left join TagStorage on RackObject.id = TagStorage.entity_id and entity_realm = 'object' " .
-		"where RackObject.deleted = 'no' and Chapter.name = 'RackObjectType' " .
-		$whereclause .
-		"order by name";
-	$result = useSelectBlade ($query, __FUNCTION__);
-	$ret = array();
-	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-		$ret[$row['id']] = $row;
-	$result->closeCursor();
-	foreach (array_keys ($ret) as $key)
-		$ret[$key]['dname'] = displayedName ($ret[$key]);
-	return $ret;
-}
-
 // For a given realm return a list of entity records, each with
 // enough information for judgeEntityRecord() to execute.
-function listCells ($realm)
+function listCells ($realm, $parent_id = 0)
 {
 	switch ($realm)
 	{
@@ -285,16 +238,33 @@ function listCells ($realm)
 		$keycolumn = 'id';
 		$ordcolumns = array ('name', 'id');
 		break;
+	case 'rack':
+		$table = 'Rack';
+		$columns = array
+		(
+			'id' => 'id',
+			'name' => 'name',
+			'height' => 'height',
+			'comment' => 'comment',
+			'row_id' => 'row_id',
+			'row_name' => '(select name from RackRow where RackRow.id = row_id)',
+		);
+		$keycolumn = 'id';
+		$ordcolumns = array ('row_id', 'name');
+		$pidcolumn = 'row_id';
+		break;
 	default:
 		showError ('invalid arg', __FUNCTION__);
 		return NULL;
 	}
-	$query = 'select tag_id';
+	$query = 'SELECT tag_id';
 	foreach ($columns as $alias => $expression)
 		// Automatically prepend table name to each single column, but leave all others intact.
 		$query .= ', ' . ($alias == $expression ? "${table}.${alias}" : "${expression} as ${alias}");
-	$query .= " from ${table} left join TagStorage on entity_realm = '${realm}' and entity_id = ${table}.${keycolumn}";
-	$query .= " order by ";
+	$query .= " FROM ${table} LEFT JOIN TagStorage on entity_realm = '${realm}' and entity_id = ${table}.${keycolumn}";
+	if (isset ($pidcolumn) and $parent_id)
+		$query .= " WHERE ${table}.${pidcolumn} = ${parent_id}";
+	$query .= " ORDER BY ";
 	foreach ($ordcolumns as $oc)
 		$query .= "${table}.${oc}, ";
 	$query .= " tag_id";
@@ -367,34 +337,6 @@ function amplifyCell (&$record, $dummy = NULL)
 		break;
 	default:
 	}
-}
-
-function getRacksForRow ($row_id = 0, $tagfilter = array())
-{
-	$query =
-		"select Rack.id, Rack.name, height, Rack.comment, row_id, RackRow.name as row_name " .
-		"from Rack left join RackRow on Rack.row_id = RackRow.id " .
-		"left join TagStorage on Rack.id = TagStorage.entity_id and entity_realm = 'rack' " .
-		"where  Rack.deleted = 'no' " .
-		(($row_id == 0) ? "" : "and row_id = ${row_id} ") .
-		getWhereClause ($tagfilter) .
-		" order by row_name, Rack.name";
-	$result = useSelectBlade ($query, __FUNCTION__);
-	$ret = array();
-	$clist = array
-	(
-		'id',
-		'name',
-		'height',
-		'comment',
-		'row_id',
-		'row_name'
-	);
-	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-		foreach ($clist as $cname)
-			$ret[$row['id']][$cname] = $row[$cname];
-	$result->closeCursor();
-	return $ret;
 }
 
 // This is a popular helper for getting information about
@@ -1858,7 +1800,7 @@ function renderTagStats ()
 				echo '&nbsp;';
 			else
 			{
-				echo "<a href='${root}?page=" . $pagebyrealm[$realm] . "&tagfilter[]=${ref['id']}'>";
+				echo "<a href='${root}?page=" . $pagebyrealm[$realm] . "&cft[]=${ref['id']}'>";
 				echo $taglist[$ref['id']]['refcnt'][$realm] . '</a>';
 			}
 			echo '</td>';

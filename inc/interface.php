@@ -273,11 +273,10 @@ function renderIndex ()
 
 function renderRackspace ()
 {
-	$tagfilter = getTagFilter();
-	$tagfilter_str = getTagFilterStr ($tagfilter);
 	showMessageOrError();
 	echo "<table class=objview border=0 width='100%'><tr><td class=pcleft>";
-	renderTagFilterPortlet ($tagfilter, 'rack');
+	$cellfilter = getCellFilter();
+	renderCellFilterPortlet ($cellfilter, 'rack');
 	echo '</td><td class=pcright>';
 	echo '<table border=0 cellpadding=10 cellpadding=1>';
 	// generate thumb gallery
@@ -288,12 +287,12 @@ function renderRackspace ()
 	$order = 'odd';
 	foreach (getRackRows() as $row_id => $row_name)
 	{
-		$rackList = getRacksForRow ($row_id, $tagfilter);
-		if (!count ($rackList) and count ($tagfilter))
+		$rackList = filterCellList (listCells ('rack', $row_id), $cellfilter['expression']);
+		if (!count ($rackList) and count ($cellfilter['expression']))
 			continue;
 		$rackListIdx = 0;
 		echo "<tr class=row_${order}><th class=tdleft>";
-		echo "<a href='".makeHref(array('page'=>'row', 'row_id'=>$row_id))."${tagfilter_str}'>";
+		echo "<a href='".makeHref(array('page'=>'row', 'row_id'=>$row_id))."${cellfilter['urlextra']}'>";
 		echo "${row_name}</a></th><td><table border=0 cellspacing=5><tr>";
 		if (!count ($rackList))
 			echo "<td>(empty row)</td>";
@@ -341,7 +340,7 @@ function renderRackspaceRowEditor ()
 	foreach (getRackRows() as $row_id => $row_name)
 	{
 		echo "<tr><td>";
-		if ($rc = count (getRacksForRow ($row_id)))
+		if ($rc = count (listCells ('rack', $row_id)))
 			printImageHREF ('nodestroy', "${rc} rack(s) here");
 		else
 		{
@@ -372,8 +371,8 @@ function renderRow ($row_id = 0)
 		showError ('getRackRowInfo() failed', __FUNCTION__);
 		return;
 	}
-	$tagfilter = getTagFilter();
-	$rackList = getRacksForRow ($row_id, $tagfilter);
+	$cellfilter = getCellFilter();
+	$rackList = filterCellList (listCells ('rack', $row_id), $cellfilter['expression']);
 	// Main layout starts.
 	echo "<table border=0 class=objectview cellspacing=0 cellpadding=0>";
 
@@ -388,7 +387,7 @@ function renderRow ($row_id = 0)
 	echo "</td></tr>\n";
 	echo "</table><br>\n";
 	finishPortlet();
-	renderTagFilterPortlet ($tagfilter, 'rack', 'row_id', $row_id);
+	renderCellFilterPortlet ($cellfilter, 'rack', 'row_id', $row_id);
 
 	echo "</td><td class=pcright>";
 
@@ -934,7 +933,7 @@ function renderRackObject ($object_id = 0)
 				'page'=>'depot',
 				'tab'=>'default',
 				'andor' => 'and',
-				'cfe'=>'{$typeid_' . $info['objtype_id'] . '}'
+				'cfe' => '{$typeid_' . $info['objtype_id'] . '}',
 			)
 		)."&"
 	);
@@ -1748,7 +1747,7 @@ function renderRackSpaceForObject ($object_id = 0)
 	// Left portlet with rack list.
 	echo "<td class=pcleft height='1%'>";
 	startPortlet ('Racks');
-	$allRacksData = getRacksForRow();
+	$allRacksData = listCells ('rack');
 	if (count ($allRacksData) <= getConfigVar ('RACK_PRESELECT_THRESHOLD'))
 	{
 		foreach (array_keys ($allRacksData) as $rack_id)
@@ -2135,7 +2134,7 @@ function renderIPv4Space ()
 		echo "<th>routed by</th>";
 	echo "</tr>\n";
 	$tagcache = array();
-	$baseurl = makeHref(array('page'=>$pageno, 'tab'=>$tabno)) . getTagFilterStr (getTagFilter());
+	$baseurl = makeHref(array('page'=>$pageno, 'tab'=>$tabno)) . $cellfilter['urlextra'];
 	renderIPv4SpaceRecords ($tree, $tagcache, $baseurl, $eid);
 	echo "</table>\n";
 	finishPortlet();
@@ -4979,44 +4978,6 @@ function printTagTRs ($baseurl = '')
 		echo "<tr><th width='50%' class=tagchain>Automatic tags:</th><td class=tagchain>";
 		echo serializeTags ($auto_tags) . "</td></tr>\n";
 	}
-}
-
-// Output a portlet with currently selected tags and prepare a form for update.
-function renderTagFilterPortlet ($tagfilter, $realm, $bypass_name = '', $bypass_value = '')
-{
-	global $pageno, $tabno, $taglist, $tagtree;
-	$objectivetags = getObjectiveTagTree ($tagtree, $realm);
-	startPortlet ('filter');
-	if (!count ($objectivetags))
-	{
-		echo "None used in current realm.<br>";
-		finishPortlet();
-		return;
-	}
-	echo '<table border=0 align=center>';
-
-	echo "<form method=get>\n";
-	echo "<input type=hidden name=page value=${pageno}>\n";
-	echo "<input type=hidden name=tab value=${tabno}>\n";
-	if ($bypass_name != '')
-		echo "<input type=hidden name=${bypass_name} value='${bypass_value}'>\n";
-	echo '<tr><td colspan=2>';
-	// Show a tree of tags, pre-select according to currently requested list filter.
-	foreach ($objectivetags as $taginfo)
-		renderTagCheckbox ('tagfilter', buildTagChainFromIds ($tagfilter), $taginfo);
-	echo '</td></tr><tr><td>';
-	printImageHREF ('apply', 'Apply filter', TRUE);
-	echo "</form></td><td>";
-
-	// "reset"
-	echo "<form method=get>\n";
-	echo "<input type=hidden name=page value=${pageno}>\n";
-	echo "<input type=hidden name=tab value=${tabno}>\n";
-	if ($bypass_name != '')
-		echo "<input type=hidden name=${bypass_name} value='${bypass_value}'>\n";
-	printImageHREF ('clear', 'reset', TRUE);
-	echo '</form></td></tr></table>';
-	finishPortlet();
 }
 
 // This one is going to replace the tag filter.

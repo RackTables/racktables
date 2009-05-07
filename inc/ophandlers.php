@@ -1454,11 +1454,11 @@ function rollTags ()
 	// Minimizing the extra chain early, so that tag rebuilder doesn't have to
 	// filter out the same tag again and again. It will have own noise to cancel.
 	$extrachain = getExplicitTagsOnly (buildTagChainFromIds ($extratags));
-	foreach (getRacksForRow ($_REQUEST['row_id']) as $rackInfo)
+	foreach (array_keys (listCells ('rack', $_REQUEST['row_id'])) as $rack_id)
 	{
-		if (rebuildTagChainForEntity ('rack', $rackInfo['id'], $extrachain))
+		if (rebuildTagChainForEntity ('rack', $rack_id, $extrachain))
 			$n_ok++;
-		foreach (stuffInRackspace (getRackData ($rackInfo['id'])) as $object_id)
+		foreach (stuffInRackspace (getRackData ($rack_id)) as $object_id)
 			if (rebuildTagChainForEntity ('object', $object_id, $extrachain))
 				$n_ok++;
 	}

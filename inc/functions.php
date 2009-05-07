@@ -454,7 +454,7 @@ function getPrevIDforRack ($row_id = 0, $rack_id = 0)
 		showError ('Invalid arguments passed', __FUNCTION__);
 		return NULL;
 	}
-	$rackList = getRacksForRow ($row_id);
+	$rackList = listCells ('rack', $row_id);
 	doubleLink ($rackList);
 	if (isset ($rackList[$rack_id]['prev_key']))
 		return $rackList[$rack_id]['prev_key'];
@@ -468,7 +468,7 @@ function getNextIDforRack ($row_id = 0, $rack_id = 0)
 		showError ('Invalid arguments passed', __FUNCTION__);
 		return NULL;
 	}
-	$rackList = getRacksForRow ($row_id);
+	$rackList = listCells ('rack', $row_id);
 	doubleLink ($rackList);
 	if (isset ($rackList[$rack_id]['next_key']))
 		return $rackList[$rack_id]['next_key'];
@@ -851,7 +851,7 @@ function serializeTags ($chain, $baseurl = '')
 	foreach ($chain as $taginfo)
 	{
 		$ret .= $comma .
-			($baseurl == '' ? '' : "<a href='${baseurl}tagfilter[]=${taginfo['id']}'>") .
+			($baseurl == '' ? '' : "<a href='${baseurl}cft[]=${taginfo['id']}'>") .
 			$taginfo['tag'] .
 			($baseurl == '' ? '' : '</a>');
 		$comma = ', ';
@@ -1207,19 +1207,6 @@ function mergeTagChains ($chainA, $chainB)
 	return $ret;
 }
 
-function getTagFilter ()
-{
-	return isset ($_REQUEST['tagfilter']) ? complementByKids ($_REQUEST['tagfilter']) : array();
-}
-
-function getTagFilterStr ($tagfilter = array())
-{
-	$ret = '';
-	foreach (getExplicitTagsOnly (buildTagChainFromIds ($tagfilter)) as $taginfo)
-		$ret .= "&tagfilter[]=" . $taginfo['id'];
-	return $ret;
-}
-
 function getCellFilter ()
 {
 	if (isset ($_REQUEST['tagfilter']) and is_array ($_REQUEST['tagfilter']))
@@ -1236,6 +1223,7 @@ function getCellFilter ()
 		'text' => '',
 		'extratext' => '',
 		'expression' => array(),
+		'urlextra' => '', // Just put text here and let makeHref call urlencode().
 	);
 	switch (TRUE)
 	{
@@ -1245,6 +1233,7 @@ function getCellFilter ()
 	case ($_REQUEST['andor'] == 'and'):
 	case ($_REQUEST['andor'] == 'or'):
 		$ret['andor'] = $andor2 = $_REQUEST['andor'];
+		$ret['urlextra'] .= '&andor=' . $ret['andor'];
 		break;
 	default:
 		showError ('Invalid and/or switch value in submitted form', __FUNCTION__);
@@ -1263,6 +1252,7 @@ function getCellFilter ()
 				$ret['tnamelist'][] = $taglist[$req_id]['tag'];
 				$ret['text'] .= $andor1 . '{' . $taglist[$req_id]['tag'] . '}';
 				$andor1 = ' ' . $andor2 . ' ';
+				$ret['urlextra'] .= '&cft[]=' . $req_id;
 			}
 	}
 	if (isset ($_REQUEST['cfp']) and is_array ($_REQUEST['cfp']))
@@ -1274,10 +1264,14 @@ function getCellFilter ()
 				$ret['pnamelist'][] = $req_name;
 				$ret['text'] .= $andor1 . '[' . $req_name . ']';
 				$andor1 = ' ' . $andor2 . ' ';
+				$ret['urlextra'] .= '&cfp[]=' . $req_name;
 			}
 	}
 	if (isset ($_REQUEST['cfe']))
+	{
 		$ret['extratext'] = trim ($_REQUEST['cfe']);
+		$ret['urlextra'] .= '&cfe=' . $ret['extratext'];
+	}
 	$finaltext = array();
 	if (strlen ($ret['text']))
 		$finaltext[] = '(' . $ret['text'] . ')';
