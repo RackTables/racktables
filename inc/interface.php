@@ -281,15 +281,16 @@ function renderRackspace ()
 	echo '</td><td class=pcright>';
 	echo '<table border=0 cellpadding=10 cellpadding=1>';
 	// generate thumb gallery
-	$rackrowList = getRackspace ($tagfilter);
 	global $nextorder;
 	$rackwidth = getRackImageWidth();
 	// Zero value effectively disables the limit.
 	$maxPerRow = getConfigVar ('RACKS_PER_ROW');
 	$order = 'odd';
-	foreach ($rackrowList as $rackrow)
+	foreach (getRackRows() as $row_id => $row_name)
 	{
-		$rackList = getRacksForRow ($rackrow['row_id'], $tagfilter);
+		$rackList = getRacksForRow ($row_id, $tagfilter);
+		if (!count ($rackList) and count ($tagfilter))
+			continue;
 		$rackListIdx = 0;
 		foreach ($rackList as $rack)
 		{
@@ -298,8 +299,8 @@ function renderRackspace ()
 				if ($rackListIdx > 0)
 					echo '</tr></table></tr>';
 				echo "<tr class=row_${order}><th class=tdleft>";
-				echo "<a href='".makeHref(array('page'=>'row', 'row_id'=>$rackrow['row_id']))."${tagfilter_str}'>";
-				echo "${rackrow['row_name']}</a>";
+				echo "<a href='".makeHref(array('page'=>'row', 'row_id'=>$row_id))."${tagfilter_str}'>";
+				echo "${row_name}</a>";
 				if ($rackListIdx > 0)
 					echo ' (continued)';
 				echo "</th><td><table border=0 cellspacing=5><tr>";
@@ -339,8 +340,8 @@ function renderRackspaceRowEditor ()
 	foreach (getRackRows() as $row_id => $row_name)
 	{
 		echo "<tr><td>";
-		if (count (getRacksForRow ($row_id)))
-			printImageHREF ('nodestroy', $rackrow['count'] . ' racks');
+		if ($rc = count (getRacksForRow ($row_id)))
+			printImageHREF ('nodestroy', "${rc} rack(s) here");
 		else
 		{
 			echo "<a href=\"".makeHrefProcess(array('op'=>'delete', 'row_id'=>$row_id))."\">";

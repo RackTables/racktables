@@ -33,26 +33,6 @@ function escapeString ($value, $do_db_escape = TRUE)
 	return $ret;
 }
 
-function getRackspace ($tagfilter = array())
-{
-	$whereclause = getWhereClause ($tagfilter);
-	$query =
-		"select RackRow.id as row_id, RackRow.name as row_name, count(Rack.id) as count " .
-		"from RackRow left join Rack on Rack.row_id = RackRow.id " .
-		"left join TagStorage on Rack.id = TagStorage.entity_id and entity_realm = 'rack' " .
-		"where 1=1 " .
-		$whereclause .
-		" group by RackRow.id order by RackRow.name";
-	$result = useSelectBlade ($query, __FUNCTION__);
-	$ret = array();
-	$clist = array ('row_id', 'row_name', 'count');
-	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-		foreach ($clist as $cname)
-			$ret[$row['row_id']][$cname] = $row[$cname];
-	$result->closeCursor();
-	return $ret;
-}
-
 // Return detailed information about one rack row.
 function getRackRowInfo ($rackrow_id)
 {
