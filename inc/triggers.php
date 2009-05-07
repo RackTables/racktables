@@ -53,12 +53,6 @@ function trigger_snmpportfinder ()
 	return TRUE;
 }
 
-// Show "click me" teaser in an empty rackspace.
-function trigger_emptyRackspace ()
-{
-	return (count (getRackRows()) == 0);
-}
-
 function trigger_isloadbalancer ()
 {
 	assertUIntArg ('object_id', __FUNCTION__);
