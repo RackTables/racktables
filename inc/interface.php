@@ -666,9 +666,9 @@ function renderEditObjectForm ($object_id)
 	echo "<tr><td>&nbsp;</td><th class=tdright>Barcode:</th><td class=tdleft><input type=text name=object_barcode value='${object['barcode']}'></td></tr>\n";
 	// optional attributes
 	$values = getAttrValues ($object_id);
+	echo '<input type=hidden name=num_attrs value=' . count($values) . ">\n";
 	if (count($values) > 0)
 	{
-		echo '<input type=hidden name=num_attrs value=' . count($values) . ">\n";
 		$i = 0;
 		foreach ($values as $record)
 		{
