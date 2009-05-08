@@ -232,6 +232,10 @@ CREATE TABLE `LDAPCache` (
   KEY `scanidx` (`presented_username`,`successful_hash`)
 ) ENGINE=InnoDB;";
 			$query[] = "alter table UserAccount modify column user_password_hash char(40) NULL";
+			$query[] = 'ALTER TABLE Rack DROP COLUMN deleted';
+			$query[] = 'ALTER TABLE RackHistory DROP COLUMN deleted';
+			$query[] = 'ALTER TABLE RackObject DROP COLUMN deleted';
+			$query[] = 'ALTER TABLE RackObjectHistory DROP COLUMN deleted';
 			$query[] = "UPDATE Config SET varvalue = '0.17.0' WHERE varname = 'DB_VERSION'";
 
 			break;

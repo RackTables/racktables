@@ -226,7 +226,6 @@ CREATE TABLE `RackRow` (
 CREATE TABLE `Rack` (
   `id` int(10) unsigned NOT NULL auto_increment,
   `name` char(255) default NULL,
-  `deleted` enum('yes','no') NOT NULL default 'no',
   `row_id` int(10) unsigned NOT NULL default '1',
   `height` tinyint(3) unsigned NOT NULL default '42',
   `comment` text,
@@ -238,7 +237,6 @@ CREATE TABLE `Rack` (
 CREATE TABLE `RackHistory` (
   `id` int(10) unsigned default NULL,
   `name` char(255) default NULL,
-  `deleted` enum('yes','no') default NULL,
   `row_id` int(10) unsigned default NULL,
   `height` tinyint(3) unsigned default NULL,
   `comment` text,
@@ -252,7 +250,6 @@ CREATE TABLE `RackObject` (
   `name` char(255) default NULL,
   `label` char(255) default NULL,
   `barcode` char(16) default NULL,
-  `deleted` enum('yes','no') NOT NULL default 'no',
   `objtype_id` int(10) unsigned NOT NULL default '1',
   `asset_no` char(64) default NULL,
   `has_problems` enum('yes','no') NOT NULL default 'no',
@@ -268,7 +265,6 @@ CREATE TABLE `RackObjectHistory` (
   `name` char(255) default NULL,
   `label` char(255) default NULL,
   `barcode` char(16) default NULL,
-  `deleted` enum('yes','no') default NULL,
   `objtype_id` int(10) unsigned default NULL,
   `asset_no` char(64) default NULL,
   `has_problems` enum('yes','no') NOT NULL default 'no',

@@ -1919,25 +1919,25 @@ function renderHistory ($object_type, $object_id)
 	switch ($object_type)
 	{
 		case 'row':
-			$query = "select ctime, user_name, name, deleted, comment from RackRowHistory where id = ${object_id} order by ctime";
-			$header = '<tr><th>change time</th><th>author</th><th>rack row name</th><th>is deleted?</th><th>rack row comment</th></tr>';
-			$extra = 4;
+			$query = "select ctime, user_name, name, comment from RackRowHistory where id = ${object_id} order by ctime";
+			$header = '<tr><th>change time</th><th>author</th><th>rack row name</th><th>rack row comment</th></tr>';
+			$extra = 3;
 			break;
 		case 'rack':
 			$query =
-				"select ctime, user_name, rh.name, rh.deleted, rr.name as name, rh.height, rh.comment " .
+				"select ctime, user_name, rh.name, rr.name as name, rh.height, rh.comment " .
 				"from RackHistory as rh left join RackRow as rr on rh.row_id = rr.id " .
 				"where rh.id = ${object_id} order by ctime";
-			$header = '<tr><th>change time</th><th>author</th><th>rack name</th><th>is deleted?</th><th>rack row name</th><th>rack height</th><th>rack comment</th></tr>';
-			$extra = 6;
+			$header = '<tr><th>change time</th><th>author</th><th>rack name</th><th>rack row name</th><th>rack height</th><th>rack comment</th></tr>';
+			$extra = 5;
 			break;
 		case 'object':
 			$query =
-				"select ctime, user_name, RackObjectHistory.name as name, label, barcode, asset_no, deleted, has_problems, dict_value, comment " .
+				"select ctime, user_name, RackObjectHistory.name as name, label, barcode, asset_no, has_problems, dict_value, comment " .
 				"from RackObjectHistory inner join Dictionary on objtype_id = dict_key join Chapter on Dictionary.chapter_id = Chapter.id " .
 				"where Chapter.name = 'RackObjectType' and RackObjectHistory.id=${object_id} order by ctime";
-			$header = '<tr><th>change time</th><th>author</th><th>common name</th><th>visible label</th><th>barcode</th><th>asset no</th><th>is deleted?</th><th>has problems?</th><th>object type</th><th>comment</th></tr>';
-			$extra = 9;
+			$header = '<tr><th>change time</th><th>author</th><th>common name</th><th>visible label</th><th>barcode</th><th>asset no</th><th>has problems?</th><th>object type</th><th>comment</th></tr>';
+			$extra = 8;
 			break;
 		default:
 			showError ("Uknown object type '${object_type}'", __FUNCTION__);

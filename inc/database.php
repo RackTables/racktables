@@ -125,7 +125,7 @@ function getNarrowObjectList ($varname = '')
 		"select RackObject.id as id, RackObject.name as name, dict_value as objtype_name, " .
 		"objtype_id from " .
 		"RackObject inner join Dictionary on objtype_id=dict_key join Chapter on Chapter.id = Dictionary.chapter_id " .
-		"where RackObject.deleted = 'no' and Chapter.name = 'RackObjectType' " .
+		"where Chapter.name = 'RackObjectType' " .
 		"order by objtype_id, name";
 	$result = useSelectBlade ($query, __FUNCTION__);
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
@@ -352,7 +352,7 @@ function getRackData ($rack_id = 0, $silent = FALSE)
 	$query =
 		"select Rack.id, Rack.name, row_id, height, Rack.comment, RackRow.name as row_name from " .
 		"Rack left join RackRow on Rack.row_id = RackRow.id  " .
-		"where  Rack.id='${rack_id}' and Rack.deleted = 'no'";
+		"where Rack.id='${rack_id}'";
 	$result = useSelectBlade ($query, __FUNCTION__);
 	if (($row = $result->fetch (PDO::FETCH_ASSOC)) == NULL)
 	{
@@ -407,7 +407,7 @@ function getObjectInfo ($object_id = 0, $set_dname = TRUE)
 	$query =
 		"select RackObject.id as id, RackObject.name as name, label, barcode, dict_value as objtype_name, asset_no, dict_key as objtype_id, has_problems, comment from " .
 		"RackObject inner join Dictionary on objtype_id = dict_key join Chapter on Chapter.id = Dictionary.chapter_id " .
-		"where RackObject.id = '${object_id}' and RackObject.deleted = 'no' and Chapter.name = 'RackObjectType' limit 1";
+		"where RackObject.id = '${object_id}' and Chapter.name = 'RackObjectType'";
 	$result = useSelectBlade ($query, __FUNCTION__);
 	if (($ret = $result->fetch (PDO::FETCH_ASSOC)) == NULL)
 	{
