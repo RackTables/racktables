@@ -1784,11 +1784,11 @@ function renderTagStats ()
 	echo '<th>IPv4 VS</th><th>IPv4 RS pools</th><th>users</th><th>files</th></tr>';
 	$pagebyrealm = array
 	(
-		'file' => 'files&entity_type=all',
+		'file' => 'files&tab=default',
 		'ipv4net' => 'ipv4space&tab=default',
 		'ipv4vs' => 'ipv4vslist&tab=default',
 		'ipv4rspool' => 'ipv4rsplist&tab=default',
-		'object' => 'objgroup&group_id=0',
+		'object' => 'depot&tab=default',
 		'rack' => 'rackspace&tab=default',
 		'user' => 'userlist&tab=default'
 	);
