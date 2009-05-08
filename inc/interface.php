@@ -359,13 +359,8 @@ function renderRackspaceRowEditor ()
 	finishPortlet();
 }
 
-function renderRow ($row_id = 0)
+function renderRow ($row_id)
 {
-	if ($row_id == 0)
-	{
-		showError ('Invalid row_id', __FUNCTION__);
-		return;
-	}
 	if (($rowInfo = getRackRowInfo ($row_id)) == NULL)
 	{
 		showError ('getRackRowInfo() failed', __FUNCTION__);
@@ -511,13 +506,8 @@ function assertIPv4Arg ($argname, $caller = 'N/A', $ok_if_empty = FALSE)
 }
 
 // This function renders rack as HTML table.
-function renderRack ($rack_id = 0, $hl_obj_id = 0)
+function renderRack ($rack_id, $hl_obj_id = 0)
 {
-	if ($rack_id == 0)
-	{
-		showError ('Invalid rack_id', __FUNCTION__);
-		return;
-	}
 	if (($rackData = getRackData ($rack_id)) == NULL)
 	{
 		showError ('getRackData() failed', __FUNCTION__);
@@ -815,13 +805,8 @@ function renderRackInfoPortlet ($rackData)
 
 // This is a universal editor of rack design/waste.
 // FIXME: switch to using printOpFormIntro()
-function renderGridForm ($rack_id = 0, $filter, $header, $submit, $state1, $state2)
+function renderGridForm ($rack_id, $filter, $header, $submit, $state1, $state2)
 {
-	if ($rack_id == 0)
-	{
-		showError ('Invalid rack_id', __FUNCTION__);
-		return;
-	}
 	if (($rackData = getRackData ($rack_id)) == NULL)
 	{
 		showError ('getRackData() failed', __FUNCTION__);
@@ -864,7 +849,7 @@ function renderRackDesign ($rack_id)
 	renderGridForm ($rack_id, 'applyRackDesignMask', 'Rack design', 'Set rack design', 'A', 'F');
 }
 
-function renderRackProblems ($rack_id = 0)
+function renderRackProblems ($rack_id)
 {
 	renderGridForm ($rack_id, 'applyRackProblemMask', 'Rack problems', 'Mark unusable atoms', 'F', 'U');
 }
@@ -879,14 +864,9 @@ function finishPortlet ()
 	echo "</div>\n";
 }
 
-function renderRackObject ($object_id = 0)
+function renderRackObject ($object_id)
 {
 	global $nextorder, $aac;
-	if ($object_id <= 0)
-	{
-		showError ('Invalid object_id', __FUNCTION__);
-		return;
-	}
 	$info = getObjectInfo ($object_id);
 	if ($info == NULL)
 	{
@@ -1196,7 +1176,7 @@ function showMessageOrError ()
 }
 
 // This function renders a form for port edition.
-function renderPortsForObject ($object_id = 0)
+function renderPortsForObject ($object_id)
 {
 	function printNewItemTR ()
 	{
@@ -1210,11 +1190,6 @@ function renderPortsForObject ($object_id = 0)
 		echo "<td colspan=3>&nbsp;</td><td>";
 		printImageHREF ('add', 'add a port', TRUE, 104);
 		echo "</td></tr></form>";
-	}
-	if ($object_id <= 0)
-	{
-		showError ('Invalid object_id', __FUNCTION__);
-		return;
 	}
 	showMessageOrError();
 	startPortlet ('Ports and interfaces');
@@ -1308,7 +1283,7 @@ function renderPortsForObject ($object_id = 0)
 	finishPortlet();
 }
 
-function renderIPv4ForObject ($object_id = 0)
+function renderIPv4ForObject ($object_id)
 {
 	function printNewItemTR ()
 	{
@@ -1326,11 +1301,6 @@ function renderIPv4ForObject ($object_id = 0)
 		echo "</td></tr></form>";
 	}
 	global $aat;
-	if ($object_id <= 0)
-	{
-		showError ('Invalid object_id', __FUNCTION__);
-		return;
-	}
 	showMessageOrError();
 	startPortlet ('Allocations');
 	$alloclist = getObjectIPv4Allocations ($object_id);
@@ -1685,13 +1655,8 @@ and either delete them before unmounting or refuse to unmount the object.
 */
 
 // We extensively use $_REQUEST in the function.
-function renderRackSpaceForObject ($object_id = 0)
+function renderRackSpaceForObject ($object_id)
 {
-	if ($object_id <= 0)
-	{
-		showError ('Invalid object_id', __FUNCTION__);
-		return;
-	}
 	$is_update = isset ($_REQUEST['rackmulti'][0]);
 	$info = getObjectInfo ($object_id);
 	if ($info == NULL)
@@ -2729,7 +2694,7 @@ function renderIPv4AddressAllocations ($dottedquad)
 	echo "</table><br><br>";
 }
 
-function renderNATv4ForObject ($object_id = 0)
+function renderNATv4ForObject ($object_id)
 {
 	function printNewItemTR ($alloclist)
 	{
@@ -3360,11 +3325,6 @@ function renderConfigMainpage ()
 
 function renderRackPage ($rack_id)
 {
-	if ($rack_id == 0)
-	{
-		showError ('Invalid argument', __FUNCTION__);
-		return;
-	}
 	if (($rackData = getRackData ($rack_id)) == NULL)
 	{
 		showError ('getRackData() failed', __FUNCTION__);
@@ -3899,7 +3859,7 @@ function renderUIConfigEditForm ()
 
 // This function queries the gateway about current VLAN configuration and
 // renders a form suitable for submit. Ah, and it does submit processing as well.
-function renderVLANMembership ($object_id = 0)
+function renderVLANMembership ($object_id)
 {
 	showMessageOrError();
 	$data = getSwitchVLANs ($object_id);
@@ -4037,14 +3997,9 @@ function renderVLANMembership ($object_id = 0)
 	echo '</td></tr></table>';
 }
 
-function renderSNMPPortFinder ($object_id = 0)
+function renderSNMPPortFinder ($object_id)
 {
 	showMessageOrError();
-	if ($object_id <= 0)
-	{
-		showError ('Invalid argument', __FUNCTION__);
-		return;
-	}
 	printOpFormIntro ('querySNMPData');
 	if (!extension_loaded ('snmp'))
 	{
@@ -4070,14 +4025,9 @@ function renderUIResetForm()
 	echo "</form>";
 }
 
-function renderLVSConfig ($object_id = 0)
+function renderLVSConfig ($object_id)
 {
 	showMessageOrError();
-	if ($object_id <= 0)
-	{
-		showError ('Invalid argument', __FUNCTION__);
-		return;
-	}
 	echo '<br>';
 	printOpFormIntro ('submitSLBConfig');
 	echo "<center><input type=submit value='Submit for activation'></center>";
@@ -4179,14 +4129,9 @@ function renderProgressBar ($percentage = 0, $theme = '')
 	echo (empty ($theme) ? '' : "&theme=${theme}") . "'>";
 }
 
-function renderRSPoolServerForm ($pool_id = 0)
+function renderRSPoolServerForm ($pool_id)
 {
 	global $nextorder;
-	if ($pool_id <= 0)
-	{
-		showError ('Invalid pool_id', __FUNCTION__);
-		return;
-	}
 	showMessageOrError();
 	$poolInfo = getRSPoolInfo ($pool_id);
 
@@ -4258,7 +4203,7 @@ function renderRSPoolServerForm ($pool_id = 0)
 	finishPortlet();
 }
 
-function renderRSPoolLBForm ($pool_id = 0)
+function renderRSPoolLBForm ($pool_id)
 {
 	global $nextorder;
 	showMessageOrError();
@@ -4307,7 +4252,7 @@ function renderRSPoolLBForm ($pool_id = 0)
 	finishPortlet();
 }
 
-function renderVServiceLBForm ($vs_id = 0)
+function renderVServiceLBForm ($vs_id)
 {
 	global $nextorder;
 	showMessageOrError();
@@ -4355,14 +4300,9 @@ function renderVServiceLBForm ($vs_id = 0)
 	finishPortlet();
 }
 
-function renderRSPool ($pool_id = 0)
+function renderRSPool ($pool_id)
 {
 	global $nextorder;
-	if ($pool_id <= 0)
-	{
-		showError ('Invalid pool_id', __FUNCTION__);
-		return;
-	}
 	$poolInfo = getRSPoolInfo ($pool_id);
 	if ($poolInfo == NULL)
 	{
@@ -4609,13 +4549,8 @@ function renderLBList ()
 	echo "</table>";
 }
 
-function renderRSPoolRSInServiceForm ($pool_id = 0)
+function renderRSPoolRSInServiceForm ($pool_id)
 {
-	if ($pool_id <= 0)
-	{
-		showError ('Invalid pool_id', __FUNCTION__);
-		return;
-	}
 	showMessageOrError();
 	$poolInfo = getRSPoolInfo ($pool_id);
 	printOpFormIntro ('upd', array ('rscount' => count ($poolInfo['rslist'])));
@@ -4635,13 +4570,8 @@ function renderRSPoolRSInServiceForm ($pool_id = 0)
 	echo "</td></tr></table>\n</form>";
 }
 
-function renderLivePTR ($id = 0)
+function renderLivePTR ()
 {
-	if ($id == 0)
-	{
-		showError ("Invalid argument", __FUNCTION__);
-		return;
-	}
 	showMessageOrError();
 	if (isset($_REQUEST['pg']))
 		$page = $_REQUEST['pg'];
@@ -4751,13 +4681,8 @@ function renderLivePTR ($id = 0)
 	echo "</td></tr></table>\n";
 }
 
-function renderAutoPortsForm ($object_id = 0)
+function renderAutoPortsForm ($object_id)
 {
-	if ($object_id <= 0)
-	{
-		showError ('Invalid object_id', __FUNCTION__);
-		return;
-	}
 	// If the below call has any data to display, the non-default redirection from the generator
 	// has failed. Don't ignore the message log anyway.
 	showMessageOrError();
@@ -4916,14 +4841,9 @@ function renderTagCheckbox ($inputname, $preselect, $taginfo, $level = 0)
 		$self ($inputname, $preselect, $kid, $level + 1);
 }
 
-function renderEntityTags ($entity_id = 0)
+function renderEntityTags ($entity_id)
 {
 	global $tagtree, $target_given_tags, $pageno, $page, $target_given_tags;
-	if ($entity_id <= 0)
-	{
-		showError ('Invalid or missing arguments', __FUNCTION__);
-		return;
-	}
 	showMessageOrError();
 	$bypass_name = $page[$pageno]['bypass'];
 	startPortlet ('Tag list');
@@ -5365,14 +5285,9 @@ function renderMyAccount ()
 }
 
 // File-related functions
-function renderFile ($file_id = 0)
+function renderFile ($file_id)
 {
 	global $nextorder, $aac, $root;
-	if ($file_id <= 0)
-	{
-		showError ('Invalid file_id', __FUNCTION__);
-		return;
-	}
 	$file = getFileInfo ($file_id);
 	if ($file == NULL)
 	{
@@ -5460,7 +5375,7 @@ function renderFileReuploader ()
 	finishPortlet();
 }
 
-function renderFileProperties ($file_id = 0)
+function renderFileProperties ($file_id)
 {
 	$file = getFileInfo ($file_id);
 	if ($file === NULL)
@@ -5567,15 +5482,9 @@ function renderFilesPortlet ($entity_type = NULL, $entity_id = 0)
 	}
 }
 
-function renderFilesForEntity ($entity_id = 0)
+function renderFilesForEntity ($entity_id)
 {
 	global $page, $pageno, $etype_by_pageno;
-	if ($entity_id <= 0)
-	{
-		showError ('Invalid entity info', __FUNCTION__);
-		return;
-	}
-
 	showMessageOrError();
 	// Now derive entity_type and bypass_name from pageno.
 	$entity_type = $etype_by_pageno[$pageno];
