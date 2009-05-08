@@ -105,7 +105,6 @@ INSERT INTO `Chapter` (`id`, `sticky`, `name`) VALUES
 (14,'no','switch OS type'),
 (1,'yes','RackObjectType'),
 (2,'yes','PortType'),
-(3,'yes','RackRow'),
 (16,'no','router OS type'),
 (17,'no','router models'),
 (18,'no','disk array models'),

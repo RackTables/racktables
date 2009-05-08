@@ -219,6 +219,7 @@ CREATE TABLE `FileLink` (
 				$query[] = "insert into RackRow set id=${row[0]}, name='${row[1]}'";
 			}
 			$query[] = "delete from Dictionary where chapter_id = 3";
+			$query[] = "delete from Chapter where id = 3";
 			$query[] = "
 CREATE TABLE `LDAPCache` (
   `presented_username` char(64) NOT NULL,

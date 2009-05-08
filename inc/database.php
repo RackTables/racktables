@@ -1637,6 +1637,8 @@ function addPortCompat ($type1 = 0, $type2 = 0)
 // This function returns the dictionary as an array of trees, each tree
 // representing a single chapter. Each element has 'id', 'name', 'sticky'
 // and 'word' keys with the latter holding all the words within the chapter.
+// FIXME: there's a lot of excess legacy code in this function, it's reasonable
+// to merge it with readChapter().
 function getDict ($parse_links = FALSE)
 {
 	$query1 =
@@ -3670,9 +3672,9 @@ function commitDeleteFile ($file_id)
 function getChapterList ()
 {
 	$ret = array();
-	$result = useSelectBlade ('select id as chapter_no, name as chapter_name from Chapter order by Chapter.name');
+	$result = useSelectBlade ('SELECT id, sticky, name, count(chapter_id) as wordc FROM Chapter LEFT JOIN Dictionary ON Chapter.id = chapter_id GROUP BY id ORDER BY name');
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-		$ret[$row['chapter_no']] = $row['chapter_name'];
+		$ret[$row['id']] = $row;
 	return $ret;
 }
 
