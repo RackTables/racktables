@@ -1685,7 +1685,6 @@ and either delete them before unmounting or refuse to unmount the object.
 */
 
 // We extensively use $_REQUEST in the function.
-// FIXME: move related code into ophandler
 function renderRackSpaceForObject ($object_id = 0)
 {
 	if ($object_id <= 0)
@@ -1693,7 +1692,6 @@ function renderRackSpaceForObject ($object_id = 0)
 		showError ('Invalid object_id', __FUNCTION__);
 		return;
 	}
-	$is_submit = isset ($_REQUEST['got_atoms']);
 	$is_update = isset ($_REQUEST['rackmulti'][0]);
 	$info = getObjectInfo ($object_id);
 	if ($info == NULL)
@@ -1703,13 +1701,8 @@ function renderRackSpaceForObject ($object_id = 0)
 	}
 	// Always process occupied racks plus racks chosen by user. First get racks with
 	// already allocated rackspace...
-	$workingRacksData = getResidentRacksData ($object_id);
-	if ($workingRacksData === NULL)
-	{
-		print_r ($workingRacksData);
-		showError ('getResidentRacksData() failed', __FUNCTION__);
-		return;
-	}
+	if (NULL === ($workingRacksData = getResidentRacksData ($object_id)))
+		die; // some error already shown
 
 	// ...and then add those chosen by user (if any).
 	if (isset($_REQUEST['rackmulti']))
@@ -1792,7 +1785,7 @@ function renderRackSpaceForObject ($object_id = 0)
 		markupAtomGrid ($rackData, 'T');
 		// If we have a form processed, discard user input and show new database
 		// contents.
-		if (!$is_submit and $is_update)
+		if ($is_update)
 			mergeGridFormToRack ($rackData);
 		echo "<td valign=top>";
 		echo "<center>\n<h2>${rackData['name']}</h2>\n";

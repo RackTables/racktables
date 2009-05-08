@@ -691,18 +691,10 @@ function updateObjectAllocation ()
 	assertUIntArg ('object_id', __FUNCTION__);
 
 	$is_submit = isset ($_REQUEST['got_atoms']);
-	$is_update = isset ($_REQUEST['rackmulti'][0]);
 
 	if ($is_submit)
 	{
 		$object_id = $_REQUEST['object_id'];
-		$workingRacksData = getResidentRacksData ($object_id);
-		if ($workingRacksData === NULL)
-		{
-			print_r ($workingRacksData);
-			showError ('getResidentRacksData() failed', __FUNCTION__);
-			return;
-		}
 		$workingRacksData = array();
 		foreach ($_REQUEST['rackmulti'] as $cand_id)
 		{
@@ -730,7 +722,6 @@ function updateObjectAllocation ()
 			$log[] = $logrecord;
 		}
 		return buildWideRedirectURL($log);
-		
 	}
 	else
 	{
@@ -742,7 +733,6 @@ function updateObjectAllocation ()
 		unset($_POST['op']);
 		return buildWideRedirectURL(array(), NULL, NULL, array_merge($_GET, $_POST));
 	}
-
 }
 
 $msgcode['updateObject']['OK'] = 16;
@@ -902,7 +892,10 @@ function deleteObject ()
 	if (NULL === ($oinfo = getObjectInfo ($_REQUEST['object_id'])))
 		return buildRedirectURL (__FUNCTION__, 'ERR', array ('object not found'));
 
+	$racklist = getResidentRacksData ($_REQUEST['object_id'], FALSE);
 	$error = commitDeleteObject ($_REQUEST['object_id']);
+	foreach ($racklist as $rack_id)
+		resetThumbCache ($rack_id);
 
 	if ($error != '')
 		return buildRedirectURL (__FUNCTION__, 'ERR', array ($error));
