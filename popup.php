@@ -6,23 +6,23 @@
 <head>
  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <?php
-	// This is our context.
-	$pageno = 'objects';
-	$tabno = 'default';
-	echo '<title>' . getTitle ($pageno) . "</title>\n";
+	echo "<title>RackTables pop-up</title>\n";
 	echo "<link rel=stylesheet type='text/css' href=pi.css />\n";
 	echo "<link rel=icon href='" . getFaviconURL() . "' type='image/x-icon' />";
 	echo '</head><body style="height: 100%;">';
-	fixContext();
-	if (!permitted())
-	{
-		renderAccessDenied();
-		die;
-	}
 	assertStringArg ('helper', __FILE__);
 	switch ($_REQUEST['helper'])
 	{
 		case 'portlist':
+			// FIXME: shouldn't this be derived from the URL?
+			$pageno = 'object';
+			$tabno = 'ports';
+			fixContext();
+			if (!permitted())
+			{
+				renderAccessDenied();
+				die;
+			}
 			assertUIntArg ('type', __FILE__);
 			assertUIntArg ('port', __FILE__);
 			assertUIntArg ('object_id', __FILE__);
@@ -46,6 +46,14 @@
 			echo '</form></div>';
 			break;
 		case 'inet4list':
+			$pageno = 'ipv4space';
+			$tabno = 'default';
+			fixContext();
+			if (!permitted())
+			{
+				renderAccessDenied();
+				die;
+			}
 			echo '<div style="background-color: #f0f0f0; border: 1px solid #3c78b5; padding: 10px; height: 100%; text-align: center; margin: 5px;">';
 			echo '<h2>Choose a port:</h2><br><br>';
 			echo '<form action="javascript:;">';
@@ -71,4 +79,3 @@
 ?>
 </body>
 </html>
-
