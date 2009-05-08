@@ -273,7 +273,6 @@ function renderIndex ()
 
 function renderRackspace ()
 {
-	showMessageOrError();
 	echo "<table class=objview border=0 width='100%'><tr><td class=pcleft>";
 	$cellfilter = getCellFilter();
 	renderCellFilterPortlet ($cellfilter, 'rack');
@@ -331,7 +330,6 @@ function renderRackspaceRowEditor ()
 		printImageHREF ('create', 'Add new row', TRUE, 101);
 		echo "</td></tr></form>";
 	}
-	showMessageOrError();
 	startPortlet ('Rows');
 	echo "<table border=0 cellspacing=0 cellpadding=5 align=center class=widetable>\n";
 	echo "<tr><th>&nbsp;</th><th>Name</th><th>&nbsp;</th></tr>\n";
@@ -593,8 +591,6 @@ function renderRack ($rack_id, $hl_obj_id = 0)
 
 function renderNewRackForm ($row_id)
 {
-	showMessageOrError();
-
 	startPortlet ('Add one');
 	printOpFormIntro ('addRack', array ('got_data' => 'TRUE'));
 	echo '<table border=0 align=center>';
@@ -631,8 +627,6 @@ function renderNewRackForm ($row_id)
 
 function renderEditObjectForm ($object_id)
 {
-	showMessageOrError();
-
 	global $pageno;
 	$object = getObjectInfo ($object_id);
 	if ($object == NULL)
@@ -716,7 +710,6 @@ function renderEditObjectForm ($object_id)
 // This is a clone of renderEditObjectForm().
 function renderEditRackForm ($rack_id)
 {
-	showMessageOrError();
 	global $pageno;
 	$rack = getRackData ($rack_id);
 	if ($rack == NULL)
@@ -812,7 +805,6 @@ function renderGridForm ($rack_id, $filter, $header, $submit, $state1, $state2)
 		showError ('getRackData() failed', __FUNCTION__);
 		return;
 	}
-	showMessageOrError();
 	$filter ($rackData);
 	markupObjectProblems ($rackData);
 
@@ -1191,7 +1183,6 @@ function renderPortsForObject ($object_id)
 		printImageHREF ('add', 'add a port', TRUE, 104);
 		echo "</td></tr></form>";
 	}
-	showMessageOrError();
 	startPortlet ('Ports and interfaces');
 	$ports = getObjectPortsAndLinks ($object_id);
 	usort($ports, 'sortByName');
@@ -1301,7 +1292,6 @@ function renderIPv4ForObject ($object_id)
 		echo "</td></tr></form>";
 	}
 	global $aat;
-	showMessageOrError();
 	startPortlet ('Allocations');
 	$alloclist = getObjectIPv4Allocations ($object_id);
 	echo "<table cellspacing=0 cellpadding='5' align='center' class='widetable'>\n";
@@ -1697,7 +1687,6 @@ function renderRackSpaceForObject ($object_id)
 	unset ($rackData);
 
 	// This is the time for rendering.
-	showMessageOrError();
 
 	// Main layout starts.
 	echo "<table border=0 class=objectview cellspacing=0 cellpadding=0><tr>";
@@ -1833,7 +1822,6 @@ function renderEmptyPortsSelect ($port_id, $type_id)
 function renderDepot ()
 {
 	global $pageno, $nextorder;
-	showMessageOrError();
 	$cellfilter = getCellFilter();
 	$objects = filterCellList (listCells ('object'), $cellfilter['expression']);
 
@@ -2169,8 +2157,6 @@ function renderIPv4SLB ()
 
 function renderIPv4SpaceEditor ()
 {
-	showMessageOrError();
-
 	// IPv4 validator
 ?>
 	<script type="text/javascript">
@@ -2495,7 +2481,6 @@ function renderIPv4Network ($id)
 
 function renderIPv4NetworkProperties ($id)
 {
-	showMessageOrError();
 	$netdata = getIPv4NetworkInfo ($id);
 	echo "<center><h1>${netdata['ip']}/${netdata['mask']}</h1></center>\n";
 	echo "<table border=0 cellpadding=10 cellpadding=1 align='center'>\n";
@@ -2617,7 +2602,6 @@ function renderIPv4Address ($dottedquad)
 
 function renderIPv4AddressProperties ($dottedquad)
 {
-	showMessageOrError();
 	$address = getIPv4Address ($dottedquad);
 	echo "<center><h1>$dottedquad</h1></center>\n";
 
@@ -2644,7 +2628,6 @@ function renderIPv4AddressProperties ($dottedquad)
 
 function renderIPv4AddressAllocations ($dottedquad)
 {
-	showMessageOrError();
 	function printNewItemTR ()
 	{
 		global $aat;
@@ -2727,7 +2710,6 @@ function renderNATv4ForObject ($object_id)
 	$info = getObjectInfo ($object_id);
 	$forwards = getNATv4ForObject ($object_id);
 	$alloclist = getObjectIPv4Allocations ($object_id);
-	showMessageOrError();
 	echo "<center><h2>locally performed NAT</h2></center>";
 
 	echo "<table class='widetable' cellpadding=5 cellspacing=0 border=0 align='center'>\n";
@@ -2824,7 +2806,6 @@ function renderNATv4ForObject ($object_id)
 
 function renderAddMultipleObjectsForm ()
 {
-	showMessageOrError();
 	$typelist = getObjectTypeList();
 	$typelist[0] = 'select type...';
 	$max = getConfigVar ('MASSCOUNT');
@@ -3241,7 +3222,6 @@ function renderUserListEditor ()
 	}
 	$accounts = listCells ('user');
 	startPortlet ('User accounts (' . count ($accounts) . ')');
-	showMessageOrError();
 	echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
 	echo "<tr><th>Username</th><th>Real name</th><th>Password</th><th>&nbsp;</th></tr>\n";
 	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
@@ -3274,7 +3254,6 @@ function renderPortMapEditor ()
 function renderPortMap ($editable = FALSE)
 {
 	global $nextorder;
-	showMessageOrError();
 	startPortlet ("Port compatibility map");
 	$ptlist = getPortTypes();
 	$pclist = getPortCompat();
@@ -3407,7 +3386,6 @@ function renderChapterEditor ($tgt_chapter_no)
 		echo '</td></tr></form>';
 	}
 	$dict = getDict();
-	showMessageOrError();
 	echo "<br><table class=cooltable border=0 cellpadding=5 cellspacing=0 align=center>\n";
 	foreach ($dict as $chapter_no => $chapter)
 	{
@@ -3467,7 +3445,6 @@ function renderChaptersEditor ()
 		printImageHREF ('create', 'Add new', TRUE, 101);
 		echo '</td></tr></form>';
 	}
-	showMessageOrError();
 	$dict = getChapterList();
 	foreach (array_keys ($dict) as $chapter_no)
 		$dict[$chapter_no]['mapped'] = FALSE;
@@ -3558,7 +3535,6 @@ function renderEditAttributesForm ()
 		echo '</td></tr></form>';
 	}
 	$attrMap = getAttrMap();
-	showMessageOrError();
 	startPortlet ('Optional attributes');
 	echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
 	echo '<tr><th>&nbsp;</th><th>Name</th><th>Type</th><th>&nbsp;</th></tr>';
@@ -3611,7 +3587,6 @@ function renderEditAttrMapForm ()
 		echo '</form>';
 	}
 	$attrMap = getAttrMap();
-	showMessageOrError();
 	startPortlet ('Attribute map');
 	echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
 	echo '<tr><th>&nbsp;</th><th>Attribute name</th><th>Object type</th><th>Dictionary chapter</th><th>&nbsp;</th></tr>';
@@ -3810,7 +3785,6 @@ function dragon ()
 function renderUIConfig ()
 {
 	global $configCache, $nextorder;
-	showMessageOrError();
 	startPortlet ('Current configuration');
 	echo '<table class=cooltable border=0 cellpadding=5 cellspacing=0 align=center width="50%">';
 	echo '<tr><th class=tdleft>Option</th><th class=tdleft>Value</th></tr>';
@@ -3831,7 +3805,6 @@ function renderUIConfig ()
 function renderUIConfigEditForm ()
 {
 	global $configCache;
-	showMessageOrError();
 	startPortlet ('Current configuration');
 	echo "<table cellspacing=0 cellpadding=5 align=center class=widetable width='50%'>\n";
 	echo "<tr><th class=tdleft>Option</th>";
@@ -3861,7 +3834,6 @@ function renderUIConfigEditForm ()
 // renders a form suitable for submit. Ah, and it does submit processing as well.
 function renderVLANMembership ($object_id)
 {
-	showMessageOrError();
 	$data = getSwitchVLANs ($object_id);
 	if ($data === NULL)
 	{
@@ -3999,7 +3971,6 @@ function renderVLANMembership ($object_id)
 
 function renderSNMPPortFinder ($object_id)
 {
-	showMessageOrError();
 	printOpFormIntro ('querySNMPData');
 	if (!extension_loaded ('snmp'))
 	{
@@ -4027,7 +3998,6 @@ function renderUIResetForm()
 
 function renderLVSConfig ($object_id)
 {
-	showMessageOrError();
 	echo '<br>';
 	printOpFormIntro ('submitSLBConfig');
 	echo "<center><input type=submit value='Submit for activation'></center>";
@@ -4132,7 +4102,6 @@ function renderProgressBar ($percentage = 0, $theme = '')
 function renderRSPoolServerForm ($pool_id)
 {
 	global $nextorder;
-	showMessageOrError();
 	$poolInfo = getRSPoolInfo ($pool_id);
 
 	if (($rsc = count ($poolInfo['rslist'])))
@@ -4206,8 +4175,6 @@ function renderRSPoolServerForm ($pool_id)
 function renderRSPoolLBForm ($pool_id)
 {
 	global $nextorder;
-	showMessageOrError();
-
 	$poolInfo = getRSPoolInfo ($pool_id);
 
 	if (count ($poolInfo['lblist']))
@@ -4255,7 +4222,6 @@ function renderRSPoolLBForm ($pool_id)
 function renderVServiceLBForm ($vs_id)
 {
 	global $nextorder;
-	showMessageOrError();
 	$vsinfo = getVServiceInfo ($vs_id);
 
 	if (count ($vsinfo['rspool']))
@@ -4382,7 +4348,6 @@ function renderVSList ()
 function renderVSListEditForm ()
 {
 	global $nextorder;
-	showMessageOrError();
 	$protocols = array ('TCP' => 'TCP', 'UDP' => 'UDP');
 
 	startPortlet ('Add new');
@@ -4452,8 +4417,6 @@ function renderRSPoolList ()
 function editRSPools ()
 {
 	global $nextorder;
-	showMessageOrError();
-
 	startPortlet ('Add new');
 	printOpFormIntro ('add');
 	echo "<table class=widetable border=0 cellpadding=10 cellspacing=0 align=center>\n";
@@ -4551,7 +4514,6 @@ function renderLBList ()
 
 function renderRSPoolRSInServiceForm ($pool_id)
 {
-	showMessageOrError();
 	$poolInfo = getRSPoolInfo ($pool_id);
 	printOpFormIntro ('upd', array ('rscount' => count ($poolInfo['rslist'])));
 	echo "<table class=widetable border=0 cellpadding=10 cellspacing=0 align=center>\n";
@@ -4572,7 +4534,6 @@ function renderRSPoolRSInServiceForm ($pool_id)
 
 function renderLivePTR ()
 {
-	showMessageOrError();
 	if (isset($_REQUEST['pg']))
 		$page = $_REQUEST['pg'];
 	else
@@ -4683,9 +4644,6 @@ function renderLivePTR ()
 
 function renderAutoPortsForm ($object_id)
 {
-	// If the below call has any data to display, the non-default redirection from the generator
-	// has failed. Don't ignore the message log anyway.
-	showMessageOrError();
 	$info = getObjectInfo ($object_id);
 	$ptlist = readChapter ('PortType');
 	echo "<table class='widetable' border=0 cellspacing=0 cellpadding=5 align='center'>\n";
@@ -4782,7 +4740,6 @@ function renderTagTreeEditor ()
 		echo "</td></tr></form>\n";
 	}
 	global $taglist, $tagtree;
-	showMessageOrError();
 
 	$otags = getOrphanedTags();
 	if (count ($otags))
@@ -4844,7 +4801,6 @@ function renderTagCheckbox ($inputname, $preselect, $taginfo, $level = 0)
 function renderEntityTags ($entity_id)
 {
 	global $tagtree, $target_given_tags, $pageno, $page, $target_given_tags;
-	showMessageOrError();
 	$bypass_name = $page[$pageno]['bypass'];
 	startPortlet ('Tag list');
 	echo '<table border=0 cellspacing=0 cellpadding=3 align=center>';
@@ -5007,7 +4963,6 @@ function renderTagRollerForRow ($row_id)
 	$a = rand (1, 20);
 	$b = rand (1, 20);
 	$sum = $a + $b;
-	showMessageOrError();
 	printOpFormIntro ('rollTags', array ('realsum' => $sum));
 	echo "<table border=1 align=center>";
 	echo "<tr><td colspan=2>This special tool allows assigning tags to physical contents (racks <strong>and all contained objects</strong>) of the current ";
@@ -5024,7 +4979,6 @@ function renderTagRollerForRow ($row_id)
 function renderObjectSLB ($object_id)
 {
 	global $nextorder;
-	showMessageOrError();
 	// Keep the list in a variable to assist in decoding pool name below.
 	$rsplist = getIPv4RSPoolOptions();
 
@@ -5073,7 +5027,6 @@ function renderObjectSLB ($object_id)
 
 function renderEditRSPool ($pool_id)
 {
-	showMessageOrError();
 	$poolinfo = getRSPoolInfo ($pool_id);
 	printOpFormIntro ('updIPv4RSP');
 	echo '<table border=0 align=center>';
@@ -5088,7 +5041,6 @@ function renderEditRSPool ($pool_id)
 
 function renderEditVService ($vsid)
 {
-	showMessageOrError();
 	$vsinfo = getVServiceInfo ($vsid);
 	printOpFormIntro ('updIPv4VS');
 	echo '<table border=0 align=center>';
@@ -5129,7 +5081,6 @@ function renderRackCodeViewer ()
 function renderRackCodeEditor ()
 {
 	$text = loadScript ('RackCode');
-	showMessageOrError();
 	printOpFormIntro ('saveRackCode');
 	echo <<<ENDJAVASCRIPT
 <script type="text/javascript">
@@ -5227,7 +5178,6 @@ function renderUser ($user_id)
 
 function renderMyPasswordEditor ()
 {
-	showMessageOrError();
 	printOpFormIntro ('changeMyPassword');
 	echo '<table border=0 align=center>';
 	echo "<tr><th class=tdright>Current password (*):</th><td><input type=password name=oldpassword tabindex=1></td></tr>";
@@ -5366,7 +5316,6 @@ function renderFile ($file_id)
 
 function renderFileReuploader ()
 {
-	showMessageOrError();
 	startPortlet ('Replace existing contents');
 	printOpFormIntro ('replaceFile', array (), TRUE);
 	echo "<input type=file size=10 name=file tabindex=100>&nbsp;\n";
@@ -5383,7 +5332,6 @@ function renderFileProperties ($file_id)
 		showError ('getFileInfo() failed', __FUNCTION__);
 		return;
 	}
-	showMessageOrError();
 	echo '<table border=0 align=center>';
 	printOpFormIntro ('updateFile');
 	echo "<tr><th class=tdright>MIME-type:</th><td class=tdleft><input tabindex=101 type=text name=file_type value='";
@@ -5406,8 +5354,6 @@ function renderFileBrowser ()
 function renderFileManager ()
 {
 	global $nextorder;
-	showMessageOrError();
-
 	// Used for uploading a parentless file
 	startPortlet ('Upload new');
 	echo "<table border=0 cellspacing=0 cellpadding='5' align='center' class='widetable'>\n";
@@ -5485,7 +5431,6 @@ function renderFilesPortlet ($entity_type = NULL, $entity_id = 0)
 function renderFilesForEntity ($entity_id)
 {
 	global $page, $pageno, $etype_by_pageno;
-	showMessageOrError();
 	// Now derive entity_type and bypass_name from pageno.
 	$entity_type = $etype_by_pageno[$pageno];
 	$id_name = $page[$pageno]['bypass'];
@@ -5829,7 +5774,6 @@ function getFilePreviewCode ($file)
 function renderTextEditor ($file_id)
 {
 	global $CodePressMap;
-	showMessageOrError();
 	$fullInfo = getFile ($file_id);
 	printOpFormIntro ('updateFileText', array ('mtime_copy' => $fullInfo['mtime']));
 	preg_match('/.+\.([^.]*)$/', $fullInfo['name'], $matches); # get file extension

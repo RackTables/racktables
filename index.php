@@ -88,13 +88,20 @@ if (isset ($tabhandler[$pageno][$tabno]))
 				showError ('Dispatching error for bypass parameter', __FILE__);
 				break;
 		}
+		showMessageOrError();
 		$tabhandler[$pageno][$tabno] ($_REQUEST[$page[$pageno]['bypass']]);
 	}
 	else
+	{
+		showMessageOrError();
 		$tabhandler[$pageno][$tabno] ();
+	}
 }
 elseif (isset ($page[$pageno]['handler']))
+{
+	showMessageOrError();
 	$page[$pageno]['handler'] ($tabno);
+}
 else
 	showError ("Failed to find handler for page '${pageno}', tab '${tabno}'", __FILE__);
 ?>
