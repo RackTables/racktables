@@ -215,9 +215,8 @@ CREATE TABLE `FileLink` (
 
 			$result = $dbxlink->query ("select dict_key, dict_value from Dictionary where chapter_no = 3");
 			while($row = $result->fetch(PDO::FETCH_NUM))
-			{
 				$query[] = "insert into RackRow set id=${row[0]}, name='${row[1]}'";
-			}
+			unset ($result);
 			$query[] = "delete from Dictionary where chapter_id = 3";
 			$query[] = "delete from Chapter where id = 3";
 			$query[] = "
