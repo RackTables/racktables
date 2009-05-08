@@ -340,14 +340,15 @@ INSERT INTO `IPv4NAT` (`object_id`, `proto`, `localip`, `localport`, `remoteip`,
 INSERT INTO `IPv4NAT` (`object_id`, `proto`, `localip`, `localport`, `remoteip`, `remoteport`, `description`) VALUES (915,'TCP',180879677,443,180879686,443,'');
 INSERT INTO `IPv4NAT` (`object_id`, `proto`, `localip`, `localport`, `remoteip`, `remoteport`, `description`) VALUES (915,'TCP',180879677,443,180879687,443,'');
 
-INSERT INTO `Rack` VALUES (40,'L01','no',50003,42,'test',NULL);
-INSERT INTO `Rack` VALUES (41,'L02','no',50003,12,'network equipment mini-rack',NULL);
-INSERT INTO `Rack` VALUES (42,'L03','no',50003,42,'',NULL);
-INSERT INTO `Rack` VALUES (43,'NY100','no',50002,16,'',NULL);
-INSERT INTO `Rack` VALUES (44,'NY101','no',50002,42,'server farm wing A',NULL);
-INSERT INTO `Rack` VALUES (45,'M01','no',50000,42,'',NULL);
-INSERT INTO `Rack` VALUES (46,'NY102','no',50002,42,'server farm wing B',NULL);
-INSERT INTO `Rack` VALUES (47,'T01','no',50001,16,'',NULL);
+INSERT INTO `Rack` (id, name, row_id, height, comment) VALUES
+(40,'L01',50003,42,'test'),
+(41,'L02',50003,12,'network equipment mini-rack'),
+(42,'L03',50003,42,''),
+(43,'NY100',50002,16,''),
+(44,'NY101',50002,42,'server farm wing A'),
+(45,'M01',50000,42,''),
+(46,'NY102',50002,42,'server farm wing B'),
+(47,'T01',50001,16,'');
 
 INSERT INTO `RackObject` (id, name, label, barcode, objtype_id, asset_no, has_problems, comment) VALUES 
 (905,'london router','bbrtr1',NULL,7,'net247','no',''),
