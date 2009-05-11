@@ -4102,7 +4102,8 @@ function renderProgressBar ($percentage = 0, $theme = '')
 function renderRSPoolServerForm ($pool_id)
 {
 	global $nextorder;
-	$poolInfo = getRSPoolInfo ($pool_id);
+	$poolInfo = spotEntity ('ipv4rspool', $pool_id);
+	amplifyCell ($poolInfo);
 
 	if (($rsc = count ($poolInfo['rslist'])))
 	{
@@ -4175,7 +4176,8 @@ function renderRSPoolServerForm ($pool_id)
 function renderRSPoolLBForm ($pool_id)
 {
 	global $nextorder;
-	$poolInfo = getRSPoolInfo ($pool_id);
+	$poolInfo = spotEntity ('ipv4rspool', $pool_id);
+	amplifyCell ($poolInfo);
 
 	if (count ($poolInfo['lblist']))
 	{
@@ -4269,10 +4271,11 @@ function renderVServiceLBForm ($vs_id)
 function renderRSPool ($pool_id)
 {
 	global $nextorder;
-	$poolInfo = getRSPoolInfo ($pool_id);
+	$poolInfo = spotEntity ('ipv4rspool', $pool_id);
+	amplifyCell ($poolInfo);
 	if ($poolInfo == NULL)
 	{
-		showError ('getRSPoolInfo() returned NULL', __FUNCTION__);
+		showError ('Could not load data!', __FUNCTION__);
 		return;
 	}
 
@@ -4514,7 +4517,8 @@ function renderLBList ()
 
 function renderRSPoolRSInServiceForm ($pool_id)
 {
-	$poolInfo = getRSPoolInfo ($pool_id);
+	$poolInfo = spotEntity ('ipv4rspool', $pool_id);
+	amplifyCell ($poolInfo);
 	printOpFormIntro ('upd', array ('rscount' => count ($poolInfo['rslist'])));
 	echo "<table class=widetable border=0 cellpadding=10 cellspacing=0 align=center>\n";
 	echo "<tr><th>RS address</th><th>RS port</th><th>RS configuration</th><th>in service</th></tr>\n";
@@ -5027,7 +5031,7 @@ function renderObjectSLB ($object_id)
 
 function renderEditRSPool ($pool_id)
 {
-	$poolinfo = getRSPoolInfo ($pool_id);
+	$poolinfo = spotEntity ('ipv4rspool', $pool_id);
 	printOpFormIntro ('updIPv4RSP');
 	echo '<table border=0 align=center>';
 	echo "<tr><th class=tdright>name:</th><td class=tdleft><input type=text name=name value='${poolinfo['name']}'></td></tr>\n";
@@ -5912,7 +5916,7 @@ function dynamic_title_decoder ($path_position)
 		);
 	case 'ipv4rspool':
 		assertUIntArg ('pool_id', __FUNCTION__);
-		$poolInfo = getRSPoolInfo ($_REQUEST['pool_id']);
+		$poolInfo = spotEntity ('ipv4rspool', $_REQUEST['pool_id']);
 		return array
 		(
 			'name' => empty ($poolInfo['name']) ? 'ANONYMOUS' : $poolInfo['name'],

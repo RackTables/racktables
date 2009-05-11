@@ -1069,7 +1069,7 @@ function findAutoTagWarnings ($expr)
 			{
 				case (mb_ereg_match ('^\$id_', $expr['load'])):
 					$recid = mb_ereg_replace ('^\$id_', '', $expr['load']);
-					if (recordExists ($recid, 'object'))
+					if (NULL !== spotEntity ('object', $recid))
 						return array();
 					return array (array
 					(
@@ -1079,7 +1079,7 @@ function findAutoTagWarnings ($expr)
 					));
 				case (mb_ereg_match ('^\$ipv4netid_', $expr['load'])):
 					$recid = mb_ereg_replace ('^\$ipv4netid_', '', $expr['load']);
-					if (recordExists ($recid, 'ipv4net'))
+					if (NULL != spotEntity ('ipv4net', $recid))
 						return array();
 					return array (array
 					(
@@ -1089,7 +1089,7 @@ function findAutoTagWarnings ($expr)
 					));
 				case (mb_ereg_match ('^\$userid_', $expr['load'])):
 					$recid = mb_ereg_replace ('^\$userid_', '', $expr['load']);
-					if (recordExists ($recid, 'user'))
+					if (NULL !== spotEntity ('user', $recid))
 						return array();
 					return array (array
 					(

@@ -5,6 +5,122 @@
 *
 */
 
+$SQLSchema = array
+(
+	'object' => array
+	(
+		'table' => 'RackObject',
+		'columns' => array
+		(
+			'id' => 'id',
+			'name' => 'name',
+			'label' => 'label',
+			'barcode' => 'barcode',
+			'asset_no' => 'asset_no',
+			'objtype_id' => 'objtype_id',
+			'rack_id' => '(select rack_id from RackSpace where object_id = id order by rack_id asc limit 1)',
+			'Rack_name' => '(select name from Rack where id = rack_id)',
+			'row_id' => '(select row_id from Rack where id = rack_id)',
+			'Row_name' => '(select name from RackRow where id = row_id)',
+			'objtype_name' => '(select dict_value from Dictionary where dict_key = objtype_id)',
+		),
+		'keycolumn' => 'id',
+		'ordcolumns' => array ('name'),
+	),
+	'user' => array
+	(
+		'table' => 'UserAccount',
+		'columns' => array
+		(
+			'user_id' => 'user_id',
+			'user_name' => 'user_name',
+			'user_password_hash' => 'user_password_hash',
+			'user_realname' => 'user_realname',
+		),
+		'keycolumn' => 'user_id',
+		'ordcolumns' => array ('user_name'),
+	),
+	'ipv4net' => array
+	(
+		'table' => 'IPv4Network',
+		'columns' => array
+		(
+			'id' => 'id',
+			'ip' => 'INET_NTOA(IPv4Network.ip)',
+			'mask' => 'mask',
+			'name' => 'name',
+		),
+		'keycolumn' => 'id',
+		'ordcolumns' => array ('ip', 'mask'),
+	),
+	'file' => array
+	(
+		'table' => 'File',
+		'columns' => array
+		(
+			'id' => 'id',
+			'name' => 'name',
+			'type' => 'type',
+			'size' => 'size',
+			'ctime' => 'ctime',
+			'mtime' => 'mtime',
+			'atime' => 'atime',
+			'comment' => 'comment',
+		),
+		'keycolumn' => 'id',
+		'ordcolumns' => array ('name'),
+	),
+	'ipv4vs' => array
+	(
+		'table' => 'IPv4VS',
+		'columns' => array
+		(
+			'id' => 'id',
+			'vip' => 'INET_NTOA(vip)',
+			'vport' => 'vport',
+			'proto' => 'proto',
+			'name' => 'name',
+			'vsconfig' => 'vsconfig',
+			'rsconfig' => 'rsconfig',
+			'poolcount' => '(select count(vs_id) from IPv4LB where vs_id = id)',
+			'dname' => 'CONCAT_WS("/", CONCAT_WS(":", INET_NTOA(vip), vport), proto)',
+		),
+		'keycolumn' => 'id',
+		'ordcolumns' => array ('vip', 'proto', 'vport'),
+	),
+	'ipv4rspool' => array
+	(
+		'table' => 'IPv4RSPool',
+		'columns' => array
+		(
+			'id' => 'id',
+			'name' => 'name',
+			'refcnt' => '(select count(rspool_id) from IPv4LB where rspool_id = id)',
+			'rscount' => '(select count(rspool_id) from IPv4RS where rspool_id = IPv4RSPool.id)',
+			'vsconfig' => 'vsconfig',
+			'rsconfig' => 'rsconfig',
+		),
+		'keycolumn' => 'id',
+		'ordcolumns' => array ('name', 'id'),
+	),
+	'rack' => array
+	(
+		'table' => 'Rack',
+		'columns' => array
+		(
+			'id' => 'id',
+			'name' => 'name',
+			'height' => 'height',
+			'comment' => 'comment',
+			'row_id' => 'row_id',
+			'row_name' => '(select name from RackRow where RackRow.id = row_id)',
+		),
+		'keycolumn' => 'id',
+		'ordcolumns' => array ('row_id', 'name'),
+		'pidcolumn' => 'row_id',
+	),
+);
+
 function isInnoDBSupported ($dbh = FALSE) {
 	global $dbxlink;
 
@@ -128,7 +244,11 @@ function getNarrowObjectList ($varname = '')
 		"where Chapter.name = 'RackObjectType' " .
 		"order by objtype_id, name";
 	$result = useSelectBlade ($query, __FUNCTION__);
-	while ($row = $result->fetch (PDO::FETCH_ASSOC))
+	// Fetch everything at once to unblock result buffer and enable
+	// loadEntityTags(), which will be called soon.
+	$buffer = $result->fetchAll (PDO::FETCH_ASSOC);
+	unset ($result);
+	foreach ($buffer as $row)
 		$ret[$row['id']] = displayedName ($row);
 	if (strlen ($varname) and strlen (getConfigVar ($varname)))
 	{
@@ -146,127 +266,23 @@ function getNarrowObjectList ($varname = '')
 // enough information for judgeEntityRecord() to execute.
 function listCells ($realm, $parent_id = 0)
 {
-	switch ($realm)
+	global $SQLSchema;
+	if (!isset ($SQLSchema[$realm]))
 	{
-	case 'object':
-		$table = 'RackObject';
-		$columns = array
-		(
-			'id' => 'id',
-			'name' => 'name',
-			'label' => 'label',
-			'barcode' => 'barcode',
-			'asset_no' => 'asset_no',
-			'objtype_id' => 'objtype_id',
-			'rack_id' => '(select rack_id from RackSpace where object_id = id order by rack_id asc limit 1)',
-			'Rack_name' => '(select name from Rack where id = rack_id)',
-			'row_id' => '(select row_id from Rack where id = rack_id)',
-			'Row_name' => '(select name from RackRow where id = row_id)',
-			'objtype_name' => '(select dict_value from Dictionary where dict_key = objtype_id)',
-		);
-		$keycolumn = 'id';
-		$ordcolumns = array ('name');
-		break;
-	case 'user':
-		$table= 'UserAccount';
-		$columns = array
-		(
-			'user_id' => 'user_id',
-			'user_name' => 'user_name',
-			'user_password_hash' => 'user_password_hash',
-			'user_realname' => 'user_realname',
-		);
-		$keycolumn = 'user_id';
-		$ordcolumns = array ('user_name');
-		break;
-	case 'ipv4net':
-		$table = 'IPv4Network';
-		$columns = array
-		(
-			'id' => 'id',
-			'ip' => 'INET_NTOA(IPv4Network.ip)',
-			'mask' => 'mask',
-			'name' => 'name',
-		);
-		$keycolumn = 'id';
-		$ordcolumns = array ('ip', 'mask');
-		break;
-	case 'file':
-		$table = 'File';
-		$columns = array
-		(
-			'id' => 'id',
-			'name' => 'name',
-			'type' => 'type',
-			'size' => 'size',
-			'ctime' => 'ctime',
-			'mtime' => 'mtime',
-			'atime' => 'atime',
-			'comment' => 'comment',
-		);
-		$keycolumn = 'id';
-		$ordcolumns = array ('name');
-		break;
-	case 'ipv4vs':
-		$table = 'IPv4VS';
-		$columns = array
-		(
-			'id' => 'id',
-			'vip' => 'INET_NTOA(vip)',
-			'vport' => 'vport',
-			'proto' => 'proto',
-			'name' => 'name',
-			'vsconfig' => 'vsconfig',
-			'rsconfig' => 'rsconfig',
-			'poolcount' => '(select count(vs_id) from IPv4LB where vs_id = id)',
-			'dname' => 'CONCAT_WS("/", CONCAT_WS(":", INET_NTOA(vip), vport), proto)',
-		);
-		$keycolumn = 'id';
-		$ordcolumns = array ('vip', 'proto', 'vport');
-		break;
-	case 'ipv4rspool':
-		$table = 'IPv4RSPool';
-		$columns = array
-		(
-			'id' => 'id',
-			'name' => 'name',
-			'refcnt' => '(select count(rspool_id) from IPv4LB where rspool_id = id)',
-			'rscount' => '(select count(rspool_id) from IPv4RS where rspool_id = IPv4RSPool.id)',
-			'vsconfig' => 'vsconfig',
-			'rsconfig' => 'rsconfig',
-		);
-		$keycolumn = 'id';
-		$ordcolumns = array ('name', 'id');
-		break;
-	case 'rack':
-		$table = 'Rack';
-		$columns = array
-		(
-			'id' => 'id',
-			'name' => 'name',
-			'height' => 'height',
-			'comment' => 'comment',
-			'row_id' => 'row_id',
-			'row_name' => '(select name from RackRow where RackRow.id = row_id)',
-		);
-		$keycolumn = 'id';
-		$ordcolumns = array ('row_id', 'name');
-		$pidcolumn = 'row_id';
-		break;
-	default:
 		showError ('invalid arg', __FUNCTION__);
 		return NULL;
 	}
+	$SQLinfo = $SQLSchema[$realm];
 	$query = 'SELECT tag_id';
-	foreach ($columns as $alias => $expression)
+	foreach ($SQLinfo['columns'] as $alias => $expression)
 		// Automatically prepend table name to each single column, but leave all others intact.
-		$query .= ', ' . ($alias == $expression ? "${table}.${alias}" : "${expression} as ${alias}");
-	$query .= " FROM ${table} LEFT JOIN TagStorage on entity_realm = '${realm}' and entity_id = ${table}.${keycolumn}";
-	if (isset ($pidcolumn) and $parent_id)
-		$query .= " WHERE ${table}.${pidcolumn} = ${parent_id}";
+		$query .= ', ' . ($alias == $expression ? "${SQLinfo['table']}.${alias}" : "${expression} as ${alias}");
+	$query .= " FROM ${SQLinfo['table']} LEFT JOIN TagStorage on entity_realm = '${realm}' and entity_id = ${SQLinfo['table']}.${SQLinfo['keycolumn']}";
+	if (isset ($SQLinfo['pidcolumn']) and $parent_id)
+		$query .= " WHERE ${SQLinfo['table']}.${SQLinfo['pidcolumn']} = ${parent_id}";
 	$query .= " ORDER BY ";
-	foreach ($ordcolumns as $oc)
-		$query .= "${table}.${oc}, ";
+	foreach ($SQLinfo['ordcolumns'] as $oc)
+		$query .= "${SQLinfo['table']}.${oc}, ";
 	$query .= " tag_id";
 	$result = useSelectBlade ($query, __FUNCTION__);
 	$ret = array();
@@ -274,12 +290,12 @@ function listCells ($realm, $parent_id = 0)
 	// Index returned result by the value of key column.
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
-		$entity_id = $row[$keycolumn];
+		$entity_id = $row[$SQLinfo['keycolumn']];
 		// Init the first record anyway, but store tag only if there is one.
 		if (!isset ($ret[$entity_id]))
 		{
 			$ret[$entity_id] = array ('realm' => $realm);
-			foreach (array_keys ($columns) as $alias)
+			foreach (array_keys ($SQLinfo['columns']) as $alias)
 				$ret[$entity_id][$alias] = $row[$alias];
 			$ret[$entity_id]['etags'] = array();
 			if ($row['tag_id'] != NULL && isset ($taglist[$row['tag_id']]))
@@ -290,7 +306,7 @@ function listCells ($realm, $parent_id = 0)
 					'parent_id' => $taglist[$row['tag_id']]['parent_id'],
 				);
 		}
-		else
+		elseif (isset ($taglist[$row['tag_id']]))
 			// Meeting existing key later is always more tags on existing list.
 			$ret[$entity_id]['etags'][] = array
 			(
@@ -316,6 +332,65 @@ function listCells ($realm, $parent_id = 0)
 	return $ret;
 }
 
+// Very much like listCells(), but return only one record requested (or NULL,
+// if it does not exist).
+function spotEntity ($realm, $id)
+{
+	global $SQLSchema;
+	if (!isset ($SQLSchema[$realm]))
+	{
+		showError ('invalid arg', __FUNCTION__);
+		return NULL;
+	}
+	$SQLinfo = $SQLSchema[$realm];
+	$query = 'SELECT tag_id';
+	foreach ($SQLinfo['columns'] as $alias => $expression)
+		// Automatically prepend table name to each single column, but leave all others intact.
+		$query .= ', ' . ($alias == $expression ? "${SQLinfo['table']}.${alias}" : "${expression} as ${alias}");
+	$query .= " FROM ${SQLinfo['table']} LEFT JOIN TagStorage on entity_realm = '${realm}' and entity_id = ${SQLinfo['table']}.${SQLinfo['keycolumn']}";
+	$query .= " WHERE ${SQLinfo['table']}.${SQLinfo['keycolumn']} = ${id}";
+	$query .= " ORDER BY tag_id";
+	$result = useSelectBlade ($query, __FUNCTION__);
+	$ret = array();
+	global $taglist;
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
+		if (!isset ($ret['realm']))
+		{
+			$ret = array ('realm' => $realm);
+			foreach (array_keys ($SQLinfo['columns']) as $alias)
+				$ret[$alias] = $row[$alias];
+			$ret['etags'] = array();
+			if ($row['tag_id'] != NULL && isset ($taglist[$row['tag_id']]))
+				$ret['etags'][] = array
+				(
+					'id' => $row['tag_id'],
+					'tag' => $taglist[$row['tag_id']]['tag'],
+					'parent_id' => $taglist[$row['tag_id']]['parent_id'],
+				);
+		}
+		elseif (isset ($taglist[$row['tag_id']]))
+			$ret['etags'][] = array
+			(
+				'id' => $row['tag_id'],
+				'tag' => $taglist[$row['tag_id']]['tag'],
+				'parent_id' => $taglist[$row['tag_id']]['parent_id'],
+			);
+	unset ($result);
+	if (!isset ($ret['realm'])) // no rows were returned
+		return NULL;
+	$ret['itags'] = getImplicitTags ($ret['etags']);
+	$ret['atags'] = generateEntityAutoTags ($realm, $id);
+	switch ($realm)
+	{
+	case 'object':
+		$ret['dname'] = displayedName ($ret);
+		break;
+	default:
+		break;
+	}
+	return $ret;
+}
+
 // This function can be used with array_walk().
 function amplifyCell (&$record, $dummy = NULL)
 {
@@ -335,6 +410,31 @@ function amplifyCell (&$record, $dummy = NULL)
 	case 'file':
 		$record['links'] = getFileLinks ($record['id']);
 		break;
+	case 'ipv4rspool':
+		$record['lblist'] = array();
+		$query = "select object_id, vs_id, lb.vsconfig, lb.rsconfig from " .
+			"IPv4LB as lb inner join IPv4VS as vs on lb.vs_id = vs.id " .
+			"where rspool_id = ${record['id']} order by object_id, vip, vport";
+		$result = useSelectBlade ($query, __FUNCTION__);
+		while ($row = $result->fetch (PDO::FETCH_ASSOC))
+			$record['lblist'][$row['object_id']][$row['vs_id']] = array
+			(
+				'rsconfig' => $row['rsconfig'],
+				'vsconfig' => $row['vsconfig'],
+			);
+		unset ($result);
+		$query = "select id, inservice, inet_ntoa(rsip) as rsip, rsport, rsconfig from " .
+			"IPv4RS where rspool_id = ${record['id']} order by IPv4RS.rsip, rsport";
+		$result = useSelectBlade ($query, __FUNCTION__);
+		while ($row = $result->fetch (PDO::FETCH_ASSOC))
+			$record['rslist'][$row['id']] = array
+			(
+				'inservice' => $row['inservice'],
+				'rsip' => $row['rsip'],
+				'rsport' => $row['rsport'],
+				'rsconfig' => $row['rsconfig'],
+			);
+		unset ($result);
 	default:
 	}
 }
@@ -2279,6 +2379,7 @@ function useSelectBlade ($query, $caller = 'N/A')
 	{
 		$ei = $dbxlink->errorInfo();
 		showError ("SQL query '${query}'\n failed in useSelectBlade with error ${ei[1]} (${ei[2]})", $caller);
+		debug_print_backtrace();
 		return NULL;
 	}
 	return $result;
@@ -2420,46 +2521,6 @@ function getVServiceInfo ($vsid = 0)
 	}
 	$result->closeCursor();
 	return $vsinfo;
-}
-
-// Collect and return the following info about the given real server pool:
-// basic information
-// parent virtual service information
-// load balancers list (each with a list of VSes)
-// real servers list
-
-function getRSPoolInfo ($id = 0)
-{
-	$query1 = "select id, name, vsconfig, rsconfig from " .
-		"IPv4RSPool where id = ${id}";
-	$result = useSelectBlade ($query1, __FUNCTION__);
-	$ret = array();
-	$row = $result->fetch (PDO::FETCH_ASSOC);
-	if (!$row)
-		return NULL;
-	foreach (array ('id', 'name', 'vsconfig', 'rsconfig') as $c)
-		$ret[$c] = $row[$c];
-	$result->closeCursor();
-	unset ($result);
-	$ret['lblist'] = array();
-	$ret['rslist'] = array();
-	$query2 = "select object_id, vs_id, lb.vsconfig, lb.rsconfig from " .
-		"IPv4LB as lb inner join IPv4VS as vs on lb.vs_id = vs.id " .
-		"where rspool_id = ${id} order by object_id, vip, vport";
-	$result = useSelectBlade ($query2, __FUNCTION__);
-	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-		foreach (array ('vsconfig', 'rsconfig') as $c)
-			$ret['lblist'][$row['object_id']][$row['vs_id']][$c] = $row[$c];
-	$result->closeCursor();
-	unset ($result);
-	$query3 = "select id, inservice, inet_ntoa(rsip) as rsip, rsport, rsconfig from " .
-		"IPv4RS where rspool_id = ${id} order by IPv4RS.rsip, rsport";
-	$result = useSelectBlade ($query3, __FUNCTION__);
-	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-		foreach (array ('inservice', 'rsip', 'rsport', 'rsconfig') as $c)
-			$ret['rslist'][$row['id']][$c] = $row[$c];
-	$result->closeCursor();
-	return $ret;
 }
 
 function addRStoRSPool ($pool_id = 0, $rsip = '', $rsport = 0, $inservice = 'no', $rsconfig = '')
@@ -3147,35 +3208,6 @@ function objectIsPortless ($id = 0)
 	return $count === '0';
 }
 
-function recordExists ($id = 0, $realm = 'object')
-{
-	if ($id <= 0)
-		return FALSE;
-	$table = array
-	(
-		'object' => 'RackObject',
-		'ipv4net' => 'IPv4Network',
-		'user' => 'UserAccount',
-	);
-	$idcol = array
-	(
-		'object' => 'id',
-		'ipv4net' => 'id',
-		'user' => 'user_id',
-	);
-	$query = 'select count(*) from ' . $table[$realm] . ' where ' . $idcol[$realm] . ' = ' . $id;
-	if (($result = useSelectBlade ($query, __FUNCTION__)) == NULL) 
-	{
-		showError ('SQL query failed', __FUNCTION__);
-		return FALSE;
-	}
-	$row = $result->fetch (PDO::FETCH_NUM);
-	$count = $row[0];
-	$result->closeCursor();
-	unset ($result);
-	return $count === '1';
-}
-
 function newPortForwarding ($object_id, $localip, $localport, $remoteip, $remoteport, $proto, $description)
 {
 	if (NULL === getIPv4AddressNetworkId ($localip))
@@ -3484,7 +3516,7 @@ function getFileLinks ($file_id = 0)
 			case 'ipv4rspool':
 				$page = 'ipv4rspool';
 				$id_name = 'pool_id';
-				$parent = getRSPoolInfo($row['entity_id']);
+				$parent = spotEntity ($row['entity_type'], $row['entity_id']);
 				$name = $parent['name'];
 				break;
 			case 'ipv4vs':

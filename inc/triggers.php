@@ -77,7 +77,8 @@ function trigger_natv4 ()
 function trigger_poolrscount ()
 {
 	assertUIntArg ('pool_id', __FUNCTION__);
-	$poolInfo = getRSPoolInfo ($_REQUEST['pool_id']);
+	$poolInfo = spotEntity ('ipv4rspool', $_REQUEST['pool_id']);
+	amplifyCell ($poolInfo);
 	return count ($poolInfo['rslist']) > 0;
 }
 
