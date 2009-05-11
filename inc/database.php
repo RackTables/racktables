@@ -423,6 +423,7 @@ function amplifyCell (&$record, $dummy = NULL)
 				'vsconfig' => $row['vsconfig'],
 			);
 		unset ($result);
+		$record['rslist'] = array();
 		$query = "select id, inservice, inet_ntoa(rsip) as rsip, rsport, rsconfig from " .
 			"IPv4RS where rspool_id = ${record['id']} order by IPv4RS.rsip, rsport";
 		$result = useSelectBlade ($query, __FUNCTION__);
@@ -435,6 +436,37 @@ function amplifyCell (&$record, $dummy = NULL)
 				'rsconfig' => $row['rsconfig'],
 			);
 		unset ($result);
+		break;
+	case 'ipv4vs':
+		// Get the detailed composition of a particular virtual service, namely the list
+		// of all pools, each shown with the list of objects servicing it. VS/RS configs
+		// will be returned as well.
+		$record['rspool'] = array();
+		$query = "select pool.id, name, pool.vsconfig, pool.rsconfig, object_id, " .
+			"lb.vsconfig as lb_vsconfig, lb.rsconfig as lb_rsconfig from " .
+			"IPv4RSPool as pool left join IPv4LB as lb on pool.id = lb.rspool_id " .
+			"where vs_id = ${record['id']} order by pool.name, object_id";
+		$result = useSelectBlade ($query, __FUNCTION__);
+		while ($row = $result->fetch (PDO::FETCH_ASSOC))
+		{
+			if (!isset ($record['rspool'][$row['id']]))
+				$record['rspool'][$row['id']] = array
+				(
+					'name' => $row['name'],
+					'vsconfig' => $row['vsconfig'],
+					'rsconfig' => $row['rsconfig'],
+					'lblist' => array(),
+				);
+			if ($row['object_id'] == NULL)
+				continue;
+			$record['rspool'][$row['id']]['lblist'][$row['object_id']] = array
+			(
+				'vsconfig' => $row['lb_vsconfig'],
+				'rsconfig' => $row['lb_rsconfig'],
+			);
+		}
+		unset ($result);
+		break;
 	default:
 	}
 }
@@ -2480,49 +2512,6 @@ function getSLBSummary ()
 	return $ret;
 }
 
-// Get the detailed composition of a particular virtual service, namely the list
-// of all pools, each shown with the list of objects servicing it. VS/RS configs
-// will be returned as well.
-function getVServiceInfo ($vsid = 0)
-{
-	$query1 = "select id, inet_ntoa(vip) as vip, vport, proto, name, vsconfig, rsconfig " .
-		"from IPv4VS where id = ${vsid}";
-	$result = useSelectBlade ($query1, __FUNCTION__);
-	$vsinfo = array ();
-	$row = $result->fetch (PDO::FETCH_ASSOC);
-	if (!$row)
-		return NULL;
-	foreach (array ('id', 'vip', 'vport', 'proto', 'name', 'vsconfig', 'rsconfig') as $cname)
-		$vsinfo[$cname] = $row[$cname];
-	$vsinfo['rspool'] = array();
-	$result->closeCursor();
-	unset ($result);
-	$query2 = "select pool.id, name, pool.vsconfig, pool.rsconfig, object_id, " .
-		"lb.vsconfig as lb_vsconfig, lb.rsconfig as lb_rsconfig from " .
-		"IPv4RSPool as pool left join IPv4LB as lb on pool.id = lb.rspool_id " .
-		"where vs_id = ${vsid} order by pool.name, object_id";
-	$result = useSelectBlade ($query2, __FUNCTION__);
-	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-	{
-		if (!isset ($vsinfo['rspool'][$row['id']]))
-		{
-			$vsinfo['rspool'][$row['id']]['name'] = $row['name'];
-			$vsinfo['rspool'][$row['id']]['vsconfig'] = $row['vsconfig'];
-			$vsinfo['rspool'][$row['id']]['rsconfig'] = $row['rsconfig'];
-			$vsinfo['rspool'][$row['id']]['lblist'] = array();
-		}
-		if ($row['object_id'] == NULL)
-			continue;
-		$vsinfo['rspool'][$row['id']]['lblist'][$row['object_id']] = array
-		(
-			'vsconfig' => $row['lb_vsconfig'],
-			'rsconfig' => $row['lb_rsconfig']
-		);
-	}
-	$result->closeCursor();
-	return $vsinfo;
-}
-
 function addRStoRSPool ($pool_id = 0, $rsip = '', $rsport = 0, $inservice = 'no', $rsconfig = '')
 {
 	if ($pool_id <= 0)
@@ -3522,7 +3511,7 @@ function getFileLinks ($file_id = 0)
 			case 'ipv4vs':
 				$page = 'ipv4vs';
 				$id_name = 'vs_id';
-				$parent = getVServiceInfo($row['entity_id']);
+				$parent = spotEntity ($row['entity_type'], $row['entity_id']);
 				$name = $parent['name'];
 				break;
 			case 'object':

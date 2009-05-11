@@ -4015,7 +4015,8 @@ function renderVirtualService ($vsid)
 		showError ('Invalid argument', __FUNCTION__);
 		return;
 	}
-	$vsinfo = getVServiceInfo ($vsid);
+	$vsinfo = spotEntity ('ipv4vs', $vsid);
+	amplifyCell ($vsinfo);
 	echo '<table border=0 class=objectview cellspacing=0 cellpadding=0>';
 	if (!empty ($vsinfo['name']))
 		echo "<tr><td colspan=2 align=center><h1>${vsinfo['name']}</h1></td></tr>\n";
@@ -4224,7 +4225,8 @@ function renderRSPoolLBForm ($pool_id)
 function renderVServiceLBForm ($vs_id)
 {
 	global $nextorder;
-	$vsinfo = getVServiceInfo ($vs_id);
+	$vsinfo = spotEntity ('ipv4vs', $vs_id);
+	amplifyCell ($vsinfo);
 
 	if (count ($vsinfo['rspool']))
 	{
@@ -5045,7 +5047,8 @@ function renderEditRSPool ($pool_id)
 
 function renderEditVService ($vsid)
 {
-	$vsinfo = getVServiceInfo ($vsid);
+	$vsinfo = spotEntity ('ipv4vs', $vsid);
+	amplifyCell ($vsinfo);
 	printOpFormIntro ('updIPv4VS');
 	echo '<table border=0 align=center>';
 	echo "<tr><th class=tdright>VIP:</th><td class=tdleft><input tabindex=1 type=text name=vip value='${vsinfo['vip']}'></td></tr>\n";
@@ -5658,7 +5661,7 @@ function renderRSPoolCell ($pool_id, $pool_name)
 // FIXME: migrate to renderIPv4VSCell()
 function renderVSCell ($vs_id)
 {
-	renderIPv4VSCell (getVServiceInfo ($vs_id));
+	renderIPv4VSCell (spotEntity ('ipv4vs', $vs_id));
 }
 
 function renderIPv4VSCell ($vsinfo)
@@ -5924,9 +5927,10 @@ function dynamic_title_decoder ($path_position)
 		);
 	case 'ipv4vs':
 		assertUIntArg ('vs_id', __FUNCTION__);
+		$tmp = spotEntity ('ipv4vs', $_REQUEST['vs_id']);
 		return array
 		(
-			'name' => buildVServiceName (getVServiceInfo ($_REQUEST['vs_id'])),
+			'name' => $tmp['dname'],
 			'params' => array ('vs_id' => $_REQUEST['vs_id'])
 		);
 	case 'object':
