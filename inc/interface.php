@@ -3579,7 +3579,7 @@ function renderEditAttrMapForm ()
 		echo '</td>';
 		echo '<td><select name=chapter_no tabindex=102>';
 		foreach (getChapterList() as $chapter)
-			if (!$chapter['sticky'])
+			if ($chapter['sticky'] != 'yes')
 				echo "<option value='${chapter['id']}'>${chapter['name']}</option>";
 		echo '</select></td><td>';
 		printImageHREF ('add', '', TRUE, 103);
