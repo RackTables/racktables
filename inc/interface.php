@@ -2066,9 +2066,12 @@ function renderIPv4Space ()
 	startPortlet ("networks (${netcount})");
 	echo '<h4>';
 	if ($eid === 0)
-		echo 'auto-collapsing at threshold ' . getConfigVar ('TREE_THRESHOLD') . " (<a href='".makeHref(array('page'=>$pageno, 'tab'=>$tabno, 'eid'=>'ALL'))."'>expand all</a>)";
+		echo 'auto-collapsing at threshold ' . getConfigVar ('TREE_THRESHOLD') .
+			" (<a href='".makeHref(array('page'=>$pageno, 'tab'=>$tabno, 'eid'=>'ALL')) .
+			$cellfilter['urlextra'] . "'>expand all</a>)";
 	elseif ($eid === 'ALL')
-		echo "expanding all (<a href='".makeHref(array('page'=>$pageno, 'tab'=>$tabno))."'>auto-collapse</a>)";
+		echo "expanding all (<a href='".makeHref(array('page'=>$pageno, 'tab'=>$tabno)) .
+			$cellfilter['urlextra'] . "'>auto-collapse</a>)";
 	else
 	{
 		$netinfo = getIPv4NetworkInfo ($eid);
