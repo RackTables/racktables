@@ -506,11 +506,8 @@ function assertIPv4Arg ($argname, $caller = 'N/A', $ok_if_empty = FALSE)
 // This function renders rack as HTML table.
 function renderRack ($rack_id, $hl_obj_id = 0)
 {
-	if (($rackData = getRackData ($rack_id)) == NULL)
-	{
-		showError ('getRackData() failed', __FUNCTION__);
-		return;
-	}
+	$rackData = spotEntity ('rack', $rack_id);
+	amplifyCell ($rackData);
 	markAllSpans ($rackData);
 	if ($hl_obj_id > 0)
 		highlightObject ($rackData, $hl_obj_id);
@@ -711,12 +708,8 @@ function renderEditObjectForm ($object_id)
 function renderEditRackForm ($rack_id)
 {
 	global $pageno;
-	$rack = getRackData ($rack_id);
-	if ($rack == NULL)
-	{
-		showError ('getRackData() failed', __FUNCTION__);
-		return;
-	}
+	$rack = spotEntity ('rack', $rack_id);
+	amplifyCell ($rack);
 
 	startPortlet ('Rack attributes');
 	printOpFormIntro ('updateRack');
@@ -787,7 +780,7 @@ function renderRackInfoPortlet ($rackData)
 	renderProgressBar (getRSUforRack ($rackData));
 	echo "</td></tr>\n";
 	echo "<tr><th width='50%' class=tdright>Objects:</th><td class=tdleft>";
-	echo count (stuffInRackspace ($rackData));
+	echo count ($rackData['mountedObjects']);
 	echo "</td></tr>\n";
 	printTagTRs (makeHref(array('page'=>'rackspace', 'tab'=>'default'))."&");
 	if (!empty ($rackData['comment']))
@@ -800,11 +793,8 @@ function renderRackInfoPortlet ($rackData)
 // FIXME: switch to using printOpFormIntro()
 function renderGridForm ($rack_id, $filter, $header, $submit, $state1, $state2)
 {
-	if (($rackData = getRackData ($rack_id)) == NULL)
-	{
-		showError ('getRackData() failed', __FUNCTION__);
-		return;
-	}
+	$rackData = spotEntity ('rack', $rack_id);
+	amplifyCell ($rackData);
 	$filter ($rackData);
 	markupObjectProblems ($rackData);
 
@@ -1665,12 +1655,12 @@ function renderRackSpaceForObject ($object_id)
 		{
 			if (!isset ($workingRacksData[$cand_id]))
 			{
-				$rackData = getRackData ($cand_id);
-				if ($rackData == NULL)
+				if (NULL == ($rackData = spotEntity ('rack', $cand_id)))
 				{
-					showError ('getRackData() failed', __FUNCTION__);
+					showError ('Rack not found', __FUNCTION__);
 					return NULL;
 				}
+				amplifyCell ($rackData);
 				$workingRacksData[$cand_id] = $rackData;
 			}
 		}
@@ -1697,15 +1687,10 @@ function renderRackSpaceForObject ($object_id)
 	$allRacksData = listCells ('rack');
 	if (count ($allRacksData) <= getConfigVar ('RACK_PRESELECT_THRESHOLD'))
 	{
-		foreach (array_keys ($allRacksData) as $rack_id)
+		foreach ($allRacksData as $rack)
 		{
-			$rackData = getRackData ($rack_id);
-			if ($rackData == NULL)
-			{
-				showError ('getRackData() failed', __FUNCTION__);
-				return NULL;
-			}
-			$workingRacksData[$rack_id] = $rackData;
+			amplifyCell ($rack);
+			$workingRacksData[$rack_id] = $rack;
 		}
 		foreach ($workingRacksData as &$rackData)
 			applyObjectMountMask ($rackData, $object_id);
@@ -1777,7 +1762,8 @@ function renderMolecule ($mdata, $object_id)
 		$atom = $rua['atom'];
 		if (!isset ($rackpack[$rack_id]))
 		{
-			$rackData = getRackData ($rack_id);
+			$rackData = spotEntity ('rack', $rack_id);
+			amplifyCell ($rackData);
 			for ($i = $rackData['height']; $i > 0; $i--)
 				for ($locidx = 0; $locidx < 3; $locidx++)
 					$rackData[$i][$locidx]['state'] = 'F';
@@ -3144,7 +3130,7 @@ function renderSearchResults ()
 
 // This function prints a table of checkboxes to aid the user in toggling mount atoms
 // from one state to another. The first argument is rack data as
-// produced by getRackData(), the second is the value used for the 'unckecked' state
+// produced by amplifyCell(), the second is the value used for the 'unckecked' state
 // and the third is the value used for 'checked' state.
 // Usage contexts:
 // for mounting an object:             printAtomGrid ($data, 'F', 'T')
@@ -3307,11 +3293,12 @@ function renderConfigMainpage ()
 
 function renderRackPage ($rack_id)
 {
-	if (($rackData = getRackData ($rack_id)) == NULL)
+	if (NULL == ($rackData = spotEntity ('rack', $rack_id)))
 	{
-		showError ('getRackData() failed', __FUNCTION__);
+		showError ('Rack not found', __FUNCTION__);
 		return;
 	}
+	amplifyCell ($rackData);
 	echo "<table border=0 class=objectview cellspacing=0 cellpadding=0><tr>";
 
 	// Left column with information.
@@ -5952,7 +5939,7 @@ function dynamic_title_decoder ($path_position)
 		);
 	case 'rack':
 		assertUIntArg ('rack_id', __FUNCTION__);
-		$rack = getRackData ($_REQUEST['rack_id']);
+		$rack = spotEntity ('rack', $_REQUEST['rack_id']);
 		return array
 		(
 			'name' => $rack['name'],
@@ -6029,10 +6016,10 @@ function dynamic_title_decoder ($path_position)
 		{
 		case 'rack':
 			assertUIntArg ('rack_id', __FUNCTION__);
-			$rack = getRackData ($_REQUEST['rack_id']);
+			$rack = spotEntity ('rack', $_REQUEST['rack_id']);
 			if ($rack == NULL)
 			{
-				showError ('getRackData() failed', __FUNCTION__);
+				showError ('Rack not found', __FUNCTION__);
 				return NULL;
 			}
 			return array

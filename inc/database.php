@@ -467,70 +467,32 @@ function amplifyCell (&$record, $dummy = NULL)
 		}
 		unset ($result);
 		break;
+	case 'rack':
+		$record['mountedObjects'] = array();
+		// start with default rackspace
+		for ($i = $record['height']; $i > 0; $i--)
+			for ($locidx = 0; $locidx < 3; $locidx++)
+				$record[$i][$locidx]['state'] = 'F';
+		// load difference
+		$query =
+			"select unit_no, atom, state, object_id " .
+			"from RackSpace where rack_id = ${record['id']} and " .
+			"unit_no between 1 and " . $record['height'] . " order by unit_no";
+		$result = useSelectBlade ($query, __FUNCTION__);
+		global $loclist;
+		$mounted_objects = array();
+		while ($row = $result->fetch (PDO::FETCH_ASSOC))
+		{
+			$record[$row['unit_no']][$loclist[$row['atom']]]['state'] = $row['state'];
+			$record[$row['unit_no']][$loclist[$row['atom']]]['object_id'] = $row['object_id'];
+			if ($row['state'] == 'T' and $row['object_id'] != NULL)
+				$mounted_objects[$row['object_id']] = TRUE;
+		}
+		$record['mountedObjects'] = array_keys ($mounted_objects);
+		unset ($result);
+		break;
 	default:
 	}
-}
-
-// This is a popular helper for getting information about
-// a particular rack and its rackspace at once.
-function getRackData ($rack_id = 0, $silent = FALSE)
-{
-	if ($rack_id == 0)
-	{
-		if ($silent == FALSE)
-			showError ('Invalid rack_id', __FUNCTION__);
-		return NULL;
-	}
-	$query =
-		"select Rack.id, Rack.name, row_id, height, Rack.comment, RackRow.name as row_name from " .
-		"Rack left join RackRow on Rack.row_id = RackRow.id  " .
-		"where Rack.id='${rack_id}'";
-	$result = useSelectBlade ($query, __FUNCTION__);
-	if (($row = $result->fetch (PDO::FETCH_ASSOC)) == NULL)
-	{
-		if ($silent == FALSE)
-			showError ('Query #1 succeded, but returned no data', __FUNCTION__);
-		return NULL;
-	}
-
-	// load metadata
-	$clist = array
-	(
-		'id',
-		'name',
-		'height',
-		'comment',
-		'row_id',
-		'row_name'
-	);
-	foreach ($clist as $cname)
-		$rack[$cname] = $row[$cname];
-	$result->closeCursor();
-	unset ($result);
-
-	// start with default rackspace
-	for ($i = $rack['height']; $i > 0; $i--)
-		for ($locidx = 0; $locidx < 3; $locidx++)
-			$rack[$i][$locidx]['state'] = 'F';
-
-	// load difference
-	$query =
-		"select unit_no, atom, state, object_id " .
-		"from RackSpace where rack_id = ${rack_id} and " .
-		"unit_no between 1 and " . $rack['height'] . " order by unit_no";
-	$result = useSelectBlade ($query, __FUNCTION__);
-	global $loclist;
-	$mounted_objects = array();
-	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-	{
-		$rack[$row['unit_no']][$loclist[$row['atom']]]['state'] = $row['state'];
-		$rack[$row['unit_no']][$loclist[$row['atom']]]['object_id'] = $row['object_id'];
-		if ($row['state'] == 'T' and $row['object_id']!=NULL)
-			$mounted_objects[$row['object_id']] = TRUE;
-	}
-	$rack['mountedObjects'] = array_keys($mounted_objects);
-	$result->closeCursor();
-	return $rack;
 }
 
 // This is a popular helper.
@@ -774,7 +736,7 @@ function commitUpdateRack ($rack_id, $new_name, $new_height, $new_row_id, $new_c
 	return recordHistory ('Rack', "id = ${rack_id}");
 }
 
-// This function accepts rack data returned by getRackData(), validates and applies changes
+// This function accepts rack data returned by amplifyCell(), validates and applies changes
 // supplied in $_REQUEST and returns resulting array. Only those changes are examined, which
 // correspond to current rack ID.
 // 1st arg is rackdata, 2nd arg is unchecked state, 3rd arg is checked state.
@@ -992,7 +954,7 @@ function getResidentRacksData ($object_id = 0, $fetch_rackdata = TRUE)
 	$query = "select distinct rack_id from RackSpace where object_id = ${object_id} order by rack_id";
 	$result = useSelectBlade ($query, __FUNCTION__);
 	$rows = $result->fetchAll (PDO::FETCH_NUM);
-	$result->closeCursor();
+	unset ($result);
 	$ret = array();
 	foreach ($rows as $row)
 	{
@@ -1001,15 +963,14 @@ function getResidentRacksData ($object_id = 0, $fetch_rackdata = TRUE)
 			$ret[$row[0]] = $row[0];
 			continue;
 		}
-		$rackData = getRackData ($row[0]);
-		if ($rackData == NULL)
+		if (NULL == ($rackData = spotEntity ('rack', $row[0])))
 		{
-			showError ('getRackData() failed', __FUNCTION__);
+			showError ('Rack not found', __FUNCTION__);
 			return NULL;
 		}
+		amplifyCell ($rackData);
 		$ret[$row[0]] = $rackData;
 	}
-	$result->closeCursor();
 	return $ret;
 }
 
@@ -3523,7 +3484,7 @@ function getFileLinks ($file_id = 0)
 			case 'rack':
 				$page = 'rack';
 				$id_name = 'rack_id';
-				$parent = getRackData($row['entity_id']);
+				$parent = spotEntity ($row['entity_type'], $row['entity_id']);
 				$name = $parent['name'];
 				break;
 			case 'user':

@@ -366,7 +366,7 @@ function binInvMaskFromDec ($maskL)
 
 // This function looks up 'has_problems' flag for 'T' atoms
 // and modifies 'hl' key. May be, this should be better done
-// in getRackData(). We don't honour 'skipped' key, because
+// in amplifyCell(). We don't honour 'skipped' key, because
 // the function is also used for thumb creation.
 function markupObjectProblems (&$rackData)
 {
@@ -672,28 +672,14 @@ function getRSUforRackRow ($rowData = NULL)
 	$total_height = 0;
 	foreach (array_keys ($rowData) as $rack_id)
 	{
-		$data = getRackData ($rack_id);
+		$data = spotEntity ('rack', $rack_id);
+		amplifyCell ($data);
 		$total_height += $data['height'];
 		for ($unit_no = $data['height']; $unit_no > 0; $unit_no--)
 			for ($locidx = 0; $locidx < 3; $locidx++)
 				$counter[$data[$unit_no][$locidx]['state']]++;
 	}
 	return ($counter['T'] + $counter['W'] + $counter['U']) / ($counter['T'] + $counter['W'] + $counter['U'] + $counter['F']);
-}
-
-// Return a list of object IDs, which can be found in the given rackspace block.
-function stuffInRackspace ($rackData)
-{
-	$objects = array();
-	for ($i = $rackData['height']; $i > 0; $i--)
-		for ($locidx = 0; $locidx < 3; $locidx++)
-			if
-			(
-				$rackData[$i][$locidx]['state'] == 'T' and
-				!in_array ($rackData[$i][$locidx]['object_id'], $objects)
-			)
-				$objects[] = $rackData[$i][$locidx]['object_id'];
-	return $objects;
 }
 
 // Make sure the string is always wrapped with LF characters

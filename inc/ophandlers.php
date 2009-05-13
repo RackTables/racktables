@@ -700,12 +700,13 @@ function updateObjectAllocation ()
 		{
 			if (!isset ($workingRacksData[$cand_id]))
 			{
-				$rackData = getRackData ($cand_id);
+				$rackData = spotEntity ('rack', $cand_id);
 				if ($rackData == NULL)
 				{
-					showError ('getRackData() failed', __FUNCTION__);
+					showError ('rack not found', __FUNCTION__);
 					return;
 				}
+				amplifyCell ($rackData);
 				$workingRacksData[$cand_id] = $rackData;
 			}
 		}
@@ -1449,11 +1450,12 @@ function rollTags ()
 	// Minimizing the extra chain early, so that tag rebuilder doesn't have to
 	// filter out the same tag again and again. It will have own noise to cancel.
 	$extrachain = getExplicitTagsOnly (buildTagChainFromIds ($extratags));
-	foreach (array_keys (listCells ('rack', $_REQUEST['row_id'])) as $rack_id)
+	foreach (listCells ('rack', $_REQUEST['row_id']) as $rack)
 	{
-		if (rebuildTagChainForEntity ('rack', $rack_id, $extrachain))
+		if (rebuildTagChainForEntity ('rack', $rack['id'], $extrachain))
 			$n_ok++;
-		foreach (stuffInRackspace (getRackData ($rack_id)) as $object_id)
+		amplifyCell ($rack);
+		foreach ($rack['mountedObjects'] as $object_id)
 			if (rebuildTagChainForEntity ('object', $object_id, $extrachain))
 				$n_ok++;
 	}
@@ -1660,25 +1662,14 @@ $msgcode['deleteRack']['ERR1'] = 206;
 function deleteRack ()
 {
 	assertUIntArg ('rack_id', __FUNCTION__);
-	$rack_id = $_REQUEST['rack_id'];
-	$rackData = getRackData ($rack_id);
-	if ($rackData == NULL)
-	{
-		showError ('getRackData() failed', __FUNCTION__);
-		return;
-	}
-	if (count ($rackData['mountedObjects']) == 0)
-	{
-		resetThumbCache ($rack_id);
-		if (TRUE === commitDeleteRack ($rack_id))
-			return buildRedirectURL (__FUNCTION__, 'OK', array ($rackData['name']), 'rackspace', 'default');
-		else
-			return buildRedirectURL (__FUNCTION__, 'ERR', array(), 'rackspace', 'default');
-	}
-	else
-	{
+	if (NULL == ($rackData = spotEntity ('rack', $_REQUEST['rack_id'])))
+		return buildRedirectURL (__FUNCTION__, 'ERR', array ('Rack not found'), 'rackspace', 'default');
+	amplifyCell ($rackData);
+	if (count ($rackData['mountedObjects']))
 		return buildRedirectURL (__FUNCTION__, 'ERR1');
-	}
+	if (TRUE !== commitDeleteRack ($_REQUEST['rack_id']))
+		return buildRedirectURL (__FUNCTION__, 'ERR', array(), 'rackspace', 'default');
+	return buildRedirectURL (__FUNCTION__, 'OK', array ($rackData['name']), 'rackspace', 'default');
 }
 
 $msgcode['updateRack']['OK'] = 68;
@@ -1698,28 +1689,26 @@ function updateRack ()
 		return buildRedirectURL (__FUNCTION__, 'ERR');
 }
 
+$msgcode['updateRackDesign']['ERR'] = 100;
 function updateRackDesign ()
 {
 	assertUIntArg ('rack_id', __FUNCTION__);
-	if (($rackData = getRackData ($_REQUEST['rack_id'])) == NULL)
-	{
-		showError ('getRackData() failed', __FUNCTION__);
-		return;
-	}
+	if (NULL == ($rackData = spotEntity ('rack', $_REQUEST['rack_id'])))
+		return buildRedirectURL (__FUNCTION__, 'ERR', array ('Rack not found'), 'rackspace', 'default');
+	amplifyCell ($rackData);
 	applyRackDesignMask($rackData);
 	markupObjectProblems ($rackData);
 	$response = processGridForm ($rackData, 'A', 'F');
 	return buildWideRedirectURL (array($response));
 }
 
+$msgcode['updateRackProblems']['ERR'] = 100;
 function updateRackProblems ()
 {
 	assertUIntArg ('rack_id', __FUNCTION__);
-	if (($rackData = getRackData ($_REQUEST['rack_id'])) == NULL)
-	{
-		showError ('getRackData() failed', __FUNCTION__);
-		return;
-	}
+	if (NULL == ($rackData = spotEntity ('rack', $_REQUEST['rack_id'])))
+		return buildRedirectURL (__FUNCTION__, 'ERR', array ('Rack not found'), 'rackspace', 'default');
+	amplifyCell ($rackData);
 	applyRackProblemMask($rackData);
 	markupObjectProblems ($rackData);
 	$response = processGridForm ($rackData, 'F', 'U');
