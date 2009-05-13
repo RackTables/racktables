@@ -303,8 +303,9 @@ function init_database_static ()
 		}
 		fclose ($f);
 		$nq = $nerrs = 0;
-		foreach (explode (";\n", $longq) as $query)
+		foreach (preg_split ("/;\s*\n/", $longq) as $query)
 		{
+			$query = trim($query);
 			if (empty ($query))
 				continue;
 			$nq++;
