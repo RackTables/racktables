@@ -4538,7 +4538,7 @@ function renderRSPoolRSInServiceForm ($pool_id)
 	echo "</td></tr></table>\n</form>";
 }
 
-function renderLivePTR ()
+function renderLivePTR ($id)
 {
 	if (isset($_REQUEST['pg']))
 		$page = $_REQUEST['pg'];
