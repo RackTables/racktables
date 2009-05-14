@@ -976,7 +976,7 @@ function renderRackObject ($object_id)
 			$netid = getIPv4AddressNetworkId ($dottedquad);
 			if (NULL !== $netid)
 			{
-				$netinfo = getIPv4NetworkInfo ($netid);
+				$netinfo = spotEntity ('ipv4net', $netid);
 				loadIPv4AddrList ($netinfo);
 			}
 			echo "<tr class='${class}' valign=top><td class=tdleft>${alloc['osif']}</td><td class='${secondclass}'>";
@@ -1298,7 +1298,7 @@ function renderIPv4ForObject ($object_id)
 		$netid = getIPv4AddressNetworkId ($dottedquad);
 		if (NULL !== $netid)
 		{
-			$netinfo = getIPv4NetworkInfo ($netid);
+			$netinfo = spotEntity ('ipv4net', $netid);
 			loadIPv4AddrList ($netinfo);
 		}
 		printOpFormIntro ('updIPv4Allocation', array ('ip' => $dottedquad));
@@ -2060,7 +2060,7 @@ function renderIPv4Space ()
 			$cellfilter['urlextra'] . "'>auto-collapse</a>)";
 	else
 	{
-		$netinfo = getIPv4NetworkInfo ($eid);
+		$netinfo = spotEntity ('ipv4net', $eid);
 		echo "expanding ${netinfo['ip']}/${netinfo['mask']} (<a href='".makeHref(array('page'=>$pageno, 'tab'=>$tabno))."'>auto-collapse</a> / <a href='".makeHref(array('page'=>$pageno, 'tab'=>$tabno, 'eid'=>'ALL'))."'>expand&nbsp;all</a>)"; 
 	}
 	echo "</h4><table class='widetable' border=0 cellpadding=5 cellspacing=0 align='center'>\n";
@@ -2197,7 +2197,7 @@ function renderIPv4SpaceEditor ()
 			}
 			else // only render clickable image for empty networks
 			{
-				$netdata = getIPv4NetworkInfo ($netinfo['id']);
+				$netdata = spotEntity ('ipv4net', $netinfo['id']);
 				loadIPv4AddrList ($netdata);
 				if (count ($netdata['addrlist']))
 					printImageHREF ('nodestroy', 'There are ' . count ($netdata['addrlist']) . ' allocations inside');
@@ -2299,7 +2299,7 @@ function renderIPv4Network ($id)
 	else
 		$page=0;
 
-	$range = getIPv4NetworkInfo ($id);
+	$range = spotEntity ('ipv4net', $id);
 	loadIPv4AddrList ($range);
 	echo "<table border=0 class=objectview cellspacing=0 cellpadding=0>";
 	echo "<tr><td colspan=2 align=center><h1>${range['ip']}/${range['mask']}</h1><h2>${range['name']}</h2></td></tr>\n";
@@ -2321,14 +2321,13 @@ function renderIPv4Network ($id)
 		$backtrace = array();
 		while (NULL !== ($upperid = getIPv4AddressNetworkId ($range['ip'], $clen)))
 		{
-			$upperinfo = getIPv4NetworkInfo ($upperid);
+			$upperinfo = spotEntity ('ipv4net', $upperid);
 			$clen = $upperinfo['mask'];
-			$backtrace[] = $upperid;
+			$backtrace[] = $upperinfo;
 		}
 		$arrows = count ($backtrace);
-		foreach (array_reverse ($backtrace) as $ancestorid)
+		foreach (array_reverse ($backtrace) as $ainfo)
 		{
-			$ainfo = getIPv4NetworkInfo ($ancestorid);
 			echo "<tr><th width='50%' class=tdright>";
 			for ($i = 0; $i < $arrows; $i++)
 				echo '&uarr;';
@@ -2470,7 +2469,7 @@ function renderIPv4Network ($id)
 
 function renderIPv4NetworkProperties ($id)
 {
-	$netdata = getIPv4NetworkInfo ($id);
+	$netdata = spotEntity ('ipv4net', $id);
 	echo "<center><h1>${netdata['ip']}/${netdata['mask']}</h1></center>\n";
 	echo "<table border=0 cellpadding=10 cellpadding=1 align='center'>\n";
 	printOpFormIntro ('editRange');
@@ -2909,7 +2908,7 @@ function renderSearchResults ()
 		{
 			$nhits++;
 			$lasthit = 'ipv4network';
-			$summary['ipv4network'][] = getIPv4NetworkInfo ($tmp);
+			$summary['ipv4network'][] = spotEntity ('ipv4net', $tmp);
 		}
 	}
 	else
@@ -4536,7 +4535,7 @@ function renderLivePTR ($id)
 		$page=0;
 	global $pageno, $tabno;
 	$maxperpage = getConfigVar ('IPV4_ADDRS_PER_PAGE');
-	$range = getIPv4NetworkInfo ($id);
+	$range = spotEntity ('ipv4net', $id);
 	loadIPv4AddrList ($range);
 	echo "<center><h1>${range['ip']}/${range['mask']}</h1><h2>${range['name']}</h2></center>\n";
 
@@ -5285,7 +5284,7 @@ function renderFile ($file_id)
 						renderCell ($userinfo);
 					break;
 				case 'ipv4net':
-					renderIPv4NetCell (getIPv4NetworkInfo ($link['entity_id']));
+					renderIPv4NetCell (spotEntity ($link['entity_type'], $link['entity_id']));
 					break;
 				default:
 					echo formatEntityName ($link['entity_type']) . ': ';
@@ -5983,7 +5982,7 @@ function dynamic_title_decoder ($path_position)
 		{
 		case 'ipv4net':
 			assertUIntArg ('id', __FUNCTION__);
-			$range = getIPv4NetworkInfo ($_REQUEST['id']);
+			$range = spotEntity ('ipv4net', $_REQUEST['id']);
 			return array
 			(
 				'name' => $range['ip'] . '/' . $range['mask'],
@@ -5991,7 +5990,7 @@ function dynamic_title_decoder ($path_position)
 			);
 		case 'ipaddress':
 			assertIPv4Arg ('ip', __FUNCTION__);
-			$range = getIPv4NetworkInfo (getIPv4AddressNetworkId ($_REQUEST['ip']));
+			$range = spotEntity ('ipv4net', getIPv4AddressNetworkId ($_REQUEST['ip']));
 			return array
 			(
 				'name' => $range['ip'] . '/' . $range['mask'],

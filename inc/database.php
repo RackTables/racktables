@@ -325,6 +325,13 @@ function listCells ($realm, $parent_id = 0)
 		case 'object':
 			$ret[$entity_id]['dname'] = displayedName ($ret[$entity_id]);
 			break;
+		case 'ipv4net':
+			$ret[$entity_id]['ip_bin'] = ip2long ($ret[$entity_id]['ip']);
+			$ret[$entity_id]['mask_bin'] = binMaskFromDec ($ret[$entity_id]['mask']);
+			$ret[$entity_id]['mask_bin_inv'] = binInvMaskFromDec ($ret[$entity_id]['mask']);
+			$ret[$entity_id]['db_first'] = sprintf ('%u', 0x00000000 + $ret[$entity_id]['ip_bin'] & $ret[$entity_id]['mask_bin']);
+			$ret[$entity_id]['db_last'] = sprintf ('%u', 0x00000000 + $ret[$entity_id]['ip_bin'] | ($ret[$entity_id]['mask_bin_inv']));
+			break;
 		default:
 			break;
 		}
@@ -384,6 +391,13 @@ function spotEntity ($realm, $id)
 	{
 	case 'object':
 		$ret['dname'] = displayedName ($ret);
+		break;
+	case 'ipv4net':
+		$ret['ip_bin'] = ip2long ($ret['ip']);
+		$ret['mask_bin'] = binMaskFromDec ($ret['mask']);
+		$ret['mask_bin_inv'] = binInvMaskFromDec ($ret['mask']);
+		$ret['db_first'] = sprintf ('%u', 0x00000000 + $ret['ip_bin'] & $ret['mask_bin']);
+		$ret['db_last'] = sprintf ('%u', 0x00000000 + $ret['ip_bin'] | ($ret['mask_bin_inv']));
 		break;
 	default:
 		break;
@@ -3431,7 +3445,7 @@ function getFileLinks ($file_id = 0)
 			case 'ipv4net':
 				$page = 'ipv4net';
 				$id_name = 'id';
-				$parent = getIPv4NetworkInfo($row['entity_id']);
+				$parent = spotEntity ($row['entity_type'], $row['entity_id']);
 				$name = sprintf("%s (%s/%s)", $parent['name'], $parent['ip'], $parent['mask']);
 				break;
 			case 'ipv4rspool':
