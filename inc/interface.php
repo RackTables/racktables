@@ -5844,7 +5844,7 @@ function getTitle ($pageno)
 
 function showTabs ($pageno, $tabno)
 {
-	global $tab, $root, $page, $trigger, $tabextraclass;
+	global $tab, $root, $page, $trigger;
 	if (!isset ($tab[$pageno]['default']))
 		return;
 	echo "<td><div class=greynavbar><ul id=foldertab style='margin-bottom: 0px; padding-top: 10px;'>";
@@ -5854,15 +5854,13 @@ function showTabs ($pageno, $tabno)
 		if (!permitted ($pageno, $tabidx))
 			continue;
 		// Dynamic tabs should only be shown in certain cases (trigger exists and returns true).
-		if (isset ($trigger[$pageno][$tabidx]))
-		{
-			$ok = $trigger[$pageno][$tabidx] ();
-			if (!$ok)
-				continue;
-		}
-		$class = ($tabidx == $tabno) ? 'current' : 'std';
-		$extra = (isset ($tabextraclass[$pageno][$tabidx])) ? $tabextraclass[$pageno][$tabidx] : '';
-		echo "<li><a class=${class}{$extra}";
+		if (!isset ($trigger[$pageno][$tabidx]))
+			$tabclass = 'std';
+		elseif (!strlen ($tabclass = $trigger[$pageno][$tabidx] ()))
+			continue;
+		if ($tabidx == $tabno)
+		       $tabclass = 'current'; // override any class for an an active selection
+		echo "<li><a class=${tabclass}";
 		echo " href='${root}?page=${pageno}&tab=${tabidx}";
 		if (isset ($page[$pageno]['bypass']) and isset ($_REQUEST[$page[$pageno]['bypass']]))
 		{

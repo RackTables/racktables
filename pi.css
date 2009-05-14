@@ -311,31 +311,17 @@ color: black;
 }
 
 /* "Attention" tab, inactive. */
-#foldertab li a.stdattn {
+#foldertab li a.attn {
 border-bottom: none;
 background: #ffa500;
 border-color: #ffa500;
 }
-#foldertab li a.stdattn:link { color: white; }
-#foldertab li a.stdattn:visited { color: white; }
-#foldertab li a.stdattn:hover {
+#foldertab li a.attn:link { color: white; }
+#foldertab li a.attn:visited { color: white; }
+#foldertab li a.attn:hover {
 color: white;
 background: #ff8c00;
 border-color: #ff8c00;
-}
-
-/* "Attention" tab, selected. */
-#foldertab li a.currentattn {
-background: white;
-border-bottom: 1px solid white;
-color: black;
-}
-#foldertab li a.currentattn:link { color: black; }
-#foldertab li a.currentattn:visited { color: black; }
-#foldertab li a.currentattn:hover {
-background: white;
-border-bottom: 1px solid white;
-color: black;
 }
 
 .greynavbar {background-color: #f0f0f0; border-top: 1px solid #3c78b5; margin-top: 0px}

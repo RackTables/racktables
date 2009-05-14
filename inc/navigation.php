@@ -10,7 +10,6 @@ $tab = array();
 $trigger = array();
 $ophandler = array();
 $tabhandler = array();
-$tabextraclass = array();
 $delayauth = array();
 
 $page['index']['title'] = 'Main page';
@@ -104,8 +103,6 @@ $tabhandler['object']['autoports'] = 'renderAutoPortsForm';
 $tabhandler['object']['tags'] = 'renderEntityTags';
 $tabhandler['object']['files'] = 'renderFilesForEntity';
 $tabhandler['object']['editrspvs'] = 'renderObjectSLB';
-$tabextraclass['object']['snmpportfinder'] = 'attn';
-$tabextraclass['object']['autoports'] = 'attn';
 $trigger['object']['ipv4'] = 'trigger_ipv4';
 $trigger['object']['nat4'] = 'trigger_natv4';
 $trigger['object']['livevlans'] = 'trigger_livevlans';
