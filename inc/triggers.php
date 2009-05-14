@@ -44,7 +44,7 @@ function trigger_livevlans ()
 function trigger_snmpportfinder ()
 {
 	assertUIntArg ('object_id', __FUNCTION__);
-	$object = spotEntity ('object', $object_id);
+	$object = spotEntity ('object', $_REQUEST['object_id']);
 	if ($object['objtype_id'] != 8)
 		return '';
 	return count (getObjectPortsAndLinks ($_REQUEST['object_id'])) ? '' : 'attn';
