@@ -520,13 +520,8 @@ function getPortTypes ()
 	return readChapter ('PortType');
 }
 
-function getObjectPortsAndLinks ($object_id = 0)
+function getObjectPortsAndLinks ($object_id)
 {
-	if ($object_id == 0)
-	{
-		showError ('Invalid object_id', __FUNCTION__);
-		return;
-	}
 	// prepare decoder
 	$ptd = readChapter ('PortType');
 	$query = "select id, name, label, l2address, type as type_id, reservation_comment from Port where object_id = ${object_id}";
@@ -545,6 +540,7 @@ function getObjectPortsAndLinks ($object_id = 0)
 	}
 	unset ($result);
 	// now find and decode remote ends for all locally terminated connections
+	// FIXME: can't this data be extracted in one pass with sub-queries?
 	foreach (array_keys ($ret) as $tmpkey)
 	{
 		$portid = $ret[$tmpkey]['id'];
@@ -3131,31 +3127,6 @@ function saveScript ($name, $text)
 			'script_text' => "'${text}'"
 		)
 	);
-}
-
-function saveUserPassword ($user_id, $newp)
-{
-	$newhash = sha1 ($newp);
-	$query = "update UserAccount set user_password_hash = ${newhash} where user_id = ${user_id} limit 1";
-}
-
-function objectIsPortless ($id = 0)
-{
-	if ($id <= 0)
-	{
-		showError ('Invalid argument', __FUNCTION__);
-		return;
-	}
-	if (($result = useSelectBlade ("select count(id) from Port where object_id = ${id}", __FUNCTION__)) == NULL) 
-	{
-		showError ('SQL query failed', __FUNCTION__);
-		return;
-	}
-	$row = $result->fetch (PDO::FETCH_NUM);
-	$count = $row[0];
-	$result->closeCursor();
-	unset ($result);
-	return $count === '0';
 }
 
 function newPortForwarding ($object_id, $localip, $localport, $remoteip, $remoteport, $proto, $description)

@@ -44,13 +44,10 @@ function trigger_livevlans ()
 function trigger_snmpportfinder ()
 {
 	assertUIntArg ('object_id', __FUNCTION__);
-	$object_id = $_REQUEST['object_id'];
-	$object = getObjectInfo ($object_id);
+	$object = spotEntity ('object', $object_id);
 	if ($object['objtype_id'] != 8)
 		return '';
-	if (!objectIsPortless ($_REQUEST['object_id']))
-		return '';
-	return 'attn';
+	return count (getObjectPortsAndLinks ($_REQUEST['object_id'])) ? '' : 'attn';
 }
 
 function trigger_isloadbalancer ()
@@ -85,9 +82,9 @@ function trigger_poolrscount ()
 function trigger_autoports ()
 {
 	assertUIntArg ('object_id', __FUNCTION__);
-	if (!objectIsPortless ($_REQUEST['object_id']))
+	if (count (getObjectPortsAndLinks ($_REQUEST['object_id'])))
 		return '';
-	$info = getObjectInfo ($_REQUEST['object_id'], FALSE);
+	$info = spotEntity ('object', $_REQUEST['object_id']);
 	return count (getAutoPorts ($info['objtype_id'])) ? 'attn' : '';
 }
 
