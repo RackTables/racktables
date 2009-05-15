@@ -318,6 +318,7 @@ function listCells ($realm, $parent_id = 0)
 	// Add necessary finish to the list before returning it.
 	foreach (array_keys ($ret) as $entity_id)
 	{
+		$ret[$entity_id]['etags'] = getExplicitTagsOnly ($ret[$entity_id]['etags']);
 		$ret[$entity_id]['itags'] = getImplicitTags ($ret[$entity_id]['etags']);
 		$ret[$entity_id]['atags'] = generateEntityAutoTags ($realm, $entity_id);
 		switch ($realm)
@@ -385,6 +386,7 @@ function spotEntity ($realm, $id)
 	unset ($result);
 	if (!isset ($ret['realm'])) // no rows were returned
 		return NULL;
+	$ret['etags'] = getExplicitTagsOnly ($ret['etags']);
 	$ret['itags'] = getImplicitTags ($ret['etags']);
 	$ret['atags'] = generateEntityAutoTags ($realm, $id);
 	switch ($realm)
@@ -1498,17 +1500,17 @@ function searchByl2address ($port_l2address)
 
 function getIPv4PrefixSearchResult ($terms)
 {
-	$query = "select id, inet_ntoa(ip) as ip, mask, name from IPv4Network where ";
-	$or = '';
-	foreach (explode (' ', $terms) as $term)
-	{
-		$query .= $or . "name like '%${term}%'";
-		$or = ' or ';
-	}
-	$result = useSelectBlade ($query, __FUNCTION__);
+	$byname = getSearchResultByField
+	(
+		'IPv4Network',
+		array ('id'),
+		'name',
+		$terms,
+		'ip'
+	);
 	$ret = array();
-	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-		$ret[] = $row;
+	foreach ($byname as $row)
+		$ret[] = spotEntity ('ipv4net', $row['id']);
 	return $ret;
 }
 
@@ -1546,17 +1548,17 @@ function getIPv4RSPoolSearchResult ($terms)
 
 function getIPv4VServiceSearchResult ($terms)
 {
-	$query = "select id, inet_ntoa(vip) as vip, vport, proto, name from IPv4VS where ";
-	$or = '';
-	foreach (explode (' ', $terms) as $term)
-	{
-		$query .= $or . "name like '%${term}%'";
-		$or = ' or ';
-	}
-	$result = useSelectBlade ($query, __FUNCTION__);
+	$byname = getSearchResultByField
+	(
+		'IPv4VS',
+		array ('id'),
+		'name',
+		$terms,
+		'vip'
+	);
 	$ret = array();
-	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-		$ret[] = $row;
+	foreach ($byname as $row)
+		$ret[] = spotEntity ('ipv4vs', $row['id']);
 	return $ret;
 }
 
@@ -1598,7 +1600,7 @@ function getFileSearchResult ($terms)
 	$byFilename = getSearchResultByField
 	(
 		'File',
-		array ('id', 'name', 'comment', 'type', 'size'),
+		array ('id'),
 		'name',
 		$terms,
 		'name'
@@ -1606,7 +1608,7 @@ function getFileSearchResult ($terms)
 	$byComment = getSearchResultByField
 	(
 		'File',
-		array ('id', 'name', 'comment', 'type', 'size'),
+		array ('id'),
 		'comment',
 		$terms,
 		'name'
@@ -1619,7 +1621,10 @@ function getFileSearchResult ($terms)
 				unset ($byComment[$key2]);
 				continue 2;
 			}
-	return array_merge ($byFilename, $byComment);
+	$ret = array();
+	foreach (array_merge ($byFilename, $byComment) as $row)
+		$ret[] = spotEntity ('file', $row['id']);
+	return $ret;
 }
 
 function getSearchResultByField ($tname, $rcolumns, $scolumn, $terms, $ocolumn = '')
@@ -3320,6 +3325,8 @@ function getAllUnlinkedFiles ($entity_type = NULL, $entity_id = 0)
 	return $ret;
 }
 
+// FIXME: return a standard cell list, so upper layer can iterate over
+// it conveniently.
 function getFilesOfEntity ($entity_type = NULL, $entity_id = 0)
 {
 	if ($entity_type == NULL || $entity_id == 0)

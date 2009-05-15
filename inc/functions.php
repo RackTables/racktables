@@ -632,6 +632,8 @@ function parseWikiLink ($line, $which, $strip_optgroup = FALSE)
 		return $o_value;
 }
 
+// FIXME: only renderIPv4Address() is using this function, consider
+// phasing it out.
 function buildVServiceName ($vsinfo = NULL)
 {
 	if ($vsinfo == NULL)
