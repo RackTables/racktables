@@ -1037,6 +1037,14 @@ function tagOnChain ($taginfo, $tagchain)
 	return FALSE;
 }
 
+function tagNameOnChain ($tagname, $tagchain)
+{
+	foreach ($tagchain as $test)
+		if ($test['tag'] == $tagname)
+			return TRUE;
+	return FALSE;
+}
+
 // Idem, but use ID list instead of chain.
 function tagOnIdList ($taginfo, $tagidlist)
 {
