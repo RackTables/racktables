@@ -5597,6 +5597,9 @@ function renderCell ($cell)
 	case 'ipv4rspool':
 		renderRSPoolCell ($cell['id'], $cell['name']);
 		break;
+	case 'ipv4net':
+		renderIPv4NetCell ($cell);
+		break;
 	default:
 		showError ('odd data', __FUNCTION__);
 		break;
