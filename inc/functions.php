@@ -34,7 +34,6 @@ $etype_by_pageno = array
 	'rack' => 'rack',
 	'user' => 'user',
 	'file' => 'file',
-	'ipaddress' => 'ipaddress',
 );
 
 // Objects of some types should be explicitly shown as
@@ -960,7 +959,6 @@ function complementByKids ($idlist, $tree = NULL, $getall = FALSE)
 }
 
 // Universal autotags generator, a complementing function for loadEntityTags().
-// An important extension is that 'ipaddress' quasi-realm is also handled.
 // Bypass key isn't strictly typed, but interpreted depending on the realm.
 function generateEntityAutoTags ($entity_realm = '', $bypass_value = '')
 {
@@ -981,16 +979,9 @@ function generateEntityAutoTags ($entity_realm = '', $bypass_value = '')
 			if (!count (getResidentRacksData ($bypass_value, FALSE)))
 				$ret[] = array ('tag' => '$unmounted');
 			break;
-		case 'ipv4net':
-			$netinfo = getIPv4NetworkInfo ($bypass_value);
-			$ret[] = array ('tag' => '$ip4netid_' . $bypass_value);
-			$ret[] = array ('tag' => '$ip4net-' . str_replace ('.', '-', $netinfo['ip']) . '-' . $netinfo['mask']);
-			$ret[] = array ('tag' => '$any_ip4net');
-			$ret[] = array ('tag' => '$any_net');
-			break;
-		case 'ipaddress':
-			$netinfo = getIPv4NetworkInfo (getIPv4AddressNetworkId ($bypass_value));
-			$ret[] = array ('tag' => '$ip4net-' . str_replace ('.', '-', $bypass_value) . '-32');
+		case 'ipv4net': // during transition bypass is already the whole structure
+			$netinfo = $bypass_value;
+			$ret[] = array ('tag' => '$ip4netid_' . $netinfo['id']);
 			$ret[] = array ('tag' => '$ip4net-' . str_replace ('.', '-', $netinfo['ip']) . '-' . $netinfo['mask']);
 			$ret[] = array ('tag' => '$any_ip4net');
 			$ret[] = array ('tag' => '$any_net');
@@ -1105,26 +1096,18 @@ function fixContext ()
 	if (isset ($tmap[$pageno][$tabno]))
 		redirectUser ($pageno, $tmap[$pageno][$tabno]);
 
-	// Don't reset autochain, because auth procedures could push stuff there in.
-	// Another important point is to ignore 'user' realm, so we don't infuse effective
-	// context with autotags of the displayed account and don't try using uint
-	// bypass, where string is expected.
-	if
-	(
-		$pageno != 'user' and
-		isset ($etype_by_pageno[$pageno]) and
-		isset ($page[$pageno]['bypass']) and
-		isset ($_REQUEST[$page[$pageno]['bypass']])
-	)
-		$auto_tags = array_merge ($auto_tags, generateEntityAutoTags ($etype_by_pageno[$pageno], $_REQUEST[$page[$pageno]['bypass']]));
-	if
-	(
-		isset ($page[$pageno]['bypass']) and
-		isset ($page[$pageno]['bypass_type']) and
-		$page[$pageno]['bypass_type'] == 'uint' and
-		isset ($_REQUEST[$page[$pageno]['bypass']])
-	)
-		$target_given_tags = loadEntityTags ($pageno, $_REQUEST[$page[$pageno]['bypass']]);
+	if (isset ($etype_by_pageno[$pageno]))
+	{
+		// Each page listed in the map above requires one uint argument.
+		assertUIntArg ($page[$pageno]['bypass'], __FUNCTION__);
+		$target = spotEntity ($etype_by_pageno[$pageno], $_REQUEST[$page[$pageno]['bypass']]);
+		$target_given_tags = $target['etags'];
+		// Don't reset autochain, because auth procedures could push stuff there in.
+		// Another important point is to ignore 'user' realm, so we don't infuse effective
+		// context with autotags of the displayed account.
+		if ($pageno != 'user')
+			$auto_tags = array_merge ($auto_tags, $target['atags']);
+	}
 	// Explicit and implicit chains should be normally empty at this point, so
 	// overwrite the contents anyway.
 	$expl_tags = mergeTagChains ($user_given_tags, $target_given_tags);

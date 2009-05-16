@@ -309,7 +309,14 @@ function listCells ($realm, $parent_id = 0)
 	{
 		$ret[$entity_id]['etags'] = getExplicitTagsOnly ($ret[$entity_id]['etags']);
 		$ret[$entity_id]['itags'] = getImplicitTags ($ret[$entity_id]['etags']);
-		$ret[$entity_id]['atags'] = generateEntityAutoTags ($realm, $entity_id);
+		switch ($realm)
+		{
+		case 'ipv4net':
+			$ret[$entity_id]['atags'] = generateEntityAutoTags ($realm, $ret[$entity_id]);
+			break;
+		default:
+			$ret[$entity_id]['atags'] = generateEntityAutoTags ($realm, $entity_id);
+		}
 		switch ($realm)
 		{
 		case 'object':
@@ -377,7 +384,14 @@ function spotEntity ($realm, $id)
 		return NULL;
 	$ret['etags'] = getExplicitTagsOnly ($ret['etags']);
 	$ret['itags'] = getImplicitTags ($ret['etags']);
-	$ret['atags'] = generateEntityAutoTags ($realm, $id);
+	switch ($realm)
+	{
+	case 'ipv4net':
+		$ret['atags'] = generateEntityAutoTags ($realm, $ret);
+		break;
+	default:
+		$ret['atags'] = generateEntityAutoTags ($realm, $id);
+	}
 	switch ($realm)
 	{
 	case 'object':
@@ -1334,30 +1348,6 @@ function scanIPv4Space ($pairlist)
 		$ret[$localip_bin]['outpf'][] = $row;
 	}
 	unset ($result);
-	return $ret;
-}
-
-// Return summary data about an IPv4 prefix, if it exists, or NULL otherwise.
-function getIPv4NetworkInfo ($id = 0)
-{
-	if ($id <= 0)
-	{
-		showError ('Invalid arg', __FUNCTION__);
-		return NULL;
-	}
-	$query = "select INET_NTOA(ip) as ip, mask, name ".
-		"from IPv4Network where id = $id";
-	$result = useSelectBlade ($query, __FUNCTION__);
-	$ret = $result->fetch (PDO::FETCH_ASSOC);
-	if ($ret == NULL)
-		return NULL;
-	unset ($result);
-	$ret['id'] = $id;
-	$ret['ip_bin'] = ip2long ($ret['ip']);
-	$ret['mask_bin'] = binMaskFromDec ($ret['mask']);
-	$ret['mask_bin_inv'] = binInvMaskFromDec ($ret['mask']);
-	$ret['db_first'] = sprintf ('%u', 0x00000000 + $ret['ip_bin'] & $ret['mask_bin']);
-	$ret['db_last'] = sprintf ('%u', 0x00000000 + $ret['ip_bin'] | ($ret['mask_bin_inv']));
 	return $ret;
 }
 
