@@ -216,22 +216,6 @@ function applyRackProblemMask (&$rackData)
 			}
 }
 
-// This mask should allow toggling 'T' and 'W' on object's rackspace.
-function applyObjectProblemMask (&$rackData)
-{
-	for ($unit_no = $rackData['height']; $unit_no > 0; $unit_no--)
-		for ($locidx = 0; $locidx < 3; $locidx++)
-			switch ($rackData[$unit_no][$locidx]['state'])
-			{
-				case 'T':
-				case 'W':
-					$rackData[$unit_no][$locidx]['enabled'] = ($rackData[$unit_no][$locidx]['object_id'] == $object_id);
-					break;
-				default:
-					$rackData[$unit_no][$locidx]['enabled'] = FALSE;
-			}
-}
-
 // This function highlights specified object (and removes previous highlight).
 function highlightObject (&$rackData, $object_id)
 {

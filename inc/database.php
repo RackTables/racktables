@@ -171,7 +171,7 @@ function getRackRows ()
 	$result = useSelectBlade ($query, __FUNCTION__);
 	$rows = array();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-		$rows[$row['id']] = parseWikiLink ($row['name'], 'o');
+		$rows[$row['id']] = $row['name'];
 	$result->closeCursor();
 	asort ($rows);
 	return $rows;
