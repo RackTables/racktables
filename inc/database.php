@@ -312,6 +312,7 @@ function listCells ($realm, $parent_id = 0)
 		switch ($realm)
 		{
 		case 'ipv4net':
+		case 'object':
 			$ret[$entity_id]['atags'] = generateEntityAutoTags ($realm, $ret[$entity_id]);
 			break;
 		default:
@@ -387,6 +388,7 @@ function spotEntity ($realm, $id)
 	switch ($realm)
 	{
 	case 'ipv4net':
+	case 'object':
 		$ret['atags'] = generateEntityAutoTags ($realm, $ret);
 		break;
 	default:

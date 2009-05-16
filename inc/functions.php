@@ -969,14 +969,14 @@ function generateEntityAutoTags ($entity_realm = '', $bypass_value = '')
 			$ret[] = array ('tag' => '$rackid_' . $bypass_value);
 			$ret[] = array ('tag' => '$any_rack');
 			break;
-		case 'object':
-			$oinfo = getObjectInfo ($bypass_value, FALSE);
-			$ret[] = array ('tag' => '$id_' . $bypass_value);
+		case 'object': // during transition bypass is already the whole structure
+			$oinfo = $bypass_value;
+			$ret[] = array ('tag' => '$id_' . $oinfo['id']);
 			$ret[] = array ('tag' => '$typeid_' . $oinfo['objtype_id']);
 			$ret[] = array ('tag' => '$any_object');
 			if (validTagName ('$cn_' . $oinfo['name']))
 				$ret[] = array ('tag' => '$cn_' . $oinfo['name']);
-			if (!count (getResidentRacksData ($bypass_value, FALSE)))
+			if (!strlen ($oinfo['rack_id']))
 				$ret[] = array ('tag' => '$unmounted');
 			break;
 		case 'ipv4net': // during transition bypass is already the whole structure
