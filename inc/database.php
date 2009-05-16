@@ -1578,7 +1578,7 @@ function getAccountSearchResult ($terms)
 
 function getFileSearchResult ($terms)
 {
-	$byFilename = getSearchResultByField
+	$byName = getSearchResultByField
 	(
 		'File',
 		array ('id'),
@@ -1595,7 +1595,7 @@ function getFileSearchResult ($terms)
 		'name'
 	);
 	// Filter out dupes.
-	foreach ($byFilename as $res1)
+	foreach ($byName as $res1)
 		foreach (array_keys ($byComment) as $key2)
 			if ($res1['id'] == $byComment[$key2]['id'])
 			{
@@ -1603,8 +1603,40 @@ function getFileSearchResult ($terms)
 				continue 2;
 			}
 	$ret = array();
-	foreach (array_merge ($byFilename, $byComment) as $row)
+	foreach (array_merge ($byName, $byComment) as $row)
 		$ret[] = spotEntity ('file', $row['id']);
+	return $ret;
+}
+
+function getRackSearchResult ($terms)
+{
+	$byName = getSearchResultByField
+	(
+		'Rack',
+		array ('id'),
+		'name',
+		$terms,
+		'name'
+	);
+	$byComment = getSearchResultByField
+	(
+		'Rack',
+		array ('id'),
+		'comment',
+		$terms,
+		'name'
+	);
+	// Filter out dupes.
+	foreach ($byName as $res1)
+		foreach (array_keys ($byComment) as $key2)
+			if ($res1['id'] == $byComment[$key2]['id'])
+			{
+				unset ($byComment[$key2]);
+				continue 2;
+			}
+	$ret = array();
+	foreach (array_merge ($byName, $byComment) as $row)
+		$ret[] = spotEntity ('rack', $row['id']);
 	return $ret;
 }
 

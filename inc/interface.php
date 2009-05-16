@@ -2965,6 +2965,13 @@ function renderSearchResults ()
 			$lasthit = 'file';
 			$summary['file'] = $tmp;
 		}
+		$tmp = getRackSearchResult ($terms);
+		if (count ($tmp))
+		{
+			$nhits += count ($tmp);
+			$lasthit = 'rack';
+			$summary['rack'] = $tmp;
+		}
 	}
 	if ($nhits == 0)
 		echo "<center><h2>Nothing found for '${terms}'</h2></center>";
@@ -3011,6 +3018,9 @@ function renderSearchResults ()
 				break;
 			case 'file':
 				echo "<script language='Javascript'>document.location='${root}?page=file&file_id=${record['id']}';//</script>";
+				break;
+			case 'rack':
+				echo "<script language='Javascript'>document.location='${root}?page=rack&rack_id=${record['id']}';//</script>";
 				break;
 		}
 		return;
@@ -3114,6 +3124,19 @@ function renderSearchResults ()
 					break;
 				case 'file':
 					startPortlet ("<a href='${root}?page=files'>Files</a>");
+					echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
+					foreach ($what as $cell)
+					{
+						echo "<tr class=row_${order}><td class=tdleft>";
+						renderCell ($cell);
+						echo "</td></tr>";
+						$order = $nextorder[$order];
+					}
+					echo '</table>';
+					finishPortlet();
+					break;
+				case 'rack':
+					startPortlet ("<a href='${root}?page=rackspace'>Racks</a>");
 					echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
 					foreach ($what as $cell)
 					{
@@ -5629,6 +5652,20 @@ function renderCell ($cell)
 			echo "<tr><td class=sparenetwork>no name</td></tr>";
 		echo '<td>';
 		echo count ($cell['etags']) ? ("<small>" . serializeTags ($cell['etags']) . "</small>") : '&nbsp;';
+		echo "</td></tr></table>";
+		break;
+	case 'rack':
+		echo "<table class='slbcell vscell'><tr><td rowspan=3 width='5%'>";
+		$thumbwidth = getRackImageWidth();
+		$thumbheight = getRackImageHeight ($cell['height']);
+		echo "<img border=0 width=${thumbwidth} height=${thumbheight} title='${cell['height']} units' ";
+		echo "src='render_image.php?img=minirack&rack_id=${cell['id']}'>";
+		echo "</td><td>";
+		printf ("<a href='${root}?page=rack&rack_id=%s'><strong>%s</strong></a>", $cell['id'], niftyString ($cell['name']));
+		echo "</td></tr><tr><td>";
+		echo count ($cell['etags']) ? ("<small>" . serializeTags ($cell['etags']) . "</small>") : '&nbsp;';
+		echo "</td></tr><tr><td>";
+		echo niftyString ($cell['comment']);
 		echo "</td></tr></table>";
 		break;
 	default:
