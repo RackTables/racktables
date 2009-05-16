@@ -44,10 +44,21 @@ function displayedName ($objectData)
 {
 	if ($objectData['name'] != '')
 		return $objectData['name'];
-	elseif (considerConfiguredConstraint ('object', $objectData['id'], 'NAMEWARN_LISTSRC'))
-		return "ANONYMOUS " . $objectData['objtype_name'];
+	// handle transition of argument type
+	if (isset ($objectData['realm']))
+	{
+		if (considerConfiguredConstraint ($objectData, 'NAMEWARN_LISTSRC'))
+			return "ANONYMOUS " . $objectData['objtype_name'];
+		else
+			return "[${objectData['objtype_name']}]";
+	}
 	else
-		return "[${objectData['objtype_name']}]";
+	{
+		if (considerConfiguredConstraint (spotEntity ('object', $objectData['id']), 'NAMEWARN_LISTSRC'))
+			return "ANONYMOUS " . $objectData['objtype_name'];
+		else
+			return "[${objectData['objtype_name']}]";
+	}
 }
 
 // This function finds height of solid rectangle of atoms, which are all
@@ -1945,19 +1956,6 @@ function buildPredicateTable ($parsetree)
 // Take a list of records and filter against given RackCode expression. Return
 // the original list intact, if there was no filter requested, but return an
 // empty list, if there was an error.
-function filterEntityList ($list_in, $realm, $expression = array())
-{
-	if ($expression === NULL)
-		return array();
-	if (!count ($expression))
-		return $list_in;
-	$list_out = array();
-	foreach ($list_in as $item_key => $item_value)
-		if (TRUE === judgeEntity ($realm, $item_key, $expression))
-			$list_out[$item_key] = $item_value;
-	return $list_out;
-}
-
 function filterCellList ($list_in, $expression = array())
 {
 	if ($expression === NULL)
@@ -1971,26 +1969,7 @@ function filterCellList ($list_in, $expression = array())
 	return $list_out;
 }
 
-// Tell, if the given expression is true for the given entity.
-function judgeEntity ($realm, $id, $expression)
-{
-	$item_explicit_tags = loadEntityTags ($realm, $id);
-	global $pTable;
-	return eval_expression
-	(
-		$expression,
-		array_merge
-		(
-			$item_explicit_tags,
-			getImplicitTags ($item_explicit_tags),
-			generateEntityAutoTags ($realm, $id)
-		),
-		$pTable,
-		TRUE
-	);
-}
-
-// Idem, but use complete record instead of key.
+// Tell, if the given expression is true for the given entity. Take complete record on input.
 function judgeCell ($cell, $expression)
 {
 	global $pTable;
@@ -2008,21 +1987,8 @@ function judgeCell ($cell, $expression)
 	);
 }
 
-// If the requested predicate exists, return its [last] definition.
-// Otherwise return NULL (to signal filterEntityList() about error).
-// Also detect "not set" option selected.
-function interpretPredicate ($pname)
-{
-	if ($pname == '_')
-		return array();
-	global $pTable;
-	if (isset ($pTable[$pname]))
-		return $pTable[$pname];
-	return NULL;
-}
-
 // Tell, if a constraint from config option permits given record.
-function considerConfiguredConstraint ($entity_realm, $entity_id, $varname)
+function considerConfiguredConstraint ($cell, $varname)
 {
 	if (!strlen (getConfigVar ($varname)))
 		return TRUE; // no restriction
@@ -2033,7 +1999,7 @@ function considerConfiguredConstraint ($entity_realm, $entity_id, $varname)
 		$parseCache[$varname] = spotPayload (getConfigVar ($varname), 'SYNT_EXPR');
 	if ($parseCache[$varname]['result'] != 'ACK')
 		return FALSE; // constraint set, but cannot be used due to compilation error
-	return judgeEntity ($entity_realm, $entity_id, $parseCache[$varname]['load']);
+	return judgeCell ($cell, $parseCache[$varname]['load']);
 }
 
 // Return list of records in the given realm, which conform to

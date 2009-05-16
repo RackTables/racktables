@@ -864,7 +864,8 @@ function renderRackObject ($object_id)
 	echo "<table border=0 cellspacing=0 cellpadding=3 width='100%'>\n";
 	if (!empty ($info['name']))
 		echo "<tr><th width='50%' class=tdright>Common name:</th><td class=tdleft>${info['name']}</td></tr>\n";
-	elseif (considerConfiguredConstraint ('object', $object_id, 'NAMEWARN_LISTSRC'))
+	// FIXME: don't call spotEntity() each time, do it once in the beginning.
+	elseif (considerConfiguredConstraint (spotEntity ('object', $object_id), 'NAMEWARN_LISTSRC'))
 		echo "<tr><td colspan=2 class=msg_error>Common name is missing.</td></tr>\n";
 	echo "<tr><th width='50%' class=tdright>Object type:</th><td class=tdleft><a href='";
 	echo makeHref (array (
@@ -875,7 +876,8 @@ function renderRackObject ($object_id)
 	echo "'>${info['objtype_name']}</a></td></tr>\n";
 	if (!empty ($info['asset_no']))
 		echo "<tr><th width='50%' class=tdright>Asset tag:</th><td class=tdleft>${info['asset_no']}</td></tr>\n";
-	elseif (considerConfiguredConstraint ('object', $object_id, 'ASSETWARN_LISTSRC'))
+	// FIXME: ditto
+	elseif (considerConfiguredConstraint (spotEntity ('object', $object_id), 'ASSETWARN_LISTSRC'))
 		echo "<tr><td colspan=2 class=msg_error>Asset tag is missing.</td></tr>\n";
 	if (!empty ($info['label']))
 		echo "<tr><th width='50%' class=tdright>Visible label:</th><td class=tdleft>${info['label']}</td></tr>\n";

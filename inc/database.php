@@ -235,21 +235,7 @@ function getObjectTypeList ()
 // option with constraint in RackCode.
 function getNarrowObjectList ($varname = '')
 {
-	$ret = array();
-	global $dbxlink;
-	$query =
-		"select RackObject.id as id, RackObject.name as name, dict_value as objtype_name, " .
-		"objtype_id from " .
-		"RackObject inner join Dictionary on objtype_id=dict_key join Chapter on Chapter.id = Dictionary.chapter_id " .
-		"where Chapter.name = 'RackObjectType' " .
-		"order by objtype_id, name";
-	$result = useSelectBlade ($query, __FUNCTION__);
-	// Fetch everything at once to unblock result buffer and enable
-	// loadEntityTags(), which will be called soon.
-	$buffer = $result->fetchAll (PDO::FETCH_ASSOC);
-	unset ($result);
-	foreach ($buffer as $row)
-		$ret[$row['id']] = displayedName ($row);
+	$wideList = listCells ('object');
 	if (strlen ($varname) and strlen (getConfigVar ($varname)))
 	{
 		global $parseCache;
@@ -257,13 +243,16 @@ function getNarrowObjectList ($varname = '')
 			$parseCache[$varname] = spotPayload (getConfigVar ($varname), 'SYNT_EXPR');
 		if ($parseCache[$varname]['result'] != 'ACK')
 			return array();
-		$ret = filterEntityList ($ret, 'object', $parseCache[$varname]['load']);
+		$wideList = filterCellList ($wideList, $parseCache[$varname]['load']);
 	}
+	$ret = array();
+	foreach ($wideList as $cell)
+		$ret[$cell['id']] = $cell['dname'];
 	return $ret;
 }
 
 // For a given realm return a list of entity records, each with
-// enough information for judgeEntityRecord() to execute.
+// enough information for judgeCell() to execute.
 function listCells ($realm, $parent_id = 0)
 {
 	global $SQLSchema;

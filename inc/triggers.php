@@ -53,7 +53,7 @@ function trigger_snmpportfinder ()
 function trigger_isloadbalancer ()
 {
 	assertUIntArg ('object_id', __FUNCTION__);
-	return considerConfiguredConstraint ('object', $_REQUEST['object_id'], 'IPV4LB_LISTSRC') ? 'std' : '';
+	return considerConfiguredConstraint (spotEntity ('object', $_REQUEST['object_id']), 'IPV4LB_LISTSRC') ? 'std' : '';
 }
 
 function trigger_ipv4 ()
@@ -62,13 +62,13 @@ function trigger_ipv4 ()
 	if (count (getObjectIPv4Allocations ($_REQUEST['object_id'])))
 		return 'std';
 	// Only hide the tab, if there are no addresses allocated.
-	return considerConfiguredConstraint ('object', $_REQUEST['object_id'], 'IPV4OBJ_LISTSRC') ? 'std' : '';
+	return considerConfiguredConstraint (spotEntity ('object', $_REQUEST['object_id']), 'IPV4OBJ_LISTSRC') ? 'std' : '';
 }
 
 function trigger_natv4 ()
 {
 	assertUIntArg ('object_id', __FUNCTION__);
-	return considerConfiguredConstraint ('object', $_REQUEST['object_id'], 'IPV4NAT_LISTSRC') ? 'std' : '';
+	return considerConfiguredConstraint (spotEntity ('object', $_REQUEST['object_id']), 'IPV4NAT_LISTSRC') ? 'std' : '';
 }
 
 function trigger_poolrscount ()
