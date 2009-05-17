@@ -890,7 +890,7 @@ $msgcode['deleteObject']['ERR'] = 100;
 function deleteObject ()
 {
 	assertUIntArg ('object_id', __FUNCTION__);
-	if (NULL === ($oinfo = getObjectInfo ($_REQUEST['object_id'])))
+	if (NULL === ($oinfo = spotEntity ('object', $_REQUEST['object_id'])))
 		return buildRedirectURL (__FUNCTION__, 'ERR', array ('object not found'));
 
 	$racklist = getResidentRacksData ($_REQUEST['object_id'], FALSE);
@@ -1342,7 +1342,7 @@ function generateAutoPorts ()
 {
 	global $pageno;
 	assertUIntArg ('object_id', __FUNCTION__);
-	$info = getObjectInfo ($_REQUEST['object_id'], FALSE);
+	$info = spotEntity ('object', $_REQUEST['object_id']);
 	// Navigate away in case of success, stay at the place otherwise.
 	if (executeAutoPorts ($_REQUEST['object_id'], $info['objtype_id']))
 		return buildRedirectURL (__FUNCTION__, 'OK', array(), $pageno, 'ports');

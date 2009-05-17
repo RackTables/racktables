@@ -19,7 +19,7 @@ function trigger_livevlans ()
 {
 	assertUIntArg ('object_id', __FUNCTION__);
 	$object_id = $_REQUEST['object_id'];
-	$object = getObjectInfo ($object_id, FALSE);
+	$object = spotEntity ('object', $object_id, FALSE);
 	if ($object['objtype_id'] != 8)
 		return '';
 	$values = getAttrValues ($object_id);

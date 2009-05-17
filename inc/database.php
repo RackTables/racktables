@@ -3484,7 +3484,7 @@ function getFileLinks ($file_id = 0)
 			case 'object':
 				$page = 'object';
 				$id_name = 'object_id';
-				$parent = getObjectInfo($row['entity_id']);
+				$parent = spotEntity ($row['entity_type'], $row['entity_id']);
 				$name = $parent['dname'];
 				break;
 			case 'rack':

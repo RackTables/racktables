@@ -368,7 +368,7 @@ function markupObjectProblems (&$rackData)
 		for ($locidx = 0; $locidx < 3; $locidx++)
 			if ($rackData[$i][$locidx]['state'] == 'T')
 			{
-				$object = getObjectInfo ($rackData[$i][$locidx]['object_id'], FALSE);
+				$object = spotEntity ('object', $rackData[$i][$locidx]['object_id']);
 				if ($object['has_problems'] == 'yes')
 				{
 					// Object can be already highlighted.
@@ -1366,7 +1366,7 @@ function buildLVSConfig ($object_id = 0)
 		showError ('Invalid argument', __FUNCTION__);
 		return;
 	}
-	$oInfo = getObjectInfo ($object_id, FALSE);
+	$oInfo = spotEntity ('object', $object_id);
 	$lbconfig = getSLBConfig ($object_id);
 	if ($lbconfig === NULL)
 	{

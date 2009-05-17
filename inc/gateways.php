@@ -73,7 +73,7 @@ function getSwitchVLANs ($object_id = 0)
 		showError ('Invalid object_id', __FUNCTION__);
 		return;
 	}
-	$objectInfo = getObjectInfo ($object_id, FALSE);
+	$objectInfo = spotEntity ('object', $object_id);
 	$endpoints = findAllEndpoints ($object_id, $objectInfo['name']);
 	if (count ($endpoints) == 0)
 	{
@@ -159,7 +159,7 @@ function setSwitchVLANs ($object_id = 0, $setcmd)
 	global $remote_username;
 	if ($object_id <= 0)
 		return oneLiner (160); // invalid arguments
-	$objectInfo = getObjectInfo ($object_id, FALSE);
+	$objectInfo = spotEntity ('object', $object_id);
 	$endpoints = findAllEndpoints ($object_id, $objectInfo['name']);
 	if (count ($endpoints) == 0)
 		return oneLiner (161); // endpoint not found
@@ -268,7 +268,7 @@ function gwSendFileToObject ($object_id = 0, $handlername, $filetext = '')
 	global $remote_username;
 	if ($object_id <= 0 or empty ($handlername))
 		return oneLiner (160); // invalid arguments
-	$objectInfo = getObjectInfo ($object_id, FALSE);
+	$objectInfo = spotEntity ('object', $object_id);
 	$endpoints = findAllEndpoints ($object_id, $objectInfo['name']);
 	if (count ($endpoints) == 0)
 		return oneLiner (161); // endpoint not found
@@ -283,7 +283,7 @@ function gwRecvFileFromObject ($object_id = 0, $handlername, &$output)
 	global $remote_username;
 	if ($object_id <= 0 or empty ($handlername))
 		return oneLiner (160); // invalid arguments
-	$objectInfo = getObjectInfo ($object_id, FALSE);
+	$objectInfo = spotEntity ('object', $object_id);
 	$endpoints = findAllEndpoints ($object_id, $objectInfo['name']);
 	if (count ($endpoints) == 0)
 		return oneLiner (161); // endpoint not found

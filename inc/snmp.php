@@ -99,7 +99,7 @@ function doSNMPmining ($object_id, $community)
 		61 => 24,  // 10/100/1000BaseT => RJ-45/1000Base-T
 	);
 
-	$objectInfo = getObjectInfo ($object_id, FALSE);
+	$objectInfo = spotEntity ('object', $object_id, FALSE);
 	$endpoints = findAllEndpoints ($object_id, $objectInfo['name']);
 	$sysName = substr (snmpget ($endpoints[0], $community, 'sysName.0'), strlen ('STRING: '));
 	$sysDescr = snmpget ($endpoints[0], $community, 'sysDescr.0');
