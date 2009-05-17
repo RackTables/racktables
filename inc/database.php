@@ -737,6 +737,7 @@ function commitUpdateRack ($rack_id, $new_name, $new_height, $new_row_id, $new_c
 	$check_sql = "SELECT COUNT(*) AS count FROM RackSpace WHERE rack_id = '${rack_id}' AND unit_no > '{$new_height}'";
 	$check_result = $dbxlink->query($check_sql);
 	$check_row = $check_result->fetch (PDO::FETCH_ASSOC);
+	unset ($check_result);
 	if ($check_row['count'] > 0) {
 		showError ('Cannot shrink rack, objects are still mounted there', __FUNCTION__);
 		return FALSE;

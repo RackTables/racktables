@@ -4024,11 +4024,6 @@ function renderLVSConfig ($object_id)
 function renderVirtualService ($vsid)
 {
 	global $nextorder;
-	if ($vsid <= 0)
-	{
-		showError ('Invalid argument', __FUNCTION__);
-		return;
-	}
 	$vsinfo = spotEntity ('ipv4vs', $vsid);
 	amplifyCell ($vsinfo);
 	echo '<table border=0 class=objectview cellspacing=0 cellpadding=0>';
@@ -4101,8 +4096,8 @@ function renderVirtualService ($vsid)
 	}
 	echo "</table>\n";
 	finishPortlet ();
-	echo '</td>';
-
+	echo '</td></tr><tr><td colspan=2>';
+	renderFilesPortlet ('ipv4vs', $vsid);
 	echo '</tr><table>';
 }
 
@@ -4288,12 +4283,12 @@ function renderRSPool ($pool_id)
 {
 	global $nextorder;
 	$poolInfo = spotEntity ('ipv4rspool', $pool_id);
-	amplifyCell ($poolInfo);
 	if ($poolInfo == NULL)
 	{
 		showError ('Could not load data!', __FUNCTION__);
 		return;
 	}
+	amplifyCell ($poolInfo);
 
 	echo "<table border=0 class=objectview cellspacing=0 cellpadding=0>";
 	if (!empty ($poolInfo['name']))
@@ -4355,7 +4350,8 @@ function renderRSPool ($pool_id)
 	}
 	echo "</table>\n";
 	finishPortlet();
-
+	echo "</td></tr><tr><td colspan=2>\n";
+	renderFilesPortlet ('ipv4rspool', $pool_id);
 	echo "</td></tr></table>\n";
 }
 
@@ -5303,6 +5299,9 @@ function renderFile ($file_id)
 			{
 				case 'user':
 				case 'ipv4net':
+				case 'rack':
+				case 'ipv4vs':
+				case 'ipv4rspool':
 					renderCell (spotEntity ($link['entity_type'], $link['entity_id']));
 					break;
 				default:
@@ -5676,9 +5675,9 @@ function renderCell ($cell)
 		echo "</td><td>";
 		printf ("<a href='${root}?page=rack&rack_id=%s'><strong>%s</strong></a>", $cell['id'], niftyString ($cell['name']));
 		echo "</td></tr><tr><td>";
-		echo count ($cell['etags']) ? ("<small>" . serializeTags ($cell['etags']) . "</small>") : '&nbsp;';
-		echo "</td></tr><tr><td>";
 		echo niftyString ($cell['comment']);
+		echo "</td></tr><tr><td>";
+		echo count ($cell['etags']) ? ("<small>" . serializeTags ($cell['etags']) . "</small>") : '&nbsp;';
 		echo "</td></tr></table>";
 		break;
 	default:
