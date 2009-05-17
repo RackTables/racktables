@@ -1102,7 +1102,7 @@ function renderRackObject ($object_id)
  			echo "<tr valign=top class=row_${order}><td class=tdleft>";
  			renderCell (spotEntity ('ipv4vs', $vs_id));
  			echo "</td><td class=tdleft>";
- 			renderRSPoolCell ($info['pool_id'], $info['pool_name']);
+ 			renderCell (spotEntity ('ipv4rspool', $info['pool_id']));
  			echo '</td><td class=tdleft>' . $info['rscount'] . '</td>';
  			echo "<td class=slbconf>${info['vsconfig']}</td>";
  			echo "<td class=slbconf>${info['rsconfig']}</td>";
@@ -3086,10 +3086,10 @@ function renderSearchResults ()
 				case 'ipv4rspool':
 					startPortlet ("<a href='${root}?page=ipv4rsplist'>RS pools</a>");
 					echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
-					foreach ($what as $rspool)
+					foreach ($what as $cell)
 					{
 						echo "<tr class=row_${order}><td class=tdleft>";
-						renderRSPoolCell ($rspool['pool_id'], $rspool['name']);
+						renderCell ($cell);
 						echo "</td></tr>";
 						$order = $nextorder[$order];
 					}
@@ -4070,7 +4070,7 @@ function renderVirtualService ($vsid)
 		// Pool info
 		echo '<table width=100%>';
 		echo "<tr><td colspan=2>";
-		renderRSPoolCell ($pool_id, $poolInfo['name']);
+		renderCell (spotEntity ('ipv4rspool', $pool_id));
 		echo "</td></tr>";
 		if (!empty ($poolInfo['vsconfig']))
 			echo "<tr><th>VS config</th><td class='dashed slbconf'>${poolInfo['vsconfig']}</td></tr>";
@@ -4258,7 +4258,7 @@ function renderVServiceLBForm ($vs_id)
 				echo "<td class=tdleft>";
 				renderLBCell ($object_id);
 				echo "</td><td class=tdleft>";
-				renderRSPoolCell ($pool_id, $rspinfo['name']);
+				renderCell (spotEntity ('ipv4rspool', $pool_id));
 				echo "</td><td><textarea name=vsconfig>${configs['vsconfig']}</textarea></td>";
 				echo "<td><textarea name=rsconfig>${configs['rsconfig']}</textarea></td><td>";
 				printImageHREF ('SAVE', 'Save changes', TRUE);
@@ -5000,7 +5000,6 @@ function renderObjectSLB ($object_id)
 {
 	global $nextorder;
 	// Keep the list in a variable to assist in decoding pool name below.
-	$rsplist = getIPv4RSPoolOptions();
 
 	startPortlet ('Add new');
 	echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
@@ -5008,7 +5007,7 @@ function renderObjectSLB ($object_id)
 	echo "<tr valign=top><th>VS / RS pool</th><td class=tdleft>";
 	printSelect (getIPv4VSOptions(), 'vs_id', NULL, 1);
 	echo "</td><td>";
-	printSelect ($rsplist, 'pool_id', NULL, 2);
+	printSelect (getIPv4RSPoolOptions(), 'pool_id', NULL, 2);
 	echo "</td><td>";
 	printImageHREF ('add', 'Configure LB', TRUE, 5);
 	echo "</td></tr>\n";
@@ -5033,7 +5032,7 @@ function renderObjectSLB ($object_id)
 			echo "</td><td class=tdleft>";
 			renderCell (spotEntity ('ipv4vs', $vs_id));
 			echo "</td><td class=tdleft>";
-			renderRSPoolCell ($vsinfo['pool_id'], $rsplist[$vsinfo['pool_id']]);
+			renderCell (spotEntity ('ipv4rspool', $vsinfo['pool_id']));
 			echo "</td><td><textarea name=vsconfig>${vsinfo['vsconfig']}</textarea></td>";
 			echo "<td><textarea name=rsconfig>${vsinfo['rsconfig']}</textarea></td><td>";
 			printImageHREF ('SAVE', 'Save changes', TRUE);
@@ -5597,7 +5596,19 @@ function renderCell ($cell)
 	switch ($cell['realm'])
 	{
 	case 'user':
-		renderUserCell ($cell);
+		echo "<table class='slbcell vscell'><tr><td rowspan=3 width='5%'>";
+		printImageHREF ('USER');
+		echo '</td>';
+		echo "<td><a href='${root}?page=user&user_id=${cell['user_id']}'>${cell['user_name']}</a></td></tr>";
+		if (strlen ($cell['user_realname']))
+			echo "<tr><td><strong>" . niftyString ($cell['user_realname']) . "</strong></td></tr>";
+		else
+			echo "<tr><td class=sparenetwork>no name</td></tr>";
+		echo '<td>';
+		if (!isset ($cell['etags']))
+			$cell['etags'] = loadEntityTags ('user', $cell['user_id']);
+		echo count ($cell['etags']) ? ("<small>" . serializeTags ($cell['etags']) . "</small>") : '&nbsp;';
+		echo "</td></tr></table>";
 		break;
 	case 'file':
 		echo "<table class='slbcell vscell'><tr><td rowspan=3 width='5%'>";
@@ -5639,7 +5650,14 @@ function renderCell ($cell)
 		echo "</td></tr></table>";
 		break;
 	case 'ipv4rspool':
-		renderRSPoolCell ($cell['id'], $cell['name']);
+		echo "<table class=slbcell><tr><td>";
+		echo "<a href='${root}?page=ipv4rspool&pool_id=${cell['id']}'>";
+		echo empty ($cell['name']) ? "ANONYMOUS pool [${cell['id']}]" : niftyString ($cell['name']);
+		echo "</a></td></tr><tr><td>";
+		printImageHREF ('RS pool');
+		echo "</td></tr><tr><td>";
+		echo count ($cell['etags']) ? ("<small>" . serializeTags ($cell['etags']) . "</small>") : '&nbsp;';
+		echo "</td></tr></table>";
 		break;
 	case 'ipv4net':
 		echo "<table class='slbcell vscell'><tr><td rowspan=3 width='5%'>";
@@ -5674,24 +5692,6 @@ function renderCell ($cell)
 	}
 }
 
-function renderUserCell ($account)
-{
-	global $root;
-	echo "<table class='slbcell vscell'><tr><td rowspan=3 width='5%'>";
-	printImageHREF ('USER');
-	echo '</td>';
-	echo "<td><a href='${root}?page=user&user_id=${account['user_id']}'>${account['user_name']}</a></td></tr>";
-	if (strlen ($account['user_realname']))
-		echo "<tr><td><strong>" . niftyString ($account['user_realname']) . "</strong></td></tr>";
-	else
-		echo "<tr><td class=sparenetwork>no name</td></tr>";
-	echo '<td>';
-	if (!isset ($account['etags']))
-		$account['etags'] = loadEntityTags ('user', $account['user_id']);
-	echo count ($account['etags']) ? ("<small>" . serializeTags ($account['etags']) . "</small>") : '&nbsp;';
-	echo "</td></tr></table>";
-}
-
 function renderLBCell ($object_id)
 {
 	global $root;
@@ -5702,19 +5702,6 @@ function renderLBCell ($object_id)
 	printImageHREF ('LB');
 	echo "</td></tr><tr><td><small>";
 	echo serializeTags (loadEntityTags ('object', $object_id));
-	echo "</small></td></tr></table>";
-}
-
-function renderRSPoolCell ($pool_id, $pool_name)
-{
-	global $root;
-	echo "<table class=slbcell><tr><td>";
-	echo "<a href='${root}?page=ipv4rspool&pool_id=${pool_id}'>";
-	echo empty ($pool_name) ? "ANONYMOUS pool [${pool_id}]" : niftyString ($pool_name);
-	echo "</a></td></tr><tr><td>";
-	printImageHREF ('RS pool');
-	echo "</td></tr><tr><td><small>";
-	echo serializeTags (loadEntityTags ('ipv4rspool', $pool_id));
 	echo "</small></td></tr></table>";
 }
 

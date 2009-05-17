@@ -1513,17 +1513,17 @@ function getIPv4AddressSearchResult ($terms)
 
 function getIPv4RSPoolSearchResult ($terms)
 {
-	$query = "select id as pool_id, name from IPv4RSPool where ";
-	$or = '';
-	foreach (explode (' ', $terms) as $term)
-	{
-		$query .= $or . "name like '%${term}%'";
-		$or = ' or ';
-	}
-	$result = useSelectBlade ($query, __FUNCTION__);
+	$byname = getSearchResultByField
+	(
+		'IPv4RSPool',
+		array ('id'),
+		'name',
+		$terms,
+		'name'
+	);
 	$ret = array();
-	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-		$ret[] = $row;
+	foreach ($byname as $row)
+		$ret[] = spotEntity ('ipv4rspool', $row['id']);
 	return $ret;
 }
 
