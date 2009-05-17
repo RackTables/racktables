@@ -60,10 +60,10 @@ function authenticate ()
 	$remote_displayname = $remote_username;
 	if (NULL !== ($remote_userid = getUserIDByUsername ($remote_username)))
 	{
-		$user_given_tags = loadEntityTags ('user', $remote_userid);
 		// Always set $remote_displayname, if a local account exists and has one.
 		// This can be overloaded from LDAP later though.
-		$userinfo = getUserInfo ($remote_userid);
+		$userinfo = spotEntity ('user', $remote_userid);
+		$user_given_tags = $userinfo['etags'];
 		if (!empty ($userinfo['user_realname']))
 			$remote_displayname = $userinfo['user_realname'];
 	}
@@ -329,7 +329,9 @@ function authenticated_via_database ($username, $password)
 {
 	if (NULL === ($userid = getUserIDByUsername ($username))) // user not found
 		return FALSE;
-	if (NULL === ($userinfo = getUserInfo ($userid))) // user found, DB error
+	// FIXME: consider avoiding this DB call, because user data should be already
+	// available in authenticate().
+	if (NULL === ($userinfo = spotEntity ('user', $userid))) // user found, DB error
 	{
 		showError ('Cannot load user data', __FUNCTION__);
 		die();

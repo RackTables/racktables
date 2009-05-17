@@ -3495,8 +3495,8 @@ function getFileLinks ($file_id = 0)
 			case 'user':
 				$page = 'user';
 				$id_name = 'user_id';
-				$userinfo = getUserInfo ($row['entity_id']);
-				$name = $userinfo['user_name'];
+				$parent = spotEntity ($row['entity_type'], $row['entity_id']);
+				$name = $parent['user_name'];
 				break;
 		}
 
@@ -3745,19 +3745,6 @@ function getUserIDByUsername ($username)
 	}
 	if ($row = $result->fetch (PDO::FETCH_ASSOC))
 		return $row['user_id'];
-	return NULL;
-}
-
-function getUserInfo ($user_id)
-{
-	$query = "select 'user' as realm, user_id, user_name, user_password_hash, user_realname from UserAccount where user_id = ${user_id}";
-	if (($result = useSelectBlade ($query, __FUNCTION__)) == NULL)
-	{
-		showError ('SQL query failed', __FUNCTION__);
-		die;
-	}
-	if ($row = $result->fetch (PDO::FETCH_ASSOC))
-		return $row;
 	return NULL;
 }
 

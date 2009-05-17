@@ -5163,7 +5163,7 @@ ENDJAVASCRIPT;
 function renderUser ($user_id)
 {
 	global $target_given_tags;
-	$userinfo = getUserInfo ($user_id);
+	$userinfo = spotEntity ('user', $user_id);
 
 	startPortlet ('summary');
 	echo '<table border=0 align=center>';
@@ -5302,11 +5302,6 @@ function renderFile ($file_id)
 			switch ($link['entity_type'])
 			{
 				case 'user':
-					if (NULL === ($userinfo = getUserInfo ($link['entity_id'])))
-						echo "Internal error: user id ${link['entity_id']} not found";
-					else
-						renderCell ($userinfo);
-					break;
 				case 'ipv4net':
 					renderCell (spotEntity ($link['entity_type'], $link['entity_id']));
 					break;
@@ -5898,7 +5893,7 @@ function dynamic_title_decoder ($path_position)
 		);
 	case 'user':
 		assertUIntArg ('user_id', __FUNCTION__);
-		$userinfo = getUserInfo ($_REQUEST['user_id']);
+		$userinfo = spotEntity ('user', $_REQUEST['user_id']);
 		return array
 		(
 			'name' => "Local user '" . $userinfo['user_name'] . "'",

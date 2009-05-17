@@ -483,7 +483,7 @@ function updateUser ()
 	assertStringArg ('password', __FUNCTION__);
 	$username = $_REQUEST['username'];
 	$new_password = $_REQUEST['password'];
-	if (NULL == ($userinfo = getUserInfo ($_REQUEST['user_id'])))
+	if (NULL == ($userinfo = spotEntity ('user', $_REQUEST['user_id'])))
 		return buildRedirectURL (__FUNCTION__, 'ERR1');
 	// Update user password only if provided password is not the same as current password hash.
 	if ($new_password != $userinfo['user_password_hash'])
@@ -1476,7 +1476,7 @@ function changeMyPassword ()
 	assertStringArg ('newpassword1', __FUNCTION__);
 	assertStringArg ('newpassword2', __FUNCTION__);
 	$remote_userid = getUserIDByUsername ($remote_username);
-	$userinfo = getUserInfo ($remote_userid);
+	$userinfo = spotEntity ('user', $remote_userid);
 	if ($userinfo['user_password_hash'] != sha1 ($_REQUEST['oldpassword']))
 		return buildRedirectURL (__FUNCTION__, 'ERR2');
 	if ($_REQUEST['newpassword1'] != $_REQUEST['newpassword2'])
