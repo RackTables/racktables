@@ -24,6 +24,7 @@ $SQLSchema = array
 			'Row_name' => '(select name from RackRow where id = row_id)',
 			'objtype_name' => '(select dict_value from Dictionary where dict_key = objtype_id)',
 			'has_problems' => 'has_problems',
+			'comment' => 'comment',
 		),
 		'keycolumn' => 'id',
 		'ordcolumns' => array ('name'),
@@ -684,6 +685,13 @@ function commitUpdateObject ($object_id = 0, $new_name = '', $new_label = '', $n
 	return recordHistory ('RackObject', "id = ${object_id}");
 }
 
+// Remove file links related to the entity, but leave the entity and file(s) intact.
+function releaseFiles ($entity_realm, $entity_id)
+{
+	global $dbxlink;
+	$dbxlink->exec ("DELETE FROM FileLink WHERE entity_type = '${entity_realm}' AND entity_id = ${entity_id}");
+}
+
 // There are times when you want to delete all traces of an object
 function commitDeleteObject ($object_id = 0)
 {
@@ -693,8 +701,8 @@ function commitDeleteObject ($object_id = 0)
 		die;
 	}
 	global $dbxlink;
+	releaseFiles ('object', $object_id);
 	$dbxlink->query("DELETE FROM AttributeValue WHERE object_id = ${object_id}");
-	$dbxlink->query("DELETE FROM File WHERE id IN (SELECT file_id FROM FileLink WHERE entity_id = 'object' AND entity_id = ${object_id})");
 	$dbxlink->query("DELETE FROM IPv4LB WHERE object_id = ${object_id}");
 	$dbxlink->query("DELETE FROM IPv4Allocation WHERE object_id = ${object_id}");
 	$dbxlink->query("DELETE FROM Port WHERE object_id = ${object_id}");
@@ -713,6 +721,7 @@ function commitDeleteObject ($object_id = 0)
 function commitDeleteRack($rack_id)
 {
 	global $dbxlink;
+	releaseFiles ('rack', $rack_id);
 	$query = "delete from RackSpace where rack_id = '${rack_id}'";
 	$dbxlink->query ($query);
 	$query = "delete from TagStorage where entity_realm='rack' and entity_id='${rack_id}'";
@@ -2577,6 +2586,7 @@ function commitDeleteVS ($id = 0)
 {
 	if ($id <= 0)
 		return FALSE;
+	releaseFiles ('ipv4vs', $id);
 	return useDeleteBlade ('IPv4VS', 'id', $id) && destroyTagsForEntity ('ipv4vs', $id);
 }
 
@@ -2756,6 +2766,7 @@ function commitDeleteRSPool ($pool_id = 0)
 	global $dbxlink;
 	if ($pool_id <= 0)
 		return FALSE;
+	releaseFiles ('ipv4rspool', $pool_id);
 	return useDeleteBlade ('IPv4RSPool', 'id', $pool_id) && destroyTagsForEntity ('ipv4rspool', $pool_id);
 }
 
@@ -3124,6 +3135,7 @@ function destroyIPv4Prefix ($id = 0)
 {
 	if ($id <= 0)
 		return __FUNCTION__ . ': Invalid IPv4 prefix ID';
+	releaseFiles ('ipv4net', $id);
 	if (!useDeleteBlade ('IPv4Network', 'id', $id))
 		return __FUNCTION__ . ': SQL query #1 failed';
 	if (!destroyTagsForEntity ('ipv4net', $id))
