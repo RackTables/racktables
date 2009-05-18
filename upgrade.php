@@ -241,7 +241,7 @@ CREATE TABLE `LDAPCache` (
 				$query[] = "DELETE FROM PortCompat WHERE type1 = ${row['type1']} AND type2 = ${row['type2']} limit ${row['excess']}";
 			unset ($result);
 			$query[] = 'ALTER TABLE PortCompat DROP KEY type1';
-			$query[] = 'ALTER TABLE PortCompat ADD UNIQUE (type1, type2)';
+			$query[] = 'ALTER TABLE PortCompat ADD UNIQUE `type1_2` (type1, type2)';
 			$query[] = "UPDATE Config SET varvalue = '0.17.0' WHERE varname = 'DB_VERSION'";
 
 			break;
