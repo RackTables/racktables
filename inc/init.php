@@ -138,6 +138,8 @@ $pTable = buildPredicateTable ($rackCode);
 // things running is to maintain application cache for them.
 $parseCache = array();
 
+$entityCache = array();
+
 $taglist = getTagList();
 $tagtree = treeFromList ($taglist);
 sortTree ($tagtree, 'taginfoCmp');

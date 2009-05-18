@@ -255,6 +255,12 @@ function getNarrowObjectList ($varname = '')
 // enough information for judgeCell() to execute.
 function listCells ($realm, $parent_id = 0)
 {
+	if (!$parent_id)
+	{
+		global $entityCache;
+		if (isset ($entityCache['complete'][$realm]))
+			return $entityCache['complete'][$realm];
+	}
 	global $SQLSchema;
 	if (!isset ($SQLSchema[$realm]))
 	{
@@ -304,7 +310,9 @@ function listCells ($realm, $parent_id = 0)
 				'parent_id' => $taglist[$row['tag_id']]['parent_id'],
 			);
 	}
-	// Add necessary finish to the list before returning it.
+	// Add necessary finish to the list before returning it. Maintain caches.
+	if (!$parent_id)
+		unset ($entityCache['partial'][$realm]);
 	foreach (array_keys ($ret) as $entity_id)
 	{
 		$ret[$entity_id]['etags'] = getExplicitTagsOnly ($ret[$entity_id]['etags']);
@@ -333,6 +341,10 @@ function listCells ($realm, $parent_id = 0)
 		default:
 			break;
 		}
+		if (!$parent_id)
+			$entityCache['complete'][$realm][$entity_id] = $ret[$entity_id];
+		else
+			$entityCache['partial'][$realm][$entity_id] = $ret[$entity_id];
 	}
 	return $ret;
 }
@@ -341,6 +353,12 @@ function listCells ($realm, $parent_id = 0)
 // if it does not exist).
 function spotEntity ($realm, $id)
 {
+	global $entityCache;
+	if (isset ($entityCache['complete'][$realm]))
+	// Emphasize the absence of record, if listCells() has already been called.
+		return (isset ($entityCache['complete'][$realm][$id])) ? $entityCache['complete'][$realm][$id] : NULL;
+	elseif (isset ($entityCache['partial'][$realm][$id]))
+		return $entityCache['partial'][$realm][$id];
 	global $SQLSchema;
 	if (!isset ($SQLSchema[$realm]))
 	{
@@ -409,6 +427,7 @@ function spotEntity ($realm, $id)
 	default:
 		break;
 	}
+	$entityCache['partial'][$realm][$id] = $ret;
 	return $ret;
 }
 
