@@ -516,26 +516,6 @@ function amplifyCell (&$record, $dummy = NULL)
 	}
 }
 
-// This is a popular helper.
-function getObjectInfo ($object_id = 0, $set_dname = TRUE)
-{
-	$query =
-		"select RackObject.id as id, RackObject.name as name, label, barcode, dict_value as objtype_name, asset_no, dict_key as objtype_id, has_problems, comment from " .
-		"RackObject inner join Dictionary on objtype_id = dict_key join Chapter on Chapter.id = Dictionary.chapter_id " .
-		"where RackObject.id = '${object_id}' and Chapter.name = 'RackObjectType'";
-	$result = useSelectBlade ($query, __FUNCTION__);
-	if (($ret = $result->fetch (PDO::FETCH_ASSOC)) == NULL)
-	{
-		showError ('Query succeeded, but returned no data', __FUNCTION__);
-		return NULL;
-	}
-	$result->closeCursor();
-	// It's safe now to run subsequent queries.
-	if ($set_dname)
-		$ret['dname'] = displayedName ($ret);
-	return $ret;
-}
-
 function getPortTypes ()
 {
 	return readChapter ('PortType');
@@ -593,7 +573,7 @@ function getObjectPortsAndLinks ($object_id)
 			// only call displayedName() when necessary
 			if (empty ($ret[$tmpkey]['remote_object_name']) and !empty ($ret[$tmpkey]['remote_object_id']))
 			{
-				$oi = getObjectInfo ($ret[$tmpkey]['remote_object_id']);
+				$oi = spotEntity ('object', $ret[$tmpkey]['remote_object_id']);
 				$ret[$tmpkey]['remote_object_name'] = $oi['dname'];
 			}
 		}

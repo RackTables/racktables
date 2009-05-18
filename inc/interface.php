@@ -553,7 +553,7 @@ function renderRack ($rack_id, $hl_obj_id = 0)
 			switch ($state)
 			{
 				case 'T':
-					$objectData = getObjectInfo ($rackData[$i][$locidx]['object_id']);
+					$objectData = spotEntity ('object', $rackData[$i][$locidx]['object_id']);
 					if (!empty ($objectData['asset_no']))
 						$prefix = "<div title='${objectData['asset_no']}";
 					else
@@ -625,10 +625,10 @@ function renderNewRackForm ($row_id)
 function renderEditObjectForm ($object_id)
 {
 	global $pageno;
-	$object = getObjectInfo ($object_id);
+	$object = spotEntity ('object', $object_id);
 	if ($object == NULL)
 	{
-		showError ('getObjectInfo() failed', __FUNCTION__);
+		showError ('Error retrieving data', __FUNCTION__);
 		return;
 	}
 	startPortlet ();
@@ -849,10 +849,12 @@ function finishPortlet ()
 function renderRackObject ($object_id)
 {
 	global $nextorder, $aac;
-	$info = getObjectInfo ($object_id);
+	$info = spotEntity ('object', $object_id);
+	// FIXME: employ amplifyCell() instead of calling loader functions directly
+	#amplifyCell ($info);
 	if ($info == NULL)
 	{
-		showError ('getObjectInfo() failed', __FUNCTION__);
+		showError ('Error loading data', __FUNCTION__);
 		return;
 	}
 	// Main layout starts.
@@ -1640,10 +1642,10 @@ and either delete them before unmounting or refuse to unmount the object.
 function renderRackSpaceForObject ($object_id)
 {
 	$is_update = isset ($_REQUEST['rackmulti'][0]);
-	$info = getObjectInfo ($object_id);
+	$info = spotEntity ('object', $object_id);
 	if ($info == NULL)
 	{
-		showError ('getObjectInfo() failed', __FUNCTION__);
+		showError ('Error loading data', __FUNCTION__);
 		return;
 	}
 	// Always process occupied racks plus racks chosen by user. First get racks with
@@ -2101,7 +2103,7 @@ function renderIPv4SLB ()
 		foreach (array_keys ($vipdata['lblist']) as $lb_object_id)
 			if (!in_array ($lb_object_id, $lblist))
 			{
-				$oi = getObjectInfo ($lb_object_id);
+				$oi = spotEntity ('object', $lb_object_id);
 				$lbdname[$lb_object_id] = $oi['dname'];
 				$lblist[] = $lb_object_id;
 			}
@@ -2697,7 +2699,6 @@ function renderNATv4ForObject ($object_id)
 		echo "</td></tr></form>";
 	}
 	
-	$info = getObjectInfo ($object_id);
 	$forwards = getNATv4ForObject ($object_id);
 	$alloclist = getObjectIPv4Allocations ($object_id);
 	echo "<center><h2>locally performed NAT</h2></center>";
@@ -4513,14 +4514,12 @@ function renderLBList ()
 	global $nextorder;
 	echo "<table class=widetable border=0 cellpadding=10 cellspacing=0 align=center>\n";
 	echo "<tr><th>Object</th><th>RS pools configured</th></tr>";
-	$oicache = array();
 	$order = 'odd';
 	foreach (getLBList() as $object_id => $poolcount)
 	{
-		if (!isset ($oicache[$object_id]))
-			$oicache[$object_id] = getObjectInfo ($object_id);
+		$oi = spotEntity ('object', $object_id);
 		echo "<tr valign=top class=row_${order}><td><a href='".makeHref(array('page'=>'object', 'object_id'=>$object_id))."'>";
-		echo $oicache[$object_id]['dname'] . '</a></td>';
+		echo $oi['dname'] . '</a></td>';
 		echo "<td>${poolcount}</td></tr>";
 		$order = $nextorder[$order];
 	}
@@ -4660,7 +4659,7 @@ function renderLivePTR ($id)
 
 function renderAutoPortsForm ($object_id)
 {
-	$info = getObjectInfo ($object_id);
+	$info = spotEntity ('object', $object_id);
 	$ptlist = readChapter ('PortType');
 	echo "<table class='widetable' border=0 cellspacing=0 cellpadding=5 align='center'>\n";
 	echo "<caption>The following ports can be quickly added:</caption>";
@@ -5689,14 +5688,15 @@ function renderCell ($cell)
 function renderLBCell ($object_id)
 {
 	global $root;
-	$oi = getObjectInfo ($object_id);
+	$oi = spotEntity ('object', $object_id);
 	echo "<table class=slbcell><tr><td>";
 	echo "<a href='${root}?page=object&object_id=${object_id}'>${oi['dname']}</a>";
 	echo "</td></tr><tr><td>";
 	printImageHREF ('LB');
-	echo "</td></tr><tr><td><small>";
-	echo serializeTags (loadEntityTags ('object', $object_id));
-	echo "</small></td></tr></table>";
+	echo "</td></tr><tr><td>";
+	if (count ($oi['etags']))
+		echo '<small>' . serializeTags ($oi['etags']) . '</small>';
+	echo "</td></tr></table>";
 }
 
 function renderRouterCell ($dottedquad, $ifname, $object_id, $object_dname)
@@ -5916,7 +5916,7 @@ function dynamic_title_decoder ($path_position)
 		);
 	case 'object':
 		assertUIntArg ('object_id', __FUNCTION__);
-		$object = getObjectInfo ($_REQUEST['object_id']);
+		$object = spotEntity ('object', $_REQUEST['object_id']);
 		if ($object == NULL)
 			return array
 			(
