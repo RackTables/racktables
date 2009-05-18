@@ -1785,7 +1785,7 @@ function linkFileToEntity ()
 	$bypass_name = $page[$pageno]['bypass'];
 	assertUIntArg ($bypass_name, __FUNCTION__);
 
-	$fi = getFileInfo ($_REQUEST['file_id']);
+	$fi = spotEntity ('file', $_REQUEST['file_id']);
 	if ($fi === NULL)
 		return buildRedirectURL (__FUNCTION__, 'ERR1'); // file not found
 	$error = commitLinkFile ($_REQUEST['file_id'], $entity_type, $_REQUEST[$bypass_name]);
@@ -1807,7 +1807,7 @@ function replaceFile ()
 	// Make sure the file can be uploaded
 	if (get_cfg_var('file_uploads') != 1)
 		return buildRedirectURL (__FUNCTION__, 'ERR1');
-	$shortInfo = getFileInfo ($sic['file_id']);
+	$shortInfo = spotEntity ('file', $sic['file_id']);
 
 	$fp = fopen($_FILES['file']['tmp_name'], 'rb');
 	if ($fp === FALSE)
@@ -1854,7 +1854,7 @@ $msgcode['deleteFile']['ERR'] = 100;
 function deleteFile ()
 {
 	assertUIntArg ('file_id', __FUNCTION__);
-	$shortInfo = getFileInfo ($_REQUEST['file_id']);
+	$shortInfo = spotEntity ('file', $_REQUEST['file_id']);
 	$error = commitDeleteFile ($_REQUEST['file_id']);
 
 	if ($error != '')
@@ -1871,7 +1871,7 @@ function updateFileText ()
 	assertUIntArg ('file_id', __FUNCTION__);
 	assertStringArg ('mtime_copy', __FUNCTION__);
 	assertStringArg ('file_text', __FUNCTION__, TRUE); // it's Ok to save empty
-	$shortInfo = getFileInfo ($_REQUEST['file_id']);
+	$shortInfo = spotEntity ('file', $_REQUEST['file_id']);
 	if ($shortInfo['mtime'] != $_REQUEST['mtime_copy'])
 		return buildRedirectURL (__FUNCTION__, 'ERR1');
 	global $sic;

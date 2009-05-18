@@ -3411,38 +3411,6 @@ function getFile ($file_id = 0)
 	return $ret;
 }
 
-function getFileInfo ($file_id = 0)
-{
-	if ($file_id == 0)
-	{
-		showError ('Invalid file_id', __FUNCTION__);
-		return NULL;
-	}
-	global $dbxlink;
-	$query = $dbxlink->prepare('SELECT id, name, type, size, ctime, mtime, atime, comment FROM File WHERE id = ?');
-	$query->bindParam(1, $file_id);
-	$query->execute();
-	if (($row = $query->fetch (PDO::FETCH_ASSOC)) == NULL)
-	{
-		showError ('Query succeeded, but returned no data', __FUNCTION__);
-		$ret = NULL;
-	}
-	else
-	{
-		$ret = array();
-		$ret['id'] = $row['id'];
-		$ret['name'] = $row['name'];
-		$ret['type'] = $row['type'];
-		$ret['size'] = $row['size'];
-		$ret['ctime'] = $row['ctime'];
-		$ret['mtime'] = $row['mtime'];
-		$ret['atime'] = $row['atime'];
-		$ret['comment'] = $row['comment'];
-		$query->closeCursor();
-	}
-	return $ret;
-}
-
 function getFileLinks ($file_id = 0)
 {
 	if ($file_id <= 0)

@@ -5253,10 +5253,10 @@ function renderMyAccount ()
 function renderFile ($file_id)
 {
 	global $nextorder, $aac, $root;
-	$file = getFileInfo ($file_id);
+	$file = spotEntity ('file', $file_id);
 	if ($file == NULL)
 	{
-		showError ('getFileInfo() failed', __FUNCTION__);
+		showError ('Error loading data', __FUNCTION__);
 		return;
 	}
 	echo "<table border=0 class=objectview cellspacing=0 cellpadding=0>";
@@ -5339,10 +5339,10 @@ function renderFileReuploader ()
 
 function renderFileProperties ($file_id)
 {
-	$file = getFileInfo ($file_id);
+	$file = spotEntity ('file', $file_id);
 	if ($file === NULL)
 	{
-		showError ('getFileInfo() failed', __FUNCTION__);
+		showError ('Error loading data', __FUNCTION__);
 		return;
 	}
 	echo '<table border=0 align=center>';
@@ -5951,7 +5951,7 @@ function dynamic_title_decoder ($path_position)
 			);
 	case 'file':
 		assertUIntArg ('file_id', __FUNCTION__);
-		$file = getFileInfo ($_REQUEST['file_id']);
+		$file = spotEntity ('file', $_REQUEST['file_id']);
 		if ($file == NULL)
 			return array
 			(

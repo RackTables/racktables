@@ -109,7 +109,7 @@ function trigger_localreports ()
 function trigger_file_editText ()
 {
 	assertUIntArg ('file_id', __FUNCTION__);
-	$fileInfo = getFileInfo ($_REQUEST['file_id']);
+	$fileInfo = spotEntity ('file', $_REQUEST['file_id']);
 	return ($fileInfo['type'] == 'text/plain') ? 'std' : '';
 }
 
