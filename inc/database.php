@@ -23,6 +23,7 @@ $SQLSchema = array
 			'row_id' => '(select row_id from Rack where id = rack_id)',
 			'Row_name' => '(select name from RackRow where id = row_id)',
 			'objtype_name' => '(select dict_value from Dictionary where dict_key = objtype_id)',
+			'has_problems' => 'has_problems',
 		),
 		'keycolumn' => 'id',
 		'ordcolumns' => array ('name'),
