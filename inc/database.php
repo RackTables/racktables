@@ -2400,7 +2400,6 @@ function useSelectBlade ($query, $caller = 'N/A')
 	{
 		$ei = $dbxlink->errorInfo();
 		showError ("SQL query '${query}'\n failed in useSelectBlade with error ${ei[1]} (${ei[2]})", $caller);
-		debug_print_backtrace();
 		return NULL;
 	}
 	return $result;
