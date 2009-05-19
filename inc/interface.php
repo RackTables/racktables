@@ -5157,7 +5157,6 @@ ENDJAVASCRIPT;
 
 function renderUser ($user_id)
 {
-	global $target_given_tags;
 	$userinfo = spotEntity ('user', $user_id);
 
 	startPortlet ('summary');
@@ -5168,22 +5167,20 @@ function renderUser ($user_id)
 	// data, not the viewed one. Another special reason is that the displayed user's given tags are in
 	// the "target" chain.
 	$baseurl = makeHref(array('page'=>'userlist', 'tab'=>'default'))."&";
-	if (getConfigVar ('SHOW_EXPLICIT_TAGS') == 'yes' and count ($target_given_tags))
+	if (getConfigVar ('SHOW_EXPLICIT_TAGS') == 'yes' and count ($userinfo['etags']))
 	{
 		echo "<tr><th width='50%' class=tagchain>Given explicit tags:</th><td class=tagchain>";
-		echo serializeTags ($target_given_tags, $baseurl) . "</td></tr>\n";
+		echo serializeTags ($userinfo['etags'], $baseurl) . "</td></tr>\n";
 	}
-	$target_shadow = getImplicitTags ($target_given_tags);
-	if (getConfigVar ('SHOW_IMPLICIT_TAGS') == 'yes' and count ($target_shadow))
+	if (getConfigVar ('SHOW_IMPLICIT_TAGS') == 'yes' and count ($userinfo['itags']))
 	{
 		echo "<tr><th width='50%' class=tagchain>Given implicit tags:</th><td class=tagchain>";
-		echo serializeTags ($target_shadow, $baseurl) . "</td></tr>\n";
+		echo serializeTags ($userinfo['itags'], $baseurl) . "</td></tr>\n";
 	}
-	$target_auto_tags = generateEntityAutoTags ('user', $userinfo['user_name']);
-	if (getConfigVar ('SHOW_AUTOMATIC_TAGS') == 'yes' and count ($target_auto_tags))
+	if (getConfigVar ('SHOW_AUTOMATIC_TAGS') == 'yes' and count ($userinfo['atags']))
 	{
 		echo "<tr><th width='50%' class=tagchain>Automatic tags:</th><td class=tagchain>";
-		echo serializeTags ($target_auto_tags) . "</td></tr>\n";
+		echo serializeTags ($userinfo['atags']) . "</td></tr>\n";
 	}
 	echo '</table>';
 	finishPortlet();
