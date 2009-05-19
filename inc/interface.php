@@ -782,7 +782,7 @@ function renderRackInfoPortlet ($rackData)
 	echo "<tr><th width='50%' class=tdright>Objects:</th><td class=tdleft>";
 	echo count ($rackData['mountedObjects']);
 	echo "</td></tr>\n";
-	printTagTRs (makeHref(array('page'=>'rackspace', 'tab'=>'default'))."&");
+	printTagTRs ($rackData, makeHref(array('page'=>'rackspace', 'tab'=>'default'))."&");
 	if (!empty ($rackData['comment']))
 		echo "<tr><th width='50%' class=tdright>Comment:</th><td class=tdleft>${rackData['comment']}</td></tr>\n";
 	echo '</table>';
@@ -892,6 +892,7 @@ function renderRackObject ($object_id)
 			echo "<tr><th width='50%' class=sticker>${record['name']}:</th><td class=sticker>${record['a_value']}</td></tr>\n";
 	printTagTRs
 	(
+		$info,
 		makeHref
 		(
 			array
@@ -2368,7 +2369,7 @@ function renderIPv4Network ($id)
 		echo "</tr>\n";
 	}
 
-	printTagTRs (makeHref(array('page'=>'ipv4space', 'tab'=>'default'))."&");
+	printTagTRs ($range, makeHref(array('page'=>'ipv4space', 'tab'=>'default'))."&");
 	echo "</table><br>\n";
 	finishPortlet();
 
@@ -2500,7 +2501,6 @@ function renderIPv4Address ($dottedquad)
 	echo "<tr><th width='50%' class=tdright>Arriving NAT connections:</th><td class=tdleft>" . count ($address['inpf']) . "</td></tr>\n";
 	echo "<tr><th width='50%' class=tdright>SLB virtual services:</th><td class=tdleft>" . count ($address['lblist']) . "</td></tr>\n";
 	echo "<tr><th width='50%' class=tdright>SLB real servers:</th><td class=tdleft>" . count ($address['rslist']) . "</td></tr>\n";
-	printTagTRs();
 	echo "</table><br>\n";
 	finishPortlet();
 	echo "</td>\n";
@@ -4040,7 +4040,7 @@ function renderVirtualService ($vsid)
 	echo "<tr><th width='50%' class=tdright>Protocol:</th><td class=tdleft>${vsinfo['proto']}</td></tr>\n";
 	echo "<tr><th width='50%' class=tdright>Virtual IP address:</th><td class=tdleft><a href='".makeHref(array('page'=>'ipaddress', 'tab'=>'default', 'ip'=>$vsinfo['vip']))."'>${vsinfo['vip']}</a></td></tr>\n";
 	echo "<tr><th width='50%' class=tdright>Virtual port:</th><td class=tdleft>${vsinfo['vport']}</td></tr>\n";
-	printTagTRs (makeHref(array('page'=>'ipv4vslist', 'tab'=>'default'))."&");
+	printTagTRs ($vsinfo, makeHref(array('page'=>'ipv4vslist', 'tab'=>'default'))."&");
 	if (!empty ($vsinfo['vsconfig']))
 	{
 		echo "<tr><th class=slbconf>VS configuration:</th><td>&nbsp;</td></tr>";
@@ -4302,7 +4302,7 @@ function renderRSPool ($pool_id)
 		echo "<tr><th width='50%' class=tdright>Pool name:</th><td class=tdleft>${poolInfo['name']}</td></tr>\n";
 	echo "<tr><th width='50%' class=tdright>Real servers:</th><td class=tdleft>" . count ($poolInfo['rslist']) . "</td></tr>\n";
 	echo "<tr><th width='50%' class=tdright>Load balancers:</th><td class=tdleft>" . count ($poolInfo['lblist']) . "</td></tr>\n";
-	printTagTRs (makeHref(array('page'=>'ipv4rsplist', 'tab'=>'default'))."&");
+	printTagTRs ($poolInfo, makeHref(array('page'=>'ipv4rsplist', 'tab'=>'default'))."&");
 	if (!empty ($poolInfo['vsconfig']))
 	{
 		echo "<tr><th width='50%' class=tdright>VS configuration:</th><td>&nbsp;</td></tr>\n";
@@ -4838,27 +4838,22 @@ function renderEntityTags ($entity_id)
 	finishPortlet();
 }
 
-function printTagTRs ($baseurl = '')
+function printTagTRs ($cell, $baseurl = '')
 {
-	global $expl_tags, $impl_tags, $auto_tags, $target_given_tags;
-	if (getConfigVar ('SHOW_EXPLICIT_TAGS') == 'yes' and count ($target_given_tags))
+	if (getConfigVar ('SHOW_EXPLICIT_TAGS') == 'yes' and count ($cell['etags']))
 	{
-		echo "<tr><th width='50%' class=tagchain>Given explicit tags:</th><td class=tagchain>";
-		echo serializeTags ($target_given_tags, $baseurl) . "</td></tr>\n";
-		// only display "effective" line, when if differs
-		if (tagChainCmp ($target_given_tags, $expl_tags))
-			echo "<tr><th width='50%' class=tagchain>Effective explicit tags:</th><td class=tagchain>" .
-				serializeTags ($expl_tags, $baseurl) . "</td></tr>\n";
+		echo "<tr><th width='50%' class=tagchain>Explicit tags:</th><td class=tagchain>";
+		echo serializeTags ($cell['etags'], $baseurl) . "</td></tr>\n";
 	}
-	if (getConfigVar ('SHOW_IMPLICIT_TAGS') == 'yes' and count ($impl_tags))
+	if (getConfigVar ('SHOW_IMPLICIT_TAGS') == 'yes' and count ($cell['itags']))
 	{
-		echo "<tr><th width='50%' class=tagchain>Effective implicit tags:</th><td class=tagchain>";
-		echo serializeTags ($impl_tags, $baseurl) . "</td></tr>\n";
+		echo "<tr><th width='50%' class=tagchain>Implicit tags:</th><td class=tagchain>";
+		echo serializeTags ($cell['itags'], $baseurl) . "</td></tr>\n";
 	}
-	if (getConfigVar ('SHOW_AUTOMATIC_TAGS') == 'yes' and count ($auto_tags))
+	if (getConfigVar ('SHOW_AUTOMATIC_TAGS') == 'yes' and count ($cell['atags']))
 	{
 		echo "<tr><th width='50%' class=tagchain>Automatic tags:</th><td class=tagchain>";
-		echo serializeTags ($auto_tags) . "</td></tr>\n";
+		echo serializeTags ($cell['atags']) . "</td></tr>\n";
 	}
 }
 
@@ -5163,25 +5158,7 @@ function renderUser ($user_id)
 	echo '<table border=0 align=center>';
 	echo "<tr><th class=tdright>Account name:</th><td class=tdleft>${userinfo['user_name']}</td></tr>";
 	echo '<tr><th class=tdright>Real name:</th><td class=tdleft>' . $userinfo['user_realname'] . '</td></tr>';
-	// Using printTagTRs() is inappropriate here, because autotags will be filled with current user's
-	// data, not the viewed one. Another special reason is that the displayed user's given tags are in
-	// the "target" chain.
-	$baseurl = makeHref(array('page'=>'userlist', 'tab'=>'default'))."&";
-	if (getConfigVar ('SHOW_EXPLICIT_TAGS') == 'yes' and count ($userinfo['etags']))
-	{
-		echo "<tr><th width='50%' class=tagchain>Given explicit tags:</th><td class=tagchain>";
-		echo serializeTags ($userinfo['etags'], $baseurl) . "</td></tr>\n";
-	}
-	if (getConfigVar ('SHOW_IMPLICIT_TAGS') == 'yes' and count ($userinfo['itags']))
-	{
-		echo "<tr><th width='50%' class=tagchain>Given implicit tags:</th><td class=tagchain>";
-		echo serializeTags ($userinfo['itags'], $baseurl) . "</td></tr>\n";
-	}
-	if (getConfigVar ('SHOW_AUTOMATIC_TAGS') == 'yes' and count ($userinfo['atags']))
-	{
-		echo "<tr><th width='50%' class=tagchain>Automatic tags:</th><td class=tagchain>";
-		echo serializeTags ($userinfo['atags']) . "</td></tr>\n";
-	}
+	printTagTRs ($userinfo, makeHref(array('page'=>'userlist', 'tab'=>'default'))."&");
 	echo '</table>';
 	finishPortlet();
 
