@@ -6,14 +6,6 @@ th.rack {
 	font: bold 12px Verdana, sans-serif;
 }
 
-li.step {
-	list-style-type: circle;
-}
-
-li.cstep {
-	list-style-type: disc;
-}
-
 body {
   font-family: Arial, Sans-Serif, sans-serif;
   font-size : small;
@@ -326,32 +318,6 @@ border-color: #ff8c00;
 
 .greynavbar {background-color: #f0f0f0; border-top: 1px solid #3c78b5; margin-top: 0px}
 
-.miniracks {
-	width: 100px;
-	border: 0px solid black;
-	padding: 3px;
-	margin: 3px;
-	text-align: center;
-	display: inline;
-}
-
-.miniracks img {
-	border: 0px;
-}
-
-.miniracks a {
-	padding: 3px;
-	margin: 3px;
-}
-
-.rackname {
-	font: bold 10px Verdana, sans-serif;
-	color: #000;
-	padding: 3px;
-	margin: 3px;
-
-}
-
 .rack {
 	font: bold 12px Verdana, sans-serif;
 	border: 1px solid black;
@@ -419,41 +385,6 @@ border-color: #ff8c00;
 
 .mainmenu img {
 	border: 0px;
-}
-
-.unracked {
-	background-color: #f0f0f0;
-	border: 1px solid #3c78b5;
-}
-
-.unracked li {
-	text-align: left;
-	list-style-type: none;
-}
-
-.unracked li a {
-	color: #254a6f;
-	text-decoration: none;
-	font: bold 10px Verdana, sans-serif;
-}
-
-.unracked li a:hover {
-	text-decoration: underline;
-}
-
-.allobjects li {
-	text-align: left;
-	list-style-type: none;
-}
-
-.allobjects li a {
-	color: #254a6f;
-	text-decoration: none;
-	font: bold 10px Verdana, sans-serif;
-}
-
-.allobjects li a:hover {
-	text-decoration: underline;
 }
 
 .visible {
