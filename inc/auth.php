@@ -56,20 +56,12 @@ function authenticate ()
 			showError ('Invalid authentication source!', __FUNCTION__);
 			die;
 	}
-	// Fallback value.
-	$remote_displayname = $remote_username;
-	if (NULL !== ($remote_userid = getUserIDByUsername ($remote_username)))
-	{
-		// Always set $remote_displayname, if a local account exists and has one.
-		// This can be overloaded from LDAP later though.
-		$userinfo = spotEntity ('user', $remote_userid);
-		$user_given_tags = $userinfo['etags'];
-		if (!empty ($userinfo['user_realname']))
-			$remote_displayname = $userinfo['user_realname'];
-	}
-	elseif ($require_local_account)
+	$userinfo = constructUserCell ($remote_username);
+	if ($require_local_account and !isset ($userinfo['user_id']))
 		dieWith401();
-	$auto_tags = array_merge ($auto_tags, generateEntityAutoTags ('user', $remote_username));
+	$remote_displayname = strlen ($userinfo['user_realname']) ? $userinfo['user_realname'] : $remote_username;
+	$user_given_tags = $userinfo['etags'];
+	$auto_tags = array_merge ($auto_tags, $userinfo['atags']);
 	switch (TRUE)
 	{
 		// Just trust the server, because the password isn't known.
@@ -77,7 +69,7 @@ function authenticate ()
 			return;
 		// When using LDAP, leave a mean to fix things. Admin user is always authenticated locally.
 		case ('database' == $user_auth_src or $remote_userid == 1):
-			if (authenticated_via_database ($remote_username, $_SERVER['PHP_AUTH_PW']))
+			if (authenticated_via_database ($userinfo, $_SERVER['PHP_AUTH_PW']))
 				return;
 			break;
 		case ('ldap' == $user_auth_src):
@@ -325,17 +317,10 @@ function queryLDAPServer ($username, $password)
 	return $ret;
 }
 
-function authenticated_via_database ($username, $password)
+function authenticated_via_database ($userinfo, $password)
 {
-	if (NULL === ($userid = getUserIDByUsername ($username))) // user not found
+	if (!isset ($userinfo['user_id'])) // not a local account
 		return FALSE;
-	// FIXME: consider avoiding this DB call, because user data should be already
-	// available in authenticate().
-	if (NULL === ($userinfo = spotEntity ('user', $userid))) // user found, DB error
-	{
-		showError ('Cannot load user data', __FUNCTION__);
-		die();
-	}
 	return $userinfo['user_password_hash'] == sha1 ($password);
 }
 

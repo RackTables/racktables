@@ -319,15 +319,7 @@ function listCells ($realm, $parent_id = 0)
 	{
 		$ret[$entity_id]['etags'] = getExplicitTagsOnly ($ret[$entity_id]['etags']);
 		$ret[$entity_id]['itags'] = getImplicitTags ($ret[$entity_id]['etags']);
-		switch ($realm)
-		{
-		case 'ipv4net':
-		case 'object':
-			$ret[$entity_id]['atags'] = generateEntityAutoTags ($realm, $ret[$entity_id]);
-			break;
-		default:
-			$ret[$entity_id]['atags'] = generateEntityAutoTags ($realm, $entity_id);
-		}
+		$ret[$entity_id]['atags'] = generateEntityAutoTags ($ret[$entity_id]);
 		switch ($realm)
 		{
 		case 'object':
@@ -405,15 +397,7 @@ function spotEntity ($realm, $id)
 		return NULL;
 	$ret['etags'] = getExplicitTagsOnly ($ret['etags']);
 	$ret['itags'] = getImplicitTags ($ret['etags']);
-	switch ($realm)
-	{
-	case 'ipv4net':
-	case 'object':
-		$ret['atags'] = generateEntityAutoTags ($realm, $ret);
-		break;
-	default:
-		$ret['atags'] = generateEntityAutoTags ($realm, $id);
-	}
+	$ret['atags'] = generateEntityAutoTags ($ret);
 	switch ($realm)
 	{
 	case 'object':

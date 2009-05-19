@@ -960,54 +960,52 @@ function complementByKids ($idlist, $tree = NULL, $getall = FALSE)
 
 // Universal autotags generator, a complementing function for loadEntityTags().
 // Bypass key isn't strictly typed, but interpreted depending on the realm.
-function generateEntityAutoTags ($entity_realm = '', $bypass_value = '')
+function generateEntityAutoTags ($cell)
 {
 	$ret = array();
-	switch ($entity_realm)
+	switch ($cell['realm'])
 	{
 		case 'rack':
-			$ret[] = array ('tag' => '$rackid_' . $bypass_value);
+			$ret[] = array ('tag' => '$rackid_' . $cell['id']);
 			$ret[] = array ('tag' => '$any_rack');
 			break;
 		case 'object': // during transition bypass is already the whole structure
-			$oinfo = $bypass_value;
-			$ret[] = array ('tag' => '$id_' . $oinfo['id']);
-			$ret[] = array ('tag' => '$typeid_' . $oinfo['objtype_id']);
+			$ret[] = array ('tag' => '$id_' . $cell['id']);
+			$ret[] = array ('tag' => '$typeid_' . $cell['objtype_id']);
 			$ret[] = array ('tag' => '$any_object');
-			if (validTagName ('$cn_' . $oinfo['name']))
-				$ret[] = array ('tag' => '$cn_' . $oinfo['name']);
-			if (!strlen ($oinfo['rack_id']))
+			if (validTagName ('$cn_' . $cell['name']))
+				$ret[] = array ('tag' => '$cn_' . $cell['name']);
+			if (!strlen ($cell['rack_id']))
 				$ret[] = array ('tag' => '$unmounted');
 			break;
 		case 'ipv4net': // during transition bypass is already the whole structure
-			$netinfo = $bypass_value;
-			$ret[] = array ('tag' => '$ip4netid_' . $netinfo['id']);
-			$ret[] = array ('tag' => '$ip4net-' . str_replace ('.', '-', $netinfo['ip']) . '-' . $netinfo['mask']);
+			$ret[] = array ('tag' => '$ip4netid_' . $cell['id']);
+			$ret[] = array ('tag' => '$ip4net-' . str_replace ('.', '-', $cell['ip']) . '-' . $cell['mask']);
 			$ret[] = array ('tag' => '$any_ip4net');
 			$ret[] = array ('tag' => '$any_net');
 			break;
 		case 'ipv4vs':
-			$ret[] = array ('tag' => '$ipv4vsid_' . $bypass_value);
+			$ret[] = array ('tag' => '$ipv4vsid_' . $cell['id']);
 			$ret[] = array ('tag' => '$any_ipv4vs');
 			$ret[] = array ('tag' => '$any_vs');
 			break;
 		case 'ipv4rspool':
-			$ret[] = array ('tag' => '$ipv4rspid_' . $bypass_value);
+			$ret[] = array ('tag' => '$ipv4rspid_' . $cell['id']);
 			$ret[] = array ('tag' => '$any_ipv4rsp');
 			$ret[] = array ('tag' => '$any_rsp');
 			break;
 		case 'user':
 			// {$username_XXX} autotag is generated always, but {$userid_XXX}
 			// appears only for accounts, which exist in local database.
-			$ret[] = array ('tag' => '$username_' . $bypass_value);
-			if (NULL !== ($userid = getUserIDByUsername ($bypass_value)))
-				$ret[] = array ('tag' => '$userid_' . $userid);
+			$ret[] = array ('tag' => '$username_' . $cell['user_name']);
+			if (isset ($cell['user_id']))
+				$ret[] = array ('tag' => '$userid_' . $cell['user_id']);
 			break;
 		case 'file':
-			$ret[] = array ('tag' => '$fileid_' . $bypass_value);
+			$ret[] = array ('tag' => '$fileid_' . $cell['id']);
 			$ret[] = array ('tag' => '$any_file');
 			break;
-		default:
+		default: // HCF!
 			break;
 	}
 	return $ret;
@@ -2031,6 +2029,24 @@ function getIPv4RSPoolOptions ()
 	$ret = array();
 	foreach (listCells ('ipv4rspool') as $pool_id => $poolInfo)
 		$ret[$pool_id] = $poolInfo['name'];
+	return $ret;
+}
+
+// Derive a complete cell structure from the given username regardless
+// if it is a local account or not.
+function constructUserCell ($username)
+{
+	if (NULL !== ($userid = getUserIDByUsername ($username)))
+		return spotEntity ('user', $userid);
+	$ret = array
+	(
+		'realm' => 'user',
+		'user_name' => $username,
+		'user_realname' => '',
+		'etags' => array(),
+		'itags' => array(),
+		'atags' => array(),
+	);
 	return $ret;
 }
 
