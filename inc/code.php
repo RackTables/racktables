@@ -889,12 +889,21 @@ function semanticFilter ($code)
 		switch ($sentence['type'])
 		{
 			case 'SYNT_DEFINITION':
+				// A predicate can only be defined once.
+				if (in_array ($sentence['term'], $predicatelist))
+					return array
+					(
+						'result' => 'NAK',
+						'load' => "[${sentence['term']}] has already been defined earlier"
+					);
+				// Check below makes sure, that definitions are built from already existing
+				// tokens. This also makes recursive definitions impossible.
 				$up = firstUnrefPredicate ($predicatelist, $sentence['definition']);
 				if ($up !== NULL)
 					return array
 					(
 						'result' => 'NAK',
-						'load' => "definition [${sentence['term']}] uses unknown predicate [${up}]"
+						'load' => "definition of [${sentence['term']}] refers to [${up}], which is not (yet) defined"
 					);
 				$predicatelist[] = $sentence['term'];
 				break;
