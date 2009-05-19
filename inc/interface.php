@@ -1834,10 +1834,9 @@ function renderDepot ()
 			$secondclass = 'tdleft port_highlight';
 		else
 			$secondclass = 'tdleft';
-		$tags = loadEntityTags ('object', $obj['id']);
 		echo "<tr class=row_${order} valign=top><td class='${secondclass}'><a href='".makeHref(array('page'=>'object', 'object_id'=>$obj['id']))."'><strong>${obj['dname']}</strong></a>";
-		if (count ($tags))
-			echo '<br><small>' . serializeTags ($tags, makeHref(array('page'=>$pageno, 'tab'=>'default')) . '&') . '</small>';
+		if (count ($obj['etags']))
+			echo '<br><small>' . serializeTags ($obj['etags'], makeHref(array('page'=>$pageno, 'tab'=>'default')) . '&') . '</small>';
 		echo "</td><td class='${secondclass}'>${obj['label']}</td>";
 		echo "<td class='${secondclass}'>${obj['asset_no']}</td>";
 		echo "<td class='${secondclass}'>${obj['barcode']}</td>";
