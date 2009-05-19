@@ -1181,6 +1181,7 @@ function mergeTagChains ($chainA, $chainB)
 
 function getCellFilter ()
 {
+	global $sic;
 	if (isset ($_REQUEST['tagfilter']) and is_array ($_REQUEST['tagfilter']))
 	{
 		$_REQUEST['cft'] = $_REQUEST['tagfilter'];
@@ -1239,10 +1240,16 @@ function getCellFilter ()
 				$ret['urlextra'] .= '&cfp[]=' . $req_name;
 			}
 	}
-	if (isset ($_REQUEST['cfe']))
+	// Extra text comes from TEXTAREA and is easily screwed by standard escaping function.
+	if (isset ($sic['cfe']))
 	{
-		$ret['extratext'] = trim ($_REQUEST['cfe']);
-		$ret['urlextra'] .= '&cfe=' . $ret['extratext'];
+		// Only consider extra text, when it is a correct RackCode expression.
+		$parse = spotPayload ($sic['cfe'], 'SYNT_EXPR');
+		if ($parse['result'] == 'ACK')
+		{
+			$ret['extratext'] = trim ($sic['cfe']);
+			$ret['urlextra'] .= '&cfe=' . $ret['extratext'];
+		}
 	}
 	$finaltext = array();
 	if (strlen ($ret['text']))
