@@ -5524,7 +5524,6 @@ function printRoutersTD ($rlist)
 function printIPv4NetInfoTDs ($netinfo, $tdclass = 'tdleft', $indent = 0, $symbol = 'spacer', $symbolurl = '')
 {
 	global $root;
-	$tags = isset ($netinfo['id']) ? loadEntityTags ('ipv4net', $netinfo['id']) : array();
 	if ($symbol == 'spacer')
 	{
 		$indent++;
@@ -5550,8 +5549,8 @@ function printIPv4NetInfoTDs ($netinfo, $tdclass = 'tdleft', $indent = 0, $symbo
 	else
 	{
 		echo niftyString ($netinfo['name']);
-		if (count ($tags))
-			echo '<br><small>' . serializeTags ($tags, "${root}?page=ipv4space&tab=default&") . '</small>';
+		if (count ($netinfo['etags']))
+			echo '<br><small>' . serializeTags ($netinfo['etags'], "${root}?page=ipv4space&tab=default&") . '</small>';
 	}
 	echo "</td>";
 }
