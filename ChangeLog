@@ -1,7 +1,5 @@
-0.17.0
+0.17.0 2009-05-20
 	new feature: file attachments (by Aaron)
-	new feature: IPv4 tree expand/collapse switch
-	new feature: IPV4_TREE_SHOW_USAGE option controls IPv4 performance
 	new feature: ability to delete objects (by Aaron)
 	new feature: external "httpd" user authentication
 	new feature: validator in RackCode editor
@@ -12,27 +10,34 @@
 	new feature: LDAP cache
 	update: display row name when listing objects. closes ticket 16 (by Aaron)
 	update: ability to manage rows from the Rackspace page in addition to the Dictionary (by Aaron)
-	update: IPv4 calculations were optimized for better speed
 	update: allow port type to be changed if it isn't linked.  closes ticket 137 (by Aaron)
 	update: add network security chapter and dictionary entries.  closes ticket 148 (by Aaron)
 	update: add HP and Juniper dictionary entries.  closes tickets 145 and 165 (by Aaron)
 	update: combined two forms on object properties page into one.  closes tickets 36 and 87 (by Aaron)
-	update: resolved performance issue for systems with many L2 ports
-	update: enable username handling in Cisco switch connector
-	update: introduce icons for routers and SLB
 	update: display and edit the dictionary chapter by chapter (ticket:151)
 	update: 'enabled' user acount flag was dropped
-	update: switchvlans gateway has been changed
+	update: switchvlans gateway has been updated
 	update: RackTables installation is now done only through install.php
 	update: records for F5 hardware
 	update: don't require HASH extension any more
 	update: rack thumb dimensions aren't configured any more
 	update: SNMP code for Nexus and HP switches (with help from killsystem)
+	update: tag filter has been completely rewritten
 	bugfix: show error message if snmp module isn't loaded.  closes ticket 43 (by Aaron)
-	bugfix: show error message for duplicate IPv4 network record
+	bugfix: fixed IIS-specific issues with accessing via HTTP or from docroot (reported by Sean Brown)
+0.16.6 2009-01-12
 	bugfix: it was possible to access the system as any existing
 		LDAP user w/o his password (reported by Igor Shishkin)
-	bugfix: fixed IIS-specific issues with accessing via HTTP or from docroot (reported by Sean Brown)
+0.16.5 2008-12-23
+	bugfix: suppress several meaningless PHP warnings
+	bugfix: better handle IPv4 addresses w/o a covering prefix
+	bugfix: show error message for duplicate IPv4 network record
+	update: IPv4 calculations were optimized for better speed
+	update: resolved performance issue for systems with many L2 ports
+	update: enable username handling in Cisco switch connector
+	update: introduce icons for routers and SLB
+	new feature: IPv4 tree expand/collapse switch
+	new feature: IPV4_TREE_SHOW_USAGE option controls IPv4 performance
 0.16.4 2008-11-04
 	bugfix: display VS/RS config block in RS pool view
 	bugfix: resolve tabindex issues in many forms
