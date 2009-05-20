@@ -2088,41 +2088,43 @@ function readChapter ($chapter_name = '')
 	return $chapter;
 }
 
+// Return a list of all stickers with sticker map applied. Each sticker records will
+// list all its ways on the map with refcnt set.
 function getAttrMap ()
 {
 	$query =
-		"select a.id as attr_id, a.type as attr_type, a.name as attr_name, am.objtype_id, " .
-		"d.dict_value as objtype_name, am.chapter_id, c2.name as chapter_name from " .
-		"Attribute as a left join AttributeMap as am on a.id = am.attr_id " .
-		"left join Dictionary as d on am.objtype_id = d.dict_key " .
-		"left join Chapter as c1 on d.chapter_id = c1.id " .
-		"left join Chapter as c2 on am.chapter_id = c2.id " .
-		"where c1.name = 'RackObjectType' or c1.name is null " .
-		"order by a.name";
+		'SELECT id, type, name, chapter_id, (SELECT name FROM Chapter WHERE id = chapter_id) ' .
+		'AS chapter_name, objtype_id, (SELECT dict_value FROM Dictionary WHERE dict_key = objtype_id) ' .
+		'AS objtype_name, (SELECT COUNT(object_id) FROM AttributeValue AS av INNER JOIN RackObject AS ro ' .
+		'ON av.object_id = ro.id WHERE av.attr_id = Attribute.id AND ro.objtype_id = AttributeMap.objtype_id) ' .
+		'AS refcnt FROM Attribute LEFT JOIN AttributeMap ON id = attr_id ORDER BY Attribute.name, objtype_id';
 	$result = useSelectBlade ($query, __FUNCTION__);
 	$ret = array();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
-		$attr_id = $row['attr_id'];
-		if (!isset ($ret[$attr_id]))
-		{
-			$ret[$attr_id]['id'] = $attr_id;
-			$ret[$attr_id]['type'] = $row['attr_type'];
-			$ret[$attr_id]['name'] = $row['attr_name'];
-			$ret[$attr_id]['application'] = array();
-		}
+		if (!isset ($ret[$row['id']]))
+			$ret[$row['id']] = array
+			(
+				'id' => $row['id'],
+				'type' => $row['type'],
+				'name' => $row['name'],
+				'application' => array(),
+			);
 		if ($row['objtype_id'] == '')
 			continue;
-		$application['objtype_id'] = $row['objtype_id'];
-		$application['objtype_name'] = $row['objtype_name'];
-		if ($row['attr_type'] == 'dict')
+		$application = array
+		(
+			'objtype_id' => $row['objtype_id'],
+			'objtype_name' => $row['objtype_name'],
+			'refcnt' => $row['refcnt'],
+		);
+		if ($row['type'] == 'dict')
 		{
 			$application['chapter_no'] = $row['chapter_id'];
 			$application['chapter_name'] = $row['chapter_name'];
 		}
-		$ret[$attr_id]['application'][] = $application;
+		$ret[$row['id']]['application'][] = $application;
 	}
-	$result->closeCursor();
 	return $ret;
 }
 

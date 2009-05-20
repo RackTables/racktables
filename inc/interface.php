@@ -3557,11 +3557,16 @@ function renderEditAttributesForm ()
 	foreach ($attrMap as $attr)
 	{
 		printOpFormIntro ('upd', array ('attr_id' => $attr['id']));
-		echo '<tr>';
-		echo "<td><a href='".makeHrefProcess(array('op'=>'del', 'attr_id'=>$attr['id']))."'>";
-		printImageHREF ('delete', 'Remove attribute');
-		echo '</a></td>';
-		echo "<td><input type=text name=attr_name value='${attr['name']}'></td>";
+		echo '<tr><td>';
+		if (count ($attr['application']))
+			printImageHREF ('nodelete', count ($attr['application']) . ' reference(s) in attribute map');
+		else
+		{
+			echo "<a href='".makeHrefProcess(array('op'=>'del', 'attr_id'=>$attr['id']))."'>";
+			printImageHREF ('delete', 'Remove attribute');
+			echo '</a>';
+		}
+		echo "</td><td><input type=text name=attr_name value='${attr['name']}'></td>";
 		echo "<td class=tdleft>${attr['type']}</td><td>";
 		printImageHREF ('save', 'Save changes', TRUE);
 		echo '</td></tr>';
@@ -3607,18 +3612,18 @@ function renderEditAttrMapForm ()
 	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
 		printNewItemTR ($attrMap);
 	foreach ($attrMap as $attr)
-	{
-		if (count ($attr['application']) == 0)
-			continue;
 		foreach ($attr['application'] as $app)
 		{
-			echo '<tr>';
-			echo '<td>';
-			echo "<a href='".makeHrefProcess(array('op'=>'del', 'attr_id'=>$attr['id'], 'objtype_id'=>$app['objtype_id']))."'>";
-			printImageHREF ('delete', 'Remove mapping');
-			echo "</a>";
-			echo '</td>';
-			echo "<td>${attr['name']}</td>";
+			echo '<tr><td>';
+			if ($app['refcnt'])
+				printImageHREF ('nodelete', $app['refcnt'] . ' value(s) stored for objects');
+			else
+			{
+				echo "<a href='".makeHrefProcess(array('op'=>'del', 'attr_id'=>$attr['id'], 'objtype_id'=>$app['objtype_id']))."'>";
+				printImageHREF ('delete', 'Remove mapping');
+				echo "</a>";
+			}
+			echo "</td><td>${attr['name']}</td>";
 			echo "<td>${app['objtype_name']}</td>";
 			echo "<td>";
 			if ($attr['type'] == 'dict')
@@ -3627,7 +3632,6 @@ function renderEditAttrMapForm ()
 				echo '&nbsp;';
 			echo "</td></tr>\n";
 		}
-	}
 	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')
 		printNewItemTR ($attrMap);
 	echo "</table>\n";
