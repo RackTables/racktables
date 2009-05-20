@@ -74,7 +74,7 @@ function executeUpgradeBatch ($batchid)
 			// create tables for storing files (requires InnoDB support)
 			if (!isInnoDBSupported ())
 			{
-				showError ("Cannot upgrade because InnoDB tables are not supported by your MySQL server. See the README for details.", __FILE__);
+				showFailure ("Cannot upgrade because InnoDB tables are not supported by your MySQL server. See the README for details.", __FILE__);
 				die;
 			}
 
@@ -96,7 +96,7 @@ function executeUpgradeBatch ($batchid)
 			$f = fopen ("install/init-dictvendors.sql", 'r');
 			if ($f === FALSE)
 			{
-				showError ("Failed to open install/init-dictvendors.sql for reading");
+				showFailure ("Failed to open install/init-dictvendors.sql for reading");
 				die;
 			}
 			$longq = '';
@@ -246,7 +246,7 @@ CREATE TABLE `LDAPCache` (
 
 			break;
 		default:
-			showError ("executeUpgradeBatch () failed, because batch '${batchid}' isn't defined", __FILE__);
+			showFailure ("executeUpgradeBatch () failed, because batch '${batchid}' isn't defined", __FILE__);
 			die;
 			break;
 	}
@@ -288,18 +288,29 @@ $root .= strtr (dirname ($_SERVER['PHP_SELF']), '\\', '/');
 if (substr ($root, -1) != '/')
 	$root .= '/';
 
-// The below will be necessary as long as we rely on showError()
-require_once 'inc/interface.php';
+// a clone of showError() to drop dependency on interface.php
+function showFailure ($info = '', $location = 'N/A')
+{
+	global $root;
+	if (preg_match ('/\.php$/', $location))
+		$location = basename ($location);
+	elseif ($location != 'N/A')
+		$location = $location . '()';
+	echo "<div class=msg_error>An error has occured in [${location}]. ";
+	if (empty ($info))
+		echo 'No additional information is available.';
+	else
+		echo "Additional information:<br><p>\n<pre>\n${info}\n</pre></p>";
+	echo "This failure is most probably fatal.<br></div>\n";
+}
 
-require_once 'inc/config.php';
-require_once 'inc/database.php';
+require_once 'inc/config.php'; // for CODE_VERSION
+require_once 'inc/database.php'; // for getDatabaseVersion()
+// Enforce default value for now, releases prior to 0.17.0 didn't support 'httpd' auth source.
+$user_auth_src = 'database';
+
 if (file_exists ('inc/secret.php'))
 	require_once 'inc/secret.php';
-elseif (file_exists ('inc/secret.php')) // 0.16.x -> 0.17.x upgrade
-{
-	require_once 'inc/secret.php';
-	$user_auth_src = getConfigVar ('USER_AUTH_SRC');
-}
 else
 	die ("Database connection parameters are read from inc/secret.php file, " .
 		"which cannot be found.\nCopy provided inc/secret-sample.php to " .
