@@ -110,7 +110,7 @@ during the upgrade.
 
 LDAP options have been moved to LDAP_options array. This means, that if you were
 using LDAP authentication for users in version 0.16.x, it will break right after
-upgrade to 0.17.0. To get things working again, Adjust existing secret.php file
+upgrade to 0.17.0. To get things working again, adjust existing secret.php file
 according to secret-sample.php file provided with 0.17.0 release.
 
 This release is the first to take advantage of the foreign key support

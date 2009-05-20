@@ -4,7 +4,7 @@ $relnotes = array
 (
 	'0.17.0' => "LDAP options have been moved to LDAP_options array. This means, that if you were<br>" .
 		"using LDAP authentication for users in version 0.16.x, it will break right after<br>" .
-		"upgrade to 0.17.0. To get things working again, Adjust existing secret.php file<br>" .
+		"upgrade to 0.17.0. To get things working again, adjust existing secret.php file<br>" .
 		"according to secret-sample.php file provided with 0.17.0 release.<br><br>" .
 		"Another change is the addition of support for file uploads.  Files are stored<br>" .
 		"in the database.  There are several settings in php.ini which you may need to modify:<br>" .
