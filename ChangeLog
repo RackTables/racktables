@@ -17,7 +17,6 @@
 	update: add network security chapter and dictionary entries.  closes ticket 148 (by Aaron)
 	update: add HP and Juniper dictionary entries.  closes tickets 145 and 165 (by Aaron)
 	update: combined two forms on object properties page into one.  closes tickets 36 and 87 (by Aaron)
-	update: secret.php and local.php moved from inc/ to local/. closes ticket 39 (by Aaron)
 	update: resolved performance issue for systems with many L2 ports
 	update: enable username handling in Cisco switch connector
 	update: introduce icons for routers and SLB

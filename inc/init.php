@@ -29,13 +29,13 @@ require_once 'inc/config.php';
 require_once 'inc/interface.php';
 require_once 'inc/functions.php';
 require_once 'inc/database.php';
-if (file_exists ('local/secret.php'))
-	require_once 'local/secret.php';
+if (file_exists ('inc/secret.php'))
+	require_once 'inc/secret.php';
 else
 {
 	showError
 	(
-		"Database connection parameters are read from local/secret.php file, " .
+		"Database connection parameters are read from inc/secret.php file, " .
 		"which cannot be found.\nYou probably need to complete the installation " .
 		"procedure by following <a href='${root}install.php'>this link</a>.",
 		__FILE__
@@ -189,8 +189,8 @@ $op = (isset ($_REQUEST['op'])) ? $_REQUEST['op'] : '';
 require_once 'inc/navigation.php';
 require_once 'inc/triggers.php';
 require_once 'inc/gateways.php';
-if (file_exists ('local/local.php'))
-	require_once 'local/local.php';
+if (file_exists ('inc/local.php'))
+	require_once 'inc/local.php';
 
 // These will be filled in by fixContext()
 $expl_tags = array();

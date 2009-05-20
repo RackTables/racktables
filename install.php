@@ -61,7 +61,7 @@ echo "<input type=hidden name=step value='${next_step}'>\n";
 // Check if the software is already installed.
 function not_already_installed()
 {
-	@include ('local/secret.php');
+	@include ('inc/secret.php');
 	if (isset ($pdo_dsn))
 	{
 		echo 'Your configuration file exists and seems to hold necessary data already.<br>';
@@ -164,10 +164,10 @@ function platform_is_ok ()
 // credentials.
 function init_config ()
 {
-	if (!is_writable ('local/secret.php'))
+	if (!is_writable ('inc/secret.php'))
 	{
-		echo "The local/secret.php file is not writable by web-server. Make sure it is.";
-		echo "The following commands should suffice:<pre>touch local/secret.php\nchmod 666 local/secret.php</pre>";
+		echo "The inc/secret.php file is not writable by web-server. Make sure it is.";
+		echo "The following commands should suffice:<pre>touch inc/secret.php\nchmod 666 inc/secret.php</pre>";
 		echo 'Fedora Linux with SELinux may require this file to be owned by specific user (apache) and/or executing "setenforce 0" for the time of installation. ';
 		echo 'SELinux may be turned back on with "setenforce 1" command.';
 		return FALSE;
@@ -224,10 +224,10 @@ function init_config ()
 		return FALSE;
 	}
 
-	$conf = fopen ('local/secret.php', 'w+');
+	$conf = fopen ('inc/secret.php', 'w+');
 	if ($conf === FALSE)
 	{
-		echo "Error: failed to open local/secret.php for writing";
+		echo "Error: failed to open inc/secret.php for writing";
 		return FALSE;
 	}
 	fwrite ($conf, "<?php\n/* This file has been generated automatically by RackTables installer.\n");
@@ -252,7 +252,7 @@ function init_config ()
 
 function connect_to_db ()
 {
-	require ('local/secret.php');
+	require ('inc/secret.php');
 	global $dbxlink;
 	try
 	{

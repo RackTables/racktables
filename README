@@ -61,8 +61,8 @@ If you already have a working installation, the following procedure
 should be sufficient:
 
 0. BACKUP YOUR DATABASE
-1. Remove all existing files except local/secret.php, gateways'
-   configuration (in the gateways directory) and local mod (local/local.php).
+1. Remove all existing files except inc/secret.php, gateways'
+   configuration (in the gateways directory) and local mod (inc/local.php).
 2. Unpack the new tarball into the place.
 3. Open the RackTables page in your browser. The software detects version
    mismatch and displays a message telling to log in as admin to finish
@@ -107,13 +107,6 @@ normal to see several "update TagStorage ... Duplicate entry" failed queries
 during the upgrade.
 
 *** Upgrading to 0.17.0 ***
-
-User-modifiable files have been moved to a dedicated directory to make future upgrades easier.
-cd to the RackTables directory and run these commands:
-
-1. mkdir local
-2. mv inc/secret*.php local/
-3. mv inc/local.php local/
 
 This release is the first to take advantage of the foreign key support
 provided by the InnoDB storage engine in MySQL.  The installer and
