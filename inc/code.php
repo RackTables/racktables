@@ -1119,7 +1119,18 @@ function findAutoTagWarnings ($expr)
 						'class' => 'warning',
 						'text' => "Local user account '${recid}' does not exist."
 					));
+				// FIXME: pull identifier at the same pass, which does the matching
 				case (mb_ereg_match ('^\$page_[[:alnum:]]+$', $expr['load'])):
+					$recid = mb_ereg_replace ('^\$page_', '', $expr['load']);
+					global $page;
+					if (isset ($page[$recid]))
+						return array();
+					return array (array
+					(
+						'header' => refRCLineno ($expr['lineno']),
+						'class' => 'warning',
+						'text' => "Page number '${recid}' does not exist."
+					));
 				case (mb_ereg_match ('^\$tab_[[:alnum:]]+$', $expr['load'])):
 				case (mb_ereg_match ('^\$op_[[:alnum:]]+$', $expr['load'])):
 				case (mb_ereg_match ('^\$any_op$', $expr['load'])):
