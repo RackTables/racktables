@@ -108,6 +108,11 @@ during the upgrade.
 
 *** Upgrading to 0.17.0 ***
 
+LDAP options have been moved to LDAP_options array. This means, that if you were
+using LDAP authentication for users in version 0.16.x, it will break right after
+upgrade to 0.17.0. To get things working again, Adjust existing secret.php file
+according to secret-sample.php file provided with 0.17.0 release.
+
 This release is the first to take advantage of the foreign key support
 provided by the InnoDB storage engine in MySQL.  The installer and
 upgrader scripts check for InnoDB support and cannot complete without it.

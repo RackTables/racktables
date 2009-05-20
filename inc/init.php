@@ -29,6 +29,11 @@ require_once 'inc/config.php';
 require_once 'inc/interface.php';
 require_once 'inc/functions.php';
 require_once 'inc/database.php';
+// Always have default values for these options, so if a user didn't
+// care to set, something would be working anyway.
+$user_auth_src = 'database';
+$require_local_account = TRUE;
+
 if (file_exists ('inc/secret.php'))
 	require_once 'inc/secret.php';
 else

@@ -2,10 +2,10 @@
 
 $relnotes = array
 (
-	'0.17.0' => "This release requires more options to secret.php. Add the " .
-		"following into inc/secret.php:<br><br>" .
-		"\$user_auth_src = 'database';<br>\$require_local_account = TRUE;<br><br>" .
-		"(and adjust to your needs, if necessary)<br>" .
+	'0.17.0' => "LDAP options have been moved to LDAP_options array. This means, that if you were<br>" .
+		"using LDAP authentication for users in version 0.16.x, it will break right after<br>" .
+		"upgrade to 0.17.0. To get things working again, Adjust existing secret.php file<br>" .
+		"according to secret-sample.php file provided with 0.17.0 release.<br><br>" .
 		"Another change is the addition of support for file uploads.  Files are stored<br>" .
 		"in the database.  There are several settings in php.ini which you may need to modify:<br>" .
 		"<ul><li>file_uploads        - needs to be On</li>" .

@@ -9,9 +9,12 @@ $pdo_dsn = 'mysql:host=localhost;dbname=racktables';
 $db_username = 'username';
 $db_password = 'password';
 
+// Default setting is to authenticate users locally, but it is possible to
+// employ existing LDAP or Apache userbase. Uncommenting below two lines MAY
+// help in switching authentication to LDAP completely.
 // More info: http://racktables.org/trac/wiki/RackTablesUserAuthentication
-$user_auth_src = 'database';
-$require_local_account = TRUE;
+#$user_auth_src = 'ldap';
+#$require_local_account = FALSE;
 
 // This is only necessary for 'ldap' authentication source
 $LDAP_options = array
