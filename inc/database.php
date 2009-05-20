@@ -1756,10 +1756,10 @@ function addPortCompat ($type1 = 0, $type2 = 0)
 // to merge it with readChapter().
 function getDict ($parse_links = FALSE)
 {
-	$query1 =
+	$query =
 		"select Chapter.name as chapter_name, Chapter.id as chapter_no, dict_key, dict_value, sticky from " .
 		"Chapter left join Dictionary on Chapter.id = Dictionary.chapter_id order by Chapter.name, dict_value";
-	$result = useSelectBlade ($query1, __FUNCTION__);
+	$result = useSelectBlade ($query, __FUNCTION__);
 	$dict = array();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
@@ -1778,21 +1778,35 @@ function getDict ($parse_links = FALSE)
 			$dict[$chapter_no]['refcnt'][$row['dict_key']] = 0;
 		}
 	}
-	$result->closeCursor();
 	unset ($result);
-// Find the list of all assigned values of dictionary-addressed attributes, each with
-// chapter/word keyed reference counters. Use the structure to adjust reference counters
-// of the returned disctionary words.
-	$query2 = "select a.id as attr_id, am.chapter_id as chapter_no, uint_value, count(object_id) as refcnt " .
+	// Find the list of all assigned values of dictionary-addressed attributes, each with
+	// chapter/word keyed reference counters. Use the structure to adjust reference counters
+	// of the returned disctionary words.
+	$query = "select a.id as attr_id, am.chapter_id as chapter_no, uint_value, count(object_id) as refcnt " .
 		"from Attribute as a inner join AttributeMap as am on a.id = am.attr_id " .
 		"inner join AttributeValue as av on a.id = av.attr_id " .
 		"inner join Dictionary as d on am.chapter_id = d.chapter_id and av.uint_value = d.dict_key " .
 		"where a.type = 'dict' group by a.id, am.chapter_id, uint_value " .
 		"order by a.id, am.chapter_id, uint_value";
-	$result = useSelectBlade ($query2, __FUNCTION__);
+	$result = useSelectBlade ($query, __FUNCTION__);
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 		$dict[$row['chapter_no']]['refcnt'][$row['uint_value']] = $row['refcnt'];
-	$result->closeCursor();
+	unset ($result);
+	// PortType chapter is referenced by PortCompat and Port tables
+	$query = 'select dict_key as uint_value, chapter_id as chapter_no, (select count(*) from PortCompat where type1 = dict_key or type2 = dict_key) + ' .
+		'(select count(*) from Port where type = dict_key) as refcnt ' .
+		'from Dictionary where chapter_id = 2';
+	$result = useSelectBlade ($query, __FUNCTION__);
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
+		$dict[$row['chapter_no']]['refcnt'][$row['uint_value']] = $row['refcnt'];
+	unset ($result);
+	// RackObjectType chapter is referenced by AttributeMap and RackObject tables
+	$query = 'select dict_key as uint_value, chapter_id as chapter_no, (select count(*) from AttributeMap where objtype_id = dict_key) + ' .
+		'(select count(*) from RackObject where objtype_id = dict_key) as refcnt from Dictionary where chapter_id = 1';
+	$result = useSelectBlade ($query, __FUNCTION__);
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
+		$dict[$row['chapter_no']]['refcnt'][$row['uint_value']] = $row['refcnt'];
+	unset ($result);
 	return $dict;
 }
 
