@@ -68,7 +68,7 @@ function authenticate ()
 		case ('httpd' == $user_auth_src):
 			return;
 		// When using LDAP, leave a mean to fix things. Admin user is always authenticated locally.
-		case ('database' == $user_auth_src or $remote_userid == 1):
+		case ('database' == $user_auth_src or $userinfo['user_id'] == 1):
 			if (authenticated_via_database ($userinfo, $_SERVER['PHP_AUTH_PW']))
 				return;
 			break;
