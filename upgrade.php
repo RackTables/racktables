@@ -32,6 +32,7 @@ function getDBUpgradePath ($v1, $v2)
 		'0.16.5',
 		'0.16.6',
 		'0.17.0',
+		'0.17.1',
 	);
 	if (!in_array ($v1, $versionhistory) or !in_array ($v2, $versionhistory))
 		return NULL;
@@ -245,6 +246,10 @@ CREATE TABLE `LDAPCache` (
 			$query[] = "UPDATE Config SET varvalue = '0.17.0' WHERE varname = 'DB_VERSION'";
 
 			break;
+		case '0.17.1':
+			// Token set has changed, so the cache isn't valid any more.
+			$query[] = "UPDATE Script SET script_text = NULL WHERE script_name = 'RackCodeCache'";
+			$query[] = "UPDATE Config SET varvalue = '0.17.1' WHERE varname = 'DB_VERSION'";
 		default:
 			showFailure ("executeUpgradeBatch () failed, because batch '${batchid}' isn't defined", __FILE__);
 			die;
