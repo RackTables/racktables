@@ -50,7 +50,8 @@ function lexError4 ($s, $ln = 'N/A')
  * LEX_RBRACE
  * LEX_DECISION
  * LEX_DEFINE
- * LEX_BOOLCONST
+ * LEX_TRUE
+ * LEX_FALSE
  * LEX_NOT
  * LEX_TAG
  * LEX_AUTOTAG
@@ -136,9 +137,11 @@ function getLexemsFromRawText ($text)
 							case 'not':
 								$ret[] = array ('type' => 'LEX_NOT', 'lineno' => $lineno);
 								break;
-							case 'false':
 							case 'true':
-								$ret[] = array ('type' => 'LEX_BOOLCONST', 'load' => $buffer, 'lineno' => $lineno);
+								$ret[] = array ('type' => 'LEX_TRUE', 'lineno' => $lineno);
+								break;
+							case 'false':
+								$ret[] = array ('type' => 'LEX_FALSE', 'lineno' => $lineno);
 								break;
 							case 'context':
 								$ret[] = array ('type' => 'LEX_CONTEXT', 'lineno' => $lineno);
@@ -277,7 +280,8 @@ function spotPayload ($text, $reqtype = 'SYNT_CODETEXT')
 // LEX_TAG
 // LEX_AUTOTAG
 // LEX_PREDICATE
-// LEX_BOOLCONST
+// LEX_TRUE
+// LEX_FALSE
 // SYNT_NOTEXPR (1 argument, holding SYNT_EXPR)
 // SYNT_BOOLOP (2 arguments, each holding SYNT_EXPR)
 // SYNT_DEFINITION (2 arguments: term and definition)
@@ -472,10 +476,11 @@ function getParseTreeFromLexems ($lexems)
 			// in the grammar and keep us from an extra shift action.
 			if
 			(
-				$stacktop['type'] == 'LEX_BOOLCONST' or
-				$stacktop['type'] == 'LEX_TAG' or
-				$stacktop['type'] == 'LEX_AUTOTAG' or
-				$stacktop['type'] == 'LEX_PREDICATE'
+				$stacktop['type'] == 'LEX_TAG' or // first look for tokens, which are most
+				$stacktop['type'] == 'LEX_AUTOTAG' or // likely to appear in the text
+				$stacktop['type'] == 'LEX_PREDICATE' or // supplied by user
+				$stacktop['type'] == 'LEX_TRUE' or
+				$stacktop['type'] == 'LEX_FALSE'
 			)
 			{
 				// reduce!
@@ -693,6 +698,7 @@ function getParseTreeFromLexems ($lexems)
 
 function eval_expression ($expr, $tagchain, $ptable, $silent = FALSE)
 {
+	$self = __FUNCTION__;
 	switch ($expr['type'])
 	{
 		// Return true, if given tag is present on the tag chain.
@@ -710,21 +716,13 @@ function eval_expression ($expr, $tagchain, $ptable, $silent = FALSE)
 					showError ("Predicate '${pname}' is referenced before declaration", __FUNCTION__);
 				return NULL;
 			}
-			return eval_expression ($ptable[$pname], $tagchain, $ptable);
-		case 'LEX_BOOLCONST': // Evaluate a boolean constant.
-			switch ($expr['load'])
-			{
-				case 'true':
-					return TRUE;
-				case 'false':
-					return FALSE;
-				default:
-					if (!$silent)
-						showError ("Could not parse a boolean constant with value '${expr['load']}'", __FUNCTION__);
-					return NULL; // should failure be harder?
-			}
+			return $self ($ptable[$pname], $tagchain, $ptable);
+		case 'LEX_TRUE':
+			return TRUE;
+		case 'LEX_FALSE':
+			return FALSE;
 		case 'SYNT_NOTEXPR':
-			$tmp = eval_expression ($expr['load'], $tagchain, $ptable);
+			$tmp = $self ($expr['load'], $tagchain, $ptable);
 			if ($tmp === TRUE)
 				return FALSE;
 			elseif ($tmp === FALSE)
@@ -732,17 +730,17 @@ function eval_expression ($expr, $tagchain, $ptable, $silent = FALSE)
 			else
 				return $tmp;
 		case 'SYNT_BOOLOP':
-			$leftresult = eval_expression ($expr['left'], $tagchain, $ptable);
+			$leftresult = $self ($expr['left'], $tagchain, $ptable);
 			switch ($expr['subtype'])
 			{
 				case 'or':
 					if ($leftresult)
 						return TRUE; // early success
-					return eval_expression ($expr['right'], $tagchain, $ptable);
+					return $self ($expr['right'], $tagchain, $ptable);
 				case 'and':
 					if (!$leftresult)
 						return FALSE; // early failure
-					return eval_expression ($expr['right'], $tagchain, $ptable);
+					return $self ($expr['right'], $tagchain, $ptable);
 				default:
 					if (!$silent)
 						showError ("Cannot evaluate unknown boolean operation '${boolop['subtype']}'");
@@ -861,20 +859,22 @@ function getRackCode ($text)
 // predicate list. Return the name of the first show stopper otherwise.
 function firstUnrefPredicate ($plist, $expr)
 {
+	$self = __FUNCTION__;
 	switch ($expr['type'])
 	{
-		case 'LEX_BOOLCONST':
+		case 'LEX_TRUE':
+		case 'LEX_FALSE':
 		case 'LEX_TAG':
 		case 'LEX_AUTOTAG':
 			return NULL;
 		case 'LEX_PREDICATE':
 			return in_array ($expr['load'], $plist) ? NULL : $expr['load'];
 		case 'SYNT_NOTEXPR':
-			return firstUnrefPredicate ($plist, $expr['load']);
+			return $self ($plist, $expr['load']);
 		case 'SYNT_BOOLOP':
-			if (($tmp = firstUnrefPredicate ($plist, $expr['left'])) !== NULL)
+			if (($tmp = $self ($plist, $expr['left'])) !== NULL)
 				return $tmp;
-			if (($tmp = firstUnrefPredicate ($plist, $expr['right'])) !== NULL)
+			if (($tmp = $self ($plist, $expr['right'])) !== NULL)
 				return $tmp;
 			return NULL;
 		default:
@@ -1069,7 +1069,8 @@ function findAutoTagWarnings ($expr)
 	$self = __FUNCTION__;
 	switch ($expr['type'])
 	{
-		case 'LEX_BOOLCONST':
+		case 'LEX_TRUE':
+		case 'LEX_FALSE':
 		case 'LEX_PREDICATE':
 		case 'LEX_TAG':
 			return array();
@@ -1179,9 +1180,11 @@ function findAutoTagWarnings ($expr)
 // Idem WRT tags.
 function findTagWarnings ($expr)
 {
+	$self = __FUNCTION__;
 	switch ($expr['type'])
 	{
-		case 'LEX_BOOLCONST':
+		case 'LEX_TRUE':
+		case 'LEX_FALSE':
 		case 'LEX_PREDICATE':
 		case 'LEX_AUTOTAG':
 			return array();
@@ -1195,12 +1198,12 @@ function findTagWarnings ($expr)
 				'text' => "Tag '${expr['load']}' does not exist."
 			));
 		case 'SYNT_NOTEXPR':
-			return findTagWarnings ($expr['load']);
+			return $self ($expr['load']);
 		case 'SYNT_BOOLOP':
 			return array_merge
 			(
-				findTagWarnings ($expr['left']),
-				findTagWarnings ($expr['right'])
+				$self ($expr['left']),
+				$self ($expr['right'])
 			);
 		default:
 			return array (array
@@ -1230,18 +1233,20 @@ function findCtxModWarnings ($modlist)
 // Return true, if the expression makes use of the predicate given.
 function referencedPredicate ($pname, $expr)
 {
+	$self = __FUNCTION__;
 	switch ($expr['type'])
 	{
-		case 'LEX_BOOLCONST':
+		case 'LEX_TRUE':
+		case 'LEX_FALSE':
 		case 'LEX_TAG':
 		case 'LEX_AUTOTAG':
 			return FALSE;
 		case 'LEX_PREDICATE':
 			return $pname == $expr['load'];
 		case 'SYNT_NOTEXPR':
-			return referencedPredicate ($pname, $expr['load']);
+			return $self ($pname, $expr['load']);
 		case 'SYNT_BOOLOP':
-			return referencedPredicate ($pname, $expr['left']) or referencedPredicate ($pname, $expr['right']);
+			return $self ($pname, $expr['left']) or $self ($pname, $expr['right']);
 		default: // This is actually an internal error.
 			return FALSE;
 	}
@@ -1257,9 +1262,9 @@ function invariantExpression ($expr)
 			return $self ($expr['condition']);
 		case 'SYNT_DEFINITION':
 			return $self ($expr['definition']);
-		case 'LEX_BOOLCONST':
-			if ($expr['load'] == 'true')
-				return 'always true';
+		case 'LEX_TRUE':
+			return 'always true';
+		case 'LEX_FALSE':
 			return 'always false';
 		case 'LEX_TAG':
 		case 'LEX_AUTOTAG':
