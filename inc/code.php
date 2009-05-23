@@ -44,7 +44,7 @@ function lexError4 ($s, $ln = 'N/A')
 	);
 }
 
-/* Produce a list of lexems from the given text. Possible lexems are:
+/* Produce a list of lexems (tokens) from the given text. Possible lexems are:
  *
  * LEX_LBRACE
  * LEX_RBRACE
@@ -56,7 +56,8 @@ function lexError4 ($s, $ln = 'N/A')
  * LEX_TAG
  * LEX_AUTOTAG
  * LEX_PREDICATE
- * LEX_BOOLOP
+ * LEX_AND
+ * LEX_OR
  * LEX_CONTEXT
  * LEX_CLEAR
  * LEX_INSERT
@@ -131,8 +132,10 @@ function getLexemsFromRawText ($text)
 								$ret[] = array ('type' => 'LEX_DEFINE', 'lineno' => $lineno);
 								break;
 							case 'and':
+								$ret[] = array ('type' => 'LEX_AND', 'lineno' => $lineno);
+								break;
 							case 'or':
-								$ret[] = array ('type' => 'LEX_BOOLOP', 'load' => $buffer, 'lineno' => $lineno);
+								$ret[] = array ('type' => 'LEX_OR', 'lineno' => $lineno);
 								break;
 							case 'not':
 								$ret[] = array ('type' => 'LEX_NOT', 'lineno' => $lineno);
@@ -282,8 +285,10 @@ function spotPayload ($text, $reqtype = 'SYNT_CODETEXT')
 // LEX_PREDICATE
 // LEX_TRUE
 // LEX_FALSE
-// SYNT_NOTEXPR (1 argument, holding SYNT_EXPR)
-// SYNT_BOOLOP (2 arguments, each holding SYNT_EXPR)
+// SYNT_UNARY_EXPR (any of the above lexems in "load" or even SYNT_EXPR)
+// SYNT_NOT_EXPR (SYNT_UNARY_EXPR in "load")
+// SYNT_AND_EXPR (either one arg in "load" or two args in "left" and "right")
+// SYNT_EXPR (idem), in fact it's boolean OR, but we keep the naming for compatibility
 // SYNT_DEFINITION (2 arguments: term and definition)
 // SYNT_GRANT (2 arguments: decision and condition)
 // SYNT_ADJUSTMENT (context modifier with action(s) and condition)
@@ -320,9 +325,9 @@ function getParseTreeFromLexems ($lexems)
 			// on "shift" action to make EXPR parsing hungry one.
 			if
 			(
-				$stacktop['type'] == 'SYNT_EXPR' and
-				($done < $todo) and 
-				$lexems[$done]['type'] == 'LEX_BOOLOP'
+				$stacktop['type'] == 'SYNT_AND_EXPR' and
+				($done < $todo) and
+				$lexems[$done]['type'] == 'LEX_AND'
 			)
 			{
 				// shift!
@@ -347,7 +352,8 @@ function getParseTreeFromLexems ($lexems)
 			}
 			array_push ($stack, $stacktop);
 			// First detect definition start to save the predicate from being reduced into
-			// expression.
+			// unary expression.
+			// DEFINE ::= define PREDICATE
 			if
 			(
 				$stacktop['type'] == 'LEX_PREDICATE' and
@@ -369,6 +375,7 @@ function getParseTreeFromLexems ($lexems)
 				);
 				continue;
 			}
+			// CTXMOD ::= clear
 			if
 			(
 				$stacktop['type'] == 'LEX_CLEAR'
@@ -388,6 +395,7 @@ function getParseTreeFromLexems ($lexems)
 				);
 				continue;
 			}
+			// CTXMOD ::= insert TAG
 			if
 			(
 				$stacktop['type'] == 'LEX_TAG' and
@@ -409,6 +417,7 @@ function getParseTreeFromLexems ($lexems)
 				);
 				continue;
 			}
+			// CTXMOD ::= remove TAG
 			if
 			(
 				$stacktop['type'] == 'LEX_TAG' and
@@ -430,13 +439,32 @@ function getParseTreeFromLexems ($lexems)
 				);
 				continue;
 			}
+			// CTXMODLIST ::= CTXMOD
+			if
+			(
+				$stacktop['type'] == 'SYNT_CTXMOD'
+			)
+			{
+				array_pop ($stack);
+				array_push
+				(
+					$stack,
+					array
+					(
+						'type' => 'SYNT_CTXMODLIST',
+						'lineno' => $stacktop['lineno'],
+						'load' => array ($stacktop['load'])
+					)
+				);
+				continue;
+			}
+			// CTXMODLIST ::= CTXMODLIST CTXMOD
 			if
 			(
 				$stacktop['type'] == 'SYNT_CTXMOD' and
 				$stacksecondtop['type'] == 'SYNT_CTXMODLIST'
 			)
 			{
-				// reduce!
 				array_pop ($stack);
 				array_pop ($stack);
 				array_push
@@ -451,29 +479,11 @@ function getParseTreeFromLexems ($lexems)
 				);
 				continue;
 			}
-			if
-			(
-				$stacktop['type'] == 'SYNT_CTXMOD'
-			)
-			{
-				// reduce!
-				array_pop ($stack);
-				array_push
-				(
-					$stack,
-					array
-					(
-						'type' => 'SYNT_CTXMODLIST',
-						'lineno' => $stacktop['lineno'],
-						'load' => array ($stacktop['load'])
-					)
-				);
-				continue;
-			}
 			// Try "replace" action only on a non-empty stack.
 			// If a handle is found for reversing a production rule, do it and start a new
 			// cycle instead of advancing further on rule list. This will preserve rule priority
 			// in the grammar and keep us from an extra shift action.
+			// UNARY_EXPRESSION ::= true | false | TAG | AUTOTAG | PREDICATE
 			if
 			(
 				$stacktop['type'] == 'LEX_TAG' or // first look for tokens, which are most
@@ -490,38 +500,17 @@ function getParseTreeFromLexems ($lexems)
 					$stack,
 					array
 					(
-						'type' => 'SYNT_EXPR',
+						'type' => 'SYNT_UNARY_EXPR',
 						'lineno' => $stacktop['lineno'],
 						'load' => $stacktop
 					)
 				);
 				continue;
 			}
-			if
-			(
-				$stacktop['type'] == 'SYNT_EXPR' and
-				$stacksecondtop['type'] == 'LEX_NOT'
-			)
-			{
-				// reduce!
-				array_pop ($stack);
-				array_pop ($stack);
-				array_push
-				(
-					$stack,
-					array
-					(
-						'type' => 'SYNT_EXPR',
-						'lineno' => $stacktop['lineno'],
-						'load' => array
-						(
-							'type' => 'SYNT_NOTEXPR',
-							'load' => $stacktop['load']
-						)
-					)
-				);
-				continue;
-			}
+			// UNARY_EXPRESSION ::= (EXPRESSION)
+			// Useful trick about AND- and OR-expressions is to check, if the
+			// node we are reducing contains only 1 argument. In this case
+			// discard the wrapper and join the "load" argument into new node directly.
 			if
 			(
 				$stacktop['type'] == 'LEX_RBRACE' and
@@ -533,22 +522,95 @@ function getParseTreeFromLexems ($lexems)
 				array_pop ($stack);
 				array_pop ($stack);
 				array_pop ($stack);
-				$stacksecondtop['lineno'] = $stacktop['lineno'];
 				array_push
 				(
 					$stack,
-					$stacksecondtop
+					array
+					(
+						'type' => 'SYNT_UNARY_EXPR',
+						'lineno' => $stacksecondtop['lineno'],
+						'load' => isset ($stacksecondtop['load']) ? $stacksecondtop['load'] : $stacksecondtop
+					)
 				);
 				continue;
 			}
+			// UNARY_EXPRESSION ::= not UNARY_EXPRESSION
 			if
 			(
-				$stacktop['type'] == 'SYNT_EXPR' and
-				$stacksecondtop['type'] == 'LEX_BOOLOP' and
-				$stackthirdtop['type'] == 'SYNT_EXPR'
+				$stacktop['type'] == 'SYNT_UNARY_EXPR' and
+				$stacksecondtop['type'] == 'LEX_NOT'
 			)
 			{
 				// reduce!
+				array_pop ($stack);
+				array_pop ($stack);
+				array_push
+				(
+					$stack,
+					array
+					(
+						'type' => 'SYNT_UNARY_EXPR',
+						'lineno' => $stacktop['lineno'],
+						'load' => array
+						(
+							'type' => 'SYNT_NOT_EXPR',
+							'load' => $stacktop['load']
+						)
+					)
+				);
+				continue;
+			}
+			// AND_EXPRESSION ::= AND_EXPRESSION and UNARY_EXPRESSION
+			if
+			(
+				$stacktop['type'] == 'SYNT_UNARY_EXPR' and
+				$stacksecondtop['type'] == 'LEX_AND' and
+				$stackthirdtop['type'] == 'SYNT_AND_EXPR'
+			)
+			{
+				array_pop ($stack);
+				array_pop ($stack);
+				array_pop ($stack);
+				array_push
+				(
+					$stack,
+					array
+					(
+						'type' => 'SYNT_AND_EXPR',
+						'lineno' => $stacktop['lineno'],
+						'left' => isset ($stackthirdtop['load']) ? $stackthirdtop['load'] : $stackthirdtop,
+						'right' => $stacktop['load']
+					)
+				);
+				continue;
+			}
+			// AND_EXPRESSION ::= UNARY_EXPRESSION
+			if
+			(
+				$stacktop['type'] == 'SYNT_UNARY_EXPR'
+			)
+			{
+				array_pop ($stack);
+				array_push
+				(
+					$stack,
+					array
+					(
+						'type' => 'SYNT_AND_EXPR',
+						'lineno' => $stacktop['lineno'],
+						'load' => $stacktop['load']
+					)
+				);
+				continue;
+			}
+			// EXPRESSION ::= EXPRESSION or AND_EXPRESSION
+			if
+			(
+				$stacktop['type'] == 'SYNT_AND_EXPR' and
+				$stacksecondtop['type'] == 'LEX_OR' and
+				$stackthirdtop['type'] == 'SYNT_EXPR'
+			)
+			{
 				array_pop ($stack);
 				array_pop ($stack);
 				array_pop ($stack);
@@ -559,17 +621,32 @@ function getParseTreeFromLexems ($lexems)
 					(
 						'type' => 'SYNT_EXPR',
 						'lineno' => $stacktop['lineno'],
-						'load' => array
-						(
-							'type' => 'SYNT_BOOLOP',
-							'subtype' => $stacksecondtop['load'],
-							'left' => $stackthirdtop['load'],
-							'right' => $stacktop['load']
-						)
+						'left' => isset ($stackthirdtop['load']) ? $stackthirdtop['load'] : $stackthirdtop,
+						'right' => isset ($stacktop['load']) ? $stacktop['load'] : $stacktop
 					)
 				);
 				continue;
 			}
+			// EXPRESSION ::= AND_EXPRESSION
+			if
+			(
+				$stacktop['type'] == 'SYNT_AND_EXPR'
+			)
+			{
+				array_pop ($stack);
+				array_push
+				(
+					$stack,
+					array
+					(
+						'type' => 'SYNT_EXPR',
+						'lineno' => $stacktop['lineno'],
+						'load' => isset ($stacktop['load']) ? $stacktop['load'] : $stacktop
+					)
+				);
+				continue;
+			}
+			// GRANT ::= DECISION EXPRESSION
 			if
 			(
 				$stacktop['type'] == 'SYNT_EXPR' and
@@ -592,6 +669,7 @@ function getParseTreeFromLexems ($lexems)
 				);
 				continue;
 			}
+			// DEFINE ::= define PREDICATE
 			if
 			(
 				$stacktop['type'] == 'SYNT_EXPR' and
@@ -614,6 +692,7 @@ function getParseTreeFromLexems ($lexems)
 				);
 				continue;
 			}
+			// ADJUSTMENT ::= context CTXMODLIST on EXPRESSION
 			if
 			(
 				$stacktop['type'] == 'SYNT_EXPR' and
@@ -640,6 +719,8 @@ function getParseTreeFromLexems ($lexems)
 				);
 				continue;
 			}
+			// CODESENTENCE ::= DEFINITION | GRANT | ADJUSTMENT
+			// CODETEXT ::= CODESENTENCE | CODETEXT CODESENTENCE
 			if
 			(
 				($stacktop['type'] == 'SYNT_GRANT' or $stacktop['type'] == 'SYNT_DEFINITION' or $stacktop['type'] == 'SYNT_ADJUSTMENT') and
@@ -721,7 +802,7 @@ function eval_expression ($expr, $tagchain, $ptable, $silent = FALSE)
 			return TRUE;
 		case 'LEX_FALSE':
 			return FALSE;
-		case 'SYNT_NOTEXPR':
+		case 'SYNT_NOT_EXPR':
 			$tmp = $self ($expr['load'], $tagchain, $ptable);
 			if ($tmp === TRUE)
 				return FALSE;
@@ -729,23 +810,14 @@ function eval_expression ($expr, $tagchain, $ptable, $silent = FALSE)
 				return TRUE;
 			else
 				return $tmp;
-		case 'SYNT_BOOLOP':
-			$leftresult = $self ($expr['left'], $tagchain, $ptable);
-			switch ($expr['subtype'])
-			{
-				case 'or':
-					if ($leftresult)
-						return TRUE; // early success
-					return $self ($expr['right'], $tagchain, $ptable);
-				case 'and':
-					if (!$leftresult)
-						return FALSE; // early failure
-					return $self ($expr['right'], $tagchain, $ptable);
-				default:
-					if (!$silent)
-						showError ("Cannot evaluate unknown boolean operation '${boolop['subtype']}'");
-					return NULL;
-			}
+		case 'SYNT_AND_EXPR': // binary AND
+			if (FALSE == $self ($expr['left'], $tagchain, $ptable))
+				return FALSE; // early failure
+			return $self ($expr['right'], $tagchain, $ptable);
+		case 'SYNT_EXPR': // binary OR
+			if (TRUE == $self ($expr['left'], $tagchain, $ptable))
+				return TRUE; // early success
+			return $self ($expr['right'], $tagchain, $ptable);
 		default:
 			if (!$silent)
 				showError ("Evaluation error, cannot process expression type '${expr['type']}'", __FUNCTION__);
@@ -869,7 +941,7 @@ function firstUnrefPredicate ($plist, $expr)
 			return NULL;
 		case 'LEX_PREDICATE':
 			return in_array ($expr['load'], $plist) ? NULL : $expr['load'];
-		case 'SYNT_NOTEXPR':
+		case 'SYNT_NOT_EXPR':
 			return $self ($plist, $expr['load']);
 		case 'SYNT_BOOLOP':
 			if (($tmp = $self ($plist, $expr['left'])) !== NULL)
@@ -1159,7 +1231,7 @@ function findAutoTagWarnings ($expr)
 						'text' => "Martian autotag '${expr['load']}'"
 					));
 			}
-		case 'SYNT_NOTEXPR':
+		case 'SYNT_NOT_EXPR':
 			return $self ($expr['load']);
 		case 'SYNT_BOOLOP':
 			return array_merge
@@ -1197,7 +1269,7 @@ function findTagWarnings ($expr)
 				'class' => 'warning',
 				'text' => "Tag '${expr['load']}' does not exist."
 			));
-		case 'SYNT_NOTEXPR':
+		case 'SYNT_NOT_EXPR':
 			return $self ($expr['load']);
 		case 'SYNT_BOOLOP':
 			return array_merge
@@ -1243,7 +1315,7 @@ function referencedPredicate ($pname, $expr)
 			return FALSE;
 		case 'LEX_PREDICATE':
 			return $pname == $expr['load'];
-		case 'SYNT_NOTEXPR':
+		case 'SYNT_NOT_EXPR':
 			return $self ($pname, $expr['load']);
 		case 'SYNT_BOOLOP':
 			return $self ($pname, $expr['left']) or $self ($pname, $expr['right']);
@@ -1270,7 +1342,7 @@ function invariantExpression ($expr)
 		case 'LEX_AUTOTAG':
 		case 'LEX_PREDICATE':
 			return 'sometimes something';
-		case 'SYNT_NOTEXPR':
+		case 'SYNT_NOT_EXPR':
 			return $self ($expr['load']);
 		case 'SYNT_BOOLOP':
 			$leftanswer = $self ($expr['left']);
