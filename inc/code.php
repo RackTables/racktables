@@ -48,7 +48,8 @@ function lexError4 ($s, $ln = 'N/A')
  *
  * LEX_LBRACE
  * LEX_RBRACE
- * LEX_DECISION
+ * LEX_ALLOW
+ * LEX_DENY
  * LEX_DEFINE
  * LEX_TRUE
  * LEX_FALSE
@@ -73,7 +74,7 @@ function getLexemsFromRawText ($text)
 	$text .= ' ';
 	$textlen = mb_strlen ($text);
 	$lineno = 1;
-	$state = "ESOTSM";
+	$state = 'ESOTSM';
 	for ($i = 0; $i < $textlen; $i++) :
 		$char = mb_substr ($text, $i, 1);
 		$newstate = $state;
@@ -96,7 +97,7 @@ function getLexemsFromRawText ($text)
 						break;
 					case ($char == "\n"):
 						$lineno++; // fall through
-					case ($char == " "):
+					case ($char == ' '):
 					case ($char == "\t"):
 						// nom-nom...
 						break;
@@ -118,15 +119,17 @@ function getLexemsFromRawText ($text)
 						break;
 					case ($char == "\n"):
 						$lineno++; // fall through
-					case ($char == " "):
+					case ($char == ' '):
 					case ($char == "\t"):
 					case ($char == ')'): // this will be handled below
 						// got a word, sort it out
 						switch ($buffer)
 						{
 							case 'allow':
+								$ret[] = array ('type' => 'LEX_ALLOW', 'lineno' => $lineno);
+								break;
 							case 'deny':
-								$ret[] = array ('type' => 'LEX_DECISION', 'load' => $buffer, 'lineno' => $lineno);
+								$ret[] = array ('type' => 'LEX_DENY', 'lineno' => $lineno);
 								break;
 							case 'define':
 								$ret[] = array ('type' => 'LEX_DEFINE', 'lineno' => $lineno);
@@ -177,7 +180,7 @@ function getLexemsFromRawText ($text)
 				{
 					case ($char == "\n"):
 						$lineno++; // fall through
-					case ($char == " "):
+					case ($char == ' '):
 					case ($char == "\t"):
 						// nom-nom...
 						break;
@@ -209,7 +212,10 @@ function getLexemsFromRawText ($text)
 			case 'reading predicate 1':
 				switch (TRUE)
 				{
-					case (preg_match ('/^[ \t\n]$/', $char)):
+					case ($char == "\n"):
+						$lineno++; // fall through
+					case ($char == ' '):
+					case ($char == "\t"):
 						// nom-nom...
 						break;
 					case (mb_ereg ('[[:alnum:]]', $char) > 0):
@@ -285,12 +291,11 @@ function spotPayload ($text, $reqtype = 'SYNT_CODETEXT')
 // LEX_PREDICATE
 // LEX_TRUE
 // LEX_FALSE
-// SYNT_UNARY_EXPR (any of the above lexems in "load" or even SYNT_EXPR)
-// SYNT_NOT_EXPR (SYNT_UNARY_EXPR in "load")
-// SYNT_AND_EXPR (either one arg in "load" or two args in "left" and "right")
+// SYNT_NOT_EXPR (one arg in "load")
+// SYNT_AND_EXPR (two args in "left" and "right")
 // SYNT_EXPR (idem), in fact it's boolean OR, but we keep the naming for compatibility
-// SYNT_DEFINITION (2 arguments: term and definition)
-// SYNT_GRANT (2 arguments: decision and condition)
+// SYNT_DEFINITION (2 args in "term" and "definition")
+// SYNT_GRANT (2 args in "decision" and "condition")
 // SYNT_ADJUSTMENT (context modifier with action(s) and condition)
 // SYNT_CODETEXT (sequence of sentences)
 //
@@ -322,7 +327,7 @@ function getParseTreeFromLexems ($lexems)
 			// It is possible to run into a S/R conflict, when having a syntaxically
 			// correct sentence base on the stack and some "and {something}" items
 			// on the input tape, hence let's detect this specific case and insist
-			// on "shift" action to make EXPR parsing hungry one.
+			// on "shift" action to make SYNT_AND_EXPR parsing hungry.
 			if
 			(
 				$stacktop['type'] == 'SYNT_AND_EXPR' and
@@ -646,11 +651,11 @@ function getParseTreeFromLexems ($lexems)
 				);
 				continue;
 			}
-			// GRANT ::= DECISION EXPRESSION
+			// GRANT ::= allow EXPRESSION | deny EXPRESSION
 			if
 			(
 				$stacktop['type'] == 'SYNT_EXPR' and
-				$stacksecondtop['type'] == 'LEX_DECISION'
+				($stacksecondtop['type'] == 'LEX_ALLOW' or $stacksecondtop['type'] == 'LEX_DENY')
 			)
 			{
 				// reduce!
@@ -663,7 +668,7 @@ function getParseTreeFromLexems ($lexems)
 					(
 						'type' => 'SYNT_GRANT',
 						'lineno' => $stacktop['lineno'],
-						'decision' => $stacksecondtop['load'],
+						'decision' => $stacksecondtop['type'],
 						'condition' => $stacktop['load']
 					)
 				);
@@ -719,8 +724,7 @@ function getParseTreeFromLexems ($lexems)
 				);
 				continue;
 			}
-			// CODESENTENCE ::= DEFINITION | GRANT | ADJUSTMENT
-			// CODETEXT ::= CODESENTENCE | CODETEXT CODESENTENCE
+			// CODETEXT ::= CODETEXT GRANT | CODETEXT DEFINITION | CODETEXT ADJUSTMENT
 			if
 			(
 				($stacktop['type'] == 'SYNT_GRANT' or $stacktop['type'] == 'SYNT_DEFINITION' or $stacktop['type'] == 'SYNT_ADJUSTMENT') and
@@ -739,6 +743,7 @@ function getParseTreeFromLexems ($lexems)
 				);
 				continue;
 			}
+			// CODETEXT ::= GRANT | DEFINITION | ADJUSTMENT
 			if
 			(
 				$stacktop['type'] == 'SYNT_GRANT' or
@@ -885,9 +890,9 @@ function gotClearanceForTagChain ($const_base)
 				if (eval_expression ($sentence['condition'], array_merge ($const_base, $expl_tags, $impl_tags), $ptable))
 					switch ($sentence['decision'])
 					{
-						case 'allow':
+						case 'LEX_ALLOW':
 							return TRUE;
-						case 'deny':
+						case 'LEX_DENY':
 							return FALSE;
 						default:
 							showError ("Condition match for unknown grant decision '${sentence['decision']}'", __FUNCTION__);
