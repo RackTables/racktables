@@ -5254,7 +5254,7 @@ function renderFile ($file_id)
 	echo "<tr><th width='50%' class=tdright>Accessed:</th>";
 	printf("<td class=tdleft>%s</td></tr>", formatTimestamp($file['atime']));
 
-	printTagTRs (makeHref(array('page'=>'files', 'tab'=>'default'))."&");
+	printTagTRs ($file, makeHref(array('page'=>'files', 'tab'=>'default'))."&");
 	if (!empty ($file['comment']))
 	{
 		echo '<tr><th class=slbconf>Comment:</th><td>&nbsp;</td></tr>';
