@@ -1735,7 +1735,9 @@ function addFileWithoutLink ()
 		return buildRedirectURL (__FUNCTION__, 'ERR', array ("file uploads not allowed, change 'file_uploads' parameter in php.ini"));
 
 	$fp = fopen($_FILES['file']['tmp_name'], 'rb');
-	$error = commitAddFile ($_FILES['file']['name'], $_FILES['file']['type'], $_FILES['file']['size'], $fp, $_REQUEST['comment']);
+	global $sic;
+	// commitAddFile() uses prepared statements
+	$error = commitAddFile ($_FILES['file']['name'], $_FILES['file']['type'], $_FILES['file']['size'], $fp, $sic['comment']);
 
 	if ($error != '')
 		return buildRedirectURL (__FUNCTION__, 'ERR', array ($error));
@@ -1763,7 +1765,9 @@ function addFileToEntity ()
 		return buildRedirectURL (__FUNCTION__, 'ERR2');
 
 	$fp = fopen($_FILES['file']['tmp_name'], 'rb');
-	$error = commitAddFile ($_FILES['file']['name'], $_FILES['file']['type'], $_FILES['file']['size'], $fp, $_REQUEST['comment']);
+	global $sic;
+	// commitAddFile() uses prepared statements
+	$error = commitAddFile ($_FILES['file']['name'], $_FILES['file']['type'], $_FILES['file']['size'], $fp, $sic['comment']);
 	if ($error != '')
 		return buildRedirectURL (__FUNCTION__, 'ERR3', array ($error));
 

@@ -1,5 +1,6 @@
 0.17.1
 	bugfix: tags were not displayed on "File" page
+	bugfix: multiline comment for an added file was stored incorrectly
 0.17.0 2009-05-20
 	new feature: file attachments (by Aaron)
 	new feature: ability to delete objects (by Aaron)
