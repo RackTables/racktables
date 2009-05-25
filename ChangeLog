@@ -1,3 +1,5 @@
+0.17.1
+	bugfix: tags were not displayed on "File" page
 0.17.0 2009-05-20
 	new feature: file attachments (by Aaron)
 	new feature: ability to delete objects (by Aaron)
