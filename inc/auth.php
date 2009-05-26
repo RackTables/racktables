@@ -163,13 +163,14 @@ function authenticated_via_ldap ($username, $password)
 		$newinfo = queryLDAPServer ($username, $password);
 		if ($newinfo['result'] == 'ACK')
 		{
-			$remote_displayname = $newinfo['displayed_name'];
+			if (strlen ($newinfo['displayed_name']))
+				$remote_displayname = $newinfo['displayed_name'];
 			foreach ($newinfo['memberof'] as $autotag)
 				$auto_tags[] = array ('tag' => $autotag);
 			replaceLDAPCacheRecord ($username, sha1 ($password), $newinfo['displayed_name'], $newinfo['memberof']);
 		}
 		releaseLDAPCache();
-		// Do cache maintenence each time fresh data is stored.
+		// Do cache maintenance each time fresh data is stored.
 		discardLDAPCache ($LDAP_options['cache_expiry']);
 		return $newinfo['result'] == 'ACK';
 	}
@@ -179,7 +180,8 @@ function authenticated_via_ldap ($username, $password)
 	if ($oldinfo['success_age'] < $LDAP_options['cache_refresh'] or $oldinfo['retry_age'] < $LDAP_options['cache_retry'])
 	{
 		releaseLDAPCache();
-		$remote_displayname = $oldinfo['displayed_name'];
+		if (strlen ($oldinfo['displayed_name']))
+			$remote_displayname = $oldinfo['displayed_name'];
 		foreach ($oldinfo['memberof'] as $autotag)
 			$auto_tags[] = array ('tag' => $autotag);
 		return TRUE;
@@ -189,7 +191,8 @@ function authenticated_via_ldap ($username, $password)
 	switch ($newinfo['result'])
 	{
 	case 'ACK': // refresh existing record
-		$remote_displayname = $newinfo['displayed_name'];
+		if (strlen ($newinfo['displayed_name']))
+			$remote_displayname = $newinfo['displayed_name'];
 		foreach ($newinfo['memberof'] as $autotag)
 			$auto_tags[] = array ('tag' => $autotag);
 		replaceLDAPCacheRecord ($username, sha1 ($password), $newinfo['displayed_name'], $newinfo['memberof']);
@@ -200,7 +203,8 @@ function authenticated_via_ldap ($username, $password)
 		releaseLDAPCache();
 		return FALSE;
 	case 'CAN': // retry failed, do nothing, use old value till next retry
-		$remote_displayname = $oldinfo['displayed_name'];
+		if (strlen ($oldinfo['displayed_name']))
+			$remote_displayname = $oldinfo['displayed_name'];
 		foreach ($oldinfo['memberof'] as $autotag)
 			$auto_tags[] = array ('tag' => $autotag);
 		touchLDAPCacheRecord ($username);
@@ -275,11 +279,8 @@ function queryLDAPServer ($username, $password)
 	// Displayed name only makes sense for authenticated users anyway.
 	if
 	(
-		isset ($LDAP_options['displayname_attrs']) and
-		count ($LDAP_options['displayname_attrs']) and
-		isset ($LDAP_options['search_dn']) and
+		!empty ($LDAP_options['displayname_attrs']) and
 		!empty ($LDAP_options['search_dn']) and
-		isset ($LDAP_options['search_attr']) and
 		!empty ($LDAP_options['search_attr'])
 	)
 	{
