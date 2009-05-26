@@ -303,7 +303,6 @@ function renderRackspace ()
 					echo '</tr></table></tr>';
 					echo "<tr class=row_${order}><th class=tdleft>${row_name} (continued)";
 					echo "</th><td><table border=0 cellspacing=5><tr>";
-					$order = $nextorder[$order];
 				}
 				echo "<td align=center><a href='".makeHref(array('page'=>'rack', 'rack_id'=>$rack['id']))."'>";
 				echo "<img border=0 width=${rackwidth} height=";
@@ -313,6 +312,7 @@ function renderRackspace ()
 				echo "<br>${rack['name']}</a></td>";
 				$rackListIdx++;
 			}
+		$order = $nextorder[$order];
 		echo "</tr></table></tr>\n";
 	}
 	echo "</table>\n";
