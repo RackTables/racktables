@@ -59,7 +59,6 @@
 			echo '<form action="javascript:;">';
 			echo '<input type=hidden id=ip>';
 			echo '<select size=' . getConfigVar ('MAXSELSIZE') . ' id=addresses>';
-			renderAllIPv4Allocations();
 			$addresses = getAllIPv4Allocations();
 			usort ($addresses, 'sortObjectAddressesAndNames');
 			foreach ($addresses as $address)
