@@ -55,7 +55,6 @@ CREATE TABLE `Dictionary` (
   `dict_key` int(10) unsigned NOT NULL auto_increment,
   `dict_value` char(255) default NULL,
   PRIMARY KEY  (`dict_key`),
-  UNIQUE KEY `chap_to_key` (`chapter_id`,`dict_key`),
   UNIQUE KEY `chap_to_val` (`chapter_id`,`dict_value`)
 ) ENGINE=MyISAM AUTO_INCREMENT=50000;
 
