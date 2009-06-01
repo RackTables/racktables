@@ -139,7 +139,7 @@ function doSNMPmining ($object_id, $community)
 	// Only fill in attribute values, if they are not set.
 	// FIXME: this is hardcoded
 
-	if (empty ($attrs[3]['value']) && !empty ($sysName)) // FQDN
+	if (!strlen ($attrs[3]['value']) && strlen ($sysName)) // FQDN
 	{
 		$error = commitUpdateAttrValue ($object_id, 3, $sysName);
 		if ($error == TRUE)
@@ -148,7 +148,7 @@ function doSNMPmining ($object_id, $community)
 			$log[] = array ('code' => 'error', 'message' => 'Failed settig FQDN: ' . $error);
 	}
 
-	if (empty ($attrs[5]['value']) and strlen ($swversion) > 0) // SW version
+	if (!strlen ($attrs[5]['value']) and strlen ($swversion) > 0) // SW version
 	{
 		$error = commitUpdateAttrValue ($object_id, 5, $swversion);
 		if ($error == TRUE)
@@ -157,7 +157,7 @@ function doSNMPmining ($object_id, $community)
 			$log[] = array ('code' => 'error', 'message' => 'Failed settig SW version: ' . $error);
 	}
 
-	if (empty ($attrs[1]['value']) and strlen ($sysChassi) > 0) // OEM Serial #1
+	if (!strlen ($attrs[1]['value']) and strlen ($sysChassi) > 0) // OEM Serial #1
 	{
 		$error = commitUpdateAttrValue ($object_id, 1, $sysChassi);
 		if ($error == TRUE)
@@ -166,7 +166,7 @@ function doSNMPmining ($object_id, $community)
 			$log[] = array ('code' => 'error', 'message' => 'Failed settig OEM S/N 1: ' . $error);
 	}
 
-	if (empty ($attrs[4]['value']) and $swfamily != 'HP') // switch OS type
+	if (!strlen ($attrs[4]['value']) and $swfamily != 'HP') // switch OS type
 	{
 		switch ($swfamily . '-' . $swrelease)
 		{
@@ -205,7 +205,7 @@ function doSNMPmining ($object_id, $community)
 		return $log;
 	}
 	$log[] = array ('code' => 'success', 'message' => 'HW is ' . $ciscomodel[$sysObjectID]);
-	if (empty ($attrs[2]['value']) and isset ($hwtype[$sysObjectID])) // switch HW type
+	if (!strlen ($attrs[2]['value']) and isset ($hwtype[$sysObjectID])) // switch HW type
 	{
 		$error = commitUpdateAttrValue ($object_id, 2, $hwtype[$sysObjectID]);
 		if ($error == TRUE)

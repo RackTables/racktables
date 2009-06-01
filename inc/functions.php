@@ -587,13 +587,13 @@ function findAllEndpoints ($object_id, $fallback = '')
 {
 	$values = getAttrValues ($object_id);
 	foreach ($values as $record)
-		if ($record['name'] == 'FQDN' && !empty ($record['value']))
+		if ($record['name'] == 'FQDN' && strlen ($record['value']))
 			return array ($record['value']);
 	$regular = array();
 	foreach (getObjectIPv4Allocations ($object_id) as $dottedquad => $alloc)
 		if ($alloc['type'] == 'regular')
 			$regular[] = $dottedquad;
-	if (!count ($regular) && !empty ($fallback))
+	if (!count ($regular) && strlen ($fallback))
 		return array ($fallback);
 	return $regular;
 }
@@ -682,7 +682,7 @@ function getRSUforRackRow ($rowData = NULL)
 function lf_wrap ($str)
 {
 	$ret = trim ($str, "\r\n");
-	if (!empty ($ret))
+	if (strlen ($ret))
 		$ret .= "\n";
 	return $ret;
 }
@@ -1383,8 +1383,8 @@ function buildLVSConfig ($object_id = 0)
 	foreach ($lbconfig as $vs_id => $vsinfo)
 	{
 		$newconfig .=  "########################################################\n" .
-			"# VS (id == ${vs_id}): " . (empty ($vsinfo['vs_name']) ? 'NO NAME' : $vsinfo['vs_name']) . "\n" .
-			"# RS pool (id == ${vsinfo['pool_id']}): " . (empty ($vsinfo['pool_name']) ? 'ANONYMOUS' : $vsinfo['pool_name']) . "\n" .
+			"# VS (id == ${vs_id}): " . (!strlen ($vsinfo['vs_name']) ? 'NO NAME' : $vsinfo['vs_name']) . "\n" .
+			"# RS pool (id == ${vsinfo['pool_id']}): " . (!strlen ($vsinfo['pool_name']) ? 'ANONYMOUS' : $vsinfo['pool_name']) . "\n" .
 			"########################################################\n";
 		# The order of inheritance is: VS -> LB -> pool [ -> RS ]
 		$macros = array
@@ -1406,7 +1406,7 @@ function buildLVSConfig ($object_id = 0)
 		);
 		foreach ($vsinfo['rslist'] as $rs)
 		{
-			if (empty ($rs['rsport']))
+			if (!strlen ($rs['rsport']))
 				$rs['rsport'] = $vsinfo['vport'];
 			$macros['%RSIP%'] = $rs['rsip'];
 			$macros['%RSPORT%'] = $rs['rsport'];
@@ -1517,7 +1517,7 @@ function IPv4NetworkCmp ($netA, $netB)
 // Modify the given tag tree so, that each level's items are sorted alphabetically.
 function sortTree (&$tree, $sortfunc = '')
 {
-	if (empty ($sortfunc))
+	if (!strlen ($sortfunc))
 		return;
 	$self = __FUNCTION__;
 	usort ($tree, $sortfunc);
@@ -1529,7 +1529,7 @@ function sortTree (&$tree, $sortfunc = '')
 
 function iptree_fill (&$netdata)
 {
-	if (!isset ($netdata['kids']) or empty ($netdata['kids']))
+	if (!isset ($netdata['kids']) or !count ($netdata['kids']))
 		return;
 	// If we really have nested prefixes, they must fit into the tree.
 	$worktree = array
@@ -1607,13 +1607,13 @@ function iptree_embed (&$node, $pfx)
 
 function treeApplyFunc (&$tree, $func = '', $stopfunc = '')
 {
-	if (empty ($func))
+	if (!strlen ($func))
 		return;
 	$self = __FUNCTION__;
 	foreach (array_keys ($tree) as $key)
 	{
 		$func ($tree[$key]);
-		if (!empty ($stopfunc) and $stopfunc ($tree[$key]))
+		if (strlen ($stopfunc) and $stopfunc ($tree[$key]))
 			continue;
 		$self ($tree[$key]['kids'], $func);
 	}
@@ -1633,7 +1633,7 @@ function countOwnIPv4Addresses (&$node)
 	$node['mask_bin_inv'] = binInvMaskFromDec ($node['mask']);
 	$node['db_first'] = sprintf ('%u', 0x00000000 + $node['ip_bin'] & $node['mask_bin']);
 	$node['db_last'] = sprintf ('%u', 0x00000000 + $node['ip_bin'] | ($node['mask_bin_inv']));
-	if (empty ($node['kids']))
+	if (!count ($node['kids']))
 	{
 		$toscan[] = array ('i32_first' => $node['db_first'], 'i32_last' => $node['db_last']);
 		$node['addrt'] = binInvMaskFromDec ($node['mask']) + 1;
@@ -1658,7 +1658,7 @@ function nodeIsCollapsed ($node)
 function loadOwnIPv4Addresses (&$node)
 {
 	$toscan = array();
-	if (empty ($node['kids']))
+	if (!count ($node['kids']))
 		$toscan[] = array ('i32_first' => $node['db_first'], 'i32_last' => $node['db_last']);
 	else
 		foreach ($node['kids'] as $nested)
@@ -2027,7 +2027,7 @@ function getIPv4VSOptions ()
 {
 	$ret = array();
 	foreach (listCells ('ipv4vs') as $vsid => $vsinfo)
-		$ret[$vsid] = $vsinfo['dname'] . (empty ($vsinfo['name']) ? '' : " (${vsinfo['name']})");
+		$ret[$vsid] = $vsinfo['dname'] . (!strlen ($vsinfo['name']) ? '' : " (${vsinfo['name']})");
 	return $ret;
 }
 

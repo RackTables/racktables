@@ -420,7 +420,7 @@ function showError ($info = '', $location = 'N/A')
 	elseif ($location != 'N/A')
 		$location = $location . '()';
 	echo "<div class=msg_error>An error has occured in [${location}]. ";
-	if (empty ($info))
+	if (!strlen ($info))
 		echo 'No additional information is available.';
 	else
 		echo "Additional information:<br><p>\n<pre>\n${info}\n</pre></p>";
@@ -446,7 +446,7 @@ function assertUIntArg ($argname, $caller = 'N/A', $allow_zero = FALSE)
 		showError ("Parameter '${argname}' is less than zero (calling function is [${caller}]).", __FUNCTION__);
 		die();
 	}
-	if (!$allow_zero and $_REQUEST[$argname] == 0)
+	if (!$allow_zero and $_REQUEST[$argname] === 0)
 	{
 		showError ("Parameter '${argname}' is equal to zero (calling function is [${caller}]).", __FUNCTION__);
 		die();
@@ -467,7 +467,7 @@ function assertStringArg ($argname, $caller = 'N/A', $ok_if_empty = FALSE)
 		showError ("Parameter '${argname}' is not a string (calling function is [${caller}]).", __FUNCTION__);
 		die();
 	}
-	if (!$ok_if_empty and empty ($_REQUEST[$argname]))
+	if (!$ok_if_empty and !strlen ($_REQUEST[$argname]))
 	{
 		showError ("Parameter '${argname}' is an empty string (calling function is [${caller}]).", __FUNCTION__);
 		die();
@@ -486,7 +486,7 @@ function assertBoolArg ($argname, $caller = 'N/A', $ok_if_empty = FALSE)
 		showError ("Parameter '${argname}' is not a string (calling function is [${caller}]).", __FUNCTION__);
 		die();
 	}
-	if (!$ok_if_empty and empty ($_REQUEST[$argname]))
+	if (!$ok_if_empty and !strlen ($_REQUEST[$argname]))
 	{
 		showError ("Parameter '${argname}' is an empty string (calling function is [${caller}]).", __FUNCTION__);
 		die();
@@ -496,7 +496,7 @@ function assertBoolArg ($argname, $caller = 'N/A', $ok_if_empty = FALSE)
 function assertIPv4Arg ($argname, $caller = 'N/A', $ok_if_empty = FALSE)
 {
 	assertStringArg ($argname, $caller, $ok_if_empty);
-	if (!empty ($_REQUEST[$argname]) and long2ip (ip2long ($_REQUEST[$argname])) !== $_REQUEST[$argname])
+	if (strlen ($_REQUEST[$argname]) and long2ip (ip2long ($_REQUEST[$argname])) !== $_REQUEST[$argname])
 	{
 		showError ("IPv4 address validation failed for value '" . $_REQUEST[$argname] . "' (calling function is [${caller}]).", __FUNCTION__);
 		die();
@@ -554,12 +554,12 @@ function renderRack ($rack_id, $hl_obj_id = 0)
 			{
 				case 'T':
 					$objectData = spotEntity ('object', $rackData[$i][$locidx]['object_id']);
-					if (!empty ($objectData['asset_no']))
+					if (strlen ($objectData['asset_no']))
 						$prefix = "<div title='${objectData['asset_no']}";
 					else
 						$prefix = "<div title='no asset tag";
 					// Don't tell about label, if it matches common name.
-					if ($objectData['name'] != $objectData['label'] and !empty ($objectData['label']))
+					if ($objectData['name'] != $objectData['label'] and strlen ($objectData['label']))
 						$suffix = ", visible label is \"${objectData['label']}\"'>";
 					else
 						$suffix = "'>";
@@ -655,7 +655,7 @@ function renderEditObjectForm ($object_id)
 		{
 			echo "<input type=hidden name=${i}_attr_id value=${record['id']}>";
 			echo '<tr><td>';
-			if (!empty ($record['value']))
+			if (strlen ($record['value']))
 			{
 				echo "<a href='".makeHrefProcess(array('op'=>'clearSticker', 'object_id'=>$object_id, 'attr_id'=>$record['id']))."'>";
 				printImageHREF ('clear', 'Clear value');
@@ -783,7 +783,7 @@ function renderRackInfoPortlet ($rackData)
 	echo count ($rackData['mountedObjects']);
 	echo "</td></tr>\n";
 	printTagTRs ($rackData, makeHref(array('page'=>'rackspace', 'tab'=>'default'))."&");
-	if (!empty ($rackData['comment']))
+	if (strlen ($rackData['comment']))
 		echo "<tr><th width='50%' class=tdright>Comment:</th><td class=tdleft>${rackData['comment']}</td></tr>\n";
 	echo '</table>';
 	finishPortlet();
@@ -864,7 +864,7 @@ function renderRackObject ($object_id)
 	echo "<tr><td class=pcleft>";
 	startPortlet ('summary');
 	echo "<table border=0 cellspacing=0 cellpadding=3 width='100%'>\n";
-	if (!empty ($info['name']))
+	if (strlen ($info['name']))
 		echo "<tr><th width='50%' class=tdright>Common name:</th><td class=tdleft>${info['name']}</td></tr>\n";
 	// FIXME: don't call spotEntity() each time, do it once in the beginning.
 	elseif (considerConfiguredConstraint (spotEntity ('object', $object_id), 'NAMEWARN_LISTSRC'))
@@ -876,19 +876,19 @@ function renderRackObject ($object_id)
 		'cfe' => '{$typeid_' . $info['objtype_id'] . '}'
 	));
 	echo "'>${info['objtype_name']}</a></td></tr>\n";
-	if (!empty ($info['asset_no']))
+	if (strlen ($info['asset_no']))
 		echo "<tr><th width='50%' class=tdright>Asset tag:</th><td class=tdleft>${info['asset_no']}</td></tr>\n";
 	// FIXME: ditto
 	elseif (considerConfiguredConstraint (spotEntity ('object', $object_id), 'ASSETWARN_LISTSRC'))
 		echo "<tr><td colspan=2 class=msg_error>Asset tag is missing.</td></tr>\n";
-	if (!empty ($info['label']))
+	if (strlen ($info['label']))
 		echo "<tr><th width='50%' class=tdright>Visible label:</th><td class=tdleft>${info['label']}</td></tr>\n";
-	if (!empty ($info['barcode']))
+	if (strlen ($info['barcode']))
 		echo "<tr><th width='50%' class=tdright>Barcode:</th><td class=tdleft>${info['barcode']}</td></tr>\n";
 	if ($info['has_problems'] == 'yes')
 		echo "<tr><td colspan=2 class=msg_error>Has problems</td></tr>\n";
 	foreach (getAttrValues ($object_id, TRUE) as $record)
-		if (!empty ($record['value']))
+		if (strlen ($record['value']))
 			echo "<tr><th width='50%' class=sticker>${record['name']}:</th><td class=sticker>${record['a_value']}</td></tr>\n";
 	printTagTRs
 	(
@@ -907,7 +907,7 @@ function renderRackObject ($object_id)
 	echo "</table><br>\n";
 	finishPortlet();
 
-	if (!empty ($info['comment']))
+	if (strlen ($info['comment']))
 	{
 		startPortlet ('Comment');
 		echo '<div class=commentblock>' . string_insert_hrefs ($info['comment']) . '</div>';
@@ -944,7 +944,7 @@ function renderRackObject ($object_id)
 					echo "<td><a href='".makeHref(array('page'=>'object', 'object_id'=>$port['remote_object_id'], 'hl_port_id'=>$port['remote_id']))."'>${port['remote_object_name']}</a></td>";
 					echo "<td>${port['remote_name']}</td>";
 				}
-				elseif (!empty ($port['reservation_comment']))
+				elseif (strlen ($port['reservation_comment']))
 				{
 					echo "<td><b>Reserved;</b></td>";
 					echo "<td>${port['reservation_comment']}</td>";
@@ -992,7 +992,7 @@ function renderRackObject ($object_id)
 			if (getConfigVar ('EXT_IPV4_VIEW') != 'yes')
 				echo '<small>/' . (NULL === $netid ? '??' : $netinfo['mask']) . '</small>';
 			echo '&nbsp;' . $aac[$alloc['type']];
-			if (!empty ($alloc['addrinfo']['name']))
+			if (strlen ($alloc['addrinfo']['name']))
 				echo ' (' . niftyString ($alloc['addrinfo']['name']) . ')';
 			echo '</td>';
 			if (getConfigVar ('EXT_IPV4_VIEW') == 'yes')
@@ -1028,7 +1028,7 @@ function renderRackObject ($object_id)
 				if ($allocpeer['object_id'] == $object_id)
 					continue;
 				echo $prefix . "<a href='".makeHref(array('page'=>'object', 'object_id'=>$allocpeer['object_id']))."'>";
-				if (!empty ($allocpeer['osif']))
+				if (strlen ($allocpeer['osif']))
 					echo $allocpeer['osif'] . '@';
 				echo $allocpeer['object_name'] . '</a>';
 				$prefix = '; ';
@@ -1069,7 +1069,7 @@ function renderRackObject ($object_id)
 				if (count ($address['allocs']))
 					foreach($address['allocs'] as $bond)
 						echo "<a href='".makeHref(array('page'=>'object', 'tab'=>'default', 'object_id'=>$bond['object_id']))."'>${bond['object_name']}(${bond['name']})</a> ";
-				elseif (!empty ($pf['remote_addr_name']))
+				elseif (strlen ($pf['remote_addr_name']))
 					echo '(' . $pf['remote_addr_name'] . ')';
 				echo "</td><td class='description'>${pf['description']}</td></tr>";
 			}
@@ -1222,7 +1222,7 @@ function renderPortsForObject ($object_id)
 			printImageHREF ('cut', 'Unlink this port');
 			echo "</a></td>";
 		}
-		elseif (!empty ($port['reservation_comment']))
+		elseif (strlen ($port['reservation_comment']))
 		{
 			echo "<td><b>Reserved;</b></td>";
 			echo "<td><input type=text name=reservation_comment value='${port['reservation_comment']}'></td>";
@@ -1317,7 +1317,7 @@ function renderIPv4ForObject ($object_id)
 			echo $dottedquad;
 		if (getConfigVar ('EXT_IPV4_VIEW') != 'yes')
 			echo '<small>/' . (NULL === $netid ? '??' : $netinfo['mask']) . '</small>';
-		if (!empty ($alloc['addrinfo']['name']))
+		if (strlen ($alloc['addrinfo']['name']))
 			echo ' (' . niftyString ($alloc['addrinfo']['name']) . ')';
 		echo '</td>';
 		// FIXME: this a copy-and-paste from renderRackObject()
@@ -1355,7 +1355,7 @@ function renderIPv4ForObject ($object_id)
 			if ($allocpeer['object_id'] == $object_id)
 				continue;
 			echo $prefix . "<a href='".makeHref(array('page'=>'object', 'object_id'=>$allocpeer['object_id']))."'>";
-			if (!empty ($allocpeer['osif']))
+			if (strlen ($allocpeer['osif']))
 				echo $allocpeer['osif'] . '@';
 			echo $allocpeer['object_name'] . '</a>';
 			$prefix = '; ';
@@ -2431,7 +2431,7 @@ function renderIPv4Network ($id)
 		{
 			echo $delim . $aac2[$ref['type']];
 			echo "<a href='".makeHref(array('page'=>'object', 'object_id'=>$ref['object_id'], 'hl_ipv4_addr'=>$addr['ip']))."'>";
-			echo $ref['name'] . (empty ($ref['name']) ? '' : '@');
+			echo $ref['name'] . (!strlen ($ref['name']) ? '' : '@');
 			echo "${ref['object_name']}</a>";
 			$delim = '; ';
 		}
@@ -2489,7 +2489,7 @@ function renderIPv4Address ($dottedquad)
 	$address = getIPv4Address ($dottedquad);
 	echo "<table border=0 class=objectview cellspacing=0 cellpadding=0>";
 	echo "<tr><td colspan=2 align=center><h1>${dottedquad}</h1></td></tr>\n";
-	if (!empty ($address['name']))
+	if (strlen ($address['name']))
 		echo "<tr><td colspan=2 align=center><h2>${address['name']}</h2></td></tr>\n";
 
 	echo "<tr><td class=pcleft>";
@@ -2605,7 +2605,7 @@ function renderIPv4AddressProperties ($dottedquad)
 	echo "></tr><tr><td class=tdleft>";
 	printImageHREF ('SAVE', 'Save changes', TRUE);
 	echo "</td></form><td class=tdright>";
-	if (empty ($address['name']) and $address['reserved'] == 'no')
+	if (!strlen ($address['name']) and $address['reserved'] == 'no')
 		printImageHREF ('CLEAR gray');
 	else
 	{
@@ -2681,8 +2681,8 @@ function renderNATv4ForObject ($object_id)
 
 		foreach ($alloclist as $dottedquad => $alloc)
 		{
-			$name = empty ($alloc['addrinfo']['name']) ? '' : (' (' . niftyString ($alloc['addrinfo']['name']) . ')');
-			$osif = empty ($alloc['osif']) ? '' : ($alloc['osif'] . ': ');
+			$name = !strlen ($alloc['addrinfo']['name']) ? '' : (' (' . niftyString ($alloc['addrinfo']['name']) . ')');
+			$osif = !strlen ($alloc['osif']) ? '' : ($alloc['osif'] . ': ');
 			echo "<option value='${dottedquad}'>${osif}${dottedquad}${name}</option>";
 		}
 
@@ -2731,7 +2731,7 @@ function renderNATv4ForObject ($object_id)
 		printImageHREF ('delete', 'Delete NAT rule');
 		echo "</a></td>";
 		echo "<td>${pf['proto']}/${osif}<a href='".makeHref(array('page'=>'ipaddress', 'tab'=>'default', 'ip'=>$pf['localip']))."'>${pf['localip']}</a>:${pf['localport']}";
-		if (!empty ($pf['local_addr_name']))
+		if (strlen ($pf['local_addr_name']))
 			echo ' (' . $pf['local_addr_name'] . ')';
 		echo "</td>";
 		echo "<td><a href='".makeHref(array('page'=>'ipaddress', 'tab'=>'default', 'ip'=>$pf['remoteip']))."'>${pf['remoteip']}</a>:${pf['remoteport']}</td>";
@@ -2742,7 +2742,7 @@ function renderNATv4ForObject ($object_id)
 		if (count ($address['allocs']))
 			foreach ($address['allocs'] as $bond)
 				echo "<a href='".makeHref(array('page'=>'object', 'tab'=>'default', 'object_id'=>$bond['object_id']))."'>${bond['object_name']}(${bond['name']})</a> ";
-		elseif (!empty ($pf['remote_addr_name']))
+		elseif (strlen ($pf['remote_addr_name']))
 			echo '(' . $pf['remote_addr_name'] . ')';
 		printOpFormIntro
 		(
@@ -2857,7 +2857,7 @@ function renderSearchResults ()
 {
 	global $root;
 	$terms = trim ($_REQUEST['q']);
-	if (empty ($terms))
+	if (!strlen ($terms))
 	{
 		showError ('Search string cannot be empty.', __FUNCTION__);
 		return;
@@ -3655,7 +3655,7 @@ function getImageHREF ($tag, $title = '', $do_input = FALSE, $tabindex = 0)
 			"src='${root}${img['path']}' " .
 			"border=0 " .
 			($tabindex ? "tabindex=${tabindex}" : '') .
-			(empty ($title) ? '' : " title='${title}'") . // JT: Add title to input hrefs too
+			(!strlen ($title) ? '' : " title='${title}'") . // JT: Add title to input hrefs too
 			">";
 	else
 		return
@@ -3664,7 +3664,7 @@ function getImageHREF ($tag, $title = '', $do_input = FALSE, $tabindex = 0)
 			"width=${img['width']} " .
 			"height=${img['height']} " .
 			"border=0 " .
-			(empty ($title) ? '' : "title='${title}'") .
+			(!strlen ($title) ? '' : "title='${title}'") .
 			">";
 }
 
@@ -4031,25 +4031,25 @@ function renderVirtualService ($vsid)
 	$vsinfo = spotEntity ('ipv4vs', $vsid);
 	amplifyCell ($vsinfo);
 	echo '<table border=0 class=objectview cellspacing=0 cellpadding=0>';
-	if (!empty ($vsinfo['name']))
+	if (strlen ($vsinfo['name']))
 		echo "<tr><td colspan=2 align=center><h1>${vsinfo['name']}</h1></td></tr>\n";
 	echo '<tr>';
 
 	echo '<td class=pcleft>';
 	startPortlet ('Frontend');
 	echo "<table border=0 cellspacing=0 cellpadding=3 width='100%'>\n";
-	if (!empty ($vsinfo['name']))
+	if (strlen ($vsinfo['name']))
 		echo "<tr><th width='50%' class=tdright>Name:</th><td class=tdleft>${vsinfo['name']}</td></tr>\n";
 	echo "<tr><th width='50%' class=tdright>Protocol:</th><td class=tdleft>${vsinfo['proto']}</td></tr>\n";
 	echo "<tr><th width='50%' class=tdright>Virtual IP address:</th><td class=tdleft><a href='".makeHref(array('page'=>'ipaddress', 'tab'=>'default', 'ip'=>$vsinfo['vip']))."'>${vsinfo['vip']}</a></td></tr>\n";
 	echo "<tr><th width='50%' class=tdright>Virtual port:</th><td class=tdleft>${vsinfo['vport']}</td></tr>\n";
 	printTagTRs ($vsinfo, makeHref(array('page'=>'ipv4vslist', 'tab'=>'default'))."&");
-	if (!empty ($vsinfo['vsconfig']))
+	if (strlen ($vsinfo['vsconfig']))
 	{
 		echo "<tr><th class=slbconf>VS configuration:</th><td>&nbsp;</td></tr>";
 		echo "<tr><td colspan=2 class='dashed slbconf'>${vsinfo['vsconfig']}</td></tr>\n";
 	}
-	if (!empty ($vsinfo['rsconfig']))
+	if (strlen ($vsinfo['rsconfig']))
 	{
 		echo "<tr><th class=slbconf>RS configuration:</th><td class=tdleft>&nbsp;</td></tr>\n";
 		echo "<tr><td colspan=2 class='dashed slbconf'>${vsinfo['rsconfig']}</td></tr>\n";
@@ -4071,9 +4071,9 @@ function renderVirtualService ($vsid)
 		echo "<tr><td colspan=2>";
 		renderCell (spotEntity ('ipv4rspool', $pool_id));
 		echo "</td></tr>";
-		if (!empty ($poolInfo['vsconfig']))
+		if (strlen ($poolInfo['vsconfig']))
 			echo "<tr><th>VS config</th><td class='dashed slbconf'>${poolInfo['vsconfig']}</td></tr>";
-		if (!empty ($poolInfo['rsconfig']))
+		if (strlen ($poolInfo['rsconfig']))
 			echo "<tr><th>RS config</th><td class='dashed slbconf'>${poolInfo['rsconfig']}</td></tr>";
 		echo '</table>';
 		echo '</td><td>';
@@ -4088,9 +4088,9 @@ function renderVirtualService ($vsid)
 				echo "<tr><td colspan=2>";
 				renderLBCell ($object_id);
 				echo '</td></tr>';
-				if (!empty ($lbInfo['vsconfig']))
+				if (strlen ($lbInfo['vsconfig']))
 					echo "<tr><th>VS config</th><td class='dashed slbconf'>${lbInfo['vsconfig']}</td></tr>";
-				if (!empty ($lbInfo['rsconfig']))
+				if (strlen ($lbInfo['rsconfig']))
 					echo "<tr><th>RS config</th><td class='dashed slbconf'>${lbInfo['rsconfig']}</td></tr>";
 			}
 			echo '</table>';
@@ -4110,7 +4110,7 @@ function renderProgressBar ($percentage = 0, $theme = '')
 	global $root;
 	$done = ((int) ($percentage * 100));
 	echo "<img width=100 height=10 border=0 title='${done}%' src='${root}render_image.php?img=progressbar&done=${done}";
-	echo (empty ($theme) ? '' : "&theme=${theme}") . "'>";
+	echo (!strlen ($theme) ? '' : "&theme=${theme}") . "'>";
 }
 
 function renderRSPoolServerForm ($pool_id)
@@ -4295,23 +4295,23 @@ function renderRSPool ($pool_id)
 	amplifyCell ($poolInfo);
 
 	echo "<table border=0 class=objectview cellspacing=0 cellpadding=0>";
-	if (!empty ($poolInfo['name']))
+	if (strlen ($poolInfo['name']))
 		echo "<tr><td colspan=2 align=center><h1>{$poolInfo['name']}</h1></td></tr>";
 	echo "<tr><td class=pcleft>\n";
 
 	startPortlet ('Summary');
 	echo "<table border=0 cellspacing=0 cellpadding=3 width='100%'>\n";
-	if (!empty ($poolInfo['name']))
+	if (strlen ($poolInfo['name']))
 		echo "<tr><th width='50%' class=tdright>Pool name:</th><td class=tdleft>${poolInfo['name']}</td></tr>\n";
 	echo "<tr><th width='50%' class=tdright>Real servers:</th><td class=tdleft>" . count ($poolInfo['rslist']) . "</td></tr>\n";
 	echo "<tr><th width='50%' class=tdright>Load balancers:</th><td class=tdleft>" . count ($poolInfo['lblist']) . "</td></tr>\n";
 	printTagTRs ($poolInfo, makeHref(array('page'=>'ipv4rsplist', 'tab'=>'default'))."&");
-	if (!empty ($poolInfo['vsconfig']))
+	if (strlen ($poolInfo['vsconfig']))
 	{
 		echo "<tr><th width='50%' class=tdright>VS configuration:</th><td>&nbsp;</td></tr>\n";
 		echo "<tr><td colspan=2 class='dashed slbconf'>${poolInfo['vsconfig']}</td></tr>\n";
 	}
-	if (!empty ($poolInfo['rsconfig']))
+	if (strlen ($poolInfo['rsconfig']))
 	{
 		echo "<tr><th width='50%' class=tdright>RS configuration:</th><td>&nbsp;</td></tr>\n";
 		echo "<tr><td colspan=2 class='dashed slbconf'>${poolInfo['rsconfig']}</td></tr>\n";
@@ -4498,7 +4498,7 @@ function renderRealServerList ()
 			$last_pool_id = $rsinfo['rspool_id'];
 		}
 		echo "<tr valign=top class=row_${order}><td><a href='".makeHref(array('page'=>'ipv4rspool', 'pool_id'=>$rsinfo['rspool_id']))."'>";
-		echo empty ($pool_list[$rsinfo['rspool_id']]['name']) ? 'ANONYMOUS' : $pool_list[$rsinfo['rspool_id']]['name'];
+		echo !strlen ($pool_list[$rsinfo['rspool_id']]['name']) ? 'ANONYMOUS' : $pool_list[$rsinfo['rspool_id']]['name'];
 		echo '</a></td><td align=center>';
 		if ($rsinfo['inservice'] == 'yes')
 			printImageHREF ('inservice', 'in service');
@@ -4609,13 +4609,13 @@ function renderLivePTR ($id)
 		$print_cbox = FALSE;
 		if ($addr['name'] == $ptrname)
 		{
-			if (!empty ($ptrname))
+			if (strlen ($ptrname))
 			{
 				echo ' class=trok';
 				$cnt_match++;
 			}
 		}
-		elseif (empty ($addr['name']) or empty ($ptrname))
+		elseif (!strlen ($addr['name']) or !strlen ($ptrname))
 		{
 			echo ' class=trwarning';
 			$print_cbox = TRUE;
@@ -4628,7 +4628,7 @@ function renderLivePTR ($id)
 			$cnt_mismatch++;
 		}
 		echo "><td class='tdleft";
-		if (!empty ($range['addrlist'][$ip]['class']))
+		if (strlen ($range['addrlist'][$ip]['class']))
 			echo ' ' . $range['addrlist'][$ip]['class'];
 		echo "'><a href='".makeHref(array('page'=>'ipaddress', 'ip'=>$straddr))."'>${straddr}</a></td>";
 		echo "<td class=tdleft>${addr['name']}</td><td class=tdleft>${ptrname}</td><td>";
@@ -5255,7 +5255,7 @@ function renderFile ($file_id)
 	printf("<td class=tdleft>%s</td></tr>", formatTimestamp($file['atime']));
 
 	printTagTRs ($file, makeHref(array('page'=>'files', 'tab'=>'default'))."&");
-	if (!empty ($file['comment']))
+	if (strlen ($file['comment']))
 	{
 		echo '<tr><th class=slbconf>Comment:</th><td>&nbsp;</td></tr>';
 		echo '<tr><td colspan=2 class="dashed slbconf">' . string_insert_hrefs (htmlspecialchars ($file['comment'])) . '</td></tr>';
@@ -5497,7 +5497,7 @@ function printOpFormIntro ($opname, $extra = array(), $upload = FALSE)
 function niftyString ($string, $maxlen = 30)
 {
 	$cutind = '&hellip;'; // length is 1
-	if (empty ($string))
+	if (!strlen ($string))
 		return '&nbsp;';
 	if (mb_strlen ($string) > $maxlen)
 		return "<span title='" . htmlspecialchars ($string, ENT_QUOTES, 'UTF-8') . "'>" .
@@ -5534,12 +5534,12 @@ function printIPv4NetInfoTDs ($netinfo, $tdclass = 'tdleft', $indent = 0, $symbo
 		$symbol = '';
 	}
 	echo "<td class='${tdclass}' style='padding-left: " . ($indent * 16) . "px;'>";
-	if (!empty ($symbol))
+	if (strlen ($symbol))
 	{
-		if (!empty ($symbolurl))
+		if (strlen ($symbolurl))
 			echo "<a href='${symbolurl}'>";
 		printImageHREF ($symbol, $symbolurl);
-		if (!empty ($symbolurl))
+		if (strlen ($symbolurl))
 			echo '</a>';
 	}
 	if (isset ($netinfo['id']))
@@ -5621,7 +5621,7 @@ function renderCell ($cell)
 	case 'ipv4rspool':
 		echo "<table class=slbcell><tr><td>";
 		echo "<a href='${root}?page=ipv4rspool&pool_id=${cell['id']}'>";
-		echo empty ($cell['name']) ? "ANONYMOUS pool [${cell['id']}]" : niftyString ($cell['name']);
+		echo !strlen ($cell['name']) ? "ANONYMOUS pool [${cell['id']}]" : niftyString ($cell['name']);
 		echo "</a></td></tr><tr><td>";
 		printImageHREF ('RS pool');
 		echo "</td></tr><tr><td>";
@@ -5679,7 +5679,7 @@ function renderRouterCell ($dottedquad, $ifname, $object_id, $object_dname)
 {
 	global $root;
 	echo "<table class=slbcell><tr><td rowspan=3>${dottedquad}";
-	if (!empty ($ifname))
+	if (strlen ($ifname))
 		echo '@' . $ifname;
 	echo "</td>";
 	echo "<td><a href='${root}?page=object&object_id=${object_id}&hl_ipv4_addr=${dottedquad}'><strong>${object_dname}</strong></a></td>";
@@ -5879,7 +5879,7 @@ function dynamic_title_decoder ($path_position)
 		$poolInfo = spotEntity ('ipv4rspool', $_REQUEST['pool_id']);
 		return array
 		(
-			'name' => empty ($poolInfo['name']) ? 'ANONYMOUS' : $poolInfo['name'],
+			'name' => !strlen ($poolInfo['name']) ? 'ANONYMOUS' : $poolInfo['name'],
 			'params' => array ('pool_id' => $_REQUEST['pool_id'])
 		);
 	case 'ipv4vs':

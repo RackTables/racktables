@@ -576,7 +576,7 @@ function getObjectPortsAndLinks ($object_id)
 			$ret[$tmpkey]['remote_id'] = $remote_id;
 			unset ($result);
 			// only call displayedName() when necessary
-			if (empty ($ret[$tmpkey]['remote_object_name']) and !empty ($ret[$tmpkey]['remote_object_id']))
+			if (!strlen ($ret[$tmpkey]['remote_object_name']) and strlen ($ret[$tmpkey]['remote_object_id']))
 			{
 				$oi = spotEntity ('object', $ret[$tmpkey]['remote_object_id']);
 				$ret[$tmpkey]['remote_object_name'] = $oi['dname'];
@@ -588,7 +588,7 @@ function getObjectPortsAndLinks ($object_id)
 
 function commitAddRack ($name, $height = 0, $row_id = 0, $comment, $taglist)
 {
-	if ($row_id <= 0 or $height <= 0 or empty ($name))
+	if ($row_id <= 0 or $height <= 0 or !strlen ($name))
 		return FALSE;
 	$result = useInsertBlade
 	(
@@ -620,11 +620,11 @@ function commitAddObject ($new_name, $new_label, $new_barcode, $new_type_id, $ne
 		'RackObject',
 		array
 		(
-			'name' => empty ($new_name) ? 'NULL' : "'${new_name}'",
+			'name' => !strlen ($new_name) ? 'NULL' : "'${new_name}'",
 			'label' => "'${new_label}'",
-			'barcode' => empty ($new_barcode) ? 'NULL' : "'${new_barcode}'",
+			'barcode' => !strlen ($new_barcode) ? 'NULL' : "'${new_barcode}'",
 			'objtype_id' => $new_type_id,
-			'asset_no' => empty ($new_asset_no) ? 'NULL' : "'${new_asset_no}'"
+			'asset_no' => !strlen ($new_asset_no) ? 'NULL' : "'${new_asset_no}'"
 		)
 	);
 	if ($result1 == NULL)
@@ -653,9 +653,9 @@ function commitUpdateObject ($object_id = 0, $new_name = '', $new_label = '', $n
 		return FALSE;
 	}
 	global $dbxlink;
-	$new_asset_no = empty ($new_asset_no) ? 'NULL' : "'${new_asset_no}'";
-	$new_barcode = empty ($new_barcode) ? 'NULL' : "'${new_barcode}'";
-	$new_name = empty ($new_name) ? 'NULL' : "'${new_name}'";
+	$new_asset_no = !strlen ($new_asset_no) ? 'NULL' : "'${new_asset_no}'";
+	$new_barcode = !strlen ($new_barcode) ? 'NULL' : "'${new_barcode}'";
+	$new_name = !strlen ($new_name) ? 'NULL' : "'${new_name}'";
 	$query = "update RackObject set name=${new_name}, label='${new_label}', barcode=${new_barcode}, objtype_id='${new_type_id}', " .
 		"has_problems='${new_has_problems}', asset_no=${new_asset_no}, comment='${new_comment}' " .
 		"where id='${object_id}' limit 1";
@@ -719,7 +719,7 @@ function commitDeleteRack($rack_id)
 
 function commitUpdateRack ($rack_id, $new_name, $new_height, $new_row_id, $new_comment)
 {
-	if (empty ($rack_id) || empty ($new_name) || empty ($new_height))
+	if (!strlen ($rack_id) || !strlen ($new_name) || !strlen ($new_height))
 	{
 		showError ('Not all required args are present.', __FUNCTION__);
 		return FALSE;
@@ -1891,7 +1891,7 @@ function getRackspaceStats ()
 	{
 		$result = useSelectBlade ($item['q'], __FUNCTION__);
 		$row = $result->fetch (PDO::FETCH_NUM);
-		$ret[$item['txt']] = empty ($row[0]) ? 0 : $row[0];
+		$ret[$item['txt']] = !strlen ($row[0]) ? 0 : $row[0];
 		$result->closeCursor();
 		unset ($result);
 	}
@@ -1961,7 +1961,7 @@ mysql> select tag_id from TagStorage left join TagTree on tag_id = id where id i
 
 function commitUpdateDictionary ($chapter_no = 0, $dict_key = 0, $dict_value = '')
 {
-	if ($chapter_no <= 0 or $dict_key <= 0 or empty ($dict_value))
+	if ($chapter_no <= 0 or $dict_key <= 0 or !strlen ($dict_value))
 	{
 		showError ('Invalid args', __FUNCTION__);
 		die;
@@ -1981,7 +1981,7 @@ function commitUpdateDictionary ($chapter_no = 0, $dict_key = 0, $dict_value = '
 
 function commitSupplementDictionary ($chapter_no = 0, $dict_value = '')
 {
-	if ($chapter_no <= 0 or empty ($dict_value))
+	if ($chapter_no <= 0 or !strlen ($dict_value))
 	{
 		showError ('Invalid args', __FUNCTION__);
 		die;
@@ -2015,7 +2015,7 @@ function commitReduceDictionary ($chapter_no = 0, $dict_key = 0)
 
 function commitAddChapter ($chapter_name = '')
 {
-	if (empty ($chapter_name))
+	if (!strlen ($chapter_name))
 	{
 		showError ('Invalid args', __FUNCTION__);
 		die;
@@ -2029,7 +2029,7 @@ function commitAddChapter ($chapter_name = '')
 
 function commitUpdateChapter ($chapter_no = 0, $chapter_name = '')
 {
-	if ($chapter_no <= 0 or empty ($chapter_name))
+	if ($chapter_no <= 0 or !strlen ($chapter_name))
 	{
 		showError ('Invalid args', __FUNCTION__);
 		die;
@@ -2070,7 +2070,7 @@ function commitDeleteChapter ($chapter_no = 0)
 // nice <select> drop-downs.
 function readChapter ($chapter_name = '')
 {
-	if (empty ($chapter_name))
+	if (!strlen ($chapter_name))
 	{
 		showError ('invalid argument', __FUNCTION__);
 		return NULL;
@@ -2130,7 +2130,7 @@ function getAttrMap ()
 
 function commitUpdateAttribute ($attr_id = 0, $attr_name = '')
 {
-	if ($attr_id <= 0 or empty ($attr_name))
+	if ($attr_id <= 0 or !strlen ($attr_name))
 	{
 		showError ('Invalid args', __FUNCTION__);
 		die;
@@ -2150,7 +2150,7 @@ function commitUpdateAttribute ($attr_id = 0, $attr_name = '')
 
 function commitAddAttribute ($attr_name = '', $attr_type = '')
 {
-	if (empty ($attr_name))
+	if (!strlen ($attr_name))
 	{
 		showError ('Invalid args', __FUNCTION__);
 		die;
@@ -2300,7 +2300,7 @@ function commitUpdateAttrValue ($object_id = 0, $attr_id = 0, $value = '')
 		showError ('Invalid arguments', __FUNCTION__);
 		die;
 	}
-	if (empty ($value))
+	if (!strlen ($value))
 		return commitResetAttrValue ($object_id, $attr_id);
 	global $dbxlink;
 	$query1 = "select type as attr_type from Attribute where id = ${attr_id}";
@@ -2430,7 +2430,7 @@ function loadConfigCache ()
 function storeConfigVar ($varname = NULL, $varvalue = NULL)
 {
 	global $dbxlink;
-	if (empty ($varname) || $varvalue === NULL)
+	if (!strlen ($varname) || $varvalue === NULL)
 	{
 		showError ('Invalid arguments', __FUNCTION__);
 		return FALSE;
@@ -2465,7 +2465,7 @@ function getDatabaseVersion ()
 		die (__FUNCTION__ . ': SQL query #1 failed with error ' . $errorInfo[2]);
 	}
 	$rows = $result->fetchAll (PDO::FETCH_NUM);
-	if (count ($rows) != 1 || empty ($rows[0][0]))
+	if (count ($rows) != 1 || !strlen ($rows[0][0]))
 	{
 		$result->closeCursor();
 		die (__FUNCTION__ . ': Cannot guess database version. Config table is present, but DB_VERSION is missing or invalid. Giving up.');
@@ -2517,7 +2517,7 @@ function addRStoRSPool ($pool_id = 0, $rsip = '', $rsport = 0, $inservice = 'no'
 		showError ('Invalid arguments', __FUNCTION__);
 		die;
 	}
-	if (empty ($rsport) or $rsport == 0)
+	if (!strlen ($rsport) or $rsport === 0)
 		$rsport = 'NULL';
 	return useInsertBlade
 	(
@@ -2528,14 +2528,14 @@ function addRStoRSPool ($pool_id = 0, $rsip = '', $rsport = 0, $inservice = 'no'
 			'rsport' => $rsport,
 			'rspool_id' => $pool_id,
 			'inservice' => ($inservice == 'yes' ? "'yes'" : "'no'"),
-			'rsconfig' => (empty ($rsconfig) ? 'NULL' : "'${rsconfig}'")
+			'rsconfig' => (!strlen ($rsconfig) ? 'NULL' : "'${rsconfig}'")
 		)
 	);
 }
 
 function commitCreateVS ($vip = '', $vport = 0, $proto = '', $name = '', $vsconfig, $rsconfig, $taglist = array())
 {
-	if (empty ($vip) or $vport <= 0 or empty ($proto))
+	if (!strlen ($vip) or $vport <= 0 or !strlen ($proto))
 		return __FUNCTION__ . ': invalid arguments';
 	if (!useInsertBlade
 	(
@@ -2545,9 +2545,9 @@ function commitCreateVS ($vip = '', $vport = 0, $proto = '', $name = '', $vsconf
 			'vip' => "inet_aton('${vip}')",
 			'vport' => $vport,
 			'proto' => "'${proto}'",
-			'name' => (empty ($name) ? 'NULL' : "'${name}'"),
-			'vsconfig' => (empty ($vsconfig) ? 'NULL' : "'${vsconfig}'"),
-			'rsconfig' => (empty ($rsconfig) ? 'NULL' : "'${rsconfig}'")
+			'name' => (!strlen ($name) ? 'NULL' : "'${name}'"),
+			'vsconfig' => (!strlen ($vsconfig) ? 'NULL' : "'${vsconfig}'"),
+			'rsconfig' => (!strlen ($rsconfig) ? 'NULL' : "'${rsconfig}'")
 		)
 	))
 		return __FUNCTION__ . ': SQL insertion failed';
@@ -2569,8 +2569,8 @@ function addLBtoRSPool ($pool_id = 0, $object_id = 0, $vs_id = 0, $vsconfig = ''
 			'object_id' => $object_id,
 			'rspool_id' => $pool_id,
 			'vs_id' => $vs_id,
-			'vsconfig' => (empty ($vsconfig) ? 'NULL' : "'${vsconfig}'"),
-			'rsconfig' => (empty ($rsconfig) ? 'NULL' : "'${rsconfig}'")
+			'vsconfig' => (!strlen ($vsconfig) ? 'NULL' : "'${vsconfig}'"),
+			'rsconfig' => (!strlen ($rsconfig) ? 'NULL' : "'${rsconfig}'")
 		)
 	);
 }
@@ -2618,12 +2618,12 @@ function commitUpdateRS ($rsid = 0, $rsip = '', $rsport = 0, $rsconfig = '')
 		showError ("Invalid IP address '${rsip}'", __FUNCTION__);
 		die;
 	}
-	if (empty ($rsport) or $rsport == 0)
+	if (!strlen ($rsport) or $rsport === 0)
 		$rsport = 'NULL';
 	global $dbxlink;
 	$query =
 		"update IPv4RS set rsip = inet_aton('${rsip}'), rsport = ${rsport}, rsconfig = " .
-		(empty ($rsconfig) ? 'NULL' : "'${rsconfig}'") .
+		(!strlen ($rsconfig) ? 'NULL' : "'${rsconfig}'") .
 		" where id = ${rsid} limit 1";
 	$result = $dbxlink->query ($query);
 	if ($result == NULL)
@@ -2644,9 +2644,9 @@ function commitUpdateLB ($object_id = 0, $pool_id = 0, $vs_id = 0, $vsconfig = '
 	global $dbxlink;
 	$query =
 		"update IPv4LB set vsconfig = " .
-		(empty ($vsconfig) ? 'NULL' : "'${vsconfig}'") .
+		(!strlen ($vsconfig) ? 'NULL' : "'${vsconfig}'") .
 		', rsconfig = ' .
-		(empty ($rsconfig) ? 'NULL' : "'${rsconfig}'") .
+		(!strlen ($rsconfig) ? 'NULL' : "'${rsconfig}'") .
 		" where object_id = ${object_id} and rspool_id = ${pool_id} " .
 		"and vs_id = ${vs_id} limit 1";
 	$result = $dbxlink->exec ($query);
@@ -2658,7 +2658,7 @@ function commitUpdateLB ($object_id = 0, $pool_id = 0, $vs_id = 0, $vsconfig = '
 
 function commitUpdateVS ($vsid = 0, $vip = '', $vport = 0, $proto = '', $name = '', $vsconfig = '', $rsconfig = '')
 {
-	if ($vsid <= 0 or empty ($vip) or $vport <= 0 or empty ($proto))
+	if ($vsid <= 0 or !strlen ($vip) or $vport <= 0 or !strlen ($proto))
 	{
 		showError ('Invalid args', __FUNCTION__);
 		die;
@@ -2668,9 +2668,9 @@ function commitUpdateVS ($vsid = 0, $vip = '', $vport = 0, $proto = '', $name = 
 		"vip = inet_aton('${vip}'), " .
 		"vport = ${vport}, " .
 		"proto = '${proto}', " .
-		'name = ' . (empty ($name) ? 'NULL,' : "'${name}', ") .
-		'vsconfig = ' . (empty ($vsconfig) ? 'NULL,' : "'${vsconfig}', ") .
-		'rsconfig = ' . (empty ($rsconfig) ? 'NULL' : "'${rsconfig}'") .
+		'name = ' . (!strlen ($name) ? 'NULL,' : "'${name}', ") .
+		'vsconfig = ' . (!strlen ($vsconfig) ? 'NULL,' : "'${vsconfig}', ") .
+		'rsconfig = ' . (!strlen ($rsconfig) ? 'NULL' : "'${rsconfig}'") .
 		" where id = ${vsid} limit 1";
 	$result = $dbxlink->exec ($query);
 	if ($result === NULL)
@@ -2745,16 +2745,16 @@ function getRSPoolsForObject ($object_id = 0)
 
 function commitCreateRSPool ($name = '', $vsconfig = '', $rsconfig = '', $taglist = array())
 {
-	if (empty ($name))
+	if (!strlen ($name))
 		return __FUNCTION__ . ': invalid arguments';
 	if (!useInsertBlade
 	(
 		'IPv4RSPool',
 		array
 		(
-			'name' => (empty ($name) ? 'NULL' : "'${name}'"),
-			'vsconfig' => (empty ($vsconfig) ? 'NULL' : "'${vsconfig}'"),
-			'rsconfig' => (empty ($rsconfig) ? 'NULL' : "'${rsconfig}'")
+			'name' => (!strlen ($name) ? 'NULL' : "'${name}'"),
+			'vsconfig' => (!strlen ($vsconfig) ? 'NULL' : "'${vsconfig}'"),
+			'rsconfig' => (!strlen ($rsconfig) ? 'NULL' : "'${rsconfig}'")
 		)
 	))
 		return __FUNCTION__ . ': SQL insertion failed';
@@ -2779,9 +2779,9 @@ function commitUpdateRSPool ($pool_id = 0, $name = '', $vsconfig = '', $rsconfig
 	}
 	global $dbxlink;
 	$query = "update IPv4RSPool set " .
-		'name = ' . (empty ($name) ? 'NULL,' : "'${name}', ") .
-		'vsconfig = ' . (empty ($vsconfig) ? 'NULL,' : "'${vsconfig}', ") .
-		'rsconfig = ' . (empty ($rsconfig) ? 'NULL' : "'${rsconfig}'") .
+		'name = ' . (!strlen ($name) ? 'NULL,' : "'${name}', ") .
+		'vsconfig = ' . (!strlen ($vsconfig) ? 'NULL,' : "'${vsconfig}', ") .
+		'rsconfig = ' . (!strlen ($rsconfig) ? 'NULL' : "'${rsconfig}'") .
 		" where id = ${pool_id} limit 1";
 	$result = $dbxlink->exec ($query);
 	if ($result === NULL)
@@ -2859,7 +2859,7 @@ function getSLBConfig ($object_id)
 
 function commitSetInService ($rs_id = 0, $inservice = '')
 {
-	if ($rs_id <= 0 or empty ($inservice))
+	if ($rs_id <= 0 or !strlen ($inservice))
 	{
 		showError ('Invalid args', __FUNCTION__);
 		return NULL;
@@ -3010,7 +3010,7 @@ function deleteTagForEntity ($entity_realm, $entity_id, $tag_id)
 // Push a record into TagStorage unconditionally.
 function addTagForEntity ($realm = '', $entity_id, $tag_id)
 {
-	if (empty ($realm))
+	if (!strlen ($realm))
 		return FALSE;
 	return useInsertBlade
 	(
@@ -3077,7 +3077,7 @@ function createIPv4Prefix ($range = '', $name = '', $is_bcast = FALSE, $taglist 
 	$ip = $rangeArray[0];
 	$mask = $rangeArray[1];
 
-	if (empty ($ip) or empty ($mask))
+	if (!strlen ($ip) or !strlen ($mask))
 		return "Invalid IPv4 prefix '${range}'";
 	$ipL = ip2long($ip);
 	$maskL = ip2long($mask);
@@ -3155,7 +3155,7 @@ function loadScript ($name)
 
 function saveScript ($name, $text)
 {
-	if (empty ($name))
+	if (!strlen ($name))
 	{
 		showError ('Invalid argument');
 		return FALSE;
@@ -3481,7 +3481,7 @@ function getFileLinks ($file_id = 0)
 		}
 
 		// name needs to have some value for hrefs to work
-        if (empty($name))
+        if (!strlen ($name))
 			$name = sprintf("[Unnamed %s]", formatEntityName($row['entity_type']));
 
 		$ret[$row['id']] = array(
@@ -3604,7 +3604,7 @@ function commitReplaceFile ($file_id = 0, $contents)
 
 function commitUpdateFile ($file_id = 0, $new_name = '', $new_type = '', $new_comment = '')
 {
-	if ($file_id <= 0 or empty ($new_name) or empty ($new_type))
+	if ($file_id <= 0 or !strlen ($new_name) or !strlen ($new_type))
 	{
 		showError ('Not all required args are present.', __FUNCTION__);
 		return FALSE;

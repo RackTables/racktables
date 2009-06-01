@@ -61,7 +61,7 @@ function setConfigVar ($varname = '', $varvalue = '', $softfail = FALSE)
 		showError ('Configuration cache is unavailable', __FUNCTION__);
 		die;
 	}
-	if (empty ($varname))
+	if (!strlen ($varname))
 	{
 		showError ("Empty argument", __FUNCTION__);
 		die;
@@ -80,7 +80,7 @@ function setConfigVar ($varname = '', $varvalue = '', $softfail = FALSE)
 		showError ($errormsg, __FUNCTION__);
 		die;
 	}
-	if (empty ($varvalue) && $configCache[$varname]['emptyok'] != 'yes')
+	if (!strlen ($varvalue) && $configCache[$varname]['emptyok'] != 'yes')
 	{
 		$errormsg = "'${varname}' is configured to take non-empty value. Perhaps there was a reason to do so.";
 		if ($softfail)
@@ -88,7 +88,7 @@ function setConfigVar ($varname = '', $varvalue = '', $softfail = FALSE)
 		showError ($errormsg, __FUNCTION__);
 		die;
 	}
-	if (!empty ($varvalue) && $configCache[$varname]['vartype'] == 'uint' && (!is_numeric ($varvalue) or $varvalue < 0 ))
+	if (strlen ($varvalue) && $configCache[$varname]['vartype'] == 'uint' && (!is_numeric ($varvalue) or $varvalue < 0 ))
 	{
 		$errormsg = "'${varname}' can accept UINT values only";
 		if ($softfail)

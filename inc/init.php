@@ -112,7 +112,7 @@ if (!count ($configCache))
 
 require_once 'inc/code.php'; // for getRackCode()
 $rackCodeCache = loadScript ('RackCodeCache');
-if ($rackCodeCache == NULL or empty ($rackCodeCache))
+if ($rackCodeCache == NULL or !strlen ($rackCodeCache))
 {
 	$rackCode = getRackCode (loadScript ('RackCode'));
 	saveScript ('RackCodeCache', base64_encode (serialize ($rackCode)));

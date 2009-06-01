@@ -106,7 +106,7 @@ function permitted ($p = NULL, $t = NULL, $o = NULL, $annex = array())
 	$my_auto_tags = $auto_tags;
 	$my_auto_tags[] = array ('tag' => '$page_' . $p);
 	$my_auto_tags[] = array ('tag' => '$tab_' . $t);
-	if ($o === NULL and !empty ($op)) // $op can be set to empty string
+	if ($o === NULL and strlen ($op)) // $op can be set to empty string
 	{
 		$my_auto_tags[] = array ('tag' => '$op_' . $op);
 		$my_auto_tags[] = array ('tag' => '$any_op');
@@ -237,14 +237,14 @@ function queryLDAPServer ($username, $password)
 		return array ('result' => 'CAN');
 
 	// Decide on the username we will actually authenticate for.
-	if (isset ($LDAP_options['domain']) and !empty ($LDAP_options['domain']))
+	if (isset ($LDAP_options['domain']) and strlen ($LDAP_options['domain']))
 		$auth_user_name = $username . "@" . $LDAP_options['domain'];
 	elseif
 	(
 		isset ($LDAP_options['search_dn']) and
-		!empty ($LDAP_options['search_dn']) and
+		strlen ($LDAP_options['search_dn']) and
 		isset ($LDAP_options['search_attr']) and
-		!empty ($LDAP_options['search_attr'])
+		strlen ($LDAP_options['search_attr'])
 	)
 	{
 		$results = @ldap_search ($connect, $LDAP_options['search_dn'], '(' . $LDAP_options['search_attr'] . "=${username})", array("dn"));
@@ -279,9 +279,12 @@ function queryLDAPServer ($username, $password)
 	// Displayed name only makes sense for authenticated users anyway.
 	if
 	(
-		!empty ($LDAP_options['displayname_attrs']) and
-		!empty ($LDAP_options['search_dn']) and
-		!empty ($LDAP_options['search_attr'])
+		isset ($LDAP_options['displayname_attrs']) and
+		strlen ($LDAP_options['displayname_attrs']) and
+		isset ($LDAP_options['search_dn']) and
+		strlen ($LDAP_options['search_dn']) and
+		isset ($LDAP_options['search_attr']) and
+		strlen ($LDAP_options['search_attr'])
 	)
 	{
 		$results = @ldap_search
