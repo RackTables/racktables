@@ -11,7 +11,7 @@ if ($_REQUEST['op'] == 'addFile' && !isset($_FILES['file']['error'])) {
 }
 fixContext();
 
-if (empty ($op) or !isset ($ophandler[$pageno][$tabno][$op]))
+if (!strlen ($op) or !isset ($ophandler[$pageno][$tabno][$op]))
 {
 	showError ("Invalid request in operation broker: page '${pageno}', tab '${tabno}', op '${op}'", __FILE__);
 	die();
@@ -23,7 +23,7 @@ if (!isset ($delayauth[$pageno][$tabno][$op]) and !permitted())
 else
 {
 	$location = $ophandler[$pageno][$tabno][$op]();
-	if (empty ($location))
+	if (!strlen ($location))
 	{
 		showError ('Operation handler failed to return its status', __FILE__);
 	}

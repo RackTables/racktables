@@ -46,7 +46,7 @@ function queryGateway ($gwname, $questions)
 	while (!feof($pipes[1]))
 	{
 		$a = fgets ($pipes[1]);
-		if (empty ($a))
+		if (!strlen ($a))
 			continue;
 		// Somehow I got a space appended at the end. Kick it.
 		$answers[] = trim ($a);
@@ -88,9 +88,9 @@ function getSwitchVLANs ($object_id = 0)
 	$hwtype = $swtype = 'unknown';
 	foreach (getAttrValues ($object_id, TRUE) as $record)
 	{
-		if ($record['name'] == 'SW type' && !empty ($record['value']))
+		if ($record['name'] == 'SW type' && strlen ($record['value']))
 			$swtype = str_replace (' ', '+', $record['value']);
-		if ($record['name'] == 'HW type' && !empty ($record['value']))
+		if ($record['name'] == 'HW type' && strlen ($record['value']))
 			$hwtype = str_replace (' ', '+', $record['value']);
 	}
 	$endpoint = str_replace (' ', '+', $endpoints[0]);
@@ -146,7 +146,7 @@ function getSwitchVLANs ($object_id = 0)
 	foreach (explode (';', substr ($data[3], strlen ('OK!'))) as $pair)
 	{
 		list ($macaddr, $pair2) = explode ('=', $pair);
-		if (empty ($pair2))
+		if (!strlen ($pair2))
 			continue;
 		list ($vlanid, $ifname) = explode ('@', $pair2);
 		$maclist[$ifname][$vlanid][] = $macaddr;
@@ -168,9 +168,9 @@ function setSwitchVLANs ($object_id = 0, $setcmd)
 	$hwtype = $swtype = 'unknown';
 	foreach (getAttrValues ($object_id, TRUE) as $record)
 	{
-		if ($record['name'] == 'SW type' && !empty ($record['value']))
+		if ($record['name'] == 'SW type' && strlen ($record['value']))
 			$swtype = strtr ($record['value'], ' ', '+');
-		if ($record['name'] == 'HW type' && !empty ($record['value']))
+		if ($record['name'] == 'HW type' && strlen ($record['value']))
 			$hwtype = strtr ($record['value'], ' ', '+');
 	}
 	$endpoint = str_replace (' ', '+', $endpoints[0]);
@@ -266,7 +266,7 @@ function gwRecvFile ($endpoint, $handlername, &$output)
 function gwSendFileToObject ($object_id = 0, $handlername, $filetext = '')
 {
 	global $remote_username;
-	if ($object_id <= 0 or empty ($handlername))
+	if ($object_id <= 0 or !strlen ($handlername))
 		return oneLiner (160); // invalid arguments
 	$objectInfo = spotEntity ('object', $object_id);
 	$endpoints = findAllEndpoints ($object_id, $objectInfo['name']);
@@ -281,7 +281,7 @@ function gwSendFileToObject ($object_id = 0, $handlername, $filetext = '')
 function gwRecvFileFromObject ($object_id = 0, $handlername, &$output)
 {
 	global $remote_username;
-	if ($object_id <= 0 or empty ($handlername))
+	if ($object_id <= 0 or !strlen ($handlername))
 		return oneLiner (160); // invalid arguments
 	$objectInfo = spotEntity ('object', $object_id);
 	$endpoints = findAllEndpoints ($object_id, $objectInfo['name']);

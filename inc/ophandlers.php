@@ -59,7 +59,7 @@ function addPortForwarding ()
 	assertStringArg ('proto', __FUNCTION__);
 	assertStringArg ('description', __FUNCTION__, TRUE);
 	$remoteport = isset ($_REQUEST['remoteport']) ? $_REQUEST['remoteport'] : '';
-	if (empty ($remoteport))
+	if (!strlen ($remoteport))
 		$remoteport = $_REQUEST['localport'];
 
 	$error = newPortForwarding
@@ -140,7 +140,7 @@ function addPortForObject ()
 {
 	assertUIntArg ('object_id', __FUNCTION__);
 	assertStringArg ('port_name', __FUNCTION__, TRUE);
-	if (empty ($_REQUEST['port_name']))
+	if (!strlen ($_REQUEST['port_name']))
 		return buildRedirectURL (__FUNCTION__, 'ERR1');
 	$error = commitAddPort ($_REQUEST['object_id'], $_REQUEST['port_name'], $_REQUEST['port_type_id'], $_REQUEST['port_label'], $_REQUEST['port_l2address']);
 	if ($error != '')
@@ -158,10 +158,10 @@ function editPortForObject ()
 	assertUIntArg ('port_type_id', __FUNCTION__);
 	// tolerate empty value now to produce custom informative message later
 	assertStringArg ('name', __FUNCTION__, TRUE);
-	if (empty ($_REQUEST['name']))
+	if (!strlen ($_REQUEST['name']))
 		return buildRedirectURL (__FUNCTION__, 'ERR1');
 
-	if (isset ($_REQUEST['reservation_comment']) and !empty ($_REQUEST['reservation_comment']))
+	if (isset ($_REQUEST['reservation_comment']) and strlen ($_REQUEST['reservation_comment']))
 		$port_rc = '"' . $_REQUEST['reservation_comment'] . '"';
 	else
 		$port_rc = 'NULL';
@@ -236,7 +236,7 @@ function addMultiPorts ()
 	{
 		$parts = explode ('\r', $line);
 		reset ($parts);
-		if (empty ($parts[0]))
+		if (!strlen ($parts[0]))
 			continue;
 		else
 			$lines2[] = rtrim ($parts[0]);
@@ -292,7 +292,7 @@ http://www.cisco.com/en/US/products/hw/routers/ps274/products_tech_note09186a008
 				break;
 			case 'ssv1':
 				$words = explode (' ', $line);
-				if (empty ($words[0]) or empty ($words[1]))
+				if (!strlen ($words[0]) or !strlen ($words[1]))
 					continue;
 				$ports[] = array
 				(
@@ -380,7 +380,7 @@ function addIPv4Allocation ()
 	if ($error != '')
 		return buildRedirectURL (__FUNCTION__, 'ERR2', array ($error));
 	$address = getIPv4Address ($ip);
-	if ($address['reserved'] == 'yes' or !empty ($address['name']))
+	if ($address['reserved'] == 'yes' or strlen ($address['name']))
 	{
 		$release = getConfigVar ('IPV4_AUTO_RELEASE');
 		if ($release >= 1)
@@ -774,7 +774,7 @@ function updateObject ()
 		$attr_id = $_REQUEST["${i}_attr_id"];
 
 		// Field is empty, delete attribute and move on.
-		if (empty($_REQUEST["${i}_value"]))
+		if (!strlen ($_REQUEST["${i}_value"]))
 		{
 			commitResetAttrValue ($_REQUEST['object_id'], $attr_id);
 			continue;
@@ -798,7 +798,7 @@ function updateObject ()
 				showError ('Internal structure error', __FUNCTION__);
 				die;
 		}
-		if ($value == $oldvalue)
+		if ($value === $oldvalue) // ('' == 0), but ('' !== 0)
 			continue;
 
 		// Note if the queries succeed or not, it determines which page they see.
@@ -860,7 +860,7 @@ function addLotOfObjects()
 	assertUIntArg ('global_type_id', __FUNCTION__, TRUE);
 	assertStringArg ('namelist', __FUNCTION__, TRUE);
 	$global_type_id = $_REQUEST['global_type_id'];
-	if ($global_type_id == 0 or empty ($_REQUEST['namelist']))
+	if ($global_type_id == 0 or !strlen ($_REQUEST['namelist']))
 		$log = mergeLogs ($log, oneLiner (186));
 	else
 	{
@@ -871,7 +871,7 @@ function addLotOfObjects()
 		{
 			$parts = explode ('\r', $line);
 			reset ($parts);
-			if (empty ($parts[0]))
+			if (!strlen ($parts[0]))
 				continue;
 			else
 				$names2[] = rtrim ($parts[0]);
@@ -920,7 +920,6 @@ $msgcode['updateUI']['ERR'] = 125;
 function updateUI ()
 {
 	assertUIntArg ('num_vars', __FUNCTION__);
-	$error = '';
 
 	for ($i = 0; $i < $_REQUEST['num_vars']; $i++)
 	{
@@ -930,18 +929,14 @@ function updateUI ()
 		$varvalue = $_REQUEST["${i}_varvalue"];
 
 		// If form value = value in DB, don't bother updating DB
-		if ($varvalue == getConfigVar ($varname))
+		if ($varvalue === getConfigVar ($varname))
 			continue;
 
 		// Note if the queries succeed or not, it determines which page they see.
 		$error = setConfigVar ($varname, $varvalue, TRUE);
-		if (!empty ($error))
-			break;
+		if (strlen ($error))
+			return buildRedirectURL (__FUNCTION__, 'ERR', array ($error));
 	}
-
-	if ($error != '')
-		return buildRedirectURL (__FUNCTION__, 'ERR', array ($error));
-
 	return buildRedirectURL (__FUNCTION__, 'OK');
 }
 
@@ -1028,7 +1023,7 @@ function addRealServers ()
 	// Keep in mind, that the text will have HTML entities (namely '>') escaped.
 	foreach (explode ('\n', $rawtext) as $line)
 	{
-		if (empty ($line))
+		if (!strlen ($line))
 			continue;
 		$match = array ();
 		switch ($_REQUEST['format'])
@@ -1639,7 +1634,7 @@ function addRack ()
 		{
 			$parts = explode ('\r', $line);
 			reset ($parts);
-			if (empty ($parts[0]))
+			if (!strlen ($parts[0]))
 				continue;
 			else
 				$names2[] = rtrim ($parts[0]);

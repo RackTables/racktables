@@ -1,12 +1,7 @@
 <?php
 require 'inc/init.php';
 
-if (empty($_REQUEST['file_id']))
-{
-	showError ("Invalid file specified", __FILE__);
-	die();
-}
-
+assertUIntArg ('file_id', __FILE__);
 $pageno = 'file';
 $tabno = 'default';
 fixContext();
