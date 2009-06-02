@@ -686,45 +686,12 @@ function clearSticker ()
 		return buildRedirectURL (__FUNCTION__, 'ERR');
 }
 
+$msgcode['updateObjectAllocation']['OK'] = 63;
 function updateObjectAllocation ()
 {
 	assertUIntArg ('object_id', __FUNCTION__);
 
-	$is_submit = isset ($_REQUEST['got_atoms']);
-
-	if ($is_submit)
-	{
-		$object_id = $_REQUEST['object_id'];
-		$workingRacksData = array();
-		foreach ($_REQUEST['rackmulti'] as $cand_id)
-		{
-			if (!isset ($workingRacksData[$cand_id]))
-			{
-				$rackData = spotEntity ('rack', $cand_id);
-				if ($rackData == NULL)
-				{
-					showError ('rack not found', __FUNCTION__);
-					return;
-				}
-				amplifyCell ($rackData);
-				$workingRacksData[$cand_id] = $rackData;
-			}
-		}
-
-		foreach ($workingRacksData as &$rd)
-			applyObjectMountMask ($rd, $object_id);
-
-		$oldMolecule = getMoleculeForObject ($object_id);
-		$worldchanged = FALSE;
-		$log = array();
-		foreach ($workingRacksData as $rack_id => $rackData)
-		{
-			$logrecord = processGridForm ($rackData, 'F', 'T', $object_id);
-			$log[] = $logrecord;
-		}
-		return buildWideRedirectURL($log);
-	}
-	else
+	if (!isset ($_REQUEST['got_atoms']))
 	{
 		unset($_GET['page']);
 		unset($_GET['tab']);
@@ -732,8 +699,64 @@ function updateObjectAllocation ()
 		unset($_POST['page']);
 		unset($_POST['tab']);
 		unset($_POST['op']);
-		return buildWideRedirectURL(array(), NULL, NULL, array_merge($_GET, $_POST));
+		return buildWideRedirectURL (array(), NULL, NULL, array_merge ($_GET, $_POST));
 	}
+	$object_id = $_REQUEST['object_id'];
+	$workingRacksData = array();
+	foreach ($_REQUEST['rackmulti'] as $cand_id)
+	{
+		if (!isset ($workingRacksData[$cand_id]))
+		{
+			$rackData = spotEntity ('rack', $cand_id);
+			if ($rackData == NULL)
+			{
+				showError ('rack not found', __FUNCTION__);
+				return;
+			}
+			amplifyCell ($rackData);
+			$workingRacksData[$cand_id] = $rackData;
+		}
+	}
+
+	foreach ($workingRacksData as &$rd)
+		applyObjectMountMask ($rd, $object_id);
+
+	$oldMolecule = getMoleculeForObject ($object_id);
+	$changecnt = 0;
+	$log = array();
+	foreach ($workingRacksData as $rack_id => $rackData)
+	{
+		$logrecord = processGridForm ($rackData, 'F', 'T', $object_id);
+		$log[] = $logrecord;
+		if ($logrecord['code'] == 300)
+			continue;
+		$changecnt++;
+		// Reload our working copy after form processing.
+		$rackData = spotEntity ('rack', $cand_id);
+		amplifyCell ($rackData);
+		applyObjectMountMask ($rackData, $object_id);
+		$workingRacksData[$rack_id] = $rackData;
+	}
+	if (!$changecnt)
+		return buildRedirectURL (__FUNCTION__, 'OK', $changecnt);
+	// Log a record.
+	$newMolecule = getMoleculeForObject ($object_id);
+	$oc = count ($oldMolecule);
+	$nc = count ($newMolecule);
+	$omid = $oc ? createMolecule ($oldMolecule) : 'NULL';
+	$nmid = $nc ? createMolecule ($newMolecule) : 'NULL';
+	global $remote_username;
+	$comment = empty ($_REQUEST['comment']) ? 'NULL' : "'${_REQUEST['comment']}'";
+	$query =
+		"insert into MountOperation(object_id, old_molecule_id, new_molecule_id, user_name, comment) " .
+		"values (${object_id}, ${omid}, ${nmid}, '${remote_username}', ${comment})";
+	global $dbxlink;
+	$result = $dbxlink->query ($query);
+	if ($result == NULL)
+		$log[] = array ('code' => 500, 'message' => 'SQL query failed during history logging.');
+	else
+		$log[] = array ('code' => 200, 'message' => 'History logged.');
+	return buildWideRedirectURL ($log);
 }
 
 $msgcode['updateObject']['OK'] = 16;
