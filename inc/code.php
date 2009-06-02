@@ -1241,7 +1241,8 @@ function findAutoTagWarnings ($expr)
 			}
 		case 'SYNT_NOT_EXPR':
 			return $self ($expr['load']);
-		case 'SYNT_BOOLOP':
+		case 'SYNT_AND_EXPR':
+		case 'SYNT_EXPR':
 			return array_merge
 			(
 				$self ($expr['left']),
@@ -1250,7 +1251,7 @@ function findAutoTagWarnings ($expr)
 		default:
 			return array (array
 			(
-				'header' => 'internal error',
+				'header' => "internal error in ${self}",
 				'class' => 'error',
 				'text' => "Skipped expression of unknown type '${expr['type']}'"
 			));
@@ -1279,7 +1280,8 @@ function findTagWarnings ($expr)
 			));
 		case 'SYNT_NOT_EXPR':
 			return $self ($expr['load']);
-		case 'SYNT_BOOLOP':
+		case 'SYNT_AND_EXPR':
+		case 'SYNT_EXPR':
 			return array_merge
 			(
 				$self ($expr['left']),
@@ -1288,7 +1290,7 @@ function findTagWarnings ($expr)
 		default:
 			return array (array
 			(
-				'header' => 'internal error',
+				'header' => "internal error in ${self}",
 				'class' => 'error',
 				'text' => "Skipped expression of unknown type '${expr['type']}'"
 			));
@@ -1325,7 +1327,8 @@ function referencedPredicate ($pname, $expr)
 			return $pname == $expr['load'];
 		case 'SYNT_NOT_EXPR':
 			return $self ($pname, $expr['load']);
-		case 'SYNT_BOOLOP':
+		case 'SYNT_AND_EXPR':
+		case 'SYNT_EXPR':
 			return $self ($pname, $expr['left']) or $self ($pname, $expr['right']);
 		default: // This is actually an internal error.
 			return FALSE;
@@ -1352,20 +1355,24 @@ function invariantExpression ($expr)
 			return 'sometimes something';
 		case 'SYNT_NOT_EXPR':
 			return $self ($expr['load']);
-		case 'SYNT_BOOLOP':
+		case 'SYNT_AND_EXPR':
+			$leftanswer = $self ($expr['left']);
+			$rightanswer = $self ($expr['right']);
+			// "false and anything" is always false and thus const
+			if ($leftanswer == 'always false' or $rightanswer == 'always false')
+				return 'always false';
+			// "true and true" is true
+			if ($leftanswer == 'always true' and $rightanswer == 'always true')
+				return 'always true';
+			return '';
+		case 'SYNT_EXPR':
 			$leftanswer = $self ($expr['left']);
 			$rightanswer = $self ($expr['right']);
 			// "true or anything" is always true and thus const
-			if ($expr['subtype'] == 'or' and ($leftanswer == 'always true' or $rightanswer == 'always true'))
-				return 'always true';
-			// "false and anything" is always false and thus const
-			if ($expr['subtype'] == 'and' and ($leftanswer == 'always false' or $rightanswer == 'always false'))
-				return 'always false';
-			// "true and true" is true
-			if ($expr['subtype'] == 'and' and ($leftanswer == 'always true' and $rightanswer == 'always true'))
+			if ($leftanswer == 'always true' or $rightanswer == 'always true')
 				return 'always true';
 			// "false or false" is false
-			if ($expr['subtype'] == 'or' and ($leftanswer == 'always false' and $rightanswer == 'always false'))
+			if ($leftanswer == 'always false' and $rightanswer == 'always false')
 				return 'always false';
 			return '';
 		default: // This is actually an internal error.
