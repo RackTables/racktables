@@ -672,12 +672,12 @@ function getParseTreeFromLexems ($lexems)
 						'type' => 'SYNT_GRANT',
 						'lineno' => $stacktop['lineno'],
 						'decision' => $stacksecondtop['type'],
-						'condition' => $stacktop
+						'condition' => isset ($stacktop['load']) ? $stacktop['load'] : $stacktop
 					)
 				);
 				continue;
 			}
-			// DEFINE ::= define PREDICATE
+			// DEFINITION ::= DEFINE EXPRESSION
 			if
 			(
 				$stacktop['type'] == 'SYNT_EXPR' and
@@ -695,7 +695,7 @@ function getParseTreeFromLexems ($lexems)
 						'type' => 'SYNT_DEFINITION',
 						'lineno' => $stacktop['lineno'],
 						'term' => $stacksecondtop['load'],
-						'definition' => $stacktop['load']
+						'definition' => isset ($stacktop['load']) ? $stacktop['load'] : $stacktop
 					)
 				);
 				continue;
@@ -722,7 +722,7 @@ function getParseTreeFromLexems ($lexems)
 						'type' => 'SYNT_ADJUSTMENT',
 						'lineno' => $stacktop['lineno'],
 						'modlist' => $stackthirdtop['load'],
-						'condition' => $stacktop['load']
+						'condition' => isset ($stacktop['load']) ? $stacktop['load'] : $stacktop
 					)
 				);
 				continue;
