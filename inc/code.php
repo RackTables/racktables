@@ -328,11 +328,14 @@ function getParseTreeFromLexems ($lexems)
 			// correct sentence base on the stack and some "and {something}" items
 			// on the input tape, hence let's detect this specific case and insist
 			// on "shift" action to make SYNT_AND_EXPR parsing hungry.
+			// P.S. Same action is taken for SYNT_EXPR (logical-OR) to prevent
+			// premature reduction of "condition" for grant/definition/context
+			// modifier sentences. The shift tries to be conservative, it advances
+			// by only one token on the tape.
 			if
 			(
-				$stacktop['type'] == 'SYNT_AND_EXPR' and
-				($done < $todo) and
-				$lexems[$done]['type'] == 'LEX_AND'
+				$stacktop['type'] == 'SYNT_AND_EXPR' and $done < $todo and $lexems[$done]['type'] == 'LEX_AND' or
+				$stacktop['type'] == 'SYNT_EXPR' and $done < $todo and $lexems[$done]['type'] == 'LEX_OR'
 			)
 			{
 				// shift!
@@ -444,25 +447,6 @@ function getParseTreeFromLexems ($lexems)
 				);
 				continue;
 			}
-			// CTXMODLIST ::= CTXMOD
-			if
-			(
-				$stacktop['type'] == 'SYNT_CTXMOD'
-			)
-			{
-				array_pop ($stack);
-				array_push
-				(
-					$stack,
-					array
-					(
-						'type' => 'SYNT_CTXMODLIST',
-						'lineno' => $stacktop['lineno'],
-						'load' => array ($stacktop['load'])
-					)
-				);
-				continue;
-			}
 			// CTXMODLIST ::= CTXMODLIST CTXMOD
 			if
 			(
@@ -480,6 +464,25 @@ function getParseTreeFromLexems ($lexems)
 						'type' => 'SYNT_CTXMODLIST',
 						'lineno' => $stacktop['lineno'],
 						'load' => array_merge ($stacksecondtop['load'], array ($stacktop['load']))
+					)
+				);
+				continue;
+			}
+			// CTXMODLIST ::= CTXMOD
+			if
+			(
+				$stacktop['type'] == 'SYNT_CTXMOD'
+			)
+			{
+				array_pop ($stack);
+				array_push
+				(
+					$stack,
+					array
+					(
+						'type' => 'SYNT_CTXMODLIST',
+						'lineno' => $stacktop['lineno'],
+						'load' => array ($stacktop['load'])
 					)
 				);
 				continue;
@@ -669,7 +672,7 @@ function getParseTreeFromLexems ($lexems)
 						'type' => 'SYNT_GRANT',
 						'lineno' => $stacktop['lineno'],
 						'decision' => $stacksecondtop['type'],
-						'condition' => $stacktop['load']
+						'condition' => $stacktop
 					)
 				);
 				continue;
