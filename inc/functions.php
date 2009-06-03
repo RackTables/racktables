@@ -1658,7 +1658,7 @@ function nodeIsCollapsed ($node)
 function loadOwnIPv4Addresses (&$node)
 {
 	$toscan = array();
-	if (!count ($node['kids']))
+	if (!isset ($node['kids']) or !count ($node['kids']))
 		$toscan[] = array ('i32_first' => $node['db_first'], 'i32_last' => $node['db_last']);
 	else
 		foreach ($node['kids'] as $nested)
