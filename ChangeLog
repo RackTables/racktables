@@ -1,4 +1,4 @@
-0.17.1
+0.17.1 2009-06-03
 	bugfix: tags were not displayed on "File" page
 	bugfix: multiline comment for an added file was stored incorrectly
 	bugfix: user's displayed name was sometimes lost with LDAP auth
