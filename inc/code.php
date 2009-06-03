@@ -951,7 +951,8 @@ function firstUnrefPredicate ($plist, $expr)
 			return in_array ($expr['load'], $plist) ? NULL : $expr['load'];
 		case 'SYNT_NOT_EXPR':
 			return $self ($plist, $expr['load']);
-		case 'SYNT_BOOLOP':
+		case 'SYNT_EXPR':
+		case 'SYNT_AND_EXPR':
 			if (($tmp = $self ($plist, $expr['left'])) !== NULL)
 				return $tmp;
 			if (($tmp = $self ($plist, $expr['right'])) !== NULL)
