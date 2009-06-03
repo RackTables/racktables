@@ -247,9 +247,9 @@ CREATE TABLE `LDAPCache` (
 
 			break;
 		case '0.17.1':
+			$query[] = "ALTER TABLE Dictionary DROP KEY `chap_to_key`";
 			// Token set has changed, so the cache isn't valid any more.
 			$query[] = "UPDATE Script SET script_text = NULL WHERE script_name = 'RackCodeCache'";
-			$query[] = "ALTER TABLE Dictionary DROP KEY `chap_to_key`;";
 			$query[] = "UPDATE Config SET varvalue = '0.17.1' WHERE varname = 'DB_VERSION'";
 		default:
 			showFailure ("executeUpgradeBatch () failed, because batch '${batchid}' isn't defined", __FILE__);
