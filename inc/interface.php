@@ -1028,7 +1028,7 @@ function renderRackObject ($object_id)
 				if ($allocpeer['object_id'] == $object_id)
 					continue;
 				echo $prefix . "<a href='".makeHref(array('page'=>'object', 'object_id'=>$allocpeer['object_id']))."'>";
-				if (strlen ($allocpeer['osif']))
+				if (isset ($allocpeer['osif']) and strlen ($allocpeer['osif']))
 					echo $allocpeer['osif'] . '@';
 				echo $allocpeer['object_name'] . '</a>';
 				$prefix = '; ';
@@ -1355,7 +1355,7 @@ function renderIPv4ForObject ($object_id)
 			if ($allocpeer['object_id'] == $object_id)
 				continue;
 			echo $prefix . "<a href='".makeHref(array('page'=>'object', 'object_id'=>$allocpeer['object_id']))."'>";
-			if (strlen ($allocpeer['osif']))
+			if (isset ($allocpeer['osif']) and strlen ($allocpeer['osif']))
 				echo $allocpeer['osif'] . '@';
 			echo $allocpeer['object_name'] . '</a>';
 			$prefix = '; ';
@@ -2681,8 +2681,8 @@ function renderNATv4ForObject ($object_id)
 
 		foreach ($alloclist as $dottedquad => $alloc)
 		{
-			$name = !strlen ($alloc['addrinfo']['name']) ? '' : (' (' . niftyString ($alloc['addrinfo']['name']) . ')');
-			$osif = !strlen ($alloc['osif']) ? '' : ($alloc['osif'] . ': ');
+			$name = (!isset ($alloc['addrinfo']['name']) or !strlen ($alloc['addrinfo']['name'])) ? '' : (' (' . niftyString ($alloc['addrinfo']['name']) . ')');
+			$osif = (!isset ($alloc['osif']) or !strlen ($alloc['osif'])) ? '' : ($alloc['osif'] . ': ');
 			echo "<option value='${dottedquad}'>${osif}${dottedquad}${name}</option>";
 		}
 
