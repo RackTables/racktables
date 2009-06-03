@@ -6,6 +6,7 @@
 	bugfix: IPv4 address picker window was broken
 	bugfix: string value "0" was incorrectly handled, when displaying or entering data
 	bugfix: rackspace allocation history recording did not work in 0.17.0
+	bugfix: boolean expressions parsing in RackCode now honours priorities
 	update: removed unused database index
 0.17.0 2009-05-20
 	new feature: file attachments (by Aaron)
