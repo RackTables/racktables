@@ -360,7 +360,7 @@ switch ($user_auth_src)
 		{
 			header ('WWW-Authenticate: Basic realm="RackTables upgrade"');
 			header ('HTTP/1.0 401 Unauthorized');
-			showError ('You must be authenticated as an administrator to complete the upgrade.', __FILE__);
+			showFailure ('You must be authenticated as an administrator to complete the upgrade.', __FILE__);
 			die;
 		}
 		break; // cleared
@@ -371,12 +371,12 @@ switch ($user_auth_src)
 			!strlen ($_SERVER['REMOTE_USER'])
 		)
 		{
-			showError ('System misconfiguration. The web-server didn\'t authenticate the user, although ought to do.');
+			showFailure ('System misconfiguration. The web-server didn\'t authenticate the user, although ought to do.');
 			die;
 		}
 		break; // cleared
 	default:
-		showError ('authentication source misconfiguration', __FILE__);
+		showFailure ('authentication source misconfiguration', __FILE__);
 		die;
 }
 
