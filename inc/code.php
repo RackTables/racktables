@@ -275,7 +275,7 @@ function spotPayload ($text, $reqtype = 'SYNT_CODETEXT')
 	// The only possible way to "accept" is to have sole starting
 	// nonterminal on the stack (and it must be of the requested class).
 	if (count ($stack) == 1 and $stack[0]['type'] == $reqtype)
-		return array ('result' => 'ACK', 'load' => $stack[0]['load']);
+		return array ('result' => 'ACK', 'load' => isset ($stack[0]['load']) ? $stack[0]['load'] : $stack[0]);
 	// No luck. Prepare to complain.
 	if ($lineno = locateSyntaxError ($stack))
 		return array ('result' => 'NAK', 'load' => "Syntax error for type '${reqtype}' near line ${lineno}");
