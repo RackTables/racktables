@@ -1,5 +1,8 @@
 <?php
 
+
+ob_start();
+try {
 require 'inc/init.php';
 
 assertStringArg ('img', __FILE__);
@@ -33,6 +36,16 @@ switch ($_REQUEST['img'])
 	default:
 		renderError();
 }
+
+ob_end_flush();
+}
+catch (Exception $e)
+{
+	ob_end_clean();
+	printException($e);
+}
+
+
 
 //------------------------------------------------------------------------
 function renderError ()
@@ -181,5 +194,4 @@ function renderFilePreview ($file_id = 0)
 	imagepng ($image);
 	imagedestroy ($image);
 }
-
 ?>

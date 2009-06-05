@@ -1,5 +1,6 @@
 <?php
-
+ob_start();
+try {
 require 'inc/init.php';
 // no ctx override is necessary
 fixContext();
@@ -110,3 +111,9 @@ else
 	</table>
 </body>
 </html>
+<?php
+	ob_end_flush();
+} catch (Exception $e) {
+	ob_end_clean();
+	printException($e);
+}

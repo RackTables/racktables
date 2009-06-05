@@ -1,4 +1,6 @@
 <?php
+ob_start();
+try {
 
 require 'inc/init.php';
 $_REQUEST['page'] = 'perms';
@@ -27,6 +29,13 @@ switch ($_REQUEST['ac'])
 		else
 			echo "NAK\n".$result['load'];
 	break;
+}
+ob_end_flush();
+}
+catch (Exception $e)
+{
+	ob_end_clean();
+	printException($e);
 }
 
 

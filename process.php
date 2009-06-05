@@ -1,5 +1,6 @@
 <?php
-
+ob_start();
+try {
 // Include init after ophandlers, not before, so local.php can redefine things later.
 require 'inc/ophandlers.php';
 require 'inc/init.php';
@@ -29,5 +30,13 @@ else
 	}
 }
 header ("Location: " . $location);
+ob_end_flush();
+}
+catch (Exception $e)
+{
+	ob_end_clean();
+	printException($e);
+}
+?>
 
 ?>
