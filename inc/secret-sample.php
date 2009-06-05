@@ -12,7 +12,7 @@ $db_password = 'password';
 // Default setting is to authenticate users locally, but it is possible to
 // employ existing LDAP or Apache userbase. Uncommenting below two lines MAY
 // help in switching authentication to LDAP completely.
-// More info: http://racktables.org/trac/wiki/RackTablesUserAuthentication
+// More info: http://racktables.org/trac/wiki/RackTablesAdminGuide
 #$user_auth_src = 'ldap';
 #$require_local_account = FALSE;
 
