@@ -1098,7 +1098,19 @@ function fixContext ()
 	{
 		// Each page listed in the map above requires one uint argument.
 		assertUIntArg ($page[$pageno]['bypass'], __FUNCTION__);
-		$target = spotEntity ($etype_by_pageno[$pageno], $_REQUEST[$page[$pageno]['bypass']]);
+		$target_realm = $etype_by_pageno[$pageno];
+		$target_id = $_REQUEST[$page[$pageno]['bypass']];
+		if (NULL === ($target = spotEntity ($target_realm, $target_id)))
+		{
+			showError
+				(
+					"The record you are requesting isn't in the database (any more)\n" .
+					"realm: '${target_realm}'\n" .
+					"id: '${target_id}'",
+					__FUNCTION__
+				);
+			die;
+		}
 		$target_given_tags = $target['etags'];
 		// Don't reset autochain, because auth procedures could push stuff there in.
 		// Another important point is to ignore 'user' realm, so we don't infuse effective
