@@ -1,5 +1,6 @@
 0.17.2
 	update: show appropriate message, if a record cannot be found
+	bugfix: do not produce PHP warning on LivePTR tab
 0.17.1 2009-06-03
 	bugfix: tags were not displayed on "File" page
 	bugfix: multiline comment for an added file was stored incorrectly

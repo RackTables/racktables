@@ -4628,7 +4628,7 @@ function renderLivePTR ($id)
 			$cnt_mismatch++;
 		}
 		echo "><td class='tdleft";
-		if (strlen ($range['addrlist'][$ip]['class']))
+		if (isset ($range['addrlist'][$ip]['class']) and strlen ($range['addrlist'][$ip]['class']))
 			echo ' ' . $range['addrlist'][$ip]['class'];
 		echo "'><a href='".makeHref(array('page'=>'ipaddress', 'ip'=>$straddr))."'>${straddr}</a></td>";
 		echo "<td class=tdleft>${addr['name']}</td><td class=tdleft>${ptrname}</td><td>";
