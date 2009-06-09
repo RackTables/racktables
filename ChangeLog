@@ -1,5 +1,6 @@
 0.17.2
 	update: show appropriate message, if a record cannot be found
+	update: add OS, router, fibre switch dictionary entries for ticket 238 (by Aaron)
 	bugfix: do not produce PHP warning on LivePTR tab
 0.17.1 2009-06-03
 	bugfix: tags were not displayed on "File" page

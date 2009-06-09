@@ -33,6 +33,7 @@ function getDBUpgradePath ($v1, $v2)
 		'0.16.6',
 		'0.17.0',
 		'0.17.1',
+		'0.17.2',
 	);
 	if (!in_array ($v1, $versionhistory) or !in_array ($v2, $versionhistory))
 		return NULL;
@@ -251,6 +252,35 @@ CREATE TABLE `LDAPCache` (
 			// Token set has changed, so the cache isn't valid any more.
 			$query[] = "UPDATE Script SET script_text = NULL WHERE script_name = 'RackCodeCache'";
 			$query[] = "UPDATE Config SET varvalue = '0.17.1' WHERE varname = 'DB_VERSION'";
+			break;
+		case '0.17.2':
+			// Many dictionary changes were made... remove all dictvendor entries and install fresh.
+			// Take care not to erase locally added records. 0.17.1 ends with max key 988
+			$query[] = "INSERT INTO `Chapter` (`id`, `sticky`, `name`) VALUES (26,'no','fibre channel switch models')";
+			$query[] = 'DELETE FROM Dictionary WHERE ((chapter_id BETWEEN 11 AND 14) or (chapter_id BETWEEN 16 AND 19) ' .
+				'or (chapter_id BETWEEN 21 AND 25)) and dict_key <= 988';
+			$f = fopen ("install/init-dictvendors.sql", 'r');
+			if ($f === FALSE)
+			{
+				showFailure ("Failed to open install/init-dictvendors.sql for reading");
+				die;
+			}
+			$longq = '';
+			while (!feof ($f))
+			{
+				$line = fgets ($f);
+				if (ereg ('^--', $line))
+					continue;
+				$longq .= $line;
+			}
+			fclose ($f);
+			foreach (explode (";\n", $longq) as $dict_query)
+			{
+				if (empty ($dict_query))
+					continue;
+				$query[] = $dict_query;
+			}
+			$query[] = "UPDATE Config SET varvalue = '0.17.2' WHERE varname = 'DB_VERSION'";
 			break;
 		default:
 			showFailure ("executeUpgradeBatch () failed, because batch '${batchid}' isn't defined", __FILE__);

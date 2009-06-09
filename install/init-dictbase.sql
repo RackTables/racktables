@@ -99,12 +99,12 @@ INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_id`) VALUES
 (965,2,25);
 
 INSERT INTO `Chapter` (`id`, `sticky`, `name`) VALUES
+(1,'yes','RackObjectType'),
+(2,'yes','PortType'),
 (11,'no','server models'),
 (12,'no','network switch models'),
 (13,'no','server OS type'),
 (14,'no','switch OS type'),
-(1,'yes','RackObjectType'),
-(2,'yes','PortType'),
 (16,'no','router OS type'),
 (17,'no','router models'),
 (18,'no','disk array models'),
@@ -113,7 +113,8 @@ INSERT INTO `Chapter` (`id`, `sticky`, `name`) VALUES
 (22,'no','multiplexer models'),
 (23,'no','console models'),
 (24,'no','network security models'),
-(25,'no','wireless models');
+(25,'no','wireless models'),
+(26,'no','fibre channel switch models');
 
 INSERT INTO `PortCompat` (`type1`, `type2`) VALUES
 (17,17),
@@ -268,6 +269,6 @@ INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, descriptio
 ('FILTER_SUGGEST_TAGS','yes','string','no','no','Suggest tags in list filter'),
 ('FILTER_SUGGEST_PREDICATES','yes','string','no','no','Suggest predicates in list filter'),
 ('FILTER_SUGGEST_EXTRA','no','string','no','no','Suggest extra expression in list filter'),
-('DB_VERSION','0.17.1','string','no','yes','Database version.');
+('DB_VERSION','0.17.2','string','no','yes','Database version.');
 
 INSERT INTO `Script` VALUES ('RackCode','allow {$userid_1}');
