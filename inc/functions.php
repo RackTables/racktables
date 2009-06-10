@@ -1100,17 +1100,7 @@ function fixContext ()
 		assertUIntArg ($page[$pageno]['bypass'], __FUNCTION__);
 		$target_realm = $etype_by_pageno[$pageno];
 		$target_id = $_REQUEST[$page[$pageno]['bypass']];
-		if (NULL === ($target = spotEntity ($target_realm, $target_id)))
-		{
-			showError
-				(
-					"The record you are requesting isn't in the database (any more)\n" .
-					"realm: '${target_realm}'\n" .
-					"id: '${target_id}'",
-					__FUNCTION__
-				);
-			die;
-		}
+		$target = spotEntity ($target_realm, $target_id);
 		$target_given_tags = $target['etags'];
 		// Don't reset autochain, because auth procedures could push stuff there in.
 		// Another important point is to ignore 'user' realm, so we don't infuse effective

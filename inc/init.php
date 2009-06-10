@@ -23,6 +23,7 @@ if (substr ($root, -1) != '/')
 	$root .= '/';
 
 // This is the first thing we need to do.
+require_once 'inc/exceptions.php';
 require_once 'inc/config.php';
 
 // What we need first is database and interface functions.

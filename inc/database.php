@@ -350,7 +350,10 @@ function spotEntity ($realm, $id)
 	global $entityCache;
 	if (isset ($entityCache['complete'][$realm]))
 	// Emphasize the absence of record, if listCells() has already been called.
-		return (isset ($entityCache['complete'][$realm][$id])) ? $entityCache['complete'][$realm][$id] : NULL;
+		if (isset ($entityCache['complete'][$realm][$id]))
+			return $entityCache['complete'][$realm][$id];
+		else
+			throw new EntityNotFoundException ($realm, $id);
 	elseif (isset ($entityCache['partial'][$realm][$id]))
 		return $entityCache['partial'][$realm][$id];
 	global $SQLSchema;
@@ -394,7 +397,7 @@ function spotEntity ($realm, $id)
 			);
 	unset ($result);
 	if (!isset ($ret['realm'])) // no rows were returned
-		return NULL;
+		throw new EntityNotFoundException ($realm, $id);
 	$ret['etags'] = getExplicitTagsOnly ($ret['etags']);
 	$ret['itags'] = getImplicitTags ($ret['etags']);
 	$ret['atags'] = generateEntityAutoTags ($ret);
