@@ -96,7 +96,8 @@ INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_id`) VALUES
 (798,24,0),
 (965,1,0),
 (965,3,0),
-(965,2,25);
+(965,2,25),
+(1055,2,26);
 
 INSERT INTO `Chapter` (`id`, `sticky`, `name`) VALUES
 (1,'yes','RackObjectType'),
@@ -217,7 +218,8 @@ INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES
 (2,681,'async serial (DB-9)'),
 (2,682,'async serial (DB-25)'),
 (1,798,'Network security'),
-(1,965,'Wireless');
+(1,965,'Wireless'),
+(1,1055,'FC switch');
 
 INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES
 ('color_F','8fbfbf','string','no','yes','HSV: 180-25-75. Free atoms, they are available for allocation to objects.'),
