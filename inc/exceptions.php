@@ -18,3 +18,17 @@ class EntityNotFoundException extends Exception {
 		return $this->id;
 	}
 }
+
+class NotUniqueException extends Exception
+{
+	function __construct ($subject = NULL)
+	{
+		parent::__construct ('Cannot add duplicate record' . ($subject === NULL ? '' : " (${subject} must be unique)"));
+	}
+	function getSubject()
+	{
+		return $this->subject;
+	}
+}
+
+?>
