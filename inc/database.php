@@ -3357,11 +3357,8 @@ function getAllUnlinkedFiles ($entity_type = NULL, $entity_id = 0)
 // it conveniently.
 function getFilesOfEntity ($entity_type = NULL, $entity_id = 0)
 {
-	if ($entity_type == NULL || $entity_id == 0)
-	{
-		showError ('Invalid parameters', __FUNCTION__);
-		return NULL;
-	}
+	if ($entity_type == NULL || $entity_id <= 0)
+		throw new InvalidArgException();
 	global $dbxlink;
 	$sql =
 		'SELECT FileLink.file_id, FileLink.id AS link_id, name, type, size, ctime, mtime, atime, comment ' .

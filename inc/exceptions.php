@@ -21,13 +21,29 @@ class EntityNotFoundException extends Exception {
 
 class NotUniqueException extends Exception
 {
-	function __construct ($subject = NULL)
+	private $subject;
+	function __construct ($what = NULL)
 	{
-		parent::__construct ('Cannot add duplicate record' . ($subject === NULL ? '' : " (${subject} must be unique)"));
+		$this->subject = $what;
+		parent::__construct ('Cannot add duplicate record' . ($what === NULL ? '' : " (${what} must be unique)"));
 	}
 	function getSubject()
 	{
 		return $this->subject;
+	}
+}
+
+class InvalidArgException extends Exception
+{
+	private $location;
+	function __construct ($where = '[N/A]')
+	{
+		$this->location = $where;
+		parent::__construct ("One or more arguments to function ${where} are invalid");
+	}
+	function getLocation()
+	{
+		return $this->location;
 	}
 }
 
