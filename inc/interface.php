@@ -879,7 +879,7 @@ function renderRackObject ($object_id)
 	if (strlen ($info['asset_no']))
 		echo "<tr><th width='50%' class=tdright>Asset tag:</th><td class=tdleft>${info['asset_no']}</td></tr>\n";
 	// FIXME: ditto
-	elseif (considerConfiguredConstraint (info, 'ASSETWARN_LISTSRC'))
+	elseif (considerConfiguredConstraint ($info, 'ASSETWARN_LISTSRC'))
 		echo "<tr><td colspan=2 class=msg_error>Asset tag is missing.</td></tr>\n";
 	if (strlen ($info['label']))
 		echo "<tr><th width='50%' class=tdright>Visible label:</th><td class=tdleft>${info['label']}</td></tr>\n";
