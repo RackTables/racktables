@@ -141,9 +141,6 @@ $image['CREATE']['height'] = 32;
 $image['DENIED']['path'] = 'pix/tango-dialog-error-big.png';
 $image['DENIED']['width'] = 32;
 $image['DENIED']['height'] = 32;
-$image['apply']['path'] = 'pix/tango-emblem-system.png';
-$image['apply']['width'] = 16;
-$image['apply']['height'] = 16;
 $image['node-collapsed']['path'] = 'pix/node-collapsed.png';
 $image['node-collapsed']['width'] = 16;
 $image['node-collapsed']['height'] = 16;
@@ -192,6 +189,12 @@ $image['NET']['height'] = 32;
 $image['USER']['path'] = 'pix/crystal-edit-user-32x32.png';
 $image['USER']['width'] = 32;
 $image['USER']['height'] = 32;
+$image['setfilter']['path'] = 'pix/pgadmin3-viewfiltereddata.png';
+$image['setfilter']['width'] = 32;
+$image['setfilter']['height'] = 32;
+$image['resetfilter']['path'] = 'pix/pgadmin3-viewdata.png';
+$image['resetfilter']['width'] = 32;
+$image['resetfilter']['height'] = 32;
 
 // This may be populated later onsite, report rendering function will use it.
 // See the $systemreport for structure.
@@ -4934,20 +4937,20 @@ function renderCellFilterPortlet ($preselect, $realm, $bypass_name = '', $bypass
 		echo $hr;
 		$hr = $ruler;
 		// "apply"
-		echo '<tr><td>';
+		echo '<tr><td class=tdleft>';
 		echo "<input type=hidden name=page value=${pageno}>\n";
 		echo "<input type=hidden name=tab value=${tabno}>\n";
 		if ($bypass_name != '')
 			echo "<input type=hidden name=${bypass_name} value='${bypass_value}'>\n";
-		printImageHREF ('apply', 'Apply filter', TRUE);
-		echo "</form></td><td>";
+		printImageHREF ('setfilter', 'set filter', TRUE);
+		echo "</form></td><td class=tdright>";
 		// "reset"
 		echo "<form method=get>\n";
 		echo "<input type=hidden name=page value=${pageno}>\n";
 		echo "<input type=hidden name=tab value=${tabno}>\n";
 		if ($bypass_name != '')
 			echo "<input type=hidden name=${bypass_name} value='${bypass_value}'>\n";
-		printImageHREF ('clear', 'reset', TRUE);
+		printImageHREF ('resetfilter', 'reset filter', TRUE);
 		echo '</form></td></tr>';
 	}
 	echo '</table>';
