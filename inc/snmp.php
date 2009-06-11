@@ -286,7 +286,7 @@ function doSNMPmining ($object_id, $community)
 			for ($i = 1; $i <= 26; $i++)
 			{
 				$label = "${i}X"; 
-				$error = commitAddPort ($object_id, 'fa0/' . $i, 24, $label, $ifList2["FastEthernet0/${i}"]['phyad']);
+				$error = commitAddPort ($object_id, 'fa0/' . $i, 19, $label, $ifList2["FastEthernet0/${i}"]['phyad']);
 				if ($error == '')
 					$newports++;
 				else
@@ -297,7 +297,7 @@ function doSNMPmining ($object_id, $community)
 			for ($i = 1; $i <= 24; $i++)
 			{
 				$label = "${i}X"; 
-				$error = commitAddPort ($object_id, 'fa0/' . $i, 24, $label, $ifList2["FastEthernet0/${i}"]['phyad']);
+				$error = commitAddPort ($object_id, 'fa0/' . $i, 19, $label, $ifList2["FastEthernet0/${i}"]['phyad']);
 				if ($error == '')
 					$newports++;
 				else
