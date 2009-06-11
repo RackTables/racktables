@@ -626,18 +626,6 @@ function parseWikiLink ($line, $which, $strip_optgroup = FALSE)
 		return $o_value;
 }
 
-// FIXME: only renderIPv4Address() is using this function, consider
-// phasing it out.
-function buildVServiceName ($vsinfo = NULL)
-{
-	if ($vsinfo == NULL)
-	{
-		showError ('NULL argument', __FUNCTION__);
-		return NULL;
-	}
-	return $vsinfo['vip'] . ':' . $vsinfo['vport'] . '/' . $vsinfo['proto'];
-}
-
 // rackspace usage for a single rack
 // (T + W + U) / (height * 3 - A)
 function getRSUforRack ($data = NULL)

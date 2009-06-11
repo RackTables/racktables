@@ -2484,7 +2484,7 @@ function renderIPv4NetworkProperties ($id)
 
 function renderIPv4Address ($dottedquad)
 {
-	global $aat;
+	global $aat, $nextorder;
 	$address = getIPv4Address ($dottedquad);
 	echo "<table border=0 class=objectview cellspacing=0 cellpadding=0>";
 	echo "<tr><td colspan=2 align=center><h1>${dottedquad}</h1></td></tr>\n";
@@ -2534,12 +2534,16 @@ function renderIPv4Address ($dottedquad)
 	{
 		startPortlet ('Virtual services (' . count ($address['lblist']) . ')');
 		echo "<table class='widetable' cellpadding=5 cellspacing=0 border=0 align='center' width='100%'>\n";
-		echo "<tr><th>VS</th><th>name</th></tr>\n";
+		echo "<tr><th>VS</th><th>LB</th></tr>\n";
+		$order = 'odd';
 		foreach ($address['lblist'] as $vsinfo)
 		{
-			echo "<tr><td class=tdleft><a href='".makeHref(array('page'=>'ipv4vs', 'vs_id'=>$vsinfo['vs_id']))."'>";
-			echo buildVServiceName ($vsinfo) . "</a></td><td class=tdleft>";
-			echo $vsinfo['name'] . "</td></tr>\n";
+			echo "<tr valign=top class=row_${order}><td class=tdleft>";
+			renderCell (spotEntity ('ipv4vs', $vsinfo['vs_id']));
+			echo "</td><td class=tdleft>";
+			renderLBCell ($vsinfo['object_id']);
+			echo "</td></tr>";
+			$order = $nextorder[$order];
 		}
 		echo "</table><br><br>";
 		finishPortlet();
