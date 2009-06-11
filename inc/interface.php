@@ -1978,7 +1978,7 @@ function renderRackspaceHistory ()
 	echo '</td></tr></table>';
 }
 
-function renderIPv4SpaceRecords ($tree, &$tagcache, $baseurl, $target = 0, $level = 1)
+function renderIPv4SpaceRecords ($tree, $baseurl, $target = 0, $level = 1)
 {
 	$self = __FUNCTION__;
 	foreach ($tree as $item)
@@ -2016,10 +2016,10 @@ function renderIPv4SpaceRecords ($tree, &$tagcache, $baseurl, $target = 0, $leve
 				echo "<small>${total}</small>";
 			echo "</td>";
 			if (getConfigVar ('EXT_IPV4_VIEW') == 'yes')
-				printRoutersTD (findRouters ($item['addrlist']), $tagcache);
+				printRoutersTD (findRouters ($item['addrlist']));
 			echo "</tr>";
 			if ($item['symbol'] == 'node-expanded' or $item['symbol'] == 'node-expanded-static')
-				$self ($item['kids'], $tagcache, $baseurl, $target, $level + 1);
+				$self ($item['kids'], $baseurl, $target, $level + 1);
 		}
 		else
 		{
@@ -2071,9 +2071,8 @@ function renderIPv4Space ()
 	if (getConfigVar ('EXT_IPV4_VIEW') == 'yes')
 		echo "<th>routed by</th>";
 	echo "</tr>\n";
-	$tagcache = array();
 	$baseurl = makeHref(array('page'=>$pageno, 'tab'=>$tabno)) . $cellfilter['urlextra'];
-	renderIPv4SpaceRecords ($tree, $tagcache, $baseurl, $eid);
+	renderIPv4SpaceRecords ($tree, $baseurl, $eid);
 	echo "</table>\n";
 	finishPortlet();
 	echo '</td><td class=pcright>';
@@ -5519,7 +5518,7 @@ function printRoutersTD ($rlist)
 	}
 	echo "<td class='${rtrclass}'>";
 	foreach ($rlist as $rtr)
-		renderRouterCell ($rtr['addr'], $rtr['iface'], $rtr['id'], $rtr['dname']);
+		renderRouterCell ($rtr['addr'], $rtr['iface'], spotEntity ('object', $rtr['id']));
 	echo '</td>';
 }
 
@@ -5674,19 +5673,20 @@ function renderLBCell ($object_id)
 	echo "</td></tr></table>";
 }
 
-function renderRouterCell ($dottedquad, $ifname, $object_id, $object_dname)
+function renderRouterCell ($dottedquad, $ifname, $cell)
 {
 	global $root;
 	echo "<table class=slbcell><tr><td rowspan=3>${dottedquad}";
 	if (strlen ($ifname))
 		echo '@' . $ifname;
 	echo "</td>";
-	echo "<td><a href='${root}?page=object&object_id=${object_id}&hl_ipv4_addr=${dottedquad}'><strong>${object_dname}</strong></a></td>";
+	echo "<td><a href='${root}?page=object&object_id=${cell['id']}&hl_ipv4_addr=${dottedquad}'><strong>${cell['dname']}</strong></a></td>";
 	echo "</td></tr><tr><td>";
 	printImageHREF ('router');
-	echo "</td></tr><tr><td><small>";
-	echo serializeTags (loadEntityTags ('object', $object_id));
-	echo "</small></td></tr></table>";
+	echo "</td></tr><tr><td>";
+	if (count ($cell['etags']))
+		echo '<small>' . serializeTags ($cell['etags']) . '</small>';
+	echo "</td></tr></table>";
 }
 
 // Return HTML code necessary to show a preview of the file give. Return an empty string,
