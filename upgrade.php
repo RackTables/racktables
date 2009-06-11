@@ -257,6 +257,7 @@ CREATE TABLE `LDAPCache` (
 			// Many dictionary changes were made... remove all dictvendor entries and install fresh.
 			// Take care not to erase locally added records. 0.17.1 ends with max key 988
 			$query[] = "INSERT INTO `Chapter` (`id`, `sticky`, `name`) VALUES (26,'no','fibre channel switch models')";
+			$query[] = "INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_id`) VALUES (1055,2,26)";
 			$query[] = 'DELETE FROM Dictionary WHERE ((chapter_id BETWEEN 11 AND 14) or (chapter_id BETWEEN 16 AND 19) ' .
 				'or (chapter_id BETWEEN 21 AND 25)) and dict_key <= 988';
 			$f = fopen ("install/init-dictvendors.sql", 'r');
