@@ -2008,7 +2008,7 @@ function scanRealmByText ($realm = NULL, $ftext = '')
 		}
 		return filterCellList (listCells ($realm), $fexpr);
 	default:
-		return NULL;
+		throw new InvalidArgException (__FUNCTION__);
 	}
 
 }

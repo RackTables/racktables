@@ -265,10 +265,7 @@ function listCells ($realm, $parent_id = 0)
 	}
 	global $SQLSchema;
 	if (!isset ($SQLSchema[$realm]))
-	{
-		showError ('invalid arg', __FUNCTION__);
-		return NULL;
-	}
+		throw new InvalidArgException (__FUNCTION__);
 	$SQLinfo = $SQLSchema[$realm];
 	$query = 'SELECT tag_id';
 	foreach ($SQLinfo['columns'] as $alias => $expression)
@@ -358,10 +355,7 @@ function spotEntity ($realm, $id)
 		return $entityCache['partial'][$realm][$id];
 	global $SQLSchema;
 	if (!isset ($SQLSchema[$realm]))
-	{
-		showError ('invalid arg', __FUNCTION__);
-		return NULL;
-	}
+		throw new InvalidArgException (__FUNCTION__);
 	$SQLinfo = $SQLSchema[$realm];
 	$query = 'SELECT tag_id';
 	foreach ($SQLinfo['columns'] as $alias => $expression)
@@ -3357,8 +3351,8 @@ function getAllUnlinkedFiles ($entity_type = NULL, $entity_id = 0)
 // it conveniently.
 function getFilesOfEntity ($entity_type = NULL, $entity_id = 0)
 {
-	if ($entity_type == NULL || $entity_id <= 0)
-		throw new InvalidArgException();
+	if ($entity_type === NULL || $entity_id <= 0)
+		throw new InvalidArgException (__FUNCTION__);
 	global $dbxlink;
 	$sql =
 		'SELECT FileLink.file_id, FileLink.id AS link_id, name, type, size, ctime, mtime, atime, comment ' .
