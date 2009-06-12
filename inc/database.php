@@ -644,11 +644,8 @@ function commitAddObject ($new_name, $new_label, $new_barcode, $new_type_id, $ne
 
 function commitUpdateObject ($object_id = 0, $new_name = '', $new_label = '', $new_barcode = '', $new_type_id = 0, $new_has_problems = 'no', $new_asset_no = '', $new_comment = '')
 {
-	if ($object_id == 0 || $new_type_id == 0)
-	{
-		showError ('Not all required args are present.', __FUNCTION__);
-		return FALSE;
-	}
+	if ($new_type_id == 0)
+		throw new InvalidArgException (__FUNCTION__);
 	global $dbxlink;
 	$new_asset_no = !strlen ($new_asset_no) ? 'NULL' : "'${new_asset_no}'";
 	$new_barcode = !strlen ($new_barcode) ? 'NULL' : "'${new_barcode}'";
@@ -676,11 +673,6 @@ function releaseFiles ($entity_realm, $entity_id)
 // There are times when you want to delete all traces of an object
 function commitDeleteObject ($object_id = 0)
 {
-	if ($object_id <= 0)
-	{
-		showError ('Invalid args', __FUNCTION__);
-		die;
-	}
 	global $dbxlink;
 	releaseFiles ('object', $object_id);
 	$dbxlink->query("DELETE FROM AttributeValue WHERE object_id = ${object_id}");
@@ -824,11 +816,6 @@ function processGridForm (&$rackData, $unchecked_state, $checked_state, $object_
 // the requested object.
 function getMoleculeForObject ($object_id = 0)
 {
-	if ($object_id == 0)
-	{
-		showError ("object_id == 0", __FUNCTION__);
-		return NULL;
-	}
 	$query =
 		"select rack_id, unit_no, atom from RackSpace " .
 		"where state = 'T' and object_id = ${object_id} order by rack_id, unit_no, atom";
@@ -841,11 +828,6 @@ function getMoleculeForObject ($object_id = 0)
 // This function builds a list of rack-unit-atom records for requested molecule.
 function getMolecule ($mid = 0)
 {
-	if ($mid == 0)
-	{
-		showError ("mid == 0", __FUNCTION__);
-		return NULL;
-	}
 	$query =
 		"select rack_id, unit_no, atom from Atom " .
 		"where molecule_id=${mid}";
@@ -932,11 +914,6 @@ function getRackspaceHistory ()
 // This function is used in renderRackspaceHistory()
 function getOperationMolecules ($op_id = 0)
 {
-	if ($op_id <= 0)
-	{
-		showError ("Missing argument", __FUNCTION__);
-		return;
-	}
 	$query = "select old_molecule_id, new_molecule_id from MountOperation where id = ${op_id}";
 	$result = useSelectBlade ($query, __FUNCTION__);
 	// We expect one row.
@@ -954,11 +931,6 @@ function getOperationMolecules ($op_id = 0)
 
 function getResidentRacksData ($object_id = 0, $fetch_rackdata = TRUE)
 {
-	if ($object_id <= 0)
-	{
-		showError ('Invalid object_id', __FUNCTION__);
-		return;
-	}
 	$query = "select distinct rack_id from RackSpace where object_id = ${object_id} order by rack_id";
 	$result = useSelectBlade ($query, __FUNCTION__);
 	$rows = $result->fetchAll (PDO::FETCH_NUM);
@@ -984,11 +956,6 @@ function getResidentRacksData ($object_id = 0, $fetch_rackdata = TRUE)
 
 function commitAddPort ($object_id = 0, $port_name, $port_type_id, $port_label, $port_l2address)
 {
-	if ($object_id <= 0)
-	{
-		showError ('Invalid object_id', __FUNCTION__);
-		return;
-	}
 	if (NULL === ($db_l2address = l2addressForDatabase ($port_l2address)))
 		return "Invalid L2 address ${port_l2address}";
 	$result = useInsertBlade
@@ -1174,7 +1141,7 @@ function scanIPv4Space ($pairlist)
 {
 	$ret = array();
 	if (!count ($pairlist)) // this is normal for a network completely divided into smaller parts
-		return $ret;;
+		return $ret;
 	$dnamechache = array();
 	// FIXME: this is a copy-and-paste prototype
 	$or = '';
@@ -1347,10 +1314,7 @@ function scanIPv4Space ($pairlist)
 function getIPv4Address ($dottedquad = '')
 {
 	if ($dottedquad == '')
-	{
-		showError ('Invalid arg', __FUNCTION__);
-		return NULL;
-	}
+		throw new InvalidArgException (__FUNCTION__);
 	$i32 = ip2long ($dottedquad); // signed 32 bit
 	$scanres = scanIPv4Space (array (array ('i32_first' => $i32, 'i32_last' => $i32)));
 	if (!isset ($scanres[$i32]))
@@ -1956,13 +1920,11 @@ mysql> select tag_id from TagStorage left join TagTree on tag_id = id where id i
 
 */
 
+// See below why chapter_id is necessary.
 function commitUpdateDictionary ($chapter_no = 0, $dict_key = 0, $dict_value = '')
 {
 	if ($chapter_no <= 0 or $dict_key <= 0 or !strlen ($dict_value))
-	{
-		showError ('Invalid args', __FUNCTION__);
-		die;
-	}
+		throw new InvalidArgException (__FUNCTION__);
 	global $dbxlink;
 	$query =
 		"update Dictionary set dict_value = '${dict_value}' where chapter_id=${chapter_no} " .
@@ -1979,10 +1941,7 @@ function commitUpdateDictionary ($chapter_no = 0, $dict_key = 0, $dict_value = '
 function commitSupplementDictionary ($chapter_no = 0, $dict_value = '')
 {
 	if ($chapter_no <= 0 or !strlen ($dict_value))
-	{
-		showError ('Invalid args', __FUNCTION__);
-		die;
-	}
+		throw new InvalidArgException (__FUNCTION__);
 	return useInsertBlade
 	(
 		'Dictionary',
@@ -1990,13 +1949,11 @@ function commitSupplementDictionary ($chapter_no = 0, $dict_value = '')
 	);
 }
 
+// Technically dict_key is enough to delete, but including chapter_id into
+// WHERE clause makes sure, that the action actually happends for the same
+// chapter, which authorization was granted for.
 function commitReduceDictionary ($chapter_no = 0, $dict_key = 0)
 {
-	if ($chapter_no <= 0 or $dict_key <= 0)
-	{
-		showError ('Invalid args', __FUNCTION__);
-		die;
-	}
 	global $dbxlink;
 	$query =
 		"delete from Dictionary where chapter_id=${chapter_no} " .
@@ -2013,10 +1970,7 @@ function commitReduceDictionary ($chapter_no = 0, $dict_key = 0)
 function commitAddChapter ($chapter_name = '')
 {
 	if (!strlen ($chapter_name))
-	{
-		showError ('Invalid args', __FUNCTION__);
-		die;
-	}
+		throw new InvalidArgException (__FUNCTION__);
 	return useInsertBlade
 	(
 		'Chapter',
@@ -2026,11 +1980,8 @@ function commitAddChapter ($chapter_name = '')
 
 function commitUpdateChapter ($chapter_no = 0, $chapter_name = '')
 {
-	if ($chapter_no <= 0 or !strlen ($chapter_name))
-	{
-		showError ('Invalid args', __FUNCTION__);
-		die;
-	}
+	if (!strlen ($chapter_name))
+		throw new InvalidArgException (__FUNCTION__);
 	global $dbxlink;
 	$query =
 		"update Chapter set name = '${chapter_name}' where id = ${chapter_no} " .
@@ -2046,11 +1997,6 @@ function commitUpdateChapter ($chapter_no = 0, $chapter_name = '')
 
 function commitDeleteChapter ($chapter_no = 0)
 {
-	if ($chapter_no <= 0)
-	{
-		showError ('Invalid args', __FUNCTION__);
-		die;
-	}
 	global $dbxlink;
 	$query =
 		"delete from Chapter where id = ${chapter_no} and sticky = 'no' limit 1";
@@ -2068,10 +2014,7 @@ function commitDeleteChapter ($chapter_no = 0)
 function readChapter ($chapter_name = '')
 {
 	if (!strlen ($chapter_name))
-	{
-		showError ('invalid argument', __FUNCTION__);
-		return NULL;
-	}
+		throw new InvalidArgException (__FUNCTION__);
 	$query =
 		"select dict_key, dict_value from Dictionary join Chapter on Chapter.id = Dictionary.chapter_id " .
 		"where Chapter.name = '${chapter_name}'";
@@ -2428,10 +2371,7 @@ function storeConfigVar ($varname = NULL, $varvalue = NULL)
 {
 	global $dbxlink;
 	if (!strlen ($varname) || $varvalue === NULL)
-	{
-		showError ('Invalid arguments', __FUNCTION__);
-		return FALSE;
-	}
+		throw new InvalidArgException (__FUNCTION__);
 	$query = "update Config set varvalue='${varvalue}' where varname='${varname}' limit 1";
 	$result = $dbxlink->query ($query);
 	if ($result == NULL)
@@ -2510,10 +2450,7 @@ function getSLBSummary ()
 function addRStoRSPool ($pool_id = 0, $rsip = '', $rsport = 0, $inservice = 'no', $rsconfig = '')
 {
 	if ($pool_id <= 0)
-	{
-		showError ('Invalid arguments', __FUNCTION__);
-		die;
-	}
+		throw new InvalidArgException (__FUNCTION__);
 	if (!strlen ($rsport) or $rsport === 0)
 		$rsport = 'NULL';
 	return useInsertBlade
@@ -2533,7 +2470,7 @@ function addRStoRSPool ($pool_id = 0, $rsip = '', $rsport = 0, $inservice = 'no'
 function commitCreateVS ($vip = '', $vport = 0, $proto = '', $name = '', $vsconfig, $rsconfig, $taglist = array())
 {
 	if (!strlen ($vip) or $vport <= 0 or !strlen ($proto))
-		return __FUNCTION__ . ': invalid arguments';
+		throw new InvalidArgException (__FUNCTION__);
 	if (!useInsertBlade
 	(
 		'IPv4VS',
@@ -2554,10 +2491,7 @@ function commitCreateVS ($vip = '', $vport = 0, $proto = '', $name = '', $vsconf
 function addLBtoRSPool ($pool_id = 0, $object_id = 0, $vs_id = 0, $vsconfig = '', $rsconfig = '')
 {
 	if ($pool_id <= 0 or $object_id <= 0 or $vs_id <= 0)
-	{
-		showError ('Invalid arguments', __FUNCTION__);
-		die;
-	}
+		throw new InvalidArgException (__FUNCTION__);
 	return useInsertBlade
 	(
 		'IPv4LB',
@@ -2581,8 +2515,6 @@ function commitDeleteRS ($id = 0)
 
 function commitDeleteVS ($id = 0)
 {
-	if ($id <= 0)
-		return FALSE;
 	releaseFiles ('ipv4vs', $id);
 	return useDeleteBlade ('IPv4VS', 'id', $id) && destroyTagsForEntity ('ipv4vs', $id);
 }
@@ -2605,16 +2537,8 @@ function commitDeleteLB ($object_id = 0, $pool_id = 0, $vs_id = 0)
 
 function commitUpdateRS ($rsid = 0, $rsip = '', $rsport = 0, $rsconfig = '')
 {
-	if ($rsid <= 0)
-	{
-		showError ('Invalid args', __FUNCTION__);
-		die;
-	}
 	if (long2ip (ip2long ($rsip)) !== $rsip)
-	{
-		showError ("Invalid IP address '${rsip}'", __FUNCTION__);
-		die;
-	}
+		throw new InvalidArgException (__FUNCTION__);
 	if (!strlen ($rsport) or $rsport === 0)
 		$rsport = 'NULL';
 	global $dbxlink;
@@ -2633,11 +2557,6 @@ function commitUpdateRS ($rsid = 0, $rsip = '', $rsport = 0, $rsconfig = '')
 
 function commitUpdateLB ($object_id = 0, $pool_id = 0, $vs_id = 0, $vsconfig = '', $rsconfig = '')
 {
-	if ($object_id <= 0 or $pool_id <= 0 or $vs_id <= 0)
-	{
-		showError ('Invalid args', __FUNCTION__);
-		die;
-	}
 	global $dbxlink;
 	$query =
 		"update IPv4LB set vsconfig = " .
@@ -2655,11 +2574,8 @@ function commitUpdateLB ($object_id = 0, $pool_id = 0, $vs_id = 0, $vsconfig = '
 
 function commitUpdateVS ($vsid = 0, $vip = '', $vport = 0, $proto = '', $name = '', $vsconfig = '', $rsconfig = '')
 {
-	if ($vsid <= 0 or !strlen ($vip) or $vport <= 0 or !strlen ($proto))
-	{
-		showError ('Invalid args', __FUNCTION__);
-		die;
-	}
+	if (!strlen ($vip) or $vport <= 0 or !strlen ($proto))
+		throw new InvalidArgException (__FUNCTION__);
 	global $dbxlink;
 	$query = "update IPv4VS set " .
 		"vip = inet_aton('${vip}'), " .
@@ -2691,11 +2607,8 @@ function loadThumbCache ($rack_id = 0)
 function saveThumbCache ($rack_id = 0, $cache = NULL)
 {
 	global $dbxlink;
-	if ($rack_id == 0 or $cache == NULL)
-	{
-		showError ('Invalid arguments', __FUNCTION__);
-		return;
-	}
+	if ($cache == NULL)
+		throw new InvalidArgException (__FUNCTION__);
 	$data = base64_encode ($cache);
 	$query = "update Rack set thumb_data = '${data}' where id = ${rack_id} limit 1";
 	$result = $dbxlink->exec ($query);
@@ -2704,11 +2617,6 @@ function saveThumbCache ($rack_id = 0, $cache = NULL)
 function resetThumbCache ($rack_id = 0)
 {
 	global $dbxlink;
-	if ($rack_id == 0)
-	{
-		showError ('Invalid argument', __FUNCTION__);
-		return;
-	}
 	$query = "update Rack set thumb_data = NULL where id = ${rack_id} limit 1";
 	$result = $dbxlink->exec ($query);
 }
@@ -2719,11 +2627,6 @@ function resetThumbCache ($rack_id = 0)
 // current object.
 function getRSPoolsForObject ($object_id = 0)
 {
-	if ($object_id <= 0)
-	{
-		showError ('Invalid object_id', __FUNCTION__);
-		return NULL;
-	}
 	$query = 'select vs_id, inet_ntoa(vip) as vip, vport, proto, vs.name, pool.id as pool_id, ' .
 		'pool.name as pool_name, count(rsip) as rscount, lb.vsconfig, lb.rsconfig from ' .
 		'IPv4LB as lb inner join IPv4RSPool as pool on lb.rspool_id = pool.id ' .
@@ -2743,7 +2646,7 @@ function getRSPoolsForObject ($object_id = 0)
 function commitCreateRSPool ($name = '', $vsconfig = '', $rsconfig = '', $taglist = array())
 {
 	if (!strlen ($name))
-		return __FUNCTION__ . ': invalid arguments';
+		throw new InvalidArgException (__FUNCTION__);
 	if (!useInsertBlade
 	(
 		'IPv4RSPool',
@@ -2769,11 +2672,6 @@ function commitDeleteRSPool ($pool_id = 0)
 
 function commitUpdateRSPool ($pool_id = 0, $name = '', $vsconfig = '', $rsconfig = '')
 {
-	if ($pool_id <= 0)
-	{
-		showError ('Invalid arg', __FUNCTION__);
-		die;
-	}
 	global $dbxlink;
 	$query = "update IPv4RSPool set " .
 		'name = ' . (!strlen ($name) ? 'NULL,' : "'${name}', ") .
@@ -2815,17 +2713,12 @@ function getLBList ()
 	return $ret;
 }
 
-// For the given object return: it vsconfig/rsconfig; the list of RS pools
+// For the given object return: its vsconfig/rsconfig; the list of RS pools
 // attached (each with vsconfig/rsconfig in turn), each with the list of
 // virtual services terminating the pool. Each pool also lists all real
 // servers with rsconfig.
 function getSLBConfig ($object_id)
 {
-	if ($object_id <= 0)
-	{
-		showError ('Invalid arg', __FUNCTION__);
-		return NULL;
-	}
 	$ret = array();
 	$query = 'select vs_id, inet_ntoa(vip) as vip, vport, proto, vs.name as vs_name, ' .
 		'vs.vsconfig as vs_vsconfig, vs.rsconfig as vs_rsconfig, ' .
@@ -2857,10 +2750,7 @@ function getSLBConfig ($object_id)
 function commitSetInService ($rs_id = 0, $inservice = '')
 {
 	if ($rs_id <= 0 or !strlen ($inservice))
-	{
-		showError ('Invalid args', __FUNCTION__);
-		return NULL;
-	}
+		throw new InvalidArgException (__FUNCTION__);
 	global $dbxlink;
 	$query = "update IPv4RS set inservice = '${inservice}' where id = ${rs_id} limit 1";
 	$result = $dbxlink->exec ($query);
@@ -2875,10 +2765,7 @@ function commitSetInService ($rs_id = 0, $inservice = '')
 function executeAutoPorts ($object_id = 0, $type_id = 0)
 {
 	if ($object_id == 0 or $type_id == 0)
-	{
-		showError ('Invalid arguments', __FUNCTION__);
-		die;
-	}
+		throw new InvalidArgException (__FUNCTION__);
 	$ret = TRUE;
 	foreach (getAutoPorts ($type_id) as $autoport)
 		$ret = $ret and '' == commitAddPort ($object_id, $autoport['name'], $autoport['type'], '', '');
@@ -3150,13 +3037,10 @@ function loadScript ($name)
 		return NULL;
 }
 
-function saveScript ($name, $text)
+function saveScript ($name = '', $text)
 {
 	if (!strlen ($name))
-	{
-		showError ('Invalid argument');
-		return FALSE;
-	}
+		throw new InvalidArgException (__FUNCTION__);
 	// delete regardless of existence
 	useDeleteBlade ('Script', 'script_name', "'${name}'");
 	return useInsertBlade
@@ -3323,15 +3207,12 @@ function getLostIPv4Addresses ()
 	dragon();
 }
 
-// Return a list of files which are not linked to the specified record. This list
+// Return a list of files, which are not linked to the specified record. This list
 // will be used by printSelect().
 function getAllUnlinkedFiles ($entity_type = NULL, $entity_id = 0)
 {
 	if ($entity_type == NULL || $entity_id == 0)
-	{
-		showError ('Invalid parameters', __FUNCTION__);
-		return NULL;
-	}
+		throw new InvalidArgException (__FUNCTION__);
 	global $dbxlink;
 	$sql =
 		'SELECT id, name FROM File ' .
@@ -3380,11 +3261,6 @@ function getFilesOfEntity ($entity_type = NULL, $entity_id = 0)
 
 function getFile ($file_id = 0)
 {
-	if ($file_id == 0)
-	{
-		showError ('Invalid file_id', __FUNCTION__);
-		return NULL;
-	}
 	global $dbxlink;
 	$query = $dbxlink->prepare('SELECT * FROM File WHERE id = ?');
 	$query->bindParam(1, $file_id);
@@ -3419,12 +3295,6 @@ function getFile ($file_id = 0)
 
 function getFileLinks ($file_id = 0)
 {
-	if ($file_id <= 0)
-	{
-		showError ('Invalid file_id', __FUNCTION__);
-		return NULL;
-	}
-
 	global $dbxlink;
 	$query = $dbxlink->prepare('SELECT * FROM FileLink WHERE file_id = ? ORDER BY entity_type, entity_id');
 	$query->bindParam(1, $file_id);
@@ -3560,12 +3430,6 @@ function commitLinkFile ($file_id, $entity_type, $entity_id)
 
 function commitReplaceFile ($file_id = 0, $contents)
 {
-	if ($file_id == 0)
-	{
-		showError ('Not all required args are present.', __FUNCTION__);
-		return FALSE;
-	}
-
 	global $dbxlink;
 	$query = $dbxlink->prepare('UPDATE File SET mtime = NOW(), contents = ?, size = LENGTH(contents) WHERE id = ?');
 	$query->bindParam(1, $contents, PDO::PARAM_LOB);
@@ -3582,11 +3446,8 @@ function commitReplaceFile ($file_id = 0, $contents)
 
 function commitUpdateFile ($file_id = 0, $new_name = '', $new_type = '', $new_comment = '')
 {
-	if ($file_id <= 0 or !strlen ($new_name) or !strlen ($new_type))
-	{
-		showError ('Not all required args are present.', __FUNCTION__);
-		return FALSE;
-	}
+	if (!strlen ($new_name) or !strlen ($new_type))
+		throw new InvalidArgException (__FUNCTION__);
 	global $dbxlink;
 	$query = $dbxlink->prepare('UPDATE File SET name = ?, type = ?, comment = ? WHERE id = ?');
 	$query->bindParam(1, $new_name);
