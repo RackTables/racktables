@@ -3489,46 +3489,30 @@ function getFileLinks ($file_id = 0)
 	return $ret;
 }
 
-// Return list of possible file parents along with the number of children.
-// Used on main Files listing page.
-function getFileLinkInfo ()
+function getFileStats ()
 {
-	global $dbxlink;
 	$query = 'SELECT entity_type, COUNT(*) AS count FROM FileLink GROUP BY entity_type';
-
 	$result = useSelectBlade ($query, __FUNCTION__);
 	$ret = array();
-	$ret[0] = array ('entity_type' => 'all', 'name' => 'ALL files');
-	$clist = array ('entity_type', 'name', 'count');
-	$total = 0;
-	$i=2;
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 		if ($row['count'] > 0)
-		{
-			$total += $row['count'];
-			$row['name'] = formatEntityName ($row['entity_type']);
-			foreach ($clist as $cname)
-				$ret[$i][$cname] = $row[$cname];
-				$i++;
-		}
-	$result->closeCursor();
+			$ret["Links in realm '${row['entity_type']}'"] = $row['count'];
+	unset ($result);
 
 	// Find number of files without any linkage
 	$linkless_sql =
 		'SELECT COUNT(*) ' .
 		'FROM File ' .
 		'WHERE id NOT IN (SELECT file_id FROM FileLink)';
-	$q_linkless = useSelectBlade ($linkless_sql, __FUNCTION__);
-	$ret[1] = array ('entity_type' => 'no_links', 'name' => 'Files w/no links', 'count' => $q_linkless->fetchColumn ());
-	$q_linkless->closeCursor();
+	$result = useSelectBlade ($linkless_sql, __FUNCTION__);
+	$ret["Unattached files"] = $result->fetchColumn ();
+	unset ($result);
 
 	// Find total number of files
 	$total_sql = 'SELECT COUNT(*) FROM File';
-	$q_total = useSelectBlade ($total_sql, __FUNCTION__);
-	$ret[0]['count'] = $q_total->fetchColumn ();
-	$q_total->closeCursor();
+	$result = useSelectBlade ($total_sql, __FUNCTION__);
+	$ret["Total files"] = $result->fetchColumn ();
 
-	ksort($ret);
 	return $ret;
 }
 

@@ -3697,6 +3697,12 @@ function renderSystemReports ()
 		),
 		array
 		(
+			'title' => 'Files',
+			'type' => 'counters',
+			'func' => 'getFileStats'
+		),
+		array
+		(
 			'title' => 'Tags top-50',
 			'type' => 'custom',
 			'func' => 'renderTagStats'
