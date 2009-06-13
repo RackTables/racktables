@@ -114,7 +114,8 @@ function doSNMPmining ($object_id, $community)
 		$sysChassi = str_replace ('"', '', substr ($sysChassi, strlen ('STRING: ')));
 	// Strip the object type, it's always string here.
 	$sysDescr = substr ($sysDescr, strlen ('STRING: '));
-	if (FALSE !== ereg ('^(Cisco )?IOS .+$', $sysDescr))
+	$sysDescr = str_replace(array("\n", "\r"), "", $sysDescr);  // Make it one line
+	if (FALSE !== ereg ('^(Cisco )?(Internetwork Operating System Software )?IOS .+$', $sysDescr))
 	{
 		$swfamily = 'IOS';
 		$swversion = ereg_replace ('^.*, Version ([^ ]+), .*$', '\\1', $sysDescr);
@@ -190,7 +191,9 @@ function doSNMPmining ($object_id, $community)
 				break;
 			default:
 				$log[] = array ('code' => 'error', 'message' => "Unknown SW version ${swversion}");
-				$error = TRUE;
+				// The logic for 'error' is backwards...
+				// This should be set 'FALSE' if there is an error
+				$error = FALSE;
 				break;
 		}
 		if ($error == TRUE)
