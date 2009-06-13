@@ -251,6 +251,7 @@ CREATE TABLE `LDAPCache` (
 			$query[] = "ALTER TABLE Dictionary DROP KEY `chap_to_key`";
 			// Token set has changed, so the cache isn't valid any more.
 			$query[] = "UPDATE Script SET script_text = NULL WHERE script_name = 'RackCodeCache'";
+			$query[] = "INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (12,989,'Cisco%GPASS%Catalyst CBS3030-DEL')";
 			$query[] = "UPDATE Config SET varvalue = '0.17.1' WHERE varname = 'DB_VERSION'";
 			break;
 		case '0.17.2':

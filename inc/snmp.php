@@ -8,6 +8,7 @@ function doSNMPmining ($object_id, $community)
 // 2950: http://www.cisco.com/en/US/products/hw/switches/ps628/prod_models_home.html
 // 2960: http://www.cisco.com/en/US/products/ps6406/prod_models_comparison.html
 // 2970: http://cisco.com/en/US/products/hw/switches/ps5206/products_qanda_item09186a00801b1750.shtml
+// 3030: http://www.cisco.com/en/US/products/ps6764/index.html 
 // 3500XL: http://cisco.com/en/US/products/hw/switches/ps637/products_eol_models.html
 // 3560: http://cisco.com/en/US/products/hw/switches/ps5528/products_data_sheet09186a00801f3d7f.html
 // 3750: http://cisco.com/en/US/products/hw/switches/ps5023/products_data_sheet09186a008016136f.html
@@ -46,6 +47,7 @@ function doSNMPmining ($object_id, $community)
 		428 => 'WS-C2950G-24 (24 Ethernet 10/100 ports and 2 1000 GBIC uplinks)',
 		429 => 'WS-C2950G-48 (48 Ethernet 10/100 ports and 2 1000 GBIC uplinks)',
 		559 => 'WS-C2950T-48 (48 Ethernet 10/100 ports and 2 10/100/1000 uplinks)',
+		749 => 'WS-CBS3030-DEL (12 Ethernet 10/100/1000 and 4 10/100/1000 SFP uplinks)',
 		920 => 'WS-CBS3032-DEL-F (16 Ethernet 10/100/1000 and up to 8 10/100/1000 uplinks)',
 		719 => 'N5K-C5020 (40-ports system)',
 		// FIXME: the following two origin at a different OID, so a complete form should be
@@ -87,6 +89,7 @@ function doSNMPmining ($object_id, $community)
 		717 => 162,
 		920 => 795,
 		719 => 960,
+		749 => 989,
 		36 => 865,
 		35 => 867,
 	);
@@ -556,6 +559,18 @@ function doSNMPmining ($object_id, $community)
 				else
 					$log[] = array ('code' => 'error', 'message' => 'Failed to add port ' . $label . ': ' . $error);
 			}
+			break;
+		case '749': // WS-CBS3030-DEL-F (or WS-CBS3030-DEL-S)
+			for ($i = 1; $i <= 16; $i++)
+			{
+				$label = "${i}";
+				$error = commitAddPort ($object_id, 'gi0/' . $i, 24, $label, $ifList2["GigabitEthernet0/${i}"]['phyad']);
+				if ($error == '')
+					$newports++;
+				else
+					$log[] = array ('code' => 'error', 'message' => 'Failed to add port ' . $label . ': ' . $error);
+			}
+
 			break;
 		case '719':
 			break;
