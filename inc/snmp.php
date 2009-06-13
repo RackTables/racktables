@@ -104,7 +104,13 @@ function doSNMPmining ($object_id, $community)
 
 	$objectInfo = spotEntity ('object', $object_id, FALSE);
 	$endpoints = findAllEndpoints ($object_id, $objectInfo['name']);
-	$sysName = substr (snmpget ($endpoints[0], $community, 'sysName.0'), strlen ('STRING: '));
+	$sysName = @snmpget ($endpoints[0], $community, 'sysName.0');
+	if ($sysName === FALSE or $sysname == FALSE)
+	{
+		$log[] = array ('code' => 'error', 'message' => 'SNMP error connecting to "' . $endpoints[0] . '"');
+		return $log;
+	}
+	$sysName = substr ($sysName, strlen ('STRING: '));
 	$sysDescr = snmpget ($endpoints[0], $community, 'sysDescr.0');
 	// Don't generate error for agents other than IOS.
 	$sysChassi = @snmpget ($endpoints[0], $community, '1.3.6.1.4.1.9.3.6.3.0');
