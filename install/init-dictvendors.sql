@@ -1004,3 +1004,4 @@ INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (13,105
 INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (13,1052,'[[Linux%GSKIP%Gentoo 2007.0 | http://www.gentoo.org/proj/en/releng/release/2007.0/2007.0-press-release.txt]]');
 INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (13,1053,'[[Linux%GSKIP%Gentoo 2008.0 | http://www.gentoo.org/proj/en/releng/release/2008.0/index.xml]]');
 INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (13,1054,'Linux%GSKIP%Ubuntu 9.04');
+INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (12,1055,'Cisco%GPASS%Catalyst CBS3030-DEL');
