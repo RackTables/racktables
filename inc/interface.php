@@ -4006,11 +4006,15 @@ function renderSNMPPortFinder ($object_id)
 	}
 	else
 	{
+		$snmpcomm = getConfigVar('DEFAULT_SNMP_COMMUNITY');
+		if (empty($snmpcomm))
+			$snmpcomm = 'public';
+
 		echo "<p align=center>
 This object has no ports listed, that's why you see this form. If you supply a SNMP community,
 I can try to automatically harvest the data. As soon as at least one port is added,
 this tab will not be seen any more. Good luck.<br>\n";
-		echo "<input type=text name=community value='public'>\n";
+		echo "<input type=text name=community value='" . $snmpcomm . "'>\n";
 		echo "<input type=submit name='do_scan' value='Go!'> \n";
 		echo "</form></p>\n";
 	}

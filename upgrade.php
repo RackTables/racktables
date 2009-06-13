@@ -281,6 +281,7 @@ CREATE TABLE `LDAPCache` (
 					continue;
 				$query[] = $dict_query;
 			}
+			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('DEFAULT_SNMP_COMMUNITY','public','string','no','no','Default SNMP Community string')";
 			$query[] = "UPDATE Config SET varvalue = '0.17.2' WHERE varname = 'DB_VERSION'";
 			break;
 		default:

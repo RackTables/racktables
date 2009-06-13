@@ -1007,6 +1007,7 @@ function resetUIConfig()
 	setConfigVar ('FILTER_SUGGEST_TAGS','yes');
 	setConfigVar ('FILTER_SUGGEST_PREDICATES','yes');
 	setConfigVar ('FILTER_SUGGEST_EXTRA','no');
+        setConfigVar ('DEFAULT_SNMP_COMMUNITY','public');
 	return buildRedirectURL (__FUNCTION__, 'OK');
 }
 

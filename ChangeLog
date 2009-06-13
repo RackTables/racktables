@@ -1,4 +1,5 @@
 0.17.2
+	new feature: configure default SNMP community (by jthurman)
 	update: show appropriate message, if a record cannot be found
 	update: add OS, router, fibre switch dictionary entries for ticket 238 (by Aaron)
 	bugfix: do not produce PHP warning on LivePTR tab
