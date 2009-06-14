@@ -1116,31 +1116,31 @@ function buildTagChainFromIds ($tagidlist)
 
 // Process a given tag tree and return only meaningful branches. The resulting
 // (sub)tree will have refcnt leaves on every last branch.
-function getObjectiveTagTree ($tree, $realm)
+function getObjectiveTagTree ($tree, $realm, $preselect)
 {
 	$self = __FUNCTION__;
 	$ret = array();
 	foreach ($tree as $taginfo)
 	{
-		$subsearch = array();
-		$pick = FALSE;
-		if (count ($taginfo['kids']))
-		{
-			$subsearch = $self ($taginfo['kids'], $realm);
-			$pick = count ($subsearch) > 0;
-		}
-		if (isset ($taginfo['refcnt'][$realm]))
-			$pick = TRUE;
-		if (!$pick)
-			continue;
-		$ret[] = array
+		$subsearch = $self ($taginfo['kids'], $realm, $preselect);
+		// If the current node addresses something, add it to the result
+		// regardless of how many sub-nodes it features.
+		if
 		(
-			'id' => $taginfo['id'],
-			'tag' => $taginfo['tag'],
-			'parent_id' => $taginfo['parent_id'],
-			'refcnt' => $taginfo['refcnt'],
-			'kids' => $subsearch
-		);
+			isset ($taginfo['refcnt'][$realm]) or
+			count ($subsearch) > 1 or
+			tagOnIdList ($taginfo, $preselect)
+		)
+			$ret[] = array
+			(
+				'id' => $taginfo['id'],
+				'tag' => $taginfo['tag'],
+				'parent_id' => $taginfo['parent_id'],
+				'refcnt' => $taginfo['refcnt'],
+				'kids' => $subsearch
+			);
+		else
+			$ret = array_merge ($ret, $subsearch);
 	}
 	return $ret;
 }
