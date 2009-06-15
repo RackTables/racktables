@@ -599,7 +599,7 @@ function renderNewRackForm ($row_id)
 		$defh = '';
 	echo "<tr><th class=tdright>Rack name (*):</th><td class=tdleft><input type=text name=rack_name tabindex=1></td>";
 	echo "<td rowspan=4>Assign tags:<br>";
-	renderNewEntityTags();
+	renderNewEntityTags ('rack');
 	echo "</td></tr>\n";
 	echo "<tr><th class=tdright>Height in units (*):</th><td class=tdleft><input type=text name=rack_height1 tabindex=2 value='${defh}'></td></tr>\n";
 	echo "<tr><th class=tdright>Comment:</th><td class=tdleft><input type=text name=rack_comment tabindex=3></td></tr>\n";
@@ -616,7 +616,7 @@ function renderNewRackForm ($row_id)
 		$defh = '';
 	echo "<tr><th class=tdright>Height in units (*):</th><td class=tdleft><input type=text name=rack_height2 value='${defh}'></td>";
 	echo "<td rowspan=3 valign=top>Assign tags:<br>";
-	renderNewEntityTags();
+	renderNewEntityTags ('rack');
 	echo "</td></tr>\n";
 	echo "<tr><th class=tdright>Rack names (*):</th><td class=tdleft><textarea name=rack_names cols=40 rows=25></textarea></td></tr>\n";
 	echo "<tr><td class=submit colspan=2>";
@@ -2173,7 +2173,7 @@ function renderIPv4SpaceEditor ()
 	echo "<input type=hidden name=op value=addIPv4Prefix>\n";
 	// tags column
 	echo '<tr><td rowspan=4><h3>assign tags</h3>';
-	renderNewEntityTags();
+	renderNewEntityTags ('ipv4net');
 	echo '</td>';
 	// inputs column
 	echo "<th class=tdright>prefix</th><td class=tdleft><input type=text name='range' size=18 class='live-validate' tabindex=1></td>";
@@ -2826,7 +2826,7 @@ function renderAddMultipleObjectsForm ()
 		if ($i == 0)
 		{
 			echo "<td valign=top rowspan=${max}>";
-			renderNewEntityTags();
+			renderNewEntityTags ('object');
 			echo "</td>\n";
 		}
 		echo "</tr>\n";
@@ -2845,7 +2845,7 @@ function renderAddMultipleObjectsForm ()
 	echo "</td></tr>";
 	echo "<tr><th>Tags</th></tr>";
 	echo "<tr><td valign=top>";
-	renderNewEntityTags();
+	renderNewEntityTags ('object');
 	echo "</td></tr>";
 	echo "<tr><td colspan=2><input type=submit name=got_very_fast_data value='Go!'></td></tr></table>\n";
 	echo "</form>\n";
@@ -4396,7 +4396,7 @@ function renderVSListEditForm ()
 	printImageHREF ('CREATE', 'create virtual service', TRUE);
 	echo "</td></tr><tr><th>VS configuration</th><td colspan=4 class=tdleft><textarea name=vsconfig rows=10 cols=80></textarea></td>\n";
 	echo "<td rowspan=2><h3>assign tags</h3>";
-	renderNewEntityTags();
+	renderNewEntityTags ('ipv4vs');
 	echo "</td></tr>";
 	echo "<tr><th>RS configuration</th><td colspan=4 class=tdleft><textarea name=rsconfig rows=10 cols=80></textarea></td></tr>\n";
 	echo "</table>";
@@ -4455,7 +4455,7 @@ function editRSPools ()
 	printImageHREF ('CREATE', 'create real server pool', TRUE);
 	echo "</td></tr><tr><th>VS configuration</th><td><textarea name=vsconfig rows=10 cols=80></textarea></td>";
 	echo "<td rowspan=2><h3>assign tags</h3>";
-	renderNewEntityTags();
+	renderNewEntityTags ('ipv4rspool');
 	echo "</td></tr>";
 	echo "<tr><th>RS configuration</th><td><textarea name=rsconfig rows=10 cols=80></textarea></td></tr>";
 	echo "</table></form>";
@@ -4692,12 +4692,12 @@ function renderTagRowForViewer ($taginfo, $level = 0)
 	$self = __FUNCTION__;
 	if (!count ($taginfo['kids']))
 		$level++; // Shift instead of placing a spacer. This won't impact any nested nodes.
+	$refc = array_sum ($taginfo['refcnt']);
 	echo "<tr><td align=left style='padding-left: " . ($level * 16) . "px;'>";
 	if (count ($taginfo['kids']))
 		printImageHREF ('node-expanded-static');
-	echo '<span title="id = ' . $taginfo['id'] . '">';
-	echo $taginfo['tag'] . '</span>';
-	echo "</td></tr>\n";
+	echo '<span title="id = ' . $taginfo['id'] . '">' . $taginfo['tag'];
+	echo ($refc ? " <small><i>(${refc})</i></small>" : '') . '</span></td></tr>';
 	foreach ($taginfo['kids'] as $kid)
 		$self ($kid, $level + 1);
 }
@@ -4807,7 +4807,7 @@ function renderTagTreeEditor ()
 	finishPortlet();
 }
 
-function renderTagCheckbox ($inputname, $preselect, $taginfo, $level = 0)
+function renderTagCheckbox ($inputname, $preselect, $taginfo, $refcnt_realm = '', $level = 0)
 {
 	$self = __FUNCTION__;
 	if (tagOnChain ($taginfo, $preselect))
@@ -4822,21 +4822,23 @@ function renderTagCheckbox ($inputname, $preselect, $taginfo, $level = 0)
 	}
 	echo "<tr><td colspan=2 class=${class} style='padding-left: " . ($level * 16) . "px;'>";
 	echo "<input type=checkbox name='${inputname}[]' value='${taginfo['id']}'${selected}> ";
-	echo $taginfo['tag'] . "</td></tr>\n";
+	echo $taginfo['tag'];
+	if (strlen ($refcnt_realm) and isset ($taginfo['refcnt'][$refcnt_realm]))
+		echo ' <small><i>(' . $taginfo['refcnt'][$refcnt_realm] . ')</i></small>';
+	echo "</td></tr>\n";
 	foreach ($taginfo['kids'] as $kid)
-		$self ($inputname, $preselect, $kid, $level + 1);
+		$self ($inputname, $preselect, $kid, $refcnt_realm, $level + 1);
 }
 
 function renderEntityTags ($entity_id)
 {
-	global $tagtree, $target_given_tags, $pageno, $page, $target_given_tags;
-	$bypass_name = $page[$pageno]['bypass'];
+	global $tagtree, $target_given_tags, $pageno, $etype_by_pageno, $target_given_tags;
 	startPortlet ('Tag list');
 	echo '<table border=0 cellspacing=0 cellpadding=3 align=center>';
 	printOpFormIntro ('saveTags');
 	// Show a tree of tags with preselection, which matches current chain.
 	foreach ($tagtree as $taginfo)
-		renderTagCheckbox ('taglist', $target_given_tags, $taginfo);
+		renderTagCheckbox ('taglist', $target_given_tags, $taginfo, $etype_by_pageno[$pageno]);
 	echo '<tr><td class=tdleft>';
 	printImageHREF ('SAVE', 'Save changes', TRUE);
 	echo "</form></td><td class=tdright>";
@@ -4902,12 +4904,12 @@ function renderCellFilterPortlet ($preselect, $realm, $bypass_name = '', $bypass
 		$hr = $ruler;
 		// Show a tree of tags, pre-select according to currently requested list filter.
 		global $tagtree;
-		$objectivetags = getObjectiveTagTree ($tagtree, $realm);
+		$objectivetags = getObjectiveTagTree ($tagtree, $realm, $preselect['tagidlist']);
 		if (!count ($objectivetags))
 			echo "<tr><td colspan=2 class='tagbox sparenetwork'>(nothing is tagged yet)</td></tr>";
 		else
 			foreach ($objectivetags as $taginfo)
-				renderTagCheckbox ('cft', buildTagChainFromIds ($preselect['tagidlist']), $taginfo);
+				renderTagCheckbox ('cft', buildTagChainFromIds ($preselect['tagidlist']), $taginfo, $realm);
 	}
 	// predicates block
 	if (getConfigVar ('FILTER_SUGGEST_PREDICATES') == 'yes' or count ($preselect['pnamelist']))
@@ -4968,7 +4970,7 @@ function renderCellFilterPortlet ($preselect, $realm, $bypass_name = '', $bypass
 }
 
 // Dump all tags in a single SELECT element.
-function renderNewEntityTags ()
+function renderNewEntityTags ($for_realm = '')
 {
 	global $taglist, $tagtree;
 	if (!count ($taglist))
@@ -4978,7 +4980,7 @@ function renderNewEntityTags ()
 	}
 	echo '<div class=tagselector><table border=0 align=center>';
 	foreach ($tagtree as $taginfo)
-		renderTagCheckbox ('taglist', array(), $taginfo);
+		renderTagCheckbox ('taglist', array(), $taginfo, $for_realm);
 	echo '</table></div>';
 }
 
