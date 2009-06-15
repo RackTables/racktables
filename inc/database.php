@@ -539,6 +539,7 @@ function getObjectPortsAndLinks ($object_id)
 		$row['remote_name'] = NULL;
 		$row['remote_object_id'] = NULL;
 		$row['remote_object_name'] = NULL;
+		$row['remote_type_id'] = NULL;
 		$ret[] = $row;
 	}
 	unset ($result);
@@ -569,6 +570,7 @@ function getObjectPortsAndLinks ($object_id)
 				$ret[$tmpkey]['remote_name'] = $row['port_name'];
 				$ret[$tmpkey]['remote_object_id'] = $row['object_id'];
 				$ret[$tmpkey]['remote_object_name'] = $row['object_name'];
+				$ret[$tmpkey]['remote_type_id'] = $row['port_type'];
 			}
 			$ret[$tmpkey]['remote_id'] = $remote_id;
 			unset ($result);
