@@ -996,6 +996,8 @@ function generateEntityAutoTags ($cell)
 		default: // HCF!
 			break;
 	}
+	if (!count ($cell['etags']))
+		$ret[] = array ('tag' => '$untagged');
 	return $ret;
 }
 
