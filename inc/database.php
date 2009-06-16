@@ -677,13 +677,13 @@ function commitDeleteObject ($object_id = 0)
 {
 	global $dbxlink;
 	releaseFiles ('object', $object_id);
+	destroyTagsForEntity ('object', $object_id);
 	$dbxlink->query("DELETE FROM AttributeValue WHERE object_id = ${object_id}");
 	$dbxlink->query("DELETE FROM IPv4LB WHERE object_id = ${object_id}");
 	$dbxlink->query("DELETE FROM IPv4Allocation WHERE object_id = ${object_id}");
 	$dbxlink->query("DELETE FROM Port WHERE object_id = ${object_id}");
 	$dbxlink->query("DELETE FROM IPv4NAT WHERE object_id = ${object_id}");
 	$dbxlink->query("DELETE FROM RackSpace WHERE object_id = ${object_id}");
-	$dbxlink->query("DELETE FROM TagStorage WHERE entity_realm = 'object' and entity_id = ${object_id}");
 	$dbxlink->query("DELETE FROM Atom WHERE molecule_id IN (SELECT new_molecule_id FROM MountOperation WHERE object_id = ${object_id})");
 	$dbxlink->query("DELETE FROM Molecule WHERE id IN (SELECT new_molecule_id FROM MountOperation WHERE object_id = ${object_id})");
 	$dbxlink->query("DELETE FROM MountOperation WHERE object_id = ${object_id}");
@@ -697,9 +697,8 @@ function commitDeleteRack($rack_id)
 {
 	global $dbxlink;
 	releaseFiles ('rack', $rack_id);
+	destroyTagsForEntity ('rack', $rack_id);
 	$query = "delete from RackSpace where rack_id = '${rack_id}'";
-	$dbxlink->query ($query);
-	$query = "delete from TagStorage where entity_realm='rack' and entity_id='${rack_id}'";
 	$dbxlink->query ($query);
 	$query = "delete from RackHistory where id = '${rack_id}'";
 	$dbxlink->query ($query);
@@ -2882,6 +2881,8 @@ function destroyTagsForEntity ($entity_realm, $entity_id)
 }
 
 // Drop only one record. This operation doesn't involve retossing other tags, unlike when adding.
+// FIXME: this function could be used by 3rd-party scripts, dismiss it at some later point,
+// but not now.
 function deleteTagForEntity ($entity_realm, $entity_id, $tag_id)
 {
 	global $dbxlink;
@@ -3472,6 +3473,7 @@ function commitUnlinkFile ($link_id)
 
 function commitDeleteFile ($file_id)
 {
+	destroyTagsForEntity ('file', $file_id);
 	if (useDeleteBlade ('File', 'id', $file_id) != TRUE)
 		return __FUNCTION__ . ': useDeleteBlade() failed';
 	return '';

@@ -7,6 +7,7 @@
 	bugfix: wrong port type set for WS-C2950-24. closes ticket 229 (by jthurman)
 	bugfix: improved IOS detection and fixed a logic error. closes ticket 232 (by jthurman)
 	bugfix: user account autotags were not generated under certain conditions (reported by Jason Hamilton)
+	bugfix: correctly remove tags, when deleting files
 0.17.1 2009-06-03
 	bugfix: tags were not displayed on "File" page
 	bugfix: multiline comment for an added file was stored incorrectly
