@@ -2042,8 +2042,8 @@ function constructUserCell ($username)
 		'user_realname' => '',
 		'etags' => array(),
 		'itags' => array(),
-		'atags' => array(),
 	);
+	$ret['atags'] = generateEntityAutoTags ($ret);
 	return $ret;
 }
 
