@@ -157,11 +157,21 @@ $user_given_tags = array();
 
 if (!isset ($script_mode) or $script_mode !== TRUE)
 {
-	authenticate(); // this call always generates autotags and somethimes --- given tags
+	// A successful call to authenticate() always generates autotags and somethimes
+	// even given/implicit tags. It also sets remote_username and remote_displayname.
+	authenticate();
 	// Authentication passed.
 	// Note that we don't perform autorization here, so each 1st level page
 	// has to do it in its way, e.g. by calling authorize() after fixContext().
 	session_start();
+}
+else
+{
+	// Some functions require remote_username to be set to something to act correctly,
+	// even though they don't use the value itself.
+	$admin_account = spotEntity ('user', 1);
+	$remote_username = $admin_account['user_name'];
+	unset ($admin_account);
 }
 
 $pageno = (isset ($_REQUEST['page'])) ? $_REQUEST['page'] : 'index';
