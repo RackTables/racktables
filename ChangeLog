@@ -1,5 +1,6 @@
 0.17.2
 	new feature: configure default SNMP community (by jthurman)
+	new feature: "$untagged" autotag
 	update: show appropriate message, if a record cannot be found
 	update: add Cisco dictionary entry for WS-CBS3030-DEL. closes ticket 225 (by jthurman)
 	update: add OS, router, fibre switch dictionary entries for ticket 238 (by Aaron)
