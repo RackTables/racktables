@@ -283,6 +283,8 @@ CREATE TABLE `LDAPCache` (
 				$query[] = $dict_query;
 			}
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('DEFAULT_SNMP_COMMUNITY','public','string','no','no','Default SNMP Community string')";
+			// wipe irrelevant records (ticket:250)
+			$query[] = "DELETE FROM TagStorage WHERE entity_realm = 'file' AND entity_id NOT IN (SELECT id FROM File)";
 			$query[] = "UPDATE Config SET varvalue = '0.17.2' WHERE varname = 'DB_VERSION'";
 			break;
 		default:
