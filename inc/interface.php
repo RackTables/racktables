@@ -4700,7 +4700,7 @@ function renderTagRowForViewer ($taginfo, $level = 0)
 	if (count ($taginfo['kids']))
 		printImageHREF ('node-expanded-static');
 	echo '<span title="id = ' . $taginfo['id'] . '">' . $taginfo['tag'];
-	echo ($refc ? " <small><i>(${refc})</i></small>" : '') . '</span></td></tr>';
+	echo ($refc ? " <i>(${refc})</i>" : '') . '</span></td></tr>';
 	foreach ($taginfo['kids'] as $kid)
 		$self ($kid, $level + 1);
 }
@@ -4827,7 +4827,7 @@ function renderTagCheckbox ($inputname, $preselect, $taginfo, $refcnt_realm = ''
 	echo "<input type=checkbox name='${inputname}[]' value='${taginfo['id']}'${selected}> ";
 	echo $taginfo['tag'];
 	if (strlen ($refcnt_realm) and isset ($taginfo['refcnt'][$refcnt_realm]))
-		echo ' <small><i>(' . $taginfo['refcnt'][$refcnt_realm] . ')</i></small>';
+		echo ' <i>(' . $taginfo['refcnt'][$refcnt_realm] . ')</i>';
 	echo "</td></tr>\n";
 	foreach ($taginfo['kids'] as $kid)
 		$self ($inputname, $preselect, $kid, $refcnt_realm, $level + 1);
