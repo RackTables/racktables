@@ -957,7 +957,7 @@ function generateEntityAutoTags ($cell)
 			$ret[] = array ('tag' => '$rackid_' . $cell['id']);
 			$ret[] = array ('tag' => '$any_rack');
 			break;
-		case 'object': // during transition bypass is already the whole structure
+		case 'object':
 			$ret[] = array ('tag' => '$id_' . $cell['id']);
 			$ret[] = array ('tag' => '$typeid_' . $cell['objtype_id']);
 			$ret[] = array ('tag' => '$any_object');
@@ -966,9 +966,10 @@ function generateEntityAutoTags ($cell)
 			if (!strlen ($cell['rack_id']))
 				$ret[] = array ('tag' => '$unmounted');
 			break;
-		case 'ipv4net': // during transition bypass is already the whole structure
+		case 'ipv4net':
 			$ret[] = array ('tag' => '$ip4netid_' . $cell['id']);
 			$ret[] = array ('tag' => '$ip4net-' . str_replace ('.', '-', $cell['ip']) . '-' . $cell['mask']);
+			$ret[] = array ('tag' => '$masklen_' . $cell['mask']);
 			$ret[] = array ('tag' => '$any_ip4net');
 			$ret[] = array ('tag' => '$any_net');
 			break;
@@ -996,8 +997,21 @@ function generateEntityAutoTags ($cell)
 		default: // HCF!
 			break;
 	}
-	if (!count ($cell['etags']))
-		$ret[] = array ('tag' => '$untagged');
+	// {$tagless} doesn't apply to users
+	switch ($cell['realm'])
+	{
+		case 'rack':
+		case 'object':
+		case 'ipv4net':
+		case 'ipv4vs':
+		case 'ipv4rspool':
+		case 'file':
+			if (!count ($cell['etags']))
+				$ret[] = array ('tag' => '$untagged');
+			break;
+		default:
+			break;
+	}
 	return $ret;
 }
 
