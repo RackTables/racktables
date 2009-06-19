@@ -105,7 +105,7 @@ function doSNMPmining ($object_id, $community)
 	$objectInfo = spotEntity ('object', $object_id, FALSE);
 	$endpoints = findAllEndpoints ($object_id, $objectInfo['name']);
 	$sysName = @snmpget ($endpoints[0], $community, 'sysName.0');
-	if ($sysName === FALSE or $sysname == FALSE)
+	if ($sysName === FALSE)
 	{
 		$log[] = array ('code' => 'error', 'message' => 'SNMP error connecting to "' . $endpoints[0] . '"');
 		return $log;
