@@ -969,7 +969,16 @@ function generateEntityAutoTags ($cell)
 		case 'ipv4net':
 			$ret[] = array ('tag' => '$ip4netid_' . $cell['id']);
 			$ret[] = array ('tag' => '$ip4net-' . str_replace ('.', '-', $cell['ip']) . '-' . $cell['mask']);
-			$ret[] = array ('tag' => '$masklen_' . $cell['mask']);
+			for ($i = 8; $i < 32; $i++)
+			{
+				// these conditions hit 1 to 3 times per each i
+				if ($cell['mask'] >= $i)
+					$ret[] = array ('tag' => '$masklen_ge_' . $i);
+				if ($cell['mask'] <= $i)
+					$ret[] = array ('tag' => '$masklen_le_' . $i);
+				if ($cell['mask'] == $i)
+					$ret[] = array ('tag' => '$masklen_eq_' . $i);
+			}
 			$ret[] = array ('tag' => '$any_ip4net');
 			$ret[] = array ('tag' => '$any_net');
 			break;
