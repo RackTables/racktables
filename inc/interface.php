@@ -4824,11 +4824,11 @@ function renderTagCheckbox ($inputname, $preselect, $taginfo, $refcnt_realm = ''
 		$class = 'tagbox';
 	}
 	echo "<tr><td colspan=2 class=${class} style='padding-left: " . ($level * 16) . "px;'>";
-	echo "<input type=checkbox name='${inputname}[]' value='${taginfo['id']}'${selected}> ";
+	echo "<label><input type=checkbox name='${inputname}[]' value='${taginfo['id']}'${selected}> ";
 	echo $taginfo['tag'];
 	if (strlen ($refcnt_realm) and isset ($taginfo['refcnt'][$refcnt_realm]))
 		echo ' <i>(' . $taginfo['refcnt'][$refcnt_realm] . ')</i>';
-	echo "</td></tr>\n";
+	echo "</label></td></tr>\n";
 	foreach ($taginfo['kids'] as $kid)
 		$self ($inputname, $preselect, $kid, $refcnt_realm, $level + 1);
 }
