@@ -3744,12 +3744,6 @@ function renderIPv4Reports ()
 			'type' => 'counters',
 			'func' => 'getIPv4Stats'
 		),
-		array
-		(
-			'title' => 'Lost addresses',
-			'type' => 'custom',
-			'func' => 'getLostIPv4Addresses'
-		),
 	);
 	renderReports ($tmp);
 }

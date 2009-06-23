@@ -834,35 +834,6 @@ function getImplicitTags ($oldtags)
 }
 
 // Minimize the chain: exclude all implicit tags and return the result.
-function getExplicitTagsOnly_old ($chain, $tree = NULL)
-{
-	$self = __FUNCTION__;
-	global $tagtree;
-	if ($tree === NULL)
-		$tree = $tagtree;
-	$ret = array();
-	foreach ($tree as $taginfo)
-	{
-		if (isset ($taginfo['kids']))
-		{
-			$harvest = $self ($chain, $taginfo['kids']);
-			if (count ($harvest) > 0)
-			{
-				$ret = array_merge ($ret, $harvest);
-				continue;
-			}
-		}
-		// This tag isn't implicit, test is for being explicit.
-		foreach ($chain as $testtag)
-			if ($taginfo['id'] == $testtag['id'])
-			{
-				$ret[] = $testtag;
-				break;
-			}
-	}
-	return $ret;
-}
-
 function getExplicitTagsOnly ($chain)
 {
 	$ret = array();
