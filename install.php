@@ -25,6 +25,7 @@ if ($step > count ($stepfunc))
 	exit;
 }
 $title = "RackTables installation: step ${step} of " . count ($stepfunc);
+require_once ('inc/dictionary.php');
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
@@ -342,7 +343,6 @@ function init_database_static ()
 		echo "<td>${nq}</td><td>${nerrs}</td></tr>\n";
 	}
 	// (re)load dictionary by pure PHP means w/o any external file
-	require_once ('inc/dictionary.php');
 	echo "<tr><th>dictionary</th>";
 	$nq = $nerrs = 0;
 	global $dictreload;
