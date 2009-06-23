@@ -307,7 +307,7 @@ function init_database_static ()
 	echo '<table border=1>';
 	echo "<tr><th>file</th><th>queries</th><th>errors</th></tr>";
 	$errlist = array();
-	foreach (array ('structure', 'dictbase', 'dictvendors') as $part)
+	foreach (array ('structure', 'dictbase') as $part)
 	{
 		$filename = "install/init-${part}.sql";
 		echo "<tr><td>${filename}</td>";
@@ -341,6 +341,24 @@ function init_database_static ()
 		}
 		echo "<td>${nq}</td><td>${nerrs}</td></tr>\n";
 	}
+	// (re)load dictionary by pure PHP means w/o any external file
+	require_once ('inc/dictionary.php');
+	echo "<tr><th>dictionary</th>";
+	$nq = $nerrs = 0;
+	global $dictreload;
+	$dictq = array();
+	foreach ($dictreload as $tmp)
+		foreach (reloadDictionary ($tmp['from'], $tmp['to']) as $query)
+		{
+			$nq++;
+			if ($dbxlink->exec ($query) === FALSE)
+			{
+				$nerrs++;
+				$errlist[] = $query;
+			}
+		}
+	echo "<td>${nq}</td><td>${nerrs}</td></tr>\n";
+			
 	echo '</table>';
 	if (count ($errlist))
 	{

@@ -62,7 +62,7 @@ function getDBUpgradePath ($v1, $v2)
 function executeUpgradeBatch ($batchid)
 {
 	$query = array();
-	global $dbxlink;
+	global $dbxlink, $dictreload;
 	switch ($batchid)
 	{
 		case '0.16.5':
@@ -91,32 +91,8 @@ function executeUpgradeBatch ($batchid)
 			$query[] = "alter table Attribute add UNIQUE KEY name (name)";
 			$query[] = "alter table AttributeMap change chapter_no chapter_id int(10) unsigned NOT NULL";
 			$query[] = "alter table Dictionary change chapter_no chapter_id int(10) unsigned NOT NULL";
-			// Many dictionary changes were made... remove all dictvendor entries and install fresh.
-			// Take care not to erase locally added records. 0.16.x ends with max key 797
-			$query[] = 'DELETE FROM Dictionary WHERE ((chapter_id BETWEEN 11 AND 14) or (chapter_id BETWEEN 16 AND 19) ' .
-				'or (chapter_id BETWEEN 21 AND 24)) and dict_key <= 797';
-			$f = fopen ("install/init-dictvendors.sql", 'r');
-			if ($f === FALSE)
-			{
-				showFailure ("Failed to open install/init-dictvendors.sql for reading");
-				die;
-			}
-			$longq = '';
-			while (!feof ($f))
-			{
-				$line = fgets ($f);
-				if (ereg ('^--', $line))
-					continue;
-				$longq .= $line;
-			}
-			fclose ($f);
-			foreach (explode (";\n", $longq) as $dict_query)
-			{
-				if (empty ($dict_query))
-					continue;
-				$query[] = $dict_query;
-			}
-
+			if (isset ($dictreload[$batchid]))
+				reloadDictionary ($dictreload[$batchid]['from'], $dictreload[$batchid]['to']);
 			// schema changes for file management
 			$query[] = "
 CREATE TABLE `File` (
@@ -249,39 +225,17 @@ CREATE TABLE `LDAPCache` (
 			break;
 		case '0.17.1':
 			$query[] = "ALTER TABLE Dictionary DROP KEY `chap_to_key`";
+			if (isset ($dictreload[$batchid]))
+				reloadDictionary ($dictreload[$batchid]['from'], $dictreload[$batchid]['to']);
 			// Token set has changed, so the cache isn't valid any more.
 			$query[] = "UPDATE Script SET script_text = NULL WHERE script_name = 'RackCodeCache'";
-			$query[] = "INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (12,989,'Cisco%GPASS%Catalyst CBS3030-DEL')";
 			$query[] = "UPDATE Config SET varvalue = '0.17.1' WHERE varname = 'DB_VERSION'";
 			break;
 		case '0.17.2':
-			// Many dictionary changes were made... remove all dictvendor entries and install fresh.
-			// Take care not to erase locally added records. 0.17.1 ends with max key 988
 			$query[] = "INSERT INTO `Chapter` (`id`, `sticky`, `name`) VALUES (26,'no','fibre channel switch models')";
+			if (isset ($dictreload[$batchid]))
+				reloadDictionary ($dictreload[$batchid]['from'], $dictreload[$batchid]['to']);
 			$query[] = "INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_id`) VALUES (1055,2,26)";
-			$query[] = 'DELETE FROM Dictionary WHERE ((chapter_id BETWEEN 11 AND 14) or (chapter_id BETWEEN 16 AND 19) ' .
-				'or (chapter_id BETWEEN 21 AND 25)) and dict_key <= 988';
-			$f = fopen ("install/init-dictvendors.sql", 'r');
-			if ($f === FALSE)
-			{
-				showFailure ("Failed to open install/init-dictvendors.sql for reading");
-				die;
-			}
-			$longq = '';
-			while (!feof ($f))
-			{
-				$line = fgets ($f);
-				if (ereg ('^--', $line))
-					continue;
-				$longq .= $line;
-			}
-			fclose ($f);
-			foreach (explode (";\n", $longq) as $dict_query)
-			{
-				if (empty ($dict_query))
-					continue;
-				$query[] = $dict_query;
-			}
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('DEFAULT_SNMP_COMMUNITY','public','string','no','no','Default SNMP Community string')";
 			// wipe irrelevant records (ticket:250)
 			$query[] = "DELETE FROM TagStorage WHERE entity_realm = 'file' AND entity_id NOT IN (SELECT id FROM File)";
@@ -348,6 +302,7 @@ function showFailure ($info = '', $location = 'N/A')
 
 require_once 'inc/config.php'; // for CODE_VERSION
 require_once 'inc/database.php'; // for getDatabaseVersion()
+require_once 'inc/dictionary.php';
 // Enforce default value for now, releases prior to 0.17.0 didn't support 'httpd' auth source.
 $user_auth_src = 'database';
 
