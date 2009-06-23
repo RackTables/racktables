@@ -556,16 +556,6 @@ function sortObjectAddressesAndNames ($a, $b)
 	return $objname_cmp;
 }
 
-function sortAddresses ($a, $b)
-{
-	$name_cmp = sortTokenize($a['name'], $b['name']);
-	if ($name_cmp == 0)
-	{
-		return sortTokenize($a['ip'], $b['ip']);
-	}
-	return $name_cmp;
-}
-
 // This function expands port compat list into a matrix.
 function buildPortCompatMatrixFromList ($portTypeList, $portCompatList)
 {
