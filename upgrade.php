@@ -91,8 +91,9 @@ function executeUpgradeBatch ($batchid)
 			$query[] = "alter table Attribute add UNIQUE KEY name (name)";
 			$query[] = "alter table AttributeMap change chapter_no chapter_id int(10) unsigned NOT NULL";
 			$query[] = "alter table Dictionary change chapter_no chapter_id int(10) unsigned NOT NULL";
+			// Only after the above call it is Ok to use reloadDictionary()
 			if (isset ($dictreload[$batchid]))
-				reloadDictionary ($dictreload[$batchid]['from'], $dictreload[$batchid]['to']);
+				$query = array_merge ($query, reloadDictionary ($dictreload[$batchid]['from'], $dictreload[$batchid]['to']));
 			// schema changes for file management
 			$query[] = "
 CREATE TABLE `File` (
@@ -121,8 +122,6 @@ CREATE TABLE `FileLink` (
 ) ENGINE=InnoDB";
 			$query[] = "ALTER TABLE TagStorage MODIFY COLUMN target_realm enum('file','ipv4net','ipv4rspool','ipv4vs','object','rack','user') NOT NULL default 'object'";
 
-			$query[] = "INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (1,798,'Network security')";
-			$query[] = "INSERT INTO `Dictionary` (`chapter_id`, `dict_key`, `dict_value`) VALUES (1,965,'Wireless')";
 			$query[] = "INSERT INTO `Chapter` (`id`, `sticky`, `name`) VALUES (24,'no','network security models')";
 			$query[] = "INSERT INTO `Chapter` (`id`, `sticky`, `name`) VALUES (25,'no','wireless models')";
 			$query[] = "INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_id`) VALUES (798,1,0)";
@@ -140,7 +139,6 @@ CREATE TABLE `FileLink` (
 			$query[] = "INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_id`) VALUES (965,1,0)";
 			$query[] = "INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_id`) VALUES (965,3,0)";
 			$query[] = "INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_id`) VALUES (965,2,25)";
-			$query[] = "UPDATE Dictionary SET dict_value = 'Network switch' WHERE dict_key = 8";
 			$query[] = 'alter table IPBonds rename to IPv4Allocation';
 			$query[] = 'alter table PortForwarding rename to IPv4NAT';
 			$query[] = 'alter table IPRanges rename to IPv4Network';
@@ -226,7 +224,7 @@ CREATE TABLE `LDAPCache` (
 		case '0.17.1':
 			$query[] = "ALTER TABLE Dictionary DROP KEY `chap_to_key`";
 			if (isset ($dictreload[$batchid]))
-				reloadDictionary ($dictreload[$batchid]['from'], $dictreload[$batchid]['to']);
+				$query = array_merge ($query, reloadDictionary ($dictreload[$batchid]['from'], $dictreload[$batchid]['to']));
 			// Token set has changed, so the cache isn't valid any more.
 			$query[] = "UPDATE Script SET script_text = NULL WHERE script_name = 'RackCodeCache'";
 			$query[] = "UPDATE Config SET varvalue = '0.17.1' WHERE varname = 'DB_VERSION'";
@@ -234,7 +232,7 @@ CREATE TABLE `LDAPCache` (
 		case '0.17.2':
 			$query[] = "INSERT INTO `Chapter` (`id`, `sticky`, `name`) VALUES (26,'no','fibre channel switch models')";
 			if (isset ($dictreload[$batchid]))
-				reloadDictionary ($dictreload[$batchid]['from'], $dictreload[$batchid]['to']);
+				$query = array_merge ($query, reloadDictionary ($dictreload[$batchid]['from'], $dictreload[$batchid]['to']));
 			$query[] = "INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_id`) VALUES (1055,2,26)";
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('DEFAULT_SNMP_COMMUNITY','public','string','no','no','Default SNMP Community string')";
 			// wipe irrelevant records (ticket:250)
