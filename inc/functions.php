@@ -958,17 +958,6 @@ function tagNameOnChain ($tagname, $tagchain)
 	return FALSE;
 }
 
-// Idem, but use ID list instead of chain.
-function tagOnIdList ($taginfo, $tagidlist)
-{
-	if (!isset ($taginfo['id']))
-		return FALSE;
-	foreach ($tagidlist as $tagid)
-		if ($taginfo['id'] == $tagid)
-			return TRUE;
-	return FALSE;
-}
-
 // Return TRUE, if two tags chains differ (order of tags doesn't matter).
 // Assume, that neither of the lists contains duplicates.
 // FIXME: a faster, than O(x^2) method is possible for this calculation.
@@ -1078,7 +1067,7 @@ function getObjectiveTagTree ($tree, $realm, $preselect)
 		(
 			isset ($taginfo['refcnt'][$realm]) or
 			count ($subsearch) > 1 or
-			tagOnIdList ($taginfo, $preselect)
+			in_array ($taginfo['id'], $preselect)
 		)
 			$ret[] = array
 			(
