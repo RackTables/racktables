@@ -265,7 +265,7 @@ function listCells ($realm, $parent_id = 0)
 	}
 	global $SQLSchema;
 	if (!isset ($SQLSchema[$realm]))
-		throw new InvalidArgException (__FUNCTION__);
+		throw new RealmNotFoundException ($realm);
 	$SQLinfo = $SQLSchema[$realm];
 	$query = 'SELECT tag_id';
 	foreach ($SQLinfo['columns'] as $alias => $expression)
@@ -355,7 +355,7 @@ function spotEntity ($realm, $id)
 		return $entityCache['partial'][$realm][$id];
 	global $SQLSchema;
 	if (!isset ($SQLSchema[$realm]))
-		throw new InvalidArgException (__FUNCTION__);
+		throw new RealmNotFoundException ($realm);
 	$SQLinfo = $SQLSchema[$realm];
 	$query = 'SELECT tag_id';
 	foreach ($SQLinfo['columns'] as $alias => $expression)
@@ -647,7 +647,7 @@ function commitAddObject ($new_name, $new_label, $new_barcode, $new_type_id, $ne
 function commitUpdateObject ($object_id = 0, $new_name = '', $new_label = '', $new_barcode = '', $new_type_id = 0, $new_has_problems = 'no', $new_asset_no = '', $new_comment = '')
 {
 	if ($new_type_id == 0)
-		throw new InvalidArgException (__FUNCTION__);
+		throw new InvalidArgException ('$new_type_id', $new_type_id);
 	global $dbxlink;
 	$new_asset_no = !strlen ($new_asset_no) ? 'NULL' : "'${new_asset_no}'";
 	$new_barcode = !strlen ($new_barcode) ? 'NULL' : "'${new_barcode}'";
@@ -1315,7 +1315,7 @@ function scanIPv4Space ($pairlist)
 function getIPv4Address ($dottedquad = '')
 {
 	if ($dottedquad == '')
-		throw new InvalidArgException (__FUNCTION__);
+		throw new InvalidArgException ('$dottedquad', $dottedquad);
 	$i32 = ip2long ($dottedquad); // signed 32 bit
 	$scanres = scanIPv4Space (array (array ('i32_first' => $i32, 'i32_last' => $i32)));
 	if (!isset ($scanres[$i32]))
@@ -1924,8 +1924,13 @@ mysql> select tag_id from TagStorage left join TagTree on tag_id = id where id i
 // See below why chapter_id is necessary.
 function commitUpdateDictionary ($chapter_no = 0, $dict_key = 0, $dict_value = '')
 {
-	if ($chapter_no <= 0 or $dict_key <= 0 or !strlen ($dict_value))
-		throw new InvalidArgException (__FUNCTION__);
+	if ($chapter_no <= 0)
+		throw new InvalidArgException ('$chapter_no', $chapter_no);
+	if ($dict_key <= 0)
+		throw new InvalidArgException ('$dict_key', $dict_key);
+	if (!strlen ($dict_value))
+		throw new InvalidArgException ('$dict_value', $dict_value);
+
 	global $dbxlink;
 	$query =
 		"update Dictionary set dict_value = '${dict_value}' where chapter_id=${chapter_no} " .
@@ -1941,8 +1946,10 @@ function commitUpdateDictionary ($chapter_no = 0, $dict_key = 0, $dict_value = '
 
 function commitSupplementDictionary ($chapter_no = 0, $dict_value = '')
 {
-	if ($chapter_no <= 0 or !strlen ($dict_value))
-		throw new InvalidArgException (__FUNCTION__);
+	if ($chapter_no <= 0)
+		throw new InvalidArgException ('$chapter_no', $chapter_no);
+	if (!strlen ($dict_value))
+		throw new InvalidArgException ('$dict_value', $dict_value);
 	return useInsertBlade
 	(
 		'Dictionary',
@@ -1971,7 +1978,7 @@ function commitReduceDictionary ($chapter_no = 0, $dict_key = 0)
 function commitAddChapter ($chapter_name = '')
 {
 	if (!strlen ($chapter_name))
-		throw new InvalidArgException (__FUNCTION__);
+		throw new InvalidArgException ('$chapter_name', $chapter_name);
 	return useInsertBlade
 	(
 		'Chapter',
@@ -1982,7 +1989,7 @@ function commitAddChapter ($chapter_name = '')
 function commitUpdateChapter ($chapter_no = 0, $chapter_name = '')
 {
 	if (!strlen ($chapter_name))
-		throw new InvalidArgException (__FUNCTION__);
+		throw new InvalidArgException ('$chapter_name', $chapter_name);
 	global $dbxlink;
 	$query =
 		"update Chapter set name = '${chapter_name}' where id = ${chapter_no} " .
@@ -2015,7 +2022,7 @@ function commitDeleteChapter ($chapter_no = 0)
 function readChapter ($chapter_name = '')
 {
 	if (!strlen ($chapter_name))
-		throw new InvalidArgException (__FUNCTION__);
+		throw new InvalidArgException ('$chapter_name', $chapter_name);
 	$query =
 		"select dict_key, dict_value from Dictionary join Chapter on Chapter.id = Dictionary.chapter_id " .
 		"where Chapter.name = '${chapter_name}'";
@@ -2371,8 +2378,10 @@ function loadConfigCache ()
 function storeConfigVar ($varname = NULL, $varvalue = NULL)
 {
 	global $dbxlink;
-	if (!strlen ($varname) || $varvalue === NULL)
-		throw new InvalidArgException (__FUNCTION__);
+	if (!strlen ($varname))
+		throw new InvalidArgException ('$varname', $varname);
+	if ($varvalue === NULL)
+		throw new InvalidArgException ('$varvalue', $varvalue);
 	$query = "update Config set varvalue='${varvalue}' where varname='${varname}' limit 1";
 	$result = $dbxlink->query ($query);
 	if ($result == NULL)
@@ -2451,7 +2460,7 @@ function getSLBSummary ()
 function addRStoRSPool ($pool_id = 0, $rsip = '', $rsport = 0, $inservice = 'no', $rsconfig = '')
 {
 	if ($pool_id <= 0)
-		throw new InvalidArgException (__FUNCTION__);
+		throw new InvalidArgException ('$pool_id', $pool_id);
 	if (!strlen ($rsport) or $rsport === 0)
 		$rsport = 'NULL';
 	return useInsertBlade
@@ -2470,8 +2479,12 @@ function addRStoRSPool ($pool_id = 0, $rsip = '', $rsport = 0, $inservice = 'no'
 
 function commitCreateVS ($vip = '', $vport = 0, $proto = '', $name = '', $vsconfig, $rsconfig, $taglist = array())
 {
-	if (!strlen ($vip) or $vport <= 0 or !strlen ($proto))
-		throw new InvalidArgException (__FUNCTION__);
+	if (!strlen ($vip))
+		throw new InvalidArgException ('$vip', $vip);
+	if ($vport <= 0)
+		throw new InvalidArgException ('$vport', $vport);
+	if (!strlen ($proto))
+		throw new InvalidArgException ('$proto', $proto);
 	if (!useInsertBlade
 	(
 		'IPv4VS',
@@ -2491,8 +2504,12 @@ function commitCreateVS ($vip = '', $vport = 0, $proto = '', $name = '', $vsconf
 
 function addLBtoRSPool ($pool_id = 0, $object_id = 0, $vs_id = 0, $vsconfig = '', $rsconfig = '')
 {
-	if ($pool_id <= 0 or $object_id <= 0 or $vs_id <= 0)
-		throw new InvalidArgException (__FUNCTION__);
+	if ($pool_id <= 0)
+		throw new InvalidArgException ('$pool_id', $pool_id);
+	if ($object_id <= 0)
+		throw new InvalidArgException ('$object_id', $object_id);
+	if ($vs_id <= 0)
+		throw new InvalidArgException ('$vs_id', $vs_id);
 	return useInsertBlade
 	(
 		'IPv4LB',
@@ -2539,7 +2556,7 @@ function commitDeleteLB ($object_id = 0, $pool_id = 0, $vs_id = 0)
 function commitUpdateRS ($rsid = 0, $rsip = '', $rsport = 0, $rsconfig = '')
 {
 	if (long2ip (ip2long ($rsip)) !== $rsip)
-		throw new InvalidArgException (__FUNCTION__);
+		throw new InvalidArgException ('$rsip', $rsip);
 	if (!strlen ($rsport) or $rsport === 0)
 		$rsport = 'NULL';
 	global $dbxlink;
@@ -2575,8 +2592,12 @@ function commitUpdateLB ($object_id = 0, $pool_id = 0, $vs_id = 0, $vsconfig = '
 
 function commitUpdateVS ($vsid = 0, $vip = '', $vport = 0, $proto = '', $name = '', $vsconfig = '', $rsconfig = '')
 {
-	if (!strlen ($vip) or $vport <= 0 or !strlen ($proto))
-		throw new InvalidArgException (__FUNCTION__);
+	if (!strlen ($vip))
+		throw new InvalidArgException ('$vip', $vip);
+	if ($vport <= 0)
+		throw new InvalidArgException ('$vport', $vport);
+	if (!strlen ($proto))
+		throw new InvalidArgException ('$proto', $proto);
 	global $dbxlink;
 	$query = "update IPv4VS set " .
 		"vip = inet_aton('${vip}'), " .
@@ -2609,7 +2630,7 @@ function saveThumbCache ($rack_id = 0, $cache = NULL)
 {
 	global $dbxlink;
 	if ($cache == NULL)
-		throw new InvalidArgException (__FUNCTION__);
+		throw new InvalidArgException ('$cache', $cache);
 	$data = base64_encode ($cache);
 	$query = "update Rack set thumb_data = '${data}' where id = ${rack_id} limit 1";
 	$result = $dbxlink->exec ($query);
@@ -2647,7 +2668,7 @@ function getRSPoolsForObject ($object_id = 0)
 function commitCreateRSPool ($name = '', $vsconfig = '', $rsconfig = '', $taglist = array())
 {
 	if (!strlen ($name))
-		throw new InvalidArgException (__FUNCTION__);
+		throw new InvalidArgException ('$name', $name);
 	if (!useInsertBlade
 	(
 		'IPv4RSPool',
@@ -2750,8 +2771,10 @@ function getSLBConfig ($object_id)
 
 function commitSetInService ($rs_id = 0, $inservice = '')
 {
-	if ($rs_id <= 0 or !strlen ($inservice))
-		throw new InvalidArgException (__FUNCTION__);
+	if (!strlen ($inservice))
+		throw new InvalidArgException ('$inservice', $inservice);
+	if ($rs_id <= 0)
+		throw new InvalidArgException ('$rs_id', $rs_id);
 	global $dbxlink;
 	$query = "update IPv4RS set inservice = '${inservice}' where id = ${rs_id} limit 1";
 	$result = $dbxlink->exec ($query);
@@ -2765,8 +2788,10 @@ function commitSetInService ($rs_id = 0, $inservice = '')
 
 function executeAutoPorts ($object_id = 0, $type_id = 0)
 {
-	if ($object_id == 0 or $type_id == 0)
-		throw new InvalidArgException (__FUNCTION__);
+	if ($object_id == 0)
+		throw new InvalidArgException ('$object_id', $object_id);
+	if ($type_id == 0)
+		throw new InvalidArgException ('$type_id', $type_id);
 	$ret = TRUE;
 	foreach (getAutoPorts ($type_id) as $autoport)
 		$ret = $ret and '' == commitAddPort ($object_id, $autoport['name'], $autoport['type'], '', '');
@@ -3043,7 +3068,7 @@ function loadScript ($name)
 function saveScript ($name = '', $text)
 {
 	if (!strlen ($name))
-		throw new InvalidArgException (__FUNCTION__);
+		throw new InvalidArgException ('$name', $name);
 	// delete regardless of existence
 	useDeleteBlade ('Script', 'script_name', "'${name}'");
 	return useInsertBlade
@@ -3214,8 +3239,10 @@ function getLostIPv4Addresses ()
 // will be used by printSelect().
 function getAllUnlinkedFiles ($entity_type = NULL, $entity_id = 0)
 {
-	if ($entity_type == NULL || $entity_id == 0)
-		throw new InvalidArgException (__FUNCTION__);
+	if ($entity_type == NULL)
+		throw new InvalidArgException ('$entity_type', $entity_type);
+	if ($entity_id == 0)
+		throw new InvalidArgException ('$entity_id', $entity_id);
 	global $dbxlink;
 	$sql =
 		'SELECT id, name FROM File ' .
@@ -3235,8 +3262,10 @@ function getAllUnlinkedFiles ($entity_type = NULL, $entity_id = 0)
 // it conveniently.
 function getFilesOfEntity ($entity_type = NULL, $entity_id = 0)
 {
-	if ($entity_type === NULL || $entity_id <= 0)
-		throw new InvalidArgException (__FUNCTION__);
+	if ($entity_type === NULL)
+		throw new InvalidArgException ('$entity_type', $entity_type);
+	if ($entity_id <= 0)
+		throw new InvalidArgException ('$entity_id', $entity_id);
 	global $dbxlink;
 	$sql =
 		'SELECT FileLink.file_id, FileLink.id AS link_id, name, type, size, ctime, mtime, atime, comment ' .
@@ -3449,8 +3478,10 @@ function commitReplaceFile ($file_id = 0, $contents)
 
 function commitUpdateFile ($file_id = 0, $new_name = '', $new_type = '', $new_comment = '')
 {
-	if (!strlen ($new_name) or !strlen ($new_type))
-		throw new InvalidArgException (__FUNCTION__);
+	if (!strlen ($new_name))
+		throw new InvalidArgException ('$new_name', $new_name);
+	if (!strlen ($new_type))
+		throw new InvalidArgException ('$new_type', $new_type);
 	global $dbxlink;
 	$query = $dbxlink->prepare('UPDATE File SET name = ?, type = ?, comment = ? WHERE id = ?');
 	$query->bindParam(1, $new_name);

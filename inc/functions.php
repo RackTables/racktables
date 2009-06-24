@@ -2033,7 +2033,7 @@ function scanRealmByText ($realm = NULL, $ftext = '')
 		}
 		return filterCellList (listCells ($realm), $fexpr);
 	default:
-		throw new InvalidArgException (__FUNCTION__);
+		throw new InvalidArgException ('$realm', $realm);
 	}
 
 }

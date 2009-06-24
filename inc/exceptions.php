@@ -19,6 +19,21 @@ class EntityNotFoundException extends Exception {
 	}
 }
 
+class RealmNotFoundException extends Exception {
+	private $realm;
+	function __construct($realm)
+	{
+		parent::__construct ("Realm '$realm' does not exist");
+		$this->realm = $realm;
+	}
+	function getRealm()
+	{
+		return $this->realm;
+	}
+}
+
+
+
 class NotUniqueException extends Exception
 {
 	private $subject;
@@ -35,15 +50,21 @@ class NotUniqueException extends Exception
 
 class InvalidArgException extends Exception
 {
-	private $location;
-	function __construct ($where = '[N/A]')
+	private $name;
+	private $value;
+	function __construct ($name, $value)
 	{
-		$this->location = $where;
-		parent::__construct ("One or more arguments to function ${where} are invalid");
+		parent::__construct ("Argument '${name}' of value '".var_export(${value},true)."' is invalid");
+		$this->name = $name;
+		$this->value = $value;
 	}
-	function getLocation()
+	function getName()
 	{
-		return $this->location;
+		return $this->name;
+	}
+	function getValue()
+	{
+		return $this->value;
 	}
 }
 
