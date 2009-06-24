@@ -1078,6 +1078,8 @@ $dictionary = array
 	1054 => array ('chapter_id' => 13, 'dict_value' => 'Linux%GSKIP%Ubuntu 9.04'),
 	1055 => array ('chapter_id' => 1, 'dict_value' => 'FC switch'),
 	1056 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst CBS3030-DEL'),
+	1057 => array ('chapter_id' => 13, 'dict_value' => '[[BSD%GSKIP%FreeBSD 7.1 | http://www.freebsd.org/releases/7.1R/relnotes.html]]'),
+	1058 => array ('chapter_id' => 13, 'dict_value' => '[[BSD%GSKIP%FreeBSD 7.2 | http://www.freebsd.org/releases/7.2R/relnotes.html]]'),
 );
 
 ?>
