@@ -103,6 +103,7 @@ $tabhandler['object']['autoports'] = 'renderAutoPortsForm';
 $tabhandler['object']['tags'] = 'renderEntityTags';
 $tabhandler['object']['files'] = 'renderFilesForEntity';
 $tabhandler['object']['editrspvs'] = 'renderObjectSLB';
+$trigger['object']['rackspace'] = 'trigger_rackspace';
 $trigger['object']['ipv4'] = 'trigger_ipv4';
 $trigger['object']['nat4'] = 'trigger_natv4';
 $trigger['object']['livevlans'] = 'trigger_livevlans';

@@ -113,4 +113,11 @@ function trigger_file_editText ()
 	return ($fileInfo['type'] == 'text/plain') ? 'std' : '';
 }
 
+function trigger_rackspace ()
+{
+	$rackspace = getRackspaceStats();
+	if ($rackspace['Racks'] > 0) return 'std';
+	return '';
+}
+
 ?>
