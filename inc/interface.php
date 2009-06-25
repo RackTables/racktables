@@ -195,6 +195,9 @@ $image['setfilter']['height'] = 32;
 $image['resetfilter']['path'] = 'pix/pgadmin3-viewdata.png';
 $image['resetfilter']['width'] = 32;
 $image['resetfilter']['height'] = 32;
+$image['knight']['path'] = 'pix/smiley_knight.png';
+$image['knight']['width'] = 36;
+$image['knight']['height'] = 33;
 
 // This may be populated later onsite, report rendering function will use it.
 // See the $systemreport for structure.
