@@ -10,6 +10,8 @@
 	bugfix: user account autotags were not generated under certain conditions (reported by Jason Hamilton)
 	bugfix: correctly remove tags, when deleting files
 	bugfix: switchvlans failed on "%" or "~" character in port name (by Boris Lytochkin)
+	new feature: rackspace tab is shown only if there is at least one rack
+		in the system. Closes ticket 234. 
 0.17.1 2009-06-03
 	bugfix: tags were not displayed on "File" page
 	bugfix: multiline comment for an added file was stored incorrectly
