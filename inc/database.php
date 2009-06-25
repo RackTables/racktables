@@ -3230,11 +3230,6 @@ function mergeSearchResults (&$objects, $terms, $fieldname)
 	return $objects;
 }
 
-function getLostIPv4Addresses ()
-{
-	dragon();
-}
-
 // Return a list of files, which are not linked to the specified record. This list
 // will be used by printSelect().
 function getAllUnlinkedFiles ($entity_type = NULL, $entity_id = 0)

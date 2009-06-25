@@ -556,16 +556,6 @@ function sortObjectAddressesAndNames ($a, $b)
 	return $objname_cmp;
 }
 
-function sortAddresses ($a, $b)
-{
-	$name_cmp = sortTokenize($a['name'], $b['name']);
-	if ($name_cmp == 0)
-	{
-		return sortTokenize($a['ip'], $b['ip']);
-	}
-	return $name_cmp;
-}
-
 // This function expands port compat list into a matrix.
 function buildPortCompatMatrixFromList ($portTypeList, $portCompatList)
 {
@@ -757,9 +747,10 @@ function pokeNode (&$tree, $trace, $key, $value, $threshold = 0)
 // key, which is in turn indexed by id. Functions, which are ready to handle
 // tree collapsion/expansion themselves, may request non-zero threshold value
 // for smaller resulting tree.
-function treeFromList ($nodelist, $threshold = 0, $return_main_payload = TRUE)
+function treeFromList (&$orig_nodelist, $threshold = 0, $return_main_payload = TRUE)
 {
 	$tree = array();
+	$nodelist = $orig_nodelist;
 	// Array equivalent of traceEntity() function.
 	$trace = array();
 	// set kidc and kids only once
@@ -799,10 +790,12 @@ function treeFromList ($nodelist, $threshold = 0, $return_main_payload = TRUE)
 		}
 	}
 	while ($nextpass);
-	if ($return_main_payload)
-		return $tree;
-	else
+	if (!$return_main_payload)
 		return $nodelist;
+	// update each input node with its backtrace route
+	foreach ($trace as $nodeid => $route)
+		$orig_nodelist[$nodeid]['trace'] = $route;
+	return $tree;
 }
 
 // Build a tree from the tag list and return everything _except_ the tree.
@@ -829,120 +822,25 @@ function serializeTags ($chain, $baseurl = '')
 	return $ret;
 }
 
-// For each tag add all its parent tags onto the list. Don't expect anything
-// except user's tags on the chain.
-function getTagChainExpansion ($chain, $tree = NULL)
-{
-	$self = __FUNCTION__;
-	if ($tree === NULL)
-	{
-		global $tagtree;
-		$tree = $tagtree;
-	}
-	// For each tag find its path from the root, then combine items
-	// of all paths and add them to the chain, if they aren't there yet.
-	$ret = array();
-	foreach ($tree as $taginfo1)
-	{
-		$hit = FALSE;
-		foreach ($chain as $taginfo2)
-			if ($taginfo1['id'] == $taginfo2['id'])
-			{
-				$hit = TRUE;
-				break;
-			}
-		if (count ($taginfo1['kids']) > 0)
-		{
-			$subsearch = $self ($chain, $taginfo1['kids']);
-			if (count ($subsearch))
-			{
-				$hit = TRUE;
-				$ret = array_merge ($ret, $subsearch);
-			}
-		}
-		if ($hit)
-			$ret[] = $taginfo1;
-	}
-	return $ret;
-}
-
 // Return the list of missing implicit tags.
 function getImplicitTags ($oldtags)
 {
-	$ret = array();
-	$newtags = getTagChainExpansion ($oldtags);
-	foreach ($newtags as $newtag)
-	{
-		$already_exists = FALSE;
-		foreach ($oldtags as $oldtag)
-			if ($newtag['id'] == $oldtag['id'])
-			{
-				$already_exists = TRUE;
-				break;
-			}
-		if ($already_exists)
-			continue;
-		$ret[] = array ('id' => $newtag['id'], 'tag' => $newtag['tag'], 'parent_id' => $newtag['parent_id']);
-	}
-	return $ret;
+	global $taglist;
+	$tmp = array();
+	foreach ($oldtags as $taginfo)
+		$tmp = array_merge ($tmp, $taglist[$taginfo['id']]['trace']);
+	// don't call array_unique here, it is in the function we will call now
+	return buildTagChainFromIds ($tmp);
 }
 
 // Minimize the chain: exclude all implicit tags and return the result.
-function getExplicitTagsOnly ($chain, $tree = NULL)
+function getExplicitTagsOnly ($chain)
 {
-	$self = __FUNCTION__;
-	global $tagtree;
-	if ($tree === NULL)
-		$tree = $tagtree;
 	$ret = array();
-	foreach ($tree as $taginfo)
-	{
-		if (isset ($taginfo['kids']))
-		{
-			$harvest = $self ($chain, $taginfo['kids']);
-			if (count ($harvest) > 0)
-			{
-				$ret = array_merge ($ret, $harvest);
-				continue;
-			}
-		}
-		// This tag isn't implicit, test is for being explicit.
-		foreach ($chain as $testtag)
-			if ($taginfo['id'] == $testtag['id'])
-			{
-				$ret[] = $testtag;
-				break;
-			}
-	}
-	return $ret;
-}
-
-// Maximize the chain: for each tag add all tags, for which it is direct or indirect parent.
-// Unlike other functions, this one accepts and returns a list of integer tag IDs, not
-// a list of tag structures. Same structure (tag ID list) is returned after processing.
-function complementByKids ($idlist, $tree = NULL, $getall = FALSE)
-{
-	$self = __FUNCTION__;
-	global $tagtree;
-	if ($tree === NULL)
-		$tree = $tagtree;
-	$getallkids = $getall;
-	$ret = array();
-	foreach ($tree as $taginfo)
-	{
-		foreach ($idlist as $test_id)
-			if ($getall or $taginfo['id'] == $test_id)
-			{
-				$ret[] = $taginfo['id'];
-				// Once matched node makes all sub-nodes match, but don't make
-				// a mistake of matching every other node at the current level.
-				$getallkids = TRUE;
-				break;
-			}
-		if (isset ($taginfo['kids']))
-			$ret = array_merge ($ret, $self ($idlist, $taginfo['kids'], $getallkids));
-		$getallkids = FALSE;
-	}
+	$big_backtrace = getImplicitTags ($chain);
+	foreach ($chain as $key => $taginfo)
+		if (!tagOnChain ($taginfo, $big_backtrace))
+			$ret[$key] = $taginfo;
 	return $ret;
 }
 
@@ -1040,17 +938,6 @@ function tagNameOnChain ($tagname, $tagchain)
 {
 	foreach ($tagchain as $test)
 		if ($test['tag'] == $tagname)
-			return TRUE;
-	return FALSE;
-}
-
-// Idem, but use ID list instead of chain.
-function tagOnIdList ($taginfo, $tagidlist)
-{
-	if (!isset ($taginfo['id']))
-		return FALSE;
-	foreach ($tagidlist as $tagid)
-		if ($taginfo['id'] == $tagid)
 			return TRUE;
 	return FALSE;
 }
@@ -1154,7 +1041,7 @@ function getObjectiveTagTree ($tree, $realm, $preselect)
 		(
 			isset ($taginfo['refcnt'][$realm]) or
 			count ($subsearch) > 1 or
-			tagOnIdList ($taginfo, $preselect)
+			in_array ($taginfo['id'], $preselect)
 		)
 			$ret[] = array
 			(
