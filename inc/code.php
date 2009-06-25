@@ -1232,6 +1232,7 @@ function findAutoTagWarnings ($expr)
 				case (mb_ereg_match ('^\$tovlan_[[:digit:]]+$', $expr['load'])):
 				case (mb_ereg_match ('^\$unmounted$', $expr['load'])):
 				case (mb_ereg_match ('^\$untagged$', $expr['load'])):
+				case (mb_ereg_match ('^\$masklen_(eq|le|ge)_[[:digit:]][[:digit:]]?$', $expr['load'])):
 					return array();
 				default:
 					return array (array
