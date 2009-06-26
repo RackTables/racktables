@@ -1375,7 +1375,7 @@ $msgcode['saveEntityTags']['ERR2'] = 187;
 // Filter out implicit tags before storing the new tag set.
 function saveEntityTags ()
 {
-	global $explicit_tags, $implicit_tags, $page, $pageno, $etype_by_pageno;
+	global $page, $pageno, $etype_by_pageno;
 	if (!isset ($etype_by_pageno[$pageno]) or !isset ($page[$pageno]['bypass']))
 		return buildRedirectURL (__FUNCTION__, 'ERR2', array (__FUNCTION__));
 	$realm = $etype_by_pageno[$pageno];
@@ -1386,6 +1386,8 @@ function saveEntityTags ()
 	// Build a chain from the submitted data, minimize it,
 	// then wipe existing records and store the new set instead.
 	destroyTagsForEntity ($realm, $entity_id);
+	// TODO: these actions are very close to what rebuildTagChainForEntity() does,
+	// so why not use it?
 	$newchain = getExplicitTagsOnly (buildTagChainFromIds ($taglist));
 	$n_succeeds = $n_errors = 0;
 	foreach ($newchain as $taginfo)
