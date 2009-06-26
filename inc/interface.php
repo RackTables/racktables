@@ -3019,7 +3019,7 @@ function renderSearchResults ()
 				echo "<script language='Javascript'>document.location='${root}?page=object&object_id=${record['id']}';//</script>";
 				break;
 			case 'ipv4rspool':
-				echo "<script language='Javascript'>document.location='${root}?page=ipv4rspool&pool_id=${record['pool_id']}';//</script>";
+				echo "<script language='Javascript'>document.location='${root}?page=ipv4rspool&pool_id=${record['id']}';//</script>";
 				break;
 			case 'ipv4vs':
 				echo "<script language='Javascript'>document.location='${root}?page=ipv4vs&vs_id=${record['id']}';//</script>";
