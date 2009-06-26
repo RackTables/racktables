@@ -219,6 +219,7 @@ INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, descriptio
 ('FILTER_SUGGEST_PREDICATES','yes','string','no','no','Suggest predicates in list filter'),
 ('FILTER_SUGGEST_EXTRA','no','string','no','no','Suggest extra expression in list filter'),
 ('DEFAULT_SNMP_COMMUNITY','public','string','no','no','Default SNMP Community string'),
+('IPV4_ENABLE_KNIGHT','yes','string','no','no','Enable IPv4 knight feature'),
 ('DB_VERSION','0.17.2','string','no','yes','Database version.');
 
 INSERT INTO `Script` VALUES ('RackCode','allow {$userid_1}');

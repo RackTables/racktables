@@ -1,6 +1,7 @@
 0.17.2
 	new feature: configure default SNMP community (by jthurman)
 	new feature: "$untagged" and "$masklen_OP_NN" autotags
+	new feature: knight button in IPv4 tree
 	update: show appropriate message, if a record cannot be found
 	update: add Cisco dictionary entry for WS-CBS3030-DEL. closes ticket 225 (by jthurman)
 	update: add OS, router, fibre switch dictionary entries for ticket 238 (by Aaron)
@@ -10,6 +11,7 @@
 	bugfix: user account autotags were not generated under certain conditions (reported by Jason Hamilton)
 	bugfix: correctly remove tags, when deleting files
 	bugfix: switchvlans failed on "%" or "~" character in port name (by Boris Lytochkin)
+	bugfix: search failed, when only one RS pool was found for request
 	new feature: rackspace tab is shown only if there is at least one rack
 		in the system. Closes ticket 234.
 0.17.1 2009-06-03

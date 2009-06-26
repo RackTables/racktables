@@ -195,6 +195,9 @@ $image['setfilter']['height'] = 32;
 $image['resetfilter']['path'] = 'pix/pgadmin3-viewdata.png';
 $image['resetfilter']['width'] = 32;
 $image['resetfilter']['height'] = 32;
+$image['knight']['path'] = 'pix/smiley_knight.png';
+$image['knight']['width'] = 36;
+$image['knight']['height'] = 33;
 
 // This may be populated later onsite, report rendering function will use it.
 // See the $systemreport for structure.
@@ -2171,7 +2174,8 @@ function renderIPv4SpaceEditor ()
 	renderNewEntityTags ('ipv4net');
 	echo '</td>';
 	// inputs column
-	echo "<th class=tdright>prefix</th><td class=tdleft><input type=text name='range' size=18 class='live-validate' tabindex=1></td>";
+	$prefix_value = empty ($_REQUEST['set-prefix']) ? '' : $_REQUEST['set-prefix'];
+	echo "<th class=tdright>prefix</th><td class=tdleft><input type=text name='range' size=18 class='live-validate' tabindex=1 value='${prefix_value}'></td>";
 	echo "<tr><th class=tdright>name</th><td class=tdleft><input type=text name='name' size='20' tabindex=2></td></tr>";
 	echo "<tr><th class=tdright>connected network</th><td class=tdleft><input type=checkbox name='is_bcast' tabindex=3></td></tr>";
 	echo "<tr><td colspan=2>";
@@ -3012,7 +3016,7 @@ function renderSearchResults ()
 				echo "<script language='Javascript'>document.location='${root}?page=object&object_id=${record['id']}';//</script>";
 				break;
 			case 'ipv4rspool':
-				echo "<script language='Javascript'>document.location='${root}?page=ipv4rspool&pool_id=${record['pool_id']}';//</script>";
+				echo "<script language='Javascript'>document.location='${root}?page=ipv4rspool&pool_id=${record['id']}';//</script>";
 				break;
 			case 'ipv4vs':
 				echo "<script language='Javascript'>document.location='${root}?page=ipv4vs&vs_id=${record['id']}';//</script>";
@@ -5553,7 +5557,20 @@ function printIPv4NetInfoTDs ($netinfo, $tdclass = 'tdleft', $indent = 0, $symbo
 		echo '</a>';
 	echo "</td><td class='${tdclass}'>";
 	if (!isset ($netinfo['id']))
+	{
 		printImageHREF ('dragons', 'Here be dragons.');
+		if (getConfigVar ('IPV4_ENABLE_KNIGHT') == 'yes')
+		{
+			echo '&nbsp;<a href="' . makeHref (array
+			(
+				'page' => 'ipv4space',
+				'tab' => 'newrange',
+				'set-prefix' => $netinfo['ip'] . '/' . $netinfo['mask'],
+			)) . '">';
+			printImageHREF ('knight', 'create network here', TRUE);
+			echo '</a>';
+		}
+	}
 	else
 	{
 		echo niftyString ($netinfo['name']);
