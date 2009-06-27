@@ -36,6 +36,14 @@ $etype_by_pageno = array
 	'file' => 'file',
 );
 
+// Rack thumbnail image width summands: "front", "interior" and "rear" elements w/o surrounding border.
+$rtwidth = array
+(
+	0 => 9,
+	1 => 21,
+	2 => 9
+);
+
 // This function assures that specified argument was passed
 // and is a number greater than zero.
 function assertUIntArg ($argname, $caller = 'N/A', $allow_zero = FALSE)

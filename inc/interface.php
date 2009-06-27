@@ -219,14 +219,6 @@ $attrtypes = array
 	'dict' => '[D] dictionary record'
 );
 
-// Rack thumbnail image width summands: "front", "interior" and "rear" elements w/o surrounding border.
-$rtwidth = array
-(
-	0 => 9,
-	1 => 21,
-	2 => 9
-);
-
 // Main menu.
 function renderIndex ()
 {
