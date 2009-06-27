@@ -27,13 +27,26 @@ require_once 'inc/exceptions.php';
 require_once 'inc/config.php';
 
 // What we need first is database and interface functions.
-require_once 'inc/interface.php';
 require_once 'inc/functions.php';
 require_once 'inc/database.php';
 // Always have default values for these options, so if a user didn't
 // care to set, something would be working anyway.
 $user_auth_src = 'database';
 $require_local_account = TRUE;
+
+function showError ($info = '', $location = 'N/A')
+{
+	if (preg_match ('/\.php$/', $location))
+		$location = basename ($location);
+	elseif ($location != 'N/A')
+		$location = $location . '()';
+	echo "<div class=msg_error>An error has occured in [${location}]. ";
+	if (!strlen ($info))
+		echo 'No additional information is available.';
+	else
+		echo "Additional information:<br><p>\n<pre>\n${info}\n</pre></p>";
+	echo "Go back or try starting from <a href='".makeHref()."'>index page</a>.<br></div>\n";
+}
 
 if (file_exists ('inc/secret.php'))
 	require_once 'inc/secret.php';
