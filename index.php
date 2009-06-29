@@ -1,5 +1,6 @@
 <?php
 
+require 'inc/interface.php';
 require 'inc/init.php';
 // no ctx override is necessary
 fixContext();
