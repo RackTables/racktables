@@ -583,7 +583,7 @@ $dictionary = array
 	559 => array ('chapter_id' => 12, 'dict_value' => '[[NETGEAR%GPASS%GSM7212 | http://www.netgear.com/Products/Switches/Layer2ManagedSwitches/GSM7212.aspx]]'),
 	560 => array ('chapter_id' => 12, 'dict_value' => '[[NETGEAR%GPASS%FSM726S | http://www.netgear.com/Products/Switches/Layer2ManagedSwitches/FSM726S.aspx]]'),
 	561 => array ('chapter_id' => 12, 'dict_value' => '[[NETGEAR%GPASS%GSM7248R | http://www.netgear.com/Products/Switches/Layer2ManagedSwitches/GSM7248R.aspx]]'),
-	562 => array ('chapter_id' => 12, 'dict_value' => '[[NETGEAR%GPASS%GSM7224 | http://www.netgear.com/Products/Switches/Layer2ManagedSwitches/GSM7224.aspx]]'),
+	562 => array ('chapter_id' => 12, 'dict_value' => '[[NETGEAR%GPASS%GSM7224 | http://www.netgear.com/Products/Switches/FullyManaged10_100_1000Switches/GSM7224.aspx]]'),
 	563 => array ('chapter_id' => 12, 'dict_value' => '[[NETGEAR%GPASS%FSM750S | http://www.netgear.com/Products/Switches/Layer2ManagedSwitches/FSM750S.aspx]]'),
 	564 => array ('chapter_id' => 12, 'dict_value' => '[[NETGEAR%GPASS%FSM726 | http://www.netgear.com/Products/Switches/Layer2ManagedSwitches/FSM726.aspx]]'),
 	565 => array ('chapter_id' => 12, 'dict_value' => '[[NETGEAR%GPASS%GS724TP | http://www.netgear.com/Products/Switches/SmartSwitches/GS724TP.aspx]]'),

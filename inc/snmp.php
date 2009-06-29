@@ -14,84 +14,84 @@ function doSNMPmining ($object_id, $community)
 // 3750: http://cisco.com/en/US/products/hw/switches/ps5023/products_data_sheet09186a008016136f.html
 
 	// Cisco sysObjectID to model (not product number, i.e. image code is missing) decoder
-	$ciscomodel = array
+	$verb_model = array
 	(
-		278 => 'WS-C3548-XL (48 Ethernet 10/100 ports and 2 10/100/1000 uplinks)',
-		283 => 'WS-C6509-E (9-slot system)',
-		324 => 'WS-C2950-24 (24 Ethernet 10/100 ports)',
-		325 => 'WS-C2950C-24 (24 Ethernet 10/100 ports and 2 100FX uplinks)',
-#		694 => 'WS-C2960-24TC-L (24 Ethernet 10/100 ports and 2 dual-purpose uplinks)',
-#		695 => 'WS-C2960-48TC-L (48 Ethernet 10/100 ports and 2 dual-purpose uplinks)',
-		696 => 'WS-C2960G-24TC-L (20 Ethernet 10/100/1000 ports and 4 dual-purpose uplinks)',
-		697 => 'WS-C2960G-48TC-L (44 Ethernet 10/100/1000 ports and 4 dual-purpose uplinks)',
-		716 => 'WS-C2960-24TT-L (24 Ethernet 10/100 ports and 2 10/100/1000 uplinks)',
-		717 => 'WS-C2960-48TT-L (48 Ethernet 10/100 ports and 2 10/100/1000 uplinks)',
-		527 => 'WS-C2970G-24T (24 Ethernet 10/100/1000 ports)',
-		561 => 'WS-C2970G-24TS (24 Ethernet 10/100/1000 ports and 4 10/100/1000 SFP uplinks)',
-		633 => 'WS-C3560-24TS (24 Ethernet 10/100 ports and 2 10/100/1000 SFP uplinks)',
-		634 => 'WS-C3560-48TS (48 Ethernet 10/100 ports and 4 10/100/1000 SFP uplinks)',
-		563 => 'WS-C3560-24PS (24 Ethernet 10/100 POE ports and 2 10/100/1000 SFP uplinks)',
-		564 => 'WS-C3560-48PS (48 Ethernet 10/100 POE ports and 4 10/100/1000 SFP uplinks)',
-		516 => 'WS-C3750-XXPS (24 or 48 Ethernet 10/100 POE ports and 4 10/100/1000 SFP uplinks)',
-		614 => 'WS-C3560G-24PS (24 Ethernet 10/100/1000 POE ports and 4 10/100/1000 SFP uplinks)',
-		615 => 'WS-C3560G-24TS (24 Ethernet 10/100/1000 ports and 4 10/100/1000 SFP uplinks)',
-		616 => 'WS-C3560G-48PS (48 Ethernet 10/100/1000 POE ports and 4 10/100/1000 SFP uplinks)',
-		617 => 'WS-C3560G-48TS (48 Ethernet 10/100/1000 ports and 4 10/100/1000 SFP uplinks)',
-		624 => 'WS-C3750G-24TS (24 Ethernet 10/100/1000 ports and 4 10/100/1000 SFP uplinks)',
-		58 => 'WS-C4503 (3-slot system)',
-		503 => '4503 (3-slot system)',
-		59 => 'WS-C4506 (6-slot system)',
-		502 => '4506 (6-slot system)',
-		626 => 'WS-C4948 (48 Ethernet 10/100/1000 ports and 4 10/100/1000 SFP uplinks)',
-		659 => 'WS-C4948-10GE (48 Ethernet 10/100/1000 ports and 2 10Gb X2 uplinks)',
-		428 => 'WS-C2950G-24 (24 Ethernet 10/100 ports and 2 1000 GBIC uplinks)',
-		429 => 'WS-C2950G-48 (48 Ethernet 10/100 ports and 2 1000 GBIC uplinks)',
-		559 => 'WS-C2950T-48 (48 Ethernet 10/100 ports and 2 10/100/1000 uplinks)',
-		749 => 'WS-CBS3030-DEL (12 Ethernet 10/100/1000 and 4 10/100/1000 SFP uplinks)',
-		920 => 'WS-CBS3032-DEL-F (16 Ethernet 10/100/1000 and up to 8 10/100/1000 uplinks)',
-		719 => 'N5K-C5020 (40-ports system)',
-		// FIXME: the following two origin at a different OID, so a complete form should be
-		// used at a latter point to avoid value clashes.
-		36 => 'HP J8164A (24 Ethernet 10/100 ports and 2 100/1000 uplinks)',
-		35 => 'HP J8165A (48  Ethernet 10/100 ports and 2 100/1000 uplinks)',
+		'9.1.278' => 'WS-C3548-XL (48 Ethernet 10/100 ports and 2 10/100/1000 uplinks)',
+		'9.1.283' => 'WS-C6509-E (9-slot system)',
+		'9.1.324' => 'WS-C2950-24 (24 Ethernet 10/100 ports)',
+		'9.1.325' => 'WS-C2950C-24 (24 Ethernet 10/100 ports and 2 100FX uplinks)',
+#		'9.1.694' => 'WS-C2960-24TC-L (24 Ethernet 10/100 ports and 2 dual-purpose uplinks)',
+#		'9.1.695' => 'WS-C2960-48TC-L (48 Ethernet 10/100 ports and 2 dual-purpose uplinks)',
+		'9.1.696' => 'WS-C2960G-24TC-L (20 Ethernet 10/100/1000 ports and 4 dual-purpose uplinks)',
+		'9.1.697' => 'WS-C2960G-48TC-L (44 Ethernet 10/100/1000 ports and 4 dual-purpose uplinks)',
+		'9.1.716' => 'WS-C2960-24TT-L (24 Ethernet 10/100 ports and 2 10/100/1000 uplinks)',
+		'9.1.717' => 'WS-C2960-48TT-L (48 Ethernet 10/100 ports and 2 10/100/1000 uplinks)',
+		'9.1.527' => 'WS-C2970G-24T (24 Ethernet 10/100/1000 ports)',
+		'9.1.561' => 'WS-C2970G-24TS (24 Ethernet 10/100/1000 ports and 4 10/100/1000 SFP uplinks)',
+		'9.1.633' => 'WS-C3560-24TS (24 Ethernet 10/100 ports and 2 10/100/1000 SFP uplinks)',
+		'9.1.634' => 'WS-C3560-48TS (48 Ethernet 10/100 ports and 4 10/100/1000 SFP uplinks)',
+		'9.1.563' => 'WS-C3560-24PS (24 Ethernet 10/100 POE ports and 2 10/100/1000 SFP uplinks)',
+		'9.1.564' => 'WS-C3560-48PS (48 Ethernet 10/100 POE ports and 4 10/100/1000 SFP uplinks)',
+		'9.1.516' => 'WS-C3750-XXPS (24 or 48 Ethernet 10/100 POE ports and 4 10/100/1000 SFP uplinks)',
+		'9.1.614' => 'WS-C3560G-24PS (24 Ethernet 10/100/1000 POE ports and 4 10/100/1000 SFP uplinks)',
+		'9.1.615' => 'WS-C3560G-24TS (24 Ethernet 10/100/1000 ports and 4 10/100/1000 SFP uplinks)',
+		'9.1.616' => 'WS-C3560G-48PS (48 Ethernet 10/100/1000 POE ports and 4 10/100/1000 SFP uplinks)',
+		'9.1.617' => 'WS-C3560G-48TS (48 Ethernet 10/100/1000 ports and 4 10/100/1000 SFP uplinks)',
+		'9.1.624' => 'WS-C3750G-24TS (24 Ethernet 10/100/1000 ports and 4 10/100/1000 SFP uplinks)',
+		'9.1.58'  => 'WS-C4503 (3-slot system)',
+		'9.1.503' => '4503 (3-slot system)',
+		'9.1.59'  => 'WS-C4506 (6-slot system)',
+		'9.1.502' => '4506 (6-slot system)',
+		'9.1.626' => 'WS-C4948 (48 Ethernet 10/100/1000 ports and 4 10/100/1000 SFP uplinks)',
+		'9.1.659' => 'WS-C4948-10GE (48 Ethernet 10/100/1000 ports and 2 10Gb X2 uplinks)',
+		'9.1.428' => 'WS-C2950G-24 (24 Ethernet 10/100 ports and 2 1000 GBIC uplinks)',
+		'9.1.429' => 'WS-C2950G-48 (48 Ethernet 10/100 ports and 2 1000 GBIC uplinks)',
+		'9.1.559' => 'WS-C2950T-48 (48 Ethernet 10/100 ports and 2 10/100/1000 uplinks)',
+		'9.1.749' => 'WS-CBS3030-DEL (12 Ethernet 10/100/1000 and 4 10/100/1000 SFP uplinks)',
+		'9.1.920' => 'WS-CBS3032-DEL-F (16 Ethernet 10/100/1000 and up to 8 10/100/1000 uplinks)',
+		'9.12.3.1.3.719' => 'N5K-C5020 (40-ports system)',
+		'11.2.3.7.11.36' => 'HP J8164A (24 Ethernet 10/100 ports and 2 100/1000 uplinks)',
+		'11.2.3.7.11.35' => 'HP J8165A (48  Ethernet 10/100 ports and 2 100/1000 uplinks)',
+		'4526.100.2.2' => 'NETGEAR GSM7224 (24 Ethernet 10/100/1000 ports)',
 	);
 	// Cisco sysObjectID to Dictionary dict_key map
 	$hwtype = array
 	(
-		278 => 395,
-		283 => 148,
-		324 => 380,
-		325 => 382,
-		696 => 167,
-		697 => 166,
-		527 => 210,
-		561 => 115,
-		633 => 169,
-		634 => 170,
-		563 => 171,
-		564 => 172,
-		614 => 175,
-		615 => 173,
-		616 => 176,
-		617 => 174,
-		624 => 143,
-		58 => 145,
-		503 => 145,
-		59 => 156,
-		502 => 156,
-		626 => 147,
-		659 => 377,
-		428 => 389,
-		429 => 390,
-		559 => 387,
-		516 => 179,
-		716 => 164,
-		717 => 162,
-		920 => 795,
-		719 => 960,
-		749 => 989,
-		36 => 865,
-		35 => 867,
+		'9.1.278' => 395,
+		'9.1.283' => 148,
+		'9.1.324' => 380,
+		'9.1.325' => 382,
+		'9.1.696' => 167,
+		'9.1.697' => 166,
+		'9.1.527' => 210,
+		'9.1.561' => 115,
+		'9.1.633' => 169,
+		'9.1.634' => 170,
+		'9.1.563' => 171,
+		'9.1.564' => 172,
+		'9.1.614' => 175,
+		'9.1.615' => 173,
+		'9.1.616' => 176,
+		'9.1.617' => 174,
+		'9.1.624' => 143,
+		'9.1.58' => 145,
+		'9.1.503' => 145,
+		'9.1.59' => 156,
+		'9.1.502' => 156,
+		'9.1.626' => 147,
+		'9.1.659' => 377,
+		'9.1.428' => 389,
+		'9.1.429' => 390,
+		'9.1.559' => 387,
+		'9.1.516' => 179,
+		'9.1.716' => 164,
+		'9.1.717' => 162,
+		'9.1.920' => 795,
+		'9.12.3.1.3.719' => 960,
+		'9.1.749' => 989,
+		'11.2.3.7.11.36' => 865,
+		'11.2.3.7.11.35' => 867,
+		'4526.100.2.2' => 562,
 	);
 	// Cisco portType to Dictionary dict_key map
 	$porttype = array
@@ -102,6 +102,8 @@ function doSNMPmining ($object_id, $community)
 		61 => 24,  // 10/100/1000BaseT => RJ-45/1000Base-T
 	);
 
+	// TODO: to make all processing purely OID-based, it may help to call:
+	// snmp_set_oid_output_format (SNMP_OID_OUTPUT_NUMERIC) (in PHP 5.2+)
 	$objectInfo = spotEntity ('object', $object_id, FALSE);
 	$endpoints = findAllEndpoints ($object_id, $objectInfo['name']);
 	$sysName = @snmpget ($endpoints[0], $community, 'sysName.0');
@@ -143,6 +145,11 @@ function doSNMPmining ($object_id, $community)
 		$swversion = ereg_replace ('^.* revision ([^ ]+), .*$', '\\1', $sysDescr);
 		$swrelease = 'HP';
 	}
+	elseif (FALSE !== ereg ('^GSM[[:alnum:]]+ L2 Managed Gigabit Switch$', $sysDescr))
+	{
+		$swfamily = 'NETGEAR';
+		$swrelease = 'NETGEAR';
+	}
 	else
 		$log[] = array ('code' => 'error', 'message' => 'No idea how to handle ' . $sysDescr);
 	$attrs = getAttrValues ($object_id);
@@ -176,7 +183,7 @@ function doSNMPmining ($object_id, $community)
 			$log[] = array ('code' => 'error', 'message' => 'Failed settig OEM S/N 1: ' . $error);
 	}
 
-	if (!strlen ($attrs[4]['value']) and $swfamily != 'HP') // switch OS type
+	if (!strlen ($attrs[4]['value']) and ($swfamily == 'IOS' or $swfamily == 'NX-OS')) // switch OS type
 	{
 		switch ($swfamily . '-' . $swrelease)
 		{
@@ -210,13 +217,13 @@ function doSNMPmining ($object_id, $community)
 
 	$sysObjectID = snmpget ($endpoints[0], $community, 'sysObjectID.0');
 	// Transform OID
-	$sysObjectID = ereg_replace ('^.*(enterprises\.9\.1\.|enterprises\.9\.12\.3\.1\.3\.|enterprises.11.2.3.7.11.)([[:digit:]]+)$', '\\2', $sysObjectID);
-	if (!isset ($ciscomodel[$sysObjectID]))
+	$sysObjectID = ereg_replace ('^.*(enterprises\.)([\.[:digit:]]+)$', '\\2', $sysObjectID);
+	if (!isset ($verb_model[$sysObjectID]))
 	{
-		$log[] = array ('code' => 'error', 'message' => 'Could not guess exact HW model!');
+		$log[] = array ('code' => 'error', 'message' => 'Could not guess exact HW model (system OID is ' . $sysObjectID . ')!');
 		return $log;
 	}
-	$log[] = array ('code' => 'success', 'message' => 'HW is ' . $ciscomodel[$sysObjectID]);
+	$log[] = array ('code' => 'success', 'message' => 'HW is ' . $verb_model[$sysObjectID]);
 	if (!strlen ($attrs[2]['value']) and isset ($hwtype[$sysObjectID])) // switch HW type
 	{
 		$error = commitUpdateAttrValue ($object_id, 2, $hwtype[$sysObjectID]);
@@ -227,7 +234,7 @@ function doSNMPmining ($object_id, $community)
 	}
 	// Now fetch ifType, ifDescr and ifPhysAddr and let model-specific code sort the data out.
 	$ifType = snmpwalkoid ($endpoints[0], $community, 'ifType');
-	$ifDescr = snmpwalkoid ($endpoints[0], $community, 'ifdescr');
+	$ifDescr = snmpwalkoid ($endpoints[0], $community, 'ifDescr');
 	$ifPhysAddress = snmpwalkoid ($endpoints[0], $community, 'ifPhysAddress');
 	// Combine 3 tables into 1...
 	$ifList1 = array();
@@ -280,7 +287,7 @@ function doSNMPmining ($object_id, $community)
 	// FIXME: chassis edge switches often share a common naming scheme, so
 	// the sequences below have to be generalized. Let's have some duplicated
 	// code for the time being, as this is the first implementation ever.
-		case '697': // WS-C2960G-48TC-L
+		case '9.1.697': // WS-C2960G-48TC-L
 			// 44 copper ports: 1X, 2X, 3X...
 			// 4 combo ports: 45, 46, 47, 48. Don't list SFP connectors atm, as it's not
 			// clear how to fit them into current Ports table structure.
@@ -294,7 +301,7 @@ function doSNMPmining ($object_id, $community)
 					$log[] = array ('code' => 'error', 'message' => 'Failed to add port ' . $label . ': ' . $error);
 			}
 			break;
-		case '325': // WS-C2950C-24
+		case '9.1.325': // WS-C2950C-24
 			for ($i = 1; $i <= 26; $i++)
 			{
 				$label = "${i}X"; 
@@ -305,7 +312,7 @@ function doSNMPmining ($object_id, $community)
 					$log[] = array ('code' => 'error', 'message' => 'Failed to add port ' . $label . ': ' . $error);
 			}
 			break;
-		case '324': // WS-C2950-24
+		case '9.1.324': // WS-C2950-24
 			for ($i = 1; $i <= 24; $i++)
 			{
 				$label = "${i}X"; 
@@ -316,8 +323,8 @@ function doSNMPmining ($object_id, $community)
 					$log[] = array ('code' => 'error', 'message' => 'Failed to add port ' . $label . ': ' . $error);
 			}
 			break;
-		case '624': // WS-C3750-24TS
-		case '696': // WS-C2960G-24TC-L
+		case '9.1.624': // WS-C3750-24TS
+		case '9.1.696': // WS-C2960G-24TC-L
 			// Quite similar to the above.
 			for ($i = 1; $i <= 24; $i++)
 			{
@@ -329,10 +336,10 @@ function doSNMPmining ($object_id, $community)
 					$log[] = array ('code' => 'error', 'message' => 'Failed to add port ' . $label . ': ' . $error);
 			}
 			break;
-		case '716': // WS-C2960-24TT-L
-		case '563': // WS-C3560-24PS
-		case '633': // WS-C3560-24TS
-		case '428': // WS-C2950G-24
+		case '9.1.716': // WS-C2960-24TT-L
+		case '9.1.563': // WS-C3560-24PS
+		case '9.1.633': // WS-C3560-24TS
+		case '9.1.428': // WS-C2950G-24
 			for ($i = 1; $i <= 24; $i++)
 			{
 				$label = "${i}X";
@@ -352,9 +359,9 @@ function doSNMPmining ($object_id, $community)
 					$log[] = array ('code' => 'error', 'message' => 'Failed to add port ' . $label . ': ' . $error);
 			}
 			break;
-		case '717': // WS-C2960-48TT-L
-		case '429': // WS-C2950G-48
-		case '559': // WS-C2950T-48
+		case '9.1.717': // WS-C2960-48TT-L
+		case '9.1.429': // WS-C2950G-48
+		case '9.1.559': // WS-C2950T-48
 			for ($i = 1; $i <= 48; $i++)
 			{
 				$label = "${i}X";
@@ -374,7 +381,7 @@ function doSNMPmining ($object_id, $community)
 					$log[] = array ('code' => 'error', 'message' => 'Failed to add port ' . $label . ': ' . $error);
 			}
 			break;
-		case '516': // WS-C3750G-24TS OR WS-C3750-48PS
+		case '9.1.516': // WS-C3750G-24TS OR WS-C3750-48PS
 			// FIXME: only handles 2 models of 3750, make it handle all of them
 			// see if it has 24 or 48 ports
 			$numports = substr (snmpget ($endpoints[0], $community, '.1.3.6.1.4.1.9.5.1.3.1.1.14.1'), strlen('INTEGER: '));
@@ -413,8 +420,8 @@ function doSNMPmining ($object_id, $community)
 				}
 			}
 			break;
-		case '564': // WS-C3560-48PS
-		case '634': // WS-C3560-48TS
+		case '9.1.564': // WS-C3560-48PS
+		case '9.1.634': // WS-C3560-48TS
 			for ($i = 1; $i <= 48; $i++)
 			{
 				$label = "${i}X";
@@ -434,10 +441,10 @@ function doSNMPmining ($object_id, $community)
 					$log[] = array ('code' => 'error', 'message' => 'Failed to add port ' . $label . ': ' . $error);
 			}
 			break;
-		case '614': // WS-C3560G-24PS
-		case '615': // WS-C3560G-24TS
-		case '527': // WS-C2970G-24T
-		case '561': // WS-C2970G-24TS
+		case '9.1.614': // WS-C3560G-24PS
+		case '9.1.615': // WS-C3560G-24TS
+		case '9.1.527': // WS-C2970G-24T
+		case '9.1.561': // WS-C2970G-24TS
 			for ($i = 1; $i <= 24; $i++)
 			{
 				$label = "${i}X";
@@ -448,8 +455,8 @@ function doSNMPmining ($object_id, $community)
 					$log[] = array ('code' => 'error', 'message' => 'Failed to add port ' . $label . ': ' . $error);
 			}
 			break;
-		case '616': // WS-C3560G-48PS
-		case '617': // WS-C3560G-48TS
+		case '9.1.616': // WS-C3560G-48PS
+		case '9.1.617': // WS-C3560G-48TS
 			for ($i = 1; $i <= 48; $i++)
 			{
 				$label = "${i}X";
@@ -460,8 +467,8 @@ function doSNMPmining ($object_id, $community)
 					$log[] = array ('code' => 'error', 'message' => 'Failed to add port ' . $label . ': ' . $error);
 			}
 			break;
-		case '626': // WS-C4948
-		case '659': // WS-C4948-10GE
+		case '9.1.626': // WS-C4948
+		case '9.1.659': // WS-C4948-10GE
 			for ($i = 1; $i <= 48; $i++)
 			{
 				$label = "${i}X";
@@ -474,11 +481,11 @@ function doSNMPmining ($object_id, $community)
 			break;
 	// For modular devices we issue a separate SNMP query to determine port type,
 	// then extract blade & port numbers from the results.
-		case '58':  // WS-C4503
-		case '503': // WS-C4503
-		case '59':  // WS-C4506
-		case '502': // WS-C4506
-		case '283': // WS-C6509-E
+		case '9.1.58':  // WS-C4503
+		case '9.1.503': // WS-C4503
+		case '9.1.59':  // WS-C4506
+		case '9.1.502': // WS-C4506
+		case '9.1.283': // WS-C6509-E
 			// get slot #, port # and port type using Cisco's MIB
 			$portType = snmpwalkoid ($endpoints[0], $community, '.1.3.6.1.4.1.9.5.1.4.1.1.5');
 			$ifList = array();
@@ -538,7 +545,7 @@ function doSNMPmining ($object_id, $community)
 				$i++;
 			}
 			break;
-		case '278': // WS-C3548-XL
+		case '9.1.278': // WS-C3548-XL
 			for ($i = 1; $i <= 48; $i++)
 			{
 				$label = "${i}X";
@@ -558,7 +565,7 @@ function doSNMPmining ($object_id, $community)
 					$log[] = array ('code' => 'error', 'message' => 'Failed to add port ' . $label . ': ' . $error);
 			}
 			break;
-		case '920': // WS-CBS3032-DEL-F
+		case '9.1.920': // WS-CBS3032-DEL-F
 			for ($i = 1; $i <= 24; $i++)
 			{
 				$label = "${i}";
@@ -569,7 +576,7 @@ function doSNMPmining ($object_id, $community)
 					$log[] = array ('code' => 'error', 'message' => 'Failed to add port ' . $label . ': ' . $error);
 			}
 			break;
-		case '749': // WS-CBS3030-DEL-F (or WS-CBS3030-DEL-S)
+		case '9.1.749': // WS-CBS3030-DEL-F (or WS-CBS3030-DEL-S)
 			for ($i = 1; $i <= 16; $i++)
 			{
 				$label = "${i}";
@@ -579,15 +586,14 @@ function doSNMPmining ($object_id, $community)
 				else
 					$log[] = array ('code' => 'error', 'message' => 'Failed to add port ' . $label . ': ' . $error);
 			}
-
 			break;
-		case '719':
+		case '9.12.3.1.3.719': // N5K-C5020
 			break;
-		case '35':
+		case '11.2.3.7.11.35':
 			$n100 = 48;
 			// fall through
-		case '36':
-			if ($sysObjectID == '36')
+		case '11.2.3.7.11.36':
+			if ($sysObjectID == '11.2.3.7.11.36')
 				$n100 = 24;
 			$n1000 = 2;
 			for ($i = 1; $i <= $n100; $i++)
@@ -600,6 +606,13 @@ function doSNMPmining ($object_id, $community)
 					$newports++;
 				else
 					$log[] = array ('code' => 'error', 'message' => "Failed to add port ${i}: " . $error);
+			break;
+		case '4526.100.2.2':
+			for ($i = 1; $i <= 24; $i++)
+				if ('' == ($error = commitAddPort ($object_id, $i, 24, '', $ifList2["Unit: 1 Slot: 0 Port: ${i} Gigabit - Level"]['phyad'])))
+					$newports++;
+				else
+					$log[] = array ('code' => 'error', 'message' => "Failed to add port ${label}: ${error}");
 			break;
 		default:
 			$log[] = array ('code' => 'error', 'message' => "Unexpected sysObjectID '${sysObjectID}'");
