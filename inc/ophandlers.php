@@ -430,9 +430,9 @@ function updIPv4Prefix ()
 {
 	assertUIntArg ('id', __FUNCTION__);
 	assertStringArg ('name', __FUNCTION__, TRUE);
-
-	$error = updateRange ($_REQUEST['id'], $_REQUEST['name']);
-	if ($error != '')
+	assertStringArg ('comment', __FUNCTION__, TRUE);
+	global $sic;
+	if (strlen ($error = updateIPv4Network_real ($sic['id'], $sic['name'], $sic['comment'])))
 		return buildRedirectURL (__FUNCTION__, 'ERR', array ($error));
 	else
 		return buildRedirectURL (__FUNCTION__, 'OK');

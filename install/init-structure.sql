@@ -120,6 +120,7 @@ CREATE TABLE `IPv4Network` (
   `ip` int(10) unsigned NOT NULL,
   `mask` int(10) unsigned NOT NULL,
   `name` char(255) default NULL,
+  `comment` text,
   PRIMARY KEY  (`id`),
   UNIQUE KEY `base-len` (`ip`,`mask`)
 ) ENGINE=MyISAM;
