@@ -427,7 +427,6 @@ function amplifyCell (&$record, $dummy = NULL)
 		$record['files'] = getFilesOfEntity ($record['realm'], $record['id']);
 		break;
 	case 'ipv4net':
-		$record['ip_bin'] = ip2long ($record['ip']);
 		$record['parent_id'] = getIPv4AddressNetworkId ($record['ip'], $record['mask']);
 		break;
 	case 'file':
