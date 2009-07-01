@@ -151,8 +151,8 @@ $image['node-expanded-static']['path'] = 'pix/node-expanded-static.png';
 $image['node-expanded-static']['width'] = 16;
 $image['node-expanded-static']['height'] = 16;
 $image['dragons']['path'] = 'pix/mitsudragon.png';
-$image['dragons']['width'] = 125;
-$image['dragons']['height'] = 21;
+$image['dragons']['width'] = 195;
+$image['dragons']['height'] = 33;
 $image['LB']['path'] = 'pix/loadbalancer.png';
 $image['LB']['width'] = 32;
 $image['LB']['height'] = 32;
@@ -196,7 +196,7 @@ $image['resetfilter']['path'] = 'pix/pgadmin3-viewdata.png';
 $image['resetfilter']['width'] = 32;
 $image['resetfilter']['height'] = 32;
 $image['knight']['path'] = 'pix/smiley_knight.png';
-$image['knight']['width'] = 36;
+$image['knight']['width'] = 72;
 $image['knight']['height'] = 33;
 
 // This may be populated later onsite, report rendering function will use it.
@@ -5463,7 +5463,7 @@ function printIPv4NetInfoTDs ($netinfo, $tdclass = 'tdleft', $indent = 0, $symbo
 		printImageHREF ('dragons', 'Here be dragons.');
 		if (getConfigVar ('IPV4_ENABLE_KNIGHT') == 'yes')
 		{
-			echo '&nbsp;<a href="' . makeHref (array
+			echo '<a href="' . makeHref (array
 			(
 				'page' => 'ipv4space',
 				'tab' => 'newrange',
