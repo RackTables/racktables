@@ -165,6 +165,12 @@ $image['VS']['height'] = 62;
 $image['router']['path'] = 'pix/router.png';
 $image['router']['width'] = 32;
 $image['router']['height'] = 32;
+$image['object']['path'] = 'pix/bracket-16x16.png';
+$image['object']['width'] = 16;
+$image['object']['height'] = 16;
+$image['OBJECT']['path'] = 'pix/bracket-32x32.png';
+$image['OBJECT']['width'] = 32;
+$image['OBJECT']['height'] = 32;
 $image['ATTACH']['path'] = 'pix/crystal-attach-32x32.png';
 $image['ATTACH']['width'] = 32;
 $image['ATTACH']['height'] = 32;
@@ -2879,13 +2885,9 @@ function renderSearchResults ()
 					echo '<tr><th>Common name</th><th>Visible label</th><th>Asset tag</th><th>Barcode</th></tr>';
 					foreach ($what as $obj)
 					{
-						$tags = loadEntityTags ('object', $obj['id']);
-						echo "<tr class=row_${order} valign=top><td class=tdleft><a href=\"${root}?page=object&object_id=${obj['id']}\">${obj['dname']}</a>";
-						if (count ($tags))
-							echo '<br><small>' . serializeTags ($tags) . '</small>';
-						echo "</td><td>${obj['label']}</td>";
-						echo "<td>${obj['asset_no']}</td>";
-						echo "<td>${obj['barcode']}</td></tr>";
+						echo "<tr class=row_${order} valign=top><td>";
+						renderCell (spotEntity ('object', $obj['id']));
+						echo "</td></tr>\n";
 						$order = $nextorder[$order];
 					}
 					echo '</table>';
@@ -5124,6 +5126,7 @@ function renderFile ($file_id)
 				case 'rack':
 				case 'ipv4vs':
 				case 'ipv4rspool':
+				case 'object':
 					renderCell (spotEntity ($link['entity_type'], $link['entity_id']));
 					break;
 				default:
@@ -5505,6 +5508,16 @@ function renderCell ($cell)
 		echo "</td></tr><tr><td>";
 		echo niftyString ($cell['comment']);
 		echo "</td></tr><tr><td>";
+		echo count ($cell['etags']) ? ("<small>" . serializeTags ($cell['etags']) . "</small>") : '&nbsp;';
+		echo "</td></tr></table>";
+		break;
+	case 'object':
+		echo "<table class='slbcell vscell'><tr><td rowspan=2 width='5%'>";
+		printImageHREF ('OBJECT');
+		echo '</td>';
+		echo "<td><a href='${root}?page=object&object_id=${cell['id']}'>";
+		echo "<strong>" . niftyString ($cell['dname']) . "</strong></a></td></tr>";
+		echo '<td>';
 		echo count ($cell['etags']) ? ("<small>" . serializeTags ($cell['etags']) . "</small>") : '&nbsp;';
 		echo "</td></tr></table>";
 		break;
