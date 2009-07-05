@@ -402,7 +402,7 @@ function doSNMPmining ($object_id, $community)
 
 	// TODO: to make all processing purely OID-based, it may help to call:
 	// snmp_set_oid_output_format (SNMP_OID_OUTPUT_NUMERIC) (in PHP 5.2+)
-	$objectInfo = spotEntity ('object', $object_id, FALSE);
+	$objectInfo = spotEntity ('object', $object_id);
 	$endpoints = findAllEndpoints ($object_id, $objectInfo['name']);
 	$sysName = @snmpget ($endpoints[0], $community, 'sysName.0');
 	if ($sysName === FALSE)
@@ -923,6 +923,73 @@ function doSNMPmining ($object_id, $community)
 	if ($newports > 0)
 		$log[] = array ('code' => 'success', 'message' => "Added ${newports} new ports");
 	return $log;
+}
+
+
+function updateStickerForCell ($cell, $attr_id, $new_value)
+{
+	if (!strlen ($cell['attrs'][$attr_id]['value']) && strlen ($new_value))
+		commitUpdateAttrValue ($cell['id'], $attr_id, $new_value);
+}
+
+function doSNMPmining_new ($object_id, $community)
+{
+	$log = emptyLog();
+	global $known_switches, $iftable_processors;
+	
+	$objectInfo = spotEntity ('object', $object_id);
+	$objectInfo['attrs'] = getAttrValues ($object_id);
+	$endpoints = findAllEndpoints ($object_id, $objectInfo['name']);
+	if (count ($endpoints) == 0)
+		return oneLiner (161); // endpoint not found
+	if (count ($endpoints) > 1)
+		return oneLiner (162); // can't pick an address
+	
+	if (FALSE === ($sysObjectID = snmpget ($endpoints[0], $community, 'sysObjectID.0')))
+		return oneLiner (188); // fatal SNMP failure
+	$sysObjectID = ereg_replace ('^.*(enterprises\.)([\.[:digit:]]+)$', '\\2', $sysObjectID);
+	$sysName = snmpget ($endpoints[0], $community, 'sysName.0');
+	$sysDescr = substr (snmpget ($endpoints[0], $community, 'sysDescr.0'), strlen ('STRING: '));
+	$sysDescr = str_replace (array ("\n", "\r"), " ", $sysDescr);  // Make it one line
+	if (!isset ($known_switches[$sysObjectID]))
+		return oneLiner (189, array ($sysObjectID)); // unknown OID
+	updateStickerForCell ($objectInfo, 2, $hwtype[$sysObjectID]);
+	updateStickerForCell ($objectInfo, 3, $sysName);
+	switch (1)
+	{
+	case preg_match ('^9\.1\.', $sysObjectID): // Catalyst
+		$exact_release = ereg_replace ('^.*, Version ([^ ]+), .*$', '\\1', $sysDescr);
+		$major_line = ereg_replace ('^([[:digit:]]+\.[[:digit:]]+)[^[:digit:]].*', '\\1', $exact_release);
+		$ios_codes = array
+		(
+			'12.0' => 244,
+			'12.1' => 251,
+			'12.2' => 252,
+		);
+		updateStickerForCell ($objectInfo, 5, $exact_release);
+		updateStickerForCell ($objectInfo, 4, $ios_codes[$major_line]);
+		$sysChassi = snmpget ($endpoints[0], $community, '1.3.6.1.4.1.9.3.6.3.0');
+		if ($sysChassi !== FALSE or $sysChassi !== NULL)
+			updateStickerForCell ($objectInfo, 1, str_replace ('"', '', substr ($sysChassi, strlen ('STRING: '))));
+		break;
+	case preg_match ('^9\.12\.3\.1\.3\.', $sysObjectID): // Nexus
+		$exact_release = ereg_replace ('^.*, Version ([^ ]+), .*$', '\\1', $sysDescr);
+		$major_line = ereg_replace ('^([[:digit:]]+\.[[:digit:]]+)[^[:digit:]].*', '\\1', $exact_release);
+		$nxos_codes = array
+		(
+			'4.0' => 963,
+			'4.1' => 964,
+		);
+		updateStickerForCell ($objectInfo, 4, $nxos_codes[$major_line]);
+		updateStickerForCell ($objectInfo, 5, $exact_release);
+		break;
+	case preg_match ('^11\.2\.3\.7\.11\.', $sysObjectID): // ProCurve
+		$exact_release = ereg_replace ('^.* revision ([^ ]+), .*$', '\\1', $sysDescr);
+		updateStickerForCell ($objectInfo, 5, $exact_release);
+		break;
+	case preg_match ('^4526\.100\.2\.', $sysObjectID): // NETGEAR
+		break;
+	}
 }
 
 ?>
