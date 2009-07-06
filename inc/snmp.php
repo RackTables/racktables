@@ -1,118 +1,84 @@
 <?php
 
 $iftable_processors = array();
-$iftable_processors['catalyst-Nx100TX-Nx1000T'][] = array
+$iftable_processors['catalyst-any-100TX'] = array
 (
 	'pattern' => '^FastEthernet(0/[[:digit:]]+)$',
 	'replacement' => 'fa\\1',
 	'dict_key' => 19,
 );
-$iftable_processors['catalyst-Nx100TX-Nx1000T'][] = array
+
+$iftable_processors['catalyst-any-1000T'] = array
 (
 	'pattern' => '^GigabitEthernet(0/[[:digit:]]+)$',
 	'replacement' => 'gi\\1',
 	'dict_key' => 24,
 );
 
-$iftable_processors['catalyst-Nx100TX-Nx1000SFP'][] = array
-(
-	'pattern' => '^FastEthernet(0/[[:digit:]]+)$',
-	'replacement' => 'fa\\1',
-	'dict_key' => 19,
-);
-$iftable_processors['catalyst-Nx100TX-Nx1000SFP'][] = array
+$iftable_processors['catalyst-any-1000SFP'] = array
 (
 	'pattern' => '^GigabitEthernet(0/[[:digit:]]+)$',
 	'replacement' => 'gi\\1',
 	'dict_key' => 440,
 );
 
-$iftable_processors['catalyst-24x1000T-4x1000SFP'][] = array
+$iftable_processors['catalyst-25-to-28-1000SFP'] = array
 (
 	'pattern' => '^GigabitEthernet(0/(25|26|27|28))$',
 	'replacement' => 'gi\\1',
 	'dict_key' => 440,
 );
-$iftable_processors['catalyst-24x1000T-4x1000SFP'][] = array
-(
-	'pattern' => '^GigabitEthernet(0/[[:digit:]]+)$',
-	'replacement' => 'gi\\1',
-	'dict_key' => 24,
-);
 
-$iftable_processors['catalyst-48x1000T-4x1000SFP'][] = array
+$iftable_processors['catalyst-49-to-52-1000SFP'] = array
 (
 	'pattern' => '^GigabitEthernet(0/(49|50|51|52))$',
 	'replacement' => 'gi\\1',
 	'dict_key' => 440,
 );
-$iftable_processors['catalyst-48x1000T-4x1000SFP'][] = array
-(
-	'pattern' => '^GigabitEthernet(0/[[:digit:]]+)$',
-	'replacement' => 'gi\\1',
-	'dict_key' => 24,
-);
 
-$iftable_processors['catalyst-12x1000T-4x1000SFP'][] = array
+$iftable_processors['catalyst-13-to-16-1000SFP'] = array
 (
 	'pattern' => '^GigabitEthernet(0/(13|14|15|16))$',
 	'replacement' => 'gi\\1',
 	'dict_key' => 440,
 );
-$iftable_processors['catalyst-12x1000T-4x1000SFP'][] = array
-(
-	'pattern' => '^GigabitEthernet(0/[[:digit:]]+)$',
-	'replacement' => 'gi\\1',
-	'dict_key' => 24,
-);
 
-$iftable_processors['catalyst-20x1000T-4x1000SFP'][] = array
+$iftable_processors['catalyst-21-to-24-1000SFP'] = array
 (
 	'pattern' => '^GigabitEthernet(0/(21|22|23|24))$',
 	'replacement' => 'gi\\1',
 	'dict_key' => 440,
 );
-$iftable_processors['catalyst-20x1000T-4x1000SFP'][] = array
-(
-	'pattern' => '^GigabitEthernet(0/[[:digit:]]+)$',
-	'replacement' => 'gi\\1',
-	'dict_key' => 24,
-);
 
-$iftable_processors['nexus-5000'][] = array
+$iftable_processors['nexus-any-10000SFP+'] = array
 (
 	'pattern' => '^Ethernet([[:digit:]]/[[:digit:]]+)$',
 	'replacement' => 'e\\1',
 	'dict_key' => 440,
 );
 
-$iftable_processors['procurve-24x100TX-2x1000T'][] = array
+$iftable_processors['procurve-any-100TX'] = array
+(
+	'pattern' => '^([[:digit:]]+)$',
+	'replacement' => '\\1',
+	'dict_key' => 19,
+);
+
+$iftable_processors['procurve-25-to-26-1000T'] = array
 (
 	'pattern' => '^(25|26)$',
 	'replacement' => '\\1',
 	'dict_key' => 24,
 );
-$iftable_processors['procurve-24x100TX-2x1000T'][] = array
-(
-	'pattern' => '^([[:digit:]]+)$',
-	'replacement' => '\\1',
-	'dict_key' => 19,
-);
 
-$iftable_processors['procurve-48x100TX-2x1000T'][] = array
+$iftable_processors['procurve-49-to-50-1000T'] = array
 (
 	'pattern' => '^(49|50)$',
 	'replacement' => '\\1',
 	'dict_key' => 24,
 );
-$iftable_processors['procurve-48x100TX-2x1000T'][] = array
-(
-	'pattern' => '^([[:digit:]]+)$',
-	'replacement' => '\\1',
-	'dict_key' => 19,
-);
 
-$iftable_processors['netgear-Nx1000T'][] = array
+$iftable_processors['netgear-any-1000T'] = array
 (
 	'pattern' => '^Unit: 1 Slot: 0 Port: ([[:digit:]]+) Gigabit - Level$',
 	'replacement' => '\\1',
@@ -125,175 +91,175 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 	(
 		'dict_key' => 380,
 		'text' => 'WS-C2950-24: 24 RJ-45/10-100TX',
-		'processor' => 'catalyst-Nx100TX-Nx1000T',
+		'processors' => array ('catalyst-any-100TX'),
 	),
 	'9.1.325' => array
 	(
 		'dict_key' => 382,
 		'text' => 'WS-C2950C-24: 24 RJ-45/10-100TX + 2 MT-RJ/100FX fiber',
-		'processor' => 'catalyst-Nx100TX-Nx1000T',
+		'processors' => array ('catalyst-25-to-26-100FX/MT-RJ', 'catalyst-any-Nx100TX'),
 	),
 	'9.1.696' => array
 	(
 		'dict_key' => 167,
 		'text' => 'WS-C2960G-24TC-L: 20 RJ-45/10-100-1000T(X) + 4 combo-gig',
-		'processor' => 'catalyst-Nx100TX-Nx1000T',
+		'processors' => array ('catalyst-any-1000T'),
 	),
 	'9.1.697' => array
 	(
 		'dict_key' => 166,
 		'text' => 'WS-C2960G-48TC-L: 44 RJ-45/10-100-1000T(X) + 4 combo-gig',
-		'processor' => 'catalyst-Nx100TX-Nx1000T',
+		'processors' => array ('catalyst-any-1000T'),
 	),
 	'9.1.716' => array
 	(
 		'dict_key' => 164,
 		'text' => 'WS-C2960-24TT-L: 24 RJ-45/10-100TX + 2 RJ-45/10-100-1000T(X)',
-		'processor' => 'catalyst-Nx100TX-Nx1000T',
+		'processors' => array ('catalyst-any-100TX', 'catalyst-any-1000T'),
 	),
 	'9.1.717' => array
 	(
 		'dict_key' => 162,
 		'text' => 'WS-C2960-48TT-L: 48 RJ-45/10-100TX + 2 RJ-45/10-100-1000T(X)',
-		'processor' => 'catalyst-Nx100TX-Nx1000T',
+		'processors' => array ('catalyst-any-100TX', 'catalyst-any-1000T'),
 	),
 	'9.1.527' => array
 	(
 		'dict_key' => 210,
 		'text' => 'WS-C2970G-24T: 24 RJ-45/10-100-1000T(X)',
-		'processor' => 'catalyst-Nx100TX-Nx1000T',
+		'processors' => array ('catalyst-any-1000T'),
 	),
 	'9.1.561' => array
 	(
 		'dict_key' => 115,
 		'text' => 'WS-C2970G-24TS: 24 RJ-45/10-100-1000T(X) + 4 SFP/1000',
-		'processor' => 'catalyst-24x1000T-4x1000SFP',
+		'processors' => array ('catalyst-25-to-28-1000SFP', 'catalyst-any-1000T'),
 	),
 	'9.1.633' => array
 	(
 		'dict_key' => 169,
 		'text' => 'WS-C3560-24TS: 24 RJ-45/10-100TX + 2 SFP/1000',
-		'processor' => 'catalyst-Nx100TX-Nx1000SFP',
+		'processors' => array ('catalyst-any-1000SFP', 'catalyst-any-100TX'),
 	),
 	'9.1.634' => array
 	(
 		'dict_key' => 170,
 		'text' => 'WS-C3560-48TS: 48 RJ-45/10-100TX + 4 SFP/1000',
-		'processor' => 'catalyst-Nx100TX-Nx1000SFP',
+		'processors' => array ('catalyst-any-1000SFP', 'catalyst-any-100TX'),
 	),
 	'9.1.563' => array
 	(
 		'dict_key' => 171,
 		'text' => 'WS-C3560-24PS: 24 RJ-45/10-100TX + 2 SFP/1000',
-		'processor' => 'catalyst-Nx100TX-Nx1000SFP',
+		'processors' => array ('catalyst-any-1000SFP', 'catalyst-any-100TX'),
 	),
 	'9.1.564' => array
 	(
 		'dict_key' => 172,
 		'text' => 'WS-C3560-48PS: 48 RJ-45/10-100TX + 4 SFP/1000',
-		'processor' => 'catalyst-Nx100TX-Nx1000SFP',
+		'processors' => array ('catalyst-any-1000SFP', 'catalyst-any-100TX'),
 	),
 	'9.1.516' => array
 	(
 		'dict_key' => 179,
 		'text' => 'WS-C3750-xxPS: 24 or 48 RJ-45/10-100TX + 4 SFP/1000',
-		'processor' => 'catalyst-Nx100TX-Nx1000SFP',
+		'processors' => array ('catalyst-any-1000SFP', 'catalyst-any-100TX'),
 	),
 	'9.1.614' => array
 	(
 		'dict_key' => 175,
 		'text' => 'WS-C3560G-24PS: 24 RJ-45/10-100-1000T(X) + 4 SFP/1000',
-		'processor' => 'catalyst-24x1000T-4x1000SFP',
+		'processors' => array ('catalyst-25-to-28-1000SFP', 'catalyst-any-1000T'),
 	),
 	'9.1.615' => array
 	(
 		'dict_key' => 173,
 		'text' => 'WS-C3560G-24TS: 24 RJ-45/10-100-1000T(X) + 4 SFP/1000',
-		'processor' => 'catalyst-24x1000T-4x1000SFP',
+		'processors' => array ('catalyst-25-to-28-1000SFP', 'catalyst-any-1000T'),
 	),
 	'9.1.616' => array
 	(
 		'dict_key' => 176,
 		'text' => 'WS-C3560G-48PS: 48 RJ-45/10-100-1000T(X) + 4 SFP/1000',
-		'processor' => 'catalyst-48x1000T-4x1000SFP',
+		'processors' => array ('catalyst-49-to-52-1000SFP', 'catalyst-any-1000T'),
 	),
 	'9.1.617' => array
 	(
 		'dict_key' => 174,
 		'text' => 'WS-C3560G-48TS: 48 RJ-45/10-100-1000T(X) + 4 SFP/1000',
-		'processor' => 'catalyst-48x1000T-4x1000SFP',
+		'processors' => array ('catalyst-49-to-52-1000SFP', 'catalyst-any-1000T'),
 	),
 	'9.1.624' => array
 	(
 		'dict_key' => 143,
 		'text' => 'WS-C3750G-24TS: 24 RJ-45/10-100-1000T(X) + 4 SFP/1000',
-		'processor' => 'catalyst-24x1000T-4x1000SFP',
+		'processors' => array ('catalyst-25-to-28-1000SFP', 'catalyst-any-1000T'),
 	),
 	'9.1.626' => array
 	(
 		'dict_key' => 147,
 		'text' => 'WS-C4948: 48 RJ-45/10-100-1000T(X) + 4 SFP/1000',
-		'processor' => 'catalyst-48x1000T-4x1000SFP',
+		'processors' => array ('catalyst-49-to-52-1000SFP', 'catalyst-any-1000T'),
 	),
 	'9.1.659' => array
 	(
 		'dict_key' => 377,
 		'text' => 'WS-C4948-10GE: 48 RJ-45/10-100-1000T(X) + 2 X2/10000',
-		'processor' => 'catalyst-48x1000T-4x1000SFP',
+		'processors' => array ('catalyst-any-10000X2', 'catalyst-any-1000T'),
 	),
 	'9.1.428' => array
 	(
 		'dict_key' => 389,
 		'text' => 'WS-C2950G-24: 24 RJ-45/10-100TX + 2 GBIC/1000',
-		'processor' => 'catalyst-24x1000T-4x1000SFP',
+		'processors' => array ('catalyst-any-1000GBIC', 'catalyst-any-100TX'),
 	),
 	'9.1.429' => array
 	(
 		'dict_key' => 390,
 		'text' => 'WS-C2950G-48: 48 RJ-45/10-100TX + 2 GBIC/1000',
-		'processor' => 'catalyst-48x1000T-4x1000SFP',
+		'processors' => array ('catalyst-any-1000GBIC', 'catalyst-any-100TX'),
 	),
 	'9.1.559' => array
 	(
 		'dict_key' => 387,
 		'text' => 'WS-C2950T-48: 48 RJ-45/10-100TX + 2 RJ-45/10-100-1000T(X)',
-		'processor' => 'catalyst-Nx100TX-Nx1000T',
+		'processors' => array ('catalyst-any-1000T', 'catalyst-any-100TX'),
 	),
 	'9.1.749' => array
 	(
 		'dict_key' => 989,
-		'text' => 'WS-CBS3030-DEL: 12 RJ-45/10-100-1000T(X) + 4 SFP/1000',
-		'processor' => 'catalyst-12x1000T-4x1000SFP',
+		'text' => 'WS-CBS3030-DEL: 10 internal/10-100-1000T(X) + 2 RJ-45/10-100-1000T(X) + 4 SFP/1000',
+		'processors' => array ('catalyst-11-to-12-1000T', 'catalyst-13-to-16-1000SFP', 'catalyst-any-1000Tbp'),
 	),
 	'9.1.920' => array
 	(
 		'dict_key' => 795,
-		'text' => 'WS-CBS3032-DEL: 20 RJ-45/10-100-1000T(X) + 4 SFP/1000',
-		'processor' => 'catalyst-20x1000T-4x1000SFP',
+		'text' => 'WS-CBS3032-DEL: 16 internal/10-100-1000T(X) + 4 RJ-45/10-100-1000T(X) + 4 SFP/1000',
+		'processors' => array ('catalyst-17-to-20-1000T', 'catalyst-21-to-24-1000SFP', 'catalyst-any-1000Tbp'),
 	),
 	'9.12.3.1.3.719' => array
 	(
 		'dict_key' => 960,
 		'text' => 'N5K-C5020: 40 SFP+/10000',
-		'processor' => 'nexus-5000',
+		'processors' => array ('nexus-any-10000SFP+'),
 	),
 	'11.2.3.7.11.36' => array
 	(
 		'dict_key' => 865,
 		'text' => 'J8164A: 24 RJ-45/10-100TX + 2 RJ-45/10-100-1000T(X)',
-		'processor' => 'procurve-24x100TX-2x1000T',
+		'processors' => array ('procurve-25-to-26-1000T', 'procurve-any-100TX'),
 	),
 	'11.2.3.7.11.35' => array
 	(
 		'dict_key' => 867,
 		'text' => 'J8165A: 48 RJ-45/10-100TX + 2 RJ-45/10-100-1000T(X)',
-		'processor' => 'procurve-48x100TX-2x1000T',
+		'processors' => array ('procurve-49-to-50-1000T', 'procurve-any-100TX'),
 	),
 	'4526.100.2.2' => array
 	(
 		'dict_key' => 562,
 		'text' => 'GSM7224: 24 RJ-45/10-100-1000T(X)',
-		'processor' => 'netgear-Nx1000T',
+		'processors' => array ('netgear-any-1000T'),
 	),
 );
 
