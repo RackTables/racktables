@@ -239,6 +239,12 @@ CREATE TABLE `LDAPCache` (
 			$query[] = "DELETE FROM TagStorage WHERE entity_realm = 'file' AND entity_id NOT IN (SELECT id FROM File)";
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('IPV4_ENABLE_KNIGHT','yes','string','no','no','Enable IPv4 knight feature')";
 			$query[] = "ALTER TABLE IPv4Network ADD COLUMN comment text AFTER name";
+			$query[] = "INSERT INTO PortCompat (type1, type2) VALUES (20,1083)";
+			$query[] = "INSERT INTO PortCompat (type1, type2) VALUES (21,1083)";
+			$query[] = "INSERT INTO PortCompat (type1, type2) VALUES (1077,1077)";
+			$query[] = "INSERT INTO PortCompat (type1, type2) VALUES (1083,20)";
+			$query[] = "INSERT INTO PortCompat (type1, type2) VALUES (1083,21)";
+			$query[] = "INSERT INTO PortCompat (type1, type2) VALUES (1083,1083)";
 			$query[] = "UPDATE Config SET varvalue = '0.17.2' WHERE varname = 'DB_VERSION'";
 			break;
 		default:
