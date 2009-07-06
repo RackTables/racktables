@@ -3,105 +3,105 @@
 $iftable_processors = array();
 $iftable_processors['catalyst-any-100TX'] = array
 (
-	'pattern' => '^FastEthernet([[:digit:]]+/[[:digit:]]+)$',
+	'pattern' => '@^FastEthernet(([[:digit:]]+/)?[[:digit:]]+)$@',
 	'replacement' => 'fa\\1',
 	'dict_key' => 19,
 );
 
 $iftable_processors['catalyst-25-to-26-100FX/MT-RJ'] = array
 (
-	'pattern' => '^FastEthernet([[:digit:]]+/(25|26))$',
+	'pattern' => '@^FastEthernet([[:digit:]]+/(25|26))$@',
 	'replacement' => 'fa\\1',
 	'dict_key' => 1083,
 );
 
 $iftable_processors['catalyst-any-1000T'] = array
 (
-	'pattern' => '^GigabitEthernet([[:digit:]]+/[[:digit:]]+)$',
+	'pattern' => '@^GigabitEthernet([[:digit:]]+/[[:digit:]]+)$@',
 	'replacement' => 'gi\\1',
 	'dict_key' => 24,
 );
 
 $iftable_processors['catalyst-any-1000SFP'] = array
 (
-	'pattern' => '^GigabitEthernet([[:digit:]]+/[[:digit:]]+)$',
+	'pattern' => '@^GigabitEthernet([[:digit:]]+/[[:digit:]]+)$@',
 	'replacement' => 'gi\\1',
 	'dict_key' => 1077,
 );
 
 $iftable_processors['catalyst-any-1000GBIC'] = array
 (
-	'pattern' => '^GigabitEthernet([[:digit:]]+/[[:digit:]]+)$',
+	'pattern' => '@^GigabitEthernet([[:digit:]]+/[[:digit:]]+)$@',
 	'replacement' => 'gi\\1',
 	'dict_key' => 1078,
 );
 
 $iftable_processors['catalyst-any-10000X2'] = array
 (
-	'pattern' => '^TenGigabitEthernet([[:digit:]]+/[[:digit:]]+)$',
+	'pattern' => '@^TenGigabitEthernet([[:digit:]]+/[[:digit:]]+)$@',
 	'replacement' => 'te\\1',
 	'dict_key' => 1080,
 );
 
 $iftable_processors['catalyst-25-to-28-1000SFP'] = array
 (
-	'pattern' => '^GigabitEthernet(0/(25|26|27|28))$',
+	'pattern' => '@^GigabitEthernet(0/(25|26|27|28))$@',
 	'replacement' => 'gi\\1',
 	'dict_key' => 1077,
 );
 
 $iftable_processors['catalyst-49-to-52-1000SFP'] = array
 (
-	'pattern' => '^GigabitEthernet(0/(49|50|51|52))$',
+	'pattern' => '@^GigabitEthernet(0/(49|50|51|52))$@',
 	'replacement' => 'gi\\1',
 	'dict_key' => 1077,
 );
 
 $iftable_processors['catalyst-13-to-16-1000SFP'] = array
 (
-	'pattern' => '^GigabitEthernet(0/(13|14|15|16))$',
+	'pattern' => '@^GigabitEthernet(0/(13|14|15|16))$@',
 	'replacement' => 'gi\\1',
 	'dict_key' => 1077,
 );
 
 $iftable_processors['catalyst-21-to-24-1000SFP'] = array
 (
-	'pattern' => '^GigabitEthernet(0/(21|22|23|24))$',
+	'pattern' => '@^GigabitEthernet(0/(21|22|23|24))$@',
 	'replacement' => 'gi\\1',
 	'dict_key' => 1077,
 );
 
 $iftable_processors['nexus-any-10000SFP+'] = array
 (
-	'pattern' => '^Ethernet([[:digit:]]/[[:digit:]]+)$',
+	'pattern' => '@^Ethernet([[:digit:]]/[[:digit:]]+)$@',
 	'replacement' => 'e\\1',
 	'dict_key' => 1084,
 );
 
 $iftable_processors['procurve-any-100TX'] = array
 (
-	'pattern' => '^([[:digit:]]+)$',
+	'pattern' => '@^([[:digit:]]+)$@',
 	'replacement' => '\\1',
 	'dict_key' => 19,
 );
 
 $iftable_processors['procurve-25-to-26-1000T'] = array
 (
-	'pattern' => '^(25|26)$',
+	'pattern' => '@^(25|26)$@',
 	'replacement' => '\\1',
 	'dict_key' => 24,
 );
 
 $iftable_processors['procurve-49-to-50-1000T'] = array
 (
-	'pattern' => '^(49|50)$',
+	'pattern' => '@^(49|50)$@',
 	'replacement' => '\\1',
 	'dict_key' => 24,
 );
 
 $iftable_processors['netgear-any-1000T'] = array
 (
-	'pattern' => '^Unit: 1 Slot: 0 Port: ([[:digit:]]+) Gigabit - Level$',
+	'pattern' => '@^Unit: 1 Slot: 0 Port: ([[:digit:]]+) Gigabit - Level$@',
 	'replacement' => '\\1',
 	'dict_key' => 24,
 );
@@ -219,14 +219,14 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 	'9.1.626' => array
 	(
 		'dict_key' => 147,
-		'text' => 'WS-C4948: 48 RJ-45/10-100-1000T(X) + 4 SFP/1000',
-		'processors' => array ('catalyst-49-to-52-1000SFP', 'catalyst-any-1000T'),
+		'text' => 'WS-C4948: 48 RJ-45/10-100-1000T(X) + 4 SFP/1000 + 1 RJ-45/100TX (OOB mgmt)',
+		'processors' => array ('catalyst-49-to-52-1000SFP', 'catalyst-any-1000T', 'catalyst-any-100TX'),
 	),
 	'9.1.659' => array
 	(
 		'dict_key' => 377,
-		'text' => 'WS-C4948-10GE: 48 RJ-45/10-100-1000T(X) + 2 X2/10000',
-		'processors' => array ('catalyst-any-10000X2', 'catalyst-any-1000T'),
+		'text' => 'WS-C4948-10GE: 48 RJ-45/10-100-1000T(X) + 2 X2/10000 + 1 RJ-45/100TX (OOB mgmt)',
+		'processors' => array ('catalyst-any-10000X2', 'catalyst-any-1000T', 'catalyst-any-100TX'),
 	),
 	'9.1.428' => array
 	(
@@ -940,11 +940,12 @@ function doSNMPmining_new ($object_id, $community)
 	$sysDescr = str_replace (array ("\n", "\r"), " ", $sysDescr);  // Make it one line
 	if (!isset ($known_switches[$sysObjectID]))
 		return oneLiner (189, array ($sysObjectID)); // unknown OID
-	updateStickerForCell ($objectInfo, 2, $hwtype[$sysObjectID]);
+	updateStickerForCell ($objectInfo, 2, $known_switches[$sysObjectID]['dict_key']);
 	updateStickerForCell ($objectInfo, 3, $sysName);
+	$log = mergeLogs ($log, oneLiner (81, array ('generic')));
 	switch (1)
 	{
-	case preg_match ('^9\.1\.', $sysObjectID): // Catalyst
+	case preg_match ('/^9\.1\./', $sysObjectID): // Catalyst
 		$exact_release = ereg_replace ('^.*, Version ([^ ]+), .*$', '\\1', $sysDescr);
 		$major_line = ereg_replace ('^([[:digit:]]+\.[[:digit:]]+)[^[:digit:]].*', '\\1', $exact_release);
 		$ios_codes = array
@@ -958,8 +959,9 @@ function doSNMPmining_new ($object_id, $community)
 		$sysChassi = snmpget ($endpoints[0], $community, '1.3.6.1.4.1.9.3.6.3.0');
 		if ($sysChassi !== FALSE or $sysChassi !== NULL)
 			updateStickerForCell ($objectInfo, 1, str_replace ('"', '', substr ($sysChassi, strlen ('STRING: '))));
+		$log = mergeLogs ($log, oneLiner (81, array ('catalyst-generic')));
 		break;
-	case preg_match ('^9\.12\.3\.1\.3\.', $sysObjectID): // Nexus
+	case preg_match ('/^9\.12\.3\.1\.3\./', $sysObjectID): // Nexus
 		$exact_release = ereg_replace ('^.*, Version ([^ ]+), .*$', '\\1', $sysDescr);
 		$major_line = ereg_replace ('^([[:digit:]]+\.[[:digit:]]+)[^[:digit:]].*', '\\1', $exact_release);
 		$nxos_codes = array
@@ -969,14 +971,61 @@ function doSNMPmining_new ($object_id, $community)
 		);
 		updateStickerForCell ($objectInfo, 4, $nxos_codes[$major_line]);
 		updateStickerForCell ($objectInfo, 5, $exact_release);
+		$log = mergeLogs ($log, oneLiner (81, array ('nexus-generic')));
 		break;
-	case preg_match ('^11\.2\.3\.7\.11\.', $sysObjectID): // ProCurve
+	case preg_match ('/^11\.2\.3\.7\.11\./', $sysObjectID): // ProCurve
 		$exact_release = ereg_replace ('^.* revision ([^ ]+), .*$', '\\1', $sysDescr);
 		updateStickerForCell ($objectInfo, 5, $exact_release);
+		$log = mergeLogs ($log, oneLiner (81, array ('procurve-generic')));
 		break;
-	case preg_match ('^4526\.100\.2\.', $sysObjectID): // NETGEAR
+	case preg_match ('/^4526\.100\.2\./', $sysObjectID): // NETGEAR
 		break;
 	}
+	$ifInfo = array();
+	$tablename = 'ifDescr';
+	foreach (snmpwalkoid ($endpoints[0], $community, $tablename) as $oid => $value)
+	{
+		$randomindex = ereg_replace ("^.*${tablename}\.(.+)\$", '\\1', $oid);
+		$value = trim (ereg_replace ('^.+: (.+)$', '\\1', $value), '"');
+		$ifInfo[$randomindex][$tablename] = $value;
+	}
+	$tablename = 'ifPhysAddress';
+	foreach (snmpwalkoid ($endpoints[0], $community, $tablename) as $oid => $value)
+	{
+		$randomindex = ereg_replace ("^.*${tablename}\.(.+)\$", '\\1', $oid);
+		$value = trim ($value);
+		// NET-SNMP may return MAC addresses in one of two (?) formats depending on
+		// DISPLAY-HINT internal database. The best we can do about it is to accept both.
+		// Bug originally reported by Walery Wysotsky against openSUSE 11.0.
+		if (preg_match ('/^string: /i', $value)) // STRING: x:yy:z:xx:y:zz
+		{
+			list ($dummy, $value) = explode (' ', $value);
+			$addrbytes = explode (':', $value);
+			foreach ($addrbytes as $bidx => $bytestr)
+				if (strlen ($bytestr) == 1)
+					$addrbytes[$bidx] = '0' . $bytestr;
+		}
+		elseif (preg_match ('/^hex-string: /i', $value)) // Hex-STRING: xx yy zz xx yy zz
+			$addrbytes = explode (' ', substr ($value, -17));
+		else
+			continue; // martian format
+		$ifInfo[$randomindex][$tablename] = implode ('', $addrbytes);
+	}
+	// process each interface only once regardless of how many processors we have to run
+	foreach ($ifInfo as $iface)
+		foreach ($known_switches[$sysObjectID]['processors'] as $processor_name)
+		{
+//			echo "subject == '" . $iface['ifDescr'] . "'<br>";
+//			echo "pattern == '" . $iftable_processors[$processor_name]['pattern'] . "', replacement == '" . $iftable_processors[$processor_name]['replacement'] . "'<br>";
+			$newname = preg_replace ($iftable_processors[$processor_name]['pattern'], $iftable_processors[$processor_name]['replacement'], $iface['ifDescr'], 1, $count);
+			if ($count)
+//				echo "HIT!";
+//			continue;
+				commitAddPort ($object_id, $newname, $iftable_processors[$processor_name]['dict_key'], '', $iface['ifPhysAddress']);
+		}
+	foreach ($known_switches[$sysObjectID]['processors'] as $processor_name)
+		$log = mergeLogs ($log, oneLiner (81, array ($processor_name)));
+	return $log;
 }
 
 ?>
