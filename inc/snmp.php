@@ -78,9 +78,16 @@ $iftable_processors['nexus-any-10000SFP+'] = array
 	'dict_key' => 1084,
 );
 
-$iftable_processors['procurve-any-100TX'] = array
+$iftable_processors['procurve-chassis-100TX'] = array
 (
 	'pattern' => '@^([[:digit:]]+)$@',
+	'replacement' => '\\1',
+	'dict_key' => 19,
+);
+
+$iftable_processors['procurve-modular-100TX'] = array
+(
+	'pattern' => '@^([A-Z][[:digit:]]+)$@',
 	'replacement' => '\\1',
 	'dict_key' => 19,
 );
@@ -102,6 +109,13 @@ $iftable_processors['procurve-49-to-50-1000T'] = array
 $iftable_processors['netgear-any-1000T'] = array
 (
 	'pattern' => '@^Unit: 1 Slot: 0 Port: ([[:digit:]]+) Gigabit - Level$@',
+	'replacement' => '\\1',
+	'dict_key' => 24,
+);
+
+$iftable_processors['nortel-any-1000T'] = array
+(
+	'pattern' => '@^Ethernet Port on unit 1, port ([[:digit:]]+)$@',
 	'replacement' => '\\1',
 	'dict_key' => 24,
 );
@@ -268,19 +282,31 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 	(
 		'dict_key' => 865,
 		'text' => 'J8164A: 24 RJ-45/10-100TX + 2 RJ-45/10-100-1000T(X)',
-		'processors' => array ('procurve-25-to-26-1000T', 'procurve-any-100TX'),
+		'processors' => array ('procurve-25-to-26-1000T', 'procurve-chassis-100TX'),
 	),
 	'11.2.3.7.11.35' => array
 	(
 		'dict_key' => 867,
 		'text' => 'J8165A: 48 RJ-45/10-100TX + 2 RJ-45/10-100-1000T(X)',
-		'processors' => array ('procurve-49-to-50-1000T', 'procurve-any-100TX'),
+		'processors' => array ('procurve-49-to-50-1000T', 'procurve-chassis-100TX'),
+	),
+	'11.2.3.7.11.9' => array
+	(
+		'dict_key' => 1086,
+		'text' => 'J4121A: modular system',
+		'processors' => array ('procurve-modular-100TX'),
 	),
 	'4526.100.2.2' => array
 	(
 		'dict_key' => 562,
 		'text' => 'GSM7224: 24 RJ-45/10-100-1000T(X)',
 		'processors' => array ('netgear-any-1000T'),
+	),
+	'45.3.68.5' => array
+	(
+		'dict_key' => 1085,
+		'text' => 'BES50GE-12T PWR: 12 RJ-45/10-100-1000T(X)',
+		'processors' => array ('nortel-any-1000T'),
 	),
 );
 
@@ -978,7 +1004,7 @@ function doSNMPmining_new ($object_id, $community)
 		updateStickerForCell ($objectInfo, 5, $exact_release);
 		$log = mergeLogs ($log, oneLiner (81, array ('procurve-generic')));
 		break;
-	case preg_match ('/^4526\.100\.2\./', $sysObjectID): // NETGEAR
+	default: // Nortel, NETGEAR...
 		break;
 	}
 	$ifInfo = array();
