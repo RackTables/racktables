@@ -3,58 +3,79 @@
 $iftable_processors = array();
 $iftable_processors['catalyst-any-100TX'] = array
 (
-	'pattern' => '^FastEthernet(0/[[:digit:]]+)$',
+	'pattern' => '^FastEthernet([[:digit:]]+/[[:digit:]]+)$',
 	'replacement' => 'fa\\1',
 	'dict_key' => 19,
 );
 
+$iftable_processors['catalyst-25-to-26-100FX/MT-RJ'] = array
+(
+	'pattern' => '^FastEthernet([[:digit:]]+/(25|26))$',
+	'replacement' => 'fa\\1',
+	'dict_key' => 1083,
+);
+
 $iftable_processors['catalyst-any-1000T'] = array
 (
-	'pattern' => '^GigabitEthernet(0/[[:digit:]]+)$',
+	'pattern' => '^GigabitEthernet([[:digit:]]+/[[:digit:]]+)$',
 	'replacement' => 'gi\\1',
 	'dict_key' => 24,
 );
 
 $iftable_processors['catalyst-any-1000SFP'] = array
 (
-	'pattern' => '^GigabitEthernet(0/[[:digit:]]+)$',
+	'pattern' => '^GigabitEthernet([[:digit:]]+/[[:digit:]]+)$',
 	'replacement' => 'gi\\1',
-	'dict_key' => 440,
+	'dict_key' => 1077,
+);
+
+$iftable_processors['catalyst-any-1000GBIC'] = array
+(
+	'pattern' => '^GigabitEthernet([[:digit:]]+/[[:digit:]]+)$',
+	'replacement' => 'gi\\1',
+	'dict_key' => 1078,
+);
+
+$iftable_processors['catalyst-any-10000X2'] = array
+(
+	'pattern' => '^TenGigabitEthernet([[:digit:]]+/[[:digit:]]+)$',
+	'replacement' => 'te\\1',
+	'dict_key' => 1080,
 );
 
 $iftable_processors['catalyst-25-to-28-1000SFP'] = array
 (
 	'pattern' => '^GigabitEthernet(0/(25|26|27|28))$',
 	'replacement' => 'gi\\1',
-	'dict_key' => 440,
+	'dict_key' => 1077,
 );
 
 $iftable_processors['catalyst-49-to-52-1000SFP'] = array
 (
 	'pattern' => '^GigabitEthernet(0/(49|50|51|52))$',
 	'replacement' => 'gi\\1',
-	'dict_key' => 440,
+	'dict_key' => 1077,
 );
 
 $iftable_processors['catalyst-13-to-16-1000SFP'] = array
 (
 	'pattern' => '^GigabitEthernet(0/(13|14|15|16))$',
 	'replacement' => 'gi\\1',
-	'dict_key' => 440,
+	'dict_key' => 1077,
 );
 
 $iftable_processors['catalyst-21-to-24-1000SFP'] = array
 (
 	'pattern' => '^GigabitEthernet(0/(21|22|23|24))$',
 	'replacement' => 'gi\\1',
-	'dict_key' => 440,
+	'dict_key' => 1077,
 );
 
 $iftable_processors['nexus-any-10000SFP+'] = array
 (
 	'pattern' => '^Ethernet([[:digit:]]/[[:digit:]]+)$',
 	'replacement' => 'e\\1',
-	'dict_key' => 440,
+	'dict_key' => 1084,
 );
 
 $iftable_processors['procurve-any-100TX'] = array
@@ -97,7 +118,7 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 	(
 		'dict_key' => 382,
 		'text' => 'WS-C2950C-24: 24 RJ-45/10-100TX + 2 MT-RJ/100FX fiber',
-		'processors' => array ('catalyst-25-to-26-100FX/MT-RJ', 'catalyst-any-Nx100TX'),
+		'processors' => array ('catalyst-25-to-26-100FX/MT-RJ', 'catalyst-any-100TX'),
 	),
 	'9.1.696' => array
 	(

@@ -19,7 +19,7 @@ function reloadDictionary ($from_key, $to_key)
 $dictreload = array
 (
 	'0.17.0' => array ('from' => 1, 'to' => 988),
-	'0.17.2' => array ('from' => 989, 'to' => 1083),
+	'0.17.2' => array ('from' => 989, 'to' => 1084),
 );
 
 $dictionary = array
@@ -1105,6 +1105,7 @@ $dictionary = array
 	1081 => array ('chapter_id' => 2, 'dict_value' => 'XPAK (empty)'),
 	1082 => array ('chapter_id' => 2, 'dict_value' => 'XFP (empty)'),
 	1083 => array ('chapter_id' => 2, 'dict_value' => 'MT-RJ/100Base-FX'),
+	1084 => array ('chapter_id' => 2, 'dict_value' => 'SFP+ (empty)'),
 );
 
 ?>
