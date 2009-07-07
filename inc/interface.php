@@ -2882,7 +2882,6 @@ function renderSearchResults ()
 				case 'object':
 					startPortlet ("<a href='${root}?page=depot'>Objects</a>");
 					echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
-					echo '<tr><th>Common name</th><th>Visible label</th><th>Asset tag</th><th>Barcode</th></tr>';
 					foreach ($what as $obj)
 					{
 						echo "<tr class=row_${order} valign=top><td>";
