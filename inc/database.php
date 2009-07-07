@@ -25,6 +25,7 @@ $SQLSchema = array
 			'objtype_name' => '(select dict_value from Dictionary where dict_key = objtype_id)',
 			'has_problems' => 'has_problems',
 			'comment' => 'comment',
+			'nports' => '(SELECT COUNT(*) FROM Port WHERE object_id = RackObject.id)',
 		),
 		'keycolumn' => 'id',
 		'ordcolumns' => array ('name'),
