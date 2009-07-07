@@ -22,6 +22,13 @@ $iftable_processors['catalyst-any-1000T'] = array
 	'dict_key' => 24,
 );
 
+$iftable_processors['catalyst-any-bp/1000T'] = array
+(
+	'pattern' => '@^GigabitEthernet([[:digit:]]+/[[:digit:]]+)$@',
+	'replacement' => 'gi\\1',
+	'dict_key' => 1087,
+);
+
 $iftable_processors['catalyst-any-1000SFP'] = array
 (
 	'pattern' => '@^GigabitEthernet([[:digit:]]+/[[:digit:]]+)$@',
@@ -264,13 +271,13 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 	(
 		'dict_key' => 989,
 		'text' => 'WS-CBS3030-DEL: 10 internal/10-100-1000T(X) + 2 RJ-45/10-100-1000T(X) + 4 SFP/1000',
-		'processors' => array ('catalyst-11-to-12-1000T', 'catalyst-13-to-16-1000SFP', 'catalyst-any-1000Tbp'),
+		'processors' => array ('catalyst-11-to-12-1000T', 'catalyst-13-to-16-1000SFP', 'catalyst-any-bp/1000T'),
 	),
 	'9.1.920' => array
 	(
 		'dict_key' => 795,
 		'text' => 'WS-CBS3032-DEL: 16 internal/10-100-1000T(X) + 4 RJ-45/10-100-1000T(X) + 4 SFP/1000',
-		'processors' => array ('catalyst-17-to-20-1000T', 'catalyst-21-to-24-1000SFP', 'catalyst-any-1000Tbp'),
+		'processors' => array ('catalyst-17-to-20-1000T', 'catalyst-21-to-24-1000SFP', 'catalyst-any-bp/1000T'),
 	),
 	'9.12.3.1.3.719' => array
 	(
