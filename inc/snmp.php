@@ -92,6 +92,13 @@ $iftable_processors['procurve-chassis-100TX'] = array
 	'dict_key' => 19,
 );
 
+$iftable_processors['procurve-chassis-1000T'] = array
+(
+	'pattern' => '@^([[:digit:]]+)$@',
+	'replacement' => '\\1',
+	'dict_key' => 24,
+);
+
 $iftable_processors['procurve-modular-100TX'] = array
 (
 	'pattern' => '@^([A-Z][[:digit:]]+)$@',
@@ -284,6 +291,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'dict_key' => 960,
 		'text' => 'N5K-C5020: 40 SFP+/10000',
 		'processors' => array ('nexus-any-10000SFP+'),
+	),
+	'11.2.3.7.11.32' => array
+	(
+		'dict_key' => 871,
+		'text' => 'J4904A: 48 RJ-45/10-100-1000T(X)',
+		'processors' => array ('procurve-chassis-1000T'),
 	),
 	'11.2.3.7.11.36' => array
 	(
