@@ -2788,13 +2788,6 @@ function renderSearchResults ()
 			$lasthit = 'object';
 			$summary['object'] = $tmp;
 		}
-		$tmp = getObjectSearchResults_new ($terms);
-		if (count ($tmp))
-		{
-			$nhits += count ($tmp);
-			$lasthit = 'object_new';
-			$summary['object_new'] = $tmp;
-		}
 		$tmp = getIPv4AddressSearchResult ($terms);
 		if (count ($tmp))
 		{
@@ -2877,7 +2870,6 @@ function renderSearchResults ()
 				echo "';//</script>";
 				break;
 			case 'object':
-			case 'object_new':
 				echo "<script language='Javascript'>document.location='${root}?page=object&object_id=${record['id']}';//</script>";
 				break;
 			case 'ipv4rspool':
@@ -2907,19 +2899,6 @@ function renderSearchResults ()
 			switch ($where)
 			{
 				case 'object':
-					startPortlet ("<a href='${root}?page=depot'>Objects</a>");
-					echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
-					foreach ($what as $obj)
-					{
-						echo "<tr class=row_${order} valign=top><td>";
-						renderCell (spotEntity ('object', $obj['id']));
-						echo "</td></tr>\n";
-						$order = $nextorder[$order];
-					}
-					echo '</table>';
-					finishPortlet();
-					break;
-				case 'object_new':
 					startPortlet ("<a href='${root}?page=depot'>Objects (continued)</a>");
 					echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
 					echo '<tr><th>what</th><th>why</th></tr>';
@@ -2927,7 +2906,16 @@ function renderSearchResults ()
 					{
 						echo "<tr class=row_${order} valign=top><td>";
 						renderCell (spotEntity ('object', $obj['id']));
-						echo "</td><td>";
+						echo "</td><td class=tdleft>";
+						if (isset ($obj['by_attr']))
+						{
+							// only explain non-obvious reasons for listing
+							echo '<ul>';
+							foreach ($obj['by_attr'] as $attr_name)
+								if ($attr_name != 'name')
+									echo "<li>${attr_name} matched</li>";
+							echo '</ul>';
+						}
 						if (isset ($obj['by_sticker']))
 						{
 							echo '<table>';
