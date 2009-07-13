@@ -1620,10 +1620,7 @@ function getSearchResultByField ($tname, $rcolumns, $scolumn, $terms, $ocolumn =
 	return $ret;
 }
 
-// This function will eventually merge the functionality of the "older"
-// searching function. Both ones are used at the moment, and they do
-// search in different value spaces.
-function getObjectSearchResults_new ($what)
+function getObjectSearchResults ($what)
 {
 	$ret = array();
 	foreach (getStickerSearchResults ($what) as $objRecord)
@@ -1635,6 +1632,33 @@ function getObjectSearchResults_new ($what)
 	{
 		$ret[$objRecord['id']]['id'] = $objRecord['id'];
 		$ret[$objRecord['id']]['by_portrsv'] = $objRecord['by_portrsv'];
+	}
+	foreach (getObjectAttrsSearchResults ($what) as $objRecord)
+	{
+		$ret[$objRecord['id']]['id'] = $objRecord['id'];
+		$ret[$objRecord['id']]['by_attr'] = $objRecord['by_attr'];
+	}
+	return $ret;
+}
+
+function getObjectAttrsSearchResults ($what)
+{
+	$ret = array();
+	foreach (array ('name', 'label', 'asset_no', 'barcode') as $column)
+	{
+		$tmp = getSearchResultByField
+		(
+			'RackObject',
+			array ('id'),
+			$column,
+			$what,
+			$column
+		);
+		foreach ($tmp as $row)
+		{
+			$ret[$row['id']]['id'] = $row['id'];
+			$ret[$row['id']]['by_attr'][] = $column;
+		}
 	}
 	return $ret;
 }

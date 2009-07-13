@@ -536,23 +536,6 @@ function markupObjectProblems (&$rackData)
 			}
 }
 
-function search_cmpObj ($a, $b)
-{
-	return ($a['score'] > $b['score'] ? -1 : 1);
-}
-
-function getObjectSearchResults ($terms)
-{
-	$objects = array();
-	mergeSearchResults ($objects, $terms, 'name');
-	mergeSearchResults ($objects, $terms, 'label');
-	mergeSearchResults ($objects, $terms, 'asset_no');
-	mergeSearchResults ($objects, $terms, 'barcode');
-	if (count ($objects) == 1)
-		usort ($objects, 'search_cmpObj');
-	return $objects;
-}
-
 // This function removes all colons and dots from a string.
 function l2addressForDatabase ($string)
 {
