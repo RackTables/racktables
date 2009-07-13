@@ -2769,6 +2769,13 @@ function renderSearchResults ()
 			$lasthit = 'object';
 			$summary['object'] = $tmp;
 		}
+		$tmp = getObjectSearchResults_new ($terms);
+		if (count ($tmp))
+		{
+			$nhits += count ($tmp);
+			$lasthit = 'object_new';
+			$summary['object_new'] = $tmp;
+		}
 		$tmp = getIPv4AddressSearchResult ($terms);
 		if (count ($tmp))
 		{
@@ -2851,6 +2858,7 @@ function renderSearchResults ()
 				echo "';//</script>";
 				break;
 			case 'object':
+			case 'object_new':
 				echo "<script language='Javascript'>document.location='${root}?page=object&object_id=${record['id']}';//</script>";
 				break;
 			case 'ipv4rspool':
@@ -2887,6 +2895,51 @@ function renderSearchResults ()
 						echo "<tr class=row_${order} valign=top><td>";
 						renderCell (spotEntity ('object', $obj['id']));
 						echo "</td></tr>\n";
+						$order = $nextorder[$order];
+					}
+					echo '</table>';
+					finishPortlet();
+					break;
+				case 'object_new':
+					startPortlet ("<a href='${root}?page=depot'>Objects (continued)</a>");
+					echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
+					echo '<tr><th>what</th><th>why</th></tr>';
+					foreach ($what as $obj)
+					{
+						echo "<tr class=row_${order} valign=top><td>";
+						renderCell (spotEntity ('object', $obj['id']));
+						echo "</td><td>";
+						if (isset ($obj['by_sticker']))
+						{
+							echo '<table>';
+							$aval = getAttrValues ($obj['id']);
+							foreach ($obj['by_sticker'] as $attr_id)
+							{
+								$record = array
+								(
+									'name' => $aval[$attr_id]['name'],
+									'a_value' => $aval[$attr_id]['a_value']
+								);
+								echo "<tr><th width='50%' class=sticker>${record['name']}:</th>";
+								echo "<td class=sticker>${record['a_value']}</td></tr>";
+							}
+							echo '</table>';
+						}
+						if (isset ($obj['by_portrsv']))
+						{
+							echo '<table>';
+							$ports = getObjectPortsAndLinks ($obj['id']);
+							foreach ($obj['by_portrsv'] as $port_id)
+								foreach ($ports as $port)
+									if ($port['id'] == $port_id)
+									{
+										echo "<tr><td>port ${port['name']} (${port['type']}):</td>";
+										echo "<td class=tdleft>${port['reservation_comment']}</td></tr>";
+										break; // next reason
+									}
+							echo '</table>';
+						}
+						echo "</td></tr>";
 						$order = $nextorder[$order];
 					}
 					echo '</table>';
