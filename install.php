@@ -75,6 +75,18 @@ function not_already_installed()
 	}
 }
 
+function extension_issues ($funcname, $extname)
+{
+	echo "<tr><td>${extname}</td>";
+	if (function_exists ($funcname))
+	{
+		echo '<td class=msg_success>Ok</td></tr>';
+		return 0;
+	}
+	echo '<td class=msg_error>not found</td></tr>';
+	return 1;
+}
+
 // Check for PHP extensions.
 function platform_is_ok ()
 {
@@ -101,15 +113,9 @@ function platform_is_ok ()
 	}
 	echo '</td></tr>';
 
-	echo '<tr><td>hash function</td>';
-	if (function_exists ('sha1'))
-		echo '<td class=msg_success>Ok';
-	else
-	{
-		echo '<td class=msg_error>not found';
-		$nerrs++;
-	}
-	echo '</td></tr>';
+	$nerrs += extension_issues ('sha1', 'hash function');
+	$nerrs += extension_issues ('preg_match', 'PCRE extension');
+	$nerrs += extension_issues ('ereg', 'POSIX Regex extension');
 
 	echo '<tr><td>SNMP extension</td>';
 	if (defined ('SNMP_NULL'))
@@ -118,15 +124,7 @@ function platform_is_ok ()
 		echo '<td class=msg_warning>Not found. Live SNMP tab will not function properly until the extension is installed.';
 	echo '</td></tr>';
 
-	echo '<tr><td>GD functions</td>';
-	if (defined ('IMG_PNG'))
-		echo '<td class=msg_success>Ok';
-	else
-	{
-		echo '<td class=msg_error>not found';
-		$nerrs++;
-	}
-	echo '</td></tr>';
+	$nerrs += extension_issues ('gd_info', 'GD extension');
 
 	echo '<tr><td>HTTP scheme</td>';
 	if (!empty($_SERVER['HTTPS']) and $_SERVER['HTTPS'] != 'off')
@@ -135,15 +133,7 @@ function platform_is_ok ()
 		echo '<td class=msg_warning>HTTP (all your passwords will be transmitted in cleartext)';
 	echo '</td></tr>';
 
-	echo '<tr><td>Multibyte string extension</td>';
-	if (defined ('MB_CASE_LOWER'))
-		echo '<td class=msg_success>Ok';
-	else
-	{
-		echo '<td class=msg_error>not found';
-		$nerrs++;
-	}
-	echo '</td></tr>';
+	$nerrs += extension_issues ('mb_strlen', 'Multibyte string extension');
 
 	echo '<tr><td>LDAP extension</td>';
 	if (defined ('LDAP_OPT_DEREF'))
