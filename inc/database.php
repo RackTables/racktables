@@ -3174,7 +3174,7 @@ function newPortForwarding ($object_id, $localip, $localport, $remoteip, $remote
 {
 	if (NULL === getIPv4AddressNetworkId ($localip))
 		return "$localip: Non existant ip";
-	if (NULL === getIPv4AddressNetworkId ($localip))
+	if (NULL === getIPv4AddressNetworkId ($remoteip))
 		return "$remoteip: Non existant ip";
 	if ( ($localport <= 0) or ($localport >= 65536) )
 		return "$localport: invaild port";
