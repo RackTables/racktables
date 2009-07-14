@@ -3277,46 +3277,6 @@ function getNATv4ForObject ($object_id)
 	return $ret;
 }
 
-// This function performs search and then calculates score for each result.
-// Given previous search results in $objects argument, it adds new results
-// to the array and updates score for existing results, if it is greater than
-// existing score.
-function mergeSearchResults (&$objects, $terms, $fieldname)
-{
-	global $dbxlink;
-	$query =
-		"select ro.name, label, asset_no, barcode, ro.id, dict_key as objtype_id, " .
-		"dict_value as objtype_name, asset_no from RackObject as ro inner join Dictionary " .
-		"on objtype_id = dict_key join Chapter on Chapter.id = Dictionary.chapter_id where Chapter.name = 'RackObjectType' and ";
-	$count = 0;
-	foreach (explode (' ', $terms) as $term)
-	{
-		if ($count) $query .= ' or ';
-		$query .= "ro.${fieldname} like '%$term%'";
-		$count++;
-	}
-	$query .= " order by ${fieldname}";
-	$result = useSelectBlade ($query, __FUNCTION__);
-	$clist = array ('id', 'name', 'label', 'asset_no', 'barcode', 'objtype_id', 'objtype_name');
-	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-	{
-		foreach ($clist as $cname)
-			$object[$cname] = $row[$cname];
-		$object['score'] = 0;
-		$object['dname'] = displayedName ($object);
-		unset ($object['objtype_id']);
-		foreach (explode (' ', $terms) as $term)
-			if (strstr ($object['name'], $term))
-				$object['score'] += 1;
-		unset ($object['name']);
-		if (!isset ($objects[$row['id']]))
-			$objects[$row['id']] = $object;
-		elseif ($objects[$row['id']]['score'] < $object['score'])
-			$objects[$row['id']]['score'] = $object['score'];
-	}
-	return $objects;
-}
-
 // Return a list of files, which are not linked to the specified record. This list
 // will be used by printSelect().
 function getAllUnlinkedFiles ($entity_type = NULL, $entity_id = 0)
