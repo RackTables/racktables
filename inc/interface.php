@@ -2714,31 +2714,7 @@ function renderSearchResults ()
 		return;
 	}
 	$nhits = 0;
-	// If we search for L2 address, we can either find one or find none.
-	if
-	(
-		preg_match (RE_L2_IFCFG, $terms) or
-		preg_match (RE_L2_SOLID, $terms) or
-		preg_match (RE_L2_CISCO, $terms) or
-		preg_match (RE_L2_IPCFG, $terms) or
-		// Foundry STP bridge ID: bridge priotity + port MAC address. Cut off first 4 chars and look for MAC address.
-		preg_match (RE_L2_FDRYSTP, $terms)
-	)
-	// Search for L2 address.
-	{
-		$terms = str_replace ('.', '', $terms);
-		$terms = str_replace (':', '', $terms);
-		$terms = str_replace ('-', '', $terms);
-		$terms = substr ($terms, -12);
-		$result = searchByl2address ($terms);
-		if ($result !== NULL)
-		{
-			$nhits++;
-			$lasthit = 'port';
-			$summary['port'][] = $result;
-		}
-	}
-	elseif (preg_match (RE_IP4_ADDR, $terms))
+	if (preg_match (RE_IP4_ADDR, $terms))
 	// Search for IPv4 address.
 	{
 		if (NULL !== getIPv4AddressNetworkId ($terms))
@@ -2826,11 +2802,6 @@ function renderSearchResults ()
 		$record = current ($summary[$lasthit]);
 		switch ($lasthit)
 		{
-			case 'port':
-				echo "<script language='Javascript'>document.location='${root}?page=object";
-				echo "&hl_port_id=" . $record['port_id'];
-				echo "&object_id=" . $record['object_id'] . "';//</script>";
-				break;
 			case 'ipv4addressbydq':
 				$parentnet = getIPv4AddressNetworkId ($record);
 				if ($parentnet !== NULL)
@@ -2913,15 +2884,15 @@ function renderSearchResults ()
 							}
 							echo '</table>';
 						}
-						if (isset ($obj['by_portrsv']))
+						if (isset ($obj['by_port']))
 						{
 							echo '<table>';
 							$ports = getObjectPortsAndLinks ($obj['id']);
-							foreach ($obj['by_portrsv'] as $port_id)
+							foreach ($obj['by_port'] as $port_id)
 								foreach ($ports as $port)
 									if ($port['id'] == $port_id)
 									{
-										echo "<tr><td>port ${port['name']} (${port['type']}):</td>";
+										echo "<tr><td>port ${port['name']} (${port['type']} ${port['l2address']}):</td>";
 										echo "<td class=tdleft>${port['reservation_comment']}</td></tr>";
 										break; // next reason
 									}

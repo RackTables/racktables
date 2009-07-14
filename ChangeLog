@@ -6,6 +6,7 @@
 	update: show appropriate message, if a record cannot be found
 	update: add Cisco dictionary entry for WS-CBS3030-DEL. closes ticket 225 (by jthurman)
 	update: add OS, router, fibre switch dictionary entries for ticket 238 (by Aaron)
+	update: allow variations of FC WWN as an L2 address (by killsystem)
 	bugfix: do not produce PHP warning on LivePTR tab
 	bugfix: wrong port type set for WS-C2950-24. closes ticket 229 (by jthurman)
 	bugfix: improved IOS detection and fixed a logic error. closes ticket 232 (by jthurman)

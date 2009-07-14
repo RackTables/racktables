@@ -1417,23 +1417,6 @@ function unbindIpFromObject ($ip='', $object_id=0)
 	return '';
 }
 
-function searchByl2address ($port_l2address)
-{
-	if (NULL === ($db_l2address = l2addressForDatabase ($port_l2address)))
-		return NULL; // Don't complain, other searches may return own data.
-	$query = "select object_id, Port.id as port_id from RackObject as ro inner join Port on ro.id = Port.object_id " .
-		"where l2address = '${db_l2address}'";
-	$result = useSelectBlade ($query, __FUNCTION__);
-	$rows = $result->fetchAll (PDO::FETCH_ASSOC);
-	$result->closeCursor();
-	if (count ($rows) == 0) // No results.
-		return NULL;
-	if (count ($rows) == 1) // Target found.
-		return $rows[0];
-	showError ('More than one results was found. This is probably a broken unique key.', __FUNCTION__);
-	return NULL;
-}
-
 function getIPv4PrefixSearchResult ($terms)
 {
 	$byname = getSearchResultByField
@@ -1628,10 +1611,10 @@ function getObjectSearchResults ($what)
 		$ret[$objRecord['id']]['id'] = $objRecord['id'];
 		$ret[$objRecord['id']]['by_sticker'] = $objRecord['by_sticker'];
 	}
-	foreach (getPortRsvSearchResults ($what) as $objRecord)
+	foreach (getPortSearchResults ($what) as $objRecord)
 	{
 		$ret[$objRecord['id']]['id'] = $objRecord['id'];
-		$ret[$objRecord['id']]['by_portrsv'] = $objRecord['by_portrsv'];
+		$ret[$objRecord['id']]['by_port'] = $objRecord['by_port'];
 	}
 	foreach (getObjectAttrsSearchResults ($what) as $objRecord)
 	{
@@ -1688,8 +1671,8 @@ function getStickerSearchResults ($what, $exactness = 0)
 	return $ret;
 }
 
-// search in port "reservation comment" column
-function getPortRsvSearchResults ($what)
+// search in port "reservation comment" and "L2 address" columns
+function getPortSearchResults ($what)
 {
 	$ports = getSearchResultByField
 	(
@@ -1704,7 +1687,23 @@ function getPortRsvSearchResults ($what)
 	foreach ($ports as $port)
 	{
 		$ret[$port['object_id']]['id'] = $port['object_id'];
-		$ret[$port['object_id']]['by_portrsv'][] = $port['id'];
+		$ret[$port['object_id']]['by_port'][] = $port['id'];
+	}
+	if (NULL === ($db_l2address = l2addressForDatabase ($what)))
+		return $ret;
+	$ports = getSearchResultByField
+	(
+		'Port',
+		array ('object_id', 'id'),
+		'l2address',
+		$db_l2address,
+		'object_id',
+		2
+	);
+	foreach ($ports as $port)
+	{
+		$ret[$port['object_id']]['id'] = $port['object_id'];
+		$ret[$port['object_id']]['by_port'][] = $port['id'];
 	}
 	return $ret;
 }
