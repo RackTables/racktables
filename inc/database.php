@@ -1142,7 +1142,6 @@ function scanIPv4Space ($pairlist)
 	$ret = array();
 	if (!count ($pairlist)) // this is normal for a network completely divided into smaller parts
 		return $ret;
-	$dnamechache = array();
 	// FIXME: this is a copy-and-paste prototype
 	$or = '';
 	$whereexpr1 = '(';
@@ -1186,67 +1185,51 @@ function scanIPv4Space ($pairlist)
 
 	// 2. check for allocations
 	$query =
-		"select INET_NTOA(ipb.ip) as ip, ro.id as object_id, " .
-		"ro.name as object_name, ipb.name, ipb.type, objtype_id, " .
-		"dict_value as objtype_name from " .
-		"IPv4Allocation as ipb inner join RackObject as ro on ipb.object_id = ro.id " .
-		"left join Dictionary on objtype_id=dict_key join Chapter on Chapter.id = Dictionary.chapter_id " .
-		"where ${whereexpr2} " .
-		"and Chapter.name = 'RackObjectType'" .
-		"order by ipb.type, object_name";
+		"select INET_NTOA(ip) as ip, object_id, name, type " .
+		"from IPv4Allocation where ${whereexpr2} order by type";
 	$result = useSelectBlade ($query, __FUNCTION__);
-	while ($row = $result->fetch (PDO::FETCH_ASSOC))
+	// release DBX early to avoid issues with nested spotEntity() calls
+	$allRows = $result->fetchAll (PDO::FETCH_ASSOC);
+	unset ($result);
+	foreach ($allRows as $row)
 	{
 		$ip_bin = ip2long ($row['ip']);
 		if (!isset ($ret[$ip_bin]))
 			$ret[$ip_bin] = constructIPv4Address ($row['ip']);
-		if (!isset ($dnamecache[$row['object_id']]))
-		{
-			$quasiobject['id'] = $row['object_id'];
-			$quasiobject['name'] = $row['object_name'];
-			$quasiobject['objtype_id'] = $row['objtype_id'];
-			$quasiobject['objtype_name'] = $row['objtype_name'];
-			$dnamecache[$row['object_id']] = displayedName ($quasiobject);
-		}
-		$tmp = array();
-		foreach (array ('object_id', 'type', 'name') as $cname)
-			$tmp[$cname] = $row[$cname];
-		$tmp['object_name'] = $dnamecache[$row['object_id']];
-		$ret[$ip_bin]['allocs'][] = $tmp;
+		$oinfo = spotEntity ('object', $row['object_id']);
+		$ret[$ip_bin]['allocs'][] = array
+		(
+			'type' => $row['type'],
+			'name' => $row['name'],
+			'object_id' => $row['object_id'],
+			'object_name' => $oinfo['dname'],
+		);
 	}
-	unset ($result);
 
 	// 3. look for virtual services and related LB 
-	$query = "select vs_id, inet_ntoa(vip) as ip, vport, proto, vs.name, " .
-		"object_id, objtype_id, ro.name as object_name, dict_value as objtype_name from " .
-		"IPv4VS as vs inner join IPv4LB as lb on vs.id = lb.vs_id " .
-		"inner join RackObject as ro on lb.object_id = ro.id " .
-		"left join Dictionary on objtype_id=dict_key " .
-		"join Chapter on Chapter.id = Dictionary.chapter_id " .
-		"where ${whereexpr3} " .
-		"and Chapter.name = 'RackObjectType'" .
-		"order by vport, proto, ro.name, object_id";
+	$query = "select vs_id, inet_ntoa(vip) as ip, vport, proto, vs.name, object_id " .
+		"from IPv4VS as vs inner join IPv4LB as lb on vs.id = lb.vs_id " .
+		"where ${whereexpr3} order by vport, proto, object_id";
 	$result = useSelectBlade ($query, __FUNCTION__);
-	while ($row = $result->fetch (PDO::FETCH_ASSOC))
+	$allRows = $result->fetchAll (PDO::FETCH_ASSOC);
+	unset ($result);
+	foreach ($allRows as $row)
 	{
 		$ip_bin = ip2long ($row['ip']);
 		if (!isset ($ret[$ip_bin]))
 			$ret[$ip_bin] = constructIPv4Address ($row['ip']);
-		if (!isset ($dnamecache[$row['object_id']]))
-		{
-			$quasiobject['name'] = $row['object_name'];
-			$quasiobject['objtype_id'] = $row['objtype_id'];
-			$quasiobject['objtype_name'] = $row['objtype_name'];
-			$dnamecache[$row['object_id']] = displayedName ($quasiobject);
-		}
-		$tmp = array();
-		foreach (array ('object_id', 'vport', 'proto', 'vs_id', 'name') as $cname)
-			$tmp[$cname] = $row[$cname];
-		$tmp['object_name'] = $dnamecache[$row['object_id']];
-		$tmp['vip'] = $row['ip'];
-		$ret[$ip_bin]['lblist'][] = $tmp;
+		$oinfo = spotEntity ('object', $row['object_id']);
+		$ret[$ip_bin]['lblist'][] = array
+		(
+			'vport' => $row['vport'],
+			'proto' => $row['proto'],
+			'vs_id' => $row['vs_id'],
+			'name' => $row['name'],
+			'vip' => $row['ip'],
+			'object_id' => $row['object_id'],
+			'object_name' => $oinfo['dname'],
+		);
 	}
-	unset ($result);
 
 	// 4. don't forget about real servers along with pools
 	$query = "select inet_ntoa(rsip) as ip, inservice, rsport, rspool_id, rsp.name as rspool_name from " .
