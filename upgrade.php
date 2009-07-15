@@ -239,6 +239,8 @@ CREATE TABLE `LDAPCache` (
 			$query[] = "DELETE FROM TagStorage WHERE entity_realm = 'file' AND entity_id NOT IN (SELECT id FROM File)";
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('IPV4_ENABLE_KNIGHT','yes','string','no','no','Enable IPv4 knight feature')";
 			$query[] = "ALTER TABLE Port ADD INDEX comment (reservation_comment)";
+			$query[] = "ALTER TABLE Port DROP KEY l2address"; // UNIQUE
+			$query[] = "ALTER TABLE Port ADD KEY (l2address)"; // not UNIQUE
 			$query[] = "UPDATE Config SET varvalue = '0.17.2' WHERE varname = 'DB_VERSION'";
 			break;
 		default:

@@ -958,6 +958,13 @@ function commitAddPort ($object_id = 0, $port_name, $port_type_id, $port_label, 
 {
 	if (NULL === ($db_l2address = l2addressForDatabase ($port_l2address)))
 		return "Invalid L2 address ${port_l2address}";
+	global $dbxlink;
+	$dbxlink->exec ('LOCK TABLES Port WRITE');
+	if (alreadyUsedL2Address ($db_l2address, $object_id))
+	{
+		$dbxlink->exec ('UNLOCK TABLES');
+		return "address ${db_l2address} belongs to another object";
+	}
 	$result = useInsertBlade
 	(
 		'Port',
@@ -970,6 +977,7 @@ function commitAddPort ($object_id = 0, $port_name, $port_type_id, $port_label, 
 			'l2address' => ($db_l2address === '') ? 'NULL' : "'${db_l2address}'"
 		)
 	);
+	$dbxlink->exec ('UNLOCK TABLES');
 	if ($result)
 		return '';
 	else
@@ -984,12 +992,20 @@ function commitUpdatePort ($port_id, $port_name, $port_type_id, $port_label, $po
 	global $dbxlink;
 	if (NULL === ($db_l2address = l2addressForDatabase ($port_l2address)))
 		return "Invalid L2 address ${port_l2address}";
+	global $dbxlink;
+	$dbxlink->exec ('LOCK TABLES Port WRITE');
+	if (alreadyUsedL2Address ($db_l2address, $object_id))
+	{
+		$dbxlink->exec ('UNLOCK TABLES');
+		return "address ${db_l2address} belongs to another object";
+	}
 	$query =
 		"update Port set name='$port_name', type=$port_type_id, label='$port_label', " .
 		"reservation_comment = ${port_reservation_comment}, l2address=" .
 		(($db_l2address === '') ? 'NULL' : "'${db_l2address}'") .
 		" where id='$port_id'";
 	$result = $dbxlink->exec ($query);
+	$dbxlink->exec ('UNLOCK TABLES');
 	if ($result == 1)
 		return '';
 	$errorInfo = $dbxlink->errorInfo();
@@ -3625,6 +3641,22 @@ function getUserIDByUsername ($username)
 	if ($row = $result->fetch (PDO::FETCH_ASSOC))
 		return $row['user_id'];
 	return NULL;
+}
+
+// Return TRUE, if the given address is assigned to a port of any object
+// except the current object. Using this function as a constraint makes
+// it possible to reuse L2 addresses within one object, yet keeping them
+// universally unique on the other hand.
+function alreadyUsedL2Address ($address, $my_object_id)
+{
+	$query = "SELECT COUNT(*) FROM Port WHERE BINARY l2address = '${address}' AND object_id != ${my_object_id}";
+	if (NULL == ($result = useSelectBlade ($query, __FUNCTION__)))
+	{
+		showError ('SQL query failed', __FUNCTION__);
+		die;
+	}
+	$row = $result->fetch (PDO::FETCH_NUM);
+	return $row[0] != 0;
 }
 
 ?>

@@ -191,9 +191,9 @@ CREATE TABLE `Port` (
   `label` char(255) default NULL,
   PRIMARY KEY  (`id`),
   UNIQUE KEY `object_id` (`object_id`,`name`),
-  UNIQUE KEY `l2address` (`l2address`),
   KEY `type` (`type`),
-  KEY `comment` (`reservation_comment`)
+  KEY `comment` (`reservation_comment`),
+  KEY `l2address` (`l2address`)
 ) ENGINE=MyISAM;
 
 CREATE TABLE `PortCompat` (
