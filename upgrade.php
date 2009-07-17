@@ -241,6 +241,8 @@ CREATE TABLE `LDAPCache` (
 			$query[] = "ALTER TABLE Port ADD INDEX comment (reservation_comment)";
 			$query[] = "ALTER TABLE Port DROP KEY l2address"; // UNIQUE
 			$query[] = "ALTER TABLE Port ADD KEY (l2address)"; // not UNIQUE
+			$query[] = "ALTER TABLE Port DROP KEY object_id";
+			$query[] = "ALTER TABLE Port ADD UNIQUE KEY per_object (object_id, name, type)";
 			$query[] = "UPDATE Config SET varvalue = '0.17.2' WHERE varname = 'DB_VERSION'";
 			break;
 		default:

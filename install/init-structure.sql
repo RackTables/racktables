@@ -190,7 +190,7 @@ CREATE TABLE `Port` (
   `reservation_comment` char(255) default NULL,
   `label` char(255) default NULL,
   PRIMARY KEY  (`id`),
-  UNIQUE KEY `object_id` (`object_id`,`name`),
+  UNIQUE KEY `per_object` (`object_id`,`name`,`type`),
   KEY `type` (`type`),
   KEY `comment` (`reservation_comment`),
   KEY `l2address` (`l2address`)

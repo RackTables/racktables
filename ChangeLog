@@ -8,6 +8,7 @@
 	update: add OS, router, fibre switch dictionary entries for ticket 238 (by Aaron)
 	update: allow variations of FC WWN as an L2 address (by killsystem)
 	update: port L2 address can be reused on the same object
+	update: same port name can be repeated for an object with different types
 	bugfix: do not produce PHP warning on LivePTR tab
 	bugfix: wrong port type set for WS-C2950-24. closes ticket 229 (by jthurman)
 	bugfix: improved IOS detection and fixed a logic error. closes ticket 232 (by jthurman)
