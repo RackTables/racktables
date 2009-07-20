@@ -31,7 +31,7 @@ switch ($_REQUEST['img'])
 		if (!permitted())
 			renderAccessDeniedImage();
 		else
-			renderFilePreview ($_REQUEST['file_id']);
+			renderFilePreview ($_REQUEST['file_id'], $_REQUEST['img']);
 		break;
 	default:
 		renderError();
@@ -172,26 +172,48 @@ function renderAccessDeniedImage ()
 	imagedestroy ($img);
 }
 
-function renderFilePreview ($file_id = 0)
+function renderFilePreview ($file_id = 0, $mode = 'view')
 {
-	$file = getFile ($file_id);
-	$image = imagecreatefromstring ($file['contents']);
-	$width = imagesx ($image);
-	$height = imagesy ($image);
-	if ($_REQUEST['img'] == 'preview' and ($width > getConfigVar ('PREVIEW_IMAGE_MAXPXS') or $height > getConfigVar ('PREVIEW_IMAGE_MAXPXS')))
+	switch ($mode)
 	{
-		// TODO: cache thumbs for faster page generation
-		$ratio = getConfigVar ('PREVIEW_IMAGE_MAXPXS') / max ($width, $height);
-		$newwidth = $width * $ratio;
-		$newheight = $height * $ratio;
-		$resampled = imagecreatetruecolor ($newwidth, $newheight);
-		imagecopyresampled ($resampled, $image, 0, 0, 0, 0, $newwidth, $newheight, $width, $height);
+	case 'view':
+		// GFX files can become really big, if we uncompress them in memory just to
+		// provide a PNG version of a file. To keep things working, just send the
+		// contents as is for known MIME types.
+		$file = getFile ($file_id);
+		if (!in_array ($file['type'], array ('image/jpeg', 'image/png', 'image/gif')))
+		{
+			showError ('Invalid MIME type on file', __FUNCTION__);
+			break;
+		}
+		header("Content-type: ${file['type']}");
+		echo $file['contents'];
+		break;
+	case 'preview':
+		$file = getFile ($file_id);
+		$image = imagecreatefromstring ($file['contents']);
+		unset ($file);
+		$width = imagesx ($image);
+		$height = imagesy ($image);
+		if ($width > getConfigVar ('PREVIEW_IMAGE_MAXPXS') or $height > getConfigVar ('PREVIEW_IMAGE_MAXPXS'))
+		{
+			// TODO: cache thumbs for faster page generation
+			$ratio = getConfigVar ('PREVIEW_IMAGE_MAXPXS') / max ($width, $height);
+			$newwidth = $width * $ratio;
+			$newheight = $height * $ratio;
+			$resampled = imagecreatetruecolor ($newwidth, $newheight);
+			imagecopyresampled ($resampled, $image, 0, 0, 0, 0, $newwidth, $newheight, $width, $height);
+			imagedestroy ($image);
+			$image = $resampled;
+			unset ($resampled);
+		}
+		header("Content-type: image/png"); // don't announce content-length, it may have changed after resampling
+		imagepng ($image);
 		imagedestroy ($image);
-		$image = $resampled;
-		unset ($resampled);
+		break;
+	default:
+		showError ('Invalid argument', __FUNCTION__);
+		break;
 	}
-	header("Content-type: image/png"); // don't announce content-length, it may have changed after resampling
-	imagepng ($image);
-	imagedestroy ($image);
 }
 ?>

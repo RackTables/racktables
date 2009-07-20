@@ -16,6 +16,7 @@
 	bugfix: correctly remove tags, when deleting files
 	bugfix: switchvlans failed on "%" or "~" character in port name (by Boris Lytochkin)
 	bugfix: search failed, when only one RS pool was found for request
+	bugfix: large images could not be rendered often due to memory limit hit
 	new feature: rackspace tab is shown only if there is at least one rack
 		in the system. Closes ticket 234.
 0.17.1 2009-06-03
