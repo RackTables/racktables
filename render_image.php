@@ -216,4 +216,5 @@ function renderFilePreview ($file_id = 0, $mode = 'view')
 		break;
 	}
 }
+
 ?>

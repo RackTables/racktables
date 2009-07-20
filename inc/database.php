@@ -2019,7 +2019,6 @@ mysql> select tag_id from TagStorage left join TagTree on tag_id = id where id i
 
 */
 
-// See below why chapter_id is necessary.
 function commitUpdateDictionary ($chapter_no = 0, $dict_key = 0, $dict_value = '')
 {
 	if ($chapter_no <= 0)
