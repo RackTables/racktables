@@ -198,9 +198,15 @@ $image['USER']['height'] = 32;
 $image['setfilter']['path'] = 'pix/pgadmin3-viewfiltereddata.png';
 $image['setfilter']['width'] = 32;
 $image['setfilter']['height'] = 32;
+$image['setfilter gray']['path'] = 'pix/pgadmin3-viewfiltereddata-grayscale.png';
+$image['setfilter gray']['width'] = 32;
+$image['setfilter gray']['height'] = 32;
 $image['resetfilter']['path'] = 'pix/pgadmin3-viewdata.png';
 $image['resetfilter']['width'] = 32;
 $image['resetfilter']['height'] = 32;
+$image['resetfilter gray']['path'] = 'pix/pgadmin3-viewdata-grayscale.png';
+$image['resetfilter gray']['width'] = 32;
+$image['resetfilter gray']['height'] = 32;
 $image['knight']['path'] = 'pix/smiley_knight.png';
 $image['knight']['width'] = 72;
 $image['knight']['height'] = 33;
@@ -4741,6 +4747,10 @@ function renderCellFilterPortlet ($preselect, $realm, $bypass_name = '', $bypass
 	echo '<table border=0 align=center>';
 	$ruler = "<tr><td colspan=2 class=tagbox><hr></td></tr>\n";
 	$hr = '';
+	// "reset filter" button only gets active when a filter is applied
+	$enable_reset = FALSE;
+	// "apply filter" button only gets active when there are checkbox/textarea inputs on the roster
+	$enable_apply = FALSE;
 	// and/or block
 	if (getConfigVar ('FILTER_SUGGEST_ANDOR') == 'yes' or strlen ($preselect['andor']))
 	{
@@ -4759,6 +4769,8 @@ function renderCellFilterPortlet ($preselect, $realm, $bypass_name = '', $bypass
 	// tags block
 	if (getConfigVar ('FILTER_SUGGEST_TAGS') == 'yes' or count ($preselect['tagidlist']))
 	{
+		if (count ($preselect['tagidlist']))
+			$enable_reset = TRUE;
 		echo $hr;
 		$hr = $ruler;
 		// Show a tree of tags, pre-select according to currently requested list filter.
@@ -4767,12 +4779,18 @@ function renderCellFilterPortlet ($preselect, $realm, $bypass_name = '', $bypass
 		if (!count ($objectivetags))
 			echo "<tr><td colspan=2 class='tagbox sparenetwork'>(nothing is tagged yet)</td></tr>";
 		else
+		{
+			$enable_apply = TRUE;
 			foreach ($objectivetags as $taginfo)
 				renderTagCheckbox ('cft', buildTagChainFromIds ($preselect['tagidlist']), $taginfo, $realm);
+		}
 	}
 	// predicates block
 	if (getConfigVar ('FILTER_SUGGEST_PREDICATES') == 'yes' or count ($preselect['pnamelist']))
 	{
+		$enable_apply = TRUE;
+		if (count ($preselect['pnamelist']))
+			$enable_reset = TRUE;
 		echo $hr;
 		$hr = $ruler;
 		global $pTable;
@@ -4786,6 +4804,7 @@ function renderCellFilterPortlet ($preselect, $realm, $bypass_name = '', $bypass
 			echo "<tr><td colspan=2 class='tagbox sparenetwork'>(no predicates to show)</td></tr>";
 		else
 		{
+			$enable_apply = TRUE;
 			// Repack preselect likewise.
 			$myPreselect = array();
 			foreach ($preselect['pnamelist'] as $pname)
@@ -4797,6 +4816,9 @@ function renderCellFilterPortlet ($preselect, $realm, $bypass_name = '', $bypass
 	// extra code
 	if (getConfigVar ('FILTER_SUGGEST_EXTRA') == 'yes' or strlen ($preselect['extratext']))
 	{
+		$enable_apply = TRUE;
+		if (strlen ($preselect['extratext']))
+			$enable_reset = TRUE;
 		echo $hr;
 		$hr = $ruler;
 		$class = isset ($preselect['extraclass']) ? 'class=' . $preselect['extraclass'] : '';
@@ -4807,22 +4829,35 @@ function renderCellFilterPortlet ($preselect, $realm, $bypass_name = '', $bypass
 	{
 		echo $hr;
 		$hr = $ruler;
-		// "apply"
 		echo '<tr><td class=tdleft>';
+		// "apply"
 		echo "<input type=hidden name=page value=${pageno}>\n";
 		echo "<input type=hidden name=tab value=${tabno}>\n";
 		if ($bypass_name != '')
 			echo "<input type=hidden name=${bypass_name} value='${bypass_value}'>\n";
-		printImageHREF ('setfilter', 'set filter', TRUE);
-		echo "</form></td><td class=tdright>";
+		// FIXME: The user will be able to "submit" the empty form even without a "submit"
+		// input. To make things consistent, it is necessary to avoid pritning both <FORM>
+		// and "and/or" radio-buttons, when enable_apply isn't TRUE.
+		if (!$enable_apply)
+			printImageHREF ('setfilter gray');
+		else
+			printImageHREF ('setfilter', 'set filter', TRUE);
+		echo '</form>';
+		echo '</td><td class=tdright>';
 		// "reset"
-		echo "<form method=get>\n";
-		echo "<input type=hidden name=page value=${pageno}>\n";
-		echo "<input type=hidden name=tab value=${tabno}>\n";
-		if ($bypass_name != '')
-			echo "<input type=hidden name=${bypass_name} value='${bypass_value}'>\n";
-		printImageHREF ('resetfilter', 'reset filter', TRUE);
-		echo '</form></td></tr>';
+		if (!$enable_reset)
+			printImageHREF ('resetfilter gray');
+		else
+		{
+			echo "<form method=get>\n";
+			echo "<input type=hidden name=page value=${pageno}>\n";
+			echo "<input type=hidden name=tab value=${tabno}>\n";
+			if ($bypass_name != '')
+				echo "<input type=hidden name=${bypass_name} value='${bypass_value}'>\n";
+			printImageHREF ('resetfilter', 'reset filter', TRUE);
+			echo '</form>';
+		}
+		echo '</td></tr>';
 	}
 	echo '</table>';
 	finishPortlet();
