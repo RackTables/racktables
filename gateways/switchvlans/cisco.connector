@@ -49,9 +49,13 @@ prepare_connect_commands()
 
 			username=`echo $line | cut -s -d' ' -f5`
 			[ "$username" != "-" ] && echo $username > $CMDS1
+			# access password
 			echo $line | cut -s -d' ' -f6 >> $CMDS1
-			echo en >> $CMDS1
-			echo $line | cut -s -d' ' -f7 >> $CMDS1
+			enable_password=`echo $line | cut -s -d' ' -f7`
+			[ "$enable_password" != "-" ] && {
+				echo en >> $CMDS1
+				echo $enable_password >> $CMDS1
+			}
 			# same for ports
 			cat "$CMDS1" > "$CMDS2"
 			# ...and MAC addresses
