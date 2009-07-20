@@ -138,7 +138,9 @@ INSERT INTO `PortCompat` (`type1`, `type2`) VALUES
 (24,19),
 (29,29),
 (20,21),
+(20,1083),
 (21,20),
+(21,1083),
 (22,23),
 (23,22),
 (25,26),
@@ -166,7 +168,11 @@ INSERT INTO `PortCompat` (`type1`, `type2`) VALUES
 (681,682),
 (682,29),
 (682,681),
-(682,682);
+(682,682)
+(1077,1077),
+(1083,20),
+(1083,21),
+(1083,1083);
 
 INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES
 ('color_F','8fbfbf','string','no','yes','HSV: 180-25-75. Free atoms, they are available for allocation to objects.'),

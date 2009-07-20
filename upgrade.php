@@ -244,6 +244,12 @@ CREATE TABLE `LDAPCache` (
 			$query[] = "ALTER TABLE Port ADD KEY (l2address)"; // not UNIQUE
 			$query[] = "ALTER TABLE Port DROP KEY object_id";
 			$query[] = "ALTER TABLE Port ADD UNIQUE KEY per_object (object_id, name, type)";
+			$query[] = "INSERT INTO PortCompat (type1, type2) VALUES (20,1083)";
+			$query[] = "INSERT INTO PortCompat (type1, type2) VALUES (21,1083)";
+			$query[] = "INSERT INTO PortCompat (type1, type2) VALUES (1077,1077)";
+			$query[] = "INSERT INTO PortCompat (type1, type2) VALUES (1083,20)";
+			$query[] = "INSERT INTO PortCompat (type1, type2) VALUES (1083,21)";
+			$query[] = "INSERT INTO PortCompat (type1, type2) VALUES (1083,1083)";
 			$query[] = "UPDATE Config SET varvalue = '0.17.2' WHERE varname = 'DB_VERSION'";
 			break;
 		default:

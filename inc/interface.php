@@ -1476,6 +1476,8 @@ function showMessageOrError ()
 				185 => array ('code' => 'error', 'format' => "Failed to add object '%s'"),
 				186 => array ('code' => 'error', 'format' => 'Incomplete form has been ignored. Cheers.'),
 				187 => array ('code' => 'error', 'format' => "Internal error in function '%s'"),
+				188 => array ('code' => 'error', 'format' => "Fatal SNMP failure"),
+				189 => array ('code' => 'error', 'format' => "Unknown OID '%s'"),
 
 // records 200~299 with warnings
 				200 => array ('code' => 'warning', 'format' => '%s'),

@@ -19,7 +19,7 @@ function reloadDictionary ($from_key, $to_key)
 $dictreload = array
 (
 	'0.17.0' => array ('from' => 1, 'to' => 988),
-	'0.17.2' => array ('from' => 989, 'to' => 1056),
+	'0.17.2' => array ('from' => 989, 'to' => 1083),
 );
 
 $dictionary = array
@@ -583,7 +583,7 @@ $dictionary = array
 	559 => array ('chapter_id' => 12, 'dict_value' => '[[NETGEAR%GPASS%GSM7212 | http://www.netgear.com/Products/Switches/Layer2ManagedSwitches/GSM7212.aspx]]'),
 	560 => array ('chapter_id' => 12, 'dict_value' => '[[NETGEAR%GPASS%FSM726S | http://www.netgear.com/Products/Switches/Layer2ManagedSwitches/FSM726S.aspx]]'),
 	561 => array ('chapter_id' => 12, 'dict_value' => '[[NETGEAR%GPASS%GSM7248R | http://www.netgear.com/Products/Switches/Layer2ManagedSwitches/GSM7248R.aspx]]'),
-	562 => array ('chapter_id' => 12, 'dict_value' => '[[NETGEAR%GPASS%GSM7224 | http://www.netgear.com/Products/Switches/Layer2ManagedSwitches/GSM7224.aspx]]'),
+	562 => array ('chapter_id' => 12, 'dict_value' => '[[NETGEAR%GPASS%GSM7224 | http://www.netgear.com/Products/Switches/FullyManaged10_100_1000Switches/GSM7224.aspx]]'),
 	563 => array ('chapter_id' => 12, 'dict_value' => '[[NETGEAR%GPASS%FSM750S | http://www.netgear.com/Products/Switches/Layer2ManagedSwitches/FSM750S.aspx]]'),
 	564 => array ('chapter_id' => 12, 'dict_value' => '[[NETGEAR%GPASS%FSM726 | http://www.netgear.com/Products/Switches/Layer2ManagedSwitches/FSM726.aspx]]'),
 	565 => array ('chapter_id' => 12, 'dict_value' => '[[NETGEAR%GPASS%GS724TP | http://www.netgear.com/Products/Switches/SmartSwitches/GS724TP.aspx]]'),
@@ -1098,6 +1098,13 @@ $dictionary = array
 	1074 => array ('chapter_id' => 26, 'dict_value' => 'Brocade%GPASS%Silkworm 3800'),
 	1075 => array ('chapter_id' => 26, 'dict_value' => 'Brocade%GPASS%Silkworm 3900'),
 	1076 => array ('chapter_id' => 26, 'dict_value' => 'Brocade%GPASS%Silkworm 4100'),
+	1077 => array ('chapter_id' => 2, 'dict_value' => 'SFP (empty)'),
+	1078 => array ('chapter_id' => 2, 'dict_value' => 'GBIC (empty)'),
+	1079 => array ('chapter_id' => 2, 'dict_value' => 'XENPAK (empty)'),
+	1080 => array ('chapter_id' => 2, 'dict_value' => 'X2 (empty)'),
+	1081 => array ('chapter_id' => 2, 'dict_value' => 'XPAK (empty)'),
+	1082 => array ('chapter_id' => 2, 'dict_value' => 'XFP (empty)'),
+	1083 => array ('chapter_id' => 2, 'dict_value' => 'MT-RJ/100Base-FX'),
 );
 
 ?>
