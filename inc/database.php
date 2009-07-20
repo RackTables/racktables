@@ -1195,7 +1195,7 @@ function scanIPv4Space ($pairlist)
 {
 	$ret = array();
 	if (!count ($pairlist)) // this is normal for a network completely divided into smaller parts
-		return $ret;;
+		return $ret;
 	// FIXME: this is a copy-and-paste prototype
 	$or = '';
 	$whereexpr1 = '(';
@@ -2917,7 +2917,7 @@ function getLBList ()
 	return $ret;
 }
 
-// For the given object return: it vsconfig/rsconfig; the list of RS pools
+// For the given object return: its vsconfig/rsconfig; the list of RS pools
 // attached (each with vsconfig/rsconfig in turn), each with the list of
 // virtual services terminating the pool. Each pool also lists all real
 // servers with rsconfig.
@@ -3382,7 +3382,7 @@ function getNATv4ForObject ($object_id)
 	return $ret;
 }
 
-// Return a list of files which are not linked to the specified record. This list
+// Return a list of files, which are not linked to the specified record. This list
 // will be used by printSelect().
 function getAllUnlinkedFiles ($entity_type = NULL, $entity_id = 0)
 {

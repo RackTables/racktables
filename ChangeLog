@@ -20,7 +20,7 @@
 	bugfix: search failed, when only one RS pool was found for request
 	bugfix: large images could not be rendered often due to memory limit hit
 	new feature: rackspace tab is shown only if there is at least one rack
-		in the system. Closes ticket 234. 
+		in the system. Closes ticket 234.
 0.17.1 2009-06-03
 	bugfix: tags were not displayed on "File" page
 	bugfix: multiline comment for an added file was stored incorrectly
