@@ -536,27 +536,25 @@ function markupObjectProblems (&$rackData)
 			}
 }
 
-// This function removes all colons and dots from a string.
+// Return a uniformly (010203040506 or 0102030405060708) formatted address, if it is present
+// in the provided string, an empty string for an empty string or NULL for error.
 function l2addressForDatabase ($string)
 {
 	$string = strtoupper ($string);
 	switch (TRUE)
 	{
-		case ($string == '' or preg_match (RE_L2_SOLID, $string)):
+		case ($string == '' or preg_match (RE_L2_SOLID, $string) or preg_match (RE_L2_WWN_SOLID, $string)):
 			return $string;
-		case (preg_match (RE_L2_IFCFG, $string)):
-			$pieces = explode (':', $string);
-			// This workaround is for SunOS ifconfig.
-			foreach ($pieces as &$byte)
-				if (strlen ($byte) == 1)
-					$byte = '0' . $byte;
-			// And this workaround is for PHP.
-			unset ($byte);
-			return implode ('', $pieces);
+		case (preg_match (RE_L2_IFCFG, $string) or preg_match (RE_L2_WWN_COLON, $string)):
+			// reformat output of SunOS ifconfig
+			$ret = '';
+			foreach (explode (':', $string) as $byte)
+				$ret .= (strlen ($byte) == 1 ? '0' : '') . $byte;
+			return $ret;
 		case (preg_match (RE_L2_CISCO, $string)):
-			return implode ('', explode ('.', $string));
-		case (preg_match (RE_L2_IPCFG, $string)):
-			return implode ('', explode ('-', $string));
+			return str_replace ('.', '', $string);
+		case (preg_match (RE_L2_IPCFG, $string) or preg_match (RE_L2_WWN_HYPHEN, $string)):
+			return str_replace ('-', '', $string);
 		default:
 			return NULL;
 	}
@@ -567,7 +565,7 @@ function l2addressFromDatabase ($string)
 	switch (strlen ($string))
 	{
 		case 12: // Ethernet
-		case 16: // FireWire
+		case 16: // FireWire/Fibre Channel
 			$ret = implode (':', str_split ($string, 2));
 			break;
 		default:
