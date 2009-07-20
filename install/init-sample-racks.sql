@@ -698,6 +698,15 @@ INSERT INTO `TagTree` (`id`, `parent_id`, `tag`) VALUES (16,NULL,'Geo');
 INSERT INTO `TagTree` (`id`, `parent_id`, `tag`) VALUES (17,NULL,'network');
 INSERT INTO `TagTree` (`id`, `parent_id`, `tag`) VALUES (18,17,'small network');
 INSERT INTO `TagTree` (`id`, `parent_id`, `tag`) VALUES (19,17,'medium network');
+INSERT INTO `TagTree` (`id`, `parent_id`, `tag`) VALUES (20,5,'北京');
+INSERT INTO `TagTree` (`id`, `parent_id`, `tag`) VALUES (21,5,'서울');
+INSERT INTO `TagTree` (`id`, `parent_id`, `tag`) VALUES (22,5,'Владивосток');
+INSERT INTO `TagTree` (`id`, `parent_id`, `tag`) VALUES (23,NULL,'XKCD');
+INSERT INTO `TagTree` (`id`, `parent_id`, `tag`) VALUES (24,23,'romance');
+INSERT INTO `TagTree` (`id`, `parent_id`, `tag`) VALUES (25,23,'sarcasm');
+INSERT INTO `TagTree` (`id`, `parent_id`, `tag`) VALUES (26,23,'math');
+INSERT INTO `TagTree` (`id`, `parent_id`, `tag`) VALUES (27,23,'language');
+
 INSERT INTO `TagStorage` VALUES ('object',905,3);
 INSERT INTO `TagStorage` VALUES ('object',905,8);
 INSERT INTO `TagStorage` VALUES ('object',908,4);
