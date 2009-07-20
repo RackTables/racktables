@@ -1578,7 +1578,7 @@ function getRackSearchResult ($terms)
 	return $ret;
 }
 
-function getSearchResultByField ($tname, $rcolumns, $scolumn, $terms, $ocolumn = '')
+function getSearchResultByField ($tname, $rcolumns, $scolumn, $terms, $ocolumn = '', $exactness = 0)
 {
 	$pfx = '';
 	$query = 'select ';
@@ -1591,7 +1591,18 @@ function getSearchResultByField ($tname, $rcolumns, $scolumn, $terms, $ocolumn =
 	$query .= " from ${tname} where ";
 	foreach (explode (' ', $terms) as $term)
 	{
-		$query .= $pfx . "${scolumn} like '%${term}%'";
+		switch ($exactness)
+		{
+		case 2: // does this work as expected?
+			$query .= $pfx . "binary ${scolumn} = '${term}'";
+			break;
+		case 1:
+			$query .= $pfx . "${scolumn} = '${term}'";
+			break;
+		default:
+			$query .= $pfx . "${scolumn} like '%${term}%'";
+			break;
+		}
 		$pfx = ' or ';
 	}
 	if ($ocolumn != '')
@@ -1705,6 +1716,28 @@ function getPortSearchResults ($what)
 		$ret[$port['object_id']]['id'] = $port['object_id'];
 		$ret[$port['object_id']]['by_port'][] = $port['id'];
 	}
+	return $ret;
+}
+
+// Look for EXACT value in stickers and return a list of pairs "object_id-attribute_id",
+// which matched. A partilar object_id could be returned more, than once, if it has
+// multiple matching stickers. Search is only performed on "string" attributes.
+function getStickerSearchResults ($what)
+{
+	$stickers = getSearchResultByField
+	(
+		'AttributeValue',
+		array ('object_id', 'attr_id'),
+		'string_value',
+		$what,
+		'object_id',
+		1
+	);
+	$map = getAttrMap();
+	$ret = array();
+	foreach ($stickers as $sticker)
+		if ($map[$sticker['attr_id']]['type'] == 'string')
+			$ret[] = $sticker;
 	return $ret;
 }
 
