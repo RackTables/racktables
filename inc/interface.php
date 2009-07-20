@@ -4765,8 +4765,8 @@ function renderCellFilterPortlet ($preselect, $realm, $bypass_name = '', $bypass
 		{
 			$class = $andor == $boolop ? 'seltagbox' : 'tagbox';
 			$checked = $andor == $boolop ? ' checked' : '';
-			echo "<td class=${class}><input type=radio name=andor value=${boolop}";
-			echo $checked . ">${boolop}</input></td>";
+			echo "<td class=${class}><label><input type=radio name=andor value=${boolop}";
+			echo $checked . ">${boolop}</input></label></td>";
 		}
 	}
 	// tags block
