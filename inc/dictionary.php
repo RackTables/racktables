@@ -1107,7 +1107,7 @@ $dictionary = array
 	1083 => array ('chapter_id' => 2, 'dict_value' => 'MT-RJ/100Base-FX'),
 	1084 => array ('chapter_id' => 2, 'dict_value' => 'SFP+ (empty)'),
 	1085 => array ('chapter_id' => 12, 'dict_value' => 'Nortel%GPASS%BES50GE-12T PWR'),
-	1086 => array ('chapter_id' => 12, 'dict_value' => '[[HP ProCurve%GPASS%4000M | http://www.hp.com/rnd/products/switches/switch4000/overview.htm]]')
+	1086 => array ('chapter_id' => 12, 'dict_value' => '[[HP ProCurve%GPASS%4000M | http://www.hp.com/rnd/products/switches/switch4000/overview.htm]]'),
 	1087 => array ('chapter_id' => 2, 'dict_value' => 'backplane/1000Base-T'),
 	1088 => array ('chapter_id' => 18, 'dict_value' => '[[NetApp%GPASS%FAS2020 | http://www.netapp.com/us/products/storage-systems/fas2000/]]'),
 	1089 => array ('chapter_id' => 18, 'dict_value' => '[[NetApp%GPASS%FAS2050 | http://www.netapp.com/us/products/storage-systems/fas2000/]]'),
