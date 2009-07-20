@@ -1073,15 +1073,6 @@ function renderRackMultiSelect ($sname, $racks, $selected)
 	echo "</select>\n";
 }
 
-function showMessageOrError ()
-{
-	if (isset ($_SESSION['log']))
-	{
-		printLog ($_SESSION['log']);
-		unset($_SESSION['log']);
-	}
-}
-
 // This function renders a form for port edition.
 function renderPortsForObject ($object_id)
 {
@@ -1296,8 +1287,11 @@ function renderIPv4ForObject ($object_id)
 // 1: the whole structure is a list of code-message pairs
 // 2 and later: there's a "v" field set, which indicates the version
 // 2: there's a "m" list set to hold message code and optional arguments
-function printLog ($log)
+function showMessageOrError ()
 {
+	if (!isset ($_SESSION['log']))
+		return;
+	$log = $_SESSION['log'];
 	switch (TRUE)
 	{
 		case !isset ($log['v']):
@@ -1552,6 +1546,7 @@ function printLog ($log)
 			echo '<div class=msg_error>' . __FUNCTION__ . ': internal error</div>';
 			break;
 	}
+	unset($_SESSION['log']);
 }
 
 /*
