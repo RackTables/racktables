@@ -240,6 +240,8 @@ CREATE TABLE `LDAPCache` (
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('IPV4_ENABLE_KNIGHT','yes','string','no','no','Enable IPv4 knight feature')";
 			$query[] = "ALTER TABLE IPv4Network ADD COLUMN comment text AFTER name";
 			$query[] = "ALTER TABLE Port ADD INDEX comment (reservation_comment)";
+			$query[] = "ALTER TABLE Port DROP KEY l2address"; // UNIQUE
+			$query[] = "ALTER TABLE Port ADD KEY (l2address)"; // not UNIQUE
 			$query[] = "INSERT INTO PortCompat (type1, type2) VALUES (20,1083)";
 			$query[] = "INSERT INTO PortCompat (type1, type2) VALUES (21,1083)";
 			$query[] = "INSERT INTO PortCompat (type1, type2) VALUES (1077,1077)";
