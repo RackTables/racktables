@@ -1000,6 +1000,8 @@ function generateEntityAutoTags ($cell)
 				$ret[] = array ('tag' => '$cn_' . $cell['name']);
 			if (!strlen ($cell['rack_id']))
 				$ret[] = array ('tag' => '$unmounted');
+			if (!$cell['nports'])
+				$ret[] = array ('tag' => '$portless');
 			break;
 		case 'ipv4net':
 			$ret[] = array ('tag' => '$ip4netid_' . $cell['id']);
