@@ -18,6 +18,10 @@ if (!strlen ($op) or !isset ($ophandler[$pageno][$tabno][$op]))
 	die();
 }
 
+// This is the only exception at the moment, so its handling is hardcoded.
+if ($op == 'querySNMPData')
+	include 'inc/snmp.php';
+
 // We have a chance to handle an error before starting HTTP header.
 if (!isset ($delayauth[$pageno][$tabno][$op]) and !permitted())
 	$location = buildWideRedirectURL (oneLiner (157)); // operation not permitted

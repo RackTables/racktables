@@ -19,7 +19,7 @@ function reloadDictionary ($from_key, $to_key)
 $dictreload = array
 (
 	'0.17.0' => array ('from' => 1, 'to' => 988),
-	'0.17.2' => array ('from' => 989, 'to' => 1083),
+	'0.17.2' => array ('from' => 989, 'to' => 1087),
 );
 
 $dictionary = array
@@ -1105,6 +1105,10 @@ $dictionary = array
 	1081 => array ('chapter_id' => 2, 'dict_value' => 'XPAK (empty)'),
 	1082 => array ('chapter_id' => 2, 'dict_value' => 'XFP (empty)'),
 	1083 => array ('chapter_id' => 2, 'dict_value' => 'MT-RJ/100Base-FX'),
+	1084 => array ('chapter_id' => 2, 'dict_value' => 'SFP+ (empty)'),
+	1085 => array ('chapter_id' => 12, 'dict_value' => 'Nortel%GPASS%BES50GE-12T PWR'),
+	1086 => array ('chapter_id' => 12, 'dict_value' => '[[HP ProCurve%GPASS%4000M | http://www.hp.com/rnd/products/switches/switch4000/overview.htm]]')
+	1087 => array ('chapter_id' => 2, 'dict_value' => 'backplane/1000Base-T'),
 );
 
 ?>

@@ -1386,6 +1386,7 @@ function showMessageOrError ()
 				78 => array ('code' => 'success', 'format' => 'File "%s" saved Ok'),
 				79 => array ('code' => 'success', 'format' => 'Rack "%s" was deleted successfully'),
 				80 => array ('code' => 'success', 'format' => "Added new object '%s'"),
+				81 => array ('code' => 'success', 'format' => "SNMP: completed '%s' work"),
 
 // records 100~199 with fatal error messages
 				100 => array ('code' => 'error', 'format' => '%s'),
@@ -4978,13 +4979,6 @@ function renderEditVService ($vsid)
 	printImageHREF ('SAVE', 'Save changes', TRUE, 7);
 	echo "</td></tr>\n";
 	echo "</table></form>\n";
-}
-
-function dump ($var)
-{
-	echo '<div align=left><pre>';
-	print_r ($var);
-	echo '</pre></div>';
 }
 
 function renderRackCodeViewer ()

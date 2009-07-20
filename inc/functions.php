@@ -2098,4 +2098,12 @@ function constructUserCell ($username)
 	return $ret;
 }
 
+// Let's have this debug helper here to enable debugging of process.php w/o interface.php.
+function dump ($var)
+{
+	echo '<div align=left><pre>';
+	print_r ($var);
+	echo '</pre></div>';
+}
+
 ?>

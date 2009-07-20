@@ -3,86 +3,191 @@
 $iftable_processors = array();
 $iftable_processors['catalyst-any-100TX'] = array
 (
-	'pattern' => '^FastEthernet(0/[[:digit:]]+)$',
+	'pattern' => '@^FastEthernet(([[:digit:]]+/)?[[:digit:]]+)$@',
 	'replacement' => 'fa\\1',
 	'dict_key' => 19,
+	'label' => '\\1X',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['catalyst-25-to-26-100FX/MT-RJ'] = array
+(
+	'pattern' => '@^FastEthernet([[:digit:]]+/(25|26))$@',
+	'replacement' => 'fa\\1',
+	'dict_key' => 1083,
+	'label' => '\\1',
+	'try_next_proc' => FALSE,
 );
 
 $iftable_processors['catalyst-any-1000T'] = array
 (
-	'pattern' => '^GigabitEthernet(0/[[:digit:]]+)$',
+	'pattern' => '@^GigabitEthernet([[:digit:]]+/[[:digit:]]+)$@',
 	'replacement' => 'gi\\1',
 	'dict_key' => 24,
+	'label' => '\\1X',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['catalyst-any-bp/1000T'] = array
+(
+	'pattern' => '@^GigabitEthernet([[:digit:]]+/[[:digit:]]+)$@',
+	'replacement' => 'gi\\1',
+	'dict_key' => 1087,
+	'label' => '',
+	'try_next_proc' => FALSE,
 );
 
 $iftable_processors['catalyst-any-1000SFP'] = array
 (
-	'pattern' => '^GigabitEthernet(0/[[:digit:]]+)$',
+	'pattern' => '@^GigabitEthernet([[:digit:]]+/[[:digit:]]+)$@',
 	'replacement' => 'gi\\1',
-	'dict_key' => 440,
+	'dict_key' => 1077,
+	'label' => '\\1',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['catalyst-any-1000GBIC'] = array
+(
+	'pattern' => '@^GigabitEthernet([[:digit:]]+/[[:digit:]]+)$@',
+	'replacement' => 'gi\\1',
+	'dict_key' => 1078,
+	'label' => '\\1',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['catalyst-21-to-24-combo-1000SFP'] = array
+(
+	'pattern' => '@^GigabitEthernet([[:digit:]]+/(21|22|23|24))$@',
+	'replacement' => 'gi\\1',
+	'dict_key' => 1077,
+	'label' => '\\1',
+	'try_next_proc' => TRUE,
+);
+
+$iftable_processors['catalyst-45-to-48-combo-1000SFP'] = array
+(
+	'pattern' => '@^GigabitEthernet([[:digit:]]+/(45|46|47|48))$@',
+	'replacement' => 'gi\\1',
+	'dict_key' => 1077,
+	'label' => '\\1',
+	'try_next_proc' => TRUE,
+);
+
+$iftable_processors['catalyst-any-10000X2'] = array
+(
+	'pattern' => '@^TenGigabitEthernet([[:digit:]]+/[[:digit:]]+)$@',
+	'replacement' => 'te\\1',
+	'dict_key' => 1080,
+	'label' => '\\1',
+	'try_next_proc' => FALSE,
 );
 
 $iftable_processors['catalyst-25-to-28-1000SFP'] = array
 (
-	'pattern' => '^GigabitEthernet(0/(25|26|27|28))$',
+	'pattern' => '@^GigabitEthernet(0/(25|26|27|28))$@',
 	'replacement' => 'gi\\1',
-	'dict_key' => 440,
+	'dict_key' => 1077,
+	'label' => '\\1',
+	'try_next_proc' => FALSE,
 );
 
 $iftable_processors['catalyst-49-to-52-1000SFP'] = array
 (
-	'pattern' => '^GigabitEthernet(0/(49|50|51|52))$',
+	'pattern' => '@^GigabitEthernet(0/(49|50|51|52))$@',
 	'replacement' => 'gi\\1',
-	'dict_key' => 440,
+	'dict_key' => 1077,
+	'label' => '\\1',
+	'try_next_proc' => FALSE,
 );
 
 $iftable_processors['catalyst-13-to-16-1000SFP'] = array
 (
-	'pattern' => '^GigabitEthernet(0/(13|14|15|16))$',
+	'pattern' => '@^GigabitEthernet(0/(13|14|15|16))$@',
 	'replacement' => 'gi\\1',
-	'dict_key' => 440,
+	'dict_key' => 1077,
+	'label' => '\\1',
+	'try_next_proc' => FALSE,
 );
 
 $iftable_processors['catalyst-21-to-24-1000SFP'] = array
 (
-	'pattern' => '^GigabitEthernet(0/(21|22|23|24))$',
+	'pattern' => '@^GigabitEthernet(0/(21|22|23|24))$@',
 	'replacement' => 'gi\\1',
-	'dict_key' => 440,
+	'dict_key' => 1077,
+	'label' => '\\1',
+	'try_next_proc' => FALSE,
 );
 
 $iftable_processors['nexus-any-10000SFP+'] = array
 (
-	'pattern' => '^Ethernet([[:digit:]]/[[:digit:]]+)$',
+	'pattern' => '@^Ethernet([[:digit:]]/[[:digit:]]+)$@',
 	'replacement' => 'e\\1',
-	'dict_key' => 440,
+	'dict_key' => 1084,
+	'label' => '\\1',
+	'try_next_proc' => FALSE,
 );
 
-$iftable_processors['procurve-any-100TX'] = array
+$iftable_processors['procurve-chassis-100TX'] = array
 (
-	'pattern' => '^([[:digit:]]+)$',
+	'pattern' => '@^([[:digit:]]+)$@',
 	'replacement' => '\\1',
 	'dict_key' => 19,
+	'label' => '\\1',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['procurve-chassis-1000T'] = array
+(
+	'pattern' => '@^([[:digit:]]+)$@',
+	'replacement' => '\\1',
+	'dict_key' => 24,
+	'label' => '\\1',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['procurve-modular-100TX'] = array
+(
+	'pattern' => '@^([A-Z][[:digit:]]+)$@',
+	'replacement' => '\\1',
+	'dict_key' => 19,
+	'label' => '\\1',
+	'try_next_proc' => FALSE,
 );
 
 $iftable_processors['procurve-25-to-26-1000T'] = array
 (
-	'pattern' => '^(25|26)$',
+	'pattern' => '@^(25|26)$@',
 	'replacement' => '\\1',
 	'dict_key' => 24,
+	'label' => '\\1',
+	'try_next_proc' => FALSE,
 );
 
 $iftable_processors['procurve-49-to-50-1000T'] = array
 (
-	'pattern' => '^(49|50)$',
+	'pattern' => '@^(49|50)$@',
 	'replacement' => '\\1',
 	'dict_key' => 24,
+	'label' => '\\1',
+	'try_next_proc' => FALSE,
 );
 
 $iftable_processors['netgear-any-1000T'] = array
 (
-	'pattern' => '^Unit: 1 Slot: 0 Port: ([[:digit:]]+) Gigabit - Level$',
+	'pattern' => '@^Unit: 1 Slot: 0 Port: ([[:digit:]]+) Gigabit - Level$@',
 	'replacement' => '\\1',
 	'dict_key' => 24,
+	'label' => '\\1',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['nortel-any-1000T'] = array
+(
+	'pattern' => '@^Ethernet Port on unit 1, port ([[:digit:]]+)$@',
+	'replacement' => '\\1',
+	'dict_key' => 24,
+	'label' => '\\1',
+	'try_next_proc' => FALSE,
 );
 
 $known_switches = array // key is system OID w/o "enterprises" prefix
@@ -97,19 +202,19 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 	(
 		'dict_key' => 382,
 		'text' => 'WS-C2950C-24: 24 RJ-45/10-100TX + 2 MT-RJ/100FX fiber',
-		'processors' => array ('catalyst-25-to-26-100FX/MT-RJ', 'catalyst-any-Nx100TX'),
+		'processors' => array ('catalyst-25-to-26-100FX/MT-RJ', 'catalyst-any-100TX'),
 	),
 	'9.1.696' => array
 	(
 		'dict_key' => 167,
 		'text' => 'WS-C2960G-24TC-L: 20 RJ-45/10-100-1000T(X) + 4 combo-gig',
-		'processors' => array ('catalyst-any-1000T'),
+		'processors' => array ('catalyst-21-to-24-combo-1000SFP', 'catalyst-any-1000T'),
 	),
 	'9.1.697' => array
 	(
 		'dict_key' => 166,
 		'text' => 'WS-C2960G-48TC-L: 44 RJ-45/10-100-1000T(X) + 4 combo-gig',
-		'processors' => array ('catalyst-any-1000T'),
+		'processors' => array ('catalyst-45-to-48-combo-1000SFP', 'catalyst-any-1000T'),
 	),
 	'9.1.716' => array
 	(
@@ -198,14 +303,14 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 	'9.1.626' => array
 	(
 		'dict_key' => 147,
-		'text' => 'WS-C4948: 48 RJ-45/10-100-1000T(X) + 4 SFP/1000',
-		'processors' => array ('catalyst-49-to-52-1000SFP', 'catalyst-any-1000T'),
+		'text' => 'WS-C4948: 48 RJ-45/10-100-1000T(X) + 4 SFP/1000 + 1 RJ-45/100TX (OOB mgmt)',
+		'processors' => array ('catalyst-49-to-52-1000SFP', 'catalyst-any-1000T', 'catalyst-any-100TX'),
 	),
 	'9.1.659' => array
 	(
 		'dict_key' => 377,
-		'text' => 'WS-C4948-10GE: 48 RJ-45/10-100-1000T(X) + 2 X2/10000',
-		'processors' => array ('catalyst-any-10000X2', 'catalyst-any-1000T'),
+		'text' => 'WS-C4948-10GE: 48 RJ-45/10-100-1000T(X) + 2 X2/10000 + 1 RJ-45/100TX (OOB mgmt)',
+		'processors' => array ('catalyst-any-10000X2', 'catalyst-any-1000T', 'catalyst-any-100TX'),
 	),
 	'9.1.428' => array
 	(
@@ -229,13 +334,13 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 	(
 		'dict_key' => 989,
 		'text' => 'WS-CBS3030-DEL: 10 internal/10-100-1000T(X) + 2 RJ-45/10-100-1000T(X) + 4 SFP/1000',
-		'processors' => array ('catalyst-11-to-12-1000T', 'catalyst-13-to-16-1000SFP', 'catalyst-any-1000Tbp'),
+		'processors' => array ('catalyst-11-to-12-1000T', 'catalyst-13-to-16-1000SFP', 'catalyst-any-bp/1000T'),
 	),
 	'9.1.920' => array
 	(
 		'dict_key' => 795,
 		'text' => 'WS-CBS3032-DEL: 16 internal/10-100-1000T(X) + 4 RJ-45/10-100-1000T(X) + 4 SFP/1000',
-		'processors' => array ('catalyst-17-to-20-1000T', 'catalyst-21-to-24-1000SFP', 'catalyst-any-1000Tbp'),
+		'processors' => array ('catalyst-17-to-20-1000T', 'catalyst-21-to-24-1000SFP', 'catalyst-any-bp/1000T'),
 	),
 	'9.12.3.1.3.719' => array
 	(
@@ -243,17 +348,29 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'N5K-C5020: 40 SFP+/10000',
 		'processors' => array ('nexus-any-10000SFP+'),
 	),
+	'11.2.3.7.11.32' => array
+	(
+		'dict_key' => 871,
+		'text' => 'J4904A: 48 RJ-45/10-100-1000T(X)',
+		'processors' => array ('procurve-chassis-1000T'),
+	),
 	'11.2.3.7.11.36' => array
 	(
 		'dict_key' => 865,
 		'text' => 'J8164A: 24 RJ-45/10-100TX + 2 RJ-45/10-100-1000T(X)',
-		'processors' => array ('procurve-25-to-26-1000T', 'procurve-any-100TX'),
+		'processors' => array ('procurve-25-to-26-1000T', 'procurve-chassis-100TX'),
 	),
 	'11.2.3.7.11.35' => array
 	(
 		'dict_key' => 867,
 		'text' => 'J8165A: 48 RJ-45/10-100TX + 2 RJ-45/10-100-1000T(X)',
-		'processors' => array ('procurve-49-to-50-1000T', 'procurve-any-100TX'),
+		'processors' => array ('procurve-49-to-50-1000T', 'procurve-chassis-100TX'),
+	),
+	'11.2.3.7.11.9' => array
+	(
+		'dict_key' => 1086,
+		'text' => 'J4121A: modular system',
+		'processors' => array ('procurve-modular-100TX'),
 	),
 	'4526.100.2.2' => array
 	(
@@ -261,9 +378,17 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'GSM7224: 24 RJ-45/10-100-1000T(X)',
 		'processors' => array ('netgear-any-1000T'),
 	),
+	'45.3.68.5' => array
+	(
+		'dict_key' => 1085,
+		'text' => 'BES50GE-12T PWR: 12 RJ-45/10-100-1000T(X)',
+		'processors' => array ('nortel-any-1000T'),
+	),
 );
 
-function doSNMPmining ($object_id, $community)
+// This function is only kept here for reference, it will be removed after we
+// make sure, that the new code performs everything correctly.
+function doSNMPmining_old ($object_id, $community)
 {
 	return; // overhaul in progress
 	// FIXME: switch to message log version 2
@@ -366,285 +491,8 @@ function doSNMPmining ($object_id, $community)
 		61 => 24,  // 10/100/1000BaseT => RJ-45/1000Base-T
 	);
 
-	// TODO: to make all processing purely OID-based, it may help to call:
-	// snmp_set_oid_output_format (SNMP_OID_OUTPUT_NUMERIC) (in PHP 5.2+)
-	$objectInfo = spotEntity ('object', $object_id);
-	$endpoints = findAllEndpoints ($object_id, $objectInfo['name']);
-	$sysName = @snmpget ($endpoints[0], $community, 'sysName.0');
-	if ($sysName === FALSE)
-	{
-		$log[] = array ('code' => 'error', 'message' => 'SNMP error connecting to "' . $endpoints[0] . '"');
-		return $log;
-	}
-	$sysName = substr ($sysName, strlen ('STRING: '));
-	$sysDescr = snmpget ($endpoints[0], $community, 'sysDescr.0');
-	// Don't generate error for agents other than IOS.
-	$sysChassi = @snmpget ($endpoints[0], $community, '1.3.6.1.4.1.9.3.6.3.0');
-	if ($sysChassi === FALSE or $sysChassi == NULL)
-		$sysChassi = '';
-	else
-		$sysChassi = str_replace ('"', '', substr ($sysChassi, strlen ('STRING: ')));
-	// Strip the object type, it's always string here.
-	$sysDescr = substr ($sysDescr, strlen ('STRING: '));
-	$sysDescr = str_replace(array("\n", "\r"), "", $sysDescr);  // Make it one line
-	if (FALSE !== ereg ('^(Cisco )?(Internetwork Operating System Software )?IOS .+$', $sysDescr))
-	{
-		$swfamily = 'IOS';
-		$swversion = ereg_replace ('^.*, Version ([^ ]+), .*$', '\\1', $sysDescr);
-		$swrelease = ereg_replace ('^([[:digit:]]+\.[[:digit:]]+)[^[:digit:]].*', '\\1', $swversion);
-	}
-	elseif (FALSE !== ereg ('^Cisco NX-OS.+$', $sysDescr))
-	{
-		$swfamily = 'NX-OS';
-		$swversion = ereg_replace ('^.*, Version ([^ ]+), .*$', '\\1', $sysDescr);
-		$swrelease = ereg_replace ('^([[:digit:]]+\.[[:digit:]]+)[^[:digit:]].*', '\\1', $swversion);
-	}
-	elseif
-	(
-		FALSE !== ereg ('^HP [[:alnum:]]+ ProCurve Switch', $sysDescr) or
-		FALSE !== ereg ('^ProCurve [[:alnum:]]+ Switch', $sysDescr)
-	)
-	{
-		$swfamily = 'HP';
-		$swversion = ereg_replace ('^.* revision ([^ ]+), .*$', '\\1', $sysDescr);
-		$swrelease = 'HP';
-	}
-	elseif (FALSE !== ereg ('^GSM[[:alnum:]]+ L2 Managed Gigabit Switch$', $sysDescr))
-	{
-		$swfamily = 'NETGEAR';
-		$swrelease = 'NETGEAR';
-	}
-	else
-		$log[] = array ('code' => 'error', 'message' => 'No idea how to handle ' . $sysDescr);
-	$attrs = getAttrValues ($object_id);
-	// Only fill in attribute values, if they are not set.
-	// FIXME: this is hardcoded
-
-	if (!strlen ($attrs[3]['value']) && strlen ($sysName)) // FQDN
-	{
-		$error = commitUpdateAttrValue ($object_id, 3, $sysName);
-		if ($error == TRUE)
-			$log[] = array ('code' => 'success', 'message' => 'FQDN set to ' . $sysName);
-		else
-			$log[] = array ('code' => 'error', 'message' => 'Failed settig FQDN: ' . $error);
-	}
-
-	if (!strlen ($attrs[5]['value']) and strlen ($swversion) > 0) // SW version
-	{
-		$error = commitUpdateAttrValue ($object_id, 5, $swversion);
-		if ($error == TRUE)
-			$log[] = array ('code' => 'success', 'message' => 'SW version set to ' . $swversion);
-		else
-			$log[] = array ('code' => 'error', 'message' => 'Failed settig SW version: ' . $error);
-	}
-
-	if (!strlen ($attrs[1]['value']) and strlen ($sysChassi) > 0) // OEM Serial #1
-	{
-		$error = commitUpdateAttrValue ($object_id, 1, $sysChassi);
-		if ($error == TRUE)
-			$log[] = array ('code' => 'success', 'message' => 'OEM S/N 1 set to ' . $sysChassi);
-		else
-			$log[] = array ('code' => 'error', 'message' => 'Failed settig OEM S/N 1: ' . $error);
-	}
-
-	if (!strlen ($attrs[4]['value']) and ($swfamily == 'IOS' or $swfamily == 'NX-OS')) // switch OS type
-	{
-		switch ($swfamily . '-' . $swrelease)
-		{
-			case 'IOS-12.2':
-				$error = commitUpdateAttrValue ($object_id, 4, 252);
-				break;
-			case 'IOS-12.1':
-				$error = commitUpdateAttrValue ($object_id, 4, 251);
-				break;
-			case 'IOS-12.0':
-				$error = commitUpdateAttrValue ($object_id, 4, 244);
-				break;
-			case 'NX-OS-4.0':
-				$error = commitUpdateAttrValue ($object_id, 4, 963);
-				break;
-			case 'NX-OS-4.1':
-				$error = commitUpdateAttrValue ($object_id, 4, 964);
-				break;
-			default:
-				$log[] = array ('code' => 'error', 'message' => "Unknown SW version ${swversion}");
-				// The logic for 'error' is backwards...
-				// This should be set 'FALSE' if there is an error
-				$error = FALSE;
-				break;
-		}
-		if ($error == TRUE)
-			$log[] = array ('code' => 'success', 'message' => "Switch OS type set to ${swfamily} ${swrelease}");
-		else
-			$log[] = array ('code' => 'error', 'message' => 'Failed setting Switch OS type');
-	}
-
-	$sysObjectID = snmpget ($endpoints[0], $community, 'sysObjectID.0');
-	// Transform OID
-	$sysObjectID = ereg_replace ('^.*(enterprises\.)([\.[:digit:]]+)$', '\\2', $sysObjectID);
-	if (!isset ($verb_model[$sysObjectID]))
-	{
-		$log[] = array ('code' => 'error', 'message' => 'Could not guess exact HW model (system OID is ' . $sysObjectID . ')!');
-		return $log;
-	}
-	$log[] = array ('code' => 'success', 'message' => 'HW is ' . $verb_model[$sysObjectID]);
-	if (!strlen ($attrs[2]['value']) and isset ($hwtype[$sysObjectID])) // switch HW type
-	{
-		$error = commitUpdateAttrValue ($object_id, 2, $hwtype[$sysObjectID]);
-		if ($error == TRUE)
-			$log[] = array ('code' => 'success', 'message' => 'HW type updated Ok');
-		else
-			$log[] = array ('code' => 'error', 'message' => 'Failed settig HW type: ' . $error);
-	}
-	// Now fetch ifType, ifDescr and ifPhysAddr and let model-specific code sort the data out.
-	$ifType = snmpwalkoid ($endpoints[0], $community, 'ifType');
-	$ifDescr = snmpwalkoid ($endpoints[0], $community, 'ifDescr');
-	$ifPhysAddress = snmpwalkoid ($endpoints[0], $community, 'ifPhysAddress');
-	// Combine 3 tables into 1...
-	$ifList1 = array();
-	foreach ($ifType as $key => $val)
-	{
-		list ($dummy, $ifIndex) = explode ('.', $key);
-		list ($dummy, $type) = explode (' ', $val);
-		$ifList1[$ifIndex]['type'] = $type;
-	}
-	foreach ($ifDescr as $key => $val)
-	{
-		list ($dummy, $ifIndex) = explode ('.', $key);
-		list ($dummy, $descr) = explode (' ', $val);
-		$ifList1[$ifIndex]['descr'] = trim ($descr, '"');
-	}
-	foreach ($ifPhysAddress as $key => $val)
-	{
-		$val = trim ($val);
-		list ($dummy, $ifIndex) = explode ('.', $key);
-		// NET-SNMP may return MAC addresses in one of two (?) formats depending on
-		// DISPLAY-HINT internal database. The best we can do about it is to accept both.
-		// Bug originally reported by Walery Wysotsky against openSUSE 11.0.
-		if (preg_match ('/^string: /i', $val)) // STRING: x:yy:z:xx:y:zz
-		{
-			list ($dummy, $val) = explode (' ', $val);
-			$addrbytes = explode (':', $val);
-			foreach ($addrbytes as $bidx => $bytestr)
-				if (strlen ($bytestr) == 1)
-					$addrbytes[$bidx] = '0' . $bytestr;
-		}
-		elseif (preg_match ('/^hex-string: /i', $val)) // Hex-STRING: xx yy zz xx yy zz
-			$addrbytes = explode (' ', substr ($val, -17));
-		else
-			continue; // martian format
-		$ifList1[$ifIndex]['phyad'] = implode ('', $addrbytes);
-	}
-	// ...and then reverse it inside out to make description the key.
-	$ifList2 = array();
-	foreach ($ifList1 as $ifIndex => $data)
-	{
-		$ifList2[$data['descr']]['type'] = $data['type'];
-		$ifList2[$data['descr']]['phyad'] = $data['phyad'];
-		$ifList2[$data['descr']]['idx'] = $ifIndex;
-	}
-	$newports = 0;
-	// Now we can directly pick necessary ports from the table accordingly
-	// to our known hardware model.
 	switch ($sysObjectID)
 	{
-	// FIXME: chassis edge switches often share a common naming scheme, so
-	// the sequences below have to be generalized. Let's have some duplicated
-	// code for the time being, as this is the first implementation ever.
-		case '9.1.697': // WS-C2960G-48TC-L
-			// 44 copper ports: 1X, 2X, 3X...
-			// 4 combo ports: 45, 46, 47, 48. Don't list SFP connectors atm, as it's not
-			// clear how to fit them into current Ports table structure.
-			for ($i = 1; $i <= 48; $i++)
-			{
-				$label = ($i >= 45) ? "${i}" : "${i}X";
-				$error = commitAddPort ($object_id, 'gi0/' . $i, 24, $label, $ifList2["GigabitEthernet0/${i}"]['phyad']);
-				if ($error == '')
-					$newports++;
-				else
-					$log[] = array ('code' => 'error', 'message' => 'Failed to add port ' . $label . ': ' . $error);
-			}
-			break;
-		case '9.1.325': // WS-C2950C-24
-			for ($i = 1; $i <= 26; $i++)
-			{
-				$label = "${i}X"; 
-				$error = commitAddPort ($object_id, 'fa0/' . $i, 19, $label, $ifList2["FastEthernet0/${i}"]['phyad']);
-				if ($error == '')
-					$newports++;
-				else
-					$log[] = array ('code' => 'error', 'message' => 'Failed to add port ' . $label . ': ' . $error);
-			}
-			break;
-		case '9.1.324': // WS-C2950-24
-			for ($i = 1; $i <= 24; $i++)
-			{
-				$label = "${i}X"; 
-				$error = commitAddPort ($object_id, 'fa0/' . $i, 19, $label, $ifList2["FastEthernet0/${i}"]['phyad']);
-				if ($error == '')
-					$newports++;
-				else
-					$log[] = array ('code' => 'error', 'message' => 'Failed to add port ' . $label . ': ' . $error);
-			}
-			break;
-		case '9.1.624': // WS-C3750-24TS
-		case '9.1.696': // WS-C2960G-24TC-L
-			// Quite similar to the above.
-			for ($i = 1; $i <= 24; $i++)
-			{
-				$label = ($i >= 21) ? "${i}" : "${i}X";
-				$error = commitAddPort ($object_id, 'gi0/' . $i, 24, $label, $ifList2["GigabitEthernet0/${i}"]['phyad']);
-				if ($error == '')
-					$newports++;
-				else
-					$log[] = array ('code' => 'error', 'message' => 'Failed to add port ' . $label . ': ' . $error);
-			}
-			break;
-		case '9.1.716': // WS-C2960-24TT-L
-		case '9.1.563': // WS-C3560-24PS
-		case '9.1.633': // WS-C3560-24TS
-		case '9.1.428': // WS-C2950G-24
-			for ($i = 1; $i <= 24; $i++)
-			{
-				$label = "${i}X";
-				$error = commitAddPort ($object_id, 'fa0/' . $i, 19, $label, $ifList2["FastEthernet0/${i}"]['phyad']);
-				if ($error == '')
-					$newports++;
-				else
-					$log[] = array ('code' => 'error', 'message' => 'Failed to add port ' . $label . ': ' . $error);
-			}
-			for ($i = 1; $i <= 2; $i++)
-			{
-				$label = "${i}";
-				$error = commitAddPort ($object_id, 'gi0/' . $i, 24, $label, $ifList2["GigabitEthernet0/${i}"]['phyad']);
-				if ($error == '')
-					$newports++;
-				else
-					$log[] = array ('code' => 'error', 'message' => 'Failed to add port ' . $label . ': ' . $error);
-			}
-			break;
-		case '9.1.717': // WS-C2960-48TT-L
-		case '9.1.429': // WS-C2950G-48
-		case '9.1.559': // WS-C2950T-48
-			for ($i = 1; $i <= 48; $i++)
-			{
-				$label = "${i}X";
-				$error = commitAddPort ($object_id, 'fa0/' . $i, 19, $label, $ifList2["FastEthernet0/${i}"]['phyad']);
-				if ($error == '')
-					$newports++;
-				else
-					$log[] = array ('code' => 'error', 'message' => 'Failed to add port ' . $label . ': ' . $error);
-			}
-			for ($i = 1; $i <= 2; $i++)
-			{
-				$label = "${i}";
-				$error = commitAddPort ($object_id, 'gi0/' . $i, 24, $label, $ifList2["GigabitEthernet0/${i}"]['phyad']);
-				if ($error == '')
-					$newports++;
-				else
-					$log[] = array ('code' => 'error', 'message' => 'Failed to add port ' . $label . ': ' . $error);
-			}
-			break;
 		case '9.1.516': // WS-C3750G-24TS OR WS-C3750-48PS
 			// FIXME: only handles 2 models of 3750, make it handle all of them
 			// see if it has 24 or 48 ports
@@ -682,65 +530,6 @@ function doSNMPmining ($object_id, $community)
 					else
 						$log[] = array ('code' => 'error', 'message' => 'Failed to add port ' . $label . ': ' . $error);
 				}
-			}
-			break;
-		case '9.1.564': // WS-C3560-48PS
-		case '9.1.634': // WS-C3560-48TS
-			for ($i = 1; $i <= 48; $i++)
-			{
-				$label = "${i}X";
-				$error = commitAddPort ($object_id, 'fa0/' . $i, 19, $label, $ifList2["FastEthernet0/${i}"]['phyad']);
-				if ($error == '')
-					$newports++;
-				else
-					$log[] = array ('code' => 'error', 'message' => 'Failed to add port ' . $label . ': ' . $error);
-			}
-			for ($i = 1; $i <= 4; $i++)
-			{
-				$label = "${i}";
-				$error = commitAddPort ($object_id, 'gi0/' . $i, 24, $label, $ifList2["GigabitEthernet0/${i}"]['phyad']);
-				if ($error == '')
-					$newports++;
-				else
-					$log[] = array ('code' => 'error', 'message' => 'Failed to add port ' . $label . ': ' . $error);
-			}
-			break;
-		case '9.1.614': // WS-C3560G-24PS
-		case '9.1.615': // WS-C3560G-24TS
-		case '9.1.527': // WS-C2970G-24T
-		case '9.1.561': // WS-C2970G-24TS
-			for ($i = 1; $i <= 24; $i++)
-			{
-				$label = "${i}X";
-				$error = commitAddPort ($object_id, 'gi0/' . $i, 24, $label, $ifList2["GigabitEthernet0/${i}"]['phyad']);
-				if ($error == '')
-					$newports++;
-				else
-					$log[] = array ('code' => 'error', 'message' => 'Failed to add port ' . $label . ': ' . $error);
-			}
-			break;
-		case '9.1.616': // WS-C3560G-48PS
-		case '9.1.617': // WS-C3560G-48TS
-			for ($i = 1; $i <= 48; $i++)
-			{
-				$label = "${i}X";
-				$error = commitAddPort ($object_id, 'gi0/' . $i, 24, $label, $ifList2["GigabitEthernet0/${i}"]['phyad']);
-				if ($error == '')
-					$newports++;
-				else
-					$log[] = array ('code' => 'error', 'message' => 'Failed to add port ' . $label . ': ' . $error);
-			}
-			break;
-		case '9.1.626': // WS-C4948
-		case '9.1.659': // WS-C4948-10GE
-			for ($i = 1; $i <= 48; $i++)
-			{
-				$label = "${i}X";
-				$error = commitAddPort ($object_id, 'gi1/' . $i, 24, $label, $ifList2["GigabitEthernet1/${i}"]['phyad']);
-				if ($error == '')
-					$newports++;
-				else
-					$log[] = array ('code' => 'error', 'message' => 'Failed to add port ' . $label . ': ' . $error);
 			}
 			break;
 	// For modular devices we issue a separate SNMP query to determine port type,
@@ -809,88 +598,11 @@ function doSNMPmining ($object_id, $community)
 				$i++;
 			}
 			break;
-		case '9.1.278': // WS-C3548-XL
-			for ($i = 1; $i <= 48; $i++)
-			{
-				$label = "${i}X";
-				$error = commitAddPort ($object_id, 'fa0/' . $i, 19, $label, $ifList2["FastEthernet0/${i}"]['phyad']);
-				if ($error == '')
-					$newports++;
-				else
-					$log[] = array ('code' => 'error', 'message' => 'Failed to add port ' . $label . ': ' . $error);
-			}
-			for ($i = 1; $i <= 2; $i++)
-			{
-				$label = "${i}";
-				$error = commitAddPort ($object_id, 'gi0/' . $i, 24, $label, $ifList2["GigabitEthernet0/${i}"]['phyad']);
-				if ($error == '')
-					$newports++;
-				else
-					$log[] = array ('code' => 'error', 'message' => 'Failed to add port ' . $label . ': ' . $error);
-			}
-			break;
-		case '9.1.920': // WS-CBS3032-DEL-F
-			for ($i = 1; $i <= 24; $i++)
-			{
-				$label = "${i}";
-				$error = commitAddPort ($object_id, 'gi0/' . $i, 24, $label, $ifList2["GigabitEthernet0/${i}"]['phyad']);
-				if ($error == '')
-					$newports++;
-				else
-					$log[] = array ('code' => 'error', 'message' => 'Failed to add port ' . $label . ': ' . $error);
-			}
-			break;
-		case '9.1.749': // WS-CBS3030-DEL-F (or WS-CBS3030-DEL-S)
-			for ($i = 1; $i <= 16; $i++)
-			{
-				$label = "${i}";
-				$error = commitAddPort ($object_id, 'gi0/' . $i, 24, $label, $ifList2["GigabitEthernet0/${i}"]['phyad']);
-				if ($error == '')
-					$newports++;
-				else
-					$log[] = array ('code' => 'error', 'message' => 'Failed to add port ' . $label . ': ' . $error);
-			}
-			break;
-		case '9.12.3.1.3.719': // N5K-C5020
-			break;
-		case '11.2.3.7.11.35':
-			$n100 = 48;
-			// fall through
-		case '11.2.3.7.11.36':
-			if ($sysObjectID == '11.2.3.7.11.36')
-				$n100 = 24;
-			$n1000 = 2;
-			for ($i = 1; $i <= $n100; $i++)
-				if ('' == ($error = commitAddPort ($object_id, $i, 19, $i, $ifList2[$i]['phyad'])))
-					$newports++;
-				else
-					$log[] = array ('code' => 'error', 'message' => "Failed to add port ${i}: " . $error);
-			for ($i = $n100 + 1; $i <= $n100 + $n1000; $i++)
-				if ('' == ($error = commitAddPort ($object_id, $i, 24, $i, $ifList2[$i]['phyad'])))
-					$newports++;
-				else
-					$log[] = array ('code' => 'error', 'message' => "Failed to add port ${i}: " . $error);
-			break;
-		case '4526.100.2.2':
-			for ($i = 1; $i <= 24; $i++)
-				if ('' == ($error = commitAddPort ($object_id, $i, 24, '', $ifList2["Unit: 1 Slot: 0 Port: ${i} Gigabit - Level"]['phyad'])))
-					$newports++;
-				else
-					$log[] = array ('code' => 'error', 'message' => "Failed to add port ${label}: ${error}");
-			break;
 		default:
 			$log[] = array ('code' => 'error', 'message' => "Unexpected sysObjectID '${sysObjectID}'");
 	}
 	$error = commitAddPort ($object_id, 'con0', 29, 'console', '');
-	if ($error == '')
-		$newports++;
-	else
-		$log[] = array ('code' => 'error', 'message' => 'Failed to add console port : ' . $error);
-	if ($newports > 0)
-		$log[] = array ('code' => 'success', 'message' => "Added ${newports} new ports");
-	return $log;
 }
-
 
 function updateStickerForCell ($cell, $attr_id, $new_value)
 {
@@ -898,7 +610,7 @@ function updateStickerForCell ($cell, $attr_id, $new_value)
 		commitUpdateAttrValue ($cell['id'], $attr_id, $new_value);
 }
 
-function doSNMPmining_new ($object_id, $community)
+function doSNMPmining ($object_id, $community)
 {
 	$log = emptyLog();
 	global $known_switches, $iftable_processors;
@@ -914,16 +626,17 @@ function doSNMPmining_new ($object_id, $community)
 	if (FALSE === ($sysObjectID = snmpget ($endpoints[0], $community, 'sysObjectID.0')))
 		return oneLiner (188); // fatal SNMP failure
 	$sysObjectID = ereg_replace ('^.*(enterprises\.)([\.[:digit:]]+)$', '\\2', $sysObjectID);
-	$sysName = snmpget ($endpoints[0], $community, 'sysName.0');
+	$sysName = substr (snmpget ($endpoints[0], $community, 'sysName.0'), strlen ('STRING: '));
 	$sysDescr = substr (snmpget ($endpoints[0], $community, 'sysDescr.0'), strlen ('STRING: '));
 	$sysDescr = str_replace (array ("\n", "\r"), " ", $sysDescr);  // Make it one line
 	if (!isset ($known_switches[$sysObjectID]))
 		return oneLiner (189, array ($sysObjectID)); // unknown OID
-	updateStickerForCell ($objectInfo, 2, $hwtype[$sysObjectID]);
+	updateStickerForCell ($objectInfo, 2, $known_switches[$sysObjectID]['dict_key']);
 	updateStickerForCell ($objectInfo, 3, $sysName);
+	$log = mergeLogs ($log, oneLiner (81, array ('generic')));
 	switch (1)
 	{
-	case preg_match ('^9\.1\.', $sysObjectID): // Catalyst
+	case preg_match ('/^9\.1\./', $sysObjectID): // Catalyst
 		$exact_release = ereg_replace ('^.*, Version ([^ ]+), .*$', '\\1', $sysDescr);
 		$major_line = ereg_replace ('^([[:digit:]]+\.[[:digit:]]+)[^[:digit:]].*', '\\1', $exact_release);
 		$ios_codes = array
@@ -937,8 +650,9 @@ function doSNMPmining_new ($object_id, $community)
 		$sysChassi = snmpget ($endpoints[0], $community, '1.3.6.1.4.1.9.3.6.3.0');
 		if ($sysChassi !== FALSE or $sysChassi !== NULL)
 			updateStickerForCell ($objectInfo, 1, str_replace ('"', '', substr ($sysChassi, strlen ('STRING: '))));
+		$log = mergeLogs ($log, oneLiner (81, array ('catalyst-generic')));
 		break;
-	case preg_match ('^9\.12\.3\.1\.3\.', $sysObjectID): // Nexus
+	case preg_match ('/^9\.12\.3\.1\.3\./', $sysObjectID): // Nexus
 		$exact_release = ereg_replace ('^.*, Version ([^ ]+), .*$', '\\1', $sysDescr);
 		$major_line = ereg_replace ('^([[:digit:]]+\.[[:digit:]]+)[^[:digit:]].*', '\\1', $exact_release);
 		$nxos_codes = array
@@ -948,14 +662,63 @@ function doSNMPmining_new ($object_id, $community)
 		);
 		updateStickerForCell ($objectInfo, 4, $nxos_codes[$major_line]);
 		updateStickerForCell ($objectInfo, 5, $exact_release);
+		$log = mergeLogs ($log, oneLiner (81, array ('nexus-generic')));
 		break;
-	case preg_match ('^11\.2\.3\.7\.11\.', $sysObjectID): // ProCurve
+	case preg_match ('/^11\.2\.3\.7\.11\./', $sysObjectID): // ProCurve
 		$exact_release = ereg_replace ('^.* revision ([^ ]+), .*$', '\\1', $sysDescr);
 		updateStickerForCell ($objectInfo, 5, $exact_release);
+		$log = mergeLogs ($log, oneLiner (81, array ('procurve-generic')));
 		break;
-	case preg_match ('^4526\.100\.2\.', $sysObjectID): // NETGEAR
+	default: // Nortel, NETGEAR...
 		break;
 	}
+	$ifInfo = array();
+	$tablename = 'ifDescr';
+	foreach (snmpwalkoid ($endpoints[0], $community, $tablename) as $oid => $value)
+	{
+		$randomindex = ereg_replace ("^.*${tablename}\.(.+)\$", '\\1', $oid);
+		$value = trim (ereg_replace ('^.+: (.+)$', '\\1', $value), '"');
+		$ifInfo[$randomindex][$tablename] = $value;
+	}
+	$tablename = 'ifPhysAddress';
+	foreach (snmpwalkoid ($endpoints[0], $community, $tablename) as $oid => $value)
+	{
+		$randomindex = ereg_replace ("^.*${tablename}\.(.+)\$", '\\1', $oid);
+		$value = trim ($value);
+		// NET-SNMP may return MAC addresses in one of two (?) formats depending on
+		// DISPLAY-HINT internal database. The best we can do about it is to accept both.
+		// Bug originally reported by Walery Wysotsky against openSUSE 11.0.
+		if (preg_match ('/^string: /i', $value)) // STRING: x:yy:z:xx:y:zz
+		{
+			list ($dummy, $value) = explode (' ', $value);
+			$addrbytes = explode (':', $value);
+			foreach ($addrbytes as $bidx => $bytestr)
+				if (strlen ($bytestr) == 1)
+					$addrbytes[$bidx] = '0' . $bytestr;
+		}
+		elseif (preg_match ('/^hex-string: /i', $value)) // Hex-STRING: xx yy zz xx yy zz
+			$addrbytes = explode (' ', substr ($value, -17));
+		else
+			continue; // martian format
+		$ifInfo[$randomindex][$tablename] = implode ('', $addrbytes);
+	}
+	// process each interface only once regardless of how many processors we have to run
+	foreach ($ifInfo as $iface)
+		foreach ($known_switches[$sysObjectID]['processors'] as $processor_name)
+		{
+//			echo "subject == '" . $iface['ifDescr'] . "'<br>";
+//			echo "pattern == '" . $iftable_processors[$processor_name]['pattern'] . "', replacement == '" . $iftable_processors[$processor_name]['replacement'] . "'<br>";
+			$newname = preg_replace ($iftable_processors[$processor_name]['pattern'], $iftable_processors[$processor_name]['replacement'], $iface['ifDescr'], 1, $count);
+			if (!$count)
+				continue; // try next processor on current port
+			$newlabel = preg_replace ($iftable_processors[$processor_name]['pattern'], $iftable_processors[$processor_name]['label'], $iface['ifDescr'], 1, $count);
+			commitAddPort ($object_id, $newname, $iftable_processors[$processor_name]['dict_key'], $newlabel, $iface['ifPhysAddress']);
+			if (!$iftable_processors[$processor_name]['try_next_proc']) // done with this port
+				continue 2;
+		}
+	foreach ($known_switches[$sysObjectID]['processors'] as $processor_name)
+		$log = mergeLogs ($log, oneLiner (81, array ($processor_name)));
+	return $log;
 }
 
 ?>
