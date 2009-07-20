@@ -1719,28 +1719,6 @@ function getPortSearchResults ($what)
 	return $ret;
 }
 
-// Look for EXACT value in stickers and return a list of pairs "object_id-attribute_id",
-// which matched. A partilar object_id could be returned more, than once, if it has
-// multiple matching stickers. Search is only performed on "string" attributes.
-function getStickerSearchResults ($what)
-{
-	$stickers = getSearchResultByField
-	(
-		'AttributeValue',
-		array ('object_id', 'attr_id'),
-		'string_value',
-		$what,
-		'object_id',
-		1
-	);
-	$map = getAttrMap();
-	$ret = array();
-	foreach ($stickers as $sticker)
-		if ($map[$sticker['attr_id']]['type'] == 'string')
-			$ret[] = $sticker;
-	return $ret;
-}
-
 // This function returns either port ID or NULL for specified arguments.
 function getPortID ($object_id, $port_name)
 {
