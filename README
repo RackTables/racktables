@@ -122,6 +122,14 @@ during the upgrade.
 
 *** Upgrading to 0.17.0 ***
 
+One can always install RackTables 0.17.0 from scratch. However, upgrading
+an existing installation to 0.17.0 implies a certain upgrade path. If the
+existing database version is less, than 0.16.4, it must first be upgraded
+to version 0.16.4, 0.16.5 or 0.16.6 (at one's choice) using appropriate
+tar.gz distribution. The resulting 0.16.4+ database can be upgraded to
+0.17.0 (or later version) in a normal way (with tar.gz of the desired 0.17.x
+release).
+
 LDAP options have been moved to LDAP_options array. This means, that if you were
 using LDAP authentication for users in version 0.16.x, it will break right after
 upgrade to 0.17.0. To get things working again, adjust existing secret.php file
