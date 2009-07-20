@@ -40,6 +40,20 @@ php5-pdo_mysql php5-pdo apache2-mod_php5 php5-mbstring
 * openSUSE 11.0: use YaST to apache2-mod_php5, php5-gd, php5-mbstring, php5-mysql,
 php5-snmp and php5-ldap
 
+* FreeBSD 7:
+# make -C /usr/ports/www/apache13-modssl install
+# make -C /usr/ports/www/php5-session install
+[X] CLI        Build CLI version
+[X] APACHE     Build Apache module
+[X] MULTIBYTE  Enable zend multibyte support
+# make -C /usr/ports/graphics/php5-gd install
+# make -C /usr/ports/databases/php5-pdo_mysql install
+# make -C /usr/ports/devel/php5-pcre install
+# make -C /usr/ports/converters/php5-mbstring install
+[X] REGEX  Enable multibyte regex support
+
+# make -C /usr/ports/net-mgmt/php5-snmp install
+# make -C /usr/ports/net/php5-ldap install
 
 II. Prepare the files and database.
 1. Unpack the tarball and make it web-accessible, e.g. http://yourcompany.com/racktables
