@@ -771,7 +771,7 @@ function renderRackObject ($object_id)
 	global $nextorder, $aac;
 	$info = spotEntity ('object', $object_id);
 	// FIXME: employ amplifyCell() instead of calling loader functions directly
-	#amplifyCell ($info);
+	amplifyCell ($info);
 	if ($info == NULL)
 	{
 		showError ('Error loading data', __FUNCTION__);
@@ -787,7 +787,7 @@ function renderRackObject ($object_id)
 	if (strlen ($info['name']))
 		echo "<tr><th width='50%' class=tdright>Common name:</th><td class=tdleft>${info['name']}</td></tr>\n";
 	// FIXME: don't call spotEntity() each time, do it once in the beginning.
-	elseif (considerConfiguredConstraint (spotEntity ('object', $object_id), 'NAMEWARN_LISTSRC'))
+	elseif (considerConfiguredConstraint ($info, 'NAMEWARN_LISTSRC'))
 		echo "<tr><td colspan=2 class=msg_error>Common name is missing.</td></tr>\n";
 	echo "<tr><th width='50%' class=tdright>Object type:</th><td class=tdleft><a href='";
 	echo makeHref (array (
@@ -799,7 +799,7 @@ function renderRackObject ($object_id)
 	if (strlen ($info['asset_no']))
 		echo "<tr><th width='50%' class=tdright>Asset tag:</th><td class=tdleft>${info['asset_no']}</td></tr>\n";
 	// FIXME: ditto
-	elseif (considerConfiguredConstraint (spotEntity ('object', $object_id), 'ASSETWARN_LISTSRC'))
+	elseif (considerConfiguredConstraint ($info, 'ASSETWARN_LISTSRC'))
 		echo "<tr><td colspan=2 class=msg_error>Asset tag is missing.</td></tr>\n";
 	if (strlen ($info['label']))
 		echo "<tr><th width='50%' class=tdright>Visible label:</th><td class=tdleft>${info['label']}</td></tr>\n";
@@ -836,7 +836,7 @@ function renderRackObject ($object_id)
 
 	renderFilesPortlet ('object', $object_id);
 
-	$ports = getObjectPortsAndLinks ($object_id);
+	$ports = $info['ports'];
 	if (count ($ports))
 	{
 		startPortlet ('ports and links');
@@ -878,7 +878,7 @@ function renderRackObject ($object_id)
 		finishPortlet();
 	}
 
-	$alloclist = getObjectIPv4Allocations ($object_id);
+	$alloclist = $info['ipv4'];
 	if (count ($alloclist))
 	{
 		startPortlet ('IPv4 addresses');
@@ -959,7 +959,7 @@ function renderRackObject ($object_id)
 		finishPortlet();
 	}
 
-	$forwards = getNATv4ForObject ($object_id);
+	$forwards = $info['nat4'];
 	if (count($forwards['in']) or count($forwards['out']))
 	{
 		startPortlet('NATv4');
@@ -1013,7 +1013,7 @@ function renderRackObject ($object_id)
 		finishPortlet();
 	}
 
-	$pools = getRSPoolsForObject ($object_id);
+	$pools = $info['ipv4rspools'];
 	if (count ($pools))
 	{
 		$order = 'odd';
@@ -1197,9 +1197,10 @@ function renderIPv4ForObject ($object_id)
 		printImageHREF ('add', 'allocate', TRUE, 103);
 		echo "</td></tr></form>";
 	}
+	$focus = spotEntity ('object', $object_id);
+	amplifyCell ($focus);
 	global $aat;
 	startPortlet ('Allocations');
-	$alloclist = getObjectIPv4Allocations ($object_id);
 	echo "<table cellspacing=0 cellpadding='5' align='center' class='widetable'>\n";
 	echo '<tr><th>&nbsp;</th><th>OS interface</th><th>IP address</th>';
 	if (getConfigVar ('EXT_IPV4_VIEW') == 'yes')
@@ -1208,7 +1209,7 @@ function renderIPv4ForObject ($object_id)
 
 	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
 		printNewItemTR();
-	foreach ($alloclist as $dottedquad => $alloc)
+	foreach ($focus['ipv4'] as $dottedquad => $alloc)
 	{
 		$class = $alloc['addrinfo']['class'];
 		$netid = getIPv4AddressNetworkId ($dottedquad);
@@ -2563,23 +2564,23 @@ function renderNATv4ForObject ($object_id)
 		echo "</td></tr></form>";
 	}
 	
-	$forwards = getNATv4ForObject ($object_id);
-	$alloclist = getObjectIPv4Allocations ($object_id);
+	$focus = spotEntity ('object', $object_id);
+	amplifyCell ($focus);
 	echo "<center><h2>locally performed NAT</h2></center>";
 
 	echo "<table class='widetable' cellpadding=5 cellspacing=0 border=0 align='center'>\n";
 	echo "<tr><th></th><th>Match endpoint</th><th>Translate to</th><th>Target object</th><th>Comment</th><th>&nbsp;</th></tr>\n";
 
 	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
-		printNewItemTR ($alloclist);
-	foreach ($forwards['out'] as $pf)
+		printNewItemTR ($focus['ipv4']);
+	foreach ($focus['nat4']['out'] as $pf)
 	{
 		$class = 'trerror';
 		$osif = '';
-		if (isset ($alloclist [$pf['localip']]))
+		if (isset ($focus['ipv4'][$pf['localip']]))
 		{
-			$class = $alloclist [$pf['localip']]['addrinfo']['class'];
-			$osif = $alloclist [$pf['localip']]['osif'] . ': ';
+			$class = $focus['ipv4'][$pf['localip']]['addrinfo']['class'];
+			$osif = $focus['ipv4'][$pf['localip']]['osif'] . ': ';
 		}
 
 		echo "<tr class='$class'>";
@@ -2627,15 +2628,17 @@ function renderNATv4ForObject ($object_id)
 		echo "</td></form></tr>";
 	}
 	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')
-		printNewItemTR ($alloclist);
+		printNewItemTR ($focus['ipv4']);
 
 	echo "</table><br><br>";
+	if (!count ($focus['nat4']))
+		return;
 
 	echo "<center><h2>arriving NAT connections</h2></center>";
 	echo "<table class='widetable' cellpadding=5 cellspacing=0 border=0 align='center'>\n";
 	echo "<tr><th></th><th>Source</th><th>Source objects</th><th>Target</th><th>Description</th></tr>\n";
 
-	foreach ($forwards['in'] as $pf)
+	foreach ($focus['nat4']['in'] as $pf)
 	{
 		echo "<tr><td><a href='".
 			makeHrefProcess(array(
