@@ -52,6 +52,7 @@ $SQLSchema = array
 			'ip' => 'INET_NTOA(IPv4Network.ip)',
 			'mask' => 'mask',
 			'name' => 'name',
+			'comment' => 'comment',
 		),
 		'keycolumn' => 'id',
 		'ordcolumns' => array ('ip', 'mask'),
@@ -1372,13 +1373,12 @@ function getIPv4AddressNetworkId ($dottedquad, $masklen = 32)
 	return NULL;
 }
 
-function updateRange ($id=0, $name='')
+function updateIPv4Network_real ($id = 0, $name = '', $comment = '')
 {
 	global $dbxlink;
-	$query =
-		"update IPv4Network set name='$name' where id='$id'";
-	$result = $dbxlink->exec ($query);
-	return '';
+	$query = $dbxlink->prepare ('UPDATE IPv4Network SET name = ?, comment = ? WHERE id = ?');
+	// TODO: $dbxlink->setAttribute (PDO::ATTR_ORACLE_NULLS, PDO::NULL_EMPTY_STRING);
+	return $query->execute (array ($name, $comment, $id)) ? '' : 'SQL query failed in ' . __FUNCTION__;
 }
 
 // This function is actually used not only to update, but also to create records,

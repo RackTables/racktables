@@ -2146,7 +2146,8 @@ function renderIPv4Network ($id)
 	$range = spotEntity ('ipv4net', $id);
 	loadIPv4AddrList ($range);
 	echo "<table border=0 class=objectview cellspacing=0 cellpadding=0>";
-	echo "<tr><td colspan=2 align=center><h1>${range['ip']}/${range['mask']}</h1><h2>${range['name']}</h2></td></tr>\n";
+	echo "<tr><td colspan=2 align=center><h1>${range['ip']}/${range['mask']}</h1><h2>";
+	echo htmlspecialchars ($range['name'], ENT_QUOTES, 'UTF-8') . "</h2></td></tr>\n";
 
 	echo "<tr><td class=pcleft width='50%'>";
 	startPortlet ('summary');
@@ -2211,6 +2212,13 @@ function renderIPv4Network ($id)
 	printTagTRs ($range, makeHref(array('page'=>'ipv4space', 'tab'=>'default'))."&");
 	echo "</table><br>\n";
 	finishPortlet();
+
+	if (strlen ($range['comment']))
+	{
+		startPortlet ('Comment');
+		echo '<div class=commentblock>' . string_insert_hrefs (htmlspecialchars ($range['comment'], ENT_QUOTES, 'UTF-8')) . '</div>';
+		finishPortlet ();
+	}
 
 	renderFilesPortlet ('ipv4net', $id);
 	echo "</td>\n";
@@ -2317,7 +2325,12 @@ function renderIPv4NetworkProperties ($id)
 	echo "<center><h1>${netdata['ip']}/${netdata['mask']}</h1></center>\n";
 	echo "<table border=0 cellpadding=10 cellpadding=1 align='center'>\n";
 	printOpFormIntro ('editRange');
-	echo "<tr><td class='tdright'>Name:</td><td class='tdleft'><input type=text name=name size=20 value='${netdata['name']}'></tr>";
+	echo '<tr><td class=tdright><label for=nameinput>Name:</label></td>';
+	echo "<td class=tdleft><input type=text name=name id=nameinput size=80 maxlength=255 value='";
+	echo htmlspecialchars ($netdata['name'], ENT_QUOTES, 'UTF-8') . "'></tr>";
+	echo '<tr><td class=tdright><label for=commentinput>Comment:</label></td>';
+	echo "<td class=tdleft><textarea name=comment id=commentinput cols=80 rows=25>\n";
+	echo htmlspecialchars ($netdata['comment'], ENT_QUOTES, 'UTF-8') . "</textarea></tr>";
 	echo "<tr><td colspan=2 class=tdcenter>";
 	printImageHREF ('SAVE', 'Save changes', TRUE);
 	echo "</td></form></tr></table>\n";
@@ -5351,12 +5364,14 @@ function printOpFormIntro ($opname, $extra = array(), $upload = FALSE)
 function niftyString ($string, $maxlen = 30)
 {
 	$cutind = '&hellip;'; // length is 1
-	if (!strlen ($string))
+	if (!mb_strlen ($string))
 		return '&nbsp;';
-	if (mb_strlen ($string) > $maxlen)
-		return "<span title='" . htmlspecialchars ($string, ENT_QUOTES, 'UTF-8') . "'>" .
-			str_replace (' ', '&nbsp;', str_replace ("\t", ' ', mb_substr ($string, 0, $maxlen - 1))) . $cutind . '</span>';
-	return $string;
+	// a tab counts for a space
+	$string = mb_ereg_replace ("\t", ' ', $string);
+	if (mb_strlen ($string) <= $maxlen)
+		return htmlspecialchars ($string, ENT_QUOTES, 'UTF-8');
+	return "<span title='" . htmlspecialchars ($string, ENT_QUOTES, 'UTF-8') . "'>" .
+		str_replace (' ', '&nbsp;', htmlspecialchars (mb_substr ($string, 0, $maxlen - 1), ENT_QUOTES, 'UTF-8')) . $cutind . '</span>';
 }
 
 // Iterate over what findRouters() returned and output some text suitable for a TD element.
