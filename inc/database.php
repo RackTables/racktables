@@ -1657,25 +1657,6 @@ function getObjectAttrsSearchResults ($what)
 	return $ret;
 }
 
-// This function will eventually merge the functionality of the "older"
-// searching function. Both ones are used at the moment, and they do
-// search in different value spaces.
-function getObjectSearchResults_new ($what)
-{
-	$ret = array();
-	foreach (getStickerSearchResults ($what) as $objRecord)
-	{
-		$ret[$objRecord['id']]['id'] = $objRecord['id'];
-		$ret[$objRecord['id']]['by_sticker'] = $objRecord['by_sticker'];
-	}
-	foreach (getPortRsvSearchResults ($what) as $objRecord)
-	{
-		$ret[$objRecord['id']]['id'] = $objRecord['id'];
-		$ret[$objRecord['id']]['by_portrsv'] = $objRecord['by_portrsv'];
-	}
-	return $ret;
-}
-
 // Look for EXACT value in stickers and return a list of pairs "object_id-attribute_id",
 // which matched. A partilar object_id could be returned more, than once, if it has
 // multiple matching stickers. Search is only performed on "string" attributes.
@@ -1738,24 +1719,25 @@ function getPortSearchResults ($what)
 	return $ret;
 }
 
-// search in port "reservation comment" column
-function getPortRsvSearchResults ($what)
+// Look for EXACT value in stickers and return a list of pairs "object_id-attribute_id",
+// which matched. A partilar object_id could be returned more, than once, if it has
+// multiple matching stickers. Search is only performed on "string" attributes.
+function getStickerSearchResults ($what)
 {
-	$ports = getSearchResultByField
+	$stickers = getSearchResultByField
 	(
-		'Port',
-		array ('object_id', 'id'),
-		'reservation_comment',
+		'AttributeValue',
+		array ('object_id', 'attr_id'),
+		'string_value',
 		$what,
 		'object_id',
-		0
+		1
 	);
+	$map = getAttrMap();
 	$ret = array();
-	foreach ($ports as $port)
-	{
-		$ret[$port['object_id']]['id'] = $port['object_id'];
-		$ret[$port['object_id']]['by_portrsv'][] = $port['id'];
-	}
+	foreach ($stickers as $sticker)
+		if ($map[$sticker['attr_id']]['type'] == 'string')
+			$ret[] = $sticker;
 	return $ret;
 }
 
