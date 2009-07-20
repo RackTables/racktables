@@ -19,7 +19,7 @@ function reloadDictionary ($from_key, $to_key)
 $dictreload = array
 (
 	'0.17.0' => array ('from' => 1, 'to' => 988),
-	'0.17.2' => array ('from' => 989, 'to' => 1087),
+	'0.17.2' => array ('from' => 989, 'to' => 1110),
 );
 
 $dictionary = array
@@ -1109,6 +1109,29 @@ $dictionary = array
 	1085 => array ('chapter_id' => 12, 'dict_value' => 'Nortel%GPASS%BES50GE-12T PWR'),
 	1086 => array ('chapter_id' => 12, 'dict_value' => '[[HP ProCurve%GPASS%4000M | http://www.hp.com/rnd/products/switches/switch4000/overview.htm]]')
 	1087 => array ('chapter_id' => 2, 'dict_value' => 'backplane/1000Base-T'),
+	1088 => array ('chapter_id' => 18, 'dict_value' => '[[NetApp%GPASS%FAS2020 | http://www.netapp.com/us/products/storage-systems/fas2000/]]'),
+	1089 => array ('chapter_id' => 18, 'dict_value' => '[[NetApp%GPASS%FAS2050 | http://www.netapp.com/us/products/storage-systems/fas2000/]]'),
+	1090 => array ('chapter_id' => 18, 'dict_value' => 'NetApp%GPASS%FAS3020'),
+	1091 => array ('chapter_id' => 18, 'dict_value' => 'NetApp%GPASS%FAS3040'),
+	1092 => array ('chapter_id' => 18, 'dict_value' => 'NetApp%GPASS%FAS3050'),
+	1093 => array ('chapter_id' => 18, 'dict_value' => 'NetApp%GPASS%FAS3070'),
+	1094 => array ('chapter_id' => 18, 'dict_value' => '[[NetApp%GPASS%FAS3140 | http://www.netapp.com/us/products/storage-systems/fas3100/]]'),
+	1095 => array ('chapter_id' => 18, 'dict_value' => '[[NetApp%GPASS%FAS3160 | http://www.netapp.com/us/products/storage-systems/fas3100/]]'),
+	1096 => array ('chapter_id' => 18, 'dict_value' => '[[NetApp%GPASS%FAS3170 | http://www.netapp.com/us/products/storage-systems/fas3100/]]'),
+	1097 => array ('chapter_id' => 18, 'dict_value' => 'NetApp%GPASS%FAS6030'),
+	1098 => array ('chapter_id' => 18, 'dict_value' => '[[NetApp%GPASS%FAS6040 | http://www.netapp.com/us/products/storage-systems/fas6000/]]'),
+	1099 => array ('chapter_id' => 18, 'dict_value' => 'NetApp%GPASS%FAS6070'),
+	1100 => array ('chapter_id' => 18, 'dict_value' => '[[NetApp%GPASS%FAS6080 | http://www.netapp.com/us/products/storage-systems/fas6000/]]'),
+	1101 => array ('chapter_id' => 18, 'dict_value' => '[[NetApp%GPASS%V3140 | http://www.netapp.com/us/products/storage-systems/v3100/]]'),
+	1102 => array ('chapter_id' => 18, 'dict_value' => '[[NetApp%GPASS%V3160 | http://www.netapp.com/us/products/storage-systems/v3100/]]'),
+	1103 => array ('chapter_id' => 18, 'dict_value' => '[[NetApp%GPASS%V3170 | http://www.netapp.com/us/products/storage-systems/v3100/]]'),
+	1104 => array ('chapter_id' => 18, 'dict_value' => '[[NetApp%GPASS%V6030 | http://www.netapp.com/us/products/storage-systems/v6000/]]'),
+	1105 => array ('chapter_id' => 18, 'dict_value' => '[[NetApp%GPASS%V6040 | http://www.netapp.com/us/products/storage-systems/v6000/]]'),
+	1106 => array ('chapter_id' => 18, 'dict_value' => '[[NetApp%GPASS%V6070 | http://www.netapp.com/us/products/storage-systems/v6000/]]'),
+	1107 => array ('chapter_id' => 18, 'dict_value' => '[[NetApp%GPASS%V6080 | http://www.netapp.com/us/products/storage-systems/v6000/]]'),
+	1108 => array ('chapter_id' => 18, 'dict_value' => 'NetApp%GPASS%DS14mk2 AT'),
+	1109 => array ('chapter_id' => 18, 'dict_value' => 'NetApp%GPASS%DS14mk2 FC'),
+	1110 => array ('chapter_id' => 18, 'dict_value' => 'NetApp%GPASS%DS14mk4 FC'),
 );
 
 ?>
