@@ -322,7 +322,7 @@ function listCells ($realm, $parent_id = 0)
 		switch ($realm)
 		{
 		case 'object':
-			$ret[$entity_id]['dname'] = displayedName ($ret[$entity_id]);
+			setDisplayedName ($ret[$entity_id]);
 			break;
 		case 'ipv4net':
 			$ret[$entity_id]['ip_bin'] = ip2long ($ret[$entity_id]['ip']);
@@ -400,7 +400,7 @@ function spotEntity ($realm, $id)
 	switch ($realm)
 	{
 	case 'object':
-		$ret['dname'] = displayedName ($ret);
+		setDisplayedName ($ret);
 		break;
 	case 'ipv4net':
 		$ret['ip_bin'] = ip2long ($ret['ip']);

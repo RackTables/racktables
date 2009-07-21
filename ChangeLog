@@ -1,6 +1,6 @@
 0.17.2
 	new feature: configure default SNMP community (by jthurman)
-	new feature: "$untagged", "$portless" and "$masklen_OP_NN" autotags
+	new feature: "$untagged", "$portless", "$nameless" and "$masklen_OP_NN" autotags
 	new feature: knight button in IPv4 tree
 	new feature: searching by attribute value or port reservation comment
 	update: show appropriate message, if a record cannot be found

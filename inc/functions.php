@@ -195,24 +195,17 @@ function assertIPv4Arg ($argname, $caller = 'N/A', $ok_if_empty = FALSE)
 // Objects of some types should be explicitly shown as
 // anonymous (labelless). This function is a single place where the
 // decision about displayed name is made.
-function displayedName ($objectData)
+function setDisplayedName (&$cell)
 {
-	if ($objectData['name'] != '')
-		return $objectData['name'];
-	// handle transition of argument type
-	if (isset ($objectData['realm']))
-	{
-		if (considerConfiguredConstraint ($objectData, 'NAMEWARN_LISTSRC'))
-			return "ANONYMOUS " . $objectData['objtype_name'];
-		else
-			return "[${objectData['objtype_name']}]";
-	}
+	if ($cell['name'] != '')
+		$cell['dname'] = $cell['name'];
 	else
 	{
-		if (considerConfiguredConstraint (spotEntity ('object', $objectData['id']), 'NAMEWARN_LISTSRC'))
-			return "ANONYMOUS " . $objectData['objtype_name'];
+		$cell['atags'][] = array ('tag' => '$nameless');
+		if (considerConfiguredConstraint ($cell, 'NAMEWARN_LISTSRC'))
+			$cell['dname'] = 'ANONYMOUS ' . $cell['objtype_name'];
 		else
-			return "[${objectData['objtype_name']}]";
+			$cell['dname'] = '[' . $cell['objtype_name'] . ']';
 	}
 }
 
