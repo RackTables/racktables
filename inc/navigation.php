@@ -149,7 +149,6 @@ $tabhandler['ipv4space']['default'] = 'renderIPv4Space';
 $tabhandler['ipv4space']['newrange'] = 'renderIPv4SpaceEditor';
 $ophandler['ipv4space']['newrange']['addIPv4Prefix'] = 'addIPv4Prefix';
 $ophandler['ipv4space']['newrange']['delIPv4Prefix'] = 'delIPv4Prefix';
-$ophandler['ipv4space']['newrange']['updIPv4Prefix'] = 'updIPv4Prefix';
 
 $page['ipv4net']['parent'] = 'ipv4space';
 $page['ipv4net']['bypass'] = 'id';
