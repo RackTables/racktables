@@ -19,7 +19,7 @@ function reloadDictionary ($from_key, $to_key)
 $dictreload = array
 (
 	'0.17.0' => array ('from' => 1, 'to' => 988),
-	'0.17.2' => array ('from' => 989, 'to' => 1149),
+	'0.17.2' => array ('from' => 989, 'to' => 1150),
 );
 
 $dictionary = array
@@ -1171,6 +1171,7 @@ $dictionary = array
 	1147 => array ('chapter_id' => 27, 'dict_value' => 'APC%GPASS%AP9565'),
 	1148 => array ('chapter_id' => 27, 'dict_value' => 'APC%GPASS%AP9568'),
 	1149 => array ('chapter_id' => 27, 'dict_value' => 'APC%GPASS%AP9572'),
+	1150 => array ('chapter_id' => 12, 'dict_value' => '[[Cisco%GPASS%Catalyst 6509-V-E | http://www.cisco.com/en/US/products/ps9306/index.html]]'),
 );
 
 ?>
