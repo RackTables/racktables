@@ -11,6 +11,7 @@
 	update: same port name can be repeated for an object with different types
 	update: added comment field for IPv4 networks
 	update: NetApp records (by Sander Klein)
+	update: APC records (by Ray Robertson)
 	bugfix: do not produce PHP warning on LivePTR tab
 	bugfix: wrong port type set for WS-C2950-24. closes ticket 229 (by jthurman)
 	bugfix: improved IOS detection and fixed a logic error. closes ticket 232 (by jthurman)
