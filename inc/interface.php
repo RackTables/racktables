@@ -2101,16 +2101,14 @@ function renderIPv4SpaceEditor ()
 	echo "</form></table><br><br>\n";
 	finishPortlet();
 
-	$addrspaceList = listCells ('ipv4net');
-	array_walk ($addrspaceList, 'amplifyCell');
-	if (count ($addrspaceList))
+	if (count ($addrspaceList = listCells ('ipv4net')))
 	{
 		startPortlet ('Manage existing (' . count ($addrspaceList) . ')');
 		echo "<table class='widetable' border=0 cellpadding=5 cellspacing=0 align='center'>\n";
-		echo "<tr><th>&nbsp;</th><th>prefix</th><th>name</th><th>&nbsp;</th></tr>";
+		echo "<tr><th>&nbsp;</th><th>prefix</th><th>name</th></tr>";
 		foreach ($addrspaceList as $netinfo)
 		{
-			echo "<form method=post action='".makeHrefProcess(array('op'=>'updIPv4Prefix', 'id'=>$netinfo['id']))."'>";
+			amplifyCell ($netinfo);
 			echo "<tr valign=top><td>";
 			if (getConfigVar ('IPV4_JAYWALK') == 'yes')
 			{
@@ -2120,10 +2118,9 @@ function renderIPv4SpaceEditor ()
 			}
 			else // only render clickable image for empty networks
 			{
-				$netdata = spotEntity ('ipv4net', $netinfo['id']);
-				loadIPv4AddrList ($netdata);
-				if (count ($netdata['addrlist']))
-					printImageHREF ('nodestroy', 'There are ' . count ($netdata['addrlist']) . ' allocations inside');
+				loadIPv4AddrList ($netinfo);
+				if (count ($netinfo['addrlist']))
+					printImageHREF ('nodestroy', 'There are ' . count ($netinfo['addrlist']) . ' allocations inside');
 				else
 				{
 					echo "<a href='".makeHrefProcess(array('op'=>'delIPv4Prefix', 'id'=>$netinfo['id']))."'>";
@@ -2132,11 +2129,9 @@ function renderIPv4SpaceEditor ()
 				}
 
 			}
-			echo "</td>\n<td class=tdleft>${netinfo['ip']}/${netinfo['mask']}</td>";
-			echo "<td><input type=text name=name size=40 value='${netinfo['name']}'>";
-			echo "</td><td>";
-			printImageHREF ('save', 'Save changes', TRUE);
-			echo "</td></tr></form>\n";
+			echo '</td><td class=tdleft><a href="' . makeHref (array ('page' => 'ipv4net', 'id' => $netinfo['id'])) . '">';
+			echo "${netinfo['ip']}/${netinfo['mask']}</a></td>";
+			echo '<td class=tdleft>' . htmlspecialchars ($netinfo['name']) . '</td></tr>';
 		}
 		echo "</table>";
 		finishPortlet();
