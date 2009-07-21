@@ -989,7 +989,7 @@ function commitAddPort ($object_id = 0, $port_name, $port_type_id, $port_label, 
 // The fifth argument may be either explicit 'NULL' or some (already quoted by the upper layer)
 // string value. In case it is omitted, we just assign it its current value.
 // It would be nice to simplify this semantics later.
-function commitUpdatePort ($port_id, $port_name, $port_type_id, $port_label, $port_l2address, $port_reservation_comment = 'reservation_comment')
+function commitUpdatePort ($object_id, $port_id, $port_name, $port_type_id, $port_label, $port_l2address, $port_reservation_comment = 'reservation_comment')
 {
 	global $dbxlink;
 	if (NULL === ($db_l2address = l2addressForDatabase ($port_l2address)))
@@ -1005,7 +1005,7 @@ function commitUpdatePort ($port_id, $port_name, $port_type_id, $port_label, $po
 		"update Port set name='$port_name', type=$port_type_id, label='$port_label', " .
 		"reservation_comment = ${port_reservation_comment}, l2address=" .
 		(($db_l2address === '') ? 'NULL' : "'${db_l2address}'") .
-		" where id='$port_id'";
+		" WHERE id='$port_id' and object_id=${object_id}";
 	$result = $dbxlink->exec ($query);
 	$dbxlink->exec ('UNLOCK TABLES');
 	if ($result == 1)

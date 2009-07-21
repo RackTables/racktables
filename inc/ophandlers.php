@@ -154,6 +154,7 @@ $msgcode['editPortForObject']['ERR1'] = 101;
 $msgcode['editPortForObject']['ERR2'] = 100;
 function editPortForObject ()
 {
+	assertUIntArg ('object_id', __FUNCTION__);
 	assertUIntArg ('port_id', __FUNCTION__);
 	assertUIntArg ('port_type_id', __FUNCTION__);
 	// tolerate empty value now to produce custom informative message later
@@ -165,7 +166,7 @@ function editPortForObject ()
 		$port_rc = '"' . $_REQUEST['reservation_comment'] . '"';
 	else
 		$port_rc = 'NULL';
-	$error = commitUpdatePort ($_REQUEST['port_id'], $_REQUEST['name'], $_REQUEST['port_type_id'], $_REQUEST['label'], $_REQUEST['l2address'], $port_rc);
+	$error = commitUpdatePort ($_REQUEST['object_id'], $_REQUEST['port_id'], $_REQUEST['name'], $_REQUEST['port_type_id'], $_REQUEST['label'], $_REQUEST['l2address'], $port_rc);
 	if ($error != '')
 		return buildRedirectURL (__FUNCTION__, 'ERR2', array ($error));
 	else
@@ -321,7 +322,7 @@ http://www.cisco.com/en/US/products/hw/routers/ps274/products_tech_note09186a008
 		}
 		else
 		{
-			$result = commitUpdatePort ($port_id, $port['name'], $port_type, $port['label'], $port['l2address']);
+			$result = commitUpdatePort ($object_id, $port_id, $port['name'], $port_type, $port['label'], $port['l2address']);
 			if ($result == '')
 				$updated_count++;
 			else

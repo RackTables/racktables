@@ -1,120 +1,139 @@
 <?php
 
 $iftable_processors = array();
-$iftable_processors['catalyst-any-100TX'] = array
+
+$iftable_processors['catalyst-4948-mgmt'] = array
 (
-	'pattern' => '@^FastEthernet(([[:digit:]]+/)?[[:digit:]]+)$@',
-	'replacement' => 'fa\\1',
+	'pattern' => '@^FastEthernet1$@',
+	'replacement' => 'fa1',
 	'dict_key' => 19,
-	'label' => '\\1X',
+	'label' => 'mgmt',
 	'try_next_proc' => FALSE,
 );
 
-$iftable_processors['catalyst-25-to-26-100FX/MT-RJ'] = array
+$iftable_processors['catalyst-chassis-any-100TX'] = array
 (
-	'pattern' => '@^FastEthernet([[:digit:]]+/(25|26))$@',
-	'replacement' => 'fa\\1',
+	'pattern' => '@^FastEthernet([[:digit:]]+/)?([[:digit:]]+)$@',
+	'replacement' => 'fa\\1\\2',
+	'dict_key' => 19,
+	'label' => '\\2X',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['catalyst-chassis-25-to-26-100FX/MT-RJ'] = array
+(
+	'pattern' => '@^FastEthernet([[:digit:]]+/)?(25|26)$@',
+	'replacement' => 'fa\\1\\2',
 	'dict_key' => 1083,
-	'label' => '\\1',
+	'label' => '\\2',
 	'try_next_proc' => FALSE,
 );
 
-$iftable_processors['catalyst-any-1000T'] = array
+$iftable_processors['catalyst-chassis-any-1000T'] = array
 (
-	'pattern' => '@^GigabitEthernet([[:digit:]]+/[[:digit:]]+)$@',
-	'replacement' => 'gi\\1',
+	'pattern' => '@^GigabitEthernet([[:digit:]]+/)?([[:digit:]]+)$@',
+	'replacement' => 'gi\\1\\2',
 	'dict_key' => 24,
-	'label' => '\\1X',
+	'label' => '\\2X',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['catalyst-chassis-uplinks-1000T'] = array
+(
+	'pattern' => '@^GigabitEthernet([[:digit:]]+/)?([[:digit:]]+)$@',
+	'replacement' => 'gi\\1\\2',
+	'dict_key' => 24,
+	'label' => '\\2',
 	'try_next_proc' => FALSE,
 );
 
 $iftable_processors['catalyst-any-bp/1000T'] = array
 (
-	'pattern' => '@^GigabitEthernet([[:digit:]]+/[[:digit:]]+)$@',
-	'replacement' => 'gi\\1',
+	'pattern' => '@^GigabitEthernet([[:digit:]]+/)?([[:digit:]]+)$@',
+	'replacement' => 'gi\\1\\2',
 	'dict_key' => 1087,
 	'label' => '',
 	'try_next_proc' => FALSE,
 );
 
-$iftable_processors['catalyst-any-1000SFP'] = array
+$iftable_processors['catalyst-chassis-any-1000SFP'] = array
 (
-	'pattern' => '@^GigabitEthernet([[:digit:]]+/[[:digit:]]+)$@',
-	'replacement' => 'gi\\1',
+	'pattern' => '@^GigabitEthernet([[:digit:]]+/)?([[:digit:]]+)$@',
+	'replacement' => 'gi\\1\\2',
 	'dict_key' => 1077,
-	'label' => '\\1',
+	'label' => '\\2',
 	'try_next_proc' => FALSE,
 );
 
-$iftable_processors['catalyst-any-1000GBIC'] = array
+$iftable_processors['catalyst-chassis-any-1000GBIC'] = array
 (
-	'pattern' => '@^GigabitEthernet([[:digit:]]+/[[:digit:]]+)$@',
-	'replacement' => 'gi\\1',
+	'pattern' => '@^GigabitEthernet([[:digit:]]+/)?([[:digit:]]+)$@',
+	'replacement' => 'gi\\1\\2',
 	'dict_key' => 1078,
-	'label' => '\\1',
+	'label' => '\\2',
 	'try_next_proc' => FALSE,
 );
 
-$iftable_processors['catalyst-21-to-24-combo-1000SFP'] = array
+$iftable_processors['catalyst-chassis-21-to-24-combo-1000SFP'] = array
 (
-	'pattern' => '@^GigabitEthernet([[:digit:]]+/(21|22|23|24))$@',
-	'replacement' => 'gi\\1',
+	'pattern' => '@^GigabitEthernet([[:digit:]]+/)?(21|22|23|24)$@',
+	'replacement' => 'gi\\1\\2',
 	'dict_key' => 1077,
-	'label' => '\\1',
+	'label' => '\\2',
 	'try_next_proc' => TRUE,
 );
 
-$iftable_processors['catalyst-45-to-48-combo-1000SFP'] = array
+$iftable_processors['catalyst-chassis-45-to-48-combo-1000SFP'] = array
 (
-	'pattern' => '@^GigabitEthernet([[:digit:]]+/(45|46|47|48))$@',
-	'replacement' => 'gi\\1',
+	'pattern' => '@^GigabitEthernet([[:digit:]]+/)?(45|46|47|48)$@',
+	'replacement' => 'gi\\1\\2',
 	'dict_key' => 1077,
-	'label' => '\\1',
+	'label' => '\\2',
 	'try_next_proc' => TRUE,
 );
 
-$iftable_processors['catalyst-any-10000X2'] = array
+$iftable_processors['catalyst-chassis-uplinks-10000X2'] = array
 (
-	'pattern' => '@^TenGigabitEthernet([[:digit:]]+/[[:digit:]]+)$@',
-	'replacement' => 'te\\1',
+	'pattern' => '@^TenGigabitEthernet([[:digit:]]+/)?([[:digit:]]+)$@',
+	'replacement' => 'te\\1\\2',
 	'dict_key' => 1080,
-	'label' => '\\1',
+	'label' => '\\2',
 	'try_next_proc' => FALSE,
 );
 
-$iftable_processors['catalyst-25-to-28-1000SFP'] = array
+$iftable_processors['catalyst-chassis-25-to-28-1000SFP'] = array
 (
-	'pattern' => '@^GigabitEthernet(0/(25|26|27|28))$@',
-	'replacement' => 'gi\\1',
+	'pattern' => '@^GigabitEthernet([[:digit:]]+/)?(25|26|27|28)$@',
+	'replacement' => 'gi\\1\\2',
 	'dict_key' => 1077,
-	'label' => '\\1',
+	'label' => '\\2',
 	'try_next_proc' => FALSE,
 );
 
-$iftable_processors['catalyst-49-to-52-1000SFP'] = array
+$iftable_processors['catalyst-chassis-49-to-52-1000SFP'] = array
 (
-	'pattern' => '@^GigabitEthernet(0/(49|50|51|52))$@',
-	'replacement' => 'gi\\1',
+	'pattern' => '@^GigabitEthernet([[:digit:]]+/)?(49|50|51|52)$@',
+	'replacement' => 'gi\\1\\2',
 	'dict_key' => 1077,
-	'label' => '\\1',
+	'label' => '\\2',
 	'try_next_proc' => FALSE,
 );
 
 $iftable_processors['catalyst-13-to-16-1000SFP'] = array
 (
-	'pattern' => '@^GigabitEthernet(0/(13|14|15|16))$@',
-	'replacement' => 'gi\\1',
+	'pattern' => '@^GigabitEthernet([[:digit:]]+/)?(13|14|15|16)$@',
+	'replacement' => 'gi\\1\\2',
 	'dict_key' => 1077,
-	'label' => '\\1',
+	'label' => '\\2',
 	'try_next_proc' => FALSE,
 );
 
 $iftable_processors['catalyst-21-to-24-1000SFP'] = array
 (
-	'pattern' => '@^GigabitEthernet(0/(21|22|23|24))$@',
-	'replacement' => 'gi\\1',
+	'pattern' => '@^GigabitEthernet([[:digit:]]+/)?(21|22|23|24)$@',
+	'replacement' => 'gi\\1\\2',
 	'dict_key' => 1077,
-	'label' => '\\1',
+	'label' => '\\2',
 	'try_next_proc' => FALSE,
 );
 
@@ -172,13 +191,31 @@ $iftable_processors['procurve-49-to-50-1000T'] = array
 	'try_next_proc' => FALSE,
 );
 
-$iftable_processors['netgear-any-1000T'] = array
+$iftable_processors['netgear-chassis-any-1000T'] = array
 (
 	'pattern' => '@^Unit: 1 Slot: 0 Port: ([[:digit:]]+) Gigabit - Level$@',
 	'replacement' => '\\1',
 	'dict_key' => 24,
 	'label' => '\\1',
 	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['netgear-chassis-21-to-24-1000Tcombo'] = array
+(
+	'pattern' => '@^Unit: 1 Slot: 0 Port: ([[:digit:]]+) Gigabit - Level$@',
+	'replacement' => '\\1',
+	'dict_key' => 24,
+	'label' => '\\1T',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['netgear-chassis-21-to-24-1000SFP'] = array
+(
+	'pattern' => '@^Unit: 1 Slot: 0 Port: ([[:digit:]]+) Gigabit - Level$@',
+	'replacement' => '\\1',
+	'dict_key' => 1077,
+	'label' => '\\1F',
+	'try_next_proc' => TRUE,
 );
 
 $iftable_processors['nortel-any-1000T'] = array
@@ -196,139 +233,127 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 	(
 		'dict_key' => 380,
 		'text' => 'WS-C2950-24: 24 RJ-45/10-100TX',
-		'processors' => array ('catalyst-any-100TX'),
+		'processors' => array ('catalyst-chassis-any-100TX'),
 	),
 	'9.1.325' => array
 	(
 		'dict_key' => 382,
 		'text' => 'WS-C2950C-24: 24 RJ-45/10-100TX + 2 MT-RJ/100FX fiber',
-		'processors' => array ('catalyst-25-to-26-100FX/MT-RJ', 'catalyst-any-100TX'),
+		'processors' => array ('catalyst-chassis-25-to-26-100FX/MT-RJ', 'catalyst-chassis-any-100TX'),
 	),
 	'9.1.696' => array
 	(
 		'dict_key' => 167,
 		'text' => 'WS-C2960G-24TC-L: 20 RJ-45/10-100-1000T(X) + 4 combo-gig',
-		'processors' => array ('catalyst-21-to-24-combo-1000SFP', 'catalyst-any-1000T'),
+		'processors' => array ('catalyst-chassis-21-to-24-combo-1000SFP', 'catalyst-chassis-any-1000T'),
 	),
 	'9.1.697' => array
 	(
 		'dict_key' => 166,
 		'text' => 'WS-C2960G-48TC-L: 44 RJ-45/10-100-1000T(X) + 4 combo-gig',
-		'processors' => array ('catalyst-45-to-48-combo-1000SFP', 'catalyst-any-1000T'),
+		'processors' => array ('catalyst-chassis-45-to-48-combo-1000SFP', 'catalyst-chassis-any-1000T'),
 	),
 	'9.1.716' => array
 	(
 		'dict_key' => 164,
 		'text' => 'WS-C2960-24TT-L: 24 RJ-45/10-100TX + 2 RJ-45/10-100-1000T(X)',
-		'processors' => array ('catalyst-any-100TX', 'catalyst-any-1000T'),
+		'processors' => array ('catalyst-chassis-any-100TX', 'catalyst-chassis-any-1000T'),
 	),
 	'9.1.717' => array
 	(
 		'dict_key' => 162,
 		'text' => 'WS-C2960-48TT-L: 48 RJ-45/10-100TX + 2 RJ-45/10-100-1000T(X)',
-		'processors' => array ('catalyst-any-100TX', 'catalyst-any-1000T'),
+		'processors' => array ('catalyst-chassis-any-100TX', 'catalyst-chassis-any-1000T'),
 	),
 	'9.1.527' => array
 	(
 		'dict_key' => 210,
 		'text' => 'WS-C2970G-24T: 24 RJ-45/10-100-1000T(X)',
-		'processors' => array ('catalyst-any-1000T'),
+		'processors' => array ('catalyst-chassis-any-1000T'),
 	),
 	'9.1.561' => array
 	(
 		'dict_key' => 115,
 		'text' => 'WS-C2970G-24TS: 24 RJ-45/10-100-1000T(X) + 4 SFP/1000',
-		'processors' => array ('catalyst-25-to-28-1000SFP', 'catalyst-any-1000T'),
+		'processors' => array ('catalyst-chassis-25-to-28-1000SFP', 'catalyst-chassis-any-1000T'),
 	),
 	'9.1.633' => array
 	(
 		'dict_key' => 169,
 		'text' => 'WS-C3560-24TS: 24 RJ-45/10-100TX + 2 SFP/1000',
-		'processors' => array ('catalyst-any-1000SFP', 'catalyst-any-100TX'),
+		'processors' => array ('catalyst-chassis-any-1000SFP', 'catalyst-chassis-any-100TX'),
 	),
 	'9.1.634' => array
 	(
 		'dict_key' => 170,
 		'text' => 'WS-C3560-48TS: 48 RJ-45/10-100TX + 4 SFP/1000',
-		'processors' => array ('catalyst-any-1000SFP', 'catalyst-any-100TX'),
+		'processors' => array ('catalyst-chassis-any-1000SFP', 'catalyst-chassis-any-100TX'),
 	),
 	'9.1.563' => array
 	(
 		'dict_key' => 171,
 		'text' => 'WS-C3560-24PS: 24 RJ-45/10-100TX + 2 SFP/1000',
-		'processors' => array ('catalyst-any-1000SFP', 'catalyst-any-100TX'),
+		'processors' => array ('catalyst-chassis-any-1000SFP', 'catalyst-chassis-any-100TX'),
 	),
 	'9.1.564' => array
 	(
 		'dict_key' => 172,
 		'text' => 'WS-C3560-48PS: 48 RJ-45/10-100TX + 4 SFP/1000',
-		'processors' => array ('catalyst-any-1000SFP', 'catalyst-any-100TX'),
-	),
-	'9.1.516' => array
-	(
-		'dict_key' => 179,
-		'text' => 'WS-C3750-xxPS: 24 or 48 RJ-45/10-100TX + 4 SFP/1000',
-		'processors' => array ('catalyst-any-1000SFP', 'catalyst-any-100TX'),
+		'processors' => array ('catalyst-chassis-any-1000SFP', 'catalyst-chassis-any-100TX'),
 	),
 	'9.1.614' => array
 	(
 		'dict_key' => 175,
 		'text' => 'WS-C3560G-24PS: 24 RJ-45/10-100-1000T(X) + 4 SFP/1000',
-		'processors' => array ('catalyst-25-to-28-1000SFP', 'catalyst-any-1000T'),
+		'processors' => array ('catalyst-chassis-25-to-28-1000SFP', 'catalyst-chassis-any-1000T'),
 	),
 	'9.1.615' => array
 	(
 		'dict_key' => 173,
 		'text' => 'WS-C3560G-24TS: 24 RJ-45/10-100-1000T(X) + 4 SFP/1000',
-		'processors' => array ('catalyst-25-to-28-1000SFP', 'catalyst-any-1000T'),
+		'processors' => array ('catalyst-chassis-25-to-28-1000SFP', 'catalyst-chassis-any-1000T'),
 	),
 	'9.1.616' => array
 	(
 		'dict_key' => 176,
 		'text' => 'WS-C3560G-48PS: 48 RJ-45/10-100-1000T(X) + 4 SFP/1000',
-		'processors' => array ('catalyst-49-to-52-1000SFP', 'catalyst-any-1000T'),
+		'processors' => array ('catalyst-chassis-49-to-52-1000SFP', 'catalyst-chassis-any-1000T'),
 	),
 	'9.1.617' => array
 	(
 		'dict_key' => 174,
 		'text' => 'WS-C3560G-48TS: 48 RJ-45/10-100-1000T(X) + 4 SFP/1000',
-		'processors' => array ('catalyst-49-to-52-1000SFP', 'catalyst-any-1000T'),
-	),
-	'9.1.624' => array
-	(
-		'dict_key' => 143,
-		'text' => 'WS-C3750G-24TS: 24 RJ-45/10-100-1000T(X) + 4 SFP/1000',
-		'processors' => array ('catalyst-25-to-28-1000SFP', 'catalyst-any-1000T'),
+		'processors' => array ('catalyst-chassis-49-to-52-1000SFP', 'catalyst-chassis-any-1000T'),
 	),
 	'9.1.626' => array
 	(
 		'dict_key' => 147,
 		'text' => 'WS-C4948: 48 RJ-45/10-100-1000T(X) + 4 SFP/1000 + 1 RJ-45/100TX (OOB mgmt)',
-		'processors' => array ('catalyst-49-to-52-1000SFP', 'catalyst-any-1000T', 'catalyst-any-100TX'),
+		'processors' => array ('catalyst-chassis-49-to-52-1000SFP', 'catalyst-chassis-uplinks-1000T', 'catalyst-4948-mgmt'),
 	),
 	'9.1.659' => array
 	(
 		'dict_key' => 377,
 		'text' => 'WS-C4948-10GE: 48 RJ-45/10-100-1000T(X) + 2 X2/10000 + 1 RJ-45/100TX (OOB mgmt)',
-		'processors' => array ('catalyst-any-10000X2', 'catalyst-any-1000T', 'catalyst-any-100TX'),
+		'processors' => array ('catalyst-chassis-uplinks-10000X2', 'catalyst-chassis-uplinks-1000T', 'catalyst-4948-mgmt'),
 	),
 	'9.1.428' => array
 	(
 		'dict_key' => 389,
 		'text' => 'WS-C2950G-24: 24 RJ-45/10-100TX + 2 GBIC/1000',
-		'processors' => array ('catalyst-any-1000GBIC', 'catalyst-any-100TX'),
+		'processors' => array ('catalyst-chassis-any-1000GBIC', 'catalyst-chassis-any-100TX'),
 	),
 	'9.1.429' => array
 	(
 		'dict_key' => 390,
 		'text' => 'WS-C2950G-48: 48 RJ-45/10-100TX + 2 GBIC/1000',
-		'processors' => array ('catalyst-any-1000GBIC', 'catalyst-any-100TX'),
+		'processors' => array ('catalyst-chassis-any-1000GBIC', 'catalyst-chassis-any-100TX'),
 	),
 	'9.1.559' => array
 	(
 		'dict_key' => 387,
 		'text' => 'WS-C2950T-48: 48 RJ-45/10-100TX + 2 RJ-45/10-100-1000T(X)',
-		'processors' => array ('catalyst-any-1000T', 'catalyst-any-100TX'),
+		'processors' => array ('catalyst-chassis-uplinks-1000T', 'catalyst-chassis-any-100TX'),
 	),
 	'9.1.749' => array
 	(
@@ -375,8 +400,8 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 	'4526.100.2.2' => array
 	(
 		'dict_key' => 562,
-		'text' => 'GSM7224: 24 RJ-45/10-100-1000T(X)',
-		'processors' => array ('netgear-any-1000T'),
+		'text' => 'GSM7224: 20 RJ-45/10-100-1000T(X) + 4 combo-gig',
+		'processors' => array ('netgear-chassis-21-to-24-1000SFP', 'netgear-chassis-21-to-24-1000Tcombo', 'netgear-chassis-any-1000T'),
 	),
 	'45.3.68.5' => array
 	(
@@ -405,82 +430,20 @@ function doSNMPmining_old ($object_id, $community)
 	// Cisco sysObjectID to model (not product number, i.e. image code is missing) decoder
 	$verb_model = array
 	(
-		'9.1.278' => 'WS-C3548-XL (48 Ethernet 10/100 ports and 2 10/100/1000 uplinks)',
 		'9.1.283' => 'WS-C6509-E (9-slot system)',
-		'9.1.324' => 'WS-C2950-24 (24 Ethernet 10/100 ports)',
-		'9.1.325' => 'WS-C2950C-24 (24 Ethernet 10/100 ports and 2 100FX uplinks)',
-#		'9.1.694' => 'WS-C2960-24TC-L (24 Ethernet 10/100 ports and 2 dual-purpose uplinks)',
-#		'9.1.695' => 'WS-C2960-48TC-L (48 Ethernet 10/100 ports and 2 dual-purpose uplinks)',
-		'9.1.696' => 'WS-C2960G-24TC-L (20 Ethernet 10/100/1000 ports and 4 dual-purpose uplinks)',
-		'9.1.697' => 'WS-C2960G-48TC-L (44 Ethernet 10/100/1000 ports and 4 dual-purpose uplinks)',
-		'9.1.716' => 'WS-C2960-24TT-L (24 Ethernet 10/100 ports and 2 10/100/1000 uplinks)',
-		'9.1.717' => 'WS-C2960-48TT-L (48 Ethernet 10/100 ports and 2 10/100/1000 uplinks)',
-		'9.1.527' => 'WS-C2970G-24T (24 Ethernet 10/100/1000 ports)',
-		'9.1.561' => 'WS-C2970G-24TS (24 Ethernet 10/100/1000 ports and 4 10/100/1000 SFP uplinks)',
-		'9.1.633' => 'WS-C3560-24TS (24 Ethernet 10/100 ports and 2 10/100/1000 SFP uplinks)',
-		'9.1.634' => 'WS-C3560-48TS (48 Ethernet 10/100 ports and 4 10/100/1000 SFP uplinks)',
-		'9.1.563' => 'WS-C3560-24PS (24 Ethernet 10/100 POE ports and 2 10/100/1000 SFP uplinks)',
-		'9.1.564' => 'WS-C3560-48PS (48 Ethernet 10/100 POE ports and 4 10/100/1000 SFP uplinks)',
-		'9.1.516' => 'WS-C3750-XXPS (24 or 48 Ethernet 10/100 POE ports and 4 10/100/1000 SFP uplinks)',
-		'9.1.614' => 'WS-C3560G-24PS (24 Ethernet 10/100/1000 POE ports and 4 10/100/1000 SFP uplinks)',
-		'9.1.615' => 'WS-C3560G-24TS (24 Ethernet 10/100/1000 ports and 4 10/100/1000 SFP uplinks)',
-		'9.1.616' => 'WS-C3560G-48PS (48 Ethernet 10/100/1000 POE ports and 4 10/100/1000 SFP uplinks)',
-		'9.1.617' => 'WS-C3560G-48TS (48 Ethernet 10/100/1000 ports and 4 10/100/1000 SFP uplinks)',
-		'9.1.624' => 'WS-C3750G-24TS (24 Ethernet 10/100/1000 ports and 4 10/100/1000 SFP uplinks)',
 		'9.1.58'  => 'WS-C4503 (3-slot system)',
 		'9.1.503' => '4503 (3-slot system)',
 		'9.1.59'  => 'WS-C4506 (6-slot system)',
 		'9.1.502' => '4506 (6-slot system)',
-		'9.1.626' => 'WS-C4948 (48 Ethernet 10/100/1000 ports and 4 10/100/1000 SFP uplinks)',
-		'9.1.659' => 'WS-C4948-10GE (48 Ethernet 10/100/1000 ports and 2 10Gb X2 uplinks)',
-		'9.1.428' => 'WS-C2950G-24 (24 Ethernet 10/100 ports and 2 1000 GBIC uplinks)',
-		'9.1.429' => 'WS-C2950G-48 (48 Ethernet 10/100 ports and 2 1000 GBIC uplinks)',
-		'9.1.559' => 'WS-C2950T-48 (48 Ethernet 10/100 ports and 2 10/100/1000 uplinks)',
-		'9.1.749' => 'WS-CBS3030-DEL (12 Ethernet 10/100/1000 and 4 10/100/1000 SFP uplinks)',
-		'9.1.920' => 'WS-CBS3032-DEL-F (16 Ethernet 10/100/1000 and up to 8 10/100/1000 uplinks)',
-		'9.12.3.1.3.719' => 'N5K-C5020 (40-ports system)',
-		'11.2.3.7.11.36' => 'HP J8164A (24 Ethernet 10/100 ports and 2 100/1000 uplinks)',
-		'11.2.3.7.11.35' => 'HP J8165A (48  Ethernet 10/100 ports and 2 100/1000 uplinks)',
-		'4526.100.2.2' => 'NETGEAR GSM7224 (24 Ethernet 10/100/1000 ports)',
 	);
 	// Cisco sysObjectID to Dictionary dict_key map
 	$hwtype = array
 	(
-		'9.1.278' => 395,
 		'9.1.283' => 148,
-		'9.1.324' => 380,
-		'9.1.325' => 382,
-		'9.1.696' => 167,
-		'9.1.697' => 166,
-		'9.1.527' => 210,
-		'9.1.561' => 115,
-		'9.1.633' => 169,
-		'9.1.634' => 170,
-		'9.1.563' => 171,
-		'9.1.564' => 172,
-		'9.1.614' => 175,
-		'9.1.615' => 173,
-		'9.1.616' => 176,
-		'9.1.617' => 174,
-		'9.1.624' => 143,
 		'9.1.58' => 145,
 		'9.1.503' => 145,
 		'9.1.59' => 156,
 		'9.1.502' => 156,
-		'9.1.626' => 147,
-		'9.1.659' => 377,
-		'9.1.428' => 389,
-		'9.1.429' => 390,
-		'9.1.559' => 387,
-		'9.1.516' => 179,
-		'9.1.716' => 164,
-		'9.1.717' => 162,
-		'9.1.920' => 795,
-		'9.12.3.1.3.719' => 960,
-		'9.1.749' => 989,
-		'11.2.3.7.11.36' => 865,
-		'11.2.3.7.11.35' => 867,
-		'4526.100.2.2' => 562,
 	);
 	// Cisco portType to Dictionary dict_key map
 	$porttype = array
@@ -493,45 +456,6 @@ function doSNMPmining_old ($object_id, $community)
 
 	switch ($sysObjectID)
 	{
-		case '9.1.516': // WS-C3750G-24TS OR WS-C3750-48PS
-			// FIXME: only handles 2 models of 3750, make it handle all of them
-			// see if it has 24 or 48 ports
-			$numports = substr (snmpget ($endpoints[0], $community, '.1.3.6.1.4.1.9.5.1.3.1.1.14.1'), strlen('INTEGER: '));
-
-			if ($numports == 28) // has 24 ports (+4 SFP) meaning it's a WS-C3750G-24TS
-			{
-				for ($i = 1; $i <= 28; $i++)
-				{
-					$label = "${i}";
-					$error = commitAddPort ($object_id, 'gi1/0/' . $i, 24, $label, $ifList2["GigabitEthernet1/0/${i}"]['phyad']);
-					if ($error == '')
-						$newports++;
-					else
-						$log[] = array ('code' => 'error', 'message' => 'Failed to add port ' . $label . ': ' . $error);
-				}
-			}
-			elseif ($numports == 52) // has 48 ports (+4 SFP) meaning it's a WS-C3750-48PS
-			{
-				for ($i = 1; $i <= 48; $i++)
-				{
-					$label = "${i}X";
-					$error = commitAddPort ($object_id, 'fa1/0/' . $i, 19, $label, $ifList2["FastEthernet1/0/${i}"]['phyad']);
-					if ($error == '')
-						$newports++;
-					else
-						$log[] = array ('code' => 'error', 'message' => 'Failed to add port ' . $label . ': ' . $error);
-				}
-				for ($i = 1; $i <= 4; $i++)
-				{
-					$label = "${i}";
-					$error = commitAddPort ($object_id, 'gi1/0/' . $i, 24, $label, $ifList2["GigabitEthernet1/0/${i}"]['phyad']);
-					if ($error == '')
-						$newports++;
-					else
-						$log[] = array ('code' => 'error', 'message' => 'Failed to add port ' . $label . ': ' . $error);
-				}
-			}
-			break;
 	// For modular devices we issue a separate SNMP query to determine port type,
 	// then extract blade & port numbers from the results.
 		case '9.1.58':  // WS-C4503
@@ -646,10 +570,12 @@ function doSNMPmining ($object_id, $community)
 			'12.2' => 252,
 		);
 		updateStickerForCell ($objectInfo, 5, $exact_release);
-		updateStickerForCell ($objectInfo, 4, $ios_codes[$major_line]);
+		if (array_key_exists ($major_line, $ios_codes))
+			updateStickerForCell ($objectInfo, 4, $ios_codes[$major_line]);
 		$sysChassi = snmpget ($endpoints[0], $community, '1.3.6.1.4.1.9.3.6.3.0');
 		if ($sysChassi !== FALSE or $sysChassi !== NULL)
 			updateStickerForCell ($objectInfo, 1, str_replace ('"', '', substr ($sysChassi, strlen ('STRING: '))));
+		commitAddPort ($object_id, 'con0', 29, 'console', ''); // RJ-45 RS-232 console
 		$log = mergeLogs ($log, oneLiner (81, array ('catalyst-generic')));
 		break;
 	case preg_match ('/^9\.12\.3\.1\.3\./', $sysObjectID): // Nexus
@@ -660,7 +586,8 @@ function doSNMPmining ($object_id, $community)
 			'4.0' => 963,
 			'4.1' => 964,
 		);
-		updateStickerForCell ($objectInfo, 4, $nxos_codes[$major_line]);
+		if (array_key_exists ($major_line, $nxos_codes))
+			updateStickerForCell ($objectInfo, 4, $nxos_codes[$major_line]);
 		updateStickerForCell ($objectInfo, 5, $exact_release);
 		$log = mergeLogs ($log, oneLiner (81, array ('nexus-generic')));
 		break;
@@ -668,6 +595,10 @@ function doSNMPmining ($object_id, $community)
 		$exact_release = ereg_replace ('^.* revision ([^ ]+), .*$', '\\1', $sysDescr);
 		updateStickerForCell ($objectInfo, 5, $exact_release);
 		$log = mergeLogs ($log, oneLiner (81, array ('procurve-generic')));
+		break;
+	case preg_match ('/^4526\.100\.2\./', $sysObjectID): // NETGEAR
+		commitAddPort ($object_id, 'console', 681, 'console', ''); // DB-9 RS-232 console
+		$log = mergeLogs ($log, oneLiner (81, array ('netgear-generic')));
 		break;
 	default: // Nortel, NETGEAR...
 		break;
@@ -706,8 +637,6 @@ function doSNMPmining ($object_id, $community)
 	foreach ($ifInfo as $iface)
 		foreach ($known_switches[$sysObjectID]['processors'] as $processor_name)
 		{
-//			echo "subject == '" . $iface['ifDescr'] . "'<br>";
-//			echo "pattern == '" . $iftable_processors[$processor_name]['pattern'] . "', replacement == '" . $iftable_processors[$processor_name]['replacement'] . "'<br>";
 			$newname = preg_replace ($iftable_processors[$processor_name]['pattern'], $iftable_processors[$processor_name]['replacement'], $iface['ifDescr'], 1, $count);
 			if (!$count)
 				continue; // try next processor on current port
