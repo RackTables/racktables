@@ -250,6 +250,7 @@ CREATE TABLE `LDAPCache` (
 			$query[] = "INSERT INTO PortCompat (type1, type2) VALUES (1083,20)";
 			$query[] = "INSERT INTO PortCompat (type1, type2) VALUES (1083,21)";
 			$query[] = "INSERT INTO PortCompat (type1, type2) VALUES (1083,1083)";
+			$query[] = "INSERT INTO PortCompat (type1, type2) VALUES (1087,1087)";
 			$query[] = "INSERT INTO `Chapter` (`id`, `sticky`, `name`) VALUES (27,'no','PDU models')";
 			$query[] = "INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_id`) VALUES (2,2,27)";
 			$query[] = "UPDATE Config SET varvalue = '0.17.2' WHERE varname = 'DB_VERSION'";

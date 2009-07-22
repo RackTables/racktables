@@ -19,7 +19,7 @@ function reloadDictionary ($from_key, $to_key)
 $dictreload = array
 (
 	'0.17.0' => array ('from' => 1, 'to' => 988),
-	'0.17.2' => array ('from' => 989, 'to' => 1150),
+	'0.17.2' => array ('from' => 562, 'to' => 1150),
 );
 
 $dictionary = array
