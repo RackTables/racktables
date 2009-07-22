@@ -23,6 +23,7 @@ INSERT INTO `Attribute` (`id`, `type`, `name`) VALUES
 (25,'string','UUID');
 
 INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_id`) VALUES
+(2,2,27),
 (4,1,0),
 (4,2,11),
 (4,3,0),
