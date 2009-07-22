@@ -4786,7 +4786,6 @@ function renderCellFilterPortlet ($preselect, $realm, $bypass_name = '', $bypass
 	// predicates block
 	if (getConfigVar ('FILTER_SUGGEST_PREDICATES') == 'yes' or count ($preselect['pnamelist']))
 	{
-		$enable_apply = TRUE;
 		if (count ($preselect['pnamelist']))
 			$enable_reset = TRUE;
 		echo $hr;
