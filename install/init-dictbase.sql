@@ -116,7 +116,8 @@ INSERT INTO `Chapter` (`id`, `sticky`, `name`) VALUES
 (23,'no','console models'),
 (24,'no','network security models'),
 (25,'no','wireless models'),
-(26,'no','fibre channel switch models');
+(26,'no','fibre channel switch models'),
+(27,'no','PDU models');
 
 INSERT INTO `PortCompat` (`type1`, `type2`) VALUES
 (17,17),
