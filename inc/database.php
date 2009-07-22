@@ -3258,7 +3258,7 @@ function loadScript ($name)
 		return NULL;
 }
 
-function saveScript ($name, $text)
+function saveScript ($name = '', $text)
 {
 	if (!strlen ($name))
 	{
