@@ -2868,7 +2868,7 @@ function renderSearchResults ()
 			switch ($where)
 			{
 				case 'object':
-					startPortlet ("<a href='${root}?page=depot'>Objects (continued)</a>");
+					startPortlet ("<a href='${root}?page=depot'>Objects</a>");
 					echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
 					echo '<tr><th>what</th><th>why</th></tr>';
 					foreach ($what as $obj)
