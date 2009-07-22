@@ -1,4 +1,4 @@
-0.17.2
+0.17.2 2009-07-22
 	new feature: configure default SNMP community (by jthurman)
 	new feature: "$untagged", "$portless", "$nameless" and "$masklen_OP_NN" autotags
 	new feature: knight button in IPv4 tree
