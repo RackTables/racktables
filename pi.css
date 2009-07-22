@@ -491,6 +491,16 @@ td.dashed {
 }
 
 div.tagselector {
-	overflow: scroll;
+	overflow: auto;
 	max-height: 400px;
+	background-color : #f0f0f0;
+	border-width : 1px;
+	border-style : solid;
+	border-color : #000000;
 }
+
+/* prevent tag selector in a "cooltable" against a series of horizintal lines */
+div.tagselector td {
+	border-width: 0px;
+}
+
