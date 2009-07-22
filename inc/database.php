@@ -1872,7 +1872,7 @@ function getDict ($parse_links = FALSE)
 
 function getDictStats ()
 {
-	$stock_chapters = array (1, 2, 11, 12, 13, 14, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26);
+	$stock_chapters = array (1, 2, 11, 12, 13, 14, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27);
 	$query =
 		"select Chapter.id as chapter_no, Chapter.name as chapter_name, count(dict_key) as wc from " .
 		"Chapter left join Dictionary on Chapter.id = Dictionary.chapter_id group by Chapter.id";
