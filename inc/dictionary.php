@@ -1023,7 +1023,7 @@ $dictionary = array
 	999 => array ('chapter_id' => 18, 'dict_value' => '[[EMC CLARiiON CX4-120 SPE | http://www.emc.com/products/detail/hardware/clariion-cx4-model-120.htm]]'),
 	1000 => array ('chapter_id' => 18, 'dict_value' => '[[EMC CLARiiON CX4-240 SPE | http://www.emc.com/products/detail/hardware/clariion-cx4-model-240.htm]]'),
 	1001 => array ('chapter_id' => 18, 'dict_value' => '[[EMC CLARiiON CX4-480 SPE | http://www.emc.com/products/detail/hardware/clariion-cx4-model-480.htm]]'),
-	1002 => array ('chapter_id' => 18, 'dict_value' => '[[EMC CLARiiON CX4-960 SPE | http://www.emc.com/products/detail/hardware/clariion-cx4-model-960.htm'),
+	1002 => array ('chapter_id' => 18, 'dict_value' => '[[EMC CLARiiON CX4-960 SPE | http://www.emc.com/products/detail/hardware/clariion-cx4-model-960.htm]]'),
 	1003 => array ('chapter_id' => 18, 'dict_value' => 'EMC CLARiiON CX4 DAE'),
 	1004 => array ('chapter_id' => 26, 'dict_value' => '[[Brocade%GPASS%300 | http://www.brocade.com/products-solutions/products/switches/product-details/300-switch/index.page]]'),
 	1005 => array ('chapter_id' => 26, 'dict_value' => '[[Brocade%GPASS%4900 | http://www.brocade.com/products-solutions/products/switches/index.page]]'),
