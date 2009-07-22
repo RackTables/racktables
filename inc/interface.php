@@ -4621,7 +4621,7 @@ function renderTagTreeEditor ()
 	{
 		global $taglist;
 		printOpFormIntro ('createTag');
-		echo "<tr><td class=tdleft>";
+		echo "<tr><td align=left style='padding-left: 16px;'>";
 		printImageHREF ('create', 'Create tag', TRUE);
 		echo '</td><td><input type=text name=tag_name tabindex=100></td><td><select name=parent_id tabindex=101>';
 		echo "<option value=0>-- NONE --</option>\n";
