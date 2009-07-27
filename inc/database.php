@@ -1632,6 +1632,16 @@ function getObjectSearchResults ($what)
 		$ret[$objRecord['id']]['id'] = $objRecord['id'];
 		$ret[$objRecord['id']]['by_attr'] = $objRecord['by_attr'];
 	}
+	foreach (getObjectIfacesSearchResults ($what) as $objRecord)
+	{
+		$ret[$objRecord['id']]['id'] = $objRecord['id'];
+		$ret[$objRecord['id']]['by_iface'] = $objRecord['by_iface'];
+	}
+	foreach (getObjectNATSearchResults ($what) as $objRecord)
+	{
+		$ret[$objRecord['id']]['id'] = $objRecord['id'];
+		$ret[$objRecord['id']]['by_nat'] = $objRecord['by_nat'];
+	}
 	return $ret;
 }
 
@@ -1719,6 +1729,46 @@ function getPortSearchResults ($what)
 	return $ret;
 }
 
+// search in IPv4 allocations
+function getObjectIfacesSearchResults ($what)
+{
+	$ret = array();
+	$ifaces = getSearchResultByField
+	(
+		'IPv4Allocation',
+		array ('object_id', 'name'),
+		'name',
+		$what,
+		'object_id'
+	);
+	foreach ($ifaces as $row)
+	{
+		$ret[$row['object_id']]['id'] = $row['object_id'];
+		$ret[$row['object_id']]['by_iface'][] = $row['name'];
+	}
+	return $ret;
+}
+
+function getObjectNATSearchResults ($what)
+{
+	$ret = array();
+	$ifaces = getSearchResultByField
+	(
+		'IPv4NAT',
+		array ('object_id', 'description'),
+		'description',
+		$what,
+		'object_id'
+	);
+	foreach ($ifaces as $row)
+	{
+		$ret[$row['object_id']]['id'] = $row['object_id'];
+		$ret[$row['object_id']]['by_nat'][] = $row['description'];
+	}
+	return $ret;
+}
+
+// This function returns either port ID or NULL for specified arguments.
 // This function returns either port ID or NULL for specified arguments.
 function getPortID ($object_id, $port_name)
 {

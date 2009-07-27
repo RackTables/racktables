@@ -156,8 +156,9 @@ $pTable = buildPredicateTable ($rackCode);
 // Constraints parse trees aren't cached in the database, so the least to keep
 // things running is to maintain application cache for them.
 $parseCache = array();
-
 $entityCache = array();
+// used by getExplicitTagsOnly()
+$tagRelCache = array();
 
 $taglist = getTagList();
 $tagtree = treeFromList ($taglist);
