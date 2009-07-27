@@ -964,13 +964,28 @@ function getImplicitTags ($oldtags)
 }
 
 // Minimize the chain: exclude all implicit tags and return the result.
+// This function makes use of an external cache with a miss/hit ratio
+// about 3/7 (ticket:255).
 function getExplicitTagsOnly ($chain)
 {
+	global $taglist, $tagRelCache;
 	$ret = array();
-	$big_backtrace = getImplicitTags ($chain);
-	foreach ($chain as $key => $taginfo)
-		if (!tagOnChain ($taginfo, $big_backtrace))
-			$ret[$key] = $taginfo;
+	foreach (array_keys ($chain) as $keyA) // check each A
+	{
+		$tagidA = $chain[$keyA]['id'];
+		// do not include A in result, if A is seen on the trace of any B!=A
+		foreach (array_keys ($chain) as $keyB)
+		{
+			$tagidB = $chain[$keyB]['id'];
+			if ($tagidA == $tagidB)
+				continue;
+			if (!isset ($tagRelCache[$tagidA][$tagidB]))
+				$tagRelCache[$tagidA][$tagidB] = tagOnChain ($chain[$keyA], $taglist[$tagidB]['trace']);
+			if ($tagRelCache[$tagidA][$tagidB] === TRUE) // A is ancestor of B
+				continue 2; // skip this A
+		}
+		$ret[] = $chain[$keyA];
+	}
 	return $ret;
 }
 
