@@ -229,6 +229,9 @@ INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, descriptio
 ('FILTER_SUGGEST_EXTRA','no','string','no','no','Suggest extra expression in list filter'),
 ('DEFAULT_SNMP_COMMUNITY','public','string','no','no','Default SNMP Community string'),
 ('IPV4_ENABLE_KNIGHT','yes','string','no','no','Enable IPv4 knight feature'),
+('TAGS_TOPLIST_SIZE','50','uint','yes','no','Tags top list size'),
+('TAGS_QUICKLIST_SIZE','20','uint','no','no','Tags quick list size'),
+('TAGS_QUICKLIST_THRESHOLD','50','uint','yes','no','Tags quick list threshold'),
 ('DB_VERSION','0.17.2','string','no','yes','Database version.');
 
 INSERT INTO `Script` VALUES ('RackCode','allow {$userid_1}');

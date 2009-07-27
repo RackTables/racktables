@@ -3583,7 +3583,7 @@ function renderSystemReports ()
 		),
 		array
 		(
-			'title' => 'Tags top-50',
+			'title' => 'Tags top list',
 			'type' => 'custom',
 			'func' => 'renderTagStats'
 		),
@@ -3660,6 +3660,41 @@ function renderReports ($what)
 		echo "<tr><td colspan=2><hr></td></tr>\n";
 	}
 	echo "</table>\n";
+}
+
+function renderTagStats ()
+{
+	global $taglist, $root;
+	echo '<table border=1><tr><th>tag</th><th>total</th><th>objects</th><th>IPv4 nets</th><th>racks</th>';
+	echo '<th>IPv4 VS</th><th>IPv4 RS pools</th><th>users</th><th>files</th></tr>';
+	$pagebyrealm = array
+	(
+		'file' => 'files&tab=default',
+		'ipv4net' => 'ipv4space&tab=default',
+		'ipv4vs' => 'ipv4vslist&tab=default',
+		'ipv4rspool' => 'ipv4rsplist&tab=default',
+		'object' => 'depot&tab=default',
+		'rack' => 'rackspace&tab=default',
+		'user' => 'userlist&tab=default'
+	);
+	foreach (getTagChart (getConfigVar ('TAGS_TOPLIST_SIZE')) as $taginfo)
+	{
+		echo "<tr><td>${taginfo['tag']}</td><td>" . $taginfo['refcnt']['total'] . "</td>";
+		foreach (array ('object', 'ipv4net', 'rack', 'ipv4vs', 'ipv4rspool', 'user', 'file') as $realm)
+		{
+			echo '<td>';
+			if (!isset ($taginfo['refcnt'][$realm]))
+				echo '&nbsp;';
+			else
+			{
+				echo "<a href='${root}?page=" . $pagebyrealm[$realm] . "&cft[]=${taginfo['id']}'>";
+				echo $taginfo['refcnt'][$realm] . '</a>';
+			}
+			echo '</td>';
+		}
+		echo '</tr>';
+	}
+	echo '</table>';
 }
 
 function dragon ()
@@ -4703,23 +4738,22 @@ function renderTagCheckbox ($inputname, $preselect, $taginfo, $refcnt_realm = ''
 	if (strlen ($refcnt_realm) and isset ($taginfo['refcnt'][$refcnt_realm]))
 		echo ' <i>(' . $taginfo['refcnt'][$refcnt_realm] . ')</i>';
 	echo "</label></td></tr>\n";
-	foreach ($taginfo['kids'] as $kid)
-		$self ($inputname, $preselect, $kid, $refcnt_realm, $level + 1);
+	if (isset ($taginfo['kids']))
+		foreach ($taginfo['kids'] as $kid)
+			$self ($inputname, $preselect, $kid, $refcnt_realm, $level + 1);
 }
 
-function renderEntityTags ($entity_id)
+function renderEntityTagsPortlet ($title, $tags, $preselect, $realm)
 {
-	global $tagtree, $target_given_tags, $pageno, $etype_by_pageno, $target_given_tags;
-	startPortlet ('Tag list');
+	startPortlet ($title);
 	echo '<table border=0 cellspacing=0 cellpadding=3 align=center>';
 	printOpFormIntro ('saveTags');
-	// Show a tree of tags with preselection, which matches current chain.
-	foreach ($tagtree as $taginfo)
-		renderTagCheckbox ('taglist', $target_given_tags, $taginfo, $etype_by_pageno[$pageno]);
+	foreach ($tags as $taginfo)
+		renderTagCheckbox ('taglist', $preselect, $taginfo, $realm);
 	echo '<tr><td class=tdleft>';
 	printImageHREF ('SAVE', 'Save changes', TRUE);
 	echo "</form></td><td class=tdright>";
-	if (!count ($target_given_tags))
+	if (!count ($preselect))
 		printImageHREF ('CLEAR gray');
 	else
 	{
@@ -4729,6 +4763,31 @@ function renderEntityTags ($entity_id)
 	}
 	echo '</td></tr></table>';
 	finishPortlet();
+}
+
+function renderEntityTags ($entity_id)
+{
+	global $tagtree, $taglist, $target_given_tags, $pageno, $etype_by_pageno;
+	echo '<table border=0 width="100%"><tr>';
+
+	if (count ($taglist) > getConfigVar ('TAGS_QUICKLIST_THRESHOLD'))
+	{
+		$minilist = getTagChart (getConfigVar ('TAGS_QUICKLIST_SIZE'), $etype_by_pageno[$pageno], $target_given_tags);
+		// It could happen, that none of existing tags have been used in the current realm.
+		if (count ($minilist))
+		{
+			echo '<td class=pcleft width="50%">';
+			renderEntityTagsPortlet ('Quick list', $minilist, $target_given_tags, $etype_by_pageno[$pageno]);
+			echo '</td>';
+		}
+	}
+
+	// do not do anything about empty tree, trigger function ought to work this out
+	echo '<td class=pcright>';
+	renderEntityTagsPortlet ('Full tree', $tagtree, $target_given_tags, $etype_by_pageno[$pageno]);
+	echo '</td>';
+
+	echo '</tr></table>';
 }
 
 function printTagTRs ($cell, $baseurl = '')
@@ -4810,7 +4869,7 @@ function renderCellFilterPortlet ($preselect, $realm, $bypass_name = '', $bypass
 		// Repack matching predicates in a way, which tagOnChain() understands.
 		foreach (array_keys ($pTable) as $pname)
 			if (mb_ereg_match ($psieve, $pname))
-				$myPredicates[] = array ('id' => $pname, 'tag' => $pname, 'kids' => array());
+				$myPredicates[] = array ('id' => $pname, 'tag' => $pname);
 		if (!count ($myPredicates))
 			echo "<tr><td colspan=2 class='tagbox sparenetwork'>(no predicates to show)</td></tr>";
 		else

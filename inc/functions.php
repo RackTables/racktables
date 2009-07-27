@@ -2114,4 +2114,33 @@ function dump ($var)
 	echo '</pre></div>';
 }
 
+function getTagChart ($limit = 0, $realm = 'total', $special_tags = array())
+{
+	global $taglist;
+	// first build top-N chart...
+	$toplist = array();
+	foreach ($taglist as $taginfo)
+		if (isset ($taginfo['refcnt'][$realm]))
+			$toplist[$taginfo['id']] = $taginfo['refcnt'][$realm];
+	arsort ($toplist, SORT_NUMERIC);
+	$ret = array();
+	$done = 0;
+	foreach (array_keys ($toplist) as $tag_id)
+	{
+		$ret[$tag_id] = $taglist[$tag_id];
+		if (++$done == $limit)
+			break;
+	}
+	// ...then make sure, that every item of the special list is shown
+	// (using the same sort order)
+	$extra = array();
+	foreach ($special_tags as $taginfo)
+		if (!array_key_exists ($taginfo['id'], $ret))
+			$extra[$taginfo['id']] = $taglist[$taginfo['id']]['refcnt'][$realm];
+	arsort ($extra, SORT_NUMERIC);
+	foreach (array_keys ($extra) as $tag_id)
+		$ret[] = $taglist[$tag_id];
+	return $ret;
+}
+
 ?>

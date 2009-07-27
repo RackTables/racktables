@@ -2008,49 +2008,6 @@ function getRackspaceStats ()
 	return $ret;
 }
 
-function renderTagStats ()
-{
-	global $taglist, $root;
-	$query = "select id, tag, count(tag_id) as refcnt from " .
-		"TagTree inner join TagStorage on TagTree.id = TagStorage.tag_id " .
-		"group by tag_id order by refcnt desc limit 50";
-	// The same data is already present in pre-loaded tag list, but not in
-	// the form we need. So let's ask the DB server for cooked top list and
-	// use the cooked tag list to break it down.
-	$result = useSelectBlade ($query, __FUNCTION__);
-	$refc = $result->fetchAll (PDO::FETCH_ASSOC);
-	echo '<table border=1><tr><th>tag</th><th>total</th><th>objects</th><th>IPv4 nets</th><th>racks</th>';
-	echo '<th>IPv4 VS</th><th>IPv4 RS pools</th><th>users</th><th>files</th></tr>';
-	$pagebyrealm = array
-	(
-		'file' => 'files&tab=default',
-		'ipv4net' => 'ipv4space&tab=default',
-		'ipv4vs' => 'ipv4vslist&tab=default',
-		'ipv4rspool' => 'ipv4rsplist&tab=default',
-		'object' => 'depot&tab=default',
-		'rack' => 'rackspace&tab=default',
-		'user' => 'userlist&tab=default'
-	);
-	foreach ($refc as $ref)
-	{
-		echo "<tr><td>${ref['tag']}</td><td>${ref['refcnt']}</td>";
-		foreach (array ('object', 'ipv4net', 'rack', 'ipv4vs', 'ipv4rspool', 'user', 'file') as $realm)
-		{
-			echo '<td>';
-			if (!isset ($taglist[$ref['id']]['refcnt'][$realm]))
-				echo '&nbsp;';
-			else
-			{
-				echo "<a href='${root}?page=" . $pagebyrealm[$realm] . "&cft[]=${ref['id']}'>";
-				echo $taglist[$ref['id']]['refcnt'][$realm] . '</a>';
-			}
-			echo '</td>';
-		}
-		echo '</tr>';
-	}
-	echo '</table>';
-}
-
 /*
 
 The following allows figuring out records in TagStorage, which refer to non-existing entities:
@@ -2984,10 +2941,13 @@ function getTagList ()
 				'tag' => $row['tag'],
 				'ci' => $ci++,
 				'parent_id' => $row['parent_id'],
-				'refcnt' => array()
+				'refcnt' => array ('total' => 0)
 			);
 		if ($row['realm'])
+		{
 			$ret[$row['id']]['refcnt'][$row['realm']] = $row['refcnt'];
+			$ret[$row['id']]['refcnt']['total'] += $row['refcnt'];
+		}
 	}
 	$result->closeCursor();
 	return $ret;
