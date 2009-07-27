@@ -1010,6 +1010,9 @@ function resetUIConfig()
 	setConfigVar ('FILTER_SUGGEST_EXTRA','no');
         setConfigVar ('DEFAULT_SNMP_COMMUNITY','public');
 	setConfigVar ('IPV4_ENABLE_KNIGHT','yes');
+	setConfigVar ('TAGS_TOPLIST_SIZE','50');
+	setConfigVar ('TAGS_QUICKLIST_SIZE','20');
+	setConfigVar ('TAGS_QUICKLIST_THRESHOLD','50');
 	return buildRedirectURL (__FUNCTION__, 'OK');
 }
 
