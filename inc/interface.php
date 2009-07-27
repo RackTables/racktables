@@ -2915,6 +2915,20 @@ function renderSearchResults ()
 									}
 							echo '</table>';
 						}
+						if (isset ($obj['by_iface']))
+						{
+							echo '<ul>';
+							foreach ($obj['by_iface'] as $ifname)
+								echo "<li>interface ${ifname}</li>";
+							echo '</ul>';
+						}
+						if (isset ($obj['by_nat']))
+						{
+							echo '<ul>';
+							foreach ($obj['by_nat'] as $comment)
+								echo "<li>NAT rule: ${comment}</li>";
+							echo '</ul>';
+						}
 						echo "</td></tr>";
 						$order = $nextorder[$order];
 					}
