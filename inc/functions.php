@@ -203,9 +203,9 @@ function setDisplayedName (&$cell)
 	{
 		$cell['atags'][] = array ('tag' => '$nameless');
 		if (considerConfiguredConstraint ($cell, 'NAMEWARN_LISTSRC'))
-			$cell['dname'] = 'ANONYMOUS ' . $cell['objtype_name'];
+			$cell['dname'] = 'ANONYMOUS ' . decodeObjectType ($cell['objtype_id'], 'o');
 		else
-			$cell['dname'] = '[' . $cell['objtype_name'] . ']';
+			$cell['dname'] = '[' . decodeObjectType ($cell['objtype_id'], 'o') . ']';
 	}
 }
 
@@ -705,9 +705,8 @@ function buildPortCompatMatrixFromList ($portTypeList, $portCompatList)
 // object is returned (which may appear 0 and more elements long).
 function findAllEndpoints ($object_id, $fallback = '')
 {
-	$values = getAttrValues ($object_id);
-	foreach ($values as $record)
-		if ($record['name'] == 'FQDN' && strlen ($record['value']))
+	foreach (getAttrValues ($object_id) as $record)
+		if ($record['id'] == 3 && strlen ($record['value'])) // FQDN
 			return array ($record['value']);
 	$regular = array();
 	foreach (getObjectIPv4Allocations ($object_id) as $dottedquad => $alloc)
@@ -725,11 +724,13 @@ function findAllEndpoints ($object_id, $fallback = '')
 // 3. [[word word word | URL]]
 // This function parses the line and returns text suitable for either A
 // (rendering <A HREF>) or O (for <OPTION>).
-function parseWikiLink ($line, $which, $strip_optgroup = FALSE)
+function parseWikiLink ($line, $which)
 {
 	if (preg_match ('/^\[\[.+\]\]$/', $line) == 0)
 	{
-		if ($strip_optgroup)
+		// always strip the marker for A-data, but let cookOptgroup()
+		// do this later (otherwise it can't sort groups out)
+		if ($which == 'a')
 			return ereg_replace ('^.+%GSKIP%', '', ereg_replace ('^(.+)%GPASS%', '\\1 ', $line));
 		else
 			return $line;
@@ -737,13 +738,11 @@ function parseWikiLink ($line, $which, $strip_optgroup = FALSE)
 	$line = preg_replace ('/^\[\[(.+)\]\]$/', '$1', $line);
 	$s = explode ('|', $line);
 	$o_value = trim ($s[0]);
-	if ($strip_optgroup)
-		$o_value = ereg_replace ('^.+%GSKIP%', '', ereg_replace ('^(.+)%GPASS%', '\\1 ', $o_value));
-	$a_value = trim ($s[1]);
-	if ($which == 'a')
-		return "<a href='${a_value}'>${o_value}</a>";
 	if ($which == 'o')
 		return $o_value;
+	$o_value = ereg_replace ('^.+%GSKIP%', '', ereg_replace ('^(.+)%GPASS%', '\\1 ', $o_value));
+	$a_value = trim ($s[1]);
+	return "<a href='${a_value}'>${o_value}</a>";
 }
 
 // rackspace usage for a single rack
@@ -2141,6 +2140,19 @@ function getTagChart ($limit = 0, $realm = 'total', $special_tags = array())
 	foreach (array_keys ($extra) as $tag_id)
 		$ret[] = $taglist[$tag_id];
 	return $ret;
+}
+
+function decodeObjectType ($objtype_id, $style = 'r')
+{
+	static $types = array();
+	if (!count ($types))
+		$types = array
+		(
+			'r' => readChapter (CHAP_OBJTYPE),
+			'a' => readChapter (CHAP_OBJTYPE, 'a'),
+			'o' => readChapter (CHAP_OBJTYPE, 'o')
+		);
+	return $types[$style][$objtype_id];
 }
 
 ?>

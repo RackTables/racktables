@@ -502,7 +502,8 @@ $msgcode['savePortMap']['ERR'] = 108;
 // and modifies database accordingly.
 function savePortMap ()
 {
-	$ptlist = getPortTypes();
+	// values' format doesn't matter, only keys are used
+	$ptlist = readChapter (CHAP_PORTTYPE);
 	$oldCompat = getPortCompat();
 	$newCompat = array();
 	foreach (array_keys ($ptlist) as $leftKey)

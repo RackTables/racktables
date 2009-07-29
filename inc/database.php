@@ -22,7 +22,6 @@ $SQLSchema = array
 			'Rack_name' => '(select name from Rack where id = rack_id)',
 			'row_id' => '(select row_id from Rack where id = rack_id)',
 			'Row_name' => '(select name from RackRow where id = row_id)',
-			'objtype_name' => '(select dict_value from Dictionary where dict_key = objtype_id)',
 			'has_problems' => 'has_problems',
 			'comment' => 'comment',
 			'nports' => '(SELECT COUNT(*) FROM Port WHERE object_id = RackObject.id)',
@@ -225,13 +224,6 @@ function commitDeleteRow($rackrow_id)
 	}
 	$result->closeCursor();
 	return TRUE;
-}
-
-// This function returns id->name map for all object types. The map is used
-// to build <select> input for objects.
-function getObjectTypeList ()
-{
-	return readChapter ('RackObjectType');
 }
 
 // Return a simple object list w/o related information, so that the returned value
@@ -519,15 +511,10 @@ function amplifyCell (&$record, $dummy = NULL)
 	}
 }
 
-function getPortTypes ()
-{
-	return readChapter ('PortType');
-}
-
 function getObjectPortsAndLinks ($object_id)
 {
 	// prepare decoder
-	$ptd = readChapter ('PortType');
+	$ptd = readChapter (CHAP_PORTTYPE, 'a');
 	$query = "select id, name, label, l2address, type as type_id, reservation_comment from Port where object_id = ${object_id}";
 	// list and decode all ports of the current object
 	$result = useSelectBlade ($query, __FUNCTION__);
@@ -903,14 +890,10 @@ function recordHistory ($tableName, $whereClause)
 function getRackspaceHistory ()
 {
 	$query =
-		"select mo.id as mo_id, ro.id as ro_id, ro.name, mo.ctime, mo.comment, dict_value as objtype_name, user_name from " .
-		"MountOperation as mo inner join RackObject as ro on mo.object_id = ro.id " .
-		"inner join Dictionary on objtype_id = dict_key join Chapter on Chapter.id = Dictionary.chapter_id " .
-		"where Chapter.name = 'RackObjectType' order by ctime desc";
+		"SELECT id as mo_id, object_id as ro_id, ctime, comment, user_name FROM " .
+		"MountOperation ORDER BY ctime DESC";
 	$result = useSelectBlade ($query, __FUNCTION__);
-	$ret = $result->fetchAll(PDO::FETCH_ASSOC);
-	$result->closeCursor();
-	return $ret;
+	return $result->fetchAll (PDO::FETCH_ASSOC);
 }
 
 // This function is used in renderRackspaceHistory()
@@ -1859,67 +1842,6 @@ function addPortCompat ($type1 = 0, $type2 = 0)
 	);
 }
 
-// This function returns the dictionary as an array of trees, each tree
-// representing a single chapter. Each element has 'id', 'name', 'sticky'
-// and 'word' keys with the latter holding all the words within the chapter.
-// FIXME: there's a lot of excess legacy code in this function, it's reasonable
-// to merge it with readChapter().
-function getDict ($parse_links = FALSE)
-{
-	$query =
-		"select Chapter.name as chapter_name, Chapter.id as chapter_no, dict_key, dict_value, sticky from " .
-		"Chapter left join Dictionary on Chapter.id = Dictionary.chapter_id order by Chapter.name, dict_value";
-	$result = useSelectBlade ($query, __FUNCTION__);
-	$dict = array();
-	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-	{
-		$chapter_no = $row['chapter_no'];
-		if (!isset ($dict[$chapter_no]))
-		{
-			$dict[$chapter_no]['no'] = $chapter_no;
-			$dict[$chapter_no]['name'] = $row['chapter_name'];
-			$dict[$chapter_no]['sticky'] = $row['sticky'] == 'yes' ? TRUE : FALSE;
-			$dict[$chapter_no]['word'] = array();
-		}
-		if ($row['dict_key'] != NULL)
-		{
-			$dict[$chapter_no]['word'][$row['dict_key']] = ($parse_links or $row['dict_key'] <= MAX_DICT_KEY) ?
-				parseWikiLink ($row['dict_value'], 'a') : $row['dict_value'];
-			$dict[$chapter_no]['refcnt'][$row['dict_key']] = 0;
-		}
-	}
-	unset ($result);
-	// Find the list of all assigned values of dictionary-addressed attributes, each with
-	// chapter/word keyed reference counters. Use the structure to adjust reference counters
-	// of the returned disctionary words.
-	$query = "select a.id as attr_id, am.chapter_id as chapter_no, uint_value, count(object_id) as refcnt " .
-		"from Attribute as a inner join AttributeMap as am on a.id = am.attr_id " .
-		"inner join AttributeValue as av on a.id = av.attr_id " .
-		"inner join Dictionary as d on am.chapter_id = d.chapter_id and av.uint_value = d.dict_key " .
-		"where a.type = 'dict' group by a.id, am.chapter_id, uint_value " .
-		"order by a.id, am.chapter_id, uint_value";
-	$result = useSelectBlade ($query, __FUNCTION__);
-	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-		$dict[$row['chapter_no']]['refcnt'][$row['uint_value']] = $row['refcnt'];
-	unset ($result);
-	// PortType chapter is referenced by PortCompat and Port tables
-	$query = 'select dict_key as uint_value, chapter_id as chapter_no, (select count(*) from PortCompat where type1 = dict_key or type2 = dict_key) + ' .
-		'(select count(*) from Port where type = dict_key) as refcnt ' .
-		'from Dictionary where chapter_id = 2';
-	$result = useSelectBlade ($query, __FUNCTION__);
-	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-		$dict[$row['chapter_no']]['refcnt'][$row['uint_value']] = $row['refcnt'];
-	unset ($result);
-	// RackObjectType chapter is referenced by AttributeMap and RackObject tables
-	$query = 'select dict_key as uint_value, chapter_id as chapter_no, (select count(*) from AttributeMap where objtype_id = dict_key) + ' .
-		'(select count(*) from RackObject where objtype_id = dict_key) as refcnt from Dictionary where chapter_id = 1';
-	$result = useSelectBlade ($query, __FUNCTION__);
-	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-		$dict[$row['chapter_no']]['refcnt'][$row['uint_value']] = $row['refcnt'];
-	unset ($result);
-	return $dict;
-}
-
 function getDictStats ()
 {
 	$stock_chapters = array (1, 2, 11, 12, 13, 14, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27);
@@ -2124,21 +2046,54 @@ function commitDeleteChapter ($chapter_no = 0)
 
 // This is a dictionary accessor. We perform link rendering, so the user sees
 // nice <select> drop-downs.
-function readChapter ($chapter_name = '')
+function readChapter ($chapter_id = 0, $style = '')
 {
-	if (!strlen ($chapter_name))
-		throw new InvalidArgException ('$chapter_name', $chapter_name);
+	if ($chapter_id <= 0)
+		throw new InvalidArgException ('$chapter_id', $chapter_id);
 	$query =
-		"select dict_key, dict_value from Dictionary join Chapter on Chapter.id = Dictionary.chapter_id " .
-		"where Chapter.name = '${chapter_name}'";
+		"select dict_key, dict_value from Dictionary " .
+		"where chapter_id = ${chapter_id}";
 	$result = useSelectBlade ($query, __FUNCTION__);
 	$chapter = array();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-		$chapter[$row['dict_key']] = parseWikiLink ($row['dict_value'], 'o');
+		$chapter[$row['dict_key']] = $style == '' ? $row['dict_value'] : parseWikiLink ($row['dict_value'], $style);
 	$result->closeCursor();
 	// SQL ORDER BY had no sense, because we need to sort after link rendering, not before.
 	asort ($chapter);
 	return $chapter;
+}
+
+// Return refcounters for all given keys of the given chapter.
+function getChapterRefc ($chapter_id, $keylist)
+{
+	$ret = array_fill_keys ($keylist, 0);
+	switch ($chapter_id)
+	{
+	case CHAP_OBJTYPE:
+		// RackObjectType chapter is referenced by AttributeMap and RackObject tables
+		$query = 'select dict_key as uint_value, (select count(*) from AttributeMap where objtype_id = dict_key) + ' .
+			"(select count(*) from RackObject where objtype_id = dict_key) as refcnt from Dictionary where chapter_id = ${chapter_id}";
+		break;
+	case CHAP_PORTTYPE:
+		// PortType chapter is referenced by PortCompat and Port tables
+		$query = 'select dict_key as uint_value, (select count(*) from PortCompat where type1 = dict_key or type2 = dict_key) + ' .
+			'(select count(*) from Port where type = dict_key) as refcnt ' .
+			"from Dictionary where chapter_id = ${chapter_id}";
+		break;
+	default:
+		// Find the list of all assigned values of dictionary-addressed attributes, each with
+		// chapter/word keyed reference counters.
+		$query = "select uint_value, count(object_id) as refcnt " .
+			"from Attribute as a inner join AttributeMap as am on a.id = am.attr_id " .
+			"inner join AttributeValue as av on a.id = av.attr_id " .
+			"inner join Dictionary as d on am.chapter_id = d.chapter_id and av.uint_value = d.dict_key " .
+			"where a.type = 'dict' and am.chapter_id = ${chapter_id} group by uint_value";
+		break;
+	}
+	$result = useSelectBlade ($query, __FUNCTION__);
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
+		$ret[$row['uint_value']] = $row['refcnt'];
+	return $ret;
 }
 
 // Return a list of all stickers with sticker map applied. Each sticker records will
@@ -2147,8 +2102,7 @@ function getAttrMap ()
 {
 	$query =
 		'SELECT id, type, name, chapter_id, (SELECT name FROM Chapter WHERE id = chapter_id) ' .
-		'AS chapter_name, objtype_id, (SELECT dict_value FROM Dictionary WHERE dict_key = objtype_id) ' .
-		'AS objtype_name, (SELECT COUNT(object_id) FROM AttributeValue AS av INNER JOIN RackObject AS ro ' .
+		'AS chapter_name, objtype_id, (SELECT COUNT(object_id) FROM AttributeValue AS av INNER JOIN RackObject AS ro ' .
 		'ON av.object_id = ro.id WHERE av.attr_id = Attribute.id AND ro.objtype_id = AttributeMap.objtype_id) ' .
 		'AS refcnt FROM Attribute LEFT JOIN AttributeMap ON id = attr_id ORDER BY Attribute.name, objtype_id';
 	$result = useSelectBlade ($query, __FUNCTION__);
@@ -2168,7 +2122,6 @@ function getAttrMap ()
 		$application = array
 		(
 			'objtype_id' => $row['objtype_id'],
-			'objtype_name' => $row['objtype_name'],
 			'refcnt' => $row['refcnt'],
 		);
 		if ($row['type'] == 'dict')
@@ -2279,7 +2232,7 @@ function commitReduceAttrMap ($attr_id = 0, $objtype_id)
 // This function returns all optional attributes for requested object
 // as an array of records. NULL is returned on error and empty array
 // is returned, if there are no attributes found.
-function getAttrValues ($object_id, $strip_optgroup = FALSE)
+function getAttrValues ($object_id)
 {
 	if ($object_id <= 0)
 	{
@@ -2289,7 +2242,7 @@ function getAttrValues ($object_id, $strip_optgroup = FALSE)
 	$ret = array();
 	$query =
 		"select A.id as attr_id, A.name as attr_name, A.type as attr_type, C.name as chapter_name, " .
-		"AV.uint_value, AV.float_value, AV.string_value, D.dict_value from " .
+		"C.id as chapter_id, AV.uint_value, AV.float_value, AV.string_value, D.dict_value from " .
 		"RackObject as RO inner join AttributeMap as AM on RO.objtype_id = AM.objtype_id " .
 		"inner join Attribute as A on AM.attr_id = A.id " .
 		"left join AttributeValue as AV on AV.attr_id = AM.attr_id and AV.object_id = RO.id " .
@@ -2305,17 +2258,17 @@ function getAttrValues ($object_id, $strip_optgroup = FALSE)
 		$record['type'] = $row['attr_type'];
 		switch ($row['attr_type'])
 		{
+			case 'dict':
+				$record['chapter_id'] = $row['chapter_id'];
+				$record['chapter_name'] = $row['chapter_name'];
+				$record['key'] = $row['uint_value'];
+				// fall through
 			case 'uint':
 			case 'float':
 			case 'string':
 				$record['value'] = $row[$row['attr_type'] . '_value'];
+				$record['o_value'] = parseWikiLink ($record['value'], 'o');
 				$record['a_value'] = parseWikiLink ($record['value'], 'a');
-				break;
-			case 'dict':
-				$record['value'] = parseWikiLink ($row[$row['attr_type'] . '_value'], 'o', $strip_optgroup);
-				$record['a_value'] = parseWikiLink ($row[$row['attr_type'] . '_value'], 'a', $strip_optgroup);
-				$record['chapter_name'] = $row['chapter_name'];
-				$record['key'] = $row['uint_value'];
 				break;
 			default:
 				$record['value'] = NULL;

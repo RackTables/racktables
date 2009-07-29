@@ -86,7 +86,7 @@ function getSwitchVLANs ($object_id = 0)
 		return NULL;
 	}
 	$hwtype = $swtype = 'unknown';
-	foreach (getAttrValues ($object_id, TRUE) as $record)
+	foreach (getAttrValues ($object_id) as $record)
 	{
 		if ($record['name'] == 'SW type' && strlen ($record['value']))
 			$swtype = str_replace (' ', '+', $record['value']);
@@ -166,7 +166,7 @@ function setSwitchVLANs ($object_id = 0, $setcmd)
 	if (count ($endpoints) > 1)
 		return oneLiner (162); // can't pick an address
 	$hwtype = $swtype = 'unknown';
-	foreach (getAttrValues ($object_id, TRUE) as $record)
+	foreach (getAttrValues ($object_id) as $record)
 	{
 		if ($record['name'] == 'SW type' && strlen ($record['value']))
 			$swtype = strtr ($record['value'], ' ', '+');

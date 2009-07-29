@@ -558,7 +558,7 @@ function renderEditObjectForm ($object_id)
 	echo '<table border=0 cellspacing=0 cellpadding=3 align=center>';
 	echo "<tr><td>&nbsp;</td><th colspan=2><h2>Attributes</h2></th></tr>";
 	echo "<tr><td>&nbsp;</td><th class=tdright>Type:</th><td class=tdleft>";
-	printSelect (getObjectTypeList(), 'object_type_id', $object['objtype_id']);
+	printNiftySelect (cookOptgroups (readChapter (CHAP_OBJTYPE, 'o')), 'object_type_id', $object['objtype_id']);
 	echo "</td></tr>\n";
 	// baseline info
 	echo "<tr><td>&nbsp;</td><th class=tdright>Common name:</th><td class=tdleft><input type=text name=object_name value='${object['name']}'></td></tr>\n";
@@ -593,7 +593,7 @@ function renderEditObjectForm ($object_id)
 					echo "<input type=text name=${i}_value value='${record['value']}'>";
 					break;
 				case 'dict':
-					$chapter = readChapter ($record['chapter_name']);
+					$chapter = readChapter ($record['chapter_id'], 'o');
 					$chapter[0] = '-- NOT SET --';
 					$chapter = cookOptgroups ($chapter, $object['objtype_id'], $record['key']);
 					printNiftySelect ($chapter, "${i}_value", $record['key']);
@@ -795,7 +795,7 @@ function renderRackObject ($object_id)
 		'tab' => 'default',
 		'cfe' => '{$typeid_' . $info['objtype_id'] . '}'
 	));
-	echo "'>${info['objtype_name']}</a></td></tr>\n";
+	echo "'>" . decodeObjectType ($info['objtype_id'], 'o') . '</a></td></tr>';
 	if (strlen ($info['asset_no']))
 		echo "<tr><th width='50%' class=tdright>Asset tag:</th><td class=tdleft>${info['asset_no']}</td></tr>\n";
 	// FIXME: ditto
@@ -807,7 +807,7 @@ function renderRackObject ($object_id)
 		echo "<tr><th width='50%' class=tdright>Barcode:</th><td class=tdleft>${info['barcode']}</td></tr>\n";
 	if ($info['has_problems'] == 'yes')
 		echo "<tr><td colspan=2 class=msg_error>Has problems</td></tr>\n";
-	foreach (getAttrValues ($object_id, TRUE) as $record)
+	foreach (getAttrValues ($object_id) as $record)
 		if (strlen ($record['value']))
 			echo "<tr><th width='50%' class=sticker>${record['name']}:</th><td class=sticker>${record['a_value']}</td></tr>\n";
 	printTagTRs
@@ -1076,14 +1076,15 @@ function renderRackMultiSelect ($sname, $racks, $selected)
 // This function renders a form for port edition.
 function renderPortsForObject ($object_id)
 {
-	function printNewItemTR ()
+	$portOptions = cookOptgroups (readChapter (CHAP_PORTTYPE, 'o'));
+	function printNewItemTR ($portOptions)
 	{
 		printOpFormIntro ('addPort');
 		echo "<tr><td>";
 		printImageHREF ('add', 'add a port', TRUE);
 		echo "</td><td><input type=text size=8 name=port_name tabindex=100></td>\n";
 		echo "<td><input type=text size=24 name=port_label tabindex=101></td><td>";
-		printSelect (getPortTypes(), 'port_type_id', getConfigVar ('default_port_type'), 102);
+		printNiftySelect ($portOptions, 'port_type_id', getConfigVar ('default_port_type'), 102);
 		echo "<td><input type=text name=port_l2address tabindex=103></td>\n";
 		echo "<td colspan=3>&nbsp;</td><td>";
 		printImageHREF ('add', 'add a port', TRUE, 104);
@@ -1096,7 +1097,7 @@ function renderPortsForObject ($object_id)
 	echo "<tr><th>&nbsp;</th><th>Local name</th><th>Visible label</th><th>Port type</th><th>L2 address</th>";
 	echo "<th>Rem. object</th><th>Rem. port</th><th>(Un)link or (un)reserve</th><th>&nbsp;</th></tr>\n";
 	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
-		printNewItemTR();
+		printNewItemTR ($portOptions);
 	foreach ($ports as $port)
 	{
 		printOpFormIntro ('editPort', array ('port_id' => $port['id']));
@@ -1108,7 +1109,7 @@ function renderPortsForObject ($object_id)
 		if (!$port['remote_object_id'])
 		{
 			echo "<td>";
-			printSelect (getPortTypes(), 'port_type_id', $port['type_id']);
+			printNiftySelect ($portOptions, 'port_type_id', $port['type_id']);
 			echo "</td>";
 		}
 		else
@@ -1160,7 +1161,7 @@ function renderPortsForObject ($object_id)
 		echo "</td></form></tr>\n";
 	}
 	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')
-		printNewItemTR();
+		printNewItemTR ($portOptions);
 	echo "</table><br>\n";
 	finishPortlet();
 
@@ -1173,7 +1174,7 @@ function renderPortsForObject ($object_id)
 	echo '<option value=ssv1>SSV:&lt;interface name&gt; &lt;MAC address&gt;</option>';
 	echo "</select>";
 	echo 'Default port type: ';
-	printSelect (getPortTypes(), 'port_type', getConfigVar ('default_port_type'), 202);
+	printNiftySelect ($portOptions, 'port_type', getConfigVar ('default_port_type'), 202);
 	echo "<input type=submit value='Parse output' tabindex=204><br>\n";
 	echo "<textarea name=input cols=100 rows=50 tabindex=203></textarea><br>\n";
 	echo '</form>';
@@ -1879,7 +1880,7 @@ function renderRackspaceHistory ()
 
 	startPortlet ('Rackspace allocation history');
 	echo "<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>\n";
-	echo "<tr><th>timestamp</th><th>author</th><th>rack object ID</th><th>rack object type</th><th>rack object name</th><th>comment</th></tr>\n";
+	echo "<tr><th>timestamp</th><th>author</th><th>object</th><th>comment</th></tr>\n";
 	foreach ($history as $row)
 	{
 		if ($row['mo_id'] == $op_id)
@@ -1887,8 +1888,9 @@ function renderRackspaceHistory ()
 		else
 			$class = "row_${order}";
 		echo "<tr class=${class}><td><a href='".makeHref(array('page'=>$pageno, 'tab'=>$tabno, 'op_id'=>$row['mo_id']))."'>${row['ctime']}</a></td>";
-		echo "<td>${row['user_name']}</td>";
-		echo "<td>${row['ro_id']}</td><td>${row['objtype_name']}</td><td>${row['name']}</td><td>${row['comment']}</td>\n";
+		echo "<td>${row['user_name']}</td><td>";
+		renderCell (spotEntity ('object', $row['ro_id']));
+		echo "</td><td>${row['comment']}</td>\n";
 		echo "</tr>\n";
 		$order = $nextorder[$order];
 	}
@@ -2659,8 +2661,9 @@ function renderNATv4ForObject ($object_id)
 
 function renderAddMultipleObjectsForm ()
 {
-	$typelist = getObjectTypeList();
+	$typelist = readChapter (CHAP_OBJTYPE, 'o');
 	$typelist[0] = 'select type...';
+	$typelist = cookOptgroups ($typelist);
 	$max = getConfigVar ('MASSCOUNT');
 	$tabindex = 100;
 
@@ -2673,7 +2676,7 @@ function renderAddMultipleObjectsForm ()
 	{
 		echo '<tr><td>';
 		// Don't employ DEFAULT_OBJECT_TYPE to avoid creating ghost records for pre-selected empty rows.
-		printSelect ($typelist, "${i}_object_type_id", 0, $tabindex);
+		printNiftySelect ($typelist, "${i}_object_type_id", 0, $tabindex);
 		echo '</td>';
 		echo "<td><input type=text size=30 name=${i}_object_name tabindex=${tabindex}></td>";
 		echo "<td><input type=text size=30 name=${i}_object_label tabindex=${tabindex}></td>";
@@ -3152,7 +3155,7 @@ function renderPortMap ($editable = FALSE)
 {
 	global $nextorder;
 	startPortlet ("Port compatibility map");
-	$ptlist = getPortTypes();
+	$ptlist = readChapter (CHAP_PORTTYPE, 'a');
 	$pclist = getPortCompat();
 	$pctable = buildPortCompatMatrixFromList ($ptlist, $pclist);
 	if ($editable)
@@ -3241,33 +3244,29 @@ function renderDictionary ()
 function renderChapter ($tgt_chapter_no)
 {
 	global $nextorder;
-	foreach (getDict (TRUE) as $chapter_no => $chapter)
+	$words = readChapter ($tgt_chapter_no, 'a');
+	$wc = count ($words);
+	if (!$wc)
 	{
-		if ($chapter_no != $tgt_chapter_no)
-			continue;
-		$wc = count ($chapter['word']);
-		if (!$wc)
-		{
-			echo "<center><h2>(no records)</h2></center>";
-			break;
-		}
-		echo "<br><table class=cooltable border=0 cellpadding=5 cellspacing=0 align=center>\n";
-		echo "<tr><th colspan=3>${wc} record(s)</th></tr>\n";
-		echo "<tr><th>Origin</th><th>Refcnt</th><th>Word</th></tr>\n";
-		$order = 'odd';
-		foreach ($chapter['word'] as $key => $value)
-		{
-			echo "<tr class=row_${order}><td>";
-			printImageHREF (($key <= MAX_DICT_KEY) ? 'computer' : 'favorite');
-			echo '</td><td>';
-			if ($chapter['refcnt'][$key])
-				echo $chapter['refcnt'][$key];
-			echo "</td><td><div title='key=${key}'>${value}</div></td></tr>\n";
-			$order = $nextorder[$order];
-		}
-		echo "</table>\n<br>";
-		break;
+		echo "<center><h2>(no records)</h2></center>";
+		return;
 	}
+	$refcnt = getChapterRefc ($tgt_chapter_no, array_keys ($words));
+	echo "<br><table class=cooltable border=0 cellpadding=5 cellspacing=0 align=center>\n";
+	echo "<tr><th colspan=3>${wc} record(s)</th></tr>\n";
+	echo "<tr><th>Origin</th><th>Refcnt</th><th>Word</th></tr>\n";
+	$order = 'odd';
+	foreach ($words as $key => $value)
+	{
+		echo "<tr class=row_${order}><td>";
+		printImageHREF (($key <= MAX_DICT_KEY) ? 'computer' : 'favorite');
+		echo '</td><td>';
+		if ($refcnt[$key])
+			echo $refcnt[$key];
+		echo "</td><td><div title='key=${key}'>${value}</div></td></tr>\n";
+		$order = $nextorder[$order];
+	}
+	echo "</table>\n<br>";
 }
 
 function renderChapterEditor ($tgt_chapter_no)
@@ -3283,51 +3282,44 @@ function renderChapterEditor ($tgt_chapter_no)
 		printImageHREF ('add', 'Add new', TRUE, 101);
 		echo '</td></tr></form>';
 	}
-	$dict = getDict();
 	echo "<br><table class=cooltable border=0 cellpadding=5 cellspacing=0 align=center>\n";
-	foreach ($dict as $chapter_no => $chapter)
+	$words = readChapter ($tgt_chapter_no);
+	$refcnt = getChapterRefc ($tgt_chapter_no, array_keys ($words));
+	$order = 'odd';
+	echo "<tr><th>Origin</th><th>&nbsp;</th><th>Word</th><th>&nbsp;</th></tr>\n";
+	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
+		printNewItemTR();
+	foreach ($words as $key => $value)
 	{
-		if ($chapter_no != $tgt_chapter_no)
-			continue;
-		$order = 'odd';
-		echo "<tr><th>Origin</th><th>&nbsp;</th><th>Word</th><th>&nbsp;</th></tr>\n";
-		if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
-			printNewItemTR();
-		foreach ($chapter['word'] as $key => $value)
+		echo "<tr class=row_${order}><td>";
+		$order = $nextorder[$order];
+		// Show plain row for stock records, render a form for user's ones.
+		if ($key <= MAX_DICT_KEY)
 		{
-			echo "<tr class=row_${order}><td>";
-			// Show plain row for stock records, render a form for user's ones.
-			if ($key <= MAX_DICT_KEY)
-			{
-				printImageHREF ('computer');
-				echo "</td><td>&nbsp;</td><td>${value}</td><td>&nbsp;</td></tr>";
-			}
-			else
-			{
-				printOpFormIntro ('upd', array ('dict_key' => $key));
-				printImageHREF ('favorite');
-				echo "</td><td>";
-				// Prevent deleting words currently used somewhere.
-				if ($chapter['refcnt'][$key])
-					printImageHREF ('nodelete', 'referenced ' . $chapter['refcnt'][$key] . ' time(s)');
-				else
-				{
-					echo "<a href='".makeHrefProcess(array('op'=>'del', 'chapter_no'=>$chapter_no, 'dict_key'=>$key))."'>";
-					printImageHREF ('delete', 'Delete word');
-					echo "</a>";
-				}
-				echo '</td>';
-				echo "<td class=tdright><input type=text name=dict_value size=64 value='${value}'></td><td>";
-				printImageHREF ('save', 'Save changes', TRUE);
-				echo "</td></tr></form>\n";
-			}
-			$order = $nextorder[$order];
-		} // foreach ($chapter['word']
-		if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')
-			printNewItemTR();
-		echo "</table>\n";
-		break;
-	} // foreach ($dict
+			printImageHREF ('computer');
+			echo "</td><td>&nbsp;</td><td>${value}</td><td>&nbsp;</td></tr>";
+			continue;
+		}
+		printOpFormIntro ('upd', array ('dict_key' => $key));
+		printImageHREF ('favorite');
+		echo "</td><td>";
+		// Prevent deleting words currently used somewhere.
+		if ($refcnt[$key])
+			printImageHREF ('nodelete', 'referenced ' . $refcnt[$key] . ' time(s)');
+		else
+		{
+			echo "<a href='".makeHrefProcess(array('op'=>'del', 'chapter_no'=>$tgt_chapter_no, 'dict_key'=>$key))."'>";
+			printImageHREF ('delete', 'Delete word');
+			echo "</a>";
+		}
+		echo '</td>';
+		echo "<td class=tdright><input type=text name=dict_value size=64 value='${value}'></td><td>";
+		printImageHREF ('save', 'Save changes', TRUE);
+		echo "</td></tr></form>";
+	}
+	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')
+		printNewItemTR();
+	echo "</table>\n";
 }
 
 // We don't allow to rename/delete a sticky chapter and we don't allow
@@ -3391,12 +3383,11 @@ function renderChaptersEditor ()
 function renderAttributes ()
 {
 	global $nextorder, $attrtypes;
-	$attrMap = getAttrMap();
 	startPortlet ('Optional attributes');
-	echo "<table class=cooltable border=0 cellpadding=5 cellspacing=0 align=center>\n";
+	echo "<table class=cooltable border=0 cellpadding=5 cellspacing=0 align=center>";
 	echo "<tr><th class=tdleft>Attribute name</th><th class=tdleft>Attribute type</th><th class=tdleft>Applies to</th></tr>";
 	$order = 'odd';
-	foreach ($attrMap as $attr)
+	foreach (getAttrMap() as $attr)
 	{
 		echo "<tr class=row_${order}>";
 		echo "<td class=tdleft>${attr['name']}</td>";
@@ -3407,11 +3398,10 @@ function renderAttributes ()
 		else
 			foreach ($attr['application'] as $app)
 				if ($attr['type'] == 'dict')
-					echo "${app['objtype_name']} (values from '${app['chapter_name']}')<br>";
+					echo decodeObjectType ($app['objtype_id'], 'a') . " (values from '${app['chapter_name']}')<br>";
 				else
-					echo "${app['objtype_name']}<br>";
-		echo '</td>';
-		echo "</tr>\n";
+					echo decodeObjectType ($app['objtype_id'], 'a') . '<br>';
+		echo '</td></tr>';
 		$order = $nextorder[$order];
 	}
 	echo "</table><br>\n";
@@ -3432,13 +3422,12 @@ function renderEditAttributesForm ()
 		printImageHREF ('add', 'Create attribute', TRUE, 102);
 		echo '</td></tr></form>';
 	}
-	$attrMap = getAttrMap();
 	startPortlet ('Optional attributes');
 	echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
 	echo '<tr><th>&nbsp;</th><th>Name</th><th>Type</th><th>&nbsp;</th></tr>';
 	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
 		printNewItemTR();
-	foreach ($attrMap as $attr)
+	foreach (getAttrMap() as $attr)
 	{
 		printOpFormIntro ('upd', array ('attr_id' => $attr['id']));
 		echo '<tr><td>';
@@ -3467,38 +3456,40 @@ function renderEditAttrMapForm ()
 	function printNewItemTR ($attrMap)
 	{
 		printOpFormIntro ('add');
-		echo '<tr><td>';
-		printImageHREF ('add', '', TRUE);
-		echo "</td><td><select name=attr_id tabindex=100>";
+		echo '<tr><td colspan=2 class=tdleft>';
+		echo '<select name=attr_id tabindex=100>';
 		$shortType['uint'] = 'U';
 		$shortType['float'] = 'F';
 		$shortType['string'] = 'S';
 		$shortType['dict'] = 'D';
 		foreach ($attrMap as $attr)
 			echo "<option value=${attr['id']}>[" . $shortType[$attr['type']] . "] ${attr['name']}</option>";
-		echo "</select></td>";
-		echo '<td>';
-		printSelect (getObjectTypeList(), 'objtype_id', NULL, 101);
-		echo '</td>';
-		echo '<td><select name=chapter_no tabindex=102>';
+		echo "</select></td><td class=tdleft>";
+		printImageHREF ('add', '', TRUE);
+		echo ' ';
+		printNiftySelect (cookOptgroups (readChapter (CHAP_OBJTYPE, 'o')), 'objtype_id', NULL, 101);
+		echo ' <select name=chapter_no tabindex=102>';
 		foreach (getChapterList() as $chapter)
 			if ($chapter['sticky'] != 'yes')
 				echo "<option value='${chapter['id']}'>${chapter['name']}</option>";
-		echo '</select></td><td>';
-		printImageHREF ('add', '', TRUE, 103);
-		echo '</td></tr>';
-		echo '</form>';
+		echo '</select></td></tr></form>';
 	}
+	global $attrtypes, $nextorder;
+	$order = 'odd';
 	$attrMap = getAttrMap();
 	startPortlet ('Attribute map');
-	echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
-	echo '<tr><th>&nbsp;</th><th>Attribute name</th><th>Object type</th><th>Dictionary chapter</th><th>&nbsp;</th></tr>';
+	echo "<table class=cooltable border=0 cellpadding=5 cellspacing=0 align=center>";
+	echo '<tr><th class=tdleft>Attribute name</th><th class=tdleft>Attribute type</th><th class=tdleft>Applies to</th></tr>';
 	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
 		printNewItemTR ($attrMap);
 	foreach ($attrMap as $attr)
+	{
+		if (!count ($attr['application']))
+			continue;
+		echo "<tr class=row_${order}><td class=tdleft>${attr['name']}</td>";
+		echo "<td class=tdleft>" . $attrtypes[$attr['type']] . "</td><td colspan=2 class=tdleft>";
 		foreach ($attr['application'] as $app)
 		{
-			echo '<tr><td>';
 			if ($app['refcnt'])
 				printImageHREF ('nodelete', $app['refcnt'] . ' value(s) stored for objects');
 			else
@@ -3507,15 +3498,15 @@ function renderEditAttrMapForm ()
 				printImageHREF ('delete', 'Remove mapping');
 				echo "</a>";
 			}
-			echo "</td><td>${attr['name']}</td>";
-			echo "<td>${app['objtype_name']}</td>";
-			echo "<td>";
+			echo ' ';
 			if ($attr['type'] == 'dict')
-				echo "${app['chapter_name']}";
+				echo decodeObjectType ($app['objtype_id'], 'o') . " (values from '${app['chapter_name']}')<br>";
 			else
-				echo '&nbsp;';
-			echo "</td></tr>\n";
+				echo decodeObjectType ($app['objtype_id'], 'o') . '<br>';
 		}
+		echo "</td></tr>";
+		$order = $nextorder[$order];
+	}
 	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')
 		printNewItemTR ($attrMap);
 	echo "</table>\n";
@@ -4586,7 +4577,7 @@ function renderLivePTR ($id)
 function renderAutoPortsForm ($object_id)
 {
 	$info = spotEntity ('object', $object_id);
-	$ptlist = readChapter ('PortType');
+	$ptlist = readChapter (CHAP_PORTTYPE, 'a');
 	echo "<table class='widetable' border=0 cellspacing=0 cellpadding=5 align='center'>\n";
 	echo "<caption>The following ports can be quickly added:</caption>";
 	echo "<tr><th>type</th><th>name</th></tr>";
