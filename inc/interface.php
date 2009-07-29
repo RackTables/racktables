@@ -1614,7 +1614,7 @@ function renderRackSpaceForObject ($object_id)
 		foreach ($allRacksData as $rack)
 		{
 			amplifyCell ($rack);
-			$workingRacksData[$rack_id] = $rack;
+			$workingRacksData[$rack['id']] = $rack;
 		}
 		foreach ($workingRacksData as &$rackData)
 			applyObjectMountMask ($rackData, $object_id);
