@@ -3468,7 +3468,7 @@ function renderEditAttrMapForm ()
 		printImageHREF ('add', '', TRUE);
 		echo ' ';
 		printNiftySelect (cookOptgroups (readChapter (CHAP_OBJTYPE, 'o')), 'objtype_id', NULL, 101);
-		echo ' <select name=chapter_no tabindex=102>';
+		echo ' <select name=chapter_no tabindex=102><option value=0>-- dictionary chapter for [D] attributes --</option>';
 		foreach (getChapterList() as $chapter)
 			if ($chapter['sticky'] != 'yes')
 				echo "<option value='${chapter['id']}'>${chapter['name']}</option>";

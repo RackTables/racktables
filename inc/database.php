@@ -2192,7 +2192,7 @@ function commitDeleteAttribute ($attr_id = 0)
 // FIXME: don't store garbage in chapter_no for non-dictionary types.
 function commitSupplementAttrMap ($attr_id = 0, $objtype_id = 0, $chapter_no = 0)
 {
-	if ($attr_id <= 0 or $objtype_id <= 0 or $chapter_no <= 0)
+	if ($attr_id <= 0 or $objtype_id <= 0)
 	{
 		showError ('Invalid args', __FUNCTION__);
 		die;
