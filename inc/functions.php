@@ -980,7 +980,7 @@ function getExplicitTagsOnly ($chain)
 			if ($tagidA == $tagidB)
 				continue;
 			if (!isset ($tagRelCache[$tagidA][$tagidB]))
-				$tagRelCache[$tagidA][$tagidB] = tagOnChain ($chain[$keyA], $taglist[$tagidB]['trace']);
+				$tagRelCache[$tagidA][$tagidB] = in_array ($tagidA, $taglist[$tagidB]['trace']);
 			if ($tagRelCache[$tagidA][$tagidB] === TRUE) // A is ancestor of B
 				continue 2; // skip this A
 		}
