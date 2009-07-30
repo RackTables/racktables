@@ -214,8 +214,7 @@ elseif (basename($_SERVER['PHP_SELF']) == 'index.php' and getConfigVar ('SHOW_LA
 else
 	$tabno = 'default';
 
-$op = (isset ($_REQUEST['op'])) ? $_REQUEST['op'] : '';
-
+$op = '';
 require_once 'inc/navigation.php';
 require_once 'inc/triggers.php';
 require_once 'inc/gateways.php';

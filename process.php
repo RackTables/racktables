@@ -4,15 +4,17 @@ try {
 // Include init after ophandlers, not before, so local.php can redefine things later.
 require 'inc/ophandlers.php';
 require 'inc/init.php';
+assertStringArg ('op', __FILE__);
+$op = $_REQUEST['op'];
 
 // FIXME: find a better way to handle this error
-if ($_REQUEST['op'] == 'addFile' && !isset($_FILES['file']['error'])) {
+if ($op == 'addFile' && !isset($_FILES['file']['error'])) {
 	showError ("File upload error, it's size probably exceeds upload_max_filesize directive in php.ini");
 	die;
 }
 fixContext();
 
-if (!strlen ($op) or !isset ($ophandler[$pageno][$tabno][$op]))
+if (!isset ($ophandler[$pageno][$tabno][$op]))
 {
 	showError ("Invalid request in operation broker: page '${pageno}', tab '${tabno}', op '${op}'", __FILE__);
 	die();
