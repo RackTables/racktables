@@ -871,6 +871,26 @@ function pokeNode (&$tree, $trace, $key, $value, $threshold = 0)
 	}
 }
 
+// Likewise traverse the tree with the trace and return the final node.
+function peekNode ($tree, $trace, $target_id)
+{
+	$self = __FUNCTION__;
+	if (NULL === ($next = array_shift ($trace))) // warm
+	{
+		foreach ($tree as $node)
+			if ($node['id'] == $target_id) // hot
+				return $node;
+	}
+	else // cold
+	{
+		foreach ($tree as $node)
+			if ($node['id'] == $next) // warmer
+				return $self ($node['kids'], $trace, $target_id);
+	}
+	// HCF
+	return NULL;
+}
+
 // Build a tree from the item list and return it. Input and output data is
 // indexed by item id (nested items in output are recursively stored in 'kids'
 // key, which is in turn indexed by id. Functions, which are ready to handle
