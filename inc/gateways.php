@@ -169,9 +169,9 @@ function setSwitchVLANs ($object_id = 0, $setcmd)
 	foreach (getAttrValues ($object_id) as $record)
 	{
 		if ($record['name'] == 'SW type' && strlen ($record['o_value']))
-			$swtype = strtr (execGMarket ($record['o_value']), ' ', '+');
+			$swtype = strtr (execGMarker ($record['o_value']), ' ', '+');
 		if ($record['name'] == 'HW type' && strlen ($record['o_value']))
-			$hwtype = strtr (execGMarket ($record['o_value']), ' ', '+');
+			$hwtype = strtr (execGMarker ($record['o_value']), ' ', '+');
 	}
 	$endpoint = str_replace (' ', '+', $endpoints[0]);
 	$data = queryGateway
