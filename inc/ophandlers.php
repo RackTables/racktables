@@ -652,16 +652,25 @@ function deleteAttribute ()
 }
 
 $msgcode['supplementAttrMap']['OK'] = 48;
-$msgcode['supplementAttrMap']['ERR'] = 118;
+$msgcode['supplementAttrMap']['ERR1'] = 154;
+$msgcode['supplementAttrMap']['ERR2'] = 118;
 function supplementAttrMap ()
 {
 	assertUIntArg ('attr_id', __FUNCTION__);
 	assertUIntArg ('objtype_id', __FUNCTION__);
-	assertUIntArg ('chapter_no', __FUNCTION__);
-	if (commitSupplementAttrMap ($_REQUEST['attr_id'], $_REQUEST['objtype_id'], $_REQUEST['chapter_no']) === TRUE)
+	$attrMap = getAttrMap();
+	if ($attrMap[$_REQUEST['attr_id']]['type'] != 'dict')
+		$chapter_id = 'NULL';
+	else
+	{
+		assertUIntArg ('chapter_no', __FUNCTION__); // FIXME: this doesn't fail on 0 (ticket:272)
+		if (0 == ($chapter_id = $_REQUEST['chapter_no']))
+			return buildRedirectURL (__FUNCTION__, 'ERR1', array ('chapter not selected'));
+	}
+	if (commitSupplementAttrMap ($_REQUEST['attr_id'], $_REQUEST['objtype_id'], $chapter_id) === TRUE)
 		return buildRedirectURL (__FUNCTION__, 'OK');
 	else
-		return buildRedirectURL (__FUNCTION__, 'ERR');
+		return buildRedirectURL (__FUNCTION__, 'ERR2');
 }
 
 $msgcode['reduceAttrMap']['OK'] = 49;
