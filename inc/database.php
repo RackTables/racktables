@@ -208,6 +208,7 @@ function commitDeleteRow($rackrow_id)
 	{
 		if ($row[0] == 0)
 		{
+			$result->closeCursor();
 			$query = "delete from RackRow where id=${rackrow_id}";
 			$result = $dbxlink->query ($query);
 			if ($result == NULL)
@@ -222,7 +223,6 @@ function commitDeleteRow($rackrow_id)
 		showError ("SQL query '${query}' failed", __FUNCTION__);
 		return FALSE;
 	}
-	$result->closeCursor();
 	return TRUE;
 }
 
