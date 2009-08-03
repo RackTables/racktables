@@ -1908,17 +1908,16 @@ function renderIPv4SpaceRecords ($tree, $baseurl, $target = 0, $level = 1)
 	$self = __FUNCTION__;
 	foreach ($tree as $item)
 	{
-		$total = $item['addrt'];
 		if (getConfigVar ('IPV4_TREE_SHOW_USAGE') == 'yes')
-		{
 			loadIPv4AddrList ($item); // necessary to compute router list and address counter
-			$used = $item['addrc'];
-		}
 		else
 		{
 			$item['addrlist'] = array();
 			$item['addrc'] = 0;
 		}
+		$used = $item['addrc'];
+		$maxdirect = $item['addrt'];
+		$maxtotal = binInvMaskFromDec ($item['mask']) + 1;
 		if (isset ($item['id']))
 		{
 			if ($item['symbol'] == 'node-collapsed')
@@ -1934,11 +1933,11 @@ function renderIPv4SpaceRecords ($tree, $baseurl, $target = 0, $level = 1)
 				echo "<a name=netid${target}></a>";
 			if (getConfigVar ('IPV4_TREE_SHOW_USAGE') == 'yes')
 			{
-				renderProgressBar ($total ? $used/$total : 0);
-				echo "<br><small>${used}/${total}</small>";
+				renderProgressBar ($maxdirect ? $used/$maxdirect : 0);
+				echo "<br><small>${used}/${maxdirect}" . ($maxdirect == $maxtotal ? '' : "/${maxtotal}") . '</small>';
 			}
 			else
-				echo "<small>${total}</small>";
+				echo "<small>${maxdirect}</small>";
 			echo "</td>";
 			if (getConfigVar ('EXT_IPV4_VIEW') == 'yes')
 				printRoutersTD (findRouters ($item['addrlist']));
@@ -1953,11 +1952,11 @@ function renderIPv4SpaceRecords ($tree, $baseurl, $target = 0, $level = 1)
 			echo "<td class=tdcenter>";
 			if (getConfigVar ('IPV4_TREE_SHOW_USAGE') == 'yes')
 			{
-				renderProgressBar ($used/$total, 'sparenetwork');
-				echo "<br><small>${used}/${total}</small>";
+				renderProgressBar ($used/$maxtotal, 'sparenetwork');
+				echo "<br><small>${used}/${maxtotal}</small>";
 			}
 			else
-				echo "<small>${total}</small>";
+				echo "<small>${maxtotal}</small>";
 			echo "</td><td>&nbsp;</td></tr>";
 		}
 	}
