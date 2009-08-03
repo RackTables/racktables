@@ -197,7 +197,6 @@ $tabhandler['ipv4vslist']['default'] = 'renderVSList';
 $tabhandler['ipv4vslist']['edit'] = 'renderVSListEditForm';
 $ophandler['ipv4vslist']['edit']['add'] = 'addVService';
 $ophandler['ipv4vslist']['edit']['del'] = 'deleteVService';
-$ophandler['ipv4vslist']['edit']['upd'] = 'updateVService';
 
 $page['ipv4vs']['parent'] = 'ipv4vslist';
 $page['ipv4vs']['bypass'] = 'vs_id';
@@ -230,7 +229,6 @@ $tabhandler['ipv4rsplist']['default'] = 'renderRSPoolList';
 $tabhandler['ipv4rsplist']['edit'] = 'editRSPools';
 $ophandler['ipv4rsplist']['edit']['add'] = 'addRSPool';
 $ophandler['ipv4rsplist']['edit']['del'] = 'deleteRSPool';
-$ophandler['ipv4rsplist']['edit']['upd'] = 'updateRSPool';
 
 $page['ipv4rspool']['parent'] = 'ipv4rsplist';
 $page['ipv4rspool']['bypass'] = 'pool_id';
