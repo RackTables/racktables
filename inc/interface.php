@@ -3451,7 +3451,7 @@ function renderEditAttributesForm ()
 	{
 		printOpFormIntro ('add');
 		echo '<tr><td>';
-		printImageHREF ('add', 'Create attribute', TRUE);
+		printImageHREF ('create', 'Create attribute', TRUE);
 		echo "</td><td><input type=text tabindex=100 name=attr_name></td><td>";
 		global $attrtypes;
 		printSelect ($attrtypes, 'attr_type', NULL, 101);
@@ -3469,11 +3469,11 @@ function renderEditAttributesForm ()
 		printOpFormIntro ('upd', array ('attr_id' => $attr['id']));
 		echo '<tr><td>';
 		if (count ($attr['application']))
-			printImageHREF ('nodelete', count ($attr['application']) . ' reference(s) in attribute map');
+			printImageHREF ('nodestroy', count ($attr['application']) . ' reference(s) in attribute map');
 		else
 		{
 			echo "<a href='".makeHrefProcess(array('op'=>'del', 'attr_id'=>$attr['id']))."'>";
-			printImageHREF ('delete', 'Remove attribute');
+			printImageHREF ('destroy', 'Remove attribute');
 			echo '</a>';
 		}
 		echo "</td><td><input type=text name=attr_name value='${attr['name']}'></td>";
