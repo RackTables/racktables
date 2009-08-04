@@ -87,6 +87,9 @@ $image['ADD']['height'] = 32;
 $image['delete']['path'] = 'pix/tango-list-remove.png';
 $image['delete']['width'] = 16;
 $image['delete']['height'] = 16;
+$image['DELETE']['path'] = 'pix/tango-list-remove-32x32.png';
+$image['DELETE']['width'] = 32;
+$image['DELETE']['height'] = 32;
 $image['destroy']['path'] = 'pix/tango-user-trash-16x16.png';
 $image['destroy']['width'] = 16;
 $image['destroy']['height'] = 16;
@@ -2081,27 +2084,32 @@ function renderIPv4SpaceEditor ()
 	</script>
 <?php
 
-	startPortlet ("Add new");
-	echo '<table border=0 cellpadding=10 align=center>';
-	// This form requires a name, so JavaScript validator can find it.
-	// No printOpFormIntro() hence
-	echo "<form method=post name='add_new_range' action='".makeHrefProcess()."'>\n";
-	echo "<input type=hidden name=op value=addIPv4Prefix>\n";
-	// tags column
-	echo '<tr><td rowspan=4><h3>assign tags</h3>';
-	renderNewEntityTags ('ipv4net');
-	echo '</td>';
-	// inputs column
-	$prefix_value = empty ($_REQUEST['set-prefix']) ? '' : $_REQUEST['set-prefix'];
-	echo "<th class=tdright>prefix</th><td class=tdleft><input type=text name='range' size=18 class='live-validate' tabindex=1 value='${prefix_value}'></td>";
-	echo "<tr><th class=tdright>name</th><td class=tdleft><input type=text name='name' size='20' tabindex=2></td></tr>";
-	echo "<tr><th class=tdright>connected network</th><td class=tdleft><input type=checkbox name='is_bcast' tabindex=3></td></tr>";
-	echo "<tr><td colspan=2>";
-	printImageHREF ('CREATE', 'Add a new network', TRUE, 4);
-	echo '</td></tr>';
-	echo "</form></table><br><br>\n";
-	finishPortlet();
+	function printNewItemTR ()
+	{
+		startPortlet ('Add new');
+		echo '<table border=0 cellpadding=10 align=center>';
+		// This form requires a name, so JavaScript validator can find it.
+		// No printOpFormIntro() hence
+		echo "<form method=post name='add_new_range' action='".makeHrefProcess()."'>\n";
+		echo "<input type=hidden name=op value=addIPv4Prefix>\n";
+		// tags column
+		echo '<tr><td rowspan=4><h3>assign tags</h3>';
+		renderNewEntityTags ('ipv4net');
+		echo '</td>';
+		// inputs column
+		$prefix_value = empty ($_REQUEST['set-prefix']) ? '' : $_REQUEST['set-prefix'];
+		echo "<th class=tdright>prefix</th><td class=tdleft><input type=text name='range' size=18 class='live-validate' tabindex=1 value='${prefix_value}'></td>";
+		echo "<tr><th class=tdright>name</th><td class=tdleft><input type=text name='name' size='20' tabindex=2></td></tr>";
+		echo "<tr><th class=tdright>connected network</th><td class=tdleft><input type=checkbox name='is_bcast' tabindex=3></td></tr>";
+		echo "<tr><td colspan=2>";
+		printImageHREF ('CREATE', 'Add a new network', TRUE, 4);
+		echo '</td></tr>';
+		echo "</form></table><br><br>\n";
+		finishPortlet();
+	}
 
+	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
+		printNewItemTR();
 	if (count ($addrspaceList = listCells ('ipv4net')))
 	{
 		startPortlet ('Manage existing (' . count ($addrspaceList) . ')');
@@ -2151,6 +2159,8 @@ function renderIPv4SpaceEditor ()
 		echo "</table>";
 		finishPortlet();
 	}
+	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')
+		printNewItemTR();
 }
 
 function renderIPv4Network ($id)
@@ -3130,32 +3140,41 @@ function renderUserListEditor ()
 {
 	function printNewItemTR ()
 	{
+		startPortlet ('Add new');
 		printOpFormIntro ('createUser');
-		echo "<tr><td><input type=text size=16 name=username tabindex=100></td>\n";
-		echo "<td><input type=text size=24 name=realname tabindex=101></td>";
-		echo "<td><input type=password size=64 name=password tabindex=102></td><td>";
-		printImageHREF ('create', 'Add new account', TRUE, 103);
-		echo "</td></tr></form>";
+		echo '<table cellspacing=0 cellpadding=5 align=center>';
+		echo '<tr><th>&nbsp;</th><th>&nbsp;</th><th>Assign tags</th></tr>';
+		echo '<tr><th class=tdright>Username</th><td class=tdleft><input type=text size=64 name=username tabindex=100></td>';
+		echo '<td rowspan=4>';
+		renderNewEntityTags ('user');
+		echo '</td></tr>';
+		echo '<tr><th class=tdright>Real name</th><td class=tdleft><input type=text size=64 name=realname tabindex=101></td></tr>';
+		echo '<tr><th class=tdright>Password</th><td class=tdleft><input type=password size=64 name=password tabindex=102></td></tr>';
+		echo '<tr><td colspan=2>';
+		printImageHREF ('CREATE', 'Add new account', TRUE, 103);
+		echo '</td></tr>';
+		echo '</table></form>';
+		finishPortlet();
 	}
-	$accounts = listCells ('user');
-	startPortlet ('User accounts (' . count ($accounts) . ')');
-	echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
-	echo "<tr><th>Username</th><th>Real name</th><th>Password</th><th>&nbsp;</th></tr>\n";
 	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
 		printNewItemTR();
+	$accounts = listCells ('user');
+	startPortlet ('Manage existing (' . count ($accounts) . ')');
+	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
+	echo '<tr><th>Username</th><th>Real name</th><th>Password</th><th>&nbsp;</th></tr>';
 	foreach ($accounts as $account)
 	{
 		printOpFormIntro ('updateUser', array ('user_id' => $account['user_id']));
 		echo "<tr><td><input type=text name=username value='${account['user_name']}' size=16></td>";
 		echo "<td><input type=text name=realname value='${account['user_realname']}' size=24></td>";
-		echo "<td><input type=password name=password value='${account['user_password_hash']}' size=64></td><td>";
+		echo "<td><input type=password name=password value='${account['user_password_hash']}' size=40></td><td>";
 		printImageHREF ('save', 'Save changes', TRUE);
-		echo "</td></form></tr>\n";
+		echo '</td></form></tr>';
 	}
+	echo '</table><br>';
+	finishPortlet();
 	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')
 		printNewItemTR();
-	echo "</table><br>\n";
-	finishPortlet();
 }
 
 function renderPortMapViewer ()
@@ -3431,7 +3450,7 @@ function renderEditAttributesForm ()
 	{
 		printOpFormIntro ('add');
 		echo '<tr><td>';
-		printImageHREF ('add', 'Create attribute', TRUE);
+		printImageHREF ('create', 'Create attribute', TRUE);
 		echo "</td><td><input type=text tabindex=100 name=attr_name></td><td>";
 		global $attrtypes;
 		printSelect ($attrtypes, 'attr_type', NULL, 101);
@@ -3449,11 +3468,11 @@ function renderEditAttributesForm ()
 		printOpFormIntro ('upd', array ('attr_id' => $attr['id']));
 		echo '<tr><td>';
 		if (count ($attr['application']))
-			printImageHREF ('nodelete', count ($attr['application']) . ' reference(s) in attribute map');
+			printImageHREF ('nodestroy', count ($attr['application']) . ' reference(s) in attribute map');
 		else
 		{
 			echo "<a href='".makeHrefProcess(array('op'=>'del', 'attr_id'=>$attr['id']))."'>";
-			printImageHREF ('delete', 'Remove attribute');
+			printImageHREF ('destroy', 'Remove attribute');
 			echo '</a>';
 		}
 		echo "</td><td><input type=text name=attr_name value='${attr['name']}'></td>";
@@ -4120,50 +4139,58 @@ function renderRSPoolServerForm ($pool_id)
 
 function renderRSPoolLBForm ($pool_id)
 {
-	global $nextorder;
 	$poolInfo = spotEntity ('ipv4rspool', $pool_id);
 	amplifyCell ($poolInfo);
 
+	function printNewItemTR ()
+	{
+		startPortlet ('Add new');
+		echo "<table cellspacing=0 cellpadding=5 align=center>";
+		printOpFormIntro ('addLB');
+		echo "<tr valign=top><th class=tdright>Load balancer</th><td class=tdleft>";
+		printSelect (getNarrowObjectList ('IPV4LB_LISTSRC'), 'object_id', NULL, 1);
+		echo '</td><td class=tdcenter valign=middle rowspan=2>';
+		printImageHREF ('ADD', 'Configure LB', TRUE, 5);
+		echo '</td></tr><tr><th class=tdright>Virtual service</th><td class=tdleft>';
+		printSelect (getIPv4VSOptions(), 'vs_id', NULL, 2);
+		echo "</td></tr>\n";
+		echo "<tr><th class=tdright>VS config</th><td colspan=2><textarea tabindex=3 name=vsconfig rows=10 cols=80></textarea></td></tr>";
+		echo "<tr><th class=tdright>RS config</th><td colspan=2><textarea tabindex=4 name=rsconfig rows=10 cols=80></textarea></td></tr>";
+		echo "</form></table>\n";
+		finishPortlet();
+	}
+	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
+		printNewItemTR();
 	if (count ($poolInfo['lblist']))
 	{
 		startPortlet ('Manage existing (' . count ($poolInfo['lblist']) . ')');
 		echo "<table cellspacing=0 cellpadding=5 align=center class=cooltable>\n";
-		echo "<tr><th>&nbsp;</th><th>LB</th><th>VS</th><th>VS config</th><th>RS config</th><th>&nbsp;</th></tr>\n";
+		global $nextorder;
 		$order = 'odd';
 		foreach ($poolInfo['lblist'] as $object_id => $vslist)
 			foreach ($vslist as $vs_id => $configs)
 			{
 				printOpFormIntro ('updLB', array ('vs_id' => $vs_id, 'object_id' => $object_id));
-				echo "<tr valign=top class=row_${order}><td><a href='".makeHrefProcess(array('op'=>'delLB', 'pool_id'=>$pool_id, 'object_id'=>$object_id, 'vs_id'=>$vs_id))."'>";
-				printImageHREF ('delete', 'Unconfigure');
+				echo "<tr valign=top class=row_${order}><td rowspan=2 class=tdright valign=middle><a href='".makeHrefProcess(array('op'=>'delLB', 'pool_id'=>$pool_id, 'object_id'=>$object_id, 'vs_id'=>$vs_id))."'>";
+				printImageHREF ('DELETE', 'Unconfigure');
 				echo "</a></td>";
-				echo "<td class=tdleft>";
+				echo "<td class=tdleft valign=bottom>";
 				renderLBCell ($object_id);
-				echo "</td><td class=tdleft>";
-				renderCell (spotEntity ('ipv4vs', $vs_id));
-				echo "</td><td><textarea name=vsconfig>${configs['vsconfig']}</textarea></td>";
-				echo "<td><textarea name=rsconfig>${configs['rsconfig']}</textarea></td><td>";
+				echo "</td><td>VS config &darr;<br><textarea name=vsconfig rows=5 cols=70>${configs['vsconfig']}</textarea></td>";
+				echo '<td class=tdleft rowspan=2 valign=middle>';
 				printImageHREF ('SAVE', 'Save changes', TRUE);
-				echo "</td></tr></form>\n";
+				echo "</td></tr><tr class=row_${order}><td class=tdleft valign=top>";
+				renderCell (spotEntity ('ipv4vs', $vs_id));
+				echo '</td><td>';
+				echo "<textarea name=rsconfig rows=5 cols=70>${configs['rsconfig']}</textarea><br>RS config &uarr;";
+				echo '</td></tr></form>';
 				$order = $nextorder[$order];
 			}
 		echo "</table>\n";
 		finishPortlet();
 	}
-
-	startPortlet ('Add new');
-	echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
-	printOpFormIntro ('addLB');
-	echo "<tr valign=top><th>LB / VS</th><td class=tdleft>";
-	printSelect (getNarrowObjectList ('IPV4LB_LISTSRC'), 'object_id', NULL, 1);
-	printSelect (getIPv4VSOptions(), 'vs_id', NULL, 2);
-	echo "</td><td>";
-	printImageHREF ('add', 'Configure LB', TRUE, 5);
-	echo "</td></tr>\n";
-	echo "<tr><th>VS config</th><td colspan=2><textarea tabindex=3 name=vsconfig rows=10 cols=80></textarea></td></tr>";
-	echo "<tr><th>RS config</th><td colspan=2><textarea tabindex=4 name=rsconfig rows=10 cols=80></textarea></td></tr>";
-	echo "</form></table>\n";
-	finishPortlet();
+	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')
+		printNewItemTR();
 }
 
 function renderVServiceLBForm ($vs_id)
@@ -4172,46 +4199,55 @@ function renderVServiceLBForm ($vs_id)
 	$vsinfo = spotEntity ('ipv4vs', $vs_id);
 	amplifyCell ($vsinfo);
 
+	function printNewItemTR ()
+	{
+		startPortlet ('Add new');
+		echo '<table cellspacing=0 cellpadding=5 align=center>';
+		printOpFormIntro ('addLB');
+		echo '<tr valign=top><th class=tdright>Load balancer</th><td class=tdleft>';
+		printSelect (getNarrowObjectList ('IPV4LB_LISTSRC'), 'object_id', NULL, 101);
+		echo '</td><td rowspan=2 class=tdcenter valign=middle>';
+		printImageHREF ('ADD', 'Configure LB', TRUE, 105);
+		echo '</td></tr><tr><th class=tdright>RS pool</th><td class=tdleft>';
+		printSelect (getIPv4RSPoolOptions(), 'pool_id', NULL, 102);
+		echo '</td></tr>';
+		echo '<tr><th class=tdright>VS config</th><td colspan=2><textarea tabindex=103 name=vsconfig rows=10 cols=80></textarea></td></tr>';
+		echo '<tr><th class=tdright>RS config</th><td colspan=2><textarea tabindex=104 name=rsconfig rows=10 cols=80></textarea></td></tr>';
+		echo '</form></table>';
+		finishPortlet();
+	}
+	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
+		printNewItemTR();
 	if (count ($vsinfo['rspool']))
 	{
 		startPortlet ('Manage existing (' . count ($vsinfo['rspool']) . ')');
-		echo "<table cellspacing=0 cellpadding=5 align=center class=cooltable>\n";
-		echo "<tr><th>&nbsp;</th><th>LB</th><th>RS pool</th><th>VS config</th><th>RS config</th><th>&nbsp;</th></tr>\n";
+		echo '<table cellspacing=0 cellpadding=5 align=center class=cooltable>';
 		$order = 'odd';
 		foreach ($vsinfo['rspool'] as $pool_id => $rspinfo)
 			foreach ($rspinfo['lblist'] as $object_id => $configs)
 			{
 				printOpFormIntro ('updLB', array ('pool_id' => $pool_id, 'object_id' => $object_id));
-				echo "<tr valign=top class=row_${order}><td><a href='".makeHrefProcess(array('op'=>'delLB', 'pool_id'=>$pool_id, 'object_id'=>$object_id, 'vs_id'=>$vs_id))."'>";
-				printImageHREF ('delete', 'Unconfigure');
+				echo "<tr valign=middle class=row_${order}><td rowspan=2>";
+				echo "<a href='".makeHrefProcess(array('op'=>'delLB', 'pool_id'=>$pool_id, 'object_id'=>$object_id, 'vs_id'=>$vs_id))."'>";
+				printImageHREF ('DELETE', 'Unconfigure');
 				echo "</a></td>";
-				echo "<td class=tdleft>";
+				echo '<td class=tdleft valign=bottom>';
 				renderLBCell ($object_id);
-				echo "</td><td class=tdleft>";
-				renderCell (spotEntity ('ipv4rspool', $pool_id));
-				echo "</td><td><textarea name=vsconfig>${configs['vsconfig']}</textarea></td>";
-				echo "<td><textarea name=rsconfig>${configs['rsconfig']}</textarea></td><td>";
+				echo "</td><td>VS config &darr;<br><textarea name=vsconfig rows=5 cols=70>${configs['vsconfig']}</textarea></td>";
+				echo '<td rowspan=2>';
 				printImageHREF ('SAVE', 'Save changes', TRUE);
-				echo "</td></tr></form>\n";
+				echo '</td></tr>';
+				echo "<tr class=row_${order}><td valign=top>";
+				renderCell (spotEntity ('ipv4rspool', $pool_id));
+				echo "</td><td><textarea name=rsconfig rows=5 cols=70>${configs['rsconfig']}</textarea><br>";
+				echo 'RS config &uarr;</td></tr></form>';
 				$order = $nextorder[$order];
 			}
-		echo "</table>\n";
+		echo '</table>';
 		finishPortlet();
 	}
-
-	startPortlet ('Add new');
-	echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
-	printOpFormIntro ('addLB');
-	echo "<tr valign=top><th>LB / RS pool</th><td class=tdleft>";
-	printSelect (getNarrowObjectList ('IPV4LB_LISTSRC'), 'object_id', NULL, 1);
-	printSelect (getIPv4RSPoolOptions(), 'pool_id', NULL, 2);
-	echo "</td><td>";
-	printImageHREF ('add', 'Configure LB', TRUE, 5);
-	echo "</td></tr>\n";
-	echo "<tr><th>VS config</th><td colspan=2><textarea tabindex=3 name=vsconfig rows=10 cols=80></textarea></td></tr>";
-	echo "<tr><th>RS config</th><td colspan=2><textarea tabindex=4 name=rsconfig rows=10 cols=80></textarea></td></tr>";
-	echo "</form></table>\n";
-	finishPortlet();
+	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')
+		printNewItemTR();
 }
 
 function renderRSPool ($pool_id)
@@ -4300,63 +4336,58 @@ function renderVSListEditForm ()
 	global $nextorder;
 	$protocols = array ('TCP' => 'TCP', 'UDP' => 'UDP');
 
-	startPortlet ('Add new');
-	printOpFormIntro ('add');
-	echo "<table class=widetable border=0 cellpadding=10 cellspacing=0 align=center>\n";
-	echo "<tr><th>&nbsp;</th><th>VIP</th><th>port</th><th>proto</th><th>name</th><th>&nbsp;</th></tr>";
-	echo "<tr valign=top><td>&nbsp;</td>";
-	echo "<td><input type=text name=vip tabindex=1></td>";
-	$default_port = getConfigVar ('DEFAULT_SLB_VS_PORT');
-	if ($default_port == 0)
-		$default_port = '';
-	echo "<td><input type=text name=vport size=5 value='${default_port}' tabindex=2></td><td>";
-	printSelect ($protocols, 'proto', 'TCP');
-	echo "</td>";
-	echo "<td><input type=text name=name tabindex=4></td><td>";
-	printImageHREF ('CREATE', 'create virtual service', TRUE);
-	echo "</td></tr><tr><th>VS configuration</th><td colspan=4 class=tdleft><textarea name=vsconfig rows=10 cols=80></textarea></td>\n";
-	echo "<td rowspan=2><h3>assign tags</h3>";
-	renderNewEntityTags ('ipv4vs');
-	echo "</td></tr>";
-	echo "<tr><th>RS configuration</th><td colspan=4 class=tdleft><textarea name=rsconfig rows=10 cols=80></textarea></td></tr>\n";
-	echo "</table>";
-	echo "</form>\n";
-	finishPortlet();
-
-	$vslist = listCells ('ipv4vs');
-	if (!count ($vslist))
-		return;
-	startPortlet ('Manage existing (' . count ($vslist) . ')');
-	echo "<table class=cooltable border=0 cellpadding=10 cellspacing=0 align=center>\n";
-	echo "<tr><th>&nbsp;</th><th>VIP</th><th>port</th><th>proto</th><th>name</th>";
-	echo "<th>VS configuration</th><th>RS configuration</th><th></th></tr>";
-	$order = 'odd';
-	foreach ($vslist as $vsid => $vsinfo)
+	function printNewItemTR ($protocols)
 	{
-		printOpFormIntro ('upd', array ('vs_id' => $vsid));
-		echo "<tr valign=top class=row_${order}><td>";
-		if ($vsinfo['poolcount'])
-			printImageHREF ('nodelete', 'there are ' . $vsinfo['poolcount'] . ' RS pools configured');
-		else
-		{
-			echo "<a href='".makeHrefProcess(array('op'=>'del', 'vs_id'=>$vsid))."'>";
-			printImageHREF ('delete', 'delete virtual service');
-			echo '</a>';
-		}
-		echo "</td><td class=tdleft><input type=text name=vip value='${vsinfo['vip']}'></td>";
-		echo "<td class=tdleft><input type=text name=vport size=5 value='${vsinfo['vport']}'></td>";
-		echo "<td class=tdleft>";
-		printSelect ($protocols, 'proto', $vsinfo['proto']);
-		echo "</td>";
-		echo "<td class=tdleft><input type=text name=name value='${vsinfo['name']}'></td>";
-		echo "<td><textarea name=vsconfig>${vsinfo['vsconfig']}</textarea></td>";
-		echo "<td><textarea name=rsconfig>${vsinfo['rsconfig']}</textarea></td><td>";
-		printImageHREF ('SAVE', 'save changes', TRUE);
-		echo "</td></tr></form>\n";
-		$order = $nextorder[$order];
+		startPortlet ('Add new');
+		printOpFormIntro ('add');
+		echo "<table border=0 cellpadding=10 cellspacing=0 align=center>\n";
+		echo "<tr valign=bottom><td>&nbsp;</td><th>VIP</th><th>port</th><th>proto</th><th>name</th><th>&nbsp;</th><th>Assign tags</th></tr>";
+		echo '<tr valign=top><td>&nbsp;</td>';
+		echo "<td><input type=text name=vip tabindex=101></td>";
+		$default_port = getConfigVar ('DEFAULT_SLB_VS_PORT');
+		if ($default_port == 0)
+			$default_port = '';
+		echo "<td><input type=text name=vport size=5 value='${default_port}' tabindex=102></td><td>";
+		printSelect ($protocols, 'proto', 'TCP');
+		echo '</td><td><input type=text name=name tabindex=104></td><td>';
+		printImageHREF ('CREATE', 'create virtual service', TRUE, 105);
+		echo "</td><td rowspan=3>";
+		renderNewEntityTags ('ipv4vs');
+		echo "</td></tr><tr><th>VS configuration</th><td colspan=5 class=tdleft><textarea name=vsconfig rows=10 cols=80></textarea></td>";
+		echo "<tr><th>RS configuration</th><td colspan=5 class=tdleft><textarea name=rsconfig rows=10 cols=80></textarea></td></tr>";
+		echo '</table></form>';
+		finishPortlet();
 	}
-	echo "</table>";
-	finishPortlet();
+
+	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
+		printNewItemTR ($protocols);
+
+	if (count ($vslist = listCells ('ipv4vs')))
+	{
+		startPortlet ('Delete existing (' . count ($vslist) . ')');
+		echo '<table class=cooltable border=0 cellpadding=10 cellspacing=0 align=center>';
+		$order = 'odd';
+		foreach ($vslist as $vsid => $vsinfo)
+		{
+			echo "<tr valign=top class=row_${order}><td valign=middle>";
+			if ($vsinfo['poolcount'])
+				printImageHREF ('NODESTROY', 'there are ' . $vsinfo['poolcount'] . ' RS pools configured');
+			else
+			{
+				echo "<a href='".makeHrefProcess(array('op'=>'del', 'vs_id'=>$vsid))."'>";
+				printImageHREF ('DESTROY', 'delete virtual service');
+				echo '</a>';
+			}
+			echo "</td><td class=tdleft>";
+			renderCell ($vsinfo);
+			echo "</td></tr>";
+			$order = $nextorder[$order];
+		}
+		echo "</table>";
+		finishPortlet();
+	}
+	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')
+		printNewItemTR ($protocols);
 }
 
 function renderRSPoolList ()
@@ -4366,50 +4397,53 @@ function renderRSPoolList ()
 
 function editRSPools ()
 {
-	global $nextorder;
-	startPortlet ('Add new');
-	printOpFormIntro ('add');
-	echo "<table class=widetable border=0 cellpadding=10 cellspacing=0 align=center>\n";
-	echo "<tr><th>name</th>";
-	echo "<td class=tdleft><input type=text name=name tabindex=1></td><td>";
-	printImageHREF ('CREATE', 'create real server pool', TRUE);
-	echo "</td></tr><tr><th>VS configuration</th><td><textarea name=vsconfig rows=10 cols=80></textarea></td>";
-	echo "<td rowspan=2><h3>assign tags</h3>";
-	renderNewEntityTags ('ipv4rspool');
-	echo "</td></tr>";
-	echo "<tr><th>RS configuration</th><td><textarea name=rsconfig rows=10 cols=80></textarea></td></tr>";
-	echo "</table></form>";
-	finishPortlet();
-
-	$pool_list = listCells ('ipv4rspool');
-	if (!count ($pool_list))
-		return;
-	startPortlet ('Manage existing (' . count ($pool_list) . ')');
-	echo "<table class=cooltable border=0 cellpadding=10 cellspacing=0 align=center>\n";
-	echo "<tr><th>&nbsp;</th><th>name</th><th>VS configuration</th><th>RS configuration</th><th>&nbsp;</th></tr>";
-	$order='odd';
-	foreach ($pool_list as $pool_id => $pool_info)
+	function printNewItemTR()
 	{
-		printOpFormIntro ('upd', array ('pool_id' => $pool_id));
-		echo "<tr valign=top class=row_${order}><td>";
-		if ($pool_info['refcnt'] or $pool_info['rscount'])
-			printImageHREF ('nodelete', 'RS pool is used ' . $pool_info['refcnt'] . ' time(s)');
-		else
-		{
-			echo "<a href='".makeHrefProcess(array('op'=>'del', 'pool_id'=>$pool_id))."'>";
-			printImageHREF ('delete', 'delete real server pool');
-			echo '</a>';
-		}
-		echo "</td>";
-		echo "<td class=tdleft><input type=text name=name value='${pool_info['name']}'></td>";
-		echo "<td><textarea name=vsconfig>${pool_info['vsconfig']}</textarea></td>";
-		echo "<td><textarea name=rsconfig>${pool_info['rsconfig']}</textarea></td><td>";
-		printImageHREF ('save', 'save changes', TRUE);
-		echo "</td></tr></form>\n";
-		$order = $nextorder[$order];
+		startPortlet ('Add new');
+		printOpFormIntro ('add');
+		echo "<table border=0 cellpadding=10 cellspacing=0 align=center>";
+		echo "<tr><th class=tdright>Name</th>";
+		echo "<td class=tdleft><input type=text name=name tabindex=101></td><td>";
+		printImageHREF ('CREATE', 'create real server pool', TRUE, 104);
+		echo "</td><th>Assign tags</th></tr>";
+		echo "<tr><th class=tdright>VS config</th><td colspan=2><textarea name=vsconfig rows=10 cols=80 tabindex=102></textarea></td>";
+		echo "<td rowspan=2>";
+		renderNewEntityTags ('ipv4rspool');
+		echo "</td></tr>";
+		echo "<tr><th class=tdright>RS config</th><td colspan=2><textarea name=rsconfig rows=10 cols=80 tabindex=103></textarea></td></tr>";
+		echo "</table></form>";
+		finishPortlet();
 	}
-	echo "</table>";
-	finishPortlet();
+
+	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
+		printNewItemTR();
+	if (count ($pool_list = listCells ('ipv4rspool')))
+	{
+		startPortlet ('Delete existing (' . count ($pool_list) . ')');
+		echo "<table class=cooltable border=0 cellpadding=10 cellspacing=0 align=center>\n";
+		global $nextorder;
+		$order='odd';
+		foreach ($pool_list as $pool_info)
+		{
+			echo "<tr valign=top class=row_${order}><td valign=middle>";
+			if ($pool_info['refcnt'] or $pool_info['rscount'])
+				printImageHREF ('NODESTROY', 'RS pool is used ' . $pool_info['refcnt'] . ' time(s)');
+			else
+			{
+				echo "<a href='".makeHrefProcess(array('op'=>'del', 'pool_id'=>$pool_info['id']))."'>";
+				printImageHREF ('DESTROY', 'delete real server pool');
+				echo '</a>';
+			}
+			echo '</td><td class=tdleft>';
+			renderCell ($pool_info);
+			echo '</td></tr>';
+			$order = $nextorder[$order];
+		}
+		echo "</table>";
+		finishPortlet();
+	}
+	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')
+		printNewItemTR();
 }
 
 function renderRealServerList ()
@@ -4745,7 +4779,7 @@ function renderTagCheckbox ($inputname, $preselect, $taginfo, $refcnt_realm = ''
 	echo $taginfo['tag'];
 	if (strlen ($refcnt_realm) and isset ($taginfo['refcnt'][$refcnt_realm]))
 		echo ' <i>(' . $taginfo['refcnt'][$refcnt_realm] . ')</i>';
-	echo "</label></td></tr>\n";
+	echo "</label></td></tr>";
 	if (isset ($taginfo['kids']))
 		foreach ($taginfo['kids'] as $kid)
 			$self ($inputname, $preselect, $kid, $refcnt_realm, $level + 1);
@@ -4976,50 +5010,59 @@ function renderTagRollerForRow ($row_id)
 
 function renderObjectSLB ($object_id)
 {
-	global $nextorder;
-	// Keep the list in a variable to assist in decoding pool name below.
-
-	startPortlet ('Add new');
-	echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
-	printOpFormIntro ('addLB');
-	echo "<tr valign=top><th>VS / RS pool</th><td class=tdleft>";
-	printSelect (getIPv4VSOptions(), 'vs_id', NULL, 1);
-	echo "</td><td>";
-	printSelect (getIPv4RSPoolOptions(), 'pool_id', NULL, 2);
-	echo "</td><td>";
-	printImageHREF ('add', 'Configure LB', TRUE, 5);
-	echo "</td></tr>\n";
-	echo "<tr><th>VS config</th><td colspan=2><textarea tabindex=3 name=vsconfig rows=10 cols=80></textarea></td></tr>";
-	echo "<tr><th>RS config</th><td colspan=2><textarea tabindex=4 name=rsconfig rows=10 cols=80></textarea></td></tr>";
-	echo "</form></table>\n";
-	finishPortlet();
-
-	$myvslist = getRSPoolsForObject ($object_id);
-	if (count ($myvslist))
+	function printNewItemTR ()
 	{
-		startPortlet ('Manage existing (' . count ($myvslist) . ')');
-		echo "<table cellspacing=0 cellpadding=5 align=center class=cooltable>\n";
-		echo "<tr><th>&nbsp;</th><th>VS</th><th>RS pool</th><th>VS config</th><th>RS config</th><th>&nbsp;</th></tr>\n";
+		startPortlet ('Add new');
+		echo '<table cellspacing=0 cellpadding=5 align=center>';
+		printOpFormIntro ('addLB');
+		echo '<tr><th class=tdright>Virtual service</th><td class=tdleft>';
+		printSelect (getIPv4VSOptions(), 'vs_id', NULL, 101);
+		echo '</td><td class=tdcenter valign=middle rowspan=2>';
+		printImageHREF ('ADD', 'Configure LB', TRUE, 105);
+		echo '</td></tr>';
+		echo '</tr><th class=tdright>RS pool</th><td class=tdleft>';
+		printSelect (getIPv4RSPoolOptions(), 'pool_id', NULL, 102);
+		echo "</td></tr>";
+		echo '<tr><th class=tdright>VS config</th><td colspan=2><textarea tabindex=103 name=vsconfig rows=10 cols=80></textarea></td></tr>';
+		echo '<tr><th class=tdright>RS config</th><td colspan=2><textarea tabindex=104 name=rsconfig rows=10 cols=80></textarea></td></tr>';
+		echo '</form></table>';
+		finishPortlet();
+	}
+	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
+		printNewItemTR();
+
+	$focus = spotEntity ('object', $object_id);
+	amplifyCell ($focus);
+	if (count ($focus['ipv4rspools']))
+	{
+		startPortlet ('Manage existing (' . count ($focus['ipv4rspools']) . ')');
+		echo '<table cellspacing=0 cellpadding=5 align=center class=cooltable>';
 		$order = 'odd';
-		foreach ($myvslist as $vs_id => $vsinfo)
+		global $nextorder;
+		foreach ($focus['ipv4rspools'] as $vs_id => $vsinfo)
 		{
 			printOpFormIntro ('updLB', array ('vs_id' => $vs_id, 'pool_id' => $vsinfo['pool_id']));
-			echo "<tr valign=top class=row_${order}><td><a href='".makeHrefProcess(array('op'=>'delLB', 'pool_id'=>$vsinfo['pool_id'], 'object_id'=>$object_id, 'vs_id'=>$vs_id))."'>";
-			printImageHREF ('delete', 'Unconfigure');
+			echo "<tr class=row_${order}><td rowspan=2 valign=center><a href='".makeHrefProcess(array('op'=>'delLB', 'pool_id'=>$vsinfo['pool_id'], 'object_id'=>$object_id, 'vs_id'=>$vs_id))."'>";
+			printImageHREF ('DELETE', 'Unconfigure');
 			echo "</a></td>";
-			echo "</td><td class=tdleft>";
+			echo "</td><td class=tdleft valign=bottom>";
 			renderCell (spotEntity ('ipv4vs', $vs_id));
-			echo "</td><td class=tdleft>";
-			renderCell (spotEntity ('ipv4rspool', $vsinfo['pool_id']));
-			echo "</td><td><textarea name=vsconfig>${vsinfo['vsconfig']}</textarea></td>";
-			echo "<td><textarea name=rsconfig>${vsinfo['rsconfig']}</textarea></td><td>";
+			echo '</td>';
+			echo "<td>VS config &darr;<br><textarea name=vsconfig rows=5 cols=70>${vsinfo['vsconfig']}</textarea></td>";
+			echo "<td rowspan=2 valign=middle>";
 			printImageHREF ('SAVE', 'Save changes', TRUE);
-			echo "</td></tr></form>\n";
+			echo '</td></tr>';
+			echo "<tr class=row_${order}><td valign=top>";
+			renderCell (spotEntity ('ipv4rspool', $vsinfo['pool_id']));
+			echo "</td><td><textarea name=rsconfig rows=5 cols=70>${vsinfo['rsconfig']}</textarea><br>RS config &uarr;</td></tr>";
+			echo '</form>';
 			$order = $nextorder[$order];
 		}
 		echo "</table>\n";
 		finishPortlet();
 	}
+	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')
+		printNewItemTR();
 }
 
 function renderEditRSPool ($pool_id)
@@ -5322,52 +5365,60 @@ function renderFileBrowser ()
 // Like renderFileBrowser(), but with the option to delete files
 function renderFileManager ()
 {
-	global $nextorder;
 	// Used for uploading a parentless file
-	startPortlet ('Upload new');
-	echo "<table border=0 cellspacing=0 cellpadding='5' align='center' class='widetable'>\n";
-	echo "<tr><th>File</th><th>Comment</th><th></th></tr>\n";
-	printOpFormIntro ('addFile', array (), TRUE);
-	echo "<tr>";
-	echo "<td class=tdleft><input type='file' size='10' name='file' tabindex=100></td>\n";
-	echo "<td class=tdleft><textarea tabindex=101 name=comment rows=10 cols=80></textarea></td>\n";
-	echo '<td>';
-	printImageHREF ('CREATE', 'Upload file', TRUE, 102);
-	echo '</td></tr></form>';
-	echo "</table><br>\n";
-	finishPortlet();
-
-	$files = listCells ('file');
-	if (!count ($files))
-		return;
-
-	startPortlet ('Manage existing (' . count ($files) . ')');
-	$order = 'odd';
-	echo '<table cellpadding=5 cellspacing=0 align=center class=cooltable>';
-	echo '<tr><th>File</th><th>Unlink</th><th>Destroy</th></tr>';
-	foreach ($files as $file)
+	function printNewItemTR ()
 	{
-		printf("<tr class=row_%s valign=top><td class=tdleft>", $order);
-		renderCell ($file);
-		// Don't load links data earlier to enable special processing.
-		amplifyCell ($file);
-		echo '</td><td class=tdleft>';
-		echo serializeFileLinks ($file['links'], TRUE);
-		echo '</td><td class=tdcenter>';
-		if (count ($file['links']))
-			printImageHREF ('NODESTROY', 'References (' . count ($file['links']) . ')');
-		else
-		{
-			echo "<a href='".makeHrefProcess(array('op'=>'deleteFile', 'file_id'=>$file['id'])).
-				"' onclick=\"javascript:return confirm('Are you sure you want to delete the file?')\">";
-			printImageHREF ('DESTROY', 'Delete file');
-			echo "</a>";
-		}
-		echo "</td></tr>\n";
-		$order = $nextorder[$order];
+		startPortlet ('Upload new');
+		printOpFormIntro ('addFile', array (), TRUE);
+		echo "<table border=0 cellspacing=0 cellpadding='5' align='center'>";
+		echo '<tr><th colspan=2>Comment</th><th>Assign tags</th></tr>';
+		echo '<tr><td valign=top colspan=2><textarea tabindex=101 name=comment rows=10 cols=80></textarea></td>';
+		echo '<td rowspan=2>';
+		renderNewEntityTags ('file');
+		echo '</td></tr>';
+		echo "<tr><td class=tdleft><label>File: <input type='file' size='10' name='file' tabindex=100></label></td><td class=tdcenter>";
+		printImageHREF ('CREATE', 'Upload file', TRUE, 102);
+		echo '</td></tr>';
+		echo "</table></form><br>";
+		finishPortlet();
 	}
-	echo '</table>';
-	finishPortlet();
+
+	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
+		printNewItemTR();
+	if (count ($files = listCells ('file')))
+	{
+		startPortlet ('Manage existing (' . count ($files) . ')');
+		global $nextorder;
+		$order = 'odd';
+		echo '<table cellpadding=5 cellspacing=0 align=center class=cooltable>';
+		echo '<tr><th>File</th><th>Unlink</th><th>Destroy</th></tr>';
+		foreach ($files as $file)
+		{
+			printf("<tr class=row_%s valign=top><td class=tdleft>", $order);
+			renderCell ($file);
+			// Don't load links data earlier to enable special processing.
+			amplifyCell ($file);
+			echo '</td><td class=tdleft>';
+			echo serializeFileLinks ($file['links'], TRUE);
+			echo '</td><td class=tdcenter valign=middle>';
+			if (count ($file['links']))
+				printImageHREF ('NODESTROY', 'References (' . count ($file['links']) . ')');
+			else
+			{
+				echo "<a href='".makeHrefProcess(array('op'=>'deleteFile', 'file_id'=>$file['id'])).
+					"' onclick=\"javascript:return confirm('Are you sure you want to delete the file?')\">";
+				printImageHREF ('DESTROY', 'Delete file');
+				echo "</a>";
+			}
+			echo "</td></tr>";
+			$order = $nextorder[$order];
+		}
+		echo '</table>';
+		finishPortlet();
+	}
+
+	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')
+		printNewItemTR();
 }
 
 function renderFilesPortlet ($entity_type = NULL, $entity_id = 0)

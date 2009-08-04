@@ -467,10 +467,11 @@ function createUser ()
 	$username = $_REQUEST['username'];
 	$password = sha1 ($_REQUEST['password']);
 	$result = commitCreateUserAccount ($username, $_REQUEST['realname'], $password);
-	if ($result == TRUE)
-		return buildRedirectURL (__FUNCTION__, 'OK', array ($username));
-	else
+	if ($result != TRUE)
 		return buildRedirectURL (__FUNCTION__, 'ERR', array ($username));
+	if (isset ($_REQUEST['taglist']))
+		produceTagsForLastRecord ('user', $_REQUEST['taglist']);
+	return buildRedirectURL (__FUNCTION__, 'OK', array ($username));
 }
 
 $msgcode['updateUser']['OK'] = 39;
@@ -1773,6 +1774,8 @@ function addFileWithoutLink ()
 	global $sic;
 	// commitAddFile() uses prepared statements
 	$error = commitAddFile ($_FILES['file']['name'], $_FILES['file']['type'], $_FILES['file']['size'], $fp, $sic['comment']);
+	if (isset ($_REQUEST['taglist']))
+		produceTagsForLastRecord ('file', $_REQUEST['taglist']);
 
 	if ($error != '')
 		return buildRedirectURL (__FUNCTION__, 'ERR', array ($error));
