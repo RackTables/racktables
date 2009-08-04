@@ -1,26 +1,25 @@
 <?php
 
-function reloadDictionary ($from_key, $to_key)
+function reloadDictionary ($release = NULL)
 {
-	$ret = array();
-	global $dictionary;
-	foreach ($dictionary as $dict_key => $tmp)
-		if ($dict_key >= $from_key and $dict_key <= $to_key)
-		{
-			$chapter_id = $tmp['chapter_id'];
-			$dict_value = $tmp['dict_value'];
-			$ret[] = "DELETE FROM Dictionary WHERE dict_key = ${dict_key}";
-			$ret[] = "INSERT INTO Dictionary (dict_key, chapter_id, dict_value) VALUES (" .
-				"${dict_key}, ${chapter_id}, '${dict_value}')";
-		}
+	global $dictionary, $max_dict_key;
+	if ($release === NULL)
+		$maxkey = max (array_keys ($dictionary));
+	else
+		$maxkey = $max_dict_key[$release];
+	// Not only update existing stuff, but make sure all obsolete records are gone.
+	$ret = array ("DELETE FROM Dictionary WHERE dict_key BETWEEN 1 AND ${maxkey}");
+	for ($i = 1; $i <= $maxkey; $i++)
+	{
+		if (!array_key_exists ($i, $dictionary))
+			continue;
+		$chapter_id = $dictionary[$i]['chapter_id'];
+		$dict_value = $dictionary[$i]['dict_value'];
+		$ret[] = "INSERT INTO Dictionary (dict_key, chapter_id, dict_value) VALUES (" .
+			"${i}, ${chapter_id}, '${dict_value}')";
+	}
 	return $ret;
 }
-
-$dictreload = array
-(
-	'0.17.0' => array ('from' => 1, 'to' => 988),
-	'0.17.2' => array ('from' => 562, 'to' => 1150),
-);
 
 $dictionary = array
 (

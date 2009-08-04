@@ -63,7 +63,7 @@ function getDBUpgradePath ($v1, $v2)
 function executeUpgradeBatch ($batchid)
 {
 	$query = array();
-	global $dbxlink, $dictreload;
+	global $dbxlink;
 	switch ($batchid)
 	{
 		case '0.16.5':
@@ -93,8 +93,7 @@ function executeUpgradeBatch ($batchid)
 			$query[] = "alter table AttributeMap change chapter_no chapter_id int(10) unsigned NOT NULL";
 			$query[] = "alter table Dictionary change chapter_no chapter_id int(10) unsigned NOT NULL";
 			// Only after the above call it is Ok to use reloadDictionary()
-			if (isset ($dictreload[$batchid]))
-				$query = array_merge ($query, reloadDictionary ($dictreload[$batchid]['from'], $dictreload[$batchid]['to']));
+			$query = array_merge ($query, reloadDictionary ($batchid));
 			// schema changes for file management
 			$query[] = "
 CREATE TABLE `File` (
@@ -224,16 +223,14 @@ CREATE TABLE `LDAPCache` (
 			break;
 		case '0.17.1':
 			$query[] = "ALTER TABLE Dictionary DROP KEY `chap_to_key`";
-			if (isset ($dictreload[$batchid]))
-				$query = array_merge ($query, reloadDictionary ($dictreload[$batchid]['from'], $dictreload[$batchid]['to']));
+			$query = array_merge ($query, reloadDictionary ($batchid));
 			// Token set has changed, so the cache isn't valid any more.
 			$query[] = "UPDATE Script SET script_text = NULL WHERE script_name = 'RackCodeCache'";
 			$query[] = "UPDATE Config SET varvalue = '0.17.1' WHERE varname = 'DB_VERSION'";
 			break;
 		case '0.17.2':
 			$query[] = "INSERT INTO `Chapter` (`id`, `sticky`, `name`) VALUES (26,'no','fibre channel switch models')";
-			if (isset ($dictreload[$batchid]))
-				$query = array_merge ($query, reloadDictionary ($dictreload[$batchid]['from'], $dictreload[$batchid]['to']));
+			$query = array_merge ($query, reloadDictionary ($batchid));
 			$query[] = "INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_id`) VALUES (1055,2,26)";
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('DEFAULT_SNMP_COMMUNITY','public','string','no','no','Default SNMP Community string')";
 			// wipe irrelevant records (ticket:250)
