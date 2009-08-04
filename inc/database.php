@@ -52,6 +52,7 @@ $SQLSchema = array
 			'mask' => 'mask',
 			'name' => 'name',
 			'comment' => 'comment',
+			'parent_id' => '(SELECT id FROM IPv4Network AS subt WHERE IPv4Network.ip & (4294967295 >> (32 - subt.mask)) << (32 - subt.mask) = subt.ip and subt.mask < IPv4Network.mask ORDER BY subt.mask DESC limit 1)',
 		),
 		'keycolumn' => 'id',
 		'ordcolumns' => array ('ip', 'mask'),
@@ -419,9 +420,6 @@ function amplifyCell (&$record, $dummy = NULL)
 		$record['nat4'] = getNATv4ForObject ($record['id']);
 		$record['ipv4rspools'] = getRSPoolsForObject ($record['id']);
 		$record['files'] = getFilesOfEntity ($record['realm'], $record['id']);
-		break;
-	case 'ipv4net':
-		$record['parent_id'] = getIPv4AddressNetworkId ($record['ip'], $record['mask']);
 		break;
 	case 'file':
 		$record['links'] = getFileLinks ($record['id']);

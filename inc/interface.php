@@ -1905,17 +1905,16 @@ function renderIPv4SpaceRecords ($tree, $baseurl, $target = 0, $level = 1)
 	$self = __FUNCTION__;
 	foreach ($tree as $item)
 	{
-		$total = $item['addrt'];
 		if (getConfigVar ('IPV4_TREE_SHOW_USAGE') == 'yes')
-		{
 			loadIPv4AddrList ($item); // necessary to compute router list and address counter
-			$used = $item['addrc'];
-		}
 		else
 		{
 			$item['addrlist'] = array();
 			$item['addrc'] = 0;
 		}
+		$used = $item['addrc'];
+		$maxdirect = $item['addrt'];
+		$maxtotal = binInvMaskFromDec ($item['mask']) + 1;
 		if (isset ($item['id']))
 		{
 			if ($item['symbol'] == 'node-collapsed')
@@ -1931,11 +1930,11 @@ function renderIPv4SpaceRecords ($tree, $baseurl, $target = 0, $level = 1)
 				echo "<a name=netid${target}></a>";
 			if (getConfigVar ('IPV4_TREE_SHOW_USAGE') == 'yes')
 			{
-				renderProgressBar ($total ? $used/$total : 0);
-				echo "<br><small>${used}/${total}</small>";
+				renderProgressBar ($maxdirect ? $used/$maxdirect : 0);
+				echo "<br><small>${used}/${maxdirect}" . ($maxdirect == $maxtotal ? '' : "/${maxtotal}") . '</small>';
 			}
 			else
-				echo "<small>${total}</small>";
+				echo "<small>${maxdirect}</small>";
 			echo "</td>";
 			if (getConfigVar ('EXT_IPV4_VIEW') == 'yes')
 				printRoutersTD (findRouters ($item['addrlist']));
@@ -1950,11 +1949,11 @@ function renderIPv4SpaceRecords ($tree, $baseurl, $target = 0, $level = 1)
 			echo "<td class=tdcenter>";
 			if (getConfigVar ('IPV4_TREE_SHOW_USAGE') == 'yes')
 			{
-				renderProgressBar ($used/$total, 'sparenetwork');
-				echo "<br><small>${used}/${total}</small>";
+				renderProgressBar ($used/$maxtotal, 'sparenetwork');
+				echo "<br><small>${used}/${maxtotal}</small>";
 			}
 			else
-				echo "<small>${total}</small>";
+				echo "<small>${maxtotal}</small>";
 			echo "</td><td>&nbsp;</td></tr>";
 		}
 	}
@@ -2107,10 +2106,22 @@ function renderIPv4SpaceEditor ()
 	{
 		startPortlet ('Manage existing (' . count ($addrspaceList) . ')');
 		echo "<table class='widetable' border=0 cellpadding=5 cellspacing=0 align='center'>\n";
-		echo "<tr><th>&nbsp;</th><th>prefix</th><th>name</th></tr>";
+		echo "<tr><th>&nbsp;</th><th>prefix</th><th>name</th><th>capacity</th></tr>";
+		if (getConfigVar ('IPV4_JAYWALK') != 'yes')
+		{
+			array_walk ($addrspaceList, 'amplifyCell');
+			$tree = prepareIPv4Tree ($addrspaceList, 'ALL');
+			// this is only called for having "trace" set
+			treeFromList ($addrspaceList);
+		}
 		foreach ($addrspaceList as $netinfo)
 		{
-			amplifyCell ($netinfo);
+			$netinfo = peekNode ($tree, $netinfo['trace'], $netinfo['id']);
+			// now we have all subnets listed in netinfo
+			loadIPv4AddrList ($netinfo);
+			$used = $netinfo['addrc'];
+			$maxdirect = $netinfo['addrt'];
+			$maxtotal = binInvMaskFromDec ($netinfo['mask']) + 1;
 			echo "<tr valign=top><td>";
 			if (getConfigVar ('IPV4_JAYWALK') == 'yes')
 			{
@@ -2120,7 +2131,6 @@ function renderIPv4SpaceEditor ()
 			}
 			else // only render clickable image for empty networks
 			{
-				loadIPv4AddrList ($netinfo);
 				if (count ($netinfo['addrlist']))
 					printImageHREF ('nodestroy', 'There are ' . count ($netinfo['addrlist']) . ' allocations inside');
 				else
@@ -2133,7 +2143,10 @@ function renderIPv4SpaceEditor ()
 			}
 			echo '</td><td class=tdleft><a href="' . makeHref (array ('page' => 'ipv4net', 'id' => $netinfo['id'])) . '">';
 			echo "${netinfo['ip']}/${netinfo['mask']}</a></td>";
-			echo '<td class=tdleft>' . htmlspecialchars ($netinfo['name']) . '</td></tr>';
+			echo '<td class=tdleft>' . htmlspecialchars ($netinfo['name']) . '</td><td>';
+			renderProgressBar ($maxdirect ? $used/$maxdirect : 0);
+			echo "<br><small>${used}/${maxdirect}" . ($maxdirect == $maxtotal ? '' : "/${maxtotal}") . '</small></td>';
+			echo '</tr>';
 		}
 		echo "</table>";
 		finishPortlet();
