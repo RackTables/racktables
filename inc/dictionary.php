@@ -752,7 +752,7 @@ $dictionary = array
 	728 => array ('chapter_id' => 13, 'dict_value' => '[[BSD%GSKIP%OpenBSD 4.1 | http://openbsd.org/41.html]]'),
 	729 => array ('chapter_id' => 13, 'dict_value' => '[[BSD%GSKIP%OpenBSD 4.2 | http://openbsd.org/42.html]]'),
 	730 => array ('chapter_id' => 13, 'dict_value' => '[[BSD%GSKIP%OpenBSD 4.3 | http://openbsd.org/43.html]]'),
-	731 => array ('chapter_id' => 12, 'dict_value' => '[[Cisco%GSKIP%Catalyst 4900M | http://www.cisco.com/en/US/products/ps9310/index.html]]'),
+// 1018 duplicated 731 later, so 731 isn't here any more
 	732 => array ('chapter_id' => 13, 'dict_value' => '[[BSD%GSKIP%FreeBSD 7.0 | http://www.freebsd.org/releases/7.0R/announce.html]]'),
 	733 => array ('chapter_id' => 13, 'dict_value' => '[[BSD%GSKIP%NetBSD 2.0 | http://netbsd.org/releases/formal-2.0/]]'),
 	734 => array ('chapter_id' => 13, 'dict_value' => '[[BSD%GSKIP%NetBSD 2.1 | http://netbsd.org/releases/formal-2.0/NetBSD-2.1.html]]'),
