@@ -3,8 +3,8 @@
 	update: suggest tag selector for new files and users (ticket:205)
 	new feature: tags quick list on "Tags" tab (ticket:259)
 	bugfix: removed PHP warnings on "Rackspace" tab
-	bugfix: improve usage counters for IPv4 networks
 	bugfix: rack row removal sometimes failed (by Marcin Suchocki)
+	bugfix: improve usage counters for IPv4 networks
 	bugfix: make ADDNEW_AT_TOP options really work everywhere (ticket:213)
 0.17.2 2009-07-22
 	new feature: configure default SNMP community (by jthurman)

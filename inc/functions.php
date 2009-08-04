@@ -745,6 +745,12 @@ function parseWikiLink ($line, $which)
 	return "<a href='${a_value}'>${o_value}</a>";
 }
 
+// FIXME: should this be saved as "P-data"?
+function execGMarker ($line)
+{
+	return ereg_replace ('^.+%GSKIP%', '', ereg_replace ('^(.+)%GPASS%', '\\1 ', $line));
+}
+
 // rackspace usage for a single rack
 // (T + W + U) / (height * 3 - A)
 function getRSUforRack ($data = NULL)

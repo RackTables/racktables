@@ -89,9 +89,9 @@ function getSwitchVLANs ($object_id = 0)
 	foreach (getAttrValues ($object_id) as $record)
 	{
 		if ($record['name'] == 'SW type' && strlen ($record['o_value']))
-			$swtype = str_replace (' ', '+', $record['o_value']);
+			$swtype = str_replace (' ', '+', execGMarker ($record['o_value']));
 		if ($record['name'] == 'HW type' && strlen ($record['o_value']))
-			$hwtype = str_replace (' ', '+', $record['o_value']);
+			$hwtype = str_replace (' ', '+', execGMarker ($record['o_value']));
 	}
 	$endpoint = str_replace (' ', '+', $endpoints[0]);
 	$commands = array
@@ -169,9 +169,9 @@ function setSwitchVLANs ($object_id = 0, $setcmd)
 	foreach (getAttrValues ($object_id) as $record)
 	{
 		if ($record['name'] == 'SW type' && strlen ($record['o_value']))
-			$swtype = strtr ($record['o_value'], ' ', '+');
+			$swtype = strtr (execGMarker ($record['o_value']), ' ', '+');
 		if ($record['name'] == 'HW type' && strlen ($record['o_value']))
-			$hwtype = strtr ($record['o_value'], ' ', '+');
+			$hwtype = strtr (execGMarker ($record['o_value']), ' ', '+');
 	}
 	$endpoint = str_replace (' ', '+', $endpoints[0]);
 	$data = queryGateway
