@@ -335,18 +335,16 @@ function init_database_static ()
 	// (re)load dictionary by pure PHP means w/o any external file
 	echo "<tr><th>dictionary</th>";
 	$nq = $nerrs = 0;
-	global $dictreload;
 	$dictq = array();
-	foreach ($dictreload as $tmp)
-		foreach (reloadDictionary ($tmp['from'], $tmp['to']) as $query)
+	foreach (reloadDictionary() as $query)
+	{
+		$nq++;
+		if ($dbxlink->exec ($query) === FALSE)
 		{
-			$nq++;
-			if ($dbxlink->exec ($query) === FALSE)
-			{
-				$nerrs++;
-				$errlist[] = $query;
-			}
+			$nerrs++;
+			$errlist[] = $query;
 		}
+	}
 	echo "<td>${nq}</td><td>${nerrs}</td></tr>\n";
 			
 	echo '</table>';
