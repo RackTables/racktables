@@ -2855,7 +2855,11 @@ function renderSearchResults ()
 				echo "';//</script>";
 				break;
 			case 'object':
-				echo "<script language='Javascript'>document.location='${root}?page=object&object_id=${record['id']}';//</script>";
+				if (isset ($record['by_port']) and 1 == count ($record['by_port']))
+					$hl = '&hl_port_id=' . key ($record['by_port']);
+				else
+					$hl = '';
+				echo "<script language='Javascript'>document.location='${root}?page=object&object_id=${record['id']}${hl}';//</script>";
 				break;
 			case 'ipv4rspool':
 				echo "<script language='Javascript'>document.location='${root}?page=ipv4rspool&pool_id=${record['id']}';//</script>";
@@ -2921,12 +2925,12 @@ function renderSearchResults ()
 						{
 							echo '<table>';
 							$ports = getObjectPortsAndLinks ($obj['id']);
-							foreach ($obj['by_port'] as $port_id)
+							foreach ($obj['by_port'] as $port_id => $text)
 								foreach ($ports as $port)
 									if ($port['id'] == $port_id)
 									{
-										echo "<tr><td>port ${port['name']} (${port['type']} ${port['l2address']}):</td>";
-										echo "<td class=tdleft>${port['reservation_comment']}</td></tr>";
+										echo "<tr><td>port ${port['name']}:</td>";
+										echo "<td class=tdleft>${text}</td></tr>";
 										break; // next reason
 									}
 							echo '</table>';

@@ -125,6 +125,18 @@ $SQLSchema = array
 	),
 );
 
+$searchfunc = array
+(
+	'object' => array
+	(
+		'by_sticker' => 'getStickerSearchResults',
+		'by_port' => 'getPortSearchResults',
+		'by_attr' => 'getObjectAttrsSearchResults',
+		'by_iface' => 'getObjectIfacesSearchResults',
+		'by_nat' => 'getObjectNATSearchResults',
+	),
+);
+
 function isInnoDBSupported ($dbh = FALSE) {
 	global $dbxlink;
 
@@ -1598,31 +1610,13 @@ function getSearchResultByField ($tname, $rcolumns, $scolumn, $terms, $ocolumn =
 function getObjectSearchResults ($what)
 {
 	$ret = array();
-	foreach (getStickerSearchResults ($what) as $objRecord)
-	{
-		$ret[$objRecord['id']]['id'] = $objRecord['id'];
-		$ret[$objRecord['id']]['by_sticker'] = $objRecord['by_sticker'];
-	}
-	foreach (getPortSearchResults ($what) as $objRecord)
-	{
-		$ret[$objRecord['id']]['id'] = $objRecord['id'];
-		$ret[$objRecord['id']]['by_port'] = $objRecord['by_port'];
-	}
-	foreach (getObjectAttrsSearchResults ($what) as $objRecord)
-	{
-		$ret[$objRecord['id']]['id'] = $objRecord['id'];
-		$ret[$objRecord['id']]['by_attr'] = $objRecord['by_attr'];
-	}
-	foreach (getObjectIfacesSearchResults ($what) as $objRecord)
-	{
-		$ret[$objRecord['id']]['id'] = $objRecord['id'];
-		$ret[$objRecord['id']]['by_iface'] = $objRecord['by_iface'];
-	}
-	foreach (getObjectNATSearchResults ($what) as $objRecord)
-	{
-		$ret[$objRecord['id']]['id'] = $objRecord['id'];
-		$ret[$objRecord['id']]['by_nat'] = $objRecord['by_nat'];
-	}
+	global $searchfunc;
+	foreach ($searchfunc['object'] as $method => $func)
+		foreach ($func ($what) as $objRecord)
+		{
+			$ret[$objRecord['id']]['id'] = $objRecord['id'];
+			$ret[$objRecord['id']][$method] = $objRecord[$method];
+		}
 	return $ret;
 }
 
@@ -1679,7 +1673,7 @@ function getPortSearchResults ($what)
 	$ports = getSearchResultByField
 	(
 		'Port',
-		array ('object_id', 'id'),
+		array ('object_id', 'id', 'reservation_comment'),
 		'reservation_comment',
 		$what,
 		'object_id',
@@ -1689,14 +1683,14 @@ function getPortSearchResults ($what)
 	foreach ($ports as $port)
 	{
 		$ret[$port['object_id']]['id'] = $port['object_id'];
-		$ret[$port['object_id']]['by_port'][] = $port['id'];
+		$ret[$port['object_id']]['by_port'][$port['id']] = $port['reservation_comment'];
 	}
 	if (NULL === ($db_l2address = l2addressForDatabase ($what)))
 		return $ret;
 	$ports = getSearchResultByField
 	(
 		'Port',
-		array ('object_id', 'id'),
+		array ('object_id', 'id', 'l2address'),
 		'l2address',
 		$db_l2address,
 		'object_id',
@@ -1705,7 +1699,7 @@ function getPortSearchResults ($what)
 	foreach ($ports as $port)
 	{
 		$ret[$port['object_id']]['id'] = $port['object_id'];
-		$ret[$port['object_id']]['by_port'][] = $port['id'];
+		$ret[$port['object_id']]['by_port'][$port['id']] = $port['l2address'];
 	}
 	return $ret;
 }
