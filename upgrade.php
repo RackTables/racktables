@@ -264,6 +264,7 @@ CREATE TABLE `LDAPCache` (
 			$query[] = 'DELETE FROM Dictionary WHERE dict_key = 731';
 			$query = array_merge ($query, reloadDictionary ($batchid));
 			$query[] = "UPDATE Config SET vartype='uint' WHERE varname='RACKS_PER_ROW'";
+			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('ENABLE_MULTIPORT_FORM','no','string','no','no','Enable \"Add/update multiple ports\" form')";
 			$query[] = "UPDATE Config SET varvalue = '0.17.3' WHERE varname = 'DB_VERSION'";
 			break;
 		default:

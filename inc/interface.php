@@ -1093,7 +1093,10 @@ function renderPortsForObject ($object_id)
 		printImageHREF ('add', 'add a port', TRUE, 104);
 		echo "</td></tr></form>";
 	}
-	startPortlet ('Ports and interfaces');
+	if (getConfigVar('ENABLE_MULTIPORT_FORM') == 'yes')
+		startPortlet ('Ports and interfaces');
+	else
+		echo '<br>';
 	$ports = getObjectPortsAndLinks ($object_id);
 	usort($ports, 'sortByName');
 	echo "<table cellspacing=0 cellpadding='5' align='center' class='widetable'>\n";
@@ -1166,7 +1169,10 @@ function renderPortsForObject ($object_id)
 	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')
 		printNewItemTR ($portOptions);
 	echo "</table><br>\n";
-	finishPortlet();
+	if (getConfigVar('ENABLE_MULTIPORT_FORM') == 'yes')
+		finishPortlet();
+	if (getConfigVar('ENABLE_MULTIPORT_FORM') != 'yes')
+		return;
 
 	startPortlet ('Add/update multiple ports');
 	printOpFormIntro ('addMultiPorts');

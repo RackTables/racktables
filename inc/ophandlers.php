@@ -1024,6 +1024,7 @@ function resetUIConfig()
 	setConfigVar ('TAGS_TOPLIST_SIZE','50');
 	setConfigVar ('TAGS_QUICKLIST_SIZE','20');
 	setConfigVar ('TAGS_QUICKLIST_THRESHOLD','50');
+	setConfigVar ('ENABLE_MULTIPORT_FORM', 'no');
 	return buildRedirectURL (__FUNCTION__, 'OK');
 }
 
