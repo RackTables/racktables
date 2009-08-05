@@ -20,10 +20,7 @@
 			$tabno = 'ports';
 			fixContext();
 			if (!permitted())
-			{
 				renderAccessDenied();
-				die;
-			}
 			assertUIntArg ('type', __FILE__);
 			assertUIntArg ('port', __FILE__);
 			assertUIntArg ('object_id', __FILE__);
@@ -51,10 +48,7 @@
 			$tabno = 'default';
 			fixContext();
 			if (!permitted())
-			{
 				renderAccessDenied();
-				die;
-			}
 			echo '<div style="background-color: #f0f0f0; border: 1px solid #3c78b5; padding: 10px; height: 100%; text-align: center; margin: 5px;">';
 			echo '<h2>Choose a port:</h2><br><br>';
 			echo '<form action="javascript:;">';
