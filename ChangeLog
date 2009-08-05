@@ -1,6 +1,7 @@
 0.17.3
 	update: even better search function (ticket:20)
 	update: suggest tag selector for new files and users (ticket:205)
+	update: "multiple ports" form is now hidden by default (ticket:274)
 	new feature: tags quick list on "Tags" tab (ticket:259)
 	bugfix: removed PHP warnings on "Rackspace" tab
 	bugfix: rack row removal sometimes failed (by Marcin Suchocki)

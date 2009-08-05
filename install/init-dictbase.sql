@@ -232,6 +232,7 @@ INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, descriptio
 ('TAGS_TOPLIST_SIZE','50','uint','yes','no','Tags top list size'),
 ('TAGS_QUICKLIST_SIZE','20','uint','no','no','Tags quick list size'),
 ('TAGS_QUICKLIST_THRESHOLD','50','uint','yes','no','Tags quick list threshold'),
+('ENABLE_MULTIPORT_FORM','no','string','no','no','Enable "Add/update multiple ports" form'),
 ('DB_VERSION','0.17.2','string','no','yes','Database version.');
 
 INSERT INTO `Script` VALUES ('RackCode','allow {$userid_1}');
