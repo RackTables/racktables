@@ -262,6 +262,8 @@ CREATE TABLE `LDAPCache` (
 			// ticket:239
 			$query[] = 'UPDATE AttributeValue SET uint_value = 1018 WHERE uint_value = 731 AND attr_id IN (SELECT attr_id FROM AttributeMap WHERE chapter_id = 12)';
 			$query[] = 'DELETE FROM Dictionary WHERE dict_key = 731';
+			$query = array_merge ($query, reloadDictionary ($batchid));
+			$query[] = "UPDATE Config SET vartype='uint' WHERE varname='RACKS_PER_ROW'";
 			$query[] = "UPDATE Config SET varvalue = '0.17.3' WHERE varname = 'DB_VERSION'";
 			break;
 		default:
