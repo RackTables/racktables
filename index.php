@@ -4,12 +4,10 @@ try {
 require 'inc/interface.php';
 require 'inc/init.php';
 // no ctx override is necessary
+redirectIfNecessary();
 fixContext();
 if (!permitted())
-{
 	renderAccessDenied();
-	die;
-}
 // Only store the tab name after clearance is got. Any failure is unhandleable.
 $_SESSION['RTLT'][$pageno] = $tabno;
 

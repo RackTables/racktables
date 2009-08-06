@@ -1,22 +1,23 @@
 <?php
 require 'inc/init.php';
+// purely for renderAccessDenied()
+require 'inc/interface.php';
 
 assertUIntArg ('file_id', __FILE__);
 $pageno = 'file';
-$tabno = 'default';
+$tabno = 'download';
 fixContext();
 if (!permitted())
-{
-	showError ("Permission denied", __FILE__);
-	die();
-}
+	renderAccessDenied();
 
+$asattach = (isset ($_REQUEST['asattach']) and $_REQUEST['asattach'] == 'no') ? FALSE : TRUE;
 $file = getFile($_REQUEST['file_id']);
 if ($file != NULL) 
 {
 	header("Content-Type: {$file['type']}");
 	header("Content-Length: {$file['size']}");
-	header("Content-Disposition: attachment; filename={$file['name']}");
+	if ($asattach)
+		header("Content-Disposition: attachment; filename={$file['name']}");
 	echo $file['contents'];
 }
 ?>

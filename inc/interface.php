@@ -5242,6 +5242,7 @@ function renderAccessDenied ()
 	echo "<tr><td colspan=2 align=center>Click <a href='${root}?logout'>here</a> to logout.</td></tr>\n";
 	echo "</table>\n";
 	echo "</body></html>";
+	die;
 }
 
 function renderMyAccount ()
@@ -5270,10 +5271,14 @@ function renderFile ($file_id)
 	echo "<table border=0 cellspacing=0 cellpadding=3 width='100%'>\n";
 	echo "<tr><th width='50%' class=tdright>Type:</th>";
 	printf("<td class=tdleft>%s</td></tr>", htmlspecialchars ($file['type']));
-	echo "<tr><th width='50%' class=tdright>Size:</th>";
-	echo "<td class=tdleft><a href='${root}download.php?file_id=${file_id}'>";
-	printImageHREF ('download', 'Download file');
-	printf("</a>&nbsp;%s</td></tr>", formatFileSize($file['size']));
+	echo "<tr><th width='50%' class=tdright>Size:</th><td class=tdleft>";
+	if (isolatedPermission ('file', 'download', $file))
+	{
+		echo "<a href='${root}download.php?file_id=${file_id}'>";
+		printImageHREF ('download', 'Download file');
+		echo '</a>&nbsp;';
+	}
+	printf("%s</td></tr>", formatFileSize($file['size']));
 	echo "<tr><th width='50%' class=tdright>Created:</th>";
 	printf("<td class=tdleft>%s</td></tr>", formatTimestamp($file['ctime']));
 	echo "<tr><th width='50%' class=tdright>Modified:</th>";
@@ -5320,7 +5325,7 @@ function renderFile ($file_id)
 		finishPortlet();
 	}
 
-	if ('' != ($pcode = getFilePreviewCode ($file)))
+	if (isolatedPermission ('file', 'download', $file) and '' != ($pcode = getFilePreviewCode ($file)))
 	{
 		echo "</td><td class=pcright>";
 		startPortlet ('preview');
@@ -5340,6 +5345,14 @@ function renderFileReuploader ()
 	printImageHREF ('save', 'Save changes', TRUE, 101);
 	echo "</form>\n";
 	finishPortlet();
+}
+
+function renderFileDownloader ($file_id)
+{
+	global $root;
+	echo "<br><center><a target='_blank' href='${root}download.php?file_id=${file_id}&asattach=1'>";
+	printImageHREF ('DOWNLOAD');
+	echo '</a></center>';
 }
 
 function renderFileProperties ($file_id)
@@ -5440,9 +5453,10 @@ function renderFilesPortlet ($entity_type = NULL, $entity_id = 0)
 			echo "<tr valign=top><td class=tdleft>";
 			// That's a bit of overkill and ought to be justified after
 			// getFilesOfEntity() returns a standard cell list.
-			renderCell (spotEntity ('file', $file['id']));
+			$file = spotEntity ('file', $file['id']);
+			renderCell ($file);
 			echo "</td><td class=tdleft>${file['comment']}</td></tr>";
-			if ('' != ($pcode = getFilePreviewCode ($file)))
+			if (isolatedPermission ('file', 'download', $file) and '' != ($pcode = getFilePreviewCode ($file)))
 				echo "<tr><td colspan=2>${pcode}</td></tr>\n";
 		}
 		echo "</table><br>\n";
@@ -5647,9 +5661,13 @@ function renderCell ($cell)
 			printf ("<small>%s</small>", serializeFileLinks ($cell['links']));
 		echo "</td></tr><tr><td>";
 		echo count ($cell['etags']) ? ("<small>" . serializeTags ($cell['etags']) . "</small>") : '&nbsp;';
-		echo "</td></tr><tr><td><a href='${root}download.php?file_id=${cell['id']}'>";
-		printImageHREF ('download', 'Download file');
-		echo '</a>&nbsp;';
+		echo '</td></tr><tr><td>';
+		if (isolatedPermission ('file', 'download', $cell))
+		{
+			echo "<a href='${root}download.php?file_id=${cell['id']}'>";
+			printImageHREF ('download', 'Download file');
+			echo '</a>&nbsp;';
+		}
 		echo formatFileSize ($cell['size']);
 		echo "</td></tr></table>";
 		break;
@@ -5772,10 +5790,10 @@ function getFilePreviewCode ($file)
 				$resampled = TRUE;
 			}
 			if ($resampled)
-				$ret .= "<a href='${root}render_image.php?img=view&file_id=${file['id']}'>";
+				$ret .= "<a href='${root}download.php?file_id=${file['id']}&asattach=no'>";
 			$ret .= "<img width=${width} height=${height} src='${root}render_image.php?img=preview&file_id=${file['id']}'>";
 			if ($resampled)
-				$ret .= '</a>';
+				$ret .= '</a><br>(click to zoom)';
 			break;
 		case 'text/plain':
 			if ($file['size'] < getConfigVar ('PREVIEW_TEXT_MAXCHARS'))

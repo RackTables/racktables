@@ -1127,23 +1127,9 @@ function tagChainCmp ($chain1, $chain2)
 	return FALSE;
 }
 
-// If the page-tab-op triplet is final, make $expl_tags and $impl_tags
-// hold all appropriate (explicit and implicit) tags respectively.
-// Otherwise some limited redirection is necessary (only page and tab
-// names are preserved, ophandler name change isn't handled).
-function fixContext ()
+function redirectIfNecessary ()
 {
-	global
-		$pageno,
-		$tabno,
-		$auto_tags,
-		$expl_tags,
-		$impl_tags,
-		$target_given_tags,
-		$user_given_tags,
-		$etype_by_pageno,
-		$page;
-
+	global $pageno, $tabno;
 	$pmap = array
 	(
 		'accounts' => 'userlist',
@@ -1165,19 +1151,38 @@ function fixContext ()
 		redirectUser ($pmap[$pageno], $tabno);
 	if (isset ($tmap[$pageno][$tabno]))
 		redirectUser ($pageno, $tmap[$pageno][$tabno]);
+}
 
-	if (isset ($etype_by_pageno[$pageno]))
+function fixContext ($target = NULL)
+{
+	global
+		$pageno,
+		$auto_tags,
+		$expl_tags,
+		$impl_tags,
+		$target_given_tags,
+		$user_given_tags,
+		$etype_by_pageno,
+		$page;
+
+	if ($target !== NULL)
 	{
-		// Each page listed in the map above requires one uint argument.
-		assertUIntArg ($page[$pageno]['bypass'], __FUNCTION__);
-		$target_realm = $etype_by_pageno[$pageno];
-		$target_id = $_REQUEST[$page[$pageno]['bypass']];
-		$target = spotEntity ($target_realm, $target_id);
 		$target_given_tags = $target['etags'];
 		// Don't reset autochain, because auth procedures could push stuff there in.
 		// Another important point is to ignore 'user' realm, so we don't infuse effective
 		// context with autotags of the displayed account.
-		if ($pageno != 'user')
+		if ($target['realm'] != 'user')
+			$auto_tags = array_merge ($auto_tags, $target['atags']);
+	}
+	elseif (array_key_exists ($pageno, $etype_by_pageno))
+	{
+		// Each page listed in the map above requires one uint argument.
+		$target_realm = $etype_by_pageno[$pageno];
+		assertUIntArg ($page[$pageno]['bypass'], __FUNCTION__);
+		$target_id = $_REQUEST[$page[$pageno]['bypass']];
+		$target = spotEntity ($target_realm, $target_id);
+		$target_given_tags = $target['etags'];
+		if ($target['realm'] != 'user')
 			$auto_tags = array_merge ($auto_tags, $target['atags']);
 	}
 	// Explicit and implicit chains should be normally empty at this point, so
@@ -2179,6 +2184,34 @@ function decodeObjectType ($objtype_id, $style = 'r')
 			'o' => readChapter (CHAP_OBJTYPE, 'o')
 		);
 	return $types[$style][$objtype_id];
+}
+
+function isolatedPermission ($p, $t, $cell)
+{
+	// This function is called from both "file" page and a number of other pages,
+	// which have already fixed security context and authorized the user for it.
+	// OTOH, it is necessary here to authorize against the current file, which
+	// means saving the current context and building a new one.
+	global
+		$expl_tags,
+		$impl_tags,
+		$target_given_tags,
+		$auto_tags;
+	// push current context
+	$orig_expl_tags = $expl_tags;
+	$orig_impl_tags = $impl_tags;
+	$orig_target_given_tags = $target_given_tags;
+	$orig_auto_tags = $auto_tags;
+	// retarget
+	fixContext ($cell);
+	// remember decision
+	$ret = permitted ($p, $t);
+	// pop context
+	$expl_tags = $orig_expl_tags;
+	$impl_tags = $orig_impl_tags;
+	$target_given_tags = $orig_target_given_tags;
+	$auto_tags = $orig_auto_tags;
+	return $ret;
 }
 
 ?>

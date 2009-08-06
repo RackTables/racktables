@@ -22,11 +22,10 @@ switch ($_REQUEST['img'])
 		assertUIntArg ('done', __FILE__, TRUE);
 		renderProgressBarImage ($_REQUEST['done']);
 		break;
-	case 'view': // file security context
-	case 'preview':
+	case 'preview': // file security context
 		assertUIntArg ('file_id', __FILE__);
 		$pageno = 'file';
-		$tabno = 'default';
+		$tabno = 'download';
 		fixContext();
 		if (!permitted())
 			renderAccessDeniedImage();
@@ -170,6 +169,7 @@ function renderAccessDeniedImage ()
 	header("Content-type: image/png");
 	imagepng ($img);
 	imagedestroy ($img);
+	die;
 }
 
 function renderFilePreview ($file_id = 0, $mode = 'view')

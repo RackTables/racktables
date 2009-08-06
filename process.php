@@ -12,6 +12,7 @@ if ($op == 'addFile' && !isset($_FILES['file']['error'])) {
 	showError ("File upload error, it's size probably exceeds upload_max_filesize directive in php.ini");
 	die;
 }
+redirectIfNecessary();
 fixContext();
 
 if (!isset ($ophandler[$pageno][$tabno][$op]))
