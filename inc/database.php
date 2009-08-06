@@ -1853,7 +1853,7 @@ function getDictStats ()
 	}
 	$result->closeCursor();
 	unset ($result);
-	$query = "select count(id) as attrc from RackObject as ro left join " .
+	$query = "select count(object_id) as attrc from RackObject as ro left join " .
 		"AttributeValue as av on ro.id = av.object_id group by ro.id";
 	$result = useSelectBlade ($query, __FUNCTION__);
 	$to = $ta = $so = 0;
