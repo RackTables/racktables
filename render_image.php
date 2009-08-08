@@ -157,6 +157,16 @@ function renderProgressBarImage ($done)
 	}
 	imagefilledrectangle ($img, 0, 0, $done, 10, $color['T']);
 	imagefilledrectangle ($img, $done, 0, 100, 10, $color['F']);
+	for ($x = 20; $x <= 80; $x += 20)
+	{
+		$cc = $x > $done ? $color['T'] : $color['F'];
+		imagesetpixel ($img, $x, 0, $cc);
+		imagesetpixel ($img, $x, 1, $cc);
+		imagesetpixel ($img, $x, 4, $cc);
+		imagesetpixel ($img, $x, 5, $cc);
+		imagesetpixel ($img, $x, 8, $cc);
+		imagesetpixel ($img, $x, 9, $cc);
+	}
 	header("Content-type: image/png");
 	imagepng ($img);
 	imagedestroy ($img);
