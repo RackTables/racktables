@@ -257,7 +257,7 @@ CREATE TABLE `LDAPCache` (
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('TAGS_TOPLIST_SIZE','50','uint','yes','no','Tags top list size')";
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('TAGS_QUICKLIST_SIZE','20','uint','no','no','Tags quick list size')";
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('TAGS_QUICKLIST_THRESHOLD','50','uint','yes','no','Tags quick list threshold')";
-			$query[] = "ALTER TABLE AttributeMap MODIFY COLUMN chapter_id int(10) unsigned NULL'";
+			$query[] = "ALTER TABLE AttributeMap MODIFY COLUMN chapter_id int(10) unsigned NULL";
 			$query[] = "UPDATE AttributeMap SET chapter_id = NULL WHERE attr_id IN (SELECT id FROM Attribute WHERE type != 'dict')";
 			// ticket:239
 			$query[] = 'UPDATE AttributeValue SET uint_value = 1018 WHERE uint_value = 731 AND attr_id IN (SELECT attr_id FROM AttributeMap WHERE chapter_id = 12)';
