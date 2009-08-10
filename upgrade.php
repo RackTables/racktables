@@ -35,6 +35,7 @@ function getDBUpgradePath ($v1, $v2)
 		'0.17.1',
 		'0.17.2',
 		'0.17.3',
+		'0.17.4',
 	);
 	if (!in_array ($v1, $versionhistory) or !in_array ($v2, $versionhistory))
 		return NULL;
@@ -266,6 +267,13 @@ CREATE TABLE `LDAPCache` (
 			$query[] = "UPDATE Config SET vartype='uint' WHERE varname='RACKS_PER_ROW'";
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('ENABLE_MULTIPORT_FORM','no','string','no','no','Enable \"Add/update multiple ports\" form')";
 			$query[] = "UPDATE Config SET varvalue = '0.17.3' WHERE varname = 'DB_VERSION'";
+			break;
+		case '0.17.4':
+			$query[] = "ALTER TABLE Link ENGINE=InnoDB";
+			$query[] = "ALTER TABLE Port ENGINE=InnoDB";
+			$query[] = "ALTER TABLE Link ADD CONSTRAINT `Link-FK-a` FOREIGN KEY (porta) REFERENCES Port (id)";
+			$query[] = "ALTER TABLE Link ADD CONSTRAINT `Link-FK-b` FOREIGN KEY (portb) REFERENCES Port (id)";
+			$query[] = "UPDATE Config SET varvalue = '0.17.4' WHERE varname = 'DB_VERSION'";
 			break;
 		default:
 			showFailure ("executeUpgradeBatch () failed, because batch '${batchid}' isn't defined", __FILE__);

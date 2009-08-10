@@ -163,8 +163,10 @@ CREATE TABLE `Link` (
   `portb` int(10) unsigned NOT NULL,
   PRIMARY KEY  (`porta`,`portb`),
   UNIQUE KEY `porta` (`porta`),
-  UNIQUE KEY `portb` (`portb`)
-) ENGINE=MyISAM;
+  UNIQUE KEY `portb` (`portb`),
+  CONSTRAINT `Link-FK-a` FOREIGN KEY (`porta`) REFERENCES `Port` (`id`),
+  CONSTRAINT `Link-FK-b` FOREIGN KEY (`portb`) REFERENCES `Port` (`id`)
+) ENGINE=InnoDB;
 
 CREATE TABLE `Molecule` (
   `id` int(10) unsigned NOT NULL auto_increment,
@@ -195,7 +197,7 @@ CREATE TABLE `Port` (
   KEY `type` (`type`),
   KEY `comment` (`reservation_comment`),
   KEY `l2address` (`l2address`)
-) ENGINE=MyISAM;
+) ENGINE=InnoDB;
 
 CREATE TABLE `PortCompat` (
   `type1` int(10) unsigned NOT NULL,
