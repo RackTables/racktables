@@ -884,7 +884,7 @@ function peekNode ($tree, $trace, $target_id)
 	if (NULL === ($next = array_shift ($trace))) // warm
 	{
 		foreach ($tree as $node)
-			if ($node['id'] == $target_id) // hot
+			if (array_key_exists ('id', $node) and $node['id'] == $target_id) // hot
 				return $node;
 	}
 	else // cold
