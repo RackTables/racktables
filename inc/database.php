@@ -2058,7 +2058,9 @@ function readChapter ($chapter_id = 0, $style = '')
 // Return refcounters for all given keys of the given chapter.
 function getChapterRefc ($chapter_id, $keylist)
 {
-	$ret = array_fill_keys ($keylist, 0);
+	$ret = array();
+	foreach ($keylist as $key)
+		$ret[$key] = 0;
 	switch ($chapter_id)
 	{
 	case CHAP_OBJTYPE:
