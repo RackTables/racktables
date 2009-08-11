@@ -1,5 +1,6 @@
 0.17.4
 	bugfix: remove PHP warnings on IPv4 space management tab (ticket:277)
+	bugfix: work around array_fill_keys() from PHP 5.2 (ticket:278)
 0.17.3	2009-08-08
 	update: even better search function (ticket:20)
 	update: suggest tag selector for new files and users (ticket:205)
