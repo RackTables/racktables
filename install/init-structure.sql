@@ -158,16 +158,6 @@ CREATE TABLE `LDAPCache` (
   KEY `scanidx` (`presented_username`,`successful_hash`)
 ) ENGINE=InnoDB;
 
-CREATE TABLE `Link` (
-  `porta` int(10) unsigned NOT NULL,
-  `portb` int(10) unsigned NOT NULL,
-  PRIMARY KEY  (`porta`,`portb`),
-  UNIQUE KEY `porta` (`porta`),
-  UNIQUE KEY `portb` (`portb`),
-  CONSTRAINT `Link-FK-a` FOREIGN KEY (`porta`) REFERENCES `Port` (`id`),
-  CONSTRAINT `Link-FK-b` FOREIGN KEY (`portb`) REFERENCES `Port` (`id`)
-) ENGINE=InnoDB;
-
 CREATE TABLE `Molecule` (
   `id` int(10) unsigned NOT NULL auto_increment,
   PRIMARY KEY  (`id`)
@@ -197,6 +187,16 @@ CREATE TABLE `Port` (
   KEY `type` (`type`),
   KEY `comment` (`reservation_comment`),
   KEY `l2address` (`l2address`)
+) ENGINE=InnoDB;
+
+CREATE TABLE `Link` (
+  `porta` int(10) unsigned NOT NULL,
+  `portb` int(10) unsigned NOT NULL,
+  PRIMARY KEY  (`porta`,`portb`),
+  UNIQUE KEY `porta` (`porta`),
+  UNIQUE KEY `portb` (`portb`),
+  CONSTRAINT `Link-FK-a` FOREIGN KEY (`porta`) REFERENCES `Port` (`id`),
+  CONSTRAINT `Link-FK-b` FOREIGN KEY (`portb`) REFERENCES `Port` (`id`)
 ) ENGINE=InnoDB;
 
 CREATE TABLE `PortCompat` (
