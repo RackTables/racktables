@@ -113,7 +113,7 @@ CREATE TABLE `IPv4RSPool` (
   `vsconfig` text,
   `rsconfig` text,
   PRIMARY KEY  (`id`)
-) ENGINE=MyISAM;
+) ENGINE=InnoDB;
 
 CREATE TABLE `IPv4Network` (
   `id` int(10) unsigned NOT NULL auto_increment,
@@ -133,8 +133,9 @@ CREATE TABLE `IPv4RS` (
   `rspool_id` int(10) unsigned default NULL,
   `rsconfig` text,
   PRIMARY KEY  (`id`),
-  UNIQUE KEY `pool-endpoint` (`rspool_id`,`rsip`,`rsport`)
-) ENGINE=MyISAM;
+  UNIQUE KEY `pool-endpoint` (`rspool_id`,`rsip`,`rsport`),
+  CONSTRAINT `IPv4RS-FK` FOREIGN KEY (`rspool_id`) REFERENCES `IPv4RSPool` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB;
 
 CREATE TABLE `IPv4VS` (
   `id` int(10) unsigned NOT NULL auto_increment,

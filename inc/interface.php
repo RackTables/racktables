@@ -4432,7 +4432,7 @@ function editRSPools ()
 		foreach ($pool_list as $pool_info)
 		{
 			echo "<tr valign=top class=row_${order}><td valign=middle>";
-			if ($pool_info['refcnt'] or $pool_info['rscount'])
+			if ($pool_info['refcnt'])
 				printImageHREF ('NODESTROY', 'RS pool is used ' . $pool_info['refcnt'] . ' time(s)');
 			else
 			{
@@ -5682,11 +5682,13 @@ function renderCell ($cell)
 		echo "</td></tr></table>";
 		break;
 	case 'ipv4rspool':
-		echo "<table class=slbcell><tr><td>";
+		echo "<table class='slbcell vscell'><tr><td>";
 		echo "<a href='${root}?page=ipv4rspool&pool_id=${cell['id']}'>";
 		echo !strlen ($cell['name']) ? "ANONYMOUS pool [${cell['id']}]" : niftyString ($cell['name']);
 		echo "</a></td></tr><tr><td>";
 		printImageHREF ('RS pool');
+		if ($cell['rscount'])
+			echo ' <small>(' . $cell['rscount'] . ')</small>';
 		echo "</td></tr><tr><td>";
 		echo count ($cell['etags']) ? ("<small>" . serializeTags ($cell['etags']) . "</small>") : '&nbsp;';
 		echo "</td></tr></table>";

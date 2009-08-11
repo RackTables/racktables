@@ -271,8 +271,12 @@ CREATE TABLE `LDAPCache` (
 		case '0.17.4':
 			$query[] = "ALTER TABLE Link ENGINE=InnoDB";
 			$query[] = "ALTER TABLE Port ENGINE=InnoDB";
+			$query[] = "ALTER TABLE IPv4RS ENGINE=InnoDB";
+			$query[] = "ALTER TABLE IPv4RSPool ENGINE=InnoDB";
+			$query[] = "DELETE FROM IPv4RS WHERE rspool_id NOT IN (SELECT id FROM IPv4RSPool)";
 			$query[] = "ALTER TABLE Link ADD CONSTRAINT `Link-FK-a` FOREIGN KEY (porta) REFERENCES Port (id)";
 			$query[] = "ALTER TABLE Link ADD CONSTRAINT `Link-FK-b` FOREIGN KEY (portb) REFERENCES Port (id)";
+			$query[] = "ALTER TABLE IPv4RS ADD CONSTRAINT `IPv4RS-FK` FOREIGN KEY (rspool_id) REFERENCES IPv4RSPool (id) ON DELETE CASCADE";
 			$query[] = "UPDATE Config SET varvalue = '0.17.4' WHERE varname = 'DB_VERSION'";
 			break;
 		default:
