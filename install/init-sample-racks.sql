@@ -161,6 +161,9 @@ INSERT INTO `IPv4Network` (`id`, `ip`, `mask`, `name`) VALUES (105,180879366,31,
 INSERT INTO `IPv4Network` (`id`, `ip`, `mask`, `name`) VALUES (106,180880384,26,'Moscow network devices');
 INSERT INTO `IPv4Network` (`id`, `ip`, `mask`, `name`) VALUES (107,180880448,26,'Moscow servers');
 
+INSERT INTO `IPv4RSPool` VALUES (1,'Apache servers',NULL,NULL);
+INSERT INTO `IPv4RSPool` VALUES (2,'Resin servers',NULL,NULL);
+
 INSERT INTO `IPv4RS` VALUES (1,'yes',180879973,80,1,NULL);
 INSERT INTO `IPv4RS` VALUES (2,'yes',180879974,80,1,NULL);
 INSERT INTO `IPv4RS` VALUES (3,'no',180879975,80,1,NULL);
@@ -171,9 +174,6 @@ INSERT INTO `IPv4RS` VALUES (7,'yes',180879979,8080,2,NULL);
 INSERT INTO `IPv4RS` VALUES (8,'yes',180879980,8080,2,NULL);
 INSERT INTO `IPv4RS` VALUES (9,'yes',180879981,8080,2,NULL);
 INSERT INTO `IPv4RS` VALUES (10,'yes',180879982,8080,2,NULL);
-
-INSERT INTO `IPv4RSPool` VALUES (1,'Apache servers',NULL,NULL);
-INSERT INTO `IPv4RSPool` VALUES (2,'Resin servers',NULL,NULL);
 
 INSERT INTO `IPv4VS` VALUES (1,180879877,80,'TCP','virtual web','lvs_sched wlc\r\nlvs_method NAT\r\ndelay_loop 3\r\nalpha\r\nomega\r\nquorum 3\r\nhysteresis 1\r\n\r\n# this is a comment\r\n# VS name is %VNAME%\r\n#\r\n','HTTP_GET {\r\nurl {\r\npath /\r\nstatus_code 200\r\n}\r\nconnect_timeout 1\r\n}');
 INSERT INTO `IPv4VS` VALUES (2,180879878,80,'TCP','virtual app','lvs_sched wlc\r\nlvs_method NAT\r\ndelay_loop 3\r\nalpha\r\nomega\r\nquorum 3\r\nhysteresis 1\r\n\r\n','HTTP_GET {\r\nurl {\r\npath /\r\nstatus_code 200\r\n}\r\nconnect_timeout 1\r\n}');
