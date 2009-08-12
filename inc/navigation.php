@@ -35,6 +35,7 @@ $tabhandler['depot']['default'] = 'renderDepot';
 $tabhandler['depot']['addmore'] = 'renderAddMultipleObjectsForm';
 $ophandler['depot']['addmore']['addObjects'] = 'addMultipleObjects';
 $ophandler['depot']['addmore']['addLotOfObjects'] = 'addLotOfObjects';
+$ophandler['depot']['addmore']['deleteObject'] = 'deleteObject';
 
 $page['row']['bypass'] = 'row_id';
 $page['row']['bypass_type'] = 'uint';

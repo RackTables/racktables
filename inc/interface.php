@@ -611,7 +611,7 @@ function renderEditObjectForm ($object_id)
 		echo ' checked';
 	echo "></td></tr>\n";
 	echo "<tr><td>&nbsp;</td><th class=tdright>Actions:</th><td class=tdleft><a href='".
-		makeHrefProcess(array('op'=>'deleteObject', 'page'=>'depot', 'tab'=>'default', 'object_id'=>$object_id)).
+		makeHrefProcess(array('op'=>'deleteObject', 'page'=>'depot', 'tab'=>'addmore', 'object_id'=>$object_id)).
 		"' onclick=\"javascript:return confirm('Are you sure you want to delete the object?')\">Delete object</a></td></tr>\n";
 	echo "<tr><td colspan=3><b>Comment:</b><br><textarea name=object_comment rows=10 cols=80>${object['comment']}</textarea></td></tr>";
 
