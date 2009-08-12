@@ -23,14 +23,30 @@ CREATE TABLE `AttributeMap` (
   UNIQUE KEY `objtype_id` (`objtype_id`,`attr_id`)
 ) ENGINE=MyISAM;
 
+CREATE TABLE `RackObject` (
+  `id` int(10) unsigned NOT NULL auto_increment,
+  `name` char(255) default NULL,
+  `label` char(255) default NULL,
+  `barcode` char(16) default NULL,
+  `objtype_id` int(10) unsigned NOT NULL default '1',
+  `asset_no` char(64) default NULL,
+  `has_problems` enum('yes','no') NOT NULL default 'no',
+  `comment` text,
+  PRIMARY KEY  (`id`),
+  UNIQUE KEY `RackObject_asset_no` (`asset_no`),
+  UNIQUE KEY `name` (`name`),
+  UNIQUE KEY `barcode` (`barcode`)
+) ENGINE=InnoDB;
+
 CREATE TABLE `AttributeValue` (
   `object_id` int(10) unsigned default NULL,
   `attr_id` int(10) unsigned default NULL,
   `string_value` char(128) default NULL,
   `uint_value` int(10) unsigned default NULL,
   `float_value` float default NULL,
-  UNIQUE KEY `object_id` (`object_id`,`attr_id`)
-) ENGINE=MyISAM;
+  UNIQUE KEY `object_id` (`object_id`,`attr_id`),
+  CONSTRAINT `AttributeValue-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `RackObject` (`id`)
+) ENGINE=InnoDB;
 
 CREATE TABLE `Chapter` (
   `id` int(10) unsigned NOT NULL auto_increment,
@@ -98,21 +114,37 @@ CREATE TABLE `IPv4Allocation` (
   PRIMARY KEY  (`object_id`,`ip`)
 ) ENGINE=MyISAM;
 
-CREATE TABLE `IPv4LB` (
-  `object_id` int(10) unsigned default NULL,
-  `rspool_id` int(10) unsigned default NULL,
-  `vs_id` int(10) unsigned default NULL,
-  `vsconfig` text,
-  `rsconfig` text,
-  UNIQUE KEY `LB-VS` (`object_id`,`vs_id`)
-) ENGINE=MyISAM;
-
 CREATE TABLE `IPv4RSPool` (
   `id` int(10) unsigned NOT NULL auto_increment,
   `name` char(255) default NULL,
   `vsconfig` text,
   `rsconfig` text,
   PRIMARY KEY  (`id`)
+) ENGINE=InnoDB;
+
+CREATE TABLE `IPv4VS` (
+  `id` int(10) unsigned NOT NULL auto_increment,
+  `vip` int(10) unsigned default NULL,
+  `vport` smallint(5) unsigned default NULL,
+  `proto` enum('TCP','UDP') NOT NULL default 'TCP',
+  `name` char(255) default NULL,
+  `vsconfig` text,
+  `rsconfig` text,
+  PRIMARY KEY  (`id`)
+) ENGINE=InnoDB;
+
+CREATE TABLE `IPv4LB` (
+  `object_id` int(10) unsigned default NULL,
+  `rspool_id` int(10) unsigned default NULL,
+  `vs_id` int(10) unsigned default NULL,
+  `vsconfig` text,
+  `rsconfig` text,
+  UNIQUE KEY `LB-VS` (`object_id`,`vs_id`),
+  KEY `IPv4LB-FK-rspool_id` (`rspool_id`),
+  KEY `IPv4LB-FK-vs_id` (`vs_id`),
+  CONSTRAINT `IPv4LB-FK-vs_id` FOREIGN KEY (`vs_id`) REFERENCES `IPv4VS` (`id`),
+  CONSTRAINT `IPv4LB-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `RackObject` (`id`),
+  CONSTRAINT `IPv4LB-FK-rspool_id` FOREIGN KEY (`rspool_id`) REFERENCES `IPv4RSPool` (`id`)
 ) ENGINE=InnoDB;
 
 CREATE TABLE `IPv4Network` (
@@ -136,17 +168,6 @@ CREATE TABLE `IPv4RS` (
   UNIQUE KEY `pool-endpoint` (`rspool_id`,`rsip`,`rsport`),
   CONSTRAINT `IPv4RS-FK` FOREIGN KEY (`rspool_id`) REFERENCES `IPv4RSPool` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB;
-
-CREATE TABLE `IPv4VS` (
-  `id` int(10) unsigned NOT NULL auto_increment,
-  `vip` int(10) unsigned default NULL,
-  `vport` smallint(5) unsigned default NULL,
-  `proto` enum('TCP','UDP') NOT NULL default 'TCP',
-  `name` char(255) default NULL,
-  `vsconfig` text,
-  `rsconfig` text,
-  PRIMARY KEY  (`id`)
-) ENGINE=MyISAM;
 
 CREATE TABLE `LDAPCache` (
   `presented_username` char(64) NOT NULL,
@@ -187,7 +208,8 @@ CREATE TABLE `Port` (
   UNIQUE KEY `per_object` (`object_id`,`name`,`type`),
   KEY `type` (`type`),
   KEY `comment` (`reservation_comment`),
-  KEY `l2address` (`l2address`)
+  KEY `l2address` (`l2address`),
+  CONSTRAINT `Port-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `RackObject` (`id`)
 ) ENGINE=InnoDB;
 
 CREATE TABLE `Link` (
@@ -218,8 +240,9 @@ CREATE TABLE `IPv4NAT` (
   PRIMARY KEY  (`object_id`,`proto`,`localip`,`localport`,`remoteip`,`remoteport`),
   KEY `localip` (`localip`),
   KEY `remoteip` (`remoteip`),
-  KEY `object_id` (`object_id`)
-) ENGINE=MyISAM;
+  KEY `object_id` (`object_id`),
+  CONSTRAINT `IPv4NAT-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `RackObject` (`id`)
+) ENGINE=InnoDB;
 
 CREATE TABLE `RackRow` (
   `id` int(10) unsigned NOT NULL auto_increment,
@@ -247,21 +270,6 @@ CREATE TABLE `RackHistory` (
   `thumb_data` blob,
   `ctime` timestamp NOT NULL,
   `user_name` char(64) default NULL
-) ENGINE=MyISAM;
-
-CREATE TABLE `RackObject` (
-  `id` int(10) unsigned NOT NULL auto_increment,
-  `name` char(255) default NULL,
-  `label` char(255) default NULL,
-  `barcode` char(16) default NULL,
-  `objtype_id` int(10) unsigned NOT NULL default '1',
-  `asset_no` char(64) default NULL,
-  `has_problems` enum('yes','no') NOT NULL default 'no',
-  `comment` text,
-  PRIMARY KEY  (`id`),
-  UNIQUE KEY `RackObject_asset_no` (`asset_no`),
-  UNIQUE KEY `name` (`name`),
-  UNIQUE KEY `barcode` (`barcode`)
 ) ENGINE=MyISAM;
 
 CREATE TABLE `RackObjectHistory` (

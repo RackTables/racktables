@@ -1,5 +1,65 @@
 set names 'utf8';
 
+INSERT INTO `RackObject` (id, name, label, barcode, objtype_id, asset_no, has_problems, comment) VALUES 
+(905,'london router','bbrtr1',NULL,7,'net247','no',''),
+(906,'londonswitch1','',NULL,8,NULL,'no',''),
+(907,'New-York router 1','bbrtr2a',NULL,7,'net55','no',''),
+(908,'moscow router','bbrtr3',NULL,7,NULL,'no',NULL),
+(909,'tokyo router','bbrtr4',NULL,7,NULL,'no',NULL),
+(910,'London server 1','lserver01',NULL,4,'srv500','no',''),
+(911,'London server 2','lserver02',NULL,4,'srv501','no',''),
+(912,'London server 3','lserver03',NULL,4,'srv502','no',''),
+(913,'London server 4','lserver04',NULL,4,'srv503','yes','this one needs replacement'),
+(914,'London server 5','lserver05',NULL,4,'srv504','no',''),
+(915,'london LB','llb',NULL,8,'net1000','no',''),
+(916,'shared storage','',NULL,5,NULL,'no',''),
+(917,'london-NAS','',NULL,7,'net1001','no',''),
+(918,'London server 6','lserver06',NULL,4,'srv505','no',NULL),
+(919,'London server 7','lserver07',NULL,4,'srv506','no',NULL),
+(920,'backup library','lbackup',NULL,6,'misc200','no',NULL),
+(921,'lserver06 array','lserver06 array',NULL,5,NULL,'no',NULL),
+(922,'lserver07 array','lserver07 array',NULL,5,NULL,'no',NULL),
+(923,'Tokyo server 1','tserver01',NULL,4,'srv654','no',NULL),
+(924,'Tokyo server 2','tserver02',NULL,4,'srv848','no',NULL),
+(925,'Tokyo server 3','tserver03',NULL,4,'srv139','no',NULL),
+(926,'Tokyo switch','tswitch',NULL,8,'net385','no',NULL),
+(927,'New-York router 2','bbrtr2b',NULL,7,'net498','no',NULL),
+(928,'New-York IPVS LB A','nylba',NULL,4,'net554','no',NULL),
+(929,'New-York IPVS LB B','nylbb',NULL,4,'net555','no',NULL),
+(930,'New-York server switch A','nyswitcha',NULL,8,'net084','no',NULL),
+(931,'New-York server switch B','nyswitchb',NULL,8,'net486','no',NULL),
+(932,'New-York server 1A','nysrv1a',NULL,4,'srv287','no',NULL),
+(933,'New-York server 1B','nysrv1b',NULL,4,'srv288','no',NULL),
+(934,'New-York server 2A','nysrv2a',NULL,4,NULL,'no',NULL),
+(935,'New-York server 2B','nysrv2b',NULL,4,NULL,'no',NULL),
+(936,'New-York server 3A','nysrv3a',NULL,4,NULL,'no',NULL),
+(937,'New-York server 3B','nysrv3b',NULL,4,NULL,'no',NULL),
+(938,'New-York server 4A','nysrv4a',NULL,4,NULL,'no',NULL),
+(939,'New-York server 4B','nysrv4b',NULL,4,NULL,'no',NULL),
+(940,'New-York server 5A','nysrv5a',NULL,4,NULL,'no',NULL),
+(941,'New-York server 5B','nysrv5b',NULL,4,NULL,'no',NULL),
+(942,'wing A UPS','',NULL,12,NULL,'no',NULL),
+(943,'wing B UPS','',NULL,12,NULL,'no',NULL),
+(944,'network UPS','',NULL,12,NULL,'no',NULL),
+(945,NULL,'',NULL,9,NULL,'no',NULL),
+(946,NULL,'',NULL,9,NULL,'no',NULL),
+(947,NULL,'',NULL,2,NULL,'no',NULL),
+(948,NULL,'',NULL,2,NULL,'no',NULL),
+(949,NULL,'',NULL,2,NULL,'no',NULL),
+(950,NULL,'',NULL,2,NULL,'no',NULL),
+(951,NULL,'',NULL,2,NULL,'no',NULL),
+(952,NULL,'',NULL,2,NULL,'no',NULL),
+(953,NULL,'',NULL,2,NULL,'no',NULL),
+(954,NULL,'',NULL,2,NULL,'no',NULL),
+(955,NULL,'',NULL,2,NULL,'no',NULL),
+(956,'mps1','','200161',4,NULL,'no',NULL),
+(957,'mps2','','200283',4,NULL,'no',NULL),
+(958,'mps3','','200881',4,NULL,'no',NULL),
+(959,'mps4','','200458',4,NULL,'no',NULL),
+(960,'mps5','','200112',4,NULL,'no',NULL),
+(961,'mskswitch','',NULL,8,'sw0001','no',NULL),
+(962,'moscow kvm switch','','300221',445,'sw0002','no',NULL);
+
 INSERT INTO `AttributeValue` VALUES (905,2,NULL,269,NULL);
 INSERT INTO `AttributeValue` VALUES (906,2,NULL,165,NULL);
 INSERT INTO `AttributeValue` VALUES (915,2,NULL,118,NULL);
@@ -145,10 +205,6 @@ INSERT INTO `IPv4Allocation` VALUES (927,180879998,'','shared');
 INSERT INTO `IPv4Allocation` VALUES (908,180880446,'fa1/0','router');
 INSERT INTO `IPv4Allocation` VALUES (961,180880385,'','regular');
 
-INSERT INTO `IPv4LB` VALUES (928,1,1,NULL,NULL);
-INSERT INTO `IPv4LB` VALUES (929,1,1,NULL,NULL);
-INSERT INTO `IPv4LB` VALUES (929,2,2,NULL,NULL);
-
 INSERT INTO `IPv4Network` (`id`, `ip`, `mask`, `name`) VALUES (96,180879616,26,'London network devices and VIPs');
 INSERT INTO `IPv4Network` (`id`, `ip`, `mask`, `name`) VALUES (97,180879680,26,'London HA server farm');
 INSERT INTO `IPv4Network` (`id`, `ip`, `mask`, `name`) VALUES (98,180879872,26,'New-York network devices');
@@ -164,6 +220,13 @@ INSERT INTO `IPv4Network` (`id`, `ip`, `mask`, `name`) VALUES (107,180880448,26,
 INSERT INTO `IPv4RSPool` VALUES (1,'Apache servers',NULL,NULL);
 INSERT INTO `IPv4RSPool` VALUES (2,'Resin servers',NULL,NULL);
 
+INSERT INTO `IPv4VS` VALUES (1,180879877,80,'TCP','virtual web','lvs_sched wlc\r\nlvs_method NAT\r\ndelay_loop 3\r\nalpha\r\nomega\r\nquorum 3\r\nhysteresis 1\r\n\r\n# this is a comment\r\n# VS name is %VNAME%\r\n#\r\n','HTTP_GET {\r\nurl {\r\npath /\r\nstatus_code 200\r\n}\r\nconnect_timeout 1\r\n}');
+INSERT INTO `IPv4VS` VALUES (2,180879878,80,'TCP','virtual app','lvs_sched wlc\r\nlvs_method NAT\r\ndelay_loop 3\r\nalpha\r\nomega\r\nquorum 3\r\nhysteresis 1\r\n\r\n','HTTP_GET {\r\nurl {\r\npath /\r\nstatus_code 200\r\n}\r\nconnect_timeout 1\r\n}');
+
+INSERT INTO `IPv4LB` VALUES (928,1,1,NULL,NULL);
+INSERT INTO `IPv4LB` VALUES (929,1,1,NULL,NULL);
+INSERT INTO `IPv4LB` VALUES (929,2,2,NULL,NULL);
+
 INSERT INTO `IPv4RS` VALUES (1,'yes',180879973,80,1,NULL);
 INSERT INTO `IPv4RS` VALUES (2,'yes',180879974,80,1,NULL);
 INSERT INTO `IPv4RS` VALUES (3,'no',180879975,80,1,NULL);
@@ -174,9 +237,6 @@ INSERT INTO `IPv4RS` VALUES (7,'yes',180879979,8080,2,NULL);
 INSERT INTO `IPv4RS` VALUES (8,'yes',180879980,8080,2,NULL);
 INSERT INTO `IPv4RS` VALUES (9,'yes',180879981,8080,2,NULL);
 INSERT INTO `IPv4RS` VALUES (10,'yes',180879982,8080,2,NULL);
-
-INSERT INTO `IPv4VS` VALUES (1,180879877,80,'TCP','virtual web','lvs_sched wlc\r\nlvs_method NAT\r\ndelay_loop 3\r\nalpha\r\nomega\r\nquorum 3\r\nhysteresis 1\r\n\r\n# this is a comment\r\n# VS name is %VNAME%\r\n#\r\n','HTTP_GET {\r\nurl {\r\npath /\r\nstatus_code 200\r\n}\r\nconnect_timeout 1\r\n}');
-INSERT INTO `IPv4VS` VALUES (2,180879878,80,'TCP','virtual app','lvs_sched wlc\r\nlvs_method NAT\r\ndelay_loop 3\r\nalpha\r\nomega\r\nquorum 3\r\nhysteresis 1\r\n\r\n','HTTP_GET {\r\nurl {\r\npath /\r\nstatus_code 200\r\n}\r\nconnect_timeout 1\r\n}');
 
 INSERT INTO `Port` VALUES (3057,905,'se1/0',32,NULL,NULL,'');
 INSERT INTO `Port` VALUES (3058,905,'se1/1',32,NULL,NULL,'');
@@ -349,66 +409,6 @@ INSERT INTO `Rack` (id, name, row_id, height, comment) VALUES
 (45,'M01',50000,42,''),
 (46,'NY102',50002,42,'server farm wing B'),
 (47,'T01',50001,16,'');
-
-INSERT INTO `RackObject` (id, name, label, barcode, objtype_id, asset_no, has_problems, comment) VALUES 
-(905,'london router','bbrtr1',NULL,7,'net247','no',''),
-(906,'londonswitch1','',NULL,8,NULL,'no',''),
-(907,'New-York router 1','bbrtr2a',NULL,7,'net55','no',''),
-(908,'moscow router','bbrtr3',NULL,7,NULL,'no',NULL),
-(909,'tokyo router','bbrtr4',NULL,7,NULL,'no',NULL),
-(910,'London server 1','lserver01',NULL,4,'srv500','no',''),
-(911,'London server 2','lserver02',NULL,4,'srv501','no',''),
-(912,'London server 3','lserver03',NULL,4,'srv502','no',''),
-(913,'London server 4','lserver04',NULL,4,'srv503','yes','this one needs replacement'),
-(914,'London server 5','lserver05',NULL,4,'srv504','no',''),
-(915,'london LB','llb',NULL,8,'net1000','no',''),
-(916,'shared storage','',NULL,5,NULL,'no',''),
-(917,'london-NAS','',NULL,7,'net1001','no',''),
-(918,'London server 6','lserver06',NULL,4,'srv505','no',NULL),
-(919,'London server 7','lserver07',NULL,4,'srv506','no',NULL),
-(920,'backup library','lbackup',NULL,6,'misc200','no',NULL),
-(921,'lserver06 array','lserver06 array',NULL,5,NULL,'no',NULL),
-(922,'lserver07 array','lserver07 array',NULL,5,NULL,'no',NULL),
-(923,'Tokyo server 1','tserver01',NULL,4,'srv654','no',NULL),
-(924,'Tokyo server 2','tserver02',NULL,4,'srv848','no',NULL),
-(925,'Tokyo server 3','tserver03',NULL,4,'srv139','no',NULL),
-(926,'Tokyo switch','tswitch',NULL,8,'net385','no',NULL),
-(927,'New-York router 2','bbrtr2b',NULL,7,'net498','no',NULL),
-(928,'New-York IPVS LB A','nylba',NULL,4,'net554','no',NULL),
-(929,'New-York IPVS LB B','nylbb',NULL,4,'net555','no',NULL),
-(930,'New-York server switch A','nyswitcha',NULL,8,'net084','no',NULL),
-(931,'New-York server switch B','nyswitchb',NULL,8,'net486','no',NULL),
-(932,'New-York server 1A','nysrv1a',NULL,4,'srv287','no',NULL),
-(933,'New-York server 1B','nysrv1b',NULL,4,'srv288','no',NULL),
-(934,'New-York server 2A','nysrv2a',NULL,4,NULL,'no',NULL),
-(935,'New-York server 2B','nysrv2b',NULL,4,NULL,'no',NULL),
-(936,'New-York server 3A','nysrv3a',NULL,4,NULL,'no',NULL),
-(937,'New-York server 3B','nysrv3b',NULL,4,NULL,'no',NULL),
-(938,'New-York server 4A','nysrv4a',NULL,4,NULL,'no',NULL),
-(939,'New-York server 4B','nysrv4b',NULL,4,NULL,'no',NULL),
-(940,'New-York server 5A','nysrv5a',NULL,4,NULL,'no',NULL),
-(941,'New-York server 5B','nysrv5b',NULL,4,NULL,'no',NULL),
-(942,'wing A UPS','',NULL,12,NULL,'no',NULL),
-(943,'wing B UPS','',NULL,12,NULL,'no',NULL),
-(944,'network UPS','',NULL,12,NULL,'no',NULL),
-(945,NULL,'',NULL,9,NULL,'no',NULL),
-(946,NULL,'',NULL,9,NULL,'no',NULL),
-(947,NULL,'',NULL,2,NULL,'no',NULL),
-(948,NULL,'',NULL,2,NULL,'no',NULL),
-(949,NULL,'',NULL,2,NULL,'no',NULL),
-(950,NULL,'',NULL,2,NULL,'no',NULL),
-(951,NULL,'',NULL,2,NULL,'no',NULL),
-(952,NULL,'',NULL,2,NULL,'no',NULL),
-(953,NULL,'',NULL,2,NULL,'no',NULL),
-(954,NULL,'',NULL,2,NULL,'no',NULL),
-(955,NULL,'',NULL,2,NULL,'no',NULL),
-(956,'mps1','','200161',4,NULL,'no',NULL),
-(957,'mps2','','200283',4,NULL,'no',NULL),
-(958,'mps3','','200881',4,NULL,'no',NULL),
-(959,'mps4','','200458',4,NULL,'no',NULL),
-(960,'mps5','','200112',4,NULL,'no',NULL),
-(961,'mskswitch','',NULL,8,'sw0001','no',NULL),
-(962,'moscow kvm switch','','300221',445,'sw0002','no',NULL);
 
 INSERT INTO `RackSpace` VALUES (41,9,'interior','T',905);
 INSERT INTO `RackSpace` VALUES (41,9,'front','T',905);

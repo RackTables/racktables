@@ -273,10 +273,21 @@ CREATE TABLE `LDAPCache` (
 			$query[] = "ALTER TABLE Port ENGINE=InnoDB";
 			$query[] = "ALTER TABLE IPv4RS ENGINE=InnoDB";
 			$query[] = "ALTER TABLE IPv4RSPool ENGINE=InnoDB";
+			$query[] = "ALTER TABLE AttributeValue ENGINE=InnoDB";
+			$query[] = "ALTER TABLE RackObject ENGINE=InnoDB";
+			$query[] = "ALTER TABLE IPv4NAT ENGINE=InnoDB";
+			$query[] = "ALTER TABLE IPv4LB ENGINE=InnoDB";
+			$query[] = "ALTER TABLE IPv4VS ENGINE=InnoDB";
 			$query[] = "DELETE FROM IPv4RS WHERE rspool_id NOT IN (SELECT id FROM IPv4RSPool)";
-			$query[] = "ALTER TABLE Link ADD CONSTRAINT `Link-FK-a` FOREIGN KEY (porta) REFERENCES Port (id)";
 			$query[] = "ALTER TABLE Link ADD CONSTRAINT `Link-FK-b` FOREIGN KEY (portb) REFERENCES Port (id)";
+			$query[] = "ALTER TABLE Link ADD CONSTRAINT `Link-FK-a` FOREIGN KEY (porta) REFERENCES Port (id)";
 			$query[] = "ALTER TABLE IPv4RS ADD CONSTRAINT `IPv4RS-FK` FOREIGN KEY (rspool_id) REFERENCES IPv4RSPool (id) ON DELETE CASCADE";
+			$query[] = "ALTER TABLE AttributeValue ADD CONSTRAINT `AttributeValue-FK-object_id` FOREIGN KEY (object_id) REFERENCES RackObject (id)";
+			$query[] = "ALTER TABLE IPv4NAT ADD CONSTRAINT `IPv4NAT-FK-object_id` FOREIGN KEY (object_id) REFERENCES RackObject (id)";
+			$query[] = "ALTER TABLE Port ADD CONSTRAINT `Port-FK-object_id` FOREIGN KEY (object_id) REFERENCES RackObject (id)";
+			$query[] = "ALTER TABLE IPv4LB ADD CONSTRAINT `IPv4LB-FK-rspool_id` FOREIGN KEY (rspool_id) REFERENCES IPv4RSPool (id)";
+			$query[] = "ALTER TABLE IPv4LB ADD CONSTRAINT `IPv4LB-FK-object_id` FOREIGN KEY (object_id) REFERENCES RackObject (id)";
+			$query[] = "ALTER TABLE IPv4LB ADD CONSTRAINT `IPv4LB-FK-vs_id` FOREIGN KEY (vs_id) REFERENCES IPv4VS (id)";
 			$query[] = "UPDATE Config SET varvalue = '0.17.4' WHERE varname = 'DB_VERSION'";
 			break;
 		default:
