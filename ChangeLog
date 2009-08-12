@@ -4,6 +4,7 @@
 	bugfix: delete real servers on RS pool deletion (ticket:233)
 	bugfix: "Same type, same tags" form was broken (ticket:279)
 	update: add more InnoDB foreign keys
+	update: also search object ports by label text
 0.17.3	2009-08-08
 	update: even better search function (ticket:20)
 	update: suggest tag selector for new files and users (ticket:205)

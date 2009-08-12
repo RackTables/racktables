@@ -1667,9 +1667,10 @@ function getStickerSearchResults ($what, $exactness = 0)
 	return $ret;
 }
 
-// search in port "reservation comment" and "L2 address" columns
+// search in port "reservation comment", "label" and "L2 address" columns
 function getPortSearchResults ($what)
 {
+	$ret = array();
 	$ports = getSearchResultByField
 	(
 		'Port',
@@ -1679,11 +1680,24 @@ function getPortSearchResults ($what)
 		'object_id',
 		0
 	);
-	$ret = array();
 	foreach ($ports as $port)
 	{
 		$ret[$port['object_id']]['id'] = $port['object_id'];
 		$ret[$port['object_id']]['by_port'][$port['id']] = $port['reservation_comment'];
+	}
+	$ports = getSearchResultByField
+	(
+		'Port',
+		array ('object_id', 'id', 'label'),
+		'label',
+		$what,
+		'object_id',
+		0
+	);
+	foreach ($ports as $port)
+	{
+		$ret[$port['object_id']]['id'] = $port['object_id'];
+		$ret[$port['object_id']]['by_port'][$port['id']] = $port['label'];
 	}
 	if (NULL === ($db_l2address = l2addressForDatabase ($what)))
 		return $ret;
