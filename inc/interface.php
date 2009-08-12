@@ -2729,7 +2729,7 @@ function renderAddMultipleObjectsForm ()
 	echo "<table border=0 align=center><tr><th>names</th><th>type</th></tr>";
 	echo "<tr><td rowspan=3><textarea name=namelist cols=40 rows=25>\n";
 	echo "</textarea></td><td valign=top>";
-	printSelect ($typelist, "global_type_id", getConfigVar ('DEFAULT_OBJECT_TYPE'));
+	printNiftySelect ($typelist, "global_type_id", getConfigVar ('DEFAULT_OBJECT_TYPE'));
 	echo "</td></tr>";
 	echo "<tr><th>Tags</th></tr>";
 	echo "<tr><td valign=top>";
