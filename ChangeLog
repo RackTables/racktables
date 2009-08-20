@@ -1,3 +1,5 @@
+0.17.5
+	bugfix: corrected reference counters in tag tree
 0.17.4 2009-08-13
 	bugfix: remove PHP warnings on IPv4 space management tab (ticket:277)
 	bugfix: work around array_fill_keys() from PHP 5.2 (ticket:278)
