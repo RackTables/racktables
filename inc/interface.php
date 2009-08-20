@@ -4652,7 +4652,7 @@ function renderTagRowForViewer ($taginfo, $level = 0)
 	$self = __FUNCTION__;
 	if (!count ($taginfo['kids']))
 		$level++; // Shift instead of placing a spacer. This won't impact any nested nodes.
-	$refc = array_sum ($taginfo['refcnt']);
+	$refc = $taginfo['refcnt']['total'];
 	echo "<tr><td align=left style='padding-left: " . ($level * 16) . "px;'>";
 	if (count ($taginfo['kids']))
 		printImageHREF ('node-expanded-static');
@@ -4671,11 +4671,8 @@ function renderTagRowForEditor ($taginfo, $level = 0)
 	echo "<tr><td align=left style='padding-left: " . ($level * 16) . "px;'>";
 	if (count ($taginfo['kids']))
 		printImageHREF ('node-expanded-static');
-	$nrefs = 0;
-	foreach ($taginfo['refcnt'] as $part)
-		$nrefs += $part;
-	if ($nrefs > 0 or count ($taginfo['kids']) > 0)
-		printImageHREF ('nodestroy', "${nrefs} references, " . count ($taginfo['kids']) . ' sub-tags');
+	if ($taginfo['refcnt']['total'] > 0 or count ($taginfo['kids']) > 0)
+		printImageHREF ('nodestroy', $taginfo['refcnt']['total'] . ' references, ' . count ($taginfo['kids']) . ' sub-tags');
 	else
 	{
 		echo "<a href='".makeHrefProcess(array('op'=>'destroyTag', 'tag_id'=>$taginfo['id']))."'>";
