@@ -36,6 +36,7 @@ function getDBUpgradePath ($v1, $v2)
 		'0.17.2',
 		'0.17.3',
 		'0.17.4',
+		'0.17.5',
 	);
 	if (!in_array ($v1, $versionhistory) or !in_array ($v2, $versionhistory))
 		return NULL;
@@ -290,6 +291,13 @@ CREATE TABLE `LDAPCache` (
 			$query[] = "ALTER TABLE IPv4LB ADD CONSTRAINT `IPv4LB-FK-vs_id` FOREIGN KEY (vs_id) REFERENCES IPv4VS (id)";
 			$query = array_merge ($query, reloadDictionary ($batchid));
 			$query[] = "UPDATE Config SET varvalue = '0.17.4' WHERE varname = 'DB_VERSION'";
+			break;
+		case '0.17.5':
+			$query[] = "ALTER TABLE TagTree ENGINE=InnoDB";
+			$query[] = "ALTER TABLE TagStorage ENGINE=InnoDB";
+			$query[] = "ALTER TABLE TagStorage ADD CONSTRAINT `TagStorage-FK-tag_id` FOREIGN KEY (tag_id) REFERENCES TagTree (id)";
+			$query[] = "ALTER TABLE TagTree ADD CONSTRAINT `TagTree-K-parent_id` FOREIGN KEY (parent_id) REFERENCES TagTree (id)";
+			$query[] = "UPDATE Config SET varvalue = '0.17.5' WHERE varname = 'DB_VERSION'";
 			break;
 		default:
 			showFailure ("executeUpgradeBatch () failed, because batch '${batchid}' isn't defined", __FILE__);

@@ -301,21 +301,25 @@ CREATE TABLE `Script` (
   PRIMARY KEY  (`script_name`)
 ) TYPE=MyISAM;
 
-CREATE TABLE `TagStorage` (
-  `entity_realm` enum('file','ipv4net','ipv4vs','ipv4rspool','object','rack','user') NOT NULL default 'object',
-  `entity_id` int(10) unsigned NOT NULL,
-  `tag_id` int(10) unsigned NOT NULL,
-  UNIQUE KEY `entity_tag` (`entity_realm`,`entity_id`,`tag_id`),
-  KEY `entity_id` (`entity_id`)
-) TYPE=MyISAM;
-
 CREATE TABLE `TagTree` (
   `id` int(10) unsigned NOT NULL auto_increment,
   `parent_id` int(10) unsigned default NULL,
   `valid_realm` set('file','ipv4net','ipv4vs','ipv4rspool','object','rack','user') NOT NULL default 'file,ipv4net,ipv4vs,ipv4rspool,object,rack,user',
   `tag` char(255) default NULL,
   PRIMARY KEY  (`id`),
-  UNIQUE KEY `tag` (`tag`)
+  UNIQUE KEY `tag` (`tag`),
+  KEY `TagTree-K-parent_id` (`parent_id`),
+  CONSTRAINT `TagTree-K-parent_id` FOREIGN KEY (`parent_id`) REFERENCES `TagTree` (`id`)
+) TYPE=MyISAM;
+
+CREATE TABLE `TagStorage` (
+  `entity_realm` enum('file','ipv4net','ipv4vs','ipv4rspool','object','rack','user') NOT NULL default 'object',
+  `entity_id` int(10) unsigned NOT NULL,
+  `tag_id` int(10) unsigned NOT NULL,
+  UNIQUE KEY `entity_tag` (`entity_realm`,`entity_id`,`tag_id`),
+  KEY `entity_id` (`entity_id`),
+  KEY `TagStorage-FK-tag_id` (`tag_id`),
+  CONSTRAINT `TagStorage-FK-tag_id` FOREIGN KEY (`tag_id`) REFERENCES `TagTree` (`id`)
 ) TYPE=MyISAM;
 
 CREATE TABLE `UserAccount` (
