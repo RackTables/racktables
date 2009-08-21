@@ -2927,13 +2927,18 @@ function commitCreateTag ($tagname = '', $parent_id = 0)
 			'parent_id' => $parent_id
 		)
 	);
-	global $dbxlink;
 	if ($result)
 		return '';
-	elseif ($dbxlink->errorCode() == 23000)
-		return "name '${tag_name}' is already used";
-	else
-		return "SQL query failed in " . __FUNCTION__;
+	global $dbxlink;
+	if ($dbxlink->errorCode() == 23000) // integrity constraint violation
+	{
+		$ei = $dbxlink->errorInfo();
+		if ($ei[1] == 1062)
+			return 'tag name must be unique';
+		if ($ei[1] == 1452)
+			return "parent tag id ${parent_id} does not exist";
+	}
+	return "SQL query failed in " . __FUNCTION__;
 }
 
 function commitDestroyTag ($tagid = 0)
@@ -2956,10 +2961,15 @@ function commitUpdateTag ($tag_id, $tag_name, $parent_id)
 	$result = $dbxlink->exec ($query);
 	if ($result !== FALSE)
 		return '';
-	elseif ($dbxlink->errorCode() == 23000)
-		return "name '${tag_name}' is already used";
-	else
-		return 'SQL query failed in ' . __FUNCTION__;
+	if ($dbxlink->errorCode() == 23000)
+	{
+		$ei = $dbxlink->errorInfo();
+		if ($ei[1] == 1062)
+			return 'tag name must be unique';
+		if ($ei[1] == 1452)
+			return "parent tag id ${parent_id} does not exist";
+	}
+	return 'SQL query failed in ' . __FUNCTION__;
 }
 
 // Drop the whole chain stored.
