@@ -310,7 +310,7 @@ CREATE TABLE `TagTree` (
   UNIQUE KEY `tag` (`tag`),
   KEY `TagTree-K-parent_id` (`parent_id`),
   CONSTRAINT `TagTree-K-parent_id` FOREIGN KEY (`parent_id`) REFERENCES `TagTree` (`id`)
-) TYPE=MyISAM;
+) TYPE=InnoDB;
 
 CREATE TABLE `TagStorage` (
   `entity_realm` enum('file','ipv4net','ipv4vs','ipv4rspool','object','rack','user') NOT NULL default 'object',
@@ -320,7 +320,7 @@ CREATE TABLE `TagStorage` (
   KEY `entity_id` (`entity_id`),
   KEY `TagStorage-FK-tag_id` (`tag_id`),
   CONSTRAINT `TagStorage-FK-tag_id` FOREIGN KEY (`tag_id`) REFERENCES `TagTree` (`id`)
-) TYPE=MyISAM;
+) TYPE=InnoDB;
 
 CREATE TABLE `UserAccount` (
   `user_id` int(10) unsigned NOT NULL auto_increment,
