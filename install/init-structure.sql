@@ -225,8 +225,8 @@ CREATE TABLE `Port` (
   KEY `type` (`type`),
   KEY `comment` (`reservation_comment`),
   KEY `l2address` (`l2address`),
-  KEY `Port-FK-iif_id` (`iif_id`),
-  CONSTRAINT `Port-FK-iif_id` FOREIGN KEY (`iif_id`) REFERENCES `PortInnerInterface` (`id`),
+  KEY `Port-FK-iif-oif` (`iif_id`,`type`),
+  CONSTRAINT `Port-FK-iif-oif` FOREIGN KEY (`iif_id`, `type`) REFERENCES `PortInterfaceCompat` (`iif_id`, `oif_id`),
   CONSTRAINT `Port-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `RackObject` (`id`)
 ) ENGINE=InnoDB;
 
