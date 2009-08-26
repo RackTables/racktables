@@ -1075,13 +1075,13 @@ function getEmptyPortsOfType ($type_id)
 		"dict_value as Port_type_name ".
 		"from ( ".
 		"	( ".
-		"		Port inner join Dictionary on Port.type = dict_key join Chapter on Chapter.id = Dictionary.chapter_id ".
+		"		Port inner join Dictionary on Port.type = dict_key ".
 		"	) ".
 		" 	join RackObject on Port.object_id = RackObject.id ".
 		") ".
 		"left join Link on Port.id=Link.porta or Port.id=Link.portb ".
 		"inner join PortCompat on Port.type = PortCompat.type2 ".
-		"where Chapter.name = 'PortType' and PortCompat.type1 = '$type_id' and Link.porta is NULL ".
+		"where PortCompat.type1 = '$type_id' and Link.porta is NULL ".
 		"and Port.reservation_comment is null order by Object_name, Port_name";
 	$result = useSelectBlade ($query, __FUNCTION__);
 	$ret = array();
@@ -1828,10 +1828,7 @@ function getPortCompat ()
 	$query =
 		"select type1, type2, d1.dict_value as type1name, d2.dict_value as type2name from " .
 		"PortCompat as pc inner join Dictionary as d1 on pc.type1 = d1.dict_key " .
-		"inner join Dictionary as d2 on pc.type2 = d2.dict_key " .
-		"inner join Chapter as c1 on d1.chapter_id = c1.id " .
-		"inner join Chapter as c2 on d2.chapter_id = c2.id " .
-		"where c1.name = 'PortType' and c2.name = 'PortType'";
+		"inner join Dictionary as d2 on pc.type2 = d2.dict_key";
 	$result = useSelectBlade ($query, __FUNCTION__);
 	$ret = $result->fetchAll (PDO::FETCH_ASSOC);
 	$result->closeCursor();

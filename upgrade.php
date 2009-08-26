@@ -298,22 +298,23 @@ CREATE TABLE `LDAPCache` (
 			$query[] = "ALTER TABLE TagStorage ADD CONSTRAINT `TagStorage-FK-tag_id` FOREIGN KEY (tag_id) REFERENCES TagTree (id)";
 			$query[] = "ALTER TABLE TagTree ADD CONSTRAINT `TagTree-K-parent_id` FOREIGN KEY (parent_id) REFERENCES TagTree (id)";
 			$query[] = "
-CREATE TABLE `PortInnerIF` (
+CREATE TABLE `PortInnerInterface` (
   `id` int(10) unsigned NOT NULL auto_increment,
-  `primary_oif_id` int(10) unsigned NOT NULL,
+  `default_oif_id` int(10) unsigned NOT NULL,
   `iif_name` char(16) NOT NULL,
   PRIMARY KEY  (`id`),
   UNIQUE KEY `inner_if` (`iif_name`)
 ) ENGINE=InnoDB";
 			$query[] = "
-CREATE TABLE `PortExtraOIF` (
+CREATE TABLE `PortInterfaceCompat` (
   `iif_id` int(10) unsigned NOT NULL,
   `oif_id` int(10) unsigned NOT NULL,
   UNIQUE KEY `pair` (`iif_id`,`oif_id`),
-  CONSTRAINT `PortExtraOIF-FK-iif_id` FOREIGN KEY (`iif_id`) REFERENCES `PortInnerIF` (`id`)
+  CONSTRAINT `PortInterfaceCompat-FK-iif_id` FOREIGN KEY (`iif_id`) REFERENCES `PortInnerIF` (`id`)
 ) ENGINE=InnoDB";
-			$query[] = "ALTER TABLE Port ADD COLUMN iif_id int unsigned NULL AFTER name";
-			$query[] = "ALTER TABLE Port ADD CONSTRAINT `Port-FK-iif_id` FOREIGN KEY (iif_id) REFERENCES PortInnerIF(id)";
+			$query[] = "ALTER TABLE Port ADD COLUMN iif_id int unsigned NOT NULL AFTER name";
+			$query[] = "UPDATE Port SET iif_id = 1";
+			$query[] = "ALTER TABLE Port ADD CONSTRAINT `Port-FK-iif_id` FOREIGN KEY (iif_id) REFERENCES PortInnerInterface(id)";
 			$query[] = "UPDATE Config SET varvalue = '0.17.5' WHERE varname = 'DB_VERSION'";
 			break;
 		default:
