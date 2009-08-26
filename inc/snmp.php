@@ -650,4 +650,100 @@ function doSNMPmining ($object_id, $community)
 	return $log;
 }
 
+// APC SNMP code by Russ Garrett
+
+function doPDUSNMPmining ($object_id, $community)
+{
+	$objectInfo = spotEntity ('object', $object_id);
+	$endpoints = findAllEndpoints ($object_id, $objectInfo['name']);
+	$switch = new APCPowerSwitch($endpoints[0], 'public');
+	$log = array();
+	$sysName = $switch->getName();
+	$error = commitUpdateAttrValue ($object_id, 3, $sysName);
+	if ($error == TRUE)
+		$log[] = array ('code' => 'success', 'message' => 'FQDN set to ' . $sysName);
+	else
+		$log[] = array ('code' => 'error', 'message' => 'Failed settig FQDN: ' . $error);
+	
+	$updated = 0;
+	$ports = $switch->getPorts();
+	foreach ($ports as $name => $port) {
+		if (commitUpdatePortLabels($object_id, $name, 16, $port[0])) {
+			$updated++;
+		}
+	}
+	if ($updated > 0)
+		$log[] = array ('code' => 'success', 'message' => "Updated ${updated} port(s)");
+
+	return $log;
+}
+
+define('APC_STATUS_ON', 1);
+define('APC_STATUS_OFF', 2);
+define('APC_STATUS_REBOOT', 3);
+
+class SNMPDevice {
+    protected $hostname;
+    protected $community;
+
+    function __construct($hostname, $community) {
+        $this->hostname = $hostname;
+        $this->community = $community;
+    }
+
+    function getName() {
+	return $this->getString('sysName.0');
+    }
+ 
+    function getDescription() {
+	return $this->getString('sysDescr.0');
+    }
+
+    protected function snmpSet($oid, $type, $value) {
+        return snmpset($this->hostname, $this->community, $oid, $type, $value);
+    }
+
+    protected function getString($oid) {
+	return trim(str_replace('STRING: ', '', snmpget($this->hostname, $this->community, $oid)), '"');
+    }
+}
+
+class APCPowerSwitch extends SNMPDevice {
+    protected $snmpMib = 'SNMPv2-SMI::enterprises.318';
+
+    function getPorts() {
+        $data = snmpwalk($this->hostname, $this->community, "{$this->snmpMib}.1.1.12.3.3.1.1.2");
+        $status = snmpwalk($this->hostname, $this->community, "{$this->snmpMib}.1.1.12.3.3.1.1.4");
+        $out = array();
+        foreach ($data as $id => $d) {
+            $out[$id + 1] = array(trim(str_replace('STRING: ', '', $d), '"'), str_replace('INTEGER: ', '', $status[$id]));
+        }
+        return $out;
+    }
+    
+    function getPortStatus($id) {
+        return trim(snmpget($this->hostname, $this->community, "{$this->snmpMib}.1.1.12.3.3.1.1.4.$id"), 'INTEGER: ');
+    }
+
+    function getPortName($id) {
+        return trim(str_replace('STRING: ', '', snmpget($this->hostname, $this->community, "{$this->snmpMib}.1.1.12.3.3.1.1.2.$id")), '"');
+    }
+
+    function setPortName($id, $name) {
+        return snmpset($this->hostname, $this->community, "{$this->snmpMib}.1.1.4.5.2.1.3.$id", 's', $name);
+    }
+
+    function portOff($id) {
+        return $this->snmpSet("{$this->snmpMib}.1.1.12.3.3.1.1.4.$id", 'i', APC_STATUS_OFF);
+    }
+
+    function portOn($id) {
+        return $this->snmpSet("{$this->snmpMib}.1.1.12.3.3.1.1.4.$id", 'i', APC_STATUS_ON);
+    }
+
+    function portReboot($id) {
+        return $this->snmpSet("{$this->snmpMib}.1.1.12.3.3.1.1.4.$id", 'i', APC_STATUS_REBOOT);
+    }
+}
+
 ?>

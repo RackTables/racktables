@@ -1010,6 +1010,28 @@ function commitUpdatePort ($object_id, $port_id, $port_name, $port_type_id, $por
 	return $errorInfo[2];
 }
 
+function commitUpdatePortLabels($object_id = 0, $port_name, $port_type_id, $port_label) {
+	global $dbxlink;
+	$query =
+		"update Port set name='$port_name', label='$port_label'" .
+		"where object_id='$object_id' and name = '$port_name'";
+	$result = $dbxlink->exec ($query);
+	if ($result == 1)
+		return $result;
+	$result = useInsertBlade
+		(
+		 'Port',
+		 array
+		 (
+		  'name' => "'${port_name}'",
+		  'object_id' => "'${object_id}'",
+		  'label' => "'${port_label}'",
+		  'type' => "'${port_type_id}'",
+		 )
+		);
+	return $result;
+}
+
 function delObjectPort ($port_id)
 {
 	if (unlinkPort ($port_id) != '')
