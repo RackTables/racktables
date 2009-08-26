@@ -300,7 +300,6 @@ CREATE TABLE `LDAPCache` (
 			$query[] = "
 CREATE TABLE `PortInnerInterface` (
   `id` int(10) unsigned NOT NULL auto_increment,
-  `default_oif_id` int(10) unsigned NOT NULL,
   `iif_name` char(16) NOT NULL,
   PRIMARY KEY  (`id`),
   UNIQUE KEY `inner_if` (`iif_name`)
@@ -312,9 +311,17 @@ CREATE TABLE `PortInterfaceCompat` (
   UNIQUE KEY `pair` (`iif_id`,`oif_id`),
   CONSTRAINT `PortInterfaceCompat-FK-iif_id` FOREIGN KEY (`iif_id`) REFERENCES `PortInnerIF` (`id`)
 ) ENGINE=InnoDB";
-			$query[] = "ALTER TABLE Port ADD COLUMN iif_id int unsigned NOT NULL AFTER name";
-			$query[] = "UPDATE Port SET iif_id = 1";
-			$query[] = "ALTER TABLE Port ADD CONSTRAINT `Port-FK-iif_id` FOREIGN KEY (iif_id) REFERENCES PortInnerInterface(id)";
+			$query[] = "ALTER TABLE Port ADD COLUMN iif_id int unsigned NOT NULL AFTER name"; // will set iif_id to 0
+			$query[] = "UPDATE Port SET iif_id = 2 WHERE type = 1208";
+			$query[] = "UPDATE Port SET iif_id = 3 WHERE type = 1078";
+			$query[] = "UPDATE Port SET iif_id = 4 WHERE type = 1077";
+			$query[] = "UPDATE Port SET iif_id = 5 WHERE type = 1079";
+			$query[] = "UPDATE Port SET iif_id = 6 WHERE type = 1080";
+			$query[] = "UPDATE Port SET iif_id = 7 WHERE type = 1081";
+			$query[] = "UPDATE Port SET iif_id = 8 WHERE type = 1082";
+			$query[] = "UPDATE Port SET iif_id = 9 WHERE type = 1084";
+			$query[] = "UPDATE Port SET iif_id = 1 WHERE iif_id = 0";
+			$query[] = "ALTER TABLE Port ADD CONSTRAINT `Port-FK-iif-oif` FOREIGN KEY (`iif_id`, `type`) REFERENCES `PortInterfaceCompat` (`iif_id`, `oif_id`)";
 			$query[] = "UPDATE Config SET varvalue = '0.17.5' WHERE varname = 'DB_VERSION'";
 			break;
 		default:

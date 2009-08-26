@@ -198,7 +198,6 @@ CREATE TABLE `MountOperation` (
 
 CREATE TABLE `PortInnerInterface` (
   `id` int(10) unsigned NOT NULL,
-  `default_oif_id` int(10) unsigned NOT NULL,
   `iif_name` char(16) NOT NULL,
   PRIMARY KEY  (`id`),
   UNIQUE KEY `iif_name` (`iif_name`)

@@ -120,15 +120,15 @@ INSERT INTO `Chapter` (`id`, `sticky`, `name`) VALUES
 (27,'no','PDU models');
 
 INSERT INTO `PortInnerInterface` VALUES
-(1,24,'hardwired'),
-(2,1208,'SFP-100'),
-(3,1078,'GBIC'),
-(4,1077,'SFP-1000'),
-(5,1079,'XENPAK'),
-(6,1080,'X2'),
-(7,1081,'XPAK'),
-(8,1082,'XFP'),
-(9,1084,'SFP+');
+(1,'hardwired'),
+(2,'SFP-100'),
+(3,'GBIC'),
+(4,'SFP-1000'),
+(5,'XENPAK'),
+(6,'X2'),
+(7,'XPAK'),
+(8,'XFP'),
+(9,'SFP+');
 
 INSERT INTO `PortInterfaceCompat` VALUES
 
@@ -282,7 +282,8 @@ INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, descriptio
 ('TAGS_QUICKLIST_SIZE','20','uint','no','no','Tags quick list size'),
 ('TAGS_QUICKLIST_THRESHOLD','50','uint','yes','no','Tags quick list threshold'),
 ('ENABLE_MULTIPORT_FORM','no','string','no','no','Enable "Add/update multiple ports" form'),
-('DEFAULT_PORT_IIF_ID','1','uint','no','no','Default port inner interface id (1-9)'),
+('DEFAULT_PORT_IIF_ID','1','uint','no','no','Default port inner interface ID'),
+('DEFAULT_PORT_OIF_IDS','1=24; 2=1208; 3=1078; 4=1077; 5=1079; 6=1080; 7=1081; 8=1082; 9=1084','string','no','no','Default port outer interface IDs'),
 ('DB_VERSION','0.17.4','string','no','yes','Database version.');
 
 INSERT INTO `Script` VALUES ('RackCode','allow {$userid_1}');
