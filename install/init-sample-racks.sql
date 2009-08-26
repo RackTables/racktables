@@ -679,6 +679,8 @@ INSERT INTO `RackSpace` VALUES (45,35,'rear','T',961);
 INSERT INTO `RackSpace` VALUES (45,34,'interior','T',962);
 INSERT INTO `RackSpace` VALUES (45,34,'rear','T',962);
 
+INSERT INTO `TagTree` (`id`, `parent_id`, `tag`) VALUES (16,NULL,'Geo');
+INSERT INTO `TagTree` (`id`, `parent_id`, `tag`) VALUES (17,NULL,'network');
 INSERT INTO `TagTree` (`id`, `parent_id`, `tag`) VALUES (1,16,'east');
 INSERT INTO `TagTree` (`id`, `parent_id`, `tag`) VALUES (2,16,'west');
 INSERT INTO `TagTree` (`id`, `parent_id`, `tag`) VALUES (3,NULL,'testing');
@@ -694,8 +696,6 @@ INSERT INTO `TagTree` (`id`, `parent_id`, `tag`) VALUES (12,NULL,'racks');
 INSERT INTO `TagTree` (`id`, `parent_id`, `tag`) VALUES (13,12,'tall racks');
 INSERT INTO `TagTree` (`id`, `parent_id`, `tag`) VALUES (14,12,'low racks');
 INSERT INTO `TagTree` (`id`, `parent_id`, `tag`) VALUES (15,NULL,'load balancer');
-INSERT INTO `TagTree` (`id`, `parent_id`, `tag`) VALUES (16,NULL,'Geo');
-INSERT INTO `TagTree` (`id`, `parent_id`, `tag`) VALUES (17,NULL,'network');
 INSERT INTO `TagTree` (`id`, `parent_id`, `tag`) VALUES (18,17,'small network');
 INSERT INTO `TagTree` (`id`, `parent_id`, `tag`) VALUES (19,17,'medium network');
 INSERT INTO `TagTree` (`id`, `parent_id`, `tag`) VALUES (20,5,'北京');
