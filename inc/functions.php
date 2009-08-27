@@ -2214,4 +2214,23 @@ function isolatedPermission ($p, $t, $cell)
 	return $ret;
 }
 
+function getPortListPrefs()
+{
+	$ret = array();
+	if (0 >= ($ret['iif_pick'] = getConfigVar ('DEFAULT_PORT_IIF_ID')))
+		$ret['iif_pick'] = 1;
+	$ret['oif_picks'] = array();
+	foreach (explode (';', getConfigVar ('DEFAULT_PORT_OIF_IDS')) as $tmp)
+	{
+		$tmp = explode ('=', trim ($tmp));
+		if (count ($tmp) == 2 and $tmp[0] > 0 and $tmp[1] > 0)
+			$ret['oif_picks'][$tmp[0]] = $tmp[1];
+	}
+	// enforce default value
+	if (!array_key_exists (1, $ret['oif_picks']))
+		$ret['oif_picks'][1] = 24;
+	$ret['selected'] = $ret['iif_pick'] . '-' . $ret['oif_picks'][$ret['iif_pick']];
+	return $ret;
+}
+
 ?>

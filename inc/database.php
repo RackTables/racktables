@@ -525,7 +525,8 @@ function getObjectPortsAndLinks ($object_id)
 {
 	// prepare decoder
 	$ptd = readChapter (CHAP_PORTTYPE, 'a');
-	$query = "select id, name, label, l2address, type as type_id, reservation_comment from Port where object_id = ${object_id}";
+	$query = "SELECT id, name, label, l2address, iif_id, " .
+		"(SELECT iif_name FROM PortInnerInterface WHERE id = iif_id) AS iif_name, type as type_id, reservation_comment from Port where object_id = ${object_id}";
 	// list and decode all ports of the current object
 	$result = useSelectBlade ($query, __FUNCTION__);
 	$ret=array();
@@ -960,15 +961,31 @@ function commitAddPort ($object_id = 0, $port_name, $port_type_id, $port_label, 
 		$dbxlink->exec ('UNLOCK TABLES');
 		return "address ${db_l2address} belongs to another object";
 	}
+	$matches = array();
+	switch (1)
+	{
+	case preg_match ('/^([[:digit:]]+)-([[:digit:]]+)$/', $port_type_id, $matches):
+		$iif_id = $matches[1];
+		$oif_id = $matches[2];
+		break;
+	case preg_match ('/^([[:digit:]]+)$/', $port_type_id, $matches):
+		$iif_id = 1;
+		$oif_id = $matches[1];
+		break;
+	default:
+		$dbxlink->exec ('UNLOCK TABLES');
+		return "invalid port type id '${port_type_id}'";
+	}
 	$result = useInsertBlade
 	(
 		'Port',
 		array
 		(
 			'name' => "'${port_name}'",
-			'object_id' => "'${object_id}'",
+			'object_id' => $object_id,
 			'label' => "'${port_label}'",
-			'type' => "'${port_type_id}'",
+			'iif_id' => $iif_id,
+			'type' => $oif_id,
 			'l2address' => ($db_l2address === '') ? 'NULL' : "'${db_l2address}'"
 		)
 	);
@@ -3669,6 +3686,51 @@ function alreadyUsedL2Address ($address, $my_object_id)
 	}
 	$row = $result->fetch (PDO::FETCH_NUM);
 	return $row[0] != 0;
+}
+
+// Return data for printNiftySelect() with port type options. All OIF options
+// for the default IIF will be shown, but only the default OIFs will be present
+// for each other IIFs. IIFs, for which there is no default OIF, will not
+// be listed.
+// This SELECT will be used for the "add new port" form.
+function getNewPortTypeOptions()
+{
+	$query = 'SELECT iif_id, iif_name, oif_id, dict_value AS oif_name ' .
+		'FROM PortInterfaceCompat INNER JOIN PortInnerInterface ON id = iif_id ' .
+		'INNER JOIN Dictionary ON dict_key = oif_id ' .
+		'ORDER BY iif_id, oif_name';
+	$result = useSelectBlade ($query, __FUNCTION__);
+	$ret = array();
+	$prefs = getPortListPrefs();
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
+	{
+		// Add all records for the picked IIF under own OPTGROUP
+		if ($row['iif_id'] == $prefs['iif_pick'])
+			$optgroup = $row['iif_name'];
+		elseif (array_key_exists ($row['iif_id'], $prefs['oif_picks']) and $prefs['oif_picks'][$row['iif_id']] == $row['oif_id'])
+			$optgroup = 'other';
+		else
+			continue;
+		if (!array_key_exists ($optgroup, $ret))
+			$ret[$optgroup] = array();
+		$ret[$optgroup][$row['iif_id'] . '-' . $row['oif_id']] = $row['oif_name'];
+	}
+	return $ret;
+}
+
+// Return a set of options for a plain SELECT. These options include the current
+// OIF of the given port and all OIFs of its permanent IIF.
+function getExistingPortTypeOptions ($port_id)
+{
+	$query = 'SELECT oif_id, dict_value AS oif_name ' .
+		'FROM PortInterfaceCompat INNER JOIN Dictionary ON oif_id = dict_key ' .
+		"WHERE iif_id = (SELECT iif_id FROM Port WHERE id = ${port_id}) " .
+		'ORDER BY oif_name';
+	$result = useSelectBlade ($query, __FUNCTION__);
+	$ret = array();
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
+		$ret[$row['oif_id']] = $row['oif_name'];
+	return $ret;
 }
 
 ?>

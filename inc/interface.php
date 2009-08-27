@@ -852,31 +852,34 @@ function renderRackObject ($object_id)
 				assertUIntArg ('hl_port_id', __FUNCTION__);
 				$hl_port_id = $_REQUEST['hl_port_id'];
 			}
-			echo "<table cellspacing=0 cellpadding='5' align='center' class='widetable'>\n";
-			echo "<tr><th>Local name</th><th>Visible label</th><th>Port type</th><th>L2 address</th>";
-			echo "<th>Rem. Object</th><th>Rem. port</th></tr>\n";
+			echo "<table cellspacing=0 cellpadding='5' align='center' class='widetable'>";
+			echo '<tr><th class=tdleft>Local name</th><th class=tdleft>Visible label</th>';
+			echo '<th class=tdleft>Port type</th><th class=tdleft>L2 address</th>';
+			echo '<th class=tdleft>Rem. Object</th><th class=tdleft>Rem. port</th></tr>';
 			foreach ($ports as $port)
 			{
 				echo '<tr';
 				if ($hl_port_id == $port['id'])
 					echo ' class=port_highlight';
-				echo "><td>${port['name']}</td><td>${port['label']}</td><td>${port['type']}</td>";
-				echo "<td>${port['l2address']}</td>";
+				echo "><td class=tdleft>${port['name']}</td><td class=tdleft>${port['label']}</td><td class=tdleft>";
+				if ($port['iif_id'] != 1)
+					echo $port['iif_name'] . '/';
+				echo $port['type'] . "</td><td class=tdleft><tt>${port['l2address']}</tt></td>";
 				if ($port['remote_object_id'])
 				{
-					echo "<td><a href='".makeHref(array('page'=>'object', 'object_id'=>$port['remote_object_id'], 'hl_port_id'=>$port['remote_id']))."'>${port['remote_object_name']}</a></td>";
-					echo "<td>${port['remote_name']}</td>";
+					echo "<td class=tdleft><a href='".makeHref(array('page'=>'object', 'object_id'=>$port['remote_object_id'], 'hl_port_id'=>$port['remote_id']))."'>${port['remote_object_name']}</a></td>";
+					echo "<td class=tdleft>${port['remote_name']}</td>";
 				}
 				elseif (strlen ($port['reservation_comment']))
 				{
-					echo "<td><b>Reserved;</b></td>";
-					echo "<td>${port['reservation_comment']}</td>";
+					echo "<td class=tdleft><b>Reserved:</b></td>";
+					echo "<td class='tdleft rsvtext'>${port['reservation_comment']}</td>";
 				}
 				else
 					echo '<td>&nbsp;</td><td>&nbsp;</td>';
-				echo "</tr>\n";
+				echo "</tr>";
 			}
-			echo "</table><br>\n";
+			echo "</table><br>";
 		}
 		finishPortlet();
 	}
@@ -1079,15 +1082,15 @@ function renderRackMultiSelect ($sname, $racks, $selected)
 // This function renders a form for port edition.
 function renderPortsForObject ($object_id)
 {
-	$portOptions = cookOptgroups (readChapter (CHAP_PORTTYPE, 'o'));
-	function printNewItemTR ($portOptions)
+	$prefs = getPortListPrefs();
+	function printNewItemTR ($prefs)
 	{
 		printOpFormIntro ('addPort');
 		echo "<tr><td>";
 		printImageHREF ('add', 'add a port', TRUE);
 		echo "</td><td><input type=text size=8 name=port_name tabindex=100></td>\n";
 		echo "<td><input type=text size=24 name=port_label tabindex=101></td><td>";
-		printNiftySelect ($portOptions, 'port_type_id', getConfigVar ('default_port_type'), 102);
+		printNiftySelect (getNewPortTypeOptions(), 'port_type_id', $prefs['selected'], 102);
 		echo "<td><input type=text name=port_l2address tabindex=103></td>\n";
 		echo "<td colspan=3>&nbsp;</td><td>";
 		printImageHREF ('add', 'add a port', TRUE, 104);
@@ -1103,7 +1106,7 @@ function renderPortsForObject ($object_id)
 	echo "<tr><th>&nbsp;</th><th>Local name</th><th>Visible label</th><th>Port type</th><th>L2 address</th>";
 	echo "<th>Rem. object</th><th>Rem. port</th><th>(Un)link or (un)reserve</th><th>&nbsp;</th></tr>\n";
 	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
-		printNewItemTR ($portOptions);
+		printNewItemTR ($prefs);
 	foreach ($ports as $port)
 	{
 		printOpFormIntro ('editPort', array ('port_id' => $port['id']));
@@ -1114,21 +1117,27 @@ function renderPortsForObject ($object_id)
 		echo "<td><input type=text name=label value='${port['label']}' size=24></td>";
 		if (!$port['remote_object_id'])
 		{
-			echo "<td>";
-			printNiftySelect ($portOptions, 'port_type_id', $port['type_id']);
-			echo "</td>";
+			echo '<td>';
+			if ($port['iif_id'] != 1)
+				echo '<label>' . $port['iif_name'] . ' ';
+			printSelect (getExistingPortTypeOptions ($port['id']), 'port_type_id', $port['type_id']);
+			if ($port['iif_id'] != 1)
+				echo '</label>';
+			echo '</td>';
 		}
 		else
 		{
-			echo "<input type=hidden name=port_type_id value='${port['type_id']}'>";
-			echo "<td class=tdleft>${port['type']}</td>\n";
+			echo "<input type=hidden name=port_type_id value='${port['type_id']}'><td class=tdleft>";
+			if ($port['iif_id'] != 1)
+				echo $port['iif_name'] . '/';
+			echo "${port['type']}</td>\n";
 		}
 		echo "<td><input type=text name=l2address value='${port['l2address']}'></td>\n";
 		if ($port['remote_object_id'])
 		{
 			echo "<td><a href='".makeHref(array('page'=>'object', 'object_id'=>$port['remote_object_id']))."'>${port['remote_object_name']}</a></td>";
 			echo "<td>${port['remote_name']}</td>";
-			echo "<td><a href='".
+			echo "<td class=tdcenter><a href='".
 				makeHrefProcess(array(
 					'op'=>'unlinkPort', 
 					'port_id'=>$port['id'], 
@@ -1142,9 +1151,9 @@ function renderPortsForObject ($object_id)
 		}
 		elseif (strlen ($port['reservation_comment']))
 		{
-			echo "<td><b>Reserved;</b></td>";
+			echo "<td><b>Reserved:</b></td>";
 			echo "<td><input type=text name=reservation_comment value='${port['reservation_comment']}'></td>";
-			echo "<td><a href='".
+			echo "<td class=tdcenter><a href='".
 				makeHrefProcess(array(
 					'op'=>'useup',
 					'port_id'=>$port['id'], 
@@ -1156,7 +1165,7 @@ function renderPortsForObject ($object_id)
 		else
 		{
 			echo "<td>&nbsp;</td><td>&nbsp;</td>";
-			echo "<td>";
+			echo "<td class=tdcenter>";
 			echo "<a href='javascript:;' onclick='window.open(\"".makeHrefForHelper('portlist', array('port'=>$port['id'], 'type'=>$port['type_id'], 'object_id'=>$object_id, 'port_name'=>$port['name']))."\",\"findlink\",\"height=700, width=400, location=no, menubar=no, resizable=yes, scrollbars=no, status=no, titlebar=no, toolbar=no\");'>";
 			printImageHREF ('plug', 'Link this port');
 			echo "</a> <input type=text name=reservation_comment>";
@@ -1167,7 +1176,7 @@ function renderPortsForObject ($object_id)
 		echo "</td></form></tr>\n";
 	}
 	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')
-		printNewItemTR ($portOptions);
+		printNewItemTR ($prefs);
 	echo "</table><br>\n";
 	if (getConfigVar('ENABLE_MULTIPORT_FORM') == 'yes')
 		finishPortlet();
@@ -1206,7 +1215,7 @@ EOF;
 	echo '<option value=ssv1>SSV:&lt;interface name&gt; &lt;MAC address&gt;</option>';
 	echo "</select>";
 	echo 'Default port type: ';
-	printNiftySelect ($portOptions, 'port_type', getConfigVar ('default_port_type'), 202);
+	printNiftySelect (getNewPortTypeOptions(), 'port_type', $prefs['selected'], 202);
 	echo "<input type=submit value='Parse output' tabindex=204><br>\n";
 	echo "<textarea name=input cols=100 rows=50 tabindex=203></textarea><br>\n";
 	echo '</form>';
