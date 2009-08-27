@@ -53,7 +53,7 @@ $dictionary = array
 	28 => array ('chapter_id' => 2, 'dict_value' => '1000Base-LX (LC)'),
 	29 => array ('chapter_id' => 2, 'dict_value' => 'RS-232 (RJ-45)'),
 	30 => array ('chapter_id' => 2, 'dict_value' => '10GBase-SR'),
-	31 => array ('chapter_id' => 2, 'dict_value' => 'veth (Xen bridge)'),
+	31 => array ('chapter_id' => 2, 'dict_value' => 'virtual bridge'),
 	32 => array ('chapter_id' => 2, 'dict_value' => 'sync serial'),
 	33 => array ('chapter_id' => 2, 'dict_value' => 'KVM (host)'),
 	34 => array ('chapter_id' => 2, 'dict_value' => '1000Base-ZX'),
