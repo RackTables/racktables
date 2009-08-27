@@ -642,7 +642,10 @@ function commitAddObject ($new_name, $new_label, $new_barcode, $new_type_id, $ne
 		showError ("Error adding tags for the object: ${error}");
 		return FALSE;
 	}
-	return recordHistory ('RackObject', "id = ${last_insert_id}");
+
+	recordHistory ('RackObject', "id = ${last_insert_id}");
+
+	return $last_insert_id;
 }
 
 function commitUpdateObject ($object_id = 0, $new_name = '', $new_label = '', $new_barcode = '', $new_type_id = 0, $new_has_problems = 'no', $new_asset_no = '', $new_comment = '')
