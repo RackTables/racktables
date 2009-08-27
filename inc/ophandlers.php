@@ -1924,4 +1924,26 @@ function updateFileText ()
 	return buildRedirectURL (__FUNCTION__, 'ERR2');
 }
 
+$msgcode['addPortInterfaceCompat']['OK'] = 48;
+$msgcode['addPortInterfaceCompat']['ERR'] = 110;
+function addPortInterfaceCompat ()
+{
+	assertUIntArg ('iif_id', __FUNCTION__);
+	assertUIntArg ('oif_id', __FUNCTION__);
+	if (commitSupplementPIC ($_REQUEST['iif_id'], $_REQUEST['oif_id']))
+		return buildRedirectURL (__FUNCTION__, 'OK');
+	return buildRedirectURL (__FUNCTION__, 'ERR');
+}
+
+$msgcode['delPortInterfaceCompat']['OK'] = 49;
+$msgcode['delPortInterfaceCompat']['ERR'] = 111;
+function delPortInterfaceCompat ()
+{
+	assertUIntArg ('iif_id', __FUNCTION__);
+	assertUIntArg ('oif_id', __FUNCTION__);
+	if (commitReducePIC ($_REQUEST['iif_id'], $_REQUEST['oif_id']))
+		return buildRedirectURL (__FUNCTION__, 'OK');
+	return buildRedirectURL (__FUNCTION__, 'ERR');
+}
+
 ?>

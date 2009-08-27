@@ -2233,4 +2233,28 @@ function getPortListPrefs()
 	return $ret;
 }
 
+// Return data for printNiftySelect() with port type options. All OIF options
+// for the default IIF will be shown, but only the default OIFs will be present
+// for each other IIFs. IIFs, for which there is no default OIF, will not
+// be listed.
+// This SELECT will be used for the "add new port" form.
+function getNewPortTypeOptions()
+{
+	$ret = array();
+	$prefs = getPortListPrefs();
+	foreach (getPortInterfaceCompat() as $row)
+	{
+		if ($row['iif_id'] == $prefs['iif_pick'])
+			$optgroup = $row['iif_name'];
+		elseif (array_key_exists ($row['iif_id'], $prefs['oif_picks']) and $prefs['oif_picks'][$row['iif_id']] == $row['oif_id'])
+			$optgroup = 'other';
+		else
+			continue;
+		if (!array_key_exists ($optgroup, $ret))
+			$ret[$optgroup] = array();
+		$ret[$optgroup][$row['iif_id'] . '-' . $row['oif_id']] = $row['oif_name'];
+	}
+	return $ret;
+}
+
 ?>

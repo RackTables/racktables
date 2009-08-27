@@ -6128,4 +6128,66 @@ function dynamic_title_decoder ($path_position)
 	}
 }
 
+function renderPortIFCompat()
+{
+	global $nextorder;
+	echo '<br><table class=cooltable align=center border=0 cellpadding=5 cellspacing=0>';
+	echo '<tr><th class=tdleft>inner interface</th><th class=tdleft>outer interface</th></tr>';
+	$last_iif_id = 0;
+	$order = 'even';
+	foreach (getPortInterfaceCompat() as $record)
+	{
+		if ($last_iif_id != $record['iif_id'])
+		{
+			$order = $nextorder[$order];
+			$last_iif_id = $record['iif_id'];
+		}
+		echo "<tr class=row_${order}><td class=tdleft>${record['iif_name']}</td><td class=tdleft>${record['oif_name']}</td></tr>";
+	}
+	echo '</table>';
+}
+
+function renderPortIFCompatEditor()
+{
+	function printNewitemTR()
+	{
+		printOpFormIntro ('add');
+		echo '<tr><th class=tdleft>';
+		printImageHREF ('add', 'add pair', TRUE);
+		echo '</th><th class=tdleft>';
+		printSelect (getPortIIFOptions(), 'iif_id');
+		echo '</th><th class=tdleft>';
+		printSelect (readChapter (CHAP_PORTTYPE), 'oif_id');
+		echo '</th></tr></form>';
+	}
+
+	startPortlet ('[WDM helpers]');
+	finishPortlet();
+
+	startPortlet ('interface by interface');
+	global $nextorder;
+	$last_iif_id = 0;
+	$order = 'even';
+	echo '<br><table class=cooltable align=center border=0 cellpadding=5 cellspacing=0>';
+	echo '<tr><th>&nbsp;</th><th class=tdleft>inner interface</th><th class=tdleft>outer interface</th></tr>';
+	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
+		printNewitemTR();
+	foreach (getPortInterfaceCompat() as $record)
+	{
+		if ($last_iif_id != $record['iif_id'])
+		{
+			$order = $nextorder[$order];
+			$last_iif_id = $record['iif_id'];
+		}
+		echo "<tr class=row_${order}><td>";
+		echo '<a href="' . makeHrefProcess (array ('op' => 'del', 'iif_id' => $record['iif_id'], 'oif_id' => $record['oif_id'])) . '">';
+		printImageHREF ('delete', 'remove pair', TRUE);
+		echo "</a></td><td class=tdleft>${record['iif_name']}</td><td class=tdleft>${record['oif_name']}</td></tr>";
+	}
+	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')
+		printNewitemTR();
+	echo '</table>';
+	finishPortlet();
+}
+
 ?>

@@ -3688,34 +3688,14 @@ function alreadyUsedL2Address ($address, $my_object_id)
 	return $row[0] != 0;
 }
 
-// Return data for printNiftySelect() with port type options. All OIF options
-// for the default IIF will be shown, but only the default OIFs will be present
-// for each other IIFs. IIFs, for which there is no default OIF, will not
-// be listed.
-// This SELECT will be used for the "add new port" form.
-function getNewPortTypeOptions()
+function getPortInterfaceCompat()
 {
 	$query = 'SELECT iif_id, iif_name, oif_id, dict_value AS oif_name ' .
 		'FROM PortInterfaceCompat INNER JOIN PortInnerInterface ON id = iif_id ' .
 		'INNER JOIN Dictionary ON dict_key = oif_id ' .
 		'ORDER BY iif_id, oif_name';
 	$result = useSelectBlade ($query, __FUNCTION__);
-	$ret = array();
-	$prefs = getPortListPrefs();
-	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-	{
-		// Add all records for the picked IIF under own OPTGROUP
-		if ($row['iif_id'] == $prefs['iif_pick'])
-			$optgroup = $row['iif_name'];
-		elseif (array_key_exists ($row['iif_id'], $prefs['oif_picks']) and $prefs['oif_picks'][$row['iif_id']] == $row['oif_id'])
-			$optgroup = 'other';
-		else
-			continue;
-		if (!array_key_exists ($optgroup, $ret))
-			$ret[$optgroup] = array();
-		$ret[$optgroup][$row['iif_id'] . '-' . $row['oif_id']] = $row['oif_name'];
-	}
-	return $ret;
+	return $result->fetchAll (PDO::FETCH_ASSOC);
 }
 
 // Return a set of options for a plain SELECT. These options include the current
@@ -3731,6 +3711,31 @@ function getExistingPortTypeOptions ($port_id)
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 		$ret[$row['oif_id']] = $row['oif_name'];
 	return $ret;
+}
+
+function getPortIIFOptions()
+{
+	$ret = array();
+	$result = useSelectBlade ('SELECT id, iif_name FROM PortInnerInterface ORDER BY iif_name', __FUNCTION__);
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
+		$ret[$row['id']] = $row['iif_name'];
+	return $ret;
+}
+
+function commitSupplementPIC ($iif_id, $oif_id)
+{
+	return useInsertBlade
+	(
+		'PortInterfaceCompat',
+		array ('iif_id' => $iif_id, 'oif_id' => $oif_id)
+	);
+}
+
+function commitReducePIC ($iif_id, $oif_id)
+{
+	global $dbxlink;
+	$query = "DELETE FROM PortInterfaceCompat WHERE iif_id = ${iif_id} AND oif_id = ${oif_id}";
+	return $dbxlink->query ($query) != NULL;
 }
 
 ?>
