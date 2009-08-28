@@ -850,7 +850,7 @@ function renderRackObject ($object_id)
 		}
 		echo "<table cellspacing=0 cellpadding='5' align='center' class='widetable'>";
 		echo '<tr><th class=tdleft>Local name</th><th class=tdleft>Visible label</th>';
-		echo '<th class=tdleft>interface</th><th class=tdleft>L2 address</th>';
+		echo '<th class=tdleft>Interface</th><th class=tdleft>L2 address</th>';
 		echo '<th class=tdcenter colspan=2>Remote object and port</th></tr>';
 		foreach ($info['ports'] as $port)
 		{
@@ -1098,8 +1098,8 @@ function renderPortsForObject ($object_id)
 	$object = spotEntity ('object', $object_id);
 	amplifyCell ($object);
 	echo "<table cellspacing=0 cellpadding='5' align='center' class='widetable'>\n";
-	echo "<tr><th>&nbsp;</th><th>Local name</th><th>Visible label</th><th>Port type</th><th>L2 address</th>";
-	echo "<th>Rem. object</th><th>Rem. port</th><th>(Un)link or (un)reserve</th><th>&nbsp;</th></tr>\n";
+	echo "<tr><th>&nbsp;</th><th class=tdleft>Local name</th><th class=tdleft>Visible label</th><th class=tdleft>Interface</th><th class=tdleft>L2 address</th>";
+	echo "<th class=tdcenter colspan=2>Remote object and port</th><th class=tdcenter>(Un)link or (un)reserve</th><th>&nbsp;</th></tr>\n";
 	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
 		printNewItemTR ($prefs);
 	foreach ($object['ports'] as $port)
