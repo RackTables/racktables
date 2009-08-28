@@ -1107,7 +1107,7 @@ $dictionary = array
 	1084 => array ('chapter_id' => 2, 'dict_value' => 'empty SFP+'),
 	1085 => array ('chapter_id' => 12, 'dict_value' => 'Nortel%GPASS%BES50GE-12T PWR'),
 	1086 => array ('chapter_id' => 12, 'dict_value' => '[[HP ProCurve%GPASS%4000M | http://www.hp.com/rnd/products/switches/switch4000/overview.htm]]'),
-	1087 => array ('chapter_id' => 2, 'dict_value' => '1000Base-T (Dell1)'),
+	1087 => array ('chapter_id' => 2, 'dict_value' => '1000Base-T (Dell 1855)'),
 	1088 => array ('chapter_id' => 18, 'dict_value' => '[[NetApp%GPASS%FAS2020 | http://www.netapp.com/us/products/storage-systems/fas2000/]]'),
 	1089 => array ('chapter_id' => 18, 'dict_value' => '[[NetApp%GPASS%FAS2050 | http://www.netapp.com/us/products/storage-systems/fas2000/]]'),
 	1090 => array ('chapter_id' => 18, 'dict_value' => 'NetApp%GPASS%FAS3020'),
@@ -1336,6 +1336,7 @@ $dictionary = array
 	1313 => array ('chapter_id' => 25, 'dict_value' => 'Cisco%GPASS%AIR-WLC2106'),
 	1314 => array ('chapter_id' => 25, 'dict_value' => 'Cisco%GPASS%AIR-WLC526'),
 	1315 => array ('chapter_id' => 25, 'dict_value' => 'Cisco%GPASS%AIR-WLC4402'),
+	1316 => array ('chapter_id' => 2, 'dict_value' => '1000Base-T (Dell M1000e)'),
 );
 
 ?>

@@ -102,7 +102,7 @@ INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_id`) VALUES
 
 INSERT INTO `Chapter` (`id`, `sticky`, `name`) VALUES
 (1,'yes','RackObjectType'),
-(2,'yes','PortType'),
+(2,'yes','PortOuterInterface'),
 (11,'no','server models'),
 (12,'no','network switch models'),
 (13,'no','server OS type'),
@@ -321,7 +321,8 @@ INSERT INTO `PortCompat` (`type1`, `type2`) VALUES
 (1297,1297),
 (1298,1298),
 (1299,1299),
-(1300,1300);
+(1300,1300),
+(1316,1316);
 
 INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES
 ('color_F','8fbfbf','string','no','yes','HSV: 180-25-75. Free atoms, they are available for allocation to objects.'),

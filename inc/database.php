@@ -2119,9 +2119,9 @@ function getChapterRefc ($chapter_id, $keylist)
 			"(select count(*) from RackObject where objtype_id = dict_key) as refcnt from Dictionary where chapter_id = ${chapter_id}";
 		break;
 	case CHAP_PORTTYPE:
-		// PortType chapter is referenced by PortCompat and Port tables
+		// PortOuterInterface chapter is referenced by PortCompat, PortInterfaceCompat and Port tables
 		$query = 'select dict_key as uint_value, (select count(*) from PortCompat where type1 = dict_key or type2 = dict_key) + ' .
-			'(select count(*) from Port where type = dict_key) as refcnt ' .
+			'(select count(*) from Port where type = dict_key) + (SELECT COUNT(*) FROM PortInterfaceCompat WHERE oif_id = dict_key) as refcnt ' .
 			"from Dictionary where chapter_id = ${chapter_id}";
 		break;
 	default:
