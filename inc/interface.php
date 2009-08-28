@@ -6161,20 +6161,42 @@ function renderPortIFCompatEditor()
 		echo '</th></tr></form>';
 	}
 
-	startPortlet ('[turbo switches]');
+	startPortlet ('WDM standard by interface');
+	$packs = array
+	(
+		'1000cwdm80' => array
+		(
+			'title' => '1000Base-CWDM80 (8 channels)',
+			'iif_ids' => array (3, 4),
+		),
+		'1000dwdm80' => array
+		(
+			'title' => '1000Base-DWDM80 (42 channels)',
+			'iif_ids' => array (3, 4),
+		),
+		'10000dwdm80' => array
+		(
+			'title' => '10GBase-ZR-DWDM80 (42 channels)',
+			'iif_ids' => array (9, 6, 5, 8, 7),
+		),
+	);
+	$iif = getPortIIFOptions();
+	global $nextorder;
+	$order = 'odd';
 	echo '<table border=0 align=center cellspacing=0 cellpadding=5>';
-	echo '<tr><th>&nbsp;</th><th>1000Base-CWDM80</th><th>1000Base-DWDM80</th></tr>';
-	echo '<tr class=row_odd><th class=tdleft>GBIC</th><td>+/-</td><td>+/-</td></tr>';
-	echo '<tr class=row_even><th class=tdleft>SFP-1000</th><td>+/-</td><td>+/-</td></tr>';
-	echo '</table>';
-	echo '<br>';
-	echo '<table border=0 align=center cellspacing=0 cellpadding=5>';
-	echo '<tr><th>&nbsp;</th><th>10GBase-ZR-DWDM80</th></tr>';
-	echo '<tr class=row_odd><th class=tdleft>SFP+</th><td>+/-</td></tr>';
-	echo '<tr class=row_even><th class=tdleft>X2</th><td>+/-</td></tr>';
-	echo '<tr class=row_odd><th class=tdleft>XENPAK</th><td>+/-</td></tr>';
-	echo '<tr class=row_even><th class=tdleft>XFP</th><td>+/-</td></tr>';
-	echo '<tr class=row_odd><th class=tdleft>XPAK</th><td>+/-</td></tr>';
+	foreach ($packs as $codename => $packinfo)
+	{
+		echo "<tr><th>&nbsp;</th><th colspan=2>${packinfo['title']}</th></tr>";
+		foreach ($packinfo['iif_ids'] as $iif_id)
+		{
+			echo "<tr class=row_${order}><th class=tdleft>" . $iif[$iif_id] . '</th><td><a href="';
+			echo makeHrefProcess (array ('op' => 'addPack', 'standard' => $codename, 'iif_id' => $iif_id));
+			echo '">' . getImageHREF ('add') . '</a></td><td><a href="';
+			echo makeHrefProcess (array ('op' => 'delPack', 'standard' => $codename, 'iif_id' => $iif_id));
+			echo '">' . getImageHREF ('delete') . '</a></td></tr>';
+			$order = $nextorder[$order];
+		}
+	}
 	echo '</table>';
 	finishPortlet();
 

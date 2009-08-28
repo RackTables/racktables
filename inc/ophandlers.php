@@ -1968,12 +1968,40 @@ $ifcompatpack = array
 	),
 );
 
+$msgcode['addPortInterfaceCompatPack']['OK'] = 44;
+$msgcode['addPortInterfaceCompatPack']['ERR'] = 123;
 function addPortInterfaceCompatPack ()
 {
+	assertStringArg ('standard', __FUNCTION__);
+	assertUIntArg ('iif_id', __FUNCTION__);
+	global $ifcompatpack;
+	if (!array_key_exists ($_REQUEST['standard'], $ifcompatpack) or !array_key_exists ($_REQUEST['iif_id'], getPortIIFOptions()))
+		return buildRedirectURL (__FUNCTION__, 'ERR');
+	$ngood = $nbad = 0;
+	foreach ($ifcompatpack[$_REQUEST['standard']] as $oif_id)
+		if (commitSupplementPIC ($_REQUEST['iif_id'], $oif_id))
+			$ngood++;
+		else
+			$nbad++;
+	return buildRedirectURL (__FUNCTION__, 'OK', array ($nbad, $ngood));
 }
 
+$msgcode['delPortInterfaceCompatPack']['OK'] = 44;
+$msgcode['delPortInterfaceCompatPack']['ERR'] = 123;
 function delPortInterfaceCompatPack ()
 {
+	assertStringArg ('standard', __FUNCTION__);
+	assertUIntArg ('iif_id', __FUNCTION__);
+	global $ifcompatpack;
+	if (!array_key_exists ($_REQUEST['standard'], $ifcompatpack) or !array_key_exists ($_REQUEST['iif_id'], getPortIIFOptions()))
+		return buildRedirectURL (__FUNCTION__, 'ERR');
+	$ngood = $nbad = 0;
+	foreach ($ifcompatpack[$_REQUEST['standard']] as $oif_id)
+		if (commitReducePIC ($_REQUEST['iif_id'], $oif_id))
+			$ngood++;
+		else
+			$nbad++;
+	return buildRedirectURL (__FUNCTION__, 'OK', array ($nbad, $ngood));
 }
 
 ?>

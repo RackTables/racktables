@@ -3734,8 +3734,7 @@ function commitSupplementPIC ($iif_id, $oif_id)
 function commitReducePIC ($iif_id, $oif_id)
 {
 	global $dbxlink;
-	$query = "DELETE FROM PortInterfaceCompat WHERE iif_id = ${iif_id} AND oif_id = ${oif_id}";
-	return $dbxlink->query ($query) != NULL;
+	return 1 === $dbxlink->exec ("DELETE FROM PortInterfaceCompat WHERE iif_id = ${iif_id} AND oif_id = ${oif_id}");
 }
 
 ?>

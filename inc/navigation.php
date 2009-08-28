@@ -328,6 +328,8 @@ $tabhandler['portifcompat']['default'] = 'renderPortIFCompat';
 $tabhandler['portifcompat']['edit'] = 'renderPortIFCompatEditor';
 $ophandler['portifcompat']['edit']['add'] = 'addPortInterfaceCompat';
 $ophandler['portifcompat']['edit']['del'] = 'delPortInterfaceCompat';
+$ophandler['portifcompat']['edit']['addPack'] = 'addPortInterfaceCompatPack';
+$ophandler['portifcompat']['edit']['delPack'] = 'delPortInterfaceCompatPack';
 
 $page['attrs']['title'] = 'Attributes';
 $page['attrs']['parent'] = 'config';
