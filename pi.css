@@ -128,8 +128,15 @@ td.sticker {
 	text-align: left;
 }
 
+.widetable th {
+	padding-left: 5px;
+	padding-right: 5px;
+}
+
 .widetable td {
-	border-top: 1px solid black;
+	border-top: 1px solid #a0a0a0;
+	padding-left: 5px;
+	padding-right: 5px;
 }
 
 tr.port_highlight, td.port_highlight {
