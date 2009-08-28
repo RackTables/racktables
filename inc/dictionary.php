@@ -1321,6 +1321,21 @@ $dictionary = array
 	1298 => array ('chapter_id' => 2, 'dict_value' => '10GBase-ZR-DWDM80-30.33 (ITU 59)'),
 	1299 => array ('chapter_id' => 2, 'dict_value' => '10GBase-ZR-DWDM80-29.55 (ITU 60)'),
 	1300 => array ('chapter_id' => 2, 'dict_value' => '10GBase-ZR-DWDM80-28.77 (ITU 61)'),
+	1301 => array ('chapter_id' => 25, 'dict_value' => 'Cisco%GPASS%AIR-BR1410A'),
+	1302 => array ('chapter_id' => 25, 'dict_value' => 'Cisco%GPASS%AIR-BR1310G'),
+	1303 => array ('chapter_id' => 25, 'dict_value' => 'Cisco%GPASS%AIR-AP1252AG'),
+	1304 => array ('chapter_id' => 25, 'dict_value' => 'Cisco%GPASS%AIR-AP1252G'),
+	1305 => array ('chapter_id' => 25, 'dict_value' => 'Cisco%GPASS%AIR-AP1242AG'),
+	1306 => array ('chapter_id' => 25, 'dict_value' => 'Cisco%GPASS%AIR-AP1242G'),
+	1307 => array ('chapter_id' => 25, 'dict_value' => 'Cisco%GPASS%AIR-AP1231G'),
+	1308 => array ('chapter_id' => 25, 'dict_value' => 'Cisco%GPASS%AIR-AP1232AG'),
+	1309 => array ('chapter_id' => 25, 'dict_value' => 'Cisco%GPASS%AIR-AP1131AG'),
+	1310 => array ('chapter_id' => 25, 'dict_value' => 'Cisco%GPASS%AIR-AP1131G'),
+	1311 => array ('chapter_id' => 25, 'dict_value' => 'Cisco%GPASS%AIR-AP1121G'),
+	1312 => array ('chapter_id' => 25, 'dict_value' => 'Cisco%GPASS%AIR-AP521G'),
+	1313 => array ('chapter_id' => 25, 'dict_value' => 'Cisco%GPASS%AIR-WLC2106'),
+	1314 => array ('chapter_id' => 25, 'dict_value' => 'Cisco%GPASS%AIR-WLC526'),
+	1315 => array ('chapter_id' => 25, 'dict_value' => 'Cisco%GPASS%AIR-WLC4402'),
 );
 
 ?>
