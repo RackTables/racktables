@@ -139,7 +139,7 @@ INSERT INTO `PortInterfaceCompat` VALUES
 (7,1081),(7,30),(7,35),(7,36),(7,37),(7,38),(7,39),(7,40),
 (8,1082),(8,30),(8,35),(8,36),(8,37),(8,38),(8,39),(8,40),
 (9,1084),(9,30),(9,35),(9,36),(9,37),(9,38),(9,39),(9,40),
-(1,16),(1,19),(1,24),(1,29),(1,31),(1,33),(1,446),(1,681),(1,682),(1,1087);
+(1,16),(1,19),(1,24),(1,29),(1,31),(1,33),(1,446),(1,681),(1,682);
 
 INSERT INTO `PortCompat` (`type1`, `type2`) VALUES
 (17,17),
@@ -331,7 +331,6 @@ INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, descriptio
 ('color_Th','80ffff','string','no','yes','HSV: 180-50-100. Taken atoms with highlight. They are not stored in the database and are only used for highlighting.'),
 ('color_Tw','804040','string','no','yes','HSV: 0-50-50. Taken atoms with object problem. This is detected at runtime.'),
 ('color_Thw','ff8080','string','no','yes','HSV: 0-50-100. An object can be both current and problematic. We run highlightObject() first and markupObjectProblems() second.'),
-('default_port_type','24','uint','no','no','Default port type'),
 ('MASSCOUNT','15','uint','no','no','&quot;Fast&quot; form is this many records tall'),
 ('MAXSELSIZE','30','uint','no','no','&lt;SELECT&gt; lists height'),
 ('enterprise','MyCompanyName','string','no','no','Organization name'),

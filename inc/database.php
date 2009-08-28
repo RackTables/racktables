@@ -3693,7 +3693,7 @@ function getPortInterfaceCompat()
 	$query = 'SELECT iif_id, iif_name, oif_id, dict_value AS oif_name ' .
 		'FROM PortInterfaceCompat INNER JOIN PortInnerInterface ON id = iif_id ' .
 		'INNER JOIN Dictionary ON dict_key = oif_id ' .
-		'ORDER BY iif_id, oif_name';
+		'ORDER BY iif_name, oif_name';
 	$result = useSelectBlade ($query, __FUNCTION__);
 	return $result->fetchAll (PDO::FETCH_ASSOC);
 }

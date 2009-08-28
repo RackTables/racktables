@@ -297,6 +297,40 @@ CREATE TABLE `LDAPCache` (
 			$query[] = "ALTER TABLE TagStorage ENGINE=InnoDB";
 			$query[] = "ALTER TABLE TagStorage ADD CONSTRAINT `TagStorage-FK-tag_id` FOREIGN KEY (tag_id) REFERENCES TagTree (id)";
 			$query[] = "ALTER TABLE TagTree ADD CONSTRAINT `TagTree-K-parent_id` FOREIGN KEY (parent_id) REFERENCES TagTree (id)";
+			$query[] = 'INSERT INTO PortCompat (type1, type2) VALUES (21,1195)';
+			$query[] = 'INSERT INTO PortCompat (type1, type2) VALUES (22,1196)';
+			$query[] = 'INSERT INTO PortCompat (type1, type2) VALUES (23,1196)';
+			$query[] = 'INSERT INTO PortCompat (type1, type2) VALUES (20,1195)';
+			$query[] = 'INSERT INTO PortCompat (type1, type2) VALUES (25,1202)';
+			$query[] = 'INSERT INTO PortCompat (type1, type2) VALUES (26,1202)';
+			$query[] = 'INSERT INTO PortCompat (type1, type2) VALUES (27,1204)';
+			$query[] = 'INSERT INTO PortCompat (type1, type2) VALUES (28,1204)';
+			$query[] = 'INSERT INTO PortCompat (type1, type2) VALUES (1083,1195)';
+			$query[] = 'INSERT INTO PortCompat (type1, type2) VALUES (1084,1084)';
+			$query[] = 'INSERT INTO PortCompat (type1, type2) VALUES (1195,20)';
+			$query[] = 'INSERT INTO PortCompat (type1, type2) VALUES (1195,21)';
+			$query[] = 'INSERT INTO PortCompat (type1, type2) VALUES (1195,1083)';
+			$query[] = 'INSERT INTO PortCompat (type1, type2) VALUES (1195,1195)';
+			$query[] = 'INSERT INTO PortCompat (type1, type2) VALUES (1196,22)';
+			$query[] = 'INSERT INTO PortCompat (type1, type2) VALUES (1196,23)';
+			$query[] = 'INSERT INTO PortCompat (type1, type2) VALUES (1196,1196)';
+			$query[] = 'INSERT INTO PortCompat (type1, type2) VALUES (1197,1197)';
+			$query[] = 'INSERT INTO PortCompat (type1, type2) VALUES (1198,1199)';
+			$query[] = 'INSERT INTO PortCompat (type1, type2) VALUES (1199,1198)';
+			$query[] = 'INSERT INTO PortCompat (type1, type2) VALUES (1200,1200)';
+			$query[] = 'INSERT INTO PortCompat (type1, type2) VALUES (1201,1201)';
+			$query[] = 'INSERT INTO PortCompat (type1, type2) VALUES (1202,25)';
+			$query[] = 'INSERT INTO PortCompat (type1, type2) VALUES (1202,26)';
+			$query[] = 'INSERT INTO PortCompat (type1, type2) VALUES (1202,1202)';
+			$query[] = 'INSERT INTO PortCompat (type1, type2) VALUES (1203,1203)';
+			$query[] = 'INSERT INTO PortCompat (type1, type2) VALUES (1204,27)';
+			$query[] = 'INSERT INTO PortCompat (type1, type2) VALUES (1204,28)';
+			$query[] = 'INSERT INTO PortCompat (type1, type2) VALUES (1204,1204)';
+			$query[] = 'INSERT INTO PortCompat (type1, type2) VALUES (1205,1205)';
+			$query[] = 'INSERT INTO PortCompat (type1, type2) VALUES (1206,1207)';
+			$query[] = 'INSERT INTO PortCompat (type1, type2) VALUES (1207,1206)';
+			for ($i = 1209; $i <= 1300; $i++)
+				$query[] = "INSERT INTO PortCompat (type1, type2) VALUES (${i}, ${i})";
 			$query[] = "
 CREATE TABLE `PortInnerInterface` (
   `id` int(10) unsigned NOT NULL auto_increment,
@@ -304,12 +338,21 @@ CREATE TABLE `PortInnerInterface` (
   PRIMARY KEY  (`id`),
   UNIQUE KEY `inner_if` (`iif_name`)
 ) ENGINE=InnoDB";
+			$query[] = "INSERT INTO `PortInnerInterface` VALUES (1,'hardwired')";
+			$query[] = "INSERT INTO `PortInnerInterface` VALUES (2,'SFP-100')";
+			$query[] = "INSERT INTO `PortInnerInterface` VALUES (3,'GBIC')";
+			$query[] = "INSERT INTO `PortInnerInterface` VALUES (4,'SFP-1000')";
+			$query[] = "INSERT INTO `PortInnerInterface` VALUES (5,'XENPAK')";
+			$query[] = "INSERT INTO `PortInnerInterface` VALUES (6,'X2')";
+			$query[] = "INSERT INTO `PortInnerInterface` VALUES (7,'XPAK')";
+			$query[] = "INSERT INTO `PortInnerInterface` VALUES (8,'XFP')";
+			$query[] = "INSERT INTO `PortInnerInterface` VALUES (9,'SFP+')";
 			$query[] = "
 CREATE TABLE `PortInterfaceCompat` (
   `iif_id` int(10) unsigned NOT NULL,
   `oif_id` int(10) unsigned NOT NULL,
   UNIQUE KEY `pair` (`iif_id`,`oif_id`),
-  CONSTRAINT `PortInterfaceCompat-FK-iif_id` FOREIGN KEY (`iif_id`) REFERENCES `PortInnerIF` (`id`)
+  CONSTRAINT `PortInterfaceCompat-FK-iif_id` FOREIGN KEY (`iif_id`) REFERENCES `PortInnerInterface` (`id`)
 ) ENGINE=InnoDB";
 			$query[] = "ALTER TABLE Port ADD COLUMN iif_id int unsigned NOT NULL AFTER name"; // will set iif_id to 0
 			$query[] = "UPDATE Port SET iif_id = 2 WHERE type = 1208";
@@ -321,7 +364,36 @@ CREATE TABLE `PortInterfaceCompat` (
 			$query[] = "UPDATE Port SET iif_id = 8 WHERE type = 1082";
 			$query[] = "UPDATE Port SET iif_id = 9 WHERE type = 1084";
 			$query[] = "UPDATE Port SET iif_id = 1 WHERE iif_id = 0";
+			$base1000 = array (24, 34, 1202, 1203, 1204, 1205, 1206, 1207);
+			$base10000 = array (30, 35, 36, 37, 38, 39, 40);
+			$PICdata = array
+			(
+				1 => array (16, 19, 24, 29, 31, 33, 446, 681, 682),
+				2 => array (1208, 1195, 1196, 1197, 1198, 1199, 1200, 1201),
+				3 => array_merge (array (1078), $base1000),
+				4 => array_merge (array (1077), $base1000),
+				5 => array_merge (array (1079), $base10000),
+				6 => array_merge (array (1080), $base10000),
+				7 => array_merge (array (1081), $base10000),
+				8 => array_merge (array (1082), $base10000),
+				9 => array_merge (array (1084), $base10000),
+			);
+			// make sure all IIF/OIF pairs referenced from Port exist in PortInterfaceCompat before enabling FK
+			// iif_id doesn't exist at this point
+			$result = $dbxlink->query ('SELECT DISTINCT type FROM Port WHERE type NOT IN (1208, 1078, 1077, 1079, 1080, 1081, 1082, 1084)');
+			while ($row = $result->fetch (PDO::FETCH_ASSOC))
+				if (FALSE === array_search ($row['type'], $PICdata[1]))
+					array_push ($PICdata[1], $row['type']);
+			unset ($result);
+			foreach ($PICdata as $iif_id => $oif_ids)
+				foreach ($oif_ids as $oif_id)
+					$query[] = "INSERT INTO PortInterfaceCompat (iif_id, oif_id) VALUES (${iif_id}, ${oif_id})";
 			$query[] = "ALTER TABLE Port ADD CONSTRAINT `Port-FK-iif-oif` FOREIGN KEY (`iif_id`, `type`) REFERENCES `PortInterfaceCompat` (`iif_id`, `oif_id`)";
+			$query = array_merge ($query, reloadDictionary ($batchid));
+			$query[] = "DELETE FROM Config WHERE varname = 'default_port_type'";
+			$query[] = "INSERT INTO Config VALUES ('DEFAULT_PORT_IIF_ID','1','uint','no','no','Default port inner interface ID')";
+			$query[] = "INSERT INTO Config VALUES ('DEFAULT_PORT_OIF_IDS','1=24; 3=1078; 4=1077; 5=1079; 6=1080; 8=1082; 9=1084','string','no','no','Default port outer interface IDs')";
+
 			$query[] = "UPDATE Config SET varvalue = '0.17.5' WHERE varname = 'DB_VERSION'";
 			break;
 		default:

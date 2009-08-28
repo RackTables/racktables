@@ -6161,7 +6161,21 @@ function renderPortIFCompatEditor()
 		echo '</th></tr></form>';
 	}
 
-	startPortlet ('[WDM helpers]');
+	startPortlet ('[turbo switches]');
+	echo '<table border=0 align=center cellspacing=0 cellpadding=5>';
+	echo '<tr><th>&nbsp;</th><th>1000Base-CWDM80</th><th>1000Base-DWDM80</th></tr>';
+	echo '<tr class=row_odd><th class=tdleft>GBIC</th><td>+/-</td><td>+/-</td></tr>';
+	echo '<tr class=row_even><th class=tdleft>SFP-1000</th><td>+/-</td><td>+/-</td></tr>';
+	echo '</table>';
+	echo '<br>';
+	echo '<table border=0 align=center cellspacing=0 cellpadding=5>';
+	echo '<tr><th>&nbsp;</th><th>10GBase-ZR-DWDM80</th></tr>';
+	echo '<tr class=row_odd><th class=tdleft>SFP+</th><td>+/-</td></tr>';
+	echo '<tr class=row_even><th class=tdleft>X2</th><td>+/-</td></tr>';
+	echo '<tr class=row_odd><th class=tdleft>XENPAK</th><td>+/-</td></tr>';
+	echo '<tr class=row_even><th class=tdleft>XFP</th><td>+/-</td></tr>';
+	echo '<tr class=row_odd><th class=tdleft>XPAK</th><td>+/-</td></tr>';
+	echo '</table>';
 	finishPortlet();
 
 	startPortlet ('interface by interface');

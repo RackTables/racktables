@@ -978,7 +978,6 @@ function updateUI ()
 $msgcode['resetUIConfig']['OK'] = 57;
 function resetUIConfig()
 {
-	setConfigVar ('default_port_type','24');
 	setConfigVar ('MASSCOUNT','15');
 	setConfigVar ('MAXSELSIZE','30');
 	setConfigVar ('ROW_SCALE','2');
@@ -1025,6 +1024,8 @@ function resetUIConfig()
 	setConfigVar ('TAGS_QUICKLIST_SIZE','20');
 	setConfigVar ('TAGS_QUICKLIST_THRESHOLD','50');
 	setConfigVar ('ENABLE_MULTIPORT_FORM', 'no');
+	setConfigVar ('DEFAULT_PORT_IIF_ID', '1');
+	setConfigVar ('DEFAULT_PORT_OIF_IDS', '1=24; 3=1078; 4=1077; 5=1079; 6=1080; 8=1082; 9=1084');
 	return buildRedirectURL (__FUNCTION__, 'OK');
 }
 
@@ -1944,6 +1945,35 @@ function delPortInterfaceCompat ()
 	if (commitReducePIC ($_REQUEST['iif_id'], $_REQUEST['oif_id']))
 		return buildRedirectURL (__FUNCTION__, 'OK');
 	return buildRedirectURL (__FUNCTION__, 'ERR');
+}
+
+$ifcompatpack = array
+(
+	'1000cwdm80' => array (1209, 1210, 1211, 1212, 1213, 1214, 1215, 1216),
+	'1000dwdm80' => array // ITU channels 20~61
+	(
+		1217, 1218, 1219, 1220, 1221, 1222, 1223, 1224, 1225, 1226,
+		1227, 1228, 1229, 1230, 1231, 1232, 1233, 1234, 1235, 1236,
+		1237, 1238, 1239, 1240, 1241, 1242, 1243, 1244, 1245, 1246,
+		1247, 1248, 1249, 1250, 1251, 1252, 1253, 1254, 1255, 1256,
+		1257, 1258
+	),
+	'10000dwdm80' => array // same channels for 10GE
+	(
+		1259, 1260, 1261, 1262, 1263, 1264, 1265, 1266, 1267, 1268,
+		1269, 1270, 1271, 1272, 1273, 1274, 1275, 1276, 1277, 1278,
+		1279, 1280, 1281, 1282, 1283, 1284, 1285, 1286, 1287, 1288,
+		1289, 1290, 1291, 1292, 1293, 1294, 1295, 1296, 1297, 1298,
+		1299, 1300
+	),
+);
+
+function addPortInterfaceCompatPack ()
+{
+}
+
+function delPortInterfaceCompatPack ()
+{
 }
 
 ?>
