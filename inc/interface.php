@@ -839,48 +839,43 @@ function renderRackObject ($object_id)
 
 	renderFilesPortlet ('object', $object_id);
 
-	$ports = $info['ports'];
-	if (count ($ports))
+	if (count ($info['ports']))
 	{
 		startPortlet ('ports and links');
-		usort($ports, 'sortByName');
-		if ($ports)
+		$hl_port_id = 0;
+		if (isset ($_REQUEST['hl_port_id']))
 		{
-			$hl_port_id = 0;
-			if (isset ($_REQUEST['hl_port_id']))
-			{
-				assertUIntArg ('hl_port_id', __FUNCTION__);
-				$hl_port_id = $_REQUEST['hl_port_id'];
-			}
-			echo "<table cellspacing=0 cellpadding='5' align='center' class='widetable'>";
-			echo '<tr><th class=tdleft>Local name</th><th class=tdleft>Visible label</th>';
-			echo '<th class=tdleft>Port type</th><th class=tdleft>L2 address</th>';
-			echo '<th class=tdleft>Rem. Object</th><th class=tdleft>Rem. port</th></tr>';
-			foreach ($ports as $port)
-			{
-				echo '<tr';
-				if ($hl_port_id == $port['id'])
-					echo ' class=port_highlight';
-				echo "><td class=tdleft>${port['name']}</td><td class=tdleft>${port['label']}</td><td class=tdleft>";
-				if ($port['iif_id'] != 1)
-					echo $port['iif_name'] . '/';
-				echo $port['type'] . "</td><td class=tdleft><tt>${port['l2address']}</tt></td>";
-				if ($port['remote_object_id'])
-				{
-					echo "<td class=tdleft><a href='".makeHref(array('page'=>'object', 'object_id'=>$port['remote_object_id'], 'hl_port_id'=>$port['remote_id']))."'>${port['remote_object_name']}</a></td>";
-					echo "<td class=tdleft>${port['remote_name']}</td>";
-				}
-				elseif (strlen ($port['reservation_comment']))
-				{
-					echo "<td class=tdleft><b>Reserved:</b></td>";
-					echo "<td class='tdleft rsvtext'>${port['reservation_comment']}</td>";
-				}
-				else
-					echo '<td>&nbsp;</td><td>&nbsp;</td>';
-				echo "</tr>";
-			}
-			echo "</table><br>";
+			assertUIntArg ('hl_port_id', __FUNCTION__);
+			$hl_port_id = $_REQUEST['hl_port_id'];
 		}
+		echo "<table cellspacing=0 cellpadding='5' align='center' class='widetable'>";
+		echo '<tr><th class=tdleft>Local name</th><th class=tdleft>Visible label</th>';
+		echo '<th class=tdleft>interface</th><th class=tdleft>L2 address</th>';
+		echo '<th class=tdcenter colspan=2>Remote object and port</th></tr>';
+		foreach ($info['ports'] as $port)
+		{
+			echo '<tr';
+			if ($hl_port_id == $port['id'])
+				echo ' class=port_highlight';
+			echo "><td class=tdleft>${port['name']}</td><td class=tdleft>${port['label']}</td><td class=tdleft>";
+			if ($port['iif_id'] != 1)
+				echo $port['iif_name'] . '/';
+			echo $port['oif_name'] . "</td><td class=tdleft><tt>${port['l2address']}</tt></td>";
+			if ($port['remote_object_id'])
+			{
+				echo "<td class=tdleft><a href='".makeHref(array('page'=>'object', 'object_id'=>$port['remote_object_id'], 'hl_port_id'=>$port['remote_id']))."'>${port['remote_object_name']}</a></td>";
+				echo "<td class=tdleft>${port['remote_name']}</td>";
+			}
+			elseif (strlen ($port['reservation_comment']))
+			{
+				echo "<td class=tdleft><b>Reserved:</b></td>";
+				echo "<td class='tdleft rsvtext'>${port['reservation_comment']}</td>";
+			}
+			else
+				echo '<td>&nbsp;</td><td>&nbsp;</td>';
+			echo "</tr>";
+		}
+		echo "</table><br>";
 		finishPortlet();
 	}
 
@@ -1100,14 +1095,14 @@ function renderPortsForObject ($object_id)
 		startPortlet ('Ports and interfaces');
 	else
 		echo '<br>';
-	$ports = getObjectPortsAndLinks ($object_id);
-	usort($ports, 'sortByName');
+	$object = spotEntity ('object', $object_id);
+	amplifyCell ($object);
 	echo "<table cellspacing=0 cellpadding='5' align='center' class='widetable'>\n";
 	echo "<tr><th>&nbsp;</th><th>Local name</th><th>Visible label</th><th>Port type</th><th>L2 address</th>";
 	echo "<th>Rem. object</th><th>Rem. port</th><th>(Un)link or (un)reserve</th><th>&nbsp;</th></tr>\n";
 	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
 		printNewItemTR ($prefs);
-	foreach ($ports as $port)
+	foreach ($object['ports'] as $port)
 	{
 		printOpFormIntro ('editPort', array ('port_id' => $port['id']));
 		echo "<tr><td><a href='".makeHrefProcess(array('op'=>'delPort', 'port_id'=>$port['id'], 'object_id'=>$object_id, 'port_name'=>$port['name']))."'>";
@@ -1120,7 +1115,7 @@ function renderPortsForObject ($object_id)
 			echo '<td>';
 			if ($port['iif_id'] != 1)
 				echo '<label>' . $port['iif_name'] . ' ';
-			printSelect (getExistingPortTypeOptions ($port['id']), 'port_type_id', $port['type_id']);
+			printSelect (getExistingPortTypeOptions ($port['id']), 'port_type_id', $port['oif_id']);
 			if ($port['iif_id'] != 1)
 				echo '</label>';
 			echo '</td>';
@@ -1130,7 +1125,7 @@ function renderPortsForObject ($object_id)
 			echo "<input type=hidden name=port_type_id value='${port['type_id']}'><td class=tdleft>";
 			if ($port['iif_id'] != 1)
 				echo $port['iif_name'] . '/';
-			echo "${port['type']}</td>\n";
+			echo "${port['oif_name']}</td>\n";
 		}
 		echo "<td><input type=text name=l2address value='${port['l2address']}'></td>\n";
 		if ($port['remote_object_id'])
@@ -2942,7 +2937,8 @@ function renderSearchResults ()
 					foreach ($what as $obj)
 					{
 						echo "<tr class=row_${order} valign=top><td>";
-						renderCell (spotEntity ('object', $obj['id']));
+						$object = spotEntity ('object', $obj['id']);
+						renderCell ($object);
 						echo "</td><td class=tdleft>";
 						if (isset ($obj['by_attr']))
 						{
@@ -2972,9 +2968,9 @@ function renderSearchResults ()
 						if (isset ($obj['by_port']))
 						{
 							echo '<table>';
-							$ports = getObjectPortsAndLinks ($obj['id']);
+							amplifyCell ($object);
 							foreach ($obj['by_port'] as $port_id => $text)
-								foreach ($ports as $port)
+								foreach ($object['ports'] as $port)
 									if ($port['id'] == $port_id)
 									{
 										echo "<tr><td>port ${port['name']}:</td>";

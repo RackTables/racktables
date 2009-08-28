@@ -98,7 +98,8 @@ function trigger_snmpportfinder ()
 	$object = spotEntity ('object', $_REQUEST['object_id']);
 	if ($object['objtype_id'] != 8)
 		return '';
-	return count (getObjectPortsAndLinks ($_REQUEST['object_id'])) ? '' : 'attn';
+	amplifyCell ($object);
+	return count ($object['ports']) ? '' : 'attn';
 }
 
 function trigger_isloadbalancer ()
@@ -133,10 +134,11 @@ function trigger_poolrscount ()
 function trigger_autoports ()
 {
 	assertUIntArg ('object_id', __FUNCTION__);
-	if (count (getObjectPortsAndLinks ($_REQUEST['object_id'])))
+	$object = spotEntity ('object', $_REQUEST['object_id']);
+	amplifyCell ($object);
+	if (count ($object['ports']))
 		return '';
-	$info = spotEntity ('object', $_REQUEST['object_id']);
-	return count (getAutoPorts ($info['objtype_id'])) ? 'attn' : '';
+	return count (getAutoPorts ($object['objtype_id'])) ? 'attn' : '';
 }
 
 function trigger_tags ()
