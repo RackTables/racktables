@@ -196,10 +196,25 @@ CREATE TABLE `MountOperation` (
   PRIMARY KEY  (`id`)
 ) ENGINE=MyISAM;
 
+CREATE TABLE `PortInnerInterface` (
+  `id` int(10) unsigned NOT NULL,
+  `iif_name` char(16) NOT NULL,
+  PRIMARY KEY  (`id`),
+  UNIQUE KEY `iif_name` (`iif_name`)
+) ENGINE=InnoDB;
+
+CREATE TABLE `PortInterfaceCompat` (
+  `iif_id` int(10) unsigned NOT NULL,
+  `oif_id` int(10) unsigned NOT NULL,
+  UNIQUE KEY `pair` (`iif_id`,`oif_id`),
+  CONSTRAINT `PortInterfaceCompat-FK-iif_id` FOREIGN KEY (`iif_id`) REFERENCES `PortInnerInterface` (`id`)
+) ENGINE=InnoDB;
+
 CREATE TABLE `Port` (
   `id` int(10) unsigned NOT NULL auto_increment,
   `object_id` int(10) unsigned NOT NULL,
   `name` char(255) NOT NULL,
+  `iif_id` int(10) unsigned NOT NULL,
   `type` int(10) unsigned NOT NULL,
   `l2address` char(64) default NULL,
   `reservation_comment` char(255) default NULL,
@@ -209,6 +224,8 @@ CREATE TABLE `Port` (
   KEY `type` (`type`),
   KEY `comment` (`reservation_comment`),
   KEY `l2address` (`l2address`),
+  KEY `Port-FK-iif-oif` (`iif_id`,`type`),
+  CONSTRAINT `Port-FK-iif-oif` FOREIGN KEY (`iif_id`, `type`) REFERENCES `PortInterfaceCompat` (`iif_id`, `oif_id`),
   CONSTRAINT `Port-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `RackObject` (`id`)
 ) ENGINE=InnoDB;
 

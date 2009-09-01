@@ -528,7 +528,8 @@ function getObjectPortsAndLinks ($object_id)
 {
 	// prepare decoder
 	$ptd = readChapter (CHAP_PORTTYPE, 'a');
-	$query = "select id, name, label, l2address, type as type_id, reservation_comment from Port where object_id = ${object_id}";
+	$query = "SELECT id, name, label, l2address, iif_id, " .
+		"(SELECT iif_name FROM PortInnerInterface WHERE id = iif_id) AS iif_name, type as type_id, reservation_comment from Port where object_id = ${object_id}";
 	// list and decode all ports of the current object
 	$result = useSelectBlade ($query, __FUNCTION__);
 	$ret=array();
@@ -999,15 +1000,31 @@ function commitAddPort ($object_id = 0, $port_name, $port_type_id, $port_label, 
 		$dbxlink->exec ('UNLOCK TABLES');
 		return "address ${db_l2address} belongs to another object";
 	}
+	$matches = array();
+	switch (1)
+	{
+	case preg_match ('/^([[:digit:]]+)-([[:digit:]]+)$/', $port_type_id, $matches):
+		$iif_id = $matches[1];
+		$oif_id = $matches[2];
+		break;
+	case preg_match ('/^([[:digit:]]+)$/', $port_type_id, $matches):
+		$iif_id = 1;
+		$oif_id = $matches[1];
+		break;
+	default:
+		$dbxlink->exec ('UNLOCK TABLES');
+		return "invalid port type id '${port_type_id}'";
+	}
 	$result = useInsertBlade
 	(
 		'Port',
 		array
 		(
 			'name' => "'${port_name}'",
-			'object_id' => "'${object_id}'",
+			'object_id' => $object_id,
 			'label' => "'${port_label}'",
-			'type' => "'${port_type_id}'",
+			'iif_id' => $iif_id,
+			'type' => $oif_id,
 			'l2address' => ($db_l2address === '') ? 'NULL' : "'${db_l2address}'"
 		)
 	);
@@ -1092,13 +1109,13 @@ function getEmptyPortsOfType ($type_id)
 		"dict_value as Port_type_name ".
 		"from ( ".
 		"	( ".
-		"		Port inner join Dictionary on Port.type = dict_key join Chapter on Chapter.id = Dictionary.chapter_id ".
+		"		Port inner join Dictionary on Port.type = dict_key ".
 		"	) ".
 		" 	join RackObject on Port.object_id = RackObject.id ".
 		") ".
 		"left join Link on Port.id=Link.porta or Port.id=Link.portb ".
 		"inner join PortCompat on Port.type = PortCompat.type2 ".
-		"where Chapter.name = 'PortType' and PortCompat.type1 = '$type_id' and Link.porta is NULL ".
+		"where PortCompat.type1 = '$type_id' and Link.porta is NULL ".
 		"and Port.reservation_comment is null order by Object_name, Port_name";
 	$result = useSelectBlade ($query, __FUNCTION__);
 	$ret = array();
@@ -1848,10 +1865,7 @@ function getPortCompat ()
 	$query =
 		"select type1, type2, d1.dict_value as type1name, d2.dict_value as type2name from " .
 		"PortCompat as pc inner join Dictionary as d1 on pc.type1 = d1.dict_key " .
-		"inner join Dictionary as d2 on pc.type2 = d2.dict_key " .
-		"inner join Chapter as c1 on d1.chapter_id = c1.id " .
-		"inner join Chapter as c2 on d2.chapter_id = c2.id " .
-		"where c1.name = 'PortType' and c2.name = 'PortType'";
+		"inner join Dictionary as d2 on pc.type2 = d2.dict_key";
 	$result = useSelectBlade ($query, __FUNCTION__);
 	$ret = $result->fetchAll (PDO::FETCH_ASSOC);
 	$result->closeCursor();
@@ -3771,6 +3785,55 @@ function alreadyUsedL2Address ($address, $my_object_id)
 	}
 	$row = $result->fetch (PDO::FETCH_NUM);
 	return $row[0] != 0;
+}
+
+function getPortInterfaceCompat()
+{
+	$query = 'SELECT iif_id, iif_name, oif_id, dict_value AS oif_name ' .
+		'FROM PortInterfaceCompat INNER JOIN PortInnerInterface ON id = iif_id ' .
+		'INNER JOIN Dictionary ON dict_key = oif_id ' .
+		'ORDER BY iif_name, oif_name';
+	$result = useSelectBlade ($query, __FUNCTION__);
+	return $result->fetchAll (PDO::FETCH_ASSOC);
+}
+
+// Return a set of options for a plain SELECT. These options include the current
+// OIF of the given port and all OIFs of its permanent IIF.
+function getExistingPortTypeOptions ($port_id)
+{
+	$query = 'SELECT oif_id, dict_value AS oif_name ' .
+		'FROM PortInterfaceCompat INNER JOIN Dictionary ON oif_id = dict_key ' .
+		"WHERE iif_id = (SELECT iif_id FROM Port WHERE id = ${port_id}) " .
+		'ORDER BY oif_name';
+	$result = useSelectBlade ($query, __FUNCTION__);
+	$ret = array();
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
+		$ret[$row['oif_id']] = $row['oif_name'];
+	return $ret;
+}
+
+function getPortIIFOptions()
+{
+	$ret = array();
+	$result = useSelectBlade ('SELECT id, iif_name FROM PortInnerInterface ORDER BY iif_name', __FUNCTION__);
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
+		$ret[$row['id']] = $row['iif_name'];
+	return $ret;
+}
+
+function commitSupplementPIC ($iif_id, $oif_id)
+{
+	return useInsertBlade
+	(
+		'PortInterfaceCompat',
+		array ('iif_id' => $iif_id, 'oif_id' => $oif_id)
+	);
+}
+
+function commitReducePIC ($iif_id, $oif_id)
+{
+	global $dbxlink;
+	return 1 === $dbxlink->exec ("DELETE FROM PortInterfaceCompat WHERE iif_id = ${iif_id} AND oif_id = ${oif_id}");
 }
 
 ?>

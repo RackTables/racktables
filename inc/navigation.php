@@ -310,13 +310,24 @@ $tabhandler['perms']['default'] = 'renderRackCodeViewer';
 $tabhandler['perms']['edit'] = 'renderRackCodeEditor';
 $ophandler['perms']['edit']['saveRackCode'] = 'saveRackCode';
 
-$page['portmap']['title'] = 'Port compatibility map';
+$page['portmap']['title'] = 'Port compatibility';
 $page['portmap']['parent'] = 'config';
 $tab['portmap']['default'] = 'View';
 $tab['portmap']['edit'] = 'Change';
 $tabhandler['portmap']['default'] = 'renderPortMapViewer';
 $tabhandler['portmap']['edit'] = 'renderPortMapEditor';
 $ophandler['portmap']['edit']['save'] = 'savePortMap';
+
+$page['portifcompat']['title'] = 'Enabled port types';
+$page['portifcompat']['parent'] = 'config';
+$tab['portifcompat']['default'] = 'View';
+$tab['portifcompat']['edit'] = 'Edit';
+$tabhandler['portifcompat']['default'] = 'renderPortIFCompat';
+$tabhandler['portifcompat']['edit'] = 'renderPortIFCompatEditor';
+$ophandler['portifcompat']['edit']['add'] = 'addPortInterfaceCompat';
+$ophandler['portifcompat']['edit']['del'] = 'delPortInterfaceCompat';
+$ophandler['portifcompat']['edit']['addPack'] = 'addPortInterfaceCompatPack';
+$ophandler['portifcompat']['edit']['delPack'] = 'delPortInterfaceCompatPack';
 
 $page['attrs']['title'] = 'Attributes';
 $page['attrs']['parent'] = 'config';
