@@ -329,6 +329,7 @@ CREATE TABLE `LDAPCache` (
 			$query[] = 'INSERT INTO PortCompat (type1, type2) VALUES (1205,1205)';
 			$query[] = 'INSERT INTO PortCompat (type1, type2) VALUES (1206,1207)';
 			$query[] = 'INSERT INTO PortCompat (type1, type2) VALUES (1207,1206)';
+			$query[] = 'INSERT INTO PortCompat (type1, type2) VALUES (1316,1316)';
 			for ($i = 1209; $i <= 1300; $i++)
 				$query[] = "INSERT INTO PortCompat (type1, type2) VALUES (${i}, ${i})";
 			$query[] = "
@@ -394,6 +395,7 @@ CREATE TABLE `PortInterfaceCompat` (
 			$query[] = "INSERT INTO Config VALUES ('DEFAULT_PORT_IIF_ID','1','uint','no','no','Default port inner interface ID')";
 			$query[] = "INSERT INTO Config VALUES ('DEFAULT_PORT_OIF_IDS','1=24; 3=1078; 4=1077; 5=1079; 6=1080; 8=1082; 9=1084','string','no','no','Default port outer interface IDs')";
 
+			$query[] = "UPDATE Chapter SET name = 'PortOuterInterface' WHERE id = 2";
 			$query[] = "UPDATE Config SET varvalue = '0.17.5' WHERE varname = 'DB_VERSION'";
 			break;
 		default:

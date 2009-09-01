@@ -1107,7 +1107,7 @@ $dictionary = array
 	1084 => array ('chapter_id' => 2, 'dict_value' => 'empty SFP+'),
 	1085 => array ('chapter_id' => 12, 'dict_value' => 'Nortel%GPASS%BES50GE-12T PWR'),
 	1086 => array ('chapter_id' => 12, 'dict_value' => '[[HP ProCurve%GPASS%4000M | http://www.hp.com/rnd/products/switches/switch4000/overview.htm]]'),
-	1087 => array ('chapter_id' => 2, 'dict_value' => '1000Base-T (Dell1)'),
+	1087 => array ('chapter_id' => 2, 'dict_value' => '1000Base-T (Dell 1855)'),
 	1088 => array ('chapter_id' => 18, 'dict_value' => '[[NetApp%GPASS%FAS2020 | http://www.netapp.com/us/products/storage-systems/fas2000/]]'),
 	1089 => array ('chapter_id' => 18, 'dict_value' => '[[NetApp%GPASS%FAS2050 | http://www.netapp.com/us/products/storage-systems/fas2000/]]'),
 	1090 => array ('chapter_id' => 18, 'dict_value' => 'NetApp%GPASS%FAS3020'),
@@ -1277,6 +1277,7 @@ $dictionary = array
 	1298 => array ('chapter_id' => 2, 'dict_value' => '10GBase-ZR-DWDM80-30.33 (ITU 59)'),
 	1299 => array ('chapter_id' => 2, 'dict_value' => '10GBase-ZR-DWDM80-29.55 (ITU 60)'),
 	1300 => array ('chapter_id' => 2, 'dict_value' => '10GBase-ZR-DWDM80-28.77 (ITU 61)'),
+	1316 => array ('chapter_id' => 2, 'dict_value' => '1000Base-T (Dell M1000e)'),
 );
 
 ?>
