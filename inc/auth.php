@@ -264,6 +264,9 @@ function queryLDAPServer ($username, $password)
 		showError ('LDAP misconfiguration. Cannon build username for authentication.', __FUNCTION__);
 		die;
 	}
+	if (array_key_exists ('options', $LDAP_options) and is_array ($LDAP_options['options']))
+		foreach ($LDAP_options['options'] as $opt_code => $opt_value)
+			ldap_set_option ($connect, $opt_code, $opt_value);
 	$bind = @ldap_bind ($connect, $auth_user_name, $password);
 	if ($bind === FALSE)
 		switch (ldap_errno ($connect))

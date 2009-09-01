@@ -35,6 +35,9 @@ $LDAP_options = array
 	'cache_refresh' => 300,
 	'cache_retry' => 15,
 	'cache_expiry' => 600,
+// Uncomment line below to work around ActiveDirectory+PHP problem to perform
+// search right in the base DN (not in one of OUs/CNs below).
+#	'options' => array (LDAP_OPT_PROTOCOL_VERSION => 3, LDAP_OPT_REFERRALS => 0),
 );
 
 ?>
