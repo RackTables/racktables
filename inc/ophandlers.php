@@ -872,7 +872,7 @@ function addMultipleObjects()
 		// It's better to skip silently, than to print a notice.
 		if ($_REQUEST["${i}_object_type_id"] == 0)
 			continue;
-		if (commitAddObject
+		if (($object_id = commitAddObject
 		(
 			$name,
 			$_REQUEST["${i}_object_label"],
@@ -880,10 +880,14 @@ function addMultipleObjects()
 			$_REQUEST["${i}_object_type_id"],
 			$_REQUEST["${i}_object_asset_no"],
 			$taglist
-		) === TRUE)
-			$log = mergeLogs ($log, oneLiner (80, array ($name)));
-		else
+		)) !== FALSE){
+			$info = spotEntity ('object', $object_id);
+			// FIXME: employ amplifyCell() instead of calling loader functions directly
+			amplifyCell ($info);
+			$log = mergeLogs ($log, oneLiner (80, array ('<a href="' . makeHref (array ('page' => 'object', 'tab' => 'default', 'object_id' => $object_id)) . '">' . $info['dname'] . '</a>')));
+		}else{
 			$log = mergeLogs ($log, oneLiner (185, array ($name)));
+		}
 	}
 	return buildWideRedirectURL ($log);
 }
@@ -912,7 +916,7 @@ function addLotOfObjects()
 				$names2[] = rtrim ($parts[0]);
 		}
 		foreach ($names2 as $name)
-			if (commitAddObject ($name, '', '', $global_type_id, '', $taglist) === TRUE)
+			if (commitAddObject ($name, '', '', $global_type_id, '', $taglist) !== FALSE)
 				$log = mergeLogs ($log, oneLiner (80, array ($name)));
 			else
 				$log = mergeLogs ($log, oneLiner (185, array ($name)));
