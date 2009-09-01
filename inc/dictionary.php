@@ -1278,6 +1278,9 @@ $dictionary = array
 	1299 => array ('chapter_id' => 2, 'dict_value' => '10GBase-ZR-DWDM80-29.55 (ITU 60)'),
 	1300 => array ('chapter_id' => 2, 'dict_value' => '10GBase-ZR-DWDM80-28.77 (ITU 61)'),
 	1316 => array ('chapter_id' => 2, 'dict_value' => '1000Base-T (Dell M1000e)'),
+	1317 => array ('chapter_id' => 13, 'dict_value' => 'Linux%GSKIP%SLES11'),
+	1318 => array ('chapter_id' => 13, 'dict_value' => 'Windows Server 2008'),
+	1319 => array ('chapter_id' => 13, 'dict_value' => 'Linux%GSKIP%Slackware 13.0'),
 );
 
 ?>
