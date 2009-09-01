@@ -396,6 +396,9 @@ CREATE TABLE `PortInterfaceCompat` (
 			$query[] = "INSERT INTO Config VALUES ('DEFAULT_PORT_OIF_IDS','1=24; 3=1078; 4=1077; 5=1079; 6=1080; 8=1082; 9=1084','string','no','no','Default port outer interface IDs')";
 
 			$query[] = "UPDATE Chapter SET name = 'PortOuterInterface' WHERE id = 2";
+			// remap refs to duplicate records, which will be discarded (ticket:286)
+			$query[] = 'UPDATE AttributeValue SET uint_value = 147 WHERE uint_value = 1020 AND attr_id = 2';
+			$query[] = 'UPDATE AttributeValue SET uint_value = 377 WHERE uint_value = 1021 AND attr_id = 2';
 			$query[] = "UPDATE Config SET varvalue = '0.17.5' WHERE varname = 'DB_VERSION'";
 			break;
 		default:
