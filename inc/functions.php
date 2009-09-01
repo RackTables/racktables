@@ -1029,7 +1029,7 @@ function generateEntityAutoTags ($cell)
 			$ret[] = array ('tag' => '$id_' . $cell['id']);
 			$ret[] = array ('tag' => '$typeid_' . $cell['objtype_id']);
 			$ret[] = array ('tag' => '$any_object');
-			if (validTagName ('$cn_' . $cell['name']))
+			if (validTagName ('$cn_' . $cell['name'], TRUE))
 				$ret[] = array ('tag' => '$cn_' . $cell['name']);
 			if (!strlen ($cell['rack_id']))
 				$ret[] = array ('tag' => '$unmounted');
