@@ -1337,6 +1337,9 @@ $dictionary = array
 	1314 => array ('chapter_id' => 25, 'dict_value' => 'Cisco%GPASS%AIR-WLC526'),
 	1315 => array ('chapter_id' => 25, 'dict_value' => 'Cisco%GPASS%AIR-WLC4402'),
 	1316 => array ('chapter_id' => 2, 'dict_value' => '1000Base-T (Dell M1000e)'),
+	1317 => array ('chapter_id' => 13, 'dict_value' => 'Linux%GSKIP%SLES11'),
+	1318 => array ('chapter_id' => 13, 'dict_value' => 'Windows Server 2008'),
+	1319 => array ('chapter_id' => 13, 'dict_value' => 'Linux%GSKIP%Slackware 13.0'),
 );
 
 ?>
