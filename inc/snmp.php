@@ -60,7 +60,7 @@ $iftable_processors['catalyst-chassis-any-1000SFP'] = array
 (
 	'pattern' => '@^GigabitEthernet([[:digit:]]+/)?([[:digit:]]+)$@',
 	'replacement' => 'gi\\1\\2',
-	'dict_key' => 1077,
+	'dict_key' => '4-1077',
 	'label' => '\\2',
 	'try_next_proc' => FALSE,
 );
@@ -69,7 +69,7 @@ $iftable_processors['catalyst-chassis-any-1000GBIC'] = array
 (
 	'pattern' => '@^GigabitEthernet([[:digit:]]+/)?([[:digit:]]+)$@',
 	'replacement' => 'gi\\1\\2',
-	'dict_key' => 1078,
+	'dict_key' => '3-1078',
 	'label' => '\\2',
 	'try_next_proc' => FALSE,
 );
@@ -78,7 +78,7 @@ $iftable_processors['catalyst-chassis-21-to-24-combo-1000SFP'] = array
 (
 	'pattern' => '@^GigabitEthernet([[:digit:]]+/)?(21|22|23|24)$@',
 	'replacement' => 'gi\\1\\2',
-	'dict_key' => 1077,
+	'dict_key' => '4-1077',
 	'label' => '\\2',
 	'try_next_proc' => TRUE,
 );
@@ -87,7 +87,7 @@ $iftable_processors['catalyst-chassis-45-to-48-combo-1000SFP'] = array
 (
 	'pattern' => '@^GigabitEthernet([[:digit:]]+/)?(45|46|47|48)$@',
 	'replacement' => 'gi\\1\\2',
-	'dict_key' => 1077,
+	'dict_key' => '4-1077',
 	'label' => '\\2',
 	'try_next_proc' => TRUE,
 );
@@ -96,7 +96,7 @@ $iftable_processors['catalyst-chassis-uplinks-10000X2'] = array
 (
 	'pattern' => '@^TenGigabitEthernet([[:digit:]]+/)?([[:digit:]]+)$@',
 	'replacement' => 'te\\1\\2',
-	'dict_key' => 1080,
+	'dict_key' => '6-1080',
 	'label' => '\\2',
 	'try_next_proc' => FALSE,
 );
@@ -105,7 +105,7 @@ $iftable_processors['catalyst-chassis-25-to-28-1000SFP'] = array
 (
 	'pattern' => '@^GigabitEthernet([[:digit:]]+/)?(25|26|27|28)$@',
 	'replacement' => 'gi\\1\\2',
-	'dict_key' => 1077,
+	'dict_key' => '4-1077',
 	'label' => '\\2',
 	'try_next_proc' => FALSE,
 );
@@ -114,7 +114,7 @@ $iftable_processors['catalyst-chassis-49-to-52-1000SFP'] = array
 (
 	'pattern' => '@^GigabitEthernet([[:digit:]]+/)?(49|50|51|52)$@',
 	'replacement' => 'gi\\1\\2',
-	'dict_key' => 1077,
+	'dict_key' => '4-1077',
 	'label' => '\\2',
 	'try_next_proc' => FALSE,
 );
@@ -123,7 +123,7 @@ $iftable_processors['catalyst-13-to-16-1000SFP'] = array
 (
 	'pattern' => '@^GigabitEthernet([[:digit:]]+/)?(13|14|15|16)$@',
 	'replacement' => 'gi\\1\\2',
-	'dict_key' => 1077,
+	'dict_key' => '4-1077',
 	'label' => '\\2',
 	'try_next_proc' => FALSE,
 );
@@ -132,7 +132,7 @@ $iftable_processors['catalyst-21-to-24-1000SFP'] = array
 (
 	'pattern' => '@^GigabitEthernet([[:digit:]]+/)?(21|22|23|24)$@',
 	'replacement' => 'gi\\1\\2',
-	'dict_key' => 1077,
+	'dict_key' => '4-1077',
 	'label' => '\\2',
 	'try_next_proc' => FALSE,
 );
@@ -141,7 +141,7 @@ $iftable_processors['nexus-any-10000SFP+'] = array
 (
 	'pattern' => '@^Ethernet([[:digit:]]/[[:digit:]]+)$@',
 	'replacement' => 'e\\1',
-	'dict_key' => 1084,
+	'dict_key' => '9-1084',
 	'label' => '\\1',
 	'try_next_proc' => FALSE,
 );
@@ -213,7 +213,7 @@ $iftable_processors['netgear-chassis-21-to-24-1000SFP'] = array
 (
 	'pattern' => '@^Unit: 1 Slot: 0 Port: ([[:digit:]]+) Gigabit - Level$@',
 	'replacement' => '\\1',
-	'dict_key' => 1077,
+	'dict_key' => '4-1077',
 	'label' => '\\1F',
 	'try_next_proc' => TRUE,
 );
@@ -417,6 +417,11 @@ function updateStickerForCell ($cell, $attr_id, $new_value)
 		commitUpdateAttrValue ($cell['id'], $attr_id, $new_value);
 }
 
+$msgcode['doSNMPmining']['ERR1'] = 161;
+$msgcode['doSNMPmining']['ERR2'] = 162;
+$msgcode['doSNMPmining']['ERR3'] = 188;
+$msgcode['doSNMPmining']['ERR4'] = 189;
+$msgcode['doSNMPmining']['OK'] = 81;
 function doSNMPmining ($object_id, $community)
 {
 	$log = emptyLog();
@@ -426,18 +431,18 @@ function doSNMPmining ($object_id, $community)
 	$objectInfo['attrs'] = getAttrValues ($object_id);
 	$endpoints = findAllEndpoints ($object_id, $objectInfo['name']);
 	if (count ($endpoints) == 0)
-		return oneLiner (161); // endpoint not found
+		return buildRedirectURL (__FUNCTION__, 'ERR1'); // endpoint not found
 	if (count ($endpoints) > 1)
-		return oneLiner (162); // can't pick an address
+		return buildRedirectURL (__FUNCTION__, 'ERR2'); // can't pick an address
 	
-	if (FALSE === ($sysObjectID = snmpget ($endpoints[0], $community, 'sysObjectID.0')))
-		return oneLiner (188); // fatal SNMP failure
+	if (FALSE === ($sysObjectID = @snmpget ($endpoints[0], $community, 'sysObjectID.0')))
+		return buildRedirectURL (__FUNCTION__, 'ERR3'); // // fatal SNMP failure
 	$sysObjectID = ereg_replace ('^.*(enterprises\.)([\.[:digit:]]+)$', '\\2', $sysObjectID);
-	$sysName = substr (snmpget ($endpoints[0], $community, 'sysName.0'), strlen ('STRING: '));
-	$sysDescr = substr (snmpget ($endpoints[0], $community, 'sysDescr.0'), strlen ('STRING: '));
+	$sysName = substr (@snmpget ($endpoints[0], $community, 'sysName.0'), strlen ('STRING: '));
+	$sysDescr = substr (@snmpget ($endpoints[0], $community, 'sysDescr.0'), strlen ('STRING: '));
 	$sysDescr = str_replace (array ("\n", "\r"), " ", $sysDescr);  // Make it one line
 	if (!isset ($known_switches[$sysObjectID]))
-		return oneLiner (189, array ($sysObjectID)); // unknown OID
+		return buildRedirectURL (__FUNCTION__, 'ERR4', array ($sysObjectID)); // unknown OID
 	updateStickerForCell ($objectInfo, 2, $known_switches[$sysObjectID]['dict_key']);
 	updateStickerForCell ($objectInfo, 3, $sysName);
 	$log = mergeLogs ($log, oneLiner (81, array ('generic')));
@@ -455,7 +460,7 @@ function doSNMPmining ($object_id, $community)
 		updateStickerForCell ($objectInfo, 5, $exact_release);
 		if (array_key_exists ($major_line, $ios_codes))
 			updateStickerForCell ($objectInfo, 4, $ios_codes[$major_line]);
-		$sysChassi = snmpget ($endpoints[0], $community, '1.3.6.1.4.1.9.3.6.3.0');
+		$sysChassi = @snmpget ($endpoints[0], $community, '1.3.6.1.4.1.9.3.6.3.0');
 		if ($sysChassi !== FALSE or $sysChassi !== NULL)
 			updateStickerForCell ($objectInfo, 1, str_replace ('"', '', substr ($sysChassi, strlen ('STRING: '))));
 		commitAddPort ($object_id, 'con0', 29, 'console', ''); // RJ-45 RS-232 console
@@ -530,7 +535,8 @@ function doSNMPmining ($object_id, $community)
 		}
 	foreach ($known_switches[$sysObjectID]['processors'] as $processor_name)
 		$log = mergeLogs ($log, oneLiner (81, array ($processor_name)));
-	return $log;
+	// No failure up to this point, thus leave current tab for the "Ports" one.
+	return buildWideRedirectURL ($log, NULL, 'ports');
 }
 
 // APC SNMP code by Russ Garrett
