@@ -424,9 +424,6 @@ $msgcode['doSNMPmining']['ERR4'] = 189;
 $msgcode['doSNMPmining']['OK'] = 81;
 function doSNMPmining ($object_id, $community)
 {
-	$log = emptyLog();
-	global $known_switches, $iftable_processors;
-	
 	$objectInfo = spotEntity ('object', $object_id);
 	$objectInfo['attrs'] = getAttrValues ($object_id);
 	$endpoints = findAllEndpoints ($object_id, $objectInfo['name']);
@@ -434,6 +431,20 @@ function doSNMPmining ($object_id, $community)
 		return buildRedirectURL (__FUNCTION__, 'ERR1'); // endpoint not found
 	if (count ($endpoints) > 1)
 		return buildRedirectURL (__FUNCTION__, 'ERR2'); // can't pick an address
+
+	switch ($objectInfo['objtype_id'])
+	{
+	case 8:
+		return doSwitchSNMPmining ($objectInfo, $endpoints[0], $community);
+	case 2:
+		return doPDUSNMPmining ($objectInfo, $endpoints[0], $community);
+	}	
+}
+
+function doSwitchSNMPmining ($object, $hostname, $comminuty)
+{
+	$log = emptyLog();
+	global $known_switches, $iftable_processors;
 	
 	if (FALSE === ($sysObjectID = @snmpget ($endpoints[0], $community, 'sysObjectID.0')))
 		return buildRedirectURL (__FUNCTION__, 'ERR3'); // // fatal SNMP failure
@@ -539,34 +550,19 @@ function doSNMPmining ($object_id, $community)
 	return buildWideRedirectURL ($log, NULL, 'ports');
 }
 
-// APC SNMP code by Russ Garrett
 
-function doPDUSNMPmining ($object_id, $community)
+$msgcode['doPDUSNMPmining']['OK'] = 0;
+function doPDUSNMPmining ($objectInfo, $hostname, $community)
 {
-	$objectInfo = spotEntity ('object', $object_id);
-	$endpoints = findAllEndpoints ($object_id, $objectInfo['name']);
-	$switch = new APCPowerSwitch($endpoints[0], 'public');
-	$log = array();
-	$sysName = $switch->getName();
-	$error = commitUpdateAttrValue ($object_id, 3, $sysName);
-	if ($error == TRUE)
-		$log[] = array ('code' => 'success', 'message' => 'FQDN set to ' . $sysName);
-	else
-		$log[] = array ('code' => 'error', 'message' => 'Failed settig FQDN: ' . $error);
-	
-	$updated = 0;
-	$ports = $switch->getPorts();
-	foreach ($ports as $name => $port) {
-		if (commitUpdatePortLabels($object_id, $name, 16, $port[0])) {
-			$updated++;
-		}
-	}
-	if ($updated > 0)
-		$log[] = array ('code' => 'success', 'message' => "Updated ${updated} port(s)");
-
-	return $log;
+	$switch = new APCPowerSwitch ($hostname, $community);
+	updateStickerForCell ($objectInfo, 3, $switch->getName());
+	$portno = 1;
+	foreach ($switch->getPorts() as $name => $port)
+		commitAddPort ($objectInfo['id'], $portno, 16, $portno++, '');
+	return buildRedirectURL (__FUNCTION__, 'OK', array ('Added ' . ($portno - 1) . ' port(s)'));
 }
 
+// APC SNMP code by Russ Garrett
 define('APC_STATUS_ON', 1);
 define('APC_STATUS_OFF', 2);
 define('APC_STATUS_REBOOT', 3);

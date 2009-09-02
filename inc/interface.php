@@ -1178,29 +1178,6 @@ function renderPortsForObject ($object_id)
 	if (getConfigVar('ENABLE_MULTIPORT_FORM') != 'yes')
 		return;
 
-	$object = getObjectInfo ($object_id);
-	if ($object['objtype_id'] == 2) {
-		startPortlet ('Live Update');
-
-		if (isset ($_REQUEST['do_scan']))
-		{
-			assertStringArg ('community', __FUNCTION__);
-			printLog (doPDUSNMPmining ($object_id, $_REQUEST['community']));
-		}
-		echo <<<EOF
-			<form method=post>
-			<input type=hidden name=pageno value='${pageno}'>
-			<input type=hidden name=tabno value='${pageno}'>
-			<p align=center>
-			To update the port labels for this power switch, enter the SNMP community:
-			</p>
-			<input type=text name=community value='public'>
-			<input type=submit name='do_scan' value='Go!'>
-			</form>
-EOF;
-		finishPortlet();
-	}
-
 	startPortlet ('Add/update multiple ports');
 	printOpFormIntro ('addMultiPorts');
 	echo 'Format: <select name=format tabindex=201>';

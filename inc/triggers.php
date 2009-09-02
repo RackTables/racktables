@@ -13,14 +13,14 @@
 
 // Return 'std', if the object belongs to specified type and has
 // specified attribute belonging to the given set of values.
-function checkTypeAndAttribute ($object_id, $type_id, $attr_id, $values)
+function checkTypeAndAttribute ($object_id, $type_id, $attr_id, $values, $hit = 'std')
 {
 	$object = spotEntity ('object', $object_id);
 	if ($object['objtype_id'] != $type_id)
 		return '';
 	foreach (getAttrValues ($object_id) as $record)
 		if ($record['id'] == $attr_id and in_array ($record['key'], $values))
-			return 'std';
+			return $hit;
 	return '';
 }
 
@@ -40,11 +40,14 @@ function trigger_livevlans ()
 	);
 }
 
-function trigger_APC_SNMP ()
+// SNMP port finder tab trigger. At the moment we decide on showing it
+// for pristine switches/PDUs only. Once a user has begun
+// filling the data in, we stop showing the tab.
+function trigger_snmpportfinder ()
 {
 // APC "switched rack PDU" stands for a number of part numbers:
 // http://www.apc.com/products/family/index.cfm?id=70
-	$known_SKUs = array
+	$known_APC_SKUs = array
 	(
 		// 100V input
 		1151 => 'AP7902J',
@@ -80,26 +83,27 @@ function trigger_APC_SNMP ()
 		// 400V 3 phases input
 		1154 => 'AP7957',
 	);
-	return checkTypeAndAttribute
-	(
-		$_REQUEST['object_id'],
-		2, // PDU
-		2, // SW type
-		$known_SKUs
-	);
-}
 
-// SNMP port finder tab trigger. At the moment we decide on showing it
-// for pristine switches only. Once a user has begun
-// filling the data in, we stop showing the tab.
-function trigger_snmpportfinder ()
-{
 	assertUIntArg ('object_id', __FUNCTION__);
 	$object = spotEntity ('object', $_REQUEST['object_id']);
-	if ($object['objtype_id'] != 8)
+	switch ($object['objtype_id'])
+	{
+	case 8: // any switch would suffuce
+		return $object['nports'] ? '' : 'attn';
+	case 2: // but only selected PDUs
+		if ($object['nports'])
+			return '';
+		return checkTypeAndAttribute
+		(
+			$object['id'],
+			2, // PDU
+			2, // HW type
+			array_keys ($known_APC_SKUs),
+			'attn'
+		);
+	default:
 		return '';
-	amplifyCell ($object);
-	return count ($object['ports']) ? '' : 'attn';
+	}
 }
 
 function trigger_isloadbalancer ()
