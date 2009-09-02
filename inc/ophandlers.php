@@ -1762,7 +1762,7 @@ function querySNMPData ()
 {
 	assertUIntArg ('object_id', __FUNCTION__);
 	assertStringArg ('community', __FUNCTION__);
-	return buildWideRedirectURL (doSNMPmining ($_REQUEST['object_id'], $_REQUEST['community']));
+	return doSNMPmining ($_REQUEST['object_id'], $_REQUEST['community']);
 }
 
 $msgcode['addFileWithoutLink']['OK'] = 69;
