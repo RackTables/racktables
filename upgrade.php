@@ -394,6 +394,7 @@ CREATE TABLE `PortInterfaceCompat` (
 			$query[] = "DELETE FROM Config WHERE varname = 'default_port_type'";
 			$query[] = "INSERT INTO Config VALUES ('DEFAULT_PORT_IIF_ID','1','uint','no','no','Default port inner interface ID')";
 			$query[] = "INSERT INTO Config VALUES ('DEFAULT_PORT_OIF_IDS','1=24; 3=1078; 4=1077; 5=1079; 6=1080; 8=1082; 9=1084','string','no','no','Default port outer interface IDs')";
+			$query[] = "INSERT INTO Config VALUES ('IPV4_TREE_RTR_AS_CELL','yes','string','no','no','Show full router info for each network in IPv4 tree view')";
 
 			$query[] = "UPDATE Chapter SET name = 'PortOuterInterface' WHERE id = 2";
 			// remap refs to duplicate records, which will be discarded (ticket:286)

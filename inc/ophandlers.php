@@ -1030,6 +1030,7 @@ function resetUIConfig()
 	setConfigVar ('ENABLE_MULTIPORT_FORM', 'no');
 	setConfigVar ('DEFAULT_PORT_IIF_ID', '1');
 	setConfigVar ('DEFAULT_PORT_OIF_IDS', '1=24; 3=1078; 4=1077; 5=1079; 6=1080; 8=1082; 9=1084');
+	setConfigVar ('IPV4_TREE_RTR_AS_CELL', 'yes');
 	return buildRedirectURL (__FUNCTION__, 'OK');
 }
 
