@@ -1338,6 +1338,7 @@ $dictionary = array
 	1317 => array ('chapter_id' => 13, 'dict_value' => 'Linux%GSKIP%SLES11'),
 	1318 => array ('chapter_id' => 13, 'dict_value' => 'Windows Server 2008'),
 	1319 => array ('chapter_id' => 13, 'dict_value' => 'Linux%GSKIP%Slackware 13.0'),
+	1320 => array ('chapter_id' => 13, 'dict_value' => 'Linux%GSKIP%Ubuntu 9.10'),
 );
 
 ?>
