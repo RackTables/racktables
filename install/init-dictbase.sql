@@ -381,6 +381,7 @@ INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, descriptio
 ('ENABLE_MULTIPORT_FORM','no','string','no','no','Enable "Add/update multiple ports" form'),
 ('DEFAULT_PORT_IIF_ID','1','uint','no','no','Default port inner interface ID'),
 ('DEFAULT_PORT_OIF_IDS','1=24; 3=1078; 4=1077; 5=1079; 6=1080; 8=1082; 9=1084','string','no','no','Default port outer interface IDs'),
+('IPV4_TREE_RTR_AS_CELL','yes','string','no','no','Show full router info for each network in IPv4 tree view'),
 ('DB_VERSION','0.17.4','string','no','yes','Database version.');
 
 INSERT INTO `Script` VALUES ('RackCode','allow {$userid_1}');

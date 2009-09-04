@@ -1950,7 +1950,7 @@ function renderIPv4SpaceRecords ($tree, $baseurl, $target = 0, $level = 1)
 				echo "<small>${maxdirect}</small>";
 			echo "</td>";
 			if (getConfigVar ('EXT_IPV4_VIEW') == 'yes')
-				printRoutersTD (findRouters ($item['addrlist']));
+				printRoutersTD (findRouters ($item['addrlist']), getConfigVar ('IPV4_TREE_RTR_AS_CELL'));
 			echo "</tr>";
 			if ($item['symbol'] == 'node-expanded' or $item['symbol'] == 'node-expanded-static')
 				$self ($item['kids'], $baseurl, $target, $level + 1);
@@ -5554,7 +5554,7 @@ function niftyString ($string, $maxlen = 30)
 }
 
 // Iterate over what findRouters() returned and output some text suitable for a TD element.
-function printRoutersTD ($rlist)
+function printRoutersTD ($rlist, $as_cell = 'yes')
 {
 	$rtrclass = 'tdleft';
 	foreach ($rlist as $rtr)
@@ -5567,8 +5567,16 @@ function printRoutersTD ($rlist)
 		}
 	}
 	echo "<td class='${rtrclass}'>";
+	$pfx = '';
 	foreach ($rlist as $rtr)
-		renderRouterCell ($rtr['addr'], $rtr['iface'], spotEntity ('object', $rtr['id']));
+	{
+		$rinfo = spotEntity ('object', $rtr['id']);
+		if ($as_cell == 'yes')
+			renderRouterCell ($rtr['addr'], $rtr['iface'], $rinfo);
+		else
+			echo $pfx . '<a href="' . makeHref (array ('page' => 'object', 'object_id' => $rinfo['id'])) . '">' . $rinfo['dname'] . '</a>';
+		$pfx = "<br>\n";
+	}
 	echo '</td>';
 }
 
