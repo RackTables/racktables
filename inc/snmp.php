@@ -227,6 +227,15 @@ $iftable_processors['nortel-any-1000T'] = array
 	'try_next_proc' => FALSE,
 );
 
+$iftable_processors['juniper-DPCE-R-4XGE-XFP'] = array
+(
+	'pattern' => '@^xe-[[:digit:]]+/[[:digit:]]+/[[:digit:]]+$@',
+	'replacement' => '\\1',
+	'dict_key' => '8-1082', // XFP/empty
+	'label' => '',
+	'try_next_proc' => FALSE,
+);
+
 $known_switches = array // key is system OID w/o "enterprises" prefix
 (
 	'9.1.324' => array
@@ -408,6 +417,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'dict_key' => 1085,
 		'text' => 'BES50GE-12T PWR: 12 RJ-45/10-100-1000T(X)',
 		'processors' => array ('nortel-any-1000T'),
+	),
+	'2636.1.1.1.2.29' => array
+	(
+		'dict_key' => 925,
+		'text' => 'MX240 modular router',
+		'processors' => array ('juniper-DPCE-R-4XGE-XFP'),
 	),
 );
 
