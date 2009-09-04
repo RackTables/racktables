@@ -3840,25 +3840,13 @@ function commitReducePIC ($iif_id, $oif_id)
 
 function getPortIIFStats ($args)
 {
-	$iif_id = current ($args);
-	$ret = array();
-	$query = "select oif_id, dict_value as oif_name, " .
-		"(select count(id) from Port where iif_id = PIC.iif_id and type = PIC.oif_id) as total, " .
-		"(select count(*) from Link where porta in (select id from Port where iif_id = PIC.iif_id and type = PIC.oif_id) or portb in (select id from Port where iif_id = PIC.iif_id and type = PIC.oif_id)) as links, " .
-		"(select count(id) from Port where iif_id = PIC.iif_id and type = PIC.oif_id and reservation_comment is not null) as rsvc " .
-		"from PortInterfaceCompat as PIC inner join Dictionary on oif_id = dict_key " .
-		"where iif_id = ${iif_id}";
+	$query = 'SELECT dict_value AS title, COUNT(id) AS max, ' .
+		'COUNT(reservation_comment) + ' .
+		'SUM((SELECT COUNT(*) FROM Link WHERE id IN (porta, portb))) AS current ' .
+		'FROM Port INNER JOIN Dictionary ON type = dict_key ' .
+		'WHERE iif_id = ' . current ($args) . ' GROUP BY type';
 	$result = useSelectBlade ($query, __FUNCTION__);
-	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-		if ($row['total'])
-			$ret[] = array
-			(
-				'title' => $row['oif_name'],
-				// one record in Link table stands for two used ports
-				'current' => $row['links'] * 2 + $row['rsvc'],
-				'max' => $row['total'],
-			);
-	return $ret;
+	return $result->fetchAll (PDO::FETCH_ASSOC);
 }
 
 ?>
