@@ -3669,6 +3669,21 @@ function renderIPv4Reports ()
 	renderReports ($tmp);
 }
 
+function renderPortsReport ()
+{
+	$tmp = array();
+	foreach (getPortIIFOptions() as $iif_id => $iif_name)
+		if (count (getPortIIFStats (array ($iif_id))))
+			$tmp[] = array
+			(
+				'title' => $iif_name,
+				'type' => 'meters',
+				'func' => 'getPortIIFStats',
+				'args' => array ($iif_id),
+			);
+	renderReports ($tmp);
+}
+
 function renderReports ($what)
 {
 	if (!count ($what))
@@ -3680,12 +3695,32 @@ function renderReports ($what)
 		switch ($item['type'])
 		{
 			case 'counters':
-				foreach ($item['func'] () as $header => $data)
+				if (array_key_exists ('args', $item))
+					$data = $item['func'] ($item['args']);
+				else
+					$data = $item['func'] ();
+				foreach ($data as $header => $data)
 					echo "<tr><td class=tdright>${header}:</td><td class=tdleft>${data}</td></tr>\n";
 				break;
 			case 'messages':
-				foreach ($item['func'] () as $msg)
+				if (array_key_exists ('args', $item))
+					$data = $item['func'] ($item['args']);
+				else
+					$data = $item['func'] ();
+				foreach ($data as $msg)
 					echo "<tr class='msg_${msg['class']}'><td class=tdright>${msg['header']}:</td><td class=tdleft>${msg['text']}</td></tr>\n";
+				break;
+			case 'meters':
+				if (array_key_exists ('args', $item))
+					$data = $item['func'] ($item['args']);
+				else
+					$data = $item['func'] ();
+				foreach ($data as $meter)
+				{
+					echo "<tr><td class=tdright>${meter['title']}:</td><td class=tdcenter>";
+					renderProgressBar ($meter['max'] ? $meter['current'] / $meter['max'] : 0);
+					echo '<br><small>' . ($meter['max'] ? $meter['current'] . '/' . $meter['max'] : '0') . '</small></td></tr>';
+				}
 				break;
 			case 'custom':
 				echo "<tr><td colspan=2>";

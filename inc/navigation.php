@@ -401,11 +401,13 @@ $page['reports']['parent'] = 'index';
 $tab['reports']['default'] = 'System';
 $tab['reports']['rackcode'] = 'RackCode';
 $tab['reports']['ipv4'] = 'IPv4';
+$tab['reports']['ports'] = 'Ports';
 $tab['reports']['local'] = getConfigVar ('enterprise');
 $trigger['reports']['local'] = 'trigger_localreports';
 $tabhandler['reports']['default'] = 'renderSystemReports';
 $tabhandler['reports']['rackcode'] = 'renderRackCodeReports';
 $tabhandler['reports']['ipv4'] = 'renderIPv4Reports';
+$tabhandler['reports']['ports'] = 'renderPortsReport';
 $tabhandler['reports']['local'] = 'renderLocalReports';
 
 $page['files']['title'] = 'Files';
