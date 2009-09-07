@@ -1411,7 +1411,7 @@ function showMessageOrError ()
 // ...
 // ...
 // ...
-				108 => array ('code' => 'error', 'format' => '%u failures and %u successfull changes.'),
+// ...
 				109 => array ('code' => 'error', 'format' => 'Update failed!'),
 				110 => array ('code' => 'error', 'format' => 'Supplement failed!'),
 				111 => array ('code' => 'error', 'format' => 'Reduction failed!'),
@@ -3188,52 +3188,27 @@ function renderUserListEditor ()
 		printNewItemTR();
 }
 
-function renderPortMapViewer ()
-{
-	renderPortMap (FALSE);
-}
-
-function renderPortMapEditor ()
-{
-	renderPortMap (TRUE);
-}
-
-function renderPortMap ($editable = FALSE)
+function renderPortOIFCompatViewer()
 {
 	global $nextorder;
-	startPortlet ("Port compatibility map");
-	$ptlist = readChapter (CHAP_PORTTYPE, 'a');
-	$pclist = getPortCompat();
-	$pctable = buildPortCompatMatrixFromList ($ptlist, $pclist);
-	if ($editable)
-		printOpFormIntro ('save');
-	echo "<table class=cooltable border=0 cellpadding=5 cellspacing=0 align=center>\n";
-	echo "<tr><th class=vert_th>&nbsp;</th>";
-	foreach ($ptlist as $name2)
-		echo "<th>to ${name2}</th>";
-	echo "</tr>";
-	// Make a copy to have an independent array pointer.
-	$ptlistY = $ptlist;
 	$order = 'odd';
-	foreach ($ptlistY as $type1 => $name1)
+	echo '<br><table class=cooltable border=0 cellpadding=5 cellspacing=0 align=center>';
+	echo '<tr><th>outer interface</th><th>outer interface</th></tr>';
+	foreach (getPortOIFCompat() as $pair)
 	{
-		echo "<tr class=row_${order}><th class=vert_th style='border-bottom: 0px;'>from $name1</th>";
-		foreach ($ptlist as $type2 => $name2)
+		if ($last_left_oif_id != $pair['type1'])
 		{
-			echo '<td' . ($pctable[$type1][$type2] ? " class=portmap_highlight_$order" : '') . '>';
-			echo '<input type=checkbox' . ($editable ? " name=atom_${type1}_${type2}" : ' disabled');
-			echo ($pctable[$type1][$type2] ? ' checked' : '') . '></td>';
+			$order = $nextorder[$order];
+			$last_left_oif_id = $pair['type1'];
 		}
-		echo "</tr>\n";
-		$order = $nextorder[$order];
+		echo "<tr class=row_${order}><td>${pair['type1name']}</td><td>${pair['type2name']}</td></tr>";
 	}
-	echo '</table><br>';
-	if ($editable)
-	{
-		printImageHREF ('SAVE', 'Save changes', TRUE);
-		echo "</form>";
-	}
-	finishPortlet();
+	echo '</table>';
+}
+
+function renderPortOIFCompatEditor()
+{
+	dragon();
 }
 
 // Find direct sub-pages and dump as a list.
@@ -3669,6 +3644,21 @@ function renderIPv4Reports ()
 	renderReports ($tmp);
 }
 
+function renderPortsReport ()
+{
+	$tmp = array();
+	foreach (getPortIIFOptions() as $iif_id => $iif_name)
+		if (count (getPortIIFStats (array ($iif_id))))
+			$tmp[] = array
+			(
+				'title' => $iif_name,
+				'type' => 'meters',
+				'func' => 'getPortIIFStats',
+				'args' => array ($iif_id),
+			);
+	renderReports ($tmp);
+}
+
 function renderReports ($what)
 {
 	if (!count ($what))
@@ -3680,12 +3670,32 @@ function renderReports ($what)
 		switch ($item['type'])
 		{
 			case 'counters':
-				foreach ($item['func'] () as $header => $data)
+				if (array_key_exists ('args', $item))
+					$data = $item['func'] ($item['args']);
+				else
+					$data = $item['func'] ();
+				foreach ($data as $header => $data)
 					echo "<tr><td class=tdright>${header}:</td><td class=tdleft>${data}</td></tr>\n";
 				break;
 			case 'messages':
-				foreach ($item['func'] () as $msg)
+				if (array_key_exists ('args', $item))
+					$data = $item['func'] ($item['args']);
+				else
+					$data = $item['func'] ();
+				foreach ($data as $msg)
 					echo "<tr class='msg_${msg['class']}'><td class=tdright>${msg['header']}:</td><td class=tdleft>${msg['text']}</td></tr>\n";
+				break;
+			case 'meters':
+				if (array_key_exists ('args', $item))
+					$data = $item['func'] ($item['args']);
+				else
+					$data = $item['func'] ();
+				foreach ($data as $meter)
+				{
+					echo "<tr><td class=tdright>${meter['title']}:</td><td class=tdcenter>";
+					renderProgressBar ($meter['max'] ? $meter['current'] / $meter['max'] : 0);
+					echo '<br><small>' . ($meter['max'] ? $meter['current'] . '/' . $meter['max'] : '0') . '</small></td></tr>';
+				}
 				break;
 			case 'custom':
 				echo "<tr><td colspan=2>";

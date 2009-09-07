@@ -686,19 +686,6 @@ function sortObjectAddressesAndNames ($a, $b)
 	return $objname_cmp;
 }
 
-// This function expands port compat list into a matrix.
-function buildPortCompatMatrixFromList ($portTypeList, $portCompatList)
-{
-	$matrix = array();
-	// Create type matrix and markup compatible types.
-	foreach (array_keys ($portTypeList) as $type1)
-		foreach (array_keys ($portTypeList) as $type2)
-			$matrix[$type1][$type2] = FALSE;
-	foreach ($portCompatList as $pair)
-		$matrix[$pair['type1']][$pair['type2']] = TRUE;
-	return $matrix;
-}
-
 // This function returns an array of single element of object's FQDN attribute,
 // if FQDN is set. The next choice is object's common name, if it looks like a
 // hostname. Otherwise an array of all 'regular' IP addresses of the

@@ -313,10 +313,9 @@ $ophandler['perms']['edit']['saveRackCode'] = 'saveRackCode';
 $page['portmap']['title'] = 'Port compatibility';
 $page['portmap']['parent'] = 'config';
 $tab['portmap']['default'] = 'View';
-$tab['portmap']['edit'] = 'Change';
-$tabhandler['portmap']['default'] = 'renderPortMapViewer';
-$tabhandler['portmap']['edit'] = 'renderPortMapEditor';
-$ophandler['portmap']['edit']['save'] = 'savePortMap';
+$tab['portmap']['edit'] = '[Edit]';
+$tabhandler['portmap']['default'] = 'renderPortOIFCompatViewer';
+$tabhandler['portmap']['edit'] = 'renderPortOIFCompatEditor';
 
 $page['portifcompat']['title'] = 'Enabled port types';
 $page['portifcompat']['parent'] = 'config';
@@ -401,11 +400,13 @@ $page['reports']['parent'] = 'index';
 $tab['reports']['default'] = 'System';
 $tab['reports']['rackcode'] = 'RackCode';
 $tab['reports']['ipv4'] = 'IPv4';
+$tab['reports']['ports'] = 'Ports';
 $tab['reports']['local'] = getConfigVar ('enterprise');
 $trigger['reports']['local'] = 'trigger_localreports';
 $tabhandler['reports']['default'] = 'renderSystemReports';
 $tabhandler['reports']['rackcode'] = 'renderRackCodeReports';
 $tabhandler['reports']['ipv4'] = 'renderIPv4Reports';
+$tabhandler['reports']['ports'] = 'renderPortsReport';
 $tabhandler['reports']['local'] = 'renderLocalReports';
 
 $page['files']['title'] = 'Files';

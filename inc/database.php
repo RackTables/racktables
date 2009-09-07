@@ -1845,19 +1845,18 @@ function commitUpdateUserAccount ($id, $new_username, $new_realname, $new_passwo
 }
 
 // This function returns an array of all port type pairs from PortCompat table.
-function getPortCompat ()
+function getPortOIFCompat ()
 {
 	$query =
 		"select type1, type2, d1.dict_value as type1name, d2.dict_value as type2name from " .
 		"PortCompat as pc inner join Dictionary as d1 on pc.type1 = d1.dict_key " .
-		"inner join Dictionary as d2 on pc.type2 = d2.dict_key";
+		"inner join Dictionary as d2 on pc.type2 = d2.dict_key " .
+		'ORDER BY type1name, type2name';
 	$result = useSelectBlade ($query, __FUNCTION__);
-	$ret = $result->fetchAll (PDO::FETCH_ASSOC);
-	$result->closeCursor();
-	return $ret;
+	return $result->fetchAll (PDO::FETCH_ASSOC);
 }
 
-function removePortCompat ($type1 = 0, $type2 = 0)
+function removePortOIFCompat ($type1 = 0, $type2 = 0)
 {
 	global $dbxlink;
 	if ($type1 == 0 or $type2 == 0)
@@ -1865,9 +1864,7 @@ function removePortCompat ($type1 = 0, $type2 = 0)
 		showError ('Invalid arguments', __FUNCTION__);
 		die;
 	}
-	$query = "delete from PortCompat where type1 = ${type1} and type2 = ${type2} limit 1";
-	$result = $dbxlink->query ($query);
-	if ($result == NULL)
+	if (NULL == $dbxlink->query ("DELETE FROM PortCompat WHERE type1 = ${type1} AND type2 = ${type2}"))
 	{
 		showError ('SQL query failed', __FUNCTION__);
 		die;
@@ -1875,7 +1872,7 @@ function removePortCompat ($type1 = 0, $type2 = 0)
 	return TRUE;
 }
 
-function addPortCompat ($type1 = 0, $type2 = 0)
+function addPortOIFCompat ($type1 = 0, $type2 = 0)
 {
 	if ($type1 <= 0 or $type2 <= 0)
 	{
@@ -3740,6 +3737,17 @@ function commitReducePIC ($iif_id, $oif_id)
 {
 	global $dbxlink;
 	return 1 === $dbxlink->exec ("DELETE FROM PortInterfaceCompat WHERE iif_id = ${iif_id} AND oif_id = ${oif_id}");
+}
+
+function getPortIIFStats ($args)
+{
+	$query = 'SELECT dict_value AS title, COUNT(id) AS max, ' .
+		'COUNT(reservation_comment) + ' .
+		'SUM((SELECT COUNT(*) FROM Link WHERE id IN (porta, portb))) AS current ' .
+		'FROM Port INNER JOIN Dictionary ON type = dict_key ' .
+		'WHERE iif_id = ' . current ($args) . ' GROUP BY type';
+	$result = useSelectBlade ($query, __FUNCTION__);
+	return $result->fetchAll (PDO::FETCH_ASSOC);
 }
 
 ?>
