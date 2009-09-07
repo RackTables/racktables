@@ -497,55 +497,6 @@ function updateUser ()
 		return buildRedirectURL (__FUNCTION__, 'ERR2', array ($username));
 }
 
-$msgcode['savePortMap']['OK'] = 44;
-$msgcode['savePortMap']['ERR'] = 108;
-// This function find differences in users's submit and PortCompat table
-// and modifies database accordingly.
-function savePortMap ()
-{
-	// values' format doesn't matter, only keys are used
-	$ptlist = readChapter (CHAP_PORTTYPE);
-	$oldCompat = getPortCompat();
-	$newCompat = array();
-	foreach (array_keys ($ptlist) as $leftKey)
-		foreach (array_keys ($ptlist) as $rightKey)
-			if (isset ($_REQUEST["atom_${leftKey}_${rightKey}"]))
-				$newCompat[] = array ('type1' => $leftKey, 'type2' => $rightKey);
-	// Build the new matrix from user's submit and compare it to
-	// the old matrix. Those pairs which appear on
-	// new matrix only, have to be stored in PortCompat table. Those who appear
-	// on the old matrix only, should be removed from PortCompat table.
-	// Those present in both matrices should be skipped.
-	$oldCompatTable = buildPortCompatMatrixFromList ($ptlist, $oldCompat);
-	$newCompatTable = buildPortCompatMatrixFromList ($ptlist, $newCompat);
-	$error_count = $success_count = 0;
-	foreach (array_keys ($ptlist) as $type1)
-		foreach (array_keys ($ptlist) as $type2)
-			if ($oldCompatTable[$type1][$type2] != $newCompatTable[$type1][$type2])
-				switch ($oldCompatTable[$type1][$type2])
-				{
-					case TRUE: // new value is FALSE
-						if (removePortCompat ($type1, $type2) === TRUE)
-							$success_count++;
-						else
-							$error_count++;
-						break;
-					case FALSE: // new value is TRUE
-						if (addPortCompat ($type1, $type2) === TRUE)
-							$success_count++;
-						else
-							$error_count++;
-						break;
-					default:
-						showError ('Internal error: oldCompatTable is invalid', __FUNCTION__);
-						break;
-				}
-	if ($error_count == 0)
-		return buildRedirectURL (__FUNCTION__, 'OK', array ($error_count, $success_count));
-	else
-		return buildRedirectURL (__FUNCTION__, 'ERR', array ($error_count, $success_count));
-}
-
 $msgcode['updateDictionary']['OK'] = 51;
 $msgcode['updateDictionary']['ERR'] = 109;
 function updateDictionary ()

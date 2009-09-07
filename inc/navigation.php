@@ -313,10 +313,9 @@ $ophandler['perms']['edit']['saveRackCode'] = 'saveRackCode';
 $page['portmap']['title'] = 'Port compatibility';
 $page['portmap']['parent'] = 'config';
 $tab['portmap']['default'] = 'View';
-$tab['portmap']['edit'] = 'Change';
-$tabhandler['portmap']['default'] = 'renderPortMapViewer';
-$tabhandler['portmap']['edit'] = 'renderPortMapEditor';
-$ophandler['portmap']['edit']['save'] = 'savePortMap';
+$tab['portmap']['edit'] = '[Edit]';
+$tabhandler['portmap']['default'] = 'renderPortOIFCompatViewer';
+$tabhandler['portmap']['edit'] = 'renderPortOIFCompatEditor';
 
 $page['portifcompat']['title'] = 'Enabled port types';
 $page['portifcompat']['parent'] = 'config';

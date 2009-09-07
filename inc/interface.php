@@ -1411,7 +1411,7 @@ function showMessageOrError ()
 // ...
 // ...
 // ...
-				108 => array ('code' => 'error', 'format' => '%u failures and %u successfull changes.'),
+// ...
 				109 => array ('code' => 'error', 'format' => 'Update failed!'),
 				110 => array ('code' => 'error', 'format' => 'Supplement failed!'),
 				111 => array ('code' => 'error', 'format' => 'Reduction failed!'),
@@ -3188,52 +3188,27 @@ function renderUserListEditor ()
 		printNewItemTR();
 }
 
-function renderPortMapViewer ()
-{
-	renderPortMap (FALSE);
-}
-
-function renderPortMapEditor ()
-{
-	renderPortMap (TRUE);
-}
-
-function renderPortMap ($editable = FALSE)
+function renderPortOIFCompatViewer()
 {
 	global $nextorder;
-	startPortlet ("Port compatibility map");
-	$ptlist = readChapter (CHAP_PORTTYPE, 'a');
-	$pclist = getPortCompat();
-	$pctable = buildPortCompatMatrixFromList ($ptlist, $pclist);
-	if ($editable)
-		printOpFormIntro ('save');
-	echo "<table class=cooltable border=0 cellpadding=5 cellspacing=0 align=center>\n";
-	echo "<tr><th class=vert_th>&nbsp;</th>";
-	foreach ($ptlist as $name2)
-		echo "<th>to ${name2}</th>";
-	echo "</tr>";
-	// Make a copy to have an independent array pointer.
-	$ptlistY = $ptlist;
 	$order = 'odd';
-	foreach ($ptlistY as $type1 => $name1)
+	echo '<br><table class=cooltable border=0 cellpadding=5 cellspacing=0 align=center>';
+	echo '<tr><th>outer interface</th><th>outer interface</th></tr>';
+	foreach (getPortOIFCompat() as $pair)
 	{
-		echo "<tr class=row_${order}><th class=vert_th style='border-bottom: 0px;'>from $name1</th>";
-		foreach ($ptlist as $type2 => $name2)
+		if ($last_left_oif_id != $pair['type1'])
 		{
-			echo '<td' . ($pctable[$type1][$type2] ? " class=portmap_highlight_$order" : '') . '>';
-			echo '<input type=checkbox' . ($editable ? " name=atom_${type1}_${type2}" : ' disabled');
-			echo ($pctable[$type1][$type2] ? ' checked' : '') . '></td>';
+			$order = $nextorder[$order];
+			$last_left_oif_id = $pair['type1'];
 		}
-		echo "</tr>\n";
-		$order = $nextorder[$order];
+		echo "<tr class=row_${order}><td>${pair['type1name']}</td><td>${pair['type2name']}</td></tr>";
 	}
-	echo '</table><br>';
-	if ($editable)
-	{
-		printImageHREF ('SAVE', 'Save changes', TRUE);
-		echo "</form>";
-	}
-	finishPortlet();
+	echo '</table>';
+}
+
+function renderPortOIFCompatEditor()
+{
+	dragon();
 }
 
 // Find direct sub-pages and dump as a list.
