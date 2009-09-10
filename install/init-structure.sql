@@ -220,7 +220,7 @@ CREATE TABLE `Port` (
   `reservation_comment` char(255) default NULL,
   `label` char(255) default NULL,
   PRIMARY KEY  (`id`),
-  UNIQUE KEY `per_object` (`object_id`,`name`,`type`),
+  UNIQUE KEY `object_iif_oif_name` (`object_id`,`iif_id`,`type`,`name`),
   KEY `type` (`type`),
   KEY `comment` (`reservation_comment`),
   KEY `l2address` (`l2address`),

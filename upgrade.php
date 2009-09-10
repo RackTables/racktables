@@ -365,6 +365,8 @@ CREATE TABLE `PortInterfaceCompat` (
 			$query[] = "UPDATE Port SET iif_id = 8 WHERE type = 1082";
 			$query[] = "UPDATE Port SET iif_id = 9 WHERE type = 1084";
 			$query[] = "UPDATE Port SET iif_id = 1 WHERE iif_id = 0";
+			$query[] = 'ALTER TABLE Port ADD UNIQUE `object_iif_oif_name` (object_id, iif_id, type, name)';
+			$query[] = 'ALTER TABLE Port DROP KEY `per_object`';
 			$base1000 = array (24, 34, 1202, 1203, 1204, 1205, 1206, 1207);
 			$base10000 = array (30, 35, 36, 37, 38, 39, 40);
 			$PICdata = array
