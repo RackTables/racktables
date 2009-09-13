@@ -146,6 +146,15 @@ $iftable_processors['nexus-any-10000SFP+'] = array
 	'try_next_proc' => FALSE,
 );
 
+$iftable_processors['nexus-mgmt'] = array
+(
+	'pattern' => '@^(mgmt[[:digit:]]+)$@',
+	'replacement' => '\\1',
+	'dict_key' => '1-24',
+	'label' => '\\1',
+	'try_next_proc' => FALSE,
+);
+
 $iftable_processors['procurve-chassis-100TX'] = array
 (
 	'pattern' => '@^([[:digit:]]+)$@',
@@ -380,7 +389,7 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 	(
 		'dict_key' => 960,
 		'text' => 'N5K-C5020: 40 SFP+/10000',
-		'processors' => array ('nexus-any-10000SFP+'),
+		'processors' => array ('nexus-any-10000SFP+', 'nexus-mgmt'),
 	),
 	'11.2.3.7.11.32' => array
 	(
@@ -503,6 +512,7 @@ function doSwitchSNMPmining ($object, $hostname, $comminuty)
 		if (array_key_exists ($major_line, $nxos_codes))
 			updateStickerForCell ($objectInfo, 4, $nxos_codes[$major_line]);
 		updateStickerForCell ($objectInfo, 5, $exact_release);
+		commitAddPort ($object_id, 'con0', '1-29', 'console', ''); // RJ-45 RS-232 console
 		$log = mergeLogs ($log, oneLiner (81, array ('nexus-generic')));
 		break;
 	case preg_match ('/^11\.2\.3\.7\.11\./', $sysObjectID): // ProCurve
