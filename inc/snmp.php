@@ -575,7 +575,6 @@ function doSwitchSNMPmining ($object, $hostname, $comminuty)
 	return buildWideRedirectURL ($log, NULL, 'ports');
 }
 
-
 $msgcode['doPDUSNMPmining']['OK'] = 0;
 function doPDUSNMPmining ($objectInfo, $hostname, $community)
 {
@@ -583,7 +582,7 @@ function doPDUSNMPmining ($objectInfo, $hostname, $community)
 	updateStickerForCell ($objectInfo, 3, $switch->getName());
 	$portno = 1;
 	foreach ($switch->getPorts() as $name => $port)
-		commitAddPort ($objectInfo['id'], $portno, 16, $portno++, '');
+		commitAddPort ($objectInfo['id'], $portno, '1-16', $portno++, '');
 	return buildRedirectURL (__FUNCTION__, 'OK', array ('Added ' . ($portno - 1) . ' port(s)'));
 }
 
@@ -654,6 +653,21 @@ class APCPowerSwitch extends SNMPDevice {
     function portReboot($id) {
         return $this->snmpSet("{$this->snmpMib}.1.1.12.3.3.1.1.4.$id", 'i', APC_STATUS_REBOOT);
     }
+	// rPDUIdentFirmwareRev.0 == .1.3.6.1.4.1.318.1.1.12.1.3.0 = STRING: "vN.N.N"
+	function getFWRev()
+	{
+		return preg_replace ('/^STRING: "(.+)"$/', '\\1', snmpget ($this->hostname, $this->community, "{$this->snmpMib}.1.1.12.1.3.0"));
+	}
+	// rPDUIdentSerialNumber.0 == .1.3.6.1.4.1.318.1.1.12.1.6.0 = STRING: "XXXXXXXXXXX"
+	function getHWSerial()
+	{
+		return preg_replace ('/^STRING: "(.+)"$/', '\\1', snmpget ($this->hostname, $this->community, "{$this->snmpMib}.1.1.12.1.6.0"));
+	}
+	// rPDUIdentModelNumber.0 == .1.3.6.1.4.1.318.1.1.12.1.5.0 = STRING: "APnnnn"
+	function getHWModel()
+	{
+		return preg_replace ('/^STRING: "(.*)"$/', '\\1', snmpget ($this->hostname, $this->community, "{$this->snmpMib}.1.1.12.1.5.0"));
+	}
 }
 
 ?>
