@@ -492,6 +492,7 @@ td.dashed {
 div.tagselector {
 	overflow: auto;
 	max-height: 400px;
+	min-width: 150px;
 	background-color : #f0f0f0;
 	border-width : 1px;
 	border-style : solid;
