@@ -45,7 +45,7 @@ function trigger_snmpportfinder ()
 {
 	assertUIntArg ('object_id', __FUNCTION__);
 	$object = spotEntity ('object', $_REQUEST['object_id']);
-	if ($object['objtype_id'] != 8)
+	if ($object['objtype_id'] != 8 and $object['objtype_id'] != 7)
 		return '';
 	amplifyCell ($object);
 	return count ($object['ports']) ? '' : 'attn';

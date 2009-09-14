@@ -238,10 +238,10 @@ $iftable_processors['nortel-any-1000T'] = array
 
 $iftable_processors['juniper-DPCE-R-4XGE-XFP'] = array
 (
-	'pattern' => '@^xe-[[:digit:]]+/[[:digit:]]+/[[:digit:]]+$@',
-	'replacement' => '\\1',
+	'pattern' => '@^xe-([[:digit:]]+)/([[:digit:]]+/[[:digit:]]+)$@',
+	'replacement' => '\\0',
 	'dict_key' => '8-1082', // XFP/empty
-	'label' => '',
+	'label' => 'slot \\1 port \\2',
 	'try_next_proc' => FALSE,
 );
 
@@ -559,6 +559,9 @@ function doSNMPmining ($object_id, $community)
 		commitAddPort ($object_id, 'console', 681, 'console', ''); // DB-9 RS-232 console
 		$log = mergeLogs ($log, oneLiner (81, array ('huawei-generic')));
 		break;
+	case preg_match ('/^2636\.1\.1\.1\.2\./', $sysObjectID): // Juniper
+		commitAddPort ($object_id, 'console', 681, 'console', ''); // DB-9 RS-232 console
+		$log = mergeLogs ($log, oneLiner (81, array ('juniper-generic')));
 	default: // Nortel...
 		break;
 	}
