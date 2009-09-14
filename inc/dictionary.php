@@ -1339,6 +1339,7 @@ $dictionary = array
 	1318 => array ('chapter_id' => 13, 'dict_value' => 'Windows Server 2008'),
 	1319 => array ('chapter_id' => 13, 'dict_value' => 'Linux%GSKIP%Slackware 13.0'),
 	1320 => array ('chapter_id' => 13, 'dict_value' => 'Linux%GSKIP%Ubuntu 9.10'),
+	1321 => array ('chapter_id' => 12, 'dict_value' => 'Huawei%GPASS%Quidway S5328C-EI-24S'),
 );
 
 ?>
