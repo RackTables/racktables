@@ -645,7 +645,7 @@ function doPDUSNMPmining ($objectInfo, $hostname, $community)
 		commitAddPort ($objectInfo['id'], $portno, '1-1322', $port[0], '');
 		$portno++;
 	}
-	$log = mergeLogs ($log, oneLiner (0, array ('Added ' . ($portno - 1) . ' port(s)')));
+	$log = mergeLogs ($log, oneLiner (0, array ("Added ${portno} port(s)")));
 	return buildWideRedirectURL ($log, NULL, 'ports');
 }
 
