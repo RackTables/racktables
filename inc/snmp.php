@@ -490,9 +490,6 @@ $msgcode['doSNMPmining']['ERR4'] = 189;
 $msgcode['doSNMPmining']['OK'] = 81;
 function doSNMPmining ($object_id, $community)
 {
-	$log = emptyLog();
-	global $known_switches, $iftable_processors;
-	
 	$objectInfo = spotEntity ('object', $object_id);
 	$objectInfo['attrs'] = getAttrValues ($object_id);
 	$endpoints = findAllEndpoints ($object_id, $objectInfo['name']);
@@ -500,6 +497,20 @@ function doSNMPmining ($object_id, $community)
 		return buildRedirectURL (__FUNCTION__, 'ERR1'); // endpoint not found
 	if (count ($endpoints) > 1)
 		return buildRedirectURL (__FUNCTION__, 'ERR2'); // can't pick an address
+
+	switch ($objectInfo['objtype_id'])
+	{
+	case 8:
+		return doSwitchSNMPmining ($objectInfo, $endpoints[0], $community);
+	case 2:
+		return doPDUSNMPmining ($objectInfo, $endpoints[0], $community);
+	}	
+}
+
+function doSwitchSNMPmining ($object, $hostname, $comminuty)
+{
+	$log = emptyLog();
+	global $known_switches, $iftable_processors;
 	
 	if (FALSE === ($sysObjectID = @snmpget ($endpoints[0], $community, 'sysObjectID.0')))
 		return buildRedirectURL (__FUNCTION__, 'ERR3'); // // fatal SNMP failure
@@ -611,6 +622,113 @@ function doSNMPmining ($object_id, $community)
 		$log = mergeLogs ($log, oneLiner (81, array ($processor_name)));
 	// No failure up to this point, thus leave current tab for the "Ports" one.
 	return buildWideRedirectURL ($log, NULL, 'ports');
+}
+
+$msgcode['doPDUSNMPmining']['OK'] = 0;
+function doPDUSNMPmining ($objectInfo, $hostname, $community)
+{
+	$log = emptyLog();
+	global $known_APC_SKUs;
+	$switch = new APCPowerSwitch ($hostname, $community);
+	if (FALSE !== ($dict_key = array_search ($switch->getHWModel(), $known_APC_SKUs)))
+		updateStickerForCell ($objectInfo, 2, $dict_key);
+	updateStickerForCell ($objectInfo, 1, $switch->getHWSerial());
+	updateStickerForCell ($objectInfo, 3, $switch->getName());
+	updateStickerForCell ($objectInfo, 5, $switch->getFWRev());
+	commitAddPort ($objectInfo['id'], 'input', '1-16', 'input', '');
+	$portno = 1;
+	foreach ($switch->getPorts() as $name => $port)
+	{
+		$label = mb_strlen ($port[0]) ? $port[0] : $portno;
+		commitAddPort ($objectInfo['id'], $portno, '1-1322', $port[0], '');
+		$portno++;
+	}
+	$log = mergeLogs ($log, oneLiner (0, array ('Added ' . ($portno - 1) . ' port(s)')));
+	return buildWideRedirectURL ($log, NULL, 'ports');
+}
+
+// APC SNMP code by Russ Garrett
+define('APC_STATUS_ON', 1);
+define('APC_STATUS_OFF', 2);
+define('APC_STATUS_REBOOT', 3);
+
+class SNMPDevice {
+    protected $hostname;
+    protected $community;
+
+    function __construct($hostname, $community) {
+        $this->hostname = $hostname;
+        $this->community = $community;
+    }
+
+    function getName() {
+	return $this->getString('sysName.0');
+    }
+ 
+    function getDescription() {
+	return $this->getString('sysDescr.0');
+    }
+
+    protected function snmpSet($oid, $type, $value) {
+        return snmpset($this->hostname, $this->community, $oid, $type, $value);
+    }
+
+    protected function getString($oid) {
+	return trim(str_replace('STRING: ', '', snmpget($this->hostname, $this->community, $oid)), '"');
+    }
+}
+
+class APCPowerSwitch extends SNMPDevice {
+    protected $snmpMib = 'SNMPv2-SMI::enterprises.318';
+
+    function getPorts() {
+        $data = snmpwalk($this->hostname, $this->community, "{$this->snmpMib}.1.1.12.3.3.1.1.2");
+        $status = snmpwalk($this->hostname, $this->community, "{$this->snmpMib}.1.1.12.3.3.1.1.4");
+        $out = array();
+        foreach ($data as $id => $d) {
+            $out[$id + 1] = array(trim(str_replace('STRING: ', '', $d), '"'), str_replace('INTEGER: ', '', $status[$id]));
+        }
+        return $out;
+    }
+    
+    function getPortStatus($id) {
+        return trim(snmpget($this->hostname, $this->community, "{$this->snmpMib}.1.1.12.3.3.1.1.4.$id"), 'INTEGER: ');
+    }
+
+    function getPortName($id) {
+        return trim(str_replace('STRING: ', '', snmpget($this->hostname, $this->community, "{$this->snmpMib}.1.1.12.3.3.1.1.2.$id")), '"');
+    }
+
+    function setPortName($id, $name) {
+        return snmpset($this->hostname, $this->community, "{$this->snmpMib}.1.1.4.5.2.1.3.$id", 's', $name);
+    }
+
+    function portOff($id) {
+        return $this->snmpSet("{$this->snmpMib}.1.1.12.3.3.1.1.4.$id", 'i', APC_STATUS_OFF);
+    }
+
+    function portOn($id) {
+        return $this->snmpSet("{$this->snmpMib}.1.1.12.3.3.1.1.4.$id", 'i', APC_STATUS_ON);
+    }
+
+    function portReboot($id) {
+        return $this->snmpSet("{$this->snmpMib}.1.1.12.3.3.1.1.4.$id", 'i', APC_STATUS_REBOOT);
+    }
+	// rPDUIdentFirmwareRev.0 == .1.3.6.1.4.1.318.1.1.12.1.3.0 = STRING: "vN.N.N"
+	function getFWRev()
+	{
+		return preg_replace ('/^STRING: "(.+)"$/', '\\1', snmpget ($this->hostname, $this->community, "{$this->snmpMib}.1.1.12.1.3.0"));
+	}
+	// rPDUIdentSerialNumber.0 == .1.3.6.1.4.1.318.1.1.12.1.6.0 = STRING: "XXXXXXXXXXX"
+	function getHWSerial()
+	{
+		return preg_replace ('/^STRING: "(.+)"$/', '\\1', snmpget ($this->hostname, $this->community, "{$this->snmpMib}.1.1.12.1.6.0"));
+	}
+	// rPDUIdentModelNumber.0 == .1.3.6.1.4.1.318.1.1.12.1.5.0 = STRING: "APnnnn"
+	function getHWModel()
+	{
+		return preg_replace ('/^STRING: "(.*)"$/', '\\1', snmpget ($this->hostname, $this->community, "{$this->snmpMib}.1.1.12.1.5.0"));
+	}
 }
 
 ?>

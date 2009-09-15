@@ -11,44 +11,101 @@
 // to decide (the 'bypass' hint of a page), and in some cases,
 // other data can be used.
 
-// This trigger filters out everything except switches with known-good
-// software.
-// FIXME: That's a bit of hardcoding at the moment, but
-// let's thinks about fixing it later.
-function trigger_livevlans ()
+// APC "switched rack PDU" stands for a number of part numbers:
+// http://www.apc.com/products/family/index.cfm?id=70
+$known_APC_SKUs = array
+(
+	// 100V input
+	1151 => 'AP7902J',
+	1152 => 'AP7930J',
+	1153 => 'AP7932J',
+	// 120V input
+	1154 => 'AP7900',
+	1155 => 'AP7901',
+	1156 => 'AP7902',
+	1157 => 'AP7930',
+	1158 => 'AP7931',
+	1159 => 'AP7932',
+	// 208V input
+	1160 => 'AP7911',
+	1161 => 'AP7940',
+	1162 => 'AP7941',
+	// 208V 3 phases input
+	1163 => 'AP7960',
+	1164 => 'AP7961',
+	1165 => 'AP7968',
+	1166 => 'AP7990',
+	1167 => 'AP7991',
+	1168 => 'AP7998',
+	// 230V input
+	1137 => 'AP7920',
+	1138 => 'AP7921',
+	1139 => 'AP7922',
+	1140 => 'AP7950',
+	1141 => 'AP7951',
+	1142 => 'AP7952',
+	1143 => 'AP7953',
+	1144 => 'AP7954',
+	// 400V 3 phases input
+	1154 => 'AP7957',
+);
+
+// Return 'std', if the object belongs to specified type and has
+// specified attribute belonging to the given set of values.
+function checkTypeAndAttribute ($object_id, $type_id, $attr_id, $values, $hit = 'std')
 {
-	assertUIntArg ('object_id', __FUNCTION__);
-	$object_id = $_REQUEST['object_id'];
-	$object = spotEntity ('object', $object_id, FALSE);
-	if ($object['objtype_id'] != 8)
+	$object = spotEntity ('object', $object_id);
+	if ($object['objtype_id'] != $type_id)
 		return '';
-	$values = getAttrValues ($object_id);
-	foreach ($values as $record)
-	{
-		if ($record['id'] != 4) // SW type
-			continue;
-		// Cisco IOS 12.0
-		// Cisco IOS 12.1
-		// Cisco IOS 12.2
-		if (in_array ($record['key'], array (244, 251, 252)))
-			return 'std';
-		else
-			return '';
-	}
+	foreach (getAttrValues ($object_id) as $record)
+		if ($record['id'] == $attr_id and in_array ($record['key'], $values))
+			return $hit;
 	return '';
 }
 
+// This trigger filters out everything except switches with known-good
+// software.
+function trigger_livevlans ()
+{
+	return checkTypeAndAttribute
+	(
+		$_REQUEST['object_id'],
+		8, // network switch
+		4, // SW type
+		// Cisco IOS 12.0
+		// Cisco IOS 12.1
+		// Cisco IOS 12.2
+		array (244, 251, 252)
+	);
+}
+
 // SNMP port finder tab trigger. At the moment we decide on showing it
-// for pristine switches only. Once a user has begun
+// for pristine switches/PDUs only. Once a user has begun
 // filling the data in, we stop showing the tab.
 function trigger_snmpportfinder ()
 {
+
 	assertUIntArg ('object_id', __FUNCTION__);
 	$object = spotEntity ('object', $_REQUEST['object_id']);
-	if ($object['objtype_id'] != 8 and $object['objtype_id'] != 7)
+	switch ($object['objtype_id'])
+	{
+	case 8: // any switch would suffuce
+		return $object['nports'] ? '' : 'attn';
+	case 2: // but only selected PDUs
+		if ($object['nports'])
+			return '';
+		global $known_APC_SKUs;
+		return checkTypeAndAttribute
+		(
+			$object['id'],
+			2, // PDU
+			2, // HW type
+			array_keys ($known_APC_SKUs),
+			'attn'
+		);
+	default:
 		return '';
-	amplifyCell ($object);
-	return count ($object['ports']) ? '' : 'attn';
+	}
 }
 
 function trigger_isloadbalancer ()
