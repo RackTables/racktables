@@ -402,6 +402,10 @@ CREATE TABLE `PortInterfaceCompat` (
 			// remap refs to duplicate records, which will be discarded (ticket:286)
 			$query[] = 'UPDATE AttributeValue SET uint_value = 147 WHERE uint_value = 1020 AND attr_id = 2';
 			$query[] = 'UPDATE AttributeValue SET uint_value = 377 WHERE uint_value = 1021 AND attr_id = 2';
+			$query[] = 'INSERT INTO PortInterfaceCompat (iif_id, oif_id) VALUES (1, 1322)';
+			$query[] = 'DELETE FROM PortCompat WHERE type1 = 16 AND type2 = 16';
+			$query[] = 'INSERT INTO PortCompat (type1, type2) VALUES (16, 1322), (1322, 16)';
+			$query[] = 'UPDATE Port SET type = 1322 WHERE type = 16 AND (SELECT objtype_id FROM RackObject WHERE id = object_id) IN (2, 12)';
 			$query[] = "UPDATE Config SET varvalue = '0.17.5' WHERE varname = 'DB_VERSION'";
 			break;
 		default:
