@@ -334,10 +334,10 @@ CREATE TABLE `LDAPCache` (
 				$query[] = "INSERT INTO PortCompat (type1, type2) VALUES (${i}, ${i})";
 			$query[] = "
 CREATE TABLE `PortInnerInterface` (
-  `id` int(10) unsigned NOT NULL auto_increment,
+  `id` int(10) unsigned NOT NULL,
   `iif_name` char(16) NOT NULL,
   PRIMARY KEY  (`id`),
-  UNIQUE KEY `inner_if` (`iif_name`)
+  UNIQUE KEY `iif_name` (`iif_name`)
 ) ENGINE=InnoDB";
 			$query[] = "INSERT INTO `PortInnerInterface` VALUES (1,'hardwired')";
 			$query[] = "INSERT INTO `PortInnerInterface` VALUES (2,'SFP-100')";
