@@ -406,6 +406,7 @@ CREATE TABLE `PortInterfaceCompat` (
 			$query[] = 'DELETE FROM PortCompat WHERE type1 = 16 AND type2 = 16';
 			$query[] = 'INSERT INTO PortCompat (type1, type2) VALUES (16, 1322), (1322, 16)';
 			$query[] = 'UPDATE Port SET type = 1322 WHERE type = 16 AND (SELECT objtype_id FROM RackObject WHERE id = object_id) IN (2, 12)';
+			$query[] = 'INSERT INTO AttributeMap (objtype_id, attr_id) VALUES (2, 1), (2, 3), (2, 5)';
 			$query[] = "UPDATE Config SET varvalue = '0.17.5' WHERE varname = 'DB_VERSION'";
 			break;
 		default:
