@@ -485,8 +485,6 @@ function updateStickerForCell ($cell, $attr_id, $new_value)
 
 $msgcode['doSNMPmining']['ERR1'] = 161;
 $msgcode['doSNMPmining']['ERR2'] = 162;
-$msgcode['doSNMPmining']['ERR3'] = 188;
-$msgcode['doSNMPmining']['ERR4'] = 189;
 $msgcode['doSNMPmining']['OK'] = 81;
 function doSNMPmining ($object_id, $community)
 {
@@ -500,6 +498,7 @@ function doSNMPmining ($object_id, $community)
 
 	switch ($objectInfo['objtype_id'])
 	{
+	case 7:
 	case 8:
 		return doSwitchSNMPmining ($objectInfo, $endpoints[0], $community);
 	case 2:
@@ -507,16 +506,18 @@ function doSNMPmining ($object_id, $community)
 	}	
 }
 
-function doSwitchSNMPmining ($object, $hostname, $comminuty)
+$msgcode['doSwitchSNMPmining']['ERR3'] = 188;
+$msgcode['doswitchSNMPmining']['ERR4'] = 189;
+function doSwitchSNMPmining ($objectInfo, $hostname, $community)
 {
 	$log = emptyLog();
 	global $known_switches, $iftable_processors;
 	
-	if (FALSE === ($sysObjectID = @snmpget ($endpoints[0], $community, 'sysObjectID.0')))
+	if (FALSE === ($sysObjectID = @snmpget ($hostname, $community, 'sysObjectID.0')))
 		return buildRedirectURL (__FUNCTION__, 'ERR3'); // // fatal SNMP failure
 	$sysObjectID = ereg_replace ('^.*(enterprises\.)([\.[:digit:]]+)$', '\\2', $sysObjectID);
-	$sysName = substr (@snmpget ($endpoints[0], $community, 'sysName.0'), strlen ('STRING: '));
-	$sysDescr = substr (@snmpget ($endpoints[0], $community, 'sysDescr.0'), strlen ('STRING: '));
+	$sysName = substr (@snmpget ($hostname, $community, 'sysName.0'), strlen ('STRING: '));
+	$sysDescr = substr (@snmpget ($hostname, $community, 'sysDescr.0'), strlen ('STRING: '));
 	$sysDescr = str_replace (array ("\n", "\r"), " ", $sysDescr);  // Make it one line
 	if (!isset ($known_switches[$sysObjectID]))
 		return buildRedirectURL (__FUNCTION__, 'ERR4', array ($sysObjectID)); // unknown OID
@@ -537,10 +538,11 @@ function doSwitchSNMPmining ($object, $hostname, $comminuty)
 		updateStickerForCell ($objectInfo, 5, $exact_release);
 		if (array_key_exists ($major_line, $ios_codes))
 			updateStickerForCell ($objectInfo, 4, $ios_codes[$major_line]);
-		$sysChassi = @snmpget ($endpoints[0], $community, '1.3.6.1.4.1.9.3.6.3.0');
+		$sysChassi = @snmpget ($hostname, $community, '1.3.6.1.4.1.9.3.6.3.0');
 		if ($sysChassi !== FALSE or $sysChassi !== NULL)
 			updateStickerForCell ($objectInfo, 1, str_replace ('"', '', substr ($sysChassi, strlen ('STRING: '))));
-		commitAddPort ($object_id, 'con0', 29, 'console', ''); // RJ-45 RS-232 console
+		commitAddPort ($objectInfo['id'], 'con0', 29, 'console', ''); // RJ-45 RS-232 console
+		commitAddPort ($objectInfo['id'], 'AC-in', '1-16', '', ''); // AC input
 		$log = mergeLogs ($log, oneLiner (81, array ('catalyst-generic')));
 		break;
 	case preg_match ('/^9\.12\.3\.1\.3\./', $sysObjectID): // Nexus
@@ -554,7 +556,7 @@ function doSwitchSNMPmining ($object, $hostname, $comminuty)
 		if (array_key_exists ($major_line, $nxos_codes))
 			updateStickerForCell ($objectInfo, 4, $nxos_codes[$major_line]);
 		updateStickerForCell ($objectInfo, 5, $exact_release);
-		commitAddPort ($object_id, 'con0', '1-29', 'console', ''); // RJ-45 RS-232 console
+		commitAddPort ($objectInfo['id'], 'con0', '1-29', 'console', ''); // RJ-45 RS-232 console
 		$log = mergeLogs ($log, oneLiner (81, array ('nexus-generic')));
 		break;
 	case preg_match ('/^11\.2\.3\.7\.11\./', $sysObjectID): // ProCurve
@@ -563,29 +565,29 @@ function doSwitchSNMPmining ($object, $hostname, $comminuty)
 		$log = mergeLogs ($log, oneLiner (81, array ('procurve-generic')));
 		break;
 	case preg_match ('/^4526\.100\.2\./', $sysObjectID): // NETGEAR
-		commitAddPort ($object_id, 'console', 681, 'console', ''); // DB-9 RS-232 console
+		commitAddPort ($objectInfo['id'], 'console', 681, 'console', ''); // DB-9 RS-232 console
 		$log = mergeLogs ($log, oneLiner (81, array ('netgear-generic')));
 		break;
 	case preg_match ('/^2011\.2\.23\./', $sysObjectID): // Huawei
-		commitAddPort ($object_id, 'console', 681, 'console', ''); // DB-9 RS-232 console
+		commitAddPort ($objectInfo['id'], 'console', 681, 'console', ''); // DB-9 RS-232 console
 		$log = mergeLogs ($log, oneLiner (81, array ('huawei-generic')));
 		break;
 	case preg_match ('/^2636\.1\.1\.1\.2\./', $sysObjectID): // Juniper
-		commitAddPort ($object_id, 'console', 681, 'console', ''); // DB-9 RS-232 console
+		commitAddPort ($objectInfo['id'], 'console', 681, 'console', ''); // DB-9 RS-232 console
 		$log = mergeLogs ($log, oneLiner (81, array ('juniper-generic')));
 	default: // Nortel...
 		break;
 	}
 	$ifInfo = array();
 	$tablename = 'ifDescr';
-	foreach (snmpwalkoid ($endpoints[0], $community, $tablename) as $oid => $value)
+	foreach (snmpwalkoid ($hostname, $community, $tablename) as $oid => $value)
 	{
 		$randomindex = ereg_replace ("^.*${tablename}\.(.+)\$", '\\1', $oid);
 		$value = trim (ereg_replace ('^.+: (.+)$', '\\1', $value), '"');
 		$ifInfo[$randomindex][$tablename] = $value;
 	}
 	$tablename = 'ifPhysAddress';
-	foreach (snmpwalkoid ($endpoints[0], $community, $tablename) as $oid => $value)
+	foreach (snmpwalkoid ($hostname, $community, $tablename) as $oid => $value)
 	{
 		$randomindex = ereg_replace ("^.*${tablename}\.(.+)\$", '\\1', $oid);
 		$value = trim ($value);
@@ -614,7 +616,7 @@ function doSwitchSNMPmining ($object, $hostname, $comminuty)
 			if (!$count)
 				continue; // try next processor on current port
 			$newlabel = preg_replace ($iftable_processors[$processor_name]['pattern'], $iftable_processors[$processor_name]['label'], $iface['ifDescr'], 1, $count);
-			commitAddPort ($object_id, $newname, $iftable_processors[$processor_name]['dict_key'], $newlabel, $iface['ifPhysAddress']);
+			commitAddPort ($objectInfo['id'], $newname, $iftable_processors[$processor_name]['dict_key'], $newlabel, $iface['ifPhysAddress']);
 			if (!$iftable_processors[$processor_name]['try_next_proc']) // done with this port
 				continue 2;
 		}
