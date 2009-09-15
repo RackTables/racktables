@@ -3,6 +3,7 @@
 	bugfix: "cn" autotag was not generated for objects
 	new feature: make text in the "added new object X" message clickable (ticket:280) (by Boris Lytochkin)
 	new feature: support for Ethernet transceivers (ticket:64) and WDM grids
+	new feature: initial support of APC switched rack PDUs (ticket:175)
 	update: power port type was split into input and output (ticket:261)
 0.17.4 2009-08-13
 	bugfix: remove PHP warnings on IPv4 space management tab (ticket:277)
