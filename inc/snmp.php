@@ -627,12 +627,24 @@ function doSwitchSNMPmining ($object, $hostname, $comminuty)
 $msgcode['doPDUSNMPmining']['OK'] = 0;
 function doPDUSNMPmining ($objectInfo, $hostname, $community)
 {
+	$log = emptyLog();
+	global $known_APC_SKUs;
 	$switch = new APCPowerSwitch ($hostname, $community);
+	if (FALSE !== ($dict_key = array_search ($switch->getHWModel(), $known_APC_SKUs)))
+		updateStickerForCell ($objectInfo, 2, $dict_key);
+	updateStickerForCell ($objectInfo, 1, $switch->getHWSerial());
 	updateStickerForCell ($objectInfo, 3, $switch->getName());
+	updateStickerForCell ($objectInfo, 5, $switch->getFWRev());
+	commitAddPort ($objectInfo['id'], 'input', '1-16', 'input', '');
 	$portno = 1;
 	foreach ($switch->getPorts() as $name => $port)
-		commitAddPort ($objectInfo['id'], $portno, '1-16', $portno++, '');
-	return buildRedirectURL (__FUNCTION__, 'OK', array ('Added ' . ($portno - 1) . ' port(s)'));
+	{
+		$label = mb_strlen ($port[0]) ? $port[0] : $portno;
+		commitAddPort ($objectInfo['id'], $portno, '1-1322', $port[0], '');
+		$portno++;
+	}
+	$log = mergeLogs ($log, oneLiner (0, array ('Added ' . ($portno - 1) . ' port(s)')));
+	return buildWideRedirectURL ($log, NULL, 'ports');
 }
 
 // APC SNMP code by Russ Garrett

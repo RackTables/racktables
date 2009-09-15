@@ -11,6 +11,45 @@
 // to decide (the 'bypass' hint of a page), and in some cases,
 // other data can be used.
 
+// APC "switched rack PDU" stands for a number of part numbers:
+// http://www.apc.com/products/family/index.cfm?id=70
+$known_APC_SKUs = array
+(
+	// 100V input
+	1151 => 'AP7902J',
+	1152 => 'AP7930J',
+	1153 => 'AP7932J',
+	// 120V input
+	1154 => 'AP7900',
+	1155 => 'AP7901',
+	1156 => 'AP7902',
+	1157 => 'AP7930',
+	1158 => 'AP7931',
+	1159 => 'AP7932',
+	// 208V input
+	1160 => 'AP7911',
+	1161 => 'AP7940',
+	1162 => 'AP7941',
+	// 208V 3 phases input
+	1163 => 'AP7960',
+	1164 => 'AP7961',
+	1165 => 'AP7968',
+	1166 => 'AP7990',
+	1167 => 'AP7991',
+	1168 => 'AP7998',
+	// 230V input
+	1137 => 'AP7920',
+	1138 => 'AP7921',
+	1139 => 'AP7922',
+	1140 => 'AP7950',
+	1141 => 'AP7951',
+	1142 => 'AP7952',
+	1143 => 'AP7953',
+	1144 => 'AP7954',
+	// 400V 3 phases input
+	1154 => 'AP7957',
+);
+
 // Return 'std', if the object belongs to specified type and has
 // specified attribute belonging to the given set of values.
 function checkTypeAndAttribute ($object_id, $type_id, $attr_id, $values, $hit = 'std')
@@ -45,44 +84,6 @@ function trigger_livevlans ()
 // filling the data in, we stop showing the tab.
 function trigger_snmpportfinder ()
 {
-// APC "switched rack PDU" stands for a number of part numbers:
-// http://www.apc.com/products/family/index.cfm?id=70
-	$known_APC_SKUs = array
-	(
-		// 100V input
-		1151 => 'AP7902J',
-		1152 => 'AP7930J',
-		1153 => 'AP7932J',
-		// 120V input
-		1154 => 'AP7900',
-		1155 => 'AP7901',
-		1156 => 'AP7902',
-		1157 => 'AP7930',
-		1158 => 'AP7931',
-		1159 => 'AP7932',
-		// 208V input
-		1160 => 'AP7911',
-		1161 => 'AP7940',
-		1162 => 'AP7941',
-		// 208V 3 phases input
-		1163 => 'AP7960',
-		1164 => 'AP7961',
-		1165 => 'AP7968',
-		1166 => 'AP7990',
-		1167 => 'AP7991',
-		1168 => 'AP7998',
-		// 230V input
-		1137 => 'AP7920',
-		1138 => 'AP7921',
-		1139 => 'AP7922',
-		1140 => 'AP7950',
-		1141 => 'AP7951',
-		1142 => 'AP7952',
-		1143 => 'AP7953',
-		1144 => 'AP7954',
-		// 400V 3 phases input
-		1154 => 'AP7957',
-	);
 
 	assertUIntArg ('object_id', __FUNCTION__);
 	$object = spotEntity ('object', $_REQUEST['object_id']);
@@ -94,6 +95,7 @@ function trigger_snmpportfinder ()
 	case 2: // but only selected PDUs
 		if ($object['nports'])
 			return '';
+		global $known_APC_SKUs;
 		return checkTypeAndAttribute
 		(
 			$object['id'],
