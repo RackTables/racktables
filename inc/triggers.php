@@ -88,7 +88,8 @@ function trigger_snmpportfinder ()
 	$object = spotEntity ('object', $_REQUEST['object_id']);
 	switch ($object['objtype_id'])
 	{
-	case 8: // any switch would suffuce
+	case 7: // any router
+	case 8: // or switch would suffice
 		return $object['nports'] ? '' : 'attn';
 	case 2: // but only selected PDUs
 		if ($object['nports'])

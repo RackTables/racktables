@@ -238,10 +238,46 @@ $iftable_processors['nortel-any-1000T'] = array
 
 $iftable_processors['juniper-DPCE-R-4XGE-XFP'] = array
 (
-	'pattern' => '@^xe-[[:digit:]]+/[[:digit:]]+/[[:digit:]]+$@',
-	'replacement' => '\\1',
+	'pattern' => '@^xe-([[:digit:]]+)/([[:digit:]]+/[[:digit:]]+)$@',
+	'replacement' => '\\0',
 	'dict_key' => '8-1082', // XFP/empty
-	'label' => '',
+	'label' => 'slot \\1 port \\2',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['quidway-21-to-24-comboT'] = array
+(
+	'pattern' => '@^GigabitEthernet([[:digit:]]+/[[:digit:]]+/)(21|22|23|24)$@',
+	'replacement' => 'gi\\1\\2',
+	'dict_key' => '1-24',
+	'label' => '\\2',
+	'try_next_proc' => TRUE,
+);
+
+$iftable_processors['quidway-any-1000SFP'] = array
+(
+	'pattern' => '@^GigabitEthernet([[:digit:]]+/[[:digit:]]+/)([[:digit:]]+)$@',
+	'replacement' => 'gi\\1\\2',
+	'dict_key' => '4-1077', // empty SFP-1000
+	'label' => '\\2',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['quidway-XFP'] = array
+(
+	'pattern' => '@^XGigabitEthernet([[:digit:]]+/[[:digit:]]+/)([[:digit:]]+)$@',
+	'replacement' => 'xg\\1\\2',
+	'dict_key' => '8-1082',
+	'label' => '\\2',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['quidway-mgmt'] = array
+(
+	'pattern' => '@^MEth([[:digit:]]+/[[:digit:]]+/)([[:digit:]]+)$@',
+	'replacement' => 'me\\1\\2',
+	'dict_key' => '1-19',
+	'label' => 'eth',
 	'try_next_proc' => FALSE,
 );
 
@@ -433,6 +469,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'MX240 modular router',
 		'processors' => array ('juniper-DPCE-R-4XGE-XFP'),
 	),
+	'2011.2.23.96' => array
+	(
+		'dict_key' => 1321,
+		'text' => 'S5328C-EI-24S: 20 RJ-45/10-100-1000T(X) + 4 combo-gig + 2 XFP slots',
+		'processors' => array ('quidway-21-to-24-comboT', 'quidway-any-1000SFP', 'quidway-XFP', 'quidway-mgmt'),
+	),
 );
 
 function updateStickerForCell ($cell, $attr_id, $new_value)
@@ -524,7 +566,14 @@ function doSwitchSNMPmining ($object, $hostname, $comminuty)
 		commitAddPort ($object_id, 'console', 681, 'console', ''); // DB-9 RS-232 console
 		$log = mergeLogs ($log, oneLiner (81, array ('netgear-generic')));
 		break;
-	default: // Nortel, NETGEAR...
+	case preg_match ('/^2011\.2\.23\./', $sysObjectID): // Huawei
+		commitAddPort ($object_id, 'console', 681, 'console', ''); // DB-9 RS-232 console
+		$log = mergeLogs ($log, oneLiner (81, array ('huawei-generic')));
+		break;
+	case preg_match ('/^2636\.1\.1\.1\.2\./', $sysObjectID): // Juniper
+		commitAddPort ($object_id, 'console', 681, 'console', ''); // DB-9 RS-232 console
+		$log = mergeLogs ($log, oneLiner (81, array ('juniper-generic')));
+	default: // Nortel...
 		break;
 	}
 	$ifInfo = array();
