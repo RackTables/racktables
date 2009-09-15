@@ -38,7 +38,7 @@ $dictionary = array
 	13 => array ('chapter_id' => 1, 'dict_value' => 'Modem'),
 	14 => array ('chapter_id' => 1, 'dict_value' => 'MediaConverter'),
 	15 => array ('chapter_id' => 1, 'dict_value' => 'console'),
-	16 => array ('chapter_id' => 2, 'dict_value' => 'pwr-in'),
+	16 => array ('chapter_id' => 2, 'dict_value' => 'AC-in'),
 	17 => array ('chapter_id' => 2, 'dict_value' => '10Base2'),
 	18 => array ('chapter_id' => 2, 'dict_value' => '10Base-T'),
 	19 => array ('chapter_id' => 2, 'dict_value' => '100Base-TX'),
@@ -1340,7 +1340,7 @@ $dictionary = array
 	1319 => array ('chapter_id' => 13, 'dict_value' => 'Linux%GSKIP%Slackware 13.0'),
 	1320 => array ('chapter_id' => 13, 'dict_value' => 'Linux%GSKIP%Ubuntu 9.10'),
 	1321 => array ('chapter_id' => 12, 'dict_value' => 'Huawei%GPASS%Quidway S5328C-EI-24S'),
-	1322 => array ('chapter_id' => 2, 'dict_value' => 'pwr-out'),
+	1322 => array ('chapter_id' => 2, 'dict_value' => 'AC-out'),
 );
 
 ?>
