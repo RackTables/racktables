@@ -330,6 +330,9 @@ CREATE TABLE `LDAPCache` (
 			$query[] = 'INSERT INTO PortCompat (type1, type2) VALUES (1206,1207)';
 			$query[] = 'INSERT INTO PortCompat (type1, type2) VALUES (1207,1206)';
 			$query[] = 'INSERT INTO PortCompat (type1, type2) VALUES (1316,1316)';
+			$query[] = 'INSERT INTO PortCompat (type1, type2) VALUES (16, 1322)';
+			$query[] = 'INSERT INTO PortCompat (type1, type2) VALUES (1322, 16)';
+			$query[] = 'DELETE FROM PortCompat WHERE type1 = 16 AND type2 = 16';
 			for ($i = 1209; $i <= 1300; $i++)
 				$query[] = "INSERT INTO PortCompat (type1, type2) VALUES (${i}, ${i})";
 			$query[] = "
@@ -371,7 +374,7 @@ CREATE TABLE `PortInterfaceCompat` (
 			$base10000 = array (30, 35, 36, 37, 38, 39, 40);
 			$PICdata = array
 			(
-				1 => array (16, 19, 24, 29, 31, 33, 446, 681, 682),
+				1 => array (16, 19, 24, 29, 31, 33, 446, 681, 682, 1322),
 				2 => array (1208, 1195, 1196, 1197, 1198, 1199, 1200, 1201),
 				3 => array_merge (array (1078), $base1000),
 				4 => array_merge (array (1077), $base1000),
@@ -392,20 +395,16 @@ CREATE TABLE `PortInterfaceCompat` (
 				foreach ($oif_ids as $oif_id)
 					$query[] = "INSERT INTO PortInterfaceCompat (iif_id, oif_id) VALUES (${iif_id}, ${oif_id})";
 			$query[] = "ALTER TABLE Port ADD CONSTRAINT `Port-FK-iif-oif` FOREIGN KEY (`iif_id`, `type`) REFERENCES `PortInterfaceCompat` (`iif_id`, `oif_id`)";
+			$query[] = 'UPDATE Port SET type = 1322 WHERE type = 16 AND (SELECT objtype_id FROM RackObject WHERE id = object_id) IN (2, 12)';
 			$query = array_merge ($query, reloadDictionary ($batchid));
 			$query[] = "DELETE FROM Config WHERE varname = 'default_port_type'";
 			$query[] = "INSERT INTO Config VALUES ('DEFAULT_PORT_IIF_ID','1','uint','no','no','Default port inner interface ID')";
 			$query[] = "INSERT INTO Config VALUES ('DEFAULT_PORT_OIF_IDS','1=24; 3=1078; 4=1077; 5=1079; 6=1080; 8=1082; 9=1084','string','no','no','Default port outer interface IDs')";
 			$query[] = "INSERT INTO Config VALUES ('IPV4_TREE_RTR_AS_CELL','yes','string','no','no','Show full router info for each network in IPv4 tree view')";
-
 			$query[] = "UPDATE Chapter SET name = 'PortOuterInterface' WHERE id = 2";
 			// remap refs to duplicate records, which will be discarded (ticket:286)
 			$query[] = 'UPDATE AttributeValue SET uint_value = 147 WHERE uint_value = 1020 AND attr_id = 2';
 			$query[] = 'UPDATE AttributeValue SET uint_value = 377 WHERE uint_value = 1021 AND attr_id = 2';
-			$query[] = 'INSERT INTO PortInterfaceCompat (iif_id, oif_id) VALUES (1, 1322)';
-			$query[] = 'DELETE FROM PortCompat WHERE type1 = 16 AND type2 = 16';
-			$query[] = 'INSERT INTO PortCompat (type1, type2) VALUES (16, 1322), (1322, 16)';
-			$query[] = 'UPDATE Port SET type = 1322 WHERE type = 16 AND (SELECT objtype_id FROM RackObject WHERE id = object_id) IN (2, 12)';
 			$query[] = 'INSERT INTO AttributeMap (objtype_id, attr_id) VALUES (2, 1), (2, 3), (2, 5)';
 			$query[] = "UPDATE Config SET varvalue = '0.17.5' WHERE varname = 'DB_VERSION'";
 			break;
