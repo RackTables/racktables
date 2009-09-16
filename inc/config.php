@@ -11,7 +11,7 @@
 
 
 // Current code version is subject to change with each new release.
-define ('CODE_VERSION', '0.17.4');
+define ('CODE_VERSION', '0.17.5');
 define ('CHAP_OBJTYPE', 1);
 define ('CHAP_PORTTYPE', 2);
 
