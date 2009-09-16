@@ -483,6 +483,30 @@ function updateStickerForCell ($cell, $attr_id, $new_value)
 		commitUpdateAttrValue ($cell['id'], $attr_id, $new_value);
 }
 
+// Accept "X-Y" on input and make sure, that PortInterfaceCompat contains
+// a record with IIF id = X and OIF id = Y.
+function checkPIC ($port_type_id)
+{
+	$matches = array();
+	switch (1)
+	{
+	case preg_match ('/^([[:digit:]]+)-([[:digit:]]+)$/', $port_type_id, $matches):
+		$iif_id = $matches[1];
+		$oif_id = $matches[2];
+		break;
+	case preg_match ('/^([[:digit:]]+)$/', $port_type_id, $matches):
+		$iif_id = 1;
+		$oif_id = $matches[1];
+		break;
+	default:
+		return;
+	}
+	foreach (getPortInterfaceCompat() as $record)
+		if ($record['iif_id'] == $iif_id and $record['oif_id'] == $oif_id)
+			return;
+	commitSupplementPIC ($iif_id, $oif_id);
+}
+
 $msgcode['doSNMPmining']['ERR1'] = 161;
 $msgcode['doSNMPmining']['ERR2'] = 162;
 $msgcode['doSNMPmining']['OK'] = 81;
@@ -541,7 +565,9 @@ function doSwitchSNMPmining ($objectInfo, $hostname, $community)
 		$sysChassi = @snmpget ($hostname, $community, '1.3.6.1.4.1.9.3.6.3.0');
 		if ($sysChassi !== FALSE or $sysChassi !== NULL)
 			updateStickerForCell ($objectInfo, 1, str_replace ('"', '', substr ($sysChassi, strlen ('STRING: '))));
-		commitAddPort ($objectInfo['id'], 'con0', 29, 'console', ''); // RJ-45 RS-232 console
+		checkPIC ('1-29');
+		commitAddPort ($objectInfo['id'], 'con0', '1-29', 'console', ''); // RJ-45 RS-232 console
+		checkPIC ('1-16');
 		commitAddPort ($objectInfo['id'], 'AC-in', '1-16', '', ''); // AC input
 		$log = mergeLogs ($log, oneLiner (81, array ('catalyst-generic')));
 		break;
@@ -556,6 +582,7 @@ function doSwitchSNMPmining ($objectInfo, $hostname, $community)
 		if (array_key_exists ($major_line, $nxos_codes))
 			updateStickerForCell ($objectInfo, 4, $nxos_codes[$major_line]);
 		updateStickerForCell ($objectInfo, 5, $exact_release);
+		checkPIC ('1-29');
 		commitAddPort ($objectInfo['id'], 'con0', '1-29', 'console', ''); // RJ-45 RS-232 console
 		$log = mergeLogs ($log, oneLiner (81, array ('nexus-generic')));
 		break;
@@ -565,15 +592,18 @@ function doSwitchSNMPmining ($objectInfo, $hostname, $community)
 		$log = mergeLogs ($log, oneLiner (81, array ('procurve-generic')));
 		break;
 	case preg_match ('/^4526\.100\.2\./', $sysObjectID): // NETGEAR
-		commitAddPort ($objectInfo['id'], 'console', 681, 'console', ''); // DB-9 RS-232 console
+		checkPIC ('1-681');
+		commitAddPort ($objectInfo['id'], 'console', '1-681', 'console', ''); // DB-9 RS-232 console
 		$log = mergeLogs ($log, oneLiner (81, array ('netgear-generic')));
 		break;
 	case preg_match ('/^2011\.2\.23\./', $sysObjectID): // Huawei
-		commitAddPort ($objectInfo['id'], 'console', 681, 'console', ''); // DB-9 RS-232 console
+		checkPIC ('1-681');
+		commitAddPort ($objectInfo['id'], 'console', '1-681', 'console', ''); // DB-9 RS-232 console
 		$log = mergeLogs ($log, oneLiner (81, array ('huawei-generic')));
 		break;
 	case preg_match ('/^2636\.1\.1\.1\.2\./', $sysObjectID): // Juniper
-		commitAddPort ($objectInfo['id'], 'console', 681, 'console', ''); // DB-9 RS-232 console
+		checkPIC ('1-681');
+		commitAddPort ($objectInfo['id'], 'console', '1-681', 'console', ''); // DB-9 RS-232 console
 		$log = mergeLogs ($log, oneLiner (81, array ('juniper-generic')));
 	default: // Nortel...
 		break;
@@ -616,6 +646,7 @@ function doSwitchSNMPmining ($objectInfo, $hostname, $community)
 			if (!$count)
 				continue; // try next processor on current port
 			$newlabel = preg_replace ($iftable_processors[$processor_name]['pattern'], $iftable_processors[$processor_name]['label'], $iface['ifDescr'], 1, $count);
+			checkPIC ($iftable_processors[$processor_name]['dict_key']);
 			commitAddPort ($objectInfo['id'], $newname, $iftable_processors[$processor_name]['dict_key'], $newlabel, $iface['ifPhysAddress']);
 			if (!$iftable_processors[$processor_name]['try_next_proc']) // done with this port
 				continue 2;
@@ -637,11 +668,13 @@ function doPDUSNMPmining ($objectInfo, $hostname, $community)
 	updateStickerForCell ($objectInfo, 1, $switch->getHWSerial());
 	updateStickerForCell ($objectInfo, 3, $switch->getName());
 	updateStickerForCell ($objectInfo, 5, $switch->getFWRev());
+	checkPIC ('1-16');
 	commitAddPort ($objectInfo['id'], 'input', '1-16', 'input', '');
 	$portno = 1;
 	foreach ($switch->getPorts() as $name => $port)
 	{
 		$label = mb_strlen ($port[0]) ? $port[0] : $portno;
+		checkPIC ('1-1322');
 		commitAddPort ($objectInfo['id'], $portno, '1-1322', $port[0], '');
 		$portno++;
 	}
