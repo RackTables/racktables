@@ -1341,6 +1341,10 @@ $dictionary = array
 	1320 => array ('chapter_id' => 13, 'dict_value' => 'Linux%GSKIP%Ubuntu 9.10'),
 	1321 => array ('chapter_id' => 12, 'dict_value' => 'Huawei%GPASS%Quidway S5328C-EI-24S'),
 	1322 => array ('chapter_id' => 2, 'dict_value' => 'AC-out'),
+	1323 => array ('chapter_id' => 1, 'dict_value' => 'Voice/video'),
+	1324 => array ('chapter_id' => 28, 'dict_value' => 'Cisco%GPASS%MCS 7816'),
+	1325 => array ('chapter_id' => 28, 'dict_value' => 'Cisco%GPASS%MCS 7825'),
+	1326 => array ('chapter_id' => 28, 'dict_value' => 'Cisco%GPASS%MCS 7835'),
 );
 
 ?>

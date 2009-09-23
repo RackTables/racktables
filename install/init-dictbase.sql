@@ -101,7 +101,11 @@ INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_id`) VALUES
 (965,1,NULL),
 (965,3,NULL),
 (965,2,25),
-(1055,2,26);
+(1055,2,26)
+(1323,1,NULL),
+(1323,2,28),
+(1323,3,NULL),
+(1323,5,NULL);
 
 INSERT INTO `Chapter` (`id`, `sticky`, `name`) VALUES
 (1,'yes','RackObjectType'),
@@ -120,7 +124,8 @@ INSERT INTO `Chapter` (`id`, `sticky`, `name`) VALUES
 (24,'no','network security models'),
 (25,'no','wireless models'),
 (26,'no','fibre channel switch models'),
-(27,'no','PDU models');
+(27,'no','PDU models'),
+(28,'no','Voice/video hardware');
 
 INSERT INTO `PortInnerInterface` VALUES
 (1,'hardwired'),
