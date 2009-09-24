@@ -3192,6 +3192,7 @@ function renderPortOIFCompatViewer()
 {
 	global $nextorder;
 	$order = 'odd';
+	$last_left_oif_id = NULL;
 	echo '<br><table class=cooltable border=0 cellpadding=5 cellspacing=0 align=center>';
 	echo '<tr><th>outer interface</th><th>outer interface</th></tr>';
 	foreach (getPortOIFCompat() as $pair)
