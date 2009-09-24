@@ -93,6 +93,7 @@ td.pcright {
 .msg_300, .msg_neutral {
 	background-color: #c0c0c0;
 	border-color: black;
+	font-weight: bold;
 }
 
 .msg_warning {
