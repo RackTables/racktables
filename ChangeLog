@@ -1,5 +1,6 @@
 0.17.6
 	update: voice/video devices
+	bugfix: PHP warning
 0.17.5 2009-09-16
 	bugfix: corrected reference counters in tag tree
 	bugfix: "cn" autotag was not generated for objects
