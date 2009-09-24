@@ -962,8 +962,8 @@ function resetUIConfig()
 	setConfigVar ('PREVIEW_IMAGE_MAXPXS', '320');
 	setConfigVar ('VENDOR_SIEVE', '');
 	setConfigVar ('IPV4LB_LISTSRC', '{$typeid_4}');
-	setConfigVar ('IPV4OBJ_LISTSRC','{$typeid_4} or {$typeid_7} or {$typeid_8} or {$typeid_12} or {$typeid_445} or {$typeid_447}');
-	setConfigVar ('IPV4NAT_LISTSRC','{$typeid_4} or {$typeid_7} or {$typeid_8}');
+	setConfigVar ('IPV4OBJ_LISTSRC','{$typeid_4} or {$typeid_7} or {$typeid_8} or {$typeid_12} or {$typeid_445} or {$typeid_447} or {$typeid_798}');
+	setConfigVar ('IPV4NAT_LISTSRC','{$typeid_4} or {$typeid_7} or {$typeid_8} or {$typeid_798}');
 	setConfigVar ('ASSETWARN_LISTSRC','{$typeid_4} or {$typeid_7} or {$typeid_8}');
 	setConfigVar ('NAMEWARN_LISTSRC','{$typeid_4} or {$typeid_7} or {$typeid_8}');
 	setConfigVar ('RACKS_PER_ROW','12');
@@ -973,7 +973,7 @@ function resetUIConfig()
 	setConfigVar ('FILTER_SUGGEST_TAGS','yes');
 	setConfigVar ('FILTER_SUGGEST_PREDICATES','yes');
 	setConfigVar ('FILTER_SUGGEST_EXTRA','no');
-        setConfigVar ('DEFAULT_SNMP_COMMUNITY','public');
+	setConfigVar ('DEFAULT_SNMP_COMMUNITY','public');
 	setConfigVar ('IPV4_ENABLE_KNIGHT','yes');
 	setConfigVar ('TAGS_TOPLIST_SIZE','50');
 	setConfigVar ('TAGS_QUICKLIST_SIZE','20');
