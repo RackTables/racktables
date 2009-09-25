@@ -2424,6 +2424,19 @@ function useInsertBlade ($tablename, $values)
 	return TRUE;
 }
 
+function usePreparedInsertBlade ($tablename, $columns)
+{
+	global $dbxlink;
+	$query = "INSERT INTO ${tablename} (" . implode (', ', array_keys ($columns));
+	$query .= ') VALUES (' . implode (', ', array_fill (0, count ($columns), '?')) . ')';
+	// Now the query should be as follows:
+	// INSERT INTO table (c1, c2, c3) VALUES (?, ?, ?)
+	$prepared = $dbxlink->prepare ($query);
+	if (!$prepared->execute (array_values ($columns)))
+		return FALSE;
+	return $prepared->rowCount() == 1;
+}
+
 // This swiss-knife blade deletes one record from the specified table
 // using the specified key name and value.
 function useDeleteBlade ($tablename, $keyname, $keyvalue)
@@ -3114,14 +3127,14 @@ function createIPv4Prefix ($range = '', $name = '', $is_bcast = FALSE, $taglist 
 	}
 	$binmask = binMaskFromDec($maskL);
 	$ipL = $ipL & $binmask;
-	$result = useInsertBlade
+	$result = usePreparedInsertBlade
 	(
 		'IPv4Network',
 		array
 		(
 			'ip' => sprintf ('%u', $ipL),
-			'mask' => "'${maskL}'",
-			'name' => "'${name}'"
+			'mask' => $maskL,
+			'name' => $name
 		)
 	);
 	if ($result != TRUE)
