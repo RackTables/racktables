@@ -3165,7 +3165,7 @@ function destroyIPv4Prefix ($id = 0)
 
 function loadScript ($name)
 {
-	$result = useSelectBlade ("select script_text from Script where script_name = '${name}'");
+	$result = useSelectBlade ("select script_text from Script where script_name = '${name}'", __FUNCTION__);
 	$row = $result->fetch (PDO::FETCH_NUM);
 	if ($row !== FALSE)
 		return $row[0];
@@ -3576,7 +3576,7 @@ function commitDeleteFile ($file_id)
 function getChapterList ()
 {
 	$ret = array();
-	$result = useSelectBlade ('SELECT id, sticky, name, count(chapter_id) as wordc FROM Chapter LEFT JOIN Dictionary ON Chapter.id = chapter_id GROUP BY id ORDER BY name');
+	$result = useSelectBlade ('SELECT id, sticky, name, count(chapter_id) as wordc FROM Chapter LEFT JOIN Dictionary ON Chapter.id = chapter_id GROUP BY id ORDER BY name', __FUNCTION__);
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 		$ret[$row['id']] = $row;
 	return $ret;
@@ -3602,7 +3602,7 @@ function acquireLDAPCache ($form_username, $password_hash, $expiry = 0)
 	$query = "select now() - first_success as success_age, now() - last_retry as retry_age, displayed_name, memberof " .
 		"from LDAPCache where presented_username = '${form_username}' and successful_hash = '${password_hash}' " .
 		"having success_age < ${expiry} for update";
-	$result = useSelectBlade ($query);
+	$result = useSelectBlade ($query, __FUNCTION__);
 	if ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
 		$row['memberof'] = unserialize (base64_decode ($row['memberof']));
