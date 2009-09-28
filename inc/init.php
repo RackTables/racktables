@@ -55,7 +55,7 @@ else
 	(
 		"Database connection parameters are read from inc/secret.php file, " .
 		"which cannot be found.\nYou probably need to complete the installation " .
-		"procedure by following <a href='${root}install.php'>this link</a>.",
+		"procedure by following <a href='install.php'>this link</a>.",
 		__FILE__
 	);
 	exit (1);
@@ -106,7 +106,7 @@ if ($dbver != CODE_VERSION)
 		'just upgraded to version ' . CODE_VERSION . ', while the '.
 		'database version is ' . $dbver . '. No user will be ' .
 		'either authenticated or shown any page until the upgrade is ' .
-		"finished. Follow <a href='${root}upgrade.php'>this link</a> and " .
+		"finished. Follow <a href='upgrade.php'>this link</a> and " .
 		'authenticate as administrator to finish the upgrade.</p>';
 	exit (1);
 }
@@ -197,7 +197,7 @@ if (isset ($_REQUEST['tab']))
 elseif (basename($_SERVER['PHP_SELF']) == 'index.php' and getConfigVar ('SHOW_LAST_TAB') == 'yes' and isset ($_SESSION['RTLT'][$pageno]))
 {
 	$tabno = $_SESSION['RTLT'][$pageno];
-	$url = "${root}?page=$pageno&tab=$tabno";
+	$url = "?page=$pageno&tab=$tabno";
 	foreach ($_GET as $name=>$value)
 	{
 		if ($name == 'page' or $name == 'tab') continue;
