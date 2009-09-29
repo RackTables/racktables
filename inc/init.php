@@ -9,19 +9,6 @@
 *
 */
 
-// "Note that when using ISAPI with IIS, the value will be 'off' if the
-// request was not made through the HTTPS protocol."
-$root = (empty($_SERVER['HTTPS']) or $_SERVER['HTTPS'] == 'off') ? 'http://' : 'https://';
-$root .= isset ($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : ($_SERVER['SERVER_NAME'].($_SERVER['SERVER_PORT']=='80'?'':$_SERVER['SERVER_PORT']));
-// "Since PHP 4.3.0, you will often get a slash or a dot back from
-// dirname() in situations where the older functionality would have given
-// you the empty string."
-// "On Windows, both slash (/) and backslash (\) are used as directory
-// separator character."
-$root .= strtr (dirname ($_SERVER['PHP_SELF']), '\\', '/');
-if (substr ($root, -1) != '/')
-	$root .= '/';
-
 // This is the first thing we need to do.
 require_once 'inc/config.php';
 
@@ -197,7 +184,7 @@ if (isset ($_REQUEST['tab']))
 elseif (basename($_SERVER['PHP_SELF']) == 'index.php' and getConfigVar ('SHOW_LAST_TAB') == 'yes' and isset ($_SESSION['RTLT'][$pageno]))
 {
 	$tabno = $_SESSION['RTLT'][$pageno];
-	$url = "?page=$pageno&tab=$tabno";
+	$url = "index.php?page=$pageno&tab=$tabno";
 	foreach ($_GET as $name=>$value)
 	{
 		if ($name == 'page' or $name == 'tab') continue;

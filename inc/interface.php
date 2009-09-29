@@ -2750,9 +2750,9 @@ function renderAddMultipleObjectsForm ()
 function printGreeting ()
 {
 	global $remote_username, $remote_displayname;
-	echo "Hello, <a href='?page=myaccount&tab=default'>${remote_displayname}</a>. This is RackTables " .
+	echo "Hello, <a href='index.php?page=myaccount&tab=default'>${remote_displayname}</a>. This is RackTables " .
 		CODE_VERSION .
-		". Click <a href='?logout'>here</a> to logout.";
+		". Click <a href='index.php?logout'>here</a> to logout.";
 }
 
 function renderSearchResults ()
@@ -2860,19 +2860,19 @@ function renderSearchResults ()
 			case 'ipv4addressbydq':
 				$parentnet = getIPv4AddressNetworkId ($record);
 				if ($parentnet !== NULL)
-					echo "<script language='Javascript'>document.location='?page=ipv4net&tab=default&id=${parentnet}&hl_ipv4_addr=${record}';//</script>";
+					echo "<script language='Javascript'>document.location='index.php?page=ipv4net&tab=default&id=${parentnet}&hl_ipv4_addr=${record}';//</script>";
 				else
-					echo "<script language='Javascript'>document.location='?page=ipaddress&ip=${record}';//</script>";
+					echo "<script language='Javascript'>document.location='index.php?page=ipaddress&ip=${record}';//</script>";
 				break;
 			case 'ipv4addressbydescr':
 				$parentnet = getIPv4AddressNetworkId ($record['ip']);
 				if ($parentnet !== NULL)
-					echo "<script language='Javascript'>document.location='?page=ipv4net&tab=default&id=${parentnet}&hl_ipv4_addr=${record['ip']}';//</script>";
+					echo "<script language='Javascript'>document.location='index.php?page=ipv4net&tab=default&id=${parentnet}&hl_ipv4_addr=${record['ip']}';//</script>";
 				else
-					echo "<script language='Javascript'>document.location='?page=ipaddress&ip=${record['ip']}';//</script>";
+					echo "<script language='Javascript'>document.location='index.php?page=ipaddress&ip=${record['ip']}';//</script>";
 				break;
 			case 'ipv4network':
-				echo "<script language='Javascript'>document.location='?page=ipv4net";
+				echo "<script language='Javascript'>document.location='index.php?page=ipv4net";
 				echo "&id=${record['id']}";
 				echo "';//</script>";
 				break;
@@ -2881,22 +2881,22 @@ function renderSearchResults ()
 					$hl = '&hl_port_id=' . key ($record['by_port']);
 				else
 					$hl = '';
-				echo "<script language='Javascript'>document.location='?page=object&object_id=${record['id']}${hl}';//</script>";
+				echo "<script language='Javascript'>document.location='index.php?page=object&object_id=${record['id']}${hl}';//</script>";
 				break;
 			case 'ipv4rspool':
-				echo "<script language='Javascript'>document.location='?page=ipv4rspool&pool_id=${record['id']}';//</script>";
+				echo "<script language='Javascript'>document.location='index.php?page=ipv4rspool&pool_id=${record['id']}';//</script>";
 				break;
 			case 'ipv4vs':
-				echo "<script language='Javascript'>document.location='?page=ipv4vs&vs_id=${record['id']}';//</script>";
+				echo "<script language='Javascript'>document.location='index.php?page=ipv4vs&vs_id=${record['id']}';//</script>";
 				break;
 			case 'user':
-				echo "<script language='Javascript'>document.location='?page=user&user_id=${record['user_id']}';//</script>";
+				echo "<script language='Javascript'>document.location='index.php?page=user&user_id=${record['user_id']}';//</script>";
 				break;
 			case 'file':
-				echo "<script language='Javascript'>document.location='?page=file&file_id=${record['id']}';//</script>";
+				echo "<script language='Javascript'>document.location='index.php?page=file&file_id=${record['id']}';//</script>";
 				break;
 			case 'rack':
-				echo "<script language='Javascript'>document.location='?page=rack&rack_id=${record['id']}';//</script>";
+				echo "<script language='Javascript'>document.location='index.php?page=rack&rack_id=${record['id']}';//</script>";
 				break;
 		}
 		return;
@@ -2910,7 +2910,7 @@ function renderSearchResults ()
 			switch ($where)
 			{
 				case 'object':
-					startPortlet ("<a href='?page=depot'>Objects</a>");
+					startPortlet ("<a href='index.php?page=depot'>Objects</a>");
 					echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
 					echo '<tr><th>what</th><th>why</th></tr>';
 					foreach ($what as $obj)
@@ -2979,7 +2979,7 @@ function renderSearchResults ()
 					finishPortlet();
 					break;
 				case 'ipv4network':
-					startPortlet ("<a href='?page=ipv4space'>IPv4 networks</a>");
+					startPortlet ("<a href='index.php?page=ipv4space'>IPv4 networks</a>");
 					echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
 					foreach ($what as $cell)
 					{
@@ -3001,9 +3001,9 @@ function renderSearchResults ()
 						echo "<tr class=row_${order}><td class=tdleft>";
 						$parentnet = getIPv4AddressNetworkId ($addr['ip']);
 						if ($parentnet !== NULL)
-							echo "<a href='?page=ipv4net&tab=default&id=${parentnet}&hl_ipv4_addr=${addr['ip']}'>${addr['ip']}</a></td>";
+							echo "<a href='index.php?page=ipv4net&tab=default&id=${parentnet}&hl_ipv4_addr=${addr['ip']}'>${addr['ip']}</a></td>";
 						else
-							echo "<a href='?page=ipaddress&ip=${addr['ip']}'>${addr['ip']}</a></td>";
+							echo "<a href='index.php?page=ipaddress&ip=${addr['ip']}'>${addr['ip']}</a></td>";
 						echo "<td class=tdleft>${addr['name']}</td></tr>";
 						$order = $nextorder[$order];
 					}
@@ -3011,7 +3011,7 @@ function renderSearchResults ()
 					finishPortlet();
 					break;
 				case 'ipv4rspool':
-					startPortlet ("<a href='?page=ipv4rsplist'>RS pools</a>");
+					startPortlet ("<a href='index.php?page=ipv4rsplist'>RS pools</a>");
 					echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
 					foreach ($what as $cell)
 					{
@@ -3024,7 +3024,7 @@ function renderSearchResults ()
 					finishPortlet();
 					break;
 				case 'ipv4vs':
-					startPortlet ("<a href='?page=ipv4vslist'>Virtual services</a>");
+					startPortlet ("<a href='index.php?page=ipv4vslist'>Virtual services</a>");
 					echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
 					foreach ($what as $cell)
 					{
@@ -3037,7 +3037,7 @@ function renderSearchResults ()
 					finishPortlet();
 					break;
 				case 'user':
-					startPortlet ("<a href='?page=userlist'>Users</a>");
+					startPortlet ("<a href='index.php?page=userlist'>Users</a>");
 					echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
 					foreach ($what as $item)
 					{
@@ -3050,7 +3050,7 @@ function renderSearchResults ()
 					finishPortlet();
 					break;
 				case 'file':
-					startPortlet ("<a href='?page=files'>Files</a>");
+					startPortlet ("<a href='index.php?page=files'>Files</a>");
 					echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
 					foreach ($what as $cell)
 					{
@@ -3063,7 +3063,7 @@ function renderSearchResults ()
 					finishPortlet();
 					break;
 				case 'rack':
-					startPortlet ("<a href='?page=rackspace'>Racks</a>");
+					startPortlet ("<a href='index.php?page=rackspace'>Racks</a>");
 					echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
 					foreach ($what as $cell)
 					{
@@ -3223,7 +3223,7 @@ function renderConfigMainpage ()
 	echo '<ul>';
 	foreach ($page as $cpageno => $cpage)
 		if (isset ($cpage['parent']) and $cpage['parent'] == $pageno)
-			echo "<li><a href='?page=${cpageno}'>" . $cpage['title'] . "</li>\n";
+			echo "<li><a href='index.php?page=${cpageno}'>" . $cpage['title'] . "</li>\n";
 	echo '</ul>';
 }
 
@@ -3737,7 +3737,7 @@ function renderTagStats ()
 				echo '&nbsp;';
 			else
 			{
-				echo "<a href='?page=" . $pagebyrealm[$realm] . "&cft[]=${taginfo['id']}'>";
+				echo "<a href='index.php?page=" . $pagebyrealm[$realm] . "&cft[]=${taginfo['id']}'>";
 				echo $taginfo['refcnt'][$realm] . '</a>';
 			}
 			echo '</td>';
@@ -5252,7 +5252,7 @@ function renderAccessDenied ()
 	echo serializeTags ($auto_tags) . "&nbsp;</td></tr>\n";
 	echo "<tr><th width='50%' class=tdright>Requested page:</th><td class=tdleft>${pageno}</td></tr>\n";
 	echo "<tr><th width='50%' class=tdright>Requested tab:</th><td class=tdleft>${tabno}</td></tr>\n";
-	echo "<tr><td colspan=2 align=center>Click <a href='?logout'>here</a> to logout.</td></tr>\n";
+	echo "<tr><td colspan=2 align=center>Click <a href='index.php?logout'>here</a> to logout.</td></tr>\n";
 	echo "</table>\n";
 	echo "</body></html>";
 	die;
@@ -5614,7 +5614,7 @@ function printIPv4NetInfoTDs ($netinfo, $tdclass = 'tdleft', $indent = 0, $symbo
 			echo '</a>';
 	}
 	if (isset ($netinfo['id']))
-		echo "<a href='?page=ipv4net&id=${netinfo['id']}'>";
+		echo "<a href='index.php?page=ipv4net&id=${netinfo['id']}'>";
 	echo "${netinfo['ip']}/${netinfo['mask']}";
 	if (isset ($netinfo['id']))
 		echo '</a>';
@@ -5638,7 +5638,7 @@ function printIPv4NetInfoTDs ($netinfo, $tdclass = 'tdleft', $indent = 0, $symbo
 	{
 		echo niftyString ($netinfo['name']);
 		if (count ($netinfo['etags']))
-			echo '<br><small>' . serializeTags ($netinfo['etags'], "?page=ipv4space&tab=default&") . '</small>';
+			echo '<br><small>' . serializeTags ($netinfo['etags'], "index.php?page=ipv4space&tab=default&") . '</small>';
 	}
 	echo "</td>";
 }
@@ -5651,7 +5651,7 @@ function renderCell ($cell)
 		echo "<table class='slbcell vscell'><tr><td rowspan=3 width='5%'>";
 		printImageHREF ('USER');
 		echo '</td>';
-		echo "<td><a href='?page=user&user_id=${cell['user_id']}'>${cell['user_name']}</a></td></tr>";
+		echo "<td><a href='index.php?page=user&user_id=${cell['user_id']}'>${cell['user_name']}</a></td></tr>";
 		if (strlen ($cell['user_realname']))
 			echo "<tr><td><strong>" . niftyString ($cell['user_realname']) . "</strong></td></tr>";
 		else
@@ -5679,7 +5679,7 @@ function renderCell ($cell)
 				break;
 		}
 		echo "</td><td>";
-		printf ("<a href='?page=file&file_id=%s'><strong>%s</strong></a>", $cell['id'], niftyString ($cell['name']));
+		printf ("<a href='index.php?page=file&file_id=%s'><strong>%s</strong></a>", $cell['id'], niftyString ($cell['name']));
 		echo "</td><td rowspan=3 valign=top>";
 		if (isset ($cell['links']) and count ($cell['links']))
 			printf ("<small>%s</small>", serializeFileLinks ($cell['links']));
@@ -5699,7 +5699,7 @@ function renderCell ($cell)
 		echo "<table class='slbcell vscell'><tr><td rowspan=3 width='5%'>";
 		printImageHREF ('VS');
 		echo "</td><td>";
-		echo "<a href='?page=ipv4vs&vs_id=${cell['id']}'>";
+		echo "<a href='index.php?page=ipv4vs&vs_id=${cell['id']}'>";
 		echo $cell['dname'] . "</a></td></tr><tr><td>";
 		echo $cell['name'] . '</td></tr><tr><td>';
 		echo count ($cell['etags']) ? ("<small>" . serializeTags ($cell['etags']) . "</small>") : '&nbsp;';
@@ -5707,7 +5707,7 @@ function renderCell ($cell)
 		break;
 	case 'ipv4rspool':
 		echo "<table class='slbcell vscell'><tr><td>";
-		echo "<a href='?page=ipv4rspool&pool_id=${cell['id']}'>";
+		echo "<a href='index.php?page=ipv4rspool&pool_id=${cell['id']}'>";
 		echo !strlen ($cell['name']) ? "ANONYMOUS pool [${cell['id']}]" : niftyString ($cell['name']);
 		echo "</a></td></tr><tr><td>";
 		printImageHREF ('RS pool');
@@ -5721,7 +5721,7 @@ function renderCell ($cell)
 		echo "<table class='slbcell vscell'><tr><td rowspan=3 width='5%'>";
 		printImageHREF ('NET');
 		echo '</td>';
-		echo "<td><a href='?page=ipv4net&id=${cell['id']}'>${cell['ip']}/${cell['mask']}</a></td></tr>";
+		echo "<td><a href='index.php?page=ipv4net&id=${cell['id']}'>${cell['ip']}/${cell['mask']}</a></td></tr>";
 		if (strlen ($cell['name']))
 			echo "<tr><td><strong>" . niftyString ($cell['name']) . "</strong></td></tr>";
 		else
@@ -5737,7 +5737,7 @@ function renderCell ($cell)
 		echo "<img border=0 width=${thumbwidth} height=${thumbheight} title='${cell['height']} units' ";
 		echo "src='render_image.php?img=minirack&rack_id=${cell['id']}'>";
 		echo "</td><td>";
-		printf ("<a href='?page=rack&rack_id=%s'><strong>%s</strong></a>", $cell['id'], niftyString ($cell['name']));
+		printf ("<a href='index.php?page=rack&rack_id=%s'><strong>%s</strong></a>", $cell['id'], niftyString ($cell['name']));
 		echo "</td></tr><tr><td>";
 		echo niftyString ($cell['comment']);
 		echo "</td></tr><tr><td>";
@@ -5748,7 +5748,7 @@ function renderCell ($cell)
 		echo "<table class='slbcell vscell'><tr><td rowspan=2 width='5%'>";
 		printImageHREF ('OBJECT');
 		echo '</td>';
-		echo "<td><a href='?page=object&object_id=${cell['id']}'>";
+		echo "<td><a href='index.php?page=object&object_id=${cell['id']}'>";
 		echo "<strong>" . niftyString ($cell['dname']) . "</strong></a></td></tr>";
 		echo '<td>';
 		echo count ($cell['etags']) ? ("<small>" . serializeTags ($cell['etags']) . "</small>") : '&nbsp;';
@@ -5764,7 +5764,7 @@ function renderLBCell ($object_id)
 {
 	$oi = spotEntity ('object', $object_id);
 	echo "<table class=slbcell><tr><td>";
-	echo "<a href='?page=object&object_id=${object_id}'>${oi['dname']}</a>";
+	echo "<a href='index.php?page=object&object_id=${object_id}'>${oi['dname']}</a>";
 	echo "</td></tr><tr><td>";
 	printImageHREF ('LB');
 	echo "</td></tr><tr><td>";
@@ -5779,7 +5779,7 @@ function renderRouterCell ($dottedquad, $ifname, $cell)
 	if (strlen ($ifname))
 		echo '@' . $ifname;
 	echo "</td>";
-	echo "<td><a href='?page=object&object_id=${cell['id']}&hl_ipv4_addr=${dottedquad}'><strong>${cell['dname']}</strong></a></td>";
+	echo "<td><a href='index.php?page=object&object_id=${cell['id']}&hl_ipv4_addr=${dottedquad}'><strong>${cell['dname']}</strong></a></td>";
 	echo "</td></tr><tr><td>";
 	printImageHREF ('router');
 	echo "</td></tr><tr><td>";
@@ -5885,7 +5885,7 @@ function showPathAndSearch ($pageno)
 			);
 		else
 			$title = dynamic_title_decoder ($no);
-		echo ": <a href='?page=${no}&tab=default";
+		echo ": <a href='index.php?page=${no}&tab=default";
 		foreach ($title['params'] as $param_name => $param_value)
 			echo "&${param_name}=${param_value}";
 		echo "'>" . $title['name'] . "</a>";
@@ -5927,7 +5927,7 @@ function showTabs ($pageno, $tabno)
 		if ($tabidx == $tabno)
 		       $tabclass = 'current'; // override any class for an an active selection
 		echo "<li><a class=${tabclass}";
-		echo " href='?page=${pageno}&tab=${tabidx}";
+		echo " href='index.php?page=${pageno}&tab=${tabidx}";
 		if (isset ($page[$pageno]['bypass']) and isset ($_REQUEST[$page[$pageno]['bypass']]))
 		{
 			$bpname = $page[$pageno]['bypass'];
