@@ -2746,15 +2746,14 @@ function renderAddMultipleObjectsForm ()
 
 function printGreeting ()
 {
-	global $root, $remote_username, $remote_displayname;
-	echo "Hello, <a href='${root}?page=myaccount&tab=default'>${remote_displayname}</a>. This is RackTables " .
+	global $remote_username, $remote_displayname;
+	echo "Hello, <a href='index.php?page=myaccount&tab=default'>${remote_displayname}</a>. This is RackTables " .
 		CODE_VERSION .
-		". Click <a href='${root}?logout'>here</a> to logout.";
+		". Click <a href='index.php?logout'>here</a> to logout.";
 }
 
 function renderSearchResults ()
 {
-	global $root;
 	$terms = trim ($_REQUEST['q']);
 	if (!strlen ($terms))
 	{
@@ -2858,19 +2857,19 @@ function renderSearchResults ()
 			case 'ipv4addressbydq':
 				$parentnet = getIPv4AddressNetworkId ($record);
 				if ($parentnet !== NULL)
-					echo "<script language='Javascript'>document.location='${root}?page=ipv4net&tab=default&id=${parentnet}&hl_ipv4_addr=${record}';//</script>";
+					echo "<script language='Javascript'>document.location='index.php?page=ipv4net&tab=default&id=${parentnet}&hl_ipv4_addr=${record}';//</script>";
 				else
-					echo "<script language='Javascript'>document.location='${root}?page=ipaddress&ip=${record}';//</script>";
+					echo "<script language='Javascript'>document.location='index.php?page=ipaddress&ip=${record}';//</script>";
 				break;
 			case 'ipv4addressbydescr':
 				$parentnet = getIPv4AddressNetworkId ($record['ip']);
 				if ($parentnet !== NULL)
-					echo "<script language='Javascript'>document.location='${root}?page=ipv4net&tab=default&id=${parentnet}&hl_ipv4_addr=${record['ip']}';//</script>";
+					echo "<script language='Javascript'>document.location='index.php?page=ipv4net&tab=default&id=${parentnet}&hl_ipv4_addr=${record['ip']}';//</script>";
 				else
-					echo "<script language='Javascript'>document.location='${root}?page=ipaddress&ip=${record['ip']}';//</script>";
+					echo "<script language='Javascript'>document.location='index.php?page=ipaddress&ip=${record['ip']}';//</script>";
 				break;
 			case 'ipv4network':
-				echo "<script language='Javascript'>document.location='${root}?page=ipv4net";
+				echo "<script language='Javascript'>document.location='index.php?page=ipv4net";
 				echo "&id=${record['id']}";
 				echo "';//</script>";
 				break;
@@ -2879,22 +2878,22 @@ function renderSearchResults ()
 					$hl = '&hl_port_id=' . key ($record['by_port']);
 				else
 					$hl = '';
-				echo "<script language='Javascript'>document.location='${root}?page=object&object_id=${record['id']}${hl}';//</script>";
+				echo "<script language='Javascript'>document.location='index.php?page=object&object_id=${record['id']}${hl}';//</script>";
 				break;
 			case 'ipv4rspool':
-				echo "<script language='Javascript'>document.location='${root}?page=ipv4rspool&pool_id=${record['id']}';//</script>";
+				echo "<script language='Javascript'>document.location='index.php?page=ipv4rspool&pool_id=${record['id']}';//</script>";
 				break;
 			case 'ipv4vs':
-				echo "<script language='Javascript'>document.location='${root}?page=ipv4vs&vs_id=${record['id']}';//</script>";
+				echo "<script language='Javascript'>document.location='index.php?page=ipv4vs&vs_id=${record['id']}';//</script>";
 				break;
 			case 'user':
-				echo "<script language='Javascript'>document.location='${root}?page=user&user_id=${record['user_id']}';//</script>";
+				echo "<script language='Javascript'>document.location='index.php?page=user&user_id=${record['user_id']}';//</script>";
 				break;
 			case 'file':
-				echo "<script language='Javascript'>document.location='${root}?page=file&file_id=${record['id']}';//</script>";
+				echo "<script language='Javascript'>document.location='index.php?page=file&file_id=${record['id']}';//</script>";
 				break;
 			case 'rack':
-				echo "<script language='Javascript'>document.location='${root}?page=rack&rack_id=${record['id']}';//</script>";
+				echo "<script language='Javascript'>document.location='index.php?page=rack&rack_id=${record['id']}';//</script>";
 				break;
 		}
 		return;
@@ -2908,7 +2907,7 @@ function renderSearchResults ()
 			switch ($where)
 			{
 				case 'object':
-					startPortlet ("<a href='${root}?page=depot'>Objects</a>");
+					startPortlet ("<a href='index.php?page=depot'>Objects</a>");
 					echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
 					echo '<tr><th>what</th><th>why</th></tr>';
 					foreach ($what as $obj)
@@ -2977,7 +2976,7 @@ function renderSearchResults ()
 					finishPortlet();
 					break;
 				case 'ipv4network':
-					startPortlet ("<a href='${root}?page=ipv4space'>IPv4 networks</a>");
+					startPortlet ("<a href='index.php?page=ipv4space'>IPv4 networks</a>");
 					echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
 					foreach ($what as $cell)
 					{
@@ -2999,9 +2998,9 @@ function renderSearchResults ()
 						echo "<tr class=row_${order}><td class=tdleft>";
 						$parentnet = getIPv4AddressNetworkId ($addr['ip']);
 						if ($parentnet !== NULL)
-							echo "<a href='${root}?page=ipv4net&tab=default&id=${parentnet}&hl_ipv4_addr=${addr['ip']}'>${addr['ip']}</a></td>";
+							echo "<a href='index.php?page=ipv4net&tab=default&id=${parentnet}&hl_ipv4_addr=${addr['ip']}'>${addr['ip']}</a></td>";
 						else
-							echo "<a href='${root}?page=ipaddress&ip=${addr['ip']}'>${addr['ip']}</a></td>";
+							echo "<a href='index.php?page=ipaddress&ip=${addr['ip']}'>${addr['ip']}</a></td>";
 						echo "<td class=tdleft>${addr['name']}</td></tr>";
 						$order = $nextorder[$order];
 					}
@@ -3009,7 +3008,7 @@ function renderSearchResults ()
 					finishPortlet();
 					break;
 				case 'ipv4rspool':
-					startPortlet ("<a href='${root}?page=ipv4rsplist'>RS pools</a>");
+					startPortlet ("<a href='index.php?page=ipv4rsplist'>RS pools</a>");
 					echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
 					foreach ($what as $cell)
 					{
@@ -3022,7 +3021,7 @@ function renderSearchResults ()
 					finishPortlet();
 					break;
 				case 'ipv4vs':
-					startPortlet ("<a href='${root}?page=ipv4vslist'>Virtual services</a>");
+					startPortlet ("<a href='index.php?page=ipv4vslist'>Virtual services</a>");
 					echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
 					foreach ($what as $cell)
 					{
@@ -3035,7 +3034,7 @@ function renderSearchResults ()
 					finishPortlet();
 					break;
 				case 'user':
-					startPortlet ("<a href='${root}?page=userlist'>Users</a>");
+					startPortlet ("<a href='index.php?page=userlist'>Users</a>");
 					echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
 					foreach ($what as $item)
 					{
@@ -3048,7 +3047,7 @@ function renderSearchResults ()
 					finishPortlet();
 					break;
 				case 'file':
-					startPortlet ("<a href='${root}?page=files'>Files</a>");
+					startPortlet ("<a href='index.php?page=files'>Files</a>");
 					echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
 					foreach ($what as $cell)
 					{
@@ -3061,7 +3060,7 @@ function renderSearchResults ()
 					finishPortlet();
 					break;
 				case 'rack':
-					startPortlet ("<a href='${root}?page=rackspace'>Racks</a>");
+					startPortlet ("<a href='index.php?page=rackspace'>Racks</a>");
 					echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
 					foreach ($what as $cell)
 					{
@@ -3217,11 +3216,11 @@ function renderPortOIFCompatEditor()
 // but use some proper abstract function later.
 function renderConfigMainpage ()
 {
-	global $pageno, $page, $root;
+	global $pageno, $page;
 	echo '<ul>';
 	foreach ($page as $cpageno => $cpage)
 		if (isset ($cpage['parent']) and $cpage['parent'] == $pageno)
-			echo "<li><a href='${root}?page=${cpageno}'>" . $cpage['title'] . "</li>\n";
+			echo "<li><a href='index.php?page=${cpageno}'>" . $cpage['title'] . "</li>\n";
 	echo '</ul>';
 }
 
@@ -3543,14 +3542,14 @@ function printImageHREF ($tag, $title = '', $do_input = FALSE, $tabindex = 0)
 
 function getImageHREF ($tag, $title = '', $do_input = FALSE, $tabindex = 0)
 {
-	global $root, $image;
+	global $image;
 	if (!isset ($image[$tag]))
 		$tag = 'error';
 	$img = $image[$tag];
 	if ($do_input == TRUE)
 		return
 			"<input type=image name=submit class=icon " .
-			"src='${root}${img['path']}' " .
+			"src='${img['path']}' " .
 			"border=0 " .
 			($tabindex ? "tabindex=${tabindex}" : '') .
 			(!strlen ($title) ? '' : " title='${title}'") . // JT: Add title to input hrefs too
@@ -3558,7 +3557,7 @@ function getImageHREF ($tag, $title = '', $do_input = FALSE, $tabindex = 0)
 	else
 		return
 			"<img " .
-			"src='${root}${img['path']}' " .
+			"src='${img['path']}' " .
 			"width=${img['width']} " .
 			"height=${img['height']} " .
 			"border=0 " .
@@ -3569,8 +3568,7 @@ function getImageHREF ($tag, $title = '', $do_input = FALSE, $tabindex = 0)
 // This function returns URL for favourite icon.
 function getFaviconURL ()
 {
-	global $root;
-	return $root . 'pix/racktables.ico';
+	return 'pix/racktables.ico';
 }
 
 function renderSystemReports ()
@@ -3713,7 +3711,7 @@ function renderReports ($what)
 
 function renderTagStats ()
 {
-	global $taglist, $root;
+	global $taglist;
 	echo '<table border=1><tr><th>tag</th><th>total</th><th>objects</th><th>IPv4 nets</th><th>racks</th>';
 	echo '<th>IPv4 VS</th><th>IPv4 RS pools</th><th>users</th><th>files</th></tr>';
 	$pagebyrealm = array
@@ -3736,7 +3734,7 @@ function renderTagStats ()
 				echo '&nbsp;';
 			else
 			{
-				echo "<a href='${root}?page=" . $pagebyrealm[$realm] . "&cft[]=${taginfo['id']}'>";
+				echo "<a href='index.php?page=" . $pagebyrealm[$realm] . "&cft[]=${taginfo['id']}'>";
 				echo $taginfo['refcnt'][$realm] . '</a>';
 			}
 			echo '</td>';
@@ -4079,9 +4077,8 @@ function renderVirtualService ($vsid)
 
 function renderProgressBar ($percentage = 0, $theme = '')
 {
-	global $root;
 	$done = ((int) ($percentage * 100));
-	echo "<img width=100 height=10 border=0 title='${done}%' src='${root}render_image.php?img=progressbar&done=${done}";
+	echo "<img width=100 height=10 border=0 title='${done}%' src='render_image.php?img=progressbar&done=${done}";
 	echo (!strlen ($theme) ? '' : "&theme=${theme}") . "'>";
 }
 
@@ -5228,7 +5225,7 @@ function renderAccessDenied ()
 	echo "<link rel=stylesheet type='text/css' href=pi.css />\n";
 	echo "<link rel=icon href='" . getFaviconURL() . "' type='image/x-icon' />";
 	echo "</head><body>";
-	global $root, $pageno, $tabno,
+	global $pageno, $tabno,
 		$user_given_tags,
 		$target_given_tags,
 		$auto_tags,
@@ -5252,7 +5249,7 @@ function renderAccessDenied ()
 	echo serializeTags ($auto_tags) . "&nbsp;</td></tr>\n";
 	echo "<tr><th width='50%' class=tdright>Requested page:</th><td class=tdleft>${pageno}</td></tr>\n";
 	echo "<tr><th width='50%' class=tdright>Requested tab:</th><td class=tdleft>${tabno}</td></tr>\n";
-	echo "<tr><td colspan=2 align=center>Click <a href='${root}?logout'>here</a> to logout.</td></tr>\n";
+	echo "<tr><td colspan=2 align=center>Click <a href='index.php?logout'>here</a> to logout.</td></tr>\n";
 	echo "</table>\n";
 	echo "</body></html>";
 	die;
@@ -5270,7 +5267,7 @@ function renderMyAccount ()
 // File-related functions
 function renderFile ($file_id)
 {
-	global $nextorder, $aac, $root;
+	global $nextorder, $aac;
 	$file = spotEntity ('file', $file_id);
 	if ($file == NULL)
 	{
@@ -5287,7 +5284,7 @@ function renderFile ($file_id)
 	echo "<tr><th width='50%' class=tdright>Size:</th><td class=tdleft>";
 	if (isolatedPermission ('file', 'download', $file))
 	{
-		echo "<a href='${root}download.php?file_id=${file_id}'>";
+		echo "<a href='download.php?file_id=${file_id}'>";
 		printImageHREF ('download', 'Download file');
 		echo '</a>&nbsp;';
 	}
@@ -5362,8 +5359,7 @@ function renderFileReuploader ()
 
 function renderFileDownloader ($file_id)
 {
-	global $root;
-	echo "<br><center><a target='_blank' href='${root}download.php?file_id=${file_id}&asattach=1'>";
+	echo "<br><center><a target='_blank' href='download.php?file_id=${file_id}&asattach=1'>";
 	printImageHREF ('DOWNLOAD');
 	echo '</a></center>';
 }
@@ -5536,9 +5532,9 @@ function renderFilesForEntity ($entity_id)
 // Use special encoding for upload forms
 function printOpFormIntro ($opname, $extra = array(), $upload = FALSE)
 {
-	global $root, $pageno, $tabno, $page;
+	global $pageno, $tabno, $page;
 
-	echo "<form method=post name=${opname} action='${root}process.php?page=${pageno}&tab=${tabno}&op=${opname}'";
+	echo "<form method=post name=${opname} action='process.php?page=${pageno}&tab=${tabno}&op=${opname}'";
 	if ($upload)
 		echo " enctype='multipart/form-data'";
 	echo ">";
@@ -5594,7 +5590,6 @@ function printRoutersTD ($rlist, $as_cell = 'yes')
 // Same as for routers, but produce two TD cells to lay the content out better.
 function printIPv4NetInfoTDs ($netinfo, $tdclass = 'tdleft', $indent = 0, $symbol = 'spacer', $symbolurl = '')
 {
-	global $root;
 	if ($symbol == 'spacer')
 	{
 		$indent++;
@@ -5610,7 +5605,7 @@ function printIPv4NetInfoTDs ($netinfo, $tdclass = 'tdleft', $indent = 0, $symbo
 			echo '</a>';
 	}
 	if (isset ($netinfo['id']))
-		echo "<a href='${root}?page=ipv4net&id=${netinfo['id']}'>";
+		echo "<a href='index.php?page=ipv4net&id=${netinfo['id']}'>";
 	echo "${netinfo['ip']}/${netinfo['mask']}";
 	if (isset ($netinfo['id']))
 		echo '</a>';
@@ -5634,21 +5629,20 @@ function printIPv4NetInfoTDs ($netinfo, $tdclass = 'tdleft', $indent = 0, $symbo
 	{
 		echo niftyString ($netinfo['name']);
 		if (count ($netinfo['etags']))
-			echo '<br><small>' . serializeTags ($netinfo['etags'], "${root}?page=ipv4space&tab=default&") . '</small>';
+			echo '<br><small>' . serializeTags ($netinfo['etags'], "index.php?page=ipv4space&tab=default&") . '</small>';
 	}
 	echo "</td>";
 }
 
 function renderCell ($cell)
 {
-	global $root;
 	switch ($cell['realm'])
 	{
 	case 'user':
 		echo "<table class='slbcell vscell'><tr><td rowspan=3 width='5%'>";
 		printImageHREF ('USER');
 		echo '</td>';
-		echo "<td><a href='${root}?page=user&user_id=${cell['user_id']}'>${cell['user_name']}</a></td></tr>";
+		echo "<td><a href='index.php?page=user&user_id=${cell['user_id']}'>${cell['user_name']}</a></td></tr>";
 		if (strlen ($cell['user_realname']))
 			echo "<tr><td><strong>" . niftyString ($cell['user_realname']) . "</strong></td></tr>";
 		else
@@ -5676,7 +5670,7 @@ function renderCell ($cell)
 				break;
 		}
 		echo "</td><td>";
-		printf ("<a href='${root}?page=file&file_id=%s'><strong>%s</strong></a>", $cell['id'], niftyString ($cell['name']));
+		printf ("<a href='index.php?page=file&file_id=%s'><strong>%s</strong></a>", $cell['id'], niftyString ($cell['name']));
 		echo "</td><td rowspan=3 valign=top>";
 		if (isset ($cell['links']) and count ($cell['links']))
 			printf ("<small>%s</small>", serializeFileLinks ($cell['links']));
@@ -5685,7 +5679,7 @@ function renderCell ($cell)
 		echo '</td></tr><tr><td>';
 		if (isolatedPermission ('file', 'download', $cell))
 		{
-			echo "<a href='${root}download.php?file_id=${cell['id']}'>";
+			echo "<a href='download.php?file_id=${cell['id']}'>";
 			printImageHREF ('download', 'Download file');
 			echo '</a>&nbsp;';
 		}
@@ -5696,7 +5690,7 @@ function renderCell ($cell)
 		echo "<table class='slbcell vscell'><tr><td rowspan=3 width='5%'>";
 		printImageHREF ('VS');
 		echo "</td><td>";
-		echo "<a href='${root}?page=ipv4vs&vs_id=${cell['id']}'>";
+		echo "<a href='index.php?page=ipv4vs&vs_id=${cell['id']}'>";
 		echo $cell['dname'] . "</a></td></tr><tr><td>";
 		echo $cell['name'] . '</td></tr><tr><td>';
 		echo count ($cell['etags']) ? ("<small>" . serializeTags ($cell['etags']) . "</small>") : '&nbsp;';
@@ -5704,7 +5698,7 @@ function renderCell ($cell)
 		break;
 	case 'ipv4rspool':
 		echo "<table class='slbcell vscell'><tr><td>";
-		echo "<a href='${root}?page=ipv4rspool&pool_id=${cell['id']}'>";
+		echo "<a href='index.php?page=ipv4rspool&pool_id=${cell['id']}'>";
 		echo !strlen ($cell['name']) ? "ANONYMOUS pool [${cell['id']}]" : niftyString ($cell['name']);
 		echo "</a></td></tr><tr><td>";
 		printImageHREF ('RS pool');
@@ -5718,7 +5712,7 @@ function renderCell ($cell)
 		echo "<table class='slbcell vscell'><tr><td rowspan=3 width='5%'>";
 		printImageHREF ('NET');
 		echo '</td>';
-		echo "<td><a href='${root}?page=ipv4net&id=${cell['id']}'>${cell['ip']}/${cell['mask']}</a></td></tr>";
+		echo "<td><a href='index.php?page=ipv4net&id=${cell['id']}'>${cell['ip']}/${cell['mask']}</a></td></tr>";
 		if (strlen ($cell['name']))
 			echo "<tr><td><strong>" . niftyString ($cell['name']) . "</strong></td></tr>";
 		else
@@ -5734,7 +5728,7 @@ function renderCell ($cell)
 		echo "<img border=0 width=${thumbwidth} height=${thumbheight} title='${cell['height']} units' ";
 		echo "src='render_image.php?img=minirack&rack_id=${cell['id']}'>";
 		echo "</td><td>";
-		printf ("<a href='${root}?page=rack&rack_id=%s'><strong>%s</strong></a>", $cell['id'], niftyString ($cell['name']));
+		printf ("<a href='index.php?page=rack&rack_id=%s'><strong>%s</strong></a>", $cell['id'], niftyString ($cell['name']));
 		echo "</td></tr><tr><td>";
 		echo niftyString ($cell['comment']);
 		echo "</td></tr><tr><td>";
@@ -5745,7 +5739,7 @@ function renderCell ($cell)
 		echo "<table class='slbcell vscell'><tr><td rowspan=2 width='5%'>";
 		printImageHREF ('OBJECT');
 		echo '</td>';
-		echo "<td><a href='${root}?page=object&object_id=${cell['id']}'>";
+		echo "<td><a href='index.php?page=object&object_id=${cell['id']}'>";
 		echo "<strong>" . niftyString ($cell['dname']) . "</strong></a></td></tr>";
 		echo '<td>';
 		echo count ($cell['etags']) ? ("<small>" . serializeTags ($cell['etags']) . "</small>") : '&nbsp;';
@@ -5759,10 +5753,9 @@ function renderCell ($cell)
 
 function renderLBCell ($object_id)
 {
-	global $root;
 	$oi = spotEntity ('object', $object_id);
 	echo "<table class=slbcell><tr><td>";
-	echo "<a href='${root}?page=object&object_id=${object_id}'>${oi['dname']}</a>";
+	echo "<a href='index.php?page=object&object_id=${object_id}'>${oi['dname']}</a>";
 	echo "</td></tr><tr><td>";
 	printImageHREF ('LB');
 	echo "</td></tr><tr><td>";
@@ -5773,12 +5766,11 @@ function renderLBCell ($object_id)
 
 function renderRouterCell ($dottedquad, $ifname, $cell)
 {
-	global $root;
 	echo "<table class=slbcell><tr><td rowspan=3>${dottedquad}";
 	if (strlen ($ifname))
 		echo '@' . $ifname;
 	echo "</td>";
-	echo "<td><a href='${root}?page=object&object_id=${cell['id']}&hl_ipv4_addr=${dottedquad}'><strong>${cell['dname']}</strong></a></td>";
+	echo "<td><a href='index.php?page=object&object_id=${cell['id']}&hl_ipv4_addr=${dottedquad}'><strong>${cell['dname']}</strong></a></td>";
 	echo "</td></tr><tr><td>";
 	printImageHREF ('router');
 	echo "</td></tr><tr><td>";
@@ -5791,7 +5783,6 @@ function renderRouterCell ($dottedquad, $ifname, $cell)
 // if a preview cannot be shown
 function getFilePreviewCode ($file)
 {
-	global $root;
 	$ret = '';
 	switch ($file['type'])
 	{
@@ -5813,8 +5804,8 @@ function getFilePreviewCode ($file)
 				$resampled = TRUE;
 			}
 			if ($resampled)
-				$ret .= "<a href='${root}download.php?file_id=${file['id']}&asattach=no'>";
-			$ret .= "<img width=${width} height=${height} src='${root}render_image.php?img=preview&file_id=${file['id']}'>";
+				$ret .= "<a href='download.php?file_id=${file['id']}&asattach=no'>";
+			$ret .= "<img width=${width} height=${height} src='render_image.php?img=preview&file_id=${file['id']}'>";
 			if ($resampled)
 				$ret .= '</a><br>(click to zoom)';
 			break;
@@ -5871,7 +5862,7 @@ function showPathAndSearch ($pageno)
 		}
 		return $path;
 	}
-	global $root, $page;
+	global $page;
 	// Path.
 	echo "<td class=activemenuitem width='99%'>" . getConfigVar ('enterprise');
 	$path = getPath ($pageno);
@@ -5885,7 +5876,7 @@ function showPathAndSearch ($pageno)
 			);
 		else
 			$title = dynamic_title_decoder ($no);
-		echo ": <a href='${root}?page=${no}&tab=default";
+		echo ": <a href='index.php?page=${no}&tab=default";
 		foreach ($title['params'] as $param_name => $param_value)
 			echo "&${param_name}=${param_value}";
 		echo "'>" . $title['name'] . "</a>";
@@ -5893,7 +5884,7 @@ function showPathAndSearch ($pageno)
 	echo "</td>";
 	// Search form.
 	echo "<td><table border=0 cellpadding=0 cellspacing=0><tr><td>Search:</td>";
-	echo "<form name=search method=get action='${root}'><td>";
+	echo "<form name=search method=get><td>";
 	echo '<input type=hidden name=page value=search>';
 	// This input will be the first, if we don't add ports or addresses.
 	echo "<input type=text name=q size=20 tabindex=1000></td></form></tr></table></td>";
@@ -5910,7 +5901,7 @@ function getTitle ($pageno)
 
 function showTabs ($pageno, $tabno)
 {
-	global $tab, $root, $page, $trigger;
+	global $tab, $page, $trigger;
 	if (!isset ($tab[$pageno]['default']))
 		return;
 	echo "<td><div class=greynavbar><ul id=foldertab style='margin-bottom: 0px; padding-top: 10px;'>";
@@ -5927,7 +5918,7 @@ function showTabs ($pageno, $tabno)
 		if ($tabidx == $tabno)
 		       $tabclass = 'current'; // override any class for an an active selection
 		echo "<li><a class=${tabclass}";
-		echo " href='${root}?page=${pageno}&tab=${tabidx}";
+		echo " href='index.php?page=${pageno}&tab=${tabidx}";
 		if (isset ($page[$pageno]['bypass']) and isset ($_REQUEST[$page[$pageno]['bypass']]))
 		{
 			$bpname = $page[$pageno]['bypass'];

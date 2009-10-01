@@ -39,7 +39,7 @@
 			echo '</select><br><br>';
 			echo "<input type='submit' value='Proceed' onclick='".
 			"if (getElementById(\"ports\").value != \"\") {".
-			"	opener.location=\"${root}process.php?page=object&tab=ports&op=linkPort&object_id=$object_id&port_id=$port_id&port_name=$port_name&remote_port_name=\"+getElementById(\"remote_port_name\").value+\"&remote_object_name=\"+getElementById(\"remote_object_name\").value+\"&remote_port_id=\"+getElementById(\"ports\").value; ".
+			"	opener.location=\"process.php?page=object&tab=ports&op=linkPort&object_id=$object_id&port_id=$port_id&port_name=$port_name&remote_port_name=\"+getElementById(\"remote_port_name\").value+\"&remote_object_name=\"+getElementById(\"remote_object_name\").value+\"&remote_port_id=\"+getElementById(\"ports\").value; ".
 			"	window.close();}'>";
 			echo '</form></div>';
 			break;

@@ -9,19 +9,6 @@
 *
 */
 
-// "Note that when using ISAPI with IIS, the value will be 'off' if the
-// request was not made through the HTTPS protocol."
-$root = (empty($_SERVER['HTTPS']) or $_SERVER['HTTPS'] == 'off') ? 'http://' : 'https://';
-$root .= isset ($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : ($_SERVER['SERVER_NAME'].($_SERVER['SERVER_PORT']=='80'?'':$_SERVER['SERVER_PORT']));
-// "Since PHP 4.3.0, you will often get a slash or a dot back from
-// dirname() in situations where the older functionality would have given
-// you the empty string."
-// "On Windows, both slash (/) and backslash (\) are used as directory
-// separator character."
-$root .= strtr (dirname ($_SERVER['PHP_SELF']), '\\', '/');
-if (substr ($root, -1) != '/')
-	$root .= '/';
-
 // This is the first thing we need to do.
 require_once 'inc/exceptions.php';
 require_once 'inc/config.php';
@@ -56,7 +43,7 @@ else
 	(
 		"Database connection parameters are read from inc/secret.php file, " .
 		"which cannot be found.\nYou probably need to complete the installation " .
-		"procedure by following <a href='${root}install.php'>this link</a>.",
+		"procedure by following <a href='install.php'>this link</a>.",
 		__FILE__
 	);
 	exit (1);
@@ -107,7 +94,7 @@ if ($dbver != CODE_VERSION)
 		'just upgraded to version ' . CODE_VERSION . ', while the '.
 		'database version is ' . $dbver . '. No user will be ' .
 		'either authenticated or shown any page until the upgrade is ' .
-		"finished. Follow <a href='${root}upgrade.php'>this link</a> and " .
+		"finished. Follow <a href='upgrade.php'>this link</a> and " .
 		'authenticate as administrator to finish the upgrade.</p>';
 	exit (1);
 }
@@ -198,7 +185,7 @@ if (isset ($_REQUEST['tab']))
 elseif (basename($_SERVER['PHP_SELF']) == 'index.php' and getConfigVar ('SHOW_LAST_TAB') == 'yes' and isset ($_SESSION['RTLT'][$pageno]))
 {
 	$tabno = $_SESSION['RTLT'][$pageno];
-	$url = "${root}?page=$pageno&tab=$tabno";
+	$url = "index.php?page=$pageno&tab=$tabno";
 	foreach ($_GET as $name=>$value)
 	{
 		if ($name == 'page' or $name == 'tab') continue;

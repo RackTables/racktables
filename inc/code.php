@@ -1034,8 +1034,7 @@ function locateSyntaxError ($stack)
 
 function refRCLineno ($ln)
 {
-	global $root;
-	return "<a href='${root}?page=perms&tab=default#line${ln}'>line ${ln}</a>";
+	return "<a href='index.php?page=perms&tab=default#line${ln}'>line ${ln}</a>";
 }
 
 function getRackCodeWarnings ()

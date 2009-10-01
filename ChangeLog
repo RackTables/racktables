@@ -1,6 +1,7 @@
 0.17.6
 	bugfix: PHP warning
 	bugfix: escaping of a newly created IPv4 network name (ticket:292)
+	bugfix: generate URLs more friendly for reverse proxies (ticket:246)
 0.17.5 2009-09-16
 	bugfix: corrected reference counters in tag tree
 	bugfix: "cn" autotag was not generated for objects

@@ -445,16 +445,9 @@ CREATE TABLE `PortInterfaceCompat` (
 //
 // ******************************************************************
 
-$root = (empty($_SERVER['HTTPS']) or $_SERVER['HTTPS'] == 'off') ? 'http://' : 'https://';
-$root .= isset ($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : ($_SERVER['SERVER_NAME'].($_SERVER['SERVER_PORT']=='80'?'':$_SERVER['SERVER_PORT']));
-$root .= strtr (dirname ($_SERVER['PHP_SELF']), '\\', '/');
-if (substr ($root, -1) != '/')
-	$root .= '/';
-
 // a clone of showError() to drop dependency on interface.php
 function showFailure ($info = '', $location = 'N/A')
 {
-	global $root;
 	if (preg_match ('/\.php$/', $location))
 		$location = basename ($location);
 	elseif ($location != 'N/A')
@@ -562,7 +555,7 @@ else
 			if (isset ($relnotes[$batchid]))
 				echo "<tr><th>Release notes for ${batchid}</th><td>" . $relnotes[$batchid] . "</td></tr>\n";
 		}
-		echo "<tr><th>Summary</th><td>Upgrade complete, it is Ok to <a href='${root}'>enter</a> the system.</td></tr>\n";
+		echo "<tr><th>Summary</th><td>Upgrade complete, it is Ok to <a href='index.php'>enter</a> the system.</td></tr>\n";
 	}
 }
 echo '</table>';

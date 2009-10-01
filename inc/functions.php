@@ -1373,8 +1373,8 @@ function validTagName ($s, $allow_autotag = FALSE)
 
 function redirectUser ($p, $t)
 {
-	global $page, $root;
-	$l = "{$root}?page=${p}&tab=${t}";
+	global $page;
+	$l = "index.php?page=${p}&tab=${t}";
 	if (isset ($page[$p]['bypass']) and isset ($_REQUEST[$page[$p]['bypass']]))
 		$l .= '&' . $page[$p]['bypass'] . '=' . $_REQUEST[$page[$p]['bypass']];
 	header ("Location: " . $l);
@@ -1806,8 +1806,6 @@ function formatTimestamp ($timestamp) {
 // prepend cutting button to each of them.
 function serializeFileLinks ($links, $scissors = FALSE)
 {
-	global $root;
-
 	$comma = '';
 	$ret = '';
 	foreach ($links as $link_id => $li)
@@ -1839,7 +1837,7 @@ function serializeFileLinks ($links, $scissors = FALSE)
 			$ret .= "<a href='" . makeHrefProcess(array('op'=>'unlinkFile', 'link_id'=>$link_id)) . "'";
 			$ret .= getImageHREF ('cut') . '</a> ';
 		}
-		$ret .= sprintf("<a href='%s?%s%s'>%s</a>", $root, $params, $li['entity_id'], $li['name']);
+		$ret .= sprintf("<a href='index.php?%s%s'>%s</a>", $params, $li['entity_id'], $li['name']);
 		$comma = '<br>';
 	}
 	return $ret;
@@ -1888,13 +1886,8 @@ function ip_long2quad ($quad)
 
 function makeHref($params = array())
 {
-	global $head_revision, $numeric_revision, $root;
-	$ret = $root.'?';
+	$ret = 'index.php?';
 	$first = true;
-	if (!isset($params['r']) and ($numeric_revision != $head_revision))
-	{
-		$params['r'] = $numeric_revision;
-	}
 	foreach($params as $key=>$value)
 	{
 		if (!$first)
@@ -1907,14 +1900,9 @@ function makeHref($params = array())
 
 function makeHrefProcess($params = array())
 {
-	global $head_revision, $numeric_revision, $root, $pageno, $tabno;
-	$ret = $root.'process.php'.'?';
+	global $pageno, $tabno;
+	$ret = 'process.php?';
 	$first = true;
-	if ($numeric_revision != $head_revision)
-	{
-		error_log("Can't make a process link when not in head revision");
-		die();
-	}
 	if (!isset($params['page']))
 		$params['page'] = $pageno;
 	if (!isset($params['tab']))
@@ -1931,13 +1919,7 @@ function makeHrefProcess($params = array())
 
 function makeHrefForHelper ($helper_name, $params = array())
 {
-	global $head_revision, $numeric_revision, $root;
-	$ret = $root.'popup.php'.'?helper='.$helper_name;
-	if ($numeric_revision != $head_revision)
-	{
-		error_log("Can't make a process link when not in head revision");
-		die();
-	}
+	$ret = 'popup.php?helper=' . $helper_name;
 	foreach($params as $key=>$value)
 		$ret .= '&'.urlencode($key).'='.urlencode($value);
 	return $ret;

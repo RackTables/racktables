@@ -9,12 +9,12 @@ $msgcode = array();
 
 function buildWideRedirectURL ($log, $nextpage = NULL, $nexttab = NULL, $moreArgs = array())
 {
-	global $root, $page, $pageno, $tabno;
+	global $page, $pageno, $tabno;
 	if ($nextpage === NULL)
 		$nextpage = $pageno;
 	if ($nexttab === NULL)
 		$nexttab = $tabno;
-	$url = "${root}?page=${nextpage}&tab=${nexttab}";
+	$url = "index.php?page=${nextpage}&tab=${nexttab}";
 	if (isset ($page[$nextpage]['bypass']))
 		$url .= '&' . $page[$nextpage]['bypass'] . '=' . $_REQUEST[$page[$nextpage]['bypass']];
 
