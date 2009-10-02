@@ -664,7 +664,7 @@ function renderEditRackForm ($rack_id)
 // Input array keys are OPTION VALUEs and input array values are OPTION text.
 function printSelect ($optionList, $select_attrs = array(), $selected_id = NULL)
 {
-	if (!array_key_exists ($select_attrs, 'name'))
+	if (!array_key_exists ('name', $select_attrs))
 		return;
 	echo '<select';
 	foreach ($select_attrs as $attr_name => $attr_value)
@@ -685,7 +685,7 @@ function printNiftySelect ($groupList, $select_attrs, $selected_id = NULL)
 		printSelect ($groupList['other'], $select_attrs, $selected_id);
 		return;
 	}
-	if (!array_key_exists ($select_attrs, 'name'))
+	if (!array_key_exists ('name', $select_attrs))
 		return;
 	echo '<select';
 	foreach ($select_attrs as $attr_name => $attr_value)
