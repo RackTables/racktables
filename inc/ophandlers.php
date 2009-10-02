@@ -192,15 +192,24 @@ function linkPortForObject ()
 {
 	assertUIntArg ('port_id', __FUNCTION__);
 	assertUIntArg ('remote_port_id', __FUNCTION__);
-	assertStringArg ('port_name', __FUNCTION__, TRUE);
-	assertStringArg ('remote_port_name', __FUNCTION__, TRUE);
-	assertStringArg ('remote_object_name', __FUNCTION__, TRUE);
 
 	$error = linkPorts ($_REQUEST['port_id'], $_REQUEST['remote_port_id']);
 	if ($error != '')
 		return buildRedirectURL (__FUNCTION__, 'ERR', array ($error));
-	else
-		return buildRedirectURL (__FUNCTION__, 'OK', array ($_REQUEST['port_name'], $_REQUEST['remote_port_name'], $_REQUEST['remote_object_name']));
+	$local_port_info = getPortInfo ($_REQUEST['port_id']);
+	$remote_port_info = getPortInfo ($_REQUEST['remote_port_id']);
+	$remote_object = spotEntity ('object', $remote_port_info['object_id']);
+	return buildRedirectURL
+	(
+		__FUNCTION__,
+		'OK',
+		array
+		(
+			$local_port_info['name'],
+			$remote_port_info['name'],
+			$remote_object['dname'],
+		)
+	);
 }
 
 $msgcode['unlinkPortForObject']['OK'] = 9;

@@ -1094,9 +1094,9 @@ function renderPortsForObject ($object_id)
 		echo "<tr><td>";
 		printImageHREF ('add', 'add a port', TRUE);
 		echo "</td><td><input type=text size=8 name=port_name tabindex=100></td>\n";
-		echo "<td><input type=text size=24 name=port_label tabindex=101></td><td>";
+		echo "<td><input type=text name=port_label tabindex=101></td><td>";
 		printNiftySelect (getNewPortTypeOptions(), array ('name' => 'port_type_id', 'tabindex' => 102), $prefs['selected']);
-		echo "<td><input type=text name=port_l2address tabindex=103></td>\n";
+		echo "<td><input type=text name=port_l2address tabindex=103 size=18 maxlength=24></td>\n";
 		echo "<td colspan=3>&nbsp;</td><td>";
 		printImageHREF ('add', 'add a port', TRUE, 104);
 		echo "</td></tr></form>";
@@ -1119,7 +1119,7 @@ function renderPortsForObject ($object_id)
 		printImageHREF ('delete', 'Unlink and Delete this port');
 		echo "</a></td>\n";
 		echo "<td><input type=text name=name value='${port['name']}' size=8></td>";
-		echo "<td><input type=text name=label value='${port['label']}' size=24></td>";
+		echo "<td><input type=text name=label value='${port['label']}'></td>";
 		if (!$port['remote_object_id'])
 		{
 			echo '<td>';
@@ -1137,7 +1137,9 @@ function renderPortsForObject ($object_id)
 				echo $port['iif_name'] . '/';
 			echo "${port['oif_name']}</td>\n";
 		}
-		echo "<td><input type=text name=l2address value='${port['l2address']}'></td>\n";
+		// 18 is enough to fit 6-byte MAC address in its longest form,
+		// while 24 should be Ok for WWN
+		echo "<td><input type=text name=l2address value='${port['l2address']}' size=18 maxlength=24></td>\n";
 		if ($port['remote_object_id'])
 		{
 			echo "<td><a href='".makeHref(array('page'=>'object', 'object_id'=>$port['remote_object_id']))."'>${port['remote_object_name']}</a></td>";
@@ -1169,12 +1171,30 @@ function renderPortsForObject ($object_id)
 		}
 		else
 		{
-			echo "<td>&nbsp;</td><td>&nbsp;</td>";
-			echo "<td class=tdcenter>";
-			echo "<a href='javascript:;' onclick='window.open(\"".makeHrefForHelper('portlist', array('port'=>$port['id'], 'type'=>$port['type_id'], 'object_id'=>$object_id, 'port_name'=>$port['name']))."\",\"findlink\",\"height=700, width=400, location=no, menubar=no, resizable=yes, scrollbars=no, status=no, titlebar=no, toolbar=no\");'>";
+			//echo "<td>&nbsp;</td><td>&nbsp;</td><td class=tdcenter><a href='javascript:;'";
+			echo "<td>&nbsp;</td><td>&nbsp;</td><td class=tdcenter><span";
+			$helper_args = array
+			(
+				'port' => $port['id'],
+				'type' => $port['type_id'],
+				'object_id' => $object_id,
+				'port_name' => $port['name'],
+				'in_rack' => 'n',
+			);
+			$popup_args = 'height=700, width=400, location=no, menubar=no, '.
+				'resizable=yes, scrollbars=no, status=no, titlebar=no, toolbar=no';
+			echo " ondblclick='window.open(\"" . makeHrefForHelper ('portlist', $helper_args);
+			echo "\",\"findlink\",\"${popup_args}\");'";
+			// end of onclick=
+			$helper_args['in_rack'] = 'y';
+			echo " onclick='window.open(\"" . makeHrefForHelper ('portlist', $helper_args);
+			echo "\",\"findlink\",\"${popup_args}\");'";
+			// end of onclick=
+			echo '>';
+			// end of <a>
 			printImageHREF ('plug', 'Link this port');
-			echo "</a> <input type=text name=reservation_comment>";
-			echo "</td>\n";
+			echo "</span>";
+			echo " <input type=text name=reservation_comment></td>\n";
 		}
 		echo "<td>";
 		printImageHREF ('save', 'Save changes', TRUE);
@@ -1741,18 +1761,6 @@ function renderMolecule ($mdata, $object_id)
 			echo "</tr>\n";
 		}
 		echo "</table>\n";
-	}
-}
-
-function renderEmptyPortsSelect ($port_id, $type_id)
-{
-	$ports = getEmptyPortsOfType($type_id);
-	usort($ports, 'sortEmptyPorts');
-	foreach ($ports as $port)
-	{
-		if ($port_id == $port['Port_id'])
-			continue;
-		echo "<option value='${port['Port_id']}' onclick='getElementById(\"remote_port_name\").value=\"${port['Port_name']}\"; getElementById(\"remote_object_name\").value=\"${port['Object_name']}\";'>${port['Object_name']} ${port['Port_name']}</option>\n";
 	}
 }
 
