@@ -37,6 +37,7 @@ function getDBUpgradePath ($v1, $v2)
 		'0.17.3',
 		'0.17.4',
 		'0.17.5',
+		'0.17.6',
 	);
 	if (!in_array ($v1, $versionhistory) or !in_array ($v2, $versionhistory))
 		return NULL;
@@ -407,6 +408,14 @@ CREATE TABLE `PortInterfaceCompat` (
 			$query[] = 'UPDATE AttributeValue SET uint_value = 377 WHERE uint_value = 1021 AND attr_id = 2';
 			$query[] = 'INSERT INTO AttributeMap (objtype_id, attr_id) VALUES (2, 1), (2, 3), (2, 5)';
 			$query[] = "UPDATE Config SET varvalue = '0.17.5' WHERE varname = 'DB_VERSION'";
+			break;
+		case '0.17.6':
+			$query[] = "INSERT INTO `Chapter` (`id`, `sticky`, `name`) VALUES (28,'no','Voice/video hardware')";
+			$query[] = "INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_id`) VALUES (1323,1,NULL)";
+			$query[] = "INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_id`) VALUES (1323,2,28)";
+			$query[] = "INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_id`) VALUES (1323,3,NULL)";
+			$query[] = "INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_id`) VALUES (1323,5,NULL)";
+			$query[] = "UPDATE Config SET varvalue = '0.17.6' WHERE varname = 'DB_VERSION'";
 			break;
 		default:
 			showFailure ("executeUpgradeBatch () failed, because batch '${batchid}' isn't defined", __FILE__);

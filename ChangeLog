@@ -1,4 +1,5 @@
 0.17.6
+	update: voice/video devices
 	bugfix: PHP warning
 	bugfix: escaping of a newly created IPv4 network name (ticket:292)
 	bugfix: generate URLs more friendly for reverse proxies (ticket:246)
