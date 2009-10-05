@@ -541,8 +541,6 @@ function getObjectPortsAndLinks ($object_id)
 		$row['remote_id'] = NULL;
 		$row['remote_name'] = NULL;
 		$row['remote_object_id'] = NULL;
-		$row['remote_object_name'] = NULL;
-		$row['remote_type_id'] = NULL;
 		$ret[] = $row;
 	}
 	unset ($result);
@@ -564,25 +562,15 @@ function getObjectPortsAndLinks ($object_id)
 		unset ($result);
 		if ($remote_id) // there's a remote end here
 		{
-			$query = "select Port.name as port_name, Port.type as port_type, object_id, RackObject.name as object_name " .
-				"from Port left join RackObject on Port.object_id = RackObject.id " .
-				"where Port.id = ${remote_id}";
+			$query = "SELECT name, object_id FROM Port WHERE id = ${remote_id}";
 			$result = useSelectBlade ($query, __FUNCTION__);
 			if ($row = $result->fetch (PDO::FETCH_ASSOC))
 			{
-				$ret[$tmpkey]['remote_name'] = $row['port_name'];
+				$ret[$tmpkey]['remote_name'] = $row['name'];
 				$ret[$tmpkey]['remote_object_id'] = $row['object_id'];
-				$ret[$tmpkey]['remote_object_name'] = $row['object_name'];
-				$ret[$tmpkey]['remote_type_id'] = $row['port_type'];
 			}
 			$ret[$tmpkey]['remote_id'] = $remote_id;
 			unset ($result);
-			// only call displayedName() when necessary
-			if (!strlen ($ret[$tmpkey]['remote_object_name']) and strlen ($ret[$tmpkey]['remote_object_id']))
-			{
-				$oi = spotEntity ('object', $ret[$tmpkey]['remote_object_id']);
-				$ret[$tmpkey]['remote_object_name'] = $oi['dname'];
-			}
 		}
 	}
 	usort ($ret, 'sortByName');
@@ -1119,12 +1107,10 @@ function linkPorts ($porta, $portb)
 	return '';
 }
 
-function unlinkPort ($port)
+function unlinkPort ($port_id)
 {
 	global $dbxlink;
-	$query =
-		"delete from Link where porta='$port' or portb='$port'";
-	$result = $dbxlink->exec ($query);
+	$dbxlink->exec ("DELETE FROM Link WHERE porta = ${port_id} OR portb = ${port_id}");
 	return '';
 }
 

@@ -193,6 +193,7 @@ function linkPortForObject ()
 	assertUIntArg ('port_id', __FUNCTION__);
 	assertUIntArg ('remote_port_id', __FUNCTION__);
 
+	// FIXME: ensure, that at least one of these ports belongs to the current object
 	$error = linkPorts ($_REQUEST['port_id'], $_REQUEST['remote_port_id']);
 	if ($error != '')
 		return buildRedirectURL (__FUNCTION__, 'ERR', array ($error));
@@ -217,15 +218,25 @@ $msgcode['unlinkPortForObject']['ERR'] = 100;
 function unlinkPortForObject ()
 {
 	assertUIntArg ('port_id', __FUNCTION__);
-	assertStringArg ('port_name', __FUNCTION__, TRUE);
-	assertStringArg ('remote_port_name', __FUNCTION__, TRUE);
-	assertStringArg ('remote_object_name', __FUNCTION__, TRUE);
+	assertUIntArg ('remote_port_id', __FUNCTION__);
 
+	$local_port_info = getPortInfo ($_REQUEST['port_id']);
+	$remote_port_info = getPortInfo ($_REQUEST['remote_port_id']);
+	$remote_object = spotEntity ('object', $remote_port_info['object_id']);
 	$error = unlinkPort ($_REQUEST['port_id']);
 	if ($error != '')
 		return buildRedirectURL (__FUNCTION__, 'ERR', array ($error));
-	else
-		return buildRedirectURL (__FUNCTION__, 'OK', array ($_REQUEST['port_name'], $_REQUEST['remote_port_name'], $_REQUEST['remote_object_name']));
+	return buildRedirectURL
+	(
+		__FUNCTION__,
+		'OK',
+		array
+		(
+			$local_port_info['name'],
+			$remote_port_info['name'],
+			$remote_object['dname'],
+		)
+	);
 }
 
 $msgcode['addMultiPorts']['OK'] = 10;

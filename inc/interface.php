@@ -873,7 +873,8 @@ function renderRackObject ($object_id)
 			echo $port['oif_name'] . "</td><td class=tdleft><tt>${port['l2address']}</tt></td>";
 			if ($port['remote_object_id'])
 			{
-				echo "<td class=tdleft><a href='".makeHref(array('page'=>'object', 'object_id'=>$port['remote_object_id'], 'hl_port_id'=>$port['remote_id']))."'>${port['remote_object_name']}</a></td>";
+				$remote_object = spotEntity ('object', $port['remote_object_id']);
+				echo "<td class=tdleft><a href='".makeHref(array('page'=>'object', 'object_id'=>$port['remote_object_id'], 'hl_port_id'=>$port['remote_id']))."'>${remote_object['dname']}</a></td>";
 				echo "<td class=tdleft>${port['remote_name']}</td>";
 			}
 			elseif (strlen ($port['reservation_comment']))
@@ -1142,16 +1143,15 @@ function renderPortsForObject ($object_id)
 		echo "<td><input type=text name=l2address value='${port['l2address']}' size=18 maxlength=24></td>\n";
 		if ($port['remote_object_id'])
 		{
-			echo "<td><a href='".makeHref(array('page'=>'object', 'object_id'=>$port['remote_object_id']))."'>${port['remote_object_name']}</a></td>";
+			$remote_object = spotEntity ('object', $port['remote_object_id']);
+			echo "<td><a href='".makeHref(array('page'=>'object', 'object_id'=>$port['remote_object_id']))."'>${remote_object['dname']}</a></td>";
 			echo "<td>${port['remote_name']}</td>";
 			echo "<td class=tdcenter><a href='".
 				makeHrefProcess(array(
 					'op'=>'unlinkPort', 
-					'port_id'=>$port['id'], 
-					'object_id'=>$object_id, 
-					'port_name'=>$port['name'], 
-					'remote_port_name'=>$port['remote_name'], 
-					'remote_object_name'=>$port['remote_object_name'])).
+					'port_id'=>$port['id'],
+					'remote_port_id' => $port['remote_id'],
+					'object_id'=>$object_id)).
 			"'>";
 			printImageHREF ('cut', 'Unlink this port');
 			echo "</a></td>";
