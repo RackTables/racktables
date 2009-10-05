@@ -6,7 +6,27 @@
 // far from the given rack in its row.
 function getProximateRacks ($rack_id, $proximity = 0)
 {
-	return array ($rack_id);
+	$rack = spotEntity ('rack', $rack_id);
+	$rackList = listCells ('rack', $rack['row_id']);
+	doubleLink ($rackList);
+	$ret = array ($rack_id);
+	$todo = $proximity;
+	$cur_item = $rackList[$rack_id];
+	while ($todo and array_key_exists ('prev_key', $cur_item))
+	{
+		$cur_item = $rackList[$cur_item['prev_key']];
+		$ret[] = $cur_item['id'];
+		$todo--;
+	}
+	$todo = $proximity;
+	$cur_item = $rackList[$rack_id];
+	while ($todo and array_key_exists ('next_key', $cur_item))
+	{
+		$cur_item = $rackList[$cur_item['next_key']];
+		$ret[] = $cur_item['id'];
+		$todo--;
+	}
+	return $ret;
 }
 
 function findSparePorts ($port_id, $only_racks = array())
@@ -67,7 +87,7 @@ function findSparePorts ($port_id, $only_racks = array())
 				{
 					$object = spotEntity ('object', $port_info['object_id']);
 					if ($object['rack_id'])
-						$only_racks = getProximateRacks ($object['rack_id']);
+						$only_racks = getProximateRacks ($object['rack_id'], getConfigVar ('PROXIMITY_RANGE'));
 				}
 			}
 			$spare_ports = findSparePorts ($port_id, $only_racks);
