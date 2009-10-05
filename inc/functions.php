@@ -661,16 +661,6 @@ function sortByName ($a, $b)
 	return sortTokenize($a['name'], $b['name']);
 }
 
-function sortEmptyPorts ($a, $b)
-{
-	$objname_cmp = sortTokenize($a['Object_name'], $b['Object_name']);
-	if ($objname_cmp == 0)
-	{
-		return sortTokenize($a['Port_name'], $b['Port_name']);
-	}
-	return $objname_cmp;
-}
-
 function sortObjectAddressesAndNames ($a, $b)
 {
 	$objname_cmp = sortTokenize($a['object_name'], $b['object_name']);

@@ -561,7 +561,7 @@ function renderEditObjectForm ($object_id)
 	echo '<table border=0 cellspacing=0 cellpadding=3 align=center>';
 	echo "<tr><td>&nbsp;</td><th colspan=2><h2>Attributes</h2></th></tr>";
 	echo "<tr><td>&nbsp;</td><th class=tdright>Type:</th><td class=tdleft>";
-	printNiftySelect (cookOptgroups (readChapter (CHAP_OBJTYPE, 'o')), 'object_type_id', $object['objtype_id']);
+	printNiftySelect (cookOptgroups (readChapter (CHAP_OBJTYPE, 'o')), array ('name' => 'object_type_id'), $object['objtype_id']);
 	echo "</td></tr>\n";
 	// baseline info
 	echo "<tr><td>&nbsp;</td><th class=tdright>Common name:</th><td class=tdleft><input type=text name=object_name value='${object['name']}'></td></tr>\n";
@@ -599,7 +599,7 @@ function renderEditObjectForm ($object_id)
 					$chapter = readChapter ($record['chapter_id'], 'o');
 					$chapter[0] = '-- NOT SET --';
 					$chapter = cookOptgroups ($chapter, $object['objtype_id'], $record['key']);
-					printNiftySelect ($chapter, "${i}_value", $record['key']);
+					printNiftySelect ($chapter, array ('name' => "${i}_value"), $record['key']);
 					break;
 			}
 			echo "</td></tr>\n";
@@ -638,7 +638,7 @@ function renderEditRackForm ($rack_id)
 	printOpFormIntro ('updateRack');
 	echo '<table border=0 align=center>';
 	echo "<tr><th class=tdright>Rack row:</th><td class=tdleft>";
-	printSelect (getRackRows(), 'rack_row_id', $rack['row_id']);
+	printSelect (getRackRows(), array ('name' => 'rack_row_id'), $rack['row_id']);
 	echo "</td></tr>\n";
 	echo "<tr><th class=tdright>Name (required):</th><td class=tdleft><input type=text name=rack_name value='${rack['name']}'></td></tr>\n";
 	echo "<tr><th class=tdright>Height (required):</th><td class=tdleft><input type=text name=rack_height value='${rack['height']}'></td></tr>\n";
@@ -662,33 +662,43 @@ function renderEditRackForm ($rack_id)
 
 // This is a helper for creators and editors.
 // Input array keys are OPTION VALUEs and input array values are OPTION text.
-function printSelect ($optionList, $select_name, $selected_id = NULL, $tabindex = NULL)
+function printSelect ($optionList, $select_attrs = array(), $selected_id = NULL)
 {
-	echo "<select name=${select_name}" . ($tabindex ? " tabindex=${tabindex}" : '') . '>';
+	if (!array_key_exists ('name', $select_attrs))
+		return;
+	echo '<select';
+	foreach ($select_attrs as $attr_name => $attr_value)
+		echo " ${attr_name}=${attr_value}";
+	echo '>';
 	foreach ($optionList as $dict_key => $dict_value)
 		echo "<option value='${dict_key}'" . ($dict_key == $selected_id ? ' selected' : '') . ">${dict_value}</option>";
-	echo "</select>";
+	echo '</select>';
 }
 
 // Input is a cooked list of OPTGROUPs, each with own sub-list of OPTIONs in the same
 // format as printSelect() expects.
-function printNiftySelect ($groupList, $select_name, $selected_id = NULL, $tabindex = NULL)
+function printNiftySelect ($groupList, $select_attrs, $selected_id = NULL)
 {
 	// special treatment for ungrouped data
 	if (count ($groupList) == 1 and isset ($groupList['other']))
 	{
-		printSelect ($groupList['other'], $select_name, $selected_id, $tabindex);
+		printSelect ($groupList['other'], $select_attrs, $selected_id);
 		return;
 	}
-	echo "<select name=${select_name}" . ($tabindex ? " tabindex=${tabindex}" : '') . '>';
+	if (!array_key_exists ('name', $select_attrs))
+		return;
+	echo '<select';
+	foreach ($select_attrs as $attr_name => $attr_value)
+		echo " ${attr_name}=${attr_value}";
+	echo '>';
 	foreach ($groupList as $groupname => $groupdata)
 	{
 		echo "<optgroup label='${groupname}'>";
 		foreach ($groupdata as $dict_key => $dict_value)
 			echo "<option value='${dict_key}'" . ($dict_key == $selected_id ? ' selected' : '') . ">${dict_value}</option>";
-		echo "</optgroup>\n";
+		echo '</optgroup>';
 	}
-	echo "</select>";
+	echo '</select>';
 }
 
 // used by renderGridForm() and renderRackPage()
@@ -863,7 +873,8 @@ function renderRackObject ($object_id)
 			echo $port['oif_name'] . "</td><td class=tdleft><tt>${port['l2address']}</tt></td>";
 			if ($port['remote_object_id'])
 			{
-				echo "<td class=tdleft><a href='".makeHref(array('page'=>'object', 'object_id'=>$port['remote_object_id'], 'hl_port_id'=>$port['remote_id']))."'>${port['remote_object_name']}</a></td>";
+				$remote_object = spotEntity ('object', $port['remote_object_id']);
+				echo "<td class=tdleft><a href='".makeHref(array('page'=>'object', 'object_id'=>$port['remote_object_id'], 'hl_port_id'=>$port['remote_id']))."'>${remote_object['dname']}</a></td>";
 				echo "<td class=tdleft>${port['remote_name']}</td>";
 			}
 			elseif (strlen ($port['reservation_comment']))
@@ -1084,9 +1095,9 @@ function renderPortsForObject ($object_id)
 		echo "<tr><td>";
 		printImageHREF ('add', 'add a port', TRUE);
 		echo "</td><td><input type=text size=8 name=port_name tabindex=100></td>\n";
-		echo "<td><input type=text size=24 name=port_label tabindex=101></td><td>";
-		printNiftySelect (getNewPortTypeOptions(), 'port_type_id', $prefs['selected'], 102);
-		echo "<td><input type=text name=port_l2address tabindex=103></td>\n";
+		echo "<td><input type=text name=port_label tabindex=101></td><td>";
+		printNiftySelect (getNewPortTypeOptions(), array ('name' => 'port_type_id', 'tabindex' => 102), $prefs['selected']);
+		echo "<td><input type=text name=port_l2address tabindex=103 size=18 maxlength=24></td>\n";
 		echo "<td colspan=3>&nbsp;</td><td>";
 		printImageHREF ('add', 'add a port', TRUE, 104);
 		echo "</td></tr></form>";
@@ -1109,13 +1120,13 @@ function renderPortsForObject ($object_id)
 		printImageHREF ('delete', 'Unlink and Delete this port');
 		echo "</a></td>\n";
 		echo "<td><input type=text name=name value='${port['name']}' size=8></td>";
-		echo "<td><input type=text name=label value='${port['label']}' size=24></td>";
+		echo "<td><input type=text name=label value='${port['label']}'></td>";
 		if (!$port['remote_object_id'])
 		{
 			echo '<td>';
 			if ($port['iif_id'] != 1)
 				echo '<label>' . $port['iif_name'] . ' ';
-			printSelect (getExistingPortTypeOptions ($port['id']), 'port_type_id', $port['oif_id']);
+			printSelect (getExistingPortTypeOptions ($port['id']), array ('name' => 'port_type_id'), $port['oif_id']);
 			if ($port['iif_id'] != 1)
 				echo '</label>';
 			echo '</td>';
@@ -1127,19 +1138,20 @@ function renderPortsForObject ($object_id)
 				echo $port['iif_name'] . '/';
 			echo "${port['oif_name']}</td>\n";
 		}
-		echo "<td><input type=text name=l2address value='${port['l2address']}'></td>\n";
+		// 18 is enough to fit 6-byte MAC address in its longest form,
+		// while 24 should be Ok for WWN
+		echo "<td><input type=text name=l2address value='${port['l2address']}' size=18 maxlength=24></td>\n";
 		if ($port['remote_object_id'])
 		{
-			echo "<td><a href='".makeHref(array('page'=>'object', 'object_id'=>$port['remote_object_id']))."'>${port['remote_object_name']}</a></td>";
+			$remote_object = spotEntity ('object', $port['remote_object_id']);
+			echo "<td><a href='".makeHref(array('page'=>'object', 'object_id'=>$port['remote_object_id']))."'>${remote_object['dname']}</a></td>";
 			echo "<td>${port['remote_name']}</td>";
 			echo "<td class=tdcenter><a href='".
 				makeHrefProcess(array(
 					'op'=>'unlinkPort', 
-					'port_id'=>$port['id'], 
-					'object_id'=>$object_id, 
-					'port_name'=>$port['name'], 
-					'remote_port_name'=>$port['remote_name'], 
-					'remote_object_name'=>$port['remote_object_name'])).
+					'port_id'=>$port['id'],
+					'remote_port_id' => $port['remote_id'],
+					'object_id'=>$object_id)).
 			"'>";
 			printImageHREF ('cut', 'Unlink this port');
 			echo "</a></td>";
@@ -1159,12 +1171,30 @@ function renderPortsForObject ($object_id)
 		}
 		else
 		{
-			echo "<td>&nbsp;</td><td>&nbsp;</td>";
-			echo "<td class=tdcenter>";
-			echo "<a href='javascript:;' onclick='window.open(\"".makeHrefForHelper('portlist', array('port'=>$port['id'], 'type'=>$port['type_id'], 'object_id'=>$object_id, 'port_name'=>$port['name']))."\",\"findlink\",\"height=700, width=400, location=no, menubar=no, resizable=yes, scrollbars=no, status=no, titlebar=no, toolbar=no\");'>";
+			//echo "<td>&nbsp;</td><td>&nbsp;</td><td class=tdcenter><a href='javascript:;'";
+			echo "<td>&nbsp;</td><td>&nbsp;</td><td class=tdcenter><span";
+			$helper_args = array
+			(
+				'port' => $port['id'],
+				'type' => $port['type_id'],
+				'object_id' => $object_id,
+				'port_name' => $port['name'],
+				'in_rack' => 'n',
+			);
+			$popup_args = 'height=700, width=400, location=no, menubar=no, '.
+				'resizable=yes, scrollbars=no, status=no, titlebar=no, toolbar=no';
+			echo " ondblclick='window.open(\"" . makeHrefForHelper ('portlist', $helper_args);
+			echo "\",\"findlink\",\"${popup_args}\");'";
+			// end of onclick=
+			$helper_args['in_rack'] = 'y';
+			echo " onclick='window.open(\"" . makeHrefForHelper ('portlist', $helper_args);
+			echo "\",\"findlink\",\"${popup_args}\");'";
+			// end of onclick=
+			echo '>';
+			// end of <a>
 			printImageHREF ('plug', 'Link this port');
-			echo "</a> <input type=text name=reservation_comment>";
-			echo "</td>\n";
+			echo "</span>";
+			echo " <input type=text name=reservation_comment></td>\n";
 		}
 		echo "<td>";
 		printImageHREF ('save', 'Save changes', TRUE);
@@ -1187,7 +1217,7 @@ function renderPortsForObject ($object_id)
 	echo '<option value=ssv1>SSV:&lt;interface name&gt; &lt;MAC address&gt;</option>';
 	echo "</select>";
 	echo 'Default port type: ';
-	printNiftySelect (getNewPortTypeOptions(), 'port_type', $prefs['selected'], 202);
+	printNiftySelect (getNewPortTypeOptions(), array ('name' => 'port_type', 'tabindex' => 202), $prefs['selected']);
 	echo "<input type=submit value='Parse output' tabindex=204><br>\n";
 	echo "<textarea name=input cols=100 rows=50 tabindex=203></textarea><br>\n";
 	echo '</form>';
@@ -1206,7 +1236,7 @@ function renderIPv4ForObject ($object_id)
 		echo "<td class=tdleft><input type='text' size='10' name='bond_name' tabindex=100></td>\n";
 		echo "<td class=tdleft><input type=text name='ip' tabindex=101></td>\n";
 		echo "<td colspan=2>&nbsp;</td><td>";
-		printSelect ($aat, 'bond_type', NULL, 102);
+		printSelect ($aat, array ('name' => 'bond_type', 'tabindex' => 102));
 		echo "</td><td>&nbsp;</td><td>";
 		printImageHREF ('add', 'allocate', TRUE, 103);
 		echo "</td></tr></form>";
@@ -1268,7 +1298,7 @@ function renderIPv4ForObject ($object_id)
 			}
 		}
 		echo '<td>';
-		printSelect ($aat, 'bond_type', $alloc['type']);
+		printSelect ($aat, array ('name' => 'bond_type'), $alloc['type']);
 		echo "</td><td>";
 		$prefix = '';
 		if ($alloc['addrinfo']['reserved'] == 'yes')
@@ -1728,18 +1758,6 @@ function renderMolecule ($mdata, $object_id)
 			echo "</tr>\n";
 		}
 		echo "</table>\n";
-	}
-}
-
-function renderEmptyPortsSelect ($port_id, $type_id)
-{
-	$ports = getEmptyPortsOfType($type_id);
-	usort($ports, 'sortEmptyPorts');
-	foreach ($ports as $port)
-	{
-		if ($port_id == $port['Port_id'])
-			continue;
-		echo "<option value='${port['Port_id']}' onclick='getElementById(\"remote_port_name\").value=\"${port['Port_name']}\"; getElementById(\"remote_object_name\").value=\"${port['Object_name']}\";'>${port['Object_name']} ${port['Port_name']}</option>\n";
 	}
 }
 
@@ -2522,9 +2540,9 @@ function renderIPv4AddressAllocations ($dottedquad)
 		echo "<tr><td>";
 		printImageHREF ('add', 'allocate', TRUE);
 		echo "</td><td>";
-		printSelect (getNarrowObjectList ('IPV4OBJ_LISTSRC'), 'object_id', NULL, 100);
+		printSelect (getNarrowObjectList ('IPV4OBJ_LISTSRC'), array ('name' => 'object_id', 'tabindex' => 100));
 		echo "</td><td><input type=text tabindex=101 name=bond_name size=10></td><td>";
-		printSelect ($aat, 'bond_type', NULL, 102);
+		printSelect ($aat, array ('name' => 'bond_type', 'tabindex' => 102));
 		echo "</td><td>";
 		printImageHREF ('add', 'allocate', TRUE, 103);
 		echo "</td></form></tr>";
@@ -2553,7 +2571,7 @@ function renderIPv4AddressAllocations ($dottedquad)
 			echo "</a></td>";
 			echo "<td><a href='".makeHref(array('page'=>'object', 'object_id'=>$bond['object_id'], 'hl_ipv4_addr'=>$dottedquad))."'>${bond['object_name']}</td>";
 			echo "<td><input type='text' name='bond_name' value='${bond['name']}' size=10></td><td>";
-			printSelect ($aat, 'bond_type', $bond['type']);
+			printSelect ($aat, array ('name' => 'bond_type'), $bond['type']);
 			echo "</td><td>";
 			printImageHREF ('save', 'Save changes', TRUE);
 			echo "</td></form></tr>\n";
@@ -2572,7 +2590,7 @@ function renderNATv4ForObject ($object_id)
 		echo "<tr align='center'><td>";
 		printImageHREF ('add', 'Add new NAT rule', TRUE);
 		echo '</td><td>';
-		printSelect (array ('TCP' => 'TCP', 'UDP' => 'UDP'), 'proto');
+		printSelect (array ('TCP' => 'TCP', 'UDP' => 'UDP'), array ('name' => 'proto'));
 		echo "<select name='localip' tabindex=1>";
 
 		foreach ($alloclist as $dottedquad => $alloc)
@@ -2709,7 +2727,7 @@ function renderAddMultipleObjectsForm ()
 	{
 		echo '<tr><td>';
 		// Don't employ DEFAULT_OBJECT_TYPE to avoid creating ghost records for pre-selected empty rows.
-		printNiftySelect ($typelist, "${i}_object_type_id", 0, $tabindex);
+		printNiftySelect ($typelist, array ('name' => "${i}_object_type_id", 'tabindex' => $tabindex), 0);
 		echo '</td>';
 		echo "<td><input type=text size=30 name=${i}_object_name tabindex=${tabindex}></td>";
 		echo "<td><input type=text size=30 name=${i}_object_label tabindex=${tabindex}></td>";
@@ -2733,7 +2751,7 @@ function renderAddMultipleObjectsForm ()
 	echo "<table border=0 align=center><tr><th>names</th><th>type</th></tr>";
 	echo "<tr><td rowspan=3><textarea name=namelist cols=40 rows=25>\n";
 	echo "</textarea></td><td valign=top>";
-	printNiftySelect ($typelist, "global_type_id", getConfigVar ('DEFAULT_OBJECT_TYPE'));
+	printNiftySelect ($typelist, array ('name' => 'global_type_id'), getConfigVar ('DEFAULT_OBJECT_TYPE'));
 	echo "</td></tr>";
 	echo "<tr><th>Tags</th></tr>";
 	echo "<tr><td valign=top>";
@@ -3439,7 +3457,7 @@ function renderEditAttributesForm ()
 		printImageHREF ('create', 'Create attribute', TRUE);
 		echo "</td><td><input type=text tabindex=100 name=attr_name></td><td>";
 		global $attrtypes;
-		printSelect ($attrtypes, 'attr_type', NULL, 101);
+		printSelect ($attrtypes, array ('name' => 'attr_type', 'tabindex' => 101));
 		echo '</td><td>';
 		printImageHREF ('add', 'Create attribute', TRUE, 102);
 		echo '</td></tr></form>';
@@ -3489,7 +3507,7 @@ function renderEditAttrMapForm ()
 		echo "</select></td><td class=tdleft>";
 		printImageHREF ('add', '', TRUE);
 		echo ' ';
-		printNiftySelect (cookOptgroups (readChapter (CHAP_OBJTYPE, 'o')), 'objtype_id', NULL, 101);
+		printNiftySelect (cookOptgroups (readChapter (CHAP_OBJTYPE, 'o')), array ('name' => 'objtype_id', 'tabindex' => 101));
 		echo ' <select name=chapter_no tabindex=102><option value=0>-- dictionary chapter for [D] attributes --</option>';
 		foreach (getChapterList() as $chapter)
 			if ($chapter['sticky'] != 'yes')
@@ -4149,7 +4167,7 @@ function renderRSPoolServerForm ($pool_id)
 		'ipvs_2' => 'ipvsadm -l -n (address and port)',
 		'ipvs_3' => 'ipvsadm -l -n (address, port and weight)',
 	);
-	printSelect ($formats, 'format', 'ssv_1');
+	printSelect ($formats, array ('name' => 'format'), 'ssv_1');
 	echo "</td><td><input type=submit value=Parse></td></tr>\n";
 	echo "<tr><td colspan=3><textarea name=rawtext cols=100 rows=50></textarea></td></tr>\n";
 	echo "</table>\n";
@@ -4167,11 +4185,11 @@ function renderRSPoolLBForm ($pool_id)
 		echo "<table cellspacing=0 cellpadding=5 align=center>";
 		printOpFormIntro ('addLB');
 		echo "<tr valign=top><th class=tdright>Load balancer</th><td class=tdleft>";
-		printSelect (getNarrowObjectList ('IPV4LB_LISTSRC'), 'object_id', NULL, 1);
+		printSelect (getNarrowObjectList ('IPV4LB_LISTSRC'), array ('name' => 'object_id', 'tabindex' => 1));
 		echo '</td><td class=tdcenter valign=middle rowspan=2>';
 		printImageHREF ('ADD', 'Configure LB', TRUE, 5);
 		echo '</td></tr><tr><th class=tdright>Virtual service</th><td class=tdleft>';
-		printSelect (getIPv4VSOptions(), 'vs_id', NULL, 2);
+		printSelect (getIPv4VSOptions(), array ('name' => 'vs_id', 'tabindex' => 2));
 		echo "</td></tr>\n";
 		echo "<tr><th class=tdright>VS config</th><td colspan=2><textarea tabindex=3 name=vsconfig rows=10 cols=80></textarea></td></tr>";
 		echo "<tr><th class=tdright>RS config</th><td colspan=2><textarea tabindex=4 name=rsconfig rows=10 cols=80></textarea></td></tr>";
@@ -4224,11 +4242,11 @@ function renderVServiceLBForm ($vs_id)
 		echo '<table cellspacing=0 cellpadding=5 align=center>';
 		printOpFormIntro ('addLB');
 		echo '<tr valign=top><th class=tdright>Load balancer</th><td class=tdleft>';
-		printSelect (getNarrowObjectList ('IPV4LB_LISTSRC'), 'object_id', NULL, 101);
+		printSelect (getNarrowObjectList ('IPV4LB_LISTSRC'), array ('name' => 'object_id', 'tabindex' => 101));
 		echo '</td><td rowspan=2 class=tdcenter valign=middle>';
 		printImageHREF ('ADD', 'Configure LB', TRUE, 105);
 		echo '</td></tr><tr><th class=tdright>RS pool</th><td class=tdleft>';
-		printSelect (getIPv4RSPoolOptions(), 'pool_id', NULL, 102);
+		printSelect (getIPv4RSPoolOptions(), array ('name' => 'pool_id', 'tabindex' => 102));
 		echo '</td></tr>';
 		echo '<tr><th class=tdright>VS config</th><td colspan=2><textarea tabindex=103 name=vsconfig rows=10 cols=80></textarea></td></tr>';
 		echo '<tr><th class=tdright>RS config</th><td colspan=2><textarea tabindex=104 name=rsconfig rows=10 cols=80></textarea></td></tr>';
@@ -4367,7 +4385,7 @@ function renderVSListEditForm ()
 		if ($default_port == 0)
 			$default_port = '';
 		echo "<td><input type=text name=vport size=5 value='${default_port}' tabindex=102></td><td>";
-		printSelect ($protocols, 'proto', 'TCP');
+		printSelect ($protocols, array ('name' => 'proto'), 'TCP');
 		echo '</td><td><input type=text name=name tabindex=104></td><td>';
 		printImageHREF ('CREATE', 'create virtual service', TRUE, 105);
 		echo "</td><td rowspan=3>";
@@ -5032,12 +5050,12 @@ function renderObjectSLB ($object_id)
 		echo '<table cellspacing=0 cellpadding=5 align=center>';
 		printOpFormIntro ('addLB');
 		echo '<tr><th class=tdright>Virtual service</th><td class=tdleft>';
-		printSelect (getIPv4VSOptions(), 'vs_id', NULL, 101);
+		printSelect (getIPv4VSOptions(), array ('name' => 'vs_id', 'tabindex' => 101));
 		echo '</td><td class=tdcenter valign=middle rowspan=2>';
 		printImageHREF ('ADD', 'Configure LB', TRUE, 105);
 		echo '</td></tr>';
 		echo '</tr><th class=tdright>RS pool</th><td class=tdleft>';
-		printSelect (getIPv4RSPoolOptions(), 'pool_id', NULL, 102);
+		printSelect (getIPv4RSPoolOptions(), array ('name' => 'pool_id', 'tabindex' => 102));
 		echo "</td></tr>";
 		echo '<tr><th class=tdright>VS config</th><td colspan=2><textarea tabindex=103 name=vsconfig rows=10 cols=80></textarea></td></tr>';
 		echo '<tr><th class=tdright>RS config</th><td colspan=2><textarea tabindex=104 name=rsconfig rows=10 cols=80></textarea></td></tr>';
@@ -5104,7 +5122,7 @@ function renderEditVService ($vsid)
 	echo "<tr><th class=tdright>VIP:</th><td class=tdleft><input tabindex=1 type=text name=vip value='${vsinfo['vip']}'></td></tr>\n";
 	echo "<tr><th class=tdright>port:</th><td class=tdleft><input tabindex=2 type=text name=vport value='${vsinfo['vport']}'></td></tr>\n";
 	echo "<tr><th class=tdright>proto:</th><td class=tdleft>";
-	printSelect (array ('TCP' => 'TCP', 'UDP' => 'UDP'), 'proto', $vsinfo['proto']);
+	printSelect (array ('TCP' => 'TCP', 'UDP' => 'UDP'), array ('name' => 'proto'), $vsinfo['proto']);
 	echo "</td></tr>\n";
 	echo "<tr><th class=tdright>name:</th><td class=tdleft><input tabindex=4 type=text name=name value='${vsinfo['name']}'></td></tr>\n";
 	echo "<tr><th class=tdright>VS config:</th><td class=tdleft><textarea tabindex=5 name=vsconfig rows=20 cols=80>${vsinfo['vsconfig']}</textarea></td></tr>\n";
@@ -5499,7 +5517,7 @@ function renderFilesForEntity ($entity_id)
 		printOpFormIntro ('linkFile');
 		echo "<table border=0 cellspacing=0 cellpadding='5' align='center'>\n";
 		echo '<tr><td class=tdleft>';
-		printSelect ($files, 'file_id');
+		printSelect ($files, array ('name' => 'file_id'));
 		echo '</td><td class=tdleft>';
 		printImageHREF ('ATTACH', 'Link file', TRUE);
 		echo '</td></tr></table>';
@@ -6138,9 +6156,9 @@ function renderPortIFCompatEditor()
 		echo '<tr><th class=tdleft>';
 		printImageHREF ('add', 'add pair', TRUE);
 		echo '</th><th class=tdleft>';
-		printSelect (getPortIIFOptions(), 'iif_id');
+		printSelect (getPortIIFOptions(), array ('name' => 'iif_id'));
 		echo '</th><th class=tdleft>';
-		printSelect (readChapter (CHAP_PORTTYPE), 'oif_id');
+		printSelect (readChapter (CHAP_PORTTYPE), array ('name' => 'oif_id'));
 		echo '</th></tr></form>';
 	}
 

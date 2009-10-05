@@ -538,8 +538,6 @@ function getObjectPortsAndLinks ($object_id)
 		$row['remote_id'] = NULL;
 		$row['remote_name'] = NULL;
 		$row['remote_object_id'] = NULL;
-		$row['remote_object_name'] = NULL;
-		$row['remote_type_id'] = NULL;
 		$ret[] = $row;
 	}
 	unset ($result);
@@ -561,25 +559,15 @@ function getObjectPortsAndLinks ($object_id)
 		unset ($result);
 		if ($remote_id) // there's a remote end here
 		{
-			$query = "select Port.name as port_name, Port.type as port_type, object_id, RackObject.name as object_name " .
-				"from Port left join RackObject on Port.object_id = RackObject.id " .
-				"where Port.id = ${remote_id}";
+			$query = "SELECT name, object_id FROM Port WHERE id = ${remote_id}";
 			$result = useSelectBlade ($query, __FUNCTION__);
 			if ($row = $result->fetch (PDO::FETCH_ASSOC))
 			{
-				$ret[$tmpkey]['remote_name'] = $row['port_name'];
+				$ret[$tmpkey]['remote_name'] = $row['name'];
 				$ret[$tmpkey]['remote_object_id'] = $row['object_id'];
-				$ret[$tmpkey]['remote_object_name'] = $row['object_name'];
-				$ret[$tmpkey]['remote_type_id'] = $row['port_type'];
 			}
 			$ret[$tmpkey]['remote_id'] = $remote_id;
 			unset ($result);
-			// only call displayedName() when necessary
-			if (!strlen ($ret[$tmpkey]['remote_object_name']) and strlen ($ret[$tmpkey]['remote_object_id']))
-			{
-				$oi = spotEntity ('object', $ret[$tmpkey]['remote_object_id']);
-				$ret[$tmpkey]['remote_object_name'] = $oi['dname'];
-			}
 		}
 	}
 	usort ($ret, 'sortByName');
@@ -1064,42 +1052,6 @@ function getAllIPv4Allocations ()
 	return $ret;
 }
 
-function getEmptyPortsOfType ($type_id)
-{
-	$query =
-		"select distinct Port.id as Port_id, ".
-		"Port.object_id as Port_object_id, ".
-		"RackObject.name as Object_name, ".
-		"Port.name as Port_name, ".
-		"Port.type as Port_type_id, ".
-		"dict_value as Port_type_name ".
-		"from ( ".
-		"	( ".
-		"		Port inner join Dictionary on Port.type = dict_key ".
-		"	) ".
-		" 	join RackObject on Port.object_id = RackObject.id ".
-		") ".
-		"left join Link on Port.id=Link.porta or Port.id=Link.portb ".
-		"inner join PortCompat on Port.type = PortCompat.type2 ".
-		"where PortCompat.type1 = '$type_id' and Link.porta is NULL ".
-		"and Port.reservation_comment is null order by Object_name, Port_name";
-	$result = useSelectBlade ($query, __FUNCTION__);
-	$ret = array();
-	$count=0;
-	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-	{
-		$ret[$count]['Port_id']=$row['Port_id'];
-		$ret[$count]['Port_object_id']=$row['Port_object_id'];
-		$ret[$count]['Object_name']=$row['Object_name'];
-		$ret[$count]['Port_name']=$row['Port_name'];
-		$ret[$count]['Port_type_id']=$row['Port_type_id'];
-		$ret[$count]['Port_type_name']=$row['Port_type_name'];
-		$count++;
-	}
-	$result->closeCursor();
-	return $ret;
-}
-
 function linkPorts ($porta, $portb)
 {
 	if ($porta == $portb)
@@ -1119,12 +1071,10 @@ function linkPorts ($porta, $portb)
 	return '';
 }
 
-function unlinkPort ($port)
+function unlinkPort ($port_id)
 {
 	global $dbxlink;
-	$query =
-		"delete from Link where porta='$port' or portb='$port'";
-	$result = $dbxlink->exec ($query);
+	$dbxlink->exec ("DELETE FROM Link WHERE porta = ${port_id} OR portb = ${port_id}");
 	return '';
 }
 
@@ -3739,6 +3689,16 @@ function getPortIIFStats ($args)
 		'WHERE iif_id = ' . current ($args) . ' GROUP BY type';
 	$result = useSelectBlade ($query, __FUNCTION__);
 	return $result->fetchAll (PDO::FETCH_ASSOC);
+}
+
+function getPortInfo ($port_id)
+{
+	$query = "SELECT object_id, name, iif_id, type AS oif_id, l2address, ".
+		"(SELECT dict_value FROM Dictionary WHERE dict_key = type) AS oif_name, " .
+		"(SELECT iif_name FROM PortInnerInterface WHERE id = iif_id) AS iif_name " .
+		"FROM Port WHERE id = ${port_id}";
+	$result = useSelectBlade ($query, __FUNCTION__);
+	return $result->fetch (PDO::FETCH_ASSOC);
 }
 
 ?>
