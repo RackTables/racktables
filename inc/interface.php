@@ -2399,12 +2399,12 @@ function renderIPv4Address ($dottedquad)
 	$address = getIPv4Address ($dottedquad);
 	echo "<table border=0 class=objectview cellspacing=0 cellpadding=0>";
 	echo "<tr><td colspan=2 align=center><h1>${dottedquad}</h1></td></tr>\n";
-	if (strlen ($address['name']))
-		echo "<tr><td colspan=2 align=center><h2>${address['name']}</h2></td></tr>\n";
 
 	echo "<tr><td class=pcleft>";
 	startPortlet ('summary');
 	echo "<table border=0 cellspacing=0 cellpadding=3 width='100%'>\n";
+	if (strlen ($address['name']))
+		echo "<tr><th width='50%' class=tdright>Comment:</th><td class=tdleft>${address['name']}</td></tr>";
 	echo "<tr><th width='50%' class=tdright>Allocations:</th><td class=tdleft>" . count ($address['allocs']) . "</td></tr>\n";
 	echo "<tr><th width='50%' class=tdright>Originated NAT connections:</th><td class=tdleft>" . count ($address['outpf']) . "</td></tr>\n";
 	echo "<tr><th width='50%' class=tdright>Arriving NAT connections:</th><td class=tdleft>" . count ($address['inpf']) . "</td></tr>\n";
@@ -6047,9 +6047,10 @@ function dynamic_title_decoder ($path_position)
 		);
 	case 'ipaddress':
 		assertIPv4Arg ('ip', __FUNCTION__);
+		$address = getIPv4Address ($_REQUEST['ip']);
 		return array
 		(
-			'name' => $_REQUEST['ip'],
+			'name' => $_REQUEST['ip'] . ($address['name'] != '' ? ' (' . $address['name'] . ')' : ''),
 			'params' => array ('ip' => $_REQUEST['ip'])
 		);
 	case 'ipv4net':
