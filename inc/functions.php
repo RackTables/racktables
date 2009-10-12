@@ -1012,6 +1012,8 @@ function generateEntityAutoTags ($cell)
 				$ret[] = array ('tag' => '$unmounted');
 			if (!$cell['nports'])
 				$ret[] = array ('tag' => '$portless');
+			if ($cell['asset_no'] == '')
+				$ret[] = array ('tag' => '$no_asset_tag');
 			break;
 		case 'ipv4net':
 			$ret[] = array ('tag' => '$ip4netid_' . $cell['id']);

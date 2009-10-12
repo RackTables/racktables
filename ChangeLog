@@ -4,6 +4,7 @@
 	bugfix: escaping of a newly created IPv4 network name (ticket:292)
 	bugfix: generate URLs more friendly for reverse proxies (ticket:246)
 	new feature: "proximity" view in port selector popup (ticket:284)
+	new feature: "$no_asset_tag" autotag (ticket:283)
 0.17.5 2009-09-16
 	bugfix: corrected reference counters in tag tree
 	bugfix: "cn" autotag was not generated for objects
