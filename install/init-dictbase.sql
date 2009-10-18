@@ -101,7 +101,7 @@ INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_id`) VALUES
 (965,1,NULL),
 (965,3,NULL),
 (965,2,25),
-(1055,2,26)
+(1055,2,26),
 (1323,1,NULL),
 (1323,2,28),
 (1323,3,NULL),
