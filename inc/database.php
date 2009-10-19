@@ -685,12 +685,7 @@ function commitUpdateRack ($rack_id, $new_name, $new_height, $new_row_id, $new_c
 
 	$update_sql = "update Rack set name='${new_name}', height='${new_height}', comment='${new_comment}', row_id=${new_row_id} " .
 		"where id='${rack_id}' limit 1";
-	$update_result = $dbxlink->query ($update_sql);
-	if ($update_result->rowCount() != 1)
-	{
-		showError ('Error updating rack information', __FUNCTION__);
-		return FALSE;
-	}
+	$dbxlink->exec ($update_sql);
 	return recordHistory ('Rack', "id = ${rack_id}");
 }
 
@@ -809,12 +804,7 @@ function createMolecule ($molData)
 {
 	global $dbxlink;
 	$query = "insert into Molecule values()";
-	$result1 = $dbxlink->query ($query);
-	if ($result1->rowCount() != 1)
-	{
-		showError ('Error inserting into Molecule', __FUNCTION__);
-		return NULL;
-	}
+	$dbxlink->exec ($query);
 	$molecule_id = lastInsertID();
 	foreach ($molData as $rua)
 	{
@@ -824,12 +814,7 @@ function createMolecule ($molData)
 		$query =
 			"insert into Atom(molecule_id, rack_id, unit_no, atom) " .
 			"values (${molecule_id}, ${rack_id}, ${unit_no}, '${atom}')";
-		$result3 = $dbxlink->query ($query);
-		if ($result3 == NULL or $result3->rowCount() != 1)
-		{
-			showError ('Error inserting into Atom', __FUNCTION__);
-			return NULL;
-		}
+		$dbxlink->exec ($query);
 	}
 	return $molecule_id;
 }
