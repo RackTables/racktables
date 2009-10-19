@@ -1839,11 +1839,6 @@ function renderHistory ($object_type, $object_id)
 	}
 	global $dbxlink;
 	$result = $dbxlink->query ($query);
-	if ($result == NULL)
-	{
-		showError ('SQL query failed', __FUNCTION__);
-		return;
-	}
 	echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
 	$order = 'odd';
 	global $nextorder;

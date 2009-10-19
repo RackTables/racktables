@@ -203,11 +203,6 @@ function commitUpdateRow($rackrow_id, $rackrow_name)
 	global $dbxlink;
 	$query = "update RackRow set name = '${rackrow_name}' where id=${rackrow_id}";
 	$result = $dbxlink->query ($query);
-	if ($result == NULL)
-	{
-		showError ("SQL query '${query}' failed", __FUNCTION__);
-		return FALSE;
-	}
 	$result->closeCursor();
 	return TRUE;
 }
@@ -224,17 +219,7 @@ function commitDeleteRow($rackrow_id)
 			$result->closeCursor();
 			$query = "delete from RackRow where id=${rackrow_id}";
 			$result = $dbxlink->query ($query);
-			if ($result == NULL)
-			{
-				showError ("SQL query '${query}' failed", __FUNCTION__);
-				return FALSE;
-			}
 		}
-	}
-	else
-	{
-		showError ("SQL query '${query}' failed", __FUNCTION__);
-		return FALSE;
 	}
 	return TRUE;
 }
@@ -589,11 +574,6 @@ function commitAddRack ($name, $height = 0, $row_id = 0, $comment, $taglist)
 			'comment' => "'${comment}'"
 		)
 	);
-	if ($result == NULL)
-	{
-		showError ('useInsertBlade() failed', __FUNCTION__);
-		return FALSE;
-	}
 	$last_insert_id = lastInsertID();
 	return (produceTagsForLastRecord ('rack', $taglist, $last_insert_id) == '') and recordHistory ('Rack', "id = ${last_insert_id}");
 }
@@ -615,21 +595,11 @@ function commitAddObject ($new_name, $new_label, $new_barcode, $new_type_id, $ne
 			'asset_no' => !strlen ($new_asset_no) ? 'NULL' : "'${new_asset_no}'"
 		)
 	);
-	if ($result1 == NULL)
-	{
-		showError ("SQL query #1 failed", __FUNCTION__);
-		return FALSE;
-	}
 	$last_insert_id = lastInsertID();
 	// Do AutoPorts magic
 	executeAutoPorts ($last_insert_id, $new_type_id);
 	// Now tags...
 	$error = produceTagsForLastRecord ('object', $taglist, $last_insert_id);
-	if ($error != '')
-	{
-		showError ("Error adding tags for the object: ${error}");
-		return FALSE;
-	}
 
 	recordHistory ('RackObject', "id = ${last_insert_id}");
 
@@ -648,11 +618,6 @@ function commitUpdateObject ($object_id = 0, $new_name = '', $new_label = '', $n
 		"has_problems='${new_has_problems}', asset_no=${new_asset_no}, comment='${new_comment}' " .
 		"where id='${object_id}' limit 1";
 	$result = $dbxlink->query ($query);
-	if ($result == NULL)
-	{
-		showError ("SQL query '${query}' failed", __FUNCTION__);
-		return FALSE;
-	}
 	$result->closeCursor();
 	return recordHistory ('RackObject', "id = ${object_id}");
 }
@@ -833,11 +798,7 @@ function getMolecule ($mid = 0)
 // returns exactly what is's named after
 function lastInsertID ()
 {
-	if (NULL == ($result = useSelectBlade ('select last_insert_id()', __FUNCTION__)))
-	{
-		showError ('SQL query failed!', __FUNCTION__);
-		die;
-	}
+	$result = useSelectBlade ('select last_insert_id()', __FUNCTION__);
 	$row = $result->fetch (PDO::FETCH_NUM);
 	return $row[0];
 }
@@ -883,11 +844,6 @@ function recordHistory ($tableName, $whereClause)
 	global $dbxlink, $remote_username;
 	$query = "insert into ${tableName}History select *, current_timestamp(), '${remote_username}' from ${tableName} where ${whereClause}";
 	$result = $dbxlink->query ($query);
-	if ($result == NULL or $result->rowCount() != 1)
-	{
-		showError ("SQL query '${query}' failed for table ${tableName}", __FUNCTION__);
-		return FALSE;
-	}
 	return TRUE;
 }
 
@@ -907,11 +863,6 @@ function getOperationMolecules ($op_id = 0)
 	$result = useSelectBlade ($query, __FUNCTION__);
 	// We expect one row.
 	$row = $result->fetch (PDO::FETCH_ASSOC);
-	if ($row == NULL)
-	{
-		showError ("SQL query succeded, but returned no results.", __FUNCTION__);
-		return;
-	}
 	$omid = $row['old_molecule_id'];
 	$nmid = $row['new_molecule_id'];
 	$result->closeCursor();
@@ -1764,11 +1715,6 @@ function commitUpdateUserAccount ($id, $new_username, $new_realname, $new_passwo
 		"update UserAccount set user_name = '${new_username}', user_realname = '${new_realname}', " .
 		"user_password_hash = '${new_password}' where user_id = ${id} limit 1";
 	$result = $dbxlink->query ($query);
-	if ($result == NULL)
-	{
-		showError ('SQL query failed', __FUNCTION__);
-		die;
-	}
 	return TRUE;
 }
 
@@ -1792,11 +1738,7 @@ function removePortOIFCompat ($type1 = 0, $type2 = 0)
 		showError ('Invalid arguments', __FUNCTION__);
 		die;
 	}
-	if (NULL == $dbxlink->query ("DELETE FROM PortCompat WHERE type1 = ${type1} AND type2 = ${type2}"))
-	{
-		showError ('SQL query failed', __FUNCTION__);
-		die;
-	}
+	$dbxlink->query ("DELETE FROM PortCompat WHERE type1 = ${type1} AND type2 = ${type2}");
 	return TRUE;
 }
 
@@ -1935,11 +1877,6 @@ function commitUpdateDictionary ($chapter_no = 0, $dict_key = 0, $dict_value = '
 		"update Dictionary set dict_value = '${dict_value}' where chapter_id=${chapter_no} " .
 		"and dict_key=${dict_key} limit 1";
 	$result = $dbxlink->query ($query);
-	if ($result == NULL)
-	{
-		showError ('SQL query failed', __FUNCTION__);
-		die;
-	}
 	return TRUE;
 }
 
@@ -1966,11 +1903,6 @@ function commitReduceDictionary ($chapter_no = 0, $dict_key = 0)
 		"delete from Dictionary where chapter_id=${chapter_no} " .
 		"and dict_key=${dict_key} limit 1";
 	$result = $dbxlink->query ($query);
-	if ($result == NULL)
-	{
-		showError ('SQL query failed', __FUNCTION__);
-		die;
-	}
 	return TRUE;
 }
 
@@ -1994,11 +1926,6 @@ function commitUpdateChapter ($chapter_no = 0, $chapter_name = '')
 		"update Chapter set name = '${chapter_name}' where id = ${chapter_no} " .
 		"and sticky = 'no' limit 1";
 	$result = $dbxlink->query ($query);
-	if ($result == NULL)
-	{
-		showError ('SQL query failed', __FUNCTION__);
-		die;
-	}
 	return TRUE;
 }
 
@@ -2008,11 +1935,6 @@ function commitDeleteChapter ($chapter_no = 0)
 	$query =
 		"delete from Chapter where id = ${chapter_no} and sticky = 'no' limit 1";
 	$result = $dbxlink->query ($query);
-	if ($result == NULL)
-	{
-		showError ('SQL query failed', __FUNCTION__);
-		die;
-	}
 	return TRUE;
 }
 
@@ -2120,11 +2042,6 @@ function commitUpdateAttribute ($attr_id = 0, $attr_name = '')
 		"update Attribute set name = '${attr_name}' " .
 		"where id = ${attr_id} limit 1";
 	$result = $dbxlink->query ($query);
-	if ($result == NULL)
-	{
-		showError ("SQL query '${query}' failed", __FUNCTION__);
-		die;
-	}
 	return TRUE;
 }
 
@@ -2195,11 +2112,6 @@ function commitReduceAttrMap ($attr_id = 0, $objtype_id)
 		"delete from AttributeMap where attr_id=${attr_id} " .
 		"and objtype_id=${objtype_id} limit 1";
 	$result = $dbxlink->query ($query);
-	if ($result == NULL)
-	{
-		showError ('SQL query failed', __FUNCTION__);
-		die;
-	}
 	return TRUE;
 }
 
@@ -2264,11 +2176,6 @@ function commitResetAttrValue ($object_id = 0, $attr_id = 0)
 	global $dbxlink;
 	$query = "delete from AttributeValue where object_id = ${object_id} and attr_id = ${attr_id} limit 1";
 	$result = $dbxlink->query ($query);
-	if ($result == NULL)
-	{
-		showError ('SQL query failed', __FUNCTION__);
-		die;
-	}
 	return TRUE;
 }
 
@@ -2285,17 +2192,7 @@ function commitUpdateAttrValue ($object_id = 0, $attr_id = 0, $value = '')
 	global $dbxlink;
 	$query1 = "select type as attr_type from Attribute where id = ${attr_id}";
 	$result = $dbxlink->query ($query1);
-	if ($result == NULL)
-	{
-		showError ('SQL query #1 failed', __FUNCTION__);
-		die;
-	}
 	$row = $result->fetch (PDO::FETCH_NUM);
-	if ($row == NULL)
-	{
-		showError ('SQL query #1 returned no results', __FUNCTION__);
-		die;
-	}
 	$attr_type = $row[0];
 	$result->closeCursor();
 	switch ($attr_type)
@@ -2316,21 +2213,11 @@ function commitUpdateAttrValue ($object_id = 0, $attr_id = 0, $value = '')
 		"delete from AttributeValue where " .
 		"object_id = ${object_id} and attr_id = ${attr_id} limit 1";
 	$result = $dbxlink->query ($query2);
-	if ($result == NULL)
-	{
-		showError ('SQL query #2 failed', __FUNCTION__);
-		die;
-	}
 	// We know $value isn't empty here.
 	$query3 =
 		"insert into AttributeValue set ${column} = '${value}', " .
 		"object_id = ${object_id}, attr_id = ${attr_id} ";
 	$result = $dbxlink->query ($query3);
-	if ($result == NULL)
-	{
-		showError ('SQL query #3 failed', __FUNCTION__);
-		die;
-	}
 	return TRUE;
 }
 
@@ -2344,11 +2231,6 @@ function commitUseupPort ($port_id = 0)
 	global $dbxlink;
 	$query = "update Port set reservation_comment = NULL where id = ${port_id} limit 1";
 	$result = $dbxlink->exec ($query);
-	if ($result == NULL)
-	{
-		showError ("SQL query failed", __FUNCTION__);
-		die;
-	}
 	return TRUE;
 	
 }
@@ -2399,12 +2281,6 @@ function useSelectBlade ($query, $caller = 'N/A')
 {
 	global $dbxlink;
 	$result = $dbxlink->query ($query);
-	if ($result == NULL)
-	{
-		$ei = $dbxlink->errorInfo();
-		showError ("SQL query '${query}'\n failed in useSelectBlade with error ${ei[1]} (${ei[2]})", $caller);
-		return NULL;
-	}
 	return $result;
 }
 
@@ -2429,11 +2305,6 @@ function storeConfigVar ($varname = NULL, $varvalue = NULL)
 		throw new InvalidArgException ('$varvalue', $varvalue);
 	$query = "update Config set varvalue='${varvalue}' where varname='${varname}' limit 1";
 	$result = $dbxlink->query ($query);
-	if ($result == NULL)
-	{
-		showError ("SQL query '${query}' failed", __FUNCTION__);
-		return FALSE;
-	}
 	$rc = $result->rowCount();
 	$result->closeCursor();
 	if ($rc == 0 or $rc == 1)
@@ -2610,11 +2481,6 @@ function commitUpdateRS ($rsid = 0, $rsip = '', $rsport = 0, $rsconfig = '')
 		(!strlen ($rsconfig) ? 'NULL' : "'${rsconfig}'") .
 		" where id = ${rsid} limit 1";
 	$result = $dbxlink->query ($query);
-	if ($result == NULL)
-	{
-		showError ("SQL query '${query}' failed", __FUNCTION__);
-		die;
-	}
 	return TRUE;
 }
 
@@ -3481,11 +3347,6 @@ function commitReplaceFile ($file_id = 0, $contents)
 	$query->bindParam(2, $file_id);
 
 	$result = $query->execute();
-	if (!$result)
-	{
-		showError ('commitReplaceFile: SQL query failed', __FUNCTION__);
-		return FALSE;
-	}
 	return '';
 }
 
@@ -3605,11 +3466,7 @@ function discardLDAPCache ($maxage = 0)
 function getUserIDByUsername ($username)
 {
 	$query = "select user_id from UserAccount where user_name = '${username}'";
-	if (($result = useSelectBlade ($query, __FUNCTION__)) == NULL) 
-	{
-		showError ('SQL query failed', __FUNCTION__);
-		die;
-	}
+	$result = useSelectBlade ($query, __FUNCTION__);
 	if ($row = $result->fetch (PDO::FETCH_ASSOC))
 		return $row['user_id'];
 	return NULL;
@@ -3622,11 +3479,7 @@ function getUserIDByUsername ($username)
 function alreadyUsedL2Address ($address, $my_object_id)
 {
 	$query = "SELECT COUNT(*) FROM Port WHERE BINARY l2address = '${address}' AND object_id != ${my_object_id}";
-	if (NULL == ($result = useSelectBlade ($query, __FUNCTION__)))
-	{
-		showError ('SQL query failed', __FUNCTION__);
-		die;
-	}
+	$result = useSelectBlade ($query, __FUNCTION__);
 	$row = $result->fetch (PDO::FETCH_NUM);
 	return $row[0] != 0;
 }

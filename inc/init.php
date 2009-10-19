@@ -59,7 +59,7 @@ catch (PDOException $e)
 	showError ("Database connection failed:\n\n" . $e->getMessage(), __FILE__);
 	exit (1);
 }
-
+$dbxlink->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 $dbxlink->exec ("set names 'utf8'");
 
 if (get_magic_quotes_gpc())
