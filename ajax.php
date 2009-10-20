@@ -19,7 +19,7 @@ switch ($_REQUEST['ac'])
 		$code = str_replace ('\r', '', str_replace ('\n', "\n", $_REQUEST['code']));
 		$result = getRackCode($code);
 		if ($result['result'] == 'ACK')
-			echo 'ACK';
+			echo "ACK\n";
 		else
 			echo "NAK\n".$result['load'];
 	break;
