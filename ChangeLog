@@ -1,4 +1,4 @@
-0.17.6
+0.17.6 2009-10-31
 	update: voice/video devices
 	bugfix: PHP warning
 	bugfix: escaping of a newly created IPv4 network name (ticket:292)
