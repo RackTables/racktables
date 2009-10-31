@@ -17,18 +17,8 @@ echo '<head><title>' . getTitle ($pageno) . "</title>\n";
 echo '<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />';
 echo "<link rel=stylesheet type='text/css' href=pi.css />\n";
 echo "<link rel=icon href='" . getFaviconURL() . "' type='image/x-icon' />";
-echo "<style type='text/css'>\n";
-// Print style information
-foreach (array ('F', 'A', 'U', 'T', 'Th', 'Tw', 'Thw') as $statecode)
-{
-	echo "td.state_${statecode} {\n";
-	echo "\ttext-align: center;\n";
-	echo "\tbackground-color: #" . (getConfigVar ('color_' . $statecode)) . ";\n";
-	echo "\tfont: bold 10px Verdana, sans-serif;\n";
-	echo "}\n\n";
-}
+printStyle();
 ?>
-	</style>
 	<script language='javascript' type='text/javascript' src='js/racktables.js'></script>
 	<script language='javascript' type='text/javascript' src='js/jquery-1.3.1.min.js'></script>
 	<script language='javascript' type='text/javascript' src='js/live_validation.js'></script>

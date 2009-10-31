@@ -1534,6 +1534,9 @@ function showMessageOrError ()
 				206 => array ('code' => 'warning', 'format' => 'Rack is not empty'),
 				207 => array ('code' => 'warning', 'format' => 'Ignored empty request'),
 
+// records 300~399 with notices
+				300 => array ('code' => 'neutral', 'format' => '%s'),
+
 			);
 			// Handle the arguments. Is there any better way to do it?
 			foreach ($log['m'] as $record)
@@ -6221,6 +6224,21 @@ function renderPortIFCompatEditor()
 		printNewitemTR();
 	echo '</table>';
 	finishPortlet();
+}
+
+// Print style information
+function printStyle ()
+{
+	echo "<style type='text/css'>\n";
+	foreach (array ('F', 'A', 'U', 'T', 'Th', 'Tw', 'Thw') as $statecode)
+	{
+		echo "td.state_${statecode} {\n";
+		echo "\ttext-align: center;\n";
+		echo "\tbackground-color: #" . (getConfigVar ('color_' . $statecode)) . ";\n";
+		echo "\tfont: bold 10px Verdana, sans-serif;\n";
+		echo "}\n\n";
+	}
+	echo '</style>';
 }
 
 ?>
