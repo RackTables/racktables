@@ -46,13 +46,11 @@ function getConfigVar ($varname = '')
 	// has failed, we don't retry loading.
 	if (!isset ($configCache))
 	{
-		showError ("Configuration cache is unavailable", __FUNCTION__);
-		die;
+		throw new RuntimeException ("Configuration cache is unavailable");
 	}
 	if ($varname == '')
 	{
-		showError ("Missing argument", __FUNCTION__);
-		die;
+		throw new InvalidArgException('$varname', $varname, 'Empty variable name');
 	}
 	if (isset ($configCache[$varname]))
 	{
@@ -72,18 +70,16 @@ function setConfigVar ($varname = '', $varvalue = '', $softfail = FALSE)
 	global $configCache;
 	if (!isset ($configCache))
 	{
-		showError ('Configuration cache is unavailable', __FUNCTION__);
-		die;
+		throw new RuntimeException ("Configuration cache is unavailable");
 	}
 	if (!strlen ($varname))
 	{
-		showError ("Empty argument", __FUNCTION__);
-		die;
+		throw new InvalidArgException('$varname', $varname, 'Empty variable name');
 	}
 	// We don't operate on unknown data.
 	if (!isset ($configCache[$varname]))
 	{
-		showError ("don't know how to handle '${varname}'", __FUNCTION__);
+		throw new InvalidArgException('$varname', $varname, "Don't know how to handle '${varname}'");
 		die;
 	}
 	if ($configCache[$varname]['is_hidden'] != 'no')
@@ -91,24 +87,21 @@ function setConfigVar ($varname = '', $varvalue = '', $softfail = FALSE)
 		$errormsg = "'${varname}' is a system variable and cannot be changed by user.";
 		if ($softfail)
 			return $errormsg;
-		showError ($errormsg, __FUNCTION__);
-		die;
+		throw new InvalidArgException('$varname', $varname, $errormsg);
 	}
 	if (!strlen ($varvalue) && $configCache[$varname]['emptyok'] != 'yes')
 	{
 		$errormsg = "'${varname}' is configured to take non-empty value. Perhaps there was a reason to do so.";
 		if ($softfail)
 			return $errormsg;
-		showError ($errormsg, __FUNCTION__);
-		die;
+		throw new InvalidArgException('$varname', $varname, $errormsg);
 	}
 	if (strlen ($varvalue) && $configCache[$varname]['vartype'] == 'uint' && (!is_numeric ($varvalue) or $varvalue < 0 ))
 	{
 		$errormsg = "'${varname}' can accept UINT values only";
 		if ($softfail)
 			return $errormsg;
-		showError ($errormsg, __FUNCTION__);
-		die;
+		throw new InvalidArgException('$varname', $varname, $errormsg);
 	}
 	// Update cache only if the changes went into DB.
 	if (storeConfigVar ($varname, $varvalue))

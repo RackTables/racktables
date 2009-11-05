@@ -372,11 +372,7 @@ function renderRackspaceRowEditor ()
 
 function renderRow ($row_id)
 {
-	if (($rowInfo = getRackRowInfo ($row_id)) == NULL)
-	{
-		showError ('getRackRowInfo() failed', __FUNCTION__);
-		return;
-	}
+	$rowInfo = getRackRowInfo ($row_id);
 	$cellfilter = getCellFilter();
 	$rackList = filterCellList (listCells ('rack', $row_id), $cellfilter['expression']);
 	// Main layout starts.
@@ -549,11 +545,6 @@ function renderEditObjectForm ($object_id)
 {
 	global $pageno;
 	$object = spotEntity ('object', $object_id);
-	if ($object == NULL)
-	{
-		showError ('Error retrieving data', __FUNCTION__);
-		return;
-	}
 	startPortlet ();
 	printOpFormIntro ('update');
 
@@ -785,11 +776,6 @@ function renderRackObject ($object_id)
 	$info = spotEntity ('object', $object_id);
 	// FIXME: employ amplifyCell() instead of calling loader functions directly
 	amplifyCell ($info);
-	if ($info == NULL)
-	{
-		showError ('Error loading data', __FUNCTION__);
-		return;
-	}
 	// Main layout starts.
 	echo "<table border=0 class=objectview cellspacing=0 cellpadding=0>";
 	echo "<tr><td colspan=2 align=center><h1>${info['dname']}</h1></td></tr>\n";
@@ -855,7 +841,7 @@ function renderRackObject ($object_id)
 		$hl_port_id = 0;
 		if (isset ($_REQUEST['hl_port_id']))
 		{
-			assertUIntArg ('hl_port_id', __FUNCTION__);
+			assertUIntArg ('hl_port_id');
 			$hl_port_id = $_REQUEST['hl_port_id'];
 		}
 		echo "<table cellspacing=0 cellpadding='5' align='center' class='widetable'>";
@@ -902,7 +888,7 @@ function renderRackObject ($object_id)
 		$hl_ipv4_addr = '';
 		if (isset ($_REQUEST['hl_ipv4_addr']))
 		{
-			assertIPv4Arg ('hl_ipv4_addr', __FUNCTION__);
+			assertIPv4Arg ('hl_ipv4_addr');
 			$hl_ipv4_addr = $_REQUEST['hl_ipv4_addr'];
 		}
 		foreach ($alloclist as $dottedquad => $alloc)
@@ -1610,11 +1596,6 @@ function renderRackSpaceForObject ($object_id)
 {
 	$is_update = isset ($_REQUEST['rackmulti'][0]);
 	$info = spotEntity ('object', $object_id);
-	if ($info == NULL)
-	{
-		showError ('Error loading data', __FUNCTION__);
-		return;
-	}
 	// Always process occupied racks plus racks chosen by user. First get racks with
 	// already allocated rackspace...
 	if (NULL === ($workingRacksData = getResidentRacksData ($object_id)))
@@ -1626,11 +1607,7 @@ function renderRackSpaceForObject ($object_id)
 		{
 			if (!isset ($workingRacksData[$cand_id]))
 			{
-				if (NULL == ($rackData = spotEntity ('rack', $cand_id)))
-				{
-					showError ('Rack not found', __FUNCTION__);
-					return NULL;
-				}
+				$rackData = spotEntity ('rack', $cand_id);
 				amplifyCell ($rackData);
 				$workingRacksData[$cand_id] = $rackData;
 			}
@@ -1774,11 +1751,6 @@ function renderDepot ()
 	echo "<tr><td class=pcleft>";
 
 	startPortlet ('Objects (' . count ($objects) . ')');
-	if ($objects === NULL)
-	{
-		showError ('Fatal error retrieving object list', __FUNCTION__);
-		return;
-	}
 	echo '<br><br><table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
 	echo '<tr><th>Common name</th><th>Visible label</th><th>Asset tag</th><th>Barcode</th><th>Row/Rack</th></tr>';
 	$order = 'odd';
@@ -1837,8 +1809,7 @@ function renderHistory ($object_type, $object_id)
 			$extra = 8;
 			break;
 		default:
-			showError ("Uknown object type '${object_type}'", __FUNCTION__);
-			return;
+			throw new RealmNotFoundException($object_type);
 	}
 	global $dbxlink;
 	$result = $dbxlink->query ($query);
@@ -2773,13 +2744,12 @@ function renderSearchResults ()
 	$terms = trim ($_REQUEST['q']);
 	if (!strlen ($terms))
 	{
-		showError ('Search string cannot be empty.', __FUNCTION__);
+		throw new InvalidRequestArgException('q', $_REQUEST['q'], 'Search string cannot be empty.');
 		return;
 	}
 	if (!permitted ('depot', 'default'))
 	{
-		showError ('You are not authorized for viewing information about objects.', __FUNCTION__);
-		return;
+		throw new NotAuthorizedException('You are not authorized for viewing information about objects.');
 	}
 	$nhits = 0;
 	if (preg_match (RE_IP4_ADDR, $terms))
@@ -3242,11 +3212,7 @@ function renderConfigMainpage ()
 
 function renderRackPage ($rack_id)
 {
-	if (NULL == ($rackData = spotEntity ('rack', $rack_id)))
-	{
-		showError ('Rack not found', __FUNCTION__);
-		return;
-	}
+	$rackData = spotEntity ('rack', $rack_id);
 	amplifyCell ($rackData);
 	echo "<table border=0 class=objectview cellspacing=0 cellpadding=0><tr>";
 
@@ -3718,7 +3684,7 @@ function renderReports ($what)
 				echo "</td></tr>\n";
 				break;
 			default:
-				showError ('Internal data error', __FUNCTION__);
+				throw new RuntimeException ('Internal data error');
 		}
 		echo "<tr><td colspan=2><hr></td></tr>\n";
 	}
@@ -3835,11 +3801,6 @@ function renderUIConfigEditForm ()
 function renderVLANMembership ($object_id)
 {
 	$data = getSwitchVLANs ($object_id);
-	if ($data === NULL)
-	{
-		showError ('getSwitchVLANs() returned NULL', __FUNCTION__);
-		return;
-	}
 	list ($vlanlist, $portlist, $maclist) = $data;
 
 	echo '<table border=0 width="100%"><tr><td colspan=3>';
@@ -4289,11 +4250,6 @@ function renderRSPool ($pool_id)
 {
 	global $nextorder;
 	$poolInfo = spotEntity ('ipv4rspool', $pool_id);
-	if ($poolInfo == NULL)
-	{
-		showError ('Could not load data!', __FUNCTION__);
-		return;
-	}
 	amplifyCell ($poolInfo);
 
 	echo "<table border=0 class=objectview cellspacing=0 cellpadding=0>";
@@ -5285,11 +5241,6 @@ function renderFile ($file_id)
 {
 	global $nextorder, $aac;
 	$file = spotEntity ('file', $file_id);
-	if ($file == NULL)
-	{
-		showError ('Error loading data', __FUNCTION__);
-		return;
-	}
 	echo "<table border=0 class=objectview cellspacing=0 cellpadding=0>";
 	echo "<tr><td colspan=2 align=center><h1>" . htmlspecialchars ($file['name']) . "</h1></td></tr>\n";
 	echo "<tr><td class=pcleft>";
@@ -5384,10 +5335,6 @@ function renderFileProperties ($file_id)
 {
 	$file = spotEntity ('file', $file_id);
 	if ($file === NULL)
-	{
-		showError ('Error loading data', __FUNCTION__);
-		return;
-	}
 	echo '<table border=0 align=center>';
 	printOpFormIntro ('updateFile');
 	echo "<tr><th class=tdright>MIME-type:</th><td class=tdleft><input tabindex=101 type=text name=file_type value='";
@@ -5762,8 +5709,7 @@ function renderCell ($cell)
 		echo "</td></tr></table>";
 		break;
 	default:
-		showError ('odd data', __FUNCTION__);
-		break;
+		throw new RealmNotFoundException($cell['realm']);
 	}
 }
 
@@ -5961,7 +5907,7 @@ function dynamic_title_decoder ($path_position)
 			'params' => array()
 		);
 	case 'chapter':
-		assertUIntArg ('chapter_no', __FUNCTION__);
+		assertUIntArg ('chapter_no');
 		$chapters = getChapterList();
 		$chapter_no = $_REQUEST['chapter_no'];
 		$chapter_name = isset ($chapters[$chapter_no]) ? $chapters[$chapter_no]['name'] : 'N/A';
@@ -5971,7 +5917,7 @@ function dynamic_title_decoder ($path_position)
 			'params' => array ('chapter_no' => $chapter_no)
 		);
 	case 'user':
-		assertUIntArg ('user_id', __FUNCTION__);
+		assertUIntArg ('user_id');
 		$userinfo = spotEntity ('user', $_REQUEST['user_id']);
 		return array
 		(
@@ -5979,7 +5925,7 @@ function dynamic_title_decoder ($path_position)
 			'params' => array ('user_id' => $_REQUEST['user_id'])
 		);
 	case 'ipv4rspool':
-		assertUIntArg ('pool_id', __FUNCTION__);
+		assertUIntArg ('pool_id');
 		$poolInfo = spotEntity ('ipv4rspool', $_REQUEST['pool_id']);
 		return array
 		(
@@ -5987,7 +5933,7 @@ function dynamic_title_decoder ($path_position)
 			'params' => array ('pool_id' => $_REQUEST['pool_id'])
 		);
 	case 'ipv4vs':
-		assertUIntArg ('vs_id', __FUNCTION__);
+		assertUIntArg ('vs_id');
 		$tmp = spotEntity ('ipv4vs', $_REQUEST['vs_id']);
 		return array
 		(
@@ -5995,7 +5941,7 @@ function dynamic_title_decoder ($path_position)
 			'params' => array ('vs_id' => $_REQUEST['vs_id'])
 		);
 	case 'object':
-		assertUIntArg ('object_id', __FUNCTION__);
+		assertUIntArg ('object_id');
 		$object = spotEntity ('object', $_REQUEST['object_id']);
 		if ($object == NULL)
 			return array
@@ -6009,7 +5955,7 @@ function dynamic_title_decoder ($path_position)
 			'params' => array ('object_id' => $_REQUEST['object_id'])
 		);
 	case 'rack':
-		assertUIntArg ('rack_id', __FUNCTION__);
+		assertUIntArg ('rack_id');
 		$rack = spotEntity ('rack', $_REQUEST['rack_id']);
 		return array
 		(
@@ -6030,7 +5976,7 @@ function dynamic_title_decoder ($path_position)
 				'params' => array()
 			);
 	case 'file':
-		assertUIntArg ('file_id', __FUNCTION__);
+		assertUIntArg ('file_id');
 		$file = spotEntity ('file', $_REQUEST['file_id']);
 		if ($file == NULL)
 			return array
@@ -6044,7 +5990,7 @@ function dynamic_title_decoder ($path_position)
 			'params' => array ('file_id' => $_REQUEST['file_id'])
 		);
 	case 'ipaddress':
-		assertIPv4Arg ('ip', __FUNCTION__);
+		assertIPv4Arg ('ip');
 		$address = getIPv4Address ($_REQUEST['ip']);
 		return array
 		(
@@ -6056,7 +6002,7 @@ function dynamic_title_decoder ($path_position)
 		switch ($pageno)
 		{
 		case 'ipv4net':
-			assertUIntArg ('id', __FUNCTION__);
+			assertUIntArg ('id');
 			$range = spotEntity ('ipv4net', $_REQUEST['id']);
 			return array
 			(
@@ -6064,7 +6010,7 @@ function dynamic_title_decoder ($path_position)
 				'params' => array ('id' => $_REQUEST['id'])
 			);
 		case 'ipaddress':
-			assertIPv4Arg ('ip', __FUNCTION__);
+			assertIPv4Arg ('ip');
 			$range = spotEntity ('ipv4net', getIPv4AddressNetworkId ($_REQUEST['ip']));
 			return array
 			(
@@ -6087,26 +6033,16 @@ function dynamic_title_decoder ($path_position)
 		switch ($pageno)
 		{
 		case 'rack':
-			assertUIntArg ('rack_id', __FUNCTION__);
+			assertUIntArg ('rack_id');
 			$rack = spotEntity ('rack', $_REQUEST['rack_id']);
-			if ($rack == NULL)
-			{
-				showError ('Rack not found', __FUNCTION__);
-				return NULL;
-			}
 			return array
 			(
 				'name' => $rack['row_name'],
 				'params' => array ('row_id' => $rack['row_id'])
 			);
 		case 'row':
-			assertUIntArg ('row_id', __FUNCTION__);
+			assertUIntArg ('row_id');
 			$rowInfo = getRackRowInfo ($_REQUEST['row_id']);
-			if ($rowInfo == NULL)
-			{
-				showError ('getRackRowInfo() failed', __FUNCTION__);
-				return NULL;
-			}
 			return array
 			(
 				'name' => $rowInfo['name'],

@@ -802,7 +802,7 @@ function eval_expression ($expr, $tagchain, $ptable, $silent = FALSE)
 			if (!isset ($ptable[$pname]))
 			{
 				if (!$silent)
-					showError ("Predicate '${pname}' is referenced before declaration", __FUNCTION__);
+					showWarning ("Predicate '${pname}' is referenced before declaration", __FUNCTION__);
 				return NULL;
 			}
 			return $self ($ptable[$pname], $tagchain, $ptable);
@@ -828,7 +828,7 @@ function eval_expression ($expr, $tagchain, $ptable, $silent = FALSE)
 			return $self ($expr['right'], $tagchain, $ptable);
 		default:
 			if (!$silent)
-				showError ("Evaluation error, cannot process expression type '${expr['type']}'", __FUNCTION__);
+				showWarning ("Evaluation error, cannot process expression type '${expr['type']}'", __FUNCTION__);
 			return NULL;
 			break;
 	}
@@ -869,8 +869,7 @@ function processAdjustmentSentence ($modlist, &$chain)
 				$didChanges = TRUE;
 				break;
 			default: // HCF
-				showError ('Internal error', __FUNCTION__);
-				die;
+				throw new CodeCompilationError('Internal error');
 		}
 	return $didChanges;
 }
@@ -898,7 +897,7 @@ function gotClearanceForTagChain ($const_base)
 						case 'LEX_DENY':
 							return FALSE;
 						default:
-							showError ("Condition match for unknown grant decision '${sentence['decision']}'", __FUNCTION__);
+							showWarning ("Condition match for unknown grant decision '${sentence['decision']}'", __FUNCTION__);
 							break;
 					}
 				break;
@@ -911,7 +910,7 @@ function gotClearanceForTagChain ($const_base)
 					$impl_tags = getImplicitTags ($expl_tags); // recalculate
 				break;
 			default:
-				showError ("Can't process sentence of unknown type '${sentence['type']}'", __FUNCTION__);
+				showWarning ("Can't process sentence of unknown type '${sentence['type']}'", __FUNCTION__);
 				break;
 		}
 	}

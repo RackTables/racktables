@@ -1,4 +1,7 @@
 <?php
+ob_start();
+try {
+
 	require 'inc/interface.php';
 	require 'inc/init.php';
 
@@ -60,7 +63,7 @@ function findSparePorts ($port_id, $only_racks = array())
 	echo "<link rel=stylesheet type='text/css' href=pi.css />\n";
 	echo "<link rel=icon href='" . getFaviconURL() . "' type='image/x-icon' />";
 	echo '</head><body style="height: 100%;">';
-	assertStringArg ('helper', __FILE__);
+	assertStringArg ('helper');
 	switch ($_REQUEST['helper'])
 	{
 		case 'portlist':
@@ -70,9 +73,9 @@ function findSparePorts ($port_id, $only_racks = array())
 			fixContext();
 			if (!permitted())
 				renderAccessDenied();
-			assertUIntArg ('port', __FILE__);
-			assertUIntArg ('object_id', __FILE__);
-			assertStringArg ('in_rack', __FILE__);
+			assertUIntArg ('port');
+			assertUIntArg ('object_id');
+			assertStringArg ('in_rack');
 			$localchoice = $_REQUEST['in_rack'] == 'y';
 			echo '<div style="background-color: #f0f0f0; border: 1px solid #3c78b5; padding: 10px; height: 100%; text-align: center; margin: 5px;"><h2>';
 			echo $localchoice ? 'Nearest spare ports:' : 'All spare ports:';
@@ -123,9 +126,17 @@ function findSparePorts ($port_id, $only_racks = array())
 			echo '</form></div>';
 			break;
 		default:
-			showError ('Invalid parameter or internal error', __FILE__);
-			break;
+			throw new RuntimeException ('Invalid parameter or internal error');
 	}
 ?>
 </body>
 </html>
+<?php
+ob_end_flush();
+}
+catch (Exception $e)
+{
+        ob_end_clean();
+        printException($e);
+}
+?>

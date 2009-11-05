@@ -118,78 +118,45 @@ $wildcardbylen = array
 
 // This function assures that specified argument was passed
 // and is a number greater than zero.
-function assertUIntArg ($argname, $caller = 'N/A', $allow_zero = FALSE)
+function assertUIntArg ($argname, $allow_zero = FALSE)
 {
 	if (!isset ($_REQUEST[$argname]))
-	{
-		showError ("Parameter '${argname}' is missing (calling function is [${caller}]).", __FUNCTION__);
-		die();
-	}
+		throw new InvalidRequestArgException('$argname', $_REQUEST[$argname], 'parameter is missing');
 	if (!is_numeric ($_REQUEST[$argname]))
-	{
-		showError ("Parameter '${argname}' is not a number (calling function is [${caller}]).", __FUNCTION__);
-		die();
-	}
+		throw new InvalidRequestArgException('$argname', $_REQUEST[$argname], 'parameter is not a number');
 	if ($_REQUEST[$argname] < 0)
-	{
-		showError ("Parameter '${argname}' is less than zero (calling function is [${caller}]).", __FUNCTION__);
-		die();
-	}
+		throw new InvalidRequestArgException('$argname', $_REQUEST[$argname], 'parameter is less than zero');
 	if (!$allow_zero and $_REQUEST[$argname] === 0)
-	{
-		showError ("Parameter '${argname}' is equal to zero (calling function is [${caller}]).", __FUNCTION__);
-		die();
-	}
+		throw new InvalidRequestArgException('$argname', $_REQUEST[$argname], 'parameter is zero');
 }
 
 // This function assures that specified argument was passed
 // and is a non-empty string.
-function assertStringArg ($argname, $caller = 'N/A', $ok_if_empty = FALSE)
+function assertStringArg ($argname, $ok_if_empty = FALSE)
 {
 	if (!isset ($_REQUEST[$argname]))
-	{
-		showError ("Parameter '${argname}' is missing (calling function is [${caller}]).", __FUNCTION__);
-		die();
-	}
+		throw new InvalidRequestArgException('$argname', $_REQUEST[$argname], 'parameter is missing');
 	if (!is_string ($_REQUEST[$argname]))
-	{
-		showError ("Parameter '${argname}' is not a string (calling function is [${caller}]).", __FUNCTION__);
-		die();
-	}
+		throw new InvalidRequestArgException('$argname', $_REQUEST[$argname], 'parameter is not a string');
 	if (!$ok_if_empty and !strlen ($_REQUEST[$argname]))
-	{
-		showError ("Parameter '${argname}' is an empty string (calling function is [${caller}]).", __FUNCTION__);
-		die();
-	}
+		throw new InvalidRequestArgException('$argname', $_REQUEST[$argname], 'parameter is an empty string');
 }
 
-function assertBoolArg ($argname, $caller = 'N/A', $ok_if_empty = FALSE)
+function assertBoolArg ($argname, $ok_if_empty = FALSE)
 {
 	if (!isset ($_REQUEST[$argname]))
-	{
-		showError ("Parameter '${argname}' is missing (calling function is [${caller}]).", __FUNCTION__);
-		die();
-	}
+		throw new InvalidRequestArgException('$argname', $_REQUEST[$argname], 'parameter is missing');
 	if (!is_string ($_REQUEST[$argname]) or $_REQUEST[$argname] != 'on')
-	{
-		showError ("Parameter '${argname}' is not a string (calling function is [${caller}]).", __FUNCTION__);
-		die();
-	}
+		throw new InvalidRequestArgException('$argname', $_REQUEST[$argname], 'parameter is not a string');
 	if (!$ok_if_empty and !strlen ($_REQUEST[$argname]))
-	{
-		showError ("Parameter '${argname}' is an empty string (calling function is [${caller}]).", __FUNCTION__);
-		die();
-	}
+		throw new InvalidRequestArgException('$argname', $_REQUEST[$argname], 'parameter is an empty string');
 }
 
-function assertIPv4Arg ($argname, $caller = 'N/A', $ok_if_empty = FALSE)
+function assertIPv4Arg ($argname, $ok_if_empty = FALSE)
 {
-	assertStringArg ($argname, $caller, $ok_if_empty);
+	assertStringArg ($argname, $ok_if_empty);
 	if (strlen ($_REQUEST[$argname]) and long2ip (ip2long ($_REQUEST[$argname])) !== $_REQUEST[$argname])
-	{
-		showError ("IPv4 address validation failed for value '" . $_REQUEST[$argname] . "' (calling function is [${caller}]).", __FUNCTION__);
-		die();
-	}
+		throw new InvalidRequestArgException('$argname', $_REQUEST[$argname], 'parameter is not a valid ipv4 address');
 }
 
 // Objects of some types should be explicitly shown as
@@ -291,7 +258,7 @@ function markAllSpans (&$rackData = NULL)
 {
 	if ($rackData == NULL)
 	{
-		showError ('Invalid rackData', __FUNCTION__);
+		showWarning ('Invalid rackData', __FUNCTION__);
 		return;
 	}
 	for ($i = $rackData['height']; $i > 0; $i--)
@@ -575,7 +542,7 @@ function getPrevIDforRack ($row_id = 0, $rack_id = 0)
 {
 	if ($row_id <= 0 or $rack_id <= 0)
 	{
-		showError ('Invalid arguments passed', __FUNCTION__);
+		showWarning ('Invalid arguments passed', __FUNCTION__);
 		return NULL;
 	}
 	$rackList = listCells ('rack', $row_id);
@@ -589,7 +556,7 @@ function getNextIDforRack ($row_id = 0, $rack_id = 0)
 {
 	if ($row_id <= 0 or $rack_id <= 0)
 	{
-		showError ('Invalid arguments passed', __FUNCTION__);
+		showWarning ('Invalid arguments passed', __FUNCTION__);
 		return NULL;
 	}
 	$rackList = listCells ('rack', $row_id);
@@ -734,7 +701,7 @@ function getRSUforRack ($data = NULL)
 {
 	if ($data == NULL)
 	{
-		showError ('Invalid argument', __FUNCTION__);
+		showWarning ('Invalid argument', __FUNCTION__);
 		return NULL;
 	}
 	$counter = array ('A' => 0, 'U' => 0, 'T' => 0, 'W' => 0, 'F' => 0);
@@ -749,7 +716,7 @@ function getRSUforRackRow ($rowData = NULL)
 {
 	if ($rowData === NULL)
 	{
-		showError ('Invalid argument', __FUNCTION__);
+		showWarning ('Invalid argument', __FUNCTION__);
 		return NULL;
 	}
 	if (!count ($rowData))
@@ -1157,7 +1124,7 @@ function fixContext ($target = NULL)
 	{
 		// Each page listed in the map above requires one uint argument.
 		$target_realm = $etype_by_pageno[$pageno];
-		assertUIntArg ($page[$pageno]['bypass'], __FUNCTION__);
+		assertUIntArg ($page[$pageno]['bypass']);
 		$target_id = $_REQUEST[$page[$pageno]['bypass']];
 		$target = spotEntity ($target_realm, $target_id);
 		$target_given_tags = $target['etags'];
@@ -1267,7 +1234,7 @@ function getCellFilter ()
 		$ret['urlextra'] .= '&andor=' . $ret['andor'];
 		break;
 	default:
-		showError ('Invalid and/or switch value in submitted form', __FUNCTION__);
+		showWarning ('Invalid and/or switch value in submitted form', __FUNCTION__);
 		return NULL;
 	}
 	$andor1 = '';
@@ -1426,14 +1393,14 @@ function buildLVSConfig ($object_id = 0)
 {
 	if ($object_id <= 0)
 	{
-		showError ('Invalid argument', __FUNCTION__);
+		showWarning ('Invalid argument', __FUNCTION__);
 		return;
 	}
 	$oInfo = spotEntity ('object', $object_id);
 	$lbconfig = getSLBConfig ($object_id);
 	if ($lbconfig === NULL)
 	{
-		showError ('getSLBConfig() failed', __FUNCTION__);
+		showWarning ('getSLBConfig() failed', __FUNCTION__);
 		return;
 	}
 	$newconfig = "#\n#\n# This configuration has been generated automatically by RackTables\n";
@@ -1632,8 +1599,7 @@ function iptree_embed (&$node, $pfx)
 	}
 	if ($node['mask'] == $pfx['mask'])
 	{
-		showError ('Internal error, the recurring loop lost control', __FUNCTION__);
-		die;
+		throw new RuntimeException('Internal error, the recurring loop lost control');
 	}
 
 	// split?
@@ -1658,8 +1624,7 @@ function iptree_embed (&$node, $pfx)
 		$self ($node['right'], $pfx);
 	else
 	{
-		showError ('Internal error, cannot decide between left and right', __FUNCTION__);
-		die;
+		throw new RuntimeException ('Internal error, cannot decide between left and right');
 	}
 }
 

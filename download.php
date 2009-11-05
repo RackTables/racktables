@@ -3,7 +3,7 @@ require 'inc/init.php';
 // purely for renderAccessDenied()
 require 'inc/interface.php';
 
-assertUIntArg ('file_id', __FILE__);
+assertUIntArg ('file_id');
 $pageno = 'file';
 $tabno = 'download';
 fixContext();

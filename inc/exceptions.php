@@ -1,5 +1,15 @@
 <?php
 
+class NotAuthorizedException extends RuntimeException {
+
+}
+
+class CodeCompilationError extends RuntimeException {
+/*
+ * This class probably needs references to code exerpt where the error occured
+ */
+}
+
 class EntityNotFoundException extends Exception {
 	private $entity;
 	private $id;
@@ -52,9 +62,14 @@ class InvalidArgException extends Exception
 {
 	private $name;
 	private $value;
-	function __construct ($name, $value)
+	private $reason;
+	function __construct ($name, $value, $reason=NULL)
 	{
-		parent::__construct ("Argument '${name}' of value '".var_export(${value},true)."' is invalid");
+		$message = "Argument '${name}' of value '".var_export($value,true)."' is invalid.";
+		if (!is_null($reason)) {
+			$message .= ' ('.$reason.')';
+		}
+		parent::__construct ($message);
 		$this->name = $name;
 		$this->value = $value;
 	}
@@ -67,6 +82,33 @@ class InvalidArgException extends Exception
 		return $this->value;
 	}
 }
+
+class InvalidRequestArgException extends Exception
+{
+	private $name;
+	private $value;
+	private $reason;
+	function __construct ($name, $value, $reason=NULL)
+	{
+		$message = "Request parameter '${name}' of value '".var_export($value,true)."' is invalid.";
+		if (!is_null($reason)) {
+			$message .= ' ('.$reason.')';
+		}
+		parent::__construct ($message);
+		$this->name = $name;
+		$this->value = $value;
+	}
+	function getName()
+	{
+		return $this->name;
+	}
+	function getValue()
+	{
+		return $this->value;
+	}
+}
+
+
 
 function dumpArray($arr)
 {
@@ -84,7 +126,7 @@ function stringTrace($trace)
 	foreach($trace as $line) {
 		$ret .= $line['file'].':'.$line['line'].' '.$line['function'].'(';
 		$f = true;
-		foreach ($line['args'] as $arg) {
+		if (isset($line['args']) and is_array($line['args'])) foreach ($line['args'] as $arg) {
 			if (!$f) $ret .= ', ';
 			if (is_string($arg))
 				$printarg = "'".$arg."'";
@@ -116,6 +158,22 @@ function print404($e)
 	echo '</body></html>';
 
 }
+
+function printNotAuthorizedException($e)
+{
+	header("HTTP/1.1 401 Unauthorized");
+	echo '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">'."\n";
+	echo '<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">'."\n";
+	echo "<head><title> Unauthorized </title>\n";
+	echo '<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />';
+	echo "<link rel=stylesheet type='text/css' href=pi.css />\n";
+#	echo "<link rel=icon href='" . getFaviconURL() . "' type='image/x-icon' />";
+	echo '</head> <body>';
+	echo '<h2>'.$e->getMessage().'</h2>';
+	echo '</body></html>';
+}
+
+
 
 function printPDOException($e)
 {
@@ -177,6 +235,8 @@ function printException($e)
 {
 	if (get_class($e) == 'EntityNotFoundException')
 		print404($e);
+	elseif (get_class($e) == 'NotAuthorizedException')
+		printNotAuthorizedException($e);
 	elseif (get_class($e) == 'PDOException')
 		printPDOException($e);
 	else

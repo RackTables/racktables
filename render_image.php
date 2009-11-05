@@ -5,11 +5,11 @@ ob_start();
 try {
 require 'inc/init.php';
 
-assertStringArg ('img', __FILE__);
+assertStringArg ('img');
 switch ($_REQUEST['img'])
 {
 	case 'minirack': // rack security context
-		assertUIntArg ('rack_id', __FILE__);
+		assertUIntArg ('rack_id');
 		$pageno = 'rack';
 		$tabno = 'default';
 		fixContext();
@@ -19,11 +19,11 @@ switch ($_REQUEST['img'])
 			renderRackThumb ($_REQUEST['rack_id']);
 		break;
 	case 'progressbar': // no security context
-		assertUIntArg ('done', __FILE__, TRUE);
+		assertUIntArg ('done', TRUE);
 		renderProgressBarImage ($_REQUEST['done']);
 		break;
 	case 'preview': // file security context
-		assertUIntArg ('file_id', __FILE__);
+		assertUIntArg ('file_id');
 		$pageno = 'file';
 		$tabno = 'download';
 		fixContext();

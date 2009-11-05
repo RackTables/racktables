@@ -4,20 +4,18 @@ try {
 // Include init after ophandlers, not before, so local.php can redefine things later.
 require 'inc/ophandlers.php';
 require 'inc/init.php';
-assertStringArg ('op', __FILE__);
+assertStringArg ('op');
 $op = $_REQUEST['op'];
 
 // FIXME: find a better way to handle this error
 if ($op == 'addFile' && !isset($_FILES['file']['error'])) {
-	showError ("File upload error, it's size probably exceeds upload_max_filesize directive in php.ini");
-	die;
+	throw new RuntimeException("File upload error, it's size probably exceeds upload_max_filesize directive in php.ini");
 }
 fixContext();
 
 if (!isset ($ophandler[$pageno][$tabno][$op]))
 {
-	showError ("Invalid request in operation broker: page '${pageno}', tab '${tabno}', op '${op}'", __FILE__);
-	die();
+	throw new RuntimeException("Invalid request in operation broker: page '${pageno}', tab '${tabno}', op '${op}'");
 }
 
 // This is the only exception at the moment, so its handling is hardcoded.
@@ -32,7 +30,7 @@ else
 	$location = $ophandler[$pageno][$tabno][$op]();
 	if (!strlen ($location))
 	{
-		showError ('Operation handler failed to return its status', __FILE__);
+		throw new RuntimeException('Operation handler failed to return its status');
 	}
 }
 header ("Location: " . $location);

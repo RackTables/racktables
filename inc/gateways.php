@@ -69,22 +69,13 @@ function getSwitchVLANs ($object_id = 0)
 {
 	global $remote_username;
 	if ($object_id <= 0)
-	{
-		showError ('Invalid object_id', __FUNCTION__);
-		return;
-	}
+		throw new InvalidArgException('$object_id', $object_id);
 	$objectInfo = spotEntity ('object', $object_id);
 	$endpoints = findAllEndpoints ($object_id, $objectInfo['name']);
 	if (count ($endpoints) == 0)
-	{
-		showError ('Can\'t find any mean to reach current object. Please either set FQDN attribute or assign an IP address to the object.', __FUNCTION__);
-		return NULL;
-	}
+		throw new RuntimeException('Can\'t find any mean to reach current object. Please either set FQDN attribute or assign an IP address to the object.');
 	if (count ($endpoints) > 1)
-	{
-		showError ('More than one IP address is assigned to this object, please configure FQDN attribute.', __FUNCTION__);
-		return NULL;
-	}
+		throw new RuntimeException('More than one IP address is assigned to this object, please configure FQDN attribute.');
 	$hwtype = $swtype = 'unknown';
 	foreach (getAttrValues ($object_id) as $record)
 	{
@@ -103,27 +94,15 @@ function getSwitchVLANs ($object_id = 0)
 	);
 	$data = queryGateway ('switchvlans', $commands);
 	if ($data == NULL)
-	{
-		showError ('Failed to get any response from queryGateway() or the gateway died', __FUNCTION__);
-		return NULL;
-	}
+		throw new RuntimeException('Failed to get any response from queryGateway() or the gateway died');
 	if (strpos ($data[0], 'OK!') !== 0)
-	{
-		showError ("Gateway failure: ${data[0]}.", __FUNCTION__);
-		return NULL;
-	}
+		throw new RuntimeException("Gateway failure: ${data[0]}.");
 	if (count ($data) != count ($commands))
-	{
-		showError ("Gateway failure: malformed reply.", __FUNCTION__);
-		return NULL;
-	}
+		throw new RuntimeException("Gateway failure: malformed reply.");
 	// Now we have VLAN list in $data[1] and port list in $data[2]. Let's sort this out.
 	$tmp = array_unique (explode (';', substr ($data[1], strlen ('OK!'))));
 	if (count ($tmp) == 0)
-	{
-		showError ("Gateway succeeded, but returned no VLAN records.", __FUNCTION__);
-		return NULL;
-	}
+		throw new RuntimeException("Gateway succeeded, but returned no VLAN records.");
 	$vlanlist = array();
 	foreach ($tmp as $record)
 	{
@@ -138,10 +117,7 @@ function getSwitchVLANs ($object_id = 0)
 		$portlist[] = array ('portname' => $portname, 'status' => $status, 'vlanid' => $vlanid);
 	}
 	if (count ($portlist) == 0)
-	{
-		showError ("Gateway succeeded, but returned no port records.", __FUNCTION__);
-		return NULL;
-	}
+		throw new RuntimeException("Gateway succeeded, but returned no port records.");
 	$maclist = array();
 	foreach (explode (';', substr ($data[3], strlen ('OK!'))) as $pair)
 	{

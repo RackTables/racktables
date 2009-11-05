@@ -35,18 +35,36 @@ function showError ($info = '', $location = 'N/A')
 	echo "Go back or try starting from <a href='".makeHref()."'>index page</a>.<br></div>\n";
 }
 
+/*
+ * This is almost a clone of showError(). This is added to get rid of 
+ * cases when script dies after showError() is shown.
+ */
+
+function showWarning ($info = '', $location = 'N/A')
+{
+	if (preg_match ('/\.php$/', $location))
+		$location = basename ($location);
+	elseif ($location != 'N/A')
+		$location = $location . '()';
+	echo "<div class=msg_error>Warning event at [${location}]. ";
+	if (!strlen ($info))
+		echo 'No additional information is available.';
+	else
+		echo "Additional information:<br><p>\n<pre>\n${info}\n</pre></p>";
+}
+
+
+
 if (file_exists ('inc/secret.php'))
 	require_once 'inc/secret.php';
 else
 {
-	showError
+	throw new RuntimeException
 	(
 		"Database connection parameters are read from inc/secret.php file, " .
 		"which cannot be found.\nYou probably need to complete the installation " .
-		"procedure by following <a href='install.php'>this link</a>.",
-		__FILE__
+		"procedure by following <a href='install.php'>this link</a>."
 	);
-	exit (1);
 }
 
 // Now try to connect...
@@ -56,8 +74,7 @@ try
 }
 catch (PDOException $e)
 {
-	showError ("Database connection failed:\n\n" . $e->getMessage(), __FILE__);
-	exit (1);
+	throw new RuntimeException ("Database connection failed:\n\n" . $e->getMessage());
 }
 $dbxlink->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 $dbxlink->exec ("set names 'utf8'");
@@ -69,8 +86,7 @@ if (get_magic_quotes_gpc())
 
 if (!set_magic_quotes_runtime (0))
 {
-	showError ('Failed to turn magic quotes off', __FILE__);
-	exit (1);
+	throw new RuntimeException('Failed to turn magic quotes off');
 }
 
 // Escape any globals before we ever try to use them, but keep a copy of originals.
@@ -101,14 +117,12 @@ if ($dbver != CODE_VERSION)
 
 if (!mb_internal_encoding ('UTF-8') or !mb_regex_encoding ('UTF-8'))
 {
-	showError ('Failed setting multibyte string encoding to UTF-8', __FILE__);
-	exit (1);
+	throw new RuntimeException('Failed setting multibyte string encoding to UTF-8');
 }
 $configCache = loadConfigCache();
 if (!count ($configCache))
 {
-	showError ('Failed to load configuration from the database.', __FILE__);
-	exit (1);
+	throw new RuntimeException('Failed to load configuration from the database.');
 }
 
 require_once 'inc/code.php'; // for getRackCode()
@@ -133,8 +147,7 @@ else
 if ($rackCode['result'] != 'ACK')
 {
 	// FIXME: display a message with an option to reset RackCode text
-	showError ('Could not load the RackCode due to error: ' . $rackCode['load'], __FILE__);
-	exit (1);
+	throw new RuntimeException('Could not load the RackCode due to error: ' . $rackCode['load']);
 }
 $rackCode = $rackCode['load'];
 // Only call buildPredicateTable() once and save the result, because it will remain

@@ -85,7 +85,7 @@ function trigger_livevlans ()
 function trigger_snmpportfinder ()
 {
 
-	assertUIntArg ('object_id', __FUNCTION__);
+	assertUIntArg ('object_id');
 	$object = spotEntity ('object', $_REQUEST['object_id']);
 	switch ($object['objtype_id'])
 	{
@@ -111,13 +111,13 @@ function trigger_snmpportfinder ()
 
 function trigger_isloadbalancer ()
 {
-	assertUIntArg ('object_id', __FUNCTION__);
+	assertUIntArg ('object_id');
 	return considerConfiguredConstraint (spotEntity ('object', $_REQUEST['object_id']), 'IPV4LB_LISTSRC') ? 'std' : '';
 }
 
 function trigger_ipv4 ()
 {
-	assertUIntArg ('object_id', __FUNCTION__);
+	assertUIntArg ('object_id');
 	if (count (getObjectIPv4Allocations ($_REQUEST['object_id'])))
 		return 'std';
 	// Only hide the tab, if there are no addresses allocated.
@@ -126,13 +126,13 @@ function trigger_ipv4 ()
 
 function trigger_natv4 ()
 {
-	assertUIntArg ('object_id', __FUNCTION__);
+	assertUIntArg ('object_id');
 	return considerConfiguredConstraint (spotEntity ('object', $_REQUEST['object_id']), 'IPV4NAT_LISTSRC') ? 'std' : '';
 }
 
 function trigger_poolrscount ()
 {
-	assertUIntArg ('pool_id', __FUNCTION__);
+	assertUIntArg ('pool_id');
 	$poolInfo = spotEntity ('ipv4rspool', $_REQUEST['pool_id']);
 	amplifyCell ($poolInfo);
 	return count ($poolInfo['rslist']) ? 'std' : '';
@@ -140,7 +140,7 @@ function trigger_poolrscount ()
 
 function trigger_autoports ()
 {
-	assertUIntArg ('object_id', __FUNCTION__);
+	assertUIntArg ('object_id');
 	$object = spotEntity ('object', $_REQUEST['object_id']);
 	amplifyCell ($object);
 	if (count ($object['ports']))
@@ -168,7 +168,7 @@ function trigger_localreports ()
 
 function trigger_file_editText ()
 {
-	assertUIntArg ('file_id', __FUNCTION__);
+	assertUIntArg ('file_id');
 	$fileInfo = spotEntity ('file', $_REQUEST['file_id']);
 	return ($fileInfo['type'] == 'text/plain') ? 'std' : '';
 }

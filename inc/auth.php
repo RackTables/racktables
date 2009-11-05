@@ -21,8 +21,7 @@ function authenticate ()
 		$require_local_account;
 	if (!isset ($user_auth_src) or !isset ($require_local_account))
 	{
-		showError ('secret.php misconfiguration: either user_auth_src or require_local_account are missing', __FUNCTION__);
-		exit (1);
+		throw new RuntimeException('secret.php misconfiguration: either user_auth_src or require_local_account are missing');
 	}
 	if (isset ($_REQUEST['logout']))
 		dieWith401(); // Reset browser credentials cache.
@@ -47,13 +46,12 @@ function authenticate ()
 				!strlen ($_SERVER['REMOTE_USER'])
 			)
 			{
-				showError ('System misconfiguration. The web-server didn\'t authenticate the user, although ought to do.');
-				die;
+				throw new RuntimeException('System misconfiguration. The web-server didn\'t authenticate the user, although ought to do.');
 			}
 			$remote_username = $_SERVER['REMOTE_USER'];
 			break;
 		default:
-			showError ('Invalid authentication source!', __FUNCTION__);
+			throw new RuntimeException('Invalid authentication source!');
 			die;
 	}
 	$userinfo = constructUserCell ($remote_username);
@@ -77,7 +75,7 @@ function authenticate ()
 				return;
 			break;
 		default:
-			showError ('Invalid authentication source!', __FUNCTION__);
+			throw new RuntimeException('Invalid authentication source!');
 			die;
 	}
 	dieWith401();
@@ -86,9 +84,7 @@ function authenticate ()
 function dieWith401 ()
 {
 	header ('WWW-Authenticate: Basic realm="' . getConfigVar ('enterprise') . ' RackTables access"');
-	header ('HTTP/1.0 401 Unauthorized');
-	showError ('This system requires authentication. You should use a username and a password.');
-	die();
+	throw new NotAuthorizedException('This system requires authentication. You should use a username and a password.');
 }
 
 // Merge accumulated tags into a single chain, add location-specific
@@ -211,7 +207,7 @@ function authenticated_via_ldap ($username, $password)
 		releaseLDAPCache();
 		return TRUE;
 	default:
-		showError ('Internal error during LDAP cache dispatching', __FUNCTION__);
+		throw new RuntimeException('Internal error during LDAP cache dispatching');
 		die;
 	}
 	// This is never reached.
@@ -261,8 +257,7 @@ function queryLDAPServer ($username, $password)
 	}
 	else
 	{
-		showError ('LDAP misconfiguration. Cannon build username for authentication.', __FUNCTION__);
-		die;
+		throw new RuntimeException('LDAP misconfiguration. Cannon build username for authentication.');
 	}
 	if (array_key_exists ('options', $LDAP_options) and is_array ($LDAP_options['options']))
 		foreach ($LDAP_options['options'] as $opt_code => $opt_value)

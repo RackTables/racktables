@@ -75,8 +75,7 @@ if (isset ($tabhandler[$pageno][$tabno]))
 				assertStringArg ($page[$pageno]['bypass'], 'index');
 				break;
 			default:
-				showError ('Dispatching error for bypass parameter', __FILE__);
-				break;
+				throw new RuntimeException ('Dispatching error for bypass parameter');
 		}
 		showMessageOrError();
 		$tabhandler[$pageno][$tabno] ($_REQUEST[$page[$pageno]['bypass']]);
@@ -93,7 +92,7 @@ elseif (isset ($page[$pageno]['handler']))
 	$page[$pageno]['handler'] ($tabno);
 }
 else
-	showError ("Failed to find handler for page '${pageno}', tab '${tabno}'", __FILE__);
+	throw new RuntimeException ("Failed to find handler for page '${pageno}', tab '${tabno}'");
 ?>
 	</td>
 	</tr>

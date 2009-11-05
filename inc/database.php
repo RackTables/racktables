@@ -178,7 +178,7 @@ function getRackRowInfo ($rackrow_id)
 	if ($row = $result->fetch (PDO::FETCH_ASSOC))
 		return $row;
 	else
-		return NULL;
+		throw new EntityNotFoundException ('rackrow', $rackrow_id);
 }
 
 function getRackRows ()
@@ -212,7 +212,7 @@ function commitDeleteRow($rackrow_id)
 	global $dbxlink;
 	$query = "select count(*) from Rack where row_id=${rackrow_id}";
 	$result = $dbxlink->query ($query);
-	if (($result!=NULL) && ($row = $result->fetch(PDO::FETCH_NUM)) )
+	if ($row = $result->fetch(PDO::FETCH_NUM))
 	{
 		if ($row[0] == 0)
 		{
@@ -666,11 +666,12 @@ function commitDeleteRack($rack_id)
 
 function commitUpdateRack ($rack_id, $new_name, $new_height, $new_row_id, $new_comment)
 {
-	if (!strlen ($rack_id) || !strlen ($new_name) || !strlen ($new_height))
-	{
-		showError ('Not all required args are present.', __FUNCTION__);
-		return FALSE;
-	}
+	if (!strlen ($rack_id)) 
+		throw new InvalidArgException ('rack_id', $rack_id, 'Must not be empty');
+	if (!strlen ($new_name))
+		throw new InvalidArgException ('new_name', $new_name, 'Must not be empty');
+	if (!strlen ($new_height))
+		throw new InvalidArgException ('new_height', $new_height, 'Must not be empty');
 	global $dbxlink;
 
 	// Can't shrink a rack if rows being deleted contain mounted objects
@@ -679,8 +680,7 @@ function commitUpdateRack ($rack_id, $new_name, $new_height, $new_row_id, $new_c
 	$check_row = $check_result->fetch (PDO::FETCH_ASSOC);
 	unset ($check_result);
 	if ($check_row['count'] > 0) {
-		showError ('Cannot shrink rack, objects are still mounted there', __FUNCTION__);
-		return FALSE;
+		throw new InvalidArgException ('new_height', $new_height, 'Cannot shrink rack, objects are still mounted there');
 	}
 
 	$update_sql = "update Rack set name='${new_name}', height='${new_height}', comment='${new_comment}', row_id=${new_row_id} " .
@@ -731,16 +731,12 @@ function processGridForm (&$rackData, $unchecked_state, $checked_state, $object_
 				"delete from RackSpace where rack_id = ${rack_id} and " .
 				"unit_no = ${unit_no} and atom = '${atom}' limit 1";
 			$r = $dbxlink->query ($query);
-			if ($r == NULL)
-				return array ('code' => 500, 'message' => __FUNCTION__ . ": ${rack_name}: SQL DELETE query failed");
 			if ($newstate != 'F')
 			{
 				$query =
 					"insert into RackSpace(rack_id, unit_no, atom, state) " .
 					"values(${rack_id}, ${unit_no}, '${atom}', '${newstate}') ";
 				$r = $dbxlink->query ($query);
-				if ($r == NULL)
-					return array ('code' => 500, 'message' => __FUNCTION__ . ": ${rack_name}: SQL INSERT query failed");
 			}
 			if ($newstate == 'T' and $object_id != 0)
 			{
@@ -868,11 +864,7 @@ function getResidentRacksData ($object_id = 0, $fetch_rackdata = TRUE)
 			$ret[$row[0]] = $row[0];
 			continue;
 		}
-		if (NULL == ($rackData = spotEntity ('rack', $row[0])))
-		{
-			showError ('Rack not found', __FUNCTION__);
-			return NULL;
-		}
+		$rackData = spotEntity ('rack', $row[0]);
 		amplifyCell ($rackData);
 		$ret[$row[0]] = $rackData;
 	}
@@ -1718,22 +1710,20 @@ function getPortOIFCompat ()
 function removePortOIFCompat ($type1 = 0, $type2 = 0)
 {
 	global $dbxlink;
-	if ($type1 == 0 or $type2 == 0)
-	{
-		showError ('Invalid arguments', __FUNCTION__);
-		die;
-	}
+	if ($type1 <= 0)
+		throw new InvalidArgException ('type1', $type1);
+	if ($type2 <= 0)
+		throw new InvalidArgException ('type2', $type2);
 	$dbxlink->query ("DELETE FROM PortCompat WHERE type1 = ${type1} AND type2 = ${type2}");
 	return TRUE;
 }
 
 function addPortOIFCompat ($type1 = 0, $type2 = 0)
 {
-	if ($type1 <= 0 or $type2 <= 0)
-	{
-		showError ('Invalid arguments', __FUNCTION__);
-		die;
-	}
+	if ($type1 <= 0)
+		throw new InvalidArgException ('type1', $type1);
+	if ($type2 <= 0)
+		throw new InvalidArgException ('type2', $type2);
 	return useInsertBlade
 	(
 		'PortCompat',
@@ -2017,11 +2007,11 @@ function getAttrMap ()
 
 function commitUpdateAttribute ($attr_id = 0, $attr_name = '')
 {
-	if ($attr_id <= 0 or !strlen ($attr_name))
-	{
-		showError ('Invalid args', __FUNCTION__);
-		die;
-	}
+	if ($attr_id <= 0)
+		throw new InvalidArgException ('$attr_id', $attr_id);
+ 	if (!strlen ($attr_name))
+		throw new InvalidArgException ('$attr_name', $attr_name);
+
 	global $dbxlink;
 	$query =
 		"update Attribute set name = '${attr_name}' " .
@@ -2033,10 +2023,7 @@ function commitUpdateAttribute ($attr_id = 0, $attr_name = '')
 function commitAddAttribute ($attr_name = '', $attr_type = '')
 {
 	if (!strlen ($attr_name))
-	{
-		showError ('Invalid args', __FUNCTION__);
-		die;
-	}
+		throw new InvalidArgException ('$attr_name', $attr_name);
 	switch ($attr_type)
 	{
 		case 'uint':
@@ -2045,8 +2032,7 @@ function commitAddAttribute ($attr_name = '', $attr_type = '')
 		case 'dict':
 			break;
 		default:
-			showError ('Invalid args', __FUNCTION__);
-			die;
+			throw new InvalidArgException ('$attr_type', $attr_type, 'Attribute type not supported');
 	}
 	return useInsertBlade
 	(
@@ -2058,21 +2044,18 @@ function commitAddAttribute ($attr_name = '', $attr_type = '')
 function commitDeleteAttribute ($attr_id = 0)
 {
 	if ($attr_id <= 0)
-	{
-		showError ('Invalid args', __FUNCTION__);
-		die;
-	}
+		throw new InvalidArgException ('$attr_id', $attr_id);
 	return useDeleteBlade ('Attribute', 'id', $attr_id);
 }
 
 // FIXME: don't store garbage in chapter_no for non-dictionary types.
 function commitSupplementAttrMap ($attr_id = 0, $objtype_id = 0, $chapter_no = 0)
 {
-	if ($attr_id <= 0 or $objtype_id <= 0)
-	{
-		showError ('Invalid args', __FUNCTION__);
-		die;
-	}
+	if ($attr_id <= 0)
+		throw new InvalidArgException ('$attr_id', $attr_id);
+	if ($objtype_id <= 0)
+		throw new InvalidArgException ('$objtype_id', $objtype_id);
+
 	return useInsertBlade
 	(
 		'AttributeMap',
@@ -2087,11 +2070,10 @@ function commitSupplementAttrMap ($attr_id = 0, $objtype_id = 0, $chapter_no = 0
 
 function commitReduceAttrMap ($attr_id = 0, $objtype_id)
 {
-	if ($attr_id <= 0 or $objtype_id <= 0)
-	{
-		showError ('Invalid args', __FUNCTION__);
-		die;
-	}
+	if ($attr_id <= 0)
+		throw new InvalidArgException ('$attr_id', $attr_id);
+	if ($objtype_id <= 0)
+		throw new InvalidArgException ('$objtype_id', $objtype_id);
 	global $dbxlink;
 	$query =
 		"delete from AttributeMap where attr_id=${attr_id} " .
@@ -2106,10 +2088,7 @@ function commitReduceAttrMap ($attr_id = 0, $objtype_id)
 function getAttrValues ($object_id)
 {
 	if ($object_id <= 0)
-	{
-		showError ('Invalid argument', __FUNCTION__);
-		return NULL;
-	}
+		throw new InvalidArgException ('$objtype_id', $objtype_id);
 	$ret = array();
 	$query =
 		"select A.id as attr_id, A.name as attr_name, A.type as attr_type, C.name as chapter_name, " .
@@ -2153,11 +2132,10 @@ function getAttrValues ($object_id)
 
 function commitResetAttrValue ($object_id = 0, $attr_id = 0)
 {
-	if ($object_id <= 0 or $attr_id <= 0)
-	{
-		showError ('Invalid arguments', __FUNCTION__);
-		die;
-	}
+	if ($object_id <= 0)
+		throw new InvalidArgException ('$objtype_id', $objtype_id);
+	if ($attr_id <= 0)
+		throw new InvalidArgException ('$attr_id', $attr_id);
 	global $dbxlink;
 	$query = "delete from AttributeValue where object_id = ${object_id} and attr_id = ${attr_id} limit 1";
 	$result = $dbxlink->query ($query);
@@ -2167,11 +2145,10 @@ function commitResetAttrValue ($object_id = 0, $attr_id = 0)
 // FIXME: don't share common code with use commitResetAttrValue()
 function commitUpdateAttrValue ($object_id = 0, $attr_id = 0, $value = '')
 {
-	if ($object_id <= 0 or $attr_id <= 0)
-	{
-		showError ('Invalid arguments', __FUNCTION__);
-		die;
-	}
+	if ($object_id <= 0)
+		throw new InvalidArgException ('$objtype_id', $objtype_id);
+	if ($attr_id <= 0)
+		throw new InvalidArgException ('$attr_id', $attr_id);
 	if (!strlen ($value))
 		return commitResetAttrValue ($object_id, $attr_id);
 	global $dbxlink;
@@ -2191,8 +2168,7 @@ function commitUpdateAttrValue ($object_id = 0, $attr_id = 0, $value = '')
 			$column = 'uint_value';
 			break;
 		default:
-			showError ("Unknown attribute type '${attr_type}' met", __FUNCTION__);
-			die;
+			throw new InvalidArgException ('$attr_type', $attr_type, 'Unknown attribute type found in object #'.$object_id.', attribute #'.$attr_id);
 	}
 	$query2 =
 		"delete from AttributeValue where " .
@@ -2209,10 +2185,7 @@ function commitUpdateAttrValue ($object_id = 0, $attr_id = 0, $value = '')
 function commitUseupPort ($port_id = 0)
 {
 	if ($port_id <= 0)
-	{
-		showError ("Invalid argument", __FUNCTION__);
-		die;
-	}
+		throw new InvalidArgException ('$port_id', $port_id);
 	global $dbxlink;
 	$query = "update Port set reservation_comment = NULL where id = ${port_id} limit 1";
 	$result = $dbxlink->exec ($query);
@@ -2294,7 +2267,7 @@ function storeConfigVar ($varname = NULL, $varvalue = NULL)
 	$result->closeCursor();
 	if ($rc == 0 or $rc == 1)
 		return TRUE;
-	showError ("Something went wrong for args '${varname}', '${varvalue}'", __FUNCTION__);
+	showWarning ("Something went wrong for args '${varname}', '${varvalue}'", __FUNCTION__);
 	return FALSE;
 }
 
@@ -2480,10 +2453,7 @@ function commitUpdateLB ($object_id = 0, $pool_id = 0, $vs_id = 0, $vsconfig = '
 		" where object_id = ${object_id} and rspool_id = ${pool_id} " .
 		"and vs_id = ${vs_id} limit 1";
 	$result = $dbxlink->exec ($query);
-	if ($result === NULL)
-		return FALSE;
-	else
-		return TRUE;
+	return TRUE;
 }
 
 function commitUpdateVS ($vsid = 0, $vip = '', $vport = 0, $proto = '', $name = '', $vsconfig = '', $rsconfig = '')
@@ -2504,10 +2474,7 @@ function commitUpdateVS ($vsid = 0, $vip = '', $vport = 0, $proto = '', $name = 
 		'rsconfig = ' . (!strlen ($rsconfig) ? 'NULL' : "'${rsconfig}'") .
 		" where id = ${vsid} limit 1";
 	$result = $dbxlink->exec ($query);
-	if ($result === NULL)
-		return FALSE;
-	else
-		return TRUE;
+	return TRUE;
 }
 
 function loadThumbCache ($rack_id = 0)
@@ -2597,9 +2564,7 @@ function commitUpdateRSPool ($pool_id = 0, $name = '', $vsconfig = '', $rsconfig
 		'rsconfig = ' . (!strlen ($rsconfig) ? 'NULL' : "'${rsconfig}'") .
 		" where id = ${pool_id} limit 1";
 	$result = $dbxlink->exec ($query);
-	if ($result === NULL)
-		return FALSE;
-	elseif ($result != 1)
+	if ($result != 1)
 		return FALSE;
 	else
 		return TRUE;
@@ -2674,9 +2639,7 @@ function commitSetInService ($rs_id = 0, $inservice = '')
 	global $dbxlink;
 	$query = "update IPv4RS set inservice = '${inservice}' where id = ${rs_id} limit 1";
 	$result = $dbxlink->exec ($query);
-	if ($result === NULL)
-		return FALSE;
-	elseif ($result != 1)
+	if ($result != 1)
 		return FALSE;
 	else
 		return TRUE;
@@ -2808,10 +2771,7 @@ function destroyTagsForEntity ($entity_realm, $entity_id)
 	global $dbxlink;
 	$query = "delete from TagStorage where entity_realm = '${entity_realm}' and entity_id = ${entity_id}";
 	$result = $dbxlink->exec ($query);
-	if ($result === NULL)
-		return FALSE;
-	else
-		return TRUE;
+	return TRUE;
 }
 
 // Drop only one record. This operation doesn't involve retossing other tags, unlike when adding.
@@ -2822,10 +2782,7 @@ function deleteTagForEntity ($entity_realm, $entity_id, $tag_id)
 	global $dbxlink;
 	$query = "delete from TagStorage where entity_realm = '${entity_realm}' and entity_id = ${entity_id} and tag_id = ${tag_id}";
 	$result = $dbxlink->exec ($query);
-	if ($result === NULL)
-		return FALSE;
-	else
-		return TRUE;
+	return TRUE;
 }
 
 // Push a record into TagStorage unconditionally.
@@ -3163,7 +3120,7 @@ function getFile ($file_id = 0)
 	$query->execute();
 	if (($row = $query->fetch (PDO::FETCH_ASSOC)) == NULL)
 	{
-		showError ('Query succeeded, but returned no data', __FUNCTION__);
+		showWarning ('Query succeeded, but returned no data', __FUNCTION__);
 		$ret = NULL;
 	}
 	else

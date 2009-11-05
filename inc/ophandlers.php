@@ -52,12 +52,12 @@ $msgcode['addPortForwarding']['OK'] = 2;
 $msgcode['addPortForwarding']['ERR'] = 100;
 function addPortForwarding ()
 {
-	assertUIntArg ('object_id', __FUNCTION__);
-	assertIPv4Arg ('localip', __FUNCTION__);
-	assertIPv4Arg ('remoteip', __FUNCTION__);
-	assertUIntArg ('localport', __FUNCTION__);
-	assertStringArg ('proto', __FUNCTION__);
-	assertStringArg ('description', __FUNCTION__, TRUE);
+	assertUIntArg ('object_id');
+	assertIPv4Arg ('localip');
+	assertIPv4Arg ('remoteip');
+	assertUIntArg ('localport');
+	assertStringArg ('proto');
+	assertStringArg ('description', TRUE);
 	$remoteport = isset ($_REQUEST['remoteport']) ? $_REQUEST['remoteport'] : '';
 	if (!strlen ($remoteport))
 		$remoteport = $_REQUEST['localport'];
@@ -83,12 +83,12 @@ $msgcode['delPortForwarding']['OK'] = 3;
 $msgcode['delPortForwarding']['ERR'] = 100;
 function delPortForwarding ()
 {
-	assertUIntArg ('object_id', __FUNCTION__);
-	assertIPv4Arg ('localip', __FUNCTION__);
-	assertIPv4Arg ('remoteip', __FUNCTION__);
-	assertUIntArg ('localport', __FUNCTION__);
-	assertUIntArg ('remoteport', __FUNCTION__);
-	assertStringArg ('proto', __FUNCTION__);
+	assertUIntArg ('object_id');
+	assertIPv4Arg ('localip');
+	assertIPv4Arg ('remoteip');
+	assertUIntArg ('localport');
+	assertUIntArg ('remoteport');
+	assertStringArg ('proto');
 
 	$error = deletePortForwarding
 	(
@@ -109,13 +109,13 @@ $msgcode['updPortForwarding']['OK'] = 4;
 $msgcode['updPortForwarding']['ERR'] = 100;
 function updPortForwarding ()
 {
-	assertUIntArg ('object_id', __FUNCTION__);
-	assertIPv4Arg ('localip', __FUNCTION__);
-	assertIPv4Arg ('remoteip', __FUNCTION__);
-	assertUIntArg ('localport', __FUNCTION__);
-	assertUIntArg ('remoteport', __FUNCTION__);
-	assertStringArg ('proto', __FUNCTION__);
-	assertStringArg ('description', __FUNCTION__);
+	assertUIntArg ('object_id');
+	assertIPv4Arg ('localip');
+	assertIPv4Arg ('remoteip');
+	assertUIntArg ('localport');
+	assertUIntArg ('remoteport');
+	assertStringArg ('proto');
+	assertStringArg ('description');
 
 	$error = updatePortForwarding
 	(
@@ -138,8 +138,8 @@ $msgcode['addPortForObject']['ERR1'] = 101;
 $msgcode['addPortForObject']['ERR2'] = 100;
 function addPortForObject ()
 {
-	assertUIntArg ('object_id', __FUNCTION__);
-	assertStringArg ('port_name', __FUNCTION__, TRUE);
+	assertUIntArg ('object_id');
+	assertStringArg ('port_name', TRUE);
 	if (!strlen ($_REQUEST['port_name']))
 		return buildRedirectURL (__FUNCTION__, 'ERR1');
 	$error = commitAddPort ($_REQUEST['object_id'], $_REQUEST['port_name'], $_REQUEST['port_type_id'], $_REQUEST['port_label'], $_REQUEST['port_l2address']);
@@ -154,11 +154,11 @@ $msgcode['editPortForObject']['ERR1'] = 101;
 $msgcode['editPortForObject']['ERR2'] = 100;
 function editPortForObject ()
 {
-	assertUIntArg ('object_id', __FUNCTION__);
-	assertUIntArg ('port_id', __FUNCTION__);
-	assertUIntArg ('port_type_id', __FUNCTION__);
+	assertUIntArg ('object_id');
+	assertUIntArg ('port_id');
+	assertUIntArg ('port_type_id');
 	// tolerate empty value now to produce custom informative message later
-	assertStringArg ('name', __FUNCTION__, TRUE);
+	assertStringArg ('name', TRUE);
 	if (!strlen ($_REQUEST['name']))
 		return buildRedirectURL (__FUNCTION__, 'ERR1');
 
@@ -177,7 +177,7 @@ $msgcode['delPortFromObject']['OK'] = 7;
 $msgcode['delPortFromObject']['ERR'] = 100;
 function delPortFromObject ()
 {
-	assertUIntArg ('port_id', __FUNCTION__);
+	assertUIntArg ('port_id');
 	$error = delObjectPort ($_REQUEST['port_id']);
 
 	if ($error != '')
@@ -190,8 +190,8 @@ $msgcode['linkPortForObject']['OK'] = 8;
 $msgcode['linkPortForObject']['ERR'] = 100;
 function linkPortForObject ()
 {
-	assertUIntArg ('port_id', __FUNCTION__);
-	assertUIntArg ('remote_port_id', __FUNCTION__);
+	assertUIntArg ('port_id');
+	assertUIntArg ('remote_port_id');
 
 	// FIXME: ensure, that at least one of these ports belongs to the current object
 	$error = linkPorts ($_REQUEST['port_id'], $_REQUEST['remote_port_id']);
@@ -217,8 +217,8 @@ $msgcode['unlinkPortForObject']['OK'] = 9;
 $msgcode['unlinkPortForObject']['ERR'] = 100;
 function unlinkPortForObject ()
 {
-	assertUIntArg ('port_id', __FUNCTION__);
-	assertUIntArg ('remote_port_id', __FUNCTION__);
+	assertUIntArg ('port_id');
+	assertUIntArg ('remote_port_id');
 
 	$local_port_info = getPortInfo ($_REQUEST['port_id']);
 	$remote_port_info = getPortInfo ($_REQUEST['remote_port_id']);
@@ -243,10 +243,10 @@ $msgcode['addMultiPorts']['OK'] = 10;
 $msgcode['addMultiPorts']['ERR'] = 123;
 function addMultiPorts ()
 {
-	assertStringArg ('format', __FUNCTION__);
-	assertStringArg ('input', __FUNCTION__);
-	assertUIntArg ('port_type', __FUNCTION__);
-	assertUIntArg ('object_id', __FUNCTION__);
+	assertStringArg ('format');
+	assertStringArg ('input');
+	assertUIntArg ('port_type');
+	assertUIntArg ('object_id');
 	$format = $_REQUEST['format'];
 	$port_type = $_REQUEST['port_type'];
 	$object_id = $_REQUEST['object_id'];
@@ -356,10 +356,10 @@ $msgcode['updIPv4Allocation']['OK'] = 12;
 $msgcode['updIPv4Allocation']['ERR'] = 100;
 function updIPv4Allocation ()
 {
-	assertIPv4Arg ('ip', __FUNCTION__);
-	assertUIntArg ('object_id', __FUNCTION__);
-	assertStringArg ('bond_name', __FUNCTION__, TRUE);
-	assertStringArg ('bond_type', __FUNCTION__);
+	assertIPv4Arg ('ip');
+	assertUIntArg ('object_id');
+	assertStringArg ('bond_name', TRUE);
+	assertStringArg ('bond_type');
 
 	$error = updateBond ($_REQUEST['ip'], $_REQUEST['object_id'], $_REQUEST['bond_name'], $_REQUEST['bond_type']);
 	if ($error != '')
@@ -372,8 +372,8 @@ $msgcode['delIPv4Allocation']['OK'] = 14;
 $msgcode['delIPv4Allocation']['ERR'] = 100;
 function delIPv4Allocation ()
 {
-	assertIPv4Arg ('ip', __FUNCTION__);
-	assertUIntArg ('object_id', __FUNCTION__);
+	assertIPv4Arg ('ip');
+	assertUIntArg ('object_id');
 
 	$error = unbindIpFromObject ($_REQUEST['ip'], $_REQUEST['object_id']);
 	if ($error != '')
@@ -387,10 +387,10 @@ $msgcode['addIPv4Allocation']['ERR1'] = 170;
 $msgcode['addIPv4Allocation']['ERR2'] = 100;
 function addIPv4Allocation ()
 {
-	assertIPv4Arg ('ip', __FUNCTION__);
-	assertUIntArg ('object_id', __FUNCTION__);
-	assertStringArg ('bond_name', __FUNCTION__, TRUE);
-	assertStringArg ('bond_type', __FUNCTION__);
+	assertIPv4Arg ('ip');
+	assertUIntArg ('object_id');
+	assertStringArg ('bond_name', TRUE);
+	assertStringArg ('bond_type');
 
 	// Strip masklen.
 	$ip = ereg_replace ('/[[:digit:]]+$', '', $_REQUEST['ip']);
@@ -421,8 +421,8 @@ $msgcode['addIPv4Prefix']['ERR3'] = 175;
 $msgcode['addIPv4Prefix']['ERR4'] = 176;
 function addIPv4Prefix ()
 {
-	assertStringArg ('range', __FUNCTION__);
-	assertStringArg ('name', __FUNCTION__, TRUE);
+	assertStringArg ('range');
+	assertStringArg ('name', TRUE);
 
 	$is_bcast = isset ($_REQUEST['is_bcast']) ? $_REQUEST['is_bcast'] : 'off';
 	$taglist = isset ($_REQUEST['taglist']) ? $_REQUEST['taglist'] : array();
@@ -438,7 +438,7 @@ $msgcode['delIPv4Prefix']['OK'] = 24;
 $msgcode['delIPv4Prefix']['ERR'] = 100;
 function delIPv4Prefix ()
 {
-	assertUIntArg ('id', __FUNCTION__);
+	assertUIntArg ('id');
 	$error = destroyIPv4Prefix ($_REQUEST['id']);
 	if ($error != '')
 		return buildRedirectURL (__FUNCTION__, 'ERR', array ($error));
@@ -450,9 +450,9 @@ $msgcode['updIPv4Prefix']['OK'] = 25;
 $msgcode['updIPv4Prefix']['ERR'] = 100;
 function updIPv4Prefix ()
 {
-	assertUIntArg ('id', __FUNCTION__);
-	assertStringArg ('name', __FUNCTION__, TRUE);
-	assertStringArg ('comment', __FUNCTION__, TRUE);
+	assertUIntArg ('id');
+	assertStringArg ('name', TRUE);
+	assertStringArg ('comment', TRUE);
 	global $sic;
 	if (strlen ($error = updateIPv4Network_real ($sic['id'], $sic['name'], $sic['comment'])))
 		return buildRedirectURL (__FUNCTION__, 'ERR', array ($error));
@@ -464,8 +464,8 @@ $msgcode['editAddress']['OK'] = 27;
 $msgcode['editAddress']['ERR'] = 100;
 function editAddress ()
 {
-	assertIPv4Arg ('ip', __FUNCTION__);
-	assertStringArg ('name', __FUNCTION__, TRUE);
+	assertIPv4Arg ('ip');
+	assertStringArg ('name', TRUE);
 
 	if (isset ($_REQUEST['reserved']))
 		$reserved = $_REQUEST['reserved'];
@@ -482,9 +482,9 @@ $msgcode['createUser']['OK'] = 40;
 $msgcode['createUser']['ERR'] = 102;
 function createUser ()
 {
-	assertStringArg ('username', __FUNCTION__);
-	assertStringArg ('realname', __FUNCTION__, TRUE);
-	assertStringArg ('password', __FUNCTION__);
+	assertStringArg ('username');
+	assertStringArg ('realname', TRUE);
+	assertStringArg ('password');
 	$username = $_REQUEST['username'];
 	$password = sha1 ($_REQUEST['password']);
 	$result = commitCreateUserAccount ($username, $_REQUEST['realname'], $password);
@@ -500,10 +500,10 @@ $msgcode['updateUser']['ERR1'] = 103;
 $msgcode['updateUser']['ERR1'] = 104;
 function updateUser ()
 {
-	assertUIntArg ('user_id', __FUNCTION__);
-	assertStringArg ('username', __FUNCTION__);
-	assertStringArg ('realname', __FUNCTION__, TRUE);
-	assertStringArg ('password', __FUNCTION__);
+	assertUIntArg ('user_id');
+	assertStringArg ('username');
+	assertStringArg ('realname', TRUE);
+	assertStringArg ('password');
 	$username = $_REQUEST['username'];
 	$new_password = $_REQUEST['password'];
 	if (NULL == ($userinfo = spotEntity ('user', $_REQUEST['user_id'])))
@@ -522,9 +522,9 @@ $msgcode['updateDictionary']['OK'] = 51;
 $msgcode['updateDictionary']['ERR'] = 109;
 function updateDictionary ()
 {
-	assertUIntArg ('chapter_no', __FUNCTION__);
-	assertUIntArg ('dict_key', __FUNCTION__);
-	assertStringArg ('dict_value', __FUNCTION__);
+	assertUIntArg ('chapter_no');
+	assertUIntArg ('dict_key');
+	assertStringArg ('dict_value');
 	if (commitUpdateDictionary ($_REQUEST['chapter_no'], $_REQUEST['dict_key'], $_REQUEST['dict_value']) === TRUE)
 		return buildRedirectURL (__FUNCTION__, 'OK');
 	else
@@ -535,8 +535,8 @@ $msgcode['supplementDictionary']['OK'] = 52;
 $msgcode['supplementDictionary']['ERR'] = 110;
 function supplementDictionary ()
 {
-	assertUIntArg ('chapter_no', __FUNCTION__);
-	assertStringArg ('dict_value', __FUNCTION__);
+	assertUIntArg ('chapter_no');
+	assertStringArg ('dict_value');
 	if (commitSupplementDictionary ($_REQUEST['chapter_no'], $_REQUEST['dict_value']) === TRUE)
 		return buildRedirectURL (__FUNCTION__, 'OK');
 	else
@@ -547,8 +547,8 @@ $msgcode['reduceDictionary']['OK'] = 50;
 $msgcode['reduceDictionary']['ERR'] = 111;
 function reduceDictionary ()
 {
-	assertUIntArg ('chapter_no', __FUNCTION__);
-	assertUIntArg ('dict_key', __FUNCTION__);
+	assertUIntArg ('chapter_no');
+	assertUIntArg ('dict_key');
 	if (commitReduceDictionary ($_REQUEST['chapter_no'], $_REQUEST['dict_key']) === TRUE)
 		return buildRedirectURL (__FUNCTION__, 'OK');
 	else
@@ -559,7 +559,7 @@ $msgcode['addChapter']['OK'] = 55;
 $msgcode['addChapter']['ERR'] = 112;
 function addChapter ()
 {
-	assertStringArg ('chapter_name', __FUNCTION__);
+	assertStringArg ('chapter_name');
 	if (commitAddChapter ($_REQUEST['chapter_name']) === TRUE)
 		return buildRedirectURL (__FUNCTION__, 'OK');
 	else
@@ -570,8 +570,8 @@ $msgcode['updateChapter']['OK'] = 54;
 $msgcode['updateChapter']['ERR'] = 113;
 function updateChapter ()
 {
-	assertUIntArg ('chapter_no', __FUNCTION__);
-	assertStringArg ('chapter_name', __FUNCTION__);
+	assertUIntArg ('chapter_no');
+	assertStringArg ('chapter_name');
 	if (commitUpdateChapter ($_REQUEST['chapter_no'], $_REQUEST['chapter_name']) === TRUE)
 		return buildRedirectURL (__FUNCTION__, 'OK');
 	else
@@ -582,7 +582,7 @@ $msgcode['delChapter']['OK'] = 53;
 $msgcode['delChapter']['ERR'] = 114;
 function delChapter ()
 {
-	assertUIntArg ('chapter_no', __FUNCTION__);
+	assertUIntArg ('chapter_no');
 	if (commitDeleteChapter ($_REQUEST['chapter_no']))
 		return buildRedirectURL (__FUNCTION__, 'OK');
 	else
@@ -593,8 +593,8 @@ $msgcode['changeAttribute']['OK'] = 46;
 $msgcode['changeAttribute']['ERR'] = 115;
 function changeAttribute ()
 {
-	assertUIntArg ('attr_id', __FUNCTION__);
-	assertStringArg ('attr_name', __FUNCTION__);
+	assertUIntArg ('attr_id');
+	assertStringArg ('attr_name');
 	if (commitUpdateAttribute ($_REQUEST['attr_id'], $_REQUEST['attr_name']))
 		return buildRedirectURL (__FUNCTION__, 'OK');
 	else
@@ -605,8 +605,8 @@ $msgcode['createAttribute']['OK'] = 45;
 $msgcode['createAttribute']['ERR'] = 116;
 function createAttribute ()
 {
-	assertStringArg ('attr_name', __FUNCTION__);
-	assertStringArg ('attr_type', __FUNCTION__);
+	assertStringArg ('attr_name');
+	assertStringArg ('attr_type');
 	if (commitAddAttribute ($_REQUEST['attr_name'], $_REQUEST['attr_type']))
 		return buildRedirectURL (__FUNCTION__, 'OK', array ($_REQUEST['attr_name']));
 	else
@@ -617,7 +617,7 @@ $msgcode['deleteAttribute']['OK'] = 47;
 $msgcode['deleteAttribute']['ERR'] = 117;
 function deleteAttribute ()
 {
-	assertUIntArg ('attr_id', __FUNCTION__);
+	assertUIntArg ('attr_id');
 	if (commitDeleteAttribute ($_REQUEST['attr_id']))
 		return buildRedirectURL (__FUNCTION__, 'OK');
 	else
@@ -629,14 +629,14 @@ $msgcode['supplementAttrMap']['ERR1'] = 154;
 $msgcode['supplementAttrMap']['ERR2'] = 118;
 function supplementAttrMap ()
 {
-	assertUIntArg ('attr_id', __FUNCTION__);
-	assertUIntArg ('objtype_id', __FUNCTION__);
+	assertUIntArg ('attr_id');
+	assertUIntArg ('objtype_id');
 	$attrMap = getAttrMap();
 	if ($attrMap[$_REQUEST['attr_id']]['type'] != 'dict')
 		$chapter_id = 'NULL';
 	else
 	{
-		assertUIntArg ('chapter_no', __FUNCTION__); // FIXME: this doesn't fail on 0 (ticket:272)
+		assertUIntArg ('chapter_no'); // FIXME: this doesn't fail on 0 (ticket:272)
 		if (0 == ($chapter_id = $_REQUEST['chapter_no']))
 			return buildRedirectURL (__FUNCTION__, 'ERR1', array ('chapter not selected'));
 	}
@@ -650,8 +650,8 @@ $msgcode['reduceAttrMap']['OK'] = 49;
 $msgcode['reduceAttrMap']['ERR'] = 119;
 function reduceAttrMap ()
 {
-	assertUIntArg ('attr_id', __FUNCTION__);
-	assertUIntArg ('objtype_id', __FUNCTION__);
+	assertUIntArg ('attr_id');
+	assertUIntArg ('objtype_id');
 	if (commitReduceAttrMap ($_REQUEST['attr_id'], $_REQUEST['objtype_id']) === TRUE)
 		return buildRedirectURL (__FUNCTION__, 'OK');
 	else
@@ -662,8 +662,8 @@ $msgcode['clearSticker']['OK'] = 15;
 $msgcode['clearSticker']['ERR'] = 120;
 function clearSticker ()
 {
-	assertUIntArg ('attr_id', __FUNCTION__);
-	assertUIntArg ('object_id', __FUNCTION__);
+	assertUIntArg ('attr_id');
+	assertUIntArg ('object_id');
 	if (commitResetAttrValue ($_REQUEST['object_id'], $_REQUEST['attr_id']) === TRUE)
 		return buildRedirectURL (__FUNCTION__, 'OK');
 	else
@@ -673,7 +673,7 @@ function clearSticker ()
 $msgcode['updateObjectAllocation']['OK'] = 63;
 function updateObjectAllocation ()
 {
-	assertUIntArg ('object_id', __FUNCTION__);
+	assertUIntArg ('object_id');
 
 	if (!isset ($_REQUEST['got_atoms']))
 	{
@@ -692,11 +692,6 @@ function updateObjectAllocation ()
 		if (!isset ($workingRacksData[$cand_id]))
 		{
 			$rackData = spotEntity ('rack', $cand_id);
-			if ($rackData == NULL)
-			{
-				showError ('rack not found', __FUNCTION__);
-				return;
-			}
 			amplifyCell ($rackData);
 			$workingRacksData[$cand_id] = $rackData;
 		}
@@ -747,13 +742,13 @@ $msgcode['updateObject']['OK'] = 16;
 $msgcode['updateObject']['ERR'] = 121;
 function updateObject ()
 {
-	assertUIntArg ('num_attrs', __FUNCTION__, TRUE);
-	assertUIntArg ('object_id', __FUNCTION__);
-	assertUIntArg ('object_type_id', __FUNCTION__);
-	assertStringArg ('object_name', __FUNCTION__, TRUE);
-	assertStringArg ('object_label', __FUNCTION__, TRUE);
-	assertStringArg ('object_barcode', __FUNCTION__, TRUE);
-	assertStringArg ('object_asset_no', __FUNCTION__, TRUE);
+	assertUIntArg ('num_attrs', TRUE);
+	assertUIntArg ('object_id');
+	assertUIntArg ('object_type_id');
+	assertStringArg ('object_name', TRUE);
+	assertStringArg ('object_label', TRUE);
+	assertStringArg ('object_barcode', TRUE);
+	assertStringArg ('object_asset_no', TRUE);
 	if (isset ($_REQUEST['object_has_problems']) and $_REQUEST['object_has_problems'] == 'on')
 		$has_problems = 'yes';
 	else
@@ -777,7 +772,7 @@ function updateObject ()
 	$num_attrs = isset ($_REQUEST['num_attrs']) ? $_REQUEST['num_attrs'] : 0;
 	for ($i = 0; $i < $num_attrs; $i++)
 	{
-		assertUIntArg ("${i}_attr_id", __FUNCTION__);
+		assertUIntArg ("${i}_attr_id");
 		$attr_id = $_REQUEST["${i}_attr_id"];
 
 		// Field is empty, delete attribute and move on.
@@ -789,7 +784,7 @@ function updateObject ()
 
 		// The value could be uint/float, but we don't know ATM. Let SQL
 		// server check this and complain.
-		assertStringArg ("${i}_value", __FUNCTION__);
+		assertStringArg ("${i}_value");
 		$value = $_REQUEST["${i}_value"];
 		switch ($oldvalues[$attr_id]['type'])
 		{
@@ -802,8 +797,7 @@ function updateObject ()
 				$oldvalue = $oldvalues[$attr_id]['key'];
 				break;
 			default:
-				showError ('Internal structure error', __FUNCTION__);
-				die;
+				throw new RuntimeException('Internal structure error');
 		}
 		if ($value === $oldvalue) // ('' == 0), but ('' !== 0)
 			continue;
@@ -834,11 +828,11 @@ function addMultipleObjects()
 			$log = mergeLogs ($log, oneLiner (184, array ($i + 1)));
 			break;
 		}
-		assertUIntArg ("${i}_object_type_id", __FUNCTION__, TRUE);
-		assertStringArg ("${i}_object_name", __FUNCTION__, TRUE);
-		assertStringArg ("${i}_object_label", __FUNCTION__, TRUE);
-		assertStringArg ("${i}_object_asset_no", __FUNCTION__, TRUE);
-		assertStringArg ("${i}_object_barcode", __FUNCTION__, TRUE);
+		assertUIntArg ("${i}_object_type_id", TRUE);
+		assertStringArg ("${i}_object_name", TRUE);
+		assertStringArg ("${i}_object_label", TRUE);
+		assertStringArg ("${i}_object_asset_no", TRUE);
+		assertStringArg ("${i}_object_barcode", TRUE);
 		$name = $_REQUEST["${i}_object_name"];
 
 		// It's better to skip silently, than to print a notice.
@@ -868,8 +862,8 @@ function addLotOfObjects()
 {
 	$log = emptyLog();
 	$taglist = isset ($_REQUEST['taglist']) ? $_REQUEST['taglist'] : array();
-	assertUIntArg ('global_type_id', __FUNCTION__, TRUE);
-	assertStringArg ('namelist', __FUNCTION__, TRUE);
+	assertUIntArg ('global_type_id', TRUE);
+	assertStringArg ('namelist', TRUE);
 	$global_type_id = $_REQUEST['global_type_id'];
 	if ($global_type_id == 0 or !strlen ($_REQUEST['namelist']))
 		$log = mergeLogs ($log, oneLiner (186));
@@ -900,7 +894,7 @@ $msgcode['deleteObject']['OK'] = 76;
 $msgcode['deleteObject']['ERR'] = 100;
 function deleteObject ()
 {
-	assertUIntArg ('object_id', __FUNCTION__);
+	assertUIntArg ('object_id');
 	if (NULL === ($oinfo = spotEntity ('object', $_REQUEST['object_id'])))
 		return buildRedirectURL (__FUNCTION__, 'ERR', array ('object not found'));
 
@@ -919,7 +913,7 @@ $msgcode['useupPort']['OK'] = 11;
 $msgcode['useupPort']['ERR'] = 124;
 function useupPort ()
 {
-	assertUIntArg ('port_id', __FUNCTION__);
+	assertUIntArg ('port_id');
 	if (commitUseupPort ($_REQUEST['port_id']) === TRUE)
 		return buildRedirectURL (__FUNCTION__, 'OK');
 	else
@@ -930,12 +924,12 @@ $msgcode['updateUI']['OK'] = 56;
 $msgcode['updateUI']['ERR'] = 125;
 function updateUI ()
 {
-	assertUIntArg ('num_vars', __FUNCTION__);
+	assertUIntArg ('num_vars');
 
 	for ($i = 0; $i < $_REQUEST['num_vars']; $i++)
 	{
-		assertStringArg ("${i}_varname", __FUNCTION__);
-		assertStringArg ("${i}_varvalue", __FUNCTION__, TRUE);
+		assertStringArg ("${i}_varname");
+		assertStringArg ("${i}_varvalue", TRUE);
 		$varname = $_REQUEST["${i}_varname"];
 		$varvalue = $_REQUEST["${i}_varvalue"];
 
@@ -1012,10 +1006,10 @@ $msgcode['addRealServer']['ERR'] = 126;
 // Add single record.
 function addRealServer ()
 {
-	assertUIntArg ('pool_id', __FUNCTION__);
-	assertIPv4Arg ('remoteip', __FUNCTION__);
-	assertStringArg ('rsport', __FUNCTION__, TRUE);
-	assertStringArg ('rsconfig', __FUNCTION__, TRUE);
+	assertUIntArg ('pool_id');
+	assertIPv4Arg ('remoteip');
+	assertStringArg ('rsport', TRUE);
+	assertStringArg ('rsconfig', TRUE);
 	if (!addRStoRSPool (
 		$_REQUEST['pool_id'],
 		$_REQUEST['remoteip'],
@@ -1034,9 +1028,9 @@ $msgcode['addRealServers']['ERR2'] = 127;
 // Parse textarea submitted and try adding a real server for each line.
 function addRealServers ()
 {
-	assertUIntArg ('pool_id', __FUNCTION__);
-	assertStringArg ('format', __FUNCTION__);
-	assertStringArg ('rawtext', __FUNCTION__);
+	assertUIntArg ('pool_id');
+	assertStringArg ('format');
+	assertStringArg ('rawtext');
 	$rawtext = str_replace ('\r', '', $_REQUEST['rawtext']);
 	$ngood = $nbad = 0;
 	$rsconfig = '';
@@ -1096,14 +1090,14 @@ $msgcode['addVService']['ERR1'] = 132;
 $msgcode['addVService']['ERR2'] = 100;
 function addVService ()
 {
-	assertIPv4Arg ('vip', __FUNCTION__);
-	assertUIntArg ('vport', __FUNCTION__);
-	assertStringArg ('proto', __FUNCTION__);
+	assertIPv4Arg ('vip');
+	assertUIntArg ('vport');
+	assertStringArg ('proto');
 	if ($_REQUEST['proto'] != 'TCP' and $_REQUEST['proto'] != 'UDP')
 		return buildRedirectURL (__FUNCTION__, 'ERR1');
-	assertStringArg ('name', __FUNCTION__, TRUE);
-	assertStringArg ('vsconfig', __FUNCTION__, TRUE);
-	assertStringArg ('rsconfig', __FUNCTION__, TRUE);
+	assertStringArg ('name', TRUE);
+	assertStringArg ('vsconfig', TRUE);
+	assertStringArg ('rsconfig', TRUE);
 	$error = commitCreateVS
 	(
 		$_REQUEST['vip'],
@@ -1124,7 +1118,7 @@ $msgcode['deleteRealServer']['OK'] = 35;
 $msgcode['deleteRealServer']['ERR'] = 128;
 function deleteRealServer ()
 {
-	assertUIntArg ('id', __FUNCTION__);
+	assertUIntArg ('id');
 	if (!commitDeleteRS ($_REQUEST['id']))
 		return buildRedirectURL (__FUNCTION__, 'ERR');
 	else
@@ -1135,9 +1129,9 @@ $msgcode['deleteLoadBalancer']['OK'] = 19;
 $msgcode['deleteLoadBalancer']['ERR'] = 129;
 function deleteLoadBalancer ()
 {
-	assertUIntArg ('object_id', __FUNCTION__);
-	assertUIntArg ('pool_id', __FUNCTION__);
-	assertUIntArg ('vs_id', __FUNCTION__);
+	assertUIntArg ('object_id');
+	assertUIntArg ('pool_id');
+	assertUIntArg ('vs_id');
 	if (!commitDeleteLB (
 		$_REQUEST['object_id'],
 		$_REQUEST['pool_id'],
@@ -1152,7 +1146,7 @@ $msgcode['deleteVService']['OK'] = 29;
 $msgcode['deleteVService']['ERR'] = 130;
 function deleteVService ()
 {
-	assertUIntArg ('vs_id', __FUNCTION__);
+	assertUIntArg ('vs_id');
 	if (!commitDeleteVS ($_REQUEST['vs_id']))
 		return buildRedirectURL (__FUNCTION__, 'ERR');
 	else
@@ -1163,10 +1157,10 @@ $msgcode['updateRealServer']['OK'] = 36;
 $msgcode['updateRealServer']['ERR'] = 133;
 function updateRealServer ()
 {
-	assertUIntArg ('rs_id', __FUNCTION__);
-	assertIPv4Arg ('rsip', __FUNCTION__);
-	assertStringArg ('rsport', __FUNCTION__, TRUE);
-	assertStringArg ('rsconfig', __FUNCTION__, TRUE);
+	assertUIntArg ('rs_id');
+	assertIPv4Arg ('rsip');
+	assertStringArg ('rsport', TRUE);
+	assertStringArg ('rsconfig', TRUE);
 	if (!commitUpdateRS (
 		$_REQUEST['rs_id'],
 		$_REQUEST['rsip'],
@@ -1182,11 +1176,11 @@ $msgcode['updateLoadBalancer']['OK'] = 20;
 $msgcode['updateLoadBalancer']['ERR'] = 134;
 function updateLoadBalancer ()
 {
-	assertUIntArg ('object_id', __FUNCTION__);
-	assertUIntArg ('pool_id', __FUNCTION__);
-	assertUIntArg ('vs_id', __FUNCTION__);
-	assertStringArg ('vsconfig', __FUNCTION__, TRUE);
-	assertStringArg ('rsconfig', __FUNCTION__, TRUE);
+	assertUIntArg ('object_id');
+	assertUIntArg ('pool_id');
+	assertUIntArg ('vs_id');
+	assertStringArg ('vsconfig', TRUE);
+	assertStringArg ('rsconfig', TRUE);
 	if (!commitUpdateLB (
 		$_REQUEST['object_id'],
 		$_REQUEST['pool_id'],
@@ -1203,13 +1197,13 @@ $msgcode['updateVService']['OK'] = 30;
 $msgcode['updateVService']['ERR'] = 135;
 function updateVService ()
 {
-	assertUIntArg ('vs_id', __FUNCTION__);
-	assertIPv4Arg ('vip', __FUNCTION__);
-	assertUIntArg ('vport', __FUNCTION__);
-	assertStringArg ('proto', __FUNCTION__);
-	assertStringArg ('name', __FUNCTION__, TRUE);
-	assertStringArg ('vsconfig', __FUNCTION__, TRUE);
-	assertStringArg ('rsconfig', __FUNCTION__, TRUE);
+	assertUIntArg ('vs_id');
+	assertIPv4Arg ('vip');
+	assertUIntArg ('vport');
+	assertStringArg ('proto');
+	assertStringArg ('name', TRUE);
+	assertStringArg ('vsconfig', TRUE);
+	assertStringArg ('rsconfig', TRUE);
 	if (!commitUpdateVS (
 		$_REQUEST['vs_id'],
 		$_REQUEST['vip'],
@@ -1228,11 +1222,11 @@ $msgcode['addLoadBalancer']['OK'] = 18;
 $msgcode['addLoadBalancer']['ERR'] = 137;
 function addLoadBalancer ()
 {
-	assertUIntArg ('pool_id', __FUNCTION__);
-	assertUIntArg ('object_id', __FUNCTION__);
-	assertUIntArg ('vs_id', __FUNCTION__);
-	assertStringArg ('vsconfig', __FUNCTION__, TRUE);
-	assertStringArg ('rsconfig', __FUNCTION__, TRUE);
+	assertUIntArg ('pool_id');
+	assertUIntArg ('object_id');
+	assertUIntArg ('vs_id');
+	assertStringArg ('vsconfig', TRUE);
+	assertStringArg ('rsconfig', TRUE);
 	if (!addLBtoRSPool (
 		$_REQUEST['pool_id'],
 		$_REQUEST['object_id'],
@@ -1249,9 +1243,9 @@ $msgcode['addRSPool']['OK'] = 31;
 $msgcode['addRSPool']['ERR'] = 100;
 function addRSPool ()
 {
-	assertStringArg ('name', __FUNCTION__, TRUE);
-	assertStringArg ('vsconfig', __FUNCTION__, TRUE);
-	assertStringArg ('rsconfig', __FUNCTION__, TRUE);
+	assertStringArg ('name', TRUE);
+	assertStringArg ('vsconfig', TRUE);
+	assertStringArg ('rsconfig', TRUE);
 	$error = commitCreateRSPool
 	(
 		$_REQUEST['name'],
@@ -1269,7 +1263,7 @@ $msgcode['deleteRSPool']['OK'] = 32;
 $msgcode['deleteRSPool']['ERR'] = 138;
 function deleteRSPool ()
 {
-	assertUIntArg ('pool_id', __FUNCTION__);
+	assertUIntArg ('pool_id');
 	if (!commitDeleteRSPool ($_REQUEST['pool_id']))
 		return buildRedirectURL (__FUNCTION__, 'ERR');
 	else
@@ -1280,10 +1274,10 @@ $msgcode['updateRSPool']['OK'] = 33;
 $msgcode['updateRSPool']['ERR'] = 139;
 function updateRSPool ()
 {
-	assertUIntArg ('pool_id', __FUNCTION__);
-	assertStringArg ('name', __FUNCTION__, TRUE);
-	assertStringArg ('vsconfig', __FUNCTION__, TRUE);
-	assertStringArg ('rsconfig', __FUNCTION__, TRUE);
+	assertUIntArg ('pool_id');
+	assertStringArg ('name', TRUE);
+	assertStringArg ('vsconfig', TRUE);
+	assertStringArg ('rsconfig', TRUE);
 	if (!commitUpdateRSPool ($_REQUEST['pool_id'], $_REQUEST['name'], $_REQUEST['vsconfig'], $_REQUEST['rsconfig']))
 		return buildRedirectURL (__FUNCTION__, 'ERR');
 	else
@@ -1294,7 +1288,7 @@ $msgcode['updateRSInService']['OK'] = 38;
 $msgcode['updateRSInService']['ERR'] = 140;
 function updateRSInService ()
 {
-	assertUIntArg ('rscount', __FUNCTION__);
+	assertUIntArg ('rscount');
 	$pool_id = $_REQUEST['pool_id'];
 	$orig = spotEntity ('ipv4rspool', $pool_id);
 	amplifyCell ($orig);
@@ -1326,16 +1320,16 @@ $msgcode['importPTRData']['ERR'] = 141;
 // are operating on.
 function importPTRData ()
 {
-	assertUIntArg ('addrcount', __FUNCTION__);
+	assertUIntArg ('addrcount');
 	$nbad = $ngood = 0;
 	for ($i = 0; $i < $_REQUEST['addrcount']; $i++)
 	{
 		$inputname = "import_${i}";
 		if (!isset ($_REQUEST[$inputname]) or $_REQUEST[$inputname] != 'on')
 			continue;
-		assertIPv4Arg ("addr_${i}", __FUNCTION__);
-		assertStringArg ("descr_${i}", __FUNCTION__, TRUE);
-		assertStringArg ("rsvd_${i}", __FUNCTION__);
+		assertIPv4Arg ("addr_${i}");
+		assertStringArg ("descr_${i}", TRUE);
+		assertStringArg ("rsvd_${i}");
 		// Non-existent addresses will not have this argument set in request.
 		$rsvd = 'no';
 		if ($_REQUEST["rsvd_${i}"] == 'yes')
@@ -1356,7 +1350,7 @@ $msgcode['generateAutoPorts']['ERR'] = 142;
 function generateAutoPorts ()
 {
 	global $pageno;
-	assertUIntArg ('object_id', __FUNCTION__);
+	assertUIntArg ('object_id');
 	$info = spotEntity ('object', $_REQUEST['object_id']);
 	// Navigate away in case of success, stay at the place otherwise.
 	if (executeAutoPorts ($_REQUEST['object_id'], $info['objtype_id']))
@@ -1376,7 +1370,7 @@ function saveEntityTags ()
 		return buildRedirectURL (__FUNCTION__, 'ERR2', array (__FUNCTION__));
 	$realm = $etype_by_pageno[$pageno];
 	$bypass = $page[$pageno]['bypass'];
-	assertUIntArg ($bypass, __FUNCTION__);
+	assertUIntArg ($bypass);
 	$entity_id = $_REQUEST[$bypass];
 	$taglist = isset ($_REQUEST['taglist']) ? $_REQUEST['taglist'] : array();
 	// Build a chain from the submitted data, minimize it,
@@ -1402,7 +1396,7 @@ $msgcode['destroyTag']['ERR1'] = 183;
 $msgcode['destroyTag']['ERR2'] = 144;
 function destroyTag ()
 {
-	assertUIntArg ('tag_id', __FUNCTION__);
+	assertUIntArg ('tag_id');
 	global $taglist;
 	if (!isset ($taglist[$_REQUEST['tag_id']]))
 		return buildRedirectURL (__FUNCTION__, 'ERR1', array ($_REQUEST['tag_id']));
@@ -1417,8 +1411,8 @@ $msgcode['createTag']['ERR1'] = 145;
 $msgcode['createTag']['ERR3'] = 147;
 function createTag ()
 {
-	assertStringArg ('tag_name', __FUNCTION__);
-	assertUIntArg ('parent_id', __FUNCTION__, TRUE);
+	assertStringArg ('tag_name');
+	assertUIntArg ('parent_id', TRUE);
 	$tagname = trim ($_REQUEST['tag_name']);
 	if (!validTagName ($tagname))
 		return buildRedirectURL (__FUNCTION__, 'ERR1', array ($tagname));
@@ -1435,9 +1429,9 @@ $msgcode['updateTag']['ERR1'] = 145;
 $msgcode['updateTag']['ERR2'] = 148;
 function updateTag ()
 {
-	assertUIntArg ('tag_id', __FUNCTION__);
-	assertUIntArg ('parent_id', __FUNCTION__, TRUE);
-	assertStringArg ('tag_name', __FUNCTION__);
+	assertUIntArg ('tag_id');
+	assertUIntArg ('parent_id', TRUE);
+	assertStringArg ('tag_name');
 	$tagname = trim ($_REQUEST['tag_name']);
 	if (!validTagName ($tagname))
 		return buildRedirectURL (__FUNCTION__, 'ERR1', array ($tagname));
@@ -1454,9 +1448,9 @@ $msgcode['rollTags']['OK'] = 67;
 $msgcode['rollTags']['ERR'] = 149;
 function rollTags ()
 {
-	assertUIntArg ('row_id', __FUNCTION__);
-	assertStringArg ('sum', __FUNCTION__, TRUE);
-	assertUIntArg ('realsum', __FUNCTION__);
+	assertUIntArg ('row_id');
+	assertStringArg ('sum', TRUE);
+	assertUIntArg ('realsum');
 	if ($_REQUEST['sum'] != $_REQUEST['realsum'])
 		return buildRedirectURL (__FUNCTION__, 'ERR');
 	// Even if the user requested an empty tag list, don't bail out, but process existing
@@ -1489,9 +1483,9 @@ function changeMyPassword ()
 	global $remote_username, $user_auth_src;
 	if ($user_auth_src != 'database')
 		return buildRedirectURL (__FUNCTION__, 'ERR1');
-	assertStringArg ('oldpassword', __FUNCTION__);
-	assertStringArg ('newpassword1', __FUNCTION__);
-	assertStringArg ('newpassword2', __FUNCTION__);
+	assertStringArg ('oldpassword');
+	assertStringArg ('newpassword1');
+	assertStringArg ('newpassword2');
 	$remote_userid = getUserIDByUsername ($remote_username);
 	$userinfo = spotEntity ('user', $remote_userid);
 	if ($userinfo['user_password_hash'] != sha1 ($_REQUEST['oldpassword']))
@@ -1528,7 +1522,7 @@ $msgcode['setPortVLAN']['ERR1'] = 156;
 // on the base chain plus necessary context added.
 function setPortVLAN ()
 {
-	assertUIntArg ('portcount', __FUNCTION__);
+	assertUIntArg ('portcount');
 	$data = getSwitchVLANs ($_REQUEST['object_id']);
 	if ($data === NULL)
 		return buildRedirectURL (__FUNCTION__, 'ERR1');
@@ -1582,7 +1576,7 @@ function setPortVLAN ()
 
 function submitSLBConfig ()
 {
-	assertUIntArg ('object_id', __FUNCTION__);
+	assertUIntArg ('object_id');
 	$newconfig = buildLVSConfig ($_REQUEST['object_id']);
 	$msglog = gwSendFileToObject ($_REQUEST['object_id'], 'slbconfig', html_entity_decode ($newconfig, ENT_QUOTES, 'UTF-8'));
 	return buildWideRedirectURL ($msglog);
@@ -1592,7 +1586,7 @@ $msgcode['addRow']['OK'] = 74;
 $msgcode['addRow']['ERR'] = 100;
 function addRow ()
 {
-	assertStringArg ('name', __FUNCTION__);
+	assertStringArg ('name');
 
 	if (commitAddRow ($_REQUEST['name']) === TRUE)
 		return buildRedirectURL (__FUNCTION__, 'OK', array ($_REQUEST['name']));
@@ -1604,8 +1598,8 @@ $msgcode['updateRow']['OK'] = 75;
 $msgcode['updateRow']['ERR'] = 100;
 function updateRow ()
 {
-	assertUIntArg ('row_id', __FUNCTION__);
-	assertStringArg ('name', __FUNCTION__);
+	assertUIntArg ('row_id');
+	assertStringArg ('name');
 
 	if (TRUE === commitUpdateRow ($_REQUEST['row_id'], $_REQUEST['name']))
 		return buildRedirectURL (__FUNCTION__, 'OK', array ($_REQUEST['name']));
@@ -1617,7 +1611,7 @@ $msgcode['deleteRow']['OK'] = 77;
 $msgcode['deleteRow']['ERR'] = 100;
 function deleteRow ()
 {
-	assertUIntArg ('row_id', __FUNCTION__);
+	assertUIntArg ('row_id');
 	$rowinfo = getRackRowInfo ($_REQUEST['row_id']);
 
 	if (TRUE === commitDeleteRow ($_REQUEST['row_id']))
@@ -1631,13 +1625,13 @@ $msgcode['addRack']['ERR1'] = 171;
 $msgcode['addRack']['ERR2'] = 172;
 function addRack ()
 {
-	assertUIntArg ('row_id', __FUNCTION__);
+	assertUIntArg ('row_id');
 	$taglist = isset ($_REQUEST['taglist']) ? $_REQUEST['taglist'] : array();
 	if (isset ($_REQUEST['got_data']))
 	{
-		assertStringArg ('rack_name', __FUNCTION__);
-		assertUIntArg ('rack_height1', __FUNCTION__);
-		assertStringArg ('rack_comment', __FUNCTION__, TRUE);
+		assertStringArg ('rack_name');
+		assertUIntArg ('rack_height1');
+		assertStringArg ('rack_comment', TRUE);
 
 		if (commitAddRack ($_REQUEST['rack_name'], $_REQUEST['rack_height1'], $_REQUEST['row_id'], $_REQUEST['rack_comment'], $taglist) === TRUE)
 			return buildRedirectURL (__FUNCTION__, 'OK', array ($_REQUEST['rack_name']));
@@ -1646,8 +1640,8 @@ function addRack ()
 	}
 	elseif (isset ($_REQUEST['got_mdata']))
 	{
-		assertUIntArg ('rack_height2', __FUNCTION__);
-		assertStringArg ('rack_names', __FUNCTION__, TRUE);
+		assertUIntArg ('rack_height2');
+		assertStringArg ('rack_names', TRUE);
 		$log = emptyLog();
 		// copy-and-paste from renderAddMultipleObjectsForm()
 		$names1 = explode ('\n', $_REQUEST['rack_names']);
@@ -1678,7 +1672,7 @@ $msgcode['deleteRack']['ERR'] = 100;
 $msgcode['deleteRack']['ERR1'] = 206;
 function deleteRack ()
 {
-	assertUIntArg ('rack_id', __FUNCTION__);
+	assertUIntArg ('rack_id');
 	if (NULL == ($rackData = spotEntity ('rack', $_REQUEST['rack_id'])))
 		return buildRedirectURL (__FUNCTION__, 'ERR', array ('Rack not found'), 'rackspace', 'default');
 	amplifyCell ($rackData);
@@ -1693,11 +1687,11 @@ $msgcode['updateRack']['OK'] = 68;
 $msgcode['updateRack']['ERR'] = 177;
 function updateRack ()
 {
-	assertUIntArg ('rack_id', __FUNCTION__);
-	assertUIntArg ('rack_row_id', __FUNCTION__);
-	assertUIntArg ('rack_height', __FUNCTION__);
-	assertStringArg ('rack_name', __FUNCTION__);
-	assertStringArg ('rack_comment', __FUNCTION__, TRUE);
+	assertUIntArg ('rack_id');
+	assertUIntArg ('rack_row_id');
+	assertUIntArg ('rack_height');
+	assertStringArg ('rack_name');
+	assertStringArg ('rack_comment', TRUE);
 
 	resetThumbCache ($_REQUEST['rack_id']);
 	if (TRUE === commitUpdateRack ($_REQUEST['rack_id'], $_REQUEST['rack_name'], $_REQUEST['rack_height'], $_REQUEST['rack_row_id'], $_REQUEST['rack_comment']))
@@ -1709,7 +1703,7 @@ function updateRack ()
 $msgcode['updateRackDesign']['ERR'] = 100;
 function updateRackDesign ()
 {
-	assertUIntArg ('rack_id', __FUNCTION__);
+	assertUIntArg ('rack_id');
 	if (NULL == ($rackData = spotEntity ('rack', $_REQUEST['rack_id'])))
 		return buildRedirectURL (__FUNCTION__, 'ERR', array ('Rack not found'), 'rackspace', 'default');
 	amplifyCell ($rackData);
@@ -1722,7 +1716,7 @@ function updateRackDesign ()
 $msgcode['updateRackProblems']['ERR'] = 100;
 function updateRackProblems ()
 {
-	assertUIntArg ('rack_id', __FUNCTION__);
+	assertUIntArg ('rack_id');
 	if (NULL == ($rackData = spotEntity ('rack', $_REQUEST['rack_id'])))
 		return buildRedirectURL (__FUNCTION__, 'ERR', array ('Rack not found'), 'rackspace', 'default');
 	amplifyCell ($rackData);
@@ -1734,8 +1728,8 @@ function updateRackProblems ()
 
 function querySNMPData ()
 {
-	assertUIntArg ('object_id', __FUNCTION__);
-	assertStringArg ('community', __FUNCTION__);
+	assertUIntArg ('object_id');
+	assertStringArg ('community');
 	return doSNMPmining ($_REQUEST['object_id'], $_REQUEST['community']);
 }
 
@@ -1744,7 +1738,7 @@ $msgcode['addFileWithoutLink']['ERR'] = 100;
 // File-related functions
 function addFileWithoutLink ()
 {
-	assertStringArg ('comment', __FUNCTION__, TRUE);
+	assertStringArg ('comment', TRUE);
 
 	// Make sure the file can be uploaded
 	if (get_cfg_var('file_uploads') != 1)
@@ -1774,9 +1768,9 @@ function addFileToEntity ()
 		return buildRedirectURL (__FUNCTION__, 'ERR1', array (__FUNCTION__));
 	$realm = $etype_by_pageno[$pageno];
 	$bypass = $page[$pageno]['bypass'];
-	assertUIntArg ($bypass, __FUNCTION__);
+	assertUIntArg ($bypass);
 	$entity_id = $_REQUEST[$bypass];
-	assertStringArg ('comment', __FUNCTION__, TRUE);
+	assertStringArg ('comment', TRUE);
 
 	// Make sure the file can be uploaded
 	if (get_cfg_var('file_uploads') != 1)
@@ -1801,11 +1795,11 @@ $msgcode['linkFileToEntity']['ERR1'] = 178;
 $msgcode['linkFileToEntity']['ERR2'] = 100;
 function linkFileToEntity ()
 {
-	assertUIntArg ('file_id', __FUNCTION__);
+	assertUIntArg ('file_id');
 	global $page, $pageno, $etype_by_pageno;
 	$entity_type = $etype_by_pageno[$pageno];
 	$bypass_name = $page[$pageno]['bypass'];
-	assertUIntArg ($bypass_name, __FUNCTION__);
+	assertUIntArg ($bypass_name);
 
 	$fi = spotEntity ('file', $_REQUEST['file_id']);
 	if ($fi === NULL)
@@ -1824,7 +1818,7 @@ $msgcode['replaceFile']['ERR3'] = 182;
 function replaceFile ()
 {
 	global $sic;
-	assertUIntArg ('file_id', __FUNCTION__);
+	assertUIntArg ('file_id');
 
 	// Make sure the file can be uploaded
 	if (get_cfg_var('file_uploads') != 1)
@@ -1845,10 +1839,10 @@ $msgcode['updateFile']['OK'] = 70;
 $msgcode['updateFile']['ERR'] = 100;
 function updateFile ()
 {
-	assertUIntArg ('file_id', __FUNCTION__);
-	assertStringArg ('file_name', __FUNCTION__);
-	assertStringArg ('file_type', __FUNCTION__);
-	assertStringArg ('file_comment', __FUNCTION__, TRUE);
+	assertUIntArg ('file_id');
+	assertStringArg ('file_name');
+	assertStringArg ('file_type');
+	assertStringArg ('file_comment', TRUE);
 	// prepared statement params below
 	global $sic;
 	$error = commitUpdateFile ($sic['file_id'], $sic['file_name'], $sic['file_type'], $sic['file_comment']);
@@ -1862,7 +1856,7 @@ $msgcode['unlinkFile']['OK'] = 72;
 $msgcode['unlinkFile']['ERR'] = 182;
 function unlinkFile ()
 {
-	assertUIntArg ('link_id', __FUNCTION__);
+	assertUIntArg ('link_id');
 	$error = commitUnlinkFile ($_REQUEST['link_id']);
 
 	if ($error != '')
@@ -1875,7 +1869,7 @@ $msgcode['deleteFile']['OK'] = 73;
 $msgcode['deleteFile']['ERR'] = 100;
 function deleteFile ()
 {
-	assertUIntArg ('file_id', __FUNCTION__);
+	assertUIntArg ('file_id');
 	$shortInfo = spotEntity ('file', $_REQUEST['file_id']);
 	$error = commitDeleteFile ($_REQUEST['file_id']);
 
@@ -1890,9 +1884,9 @@ $msgcode['updateFileText']['ERR1'] = 179;
 $msgcode['updateFileText']['ERR2'] = 180;
 function updateFileText ()
 {
-	assertUIntArg ('file_id', __FUNCTION__);
-	assertStringArg ('mtime_copy', __FUNCTION__);
-	assertStringArg ('file_text', __FUNCTION__, TRUE); // it's Ok to save empty
+	assertUIntArg ('file_id');
+	assertStringArg ('mtime_copy');
+	assertStringArg ('file_text', TRUE); // it's Ok to save empty
 	$shortInfo = spotEntity ('file', $_REQUEST['file_id']);
 	if ($shortInfo['mtime'] != $_REQUEST['mtime_copy'])
 		return buildRedirectURL (__FUNCTION__, 'ERR1');
@@ -1907,8 +1901,8 @@ $msgcode['addPortInterfaceCompat']['OK'] = 48;
 $msgcode['addPortInterfaceCompat']['ERR'] = 110;
 function addPortInterfaceCompat ()
 {
-	assertUIntArg ('iif_id', __FUNCTION__);
-	assertUIntArg ('oif_id', __FUNCTION__);
+	assertUIntArg ('iif_id');
+	assertUIntArg ('oif_id');
 	if (commitSupplementPIC ($_REQUEST['iif_id'], $_REQUEST['oif_id']))
 		return buildRedirectURL (__FUNCTION__, 'OK');
 	return buildRedirectURL (__FUNCTION__, 'ERR');
@@ -1918,8 +1912,8 @@ $msgcode['delPortInterfaceCompat']['OK'] = 49;
 $msgcode['delPortInterfaceCompat']['ERR'] = 111;
 function delPortInterfaceCompat ()
 {
-	assertUIntArg ('iif_id', __FUNCTION__);
-	assertUIntArg ('oif_id', __FUNCTION__);
+	assertUIntArg ('iif_id');
+	assertUIntArg ('oif_id');
 	if (commitReducePIC ($_REQUEST['iif_id'], $_REQUEST['oif_id']))
 		return buildRedirectURL (__FUNCTION__, 'OK');
 	return buildRedirectURL (__FUNCTION__, 'ERR');
@@ -1950,8 +1944,8 @@ $msgcode['addPortInterfaceCompatPack']['OK'] = 44;
 $msgcode['addPortInterfaceCompatPack']['ERR'] = 123;
 function addPortInterfaceCompatPack ()
 {
-	assertStringArg ('standard', __FUNCTION__);
-	assertUIntArg ('iif_id', __FUNCTION__);
+	assertStringArg ('standard');
+	assertUIntArg ('iif_id');
 	global $ifcompatpack;
 	if (!array_key_exists ($_REQUEST['standard'], $ifcompatpack) or !array_key_exists ($_REQUEST['iif_id'], getPortIIFOptions()))
 		return buildRedirectURL (__FUNCTION__, 'ERR');
@@ -1968,8 +1962,8 @@ $msgcode['delPortInterfaceCompatPack']['OK'] = 44;
 $msgcode['delPortInterfaceCompatPack']['ERR'] = 123;
 function delPortInterfaceCompatPack ()
 {
-	assertStringArg ('standard', __FUNCTION__);
-	assertUIntArg ('iif_id', __FUNCTION__);
+	assertStringArg ('standard');
+	assertUIntArg ('iif_id');
 	global $ifcompatpack;
 	if (!array_key_exists ($_REQUEST['standard'], $ifcompatpack) or !array_key_exists ($_REQUEST['iif_id'], getPortIIFOptions()))
 		return buildRedirectURL (__FUNCTION__, 'ERR');
