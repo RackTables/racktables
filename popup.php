@@ -41,8 +41,11 @@ function findSparePorts ($port_id, $only_racks = array())
 		$query .= 'AND object_id IN (SELECT DISTINCT object_id FROM RackSpace WHERE rack_id IN (' .
 			implode (', ', $only_racks) . '))';
 	$result = useSelectBlade ($query, __FUNCTION__);
+	// avoid nested queries
+	$rows = $result->fetchAll (PDO::FETCH_ASSOC);
+	unset ($result);
 	$ret = array();
-	while ($row = $result->fetch (PDO::FETCH_ASSOC))
+	foreach ($rows as $row)
 	{
 		$object = spotEntity ('object', $row['object_id']);
 		$ret[$row['id']] = $object['dname'] . ' ' . $row['name'];
