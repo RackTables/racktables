@@ -31,7 +31,7 @@ function getProximateRacks ($rack_id, $proximity = 0)
 
 function findSparePorts ($port_id, $only_racks = array())
 {
-	$query = "SELECT id, type, object_id, name FROM Port WHERE " .
+	$query = "SELECT id, object_id, name FROM Port WHERE " .
 		"id <> ${port_id} " .
 		"AND type IN (SELECT type2 FROM PortCompat WHERE type1 = (SELECT type FROM Port WHERE id = ${port_id})) " .
 		"AND reservation_comment IS NULL " .
@@ -45,10 +45,11 @@ function findSparePorts ($port_id, $only_racks = array())
 	$rows = $result->fetchAll (PDO::FETCH_ASSOC);
 	unset ($result);
 	$ret = array();
-	foreach ($rows as $row)
+	foreach (array_keys ($rows) as $rkey)
 	{
-		$object = spotEntity ('object', $row['object_id']);
-		$ret[$row['id']] = $object['dname'] . ' ' . $row['name'];
+		$object = spotEntity ('object', $rows[$rkey]['object_id']);
+		$ret[$rows[$rkey]['id']] = $object['dname'] . ' ' . $rows[$rkey]['name'];
+		unset ($rows[$rkey]);
 	}
 	return $ret;
 }
@@ -67,38 +68,34 @@ function findSparePorts ($port_id, $only_racks = array())
 	switch ($_REQUEST['helper'])
 	{
 		case 'portlist':
-			// FIXME: shouldn't this be derived from the URL?
-			$pageno = 'object';
-			$tabno = 'ports';
+			$pageno = 'depot';
+			$tabno = 'default';
 			fixContext();
 			if (!permitted())
 				renderAccessDenied();
 			assertUIntArg ('port', __FILE__);
-			assertUIntArg ('object_id', __FILE__);
 			assertStringArg ('in_rack', __FILE__);
 			$localchoice = $_REQUEST['in_rack'] == 'y';
-			echo '<div style="background-color: #f0f0f0; border: 1px solid #3c78b5; padding: 10px; height: 100%; text-align: center; margin: 5px;"><h2>';
-			echo $localchoice ? 'Nearest spare ports:' : 'All spare ports:';
-			echo '</h2><form action="javascript:;">';
 			$port_id = $_REQUEST['port'];
-			$object_id = $_REQUEST['object_id'];
+			echo '<div style="background-color: #f0f0f0; border: 1px solid #3c78b5; padding: 10px; height: 100%; text-align: center; margin: 5px;"><h2>';
+			echo $localchoice ?
+				('Nearest spare ports (<a href="popup.php?helper=portlist&port=' . $port_id . '&in_rack=n">show all</a>)') :
+				('All spare ports (<a href="popup.php?helper=portlist&port=' . $port_id . '&in_rack=y">show nearest</a>)');
+			echo '</h2><form action="javascript:;">';
 			$only_racks = array();
-			if ($_REQUEST['in_rack'] == 'y')
+			$port_info = getPortInfo ($port_id);
+			if ($_REQUEST['in_rack'] == 'y' and $port_info['object_id'])
 			{
-				$port_info = getPortInfo ($port_id);
-				if ($port_info['object_id'])
-				{
-					$object = spotEntity ('object', $port_info['object_id']);
-					if ($object['rack_id'])
-						$only_racks = getProximateRacks ($object['rack_id'], getConfigVar ('PROXIMITY_RANGE'));
-				}
+				$object = spotEntity ('object', $port_info['object_id']);
+				if ($object['rack_id'])
+					$only_racks = getProximateRacks ($object['rack_id'], getConfigVar ('PROXIMITY_RANGE'));
 			}
 			$spare_ports = findSparePorts ($port_id, $only_racks);
 			printSelect ($spare_ports, array ('name' => 'ports', 'id' => 'ports', 'size' => getConfigVar ('MAXSELSIZE')));
 			echo '<br><br>';
 			echo "<input type='submit' value='Link' onclick='".
 			"if (getElementById(\"ports\").value != \"\") {".
-			"	opener.location=\"process.php?page=object&tab=ports&op=linkPort&object_id=$object_id&port_id=$port_id&remote_port_id=\"+getElementById(\"ports\").value; ".
+			"	opener.location=\"process.php?page=object&tab=ports&op=linkPort&object_id=${port_info['object_id']}&port_id=$port_id&remote_port_id=\"+getElementById(\"ports\").value; ".
 			"	window.close();}'>";
 			echo '</form></div>';
 			break;
