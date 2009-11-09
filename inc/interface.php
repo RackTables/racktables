@@ -1162,9 +1162,6 @@ function renderPortsForObject ($object_id)
 			$helper_args = array
 			(
 				'port' => $port['id'],
-				'type' => $port['type_id'],
-				'object_id' => $object_id,
-				'port_name' => $port['name'],
 				'in_rack' => 'n',
 			);
 			$popup_args = 'height=700, width=400, location=no, menubar=no, '.
