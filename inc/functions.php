@@ -2183,4 +2183,19 @@ function getNewPortTypeOptions()
 	return $ret;
 }
 
+//Make URL from GET without parameters specified in $parameters
+function urlizeGetParameters($parameters) {
+	$url = '';
+	foreach ($_GET as $name=>$value) {
+		if (in_array($name, $parameters)) continue;
+		if ($url != '') $url .= '&';
+		if (gettype($value) == 'array')
+			foreach($value as $v)
+				$url .= urlencode($name.'[]').'='.urlencode($v);
+		else
+			$url .= urlencode($name).'='.urlencode($value);
+	}
+	return $url;
+}
+
 ?>
