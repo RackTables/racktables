@@ -189,29 +189,7 @@ else
 }
 require_once 'inc/navigation.php';
 require_once 'inc/triggers.php';
-$pageno = (isset ($_REQUEST['page'])) ? $_REQUEST['page'] : 'index';
-// Special handling of tab number to substitute the "last" index where applicable.
-// Always show explicitly requested tab, substitute the last used name in case
-// it is awailable, fall back to the default one.
 
-if (isset ($_REQUEST['tab'])) {
-	$tabno = $_REQUEST['tab'];
-	// check if we accidentaly got on a dynamic tab that shouldn't be shown for this object
-	if ( isset($trigger[$pageno][$tabno]) and !strlen($trigger[$pageno][$tabno] ()) ) {
-		$tabno = 'default';
-		$url = "index.php?page=$pageno&tab=$tabno&".urlizeGetParameters(array('page', 'tab'));
-		header('Location: '.$url);
-		exit();
-	}
-} elseif (basename($_SERVER['PHP_SELF']) == 'index.php' and getConfigVar ('SHOW_LAST_TAB') == 'yes' and isset ($_SESSION['RTLT'][$pageno]))
-{
-	$tabno = $_SESSION['RTLT'][$pageno];
-	$url = "index.php?page=$pageno&tab=$tabno&".urlizeGetParameters(array('page', 'tab'));
-	header('Location: '.$url);
-	exit();
-}
-else
-	$tabno = 'default';
 
 $op = '';
 require_once 'inc/gateways.php';
