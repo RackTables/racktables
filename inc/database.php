@@ -1824,34 +1824,21 @@ function getPortOIFCompat ()
 	return $result->fetchAll (PDO::FETCH_ASSOC);
 }
 
-function removePortOIFCompat ($type1 = 0, $type2 = 0)
+// Add a pair to the PortCompat table.
+function commitSupplementPOIFC ($type1, $type2)
 {
-	global $dbxlink;
-	if ($type1 == 0 or $type2 == 0)
-	{
-		showError ('Invalid arguments', __FUNCTION__);
-		die;
-	}
-	if (NULL == $dbxlink->query ("DELETE FROM PortCompat WHERE type1 = ${type1} AND type2 = ${type2}"))
-	{
-		showError ('SQL query failed', __FUNCTION__);
-		die;
-	}
-	return TRUE;
-}
-
-function addPortOIFCompat ($type1 = 0, $type2 = 0)
-{
-	if ($type1 <= 0 or $type2 <= 0)
-	{
-		showError ('Invalid arguments', __FUNCTION__);
-		die;
-	}
 	return useInsertBlade
 	(
 		'PortCompat',
 		array ('type1' => $type1, 'type2' => $type2)
 	);
+}
+
+// Remove a pair from the PortCompat table.
+function commitReducePOIFC ($type1, $type2)
+{
+	global $dbxlink;
+	return 1 === $dbxlink->exec ("DELETE FROM PortCompat WHERE type1 = ${type1} AND type2 = ${type2}");
 }
 
 function getDictStats ()
