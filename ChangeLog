@@ -1,3 +1,5 @@
+0.17.8
+	bugfix: properly delete objects with linked ports (ticket:300)
 0.17.7 2009-11-09
 	bugfix: work around unbuffered query in ports pop-up (ticket:297)
 	update: add inline mode switcher by Jens Groh (ticket:298)

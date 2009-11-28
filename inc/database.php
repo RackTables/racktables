@@ -638,6 +638,7 @@ function commitDeleteObject ($object_id = 0)
 	$dbxlink->query("DELETE FROM AttributeValue WHERE object_id = ${object_id}");
 	$dbxlink->query("DELETE FROM IPv4LB WHERE object_id = ${object_id}");
 	$dbxlink->query("DELETE FROM IPv4Allocation WHERE object_id = ${object_id}");
+	$dbxlink->query("DELETE FROM Link WHERE porta IN (SELECT id FROM Port WHERE object_id = ${object_id}) OR portb IN (SELECT id FROM Port WHERE object_id = ${object_id})");
 	$dbxlink->query("DELETE FROM Port WHERE object_id = ${object_id}");
 	$dbxlink->query("DELETE FROM IPv4NAT WHERE object_id = ${object_id}");
 	$dbxlink->query("DELETE FROM RackSpace WHERE object_id = ${object_id}");
