@@ -834,7 +834,7 @@ function peekNode ($tree, $trace, $target_id)
 	else // cold
 	{
 		foreach ($tree as $node)
-			if ($node['id'] == $next) // warmer
+			if (array_key_exists ('id', $node) and $node['id'] == $next) // warmer
 				return $self ($node['kids'], $trace, $target_id);
 	}
 	// HCF
