@@ -1976,4 +1976,27 @@ function delPortInterfaceCompatPack ()
 	return buildRedirectURL (__FUNCTION__, 'OK', array ($nbad, $ngood));
 }
 
+$msgcode['addPortOIFCompat']['OK'] = 48;
+$msgcode['addPortOIFCompat']['ERR'] = 110;
+function addPortOIFCompat()
+{
+	assertUIntArg('type1', __FUNCTION__);
+	assertUIntArg('type2', __FUNCTION__);
+	if (commitSupplementPOIFC($_REQUEST['type1'], $_REQUEST['type2']))
+		return buildRedirectURL(__FUNCTION__, 'OK');
+	return buildRedirectURL(__FUNCTION__, 'ERR');
+}
+
+$msgcode['delPortOIFCompat']['OK'] = 49;
+$msgcode['delPortOIFCompat']['ERR'] = 111;
+function delPortOIFCompat ()
+{
+	assertUIntArg('type1', __FUNCTION__);
+	assertUIntArg('type2', __FUNCTION__);
+	if (commitReducePOIFC ($_REQUEST['type1'], $_REQUEST['type2']))
+		return buildRedirectURL (__FUNCTION__, 'OK');
+	return buildRedirectURL (__FUNCTION__, 'ERR');
+
+}
+
 ?>

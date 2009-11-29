@@ -1708,18 +1708,8 @@ function getPortOIFCompat ()
 	return $result->fetchAll (PDO::FETCH_ASSOC);
 }
 
-function removePortOIFCompat ($type1 = 0, $type2 = 0)
-{
-	global $dbxlink;
-	if ($type1 <= 0)
-		throw new InvalidArgException ('type1', $type1);
-	if ($type2 <= 0)
-		throw new InvalidArgException ('type2', $type2);
-	$dbxlink->query ("DELETE FROM PortCompat WHERE type1 = ${type1} AND type2 = ${type2}");
-	return TRUE;
-}
-
-function addPortOIFCompat ($type1 = 0, $type2 = 0)
+// Add a pair to the PortCompat table.
+function commitSupplementPOIFC ($type1, $type2)
 {
 	if ($type1 <= 0)
 		throw new InvalidArgException ('type1', $type1);
@@ -1730,6 +1720,17 @@ function addPortOIFCompat ($type1 = 0, $type2 = 0)
 		'PortCompat',
 		array ('type1' => $type1, 'type2' => $type2)
 	);
+}
+
+// Remove a pair from the PortCompat table.
+function commitReducePOIFC ($type1, $type2)
+{
+	if ($type1 <= 0)
+		throw new InvalidArgException ('type1', $type1);
+	if ($type2 <= 0)
+		throw new InvalidArgException ('type2', $type2);
+	global $dbxlink;
+	return 1 === $dbxlink->exec ("DELETE FROM PortCompat WHERE type1 = ${type1} AND type2 = ${type2}");
 }
 
 function getDictStats ()

@@ -316,6 +316,8 @@ $tab['portmap']['default'] = 'View';
 $tab['portmap']['edit'] = '[Edit]';
 $tabhandler['portmap']['default'] = 'renderPortOIFCompatViewer';
 $tabhandler['portmap']['edit'] = 'renderPortOIFCompatEditor';
+$ophandler['portmap']['edit']['add'] = 'addPortOIFCompat';
+$ophandler['portmap']['edit']['del'] = 'delPortOIFCompat';
 
 $page['portifcompat']['title'] = 'Enabled port types';
 $page['portifcompat']['parent'] = 'config';

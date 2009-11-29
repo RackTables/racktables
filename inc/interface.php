@@ -3176,7 +3176,7 @@ function renderPortOIFCompatViewer()
 	$order = 'odd';
 	$last_left_oif_id = NULL;
 	echo '<br><table class=cooltable border=0 cellpadding=5 cellspacing=0 align=center>';
-	echo '<tr><th>outer interface</th><th>outer interface</th></tr>';
+	echo '<tr><th>From interface</th><th>To interface</th></tr>';
 	foreach (getPortOIFCompat() as $pair)
 	{
 		if ($last_left_oif_id != $pair['type1'])
@@ -3191,7 +3191,40 @@ function renderPortOIFCompatViewer()
 
 function renderPortOIFCompatEditor()
 {
-	dragon();
+	function printNewitemTR()
+	{
+		printOpFormIntro ('add');
+		echo '<tr><th class=tdleft>';
+		printImageHREF ('add', 'add pair', TRUE);
+		echo '</th><th class=tdleft>';
+		printSelect (readChapter (CHAP_PORTTYPE), array ('name' => 'type1'));
+		echo '</th><th class=tdleft>';
+		printSelect (readChapter (CHAP_PORTTYPE), array ('name' => 'type2'));
+		echo '</th></tr></form>';
+	}
+
+	global $nextorder;
+	$last_left_oif_id = NULL;
+	$order = 'odd';
+	echo '<br><table class=cooltable align=center border=0 cellpadding=5 cellspacing=0>';
+	echo '<tr><th>&nbsp;</th><th>From Interface</th><th>To Interface</th></tr>';
+	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
+		printNewitemTR();
+	foreach (getPortOIFCompat() as $pair)
+	{
+		if ($last_left_oif_id != $pair['type1'])
+		{
+			$order = $nextorder[$order];
+			$last_left_oif_id = $pair['type1'];
+		}
+		echo "<tr class=row_${order}><td>";
+		echo '<a href="' . makeHrefProcess (array ('op' => 'del', 'type1' => $pair['type1'], 'type2' => $pair['type2'])) . '">';
+		printImageHREF ('delete', 'remove pair', TRUE);
+		echo "</a></td><td class=tdleft>${pair['type1name']}</td><td class=tdleft>${pair['type2name']}</td></tr>";
+	}
+	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')
+		printNewitemTR();
+	echo '</table>';
 }
 
 // Find direct sub-pages and dump as a list.
