@@ -173,36 +173,11 @@ else
 	$remote_username = $admin_account['user_name'];
 	unset ($admin_account);
 }
-
-$pageno = (isset ($_REQUEST['page'])) ? $_REQUEST['page'] : 'index';
-// Special handling of tab number to substitute the "last" index where applicable.
-// Always show explicitly requested tab, substitute the last used name in case
-// it is awailable, fall back to the default one.
-
-if (isset ($_REQUEST['tab']))
-	$tabno = $_REQUEST['tab'];
-elseif (basename($_SERVER['PHP_SELF']) == 'index.php' and getConfigVar ('SHOW_LAST_TAB') == 'yes' and isset ($_SESSION['RTLT'][$pageno]))
-{
-	$tabno = $_SESSION['RTLT'][$pageno];
-	$url = "index.php?page=$pageno&tab=$tabno";
-	foreach ($_GET as $name=>$value)
-	{
-		if ($name == 'page' or $name == 'tab') continue;
-		if (gettype($value) == 'array')
-			foreach($value as $v)
-				$url .= '&'.urlencode($name.'[]').'='.urlencode($v);
-		else
-			$url .= '&'.urlencode($name).'='.urlencode($value);
-	}
-	header('Location: '.$url);
-	exit();
-}
-else
-	$tabno = 'default';
-
-$op = '';
 require_once 'inc/navigation.php';
 require_once 'inc/triggers.php';
+
+
+$op = '';
 require_once 'inc/gateways.php';
 if (file_exists ('inc/local.php'))
 	require_once 'inc/local.php';
