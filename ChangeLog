@@ -1,4 +1,5 @@
 0.17.8
+	bugfix: triggers disable tabs completely now (ticket:211)
 	bugfix: properly delete objects with linked ports (ticket:300)
 	bugfix: completely remove warnings caused by ticket:277 (by Jason Lifsey)
 	update: restore PortCompat editor functionality (ticket:263)
