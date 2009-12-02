@@ -5218,6 +5218,45 @@ function renderMyPasswordEditor ()
 	echo '</table></form>';
 }
 
+function renderMyPreferences ()
+{
+	global $configCache;
+	startPortlet ('Current configuration');
+	echo "<table cellspacing=0 cellpadding=5 align=center class=widetable width='50%'>\n";
+	echo "<tr><th class=tdleft>Option</th>";
+	echo "<th class=tdleft>Value</th></tr>";
+	printOpFormIntro ('upd');
+
+	$i = 0;
+	foreach ($configCache as $v)
+	{
+		if ($v['is_hidden'] != 'no')
+			continue;
+		if ($v['is_userdefined'] != 'yes')
+			continue;
+		echo "<input type=hidden name=${i}_varname value='${v['varname']}'>";
+		echo "<tr><td class=\"tdright\">${v['description']}</td>";
+		echo "<td class=\"tdleft\"><input type=text name=${i}_varvalue value='${v['varvalue']}' size=24></td>";
+		if ($v['is_altered'] == 'yes')
+			echo "<td class=\"tdleft\"><a href=\"".
+				makeHrefProcess(array('op'=>'reset', 'varname'=>$v['varname']))
+				."\">reset</a></td>";
+		else
+			echo "<td class=\"tdleft\">(default)</td>";
+		echo "</tr>\n";
+		$i++;
+	}
+	echo "<input type=hidden name=num_vars value=${i}>\n";
+	echo "<tr><td colspan=3>";
+	printImageHREF ('SAVE', 'Save changes', TRUE);
+	echo "</td></tr>";
+	echo "</form>";
+	finishPortlet();
+
+}
+
+
+
 function renderAccessDenied ()
 {
 	echo '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">'."\n";

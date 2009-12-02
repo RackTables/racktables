@@ -62,6 +62,7 @@ CREATE TABLE `Config` (
   `vartype` enum('string','uint') NOT NULL default 'string',
   `emptyok` enum('yes','no') NOT NULL default 'no',
   `is_hidden` enum('yes','no') NOT NULL default 'yes',
+  `is_userdefined` enum('yes','no') NOT NULL default 'yes',
   `description` text,
   PRIMARY KEY  (`varname`)
 ) ENGINE=MyISAM;
@@ -347,3 +348,10 @@ CREATE TABLE `UserAccount` (
   PRIMARY KEY  (`user_id`),
   UNIQUE KEY `user_name` (`user_name`)
 ) ENGINE=MyISAM AUTO_INCREMENT=10000;
+
+CREATE TABLE `UserConfig` (
+  `varname` char(32) NOT NULL,
+  `varvalue` char(255) NOT NULL,
+  `user` char(64) NOT NULL,
+  UNIQUE KEY `user_varname` (`user`,`varname`)
+) TYPE=InnoDB;

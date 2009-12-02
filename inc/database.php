@@ -2246,14 +2246,63 @@ function useSelectBlade ($query)
 
 function loadConfigCache ()
 {
-	$query = 'SELECT varname, varvalue, vartype, is_hidden, emptyok, description FROM Config ORDER BY varname';
+	$query = 'SELECT varname, varvalue, vartype, is_hidden, emptyok, description, is_userdefined FROM Config ORDER BY varname';
+	$result = useSelectBlade ($query);
+	$cache = array();
+	while ($row = $result->fetch (PDO::FETCH_ASSOC)) {
+		$cache[$row['varname']] = $row;
+	}
+	$result->closeCursor();
+
+	
+
+	return $cache;
+}
+
+function loadUserConfigCache ($username = NULL)
+{
+	if (!strlen ($username))
+		throw new InvalidArgException ('$username', $username);
+	$query = "SELECT varname, varvalue FROM UserConfig WHERE user = '$username'";
 	$result = useSelectBlade ($query);
 	$cache = array();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 		$cache[$row['varname']] = $row;
 	$result->closeCursor();
+
 	return $cache;
 }
+
+function deleteUserConfigVar ($username = NULL, $varname = NULL)
+{
+        global $dbxlink;
+        if (!strlen ($username))
+                throw new InvalidArgException ('$username', $username);
+        if (!strlen ($varname))
+                throw new InvalidArgException ('$varname', $varname);
+        $query = "delete from UserConfig where varname='${varname}' and user='${username}'";
+        $result = $dbxlink->query ($query);
+        $result->closeCursor();
+        return TRUE;
+}
+
+
+function storeUserConfigVar ($username = NULL, $varname = NULL, $varvalue = NULL)
+{
+	global $dbxlink;
+	if (!strlen ($username))
+		throw new InvalidArgException ('$username', $username);
+	if (!strlen ($varname))
+		throw new InvalidArgException ('$varname', $varname);
+	if ($varvalue === NULL)
+		throw new InvalidArgException ('$varvalue', $varvalue);
+	$query = "replace UserConfig set varvalue='${varvalue}', varname='${varname}', user='${username}'";
+	$result = $dbxlink->query ($query);
+	$result->closeCursor();
+	return TRUE;
+}
+
+
 
 // setConfigVar() is expected to perform all necessary filtering
 function storeConfigVar ($varname = NULL, $varvalue = NULL)
@@ -2265,12 +2314,8 @@ function storeConfigVar ($varname = NULL, $varvalue = NULL)
 		throw new InvalidArgException ('$varvalue', $varvalue);
 	$query = "update Config set varvalue='${varvalue}' where varname='${varname}' limit 1";
 	$result = $dbxlink->query ($query);
-	$rc = $result->rowCount();
 	$result->closeCursor();
-	if ($rc == 0 or $rc == 1)
-		return TRUE;
-	showWarning ("Something went wrong for args '${varname}', '${varvalue}'", __FUNCTION__);
-	return FALSE;
+	return TRUE;
 }
 
 // Database version detector. Should behave corretly on any

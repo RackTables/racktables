@@ -11,7 +11,7 @@
 
 
 // Current code version is subject to change with each new release.
-define ('CODE_VERSION', '0.17.7');
+define ('CODE_VERSION', '0.17.8');
 define ('CHAP_OBJTYPE', 1);
 define ('CHAP_PORTTYPE', 2);
 
@@ -40,6 +40,46 @@ define ('RE_L2_WWN_SOLID', '/^[0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0
 define ('RE_IP4_ADDR', '/^[0-9][0-9]?[0-9]?\.[0-9]?[0-9]?[0-9]?\.[0-9][0-9]?[0-9]?\.[0-9][0-9]?[0-9]?$/i');
 define ('RE_IP4_NET', '/^[0-9][0-9]?[0-9]?\.[0-9]?[0-9]?[0-9]?\.[0-9][0-9]?[0-9]?\.[0-9][0-9]?[0-9]?\/[0-9][0-9]?$/i');
 
+function loadConfigDefaults() {
+	global $configCache;
+	$configCache = loadConfigCache();
+	if (!count ($configCache)) {
+		throw new RuntimeException('Failed to load configuration from the database.');
+	}
+	foreach ($configCache as $varname => &$row) {
+		$row['is_altered'] = 'no';
+		if ($row['vartype'] == 'uint') $row['varvalue'] = 0 + $row['varvalue'];
+		$row['defaultvalue'] = $row['varvalue'];
+	}
+}
+
+function alterConfigWithUserPreferences() {
+	global $configCache;
+	global $userConfigCache;
+	global $remote_username;
+	$userConfigCache = loadUserConfigCache($remote_username);
+	foreach($userConfigCache as $key => $row) {
+		if ($configCache[$key]['is_userdefined'] == 'yes') {
+			$configCache[$key]['varvalue'] = $row['varvalue'];
+			$configCache[$key]['is_altered'] = 'yes';
+		}
+	}
+}
+
+// Returns true if varname has a different value or varname is new
+function isConfigVarChanged($varname, $varvalue) {
+	global $configCache;
+	if (!isset ($configCache))
+		throw new RuntimeException ("Configuration cache is unavailable");
+	if ($varname == '')
+		throw new InvalidArgException('$varname', $varname, 'Empty variable name');
+	if (!isset ($configCache[$varname])) return true;
+	if ($configCache[$varname]['vartype'] == 'uint')
+		return $configCache[$varname]['varvalue'] === 0 + $varvalue;
+	else
+		return $configCache[$varname]['varvalue'] === $varvalue;
+}
+
 function getConfigVar ($varname = '')
 {
 	global $configCache;
@@ -56,10 +96,7 @@ function getConfigVar ($varname = '')
 	if (isset ($configCache[$varname]))
 	{
 		// Try casting to int, if possible.
-		if ($configCache[$varname]['vartype'] == 'uint')
-			return 0 + $configCache[$varname]['varvalue'];
-		else
-			return $configCache[$varname]['varvalue'];
+		return $configCache[$varname]['varvalue'];
 	}
 	return NULL;
 }
@@ -70,49 +107,70 @@ function setConfigVar ($varname = '', $varvalue = '', $softfail = FALSE)
 {
 	global $configCache;
 	if (!isset ($configCache))
-	{
 		throw new RuntimeException ("Configuration cache is unavailable");
-	}
 	if (!strlen ($varname))
-	{
 		throw new InvalidArgException('$varname', $varname, 'Empty variable name');
-	}
 	// We don't operate on unknown data.
 	if (!isset ($configCache[$varname]))
-	{
 		throw new InvalidArgException('$varname', $varname, "Don't know how to handle '${varname}'");
-		die;
-	}
 	if ($configCache[$varname]['is_hidden'] != 'no')
-	{
-		$errormsg = "'${varname}' is a system variable and cannot be changed by user.";
-		if ($softfail)
-			return $errormsg;
-		throw new InvalidArgException('$varname', $varname, $errormsg);
-	}
+		throw new InvalidArgException('$varname', $varname, "'${varname}' is a system variable and cannot be changed by user.");
 	if (!strlen ($varvalue) && $configCache[$varname]['emptyok'] != 'yes')
-	{
-		$errormsg = "'${varname}' is configured to take non-empty value. Perhaps there was a reason to do so.";
-		if ($softfail)
-			return $errormsg;
-		throw new InvalidArgException('$varname', $varname, $errormsg);
-	}
+		throw new InvalidArgException('$varname', $varname, "'${varname}' is configured to take non-empty value. Perhaps there was a reason to do so.");
 	if (strlen ($varvalue) && $configCache[$varname]['vartype'] == 'uint' && (!is_numeric ($varvalue) or $varvalue < 0 ))
-	{
-		$errormsg = "'${varname}' can accept UINT values only";
-		if ($softfail)
-			return $errormsg;
-		throw new InvalidArgException('$varname', $varname, $errormsg);
-	}
+		throw new InvalidArgException('$varname', $varname, "'${varname}' can accept UINT values only");
 	// Update cache only if the changes went into DB.
-	if (storeConfigVar ($varname, $varvalue))
-	{
-		$configCache[$varname]['varvalue'] = $varvalue;
-		if ($softfail)
-			return '';
-	}
-	elseif ($softfail)
-		return "storeConfigVar ('${varname}', '${varvalue}') failed in setConfigVar()";
+	storeConfigVar ($varname, $varvalue);
+	$configCache[$varname]['varvalue'] = $varvalue;
+}
+
+function setUserConfigVar ($varname = '', $varvalue = '')
+{
+	global $configCache;
+	global $remote_username;
+	if (!isset ($configCache))
+		throw new RuntimeException ("Configuration cache is unavailable");
+	if (!strlen ($varname))
+		throw new InvalidArgException('$varname', $varname, 'Empty variable name');
+	// We don't operate on unknown data.
+	if (!isset ($configCache[$varname]))
+		throw new InvalidArgException('$varname', $varname, "Don't know how to handle '${varname}'");
+	if ($configCache[$varname]['is_userdefined'] != 'yes')
+		throw new InvalidArgException('$varname', $varname, "'${varname}' cannot be changed by user.");
+	if ($configCache[$varname]['is_hidden'] != 'no')
+		throw new InvalidArgException('$varname', $varname, "'${varname}' is a system variable and cannot be changed by user.");
+	if (!strlen ($varvalue) && $configCache[$varname]['emptyok'] != 'yes')
+		throw new InvalidArgException('$varname', $varname, "'${varname}' is configured to take non-empty value. Perhaps there was a reason to do so.");
+	if (strlen ($varvalue) && $configCache[$varname]['vartype'] == 'uint' && (!is_numeric ($varvalue) or $varvalue < 0 ))
+		throw new InvalidArgException('$varname', $varname, "'${varname}' can accept UINT values only");
+	// Update cache only if the changes went into DB.
+	storeUserConfigVar ($remote_username, $varname, $varvalue);
+	$configCache[$varname]['varvalue'] = $varvalue;
+	$configCache[$varname]['is_altered'] = 'yes';
+	return '';
+}
+
+function resetUserConfigVar ($varname = '')
+{
+	global $configCache;
+	global $remote_username;
+	if (!isset ($configCache))
+		throw new RuntimeException ("Configuration cache is unavailable");
+	if (!strlen ($varname))
+		throw new InvalidArgException('$varname', $varname, 'Empty variable name');
+	// We don't operate on unknown data.
+	if (!isset ($configCache[$varname]))
+		throw new InvalidArgException('$varname', $varname, "Don't know how to handle '${varname}'");
+	if ($configCache[$varname]['is_userdefined'] != 'yes')
+		throw new InvalidArgException('$varname', $varname, "'${varname}' cannot be changed by user.");
+	if ($configCache[$varname]['is_hidden'] != 'no')
+		throw new InvalidArgException('$varname', $varname, "'${varname}' is a system variable and cannot be changed by user.");
+	// Update cache only if the changes went into DB.
+	deleteUserConfigVar ($remote_username, $varname);
+	$configCache[$varname]['varvalue'] = $configCache[$varname]['defaultvalue'];
+	$configCache[$varname]['is_altered'] = 'no';
+	return '';
+
 }
 
 ?>
