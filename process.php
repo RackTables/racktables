@@ -5,13 +5,14 @@ require 'inc/ophandlers.php';
 require 'inc/init.php';
 assertStringArg ('op', __FILE__);
 $op = $_REQUEST['op'];
-
+prepareNavigation();
 // FIXME: find a better way to handle this error
 if ($op == 'addFile' && !isset($_FILES['file']['error'])) {
 	showError ("File upload error, it's size probably exceeds upload_max_filesize directive in php.ini");
 	die;
 }
 fixContext();
+
 
 if (!isset ($ophandler[$pageno][$tabno][$op]))
 {
