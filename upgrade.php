@@ -425,7 +425,7 @@ CREATE TABLE `PortInterfaceCompat` (
 			$query[] = "UPDATE Config SET varvalue = '0.17.7' WHERE varname = 'DB_VERSION'";
 			break;
 		case '0.17.8':
-			$query[] = "ALTER table Config add `is_userdefined` enum('yes','no') NOT NULL default 'no'";
+			$query[] = "ALTER table Config add `is_userdefined` enum('yes','no') NOT NULL default 'no' AFTER `is_hidden`";
 			$query[] = "
 CREATE TABLE `UserConfig` ( 
 	`varname` char(32) NOT NULL, 
