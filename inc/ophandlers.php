@@ -963,7 +963,6 @@ function saveMyPreferences ()
 		// If form value = value in DB, don't bother updating DB
 		if (isConfigVarChanged($varname, $varvalue))
 			continue;
-		error_log("$varvalue === ".getConfigVar ($varname));
 		// Note if the queries succeed or not, it determines which page they see.
 		try {
 			setUserConfigVar ($varname, $varvalue);
