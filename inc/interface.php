@@ -3896,16 +3896,15 @@ function renderVLANMembership ($object_id)
 			echo "<input type=hidden name=vlanid_${portno} value='routed'>";
 			echo "<select disabled multiple='multiple' size=1><option>ROUTED</option></select>";
 		}
+		elseif (!array_key_exists ($port['vlanid'], $vlanpermissions) or !count ($vlanpermissions[$port['vlanid']]))
+		{
+			echo "<input type=hidden name=vlanid_${portno} value=${port['vlanid']}>";
+			echo "<select disabled name=vlanid_${portno}>";
+			echo "<option value=${port['vlanid']} selected>${port['vlanid']}</option>";
+			echo "</select>";
+		}
 		else
 		{
-			if (!array_key_exists ($port['vlanid'], $vlanpermissions) or !count ($vlanpermissions[$port['vlanid']]))
-			{
-				echo "<select disabled name=vlanid_${portno}>";
-				echo "<input type=hidden name=vlanid_${portno} value=${port['vlanid']}>";
-				echo "<option value=${port['vlanid']} selected>${port['vlanid']}</option>\n";
-				echo "</select>";
-				continue;
-			}
 			echo "<select name=vlanid_${portno}>";
 			// A port may belong to a VLAN, which is absent from the VLAN table, this is normal.
 			// We must be able to render its SELECT properly at least.
