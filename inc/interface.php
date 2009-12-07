@@ -3832,6 +3832,21 @@ function renderVLANMembership ($object_id)
 {
 	$data = getSwitchVLANs ($object_id);
 	list ($vlanlist, $portlist, $maclist) = $data;
+	$vlanpermissions = array();
+	foreach ($portlist as $port)
+	{
+		if (array_key_exists ($port['vlanid'], $vlanpermissions))
+			continue;
+		$vlanpermissions[$port['vlanid']] = array();
+		foreach (array_keys ($vlanlist) as $to)
+		{
+			$annex = array();
+			$annex[] = array ('tag' => '$fromvlan_' . $port['vlanid']);
+			$annex[] = array ('tag' => '$tovlan_' . $to);
+			if (permitted (NULL, NULL, 'setPortVLAN', $annex))
+				$vlanpermissions[$port['vlanid']][] = $to;
+		}
+	}
 
 	echo '<table border=0 width="100%"><tr><td colspan=3>';
 
@@ -3884,11 +3899,19 @@ function renderVLANMembership ($object_id)
 		}
 		else
 		{
+			if (!array_key_exists ($port['vlanid'], $vlanpermissions) or !count ($vlanpermissions[$port['vlanid']]))
+			{
+				echo "<select disabled name=vlanid_${portno}>";
+				echo "<input type=hidden name=vlanid_${portno} value=${port['vlanid']}>";
+				echo "<option value=${port['vlanid']} selected>${port['vlanid']}</option>\n";
+				echo "</select>";
+				continue;
+			}
 			echo "<select name=vlanid_${portno}>";
 			// A port may belong to a VLAN, which is absent from the VLAN table, this is normal.
 			// We must be able to render its SELECT properly at least.
 			$in_table = FALSE;
-			foreach ($vlanlist as $v => $d)
+			foreach ($vlanpermissions[$port['vlanid']] as $v)
 			{
 				echo "<option value=${v}";
 				if ($v == $port['vlanid'])
