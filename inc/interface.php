@@ -48,6 +48,9 @@ $image['rackspace']['height'] = 200;
 $image['objects']['path'] = 'pix/server.png';
 $image['objects']['width'] = 218;
 $image['objects']['height'] = 200;
+$image['depot']['path'] = 'pix/server.png';
+$image['depot']['width'] = 218;
+$image['depot']['height'] = 200;
 $image['files']['path'] = 'pix/files.png';
 $image['files']['width'] = 218;
 $image['files']['height'] = 200;
@@ -235,6 +238,19 @@ $attrtypes = array
 );
 
 // Main menu.
+function renderIndexItem ($ypageno) {
+  global $page;
+  if (permitted($ypageno)) {
+    print "          <td>\n";          
+    print "            <h1><a href='".makeHref(array('page'=>$ypageno))."'>".$page[$ypageno]['title']."<br>\n";
+    printImageHREF ($ypageno);
+    print "</a></h1>\n";
+    print "          </td>\n";
+  } else {
+    print "          <td>&nbsp;</td>\n";
+  }
+}
+
 function renderIndex ()
 {
 ?>
@@ -244,37 +260,20 @@ function renderIndex ()
 			<div style='text-align: center; margin: 10px; '>
 			<table width='100%' cellspacing=0 cellpadding=30 class=mainmenu border=0>
 				<tr>
-					<td>
-						<h1><a href='<?php echo makeHref(array('page'=>'rackspace')) ?>'>Rackspace<br>
-						<?php printImageHREF ('rackspace'); ?></a></h1>
-					</td>
-					<td>
-						<h1><a href='<?php echo makeHref(array('page'=>'depot')) ?>'>Objects<br>
-						<?php printImageHREF ('objects'); ?></a></h1>
-					</td>
-					<td>
-						<h1><a href='<?php echo makeHref(array('page'=>'ipv4space')) ?>'>IPv4 space<br>
-						<?php printImageHREF ('ipv4space'); ?></a></h1>
-					</td>
-					<td>
-						<h1><a href='<?php echo makeHref(array('page'=>'files')) ?>'>Files<br>
-						<?php printImageHREF ('files'); ?></a></h1>
-					</td>
-				</tr>
-				<tr>
-					<td>
-						<h1><a href='<?php echo makeHref(array('page'=>'config')) ?>'>Configuration<br>
-						<?php printImageHREF ('config'); ?></a></h1>
-					</td>
-					<td>
-						<h1><a href='<?php echo makeHref(array('page'=>'reports')) ?>'>Reports<br>
-						<?php printImageHREF ('reports'); ?></a></h1>
-					</td>
-					<td>
-						<h1><a href='<?php echo makeHref(array('page'=>'ipv4slb')) ?>'>IPv4 SLB<br>
-						<?php printImageHREF ('ipv4slb'); ?></a></h1>
-					</td>
-					<td>&nbsp;</td>
+<?php
+renderIndexItem('rackspace');
+renderIndexItem('depot');
+renderIndexItem('ipv4space');
+renderIndexItem('files');
+?>          
+        </tr>
+        <tr>
+<?php
+renderIndexItem('config');
+renderIndexItem('reports');
+renderIndexItem('ipv4slb');
+print "          <td>&nbsp;</td>\n";
+?>          
 				</tr>
 			</table>
 			</div>
@@ -3235,7 +3234,7 @@ function renderConfigMainpage ()
 	global $pageno, $page;
 	echo '<ul>';
 	foreach ($page as $cpageno => $cpage)
-		if (isset ($cpage['parent']) and $cpage['parent'] == $pageno)
+		if (isset ($cpage['parent']) and $cpage['parent'] == $pageno  && permitted($cpageno))
 			echo "<li><a href='index.php?page=${cpageno}'>" . $cpage['title'] . "</li>\n";
 	echo '</ul>';
 }
