@@ -39,6 +39,7 @@ function getDBUpgradePath ($v1, $v2)
 		'0.17.5',
 		'0.17.6',
 		'0.17.7',
+		'0.17.8',
 	);
 	if (!in_array ($v1, $versionhistory) or !in_array ($v2, $versionhistory))
 		return NULL;
@@ -422,6 +423,10 @@ CREATE TABLE `PortInterfaceCompat` (
 			break;
 		case '0.17.7':
 			$query[] = "UPDATE Config SET varvalue = '0.17.7' WHERE varname = 'DB_VERSION'";
+			break;
+		case '0.17.8':
+			$query = array_merge ($query, reloadDictionary ($batchid));
+			$query[] = "UPDATE Config SET varvalue = '0.17.8' WHERE varname = 'DB_VERSION'";
 			break;
 		default:
 			showFailure ("executeUpgradeBatch () failed, because batch '${batchid}' isn't defined", __FILE__);
