@@ -6,6 +6,7 @@
 	update: restore PortCompat editor functionality (ticket:263)
 	update: don't show inacessible links in index (by Jeroen Benda)
 	update: consider permitted VLANs in switchvlans (#302 by Boris Lytochkin)
+	update: regular dictionary update
 0.17.7 2009-11-09
 	bugfix: work around unbuffered query in ports pop-up (ticket:297)
 	update: add inline mode switcher by Jens Groh (ticket:298)

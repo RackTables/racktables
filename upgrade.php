@@ -460,6 +460,7 @@ CREATE TABLE `UserConfig` (
 			$query[] = "UPDATE Config SET is_userdefined = 'yes' WHERE varname='PREVIEW_IMAGE_MAXPXS'";
 			$query[] = "UPDATE Config SET is_userdefined = 'yes' WHERE varname='VENDOR_SIEVE'";
 			$query[] = "UPDATE Config SET is_userdefined = 'yes' WHERE varname='RACKS_PER_ROW'";
+			$query = array_merge ($query, reloadDictionary ($batchid));
 			$query[] = "UPDATE Config SET varvalue = '0.17.8' WHERE varname = 'DB_VERSION'";
 			break;
 		default:
