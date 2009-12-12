@@ -426,6 +426,7 @@ CREATE TABLE `PortInterfaceCompat` (
 			break;
 		case '0.17.8':
 			$query = array_merge ($query, reloadDictionary ($batchid));
+			$query[] = "ALTER TABLE TagTree DROP COLUMN valid_realm";
 			$query[] = "UPDATE Config SET varvalue = '0.17.8' WHERE varname = 'DB_VERSION'";
 			break;
 		default:
