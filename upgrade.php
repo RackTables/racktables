@@ -461,6 +461,7 @@ CREATE TABLE `UserConfig` (
 			$query[] = "UPDATE Config SET is_userdefined = 'yes' WHERE varname='VENDOR_SIEVE'";
 			$query[] = "UPDATE Config SET is_userdefined = 'yes' WHERE varname='RACKS_PER_ROW'";
 			$query = array_merge ($query, reloadDictionary ($batchid));
+			$query[] = "ALTER TABLE TagTree DROP COLUMN valid_realm";
 			$query[] = "UPDATE Config SET varvalue = '0.17.8' WHERE varname = 'DB_VERSION'";
 			break;
 		default:
