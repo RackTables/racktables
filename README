@@ -58,7 +58,10 @@ php5-snmp and php5-ldap
 II. Prepare the files and database.
 1. Unpack the tarball and make it web-accessible, e.g. http://yourcompany.com/racktables
 or http://racktables.mysite.org.
-2. mysql> create database database_name; grant all privileges on database_name.* to XXX@YYY identified by 'ZZZ';
+
+2. Setup MySQL database:
+mysql> CREATE DATABASE racktables_db CHARACTER SET utf8 COLLATE utf8_general_ci;
+mysql> grant all privileges on racktables_db.* to XXX@YYY identified by 'ZZZ';
 
 
 III. Finish the installation.
