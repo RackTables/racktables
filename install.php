@@ -52,12 +52,12 @@ $testres = $stepfunc[$step] ();
 if ($testres)
 {
 	$next_step = $step + 1;
-	echo "<input type=submit value='proceed'>";
+	echo "<br><input type=submit value='proceed'>";
 }
 else
 {
 	$next_step = $step;
-	echo "<input type=submit value='retry'>";
+	echo "<br><input type=submit value='retry'>";
 }
 echo "<input type=hidden name=step value='${next_step}'>\n";
 
@@ -182,13 +182,16 @@ function init_config ()
 	)
 	{
 		echo "<input type=hidden name=save_config value=1>\n";
+		echo '<h3>Hint on setting up a database:</h3><pre>';
+		echo "mysql&gt; CREATE DATABASE racktables_db CHARACTER SET utf8 COLLATE utf8_general_ci;\n";
+		echo "mysql&gt; grant all privileges on racktables_db.* to racktables_user@localhost identified by 'MY_SECRET_PASSWORD';\n</pre>";
 		echo '<table>';
 		echo "<tr><td><label for=mysql_host>MySQL host:</label></td>";
 		echo "<td><input type=text name=mysql_host id=mysql_host value=localhost></td></tr>\n";
 		echo "<tr><td><label for=mysql_host>database:</label></td>";
-		echo "<td><input type=text name=mysql_db id=mysql_db value=racktables></td></tr>\n";
+		echo "<td><input type=text name=mysql_db id=mysql_db value=racktables_db></td></tr>\n";
 		echo "<tr><td><label for=mysql_username>username:</label></td>";
-		echo "<td><input type=text name=mysql_username></td></tr>\n";
+		echo "<td><input type=text name=mysql_username value=racktables_user></td></tr>\n";
 		echo "<tr><td><label for=mysql_password>password:</label></td>";
 		echo "<td><input type=password name=mysql_password></td></tr>\n";
 		echo '</table>';
