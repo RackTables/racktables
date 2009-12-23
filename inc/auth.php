@@ -99,12 +99,14 @@ function permitted ($p = NULL, $t = NULL, $o = NULL, $annex = array())
 		$p = $pageno;
 	if ($t === NULL)
 		$t = $tabno;
+	if ($o === NULL and strlen ($op)) // $op can be set to empty string
+		$o = $op;
 	$my_auto_tags = $auto_tags;
 	$my_auto_tags[] = array ('tag' => '$page_' . $p);
 	$my_auto_tags[] = array ('tag' => '$tab_' . $t);
-	if ($o === NULL and strlen ($op)) // $op can be set to empty string
+	if ($o !== NULL) // these tags only make sense in certain cases
 	{
-		$my_auto_tags[] = array ('tag' => '$op_' . $op);
+		$my_auto_tags[] = array ('tag' => '$op_' . $o);
 		$my_auto_tags[] = array ('tag' => '$any_op');
 	}
 	$subject = array_merge
