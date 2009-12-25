@@ -243,7 +243,7 @@ function init_config ()
 // Default setting is to authenticate users locally, but it is possible to
 // employ existing LDAP or Apache userbase. Uncommenting below two lines MAY
 // help in switching authentication to LDAP completely.
-// More info: http://racktables.org/trac/wiki/RackTablesUserAuthentication
+// More info: http://sourceforge.net/apps/mediawiki/racktables/index.php?title=RackTablesAdminGuide
 #\$user_auth_src = 'ldap';
 #\$require_local_account = FALSE;
 
@@ -405,10 +405,10 @@ function init_database_dynamic ()
 function congrats ()
 {
 	echo 'Congratulations! RackTables installation is complete. After pressing Proceed you will ';
-	echo 'enter the system. Authenticate with <strong>admin</strong> username.<br>';
-	echo "RackTables web-site runs some <a href='http://racktables.org/trac/wiki'>wiki</a> pages ";
-	echo "and <a href='http://racktables.org/trac/report/1'>a bug tracker</a>.<br>We have also got ";
-	echo "a <a href='http://www.freelists.org/list/racktables-users'>mailing list</a> for users. Have fun.<br>";
+	echo 'enter the system. Authenticate with <strong>admin</strong> username.<br>RackTables project has a ';
+	echo "<a href='http://sourceforge.net/apps/mediawiki/racktables/index.php?title=RackTablesAdminGuide'>";
+	echo "wiki</a> and a ";
+	echo "<a href='http://www.freelists.org/list/racktables-users'>mailing list</a> for users. Have fun.<br>";
 	return TRUE;
 }
 
