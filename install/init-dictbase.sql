@@ -392,6 +392,6 @@ INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdef
 ('DEFAULT_PORT_OIF_IDS','1=24; 3=1078; 4=1077; 5=1079; 6=1080; 8=1082; 9=1084','string','no','no','no','Default port outer interface IDs'),
 ('IPV4_TREE_RTR_AS_CELL','yes','string','no','no','no','Show full router info for each network in IPv4 tree view'),
 ('PROXIMITY_RANGE','0','uint','yes','no','no','Proximity range (0 is current rack only)'),
-('DB_VERSION','0.17.7','string','no','yes','no','Database version.');
+('DB_VERSION','0.17.8','string','no','yes','no','Database version.');
 
 INSERT INTO `Script` VALUES ('RackCode','allow {$userid_1}');

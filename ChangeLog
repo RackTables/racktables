@@ -1,5 +1,6 @@
-0.17.8
+0.17.9
 	new feature: added per-user UI options (ticket:29)
+0.17.8 2009-12-25
 	bugfix: triggers disable tabs completely now (ticket:211)
 	bugfix: properly delete objects with linked ports (ticket:300)
 	bugfix: completely remove warnings caused by ticket:277 (by Jason Lifsey)
