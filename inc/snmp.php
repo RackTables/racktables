@@ -531,7 +531,7 @@ function doSNMPmining ($object_id, $community)
 }
 
 $msgcode['doSwitchSNMPmining']['ERR3'] = 188;
-$msgcode['doswitchSNMPmining']['ERR4'] = 189;
+$msgcode['doSwitchSNMPmining']['ERR4'] = 189;
 function doSwitchSNMPmining ($objectInfo, $hostname, $community)
 {
 	$log = emptyLog();
