@@ -1981,7 +1981,11 @@ function renderIPv4Space ()
 	else
 	{
 		$netinfo = spotEntity ('ipv4net', $eid);
-		echo "expanding ${netinfo['ip']}/${netinfo['mask']} (<a href='".makeHref(array('page'=>$pageno, 'tab'=>$tabno))."'>auto-collapse</a> / <a href='".makeHref(array('page'=>$pageno, 'tab'=>$tabno, 'eid'=>'ALL'))."'>expand&nbsp;all</a>)"; 
+		echo "expanding ${netinfo['ip']}/${netinfo['mask']} (<a href='" .
+			makeHref (array ('page' => $pageno, 'tab' => $tabno)) .
+			$cellfilter['urlextra'] . "'>auto-collapse</a> / <a href='" .
+			makeHref (array ('page' => $pageno, 'tab' => $tabno, 'eid' => 'ALL')) .
+			$cellfilter['urlextra'] . "'>expand&nbsp;all</a>)";
 	}
 	echo "</h4><table class='widetable' border=0 cellpadding=5 cellspacing=0 align='center'>\n";
 	echo "<tr><th>prefix</th><th>name/tags</th><th>capacity</th>";
