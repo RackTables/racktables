@@ -150,6 +150,14 @@ function permitted ($p = NULL, $t = NULL, $o = NULL, $annex = array())
 function authenticated_via_ldap ($username, $password)
 {
 	global $LDAP_options;
+	if (
+		$LDAP_options['cache_retry'] > $LDAP_options['cache_refresh'] or
+		$LDAP_options['cache_refresh'] > $LDAP_options['cache_expiry']
+	)
+	{
+		showError ('Fatal LDAP configuration error, check secret.php options.', __FUNCTION__);
+		die;
+	}
 	if ($LDAP_options['cache_expiry'] == 0) // immediate expiry set means disabled cache
 		return authenticated_via_ldap_nocache ($username, $password);
 	return authenticated_via_ldap_cache ($username, $password);
