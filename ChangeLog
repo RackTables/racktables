@@ -4,6 +4,7 @@
 	bugfix: expand/collapse links on IPv4 tree view (ticket:308)
 	bugfix: local.php did not work with SNMP
 	update: SNMP support for more Catalyst switches
+	new feature: LDAP cache can be disabled now (ticket:247)
 0.17.8 2009-12-25
 	bugfix: triggers disable tabs completely now (ticket:211)
 	bugfix: properly delete objects with linked ports (ticket:300)

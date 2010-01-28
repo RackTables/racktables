@@ -32,6 +32,12 @@ $LDAP_options = array
 // server (not more often, than once in 15 seconds). After 10 minutes of
 // unsuccessful retries give up and deny access, so someone goes to fix
 // LDAP server.
+//
+// Like in DNS, the following condition must be always met:
+// cache_retry <= cache_refresh <= cache_expiry
+//
+// To disable LDAP cache completely, set cache_refresh, cache_retry and
+// cache_expiry to 0.
 	'cache_refresh' => 300,
 	'cache_retry' => 15,
 	'cache_expiry' => 600,

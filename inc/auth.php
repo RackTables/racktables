@@ -142,7 +142,43 @@ function permitted ($p = NULL, $t = NULL, $o = NULL, $annex = array())
 	return gotClearanceForTagChain ($subject);
 }
 
+// a wrapper for two LDAP auth methods below
 function authenticated_via_ldap ($username, $password)
+{
+	global $LDAP_options;
+	if (
+		$LDAP_options['cache_retry'] > $LDAP_options['cache_refresh'] or
+		$LDAP_options['cache_refresh'] > $LDAP_options['cache_expiry']
+	)
+	{
+		showError ('Fatal LDAP configuration error, check secret.php options.', __FUNCTION__);
+		die;
+	}
+	if ($LDAP_options['cache_expiry'] == 0) // immediate expiry set means disabled cache
+		return authenticated_via_ldap_nocache ($username, $password);
+	return authenticated_via_ldap_cache ($username, $password);
+}
+
+// Authenticate given user with known LDAP server, completely ignore LDAP cache data.
+function authenticated_via_ldap_nocache ($username, $password)
+{
+	global $remote_displayname, $auto_tags;
+	$server_test = queryLDAPServer ($username, $password);
+	if ($server_test['result'] == 'ACK')
+	{
+		if (strlen ($server_test['displayed_name']))
+			$remote_displayname = $server_test['displayed_name'];
+		foreach ($server_test['memberof'] as $autotag)
+			$auto_tags[] = array ('tag' => $autotag);
+		return TRUE;
+	}
+	return FALSE;
+}
+
+// Idem, but consider existing data in cache and modify/discard it, when necessary.
+// Remember to have releaseLDAPCache() called before any return statement.
+// Perform cache maintenance on each update.
+function authenticated_via_ldap_cache ($username, $password)
 {
 	global $LDAP_options, $remote_displayname, $auto_tags;
 
@@ -153,7 +189,6 @@ function authenticated_via_ldap ($username, $password)
 		saveScript ('LDAPConfigHash', sha1 (serialize ($LDAP_options)));
 	}
 	$oldinfo = acquireLDAPCache ($username, sha1 ($password), $LDAP_options['cache_expiry']);
-	// Remember to have releaseLDAPCache() called before any return statement.
 	if ($oldinfo === NULL) // cache miss
 	{
 		// On cache miss execute complete procedure and return the result. In case
@@ -166,12 +201,14 @@ function authenticated_via_ldap ($username, $password)
 			foreach ($newinfo['memberof'] as $autotag)
 				$auto_tags[] = array ('tag' => $autotag);
 			replaceLDAPCacheRecord ($username, sha1 ($password), $newinfo['displayed_name'], $newinfo['memberof']);
+			releaseLDAPCache();
+			discardLDAPCache ($LDAP_options['cache_expiry']);
+			return TRUE;
 		}
 		releaseLDAPCache();
-		// Do cache maintenance each time fresh data is stored.
-		discardLDAPCache ($LDAP_options['cache_expiry']);
-		return $newinfo['result'] == 'ACK';
+		return FALSE;
 	}
+	// cache HIT
 	// There are two confidence levels of cache hits: "certain" and "uncertain". In either case
 	// expect authentication success, unless it's well-timed to perform a retry,
 	// which may sometimes bring a NAK decision.
@@ -195,10 +232,12 @@ function authenticated_via_ldap ($username, $password)
 			$auto_tags[] = array ('tag' => $autotag);
 		replaceLDAPCacheRecord ($username, sha1 ($password), $newinfo['displayed_name'], $newinfo['memberof']);
 		releaseLDAPCache();
+		discardLDAPCache ($LDAP_options['cache_expiry']);
 		return TRUE;
 	case 'NAK': // The record isn't valid any more.
 		deleteLDAPCacheRecord ($username);
 		releaseLDAPCache();
+		discardLDAPCache ($LDAP_options['cache_expiry']);
 		return FALSE;
 	case 'CAN': // retry failed, do nothing, use old value till next retry
 		if (strlen ($oldinfo['displayed_name']))
@@ -207,6 +246,7 @@ function authenticated_via_ldap ($username, $password)
 			$auto_tags[] = array ('tag' => $autotag);
 		touchLDAPCacheRecord ($username);
 		releaseLDAPCache();
+		discardLDAPCache ($LDAP_options['cache_expiry']);
 		return TRUE;
 	default:
 		throw new RuntimeException('Internal error during LDAP cache dispatching');
