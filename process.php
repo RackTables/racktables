@@ -1,8 +1,11 @@
 <?php
 ob_start();
 try {
-// Include init after ophandlers, not before, so local.php can redefine things later.
+// Include init after ophandlers/snmp, not before, so local.php can redefine things.
 require 'inc/ophandlers.php';
+// snmp.php is an exception, it is treated by a special hack
+if (isset ($_REQUEST['op']) and $_REQUEST['op'] == 'querySNMPData')
+	include 'inc/snmp.php';
 require 'inc/init.php';
 assertStringArg ('op');
 $op = $_REQUEST['op'];
@@ -18,10 +21,6 @@ if (!isset ($ophandler[$pageno][$tabno][$op]))
 {
 	throw new RuntimeException("Invalid request in operation broker: page '${pageno}', tab '${tabno}', op '${op}'");
 }
-
-// This is the only exception at the moment, so its handling is hardcoded.
-if ($op == 'querySNMPData')
-	include 'inc/snmp.php';
 
 // We have a chance to handle an error before starting HTTP header.
 if (!isset ($delayauth[$pageno][$tabno][$op]) and !permitted())

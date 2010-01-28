@@ -65,6 +65,15 @@ $iftable_processors['catalyst-chassis-any-1000GBIC'] = array
 	'try_next_proc' => FALSE,
 );
 
+$iftable_processors['catalyst-chassis-1-to-2-combo-1000SFP'] = array
+(
+	'pattern' => '@^GigabitEthernet([[:digit:]]+/)?(1|2)$@',
+	'replacement' => 'gi\\1\\2',
+	'dict_key' => '4-1077',
+	'label' => '\\2',
+	'try_next_proc' => TRUE,
+);
+
 $iftable_processors['catalyst-chassis-21-to-24-combo-1000SFP'] = array
 (
 	'pattern' => '@^GigabitEthernet([[:digit:]]+/)?(21|22|23|24)$@',
@@ -152,6 +161,24 @@ $iftable_processors['catalyst-blade-any-bp/1000T'] = array
 	'replacement' => 'gi\\1\\2',
 	'dict_key' => '1-1087',
 	'label' => '',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['catalyst-1-to-10-1000T'] = array
+(
+	'pattern' => '@^GigabitEthernet([[:digit:]]+/)?(1|2|3|4|5|6|7|8|9|10)$@',
+	'replacement' => 'gi\\1\\2',
+	'dict_key' => '1-24',
+	'label' => '\\2',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['catalyst-11-to-12-GBIC'] = array
+(
+	'pattern' => '@^GigabitEthernet([[:digit:]]+/)?(11|12)$@',
+	'replacement' => 'gi\\1\\2',
+	'dict_key' => '3-1078',
+	'label' => '\\2',
 	'try_next_proc' => FALSE,
 );
 
@@ -313,6 +340,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'WS-C2950C-24: 24 RJ-45/10-100TX + 2 MT-RJ/100FX fiber',
 		'processors' => array ('catalyst-chassis-25-to-26-100FX/MT-RJ', 'catalyst-chassis-any-100TX'),
 	),
+	'9.1.695' => array
+	(
+		'dict_key' => 140,
+		'text' => 'WS-C2960-48TC-L: 48 RJ-45/10-100TX + 2 combo-gig',
+		'processors' => array ('catalyst-chassis-1-to-2-combo-1000SFP', 'catalyst-chassis-any-1000T', 'catalyst-chassis-any-100TX'),
+	),
 	'9.1.696' => array
 	(
 		'dict_key' => 167,
@@ -438,6 +471,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'dict_key' => 795,
 		'text' => 'WS-CBS3032-DEL: 16 internal/10-100-1000T(X) + 4 RJ-45/10-100-1000T(X) + 4 SFP/1000',
 		'processors' => array ('catalyst-blade-17-to-20-1000T', 'catalyst-blade-21-to-24-1000SFP', 'catalyst-blade-any-bp/1000T'),
+	),
+	'9.1.368' => array
+	(
+		'dict_key' => 398,
+		'text' => 'WS-C3550-12T: 10 RJ-45/10-100-1000T(X) + 2 GBIC/1000',
+		'processors' => array ('catalyst-1-to-10-1000T', 'catalyst-11-to-12-GBIC'),
 	),
 	'9.12.3.1.3.719' => array
 	(
