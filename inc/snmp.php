@@ -47,15 +47,6 @@ $iftable_processors['catalyst-chassis-uplinks-1000T'] = array
 	'try_next_proc' => FALSE,
 );
 
-$iftable_processors['catalyst-any-bp/1000T'] = array
-(
-	'pattern' => '@^GigabitEthernet([[:digit:]]+/)?([[:digit:]]+)$@',
-	'replacement' => 'gi\\1\\2',
-	'dict_key' => 1087,
-	'label' => '',
-	'try_next_proc' => FALSE,
-);
-
 $iftable_processors['catalyst-chassis-any-1000SFP'] = array
 (
 	'pattern' => '@^GigabitEthernet([[:digit:]]+/)?([[:digit:]]+)$@',
@@ -119,7 +110,7 @@ $iftable_processors['catalyst-chassis-49-to-52-1000SFP'] = array
 	'try_next_proc' => FALSE,
 );
 
-$iftable_processors['catalyst-13-to-16-1000SFP'] = array
+$iftable_processors['catalyst-blade-13-to-16-1000SFP'] = array
 (
 	'pattern' => '@^GigabitEthernet([[:digit:]]+/)?(13|14|15|16)$@',
 	'replacement' => 'gi\\1\\2',
@@ -128,12 +119,39 @@ $iftable_processors['catalyst-13-to-16-1000SFP'] = array
 	'try_next_proc' => FALSE,
 );
 
-$iftable_processors['catalyst-21-to-24-1000SFP'] = array
+$iftable_processors['catalyst-blade-21-to-24-1000SFP'] = array
 (
 	'pattern' => '@^GigabitEthernet([[:digit:]]+/)?(21|22|23|24)$@',
 	'replacement' => 'gi\\1\\2',
 	'dict_key' => '4-1077',
 	'label' => '\\2',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['catalyst-blade-11-to-12-1000T'] = array
+(
+	'pattern' => '@^GigabitEthernet([[:digit:]]+/)?(11|12)$@',
+	'replacement' => 'gi\\1\\2',
+	'dict_key' => '1-24',
+	'label' => '\\2',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['catalyst-blade-17-to-20-1000T'] = array
+(
+	'pattern' => '@^GigabitEthernet([[:digit:]]+/)?(17|18|19|20)$@',
+	'replacement' => 'gi\\1\\2',
+	'dict_key' => '1-24',
+	'label' => '\\2',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['catalyst-blade-any-bp/1000T'] = array
+(
+	'pattern' => '@^GigabitEthernet([[:digit:]]+/)?([[:digit:]]+)$@',
+	'replacement' => 'gi\\1\\2',
+	'dict_key' => '1-1087',
+	'label' => '',
 	'try_next_proc' => FALSE,
 );
 
@@ -413,13 +431,13 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 	(
 		'dict_key' => 989,
 		'text' => 'WS-CBS3030-DEL: 10 internal/10-100-1000T(X) + 2 RJ-45/10-100-1000T(X) + 4 SFP/1000',
-		'processors' => array ('catalyst-11-to-12-1000T', 'catalyst-13-to-16-1000SFP', 'catalyst-any-bp/1000T'),
+		'processors' => array ('catalyst-blade-11-to-12-1000T', 'catalyst-blade-13-to-16-1000SFP', 'catalyst-blade-any-bp/1000T'),
 	),
 	'9.1.920' => array
 	(
 		'dict_key' => 795,
 		'text' => 'WS-CBS3032-DEL: 16 internal/10-100-1000T(X) + 4 RJ-45/10-100-1000T(X) + 4 SFP/1000',
-		'processors' => array ('catalyst-17-to-20-1000T', 'catalyst-21-to-24-1000SFP', 'catalyst-any-bp/1000T'),
+		'processors' => array ('catalyst-blade-17-to-20-1000T', 'catalyst-blade-21-to-24-1000SFP', 'catalyst-blade-any-bp/1000T'),
 	),
 	'9.12.3.1.3.719' => array
 	(
