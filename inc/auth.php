@@ -57,23 +57,33 @@ function authenticate ()
 	$userinfo = constructUserCell ($remote_username);
 	if ($require_local_account and !isset ($userinfo['user_id']))
 		dieWith401();
-	$remote_displayname = strlen ($userinfo['user_realname']) ? $userinfo['user_realname'] : $remote_username;
 	$user_given_tags = $userinfo['etags'];
 	$auto_tags = array_merge ($auto_tags, $userinfo['atags']);
 	switch (TRUE)
 	{
 		// Just trust the server, because the password isn't known.
 		case ('httpd' == $user_auth_src):
-			return;
+			$remote_displayname = strlen ($userinfo['user_realname']) ?
+				$userinfo['user_realname'] :
+				$remote_username;
+			return; // success
 		// When using LDAP, leave a mean to fix things. Admin user is always authenticated locally.
 		case ('database' == $user_auth_src or $userinfo['user_id'] == 1):
+			$remote_displayname = strlen ($userinfo['user_realname']) ?
+				$userinfo['user_realname'] :
+				$remote_username;
 			if (authenticated_via_database ($userinfo, $_SERVER['PHP_AUTH_PW']))
-				return;
-			break;
+				return; // success
+			break; // failure
 		case ('ldap' == $user_auth_src):
-			if (authenticated_via_ldap ($remote_username, $_SERVER['PHP_AUTH_PW']))
-				return;
-			break;
+			$ldap_dispname = '';
+			$ldap_success = authenticated_via_ldap ($remote_username, $_SERVER['PHP_AUTH_PW'], $ldap_dispname);
+			if (!$ldap_success)
+				break; // failure
+			$remote_displayname = strlen ($userinfo['user_realname']) ? // local value is most preferred
+				$userinfo['user_realname'] :
+				(strlen ($ldap_dispname) ? $ldap_dispname : $remote_username); // then one from LDAP
+			return; // success
 		default:
 			throw new RuntimeException('Invalid authentication source!');
 			die;
@@ -143,7 +153,7 @@ function permitted ($p = NULL, $t = NULL, $o = NULL, $annex = array())
 }
 
 // a wrapper for two LDAP auth methods below
-function authenticated_via_ldap ($username, $password)
+function authenticated_via_ldap ($username, $password, &$ldap_displayname)
 {
 	global $LDAP_options;
 	if (
@@ -155,19 +165,18 @@ function authenticated_via_ldap ($username, $password)
 		die;
 	}
 	if ($LDAP_options['cache_expiry'] == 0) // immediate expiry set means disabled cache
-		return authenticated_via_ldap_nocache ($username, $password);
-	return authenticated_via_ldap_cache ($username, $password);
+		return authenticated_via_ldap_nocache ($username, $password, $ldap_displayname);
+	return authenticated_via_ldap_cache ($username, $password, $ldap_displayname);
 }
 
 // Authenticate given user with known LDAP server, completely ignore LDAP cache data.
-function authenticated_via_ldap_nocache ($username, $password)
+function authenticated_via_ldap_nocache ($username, $password, &$ldap_displayname)
 {
-	global $remote_displayname, $auto_tags;
+	global $auto_tags;
 	$server_test = queryLDAPServer ($username, $password);
 	if ($server_test['result'] == 'ACK')
 	{
-		if (strlen ($server_test['displayed_name']))
-			$remote_displayname = $server_test['displayed_name'];
+		$ldap_displayname = $server_test['displayed_name'];
 		foreach ($server_test['memberof'] as $autotag)
 			$auto_tags[] = array ('tag' => $autotag);
 		return TRUE;
@@ -178,9 +187,9 @@ function authenticated_via_ldap_nocache ($username, $password)
 // Idem, but consider existing data in cache and modify/discard it, when necessary.
 // Remember to have releaseLDAPCache() called before any return statement.
 // Perform cache maintenance on each update.
-function authenticated_via_ldap_cache ($username, $password)
+function authenticated_via_ldap_cache ($username, $password, &$ldap_displayname)
 {
-	global $LDAP_options, $remote_displayname, $auto_tags;
+	global $LDAP_options, $auto_tags;
 
 	// Destroy the cache each time config changes.
 	if (sha1 (serialize ($LDAP_options)) != loadScript ('LDAPConfigHash'))
@@ -196,8 +205,7 @@ function authenticated_via_ldap_cache ($username, $password)
 		$newinfo = queryLDAPServer ($username, $password);
 		if ($newinfo['result'] == 'ACK')
 		{
-			if (strlen ($newinfo['displayed_name']))
-				$remote_displayname = $newinfo['displayed_name'];
+			$ldap_displayname = $newinfo['displayed_name'];
 			foreach ($newinfo['memberof'] as $autotag)
 				$auto_tags[] = array ('tag' => $autotag);
 			replaceLDAPCacheRecord ($username, sha1 ($password), $newinfo['displayed_name'], $newinfo['memberof']);
@@ -215,8 +223,7 @@ function authenticated_via_ldap_cache ($username, $password)
 	if ($oldinfo['success_age'] < $LDAP_options['cache_refresh'] or $oldinfo['retry_age'] < $LDAP_options['cache_retry'])
 	{
 		releaseLDAPCache();
-		if (strlen ($oldinfo['displayed_name']))
-			$remote_displayname = $oldinfo['displayed_name'];
+		$ldap_displayname = $oldinfo['displayed_name'];
 		foreach ($oldinfo['memberof'] as $autotag)
 			$auto_tags[] = array ('tag' => $autotag);
 		return TRUE;
@@ -226,8 +233,7 @@ function authenticated_via_ldap_cache ($username, $password)
 	switch ($newinfo['result'])
 	{
 	case 'ACK': // refresh existing record
-		if (strlen ($newinfo['displayed_name']))
-			$remote_displayname = $newinfo['displayed_name'];
+		$ldap_displayname = $newinfo['displayed_name'];
 		foreach ($newinfo['memberof'] as $autotag)
 			$auto_tags[] = array ('tag' => $autotag);
 		replaceLDAPCacheRecord ($username, sha1 ($password), $newinfo['displayed_name'], $newinfo['memberof']);
@@ -240,8 +246,7 @@ function authenticated_via_ldap_cache ($username, $password)
 		discardLDAPCache ($LDAP_options['cache_expiry']);
 		return FALSE;
 	case 'CAN': // retry failed, do nothing, use old value till next retry
-		if (strlen ($oldinfo['displayed_name']))
-			$remote_displayname = $oldinfo['displayed_name'];
+		$ldap_displayname = $oldinfo['displayed_name'];
 		foreach ($oldinfo['memberof'] as $autotag)
 			$auto_tags[] = array ('tag' => $autotag);
 		touchLDAPCacheRecord ($username);

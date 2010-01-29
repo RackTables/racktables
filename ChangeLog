@@ -3,6 +3,8 @@
 	bugfix: error message was lost on SNMP tab (reported by Tommi Hokkanen)
 	bugfix: expand/collapse links on IPv4 tree view (ticket:308)
 	bugfix: local.php did not work with SNMP
+	bugfix: added error handling to gateway function (ticket:303)
+	bugfix: user's local real name was ignored with LDAP (ticket:252)
 	update: SNMP support for more Catalyst switches
 	new feature: LDAP cache can be disabled now (ticket:247)
 0.17.8 2009-12-25

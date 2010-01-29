@@ -195,8 +195,14 @@ function gwSendFile ($endpoint, $handlername, $filetext = array())
 		$name = tempnam ('', 'RackTables-sendfile-');
 		$tmpnames[] = $name;
 		$tmpfile = fopen ($name, 'wb');
-		fwrite ($tmpfile, $text);
-		fclose ($tmpfile);
+		$failed = FALSE === fwrite ($tmpfile, $text);
+		$failed = FALSE === fclose ($tmpfile) or $fail;
+		if ($failed)
+		{
+			foreach ($tmpnames as $name)
+				unlink ($name);
+			return oneLiner (164, array ('file write error')); // gateway failure
+		}
 		$command .= " ${name}";
 	}
 	$outputlines = queryGateway
