@@ -147,8 +147,6 @@ function setUserConfigVar ($varname = '', $varvalue = '')
 	// Update cache only if the changes went into DB.
 	storeUserConfigVar ($remote_username, $varname, $varvalue);
 	$configCache[$varname]['varvalue'] = $varvalue;
-	$configCache[$varname]['is_altered'] = 'yes';
-	return '';
 }
 
 function resetUserConfigVar ($varname = '')
@@ -168,10 +166,6 @@ function resetUserConfigVar ($varname = '')
 		throw new InvalidArgException('$varname', $varname, "'${varname}' is a system variable and cannot be changed by user.");
 	// Update cache only if the changes went into DB.
 	deleteUserConfigVar ($remote_username, $varname);
-	$configCache[$varname]['varvalue'] = $configCache[$varname]['defaultvalue'];
-	$configCache[$varname]['is_altered'] = 'no';
-	return '';
-
 }
 
 ?>
