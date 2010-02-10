@@ -2253,9 +2253,6 @@ function loadConfigCache ()
 		$cache[$row['varname']] = $row;
 	}
 	$result->closeCursor();
-
-	
-
 	return $cache;
 }
 
@@ -2269,7 +2266,6 @@ function loadUserConfigCache ($username = NULL)
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 		$cache[$row['varname']] = $row;
 	$result->closeCursor();
-
 	return $cache;
 }
 
@@ -2286,7 +2282,6 @@ function deleteUserConfigVar ($username = NULL, $varname = NULL)
         return TRUE;
 }
 
-
 function storeUserConfigVar ($username = NULL, $varname = NULL, $varvalue = NULL)
 {
 	global $dbxlink;
@@ -2301,8 +2296,6 @@ function storeUserConfigVar ($username = NULL, $varname = NULL, $varvalue = NULL
 	$result->closeCursor();
 	return TRUE;
 }
-
-
 
 // setConfigVar() is expected to perform all necessary filtering
 function storeConfigVar ($varname = NULL, $varvalue = NULL)
