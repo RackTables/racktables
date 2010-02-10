@@ -934,7 +934,7 @@ function updateUI ()
 		$varvalue = $_REQUEST["${i}_varvalue"];
 
 		// If form value = value in DB, don't bother updating DB
-		if (isConfigVarChanged($varname, $varvalue))
+		if (!isConfigVarChanged($varname, $varvalue))
 			continue;
 
 		// Note if the queries succeed or not, it determines which page they see.
@@ -961,7 +961,7 @@ function saveMyPreferences ()
 		$varvalue = $_REQUEST["${i}_varvalue"];
 
 		// If form value = value in DB, don't bother updating DB
-		if (isConfigVarChanged($varname, $varvalue))
+		if (!isConfigVarChanged($varname, $varvalue))
 			continue;
 		// Note if the queries succeed or not, it determines which page they see.
 		try {

@@ -76,9 +76,9 @@ function isConfigVarChanged($varname, $varvalue) {
 		throw new InvalidArgException('$varname', $varname, 'Empty variable name');
 	if (!isset ($configCache[$varname])) return true;
 	if ($configCache[$varname]['vartype'] == 'uint')
-		return $configCache[$varname]['varvalue'] === 0 + $varvalue;
+		return $configCache[$varname]['varvalue'] !== 0 + $varvalue;
 	else
-		return $configCache[$varname]['varvalue'] === $varvalue;
+		return $configCache[$varname]['varvalue'] !== $varvalue;
 }
 
 function getConfigVar ($varname = '')
