@@ -1508,6 +1508,7 @@ function showMessageOrError ()
 				187 => array ('code' => 'error', 'format' => "Internal error in function '%s'"),
 				188 => array ('code' => 'error', 'format' => "Fatal SNMP failure"),
 				189 => array ('code' => 'error', 'format' => "Unknown OID '%s'"),
+				190 => array ('code' => 'error', 'format' => "Invalid VLAN ID '%s'"),
 
 // records 200~299 with warnings
 				200 => array ('code' => 'warning', 'format' => '%s'),
@@ -6152,6 +6153,13 @@ function dynamic_title_decoder ($path_position)
 				'params' => array()
 			);
 		}
+	case 'vlandomain':
+		$dominfo = getVLANDomainInfo ($_REQUEST['vdom_id']);
+		return array
+		(
+			'name' => $dominfo['description'],
+			'params' => array ('vdom_id' => $_REQUEST['vdom_id'])
+		);
 	default:
 		return array
 		(
@@ -6272,6 +6280,371 @@ function printStyle ()
 		echo "}\n\n";
 	}
 	echo '</style>';
+}
+
+function renderObjectVLANConfig ($object_id)
+{
+	startPortlet ('VLAN domain');
+	echo "<table border=0 cellspacing=0 cellpadding=3 width='100%'>";
+	if (!($current_vdom_id = getObjectVLANDomainID ($object_id)))
+	{
+		printOpFormIntro ('bind');
+		echo "<tr><th width='50%' class=tdright>Current:</th><td class='tdleft sparenetwork'>(none)</td></tr>";
+		echo "<tr><th width='50%' class=tdright>Action:</th><td class=tdleft>";
+		$options = array();
+		foreach (getVLANDomainList() as $vdom_id => $vdom_info)
+			$options[$vdom_id] = $vdom_info['description'];
+		printSelect ($options, array ('name' => 'vdom_id'));
+		echo ' ';
+		printImageHref ('ATTACH', 'bind', TRUE);
+		echo '</td></tr></form>';
+	}
+	else
+	{
+		$vdom_info = getVLANDomainInfo ($current_vdom_id);
+		echo "<tr><th width='50%' class=tdright>Current:</th><td class=tdleft><a href='";
+		echo makeHref (array ('page' => 'vlandomain', 'vdom_id' => $current_vdom_id));
+		echo "'>" . $vdom_info['description'] . '</a></td></tr>';
+		echo "<tr><th width='50%' class=tdright>Action:</th><td class=tdleft>";
+		echo '<a href="' . makeHrefProcess (array ('op' => 'unbind', 'vdom_id' => $current_vdom_id, 'object_id' => $object_id));
+		echo '">';
+		printImageHREF ('CUT', 'unbind');
+		echo '</a></td></tr>';
+	}
+	echo '</table>';
+	finishPortlet();
+}
+
+function renderVLANDomainList ()
+{
+	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
+	echo '<tr><th>description</th><th>VLANs</th><th>switches</th></tr>';
+	echo '<ul>';
+	foreach (getVLANDomainList() as $vdom_id => $dominfo)
+	{
+		echo "<tr><td><a href='";
+		echo makeHref (array ('page' => 'vlandomain', 'vdom_id' => $vdom_id));
+		echo "'>${dominfo['description']}</a></td><td>${dominfo['vlanc']}</td>";
+		echo "<td>${dominfo['switchc']}</td></tr>";
+	}
+	echo '</table>';
+}
+
+function renderVLANDomainListEditor ()
+{
+	function printNewItemTR ()
+	{
+		printOpFormIntro ('add');
+		echo '<tr><td>';
+		printImageHREF ('create', 'create domain', TRUE, 104);
+		echo '</td><td>';
+		echo '<input type=text name=vdom_descr tabindex=102>';
+		echo '</td><td>';
+		printImageHREF ('create', 'create domain', TRUE, 103);
+		echo '</td></tr></form>';
+	}
+	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
+	echo '<tr><th>&nbsp;</th><th>description</th><th>&nbsp</th></tr>';
+	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
+		printNewItemTR();
+	foreach (getVLANDomainList() as $vdom_id => $dominfo)
+	{
+		printOpFormIntro ('upd', array ('vdom_id' => $vdom_id));
+		echo '<tr><td>';
+		if ($dominfo['switchc'] or $dominfo['vlanc'])
+			printImageHREF ('nodestroy', 'domain used elsewhere');
+		else
+		{
+			echo '<a href="';
+			echo makeHrefProcess (array ('op' => 'del', 'vdom_id' => $vdom_id)) . '">';
+			printImageHREF ('destroy', 'delete domain');
+			echo '</a>';
+		}
+		echo '</td><td><input name=vdom_descr type=text value="';
+		echo htmlspecialchars ($dominfo['description']) . '">';
+		echo '</td><td>';
+		printImageHREF ('save', 'update description', TRUE);
+		echo '</td></tr></form>';
+	}
+	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')
+		printNewItemTR();
+	echo '</table>';
+}
+
+function renderVLANDomain ($vdom_id)
+{
+	$mydomain = getVLANDomain ($vdom_id);
+	echo '<table border=0 class=objectview cellspacing=0 cellpadding=0>';
+	echo "<tr><td colspan=2 align=center><h1>${mydomain['description']}</h1></td></tr>";
+	echo "<tr><td class=pcleft width='50%'>";
+	startPortlet ('bindings');
+	if (!count ($mydomain['switchlist']))
+		echo '(none)';
+	else
+	{
+		echo '<p align=left><ul>';
+		foreach (array_keys ($mydomain['switchlist']) as $object_id)
+		{
+			$object = spotEntity ('object', $object_id);
+			echo "<li><a href='" . makeHref (array ('page' => 'object', 'object_id' => $object_id));
+			echo "'>${object['dname']}</a></li>";
+		}
+		echo '</ul></p>';
+	}
+	finishPortlet();
+
+	echo '</td><td class=pcright>';
+
+	startPortlet ('VLANs');
+	if (!count ($myvlans = getDomainVLANs ($vdom_id)))
+		echo '(none)';
+	else
+	{
+		$order = 'odd';
+		global $nextorder;
+		echo '<table class=cooltable align=center border=0 cellpadding=5 cellspacing=0>';
+		echo '<tr><th>VLAN ID</th><th>&nbsp;</th><th>description</th></tr>';
+		foreach ($myvlans as $vlan_id => $vlan_info)
+		{
+			echo "<tr class=row_${order}><td class=tdright><tt>${vlan_id}</tt></td>";
+			echo '<td>' . ($vlan_info['vlan_perm'] == 'yes' ? '<b>P</b>' : '') . '</td>';
+			echo "<td class=tdleft>${vlan_info['vlan_descr']}</td></tr>";
+			$order = $nextorder[$order];
+		}
+		echo '</table>';
+	}
+	finishPortlet();
+	echo '</td></tr></table>';
+}
+
+function renderVLANDomainSwitches ($vdom_id)
+{
+	function printNewItemTR ($twitlist = array())
+	{
+		printOpFormIntro ('bind');
+		echo '<tr><td>';
+		printImageHREF ('attach', 'bind', TRUE);
+		echo '</td><td>';
+		$options = array();
+		foreach (getNarrowObjectList ('VLAN_LISTSRC') as $object_id => $object_dname)
+			if (!in_array ($object_id, $twitlist))
+				$options[$object_id] = $object_dname;
+		printSelect ($options, array ('name' => 'object_id', 'tabindex' => 100));
+		echo '</td></tr></form>';
+	}
+
+	$mydomain = getVLANDomain ($vdom_id);
+	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
+	echo '<tr><th>&nbsp;</th><th>device</th></tr>';
+	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
+		printNewItemTR (array_keys ($mydomain['switchlist']));
+
+	foreach ($mydomain['switchlist'] as $object_id => $switchinfo)
+	{
+		echo '<tr><td><a href="';
+		echo makeHrefProcess (array ('op' => 'unbind', 'object_id' => $object_id, 'vdom_id' => $vdom_id)) . '">';
+		printImageHREF ('cut', 'unbind');
+		echo '</a></td><td>';
+		$switch = spotEntity ('object', $object_id);
+		echo $switch['dname'];
+		echo '</td></tr>';
+	}
+
+	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')
+		printNewItemTR (array_keys ($mydomain['switchlist']));
+	echo '</table>';
+}
+
+function renderVLANDomainVLANList ($vdom_id)
+{
+	function printNewItemTR ()
+	{
+		printOpFormIntro ('add');
+		echo '<tr><td>';
+		printImageHREF ('create', 'add VLAN', TRUE, 110);
+		echo '</td><td>';
+		echo '<input type=text name=vlan_id size=4 tabindex=101>';
+		echo '</td><td>';
+		echo '<input type=checkbox name=vlan_perm tabindex=102>';
+		echo '</td><td>';
+		echo '<input type=text name=vlan_descr tabindex=103>';
+		echo '</td><td>';
+		printImageHREF ('create', 'add VLAN', TRUE, 110);
+		echo '</td></tr></form>';
+	}
+	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
+	echo '<tr><th>&nbsp;</th><th>ID</th><th>permanent</th><th>description</th><th>&nbsp;</th></tr>';
+	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
+		printNewItemTR();
+	foreach (getDomainVLANs ($vdom_id) as $vlan_id => $vlan_info)
+	{
+		printOpFormIntro ('upd', array ('vlan_id' => $vlan_id));
+		echo '<tr><td><a href="';
+		echo makeHrefProcess (array ('op' => 'del', 'vdom_id' => $vdom_id, 'vlan_id' => $vlan_id)) . '">';
+		printImageHREF ('destroy', 'delete VLAN');
+		echo "</a></td><td class=tdright><tt>${vlan_id}</tt></td><td>";
+		echo '<input type=checkbox name=vlan_perm' . ($vlan_info['vlan_perm'] == 'yes' ? ' checked' : '') . '>';
+		echo '</td><td>';
+		echo '<input name=vlan_descr type=text value="' . htmlspecialchars ($vlan_info['vlan_descr']) . '">';
+		echo '</td><td>';
+		printImageHREF ('save', 'update description', TRUE);
+		echo '</td></tr></form>';
+	}
+	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')
+		printNewItemTR();
+	echo '</table>';
+}
+
+// This function handles a tab, which operates two different modes.
+// In its initial state it shown a list of VLAN-eligible ports each
+// with respective list of VLANs. Nothing can be edited. Then, when
+// the user clicks one of the ports, the tab displays only that port
+// and a form to edits VLANs it runs.
+function renderObjectVLANPorts ($object_id)
+{
+	global $pageno, $tabno;
+	$allowed = getAllowedVLANsForObjectPorts ($object_id);
+	$native = getNativeVLANsForObjectPorts ($object_id);
+	if (!isset ($_REQUEST['port_id']))
+	{
+		$object = spotEntity ('object', $object_id);
+		amplifyCell ($object);
+		echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
+		echo '<tr><th>&nbsp;</th><th>local name</th><th>VLAN IDs</th><th>&nbsp;</th></tr>';
+		foreach ($object['ports'] as $port)
+			if (array_key_exists ($port['id'], $allowed)) // eligible for 802.1Q
+			{
+				echo "<tr><td>&nbsp;";
+				echo "</td><td><a href='" . makeHref
+				(
+					array
+					(
+						'page' => $pageno,
+						'tab' => $tabno,
+						'object_id' => $object_id,
+						'port_id' => $port['id'],
+					)
+				);
+				echo "'>${port['name']}</a></td><td>";
+				echo serialiseVLANPack
+				(
+					array_key_exists ($port['id'], $native) ? $native[$port['id']] : VLAN_DFL_ID,
+					array_key_exists ($port['id'], $allowed) ? $allowed[$port['id']] : array()
+				);
+				echo '</td></tr>';
+			}
+		echo '</table>';
+	}
+	else
+	{
+		$port_id = $_REQUEST['port_id'];
+		$portinfo = getPortInfo ($port_id);
+		if ($portinfo['object_id'] != $object_id)
+		{
+			showError ('Invalid port_id', __FUNCTION__);
+			return;
+		}
+		$header = "port '${portinfo['name']}' (<a href='" . makeHref
+		(
+			array
+			(
+				'page' => $pageno,
+				'tab' => $tabno,
+				'object_id' => $object_id,
+			)
+		) . "'>show all</a>)";
+		$vdom_id = getObjectVLANDomainID ($object_id);
+		$objectdomain = getVLANDomain ($vdom_id);
+		echo '<table border=0 class=objectview cellspacing=0 cellpadding=0>';
+		echo "<tr><td colspan=2 align=center><h1>${header}</h1></td></tr>";
+		echo "<tr valign=top><td class=pcleft>";
+		startPortlet ('allowed VLAN(s)');
+		renderPortAllowedVLANs
+		(
+			$port_id,
+			$objectdomain,
+			array_key_exists ($port_id, $allowed) ? $allowed[$port_id] : array()
+		);
+		finishPortlet();
+		echo '</td><td>';
+		startPortlet ('native VLAN');
+		renderPortNativeVLAN
+		(
+			$port_id,
+			array_key_exists ($port_id, $allowed) ? $allowed[$port_id] : array(),
+			array_key_exists ($port_id, $native) ? $native[$port_id] : VLAN_DFL_ID
+		);
+		finishPortlet();
+		echo '</td></tr></table>';
+	}
+}
+
+function renderPortAllowedVLANs ($port_id, $vdom, $preselect)
+{
+	printOpFormIntro ('setAllowedVLANs', array ('port_id' => $port_id));
+	echo '<table border=0 cellspacing=0 cellpadding=3 align=center>';
+	foreach ($vdom['vlanlist'] as $vlan_id => $vlan_descr)
+	{
+		if (in_array ($vlan_id, $preselect))
+		{
+			$selected = ' checked';
+			$class = 'seltagbox';
+		}
+		else
+		{
+			$selected = '';
+			$class = 'tagbox';
+		}
+		echo "<tr><td colspan=2 class=${class}>";
+		echo "<label><input type=checkbox name='vlan_id[]' value='${vlan_id}'${selected}> ";
+		echo "<tt>${vlan_id}</tt> <i>(${vlan_descr})</i></label></td></tr>";
+	}
+	echo '<tr><td class=tdleft>';
+	printImageHREF ('SAVE', 'Save changes', TRUE);
+	echo "</form></td><td class=tdright>";
+	if (!count ($preselect))
+		printImageHREF ('CLEAR gray');
+	else
+	{
+		printOpFormIntro ('setAllowedVLANs', array ('port_id' => $port_id, 'vlan_id[]' => VLAN_DFL_ID));
+		printImageHREF ('CLEAR', 'Reset all tags', TRUE);
+		echo '</form>';
+	}
+	echo '</td></tr></table>';
+}
+
+function renderPortNativeVLAN ($port_id, $allowed, $native)
+{
+	printOpFormIntro ('setNativeVLAN', array ('port_id' => $port_id));
+	echo '<table border=0 cellspacing=0 cellpadding=3 align=center>';
+	foreach ($allowed as $vlan_id)
+	{
+		if ($vlan_id == $native)
+		{
+			$selected = ' checked';
+			$class = 'seltagbox';
+		}
+		else
+		{
+			$selected = '';
+			$class = 'tagbox';
+		}
+		echo "<tr><td colspan=2 class=${class}>";
+		echo "<label><input type=radio name='vlan_id[]' value='${vlan_id}'${selected}> ";
+		echo "<tt>${vlan_id}</tt> <i>(FIXME)</i></label></td></tr>";
+	}
+	echo '<tr><td class=tdleft>';
+	printImageHREF ('SAVE', 'Save changes', TRUE);
+	echo "</form></td><td class=tdright>";
+	if ($native == VLAN_DFL_ID)
+		printImageHREF ('CLEAR gray');
+	else
+	{
+		printOpFormIntro ('setNativeVLAN', array ('port_id' => $port_id, 'vlan_id' => VLAN_DFL_ID));
+		printImageHREF ('CLEAR', 'Reset native VLAN', TRUE);
+		echo '</form>';
+	}
+	echo '</td></tr></table>';
 }
 
 ?>

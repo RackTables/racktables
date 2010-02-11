@@ -2045,4 +2045,128 @@ function delPortOIFCompat ()
 
 }
 
+$msgcode['addVLANSwitchBinding']['OK'] = 48;
+$msgcode['addVLANSwitchBinding']['ERR'] = 118;
+function addVLANSwitchBinding ()
+{
+	assertUIntArg ('vdom_id', __FUNCTION__);
+	assertUIntArg ('object_id', __FUNCTION__);
+	global $sic;
+	$result = usePreparedInsertBlade
+	(
+		'VLANSwitch',
+		array
+		(
+			'domain_id' => $sic['vdom_id'],
+			'object_id' => $sic['object_id'],
+		)
+	);
+	return buildRedirectURL (__FUNCTION__, $result ? 'OK' : 'ERR');
+}
+
+$msgcode['delVLANSwitchBinding']['OK'] = 49;
+$msgcode['delVLANSwitchBinding']['ERR'] = 119;
+function delVLANSwitchBinding ()
+{
+	assertUIntArg ('vdom_id', __FUNCTION__);
+	assertUIntArg ('object_id', __FUNCTION__);
+	global $sic;
+	$result = commitReduceVLANSwitch ($sic['vdom_id'], $sic['object_id']);
+	return buildRedirectURL (__FUNCTION__, $result ? 'OK' : 'ERR');
+}
+
+$msgcode['addVLANDescription']['OK'] = 48;
+$msgcode['addVLANDescription']['ERR1'] = 190;
+$msgcode['addVLANDescription']['ERR2'] = 110;
+function addVLANDescription ()
+{
+	assertUIntArg ('vlan_id', __FUNCTION__);
+	assertStringArg ('vlan_descr', __FUNCTION__, TRUE);
+	global $sic;
+	if (!($sic['vlan_id'] >= VLAN_MIN_ID and $sic['vlan_id'] <= VLAN_MAX_ID))
+		return buildRedirectURL (__FUNCTION__, 'ERR1', array ($sic['vlan_id']));
+	$result = usePreparedInsertBlade
+	(
+		'VLANDescription',
+		array
+		(
+			'domain_id' => $sic['vdom_id'],
+			'vlan_id' => $sic['vlan_id'],
+			'vlan_descr' => strlen ($sic['vlan_descr']) ? $sic['vlan_descr'] : sprintf ('VLAN%04u', $sic['vlan_id'])
+		)
+	);
+	return buildRedirectURL (__FUNCTION__, $result ? 'OK' : 'ERR2');
+}
+
+$msgcode['delVLANDescription']['OK'] = 49;
+$msgcode['delVLANDescription']['ERR'] = 111;
+function delVLANDescription ()
+{
+	assertUIntArg ('vlan_id', __FUNCTION__);
+	global $sic;
+	$result = commitReduceVLANDescription ($sic['vdom_id'], $sic['vlan_id']);
+	return buildRedirectURL (__FUNCTION__, $result ? 'OK' : 'ERR');
+}
+
+$msgcode['updVLANDescription']['OK'] = 51;
+$msgcode['updVLANDescription']['ERR'] = 109;
+function updVLANDescription ()
+{
+	assertUIntArg ('vlan_id', __FUNCTION__);
+	assertStringArg ('vlan_descr', __FUNCTION__, TRUE);
+	global $sic;
+	$result = commitUpdateVLANDescription
+	(
+		$sic['vdom_id'],
+		$sic['vlan_id'],
+		(isset ($sic['vlan_perm']) and $sic['vlan_perm'] == 'on' ? 'yes' : 'no'),
+		$sic['vlan_descr']
+	);
+	return buildRedirectURL (__FUNCTION__, $result ? 'OK' : 'ERR');
+}
+
+$msgcode['createVLANDomain']['OK'] = 48;
+$msgcode['createVLANDomain']['ERR'] = 110;
+function createVLANDomain ()
+{
+	assertStringArg ('vdom_descr', __FUNCTION__);
+	global $sic;
+	$result = usePreparedInsertBlade
+	(
+		'VLANDomain',
+		array
+		(
+			'description' => $sic['vdom_descr'],
+		)
+	);
+	return buildRedirectURL (__FUNCTION__, $result ? 'OK' : 'ERR');
+}
+
+$msgcode['destroyVLANDomain']['OK'] = 49;
+$msgcode['destroyVLANDomain']['ERR'] = 111;
+function destroyVLANDomain ()
+{
+	assertUIntArg ('vdom_id', __FUNCTION__);
+	global $sic;
+	$result = usePreparedDeleteBlade ('VLANDomain', 'id', $sic['vdom_id']);
+	return buildRedirectURL (__FUNCTION__, $result ? 'OK' : 'ERR');
+}
+
+$msgcode['updateVLANDomain']['OK'] = 51;
+$msgcode['updateVLANDomain']['ERR'] = 109;
+function updateVLANDomain ()
+{
+	assertUIntArg ('vdom_id', __FUNCTION__);
+	assertStringArg ('vdom_descr', __FUNCTION__);
+	global $sic;
+	$result = commitUpdateVLANDomain ($sic['vdom_id'], $sic['vdom_descr']);
+	return buildRedirectURL (__FUNCTION__, $result ? 'OK' : 'ERR');
+}
+
+function saveAllowedVLANs ()
+{
+	assertUIntArg ('port_id', __FUNCTION__);
+	$vlan_id_list = isset ($_REQUEST['vlan_id']) ? $_REQUEST['vlan_id'] : array();
+}
+
 ?>

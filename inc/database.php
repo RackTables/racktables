@@ -2237,6 +2237,16 @@ function useDeleteBlade ($tablename, $keyname, $keyvalue)
 	return 1 === $dbxlink->exec ("delete from ${tablename} where ${keyname}=${keyvalue} limit 1");
 }
 
+// prepared version of above
+function usePreparedDeleteBlade ($tablename, $keyname, $keyvalue)
+{
+	global $dbxlink;
+	$prepared = $dbxlink->prepare ("DELETE FROM ${tablename} WHERE ${keyname} = ? LIMIT 1");
+	if (!$prepared->execute (array ($keyvalue)))
+		return FALSE;
+	return $prepared->rowCount() == 1;
+}
+
 function useSelectBlade ($query)
 {
 	global $dbxlink;
@@ -3534,6 +3544,129 @@ function getPortInfo ($port_id)
 		"FROM Port WHERE id = ${port_id}";
 	$result = useSelectBlade ($query);
 	return $result->fetch (PDO::FETCH_ASSOC);
+}
+
+function getVLANDomainList ()
+{
+	$query = 'SELECT id, description, ' .
+		'(SELECT COUNT(vlan_id) FROM VLANDescription WHERE domain_id = id) AS vlanc, ' .
+		'(SELECT COUNT(object_id) FROM VLANSwitch WHERE domain_id = id) AS switchc ' .
+		'FROM VLANDomain ORDER BY description';
+	$result = useSelectBlade ($query, __FUNCTION__);
+	$ret = array();
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
+		$ret[$row['id']] = $row;
+	return $ret;
+}
+
+function getVLANDomainInfo ($vdom_id)
+{
+	global $dbxlink;
+	$query = $dbxlink->prepare ('SELECT id, enable_all_vlans, description FROM VLANDomain WHERE id = ?');
+	$result = $query->execute (array ($vdom_id));
+	if ($row = $query->fetch (PDO::FETCH_ASSOC))
+	{
+		$ret = $row;
+		return $ret;
+	}
+	return NULL;
+}
+
+function getDomainVLANs ($vdom_id)
+{
+	global $dbxlink;
+	$query = $dbxlink->prepare ('SELECT vlan_id, vlan_perm, vlan_descr FROM VLANDescription WHERE domain_id = ? ORDER BY vlan_id');
+	$result = $query->execute (array ($vdom_id));
+	$ret = array();
+	while ($row = $query->fetch (PDO::FETCH_ASSOC))
+		$ret[$row['vlan_id']] = $row;
+	return $ret;
+}
+
+function getVLANDomainSwitches ($vdom_id)
+{
+	global $dbxlink;
+	$query = $dbxlink->prepare ('SELECT object_id, last_reset, last_pull, last_push FROM VLANSwitch WHERE domain_id = ? ORDER BY object_id');
+	$result = $query->execute (array ($vdom_id));
+	$ret = array();
+	while ($row = $query->fetch (PDO::FETCH_ASSOC))
+		$ret[$row['object_id']] = $row;
+	return $ret;
+}
+
+function commitReduceVLANSwitch ($vdom_id, $object_id)
+{
+	global $dbxlink;
+	$query = $dbxlink->prepare ('DELETE FROM VLANSwitch WHERE domain_id = ? AND object_id = ?');
+	return $query->execute (array ($vdom_id, $object_id));
+}
+
+function commitReduceVLANDescription ($vdom_id, $vlan_id)
+{
+	global $dbxlink;
+	$query = $dbxlink->prepare ('DELETE FROM VLANDescription WHERE domain_id = ? AND vlan_id = ?');
+	return $query->execute (array ($vdom_id, $vlan_id));
+}
+
+function commitUpdateVLANDescription ($vdom_id, $vlan_id, $vlan_perm, $vlan_descr)
+{
+	global $dbxlink;
+	$query = $dbxlink->prepare ('UPDATE VLANDescription SET vlan_descr = ?, vlan_perm = ? WHERE domain_id = ? AND vlan_id = ?');
+	return $query->execute (array ($vlan_descr, $vlan_perm, $vdom_id, $vlan_id));
+}
+
+function commitUpdateVLANDomain ($vdom_id, $vdom_descr)
+{
+	global $dbxlink;
+	$query = $dbxlink->prepare ('UPDATE VLANDomain SET description = ? WHERE id = ?');
+	return $query->execute (array ($vdom_descr, $vdom_id));
+}
+
+function getObjectVLANDomainID ($object_id)
+{
+	global $dbxlink;
+	$query = $dbxlink->prepare ('SELECT domain_id FROM VLANSwitch WHERE object_id = ?');
+	$query->execute (array ($object_id));
+	if ($row = $query->fetch (PDO::FETCH_ASSOC))
+		return $row['domain_id'];
+	return 0;
+}
+
+// Return a list of object's ports, which can run 802.1Q, each with a list
+// of VLANs enabled for that port. Even when a port has no VLANs enabled,
+// it is still shown on the list.
+function getAllowedVLANsForObjectPorts ($object_id)
+{
+	global $dbxlink;
+	$query = 'SELECT id AS port_id, vlan_id ' .
+		'FROM Port LEFT JOIN PortAllowedVLAN ON Port.id = PortAllowedVLAN.port_id ' .
+		'WHERE object_id = ? AND type IN (SELECT oif_id FROM VLANEligibleOIF) ' .
+		'ORDER BY port_id, vlan_id';
+	$prepared = $dbxlink->prepare ($query);
+	$prepared->execute (array ($object_id));
+	$ret = array();
+	while ($row = $prepared->fetch (PDO::FETCH_ASSOC))
+	{
+		if (!array_key_exists ($row['port_id'], $ret))
+			$ret[$row['port_id']] = array();
+		if ($row['vlan_id'] !== NULL)
+			$ret[$row['port_id']][] = $row['vlan_id'];
+	}
+	return $ret;
+}
+
+function getNativeVLANsForObjectPorts ($object_id)
+{
+	global $dbxlink;
+	$query = 'SELECT port_id, vlan_id FROM ' .
+		'PortNativeVLAN INNER JOIN Port ON Port.id = PortNativeVLAN.port_id ' .
+		'WHERE object_id = ? ORDER BY port_id';
+	$prepared = $dbxlink->prepare ($query);
+	$prepared->execute (array ($object_id));
+	$ret = array();
+	while ($row = $prepared->fetch (PDO::FETCH_ASSOC))
+		$ret[$row['port_id']] = $row['vlan_id']; // port_id is unique in this table
+	return $ret;
 }
 
 ?>

@@ -464,6 +464,10 @@ CREATE TABLE `UserConfig` (
 			$query[] = "ALTER TABLE TagTree DROP COLUMN valid_realm";
 			$query[] = "UPDATE Config SET varvalue = '0.17.8' WHERE varname = 'DB_VERSION'";
 			break;
+		case '0.17.9':
+			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('VLAN_LISTSRC', '', 'string', 'yes', 'no', 'List of VLAN running switches')";
+			$query[] = "UPDATE Config SET varvalue = '0.17.9' WHERE varname = 'DB_VERSION'";
+			break;
 		default:
 			showFailure ("executeUpgradeBatch () failed, because batch '${batchid}' isn't defined", __FILE__);
 			die;

@@ -2228,4 +2228,33 @@ function urlizeGetParameters($parameters) {
 	return $url;
 }
 
+function getVLANDomain ($vdid)
+{
+	$ret = getVLANDomainInfo ($vdid);
+	$ret['vlanlist'] = array();
+	if ($ret['enable_all_vlans'] == 'yes')
+		for ($i = VLAN_MIN_ID; $i <= VLAN_MAX_ID; $i++)
+			$ret['vlanlist'][$i] = sprintf ('VLAN%04u', $i);
+	foreach (getDomainVLANs ($vdid) as $vlan_id => $vlan_descr)
+		$ret['vlanlist'][$vlan_id] = $vlan_descr;
+	$ret['switchlist'] = getVLANDomainSwitches ($vdid);
+	return $ret;
+}
+
+// Return a serialized version of VLAN configuration for a port.
+// If a native VLAN is defined, print it first. All other VLANs
+// are tagged and are listed after a plus sign.
+function serialiseVLANPack ($native_vid = VLAN_DFL_ID, $allowed_vids = array())
+{
+	$tagged = array();
+	foreach ($allowed_vids as $vlan_id)
+		if ($vlan_id != $native_vid)
+			$tagged[] = $vlan_id;
+	sort ($tagged);
+	$ret = $native_vid == VLAN_DFL_ID ? '?' : "${native_vid}";
+	if (count ($tagged))
+		$ret .= '+' . implode (',', $tagged);
+	return strlen ($ret) ? $ret : '&nbsp;';
+}
+
 ?>

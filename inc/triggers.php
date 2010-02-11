@@ -180,4 +180,21 @@ function trigger_rackspace ()
 	return '';
 }
 
+// Offer the generic VLAN setup tab for every object, which already
+// has a VLAN domain associated or at least can have one (in the latter
+// case additionally heat the tab, if no domain is set.
+function trigger_vlanconfig ()
+{
+	if (getObjectVLANDomainID ($_REQUEST['object_id']))
+		return 'std';
+	elseif (considerConfiguredConstraint (spotEntity ('object', $_REQUEST['object_id']), 'VLAN_LISTSRC'))
+		return 'attn';
+	else
+		return '';
+}
+
+function trigger_vlanports ()
+{
+	return getObjectVLANDomainID ($_REQUEST['object_id']) ? 'std' : '';
+}
 ?>

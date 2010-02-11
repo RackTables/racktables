@@ -81,6 +81,10 @@ function isConfigVarChanged($varname, $varvalue) {
 		return $configCache[$varname]['varvalue'] !== $varvalue;
 }
 
+define ('VLAN_MIN_ID', 1);
+define ('VLAN_MAX_ID', 4094);
+define ('VLAN_DFL_ID', 1);
+
 function getConfigVar ($varname = '')
 {
 	global $configCache;
