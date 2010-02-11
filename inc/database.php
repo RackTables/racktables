@@ -2455,13 +2455,53 @@ function useSelectBlade ($query, $caller = 'N/A')
 
 function loadConfigCache ()
 {
-	$query = 'SELECT varname, varvalue, vartype, is_hidden, emptyok, description FROM Config ORDER BY varname';
+	$query = 'SELECT varname, varvalue, vartype, is_hidden, emptyok, description, is_userdefined FROM Config ORDER BY varname';
 	$result = useSelectBlade ($query, __FUNCTION__);
+	$cache = array();
+	while ($row = $result->fetch (PDO::FETCH_ASSOC)) {
+		$cache[$row['varname']] = $row;
+	}
+	$result->closeCursor();
+	return $cache;
+}
+
+function loadUserConfigCache ($username = NULL)
+{
+	if (!strlen ($username))
+		return NULL;
+	$query = "SELECT varname, varvalue FROM UserConfig WHERE user = '$username'";
+	$result = useSelectBlade ($query);
 	$cache = array();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 		$cache[$row['varname']] = $row;
 	$result->closeCursor();
 	return $cache;
+}
+
+function deleteUserConfigVar ($username = NULL, $varname = NULL)
+{
+        global $dbxlink;
+        if (!strlen ($username))
+        	return;
+        if (!strlen ($varname))
+        	return;
+        $query = "delete from UserConfig where varname='${varname}' and user='${username}'";
+        $result = $dbxlink->query ($query);
+        $result->closeCursor();
+}
+
+function storeUserConfigVar ($username = NULL, $varname = NULL, $varvalue = NULL)
+{
+	global $dbxlink;
+	if (!strlen ($username))
+		return;
+	if (!strlen ($varname))
+		return;
+	if ($varvalue === NULL)
+		return;
+	$query = "replace UserConfig set varvalue='${varvalue}', varname='${varname}', user='${username}'";
+	$result = $dbxlink->query ($query);
+	$result->closeCursor();
 }
 
 // setConfigVar() is expected to perform all necessary filtering
@@ -2480,12 +2520,8 @@ function storeConfigVar ($varname = NULL, $varvalue = NULL)
 		showError ("SQL query '${query}' failed", __FUNCTION__);
 		return FALSE;
 	}
-	$rc = $result->rowCount();
 	$result->closeCursor();
-	if ($rc == 0 or $rc == 1)
-		return TRUE;
-	showError ("Something went wrong for args '${varname}', '${varvalue}'", __FUNCTION__);
-	return FALSE;
+	return TRUE;
 }
 
 // Database version detector. Should behave corretly on any

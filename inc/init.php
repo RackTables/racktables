@@ -103,12 +103,8 @@ if (!mb_internal_encoding ('UTF-8') or !mb_regex_encoding ('UTF-8'))
 	showError ('Failed setting multibyte string encoding to UTF-8', __FILE__);
 	exit (1);
 }
-$configCache = loadConfigCache();
-if (!count ($configCache))
-{
-	showError ('Failed to load configuration from the database.', __FILE__);
-	exit (1);
-}
+
+loadConfigDefaults();
 
 require_once 'inc/code.php'; // for getRackCode()
 $rackCodeCache = loadScript ('RackCodeCache');
@@ -173,6 +169,9 @@ else
 	$remote_username = $admin_account['user_name'];
 	unset ($admin_account);
 }
+
+alterConfigWithUserPreferences();
+
 require_once 'inc/navigation.php';
 require_once 'inc/triggers.php';
 

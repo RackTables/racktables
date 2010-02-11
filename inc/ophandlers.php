@@ -940,7 +940,7 @@ function updateUI ()
 		$varvalue = $_REQUEST["${i}_varvalue"];
 
 		// If form value = value in DB, don't bother updating DB
-		if ($varvalue === getConfigVar ($varname))
+		if (!isConfigVarChanged($varname, $varvalue))
 			continue;
 
 		// Note if the queries succeed or not, it determines which page they see.
@@ -950,6 +950,41 @@ function updateUI ()
 	}
 	return buildRedirectURL (__FUNCTION__, 'OK');
 }
+
+$msgcode['saveMyPreferences']['OK'] = 56;
+$msgcode['saveMyPreferences']['ERR'] = 125;
+function saveMyPreferences ()
+{
+	assertUIntArg ('num_vars');
+
+	for ($i = 0; $i < $_REQUEST['num_vars']; $i++)
+	{
+		assertStringArg ("${i}_varname");
+		assertStringArg ("${i}_varvalue", TRUE);
+		$varname = $_REQUEST["${i}_varname"];
+		$varvalue = $_REQUEST["${i}_varvalue"];
+
+		// If form value = value in DB, don't bother updating DB
+		if (!isConfigVarChanged($varname, $varvalue))
+			continue;
+		setUserConfigVar ($varname, $varvalue);
+	}
+	return buildRedirectURL (__FUNCTION__, 'OK');
+}
+
+$msgcode['resetMyPreference']['OK'] = 56;
+$msgcode['resetMyPreference']['ERR'] = 125;
+function resetMyPreference ()
+{
+	assertStringArg ("varname");
+	$varname = $_REQUEST["varname"];
+
+	resetUserConfigVar ($varname);
+	return buildRedirectURL (__FUNCTION__, 'OK');
+}
+
+
+
 
 $msgcode['resetUIConfig']['OK'] = 57;
 function resetUIConfig()

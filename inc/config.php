@@ -41,6 +41,54 @@ define ('RE_L2_WWN_SOLID', '/^[0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0
 define ('RE_IP4_ADDR', '/^[0-9][0-9]?[0-9]?\.[0-9]?[0-9]?[0-9]?\.[0-9][0-9]?[0-9]?\.[0-9][0-9]?[0-9]?$/i');
 define ('RE_IP4_NET', '/^[0-9][0-9]?[0-9]?\.[0-9]?[0-9]?[0-9]?\.[0-9][0-9]?[0-9]?\.[0-9][0-9]?[0-9]?\/[0-9][0-9]?$/i');
 
+function loadConfigDefaults() {
+	global $configCache;
+	$configCache = loadConfigCache();
+	if (!count ($configCache))
+	{
+		showError ('Failed to load configuration from the database.', __FILE__);
+		exit (1);
+	}
+	foreach ($configCache as $varname => &$row) {
+		$row['is_altered'] = 'no';
+		if ($row['vartype'] == 'uint') $row['varvalue'] = 0 + $row['varvalue'];
+		$row['defaultvalue'] = $row['varvalue'];
+	}
+}
+
+function alterConfigWithUserPreferences() {
+	global $configCache;
+	global $userConfigCache;
+	global $remote_username;
+	$userConfigCache = loadUserConfigCache($remote_username);
+	foreach($userConfigCache as $key => $row) {
+		if ($configCache[$key]['is_userdefined'] == 'yes') {
+			$configCache[$key]['varvalue'] = $row['varvalue'];
+			$configCache[$key]['is_altered'] = 'yes';
+		}
+	}
+}
+
+// Returns true if varname has a different value or varname is new
+function isConfigVarChanged($varname, $varvalue) {
+	global $configCache;
+	if (!isset ($configCache))
+	{
+		showError ('Configuration cache is unavailable', __FUNCTION__);
+		die;
+	}
+	if ($varname == '')
+	{
+		showError ('Invalid argument', __FUNCTION__);
+		die;
+	}
+	if (!isset ($configCache[$varname])) return true;
+	if ($configCache[$varname]['vartype'] == 'uint')
+		return $configCache[$varname]['varvalue'] !== 0 + $varvalue;
+	else
+		return $configCache[$varname]['varvalue'] !== $varvalue;
+}
+
 function getConfigVar ($varname = '')
 {
 	global $configCache;
@@ -121,6 +169,85 @@ function setConfigVar ($varname = '', $varvalue = '', $softfail = FALSE)
 	}
 	elseif ($softfail)
 		return "storeConfigVar ('${varname}', '${varvalue}') failed in setConfigVar()";
+}
+
+function setUserConfigVar ($varname = '', $varvalue = '')
+{
+	global $configCache;
+	global $remote_username;
+	if (!isset ($configCache))
+	{
+		showError ('Configuration cache is unavailable', __FUNCTION__);
+		die;
+	}
+	if (!strlen ($varname) or !isset ($configCache[$varname]))
+	{
+		showError ('Invalid argument', __FUNCTION__);
+		die;
+	}
+	// We don't operate on unknown data.
+	if (!isset ($configCache[$varname]))
+	{
+		showError ("don't know how to handle '${varname}'", __FUNCTION__);
+		die;
+	}
+	if ($configCache[$varname]['is_userdefined'] != 'yes')
+	{
+		showError ("'${varname}' is a system variable and cannot be changed by user.", __FUNCTION__);
+		die;
+	}
+	if ($configCache[$varname]['is_hidden'] != 'no')
+	{
+		showError ("'${varname}' is a system variable and cannot be changed by user.", __FUNCTION__);
+		die;
+	}
+	if (!strlen ($varvalue) && $configCache[$varname]['emptyok'] != 'yes')
+	{
+		showError ("'${varname}' is configured to take non-empty value. Perhaps there was a reason to do so.", __FUNCTION__);
+		die;
+	}
+	if (strlen ($varvalue) && $configCache[$varname]['vartype'] == 'uint' && (!is_numeric ($varvalue) or $varvalue < 0 ))
+	{
+		showError ("'${varname}' can accept UINT values only", __FUNCTION__);
+		die;
+	}
+	// Update cache only if the changes went into DB.
+	storeUserConfigVar ($remote_username, $varname, $varvalue);
+	$configCache[$varname]['varvalue'] = $varvalue;
+}
+
+function resetUserConfigVar ($varname = '')
+{
+	global $configCache;
+	global $remote_username;
+	if (!isset ($configCache))
+	{
+		showError ('Configuration cache is unavailable', __FUNCTION__);
+		die;
+	}
+	if (!strlen ($varname))
+	{
+		showError ('Invalid argument', __FUNCTION__);
+		die;
+	}
+	// We don't operate on unknown data.
+	if (!isset ($configCache[$varname]))
+	{
+		showError ("don't know how to handle '${varname}'", __FUNCTION__);
+		die;
+	}
+	if ($configCache[$varname]['is_userdefined'] != 'yes')
+	{
+		showError ("'${varname}' is a system variable and cannot be changed by user.", __FUNCTION__);
+		die;
+	}
+	if ($configCache[$varname]['is_hidden'] != 'no')
+	{
+		showError ("'${varname}' is a system variable and cannot be changed by user.", __FUNCTION__);
+		die;
+	}
+	// Update cache only if the changes went into DB.
+	deleteUserConfigVar ($remote_username, $varname);
 }
 
 ?>
