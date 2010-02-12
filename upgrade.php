@@ -40,6 +40,7 @@ function getDBUpgradePath ($v1, $v2)
 		'0.17.6',
 		'0.17.7',
 		'0.17.8',
+		'0.17.9',
 	);
 	if (!in_array ($v1, $versionhistory) or !in_array ($v2, $versionhistory))
 		return NULL;
@@ -425,6 +426,11 @@ CREATE TABLE `PortInterfaceCompat` (
 			$query[] = "UPDATE Config SET varvalue = '0.17.7' WHERE varname = 'DB_VERSION'";
 			break;
 		case '0.17.8':
+			$query = array_merge ($query, reloadDictionary ($batchid));
+			$query[] = "ALTER TABLE TagTree DROP COLUMN valid_realm";
+			$query[] = "UPDATE Config SET varvalue = '0.17.8' WHERE varname = 'DB_VERSION'";
+			break;
+		case '0.17.9':
 			$query[] = "ALTER table Config add `is_userdefined` enum('yes','no') NOT NULL default 'no' AFTER `is_hidden`";
 			$query[] = "
 CREATE TABLE `UserConfig` ( 
@@ -433,38 +439,37 @@ CREATE TABLE `UserConfig` (
 	`user` char(64) NOT NULL, 
 	UNIQUE KEY `user_varname` (`user`,`varname`)
 ) TYPE=InnoDB";
-			$query[] = "UPDATE Config SET is_userdefined = 'yes' WHERE varname='MASSCOUNT'";
-			$query[] = "UPDATE Config SET is_userdefined = 'yes' WHERE varname='MAXSELSIZE'";
-			$query[] = "UPDATE Config SET is_userdefined = 'yes' WHERE varname='ROW_SCALE'";
-			$query[] = "UPDATE Config SET is_userdefined = 'yes' WHERE varname='PORTS_PER_ROW'";
-			$query[] = "UPDATE Config SET is_userdefined = 'yes' WHERE varname='IPV4_ADDRS_PER_PAGE'";
-			$query[] = "UPDATE Config SET is_userdefined = 'yes' WHERE varname='DEFAULT_RACK_HEIGHT'";
-			$query[] = "UPDATE Config SET is_userdefined = 'yes' WHERE varname='DEFAULT_SLB_VS_PORT'";
-			$query[] = "UPDATE Config SET is_userdefined = 'yes' WHERE varname='DEFAULT_SLB_RS_PORT'";
-			$query[] = "UPDATE Config SET is_userdefined = 'yes' WHERE varname='DETECT_URLS'";
-			$query[] = "UPDATE Config SET is_userdefined = 'yes' WHERE varname='RACK_PRESELECT_THRESHOLD'";
-			$query[] = "UPDATE Config SET is_userdefined = 'yes' WHERE varname='DEFAULT_IPV4_RS_INSERVICE'";
-			$query[] = "UPDATE Config SET is_userdefined = 'yes' WHERE varname='DEFAULT_OBJECT_TYPE'";
-			$query[] = "UPDATE Config SET is_userdefined = 'yes' WHERE varname='SHOW_EXPLICIT_TAGS'";
-			$query[] = "UPDATE Config SET is_userdefined = 'yes' WHERE varname='SHOW_IMPLICIT_TAGS'";
-			$query[] = "UPDATE Config SET is_userdefined = 'yes' WHERE varname='SHOW_AUTOMATIC_TAGS'";
-			$query[] = "UPDATE Config SET is_userdefined = 'yes' WHERE varname='IPV4_AUTO_RELEASE'";
-			$query[] = "UPDATE Config SET is_userdefined = 'yes' WHERE varname='SHOW_LAST_TAB'";
-			$query[] = "UPDATE Config SET is_userdefined = 'yes' WHERE varname='EXT_IPV4_VIEW'";
-			$query[] = "UPDATE Config SET is_userdefined = 'yes' WHERE varname='TREE_THRESHOLD'";
-			$query[] = "UPDATE Config SET is_userdefined = 'yes' WHERE varname='ADDNEW_AT_TOP'";
-			$query[] = "UPDATE Config SET is_userdefined = 'yes' WHERE varname='IPV4_TREE_SHOW_USAGE'";
-			$query[] = "UPDATE Config SET is_userdefined = 'yes' WHERE varname='PREVIEW_TEXT_MAXCHARS'";
-			$query[] = "UPDATE Config SET is_userdefined = 'yes' WHERE varname='PREVIEW_TEXT_ROWS'";
-			$query[] = "UPDATE Config SET is_userdefined = 'yes' WHERE varname='PREVIEW_TEXT_COLS'";
-			$query[] = "UPDATE Config SET is_userdefined = 'yes' WHERE varname='PREVIEW_IMAGE_MAXPXS'";
-			$query[] = "UPDATE Config SET is_userdefined = 'yes' WHERE varname='VENDOR_SIEVE'";
-			$query[] = "UPDATE Config SET is_userdefined = 'yes' WHERE varname='RACKS_PER_ROW'";
+			$query[] = "UPDATE Config SET is_userdefined = 'yes' WHERE varname IN
+(
+'MASSCOUNT',
+'MAXSELSIZE',
+'ROW_SCALE',
+'PORTS_PER_ROW',
+'IPV4_ADDRS_PER_PAGE',
+'DEFAULT_RACK_HEIGHT',
+'DEFAULT_SLB_VS_PORT',
+'DEFAULT_SLB_RS_PORT',
+'DETECT_URLS',
+'RACK_PRESELECT_THRESHOLD',
+'DEFAULT_IPV4_RS_INSERVICE',
+'DEFAULT_OBJECT_TYPE',
+'SHOW_EXPLICIT_TAGS',
+'SHOW_IMPLICIT_TAGS',
+'SHOW_AUTOMATIC_TAGS',
+'IPV4_AUTO_RELEASE',
+'SHOW_LAST_TAB',
+'EXT_IPV4_VIEW',
+'TREE_THRESHOLD',
+'ADDNEW_AT_TOP',
+'IPV4_TREE_SHOW_USAGE',
+'PREVIEW_TEXT_MAXCHARS',
+'PREVIEW_TEXT_ROWS',
+'PREVIEW_TEXT_COLS',
+'PREVIEW_IMAGE_MAXPXS',
+'VENDOR_SIEVE',
+'RACKS_PER_ROW'
+)";
 			$query = array_merge ($query, reloadDictionary ($batchid));
-			$query[] = "ALTER TABLE TagTree DROP COLUMN valid_realm";
-			$query[] = "UPDATE Config SET varvalue = '0.17.8' WHERE varname = 'DB_VERSION'";
-			break;
-		case '0.17.9':
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('VLAN_LISTSRC', '', 'string', 'yes', 'no', 'List of VLAN running switches')";
 			$query[] = "UPDATE Config SET varvalue = '0.17.9' WHERE varname = 'DB_VERSION'";
 			break;
