@@ -66,9 +66,9 @@ $image['config']['height'] = 200;
 $image['reports']['path'] = 'pix/report.png';
 $image['reports']['width'] = 218;
 $image['reports']['height'] = 200;
-$image['vlans']['path'] = 'pix/vlans.png';
-$image['vlans']['width'] = 218;
-$image['vlans']['height'] = 200;
+$image['vlandomainlist']['path'] = 'pix/vlans.png';
+$image['vlandomainlist']['width'] = 218;
+$image['vlandomainlist']['height'] = 200;
 $image['download']['path'] = 'pix/download.png';
 $image['download']['width'] = 16;
 $image['download']['height'] = 16;
@@ -264,21 +264,23 @@ function renderIndex ()
 	<tr>
 		<td>
 			<div style='text-align: center; margin: 10px; '>
-			<table width='100%' cellspacing=0 cellpadding=30 class=mainmenu border=0>
+			<table width='100%' cellspacing=0 cellpadding=20 class=mainmenu border=0>
 				<tr>
 <?php
 renderIndexItem('rackspace');
 renderIndexItem('depot');
 renderIndexItem('ipv4space');
 renderIndexItem('files');
+renderIndexItem('vlandomainlist');
 ?>          
-        </tr>
-        <tr>
+				</tr>
+				<tr>
 <?php
 renderIndexItem('config');
 renderIndexItem('reports');
 renderIndexItem('ipv4slb');
-print "          <td>&nbsp;</td>\n";
+print "          <td>&nbsp;</td>";
+print "          <td>&nbsp;</td>";
 ?>          
 				</tr>
 			</table>
