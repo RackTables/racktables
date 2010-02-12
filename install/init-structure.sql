@@ -355,34 +355,6 @@ CREATE TABLE `UserConfig` (
   UNIQUE KEY `user_varname` (`user`,`varname`)
 ) TYPE=InnoDB;
 
-CREATE TABLE `PortAllowedVLAN` (
-  `port_id` int(10) unsigned NOT NULL default '0',
-  `vlan_id` int(10) unsigned NOT NULL default '0',
-  PRIMARY KEY  (`port_id`,`vlan_id`),
-  KEY `vlan_id` (`vlan_id`),
-  CONSTRAINT `PortAllowedVLAN-FK-port_id` FOREIGN KEY (`port_id`) REFERENCES `Port` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `PortAllowedVLAN-FK-vlan_id` FOREIGN KEY (`vlan_id`) REFERENCES `VLANValidID` (`vlan_id`)
-) ENGINE=InnoDB;
-
-CREATE TABLE `PortNativeVLAN` (
-  `port_id` int(10) unsigned NOT NULL default '0',
-  `vlan_id` int(10) unsigned NOT NULL default '0',
-  PRIMARY KEY  (`port_id`,`vlan_id`),
-  UNIQUE KEY `port_id` (`port_id`),
-  CONSTRAINT `PortNativeVLAN-FK-compound` FOREIGN KEY (`port_id`, `vlan_id`) REFERENCES `PortAllowedVLAN` (`port_id`, `vlan_id`) ON DELETE CASCADE
-) ENGINE=InnoDB;
-
-CREATE TABLE `VLANDescription` (
-  `domain_id` int(10) unsigned NOT NULL,
-  `vlan_id` int(10) unsigned NOT NULL default '0',
-  `vlan_perm` enum('yes','no') NOT NULL default 'no',
-  `vlan_descr` char(255) default NULL,
-  PRIMARY KEY  (`domain_id`,`vlan_id`),
-  KEY `vlan_id` (`vlan_id`),
-  CONSTRAINT `VLANDescription-FK-domain_id` FOREIGN KEY (`domain_id`) REFERENCES `VLANDomain` (`id`),
-  CONSTRAINT `VLANDescription-FK-vlan_id` FOREIGN KEY (`vlan_id`) REFERENCES `VLANValidID` (`vlan_id`)
-) ENGINE=InnoDB;
-
 CREATE TABLE `VLANDomain` (
   `id` int(10) unsigned NOT NULL auto_increment,
   `description` char(255) default NULL,
@@ -400,6 +372,22 @@ CREATE TABLE `VLANEligibleOIF` (
   PRIMARY KEY  (`oif_id`)
 ) ENGINE=InnoDB;
 
+CREATE TABLE `VLANValidID` (
+  `vlan_id` int(10) unsigned NOT NULL default '1',
+  PRIMARY KEY  (`vlan_id`)
+) ENGINE=InnoDB;
+
+CREATE TABLE `VLANDescription` (
+  `domain_id` int(10) unsigned NOT NULL,
+  `vlan_id` int(10) unsigned NOT NULL default '0',
+  `vlan_perm` enum('yes','no') NOT NULL default 'no',
+  `vlan_descr` char(255) default NULL,
+  PRIMARY KEY  (`domain_id`,`vlan_id`),
+  KEY `vlan_id` (`vlan_id`),
+  CONSTRAINT `VLANDescription-FK-domain_id` FOREIGN KEY (`domain_id`) REFERENCES `VLANDomain` (`id`),
+  CONSTRAINT `VLANDescription-FK-vlan_id` FOREIGN KEY (`vlan_id`) REFERENCES `VLANValidID` (`vlan_id`)
+) ENGINE=InnoDB;
+
 CREATE TABLE `VLANSwitch` (
   `object_id` int(10) unsigned NOT NULL,
   `domain_id` int(10) unsigned NOT NULL,
@@ -412,8 +400,20 @@ CREATE TABLE `VLANSwitch` (
   CONSTRAINT `VLANSwitch-FK-domain_id` FOREIGN KEY (`domain_id`) REFERENCES `VLANDomain` (`id`)
 ) ENGINE=InnoDB;
 
-CREATE TABLE `VLANValidID` (
-  `vlan_id` int(10) unsigned NOT NULL default '1',
-  PRIMARY KEY  (`vlan_id`)
+CREATE TABLE `PortAllowedVLAN` (
+  `port_id` int(10) unsigned NOT NULL default '0',
+  `vlan_id` int(10) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`port_id`,`vlan_id`),
+  KEY `vlan_id` (`vlan_id`),
+  CONSTRAINT `PortAllowedVLAN-FK-port_id` FOREIGN KEY (`port_id`) REFERENCES `Port` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `PortAllowedVLAN-FK-vlan_id` FOREIGN KEY (`vlan_id`) REFERENCES `VLANValidID` (`vlan_id`)
+) ENGINE=InnoDB;
+
+CREATE TABLE `PortNativeVLAN` (
+  `port_id` int(10) unsigned NOT NULL default '0',
+  `vlan_id` int(10) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`port_id`,`vlan_id`),
+  UNIQUE KEY `port_id` (`port_id`),
+  CONSTRAINT `PortNativeVLAN-FK-compound` FOREIGN KEY (`port_id`, `vlan_id`) REFERENCES `PortAllowedVLAN` (`port_id`, `vlan_id`) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
