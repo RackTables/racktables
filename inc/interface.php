@@ -6588,7 +6588,7 @@ function renderPortAllowedVLANs ($port_id, $vdom, $preselect)
 {
 	printOpFormIntro ('setAllowedVLANs', array ('port_id' => $port_id));
 	echo '<table border=0 cellspacing=0 cellpadding=3 align=center>';
-	foreach ($vdom['vlanlist'] as $vlan_id => $vlan_descr)
+	foreach ($vdom['vlanlist'] as $vlan_id => $vlan_info)
 	{
 		if (in_array ($vlan_id, $preselect))
 		{
@@ -6602,7 +6602,7 @@ function renderPortAllowedVLANs ($port_id, $vdom, $preselect)
 		}
 		echo "<tr><td colspan=2 class=${class}>";
 		echo "<label><input type=checkbox name='vlan_id[]' value='${vlan_id}'${selected}> ";
-		echo "<tt>${vlan_id}</tt> <i>(${vlan_descr})</i></label></td></tr>";
+		echo "<tt>${vlan_id}</tt> <i>(${vlan_info['vlan_descr']})</i></label></td></tr>";
 	}
 	echo '<tr><td class=tdleft>';
 	printImageHREF ('SAVE', 'Save changes', TRUE);
