@@ -2026,8 +2026,8 @@ $msgcode['addPortOIFCompat']['OK'] = 48;
 $msgcode['addPortOIFCompat']['ERR'] = 110;
 function addPortOIFCompat()
 {
-	assertUIntArg('type1', __FUNCTION__);
-	assertUIntArg('type2', __FUNCTION__);
+	assertUIntArg('type1');
+	assertUIntArg('type2');
 	if (commitSupplementPOIFC($_REQUEST['type1'], $_REQUEST['type2']))
 		return buildRedirectURL(__FUNCTION__, 'OK');
 	return buildRedirectURL(__FUNCTION__, 'ERR');
@@ -2037,8 +2037,8 @@ $msgcode['delPortOIFCompat']['OK'] = 49;
 $msgcode['delPortOIFCompat']['ERR'] = 111;
 function delPortOIFCompat ()
 {
-	assertUIntArg('type1', __FUNCTION__);
-	assertUIntArg('type2', __FUNCTION__);
+	assertUIntArg('type1');
+	assertUIntArg('type2');
 	if (commitReducePOIFC ($_REQUEST['type1'], $_REQUEST['type2']))
 		return buildRedirectURL (__FUNCTION__, 'OK');
 	return buildRedirectURL (__FUNCTION__, 'ERR');
@@ -2049,8 +2049,8 @@ $msgcode['addVLANSwitchBinding']['OK'] = 48;
 $msgcode['addVLANSwitchBinding']['ERR'] = 118;
 function addVLANSwitchBinding ()
 {
-	assertUIntArg ('vdom_id', __FUNCTION__);
-	assertUIntArg ('object_id', __FUNCTION__);
+	assertUIntArg ('vdom_id');
+	assertUIntArg ('object_id');
 	global $sic;
 	$result = usePreparedInsertBlade
 	(
@@ -2068,8 +2068,8 @@ $msgcode['delVLANSwitchBinding']['OK'] = 49;
 $msgcode['delVLANSwitchBinding']['ERR'] = 119;
 function delVLANSwitchBinding ()
 {
-	assertUIntArg ('vdom_id', __FUNCTION__);
-	assertUIntArg ('object_id', __FUNCTION__);
+	assertUIntArg ('vdom_id');
+	assertUIntArg ('object_id');
 	global $sic;
 	$result = commitReduceVLANSwitch ($sic['vdom_id'], $sic['object_id']);
 	return buildRedirectURL (__FUNCTION__, $result ? 'OK' : 'ERR');
@@ -2080,8 +2080,8 @@ $msgcode['addVLANDescription']['ERR1'] = 190;
 $msgcode['addVLANDescription']['ERR2'] = 110;
 function addVLANDescription ()
 {
-	assertUIntArg ('vlan_id', __FUNCTION__);
-	assertStringArg ('vlan_descr', __FUNCTION__, TRUE);
+	assertUIntArg ('vlan_id');
+	assertStringArg ('vlan_descr', TRUE);
 	global $sic;
 	if (!($sic['vlan_id'] >= VLAN_MIN_ID and $sic['vlan_id'] <= VLAN_MAX_ID))
 		return buildRedirectURL (__FUNCTION__, 'ERR1', array ($sic['vlan_id']));
@@ -2102,7 +2102,7 @@ $msgcode['delVLANDescription']['OK'] = 49;
 $msgcode['delVLANDescription']['ERR'] = 111;
 function delVLANDescription ()
 {
-	assertUIntArg ('vlan_id', __FUNCTION__);
+	assertUIntArg ('vlan_id');
 	global $sic;
 	$result = commitReduceVLANDescription ($sic['vdom_id'], $sic['vlan_id']);
 	return buildRedirectURL (__FUNCTION__, $result ? 'OK' : 'ERR');
@@ -2112,9 +2112,9 @@ $msgcode['updVLANDescription']['OK'] = 51;
 $msgcode['updVLANDescription']['ERR'] = 109;
 function updVLANDescription ()
 {
-	assertUIntArg ('vlan_id', __FUNCTION__);
-	assertStringArg ('vlan_type', __FUNCTION__);
-	assertStringArg ('vlan_descr', __FUNCTION__, TRUE);
+	assertUIntArg ('vlan_id');
+	assertStringArg ('vlan_type');
+	assertStringArg ('vlan_descr', TRUE);
 	global $sic;
 	$result = commitUpdateVLANDescription
 	(
@@ -2130,7 +2130,7 @@ $msgcode['createVLANDomain']['OK'] = 48;
 $msgcode['createVLANDomain']['ERR'] = 110;
 function createVLANDomain ()
 {
-	assertStringArg ('vdom_descr', __FUNCTION__);
+	assertStringArg ('vdom_descr');
 	global $sic;
 	$result = usePreparedInsertBlade
 	(
@@ -2147,7 +2147,7 @@ $msgcode['destroyVLANDomain']['OK'] = 49;
 $msgcode['destroyVLANDomain']['ERR'] = 111;
 function destroyVLANDomain ()
 {
-	assertUIntArg ('vdom_id', __FUNCTION__);
+	assertUIntArg ('vdom_id');
 	global $sic;
 	$result = usePreparedDeleteBlade ('VLANDomain', 'id', $sic['vdom_id']);
 	return buildRedirectURL (__FUNCTION__, $result ? 'OK' : 'ERR');
@@ -2157,8 +2157,8 @@ $msgcode['updateVLANDomain']['OK'] = 51;
 $msgcode['updateVLANDomain']['ERR'] = 109;
 function updateVLANDomain ()
 {
-	assertUIntArg ('vdom_id', __FUNCTION__);
-	assertStringArg ('vdom_descr', __FUNCTION__);
+	assertUIntArg ('vdom_id');
+	assertStringArg ('vdom_descr');
 	global $sic;
 	$result = commitUpdateVLANDomain ($sic['vdom_id'], $sic['vdom_descr']);
 	return buildRedirectURL (__FUNCTION__, $result ? 'OK' : 'ERR');
@@ -2166,7 +2166,7 @@ function updateVLANDomain ()
 
 function saveAllowedVLANs ()
 {
-	assertUIntArg ('port_id', __FUNCTION__);
+	assertUIntArg ('port_id');
 	$vlan_id_list = isset ($_REQUEST['vlan_id']) ? $_REQUEST['vlan_id'] : array();
 }
 
