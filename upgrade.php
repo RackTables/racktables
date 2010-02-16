@@ -471,6 +471,7 @@ CREATE TABLE `UserConfig` (
 )";
 			$query = array_merge ($query, reloadDictionary ($batchid));
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('VLAN_LISTSRC', '', 'string', 'yes', 'no', 'List of VLAN running switches')";
+			$query[] = "ALTER TABLE IPv4Network ENGINE=InnoDB";
 			$query[] = "UPDATE Config SET varvalue = '0.17.9' WHERE varname = 'DB_VERSION'";
 			break;
 		default:

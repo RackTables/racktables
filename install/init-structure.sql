@@ -156,7 +156,7 @@ CREATE TABLE `IPv4Network` (
   `comment` text,
   PRIMARY KEY  (`id`),
   UNIQUE KEY `base-len` (`ip`,`mask`)
-) ENGINE=MyISAM;
+) ENGINE=InnoDB;
 
 CREATE TABLE `IPv4RS` (
   `id` int(10) unsigned NOT NULL auto_increment,
