@@ -3575,7 +3575,7 @@ function getVLANDomainInfo ($vdom_id)
 function getDomainVLANs ($vdom_id)
 {
 	global $dbxlink;
-	$query = $dbxlink->prepare ('SELECT vlan_id, vlan_perm, vlan_descr FROM VLANDescription WHERE domain_id = ? ORDER BY vlan_id');
+	$query = $dbxlink->prepare ('SELECT vlan_id, vlan_type, vlan_descr FROM VLANDescription WHERE domain_id = ? ORDER BY vlan_id');
 	$result = $query->execute (array ($vdom_id));
 	$ret = array();
 	while ($row = $query->fetch (PDO::FETCH_ASSOC))
@@ -3608,11 +3608,11 @@ function commitReduceVLANDescription ($vdom_id, $vlan_id)
 	return $query->execute (array ($vdom_id, $vlan_id));
 }
 
-function commitUpdateVLANDescription ($vdom_id, $vlan_id, $vlan_perm, $vlan_descr)
+function commitUpdateVLANDescription ($vdom_id, $vlan_id, $vlan_type, $vlan_descr)
 {
 	global $dbxlink;
-	$query = $dbxlink->prepare ('UPDATE VLANDescription SET vlan_descr = ?, vlan_perm = ? WHERE domain_id = ? AND vlan_id = ?');
-	return $query->execute (array ($vlan_descr, $vlan_perm, $vdom_id, $vlan_id));
+	$query = $dbxlink->prepare ('UPDATE VLANDescription SET vlan_descr = ?, vlan_type = ? WHERE domain_id = ? AND vlan_id = ?');
+	return $query->execute (array ($vlan_descr, $vlan_type, $vdom_id, $vlan_id));
 }
 
 function commitUpdateVLANDomain ($vdom_id, $vdom_descr)

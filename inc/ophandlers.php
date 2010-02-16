@@ -2113,13 +2113,14 @@ $msgcode['updVLANDescription']['ERR'] = 109;
 function updVLANDescription ()
 {
 	assertUIntArg ('vlan_id', __FUNCTION__);
+	assertStringArg ('vlan_type', __FUNCTION__);
 	assertStringArg ('vlan_descr', __FUNCTION__, TRUE);
 	global $sic;
 	$result = commitUpdateVLANDescription
 	(
 		$sic['vdom_id'],
 		$sic['vlan_id'],
-		(isset ($sic['vlan_perm']) and $sic['vlan_perm'] == 'on' ? 'yes' : 'no'),
+		$sic['vlan_type'],
 		$sic['vlan_descr']
 	);
 	return buildRedirectURL (__FUNCTION__, $result ? 'OK' : 'ERR');

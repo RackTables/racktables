@@ -380,8 +380,7 @@ CREATE TABLE `VLANValidID` (
 CREATE TABLE `VLANDescription` (
   `domain_id` int(10) unsigned NOT NULL,
   `vlan_id` int(10) unsigned NOT NULL default '0',
-  `vlan_perm` enum('yes','no') NOT NULL default 'no',
-  `vlan_alien` enum('yes','no') NOT NULL default 'no',
+  `vlan_type` enum('ondemand','compulsory','alien') NOT NULL default 'ondemand',
   `vlan_descr` char(255) default NULL,
   PRIMARY KEY  (`domain_id`,`vlan_id`),
   KEY `vlan_id` (`vlan_id`),

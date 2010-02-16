@@ -34,6 +34,20 @@ $aac2 = array
 	'router' => '<strong>R:</strong>',
 );
 
+$vtdecoder = array
+(
+	'ondemand' => '',
+	'compulsory' => 'MH',
+	'alien' => 'NT',
+);
+
+$vtoptions = array
+(
+	'ondemand' => 'on demand',
+	'compulsory' => 'must have',
+	'alien' => 'never touch',
+);
+
 // Let's have it here, so extensions can add their own images.
 $image = array();
 $image['error']['path'] = 'pix/error.png';
@@ -6406,13 +6420,13 @@ function renderVLANDomain ($vdom_id)
 	else
 	{
 		$order = 'odd';
-		global $nextorder;
+		global $nextorder, $vtdecoder;
 		echo '<table class=cooltable align=center border=0 cellpadding=5 cellspacing=0>';
-		echo '<tr><th>VLAN ID</th><th>&nbsp;</th><th>description</th></tr>';
+		echo '<tr><th>VLAN ID</th><th>propagation</th><th>description</th></tr>';
 		foreach ($myvlans as $vlan_id => $vlan_info)
 		{
 			echo "<tr class=row_${order}><td class=tdright><tt>${vlan_id}</tt></td>";
-			echo '<td>' . ($vlan_info['vlan_perm'] == 'yes' ? '<b>P</b>' : '') . '</td>';
+			echo '<td>' . $vtdecoder[$vlan_info['vlan_type']] . '</td>';
 			echo "<td class=tdleft>${vlan_info['vlan_descr']}</td></tr>";
 			$order = $nextorder[$order];
 		}
@@ -6464,13 +6478,14 @@ function renderVLANDomainVLANList ($vdom_id)
 {
 	function printNewItemTR ()
 	{
+		global $vtoptions;
 		printOpFormIntro ('add');
 		echo '<tr><td>';
 		printImageHREF ('create', 'add VLAN', TRUE, 110);
 		echo '</td><td>';
 		echo '<input type=text name=vlan_id size=4 tabindex=101>';
 		echo '</td><td>';
-		echo '<input type=checkbox name=vlan_perm tabindex=102>';
+		printSelect ($vtoptions, array ('name' => 'vlan_type', 'tabindex' => 102), 'ondemand');
 		echo '</td><td>';
 		echo '<input type=text name=vlan_descr tabindex=103>';
 		echo '</td><td>';
@@ -6478,17 +6493,18 @@ function renderVLANDomainVLANList ($vdom_id)
 		echo '</td></tr></form>';
 	}
 	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
-	echo '<tr><th>&nbsp;</th><th>ID</th><th>permanent</th><th>description</th><th>&nbsp;</th></tr>';
+	echo '<tr><th>&nbsp;</th><th>ID</th><th>propagation</th><th>description</th><th>&nbsp;</th></tr>';
 	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
 		printNewItemTR();
+	global $vtdecoder, $vtoptions;
 	foreach (getDomainVLANs ($vdom_id) as $vlan_id => $vlan_info)
 	{
 		printOpFormIntro ('upd', array ('vlan_id' => $vlan_id));
 		echo '<tr><td><a href="';
 		echo makeHrefProcess (array ('op' => 'del', 'vdom_id' => $vdom_id, 'vlan_id' => $vlan_id)) . '">';
 		printImageHREF ('destroy', 'delete VLAN');
-		echo "</a></td><td class=tdright><tt>${vlan_id}</tt></td><td>";
-		echo '<input type=checkbox name=vlan_perm' . ($vlan_info['vlan_perm'] == 'yes' ? ' checked' : '') . '>';
+		echo '</a></td><td class=tdright><tt>' . $vlan_id . $vtdecoder[$vlan_info['vlan_type']] . '</tt></td><td>';
+		printSelect ($vtoptions, array ('name' => 'vlan_type'), $vlan_info['vlan_type']);
 		echo '</td><td>';
 		echo '<input name=vlan_descr type=text value="' . htmlspecialchars ($vlan_info['vlan_descr']) . '">';
 		echo '</td><td>';
