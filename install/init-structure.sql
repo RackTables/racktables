@@ -362,7 +362,6 @@ CREATE TABLE `VLANDomain` (
   `last_pull` timestamp NOT NULL default '0000-00-00 00:00:00',
   `last_push` timestamp NOT NULL default '0000-00-00 00:00:00',
   `allow_pull` enum('yes','no') NOT NULL default 'no',
-  `enable_all_vlans` enum('yes','no') NOT NULL default 'no',
   PRIMARY KEY  (`id`),
   UNIQUE KEY `description` (`description`)
 ) ENGINE=InnoDB;
@@ -386,6 +385,16 @@ CREATE TABLE `VLANDescription` (
   KEY `vlan_id` (`vlan_id`),
   CONSTRAINT `VLANDescription-FK-domain_id` FOREIGN KEY (`domain_id`) REFERENCES `VLANDomain` (`id`),
   CONSTRAINT `VLANDescription-FK-vlan_id` FOREIGN KEY (`vlan_id`) REFERENCES `VLANValidID` (`vlan_id`)
+) ENGINE=InnoDB;
+
+CREATE TABLE `VLANIPv4` (
+  `domain_id` int(10) unsigned NOT NULL,
+  `vlan_id` int(10) unsigned NOT NULL,
+  `ipv4net_id` int(10) unsigned NOT NULL,
+  UNIQUE KEY `ipv4net_id` (`ipv4net_id`),
+  KEY `VLANIPv4-FK-compound` (`domain_id`,`vlan_id`),
+  CONSTRAINT `VLANIPv4-FK-compound` FOREIGN KEY (`domain_id`, `vlan_id`) REFERENCES `VLANDescription` (`domain_id`, `vlan_id`) ON DELETE CASCADE,
+  CONSTRAINT `VLANIPv4-FK-ipv4net_id` FOREIGN KEY (`ipv4net_id`) REFERENCES `IPv4Network` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
 CREATE TABLE `VLANSwitch` (

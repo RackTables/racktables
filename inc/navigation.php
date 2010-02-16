@@ -167,6 +167,7 @@ $tab['ipv4net']['properties'] = 'Properties';
 $tab['ipv4net']['liveptr'] = 'Live PTR';
 $tab['ipv4net']['tags'] = 'Tags';
 $tab['ipv4net']['files'] = 'Files';
+$tab['ipv4net']['vlan'] = '[VLAN]';
 $tabhandler['ipv4net']['default'] = 'renderIPv4Network';
 $tabhandler['ipv4net']['properties'] = 'renderIPv4NetworkProperties';
 $tabhandler['ipv4net']['liveptr'] = 'renderLivePTR';
@@ -179,6 +180,8 @@ $ophandler['ipv4net']['tags']['saveTags'] = 'saveEntityTags';
 $ophandler['ipv4net']['files']['addFile'] = 'addFileToEntity';
 $ophandler['ipv4net']['files']['linkFile'] = 'linkFileToEntity';
 $ophandler['ipv4net']['files']['unlinkFile'] = 'unlinkFile';
+$ophandler['ipv4net']['vlan']['bind'] = 'bindVLANtoIPv4';
+$ophandler['ipv4net']['vlan']['unbind'] = 'unbindVLANfromIPv4';
 
 $page['ipaddress']['parent'] = 'ipv4net';
 $page['ipaddress']['bypass'] = 'ip';
@@ -482,5 +485,15 @@ $ophandler['vlandomain']['switches']['unbind'] = 'delVLANSwitchBinding';
 $ophandler['vlandomain']['vlanlist']['add'] = 'addVLANDescription';
 $ophandler['vlandomain']['vlanlist']['del'] = 'delVLANDescription';
 $ophandler['vlandomain']['vlanlist']['upd'] = 'updVLANDescription';
+
+$page['vlan']['parent'] = 'vlandomain';
+$page['vlan']['bypass'] = 'vlan_ck';
+$page['vlan']['bypass_type'] = 'string';
+$tab['vlan']['default'] = 'View';
+$tab['vlan']['ipv4'] = 'IPv4';
+$tabhandler['vlan']['default'] = 'renderVLANInfo';
+$tabhandler['vlan']['ipv4'] = 'renderVLANIPv4';
+$ophandler['vlan']['ipv4']['bind'] = 'bindVLANtoIPv4';
+$ophandler['vlan']['ipv4']['unbind'] = 'unbindVLANfromIPv4';
 
 ?>

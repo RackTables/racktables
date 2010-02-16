@@ -2232,9 +2232,6 @@ function getVLANDomain ($vdid)
 {
 	$ret = getVLANDomainInfo ($vdid);
 	$ret['vlanlist'] = array();
-	if ($ret['enable_all_vlans'] == 'yes')
-		for ($i = VLAN_MIN_ID; $i <= VLAN_MAX_ID; $i++)
-			$ret['vlanlist'][$i] = sprintf ('VLAN%04u', $i);
 	foreach (getDomainVLANs ($vdid) as $vlan_id => $vlan_descr)
 		$ret['vlanlist'][$vlan_id] = $vlan_descr;
 	$ret['switchlist'] = getVLANDomainSwitches ($vdid);
@@ -2255,6 +2252,16 @@ function serialiseVLANPack ($native_vid = VLAN_DFL_ID, $allowed_vids = array())
 	if (count ($tagged))
 		$ret .= '+' . implode (',', $tagged);
 	return strlen ($ret) ? $ret : '&nbsp;';
+}
+
+// Decode VLAN compound key (which is a string formatted DOMAINID-VLANID) and
+// return the numbers as an array of two.
+function decodeVLANCK ($string)
+{
+	$matches = array();
+	if (1 != preg_match ('/^([[:digit:]]+)-([[:digit:]]+)$/', $string, $matches))
+		throw new InvalidArgException ('VLAN compound key', $string);
+	return array ($matches[1], $matches[2]);
 }
 
 ?>

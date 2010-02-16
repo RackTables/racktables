@@ -3562,7 +3562,7 @@ function getVLANDomainList ()
 function getVLANDomainInfo ($vdom_id)
 {
 	global $dbxlink;
-	$query = $dbxlink->prepare ('SELECT id, enable_all_vlans, description FROM VLANDomain WHERE id = ?');
+	$query = $dbxlink->prepare ('SELECT id, description FROM VLANDomain WHERE id = ?');
 	$result = $query->execute (array ($vdom_id));
 	if ($row = $query->fetch (PDO::FETCH_ASSOC))
 	{
@@ -3667,6 +3667,50 @@ function getNativeVLANsForObjectPorts ($object_id)
 	while ($row = $prepared->fetch (PDO::FETCH_ASSOC))
 		$ret[$row['port_id']] = $row['vlan_id']; // port_id is unique in this table
 	return $ret;
+}
+
+function getVLANInfo ($vlan_ck)
+{
+	list ($vdom_id, $vlan_id) = decodeVLANCK ($vlan_ck);
+	global $dbxlink;
+	$query = 'SELECT domain_id, vlan_id, vlan_type, vlan_descr, ' .
+		'(SELECT description FROM VLANDomain WHERE id = domain_id) AS domain_descr ' .
+		'FROM VLANDescription WHERE domain_id = ? AND vlan_id = ?';
+	$prepared = $dbxlink->prepare ($query);
+	$prepared->execute (array ($vdom_id, $vlan_id));
+	if (NULL == ($ret = $prepared->fetch (PDO::FETCH_ASSOC)))
+		return NULL; // throw what ?
+	unset ($prepared);
+	$query = 'SELECT ipv4net_id FROM VLANIPv4 WHERE domain_id = ? AND vlan_id = ?';
+	$prepared = $dbxlink->prepare ($query);
+	$prepared->execute (array ($vdom_id, $vlan_id));
+	$ret['ipv4nets'] = array();
+	while ($row = $prepared->fetch (PDO::FETCH_ASSOC))
+		$ret['ipv4nets'][] = $row['ipv4net_id'];
+	return $ret;
+}
+
+function commitSupplementVLANIPv4 ($vlan_ck, $ipv4net_id)
+{
+	list ($vdom_id, $vlan_id) = decodeVLANCK ($vlan_ck);
+	return usePreparedInsertBlade
+	(
+		'VLANIPv4',
+		array
+		(
+			'domain_id' => $vdom_id,
+			'vlan_id' => $vlan_id,
+			'ipv4net_id' => $ipv4net_id,
+		)
+	);
+}
+
+function commitReduceVLANIPv4 ($vlan_ck, $ipv4net_id)
+{
+	list ($vdom_id, $vlan_id) = decodeVLANCK ($vlan_ck);
+	global $dbxlink;
+	$query = $dbxlink->prepare ('DELETE FROM VLANIPv4 WHERE domain_id = ? AND vlan_id = ? AND ipv4net_id = ?');
+	return $query->execute (array ($vdom_id, $vlan_id, $ipv4net_id));
 }
 
 ?>

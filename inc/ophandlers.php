@@ -2170,4 +2170,24 @@ function saveAllowedVLANs ()
 	$vlan_id_list = isset ($_REQUEST['vlan_id']) ? $_REQUEST['vlan_id'] : array();
 }
 
+$msgcode['bindVLANtoIPv4']['OK'] = 48;
+$msgcode['bindVLANtoIPv4']['ERR'] = 110;
+function bindVLANtoIPv4 ()
+{
+	assertUIntArg ('id'); // network id
+	global $sic;
+	$result = commitSupplementVLANIPv4 ($sic['vlan_ck'], $sic['id']);
+	return buildRedirectURL (__FUNCTION__, $result ? 'OK' : 'ERR');
+}
+
+$msgcode['unbindVLANfromIPv4']['OK'] = 49;
+$msgcode['unbindVLANfromIPv4']['ERR'] = 111;
+function unbindVLANfromIPv4 ()
+{
+	assertUIntArg ('id'); // network id
+	global $sic;
+	$result = commitReduceVLANIPv4 ($sic['vlan_ck'], $sic['id']);
+	return buildRedirectURL (__FUNCTION__, $result ? 'OK' : 'ERR');
+}
+
 ?>
