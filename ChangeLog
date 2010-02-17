@@ -1,12 +1,12 @@
 0.17.9
 	new feature: added per-user UI options (ticket:29)
+	new feature: LDAP cache can be disabled now (ticket:247)
 	bugfix: error message was lost on SNMP tab (reported by Tommi Hokkanen)
 	bugfix: expand/collapse links on IPv4 tree view (ticket:308)
 	bugfix: local.php did not work with SNMP
 	bugfix: added error handling to gateway function (ticket:303)
 	bugfix: user's local real name was ignored with LDAP (ticket:252)
 	update: SNMP support for more Catalyst switches
-	new feature: LDAP cache can be disabled now (ticket:247)
 0.17.8 2009-12-25
 	bugfix: triggers disable tabs completely now (ticket:211)
 	bugfix: properly delete objects with linked ports (ticket:300)
@@ -15,6 +15,7 @@
 	update: don't show inacessible links in index (by Jeroen Benda)
 	update: consider permitted VLANs in switchvlans (#302 by Boris Lytochkin)
 	update: regular dictionary update
+	bugfix: ajax code verifier response code bugfix
 0.17.7 2009-11-09
 	bugfix: work around unbuffered query in ports pop-up (ticket:297)
 	update: add inline mode switcher by Jens Groh (ticket:298)
