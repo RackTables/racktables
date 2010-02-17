@@ -1,4 +1,4 @@
-0.17.9
+0.17.9 2010-02-17
 	new feature: added per-user UI options (ticket:29)
 	new feature: LDAP cache can be disabled now (ticket:247)
 	bugfix: error message was lost on SNMP tab (reported by Tommi Hokkanen)
