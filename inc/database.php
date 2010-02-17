@@ -2289,7 +2289,6 @@ function deleteUserConfigVar ($username = NULL, $varname = NULL)
         $query = "delete from UserConfig where varname='${varname}' and user='${username}'";
         $result = $dbxlink->query ($query);
         $result->closeCursor();
-        return TRUE;
 }
 
 function storeUserConfigVar ($username = NULL, $varname = NULL, $varvalue = NULL)
@@ -2304,7 +2303,6 @@ function storeUserConfigVar ($username = NULL, $varname = NULL, $varvalue = NULL
 	$query = "replace UserConfig set varvalue='${varvalue}', varname='${varname}', user='${username}'";
 	$result = $dbxlink->query ($query);
 	$result->closeCursor();
-	return TRUE;
 }
 
 // setConfigVar() is expected to perform all necessary filtering
@@ -2318,7 +2316,6 @@ function storeConfigVar ($varname = NULL, $varvalue = NULL)
 	$query = "update Config set varvalue='${varvalue}' where varname='${varname}' limit 1";
 	$result = $dbxlink->query ($query);
 	$result->closeCursor();
-	return TRUE;
 }
 
 // Database version detector. Should behave corretly on any

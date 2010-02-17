@@ -42,8 +42,6 @@ class RealmNotFoundException extends Exception {
 	}
 }
 
-
-
 class NotUniqueException extends Exception
 {
 	private $subject;
@@ -108,8 +106,6 @@ class InvalidRequestArgException extends Exception
 	}
 }
 
-
-
 function dumpArray($arr)
 {
 	echo '<table class="exceptionParametersDump">';
@@ -173,8 +169,6 @@ function printNotAuthorizedException($e)
 	echo '</body></html>';
 }
 
-
-
 function printPDOException($e)
 {
 	header("HTTP/1.1 500 Internal Server Error");
@@ -203,8 +197,6 @@ function printPDOException($e)
 	echo '</body></html>';
 
 }
-
-
 
 function printGenericException($e)
 {
