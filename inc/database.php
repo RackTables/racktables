@@ -53,6 +53,7 @@ $SQLSchema = array
 			'name' => 'name',
 			'comment' => 'comment',
 			'parent_id' => '(SELECT id FROM IPv4Network AS subt WHERE IPv4Network.ip & (4294967295 >> (32 - subt.mask)) << (32 - subt.mask) = subt.ip and subt.mask < IPv4Network.mask ORDER BY subt.mask DESC limit 1)',
+			'vlan_ck' => '(SELECT CONCAT(domain_id, "-", vlan_id) FROM VLANIPv4 WHERE ipv4net_id = id)',
 		),
 		'keycolumn' => 'id',
 		'ordcolumns' => array ('ip', 'mask'),
@@ -3572,7 +3573,15 @@ function getVLANDomainInfo ($vdom_id)
 function getDomainVLANs ($vdom_id)
 {
 	global $dbxlink;
-	$query = $dbxlink->prepare ('SELECT vlan_id, vlan_type, vlan_descr FROM VLANDescription WHERE domain_id = ? ORDER BY vlan_id');
+	$query = $dbxlink->prepare
+	(
+		'SELECT VLANDescription.vlan_id, vlan_type, COUNT(ipv4net_id) AS netc, vlan_descr ' .
+		'FROM VLANDescription LEFT JOIN VLANIPv4 ON VLANDescription.domain_id = VLANIPv4.domain_id AND VLANDescription.vlan_id = VLANIPv4.vlan_id ' .
+		'WHERE VLANDescription.domain_id = ? ' .
+		'GROUP BY VLANDescription.domain_id, VLANDescription.vlan_id ' .
+		'ORDER BY VLANDescription.vlan_id'
+#		'SELECT vlan_id, vlan_type, vlan_descr FROM VLANDescription WHERE domain_id = ? ORDER BY vlan_id'
+	);
 	$result = $query->execute (array ($vdom_id));
 	$ret = array();
 	while ($row = $query->fetch (PDO::FETCH_ASSOC))
@@ -3670,7 +3679,7 @@ function getVLANInfo ($vlan_ck)
 {
 	list ($vdom_id, $vlan_id) = decodeVLANCK ($vlan_ck);
 	global $dbxlink;
-	$query = 'SELECT domain_id, vlan_id, vlan_type, vlan_descr, ' .
+	$query = 'SELECT domain_id, vlan_id, vlan_type AS vlan_prop, vlan_descr, ' .
 		'(SELECT description FROM VLANDomain WHERE id = domain_id) AS domain_descr ' .
 		'FROM VLANDescription WHERE domain_id = ? AND vlan_id = ?';
 	$prepared = $dbxlink->prepare ($query);
@@ -3678,7 +3687,7 @@ function getVLANInfo ($vlan_ck)
 	if (NULL == ($ret = $prepared->fetch (PDO::FETCH_ASSOC)))
 		return NULL; // throw what ?
 	unset ($prepared);
-	$query = 'SELECT ipv4net_id FROM VLANIPv4 WHERE domain_id = ? AND vlan_id = ?';
+	$query = 'SELECT ipv4net_id FROM VLANIPv4 WHERE domain_id = ? AND vlan_id = ? ORDER BY ipv4net_id';
 	$prepared = $dbxlink->prepare ($query);
 	$prepared->execute (array ($vdom_id, $vlan_id));
 	$ret['ipv4nets'] = array();

@@ -187,7 +187,19 @@ function trigger_vlanconfig ()
 {
 	if (getObjectVLANDomainID ($_REQUEST['object_id']))
 		return 'std';
-	elseif (considerConfiguredConstraint (spotEntity ('object', $_REQUEST['object_id']), 'VLAN_LISTSRC'))
+	elseif (considerConfiguredConstraint (spotEntity ('object', $_REQUEST['object_id']), 'VLANSWITCH_LISTSRC'))
+		return 'attn';
+	else
+		return '';
+}
+
+// implement similar logic for IPv4 networks
+function trigger_ipv4net_vlanconfig ()
+{
+	$netinfo = spotEntity ('ipv4net', $_REQUEST['id']);
+	if (strlen ($netinfo['vlan_ck']))
+		return 'std';
+	elseif (considerConfiguredConstraint ($netinfo, 'VLANIPV4NET_LISTSRC'))
 		return 'attn';
 	else
 		return '';

@@ -2250,6 +2250,14 @@ function renderIPv4Network ($id)
 	echo $wildcardbylen[$range['mask']];
 	echo "</td></tr>\n";
 
+	if (strlen ($range['vlan_ck']))
+	{
+		$vlaninfo = getVLANInfo ($range['vlan_ck']);
+		echo '<tr><th width="50%" class=tdright>VLAN:</th><td class=tdleft><a href="';
+		echo makeHref (array ('page' => 'vlan', 'vlan_ck' => $range['vlan_ck'])) . '">';
+		echo $vlaninfo['vlan_id'] . '@' . $vlaninfo['domain_descr'] . ' (';
+		echo $vlaninfo['vlan_descr'] . ')</a></td></tr>';
+	}
 	if (getConfigVar ('EXT_IPV4_VIEW') == 'yes' and count ($routers = findRouters ($range['addrlist'])))
 	{
 		echo "<tr><th width='50%' class=tdright>Routed by:</th>";
@@ -2382,6 +2390,41 @@ function renderIPv4NetworkProperties ($id)
 	echo "<tr><td colspan=2 class=tdcenter>";
 	printImageHREF ('SAVE', 'Save changes', TRUE);
 	echo "</td></form></tr></table>\n";
+}
+
+function renderIPv4NetworkVLANTab ($id)
+{
+	$netinfo = spotEntity ('ipv4net', $id);
+	echo "<table border=0 cellspacing=0 cellpadding=3 width='100%'>";
+	if (strlen ($netinfo['vlan_ck']))
+	{
+		$vlaninfo = getVLANInfo ($netinfo['vlan_ck']);
+		echo '<tr><th width="50%" class=tdright>VLAN:</th><td class=tdleft><a href="';
+		echo makeHref (array ('page' => 'vlan', 'vlan_ck' => $range['vlan_ck'])) . '">';
+		echo $vlaninfo['vlan_id'] . '@' . $vlaninfo['domain_descr'] . ' (';
+		echo $vlaninfo['vlan_descr'] . ')</a></td></tr>';
+		echo "<tr><th width='50%' class=tdright>Action:</th><td class=tdleft>";
+		echo '<a href="' . makeHrefProcess (array ('op' => 'unbind', 'vlan_ck' => $netinfo['vlan_ck'], 'id' => $id));
+		echo '">';
+		printImageHREF ('CUT', 'unbind');
+		echo '</a></td></tr>';
+	}
+	else
+	{
+		$options = array();
+		foreach (getVLANDomainList() as $dominfo)
+			foreach (getDomainVLANs ($dominfo['id']) as $vlaninfo)
+				$options[$dominfo['description']][$dominfo['id']. '-' . $vlaninfo['vlan_id']] =
+					$vlaninfo['vlan_id'] . ' (' . $vlaninfo['netc'] . ') ' . $vlaninfo['vlan_descr'];
+		printOpFormIntro ('bind');
+		echo "<tr><th width='50%' class=tdright>Current:</th><td class='tdleft sparenetwork'>(none)</td></tr>";
+		echo "<tr><th width='50%' class=tdright>Action:</th><td class=tdleft>";
+		printNiftySelect ($options, array ('name' => 'vlan_ck'));
+		echo ' ';
+		printImageHref ('ATTACH', 'bind', TRUE);
+		echo '</td></tr></form>';
+	}
+	echo '</table>';
 }
 
 function renderIPv4Address ($dottedquad)
@@ -6471,7 +6514,7 @@ function renderVLANDomainSwitches ($vdom_id)
 		printImageHREF ('attach', 'bind', TRUE);
 		echo '</td><td>';
 		$options = array();
-		foreach (getNarrowObjectList ('VLAN_LISTSRC') as $object_id => $object_dname)
+		foreach (getNarrowObjectList ('VLANSWITCH_LISTSRC') as $object_id => $object_dname)
 			if (!in_array ($object_id, $twitlist))
 				$options[$object_id] = $object_dname;
 		printSelect ($options, array ('name' => 'object_id', 'tabindex' => 100));
@@ -6696,6 +6739,7 @@ function renderPortNativeVLAN ($port_id, $allowed, $native)
 
 function renderVLANInfo ()
 {
+	global $vtoptions;
 	$vlan = getVLANInfo ($_REQUEST['vlan_ck']);
 	echo '<table border=0 class=objectview cellspacing=0 cellpadding=0>';
 	echo "<tr><td colspan=2 align=center><h1>${mydomain['description']}</h1></td></tr>";
@@ -6706,7 +6750,7 @@ function renderVLANInfo ()
 	echo "<tr><th width='50%' class=tdright>VLAN ID:</th><td class=tdleft>${vlan['vlan_id']}</td></tr>";
 	if (strlen ($vlan['vlan_descr']))
 		echo "<tr><th width='50%' class=tdright>Description:</th><td class=tdleft>${vlan['vlan_descr']}</td></tr>";
-	echo "<tr><th width='50%' class=tdright>Propagation:</th><td class=tdleft>${vlan['vlan_prop']}</td></tr>";
+	echo "<tr><th width='50%' class=tdright>Propagation:</th><td class=tdleft>" . $vtoptions[$vlan['vlan_prop']] . "</td></tr>";
 	echo '</table>';
 	finishPortlet();
 	echo '</td><td class=pcright>';

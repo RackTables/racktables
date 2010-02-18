@@ -474,7 +474,8 @@ CREATE TABLE `UserConfig` (
 			break;
 		case '0.18.0':
 			$query = array_merge ($query, reloadDictionary ($batchid));
-			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('VLAN_LISTSRC', '', 'string', 'yes', 'no', 'List of VLAN running switches')";
+			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('VLANSWITCH_LISTSRC', '', 'string', 'yes', 'no', 'List of VLAN running switches')";
+			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('VLANIPV4NET_LISTSRC', '', 'string', 'yes', 'no', 'List of VLAN-based IPv4 networks')";
 			$query[] = "ALTER TABLE IPv4Network ENGINE=InnoDB";
 			$query[] = "UPDATE Config SET varvalue = '0.18.0' WHERE varname = 'DB_VERSION'";
 		default:
