@@ -2250,8 +2250,7 @@ function renderIPv4Network ($id)
 	echo $wildcardbylen[$range['mask']];
 	echo "</td></tr>\n";
 
-	$routers = findRouters ($range['addrlist']);
-	if (getConfigVar ('EXT_IPV4_VIEW') == 'yes' and count ($routers))
+	if (getConfigVar ('EXT_IPV4_VIEW') == 'yes' and count ($routers = findRouters ($range['addrlist'])))
 	{
 		echo "<tr><th width='50%' class=tdright>Routed by:</th>";
 		printRoutersTD ($routers);
