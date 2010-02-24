@@ -326,6 +326,34 @@ $iftable_processors['quidway-mgmt'] = array
 	'try_next_proc' => FALSE,
 );
 
+$iftable_processors['fgs-1-to-4-comboSFP'] = array
+(
+	# only 4 first copper ports of 1st unit of a stack
+	'pattern' => '@^GigabitEthernet1/1/(1|2|3|4)$@',
+	'replacement' => 'e1/1/\\1',
+	'dict_key' => '4-1077',
+	'label' => '\\1F',
+	'try_next_proc' => TRUE,
+);
+
+$iftable_processors['fgs-any-1000T'] = array
+(
+	'pattern' => '@^GigabitEthernet1/1/([[:digit:]]+)$@',
+	'replacement' => 'e1/1/\\1',
+	'dict_key' => '1-24',
+	'label' => '\\1',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['fgs-uplinks'] = array
+(
+	'pattern' => '@^10GigabitEthernet1/2/([[:digit:]]+)$@',
+	'replacement' => 'e1/2/\\1',
+	'dict_key' => '8-1082', // default is XFP, but may be overridden to CX4
+	'label' => 'Slot2 \\1',
+	'try_next_proc' => FALSE,
+);
+
 $known_switches = array // key is system OID w/o "enterprises" prefix
 (
 	'9.1.324' => array
@@ -532,6 +560,18 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'S5328C-EI-24S: 20 RJ-45/10-100-1000T(X) + 4 combo-gig + 2 XFP slots',
 		'processors' => array ('quidway-21-to-24-comboT', 'quidway-any-1000SFP', 'quidway-XFP', 'quidway-mgmt'),
 	),
+	'1991.1.3.45.2.1.1.1' => array
+	(
+		'dict_key' => 127,
+		'text' => 'FGS648P: 48 RJ-45/10-100-1000T(X) + 4 combo-gig + uplink slot',
+		'processors' => array ('fgs-1-to-4-comboSFP', 'fgs-any-1000T', 'fgs-uplinks'),
+	),
+	'1991.1.3.45.2.2.1.1' => array
+	(
+		'dict_key' => 131,
+		'text' => 'FGS648P-POE: 48 RJ-45/10-100-1000T(X) + 4 combo-gig + uplink slot',
+		'processors' => array ('fgs-1-to-4-comboSFP', 'fgs-any-1000T', 'fgs-uplinks'),
+	),
 );
 
 function updateStickerForCell ($cell, $attr_id, $new_value)
@@ -668,6 +708,47 @@ function doSwitchSNMPmining ($objectInfo, $hostname, $community)
 		checkPIC ('1-681');
 		commitAddPort ($objectInfo['id'], 'console', '1-681', 'console', ''); // DB-9 RS-232 console
 		$log = mergeLogs ($log, oneLiner (81, array ('juniper-generic')));
+		break;
+	case preg_match ('/^1991\.1\.3\.45\./', $sysObjectID): // snFGSFamily
+		$exact_release = ereg_replace ('^.*, IronWare Version ([^ ]+) .*$', '\\1', $sysDescr);
+		updateStickerForCell ($objectInfo, 5, $exact_release);
+		# FOUNDRY-SN-AGENT-MIB::snChasSerNum.0
+		$sysChassi = @snmpget ($hostname, $community, 'enterprises.1991.1.1.1.1.2.0');
+		if ($sysChassi !== FALSE or $sysChassi !== NULL)
+			updateStickerForCell ($objectInfo, 1, str_replace ('"', '', substr ($sysChassi, strlen ('STRING: '))));
+
+		# Type of uplink module installed.
+		# table: FOUNDRY-SN-AGENT-MIB::snAgentBrdMainBrdDescription
+		# Possible part numbers are:
+		# FGS-1XG1XGC (one fixed CX4 port)
+		# FGS-2XGC (two fixed CX4 ports)
+		# FGS-2XG (two XFP slots)
+		foreach (@snmpwalkoid ($hostname, $community, 'enterprises.1991.1.1.2.2.1.1.2') as $module_raw)
+			if (preg_match ('/^STRING: "(FGS-1XG1XGC|FGS-2XGC) /i', $module_raw))
+			{
+				$iftable_processors['fgs-uplinks']['dict_key'] = '1-40'; // CX4
+				break;
+			}
+
+		# AC inputs
+		# table: FOUNDRY-SN-AGENT-MIB::snChasPwrSupplyDescription
+		# "Power supply 1 "
+		# "Power supply 2 "
+		foreach (@snmpwalkoid ($hostname, $community, 'enterprises.1991.1.1.1.2.1.1.2') as $PSU_raw)
+		{
+			$count = 0;
+			$PSU_cooked = trim (preg_replace ('/^string: "(.+)"$/i', '\\1', $PSU_raw, 1, $count));
+			if ($count)
+			{
+				checkPIC ('1-16');
+				commitAddPort ($objectInfo['id'], $PSU_cooked, '1-16', '', '');
+			}
+		}
+		# fixed console port
+		checkPIC ('1-681');
+		commitAddPort ($objectInfo['id'], 'console', '1-681', 'console', ''); // DB-9 RS-232 console
+		$log = mergeLogs ($log, oneLiner (81, array ('brocade-generic')));
+		break;
 	default: // Nortel...
 		break;
 	}
