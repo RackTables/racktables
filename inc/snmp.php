@@ -602,6 +602,12 @@ function doSwitchSNMPmining ($objectInfo, $hostname, $community)
 	$sysDescr = str_replace (array ("\n", "\r"), " ", $sysDescr);  // Make it one line
 	if (!isset ($known_switches[$sysObjectID]))
 		return buildRedirectURL (__FUNCTION__, 'ERR4', array ($sysObjectID)); // unknown OID
+	foreach (array_keys ($known_switches[$sysObjectID]['processors']) as $pkey)
+		if (!array_key_exists ($known_switches[$sysObjectID]['processors'][$pkey], $iftable_processors))
+		{
+			$log = mergeLogs ($log, oneLiner (200, array ('processor "' . $known_switches[$sysObjectID]['processors'][$pkey] . '" not found')));
+			unset ($known_switches[$sysObjectID]['processors'][$pkey]);
+		}
 	updateStickerForCell ($objectInfo, 2, $known_switches[$sysObjectID]['dict_key']);
 	updateStickerForCell ($objectInfo, 3, $sysName);
 	$log = mergeLogs ($log, oneLiner (81, array ('generic')));
