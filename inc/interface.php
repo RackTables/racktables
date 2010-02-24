@@ -5676,7 +5676,7 @@ function niftyString ($string, $maxlen = 30)
 		return '&nbsp;';
 	// a tab counts for a space
 	$string = mb_ereg_replace ("\t", ' ', $string);
-	if (mb_strlen ($string) <= $maxlen)
+	if (!$maxlen or mb_strlen ($string) <= $maxlen)
 		return htmlspecialchars ($string, ENT_QUOTES, 'UTF-8');
 	return "<span title='" . htmlspecialchars ($string, ENT_QUOTES, 'UTF-8') . "'>" .
 		str_replace (' ', '&nbsp;', htmlspecialchars (mb_substr ($string, 0, $maxlen - 1), ENT_QUOTES, 'UTF-8')) . $cutind . '</span>';
