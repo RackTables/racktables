@@ -2264,4 +2264,14 @@ function decodeVLANCK ($string)
 	return array ($matches[1], $matches[2]);
 }
 
+// Return VLAN name formatted for HTML output (note, that input
+// argument comes from database unescaped).
+function formatVLANName ($vlaninfo)
+{
+	$ret = 'VLAN' . $vlaninfo['vlan_id'];
+	if (strlen ($vlaninfo['vlan_descr']))
+		$ret .= ' (' . niftyString ($vlaninfo['vlan_descr']) . ')';
+	return $ret;
+}
+
 ?>

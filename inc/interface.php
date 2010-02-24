@@ -2255,8 +2255,8 @@ function renderIPv4Network ($id)
 		$vlaninfo = getVLANInfo ($range['vlan_ck']);
 		echo '<tr><th width="50%" class=tdright>VLAN:</th><td class=tdleft><a href="';
 		echo makeHref (array ('page' => 'vlan', 'vlan_ck' => $range['vlan_ck'])) . '">';
-		echo $vlaninfo['vlan_id'] . '@' . $vlaninfo['domain_descr'] . ' (';
-		echo $vlaninfo['vlan_descr'] . ')</a></td></tr>';
+		echo formatVLANName ($vlaninfo) . ' @' . $vlaninfo['domain_descr'];
+		echo '</a></td></tr>';
 	}
 	if (getConfigVar ('EXT_IPV4_VIEW') == 'yes' and count ($routers = findRouters ($range['addrlist'])))
 	{
@@ -6145,7 +6145,7 @@ function dynamic_title_decoder ($path_position)
 			);
 		return array
 		(
-			'name' => htmlspecialchars ($file['name']),
+			'name' => niftyString ($file['name']),
 			'params' => array ('file_id' => $_REQUEST['file_id'])
 		);
 	case 'ipaddress':
@@ -6235,16 +6235,14 @@ function dynamic_title_decoder ($path_position)
 		$dominfo = getVLANDomainInfo ($vdom_id);
 		return array
 		(
-			'name' => $dominfo['description'],
+			'name' => niftyString ($dominfo['description']),
 			'params' => array ('vdom_id' => $vdom_id)
 		);
 	case 'vlan':
-		list ($vdom_id, $vlan_id) = decodeVLANCK ($_REQUEST['vlan_ck']);
-		$allvlans = getDomainVLANs ($vdom_id);
 		return array
 		(
-			'name' => $allvlans[$vlan_id]['vlan_descr'],
-			'params' => array ('vlan_ck' => "${vdom_id}-${vlan_id}")
+			'name' => formatVLANName (getVLANInfo ($_REQUEST['vlan_ck'])),
+			'params' => array ('vlan_ck' => $_REQUEST['vlan_ck'])
 		);
 	default:
 		return array
@@ -6746,10 +6744,12 @@ function renderVLANInfo ()
 	echo "<tr><td class=pcleft width='50%'>";
 	startPortlet ('summary');
 	echo "<table border=0 cellspacing=0 cellpadding=3 width='100%'>";
-	echo "<tr><th width='50%' class=tdright>Domain:</th><td class=tdleft>${vlan['domain_descr']}</td></tr>";
+	echo "<tr><th width='50%' class=tdright>Domain:</th><td class=tdleft>";
+	echo niftyString ($vlan['domain_descr'], 0) . '</td></tr>';
 	echo "<tr><th width='50%' class=tdright>VLAN ID:</th><td class=tdleft>${vlan['vlan_id']}</td></tr>";
 	if (strlen ($vlan['vlan_descr']))
-		echo "<tr><th width='50%' class=tdright>Description:</th><td class=tdleft>${vlan['vlan_descr']}</td></tr>";
+		echo "<tr><th width='50%' class=tdright>Description:</th><td class=tdleft>" .
+			niftyString ($vlan['vlan_descr'], 0) . "</td></tr>";
 	echo "<tr><th width='50%' class=tdright>Propagation:</th><td class=tdleft>" . $vtoptions[$vlan['vlan_prop']] . "</td></tr>";
 	echo '</table>';
 	finishPortlet();
