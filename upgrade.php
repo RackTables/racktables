@@ -477,6 +477,8 @@ CREATE TABLE `UserConfig` (
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('VLANSWITCH_LISTSRC', '', 'string', 'yes', 'no', 'List of VLAN running switches')";
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('VLANIPV4NET_LISTSRC', '', 'string', 'yes', 'no', 'List of VLAN-based IPv4 networks')";
 			$query[] = "ALTER TABLE IPv4Network ENGINE=InnoDB";
+			for ($i = 1; $i <= 4094; $i++)
+				usePreparedInsertBlade ('VLANValidID', array ('vlan_id' => $i));
 			$query[] = "UPDATE Config SET varvalue = '0.18.0' WHERE varname = 'DB_VERSION'";
 		default:
 			showFailure ("executeUpgradeBatch () failed, because batch '${batchid}' isn't defined", __FILE__);
