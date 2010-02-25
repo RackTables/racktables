@@ -121,13 +121,13 @@ $wildcardbylen = array
 function assertUIntArg ($argname, $allow_zero = FALSE)
 {
 	if (!isset ($_REQUEST[$argname]))
-		throw new InvalidRequestArgException('$argname', $_REQUEST[$argname], 'parameter is missing');
+		throw new InvalidRequestArgException($argname, $_REQUEST[$argname], 'parameter is missing');
 	if (!is_numeric ($_REQUEST[$argname]))
-		throw new InvalidRequestArgException('$argname', $_REQUEST[$argname], 'parameter is not a number');
+		throw new InvalidRequestArgException($argname, $_REQUEST[$argname], 'parameter is not a number');
 	if ($_REQUEST[$argname] < 0)
-		throw new InvalidRequestArgException('$argname', $_REQUEST[$argname], 'parameter is less than zero');
+		throw new InvalidRequestArgException($argname, $_REQUEST[$argname], 'parameter is less than zero');
 	if (!$allow_zero and $_REQUEST[$argname] === 0)
-		throw new InvalidRequestArgException('$argname', $_REQUEST[$argname], 'parameter is zero');
+		throw new InvalidRequestArgException($argname, $_REQUEST[$argname], 'parameter is zero');
 }
 
 // This function assures that specified argument was passed
@@ -135,28 +135,28 @@ function assertUIntArg ($argname, $allow_zero = FALSE)
 function assertStringArg ($argname, $ok_if_empty = FALSE)
 {
 	if (!isset ($_REQUEST[$argname]))
-		throw new InvalidRequestArgException('$argname', $_REQUEST[$argname], 'parameter is missing');
+		throw new InvalidRequestArgException($argname, $_REQUEST[$argname], 'parameter is missing');
 	if (!is_string ($_REQUEST[$argname]))
-		throw new InvalidRequestArgException('$argname', $_REQUEST[$argname], 'parameter is not a string');
+		throw new InvalidRequestArgException($argname, $_REQUEST[$argname], 'parameter is not a string');
 	if (!$ok_if_empty and !strlen ($_REQUEST[$argname]))
-		throw new InvalidRequestArgException('$argname', $_REQUEST[$argname], 'parameter is an empty string');
+		throw new InvalidRequestArgException($argname, $_REQUEST[$argname], 'parameter is an empty string');
 }
 
 function assertBoolArg ($argname, $ok_if_empty = FALSE)
 {
 	if (!isset ($_REQUEST[$argname]))
-		throw new InvalidRequestArgException('$argname', $_REQUEST[$argname], 'parameter is missing');
+		throw new InvalidRequestArgException($argname, $_REQUEST[$argname], 'parameter is missing');
 	if (!is_string ($_REQUEST[$argname]) or $_REQUEST[$argname] != 'on')
-		throw new InvalidRequestArgException('$argname', $_REQUEST[$argname], 'parameter is not a string');
+		throw new InvalidRequestArgException($argname, $_REQUEST[$argname], 'parameter is not a string');
 	if (!$ok_if_empty and !strlen ($_REQUEST[$argname]))
-		throw new InvalidRequestArgException('$argname', $_REQUEST[$argname], 'parameter is an empty string');
+		throw new InvalidRequestArgException($argname, $_REQUEST[$argname], 'parameter is an empty string');
 }
 
 function assertIPv4Arg ($argname, $ok_if_empty = FALSE)
 {
 	assertStringArg ($argname, $ok_if_empty);
 	if (strlen ($_REQUEST[$argname]) and long2ip (ip2long ($_REQUEST[$argname])) !== $_REQUEST[$argname])
-		throw new InvalidRequestArgException('$argname', $_REQUEST[$argname], 'parameter is not a valid ipv4 address');
+		throw new InvalidRequestArgException($argname, $_REQUEST[$argname], 'parameter is not a valid ipv4 address');
 }
 
 // Objects of some types should be explicitly shown as
@@ -2269,9 +2269,9 @@ function decodeVLANCK ($string)
 // argument comes from database unescaped).
 function formatVLANName ($vlaninfo)
 {
-	$ret = 'VLAN' . $vlaninfo['vlan_id'];
+	$ret = '<tt>VLAN' . $vlaninfo['vlan_id'] . '</tt>';
 	if (strlen ($vlaninfo['vlan_descr']))
-		$ret .= ' (' . niftyString ($vlaninfo['vlan_descr']) . ')';
+		$ret .= ' <i>(' . niftyString ($vlaninfo['vlan_descr']) . ')</i>';
 	return $ret;
 }
 
