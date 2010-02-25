@@ -2238,14 +2238,14 @@ function useDeleteBlade ($tablename, $keyname, $keyvalue)
 	return 1 === $dbxlink->exec ("delete from ${tablename} where ${keyname}=${keyvalue} limit 1");
 }
 
-// prepared version of above
+// Prepared version of above, but note the difference in returned value.
 function usePreparedDeleteBlade ($tablename, $keyname, $keyvalue)
 {
 	global $dbxlink;
-	$prepared = $dbxlink->prepare ("DELETE FROM ${tablename} WHERE ${keyname} = ? LIMIT 1");
+	$prepared = $dbxlink->prepare ("DELETE FROM ${tablename} WHERE ${keyname} = ?");
 	if (!$prepared->execute (array ($keyvalue)))
 		return FALSE;
-	return $prepared->rowCount() == 1;
+	return $prepared->rowCount(); // FALSE !== 0
 }
 
 function useSelectBlade ($query)
@@ -3670,6 +3670,26 @@ function getAllowedVLANsForObjectPorts ($object_id)
 	return $ret;
 }
 
+function commitSaveAllowedVLANs ($port_id, $vlan_id_list)
+{
+	global $dbxlink;
+	$dbxlink->beginTransaction();
+	// the below cascades down to PortNativeVLAN
+	if (FALSE === usePreparedDeleteBlade ('PortAllowedVLAN', 'port_id', $port_id))
+	{
+		$dbxlink->rollBack();
+		return FALSE;
+	}
+	foreach ($vlan_id_list as $vlan_id)
+		if (!usePreparedInsertBlade ('PortAllowedVLAN', array ('port_id' => $port_id, 'vlan_id' => $vlan_id)))
+		{
+			$dbxlink->rollBack();
+			return FALSE;
+		}
+	$dbxlink->commit();
+	return TRUE;
+}
+
 function getNativeVLANsForObjectPorts ($object_id)
 {
 	global $dbxlink;
@@ -3682,6 +3702,25 @@ function getNativeVLANsForObjectPorts ($object_id)
 	while ($row = $prepared->fetch (PDO::FETCH_ASSOC))
 		$ret[$row['port_id']] = $row['vlan_id']; // port_id is unique in this table
 	return $ret;
+}
+
+// When the new native VLAN ID is 0, only delete the old row (if it exists).
+function commitSaveNativeVLAN ($port_id, $vlan_id = 0)
+{
+	global $dbxlink;
+	$dbxlink->beginTransaction();
+	if (FALSE === usePreparedDeleteBlade ('PortNativeVLAN', 'port_id', $port_id))
+	{
+		$dbxlink->rollBack();
+		return FALSE;
+	}
+	if ($vlan_id and !usePreparedInsertBlade ('PortNativeVLAN', array ('port_id' => $port_id, 'vlan_id' => $vlan_id)))
+	{
+		$dbxlink->rollBack();
+		return FALSE;
+	}
+	$dbxlink->commit();
+	return TRUE;
 }
 
 function getVLANInfo ($vlan_ck)

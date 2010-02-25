@@ -6660,8 +6660,9 @@ function renderObjectVLANPorts ($object_id)
 		renderPortNativeVLAN
 		(
 			$port_id,
+			$objectdomain,
 			array_key_exists ($port_id, $allowed) ? $allowed[$port_id] : array(),
-			array_key_exists ($port_id, $native) ? $native[$port_id] : VLAN_DFL_ID
+			array_key_exists ($port_id, $native) ? $native[$port_id] : 0
 		);
 		finishPortlet();
 		echo '</td></tr></table>';
@@ -6686,7 +6687,7 @@ function renderPortAllowedVLANs ($port_id, $vdom, $preselect)
 		}
 		echo "<tr><td colspan=2 class=${class}>";
 		echo "<label><input type=checkbox name='vlan_id[]' value='${vlan_id}'${selected}> ";
-		echo "<tt>${vlan_id}</tt> <i>(${vlan_info['vlan_descr']})</i></label></td></tr>";
+		echo formatVLANName ($vlan_info) . "</label></td></tr>";
 	}
 	echo '<tr><td class=tdleft>';
 	printImageHREF ('SAVE', 'Save changes', TRUE);
@@ -6695,14 +6696,14 @@ function renderPortAllowedVLANs ($port_id, $vdom, $preselect)
 		printImageHREF ('CLEAR gray');
 	else
 	{
-		printOpFormIntro ('setAllowedVLANs', array ('port_id' => $port_id, 'vlan_id[]' => VLAN_DFL_ID));
-		printImageHREF ('CLEAR', 'Reset all tags', TRUE);
+		printOpFormIntro ('setAllowedVLANs', array ('port_id' => $port_id));
+		printImageHREF ('CLEAR', 'Unassign all VLANs', TRUE);
 		echo '</form>';
 	}
 	echo '</td></tr></table>';
 }
 
-function renderPortNativeVLAN ($port_id, $allowed, $native)
+function renderPortNativeVLAN ($port_id, $vdom, $allowed = array(), $native = 0)
 {
 	printOpFormIntro ('setNativeVLAN', array ('port_id' => $port_id));
 	echo '<table border=0 cellspacing=0 cellpadding=3 align=center>';
@@ -6719,17 +6720,17 @@ function renderPortNativeVLAN ($port_id, $allowed, $native)
 			$class = 'tagbox';
 		}
 		echo "<tr><td colspan=2 class=${class}>";
-		echo "<label><input type=radio name='vlan_id[]' value='${vlan_id}'${selected}> ";
-		echo "<tt>${vlan_id}</tt> <i>(FIXME)</i></label></td></tr>";
+		echo "<label><input type=radio name='vlan_id' value='${vlan_id}'${selected}> ";
+		echo formatVLANName ($vdom['vlanlist'][$vlan_id]) . "</label></td></tr>";
 	}
 	echo '<tr><td class=tdleft>';
 	printImageHREF ('SAVE', 'Save changes', TRUE);
 	echo "</form></td><td class=tdright>";
-	if ($native == VLAN_DFL_ID)
+	if (!$native)
 		printImageHREF ('CLEAR gray');
 	else
 	{
-		printOpFormIntro ('setNativeVLAN', array ('port_id' => $port_id, 'vlan_id' => VLAN_DFL_ID));
+		printOpFormIntro ('setNativeVLAN', array ('port_id' => $port_id, 'vlan_id' => 0));
 		printImageHREF ('CLEAR', 'Reset native VLAN', TRUE);
 		echo '</form>';
 	}

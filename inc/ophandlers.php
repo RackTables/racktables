@@ -38,14 +38,14 @@ function buildWideRedirectURL ($log, $nextpage = NULL, $nexttab = NULL, $moreArg
 	return $url;
 }
 
-function buildRedirectURL ($callfunc, $status, $args = array(), $nextpage = NULL, $nexttab = NULL)
+function buildRedirectURL ($callfunc, $status, $log_args = array(), $nextpage = NULL, $nexttab = NULL, $url_args = array())
 {
 	global $pageno, $tabno, $msgcode;
 	if ($nextpage === NULL)
 		$nextpage = $pageno;
 	if ($nexttab === NULL)
 		$nexttab = $tabno;
-	return buildWideRedirectURL (oneLiner ($msgcode[$callfunc][$status], $args), $nextpage, $nexttab);
+	return buildWideRedirectURL (oneLiner ($msgcode[$callfunc][$status], $log_args), $nextpage, $nexttab, $url_args);
 }
 
 $msgcode['addPortForwarding']['OK'] = 2;
@@ -2151,7 +2151,7 @@ function destroyVLANDomain ()
 {
 	assertUIntArg ('vdom_id');
 	global $sic;
-	$result = usePreparedDeleteBlade ('VLANDomain', 'id', $sic['vdom_id']);
+	$result = FALSE !== usePreparedDeleteBlade ('VLANDomain', 'id', $sic['vdom_id']);
 	return buildRedirectURL (__FUNCTION__, $result ? 'OK' : 'ERR');
 }
 
@@ -2166,10 +2166,34 @@ function updateVLANDomain ()
 	return buildRedirectURL (__FUNCTION__, $result ? 'OK' : 'ERR');
 }
 
+$msgcode['setAllowedVLANs']['OK'] = 17;
+$msgcode['setAllowedVLANs']['ERR1'] = 160;
+$msgcode['setAllowedVLANs']['ERR2'] = 109;
 function setAllowedVLANs ()
 {
 	assertUIntArg ('port_id');
-	$vlan_id_list = isset ($_REQUEST['vlan_id']) ? $_REQUEST['vlan_id'] : array();
+	global $sic;
+	$portinfo = getPortInfo ($sic['port_id']);
+	if ($portinfo['object_id'] != $sic['object_id'])
+		return buildRedirectURL (__FUNCTION__, 'ERR1');
+	$vlan_id_list = isset ($sic['vlan_id']) ? $sic['vlan_id'] : array();
+	$result = commitSaveAllowedVLANs ($sic['port_id'], $vlan_id_list);
+	return buildRedirectURL (__FUNCTION__, $result ? 'OK' : 'ERR2', array(), NULL, NULL, array ('port_id' => $sic['port_id']));
+}
+
+$msgcode['setNativeVLAN']['OK'] = 43;
+$msgcode['setNativeVLAN']['ERR1'] = 160;
+$msgcode['setNativeVLAN']['ERR2'] = 109;
+function setNativeVLAN ()
+{
+	assertUIntArg ('port_id');
+	global $sic;
+	$vlan_id = isset ($sic['vlan_id']) ? $sic['vlan_id'] : 0; // 0 means "reset"
+	$portinfo = getPortInfo ($sic['port_id']);
+	if ($portinfo['object_id'] != $sic['object_id'])
+		return buildRedirectURL (__FUNCTION__, 'ERR1');
+	$result = commitSaveNativeVLAN ($sic['port_id'], $vlan_id);
+	return buildRedirectURL (__FUNCTION__, $result ? 'OK' : 'ERR2', array(), NULL, NULL, array ('port_id' => $sic['port_id']));
 }
 
 $msgcode['bindVLANtoIPv4']['OK'] = 48;
