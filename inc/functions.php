@@ -2240,18 +2240,19 @@ function getVLANDomain ($vdid)
 
 // Return a serialized version of VLAN configuration for a port.
 // If a native VLAN is defined, print it first. All other VLANs
-// are tagged and are listed after a plus sign.
-function serialiseVLANPack ($native_vid = VLAN_DFL_ID, $allowed_vids = array())
+// are tagged and are listed after a plus sign. When no configuration
+// is set for a port, return "default" string.
+function serializeVLANPack ($native_vid = 0, $allowed_vids = array())
 {
 	$tagged = array();
 	foreach ($allowed_vids as $vlan_id)
 		if ($vlan_id != $native_vid)
 			$tagged[] = $vlan_id;
 	sort ($tagged);
-	$ret = $native_vid == VLAN_DFL_ID ? '?' : "${native_vid}";
+	$ret = $native_vid ? $native_vid : '';
 	if (count ($tagged))
 		$ret .= '+' . implode (',', $tagged);
-	return strlen ($ret) ? $ret : '&nbsp;';
+	return strlen ($ret) ? $ret : 'default';
 }
 
 // Decode VLAN compound key (which is a string formatted DOMAINID-VLANID) and

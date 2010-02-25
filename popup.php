@@ -86,7 +86,8 @@ function findSparePorts ($port_id, $only_racks = array())
 				('All spare ports (<a href="popup.php?helper=portlist&port=' . $port_id . '&in_rack=y">show nearest</a>)');
 			echo '</h2><form action="javascript:;">';
 			$only_racks = array();
-			$port_info = getPortInfo ($port_id);
+			global $sic;
+			$port_info = getPortInfo ($sic['port']);
 			if ($_REQUEST['in_rack'] == 'y' and $port_info['object_id'])
 			{
 				$object = spotEntity ('object', $port_info['object_id']);

@@ -197,8 +197,9 @@ function linkPortForObject ()
 	$error = linkPorts ($_REQUEST['port_id'], $_REQUEST['remote_port_id']);
 	if ($error != '')
 		return buildRedirectURL (__FUNCTION__, 'ERR', array ($error));
-	$local_port_info = getPortInfo ($_REQUEST['port_id']);
-	$remote_port_info = getPortInfo ($_REQUEST['remote_port_id']);
+	global $sic;
+	$local_port_info = getPortInfo ($sic['port_id']);
+	$remote_port_info = getPortInfo ($sic['remote_port_id']);
 	$remote_object = spotEntity ('object', $remote_port_info['object_id']);
 	return buildRedirectURL
 	(
@@ -220,8 +221,9 @@ function unlinkPortForObject ()
 	assertUIntArg ('port_id');
 	assertUIntArg ('remote_port_id');
 
-	$local_port_info = getPortInfo ($_REQUEST['port_id']);
-	$remote_port_info = getPortInfo ($_REQUEST['remote_port_id']);
+	global $sic;
+	$local_port_info = getPortInfo ($sic['port_id']);
+	$remote_port_info = getPortInfo ($sic['remote_port_id']);
 	$remote_object = spotEntity ('object', $remote_port_info['object_id']);
 	$error = unlinkPort ($_REQUEST['port_id']);
 	if ($error != '')
@@ -2164,7 +2166,7 @@ function updateVLANDomain ()
 	return buildRedirectURL (__FUNCTION__, $result ? 'OK' : 'ERR');
 }
 
-function saveAllowedVLANs ()
+function setAllowedVLANs ()
 {
 	assertUIntArg ('port_id');
 	$vlan_id_list = isset ($_REQUEST['vlan_id']) ? $_REQUEST['vlan_id'] : array();

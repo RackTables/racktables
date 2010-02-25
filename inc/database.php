@@ -2255,6 +2255,15 @@ function useSelectBlade ($query)
 	return $result;
 }
 
+function usePreparedSelectBlade ($query, $args = array())
+{
+	global $dbxlink;
+	$prepared = $dbxlink->prepare ($query);
+	if (!$prepared->execute ($args))
+		return FALSE;
+	return $prepared;
+}
+
 function loadConfigCache ()
 {
 	$query = 'SELECT varname, varvalue, vartype, is_hidden, emptyok, description, is_userdefined FROM Config ORDER BY varname';
@@ -3539,8 +3548,8 @@ function getPortInfo ($port_id)
 	$query = "SELECT object_id, name, iif_id, type AS oif_id, l2address, ".
 		"(SELECT dict_value FROM Dictionary WHERE dict_key = type) AS oif_name, " .
 		"(SELECT iif_name FROM PortInnerInterface WHERE id = iif_id) AS iif_name " .
-		"FROM Port WHERE id = ${port_id}";
-	$result = useSelectBlade ($query);
+		"FROM Port WHERE id = ?";
+	$result = usePreparedSelectBlade ($query, array ($port_id));
 	return $result->fetch (PDO::FETCH_ASSOC);
 }
 

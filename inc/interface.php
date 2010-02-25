@@ -6563,14 +6563,14 @@ function renderVLANDomainVLANList ($vdom_id)
 	echo '<tr><th>&nbsp;</th><th>ID</th><th>propagation</th><th>description</th><th>&nbsp;</th></tr>';
 	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
 		printNewItemTR();
-	global $vtdecoder, $vtoptions;
+	global $vtoptions;
 	foreach (getDomainVLANs ($vdom_id) as $vlan_id => $vlan_info)
 	{
 		printOpFormIntro ('upd', array ('vlan_id' => $vlan_id));
 		echo '<tr><td><a href="';
 		echo makeHrefProcess (array ('op' => 'del', 'vdom_id' => $vdom_id, 'vlan_id' => $vlan_id)) . '">';
 		printImageHREF ('destroy', 'delete VLAN');
-		echo '</a></td><td class=tdright><tt>' . $vlan_id . $vtdecoder[$vlan_info['vlan_type']] . '</tt></td><td>';
+		echo '</a></td><td class=tdright><tt>' . $vlan_id . '</tt></td><td>';
 		printSelect ($vtoptions, array ('name' => 'vlan_type'), $vlan_info['vlan_type']);
 		echo '</td><td>';
 		echo '<input name=vlan_descr type=text value="' . htmlspecialchars ($vlan_info['vlan_descr']) . '">';
@@ -6598,7 +6598,7 @@ function renderObjectVLANPorts ($object_id)
 		$object = spotEntity ('object', $object_id);
 		amplifyCell ($object);
 		echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
-		echo '<tr><th>&nbsp;</th><th>local name</th><th>VLAN IDs</th><th>&nbsp;</th></tr>';
+		echo '<tr><th>&nbsp;</th><th>port name</th><th>VLANs</th><th>&nbsp;</th></tr>';
 		foreach ($object['ports'] as $port)
 			if (array_key_exists ($port['id'], $allowed)) // eligible for 802.1Q
 			{
@@ -6614,9 +6614,9 @@ function renderObjectVLANPorts ($object_id)
 					)
 				);
 				echo "'>${port['name']}</a></td><td>";
-				echo serialiseVLANPack
+				echo serializeVLANPack
 				(
-					array_key_exists ($port['id'], $native) ? $native[$port['id']] : VLAN_DFL_ID,
+					array_key_exists ($port['id'], $native) ? $native[$port['id']] : 0,
 					array_key_exists ($port['id'], $allowed) ? $allowed[$port['id']] : array()
 				);
 				echo '</td></tr>';
@@ -6626,7 +6626,8 @@ function renderObjectVLANPorts ($object_id)
 	else
 	{
 		$port_id = $_REQUEST['port_id'];
-		$portinfo = getPortInfo ($port_id);
+		global $sic;
+		$portinfo = getPortInfo ($sic['port_id']);
 		if ($portinfo['object_id'] != $object_id)
 		{
 			showError ('Invalid port_id', __FUNCTION__);
