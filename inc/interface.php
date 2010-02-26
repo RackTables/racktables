@@ -6719,7 +6719,10 @@ function renderPortNativeVLAN ($port_id, $vdom, $allowed = array(), $native = 0)
 		echo '(no allowed VLANs for this port)';
 		return;
 	}
-	printOpFormIntro ('setNativeVLAN', array ('port_id' => $port_id));
+	// There is at least 1 item on the list. "Save" button requires a form,
+	// and only makes sense when there is at least one unchecked button in it.
+	if (count ($allowed) >= ($native ? 2 : 1))
+		printOpFormIntro ('setNativeVLAN', array ('port_id' => $port_id));
 	echo '<table border=0 cellspacing=0 cellpadding=3 align=center>';
 	foreach ($allowed as $vlan_id)
 	{
@@ -6738,8 +6741,14 @@ function renderPortNativeVLAN ($port_id, $vdom, $allowed = array(), $native = 0)
 		echo formatVLANName ($vdom['vlanlist'][$vlan_id]) . "</label></td></tr>";
 	}
 	echo '<tr><td class=tdleft>';
-	printImageHREF ('SAVE', 'Save changes', TRUE);
-	echo "</form></td><td class=tdright>";
+	if (count ($allowed) >= ($native ? 2 : 1))
+	{
+		printImageHREF ('SAVE', 'Save changes', TRUE);
+		echo '</form>';
+	}
+	else
+		printImageHREF ('NOSAVE', 'nothing to save');
+	echo "</td><td class=tdright>";
 	if (!$native)
 		printImageHREF ('CLEAR gray');
 	else
