@@ -3767,4 +3767,22 @@ function commitReduceVLANIPv4 ($vlan_ck, $ipv4net_id)
 	return $query->execute (array ($vdom_id, $vlan_id, $ipv4net_id));
 }
 
+// Return a list of switches, which have specific VLAN configured on
+// any port (each switch with the list of such ports).
+function getVLANConfiguredPorts ($vlan_ck)
+{
+	global $dbxlink;
+	$query = 'SELECT Port.object_id, port_id, name AS port_name ' .
+		'FROM PortAllowedVLAN AS PAV INNER JOIN Port ON PAV.port_id = Port.id ' .
+		'INNER JOIN VLANSwitch AS VS ON Port.object_id = VS.object_id ' .
+		'WHERE domain_id = ? AND vlan_id = ? ' .
+		'ORDER BY Port.object_id, port_id';
+	$prepared = $dbxlink->prepare ($query);
+	$prepared->execute (decodeVLANCK ($vlan_ck));
+	$ret = array();
+	while ($row = $prepared->fetch (PDO::FETCH_ASSOC))
+		$ret[$row['object_id']][$row['port_id']] = $row['port_name'];
+	return $ret;
+}
+
 ?>

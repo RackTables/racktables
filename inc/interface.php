@@ -6760,10 +6760,10 @@ function renderPortNativeVLAN ($port_id, $vdom, $allowed = array(), $native = 0)
 	echo '</td></tr></table>';
 }
 
-function renderVLANInfo ()
+function renderVLANInfo ($vlan_ck)
 {
 	global $vtoptions;
-	$vlan = getVLANInfo ($_REQUEST['vlan_ck']);
+	$vlan = getVLANInfo ($vlan_ck);
 	echo '<table border=0 class=objectview cellspacing=0 cellpadding=0>';
 	echo "<tr><td colspan=2 align=center><h1>${mydomain['description']}</h1></td></tr>";
 	echo "<tr><td class=pcleft width='50%'>";
@@ -6778,8 +6778,7 @@ function renderVLANInfo ()
 	echo "<tr><th width='50%' class=tdright>Propagation:</th><td class=tdleft>" . $vtoptions[$vlan['vlan_prop']] . "</td></tr>";
 	echo '</table>';
 	finishPortlet();
-	echo '</td><td class=pcright>';
-	startPortlet ('IPv4 networks');
+	startPortlet ('networks');
 	if (!count ($vlan['ipv4nets']))
 		echo '(none)';
 	else
@@ -6790,6 +6789,29 @@ function renderVLANInfo ()
 			echo '<tr><td>';
 			renderCell (spotEntity ('ipv4net', $netid));
 			echo '</td></tr>';
+		}
+		echo '</table>';
+	}
+	finishPortlet();
+	echo '</td><td class=pcright>';
+	startPortlet ('ports');
+	if (!count ($confports = getVLANConfiguredPorts ($vlan_ck)))
+		echo '(none)';
+	else
+	{
+		global $nextorder;
+		$order = 'odd';
+		echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
+		echo '<tr><th>switch</th><th>ports</th></tr>';
+		foreach ($confports as $switch_id => $portlist)
+		{
+			echo "<tr class=row_${order} valign=top><td>";
+			renderCell (spotEntity ('object', $switch_id));
+			echo '</td><td class=tdleft><ul>';
+			foreach ($portlist as $port_id => $port_name)
+				echo "<li>${port_name}</li>";
+			echo '</ul></td></tr>';
+			$order = $nextorder[$order];
 		}
 		echo '</table>';
 	}
