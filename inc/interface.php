@@ -6407,8 +6407,8 @@ function renderVLANDomainList ()
 	foreach (getVLANDomainList() as $vdom_id => $dominfo)
 	{
 		echo "<tr><td><a href='";
-		echo makeHref (array ('page' => 'vlandomain', 'vdom_id' => $vdom_id));
-		echo "'>${dominfo['description']}</a></td><td>${dominfo['vlanc']}</td>";
+		echo makeHref (array ('page' => 'vlandomain', 'vdom_id' => $vdom_id)) . "'>";
+		echo niftyString ($dominfo['description']) . "</a></td><td>${dominfo['vlanc']}</td>";
 		echo "<td>${dominfo['switchc']}</td></tr>";
 	}
 	echo '</table>';
@@ -6445,7 +6445,7 @@ function renderVLANDomainListEditor ()
 			echo '</a>';
 		}
 		echo '</td><td><input name=vdom_descr type=text value="';
-		echo htmlspecialchars ($dominfo['description']) . '">';
+		echo niftyString ($dominfo['description'], 0) . '">';
 		echo '</td><td>';
 		printImageHREF ('save', 'update description', TRUE);
 		echo '</td></tr></form>';
@@ -6459,7 +6459,8 @@ function renderVLANDomain ($vdom_id)
 {
 	$mydomain = getVLANDomain ($vdom_id);
 	echo '<table border=0 class=objectview cellspacing=0 cellpadding=0>';
-	echo "<tr><td colspan=2 align=center><h1>${mydomain['description']}</h1></td></tr>";
+	echo '<tr><td colspan=2 align=center><h1>' . niftyString ($mydomain['description']);
+	echo '</h1></td></tr>';
 	echo "<tr><td class=pcleft width='50%'>";
 	startPortlet ('bindings');
 	if (!count ($mydomain['switchlist']))
@@ -6646,7 +6647,7 @@ function renderObjectVLANPorts ($object_id)
 		$objectdomain = getVLANDomain ($vdom_id);
 		echo '<table border=0 class=objectview cellspacing=0 cellpadding=0>';
 		echo "<tr><td colspan=2 align=center><h1>${header}</h1></td></tr>";
-		echo "<tr valign=top><td class=pcleft>";
+		echo "<tr valign=top><td class=pcleft width='50%'>";
 		startPortlet ('allowed VLAN(s)');
 		renderPortAllowedVLANs
 		(
@@ -6671,6 +6672,11 @@ function renderObjectVLANPorts ($object_id)
 
 function renderPortAllowedVLANs ($port_id, $vdom, $preselect)
 {
+	if (!count ($vdom['vlanlist']))
+	{
+		echo '(no VLANs in assigned domain)';
+		return;
+	}
 	printOpFormIntro ('setAllowedVLANs', array ('port_id' => $port_id));
 	echo '<table border=0 cellspacing=0 cellpadding=3 align=center>';
 	foreach ($vdom['vlanlist'] as $vlan_id => $vlan_info)
@@ -6705,6 +6711,11 @@ function renderPortAllowedVLANs ($port_id, $vdom, $preselect)
 
 function renderPortNativeVLAN ($port_id, $vdom, $allowed = array(), $native = 0)
 {
+	if (!count ($allowed))
+	{
+		echo '(no allowed VLANs for this port)';
+		return;
+	}
 	printOpFormIntro ('setNativeVLAN', array ('port_id' => $port_id));
 	echo '<table border=0 cellspacing=0 cellpadding=3 align=center>';
 	foreach ($allowed as $vlan_id)
