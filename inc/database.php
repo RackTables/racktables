@@ -3723,6 +3723,33 @@ function commitSaveNativeVLAN ($port_id, $vlan_id = 0)
 	return TRUE;
 }
 
+// Replace current port configuration with the provided one. If the new
+// native VLAN ID doesn't belong to the allowed list, don't issue
+// INSERT query, which would always trigger an FK exception.
+// This function indicates an error, but doesn't revert it, so it is
+// assummed, that the calling function performs necessary transaction wrapping.
+function setPortVLANConfig ($port_id, $allowed, $native)
+{
+	global $dbxlink;
+	if
+	(
+		FALSE === usePreparedDeleteBlade ('PortAllowedVLAN', 'port_id', $port_id) or
+		FALSE === usePreparedDeleteBlade ('PortNativeVLAN', 'port_id', $port_id)
+	)
+		return FALSE;
+	foreach ($allowed as $vlan_id)
+		if (!usePreparedInsertBlade ('PortAllowedVLAN', array ('port_id' => $port_id, 'vlan_id' => $vlan_id)))
+			return FALSE;
+	if
+	(
+		$native and
+		in_array ($native, $allowed) and
+		!usePreparedInsertBlade ('PortNativeVLAN', array ('port_id' => $port_id, 'vlan_id' => $native))
+	)
+		return FALSE;
+	return TRUE;
+}
+
 function getVLANInfo ($vlan_ck)
 {
 	list ($vdom_id, $vlan_id) = decodeVLANCK ($vlan_ck);
@@ -3783,6 +3810,57 @@ function getVLANConfiguredPorts ($vlan_ck)
 	while ($row = $prepared->fetch (PDO::FETCH_ASSOC))
 		$ret[$row['object_id']][$row['port_id']] = $row['port_name'];
 	return $ret;
+}
+
+function setSwitchVLANConfig ($object_id, $form_mutex_rev, $work)
+{
+	global $dbxlink;
+	$dbxlink->beginTransaction();
+	$prepared = $dbxlink->prepare ('SELECT mutex_rev FROM VLANSwitch WHERE object_id = ? FOR UPDATE');
+	$prepared->execute (array ($object_id));
+	if (!$row = $prepared->fetch (PDO::FETCH_ASSOC))
+	{
+		$dbxlink->rollBack();
+		throw new InvalidArgException ('object_id', $object_id, 'VLAN domain is not set for this object');
+	}
+	$db_mutex_rev = $row['mutex_rev'];
+	unset ($prepared);
+	$allowed = getAllowedVLANsForObjectPorts ($object_id);
+	$native = getNativeVLANsForObjectPorts ($object_id);
+	$changed = FALSE;
+	foreach ($work as $item)
+	{
+		if (!array_key_exists ($item['port_id'], $allowed))
+		{
+			$dbxlink->rollBack();
+			throw new InvalidArgException ('port_id', $item['port_id'], 'the requested port does not belong to current object');
+		}
+		// Only consider touching database, when there are changes for the current port.
+		if
+		(
+			count (array_intersect ($item['allowed'], $allowed[$item['port_id']])) == count ($item['allowed']) and
+			$item['native'] == $native[$item['port_id']]
+		)
+			continue; // data already meets the request
+		$changed = TRUE;
+		if ($form_mutex_rev != $db_mutex_rev)
+		{
+			$dbxlink->rollBack();
+			throw new RuntimeException();
+		}
+		if (!setPortVLANConfig ($item['port_id'], $item['allowed'], $item['native']))
+		{
+			$dbxlink->rollBack();
+			throw new RuntimeException();
+		}
+	}
+	$query = $dbxlink->prepare ('UPDATE VLANSwitch SET mutex_rev = mutex_rev + 1 WHERE object_id = ?');
+	$query->execute (array ($object_id));
+	if ($changed)
+		$dbxlink->commit();
+	else
+		$dbxlink->rollBack();
+	return TRUE;
 }
 
 ?>

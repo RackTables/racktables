@@ -400,6 +400,7 @@ CREATE TABLE `VLANIPv4` (
 CREATE TABLE `VLANSwitch` (
   `object_id` int(10) unsigned NOT NULL,
   `domain_id` int(10) unsigned NOT NULL,
+  `mutex_rev` int(10) unsigned NOT NULL default '0',
   `last_reset` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
   `last_pull` timestamp NOT NULL default '0000-00-00 00:00:00',
   `last_push` timestamp NOT NULL default '0000-00-00 00:00:00',
