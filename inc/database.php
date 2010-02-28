@@ -3670,26 +3670,6 @@ function getAllowedVLANsForObjectPorts ($object_id)
 	return $ret;
 }
 
-function commitSaveAllowedVLANs ($port_id, $vlan_id_list)
-{
-	global $dbxlink;
-	$dbxlink->beginTransaction();
-	// the below cascades down to PortNativeVLAN
-	if (FALSE === usePreparedDeleteBlade ('PortAllowedVLAN', 'port_id', $port_id))
-	{
-		$dbxlink->rollBack();
-		return FALSE;
-	}
-	foreach ($vlan_id_list as $vlan_id)
-		if (!usePreparedInsertBlade ('PortAllowedVLAN', array ('port_id' => $port_id, 'vlan_id' => $vlan_id)))
-		{
-			$dbxlink->rollBack();
-			return FALSE;
-		}
-	$dbxlink->commit();
-	return TRUE;
-}
-
 function getNativeVLANsForObjectPorts ($object_id)
 {
 	global $dbxlink;
@@ -3702,25 +3682,6 @@ function getNativeVLANsForObjectPorts ($object_id)
 	while ($row = $prepared->fetch (PDO::FETCH_ASSOC))
 		$ret[$row['port_id']] = $row['vlan_id']; // port_id is unique in this table
 	return $ret;
-}
-
-// When the new native VLAN ID is 0, only delete the old row (if it exists).
-function commitSaveNativeVLAN ($port_id, $vlan_id = 0)
-{
-	global $dbxlink;
-	$dbxlink->beginTransaction();
-	if (FALSE === usePreparedDeleteBlade ('PortNativeVLAN', 'port_id', $port_id))
-	{
-		$dbxlink->rollBack();
-		return FALSE;
-	}
-	if ($vlan_id and !usePreparedInsertBlade ('PortNativeVLAN', array ('port_id' => $port_id, 'vlan_id' => $vlan_id)))
-	{
-		$dbxlink->rollBack();
-		return FALSE;
-	}
-	$dbxlink->commit();
-	return TRUE;
 }
 
 // Replace current port configuration with the provided one. If the new
@@ -3740,6 +3701,7 @@ function setPortVLANConfig ($port_id, $allowed, $native)
 	foreach ($allowed as $vlan_id)
 		if (!usePreparedInsertBlade ('PortAllowedVLAN', array ('port_id' => $port_id, 'vlan_id' => $vlan_id)))
 			return FALSE;
+	// When the new native VLAN ID is 0, only delete the old row (if it exists).
 	if
 	(
 		$native and

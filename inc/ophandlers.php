@@ -2166,34 +2166,28 @@ function updateVLANDomain ()
 	return buildRedirectURL (__FUNCTION__, $result ? 'OK' : 'ERR');
 }
 
-$msgcode['setAllowedVLANs']['OK'] = 17;
-$msgcode['setAllowedVLANs']['ERR1'] = 160;
-$msgcode['setAllowedVLANs']['ERR2'] = 109;
-function setAllowedVLANs ()
+$msgcode['savePortVLANConfig']['OK'] = 43;
+$msgcode['savePortVLANConfig']['ERR1'] = 160;
+$msgcode['savePortVLANConfig']['ERR2'] = 109;
+function savePortVLANConfig ()
 {
 	assertUIntArg ('port_id');
-	global $sic;
-	$portinfo = getPortInfo ($sic['port_id']);
-	if ($portinfo['object_id'] != $sic['object_id'])
-		return buildRedirectURL (__FUNCTION__, 'ERR1');
-	$vlan_id_list = isset ($sic['vlan_id']) ? $sic['vlan_id'] : array();
-	$result = commitSaveAllowedVLANs ($sic['port_id'], $vlan_id_list);
-	return buildRedirectURL (__FUNCTION__, $result ? 'OK' : 'ERR2', array(), NULL, NULL, array ('port_id' => $sic['port_id']));
-}
-
-$msgcode['setNativeVLAN']['OK'] = 43;
-$msgcode['setNativeVLAN']['ERR1'] = 160;
-$msgcode['setNativeVLAN']['ERR2'] = 109;
-function setNativeVLAN ()
-{
-	assertUIntArg ('port_id');
-	global $sic;
+	global $sic, $dbxlink;
 	$vlan_id = isset ($sic['vlan_id']) ? $sic['vlan_id'] : 0; // 0 means "reset"
 	$portinfo = getPortInfo ($sic['port_id']);
 	if ($portinfo['object_id'] != $sic['object_id'])
-		return buildRedirectURL (__FUNCTION__, 'ERR1');
-	$result = commitSaveNativeVLAN ($sic['port_id'], $vlan_id);
-	return buildRedirectURL (__FUNCTION__, $result ? 'OK' : 'ERR2', array(), NULL, NULL, array ('port_id' => $sic['port_id']));
+		// should we throw instead?
+		return buildRedirectURL (__FUNCTION__, 'ERR1', array(), NULL, NULL, array ('port_id' => $sic['port_id']));
+	$allowed = isset ($sic['allowed_id']) ? $sic['allowed_id'] : array();
+	$native = isset ($sic['native_id']) ? $sic['native_id'] : 0; // 0 means "reset"
+	$dbxlink->beginTransaction();
+	if (setPortVLANConfig ($sic['port_id'], $allowed, $native))
+	{
+		$dbxlink->commit();
+		return buildRedirectURL (__FUNCTION__, 'OK', array(), NULL, NULL, array ('port_id' => $sic['port_id']));
+	}
+	$dbxlink->rollBack();
+	return buildRedirectURL (__FUNCTION__, 'ERR2', array(), NULL, NULL, array ('port_id' => $sic['port_id']));
 }
 
 $msgcode['bindVLANtoIPv4']['OK'] = 48;

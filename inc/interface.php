@@ -6594,97 +6594,76 @@ function renderVLANDomainVLANList ($vdom_id)
 // and a form to edits VLANs it runs.
 function renderObjectVLANPorts ($object_id)
 {
-	global $pageno, $tabno;
+	global $pageno, $tabno, $sic;
 	$allowed = getAllowedVLANsForObjectPorts ($object_id);
 	$native = getNativeVLANsForObjectPorts ($object_id);
-	if (!isset ($_REQUEST['port_id']))
-	{
-		$object = spotEntity ('object', $object_id);
-		amplifyCell ($object);
-		echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
-		echo '<tr><th>&nbsp;</th><th>port name</th><th>VLANs</th><th>&nbsp;</th></tr>';
-		foreach ($object['ports'] as $port)
-			if (array_key_exists ($port['id'], $allowed)) // eligible for 802.1Q
-			{
-				echo "<tr><td>&nbsp;";
-				echo "</td><td><a href='" . makeHref
+	$object = spotEntity ('object', $object_id);
+	amplifyCell ($object);
+	$port_id = array_key_exists ('port_id', $sic) ? $sic['port_id'] : 0;
+	echo '<table border=1 width="100%"><tr valign=top><td class=tdleft width="30%">';
+	// port list
+	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
+	echo '<tr><th>port name</th><th>current config</th></tr>';
+	foreach ($object['ports'] as $port)
+		if (array_key_exists ($port['id'], $allowed)) // eligible for 802.1Q
+		{
+			$tdclass = $port['id'] == $port_id ? 'seltagbox' : 'tagbox';
+			echo "<tr><td class=${tdclass}><a href='" . makeHref
+			(
+				array
 				(
-					array
-					(
-						'page' => $pageno,
-						'tab' => $tabno,
-						'object_id' => $object_id,
-						'port_id' => $port['id'],
-					)
-				);
-				echo "'>${port['name']}</a></td><td>";
-				echo serializeVLANPack
-				(
-					array_key_exists ($port['id'], $native) ? $native[$port['id']] : 0,
-					array_key_exists ($port['id'], $allowed) ? $allowed[$port['id']] : array()
-				);
-				echo '</td></tr>';
-			}
-		echo '</table>';
-	}
+					'page' => $pageno,
+					'tab' => $tabno,
+					'object_id' => $object_id,
+					'port_id' => $port['id'],
+				)
+			);
+			echo "'>${port['name']}</a></td><td class=${tdclass}>";
+			echo serializeVLANPack
+			(
+				array_key_exists ($port['id'], $native) ? $native[$port['id']] : 0,
+				array_key_exists ($port['id'], $allowed) ? $allowed[$port['id']] : array()
+			);
+			echo '</td></tr>';
+		}
+	echo '</table>';
+	echo '</td>';
+	// configuration of currently selected port, if any
+	if (!$port_id)
+		echo '<td colspan=2>&nbsp;</td>';
 	else
 	{
-		$port_id = $_REQUEST['port_id'];
-		global $sic;
-		$portinfo = getPortInfo ($sic['port_id']);
+		$portinfo = getPortInfo ($port_id);
 		if ($portinfo['object_id'] != $object_id)
 		{
 			showError ('Invalid port_id', __FUNCTION__);
 			return;
 		}
-		$header = "port '${portinfo['name']}' (<a href='" . makeHref
-		(
-			array
-			(
-				'page' => $pageno,
-				'tab' => $tabno,
-				'object_id' => $object_id,
-			)
-		) . "'>show all</a>)";
-		$vdom_id = getObjectVLANDomainID ($object_id);
-		$objectdomain = getVLANDomain ($vdom_id);
-		echo '<table border=0 class=objectview cellspacing=0 cellpadding=0>';
-		echo "<tr><td colspan=2 align=center><h1>${header}</h1></td></tr>";
-		echo "<tr valign=top><td class=pcleft width='50%'>";
-		startPortlet ('allowed VLAN(s)');
-		renderPortAllowedVLANs
+		renderPortVLANConfig
 		(
 			$port_id,
-			$objectdomain,
-			array_key_exists ($port_id, $allowed) ? $allowed[$port_id] : array()
-		);
-		finishPortlet();
-		echo '</td><td>';
-		startPortlet ('native VLAN');
-		renderPortNativeVLAN
-		(
-			$port_id,
-			$objectdomain,
+			getVLANDomain (getObjectVLANDomainID ($object_id)),
 			array_key_exists ($port_id, $allowed) ? $allowed[$port_id] : array(),
 			array_key_exists ($port_id, $native) ? $native[$port_id] : 0
 		);
-		finishPortlet();
-		echo '</td></tr></table>';
 	}
+	echo '</tr></table>';
 }
 
-function renderPortAllowedVLANs ($port_id, $vdom, $preselect)
+function renderPortVLANConfig ($port_id, $vdom, $allowed, $native)
 {
 	if (!count ($vdom['vlanlist']))
 	{
-		echo '(no VLANs in assigned domain)';
+		echo '<td colspan=2>(configured VLAN domain is empty)</td>';
 		return;
 	}
-	printOpFormIntro ('setAllowedVLANs', array ('port_id' => $port_id));
+	printOpFormIntro ('savePortVLANConfig', array ('port_id' => $port_id));
+	echo '<td width="35%">';
 	echo '<table border=0 cellspacing=0 cellpadding=3 align=center>';
+	echo '<tr><th colspan=2>allowed</th></tr>';
 	foreach ($vdom['vlanlist'] as $vlan_id => $vlan_info)
 	{
-		if (in_array ($vlan_id, $preselect))
+		if (in_array ($vlan_id, $allowed))
 		{
 			$selected = ' checked';
 			$class = 'seltagbox';
@@ -6695,69 +6674,51 @@ function renderPortAllowedVLANs ($port_id, $vdom, $preselect)
 			$class = 'tagbox';
 		}
 		echo "<tr><td colspan=2 class=${class}>";
-		echo "<label><input type=checkbox name='vlan_id[]' value='${vlan_id}'${selected}> ";
+		echo "<label><input type=checkbox name='allowed_id[]' value='${vlan_id}'${selected}> ";
 		echo formatVLANName ($vlan_info) . "</label></td></tr>";
+	}
+	echo '</table>';
+	echo '</td><td width="35%">';
+	// rightmost table also contains form buttons
+	echo '<table border=0 cellspacing=0 cellpadding=3 align=center>';
+	echo '<tr><th colspan=2>native</th></tr>';
+	if (!count ($allowed))
+		echo '<tr><td colspan=2>(no allowed VLANs for this port)</td></tr>';
+	else
+	{
+		$native_options = array (0 => '-- NONE --');
+		foreach ($allowed as $allowed_id)
+			$native_options[$allowed_id] = formatVLANName ($vdom['vlanlist'][$allowed_id]);
+		foreach ($native_options as $vlan_id => $vlan_text)
+		{
+			if ($vlan_id == $native)
+			{
+				$selected = ' checked';
+				$class = 'seltagbox';
+			}
+			else
+			{
+				$selected = '';
+				$class = 'tagbox';
+			}
+			echo "<tr><td colspan=2 class=${class}>";
+			echo "<label><input type=radio name='native_id' value='${vlan_id}'${selected}> ";
+			echo $vlan_text . "</label></td></tr>";
+		}
 	}
 	echo '<tr><td class=tdleft>';
 	printImageHREF ('SAVE', 'Save changes', TRUE);
-	echo "</form></td><td class=tdright>";
-	if (!count ($preselect))
+	echo '</form></td><td class=tdright>';
+	if (!count ($allowed))
 		printImageHREF ('CLEAR gray');
 	else
 	{
-		printOpFormIntro ('setAllowedVLANs', array ('port_id' => $port_id));
+		printOpFormIntro ('savePortVLANConfig', array ('port_id' => $port_id));
 		printImageHREF ('CLEAR', 'Unassign all VLANs', TRUE);
 		echo '</form>';
 	}
 	echo '</td></tr></table>';
-}
-
-function renderPortNativeVLAN ($port_id, $vdom, $allowed = array(), $native = 0)
-{
-	if (!count ($allowed))
-	{
-		echo '(no allowed VLANs for this port)';
-		return;
-	}
-	// There is at least 1 item on the list. "Save" button requires a form,
-	// and only makes sense when there is at least one unchecked button in it.
-	if (count ($allowed) >= ($native ? 2 : 1))
-		printOpFormIntro ('setNativeVLAN', array ('port_id' => $port_id));
-	echo '<table border=0 cellspacing=0 cellpadding=3 align=center>';
-	foreach ($allowed as $vlan_id)
-	{
-		if ($vlan_id == $native)
-		{
-			$selected = ' checked';
-			$class = 'seltagbox';
-		}
-		else
-		{
-			$selected = '';
-			$class = 'tagbox';
-		}
-		echo "<tr><td colspan=2 class=${class}>";
-		echo "<label><input type=radio name='vlan_id' value='${vlan_id}'${selected}> ";
-		echo formatVLANName ($vdom['vlanlist'][$vlan_id]) . "</label></td></tr>";
-	}
-	echo '<tr><td class=tdleft>';
-	if (count ($allowed) >= ($native ? 2 : 1))
-	{
-		printImageHREF ('SAVE', 'Save changes', TRUE);
-		echo '</form>';
-	}
-	else
-		printImageHREF ('NOSAVE', 'nothing to save');
-	echo "</td><td class=tdright>";
-	if (!$native)
-		printImageHREF ('CLEAR gray');
-	else
-	{
-		printOpFormIntro ('setNativeVLAN', array ('port_id' => $port_id, 'vlan_id' => 0));
-		printImageHREF ('CLEAR', 'Reset native VLAN', TRUE);
-		echo '</form>';
-	}
-	echo '</td></tr></table>';
+	echo '</td>';
 }
 
 function renderVLANInfo ($vlan_ck)
