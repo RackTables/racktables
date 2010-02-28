@@ -1382,4 +1382,198 @@ function invariantExpression ($expr)
 	}
 }
 
+/*
+Scan the given IOS "running-config" text and return a sequence of lexems:
+
+LEX_KW_interface
+LEX_KW_allowed
+LEX_KW_native
+LEX_KW_switchport
+LEX_KW_mode
+LEX_KW_trunk
+LEX_KW_access
+LEX_KW_vlan
+LEX_KW_OTHER (+value)
+LEX_IFNAME (+value)
+LEX_NUMBER (+value)
+LEX_COMMA
+LEX_DASH
+LEX_NEWLINE
+*/
+
+function doIOSLexicalScan ($text)
+{
+	$ret = array();
+	$text .= ' ';
+	$textlen = mb_strlen ($text);
+	$lineno = 1;
+	$state = 'empty buffer';
+	for ($i = 0; $i < $textlen; $i++)
+	{
+		$char = mb_substr ($text, $i, 1);
+		$newstate = $state;
+		switch ($state)
+		{
+		case 'empty buffer':
+			switch (TRUE)
+			{
+			case ($char == ','):
+				$ret[] = array ('type' => 'LEX_COMMA', 'lineno' => $lineno);
+				break;
+			case ($char == '-'):
+				$ret[] = array ('type' => 'LEX_DASH', 'lineno' => $lineno);
+				break;
+			case ($char == '!'):
+				$newstate = 'skipping comment';
+				break;
+			case (preg_match ('/[[:alpha:]]/', $char) == 1):
+				$newstate = 'reading keyword';
+				$buffer = $char;
+				break;
+			case (preg_match ('/[[:digit:]]/', $char) == 1):
+				$newstate = 'reading number';
+				$buffer = $char;
+				break;
+			case ($char == "\n"):
+				$ret[] = array ('type' => 'LEX_NEWLINE', 'lineno' => $lineno++);
+				break;
+			case ($char == ' '):
+				// nom-nom...
+				break;
+			default:
+				$newstate = 'reading other';
+				$buffer = $char;
+				break;
+			}
+			break;
+		case 'reading keyword':
+			switch (TRUE)
+			{
+			case (preg_match ('/[[:alnum:]]/', $char) == 1):
+				$buffer .= $char;
+				break;
+			case ($char == "\n"):
+			case ($char == ' '):
+				// classify discovered keyword
+				switch ($buffer)
+				{
+				case 'interface':
+				case 'allowed':
+				case 'native':
+				case 'switchport':
+				case 'mode':
+				case 'trunk':
+				case 'access':
+				case 'vlan':
+					$ret[] = array ('type' => "LEX_KW_${buffer}", 'lineno' => $lineno);
+					break;
+				default:
+					$ret[] = array
+					(
+						'type' => 'LEX_KW_OTHER',
+						'load' => $buffer,
+						'lineno' => $lineno,
+					);
+					break;
+				}
+				if ($char == "\n")
+					$ret[] = array ('type' => LEX_NEWLINE, 'lineno' => $lineno++);
+				$newstate = 'empty buffer';
+				break;
+			// below two cases do late discovery
+			case ($char == '/'):
+				$buffer .= $char;
+				$newstate = 'reading ifname';
+				break;
+			default:
+				$buffer .= $char;
+				$newstate = 'reading other';
+				break;
+			}
+			break;
+		case 'reading other':
+			switch (TRUE)
+			{
+			case ($char == "\n"):
+			case ($char == ' '):
+				$ret[] = array
+				(
+					'type' => 'LEX_KW_OTHER',
+					'load' => $buffer,
+					'lineno' => $lineno,
+				);
+				if ($char == "\n")
+					$ret[] = array ('type' => LEX_NEWLINE, 'lineno' => $lineno++);
+				$newstate = 'empty buffer';
+				break;
+			default:
+				$buffer .= $char;
+			}
+			break;
+		case 'reading number':
+			switch (TRUE)
+			{
+			case (preg_match ('/[[:digit:]]/', $char) == 1):
+				$buffer .= $char;
+				break;
+			case ($char == "\n"):
+			case ($char == ' '):
+				$ret[] = array
+				(
+					'type' => 'LEX_NUMBER',
+					'load' => $buffer,
+					'lineno' => $lineno,
+				);
+				if ($char == "\n")
+					$ret[] = array ('type' => LEX_NEWLINE, 'lineno' => $lineno++);
+				$newstate = 'empty buffer';
+				break;
+			default: // reclassify to 'other' (e.g. IP address)
+				$newstate = 'reading other';
+				$buffer .= $char;
+				break;
+			}
+			break;
+		case 'reading ifname':
+			switch (TRUE)
+			{
+			case (preg_match ('/[[:digit:]]/', $char) == 1):
+				$buffer .= $char;
+				break;
+			case ($char == "\n"):
+			case ($char == ' '):
+				$ret[] = array
+				(
+					'type' => 'LEX_IFNAME',
+					'load' => $buffer,
+					'lineno' => $lineno,
+				);
+				if ($char == "\n")
+					$ret[] = array ('type' => LEX_NEWLINE, 'lineno' => $lineno++);
+				$newstate = 'empty buffer';
+				break;
+			default:
+				return lexError1 ($state, $text, $i, $lineno);
+			}
+			break;
+		case 'skipping comment':
+			switch ($char)
+			{
+			case "\n": // suppress LEX_NEWLINE
+				$lineno++;
+				$newstate = 'empty buffer';
+			default: // eaten
+				break;
+			}
+			break;
+		default:
+			die (__FUNCTION__ . "(): internal error, state == ${state}");
+		}
+		$state = $newstate;
+	}
+	if ($state != 'empty buffer' and $state != 'skipping comment')
+		return lexError3 ($state, $lineno);
+	return array ('result' => 'ACK', 'load' => $ret);
+}
+
 ?>
