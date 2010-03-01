@@ -2275,4 +2275,105 @@ function formatVLANName ($vlaninfo)
 	return $ret;
 }
 
+// Read given running-config and return a list of work items in a format
+// similar to the one, which setSwitchVLANConfig() understands.
+function iosReadVLANConfig ($input)
+{
+	$ret = array();
+	$procfunc = 'iosPickInterfaceCommand';
+	foreach (explode ("\n", $input) as $line)
+		$procfunc = $procfunc ($ret, $line);
+	return $ret;
+}
+
+function iosPickInterfaceCommand (&$work, $line)
+{
+	$matches = array();
+	if (!preg_match ('@^interface ((Ethernet|FastEthernet|GigabitEthernet|TenGigabitEthernet)[[:digit:]]+(/[[:digit:]]+)*)$@', $line, $matches))
+		return __FUNCTION__; // continue scan
+	$work['current'] = array ('port_name' => $matches[1]);
+	return 'iosPickSwitchportCommand'; // switch to interface block reading
+}
+
+function iosPickSwitchportCommand (&$work, $line)
+{
+	if ($line[0] != ' ') // end of interface section
+	{
+		$boiled = array ('port_name' => $work['current']['port_name']);
+		// fill in defaults
+		if (!array_key_exists ('mode', $work['current']))
+			$work['current']['mode'] = 'access';
+		if (!array_key_exists ('access vlan', $work['current']))
+			$work['current']['access vlan'] = 1;
+		if (!array_key_exists ('trunk native vlan', $work['current']))
+			$work['current']['trunk native vlan'] = 1;
+		if (!array_key_exists ('trunk allowed vlan', $work['current']))
+			$work['current']['trunk allowed vlan'] = range (VLAN_MIN_ID, VLAN_MAX_ID);
+		// save work, if it makes sense
+		switch ($work['current']['mode'])
+		{
+		case 'access':
+			$work[] = array
+			(
+				'port_name' => $work['current']['port_name'],
+				'allowed' => array ($work['current']['access vlan']),
+				'native' => $work['current']['access vlan'],
+			);
+			break;
+		case 'trunk':
+			$work[] = array
+			(
+				'port_name' => $work['current']['port_name'],
+				'allowed' => array ($work['current']['trunk allowed vlan']),
+				'native' => $work['current']['trunk native vlan'],
+			);
+			break;
+		default:
+			// dot1q-tunnel, dynamic, private-vlan --- skip these
+		}
+		unset ($work['current']);
+		return 'iosPickInterfaceCommand';
+	}
+	// not yet
+	$matches = array();
+	switch (TRUE)
+	{
+	case (preg_match ('@^ switchport mode (.+)$@', $line, $matches)):
+		$work['current']['mode'] = $matches[1];
+		break;
+	case (preg_match ('@^ switchport access vlan (.+)$@', $line, $matches)):
+		$work['current']['access vlan'] = $matches[1];
+		break;
+	case (preg_match ('@^ switchport trunk native vlan (.+)$@', $line, $matches)):
+		$work['current']['trunk native vlan'] = $matches[1];
+		break;
+	case (preg_match ('@^ switchport trunk allowed vlan add (.+)$@', $line, $matches)):
+		$work['current']['trunk allowed vlan'] = array_merge
+		(
+			$work['current']['trunk allowed vlan'],
+			iosParseVLANString ($matches[1])
+		);
+		break;
+	case (preg_match ('@^ switchport trunk allowed vlan (.+)$@', $line, $matches)):
+		$work['current']['trunk allowed vlan'] = iosParseVLANString ($matches[1]);
+		break;
+	default: // suppress warning on irrelevant config clause
+	}
+	return __FUNCTION__;
+}
+
+function iosParseVLANString ($string)
+{
+	$ret = array();
+	foreach (explode (',', $string) as $item)
+	{
+		$matches = array();
+		if (preg_match ('/^([[:digit:]]+)$/', $item, $matches))
+			$ret[] = $matches[1];
+		elseif (preg_match ('/^([[:digit:]]+)-([[:digit:]]+)$/', $item, $matches))
+			$ret = array_merge ($ret, range ($matches[1], $matches[2]));
+	}
+	return $ret;
+}
+
 ?>
