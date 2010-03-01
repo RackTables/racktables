@@ -1,0 +1,239 @@
+#!/bin/sh
+
+# This is a RackTables gateway for changing switch ports membership
+# across VLANs. It works accordingly to the gateway protocol described
+# in gateways.php and accepts the following commands on its stdin:
+#
+# * connect: connect to a switch, fetch all necessary data, store and
+#   disconnect
+#
+# * listvlans: list all VLANs found on the switch, propably filtering
+# out those administratively prohibited. Only the VLANs from this
+# list will be allowed as new destination for 'set' command.
+#
+# * listports: list all ports on the switch and their current status.
+#   Untagged (switchport mode access) ports will be shown with their
+#   VLAN ID and tagged ports will be shown as 'trunk' regardless of
+#   how many VLANs they are members of.
+#
+# * listmacs: output unsorted list of all dynamically learned MAC
+#   addresses present on the switch
+#
+
+endpoint=
+hw=
+sw=
+user=
+handler=
+CONNECTED=0
+MYDIR=`dirname $0`
+
+decode_error()
+{
+	case "$1" in
+		0)
+			echo -n 'success'
+		;;
+		1)
+			echo -n 'internal error 1'
+		;;
+		2)
+			echo -n 'internal error 2'
+		;;
+		3)
+			echo -n 'password not found'
+		;;
+		4)
+			echo -n 'invalid password'
+		;;
+		5)
+			echo -n 'cannot create temporary files'
+		;;
+		6)
+			echo -n 'invalid command'
+		;;
+		7)
+			echo -n 'unknown host OS'
+		;;
+		*)
+			echo -n 'unknown error'
+		;;
+	esac
+}
+
+# Not only connect, but gather all the data at once and remember the context.
+do_connect()
+{
+	endpoint=`echo $args | cut -s -d' ' -f1`
+	hw=`echo $args | cut -s -d' ' -f2`
+	sw=`echo $args | cut -s -d' ' -f3`
+	user=`echo $args | cut -s -d' ' -f4`
+	# sanity checks
+	if [ -z "$endpoint" -o -z "$hw" -o -z "$sw" -o -z "$user" ]; then
+		echo 'ERR!too few arguments to connect'
+		return
+	fi
+	case "$sw" in
+		Cisco+IOS+12.0|Cisco+IOS+12.1|Cisco+IOS+12.2)
+			handler=cisco
+		;;
+		*)
+			echo "ERR!Don't know how to handle $sw on $endpoint"
+			return
+		;;
+	esac
+
+	# prepare temp files
+	PORTINFO=`mktemp /tmp/racktables.XXXX`
+	if ! [ -f "$PORTINFO" ]; then
+		echo 'ERR!could not create portinfo tmpfile'
+		return
+	fi
+	VLANINFO=`mktemp /tmp/racktables.XXXX`
+	if ! [ -f "$VLANINFO" ]; then
+		echo 'ERR!could not create vlaninfo tmpfile'
+		rm -f "$PORTINFO"
+		return
+	fi
+	MACINFO=`mktemp /tmp/racktables.XXXX`
+	if ! [ -f "$MACINFO" ]; then
+		echo 'ERR!could not create MACinfo tmpfile'
+		rm -f "$PORTINFO" "$VLANINFO"
+		return
+	fi
+
+	# get the data
+	"$MYDIR/$handler.connector" $endpoint $hw $sw fetch "$VLANINFO" "$PORTINFO" "$MACINFO"
+	ret=$?
+	if [ $ret = 0 ]; then
+		CONNECTED=1
+		echo "OK!connected to $endpoint";
+	else
+		echo -n "ERR!Cannot connect to $endpoint ("
+		decode_error $ret
+		echo ')'
+	fi
+}
+
+do_listfile()
+{
+	local F=$1
+	if ! [ -f "$F" ]; then
+		echo "ERR!Lost temp file '$F' on the way"
+		return
+	fi
+	echo -n 'OK!'
+	local semicolon=''
+	# tr might do the work, but use our chance to perform filtering once more
+	cat "$F" | while read line; do
+		[ "$line" = "" ] && continue
+		echo -n "$semicolon$line"
+		semicolon=';'
+	done
+	echo
+}
+
+do_set()
+{
+	# sanity checks
+	local setline=$1
+	if [ -z "$setline" ]; then
+		echo 'ERR!missing set argument'
+		return
+	fi
+	local REQUESTS=`mktemp /tmp/racktables.XXXX`
+	local REPLIES=`mktemp /tmp/racktables.XXXX`
+	echo $1 | tr ';' '\n' | while read setexpr; do
+		portname=`echo $setexpr | cut -s -d'=' -f1`
+		newvlan=`echo $setexpr | cut -s -d'=' -f2`
+		curvlan=`egrep "^$portname=" $PORTINFO | cut -s -d'=' -f2 | cut -d',' -f2`
+		if [ -z "$curvlan" ]; then
+			echo "C!167!$portname" >> "$REPLIES"
+			continue
+		fi
+		if [ "$curvlan" = "trunk" ]; then
+			echo "C!168!$portname" >> "$REPLIES"
+			continue
+		fi
+		[ "$curvlan" = "$newvlan" ] && continue
+		echo "$portname $newvlan" >> "$REQUESTS"
+		cmembers=`grep -c ",$newvlan$" "$PORTINFO"`
+		if [ "$cmembers" = "0" -a $newvlan -lt 4096 ]; then
+			echo "C!203!$portname!$newvlan" >> "$REPLIES"
+			echo "C!204" >> "$REPLIES"
+		fi
+	done
+	nr=`egrep -c '^C!1.' "$REPLIES"`
+	if [ "$nr" -ge 1 ]; then
+		echo "C!205!$nr" >> "$REPLIES"
+	fi
+
+	nq=`egrep -c '^.' "$REQUESTS"`
+	if [ "$nq" -ge 1 ]; then
+		# Go!
+		"$MYDIR/$handler.connector" $endpoint $hw $sw push "$REQUESTS" "$REPLIES" "$MACINFO"
+		local ret=$?
+
+		if [ $ret != 0 ]; then
+			echo "C!169!$endpoint!$ret"
+			return
+		fi
+		echo "C!63!$nq" >> "$REPLIES"
+	fi
+	echo -n 'OK!'
+	local SEMICOLON=
+	while read reply; do
+		echo -n $SEMICOLON$reply
+		SEMICOLON=';'
+		timestamp=`date '+%Y-%m-%d %H:%M:%S'`
+		[ -w "$MYDIR/changes.log" ] && echo "$timestamp $user@$endpoint $reply" >> "$MYDIR/changes.log"
+	done < "$REPLIES"
+	echo
+	rm -f "$REQUESTS" "$REPLIES"
+}
+
+# main loop
+while read cmd args; do
+	case $cmd in
+		connect)
+			if [ $CONNECTED = 1 ]; then
+				echo 'ERR!Already connected'
+			else
+				do_connect $args
+			fi
+			;;
+		listvlans)
+			if [ $CONNECTED = 1 ]; then
+				do_listfile "$VLANINFO"
+			else
+				echo 'ERR!Not connected'
+			fi
+			;;
+		listports)
+			if [ $CONNECTED = 1 ]; then
+				do_listfile "$PORTINFO"
+			else
+				echo 'ERR!Not connected'
+			fi
+			;;
+		listmacs)
+			if [ $CONNECTED = 1 ]; then
+				do_listfile "$MACINFO"
+			else
+				echo 'ERR!Not connected'
+			fi
+			;;
+		set)
+			if [ $CONNECTED = 1 ]; then
+				do_set $args
+			else
+				echo 'ERR!Not connected'
+			fi
+			;;
+		*)
+			echo "ERR!unknown command $cmd"
+	esac
+done
+
+rm -f "$PORTINFO" "$VLANINFO" "$MACINFO"
+exit 0
