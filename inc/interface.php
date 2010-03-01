@@ -239,6 +239,9 @@ $image['resetfilter gray']['height'] = 32;
 $image['knight']['path'] = 'pix/smiley_knight.png';
 $image['knight']['width'] = 72;
 $image['knight']['height'] = 33;
+$image['UPDATEALL']['path'] = 'pix/tango-system-software-update-32x32.png';
+$image['UPDATEALL']['width'] = 32;
+$image['UPDATEALL']['height'] = 32;
 
 // This may be populated later onsite, report rendering function will use it.
 // See the $systemreport for structure.
@@ -6818,6 +6821,66 @@ function renderVLANIPv4 ()
 
 function renderObjectVLANSync ($object_id)
 {
+	global $pageno, $tabno, $nextorder;
+	$allowed = getAllowedVLANsForObjectPorts ($object_id);
+	$native = getNativeVLANsForObjectPorts ($object_id);
+	$object = spotEntity ('object', $object_id);
+	amplifyCell ($object);
+	$formports = array();
+	foreach ($allowed as $port_id => $vlans)
+		$formports[$port_id] = array
+		(
+			'desired_allowed' => $vlans,
+			'desired_native' => 0,
+		);
+	foreach ($native as $port_id => $native_id)
+		$formports[$port_id]['desired_native'] = $native_id;
+	foreach (array_keys ($formports) as $port_id)
+		foreach ($object['ports'] as $port)
+			if ($port['id'] == $port_id)
+			{
+				$formports[$port_id]['port_name'] = $port['name'];
+				break;
+			}
+	printOpFormIntro ('sync');
+	$rawconf = array();
+	gwRetrieveDeviceConfig ($object_id, $rawconf); // FIXME: handle error
+	$deviceconfig = iosReadVLANConfig (dos2unix ($rawconf));
+	foreach ($deviceconfig as $item)
+	{
+		// map interface name
+		$item['port_name'] = preg_replace ('@^Ethernet(.+)$@', 'et\\1', $item['port_name']);
+		$item['port_name'] = preg_replace ('@^FastEthernet(.+)$@', 'fa\\1', $item['port_name']);
+		$item['port_name'] = preg_replace ('@^GigabitEthernet(.+)$@', 'gi\\1', $item['port_name']);
+		$item['port_name'] = preg_replace ('@^TenGigabitEthernet(.+)$@', 'te\\1', $item['port_name']);
+		foreach (array_keys ($formports) as $tmpkey)
+			if ($formports[$tmpkey]['port_name'] == $item['port_name']) // comparing mapped value
+			{
+				$formports[$tmpkey]['running_allowed'] = $item['allowed'];
+				$formports[$tmpkey]['running_native'] = $item['native'];
+				break;
+			}
+	}
+	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
+	echo '<tr><th rowspan=2>port name</th><th rowspan=2>desired config</th><th colspan=3>wins</th>';
+	echo '<th rowspan=2>running config</th></tr><tr><th>&larr;</th><th>&nbsp;</th><th>&rarr;</th></tr>';
+	$order = 'odd';
+	foreach ($formports as $port_id => $port)
+	{
+		echo "<tr class=row_${order}><td>${port['port_name']}</td>";
+		echo '<td>' . serializeVLANPack ($port['desired_native'], $port['desired_allowed']) . '</td>';
+		echo "<td><input name=radio_${port_id} type=radio value=left></td>";
+		echo "<td><input name=radio_${port_id} type=radio value=asis checked></td>";
+		echo "<td><input name=radio_${port_id} type=radio value=right></td>";
+		echo '<td>' . serializeVLANPack ($port['running_native'], $port['running_allowed']) . '</td>';
+		echo '</tr>';
+		$order = $nextorder[$order];
+	}
+	echo '<tr><td colspan=6 align=center>';
+	printImageHREF ('UPDATEALL', 'sumbit all updates', TRUE);
+	echo '</td></tr>';
+	echo '</table>';
+	echo '</form>';
 }
 
 ?>
