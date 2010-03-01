@@ -6600,7 +6600,7 @@ function renderObjectVLANPorts ($object_id)
 	$object = spotEntity ('object', $object_id);
 	amplifyCell ($object);
 	$port_id = array_key_exists ('port_id', $sic) ? $sic['port_id'] : 0;
-	echo '<table border=1 width="100%"><tr valign=top><td class=tdleft width="30%">';
+	echo '<table border=0 width="100%"><tr valign=top><td class=tdleft width="30%">';
 	// port list
 	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
 	echo '<tr><th>port name</th><th>current config</th></tr>';
@@ -6814,6 +6814,10 @@ function renderVLANIPv4 ()
 	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')
 		printNewItemTR ($vlan['ipv4nets']);
 	echo '</table>';
+}
+
+function renderObjectVLANSync ($object_id)
+{
 }
 
 ?>
