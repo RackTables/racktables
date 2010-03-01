@@ -2250,8 +2250,27 @@ function serializeVLANPack ($native_vid = 0, $allowed_vids = array())
 			$tagged[] = $vlan_id;
 	sort ($tagged);
 	$ret = $native_vid ? $native_vid : '';
+	$tagged_bits = array();
+	$id_from = $id_to = 0;
+	foreach ($tagged as $next_id)
+	{
+		if ($id_to)
+		{
+			if ($next_id == $id_to + 1) // merge
+			{
+				$id_to = $next_id;
+				continue;
+			}
+			// flush
+			$tagged_bits[] = $id_from == $id_to ? $id_from : "${id_from}-${id_to}";
+		}
+		$id_from = $id_to = $next_id; // start next pair
+	}
+	// pull last pair
+	if ($id_to)
+		$tagged_bits[] = $id_from == $id_to ? $id_from : "${id_from}-${id_to}";
 	if (count ($tagged))
-		$ret .= '+' . implode (',', $tagged);
+		$ret .= '+' . implode (',', $tagged_bits);
 	return strlen ($ret) ? $ret : 'default';
 }
 
@@ -2324,7 +2343,7 @@ function iosPickSwitchportCommand (&$work, $line)
 			$work[] = array
 			(
 				'port_name' => $work['current']['port_name'],
-				'allowed' => array ($work['current']['trunk allowed vlan']),
+				'allowed' => $work['current']['trunk allowed vlan'],
 				'native' => $work['current']['trunk native vlan'],
 			);
 			break;
