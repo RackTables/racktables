@@ -275,4 +275,41 @@ function gwRecvFileFromObject ($object_id = 0, $handlername, &$output)
 	return gwRecvFile ($endpoint, $handlername, $output);
 }
 
+function gwRetrieveDeviceConfig ($object_id = 0, &$output)
+{
+	if ($object_id <= 0)
+		return oneLiner (160); // invalid arguments
+	$objectInfo = spotEntity ('object', $object_id);
+	$endpoints = findAllEndpoints ($object_id, $objectInfo['name']);
+	if (count ($endpoints) == 0)
+		return oneLiner (161); // endpoint not found
+	if (count ($endpoints) > 1)
+		return oneLiner (162); // can't pick an address
+	$endpoint = str_replace (' ', '\ ', str_replace (' ', '+', $endpoints[0]));
+	$tmpfilename = tempnam ('', 'RackTables-sendfile-');
+	$hwtype = $swtype = 'unknown';
+	foreach (getAttrValues ($object_id) as $record)
+	{
+		if ($record['name'] == 'SW type' && strlen ($record['o_value']))
+			$swtype = str_replace (' ', '+', execGMarker ($record['o_value']));
+		if ($record['name'] == 'HW type' && strlen ($record['o_value']))
+			$hwtype = str_replace (' ', '+', execGMarker ($record['o_value']));
+	}
+	$outputlines = queryGateway
+	(
+		'deviceconfig',
+		array ("retrieve ${endpoint} ${tmpfilename} ${hwtype} ${swtype}")
+	);
+	$output = file_get_contents ($tmpfilename);
+	unlink ($tmpfilename);
+	if ($outputlines == NULL)
+		return oneLiner (163); // unknown gateway failure
+	if (count ($outputlines) != 1)
+		return oneLiner (165); // protocol violation
+	if (strpos ($outputlines[0], 'OK!') !== 0)
+		return oneLiner (164, array ($outputlines[0])); // gateway failure
+	// Being here means having 'OK!' in the response.
+	return oneLiner (66, array ($handlername)); // ignore provided "Ok" text
+}
+
 ?>

@@ -4,11 +4,9 @@
 # equivalent) and prints it onto stdout. When run, it accepts the
 # only command on stdin:
 #
-# * retrieve <endpoint> <hardware> <software>: print text and terminate
+# * retrieve <endpoint> <outputfile> <hardware> <software>
+#   (save config text into provided file)
 
-endpoint=
-hw=
-sw=
 MYDIR=`dirname $0`
 
 decode_error()
@@ -46,17 +44,18 @@ decode_error()
 
 do_work()
 {
-	endpoint=`echo $args | cut -s -d' ' -f1`
-	hw=`echo $args | cut -s -d' ' -f2`
-	sw=`echo $args | cut -s -d' ' -f3`
+	local endpoint=`echo $args | cut -s -d' ' -f1`
+	local conftext=`echo $args | cut -s -d' ' -f2`
+	local hw=`echo $args | cut -s -d' ' -f3`
+	local sw=`echo $args | cut -s -d' ' -f4`
 	# sanity checks
-	if [ -z "$endpoint" -o -z "$hw" -o -z "$sw" ]; then
+	if [ -z "$endpoint" -o -z "$conftext" -o -z "$hw" -o -z "$sw" ]; then
 		echo 'ERR!too few arguments to connect'
 		return
 	fi
 	case "$sw" in
 		Cisco+IOS+12.0|Cisco+IOS+12.1|Cisco+IOS+12.2)
-			handler=cisco
+			local handler=cisco
 		;;
 		*)
 			echo "ERR!Don't know how to handle $sw on $endpoint"
@@ -64,17 +63,10 @@ do_work()
 		;;
 	esac
 
-	CONFTEXT=`mktemp /tmp/racktables.XXXX`
-	if ! [ -f "$CONFTEXT" ]; then
-		echo 'ERR!could not create tmpfile'
-		return
-	fi
-
-	"$MYDIR/$handler.connector" $endpoint "$CONFTEXT"
-	ret=$?
+	"$MYDIR/$handler.connector" $endpoint "$conftext"
+	local ret=$?
 	if [ $ret = 0 ]; then
 		echo "OK!connected to $endpoint"
-		cat "$CONFTEXT"
 	else
 		echo -n "ERR!Cannot connect to $endpoint ("
 		decode_error $ret
@@ -86,8 +78,6 @@ while read cmd args; do
 	case $cmd in
 		retrieve)
 			do_work $args
-			rm -f "$CONFTEXT"
-			exit 0
 			;;
 		*)
 			echo "ERR!unknown command $cmd"
