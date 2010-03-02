@@ -205,7 +205,7 @@ function trigger_ipv4net_vlanconfig ()
 		return '';
 }
 
-function trigger_vlanports ()
+function trigger_isVLANSwitch ()
 {
 	return NULL !== getVLANSwitchInfo ($_REQUEST['object_id']) ? 'std' : '';
 }
