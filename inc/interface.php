@@ -1522,7 +1522,7 @@ function showMessageOrError ()
 				176 => array ('code' => 'error', 'format' => 'This network already exists'),
 				177 => array ('code' => 'error', 'format' => 'commitUpdateRack() failed'),
 				178 => array ('code' => 'error', 'format' => 'file not found'),
-				179 => array ('code' => 'error', 'format' => 'Declining outdated text. Re-edit the file for consistency.'),
+				179 => array ('code' => 'error', 'format' => 'Expired form has been declined.'),
 				180 => array ('code' => 'error', 'format' => 'Error saving file, all changes lost!'),
 				181 => array ('code' => 'error', 'format' => "file uploads not allowed, change 'file_uploads' parameter in php.ini"),
 				182 => array ('code' => 'error', 'format' => 'SQL query failed: %s'),
@@ -6718,7 +6718,7 @@ function renderPortVLANConfig ($port_id, $object_id, $allowed, $native)
 		printImageHREF ('CLEAR gray');
 	else
 	{
-		printOpFormIntro ('savePortVLANConfig', array ('port_id' => $port_id));
+		printOpFormIntro ('savePortVLANConfig', array ('port_id' => $port_id, 'mutex_rev' => $vswitch['mutex_rev']));
 		printImageHREF ('CLEAR', 'Unassign all VLANs', TRUE);
 		echo '</form>';
 	}
@@ -6887,18 +6887,21 @@ function renderObjectVLANSync ($object_id)
 				$radio['right'] = FALSE;
 		}
 		echo "<tr class=row_${order}><td>${port['port_name']}</td>";
-		echo "<td>${desired_cfgstring}</td>";
+		echo "<td><label for=i_${port_id}_left>${desired_cfgstring}</label></td>";
 		foreach ($radio as $pos => $enabled)
 		{
 			echo '<td>';
 			if (!$enabled)
 				echo '&nbsp;';
 			else
-				echo "<input name=radio_${port_id} type=radio value=${pos}" . $checked[$pos] . ">";
+				echo "<input id=i_${port_id}_${pos} name=i_${port_id} type=radio value=${pos}" . $checked[$pos] . ">";
 			echo '</td>';
 		}
-		echo "<td>${running_cfgstring}</td>";
+		echo "<td><label for=i_${port_id}_right>${running_cfgstring}</label></td>";
 		echo '</tr>';
+		echo "<input type=hidden name=rn_${port_id} value=${port['running_native']}>";
+		foreach ($port['running_allowed'] as $a)
+			echo "<input type=hidden name=ra_${port_id}[] value=${a}>";
 		$order = $nextorder[$order];
 	}
 	echo '<tr><td colspan=6 align=center>';

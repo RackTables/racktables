@@ -150,6 +150,7 @@ $ophandler['object']['snmpportfinder']['querySNMPData'] = 'querySNMPData';
 $ophandler['object']['vlanconfig']['bind'] = 'addVLANSwitchBinding';
 $ophandler['object']['vlanconfig']['unbind'] = 'delVLANSwitchBinding';
 $ophandler['object']['vlanports']['savePortVLANConfig'] = 'savePortVLANConfig';
+$ophandler['object']['vlansync']['sync'] = 'processVLANSyncRequest';
 $delayauth['object']['livevlans']['setPortVLAN'] = TRUE;
 
 $page['ipv4space']['title'] = 'IPv4 space';

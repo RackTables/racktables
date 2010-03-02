@@ -2212,4 +2212,49 @@ function unbindVLANfromIPv4 ()
 	return buildRedirectURL (__FUNCTION__, $result ? 'OK' : 'ERR');
 }
 
+$msgcode['processVLANSyncRequest']['OK'] = 63;
+$msgcode['processVLANSyncRequest']['ERR'] = 179;
+function processVLANSyncRequest ()
+{
+	global $sic;
+	assertUIntArg ('mutex_rev');
+	// Divide submitted radio buttons into 4 groups:
+	// left (produce and send commands to switch)
+	// asis (ignore)
+	// right (fetch config from switch and save into database)
+	$object = spotEntity ('object', $_REQUEST['object_id']);
+	$allowed = getAllowedVLANsForObjectPorts ($sic['object_id']);
+	$from_running = array();
+	foreach ($allowed as $port_id => $vlanlist)
+	{
+		if (!array_key_exists ("i_${port_id}", $sic))
+			continue;
+		switch ($sic["i_${port_id}"])
+		{
+		case 'left':
+			// FIXME: queue sub-task of DB->switch request
+			break;
+		case 'right':
+			$from_running[] = array
+			(
+				'port_id' => $port_id,
+				'allowed' => $sic["ra_${port_id}"],
+				'native' => $sic["rn_${port_id}"],
+			);
+			break;
+		default:
+			// don't care
+		}
+	}
+	try
+	{
+		setSwitchVLANConfig ($sic['object_id'], $sic['mutex_rev'], $from_running);
+	}
+	catch (Exception $e)
+	{
+		buildRedirectURL (__FUNCTION__, 'ERR');
+	}
+	return buildRedirectURL (__FUNCTION__, 'OK', array (count ($from_running)));
+}
+
 ?>
