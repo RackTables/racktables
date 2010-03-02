@@ -1,5 +1,6 @@
 0.17.10
 	update: make object form messages consistent (by Tyler J. Wagner)
+	bugfix: completely fix ticket:211
 0.17.9 2010-02-17
 	new feature: added per-user UI options (ticket:29)
 	new feature: LDAP cache can be disabled now (ticket:247)
