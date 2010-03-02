@@ -3626,6 +3626,8 @@ function commitReduceVLANDescription ($vdom_id, $vlan_id)
 function commitUpdateVLANDescription ($vdom_id, $vlan_id, $vlan_type, $vlan_descr)
 {
 	global $dbxlink;
+	if (!mb_strlen ($vlan_descr))
+		$vlan_descr = NULL;
 	$query = $dbxlink->prepare ('UPDATE VLANDescription SET vlan_descr = ?, vlan_type = ? WHERE domain_id = ? AND vlan_id = ?');
 	return $query->execute (array ($vlan_descr, $vlan_type, $vdom_id, $vlan_id));
 }

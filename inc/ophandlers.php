@@ -2094,7 +2094,7 @@ function addVLANDescription ()
 		(
 			'domain_id' => $sic['vdom_id'],
 			'vlan_id' => $sic['vlan_id'],
-			'vlan_descr' => strlen ($sic['vlan_descr']) ? $sic['vlan_descr'] : sprintf ('VLAN%04u', $sic['vlan_id'])
+			'vlan_descr' => mb_strlen ($sic['vlan_descr']) ? $sic['vlan_descr'] : NULL
 		)
 	);
 	return buildRedirectURL (__FUNCTION__, $result ? 'OK' : 'ERR2');

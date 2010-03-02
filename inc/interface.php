@@ -2406,7 +2406,7 @@ function renderIPv4NetworkVLANTab ($id)
 	{
 		$vlaninfo = getVLANInfo ($netinfo['vlan_ck']);
 		echo '<tr><th width="50%" class=tdright>VLAN:</th><td class=tdleft><a href="';
-		echo makeHref (array ('page' => 'vlan', 'vlan_ck' => $range['vlan_ck'])) . '">';
+		echo makeHref (array ('page' => 'vlan', 'vlan_ck' => $netinfo['vlan_ck'])) . '">';
 		echo $vlaninfo['vlan_id'] . '@' . $vlaninfo['domain_descr'] . ' (';
 		echo $vlaninfo['vlan_descr'] . ')</a></td></tr>';
 		echo "<tr><th width='50%' class=tdright>Action:</th><td class=tdleft>";
