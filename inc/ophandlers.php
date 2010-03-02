@@ -884,8 +884,12 @@ function addLotOfObjects()
 				$names2[] = rtrim ($parts[0]);
 		}
 		foreach ($names2 as $name)
-			if (commitAddObject ($name, '', '', $global_type_id, '', $taglist) !== FALSE)
-				$log = mergeLogs ($log, oneLiner (80, array ($name)));
+			if (($object_id = commitAddObject ($name, '', '', $global_type_id, '', $taglist)) !== FALSE)
+			{
+				$info = spotEntity ('object', $object_id);
+				amplifyCell ($info);
+				$log = mergeLogs ($log, oneLiner (80, array ('<a href="' . makeHref (array ('page' => 'object', 'tab' => 'default', 'object_id' => $object_id)) . '">' . $info['dname'] . '</a>')));
+			}
 			else
 				$log = mergeLogs ($log, oneLiner (185, array ($name)));
 	}
