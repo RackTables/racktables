@@ -185,7 +185,7 @@ function trigger_rackspace ()
 // case additionally heat the tab, if no domain is set.
 function trigger_vlanconfig ()
 {
-	if (getObjectVLANDomainID ($_REQUEST['object_id']))
+	if (NULL !== getVLANSwitchInfo ($_REQUEST['object_id']))
 		return 'std';
 	elseif (considerConfiguredConstraint (spotEntity ('object', $_REQUEST['object_id']), 'VLANSWITCH_LISTSRC'))
 		return 'attn';
@@ -207,6 +207,6 @@ function trigger_ipv4net_vlanconfig ()
 
 function trigger_vlanports ()
 {
-	return getObjectVLANDomainID ($_REQUEST['object_id']) ? 'std' : '';
+	return NULL !== getVLANSwitchInfo ($_REQUEST['object_id']) ? 'std' : '';
 }
 ?>

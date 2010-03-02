@@ -3637,14 +3637,12 @@ function commitUpdateVLANDomain ($vdom_id, $vdom_descr)
 	return $query->execute (array ($vdom_descr, $vdom_id));
 }
 
-function getObjectVLANDomainID ($object_id)
+function getVLANSwitchInfo ($object_id)
 {
-	global $dbxlink;
-	$query = $dbxlink->prepare ('SELECT domain_id FROM VLANSwitch WHERE object_id = ?');
-	$query->execute (array ($object_id));
-	if ($row = $query->fetch (PDO::FETCH_ASSOC))
-		return $row['domain_id'];
-	return 0;
+	$result = usePreparedSelectBlade ('SELECT domain_id, mutex_rev FROM VLANSwitch WHERE object_id = ?', array ($object_id));
+	if ($result and $row = $result->fetch (PDO::FETCH_ASSOC))
+		return $row;
+	return NULL;
 }
 
 // Return a list of object's ports, which can run 802.1Q, each with a list

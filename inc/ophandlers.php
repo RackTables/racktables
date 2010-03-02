@@ -2172,22 +2172,24 @@ $msgcode['savePortVLANConfig']['ERR2'] = 109;
 function savePortVLANConfig ()
 {
 	assertUIntArg ('port_id');
-	global $sic, $dbxlink;
-	$vlan_id = isset ($sic['vlan_id']) ? $sic['vlan_id'] : 0; // 0 means "reset"
+	assertUIntArg ('mutex_rev');
+	global $sic;
 	$portinfo = getPortInfo ($sic['port_id']);
 	if ($portinfo['object_id'] != $sic['object_id'])
 		// should we throw instead?
 		return buildRedirectURL (__FUNCTION__, 'ERR1', array(), NULL, NULL, array ('port_id' => $sic['port_id']));
-	$allowed = isset ($sic['allowed_id']) ? $sic['allowed_id'] : array();
-	$native = isset ($sic['native_id']) ? $sic['native_id'] : 0; // 0 means "reset"
-	$dbxlink->beginTransaction();
-	if (setPortVLANConfig ($sic['port_id'], $allowed, $native))
+	try
 	{
-		$dbxlink->commit();
-		return buildRedirectURL (__FUNCTION__, 'OK', array(), NULL, NULL, array ('port_id' => $sic['port_id']));
+		$allowed = isset ($sic['allowed_id']) ? $sic['allowed_id'] : array();
+		$native = isset ($sic['native_id']) ? $sic['native_id'] : 0; // 0 means "reset"
+		$work = array (array ('port_id' => $sic['port_id'], 'allowed' => $allowed, 'native' => $native));
+		setSwitchVLANConfig ($sic['object_id'], $sic['mutex_rev'], $work);
 	}
-	$dbxlink->rollBack();
-	return buildRedirectURL (__FUNCTION__, 'ERR2', array(), NULL, NULL, array ('port_id' => $sic['port_id']));
+	catch (Exception $e)
+	{
+		return buildRedirectURL (__FUNCTION__, 'ERR2', array(), NULL, NULL, array ('port_id' => $sic['port_id']));
+	}
+	return buildRedirectURL (__FUNCTION__, 'OK', array(), NULL, NULL, array ('port_id' => $sic['port_id']));
 }
 
 $msgcode['bindVLANtoIPv4']['OK'] = 48;
