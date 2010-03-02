@@ -1101,6 +1101,7 @@ function redirectIfNecessary ()
 
 function prepareNavigation() {
 	global
+		$trigger,
 		$pageno,
 		$tabno;
 
