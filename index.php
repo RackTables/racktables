@@ -5,8 +5,8 @@ require 'inc/interface.php';
 require 'inc/init.php';
 prepareNavigation();
 // no ctx override is necessary
-redirectIfNecessary();
 fixContext();
+redirectIfNecessary();
 if (!permitted())
 	renderAccessDenied();
 // Only store the tab name after clearance is got. Any failure is unhandleable.

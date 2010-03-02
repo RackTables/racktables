@@ -1075,7 +1075,10 @@ function tagChainCmp ($chain1, $chain2)
 
 function redirectIfNecessary ()
 {
-	global $pageno, $tabno;
+	global
+		$trigger,
+		$pageno,
+		$tabno;
 	$pmap = array
 	(
 		'accounts' => 'userlist',
@@ -1097,11 +1100,13 @@ function redirectIfNecessary ()
 		redirectUser ($pmap[$pageno], $tabno);
 	if (isset ($tmap[$pageno][$tabno]))
 		redirectUser ($pageno, $tmap[$pageno][$tabno]);
+	// check if we accidentaly got on a dynamic tab that shouldn't be shown for this object
+	if (isset ($trigger[$pageno][$tabno]) and !strlen ($trigger[$pageno][$tabno] ()))
+		redirectUser ($pageno, 'default');
 }
 
 function prepareNavigation() {
 	global
-		$trigger,
 		$pageno,
 		$tabno;
 
@@ -1113,18 +1118,8 @@ function prepareNavigation() {
 
 	if (isset ($_REQUEST['tab'])) {
 		$tabno = $_REQUEST['tab'];
-		        // check if we accidentaly got on a dynamic tab that shouldn't be shown for this object
-		if ( isset($trigger[$pageno][$tabno]) and !strlen($trigger[$pageno][$tabno] ()) ) {
-			$tabno = 'default';
-			$url = "index.php?page=$pageno&tab=$tabno&".urlizeGetParameters(array('page', 'tab'));
-			header('Location: '.$url);
-			exit();
-		}
 	} elseif (basename($_SERVER['PHP_SELF']) == 'index.php' and getConfigVar ('SHOW_LAST_TAB') == 'yes' and isset ($_SESSION['RTLT'][$pageno])) {
-		$tabno = $_SESSION['RTLT'][$pageno];
-		$url = "index.php?page=$pageno&tab=$tabno&".urlizeGetParameters(array('page', 'tab'));
-		header('Location: '.$url);
-		exit();
+		redirectUser ($pageno, $_SESSION['RTLT'][$pageno]);
 	} else {
 		$tabno = 'default';
 	}
@@ -2212,21 +2207,6 @@ function getNewPortTypeOptions()
 		$ret[$optgroup][$row['iif_id'] . '-' . $row['oif_id']] = $row['oif_name'];
 	}
 	return $ret;
-}
-
-//Make URL from GET without parameters specified in $parameters
-function urlizeGetParameters($parameters) {
-	$url = '';
-	foreach ($_GET as $name=>$value) {
-		if (in_array($name, $parameters)) continue;
-		if ($url != '') $url .= '&';
-		if (gettype($value) == 'array')
-			foreach($value as $v)
-				$url .= urlencode($name.'[]').'='.urlencode($v);
-		else
-			$url .= urlencode($name).'='.urlencode($value);
-	}
-	return $url;
 }
 
 function getVLANDomain ($vdid)
