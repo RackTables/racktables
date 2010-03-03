@@ -6469,6 +6469,7 @@ function renderVLANDomainListEditor ()
 
 function renderVLANDomain ($vdom_id)
 {
+	global $nextorder;
 	$mydomain = getVLANDomain ($vdom_id);
 	echo '<table border=0 class=objectview cellspacing=0 cellpadding=0>';
 	echo '<tr><td colspan=2 align=center><h1>' . niftyString ($mydomain['description']);
@@ -6479,14 +6480,16 @@ function renderVLANDomain ($vdom_id)
 		echo '(none)';
 	else
 	{
-		echo '<p align=left><ul>';
+		echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
+		$order = 'odd';
 		foreach (array_keys ($mydomain['switchlist']) as $object_id)
 		{
-			$object = spotEntity ('object', $object_id);
-			echo "<li><a href='" . makeHref (array ('page' => 'object', 'object_id' => $object_id));
-			echo "'>${object['dname']}</a></li>";
+			echo "<tr class=row_${order}><td>";
+			renderCell (spotEntity ('object', $object_id));
+			echo '</td></tr>';
+			$order = $nextorder[$order];
 		}
-		echo '</ul></p>';
+		echo '</table>';
 	}
 	finishPortlet();
 
@@ -6498,15 +6501,18 @@ function renderVLANDomain ($vdom_id)
 	else
 	{
 		$order = 'odd';
-		global $nextorder, $vtdecoder;
+		global $vtdecoder;
 		echo '<table class=cooltable align=center border=0 cellpadding=5 cellspacing=0>';
-		echo '<tr><th>VLAN ID</th><th>propagation</th><th>description</th></tr>';
+		echo '<tr><th>VLAN ID</th><th>propagation</th><th>';
+		printImageHREF ('net');
+		echo '</th><th>description</th></tr>';
 		foreach ($myvlans as $vlan_id => $vlan_info)
 		{
 			echo "<tr class=row_${order}><td class=tdright><a href='";
 			echo makeHref (array ('page' => 'vlan', 'vlan_ck' => "${vdom_id}-${vlan_id}"));
 			echo "'>${vlan_id}</a></td>";
 			echo '<td>' . $vtdecoder[$vlan_info['vlan_type']] . '</td>';
+			echo '<td>' . ($vlan_info['netc'] ? $vlan_info['netc'] : '&nbsp;') . '</td>';
 			echo "<td class=tdleft>${vlan_info['vlan_descr']}</td></tr>";
 			$order = $nextorder[$order];
 		}
@@ -6734,7 +6740,7 @@ function renderPortVLANConfig ($port_id, $object_id, $allowed, $native)
 
 function renderVLANInfo ($vlan_ck)
 {
-	global $vtoptions;
+	global $vtoptions, $nextorder;
 	$vlan = getVLANInfo ($vlan_ck);
 	echo '<table border=0 class=objectview cellspacing=0 cellpadding=0>';
 	echo "<tr><td colspan=2 align=center><h1>${mydomain['description']}</h1></td></tr>";
@@ -6755,12 +6761,22 @@ function renderVLANInfo ($vlan_ck)
 		echo '(none)';
 	else
 	{
+		$order = 'odd';
 		echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
+		echo '<tr><th>';
+		printImageHREF ('net');
+		echo '</th><th>';
+		printImageHREF ('text');
+		echo '</th></tr>';
 		foreach ($vlan['ipv4nets'] as $netid)
 		{
+			$net = spotEntity ('ipv4net', $netid);
+			#echo "<tr class=row_${order}><td>";
 			echo '<tr><td>';
-			renderCell (spotEntity ('ipv4net', $netid));
+			renderCell ($net);
+			echo '</td><td>' . (mb_strlen ($net['comment']) ? niftyString ($net['comment']) : '&nbsp;');
 			echo '</td></tr>';
+			$order = $nextorder[$order];
 		}
 		echo '</table>';
 	}
