@@ -1999,6 +1999,8 @@ function renderIPv4SpaceRecords ($tree, $baseurl, $target = 0, $level = 1)
 			}
 			else
 				echo "<small>${maxtotal}</small>";
+			if (getConfigVar ('IPV4_TREE_SHOW_VLAN') == 'yes')
+				echo '</td><td>&nbsp;</td>';
 			echo "</td><td>&nbsp;</td></tr>";
 		}
 	}
