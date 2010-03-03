@@ -1,0 +1,54 @@
+#!/bin/sh
+
+[ $# = 2 ] || exit 1
+
+ENDPOINT=$1
+OUT1=$2
+
+prepare_connect_commands()
+{
+	[ $# = 1 ] || exit 2
+	local skip=yes cval found=no MYDIR=`dirname $0`
+	while read line; do
+		if [ "$skip" = "yes" -a "$line" = "# S-T-A-R-T" ]; then
+			skip=no
+			continue
+		fi
+		if [ "$skip" = "no" -a "$line" = "# S-T-O-P" ]; then
+			skip=yes
+			continue
+		fi
+		[ "$skip" = "yes" ] && continue
+		# ignore comments
+		[ -z "${line###*}" ] && continue
+
+		# First endpoint string/regexp match is sufficient for us.
+		cval=`echo $line | cut -s -d' ' -f1`
+		if [ -z "${1##$cval}" ]; then
+			found=yes
+			username=`echo $line | cut -s -d' ' -f5`
+			[ "$username" != "-" ] && echo $username > $CMDS1
+			# access password
+			access_password=`echo $line | cut -s -d' ' -f6`
+			[ "$access_password" != "-" ] && echo "$access_password" >> $CMDS1
+			printf "en\r\n" >> $CMDS1
+			enable_password=`echo $line | cut -s -d' ' -f7`
+			[ "$enable_password" != "-" ] && echo $enable_password >> $CMDS1
+			break
+		fi
+	done < "$MYDIR/cisco.secrets.php"
+	[ "$found" = "yes" ] && return
+	exit 3
+}
+
+CMDS1=`mktemp /tmp/fdry5.connector.XXXX`
+[ -f "$CMDS1" ] || exit 5
+prepare_connect_commands $ENDPOINT
+printf 'skip-page-display\r\nshow running-config\r\nexit\r\nexit\r\n' >> $CMDS1
+cat $CMDS1 | nc -i 1 $ENDPOINT 23 > "$OUT1"
+if fgrep -q '% Bad passwords' "$OUT1"; then
+	rm -f "$CMDS1"
+	exit 4
+fi
+rm -f "$CMDS1"
+exit 0
