@@ -2321,11 +2321,18 @@ function iosPickSwitchportCommand (&$work, $line)
 			);
 			break;
 		case 'trunk':
+			// Having configured VLAN as "native" doesn't mean anything
+			// as long as it's not listed on the "allowed" line.
+			$effective_native = in_array
+			(
+				$work['current']['trunk native vlan'],
+				$work['current']['trunk allowed vlan']
+			) ? $work['current']['trunk native vlan'] : 0;
 			$work[] = array
 			(
 				'port_name' => $work['current']['port_name'],
 				'allowed' => $work['current']['trunk allowed vlan'],
-				'native' => $work['current']['trunk native vlan'],
+				'native' => $effective_native,
 			);
 			break;
 		default:
