@@ -1934,6 +1934,9 @@ function renderRackspaceHistory ()
 function renderIPv4SpaceRecords ($tree, $baseurl, $target = 0, $level = 1)
 {
 	$self = __FUNCTION__;
+	static $vdomlist = NULL;
+	if ($vdomlist == NULL and getConfigVar ('IPV4_TREE_SHOW_VLAN') == 'yes')
+		$vdomlist = getVLANDomainList();
 	foreach ($tree as $item)
 	{
 		if (getConfigVar ('IPV4_TREE_SHOW_USAGE') == 'yes')
@@ -1967,6 +1970,17 @@ function renderIPv4SpaceRecords ($tree, $baseurl, $target = 0, $level = 1)
 			else
 				echo "<small>${maxdirect}</small>";
 			echo "</td>";
+			if (getConfigVar ('IPV4_TREE_SHOW_VLAN') == 'yes')
+			{
+				echo '<td>';
+				if ($item['vlan_ck'] != '')
+				{
+					list ($vdom_id, $vlan_id) = decodeVLANCK ($item['vlan_ck']);
+					echo '<a href="' . makeHref (array ('page' => 'vlan', 'vlan_ck' => $item['vlan_ck'])) . '">';
+					echo $vlan_id . '@' . niftyString ($vdomlist[$vdom_id]['description'], 15) . '</a>';
+				}
+				echo '</td>';
+			}
 			if (getConfigVar ('EXT_IPV4_VIEW') == 'yes')
 				printRoutersTD (findRouters ($item['addrlist']), getConfigVar ('IPV4_TREE_RTR_AS_CELL'));
 			echo "</tr>";
@@ -2024,6 +2038,8 @@ function renderIPv4Space ()
 	}
 	echo "</h4><table class='widetable' border=0 cellpadding=5 cellspacing=0 align='center'>\n";
 	echo "<tr><th>prefix</th><th>name/tags</th><th>capacity</th>";
+	if (getConfigVar ('IPV4_TREE_SHOW_VLAN') == 'yes')
+		echo '<th>VLAN</th>';
 	if (getConfigVar ('EXT_IPV4_VIEW') == 'yes')
 		echo "<th>routed by</th>";
 	echo "</tr>\n";

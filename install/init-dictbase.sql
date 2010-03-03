@@ -394,6 +394,7 @@ INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdef
 ('PROXIMITY_RANGE','0','uint','yes','no','no','Proximity range (0 is current rack only)'),
 ('VLANSWITCH_LISTSRC', '', 'string', 'yes', 'no', 'List of VLAN running switches'),
 ('VLANIPV4NET_LISTSRC', '', 'string', 'yes', 'no', 'List of VLAN-based IPv4 networks'),
+('IPV4_TREE_SHOW_VLAN','yes','string','no','no','yes','Show VLAN for each network in IPv4 tree'),
 ('DB_VERSION','0.17.9','string','no','yes','no','Database version.');
 
 INSERT INTO `Script` VALUES ('RackCode','allow {$userid_1}');

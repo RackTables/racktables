@@ -470,6 +470,7 @@ CREATE TABLE `UserConfig` (
 'VENDOR_SIEVE',
 'RACKS_PER_ROW'
 )";
+			$query[] = "INSERT INTO Config VLAUES ('IPV4_TREE_SHOW_VLAN','yes','string','no','no','yes','Show VLAN for each network in IPv4 tree')";
 			$query[] = "UPDATE Config SET varvalue = '0.17.9' WHERE varname = 'DB_VERSION'";
 			break;
 		case '0.18.0':
