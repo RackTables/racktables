@@ -6905,10 +6905,16 @@ function renderObjectVLANSync ($object_id)
 	$vswitch = getVLANSwitchInfo ($object_id);
 	$domvlans = array_keys (getDomainVLANs ($vswitch['domain_id']));
 	printOpFormIntro ('sync', array ('mutex_rev' => $vswitch['mutex_rev']));
+	$nrows = count ($formports);
 	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
 	echo '<tr><th rowspan=2>port name</th><th rowspan=2>desired config</th><th colspan=3>wins</th>';
-	echo '<th rowspan=2>running config</th></tr><tr><th>&larr;</th><th>&nbsp;</th><th>&rarr;</th></tr>';
+	echo '<th rowspan=2>running config</th></tr><tr>';
+	foreach (array ('left', 'asis', 'right') as $pos)
+		echo "<th><input type=radio name=column_radio value=${pos} " .
+			"onclick=\"checkColumnOfRadios('i_', ${nrows}, '_${pos}')\"></th>";
+	echo '</tr>';
 	$order = 'odd';
+	$rownum = 1;
 	foreach ($formports as $port_id => $port)
 	{
 		$desired_cfgstring = serializeVLANPack ($port['desired_native'], $port['desired_allowed']);
@@ -6927,22 +6933,25 @@ function renderObjectVLANSync ($object_id)
 				$radio['right'] = FALSE;
 		}
 		echo "<tr class=row_${order}><td>${port['port_name']}</td>";
-		echo "<td><label for=i_${port_id}_left>${desired_cfgstring}</label></td>";
+		echo "<td><label for=i_${rownum}_left>${desired_cfgstring}</label></td>";
 		foreach ($radio as $pos => $enabled)
 		{
 			echo '<td>';
 			if (!$enabled)
 				echo '&nbsp;';
 			else
-				echo "<input id=i_${port_id}_${pos} name=i_${port_id} type=radio value=${pos}" . $checked[$pos] . ">";
+				// For JS event handler radio input names are indexed from 1
+				// onwards, but for sumbit handler they are based on port id.
+				echo "<input id=i_${rownum}_${pos} name=i_${port_id} type=radio value=${pos}" . $checked[$pos] . ">";
 			echo '</td>';
 		}
-		echo "<td><label for=i_${port_id}_right>${running_cfgstring}</label></td>";
+		echo "<td><label for=i_${rownum}_right>${running_cfgstring}</label></td>";
 		echo '</tr>';
 		echo "<input type=hidden name=rn_${port_id} value=${port['running_native']}>";
 		foreach ($port['running_allowed'] as $a)
 			echo "<input type=hidden name=ra_${port_id}[] value=${a}>";
 		$order = $nextorder[$order];
+		$rownum++;
 	}
 	echo '<tr><td colspan=6 align=center>';
 	printImageHREF ('UPDATEALL', 'sumbit all updates', TRUE);

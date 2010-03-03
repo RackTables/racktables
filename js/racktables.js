@@ -35,3 +35,28 @@ function toggleColumnOfAtoms (rackId, columnId, numRows) {
 		}
 	}
 }
+
+// used by 802.1Q sync form
+function checkColumnOfRadios (prefix, numRows, suffix)
+{
+	var elemId;
+	for (var i=1; i < numRows+1; i++)
+	{
+		elemId = prefix + i + suffix;
+		// Not all radios are present on each form. Hence each time
+		// we are requested to switch from left to right (or vice versa)
+		// it is better to half-complete the request by setting to the
+		// middle position, than to fail completely due to missing
+		// target input.
+		if (document.getElementById(elemId) == null)
+			switch (suffix)
+			{
+			case '_asis':
+				continue;
+			case '_left':
+			case '_right':
+				elemId = prefix + i + '_asis';
+			}
+		document.getElementById(elemId).checked = true;
+	}
+}
