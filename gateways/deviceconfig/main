@@ -4,8 +4,8 @@
 # equivalent) and prints it onto stdout. When run, it accepts the
 # only command on stdin:
 #
-# * retrieve <endpoint> <outputfile> <hardware> <software>
-#   (save config text into provided file)
+# * retrieve <endpoint> <handler> <outputfile>
+#   (save remote config text into provided local file)
 
 MYDIR=`dirname $0`
 
@@ -45,24 +45,17 @@ decode_error()
 do_work()
 {
 	local endpoint=`echo $args | cut -s -d' ' -f1`
-	local conftext=`echo $args | cut -s -d' ' -f2`
-	local hw=`echo $args | cut -s -d' ' -f3`
-	local sw=`echo $args | cut -s -d' ' -f4`
+	local handler=`echo $args | cut -s -d' ' -f2`
+	local conftext=`echo $args | cut -s -d' ' -f3`
 	# sanity checks
-	if [ -z "$endpoint" -o -z "$conftext" -o -z "$hw" -o -z "$sw" ]; then
+	if [ -z "$endpoint" -o -z "$conftext" -o -z "$handler" ]; then
 		echo 'ERR!too few arguments to connect'
 		return
 	fi
-	case "$sw" in
-		Cisco+IOS+12.0|Cisco+IOS+12.1|Cisco+IOS+12.2)
-			local handler=cisco
-		;;
-		*)
-			echo "ERR!Don't know how to handle $sw on $endpoint"
-			return
-		;;
-	esac
-
+	[ -x "$MYDIR/$handler.connector" ] || {
+		echo "ERR!Handler '$handler' is not available"
+		exit 1
+	}
 	"$MYDIR/$handler.connector" $endpoint "$conftext"
 	local ret=$?
 	if [ $ret = 0 ]; then

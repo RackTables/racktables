@@ -6864,6 +6864,15 @@ function renderVLANIPv4 ()
 function renderObjectVLANSync ($object_id)
 {
 	global $pageno, $tabno, $nextorder;
+	try
+	{
+		$deviceconfig = iosReadVLANConfig (dos2unix (gwRetrieveDeviceConfig ($object_id)));
+	}
+	catch (RuntimeException $re)
+	{
+		showWarning ('Could not retrieve running-config of this device with the following error:<br>' . $re->getMessage(), __FUNCTION__);
+		return;
+	}
 	$allowed = getAllowedVLANsForObjectPorts ($object_id);
 	$native = getNativeVLANsForObjectPorts ($object_id);
 	$object = spotEntity ('object', $object_id);
@@ -6884,9 +6893,6 @@ function renderObjectVLANSync ($object_id)
 				$formports[$port_id]['port_name'] = $port['name'];
 				break;
 			}
-	$rawconf = array();
-	gwRetrieveDeviceConfig ($object_id, $rawconf); // FIXME: handle error
-	$deviceconfig = iosReadVLANConfig (dos2unix ($rawconf));
 	foreach ($deviceconfig as $item)
 	{
 		// map interface name
