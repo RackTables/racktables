@@ -2383,4 +2383,167 @@ function iosParseVLANString ($string)
 	return $ret;
 }
 
+// Another finite automata to read a dialect of Foundry configuration.
+function fdry5ReadVLANConfig ($input)
+{
+	$ret = array();
+	$procfunc = 'fdry5ScanTopLevel';
+	foreach (explode ("\n", $input) as $line)
+		$procfunc = $procfunc ($ret, $line);
+	return $ret;
+}
+
+function fdry5ScanTopLevel (&$work, $line)
+{
+	$matches = array();
+	switch (TRUE)
+	{
+	case (preg_match ('@^vlan ([[:digit:]]+)( name .+)? (by port)$@', $line, $matches)):
+		$work['current'] = array ('vlan_id' => $matches[1]);
+		return 'fdry5PickVLANSubcommand';
+	case (preg_match ('@^interface ethernet ([[:digit:]]+/[[:digit:]]+/[[:digit:]]+)$@', $line, $matches)):
+		$work['current'] = array ('port_name' => 'e' . $matches[1]);
+		return 'fdry5PickInterfaceSubcommand';
+	default:
+		return __FUNCTION__;
+	}
+}
+
+function fdry5PickVLANSubcommand (&$work, $line)
+{
+	if ($line[0] != ' ') // end of VLAN section
+	{
+		unset ($work['current']);
+		return 'fdry5ScanTopLevel';
+	}
+	// not yet
+	$matches = array();
+	switch (TRUE)
+	{
+	case (preg_match ('@^ tagged (.+)$@', $line, $matches)):
+		// add current VLAN to 'allowed' list of each mentioned port
+		foreach (fdry5ParsePortString ($matches[1]) as $port_name)
+			if ($key = scanArrayForItem ($work, 'port_name', $port_name))
+				$work[$key]['allowed'][] = $work['current']['vlan_id'];
+			else
+				$work[] = array
+				(
+					'port_name' => $port_name,
+					'allowed' => array ($work['current']['vlan_id']),
+					'native' => 0, // can be updated later
+				);
+		break;
+	case (preg_match ('@^ untagged (.+)$@', $line, $matches)):
+		// replace 'native' column of each mentioned port with current VLAN ID
+		foreach (fdry5ParsePortString ($matches[1]) as $port_name)
+			if ($key = scanArrayForItem ($work, 'port_name', $port_name))
+			{
+				$work[$key]['native'][] = $work['current']['vlan_id'];
+				if (!in_array ($work['current']['vlan_id'], $work[$key]['allowed'])) // always true?
+					$work[$key]['allowed'][] = $work['current']['vlan_id'];
+			}
+			else
+				$work[] = array
+				(
+					'port_name' => $port_name,
+					'allowed' => array ($work['current']['vlan_id']),
+					'native' => $work['current']['vlan_id'],
+				);
+		break;
+	default: // nom-nom
+	}
+	return __FUNCTION__;
+}
+
+function fdry5PickInterfaceSubcommand (&$work, $line)
+{
+	if ($line[0] != ' ') // end of interface section
+	{
+		if (array_key_exists ('dual-mode', $work['current']))
+		{
+			if ($key = scanArrayForItem ($work, 'port_name', $work['current']['port_name']))
+				// update existing record
+				$work[$key]['native'] = $work['current']['dual-mode'];
+			else
+				// add new
+				$work[] = array
+				(
+					'port_name' => $work['current']['port_name'],
+					'allowed' => array ($work['current']['dual-mode']),
+					'native' => $work['current']['dual-mode'],
+				);
+		}
+		unset ($work['current']);
+		return 'fdry5ScanTopLevel';
+	}
+	$matches = array();
+	switch (TRUE)
+	{
+	case (preg_match ('@^ dual-mode( +[[:digit:]]+ *)?$@', $line, $matches)):
+		// default VLAN ID for dual-mode command is 1
+		$work['current']['dual-mode'] = strlen (trim ($matches[1])) ? trim ($matches[1]) : 1;
+		break;
+	default: // nom-nom
+	}
+	return __FUNCTION__;
+}
+
+function fdry5ParsePortString ($string)
+{
+	$ret = array();
+	$tokens = explode (' ', trim ($string));
+	while (count ($tokens))
+	{
+		$letters = array_shift ($tokens); // "ethe", "to"
+		$numbers = array_shift ($tokens); // "x", "x/x", "x/x/x"
+		switch ($letters)
+		{
+		case 'ethe':
+			if ($prev_numbers != NULL)
+				$ret[] = 'e' . $prev_numbers;
+			$prev_numbers = $numbers;
+			break;
+		case 'to':
+			$ret = array_merge ($ret, fdry5GenPortRange ($prev_numbers, $numbers));
+			$prev_numbers = NULL; // no action on next token
+			break;
+		default: // ???
+			return array();
+		}
+	}
+	// flush delayed item
+	if ($prev_numbers != NULL)
+		$ret[] = 'e' . $prev_numbers;
+	return $ret;
+}
+
+// Take two indices in form "x", "x/x" or "x/x/x" and return the range of
+// ports spanning from the first to the last. The switch software makes it
+// easier to perform, because "ethe x/x/x to y/y/y" ranges never cross
+// unit/slot boundary (every index except the last remains constant).
+function fdry5GenPortRange ($from, $to)
+{
+	$matches = array();
+	if (1 !== preg_match ('@^([[:digit:]]+/)?([[:digit:]]+/)?([[:digit:]]+)$@', $from, $matches))
+		return array();
+	$prefix = 'e' . $matches[1] . $matches[2];
+	$from_idx = $matches[3];
+	if (1 !== preg_match ('@^([[:digit:]]+/)?([[:digit:]]+/)?([[:digit:]]+)$@', $to, $matches))
+		return array();
+	$to_idx = $matches[3];
+	for ($i = $from_idx; $i <= $to_idx; $i++)
+		$ret[] = $prefix . $i;
+	return $ret;
+}
+
+// Scan given work accumulator array and return the key, which
+// addresses the port with requested name (or NULL if there is none such).
+function scanArrayForItem ($table, $scan_column, $scan_value)
+{
+	foreach ($table as $key => $row)
+		if ($row[$scan_column] == $scan_value)
+			return $key;
+	return NULL;
+}
+
 ?>

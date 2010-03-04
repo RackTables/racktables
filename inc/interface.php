@@ -6866,7 +6866,7 @@ function renderObjectVLANSync ($object_id)
 	global $pageno, $tabno, $nextorder;
 	try
 	{
-		$deviceconfig = iosReadVLANConfig (dos2unix (gwRetrieveDeviceConfig ($object_id)));
+		$deviceconfig = getDevice8021QConfig ($object_id);
 	}
 	catch (RuntimeException $re)
 	{
@@ -6883,6 +6883,8 @@ function renderObjectVLANSync ($object_id)
 		(
 			'desired_allowed' => $vlans,
 			'desired_native' => 0,
+			'running_allowed' => array(),
+			'running_native' => 0,
 		);
 	foreach ($native as $port_id => $native_id)
 		$formports[$port_id]['desired_native'] = $native_id;

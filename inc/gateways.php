@@ -275,16 +275,8 @@ function gwRecvFileFromObject ($object_id = 0, $handlername, &$output)
 	return gwRecvFile ($endpoint, $handlername, $output);
 }
 
-function gwRetrieveDeviceConfig ($object_id = 0)
+function getDevice8021QConfig ($object_id)
 {
-	$objectInfo = spotEntity ('object', $object_id);
-	$endpoints = findAllEndpoints ($object_id, $objectInfo['name']);
-	if (count ($endpoints) == 0)
-		throw new RuntimeException ('endpoint not found');
-	if (count ($endpoints) > 1)
-		throw new RuntimeException ('cannot pick endpoint');
-	$endpoint = str_replace (' ', '\ ', str_replace (' ', '+', $endpoints[0]));
-	$tmpfilename = tempnam ('', 'RackTables-deviceconfig-');
 	$breed = '';
 	foreach (getAttrValues ($object_id) as $record)
 	{
@@ -311,6 +303,24 @@ function gwRetrieveDeviceConfig ($object_id = 0)
 	}
 	if ($breed == '')
 		throw new RuntimeException ('cannot pick handler for this device');
+	$reader = array
+	(
+		'ios12' => 'iosReadVLANConfig',
+		'fdry5' => 'fdry5ReadVLANConfig',
+	);
+	return $reader[$breed] (dos2unix (gwRetrieveDeviceConfig ($object_id, $breed)));
+}
+
+function gwRetrieveDeviceConfig ($object_id, $breed)
+{
+	$objectInfo = spotEntity ('object', $object_id);
+	$endpoints = findAllEndpoints ($object_id, $objectInfo['name']);
+	if (count ($endpoints) == 0)
+		throw new RuntimeException ('endpoint not found');
+	if (count ($endpoints) > 1)
+		throw new RuntimeException ('cannot pick endpoint');
+	$endpoint = str_replace (' ', '\ ', str_replace (' ', '+', $endpoints[0]));
+	$tmpfilename = tempnam ('', 'RackTables-deviceconfig-');
 	$outputlines = queryGateway
 	(
 		'deviceconfig',
