@@ -2423,7 +2423,7 @@ function fdry5PickVLANSubcommand (&$work, $line)
 	case (preg_match ('@^ tagged (.+)$@', $line, $matches)):
 		// add current VLAN to 'allowed' list of each mentioned port
 		foreach (fdry5ParsePortString ($matches[1]) as $port_name)
-			if ($key = scanArrayForItem ($work, 'port_name', $port_name))
+			if (NULL !== $key = scanArrayForItem ($work, 'port_name', $port_name))
 				$work[$key]['allowed'][] = $work['current']['vlan_id'];
 			else
 				$work[] = array
@@ -2436,7 +2436,7 @@ function fdry5PickVLANSubcommand (&$work, $line)
 	case (preg_match ('@^ untagged (.+)$@', $line, $matches)):
 		// replace 'native' column of each mentioned port with current VLAN ID
 		foreach (fdry5ParsePortString ($matches[1]) as $port_name)
-			if ($key = scanArrayForItem ($work, 'port_name', $port_name))
+			if (NULL != $key = scanArrayForItem ($work, 'port_name', $port_name))
 			{
 				$work[$key]['native'][] = $work['current']['vlan_id'];
 				if (!in_array ($work['current']['vlan_id'], $work[$key]['allowed'])) // always true?
@@ -2461,7 +2461,7 @@ function fdry5PickInterfaceSubcommand (&$work, $line)
 	{
 		if (array_key_exists ('dual-mode', $work['current']))
 		{
-			if ($key = scanArrayForItem ($work, 'port_name', $work['current']['port_name']))
+			if (NULL !== $key = scanArrayForItem ($work, 'port_name', $work['current']['port_name']))
 				// update existing record
 				$work[$key]['native'] = $work['current']['dual-mode'];
 			else
@@ -2538,6 +2538,8 @@ function fdry5GenPortRange ($from, $to)
 
 // Scan given work accumulator array and return the key, which
 // addresses the port with requested name (or NULL if there is none such).
+// Note that 0 and NULL mean completely different things and thus
+// require strict checking (=== and !===).
 function scanArrayForItem ($table, $scan_column, $scan_value)
 {
 	foreach ($table as $key => $row)
