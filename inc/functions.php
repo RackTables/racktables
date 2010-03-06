@@ -625,7 +625,18 @@ function sortTokenize ($a, $b)
 
 function sortByName ($a, $b)
 {
-	return sortTokenize($a['name'], $b['name']);
+	$result = sortTokenize ($a['name'], $b['name']);
+	if ($result != 0)
+		return $result;
+	if ($a['iif_id'] != $b['iif_id'])
+		return $a['iif_id'] - $b['iif_id'];
+	$result = strcmp ($a['label'], $b['label']);
+	if ($result != 0)
+		return $result;
+	$result = strcmp ($a['l2address'], $b['l2address']);
+	if ($result != 0)
+		return $result;
+	return $a['id'] - $b['id'];
 }
 
 function sortObjectAddressesAndNames ($a, $b)
