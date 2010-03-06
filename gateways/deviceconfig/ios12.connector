@@ -45,7 +45,7 @@ prepare_connect_commands()
 CMDS1=`mktemp /tmp/cisco.connector.XXXX`
 [ -f "$CMDS1" ] || exit 5
 prepare_connect_commands $ENDPOINT
-printf 'term len 0\nshow run\nquit\n' >> $CMDS1
+printf 'term len 0\nshow run\n! END OF CONFIG\nshow vlan brief\n! END OF VLAN LIST\nquit\n' >> $CMDS1
 nc $ENDPOINT 23 < $CMDS1 > "$OUT1"
 if fgrep -q '% Bad passwords' "$OUT1"; then
 	rm -f "$CMDS1"

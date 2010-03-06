@@ -305,7 +305,7 @@ function getDevice8021QConfig ($object_id)
 		throw new RuntimeException ('cannot pick handler for this device');
 	$reader = array
 	(
-		'ios12' => 'iosReadVLANConfig',
+		'ios12' => 'ios12ReadVLANConfig',
 		'fdry5' => 'fdry5ReadVLANConfig',
 	);
 	return $reader[$breed] (dos2unix (gwRetrieveDeviceConfig ($object_id, $breed)));

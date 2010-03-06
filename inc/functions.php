@@ -2277,25 +2277,40 @@ function formatVLANName ($vlaninfo)
 
 // Read given running-config and return a list of work items in a format
 // similar to the one, which setSwitchVLANConfig() understands.
-function iosReadVLANConfig ($input)
+function ios12ReadVLANConfig ($input)
 {
-	$ret = array();
-	$procfunc = 'iosPickInterfaceCommand';
+	$ret = array
+	(
+		'vlanlist' => array(),
+		'portdata' => array(),
+	);
+	$procfunc = 'ios12ScanTopLevel';
 	foreach (explode ("\n", $input) as $line)
 		$procfunc = $procfunc ($ret, $line);
 	return $ret;
 }
 
-function iosPickInterfaceCommand (&$work, $line)
+function ios12ScanTopLevel (&$work, $line)
 {
 	$matches = array();
-	if (!preg_match ('@^interface ((Ethernet|FastEthernet|GigabitEthernet|TenGigabitEthernet)[[:digit:]]+(/[[:digit:]]+)*)$@', $line, $matches))
+	switch (TRUE)
+	{
+	case (preg_match ('@^interface ((Ethernet|FastEthernet|GigabitEthernet|TenGigabitEthernet)[[:digit:]]+(/[[:digit:]]+)*)$@', $line, $matches)):
+		// map interface name
+		$matches[1] = preg_replace ('@^Ethernet(.+)$@', 'et\\1', $matches[1]);
+		$matches[1] = preg_replace ('@^FastEthernet(.+)$@', 'fa\\1', $matches[1]);
+		$matches[1] = preg_replace ('@^GigabitEthernet(.+)$@', 'gi\\1', $matches[1]);
+		$matches[1] = preg_replace ('@^TenGigabitEthernet(.+)$@', 'te\\1', $matches[1]);
+		$work['current'] = array ('port_name' => $matches[1]);
+		return 'ios12PickSwitchportCommand'; // switch to interface block reading
+	case (preg_match ('/^VLAN Name                             Status    Ports$/', $line, $matches)):
+		return 'ios12PickVLANCommand';
+	default:
 		return __FUNCTION__; // continue scan
-	$work['current'] = array ('port_name' => $matches[1]);
-	return 'iosPickSwitchportCommand'; // switch to interface block reading
+	}
 }
 
-function iosPickSwitchportCommand (&$work, $line)
+function ios12PickSwitchportCommand (&$work, $line)
 {
 	if ($line[0] != ' ') // end of interface section
 	{
@@ -2313,7 +2328,7 @@ function iosPickSwitchportCommand (&$work, $line)
 		switch ($work['current']['mode'])
 		{
 		case 'access':
-			$work[] = array
+			$work['portdata'][] = array
 			(
 				'port_name' => $work['current']['port_name'],
 				'allowed' => array ($work['current']['access vlan']),
@@ -2328,7 +2343,7 @@ function iosPickSwitchportCommand (&$work, $line)
 				$work['current']['trunk native vlan'],
 				$work['current']['trunk allowed vlan']
 			) ? $work['current']['trunk native vlan'] : 0;
-			$work[] = array
+			$work['portdata'][] = array
 			(
 				'port_name' => $work['current']['port_name'],
 				'allowed' => $work['current']['trunk allowed vlan'],
@@ -2339,7 +2354,7 @@ function iosPickSwitchportCommand (&$work, $line)
 			// dot1q-tunnel, dynamic, private-vlan --- skip these
 		}
 		unset ($work['current']);
-		return 'iosPickInterfaceCommand';
+		return 'ios12ScanTopLevel';
 	}
 	// not yet
 	$matches = array();
@@ -2369,6 +2384,25 @@ function iosPickSwitchportCommand (&$work, $line)
 	return __FUNCTION__;
 }
 
+function ios12PickVLANCommand (&$work, $line)
+{
+	$matches = array();
+	switch (TRUE)
+	{
+	case ($line == '---- -------------------------------- --------- -------------------------------'):
+		// ignore the rest of VLAN table header;
+		break;
+	case (preg_match ('@! END OF VLAN LIST$@', $line)):
+		return 'ios12ScanTopLevel';
+	case (preg_match ('@^([[:digit:]]+) {1,4}.{32} active    @', $line, $matches)):
+		if (!array_key_exists ($matches[1], $work['vlanlist']))
+			$work['vlanlist'][] = $matches[1];
+		break;
+	default:
+	}
+	return __FUNCTION__;
+}
+
 function iosParseVLANString ($string)
 {
 	$ret = array();
@@ -2386,7 +2420,11 @@ function iosParseVLANString ($string)
 // Another finite automata to read a dialect of Foundry configuration.
 function fdry5ReadVLANConfig ($input)
 {
-	$ret = array();
+	$ret = array
+	(
+		'vlanlist' => array(),
+		'portdata' => array(),
+	);
 	$procfunc = 'fdry5ScanTopLevel';
 	foreach (explode ("\n", $input) as $line)
 		$procfunc = $procfunc ($ret, $line);
@@ -2399,6 +2437,8 @@ function fdry5ScanTopLevel (&$work, $line)
 	switch (TRUE)
 	{
 	case (preg_match ('@^vlan ([[:digit:]]+)( name .+)? (by port)$@', $line, $matches)):
+		if (!array_key_exists ($matches[1], $work['vlanlist']))
+			$work['vlanlist'][] = $matches[1];
 		$work['current'] = array ('vlan_id' => $matches[1]);
 		return 'fdry5PickVLANSubcommand';
 	case (preg_match ('@^interface ethernet ([[:digit:]]+/[[:digit:]]+/[[:digit:]]+)$@', $line, $matches)):
@@ -2423,10 +2463,10 @@ function fdry5PickVLANSubcommand (&$work, $line)
 	case (preg_match ('@^ tagged (.+)$@', $line, $matches)):
 		// add current VLAN to 'allowed' list of each mentioned port
 		foreach (fdry5ParsePortString ($matches[1]) as $port_name)
-			if (NULL !== $key = scanArrayForItem ($work, 'port_name', $port_name))
-				$work[$key]['allowed'][] = $work['current']['vlan_id'];
+			if (NULL !== $key = scanArrayForItem ($work['portdata'], 'port_name', $port_name))
+				$work['portdata'][$key]['allowed'][] = $work['current']['vlan_id'];
 			else
-				$work[] = array
+				$work['portdata'][] = array
 				(
 					'port_name' => $port_name,
 					'allowed' => array ($work['current']['vlan_id']),
@@ -2436,14 +2476,13 @@ function fdry5PickVLANSubcommand (&$work, $line)
 	case (preg_match ('@^ untagged (.+)$@', $line, $matches)):
 		// replace 'native' column of each mentioned port with current VLAN ID
 		foreach (fdry5ParsePortString ($matches[1]) as $port_name)
-			if (NULL != $key = scanArrayForItem ($work, 'port_name', $port_name))
+			if (NULL != $key = scanArrayForItem ($work['portdata'], 'port_name', $port_name))
 			{
-				$work[$key]['native'][] = $work['current']['vlan_id'];
-				if (!in_array ($work['current']['vlan_id'], $work[$key]['allowed'])) // always true?
-					$work[$key]['allowed'][] = $work['current']['vlan_id'];
+				$work['portdata'][$key]['native'] = $work['current']['vlan_id'];
+				$work['portdata'][$key]['allowed'][] = $work['current']['vlan_id'];
 			}
 			else
-				$work[] = array
+				$work['portdata'][] = array
 				(
 					'port_name' => $port_name,
 					'allowed' => array ($work['current']['vlan_id']),
@@ -2461,12 +2500,12 @@ function fdry5PickInterfaceSubcommand (&$work, $line)
 	{
 		if (array_key_exists ('dual-mode', $work['current']))
 		{
-			if (NULL !== $key = scanArrayForItem ($work, 'port_name', $work['current']['port_name']))
+			if (NULL !== $key = scanArrayForItem ($work['portdata'], 'port_name', $work['current']['port_name']))
 				// update existing record
-				$work[$key]['native'] = $work['current']['dual-mode'];
+				$work['portdata'][$key]['native'] = $work['current']['dual-mode'];
 			else
 				// add new
-				$work[] = array
+				$work['portdata'][] = array
 				(
 					'port_name' => $work['current']['port_name'],
 					'allowed' => array ($work['current']['dual-mode']),

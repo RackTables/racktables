@@ -6895,13 +6895,8 @@ function renderObjectVLANSync ($object_id)
 				$formports[$port_id]['port_name'] = $port['name'];
 				break;
 			}
-	foreach ($deviceconfig as $item)
+	foreach ($deviceconfig['portdata'] as $item)
 	{
-		// map interface name
-		$item['port_name'] = preg_replace ('@^Ethernet(.+)$@', 'et\\1', $item['port_name']);
-		$item['port_name'] = preg_replace ('@^FastEthernet(.+)$@', 'fa\\1', $item['port_name']);
-		$item['port_name'] = preg_replace ('@^GigabitEthernet(.+)$@', 'gi\\1', $item['port_name']);
-		$item['port_name'] = preg_replace ('@^TenGigabitEthernet(.+)$@', 'te\\1', $item['port_name']);
 		foreach (array_keys ($formports) as $tmpkey)
 			if ($formports[$tmpkey]['port_name'] == $item['port_name']) // comparing mapped value
 			{
