@@ -6878,33 +6878,25 @@ function renderObjectVLANSync ($object_id)
 	$object = spotEntity ('object', $object_id);
 	amplifyCell ($object);
 	$formports = array();
-	foreach ($allowed as $port_id => $vlans)
-		$formports[$port_id] = array
-		(
-			'desired_allowed' => $vlans,
-			'desired_native' => 0,
-			'running_allowed' => array(),
-			'running_native' => 0,
-		);
-	foreach ($native as $port_id => $native_id)
-		$formports[$port_id]['desired_native'] = $native_id;
-	foreach (array_keys ($formports) as $port_id)
-		foreach ($object['ports'] as $port)
-			if ($port['id'] == $port_id)
-			{
-				$formports[$port_id]['port_name'] = $port['name'];
-				break;
-			}
+	// Iterate over object's ports table, which is already sorted in
+	// a particular way, and pick items from "allowed" list, which
+	// comes sorted in some other way.
+	foreach ($object['ports'] as $oport)
+		if (array_key_exists ($oport['id'], $allowed) and mb_strlen ($oport['name']))
+			$formports[$oport['id']] = array
+			(
+				'port_name' => $oport['name'],
+				'desired_allowed' => $allowed[$oport['id']],
+				'desired_native' => array_key_exists ($oport['id'], $native) ? $native[$oport['id']] : 0,
+				'running_allowed' => array(),
+				'running_native' => 0,
+			);
 	foreach ($deviceconfig['portdata'] as $item)
-	{
-		foreach (array_keys ($formports) as $tmpkey)
-			if ($formports[$tmpkey]['port_name'] == $item['port_name']) // comparing mapped value
-			{
-				$formports[$tmpkey]['running_allowed'] = $item['allowed'];
-				$formports[$tmpkey]['running_native'] = $item['native'];
-				break;
-			}
-	}
+		if (NULL !== $tmpkey = scanArrayForItem ($formports, 'port_name', $item['port_name']))
+		{
+			$formports[$tmpkey]['running_allowed'] = $item['allowed'];
+			$formports[$tmpkey]['running_native'] = $item['native'];
+		}
 	$vswitch = getVLANSwitchInfo ($object_id);
 	$domvlans = array_keys (getDomainVLANs ($vswitch['domain_id']));
 	printOpFormIntro ('sync', array ('mutex_rev' => $vswitch['mutex_rev']));
