@@ -2598,4 +2598,64 @@ function scanArrayForItem ($table, $scan_column, $scan_value)
 	return NULL;
 }
 
+function computeSwitchPushRequest ($object_id, $which_ports)
+{
+	$vswitch = getVLANSwitchInfo ($object_id);
+	$vdomain = getVLANDomain ($vswitch['domain_id']);
+	$device_config = getDevice8021QConfig ($object_id);
+	// ignore the immune VLANs
+	$old_managed_vlans = array();
+	foreach ($device_config['vlanlist'] as $vlan_id)
+		if ($vdomain['vlanlist'][$vlan_id]['vlan_type'] != 'alien')
+			$old_managed_vlans[] = $vlan_id;
+	$object = spotEntity ('object', $object_id);
+	amplifyCell ($object);
+	$db_allowed = getAllowedVLANsForObjectPorts ($object_id);
+	$db_native = getNativeVLANsForObjectPorts ($object_id);
+	$db_config = array();
+	foreach ($db_allowed as $port_id => $vlans)
+		$db_config[$port_id] = array
+		(
+			'allowed' => $vlans,
+			'native' => 0,
+		);
+	foreach ($db_native as $port_id => $vlan_id)
+		$db_config[$port_id]['native'] = $vlan_id;
+	$ports_to_do = array();
+	foreach ($which_ports as $req_port_id)
+	{
+		if (!array_key_exists ($req_port_id, $db_allowed))
+			continue;
+		if (NULL === $db_pkey = scanArrayForItem ($object['ports'], 'id', $req_port_id))
+			continue;
+		if ('' == $port_name = $object['ports'][$db_pkey]['name'])
+			continue;
+		if (NULL === $dev_pkey = scanArrayForItem ($device_config['portdata'], 'port_name', $port_name))
+			continue;
+		if
+		(
+			count ($db_config[$req_port_id]['allowed']) == 0 and
+			$db_config[$req_port_id]['native'] == 0
+		)
+			continue;
+		if
+		(
+			count ($device_config[$req_port_id]['allowed']) == 0 and
+			$device_config[$req_port_id]['native'] == 0
+		)
+			continue;
+		$ports_to_do[] = $req_port_id;
+	}
+	$new_managed_vlans = array();
+	foreach ($vdomain['vlanlist'] as $vlan_id => $vlan)
+		if ($vlan['type'] == 'mandatory')
+			$new_managed_vlans[] = $vlan_id;
+	foreach ($db_allowed as $vlanlist)
+		foreach ($vlanlist as $vlan_id)
+			if (!in_array ($vlan_id, $new_managed_vlans))
+				$new_managed_vlans[] = $vlan_id;
+	dump ($old_managed_vlans);
+	dump ($new_managed_vlans);
+}
+
 ?>
