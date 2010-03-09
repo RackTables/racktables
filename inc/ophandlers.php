@@ -2156,7 +2156,7 @@ function destroyVLANDomain ()
 {
 	assertUIntArg ('vdom_id');
 	global $sic;
-	$result = FALSE !== usePreparedDeleteBlade ('VLANDomain', 'id', $sic['vdom_id']);
+	$result = FALSE !== usePreparedDeleteBlade ('VLANDomain', array ('id' => $sic['vdom_id']));
 	return buildRedirectURL (__FUNCTION__, $result ? 'OK' : 'ERR');
 }
 

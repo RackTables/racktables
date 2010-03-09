@@ -2239,11 +2239,18 @@ function useDeleteBlade ($tablename, $keyname, $keyvalue)
 }
 
 // Prepared version of above, but note the difference in returned value.
-function usePreparedDeleteBlade ($tablename, $keyname, $keyvalue)
+function usePreparedDeleteBlade ($tablename, $columns, $conjunction = 'AND')
 {
 	global $dbxlink;
-	$prepared = $dbxlink->prepare ("DELETE FROM ${tablename} WHERE ${keyname} = ?");
-	if (!$prepared->execute (array ($keyvalue)))
+	$conj = '';
+	$query = "DELETE FROM ${tablename} WHERE ";
+	foreach ($columns as $colname => $colvalue)
+	{
+		$query .= "${conj} ${colname} = ?";
+		$conj = $conjunction;
+	}
+	$prepared = $dbxlink->prepare ($query);
+	if (!$prepared->execute (array ($columns)))
 		return FALSE;
 	return $prepared->rowCount(); // FALSE !== 0
 }
@@ -3694,8 +3701,8 @@ function setPortVLANConfig ($port_id, $allowed, $native)
 	global $dbxlink;
 	if
 	(
-		FALSE === usePreparedDeleteBlade ('PortAllowedVLAN', 'port_id', $port_id) or
-		FALSE === usePreparedDeleteBlade ('PortNativeVLAN', 'port_id', $port_id)
+		FALSE === usePreparedDeleteBlade ('PortAllowedVLAN', array ('port_id' => $port_id)) or
+		FALSE === usePreparedDeleteBlade ('PortNativeVLAN', array ('port_id' => $port_id))
 	)
 		return FALSE;
 	foreach ($allowed as $vlan_id)
