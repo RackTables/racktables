@@ -6628,62 +6628,50 @@ function renderVLANDomainVLANList ($vdom_id)
 function renderObjectVLANPorts ($object_id)
 {
 	global $pageno, $tabno, $sic;
-	$allowed = getAllowedVLANsForObjectPorts ($object_id);
-	$native = getNativeVLANsForObjectPorts ($object_id);
-	$object = spotEntity ('object', $object_id);
-	amplifyCell ($object);
-	$port_id = array_key_exists ('port_id', $sic) ? $sic['port_id'] : 0;
+	$req_port_name = array_key_exists ('port_name', $sic) ? $sic['port_name'] : '';
+	$desired_config = getDesired8021QConfig ($object_id);
 	echo '<table border=0 width="100%"><tr valign=top><td class=tdleft width="30%">';
 	// port list
 	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
 	echo '<tr><th>port name</th><th>current config</th></tr>';
-	foreach ($object['ports'] as $port)
-		if (array_key_exists ($port['id'], $allowed)) // eligible for 802.1Q
-		{
-			$tdclass = $port['id'] == $port_id ? 'seltagbox' : 'tagbox';
-			echo "<tr><td class=${tdclass}><a href='" . makeHref
+	foreach ($desired_config as $port_name => $port)
+	{
+		$tdclass = $port_name == $req_port_name ? 'seltagbox' : 'tagbox';
+		echo "<tr><td class=${tdclass}><a href='" . makeHref
+		(
+			array
 			(
-				array
-				(
-					'page' => $pageno,
-					'tab' => $tabno,
-					'object_id' => $object_id,
-					'port_id' => $port['id'],
-				)
-			);
-			echo "'>${port['name']}</a></td><td class=${tdclass}>";
-			echo serializeVLANPack
-			(
-				array_key_exists ($port['id'], $native) ? $native[$port['id']] : 0,
-				array_key_exists ($port['id'], $allowed) ? $allowed[$port['id']] : array()
-			);
-			echo '</td></tr>';
-		}
+				'page' => $pageno,
+				'tab' => $tabno,
+				'object_id' => $object_id,
+				'port_name' => $port_name,
+			)
+		);
+		echo "'>${port_name}</a></td><td class=${tdclass}>";
+		echo serializeVLANPack
+		(
+			$port['native'],
+			$port['allowed']
+		);
+		echo '</td></tr>';
+	}
 	echo '</table>';
 	echo '</td>';
 	// configuration of currently selected port, if any
-	if (!$port_id)
+	if (!array_key_exists ($req_port_name, $desired_config))
 		echo '<td colspan=2>&nbsp;</td>';
 	else
-	{
-		$portinfo = getPortInfo ($port_id);
-		if ($portinfo['object_id'] != $object_id)
-		{
-			showError ('Invalid port_id', __FUNCTION__);
-			return;
-		}
 		renderPortVLANConfig
 		(
-			$port_id,
 			$object_id,
-			array_key_exists ($port_id, $allowed) ? $allowed[$port_id] : array(),
-			array_key_exists ($port_id, $native) ? $native[$port_id] : 0
+			$req_port_name,
+			$desired_config[$req_port_name]['allowed'],
+			$desired_config[$req_port_name]['native']
 		);
-	}
 	echo '</tr></table>';
 }
 
-function renderPortVLANConfig ($port_id, $object_id, $allowed, $native)
+function renderPortVLANConfig ($object_id, $port_name, $allowed, $native)
 {
 	$vswitch = getVLANSwitchInfo ($object_id);
 	$vdom = getVLANDomain ($vswitch['domain_id']);
@@ -6692,7 +6680,7 @@ function renderPortVLANConfig ($port_id, $object_id, $allowed, $native)
 		echo '<td colspan=2>(configured VLAN domain is empty)</td>';
 		return;
 	}
-	printOpFormIntro ('savePortVLANConfig', array ('port_id' => $port_id, 'mutex_rev' => $vswitch['mutex_rev']));
+	printOpFormIntro ('savePortVLANConfig', array ('port_name' => $port_name, 'mutex_rev' => $vswitch['mutex_rev']));
 	echo '<td width="35%">';
 	echo '<table border=0 cellspacing=0 cellpadding=3 align=center>';
 	echo '<tr><th colspan=2>allowed</th></tr>';
@@ -6748,7 +6736,7 @@ function renderPortVLANConfig ($port_id, $object_id, $allowed, $native)
 		printImageHREF ('CLEAR gray');
 	else
 	{
-		printOpFormIntro ('savePortVLANConfig', array ('port_id' => $port_id, 'mutex_rev' => $vswitch['mutex_rev']));
+		printOpFormIntro ('savePortVLANConfig', array ('port_name' => $port_name, 'mutex_rev' => $vswitch['mutex_rev']));
 		printImageHREF ('CLEAR', 'Unassign all VLANs', TRUE);
 		echo '</form>';
 	}
@@ -6814,7 +6802,7 @@ function renderVLANInfo ($vlan_ck)
 			echo "<tr class=row_${order} valign=top><td>";
 			renderCell (spotEntity ('object', $switch_id));
 			echo '</td><td class=tdleft><ul>';
-			foreach ($portlist as $port_id => $port_name)
+			foreach ($portlist as $port_name)
 				echo "<li>${port_name}</li>";
 			echo '</ul></td></tr>';
 			$order = $nextorder[$order];
@@ -6873,33 +6861,40 @@ function renderObjectVLANSync ($object_id)
 		showWarning ('Could not retrieve running-config of this device with the following error:<br>' . $re->getMessage(), __FUNCTION__);
 		return;
 	}
-	$allowed = getAllowedVLANsForObjectPorts ($object_id);
-	$native = getNativeVLANsForObjectPorts ($object_id);
-	$object = spotEntity ('object', $object_id);
-	amplifyCell ($object);
+	$desired_config = getDesired8021QConfig ($object_id);
+	$running_config = getDevice8021QConfig ($object_id);
 	$formports = array();
-	// Iterate over object's ports table, which is already sorted in
-	// a particular way, and pick items from "allowed" list, which
-	// comes sorted in some other way.
-	foreach ($object['ports'] as $oport)
-		if (array_key_exists ($oport['id'], $allowed) and mb_strlen ($oport['name']))
-			$formports[$oport['id']] = array
-			(
-				'port_name' => $oport['name'],
-				'desired_allowed' => $allowed[$oport['id']],
-				'desired_native' => array_key_exists ($oport['id'], $native) ? $native[$oport['id']] : 0,
-				'running_allowed' => array(),
-				'running_native' => 0,
-			);
-	foreach ($deviceconfig['portdata'] as $item)
+	// The form is based on the "desired" list, which has every
+	// 802.1Q-eligible port of the object plus any port names
+	// already stored in the database. This list may be further
+	// extended by the "running" list of the actual device.
+	foreach ($desired_config as $port_name => $port)
+		$formports[] = array
+		(
+			'port_name' => $port_name,
+			'desired_allowed' => $port['allowed'],
+			'desired_native' => $port['native'],
+			'running_allowed' => array(),
+			'running_native' => 0,
+		);
+	foreach ($running_config['portdata'] as $item)
 		if (NULL !== $tmpkey = scanArrayForItem ($formports, 'port_name', $item['port_name']))
 		{
 			$formports[$tmpkey]['running_allowed'] = $item['allowed'];
 			$formports[$tmpkey]['running_native'] = $item['native'];
 		}
+		else
+			$formports[] = array
+			(
+				'port_name' => $item['port_name'],
+				'desired_allowed' => array(),
+				'desired_native' => 0,
+				'running_allowed' => $item['allowed'],
+				'running_native' => $item['native'],
+			);
 	$vswitch = getVLANSwitchInfo ($object_id);
 	$domvlans = array_keys (getDomainVLANs ($vswitch['domain_id']));
-	printOpFormIntro ('sync', array ('mutex_rev' => $vswitch['mutex_rev']));
+	printOpFormIntro ('sync', array ('mutex_rev' => $vswitch['mutex_rev'], 'nrows' => count ($formports)));
 	$nrows = count ($formports);
 	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
 	echo '<tr><th rowspan=2>port name</th><th rowspan=2>desired config</th><th colspan=3>wins</th>';
@@ -6910,7 +6905,7 @@ function renderObjectVLANSync ($object_id)
 	echo '</tr>';
 	$order = 'odd';
 	$rownum = 1;
-	foreach ($formports as $port_id => $port)
+	foreach ($formports as $port)
 	{
 		$desired_cfgstring = serializeVLANPack ($port['desired_native'], $port['desired_allowed']);
 		$running_cfgstring = serializeVLANPack ($port['running_native'], $port['running_allowed']);
@@ -6937,14 +6932,15 @@ function renderObjectVLANSync ($object_id)
 			else
 				// For JS event handler radio input names are indexed from 1
 				// onwards, but for sumbit handler they are based on port id.
-				echo "<input id=i_${rownum}_${pos} name=i_${port_id} type=radio value=${pos}" . $checked[$pos] . ">";
+				echo "<input id=i_${rownum}_${pos} name=i_${rownum} type=radio value=${pos}" . $checked[$pos] . ">";
 			echo '</td>';
 		}
 		echo "<td><label for=i_${rownum}_right>${running_cfgstring}</label></td>";
 		echo '</tr>';
-		echo "<input type=hidden name=rn_${port_id} value=${port['running_native']}>";
+		echo "<input type=hidden name=rn_${rownum} value=${port['running_native']}>";
 		foreach ($port['running_allowed'] as $a)
-			echo "<input type=hidden name=ra_${port_id}[] value=${a}>";
+			echo "<input type=hidden name=ra_${rownum}[] value=${a}>";
+		echo "<input type=hidden name=pn_${rownum} value='" . htmlspecialchars ($port['port_name']) . "'>";
 		$order = $nextorder[$order];
 		$rownum++;
 	}

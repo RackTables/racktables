@@ -411,19 +411,21 @@ CREATE TABLE `VLANSwitch` (
 ) ENGINE=InnoDB;
 
 CREATE TABLE `PortAllowedVLAN` (
-  `port_id` int(10) unsigned NOT NULL default '0',
+  `object_id` int(10) unsigned NOT NULL,
+  `port_name` char(255) NOT NULL,
   `vlan_id` int(10) unsigned NOT NULL default '0',
-  PRIMARY KEY  (`port_id`,`vlan_id`),
+  PRIMARY KEY  (`object_id`,`port_name`,`vlan_id`),
   KEY `vlan_id` (`vlan_id`),
-  CONSTRAINT `PortAllowedVLAN-FK-port_id` FOREIGN KEY (`port_id`) REFERENCES `Port` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `PortAllowedVLAN-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `RackObject` (`id`) ON DELETE CASCADE,
   CONSTRAINT `PortAllowedVLAN-FK-vlan_id` FOREIGN KEY (`vlan_id`) REFERENCES `VLANValidID` (`vlan_id`)
 ) ENGINE=InnoDB;
 
 CREATE TABLE `PortNativeVLAN` (
-  `port_id` int(10) unsigned NOT NULL default '0',
+  `object_id` int(10) unsigned NOT NULL,
+  `port_name` char(255) NOT NULL,
   `vlan_id` int(10) unsigned NOT NULL default '0',
-  PRIMARY KEY  (`port_id`,`vlan_id`),
-  UNIQUE KEY `port_id` (`port_id`),
-  CONSTRAINT `PortNativeVLAN-FK-compound` FOREIGN KEY (`port_id`, `vlan_id`) REFERENCES `PortAllowedVLAN` (`port_id`, `vlan_id`) ON DELETE CASCADE
+  PRIMARY KEY  (`object_id`,`port_name`,`vlan_id`),
+  UNIQUE KEY `port_id` (`object_id`,`port_name`),
+  CONSTRAINT `PortNativeVLAN-FK-compound` FOREIGN KEY (`object_id`, `port_name`, `vlan_id`) REFERENCES `PortAllowedVLAN` (`object_id`, `port_name`, `vlan_id`) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 

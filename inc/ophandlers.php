@@ -2176,25 +2176,21 @@ $msgcode['savePortVLANConfig']['ERR1'] = 160;
 $msgcode['savePortVLANConfig']['ERR2'] = 109;
 function savePortVLANConfig ()
 {
-	assertUIntArg ('port_id');
+	assertStringArg ('port_name');
 	assertUIntArg ('mutex_rev');
 	global $sic;
-	$portinfo = getPortInfo ($sic['port_id']);
-	if ($portinfo['object_id'] != $sic['object_id'])
-		// should we throw instead?
-		return buildRedirectURL (__FUNCTION__, 'ERR1', array(), NULL, NULL, array ('port_id' => $sic['port_id']));
 	try
 	{
 		$allowed = isset ($sic['allowed_id']) ? $sic['allowed_id'] : array();
 		$native = isset ($sic['native_id']) ? $sic['native_id'] : 0; // 0 means "reset"
-		$work = array (array ('port_id' => $sic['port_id'], 'allowed' => $allowed, 'native' => $native));
+		$work = array ($sic['port_name'] => array ('allowed' => $allowed, 'native' => $native));
 		setSwitchVLANConfig ($sic['object_id'], $sic['mutex_rev'], $work);
 	}
 	catch (Exception $e)
 	{
-		return buildRedirectURL (__FUNCTION__, 'ERR2', array(), NULL, NULL, array ('port_id' => $sic['port_id']));
+		return buildRedirectURL (__FUNCTION__, 'ERR2', array(), NULL, NULL, array ('port_name' => $sic['port_name']));
 	}
-	return buildRedirectURL (__FUNCTION__, 'OK', array(), NULL, NULL, array ('port_id' => $sic['port_id']));
+	return buildRedirectURL (__FUNCTION__, 'OK', array(), NULL, NULL, array ('port_name' => $sic['port_name']));
 }
 
 $msgcode['bindVLANtoIPv4']['OK'] = 48;
@@ -2223,28 +2219,28 @@ function processVLANSyncRequest ()
 {
 	global $sic;
 	assertUIntArg ('mutex_rev');
-	// Divide submitted radio buttons into 4 groups:
+	assertUIntArg ('nrows');
+	// Divide submitted radio buttons into 3 groups:
 	// left (produce and send commands to switch)
 	// asis (ignore)
 	// right (fetch config from switch and save into database)
-	$object = spotEntity ('object', $_REQUEST['object_id']);
-	$allowed = getAllowedVLANsForObjectPorts ($sic['object_id']);
+	$desired_config = getDesired8021QConfig ($sic['object_id']);
 	$from_running = array();
-	foreach ($allowed as $port_id => $vlanlist)
+	for ($i = 1; $i <= $sic['nrows']; $i++)
 	{
-		if (!array_key_exists ("i_${port_id}", $sic))
+		if (!array_key_exists ("i_${i}", $sic))
 			continue;
-		switch ($sic["i_${port_id}"])
+		// let's hope other inputs are in place
+		switch ($sic["i_${i}"])
 		{
 		case 'left':
 			// FIXME: queue sub-task of DB->switch request
 			break;
 		case 'right':
-			$from_running[] = array
+			$from_running[$sic["pn_${i}"]] = array
 			(
-				'port_id' => $port_id,
-				'allowed' => $sic["ra_${port_id}"],
-				'native' => $sic["rn_${port_id}"],
+				'allowed' => $sic["ra_${i}"],
+				'native' => $sic["rn_${i}"],
 			);
 			break;
 		default:

@@ -2246,11 +2246,11 @@ function usePreparedDeleteBlade ($tablename, $columns, $conjunction = 'AND')
 	$query = "DELETE FROM ${tablename} WHERE ";
 	foreach ($columns as $colname => $colvalue)
 	{
-		$query .= "${conj} ${colname} = ?";
+		$query .= " ${conj} ${colname}=?";
 		$conj = $conjunction;
 	}
 	$prepared = $dbxlink->prepare ($query);
-	if (!$prepared->execute (array ($columns)))
+	if (!$prepared->execute (array_values ($columns)))
 		return FALSE;
 	return $prepared->rowCount(); // FALSE !== 0
 }
@@ -3654,40 +3654,42 @@ function getVLANSwitchInfo ($object_id)
 	return NULL;
 }
 
-// Return a list of object's ports, which can run 802.1Q, each with a list
-// of VLANs enabled for that port. Even when a port has no VLANs enabled,
-// it is still shown on the list.
-function getAllowedVLANsForObjectPorts ($object_id)
+// Return the "should-be" version of 802.1Q ports, which includes
+// all current 802.1Q-eligible device ports plus the ports found
+// in the database. This means, if we have once saved configuration
+// for a port named "gi0/1" and it's not on the device's port list
+// any more, it will be present on the returned list anyway (until
+// the 802.1Q configuration is reset for that port).
+function getDesired8021QConfig ($object_id)
 {
-	global $dbxlink;
-	$query = 'SELECT id AS port_id, vlan_id ' .
-		'FROM Port LEFT JOIN PortAllowedVLAN ON Port.id = PortAllowedVLAN.port_id ' .
-		'WHERE object_id = ? AND type IN (SELECT oif_id FROM VLANEligibleOIF) ' .
-		'ORDER BY port_id, vlan_id';
-	$prepared = $dbxlink->prepare ($query);
-	$prepared->execute (array ($object_id));
 	$ret = array();
-	while ($row = $prepared->fetch (PDO::FETCH_ASSOC))
+	// currently valid ports are always included in the result
+	$query = 'SELECT name FROM Port WHERE object_id = ? AND type IN (SELECT oif_id FROM VLANEligibleOIF) AND name <> ""';
+	$result = usePreparedSelectBlade ($query, array ($object_id));
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
+		$ret[$row['name']] = array
+		(
+			'allowed' => array(),
+			'native' => 0,
+		);
+	unset ($result);
+	$query = 'SELECT port_name, vlan_id FROM PortAllowedVLAN WHERE object_id = ?';
+	$result = usePreparedSelectBlade ($query, array ($object_id));
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
-		if (!array_key_exists ($row['port_id'], $ret))
-			$ret[$row['port_id']] = array();
-		if ($row['vlan_id'] !== NULL)
-			$ret[$row['port_id']][] = $row['vlan_id'];
+		if (!array_key_exists ($row['port_name'], $ret))
+			$ret[$row['port_name']] = array
+			(
+				'allowed' => array(),
+				'native' => 0,
+			);
+		$ret[$row['port_name']]['allowed'][] = $row['vlan_id'];
 	}
-	return $ret;
-}
-
-function getNativeVLANsForObjectPorts ($object_id)
-{
-	global $dbxlink;
-	$query = 'SELECT port_id, vlan_id FROM ' .
-		'PortNativeVLAN INNER JOIN Port ON Port.id = PortNativeVLAN.port_id ' .
-		'WHERE object_id = ? ORDER BY port_id';
-	$prepared = $dbxlink->prepare ($query);
-	$prepared->execute (array ($object_id));
-	$ret = array();
-	while ($row = $prepared->fetch (PDO::FETCH_ASSOC))
-		$ret[$row['port_id']] = $row['vlan_id']; // port_id is unique in this table
+	unset ($result);
+	$query = 'SELECT port_name, vlan_id FROM PortNativeVLAN WHERE object_id = ?';
+	$result = usePreparedSelectBlade ($query, array ($object_id));
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
+		$ret[$row['port_name']]['native'] = $row['vlan_id'];
 	return $ret;
 }
 
@@ -3696,24 +3698,21 @@ function getNativeVLANsForObjectPorts ($object_id)
 // INSERT query, which would always trigger an FK exception.
 // This function indicates an error, but doesn't revert it, so it is
 // assummed, that the calling function performs necessary transaction wrapping.
-function setPortVLANConfig ($port_id, $allowed, $native)
+function setPortVLANConfig ($object_id, $port_name, $allowed, $native)
 {
 	global $dbxlink;
-	if
-	(
-		FALSE === usePreparedDeleteBlade ('PortAllowedVLAN', array ('port_id' => $port_id)) or
-		FALSE === usePreparedDeleteBlade ('PortNativeVLAN', array ('port_id' => $port_id))
-	)
+	// rely on ON DELETE CASCADE for PortNativeVLAN
+	if (FALSE === usePreparedDeleteBlade ('PortAllowedVLAN', array ('object_id' => $object_id, 'port_name' => $port_name)))
 		return FALSE;
 	foreach ($allowed as $vlan_id)
-		if (!usePreparedInsertBlade ('PortAllowedVLAN', array ('port_id' => $port_id, 'vlan_id' => $vlan_id)))
+		if (!usePreparedInsertBlade ('PortAllowedVLAN', array ('object_id' => $object_id, 'port_name' => $port_name, 'vlan_id' => $vlan_id)))
 			return FALSE;
 	// When the new native VLAN ID is 0, only delete the old row (if it exists).
 	if
 	(
 		$native and
 		in_array ($native, $allowed) and
-		!usePreparedInsertBlade ('PortNativeVLAN', array ('port_id' => $port_id, 'vlan_id' => $native))
+		!usePreparedInsertBlade ('PortNativeVLAN', array ('object_id' => $object_id, 'port_name' => $port_name, 'vlan_id' => $native))
 	)
 		return FALSE;
 	return TRUE;
@@ -3768,16 +3767,16 @@ function commitReduceVLANIPv4 ($vlan_ck, $ipv4net_id)
 function getVLANConfiguredPorts ($vlan_ck)
 {
 	global $dbxlink;
-	$query = 'SELECT Port.object_id, port_id, name AS port_name ' .
-		'FROM PortAllowedVLAN AS PAV INNER JOIN Port ON PAV.port_id = Port.id ' .
-		'INNER JOIN VLANSwitch AS VS ON Port.object_id = VS.object_id ' .
+	$query = 'SELECT PAV.object_id, PAV.port_name ' .
+		'FROM PortAllowedVLAN AS PAV ' .
+		'INNER JOIN VLANSwitch AS VS ON PAV.object_id = VS.object_id ' .
 		'WHERE domain_id = ? AND vlan_id = ? ' .
-		'ORDER BY Port.object_id, port_id';
+		'ORDER BY PAV.object_id, PAV.port_name';
 	$prepared = $dbxlink->prepare ($query);
 	$prepared->execute (decodeVLANCK ($vlan_ck));
 	$ret = array();
 	while ($row = $prepared->fetch (PDO::FETCH_ASSOC))
-		$ret[$row['object_id']][$row['port_id']] = $row['port_name'];
+		$ret[$row['object_id']][] = $row['port_name'];
 	return $ret;
 }
 
@@ -3794,21 +3793,16 @@ function setSwitchVLANConfig ($object_id, $form_mutex_rev, $work)
 	}
 	$db_mutex_rev = $row['mutex_rev'];
 	unset ($prepared);
-	$allowed = getAllowedVLANsForObjectPorts ($object_id);
-	$native = getNativeVLANsForObjectPorts ($object_id);
+	$desired_config = getDesired8021QConfig ($object_id);
 	$changed = FALSE;
-	foreach ($work as $item)
+	foreach ($work as $port_name => $item)
 	{
-		if (!array_key_exists ($item['port_id'], $allowed))
-		{
-			$dbxlink->rollBack();
-			throw new InvalidArgException ('port_id', $item['port_id'], 'the requested port does not belong to current object');
-		}
 		// Only consider touching database, when there are changes for the current port.
 		if
 		(
-			count (array_intersect ($item['allowed'], $allowed[$item['port_id']])) == count ($item['allowed']) and
-			$item['native'] == $native[$item['port_id']]
+			!count (array_diff ($item['allowed'], $desired_config[$port_name]['allowed'])) and
+			!count (array_diff ($desired_config[$port_name]['allowed'], $item['allowed'])) and
+			$item['native'] == $desired_config[$port_name]['native']
 		)
 			continue; // data already meets the request
 		$changed = TRUE;
@@ -3817,7 +3811,7 @@ function setSwitchVLANConfig ($object_id, $form_mutex_rev, $work)
 			$dbxlink->rollBack();
 			throw new RuntimeException();
 		}
-		if (!setPortVLANConfig ($item['port_id'], $item['allowed'], $item['native']))
+		if (!setPortVLANConfig ($object_id, $port_name, $item['allowed'], $item['native']))
 		{
 			$dbxlink->rollBack();
 			throw new RuntimeException();
