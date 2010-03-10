@@ -275,9 +275,8 @@ function gwRecvFileFromObject ($object_id = 0, $handlername, &$output)
 	return gwRecvFile ($endpoint, $handlername, $output);
 }
 
-function getDevice8021QConfig ($object_id)
+function detectDeviceBreed ($object_id)
 {
-	$breed = '';
 	foreach (getAttrValues ($object_id) as $record)
 	{
 		if
@@ -286,22 +285,21 @@ function getDevice8021QConfig ($object_id)
 			strlen ($record['o_value']) &&
 			preg_match ('/^Cisco IOS 12\./', execGMarker ($record['o_value']))
 		)
-		{
-			$breed = 'ios12';
-			break;
-		}
+			return 'ios12';
 		if
 		(
 			$record['name'] == 'HW type' &&
 			strlen ($record['o_value']) &&
 			preg_match ('/^Foundry FastIron GS /', execGMarker ($record['o_value']))
 		)
-		{
-			$breed = 'fdry5';
-			break;
-		}
+			return 'fdry5';
 	}
-	if ($breed == '')
+	return '';
+}
+
+function getDevice8021QConfig ($object_id)
+{
+	if ('' == $breed = detectDeviceBreed ($object_id))
 		throw new RuntimeException ('cannot pick handler for this device');
 	$reader = array
 	(
@@ -309,6 +307,18 @@ function getDevice8021QConfig ($object_id)
 		'fdry5' => 'fdry5ReadVLANConfig',
 	);
 	return $reader[$breed] (dos2unix (gwRetrieveDeviceConfig ($object_id, $breed)));
+}
+
+function setDevice8021QConfig ($object_id, $pseudocode)
+{
+	if ('' == $breed = detectDeviceBreed ($object_id))
+		throw new RuntimeException ('cannot pick handler for this device');
+	$xlator = array
+	(
+		'ios12' => 'ios12TranslatePushQueue',
+		'fdry5' => 'fdry5TranslatePushQueue',
+	);
+	return gwDeployDeviceConfig ($object_id, $breed, unix2dos ($xlator[$breed] ($pseudocode)));
 }
 
 function gwRetrieveDeviceConfig ($object_id, $breed)
@@ -336,6 +346,32 @@ function gwRetrieveDeviceConfig ($object_id, $breed)
 		throw new RuntimeException ("gateway failure: ${outputlines[0]}");
 	// Being here means it was alright.
 	return $configtext;
+}
+
+function gwDeployDeviceConfig ($object_id, $breed, $text)
+{
+	$objectInfo = spotEntity ('object', $object_id);
+	$endpoints = findAllEndpoints ($object_id, $objectInfo['name']);
+	if (count ($endpoints) == 0)
+		throw new RuntimeException ('endpoint not found');
+	if (count ($endpoints) > 1)
+		throw new RuntimeException ('cannot pick endpoint');
+	$endpoint = str_replace (' ', '\ ', str_replace (' ', '+', $endpoints[0]));
+	$tmpfilename = tempnam ('', 'RackTables-deviceconfig-');
+	if (FALSE === file_put_contents ($tmpfilename, $text))
+		throw new RuntimeException ('failed to write to temporary file');
+	$outputlines = queryGateway
+	(
+		'deviceconfig',
+		array ("deploy ${endpoint} ${breed} ${tmpfilename}")
+	);
+	unlink ($tmpfilename);
+	if ($outputlines == NULL)
+		throw new RuntimeException ('unknown gateway failure');
+	if (count ($outputlines) != 1)
+		throw new RuntimeException ('gateway protocol violation');
+	if (strpos ($outputlines[0], 'OK!') !== 0)
+		throw new RuntimeException ("gateway failure: ${outputlines[0]}");
 }
 
 ?>

@@ -2224,8 +2224,8 @@ function processVLANSyncRequest ()
 	// left (produce and send commands to switch)
 	// asis (ignore)
 	// right (fetch config from switch and save into database)
-	$desired_config = getDesired8021QConfig ($sic['object_id']);
 	$from_running = array();
+	$to_running = array();
 	for ($i = 1; $i <= $sic['nrows']; $i++)
 	{
 		if (!array_key_exists ("i_${i}", $sic))
@@ -2234,7 +2234,7 @@ function processVLANSyncRequest ()
 		switch ($sic["i_${i}"])
 		{
 		case 'left':
-			// FIXME: queue sub-task of DB->switch request
+			$to_running[] = $sic["pn_${i}"];
 			break;
 		case 'right':
 			$from_running[$sic["pn_${i}"]] = array
@@ -2249,6 +2249,8 @@ function processVLANSyncRequest ()
 	}
 	try
 	{
+		// either way it wouldn't work, because the latter increments mutex_rev
+		exportSwitch8021QConfig ($sic['object_id'], $sic['mutex_rev'], $to_running);
 		setSwitchVLANConfig ($sic['object_id'], $sic['mutex_rev'], $from_running);
 	}
 	catch (Exception $e)

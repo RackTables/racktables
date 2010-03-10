@@ -1971,6 +1971,11 @@ function dos2unix ($text)
 	return str_replace ("\r\n", "\n", $text);
 }
 
+function unix2dos ($text)
+{
+	return str_replace ("\n", "\r\n", $text);
+}
+
 function buildPredicateTable ($parsetree)
 {
 	$ret = array();

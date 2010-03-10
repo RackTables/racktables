@@ -3826,4 +3826,26 @@ function setSwitchVLANConfig ($object_id, $form_mutex_rev, $work)
 	return TRUE;
 }
 
+function exportSwitch8021QConfig ($object_id, $mutex_rev, $which_ports)
+{
+	global $dbxlink;
+	$dbxlink->beginTransaction();
+	$prepared = $dbxlink->prepare ('SELECT mutex_rev FROM VLANSwitch WHERE object_id = ? LOCK IN SHARE MODE');
+	$prepared->execute (array ($object_id));
+	if (!$row = $prepared->fetch (PDO::FETCH_ASSOC))
+	{
+		$dbxlink->rollBack();
+		throw new InvalidArgException ('object_id', $object_id, 'VLAN domain is not set for this object');
+	}
+	$db_mutex_rev = $row['mutex_rev'];
+	unset ($prepared);
+	if ($db_mutex_rev != $mutex_rev)
+	{
+		$dbxlink->rollBack();
+		throw new RuntimeException ('expired data detected');
+	}
+	setDevice8021QConfig ($object_id, computeSwitchPushRequest ($object_id, $which_ports));
+	$dbxlink->commit();
+}
+
 ?>
