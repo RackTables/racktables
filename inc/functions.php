@@ -2608,87 +2608,155 @@ function computeSwitchPushRequest ($object_id, $which_ports)
 	foreach ($device_config['vlanlist'] as $vlan_id)
 		if ($vdomain['vlanlist'][$vlan_id]['vlan_type'] != 'alien')
 			$old_managed_vlans[] = $vlan_id;
-	$object = spotEntity ('object', $object_id);
-	amplifyCell ($object);
 	$db_config = getDesired8021QConfig ($object_id);
 	$ports_to_do = array();
 	foreach ($which_ports as $port_name)
-	{
-		if (!array_key_exists ($port_name, $db_config))
-			continue;
-		if
-		(
-			count ($db_config[$port_name]['allowed']) == 0 and
-			$db_config[$port_name]['native'] == 0
-		)
-			continue;
-		$ports_to_do[] = $port_name;
-	}
+		if (array_key_exists ($port_name, $db_config))
+			$ports_to_do[$port_name] = array
+			(
+				'old_allowed' => array_key_exists ($port_name, $device_config) ?
+					$device_config[$port_name]['allowed'] :
+					array(),
+				'old_native' => array_key_exists ($port_name, $device_config) ?
+					$device_config[$port_name]['native'] :
+					0,
+				'new_allowed' => $db_config[$port_name]['allowed'],
+				'new_native' => $db_config[$port_name]['native'],
+			);
 	$new_managed_vlans = array();
 	foreach ($vdomain['vlanlist'] as $vlan_id => $vlan)
 		if ($vlan['vlan_type'] == 'compulsory')
 			$new_managed_vlans[] = $vlan_id;
 	foreach ($db_config as $portdata)
 		foreach ($portdata['allowed'] as $vlan_id)
-			if (!in_array ($vlan_id, $new_managed_vlans))
+			if
+			(
+				$vdomain['vlanlist'][$vlan_id]['vlan_type'] == 'ondemand' and
+				!in_array ($vlan_id, $new_managed_vlans)
+			)
 				$new_managed_vlans[] = $vlan_id;
 	$ret = array();
-/*
- * FIXME: this is a draft unfinished code
- *
 	// Before removing old VLANs as such it is necessary to unassign
 	// ports from them (to remove VLANs from ports' list of "allowed"
 	// VLANs. This change in turn requires, that "native" VLAN isn't
 	// set to the one being removed.
-	foreach ($ports_to_do as $port_name)
+	foreach ($ports_to_do as $port_name => $port)
 	{
-		if ($db_config[$port_name]['native'] and $db_config[$port_name]['native'] != $device_config[$port_name]['native'])
+		// "old" native is set and differs from the "new" native
+		if ($port['old_native'] and $port['old_native'] != $port['new_native'])
 			$ret[] = array
 			(
 				'opcode' => 'unset native',
-				'args' => array ($port_name, $device_config[$port_name]['native']),
+				'arg1' => $port_name,
+				'arg2' => $port['old_native'],
 			);
-		foreach (array_diff ($db_config[$port_name]['old_allowed'], $db_config[$port_name]['new_allowed']) as $vlan_id)
+		foreach (array_diff ($port['old_allowed'], $port['new_allowed']) as $vlan_id)
 			$ret[] = array
 			(
 				'opcode' => 'rem allowed',
-				'args' => array ($port_name, $vlan_id),
+				'arg1' => $port_name,
+				'arg2' => $vlan_id,
 			);
 	}
+	// Now it is safe to unconfigure VLANs, which still exist on device,
+	// but are not present on the "new" list.
 	foreach (array_diff ($old_managed_vlans, $new_managed_vlans) as $vlan_id)
 		$ret[] = array
 		(
-			'opcode' => 'unset VLAN',
-			'args' => array ($vlan_id),
+			'opcode' => 'destroy VLAN',
+			'arg1' => $vlan_id,
 		);
+	// Configure VLANs, which must be present on the device, but are not yet.
 	foreach (array_diff ($new_managed_vlans, $old_managed_vlans) as $vlan_id)
 		$ret[] = array
 		(
-			'opcode' => 'set VLAN',
-			'args' => array ($vlan_id),
+			'opcode' => 'create VLAN',
+			'arg1' => $vlan_id,
 		);
 	// Now, when all new VLANs are created (queued), it is safe to assign (queue)
 	// ports to the new VLANs.
-	foreach ($ports_to_do as $port_name)
+	foreach ($ports_to_do as $port_name => $port)
 	{
 		// For each allowed VLAN, which is present on the "new" list and missing from
 		// the "old" one, queue a command to assign current port to that VLAN.
-		foreach (array_diff ($db_config[$port_name]['allowed'], $device_config[$port_name]['allowed']) as $vlan_id)
+		foreach (array_diff ($port['new_allowed'], $port['old_allowed']) as $vlan_id)
 			$ret[] = array
 			(
 				'opcode' => 'add allowed',
-				'args' => array ($port_name, $vlan_id),
+				'arg1' => $port_name,
+				'arg2' => $vlan_id,
 			);
 		// One of the "allowed" VLANs for this port may probably be "native".
-		if (0) // "new native" is set and differs from "old native"
+		// "new native" is set and differs from "old native"
+		if ($port['new_native'] and $port['new_native'] != $port['old_native'])
 			$ret[] = array
 			(
 				'opcode' => 'set native',
-				'args' => array ($port_name, $vlan_id),
+				'arg1' => $port_name,
+				'arg2' => $port['new_native'],
 			);
 
 	}
-*/
+	return $ret;
+}
+
+// Get a list of VLAN management pseudo-commands and return a text
+// of real vendor-specific commands, which implement the work.
+function ios12TranslatePushQueue ($queue)
+{
+	$ret = "conf t\n";
+	foreach ($queue as $cmd)
+		switch ($cmd['opcode'])
+		{
+		case 'create VLAN':
+			$ret .= "vlan ${cmd['arg1']}\nexit\n";
+			break;
+		case 'destroy VLAN':
+			$ret .= "no vlan ${cmd['arg1']}\n";
+			break;
+		case 'add allowed':
+			$ret .= "interface ${cmd['arg1']}\nswitchport trunk allowed vlan add ${cmd['arg2']}\nexit\n";
+			break;
+		case 'rem allowed':
+			$ret .= "interface ${cmd['arg1']}\nswitchport trunk allowed vlan remove ${cmd['arg2']}\nexit\n";
+			break;
+		case 'set native':
+			$ret .= "interface ${cmd['arg1']}\nswitchport trunk native vlan ${cmd['arg2']}\nexit\n";
+			break;
+		case 'unset native':
+			$ret .= "interface ${cmd['arg1']}\nno switchport trunk native vlan ${cmd['arg2']}\nexit\n";
+			break;
+		}
+	$ret .= "end\n";
+	return $ret;
+}
+
+function fdry5TranslatePushQueue ($queue)
+{
+	$ret = "conf t\n";
+	foreach ($queue as $cmd)
+		switch ($cmd['opcode'])
+		{
+		case 'create VLAN':
+			$ret .= "vlan ${cmd['arg1']}\nexit\n";
+			break;
+		case 'destroy VLAN':
+			$ret .= "no vlan ${cmd['arg1']}\n";
+			break;
+		case 'add allowed':
+			$ret .= "vlan ${cmd['arg2']}\ntagged ${cmd['arg1']}\nexit\n";
+			break;
+		case 'rem allowed':
+			$ret .= "vlan ${cmd['arg2']}\nno tagged ${cmd['arg1']}\nexit\n";
+			break;
+		case 'set native':
+			$ret .= "interface ${cmd['arg1']}\ndual-mode ${cmd['arg2']}\nexit\n";
+			break;
+		case 'unset native':
+			$ret .= "interface ${cmd['arg1']}\nno dual-mode ${cmd['arg2']}\nexit\n";
+			break;
+		}
+	$ret .= "end\n";
 	return $ret;
 }
 
