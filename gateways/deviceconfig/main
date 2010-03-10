@@ -2,10 +2,13 @@
 
 # This gateway retrieves the output of "show run" command (or its
 # equivalent) and prints it onto stdout. When run, it accepts the
-# only command on stdin:
+# following commands on stdin:
 #
 # * retrieve <endpoint> <handler> <outputfile>
 #   (save remote config text into provided local file)
+#
+# * deploy <endpoint> <handler> <inputfile>
+#   (execute given text in privileged mode)
 
 MYDIR=`dirname $0`
 
@@ -44,11 +47,12 @@ decode_error()
 
 do_work()
 {
-	local endpoint=`echo $args | cut -s -d' ' -f1`
-	local handler=`echo $args | cut -s -d' ' -f2`
-	local conftext=`echo $args | cut -s -d' ' -f3`
+	local command=$1
+	local endpoint=$2
+	local handler=$3
+	local conftext=$4
 	# sanity checks
-	if [ -z "$endpoint" -o -z "$conftext" -o -z "$handler" ]; then
+	if [ -z "$endpoint" -o -z "$conftext" -o -z "$handler" -o -z "$command" ]; then
 		echo 'ERR!too few arguments to connect'
 		return
 	fi
@@ -56,10 +60,10 @@ do_work()
 		echo "ERR!Handler '$handler' is not available"
 		exit 1
 	}
-	"$MYDIR/$handler.connector" $endpoint "$conftext"
+	"$MYDIR/$handler.connector" $endpoint $command "$conftext"
 	local ret=$?
 	if [ $ret = 0 ]; then
-		echo "OK!connected to $endpoint"
+		echo "OK!request '$command' complete for $endpoint"
 	else
 		echo -n "ERR!Cannot connect to $endpoint ("
 		decode_error $ret
@@ -69,8 +73,8 @@ do_work()
 
 while read cmd args; do
 	case $cmd in
-		retrieve)
-			do_work $args
+		retrieve|deploy)
+			do_work $cmd $args
 			;;
 		*)
 			echo "ERR!unknown command $cmd"

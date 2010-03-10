@@ -1,9 +1,10 @@
 #!/bin/sh
 
-[ $# = 2 ] || exit 1
+[ $# = 3 ] || exit 1
 
 ENDPOINT=$1
-OUT1=$2
+COMMAND=$2
+WORKFILE=$3
 
 prepare_connect_commands()
 {
@@ -27,13 +28,13 @@ prepare_connect_commands()
 		if [ -z "${1##$cval}" ]; then
 			found=yes
 			username=`echo $line | cut -s -d' ' -f5`
-			[ "$username" != "-" ] && echo $username > $CMDS1
+			[ "$username" != "-" ] && echo $username > "$SESSION"
 			# access password
 			access_password=`echo $line | cut -s -d' ' -f6`
-			[ "$access_password" != "-" ] && echo "$access_password" >> $CMDS1
-			printf "en\r\n" >> $CMDS1
+			[ "$access_password" != "-" ] && echo "$access_password" >> "$SESSION"
+			printf "en\r\n" >> "$SESSION"
 			enable_password=`echo $line | cut -s -d' ' -f7`
-			[ "$enable_password" != "-" ] && echo $enable_password >> $CMDS1
+			[ "$enable_password" != "-" ] && echo $enable_password >> "$SESSION"
 			break
 		fi
 	done < "$MYDIR/switch.secrets.php"
@@ -41,14 +42,22 @@ prepare_connect_commands()
 	exit 3
 }
 
-CMDS1=`mktemp /tmp/fdry5.connector.XXXX`
-[ -f "$CMDS1" ] || exit 5
+SESSION=`mktemp /tmp/fdry5.connector.XXXX`
+[ -f "$SESSION" ] || exit 5
 prepare_connect_commands $ENDPOINT
-printf 'skip-page-display\r\nshow running-config\r\nexit\r\nexit\r\n' >> $CMDS1
-cat $CMDS1 | nc -i 1 $ENDPOINT 23 > "$OUT1"
-if fgrep -q '% Bad passwords' "$OUT1"; then
-	rm -f "$CMDS1"
-	exit 4
-fi
-rm -f "$CMDS1"
+case $COMMAND in
+retrieve)
+	printf 'skip-page-display\r\nshow running-config\r\n' >> "$SESSION"
+	outfile="$WORKFILE"
+	;;
+deploy)
+	cat "$WORKFILE" >> "$SESSION"
+	outfile=/dev/null
+	;;
+*)
+	outfile=/dev/null
+esac
+printf 'exit\r\nexit\r\n' >> "$SESSION"
+nc -i 1 $ENDPOINT 23 < "$SESSION" > "$outfile"
+rm -f "$SESSION"
 exit 0

@@ -1,9 +1,10 @@
 #!/bin/sh
 
-[ $# = 2 ] || exit 1
+[ $# = 3 ] || exit 1
 
 ENDPOINT=$1
-OUT1=$2
+COMMAND=$2
+WORKFILE=$3
 
 prepare_connect_commands()
 {
@@ -27,13 +28,13 @@ prepare_connect_commands()
 		if [ -z "${1##$cval}" ]; then
 			found=yes
 			username=`echo $line | cut -s -d' ' -f5`
-			[ "$username" != "-" ] && echo $username > $CMDS1
+			[ "$username" != "-" ] && echo $username > $SESSION
 			# access password
-			echo $line | cut -s -d' ' -f6 >> $CMDS1
+			echo $line | cut -s -d' ' -f6 >> $SESSION
 			enable_password=`echo $line | cut -s -d' ' -f7`
 			[ "$enable_password" != "-" ] && {
-				echo en >> $CMDS1
-				echo $enable_password >> $CMDS1
+				echo en >> $SESSION
+				echo $enable_password >> $SESSION
 			}
 			break
 		fi
@@ -42,14 +43,23 @@ prepare_connect_commands()
 	exit 3
 }
 
-CMDS1=`mktemp /tmp/cisco.connector.XXXX`
-[ -f "$CMDS1" ] || exit 5
+SESSION=`mktemp /tmp/ios12.connector.XXXX`
+[ -f "$SESSION" ] || exit 5
 prepare_connect_commands $ENDPOINT
-printf 'term len 0\nshow run\n! END OF CONFIG\nshow vlan brief\n! END OF VLAN LIST\nquit\n' >> $CMDS1
-nc $ENDPOINT 23 < $CMDS1 > "$OUT1"
-if fgrep -q '% Bad passwords' "$OUT1"; then
-	rm -f "$CMDS1"
-	exit 4
-fi
-rm -f "$CMDS1"
+case $COMMAND in
+retrieve)
+	printf 'term len 0\nshow run\n! END OF CONFIG\nshow vlan brief\n! END OF VLAN LIST\n' >> "$SESSION"
+	outfile="$WORKFILE"
+	;;
+deploy)
+	cat "$WORKFILE" >> "$SESSION"
+	outfile=/dev/null
+	;;
+*)
+	outfile=/dev/null
+	;;
+esac
+printf 'quit\n' >> "$SESSION"
+nc $ENDPOINT 23 < "$SESSION" > "$outfile"
+rm -f "$SESSION"
 exit 0
