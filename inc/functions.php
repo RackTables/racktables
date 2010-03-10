@@ -2339,9 +2339,8 @@ function ios12PickSwitchportCommand (&$work, $line)
 		switch ($work['current']['mode'])
 		{
 		case 'access':
-			$work['portdata'][] = array
+			$work['portdata'][$work['current']['port_name']] = array
 			(
-				'port_name' => $work['current']['port_name'],
 				'allowed' => array ($work['current']['access vlan']),
 				'native' => $work['current']['access vlan'],
 			);
@@ -2354,9 +2353,8 @@ function ios12PickSwitchportCommand (&$work, $line)
 				$work['current']['trunk native vlan'],
 				$work['current']['trunk allowed vlan']
 			) ? $work['current']['trunk native vlan'] : 0;
-			$work['portdata'][] = array
+			$work['portdata'][$work['current']['port_name']] = array
 			(
-				'port_name' => $work['current']['port_name'],
 				'allowed' => $work['current']['trunk allowed vlan'],
 				'native' => $effective_native,
 			);
@@ -2474,12 +2472,11 @@ function fdry5PickVLANSubcommand (&$work, $line)
 	case (preg_match ('@^ tagged (.+)$@', $line, $matches)):
 		// add current VLAN to 'allowed' list of each mentioned port
 		foreach (fdry5ParsePortString ($matches[1]) as $port_name)
-			if (NULL !== $key = scanArrayForItem ($work['portdata'], 'port_name', $port_name))
-				$work['portdata'][$key]['allowed'][] = $work['current']['vlan_id'];
+			if (array_key_exists ($port_name, $work['portdata']))
+				$work['portdata'][$port_name]['allowed'][] = $work['current']['vlan_id'];
 			else
-				$work['portdata'][] = array
+				$work['portdata'][$port_name] = array
 				(
-					'port_name' => $port_name,
 					'allowed' => array ($work['current']['vlan_id']),
 					'native' => 0, // can be updated later
 				);
@@ -2487,15 +2484,14 @@ function fdry5PickVLANSubcommand (&$work, $line)
 	case (preg_match ('@^ untagged (.+)$@', $line, $matches)):
 		// replace 'native' column of each mentioned port with current VLAN ID
 		foreach (fdry5ParsePortString ($matches[1]) as $port_name)
-			if (NULL != $key = scanArrayForItem ($work['portdata'], 'port_name', $port_name))
+			if (array_key_exists ($port_name, $work['portdata']))
 			{
-				$work['portdata'][$key]['native'] = $work['current']['vlan_id'];
-				$work['portdata'][$key]['allowed'][] = $work['current']['vlan_id'];
+				$work['portdata'][$port_name]['native'] = $work['current']['vlan_id'];
+				$work['portdata'][$port_name]['allowed'][] = $work['current']['vlan_id'];
 			}
 			else
-				$work['portdata'][] = array
+				$work['portdata'][$port_name] = array
 				(
-					'port_name' => $port_name,
 					'allowed' => array ($work['current']['vlan_id']),
 					'native' => $work['current']['vlan_id'],
 				);
@@ -2511,14 +2507,13 @@ function fdry5PickInterfaceSubcommand (&$work, $line)
 	{
 		if (array_key_exists ('dual-mode', $work['current']))
 		{
-			if (NULL !== $key = scanArrayForItem ($work['portdata'], 'port_name', $work['current']['port_name']))
+			if (array_key_exists ($work['current']['port_name'], $work['portdata']))
 				// update existing record
-				$work['portdata'][$key]['native'] = $work['current']['dual-mode'];
+				$work['portdata'][$work['current']['port_name']]['native'] = $work['current']['dual-mode'];
 			else
 				// add new
-				$work['portdata'][] = array
+				$work['portdata'][$work['current']['port_name']] = array
 				(
-					'port_name' => $work['current']['port_name'],
 					'allowed' => array ($work['current']['dual-mode']),
 					'native' => $work['current']['dual-mode'],
 				);
@@ -2603,10 +2598,14 @@ function computeSwitchPushRequest ($object_id, $which_ports)
 	$vswitch = getVLANSwitchInfo ($object_id);
 	$vdomain = getVLANDomain ($vswitch['domain_id']);
 	$device_config = getDevice8021QConfig ($object_id);
-	// ignore the immune VLANs
+	// only ignore VLANs, which exist and are explicitly shown as "alien"
 	$old_managed_vlans = array();
 	foreach ($device_config['vlanlist'] as $vlan_id)
-		if ($vdomain['vlanlist'][$vlan_id]['vlan_type'] != 'alien')
+		if
+		(
+			!array_key_exists ($vlan_id, $vdomain['vlanlist']) or
+			$vdomain['vlanlist'][$vlan_id]['vlan_type'] != 'alien'
+		)
 			$old_managed_vlans[] = $vlan_id;
 	$db_config = getDesired8021QConfig ($object_id);
 	$ports_to_do = array();
@@ -2614,21 +2613,38 @@ function computeSwitchPushRequest ($object_id, $which_ports)
 		if (array_key_exists ($port_name, $db_config))
 			$ports_to_do[$port_name] = array
 			(
-				'old_allowed' => array_key_exists ($port_name, $device_config) ?
-					$device_config[$port_name]['allowed'] :
+				'old_allowed' => array_key_exists ($port_name, $device_config['portdata']) ?
+					$device_config['portdata'][$port_name]['allowed'] :
 					array(),
-				'old_native' => array_key_exists ($port_name, $device_config) ?
-					$device_config[$port_name]['native'] :
+				'old_native' => array_key_exists ($port_name, $device_config['portdata']) ?
+					$device_config['portdata'][$port_name]['native'] :
 					0,
 				'new_allowed' => $db_config[$port_name]['allowed'],
 				'new_native' => $db_config[$port_name]['native'],
 			);
+	// New VLAN table is a union of:
+	// 1. all compulsory VLANs
+	// 2. all "current" allowed VLANs of those ports, which are left
+	//    intact (including VLANs, which don't exist in current domain)
+	// 3. all "new" allowed VLANs of those ports, which we do "push" now
+	// Like for old_managed_vlans, a VLANs is never listed, only if it
+	// exists and belongs to "alien" type.
 	$new_managed_vlans = array();
 	foreach ($vdomain['vlanlist'] as $vlan_id => $vlan)
 		if ($vlan['vlan_type'] == 'compulsory')
 			$new_managed_vlans[] = $vlan_id;
-	foreach ($db_config as $portdata)
-		foreach ($portdata['allowed'] as $vlan_id)
+	foreach ($device_config['portdata'] as $port_name => $port)
+		if (!in_array ($port_name, $ports_to_do))
+			foreach ($port['allowed'] as $vlan_id)
+				if
+				(
+					(!array_key_exists ($vlan_id, $vdomain['vlanlist']) or
+					$vdomain['vlanlist'][$vlan_id]['vlan_type'] != 'alien') and
+					!in_array ($vlan_id, $new_managed_vlans)
+				)
+					$new_managed_vlans[] = $vlan_id;
+	foreach ($ports_to_do as $port)
+		foreach ($port['new_allowed'] as $vlan_id)
 			if
 			(
 				$vdomain['vlanlist'][$vlan_id]['vlan_type'] == 'ondemand' and

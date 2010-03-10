@@ -6854,7 +6854,7 @@ function renderObjectVLANSync ($object_id)
 	global $pageno, $tabno, $nextorder;
 	try
 	{
-		$deviceconfig = getDevice8021QConfig ($object_id);
+		$running_config = getDevice8021QConfig ($object_id);
 	}
 	catch (RuntimeException $re)
 	{
@@ -6862,7 +6862,6 @@ function renderObjectVLANSync ($object_id)
 		return;
 	}
 	$desired_config = getDesired8021QConfig ($object_id);
-	$running_config = getDevice8021QConfig ($object_id);
 	$formports = array();
 	// The form is based on the "desired" list, which has every
 	// 802.1Q-eligible port of the object plus any port names
@@ -6877,8 +6876,8 @@ function renderObjectVLANSync ($object_id)
 			'running_allowed' => array(),
 			'running_native' => 0,
 		);
-	foreach ($running_config['portdata'] as $item)
-		if (NULL !== $tmpkey = scanArrayForItem ($formports, 'port_name', $item['port_name']))
+	foreach ($running_config['portdata'] as $port_name => $item)
+		if (NULL !== $tmpkey = scanArrayForItem ($formports, 'port_name', $port_name))
 		{
 			$formports[$tmpkey]['running_allowed'] = $item['allowed'];
 			$formports[$tmpkey]['running_native'] = $item['native'];
@@ -6886,7 +6885,7 @@ function renderObjectVLANSync ($object_id)
 		else
 			$formports[] = array
 			(
-				'port_name' => $item['port_name'],
+				'port_name' => $port_name,
 				'desired_allowed' => array(),
 				'desired_native' => 0,
 				'running_allowed' => $item['allowed'],
