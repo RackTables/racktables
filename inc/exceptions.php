@@ -143,10 +143,10 @@ function stringTrace($trace)
 function print404($e)
 {
 	header("HTTP/1.1 404 Not Found");
+	header ('Content-Type: text/html; charset=UTF-8');
 	echo '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">'."\n";
 	echo '<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">'."\n";
 	echo "<head><title> Exception </title>\n";
-	echo '<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />';
 	echo "<link rel=stylesheet type='text/css' href=pi.css />\n";
 #	echo "<link rel=icon href='" . getFaviconURL() . "' type='image/x-icon' />";
 	echo '</head> <body>';
@@ -158,10 +158,10 @@ function print404($e)
 function printNotAuthorizedException($e)
 {
 	header("HTTP/1.1 401 Unauthorized");
+	header ('Content-Type: text/html; charset=UTF-8');
 	echo '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">'."\n";
 	echo '<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">'."\n";
 	echo "<head><title> Unauthorized </title>\n";
-	echo '<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />';
 	echo "<link rel=stylesheet type='text/css' href=pi.css />\n";
 #	echo "<link rel=icon href='" . getFaviconURL() . "' type='image/x-icon' />";
 	echo '</head> <body>';
@@ -172,10 +172,10 @@ function printNotAuthorizedException($e)
 function printPDOException($e)
 {
 	header("HTTP/1.1 500 Internal Server Error");
+	header ('Content-Type: text/html; charset=UTF-8');
 	echo '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">'."\n";
 	echo '<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">'."\n";
 	echo "<head><title> PDO Exception </title>\n";
-	echo '<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />';
 	echo "<link rel=stylesheet type='text/css' href=pi.css />\n";
 #	echo "<link rel=icon href='" . getFaviconURL() . "' type='image/x-icon' />";
 	echo '</head> <body>';
@@ -201,10 +201,10 @@ function printPDOException($e)
 function printGenericException($e)
 {
 	header("HTTP/1.1 500 Internal Server Error");
+	header ('Content-Type: text/html; charset=UTF-8');
 	echo '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">'."\n";
 	echo '<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">'."\n";
 	echo "<head><title> Exception </title>\n";
-	echo '<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />';
 	echo "<link rel=stylesheet type='text/css' href=pi.css />\n";
 	echo "<link rel=icon href='pix/racktables.ico' type='image/x-icon' />";
 	echo '</head> <body>';

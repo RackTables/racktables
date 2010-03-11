@@ -2,6 +2,7 @@
 	update: make object form messages consistent (by Tyler J. Wagner)
 	update: sort object ports in a more reasonable manner
 	bugfix: completely fix ticket:211
+	bugfix: declare charset in HTTP header (#312)
 0.17.9 2010-02-17
 	new feature: added per-user UI options (ticket:29)
 	new feature: LDAP cache can be disabled now (ticket:247)
