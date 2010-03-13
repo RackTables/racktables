@@ -1,6 +1,7 @@
 0.17.10
 	update: make object form messages consistent (by Tyler J. Wagner)
 	update: sort object ports in a more reasonable manner
+	update: enable class methods as handlers (by James Tutton)
 	bugfix: completely fix ticket:211
 	bugfix: declare charset in HTTP header (#312)
 0.17.9 2010-02-17

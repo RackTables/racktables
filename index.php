@@ -79,12 +79,12 @@ if (isset ($tabhandler[$pageno][$tabno]))
 				throw new RuntimeException ('Dispatching error for bypass parameter');
 		}
 		showMessageOrError();
-		$tabhandler[$pageno][$tabno] ($_REQUEST[$page[$pageno]['bypass']]);
+		call_user_func ($tabhandler[$pageno][$tabno], $_REQUEST[$page[$pageno]['bypass']]);
 	}
 	else
 	{
 		showMessageOrError();
-		$tabhandler[$pageno][$tabno] ();
+		call_user_func ($tabhandler[$pageno][$tabno]);
 	}
 }
 elseif (isset ($page[$pageno]['handler']))

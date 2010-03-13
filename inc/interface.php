@@ -6064,7 +6064,7 @@ function showTabs ($pageno, $tabno)
 		// Dynamic tabs should only be shown in certain cases (trigger exists and returns true).
 		if (!isset ($trigger[$pageno][$tabidx]))
 			$tabclass = 'std';
-		elseif (!strlen ($tabclass = $trigger[$pageno][$tabidx] ()))
+		elseif (!strlen ($tabclass = call_user_func ($trigger[$pageno][$tabidx])))
 			continue;
 		if ($tabidx == $tabno)
 		       $tabclass = 'current'; // override any class for an an active selection

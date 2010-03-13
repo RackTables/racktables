@@ -27,7 +27,7 @@ if (!isset ($delayauth[$pageno][$tabno][$op]) and !permitted())
 	$location = buildWideRedirectURL (oneLiner (157)); // operation not permitted
 else
 {
-	$location = $ophandler[$pageno][$tabno][$op]();
+	$location = call_user_func ($ophandler[$pageno][$tabno][$op]);
 	if (!strlen ($location))
 	{
 		throw new RuntimeException('Operation handler failed to return its status');

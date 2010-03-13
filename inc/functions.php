@@ -1112,7 +1112,11 @@ function redirectIfNecessary ()
 	if (isset ($tmap[$pageno][$tabno]))
 		redirectUser ($pageno, $tmap[$pageno][$tabno]);
 	// check if we accidentaly got on a dynamic tab that shouldn't be shown for this object
-	if (isset ($trigger[$pageno][$tabno]) and !strlen ($trigger[$pageno][$tabno] ()))
+	if
+	(
+		isset ($trigger[$pageno][$tabno]) and
+		!strlen (call_user_func ($trigger[$pageno][$tabno]))
+	)
 		redirectUser ($pageno, 'default');
 }
 
