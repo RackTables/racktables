@@ -41,6 +41,5 @@ catch (Exception $e)
 	ob_end_clean();
 	printException($e);
 }
-?>
 
 ?>
