@@ -299,11 +299,29 @@ $iftable_processors['quidway-21-to-24-comboT'] = array
 	'try_next_proc' => TRUE,
 );
 
+$iftable_processors['quidway-21-to-24-comboSFP'] = array
+(
+	'pattern' => '@^GigabitEthernet([[:digit:]]+/[[:digit:]]+/)(21|22|23|24)$@',
+	'replacement' => 'gi\\1\\2',
+	'dict_key' => '4-1077',
+	'label' => '\\2',
+	'try_next_proc' => TRUE,
+);
+
 $iftable_processors['quidway-any-1000SFP'] = array
 (
 	'pattern' => '@^GigabitEthernet([[:digit:]]+/[[:digit:]]+/)([[:digit:]]+)$@',
 	'replacement' => 'gi\\1\\2',
 	'dict_key' => '4-1077', // empty SFP-1000
+	'label' => '\\2',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['quidway-any-1000T'] = array
+(
+	'pattern' => '@^GigabitEthernet([[:digit:]]+/[[:digit:]]+/)([[:digit:]]+)$@',
+	'replacement' => 'gi\\1\\2',
+	'dict_key' => '1-24',
 	'label' => '\\2',
 	'try_next_proc' => FALSE,
 );
@@ -557,8 +575,14 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 	'2011.2.23.96' => array
 	(
 		'dict_key' => 1321,
-		'text' => 'S5328C-EI-24S: 20 RJ-45/10-100-1000T(X) + 4 combo-gig + 2 XFP slots',
+		'text' => 'S5328C-EI-24S: 20 SFP-1000 + 4 combo-gig + 2 XFP slots',
 		'processors' => array ('quidway-21-to-24-comboT', 'quidway-any-1000SFP', 'quidway-XFP', 'quidway-mgmt'),
+	),
+	'2011.2.23.102' => array
+	(
+		'dict_key' => 1339,
+		'text' => 'S5328C-SI: 20 RJ-45/10-100-1000T(X) + 4 combo-gig + 2 XFP slots',
+		'processors' => array ('quidway-21-to-24-comboSFP', 'quidway-any-1000T', 'quidway-XFP', 'quidway-mgmt'),
 	),
 	'1991.1.3.45.2.1.1.1' => array
 	(
