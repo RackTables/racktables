@@ -2890,4 +2890,33 @@ function fdry5TranslatePushQueue ($queue)
 	return $ret;
 }
 
+function vrp53TranslatePushQueue ($queue)
+{
+	$ret = "system-view\n";
+	foreach ($queue as $cmd)
+		switch ($cmd['opcode'])
+		{
+		case 'create VLAN':
+			$ret .= "vlan ${cmd['arg1']}\nquit\n";
+			break;
+		case 'destroy VLAN':
+			$ret .= "undo vlan ${cmd['arg1']}\n";
+			break;
+		case 'add allowed':
+			$ret .= "interface ${cmd['arg1']}\nport trunk allow-pass vlan ${cmd['arg2']}\nquit\n";
+			break;
+		case 'rem allowed':
+			$ret .= "interface ${cmd['arg1']}\nundo port trunk allow-pass vlan ${cmd['arg2']}\nquit\n";
+			break;
+		case 'set native':
+			$ret .= "interface ${cmd['arg1']}\nport default vlan ${cmd['arg2']}\nquit\n";
+			break;
+		case 'unset native':
+			$ret .= "interface ${cmd['arg1']}\nundo port default vlan\nquit\n";
+			break;
+		}
+	$ret .= "return\n";
+	return $ret;
+}
+
 ?>

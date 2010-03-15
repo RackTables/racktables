@@ -325,6 +325,7 @@ function setDevice8021QConfig ($object_id, $pseudocode)
 	(
 		'ios12' => 'ios12TranslatePushQueue',
 		'fdry5' => 'fdry5TranslatePushQueue',
+		'vrp53' => 'vrp53TranslatePushQueue',
 	);
 	return gwDeployDeviceConfig ($object_id, $breed, unix2dos ($xlator[$breed] ($pseudocode)));
 }
