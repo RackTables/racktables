@@ -41,6 +41,7 @@ function getDBUpgradePath ($v1, $v2)
 		'0.17.7',
 		'0.17.8',
 		'0.17.9',
+		'0.17.10',
 		'0.18.0',
 	);
 	if (!in_array ($v1, $versionhistory) or !in_array ($v2, $versionhistory))
@@ -473,6 +474,9 @@ CREATE TABLE `UserConfig` (
 			$query[] = "INSERT INTO Config VLAUES ('IPV4_TREE_SHOW_VLAN','yes','string','no','no','yes','Show VLAN for each network in IPv4 tree')";
 			$query[] = "UPDATE Config SET varvalue = '0.17.9' WHERE varname = 'DB_VERSION'";
 			break;
+		case '0.17.10':
+			$query = array_merge ($query, reloadDictionary ($batchid));
+			$query[] = "UPDATE Config SET varvalue = '0.17.10' WHERE varname = 'DB_VERSION'";
 		case '0.18.0':
 			$query = array_merge ($query, reloadDictionary ($batchid));
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('VLANSWITCH_LISTSRC', '', 'string', 'yes', 'no', 'List of VLAN running switches')";
