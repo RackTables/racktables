@@ -2088,6 +2088,7 @@ $msgcode['addVLANDescription']['ERR2'] = 110;
 function addVLANDescription ()
 {
 	assertUIntArg ('vlan_id');
+	assertStringArg ('vlan_type', TRUE);
 	assertStringArg ('vlan_descr', TRUE);
 	global $sic;
 	if (!($sic['vlan_id'] >= VLAN_MIN_ID and $sic['vlan_id'] <= VLAN_MAX_ID))
@@ -2099,6 +2100,7 @@ function addVLANDescription ()
 		(
 			'domain_id' => $sic['vdom_id'],
 			'vlan_id' => $sic['vlan_id'],
+			'vlan_type' => $sic['vlan_type'],
 			'vlan_descr' => mb_strlen ($sic['vlan_descr']) ? $sic['vlan_descr'] : NULL
 		)
 	);
