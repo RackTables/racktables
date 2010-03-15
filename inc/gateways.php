@@ -293,6 +293,13 @@ function detectDeviceBreed ($object_id)
 			preg_match ('/^Foundry FastIron GS /', execGMarker ($record['o_value']))
 		)
 			return 'fdry5';
+		if
+		(
+			$record['name'] == 'HW type' &&
+			strlen ($record['o_value']) &&
+			preg_match ('/^Huawei Quidway S53/', execGMarker ($record['o_value']))
+		)
+			return 'vrp53';
 	}
 	return '';
 }
@@ -305,6 +312,7 @@ function getDevice8021QConfig ($object_id)
 	(
 		'ios12' => 'ios12ReadVLANConfig',
 		'fdry5' => 'fdry5ReadVLANConfig',
+		'vrp53' => 'vrp53ReadVLANConfig',
 	);
 	return $reader[$breed] (dos2unix (gwRetrieveDeviceConfig ($object_id, $breed)));
 }

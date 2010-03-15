@@ -2590,6 +2590,111 @@ function fdry5GenPortRange ($from, $to)
 	return $ret;
 }
 
+// an implementation for Huawei syntax
+function vrp53ReadVLANConfig ($input)
+{
+	$ret = array
+	(
+		'vlanlist' => array(),
+		'portdata' => array(),
+	);
+	$procfunc = 'vrp53ScanTopLevel';
+	foreach (explode ("\n", $input) as $line)
+		$procfunc = $procfunc ($ret, $line);
+	return $ret;
+}
+
+function vrp53ScanTopLevel (&$work, $line)
+{
+	$matches = array();
+	switch (TRUE)
+	{
+	case (preg_match ('@^ vlan batch (.+)$@', $line, $matches)):
+		foreach (vrp53ParseVLANString ($matches[1]) as $vlan_id)
+			$work['vlanlist'][] = $vlan_id;
+		return __FUNCTION__;
+	case (preg_match ('@^interface ((GigabitEthernet|XGigabitEthernet)([[:digit:]]+/[[:digit:]]+/[[:digit:]]+))$@', $line, $matches)):
+		$matches[1] = preg_replace ('@^GigabitEthernet(.+)$@', 'gi\\1', $matches[1]);
+		$matches[1] = preg_replace ('@^XGigabitEthernet(.+)$@', 'xg\\1', $matches[1]);
+		$work['current'] = array ('port_name' => $matches[1]);
+		return 'vrp53PickInterfaceSubcommand';
+	default:
+		return __FUNCTION__;
+	}
+}
+
+function vrp53ParseVLANString ($string)
+{
+	$string = preg_replace ('/ to /', '-', $string);
+	$string = preg_replace ('/ /', ',', $string);
+	return iosParseVLANString ($string);
+}
+
+function vrp53PickInterfaceSubcommand (&$work, $line)
+{
+	if ($line[0] == '#') // end of interface section
+	{
+		// Configuration Guide - Ethernet 3.3.4:
+		// "By default, the interface type is hybrid."
+		if (!array_key_exists ('link-type', $work['current']))
+			$work['current']['link-type'] = 'hybrid';
+		if (!array_key_exists ('allowed', $work['current']))
+			$work['current']['allowed'] = array();
+		if (!array_key_exists ('native', $work['current']))
+			$work['current']['native'] = 0;
+		switch ($work['current']['link-type'])
+		{
+		case 'access':
+			$work['portdata'][$work['current']['port_name']] = array
+			(
+				'allowed' => array ($work['current']['default vlan']),
+				'native' => $work['current']['default vlan'],
+			);
+			break;
+		case 'trunk':
+			$work['portdata'][$work['current']['port_name']] = array
+			(
+				'allowed' => $work['current']['allowed'],
+				'native' => 0,
+			);
+			break;
+		case 'hybrid':
+			$work['portdata'][$work['current']['port_name']] = array
+			(
+				'allowed' => $work['current']['allowed'],
+				'native' => $work['current']['native'],
+			);
+			break;
+		default: // dot1q-tunnel ?
+		}
+		unset ($work['current']);
+		return 'vrp53ScanTopLevel';
+	}
+	$matches = array();
+	switch (TRUE)
+	{
+	case (preg_match ('@^ port default vlan ([[:digit:]]+)$@', $line, $matches)):
+		$work['current']['native'] = $matches[1];
+		if (!array_key_exists ('allowed', $work['current']))
+			$work['current']['allowed'] = array();
+		if (!in_array ($matches[1], $work['current']['allowed']))
+			$work['current']['allowed'][] = $matches[1];
+		break;
+	case (preg_match ('@^ port link-type (.+)$@', $line, $matches)):
+		$work['current']['link-type'] = $matches[1];
+		break;
+	case (preg_match ('@^ port trunk allow-pass vlan (.+)$@', $line, $matches)):
+		if (!array_key_exists ('allowed', $work['current']))
+			$work['current']['allowed'] = array();
+		foreach (vrp53ParseVLANString ($matches[1]) as $vlan_id)
+			if (!in_array ($vlan_id, $work['current']['allowed']))
+				$work['current']['allowed'][] = $vlan_id;
+		break;
+	default: // nom-nom
+	}
+	return __FUNCTION__;
+}
+
 // Scan given work accumulator array and return the key, which
 // addresses the port with requested name (or NULL if there is none such).
 // Note that 0 and NULL mean completely different things and thus
