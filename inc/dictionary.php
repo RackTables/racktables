@@ -1353,6 +1353,18 @@ $dictionary = array
 	1332 => array ('chapter_id' => 13, 'dict_value' => '[[Linux%GSKIP%RH Fedora 12 | http://docs.fedoraproject.org/release-notes/f12/en-US/html/]]'),
 	1333 => array ('chapter_id' => 13, 'dict_value' => 'Linux%GSKIP%Gentoo 10.0'),
 	1334 => array ('chapter_id' => 13, 'dict_value' => 'Linux%GSKIP%Gentoo 10.1'),
+	1335 => array ('chapter_id' => 12, 'dict_value' => 'Huawei%GPASS%Quidway S5328C-EI'),
+	1336 => array ('chapter_id' => 12, 'dict_value' => 'Huawei%GPASS%Quidway S5328C-PWR-EI'),
+	1337 => array ('chapter_id' => 12, 'dict_value' => 'Huawei%GPASS%Quidway S5352C-EI'),
+	1338 => array ('chapter_id' => 12, 'dict_value' => 'Huawei%GPASS%Quidway S5352C-PWR-EI'),
+	1339 => array ('chapter_id' => 12, 'dict_value' => 'Huawei%GPASS%Quidway S5328C-SI'),
+	1340 => array ('chapter_id' => 12, 'dict_value' => 'Huawei%GPASS%Quidway S5328C-PWR-SI'),
+	1341 => array ('chapter_id' => 12, 'dict_value' => 'Huawei%GPASS%Quidway S5352C-SI'),
+	1342 => array ('chapter_id' => 12, 'dict_value' => 'Huawei%GPASS%Quidway S5352C-PWR-SI'),
+	1343 => array ('chapter_id' => 12, 'dict_value' => 'Huawei%GPASS%Quidway S5324TP-SI'),
+	1344 => array ('chapter_id' => 12, 'dict_value' => 'Huawei%GPASS%Quidway S5324TP-PWR-SI'),
+	1345 => array ('chapter_id' => 12, 'dict_value' => 'Huawei%GPASS%Quidway S5348TP-SI'),
+	1346 => array ('chapter_id' => 12, 'dict_value' => 'Huawei%GPASS%Quidway S5348TP-PWR-SI'),
 );
 
 ?>

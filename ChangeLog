@@ -2,6 +2,7 @@
 	update: make object form messages consistent (by Tyler J. Wagner)
 	update: sort object ports in a more reasonable manner
 	update: enable class methods as handlers (by James Tutton)
+	update: better support of Huawei S5300 switches
 	bugfix: completely fix ticket:211
 	bugfix: declare charset in HTTP header (#312)
 0.17.9 2010-02-17
