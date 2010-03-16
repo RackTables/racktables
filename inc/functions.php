@@ -2738,8 +2738,9 @@ function computeSwitchPushRequest ($object_id, $which_ports)
 			);
 	// New VLAN table is a union of:
 	// 1. all compulsory VLANs
-	// 2. all "current" allowed VLANs of those ports, which are left
-	//    intact (including VLANs, which don't exist in current domain)
+	// 2. all "current" non-alien allowed VLANs of those ports, which are left
+	//    intact (regardless if a VLAN exists in VLAN domain, but looking,
+	//    if it is present in device's own VLAN table)
 	// 3. all "new" allowed VLANs of those ports, which we do "push" now
 	// Like for old_managed_vlans, a VLANs is never listed, only if it
 	// exists and belongs to "alien" type.
@@ -2748,15 +2749,22 @@ function computeSwitchPushRequest ($object_id, $which_ports)
 		if ($vlan['vlan_type'] == 'compulsory')
 			$new_managed_vlans[] = $vlan_id;
 	foreach ($device_config['portdata'] as $port_name => $port)
-		if (!in_array ($port_name, $ports_to_do))
+	{
+		if (!array_key_exists ($port_name, $ports_to_do))
 			foreach ($port['allowed'] as $vlan_id)
+			{
+				if (in_array ($vlan_id, $new_managed_vlans))
+					continue;
 				if
 				(
-					(!array_key_exists ($vlan_id, $vdomain['vlanlist']) or
-					$vdomain['vlanlist'][$vlan_id]['vlan_type'] != 'alien') and
-					!in_array ($vlan_id, $new_managed_vlans)
+					array_key_exists ($vlan_id, $vdomain['vlanlist']) and
+					$vdomain['vlanlist'][$vlan_id]['vlan_type'] == 'alien'
 				)
+					continue;
+				if (in_array ($vlan_id, $device_config['vlanlist']))
 					$new_managed_vlans[] = $vlan_id;
+			}
+	}
 	foreach ($ports_to_do as $port)
 		foreach ($port['new_allowed'] as $vlan_id)
 			if

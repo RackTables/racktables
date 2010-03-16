@@ -2252,7 +2252,8 @@ function processVLANSyncRequest ()
 	try
 	{
 		// either way it wouldn't work, because the latter increments mutex_rev
-		exportSwitch8021QConfig ($sic['object_id'], $sic['mutex_rev'], $to_running);
+		if (count ($to_running))
+			exportSwitch8021QConfig ($sic['object_id'], $sic['mutex_rev'], $to_running);
 		setSwitchVLANConfig ($sic['object_id'], $sic['mutex_rev'], $from_running);
 	}
 	catch (Exception $e)
