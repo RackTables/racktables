@@ -2840,10 +2840,67 @@ function computeSwitchPushRequest ($object_id, $which_ports)
 
 // Get a list of VLAN management pseudo-commands and return a text
 // of real vendor-specific commands, which implement the work.
+// This work is done in two rounds:
+// 1. For "add allowed" and "rem allowed" commands detect continuous
+//    sequences of VLAN IDs and replace them with ranges of form "A-B",
+//    where B>A.
+// 2. Iterate over the resulting list and produce real CLI commands.
 function ios12TranslatePushQueue ($queue)
 {
+	$compressed = array();
+	$buffered = NULL;
+	foreach ($queue as $item)
+	{
+		if ($buffered !== NULL)
+		{
+			if
+			(
+				($item['opcode'] == 'add allowed' or $item['opcode'] == 'rem allowed') and
+				$item['opcode'] == $buffered['opcode'] and // same command
+				$item['arg1'] == $buffered['arg1'] and // same interface
+				$item['arg2'] == $buffered['arg3'] + 1 // fits into buffered range
+			)
+			{
+				// merge and wait for next
+				$buffered['arg3'] = $item['arg2'];
+				continue;
+			}
+			// flush
+			$compressed[] = array
+			(
+				'opcode' => $buffered['opcode'],
+				'arg1' => $buffered['arg1'],
+				'arg2' =>
+					$buffered['arg2'] .
+					($buffered['arg2'] == $buffered['arg3'] ? '' : ('-' . $buffered['arg3'])),
+			);
+			$buffered = NULL;
+		}
+		if ($item['opcode'] == 'add allowed' or $item['opcode'] == 'rem allowed')
+		// engage next round
+			$buffered = array
+			(
+				'opcode' => $item['opcode'],
+				'arg1' => $item['arg1'],
+				'arg2' => $item['arg2'],
+				'arg3' => $item['arg2'],
+			);
+		else
+			$compressed[] = $item; // pass through
+	}
+	if ($buffered !== NULL)
+		// Below implies 'opcode' IN ('add allowed', 'rem allowed') and
+		// a fixed structure of the buffered remainder.
+		$compressed[] = array
+		(
+			'opcode' => $buffered['opcode'],
+			'arg1' => $buffered['arg1'],
+			'arg2' =>
+				$buffered['arg2'] .
+				($buffered['arg2'] == $buffered['arg3'] ? '' : ('-' . $buffered['arg3'])),
+		);
 	$ret = "conf t\n";
-	foreach ($queue as $cmd)
+	foreach ($compressed as $cmd)
 		switch ($cmd['opcode'])
 		{
 		case 'create VLAN':
