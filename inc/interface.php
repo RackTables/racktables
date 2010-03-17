@@ -6630,6 +6630,7 @@ function renderObjectVLANPorts ($object_id)
 	global $pageno, $tabno, $sic;
 	$req_port_name = array_key_exists ('port_name', $sic) ? $sic['port_name'] : '';
 	$desired_config = getDesired8021QConfig ($object_id);
+	uksort ($desired_config, 'sortTokenize');
 	echo '<table border=0 width="100%"><tr valign=top><td class=tdleft width="30%">';
 	// port list
 	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
@@ -6862,6 +6863,7 @@ function renderObjectVLANSync ($object_id)
 		return;
 	}
 	$desired_config = getDesired8021QConfig ($object_id);
+	uksort ($desired_config, 'sortTokenize');
 	$formports = array();
 	// The form is based on the "desired" list, which has every
 	// 802.1Q-eligible port of the object plus any port names
