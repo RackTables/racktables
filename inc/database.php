@@ -3693,31 +3693,6 @@ function getDesired8021QConfig ($object_id)
 	return $ret;
 }
 
-// Replace current port configuration with the provided one. If the new
-// native VLAN ID doesn't belong to the allowed list, don't issue
-// INSERT query, which would always trigger an FK exception.
-// This function indicates an error, but doesn't revert it, so it is
-// assummed, that the calling function performs necessary transaction wrapping.
-function setPortVLANConfig ($object_id, $port_name, $allowed, $native)
-{
-	global $dbxlink;
-	// rely on ON DELETE CASCADE for PortNativeVLAN
-	if (FALSE === usePreparedDeleteBlade ('PortAllowedVLAN', array ('object_id' => $object_id, 'port_name' => $port_name)))
-		return FALSE;
-	foreach ($allowed as $vlan_id)
-		if (!usePreparedInsertBlade ('PortAllowedVLAN', array ('object_id' => $object_id, 'port_name' => $port_name, 'vlan_id' => $vlan_id)))
-			return FALSE;
-	// When the new native VLAN ID is 0, only delete the old row (if it exists).
-	if
-	(
-		$native and
-		in_array ($native, $allowed) and
-		!usePreparedInsertBlade ('PortNativeVLAN', array ('object_id' => $object_id, 'port_name' => $port_name, 'vlan_id' => $native))
-	)
-		return FALSE;
-	return TRUE;
-}
-
 function getVLANInfo ($vlan_ck)
 {
 	list ($vdom_id, $vlan_id) = decodeVLANCK ($vlan_ck);
@@ -3784,19 +3759,40 @@ function setSwitchVLANConfig ($object_id, $form_mutex_rev, $work)
 {
 	global $dbxlink;
 	$dbxlink->beginTransaction();
-	$prepared = $dbxlink->prepare ('SELECT mutex_rev FROM VLANSwitch WHERE object_id = ? FOR UPDATE');
+	$prepared = $dbxlink->prepare ('SELECT domain_id, mutex_rev FROM VLANSwitch WHERE object_id = ? FOR UPDATE');
 	$prepared->execute (array ($object_id));
-	if (!$row = $prepared->fetch (PDO::FETCH_ASSOC))
+	if (!$vswitch = $prepared->fetch (PDO::FETCH_ASSOC))
 	{
 		$dbxlink->rollBack();
 		throw new InvalidArgException ('object_id', $object_id, 'VLAN domain is not set for this object');
 	}
-	$db_mutex_rev = $row['mutex_rev'];
 	unset ($prepared);
+	$domain_alien_vlans = array();
+	foreach (getDomainVLANs ($vswitch['domain_id']) as $vlan_id => $vlan)
+		if ($vlan['vlan_type'] == 'alien')
+			$domain_alien_vlans[] = $vlan_id;
 	$desired_config = getDesired8021QConfig ($object_id);
 	$changed = FALSE;
 	foreach ($work as $port_name => $item)
 	{
+		// The submitted data needs a correction before further evaluation
+		// to suppress any requested changes to alien VLAN(s) presence on
+		// the port.
+		foreach ($domain_alien_vlans as $vlan_id)
+		{
+			if (in_array ($vlan_id, $desired_config[$port_name]['allowed']))
+			{
+				if (!in_array ($vlan_id, $item['allowed']))
+					$item['allowed'][] = $vlan_id;
+			}
+			else
+			{
+				if (in_array ($vlan_id, $item['allowed']))
+					unset ($item['allowed'][array_search ($vlan_id, $item['allowed'])]);
+			}
+			if ($desired_config[$port_name]['native'] == $vlan_id)
+				$item['native'] = $desired_config[$port_name]['native'];
+		}
 		// Only consider touching database, when there are changes for the current port.
 		if
 		(
@@ -3806,12 +3802,35 @@ function setSwitchVLANConfig ($object_id, $form_mutex_rev, $work)
 		)
 			continue; // data already meets the request
 		$changed = TRUE;
-		if ($form_mutex_rev != $db_mutex_rev)
+		if ($form_mutex_rev != $vswitch['mutex_rev'])
 		{
 			$dbxlink->rollBack();
 			throw new RuntimeException();
 		}
-		if (!setPortVLANConfig ($object_id, $port_name, $item['allowed'], $item['native']))
+		// Replace current port configuration with the provided one. If the new
+		// native VLAN ID doesn't belong to the allowed list, don't issue
+		// INSERT query, which would always trigger an FK exception.
+		// This function indicates an error, but doesn't revert it, so it is
+		// assummed, that the calling function performs necessary transaction wrapping.
+		// rely on ON DELETE CASCADE for PortNativeVLAN
+		if (FALSE === usePreparedDeleteBlade ('PortAllowedVLAN', array ('object_id' => $object_id, 'port_name' => $port_name)))
+		{
+			$dbxlink->rollBack();
+			throw new RuntimeException();
+		}
+		foreach ($item['allowed'] as $vlan_id)
+			if (!usePreparedInsertBlade ('PortAllowedVLAN', array ('object_id' => $object_id, 'port_name' => $port_name, 'vlan_id' => $vlan_id)))
+		{
+			$dbxlink->rollBack();
+			throw new RuntimeException();
+		}
+		// When the new native VLAN ID is 0, only delete the old row (if it exists).
+		if
+		(
+			$item['native'] and
+			in_array ($item['native'], $item['allowed']) and
+			!usePreparedInsertBlade ('PortNativeVLAN', array ('object_id' => $object_id, 'port_name' => $port_name, 'vlan_id' => $item['native']))
+		)
 		{
 			$dbxlink->rollBack();
 			throw new RuntimeException();
@@ -3823,7 +3842,6 @@ function setSwitchVLANConfig ($object_id, $form_mutex_rev, $work)
 		$dbxlink->commit();
 	else
 		$dbxlink->rollBack();
-	return TRUE;
 }
 
 function exportSwitch8021QConfig ($object_id, $mutex_rev, $which_ports)

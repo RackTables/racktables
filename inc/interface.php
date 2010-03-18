@@ -6620,11 +6620,8 @@ function renderVLANDomainVLANList ($vdom_id)
 	echo '</table>';
 }
 
-// This function handles a tab, which operates two different modes.
-// In its initial state it shown a list of VLAN-eligible ports each
-// with respective list of VLANs. Nothing can be edited. Then, when
-// the user clicks one of the ports, the tab displays only that port
-// and a form to edits VLANs it runs.
+// Show a list of 802.1Q-eligible ports in any way, but when one of
+// them is selected as current, also display a form for its setup.
 function renderObjectVLANPorts ($object_id)
 {
 	global $pageno, $tabno, $sic;
@@ -6697,6 +6694,10 @@ function renderPortVLANConfig ($object_id, $port_name, $allowed, $native)
 			$selected = '';
 			$class = 'tagbox';
 		}
+		// A real relation to an alien VLANs is shown for a
+		// particular port, but it cannot be changed by user.
+		if ($vlan_info['vlan_type'] == 'alien')
+			$selected .= ' disabled';
 		echo "<tr><td colspan=2 class=${class}>";
 		echo "<label><input type=checkbox name='allowed_id[]' value='${vlan_id}'${selected}> ";
 		echo formatVLANName ($vlan_info) . "</label></td></tr>";
@@ -6725,6 +6726,21 @@ function renderPortVLANConfig ($object_id, $port_name, $allowed, $native)
 				$selected = '';
 				$class = 'tagbox';
 			}
+			// When one or more alien VLANs are present on port's list of allowed VLANs,
+			// they are shown among radio options, but disabled, so that the user cannot
+			// break traffic of these VLANs. In addition to that, when port's native VLAN
+			// is set to one of these alien VLANs, the whole group of radio buttons is
+			// disabled. These measures make it harder for the system to break a VLAN,
+			// which is explicitly protected from it.
+			if
+			(
+				(array_key_exists ($native, $vdom['vlanlist']) and
+				$vdom['vlanlist'][$native]['vlan_type'] == 'alien')
+				or
+				(array_key_exists ($vlan_id, $vdom['vlanlist']) and
+				$vdom['vlanlist'][$vlan_id]['vlan_type'] == 'alien')
+			)
+				$selected .= ' disabled';
 			echo "<tr><td colspan=2 class=${class}>";
 			echo "<label><input type=radio name='native_id' value='${vlan_id}'${selected}> ";
 			echo $vlan_text . "</label></td></tr>";
