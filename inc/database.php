@@ -3660,7 +3660,7 @@ function commitUpdateVLANDomain ($vdom_id, $vdom_descr)
 
 function getVLANSwitchInfo ($object_id, $extrasql = '')
 {
-	$result = usePreparedSelectBlade ('SELECT domain_id, mutex_rev FROM VLANSwitch WHERE object_id = ? ${extrasql}', array ($object_id));
+	$result = usePreparedSelectBlade ('SELECT domain_id, mutex_rev FROM VLANSwitch WHERE object_id = ? ' . $extrasql, array ($object_id));
 	if ($result and $row = $result->fetch (PDO::FETCH_ASSOC))
 		return $row;
 	return NULL;

@@ -52,7 +52,7 @@ retrieve)
 	;;
 deploy)
 	cat "$WORKFILE" >> "$SESSION"
-	outfile=/dev/null
+	outfile=/tmp/tmpfile
 	;;
 *)
 	outfile=/dev/null
