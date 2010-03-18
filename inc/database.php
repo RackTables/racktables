@@ -3618,16 +3618,28 @@ function getVLANDomainSwitches ($vdom_id)
 
 function commitReduceVLANSwitch ($vdom_id, $object_id)
 {
-	global $dbxlink;
-	$query = $dbxlink->prepare ('DELETE FROM VLANSwitch WHERE domain_id = ? AND object_id = ?');
-	return $query->execute (array ($vdom_id, $object_id));
+	return usePreparedDeleteBlade
+	(
+		'VLANSwitch',
+		array
+		(
+			'domain_id' => $vdom_id,
+			'object_id' => $object_id,
+		)
+	);
 }
 
 function commitReduceVLANDescription ($vdom_id, $vlan_id)
 {
-	global $dbxlink;
-	$query = $dbxlink->prepare ('DELETE FROM VLANDescription WHERE domain_id = ? AND vlan_id = ?');
-	return $query->execute (array ($vdom_id, $vlan_id));
+	return usePreparedDeleteBlade
+	(
+		'VLANDescription',
+		array
+		(
+			'domain_id' => $vdom_id,
+			'vlan_id' => $vlan_id,
+		)
+	);
 }
 
 function commitUpdateVLANDescription ($vdom_id, $vlan_id, $vlan_type, $vlan_descr)
@@ -3646,9 +3658,9 @@ function commitUpdateVLANDomain ($vdom_id, $vdom_descr)
 	return $query->execute (array ($vdom_descr, $vdom_id));
 }
 
-function getVLANSwitchInfo ($object_id)
+function getVLANSwitchInfo ($object_id, $extrasql = '')
 {
-	$result = usePreparedSelectBlade ('SELECT domain_id, mutex_rev FROM VLANSwitch WHERE object_id = ?', array ($object_id));
+	$result = usePreparedSelectBlade ('SELECT domain_id, mutex_rev FROM VLANSwitch WHERE object_id = ? ${extrasql}', array ($object_id));
 	if ($result and $row = $result->fetch (PDO::FETCH_ASSOC))
 		return $row;
 	return NULL;
@@ -3732,9 +3744,16 @@ function commitSupplementVLANIPv4 ($vlan_ck, $ipv4net_id)
 function commitReduceVLANIPv4 ($vlan_ck, $ipv4net_id)
 {
 	list ($vdom_id, $vlan_id) = decodeVLANCK ($vlan_ck);
-	global $dbxlink;
-	$query = $dbxlink->prepare ('DELETE FROM VLANIPv4 WHERE domain_id = ? AND vlan_id = ? AND ipv4net_id = ?');
-	return $query->execute (array ($vdom_id, $vlan_id, $ipv4net_id));
+	return usePreparedDeleteBlade
+	(
+		'VLANIPv4',
+		array
+		(
+			'domain_id' => $vdom_id,
+			'vlan_id' => $vlan_id,
+			'ipv4net_id' => $ipv4net_id,
+		)
+	);
 }
 
 // Return a list of switches, which have specific VLAN configured on
@@ -3759,14 +3778,11 @@ function setSwitchVLANConfig ($object_id, $form_mutex_rev, $work)
 {
 	global $dbxlink;
 	$dbxlink->beginTransaction();
-	$prepared = $dbxlink->prepare ('SELECT domain_id, mutex_rev FROM VLANSwitch WHERE object_id = ? FOR UPDATE');
-	$prepared->execute (array ($object_id));
-	if (!$vswitch = $prepared->fetch (PDO::FETCH_ASSOC))
+	if (NULL === $vswitch = getVLANSwitchinfo ($object_id, 'FOR UPDATE'))
 	{
 		$dbxlink->rollBack();
 		throw new InvalidArgException ('object_id', $object_id, 'VLAN domain is not set for this object');
 	}
-	unset ($prepared);
 	$domain_alien_vlans = array();
 	foreach (getDomainVLANs ($vswitch['domain_id']) as $vlan_id => $vlan)
 		if ($vlan['vlan_type'] == 'alien')
@@ -3848,16 +3864,12 @@ function exportSwitch8021QConfig ($object_id, $mutex_rev, $which_ports)
 {
 	global $dbxlink;
 	$dbxlink->beginTransaction();
-	$prepared = $dbxlink->prepare ('SELECT mutex_rev FROM VLANSwitch WHERE object_id = ? LOCK IN SHARE MODE');
-	$prepared->execute (array ($object_id));
-	if (!$row = $prepared->fetch (PDO::FETCH_ASSOC))
+	if (NULL === $vswitch = getVLANSwitchInfo ($object_id, 'LOCK IN SHARE MODE'))
 	{
 		$dbxlink->rollBack();
 		throw new InvalidArgException ('object_id', $object_id, 'VLAN domain is not set for this object');
 	}
-	$db_mutex_rev = $row['mutex_rev'];
-	unset ($prepared);
-	if ($db_mutex_rev != $mutex_rev)
+	if ($vswitch['mutex_rev'] != $mutex_rev)
 	{
 		$dbxlink->rollBack();
 		throw new RuntimeException ('expired data detected');
