@@ -3836,10 +3836,10 @@ function setSwitchVLANConfig ($object_id, $form_mutex_rev, $work)
 		}
 		foreach ($item['allowed'] as $vlan_id)
 			if (!usePreparedInsertBlade ('PortAllowedVLAN', array ('object_id' => $object_id, 'port_name' => $port_name, 'vlan_id' => $vlan_id)))
-		{
-			$dbxlink->rollBack();
-			throw new RuntimeException();
-		}
+			{
+				$dbxlink->rollBack();
+				throw new RuntimeException();
+			}
 		// When the new native VLAN ID is 0, only delete the old row (if it exists).
 		if
 		(
