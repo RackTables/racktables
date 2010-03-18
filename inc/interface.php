@@ -6947,8 +6947,6 @@ function renderObjectVLANSync ($object_id)
 			if (!$enabled)
 				echo '&nbsp;';
 			else
-				// For JS event handler radio input names are indexed from 1
-				// onwards, but for sumbit handler they are based on port id.
 				echo "<input id=i_${rownum}_${pos} name=i_${rownum} type=radio value=${pos}" . $checked[$pos] . ">";
 			echo '</td>';
 		}
