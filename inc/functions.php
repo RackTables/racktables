@@ -2707,7 +2707,7 @@ function scanArrayForItem ($table, $scan_column, $scan_value)
 	return NULL;
 }
 
-function computeSwitchPushRequest ($object_id, $which_ports)
+function computeSwitchPushRequest ($object_id, $work)
 {
 	$vswitch = getVLANSwitchInfo ($object_id);
 	$vlanlist = getDomainVLANs ($vswitch['domain_id']);
@@ -2723,7 +2723,7 @@ function computeSwitchPushRequest ($object_id, $which_ports)
 			$old_managed_vlans[] = $vlan_id;
 	$db_config = getDesired8021QConfig ($object_id);
 	$ports_to_do = array();
-	foreach ($which_ports as $port_name)
+	foreach ($work as $port_name => $port)
 		if (array_key_exists ($port_name, $db_config))
 			$ports_to_do[$port_name] = array
 			(

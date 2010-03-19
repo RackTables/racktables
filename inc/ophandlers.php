@@ -2236,7 +2236,11 @@ function processVLANSyncRequest ()
 		switch ($sic["i_${i}"])
 		{
 		case 'left':
-			$to_running[] = $sic["pn_${i}"];
+			$to_running[$sic["pn_${i}"]] = array
+			(
+				'allowed' => $sic["ra_${i}"],
+				'native' => $sic["rn_${i}"],
+			);
 			break;
 		case 'right':
 			$from_running[$sic["pn_${i}"]] = array

@@ -3904,7 +3904,7 @@ function importSwitch8021QConfig ($object_id, $form_mutex_rev, $work)
 		$dbxlink->rollBack();
 }
 
-function exportSwitch8021QConfig ($object_id, $mutex_rev, $which_ports)
+function exportSwitch8021QConfig ($object_id, $mutex_rev, $work)
 {
 	global $dbxlink;
 	$dbxlink->beginTransaction();
@@ -3918,7 +3918,7 @@ function exportSwitch8021QConfig ($object_id, $mutex_rev, $which_ports)
 		$dbxlink->rollBack();
 		throw new RuntimeException ('expired data detected');
 	}
-	setDevice8021QConfig ($object_id, computeSwitchPushRequest ($object_id, $which_ports));
+	setDevice8021QConfig ($object_id, computeSwitchPushRequest ($object_id, $work));
 	$dbxlink->commit();
 }
 
