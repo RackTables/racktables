@@ -2296,7 +2296,7 @@ function formatVLANName ($vlaninfo)
 }
 
 // Read given running-config and return a list of work items in a format
-// similar to the one, which setSwitchVLANConfig() understands.
+// similar to the one, which importSwitch8021QConfig() understands.
 function ios12ReadVLANConfig ($input)
 {
 	$ret = array

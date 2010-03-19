@@ -2186,7 +2186,7 @@ function savePortVLANConfig ()
 		$allowed = isset ($sic['allowed_id']) ? $sic['allowed_id'] : array();
 		$native = isset ($sic['native_id']) ? $sic['native_id'] : 0; // 0 means "reset"
 		$work = array ($sic['port_name'] => array ('allowed' => $allowed, 'native' => $native));
-		setSwitchVLANConfig ($sic['object_id'], $sic['mutex_rev'], $work);
+		importSwitch8021QConfig ($sic['object_id'], $sic['mutex_rev'], $work);
 	}
 	catch (Exception $e)
 	{
@@ -2254,7 +2254,7 @@ function processVLANSyncRequest ()
 		// either way it wouldn't work, because the latter increments mutex_rev
 		if (count ($to_running))
 			exportSwitch8021QConfig ($sic['object_id'], $sic['mutex_rev'], $to_running);
-		setSwitchVLANConfig ($sic['object_id'], $sic['mutex_rev'], $from_running);
+		importSwitch8021QConfig ($sic['object_id'], $sic['mutex_rev'], $from_running);
 	}
 	catch (Exception $e)
 	{

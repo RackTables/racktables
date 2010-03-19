@@ -3774,7 +3774,7 @@ function getVLANConfiguredPorts ($vlan_ck)
 	return $ret;
 }
 
-function setSwitchVLANConfig ($object_id, $form_mutex_rev, $work)
+function importSwitch8021QConfig ($object_id, $form_mutex_rev, $work)
 {
 	global $dbxlink;
 	$dbxlink->beginTransaction();
