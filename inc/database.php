@@ -3778,7 +3778,7 @@ function setSwitchVLANConfig ($object_id, $form_mutex_rev, $work)
 {
 	global $dbxlink;
 	$dbxlink->beginTransaction();
-	if (NULL === $vswitch = getVLANSwitchinfo ($object_id, 'FOR UPDATE'))
+	if (NULL === $vswitch = getVLANSwitchInfo ($object_id, 'FOR UPDATE'))
 	{
 		$dbxlink->rollBack();
 		throw new InvalidArgException ('object_id', $object_id, 'VLAN domain is not set for this object');
@@ -3840,7 +3840,7 @@ function setSwitchVLANConfig ($object_id, $form_mutex_rev, $work)
 		// D != D' D' != R' R == R' abort
 		// D != D' D' != R' R != R' abort
 		// So the decision is made this way:
-		// R != R => abort
+		// R != R' => abort
 		// (being here implies R == R')
 		// D' == R' => ignore request
 		// (now D' != R' is implied)
