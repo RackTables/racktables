@@ -3788,7 +3788,7 @@ function importSwitch8021QConfig ($object_id, $form_mutex_rev, $work)
 		if ($vlan['vlan_type'] == 'alien')
 			$domain_alien_vlans[] = $vlan_id;
 	$desired_config = getDesired8021QConfig ($object_id);
-	$running_config = getDevice8021QConfig ($object_id);
+	$running_config = getRunning8021QConfig ($object_id);
 	$changed = FALSE;
 	foreach ($work as $port_name => $item)
 	{

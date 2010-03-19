@@ -6871,7 +6871,7 @@ function renderObjectVLANSync ($object_id)
 	global $pageno, $tabno, $nextorder;
 	try
 	{
-		$running_config = getDevice8021QConfig ($object_id);
+		$running_config = getRunning8021QConfig ($object_id);
 	}
 	catch (RuntimeException $re)
 	{

@@ -2711,7 +2711,7 @@ function computeSwitchPushRequest ($object_id, $which_ports)
 {
 	$vswitch = getVLANSwitchInfo ($object_id);
 	$vlanlist = getDomainVLANs ($vswitch['domain_id']);
-	$device_config = getDevice8021QConfig ($object_id);
+	$device_config = getRunning8021QConfig ($object_id);
 	// only ignore VLANs, which exist and are explicitly shown as "alien"
 	$old_managed_vlans = array();
 	foreach ($device_config['vlanlist'] as $vlan_id)

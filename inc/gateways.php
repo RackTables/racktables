@@ -304,7 +304,7 @@ function detectDeviceBreed ($object_id)
 	return '';
 }
 
-function getDevice8021QConfig ($object_id)
+function getRunning8021QConfig ($object_id)
 {
 	if ('' == $breed = detectDeviceBreed ($object_id))
 		throw new RuntimeException ('cannot pick handler for this device');
