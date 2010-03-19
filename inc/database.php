@@ -3867,11 +3867,6 @@ function setSwitchVLANConfig ($object_id, $form_mutex_rev, $work)
 			throw new RuntimeException();
 		}
 		$changed = TRUE;
-		if ($form_mutex_rev != $vswitch['mutex_rev'])
-		{
-			$dbxlink->rollBack();
-			throw new RuntimeException();
-		}
 		// Replace current port configuration with the provided one. If the new
 		// native VLAN ID doesn't belong to the allowed list, don't issue
 		// INSERT query, which would always trigger an FK exception.
