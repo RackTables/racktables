@@ -3788,6 +3788,7 @@ function setSwitchVLANConfig ($object_id, $form_mutex_rev, $work)
 		if ($vlan['vlan_type'] == 'alien')
 			$domain_alien_vlans[] = $vlan_id;
 	$desired_config = getDesired8021QConfig ($object_id);
+	$running_config = getDevice8021QConfig ($object_id);
 	$changed = FALSE;
 	foreach ($work as $port_name => $item)
 	{
@@ -3810,13 +3811,61 @@ function setSwitchVLANConfig ($object_id, $form_mutex_rev, $work)
 				$item['native'] = $desired_config[$port_name]['native'];
 		}
 		// Only consider touching database, when there are changes for the current port.
+		// In a perfect scenario mutex revision of the form submitted is equal to
+		// the value in our locked row of VLANSwitch table, while the most recent
+		// running-config records for current port match their copies in the form
+		// (this way we import same data, which the user made his decision about).
+		// In this case it is safe to replace records in database with records
+		// from the running-config. All cases (except the one below) make us cancel
+		// the whole work for the sake of data consistency. The only exception,
+		// when an expired import request is tolerated (but not executed) for the
+		// currently processed port, is:
+		// 1. D' == R' (change already merged)
+		// 2. R == R' (this is what user expects to see)
+		// Where:
+		// D' stands for the current database-config
+		// R' stands for the current running-config
+		// R stands for running-config cached in the form
+		// Also there is D (old value of database-config), value of which isn't
+		// known, but (D == D') is equivalent to (M == M'), where M and M' stand
+		// for cached and current values of mutex revision respectively.
+		// ---------------------------------------------------------------------
+		// All this can be summarized as follows:
+		// D == D' D' == R' R == R' ignore request
+		// D == D' D' == R' R != R' abort
+		// D == D' D' != R' R == R' save changes
+		// D == D' D' != R' R != R' abort
+		// D != D' D' == R' R == R' ignore request
+		// D != D' D' == R' R != R' abort
+		// D != D' D' != R' R == R' abort
+		// D != D' D' != R' R != R' abort
+		// So the decision is made this way:
+		// R != R => abort
+		// (being here implies R == R')
+		// D' == R' => ignore request
+		// (now D' != R' is implied)
+		// D != D' => abort
+		// save changes (D == D' D' != R' R == R')
 		if
 		(
-			!count (array_diff ($item['allowed'], $desired_config[$port_name]['allowed'])) and
-			!count (array_diff ($desired_config[$port_name]['allowed'], $item['allowed'])) and
-			$item['native'] == $desired_config[$port_name]['native']
+			!array_values_same ($item['allowed'], $running_config['portdata'][$port_name]['allowed']) or
+			$item['native'] != $running_config['portdata'][$port_name]['native']
 		)
-			continue; // data already meets the request
+		{
+			$dbxlink->rollBack();
+			throw new RuntimeException();
+		}
+		if
+		(
+			array_values_same ($desired_config[$port_name]['allowed'], $item['allowed']) and
+			$desired_config[$port_name]['native'] == $item['native']
+		)
+			continue;
+		if ($form_mutex_rev != $vswitch['mutex_rev'])
+		{
+			$dbxlink->rollBack();
+			throw new RuntimeException();
+		}
 		$changed = TRUE;
 		if ($form_mutex_rev != $vswitch['mutex_rev'])
 		{
