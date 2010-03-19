@@ -3913,8 +3913,26 @@ function exportSwitch8021QConfig ($object_id, $mutex_rev, $work)
 		$dbxlink->rollBack();
 		throw new InvalidArgException ('object_id', $object_id, 'VLAN domain is not set for this object');
 	}
+	// In terms of the decision making logic explained in importSwitch8021QConfig()
+	// this job is performed as follows:
+	// D == D' D' == R' R == R' ignore request
+	// D == D' D' == R' R != R' ignore request
+	// D == D' D' != R' R == R' save changes
+	// D == D' D' != R' R != R' abort
+	// D != D' D' == R' R == R' abort
+	// D != D' D' == R' R != R' abort
+	// D != D' D' != R' R == R' abort
+	// D != D' D' != R' R != R' abort
+	// This reads as:
+	// D != D' => abort (this happens for either all ports, or none of them)
+	// (now D == D' is implied)
+	// D' == R' => ignore request
+	// (now D' != R' is implied)
+	// R != R' => abort
+	// save changes (D == D' D' != R' R == R')
 	if ($vswitch['mutex_rev'] != $mutex_rev)
 	{
+		// D != D'
 		$dbxlink->rollBack();
 		throw new RuntimeException ('expired data detected');
 	}
@@ -3932,6 +3950,22 @@ function exportSwitch8021QConfig ($object_id, $mutex_rev, $work)
 	$db_config = getDesired8021QConfig ($object_id);
 	$ports_to_do = array();
 	foreach ($work as $port_name => $port)
+	{
+		if
+		(
+			array_same_values ($db_config[$port_name]['allowed'], $device_config['portdata'][$port_name]['allowed']) and
+			$db_config[$port_name]['native'] == $device_config['portdata'][$port_name]['native'] // D' == R'
+		)
+			continue;
+		if
+		(
+			!array_same_values ($port['allowed'], $device_config['portdata'][$port_name]['allowed']) or
+			$port['native'] != $device_config['portdata'][$port_name]['native'] // R != R'
+		)
+		{
+			$dbxlink->rollBack();
+			throw new RuntimeException ('expired data detected');
+		}
 		if (array_key_exists ($port_name, $db_config))
 			$ports_to_do[$port_name] = array
 			(
@@ -3944,6 +3978,7 @@ function exportSwitch8021QConfig ($object_id, $mutex_rev, $work)
 				'new_allowed' => $db_config[$port_name]['allowed'],
 				'new_native' => $db_config[$port_name]['native'],
 			);
+	}
 	// New VLAN table is a union of:
 	// 1. all compulsory VLANs
 	// 2. all "current" non-alien allowed VLANs of those ports, which are left
