@@ -3896,7 +3896,7 @@ function importSwitch8021QConfig ($object_id, $form_mutex_rev, $work)
 			throw new RuntimeException();
 		}
 	}
-	$query = $dbxlink->prepare ('UPDATE VLANSwitch SET mutex_rev = mutex_rev + 1 WHERE object_id = ?');
+	$query = $dbxlink->prepare ('UPDATE VLANSwitch SET mutex_rev = mutex_rev + 1, last_pull = NOW() WHERE object_id = ?');
 	$query->execute (array ($object_id));
 	if ($changed)
 		$dbxlink->commit();
@@ -3908,7 +3908,8 @@ function exportSwitch8021QConfig ($object_id, $mutex_rev, $work)
 {
 	global $dbxlink;
 	$dbxlink->beginTransaction();
-	if (NULL === $vswitch = getVLANSwitchInfo ($object_id, 'LOCK IN SHARE MODE'))
+	// Make sure only one copy of the script is configuring the real device at once.
+	if (NULL === $vswitch = getVLANSwitchInfo ($object_id, 'FOR UPDATE'))
 	{
 		$dbxlink->rollBack();
 		throw new InvalidArgException ('object_id', $object_id, 'VLAN domain is not set for this object');
@@ -4079,6 +4080,8 @@ function exportSwitch8021QConfig ($object_id, $mutex_rev, $work)
 
 	}
 	setDevice8021QConfig ($object_id, $crq);
+	$query = $dbxlink->prepare ('UPDATE VLANSwitch SET last_push = NOW() WHERE object_id = ?');
+	$query->execute (array ($object_id));
 	$dbxlink->commit();
 }
 
