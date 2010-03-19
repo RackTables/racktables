@@ -2180,18 +2180,34 @@ function savePortVLANConfig ()
 {
 	assertStringArg ('port_name');
 	assertUIntArg ('mutex_rev');
-	global $sic;
+	global $sic, $dbxlink;
+	$dbxlink->beginTransaction();
 	try
 	{
+		if (NULL === $vswitch = getVLANSwitchInfo ($sic['object_id'], 'FOR UPDATE'))
+			throw new InvalidArgException ('object_id', $object_id, 'VLAN domain is not set for this object');
+		$domain_vlanlist = getDomainVLANs ($vswitch['domain_id']);
+		$stored_config = getDesired8021QConfig ($sic['object_id']);
 		$allowed = isset ($sic['allowed_id']) ? $sic['allowed_id'] : array();
 		$native = isset ($sic['native_id']) ? $sic['native_id'] : 0; // 0 means "reset"
 		$work = array ($sic['port_name'] => array ('allowed' => $allowed, 'native' => $native));
-		importSwitch8021QConfig ($sic['object_id'], $sic['mutex_rev'], $work);
+		importSwitch8021QConfig
+		(
+			$sic['object_id'],
+			$sic['mutex_rev'],
+			$vswitch['mutex_rev'],
+			$domain_vlanlist,
+			$stored_config,
+			$work,
+			$work
+		);
 	}
 	catch (Exception $e)
 	{
+		$dbxlink->rollBack();
 		return buildRedirectURL (__FUNCTION__, 'ERR2', array(), NULL, NULL, array ('port_name' => $sic['port_name']));
 	}
+	$dbxlink->commit();
 	return buildRedirectURL (__FUNCTION__, 'OK', array(), NULL, NULL, array ('port_name' => $sic['port_name']));
 }
 
@@ -2219,14 +2235,14 @@ $msgcode['processVLANSyncRequest']['OK'] = 63;
 $msgcode['processVLANSyncRequest']['ERR'] = 179;
 function processVLANSyncRequest ()
 {
-	global $sic;
+	global $sic, $dbxlink;
 	assertUIntArg ('mutex_rev');
 	assertUIntArg ('nrows');
 	// Divide submitted radio buttons into 3 groups:
 	// left (produce and send commands to switch)
 	// asis (ignore)
 	// right (fetch config from switch and save into database)
-	$work = array ('left' => array(), 'right' => array());
+	$old_running_config = array();
 	for ($i = 1; $i <= $sic['nrows']; $i++)
 	{
 		if (!array_key_exists ("i_${i}", $sic))
@@ -2236,7 +2252,7 @@ function processVLANSyncRequest ()
 		{
 		case 'left':
 		case 'right':
-			$work[$sic["i_${i}"]][$sic["pn_${i}"]] = array
+			$old_running_config[$sic["i_${i}"]][$sic["pn_${i}"]] = array
 			(
 				'allowed' => $sic["ra_${i}"],
 				'native' => $sic["rn_${i}"],
@@ -2246,17 +2262,44 @@ function processVLANSyncRequest ()
 			// don't care
 		}
 	}
+	$dbxlink->beginTransaction();
 	try
 	{
+		if (NULL === $vswitch = getVLANSwitchInfo ($sic['object_id'], 'FOR UPDATE'))
+			throw new InvalidArgException ('object_id', $object_id, 'VLAN domain is not set for this object');
+		$domain_vlanlist = getDomainVLANs ($vswitch['domain_id']);
+		$stored_config = getDesired8021QConfig ($sic['object_id']);
+		$new_running_config = getRunning8021QConfig ($sic['object_id']);
 		// either way it wouldn't work, because the latter increments mutex_rev
-		if (count ($work['left']))
-			exportSwitch8021QConfig ($sic['object_id'], $sic['mutex_rev'], $work['left']);
-		importSwitch8021QConfig ($sic['object_id'], $sic['mutex_rev'], $work['right']);
+		if (count ($old_running_config['left']))
+			exportSwitch8021QConfig
+			(
+				$sic['object_id'],
+				$sic['mutex_rev'],
+				$vswitch['mutex_rev'],
+				$domain_vlanlist,
+				$new_running_config['vlanlist'],
+				$old_running_config['left'],
+				$new_running_config['portdata'],
+				$stored_config
+			);
+		importSwitch8021QConfig
+		(
+			$sic['object_id'],
+			$sic['mutex_rev'],
+			$vswitch['mutex_rev'],
+			$domain_vlanlist,
+			$stored_config,
+			$old_running_config['right'],
+			$new_running_config['portdata']
+		);
 	}
 	catch (Exception $e)
 	{
-		buildRedirectURL (__FUNCTION__, 'ERR');
+		$dbxlink->rollBack();
+		return buildRedirectURL (__FUNCTION__, 'ERR');
 	}
+	$dbxlink->commit();
 	return buildRedirectURL (__FUNCTION__, 'OK', array (count ($work['left']) + count ($work['right'])));
 }
 

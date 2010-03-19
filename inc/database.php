@@ -3774,41 +3774,50 @@ function getVLANConfiguredPorts ($vlan_ck)
 	return $ret;
 }
 
-function importSwitch8021QConfig ($object_id, $form_mutex_rev, $work)
+function importSwitch8021QConfig
+(
+	$object_id,
+	$form_mutex_rev,
+	$db_mutex_rev,
+	$domain_vlanlist,
+	$change_from,   // (D') current latest list of ports, requested to change or even all
+	$old_change_to, // (R ) only ports requested for change with their cached old state
+	$new_change_to  // (R') only ports requested for change with their new state
+)
 {
 	global $dbxlink;
-	$dbxlink->beginTransaction();
-	if (NULL === $vswitch = getVLANSwitchInfo ($object_id, 'FOR UPDATE'))
-	{
-		$dbxlink->rollBack();
-		throw new InvalidArgException ('object_id', $object_id, 'VLAN domain is not set for this object');
-	}
 	$domain_alien_vlans = array();
-	foreach (getDomainVLANs ($vswitch['domain_id']) as $vlan_id => $vlan)
+	foreach ($domain_vlanlist as $vlan_id => $vlan)
 		if ($vlan['vlan_type'] == 'alien')
 			$domain_alien_vlans[] = $vlan_id;
-	$desired_config = getDesired8021QConfig ($object_id);
-	$running_config = getRunning8021QConfig ($object_id);
 	$changed = FALSE;
-	foreach ($work as $port_name => $item)
+	foreach ($new_change_to as $port_name => $item)
 	{
+		// FIXME: iterate over old_change_to
+		if (!array_key_exists ($port_name, $old_change_to))
+			continue;
 		// The submitted data needs a correction before further evaluation
 		// to suppress any requested changes to alien VLAN(s) presence on
 		// the port.
 		foreach ($domain_alien_vlans as $vlan_id)
 		{
-			if (in_array ($vlan_id, $desired_config[$port_name]['allowed']))
+			if (in_array ($vlan_id, $change_from[$port_name]['allowed']))
 			{
 				if (!in_array ($vlan_id, $item['allowed']))
 					$item['allowed'][] = $vlan_id;
+				if (!in_array ($vlan_id, $old_change_to[$port_name]['allowed']))
+					$old_change_to[$port_name]['allowed'][] = $vlan_id;
 			}
 			else
 			{
 				if (in_array ($vlan_id, $item['allowed']))
 					unset ($item['allowed'][array_search ($vlan_id, $item['allowed'])]);
+				if (in_array ($vlan_id, $old_change_to[$port_name]['allowed']))
+					unset ($old_change_to[$port_name]['allowed'][array_search ($vlan_id, $old_change_to[$port_name]['allowed'])]);
 			}
-			if ($desired_config[$port_name]['native'] == $vlan_id)
-				$item['native'] = $desired_config[$port_name]['native'];
+			if ($change_from[$port_name]['native'] == $vlan_id)
+				$old_change_to[$port_name]['native'] =
+				$item['native'] = $change_from[$port_name]['native'];
 		}
 		// Only consider touching database, when there are changes for the current port.
 		// In a perfect scenario mutex revision of the form submitted is equal to
@@ -3848,24 +3857,18 @@ function importSwitch8021QConfig ($object_id, $form_mutex_rev, $work)
 		// save changes (D == D' D' != R' R == R')
 		if
 		(
-			!array_values_same ($item['allowed'], $running_config['portdata'][$port_name]['allowed']) or
-			$item['native'] != $running_config['portdata'][$port_name]['native']
+			!array_values_same ($old_change_to[$port_name]['allowed'], $item['allowed']) or
+			$old_change_to[$port_name]['native'] != $item['native']
 		)
-		{
-			$dbxlink->rollBack();
 			throw new RuntimeException();
-		}
 		if
 		(
-			array_values_same ($desired_config[$port_name]['allowed'], $item['allowed']) and
-			$desired_config[$port_name]['native'] == $item['native']
+			array_values_same ($change_from[$port_name]['allowed'], $new_change_to[$port_name]['allowed']) and
+			$change_from[$port_name]['native'] == $new_change_to[$port_name]['native']
 		)
 			continue;
-		if ($form_mutex_rev != $vswitch['mutex_rev'])
-		{
-			$dbxlink->rollBack();
+		if ($form_mutex_rev != $db_mutex_rev)
 			throw new RuntimeException();
-		}
 		$changed = TRUE;
 		// Replace current port configuration with the provided one. If the new
 		// native VLAN ID doesn't belong to the allowed list, don't issue
@@ -3874,16 +3877,10 @@ function importSwitch8021QConfig ($object_id, $form_mutex_rev, $work)
 		// assummed, that the calling function performs necessary transaction wrapping.
 		// rely on ON DELETE CASCADE for PortNativeVLAN
 		if (FALSE === usePreparedDeleteBlade ('PortAllowedVLAN', array ('object_id' => $object_id, 'port_name' => $port_name)))
-		{
-			$dbxlink->rollBack();
 			throw new RuntimeException();
-		}
 		foreach ($item['allowed'] as $vlan_id)
 			if (!usePreparedInsertBlade ('PortAllowedVLAN', array ('object_id' => $object_id, 'port_name' => $port_name, 'vlan_id' => $vlan_id)))
-			{
-				$dbxlink->rollBack();
 				throw new RuntimeException();
-			}
 		// When the new native VLAN ID is 0, only delete the old row (if it exists).
 		if
 		(
@@ -3891,29 +3888,27 @@ function importSwitch8021QConfig ($object_id, $form_mutex_rev, $work)
 			in_array ($item['native'], $item['allowed']) and
 			!usePreparedInsertBlade ('PortNativeVLAN', array ('object_id' => $object_id, 'port_name' => $port_name, 'vlan_id' => $item['native']))
 		)
-		{
-			$dbxlink->rollBack();
 			throw new RuntimeException();
-		}
 	}
+	if (!$changed)
+		return;
 	$query = $dbxlink->prepare ('UPDATE VLANSwitch SET mutex_rev = mutex_rev + 1, last_pull = NOW() WHERE object_id = ?');
 	$query->execute (array ($object_id));
-	if ($changed)
-		$dbxlink->commit();
-	else
-		$dbxlink->rollBack();
 }
 
-function exportSwitch8021QConfig ($object_id, $mutex_rev, $work)
+function exportSwitch8021QConfig
+(
+	$object_id,
+	$form_mutex_rev,
+	$db_mutex_rev,
+	$domain_vlanlist,
+	$device_vlanlist,
+	$old_change_from, // R
+	$new_change_from, // R'
+	$change_to // D'
+)
 {
 	global $dbxlink;
-	$dbxlink->beginTransaction();
-	// Make sure only one copy of the script is configuring the real device at once.
-	if (NULL === $vswitch = getVLANSwitchInfo ($object_id, 'FOR UPDATE'))
-	{
-		$dbxlink->rollBack();
-		throw new InvalidArgException ('object_id', $object_id, 'VLAN domain is not set for this object');
-	}
 	// In terms of the decision making logic explained in importSwitch8021QConfig()
 	// this job is performed as follows:
 	// D == D' D' == R' R == R' ignore request
@@ -3931,53 +3926,48 @@ function exportSwitch8021QConfig ($object_id, $mutex_rev, $work)
 	// (now D' != R' is implied)
 	// R != R' => abort
 	// save changes (D == D' D' != R' R == R')
-	if ($vswitch['mutex_rev'] != $mutex_rev)
-	{
-		// D != D'
-		$dbxlink->rollBack();
+	if ($db_mutex_rev != $form_mutex_rev) // D != D'
 		throw new RuntimeException ('expired data detected');
-	}
-	$vlanlist = getDomainVLANs ($vswitch['domain_id']);
 	$device_config = getRunning8021QConfig ($object_id);
 	// only ignore VLANs, which exist and are explicitly shown as "alien"
 	$old_managed_vlans = array();
-	foreach ($device_config['vlanlist'] as $vlan_id)
+	foreach ($device_vlanlist as $vlan_id)
 		if
 		(
-			!array_key_exists ($vlan_id, $vlanlist) or
-			$vlanlist[$vlan_id]['vlan_type'] != 'alien'
+			!array_key_exists ($vlan_id, $domain_vlanlist) or
+			$domain_vlanlist[$vlan_id]['vlan_type'] != 'alien'
 		)
 			$old_managed_vlans[] = $vlan_id;
 	$db_config = getDesired8021QConfig ($object_id);
 	$ports_to_do = array();
-	foreach ($work as $port_name => $port)
+	foreach ($new_change_from as $port_name => $port)
 	{
+		// FIXME: iterate over old_change_from
+		if (!array_key_exists ($port_name, $old_change_from))
+			continue;
 		if
 		(
-			array_same_values ($db_config[$port_name]['allowed'], $device_config['portdata'][$port_name]['allowed']) and
-			$db_config[$port_name]['native'] == $device_config['portdata'][$port_name]['native'] // D' == R'
+			array_values_same ($change_to[$port_name]['allowed'], $port['allowed']) and
+			$change_to[$port_name]['native'] == $port['native'] // D' == R'
 		)
 			continue;
 		if
 		(
-			!array_same_values ($port['allowed'], $device_config['portdata'][$port_name]['allowed']) or
-			$port['native'] != $device_config['portdata'][$port_name]['native'] // R != R'
+			!array_values_same ($old_change_from[$port_name]['allowed'], $port['allowed']) or
+			$old_change_from[$port_name]['native'] != $port['native'] // R != R'
 		)
-		{
-			$dbxlink->rollBack();
 			throw new RuntimeException ('expired data detected');
-		}
-		if (array_key_exists ($port_name, $db_config))
+		if (array_key_exists ($port_name, $change_to))
 			$ports_to_do[$port_name] = array
 			(
-				'old_allowed' => array_key_exists ($port_name, $device_config['portdata']) ?
-					$device_config['portdata'][$port_name]['allowed'] :
+				'old_allowed' => array_key_exists ($port_name, $new_change_from) ?
+					$new_change_from[$port_name]['allowed'] :
 					array(),
-				'old_native' => array_key_exists ($port_name, $device_config['portdata']) ?
-					$device_config['portdata'][$port_name]['native'] :
+				'old_native' => array_key_exists ($port_name, $new_change_from) ?
+					$new_change_from[$port_name]['native'] :
 					0,
-				'new_allowed' => $db_config[$port_name]['allowed'],
-				'new_native' => $db_config[$port_name]['native'],
+				'new_allowed' => $change_to[$port_name]['allowed'],
+				'new_native' => $change_to[$port_name]['native'],
 			);
 	}
 	// New VLAN table is a union of:
@@ -3989,10 +3979,10 @@ function exportSwitch8021QConfig ($object_id, $mutex_rev, $work)
 	// Like for old_managed_vlans, a VLANs is never listed, only if it
 	// exists and belongs to "alien" type.
 	$new_managed_vlans = array();
-	foreach ($vlanlist as $vlan_id => $vlan)
+	foreach ($domain_vlanlist as $vlan_id => $vlan)
 		if ($vlan['vlan_type'] == 'compulsory')
 			$new_managed_vlans[] = $vlan_id;
-	foreach ($device_config['portdata'] as $port_name => $port)
+	foreach ($new_change_from as $port_name => $port)
 	{
 		if (!array_key_exists ($port_name, $ports_to_do))
 			foreach ($port['allowed'] as $vlan_id)
@@ -4001,11 +3991,11 @@ function exportSwitch8021QConfig ($object_id, $mutex_rev, $work)
 					continue;
 				if
 				(
-					array_key_exists ($vlan_id, $vlanlist) and
-					$vlanlist[$vlan_id]['vlan_type'] == 'alien'
+					array_key_exists ($vlan_id, $domain_vlanlist) and
+					$domain_vlanlist[$vlan_id]['vlan_type'] == 'alien'
 				)
 					continue;
-				if (in_array ($vlan_id, $device_config['vlanlist']))
+				if (in_array ($vlan_id, $device_vlanlist))
 					$new_managed_vlans[] = $vlan_id;
 			}
 	}
@@ -4013,7 +4003,7 @@ function exportSwitch8021QConfig ($object_id, $mutex_rev, $work)
 		foreach ($port['new_allowed'] as $vlan_id)
 			if
 			(
-				$vlanlist[$vlan_id]['vlan_type'] == 'ondemand' and
+				$domain_vlanlist[$vlan_id]['vlan_type'] == 'ondemand' and
 				!in_array ($vlan_id, $new_managed_vlans)
 			)
 				$new_managed_vlans[] = $vlan_id;
@@ -4082,7 +4072,6 @@ function exportSwitch8021QConfig ($object_id, $mutex_rev, $work)
 	setDevice8021QConfig ($object_id, $crq);
 	$query = $dbxlink->prepare ('UPDATE VLANSwitch SET last_push = NOW() WHERE object_id = ?');
 	$query->execute (array ($object_id));
-	$dbxlink->commit();
 }
 
 ?>
