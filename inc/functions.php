@@ -2710,15 +2710,15 @@ function scanArrayForItem ($table, $scan_column, $scan_value)
 function computeSwitchPushRequest ($object_id, $which_ports)
 {
 	$vswitch = getVLANSwitchInfo ($object_id);
-	$vdomain = getVLANDomain ($vswitch['domain_id']);
+	$vlanlist = getDomainVLANs ($vswitch['domain_id']);
 	$device_config = getDevice8021QConfig ($object_id);
 	// only ignore VLANs, which exist and are explicitly shown as "alien"
 	$old_managed_vlans = array();
 	foreach ($device_config['vlanlist'] as $vlan_id)
 		if
 		(
-			!array_key_exists ($vlan_id, $vdomain['vlanlist']) or
-			$vdomain['vlanlist'][$vlan_id]['vlan_type'] != 'alien'
+			!array_key_exists ($vlan_id, $vlanlist) or
+			$vlanlist[$vlan_id]['vlan_type'] != 'alien'
 		)
 			$old_managed_vlans[] = $vlan_id;
 	$db_config = getDesired8021QConfig ($object_id);
@@ -2745,7 +2745,7 @@ function computeSwitchPushRequest ($object_id, $which_ports)
 	// Like for old_managed_vlans, a VLANs is never listed, only if it
 	// exists and belongs to "alien" type.
 	$new_managed_vlans = array();
-	foreach ($vdomain['vlanlist'] as $vlan_id => $vlan)
+	foreach ($vlanlist as $vlan_id => $vlan)
 		if ($vlan['vlan_type'] == 'compulsory')
 			$new_managed_vlans[] = $vlan_id;
 	foreach ($device_config['portdata'] as $port_name => $port)
@@ -2757,8 +2757,8 @@ function computeSwitchPushRequest ($object_id, $which_ports)
 					continue;
 				if
 				(
-					array_key_exists ($vlan_id, $vdomain['vlanlist']) and
-					$vdomain['vlanlist'][$vlan_id]['vlan_type'] == 'alien'
+					array_key_exists ($vlan_id, $vlanlist) and
+					$vlanlist[$vlan_id]['vlan_type'] == 'alien'
 				)
 					continue;
 				if (in_array ($vlan_id, $device_config['vlanlist']))
@@ -2769,7 +2769,7 @@ function computeSwitchPushRequest ($object_id, $which_ports)
 		foreach ($port['new_allowed'] as $vlan_id)
 			if
 			(
-				$vdomain['vlanlist'][$vlan_id]['vlan_type'] == 'ondemand' and
+				$vlanlist[$vlan_id]['vlan_type'] == 'ondemand' and
 				!in_array ($vlan_id, $new_managed_vlans)
 			)
 				$new_managed_vlans[] = $vlan_id;
