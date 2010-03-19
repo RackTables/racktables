@@ -2226,8 +2226,7 @@ function processVLANSyncRequest ()
 	// left (produce and send commands to switch)
 	// asis (ignore)
 	// right (fetch config from switch and save into database)
-	$from_running = array();
-	$to_running = array();
+	$work = array ('left' => array(), 'right' => array());
 	for ($i = 1; $i <= $sic['nrows']; $i++)
 	{
 		if (!array_key_exists ("i_${i}", $sic))
@@ -2236,14 +2235,8 @@ function processVLANSyncRequest ()
 		switch ($sic["i_${i}"])
 		{
 		case 'left':
-			$to_running[$sic["pn_${i}"]] = array
-			(
-				'allowed' => $sic["ra_${i}"],
-				'native' => $sic["rn_${i}"],
-			);
-			break;
 		case 'right':
-			$from_running[$sic["pn_${i}"]] = array
+			$work[$sic["i_${i}"]][$sic["pn_${i}"]] = array
 			(
 				'allowed' => $sic["ra_${i}"],
 				'native' => $sic["rn_${i}"],
@@ -2256,15 +2249,15 @@ function processVLANSyncRequest ()
 	try
 	{
 		// either way it wouldn't work, because the latter increments mutex_rev
-		if (count ($to_running))
-			exportSwitch8021QConfig ($sic['object_id'], $sic['mutex_rev'], $to_running);
-		importSwitch8021QConfig ($sic['object_id'], $sic['mutex_rev'], $from_running);
+		if (count ($work['left']))
+			exportSwitch8021QConfig ($sic['object_id'], $sic['mutex_rev'], $work['left']);
+		importSwitch8021QConfig ($sic['object_id'], $sic['mutex_rev'], $work['right']);
 	}
 	catch (Exception $e)
 	{
 		buildRedirectURL (__FUNCTION__, 'ERR');
 	}
-	return buildRedirectURL (__FUNCTION__, 'OK', array (count ($from_running)));
+	return buildRedirectURL (__FUNCTION__, 'OK', array (count ($work['left']) + count ($work['right'])));
 }
 
 ?>
