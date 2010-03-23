@@ -536,6 +536,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'N5K-C5020: 40 SFP+/10000',
 		'processors' => array ('nexus-any-10000SFP+', 'nexus-mgmt'),
 	),
+	'9.12.3.1.3.798' => array
+	(
+		'dict_key' => 959,
+		'text' => 'N5K-C5010: 20 SFP+/10000',
+		'processors' => array ('nexus-any-10000SFP+', 'nexus-mgmt'),
+	),
 	'11.2.3.7.11.32' => array
 	(
 		'dict_key' => 871,
