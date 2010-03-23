@@ -2695,6 +2695,11 @@ function vrp53PickInterfaceSubcommand (&$work, $line)
 	return __FUNCTION__;
 }
 
+function nxos4Read8021QConfig ($input)
+{
+	return $input;
+}
+
 // Scan given work accumulator array and return the key, which
 // addresses the port with requested name (or NULL if there is none such).
 // Note that 0 and NULL mean completely different things and thus

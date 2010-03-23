@@ -288,6 +288,13 @@ function detectDeviceBreed ($object_id)
 			return 'ios12';
 		if
 		(
+			$record['name'] == 'SW type' &&
+			strlen ($record['o_value']) &&
+			preg_match ('/^Cisco NX-OS 4\./', execGMarker ($record['o_value']))
+		)
+			return 'nxos4';
+		if
+		(
 			$record['name'] == 'HW type' &&
 			strlen ($record['o_value']) &&
 			preg_match ('/^Foundry FastIron GS /', execGMarker ($record['o_value']))
@@ -313,6 +320,7 @@ function getRunning8021QConfig ($object_id)
 		'ios12' => 'ios12ReadVLANConfig',
 		'fdry5' => 'fdry5ReadVLANConfig',
 		'vrp53' => 'vrp53ReadVLANConfig',
+		'nxos4' => 'nxos4Read8021QConfig',
 	);
 	return $reader[$breed] (dos2unix (gwRetrieveDeviceConfig ($object_id, $breed)));
 }
@@ -326,6 +334,7 @@ function setDevice8021QConfig ($object_id, $pseudocode)
 		'ios12' => 'ios12TranslatePushQueue',
 		'fdry5' => 'fdry5TranslatePushQueue',
 		'vrp53' => 'vrp53TranslatePushQueue',
+		'nxos4' => 'ios12TranslatePushQueue', // employ syntax compatibility
 	);
 	return gwDeployDeviceConfig ($object_id, $breed, unix2dos ($xlator[$breed] ($pseudocode)));
 }
