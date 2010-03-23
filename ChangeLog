@@ -3,6 +3,7 @@
 	update: sort object ports in a more reasonable manner
 	update: enable class methods as handlers (by James Tutton)
 	update: better support of Huawei S5300 switches
+	update: better support of Brocade/Foundry FastIron switches
 	update: also list WS-C3524-XL (#320)
 	bugfix: completely fix ticket:211
 	bugfix: declare charset in HTTP header (#312)
