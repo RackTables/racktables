@@ -5,6 +5,7 @@
 	update: better support of Huawei S5300 switches
 	bugfix: completely fix ticket:211
 	bugfix: declare charset in HTTP header (#312)
+	bugfix: don't add AC-in port for switches, which don't have it (#316)
 0.17.9 2010-02-17
 	new feature: added per-user UI options (ticket:29)
 	new feature: LDAP cache can be disabled now (ticket:247)

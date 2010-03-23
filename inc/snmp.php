@@ -694,8 +694,12 @@ function doSwitchSNMPmining ($objectInfo, $hostname, $community)
 			updateStickerForCell ($objectInfo, 1, str_replace ('"', '', substr ($sysChassi, strlen ('STRING: '))));
 		checkPIC ('1-29');
 		commitAddPort ($objectInfo['id'], 'con0', '1-29', 'console', ''); // RJ-45 RS-232 console
-		checkPIC ('1-16');
-		commitAddPort ($objectInfo['id'], 'AC-in', '1-16', '', ''); // AC input
+		// blade devices are powered through internal circuitry of chassis
+		if ($sysObjectID != '9.1.749' and $sysObjectID != '9.1.920')
+		{
+			checkPIC ('1-16'); // AC input
+			commitAddPort ($objectInfo['id'], 'AC-in', '1-16', '', '');
+		}
 		$log = mergeLogs ($log, oneLiner (81, array ('catalyst-generic')));
 		break;
 	case preg_match ('/^9\.12\.3\.1\.3\./', $sysObjectID): // Nexus
