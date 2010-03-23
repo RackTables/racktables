@@ -727,6 +727,9 @@ function doSwitchSNMPmining ($objectInfo, $hostname, $community)
 		updateStickerForCell ($objectInfo, 5, $exact_release);
 		checkPIC ('1-29');
 		commitAddPort ($objectInfo['id'], 'con0', '1-29', 'console', ''); // RJ-45 RS-232 console
+		checkPIC ('1-16'); // AC input
+		commitAddPort ($objectInfo['id'], 'AC-in-1', '1-16', 'AC1', '');
+		commitAddPort ($objectInfo['id'], 'AC-in-2', '1-16', 'AC2', '');
 		$log = mergeLogs ($log, oneLiner (81, array ('nexus-generic')));
 		break;
 	case preg_match ('/^11\.2\.3\.7\.11\./', $sysObjectID): // ProCurve
