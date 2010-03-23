@@ -68,7 +68,7 @@ function authenticate ()
 				$remote_username;
 			return; // success
 		// When using LDAP, leave a mean to fix things. Admin user is always authenticated locally.
-		case ('database' == $user_auth_src or $userinfo['user_id'] == 1):
+		case ('database' == $user_auth_src or (array_key_exists ('user_id', $userinfo) and $userinfo['user_id'] == 1)):
 			$remote_displayname = strlen ($userinfo['user_realname']) ?
 				$userinfo['user_realname'] :
 				$remote_username;

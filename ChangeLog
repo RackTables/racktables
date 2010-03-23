@@ -6,6 +6,7 @@
 	update: also list WS-C3524-XL (#320)
 	bugfix: completely fix ticket:211
 	bugfix: declare charset in HTTP header (#312)
+	bugfix: PHP warning with certain auth setups (#310)
 	bugfix: don't add AC-in port for switches, which don't have it (#316)
 0.17.9 2010-02-17
 	new feature: added per-user UI options (ticket:29)
