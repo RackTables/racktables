@@ -374,6 +374,12 @@ $iftable_processors['fgs-uplinks'] = array
 
 $known_switches = array // key is system OID w/o "enterprises" prefix
 (
+	'9.1.248' => array
+	(
+		'dict_key' => 393,
+		'text' => 'WS-C3524-XL: 24 RJ-45/10-100TX + 2 GBIC/1000',
+		'processors' => array ('catalyst-chassis-any-1000GBIC', 'catalyst-chassis-any-100TX'),
+	),
 	'9.1.324' => array
 	(
 		'dict_key' => 380,
