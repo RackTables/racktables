@@ -5,6 +5,7 @@
 	update: better support of Huawei S5300 switches
 	update: better support of Brocade/Foundry FastIron switches
 	update: also list WS-C3524-XL (#320)
+	update: better support of Nexus switches
 	bugfix: completely fix ticket:211
 	bugfix: declare charset in HTTP header (#312)
 	bugfix: PHP warning with certain auth setups (#310)
