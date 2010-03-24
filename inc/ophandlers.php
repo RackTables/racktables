@@ -270,7 +270,7 @@ function addMultiPorts ()
 		switch ($format)
 		{
 			case 'fisxii':
-				$words = explode (' ', ereg_replace ('[[:space:]]+', ' ', $line));
+				$words = explode (' ', preg_replace ('/[[:space:]]+/', ' ', $line));
 				list ($slot, $port) = explode ('/', $words[0]);
 				$ports[] = array
 				(
@@ -280,7 +280,7 @@ function addMultiPorts ()
 				);
 				break;
 			case 'c3600asy':
-				$words = explode (' ', ereg_replace ('[[:space:]]+', ' ', trim (substr ($line, 3))));
+				$words = explode (' ', preg_replace ('/[[:space:]]+/', ' ', trim (substr ($line, 3))));
 /*
 How Async Lines are Numbered in Cisco 3600 Series Routers
 http://www.cisco.com/en/US/products/hw/routers/ps274/products_tech_note09186a00801ca70b.shtml
@@ -304,7 +304,7 @@ http://www.cisco.com/en/US/products/hw/routers/ps274/products_tech_note09186a008
 				);
 				break;
 			case 'fiwg':
-				$words = explode (' ', ereg_replace ('[[:space:]]+', ' ', $line));
+				$words = explode (' ', preg_replace ('/[[:space:]]+/', ' ', $line));
 				$ifnumber = $words[0] * 1;
 				$ports[] = array
 				(
@@ -395,7 +395,7 @@ function addIPv4Allocation ()
 	assertStringArg ('bond_type');
 
 	// Strip masklen.
-	$ip = ereg_replace ('/[[:digit:]]+$', '', $_REQUEST['ip']);
+	$ip = preg_replace ('@/[[:digit:]]+$@', '', $_REQUEST['ip']);
 	if  (getConfigVar ('IPV4_JAYWALK') != 'yes' and NULL === getIPv4AddressNetworkId ($ip))
 		return buildRedirectURL (__FUNCTION__, 'ERR1', array ($ip));
 	

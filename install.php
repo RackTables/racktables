@@ -124,7 +124,6 @@ function platform_is_ok ()
 
 	$nerrs += extension_issues ('sha1', 'hash function');
 	$nerrs += extension_issues ('preg_match', 'PCRE extension');
-	$nerrs += extension_issues ('ereg', 'POSIX Regex extension');
 
 	echo '<tr><td>SNMP extension</td>';
 	if (defined ('SNMP_NULL'))
@@ -324,7 +323,7 @@ function init_database_static ()
 		while (!feof ($f))
 		{
 			$line = fgets ($f);
-			if (ereg ('^--', $line))
+			if ('--' == substr ($line, 0, 2))
 				continue;
 			$longq .= $line;
 		}

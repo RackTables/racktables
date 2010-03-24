@@ -5048,7 +5048,7 @@ function renderCellFilterPortlet ($preselect, $realm, $bypass_name = '', $bypass
 		$psieve = getConfigVar ('FILTER_PREDICATE_SIEVE');
 		// Repack matching predicates in a way, which tagOnChain() understands.
 		foreach (array_keys ($pTable) as $pname)
-			if (mb_ereg_match ($psieve, $pname))
+			if (preg_match ("/${psieve}/", $pname))
 				$myPredicates[] = array ('id' => $pname, 'tag' => $pname);
 		if (!count ($myPredicates))
 			echo "<tr><td colspan=2 class='tagbox sparenetwork'>(no predicates to show)</td></tr>";
@@ -5705,7 +5705,7 @@ function niftyString ($string, $maxlen = 30)
 	if (!mb_strlen ($string))
 		return '&nbsp;';
 	// a tab counts for a space
-	$string = mb_ereg_replace ("\t", ' ', $string);
+	$string = preg_replace ("/\t/", ' ', $string);
 	if (!$maxlen or mb_strlen ($string) <= $maxlen)
 		return htmlspecialchars ($string, ENT_QUOTES, 'UTF-8');
 	return "<span title='" . htmlspecialchars ($string, ENT_QUOTES, 'UTF-8') . "'>" .

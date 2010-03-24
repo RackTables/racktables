@@ -30,8 +30,8 @@ $max_dict_key = array
 	'0.17.10' => 1346,
 );
 
-define ('TAGNAME_REGEXP', '^[[:alnum:]]([\. _~-]?[[:alnum:]])*$');
-define ('AUTOTAGNAME_REGEXP', '^\$[[:alnum:]]([\. _~-]?[[:alnum:]])*$');
+define ('TAGNAME_REGEXP', '/^[[:alnum:]]([\. _~-]?[[:alnum:]])*$/');
+define ('AUTOTAGNAME_REGEXP', '/^\$[[:alnum:]]([\. _~-]?[[:alnum:]])*$/');
 // The latter matches both SunOS and Linux-styled formats.
 define ('RE_L2_IFCFG', '/^[0-9a-f][0-9a-f]?:[0-9a-f][0-9a-f]?:[0-9a-f][0-9a-f]?:[0-9a-f][0-9a-f]?:[0-9a-f][0-9a-f]?:[0-9a-f][0-9a-f]?$/i');
 define ('RE_L2_CISCO', '/^[0-9a-f][0-9a-f][0-9a-f][0-9a-f].[0-9a-f][0-9a-f][0-9a-f][0-9a-f].[0-9a-f][0-9a-f][0-9a-f][0-9a-f]$/i');

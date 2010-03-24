@@ -672,7 +672,7 @@ function doSwitchSNMPmining ($objectInfo, $hostname, $community)
 	
 	if (FALSE === ($sysObjectID = @snmpget ($hostname, $community, 'sysObjectID.0')))
 		return buildRedirectURL (__FUNCTION__, 'ERR3'); // // fatal SNMP failure
-	$sysObjectID = ereg_replace ('^.*(enterprises\.)([\.[:digit:]]+)$', '\\2', $sysObjectID);
+	$sysObjectID = preg_replace ('/^.*(enterprises\.)([\.[:digit:]]+)$/', '\\2', $sysObjectID);
 	$sysName = substr (@snmpget ($hostname, $community, 'sysName.0'), strlen ('STRING: '));
 	$sysDescr = substr (@snmpget ($hostname, $community, 'sysDescr.0'), strlen ('STRING: '));
 	$sysDescr = str_replace (array ("\n", "\r"), " ", $sysDescr);  // Make it one line
@@ -690,8 +690,8 @@ function doSwitchSNMPmining ($objectInfo, $hostname, $community)
 	switch (1)
 	{
 	case preg_match ('/^9\.1\./', $sysObjectID): // Catalyst
-		$exact_release = ereg_replace ('^.*, Version ([^ ]+), .*$', '\\1', $sysDescr);
-		$major_line = ereg_replace ('^([[:digit:]]+\.[[:digit:]]+)[^[:digit:]].*', '\\1', $exact_release);
+		$exact_release = preg_replace ('/^.*, Version ([^ ]+), .*$/', '\\1', $sysDescr);
+		$major_line = preg_replace ('/^([[:digit:]]+\.[[:digit:]]+)[^[:digit:]].*/', '\\1', $exact_release);
 		$ios_codes = array
 		(
 			'12.0' => 244,
@@ -715,8 +715,8 @@ function doSwitchSNMPmining ($objectInfo, $hostname, $community)
 		$log = mergeLogs ($log, oneLiner (81, array ('catalyst-generic')));
 		break;
 	case preg_match ('/^9\.12\.3\.1\.3\./', $sysObjectID): // Nexus
-		$exact_release = ereg_replace ('^.*, Version ([^ ]+), .*$', '\\1', $sysDescr);
-		$major_line = ereg_replace ('^([[:digit:]]+\.[[:digit:]]+)[^[:digit:]].*', '\\1', $exact_release);
+		$exact_release = preg_replace ('/^.*, Version ([^ ]+), .*$/', '\\1', $sysDescr);
+		$major_line = preg_replace ('/^([[:digit:]]+\.[[:digit:]]+)[^[:digit:]].*/', '\\1', $exact_release);
 		$nxos_codes = array
 		(
 			'4.0' => 963,
@@ -733,7 +733,7 @@ function doSwitchSNMPmining ($objectInfo, $hostname, $community)
 		$log = mergeLogs ($log, oneLiner (81, array ('nexus-generic')));
 		break;
 	case preg_match ('/^11\.2\.3\.7\.11\./', $sysObjectID): // ProCurve
-		$exact_release = ereg_replace ('^.* revision ([^ ]+), .*$', '\\1', $sysDescr);
+		$exact_release = preg_replace ('/^.* revision ([^ ]+), .*$/', '\\1', $sysDescr);
 		updateStickerForCell ($objectInfo, 5, $exact_release);
 		$log = mergeLogs ($log, oneLiner (81, array ('procurve-generic')));
 		break;
@@ -753,7 +753,7 @@ function doSwitchSNMPmining ($objectInfo, $hostname, $community)
 		$log = mergeLogs ($log, oneLiner (81, array ('juniper-generic')));
 		break;
 	case preg_match ('/^1991\.1\.3\.45\./', $sysObjectID): // snFGSFamily
-		$exact_release = ereg_replace ('^.*, IronWare Version ([^ ]+) .*$', '\\1', $sysDescr);
+		$exact_release = preg_replace ('/^.*, IronWare Version ([^ ]+) .*$/', '\\1', $sysDescr);
 		updateStickerForCell ($objectInfo, 5, $exact_release);
 		# FOUNDRY-SN-AGENT-MIB::snChasSerNum.0
 		$sysChassi = @snmpget ($hostname, $community, 'enterprises.1991.1.1.1.1.2.0');
@@ -799,14 +799,14 @@ function doSwitchSNMPmining ($objectInfo, $hostname, $community)
 	$tablename = 'ifDescr';
 	foreach (snmpwalkoid ($hostname, $community, $tablename) as $oid => $value)
 	{
-		$randomindex = ereg_replace ("^.*${tablename}\.(.+)\$", '\\1', $oid);
-		$value = trim (ereg_replace ('^.+: (.+)$', '\\1', $value), '"');
+		$randomindex = preg_replace ("/^.*${tablename}\.(.+)\$/", '\\1', $oid);
+		$value = trim (preg_replace ('/^.+: (.+)$/', '\\1', $value), '"');
 		$ifInfo[$randomindex][$tablename] = $value;
 	}
 	$tablename = 'ifPhysAddress';
 	foreach (snmpwalkoid ($hostname, $community, $tablename) as $oid => $value)
 	{
-		$randomindex = ereg_replace ("^.*${tablename}\.(.+)\$", '\\1', $oid);
+		$randomindex = preg_replace ("/^.*${tablename}\.(.+)\$/", '\\1', $oid);
 		$value = trim ($value);
 		// NET-SNMP may return MAC addresses in one of two (?) formats depending on
 		// DISPLAY-HINT internal database. The best we can do about it is to accept both.

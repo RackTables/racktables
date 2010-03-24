@@ -588,18 +588,18 @@ function sortTokenize ($a, $b)
 	while ($a != $aold)
 	{
 		$aold=$a;
-		$a = ereg_replace('[^a-zA-Z0-9]',' ',$a);
-		$a = ereg_replace('([0-9])([a-zA-Z])','\\1 \\2',$a);
-		$a = ereg_replace('([a-zA-Z])([0-9])','\\1 \\2',$a);
+		$a = preg_replace('/[^a-zA-Z0-9]/',' ',$a);
+		$a = preg_replace('/([0-9])([a-zA-Z])/','\\1 \\2',$a);
+		$a = preg_replace('/([a-zA-Z])([0-9])/','\\1 \\2',$a);
 	}
 
 	$bold='';
 	while ($b != $bold)
 	{
 		$bold=$b;
-		$b = ereg_replace('[^a-zA-Z0-9]',' ',$b);
-		$b = ereg_replace('([0-9])([a-zA-Z])','\\1 \\2',$b);
-		$b = ereg_replace('([a-zA-Z])([0-9])','\\1 \\2',$b);
+		$b = preg_replace('/[^a-zA-Z0-9]/',' ',$b);
+		$b = preg_replace('/([0-9])([a-zA-Z])/','\\1 \\2',$b);
+		$b = preg_replace('/([a-zA-Z])([0-9])/','\\1 \\2',$b);
 	}
 
 
@@ -686,7 +686,7 @@ function parseWikiLink ($line, $which)
 		// always strip the marker for A-data, but let cookOptgroup()
 		// do this later (otherwise it can't sort groups out)
 		if ($which == 'a')
-			return ereg_replace ('^.+%GSKIP%', '', ereg_replace ('^(.+)%GPASS%', '\\1 ', $line));
+			return preg_replace ('/^.+%GSKIP%/', '', preg_replace ('/^(.+)%GPASS%/', '\\1 ', $line));
 		else
 			return $line;
 	}
@@ -695,7 +695,7 @@ function parseWikiLink ($line, $which)
 	$o_value = trim ($s[0]);
 	if ($which == 'o')
 		return $o_value;
-	$o_value = ereg_replace ('^.+%GSKIP%', '', ereg_replace ('^(.+)%GPASS%', '\\1 ', $o_value));
+	$o_value = preg_replace ('/^.+%GSKIP%/', '', preg_replace ('/^(.+)%GPASS%/', '\\1 ', $o_value));
 	$a_value = trim ($s[1]);
 	return "<a href='${a_value}'>${o_value}</a>";
 }
@@ -703,7 +703,7 @@ function parseWikiLink ($line, $which)
 // FIXME: should this be saved as "P-data"?
 function execGMarker ($line)
 {
-	return ereg_replace ('^.+%GSKIP%', '', ereg_replace ('^(.+)%GPASS%', '\\1 ', $line));
+	return preg_replace ('/^.+%GSKIP%/', '', preg_replace ('/^(.+)%GPASS%/', '\\1 ', $line));
 }
 
 // rackspace usage for a single rack
@@ -1364,9 +1364,9 @@ function mergeLogs ($log1, $log2)
 
 function validTagName ($s, $allow_autotag = FALSE)
 {
-	if (1 == mb_ereg (TAGNAME_REGEXP, $s))
+	if (1 == preg_match (TAGNAME_REGEXP, $s))
 		return TRUE;
-	if ($allow_autotag and 1 == mb_ereg (AUTOTAGNAME_REGEXP, $s))
+	if ($allow_autotag and 1 == preg_match (AUTOTAGNAME_REGEXP, $s))
 		return TRUE;
 	return FALSE;
 }
@@ -1949,7 +1949,7 @@ function cookOptgroups ($recordList, $object_type_id = 0, $existing_value = 0)
 	{
 		$screenlist = array();
 		foreach (explode (';', getConfigVar ('VENDOR_SIEVE')) as $sieve)
-			if (FALSE !== mb_ereg ("^([^@]+)(@${object_type_id})?\$", trim ($sieve), $regs))
+			if (FALSE !== preg_match ("/^([^@]+)(@${object_type_id})?\$/", trim ($sieve), $regs))
 				$screenlist[] = $regs[1];
 		foreach (array_keys ($ret) as $vendor)
 			if (in_array ($vendor, $screenlist))

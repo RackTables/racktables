@@ -91,7 +91,7 @@ function getLexemsFromRawText ($text)
 					case ($char == '#'):
 						$newstate = 'skipping comment';
 						break;
-					case (mb_ereg ('[[:alpha:]]', $char) > 0):
+					case (preg_match ('/[[:alpha:]]/', $char) == 1):
 						$newstate = 'reading keyword';
 						$buffer = $char;
 						break;
@@ -114,7 +114,7 @@ function getLexemsFromRawText ($text)
 			case 'reading keyword':
 				switch (TRUE)
 				{
-					case (mb_ereg ('[[:alpha:]]', $char) > 0):
+					case (preg_match ('/[[:alpha:]]/', $char) == 1):
 						$buffer .= $char;
 						break;
 					case ($char == "\n"):
@@ -184,7 +184,7 @@ function getLexemsFromRawText ($text)
 					case ($char == "\t"):
 						// nom-nom...
 						break;
-					case (mb_ereg ('[[:alnum:]\$]', $char) > 0):
+					case (preg_match ('/[[:alnum:]\$]/', $char) == 1):
 						$buffer = $char;
 						$newstate = 'reading tag 2';
 						break;
@@ -202,7 +202,7 @@ function getLexemsFromRawText ($text)
 						$ret[] = array ('type' => ($buffer[0] == '$' ? 'LEX_AUTOTAG' : 'LEX_TAG'), 'load' => $buffer, 'lineno' => $lineno);
 						$newstate = 'ESOTSM';
 						break;
-					case (mb_ereg ('[[:alnum:]\. _~-]', $char) > 0):
+					case (preg_match ('/[[:alnum:]\. _~-]/', $char) == 1):
 						$buffer .= $char;
 						break;
 					default:
@@ -218,7 +218,7 @@ function getLexemsFromRawText ($text)
 					case ($char == "\t"):
 						// nom-nom...
 						break;
-					case (mb_ereg ('[[:alnum:]]', $char) > 0):
+					case (preg_match ('/[[:alnum:]]/', $char) == 1):
 						$buffer = $char;
 						$newstate = 'reading predicate 2';
 						break;
@@ -236,7 +236,7 @@ function getLexemsFromRawText ($text)
 						$ret[] = array ('type' => 'LEX_PREDICATE', 'load' => $buffer, 'lineno' => $lineno);
 						$newstate = 'ESOTSM';
 						break;
-					case (mb_ereg ('[[:alnum:]\. _~-]', $char) > 0):
+					case (preg_match ('/[[:alnum:]\. _~-]/', $char) == 1):
 						$buffer .= $char;
 						break;
 					default:
@@ -1154,10 +1154,10 @@ function findAutoTagWarnings ($expr)
 		case 'LEX_TAG':
 			return array();
 		case 'LEX_AUTOTAG':
-			switch (TRUE)
+			switch (1)
 			{
-				case (mb_ereg_match ('^\$id_', $expr['load'])):
-					$recid = mb_ereg_replace ('^\$id_', '', $expr['load']);
+				case (preg_match ('/^\$id_/', $expr['load'])):
+					$recid = preg_replace ('/^\$id_/', '', $expr['load']);
 					if (NULL !== spotEntity ('object', $recid))
 						return array();
 					return array (array
@@ -1166,8 +1166,8 @@ function findAutoTagWarnings ($expr)
 						'class' => 'warning',
 						'text' => "An object with ID '${recid}' does not exist."
 					));
-				case (mb_ereg_match ('^\$ipv4netid_', $expr['load'])):
-					$recid = mb_ereg_replace ('^\$ipv4netid_', '', $expr['load']);
+				case (preg_match ('/^\$ipv4netid_/', $expr['load'])):
+					$recid = preg_replace ('/^\$ipv4netid_/', '', $expr['load']);
 					if (NULL != spotEntity ('ipv4net', $recid))
 						return array();
 					return array (array
@@ -1176,8 +1176,8 @@ function findAutoTagWarnings ($expr)
 						'class' => 'warning',
 						'text' => "IPv4 network with ID '${recid}' does not exist."
 					));
-				case (mb_ereg_match ('^\$userid_', $expr['load'])):
-					$recid = mb_ereg_replace ('^\$userid_', '', $expr['load']);
+				case (preg_match ('/^\$userid_/', $expr['load'])):
+					$recid = preg_replace ('/^\$userid_/', '', $expr['load']);
 					if (NULL !== spotEntity ('user', $recid))
 						return array();
 					return array (array
@@ -1186,8 +1186,8 @@ function findAutoTagWarnings ($expr)
 						'class' => 'warning',
 						'text' => "User account with ID '${recid}' does not exist."
 					));
-				case (mb_ereg_match ('^\$username_', $expr['load'])):
-					$recid = mb_ereg_replace ('^\$username_', '', $expr['load']);
+				case (preg_match ('/^\$username_/', $expr['load'])):
+					$recid = preg_replace ('/^\$username_/', '', $expr['load']);
 					global $require_local_account;
 					if (!$require_local_account)
 						return array();
@@ -1200,8 +1200,8 @@ function findAutoTagWarnings ($expr)
 						'text' => "Local user account '${recid}' does not exist."
 					));
 				// FIXME: pull identifier at the same pass, which does the matching
-				case (mb_ereg_match ('^\$page_[[:alnum:]]+$', $expr['load'])):
-					$recid = mb_ereg_replace ('^\$page_', '', $expr['load']);
+				case (preg_match ('/^\$page_[[:alnum:]]+$/', $expr['load'])):
+					$recid = preg_replace ('/^\$page_/', '', $expr['load']);
 					global $page;
 					if (isset ($page[$recid]))
 						return array();
@@ -1211,27 +1211,27 @@ function findAutoTagWarnings ($expr)
 						'class' => 'warning',
 						'text' => "Page number '${recid}' does not exist."
 					));
-				case (mb_ereg_match ('^\$tab_[[:alnum:]]+$', $expr['load'])):
-				case (mb_ereg_match ('^\$op_[[:alnum:]]+$', $expr['load'])):
-				case (mb_ereg_match ('^\$any_op$', $expr['load'])):
-				case (mb_ereg_match ('^\$any_rack$', $expr['load'])):
-				case (mb_ereg_match ('^\$any_object$', $expr['load'])):
-				case (mb_ereg_match ('^\$any_ip4net$', $expr['load'])):
-				case (mb_ereg_match ('^\$any_net$', $expr['load'])):
-				case (mb_ereg_match ('^\$any_ipv4vs$', $expr['load'])):
-				case (mb_ereg_match ('^\$any_vs$', $expr['load'])):
-				case (mb_ereg_match ('^\$any_ipv4rsp$', $expr['load'])):
-				case (mb_ereg_match ('^\$any_rsp$', $expr['load'])):
-				case (mb_ereg_match ('^\$any_file$', $expr['load'])):
-				case (mb_ereg_match ('^\$typeid_[[:digit:]]+$', $expr['load'])): // FIXME: check value validity
-				case (mb_ereg_match ('^\$cn_.+$', $expr['load'])): // FIXME: check name validity and asset existence
-				case (mb_ereg_match ('^\$lgcn_.+$', $expr['load'])): // FIXME: check name validity
-				case (mb_ereg_match ('^\$fromvlan_[[:digit:]]+$', $expr['load'])):
-				case (mb_ereg_match ('^\$tovlan_[[:digit:]]+$', $expr['load'])):
-				case (mb_ereg_match ('^\$unmounted$', $expr['load'])):
-				case (mb_ereg_match ('^\$untagged$', $expr['load'])):
-				case (mb_ereg_match ('^\$no_asset_tag$', $expr['load'])):
-				case (mb_ereg_match ('^\$masklen_(eq|le|ge)_[[:digit:]][[:digit:]]?$', $expr['load'])):
+				case (preg_match ('/^\$tab_[[:alnum:]]+$/', $expr['load'])):
+				case (preg_match ('/^\$op_[[:alnum:]]+$/', $expr['load'])):
+				case (preg_match ('/^\$any_op$/', $expr['load'])):
+				case (preg_match ('/^\$any_rack$/', $expr['load'])):
+				case (preg_match ('/^\$any_object$/', $expr['load'])):
+				case (preg_match ('/^\$any_ip4net$/', $expr['load'])):
+				case (preg_match ('/^\$any_net$/', $expr['load'])):
+				case (preg_match ('/^\$any_ipv4vs$/', $expr['load'])):
+				case (preg_match ('/^\$any_vs$/', $expr['load'])):
+				case (preg_match ('/^\$any_ipv4rsp$/', $expr['load'])):
+				case (preg_match ('/^\$any_rsp$/', $expr['load'])):
+				case (preg_match ('/^\$any_file$/', $expr['load'])):
+				case (preg_match ('/^\$typeid_[[:digit:]]+$/', $expr['load'])): // FIXME: check value validity
+				case (preg_match ('/^\$cn_.+$/', $expr['load'])): // FIXME: check name validity and asset existence
+				case (preg_match ('/^\$lgcn_.+$/', $expr['load'])): // FIXME: check name validity
+				case (preg_match ('/^\$fromvlan_[[:digit:]]+$/', $expr['load'])):
+				case (preg_match ('/^\$tovlan_[[:digit:]]+$/', $expr['load'])):
+				case (preg_match ('/^\$unmounted$/', $expr['load'])):
+				case (preg_match ('/^\$untagged$/', $expr['load'])):
+				case (preg_match ('/^\$no_asset_tag$/', $expr['load'])):
+				case (preg_match ('/^\$masklen_(eq|le|ge)_[[:digit:]][[:digit:]]?$/', $expr['load'])):
 					return array();
 				default:
 					return array (array
