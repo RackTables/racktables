@@ -336,7 +336,7 @@ function setDevice8021QConfig ($object_id, $pseudocode)
 		'vrp53' => 'vrp53TranslatePushQueue',
 		'nxos4' => 'ios12TranslatePushQueue', // employ syntax compatibility
 	);
-	return gwDeployDeviceConfig ($object_id, $breed, unix2dos ($xlator[$breed] ($pseudocode)));
+	gwDeployDeviceConfig ($object_id, $breed, unix2dos ($xlator[$breed] ($pseudocode)));
 }
 
 function gwRetrieveDeviceConfig ($object_id, $breed)
