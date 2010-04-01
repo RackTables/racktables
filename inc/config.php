@@ -30,18 +30,18 @@ $max_dict_key = array
 	'0.17.10' => 1346,
 );
 
-define ('TAGNAME_REGEXP', '/^[[:alnum:]]([\. _~-]?[[:alnum:]])*$/');
-define ('AUTOTAGNAME_REGEXP', '/^\$[[:alnum:]]([\. _~-]?[[:alnum:]])*$/');
+define ('TAGNAME_REGEXP', '/^[\p{L}0-9]([. _~-]?[\p{L}0-9])*$/u');
+define ('AUTOTAGNAME_REGEXP', '/^\$[\p{L}0-9]([. _~-]?[\p{L}0-9])*$/u');
 // The latter matches both SunOS and Linux-styled formats.
-define ('RE_L2_IFCFG', '/^[0-9a-f][0-9a-f]?:[0-9a-f][0-9a-f]?:[0-9a-f][0-9a-f]?:[0-9a-f][0-9a-f]?:[0-9a-f][0-9a-f]?:[0-9a-f][0-9a-f]?$/i');
-define ('RE_L2_CISCO', '/^[0-9a-f][0-9a-f][0-9a-f][0-9a-f].[0-9a-f][0-9a-f][0-9a-f][0-9a-f].[0-9a-f][0-9a-f][0-9a-f][0-9a-f]$/i');
-define ('RE_L2_SOLID', '/^[0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]$/i');
-define ('RE_L2_IPCFG', '/^[0-9a-f][0-9a-f]-[0-9a-f][0-9a-f]-[0-9a-f][0-9a-f]-[0-9a-f][0-9a-f]-[0-9a-f][0-9a-f]-[0-9a-f][0-9a-f]$/i');
-define ('RE_L2_WWN_COLON', '/^[0-9a-f][0-9a-f]?:[0-9a-f][0-9a-f]?:[0-9a-f][0-9a-f]?:[0-9a-f][0-9a-f]?:[0-9a-f][0-9a-f]?:[0-9a-f][0-9a-f]?:[0-9a-f][0-9a-f]?:[0-9a-f][0-9a-f]$/i');
-define ('RE_L2_WWN_HYPHEN', '/^[0-9a-f][0-9a-f]-[0-9a-f][0-9a-f]-[0-9a-f][0-9a-f]-[0-9a-f][0-9a-f]-[0-9a-f][0-9a-f]-[0-9a-f][0-9a-f]-[0-9a-f][0-9a-f]-[0-9a-f][0-9a-f]$/i');
-define ('RE_L2_WWN_SOLID', '/^[0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]$/i');
-define ('RE_IP4_ADDR', '/^[0-9][0-9]?[0-9]?\.[0-9]?[0-9]?[0-9]?\.[0-9][0-9]?[0-9]?\.[0-9][0-9]?[0-9]?$/i');
-define ('RE_IP4_NET', '/^[0-9][0-9]?[0-9]?\.[0-9]?[0-9]?[0-9]?\.[0-9][0-9]?[0-9]?\.[0-9][0-9]?[0-9]?\/[0-9][0-9]?$/i');
+define ('RE_L2_IFCFG', '/^[0-9a-f]{1,2}(:[0-9a-f]{1,2}){5}$/i');
+define ('RE_L2_CISCO', '/^[0-9a-f]{4}(\.[0-9a-f]{4}){2}$/i');
+define ('RE_L2_SOLID', '/^[0-9a-f]{12}$/i');
+define ('RE_L2_IPCFG', '/^[0-9a-f]{2}(-[0-9a-f]{2}){5}$/i');
+define ('RE_L2_WWN_COLON', '/^[0-9a-f]{1,2}(:[0-9a-f]{1,2}){7}$/i');
+define ('RE_L2_WWN_HYPHEN', '/^[0-9a-f]{2}(-[0-9a-f]{2}){7}$/i');
+define ('RE_L2_WWN_SOLID', '/^[0-9a-f]{16}$/i');
+define ('RE_IP4_ADDR', '#^[0-9]{1,3}(\.[0,9]{1,3}){3}$#i');
+define ('RE_IP4_NET', '#^[0-9]{1,3}(\.[0,9]{1,3}){3}/[0-9]{1,2}$#i');
 
 function loadConfigDefaults() {
 	global $configCache;

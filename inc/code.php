@@ -91,7 +91,7 @@ function getLexemsFromRawText ($text)
 					case ($char == '#'):
 						$newstate = 'skipping comment';
 						break;
-					case (preg_match ('/[[:alpha:]]/', $char) == 1):
+					case (preg_match ('/[\p{L}]/u', $char) == 1):
 						$newstate = 'reading keyword';
 						$buffer = $char;
 						break;
@@ -114,7 +114,7 @@ function getLexemsFromRawText ($text)
 			case 'reading keyword':
 				switch (TRUE)
 				{
-					case (preg_match ('/[[:alpha:]]/', $char) == 1):
+					case (preg_match ('/[\p{L}]/u', $char) == 1):
 						$buffer .= $char;
 						break;
 					case ($char == "\n"):
@@ -184,7 +184,7 @@ function getLexemsFromRawText ($text)
 					case ($char == "\t"):
 						// nom-nom...
 						break;
-					case (preg_match ('/[[:alnum:]\$]/', $char) == 1):
+					case (preg_match ('/[\p{L}0-9\$]/u', $char) == 1):
 						$buffer = $char;
 						$newstate = 'reading tag 2';
 						break;
@@ -202,7 +202,7 @@ function getLexemsFromRawText ($text)
 						$ret[] = array ('type' => ($buffer[0] == '$' ? 'LEX_AUTOTAG' : 'LEX_TAG'), 'load' => $buffer, 'lineno' => $lineno);
 						$newstate = 'ESOTSM';
 						break;
-					case (preg_match ('/[[:alnum:]\. _~-]/', $char) == 1):
+					case (preg_match ('/[\p{L}0-9. _~-]/u', $char) == 1):
 						$buffer .= $char;
 						break;
 					default:
@@ -218,7 +218,7 @@ function getLexemsFromRawText ($text)
 					case ($char == "\t"):
 						// nom-nom...
 						break;
-					case (preg_match ('/[[:alnum:]]/', $char) == 1):
+					case (preg_match ('/[\p{L}0-9]/u', $char) == 1):
 						$buffer = $char;
 						$newstate = 'reading predicate 2';
 						break;
@@ -236,7 +236,7 @@ function getLexemsFromRawText ($text)
 						$ret[] = array ('type' => 'LEX_PREDICATE', 'load' => $buffer, 'lineno' => $lineno);
 						$newstate = 'ESOTSM';
 						break;
-					case (preg_match ('/[[:alnum:]\. _~-]/', $char) == 1):
+					case (preg_match ('/[\p{L}0-9. _~-]/u', $char) == 1):
 						$buffer .= $char;
 						break;
 					default:
@@ -1200,7 +1200,7 @@ function findAutoTagWarnings ($expr)
 						'text' => "Local user account '${recid}' does not exist."
 					));
 				// FIXME: pull identifier at the same pass, which does the matching
-				case (preg_match ('/^\$page_[[:alnum:]]+$/', $expr['load'])):
+				case (preg_match ('/^\$page_[\p{L}0-9]+$/u', $expr['load'])):
 					$recid = preg_replace ('/^\$page_/', '', $expr['load']);
 					global $page;
 					if (isset ($page[$recid]))
@@ -1211,26 +1211,13 @@ function findAutoTagWarnings ($expr)
 						'class' => 'warning',
 						'text' => "Page number '${recid}' does not exist."
 					));
-				case (preg_match ('/^\$tab_[[:alnum:]]+$/', $expr['load'])):
-				case (preg_match ('/^\$op_[[:alnum:]]+$/', $expr['load'])):
-				case (preg_match ('/^\$any_op$/', $expr['load'])):
-				case (preg_match ('/^\$any_rack$/', $expr['load'])):
-				case (preg_match ('/^\$any_object$/', $expr['load'])):
-				case (preg_match ('/^\$any_ip4net$/', $expr['load'])):
-				case (preg_match ('/^\$any_net$/', $expr['load'])):
-				case (preg_match ('/^\$any_ipv4vs$/', $expr['load'])):
-				case (preg_match ('/^\$any_vs$/', $expr['load'])):
-				case (preg_match ('/^\$any_ipv4rsp$/', $expr['load'])):
-				case (preg_match ('/^\$any_rsp$/', $expr['load'])):
-				case (preg_match ('/^\$any_file$/', $expr['load'])):
+				case (preg_match ('/^\$(tab|op)_[\p{L}0-9]+$/u', $expr['load'])):
+				case (preg_match ('/^\$any_(op|rack|object|ip4net|net|ipv4vs|vs|ipv4rsp|rsp|file)$/', $expr['load'])):
 				case (preg_match ('/^\$typeid_[[:digit:]]+$/', $expr['load'])): // FIXME: check value validity
 				case (preg_match ('/^\$cn_.+$/', $expr['load'])): // FIXME: check name validity and asset existence
 				case (preg_match ('/^\$lgcn_.+$/', $expr['load'])): // FIXME: check name validity
-				case (preg_match ('/^\$fromvlan_[[:digit:]]+$/', $expr['load'])):
-				case (preg_match ('/^\$tovlan_[[:digit:]]+$/', $expr['load'])):
-				case (preg_match ('/^\$unmounted$/', $expr['load'])):
-				case (preg_match ('/^\$untagged$/', $expr['load'])):
-				case (preg_match ('/^\$no_asset_tag$/', $expr['load'])):
+				case (preg_match ('/^\$(fromvlan|tovlan)_[[:digit:]]+$/', $expr['load'])):
+				case (preg_match ('/^\$(unmounted|untagged|no_asset_tag)$/', $expr['load'])):
 				case (preg_match ('/^\$masklen_(eq|le|ge)_[[:digit:]][[:digit:]]?$/', $expr['load'])):
 					return array();
 				default:
