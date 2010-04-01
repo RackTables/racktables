@@ -49,6 +49,9 @@ php5-snmp and php5-ldap
 [X] MULTIBYTE  Enable zend multibyte support
 # make -C /usr/ports/graphics/php5-gd install
 # make -C /usr/ports/databases/php5-pdo_mysql install
+# make -C /usr/ports/devel/pcre install
+!!! Enable UTF-8 support ............ : yes
+!!! Unicode properties .............. : yes
 # make -C /usr/ports/devel/php5-pcre install
 # make -C /usr/ports/converters/php5-mbstring install
 [X] REGEX  Enable multibyte regex support
