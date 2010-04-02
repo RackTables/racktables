@@ -465,7 +465,7 @@ $ophandler['file']['tags']['saveTags'] = 'saveEntityTags';
 $ophandler['file']['editText']['updateFileText'] = 'updateFileText';
 $ophandler['file']['replaceData']['replaceFile'] = 'replaceFile';
 
-$page['vlandomainlist']['title'] = 'VLAN domains';
+$page['vlandomainlist']['title'] = '802.1Q';
 $page['vlandomainlist']['parent'] = 'index';
 $tab['vlandomainlist']['default'] = 'Summary';
 $tab['vlandomainlist']['edit'] = 'Manage';
