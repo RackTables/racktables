@@ -127,6 +127,8 @@ function trigger_ipv4 ()
 function trigger_natv4 ()
 {
 	assertUIntArg ('object_id');
+	if (!count (getObjectIPv4Allocations ($_REQUEST['object_id'])))
+		return '';
 	return considerConfiguredConstraint (spotEntity ('object', $_REQUEST['object_id']), 'IPV4NAT_LISTSRC') ? 'std' : '';
 }
 
