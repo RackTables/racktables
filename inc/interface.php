@@ -1152,7 +1152,7 @@ function renderPortsForObject ($object_id)
 		}
 		else
 		{
-			echo "<input type=hidden name=port_type_id value='${port['type_id']}'><td class=tdleft>";
+			echo "<input type=hidden name=port_type_id value='${port['oif_id']}'><td class=tdleft>";
 			if ($port['iif_id'] != 1)
 				echo $port['iif_name'] . '/';
 			echo "${port['oif_name']}</td>\n";

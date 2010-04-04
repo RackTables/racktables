@@ -510,16 +510,13 @@ function amplifyCell (&$record, $dummy = NULL)
 function getObjectPortsAndLinks ($object_id)
 {
 	$query = "SELECT id, name, label, l2address, iif_id, (SELECT iif_name FROM PortInnerInterface WHERE id = iif_id) AS iif_name, " .
-		"type AS type_id, type AS oif_id, (SELECT dict_value FROM Dictionary WHERE dict_key = type) AS oif_name, reservation_comment " .
+		"type AS oif_id, (SELECT dict_value FROM Dictionary WHERE dict_key = type) AS oif_name, reservation_comment " .
 		"FROM Port WHERE object_id = ${object_id}";
 	// list and decode all ports of the current object
 	$result = useSelectBlade ($query);
 	$ret=array();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
-		// latter two are for transition
-		$row['type_id'] = $row['oif_id'];
-		$row['type'] = $row['oif_name'];
 		$row['l2address'] = l2addressFromDatabase ($row['l2address']);
 		$row['remote_id'] = NULL;
 		$row['remote_name'] = NULL;
