@@ -684,9 +684,13 @@ function renderEditRackForm ($rack_id)
 	finishPortlet();
 }
 
-// This is a helper for creators and editors.
-// Input array keys are OPTION VALUEs and input array values are OPTION text.
 function printSelect ($optionList, $select_attrs = array(), $selected_id = NULL)
+{
+	echo getSelect ($optionList, $select_attrs, $selected_id);
+}
+
+// Input array keys are OPTION VALUEs and input array values are OPTION text.
+function getSelect ($optionList, $select_attrs = array(), $selected_id = NULL)
 {
 	if (!array_key_exists ('name', $select_attrs))
 		return;
