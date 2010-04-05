@@ -692,15 +692,17 @@ function printSelect ($optionList, $select_attrs = array(), $selected_id = NULL)
 // Input array keys are OPTION VALUEs and input array values are OPTION text.
 function getSelect ($optionList, $select_attrs = array(), $selected_id = NULL)
 {
+	$ret = '';
 	if (!array_key_exists ('name', $select_attrs))
-		return;
-	echo '<select';
+		return '';
+	$ret .= '<select';
 	foreach ($select_attrs as $attr_name => $attr_value)
-		echo " ${attr_name}=${attr_value}";
-	echo '>';
+		$ret .= " ${attr_name}=${attr_value}";
+	$ret .= '>';
 	foreach ($optionList as $dict_key => $dict_value)
-		echo "<option value='${dict_key}'" . ($dict_key == $selected_id ? ' selected' : '') . ">${dict_value}</option>";
-	echo '</select>';
+		$ret .= "<option value='${dict_key}'" . ($dict_key == $selected_id ? ' selected' : '') . ">${dict_value}</option>";
+	$ret .= '</select>';
+	return $ret;
 }
 
 // Input is a cooked list of OPTGROUPs, each with own sub-list of OPTIONs in the same
