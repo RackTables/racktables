@@ -480,7 +480,7 @@ $ophandler['8021q']['vstlist']['add'] = 'addVLANSwitchTemplate';
 $ophandler['8021q']['vstlist']['del'] = 'delVLANSwitchTemplate';
 $ophandler['8021q']['vstlist']['upd'] = 'updVLANSwitchTemplate';
 
-$page['vlandomain']['parent'] = 'vlandomainlist';
+$page['vlandomain']['parent'] = '8021q';
 $page['vlandomain']['bypass'] = 'vdom_id';
 $page['vlandomain']['bypass_type'] = 'uint';
 $tab['vlandomain']['default'] = 'View';
@@ -502,7 +502,7 @@ $page['vst']['bypass'] = 'vst_id';
 $page['vst']['bypass_type'] = 'uint';
 $tab['vst']['default'] = 'View';
 $tab['vst']['editvst'] = 'Properties';
-$tab['vst']['editrules'] = '[Rules]';
+$tab['vst']['editrules'] = 'Rules';
 $tabhandler['vst']['default'] = 'renderVST';
 $tabhandler['vst']['editvst'] = 'renderVSTEditor';
 $tabhandler['vst']['editrules'] = 'renderVSTRulesEditor';
