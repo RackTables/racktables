@@ -185,7 +185,7 @@ function trigger_rackspace ()
 // Offer the generic VLAN setup tab for every object, which already
 // has a VLAN domain associated or at least can have one (in the latter
 // case additionally heat the tab, if no domain is set.
-function trigger_vlanconfig ()
+function trigger_object_8021qorder ()
 {
 	if (NULL !== getVLANSwitchInfo ($_REQUEST['object_id']))
 		return 'std';

@@ -3604,25 +3604,12 @@ function getDomainVLANs ($vdom_id)
 function getVLANDomainSwitches ($vdom_id)
 {
 	global $dbxlink;
-	$query = $dbxlink->prepare ('SELECT object_id, last_reset, last_pull, last_push FROM VLANSwitch WHERE domain_id = ? ORDER BY object_id');
+	$query = $dbxlink->prepare ('SELECT object_id, template_id, last_reset, last_pull, last_push FROM VLANSwitch WHERE domain_id = ? ORDER BY object_id');
 	$result = $query->execute (array ($vdom_id));
 	$ret = array();
 	while ($row = $query->fetch (PDO::FETCH_ASSOC))
 		$ret[$row['object_id']] = $row;
 	return $ret;
-}
-
-function commitReduceVLANSwitch ($vdom_id, $object_id)
-{
-	return usePreparedDeleteBlade
-	(
-		'VLANSwitch',
-		array
-		(
-			'domain_id' => $vdom_id,
-			'object_id' => $object_id,
-		)
-	);
 }
 
 function commitReduceVLANDescription ($vdom_id, $vlan_id)
@@ -3654,9 +3641,18 @@ function commitUpdateVLANDomain ($vdom_id, $vdom_descr)
 	return $query->execute (array ($vdom_descr, $vdom_id));
 }
 
+function getVLANSwitches()
+{
+	$ret = array();
+	$result = usePreparedSelectBlade ('SELECT object_id FROM VLANSwitch');
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
+		$ret[] = $row['object_id'];
+	return $ret;
+}
+
 function getVLANSwitchInfo ($object_id, $extrasql = '')
 {
-	$result = usePreparedSelectBlade ('SELECT domain_id, mutex_rev FROM VLANSwitch WHERE object_id = ? ' . $extrasql, array ($object_id));
+	$result = usePreparedSelectBlade ('SELECT domain_id, template_id, mutex_rev FROM VLANSwitch WHERE object_id = ? ' . $extrasql, array ($object_id));
 	if ($result and $row = $result->fetch (PDO::FETCH_ASSOC))
 		return $row;
 	return NULL;
@@ -4102,9 +4098,9 @@ function getVLANSwitchTemplate ($vst_id)
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 		$ret['rules'][$row['rule_no']] = $row;
 	unset ($result);
-	$result = usePreparedSelectBlade ('SELECT object_id FROM VLANSwitch WHERE template_id = ?', array ($vst_id));
+	$result = usePreparedSelectBlade ('SELECT object_id, domain_id FROM VLANSwitch WHERE template_id = ?', array ($vst_id));
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-		$ret['switches'][] = $row['object_id'];
+		$ret['switches'][$row['object_id']] = $row;
 	return $ret;
 }
 

@@ -2052,12 +2052,13 @@ function delPortOIFCompat ()
 
 }
 
-$msgcode['addVLANSwitchBinding']['OK'] = 48;
-$msgcode['addVLANSwitchBinding']['ERR'] = 118;
-function addVLANSwitchBinding ()
+$msgcode['add8021QOrder']['OK'] = 48;
+$msgcode['add8021QOrder']['ERR'] = 118;
+function add8021QOrder ()
 {
 	assertUIntArg ('vdom_id');
 	assertUIntArg ('object_id');
+	assertUIntArg ('vst_id');
 	global $sic;
 	$result = usePreparedInsertBlade
 	(
@@ -2066,19 +2067,19 @@ function addVLANSwitchBinding ()
 		(
 			'domain_id' => $sic['vdom_id'],
 			'object_id' => $sic['object_id'],
+			'template_id' => $sic['vst_id'],
 		)
 	);
 	return buildRedirectURL (__FUNCTION__, $result ? 'OK' : 'ERR');
 }
 
-$msgcode['delVLANSwitchBinding']['OK'] = 49;
-$msgcode['delVLANSwitchBinding']['ERR'] = 119;
-function delVLANSwitchBinding ()
+$msgcode['del8021QOrder']['OK'] = 49;
+$msgcode['del8021QOrder']['ERR'] = 119;
+function del8021QOrder ()
 {
-	assertUIntArg ('vdom_id');
 	assertUIntArg ('object_id');
 	global $sic;
-	$result = commitReduceVLANSwitch ($sic['vdom_id'], $sic['object_id']);
+	$result = usePreparedDeleteBlade ('VLANSwitch', array ('object_id' => $sic['object_id']));
 	return buildRedirectURL (__FUNCTION__, $result ? 'OK' : 'ERR');
 }
 

@@ -6410,37 +6410,126 @@ function printStyle ()
 	echo '</style>';
 }
 
-function renderObjectVLANConfig ($object_id)
+function render8021QOrderForm ($some_id)
 {
-	startPortlet ('VLAN domain');
-	echo "<table border=0 cellspacing=0 cellpadding=3 width='100%'>";
-	if (NULL === $vswitch = getVLANSwitchInfo ($object_id))
+	function printNewItemTR ()
 	{
-		printOpFormIntro ('bind');
-		echo "<tr><th width='50%' class=tdright>Current:</th><td class='tdleft sparenetwork'>(none)</td></tr>";
-		echo "<tr><th width='50%' class=tdright>Action:</th><td class=tdleft>";
-		$options = array();
-		foreach (getVLANDomainList() as $vdom_id => $vdom_info)
-			$options[$vdom_id] = $vdom_info['description'];
-		printSelect ($options, array ('name' => 'vdom_id'));
-		echo ' ';
-		printImageHref ('ATTACH', 'bind', TRUE);
-		echo '</td></tr></form>';
+		$all_vswitches = getVLANSwitches();
+		global $pageno;
+		printOpFormIntro ('add');
+		echo '<tr>';
+		if ($pageno != 'object')
+		{
+			echo '<td>';
+			// hide any object, which is already in the table
+			$options = array();
+			foreach (getNarrowObjectList ('VLANSWITCH_LISTSRC') as $object_id => $object_dname)
+				if (!in_array ($object_id, $all_vswitches))
+					$options[$object_id] = $object_dname;
+			printSelect ($options, array ('name' => 'object_id', 'tabindex' => 101));
+			echo '</td>';
+		}
+		if ($pageno != 'vlandomain')
+		{
+			echo '<td>';
+			$options = array();
+			foreach (getVLANDomainList() as $vdom_id => $vdom_info)
+				$options[$vdom_id] = $vdom_info['description'];
+			printSelect ($options, array ('name' => 'vdom_id', 'tabindex' => 102));
+			echo '</td>';
+		}
+		if ($pageno != 'vst')
+		{
+			echo '<td>';
+			$options = array();
+			foreach (getVLANSwitchTemplates() as $vst_id => $vst_info)
+				$options[$vst_id] = $vst_info['description'];
+			printSelect ($options, array ('name' => 'vst_id', 'tabindex' => 103));
+			echo '</td>';
+		}
+		echo '<td>' . getImageHREF ('attach', 'set', TRUE, 104) . '</td></tr></form>';
 	}
-	else
+	global $pageno;
+	$minuslines = array(); // indexed by object_id, which is unique
+	switch ($pageno)
 	{
-		$vdom_info = getVLANDomainInfo ($vswitch['domain_id']);
-		echo "<tr><th width='50%' class=tdright>Current:</th><td class=tdleft><a href='";
-		echo makeHref (array ('page' => 'vlandomain', 'vdom_id' => $vswitch['domain_id']));
-		echo "'>" . $vdom_info['description'] . '</a></td></tr>';
-		echo "<tr><th width='50%' class=tdright>Action:</th><td class=tdleft>";
-		echo '<a href="' . makeHrefProcess (array ('op' => 'unbind', 'vdom_id' => $vswitch['domain_id'], 'object_id' => $object_id));
-		echo '">';
-		printImageHREF ('CUT', 'unbind');
-		echo '</a></td></tr>';
+	case 'object':
+		if (NULL !== $vswitch = getVLANSwitchInfo ($some_id))
+			$minuslines[$some_id] = array
+			(
+				'vdom_id' => $vswitch['domain_id'],
+				'vst_id' => $vswitch['template_id'],
+			);
+		break;
+	case 'vlandomain':
+		foreach (getVLANDomainSwitches ($some_id) as $vswitch)
+			$minuslines[$vswitch['object_id']] = array
+			(
+				'vdom_id' => $some_id,
+				'vst_id' => $vswitch['template_id'],
+			);
+		break;
+	case 'vst':
+		$vst = getVLANSwitchTemplate ($some_id);
+		foreach ($vst['switches'] as $vswitch)
+			$minuslines[$vswitch['object_id']] = array
+			(
+				'vdom_id' => $vswitch['domain_id'],
+				'vst_id' => $some_id,
+			);
+		break;
+	default:
+		throw new InvalidArgException ('pageno', $pageno, 'this function only works for a fixed set of values');
 	}
+	echo "<br><table border=0 cellspacing=0 cellpadding=3 align=center>";
+	echo '<tr>';
+	if ($pageno != 'object')
+		echo '<th>switch</th>';
+	if ($pageno != 'vlandomain')
+		echo '<th>domain</th>';
+	if ($pageno != 'vst')
+		echo '<th>template</th>';
+	echo '<th>&nbsp;</th></tr>';
+	// object_id is a UNIQUE in VLANSwitch table, so there is no sense
+	// in a "plus" row on the form, when there is already a "minus" one
+	if
+	(
+		getConfigVar ('ADDNEW_AT_TOP') == 'yes' and
+		($pageno != 'object' or !count ($minuslines))
+	)
+		printNewItemTR();
+	$vdomlist = getVLANDomainList();
+	$vstlist = getVLANSwitchTemplates();
+	foreach ($minuslines as $item_object_id => $item)
+	{
+		echo '<tr>';
+		if ($pageno != 'object')
+		{
+			$object = spotEntity ('object', $item_object_id);
+			echo "<td>${object['dname']}</td>";
+		}
+		if ($pageno != 'vlandomain')
+			echo '<td>' . $vdomlist[$item['vdom_id']]['description'] . '</td>';
+		if ($pageno != 'vst')
+			echo '<td>' . $vstlist[$item['vst_id']]['description'] . '</td>';
+		echo '<td><a href="' . makeHrefProcess (array
+		(
+			'op' => 'del',
+			'object_id' => $item_object_id,
+			// These below are only necessary for redirect to work,
+			// actual deletion uses object_id only.
+			'vdom_id' => $item['vdom_id'],
+			'vst_id' => $item['vst_id'],
+		)) . '">';
+		echo getImageHREF ('cut', 'unset') . '</a></td></tr>';
+	}
+	if
+	(
+		getConfigVar ('ADDNEW_AT_TOP') != 'yes' and
+		($pageno != 'object' or !count ($minuslines))
+	)
+		printNewItemTR();
 	echo '</table>';
-	finishPortlet();
 }
 
 function render8021QStatus ()
@@ -6566,44 +6655,6 @@ function renderVLANDomain ($vdom_id)
 	}
 	finishPortlet();
 	echo '</td></tr></table>';
-}
-
-function renderVLANDomainSwitches ($vdom_id)
-{
-	function printNewItemTR ($twitlist = array())
-	{
-		printOpFormIntro ('bind');
-		echo '<tr><td>';
-		printImageHREF ('attach', 'bind', TRUE);
-		echo '</td><td>';
-		$options = array();
-		foreach (getNarrowObjectList ('VLANSWITCH_LISTSRC') as $object_id => $object_dname)
-			if (!in_array ($object_id, $twitlist))
-				$options[$object_id] = $object_dname;
-		printSelect ($options, array ('name' => 'object_id', 'tabindex' => 100));
-		echo '</td></tr></form>';
-	}
-
-	$mydomain = getVLANDomain ($vdom_id);
-	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
-	echo '<tr><th>&nbsp;</th><th>device</th></tr>';
-	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
-		printNewItemTR (array_keys ($mydomain['switchlist']));
-
-	foreach ($mydomain['switchlist'] as $object_id => $switchinfo)
-	{
-		echo '<tr><td><a href="';
-		echo makeHrefProcess (array ('op' => 'unbind', 'object_id' => $object_id, 'vdom_id' => $vdom_id)) . '">';
-		printImageHREF ('cut', 'unbind');
-		echo '</a></td><td>';
-		$switch = spotEntity ('object', $object_id);
-		echo $switch['dname'];
-		echo '</td></tr>';
-	}
-
-	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')
-		printNewItemTR (array_keys ($mydomain['switchlist']));
-	echo '</table>';
 }
 
 function renderVLANDomainVLANList ($vdom_id)
@@ -7060,7 +7111,7 @@ function renderVST ($vst_id)
 	{
 		echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
 		$order = 'odd';
-		foreach ($vst['switches'] as $object_id)
+		foreach (array_keys ($vst['switches']) as $object_id)
 		{
 			echo "<tr class=row_${order}><td>";
 			renderCell (spotEntity ('object', $object_id));
