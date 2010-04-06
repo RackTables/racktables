@@ -3593,7 +3593,6 @@ function getDomainVLANs ($vdom_id)
 		'WHERE VLANDescription.domain_id = ? ' .
 		'GROUP BY VLANDescription.domain_id, VLANDescription.vlan_id ' .
 		'ORDER BY VLANDescription.vlan_id'
-#		'SELECT vlan_id, vlan_type, vlan_descr FROM VLANDescription WHERE domain_id = ? ORDER BY vlan_id'
 	);
 	$result = $query->execute (array ($vdom_id));
 	$ret = array();
@@ -4069,6 +4068,62 @@ function exportSwitch8021QConfig
 	setDevice8021QConfig ($object_id, $crq);
 	$query = $dbxlink->prepare ('UPDATE VLANSwitch SET last_push = NOW() WHERE object_id = ?');
 	$query->execute (array ($object_id));
+}
+
+function getVLANSwitchTemplates()
+{
+	$query = 'SELECT id, max_local_vlans, description, ' .
+		'(SELECT COUNT(object_id) FROM VLANSwitch WHERE template_id = id) AS switchc, ' .
+		'(SELECT COUNT(rule_no) FROM VLANSTRule WHERE vst_id = id) AS rulec ' .
+		'FROM VLANSwitchTemplate ORDER BY id';
+	$result = usePreparedSelectBlade ($query);
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
+		$ret[$row['id']] = $row;
+	return $ret;
+}
+
+function getVLANSwitchTemplate ($vst_id)
+{
+	$result = usePreparedSelectBlade ('SELECT id, max_local_vlans, description FROM VLANSwitchTemplate WHERE id = ?', array ($vst_id));
+	if (!($row = $result->fetch (PDO::FETCH_ASSOC)))
+		throw new EntityNotFoundException ('vst', $vst_id);
+	unset ($result);
+	$ret = array
+	(
+		'id' => $row['id'],
+		'max_local_vlans' => $row['max_local_vlans'],
+		'description' => $row['description'],
+		'rules' => array(),
+		'switches' => array(),
+	);
+	$query = 'SELECT rule_no, port_pcre, port_role, wrt_vlans ' .
+		'FROM VLANSTRule WHERE vst_id = ? ORDER BY rule_no';
+	$result = usePreparedSelectBlade ($query, array ($vst_id));
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
+		$ret['rules'][$row['rule_no']] = $row;
+	unset ($result);
+	$result = usePreparedSelectBlade ('SELECT object_id FROM VLANSwitch WHERE template_id = ?', array ($vst_id));
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
+		$ret['switches'][] = $row['object_id'];
+	return $ret;
+}
+
+function commitUpdateVST ($vst_id, $max_local_vlans, $description)
+{
+	global $dbxlink;
+	$prepared = $dbxlink->prepare ('UPDATE VLANSwitchTemplate SET max_local_vlans = ?, description = ? WHERE id = ?');
+	return $prepared->execute (array ($max_local_vlans, $description, $vst_id));
+}
+
+function commitUpdateVSTRule ($vst_id, $rule_no, $new_rule_no, $port_pcre, $port_role, $wrt_vlans)
+{
+	global $dbxlink;
+	$prepared = $dbxlink->prepare
+	(
+		'UPDATE VLANSTRule SET rule_no = ?, port_pcre = ?, port_role = ?, wrt_vlans = ? ' .
+		'WHERE vst_id = ? AND rule_no = ?'
+	);
+	return $prepared->execute (array ($new_rule_no, $port_pcre, $port_role, $wrt_vlans, $vst_id, $rule_no));
 }
 
 ?>

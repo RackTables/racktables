@@ -358,10 +358,6 @@ CREATE TABLE `UserConfig` (
 CREATE TABLE `VLANDomain` (
   `id` int(10) unsigned NOT NULL auto_increment,
   `description` char(255) default NULL,
-  `last_reset` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
-  `last_pull` timestamp NOT NULL default '0000-00-00 00:00:00',
-  `last_push` timestamp NOT NULL default '0000-00-00 00:00:00',
-  `allow_pull` enum('yes','no') NOT NULL default 'no',
   PRIMARY KEY  (`id`),
   UNIQUE KEY `description` (`description`)
 ) ENGINE=InnoDB;
@@ -397,15 +393,36 @@ CREATE TABLE `VLANIPv4` (
   CONSTRAINT `VLANIPv4-FK-ipv4net_id` FOREIGN KEY (`ipv4net_id`) REFERENCES `IPv4Network` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
+CREATE TABLE `VLANSwitchTemplate` (
+  `id` int(10) unsigned NOT NULL auto_increment,
+  `max_local_vlans` int(10) unsigned default NULL,
+  `description` char(255) default NULL,
+  PRIMARY KEY  (`id`),
+  UNIQUE KEY `description` (`description`)
+) ENGINE=InnoDB;
+
+CREATE TABLE `VLANSTRule` (
+  `vst_id` int(10) unsigned NOT NULL,
+  `rule_no` int(10) unsigned NOT NULL,
+  `port_pcre` char(255) NOT NULL,
+  `port_role` enum('access','trunk','uplink') NOT NULL default 'access',
+  `wrt_vlans` char(255) default NULL,
+  UNIQUE KEY `vst-rule` (`vst_id`,`rule_no`),
+  CONSTRAINT `VLANSTRule-FK-vst_id` FOREIGN KEY (`vst_id`) REFERENCES `VLANSwitchTemplate` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
 CREATE TABLE `VLANSwitch` (
   `object_id` int(10) unsigned NOT NULL,
   `domain_id` int(10) unsigned NOT NULL,
+  `template_id` int(10) unsigned NOT NULL,
   `mutex_rev` int(10) unsigned NOT NULL default '0',
   `last_reset` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
   `last_pull` timestamp NOT NULL default '0000-00-00 00:00:00',
   `last_push` timestamp NOT NULL default '0000-00-00 00:00:00',
   UNIQUE KEY `object_id` (`object_id`),
   KEY `domain_id` (`domain_id`),
+  KEY `template_id` (`template_id`),
+  CONSTRAINT `VLANSwitch-FK-template_id` FOREIGN KEY (`template_id`) REFERENCES `VLANSwitchTemplate` (`id`),
   CONSTRAINT `VLANSwitch--FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `RackObject` (`id`),
   CONSTRAINT `VLANSwitch-FK-domain_id` FOREIGN KEY (`domain_id`) REFERENCES `VLANDomain` (`id`)
 ) ENGINE=InnoDB;

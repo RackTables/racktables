@@ -2303,4 +2303,122 @@ function processVLANSyncRequest ()
 	return buildRedirectURL (__FUNCTION__, 'OK', array (count ($work['left']) + count ($work['right'])));
 }
 
+$msgcode['addVLANSwitchTemplate']['OK'] = 48;
+$msgcode['addVLANSwitchTemplate']['ERR'] = 110;
+function addVLANSwitchTemplate()
+{
+	assertStringArg ('vst_descr');
+	global $sic;
+	$max_local_vlans = NULL;
+	if (array_key_exists ('vst_maxvlans', $sic) && mb_strlen ($sic['vst_maxvlans']))
+	{
+		assertUIntArg ('vst_maxvlans');
+		$max_local_vlans = $sic['vst_maxvlans'];
+	}
+	$result = usePreparedInsertBlade
+	(
+		'VLANSwitchTemplate',
+		array
+		(
+			'max_local_vlans' => $max_local_vlans,
+			'description' => $sic['vst_descr'],
+		)
+	);
+	return buildRedirectURL (__FUNCTION__, $result ? 'OK' : 'ERR');
+}
+
+$msgcode['delVLANSwitchTemplate']['OK'] = 49;
+$msgcode['delVLANSwitchTemplate']['ERR'] = 111;
+function delVLANSwitchTemplate()
+{
+	assertUIntArg ('vst_id');
+	global $sic;
+	$result = FALSE !== usePreparedDeleteBlade ('VLANSwitchTemplate', array ('id' => $sic['vst_id']));
+	return buildRedirectURL (__FUNCTION__, $result ? 'OK' : 'ERR');
+}
+
+$msgcode['updVLANSwitchTemplate']['OK'] = 51;
+$msgcode['updVLANSwitchTemplate']['ERR'] = 109;
+function updVLANSwitchTemplate()
+{
+	assertUIntArg ('vst_id');
+	assertStringArg ('vst_descr');
+	global $sic;
+	$max_local_vlans = NULL;
+	if (array_key_exists ('vst_maxvlans', $sic) && mb_strlen ($sic['vst_maxvlans']))
+	{
+		assertUIntArg ('vst_maxvlans');
+		$max_local_vlans = $sic['vst_maxvlans'];
+	}
+	$result = commitUpdateVST ($sic['vst_id'], $max_local_vlans, $sic['vst_descr']);
+	return buildRedirectURL (__FUNCTION__, $result ? 'OK' : 'ERR');
+}
+
+$msgcode['addVSTRule']['OK'] = 48;
+$msgcode['addVSTRule']['ERR'] = 110;
+function addVSTRule()
+{
+	assertUIntArg ('vst_id');
+	assertUIntArg ('rule_no');
+	assertPCREArg ('port_pcre');
+	assertStringArg ('port_role');
+	assertStringArg ('wrt_vlans', TRUE);
+	global $sic;
+	$result = usePreparedInsertBlade
+	(
+		'VLANSTRule',
+		array
+		(
+			'vst_id' => $sic['vst_id'],
+			'rule_no' => $sic['rule_no'],
+			'port_pcre' => $sic['port_pcre'],
+			'port_role' => $sic['port_role'],
+			'wrt_vlans' => $sic['wrt_vlans'],
+		)
+	);
+	return buildRedirectURL (__FUNCTION__, $result ? 'OK' : 'ERR');
+}
+
+$msgcode['delVSTRule']['OK'] = 49;
+$msgcode['delVSTRule']['ERR'] = 111;
+function delVSTRule()
+{
+	assertUIntArg ('vst_id');
+	assertUIntArg ('rule_no');
+	global $sic;
+	$result = FALSE !== usePreparedDeleteBlade
+	(
+		'VLANSTRule',
+		array
+		(
+			'vst_id' => $sic['vst_id'],
+			'rule_no' => $sic['rule_no']
+		)
+	);
+	return buildRedirectURL (__FUNCTION__, $result ? 'OK' : 'ERR');
+}
+
+$msgcode['updVSTRule']['OK'] = 51;
+$msgcode['updVSTRule']['ERR'] = 109;
+function updVSTRule()
+{
+	assertUIntArg ('vst_id');
+	assertUIntArg ('rule_no');
+	assertUIntArg ('new_rule_no');
+	assertPCREArg ('port_pcre');
+	assertStringArg ('port_role');
+	assertStringArg ('wrt_vlans', TRUE);
+	global $sic;
+	$result = commitUpdateVSTRule
+	(
+		$sic['vst_id'],
+		$sic['rule_no'],
+		$sic['new_rule_no'],
+		$sic['port_pcre'],
+		$sic['port_role'],
+		$sic['wrt_vlans']
+	);
+	return buildRedirectURL (__FUNCTION__, $result ? 'OK' : 'ERR');
+}
+
 ?>

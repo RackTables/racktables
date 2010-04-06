@@ -80,9 +80,9 @@ $image['config']['height'] = 200;
 $image['reports']['path'] = 'pix/report.png';
 $image['reports']['width'] = 218;
 $image['reports']['height'] = 200;
-$image['vlandomainlist']['path'] = 'pix/8021q.png';
-$image['vlandomainlist']['width'] = 218;
-$image['vlandomainlist']['height'] = 200;
+$image['8021q']['path'] = 'pix/8021q.png';
+$image['8021q']['width'] = 218;
+$image['8021q']['height'] = 200;
 $image['download']['path'] = 'pix/download.png';
 $image['download']['width'] = 16;
 $image['download']['height'] = 16;
@@ -297,7 +297,7 @@ renderIndexItem('rackspace');
 renderIndexItem('depot');
 renderIndexItem('ipv4space');
 renderIndexItem('files');
-renderIndexItem('vlandomainlist');
+renderIndexItem('8021q');
 ?>          
 				</tr>
 				<tr>
@@ -6093,6 +6093,7 @@ function showTabs ($pageno, $tabno)
 // fires for both row and its racks. Use pageno for decision in such cases.
 function dynamic_title_decoder ($path_position)
 {
+	global $sic;
 	switch ($path_position)
 	{
 	case 'index':
@@ -6280,6 +6281,13 @@ function dynamic_title_decoder ($path_position)
 			'name' => formatVLANName (getVLANInfo ($_REQUEST['vlan_ck'])),
 			'params' => array ('vlan_ck' => $_REQUEST['vlan_ck'])
 		);
+	case 'vst':
+		$vst = getVLANSwitchTemplate ($sic['vst_id']);
+		return array
+		(
+			'name' => niftyString ("switch template '${vst['description']}'", 50),
+			'params' => array ('vst_id' => $vst['id'])
+		);
 	default:
 		return array
 		(
@@ -6435,19 +6443,33 @@ function renderObjectVLANConfig ($object_id)
 	finishPortlet();
 }
 
-function renderVLANDomainList ()
+function render8021QStatus ()
 {
+	startPortlet ('VLAN domains');
 	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
 	echo '<tr><th>description</th><th>VLANs</th><th>switches</th></tr>';
-	echo '<ul>';
 	foreach (getVLANDomainList() as $vdom_id => $dominfo)
 	{
-		echo "<tr><td><a href='";
+		echo "<tr align=left><td><a href='";
 		echo makeHref (array ('page' => 'vlandomain', 'vdom_id' => $vdom_id)) . "'>";
 		echo niftyString ($dominfo['description']) . "</a></td><td>${dominfo['vlanc']}</td>";
 		echo "<td>${dominfo['switchc']}</td></tr>";
 	}
 	echo '</table>';
+	finishPortlet();
+
+	startPortlet ('switch templates');
+	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
+	echo '<tr><th>description</th><th>rules</th><th>switches</th></tr>';
+	foreach (getVLANSwitchTemplates() as $vst_id => $vst_info)
+	{
+		echo "<tr align=left><td><a href='";
+		echo makeHref (array ('page' => 'vst', 'vst_id' => $vst_id)) . "'>";
+		echo niftyString ($vst_info['description']) . "</a></td><td>${vst_info['rulec']}</td>";
+		echo "<td>${vst_info['switchc']}</td></tr>";
+	}
+	echo '</table>';
+	finishPortlet();
 }
 
 function renderVLANDomainListEditor ()
@@ -6970,6 +6992,145 @@ function renderObjectVLANSync ($object_id)
 	echo '</td></tr>';
 	echo '</table>';
 	echo '</form>';
+}
+
+function renderVSTListEditor()
+{
+	function printNewItemTR ()
+	{
+		printOpFormIntro ('add');
+		echo '<tr>';
+		echo '<td>' . getImageHREF ('create', 'create template', TRUE, 104) . '</td>';
+		echo '<td><input type=text name=vst_descr tabindex=101></td>';
+		echo '<td><input type=text name=vst_maxvlans tabindex=102></td>';
+		echo '<td>' . getImageHREF ('create', 'create domain', TRUE, 103) . '</td>';
+		echo '</tr></form>';
+	}
+	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
+	echo '<tr><th>&nbsp;</th><th>description</th><th>max local VLANs on a switch</th><th>&nbsp</th></tr>';
+	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
+		printNewItemTR();
+	foreach (getVLANSwitchTemplates() as $vst_id => $vst_info)
+	{
+		printOpFormIntro ('upd', array ('vst_id' => $vst_id));
+		echo '<tr><td>';
+		if ($vst_info['switchc'])
+			printImageHREF ('nodestroy', 'template used elsewhere');
+		else
+		{
+			echo '<a href="' . makeHrefProcess (array ('op' => 'del', 'vst_id' => $vst_id)) . '">';
+			echo getImageHREF ('destroy', 'delete domain') . '</a>';
+		}
+		echo '</td>';
+		echo '<td><input name=vst_descr type=text value="' . niftyString ($vst_info['description'], 0) . '"></td>';
+		echo "<td><input name=vst_maxvlans type=text value=${vst_info['max_local_vlans']}></td>";
+		echo '<td>' . getImageHREF ('save', 'update template', TRUE) . '</td>';
+		echo '</tr></form>';
+	}
+	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')
+		printNewItemTR();
+	echo '</table>';
+}
+
+function renderVST ($vst_id)
+{
+	global $nextorder;
+	$vst = getVLANSwitchTemplate ($vst_id);
+	echo '<table border=0 class=objectview cellspacing=0 cellpadding=0>';
+	echo "<tr><td colspan=2 align=center><h1>${vst['description']}</h1><h2>";
+	echo "<tr><td class=pcleft width='50%'>";
+	startPortlet ('rules');
+	echo '<table class=cooltable align=center border=0 cellpadding=5 cellspacing=0>';
+	echo '<tr><th>sequence</th><th>regexp</th><th>role</th><th>VLAN IDs</th></tr>';
+	$order = 'odd';
+	foreach ($vst['rules'] as $item)
+	{
+		echo "<tr class=row_${order} align=left>";
+		echo "<td>${item['rule_no']}</td><td><tt>${item['port_pcre']}</tt></td>";
+		echo "<td>${item['port_role']}</td><td>${item['wrt_vlans']}</td></tr>";
+		$order = $nextorder[$order];
+	}
+	echo '</table>';
+	finishPortlet();
+	echo '</td><td class=pcright>';
+	startPortlet ('switches');
+	if (!count ($vst['switches']))
+		echo '(none)';
+	else
+	{
+		echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
+		$order = 'odd';
+		foreach ($vst['switches'] as $object_id)
+		{
+			echo "<tr class=row_${order}><td>";
+			renderCell (spotEntity ('object', $object_id));
+			echo '</td></tr>';
+			$order = $nextorder[$order];
+		}
+		echo '</table>';
+	}
+	finishPortlet();
+	echo '</td></tr></table>';
+}
+
+function renderVSTEditor ($vst_id)
+{
+	$vst = getVLANSwitchTemplate ($vst_id);
+	echo '<center><h1>' . niftyString ($vst['description']) . '</h1></center>';
+	echo '<table border=0 cellpadding=10 cellpadding=1 align=center>';
+	printOpFormIntro ('upd');
+	echo '<tr><td class=tdright><label for=input1>Description:</label></td>';
+	echo "<td class=tdleft><input type=text name=vst_descr id=input1 maxlength=255 value='";
+	echo niftyString ($vst['description'], 0) . "'></td></tr>";
+	echo '<tr><td class=tdright><label for=input2>Max local VLANs:</label></td>';
+	echo "<td class=tdleft><input type=text name=vst_maxvlans id=input2 value=";
+	echo $vst['max_local_vlans'] . '></td></tr>';
+	echo '<tr><td colspan=2 class=tdcenter>' . getImageHREF ('SAVE', 'Save changes', TRUE) . '</td></tr>';
+	echo '</form></table>';
+}
+
+function renderVSTRulesEditor ($vst_id)
+{
+	function printNewItemTR ($port_role_options)
+	{
+		printOpFormIntro ('add');
+		echo '<tr>';
+		echo '<td>' . getImageHREF ('add', 'add rule', TRUE, 106) . '</td>';
+		echo '<td><input type=text name=rule_no size=3></td>';
+		echo '<td><input type=text name=port_pcre></td>';
+		echo '<td>' . getSelect ($port_role_options, array ('name' => 'port_role'), 'trunk') . '</td>';
+		echo '<td><input type=text name=wrt_vlans></td>';
+		echo '<td>' . getImageHREF ('add', 'add rule', TRUE, 105) . '</td>';
+		echo '</tr></form>';
+	}
+	$vst = getVLANSwitchTemplate ($vst_id);
+	echo '<center><h1>' . niftyString ($vst['description']) . '</h1></center>';
+	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
+	echo '<tr><th>&nbsp;</th><th>sequence</th><th>regexp</th><th>role</th><th>VLAN IDs</th><th>&nbsp;</th></tr>';
+	$port_role_options = array
+	(
+		'access' => 'access',
+		'trunk' => 'trunk',
+		'uplink' => 'uplink',
+	);
+	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
+		printNewItemTR ($port_role_options);
+	foreach ($vst['rules'] as $item)
+	{
+		printOpFormIntro ('upd', array ('rule_no' => $item['rule_no']));
+		echo '<tr>';
+		echo '<td><a href="' . makeHrefProcess (array ('op' => 'del', 'vst_id' => $vst_id, 'rule_no' => $item['rule_no'])) . '">';
+		echo getImageHREF ('destroy', 'delete rule') . '</a></td>';
+		echo "<td><input type=text name=new_rule_no value=${item['rule_no']} size=3></td>";
+		echo "<td><input type=text name=port_pcre value='" . niftyString ($item['port_pcre'], 0) . "'></td>";
+		echo '<td>' . getSelect ($port_role_options, array ('name' => 'port_role'), $item['port_role']) . '</td>';
+		echo "<td><input type=text name=wrt_vlans value='${item['wrt_vlans']}'></td>";
+		echo '<td>' . getImageHref ('save', 'update rule', TRUE) . '</td>';
+		echo '</tr></form>';
+	}
+	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')
+		printNewItemTR ($port_role_options);
+	echo '</table>';
 }
 
 ?>

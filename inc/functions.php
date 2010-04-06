@@ -159,6 +159,13 @@ function assertIPv4Arg ($argname, $ok_if_empty = FALSE)
 		throw new InvalidRequestArgException($argname, $_REQUEST[$argname], 'parameter is not a valid ipv4 address');
 }
 
+function assertPCREArg ($argname)
+{
+	assertStringArg ($argname, TRUE); // empty pattern is Ok
+	if (FALSE === preg_match ('#' . $_REQUEST[$argname] . '#', 'test'))
+		throw new InvalidRequestArgException($argname, $_REQUEST[$argname], 'PCRE validation failed');
+}
+
 // Objects of some types should be explicitly shown as
 // anonymous (labelless). This function is a single place where the
 // decision about displayed name is made.
