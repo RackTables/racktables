@@ -6272,7 +6272,7 @@ function dynamic_title_decoder ($path_position)
 		$dominfo = getVLANDomainInfo ($vdom_id);
 		return array
 		(
-			'name' => niftyString ($dominfo['description']),
+			'name' => niftyString ("domain '${dominfo['description']}'"),
 			'params' => array ('vdom_id' => $vdom_id)
 		);
 	case 'vlan':
@@ -6285,7 +6285,7 @@ function dynamic_title_decoder ($path_position)
 		$vst = getVLANSwitchTemplate ($sic['vst_id']);
 		return array
 		(
-			'name' => niftyString ("switch template '${vst['description']}'", 50),
+			'name' => niftyString ("template '${vst['description']}'", 50),
 			'params' => array ('vst_id' => $vst['id'])
 		);
 	default:
