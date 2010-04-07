@@ -2707,8 +2707,8 @@ function nxos4Read8021QConfig ($input)
 	return $input;
 }
 
-// Scan given work accumulator array and return the key, which
-// addresses the port with requested name (or NULL if there is none such).
+// Scan given array and return the key, which addresses the first item
+// with requested column set to given value (or NULL if there is none such).
 // Note that 0 and NULL mean completely different things and thus
 // require strict checking (=== and !===).
 function scanArrayForItem ($table, $scan_column, $scan_value)
