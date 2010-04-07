@@ -162,7 +162,7 @@ function assertIPv4Arg ($argname, $ok_if_empty = FALSE)
 function assertPCREArg ($argname)
 {
 	assertStringArg ($argname, TRUE); // empty pattern is Ok
-	if (FALSE === preg_match ('#' . $_REQUEST[$argname] . '#', 'test'))
+	if (FALSE === preg_match ($_REQUEST[$argname], 'test'))
 		throw new InvalidRequestArgException($argname, $_REQUEST[$argname], 'PCRE validation failed');
 }
 
