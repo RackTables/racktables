@@ -423,7 +423,7 @@ CREATE TABLE `VLANSwitch` (
   KEY `domain_id` (`domain_id`),
   KEY `template_id` (`template_id`),
   CONSTRAINT `VLANSwitch-FK-template_id` FOREIGN KEY (`template_id`) REFERENCES `VLANSwitchTemplate` (`id`),
-  CONSTRAINT `VLANSwitch--FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `RackObject` (`id`),
+  CONSTRAINT `VLANSwitch-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `RackObject` (`id`),
   CONSTRAINT `VLANSwitch-FK-domain_id` FOREIGN KEY (`domain_id`) REFERENCES `VLANDomain` (`id`)
 ) ENGINE=InnoDB;
 
