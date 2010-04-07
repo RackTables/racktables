@@ -3658,6 +3658,35 @@ function getVLANSwitchInfo ($object_id, $extrasql = '')
 	return NULL;
 }
 
+function get8021QOrder ($object_id)
+{
+	if (NULL === $vswitch = getVLANSwitchInfo ($object_id))
+		throw new InvalidArgException ('object_id', $object_id, 'object has no configured 802.1Q order');
+	$vst = getVLANSwitchTemplate ($vswitch['template_id']);
+	$object = spotEntity ('object', $object_id);
+	amplifyCell ($object);
+	$ret = array();
+	foreach ($vst['rules'] as $rule)
+		foreach (array_keys ($object['ports']) as $port_key)
+			if
+			(
+				!array_key_exists ($object['ports'][$port_key]['name'], $ret) and
+				mb_strlen ($object['ports'][$port_key]['name']) and
+				preg_match ($rule['port_pcre'], $object['ports'][$port_key]['name'])
+			)
+			{
+				$ret[$object['ports'][$port_key]['name']] = array
+				(
+					'port_name' => $object['ports'][$port_key]['name'],
+					'port_role' => $rule['port_role'],
+					'wrt_vlans' => $rule['wrt_vlans'],
+				);
+				// exclude from the next iteration
+				unset ($object['ports'][$port_key]);
+			}
+	return $ret;
+}
+
 // Return the "should-be" version of 802.1Q ports, which includes
 // all current 802.1Q-eligible device ports plus the ports found
 // in the database. This means, if we have once saved configuration
@@ -3675,7 +3704,22 @@ function getDesired8021QConfig ($object_id)
 		(
 			'allowed' => array(),
 			'native' => 0,
+			'mode' => 'default',
 		);
+	unset ($result);
+	$query = 'SELECT port_name, vlan_mode FROM PortVLANMode WHERE object_id = ?';
+	$result = usePreparedSelectBlade ($query, array ($object_id));
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
+	{
+		if (!array_key_exists ($row['port_name'], $ret))
+			$ret[$row['port_name']] = array
+			(
+				'allowed' => array(),
+				'native' => 0,
+				'mode' => 'default',
+			);
+		$ret[$row['port_name']]['mode'] = $row['vlan_mode'];
+	}
 	unset ($result);
 	$query = 'SELECT port_name, vlan_id FROM PortAllowedVLAN WHERE object_id = ?';
 	$result = usePreparedSelectBlade ($query, array ($object_id));
@@ -3686,6 +3730,7 @@ function getDesired8021QConfig ($object_id)
 			(
 				'allowed' => array(),
 				'native' => 0,
+				'mode' => 'default',
 			);
 		$ret[$row['port_name']]['allowed'][] = $row['vlan_id'];
 	}

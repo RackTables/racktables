@@ -427,13 +427,21 @@ CREATE TABLE `VLANSwitch` (
   CONSTRAINT `VLANSwitch-FK-domain_id` FOREIGN KEY (`domain_id`) REFERENCES `VLANDomain` (`id`)
 ) ENGINE=InnoDB;
 
+CREATE TABLE `PortVLANMode` (
+  `object_id` int(10) unsigned NOT NULL,
+  `port_name` char(255) NOT NULL,
+  `vlan_mode` enum('access','trunk') NOT NULL default 'access',
+  PRIMARY KEY  (`object_id`,`port_name`),
+  CONSTRAINT `PortVLANRole-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `RackObject` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
 CREATE TABLE `PortAllowedVLAN` (
   `object_id` int(10) unsigned NOT NULL,
   `port_name` char(255) NOT NULL,
   `vlan_id` int(10) unsigned NOT NULL default '0',
   PRIMARY KEY  (`object_id`,`port_name`,`vlan_id`),
   KEY `vlan_id` (`vlan_id`),
-  CONSTRAINT `PortAllowedVLAN-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `RackObject` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `PortAllowedVLAN-FK-object-port` FOREIGN KEY (`object_id`, `port_name`) REFERENCES `PortVLANMode` (`object_id`, `port_name`) ON DELETE CASCADE,
   CONSTRAINT `PortAllowedVLAN-FK-vlan_id` FOREIGN KEY (`vlan_id`) REFERENCES `VLANValidID` (`vlan_id`)
 ) ENGINE=InnoDB;
 
