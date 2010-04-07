@@ -2359,6 +2359,7 @@ function ios12PickSwitchportCommand (&$work, $line)
 			(
 				'allowed' => array ($work['current']['access vlan']),
 				'native' => $work['current']['access vlan'],
+				'mode' => $work['current']['mode'],
 			);
 			break;
 		case 'trunk':
@@ -2496,10 +2497,12 @@ function fdry5PickVLANSubcommand (&$work, $line)
 					'allowed' => array ($work['current']['vlan_id']),
 					'native' => 0, // can be updated later
 				);
+			$work['portdata'][$port_name]['mode'] = 'trunk';
 		break;
 	case (preg_match ('@^ untagged (.+)$@', $line, $matches)):
 		// replace 'native' column of each mentioned port with current VLAN ID
 		foreach (fdry5ParsePortString ($matches[1]) as $port_name)
+		{
 			if (array_key_exists ($port_name, $work['portdata']))
 			{
 				$work['portdata'][$port_name]['native'] = $work['current']['vlan_id'];
@@ -2511,6 +2514,12 @@ function fdry5PickVLANSubcommand (&$work, $line)
 					'allowed' => array ($work['current']['vlan_id']),
 					'native' => $work['current']['vlan_id'],
 				);
+			// Untagged ports are initially assumed to be access ports, and
+			// when this assumption is right, this is the final port mode state.
+			// When the port is dual-mode one, this is detected and justified
+			// later in "interface" section of config text.
+			$work['portdata'][$port_name]['mode'] = 'access';
+		}
 		break;
 	default: // nom-nom
 	}
@@ -2533,6 +2542,10 @@ function fdry5PickInterfaceSubcommand (&$work, $line)
 					'allowed' => array ($work['current']['dual-mode']),
 					'native' => $work['current']['dual-mode'],
 				);
+			// a dual-mode port is always considered a trunk port
+			// (but not in the IronWare's meaning of "trunk") regardless of
+			// number of assigned tagged VLANs
+			$work['portdata'][$work['current']['port_name']]['mode'] = 'trunk';
 		}
 		unset ($work['current']);
 		return 'fdry5ScanTopLevel';
@@ -2656,6 +2669,7 @@ function vrp53PickInterfaceSubcommand (&$work, $line)
 			(
 				'allowed' => array ($work['current']['default vlan']),
 				'native' => $work['current']['default vlan'],
+				'mode' => 'access',
 			);
 			break;
 		case 'trunk':
@@ -2663,6 +2677,7 @@ function vrp53PickInterfaceSubcommand (&$work, $line)
 			(
 				'allowed' => $work['current']['allowed'],
 				'native' => 0,
+				'mode' => 'trunk',
 			);
 			break;
 		case 'hybrid':
@@ -2670,6 +2685,7 @@ function vrp53PickInterfaceSubcommand (&$work, $line)
 			(
 				'allowed' => $work['current']['allowed'],
 				'native' => $work['current']['native'],
+				'mode' => 'trunk',
 			);
 			break;
 		default: // dot1q-tunnel ?
