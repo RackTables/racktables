@@ -6431,21 +6431,17 @@ function render8021QOrderForm ($some_id)
 		}
 		if ($pageno != 'vlandomain')
 		{
-			echo '<td>';
 			$options = array();
 			foreach (getVLANDomainList() as $vdom_id => $vdom_info)
 				$options[$vdom_id] = $vdom_info['description'];
-			printSelect ($options, array ('name' => 'vdom_id', 'tabindex' => 102));
-			echo '</td>';
+			echo '<td>' . getSelect ($options, array ('name' => 'vdom_id', 'tabindex' => 102), getConfigVar ('DEFAULT_VDOM_ID')) . '</td>';
 		}
 		if ($pageno != 'vst')
 		{
-			echo '<td>';
 			$options = array();
 			foreach (getVLANSwitchTemplates() as $vst_id => $vst_info)
 				$options[$vst_id] = $vst_info['description'];
-			printSelect ($options, array ('name' => 'vst_id', 'tabindex' => 103));
-			echo '</td>';
+			echo '<td>' . getSelect ($options, array ('name' => 'vst_id', 'tabindex' => 103), getConfigVar ('DEFAULT_VST_ID')) . '</td>';
 		}
 		echo '<td>' . getImageHREF ('attach', 'set', TRUE, 104) . '</td></tr></form>';
 	}

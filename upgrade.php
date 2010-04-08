@@ -481,6 +481,8 @@ CREATE TABLE `UserConfig` (
 			$query = array_merge ($query, reloadDictionary ($batchid));
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('VLANSWITCH_LISTSRC', '', 'string', 'yes', 'no', 'List of VLAN running switches')";
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('VLANIPV4NET_LISTSRC', '', 'string', 'yes', 'no', 'List of VLAN-based IPv4 networks')";
+			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('DEFAULT_VDOM_ID','','uint','yes','no','yes','Default VLAN domain ID')";
+			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('DEFAULT_VST_ID','','uint','yes','no','yes','Default VLAN switch template ID')";
 			$query[] = "ALTER TABLE IPv4Network ENGINE=InnoDB";
 			for ($i = 1; $i <= 4094; $i++)
 				usePreparedInsertBlade ('VLANValidID', array ('vlan_id' => $i));

@@ -1051,6 +1051,8 @@ function resetUIConfig()
 	setConfigVar ('IPV4_TREE_RTR_AS_CELL', 'yes');
 	setConfigVar ('PROXIMITY_RANGE', 0);
 	setConfigVar ('IPV4_TREE_SHOW_VLAN', 'yes');
+	setConfigVar ('DEFAULT_VDOM_ID', '');
+	setConfigVar ('DEFAULT_VST_ID', '');
 	return buildRedirectURL (__FUNCTION__, 'OK');
 }
 
