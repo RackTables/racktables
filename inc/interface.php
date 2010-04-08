@@ -6610,11 +6610,11 @@ function renderVLANDomain ($vdom_id)
 	echo '<tr><td colspan=2 align=center><h1>' . niftyString ($mydomain['description']);
 	echo '</h1></td></tr>';
 	echo "<tr><td class=pcleft width='50%'>";
-	startPortlet ('bindings');
 	if (!count ($mydomain['switchlist']))
-		echo '(none)';
+		startPortlet ('no orders');
 	else
 	{
+		startPortlet ('orders (' . count ($mydomain['switchlist']) . ')');
 		echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
 		$order = 'odd';
 		foreach (array_keys ($mydomain['switchlist']) as $object_id)
@@ -6630,11 +6630,11 @@ function renderVLANDomain ($vdom_id)
 
 	echo '</td><td class=pcright>';
 
-	startPortlet ('VLANs');
 	if (!count ($myvlans = getDomainVLANs ($vdom_id)))
-		echo '(none)';
+		startPortlet ('no VLANs');
 	else
 	{
+		startPortlet ('VLANs (' . count ($myvlans) . ')');
 		$order = 'odd';
 		global $vtdecoder;
 		echo '<table class=cooltable align=center border=0 cellpadding=5 cellspacing=0>';
@@ -7090,25 +7090,30 @@ function renderVST ($vst_id)
 	echo '<table border=0 class=objectview cellspacing=0 cellpadding=0>';
 	echo "<tr><td colspan=2 align=center><h1>${vst['description']}</h1><h2>";
 	echo "<tr><td class=pcleft width='50%'>";
-	startPortlet ('rules');
-	echo '<table class=cooltable align=center border=0 cellpadding=5 cellspacing=0>';
-	echo '<tr><th>sequence</th><th>regexp</th><th>role</th><th>VLAN IDs</th></tr>';
-	$order = 'odd';
-	foreach ($vst['rules'] as $item)
-	{
-		echo "<tr class=row_${order} align=left>";
-		echo "<td>${item['rule_no']}</td><td><tt>${item['port_pcre']}</tt></td>";
-		echo "<td>${item['port_role']}</td><td>${item['wrt_vlans']}</td></tr>";
-		$order = $nextorder[$order];
-	}
-	echo '</table>';
-	finishPortlet();
-	echo '</td><td class=pcright>';
-	startPortlet ('switches');
-	if (!count ($vst['switches']))
-		echo '(none)';
+	if (!count ($vst['rules']))
+		startPortlet ('no rules');
 	else
 	{
+		startPortlet ('rules (' . count ($vst['rules']) . ')');
+		echo '<table class=cooltable align=center border=0 cellpadding=5 cellspacing=0>';
+		echo '<tr><th>sequence</th><th>regexp</th><th>role</th><th>VLAN IDs</th></tr>';
+		$order = 'odd';
+		foreach ($vst['rules'] as $item)
+		{
+			echo "<tr class=row_${order} align=left>";
+			echo "<td>${item['rule_no']}</td><td><tt>${item['port_pcre']}</tt></td>";
+			echo "<td>${item['port_role']}</td><td>${item['wrt_vlans']}</td></tr>";
+			$order = $nextorder[$order];
+		}
+		echo '</table>';
+	}
+	finishPortlet();
+	echo '</td><td class=pcright>';
+	if (!count ($vst['switches']))
+		startPortlet ('no orders');
+	else
+	{
+		startPortlet ('orders (' . count ($vst['switches']) . ')');
 		echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
 		$order = 'odd';
 		foreach (array_keys ($vst['switches']) as $object_id)
