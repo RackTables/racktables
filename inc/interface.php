@@ -6701,7 +6701,7 @@ function renderObjectVLANPorts ($object_id)
 {
 	global $pageno, $tabno, $sic;
 	$req_port_name = array_key_exists ('port_name', $sic) ? $sic['port_name'] : '';
-	$desired_config = getDesired8021QConfig ($object_id);
+	$desired_config = apply8021QOrder ($object_id, getDesired8021QConfig ($object_id));
 	uksort ($desired_config, 'sortTokenize');
 	echo '<table border=0 width="100%"><tr valign=top><td class=tdleft width="30%">';
 	// port list
@@ -6709,24 +6709,31 @@ function renderObjectVLANPorts ($object_id)
 	echo '<tr><th>port name</th><th>current config</th></tr>';
 	foreach ($desired_config as $port_name => $port)
 	{
-		$tdclass = $port_name == $req_port_name ? 'seltagbox' : 'tagbox';
-		echo "<tr><td class=${tdclass}><a href='" . makeHref
+		if
 		(
-			array
+			!array_key_exists ('vst_role', $port) and
+			!array_key_exists ('mode', $port)
+		)
+			continue;
+		if (!array_key_exists ('vst_role', $port))
+			echo "<tr class=trerror><td>${port_name}";
+		else
+		{
+			$tdclass = $port_name == $req_port_name ? 'seltagbox' : 'tagbox';
+			echo "<tr><td class=${tdclass}>";
+			echo "<a href='" . makeHref
 			(
-				'page' => $pageno,
-				'tab' => $tabno,
-				'object_id' => $object_id,
-				'port_name' => $port_name,
-			)
-		);
-		echo "'>${port_name}</a></td><td class=${tdclass}>";
-		echo serializeVLANPack
-		(
-			$port['native'],
-			$port['allowed']
-		);
-		echo '</td></tr>';
+				array
+				(
+					'page' => $pageno,
+					'tab' => $tabno,
+					'object_id' => $object_id,
+					'port_name' => $port_name,
+				)
+			);
+			echo "'>${port_name}</a>";
+		}
+		echo "</td><td class=${tdclass}>" . serializeVLANPack ($port['native'], $port['allowed']) . '</td></tr>';
 	}
 	echo '</table>';
 	echo '</td>';

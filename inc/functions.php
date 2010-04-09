@@ -2888,4 +2888,26 @@ function array_values_same ($a1, $a2)
 	return !count (array_diff ($a1, $a2)) and !count (array_diff ($a2, $a1));
 }
 
+// Use the VLAN switch template associated with the given object
+// to set VST role for each port of the provided list. Return
+// resulting list.
+function apply8021QOrder ($object_id, $portlist)
+{
+	if (NULL === $vswitch = getVLANSwitchInfo ($object_id))
+		throw new InvalidArgException ('object_id', $object_id, 'object has no configured 802.1Q order');
+	$vst = getVLANSwitchTemplate ($vswitch['template_id']);
+	foreach ($vst['rules'] as $rule)
+		foreach (array_keys ($portlist) as $port_name)
+			if
+			(
+				!array_key_exists ('vst_role', $portlist[$port_name]) and
+				preg_match ($rule['port_pcre'], $port_name)
+			)
+			{
+				$portlist[$port_name]['vst_role'] = $rule['port_role'];
+				$portlist[$port_name]['wrt_vlans'] = $rule['wrt_vlans'];
+			}
+	return $portlist;
+}
+
 ?>
