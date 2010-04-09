@@ -524,6 +524,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'WS-CBS3032-DEL: 16 internal/10-100-1000T(X) + 4 RJ-45/10-100-1000T(X) + 4 SFP/1000',
 		'processors' => array ('catalyst-blade-17-to-20-1000T', 'catalyst-blade-21-to-24-1000SFP', 'catalyst-blade-any-bp/1000T'),
 	),
+	'9.1.367' => array
+	(
+		'dict_key' => 404,
+		'text' => 'WS-C3550-48: 48 RJ-45/10-100TX + 2 GBIC/1000',
+		'processors' => array ('catalyst-chassis-any-100TX', 'catalyst-chassis-any-1000GBIC'),
+	),
 	'9.1.368' => array
 	(
 		'dict_key' => 398,
