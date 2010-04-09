@@ -3716,7 +3716,6 @@ function getDesired8021QConfig ($object_id)
 			(
 				'allowed' => array(),
 				'native' => 0,
-				'mode' => 'default',
 			);
 		$ret[$row['port_name']]['mode'] = $row['vlan_mode'];
 	}
