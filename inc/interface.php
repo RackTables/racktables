@@ -428,6 +428,7 @@ function renderRow ($row_id)
 // This function renders rack as HTML table.
 function renderRack ($rack_id, $hl_obj_id = 0)
 {
+	global $trigger;
 	$rackData = spotEntity ('rack', $rack_id);
 	amplifyCell ($rackData);
 	markAllSpans ($rackData);
@@ -463,7 +464,10 @@ function renderRack ($rack_id, $hl_obj_id = 0)
 		{
 			if (isset ($rackData[$i][$locidx]['skipped']))
 				continue;
-			$state = $rackData[$i][$locidx]['state'];
+			if (isset ($trigger['renderRack']['state']))
+				$state = $trigger['renderRack']['state'] ($rackData[$i][$locidx]);
+			else
+				$state = $rackData[$i][$locidx]['state'];
 			echo "<td class=state_${state}";
 			if (isset ($rackData[$i][$locidx]['hl']))
 				echo $rackData[$i][$locidx]['hl'];
@@ -786,7 +790,7 @@ function finishPortlet ()
 
 function renderRackObject ($object_id)
 {
-	global $nextorder, $aac;
+	global $nextorder, $aac, $trigger, $page;
 	$info = spotEntity ('object', $object_id);
 	// FIXME: employ amplifyCell() instead of calling loader functions directly
 	amplifyCell ($info);
@@ -866,11 +870,16 @@ function renderRackObject ($object_id)
 		echo "<table cellspacing=0 cellpadding='5' align='center' class='widetable'>";
 		echo '<tr><th class=tdleft>Local name</th><th class=tdleft>Visible label</th>';
 		echo '<th class=tdleft>Interface</th><th class=tdleft>L2 address</th>';
-		echo '<th class=tdcenter colspan=2>Remote object and port</th></tr>';
+		echo '<th class=tdcenter colspan=2>Remote object and port</th>';
+		if (isset ($page['object']['ports']['header']))
+			echo $page['object']['ports']['header'] ();
+		echo '</tr>';
 		foreach ($info['ports'] as $port)
 		{
 			echo '<tr';
-			if ($hl_port_id == $port['id'])
+			if (isset ($trigger['renderRackObject']['ports']['state']))
+				echo ' class=' . $trigger['renderRackObject']['ports']['state'] ($port);
+			elseif ($hl_port_id == $port['id'])
 				echo ' class=port_highlight';
 			echo "><td class=tdleft>${port['name']}</td><td class=tdleft>${port['label']}</td><td class=tdleft>";
 			if ($port['iif_id'] != 1)
@@ -889,6 +898,8 @@ function renderRackObject ($object_id)
 			}
 			else
 				echo '<td>&nbsp;</td><td>&nbsp;</td>';
+			if (isset($page['object']['ports']['row']))
+				echo $page['object']['ports']['row'] ($port);
 			echo "</tr>";
 		}
 		echo "</table><br>";
