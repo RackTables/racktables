@@ -194,7 +194,8 @@ CREATE TABLE `MountOperation` (
   `old_molecule_id` int(10) unsigned default NULL,
   `new_molecule_id` int(10) unsigned default NULL,
   `comment` text,
-  PRIMARY KEY  (`id`)
+  PRIMARY KEY  (`id`),
+  KEY `object_id` (`object_id`)
 ) ENGINE=MyISAM;
 
 CREATE TABLE `PortInnerInterface` (
