@@ -474,6 +474,7 @@ CREATE TABLE `UserConfig` (
 			break;
 		case '0.17.10':
 			$query = array_merge ($query, reloadDictionary ($batchid));
+			$query[] = "ALTER TABLE MountOperation ADD KEY (object_id)";
 			$query[] = "UPDATE Config SET varvalue = '0.17.10' WHERE varname = 'DB_VERSION'";
 			break;
 		default:
