@@ -248,6 +248,12 @@ $image['knight']['height'] = 33;
 $image['UPDATEALL']['path'] = 'pix/tango-system-software-update-32x32.png';
 $image['UPDATEALL']['width'] = 32;
 $image['UPDATEALL']['height'] = 32;
+$image['Zoom']['path'] = 'pix/tango-system-search-22x22.png';
+$image['Zoom']['width'] = 22;
+$image['Zoom']['height'] = 22;
+$image['Zooming']['path'] = 'pix/tango-view-fullscreen-22x22.png';
+$image['Zooming']['width'] = 22;
+$image['Zooming']['height'] = 22;
 
 // This may be populated later onsite, report rendering function will use it.
 // See the $systemreport for structure.
