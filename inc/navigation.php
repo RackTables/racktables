@@ -150,7 +150,8 @@ $ophandler['object']['lvsconfig']['submitSLBConfig'] = 'submitSLBConfig';
 $ophandler['object']['snmpportfinder']['querySNMPData'] = 'querySNMPData';
 $ophandler['object']['8021qorder']['add'] = 'add8021QOrder';
 $ophandler['object']['8021qorder']['del'] = 'del8021QOrder';
-$ophandler['object']['8021qports']['savePortVLANConfig'] = 'savePortVLANConfig';
+$ophandler['object']['8021qports']['saveTrunk'] = 'save8021QTrunkPort';
+$ophandler['object']['8021qports']['saveAccess'] = 'save8021QAccessPort';
 $ophandler['object']['vlansync']['sync'] = 'processVLANSyncRequest';
 $delayauth['object']['livevlans']['setPortVLAN'] = TRUE;
 

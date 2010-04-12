@@ -3673,6 +3673,7 @@ function getDesired8021QConfig ($object_id)
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 		$ret[$row['name']] = array
 		(
+			'mode' => 'none',
 			'allowed' => array(),
 			'native' => 0,
 		);
@@ -3856,14 +3857,16 @@ function importSwitch8021QConfig
 		// save changes (D == D' D' != R' R == R')
 		if
 		(
+			$old_change_to[$port_name]['mode'] != $item['mode'] or
 			!array_values_same ($old_change_to[$port_name]['allowed'], $item['allowed']) or
 			$old_change_to[$port_name]['native'] != $item['native']
 		)
 			throw new RuntimeException();
 		if
 		(
-			array_values_same ($change_from[$port_name]['allowed'], $new_change_to[$port_name]['allowed']) and
-			$change_from[$port_name]['native'] == $new_change_to[$port_name]['native']
+			$change_from['mode'] == $item['mode'] and
+			array_values_same ($change_from[$port_name]['allowed'], $item['allowed']) and
+			$change_from[$port_name]['native'] == $item['native']
 		)
 			continue;
 		if ($form_mutex_rev != $db_mutex_rev)
@@ -3874,8 +3877,10 @@ function importSwitch8021QConfig
 		// INSERT query, which would always trigger an FK exception.
 		// This function indicates an error, but doesn't revert it, so it is
 		// assummed, that the calling function performs necessary transaction wrapping.
-		// rely on ON DELETE CASCADE for PortNativeVLAN
-		if (FALSE === usePreparedDeleteBlade ('PortAllowedVLAN', array ('object_id' => $object_id, 'port_name' => $port_name)))
+		// rely on ON DELETE CASCADE for PortAllowedVLAN and PortNativeVLAN
+		if (FALSE === usePreparedDeleteBlade ('PortVLANMode', array ('object_id' => $object_id, 'port_name' => $port_name)))
+			throw new RuntimeException();
+		if (!usePreparedInsertBlade ('PortVLANMode', array ('object_id' => $object_id, 'port_name' => $port_name, 'vlan_mode' => $item['mode'])))
 			throw new RuntimeException();
 		foreach ($item['allowed'] as $vlan_id)
 			if (!usePreparedInsertBlade ('PortAllowedVLAN', array ('object_id' => $object_id, 'port_name' => $port_name, 'vlan_id' => $vlan_id)))

@@ -2250,14 +2250,29 @@ function getVLANDomain ($vdid)
 // If a native VLAN is defined, print it first. All other VLANs
 // are tagged and are listed after a plus sign. When no configuration
 // is set for a port, return "default" string.
-function serializeVLANPack ($native_vid = 0, $allowed_vids = array())
+function serializeVLANPack ($vlanport)
 {
+	if (!array_key_exists ('mode', $vlanport))
+		return 'error';
+	switch ($vlanport['mode'])
+	{
+	case 'none':
+		return 'none';
+	case 'access':
+		$ret = 'A';
+		break;
+	case 'trunk':
+		$ret = 'T';
+		break;
+	default:
+		return 'error';
+	}
 	$tagged = array();
-	foreach ($allowed_vids as $vlan_id)
-		if ($vlan_id != $native_vid)
+	foreach ($vlanport['allowed'] as $vlan_id)
+		if ($vlan_id != $vlanport['native'])
 			$tagged[] = $vlan_id;
 	sort ($tagged);
-	$ret = $native_vid ? $native_vid : '';
+	$ret .= $vlanport['native'] ? $vlanport['native'] : '';
 	$tagged_bits = array();
 	$id_from = $id_to = 0;
 	foreach ($tagged as $next_id)
@@ -2294,11 +2309,11 @@ function decodeVLANCK ($string)
 
 // Return VLAN name formatted for HTML output (note, that input
 // argument comes from database unescaped).
-function formatVLANName ($vlaninfo)
+function formatVLANName ($vlaninfo, $plaintext = FALSE)
 {
-	$ret = '<tt>VLAN' . $vlaninfo['vlan_id'] . '</tt>';
+	$ret = ($plaintext ? '' : '<tt>') . 'VLAN' . $vlaninfo['vlan_id'] . ($plaintext ? '' : '</tt>');
 	if (strlen ($vlaninfo['vlan_descr']))
-		$ret .= ' <i>(' . niftyString ($vlaninfo['vlan_descr']) . ')</i>';
+		$ret .= ' ' . ($plaintext ? '' : '<i>') . '(' . niftyString ($vlaninfo['vlan_descr']) . ')' . ($plaintext ? '' : '</i>');
 	return $ret;
 }
 
@@ -2357,9 +2372,9 @@ function ios12PickSwitchportCommand (&$work, $line)
 		case 'access':
 			$work['portdata'][$work['current']['port_name']] = array
 			(
+				'mode' => 'access',
 				'allowed' => array ($work['current']['access vlan']),
 				'native' => $work['current']['access vlan'],
-				'mode' => $work['current']['mode'],
 			);
 			break;
 		case 'trunk':
@@ -2372,6 +2387,7 @@ function ios12PickSwitchportCommand (&$work, $line)
 			) ? $work['current']['trunk native vlan'] : 0;
 			$work['portdata'][$work['current']['port_name']] = array
 			(
+				'mode' => 'trunk',
 				'allowed' => $work['current']['trunk allowed vlan'],
 				'native' => $effective_native,
 			);

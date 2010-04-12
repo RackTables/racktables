@@ -6284,7 +6284,7 @@ function dynamic_title_decoder ($path_position)
 	case 'vlan':
 		return array
 		(
-			'name' => formatVLANName (getVLANInfo ($_REQUEST['vlan_ck'])),
+			'name' => formatVLANName (getVLANInfo ($_REQUEST['vlan_ck']), TRUE),
 			'params' => array ('vlan_ck' => $_REQUEST['vlan_ck'])
 		);
 	case 'vst':
@@ -6706,13 +6706,20 @@ function renderVLANDomainVLANList ($vdom_id)
 function renderObjectVLANPorts ($object_id)
 {
 	global $pageno, $tabno, $sic;
+	$vswitch = getVLANSwitchInfo ($object_id);
+	$vdom = getVLANDomain ($vswitch['domain_id']);
 	$req_port_name = array_key_exists ('port_name', $sic) ? $sic['port_name'] : '';
 	$desired_config = apply8021QOrder ($object_id, getDesired8021QConfig ($object_id));
 	uksort ($desired_config, 'sortTokenize');
 	echo '<table border=0 width="100%"><tr valign=top><td class=tdleft width="30%">';
 	// port list
 	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
-	echo '<tr><th>port name</th><th>current config</th></tr>';
+	echo '<tr><th>port name</th><th>last saved state</th>';
+	echo $req_port_name == '' ? '<th>new access VLAN</th></tr>' : '</tr>';
+	if ($req_port_name == '');
+		printOpFormIntro ('saveAccess', array ('mutex_rev' => $vswitch['mutex_rev']));
+	$seen_access = FALSE;
+	$pn = 0;
 	foreach ($desired_config as $port_name => $port)
 	{
 		if
@@ -6722,25 +6729,61 @@ function renderObjectVLANPorts ($object_id)
 		)
 			continue;
 		if (!array_key_exists ('vst_role', $port))
-			echo "<tr class=trerror><td>${port_name}";
+		{
+			echo "<tr class=trerror><td>${port_name}</td><td>";
+			echo serializeVLANPack ($port) . '</td><td>&nbsp;</td></tr>';
+		}
+		elseif ($port['vst_role'] == 'uplink')
+		{
+			echo "<tr class=trbusy><td>${port_name}</td><td>";
+			echo serializeVLANPack ($port) . '</td><td>auto</td></tr>';
+		}
+		elseif ($port['vst_role'] == 'trunk')
+		{
+			echo "<tr><td>${port_name}</td><td>" . serializeVLANPack ($port) . "</td><td>";
+			$linkparams = array
+			(
+				'page' => $pageno,
+				'tab' => $tabno,
+				'object_id' => $object_id,
+			);
+			if ($port_name == $req_port_name)
+				$imagename = 'Zooming';
+			else
+			{
+				$imagename = 'Zoom';
+				$linkparams['port_name'] = $port_name;
+			}
+			echo "<a href='" . makeHref ($linkparams) . "'>" . getImageHREF ($imagename) . '</a>';
+			echo '</td></tr>';
+		}
+		elseif ($req_port_name == '')
+		{
+			echo "<input type=hidden name=pn_${pno} value=${port_name}>";
+			echo "<input type=hidden name=pm_${pno} value=access>";
+			$wrt_vlans = iosParseVLANString ($port['wrt_vlans']);
+			$options = array (0 => '-- NONE --');
+			if ($port['native'])
+				$options[$port['native']] = 'VLAN' . $port['native'];
+			foreach ($vdom['vlanlist'] as $vlan_id => $vlan_info)
+				if
+				(
+					!count ($wrt_vlans) or
+					$vlan_id == $port['native'] or
+					in_array ($vlan_id, $wrt_vlans)
+				)
+					$options[$vlan_id] = formatVLANName ($vlan_info, TRUE);
+			echo "<tr><td>${port_name}</td><td>" . serializeVLANPack ($port) . "</td><td>";
+			echo getSelect ($options, array ('name' => 'new_vlan_id', $port['native'])) . '</td></tr>';
+			$seen_access = TRUE;
+		}
 		else
 		{
-			$tdclass = $port_name == $req_port_name ? 'seltagbox' : 'tagbox';
-			echo "<tr><td class=${tdclass}>";
-			echo "<a href='" . makeHref
-			(
-				array
-				(
-					'page' => $pageno,
-					'tab' => $tabno,
-					'object_id' => $object_id,
-					'port_name' => $port_name,
-				)
-			);
-			echo "'>${port_name}</a>";
+			echo "<tr><td>${port_name}</td><td>" . serializeVLANPack ($port) . "</td><td>&nbsp;</td></tr>";
 		}
-		echo "</td><td class=${tdclass}>" . serializeVLANPack ($port['native'], $port['allowed']) . '</td></tr>';
 	}
+	if ($req_port_name == '' and $seen_access)
+		echo '<tr><td colspan=3 class=tdcenter>' . getImageHREF ('SAVE', 'save configuration', TRUE) . '</td></tr></form>';
 	echo '</table>';
 	echo '</td>';
 	// configuration of currently selected port, if any
@@ -6749,30 +6792,34 @@ function renderObjectVLANPorts ($object_id)
 	else
 		renderPortVLANConfig
 		(
-			$object_id,
+			$vswitch,
+			$vdom,
 			$req_port_name,
-			$desired_config[$req_port_name]['allowed'],
-			$desired_config[$req_port_name]['native']
+			$desired_config[$req_port_name]
 		);
 	echo '</tr></table>';
 }
 
-function renderPortVLANConfig ($object_id, $port_name, $allowed, $native)
+function renderPortVLANConfig ($vswitch, $vdom, $port_name, $vlanport)
 {
-	$vswitch = getVLANSwitchInfo ($object_id);
-	$vdom = getVLANDomain ($vswitch['domain_id']);
 	if (!count ($vdom['vlanlist']))
 	{
 		echo '<td colspan=2>(configured VLAN domain is empty)</td>';
 		return;
 	}
-	printOpFormIntro ('savePortVLANConfig', array ('port_name' => $port_name, 'mutex_rev' => $vswitch['mutex_rev']));
+	$forminfo = array
+	(
+		'port_name' => $port_name,
+		'mutex_rev' => $vswitch['mutex_rev'],
+		'port_mode' => $vlanport['vst_role'], // this will never be 'uplink'
+	);
+	printOpFormIntro ('saveTrunk', $forminfo);
 	echo '<td width="35%">';
 	echo '<table border=0 cellspacing=0 cellpadding=3 align=center>';
 	echo '<tr><th colspan=2>allowed</th></tr>';
 	foreach ($vdom['vlanlist'] as $vlan_id => $vlan_info)
 	{
-		if (in_array ($vlan_id, $allowed))
+		if (in_array ($vlan_id, $vlanport['allowed']))
 		{
 			$selected = ' checked';
 			$class = 'seltagbox';
@@ -6795,16 +6842,16 @@ function renderPortVLANConfig ($object_id, $port_name, $allowed, $native)
 	// rightmost table also contains form buttons
 	echo '<table border=0 cellspacing=0 cellpadding=3 align=center>';
 	echo '<tr><th colspan=2>native</th></tr>';
-	if (!count ($allowed))
+	if (!count ($vlanport['allowed']))
 		echo '<tr><td colspan=2>(no allowed VLANs for this port)</td></tr>';
 	else
 	{
 		$native_options = array (0 => '-- NONE --');
-		foreach ($allowed as $allowed_id)
+		foreach ($vlanport['allowed'] as $allowed_id)
 			$native_options[$allowed_id] = formatVLANName ($vdom['vlanlist'][$allowed_id]);
 		foreach ($native_options as $vlan_id => $vlan_text)
 		{
-			if ($vlan_id == $native)
+			if ($vlan_id == $vlanport['native'])
 			{
 				$selected = ' checked';
 				$class = 'seltagbox';
@@ -6822,8 +6869,8 @@ function renderPortVLANConfig ($object_id, $port_name, $allowed, $native)
 			// which is explicitly protected from it.
 			if
 			(
-				(array_key_exists ($native, $vdom['vlanlist']) and
-				$vdom['vlanlist'][$native]['vlan_type'] == 'alien')
+				(array_key_exists ($vlanport['native'], $vdom['vlanlist']) and
+				$vdom['vlanlist'][$vlanport['native']]['vlan_type'] == 'alien')
 				or
 				(array_key_exists ($vlan_id, $vdom['vlanlist']) and
 				$vdom['vlanlist'][$vlan_id]['vlan_type'] == 'alien')
@@ -6837,11 +6884,11 @@ function renderPortVLANConfig ($object_id, $port_name, $allowed, $native)
 	echo '<tr><td class=tdleft>';
 	printImageHREF ('SAVE', 'Save changes', TRUE);
 	echo '</form></td><td class=tdright>';
-	if (!count ($allowed))
+	if (!count ($vlanport['allowed']))
 		printImageHREF ('CLEAR gray');
 	else
 	{
-		printOpFormIntro ('savePortVLANConfig', array ('port_name' => $port_name, 'mutex_rev' => $vswitch['mutex_rev']));
+		printOpFormIntro ('saveTrunk', array ('port_name' => $port_name, 'mutex_rev' => $vswitch['mutex_rev']));
 		printImageHREF ('CLEAR', 'Unassign all VLANs', TRUE);
 		echo '</form>';
 	}
@@ -6977,14 +7024,17 @@ function renderObjectVLANSync ($object_id)
 		$formports[] = array
 		(
 			'port_name' => $port_name,
+			'desired_mode' => $port['mode'],
 			'desired_allowed' => $port['allowed'],
 			'desired_native' => $port['native'],
+			'running_mode' => 'none',
 			'running_allowed' => array(),
 			'running_native' => 0,
 		);
 	foreach ($running_config['portdata'] as $port_name => $item)
 		if (NULL !== $tmpkey = scanArrayForItem ($formports, 'port_name', $port_name))
 		{
+			$formports[$tmpkey]['running_mode'] = $item['mode'];
 			$formports[$tmpkey]['running_allowed'] = $item['allowed'];
 			$formports[$tmpkey]['running_native'] = $item['native'];
 		}
@@ -6992,8 +7042,10 @@ function renderObjectVLANSync ($object_id)
 			$formports[] = array
 			(
 				'port_name' => $port_name,
+				'desired_mode' => 'none',
 				'desired_allowed' => array(),
 				'desired_native' => 0,
+				'running_mode' => $item['mode'],
 				'running_allowed' => $item['allowed'],
 				'running_native' => $item['native'],
 			);
@@ -7012,8 +7064,8 @@ function renderObjectVLANSync ($object_id)
 	$rownum = 1;
 	foreach ($formports as $port)
 	{
-		$desired_cfgstring = serializeVLANPack ($port['desired_native'], $port['desired_allowed']);
-		$running_cfgstring = serializeVLANPack ($port['running_native'], $port['running_allowed']);
+		$desired_cfgstring = serializeVLANPack (array ('mode' => $port['desired_mode'], 'native' => $port['desired_native'], 'allowed' => $port['desired_allowed']));
+		$running_cfgstring = serializeVLANPack (array ('mode' => $port['running_mode'], 'native' => $port['running_native'], 'allowed' => $port['running_allowed']));
 		// decide on the radio inputs now
 		$radio = array ('left' => TRUE, 'asis' => TRUE, 'right' => TRUE);
 		$checked = array ('left' => '', 'asis' => ' checked', 'right' => '');
