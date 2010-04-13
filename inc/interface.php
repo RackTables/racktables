@@ -6714,12 +6714,11 @@ function renderObjectVLANPorts ($object_id)
 	echo '<table border=0 width="100%"><tr valign=top><td class=tdleft width="30%">';
 	// port list
 	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
-	echo '<tr><th>port name</th><th>last saved state</th>';
-	echo $req_port_name == '' ? '<th>new access VLAN</th></tr>' : '</tr>';
+	echo '<tr><th>port&nbsp;name</th><th>last&nbsp;saved&nbsp;state</th>';
+	echo $req_port_name == '' ? '<th>new&nbsp;state</th></tr>' : '</tr>';
 	if ($req_port_name == '');
-		printOpFormIntro ('saveAccess', array ('mutex_rev' => $vswitch['mutex_rev']));
-	$seen_access = FALSE;
-	$pn = 0;
+		printOpFormIntro ('save', array ('mutex_rev' => $vswitch['mutex_rev']));
+	$nports = 0; // count only access ports
 	foreach ($desired_config as $port_name => $port)
 	{
 		if
@@ -6748,19 +6747,24 @@ function renderObjectVLANPorts ($object_id)
 				'object_id' => $object_id,
 			);
 			if ($port_name == $req_port_name)
+			{
 				$imagename = 'Zooming';
+				$imagetext = 'zoom out';
+			}
 			else
 			{
 				$imagename = 'Zoom';
+				$imagetext = 'zoom in';
 				$linkparams['port_name'] = $port_name;
 			}
-			echo "<a href='" . makeHref ($linkparams) . "'>" . getImageHREF ($imagename) . '</a>';
+			echo "<a href='" . makeHref ($linkparams) . "'>" . getImageHREF ($imagename, $imagetext) . '</a>';
 			echo '</td></tr>';
 		}
 		elseif ($req_port_name == '')
 		{
-			echo "<input type=hidden name=pn_${pno} value=${port_name}>";
-			echo "<input type=hidden name=pm_${pno} value=access>";
+			// don't render a form for access ports, when a trunk port is zoomed
+			echo "<input type=hidden name=pn_${nports} value=${port_name}>";
+			echo "<input type=hidden name=pm_${nports} value=access>";
 			$wrt_vlans = iosParseVLANString ($port['wrt_vlans']);
 			$options = array (0 => '-- NONE --');
 			if ($port['native'])
@@ -6774,16 +6778,19 @@ function renderObjectVLANPorts ($object_id)
 				)
 					$options[$vlan_id] = formatVLANName ($vlan_info, TRUE);
 			echo "<tr><td>${port_name}</td><td>" . serializeVLANPack ($port) . "</td><td>";
-			echo getSelect ($options, array ('name' => 'new_vlan_id', $port['native'])) . '</td></tr>';
-			$seen_access = TRUE;
+			echo getSelect ($options, array ('name' => "pnv_${nports}"), $port['native']) . '</td></tr>';
+			$nports++;
 		}
 		else
 		{
 			echo "<tr><td>${port_name}</td><td>" . serializeVLANPack ($port) . "</td><td>&nbsp;</td></tr>";
 		}
 	}
-	if ($req_port_name == '' and $seen_access)
-		echo '<tr><td colspan=3 class=tdcenter>' . getImageHREF ('SAVE', 'save configuration', TRUE) . '</td></tr></form>';
+	if ($req_port_name == '' and $nports)
+		echo "<input type=hidden name=nports value=${nports}>" .
+			'<tr><td colspan=3 class=tdcenter>' .
+			getImageHREF ('SAVE', 'save configuration', TRUE) .
+			'</td></tr></form>';
 	echo '</table>';
 	echo '</td>';
 	// configuration of currently selected port, if any
@@ -6807,13 +6814,14 @@ function renderPortVLANConfig ($vswitch, $vdom, $port_name, $vlanport)
 		echo '<td colspan=2>(configured VLAN domain is empty)</td>';
 		return;
 	}
-	$forminfo = array
+	$formextra = array
 	(
-		'port_name' => $port_name,
 		'mutex_rev' => $vswitch['mutex_rev'],
-		'port_mode' => $vlanport['vst_role'], // this will never be 'uplink'
+		'nports' => 1,
+		'pn_0' => $port_name,
+		'pm_0' => $vlanport['vst_role'], // calling function must make sure it is not 'uplink'
 	);
-	printOpFormIntro ('saveTrunk', $forminfo);
+	printOpFormIntro ('save', $formextra);
 	echo '<td width="35%">';
 	echo '<table border=0 cellspacing=0 cellpadding=3 align=center>';
 	echo '<tr><th colspan=2>allowed</th></tr>';
@@ -6834,7 +6842,7 @@ function renderPortVLANConfig ($vswitch, $vdom, $port_name, $vlanport)
 		if ($vlan_info['vlan_type'] == 'alien')
 			$selected .= ' disabled';
 		echo "<tr><td colspan=2 class=${class}>";
-		echo "<label><input type=checkbox name='allowed_id[]' value='${vlan_id}'${selected}> ";
+		echo "<label><input type=checkbox name='pav_0[]' value='${vlan_id}'${selected}> ";
 		echo formatVLANName ($vlan_info) . "</label></td></tr>";
 	}
 	echo '</table>';
@@ -6877,7 +6885,7 @@ function renderPortVLANConfig ($vswitch, $vdom, $port_name, $vlanport)
 			)
 				$selected .= ' disabled';
 			echo "<tr><td colspan=2 class=${class}>";
-			echo "<label><input type=radio name='native_id' value='${vlan_id}'${selected}> ";
+			echo "<label><input type=radio name='pnv_0' value='${vlan_id}'${selected}> ";
 			echo $vlan_text . "</label></td></tr>";
 		}
 	}
@@ -6888,7 +6896,7 @@ function renderPortVLANConfig ($vswitch, $vdom, $port_name, $vlanport)
 		printImageHREF ('CLEAR gray');
 	else
 	{
-		printOpFormIntro ('saveTrunk', array ('port_name' => $port_name, 'mutex_rev' => $vswitch['mutex_rev']));
+		printOpFormIntro ('save', $formextra);
 		printImageHREF ('CLEAR', 'Unassign all VLANs', TRUE);
 		echo '</form>';
 	}

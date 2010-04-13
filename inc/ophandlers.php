@@ -2176,14 +2176,21 @@ function updateVLANDomain ()
 	return buildRedirectURL (__FUNCTION__, $result ? 'OK' : 'ERR');
 }
 
-$msgcode['savePortVLANConfig']['OK'] = 43;
-$msgcode['savePortVLANConfig']['ERR1'] = 160;
-$msgcode['savePortVLANConfig']['ERR2'] = 109;
-function savePortVLANConfig ()
+$msgcode['save8021QPorts']['OK'] = 43;
+$msgcode['save8021QPorts']['ERR1'] = 160;
+$msgcode['save8021QPorts']['ERR2'] = 109;
+function save8021QPorts ()
 {
-	assertStringArg ('port_name');
-	assertUIntArg ('mutex_rev');
 	global $sic, $dbxlink;
+	assertUIntArg ('nports');
+	assertUIntArg ('mutex_rev');
+	if ($sic['nports'] == 1)
+	{
+		assertStringArg ('pn_0');
+		$extra = array ('port_name' => $sic['pn_0']);
+	}
+	else
+		$extra = array();
 	$dbxlink->beginTransaction();
 	try
 	{
@@ -2191,9 +2198,32 @@ function savePortVLANConfig ()
 			throw new InvalidArgException ('object_id', $object_id, 'VLAN domain is not set for this object');
 		$domain_vlanlist = getDomainVLANs ($vswitch['domain_id']);
 		$stored_config = getDesired8021QConfig ($sic['object_id']);
-		$allowed = isset ($sic['allowed_id']) ? $sic['allowed_id'] : array();
-		$native = isset ($sic['native_id']) ? $sic['native_id'] : 0; // 0 means "reset"
-		$work = array ($sic['port_name'] => array ('allowed' => $allowed, 'native' => $native));
+		$work = array();
+		for ($i = 0; $i < $sic['nports']; $i++)
+		{
+			assertStringArg ('pn_' . $i);
+			assertStringArg ('pm_' . $i);
+#			assertArrayArg ('pav_' . $i);
+			// An access port only generates form input for its native VLAN,
+			// which we derive allowed VLAN list from.
+			$native = isset ($sic['pnv_' . $i]) ? $sic['pnv_' . $i] : 0;
+			if ($sic["pm_${i}"] == 'trunk')
+				$allowed = isset ($sic['pav_' . $i]) ? $sic['pav_' . $i] : array();
+			elseif ($native)
+			{
+				assertUIntArg ('pnv_' . $i);
+				$allowed = array ($native);
+			}
+			else
+				$allowed = array();
+			
+			$work[$sic['pn_' . $i]] = array
+			(
+				'mode' => $sic['pm_' . $i],
+				'allowed' => $allowed,
+				'native' => $native,
+			);
+		}
 		importSwitch8021QConfig
 		(
 			$sic['object_id'],
@@ -2208,10 +2238,10 @@ function savePortVLANConfig ()
 	catch (Exception $e)
 	{
 		$dbxlink->rollBack();
-		return buildRedirectURL (__FUNCTION__, 'ERR2', array(), NULL, NULL, array ('port_name' => $sic['port_name']));
+		return buildRedirectURL (__FUNCTION__, 'ERR2', array(), NULL, NULL, $extra);
 	}
 	$dbxlink->commit();
-	return buildRedirectURL (__FUNCTION__, 'OK', array(), NULL, NULL, array ('port_name' => $sic['port_name']));
+	return buildRedirectURL (__FUNCTION__, 'OK', array(), NULL, NULL, $extra);
 }
 
 $msgcode['bindVLANtoIPv4']['OK'] = 48;
