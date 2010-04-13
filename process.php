@@ -22,6 +22,13 @@ if (!isset ($ophandler[$pageno][$tabno][$op]))
 	throw new RuntimeException("Invalid request in operation broker: page '${pageno}', tab '${tabno}', op '${op}'");
 }
 
+if (!function_exists ($ophandler[$pageno][$tabno][$op]))
+	throw new RuntimeException
+	(
+		"Dispatching error at position '${pageno}-${tabno}-${op}': function '" .
+		$ophandler[$pageno][$tabno][$op] . "' does not exist."
+	);
+
 // We have a chance to handle an error before starting HTTP header.
 if (!isset ($delayauth[$pageno][$tabno][$op]) and !permitted())
 	$location = buildWideRedirectURL (oneLiner (157)); // operation not permitted
