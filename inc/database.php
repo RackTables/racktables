@@ -3932,7 +3932,6 @@ function exportSwitch8021QConfig
 	// save changes (D == D' D' != R' R == R')
 	if ($db_mutex_rev != $form_mutex_rev) // D != D'
 		throw new RuntimeException ('expired data detected');
-	$device_config = getRunning8021QConfig ($object_id);
 	// only ignore VLANs, which exist and are explicitly shown as "alien"
 	$old_managed_vlans = array();
 	foreach ($device_vlanlist as $vlan_id)
@@ -3942,7 +3941,6 @@ function exportSwitch8021QConfig
 			$domain_vlanlist[$vlan_id]['vlan_type'] != 'alien'
 		)
 			$old_managed_vlans[] = $vlan_id;
-	$db_config = getDesired8021QConfig ($object_id);
 	$ports_to_do = array();
 	foreach ($new_change_from as $port_name => $port)
 	{
@@ -3951,12 +3949,14 @@ function exportSwitch8021QConfig
 			continue;
 		if
 		(
+			$change_to[$port_name]['mode'] == $port['mode'] and
 			array_values_same ($change_to[$port_name]['allowed'], $port['allowed']) and
 			$change_to[$port_name]['native'] == $port['native'] // D' == R'
 		)
 			continue;
 		if
 		(
+			$old_change_from[$port_name]['mode'] != $port['mode'] or
 			!array_values_same ($old_change_from[$port_name]['allowed'], $port['allowed']) or
 			$old_change_from[$port_name]['native'] != $port['native'] // R != R'
 		)
@@ -3964,12 +3964,14 @@ function exportSwitch8021QConfig
 		if (array_key_exists ($port_name, $change_to))
 			$ports_to_do[$port_name] = array
 			(
+				'old_mode' => $new_change_from[$port_name]['mode'],
 				'old_allowed' => array_key_exists ($port_name, $new_change_from) ?
 					$new_change_from[$port_name]['allowed'] :
 					array(),
 				'old_native' => array_key_exists ($port_name, $new_change_from) ?
 					$new_change_from[$port_name]['native'] :
 					0,
+				'new_mode' => $change_to[$port_name]['mode'],
 				'new_allowed' => $change_to[$port_name]['allowed'],
 				'new_native' => $change_to[$port_name]['native'],
 			);
@@ -3983,9 +3985,11 @@ function exportSwitch8021QConfig
 	// Like for old_managed_vlans, a VLANs is never listed, only if it
 	// exists and belongs to "alien" type.
 	$new_managed_vlans = array();
+	// 1
 	foreach ($domain_vlanlist as $vlan_id => $vlan)
 		if ($vlan['vlan_type'] == 'compulsory')
 			$new_managed_vlans[] = $vlan_id;
+	// 2
 	foreach ($new_change_from as $port_name => $port)
 	{
 		if (!array_key_exists ($port_name, $ports_to_do))
@@ -4003,6 +4007,7 @@ function exportSwitch8021QConfig
 					$new_managed_vlans[] = $vlan_id;
 			}
 	}
+	// 3
 	foreach ($ports_to_do as $port)
 		foreach ($port['new_allowed'] as $vlan_id)
 			if
@@ -4012,10 +4017,10 @@ function exportSwitch8021QConfig
 			)
 				$new_managed_vlans[] = $vlan_id;
 	$crq = array();
-	// Before removing old VLANs as such it is necessary to unassign
-	// ports from them (to remove VLANs from ports' list of "allowed"
-	// VLANs. This change in turn requires, that "native" VLAN isn't
-	// set to the one being removed.
+	// Before removing each old VLAN as such it is necessary to unassign
+	// ports from it (to remove VLAN from each ports' list of "allowed"
+	// VLANs). This change in turn requires, that a port's "native"
+	// VLAN isn't set to the one being removed from its "allowed" list.
 	foreach ($ports_to_do as $port_name => $port)
 	{
 		// "old" native is set and differs from the "new" native
@@ -4036,6 +4041,9 @@ function exportSwitch8021QConfig
 	}
 	// Now it is safe to unconfigure VLANs, which still exist on device,
 	// but are not present on the "new" list.
+	// FIXME: put all IDs into one pseudo-command to make it easier
+	// for translators to create/destroy VLANs in batches, where
+	// target platform allows them to do.
 	foreach (array_diff ($old_managed_vlans, $new_managed_vlans) as $vlan_id)
 		$crq[] = array
 		(
