@@ -7100,6 +7100,7 @@ function renderObjectVLANSync ($object_id)
 		}
 		echo "<td><label for=i_${rownum}_right>${running_cfgstring}</label></td>";
 		echo '</tr>';
+		echo "<input type=hidden name=rm_${rownum} value=${port['running_mode']}>";
 		echo "<input type=hidden name=rn_${rownum} value=${port['running_native']}>";
 		foreach ($port['running_allowed'] as $a)
 			echo "<input type=hidden name=ra_${rownum}[] value=${a}>";

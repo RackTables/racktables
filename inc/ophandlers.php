@@ -2287,6 +2287,7 @@ function processVLANSyncRequest ()
 		case 'right':
 			$old_running_config[$sic["i_${i}"]][$sic["pn_${i}"]] = array
 			(
+				'mode' => $sic["rm_${i}"],
 				'allowed' => $sic["ra_${i}"],
 				'native' => $sic["rn_${i}"],
 			);
