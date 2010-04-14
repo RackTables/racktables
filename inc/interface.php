@@ -6536,6 +6536,8 @@ function render8021QOrderForm ($some_id)
 
 function render8021QStatus ()
 {
+	echo '<table border=0 class=objectview cellspacing=0 cellpadding=0>';
+	echo "<tr><td class=pcleft width='50%'>";
 	startPortlet ('VLAN domains');
 	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
 	echo '<tr><th>description</th><th>VLANs</th><th>switches</th></tr>';
@@ -6561,6 +6563,29 @@ function render8021QStatus ()
 	}
 	echo '</table>';
 	finishPortlet();
+	echo '</td><td class=pcright>';
+	if (!count ($dplan = get8021QDeployPlan()))
+		startPortlet ('deploy plan is empty');
+	else
+	{
+		global $nextorder;
+		startPortlet ('deploy plan');
+		echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
+		echo '<tr><th>switch</th><th>age</th></tr>';
+		$order = 'odd';
+		foreach ($dplan as $item)
+		{
+			echo "<tr class=row_${order}><td>";
+			renderCell (spotEntity ('object', $item['object_id']));
+			echo '</td><td>';
+			echo $item['age'];
+			echo '</td></tr>';
+			$order = $nextorder[$order];
+		}
+		echo '</table>';
+	}
+	finishPortlet();
+	echo '</td></tr></table>';
 }
 
 function renderVLANDomainListEditor ()
@@ -6777,6 +6802,7 @@ function renderObjectVLANPorts ($object_id)
 					in_array ($vlan_id, $wrt_vlans)
 				)
 					$options[$vlan_id] = formatVLANName ($vlan_info, TRUE);
+			ksort ($options);
 			echo "<tr><td>${port_name}</td><td>" . serializeVLANPack ($port) . "</td><td>";
 			echo getSelect ($options, array ('name' => "pnv_${nports}"), $port['native']) . '</td></tr>';
 			$nports++;

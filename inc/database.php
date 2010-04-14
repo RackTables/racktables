@@ -4230,4 +4230,15 @@ function commitUpdateVSTRule ($vst_id, $rule_no, $new_rule_no, $port_pcre, $port
 	return $prepared->execute (array ($new_rule_no, $port_pcre, $port_role, $wrt_vlans, $vst_id, $rule_no));
 }
 
+function get8021QDeployPlan()
+{
+	$ret = array();
+	$query = 'SELECT object_id, NOW() - last_reset AS age ' .
+		'FROM VLANSwitch WHERE last_push != 0 AND last_reset > last_push';
+	$result = usePreparedSelectBlade ($query);
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
+		$ret[] = $row;
+	return $ret;
+}
+
 ?>
