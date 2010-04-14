@@ -6724,7 +6724,7 @@ function renderObjectVLANPorts ($object_id)
 		if
 		(
 			!array_key_exists ('vst_role', $port) and
-			!array_key_exists ('mode', $port)
+			$port['mode'] == 'none'
 		)
 			continue;
 		if (!array_key_exists ('vst_role', $port))
@@ -7021,7 +7021,7 @@ function renderObjectVLANSync ($object_id)
 		showWarning ('Could not retrieve running-config of this device with the following error:<br>' . $re->getMessage(), __FUNCTION__);
 		return;
 	}
-	$desired_config = getDesired8021QConfig ($object_id);
+	$desired_config = apply8021QOrder ($object_id, getDesired8021QConfig ($object_id));
 	uksort ($desired_config, 'sortTokenize');
 	$formports = array();
 	// The form is based on the "desired" list, which has every
@@ -7032,6 +7032,7 @@ function renderObjectVLANSync ($object_id)
 		$formports[] = array
 		(
 			'port_name' => $port_name,
+			'vst_role' => $port['vst_role'],
 			'desired_mode' => $port['mode'],
 			'desired_allowed' => $port['allowed'],
 			'desired_native' => $port['native'],
@@ -7077,7 +7078,13 @@ function renderObjectVLANSync ($object_id)
 		// decide on the radio inputs now
 		$radio = array ('left' => TRUE, 'asis' => TRUE, 'right' => TRUE);
 		$checked = array ('left' => '', 'asis' => ' checked', 'right' => '');
-		if ($desired_cfgstring == $running_cfgstring)
+		$trclass = 'row_' . $order;
+		if (array_key_exists ('vst_role', $port) and $port['vst_role'] == 'uplink')
+		{
+			$radio['left'] = $radio['asis'] = $radio['right'] = FALSE;
+			$trclass = 'trbusy';
+		}
+		elseif ($desired_cfgstring == $running_cfgstring)
 			$radio['left'] = $radio['right'] = FALSE;
 		else // turn off each side independently
 		{
@@ -7087,7 +7094,7 @@ function renderObjectVLANSync ($object_id)
 			if (count (array_diff ($port['running_allowed'], $domvlans)))
 				$radio['right'] = FALSE;
 		}
-		echo "<tr class=row_${order}><td>${port['port_name']}</td>";
+		echo "<tr class=${trclass}><td>${port['port_name']}</td>";
 		echo "<td><label for=i_${rownum}_left>${desired_cfgstring}</label></td>";
 		foreach ($radio as $pos => $enabled)
 		{
