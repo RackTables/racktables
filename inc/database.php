@@ -3880,6 +3880,9 @@ function importSwitch8021QConfig
 		// rely on ON DELETE CASCADE for PortAllowedVLAN and PortNativeVLAN
 		if (FALSE === usePreparedDeleteBlade ('PortVLANMode', array ('object_id' => $object_id, 'port_name' => $port_name)))
 			throw new RuntimeException();
+		// A record on a port with none VLANs allowed makes no sense regardless of port mode.
+		if (!count ($item['allowed']))
+			continue;
 		if (!usePreparedInsertBlade ('PortVLANMode', array ('object_id' => $object_id, 'port_name' => $port_name, 'vlan_mode' => $item['mode'])))
 			throw new RuntimeException();
 		foreach ($item['allowed'] as $vlan_id)
@@ -4022,23 +4025,60 @@ function exportSwitch8021QConfig
 	// VLANs). This change in turn requires, that a port's "native"
 	// VLAN isn't set to the one being removed from its "allowed" list.
 	foreach ($ports_to_do as $port_name => $port)
-	{
-		// "old" native is set and differs from the "new" native
-		if ($port['old_native'] and $port['old_native'] != $port['new_native'])
+		switch ($port['old_mode'] . '->' . $port['new_mode'])
+		{
+		case 'trunk->trunk':
+			// "old" native is set and differs from the "new" native
+			if ($port['old_native'] and $port['old_native'] != $port['new_native'])
+				$crq[] = array
+				(
+					'opcode' => 'unset native',
+					'arg1' => $port_name,
+					'arg2' => $port['old_native'],
+				);
+			foreach (array_diff ($port['old_allowed'], $port['new_allowed']) as $vlan_id)
+				$crq[] = array
+				(
+					'opcode' => 'rem allowed',
+					'arg1' => $port_name,
+					'arg2' => $vlan_id,
+				);
+			break;
+		case 'access->access':
+			if ($port['old_native'] and $port['old_native'] != $port['new_native'])
+				$crq[] = array
+				(
+					'opcode' => 'unset access',
+					'arg1' => $port_name,
+					'arg2' => $port['old_native'],
+				);
+			break;
+		case 'access->trunk':
+			$crq[] = array
+			(
+				'opcode' => 'unset access',
+				'arg1' => $port_name,
+				'arg2' => $port['old_native'],
+			);
+			break;
+		case 'trunk->access':
 			$crq[] = array
 			(
 				'opcode' => 'unset native',
 				'arg1' => $port_name,
 				'arg2' => $port['old_native'],
 			);
-		foreach (array_diff ($port['old_allowed'], $port['new_allowed']) as $vlan_id)
-			$crq[] = array
-			(
-				'opcode' => 'rem allowed',
-				'arg1' => $port_name,
-				'arg2' => $vlan_id,
-			);
-	}
+			foreach ($port['old_allowed'] as $vlan_id)
+				$crq[] = array
+				(
+					'opcode' => 'rem allowed',
+					'arg1' => $port_name,
+					'arg2' => $vlan_id,
+				);
+			break;
+		default:
+			throw new RuntimeException ('error in ports_to_do structure');
+		}
 	// Now it is safe to unconfigure VLANs, which still exist on device,
 	// but are not present on the "new" list.
 	// FIXME: put all IDs into one pseudo-command to make it easier
@@ -4060,27 +4100,75 @@ function exportSwitch8021QConfig
 	// Now, when all new VLANs are created (queued), it is safe to assign (queue)
 	// ports to the new VLANs.
 	foreach ($ports_to_do as $port_name => $port)
-	{
-		// For each allowed VLAN, which is present on the "new" list and missing from
-		// the "old" one, queue a command to assign current port to that VLAN.
-		foreach (array_diff ($port['new_allowed'], $port['old_allowed']) as $vlan_id)
+		switch ($port['old_mode'] . '->' . $port['new_mode'])
+		{
+		case 'trunk->trunk':
+			// For each allowed VLAN, which is present on the "new" list and missing from
+			// the "old" one, queue a command to assign current port to that VLAN.
+			foreach (array_diff ($port['new_allowed'], $port['old_allowed']) as $vlan_id)
+				$crq[] = array
+				(
+					'opcode' => 'add allowed',
+					'arg1' => $port_name,
+					'arg2' => $vlan_id,
+				);
+			// One of the "allowed" VLANs for this port may probably be "native".
+			// "new native" is set and differs from "old native"
+			if ($port['new_native'] and $port['new_native'] != $port['old_native'])
+				$crq[] = array
+				(
+					'opcode' => 'set native',
+					'arg1' => $port_name,
+					'arg2' => $port['new_native'],
+				);
+			break;
+		case 'access->access':
+			if ($port['new_native'] and $port['new_native'] != $port['old_native'])
+				$crq[] = array
+				(
+					'opcode' => 'set access',
+					'arg1' => $port_name,
+					'arg2' => $port['new_native'],
+				);
+			break;
+		case 'access->trunk':
 			$crq[] = array
 			(
-				'opcode' => 'add allowed',
+				'opcode' => 'set mode',
 				'arg1' => $port_name,
-				'arg2' => $vlan_id,
+				'arg2' => $port['new_mode'],
 			);
-		// One of the "allowed" VLANs for this port may probably be "native".
-		// "new native" is set and differs from "old native"
-		if ($port['new_native'] and $port['new_native'] != $port['old_native'])
+			foreach ($port['new_allowed'] as $vlan_id)
+				$crq[] = array
+				(
+					'opcode' => 'add allowed',
+					'arg1' => $port_name,
+					'arg2' => $vlan_id,
+				);
 			$crq[] = array
 			(
 				'opcode' => 'set native',
 				'arg1' => $port_name,
 				'arg2' => $port['new_native'],
 			);
-
-	}
+			break;
+		case 'trunk->access':
+			$crq[] = array
+			(
+				'opcode' => 'set mode',
+				'arg1' => $port_name,
+				'arg2' => $port['new_mode'],
+			);
+			$crq[] = array
+			(
+				'opcode' => 'set access',
+				'arg1' => $port_name,
+				'arg2' => $port['new_native'],
+			);
+			break;
+		default:
+			throw new RuntimeException ('error in ports_to_do structure');
+		}
 	setDevice8021QConfig ($object_id, $crq);
 	$query = $dbxlink->prepare ('UPDATE VLANSwitch SET last_push = NOW() WHERE object_id = ?');
 	$query->execute (array ($object_id));

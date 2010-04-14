@@ -2510,6 +2510,7 @@ function fdry5PickVLANSubcommand (&$work, $line)
 			else
 				$work['portdata'][$port_name] = array
 				(
+					'mode' => 'trunk',
 					'allowed' => array ($work['current']['vlan_id']),
 					'native' => 0, // can be updated later
 				);
@@ -2527,6 +2528,7 @@ function fdry5PickVLANSubcommand (&$work, $line)
 			else
 				$work['portdata'][$port_name] = array
 				(
+					'mode' => 'access',
 					'allowed' => array ($work['current']['vlan_id']),
 					'native' => $work['current']['vlan_id'],
 				);
@@ -2812,7 +2814,7 @@ function ios12TranslatePushQueue ($queue)
 				$buffered['arg2'] .
 				($buffered['arg2'] == $buffered['arg3'] ? '' : ('-' . $buffered['arg3'])),
 		);
-	$ret = "conf t\n";
+	$ret = "configure terminal\n";
 	foreach ($compressed as $cmd)
 		switch ($cmd['opcode'])
 		{
@@ -2833,6 +2835,15 @@ function ios12TranslatePushQueue ($queue)
 			break;
 		case 'unset native':
 			$ret .= "interface ${cmd['arg1']}\nno switchport trunk native vlan ${cmd['arg2']}\nexit\n";
+			break;
+		case 'set access':
+			$ret .= "interface ${cmd['arg1']}\nswitchport access vlan ${cmd['arg2']}\nexit\n";
+			break;
+		case 'unset access':
+			$ret .= "interface ${cmd['arg1']}\nno switchport access vlan\nexit\n";
+			break;
+		case 'set mode':
+			$ret .= "interface ${cmd['arg1']}\nswitchport mode ${cmd['arg2']}\nexit\n";
 			break;
 		}
 	$ret .= "end\n";
@@ -2863,6 +2874,14 @@ function fdry5TranslatePushQueue ($queue)
 		case 'unset native':
 			$ret .= "interface ${cmd['arg1']}\nno dual-mode ${cmd['arg2']}\nexit\n";
 			break;
+		case 'set access':
+			$ret .= "vlan ${cmd['arg2']}\nuntagged ${cmd['arg1']}\nexit\n";
+			break;
+		case 'unset access':
+			$ret .= "vlan ${cmd['arg2']}\nno untagged ${cmd['arg1']}\nexit\n";
+			break;
+		case 'set mode': // NOP
+			break;
 		}
 	$ret .= "end\n";
 	return $ret;
@@ -2887,10 +2906,17 @@ function vrp53TranslatePushQueue ($queue)
 			$ret .= "interface ${cmd['arg1']}\nundo port trunk allow-pass vlan ${cmd['arg2']}\nquit\n";
 			break;
 		case 'set native':
+		case 'set access':
 			$ret .= "interface ${cmd['arg1']}\nport default vlan ${cmd['arg2']}\nquit\n";
 			break;
 		case 'unset native':
+		case 'unset access':
 			$ret .= "interface ${cmd['arg1']}\nundo port default vlan\nquit\n";
+			break;
+		case 'set mode':
+			$modemap = array ('access' => 'access', 'trunk' => 'hybrid');
+			$ret .= "interface ${cmd['arg1']}\nport link-type ";
+			$ret .= $modemap[$cmd['arg2']] . "\nquit\n";
 			break;
 		}
 	$ret .= "return\n";
