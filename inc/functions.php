@@ -2843,7 +2843,10 @@ function ios12TranslatePushQueue ($queue)
 			$ret .= "interface ${cmd['arg1']}\nno switchport access vlan\nexit\n";
 			break;
 		case 'set mode':
-			$ret .= "interface ${cmd['arg1']}\nswitchport mode ${cmd['arg2']}\nexit\n";
+			$ret .= "interface ${cmd['arg1']}\nswitchport mode ${cmd['arg2']}\n";
+			if ($cmd['arg2'] == 'trunk')
+				$ret .= "no switchport trunk native vlan\nswitchport trunk allowed vlan none\n";
+			$ret .= "exit\n";
 			break;
 		}
 	$ret .= "end\n";
@@ -2915,8 +2918,10 @@ function vrp53TranslatePushQueue ($queue)
 			break;
 		case 'set mode':
 			$modemap = array ('access' => 'access', 'trunk' => 'hybrid');
-			$ret .= "interface ${cmd['arg1']}\nport link-type ";
-			$ret .= $modemap[$cmd['arg2']] . "\nquit\n";
+			$ret .= "interface ${cmd['arg1']}\nport link-type " . $modemap[$cmd['arg2']] . "\n";
+			if ($cmd['arg2'] == 'hybrid')
+				$ret .= "undo port default vlan\nundo port trunk allow-pass vlan all\n";
+			$ret .= "quit\n";
 			break;
 		}
 	$ret .= "return\n";
