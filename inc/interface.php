@@ -6985,6 +6985,7 @@ function renderVLANInfo ($vlan_ck)
 		echo '<tr><th>switch</th><th>ports</th></tr>';
 		foreach ($confports as $switch_id => $portlist)
 		{
+			usort ($portlist, 'sortTokenize');
 			echo "<tr class=row_${order} valign=top><td>";
 			renderCell (spotEntity ('object', $switch_id));
 			echo '</td><td class=tdleft><ul>';
@@ -6997,7 +6998,6 @@ function renderVLANInfo ($vlan_ck)
 	}
 	finishPortlet();
 	echo '</td></tr></table>';
-
 }
 
 function renderVLANIPv4 ()
