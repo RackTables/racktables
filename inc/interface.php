@@ -6513,13 +6513,14 @@ function render8021QStatus ()
 	echo "<tr><td class=pcleft width='50%'>";
 	startPortlet ('VLAN domains');
 	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
-	echo '<tr><th>description</th><th>VLANs</th><th>switches</th></tr>';
+	echo '<tr><th>description</th><th>VLANs</th><th>switches</th><th>';
+	echo getImageHREF ('net') . '</th></tr>';
 	foreach (getVLANDomainList() as $vdom_id => $dominfo)
 	{
 		echo "<tr align=left><td><a href='";
 		echo makeHref (array ('page' => 'vlandomain', 'vdom_id' => $vdom_id)) . "'>";
 		echo niftyString ($dominfo['description']) . "</a></td><td>${dominfo['vlanc']}</td>";
-		echo "<td>${dominfo['switchc']}</td></tr>";
+		echo "<td>${dominfo['switchc']}</td><td>${dominfo['ipv4netc']}</td></tr>";
 	}
 	echo '</table>';
 	finishPortlet();
