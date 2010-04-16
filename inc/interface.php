@@ -711,30 +711,33 @@ function getSelect ($optionList, $select_attrs = array(), $selected_id = NULL)
 	return $ret;
 }
 
+function printNiftySelect ($groupList, $select_attrs = array(), $selected_id = NULL)
+{
+	echo getNiftySelect ($groupList, $select_attrs, $selected_id);
+}
+
 // Input is a cooked list of OPTGROUPs, each with own sub-list of OPTIONs in the same
 // format as printSelect() expects.
-function printNiftySelect ($groupList, $select_attrs, $selected_id = NULL)
+function getNiftySelect ($groupList, $select_attrs, $selected_id = NULL)
 {
 	// special treatment for ungrouped data
 	if (count ($groupList) == 1 and isset ($groupList['other']))
-	{
-		printSelect ($groupList['other'], $select_attrs, $selected_id);
-		return;
-	}
+		return getSelect ($groupList['other'], $select_attrs, $selected_id);
 	if (!array_key_exists ('name', $select_attrs))
-		return;
-	echo '<select';
+		return '';
+	$ret = '<select';
 	foreach ($select_attrs as $attr_name => $attr_value)
-		echo " ${attr_name}=${attr_value}";
-	echo '>';
+		$ret .= " ${attr_name}=${attr_value}";
+	$ret .= '>';
 	foreach ($groupList as $groupname => $groupdata)
 	{
-		echo "<optgroup label='${groupname}'>";
+		$ret .= "<optgroup label='${groupname}'>";
 		foreach ($groupdata as $dict_key => $dict_value)
-			echo "<option value='${dict_key}'" . ($dict_key == $selected_id ? ' selected' : '') . ">${dict_value}</option>";
-		echo '</optgroup>';
+			$ret .= "<option value='${dict_key}'" . ($dict_key == $selected_id ? ' selected' : '') . ">${dict_value}</option>";
+		$ret .= '</optgroup>';
 	}
-	echo '</select>';
+	$ret .= '</select>';
+	return $ret;
 }
 
 // used by renderGridForm() and renderRackPage()
