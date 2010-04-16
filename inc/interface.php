@@ -1987,12 +1987,16 @@ function renderIPv4SpaceRecords ($tree, $baseurl, $target = 0, $level = 1)
 			echo "</td>";
 			if (getConfigVar ('IPV4_TREE_SHOW_VLAN') == 'yes')
 			{
-				echo '<td>';
-				if ($item['vlan_ck'] != '')
+				echo '<td class=tdleft>';
+				if (count ($item['8021q']))
 				{
-					list ($vdom_id, $vlan_id) = decodeVLANCK ($item['vlan_ck']);
-					echo '<a href="' . makeHref (array ('page' => 'vlan', 'vlan_ck' => $item['vlan_ck'])) . '">';
-					echo $vlan_id . '@' . niftyString ($vdomlist[$vdom_id]['description'], 15) . '</a>';
+					echo '<ul>';
+					foreach ($item['8021q'] as $binding)
+					{
+						echo '<li><a href="' . makeHref (array ('page' => 'vlan', 'vlan_ck' => $binding['domain_id'] . '-' . $binding['vlan_id'])) . '">';
+						echo $binding['vlan_id'] . '@' . niftyString ($vdomlist[$binding['domain_id']]['description'], 15) . '</a></li>';
+					}
+					echo '</ul>';
 				}
 				echo '</td>';
 			}
@@ -2238,6 +2242,7 @@ function renderIPv4Network ($id)
 		$page=0;
 
 	$range = spotEntity ('ipv4net', $id);
+	amplifyCell ($range);
 	loadIPv4AddrList ($range);
 	echo "<table border=0 class=objectview cellspacing=0 cellpadding=0>";
 	echo "<tr><td colspan=2 align=center><h1>${range['ip']}/${range['mask']}</h1><h2>";
@@ -2295,12 +2300,12 @@ function renderIPv4Network ($id)
 	echo $wildcardbylen[$range['mask']];
 	echo "</td></tr>\n";
 
-	if (strlen ($range['vlan_ck']))
+	foreach ($range['8021q'] as $item)
 	{
-		$vlaninfo = getVLANInfo ($range['vlan_ck']);
+		$vlaninfo = getVLANInfo ($item['domain_id'] . '-' . $item['vlan_id']);
 		echo '<tr><th width="50%" class=tdright>VLAN:</th><td class=tdleft><a href="';
-		echo makeHref (array ('page' => 'vlan', 'vlan_ck' => $range['vlan_ck'])) . '">';
-		echo formatVLANName ($vlaninfo) . ' @' . $vlaninfo['domain_descr'];
+		echo makeHref (array ('page' => 'vlan', 'vlan_ck' => $vlaninfo['vlan_ck'])) . '">';
+		echo formatVLANName ($vlaninfo) . ' @' . niftyString ($vlaninfo['domain_descr']);
 		echo '</a></td></tr>';
 	}
 	if (getConfigVar ('EXT_IPV4_VIEW') == 'yes' and count ($routers = findRouters ($range['addrlist'])))
@@ -2435,41 +2440,6 @@ function renderIPv4NetworkProperties ($id)
 	echo "<tr><td colspan=2 class=tdcenter>";
 	printImageHREF ('SAVE', 'Save changes', TRUE);
 	echo "</td></form></tr></table>\n";
-}
-
-function renderIPv4NetworkVLANTab ($id)
-{
-	$netinfo = spotEntity ('ipv4net', $id);
-	echo "<table border=0 cellspacing=0 cellpadding=3 width='100%'>";
-	if (strlen ($netinfo['vlan_ck']))
-	{
-		$vlaninfo = getVLANInfo ($netinfo['vlan_ck']);
-		echo '<tr><th width="50%" class=tdright>VLAN:</th><td class=tdleft><a href="';
-		echo makeHref (array ('page' => 'vlan', 'vlan_ck' => $netinfo['vlan_ck'])) . '">';
-		echo $vlaninfo['vlan_id'] . '@' . $vlaninfo['domain_descr'] . ' (';
-		echo $vlaninfo['vlan_descr'] . ')</a></td></tr>';
-		echo "<tr><th width='50%' class=tdright>Action:</th><td class=tdleft>";
-		echo '<a href="' . makeHrefProcess (array ('op' => 'unbind', 'vlan_ck' => $netinfo['vlan_ck'], 'id' => $id));
-		echo '">';
-		printImageHREF ('CUT', 'unbind');
-		echo '</a></td></tr>';
-	}
-	else
-	{
-		$options = array();
-		foreach (getVLANDomainList() as $dominfo)
-			foreach (getDomainVLANs ($dominfo['id']) as $vlaninfo)
-				$options[$dominfo['description']][$dominfo['id']. '-' . $vlaninfo['vlan_id']] =
-					$vlaninfo['vlan_id'] . ' (' . $vlaninfo['netc'] . ') ' . $vlaninfo['vlan_descr'];
-		printOpFormIntro ('bind');
-		echo "<tr><th width='50%' class=tdright>Current:</th><td class='tdleft sparenetwork'>(none)</td></tr>";
-		echo "<tr><th width='50%' class=tdright>Action:</th><td class=tdleft>";
-		printNiftySelect ($options, array ('name' => 'vlan_ck'));
-		echo ' ';
-		printImageHref ('ATTACH', 'bind', TRUE);
-		echo '</td></tr></form>';
-	}
-	echo '</table>';
 }
 
 function renderIPv4Address ($dottedquad)
@@ -6287,8 +6257,8 @@ function dynamic_title_decoder ($path_position)
 	case 'vlan':
 		return array
 		(
-			'name' => formatVLANName (getVLANInfo ($_REQUEST['vlan_ck']), TRUE),
-			'params' => array ('vlan_ck' => $_REQUEST['vlan_ck'])
+			'name' => formatVLANName (getVLANInfo ($sic['vlan_ck']), TRUE),
+			'params' => array ('vlan_ck' => $sic['vlan_ck'])
 		);
 	case 'vst':
 		$vst = getVLANSwitchTemplate ($sic['vst_id']);
@@ -7003,38 +6973,94 @@ function renderVLANInfo ($vlan_ck)
 	echo '</td></tr></table>';
 }
 
-function renderVLANIPv4 ()
+function renderVLANIPv4 ($some_id)
 {
-	function printNewItemTR ($twitlist = array())
+	function printNewItemTR ($sname, $options)
 	{
-		$options = array();
-		foreach (listCells ('ipv4net') as $netinfo)
-			if (!in_array ($netinfo['id'], $twitlist))
-				$options[$netinfo['id']] = $netinfo['ip'] . '/' . $netinfo['mask'] . ' ' . $netinfo['name'];
+		if (!count ($options))
+			return;
 		printOpFormIntro ('bind');
-		echo '<tr><td>';
-		printSelect ($options, array ('name' => 'id'));
-		echo '</td><td>';
-		printImageHREF ('ATTACH', 'bind', TRUE);
-		echo '</td></tr></form>';
+		echo '<tr><td>' . getNiftySelect ($options, array ('name' => $sname, 'tabindex' => 101));
+		echo '</td><td>' . getImageHREF ('ATTACH', 'bind', TRUE, 102) . '</td></tr></form>';
 	}
-	$vlan = getVLANInfo ($_REQUEST['vlan_ck']);
+	global $pageno;
+	$minuslines = array();
+	$plusoptions = array();
 	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
-	echo '<tr><th>network</th><th>&nbsp;</th></tr>';
+	echo '<tr>';
+	switch ($pageno)
+	{
+	case 'vlan':
+		echo '<th>' . getImageHREF ('net') . '</th>';
+		$vlan = getVLANInfo ($some_id);
+		foreach ($vlan['ipv4nets'] as $net_id)
+			$minuslines[] = array
+			(
+				'ipv4net_id' => $net_id,
+				'domain_id' => $vlan['domain_id'],
+				'vlan_id' => $vlan['vlan_id'],
+			);
+		// Any VLAN can link to any network, which isn't yet linked to current domain.
+		foreach (getVLANIPv4Options ($vlan['domain_id']) as $net_id)
+		{
+			$netinfo = spotEntity ('ipv4net', $net_id);
+			if (considerConfiguredConstraint ($netinfo, 'VLANIPV4NET_LISTSRC'))
+				$plusoptions['other'][$net_id] =
+					$netinfo['ip'] . '/' . $netinfo['mask'] . ' ' . $netinfo['name'];
+		}
+		$select_name = 'id';
+		break;
+	case 'ipv4net':
+		echo '<th>VLAN</th>';
+		$netinfo = spotEntity ('ipv4net', $some_id);
+		amplifyCell ($netinfo);
+		// find out list of VLAN domains, where the current network is already linked
+		foreach ($netinfo['8021q'] as $item)
+			$minuslines[] = array
+			(
+				'ipv4net_id' => $netinfo['id'],
+				'domain_id' => $item['domain_id'],
+				'vlan_id' => $item['vlan_id'],
+			);
+		// offer all other
+		foreach (getVLANDomainList() as $dominfo)
+			if (NULL === scanArrayForItem ($minuslines, 'domain_id', $dominfo['id']))
+				foreach (getDomainVLANs ($dominfo['id']) as $vlaninfo)
+					$plusoptions[$dominfo['description']][$dominfo['id']. '-' . $vlaninfo['vlan_id']] =
+						$vlaninfo['vlan_id'] . ' (' . $vlaninfo['netc'] . ') ' . $vlaninfo['vlan_descr'];
+		$select_name = 'vlan_ck';
+		break;
+	}
+	echo '<th>&nbsp;</th></tr>';
 	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
-		printNewItemTR ($vlan['ipv4nets']);
-	foreach ($vlan['ipv4nets'] as $netid)
+		printNewItemTR ($select_name, $plusoptions);
+	foreach ($minuslines as $item)
 	{
 		echo '<tr><td>';
-		renderCell (spotEntity ('ipv4net', $netid));
+		switch ($pageno)
+		{
+		case 'vlan':
+			renderCell (spotEntity ('ipv4net', $item['ipv4net_id']));
+			break;
+		case 'ipv4net':
+			$vlaninfo = getVLANInfo ($item['domain_id'] . '-' . $item['vlan_id']);
+			echo formatVLANName ($vlaninfo) . ' @' . niftyString ($vlaninfo['domain_descr']);
+			break;
+		}
 		echo '</td><td><a href="';
-		echo makeHrefProcess (array ('op' => 'unbind', 'id' => $netid, 'vlan_ck' => $_REQUEST['vlan_ck']));
-		echo '">';
-		printImageHREF ('CUT', 'unbind');
-		echo '</a></td></tr>';
+		echo makeHrefProcess
+		(
+			array
+			(
+				'op' => 'unbind',
+				'id' => $item['ipv4net_id'],
+				'vlan_ck' => $item['domain_id'] . '-' . $item['vlan_id']
+			)
+		);
+		echo '">' . getImageHREF ('CUT', 'unbind') . '</a></td></tr>';
 	}
 	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')
-		printNewItemTR ($vlan['ipv4nets']);
+		printNewItemTR ($select_name, $plusoptions);
 	echo '</table>';
 }
 

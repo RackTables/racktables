@@ -199,7 +199,7 @@ function trigger_object_8021qorder ()
 function trigger_ipv4net_vlanconfig ()
 {
 	$netinfo = spotEntity ('ipv4net', $_REQUEST['id']);
-	if (strlen ($netinfo['vlan_ck']))
+	if ($netinfo['vlanc'])
 		return 'std';
 	elseif (considerConfiguredConstraint ($netinfo, 'VLANIPV4NET_LISTSRC'))
 		return 'attn';
