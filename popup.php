@@ -64,8 +64,7 @@ header ('Content-Type: text/html; charset=UTF-8');
 <head>
 <?php
 	echo "<title>RackTables pop-up</title>\n";
-	echo "<link rel=stylesheet type='text/css' href=pi.css />\n";
-	echo "<link rel=icon href='" . getFaviconURL() . "' type='image/x-icon' />";
+	printPageHeaders();
 	echo '</head><body style="height: 100%;">';
 	assertStringArg ('helper');
 	switch ($_REQUEST['helper'])

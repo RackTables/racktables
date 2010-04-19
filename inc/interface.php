@@ -258,6 +258,14 @@ $image['Zooming']['height'] = 22;
 // This may be populated later onsite, report rendering function will use it.
 // See the $systemreport for structure.
 $localreports = array();
+
+// This also can be modified in local.php.
+$pageheaders = array
+(
+	100 => "<link rel=stylesheet type='text/css' href=pi.css />",
+	200 => "<link rel=icon href='pix/racktables.ico' type='image/x-icon' />",
+);
+
 $CodePressMap = array
 (
 	'sql' => 'sql',
@@ -3660,12 +3668,6 @@ function getImageHREF ($tag, $title = '', $do_input = FALSE, $tabindex = 0)
 			">";
 }
 
-// This function returns URL for favourite icon.
-function getFaviconURL ()
-{
-	return 'pix/racktables.ico';
-}
-
 function renderSystemReports ()
 {
 	$tmp = array
@@ -5368,8 +5370,7 @@ function renderAccessDenied ()
 	echo '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">'."\n";
 	echo '<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">'."\n";
 	echo "<head><title>RackTables: access denied</title>\n";
-	echo "<link rel=stylesheet type='text/css' href=pi.css />\n";
-	echo "<link rel=icon href='" . getFaviconURL() . "' type='image/x-icon' />";
+	printPageHeaders();
 	echo "</head><body>";
 	global $pageno, $tabno,
 		$user_given_tags,
@@ -6374,9 +6375,13 @@ function renderPortIFCompatEditor()
 	finishPortlet();
 }
 
-// Print style information
-function printStyle ()
+// print part of HTML HEAD block
+function printPageHeaders ()
 {
+	global $pageheaders;
+	ksort ($pageheaders);
+	foreach ($pageheaders as $s)
+		echo $s . "\n";
 	echo "<style type='text/css'>\n";
 	foreach (array ('F', 'A', 'U', 'T', 'Th', 'Tw', 'Thw') as $statecode)
 	{

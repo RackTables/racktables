@@ -16,9 +16,7 @@ $_SESSION['RTLT'][$pageno] = $tabno;
 echo '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">'."\n";
 echo '<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">'."\n";
 echo '<head><title>' . getTitle ($pageno) . "</title>\n";
-echo "<link rel=stylesheet type='text/css' href=pi.css />\n";
-echo "<link rel=icon href='" . getFaviconURL() . "' type='image/x-icon' />";
-printStyle();
+printPageHeaders();
 ?>
 	<script language='javascript' type='text/javascript' src='js/racktables.js'></script>
 	<script language='javascript' type='text/javascript' src='js/jquery-1.3.1.min.js'></script>
