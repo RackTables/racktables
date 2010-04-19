@@ -184,13 +184,10 @@ function getRackRowInfo ($rackrow_id)
 
 function getRackRows ()
 {
-	$query = "select id, name from RackRow ";
-	$result = useSelectBlade ($query);
+	$result = useSelectBlade ('SELECT id, name FROM RackRow ORDER BY name', __FUNCTION__);
 	$rows = array();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 		$rows[$row['id']] = $row['name'];
-	$result->closeCursor();
-	asort ($rows);
 	return $rows;
 }
 
