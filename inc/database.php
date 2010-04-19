@@ -27,7 +27,7 @@ $SQLSchema = array
 			'nports' => '(SELECT COUNT(*) FROM Port WHERE object_id = RackObject.id)',
 		),
 		'keycolumn' => 'id',
-		'ordcolumns' => array ('name'),
+		'ordcolumns' => array ('RackObject.name'),
 	),
 	'user' => array
 	(
@@ -40,7 +40,7 @@ $SQLSchema = array
 			'user_realname' => 'user_realname',
 		),
 		'keycolumn' => 'user_id',
-		'ordcolumns' => array ('user_name'),
+		'ordcolumns' => array ('UserAccount.user_name'),
 	),
 	'ipv4net' => array
 	(
@@ -55,7 +55,7 @@ $SQLSchema = array
 			'parent_id' => '(SELECT id FROM IPv4Network AS subt WHERE IPv4Network.ip & (4294967295 >> (32 - subt.mask)) << (32 - subt.mask) = subt.ip and subt.mask < IPv4Network.mask ORDER BY subt.mask DESC limit 1)',
 		),
 		'keycolumn' => 'id',
-		'ordcolumns' => array ('ip', 'mask'),
+		'ordcolumns' => array ('IPv4Network.ip', 'IPv4Network.mask'),
 	),
 	'file' => array
 	(
@@ -72,7 +72,7 @@ $SQLSchema = array
 			'comment' => 'comment',
 		),
 		'keycolumn' => 'id',
-		'ordcolumns' => array ('name'),
+		'ordcolumns' => array ('File.name'),
 	),
 	'ipv4vs' => array
 	(
@@ -90,7 +90,7 @@ $SQLSchema = array
 			'dname' => 'CONCAT_WS("/", CONCAT_WS(":", INET_NTOA(vip), vport), proto)',
 		),
 		'keycolumn' => 'id',
-		'ordcolumns' => array ('vip', 'proto', 'vport'),
+		'ordcolumns' => array ('IPv4VS.vip', 'IPv4VS.proto', 'IPv4VS.vport'),
 	),
 	'ipv4rspool' => array
 	(
@@ -105,7 +105,7 @@ $SQLSchema = array
 			'rsconfig' => 'rsconfig',
 		),
 		'keycolumn' => 'id',
-		'ordcolumns' => array ('name', 'id'),
+		'ordcolumns' => array ('IPv4RSPool.name', 'IPv4RSPool.id'),
 	),
 	'rack' => array
 	(
@@ -120,7 +120,7 @@ $SQLSchema = array
 			'row_name' => '(select name from RackRow where RackRow.id = row_id)',
 		),
 		'keycolumn' => 'id',
-		'ordcolumns' => array ('row_id', 'name'),
+		'ordcolumns' => array ('row_name', 'Rack.name'),
 		'pidcolumn' => 'row_id',
 	),
 );
@@ -283,7 +283,7 @@ function listCells ($realm, $parent_id = 0)
 		$query .= " WHERE ${SQLinfo['table']}.${SQLinfo['pidcolumn']} = ${parent_id}";
 	$query .= " ORDER BY ";
 	foreach ($SQLinfo['ordcolumns'] as $oc)
-		$query .= "${SQLinfo['table']}.${oc}, ";
+		$query .= "${oc}, ";
 	$query .= " tag_id";
 	$result = useSelectBlade ($query, __FUNCTION__);
 	$ret = array();
@@ -2117,10 +2117,11 @@ function getChapterRefc ($chapter_id, $keylist)
 function getAttrMap ()
 {
 	$query =
-		'SELECT id, type, name, chapter_id, (SELECT name FROM Chapter WHERE id = chapter_id) ' .
+		'SELECT id, type, name, chapter_id, (SELECT dict_value FROM Dictionary WHERE dict_key = objtype_id) '.
+		'AS objtype_name, (SELECT name FROM Chapter WHERE id = chapter_id) ' .
 		'AS chapter_name, objtype_id, (SELECT COUNT(object_id) FROM AttributeValue AS av INNER JOIN RackObject AS ro ' .
 		'ON av.object_id = ro.id WHERE av.attr_id = Attribute.id AND ro.objtype_id = AttributeMap.objtype_id) ' .
-		'AS refcnt FROM Attribute LEFT JOIN AttributeMap ON id = attr_id ORDER BY Attribute.name, objtype_id';
+		'AS refcnt FROM Attribute LEFT JOIN AttributeMap ON id = attr_id ORDER BY Attribute.name, objtype_name';
 	$result = useSelectBlade ($query, __FUNCTION__);
 	$ret = array();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
@@ -2264,7 +2265,7 @@ function getAttrValues ($object_id)
 		"left join AttributeValue as AV on AV.attr_id = AM.attr_id and AV.object_id = RO.id " .
 		"left join Dictionary as D on D.dict_key = AV.uint_value and AM.chapter_id = D.chapter_id " .
 		"left join Chapter as C on AM.chapter_id = C.id " .
-		"where RO.id = ${object_id} order by A.type, A.name";
+		"where RO.id = ${object_id} order by A.name, A.type";
 	$result = useSelectBlade ($query, __FUNCTION__);
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
