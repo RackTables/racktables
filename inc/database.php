@@ -3973,7 +3973,11 @@ function exportSwitch8021QConfig
 	foreach ($new_change_from as $port_name => $port)
 	{
 		// FIXME: iterate over old_change_from
-		if (!array_key_exists ($port_name, $old_change_from))
+		if
+		(
+			!array_key_exists ($port_name, $old_change_from) or
+			!array_key_exists ($port_name, $change_to)
+		)
 			continue;
 		if
 		(
@@ -3989,27 +3993,34 @@ function exportSwitch8021QConfig
 			$old_change_from[$port_name]['native'] != $port['native'] // R != R'
 		)
 			throw new RuntimeException ('expired data detected');
-		if (array_key_exists ($port_name, $change_to))
-			$ports_to_do[$port_name] = array
-			(
-				'old_mode' => $new_change_from[$port_name]['mode'],
-				'old_allowed' => array_key_exists ($port_name, $new_change_from) ?
-					$new_change_from[$port_name]['allowed'] :
-					array(),
-				'old_native' => array_key_exists ($port_name, $new_change_from) ?
-					$new_change_from[$port_name]['native'] :
-					0,
-				'new_mode' => $change_to[$port_name]['mode'],
-				'new_allowed' => $change_to[$port_name]['allowed'],
-				'new_native' => $change_to[$port_name]['native'],
-			);
+		$ports_to_do[$port_name] = array
+		(
+			'old_mode' => $new_change_from[$port_name]['mode'],
+			'old_allowed' => array_key_exists ($port_name, $new_change_from) ?
+				$new_change_from[$port_name]['allowed'] :
+				array(),
+			'old_native' => array_key_exists ($port_name, $new_change_from) ?
+				$new_change_from[$port_name]['native'] :
+				0,
+			'new_mode' => $change_to[$port_name]['mode'],
+			'new_allowed' => $change_to[$port_name]['allowed'],
+			'new_native' => $change_to[$port_name]['native'],
+		);
 	}
 	$after = array();
 	foreach ($new_change_from as $port_name => $port)
 		$after[$port_name] = array_key_exists ($port_name, $change_to) ?
 			$change_to[$port_name] : $port; // D' : R'
 	foreach (produceUplinkPorts (apply8021QOrder ($vswitch['object_id'], $after)) as $port_name => $item)
-		$ports_to_do[$port_name] = $item;
+		$ports_to_do[$port_name] = array
+		(
+			'old_mode' => $new_change_from[$port_name]['mode'],
+			'old_allowed' => $new_change_from[$port_name]['allowed'],
+			'old_native' => $new_change_from[$port_name]['native'],
+			'new_mode' => $item['mode'], // trunk
+			'new_allowed' => $item['allowed'],
+			'new_native' => $item['native'], // 0
+		);
 	// New VLAN table is a union of:
 	// 1. all compulsory VLANs
 	// 2. all "current" non-alien allowed VLANs of those ports, which are left
