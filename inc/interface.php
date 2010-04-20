@@ -6707,7 +6707,7 @@ function renderVLANDomainVLANList ($vdom_id)
 
 // Show a list of 802.1Q-eligible ports in any way, but when one of
 // them is selected as current, also display a form for its setup.
-function renderObjectVLANPorts ($object_id)
+function renderObject8021QPorts ($object_id)
 {
 	global $pageno, $tabno, $sic;
 	$vswitch = getVLANSwitchInfo ($object_id);
@@ -6715,35 +6715,35 @@ function renderObjectVLANPorts ($object_id)
 	$req_port_name = array_key_exists ('port_name', $sic) ? $sic['port_name'] : '';
 	$desired_config = apply8021QOrder ($object_id, getDesired8021QConfig ($object_id));
 	uksort ($desired_config, 'sortTokenize');
+	$uplinks = produceUplinkPorts ($vdom['vlanlist'], $desired_config);
 	echo '<table border=0 width="100%"><tr valign=top><td class=tdleft width="30%">';
 	// port list
 	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
-	echo '<tr><th>port&nbsp;name</th><th>last&nbsp;saved&nbsp;state</th>';
-	echo $req_port_name == '' ? '<th>new&nbsp;state</th></tr>' : '</tr>';
+	echo '<tr><th>port</th><th>last&nbsp;saved&nbsp;config</th>';
+	echo $req_port_name == '' ? '<th>new&nbsp;config</th></tr>' : '</tr>';
 	if ($req_port_name == '');
 		printOpFormIntro ('save', array ('mutex_rev' => $vswitch['mutex_rev']));
 	$nports = 0; // count only access ports
 	foreach ($desired_config as $port_name => $port)
 	{
-		if
-		(
-			!array_key_exists ('vst_role', $port) and
-			$port['mode'] == 'none'
-		)
-			continue;
+		$text_left = serializeVLANPack ($port);
+		// decide on row class
 		if (!array_key_exists ('vst_role', $port))
+			$port['vst_role'] = 'none';
+		switch ($port['vst_role'])
 		{
-			echo "<tr class=trerror><td>${port_name}</td><td>";
-			echo serializeVLANPack ($port) . '</td><td>&nbsp;</td></tr>';
-		}
-		elseif ($port['vst_role'] == 'uplink')
-		{
-			echo "<tr class=trbusy><td>${port_name}</td><td>";
-			echo serializeVLANPack ($port) . '</td><td>auto</td></tr>';
-		}
-		elseif ($port['vst_role'] == 'trunk')
-		{
-			echo "<tr><td>${port_name}</td><td>" . serializeVLANPack ($port) . "</td><td>";
+		case 'none':
+			if ($port['mode'] == 'none')
+				continue; // early miss
+			$trclass = 'trerror'; // stuck ghost port
+			$text_right = '&nbsp;';
+			break;
+		case 'uplink':
+			$text_right = serializeVLANPack ($uplinks[$port_name]);
+			$trclass = $text_left == $text_right ? 'trbusy' : 'trwarning';
+			break;
+		case 'trunk':
+			$trclass = $port['vst_role'] == $port['mode'] ? 'trbusy' : 'trwarning';
 			$linkparams = array
 			(
 				'page' => $pageno,
@@ -6761,14 +6761,19 @@ function renderObjectVLANPorts ($object_id)
 				$imagetext = 'zoom in';
 				$linkparams['port_name'] = $port_name;
 			}
-			echo "<a href='" . makeHref ($linkparams) . "'>" . getImageHREF ($imagename, $imagetext) . '</a>';
-			echo '</td></tr>';
-		}
-		elseif ($req_port_name == '')
-		{
-			// don't render a form for access ports, when a trunk port is zoomed
-			echo "<input type=hidden name=pn_${nports} value=${port_name}>";
-			echo "<input type=hidden name=pm_${nports} value=access>";
+			$text_right = "<a href='" . makeHref ($linkparams) . "'>"  .
+				getImageHREF ($imagename, $imagetext) . '</a>';
+			break;
+		case 'access':
+			$trclass = $port['vst_role'] == $port['mode'] ? 'trbusy' : 'trwarning';
+			if ($req_port_name != '')
+			{
+				// don't render a form for access ports, when a trunk port is zoomed
+				$text_right = '&nbsp;';
+				break;
+			}
+			$text_right = "<input type=hidden name=pn_${nports} value=${port_name}>";
+			$text_right .= "<input type=hidden name=pm_${nports} value=access>";
 			$wrt_vlans = iosParseVLANString ($port['wrt_vlans']);
 			$options = array (0 => '-- NONE --');
 			if ($port['native'])
@@ -6782,14 +6787,11 @@ function renderObjectVLANPorts ($object_id)
 				)
 					$options[$vlan_id] = formatVLANName ($vlan_info, TRUE);
 			ksort ($options);
-			echo "<tr><td>${port_name}</td><td>" . serializeVLANPack ($port) . "</td><td>";
-			echo getSelect ($options, array ('name' => "pnv_${nports}"), $port['native']) . '</td></tr>';
+			$text_right .= getSelect ($options, array ('name' => "pnv_${nports}"), $port['native']);
 			$nports++;
+			break;
 		}
-		else
-		{
-			echo "<tr><td>${port_name}</td><td>" . serializeVLANPack ($port) . "</td><td>&nbsp;</td></tr>";
-		}
+		echo "<tr class=${trclass}><td>${port_name}</td><td>${text_left}</td><td>${text_right}</td></tr>";
 	}
 	if ($req_port_name == '' and $nports)
 		echo "<input type=hidden name=nports value=${nports}>" .
