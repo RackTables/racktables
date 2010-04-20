@@ -2954,6 +2954,9 @@ function apply8021QOrder ($object_id, $portlist)
 				$portlist[$port_name]['vst_role'] = $rule['port_role'];
 				$portlist[$port_name]['wrt_vlans'] = $rule['wrt_vlans'];
 			}
+	foreach (array_keys ($portlist) as $port_name)
+		if (!array_key_exists ('vst_role', $portlist[$port_name]))
+			$portlist[$port_name]['vst_role'] = 'none';
 	return $portlist;
 }
 

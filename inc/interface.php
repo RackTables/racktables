@@ -6728,8 +6728,6 @@ function renderObject8021QPorts ($object_id)
 	{
 		$text_left = serializeVLANPack ($port);
 		// decide on row class
-		if (!array_key_exists ('vst_role', $port))
-			$port['vst_role'] = 'none';
 		switch ($port['vst_role'])
 		{
 		case 'none':
@@ -7159,10 +7157,10 @@ function renderObject8021QSync ($object_id)
 		}
 		if ($desired_cfgstring == $running_cfgstring)
 			// locked row : normal row
-			$trclass = $port['vst_role'] == '' ? 'trwarning' : 'trbusy';
+			$trclass = $port['vst_role'] == 'none' ? 'trwarning' : 'trbusy';
 		else
 			// locked difference : fixable difference
-			$trclass = $port['vst_role'] == '' ? 'trerror' : 'trwarning';
+			$trclass = $port['vst_role'] == 'none' ? 'trerror' : 'trwarning';
 		echo "<tr class=${trclass}><td>${port['port_name']}</td>";
 		if ($skip_inputs)
 			echo "<td>${desired_cfgstring}</td>";
