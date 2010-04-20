@@ -2957,4 +2957,11 @@ function apply8021QOrder ($object_id, $portlist)
 	return $portlist;
 }
 
+// take port list with order applied and return uplink ports in the same format
+function produceUplinkPorts ($portlist)
+{
+	$ret = array();
+	return $ret;
+}
+
 ?>
