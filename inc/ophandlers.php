@@ -2277,8 +2277,8 @@ function processVLANSyncRequest ()
 	// left (produce and send commands to switch)
 	// asis (ignore)
 	// right (fetch config from switch and save into database)
-	$old_running_config = array();
-	for ($i = 1; $i <= $sic['nrows']; $i++)
+	$old_running_config = array ('left' => array(), 'right' => array());
+	for ($i = 0; $i < $sic['nrows']; $i++)
 	{
 		if (!array_key_exists ("i_${i}", $sic))
 			continue;

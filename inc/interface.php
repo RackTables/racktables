@@ -7072,7 +7072,7 @@ function renderVLANIPv4 ($some_id)
 
 function renderObjectVLANSync ($object_id)
 {
-	global $pageno, $tabno, $nextorder;
+	global $pageno, $tabno;
 	try
 	{
 		$running_config = getRunning8021QConfig ($object_id);
@@ -7121,17 +7121,16 @@ function renderObjectVLANSync ($object_id)
 			);
 	$vswitch = getVLANSwitchInfo ($object_id);
 	$domvlans = array_keys (getDomainVLANs ($vswitch['domain_id']));
-	printOpFormIntro ('sync', array ('mutex_rev' => $vswitch['mutex_rev'], 'nrows' => count ($formports)));
+	printOpFormIntro ('sync', array ('mutex_rev' => $vswitch['mutex_rev']));
 	$nrows = count ($formports);
 	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
-	echo '<tr><th rowspan=2>port name</th><th rowspan=2>desired config</th><th colspan=3>wins</th>';
+	echo '<tr><th rowspan=2>port</th><th rowspan=2>last saved config</th><th colspan=3>winner</th>';
 	echo '<th rowspan=2>running config</th></tr><tr>';
 	foreach (array ('left', 'asis', 'right') as $pos)
 		echo "<th><input type=radio name=column_radio value=${pos} " .
 			"onclick=\"checkColumnOfRadios('i_', ${nrows}, '_${pos}')\"></th>";
 	echo '</tr>';
-	$order = 'odd';
-	$rownum = 1;
+	$rownum = 0;
 	foreach ($formports as $port)
 	{
 		$desired_cfgstring = serializeVLANPack (array ('mode' => $port['desired_mode'], 'native' => $port['desired_native'], 'allowed' => $port['desired_allowed']));
@@ -7139,28 +7138,35 @@ function renderObjectVLANSync ($object_id)
 		// decide on the radio inputs now
 		$radio = array ('left' => TRUE, 'asis' => TRUE, 'right' => TRUE);
 		$checked = array ('left' => '', 'asis' => ' checked', 'right' => '');
-		$trclass = 'row_' . $order;
-		if (array_key_exists ('vst_role', $port) and $port['vst_role'] == 'uplink')
+		if
+		(
+			$port['vst_role'] == 'uplink' or
+			($port['vst_role'] != 'access' and $port['vst_role'] != 'trunk') or
+			$desired_cfgstring == $running_cfgstring
+		)
+			$skip_inputs = TRUE;
+		else
 		{
-			$radio['left'] = $radio['asis'] = $radio['right'] = FALSE;
-			$trclass = 'trbusy';
-		}
-		elseif ($desired_cfgstring == $running_cfgstring)
-			$radio['left'] = $radio['right'] = FALSE;
-		else // turn off each side independently
-		{
-			if ($desired_cfgstring == 'default')
+			$skip_inputs = FALSE;
+			// enable, but consider each option independently
+			if ($desired_cfgstring == 'none')
 				$radio['left'] = FALSE;
 			// if any of the running VLANs isn't in the domain...
 			if (count (array_diff ($port['running_allowed'], $domvlans)))
 				$radio['right'] = FALSE;
 		}
+		if ($desired_cfgstring == $running_cfgstring)
+			// locked row : normal row
+			$trclass = $port['vst_role'] == '' ? 'trwarning' : 'trok';
+		else
+			// locked difference : fixable difference
+			$trclass = $port['vst_role'] == '' ? 'trerror' : 'trwarning';
 		echo "<tr class=${trclass}><td>${port['port_name']}</td>";
 		echo "<td><label for=i_${rownum}_left>${desired_cfgstring}</label></td>";
 		foreach ($radio as $pos => $enabled)
 		{
 			echo '<td>';
-			if (!$enabled)
+			if (!$enabled or $skip_inputs)
 				echo '&nbsp;';
 			else
 				echo "<input id=i_${rownum}_${pos} name=i_${rownum} type=radio value=${pos}" . $checked[$pos] . ">";
@@ -7168,14 +7174,17 @@ function renderObjectVLANSync ($object_id)
 		}
 		echo "<td><label for=i_${rownum}_right>${running_cfgstring}</label></td>";
 		echo '</tr>';
-		echo "<input type=hidden name=rm_${rownum} value=${port['running_mode']}>";
-		echo "<input type=hidden name=rn_${rownum} value=${port['running_native']}>";
-		foreach ($port['running_allowed'] as $a)
-			echo "<input type=hidden name=ra_${rownum}[] value=${a}>";
-		echo "<input type=hidden name=pn_${rownum} value='" . htmlspecialchars ($port['port_name']) . "'>";
-		$order = $nextorder[$order];
-		$rownum++;
+		if (!$skip_inputs)
+		{
+			echo "<input type=hidden name=rm_${rownum} value=${port['running_mode']}>";
+			echo "<input type=hidden name=rn_${rownum} value=${port['running_native']}>";
+			foreach ($port['running_allowed'] as $a)
+				echo "<input type=hidden name=ra_${rownum}[] value=${a}>";
+			echo "<input type=hidden name=pn_${rownum} value='" . htmlspecialchars ($port['port_name']) . "'>";
+		}
+		$rownum += $skip_inputs ? 0 : 1;
 	}
+	echo "<input type=hidden name=nrows value=${rownum}>";
 	echo '<tr><td colspan=6 align=center>';
 	printImageHREF ('UPDATEALL', 'sumbit all updates', TRUE);
 	echo '</td></tr>';

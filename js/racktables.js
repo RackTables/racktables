@@ -40,7 +40,7 @@ function toggleColumnOfAtoms (rackId, columnId, numRows) {
 function checkColumnOfRadios (prefix, numRows, suffix)
 {
 	var elemId;
-	for (var i=1; i < numRows+1; i++)
+	for (var i=0; i < numRows; i++)
 	{
 		elemId = prefix + i + suffix;
 		// Not all radios are present on each form. Hence each time
