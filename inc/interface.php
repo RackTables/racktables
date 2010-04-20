@@ -7072,7 +7072,7 @@ function renderVLANIPv4 ($some_id)
 	echo '</table>';
 }
 
-function renderObjectVLANSync ($object_id)
+function renderObject8021QSync ($object_id)
 {
 	global $pageno, $tabno;
 	try
@@ -7126,8 +7126,8 @@ function renderObjectVLANSync ($object_id)
 	printOpFormIntro ('sync', array ('mutex_rev' => $vswitch['mutex_rev']));
 	$nrows = count ($formports);
 	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
-	echo '<tr><th rowspan=2>port</th><th rowspan=2>last saved config</th><th colspan=3>winner</th>';
-	echo '<th rowspan=2>running config</th></tr><tr>';
+	echo '<tr><th rowspan=2>port</th><th rowspan=2>last&nbsp;saved&nbsp;config</th><th colspan=3>winner</th>';
+	echo '<th rowspan=2>running&nbsp;config</th></tr><tr>';
 	foreach (array ('left', 'asis', 'right') as $pos)
 		echo "<th><input type=radio name=column_radio value=${pos} " .
 			"onclick=\"checkColumnOfRadios('i_', ${nrows}, '_${pos}')\"></th>";
@@ -7159,12 +7159,15 @@ function renderObjectVLANSync ($object_id)
 		}
 		if ($desired_cfgstring == $running_cfgstring)
 			// locked row : normal row
-			$trclass = $port['vst_role'] == '' ? 'trwarning' : 'trok';
+			$trclass = $port['vst_role'] == '' ? 'trwarning' : 'trbusy';
 		else
 			// locked difference : fixable difference
 			$trclass = $port['vst_role'] == '' ? 'trerror' : 'trwarning';
 		echo "<tr class=${trclass}><td>${port['port_name']}</td>";
-		echo "<td><label for=i_${rownum}_left>${desired_cfgstring}</label></td>";
+		if ($skip_inputs)
+			echo "<td>${desired_cfgstring}</td>";
+		else
+			echo "<td><label for=i_${rownum}_left>${desired_cfgstring}</label></td>";
 		foreach ($radio as $pos => $enabled)
 		{
 			echo '<td>';
@@ -7174,7 +7177,10 @@ function renderObjectVLANSync ($object_id)
 				echo "<input id=i_${rownum}_${pos} name=i_${rownum} type=radio value=${pos}" . $checked[$pos] . ">";
 			echo '</td>';
 		}
-		echo "<td><label for=i_${rownum}_right>${running_cfgstring}</label></td>";
+		if ($skip_inputs)
+			echo "<td>${running_cfgstring}</td>";
+		else
+			echo "<td><label for=i_${rownum}_right>${running_cfgstring}</label></td>";
 		echo '</tr>';
 		if (!$skip_inputs)
 		{
