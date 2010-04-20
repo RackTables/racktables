@@ -2958,9 +2958,38 @@ function apply8021QOrder ($object_id, $portlist)
 }
 
 // take port list with order applied and return uplink ports in the same format
-function produceUplinkPorts ($portlist)
+function produceUplinkPorts ($domain_vlanlist, $portlist)
 {
 	$ret = array();
+	$employed = array();
+	foreach ($domain_vlanlist as $vlan_id => $vlan)
+		if ($vlan['vlan_type'] == 'compulsory')
+			$employed[] = $vlan_id;
+	foreach ($portlist as $port_name => $port)
+		if ($port['vst_role'] != 'uplink')
+			foreach ($port['allowed'] as $vlan_id)
+				if (!in_array ($vlan_id, $employed))
+					$employed[] = $vlan_id;
+	foreach ($portlist as $port_name => $port)
+		if ($port['vst_role'] == 'uplink')
+		{
+			if (!mb_strlen ($port['wrt_vlans']))
+				$employed_here = $employed;
+			else
+			{
+				$employed_here = array();
+				$wrt_vlans = iosParseVLANString ($port['wrt_vlans']);
+				foreach ($employed as $vlan_id)
+					if (in_array ($vlan_id, $wrt_vlans))
+						$employed_here[] = $vlan_id;
+			}
+			$ret[$port_name] = array
+			(
+				'mode' => 'trunk',
+				'allowed' => $employed_here,
+				'native' => 0,
+			);
+		}
 	return $ret;
 }
 

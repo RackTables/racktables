@@ -3801,7 +3801,8 @@ function importSwitch8021QConfig
 {
 	global $dbxlink;
 	$domain_alien_vlans = array();
-	foreach (getDomainVLANs ($vswitch['domain_id']) as $vlan_id => $vlan)
+	$domain_vlanlist = getDomainVLANs ($vswitch['domain_id']);
+	foreach ($domain_vlanlist as $vlan_id => $vlan)
 		if ($vlan['vlan_type'] == 'alien')
 			$domain_alien_vlans[] = $vlan_id;
 	$done = 0;
@@ -3895,7 +3896,7 @@ function importSwitch8021QConfig
 	foreach ($change_from as $port_name => $item)
 		$after[$port_name] = array_key_exists ($port_name, $new_change_to) ?
 			$new_change_to[$port_name] : $item; // R' : D'
-	foreach (produceUplinkPorts (apply8021QOrder ($vswitch['object_id'], $after)) as $port_name => $item)
+	foreach (produceUplinkPorts ($domain_vlanlist, apply8021QOrder ($vswitch['object_id'], $after)) as $port_name => $item)
 		$ports_to_do[$port_name] = $item;
 	// save all queued ports into database
 	foreach ($ports_to_do as $port_name => $item)
@@ -4011,7 +4012,7 @@ function exportSwitch8021QConfig
 	foreach ($new_change_from as $port_name => $port)
 		$after[$port_name] = array_key_exists ($port_name, $change_to) ?
 			$change_to[$port_name] : $port; // D' : R'
-	foreach (produceUplinkPorts (apply8021QOrder ($vswitch['object_id'], $after)) as $port_name => $item)
+	foreach (produceUplinkPorts ($domain_vlanlist, apply8021QOrder ($vswitch['object_id'], $after)) as $port_name => $item)
 		$ports_to_do[$port_name] = array
 		(
 			'old_mode' => $new_change_from[$port_name]['mode'],
