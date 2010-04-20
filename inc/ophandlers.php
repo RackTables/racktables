@@ -2224,7 +2224,7 @@ function save8021QPorts ()
 				'native' => $native,
 			);
 		}
-		importSwitch8021QConfig
+		$npulled = importSwitch8021QConfig
 		(
 			$sic['object_id'],
 			$sic['mutex_rev'],
@@ -2239,6 +2239,11 @@ function save8021QPorts ()
 	{
 		$dbxlink->rollBack();
 		return buildRedirectURL (__FUNCTION__, 'ERR2', array(), NULL, NULL, $extra);
+	}
+	if ($npulled)
+	{
+		$query = $dbxlink->prepare ('UPDATE VLANSwitch SET mutex_rev = mutex_rev + 1, last_pull = NOW() WHERE object_id = ?');
+		$query->execute (array ($sic['object_id']));
 	}
 	$dbxlink->commit();
 	return buildRedirectURL (__FUNCTION__, 'OK', array(), NULL, NULL, $extra);
@@ -2300,24 +2305,11 @@ function processVLANSyncRequest ()
 	try
 	{
 		if (NULL === $vswitch = getVLANSwitchInfo ($sic['object_id'], 'FOR UPDATE'))
-			throw new InvalidArgException ('object_id', $object_id, 'VLAN domain is not set for this object');
+			throw new InvalidArgException ('object_id', $sic['object_id'], 'VLAN domain is not set for this object');
 		$domain_vlanlist = getDomainVLANs ($vswitch['domain_id']);
 		$stored_config = getDesired8021QConfig ($sic['object_id']);
 		$new_running_config = getRunning8021QConfig ($sic['object_id']);
-		// either way it wouldn't work, because the latter increments mutex_rev
-		if (count ($old_running_config['left']))
-			exportSwitch8021QConfig
-			(
-				$sic['object_id'],
-				$sic['mutex_rev'],
-				$vswitch['mutex_rev'],
-				$domain_vlanlist,
-				$new_running_config['vlanlist'],
-				$old_running_config['left'],
-				$new_running_config['portdata'],
-				$stored_config
-			);
-		importSwitch8021QConfig
+		$npulled = importSwitch8021QConfig
 		(
 			$sic['object_id'],
 			$sic['mutex_rev'],
@@ -2327,14 +2319,39 @@ function processVLANSyncRequest ()
 			$old_running_config['right'],
 			$new_running_config['portdata']
 		);
+		// To keep device's VLAN table and uplink ports in sync regardless
+		// of user's choice, "export" procedure must be run:
+		// 1. even if the user didn't select any ports for "export"
+		// 2. after call to "import" function
+		$npushed = exportSwitch8021QConfig
+		(
+			$sic['object_id'],
+			$sic['mutex_rev'],
+			$vswitch['mutex_rev'],
+			$domain_vlanlist,
+			$new_running_config['vlanlist'],
+			$old_running_config['left'],
+			$new_running_config['portdata'],
+			$stored_config
+		);
 	}
 	catch (Exception $e)
 	{
 		$dbxlink->rollBack();
 		return buildRedirectURL (__FUNCTION__, 'ERR');
 	}
+	if ($npushed)
+	{
+		$query = $dbxlink->prepare ('UPDATE VLANSwitch SET last_push = NOW() WHERE object_id = ?');
+		$query->execute (array ($sic['object_id']));
+	}
+	if ($npulled)
+	{
+		$query = $dbxlink->prepare ('UPDATE VLANSwitch SET mutex_rev = mutex_rev + 1, last_pull = NOW() WHERE object_id = ?');
+		$query->execute (array ($sic['object_id']));
+	}
 	$dbxlink->commit();
-	return buildRedirectURL (__FUNCTION__, 'OK', array (count ($work['left']) + count ($work['right'])));
+	return buildRedirectURL (__FUNCTION__, 'OK', array ($npulled + $npushed));
 }
 
 $msgcode['addVLANSwitchTemplate']['OK'] = 48;

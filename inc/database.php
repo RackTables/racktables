@@ -3806,7 +3806,7 @@ function importSwitch8021QConfig
 	foreach ($domain_vlanlist as $vlan_id => $vlan)
 		if ($vlan['vlan_type'] == 'alien')
 			$domain_alien_vlans[] = $vlan_id;
-	$changed = FALSE;
+	$done = 0;
 	foreach ($new_change_to as $port_name => $item)
 	{
 		// FIXME: iterate over old_change_to
@@ -3887,7 +3887,7 @@ function importSwitch8021QConfig
 			continue;
 		if ($form_mutex_rev != $db_mutex_rev)
 			throw new RuntimeException();
-		$changed = TRUE;
+		$done++;
 		// Replace current port configuration with the provided one. If the new
 		// native VLAN ID doesn't belong to the allowed list, don't issue
 		// INSERT query, which would always trigger an FK exception.
@@ -3913,10 +3913,7 @@ function importSwitch8021QConfig
 		)
 			throw new RuntimeException();
 	}
-	if (!$changed)
-		return;
-	$query = $dbxlink->prepare ('UPDATE VLANSwitch SET mutex_rev = mutex_rev + 1, last_pull = NOW() WHERE object_id = ?');
-	$query->execute (array ($object_id));
+	return $done;
 }
 
 function exportSwitch8021QConfig
@@ -4186,8 +4183,7 @@ function exportSwitch8021QConfig
 			throw new RuntimeException ('error in ports_to_do structure');
 		}
 	setDevice8021QConfig ($object_id, $crq);
-	$query = $dbxlink->prepare ('UPDATE VLANSwitch SET last_push = NOW() WHERE object_id = ?');
-	$query->execute (array ($object_id));
+	return count ($crq);
 }
 
 function getVLANSwitchTemplates()
