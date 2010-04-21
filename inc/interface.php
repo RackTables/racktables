@@ -6521,7 +6521,7 @@ function render8021QOrderForm ($some_id)
 function render8021QStatus ()
 {
 	echo '<table border=0 class=objectview cellspacing=0 cellpadding=0>';
-	echo "<tr><td class=pcleft width='50%'>";
+	echo '<tr valign=top><td class=pcleft width="30%">';
 	if (!count ($vdlist = getVLANDomainList()))
 		startPortlet ('no VLAN domains');
 	else
@@ -6553,6 +6553,8 @@ function render8021QStatus ()
 	}
 	finishPortlet();
 
+	echo '</td><td class=pcleft width="30%">';
+
 	if (!count ($vstlist = getVLANSwitchTemplates()))
 		startPortlet ('no switch templates');
 	else
@@ -6570,7 +6572,9 @@ function render8021QStatus ()
 		echo '</table>';
 	}
 	finishPortlet();
+
 	echo '</td><td class=pcright>';
+
 	if (!count ($dplan = get8021QDeployPlan()))
 		startPortlet ('deploy plan is empty');
 	else
