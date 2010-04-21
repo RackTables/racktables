@@ -6522,31 +6522,53 @@ function render8021QStatus ()
 {
 	echo '<table border=0 class=objectview cellspacing=0 cellpadding=0>';
 	echo "<tr><td class=pcleft width='50%'>";
-	startPortlet ('VLAN domains');
-	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
-	echo '<tr><th>description</th><th>VLANs</th><th>switches</th><th>';
-	echo getImageHREF ('net') . '</th></tr>';
-	foreach (getVLANDomainList() as $vdom_id => $dominfo)
+	if (!count ($vdlist = getVLANDomainList()))
+		startPortlet ('no VLAN domains');
+	else
 	{
-		echo "<tr align=left><td><a href='";
-		echo makeHref (array ('page' => 'vlandomain', 'vdom_id' => $vdom_id)) . "'>";
-		echo niftyString ($dominfo['description']) . "</a></td><td>${dominfo['vlanc']}</td>";
-		echo "<td>${dominfo['switchc']}</td><td>${dominfo['ipv4netc']}</td></tr>";
+		startPortlet ('VLAN domains (' . count ($vdlist) . ')');
+		echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
+		echo '<tr><th>description</th><th>VLANs</th><th>switches</th><th>';
+		echo getImageHREF ('net') . '</th></tr>';
+		$stats = array();
+		foreach (array ('vlanc', 'switchc', 'ipv4netc') as $cname)
+			$stats[$cname] = 0;
+		foreach (getVLANDomainList() as $vdom_id => $dominfo)
+		{
+			foreach (array ('vlanc', 'switchc', 'ipv4netc') as $cname)
+				$stats[$cname] += $dominfo[$cname];
+			echo "<tr align=left><td><a href='";
+			echo makeHref (array ('page' => 'vlandomain', 'vdom_id' => $vdom_id)) . "'>";
+			echo niftyString ($dominfo['description']) . "</a></td><td>${dominfo['vlanc']}</td>";
+			echo "<td>${dominfo['switchc']}</td><td>${dominfo['ipv4netc']}</td></tr>";
+		}
+		if (count ($vdlist) > 1)
+		{
+			echo '<tr align=left><td>total:</td>';
+			foreach (array ('vlanc', 'switchc', 'ipv4netc') as $cname)
+				echo '<td>' . $stats[$cname] . '</td>';
+			echo '</tr>';
+		}
+		echo '</table>';
 	}
-	echo '</table>';
 	finishPortlet();
 
-	startPortlet ('switch templates');
-	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
-	echo '<tr><th>description</th><th>rules</th><th>switches</th></tr>';
-	foreach (getVLANSwitchTemplates() as $vst_id => $vst_info)
+	if (!count ($vstlist = getVLANSwitchTemplates()))
+		startPortlet ('no switch templates');
+	else
 	{
-		echo "<tr align=left><td><a href='";
-		echo makeHref (array ('page' => 'vst', 'vst_id' => $vst_id)) . "'>";
-		echo niftyString ($vst_info['description']) . "</a></td><td>${vst_info['rulec']}</td>";
-		echo "<td>${vst_info['switchc']}</td></tr>";
+		startPortlet ('switch templates (' . count ($vstlist) . ')');
+		echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
+		echo '<tr><th>description</th><th>rules</th><th>switches</th></tr>';
+		foreach (getVLANSwitchTemplates() as $vst_id => $vst_info)
+		{
+			echo "<tr align=left><td><a href='";
+			echo makeHref (array ('page' => 'vst', 'vst_id' => $vst_id)) . "'>";
+			echo niftyString ($vst_info['description']) . "</a></td><td>${vst_info['rulec']}</td>";
+			echo "<td>${vst_info['switchc']}</td></tr>";
+		}
+		echo '</table>';
 	}
-	echo '</table>';
 	finishPortlet();
 	echo '</td><td class=pcright>';
 	if (!count ($dplan = get8021QDeployPlan()))
