@@ -6433,7 +6433,7 @@ function render8021QOrderForm ($some_id)
 				$options[$vst_id] = $vst_info['description'];
 			echo '<td>' . getSelect ($options, array ('name' => 'vst_id', 'tabindex' => 103), getConfigVar ('DEFAULT_VST_ID')) . '</td>';
 		}
-		echo '<td>' . getImageHREF ('attach', 'set', TRUE, 104) . '</td></tr></form>';
+		echo '<td>' . getImageHREF ('Attach', 'set', TRUE, 104) . '</td></tr></form>';
 	}
 	global $pageno;
 	$minuslines = array(); // indexed by object_id, which is unique
@@ -6507,7 +6507,7 @@ function render8021QOrderForm ($some_id)
 			'vdom_id' => $item['vdom_id'],
 			'vst_id' => $item['vst_id'],
 		)) . '">';
-		echo getImageHREF ('cut', 'unset') . '</a></td></tr>';
+		echo getImageHREF ('Cut', 'unset') . '</a></td></tr>';
 	}
 	if
 	(
@@ -6993,7 +6993,7 @@ function renderVLANIPv4 ($some_id)
 			return;
 		printOpFormIntro ('bind');
 		echo '<tr><td>' . getNiftySelect ($options, array ('name' => $sname, 'tabindex' => 101));
-		echo '</td><td>' . getImageHREF ('ATTACH', 'bind', TRUE, 102) . '</td></tr></form>';
+		echo '</td><td>' . getImageHREF ('Attach', 'bind', TRUE, 102) . '</td></tr></form>';
 	}
 	global $pageno;
 	$minuslines = array();
@@ -7069,7 +7069,7 @@ function renderVLANIPv4 ($some_id)
 				'vlan_ck' => $item['domain_id'] . '-' . $item['vlan_id']
 			)
 		);
-		echo '">' . getImageHREF ('CUT', 'unbind') . '</a></td></tr>';
+		echo '">' . getImageHREF ('Cut', 'unbind') . '</a></td></tr>';
 	}
 	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')
 		printNewItemTR ($select_name, $plusoptions);
