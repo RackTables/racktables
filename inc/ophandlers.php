@@ -2202,20 +2202,24 @@ function save8021QPorts ()
 		{
 			assertStringArg ('pn_' . $i);
 			assertStringArg ('pm_' . $i);
-#			assertArrayArg ('pav_' . $i);
 			// An access port only generates form input for its native VLAN,
 			// which we derive allowed VLAN list from.
 			$native = isset ($sic['pnv_' . $i]) ? $sic['pnv_' . $i] : 0;
-			if ($sic["pm_${i}"] == 'trunk')
-				$allowed = isset ($sic['pav_' . $i]) ? $sic['pav_' . $i] : array();
-			elseif ($native)
+			switch ($sic["pm_${i}"])
 			{
+			case 'trunk':
+#				assertArrayArg ('pav_' . $i);
+				$allowed = isset ($sic['pav_' . $i]) ? $sic['pav_' . $i] : array();
+				break;
+			case 'access':
+				if ($native == 'same')
+					continue 2;
 				assertUIntArg ('pnv_' . $i);
 				$allowed = array ($native);
+				break;
+			default:
+				throw new InvalidRequestArgException ("pm_${i}", $_REQUEST["pm_${i}"], 'unknown port mode');
 			}
-			else
-				$allowed = array();
-			
 			$work[$sic['pn_' . $i]] = array
 			(
 				'mode' => $sic['pm_' . $i],

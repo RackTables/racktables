@@ -6801,19 +6801,18 @@ function renderObject8021QPorts ($object_id)
 			$text_right = "<input type=hidden name=pn_${nports} value=${port_name}>";
 			$text_right .= "<input type=hidden name=pm_${nports} value=access>";
 			$wrt_vlans = iosParseVLANString ($port['wrt_vlans']);
-			$options = array (0 => '-- NONE --');
-			if ($port['native'])
-				$options[$port['native']] = 'VLAN' . $port['native'];
+			$options = array();
+			// list only new options, which are listen in domain and fit into VST
 			foreach ($vdom['vlanlist'] as $vlan_id => $vlan_info)
 				if
 				(
-					!count ($wrt_vlans) or
-					$vlan_id == $port['native'] or
-					in_array ($vlan_id, $wrt_vlans)
+					$vlan_id != $port['native'] and
+					(!count ($wrt_vlans) or in_array ($vlan_id, $wrt_vlans))
 				)
 					$options[$vlan_id] = formatVLANName ($vlan_info, TRUE);
 			ksort ($options);
-			$text_right .= getSelect ($options, array ('name' => "pnv_${nports}"), $port['native']);
+			$options['same'] = '-- no change --';
+			$text_right .= getSelect ($options, array ('name' => "pnv_${nports}"), 'same');
 			$nports++;
 			break;
 		}
