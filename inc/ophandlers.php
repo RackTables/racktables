@@ -2229,11 +2229,10 @@ function save8021QPorts ()
 				'native' => $native,
 			);
 		}
-		$npulled = importSwitch8021QConfig
+		$npulled = saveSwitch8021QConfig
 		(
 			$vswitch,
 			$stored_config,
-			$work,
 			$work
 		);
 	}
