@@ -3951,19 +3951,9 @@ function exportSwitch8021QConfig
 			!array_key_exists ($port_name, $change_to)
 		)
 			continue;
-		if
-		(
-			$change_to[$port_name]['mode'] == $port['mode'] and
-			array_values_same ($change_to[$port_name]['allowed'], $port['allowed']) and
-			$change_to[$port_name]['native'] == $port['native'] // D' == R'
-		)
+		if (same8021QConfigs ($change_to[$port_name], $port)) // D' == R'
 			continue;
-		if
-		(
-			$old_change_from[$port_name]['mode'] != $port['mode'] or
-			!array_values_same ($old_change_from[$port_name]['allowed'], $port['allowed']) or
-			$old_change_from[$port_name]['native'] != $port['native'] // R != R'
-		)
+		if (!same8021QConfigs ($old_change_from[$port_name], $port)) // R != R'
 			throw new RuntimeException ('expired data detected');
 		$ports_to_do[$port_name] = array
 		(
