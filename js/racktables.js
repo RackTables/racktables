@@ -43,12 +43,14 @@ function checkColumnOfRadios (prefix, numRows, suffix)
 	for (var i=0; i < numRows; i++)
 	{
 		elemId = prefix + i + suffix;
+		if (document.getElementById(elemId) == null) // no radios on this row
+			continue;
 		// Not all radios are present on each form. Hence each time
 		// we are requested to switch from left to right (or vice versa)
 		// it is better to half-complete the request by setting to the
 		// middle position, than to fail completely due to missing
 		// target input.
-		if (document.getElementById(elemId) == null)
+		if (document.getElementById(elemId).disabled == true)
 			switch (suffix)
 			{
 			case '_asis':

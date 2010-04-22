@@ -7156,11 +7156,10 @@ function renderObject8021QSync ($object_id)
 	$rownum = 0;
 	foreach ($formports as $port_name => $port)
 	{
-		$desired_cfgstring = serializeVLANPack (array ('mode' => $port['mode'], 'native' => $port['native'], 'allowed' => $port['allowed']));
+		$desired_cfgstring = serializeVLANPack ($port);
 		$running_cfgstring = serializeVLANPack (array ('mode' => $port['running_mode'], 'native' => $port['running_native'], 'allowed' => $port['running_allowed']));
 		// decide on the radio inputs now
-		$radio = array ('left' => TRUE, 'asis' => TRUE, 'right' => TRUE);
-		$checked = array ('left' => '', 'asis' => ' checked', 'right' => '');
+		$radio_attrs = array ('left' => '', 'asis' => ' checked', 'right' => '');
 		if
 		(
 			$port['vst_role'] == 'uplink' or
@@ -7173,10 +7172,15 @@ function renderObject8021QSync ($object_id)
 			$skip_inputs = FALSE;
 			// enable, but consider each option independently
 			if ($desired_cfgstring == 'none')
-				$radio['left'] = FALSE;
-			// if any of the running VLANs isn't in the domain...
-			if (count (array_diff ($port['running_allowed'], $domvlans)))
-				$radio['right'] = FALSE;
+				$radio_attrs['left'] .= ' disabled';
+			// Don't accept running VLANs not in domain, and
+			// don't offer anything, that VST will deny.
+			if
+			(
+				count (array_diff ($port['running_allowed'], $domvlans)) or
+				$port['vst_role'] != $port['running_mode']
+			)
+				$radio_attrs['right'] .= ' disabled';
 		}
 		if ($desired_cfgstring == $running_cfgstring)
 			// locked row : normal row
@@ -7189,13 +7193,13 @@ function renderObject8021QSync ($object_id)
 			echo "<td>${desired_cfgstring}</td>";
 		else
 			echo "<td><label for=i_${rownum}_left>${desired_cfgstring}</label></td>";
-		foreach ($radio as $pos => $enabled)
+		foreach ($radio_attrs as $pos => $attrs)
 		{
 			echo '<td>';
-			if (!$enabled or $skip_inputs)
+			if ($skip_inputs)
 				echo '&nbsp;';
 			else
-				echo "<input id=i_${rownum}_${pos} name=i_${rownum} type=radio value=${pos}" . $checked[$pos] . ">";
+				echo "<input id=i_${rownum}_${pos} name=i_${rownum} type=radio value=${pos}${attrs}>";
 			echo '</td>';
 		}
 		if ($skip_inputs)
