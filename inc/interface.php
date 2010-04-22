@@ -7113,43 +7113,32 @@ function renderObject8021QSync ($object_id)
 		showWarning ('Could not retrieve running-config of this device with the following error:<br>' . $re->getMessage(), __FUNCTION__);
 		return;
 	}
-	$desired_config = apply8021QOrder ($object_id, getDesired8021QConfig ($object_id));
-	uksort ($desired_config, 'sortTokenize');
-	$formports = array();
+	$formports = getDesired8021QConfig ($object_id);
 	// The form is based on the "desired" list, which has every
 	// 802.1Q-eligible port of the object plus any port names
 	// already stored in the database. This list may be further
 	// extended by the "running" list of the actual device.
-	foreach ($desired_config as $port_name => $port)
-		$formports[] = array
-		(
-			'port_name' => $port_name,
-			'vst_role' => $port['vst_role'],
-			'desired_mode' => $port['mode'],
-			'desired_allowed' => $port['allowed'],
-			'desired_native' => $port['native'],
-			'running_mode' => 'none',
-			'running_allowed' => array(),
-			'running_native' => 0,
-		);
+	foreach (array_keys ($formports) as $port_name)
+	{
+		$formports[$port_name]['running_mode'] = 'none';
+		$formports[$port_name]['running_allowed'] = array();
+		$formports[$port_name]['running_native'] = 0;
+	}
 	foreach ($running_config['portdata'] as $port_name => $item)
-		if (NULL !== $tmpkey = scanArrayForItem ($formports, 'port_name', $port_name))
-		{
-			$formports[$tmpkey]['running_mode'] = $item['mode'];
-			$formports[$tmpkey]['running_allowed'] = $item['allowed'];
-			$formports[$tmpkey]['running_native'] = $item['native'];
-		}
-		else
-			$formports[] = array
+	{
+		if (!array_key_exists ($port_name, $formports))
+			$formports[$port_name] = array
 			(
-				'port_name' => $port_name,
-				'desired_mode' => 'none',
-				'desired_allowed' => array(),
-				'desired_native' => 0,
-				'running_mode' => $item['mode'],
-				'running_allowed' => $item['allowed'],
-				'running_native' => $item['native'],
+				'mode' => 'none',
+				'allowed' => array(),
+				'native' => 0,
 			);
+		$formports[$port_name]['running_mode'] = $item['mode'];
+		$formports[$port_name]['running_allowed'] = $item['allowed'];
+		$formports[$port_name]['running_native'] = $item['native'];
+	}
+	$formports = apply8021QOrder ($object_id, $formports);
+	uksort ($formports, 'sortTokenize');
 	$vswitch = getVLANSwitchInfo ($object_id);
 	$domvlans = array_keys (getDomainVLANs ($vswitch['domain_id']));
 	printOpFormIntro ('sync', array ('mutex_rev' => $vswitch['mutex_rev']));
@@ -7162,9 +7151,9 @@ function renderObject8021QSync ($object_id)
 			"onclick=\"checkColumnOfRadios('i_', ${nrows}, '_${pos}')\"></th>";
 	echo '</tr>';
 	$rownum = 0;
-	foreach ($formports as $port)
+	foreach ($formports as $port_name => $port)
 	{
-		$desired_cfgstring = serializeVLANPack (array ('mode' => $port['desired_mode'], 'native' => $port['desired_native'], 'allowed' => $port['desired_allowed']));
+		$desired_cfgstring = serializeVLANPack (array ('mode' => $port['mode'], 'native' => $port['native'], 'allowed' => $port['allowed']));
 		$running_cfgstring = serializeVLANPack (array ('mode' => $port['running_mode'], 'native' => $port['running_native'], 'allowed' => $port['running_allowed']));
 		// decide on the radio inputs now
 		$radio = array ('left' => TRUE, 'asis' => TRUE, 'right' => TRUE);
@@ -7192,7 +7181,7 @@ function renderObject8021QSync ($object_id)
 		else
 			// locked difference : fixable difference
 			$trclass = $port['vst_role'] == 'none' ? 'trerror' : 'trwarning';
-		echo "<tr class=${trclass}><td>${port['port_name']}</td>";
+		echo "<tr class=${trclass}><td>${port_name}</td>";
 		if ($skip_inputs)
 			echo "<td>${desired_cfgstring}</td>";
 		else
@@ -7217,7 +7206,7 @@ function renderObject8021QSync ($object_id)
 			echo "<input type=hidden name=rn_${rownum} value=${port['running_native']}>";
 			foreach ($port['running_allowed'] as $a)
 				echo "<input type=hidden name=ra_${rownum}[] value=${a}>";
-			echo "<input type=hidden name=pn_${rownum} value='" . htmlspecialchars ($port['port_name']) . "'>";
+			echo "<input type=hidden name=pn_${rownum} value='" . htmlspecialchars ($port_name) . "'>";
 		}
 		$rownum += $skip_inputs ? 0 : 1;
 	}
