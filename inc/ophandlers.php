@@ -2270,9 +2270,9 @@ function unbindVLANfromIPv4 ()
 	return buildRedirectURL (__FUNCTION__, $result ? 'OK' : 'ERR');
 }
 
-$msgcode['processVLANSyncRequest']['OK'] = 63;
-$msgcode['processVLANSyncRequest']['ERR'] = 179;
-function processVLANSyncRequest ()
+$msgcode['process8021QSyncRequest']['OK'] = 63;
+$msgcode['process8021QSyncRequest']['ERR'] = 179;
+function process8021QSyncRequest ()
 {
 	global $sic, $dbxlink;
 	assertUIntArg ('mutex_rev');
@@ -2318,6 +2318,8 @@ function processVLANSyncRequest ()
 			$old_running_config['right'],
 			$new_running_config['portdata']
 		);
+		if ($npulled)
+			$stored_config = getDesired8021QConfig ($sic['object_id']);
 		// To keep device's VLAN table and uplink ports in sync regardless
 		// of user's choice, "export" procedure must be run:
 		// 1. even if the user didn't select any ports for "export"

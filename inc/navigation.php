@@ -151,7 +151,7 @@ $ophandler['object']['snmpportfinder']['querySNMPData'] = 'querySNMPData';
 $ophandler['object']['8021qorder']['add'] = 'add8021QOrder';
 $ophandler['object']['8021qorder']['del'] = 'del8021QOrder';
 $ophandler['object']['8021qports']['save'] = 'save8021QPorts';
-$ophandler['object']['8021qsync']['sync'] = 'processVLANSyncRequest';
+$ophandler['object']['8021qsync']['sync'] = 'process8021QSyncRequest';
 $delayauth['object']['livevlans']['setPortVLAN'] = TRUE;
 
 $page['ipv4space']['title'] = 'IPv4 space';
