@@ -2196,6 +2196,8 @@ function save8021QPorts ()
 	{
 		if (NULL === $vswitch = getVLANSwitchInfo ($sic['object_id'], 'FOR UPDATE'))
 			throw new InvalidArgException ('object_id', $object_id, 'VLAN domain is not set for this object');
+		if ($vswitch['mutex_rev'] != $sic['mutex_rev'])
+			throw new RuntimeException ('expired form data');
 		$stored_config = getDesired8021QConfig ($sic['object_id']);
 		$work = array();
 		for ($i = 0; $i < $sic['nports']; $i++)
@@ -2230,7 +2232,6 @@ function save8021QPorts ()
 		$npulled = importSwitch8021QConfig
 		(
 			$vswitch,
-			$sic['mutex_rev'],
 			$stored_config,
 			$work,
 			$work
@@ -2307,12 +2308,13 @@ function processVLANSyncRequest ()
 	{
 		if (NULL === $vswitch = getVLANSwitchInfo ($sic['object_id'], 'FOR UPDATE'))
 			throw new InvalidArgException ('object_id', $sic['object_id'], 'VLAN domain is not set for this object');
+		if ($vswitch['mutex_rev'] != $sic['mutex_rev'])
+			throw new RuntimeException ('expired form data');
 		$stored_config = getDesired8021QConfig ($sic['object_id']);
 		$new_running_config = getRunning8021QConfig ($sic['object_id']);
 		$npulled = importSwitch8021QConfig
 		(
 			$vswitch,
-			$sic['mutex_rev'],
 			$stored_config,
 			$old_running_config['right'],
 			$new_running_config['portdata']
@@ -2324,7 +2326,6 @@ function processVLANSyncRequest ()
 		$npushed = exportSwitch8021QConfig
 		(
 			$vswitch,
-			$sic['mutex_rev'],
 			$new_running_config['vlanlist'],
 			$old_running_config['left'],
 			$new_running_config['portdata'],

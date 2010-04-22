@@ -2996,4 +2996,11 @@ function produceUplinkPorts ($domain_vlanlist, $portlist)
 	return $ret;
 }
 
+function same8021QConfigs ($a, $b)
+{
+	return	$a['mode'] == $b['mode'] &&
+		array_values_same ($a['allowed'], $b['allowed']) &&
+		$a['native'] == $b['native'];
+}
+
 ?>

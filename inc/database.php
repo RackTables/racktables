@@ -3793,114 +3793,59 @@ function getVLANConfiguredPorts ($vlan_ck)
 function importSwitch8021QConfig
 (
 	$vswitch,
-	$form_mutex_rev,
-	$change_from,   // (D') current latest list of ports, requested to change or even all
-	$old_change_to, // (R ) only ports requested for change with their cached old state
-	$new_change_to  // (R') only ports requested for change with their new state
+	$change_from,   // (D') list of all ports (in database)
+	$old_change_to, // (R ) list of ports requested for change with their cached old state
+	$new_change_to  // (R') list of all ports (in real world)
 )
 {
-	global $dbxlink;
 	$domain_alien_vlans = array();
 	$domain_vlanlist = getDomainVLANs ($vswitch['domain_id']);
 	foreach ($domain_vlanlist as $vlan_id => $vlan)
 		if ($vlan['vlan_type'] == 'alien')
 			$domain_alien_vlans[] = $vlan_id;
 	$done = 0;
-	$ports_to_do = array();
-	// iterate over submitted work requests, filter and queue them
-	foreach ($new_change_to as $port_name => $item)
+	$new_change_to = apply8021QOrder ($vswitch['object_id'], $new_change_to);
+	$after = apply8021QOrder ($vswitch['object_id'], $change_from);
+	// filter args and add/replace meaningful ports
+	foreach ($new_change_to as $port_name => $port)
 	{
-		// FIXME: iterate over old_change_to
-		if (!array_key_exists ($port_name, $old_change_to))
+		
+		if
+		(
+			!array_key_exists ($port_name, $old_change_to) or // not selected for import
+			$port['mode'] != $port['vst_role'] // VST violation
+		)
 			continue;
-		// The submitted data needs a correction before further evaluation
-		// to suppress any requested changes to alien VLAN(s) presence on
-		// the port.
+		if (!same8021QConfigs ($old_change_to[$port_name], $port))
+			throw new RuntimeException ("expired data for port ${port_name}");
+		// find and cancel any changes regarding immune VLANs
 		foreach ($domain_alien_vlans as $vlan_id)
 		{
-			if (in_array ($vlan_id, $change_from[$port_name]['allowed']))
+			if (in_array ($vlan_id, $change_from[$port_name]['allowed'])) // was here before
 			{
-				if (!in_array ($vlan_id, $item['allowed']))
-					$item['allowed'][] = $vlan_id;
-				if (!in_array ($vlan_id, $old_change_to[$port_name]['allowed']))
-					$old_change_to[$port_name]['allowed'][] = $vlan_id;
+				if (!in_array ($vlan_id, $port['allowed']))
+					$port['allowed'][] = $vlan_id; // restore
 			}
-			else
-			{
-				if (in_array ($vlan_id, $item['allowed']))
-					unset ($item['allowed'][array_search ($vlan_id, $item['allowed'])]);
-				if (in_array ($vlan_id, $old_change_to[$port_name]['allowed']))
-					unset ($old_change_to[$port_name]['allowed'][array_search ($vlan_id, $old_change_to[$port_name]['allowed'])]);
-			}
+			// wasn't
+			elseif (in_array ($vlan_id, $port['allowed']))
+				unset ($port['allowed'][array_search ($vlan_id, $port['allowed'])]); // cancel
 			if ($change_from[$port_name]['native'] == $vlan_id)
-				$old_change_to[$port_name]['native'] =
-				$item['native'] = $change_from[$port_name]['native'];
+				$port['native'] = $vlan_id; // restore
 		}
-		// Only consider touching database, when there are changes for the current port.
-		// In a perfect scenario mutex revision of the form submitted is equal to
-		// the value in our locked row of VLANSwitch table, while the most recent
-		// running-config records for current port match their copies in the form
-		// (this way we import same data, which the user made his decision about).
-		// In this case it is safe to replace records in database with records
-		// from the running-config. All cases (except the one below) make us cancel
-		// the whole work for the sake of data consistency. The only exception,
-		// when an expired import request is tolerated (but not executed) for the
-		// currently processed port, is:
-		// 1. D' == R' (change already merged)
-		// 2. R == R' (this is what user expects to see)
-		// Where:
-		// D' stands for the current database-config
-		// R' stands for the current running-config
-		// R stands for running-config cached in the form
-		// Also there is D (old value of database-config), value of which isn't
-		// known, but (D == D') is equivalent to (M == M'), where M and M' stand
-		// for cached and current values of mutex revision respectively.
-		// ---------------------------------------------------------------------
-		// All this can be summarized as follows:
-		// D == D' D' == R' R == R' ignore request
-		// D == D' D' == R' R != R' abort
-		// D == D' D' != R' R == R' save changes
-		// D == D' D' != R' R != R' abort
-		// D != D' D' == R' R == R' ignore request
-		// D != D' D' == R' R != R' abort
-		// D != D' D' != R' R == R' abort
-		// D != D' D' != R' R != R' abort
-		// So the decision is made this way:
-		// R != R' => abort
-		// (being here implies R == R')
-		// D' == R' => ignore request
-		// (now D' != R' is implied)
-		// D != D' => abort
-		// save changes (D == D' D' != R' R == R')
-		if
+		$after[$port_name] = $port;
+	}
+	// overwrite configuration of every uplink port present
+	foreach (produceUplinkPorts ($domain_vlanlist, $after) as $port_name => $port)
+		$after[$port_name] = $port;
+	// save added difference
+	foreach ($after as $port_name => $port)
+	{
+		if 
 		(
-			$old_change_to[$port_name]['mode'] != $item['mode'] or
-			!array_values_same ($old_change_to[$port_name]['allowed'], $item['allowed']) or
-			$old_change_to[$port_name]['native'] != $item['native']
-		)
-			throw new RuntimeException();
-		if
-		(
-			$change_from['mode'] == $item['mode'] and
-			array_values_same ($change_from[$port_name]['allowed'], $item['allowed']) and
-			$change_from[$port_name]['native'] == $item['native']
+			array_key_exists ($port_name, $change_from) and
+			same8021QConfigs ($port, $change_from[$port_name])
 		)
 			continue;
-		if ($form_mutex_rev != $vswitch['mutex_rev'])
-			throw new RuntimeException();
-		$ports_to_do[$port_name] = $item;
-	}
-	// Take the original snapshot of device's ports (D) with queued changes (R') applied
-	// and derive uplink configuration from that input. Append these findings to the queue.
-	$after = array();
-	foreach ($change_from as $port_name => $item)
-		$after[$port_name] = array_key_exists ($port_name, $new_change_to) ?
-			$new_change_to[$port_name] : $item; // R' : D'
-	foreach (produceUplinkPorts ($domain_vlanlist, apply8021QOrder ($vswitch['object_id'], $after)) as $port_name => $item)
-		$ports_to_do[$port_name] = $item;
-	// save all queued ports into database
-	foreach ($ports_to_do as $port_name => $item)
-	{
 		// Replace current port configuration with the provided one. If the new
 		// native VLAN ID doesn't belong to the allowed list, don't issue
 		// INSERT query, which would always trigger an FK exception.
@@ -3910,19 +3855,19 @@ function importSwitch8021QConfig
 		if (FALSE === usePreparedDeleteBlade ('PortVLANMode', array ('object_id' => $vswitch['object_id'], 'port_name' => $port_name)))
 			throw new RuntimeException();
 		// A record on a port with none VLANs allowed makes no sense regardless of port mode.
-		if (!count ($item['allowed']))
+		if ($port['mode'] != 'trunk' and !count ($port['allowed']))
 			continue;
-		if (!usePreparedInsertBlade ('PortVLANMode', array ('object_id' => $vswitch['object_id'], 'port_name' => $port_name, 'vlan_mode' => $item['mode'])))
+		if (!usePreparedInsertBlade ('PortVLANMode', array ('object_id' => $vswitch['object_id'], 'port_name' => $port_name, 'vlan_mode' => $port['mode'])))
 			throw new RuntimeException();
-		foreach ($item['allowed'] as $vlan_id)
+		foreach ($port['allowed'] as $vlan_id)
 			if (!usePreparedInsertBlade ('PortAllowedVLAN', array ('object_id' => $vswitch['object_id'], 'port_name' => $port_name, 'vlan_id' => $vlan_id)))
 				throw new RuntimeException();
 		// When the new native VLAN ID is 0, only delete the old row (if it exists).
 		if
 		(
-			$item['native'] and
-			in_array ($item['native'], $item['allowed']) and
-			!usePreparedInsertBlade ('PortNativeVLAN', array ('object_id' => $vswitch['object_id'], 'port_name' => $port_name, 'vlan_id' => $item['native']))
+			$port['native'] and
+			in_array ($port['native'], $port['allowed']) and
+			!usePreparedInsertBlade ('PortNativeVLAN', array ('object_id' => $vswitch['object_id'], 'port_name' => $port_name, 'vlan_id' => $port['native']))
 		)
 			throw new RuntimeException();
 		$done++;
@@ -3933,14 +3878,12 @@ function importSwitch8021QConfig
 function exportSwitch8021QConfig
 (
 	$vswitch,
-	$form_mutex_rev,
 	$device_vlanlist,
 	$old_change_from, // R
 	$new_change_from, // R'
 	$change_to // D'
 )
 {
-	global $dbxlink;
 	// In terms of the decision making logic explained in importSwitch8021QConfig()
 	// this job is performed as follows:
 	// D == D' D' == R' R == R' ignore request
@@ -3958,8 +3901,8 @@ function exportSwitch8021QConfig
 	// (now D' != R' is implied)
 	// R != R' => abort
 	// save changes (D == D' D' != R' R == R')
-	if ($vswitch['mutex_rev'] != $form_mutex_rev) // D != D'
-		throw new RuntimeException ('expired data detected');
+	// P.S. D is always equal to D'
+
 	// only ignore VLANs, which exist and are explicitly shown as "alien"
 	$old_managed_vlans = array();
 	$domain_vlanlist = getDomainVLANs ($vswitch['domain_id']);
