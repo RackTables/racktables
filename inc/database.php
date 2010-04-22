@@ -3804,8 +3804,8 @@ function importSwitch8021QConfig
 		if ($vlan['vlan_type'] == 'alien')
 			$domain_alien_vlans[] = $vlan_id;
 	$done = 0;
-	$new_change_to = apply8021QOrder ($vswitch['object_id'], $new_change_to);
-	$after = apply8021QOrder ($vswitch['object_id'], $change_from);
+	$new_change_to = apply8021QOrder ($vswitch['template_id'], $new_change_to);
+	$after = apply8021QOrder ($vswitch['template_id'], $change_from);
 	// filter args and add/replace meaningful ports
 	foreach ($new_change_to as $port_name => $port)
 	{
@@ -3955,7 +3955,7 @@ function exportSwitch8021QConfig
 	foreach ($new_change_from as $port_name => $port)
 		$after[$port_name] = array_key_exists ($port_name, $change_to) ?
 			$change_to[$port_name] : $port; // D' : R'
-	foreach (produceUplinkPorts ($domain_vlanlist, apply8021QOrder ($vswitch['object_id'], $after)) as $port_name => $item)
+	foreach (produceUplinkPorts ($domain_vlanlist, apply8021QOrder ($vswitch['template_id'], $after)) as $port_name => $item)
 		$ports_to_do[$port_name] = array
 		(
 			'old_mode' => $new_change_from[$port_name]['mode'],

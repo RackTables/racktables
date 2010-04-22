@@ -6745,7 +6745,7 @@ function renderObject8021QPorts ($object_id)
 	$vswitch = getVLANSwitchInfo ($object_id);
 	$vdom = getVLANDomain ($vswitch['domain_id']);
 	$req_port_name = array_key_exists ('port_name', $sic) ? $sic['port_name'] : '';
-	$desired_config = apply8021QOrder ($object_id, getDesired8021QConfig ($object_id));
+	$desired_config = apply8021QOrder ($vswitch['template_id'], getDesired8021QConfig ($object_id));
 	uksort ($desired_config, 'sortTokenize');
 	$uplinks = produceUplinkPorts ($vdom['vlanlist'], $desired_config);
 	echo '<table border=0 width="100%"><tr valign=top><td class=tdleft width="30%">';
@@ -7137,9 +7137,9 @@ function renderObject8021QSync ($object_id)
 		$formports[$port_name]['running_allowed'] = $item['allowed'];
 		$formports[$port_name]['running_native'] = $item['native'];
 	}
-	$formports = apply8021QOrder ($object_id, $formports);
 	uksort ($formports, 'sortTokenize');
 	$vswitch = getVLANSwitchInfo ($object_id);
+	$formports = apply8021QOrder ($vswitch['template_id'], $formports);
 	$domvlans = array_keys (getDomainVLANs ($vswitch['domain_id']));
 	printOpFormIntro ('sync', array ('mutex_rev' => $vswitch['mutex_rev']));
 	$nrows = count ($formports);

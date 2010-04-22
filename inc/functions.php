@@ -2938,11 +2938,9 @@ function array_values_same ($a1, $a2)
 // Use the VLAN switch template associated with the given object
 // to set VST role for each port of the provided list. Return
 // resulting list.
-function apply8021QOrder ($object_id, $portlist)
+function apply8021QOrder ($vst_id, $portlist)
 {
-	if (NULL === $vswitch = getVLANSwitchInfo ($object_id))
-		throw new InvalidArgException ('object_id', $object_id, 'object has no configured 802.1Q order');
-	$vst = getVLANSwitchTemplate ($vswitch['template_id']);
+	$vst = getVLANSwitchTemplate ($vst_id);
 	foreach ($vst['rules'] as $rule)
 		foreach (array_keys ($portlist) as $port_name)
 			if
