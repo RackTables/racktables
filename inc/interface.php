@@ -254,6 +254,9 @@ $image['knight']['height'] = 33;
 $image['UPDATEALL']['path'] = 'pix/tango-system-software-update-32x32.png';
 $image['UPDATEALL']['width'] = 32;
 $image['UPDATEALL']['height'] = 32;
+$image['CORE']['path'] = 'pix/crystal-apps-core-32x32.png';
+$image['CORE']['width'] = 32;
+$image['CORE']['height'] = 32;
 $image['Zoom']['path'] = 'pix/tango-system-search-22x22.png';
 $image['Zoom']['width'] = 22;
 $image['Zoom']['height'] = 22;
@@ -7212,7 +7215,7 @@ function renderObject8021QSync ($object_id)
 	}
 	echo "<input type=hidden name=nrows value=${rownum}>";
 	echo '<tr><td colspan=6 align=center>';
-	printImageHREF ('UPDATEALL', 'sumbit all updates', TRUE);
+	printImageHREF ('CORE', 'sumbit all updates', TRUE);
 	echo '</td></tr>';
 	echo '</table>';
 	echo '</form>';
