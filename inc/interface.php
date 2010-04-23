@@ -7383,7 +7383,7 @@ function renderVSTRulesEditor ($vst_id)
 		echo '<td>' . getImageHREF ('add', 'add rule', TRUE, 106) . '</td>';
 		echo '<td><input type=text tabindex=101 name=rule_no size=3></td>';
 		echo '<td><input type=text tabindex=102 name=port_pcre></td>';
-		echo '<td>' . getSelect ($port_role_options, array ('name' => 'port_role', 'tabindex' => 103), 'trunk') . '</td>';
+		echo '<td>' . getSelect ($port_role_options, array ('name' => 'port_role', 'tabindex' => 103), 'access') . '</td>';
 		echo '<td><input type=text tabindex=104 name=wrt_vlans></td>';
 		echo '<td>' . getImageHREF ('add', 'add rule', TRUE, 105) . '</td>';
 		echo '</tr></form>';
@@ -7397,6 +7397,7 @@ function renderVSTRulesEditor ($vst_id)
 		'access' => 'access',
 		'trunk' => 'trunk',
 		'uplink' => 'uplink',
+		'downlink' => 'downlink',
 	);
 	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
 		printNewItemTR ($port_role_options);
