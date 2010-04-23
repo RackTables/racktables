@@ -6776,7 +6776,11 @@ function renderObject8021QPorts ($object_id)
 			$trclass = $text_left == $text_right ? 'trbusy' : 'trwarning';
 			break;
 		case 'trunk':
-			$trclass = $port['vst_role'] == $port['mode'] ? 'trbusy' : 'trwarning';
+			$trclass =
+			(
+				$port['vst_role'] != $port['mode'] or
+				count (array_diff (array_keys ($port['allowed']), array_keys ($vdom['vlanlist'])))
+			) ? 'trwarning' : 'trbusy';
 			$linkparams = array
 			(
 				'page' => $pageno,
@@ -6798,7 +6802,11 @@ function renderObject8021QPorts ($object_id)
 				getImageHREF ($imagename, $imagetext) . '</a>';
 			break;
 		case 'access':
-			$trclass = $port['vst_role'] == $port['mode'] ? 'trbusy' : 'trwarning';
+			$trclass =
+			(
+				$port['vst_role'] != $port['mode'] or
+				!array_key_exists ($port['native'], $vdom['vlanlist'])
+			) ? 'trwarning' : 'trbusy';
 			if ($req_port_name != '')
 			{
 				// don't render a form for access ports, when a trunk port is zoomed
