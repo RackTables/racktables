@@ -6818,7 +6818,8 @@ function renderObject8021QPorts ($object_id)
 			$text_right .= "<input type=hidden name=pm_${nports} value=access>";
 			$wrt_vlans = iosParseVLANString ($port['wrt_vlans']);
 			$options = array();
-			// list only new options, which are listen in domain and fit into VST
+			// Offer only options, which are listed in domain and fit into VST.
+			// Never offer immune VLANs regardless of VST filter for this port.
 			foreach ($vdom['vlanlist'] as $vlan_id => $vlan_info)
 				if
 				(
