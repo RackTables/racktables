@@ -2243,7 +2243,8 @@ function save8021QPorts ()
 	}
 	if ($npulled)
 	{
-		$query = $dbxlink->prepare ('UPDATE VLANSwitch SET mutex_rev = mutex_rev + 1, last_pull = NOW() WHERE object_id = ?');
+		// update last_updated implicitly
+		$query = $dbxlink->prepare ('UPDATE VLANSwitch SET mutex_rev = mutex_rev + 1 WHERE object_id = ?');
 		$query->execute (array ($sic['object_id']));
 	}
 	$dbxlink->commit();
@@ -2340,12 +2341,12 @@ function process8021QSyncRequest ()
 	}
 	if ($npushed)
 	{
-		$query = $dbxlink->prepare ('UPDATE VLANSwitch SET last_push = NOW() WHERE object_id = ?');
+		$query = $dbxlink->prepare ('UPDATE VLANSwitch SET last_deploy_done = NOW() WHERE object_id = ?');
 		$query->execute (array ($sic['object_id']));
 	}
 	if ($npulled)
 	{
-		$query = $dbxlink->prepare ('UPDATE VLANSwitch SET mutex_rev = mutex_rev + 1, last_pull = NOW() WHERE object_id = ?');
+		$query = $dbxlink->prepare ('UPDATE VLANSwitch SET mutex_rev = mutex_rev + 1 WHERE object_id = ?');
 		$query->execute (array ($sic['object_id']));
 	}
 	$dbxlink->commit();

@@ -3605,11 +3605,9 @@ function getDomainVLANs ($vdom_id)
 
 function getVLANDomainSwitches ($vdom_id)
 {
-	global $dbxlink;
-	$query = $dbxlink->prepare ('SELECT object_id, template_id, last_reset, last_pull, last_push FROM VLANSwitch WHERE domain_id = ? ORDER BY object_id');
-	$result = $query->execute (array ($vdom_id));
+	$result = usePreparedSelectBlade ('SELECT object_id, template_id, last_updated, last_deploy_failed, last_deploy_done FROM VLANSwitch WHERE domain_id = ? ORDER BY object_id', array ($vdom_id));
 	$ret = array();
-	while ($row = $query->fetch (PDO::FETCH_ASSOC))
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 		$ret[$row['object_id']] = $row;
 	return $ret;
 }
@@ -4261,8 +4259,8 @@ function commitUpdateVSTRule ($vst_id, $rule_no, $new_rule_no, $port_pcre, $port
 function get8021QDeployPlan()
 {
 	$ret = array();
-	$query = 'SELECT object_id, NOW() - last_reset AS age ' .
-		'FROM VLANSwitch WHERE last_push != 0 AND last_reset > last_push';
+	$query = 'SELECT object_id, NOW() - last_updated AS age ' .
+		'FROM VLANSwitch WHERE last_updated > last_deploy_done AND last_updated > last_deploy_failed';
 	$result = usePreparedSelectBlade ($query);
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 		$ret[] = $row;
