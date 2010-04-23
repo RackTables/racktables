@@ -3882,18 +3882,45 @@ function saveSwitch8021QConfig
 			continue;
 		// find and cancel any changes regarding immune VLANs
 		foreach ($domain_immune_vlans as $immune)
-		{
-			if (in_array ($immune, $before[$port_name]['allowed'])) // was here before
+			switch ($port['mode'])
 			{
-				if (!in_array ($immune, $port['allowed']))
-					$port['allowed'][] = $immune; // restore
+			case 'access':
+				// Reverting an attempt to set an access port from
+				// "normal" VLAN to immune one (or vice versa) requires
+				// special handling, becase the calling function has
+				// discarded the old contents of 'allowed' for current port.
+				// Such reversal happens either once or never for an
+				// access port.
+				if
+				(
+					$before[$port_name]['native'] == $immune or
+					$port['native'] == $immune
+				)
+				{
+					$port['native'] = $before[$port_name]['native'];
+					$port['allowed'] = array ($port['native']);
+					break 2;
+				}
+				break;
+			case 'trunk':
+				if (in_array ($immune, $before[$port_name]['allowed'])) // was allowed before
+				{
+					if (!in_array ($immune, $port['allowed']))
+						$port['allowed'][] = $immune; // restore
+					if ($before[$port_name]['native'] == $immune) // and was native
+						$port['native'] = $immune; // also restore
+				}
+				else // wasn't
+				{
+					if (in_array ($immune, $port['allowed']))
+						unset ($port['allowed'][array_search ($immune, $port['allowed'])]); // cancel
+					if ($port['native'] == $immune)
+						$port['native'] = $before[$port_name]['native'];
+				}
+				break;
+			default:
+				throw new RuntimeException ('invalid data submitted');
 			}
-			// wasn't
-			elseif (in_array ($immune, $port['allowed']))
-				unset ($port['allowed'][array_search ($immune, $port['allowed'])]); // cancel
-			if ($before[$port_name]['native'] == $immune)
-				$port['native'] = $immune; // restore
-		}
 		$after[$port_name] = $port;
 	}
 	// overwrite configuration of every uplink port present

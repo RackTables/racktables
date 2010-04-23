@@ -2176,7 +2176,7 @@ function updateVLANDomain ()
 	return buildRedirectURL (__FUNCTION__, $result ? 'OK' : 'ERR');
 }
 
-$msgcode['save8021QPorts']['OK'] = 43;
+$msgcode['save8021QPorts']['OK'] = 63;
 $msgcode['save8021QPorts']['ERR1'] = 160;
 $msgcode['save8021QPorts']['ERR2'] = 109;
 function save8021QPorts ()
@@ -2247,7 +2247,7 @@ function save8021QPorts ()
 		$query->execute (array ($sic['object_id']));
 	}
 	$dbxlink->commit();
-	return buildRedirectURL (__FUNCTION__, 'OK', array(), NULL, NULL, $extra);
+	return buildRedirectURL (__FUNCTION__, 'OK', array ($npulled), NULL, NULL, $extra);
 }
 
 $msgcode['bindVLANtoIPv4']['OK'] = 48;

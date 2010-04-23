@@ -6805,6 +6805,15 @@ function renderObject8021QPorts ($object_id)
 				$text_right = '&nbsp;';
 				break;
 			}
+			if
+			(
+				array_key_exists ($port['native'], $vdom['vlanlist']) and
+				$vdom['vlanlist'][$port['native']]['vlan_type'] == 'alien'
+			)
+			{
+				$text_right = formatVLANName ($vdom['vlanlist'][$port['native']]);
+				break;
+			}
 			$text_right = "<input type=hidden name=pn_${nports} value=${port_name}>";
 			$text_right .= "<input type=hidden name=pm_${nports} value=access>";
 			$wrt_vlans = iosParseVLANString ($port['wrt_vlans']);
@@ -6814,6 +6823,7 @@ function renderObject8021QPorts ($object_id)
 				if
 				(
 					$vlan_id != $port['native'] and
+					$vlan_info['vlan_type'] != 'alien' and
 					(!count ($wrt_vlans) or in_array ($vlan_id, $wrt_vlans))
 				)
 					$options[$vlan_id] = formatVLANName ($vlan_info, TRUE);
@@ -6836,7 +6846,7 @@ function renderObject8021QPorts ($object_id)
 	if (!array_key_exists ($req_port_name, $desired_config))
 		echo '<td colspan=2>&nbsp;</td>';
 	else
-		renderPortVLANConfig
+		renderTrunkPortControls
 		(
 			$vswitch,
 			$vdom,
@@ -6846,7 +6856,7 @@ function renderObject8021QPorts ($object_id)
 	echo '</tr></table>';
 }
 
-function renderPortVLANConfig ($vswitch, $vdom, $port_name, $vlanport)
+function renderTrunkPortControls ($vswitch, $vdom, $port_name, $vlanport)
 {
 	if (!count ($vdom['vlanlist']))
 	{
@@ -6858,13 +6868,30 @@ function renderPortVLANConfig ($vswitch, $vdom, $port_name, $vlanport)
 		'mutex_rev' => $vswitch['mutex_rev'],
 		'nports' => 1,
 		'pn_0' => $port_name,
-		'pm_0' => $vlanport['vst_role'], // calling function must make sure it is not 'uplink'
+		'pm_0' => 'trunk',
 	);
 	printOpFormIntro ('save', $formextra);
 	echo '<td width="35%">';
 	echo '<table border=0 cellspacing=0 cellpadding=3 align=center>';
 	echo '<tr><th colspan=2>allowed</th></tr>';
+	// Present all VLANs of the domain and all currently configured VLANs
+	// (regardless if these sets intersect or not).
+	$allowed_options = array();
 	foreach ($vdom['vlanlist'] as $vlan_id => $vlan_info)
+		$allowed_options[$vlan_id] = array
+		(
+			'vlan_type' => $vlan_info['vlan_type'],
+			'text' => formatVLANName ($vlan_info),
+		);
+	foreach ($vlanport['allowed'] as $vlan_id)
+		if (!array_key_exists ($vlan_id, $allowed_options))
+			$allowed_options[$vlan_id] = array
+			(
+				'vlan_type' => 'none',
+				'text' => "unlisted VLAN ${vlan_id}",
+			);
+	ksort ($allowed_options);
+	foreach ($allowed_options as $vlan_id => $option)
 	{
 		if (in_array ($vlan_id, $vlanport['allowed']))
 		{
@@ -6878,11 +6905,11 @@ function renderPortVLANConfig ($vswitch, $vdom, $port_name, $vlanport)
 		}
 		// A real relation to an alien VLANs is shown for a
 		// particular port, but it cannot be changed by user.
-		if ($vlan_info['vlan_type'] == 'alien')
+		if ($option['vlan_type'] == 'alien')
 			$selected .= ' disabled';
 		echo "<tr><td colspan=2 class=${class}>";
 		echo "<label><input type=checkbox name='pav_0[]' value='${vlan_id}'${selected}> ";
-		echo formatVLANName ($vlan_info) . "</label></td></tr>";
+		echo $option['text'] . "</label></td></tr>";
 	}
 	echo '</table>';
 	echo '</td><td width="35%">';
@@ -6893,10 +6920,18 @@ function renderPortVLANConfig ($vswitch, $vdom, $port_name, $vlanport)
 		echo '<tr><td colspan=2>(no allowed VLANs for this port)</td></tr>';
 	else
 	{
-		$native_options = array (0 => '-- NONE --');
-		foreach ($vlanport['allowed'] as $allowed_id)
-			$native_options[$allowed_id] = formatVLANName ($vdom['vlanlist'][$allowed_id]);
-		foreach ($native_options as $vlan_id => $vlan_text)
+		$native_options = array (0 => array ('vlan_type' => 'none', 'text' => '-- NONE --'));
+		foreach ($vlanport['allowed'] as $vlan_id)
+			$native_options[$vlan_id] = array_key_exists ($vlan_id, $vdom['vlanlist']) ? array
+				(
+					'vlan_type' => $vdom['vlanlist'][$vlan_id]['vlan_type'],
+					'text' => formatVLANName ($vdom['vlanlist'][$vlan_id]),
+				) : array
+				(
+					'vlan_type' => 'none',
+					'text' => "unlisted VLAN ${vlan_id}",
+				);
+		foreach ($native_options as $vlan_id => $option)
 		{
 			if ($vlan_id == $vlanport['native'])
 			{
@@ -6916,16 +6951,13 @@ function renderPortVLANConfig ($vswitch, $vdom, $port_name, $vlanport)
 			// which is explicitly protected from it.
 			if
 			(
-				(array_key_exists ($vlanport['native'], $vdom['vlanlist']) and
-				$vdom['vlanlist'][$vlanport['native']]['vlan_type'] == 'alien')
-				or
-				(array_key_exists ($vlan_id, $vdom['vlanlist']) and
-				$vdom['vlanlist'][$vlan_id]['vlan_type'] == 'alien')
+				$native_options[$vlanport['native']]['vlan_type'] == 'alien' or
+				$option['vlan_type'] == 'alien'
 			)
 				$selected .= ' disabled';
 			echo "<tr><td colspan=2 class=${class}>";
 			echo "<label><input type=radio name='pnv_0' value='${vlan_id}'${selected}> ";
-			echo $vlan_text . "</label></td></tr>";
+			echo $option['text'] . "</label></td></tr>";
 		}
 	}
 	echo '<tr><td class=tdleft>';
