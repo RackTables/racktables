@@ -6767,7 +6767,7 @@ function renderObject8021QPorts ($object_id)
 		{
 		case 'none':
 			if ($port['mode'] == 'none')
-				continue; // early miss
+				continue 2; // early miss
 			$trclass = 'trerror'; // stuck ghost port
 			$text_right = '&nbsp;';
 			break;
@@ -7204,7 +7204,11 @@ function renderObject8021QSync ($object_id)
 		{
 			$skip_inputs = FALSE;
 			// enable, but consider each option independently
-			if ($desired_cfgstring == 'none')
+			if
+			(
+				!array_key_exists ($port_name, $running_config['portdata']) or
+				$desired_cfgstring == 'none'
+			)
 				$radio_attrs['left'] .= ' disabled';
 			// Don't accept running VLANs not in domain, and
 			// don't offer anything, that VST will deny.
@@ -7220,7 +7224,11 @@ function renderObject8021QSync ($object_id)
 			$trclass = $port['vst_role'] == 'none' ? 'trwarning' : 'trbusy';
 		else
 			// locked difference : fixable difference
-			$trclass = $port['vst_role'] == 'none' ? 'trerror' : 'trwarning';
+			$trclass =
+			(
+				$port['vst_role'] == 'none' or
+				!array_key_exists ($port_name, $running_config['portdata'])
+			) ? 'trerror' : 'trwarning';
 		echo "<tr class=${trclass}><td>${port_name}</td>";
 		if ($skip_inputs)
 			echo "<td>${desired_cfgstring}</td>";
