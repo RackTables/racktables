@@ -2264,6 +2264,12 @@ function serializeVLANPack ($vlanport)
 	case 'trunk':
 		$ret = 'T';
 		break;
+	case 'uplink':
+		$ret = 'U';
+		break;
+	case 'downlink':
+		$ret = 'D';
+		break;
 	default:
 		return 'error';
 	}
