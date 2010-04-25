@@ -268,13 +268,6 @@ $image['Zooming']['height'] = 22;
 // See the $systemreport for structure.
 $localreports = array();
 
-// This also can be modified in local.php.
-$pageheaders = array
-(
-	100 => "<link rel=stylesheet type='text/css' href=pi.css />",
-	200 => "<link rel=icon href='pix/racktables.ico' type='image/x-icon' />",
-);
-
 $CodePressMap = array
 (
 	'sql' => 'sql',
@@ -1522,7 +1515,7 @@ function showMessageOrError ()
 				138 => array ('code' => 'error', 'format' => 'commitDeleteRSPool() failed'),
 				139 => array ('code' => 'error', 'format' => 'commitUpdateRSPool() failed'),
 				140 => array ('code' => 'error', 'format' => 'Encountered %u errors, (de)activated %u real servers'),
-				141 => array ('code' => 'error', 'format' => 'Encountered %u errors, updated %u IP address(es)'),
+				141 => array ('code' => 'error', 'format' => 'Encountered %u errors, updated %u record(s)'),
 				142 => array ('code' => 'error', 'format' => 'executeAutoPorts() failed'),
 				143 => array ('code' => 'error', 'format' => 'Tried chaining %u tags, but experienced %u errors.'),
 				144 => array ('code' => 'error', 'format' => "Error deleting tag: '%s'"),
@@ -6384,25 +6377,6 @@ function renderPortIFCompatEditor()
 	finishPortlet();
 }
 
-// print part of HTML HEAD block
-function printPageHeaders ()
-{
-	global $pageheaders;
-	ksort ($pageheaders);
-	foreach ($pageheaders as $s)
-		echo $s . "\n";
-	echo "<style type='text/css'>\n";
-	foreach (array ('F', 'A', 'U', 'T', 'Th', 'Tw', 'Thw') as $statecode)
-	{
-		echo "td.state_${statecode} {\n";
-		echo "\ttext-align: center;\n";
-		echo "\tbackground-color: #" . (getConfigVar ('color_' . $statecode)) . ";\n";
-		echo "\tfont: bold 10px Verdana, sans-serif;\n";
-		echo "}\n\n";
-	}
-	echo '</style>';
-}
-
 function render8021QOrderForm ($some_id)
 {
 	function printNewItemTR ()
@@ -7147,14 +7121,38 @@ function renderVLANIPv4 ($some_id)
 
 function renderObject8021QSync ($object_id)
 {
-	global $pageno, $tabno;
+	$vswitch = getVLANSwitchInfo ($object_id);
+	startPortlet ('details');
+	echo '<table border=0 cellspacing=0 cellpadding=3 width="100%">';
+	echo '<tr><th width="50%" class=tdright>last edit:</th>';
+	echo "<td class=tdleft>${vswitch['last_updated']}</td></tr>";
+	if (!$vswitch['last_deploy_done_UTS'] and !$vswitch['last_deploy_failed_UTS'])
+		$sync_text = 'never';
+	elseif ($vswitch['last_deploy_done_UTS'] > $vswitch['last_deploy_failed_UTS'])
+		$sync_text = $vswitch['last_deploy_done'] . ' (successful)';
+	else
+		$sync_text = $vswitch['last_deploy_failed'] . ' (with conflicts)';
+	echo '<tr><th width="50%" class=tdright>last sync:</th>';
+	echo "<td class=tdleft>${sync_text}</td></tr>";
+	printOpFormIntro ('run', array ($vswitch['mutex_rev']));
+	echo '<tr><th width="50%" class=tdright><label for=do_pull>do pull:</label></th>';
+	echo "<td class=tdleft><input type=checkbox name=do_pull id=do_pull></td></tr>";
+	echo '<tr><th width="50%" class=tdright><label for=do_push>do push:</label></th>';
+	echo "<td class=tdleft><input type=checkbox name=do_push id=do_push></td></tr>";
+	echo '<tr><td colspan=2>';
+	printImageHREF ('UPDATEALL', 'sync', TRUE, 100);
+	echo '</form></td></tr>';
+	echo '</table>';
+	finishPortlet();
+
+	startPortlet ('conflicting ports');
 	try
 	{
 		$running_config = getRunning8021QConfig ($object_id);
 	}
 	catch (RuntimeException $re)
 	{
-		showWarning ('Could not retrieve running-config of this device with the following error:<br>' . $re->getMessage(), __FUNCTION__);
+		showWarning ('Device configuration unavailable:<br>' . $re->getMessage(), __FUNCTION__);
 		return;
 	}
 	$formports = getDesired8021QConfig ($object_id);
@@ -7182,10 +7180,9 @@ function renderObject8021QSync ($object_id)
 		$formports[$port_name]['running_native'] = $item['native'];
 	}
 	uksort ($formports, 'sortTokenize');
-	$vswitch = getVLANSwitchInfo ($object_id);
 	$formports = apply8021QOrder ($vswitch['template_id'], $formports);
 	$domvlans = array_keys (getDomainVLANs ($vswitch['domain_id']));
-	printOpFormIntro ('sync', array ('mutex_rev' => $vswitch['mutex_rev']));
+	printOpFormIntro ('resolve', array ('mutex_rev' => $vswitch['mutex_rev']));
 	$nrows = count ($formports);
 	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
 	echo '<tr><th rowspan=2>port</th><th rowspan=2>last&nbsp;saved&nbsp;config</th><th colspan=3>winner</th>';
@@ -7272,6 +7269,7 @@ function renderObject8021QSync ($object_id)
 	echo '</td></tr>';
 	echo '</table>';
 	echo '</form>';
+	finishPortlet();
 }
 
 function renderVSTListEditor()

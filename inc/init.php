@@ -190,6 +190,13 @@ alterConfigWithUserPreferences();
 require_once 'inc/navigation.php';
 require_once 'inc/triggers.php';
 
+// This also can be modified in local.php.
+$pageheaders = array
+(
+	100 => "<link rel=stylesheet type='text/css' href=pi.css />",
+	200 => "<link rel=icon href='pix/racktables.ico' type='image/x-icon' />",
+);
+
 
 $op = '';
 require_once 'inc/gateways.php';

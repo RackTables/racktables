@@ -138,6 +138,22 @@ $searchfunc = array
 	),
 );
 
+$tablemap_8021q = array
+(
+	'desired' => array
+	(
+		'pvm' => 'PortVLANMode',
+		'pav' => 'PortAllowedVLAN',
+		'pnv' => 'PortNativeVLAN',
+	),
+	'cached' => array
+	(
+		'pvm' => 'CachedPVM',
+		'pav' => 'CachedPAV',
+		'pnv' => 'CachedPNV',
+	),
+);
+
 function isInnoDBSupported ($dbh = FALSE) {
 	global $dbxlink;
 
@@ -3652,7 +3668,15 @@ function getVLANSwitches()
 
 function getVLANSwitchInfo ($object_id, $extrasql = '')
 {
-	$result = usePreparedSelectBlade ('SELECT object_id, domain_id, template_id, mutex_rev FROM VLANSwitch WHERE object_id = ? ' . $extrasql, array ($object_id));
+	$result = usePreparedSelectBlade
+	(
+		'SELECT object_id, domain_id, template_id, mutex_rev, ' .
+		'last_updated, UNIX_TIMESTAMP(last_updated) AS last_updated_UTS, ' .
+		'last_deploy_failed, UNIX_TIMESTAMP(last_deploy_failed) AS last_deploy_failed_UTS, ' .
+		'last_deploy_done, UNIX_TIMESTAMP(last_deploy_done) AS last_deploy_done_UTS ' .
+		'FROM VLANSwitch WHERE object_id = ? ' . $extrasql,
+		array ($object_id)
+	);
 	if ($result and $row = $result->fetch (PDO::FETCH_ASSOC))
 		return $row;
 	return NULL;
@@ -3700,6 +3724,43 @@ function getDesired8021QConfig ($object_id)
 	unset ($result);
 	$query = 'SELECT port_name, vlan_id FROM PortNativeVLAN WHERE object_id = ?';
 	$result = usePreparedSelectBlade ($query, array ($object_id));
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
+		$ret[$row['port_name']]['native'] = $row['vlan_id'];
+	return $ret;
+}
+
+function getStored8021QConfig ($object_id, $instance = 'desired')
+{
+	global $tablemap_8021q;
+	if (!array_key_exists ($instance, $tablemap_8021q))
+		throw new InvalidArgException ('instance', $instance);
+	$ret = array();
+	$result = usePreparedSelectBlade
+	(
+		'SELECT port_name, vlan_mode FROM ' . $tablemap_8021q[$instance]['pvm'] . ' WHERE object_id = ?',
+		array ($object_id)
+	);
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
+		$ret[$row['port_name']] = array
+		(
+			'mode' => $row['vlan_mode'],
+			'allowed' => array(),
+			'native' => 0,
+		);
+	unset ($result);
+	$result = usePreparedSelectBlade
+	(
+		'SELECT port_name, vlan_id FROM ' . $tablemap_8021q[$instance]['pav'] . ' WHERE object_id = ?',
+		array ($object_id)
+	);
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
+		$ret[$row['port_name']]['allowed'][] = $row['vlan_id'];
+	unset ($result);
+	$result = usePreparedSelectBlade
+	(
+		'SELECT port_name, vlan_id FROM ' . $tablemap_8021q[$instance]['pnv'] . ' WHERE object_id = ?',
+		array ($object_id)
+	);
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 		$ret[$row['port_name']]['native'] = $row['vlan_id'];
 	return $ret;
@@ -3788,10 +3849,40 @@ function getVLANConfiguredPorts ($vlan_ck)
 	return $ret;
 }
 
-function replace8021QPorts ($object_id, $before, $after)
+function replace8021QPort ($instance = 'desired', $object_id, $port_name, $port)
+{
+	global $tablemap_8021q;
+	if (!array_key_exists ($instance, $tablemap_8021q))
+		throw new InvalidArgException ('instance', $instance);
+	// Replace current port configuration with the provided one. If the new
+	// native VLAN ID doesn't belong to the allowed list, don't issue
+	// INSERT query, which would always trigger an FK exception.
+	// This function indicates an error, but doesn't revert it, so it is
+	// assummed, that the calling function performs necessary transaction wrapping.
+	// rely on ON DELETE CASCADE for PortAllowedVLAN and PortNativeVLAN
+	if (FALSE === usePreparedDeleteBlade ($tablemap_8021q[$instance]['pvm'], array ('object_id' => $object_id, 'port_name' => $port_name)))
+		throw new RuntimeException();
+	// A record on a port with none VLANs allowed makes no sense regardless of port mode.
+	if ($port['mode'] != 'trunk' and !count ($port['allowed']))
+		return;
+	if (!usePreparedInsertBlade ($tablemap_8021q[$instance]['pvm'], array ('object_id' => $object_id, 'port_name' => $port_name, 'vlan_mode' => $port['mode'])))
+		throw new RuntimeException();
+	foreach ($port['allowed'] as $vlan_id)
+		if (!usePreparedInsertBlade ($tablemap_8021q[$instance]['pav'], array ('object_id' => $object_id, 'port_name' => $port_name, 'vlan_id' => $vlan_id)))
+			throw new RuntimeException();
+	if
+	(
+		$port['native'] and
+		in_array ($port['native'], $port['allowed']) and
+		!usePreparedInsertBlade ($tablemap_8021q[$instance]['pnv'], array ('object_id' => $object_id, 'port_name' => $port_name, 'vlan_id' => $port['native']))
+	)
+		throw new RuntimeException();
+}
+
+function replace8021QPorts ($instance = 'desired', $object_id, $before, $changes)
 {
 	$done = 0;
-	foreach ($after as $port_name => $port)
+	foreach ($changes as $port_name => $port)
 	{
 		if 
 		(
@@ -3799,30 +3890,7 @@ function replace8021QPorts ($object_id, $before, $after)
 			same8021QConfigs ($port, $before[$port_name])
 		)
 			continue;
-		// Replace current port configuration with the provided one. If the new
-		// native VLAN ID doesn't belong to the allowed list, don't issue
-		// INSERT query, which would always trigger an FK exception.
-		// This function indicates an error, but doesn't revert it, so it is
-		// assummed, that the calling function performs necessary transaction wrapping.
-		// rely on ON DELETE CASCADE for PortAllowedVLAN and PortNativeVLAN
-		if (FALSE === usePreparedDeleteBlade ('PortVLANMode', array ('object_id' => $object_id, 'port_name' => $port_name)))
-			throw new RuntimeException();
-		// A record on a port with none VLANs allowed makes no sense regardless of port mode.
-		if ($port['mode'] != 'trunk' and !count ($port['allowed']))
-			continue;
-		if (!usePreparedInsertBlade ('PortVLANMode', array ('object_id' => $object_id, 'port_name' => $port_name, 'vlan_mode' => $port['mode'])))
-			throw new RuntimeException();
-		foreach ($port['allowed'] as $vlan_id)
-			if (!usePreparedInsertBlade ('PortAllowedVLAN', array ('object_id' => $object_id, 'port_name' => $port_name, 'vlan_id' => $vlan_id)))
-				throw new RuntimeException();
-		// When the new native VLAN ID is 0, only delete the old row (if it exists).
-		if
-		(
-			$port['native'] and
-			in_array ($port['native'], $port['allowed']) and
-			!usePreparedInsertBlade ('PortNativeVLAN', array ('object_id' => $object_id, 'port_name' => $port_name, 'vlan_id' => $port['native']))
-		)
-			throw new RuntimeException();
+		replace8021QPort ($instance, $object_id, $port_name, $port);
 		$done++;
 	}
 	return $done;
@@ -3932,30 +4000,10 @@ function exportSwitch8021QConfig
 (
 	$vswitch,
 	$device_vlanlist,
-	$old_change_from, // R
-	$new_change_from, // R'
-	$change_to // D'
+	$before,
+	$changes
 )
 {
-	// In terms of the decision making logic explained in importSwitch8021QConfig()
-	// this job is performed as follows:
-	// D == D' D' == R' R == R' ignore request
-	// D == D' D' == R' R != R' ignore request
-	// D == D' D' != R' R == R' save changes
-	// D == D' D' != R' R != R' abort
-	// D != D' D' == R' R == R' abort
-	// D != D' D' == R' R != R' abort
-	// D != D' D' != R' R == R' abort
-	// D != D' D' != R' R != R' abort
-	// This reads as:
-	// D != D' => abort (this happens for either all ports, or none of them)
-	// (now D == D' is implied)
-	// D' == R' => ignore request
-	// (now D' != R' is implied)
-	// R != R' => abort
-	// save changes (D == D' D' != R' R == R')
-	// P.S. D is always equal to D'
-
 	// only ignore VLANs, which exist and are explicitly shown as "alien"
 	$old_managed_vlans = array();
 	$domain_vlanlist = getDomainVLANs ($vswitch['domain_id']);
@@ -3967,47 +4015,20 @@ function exportSwitch8021QConfig
 		)
 			$old_managed_vlans[] = $vlan_id;
 	$ports_to_do = array();
-	foreach ($new_change_from as $port_name => $port)
+	$after = $before;
+	foreach ($changes as $port_name => $port)
 	{
-		// FIXME: iterate over old_change_from
-		if
-		(
-			!array_key_exists ($port_name, $old_change_from) or
-			!array_key_exists ($port_name, $change_to)
-		)
-			continue;
-		if (same8021QConfigs ($change_to[$port_name], $port)) // D' == R'
-			continue;
-		if (!same8021QConfigs ($old_change_from[$port_name], $port)) // R != R'
-			throw new RuntimeException ('expired data detected');
 		$ports_to_do[$port_name] = array
 		(
-			'old_mode' => $new_change_from[$port_name]['mode'],
-			'old_allowed' => array_key_exists ($port_name, $new_change_from) ?
-				$new_change_from[$port_name]['allowed'] :
-				array(),
-			'old_native' => array_key_exists ($port_name, $new_change_from) ?
-				$new_change_from[$port_name]['native'] :
-				0,
-			'new_mode' => $change_to[$port_name]['mode'],
-			'new_allowed' => $change_to[$port_name]['allowed'],
-			'new_native' => $change_to[$port_name]['native'],
+			'old_mode' => $before[$port_name]['mode'],
+			'old_allowed' => $before[$port_name]['allowed'],
+			'old_native' => $before[$port_name]['native'],
+			'new_mode' => $port['mode'],
+			'new_allowed' => $port['allowed'],
+			'new_native' => $port['native'],
 		);
+		$after[$port_name] = $port;
 	}
-	$after = array();
-	foreach ($new_change_from as $port_name => $port)
-		$after[$port_name] = array_key_exists ($port_name, $change_to) ?
-			$change_to[$port_name] : $port; // D' : R'
-	foreach (produceUplinkPorts ($domain_vlanlist, apply8021QOrder ($vswitch['template_id'], $after)) as $port_name => $item)
-		$ports_to_do[$port_name] = array
-		(
-			'old_mode' => $new_change_from[$port_name]['mode'],
-			'old_allowed' => $new_change_from[$port_name]['allowed'],
-			'old_native' => $new_change_from[$port_name]['native'],
-			'new_mode' => $item['mode'], // trunk
-			'new_allowed' => $item['allowed'],
-			'new_native' => $item['native'], // 0
-		);
 	// New VLAN table is a union of:
 	// 1. all compulsory VLANs
 	// 2. all "current" non-alien allowed VLANs of those ports, which are left
@@ -4022,8 +4043,8 @@ function exportSwitch8021QConfig
 		if ($vlan['vlan_type'] == 'compulsory')
 			$new_managed_vlans[] = $vlan_id;
 	// 2
-	foreach ($new_change_from as $port_name => $port)
-		if (!array_key_exists ($port_name, $ports_to_do))
+	foreach ($before as $port_name => $port)
+		if (!array_key_exists ($port_name, $changes))
 			foreach ($port['allowed'] as $vlan_id)
 			{
 				if (in_array ($vlan_id, $new_managed_vlans))
@@ -4038,7 +4059,7 @@ function exportSwitch8021QConfig
 					$new_managed_vlans[] = $vlan_id;
 			}
 	// 3
-	foreach ($ports_to_do as $port)
+	foreach ($changes as $port)
 		foreach ($port['new_allowed'] as $vlan_id)
 			if
 			(

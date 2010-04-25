@@ -207,8 +207,20 @@ function trigger_ipv4net_vlanconfig ()
 		return '';
 }
 
-function trigger_isVLANSwitch ()
+function trigger_object_8021qports ()
 {
-	return NULL !== getVLANSwitchInfo ($_REQUEST['object_id']) ? 'std' : '';
+	global $sic;
+	if (NULL === getVLANSwitchInfo ($sic['object_id']))
+		return '';
+	return count (getStored8021QConfig ($sic['object_id'], 'desired')) ? 'std' : '';
 }
+
+function trigger_object_8021qsync ()
+{
+	global $sic;
+	if (NULL === getVLANSwitchInfo ($sic['object_id']))
+		return '';
+	return count (getStored8021QConfig ($sic['object_id'], 'desired')) ? 'std' : 'attn';
+}
+
 ?>

@@ -2964,6 +2964,31 @@ function apply8021QOrder ($vst_id, $portlist)
 	return $portlist;
 }
 
+function apply8021QTemplate ($vst_id, $portnames)
+{
+	$vst = getVLANSwitchTemplate ($vst_id);
+	$ret = array();
+	foreach ($portnames as $port_name)
+	{
+		foreach ($vst['rules'] as $rule)
+			if (preg_match ($rule['port_pcre'], $port_name))
+			{
+				$ret[$port_name] = array
+				(
+					'vst_role' => $rule['port_role'],
+					'wrt_vlans' => $rule['wrt_vlans'],
+				);
+				break;
+			}
+		$ret[$port_name] = array
+		(
+			'vst_role' => 'none',
+			'wrt_vlans' => '',
+		);
+	}
+	return $ret;
+}
+
 // take port list with order applied and return uplink ports in the same format
 function produceUplinkPorts ($domain_vlanlist, $portlist)
 {
@@ -3005,6 +3030,83 @@ function same8021QConfigs ($a, $b)
 	return	$a['mode'] == $b['mode'] &&
 		array_values_same ($a['allowed'], $b['allowed']) &&
 		$a['native'] == $b['native'];
+}
+
+function get8021QSyncOptions
+(
+	$vswitch,
+	$D, // desired config
+	$C, // cached config
+	$R  // running-config
+)
+{
+	$default_port = array
+	(
+		'mode' => 'access',
+		'allowed' => array (VLAN_DFL_ID),
+		'native' => VLAN_DFL_ID,
+	);
+	$empty_port = array
+	(
+		'mode' => 'none',
+		'allowed' => array(),
+		'native' => 0,
+	);
+	$plan = array
+	(
+		'to_pull' => array(),
+		'to_push' => array(),
+		'in_conflict' => array(),
+	);
+	$all_port_names = array_unique (array_merge (array_keys ($C), array_keys ($R)));
+	foreach ($all_port_names as $pn)
+	{
+		if (!array_key_exists ($pn, $R)) // missing from device
+		{
+			if (!same8021QConfigs ($D[$pn], $default_port))
+				$plan['in_conflict'][] = $pn;
+			else
+				$plan['to_pull'][$pn] = $empty_port;
+			continue;
+		}
+		if (!array_key_exists ($pn, $C)) // missing from DB
+		{
+			$plan['to_pull'][$pn] = $R[$pn];
+			continue;
+		}
+		$D_eq_C = same8021QConfigs ($D[$pn], $C[$pn]);
+		$C_eq_R = same8021QConfigs ($C[$pn], $R[$pn]);
+		if ($D_eq_C and $C_eq_R) // implies D == R
+			continue;
+		if ($D_eq_C)
+			$plan['to_pull'][$pn] = $R[$pn];
+		elseif ($C_eq_R)
+			$plan['to_push'][$pn] = $D[$pn];
+		elseif (same8021QConfigs ($D[$pn], $R[$pn]))
+			$plan['to_pull'][$pn] = $R[$pn];
+		else // D != C, C != R, D != R
+			$plan['in_conflict'][] = $pn;
+	}
+	return $plan;
+}
+
+// print part of HTML HEAD block
+function printPageHeaders ()
+{
+	global $pageheaders;
+	ksort ($pageheaders);
+	foreach ($pageheaders as $s)
+		echo $s . "\n";
+	echo "<style type='text/css'>\n";
+	foreach (array ('F', 'A', 'U', 'T', 'Th', 'Tw', 'Thw') as $statecode)
+	{
+		echo "td.state_${statecode} {\n";
+		echo "\ttext-align: center;\n";
+		echo "\tbackground-color: #" . (getConfigVar ('color_' . $statecode)) . ";\n";
+		echo "\tfont: bold 10px Verdana, sans-serif;\n";
+		echo "}\n\n";
+	}
+	echo '</style>';
 }
 
 ?>

@@ -2272,8 +2272,45 @@ function unbindVLANfromIPv4 ()
 }
 
 $msgcode['process8021QSyncRequest']['OK'] = 63;
-$msgcode['process8021QSyncRequest']['ERR'] = 179;
+$msgcode['process8021QSyncRequest']['ERR1'] = 109;
+$msgcode['process8021QSyncRequest']['ERR2'] = 141;
 function process8021QSyncRequest ()
+{
+	global $sic, $dbxlink;
+	$do_pull = array_key_exists ('do_pull', $sic);
+	$do_push = array_key_exists ('do_push', $sic);
+	$done = 0;
+	$dbxlink->beginTransaction();
+	try
+	{
+		if (NULL === $vswitch = getVLANSwitchInfo ($sic['object_id'], 'FOR UPDATE'))
+			throw new InvalidArgException ('object_id', $sic['object_id'], 'VLAN domain is not set for this object');
+		$D = getStored8021QConfig ($vswitch['object_id'], 'desired');
+		$C = getStored8021QConfig ($vswitch['object_id'], 'cached');
+		$R = getRunning8021QConfig ($vswitch['object_id']);
+		$plan = get8021QSyncOptions ($vswitch, $D, $C, $R['portdata']);
+		if ($do_pull)
+		{
+			$done += replace8021QPorts ('cached', $vswitch['object_id'], $C, $plan['to_pull']);
+			$done += replace8021QPorts ('desired', $vswitch['object_id'], $D, $plan['to_pull']);
+		}
+		if ($do_push)
+			$done += exportSwitch8021QConfig ($vswitch, $R['vlanlist'], $R, $plan['to_push']);
+	}
+	catch (Exception $e)
+	{
+		$dbxlink->rollBack();
+		return buildRedirectURL (__FUNCTION__, 'ERR1');
+	}
+	$dbxlink->commit();
+	if (!count ($plan['in_conflict']))
+		return buildRedirectURL (__FUNCTION__, 'OK', array ($done));
+	return buildRedirectURL (__FUNCTION__, 'ERR2', array (count ($plan['in_conflict']), $done));
+}
+
+$msgcode['resolve8021QConflicts']['OK'] = 63;
+$msgcode['resolve8021QConflicts']['ERR'] = 179;
+function resolve8021QConflicts ()
 {
 	global $sic, $dbxlink;
 	assertUIntArg ('mutex_rev');
