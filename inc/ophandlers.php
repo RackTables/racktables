@@ -2307,8 +2307,6 @@ function process8021QSyncRequest ()
 			$prepared = $dbxlink->prepare ("UPDATE VLANSwitch SET last_cache_update = NOW() WHERE object_id = ?");
 			$prepared->execute (array ($vswitch['object_id']));
 		}
-#dump($plan);
-#die;
 		$conflict = count ($plan['in_conflict']) > 0;
 		if ($do_pull)
 		{
@@ -2345,8 +2343,6 @@ function process8021QSyncRequest ()
 	catch (Exception $e)
 	{
 		$dbxlink->rollBack();
-dump($e);
-die;
 		return buildRedirectURL (__FUNCTION__, 'ERR1');
 	}
 	$dbxlink->commit();
