@@ -6722,7 +6722,7 @@ function renderObject8021QPorts ($object_id)
 	$vswitch = getVLANSwitchInfo ($object_id);
 	$vdom = getVLANDomain ($vswitch['domain_id']);
 	$req_port_name = array_key_exists ('port_name', $sic) ? $sic['port_name'] : '';
-	$desired_config = apply8021QOrder ($vswitch['template_id'], getDesired8021QConfig ($object_id));
+	$desired_config = apply8021QOrder ($vswitch['template_id'], getStored8021QConfig ($object_id, 'desired'));
 	uksort ($desired_config, 'sortTokenize');
 	$uplinks = produceUplinkPorts ($vdom['vlanlist'], $desired_config);
 	echo '<table border=0 width="100%"><tr valign=top><td class=tdleft width="30%">';
@@ -6816,7 +6816,7 @@ function renderObject8021QPorts ($object_id)
 			$nports++;
 			break;
 		}
-		echo "<tr class=${trclass}><td>${port_name}</td><td>${text_left}</td><td>${text_right}</td></tr>";
+		echo "<tr class=${trclass} valign=top><td>${port_name}</td><td>${text_left}</td><td>${text_right}</td></tr>";
 	}
 	if ($req_port_name == '' and $nports)
 		echo "<input type=hidden name=nports value=${nports}>" .
@@ -7122,22 +7122,31 @@ function renderVLANIPv4 ($some_id)
 function renderObject8021QSync ($object_id)
 {
 	$vswitch = getVLANSwitchInfo ($object_id);
-	startPortlet ('details');
+	startPortlet ('schedule');
 	echo '<table border=0 cellspacing=0 cellpadding=3 width="100%">';
-	echo '<tr><th width="50%" class=tdright>last edit:</th>';
-	echo "<td class=tdleft>${vswitch['last_updated']}</td></tr>";
-	if (!$vswitch['last_push_done_UTS'] and !$vswitch['last_push_failed_UTS'])
-		$sync_text = 'never';
-	elseif ($vswitch['last_push_done_UTS'] > $vswitch['last_push_failed_UTS'])
-		$sync_text = $vswitch['last_push_done'] . ' (successful)';
+	// FIXME: sort rows newest event last
+	$rows = array();
+	if (!$vswitch['last_pull_done_UTS'] and !$vswitch['last_pull_failed_UTS'])
+		$rows['last pull:'] = 'never';
+	elseif ($vswitch['last_pull_done_UTS'] > $vswitch['last_pull_failed_UTS'])
+		$rows['last pull:'] = $vswitch['last_pull_done'] . ' (successful)';
 	else
-		$sync_text = $vswitch['last_push_failed'] . ' (with conflicts)';
-	echo '<tr><th width="50%" class=tdright>last sync:</th>';
-	echo "<td class=tdleft>${sync_text}</td></tr>";
+		$rows['last pull:'] = $vswitch['last_pull_failed'] . ' (with conflicts)';
+	if (!$vswitch['last_push_done_UTS'] and !$vswitch['last_push_failed_UTS'])
+		$rows['last push:'] = 'never';
+	elseif ($vswitch['last_push_done_UTS'] > $vswitch['last_push_failed_UTS'])
+		$rows['last push:'] = $vswitch['last_push_done'] . ' (successful)';
+	else
+		$rows['last push:'] = $vswitch['last_push_failed'] . ' (with conflicts)';
+	$rows['last cache update:'] = $vswitch['last_cache_update_UTS'] ? $vswitch['last_cache_update'] : 'never';
+	$rows['last edit:'] = $vswitch['last_edited_UTS'] ? $vswitch['last_edited'] : 'never';
+	foreach ($rows as $th => $td)
+		echo "<tr><th width='50%' class=tdright>${th}</th><td class=tdleft>${td}</td></tr>";
+
 	printOpFormIntro ('run', array ($vswitch['mutex_rev']));
-	echo '<tr><th width="50%" class=tdright><label for=do_pull>do pull:</label></th>';
+	echo '<tr><th width="50%" class=tdright><label for=do_pull>pull remote changes in:</label></th>';
 	echo "<td class=tdleft><input type=checkbox name=do_pull id=do_pull></td></tr>";
-	echo '<tr><th width="50%" class=tdright><label for=do_push>do push:</label></th>';
+	echo '<tr><th width="50%" class=tdright><label for=do_push>push local changes out:</label></th>';
 	echo "<td class=tdleft><input type=checkbox name=do_push id=do_push></td></tr>";
 	echo '<tr><td colspan=2>';
 	printImageHREF ('UPDATEALL', 'sync', TRUE, 100);
@@ -7145,62 +7154,58 @@ function renderObject8021QSync ($object_id)
 	echo '</table>';
 	finishPortlet();
 
-	startPortlet ('conflicting ports');
+	startPortlet ('port details');
 	try
 	{
-		$running_config = getRunning8021QConfig ($object_id);
+		$R = getRunning8021QConfig ($object_id);
 	}
 	catch (RuntimeException $re)
 	{
 		showWarning ('Device configuration unavailable:<br>' . $re->getMessage(), __FUNCTION__);
 		return;
 	}
-	$formports = getDesired8021QConfig ($object_id);
-	// The form is based on the "desired" list, which has every
-	// 802.1Q-eligible port of the object plus any port names
-	// already stored in the database. This list may be further
-	// extended by the "running" list of the actual device.
-	foreach (array_keys ($formports) as $port_name)
-	{
-		$formports[$port_name]['running_mode'] = 'none';
-		$formports[$port_name]['running_allowed'] = array();
-		$formports[$port_name]['running_native'] = 0;
-	}
-	foreach ($running_config['portdata'] as $port_name => $item)
-	{
-		if (!array_key_exists ($port_name, $formports))
-			$formports[$port_name] = array
-			(
-				'mode' => 'none',
-				'allowed' => array(),
-				'native' => 0,
-			);
-		$formports[$port_name]['running_mode'] = $item['mode'];
-		$formports[$port_name]['running_allowed'] = $item['allowed'];
-		$formports[$port_name]['running_native'] = $item['native'];
-	}
-	uksort ($formports, 'sortTokenize');
-	$formports = apply8021QOrder ($vswitch['template_id'], $formports);
+	$D = getStored8021QConfig ($vswitch['object_id'], 'desired');
+	$C = getStored8021QConfig ($vswitch['object_id'], 'cached');
+	$plan = get8021QSyncOptions ($vswitch, $D, $C, $R['portdata']);
+	
+	uksort ($D, 'sortTokenize');
 	$domvlans = array_keys (getDomainVLANs ($vswitch['domain_id']));
 	printOpFormIntro ('resolve', array ('mutex_rev' => $vswitch['mutex_rev']));
-	$nrows = count ($formports);
+	$nrows = count ($plan['in_conflict']);
 	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
-	echo '<tr><th rowspan=2>port</th><th rowspan=2>last&nbsp;saved&nbsp;config</th><th colspan=3>winner</th>';
-	echo '<th rowspan=2>running&nbsp;config</th></tr><tr>';
+	echo '<tr valign=top><th rowspan=2>port</th><th rowspan=2>last&nbsp;saved&nbsp;version ';
+	echo '(pushed&nbsp;out)</th><th colspan=3>winner</th>';
+	echo '<th rowspan=2>running&nbsp;version (pulled&nbsp;in)</th></tr><tr>';
 	foreach (array ('left', 'asis', 'right') as $pos)
 		echo "<th><input type=radio name=column_radio value=${pos} " .
 			"onclick=\"checkColumnOfRadios('i_', ${nrows}, '_${pos}')\"></th>";
 	echo '</tr>';
 	$rownum = 0;
-	foreach ($formports as $port_name => $port)
+	foreach (apply8021QOrder ($vswitch['template_id'], $D) as $port_name => $port)
 	{
 		$desired_cfgstring = serializeVLANPack ($port);
-		$running_cfgstring = serializeVLANPack (array ('mode' => $port['running_mode'], 'native' => $port['running_native'], 'allowed' => $port['running_allowed']));
+		$running_cfgstring = serializeVLANPack ($R['portdata'][$port_name]);
+		#if (in_array ($port_name, $plan['in_conflict']))
+		if (array_key_exists ($port_name, $plan['ok_to_push']))
+		{
+			$left_extra = ' trok';
+			$right_extra = '';
+		}
+		elseif (array_key_exists ($port_name, $plan['ok_to_pull']))
+		{
+			$left_extra = '';
+			$right_extra = ' trok';
+		}
+		else
+		{
+			$left_extra = '';
+			$right_extra = '';
+		}
+			
 		// decide on the radio inputs now
 		$radio_attrs = array ('left' => '', 'asis' => ' checked', 'right' => '');
 		if
 		(
-			$port['vst_role'] == 'uplink' or
 			($port['vst_role'] != 'access' and $port['vst_role'] != 'trunk') or
 			$desired_cfgstring == $running_cfgstring
 		)
@@ -7211,7 +7216,7 @@ function renderObject8021QSync ($object_id)
 			// enable, but consider each option independently
 			if
 			(
-				!array_key_exists ($port_name, $running_config['portdata']) or
+				!array_key_exists ($port_name, $R['portdata']) or
 				$desired_cfgstring == 'none'
 			)
 				$radio_attrs['left'] .= ' disabled';
@@ -7219,11 +7224,14 @@ function renderObject8021QSync ($object_id)
 			// don't offer anything, that VST will deny.
 			if
 			(
-				count (array_diff ($port['running_allowed'], $domvlans)) or
-				$port['vst_role'] != $port['running_mode']
+				count (array_diff ($R['portdata'][$port_name]['allowed'], $domvlans)) or
+				$port['vst_role'] != $R['portdata'][$port_name]['mode']
 			)
 				$radio_attrs['right'] .= ' disabled';
 		}
+		$skip_inputs = TRUE;
+		$trclass = '';
+/*
 		if ($desired_cfgstring == $running_cfgstring)
 			// locked row : normal row
 			$trclass = $port['vst_role'] == 'none' ? 'trwarning' : 'trbusy';
@@ -7232,13 +7240,14 @@ function renderObject8021QSync ($object_id)
 			$trclass =
 			(
 				$port['vst_role'] == 'none' or
-				!array_key_exists ($port_name, $running_config['portdata'])
+				!array_key_exists ($port_name, $R['portdata'])
 			) ? 'trerror' : 'trwarning';
+*/
 		echo "<tr class=${trclass}><td>${port_name}</td>";
 		if ($skip_inputs)
-			echo "<td>${desired_cfgstring}</td>";
+			echo "<td class='tdleft${left_extra}'>${desired_cfgstring}</td>";
 		else
-			echo "<td><label for=i_${rownum}_left>${desired_cfgstring}</label></td>";
+			echo "<td class='tdleft${left_extra}'><label for=i_${rownum}_left>${desired_cfgstring}</label></td>";
 		foreach ($radio_attrs as $pos => $attrs)
 		{
 			echo '<td>';
@@ -7249,9 +7258,9 @@ function renderObject8021QSync ($object_id)
 			echo '</td>';
 		}
 		if ($skip_inputs)
-			echo "<td>${running_cfgstring}</td>";
+			echo "<td class='tdleft${right_extra}'>${running_cfgstring}</td>";
 		else
-			echo "<td><label for=i_${rownum}_right>${running_cfgstring}</label></td>";
+			echo "<td class='tdleft${right_extra}'><label for=i_${rownum}_right>${running_cfgstring}</label></td>";
 		echo '</tr>';
 		if (!$skip_inputs)
 		{
