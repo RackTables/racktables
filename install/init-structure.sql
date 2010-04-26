@@ -422,6 +422,7 @@ CREATE TABLE `VLANSwitch` (
   `last_push_done` timestamp NOT NULL default '0000-00-00 00:00:00',
   `last_pull_failed` timestamp NOT NULL default '0000-00-00 00:00:00',
   `last_pull_done` timestamp NOT NULL default '0000-00-00 00:00:00',
+  `last_cache_update` timestamp NOT NULL default '0000-00-00 00:00:00',
   UNIQUE KEY `object_id` (`object_id`),
   KEY `domain_id` (`domain_id`),
   KEY `template_id` (`template_id`),

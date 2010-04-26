@@ -3676,6 +3676,7 @@ function getVLANSwitchInfo ($object_id, $extrasql = '')
 	$result = usePreparedSelectBlade
 	(
 		'SELECT object_id, domain_id, template_id, mutex_rev, ' .
+		'last_cache_update, UNIX_TIMESTAMP(last_cache_update) AS last_cache_update_UTS, ' .
 		'last_edited, UNIX_TIMESTAMP(last_edited) AS last_edited_UTS, ' .
 		'last_pull_failed, UNIX_TIMESTAMP(last_pull_failed) AS last_pull_failed_UTS, ' .
 		'last_pull_done, UNIX_TIMESTAMP(last_pull_done) AS last_pull_done_UTS, ' .
@@ -3856,9 +3857,51 @@ function getVLANConfiguredPorts ($vlan_ck)
 	return $ret;
 }
 
-function replace8021QPort ($instance = 'desired', $object_id, $port_name, $port)
+function add8021QPort ($object_id, $port_name, $port)
 {
 	global $tablemap_8021q;
+	if
+	(
+		!usePreparedInsertBlade
+		(
+			$tablemap_8021q['cached']['pvm'],
+			array ('object_id' => $object_id, 'port_name' => $port_name, 'vlan_mode' => $port['mode'])
+		) or
+		!usePreparedInsertBlade
+		(
+			$tablemap_8021q['desired']['pvm'],
+			array ('object_id' => $object_id, 'port_name' => $port_name, 'vlan_mode' => $port['mode'])
+		)
+	)
+		throw new RuntimeException();
+	upd8021QPort ('cached', $object_id, $port_name, $port);
+	upd8021QPort ('desired', $object_id, $port_name, $port);
+	return 1;
+}
+
+function del8021QPort ($object_id, $port_name)
+{
+	// rely on ON DELETE CASCADE for PortAllowedVLAN and PortNativeVLAN
+	global $tablemap_8021q;
+	if
+	(	FALSE === usePreparedDeleteBlade
+		(
+			$tablemap_8021q['desired']['pvm'],
+			array ('object_id' => $object_id, 'port_name' => $port_name)
+		) or
+		FALSE === usePreparedDeleteBlade
+		(
+			$tablemap_8021q['cached']['pvm'],
+			array ('object_id' => $object_id, 'port_name' => $port_name)
+		)
+	)
+		throw new RuntimeException();
+	return 1;
+}
+
+function upd8021QPort ($instance = 'desired', $object_id, $port_name, $port)
+{
+	global $tablemap_8021q, $dbxlink;
 	if (!array_key_exists ($instance, $tablemap_8021q))
 		throw new InvalidArgException ('instance', $instance);
 	// Replace current port configuration with the provided one. If the new
@@ -3866,13 +3909,12 @@ function replace8021QPort ($instance = 'desired', $object_id, $port_name, $port)
 	// INSERT query, which would always trigger an FK exception.
 	// This function indicates an error, but doesn't revert it, so it is
 	// assummed, that the calling function performs necessary transaction wrapping.
-	// rely on ON DELETE CASCADE for PortAllowedVLAN and PortNativeVLAN
-	if (FALSE === usePreparedDeleteBlade ($tablemap_8021q[$instance]['pvm'], array ('object_id' => $object_id, 'port_name' => $port_name)))
-		throw new RuntimeException();
 	// A record on a port with none VLANs allowed makes no sense regardless of port mode.
 	if ($port['mode'] != 'trunk' and !count ($port['allowed']))
 		return;
-	if (!usePreparedInsertBlade ($tablemap_8021q[$instance]['pvm'], array ('object_id' => $object_id, 'port_name' => $port_name, 'vlan_mode' => $port['mode'])))
+	$prepared = $dbxlink->prepare ('UPDATE ' . $tablemap_8021q[$instance]['pvm'] . ' SET vlan_mode = ? WHERE object_id = ? AND port_name = ?');
+	$prepared->execute (array ($port['mode'], $object_id, $port_name));
+	if (FALSE === usePreparedDeleteBlade ($tablemap_8021q[$instance]['pav'], array ('object_id' => $object_id, 'port_name' => $port_name)))
 		throw new RuntimeException();
 	foreach ($port['allowed'] as $vlan_id)
 		if (!usePreparedInsertBlade ($tablemap_8021q[$instance]['pav'], array ('object_id' => $object_id, 'port_name' => $port_name, 'vlan_id' => $vlan_id)))
@@ -3896,7 +3938,7 @@ function replace8021QPorts ($instance = 'desired', $object_id, $before, $changes
 			!same8021QConfigs ($port, $before[$port_name])
 		)
 		{
-			replace8021QPort ($instance, $object_id, $port_name, $port);
+			upd8021QPort ($instance, $object_id, $port_name, $port);
 			$done++;
 		}
 	return $done;

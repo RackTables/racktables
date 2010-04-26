@@ -3333,16 +3333,13 @@ function get8021QSyncOptions
 		'allowed' => array (VLAN_DFL_ID),
 		'native' => VLAN_DFL_ID,
 	);
-	$empty_port = array
-	(
-		'mode' => 'none',
-		'allowed' => array(),
-		'native' => 0,
-	);
 	$plan = array
 	(
-		'to_pull' => array(),
-		'to_push' => array(),
+		'ok_to_pull' => array(),
+		'ok_to_push' => array(),
+		'ok_to_delete' => array(),
+		'ok_to_add' => array(),
+		'ok_to_accept' => array(),
 		'in_conflict' => array(),
 	);
 	$all_port_names = array_unique (array_merge (array_keys ($C), array_keys ($R)));
@@ -3353,12 +3350,12 @@ function get8021QSyncOptions
 			if (!same8021QConfigs ($D[$pn], $default_port))
 				$plan['in_conflict'][] = $pn;
 			else
-				$plan['to_pull'][$pn] = $empty_port;
+				$plan['ok_to_delete'][] = $pn;
 			continue;
 		}
 		if (!array_key_exists ($pn, $C)) // missing from DB
 		{
-			$plan['to_pull'][$pn] = $R[$pn];
+			$plan['ok_to_add'][$pn] = $R[$pn];
 			continue;
 		}
 		$D_eq_C = same8021QConfigs ($D[$pn], $C[$pn]);
@@ -3366,13 +3363,13 @@ function get8021QSyncOptions
 		if ($D_eq_C and $C_eq_R) // implies D == R
 			continue;
 		if ($D_eq_C)
-			$plan['to_pull'][$pn] = $R[$pn];
+			$plan['ok_to_pull'][$pn] = $R[$pn];
 		elseif ($C_eq_R)
-			$plan['to_push'][$pn] = $D[$pn];
+			$plan['ok_to_push'][$pn] = $D[$pn];
 		elseif (same8021QConfigs ($D[$pn], $R[$pn]))
-			$plan['to_pull'][$pn] = $R[$pn];
+			$plan['ok_to_accept'][$pn] = $R[$pn];
 		else // D != C, C != R, D != R
-			$plan['in_conflict'][] = $pn;
+			$plan['in_conflict'][$pn] = $R[$pn];
 	}
 	return $plan;
 }
