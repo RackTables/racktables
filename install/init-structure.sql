@@ -417,9 +417,11 @@ CREATE TABLE `VLANSwitch` (
   `domain_id` int(10) unsigned NOT NULL,
   `template_id` int(10) unsigned NOT NULL,
   `mutex_rev` int(10) unsigned NOT NULL default '0',
-  `last_updated` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
-  `last_deploy_failed` timestamp NOT NULL default '0000-00-00 00:00:00',
-  `last_deploy_done` timestamp NOT NULL default '0000-00-00 00:00:00',
+  `last_edited` timestamp NOT NULL default '0000-00-00 00:00:00',
+  `last_push_failed` timestamp NOT NULL default '0000-00-00 00:00:00',
+  `last_push_done` timestamp NOT NULL default '0000-00-00 00:00:00',
+  `last_pull_failed` timestamp NOT NULL default '0000-00-00 00:00:00',
+  `last_pull_done` timestamp NOT NULL default '0000-00-00 00:00:00',
   UNIQUE KEY `object_id` (`object_id`),
   KEY `domain_id` (`domain_id`),
   KEY `template_id` (`template_id`),
@@ -428,12 +430,39 @@ CREATE TABLE `VLANSwitch` (
   CONSTRAINT `VLANSwitch-FK-domain_id` FOREIGN KEY (`domain_id`) REFERENCES `VLANDomain` (`id`)
 ) ENGINE=InnoDB;
 
+CREATE TABLE `CachedPVM` (
+  `object_id` int(10) unsigned NOT NULL,
+  `port_name` char(255) NOT NULL,
+  `vlan_mode` enum('access','trunk') NOT NULL default 'access',
+  PRIMARY KEY  (`object_id`,`port_name`),
+  CONSTRAINT `CachedPVM-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `RackObject` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE `CachedPAV` (
+  `object_id` int(10) unsigned NOT NULL,
+  `port_name` char(255) NOT NULL,
+  `vlan_id` int(10) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`object_id`,`port_name`,`vlan_id`),
+  KEY `vlan_id` (`vlan_id`),
+  CONSTRAINT `CachedPAV-FK-vlan_id` FOREIGN KEY (`vlan_id`) REFERENCES `VLANValidID` (`vlan_id`),
+  CONSTRAINT `CachedPAV-FK-object-port` FOREIGN KEY (`object_id`, `port_name`) REFERENCES `CachedPVM` (`object_id`, `port_name`) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE `CachedPNV` (
+  `object_id` int(10) unsigned NOT NULL,
+  `port_name` char(255) NOT NULL,
+  `vlan_id` int(10) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`object_id`,`port_name`,`vlan_id`),
+  UNIQUE KEY `port_id` (`object_id`,`port_name`),
+  CONSTRAINT `CachedPNV-FK-compound` FOREIGN KEY (`object_id`, `port_name`, `vlan_id`) REFERENCES `CachedPAV` (`object_id`, `port_name`, `vlan_id`) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
 CREATE TABLE `PortVLANMode` (
   `object_id` int(10) unsigned NOT NULL,
   `port_name` char(255) NOT NULL,
   `vlan_mode` enum('access','trunk') NOT NULL default 'access',
   PRIMARY KEY  (`object_id`,`port_name`),
-  CONSTRAINT `PortVLANRole-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `RackObject` (`id`) ON DELETE CASCADE
+  CONSTRAINT `PortVLANMode-FK-object-port` FOREIGN KEY (`object_id`, `port_name`) REFERENCES `CachedPVM` (`object_id`, `port_name`)
 ) ENGINE=InnoDB;
 
 CREATE TABLE `PortAllowedVLAN` (

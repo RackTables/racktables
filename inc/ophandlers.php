@@ -1053,6 +1053,8 @@ function resetUIConfig()
 	setConfigVar ('IPV4_TREE_SHOW_VLAN', 'yes');
 	setConfigVar ('DEFAULT_VDOM_ID', '');
 	setConfigVar ('DEFAULT_VST_ID', '');
+	setConfigVar ('8021Q_PULL_AROUND_CONFLICTS', 'yes');
+	setConfigVar ('8021Q_PUSH_AROUND_CONFLICTS', 'yes');
 	return buildRedirectURL (__FUNCTION__, 'OK');
 }
 
@@ -2198,7 +2200,7 @@ function save8021QPorts ()
 			throw new InvalidArgException ('object_id', $object_id, 'VLAN domain is not set for this object');
 		if ($vswitch['mutex_rev'] != $sic['mutex_rev'])
 			throw new RuntimeException ('expired form data');
-		$stored_config = getDesired8021QConfig ($sic['object_id']);
+		$stored_config = getStored8021QConfig ($sic['object_id'], 'desired');
 		$work = array();
 		for ($i = 0; $i < $sic['nports']; $i++)
 		{
@@ -2243,8 +2245,7 @@ function save8021QPorts ()
 	}
 	if ($npulled)
 	{
-		// update last_updated implicitly
-		$query = $dbxlink->prepare ('UPDATE VLANSwitch SET mutex_rev = mutex_rev + 1 WHERE object_id = ?');
+		$query = $dbxlink->prepare ('UPDATE VLANSwitch SET mutex_rev = mutex_rev + 1, last_edited = NOW() WHERE object_id = ?');
 		$query->execute (array ($sic['object_id']));
 	}
 	$dbxlink->commit();
@@ -2289,13 +2290,38 @@ function process8021QSyncRequest ()
 		$C = getStored8021QConfig ($vswitch['object_id'], 'cached');
 		$R = getRunning8021QConfig ($vswitch['object_id']);
 		$plan = get8021QSyncOptions ($vswitch, $D, $C, $R['portdata']);
+		$conflict = count ($plan['in_conflict']) > 0;
 		if ($do_pull)
 		{
-			$done += replace8021QPorts ('cached', $vswitch['object_id'], $C, $plan['to_pull']);
-			$done += replace8021QPorts ('desired', $vswitch['object_id'], $D, $plan['to_pull']);
+			if (!$conflict or getConfigVar ('8021Q_PULL_AROUND_CONFLICTS') == 'yes')
+			{
+				$column = $conflict ? 'last_pull_failed' : 'last_pull_done';
+				$done += replace8021QPorts ('cached', $vswitch['object_id'], $C, $plan['to_pull']);
+				$done += replace8021QPorts ('desired', $vswitch['object_id'], $D, $plan['to_pull']);
+				$prepared = $dbxlink->prepare ("UPDATE VLANSwitch SET mutex_rev = mutex_rev + 1, ${column} = NOW() WHERE object_id = ?");
+				$prepared->execute (array ($vswitch['object_id']));
+			}
+			else
+			{
+				$prepared = $dbxlink->prepare ("UPDATE VLANSwitch SET last_pull_failed = NOW() WHERE object_id = ?");
+				$prepared->execute (array ($vswitch['object_id']));
+			}
 		}
 		if ($do_push)
-			$done += exportSwitch8021QConfig ($vswitch, $R['vlanlist'], $R, $plan['to_push']);
+		{
+			if (!$conflict or getConfigVar ('8021Q_PUSH_AROUND_CONFLICTS') == 'yes')
+			{
+				$column = $conflict ? 'last_push_failed' : 'last_push_done';
+				$done += exportSwitch8021QConfig ($vswitch, $R['vlanlist'], $R, $plan['to_push']);
+				$prepared = $dbxlink->prepare ("UPDATE VLANSwitch SET mutex_rev = mutex_rev + 1, ${column} = NOW() WHERE object_id = ?");
+				$prepared->execute (array ($vswitch['object_id']));
+			}
+			else
+			{
+				$prepared = $dbxlink->prepare ("UPDATE VLANSwitch SET last_push_failed = NOW() WHERE object_id = ?");
+				$prepared->execute (array ($vswitch['object_id']));
+			}
+		}
 	}
 	catch (Exception $e)
 	{
@@ -2378,13 +2404,16 @@ function resolve8021QConflicts ()
 	}
 	if ($npushed)
 	{
-		$query = $dbxlink->prepare ('UPDATE VLANSwitch SET last_deploy_done = NOW() WHERE object_id = ?');
-		$query->execute (array ($sic['object_id']));
+# FIXME: update last_deploy_done, when there are no conflicts left behind,
+# and last_deploy_failed otherwise
+#		$query = $dbxlink->prepare ('UPDATE VLANSwitch SET last_deploy_done = NOW() WHERE object_id = ?');
+#		$query->execute (array ($sic['object_id']));
 	}
 	if ($npulled)
 	{
-		$query = $dbxlink->prepare ('UPDATE VLANSwitch SET mutex_rev = mutex_rev + 1 WHERE object_id = ?');
-		$query->execute (array ($sic['object_id']));
+# FIXME: likewise treat last_pull_done and last_pull_failed
+#		$query = $dbxlink->prepare ('UPDATE VLANSwitch SET mutex_rev = mutex_rev + 1 WHERE object_id = ?');
+#		$query->execute (array ($sic['object_id']));
 	}
 	$dbxlink->commit();
 	return buildRedirectURL (__FUNCTION__, 'OK', array ($npulled + $npushed));

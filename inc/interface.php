@@ -7126,12 +7126,12 @@ function renderObject8021QSync ($object_id)
 	echo '<table border=0 cellspacing=0 cellpadding=3 width="100%">';
 	echo '<tr><th width="50%" class=tdright>last edit:</th>';
 	echo "<td class=tdleft>${vswitch['last_updated']}</td></tr>";
-	if (!$vswitch['last_deploy_done_UTS'] and !$vswitch['last_deploy_failed_UTS'])
+	if (!$vswitch['last_push_done_UTS'] and !$vswitch['last_push_failed_UTS'])
 		$sync_text = 'never';
-	elseif ($vswitch['last_deploy_done_UTS'] > $vswitch['last_deploy_failed_UTS'])
-		$sync_text = $vswitch['last_deploy_done'] . ' (successful)';
+	elseif ($vswitch['last_push_done_UTS'] > $vswitch['last_push_failed_UTS'])
+		$sync_text = $vswitch['last_push_done'] . ' (successful)';
 	else
-		$sync_text = $vswitch['last_deploy_failed'] . ' (with conflicts)';
+		$sync_text = $vswitch['last_push_failed'] . ' (with conflicts)';
 	echo '<tr><th width="50%" class=tdright>last sync:</th>';
 	echo "<td class=tdleft>${sync_text}</td></tr>";
 	printOpFormIntro ('run', array ($vswitch['mutex_rev']));

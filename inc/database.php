@@ -3621,7 +3621,12 @@ function getDomainVLANs ($vdom_id)
 
 function getVLANDomainSwitches ($vdom_id)
 {
-	$result = usePreparedSelectBlade ('SELECT object_id, template_id, last_updated, last_deploy_failed, last_deploy_done FROM VLANSwitch WHERE domain_id = ? ORDER BY object_id', array ($vdom_id));
+	$result = usePreparedSelectBlade
+	(
+		'SELECT object_id, template_id, last_edited, last_push_failed, last_push_done ' .
+		'FROM VLANSwitch WHERE domain_id = ? ORDER BY object_id',
+		array ($vdom_id)
+	);
 	$ret = array();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 		$ret[$row['object_id']] = $row;
@@ -3671,9 +3676,11 @@ function getVLANSwitchInfo ($object_id, $extrasql = '')
 	$result = usePreparedSelectBlade
 	(
 		'SELECT object_id, domain_id, template_id, mutex_rev, ' .
-		'last_updated, UNIX_TIMESTAMP(last_updated) AS last_updated_UTS, ' .
-		'last_deploy_failed, UNIX_TIMESTAMP(last_deploy_failed) AS last_deploy_failed_UTS, ' .
-		'last_deploy_done, UNIX_TIMESTAMP(last_deploy_done) AS last_deploy_done_UTS ' .
+		'last_edited, UNIX_TIMESTAMP(last_edited) AS last_edited_UTS, ' .
+		'last_pull_failed, UNIX_TIMESTAMP(last_pull_failed) AS last_pull_failed_UTS, ' .
+		'last_pull_done, UNIX_TIMESTAMP(last_pull_done) AS last_pull_done_UTS, ' .
+		'last_push_failed, UNIX_TIMESTAMP(last_push_failed) AS last_push_failed_UTS, ' .
+		'last_push_done, UNIX_TIMESTAMP(last_push_done) AS last_push_done_UTS ' .
 		'FROM VLANSwitch WHERE object_id = ? ' . $extrasql,
 		array ($object_id)
 	);
@@ -3923,7 +3930,7 @@ function importSwitch8021QConfig
 	foreach (produceUplinkPorts (getDomainVLANs ($vswitch['domain_id']), $after) as $port_name => $port)
 		$after[$port_name] = $port;
 	// save added difference
-	return replace8021QPorts ($vswitch['object_id'], $before, $after);
+	return replace8021QPorts ('desired', $vswitch['object_id'], $before, $after);
 }
 
 function saveSwitch8021QConfig
@@ -3993,7 +4000,7 @@ function saveSwitch8021QConfig
 	foreach (produceUplinkPorts ($domain_vlanlist, $after) as $port_name => $port)
 		$after[$port_name] = $port;
 	// save added difference
-	return replace8021QPorts ($vswitch['object_id'], $before, $after);
+	return replace8021QPorts ('desired', $vswitch['object_id'], $before, $after);
 }
 
 function exportSwitch8021QConfig
@@ -4280,8 +4287,8 @@ function commitUpdateVSTRule ($vst_id, $rule_no, $new_rule_no, $port_pcre, $port
 function get8021QDeployPlan()
 {
 	$ret = array();
-	$query = 'SELECT object_id, NOW() - last_updated AS age ' .
-		'FROM VLANSwitch WHERE last_updated > last_deploy_done AND last_updated > last_deploy_failed';
+	$query = 'SELECT object_id, NOW() - last_edited AS age ' .
+		'FROM VLANSwitch WHERE last_edited > last_push_done AND last_edited > last_push_failed';
 	$result = usePreparedSelectBlade ($query);
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 		$ret[] = $row;
