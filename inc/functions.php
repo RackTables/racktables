@@ -2299,7 +2299,7 @@ function serializeVLANPack ($vlanport)
 	if ($id_to)
 		$tagged_bits[] = $id_from == $id_to ? $id_from : "${id_from}-${id_to}";
 	if (count ($tagged))
-		$ret .= '+' . implode (',', $tagged_bits);
+		$ret .= '+' . implode (', ', $tagged_bits);
 	return strlen ($ret) ? $ret : 'default';
 }
 
