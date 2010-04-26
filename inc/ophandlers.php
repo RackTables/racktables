@@ -2231,13 +2231,13 @@ function save8021QPorts ()
 			);
 		}
 		$domain_vlanlist = getDomainVLANs ($vswitch['domain_id']);
+		$after = $before = apply8021QOrder ($vswitch['template_id'], getStored8021QConfig ($sic['object_id'], 'desired'));
 		$changes = filter8021QChangeRequests
 		(
 			$domain_vlanlist,
-			getStored8021QConfig ($sic['object_id'], 'desired'),
+			$before,
 			apply8021QOrder ($vswitch['template_id'], $changes)
 		);
-		$after = $before;
 		foreach ($changes as $port_name => $port)
 			$after[$port_name] = $port;
 		foreach (produceUplinkPorts ($domain_vlanlist, $after) as $port_name => $port)
