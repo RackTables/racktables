@@ -3890,16 +3890,15 @@ function replace8021QPorts ($instance = 'desired', $object_id, $before, $changes
 {
 	$done = 0;
 	foreach ($changes as $port_name => $port)
-	{
 		if 
 		(
-			array_key_exists ($port_name, $before) and
-			same8021QConfigs ($port, $before[$port_name])
+			!array_key_exists ($port_name, $before) or
+			!same8021QConfigs ($port, $before[$port_name])
 		)
-			continue;
-		replace8021QPort ($instance, $object_id, $port_name, $port);
-		$done++;
-	}
+		{
+			replace8021QPort ($instance, $object_id, $port_name, $port);
+			$done++;
+		}
 	return $done;
 }
 
@@ -3928,76 +3927,6 @@ function importSwitch8021QConfig
 	}
 	// overwrite configuration of every uplink port present
 	foreach (produceUplinkPorts (getDomainVLANs ($vswitch['domain_id']), $after) as $port_name => $port)
-		$after[$port_name] = $port;
-	// save added difference
-	return replace8021QPorts ('desired', $vswitch['object_id'], $before, $after);
-}
-
-function saveSwitch8021QConfig
-(
-	$vswitch,
-	$before, // (D') list of all ports (in database)
-	$changes // (C ) list of ports to process (from form)
-)
-{
-	$domain_immune_vlans = array();
-	$domain_vlanlist = getDomainVLANs ($vswitch['domain_id']);
-	foreach ($domain_vlanlist as $vlan_id => $vlan)
-		if ($vlan['vlan_type'] == 'alien')
-			$domain_immune_vlans[] = $vlan_id;
-	$changes = apply8021QOrder ($vswitch['template_id'], $changes);
-	$after = apply8021QOrder ($vswitch['template_id'], $before);
-	// filter args and add/replace meaningful ports
-	foreach ($changes as $port_name => $port)
-	{
-		
-		if ($port['mode'] != $port['vst_role']) // VST violation
-			continue;
-		// find and cancel any changes regarding immune VLANs
-		foreach ($domain_immune_vlans as $immune)
-			switch ($port['mode'])
-			{
-			case 'access':
-				// Reverting an attempt to set an access port from
-				// "normal" VLAN to immune one (or vice versa) requires
-				// special handling, becase the calling function has
-				// discarded the old contents of 'allowed' for current port.
-				// Such reversal happens either once or never for an
-				// access port.
-				if
-				(
-					$before[$port_name]['native'] == $immune or
-					$port['native'] == $immune
-				)
-				{
-					$port['native'] = $before[$port_name]['native'];
-					$port['allowed'] = array ($port['native']);
-					break 2;
-				}
-				break;
-			case 'trunk':
-				if (in_array ($immune, $before[$port_name]['allowed'])) // was allowed before
-				{
-					if (!in_array ($immune, $port['allowed']))
-						$port['allowed'][] = $immune; // restore
-					if ($before[$port_name]['native'] == $immune) // and was native
-						$port['native'] = $immune; // also restore
-				}
-				else // wasn't
-				{
-					if (in_array ($immune, $port['allowed']))
-						unset ($port['allowed'][array_search ($immune, $port['allowed'])]); // cancel
-					if ($port['native'] == $immune)
-						$port['native'] = $before[$port_name]['native'];
-				}
-				break;
-			default:
-				throw new RuntimeException ('invalid data submitted');
-			}
-		$after[$port_name] = $port;
-	}
-	// overwrite configuration of every uplink port present
-	foreach (produceUplinkPorts ($domain_vlanlist, $after) as $port_name => $port)
 		$after[$port_name] = $port;
 	// save added difference
 	return replace8021QPorts ('desired', $vswitch['object_id'], $before, $after);

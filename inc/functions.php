@@ -2989,6 +2989,71 @@ function apply8021QTemplate ($vst_id, $portnames)
 	return $ret;
 }
 
+// filter list of changed ports to cancel changes forbidden by VST and domain
+// $changes
+function filter8021QChangeRequests
+(
+	$domain_vlanlist,
+	$before,  // current saved configuration of all ports
+	$changes  // changed ports with VST markup
+)
+{
+	$domain_immune_vlans = array();
+	foreach ($domain_vlanlist as $vlan_id => $vlan)
+		if ($vlan['vlan_type'] == 'alien')
+			$domain_immune_vlans[] = $vlan_id;
+	$ret = array();
+	foreach ($changes as $port_name => $port)
+	{
+		
+		if ($port['mode'] != $port['vst_role']) // VST violation
+			continue;
+		// find and cancel any changes regarding immune VLANs
+		foreach ($domain_immune_vlans as $immune)
+			switch ($port['mode'])
+			{
+			case 'access':
+				// Reverting an attempt to set an access port from
+				// "normal" VLAN to immune one (or vice versa) requires
+				// special handling, becase the calling function has
+				// discarded the old contents of 'allowed' for current port.
+				// Such reversal happens either once or never for an
+				// access port.
+				if
+				(
+					$before[$port_name]['native'] == $immune or
+					$port['native'] == $immune
+				)
+				{
+					$port['native'] = $before[$port_name]['native'];
+					$port['allowed'] = array ($port['native']);
+					break 2;
+				}
+				break;
+			case 'trunk':
+				if (in_array ($immune, $before[$port_name]['allowed'])) // was allowed before
+				{
+					if (!in_array ($immune, $port['allowed']))
+						$port['allowed'][] = $immune; // restore
+					if ($before[$port_name]['native'] == $immune) // and was native
+						$port['native'] = $immune; // also restore
+				}
+				else // wasn't
+				{
+					if (in_array ($immune, $port['allowed']))
+						unset ($port['allowed'][array_search ($immune, $port['allowed'])]); // cancel
+					if ($port['native'] == $immune)
+						$port['native'] = $before[$port_name]['native'];
+				}
+				break;
+			default:
+				continue 2; // ignore port
+			}
+		$ret[$port_name] = $port;
+	}
+	return $ret;
+}
+
 // take port list with order applied and return uplink ports in the same format
 function produceUplinkPorts ($domain_vlanlist, $portlist)
 {

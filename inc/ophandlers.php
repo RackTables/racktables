@@ -2200,8 +2200,7 @@ function save8021QPorts ()
 			throw new InvalidArgException ('object_id', $object_id, 'VLAN domain is not set for this object');
 		if ($vswitch['mutex_rev'] != $sic['mutex_rev'])
 			throw new RuntimeException ('expired form data');
-		$stored_config = getStored8021QConfig ($sic['object_id'], 'desired');
-		$work = array();
+		$changes = array();
 		for ($i = 0; $i < $sic['nports']; $i++)
 		{
 			assertStringArg ('pn_' . $i);
@@ -2224,19 +2223,26 @@ function save8021QPorts ()
 			default:
 				throw new InvalidRequestArgException ("pm_${i}", $_REQUEST["pm_${i}"], 'unknown port mode');
 			}
-			$work[$sic['pn_' . $i]] = array
+			$changes[$sic['pn_' . $i]] = array
 			(
 				'mode' => $sic['pm_' . $i],
 				'allowed' => $allowed,
 				'native' => $native,
 			);
 		}
-		$npulled = saveSwitch8021QConfig
+		$domain_vlanlist = getDomainVLANs ($vswitch['domain_id']);
+		$changes = filter8021QChangeRequests
 		(
-			$vswitch,
-			$stored_config,
-			$work
+			$domain_vlanlist,
+			getStored8021QConfig ($sic['object_id'], 'desired'),
+			apply8021QOrder ($vswitch['template_id'], $changes)
 		);
+		$after = $before;
+		foreach ($changes as $port_name => $port)
+			$after[$port_name] = $port;
+		foreach (produceUplinkPorts ($domain_vlanlist, $after) as $port_name => $port)
+			$after[$port_name] = $port;
+		$npulled = replace8021QPorts ('desired', $vswitch['object_id'], $before, $after);
 	}
 	catch (Exception $e)
 	{
