@@ -3690,53 +3690,6 @@ function getVLANSwitchInfo ($object_id, $extrasql = '')
 	return NULL;
 }
 
-// Return the "should-be" version of 802.1Q ports, which includes
-// all current 802.1Q-eligible device ports plus the ports found
-// in the database. This means, if we have once saved configuration
-// for a port named "gi0/1" and it's not on the device's port list
-// any more, it will be present on the returned list anyway (until
-// the 802.1Q configuration is reset for that port).
-function getDesired8021QConfig ($object_id)
-{
-	$ret = array();
-	// currently valid ports are always included in the result
-	$query = 'SELECT name FROM Port WHERE object_id = ? AND type IN (SELECT oif_id FROM VLANEligibleOIF) AND name <> ""';
-	$result = usePreparedSelectBlade ($query, array ($object_id));
-	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-		$ret[$row['name']] = array
-		(
-			'mode' => 'none',
-			'allowed' => array(),
-			'native' => 0,
-		);
-	unset ($result);
-	$query = 'SELECT port_name, vlan_mode FROM PortVLANMode WHERE object_id = ?';
-	$result = usePreparedSelectBlade ($query, array ($object_id));
-	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-	{
-		if (!array_key_exists ($row['port_name'], $ret))
-			$ret[$row['port_name']] = array
-			(
-				'allowed' => array(),
-				'native' => 0,
-			);
-		$ret[$row['port_name']]['mode'] = $row['vlan_mode'];
-	}
-	unset ($result);
-	$query = 'SELECT port_name, vlan_id FROM PortAllowedVLAN WHERE object_id = ?';
-	$result = usePreparedSelectBlade ($query, array ($object_id));
-	// FK forces port_name from PortAllowedVLAN to have a counterpart
-	// in PortVLANMode, from which we already have SELECTed
-	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-		$ret[$row['port_name']]['allowed'][] = $row['vlan_id'];
-	unset ($result);
-	$query = 'SELECT port_name, vlan_id FROM PortNativeVLAN WHERE object_id = ?';
-	$result = usePreparedSelectBlade ($query, array ($object_id));
-	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-		$ret[$row['port_name']]['native'] = $row['vlan_id'];
-	return $ret;
-}
-
 function getStored8021QConfig ($object_id, $instance = 'desired')
 {
 	global $tablemap_8021q;
