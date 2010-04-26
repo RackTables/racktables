@@ -2269,4 +2269,23 @@ function getNewPortTypeOptions()
 	return $ret;
 }
 
+// print part of HTML HEAD block
+function printPageHeaders ()
+{
+	global $pageheaders;
+	ksort ($pageheaders);
+	foreach ($pageheaders as $s)
+		echo $s . "\n";
+	echo "<style type='text/css'>\n";
+	foreach (array ('F', 'A', 'U', 'T', 'Th', 'Tw', 'Thw') as $statecode)
+	{
+		echo "td.state_${statecode} {\n";
+		echo "\ttext-align: center;\n";
+		echo "\tbackground-color: #" . (getConfigVar ('color_' . $statecode)) . ";\n";
+		echo "\tfont: bold 10px Verdana, sans-serif;\n";
+		echo "}\n\n";
+	}
+	echo '</style>';
+}
+
 ?>

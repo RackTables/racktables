@@ -151,6 +151,13 @@ $auto_tags = array();
 // Initial chain for the current user.
 $user_given_tags = array();
 
+// This also can be modified in local.php.
+$pageheaders = array
+(
+	100 => "<link rel=stylesheet type='text/css' href=pi.css />",
+	200 => "<link rel=icon href='pix/racktables.ico' type='image/x-icon' />",
+);
+
 if (!isset ($script_mode) or $script_mode !== TRUE)
 {
 	// A successful call to authenticate() always generates autotags and somethimes

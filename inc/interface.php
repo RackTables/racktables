@@ -221,13 +221,6 @@ $image['knight']['height'] = 33;
 // See the $systemreport for structure.
 $localreports = array();
 
-// This also can be modified in local.php.
-$pageheaders = array
-(
-	100 => "<link rel=stylesheet type='text/css' href=pi.css />",
-	200 => "<link rel=icon href='pix/racktables.ico' type='image/x-icon' />",
-);
-
 $CodePressMap = array
 (
 	'sql' => 'sql',
@@ -6347,25 +6340,6 @@ function renderPortIFCompatEditor()
 		printNewitemTR();
 	echo '</table>';
 	finishPortlet();
-}
-
-// print part of HTML HEAD block
-function printPageHeaders ()
-{
-	global $pageheaders;
-	ksort ($pageheaders);
-	foreach ($pageheaders as $s)
-		echo $s . "\n";
-	echo "<style type='text/css'>\n";
-	foreach (array ('F', 'A', 'U', 'T', 'Th', 'Tw', 'Thw') as $statecode)
-	{
-		echo "td.state_${statecode} {\n";
-		echo "\ttext-align: center;\n";
-		echo "\tbackground-color: #" . (getConfigVar ('color_' . $statecode)) . ";\n";
-		echo "\tfont: bold 10px Verdana, sans-serif;\n";
-		echo "}\n\n";
-	}
-	echo '</style>';
 }
 
 ?>
