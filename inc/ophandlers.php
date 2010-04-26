@@ -2318,7 +2318,7 @@ function process8021QSyncRequest ()
 			if (!$conflict or getConfigVar ('8021Q_PUSH_AROUND_CONFLICTS') == 'yes')
 			{
 				$column = $conflict ? 'last_push_failed' : 'last_push_done';
-				$done += exportSwitch8021QConfig ($vswitch, $R['vlanlist'], $R, $plan['to_push']);
+				$done += exportSwitch8021QConfig ($vswitch, $R['vlanlist'], $R['portdata'], $plan['to_push']);
 				$prepared = $dbxlink->prepare ("UPDATE VLANSwitch SET mutex_rev = mutex_rev + 1, ${column} = NOW() WHERE object_id = ?");
 				$prepared->execute (array ($vswitch['object_id']));
 			}
@@ -2341,7 +2341,8 @@ function process8021QSyncRequest ()
 }
 
 $msgcode['resolve8021QConflicts']['OK'] = 63;
-$msgcode['resolve8021QConflicts']['ERR'] = 179;
+$msgcode['resolve8021QConflicts']['ERR1'] = 179;
+$msgcode['resolve8021QConflicts']['ERR2'] = 109;
 function resolve8021QConflicts ()
 {
 	global $sic, $dbxlink;
@@ -2351,7 +2352,7 @@ function resolve8021QConflicts ()
 	// left (produce and send commands to switch)
 	// asis (ignore)
 	// right (fetch config from switch and save into database)
-	$old_running_config = array ('left' => array(), 'right' => array());
+	$F = array ('left' => array(), 'right' => array());
 	for ($i = 0; $i < $sic['nrows']; $i++)
 	{
 		if (!array_key_exists ("i_${i}", $sic))
@@ -2361,11 +2362,12 @@ function resolve8021QConflicts ()
 		{
 		case 'left':
 		case 'right':
-			$old_running_config[$sic["i_${i}"]][$sic["pn_${i}"]] = array
+			$F[$sic["pn_${i}"]] = array
 			(
 				'mode' => $sic["rm_${i}"],
 				'allowed' => $sic["ra_${i}"],
 				'native' => $sic["rn_${i}"],
+				'decision' => $sic["i_${i}"],
 			);
 			break;
 		default:
@@ -2378,51 +2380,49 @@ function resolve8021QConflicts ()
 		if (NULL === $vswitch = getVLANSwitchInfo ($sic['object_id'], 'FOR UPDATE'))
 			throw new InvalidArgException ('object_id', $sic['object_id'], 'VLAN domain is not set for this object');
 		if ($vswitch['mutex_rev'] != $sic['mutex_rev'])
-			throw new RuntimeException ('expired form data');
-		$stored_config = getDesired8021QConfig ($sic['object_id']);
-		$new_running_config = getRunning8021QConfig ($sic['object_id']);
-		$npulled = importSwitch8021QConfig
-		(
-			$vswitch,
-			$stored_config,
-			$old_running_config['right'],
-			$new_running_config['portdata']
-		);
-		if ($npulled)
-			$stored_config = getDesired8021QConfig ($sic['object_id']);
-		// To keep device's VLAN table and uplink ports in sync regardless
-		// of user's choice, "export" procedure must be run:
-		// 1. even if the user didn't select any ports for "export"
-		// 2. after call to "import" function
-		$npushed = exportSwitch8021QConfig
-		(
-			$vswitch,
-			$new_running_config['vlanlist'],
-			$old_running_config['left'],
-			$new_running_config['portdata'],
-			$stored_config
-		);
+		{
+			throw new RuntimeException ('expired form (table data has changed)');
+		}
+		$D = getStored8021QConfig ($sic['object_id'], 'desired');
+		$R = getRunning8021QConfig ($sic['object_id']);
+		$ndone = 0;
+		foreach ($F as $port_name => $port)
+		{
+			// for R mutex cannot be emulated, but revision can be
+			if (!same8021QConfigs ($port, $R['portdata'][$port_name]))
+				throw new RuntimeException ('expired form (switch data has changed)');
+			switch ($port['decision'])
+			{
+			case 'left':
+				// D wins, frame R by writing value of R to C
+				replace8021QPort ('cached', $vswitch['object_id'], $port_name, $port);
+				$ndone++;
+				break;
+			case 'right': // last_edited = NOW()
+				// R wins, cross D up
+				replace8021QPort ('cached', $vswitch['object_id'], $port_name, $D[$port_name]);
+				$ndone++;
+				break;
+			}
+		}
+		if ($ndone)
+		{
+			$query = $dbxlink->prepare ('UPDATE VLANSwitch SET last_edited = NOW() WHERE object_id = ?');
+			$query->execute (array ($vswitch['object_id']));
+		}
+	}
+	catch (RuntimeException $e)
+	{
+		$dbxlink->rollBack();
+		return buildRedirectURL (__FUNCTION__, 'ERR1');
 	}
 	catch (Exception $e)
 	{
 		$dbxlink->rollBack();
-		return buildRedirectURL (__FUNCTION__, 'ERR');
-	}
-	if ($npushed)
-	{
-# FIXME: update last_deploy_done, when there are no conflicts left behind,
-# and last_deploy_failed otherwise
-#		$query = $dbxlink->prepare ('UPDATE VLANSwitch SET last_deploy_done = NOW() WHERE object_id = ?');
-#		$query->execute (array ($sic['object_id']));
-	}
-	if ($npulled)
-	{
-# FIXME: likewise treat last_pull_done and last_pull_failed
-#		$query = $dbxlink->prepare ('UPDATE VLANSwitch SET mutex_rev = mutex_rev + 1 WHERE object_id = ?');
-#		$query->execute (array ($sic['object_id']));
+		return buildRedirectURL (__FUNCTION__, 'ERR2');
 	}
 	$dbxlink->commit();
-	return buildRedirectURL (__FUNCTION__, 'OK', array ($npulled + $npushed));
+	return buildRedirectURL (__FUNCTION__, 'OK', array ($ndone));
 }
 
 $msgcode['addVLANSwitchTemplate']['OK'] = 48;
