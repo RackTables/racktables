@@ -3864,7 +3864,7 @@ function upd8021QPort ($instance = 'desired', $object_id, $port_name, $port)
 	// assummed, that the calling function performs necessary transaction wrapping.
 	// A record on a port with none VLANs allowed makes no sense regardless of port mode.
 	if ($port['mode'] != 'trunk' and !count ($port['allowed']))
-		return;
+		return 0;
 	$prepared = $dbxlink->prepare ('UPDATE ' . $tablemap_8021q[$instance]['pvm'] . ' SET vlan_mode = ? WHERE object_id = ? AND port_name = ?');
 	$prepared->execute (array ($port['mode'], $object_id, $port_name));
 	if (FALSE === usePreparedDeleteBlade ($tablemap_8021q[$instance]['pav'], array ('object_id' => $object_id, 'port_name' => $port_name)))
@@ -3879,6 +3879,7 @@ function upd8021QPort ($instance = 'desired', $object_id, $port_name, $port)
 		!usePreparedInsertBlade ($tablemap_8021q[$instance]['pnv'], array ('object_id' => $object_id, 'port_name' => $port_name, 'vlan_id' => $port['native']))
 	)
 		throw new RuntimeException();
+	return 1;
 }
 
 function replace8021QPorts ($instance = 'desired', $object_id, $before, $changes)
