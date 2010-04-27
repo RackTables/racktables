@@ -7122,7 +7122,7 @@ function renderVLANIPv4 ($some_id)
 function renderObject8021QSync ($object_id)
 {
 	$vswitch = getVLANSwitchInfo ($object_id);
-	startPortlet ('schedule');
+	startPortlet ('execute');
 	echo '<table border=0 cellspacing=0 cellpadding=3 width="100%">';
 	// FIXME: sort rows newest event last
 	$rows = array();
@@ -7154,7 +7154,7 @@ function renderObject8021QSync ($object_id)
 	echo '</table>';
 	finishPortlet();
 
-	startPortlet ('port details');
+	startPortlet ('preview/resolve');
 	try
 	{
 		$R = getRunning8021QConfig ($object_id);
@@ -7166,52 +7166,80 @@ function renderObject8021QSync ($object_id)
 	}
 	$D = getStored8021QConfig ($vswitch['object_id'], 'desired');
 	$C = getStored8021QConfig ($vswitch['object_id'], 'cached');
-	$plan = get8021QSyncOptions ($vswitch, $D, $C, $R['portdata']);
+	$plan = apply8021QOrder ($vswitch['template_id'], get8021QSyncOptions ($vswitch, $D, $C, $R['portdata']));
 	
-	uksort ($D, 'sortTokenize');
+	uksort ($plan, 'sortTokenize');
 	$domvlans = array_keys (getDomainVLANs ($vswitch['domain_id']));
 	printOpFormIntro ('resolve', array ('mutex_rev' => $vswitch['mutex_rev']));
-	$nrows = count ($plan['in_conflict']);
+	$maxdecisions = 0;
+	foreach ($plan as $port)
+		if ($port['status'] == 'delete_conflict' or $port['status'] == 'merge_conflict')
+			$maxdecisions++;
 	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
 	echo '<tr valign=top><th rowspan=2>port</th><th rowspan=2>last&nbsp;saved&nbsp;version ';
 	echo '(pushed&nbsp;out)</th><th colspan=3>winner</th>';
 	echo '<th rowspan=2>running&nbsp;version (pulled&nbsp;in)</th></tr><tr>';
 	foreach (array ('left', 'asis', 'right') as $pos)
 		echo "<th><input type=radio name=column_radio value=${pos} " .
-			"onclick=\"checkColumnOfRadios('i_', ${nrows}, '_${pos}')\"></th>";
+			"onclick=\"checkColumnOfRadios('i_', ${maxdecisions}, '_${pos}')\"></th>";
 	echo '</tr>';
 	$rownum = 0;
-	foreach (apply8021QOrder ($vswitch['template_id'], $D) as $port_name => $port)
+	$default_port = array
+	(
+		'mode' => 'access',
+		'allowed' => array (VLAN_DFL_ID),
+		'native' => VLAN_DFL_ID,
+	);
+	foreach ($plan as $port_name => $item)
 	{
-		$desired_cfgstring = serializeVLANPack ($port);
-		$running_cfgstring = serializeVLANPack ($R['portdata'][$port_name]);
-		#if (in_array ($port_name, $plan['in_conflict']))
-		if (array_key_exists ($port_name, $plan['ok_to_push']))
-		{
-			$left_extra = ' trok';
-			$right_extra = '';
-		}
-		elseif (array_key_exists ($port_name, $plan['ok_to_pull']))
-		{
-			$left_extra = '';
-			$right_extra = ' trok';
-		}
-		else
-		{
-			$left_extra = '';
-			$right_extra = '';
-		}
-			
-		// decide on the radio inputs now
+		$trclass = $left_extra = $right_extra = $left_text = $right_text = '';
 		$radio_attrs = array ('left' => '', 'asis' => ' checked', 'right' => '');
-		if
-		(
-			($port['vst_role'] != 'access' and $port['vst_role'] != 'trunk') or
-			$desired_cfgstring == $running_cfgstring
-		)
-			$skip_inputs = TRUE;
-		else
+		$skip_inputs = TRUE;
+		switch ($item['status'])
 		{
+		case 'ok_to_delete':
+			$left_text = serializeVLANPack ($item['left']);
+			$right_text = 'none';
+			$left_extra = ' trnull';
+			$right_extra = ' trok'; // no confirmation is necessary
+			break;
+		case 'delete_conflict':
+			$left_text = serializeVLANPack ($item['left']);
+			$right_text = 'none';
+			$left_extra = ' trwarning'; // can be fixed on request
+			$right_extra = ' trnull';
+			break;
+		case 'ok_to_add':
+			$left_text = 'none';
+			$right_text = serializeVLANPack ($item['right']);
+			$left_extra = ' trnull';
+			$right_extra = ' trok';
+			break;
+		case 'in_sync':
+		case 'ok_to_accept':
+			if (!same8021QConfigs ($item['both'], $default_port))
+				$trclass = 'trbusy';
+			$left_text = $right_text = serializeVLANPack ($item['both']);
+			break;
+		case 'ok_to_pull':
+			// at least one of the sides is not in the default state
+			$trclass = 'trbusy';
+			$left_text = serializeVLANPack ($item['left']);
+			$right_text = serializeVLANPack ($item['right']);
+			$right_extra = ' trwarning';
+			break;
+		case 'ok_to_push':
+			$trclass = 'trbusy';
+			$left_text = serializeVLANPack ($item['left']);
+			$right_text = serializeVLANPack ($item['right']);
+			$left_extra = ' trwarning';
+			break;
+		case 'merge_conflict':
+			$left_text = serializeVLANPack ($item['left']);
+			$right_text = serializeVLANPack ($item['right']);
+			// FIXME: make it an error, when resolve option is
+			// blocked by domain or VST
+			$trclass = 'trwarning';
 			$skip_inputs = FALSE;
 			// enable, but consider each option independently
 			if
@@ -7228,9 +7256,9 @@ function renderObject8021QSync ($object_id)
 				$port['vst_role'] != $R['portdata'][$port_name]['mode']
 			)
 				$radio_attrs['right'] .= ' disabled';
+			break;
 		}
-		$skip_inputs = TRUE;
-		$trclass = '';
+			
 /*
 		if ($desired_cfgstring == $running_cfgstring)
 			// locked row : normal row
@@ -7243,11 +7271,11 @@ function renderObject8021QSync ($object_id)
 				!array_key_exists ($port_name, $R['portdata'])
 			) ? 'trerror' : 'trwarning';
 */
-		echo "<tr class=${trclass}><td>${port_name}</td>";
+		echo "<tr class='${trclass}'><td>${port_name}</td>";
 		if ($skip_inputs)
-			echo "<td class='tdleft${left_extra}'>${desired_cfgstring}</td>";
+			echo "<td class='tdleft${left_extra}'>${left_text}</td>";
 		else
-			echo "<td class='tdleft${left_extra}'><label for=i_${rownum}_left>${desired_cfgstring}</label></td>";
+			echo "<td class='tdleft${left_extra}'><label for=i_${rownum}_left>${left_text}</label></td>";
 		foreach ($radio_attrs as $pos => $attrs)
 		{
 			echo '<td>';
@@ -7258,9 +7286,9 @@ function renderObject8021QSync ($object_id)
 			echo '</td>';
 		}
 		if ($skip_inputs)
-			echo "<td class='tdleft${right_extra}'>${running_cfgstring}</td>";
+			echo "<td class='tdleft${right_extra}'>${right_text}</td>";
 		else
-			echo "<td class='tdleft${right_extra}'><label for=i_${rownum}_right>${running_cfgstring}</label></td>";
+			echo "<td class='tdleft${right_extra}'><label for=i_${rownum}_right>${right_text}</label></td>";
 		echo '</tr>';
 		if (!$skip_inputs)
 		{

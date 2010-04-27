@@ -3319,6 +3319,7 @@ function same8021QConfigs ($a, $b)
 		$a['native'] == $b['native'];
 }
 
+// merge three lists, process and markup
 function get8021QSyncOptions
 (
 	$vswitch,
@@ -3333,45 +3334,67 @@ function get8021QSyncOptions
 		'allowed' => array (VLAN_DFL_ID),
 		'native' => VLAN_DFL_ID,
 	);
-	$plan = array
-	(
-		'ok_to_pull' => array(),
-		'ok_to_push' => array(),
-		'ok_to_delete' => array(),
-		'ok_to_add' => array(),
-		'ok_to_accept' => array(),
-		'in_conflict' => array(),
-	);
-	$all_port_names = array_unique (array_merge (array_keys ($C), array_keys ($R)));
-	foreach ($all_port_names as $pn)
+	$ret = array();
+	foreach (array_unique (array_merge (array_keys ($C), array_keys ($R))) as $pn)
 	{
 		if (!array_key_exists ($pn, $R)) // missing from device
 		{
-			if (!same8021QConfigs ($D[$pn], $default_port))
-				$plan['in_conflict'][] = $pn;
-			else
-				$plan['ok_to_delete'][] = $pn;
+			$ret[$pn] = array
+			(
+				'status' => same8021QConfigs ($D[$pn], $default_port) ? 'ok_to_delete' : 'delete_conflict',
+				'left' => $D[$pn],
+			);
 			continue;
 		}
 		if (!array_key_exists ($pn, $C)) // missing from DB
 		{
-			$plan['ok_to_add'][$pn] = $R[$pn];
+			$ret[$pn] = array
+			(
+				'status' => 'ok_to_add',
+				'right' => $R[$pn],
+			);
 			continue;
 		}
 		$D_eq_C = same8021QConfigs ($D[$pn], $C[$pn]);
 		$C_eq_R = same8021QConfigs ($C[$pn], $R[$pn]);
 		if ($D_eq_C and $C_eq_R) // implies D == R
+		{
+			$ret[$pn] = array
+			(
+				'status' => 'in_sync',
+				'both' => $R[$pn],
+			);
 			continue;
+		}
 		if ($D_eq_C)
-			$plan['ok_to_pull'][$pn] = $R[$pn];
+			$ret[$pn] = array
+			(
+				'status' => 'ok_to_pull',
+				'left' => $D[$pn],
+				'right' => $R[$pn],
+			);
 		elseif ($C_eq_R)
-			$plan['ok_to_push'][$pn] = $D[$pn];
+			$ret[$pn] = array
+			(
+				'status' => 'ok_to_push',
+				'left' => $D[$pn],
+				'right' => $R[$pn],
+			);
 		elseif (same8021QConfigs ($D[$pn], $R[$pn]))
-			$plan['ok_to_accept'][$pn] = $R[$pn];
+			$ret[$pn] = array
+			(
+				'status' => 'ok_to_accept',
+				'both' => $R[$pn],
+			);
 		else // D != C, C != R, D != R
-			$plan['in_conflict'][$pn] = $R[$pn];
+			$ret[$pn] = array
+			(
+				'status' => 'merge_conflict',
+				'left' => $D[$pn],
+				'right' => $R[$pn],
+			);
 	}
-	return $plan;
+	return $ret;
 }
 
 // print part of HTML HEAD block

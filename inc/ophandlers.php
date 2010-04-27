@@ -2296,24 +2296,46 @@ function process8021QSyncRequest ()
 		$C = getStored8021QConfig ($vswitch['object_id'], 'cached');
 		$R = getRunning8021QConfig ($vswitch['object_id']);
 		$plan = get8021QSyncOptions ($vswitch, $D, $C, $R['portdata']);
-		// always update cache with new data from switch
-		replace8021QPorts ('cached', $vswitch['object_id'], $C, $plan['ok_to_accept']);
-		foreach ($plan['ok_to_delete'] as $port_name)
-			$done += del8021QPort ($vswitch['object_id'], $port_name);
-		foreach ($plan['ok_to_add'] as $port_name => $port)
-			$done += add8021QPort ($vswitch['object_id'], $port_name, $port);
-		if (count ($plan['ok_to_accept']) + count ($plan['ok_to_delete']) + count ($plan['ok_to_add']))
+		$conflict = FALSE;
+		$ok_to_pull = array();
+		$ok_to_push = array();
+		foreach ($plan as $pn => $port)
+		{
+			// always update cache with new data from switch
+			switch ($port['status'])
+			{
+			case 'ok_to_accept':
+				$done += upd8021QPort ('cached', $vswitch['object_id'], $pn, $port['both']);
+				break;
+			case 'ok_to_delete':
+				$done += del8021QPort ($vswitch['object_id'], $pn);
+				break;
+			case 'ok_to_add':
+				$done += add8021QPort ($vswitch['object_id'], $pn, $port['right']);
+				break;
+			case 'delete_conflict':
+			case 'merge_conflict':
+				$conflict = TRUE;
+				break;
+			case 'ok_to_pull':
+				$ok_to_pull[$pn] = $port['right'];
+				break;
+			case 'ok_to_push':
+				$ok_to_push[$pn] = $port['left'];
+				break;
+			}
+		}
+		if ($done)
 		{
 			$prepared = $dbxlink->prepare ("UPDATE VLANSwitch SET last_cache_update = NOW() WHERE object_id = ?");
 			$prepared->execute (array ($vswitch['object_id']));
 		}
-		$conflict = count ($plan['in_conflict']) > 0;
-		if ($do_pull)
+		if ($do_pull and count ($ok_to_pull))
 		{
 			if (!$conflict)
 			{
-				$done += replace8021QPorts ('desired', $vswitch['object_id'], $D, $plan['ok_to_pull']);
-				replace8021QPorts ('cached', $vswitch['object_id'], $C, $plan['ok_to_pull']);
+				$done += replace8021QPorts ('desired', $vswitch['object_id'], $D, $ok_to_pull);
+				replace8021QPorts ('cached', $vswitch['object_id'], $C, $ok_to_pull);
 				$prepared = $dbxlink->prepare ("UPDATE VLANSwitch SET mutex_rev = mutex_rev + 1, last_pull_done = NOW() WHERE object_id = ?");
 				$prepared->execute (array ($vswitch['object_id']));
 			}
@@ -2323,13 +2345,13 @@ function process8021QSyncRequest ()
 				$prepared->execute (array ($vswitch['object_id']));
 			}
 		}
-		if ($do_push)
+		if ($do_push and count ($ok_to_push))
 		{
 			if (!$conflict)
 			{
-				$done += exportSwitch8021QConfig ($vswitch, $R['vlanlist'], $R['portdata'], $plan['ok_to_push']);
+				$done += exportSwitch8021QConfig ($vswitch, $R['vlanlist'], $R['portdata'], $ok_to_push);
 				// update cache for ports deployed
-				replace8021QPorts ('cached', $vswitch['object_id'], $R['portdata'], $plan['ok_to_push']);
+				replace8021QPorts ('cached', $vswitch['object_id'], $R['portdata'], $ok_to_push);
 				$prepared = $dbxlink->prepare ("UPDATE VLANSwitch SET last_push_done = NOW() WHERE object_id = ?");
 				$prepared->execute (array ($vswitch['object_id']));
 			}
