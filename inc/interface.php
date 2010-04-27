@@ -263,6 +263,9 @@ $image['Zoom']['height'] = 22;
 $image['Zooming']['path'] = 'pix/tango-view-fullscreen-22x22.png';
 $image['Zooming']['width'] = 22;
 $image['Zooming']['height'] = 22;
+$image['UNLOCK']['path'] = 'pix/crystal-actions-unlock-32x32.png';
+$image['UNLOCK']['width'] = 32;
+$image['UNLOCK']['height'] = 32;
 
 // This may be populated later onsite, report rendering function will use it.
 // See the $systemreport for structure.
