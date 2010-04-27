@@ -7125,8 +7125,25 @@ function renderVLANIPv4 ($some_id)
 function renderObject8021QSync ($object_id)
 {
 	$vswitch = getVLANSwitchInfo ($object_id);
+	try
+	{
+		$R = getRunning8021QConfig ($object_id);
+	}
+	catch (RuntimeException $re)
+	{
+		showWarning ('Device configuration unavailable:<br>' . $re->getMessage(), __FUNCTION__);
+		return;
+	}
+	$D = getStored8021QConfig ($vswitch['object_id'], 'desired');
+	$C = getStored8021QConfig ($vswitch['object_id'], 'cached');
+	$plan = apply8021QOrder ($vswitch['template_id'], get8021QSyncOptions ($vswitch, $D, $C, $R['portdata']));
+	$maxdecisions = 0;
+	foreach ($plan as $port)
+		if ($port['status'] == 'delete_conflict' or $port['status'] == 'merge_conflict')
+			$maxdecisions++;
+
 	startPortlet ('execute');
-	echo '<table border=0 cellspacing=0 cellpadding=3 width="100%">';
+	echo '<table border=0 cellspacing=0 cellpadding=3 align=center>';
 	// FIXME: sort rows newest event last
 	$rows = array();
 	if (!$vswitch['last_pull_done_UTS'] and !$vswitch['last_pull_failed_UTS'])
@@ -7147,46 +7164,35 @@ function renderObject8021QSync ($object_id)
 		echo "<tr><th width='50%' class=tdright>${th}</th><td class=tdleft>${td}</td></tr>";
 
 	printOpFormIntro ('run', array ($vswitch['mutex_rev']));
-	echo '<tr><th width="50%" class=tdright><label for=do_pull>pull remote changes in:</label></th>';
-	echo "<td class=tdleft><input type=checkbox name=do_pull id=do_pull></td></tr>";
-	echo '<tr><th width="50%" class=tdright><label for=do_push>push local changes out:</label></th>';
-	echo "<td class=tdleft><input type=checkbox name=do_push id=do_push></td></tr>";
-	echo '<tr><td colspan=2>';
+	$extra = $maxdecisions ? ' disabled' : '';
+	echo '<tr class=trwarning><th width="50%" class=tdright><label for=do_pull>pull remote changes in:</label></th>';
+	echo "<td class=tdleft><input type=checkbox name=do_pull id=do_pull${extra}></td></tr>";
+	echo '<tr class=trwarning><th width="50%" class=tdright><label for=do_push>push local changes out:</label></th>';
+	echo "<td class=tdleft><input type=checkbox name=do_push id=do_push${extra}></td></tr>";
+	echo '<tr class=trok><td colspan=2>';
 	printImageHREF ('UPDATEALL', 'sync', TRUE, 100);
 	echo '</form></td></tr>';
 	echo '</table>';
 	finishPortlet();
 
 	startPortlet ('preview/resolve');
-	try
+	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
+	echo '<tr valign=top><th rowspan=2>port</th><th>last&nbsp;saved&nbsp;version</th>';
+	if ($maxdecisions)
+		echo '<th colspan=3>winner</th>';
+	echo '<th>running&nbsp;version</th></tr>';
+	echo '<tr><th class=trwarning>(pending&nbsp;push)</th>';
+	if ($maxdecisions)
 	{
-		$R = getRunning8021QConfig ($object_id);
+		printOpFormIntro ('resolve', array ('mutex_rev' => $vswitch['mutex_rev']));
+		foreach (array ('left', 'asis', 'right') as $pos)
+			echo "<th class=trerror><input type=radio name=column_radio value=${pos} " .
+				"onclick=\"checkColumnOfRadios('i_', ${maxdecisions}, '_${pos}')\"></th>";
 	}
-	catch (RuntimeException $re)
-	{
-		showWarning ('Device configuration unavailable:<br>' . $re->getMessage(), __FUNCTION__);
-		return;
-	}
-	$D = getStored8021QConfig ($vswitch['object_id'], 'desired');
-	$C = getStored8021QConfig ($vswitch['object_id'], 'cached');
-	$plan = apply8021QOrder ($vswitch['template_id'], get8021QSyncOptions ($vswitch, $D, $C, $R['portdata']));
-	
+	echo '<th class=trwarning>(pending&nbsp;pull)</th></tr>';
+	$rownum = 0;
 	uksort ($plan, 'sortTokenize');
 	$domvlans = array_keys (getDomainVLANs ($vswitch['domain_id']));
-	printOpFormIntro ('resolve', array ('mutex_rev' => $vswitch['mutex_rev']));
-	$maxdecisions = 0;
-	foreach ($plan as $port)
-		if ($port['status'] == 'delete_conflict' or $port['status'] == 'merge_conflict')
-			$maxdecisions++;
-	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
-	echo '<tr valign=top><th rowspan=2>port</th><th rowspan=2>last&nbsp;saved&nbsp;version ';
-	echo '(pushed&nbsp;out)</th><th colspan=3>winner</th>';
-	echo '<th rowspan=2>running&nbsp;version (pulled&nbsp;in)</th></tr><tr>';
-	foreach (array ('left', 'asis', 'right') as $pos)
-		echo "<th><input type=radio name=column_radio value=${pos} " .
-			"onclick=\"checkColumnOfRadios('i_', ${maxdecisions}, '_${pos}')\"></th>";
-	echo '</tr>';
-	$rownum = 0;
 	$default_port = array
 	(
 		'mode' => 'access',
@@ -7196,8 +7202,7 @@ function renderObject8021QSync ($object_id)
 	foreach ($plan as $port_name => $item)
 	{
 		$trclass = $left_extra = $right_extra = $left_text = $right_text = '';
-		$radio_attrs = array ('left' => '', 'asis' => ' checked', 'right' => '');
-		$skip_inputs = TRUE;
+		$radio_attrs = array();
 		switch ($item['status'])
 		{
 		case 'ok_to_delete':
@@ -7240,73 +7245,53 @@ function renderObject8021QSync ($object_id)
 		case 'merge_conflict':
 			$left_text = serializeVLANPack ($item['left']);
 			$right_text = serializeVLANPack ($item['right']);
-			// FIXME: make it an error, when resolve option is
-			// blocked by domain or VST
-			$trclass = 'trwarning';
-			$skip_inputs = FALSE;
+			$trclass = 'trerror';
 			// enable, but consider each option independently
-			if
-			(
-				!array_key_exists ($port_name, $R['portdata']) or
-				$desired_cfgstring == 'none'
-			)
-				$radio_attrs['left'] .= ' disabled';
 			// Don't accept running VLANs not in domain, and
 			// don't offer anything, that VST will deny.
+			// Consider domain and template constraints.
+			$radio_attrs = array ('left' => '', 'asis' => ' checked', 'right' => '');
 			if
 			(
-				count (array_diff ($R['portdata'][$port_name]['allowed'], $domvlans)) or
-				$port['vst_role'] != $R['portdata'][$port_name]['mode']
+				count (array_diff ($item['right']['allowed'], $domvlans)) or
+				$item['vst_role'] != $item['right']['mode']
 			)
-				$radio_attrs['right'] .= ' disabled';
+				$radio_attrs['right'] = 'disabled';
 			break;
 		}
-			
-/*
-		if ($desired_cfgstring == $running_cfgstring)
-			// locked row : normal row
-			$trclass = $port['vst_role'] == 'none' ? 'trwarning' : 'trbusy';
-		else
-			// locked difference : fixable difference
-			$trclass =
-			(
-				$port['vst_role'] == 'none' or
-				!array_key_exists ($port_name, $R['portdata'])
-			) ? 'trerror' : 'trwarning';
-*/
 		echo "<tr class='${trclass}'><td>${port_name}</td>";
-		if ($skip_inputs)
+		if (!count ($radio_attrs))
+		{
 			echo "<td class='tdleft${left_extra}'>${left_text}</td>";
-		else
-			echo "<td class='tdleft${left_extra}'><label for=i_${rownum}_left>${left_text}</label></td>";
-		foreach ($radio_attrs as $pos => $attrs)
-		{
-			echo '<td>';
-			if ($skip_inputs)
-				echo '&nbsp;';
-			else
-				echo "<input id=i_${rownum}_${pos} name=i_${rownum} type=radio value=${pos}${attrs}>";
-			echo '</td>';
-		}
-		if ($skip_inputs)
+			if ($maxdecisions)
+				echo '<td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>';
 			echo "<td class='tdleft${right_extra}'>${right_text}</td>";
+		}
 		else
-			echo "<td class='tdleft${right_extra}'><label for=i_${rownum}_right>${right_text}</label></td>";
-		echo '</tr>';
-		if (!$skip_inputs)
 		{
-			echo "<input type=hidden name=rm_${rownum} value=${port['running_mode']}>";
-			echo "<input type=hidden name=rn_${rownum} value=${port['running_native']}>";
-			foreach ($port['running_allowed'] as $a)
+			echo "<td class='tdleft${left_extra}'><label for=i_${rownum}_left>${left_text}</label></td>";
+			foreach ($radio_attrs as $pos => $attrs)
+				echo "<td><input id=i_${rownum}_${pos} name=i_${rownum} type=radio value=${pos}${attrs}></td>";
+			echo "<td class='tdleft${right_extra}'><label for=i_${rownum}_right>${right_text}</label></td>";
+		}
+		echo '</tr>';
+		if (count ($radio_attrs) and array_key_exists ('right', $item))
+		{
+			echo "<input type=hidden name=rm_${rownum} value=" . $item['right']['mode'] . '>';
+			echo "<input type=hidden name=rn_${rownum} value=" . $item['right']['native'] . '>';
+			foreach ($item['right']['allowed'] as $a)
 				echo "<input type=hidden name=ra_${rownum}[] value=${a}>";
 			echo "<input type=hidden name=pn_${rownum} value='" . htmlspecialchars ($port_name) . "'>";
 		}
-		$rownum += $skip_inputs ? 0 : 1;
+		$rownum += count ($radio_attrs) ? 1 : 0;
 	}
-	echo "<input type=hidden name=nrows value=${rownum}>";
-	echo '<tr><td colspan=6 align=center>';
-	printImageHREF ('CORE', 'sumbit all updates', TRUE);
-	echo '</td></tr>';
+	if ($rownum) // normally should be equal to $maxdecisions
+	{
+		echo "<input type=hidden name=nrows value=${rownum}>";
+		echo '<tr class=trerror><td colspan=2>&nbsp;</td><td colspan=3 align=center class="tdcenter trerror">';
+		printImageHREF ('UNLOCK', 'resolve conflicts', TRUE);
+		echo '</td><td>&nbsp;</td></tr>';
+	}
 	echo '</table>';
 	echo '</form>';
 	finishPortlet();
