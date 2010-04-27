@@ -2242,7 +2242,7 @@ function save8021QPorts ()
 			$after[$port_name] = $port;
 		foreach (produceUplinkPorts ($domain_vlanlist, $after) as $port_name => $port)
 			$after[$port_name] = $port;
-		$npulled = replace8021QPorts ('desired', $vswitch['object_id'], $before, $after);
+		$npulled = replace8021QPorts ('desired', $vswitch['object_id'], $before, $changes);
 	}
 	catch (Exception $e)
 	{
@@ -2286,7 +2286,7 @@ function process8021QSyncRequest ()
 	global $sic;
 	try
 	{
-		if (FALSE !== $done = exec8021QDeploy ($sic['object_id'], array_key_exists ('do_pull', $sic), array_key_exists ('do_push', $sic)))
+		if (FALSE === $done = exec8021QDeploy ($sic['object_id'], array_key_exists ('do_pull', $sic), array_key_exists ('do_push', $sic)))
 			return buildRedirectURL (__FUNCTION__, 'ERR2'); // specific case
 		return buildRedirectURL (__FUNCTION__, 'OK', array ($done));
 	}
