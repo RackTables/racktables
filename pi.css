@@ -189,6 +189,10 @@ tr.hl {
 	background-color: #D0D0FF;
 }
 
+.trnull {
+	background-color: #c0c0c0;
+}
+
 tr.mainheader {
 	background-color: black;
 }
