@@ -1365,6 +1365,8 @@ $dictionary = array
 	1344 => array ('chapter_id' => 12, 'dict_value' => 'Huawei%GPASS%Quidway S5324TP-PWR-SI'),
 	1345 => array ('chapter_id' => 12, 'dict_value' => 'Huawei%GPASS%Quidway S5348TP-SI'),
 	1346 => array ('chapter_id' => 12, 'dict_value' => 'Huawei%GPASS%Quidway S5348TP-PWR-SI'),
+	1347 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 2960G-24PC'),
+	1348 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 2350-48TD'),
 );
 
 ?>
