@@ -2689,8 +2689,8 @@ function vrp53PickInterfaceSubcommand (&$work, $line)
 		case 'access':
 			$work['portdata'][$work['current']['port_name']] = array
 			(
-				'allowed' => array ($work['current']['default vlan']),
-				'native' => $work['current']['default vlan'],
+				'allowed' => $work['current']['allowed'],
+				'native' => $work['current']['native'],
 				'mode' => 'access',
 			);
 			break;
