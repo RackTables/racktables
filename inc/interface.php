@@ -1568,6 +1568,7 @@ function showMessageOrError ()
 				188 => array ('code' => 'error', 'format' => "Fatal SNMP failure"),
 				189 => array ('code' => 'error', 'format' => "Unknown OID '%s'"),
 				190 => array ('code' => 'error', 'format' => "Invalid VLAN ID '%s'"),
+				191 => array ('code' => 'error', 'format' => "deploy was blocked due to conflicting configuration versions"),
 
 // records 200~299 with warnings
 				200 => array ('code' => 'warning', 'format' => '%s'),

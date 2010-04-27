@@ -3397,6 +3397,87 @@ function get8021QSyncOptions
 	return $ret;
 }
 
+// return number of records updated successfully of FALSE, if a conflict was in the way
+function exec8021QDeploy ($object_id, $do_pull, $do_push)
+{
+	global $dbxlink;
+	$done = 0;
+	$dbxlink->beginTransaction();
+	if (NULL === $vswitch = getVLANSwitchInfo ($object_id, 'FOR UPDATE'))
+		throw new InvalidArgException ('object_id', $object_id, 'VLAN domain is not set for this object');
+	$D = getStored8021QConfig ($vswitch['object_id'], 'desired');
+	$C = getStored8021QConfig ($vswitch['object_id'], 'cached');
+	$R = getRunning8021QConfig ($vswitch['object_id']);
+	$plan = get8021QSyncOptions ($vswitch, $D, $C, $R['portdata']);
+	$conflict = FALSE;
+	$ok_to_pull = array();
+	$ok_to_push = array();
+	foreach ($plan as $pn => $port)
+	{
+		// always update cache with new data from switch
+		switch ($port['status'])
+		{
+		case 'ok_to_accept':
+			$done += upd8021QPort ('cached', $vswitch['object_id'], $pn, $port['both']);
+			break;
+		case 'ok_to_delete':
+			$done += del8021QPort ($vswitch['object_id'], $pn);
+			break;
+		case 'ok_to_add':
+			$done += add8021QPort ($vswitch['object_id'], $pn, $port['right']);
+			break;
+		case 'delete_conflict':
+		case 'merge_conflict':
+			$conflict = TRUE;
+			break;
+		case 'ok_to_pull':
+			$ok_to_pull[$pn] = $port['right'];
+			break;
+		case 'ok_to_push':
+			$ok_to_push[$pn] = $port['left'];
+			break;
+		}
+	}
+	if ($done)
+	{
+		$prepared = $dbxlink->prepare ("UPDATE VLANSwitch SET last_cache_update = NOW() WHERE object_id = ?");
+		$prepared->execute (array ($vswitch['object_id']));
+	}
+	if ($do_pull and count ($ok_to_pull))
+	{
+		if (!$conflict)
+		{
+			$done += replace8021QPorts ('desired', $vswitch['object_id'], $D, $ok_to_pull);
+			replace8021QPorts ('cached', $vswitch['object_id'], $C, $ok_to_pull);
+			$prepared = $dbxlink->prepare ("UPDATE VLANSwitch SET mutex_rev = mutex_rev + 1, last_pull_done = NOW() WHERE object_id = ?");
+			$prepared->execute (array ($vswitch['object_id']));
+		}
+		else
+		{
+			$prepared = $dbxlink->prepare ("UPDATE VLANSwitch SET last_pull_failed = NOW() WHERE object_id = ?");
+			$prepared->execute (array ($vswitch['object_id']));
+		}
+	}
+	if ($do_push and count ($ok_to_push))
+	{
+		if (!$conflict)
+		{
+			$done += exportSwitch8021QConfig ($vswitch, $R['vlanlist'], $R['portdata'], $ok_to_push);
+			// update cache for ports deployed
+			replace8021QPorts ('cached', $vswitch['object_id'], $R['portdata'], $ok_to_push);
+			$prepared = $dbxlink->prepare ("UPDATE VLANSwitch SET last_push_done = NOW() WHERE object_id = ?");
+			$prepared->execute (array ($vswitch['object_id']));
+		}
+		else
+		{
+			$prepared = $dbxlink->prepare ("UPDATE VLANSwitch SET last_push_failed = NOW() WHERE object_id = ?");
+			$prepared->execute (array ($vswitch['object_id']));
+		}
+	}
+	$dbxlink->commit();
+	return $done;
+}
+
 // print part of HTML HEAD block
 function printPageHeaders ()
 {
