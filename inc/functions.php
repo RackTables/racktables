@@ -2938,51 +2938,48 @@ function array_values_same ($a1, $a2)
 	return !count (array_diff ($a1, $a2)) and !count (array_diff ($a2, $a1));
 }
 
-// Use the VLAN switch template associated with the given object
-// to set VST role for each port of the provided list. Return
-// resulting list.
+// Use the VLAN switch template to set VST role for each port of
+// the provided list. Return resulting list.
 function apply8021QOrder ($vst_id, $portlist)
 {
 	$vst = getVLANSwitchTemplate ($vst_id);
-	foreach ($vst['rules'] as $rule)
-		foreach (array_keys ($portlist) as $port_name)
-			if
-			(
-				!array_key_exists ('vst_role', $portlist[$port_name]) and
-				preg_match ($rule['port_pcre'], $port_name)
-			)
-			{
-				$portlist[$port_name]['vst_role'] = $rule['port_role'];
-				$portlist[$port_name]['wrt_vlans'] = $rule['wrt_vlans'];
-			}
 	foreach (array_keys ($portlist) as $port_name)
-		if (!array_key_exists ('vst_role', $portlist[$port_name]))
-			$portlist[$port_name]['vst_role'] = 'none';
-	return $portlist;
-}
-
-function apply8021QTemplate ($vst_id, $portnames)
-{
-	$vst = getVLANSwitchTemplate ($vst_id);
-	$ret = array();
-	foreach ($portnames as $port_name)
 	{
 		foreach ($vst['rules'] as $rule)
 			if (preg_match ($rule['port_pcre'], $port_name))
 			{
-				$ret[$port_name] = array
-				(
-					'vst_role' => $rule['port_role'],
-					'wrt_vlans' => $rule['wrt_vlans'],
-				);
-				break;
+				$portlist[$port_name]['vst_role'] = $rule['port_role'];
+				$portlist[$port_name]['wrt_vlans'] = reshapeVLANFilter ($rule['port_role'], $rule['wrt_vlans']);
+				continue 2;
 			}
-		$ret[$port_name] = array
-		(
-			'vst_role' => 'none',
-			'wrt_vlans' => '',
-		);
+		$portlist[$port_name]['vst_role'] = 'none';
 	}
+	return $portlist;
+}
+
+function reshapeVLANFilter ($role, $string)
+{
+	switch ($role)
+	{
+	case 'access': // 1-4094
+		$min = VLAN_MIN_ID;
+		$max = VLAN_MAX_ID;
+		break;
+	case 'trunk': // 2-4094
+	case 'uplink':
+		$min = VLAN_MIN_ID + 1;
+		$max = VLAN_MAX_ID;
+		break;
+	case 'downlink': // none
+		return array();
+	}
+	if ($string == '')
+		return range ($min, $max);
+	$ret = array();
+	foreach (iosParseVLANString ($string) as $vlan_id)
+		if ($min <= $vlan_id and $vlan_id <= $max)
+			$ret[] = $vlan_id;
+	sort ($ret);
 	return $ret;
 }
 
@@ -3291,16 +3288,10 @@ function produceUplinkPorts ($domain_vlanlist, $portlist)
 	foreach ($portlist as $port_name => $port)
 		if ($port['vst_role'] == 'uplink')
 		{
-			if (!mb_strlen ($port['wrt_vlans']))
-				$employed_here = $employed;
-			else
-			{
-				$employed_here = array();
-				$wrt_vlans = iosParseVLANString ($port['wrt_vlans']);
-				foreach ($employed as $vlan_id)
-					if (in_array ($vlan_id, $wrt_vlans))
-						$employed_here[] = $vlan_id;
-			}
+			$employed_here = array();
+			foreach ($employed as $vlan_id)
+				if (in_array ($vlan_id, $port['wrt_vlans']))
+					$employed_here[] = $vlan_id;
 			$ret[$port_name] = array
 			(
 				'mode' => 'trunk',
