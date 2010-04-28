@@ -3891,10 +3891,7 @@ function replace8021QPorts ($instance = 'desired', $object_id, $before, $changes
 			!array_key_exists ($port_name, $before) or
 			!same8021QConfigs ($port, $before[$port_name])
 		)
-		{
-			upd8021QPort ($instance, $object_id, $port_name, $port);
-			$done++;
-		}
+			$done += upd8021QPort ($instance, $object_id, $port_name, $port);
 	return $done;
 }
 
