@@ -7173,13 +7173,16 @@ function renderObject8021QSync ($object_id)
 	foreach ($rows as $th => $td)
 		echo "<tr><th width='50%' class=tdright>${th}</th><td class=tdleft>${td}</td></tr>";
 
-	printOpFormIntro ('run', array ($vswitch['mutex_rev']));
-	$extra = $maxdecisions ? ' disabled' : '';
-	echo '<tr class=trwarning><th width="50%" class=tdright><label for=do_push>push local changes out:</label></th>';
-	echo "<td class=tdleft><input type=checkbox name=do_push id=do_push${extra}></td></tr>";
-	echo '<tr class=trok><td colspan=2>';
-	printImageHREF ('UPDATEALL', 'sync', TRUE, 100);
-	echo '</form></td></tr>';
+	printOpFormIntro ('run', array ('mutex_rev' => $vswitch['mutex_rev']));
+	echo '<tr><td class=tdcenter>' . getImageHREF ('DOWN', 'pull remote changes in', TRUE, 101) . '</td></form>';
+	if ($maxdecsions)
+		echo '<td class=tdcenter>' . getImageHREF ('UPDOWN gray', 'cannot push due to version conflict(s)') . '</td>';
+	else
+	{
+		printOpFormIntro ('run', array ('mutex_rev' => $vswitch['mutex_rev'], 'do_push' => 'yes'));
+		echo '<td class=tdcenter>' . getImageHREF ('UPDOWN', 'push local changes out', TRUE, 102) . '</td></form>';
+	}
+	echo '</tr>';
 	echo '</table>';
 	finishPortlet();
 
@@ -7236,7 +7239,7 @@ function renderObject8021QSync ($object_id)
 		case 'ok_to_merge':
 			$left_extra = ' trok';
 			$right_extra = ' trok';
-		case 'ok_to_merge':
+		case 'in_sync':
 			if (!same8021QConfigs ($item['both'], $default_port))
 				$trclass = 'trbusy';
 			$left_text = $right_text = serializeVLANPack ($item['both']);
