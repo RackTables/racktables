@@ -7212,7 +7212,9 @@ function renderObject8021QSync ($object_id)
 			break;
 		case 'delete_conflict':
 			$left_text = serializeVLANPack ($item['left']);
-			$right_text = 'none';
+			$right_text = 'current: none';
+			if (!same8021QConfigs ($item['left'], $item['lastseen']))
+				$right_text .= '<br>last seen: ' . serializeVLANPack ($item['lastseen']);
 			$left_extra = ' trwarning'; // can be fixed on request
 			$right_extra = ' trnull';
 			break;
@@ -7222,7 +7224,9 @@ function renderObject8021QSync ($object_id)
 			$left_extra = ' trnull';
 			$right_extra = ' trok';
 			break;
-		case 'in_sync':
+		case 'ok_to_merge':
+			$left_extra = ' trok';
+			$right_extra = ' trok';
 		case 'ok_to_merge':
 			if (!same8021QConfigs ($item['both'], $default_port))
 				$trclass = 'trbusy';

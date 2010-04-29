@@ -3329,11 +3329,14 @@ function get8021QSyncOptions
 	{
 		if (!array_key_exists ($pn, $R)) // missing from device
 		{
-			$ret[$pn] = array
-			(
-				'status' => same8021QConfigs ($D[$pn], $default_port) ? 'ok_to_delete' : 'delete_conflict',
-				'left' => $D[$pn],
-			);
+			$ret[$pn] = array ('left' => $D[$pn]);
+			if (same8021QConfigs ($D[$pn], $default_port))
+				$ret[$pn]['status'] = 'ok_to_delete';
+			else
+			{
+				$ret[$pn]['status'] = 'delete_conflict';
+				$ret[$pn]['lastseen'] = $C[$pn];
+			}
 			continue;
 		}
 		if (!array_key_exists ($pn, $C)) // missing from DB
@@ -3474,6 +3477,8 @@ function exec8021QDeploy ($object_id, $do_push)
 			$prepared->execute (E_8021Q_PUSH_REMOTE_ERROR, array ($vswitch['object_id']));
 		}
 	}
+	// FIXME: always leave 'out_of_sync' set to actual value regardless of amount
+	// of work performed
 	$dbxlink->commit();
 	return $nsaved + $npushed;
 }
