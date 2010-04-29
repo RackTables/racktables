@@ -42,6 +42,9 @@ define ('RE_L2_WWN_HYPHEN', '/^[0-9a-f]{2}(-[0-9a-f]{2}){7}$/i');
 define ('RE_L2_WWN_SOLID', '/^[0-9a-f]{16}$/i');
 define ('RE_IP4_ADDR', '#^[0-9]{1,3}(\.[0,9]{1,3}){3}$#i');
 define ('RE_IP4_NET', '#^[0-9]{1,3}(\.[0,9]{1,3}){3}/[0-9]{1,2}$#i');
+define ('E_8021Q_VERSION_CONFLICT', 101);
+define ('E_8021Q_PULL_REMOTE_ERROR', 102);
+define ('E_8021Q_PUSH_REMOTE_ERROR', 103);
 
 function loadConfigDefaults() {
 	global $configCache;

@@ -7166,8 +7166,6 @@ function renderObject8021QSync ($object_id)
 
 	printOpFormIntro ('run', array ($vswitch['mutex_rev']));
 	$extra = $maxdecisions ? ' disabled' : '';
-	echo '<tr class=trwarning><th width="50%" class=tdright><label for=do_pull>pull remote changes in:</label></th>';
-	echo "<td class=tdleft><input type=checkbox name=do_pull id=do_pull${extra}></td></tr>";
 	echo '<tr class=trwarning><th width="50%" class=tdright><label for=do_push>push local changes out:</label></th>';
 	echo "<td class=tdleft><input type=checkbox name=do_push id=do_push${extra}></td></tr>";
 	echo '<tr class=trok><td colspan=2>';
@@ -7225,7 +7223,7 @@ function renderObject8021QSync ($object_id)
 			$right_extra = ' trok';
 			break;
 		case 'in_sync':
-		case 'ok_to_accept':
+		case 'ok_to_merge':
 			if (!same8021QConfigs ($item['both'], $default_port))
 				$trclass = 'trbusy';
 			$left_text = $right_text = serializeVLANPack ($item['both']);

@@ -417,18 +417,20 @@ CREATE TABLE `VLANSwitch` (
   `domain_id` int(10) unsigned NOT NULL,
   `template_id` int(10) unsigned NOT NULL,
   `mutex_rev` int(10) unsigned NOT NULL default '0',
-  `last_edited` timestamp NOT NULL default '0000-00-00 00:00:00',
-  `last_push_failed` timestamp NOT NULL default '0000-00-00 00:00:00',
-  `last_push_done` timestamp NOT NULL default '0000-00-00 00:00:00',
-  `last_pull_failed` timestamp NOT NULL default '0000-00-00 00:00:00',
-  `last_pull_done` timestamp NOT NULL default '0000-00-00 00:00:00',
-  `last_cache_update` timestamp NOT NULL default '0000-00-00 00:00:00',
+  `out_of_sync` enum('yes','no') NOT NULL default 'yes',
+  `last_errno` int(10) unsigned NOT NULL default '0',
+  `last_change` timestamp NOT NULL default '0000-00-00 00:00:00',
+  `last_push_started` timestamp NOT NULL default '0000-00-00 00:00:00',
+  `last_push_finished` timestamp NOT NULL default '0000-00-00 00:00:00',
+  `last_error_ts` timestamp NOT NULL default '0000-00-00 00:00:00',
   UNIQUE KEY `object_id` (`object_id`),
   KEY `domain_id` (`domain_id`),
   KEY `template_id` (`template_id`),
-  CONSTRAINT `VLANSwitch-FK-template_id` FOREIGN KEY (`template_id`) REFERENCES `VLANSwitchTemplate` (`id`),
+  KEY `out_of_sync` (`out_of_sync`),
+  KEY `last_errno` (`last_errno`),
+  CONSTRAINT `VLANSwitch-FK-domain_id` FOREIGN KEY (`domain_id`) REFERENCES `VLANDomain` (`id`),
   CONSTRAINT `VLANSwitch-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `RackObject` (`id`),
-  CONSTRAINT `VLANSwitch-FK-domain_id` FOREIGN KEY (`domain_id`) REFERENCES `VLANDomain` (`id`)
+  CONSTRAINT `VLANSwitch-FK-template_id` FOREIGN KEY (`template_id`) REFERENCES `VLANSwitchTemplate` (`id`)
 ) ENGINE=InnoDB;
 
 CREATE TABLE `CachedPVM` (

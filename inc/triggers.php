@@ -218,9 +218,9 @@ function trigger_object_8021qports ()
 function trigger_object_8021qsync ()
 {
 	global $sic;
-	if (NULL === getVLANSwitchInfo ($sic['object_id']))
+	if (NULL === $vswitch = getVLANSwitchInfo ($sic['object_id']))
 		return '';
-	return count (getStored8021QConfig ($sic['object_id'], 'desired')) ? 'std' : 'attn';
+	return $vswitch['out_of_sync'] == 'yes' ? 'attn' : 'std';
 }
 
 ?>

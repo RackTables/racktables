@@ -3623,7 +3623,7 @@ function getVLANDomainSwitches ($vdom_id)
 {
 	$result = usePreparedSelectBlade
 	(
-		'SELECT object_id, template_id, last_edited, last_push_failed, last_push_done ' .
+		'SELECT object_id, template_id ' .
 		'FROM VLANSwitch WHERE domain_id = ? ORDER BY object_id',
 		array ($vdom_id)
 	);
@@ -3675,13 +3675,8 @@ function getVLANSwitchInfo ($object_id, $extrasql = '')
 {
 	$result = usePreparedSelectBlade
 	(
-		'SELECT object_id, domain_id, template_id, mutex_rev, ' .
-		'last_cache_update, UNIX_TIMESTAMP(last_cache_update) AS last_cache_update_UTS, ' .
-		'last_edited, UNIX_TIMESTAMP(last_edited) AS last_edited_UTS, ' .
-		'last_pull_failed, UNIX_TIMESTAMP(last_pull_failed) AS last_pull_failed_UTS, ' .
-		'last_pull_done, UNIX_TIMESTAMP(last_pull_done) AS last_pull_done_UTS, ' .
-		'last_push_failed, UNIX_TIMESTAMP(last_push_failed) AS last_push_failed_UTS, ' .
-		'last_push_done, UNIX_TIMESTAMP(last_push_done) AS last_push_done_UTS ' .
+		'SELECT object_id, domain_id, template_id, mutex_rev, out_of_sync, last_errno, ' .
+		'last_change, last_push_started, last_push_finished, last_error_ts ' .
 		'FROM VLANSwitch WHERE object_id = ? ' . $extrasql,
 		array ($object_id)
 	);
@@ -3954,8 +3949,9 @@ function commitUpdateVSTRule ($vst_id, $rule_no, $new_rule_no, $port_pcre, $port
 function get8021QDeployPlan()
 {
 	$ret = array();
-	$query = 'SELECT object_id, NOW() - last_edited AS age ' .
-		'FROM VLANSwitch WHERE last_edited > last_push_done AND last_edited > last_push_failed';
+	$query = 'SELECT object_id, NOW() - last_change AS age ' .
+		'FROM VLANSwitch WHERE out_of_sync = "yes" and last_errno = 0 ' .
+		'ORDER BY age DESC';
 	$result = usePreparedSelectBlade ($query);
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 		$ret[] = $row;

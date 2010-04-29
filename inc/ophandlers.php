@@ -2251,7 +2251,7 @@ function save8021QPorts ()
 	}
 	if ($npulled)
 	{
-		$query = $dbxlink->prepare ('UPDATE VLANSwitch SET mutex_rev = mutex_rev + 1, last_edited = NOW() WHERE object_id = ?');
+		$query = $dbxlink->prepare ('UPDATE VLANSwitch SET mutex_rev = mutex_rev + 1, last_change = NOW(), out_of_sync = "yes" WHERE object_id = ?');
 		$query->execute (array ($sic['object_id']));
 	}
 	$dbxlink->commit();
@@ -2286,7 +2286,7 @@ function process8021QSyncRequest ()
 	global $sic;
 	try
 	{
-		if (FALSE === $done = exec8021QDeploy ($sic['object_id'], array_key_exists ('do_pull', $sic), array_key_exists ('do_push', $sic)))
+		if (FALSE === $done = exec8021QDeploy ($sic['object_id'], array_key_exists ('do_push', $sic)))
 			return buildRedirectURL (__FUNCTION__, 'ERR2'); // specific case
 		return buildRedirectURL (__FUNCTION__, 'OK', array ($done));
 	}
