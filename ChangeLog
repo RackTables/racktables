@@ -10,6 +10,7 @@
 	bugfix: declare charset in HTTP header (#312)
 	bugfix: PHP warning with certain auth setups (#310)
 	bugfix: don't add AC-in port for switches, which don't have it (#316)
+	bugfix: accept MAC addresses returned by newer Catalysts
 0.17.9 2010-02-17
 	new feature: added per-user UI options (ticket:29)
 	new feature: LDAP cache can be disabled now (ticket:247)
