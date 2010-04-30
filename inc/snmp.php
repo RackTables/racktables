@@ -817,7 +817,7 @@ function doSwitchSNMPmining ($objectInfo, $hostname, $community)
 		// NET-SNMP may return MAC addresses in one of two (?) formats depending on
 		// DISPLAY-HINT internal database. The best we can do about it is to accept both.
 		// Bug originally reported by Walery Wysotsky against openSUSE 11.0.
-		if (preg_match ('/^string: /i', $value)) // STRING: x:yy:z:xx:y:zz
+		if (preg_match ('/^string: [0-9a-f]{1,2}(:[0-9a-f]{1,2}){5}/i', $value)) // STRING: x:yy:z:xx:y:zz
 		{
 			list ($dummy, $value) = explode (' ', $value);
 			$addrbytes = explode (':', $value);
@@ -825,8 +825,10 @@ function doSwitchSNMPmining ($objectInfo, $hostname, $community)
 				if (strlen ($bytestr) == 1)
 					$addrbytes[$bidx] = '0' . $bytestr;
 		}
-		elseif (preg_match ('/^hex-string: /i', $value)) // Hex-STRING: xx yy zz xx yy zz
+		elseif (preg_match ('/^hex-string:( [0-9a-f]{2}){6}/i', $value)) // Hex-STRING: xx yy zz xx yy zz
 			$addrbytes = explode (' ', substr ($value, -17));
+		elseif (preg_match ('/22[0-9a-f]{12}22$/', bin2hex ($value))) // STRING: "??????"
+			$addrbytes = array (substr (bin2hex ($value), -14, 12));
 		else
 			continue; // martian format
 		$ifInfo[$randomindex][$tablename] = implode ('', $addrbytes);
