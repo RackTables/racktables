@@ -7182,13 +7182,13 @@ function renderObject8021QSync ($object_id)
 		echo "<tr><th width='50%' class=tdright>${th}</th><td class=tdleft>${td}</td></tr>";
 
 	printOpFormIntro ('run', array ('mutex_rev' => $vswitch['mutex_rev']));
-	echo '<tr><td class=tdcenter>' . getImageHREF ('DOWN', 'pull remote changes in', TRUE, 101) . '</td></form>';
+	echo '<tr><td class=tdcenter>' . getImageHREF ('prev', 'pull remote changes in', TRUE, 101) . '</td></form>';
 	if ($maxdecsions)
-		echo '<td class=tdcenter>' . getImageHREF ('UPDOWN gray', 'cannot push due to version conflict(s)') . '</td>';
+		echo '<td class=tdcenter>' . getImageHREF ('COMMIT gray', 'cannot push due to version conflict(s)') . '</td>';
 	else
 	{
 		printOpFormIntro ('run', array ('mutex_rev' => $vswitch['mutex_rev'], 'do_push' => 'yes'));
-		echo '<td class=tdcenter>' . getImageHREF ('UPDOWN', 'push local changes out', TRUE, 102) . '</td></form>';
+		echo '<td class=tdcenter>' . getImageHREF ('COMMIT', 'push local changes out', TRUE, 102) . '</td></form>';
 	}
 	echo '</tr>';
 	echo '</table>';
