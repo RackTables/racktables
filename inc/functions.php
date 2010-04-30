@@ -3325,7 +3325,51 @@ function same8021QConfigs ($a, $b)
 		$a['native'] == $b['native'];
 }
 
-// merge three lists, process and markup
+/*
+
+Relation between desired (D), cached (C) and running (R)
+copies of switch ports (P) list.
+
+  D         C           R
++---+     +---+       +---+
+| P |-----| P |-?  +--| P |
++---+     +---+   /   +---+
+| P |-----| P |--+  ?-| P |
++---+     +---+       +---+
+| P |-----| P |-------| P |
++---+     +---+       +---+
+| P |-----| P |--+  ?-| P |
++---+     +---+   \   +---+
+| P |-----| P |--+ +--| P |
++---+     +---+   \   +---+
+                   +--| P |
+                      +---+
+                    ?-| P |
+                      +---+
+
+A modified local version of a port in "conflict" state ignores remote
+changes until remote change maintains its difference. Once both edits
+match, the local copy "locks" on the remote and starts tracking it.
+
+v
+a           "o" -- remOte version
+l           "l" -- Local version
+u           "b" -- Both versions
+e
+
+^
+|         o           b
+|           o
+| l l l l l l b     b
+|   o   o       b
+| o               b
+|
+|     o
+|
+|
+0----------------------------------------------> time
+
+*/
 function get8021QSyncOptions
 (
 	$vswitch,
@@ -3343,7 +3387,8 @@ function get8021QSyncOptions
 	$ret = array();
 	foreach (array_unique (array_merge (array_keys ($C), array_keys ($R))) as $pn)
 	{
-		if (!array_key_exists ($pn, $R)) // missing from device
+		// (DC_): port missing from device
+		if (!array_key_exists ($pn, $R))
 		{
 			$ret[$pn] = array ('left' => $D[$pn]);
 			if (same8021QConfigs ($D[$pn], $default_port))
@@ -3355,7 +3400,8 @@ function get8021QSyncOptions
 			}
 			continue;
 		}
-		if (!array_key_exists ($pn, $C)) // missing from DB
+		// (__R): port missing from DB
+		if (!array_key_exists ($pn, $C))
 		{
 			$ret[$pn] = array
 			(
@@ -3366,6 +3412,7 @@ function get8021QSyncOptions
 		}
 		$D_eq_C = same8021QConfigs ($D[$pn], $C[$pn]);
 		$C_eq_R = same8021QConfigs ($C[$pn], $R[$pn]);
+		// (DCR), D = C = R: data in sync
 		if ($D_eq_C and $C_eq_R) // implies D == R
 		{
 			$ret[$pn] = array
@@ -3375,6 +3422,7 @@ function get8021QSyncOptions
 			);
 			continue;
 		}
+		// (DCR), D = C: no local edit in the way
 		if ($D_eq_C)
 			$ret[$pn] = array
 			(
@@ -3382,6 +3430,7 @@ function get8021QSyncOptions
 				'left' => $D[$pn],
 				'right' => $R[$pn],
 			);
+		// (DCR), C = R: no remote edit in the way
 		elseif ($C_eq_R)
 			$ret[$pn] = array
 			(
@@ -3389,13 +3438,14 @@ function get8021QSyncOptions
 				'left' => $D[$pn],
 				'right' => $R[$pn],
 			);
+		// (DCR), D = R: end of version conflict, restore tracking
 		elseif (same8021QConfigs ($D[$pn], $R[$pn]))
 			$ret[$pn] = array
 			(
 				'status' => 'ok_to_merge',
 				'both' => $R[$pn],
 			);
-		else // D != C, C != R, D != R
+		else // D != C, C != R, D != R: version conflict
 			$ret[$pn] = array
 			(
 				'status' => 'merge_conflict',
