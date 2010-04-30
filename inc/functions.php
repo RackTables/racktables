@@ -1255,23 +1255,25 @@ function mergeTagChains ($chainA, $chainB)
 function getCellFilter ()
 {
 	global $sic;
+	global $pageno;
 	if (isset ($_REQUEST['tagfilter']) and is_array ($_REQUEST['tagfilter']))
 	{
 		$_REQUEST['cft'] = $_REQUEST['tagfilter'];
 		unset ($_REQUEST['tagfilter']);
 	}
-	if (isset ($_SESSION['tagfilter']) and is_array ($_SESSION['tagfilter']) and !(isset($_REQUEST['cft'])))
+	if (isset ($_SESSION[$pageno]['tagfilter']) and is_array ($_SESSION[$pageno]['tagfilter']) and !(isset($_REQUEST['cft'])))
 	{
-		$_REQUEST['cft'] = $_SESSION['tagfilter'];
+		$_REQUEST['cft'] = $_SESSION[$pageno]['tagfilter'];
 	}
-	if (isset ($_SESSION['cfe']) and !(isset($sic['cfe'])))
+	if (isset ($_SESSION[$pageno]['cfe']) and !(isset($sic['cfe'])))
 	{
-		$sic['cfe'] = $_SESSION['cfe'];
+		$sic['cfe'] = $_SESSION[$pageno]['cfe'];
 	}
-	if (isset ($_SESSION['andor']) and !(isset($_REQUEST['andor'])))
+	if (isset ($_SESSION[$pageno]['andor']) and !(isset($_REQUEST['andor'])))
 	{
-		$_REQUEST['andor'] = $_SESSION['andor'];
+		$_REQUEST['andor'] = $_SESSION[$pageno]['andor'];
 	}
+
 
 	$ret = array
 	(
@@ -1291,7 +1293,7 @@ function getCellFilter ()
 		break;
 	case ($_REQUEST['andor'] == 'and'):
 	case ($_REQUEST['andor'] == 'or'):
-		$_SESSION['andor'] = $_REQUEST['andor'];
+		$_SESSION[$pageno]['andor'] = $_REQUEST['andor'];
 		$ret['andor'] = $andor2 = $_REQUEST['andor'];
 		$ret['urlextra'] .= '&andor=' . $ret['andor'];
 		break;
@@ -1304,7 +1306,7 @@ function getCellFilter ()
 	// handled somehow. Discard them silently for now.
 	if (isset ($_REQUEST['cft']) and is_array ($_REQUEST['cft']))
 	{
-		$_SESSION['tagfilter'] = $_REQUEST['cft'];
+		$_SESSION[$pageno]['tagfilter'] = $_REQUEST['cft'];
 		global $taglist;
 		foreach ($_REQUEST['cft'] as $req_id)
 			if (isset ($taglist[$req_id]))
@@ -1331,7 +1333,7 @@ function getCellFilter ()
 	// Extra text comes from TEXTAREA and is easily screwed by standard escaping function.
 	if (isset ($sic['cfe']))
 	{
-		$_SESSION['cfe'] = $sic['cfe'];
+		$_SESSION[$pageno]['cfe'] = $sic['cfe'];
 		// Only consider extra text, when it is a correct RackCode expression.
 		$parse = spotPayload ($sic['cfe'], 'SYNT_EXPR');
 		if ($parse['result'] == 'ACK')
