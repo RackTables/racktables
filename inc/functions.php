@@ -1260,6 +1260,19 @@ function getCellFilter ()
 		$_REQUEST['cft'] = $_REQUEST['tagfilter'];
 		unset ($_REQUEST['tagfilter']);
 	}
+	if (isset ($_SESSION['tagfilter']) and is_array ($_SESSION['tagfilter']) and !(isset($_REQUEST['cft'])))
+	{
+		$_REQUEST['cft'] = $_SESSION['tagfilter'];
+	}
+	if (isset ($_SESSION['cfe']) and !(isset($sic['cfe'])))
+	{
+		$sic['cfe'] = $_SESSION['cfe'];
+	}
+	if (isset ($_SESSION['andor']) and !(isset($_REQUEST['andor'])))
+	{
+		$_REQUEST['andor'] = $_SESSION['andor'];
+	}
+
 	$ret = array
 	(
 		'tagidlist' => array(),
@@ -1278,6 +1291,7 @@ function getCellFilter ()
 		break;
 	case ($_REQUEST['andor'] == 'and'):
 	case ($_REQUEST['andor'] == 'or'):
+		$_SESSION['andor'] = $_REQUEST['andor'];
 		$ret['andor'] = $andor2 = $_REQUEST['andor'];
 		$ret['urlextra'] .= '&andor=' . $ret['andor'];
 		break;
@@ -1290,6 +1304,7 @@ function getCellFilter ()
 	// handled somehow. Discard them silently for now.
 	if (isset ($_REQUEST['cft']) and is_array ($_REQUEST['cft']))
 	{
+		$_SESSION['tagfilter'] = $_REQUEST['cft'];
 		global $taglist;
 		foreach ($_REQUEST['cft'] as $req_id)
 			if (isset ($taglist[$req_id]))
@@ -1316,6 +1331,7 @@ function getCellFilter ()
 	// Extra text comes from TEXTAREA and is easily screwed by standard escaping function.
 	if (isset ($sic['cfe']))
 	{
+		$_SESSION['cfe'] = $sic['cfe'];
 		// Only consider extra text, when it is a correct RackCode expression.
 		$parse = spotPayload ($sic['cfe'], 'SYNT_EXPR');
 		if ($parse['result'] == 'ACK')
