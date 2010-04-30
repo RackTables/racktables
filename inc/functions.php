@@ -1256,20 +1256,21 @@ function getCellFilter ()
 {
 	global $sic;
 	global $pageno;
+	$staticFilter = getConfigVar ('STATIC_FILTER');
 	if (isset ($_REQUEST['tagfilter']) and is_array ($_REQUEST['tagfilter']))
 	{
 		$_REQUEST['cft'] = $_REQUEST['tagfilter'];
 		unset ($_REQUEST['tagfilter']);
 	}
-	if (isset ($_SESSION[$pageno]['tagfilter']) and is_array ($_SESSION[$pageno]['tagfilter']) and !(isset($_REQUEST['cft'])))
+	if (isset ($_SESSION[$pageno]['tagfilter']) and is_array ($_SESSION[$pageno]['tagfilter']) and !(isset($_REQUEST['cft'])) and $staticFilter == 'yes')
 	{
 		$_REQUEST['cft'] = $_SESSION[$pageno]['tagfilter'];
 	}
-	if (isset ($_SESSION[$pageno]['cfe']) and !(isset($sic['cfe'])))
+	if (isset ($_SESSION[$pageno]['cfe']) and !(isset($sic['cfe'])) and $staticFilter == 'yes')
 	{
 		$sic['cfe'] = $_SESSION[$pageno]['cfe'];
 	}
-	if (isset ($_SESSION[$pageno]['andor']) and !(isset($_REQUEST['andor'])))
+	if (isset ($_SESSION[$pageno]['andor']) and !(isset($_REQUEST['andor'])) and $staticFilter == 'yes')
 	{
 		$_REQUEST['andor'] = $_SESSION[$pageno]['andor'];
 	}

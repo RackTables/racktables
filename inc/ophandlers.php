@@ -1055,6 +1055,7 @@ function resetUIConfig()
 	setConfigVar ('DEFAULT_VST_ID', '');
 	setConfigVar ('8021Q_PULL_AROUND_CONFLICTS', 'yes');
 	setConfigVar ('8021Q_PUSH_AROUND_CONFLICTS', 'yes');
+	setConfigVar ('STATIC_FILTER', 'yes');
 	return buildRedirectURL (__FUNCTION__, 'OK');
 }
 
