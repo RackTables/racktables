@@ -3676,7 +3676,11 @@ function getVLANSwitchInfo ($object_id, $extrasql = '')
 	$result = usePreparedSelectBlade
 	(
 		'SELECT object_id, domain_id, template_id, mutex_rev, out_of_sync, last_errno, ' .
-		'last_change, last_push_started, last_push_finished, last_error_ts ' .
+		'last_push_finished - last_push_started AS last_push_lasted, ' .
+		'SEC_TO_TIME(NOW() - last_change) AS last_change_age, ' .
+		'SEC_TO_TIME(NOW() - last_error_ts) AS last_error_age, ' .
+		'SEC_TO_TIME(NOW() - last_push_finished) AS last_push_age, ' .
+		'last_change, last_push_finished, last_error_ts ' .
 		'FROM VLANSwitch WHERE object_id = ? ' . $extrasql,
 		array ($object_id)
 	);

@@ -7163,37 +7163,35 @@ function renderObject8021QSync ($object_id)
 	echo '<table border=0 class=objectview cellspacing=0 cellpadding=0>';
 	echo '<tr><td class=pcleft width="50%">';
 
-	startPortlet ('execute');
+	startPortlet ('schedule');
 	echo '<table border=0 cellspacing=0 cellpadding=3 align=center>';
 	// FIXME: sort rows newest event last
 	$rows = array();
-	if (!$vswitch['last_pull_done_UTS'] and !$vswitch['last_pull_failed_UTS'])
-		$rows['last pull:'] = 'never';
-	elseif ($vswitch['last_pull_done_UTS'] > $vswitch['last_pull_failed_UTS'])
-		$rows['last pull:'] = $vswitch['last_pull_done'] . ' (successful)';
+	$rows['edited'] = $vswitch['last_change'] . ' (' . $vswitch['last_change_age'] . ' ago)';
+	if ($vswitch['out_of_sync'] == 'yes')
+		$rows['pushed'] = 'no';
 	else
-		$rows['last pull:'] = $vswitch['last_pull_failed'] . ' (with conflicts)';
-	if (!$vswitch['last_push_done_UTS'] and !$vswitch['last_push_failed_UTS'])
-		$rows['last push:'] = 'never';
-	elseif ($vswitch['last_push_done_UTS'] > $vswitch['last_push_failed_UTS'])
-		$rows['last push:'] = $vswitch['last_push_done'] . ' (successful)';
-	else
-		$rows['last push:'] = $vswitch['last_push_failed'] . ' (with conflicts)';
-	$rows['last cache update:'] = $vswitch['last_cache_update_UTS'] ? $vswitch['last_cache_update'] : 'never';
-	$rows['last edit:'] = $vswitch['last_edited_UTS'] ? $vswitch['last_edited'] : 'never';
+	{
+		$rows['push completed'] = 'yes';
+		$rows['pushed'] = $vswitch['last_push_finished'] . ' (' . $vswitch['last_push_age'] .
+			' ago, lasted ' . $vswitch['last_push_lasted'] . ')';
+	}
+	if ($vswitch['last_errno'])
+		$rows['failed'] = $vswitch['last_error_ts'] . ' (' . strerror8021Q ($vswitch['last_errno']) . ')';
 	foreach ($rows as $th => $td)
-		echo "<tr><th width='50%' class=tdright>${th}</th><td class=tdleft>${td}</td></tr>";
+		echo "<tr><th width='50%' class=tdright>${th}:</th><td class=tdleft colspan=2>${td}</td></tr>";
 
+	echo '<tr><th class=tdright>run now:</th><td class=tdcenter>';
 	printOpFormIntro ('run', array ('mutex_rev' => $vswitch['mutex_rev']));
-	echo '<tr><td class=tdcenter>' . getImageHREF ('prev', 'pull remote changes in', TRUE, 101) . '</td></form>';
+	echo getImageHREF ('prev', 'pull remote changes in', TRUE, 101) . '</form></td>';
 	if ($maxdecisions)
-		echo '<td class=tdcenter>' . getImageHREF ('COMMIT gray', 'cannot push due to version conflict(s)') . '</td>';
+		echo getImageHREF ('COMMIT gray', 'cannot push due to version conflict(s)');
 	else
 	{
 		printOpFormIntro ('run', array ('mutex_rev' => $vswitch['mutex_rev'], 'do_push' => 'yes'));
-		echo '<td class=tdcenter>' . getImageHREF ('COMMIT', 'push local changes out', TRUE, 102) . '</td></form>';
+		echo '<td class=tdcenter>' . getImageHREF ('COMMIT', 'push local changes out', TRUE, 102) . '</form>';
 	}
-	echo '</tr>';
+	echo '</td></tr>';
 	echo '</table>';
 	finishPortlet();
 

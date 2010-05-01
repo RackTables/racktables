@@ -3581,4 +3581,15 @@ function printPageHeaders ()
 	echo '</style>';
 }
 
+function strerror8021Q ($errno)
+{
+	switch ($errno)
+	{
+	case E_8021Q_VERSION_CONFLICT: return 'pull failed due to version conflict';
+	case E_8021Q_PULL_REMOTE_ERROR: 'pull failed due to remote error';
+	case E_8021Q_PUSH_REMOTE_ERROR: 'push failed due to remote error';
+	default: return "unknown error code ${errno}";
+	}
+}
+
 ?>
