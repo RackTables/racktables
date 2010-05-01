@@ -3388,7 +3388,10 @@ function get8021QSyncOptions
 		'native' => VLAN_DFL_ID,
 	);
 	$ret = array();
+	$allports = array()
 	foreach (array_unique (array_merge (array_keys ($C), array_keys ($R))) as $pn)
+		$allports[$pn] = array();
+	foreach (apply8021QOrder ($vswitch['template_id'], $allports) as $pn => $port)
 	{
 		// (DC_): port missing from device
 		if (!array_key_exists ($pn, $R))
@@ -3451,7 +3454,11 @@ function get8021QSyncOptions
 		else // D != C, C != R, D != R: version conflict
 			$ret[$pn] = array
 			(
-				'status' => 'merge_conflict',
+				'status' => ($port['vst_role'] == 'access' or $port['vst_role'] == 'trunk') ?
+					// In case the port is normally updated by user, let him
+					// resolve the conflict. If the system manages this port,
+					// arrange the data to let remote version go down.
+					'merge_conflict' : 'ok_to_push_with_merge',
 				'left' => $D[$pn],
 				'right' => $R[$pn],
 			);
@@ -3505,6 +3512,9 @@ function exec8021QDeploy ($object_id, $do_push)
 			upd8021QPort ('cached', $vswitch['object_id'], $pn, $port['right']);
 			$nsaved++;
 			break;
+		case 'ok_to_push_with_merge':
+			upd8021QPort ('cached', $vswitch['object_id'], $pn, $port['right']);
+			// fall through
 		case 'ok_to_push':
 			$ok_to_push[$pn] = $port['left'];
 			break;

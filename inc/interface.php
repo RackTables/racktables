@@ -7235,7 +7235,7 @@ function renderObject8021QSync ($object_id)
 			$right_text = 'current: none';
 			if (!same8021QConfigs ($item['left'], $item['lastseen']))
 				$right_text .= '<br>last seen: ' . serializeVLANPack ($item['lastseen']);
-			$left_extra = ' trwarning'; // can be fixed on request
+			$left_extra = ' trerror'; // can be fixed on request
 			$right_extra = ' trnull';
 			break;
 		case 'ok_to_add':
@@ -7245,6 +7245,7 @@ function renderObject8021QSync ($object_id)
 			$right_extra = ' trok';
 			break;
 		case 'ok_to_merge':
+			$trclass = 'trbusy';
 			$left_extra = ' trok';
 			$right_extra = ' trok';
 		case 'in_sync':
@@ -7255,20 +7256,22 @@ function renderObject8021QSync ($object_id)
 		case 'ok_to_pull':
 			// at least one of the sides is not in the default state
 			$trclass = 'trbusy';
+			$right_extra = ' trok';
 			$left_text = serializeVLANPack ($item['left']);
 			$right_text = serializeVLANPack ($item['right']);
-			$right_extra = ' trwarning';
 			break;
 		case 'ok_to_push':
-			$trclass = 'trbusy';
+			$trclass = ' trbusy';
+			$left_extra = ' trok';
 			$left_text = serializeVLANPack ($item['left']);
 			$right_text = serializeVLANPack ($item['right']);
-			$left_extra = ' trwarning';
 			break;
 		case 'merge_conflict':
+			$trclass = 'trbusy';
+			$left_extra = ' trerror';
+			$right_extra = ' trerror';
 			$left_text = serializeVLANPack ($item['left']);
 			$right_text = serializeVLANPack ($item['right']);
-			$trclass = 'trerror';
 			// enable, but consider each option independently
 			// Don't accept running VLANs not in domain, and
 			// don't offer anything, that VST will deny.
@@ -7280,6 +7283,13 @@ function renderObject8021QSync ($object_id)
 				$item['vst_role'] != $item['right']['mode']
 			)
 				$radio_attrs['right'] = 'disabled';
+			break;
+		case 'ok_to_push_with_merge':
+			$trclass = 'trbusy';
+			$left_extra = ' trok';
+			$right_extra = ' trwarning';
+			$left_text = serializeVLANPack ($item['left']);
+			$right_text = serializeVLANPack ($item['right']);
 			break;
 		}
 		echo "<tr class='${trclass}'><td>${port_name}</td>";
