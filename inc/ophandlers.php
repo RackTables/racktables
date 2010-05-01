@@ -2340,27 +2340,32 @@ function resolve8021QConflicts ()
 		{
 			throw new RuntimeException ('expired form (table data has changed)');
 		}
-		$D = getStored8021QConfig ($sic['object_id'], 'desired');
-		$R = getRunning8021QConfig ($sic['object_id']);
+		$D = getStored8021QConfig ($vswitch['object_id'], 'desired');
+		$C = getStored8021QConfig ($vswitch['object_id'], 'cached');
+		$R = getRunning8021QConfig ($vswitch['object_id']);
+		$plan = get8021QSyncOptions ($vswitch, $D, $C, $R);
 		$ndone = 0;
 		foreach ($F as $port_name => $port)
 		{
-			// for R mutex cannot be emulated, but revision can be
-			if (!same8021QConfigs ($port, $R['portdata'][$port_name]))
-				throw new RuntimeException ('expired form (switch data has changed)');
-			switch ($port['decision'])
+			if (!array_key_exists ($port_name, $plan))
+				continue;
+			elseif ($plan[$port_name]['status'] == 'merge_conflict')
 			{
-			case 'left':
-				// D wins, frame R by writing value of R to C
-				upd8021QPort ('cached', $vswitch['object_id'], $port_name, $port);
-				$ndone++;
-				break;
-			case 'right': // last_edited = NOW()
-				// R wins, cross D up
-				upd8021QPort ('cached', $vswitch['object_id'], $port_name, $D[$port_name]);
-				$ndone++;
-				break;
+				// for R neither mutex nor revisions can be emulated, but revision change can be
+				if (!same8021QConfigs ($port, $R['portdata'][$port_name]))
+					throw new RuntimeException ('expired form (switch data has changed)');
+				if ($port['decision'] == 'left') // D wins, frame R by writing value of R to C
+					$ndone += upd8021QPort ('cached', $vswitch['object_id'], $port_name, $port);
+				elseif ($port['decision'] == 'right') // R wins, cross D up
+					$ndone += upd8021QPort ('cached', $vswitch['object_id'], $port_name, $D[$port_name]);
+				// otherwise there was no decision made
 			}
+			elseif ($plan[$port_name]['status'] == 'delete_conflict')
+			{
+				if ($port['decision'] == 'right') // confirm deletion of local copy
+					$ndone += del8021QPort ($vswitch['object_id'], $port_name);
+			}
+			// otherwise ignore a decision, which doesn't address a conflict
 		}
 	}
 	catch (RuntimeException $e)

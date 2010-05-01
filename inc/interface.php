@@ -7205,6 +7205,7 @@ function renderObject8021QSync ($object_id)
 	echo '<tr><td class=tdright>updated data, pending pull/push:</td><td class=trok>&nbsp;</td></tr>';
 	echo '<tr><td class=tdright>some or all remote changes will be discarded:</td><td class=trwarning>&nbsp;</td></tr>';
 	echo '<tr><td class=tdright>verson conflict, requires manual resolving:</td><td class=trerror>&nbsp;</td></tr>';
+	echo '<tr><td class=tdright>does not exist:</td><td class=trnull>&nbsp;</td></tr>';
 	echo '</table>';
 	finishPortlet();
 
@@ -7214,15 +7215,15 @@ function renderObject8021QSync ($object_id)
 	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable width="100%">';
 	if ($maxdecisions)
 		echo '<tr><th colspan=2>&nbsp;</th><th colspan=3>winner</th><th>&nbsp;</th></tr>';
-	echo '<tr valign=top><th>port</th><th>last&nbsp;saved&nbsp;version</th>';
+	echo '<tr valign=top><th>port</th><th width="40%">last&nbsp;saved&nbsp;version</th>';
 	if ($maxdecisions)
 	{
 		printOpFormIntro ('resolve', array ('mutex_rev' => $vswitch['mutex_rev']));
 		foreach (array ('left', 'asis', 'right') as $pos)
-			echo "<th class=trerror><input type=radio name=column_radio value=${pos} " .
+			echo "<th class=tdcenter><input type=radio name=column_radio value=${pos} " .
 				"onclick=\"checkColumnOfRadios('i_', ${maxdecisions}, '_${pos}')\"></th>";
 	}
-	echo '<th>running&nbsp;version</th></tr>';
+	echo '<th width="40%">running&nbsp;version</th></tr>';
 	$rownum = 0;
 	uksort ($plan, 'sortTokenize');
 	$domvlans = array_keys (getDomainVLANs ($vswitch['domain_id']));
@@ -7245,23 +7246,29 @@ function renderObject8021QSync ($object_id)
 			$right_extra = ' trok'; // no confirmation is necessary
 			break;
 		case 'delete_conflict':
-			$left_text = serializeVLANPack ($item['left']);
-			$right_text = 'current: none';
-			if (!same8021QConfigs ($item['left'], $item['lastseen']))
-				$right_text .= '<br>last seen: ' . serializeVLANPack ($item['lastseen']);
+			$trclass = 'trbusy';
 			$left_extra = ' trerror'; // can be fixed on request
 			$right_extra = ' trnull';
+			$left_text = same8021QConfigs ($item['left'], $item['lastseen']) ?
+				'' : ('<s>' . serializeVLANPack ($item['lastseen']) . '</s><br>');
+			$left_text .= serializeVLANPack ($item['left']);
+			$right_text = '&nbsp;';
+			$radio_attrs = array ('left' => ' disabled', 'asis' => ' checked', 'right' => '');
+			$item['right'] = $default_port; // dummy setting to bypass validation
 			break;
 		case 'ok_to_add':
-			$left_text = 'none';
-			$right_text = serializeVLANPack ($item['right']);
+			if (!same8021QConfigs ($item['both'], $default_port))
+				$trclass = 'trbusy';
 			$left_extra = ' trnull';
 			$right_extra = ' trok';
+			$left_text = '&nbsp;';
+			$right_text = serializeVLANPack ($item['right']);
 			break;
 		case 'ok_to_merge':
 			$trclass = 'trbusy';
 			$left_extra = ' trok';
 			$right_extra = ' trok';
+			// fall through
 		case 'in_sync':
 			if (!same8021QConfigs ($item['both'], $default_port))
 				$trclass = 'trbusy';
@@ -7306,7 +7313,7 @@ function renderObject8021QSync ($object_id)
 			$right_text = serializeVLANPack ($item['right']);
 			break;
 		}
-		echo "<tr class='${trclass}'><td>${port_name}</td>";
+		echo "<tr class='${trclass}'><td class=tdleft>${port_name}</td>";
 		if (!count ($radio_attrs))
 		{
 			echo "<td class='tdleft${left_extra}'>${left_text}</td>";
@@ -7322,7 +7329,7 @@ function renderObject8021QSync ($object_id)
 			echo "<td class='tdleft${right_extra}'><label for=i_${rownum}_right>${right_text}</label></td>";
 		}
 		echo '</tr>';
-		if (count ($radio_attrs) and array_key_exists ('right', $item))
+		if (count ($radio_attrs))
 		{
 			echo "<input type=hidden name=rm_${rownum} value=" . $item['right']['mode'] . '>';
 			echo "<input type=hidden name=rn_${rownum} value=" . $item['right']['native'] . '>';
@@ -7335,7 +7342,7 @@ function renderObject8021QSync ($object_id)
 	if ($rownum) // normally should be equal to $maxdecisions
 	{
 		echo "<input type=hidden name=nrows value=${rownum}>";
-		echo '<tr class=trerror><td colspan=2>&nbsp;</td><td colspan=3 align=center class="tdcenter trerror">';
+		echo '<tr><td colspan=2>&nbsp;</td><td colspan=3 align=center class=tdcenter>';
 		printImageHREF ('UNLOCK', 'resolve conflicts', TRUE);
 		echo '</td><td>&nbsp;</td></tr>';
 	}
