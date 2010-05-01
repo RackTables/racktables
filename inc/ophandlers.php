@@ -2306,10 +2306,10 @@ function resolve8021QConflicts ()
 	assertUIntArg ('mutex_rev');
 	assertUIntArg ('nrows');
 	// Divide submitted radio buttons into 3 groups:
-	// left (produce and send commands to switch)
+	// left (saved version wins)
 	// asis (ignore)
-	// right (fetch config from switch and save into database)
-	$F = array ('left' => array(), 'right' => array());
+	// right (running version wins)
+	$F = array();
 	for ($i = 0; $i < $sic['nrows']; $i++)
 	{
 		if (!array_key_exists ("i_${i}", $sic))
@@ -2361,11 +2361,6 @@ function resolve8021QConflicts ()
 				$ndone++;
 				break;
 			}
-		}
-		if ($ndone)
-		{
-			$query = $dbxlink->prepare ('UPDATE VLANSwitch SET last_edited = NOW() WHERE object_id = ?');
-			$query->execute (array ($vswitch['object_id']));
 		}
 	}
 	catch (RuntimeException $e)
