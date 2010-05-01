@@ -155,7 +155,7 @@ $image['UPDOWN gray']['height'] = 32;
 $image['COMMIT']['path'] = 'pix/tango-go-prev-next-32x32.png';
 $image['COMMIT']['width'] = 32;
 $image['COMMIT']['height'] = 32;
-$image['COMMIT gray']['path'] = 'pix/tango-go-prev-next-32x32.png';
+$image['COMMIT gray']['path'] = 'pix/tango-go-prev-next-gray-32x32.png';
 $image['COMMIT gray']['width'] = 32;
 $image['COMMIT gray']['height'] = 32;
 $image['clear']['path'] = 'pix/tango-edit-clear.png';
@@ -7160,6 +7160,9 @@ function renderObject8021QSync ($object_id)
 		if ($port['status'] == 'delete_conflict' or $port['status'] == 'merge_conflict')
 			$maxdecisions++;
 
+	echo '<table border=0 class=objectview cellspacing=0 cellpadding=0>';
+	echo '<tr><td class=pcleft width="50%">';
+
 	startPortlet ('execute');
 	echo '<table border=0 cellspacing=0 cellpadding=3 align=center>';
 	// FIXME: sort rows newest event last
@@ -7183,7 +7186,7 @@ function renderObject8021QSync ($object_id)
 
 	printOpFormIntro ('run', array ('mutex_rev' => $vswitch['mutex_rev']));
 	echo '<tr><td class=tdcenter>' . getImageHREF ('prev', 'pull remote changes in', TRUE, 101) . '</td></form>';
-	if ($maxdecsions)
+	if ($maxdecisions)
 		echo '<td class=tdcenter>' . getImageHREF ('COMMIT gray', 'cannot push due to version conflict(s)') . '</td>';
 	else
 	{
@@ -7194,13 +7197,24 @@ function renderObject8021QSync ($object_id)
 	echo '</table>';
 	finishPortlet();
 
-	startPortlet ('preview/resolve');
+	startPortlet ('preview legend');
 	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
-	echo '<tr valign=top><th rowspan=2>port</th><th>last&nbsp;saved&nbsp;version</th>';
+	echo '<tr><th>status</th><th width="50%">color code</th></tr>';
+	echo '<tr><td class=tdright>no action required:</td><td class=trbusy>&nbsp;</td></tr>';
+	echo '<tr><td class=tdright>port in default VLAN, no action required:</td><td>&nbsp;</td></tr>';
+	echo '<tr><td class=tdright>updated data, pending pull/push:</td><td class=trok>&nbsp;</td></tr>';
+	echo '<tr><td class=tdright>some or all remote changes will be discarded:</td><td class=trwarning>&nbsp;</td></tr>';
+	echo '<tr><td class=tdright>verson conflict, requires manual resolving:</td><td class=trerror>&nbsp;</td></tr>';
+	echo '</table>';
+	finishPortlet();
+
+	echo '</td><td class=pcright>';
+
+	startPortlet ('preview/resolve');
+	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable width="100%">';
 	if ($maxdecisions)
-		echo '<th colspan=3>winner</th>';
-	echo '<th>running&nbsp;version</th></tr>';
-	echo '<tr><th class=trwarning>(pending&nbsp;push)</th>';
+		echo '<tr><th colspan=2>&nbsp;</th><th colspan=3>winner</th><th>&nbsp;</th></tr>';
+	echo '<tr valign=top><th>port</th><th>last&nbsp;saved&nbsp;version</th>';
 	if ($maxdecisions)
 	{
 		printOpFormIntro ('resolve', array ('mutex_rev' => $vswitch['mutex_rev']));
@@ -7208,7 +7222,7 @@ function renderObject8021QSync ($object_id)
 			echo "<th class=trerror><input type=radio name=column_radio value=${pos} " .
 				"onclick=\"checkColumnOfRadios('i_', ${maxdecisions}, '_${pos}')\"></th>";
 	}
-	echo '<th class=trwarning>(pending&nbsp;pull)</th></tr>';
+	echo '<th>running&nbsp;version</th></tr>';
 	$rownum = 0;
 	uksort ($plan, 'sortTokenize');
 	$domvlans = array_keys (getDomainVLANs ($vswitch['domain_id']));
@@ -7328,6 +7342,8 @@ function renderObject8021QSync ($object_id)
 	echo '</table>';
 	echo '</form>';
 	finishPortlet();
+
+	echo '</td></tr></table>';
 }
 
 function renderVSTListEditor()

@@ -3388,7 +3388,7 @@ function get8021QSyncOptions
 		'native' => VLAN_DFL_ID,
 	);
 	$ret = array();
-	$allports = array()
+	$allports = array();
 	foreach (array_unique (array_merge (array_keys ($C), array_keys ($R))) as $pn)
 		$allports[$pn] = array();
 	foreach (apply8021QOrder ($vswitch['template_id'], $allports) as $pn => $port)
