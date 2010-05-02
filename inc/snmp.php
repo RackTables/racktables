@@ -218,6 +218,15 @@ $iftable_processors['procurve-chassis-1000T'] = array
 	'try_next_proc' => FALSE,
 );
 
+$iftable_processors['procurve-45-to-48-combo-1000SFP'] = array
+(
+	'pattern' => '@^(45|46|47|48)$@',
+	'replacement' => '\\1',
+	'dict_key' => '4-1077',
+	'label' => '\\1',
+	'try_next_proc' => TRUE,
+);
+
 $iftable_processors['procurve-modular-100TX'] = array
 (
 	'pattern' => '@^([A-Z][[:digit:]]+)$@',
@@ -571,6 +580,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'dict_key' => 1086,
 		'text' => 'J4121A: modular system',
 		'processors' => array ('procurve-modular-100TX'),
+	),
+	'11.2.3.7.11.87' => array
+	(
+		'dict_key' => 1349,
+		'text' => 'J9147A: 44 RJ-45/10-100-1000T(X) + 4 combo-gig)',
+		'processors' => array ('procurve-45-to-48-combo-1000SFP', 'procurve-chassis-1000T'),
 	),
 	'4526.100.2.2' => array
 	(
