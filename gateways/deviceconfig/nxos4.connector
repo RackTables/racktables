@@ -1,0 +1,68 @@
+#!/usr/bin/perl
+
+# a working NX-OS connector for RackTables by Dmitry Tejblum
+
+use strict;
+use File::FnMatch qw(:fnmatch);
+use Net::Telnet::Cisco;
+$#ARGV == 2 or die "usage";
+my $endpoint = shift @ARGV;
+my $command = shift @ARGV;
+my $workfile = shift @ARGV;
+
+$0 =~ m,^(.*)/[^/]+$,;
+my $mydir = $1;
+open(SECRETS, "<$mydir/switch.secrets.php") || die "switch.secrets.php: $!";
+my $skip = 1;
+my ($username, $password, $enable_password);
+while (<SECRETS>) {
+    chomp;
+    if ($skip && ($_ eq "# S-T-A-R-T")) {
+        $skip = 0;
+        next;
+    }
+    if (!$skip && ($_ eq "# S-T-O-P")) {
+        $skip = 1;
+        next;
+    }
+    next if ($skip);
+    next if m,^\s*(#.*)?$,;
+    my @f = split;
+    if (fnmatch($f[0], $endpoint)) {
+        $username = $f[4];
+        $password = $f[5];
+        $enable_password = $f[6];
+        last;
+    }
+}
+
+if (!defined($username)) {
+    exit(3);
+}
+
+my $session = Net::Telnet::Cisco->new('Host' => $endpoint, 
+  Prompt => ' /(?m:^\015?\000?[\w.-]+(?:\(config[^\)]*\))?\s?[\$#>]\s?)/'
+);
+$session->login($username, $password);
+if ($enable_password ne "-") {
+    $session->enable($enable_password);
+}
+if ($command eq "retrieve") {
+    open(WORKFILE, ">$workfile") || die "$workfile: $!";
+    $session->cmd ('terminal length 0');
+    $session->cmd ('terminal no monitor');
+    $session->cmd ('show running-config vlan 1-4094');
+    $session->cmd ('show running-config interface');
+    my @r = $session->cmd ('show running-config vlan 1-4094');
+    print WORKFILE @r;
+    @r = $session->cmd('show running-config interface');
+    print WORKFILE @r;
+    exit(0);
+}
+if ($command eq "deploy") {
+    open(WORKFILE, "<$workfile") || die "$workfile: $!";
+    while (<WORKFILE>) {
+        $session->put($_);
+    }
+    exit(0);
+}

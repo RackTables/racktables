@@ -2760,7 +2760,119 @@ function vrp53PickInterfaceSubcommand (&$work, $line)
 
 function nxos4Read8021QConfig ($input)
 {
-	return $input;
+	$ret = array
+	(
+		'vlanlist' => array(),
+		'portdata' => array(),
+	);
+	$procfunc = 'nxos4ScanTopLevel';
+	foreach (explode ("\n", $input) as $line)
+		$procfunc = $procfunc ($ret, $line);
+	return $ret;
+}
+
+function nxos4ScanTopLevel (&$work, $line)
+{
+	$matches = array();
+	switch (TRUE)
+	{
+	case (preg_match ('@^interface ((Ethernet)[[:digit:]]+(/[[:digit:]]+)*)$@', $line, $matches)):
+		$matches[1] = preg_replace ('@^Ethernet(.+)$@', 'e\\1', $matches[1]);
+		$work['current'] = array ('port_name' => $matches[1]);
+		return 'nxos4PickSwitchportCommand';
+	case (preg_match ('@^vlan ([[:digit:]]+)$@', $line, $matches)):
+		$work['vlanlist'][] = $matches[1];
+		return 'nxos4PickVLANs';
+	default:
+		return __FUNCTION__; // continue scan
+	}
+}
+
+function nxos4PickVLANs (&$work, $line)
+{
+	switch (TRUE)
+	{
+	case ($line == ''): // end of VLAN list
+		return 'nxos4ScanTopLevel';
+	case (preg_match ('@^vlan ([[:digit:]]+)$@', $line, $matches)):
+		$work['vlanlist'][] = $matches[1];
+	default: // VLAN name or any other text
+		return __FUNCTION__;
+	}
+}
+
+function nxos4PickSwitchportCommand (&$work, $line)
+{
+	if ($line == '') // end of interface section
+	{
+		// fill in defaults
+		// below assumes "system default switchport" mode set on the device
+		if (!array_key_exists ('mode', $work['current']))
+			$work['current']['mode'] = 'access';
+		// save work, if it makes sense
+		switch ($work['current']['mode'])
+		{
+		case 'access':
+			if (!array_key_exists ('access vlan', $work['current']))
+				$work['current']['access vlan'] = 1;
+			$work['portdata'][$work['current']['port_name']] = array
+			(
+				'mode' => 'access',
+				'allowed' => array ($work['current']['access vlan']),
+				'native' => $work['current']['access vlan'],
+			);
+			break;
+		case 'trunk':
+			if (!array_key_exists ('trunk native vlan', $work['current']))
+				$work['current']['trunk native vlan'] = 1;
+			if (!array_key_exists ('trunk allowed vlan', $work['current']))
+				$work['current']['trunk allowed vlan'] = range (VLAN_MIN_ID, VLAN_MAX_ID);
+			// Having configured VLAN as "native" doesn't mean anything
+			// as long as it's not listed on the "allowed" line.
+			$effective_native = in_array
+			(
+				$work['current']['trunk native vlan'],
+				$work['current']['trunk allowed vlan']
+			) ? $work['current']['trunk native vlan'] : 0;
+			$work['portdata'][$work['current']['port_name']] = array
+			(
+				'mode' => 'trunk',
+				'allowed' => $work['current']['trunk allowed vlan'],
+				'native' => $effective_native,
+			);
+			break;
+		default:
+			// dot1q-tunnel, dynamic, private-vlan --- skip these
+		}
+		unset ($work['current']);
+		return 'nxos4ScanTopLevel';
+	}
+	// not yet
+	$matches = array();
+	switch (TRUE)
+	{
+	case (preg_match ('@^  switchport mode (.+)$@', $line, $matches)):
+		$work['current']['mode'] = $matches[1];
+		break;
+	case (preg_match ('@^  switchport access vlan (.+)$@', $line, $matches)):
+		$work['current']['access vlan'] = $matches[1];
+		break;
+	case (preg_match ('@^  switchport trunk native vlan (.+)$@', $line, $matches)):
+		$work['current']['trunk native vlan'] = $matches[1];
+		break;
+	case (preg_match ('@^  switchport trunk allowed vlan add (.+)$@', $line, $matches)):
+		$work['current']['trunk allowed vlan'] = array_merge
+		(
+			$work['current']['trunk allowed vlan'],
+			iosParseVLANString ($matches[1])
+		);
+		break;
+	case (preg_match ('@^  switchport trunk allowed vlan (.+)$@', $line, $matches)):
+		$work['current']['trunk allowed vlan'] = iosParseVLANString ($matches[1]);
+		break;
+	default: // suppress warning on irrelevant config clause
+	}
+	return __FUNCTION__;
 }
 
 // Scan given array and return the key, which addresses the first item
