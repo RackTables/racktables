@@ -1367,6 +1367,7 @@ $dictionary = array
 	1346 => array ('chapter_id' => 12, 'dict_value' => 'Huawei%GPASS%Quidway S5348TP-PWR-SI'),
 	1347 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 2960G-24PC'),
 	1348 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 2350-48TD'),
+	1349 => array ('chapter_id' => 12, 'dict_value' => '[[HP ProCurve%GPASS%2910al-48G | http://h10010.www1.hp.com/wwpc/uk/en/sm/WF06b/12883-12883-3445275-427605-427605-3901671-3901675.html]]'),
 );
 
 ?>
