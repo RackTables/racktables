@@ -2064,7 +2064,7 @@ function add8021QOrder ()
 	assertUIntArg ('vdom_id');
 	assertUIntArg ('object_id');
 	assertUIntArg ('vst_id');
-	global $sic;
+	global $sic, $dbxlink;
 	$result = usePreparedInsertBlade
 	(
 		'VLANSwitch',
@@ -2075,6 +2075,8 @@ function add8021QOrder ()
 			'template_id' => $sic['vst_id'],
 		)
 	);
+	$query = $dbxlink->prepare ('UPDATE VLANSwitch SET last_change = NOW(), out_of_sync = "yes" WHERE object_id = ?');
+	$query->execute (array ($sic['object_id']));
 	return buildRedirectURL (__FUNCTION__, $result ? 'OK' : 'ERR');
 }
 
