@@ -2213,13 +2213,10 @@ function renderIPv4SpaceEditor ()
 		startPortlet ('Manage existing (' . count ($addrspaceList) . ')');
 		echo "<table class='widetable' border=0 cellpadding=5 cellspacing=0 align='center'>\n";
 		echo "<tr><th>&nbsp;</th><th>prefix</th><th>name</th><th>capacity</th></tr>";
-		if (getConfigVar ('IPV4_JAYWALK') != 'yes')
-		{
-			array_walk ($addrspaceList, 'amplifyCell');
-			$tree = prepareIPv4Tree ($addrspaceList, 'ALL');
-			// this is only called for having "trace" set
-			treeFromList ($addrspaceList);
-		}
+		array_walk ($addrspaceList, 'amplifyCell');
+		$tree = prepareIPv4Tree ($addrspaceList, 'ALL');
+		// this is only called for having "trace" set
+		treeFromList ($addrspaceList);
 		foreach ($addrspaceList as $netinfo)
 		{
 			$netinfo = peekNode ($tree, $netinfo['trace'], $netinfo['id']);
