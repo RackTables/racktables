@@ -3632,16 +3632,17 @@ function exec8021QDeploy ($object_id, $do_push)
 			break;
 		}
 	}
+	// redo uplinks unconditionally
+	$domain_vlanlist = getDomainVLANs ($vswitch['domain_id']);
+	$Dnew = apply8021QOrder ($vswitch['template_id'], getStored8021QConfig ($vswitch['object_id'], 'desired'));
+	$new_uplinks = array();
+	foreach (produceUplinkPorts ($domain_vlanlist, $Dnew) as $port_name => $port)
+		$new_uplinks[$port_name] = $port;
+	$nsaved += replace8021QPorts ('desired', $vswitch['object_id'], $Dnew, $new_uplinks);
 	if ($nsaved)
 	{
-		// redo uplinks
-		$domain_vlanlist = getDomainVLANs ($vswitch['domain_id']);
-		$Dnew = apply8021QOrder ($vswitch['template_id'], getStored8021QConfig ($vswitch['object_id'], 'desired'));
-		foreach (produceUplinkPorts ($domain_vlanlist, $Dnew) as $port_name => $port)
-			$new_uplinks[$port_name] = $port;
-		$nsaved += replace8021QPorts ('desired', $vswitch['object_id'], $Dnew, $new_uplinks);
-		// even if uplinks got no updates, being here means, that configuration
-		// has changed, so bump revision number up
+		// saved configuration has changed (either "user" ports have changed,
+		// or uplinks, or both), so bump revision number up)
 		$prepared = $dbxlink->prepare ('UPDATE VLANSwitch SET mutex_rev = mutex_rev + 1, last_change = NOW(), out_of_sync = "yes" WHERE object_id = ?');
 		$prepared->execute (array ($vswitch['object_id']));
 	}
