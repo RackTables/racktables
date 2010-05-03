@@ -4998,7 +4998,14 @@ function printTagTRs ($cell, $baseurl = '')
 function renderCellFilterPortlet ($preselect, $realm, $bypass_name = '', $bypass_value = '')
 {
 	global $pageno, $tabno, $taglist, $tagtree;
-	startPortlet ('filter');
+	$filterc =
+	(
+		count ($preselect['tagidlist']) +
+		count ($preselect['pnamelist']) +
+		(mb_strlen ($preselect['extratext']) ? 1 : 0)
+	);
+	$title = $filterc ? "filters (${filterc})" : 'filters';
+	startPortlet ($title);
 	echo "<form method=get>\n";
 	echo '<table border=0 align=center>';
 	$ruler = "<tr><td colspan=2 class=tagbox><hr></td></tr>\n";
