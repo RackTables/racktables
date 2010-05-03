@@ -4956,7 +4956,14 @@ function printTagTRs ($cell, $baseurl = '')
 function renderCellFilterPortlet ($preselect, $realm, $bypass_name = '', $bypass_value = '')
 {
 	global $pageno, $tabno, $taglist, $tagtree;
-	startPortlet ('filter');
+	$filterc =
+	(
+		count ($preselect['tagidlist']) +
+		count ($preselect['pnamelist']) +
+		(mb_strlen ($preselect['extratext']) ? 1 : 0)
+	);
+	$title = $filterc ? "filters (${filterc})" : 'filters';
+	startPortlet ($title);
 	echo "<form method=get>\n";
 	echo '<table border=0 align=center>';
 	$ruler = "<tr><td colspan=2 class=tagbox><hr></td></tr>\n";
@@ -5065,6 +5072,8 @@ function renderCellFilterPortlet ($preselect, $realm, $bypass_name = '', $bypass
 			echo "<form method=get>\n";
 			echo "<input type=hidden name=page value=${pageno}>\n";
 			echo "<input type=hidden name=tab value=${tabno}>\n";
+			echo "<input type=hidden name='cft[]' value=''>\n";
+			echo "<input type=hidden name='cfe' value=''>\n";
 			if ($bypass_name != '')
 				echo "<input type=hidden name=${bypass_name} value='${bypass_value}'>\n";
 			printImageHREF ('resetfilter', 'reset filter', TRUE);
