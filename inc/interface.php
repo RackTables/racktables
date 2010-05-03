@@ -6673,7 +6673,7 @@ function renderVLANDomain ($vdom_id)
 		echo '<table class=cooltable align=center border=0 cellpadding=5 cellspacing=0>';
 		echo '<tr><th>VLAN ID</th><th>propagation</th><th>';
 		printImageHREF ('net');
-		echo '</th><th>description</th></tr>';
+		echo '</th><th>ports</th><th>description</th></tr>';
 		foreach ($myvlans as $vlan_id => $vlan_info)
 		{
 			echo "<tr class=row_${order}><td class=tdright><a href='";
@@ -6681,6 +6681,7 @@ function renderVLANDomain ($vdom_id)
 			echo "'>${vlan_id}</a></td>";
 			echo '<td>' . $vtdecoder[$vlan_info['vlan_type']] . '</td>';
 			echo '<td>' . ($vlan_info['netc'] ? $vlan_info['netc'] : '&nbsp;') . '</td>';
+			echo '<td>' . ($vlan_info['portc'] ? $vlan_info['portc'] : '&nbsp;') . '</td>';
 			echo "<td class=tdleft>${vlan_info['vlan_descr']}</td></tr>";
 			$order = $nextorder[$order];
 		}
@@ -6716,10 +6717,16 @@ function renderVLANDomainVLANList ($vdom_id)
 	foreach (getDomainVLANs ($vdom_id) as $vlan_id => $vlan_info)
 	{
 		printOpFormIntro ('upd', array ('vlan_id' => $vlan_id));
-		echo '<tr><td><a href="';
-		echo makeHrefProcess (array ('op' => 'del', 'vdom_id' => $vdom_id, 'vlan_id' => $vlan_id)) . '">';
-		printImageHREF ('destroy', 'delete VLAN');
-		echo '</a></td><td class=tdright><tt>' . $vlan_id . '</tt></td><td>';
+		echo '<tr><td>';
+		if ($vlan_info['portc'])
+			printImageHREF ('nodestroy', $vlan_info['portc'] . ' ports configured');
+		else
+		{
+			echo '<a href="';
+			echo makeHrefProcess (array ('op' => 'del', 'vdom_id' => $vdom_id, 'vlan_id' => $vlan_id)) . '">';
+			echo getImageHREF ('destroy', 'delete VLAN') . '</a>';
+		}
+		echo '</td><td class=tdright><tt>' . $vlan_id . '</tt></td><td>';
 		printSelect ($vtoptions, array ('name' => 'vlan_type'), $vlan_info['vlan_type']);
 		echo '</td><td>';
 		echo '<input name=vlan_descr type=text value="' . htmlspecialchars ($vlan_info['vlan_descr']) . '">';
@@ -6994,11 +7001,11 @@ function renderVLANInfo ($vlan_ck)
 	echo "<tr><th width='50%' class=tdright>Propagation:</th><td class=tdleft>" . $vtoptions[$vlan['vlan_prop']] . "</td></tr>";
 	echo '</table>';
 	finishPortlet();
-	startPortlet ('networks');
 	if (!count ($vlan['ipv4nets']))
-		echo '(none)';
+		startPortlet ('no networks');
 	else
 	{
+		startPortlet ('networks (' . count ($vlan['ipv4nets']) . ')');
 		$order = 'odd';
 		echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
 		echo '<tr><th>';
@@ -7020,11 +7027,11 @@ function renderVLANInfo ($vlan_ck)
 	}
 	finishPortlet();
 	echo '</td><td class=pcright>';
-	startPortlet ('ports');
 	if (!count ($confports = getVLANConfiguredPorts ($vlan_ck)))
-		echo '(none)';
+		startPortlet ('no ports');
 	else
 	{
+		startPortlet ('ports (' . count ($confports) . ')');
 		global $nextorder;
 		$order = 'odd';
 		echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';

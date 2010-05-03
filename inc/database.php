@@ -3606,11 +3606,13 @@ function getDomainVLANs ($vdom_id)
 	global $dbxlink;
 	$query = $dbxlink->prepare
 	(
-		'SELECT VLANDescription.vlan_id, vlan_type, COUNT(ipv4net_id) AS netc, vlan_descr ' .
-		'FROM VLANDescription LEFT JOIN VLANIPv4 ON VLANDescription.domain_id = VLANIPv4.domain_id AND VLANDescription.vlan_id = VLANIPv4.vlan_id ' .
-		'WHERE VLANDescription.domain_id = ? ' .
-		'GROUP BY VLANDescription.domain_id, VLANDescription.vlan_id ' .
-		'ORDER BY VLANDescription.vlan_id'
+		'SELECT vlan_id, vlan_type, vlan_descr, ' .
+		'(SELECT COUNT(*) FROM VLANIPv4 WHERE domain_id = VD.domain_id AND vlan_id = VD.vlan_id) AS netc, ' .
+		'(SELECT COUNT(port_name) AS portc FROM VLANSwitch AS VS INNER JOIN PortAllowedVLAN AS PAV ' .
+		'ON VS.object_id = PAV.object_id WHERE domain_id = VD.domain_id AND PAV.vlan_id = VD.vlan_id GROUP BY PAV.vlan_id) AS portc ' .
+		'FROM VLANDescription AS VD ' .
+		'WHERE domain_id = ? ' .
+		'ORDER BY vlan_id'
 	);
 	$result = $query->execute (array ($vdom_id));
 	$ret = array();
