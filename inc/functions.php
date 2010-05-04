@@ -3098,10 +3098,11 @@ function reshapeVLANFilter ($role, $string)
 		break;
 	case 'trunk': // 2-4094
 	case 'uplink':
+	case 'downlink':
 		$min = VLAN_MIN_ID + 1;
 		$max = VLAN_MAX_ID;
 		break;
-	case 'downlink': // none
+	default: // none
 		return array();
 	}
 	if ($string == '')
