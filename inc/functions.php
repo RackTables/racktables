@@ -3716,4 +3716,45 @@ function strerror8021Q ($errno)
 	}
 }
 
+function saveDownlinksReverb ($object_id, $requested_changes)
+{
+	$nsaved = 0;
+	global $dbxlink;
+	$dbxlink->beginTransaction();
+	if (NULL === $vswitch = getVLANSwitchInfo ($object_id, 'FOR UPDATE'))
+		throw new InvalidArgException ('object_id', $object_id, 'VLAN domain is not set for this object');
+	$domain_vlanlist = getDomainVLANs ($vswitch['domain_id']);
+	// aplly VST to the smallest set necessary
+	$requested_changes = apply8021QOrder ($vswitch['template_id'], $requested_changes);
+	$before = getStored8021QConfig ($object_id, 'desired');
+	$changes_to_save = array();
+	// first filter by wrt_vlans constraint
+	foreach ($requested_changes as $pn => $requested)
+		if (array_key_exists ($pn, $before) and $requested['vst_role'] == 'downlink')
+		{
+			$negotiated = array
+			(
+				'vst_role' => 'downlink',
+				'mode' => 'trunk',
+				'allowed' => array(),
+				'native' => 0,
+			);
+			// wrt_vlans filter
+			foreach ($requested['allowed'] as $vlan_id)
+				if (in_array ($vlan_id, $requested['wrt_vlans']))
+					$negotiated['allowed'][] = $vlan_id;
+			$changes_to_save[$pn] = $negotiated;
+		}
+	// immune VLANs filter
+	foreach (filter8021QChangeRequests ($domain_vlanlist, $before, $changes_to_save) as $pn => $finalconfig)
+		if (!same8021QConfigs ($finalconfig, $before[$pn]))
+			$nsaved += upd8021QPort ('desired', $vswitch['object_id'], $pn, $finalconfig);
+	if ($nsaved)
+	{
+		$prepared = $dbxlink->prepare ('UPDATE VLANSwitch SET mutex_rev = mutex_rev + 1, last_change = NOW(), out_of_sync = "yes" WHERE object_id = ?');
+		$prepared->execute (array ($vswitch['object_id']));
+	}
+	$dbxlink->commit();
+}
+
 ?>
