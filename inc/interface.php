@@ -6830,7 +6830,6 @@ function renderObject8021QPorts ($object_id)
 			}
 			$text_right = "<input type=hidden name=pn_${nports} value=${port_name}>";
 			$text_right .= "<input type=hidden name=pm_${nports} value=access>";
-			$wrt_vlans = iosParseVLANString ($port['wrt_vlans']);
 			$options = array();
 			// Offer only options, which are listed in domain and fit into VST.
 			// Never offer immune VLANs regardless of VST filter for this port.
@@ -6839,7 +6838,7 @@ function renderObject8021QPorts ($object_id)
 				(
 					$vlan_id != $port['native'] and
 					$vlan_info['vlan_type'] != 'alien' and
-					(!count ($wrt_vlans) or in_array ($vlan_id, $wrt_vlans))
+					matchVLANFilter ($vlan_id, $port['wrt_vlans'])
 				)
 					$options[$vlan_id] = formatVLANName ($vlan_info, TRUE);
 			ksort ($options);

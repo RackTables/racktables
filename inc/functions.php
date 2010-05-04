@@ -3080,7 +3080,7 @@ function apply8021QOrder ($vst_id, $portlist)
 			if (preg_match ($rule['port_pcre'], $port_name))
 			{
 				$portlist[$port_name]['vst_role'] = $rule['port_role'];
-				$portlist[$port_name]['wrt_vlans'] = reshapeVLANFilter ($rule['port_role'], $rule['wrt_vlans']);
+				$portlist[$port_name]['wrt_vlans'] = buildVLANFilter ($rule['port_role'], $rule['wrt_vlans']);
 				continue 2;
 			}
 		$portlist[$port_name]['vst_role'] = 'none';
@@ -3088,8 +3088,10 @@ function apply8021QOrder ($vst_id, $portlist)
 	return $portlist;
 }
 
-function reshapeVLANFilter ($role, $string)
+// return a sequence of ranges for given string form and port role
+function buildVLANFilter ($role, $string)
 {
+	// set base
 	switch ($role)
 	{
 	case 'access': // 1-4094
@@ -3105,14 +3107,38 @@ function reshapeVLANFilter ($role, $string)
 	default: // none
 		return array();
 	}
-	if ($string == '')
-		return range ($min, $max);
-	$ret = array();
+	if ($string == '') // fast track
+		return array (array ('from' => $min, 'to' => $max));
+	// transform
+	$vlanidlist = array();
 	foreach (iosParseVLANString ($string) as $vlan_id)
 		if ($min <= $vlan_id and $vlan_id <= $max)
-			$ret[] = $vlan_id;
-	sort ($ret);
+			$vlanidlist[] = $vlan_id;
+	sort ($vlanidlist);
+	$ret = array();
+	$from = $to = NULL;
+	foreach ($vlanidlist as $vlan_id)
+		if ($from == NULL)
+			$from = $to = $vlan_id;
+		elseif ($to + 1 == $vlan_id)
+			$to = $vlan_id;
+		else
+		{
+			$ret[] = array ('from' => $from, 'to' => $to);
+			$from = $to = $vlan_id;
+		}
+	if ($from != NULL)
+		$ret[] = array ('from' => $from, 'to' => $to);
 	return $ret;
+}
+
+// return TRUE, if given VLAN ID belongs to one of filter's ranges
+function matchVLANFilter ($vlan_id, $vfilter)
+{
+	foreach ($vfilter as $range)
+		if ($range['from'] <= $vlan_id and $vlan_id <= $range['to'])
+			return TRUE;
+	return FALSE;
 }
 
 function exportSwitch8021QConfig
@@ -3427,7 +3453,7 @@ function produceUplinkPorts ($domain_vlanlist, $portlist)
 		{
 			$employed_here = array();
 			foreach ($employed as $vlan_id)
-				if (in_array ($vlan_id, $port['wrt_vlans']))
+				if (matchVLANFilter ($vlan_id, $port['wrt_vlans']))
 					$employed_here[] = $vlan_id;
 			$ret[$port_name] = array
 			(
@@ -3749,7 +3775,7 @@ function saveDownlinksReverb ($object_id, $requested_changes)
 			);
 			// wrt_vlans filter
 			foreach ($requested['allowed'] as $vlan_id)
-				if (in_array ($vlan_id, $requested['wrt_vlans']))
+				if (matchVLANFilter ($vlan_id, $requested['wrt_vlans']))
 					$negotiated['allowed'][] = $vlan_id;
 			$changes_to_save[$pn] = $negotiated;
 		}
