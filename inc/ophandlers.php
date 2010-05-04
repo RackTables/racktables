@@ -2243,22 +2243,24 @@ function save8021QPorts ()
 		);
 		foreach ($changes as $port_name => $port)
 			$after[$port_name] = $port;
-		foreach (filter8021QChangeRequests ($domain_vlanlist, $after, produceUplinkPorts ($domain_vlanlist, $after)) as $port_name => $port)
-			$changes[$port_name] = $port;
+		$new_uplinks = filter8021QChangeRequests ($domain_vlanlist, $after, produceUplinkPorts ($domain_vlanlist, $after));
 		$npulled = replace8021QPorts ('desired', $vswitch['object_id'], $before, $changes);
+		$nsaved_uplinks = replace8021QPorts ('desired', $vswitch['object_id'], $before, $new_uplinks);
 	}
 	catch (Exception $e)
 	{
 		$dbxlink->rollBack();
 		return buildRedirectURL (__FUNCTION__, 'ERR2', array(), NULL, NULL, $extra);
 	}
-	if ($npulled)
+	if ($npulled + $nsaved_uplinks)
 	{
 		$query = $dbxlink->prepare ('UPDATE VLANSwitch SET mutex_rev = mutex_rev + 1, last_change = NOW(), out_of_sync = "yes" WHERE object_id = ?');
 		$query->execute (array ($sic['object_id']));
 	}
 	$dbxlink->commit();
-	return buildRedirectURL (__FUNCTION__, 'OK', array ($npulled), NULL, NULL, $extra);
+	if ($nsaved_uplinks)
+		initiateUplinksReverb ($vswitch['object_id'], $new_uplinks);
+	return buildRedirectURL (__FUNCTION__, 'OK', array ($npulled + $nsaved_uplinks), NULL, NULL, $extra);
 }
 
 $msgcode['bindVLANtoIPv4']['OK'] = 48;

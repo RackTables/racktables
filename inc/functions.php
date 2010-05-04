@@ -3588,7 +3588,7 @@ function get8021QSyncOptions
 function exec8021QDeploy ($object_id, $do_push)
 {
 	global $dbxlink;
-	$nsaved = $npushed = 0;
+	$nsaved = $npushed = $nsaved_uplinks = 0;
 	$dbxlink->beginTransaction();
 	if (NULL === $vswitch = getVLANSwitchInfo ($object_id, 'FOR UPDATE'))
 		throw new InvalidArgException ('object_id', $object_id, 'VLAN domain is not set for this object');
@@ -3645,8 +3645,8 @@ function exec8021QDeploy ($object_id, $do_push)
 	// from it. Then cancel changes to immune VLANs and save resulting
 	// changes (if any left).
 	$new_uplinks = filter8021QChangeRequests ($domain_vlanlist, $Dnew, produceUplinkPorts ($domain_vlanlist, $Dnew));
-	$nsaved += replace8021QPorts ('desired', $vswitch['object_id'], $Dnew, $new_uplinks);
-	if ($nsaved)
+	$nsaved_uplinks += replace8021QPorts ('desired', $vswitch['object_id'], $Dnew, $new_uplinks);
+	if ($nsaved + $nsaved_uplinks)
 	{
 		// saved configuration has changed (either "user" ports have changed,
 		// or uplinks, or both), so bump revision number up)
@@ -3679,7 +3679,11 @@ function exec8021QDeploy ($object_id, $do_push)
 	// FIXME: always leave 'out_of_sync' set to actual value regardless of amount
 	// of work performed
 	$dbxlink->commit();
-	return $nsaved + $npushed;
+	// start downlink work only after unlocking current object to make deadlocks less likely to happen
+	// TODO: only process changed uplink ports
+	if ($nsaved_uplinks)
+		initiateUplinksReverb ($vswitch['object_id'], $new_uplinks);
+	return $nsaved + $npushed + $nsaved_uplinks;
 }
 
 // print part of HTML HEAD block
@@ -3721,8 +3725,11 @@ function saveDownlinksReverb ($object_id, $requested_changes)
 	$nsaved = 0;
 	global $dbxlink;
 	$dbxlink->beginTransaction();
-	if (NULL === $vswitch = getVLANSwitchInfo ($object_id, 'FOR UPDATE'))
-		throw new InvalidArgException ('object_id', $object_id, 'VLAN domain is not set for this object');
+	if (NULL === $vswitch = getVLANSwitchInfo ($object_id, 'FOR UPDATE')) // not configured, bail out
+	{
+		$dbxlink->rollBack();
+		return;
+	}
 	$domain_vlanlist = getDomainVLANs ($vswitch['domain_id']);
 	// aplly VST to the smallest set necessary
 	$requested_changes = apply8021QOrder ($vswitch['template_id'], $requested_changes);
@@ -3755,6 +3762,33 @@ function saveDownlinksReverb ($object_id, $requested_changes)
 		$prepared->execute (array ($vswitch['object_id']));
 	}
 	$dbxlink->commit();
+}
+
+// Use records from Port and Link tables to run a series of tasks on remote
+// objects. These device-specific tasks will adjust downlink ports according to
+// the current configuration of given uplink ports.
+function initiateUplinksReverb ($object_id, $uplink_ports)
+{
+	$object = spotEntity ('object', $object_id);
+	amplifyCell ($object);
+	// Filter and regroup all requests (regardless of how many will succeed)
+	// to end up with no more, than one execution per remote object.
+	$upstream_config = array();
+	foreach ($object['ports'] as $portinfo)
+		if
+		(
+			array_key_exists ($portinfo['name'], $uplink_ports) and
+			$portinfo['remote_object_id'] != '' and
+			$portinfo['remote_name'] != ''
+		)
+			$upstream_config[$portinfo['remote_object_id']][$portinfo['remote_name']] = $uplink_ports[$portinfo['name']];
+	// Note that when current object has several Port records inder same name
+	// (but with unique IIF-OIF pair), these ports can be Link'ed to different
+	// remote objects (using different media types, perhaps). Such a case can
+	// be considered as normal, and each remote object will show up on the
+	// task list (with its actual remote port name, of course).
+	foreach ($upstream_config as $remote_object_id => $remote_ports)
+		saveDownlinksReverb ($remote_object_id, $remote_ports);
 }
 
 ?>
