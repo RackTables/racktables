@@ -47,6 +47,15 @@ $iftable_processors['catalyst-chassis-uplinks-1000T'] = array
 	'try_next_proc' => FALSE,
 );
 
+$iftable_processors['catalyst-chassis-uplinks-1000SX'] = array
+(
+	'pattern' => '@^GigabitEthernet([[:digit:]]+/)?([[:digit:]]+)$@',
+	'replacement' => 'gi\\1\\2',
+	'dict_key' => '1-1202', // Gig-SX hardwired
+	'label' => '\\2',
+	'try_next_proc' => FALSE,
+);
+
 $iftable_processors['catalyst-chassis-any-1000SFP'] = array
 (
 	'pattern' => '@^GigabitEthernet([[:digit:]]+/)?([[:digit:]]+)$@',
@@ -520,6 +529,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'dict_key' => 387,
 		'text' => 'WS-C2950T-48: 48 RJ-45/10-100TX + 2 RJ-45/10-100-1000T(X)',
 		'processors' => array ('catalyst-chassis-uplinks-1000T', 'catalyst-chassis-any-100TX'),
+	),
+	'9.1.560' => array
+	(
+		'dict_key' => 384,
+		'text' => 'WS-C2950SX-48: 48 RJ-45/10-100TX + 2 1000Base-SX',
+		'processors' => array ('catalyst-chassis-uplinks-1000SX', 'catalyst-chassis-any-100TX'),
 	),
 	'9.1.749' => array
 	(
