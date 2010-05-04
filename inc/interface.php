@@ -6756,7 +6756,7 @@ function renderObject8021QPorts ($object_id)
 	$req_port_name = array_key_exists ('port_name', $sic) ? $sic['port_name'] : '';
 	$desired_config = apply8021QOrder ($vswitch['template_id'], getStored8021QConfig ($object_id, 'desired'));
 	uksort ($desired_config, 'sortTokenize');
-	$uplinks = produceUplinkPorts ($vdom['vlanlist'], $desired_config);
+	$uplinks = filter8021QChangeRequests ($vdom['vlanlist'], $desired_config, produceUplinkPorts ($vdom['vlanlist'], $desired_config));
 	echo '<table border=0 width="100%"><tr valign=top><td class=tdleft width="30%">';
 	// port list
 	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';

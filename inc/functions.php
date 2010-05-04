@@ -3354,20 +3354,17 @@ function filter8021QChangeRequests
 	$ret = array();
 	foreach ($changes as $port_name => $port)
 	{
-		
-		if ($port['mode'] != $port['vst_role']) // VST violation
-			continue;
 		// find and cancel any changes regarding immune VLANs
-		foreach ($domain_immune_vlans as $immune)
-			switch ($port['mode'])
-			{
-			case 'access':
+		switch ($port['vst_role'])
+		{
+		case 'access':
+			if ($port['mode'] != 'access') // VST violation
+				continue 2; // ignore change request
+			foreach ($domain_immune_vlans as $immune)
 				// Reverting an attempt to set an access port from
 				// "normal" VLAN to immune one (or vice versa) requires
 				// special handling, becase the calling function has
 				// discarded the old contents of 'allowed' for current port.
-				// Such reversal happens either once or never for an
-				// access port.
 				if
 				(
 					$before[$port_name]['native'] == $immune or
@@ -3376,10 +3373,17 @@ function filter8021QChangeRequests
 				{
 					$port['native'] = $before[$port_name]['native'];
 					$port['allowed'] = array ($port['native']);
-					break 2;
+					// Such reversal happens either once or never for an
+					// access port.
+					break;
 				}
-				break;
-			case 'trunk':
+			break;
+		case 'trunk':
+		case 'uplink':
+		case 'downlink':
+			if ($port['mode'] != 'trunk')
+				continue 2;
+			foreach ($domain_immune_vlans as $immune)
 				if (in_array ($immune, $before[$port_name]['allowed'])) // was allowed before
 				{
 					if (!in_array ($immune, $port['allowed']))
@@ -3394,10 +3398,11 @@ function filter8021QChangeRequests
 					if ($port['native'] == $immune)
 						$port['native'] = $before[$port_name]['native'];
 				}
-				break;
-			default:
-				continue 2; // ignore port
-			}
+			break;
+		default:
+			continue 2;
+		}
+		// save work
 		$ret[$port_name] = $port;
 	}
 	return $ret;
@@ -3425,6 +3430,7 @@ function produceUplinkPorts ($domain_vlanlist, $portlist)
 					$employed_here[] = $vlan_id;
 			$ret[$port_name] = array
 			(
+				'vst_role' => 'uplink',
 				'mode' => 'trunk',
 				'allowed' => $employed_here,
 				'native' => 0,
@@ -3635,9 +3641,10 @@ function exec8021QDeploy ($object_id, $do_push)
 	// redo uplinks unconditionally
 	$domain_vlanlist = getDomainVLANs ($vswitch['domain_id']);
 	$Dnew = apply8021QOrder ($vswitch['template_id'], getStored8021QConfig ($vswitch['object_id'], 'desired'));
-	$new_uplinks = array();
-	foreach (produceUplinkPorts ($domain_vlanlist, $Dnew) as $port_name => $port)
-		$new_uplinks[$port_name] = $port;
+	// Take new "desired" configuration and derive uplink port configuration
+	// from it. Then cancel changes to immune VLANs and save resulting
+	// changes (if any left).
+	$new_uplinks = filter8021QChangeRequests ($domain_vlanlist, $Dnew, produceUplinkPorts ($domain_vlanlist, $Dnew));
 	$nsaved += replace8021QPorts ('desired', $vswitch['object_id'], $Dnew, $new_uplinks);
 	if ($nsaved)
 	{
