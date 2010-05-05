@@ -3205,7 +3205,7 @@ function exportSwitch8021QConfig
 			}
 	// 3
 	foreach ($changes as $port)
-		foreach ($port['new_allowed'] as $vlan_id)
+		foreach ($port['allowed'] as $vlan_id)
 			if
 			(
 				$domain_vlanlist[$vlan_id]['vlan_type'] == 'ondemand' and
