@@ -1,4 +1,4 @@
-0.17.10
+0.17.10 2010-05-05
 	update: make object form messages consistent (by Tyler J. Wagner)
 	update: sort object ports in a more reasonable manner
 	update: enable class methods as handlers (by James Tutton)

@@ -397,7 +397,7 @@ INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdef
 ('IPV4_TREE_SHOW_VLAN','yes','string','no','no','yes','Show VLAN for each network in IPv4 tree'),
 ('DEFAULT_VDOM_ID','','uint','yes','no','yes','Default VLAN domain ID'),
 ('DEFAULT_VST_ID','','uint','yes','no','yes','Default VLAN switch template ID'),
-('DB_VERSION','0.17.9','string','no','yes','no','Database version.'),
+('DB_VERSION','0.17.10','string','no','yes','no','Database version.'),
 ('STATIC_FILTER','yes','string','no','no','yes','Enable Filter Caching');
 
 INSERT INTO `Script` VALUES ('RackCode','allow {$userid_1}');
