@@ -3689,7 +3689,13 @@ function exec8021QDeploy ($object_id, $do_push)
 	{
 		$prepared = $dbxlink->prepare ("UPDATE VLANSwitch SET last_errno = ?, last_error_ts = NOW() WHERE object_id = ?");
 		$prepared->execute (array (E_8021Q_NOERROR, $vswitch['object_id']));
-		if (!count ($ok_to_push))
+		// Modified uplinks are very likely to differ from those in R-copy,
+		// so don't mark device as clean, if this happened. This can cost
+		// us an additional, empty round of sync, but at least out_of_sync
+		// won't be mistakenly set to 'no'.
+		// FIXME: A cleaner way of coupling pull and push operations would
+		// be to split this function into two.
+		if (!count ($ok_to_push) and !$nsaved_uplinks)
 		{
 			$prepared = $dbxlink->prepare ("UPDATE VLANSwitch SET out_of_sync = 'no' WHERE object_id = ?");
 			$prepared->execute (array ($vswitch['object_id']));
