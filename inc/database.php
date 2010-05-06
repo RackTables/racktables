@@ -3952,15 +3952,33 @@ function commitUpdateVSTRule ($vst_id, $rule_no, $new_rule_no, $port_pcre, $port
 	return $prepared->execute (array ($new_rule_no, $port_pcre, $port_role, $wrt_vlans, $vst_id, $rule_no));
 }
 
-function get8021QDeployPlan()
+function get8021QDeployQueues()
 {
-	$ret = array();
-	$query = 'SELECT object_id, NOW() - last_change AS age ' .
-		'FROM VLANSwitch WHERE out_of_sync = "yes" and last_errno = 0 ' .
+	$ret = array
+	(
+		'aging' => array(),
+		'sync' => array(),
+		'resync' => array(),
+		'failed' => array(),
+	);
+	$query = 'SELECT object_id, NOW() - last_change AS age, last_errno, last_error_ts ' .
+		'FROM VLANSwitch WHERE out_of_sync = "yes" ' .
 		'ORDER BY age DESC';
 	$result = usePreparedSelectBlade ($query);
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-		$ret[] = $row;
+		switch ($row['last_errno'])
+		{
+		case E_8021Q_NOERROR:
+			$ret[$row['age'] < 300 ? 'aging' : 'sync'][] = $row;
+			break;
+		case E_8021Q_VERSION_CONFLICT:
+			$ret['resync'][] = $row;
+			break;
+		case E_8021Q_PULL_REMOTE_ERROR:
+		case E_8021Q_PUSH_REMOTE_ERROR:
+			$ret['failed'][] = $row;
+			break;
+		}
 	return $ret;
 }
 

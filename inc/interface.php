@@ -6577,26 +6577,21 @@ function render8021QStatus ()
 
 	echo '</td><td class=pcright>';
 
-	if (!count ($dplan = get8021QDeployPlan()))
-		startPortlet ('deploy plan is empty');
-	else
+	startPortlet ('deploy queues');
+	echo '<table border=0 cellspacing=0 cellpadding=3 width="100%">';
+	$qtitle = array
+	(
+		'aging' => 'Being edited',
+		'sync' => 'Pending sync',
+		'resync' => 'Version conflict',
+		'failed' => 'Failed',
+	);
+	foreach (get8021QDeployQueues() as $qcode => $qitems)
 	{
-		global $nextorder;
-		startPortlet ('deploy plan');
-		echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
-		echo '<tr><th>switch</th><th>age</th></tr>';
-		$order = 'odd';
-		foreach ($dplan as $item)
-		{
-			echo "<tr class=row_${order}><td>";
-			renderCell (spotEntity ('object', $item['object_id']));
-			echo '</td><td>';
-			echo $item['age'];
-			echo '</td></tr>';
-			$order = $nextorder[$order];
-		}
-		echo '</table>';
+		echo '<tr><th width="50%" class=tdright>' . $qtitle[$qcode] . ':</th>';
+		echo '<td class=tdleft>' . count ($qitems) . '</td></tr>';
 	}
+	echo '</table>';
 	finishPortlet();
 	echo '</td></tr></table>';
 }
@@ -7177,13 +7172,11 @@ function renderObject8021QSync ($object_id)
 	echo '<table border=0 cellspacing=0 cellpadding=3 align=center>';
 	// FIXME: sort rows newest event last
 	$rows = array();
-	$rows['edited'] = $vswitch['last_change'] . ' (' . $vswitch['last_change_age'] . ' ago)';
-	if ($vswitch['out_of_sync'] == 'yes')
-		$rows['pushed'] = 'no';
-	else
+	$rows['last local change'] = $vswitch['last_change'] . ' (' . $vswitch['last_change_age'] . ' ago)';
+	$rows['device out of sync'] = $vswitch['out_of_sync'];
+	if ($vswitch['out_of_sync'] == 'no')
 	{
-		$rows['push completed'] = 'yes';
-		$rows['pushed'] = $vswitch['last_push_finished'] . ' (' . $vswitch['last_push_age'] .
+		$rows['last sync session with device'] = $vswitch['last_push_finished'] . ' (' . $vswitch['last_push_age'] .
 			' ago, lasted ' . $vswitch['last_push_lasted'] . ')';
 	}
 	if ($vswitch['last_errno'])
@@ -7193,13 +7186,13 @@ function renderObject8021QSync ($object_id)
 
 	echo '<tr><th class=tdright>run now:</th><td class=tdcenter>';
 	printOpFormIntro ('run', array ('mutex_rev' => $vswitch['mutex_rev']));
-	echo getImageHREF ('prev', 'pull remote changes in', TRUE, 101) . '</form></td>';
+	echo getImageHREF ('prev', 'pull remote changes in', TRUE, 101) . '</form></td><td class=tdcenter>';
 	if ($maxdecisions)
 		echo getImageHREF ('COMMIT gray', 'cannot push due to version conflict(s)');
 	else
 	{
 		printOpFormIntro ('run', array ('mutex_rev' => $vswitch['mutex_rev'], 'do_push' => 'yes'));
-		echo '<td class=tdcenter>' . getImageHREF ('COMMIT', 'push local changes out', TRUE, 102) . '</form>';
+		echo getImageHREF ('COMMIT', 'push local changes out', TRUE, 102) . '</form>';
 	}
 	echo '</td></tr>';
 	echo '</table>';
