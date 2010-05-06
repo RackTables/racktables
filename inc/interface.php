@@ -48,6 +48,15 @@ $vtoptions = array
 	'alien' => 'never touch',
 );
 
+// 802.1Q deploy queue titles
+$dqtitle = array
+(
+	'aging' => 'Being edited',
+	'sync' => 'Pending sync',
+	'resync' => 'Version conflict',
+	'failed' => 'Failed',
+);
+
 // Let's have it here, so extensions can add their own images.
 $image = array();
 $image['error']['path'] = 'pix/error.png';
@@ -6295,6 +6304,13 @@ function dynamic_title_decoder ($path_position)
 			'name' => niftyString ("template '${vst['description']}'", 50),
 			'params' => array ('vst_id' => $vst['id'])
 		);
+	case 'dqueue':
+		global $dqtitle;
+		return array
+		(
+			'name' => 'queue "' . $dqtitle[$sic['dqcode']] . '"',
+			'params' => array ('qcode' => $sic['dqcode'])
+		);
 	default:
 		return array
 		(
@@ -6522,8 +6538,9 @@ function render8021QOrderForm ($some_id)
 
 function render8021QStatus ()
 {
+	global $dqtitle;
 	echo '<table border=0 class=objectview cellspacing=0 cellpadding=0>';
-	echo '<tr valign=top><td class=pcleft width="30%">';
+	echo '<tr valign=top><td class=pcleft width="40%">';
 	if (!count ($vdlist = getVLANDomainList()))
 		startPortlet ('no VLAN domains');
 	else
@@ -6555,7 +6572,7 @@ function render8021QStatus ()
 	}
 	finishPortlet();
 
-	echo '</td><td class=pcleft width="30%">';
+	echo '</td><td class=pcleft width="40%">';
 
 	if (!count ($vstlist = getVLANSwitchTemplates()))
 		startPortlet ('no switch templates');
@@ -6579,16 +6596,10 @@ function render8021QStatus ()
 
 	startPortlet ('deploy queues');
 	echo '<table border=0 cellspacing=0 cellpadding=3 width="100%">';
-	$qtitle = array
-	(
-		'aging' => 'Being edited',
-		'sync' => 'Pending sync',
-		'resync' => 'Version conflict',
-		'failed' => 'Failed',
-	);
 	foreach (get8021QDeployQueues() as $qcode => $qitems)
 	{
-		echo '<tr><th width="50%" class=tdright>' . $qtitle[$qcode] . ':</th>';
+		echo '<tr><th width="50%" class=tdright><a href="' . makeHREF (array ('page' => 'dqueue', 'dqcode' => $qcode));
+		echo '">' . $dqtitle[$qcode] . '</a>:</th>';
 		echo '<td class=tdleft>' . count ($qitems) . '</td></tr>';
 	}
 	echo '</table>';
@@ -7496,6 +7507,23 @@ function renderVSTRulesEditor ($vst_id)
 	}
 	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')
 		printNewItemTR ($port_role_options);
+	echo '</table>';
+}
+
+function renderDeployQueue ($dqcode)
+{
+	global $nextorder;
+	$order = 'odd';
+	$allq = get8021QDeployQueues();
+	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
+	echo '<tr><th>switch</th><th>age</th><th>';
+	foreach ($allq[$dqcode] as $item)
+	{
+		echo "<tr class=row_${order}><td>";
+		renderCell (spotEntity ('object', $item['object_id']));
+		echo "</td><td>${item['age']}</td></tr>";
+		$order = $nextorder[$order];
+	}
 	echo '</table>';
 }
 

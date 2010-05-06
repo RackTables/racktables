@@ -527,4 +527,10 @@ $ophandler['vst']['editrules']['upd'] = 'updVSTRule';
 $ophandler['vst']['8021qorder']['add'] = 'add8021QOrder';
 $ophandler['vst']['8021qorder']['del'] = 'del8021QOrder';
 
+$page['dqueue']['parent'] = '8021q';
+$page['dqueue']['bypass'] = 'dqcode';
+$page['dqueue']['bypass_type'] = 'string';
+$tab['dqueue']['default'] = 'View';
+$tabhandler['dqueue']['default'] = 'renderDeployQueue';
+
 ?>
