@@ -742,6 +742,8 @@ function getSelect ($optionList, $select_attrs = array(), $selected_id = NULL)
 	foreach ($select_attrs as $attr_name => $attr_value)
 		$ret .= " ${attr_name}=${attr_value}";
 	$ret .= '>';
+	if (is_null($selected_id))
+		echo "<option value=''></option>";
 	foreach ($optionList as $dict_key => $dict_value)
 		$ret .= "<option value='${dict_key}'" . ($dict_key == $selected_id ? ' selected' : '') . ">${dict_value}</option>";
 	$ret .= '</select>';
@@ -1304,7 +1306,7 @@ function renderIPv4ForObject ($object_id)
 		echo "<td class=tdleft><input type='text' size='10' name='bond_name' tabindex=100></td>\n";
 		echo "<td class=tdleft><input type=text name='ip' tabindex=101></td>\n";
 		echo "<td colspan=2>&nbsp;</td><td>";
-		printSelect ($aat, array ('name' => 'bond_type', 'tabindex' => 102));
+		printSelect ($aat, array ('name' => 'bond_type', 'tabindex' => 102), 'regular');
 		echo "</td><td>&nbsp;</td><td>";
 		printImageHREF ('add', 'allocate', TRUE, 103);
 		echo "</td></tr></form>";
@@ -2621,12 +2623,19 @@ function renderIPv4AddressAllocations ($dottedquad)
 	{
 		global $aat;
 		printOpFormIntro ('addIPv4Allocation');
+		echo "<script>";
+		echo "window.dhx_globalImgPath='/pix/';";
+		echo "</script>";
+		echo "<script src='js/dhtmlxcommon.js'></script>";
+		echo "<script src='js/dhtmlxcombo.js'></script>";
+		echo "<link rel='STYLESHEET' type='text/css' href='/css/dhtmlxcombo.css'>";
 		echo "<tr><td>";
 		printImageHREF ('add', 'allocate', TRUE);
 		echo "</td><td>";
-		printSelect (getNarrowObjectList ('IPV4OBJ_LISTSRC'), array ('name' => 'object_id', 'tabindex' => 100));
+		printSelect (getNarrowObjectList ('IPV4OBJ_LISTSRC'), array ('name' => 'object_id', 'tabindex' => 100, 'id' => 'object_id'));
+		echo "<script>$(document).ready(function() {var z=dhtmlXComboFromSelect('object_id');z.enableFilteringMode(true);})</script>";	
 		echo "</td><td><input type=text tabindex=101 name=bond_name size=10></td><td>";
-		printSelect ($aat, array ('name' => 'bond_type', 'tabindex' => 102));
+		printSelect ($aat, array ('name' => 'bond_type', 'tabindex' => 102, 'regular'));
 		echo "</td><td>";
 		printImageHREF ('add', 'allocate', TRUE, 103);
 		echo "</td></form></tr>";
@@ -3312,12 +3321,22 @@ function renderPortOIFCompatEditor()
 	function printNewitemTR()
 	{
 		printOpFormIntro ('add');
+		echo "<script>";
+		echo "window.dhx_globalImgPath='/pix/';";
+		echo "</script>";
+		echo "<script src='js/dhtmlxcommon.js'></script>";
+		echo "<script src='js/dhtmlxcombo.js'></script>";
+		echo "<link rel='STYLESHEET' type='text/css' href='/css/dhtmlxcombo.css'>";
+
 		echo '<tr><th class=tdleft>';
 		printImageHREF ('add', 'add pair', TRUE);
 		echo '</th><th class=tdleft>';
-		printSelect (readChapter (CHAP_PORTTYPE), array ('name' => 'type1'));
+		printSelect (readChapter (CHAP_PORTTYPE), array ('name' => 'type1', 'id' => 'type1'));
 		echo '</th><th class=tdleft>';
-		printSelect (readChapter (CHAP_PORTTYPE), array ('name' => 'type2'));
+		printSelect (readChapter (CHAP_PORTTYPE), array ('name' => 'type2', 'id' => 'type2'));
+		echo "<script>$(document).ready(function() {var z=dhtmlXComboFromSelect('type1');z.enableFilteringMode(true);})</script>";	
+		echo "<script>$(document).ready(function() {var z=dhtmlXComboFromSelect('type2');z.enableFilteringMode(true);})</script>";	
+
 		echo '</th></tr></form>';
 	}
 
@@ -4307,15 +4326,24 @@ function renderRSPoolLBForm ($pool_id)
 		startPortlet ('Add new');
 		echo "<table cellspacing=0 cellpadding=5 align=center>";
 		printOpFormIntro ('addLB');
+		echo "<script>";
+		echo "window.dhx_globalImgPath='/pix/';";
+		echo "</script>";
+		echo "<script src='js/dhtmlxcommon.js'></script>";
+		echo "<script src='js/dhtmlxcombo.js'></script>";
+		echo "<link rel='STYLESHEET' type='text/css' href='/css/dhtmlxcombo.css'>";
 		echo "<tr valign=top><th class=tdright>Load balancer</th><td class=tdleft>";
-		printSelect (getNarrowObjectList ('IPV4LB_LISTSRC'), array ('name' => 'object_id', 'tabindex' => 1));
+		printSelect (getNarrowObjectList ('IPV4LB_LISTSRC'), array ('name' => 'object_id', 'tabindex' => 1, 'id' => 'object_id'));
 		echo '</td><td class=tdcenter valign=middle rowspan=2>';
 		printImageHREF ('ADD', 'Configure LB', TRUE, 5);
 		echo '</td></tr><tr><th class=tdright>Virtual service</th><td class=tdleft>';
-		printSelect (getIPv4VSOptions(), array ('name' => 'vs_id', 'tabindex' => 2));
+		printSelect (getIPv4VSOptions(), array ('name' => 'vs_id', 'tabindex' => 2, 'id' => 'vs_id'));
 		echo "</td></tr>\n";
 		echo "<tr><th class=tdright>VS config</th><td colspan=2><textarea tabindex=3 name=vsconfig rows=10 cols=80></textarea></td></tr>";
 		echo "<tr><th class=tdright>RS config</th><td colspan=2><textarea tabindex=4 name=rsconfig rows=10 cols=80></textarea></td></tr>";
+		echo "<script>$(document).ready(function() {var z=dhtmlXComboFromSelect('object_id');z.enableFilteringMode(true);})</script>";	
+		echo "<script>$(document).ready(function() {var z=dhtmlXComboFromSelect('vs_id');z.enableFilteringMode(true);})</script>";	
+
 		echo "</form></table>\n";
 		finishPortlet();
 	}
@@ -4364,15 +4392,23 @@ function renderVServiceLBForm ($vs_id)
 		startPortlet ('Add new');
 		echo '<table cellspacing=0 cellpadding=5 align=center>';
 		printOpFormIntro ('addLB');
+		echo "<script>";
+		echo "window.dhx_globalImgPath='/pix/';";
+		echo "</script>";
+		echo "<script src='js/dhtmlxcommon.js'></script>";
+		echo "<script src='js/dhtmlxcombo.js'></script>";
+		echo "<link rel='STYLESHEET' type='text/css' href='/css/dhtmlxcombo.css'>";
 		echo '<tr valign=top><th class=tdright>Load balancer</th><td class=tdleft>';
-		printSelect (getNarrowObjectList ('IPV4LB_LISTSRC'), array ('name' => 'object_id', 'tabindex' => 101));
+		printSelect (getNarrowObjectList ('IPV4LB_LISTSRC'), array ('name' => 'object_id', 'tabindex' => 101, 'id' => 'object_id'));
 		echo '</td><td rowspan=2 class=tdcenter valign=middle>';
 		printImageHREF ('ADD', 'Configure LB', TRUE, 105);
 		echo '</td></tr><tr><th class=tdright>RS pool</th><td class=tdleft>';
-		printSelect (getIPv4RSPoolOptions(), array ('name' => 'pool_id', 'tabindex' => 102));
+		printSelect (getIPv4RSPoolOptions(), array ('name' => 'pool_id', 'tabindex' => 102, 'id' => 'pool_id'));
 		echo '</td></tr>';
 		echo '<tr><th class=tdright>VS config</th><td colspan=2><textarea tabindex=103 name=vsconfig rows=10 cols=80></textarea></td></tr>';
 		echo '<tr><th class=tdright>RS config</th><td colspan=2><textarea tabindex=104 name=rsconfig rows=10 cols=80></textarea></td></tr>';
+		echo "<script>$(document).ready(function() {var z=dhtmlXComboFromSelect('object_id');z.enableFilteringMode(true);})</script>";	
+		echo "<script>$(document).ready(function() {var z=dhtmlXComboFromSelect('pool_id');z.enableFilteringMode(true);})</script>";	
 		echo '</form></table>';
 		finishPortlet();
 	}
@@ -5176,16 +5212,24 @@ function renderObjectSLB ($object_id)
 		startPortlet ('Add new');
 		echo '<table cellspacing=0 cellpadding=5 align=center>';
 		printOpFormIntro ('addLB');
+		echo "<script>";
+		echo "window.dhx_globalImgPath='/pix/';";
+		echo "</script>";
+		echo "<script src='js/dhtmlxcommon.js'></script>";
+		echo "<script src='js/dhtmlxcombo.js'></script>";
+		echo "<link rel='STYLESHEET' type='text/css' href='/css/dhtmlxcombo.css'>";
 		echo '<tr><th class=tdright>Virtual service</th><td class=tdleft>';
-		printSelect (getIPv4VSOptions(), array ('name' => 'vs_id', 'tabindex' => 101));
+		printSelect (getIPv4VSOptions(), array ('name' => 'vs_id', 'tabindex' => 101, 'id' => 'vs_id'));
 		echo '</td><td class=tdcenter valign=middle rowspan=2>';
 		printImageHREF ('ADD', 'Configure LB', TRUE, 105);
 		echo '</td></tr>';
 		echo '</tr><th class=tdright>RS pool</th><td class=tdleft>';
-		printSelect (getIPv4RSPoolOptions(), array ('name' => 'pool_id', 'tabindex' => 102));
+		printSelect (getIPv4RSPoolOptions(), array ('name' => 'pool_id', 'tabindex' => 102, 'id' => 'pool_id'));
 		echo "</td></tr>";
 		echo '<tr><th class=tdright>VS config</th><td colspan=2><textarea tabindex=103 name=vsconfig rows=10 cols=80></textarea></td></tr>';
 		echo '<tr><th class=tdright>RS config</th><td colspan=2><textarea tabindex=104 name=rsconfig rows=10 cols=80></textarea></td></tr>';
+		echo "<script>$(document).ready(function() {var z=dhtmlXComboFromSelect('vs_id');z.enableFilteringMode(true);})</script>";	
+		echo "<script>$(document).ready(function() {var z=dhtmlXComboFromSelect('pool_id');z.enableFilteringMode(true);})</script>";	
 		echo '</form></table>';
 		finishPortlet();
 	}
@@ -5708,7 +5752,7 @@ function printOpFormIntro ($opname, $extra = array(), $upload = FALSE)
 {
 	global $pageno, $tabno, $page;
 
-	echo "<form method=post name=${opname} action='process.php?page=${pageno}&tab=${tabno}&op=${opname}'";
+	echo "<form method=post id=${opname} name=${opname} action='process.php?page=${pageno}&tab=${tabno}&op=${opname}'";
 	if ($upload)
 		echo " enctype='multipart/form-data'";
 	echo ">";
@@ -6344,12 +6388,20 @@ function renderPortIFCompatEditor()
 	function printNewitemTR()
 	{
 		printOpFormIntro ('add');
+		echo "<script>";
+		echo "window.dhx_globalImgPath='/pix/';";
+		echo "</script>";
+		echo "<script src='js/dhtmlxcommon.js'></script>";
+		echo "<script src='js/dhtmlxcombo.js'></script>";
+		echo "<link rel='STYLESHEET' type='text/css' href='/css/dhtmlxcombo.css'>";
 		echo '<tr><th class=tdleft>';
 		printImageHREF ('add', 'add pair', TRUE);
 		echo '</th><th class=tdleft>';
-		printSelect (getPortIIFOptions(), array ('name' => 'iif_id'));
+		printSelect (getPortIIFOptions(), array ('name' => 'iif_id', 'id' => 'iif_id'));
 		echo '</th><th class=tdleft>';
-		printSelect (readChapter (CHAP_PORTTYPE), array ('name' => 'oif_id'));
+		printSelect (readChapter (CHAP_PORTTYPE), array ('name' => 'oif_id', 'id' => 'oif_id'));
+		echo "<script>$(document).ready(function() {var z=dhtmlXComboFromSelect('iif_id');z.enableFilteringMode(true);})</script>";	
+		echo "<script>$(document).ready(function() {var z=dhtmlXComboFromSelect('oif_id');z.enableFilteringMode(true);})</script>";	
 		echo '</th></tr></form>';
 	}
 
@@ -6425,6 +6477,12 @@ function render8021QOrderForm ($some_id)
 		$all_vswitches = getVLANSwitches();
 		global $pageno;
 		printOpFormIntro ('add');
+		echo "<script>";
+		echo "window.dhx_globalImgPath='/pix/';";
+		echo "</script>";
+		echo "<script src='js/dhtmlxcommon.js'></script>";
+		echo "<script src='js/dhtmlxcombo.js'></script>";
+		echo "<link rel='STYLESHEET' type='text/css' href='/css/dhtmlxcombo.css'>";
 		echo '<tr>';
 		if ($pageno != 'object')
 		{
@@ -6434,7 +6492,8 @@ function render8021QOrderForm ($some_id)
 			foreach (getNarrowObjectList ('VLANSWITCH_LISTSRC') as $object_id => $object_dname)
 				if (!in_array ($object_id, $all_vswitches))
 					$options[$object_id] = $object_dname;
-			printSelect ($options, array ('name' => 'object_id', 'tabindex' => 101));
+			printSelect ($options, array ('name' => 'object_id', 'tabindex' => 101, 'id' => 'object_id'));
+			echo "<script>$(document).ready(function() {var z=dhtmlXComboFromSelect('object_id');z.enableFilteringMode(true);})</script>";	
 			echo '</td>';
 		}
 		if ($pageno != 'vlandomain')
@@ -6442,14 +6501,16 @@ function render8021QOrderForm ($some_id)
 			$options = array();
 			foreach (getVLANDomainList() as $vdom_id => $vdom_info)
 				$options[$vdom_id] = $vdom_info['description'];
-			echo '<td>' . getSelect ($options, array ('name' => 'vdom_id', 'tabindex' => 102), getConfigVar ('DEFAULT_VDOM_ID')) . '</td>';
+			echo '<td>' . getSelect ($options, array ('name' => 'vdom_id', 'tabindex' => 102, 'id' => 'vdom_id'), getConfigVar ('DEFAULT_VDOM_ID')) . '</td>';
+			echo "<script>$(document).ready(function() {var z=dhtmlXComboFromSelect('vdom_id');z.enableFilteringMode(true);})</script>";	
 		}
 		if ($pageno != 'vst')
 		{
 			$options = array();
 			foreach (getVLANSwitchTemplates() as $vst_id => $vst_info)
 				$options[$vst_id] = $vst_info['description'];
-			echo '<td>' . getSelect ($options, array ('name' => 'vst_id', 'tabindex' => 103), getConfigVar ('DEFAULT_VST_ID')) . '</td>';
+			echo '<td>' . getSelect ($options, array ('name' => 'vst_id', 'tabindex' => 103, 'id' => 'vst_id'), getConfigVar ('DEFAULT_VST_ID')) . '</td>';
+			echo "<script>$(document).ready(function() {var z=dhtmlXComboFromSelect('vst_id');z.enableFilteringMode(true);})</script>";	
 		}
 		echo '<td>' . getImageHREF ('Attach', 'set', TRUE, 104) . '</td></tr></form>';
 	}
@@ -7072,7 +7133,14 @@ function renderVLANIPv4 ($some_id)
 		if (!count ($options))
 			return;
 		printOpFormIntro ('bind');
-		echo '<tr><td>' . getNiftySelect ($options, array ('name' => $sname, 'tabindex' => 101));
+		echo "<script>";
+		echo "window.dhx_globalImgPath='/pix/';";
+		echo "</script>";
+		echo "<script src='js/dhtmlxcommon.js'></script>";
+		echo "<script src='js/dhtmlxcombo.js'></script>";
+		echo "<link rel='STYLESHEET' type='text/css' href='/css/dhtmlxcombo.css'>";
+		echo '<tr><td>' . getNiftySelect ($options, array ('name' => $sname, 'tabindex' => 101, 'id' => $sname));
+		echo "<script>$(document).ready(function() {var z=dhtmlXComboFromSelect('" . $sname . "');z.enableFilteringMode(true);})</script>";	
 		echo '</td><td>' . getImageHREF ('Attach', 'bind', TRUE, 102) . '</td></tr></form>';
 	}
 	global $pageno;
