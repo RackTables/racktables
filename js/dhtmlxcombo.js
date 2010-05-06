@@ -400,7 +400,8 @@ function dhtmlXCombo(parent,name,width,optionType,tabIndex){
 *     @topic: 2
 */
    dhtmlXCombo.prototype.setName = function(name){  
-        this.DOMelem_hidden_input.name = name;
+        this.DOMelem_hidden_input.id = name;
+		this.DOMelem_hidden_input.name = name;
         this.DOMelem_hidden_input2 = name.replace(/(\]?)$/, "_new_value$1");
 
         this.name = name;
@@ -1219,6 +1220,7 @@ dhtmlXCombo_defaultOption.prototype._DrawHeaderInput = function(self, name, widt
    z = document.createElement('input');
    z.type = 'hidden';
    z.name = name;
+   z.id = name;
    self.DOMelem.appendChild(z);
    self.DOMelem_hidden_input = z;
 

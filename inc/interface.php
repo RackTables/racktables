@@ -2629,7 +2629,7 @@ function renderIPv4AddressAllocations ($dottedquad)
 		echo "</script>";
 		echo "<script src='js/dhtmlxcommon.js'></script>";
 		echo "<script src='js/dhtmlxcombo.js'></script>";
-		echo "<link rel='STYLESHEET' type='text/css' href='/css/dhtmlxcombo.css'>";
+		echo "<link rel='STYLESHEET' type='text/css' href='css/dhtmlxcombo.css'>";
 		echo "<tr><td>";
 		printImageHREF ('add', 'allocate', TRUE);
 		echo "</td><td>";
@@ -3327,7 +3327,7 @@ function renderPortOIFCompatEditor()
 		echo "</script>";
 		echo "<script src='js/dhtmlxcommon.js'></script>";
 		echo "<script src='js/dhtmlxcombo.js'></script>";
-		echo "<link rel='STYLESHEET' type='text/css' href='/css/dhtmlxcombo.css'>";
+		echo "<link rel='STYLESHEET' type='text/css' href='css/dhtmlxcombo.css'>";
 
 		echo '<tr><th class=tdleft>';
 		printImageHREF ('add', 'add pair', TRUE);
@@ -4332,7 +4332,7 @@ function renderRSPoolLBForm ($pool_id)
 		echo "</script>";
 		echo "<script src='js/dhtmlxcommon.js'></script>";
 		echo "<script src='js/dhtmlxcombo.js'></script>";
-		echo "<link rel='STYLESHEET' type='text/css' href='/css/dhtmlxcombo.css'>";
+		echo "<link rel='STYLESHEET' type='text/css' href='css/dhtmlxcombo.css'>";
 		echo "<tr valign=top><th class=tdright>Load balancer</th><td class=tdleft>";
 		printSelect (getNarrowObjectList ('IPV4LB_LISTSRC'), array ('name' => 'object_id', 'tabindex' => 1, 'id' => 'object_id'));
 		echo '</td><td class=tdcenter valign=middle rowspan=2>';
@@ -4398,7 +4398,7 @@ function renderVServiceLBForm ($vs_id)
 		echo "</script>";
 		echo "<script src='js/dhtmlxcommon.js'></script>";
 		echo "<script src='js/dhtmlxcombo.js'></script>";
-		echo "<link rel='STYLESHEET' type='text/css' href='/css/dhtmlxcombo.css'>";
+		echo "<link rel='STYLESHEET' type='text/css' href='css/dhtmlxcombo.css'>";
 		echo '<tr valign=top><th class=tdright>Load balancer</th><td class=tdleft>';
 		printSelect (getNarrowObjectList ('IPV4LB_LISTSRC'), array ('name' => 'object_id', 'tabindex' => 101, 'id' => 'object_id'));
 		echo '</td><td rowspan=2 class=tdcenter valign=middle>';
@@ -5218,7 +5218,7 @@ function renderObjectSLB ($object_id)
 		echo "</script>";
 		echo "<script src='js/dhtmlxcommon.js'></script>";
 		echo "<script src='js/dhtmlxcombo.js'></script>";
-		echo "<link rel='STYLESHEET' type='text/css' href='/css/dhtmlxcombo.css'>";
+		echo "<link rel='STYLESHEET' type='text/css' href='css/dhtmlxcombo.css'>";
 		echo '<tr><th class=tdright>Virtual service</th><td class=tdleft>';
 		printSelect (getIPv4VSOptions(), array ('name' => 'vs_id', 'tabindex' => 101, 'id' => 'vs_id'));
 		echo '</td><td class=tdcenter valign=middle rowspan=2>';
@@ -6394,7 +6394,7 @@ function renderPortIFCompatEditor()
 		echo "</script>";
 		echo "<script src='js/dhtmlxcommon.js'></script>";
 		echo "<script src='js/dhtmlxcombo.js'></script>";
-		echo "<link rel='STYLESHEET' type='text/css' href='/css/dhtmlxcombo.css'>";
+		echo "<link rel='STYLESHEET' type='text/css' href='css/dhtmlxcombo.css'>";
 		echo '<tr><th class=tdleft>';
 		printImageHREF ('add', 'add pair', TRUE);
 		echo '</th><th class=tdleft>';
@@ -6483,7 +6483,7 @@ function render8021QOrderForm ($some_id)
 		echo "</script>";
 		echo "<script src='js/dhtmlxcommon.js'></script>";
 		echo "<script src='js/dhtmlxcombo.js'></script>";
-		echo "<link rel='STYLESHEET' type='text/css' href='/css/dhtmlxcombo.css'>";
+		echo "<link rel='STYLESHEET' type='text/css' href='css/dhtmlxcombo.css'>";
 		echo '<tr>';
 		if ($pageno != 'object')
 		{
