@@ -55,6 +55,7 @@ $dqtitle = array
 	'sync' => 'Pending sync',
 	'resync' => 'Version conflict',
 	'failed' => 'Failed',
+	'disabled' => 'Sync disabled',
 );
 
 // Let's have it here, so extensions can add their own images.

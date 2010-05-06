@@ -3960,6 +3960,7 @@ function get8021QDeployQueues()
 		'sync' => array(),
 		'resync' => array(),
 		'failed' => array(),
+		'disabled' => array(),
 	);
 	$query = 'SELECT object_id, TIMESTAMPDIFF(SECOND, last_change, NOW()) AS age_seconds, ' .
 		'SEC_TO_TIME(TIMESTAMPDIFF(SECOND, last_change, NOW())) AS age, ' .
@@ -3979,6 +3980,9 @@ function get8021QDeployQueues()
 		case E_8021Q_PULL_REMOTE_ERROR:
 		case E_8021Q_PUSH_REMOTE_ERROR:
 			$ret['failed'][] = $row;
+			break;
+		case E_8021Q_SYNC_DISABLED:
+			$ret['disabled'][] = $row;
 			break;
 		}
 	return $ret;

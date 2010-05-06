@@ -46,6 +46,7 @@ define ('E_8021Q_NOERROR', 0);
 define ('E_8021Q_VERSION_CONFLICT', 101);
 define ('E_8021Q_PULL_REMOTE_ERROR', 102);
 define ('E_8021Q_PUSH_REMOTE_ERROR', 103);
+define ('E_8021Q_SYNC_DISABLED', 104);
 
 function loadConfigDefaults() {
 	global $configCache;

@@ -3756,6 +3756,8 @@ function strerror8021Q ($errno)
 		return 'pull failed due to remote error';
 	case E_8021Q_PUSH_REMOTE_ERROR:
 		return 'push failed due to remote error';
+	case E_8021Q_SYNC_DISABLED:
+		return 'sync disabled by operator';
 	default:
 		return "unknown error code ${errno}";
 	}
