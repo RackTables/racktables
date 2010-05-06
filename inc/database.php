@@ -3678,10 +3678,10 @@ function getVLANSwitchInfo ($object_id, $extrasql = '')
 	$result = usePreparedSelectBlade
 	(
 		'SELECT object_id, domain_id, template_id, mutex_rev, out_of_sync, last_errno, ' .
-		'last_push_finished - last_push_started AS last_push_lasted, ' .
-		'SEC_TO_TIME(NOW() - last_change) AS last_change_age, ' .
-		'SEC_TO_TIME(NOW() - last_error_ts) AS last_error_age, ' .
-		'SEC_TO_TIME(NOW() - last_push_finished) AS last_push_age, ' .
+		'TIMESTAMPDIFF(SECOND, last_push_started, last_push_finished) AS last_push_lasted, ' .
+		'SEC_TO_TIME(TIMESTAMPDIFF(SECOND, last_change, NOW())) AS last_change_age, ' .
+		'SEC_TO_TIME(TIMESTAMPDIFF(SECOND, last_error_ts, NOW())) AS last_error_age, ' .
+		'SEC_TO_TIME(TIMESTAMPDIFF(SECOND, last_push_finished, NOW())) AS last_push_age, ' .
 		'last_change, last_push_finished, last_error_ts ' .
 		'FROM VLANSwitch WHERE object_id = ? ' . $extrasql,
 		array ($object_id)
@@ -3961,7 +3961,9 @@ function get8021QDeployQueues()
 		'resync' => array(),
 		'failed' => array(),
 	);
-	$query = 'SELECT object_id, NOW() - last_change AS age, last_errno, last_error_ts ' .
+	$query = 'SELECT object_id, TIMESTAMPDIFF(SECOND, last_change, NOW()) AS age_seconds, ' .
+		'SEC_TO_TIME(TIMESTAMPDIFF(SECOND, last_change, NOW())) AS age, ' .
+		'last_errno, last_error_ts ' .
 		'FROM VLANSwitch WHERE out_of_sync = "yes" ' .
 		'ORDER BY age DESC';
 	$result = usePreparedSelectBlade ($query);
@@ -3969,7 +3971,7 @@ function get8021QDeployQueues()
 		switch ($row['last_errno'])
 		{
 		case E_8021Q_NOERROR:
-			$ret[$row['age'] < 300 ? 'aging' : 'sync'][] = $row;
+			$ret[$row['age_seconds'] < 300 ? 'aging' : 'sync'][] = $row;
 			break;
 		case E_8021Q_VERSION_CONFLICT:
 			$ret['resync'][] = $row;
