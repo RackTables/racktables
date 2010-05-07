@@ -2360,12 +2360,13 @@ function ios12ScanTopLevel (&$work, $line)
 	$matches = array();
 	switch (TRUE)
 	{
-	case (preg_match ('@^interface ((Ethernet|FastEthernet|GigabitEthernet|TenGigabitEthernet)[[:digit:]]+(/[[:digit:]]+)*)$@', $line, $matches)):
+	case (preg_match ('@^interface ((Ethernet|FastEthernet|GigabitEthernet|TenGigabitEthernet|Port-channel)[[:digit:]]+(/[[:digit:]]+)*)$@', $line, $matches)):
 		// map interface name
 		$matches[1] = preg_replace ('@^Ethernet(.+)$@', 'et\\1', $matches[1]);
 		$matches[1] = preg_replace ('@^FastEthernet(.+)$@', 'fa\\1', $matches[1]);
 		$matches[1] = preg_replace ('@^GigabitEthernet(.+)$@', 'gi\\1', $matches[1]);
 		$matches[1] = preg_replace ('@^TenGigabitEthernet(.+)$@', 'te\\1', $matches[1]);
+		$matches[1] = preg_replace ('@^Port-channel(.+)$@', 'po\\1', $matches[1]);
 		$work['current'] = array ('port_name' => $matches[1]);
 		return 'ios12PickSwitchportCommand'; // switch to interface block reading
 	case (preg_match ('/^VLAN Name                             Status    Ports$/', $line, $matches)):
