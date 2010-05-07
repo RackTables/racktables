@@ -32,6 +32,7 @@
 	_height:22px;
 	overflow:hidden;
     background-color: white;
+	margin: 0 auto;
 }
 
 .dhx_combo_list{

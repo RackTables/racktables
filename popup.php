@@ -83,7 +83,7 @@ header ('Content-Type: text/html; charset=UTF-8');
 			echo $localchoice ?
 				('Nearest spare ports (<a href="popup.php?helper=portlist&port=' . $port_id . '&in_rack=n">show all</a>)') :
 				('All spare ports (<a href="popup.php?helper=portlist&port=' . $port_id . '&in_rack=y">show nearest</a>)');
-			echo '</h2><form action="javascript:;">';
+			echo '</h2><form action="javascript:;" id="portform">';
 			$only_racks = array();
 			global $sic;
 			$port_info = getPortInfo ($sic['port']);
@@ -94,7 +94,16 @@ header ('Content-Type: text/html; charset=UTF-8');
 					$only_racks = getProximateRacks ($object['rack_id'], getConfigVar ('PROXIMITY_RANGE'));
 			}
 			$spare_ports = findSparePorts ($port_id, $only_racks);
-			printSelect ($spare_ports, array ('name' => 'ports', 'id' => 'ports', 'size' => getConfigVar ('MAXSELSIZE')));
+		echo "<script>";
+		echo "window.dhx_globalImgPath='/pix/';";
+		echo "</script>";
+		echo "<script src='js/dhtmlxcommon.js'></script>";
+		echo "<script src='js/dhtmlxcombo.js'></script>";
+		echo "<link rel='STYLESHEET' type='text/css' href='css/dhtmlxcombo.css'>";
+
+			printSelect ($spare_ports, array ('name' => 'ports', 'id' => 'ports'));
+			echo "<script>$(document).ready(function() {var z=dhtmlXComboFromSelect('ports');z.enableFilteringMode(true);})</script>";	
+
 			echo '<br><br>';
 			echo "<input type='submit' value='Link' onclick='".
 			"if (getElementById(\"ports\").value != \"\") {".
