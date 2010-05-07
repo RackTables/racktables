@@ -40,8 +40,8 @@ CREATE TABLE `CachedPAV` (
   `vlan_id` int(10) unsigned NOT NULL default '0',
   PRIMARY KEY  (`object_id`,`port_name`,`vlan_id`),
   KEY `vlan_id` (`vlan_id`),
-  CONSTRAINT `CachedPAV-FK-vlan_id` FOREIGN KEY (`vlan_id`) REFERENCES `VLANValidID` (`vlan_id`),
-  CONSTRAINT `CachedPAV-FK-object-port` FOREIGN KEY (`object_id`, `port_name`) REFERENCES `CachedPVM` (`object_id`, `port_name`) ON DELETE CASCADE
+  CONSTRAINT `CachedPAV-FK-object-port` FOREIGN KEY (`object_id`, `port_name`) REFERENCES `CachedPVM` (`object_id`, `port_name`) ON DELETE CASCADE,
+  CONSTRAINT `CachedPAV-FK-vlan_id` FOREIGN KEY (`vlan_id`) REFERENCES `VLANValidID` (`vlan_id`)
 ) ENGINE=InnoDB;
 
 CREATE TABLE `CachedPNV` (
