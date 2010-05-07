@@ -3854,4 +3854,23 @@ function detectVLANSwitchQueue ($vswitch)
 	return '';
 }
 
+function acceptable8021QConfig ($port)
+{
+	switch ($port['mode'])
+	{
+	case 'trunk':
+		return TRUE;
+	case 'access':
+		if
+		(
+			count ($port['allowed']) == 1 and
+			in_array ($port['native'], $port['allowed'])
+		)
+			return TRUE;
+		// fall through
+	default:
+		return FALSE;
+	}
+}
+
 ?>

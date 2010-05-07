@@ -7396,10 +7396,11 @@ function renderObject8021QSync ($object_id)
 			$radio_attrs = array ('left' => '', 'asis' => ' checked', 'right' => '');
 			if
 			(
+				!acceptable8021QConfig ($item['right']) or
 				count (array_diff ($item['right']['allowed'], $domvlans)) or
 				$item['vst_role'] != $item['right']['mode']
 			)
-				$radio_attrs['right'] = 'disabled';
+				$radio_attrs['right'] = ' disabled';
 			break;
 		case 'ok_to_push_with_merge':
 			$trclass = 'trbusy';
