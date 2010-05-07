@@ -1,5 +1,6 @@
 alter database character set utf8;
 set names 'utf8';
+SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
 
 CREATE TABLE `Atom` (
   `molecule_id` int(10) unsigned default NULL,
@@ -23,21 +24,6 @@ CREATE TABLE `AttributeMap` (
   UNIQUE KEY `objtype_id` (`objtype_id`,`attr_id`)
 ) ENGINE=MyISAM;
 
-CREATE TABLE `RackObject` (
-  `id` int(10) unsigned NOT NULL auto_increment,
-  `name` char(255) default NULL,
-  `label` char(255) default NULL,
-  `barcode` char(16) default NULL,
-  `objtype_id` int(10) unsigned NOT NULL default '1',
-  `asset_no` char(64) default NULL,
-  `has_problems` enum('yes','no') NOT NULL default 'no',
-  `comment` text,
-  PRIMARY KEY  (`id`),
-  UNIQUE KEY `RackObject_asset_no` (`asset_no`),
-  UNIQUE KEY `name` (`name`),
-  UNIQUE KEY `barcode` (`barcode`)
-) ENGINE=InnoDB;
-
 CREATE TABLE `AttributeValue` (
   `object_id` int(10) unsigned default NULL,
   `attr_id` int(10) unsigned default NULL,
@@ -46,6 +32,33 @@ CREATE TABLE `AttributeValue` (
   `float_value` float default NULL,
   UNIQUE KEY `object_id` (`object_id`,`attr_id`),
   CONSTRAINT `AttributeValue-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `RackObject` (`id`)
+) ENGINE=InnoDB;
+
+CREATE TABLE `CachedPAV` (
+  `object_id` int(10) unsigned NOT NULL,
+  `port_name` char(255) NOT NULL,
+  `vlan_id` int(10) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`object_id`,`port_name`,`vlan_id`),
+  KEY `vlan_id` (`vlan_id`),
+  CONSTRAINT `CachedPAV-FK-vlan_id` FOREIGN KEY (`vlan_id`) REFERENCES `VLANValidID` (`vlan_id`),
+  CONSTRAINT `CachedPAV-FK-object-port` FOREIGN KEY (`object_id`, `port_name`) REFERENCES `CachedPVM` (`object_id`, `port_name`) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE `CachedPNV` (
+  `object_id` int(10) unsigned NOT NULL,
+  `port_name` char(255) NOT NULL,
+  `vlan_id` int(10) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`object_id`,`port_name`,`vlan_id`),
+  UNIQUE KEY `port_id` (`object_id`,`port_name`),
+  CONSTRAINT `CachedPNV-FK-compound` FOREIGN KEY (`object_id`, `port_name`, `vlan_id`) REFERENCES `CachedPAV` (`object_id`, `port_name`, `vlan_id`) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE `CachedPVM` (
+  `object_id` int(10) unsigned NOT NULL,
+  `port_name` char(255) NOT NULL,
+  `vlan_mode` enum('access','trunk') NOT NULL default 'access',
+  PRIMARY KEY  (`object_id`,`port_name`),
+  CONSTRAINT `CachedPVM-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `RackObject` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
 CREATE TABLE `Chapter` (
@@ -115,25 +128,6 @@ CREATE TABLE `IPv4Allocation` (
   PRIMARY KEY  (`object_id`,`ip`)
 ) ENGINE=MyISAM;
 
-CREATE TABLE `IPv4RSPool` (
-  `id` int(10) unsigned NOT NULL auto_increment,
-  `name` char(255) default NULL,
-  `vsconfig` text,
-  `rsconfig` text,
-  PRIMARY KEY  (`id`)
-) ENGINE=InnoDB;
-
-CREATE TABLE `IPv4VS` (
-  `id` int(10) unsigned NOT NULL auto_increment,
-  `vip` int(10) unsigned default NULL,
-  `vport` smallint(5) unsigned default NULL,
-  `proto` enum('TCP','UDP') NOT NULL default 'TCP',
-  `name` char(255) default NULL,
-  `vsconfig` text,
-  `rsconfig` text,
-  PRIMARY KEY  (`id`)
-) ENGINE=InnoDB;
-
 CREATE TABLE `IPv4LB` (
   `object_id` int(10) unsigned default NULL,
   `rspool_id` int(10) unsigned default NULL,
@@ -146,6 +140,21 @@ CREATE TABLE `IPv4LB` (
   CONSTRAINT `IPv4LB-FK-vs_id` FOREIGN KEY (`vs_id`) REFERENCES `IPv4VS` (`id`),
   CONSTRAINT `IPv4LB-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `RackObject` (`id`),
   CONSTRAINT `IPv4LB-FK-rspool_id` FOREIGN KEY (`rspool_id`) REFERENCES `IPv4RSPool` (`id`)
+) ENGINE=InnoDB;
+
+CREATE TABLE `IPv4NAT` (
+  `object_id` int(10) unsigned NOT NULL,
+  `proto` enum('TCP','UDP') not null default 'TCP',
+  `localip` int(10) unsigned NOT NULL,
+  `localport` smallint(5) unsigned NOT NULL,
+  `remoteip` int(10) unsigned NOT NULL,
+  `remoteport` smallint(5) unsigned NOT NULL,
+  `description` char(255) default NULL,
+  PRIMARY KEY  (`object_id`,`proto`,`localip`,`localport`,`remoteip`,`remoteport`),
+  KEY `localip` (`localip`),
+  KEY `remoteip` (`remoteip`),
+  KEY `object_id` (`object_id`),
+  CONSTRAINT `IPv4NAT-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `RackObject` (`id`)
 ) ENGINE=InnoDB;
 
 CREATE TABLE `IPv4Network` (
@@ -170,6 +179,25 @@ CREATE TABLE `IPv4RS` (
   CONSTRAINT `IPv4RS-FK` FOREIGN KEY (`rspool_id`) REFERENCES `IPv4RSPool` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
+CREATE TABLE `IPv4RSPool` (
+  `id` int(10) unsigned NOT NULL auto_increment,
+  `name` char(255) default NULL,
+  `vsconfig` text,
+  `rsconfig` text,
+  PRIMARY KEY  (`id`)
+) ENGINE=InnoDB;
+
+CREATE TABLE `IPv4VS` (
+  `id` int(10) unsigned NOT NULL auto_increment,
+  `vip` int(10) unsigned default NULL,
+  `vport` smallint(5) unsigned default NULL,
+  `proto` enum('TCP','UDP') NOT NULL default 'TCP',
+  `name` char(255) default NULL,
+  `vsconfig` text,
+  `rsconfig` text,
+  PRIMARY KEY  (`id`)
+) ENGINE=InnoDB;
+
 CREATE TABLE `LDAPCache` (
   `presented_username` char(64) NOT NULL,
   `successful_hash` char(40) NOT NULL,
@@ -179,6 +207,16 @@ CREATE TABLE `LDAPCache` (
   `memberof` text,
   UNIQUE KEY `presented_username` (`presented_username`),
   KEY `scanidx` (`presented_username`,`successful_hash`)
+) ENGINE=InnoDB;
+
+CREATE TABLE `Link` (
+  `porta` int(10) unsigned NOT NULL,
+  `portb` int(10) unsigned NOT NULL,
+  PRIMARY KEY  (`porta`,`portb`),
+  UNIQUE KEY `porta` (`porta`),
+  UNIQUE KEY `portb` (`portb`),
+  CONSTRAINT `Link-FK-a` FOREIGN KEY (`porta`) REFERENCES `Port` (`id`),
+  CONSTRAINT `Link-FK-b` FOREIGN KEY (`portb`) REFERENCES `Port` (`id`)
 ) ENGINE=InnoDB;
 
 CREATE TABLE `Molecule` (
@@ -197,20 +235,6 @@ CREATE TABLE `MountOperation` (
   PRIMARY KEY  (`id`),
   KEY `object_id` (`object_id`)
 ) ENGINE=MyISAM;
-
-CREATE TABLE `PortInnerInterface` (
-  `id` int(10) unsigned NOT NULL,
-  `iif_name` char(16) NOT NULL,
-  PRIMARY KEY  (`id`),
-  UNIQUE KEY `iif_name` (`iif_name`)
-) ENGINE=InnoDB;
-
-CREATE TABLE `PortInterfaceCompat` (
-  `iif_id` int(10) unsigned NOT NULL,
-  `oif_id` int(10) unsigned NOT NULL,
-  UNIQUE KEY `pair` (`iif_id`,`oif_id`),
-  CONSTRAINT `PortInterfaceCompat-FK-iif_id` FOREIGN KEY (`iif_id`) REFERENCES `PortInnerInterface` (`id`)
-) ENGINE=InnoDB;
 
 CREATE TABLE `Port` (
   `id` int(10) unsigned NOT NULL auto_increment,
@@ -231,14 +255,14 @@ CREATE TABLE `Port` (
   CONSTRAINT `Port-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `RackObject` (`id`)
 ) ENGINE=InnoDB;
 
-CREATE TABLE `Link` (
-  `porta` int(10) unsigned NOT NULL,
-  `portb` int(10) unsigned NOT NULL,
-  PRIMARY KEY  (`porta`,`portb`),
-  UNIQUE KEY `porta` (`porta`),
-  UNIQUE KEY `portb` (`portb`),
-  CONSTRAINT `Link-FK-a` FOREIGN KEY (`porta`) REFERENCES `Port` (`id`),
-  CONSTRAINT `Link-FK-b` FOREIGN KEY (`portb`) REFERENCES `Port` (`id`)
+CREATE TABLE `PortAllowedVLAN` (
+  `object_id` int(10) unsigned NOT NULL,
+  `port_name` char(255) NOT NULL,
+  `vlan_id` int(10) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`object_id`,`port_name`,`vlan_id`),
+  KEY `vlan_id` (`vlan_id`),
+  CONSTRAINT `PortAllowedVLAN-FK-object-port` FOREIGN KEY (`object_id`, `port_name`) REFERENCES `PortVLANMode` (`object_id`, `port_name`) ON DELETE CASCADE,
+  CONSTRAINT `PortAllowedVLAN-FK-vlan_id` FOREIGN KEY (`vlan_id`) REFERENCES `VLANValidID` (`vlan_id`)
 ) ENGINE=InnoDB;
 
 CREATE TABLE `PortCompat` (
@@ -248,26 +272,36 @@ CREATE TABLE `PortCompat` (
   KEY `type2` (`type2`)
 ) ENGINE=MyISAM;
 
-CREATE TABLE `IPv4NAT` (
-  `object_id` int(10) unsigned NOT NULL,
-  `proto` enum('TCP','UDP') not null default 'TCP',
-  `localip` int(10) unsigned NOT NULL,
-  `localport` smallint(5) unsigned NOT NULL,
-  `remoteip` int(10) unsigned NOT NULL,
-  `remoteport` smallint(5) unsigned NOT NULL,
-  `description` char(255) default NULL,
-  PRIMARY KEY  (`object_id`,`proto`,`localip`,`localport`,`remoteip`,`remoteport`),
-  KEY `localip` (`localip`),
-  KEY `remoteip` (`remoteip`),
-  KEY `object_id` (`object_id`),
-  CONSTRAINT `IPv4NAT-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `RackObject` (`id`)
+CREATE TABLE `PortInnerInterface` (
+  `id` int(10) unsigned NOT NULL,
+  `iif_name` char(16) NOT NULL,
+  PRIMARY KEY  (`id`),
+  UNIQUE KEY `iif_name` (`iif_name`)
 ) ENGINE=InnoDB;
 
-CREATE TABLE `RackRow` (
-  `id` int(10) unsigned NOT NULL auto_increment,
-  `name` char(255) NOT NULL,
-  PRIMARY KEY  (`id`)
-) ENGINE=MyISAM;
+CREATE TABLE `PortInterfaceCompat` (
+  `iif_id` int(10) unsigned NOT NULL,
+  `oif_id` int(10) unsigned NOT NULL,
+  UNIQUE KEY `pair` (`iif_id`,`oif_id`),
+  CONSTRAINT `PortInterfaceCompat-FK-iif_id` FOREIGN KEY (`iif_id`) REFERENCES `PortInnerInterface` (`id`)
+) ENGINE=InnoDB;
+
+CREATE TABLE `PortNativeVLAN` (
+  `object_id` int(10) unsigned NOT NULL,
+  `port_name` char(255) NOT NULL,
+  `vlan_id` int(10) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`object_id`,`port_name`,`vlan_id`),
+  UNIQUE KEY `port_id` (`object_id`,`port_name`),
+  CONSTRAINT `PortNativeVLAN-FK-compound` FOREIGN KEY (`object_id`, `port_name`, `vlan_id`) REFERENCES `PortAllowedVLAN` (`object_id`, `port_name`, `vlan_id`) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE `PortVLANMode` (
+  `object_id` int(10) unsigned NOT NULL,
+  `port_name` char(255) NOT NULL,
+  `vlan_mode` enum('access','trunk') NOT NULL default 'access',
+  PRIMARY KEY  (`object_id`,`port_name`),
+  CONSTRAINT `PortVLANMode-FK-object-port` FOREIGN KEY (`object_id`, `port_name`) REFERENCES `CachedPVM` (`object_id`, `port_name`)
+) ENGINE=InnoDB;
 
 CREATE TABLE `Rack` (
   `id` int(10) unsigned NOT NULL auto_increment,
@@ -291,6 +325,21 @@ CREATE TABLE `RackHistory` (
   `user_name` char(64) default NULL
 ) ENGINE=MyISAM;
 
+CREATE TABLE `RackObject` (
+  `id` int(10) unsigned NOT NULL auto_increment,
+  `name` char(255) default NULL,
+  `label` char(255) default NULL,
+  `barcode` char(16) default NULL,
+  `objtype_id` int(10) unsigned NOT NULL default '1',
+  `asset_no` char(64) default NULL,
+  `has_problems` enum('yes','no') NOT NULL default 'no',
+  `comment` text,
+  PRIMARY KEY  (`id`),
+  UNIQUE KEY `RackObject_asset_no` (`asset_no`),
+  UNIQUE KEY `name` (`name`),
+  UNIQUE KEY `barcode` (`barcode`)
+) ENGINE=InnoDB;
+
 CREATE TABLE `RackObjectHistory` (
   `id` int(10) unsigned default NULL,
   `name` char(255) default NULL,
@@ -302,6 +351,12 @@ CREATE TABLE `RackObjectHistory` (
   `comment` text,
   `ctime` timestamp NOT NULL,
   `user_name` char(64) default NULL
+) ENGINE=MyISAM;
+
+CREATE TABLE `RackRow` (
+  `id` int(10) unsigned NOT NULL auto_increment,
+  `name` char(255) NOT NULL,
+  PRIMARY KEY  (`id`)
 ) ENGINE=MyISAM;
 
 CREATE TABLE `RackSpace` (
@@ -318,17 +373,7 @@ CREATE TABLE `Script` (
   `script_name` char(64) NOT NULL,
   `script_text` longtext,
   PRIMARY KEY  (`script_name`)
-) TYPE=MyISAM;
-
-CREATE TABLE `TagTree` (
-  `id` int(10) unsigned NOT NULL auto_increment,
-  `parent_id` int(10) unsigned default NULL,
-  `tag` char(255) default NULL,
-  PRIMARY KEY  (`id`),
-  UNIQUE KEY `tag` (`tag`),
-  KEY `TagTree-K-parent_id` (`parent_id`),
-  CONSTRAINT `TagTree-K-parent_id` FOREIGN KEY (`parent_id`) REFERENCES `TagTree` (`id`)
-) TYPE=InnoDB;
+) ENGINE=MyISAM;
 
 CREATE TABLE `TagStorage` (
   `entity_realm` enum('file','ipv4net','ipv4vs','ipv4rspool','object','rack','user') NOT NULL default 'object',
@@ -338,7 +383,17 @@ CREATE TABLE `TagStorage` (
   KEY `entity_id` (`entity_id`),
   KEY `TagStorage-FK-tag_id` (`tag_id`),
   CONSTRAINT `TagStorage-FK-tag_id` FOREIGN KEY (`tag_id`) REFERENCES `TagTree` (`id`)
-) TYPE=InnoDB;
+) ENGINE=InnoDB;
+
+CREATE TABLE `TagTree` (
+  `id` int(10) unsigned NOT NULL auto_increment,
+  `parent_id` int(10) unsigned default NULL,
+  `tag` char(255) default NULL,
+  PRIMARY KEY  (`id`),
+  UNIQUE KEY `tag` (`tag`),
+  KEY `TagTree-K-parent_id` (`parent_id`),
+  CONSTRAINT `TagTree-K-parent_id` FOREIGN KEY (`parent_id`) REFERENCES `TagTree` (`id`)
+) ENGINE=InnoDB;
 
 CREATE TABLE `UserAccount` (
   `user_id` int(10) unsigned NOT NULL auto_increment,
@@ -354,23 +409,6 @@ CREATE TABLE `UserConfig` (
   `varvalue` char(255) NOT NULL,
   `user` char(64) NOT NULL,
   UNIQUE KEY `user_varname` (`user`,`varname`)
-) TYPE=InnoDB;
-
-CREATE TABLE `VLANDomain` (
-  `id` int(10) unsigned NOT NULL auto_increment,
-  `description` char(255) default NULL,
-  PRIMARY KEY  (`id`),
-  UNIQUE KEY `description` (`description`)
-) ENGINE=InnoDB;
-
-CREATE TABLE `VLANEligibleOIF` (
-  `oif_id` int(10) unsigned NOT NULL default '0',
-  PRIMARY KEY  (`oif_id`)
-) ENGINE=InnoDB;
-
-CREATE TABLE `VLANValidID` (
-  `vlan_id` int(10) unsigned NOT NULL default '1',
-  PRIMARY KEY  (`vlan_id`)
 ) ENGINE=InnoDB;
 
 CREATE TABLE `VLANDescription` (
@@ -384,6 +422,18 @@ CREATE TABLE `VLANDescription` (
   CONSTRAINT `VLANDescription-FK-vlan_id` FOREIGN KEY (`vlan_id`) REFERENCES `VLANValidID` (`vlan_id`)
 ) ENGINE=InnoDB;
 
+CREATE TABLE `VLANDomain` (
+  `id` int(10) unsigned NOT NULL auto_increment,
+  `description` char(255) default NULL,
+  PRIMARY KEY  (`id`),
+  UNIQUE KEY `description` (`description`)
+) ENGINE=InnoDB;
+
+CREATE TABLE `VLANEligibleOIF` (
+  `oif_id` int(10) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`oif_id`)
+) ENGINE=InnoDB;
+
 CREATE TABLE `VLANIPv4` (
   `domain_id` int(10) unsigned NOT NULL,
   `vlan_id` int(10) unsigned NOT NULL,
@@ -392,14 +442,6 @@ CREATE TABLE `VLANIPv4` (
   KEY `VLANIPv4-FK-compound` (`domain_id`,`vlan_id`),
   CONSTRAINT `VLANIPv4-FK-compound` FOREIGN KEY (`domain_id`, `vlan_id`) REFERENCES `VLANDescription` (`domain_id`, `vlan_id`) ON DELETE CASCADE,
   CONSTRAINT `VLANIPv4-FK-ipv4net_id` FOREIGN KEY (`ipv4net_id`) REFERENCES `IPv4Network` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB;
-
-CREATE TABLE `VLANSwitchTemplate` (
-  `id` int(10) unsigned NOT NULL auto_increment,
-  `max_local_vlans` int(10) unsigned default NULL,
-  `description` char(255) default NULL,
-  PRIMARY KEY  (`id`),
-  UNIQUE KEY `description` (`description`)
 ) ENGINE=InnoDB;
 
 CREATE TABLE `VLANSTRule` (
@@ -433,57 +475,18 @@ CREATE TABLE `VLANSwitch` (
   CONSTRAINT `VLANSwitch-FK-template_id` FOREIGN KEY (`template_id`) REFERENCES `VLANSwitchTemplate` (`id`)
 ) ENGINE=InnoDB;
 
-CREATE TABLE `CachedPVM` (
-  `object_id` int(10) unsigned NOT NULL,
-  `port_name` char(255) NOT NULL,
-  `vlan_mode` enum('access','trunk') NOT NULL default 'access',
-  PRIMARY KEY  (`object_id`,`port_name`),
-  CONSTRAINT `CachedPVM-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `RackObject` (`id`) ON DELETE CASCADE
+CREATE TABLE `VLANSwitchTemplate` (
+  `id` int(10) unsigned NOT NULL auto_increment,
+  `max_local_vlans` int(10) unsigned default NULL,
+  `description` char(255) default NULL,
+  PRIMARY KEY  (`id`),
+  UNIQUE KEY `description` (`description`)
 ) ENGINE=InnoDB;
 
-CREATE TABLE `CachedPAV` (
-  `object_id` int(10) unsigned NOT NULL,
-  `port_name` char(255) NOT NULL,
-  `vlan_id` int(10) unsigned NOT NULL default '0',
-  PRIMARY KEY  (`object_id`,`port_name`,`vlan_id`),
-  KEY `vlan_id` (`vlan_id`),
-  CONSTRAINT `CachedPAV-FK-vlan_id` FOREIGN KEY (`vlan_id`) REFERENCES `VLANValidID` (`vlan_id`),
-  CONSTRAINT `CachedPAV-FK-object-port` FOREIGN KEY (`object_id`, `port_name`) REFERENCES `CachedPVM` (`object_id`, `port_name`) ON DELETE CASCADE
+CREATE TABLE `VLANValidID` (
+  `vlan_id` int(10) unsigned NOT NULL default '1',
+  PRIMARY KEY  (`vlan_id`)
 ) ENGINE=InnoDB;
 
-CREATE TABLE `CachedPNV` (
-  `object_id` int(10) unsigned NOT NULL,
-  `port_name` char(255) NOT NULL,
-  `vlan_id` int(10) unsigned NOT NULL default '0',
-  PRIMARY KEY  (`object_id`,`port_name`,`vlan_id`),
-  UNIQUE KEY `port_id` (`object_id`,`port_name`),
-  CONSTRAINT `CachedPNV-FK-compound` FOREIGN KEY (`object_id`, `port_name`, `vlan_id`) REFERENCES `CachedPAV` (`object_id`, `port_name`, `vlan_id`) ON DELETE CASCADE
-) ENGINE=InnoDB;
-
-CREATE TABLE `PortVLANMode` (
-  `object_id` int(10) unsigned NOT NULL,
-  `port_name` char(255) NOT NULL,
-  `vlan_mode` enum('access','trunk') NOT NULL default 'access',
-  PRIMARY KEY  (`object_id`,`port_name`),
-  CONSTRAINT `PortVLANMode-FK-object-port` FOREIGN KEY (`object_id`, `port_name`) REFERENCES `CachedPVM` (`object_id`, `port_name`)
-) ENGINE=InnoDB;
-
-CREATE TABLE `PortAllowedVLAN` (
-  `object_id` int(10) unsigned NOT NULL,
-  `port_name` char(255) NOT NULL,
-  `vlan_id` int(10) unsigned NOT NULL default '0',
-  PRIMARY KEY  (`object_id`,`port_name`,`vlan_id`),
-  KEY `vlan_id` (`vlan_id`),
-  CONSTRAINT `PortAllowedVLAN-FK-object-port` FOREIGN KEY (`object_id`, `port_name`) REFERENCES `PortVLANMode` (`object_id`, `port_name`) ON DELETE CASCADE,
-  CONSTRAINT `PortAllowedVLAN-FK-vlan_id` FOREIGN KEY (`vlan_id`) REFERENCES `VLANValidID` (`vlan_id`)
-) ENGINE=InnoDB;
-
-CREATE TABLE `PortNativeVLAN` (
-  `object_id` int(10) unsigned NOT NULL,
-  `port_name` char(255) NOT NULL,
-  `vlan_id` int(10) unsigned NOT NULL default '0',
-  PRIMARY KEY  (`object_id`,`port_name`,`vlan_id`),
-  UNIQUE KEY `port_id` (`object_id`,`port_name`),
-  CONSTRAINT `PortNativeVLAN-FK-compound` FOREIGN KEY (`object_id`, `port_name`, `vlan_id`) REFERENCES `PortAllowedVLAN` (`object_id`, `port_name`, `vlan_id`) ON DELETE CASCADE
-) ENGINE=InnoDB;
+SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
 
