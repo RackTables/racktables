@@ -2347,7 +2347,7 @@ function resolve8021QConflicts ()
 		$D = getStored8021QConfig ($vswitch['object_id'], 'desired');
 		$C = getStored8021QConfig ($vswitch['object_id'], 'cached');
 		$R = getRunning8021QConfig ($vswitch['object_id']);
-		$plan = get8021QSyncOptions ($vswitch, $D, $C, $R);
+		$plan = get8021QSyncOptions ($vswitch, $D, $C, $R['portdata']);
 		$ndone = 0;
 		foreach ($F as $port_name => $port)
 		{
