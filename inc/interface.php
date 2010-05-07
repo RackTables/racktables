@@ -6738,8 +6738,8 @@ function renderVLANDomain ($vdom_id)
 		foreach ($mydomain['switchlist'] as $switchinfo)
 		{
 			echo "<tr class=row_${order}><td>";
-			renderCell (spotEntity ('object', $switchinfo[$object_id]));
-			echo '</td><td>';
+			renderCell (spotEntity ('object', $switchinfo['object_id']));
+			echo '</td><td class=tdleft>';
 			echo $vstlist[$switchinfo['template_id']]['description'];
 			echo '</td><td>';
 			$qcode = detectVLANSwitchQueue ($switchinfo);
