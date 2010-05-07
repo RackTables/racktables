@@ -56,6 +56,7 @@ $dqtitle = array
 	'resync' => 'Version conflict',
 	'failed' => 'Failed',
 	'disabled' => 'Sync disabled',
+	'done' => 'Up to date',
 );
 
 // Let's have it here, so extensions can add their own images.
@@ -276,6 +277,27 @@ $image['Zooming']['height'] = 22;
 $image['UNLOCK']['path'] = 'pix/crystal-actions-unlock-32x32.png';
 $image['UNLOCK']['width'] = 32;
 $image['UNLOCK']['height'] = 32;
+$image['CLOCK']['path'] = 'pix/tango-appointment-32x32.png';
+$image['CLOCK']['width'] = 32;
+$image['CLOCK']['height'] = 32;
+$image['DQUEUE done']['path'] = 'pix/crystal-ok-32x32.png';
+$image['DQUEUE done']['width'] = 32;
+$image['DQUEUE done']['height'] = 32;
+$image['DQUEUE aging']['path'] = 'pix/tango-appointment-32x32.png';
+$image['DQUEUE aging']['width'] = 32;
+$image['DQUEUE aging']['height'] = 32;
+$image['DQUEUE sync']['path'] = 'pix/tango-emblem-system-32x32.png';
+$image['DQUEUE sync']['width'] = 32;
+$image['DQUEUE sync']['height'] = 32;
+$image['DQUEUE resync']['path'] = 'pix/tango-emblem-important-32x32.png';
+$image['DQUEUE resync']['width'] = 32;
+$image['DQUEUE resync']['height'] = 32;
+$image['DQUEUE failed']['path'] = 'pix/tango-emblem-unreadable-32x32.png';
+$image['DQUEUE failed']['width'] = 32;
+$image['DQUEUE failed']['height'] = 32;
+$image['DQUEUE disabled']['path'] = 'pix/tango-emblem-readonly-32x32.png';
+$image['DQUEUE disabled']['width'] = 32;
+$image['DQUEUE disabled']['height'] = 32;
 
 // This may be populated later onsite, report rendering function will use it.
 // See the $systemreport for structure.
@@ -6709,11 +6731,19 @@ function renderVLANDomain ($vdom_id)
 	{
 		startPortlet ('orders (' . count ($mydomain['switchlist']) . ')');
 		echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
+		echo '<tr><th>switch</th><th>template</th><th>status</th></tr>';
 		$order = 'odd';
-		foreach (array_keys ($mydomain['switchlist']) as $object_id)
+		$vstlist = getVLANSwitchTemplates();
+		global $dqtitle;
+		foreach ($mydomain['switchlist'] as $switchinfo)
 		{
 			echo "<tr class=row_${order}><td>";
-			renderCell (spotEntity ('object', $object_id));
+			renderCell (spotEntity ('object', $switchinfo[$object_id]));
+			echo '</td><td>';
+			echo $vstlist[$switchinfo['template_id']]['description'];
+			echo '</td><td>';
+			$qcode = detectVLANSwitchQueue ($switchinfo);
+			printImageHREF ("DQUEUE ${qcode}", $dqtitle[$qcode]);
 			echo '</td></tr>';
 			$order = $nextorder[$order];
 		}

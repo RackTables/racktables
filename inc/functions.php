@@ -3834,4 +3834,23 @@ function initiateUplinksReverb ($object_id, $uplink_ports)
 		saveDownlinksReverb ($remote_object_id, $remote_ports);
 }
 
+function detectVLANSwitchQueue ($vswitch)
+{
+	if ($vswitch['out_of_sync'] == 'no')
+		return 'done';
+	switch ($vswitch['last_errno'])
+	{
+	case E_8021Q_NOERROR:
+		return $vswitch['age_seconds'] < 300 ? 'aging' : 'sync';
+	case E_8021Q_VERSION_CONFLICT:
+		return 'resync';
+	case E_8021Q_PULL_REMOTE_ERROR:
+	case E_8021Q_PUSH_REMOTE_ERROR:
+		return 'failed';
+	case E_8021Q_SYNC_DISABLED:
+		return 'disabled';
+	}
+	return '';
+}
+
 ?>

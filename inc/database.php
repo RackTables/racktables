@@ -3625,7 +3625,8 @@ function getVLANDomainSwitches ($vdom_id)
 {
 	$result = usePreparedSelectBlade
 	(
-		'SELECT object_id, template_id ' .
+		'SELECT object_id, template_id, last_errno, out_of_sync, ' .
+		'TIMESTAMPDIFF(SECOND, last_change, NOW()) AS age_seconds ' .
 		'FROM VLANSwitch WHERE domain_id = ? ORDER BY object_id',
 		array ($vdom_id)
 	);
@@ -3961,30 +3962,16 @@ function get8021QDeployQueues()
 		'resync' => array(),
 		'failed' => array(),
 		'disabled' => array(),
+		'done' => array(),
 	);
 	$query = 'SELECT object_id, TIMESTAMPDIFF(SECOND, last_change, NOW()) AS age_seconds, ' .
 		'SEC_TO_TIME(TIMESTAMPDIFF(SECOND, last_change, NOW())) AS age, ' .
-		'last_errno, last_error_ts ' .
-		'FROM VLANSwitch WHERE out_of_sync = "yes" ' .
-		'ORDER BY age DESC';
+		'last_errno, last_error_ts, out_of_sync ' .
+		'FROM VLANSwitch ORDER BY age DESC';
 	$result = usePreparedSelectBlade ($query);
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-		switch ($row['last_errno'])
-		{
-		case E_8021Q_NOERROR:
-			$ret[$row['age_seconds'] < 300 ? 'aging' : 'sync'][] = $row;
-			break;
-		case E_8021Q_VERSION_CONFLICT:
-			$ret['resync'][] = $row;
-			break;
-		case E_8021Q_PULL_REMOTE_ERROR:
-		case E_8021Q_PUSH_REMOTE_ERROR:
-			$ret['failed'][] = $row;
-			break;
-		case E_8021Q_SYNC_DISABLED:
-			$ret['disabled'][] = $row;
-			break;
-		}
+		if ('' != $qcode = detectVLANSwitchQueue ($row))
+			$ret[$qcode][] = $row;
 	return $ret;
 }
 
