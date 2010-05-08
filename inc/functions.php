@@ -2897,60 +2897,8 @@ function scanArrayForItem ($table, $scan_column, $scan_value)
 // 2. Iterate over the resulting list and produce real CLI commands.
 function ios12TranslatePushQueue ($queue)
 {
-	$compressed = array();
-	$buffered = NULL;
-	foreach ($queue as $item)
-	{
-		if ($buffered !== NULL)
-		{
-			if
-			(
-				($item['opcode'] == 'add allowed' or $item['opcode'] == 'rem allowed') and
-				$item['opcode'] == $buffered['opcode'] and // same command
-				$item['arg1'] == $buffered['arg1'] and // same interface
-				$item['arg2'] == $buffered['arg3'] + 1 // fits into buffered range
-			)
-			{
-				// merge and wait for next
-				$buffered['arg3'] = $item['arg2'];
-				continue;
-			}
-			// flush
-			$compressed[] = array
-			(
-				'opcode' => $buffered['opcode'],
-				'arg1' => $buffered['arg1'],
-				'arg2' =>
-					$buffered['arg2'] .
-					($buffered['arg2'] == $buffered['arg3'] ? '' : ('-' . $buffered['arg3'])),
-			);
-			$buffered = NULL;
-		}
-		if ($item['opcode'] == 'add allowed' or $item['opcode'] == 'rem allowed')
-		// engage next round
-			$buffered = array
-			(
-				'opcode' => $item['opcode'],
-				'arg1' => $item['arg1'],
-				'arg2' => $item['arg2'],
-				'arg3' => $item['arg2'],
-			);
-		else
-			$compressed[] = $item; // pass through
-	}
-	if ($buffered !== NULL)
-		// Below implies 'opcode' IN ('add allowed', 'rem allowed') and
-		// a fixed structure of the buffered remainder.
-		$compressed[] = array
-		(
-			'opcode' => $buffered['opcode'],
-			'arg1' => $buffered['arg1'],
-			'arg2' =>
-				$buffered['arg2'] .
-				($buffered['arg2'] == $buffered['arg3'] ? '' : ('-' . $buffered['arg3'])),
-		);
 	$ret = "configure terminal\n";
-	foreach ($compressed as $cmd)
+	foreach ($queue as $cmd)
 		switch ($cmd['opcode'])
 		{
 		case 'create VLAN':
@@ -2960,10 +2908,14 @@ function ios12TranslatePushQueue ($queue)
 			$ret .= "no vlan ${cmd['arg1']}\n";
 			break;
 		case 'add allowed':
-			$ret .= "interface ${cmd['arg1']}\nswitchport trunk allowed vlan add ${cmd['arg2']}\nexit\n";
-			break;
 		case 'rem allowed':
-			$ret .= "interface ${cmd['arg1']}\nswitchport trunk allowed vlan remove ${cmd['arg2']}\nexit\n";
+			$clause = $cmd['opcode'] == 'add allowed' ? 'add' : 'remove';
+			$ret .= "interface ${cmd['port']}\n";
+			foreach (listToRanges ($cmd['vlans']) as $range)
+				$ret .= "switchport trunk allowed vlan ${clause} " .
+					($range['from'] == $range['to'] ? $range['to'] : "${range['from']}-${range['to']}") .
+					"\n";
+			$ret .= "exit\n";
 			break;
 		case 'set native':
 			$ret .= "interface ${cmd['arg1']}\nswitchport trunk native vlan ${cmd['arg2']}\nexit\n";
@@ -3001,10 +2953,12 @@ function fdry5TranslatePushQueue ($queue)
 			$ret .= "no vlan ${cmd['arg1']}\n";
 			break;
 		case 'add allowed':
-			$ret .= "vlan ${cmd['arg2']}\ntagged ${cmd['arg1']}\nexit\n";
+			foreach ($cmd['vlans'] as $vlan_id)
+				$ret .= "vlan ${vlan_id}\ntagged ${cmd['port']}\nexit\n";
 			break;
 		case 'rem allowed':
-			$ret .= "vlan ${cmd['arg2']}\nno tagged ${cmd['arg1']}\nexit\n";
+			foreach ($cmd['vlans'] as $vlan_id)
+				$ret .= "vlan ${vlan_id}\nno tagged ${cmd['port']}\nexit\n";
 			break;
 		case 'set native':
 			$ret .= "interface ${cmd['arg1']}\ndual-mode ${cmd['arg2']}\nexit\n";
@@ -3038,10 +2992,14 @@ function vrp53TranslatePushQueue ($queue)
 			$ret .= "undo vlan ${cmd['arg1']}\n";
 			break;
 		case 'add allowed':
-			$ret .= "interface ${cmd['arg1']}\nport trunk allow-pass vlan ${cmd['arg2']}\nquit\n";
-			break;
 		case 'rem allowed':
-			$ret .= "interface ${cmd['arg1']}\nundo port trunk allow-pass vlan ${cmd['arg2']}\nquit\n";
+			$clause = $cmd['opcode'] == 'add allowed' ? '' : 'undo ';
+			$ret .= "interface ${cmd['port']}\n";
+			foreach (listToRanges ($cmd['vlans']) as $range)
+				$ret .=  "${clause}port trunk allow-pass vlan " .
+					($range['from'] == $range['to'] ? $range['to'] : "${range['from']} to ${range['to']}") .
+					"\n";
+			$ret .= "quit\n";
 			break;
 		case 'set native':
 		case 'set access':
@@ -3115,6 +3073,13 @@ function buildVLANFilter ($role, $string)
 	foreach (iosParseVLANString ($string) as $vlan_id)
 		if ($min <= $vlan_id and $vlan_id <= $max)
 			$vlanidlist[] = $vlan_id;
+	return listToRanges ($vlanidlist);
+}
+
+// pack set of integers into list of integer ranges
+// e.g. (1, 2, 3, 5, 6, 7, 9, 11) => ((1, 3), (5, 7), (9, 9), (11, 11))
+function listToRanges ($vlanidlist)
+{
 	sort ($vlanidlist);
 	$ret = array();
 	$from = $to = NULL;
@@ -3230,12 +3195,12 @@ function exportSwitch8021QConfig
 					'arg1' => $port_name,
 					'arg2' => $port['old_native'],
 				);
-			foreach (array_diff ($port['old_allowed'], $port['new_allowed']) as $vlan_id)
+			if (count ($tmp = array_diff ($port['old_allowed'], $port['new_allowed'])))
 				$crq[] = array
 				(
 					'opcode' => 'rem allowed',
-					'arg1' => $port_name,
-					'arg2' => $vlan_id,
+					'port' => $port_name,
+					'vlans' => $tmp,
 				);
 			break;
 		case 'access->access':
@@ -3262,12 +3227,12 @@ function exportSwitch8021QConfig
 				'arg1' => $port_name,
 				'arg2' => $port['old_native'],
 			);
-			foreach ($port['old_allowed'] as $vlan_id)
+			if (count ($port['old_allowed']))
 				$crq[] = array
 				(
 					'opcode' => 'rem allowed',
-					'arg1' => $port_name,
-					'arg2' => $vlan_id,
+					'port' => $port_name,
+					'vlans' => $port['old_allowed'],
 				);
 			break;
 		default:
@@ -3299,12 +3264,12 @@ function exportSwitch8021QConfig
 		case 'trunk->trunk':
 			// For each allowed VLAN, which is present on the "new" list and missing from
 			// the "old" one, queue a command to assign current port to that VLAN.
-			foreach (array_diff ($port['new_allowed'], $port['old_allowed']) as $vlan_id)
+			if (count ($tmp = array_diff ($port['new_allowed'], $port['old_allowed'])))
 				$crq[] = array
 				(
 					'opcode' => 'add allowed',
-					'arg1' => $port_name,
-					'arg2' => $vlan_id,
+					'port' => $port_name,
+					'vlans' => $tmp,
 				);
 			// One of the "allowed" VLANs for this port may probably be "native".
 			// "new native" is set and differs from "old native"
@@ -3332,12 +3297,12 @@ function exportSwitch8021QConfig
 				'arg1' => $port_name,
 				'arg2' => $port['new_mode'],
 			);
-			foreach ($port['new_allowed'] as $vlan_id)
+			if (count ($port['new_allowed']))
 				$crq[] = array
 				(
 					'opcode' => 'add allowed',
-					'arg1' => $port_name,
-					'arg2' => $vlan_id,
+					'port' => $port_name,
+					'vlans' => $port['new_allowed'],
 				);
 			$crq[] = array
 			(
