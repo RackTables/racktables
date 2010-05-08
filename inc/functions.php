@@ -2474,6 +2474,7 @@ function iosParseVLANString ($string)
 	foreach (explode (',', $string) as $item)
 	{
 		$matches = array();
+		$item = trim ($item, ' ');
 		if (preg_match ('/^([[:digit:]]+)$/', $item, $matches))
 			$ret[] = $matches[1];
 		elseif (preg_match ('/^([[:digit:]]+)-([[:digit:]]+)$/', $item, $matches))
