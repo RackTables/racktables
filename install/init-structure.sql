@@ -429,11 +429,6 @@ CREATE TABLE `VLANDomain` (
   UNIQUE KEY `description` (`description`)
 ) ENGINE=InnoDB;
 
-CREATE TABLE `VLANEligibleOIF` (
-  `oif_id` int(10) unsigned NOT NULL default '0',
-  PRIMARY KEY  (`oif_id`)
-) ENGINE=InnoDB;
-
 CREATE TABLE `VLANIPv4` (
   `domain_id` int(10) unsigned NOT NULL,
   `vlan_id` int(10) unsigned NOT NULL,
