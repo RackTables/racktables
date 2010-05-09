@@ -2638,7 +2638,7 @@ function renderIPv4AddressAllocations ($dottedquad)
 		echo "<tr><td>";
 		printImageHREF ('add', 'allocate', TRUE);
 		echo "</td><td>";
-		printSelect (getNarrowObjectList ('IPV4OBJ_LISTSRC'), array ('name' => 'object_id', 'tabindex' => 100, 'id' => 'object_id'), true);
+		printSelect (getNarrowObjectList ('IPV4OBJ_LISTSRC'), array ('name' => 'object_id', 'tabindex' => 100, 'id' => 'object_id'), Null, true);
 		echo "</td><td><input type=text tabindex=101 name=bond_name size=10></td><td>";
 		printSelect ($aat, array ('name' => 'bond_type', 'tabindex' => 102, 'regular'));
 		echo "</td><td>";
