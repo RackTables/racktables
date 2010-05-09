@@ -7097,7 +7097,7 @@ function renderVLANIPv4 ($some_id)
 			return;
 		printOpFormIntro ('bind');
 		echo "<script>";
-		echo "window.dhx_globalImgPath='/pix/';";
+		echo "window.dhx_globalImgPath='pix/';";
 		echo "</script>";
 		echo "<script src='js/dhtmlxcommon.js'></script>";
 		echo "<script src='js/dhtmlxcombo.js'></script>";

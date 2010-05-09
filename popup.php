@@ -95,7 +95,7 @@ header ('Content-Type: text/html; charset=UTF-8');
 			}
 			$spare_ports = findSparePorts ($port_id, $only_racks);
 		echo "<script>";
-		echo "window.dhx_globalImgPath='/pix/';";
+		echo "window.dhx_globalImgPath='pix/';";
 		echo "</script>";
 		echo "<script src='js/dhtmlxcommon.js'></script>";
 		echo "<script src='js/dhtmlxcombo.js'></script>";
