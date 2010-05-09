@@ -7,6 +7,7 @@
 	update: also list WS-C3524-XL (#320)
 	update: better support of Nexus switches
 	update: maintain filter per page load and isolated per realm (#217)
+	bugfix: ldap cache timestamp fix (#332)
 	bugfix: completely fix ticket:211
 	bugfix: declare charset in HTTP header (#312)
 	bugfix: PHP warning with certain auth setups (#310)
