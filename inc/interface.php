@@ -7096,14 +7096,7 @@ function renderVLANIPv4 ($some_id)
 		if (!count ($options))
 			return;
 		printOpFormIntro ('bind');
-		echo "<script>";
-		echo "window.dhx_globalImgPath='pix/';";
-		echo "</script>";
-		echo "<script src='js/dhtmlxcommon.js'></script>";
-		echo "<script src='js/dhtmlxcombo.js'></script>";
-		echo "<link rel='STYLESHEET' type='text/css' href='/css/dhtmlxcombo.css'>";
-		echo '<tr><td>' . getNiftySelect ($options, array ('name' => $sname, 'tabindex' => 101, 'id' => $sname));
-		echo "<script>$(document).ready(function() {var z=dhtmlXComboFromSelect('" . $sname . "');z.enableFilteringMode(true);})</script>";	
+		echo '<tr><td>' . getNiftySelect ($options, array ('name' => $sname, 'tabindex' => 101, 'id' => $sname), Null, true);
 		echo '</td><td>' . getImageHREF ('Attach', 'bind', TRUE, 102) . '</td></tr></form>';
 	}
 	global $pageno;

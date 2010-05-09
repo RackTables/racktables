@@ -94,15 +94,8 @@ header ('Content-Type: text/html; charset=UTF-8');
 					$only_racks = getProximateRacks ($object['rack_id'], getConfigVar ('PROXIMITY_RANGE'));
 			}
 			$spare_ports = findSparePorts ($port_id, $only_racks);
-		echo "<script>";
-		echo "window.dhx_globalImgPath='pix/';";
-		echo "</script>";
-		echo "<script src='js/dhtmlxcommon.js'></script>";
-		echo "<script src='js/dhtmlxcombo.js'></script>";
-		echo "<link rel='STYLESHEET' type='text/css' href='css/dhtmlxcombo.css'>";
 
-			printSelect ($spare_ports, array ('name' => 'ports', 'id' => 'ports'));
-			echo "<script>$(document).ready(function() {var z=dhtmlXComboFromSelect('ports');z.enableFilteringMode(true);})</script>";	
+			printSelect ($spare_ports, array ('name' => 'ports', 'id' => 'ports'), Null, true);
 
 			echo '<br><br>';
 			echo "<input type='submit' value='Link' onclick='".
