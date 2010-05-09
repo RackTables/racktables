@@ -84,10 +84,19 @@ if (get_magic_quotes_gpc())
 		if (gettype ($value) == 'string')
 			$_REQUEST[$key] = stripslashes ($value);
 
-if (!set_magic_quotes_runtime (0))
-{
-	throw new RuntimeException('Failed to turn magic quotes off');
-}
+
+if(version_compare(PHP_VERSION, '5.3.0', '<')) {
+	if (!set_magic_quotes_runtime (0))
+	{
+		throw new RuntimeException('Failed to turn magic quotes off');
+	}
+} else {
+	if (!ini_set("magic_quotes_runtime", 0))
+	{
+		throw new RuntimeException('Failed to turn magic quotes off');
+	}
+}	
+
 
 // Escape any globals before we ever try to use them, but keep a copy of originals.
 $sic = array();
