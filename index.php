@@ -18,11 +18,7 @@ echo '<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">'."\n";
 echo '<head><title>' . getTitle ($pageno) . "</title>\n";
 printPageHeaders();
 ?>
-	<script language='javascript' type='text/javascript' src='js/racktables.js'></script>
-	<script language='javascript' type='text/javascript' src='js/jquery-1.3.1.min.js'></script>
-	<script language='javascript' type='text/javascript' src='js/live_validation.js'></script>
-	<script language='javascript' type='text/javascript' src='js/codepress/codepress.js'></script>
-	</head>
+</head>
 <body>
  <table border=0 cellpadding=0 cellspacing=0 width='100%' height='100%' class=maintable>
  <tr class=mainheader>

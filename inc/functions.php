@@ -1975,8 +1975,9 @@ function cookOptgroups ($recordList, $object_type_id = 0, $existing_value = 0)
 	{
 		$screenlist = array();
 		foreach (explode (';', getConfigVar ('VENDOR_SIEVE')) as $sieve)
-			if (FALSE !== preg_match ("/^([^@]+)(@${object_type_id})?\$/", trim ($sieve), $regs))
+			if (preg_match ("/^([^@]+)(@${object_type_id})?\$/", trim ($sieve), $regs)){
 				$screenlist[] = $regs[1];
+			}
 		foreach (array_keys ($ret) as $vendor)
 			if (in_array ($vendor, $screenlist))
 			{

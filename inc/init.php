@@ -169,8 +169,17 @@ $user_given_tags = array();
 // This also can be modified in local.php.
 $pageheaders = array
 (
-	100 => "<link rel=stylesheet type='text/css' href=pi.css />",
-	200 => "<link rel=icon href='pix/racktables.ico' type='image/x-icon' />",
+	100 => "<link rel='STYLESHEET' type='text/css' href='css/pi.css' />",
+	101 => "<link rel='STYLESHEET' type='text/css' href='css/dhtmlxcombo.css' />",
+	102 => "<link rel='ICON' type='image/x-icon' href='pix/racktables.ico' />",
+	200	=> "<script language='javascript' type='text/javascript' src='js/racktables.js'></script>",
+	201 => "<script language='javascript' type='text/javascript' src='js/jquery-1.3.1.min.js'></script>",
+	202 => "<script language='javascript' type='text/javascript' src='js/live_validation.js'></script>",
+	203 => "<script language='javascript' type='text/javascript' src='js/codepress/codepress.js'></script>",
+	204 => "<script language='javascript' type='text/javascript' src='js/dhtmlxcommon.js'></script>",
+	205 => "<script language='javascript' type='text/javascript' src='js/dhtmlxcombo.js'></script>",
+	206 => "<script language='javascript'>window.dhx_globalImgPath='pix/'</script>",
+
 );
 
 if (!isset ($script_mode) or $script_mode !== TRUE)
