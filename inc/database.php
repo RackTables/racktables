@@ -3689,7 +3689,7 @@ function acquireLDAPCache ($form_username, $password_hash, $expiry = 0)
 {
 	global $dbxlink;
 	$dbxlink->beginTransaction();
-	$query = "select now() - first_success as success_age, now() - last_retry as retry_age, displayed_name, memberof " .
+	$query = "select TIMESTAMPDIFF(SECOND, first_success, now() ) as success_age, TIMESTAMPDIFF(SECOND, last_retry, now()) as retry_age, displayed_name, memberof " .
 		"from LDAPCache where presented_username = '${form_username}' and successful_hash = '${password_hash}' " .
 		"having success_age < ${expiry} for update";
 	$result = useSelectBlade ($query, __FUNCTION__);
@@ -3739,7 +3739,7 @@ function deleteLDAPCacheRecord ($form_username)
 function discardLDAPCache ($maxage = 0)
 {
 	global $dbxlink;
-	$dbxlink->exec ("DELETE from LDAPCache WHERE NOW() - first_success >= ${maxage} or NOW() < first_success");
+	$dbxlink->exec ("DELETE from LDAPCache WHERE TIMESTAMPDIFF(SECOND, first_success, NOW()) >= ${maxage} or NOW() < first_success");
 }
 
 function getUserIDByUsername ($username)
