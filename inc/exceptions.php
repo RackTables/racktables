@@ -202,7 +202,7 @@ function printGenericException($e)
 	echo '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">'."\n";
 	echo '<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">'."\n";
 	echo "<head><title> Exception </title>\n";
-	echo "<link rel=stylesheet type='text/css' href=pi.css />\n";
+	echo "<link rel=stylesheet type='text/css' href=css/pi.css />\n";
 	echo "<link rel=icon href='pix/racktables.ico' type='image/x-icon' />";
 	echo '</head> <body>';
 	echo '<h2>Uncaught exception: '.get_class($e).'</h2><code>'.$e->getMessage().'</code> (<code>'.$e->getCode().'</code>)';
