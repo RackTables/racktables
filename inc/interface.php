@@ -798,9 +798,10 @@ function comboFromSelect ($elem_ids = array())
 	{
 		echo "var z${i}=dhtmlXComboFromSelect('${elem_id}');";
 		echo "z${i}.enableFilteringMode(true);";
+		echo "z${i}.enableOptionAutoPositioning();";
 		echo "z${i}.attachEvent('onKeyPressed', function(keyCode){ z${i}.enableFilteringMode(true); });";
-		echo "z${i}.attachEvent('onOpen', function(){ z${i}.enableFilteringMode(false); });";
-//		echo "z${i}.enableOptionAutoHeight(true);";
+		echo "z${i}.attachEvent('onOpen', function(){ window.setTimeout(function(){var text = z${i}.getComboText();z${i}.setComboText('');z${i}.filterSelf();z${i}.setComboText(text);})});";
+		echo "z${i}.enableOptionAutoHeight(true, 250);";
 //		echo "z${i}.readonly(true);";
 		$i++;
 	}
