@@ -1,5 +1,7 @@
 RackTables - datacenter and server room management framework
-Copyright (c) 2009 Denis Ovsienko, Denis Yeldandi, Aaron Dummer and contributors
+Copyright (c) 2010 Denis Ovsienko, Ryan Farrington and contributors
+Copyright (c) 2009 Denis Ovsienko, Denis Yeldandi, Aaron Dummer,
+                   Jonathan Thurman and contributors
 Copyright (c) 2008 Denis Ovsienko, Aaron Dummer and contributors
 Copyright (c) 2006-2007 Denis Ovsienko, Denis Yeldandi and contributors
 All trademarks and brand names are the rightful properties of their
@@ -89,4 +91,10 @@ released under GNU LGPL.
 
 RackTables uses icons from pgAdmin III, which is copyright 2002-2009,
 The pgAdmin Development Team. pgAdmin is released under the BSD license.
+
+----------------------8<----------------------8<----------------------
+
+RackTables includes dhtmlxCombo, an AJAX-driven JavaScript ComboBox with
+autocomplete, which is copyright DHTMLX LTD. dhtmlxCombo is licensed under
+GNU GPL version 2.
 
