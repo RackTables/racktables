@@ -837,6 +837,11 @@ function dhtmlXCombo(parent,name,width,optionType,tabIndex){
           	data = z?z.value:this.DOMelem_input.value;
           	status = (z==null);
           	if (data==this.getActualValue()) return;
+			if (z==null) {
+				var obi = this.getOptionByIndex(0);
+				this.setComboValue(obi.value)
+				//this.setComboText(z?z.data()[1]:this.DOMelem_hidden_input.value)
+			}return;
       	}
           	
       	this.DOMelem_hidden_input.value=data;
@@ -931,8 +936,10 @@ function dhtmlXCombo(parent,name,width,optionType,tabIndex){
 	  if (this._disabled) return;
       this.closeAll();
       this._positList();
+
       this.DOMlist.style.display="block";
       this.callEvent("onOpen",[]);
+
 	  if(this._tempSel) this._tempSel.deselect();
 	  if(this._selOption) this._selOption.select();
 	  if(this._selOption){

@@ -797,12 +797,16 @@ function comboFromSelect ($elem_ids = array())
 	foreach ($elem_ids as $elem_id)
 	{
 		echo "var z${i}=dhtmlXComboFromSelect('${elem_id}');";
+		echo "z${i}.setComboText('');";
 		echo "z${i}.enableFilteringMode(true);";
 		echo "z${i}.enableOptionAutoPositioning();";
-		echo "z${i}.attachEvent('onKeyPressed', function(keyCode){ z${i}.enableFilteringMode(true); });";
-		echo "z${i}.attachEvent('onOpen', function(){ window.setTimeout(function(){var text = z${i}.getComboText();z${i}.setComboText('');z${i}.filterSelf();z${i}.setComboText(text);})});";
+//		echo "z${i}.attachEvent('onKeyPressed', function(keyCode){ z${i}.enableFilteringMode(true); });";
+//		echo "z${i}.attachEvent('onOpen', function(){z${i}.enableFilteringMode(false);});";
+//		echo "z${i}.attachEvent('onOpen', function(){ window.setTimeout(function(){var text = z${i}.getComboText();z${i}.setComboText('');z${i}.filterSelf();z${i}.setComboText(text);}); return true;});";
+		echo "z${i}.attachEvent('onOpen', function(){ z${i}.setComboText('');return true;});";
+//		echo "z${i}.attachEvent('onBlur', function(){ alert(z${i}.getSelectedValue())});";
 		echo "z${i}.enableOptionAutoHeight(true, 250);";
-//		echo "z${i}.readonly(true);";
+//		echo "z${i}.readonly(true,true);";
 		$i++;
 	}
 	echo '})</script>';
