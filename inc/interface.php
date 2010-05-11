@@ -6458,14 +6458,14 @@ function render8021QOrderForm ($some_id)
 			$options = array();
 			foreach (getVLANDomainList() as $vdom_id => $vdom_info)
 				$options[$vdom_id] = $vdom_info['description'];
-			echo '<td>' . printSelect ($options, array ('name' => 'vdom_id', 'tabindex' => 102, 'id' => 'vdom_id'), getConfigVar ('DEFAULT_VDOM_ID'), true) . '</td>';
+			echo '<td>' . getSelect ($options, array ('name' => 'vdom_id', 'tabindex' => 102, 'id' => 'vdom_id'), getConfigVar ('DEFAULT_VDOM_ID'), true) . '</td>';
 		}
 		if ($pageno != 'vst')
 		{
 			$options = array();
 			foreach (getVLANSwitchTemplates() as $vst_id => $vst_info)
 				$options[$vst_id] = $vst_info['description'];
-			echo '<td>' . printSelect ($options, array ('name' => 'vst_id', 'tabindex' => 103, 'id' => 'vst_id'), getConfigVar ('DEFAULT_VST_ID'), true) . '</td>';
+			echo '<td>' . getSelect ($options, array ('name' => 'vst_id', 'tabindex' => 103, 'id' => 'vst_id'), getConfigVar ('DEFAULT_VST_ID'), true) . '</td>';
 		}
 		echo '<td>' . getImageHREF ('Attach', 'set', TRUE, 104) . '</td></tr></form>';
 	}
