@@ -322,7 +322,12 @@ function getRunning8021QConfig ($object_id)
 		'vrp53' => 'vrp53ReadVLANConfig',
 		'nxos4' => 'nxos4Read8021QConfig',
 	);
-	return $reader[$breed] (dos2unix (gwRetrieveDeviceConfig ($object_id, $breed)));
+	$ret = $reader[$breed] (dos2unix (gwRetrieveDeviceConfig ($object_id, $breed)));
+	// Once there is no default VLAN in the parsed data, it means
+	// something else was parsed instead of config text.
+	if (!in_array (VLAN_DFL_ID, $ret['vlanlist']))
+		throw new RuntimeException ('communication with device failed');
+	return $ret;
 }
 
 function setDevice8021QConfig ($object_id, $pseudocode)
