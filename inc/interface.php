@@ -738,8 +738,6 @@ function renderEditRackForm ($rack_id)
 function printSelect ($optionList, $select_attrs = array(), $selected_id = NULL, $autocomplete = false)
 {
 	echo getSelect ($optionList, $select_attrs, $selected_id);
-	if (array_key_exists ('id', $select_attrs) && $autocomplete)
-		echo "<script>$(document).ready(function() {var z=dhtmlXComboFromSelect('" . $select_attrs['id'] . "');z.enableFilteringMode(true);})</script>";
 }
 
 // Input array keys are OPTION VALUEs and input array values are OPTION text.
@@ -748,6 +746,8 @@ function getSelect ($optionList, $select_attrs = array(), $selected_id = NULL)
 	$ret = '';
 	if (!array_key_exists ('name', $select_attrs))
 		return '';
+	if (!array_key_exists ('id', $select_attrs))
+		$select_attrs['id'] = $select_attrs['name'];
 	$ret .= '<select';
 	foreach ($select_attrs as $attr_name => $attr_value)
 		$ret .= " ${attr_name}=${attr_value}";
@@ -763,8 +763,6 @@ function getSelect ($optionList, $select_attrs = array(), $selected_id = NULL)
 function printNiftySelect ($groupList, $select_attrs = array(), $selected_id = NULL, $autocomplete = false)
 {
 	echo getNiftySelect ($groupList, $select_attrs, $selected_id);
-	if (array_key_exists ('id', $select_attrs) && $autocomplete)
-		echo "<script>$(document).ready(function() {var z=dhtmlXComboFromSelect('" . $select_attrs['id'] . "');z.enableFilteringMode(true);})</script>";
 }
 
 // Input is a cooked list of OPTGROUPs, each with own sub-list of OPTIONs in the same
@@ -776,6 +774,8 @@ function getNiftySelect ($groupList, $select_attrs, $selected_id = NULL)
 		return getSelect ($groupList['other'], $select_attrs, $selected_id);
 	if (!array_key_exists ('name', $select_attrs))
 		return '';
+	if (!array_key_exists ('id', $select_attrs))
+		$select_attrs['id'] = $select_attrs['name'];
 	$ret = '<select';
 	foreach ($select_attrs as $attr_name => $attr_value)
 		$ret .= " ${attr_name}=${attr_value}";
@@ -789,6 +789,12 @@ function getNiftySelect ($groupList, $select_attrs, $selected_id = NULL)
 	}
 	$ret .= '</select>';
 	return $ret;
+}
+
+function comboFromSelect ($elem_id)
+{
+	echo "<script>$(document).ready(function() {var z=dhtmlXComboFromSelect('${elem_id}');";
+	echo "z.enableFilteringMode(true);})</script>";
 }
 
 // used by renderGridForm() and renderRackPage()
