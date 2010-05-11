@@ -6829,6 +6829,10 @@ function renderObject8021QPorts ($object_id)
 			$trclass = 'trerror'; // stuck ghost port
 			$text_right = '&nbsp;';
 			break;
+		case 'downlink':
+			$text_right = '&nbsp;';
+			$trclass = 'trbusy';
+			break;
 		case 'uplink':
 			$text_right = serializeVLANPack ($uplinks[$port_name]);
 			$trclass = $text_left == $text_right ? 'trbusy' : 'trwarning';
