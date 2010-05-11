@@ -752,8 +752,6 @@ function getSelect ($optionList, $select_attrs = array(), $selected_id = NULL)
 	foreach ($select_attrs as $attr_name => $attr_value)
 		$ret .= " ${attr_name}=${attr_value}";
 	$ret .= '>';
-	if (is_null($selected_id))
-		$ret .= "<option value=''></option>";
 	foreach ($optionList as $dict_key => $dict_value)
 		$ret .= "<option value='${dict_key}'" . ($dict_key == $selected_id ? ' selected' : '') . ">${dict_value}</option>";
 	$ret .= '</select>';
@@ -791,10 +789,19 @@ function getNiftySelect ($groupList, $select_attrs, $selected_id = NULL)
 	return $ret;
 }
 
-function comboFromSelect ($elem_id)
+function comboFromSelect ($elem_ids = array())
 {
-	echo "<script>$(document).ready(function() {var z=dhtmlXComboFromSelect('${elem_id}');";
-	echo "z.enableFilteringMode(true);})</script>";
+	
+	echo '<script>$(document).ready(function() {';
+	$i = 1;
+	foreach ($elem_ids as $elem_id)
+	{
+		echo "var z${i}=dhtmlXComboFromSelect('${elem_id}');";
+#		echo "z${i}.enableOptionAutoHeight(true);";
+		echo "z${i}.readonly(true);";
+		$i++;
+	}
+	echo '})</script>';
 }
 
 // used by renderGridForm() and renderRackPage()
@@ -3335,9 +3342,10 @@ function renderPortOIFCompatEditor()
 		echo '<tr><th class=tdleft>';
 		printImageHREF ('add', 'add pair', TRUE);
 		echo '</th><th class=tdleft>';
-		printSelect (readChapter (CHAP_PORTTYPE), array ('name' => 'type1', 'id' => 'type1'),Null,true);
+		printSelect (readChapter (CHAP_PORTTYPE), array ('name' => 'type1'));
 		echo '</th><th class=tdleft>';
-		printSelect (readChapter (CHAP_PORTTYPE), array ('name' => 'type2', 'id' => 'type2'),Null,true);
+		printSelect (readChapter (CHAP_PORTTYPE), array ('name' => 'type2'));
+		comboFromSelect (array ('type1', 'type2'));
 		echo '</th></tr></form>';
 	}
 
@@ -6446,6 +6454,7 @@ function render8021QOrderForm ($some_id)
 	{
 		$all_vswitches = getVLANSwitches();
 		global $pageno;
+		$combos = array();
 		printOpFormIntro ('add');
 		echo '<tr>';
 		if ($pageno != 'object')
@@ -6456,7 +6465,8 @@ function render8021QOrderForm ($some_id)
 			foreach (getNarrowObjectList ('VLANSWITCH_LISTSRC') as $object_id => $object_dname)
 				if (!in_array ($object_id, $all_vswitches))
 					$options[$object_id] = $object_dname;
-			printSelect ($options, array ('name' => 'object_id', 'tabindex' => 101, 'id' => 'object_id'),Null,true);
+			printSelect ($options, array ('name' => 'object_id', 'tabindex' => 101));
+			$combos[] = 'object_id';
 			echo '</td>';
 		}
 		if ($pageno != 'vlandomain')
@@ -6464,15 +6474,18 @@ function render8021QOrderForm ($some_id)
 			$options = array();
 			foreach (getVLANDomainList() as $vdom_id => $vdom_info)
 				$options[$vdom_id] = $vdom_info['description'];
-			echo '<td>' . getSelect ($options, array ('name' => 'vdom_id', 'tabindex' => 102, 'id' => 'vdom_id'), getConfigVar ('DEFAULT_VDOM_ID'), true) . '</td>';
+			echo '<td>' . getSelect ($options, array ('name' => 'vdom_id', 'tabindex' => 102), getConfigVar ('DEFAULT_VDOM_ID')) . '</td>';
+			$combos[] = 'vdom_id';
 		}
 		if ($pageno != 'vst')
 		{
 			$options = array();
 			foreach (getVLANSwitchTemplates() as $vst_id => $vst_info)
 				$options[$vst_id] = $vst_info['description'];
-			echo '<td>' . getSelect ($options, array ('name' => 'vst_id', 'tabindex' => 103, 'id' => 'vst_id'), getConfigVar ('DEFAULT_VST_ID'), true) . '</td>';
+			echo '<td>' . getSelect ($options, array ('name' => 'vst_id', 'tabindex' => 103), getConfigVar ('DEFAULT_VST_ID')) . '</td>';
+			$combos[] = 'vst_id';
 		}
+		comboFromSelect ($combos);
 		echo '<td>' . getImageHREF ('Attach', 'set', TRUE, 104) . '</td></tr></form>';
 	}
 	global $pageno;
