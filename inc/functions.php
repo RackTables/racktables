@@ -3840,4 +3840,20 @@ function acceptable8021QConfig ($port)
 	}
 }
 
+function authorize8021QChangeRequests ($before, $changes)
+{
+	$ret = array();
+	foreach ($changes as $pn => $change)
+	{
+		$annex = array();
+		foreach (array_diff ($change['allowed'], $before[$pn]['allowed']) as $added_id)
+			$annex[] = array ('tag' => '$tovlan_' . $added_id);
+		foreach (array_diff ($before[$pn]['allowed'], $change['allowed']) as $removed_id)
+			$annex[] = array ('tag' => '$fromvlan_' . $removed_id);
+		if (permitted (NULL, NULL, NULL, $annex))
+			$ret[$pn] = $change;
+	}
+	return $ret;
+}
+
 ?>

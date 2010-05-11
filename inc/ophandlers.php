@@ -2241,6 +2241,7 @@ function save8021QPorts ()
 			$before,
 			apply8021QOrder ($vswitch['template_id'], $changes)
 		);
+		$changes = authorize8021QChangeRequests ($before, $changes);
 		foreach ($changes as $port_name => $port)
 			$after[$port_name] = $port;
 		$new_uplinks = filter8021QChangeRequests ($domain_vlanlist, $after, produceUplinkPorts ($domain_vlanlist, $after));

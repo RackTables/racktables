@@ -154,7 +154,7 @@ $ophandler['object']['8021qports']['save'] = 'save8021QPorts';
 $ophandler['object']['8021qports']['sync'] = 'sync8021QPorts';
 $ophandler['object']['8021qsync']['run'] = 'process8021QSyncRequest';
 $ophandler['object']['8021qsync']['resolve'] = 'resolve8021QConflicts';
-#$delayauth['object']['8021qports']['save'] = TRUE;
+$delayauth['object']['8021qports']['save'] = TRUE;
 #$delayauth['object']['8021qsync']['resolve'] = TRUE;
 $delayauth['object']['livevlans']['setPortVLAN'] = TRUE;
 
