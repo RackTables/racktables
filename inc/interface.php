@@ -797,8 +797,11 @@ function comboFromSelect ($elem_ids = array())
 	foreach ($elem_ids as $elem_id)
 	{
 		echo "var z${i}=dhtmlXComboFromSelect('${elem_id}');";
-#		echo "z${i}.enableOptionAutoHeight(true);";
-		echo "z${i}.readonly(true);";
+		echo "z${i}.enableFilteringMode(true);";
+		echo "z${i}.attachEvent('onKeyPressed', function(keyCode){ z${i}.enableFilteringMode(true); });";
+		echo "z${i}.attachEvent('onOpen', function(){ z${i}.enableFilteringMode(false); });";
+//		echo "z${i}.enableOptionAutoHeight(true);";
+//		echo "z${i}.readonly(true);";
 		$i++;
 	}
 	echo '})</script>';

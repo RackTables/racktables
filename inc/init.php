@@ -187,7 +187,8 @@ $pageheaders = array
 	203 => "<script language='javascript' type='text/javascript' src='js/codepress/codepress.js'></script>",
 	204 => "<script language='javascript' type='text/javascript' src='js/dhtmlxcommon.js'></script>",
 	205 => "<script language='javascript' type='text/javascript' src='js/dhtmlxcombo.js'></script>",
-	206 => "<script language='javascript'>window.dhx_globalImgPath='pix/'</script>",
+	206 => "<script language='javascript' type='text/javascript' src='js/dhtmlxcombo_whp.js'></script>",
+	207 => "<script language='javascript'>window.dhx_globalImgPath='pix/'</script>",
 
 );
 
