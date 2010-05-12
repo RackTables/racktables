@@ -152,10 +152,11 @@ $ophandler['object']['8021qorder']['add'] = 'add8021QOrder';
 $ophandler['object']['8021qorder']['del'] = 'del8021QOrder';
 $ophandler['object']['8021qports']['save8021QConfig'] = 'save8021QPorts';
 $ophandler['object']['8021qports']['sync'] = 'sync8021QPorts';
-$ophandler['object']['8021qsync']['run'] = 'process8021QSyncRequest';
-$ophandler['object']['8021qsync']['resolve'] = 'resolve8021QConflicts';
-$delayauth['object']['8021qports']['save'] = TRUE;
-#$delayauth['object']['8021qsync']['resolve'] = TRUE;
+$ophandler['object']['8021qsync']['exec8021QPull'] = 'process8021QSyncRequest';
+$ophandler['object']['8021qsync']['exec8021QPush'] = 'process8021QSyncRequest';
+$ophandler['object']['8021qsync']['resolve8021QConflicts'] = 'resolve8021QConflicts';
+$delayauth['object']['8021qports']['save8021QConfig'] = TRUE;
+#$delayauth['object']['8021qsync']['resolve8021QConflicts'] = TRUE;
 $delayauth['object']['livevlans']['setPortVLAN'] = TRUE;
 
 $page['ipv4space']['title'] = 'IPv4 space';

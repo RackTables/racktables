@@ -7251,13 +7251,13 @@ function renderObject8021QSync ($object_id)
 		echo "<tr><th width='50%' class=tdright>${th}:</th><td class=tdleft colspan=2>${td}</td></tr>";
 
 	echo '<tr><th class=tdright>run now:</th><td class=tdcenter>';
-	printOpFormIntro ('run', array ('mutex_rev' => $vswitch['mutex_rev']));
+	printOpFormIntro ('exec8021QPull');
 	echo getImageHREF ('prev', 'pull remote changes in', TRUE, 101) . '</form></td><td class=tdcenter>';
 	if ($maxdecisions)
 		echo getImageHREF ('COMMIT gray', 'cannot push due to version conflict(s)');
 	else
 	{
-		printOpFormIntro ('run', array ('mutex_rev' => $vswitch['mutex_rev'], 'do_push' => 'yes'));
+		printOpFormIntro ('exec8021QPush');
 		echo getImageHREF ('COMMIT', 'push local changes out', TRUE, 102) . '</form>';
 	}
 	echo '</td></tr>';
@@ -7285,7 +7285,7 @@ function renderObject8021QSync ($object_id)
 	echo '<tr valign=top><th>port</th><th width="40%">last&nbsp;saved&nbsp;version</th>';
 	if ($maxdecisions)
 	{
-		printOpFormIntro ('resolve', array ('mutex_rev' => $vswitch['mutex_rev']));
+		printOpFormIntro ('resolve8021QConflicts', array ('mutex_rev' => $vswitch['mutex_rev']));
 		foreach (array ('left', 'asis', 'right') as $pos)
 			echo "<th class=tdcenter><input type=radio name=column_radio value=${pos} " .
 				"onclick=\"checkColumnOfRadios('i_', ${maxdecisions}, '_${pos}')\"></th>";

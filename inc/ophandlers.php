@@ -2289,10 +2289,11 @@ $msgcode['process8021QSyncRequest']['ERR1'] = 109;
 $msgcode['process8021QSyncRequest']['ERR2'] = 191;
 function process8021QSyncRequest ()
 {
-	global $sic;
+	// behave depending on current operation: exec8021QPull or exec8021QPush
+	global $sic, $op;
 	try
 	{
-		if (FALSE === $done = exec8021QDeploy ($sic['object_id'], array_key_exists ('do_push', $sic)))
+		if (FALSE === $done = exec8021QDeploy ($sic['object_id'], $op == 'exec8021QPush'))
 			return buildRedirectURL (__FUNCTION__, 'ERR2'); // specific case
 		return buildRedirectURL (__FUNCTION__, 'OK', array ($done));
 	}
