@@ -2381,19 +2381,12 @@ function ios12PickSwitchportCommand (&$work, $line)
 {
 	if ($line[0] != ' ') // end of interface section
 	{
-		// fill in defaults
-		if (!array_key_exists ('mode', $work['current']))
-			$work['current']['mode'] = 'access';
-		if (!array_key_exists ('access vlan', $work['current']))
-			$work['current']['access vlan'] = 1;
-		if (!array_key_exists ('trunk native vlan', $work['current']))
-			$work['current']['trunk native vlan'] = 1;
-		if (!array_key_exists ('trunk allowed vlan', $work['current']))
-			$work['current']['trunk allowed vlan'] = range (VLAN_MIN_ID, VLAN_MAX_ID);
 		// save work, if it makes sense
-		switch ($work['current']['mode'])
+		switch (TRUE)
 		{
-		case 'access':
+		case 'access' == $work['current']['mode']:
+			if (!array_key_exists ('access vlan', $work['current']))
+				$work['current']['access vlan'] = 1;
 			$work['portdata'][$work['current']['port_name']] = array
 			(
 				'mode' => 'access',
@@ -2401,7 +2394,11 @@ function ios12PickSwitchportCommand (&$work, $line)
 				'native' => $work['current']['access vlan'],
 			);
 			break;
-		case 'trunk':
+		case 'trunk' == $work['current']['mode']:
+			if (!array_key_exists ('trunk native vlan', $work['current']))
+				$work['current']['trunk native vlan'] = 1;
+			if (!array_key_exists ('trunk allowed vlan', $work['current']))
+				$work['current']['trunk allowed vlan'] = range (VLAN_MIN_ID, VLAN_MAX_ID);
 			// Having configured VLAN as "native" doesn't mean anything
 			// as long as it's not listed on the "allowed" line.
 			$effective_native = in_array
@@ -2417,7 +2414,17 @@ function ios12PickSwitchportCommand (&$work, $line)
 			);
 			break;
 		default:
-			// dot1q-tunnel, dynamic, private-vlan --- skip these
+			// dot1q-tunnel, dynamic, private-vlan or even none --
+			// show in returned config and let user decide, if they
+			// want to fix device config or work around these ports
+			// by means of VST.
+			$work['portdata'][$work['current']['port_name']] = array
+			(
+				'mode' => 'none',
+				'allowed' => array(),
+				'native' => 0,
+			);
+			break;
 		}
 		unset ($work['current']);
 		return 'ios12ScanTopLevel';
