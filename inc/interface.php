@@ -6820,7 +6820,7 @@ function renderObject8021QPorts ($object_id)
 	echo '<tr><th>port</th><th>last&nbsp;saved&nbsp;config</th>';
 	echo $req_port_name == '' ? '<th>new&nbsp;config</th></tr>' : '</tr>';
 	if ($req_port_name == '');
-		printOpFormIntro ('save', array ('mutex_rev' => $vswitch['mutex_rev']));
+		printOpFormIntro ('save8021QConfig', array ('mutex_rev' => $vswitch['mutex_rev']));
 	$nports = 0; // count only access ports
 	foreach ($desired_config as $port_name => $port)
 	{
