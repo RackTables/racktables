@@ -2715,12 +2715,20 @@ function vrp53PickInterfaceSubcommand (&$work, $line)
 		switch ($work['current']['link-type'])
 		{
 		case 'access':
-			$work['portdata'][$work['current']['port_name']] = array
-			(
-				'allowed' => $work['current']['allowed'],
-				'native' => $work['current']['native'],
-				'mode' => 'access',
-			);
+			// VRP does not assign access ports to VLAN1 by default,
+			// leaving them blocked.
+			$work['portdata'][$work['current']['port_name']] =
+				$work['current']['native'] ? array
+				(
+					'allowed' => $work['current']['allowed'],
+					'native' => $work['current']['native'],
+					'mode' => 'access',
+				) : array
+				(
+					'mode' => 'none',
+					'allowed' => array(),
+					'native' => 0,
+				);
 			break;
 		case 'trunk':
 			$work['portdata'][$work['current']['port_name']] = array
