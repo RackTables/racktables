@@ -777,8 +777,8 @@ function updateObject ()
 		assertUIntArg ("${i}_attr_id");
 		$attr_id = $_REQUEST["${i}_attr_id"];
 
-		// Field is empty, delete attribute and move on.
-		if (!strlen ($_REQUEST["${i}_value"]))
+		// Field is empty, delete attribute and move on. OR if the field type is a dictionary and it is the --NOT SET-- value of 0
+		if (!strlen ($_REQUEST["${i}_value"]) || ($oldvalues[$attr_id]['type']=='dict' && $_REQUEST["${i}_value"] == 0))
 		{
 			commitResetAttrValue ($_REQUEST['object_id'], $attr_id);
 			continue;
