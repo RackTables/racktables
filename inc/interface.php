@@ -7395,6 +7395,13 @@ function renderObject8021QSync ($object_id)
 			$right_text = '&nbsp;';
 			break;
 		case 'martian_conflict':
+			if ($item['right']['mode'] == 'none')
+				$right_text = '&nbsp;';
+			else
+			{
+				$right_text = serializeVLANPack ($item['right']);
+				$right_extra = ' trerror';
+			}
 			if ($item['left']['mode'] == 'none')
 				$left_text = '&nbsp;';
 			else
@@ -7404,13 +7411,6 @@ function renderObject8021QSync ($object_id)
 				$radio_attrs = array ('left' => '', 'asis' => ' checked', 'right' => ' disabled');
 				// idem, see above
 				$item['right'] = $default_port;
-			}
-			if ($item['right']['mode'] == 'none')
-				$right_text = '&nbsp;';
-			else
-			{
-				$right_text = serializeVLANPack ($item['right']);
-				$right_extra = ' trerror';
 			}
 			break;
 		default:
