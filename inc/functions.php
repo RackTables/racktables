@@ -2683,9 +2683,10 @@ function vrp53ScanTopLevel (&$work, $line)
 		foreach (vrp53ParseVLANString ($matches[1]) as $vlan_id)
 			$work['vlanlist'][] = $vlan_id;
 		return __FUNCTION__;
-	case (preg_match ('@^interface ((GigabitEthernet|XGigabitEthernet)([[:digit:]]+/[[:digit:]]+/[[:digit:]]+))$@', $line, $matches)):
+	case (preg_match ('@^interface ((GigabitEthernet|XGigabitEthernet|Eth-Trunk)([[:digit:]]+(/[[:digit:]]+)*))$@', $line, $matches)):
 		$matches[1] = preg_replace ('@^GigabitEthernet(.+)$@', 'gi\\1', $matches[1]);
 		$matches[1] = preg_replace ('@^XGigabitEthernet(.+)$@', 'xg\\1', $matches[1]);
+		$matches[1] = preg_replace ('@^Eth-Trunk(.+)$@', 'et\\1', $matches[1]);
 		$work['current'] = array ('port_name' => $matches[1]);
 		return 'vrp53PickInterfaceSubcommand';
 	default:
@@ -2771,6 +2772,7 @@ function vrp53PickInterfaceSubcommand (&$work, $line)
 			if (!in_array ($vlan_id, $work['current']['allowed']))
 				$work['current']['allowed'][] = $vlan_id;
 		break;
+	// TODO: make sure, that a port with "eth-trunk" clause always ends up in "none" mode
 	default: // nom-nom
 	}
 	return __FUNCTION__;
