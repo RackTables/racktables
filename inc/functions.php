@@ -2460,8 +2460,10 @@ function ios12PickSwitchportCommand (&$work, $line)
 	case (preg_match ('@^ switchport trunk allowed vlan (.+)$@', $line, $matches)):
 		$work['current']['trunk allowed vlan'] = iosParseVLANString ($matches[1]);
 		break;
-	case (preg_match ('@^ channel-group @', $line)):
-		// port-channel subinterface config follows that of the master interface
+	case preg_match ('@^ channel-group @', $line):
+	// port-channel subinterface config follows that of the master interface
+	case preg_match ('@^ ip address @', $line):
+	// L3 interface does no switchport functions
 		$work['current']['ignore'] = TRUE;
 		break;
 	default: // suppress warning on irrelevant config clause
@@ -2619,6 +2621,7 @@ function fdry5PickInterfaceSubcommand (&$work, $line)
 		// default VLAN ID for dual-mode command is 1
 		$work['current']['dual-mode'] = strlen (trim ($matches[1])) ? trim ($matches[1]) : 1;
 		break;
+	// FIXME: trunk/link-aggregate/ip address pulls port from 802.1Q field
 	default: // nom-nom
 	}
 	return __FUNCTION__;
