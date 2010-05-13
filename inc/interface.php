@@ -7530,7 +7530,7 @@ function renderVSTRulesEditor ($vst_id)
 		echo '<td>' . getImageHREF ('add', 'add rule', TRUE, 106) . '</td>';
 		echo '<td><input type=text tabindex=101 name=rule_no size=3></td>';
 		echo '<td><input type=text tabindex=102 name=port_pcre></td>';
-		echo '<td>' . getSelect ($port_role_options, array ('name' => 'port_role', 'tabindex' => 103), 'access') . '</td>';
+		echo '<td>' . getSelect ($port_role_options, array ('name' => 'port_role', 'tabindex' => 103), 'none') . '</td>';
 		echo '<td><input type=text tabindex=104 name=wrt_vlans></td>';
 		echo '<td>' . getImageHREF ('add', 'add rule', TRUE, 105) . '</td>';
 		echo '</tr></form>';
@@ -7541,6 +7541,7 @@ function renderVSTRulesEditor ($vst_id)
 	echo '<tr><th>&nbsp;</th><th>sequence</th><th>regexp</th><th>role</th><th>VLAN IDs</th><th>&nbsp;</th></tr>';
 	$port_role_options = array
 	(
+		'none' => 'none',
 		'access' => 'access',
 		'trunk' => 'trunk',
 		'uplink' => 'uplink',
