@@ -2,11 +2,11 @@
 
 $iftable_processors = array();
 
-$iftable_processors['catalyst-4948-mgmt'] = array
+$iftable_processors['catalyst-chassis-mgmt'] = array
 (
-	'pattern' => '@^FastEthernet1$@',
-	'replacement' => 'fa1',
-	'dict_key' => 19,
+	'pattern' => '@^FastEthernet([[:digit:]])$@',
+	'replacement' => 'fa\\1',
+	'dict_key' => '1-19',
 	'label' => 'mgmt',
 	'try_next_proc' => FALSE,
 );
@@ -504,13 +504,13 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 	(
 		'dict_key' => 147,
 		'text' => 'WS-C4948: 48 RJ-45/10-100-1000T(X) + 4 SFP/1000 + 1 RJ-45/100TX (OOB mgmt)',
-		'processors' => array ('catalyst-chassis-49-to-52-1000SFP', 'catalyst-chassis-uplinks-1000T', 'catalyst-4948-mgmt'),
+		'processors' => array ('catalyst-chassis-49-to-52-1000SFP', 'catalyst-chassis-uplinks-1000T', 'catalyst-chassis-mgmt'),
 	),
 	'9.1.659' => array
 	(
 		'dict_key' => 377,
 		'text' => 'WS-C4948-10GE: 48 RJ-45/10-100-1000T(X) + 2 X2/10000 + 1 RJ-45/100TX (OOB mgmt)',
-		'processors' => array ('catalyst-chassis-uplinks-10000X2', 'catalyst-chassis-uplinks-1000T', 'catalyst-4948-mgmt'),
+		'processors' => array ('catalyst-chassis-uplinks-10000X2', 'catalyst-chassis-uplinks-1000T', 'catalyst-chassis-mgmt'),
 	),
 	'9.1.428' => array
 	(
@@ -565,6 +565,18 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'dict_key' => 154,
 		'text' => 'WS-C6506: modular device (INCOMPLETE!)',
 		'processors' => array ('catalyst-chassis-any-1000T'),
+	),
+	'9.1.1104' => array
+	(
+		'dict_key' => 1348,
+		'text' => 'WS-C2350-48TD: 48 RJ-45/10-100-1000T(X) + 2 X2/10000 w/TwinGig option',
+		'processors' => array
+		(
+			'catalyst-chassis-49-to-52-1000SFP', // TwinGig actually
+			'catalyst-chassis-any-1000T',
+			'catalyst-chassis-uplinks-10000X2',
+			'catalyst-chassis-mgmt',
+		),
 	),
 	'9.12.3.1.3.719' => array
 	(
