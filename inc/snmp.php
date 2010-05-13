@@ -566,6 +566,18 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'WS-C6506: modular device (INCOMPLETE!)',
 		'processors' => array ('catalyst-chassis-any-1000T'),
 	),
+	'9.1.1104' => array
+	(
+		'dict_key' => 1348,
+		'text' => 'WS-C2350-48TD: 48 RJ-45/10-100-1000T(X) + 2 X2/10000 w/TwinGig option',
+		'processors' => array
+		(
+			'catalyst-chassis-49-to-52-1000SFP', // TwinGig actually
+			'catalyst-chassis-any-1000T',
+			'catalyst-chassis-uplinks-10000X2',
+			'catalyst-chassis-mgmt',
+		),
+	),
 	'9.12.3.1.3.719' => array
 	(
 		'dict_key' => 960,
