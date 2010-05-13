@@ -1053,8 +1053,6 @@ function resetUIConfig()
 	setConfigVar ('IPV4_TREE_SHOW_VLAN', 'yes');
 	setConfigVar ('DEFAULT_VDOM_ID', '');
 	setConfigVar ('DEFAULT_VST_ID', '');
-	setConfigVar ('8021Q_PULL_AROUND_CONFLICTS', 'yes');
-	setConfigVar ('8021Q_PUSH_AROUND_CONFLICTS', 'yes');
 	setConfigVar ('STATIC_FILTER', 'yes');
 	return buildRedirectURL (__FUNCTION__, 'OK');
 }
