@@ -2358,15 +2358,19 @@ function resolve8021QConflicts ()
 				// for R neither mutex nor revisions can be emulated, but revision change can be
 				if (!same8021QConfigs ($port, $R['portdata'][$port_name]))
 					throw new RuntimeException ('expired form (switch data has changed)');
-				if ($port['decision'] == 'left') // D wins, frame R by writing value of R to C
+				if ($port['decision'] == 'right') // D wins, frame R by writing value of R to C
 					$ndone += upd8021QPort ('cached', $vswitch['object_id'], $port_name, $port);
-				elseif ($port['decision'] == 'right') // R wins, cross D up
+				elseif ($port['decision'] == 'left') // R wins, cross D up
 					$ndone += upd8021QPort ('cached', $vswitch['object_id'], $port_name, $D[$port_name]);
 				// otherwise there was no decision made
 			}
-			elseif ($plan[$port_name]['status'] == 'delete_conflict')
+			elseif
+			(
+				$plan[$port_name]['status'] == 'delete_conflict' or
+				$plan[$port_name]['status'] == 'martian_conflict'
+			)
 			{
-				if ($port['decision'] == 'right') // confirm deletion of local copy
+				if ($port['decision'] == 'left') // confirm deletion of local copy
 					$ndone += del8021QPort ($vswitch['object_id'], $port_name);
 			}
 			// otherwise ignore a decision, which doesn't address a conflict

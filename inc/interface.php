@@ -7287,7 +7287,7 @@ function renderObject8021QSync ($object_id)
 	startPortlet ('preview/resolve');
 	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable width="100%">';
 	if ($maxdecisions)
-		echo '<tr><th colspan=2>&nbsp;</th><th colspan=3>winner</th><th>&nbsp;</th></tr>';
+		echo '<tr><th colspan=2>&nbsp;</th><th colspan=3>discard</th><th>&nbsp;</th></tr>';
 	echo '<tr valign=top><th>port</th><th width="40%">last&nbsp;saved&nbsp;version</th>';
 	if ($maxdecisions)
 	{
@@ -7326,15 +7326,15 @@ function renderObject8021QSync ($object_id)
 				'' : ('<s>' . serializeVLANPack ($item['lastseen']) . '</s><br>');
 			$left_text .= serializeVLANPack ($item['left']);
 			$right_text = '&nbsp;';
-			$radio_attrs = array ('left' => ' disabled', 'asis' => ' checked', 'right' => '');
-			$item['right'] = $default_port; // dummy setting to bypass validation
+			$radio_attrs = array ('left' => '', 'asis' => ' checked', 'right' => ' disabled');
+			// dummy setting to suppress warnings in resolve8021QConflicts()
+			$item['right'] = $default_port;
 			break;
 		case 'add_conflict':
 			$trclass = 'trbusy';
 			$right_extra = ' trerror';
 			$left_text = '&nbsp;';
 			$right_text = serializeVLANPack ($item['right']);
-			$radio_attrs = array ('left' => ' disabled', 'asis' => ' checked', 'right' => ' disabled');
 			break;
 		case 'ok_to_add':
 			$trclass = 'trbusy';
@@ -7381,7 +7381,7 @@ function renderObject8021QSync ($object_id)
 				count (array_diff ($item['right']['allowed'], $domvlans)) or
 				$item['vst_role'] != $item['right']['mode']
 			)
-				$radio_attrs['right'] = ' disabled';
+				$radio_attrs['left'] = ' disabled';
 			break;
 		case 'ok_to_push_with_merge':
 			$trclass = 'trbusy';
@@ -7401,6 +7401,9 @@ function renderObject8021QSync ($object_id)
 			{
 				$left_text = serializeVLANPack ($item['left']);
 				$left_extra = ' trerror';
+				$radio_attrs = array ('left' => '', 'asis' => ' checked', 'right' => ' disabled');
+				// idem, see above
+				$item['right'] = $default_port;
 			}
 			if ($item['right']['mode'] == 'none')
 				$right_text = '&nbsp;';
@@ -7409,7 +7412,6 @@ function renderObject8021QSync ($object_id)
 				$right_text = serializeVLANPack ($item['right']);
 				$right_extra = ' trerror';
 			}
-			$radio_attrs = array ('left' => ' disabled', 'asis' => ' checked', 'right' => ' disabled');
 			break;
 		default:
 			$trclass = 'trerror';
