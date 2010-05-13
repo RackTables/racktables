@@ -6894,10 +6894,13 @@ function renderObject8021QPorts ($object_id)
 			$options = array();
 			// Offer only options, which are listed in domain and fit into VST.
 			// Never offer immune VLANs regardless of VST filter for this port.
+			// Also exclude current VLAN from the options, unless current port
+			// mode is "trunk" (in this case it should be possible to set VST-
+			// approved mode without changing native VLAN ID).
 			foreach ($vdom['vlanlist'] as $vlan_id => $vlan_info)
 				if
 				(
-					$vlan_id != $port['native'] and
+					($vlan_id != $port['native'] or $port['mode'] == 'trunk') and
 					$vlan_info['vlan_type'] != 'alien' and
 					matchVLANFilter ($vlan_id, $port['wrt_vlans'])
 				)
