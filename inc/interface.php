@@ -2375,7 +2375,7 @@ function renderIPv4Network ($id)
 		$vlaninfo = getVLANInfo ($item['domain_id'] . '-' . $item['vlan_id']);
 		echo '<tr><th width="50%" class=tdright>VLAN:</th><td class=tdleft><a href="';
 		echo makeHref (array ('page' => 'vlan', 'vlan_ck' => $vlaninfo['vlan_ck'])) . '">';
-		echo formatVLANName ($vlaninfo) . ' @' . niftyString ($vlaninfo['domain_descr']);
+		echo formatVLANName ($vlaninfo, 'markup long');
 		echo '</a></td></tr>';
 	}
 	if (getConfigVar ('EXT_IPV4_VIEW') == 'yes' and count ($routers = findRouters ($range['addrlist'])))
@@ -6332,7 +6332,7 @@ function dynamic_title_decoder ($path_position)
 	case 'vlan':
 		return array
 		(
-			'name' => formatVLANName (getVLANInfo ($sic['vlan_ck']), TRUE),
+			'name' => 'VLAN' . formatVLANName (getVLANInfo ($sic['vlan_ck']), 'label'),
 			'params' => array ('vlan_ck' => $sic['vlan_ck'])
 		);
 	case 'vst':
@@ -6886,7 +6886,7 @@ function renderObject8021QPorts ($object_id)
 				$vdom['vlanlist'][$port['native']]['vlan_type'] == 'alien'
 			)
 			{
-				$text_right = formatVLANName ($vdom['vlanlist'][$port['native']]);
+				$text_right = formatVLANName ($vdom['vlanlist'][$port['native']], 'label');
 				break;
 			}
 			$text_right = "<input type=hidden name=pn_${nports} value=${port_name}>";
@@ -6904,7 +6904,7 @@ function renderObject8021QPorts ($object_id)
 					$vlan_info['vlan_type'] != 'alien' and
 					matchVLANFilter ($vlan_id, $port['wrt_vlans'])
 				)
-					$options[$vlan_id] = formatVLANName ($vlan_info, TRUE);
+					$options[$vlan_id] = formatVLANName ($vlan_info, 'option');
 			ksort ($options);
 			$options['same'] = '-- no change --';
 			$text_right .= getSelect ($options, array ('name' => "pnv_${nports}"), 'same');
@@ -6959,7 +6959,7 @@ function renderTrunkPortControls ($vswitch, $vdom, $port_name, $vlanport)
 		$allowed_options[$vlan_id] = array
 		(
 			'vlan_type' => $vlan_info['vlan_type'],
-			'text' => formatVLANName ($vlan_info),
+			'text' => formatVLANName ($vlan_info, 'label'),
 		);
 	foreach ($vlanport['allowed'] as $vlan_id)
 		if (!array_key_exists ($vlan_id, $allowed_options))
@@ -7003,7 +7003,7 @@ function renderTrunkPortControls ($vswitch, $vdom, $port_name, $vlanport)
 			$native_options[$vlan_id] = array_key_exists ($vlan_id, $vdom['vlanlist']) ? array
 				(
 					'vlan_type' => $vdom['vlanlist'][$vlan_id]['vlan_type'],
-					'text' => formatVLANName ($vdom['vlanlist'][$vlan_id]),
+					'text' => formatVLANName ($vdom['vlanlist'][$vlan_id], 'label'),
 				) : array
 				(
 					'vlan_type' => 'none',
@@ -7194,7 +7194,7 @@ function renderVLANIPv4 ($some_id)
 			break;
 		case 'ipv4net':
 			$vlaninfo = getVLANInfo ($item['domain_id'] . '-' . $item['vlan_id']);
-			echo formatVLANName ($vlaninfo) . ' @' . niftyString ($vlaninfo['domain_descr']);
+			echo formatVLANName ($vlaninfo, 'markup long');
 			break;
 		}
 		echo '</td><td><a href="';

@@ -2335,12 +2335,28 @@ function decodeVLANCK ($string)
 
 // Return VLAN name formatted for HTML output (note, that input
 // argument comes from database unescaped).
-function formatVLANName ($vlaninfo, $plaintext = FALSE)
+function formatVLANName ($vlaninfo, $context = 'markup long')
 {
-	$ret = ($plaintext ? '' : '<tt>') . 'VLAN' . $vlaninfo['vlan_id'] . ($plaintext ? '' : '</tt>');
-	if (strlen ($vlaninfo['vlan_descr']))
-		$ret .= ' ' . ($plaintext ? '' : '<i>') . '(' . niftyString ($vlaninfo['vlan_descr']) . ')' . ($plaintext ? '' : '</i>');
-	return $ret;
+	switch ($context)
+	{
+	case 'option':
+		$ret = $vlaninfo['vlan_id'];
+		if ($vlaninfo['vlan_descr'] != '')
+			$ret .= ' ' . niftyString ($vlaninfo['vlan_descr']);
+		return $ret;
+	case 'label':
+		$ret = $vlaninfo['vlan_id'];
+		if ($vlaninfo['vlan_descr'] != '')
+			$ret .= ' <i>(' . niftyString ($vlaninfo['vlan_descr']) . ')</i>';
+		return $ret;
+	case 'markup long':
+	default:
+		$ret = 'VLAN' . $vlaninfo['vlan_id'];
+		$ret .= ' @' . niftyString ($vlaninfo['domain_descr']);
+		if ($vlaninfo['vlan_descr'] != '')
+			$ret .= ' <i>(' . niftyString ($vlaninfo['vlan_descr']) . ')</i>';
+		return $ret;
+	}
 }
 
 function ios12ReadVLANConfig ($input)
