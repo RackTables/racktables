@@ -2384,6 +2384,14 @@ function ios12PickSwitchportCommand (&$work, $line)
 		// save work, if it makes sense
 		switch (TRUE)
 		{
+		case $work['current']['ignore']:
+			$work['portdata'][$work['current']['port_name']] = array
+			(
+				'mode' => 'none',
+				'allowed' => array(),
+				'native' => 0,
+			);
+			break;
 		case 'access' == $work['current']['mode']:
 			if (!array_key_exists ('access vlan', $work['current']))
 				$work['current']['access vlan'] = 1;
@@ -2451,6 +2459,10 @@ function ios12PickSwitchportCommand (&$work, $line)
 		break;
 	case (preg_match ('@^ switchport trunk allowed vlan (.+)$@', $line, $matches)):
 		$work['current']['trunk allowed vlan'] = iosParseVLANString ($matches[1]);
+		break;
+	case (preg_match ('@^ channel-group @', $line)):
+		// port-channel subinterface config follows that of the master interface
+		$work['current']['ignore'] = TRUE;
 		break;
 	default: // suppress warning on irrelevant config clause
 	}
