@@ -7483,7 +7483,7 @@ function renderVSTListEditor()
 		else
 		{
 			echo '<a href="' . makeHrefProcess (array ('op' => 'del', 'vst_id' => $vst_id)) . '">';
-			echo getImageHREF ('destroy', 'delete domain') . '</a>';
+			echo getImageHREF ('destroy', 'delete template') . '</a>';
 		}
 		echo '</td>';
 		echo '<td><input name=vst_descr type=text value="' . niftyString ($vst_info['description'], 0) . '"></td>';
