@@ -7228,7 +7228,13 @@ function renderObject8021QSync ($object_id)
 	$plan = apply8021QOrder ($vswitch['template_id'], get8021QSyncOptions ($vswitch, $D, $C, $R['portdata']));
 	$maxdecisions = 0;
 	foreach ($plan as $port)
-		if ($port['status'] == 'delete_conflict' or $port['status'] == 'merge_conflict')
+		if
+		(
+			$port['status'] == 'delete_conflict' or
+			$port['status'] == 'merge_conflict' or
+			$port['status'] == 'add_conflict' or
+			$port['status'] == 'martian_conflict'
+		)
 			$maxdecisions++;
 
 	echo '<table border=0 class=objectview cellspacing=0 cellpadding=0>';
@@ -7267,12 +7273,12 @@ function renderObject8021QSync ($object_id)
 	startPortlet ('preview legend');
 	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
 	echo '<tr><th>status</th><th width="50%">color code</th></tr>';
-	echo '<tr><td class=tdright>no action required:</td><td class=trbusy>&nbsp;</td></tr>';
-	echo '<tr><td class=tdright>port in default VLAN, no action required:</td><td>&nbsp;</td></tr>';
-	echo '<tr><td class=tdright>updated data, pending pull/push:</td><td class=trok>&nbsp;</td></tr>';
-	echo '<tr><td class=tdright>some or all remote changes will be discarded:</td><td class=trwarning>&nbsp;</td></tr>';
-	echo '<tr><td class=tdright>verson conflict, requires manual resolving:</td><td class=trerror>&nbsp;</td></tr>';
-	echo '<tr><td class=tdright>does not exist:</td><td class=trnull>&nbsp;</td></tr>';
+	echo '<tr><td class=tdright>with template role:</td><td class=trbusy>&nbsp;</td></tr>';
+	echo '<tr><td class=tdright>without template role:</td><td>&nbsp;</td></tr>';
+	echo '<tr><td class=tdright>new data:</td><td class=trok>&nbsp;</td></tr>';
+	echo '<tr><td class=tdright>warnings in new data:</td><td class=trwarning>&nbsp;</td></tr>';
+	echo '<tr><td class=tdright>fatal errors in new data:</td><td class=trerror>&nbsp;</td></tr>';
+	echo '<tr><td class=tdright>deleted data:</td><td class=trnull>&nbsp;</td></tr>';
 	echo '</table>';
 	finishPortlet();
 
@@ -7323,10 +7329,15 @@ function renderObject8021QSync ($object_id)
 			$radio_attrs = array ('left' => ' disabled', 'asis' => ' checked', 'right' => '');
 			$item['right'] = $default_port; // dummy setting to bypass validation
 			break;
+		case 'add_conflict':
+			$trclass = 'trbusy';
+			$right_extra = ' trerror';
+			$left_text = '&nbsp;';
+			$right_text = serializeVLANPack ($item['right']);
+			$radio_attrs = array ('left' => ' disabled', 'asis' => ' checked', 'right' => ' disabled');
+			break;
 		case 'ok_to_add':
-			if (!same8021QConfigs ($item['both'], $default_port))
-				$trclass = 'trbusy';
-			$left_extra = ' trnull';
+			$trclass = 'trbusy';
 			$right_extra = ' trok';
 			$left_text = '&nbsp;';
 			$right_text = serializeVLANPack ($item['right']);
@@ -7337,8 +7348,7 @@ function renderObject8021QSync ($object_id)
 			$right_extra = ' trok';
 			// fall through
 		case 'in_sync':
-			if (!same8021QConfigs ($item['both'], $default_port))
-				$trclass = 'trbusy';
+			$trclass = 'trbusy';
 			$left_text = $right_text = serializeVLANPack ($item['both']);
 			break;
 		case 'ok_to_pull':
@@ -7379,6 +7389,31 @@ function renderObject8021QSync ($object_id)
 			$right_extra = ' trwarning';
 			$left_text = serializeVLANPack ($item['left']);
 			$right_text = serializeVLANPack ($item['right']);
+			break;
+		case 'none':
+			$left_text = '&nbsp;';
+			$right_text = '&nbsp;';
+			break;
+		case 'martian_conflict':
+			if ($item['left']['mode'] == 'none')
+				$left_text = '&nbsp;';
+			else
+			{
+				$left_text = serializeVLANPack ($item['left']);
+				$left_extra = ' trerror';
+			}
+			if ($item['right']['mode'] == 'none')
+				$right_text = '&nbsp;';
+			else
+			{
+				$right_text = serializeVLANPack ($item['right']);
+				$right_extra = ' trerror';
+			}
+			$radio_attrs = array ('left' => ' disabled', 'asis' => ' checked', 'right' => ' disabled');
+			break;
+		default:
+			$trclass = 'trerror';
+			$left_text = $right_text = 'internal rendering error';
 			break;
 		}
 		echo "<tr class='${trclass}'><td class=tdleft>${port_name}</td>";

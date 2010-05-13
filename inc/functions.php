@@ -3521,6 +3521,30 @@ function get8021QSyncOptions
 		$allports[$pn] = array();
 	foreach (apply8021QOrder ($vswitch['template_id'], $allports) as $pn => $port)
 	{
+		// catch anomalies early
+		if ($port['vst_role'] == 'none')
+		{
+			if ((!array_key_exists ($pn, $R) or $R[$pn]['mode'] == 'none') and !array_key_exists ($pn, $C))
+				$ret[$pn] = array ('status' => 'none');
+			else
+				$ret[$pn] = array
+				(
+					'status' => 'martian_conflict',
+					'left' => array_key_exists ($pn, $C) ? $C[$pn] : array ('mode' => 'none'),
+					'right' => array_key_exists ($pn, $R) ? $R[$pn] : array ('mode' => 'none'),
+				);
+			continue;
+		}
+		elseif ((!array_key_exists ($pn, $R) or $R[$pn]['mode'] == 'none') and array_key_exists ($pn, $C))
+		{
+			$ret[$pn] = array
+			(
+				'status' => 'martian_conflict',
+				'left' => array_key_exists ($pn, $C) ? $C[$pn] : array ('mode' => 'none'),
+				'right' => array_key_exists ($pn, $R) ? $R[$pn] : array ('mode' => 'none'),
+			);
+			continue;
+		}
 		// (DC_): port missing from device
 		if (!array_key_exists ($pn, $R))
 		{
@@ -3537,9 +3561,12 @@ function get8021QSyncOptions
 		// (__R): port missing from DB
 		if (!array_key_exists ($pn, $C))
 		{
+			// Allow importing any configuration, which passes basic
+			// validation. If port mode doesn't match its VST role,
+			// this will be handled later WRT each port.
 			$ret[$pn] = array
 			(
-				'status' => 'ok_to_add',
+				'status' => acceptable8021QConfig ($R[$pn]) ? 'ok_to_add' : 'add_conflict',
 				'right' => $R[$pn],
 			);
 			continue;
@@ -3633,6 +3660,8 @@ function exec8021QDeploy ($object_id, $do_push)
 			break;
 		case 'delete_conflict':
 		case 'merge_conflict':
+		case 'add_conflict':
+		case 'martian_conflict':
 			$conflict = TRUE;
 			break;
 		case 'ok_to_pull':
