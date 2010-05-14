@@ -58,16 +58,16 @@ if (isset ($tabhandler[$pageno][$tabno]))
 		switch ($page[$pageno]['bypass_type'])
 		{
 			case 'uint':
-				assertUIntArg ($page[$pageno]['bypass'], 'index');
+				assertUIntArg ($page[$pageno]['bypass']);
 				break;
 			case 'uint0':
-				assertUIntArg ($page[$pageno]['bypass'], 'index', TRUE);
+				assertUIntArg ($page[$pageno]['bypass'], TRUE);
 				break;
 			case 'inet4':
-				assertIPv4Arg ($page[$pageno]['bypass'], 'index');
+				assertIPv4Arg ($page[$pageno]['bypass']);
 				break;
 			case 'string':
-				assertStringArg ($page[$pageno]['bypass'], 'index');
+				assertStringArg ($page[$pageno]['bypass']);
 				break;
 			default:
 				throw new RuntimeException ('Dispatching error for bypass parameter');
