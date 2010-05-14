@@ -483,6 +483,7 @@ CREATE TABLE `UserConfig` (
 			$query = array_merge ($query, reloadDictionary ($batchid));
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdefined, description) VALUES ('ENABLE_BULKPORT_FORM','yes','string','no','no','yes','Enable \"Bulk Port\" form');";
 			$query[] = "UPDATE Config SET varvalue = '0.17.11' WHERE varname = 'DB_VERSION'";
+			$query[] = "DELETE attributevalue FROM attributevalue join attribute where attributevalue.attr_id = attribute.id and attribute.`type` = 'dict' and attributevalue.uint_value = 0;";
 		case '0.18.0':
 			$query = array_merge ($query, reloadDictionary ($batchid));
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('VLANSWITCH_LISTSRC', '', 'string', 'yes', 'no', 'List of VLAN running switches')";
