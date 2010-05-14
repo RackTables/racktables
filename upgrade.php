@@ -42,6 +42,7 @@ function getDBUpgradePath ($v1, $v2)
 		'0.17.8',
 		'0.17.9',
 		'0.17.10',
+		'0.17.11',
 	);
 	if (!in_array ($v1, $versionhistory) or !in_array ($v2, $versionhistory))
 		return NULL;
@@ -478,6 +479,10 @@ CREATE TABLE `UserConfig` (
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdefined, description) VALUES ('STATIC_FILTER','yes','string','no','no','yes','Enable Filter Caching');";
 			$query[] = "UPDATE Config SET varvalue = '0.17.10' WHERE varname = 'DB_VERSION'";
 			break;
+		case '0.17.11':
+			$query = array_merge ($query, reloadDictionary ($batchid));
+			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdefined, description) VALUES ('ENABLE_BULKPORT_FORM','yes','string','no','no','yes','Enable \"Bulk Port\" form');";
+			$query[] = "UPDATE Config SET varvalue = '0.17.11' WHERE varname = 'DB_VERSION'";
 		default:
 			showFailure ("executeUpgradeBatch () failed, because batch '${batchid}' isn't defined", __FILE__);
 			die;

@@ -393,6 +393,8 @@ INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdef
 ('IPV4_TREE_RTR_AS_CELL','yes','string','no','no','no','Show full router info for each network in IPv4 tree view'),
 ('PROXIMITY_RANGE','0','uint','yes','no','no','Proximity range (0 is current rack only)'),
 ('DB_VERSION','0.17.10','string','no','yes','no','Database version.'),
-('STATIC_FILTER','yes','string','no','no','yes','Enable Filter Caching');
+('STATIC_FILTER','yes','string','no','no','yes','Enable Filter Caching'),
+('ENABLE_BULKPORT_FORM','yes','string','no','no','yes','Enable "Bulk Port" form'),
+;
 
 INSERT INTO `Script` VALUES ('RackCode','allow {$userid_1}');
