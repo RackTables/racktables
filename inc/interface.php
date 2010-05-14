@@ -6848,6 +6848,7 @@ function renderObject8021QPorts ($object_id)
 	$vdom = getVLANDomain ($vswitch['domain_id']);
 	$req_port_name = array_key_exists ('port_name', $sic) ? $sic['port_name'] : '';
 	$desired_config = apply8021QOrder ($vswitch['template_id'], getStored8021QConfig ($object_id, 'desired'));
+	$cached_config = getStored8021QConfig ($object_id, 'cached');
 	uksort ($desired_config, 'sortTokenize');
 	$uplinks = filter8021QChangeRequests ($vdom['vlanlist'], $desired_config, produceUplinkPorts ($vdom['vlanlist'], $desired_config));
 	echo '<table border=0 width="100%"><tr valign=top><td class=tdleft width="30%">';
@@ -6860,7 +6861,9 @@ function renderObject8021QPorts ($object_id)
 	$nports = 0; // count only access ports
 	foreach ($desired_config as $port_name => $port)
 	{
-		$text_left = serializeVLANPack ($port);
+		$text_left = same8021QConfigs ($cached_config[$port_name], $port) ? '' :
+			('<s>' . serializeVLANPack ($cached_config[$port_name]) . '</s><br>');
+		$text_left .= serializeVLANPack ($port);
 		// decide on row class
 		switch ($port['vst_role'])
 		{
@@ -6871,12 +6874,12 @@ function renderObject8021QPorts ($object_id)
 			$text_right = '&nbsp;';
 			break;
 		case 'downlink':
-			$text_right = '&nbsp;';
+			$text_right = '(downlink)';
 			$trclass = 'trbusy';
 			break;
 		case 'uplink':
 			$text_right = serializeVLANPack ($uplinks[$port_name]);
-			$trclass = $text_left == $text_right ? 'trbusy' : 'trwarning';
+			$trclass = same8021QConfigs ($port, $uplinks[$port_name]) ? 'trbusy' : 'trwarning';
 			break;
 		case 'trunk':
 			$trclass =
@@ -7400,14 +7403,16 @@ function renderObject8021QSync ($object_id)
 		case 'ok_to_push':
 			$trclass = ' trbusy';
 			$left_extra = ' trok';
-			$left_text = serializeVLANPack ($item['left']);
+			$left_text = '<s>' . serializeVLANPack ($C[$port_name]) . '</s><br>' .
+				serializeVLANPack ($item['left']);
 			$right_text = serializeVLANPack ($item['right']);
 			break;
 		case 'merge_conflict':
 			$trclass = 'trbusy';
 			$left_extra = ' trerror';
 			$right_extra = ' trerror';
-			$left_text = serializeVLANPack ($item['left']);
+			$left_text = '<s>' . serializeVLANPack ($C[$port_name]) . '</s><br>' .
+				serializeVLANPack ($item['left']);
 			$right_text = serializeVLANPack ($item['right']);
 			// enable, but consider each option independently
 			// Don't accept running VLANs not in domain, and
@@ -7426,7 +7431,8 @@ function renderObject8021QSync ($object_id)
 			$trclass = 'trbusy';
 			$left_extra = ' trok';
 			$right_extra = ' trwarning';
-			$left_text = serializeVLANPack ($item['left']);
+			$left_text = '<s>' . serializeVLANPack ($C[$port_name]) . '</s><br>' .
+				serializeVLANPack ($item['left']);
 			$right_text = serializeVLANPack ($item['right']);
 			break;
 		case 'none':
