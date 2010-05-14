@@ -1208,12 +1208,30 @@ function renderPortsForObject ($object_id)
 		printImageHREF ('add', 'add a port', TRUE, 104);
 		echo "</td></tr></form>";
 	}
-	if (getConfigVar('ENABLE_MULTIPORT_FORM') == 'yes')
+	if (getConfigVar('ENABLE_MULTIPORT_FORM') == 'yes' || getConfigVar('ENABLE_BULKPORT_FORM') == 'yes' )
 		startPortlet ('Ports and interfaces');
 	else
 		echo '<br>';
 	$object = spotEntity ('object', $object_id);
 	amplifyCell ($object);
+	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes' && getConfigVar('ENABLE_BULKPORT_FORM') == 'yes'){
+		echo "<table cellspacing=0 cellpadding='5' align='center' class='widetable'>\n";
+		echo "<tr><th>&nbsp;</th><th class=tdleft>Local name</th><th class=tdleft>Visible label</th><th class=tdleft>Interface</th><th class=tdleft>Start Number</th>";
+		echo "<th class=tdleft>Count</th><th>&nbsp;</th></tr>\n";
+		printOpFormIntro ('addBulkPorts');
+		echo "<tr><td>";
+		printImageHREF ('add', 'add ports', TRUE);
+		echo "</td><td><input type=text size=8 name=port_name tabindex=105></td>\n";
+		echo "<td><input type=text name=port_label tabindex=106></td><td>";
+		printNiftySelect (getNewPortTypeOptions(), array ('name' => 'port_type_id', 'tabindex' => 107), $prefs['selected']);
+		echo "<td><input type=text name=port_numbering_start tabindex=108 size=3 maxlength=3></td>\n";
+		echo "<td><input type=text name=port_numbering_count tabindex=109 size=3 maxlength=3></td>\n";
+		echo "<td>&nbsp;</td><td>";
+		printImageHREF ('add', 'add ports', TRUE, 110);
+		echo "</td></tr></form>";
+		echo "</table><br>\n";
+	}
+	
 	echo "<table cellspacing=0 cellpadding='5' align='center' class='widetable'>\n";
 	echo "<tr><th>&nbsp;</th><th class=tdleft>Local name</th><th class=tdleft>Visible label</th><th class=tdleft>Interface</th><th class=tdleft>L2 address</th>";
 	echo "<th class=tdcenter colspan=2>Remote object and port</th><th class=tdcenter>(Un)link or (un)reserve</th><th>&nbsp;</th></tr>\n";
@@ -1306,6 +1324,23 @@ function renderPortsForObject ($object_id)
 	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')
 		printNewItemTR ($prefs);
 	echo "</table><br>\n";
+	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes' && getConfigVar('ENABLE_BULKPORT_FORM') == 'yes'){
+		echo "<table cellspacing=0 cellpadding='5' align='center' class='widetable'>\n";
+		echo "<tr><th>&nbsp;</th><th class=tdleft>Local name</th><th class=tdleft>Visible label</th><th class=tdleft>Interface</th><th class=tdleft>Start Number</th>";
+		echo "<th class=tdleft>Count</th><th>&nbsp;</th></tr>\n";
+		printOpFormIntro ('addBulkPorts'); 
+		echo "<tr><td>";
+		printImageHREF ('add', 'add ports', TRUE);
+		echo "</td><td><input type=text size=8 name=port_name tabindex=105></td>\n";
+		echo "<td><input type=text name=port_label tabindex=106></td><td>";
+		printNiftySelect (getNewPortTypeOptions(), array ('name' => 'port_type_id', 'tabindex' => 107), $prefs['selected']);
+		echo "<td><input type=text name=port_numbering_start tabindex=108 size=3 maxlength=3></td>\n";
+		echo "<td><input type=text name=port_numbering_count tabindex=109 size=3 maxlength=3></td>\n";
+		echo "<td>&nbsp;</td><td>";
+		printImageHREF ('add', 'add ports', TRUE, 110);
+		echo "</td></tr></form>";
+		echo "</table><br>\n";
+	}
 	if (getConfigVar('ENABLE_MULTIPORT_FORM') == 'yes')
 		finishPortlet();
 	if (getConfigVar('ENABLE_MULTIPORT_FORM') != 'yes')
@@ -1534,7 +1569,7 @@ function showMessageOrError ()
 				79 => array ('code' => 'success', 'format' => 'Rack "%s" was deleted successfully'),
 				80 => array ('code' => 'success', 'format' => "Added new object '%s'"),
 				81 => array ('code' => 'success', 'format' => "SNMP: completed '%s' work"),
-
+				82 => array ('code' => 'success', 'format' => "Bulk port creation was successful. %u ports created, %u failed"),
 // records 100~199 with fatal error messages
 				100 => array ('code' => 'error', 'format' => '%s'),
 				101 => array ('code' => 'error', 'format' => 'Port name cannot be empty'),
@@ -1628,6 +1663,7 @@ function showMessageOrError ()
 				189 => array ('code' => 'error', 'format' => "Unknown OID '%s'"),
 				190 => array ('code' => 'error', 'format' => "Invalid VLAN ID '%s'"),
 				191 => array ('code' => 'error', 'format' => "deploy was blocked due to conflicting configuration versions"),
+				192 => array ('code' => 'error', 'format' => "You have to supply all the information for the bulk port function to be successful."), 
 
 // records 200~299 with warnings
 				200 => array ('code' => 'warning', 'format' => '%s'),

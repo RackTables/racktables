@@ -479,6 +479,10 @@ CREATE TABLE `UserConfig` (
 			$query[] = "ALTER TABLE MountOperation ADD KEY (object_id)";
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdefined, description) VALUES ('STATIC_FILTER','yes','string','no','no','yes','Enable Filter Caching');";
 			$query[] = "UPDATE Config SET varvalue = '0.17.10' WHERE varname = 'DB_VERSION'";
+		case '0.17.11':
+			$query = array_merge ($query, reloadDictionary ($batchid));
+			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdefined, description) VALUES ('ENABLE_BULKPORT_FORM','yes','string','no','no','yes','Enable \"Bulk Port\" form');";
+			$query[] = "UPDATE Config SET varvalue = '0.17.11' WHERE varname = 'DB_VERSION'";
 		case '0.18.0':
 			$query = array_merge ($query, reloadDictionary ($batchid));
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('VLANSWITCH_LISTSRC', '', 'string', 'yes', 'no', 'List of VLAN running switches')";

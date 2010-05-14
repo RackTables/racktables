@@ -354,6 +354,43 @@ http://www.cisco.com/en/US/products/hw/routers/ps274/products_tech_note09186a008
 	return buildRedirectURL (__FUNCTION__, 'OK', array ($added_count, $updated_count, $error_count));
 }
 
+$msgcode['addBulkPorts']['OK'] = 82;
+$msgcode['addBulkPorts']['ERR'] = 192;
+
+function addBulkPorts ()
+{
+	assertUIntArg ('object_id', __FUNCTION__);
+	assertStringArg ('port_name', __FUNCTION__, TRUE);
+	assertStringArg ('port_label', __FUNCTION__, TRUE);
+	assertUIntArg('port_numbering_start', __FUNCTION__);
+	assertUIntArg('port_numbering_count', __FUNCTION__);
+	
+	$object_id = $_REQUEST['object_id'];
+	$port_name = $_REQUEST['port_name'];
+	$port_type_id = $_REQUEST['port_type_id'];
+	$port_label = $_REQUEST['port_label'];
+	$port_numbering_start = $_REQUEST['port_numbering_start'];
+	$port_numbering_count = $_REQUEST['port_numbering_count'];
+	
+	if ($object_id == 0 or $port_type_id == 0 or $port_name == '' or $port_numbering_count == 0)
+	{
+		return buildRedirectURL (__FUNCTION__, 'ERR');
+	}
+	$added_count = $error_count = 0;
+	if(strrpos($port_name, "%u") === false )
+		$port_name .= '%u';
+	for ($i=0,$c=$port_numbering_start; $i<=$port_numbering_count; $i++,$c++)
+	{
+		$ret = commitAddPort ($object_id, @sprintf($port_name,$c), $port_type_id, @sprintf($port_label,$c), '');
+		if ($result == '')
+			$added_count++;
+		else
+			$error_count++;
+	}
+	return buildRedirectURL (__FUNCTION__, 'OK', array ($added_count, $error_count));
+}
+
+
 $msgcode['updIPv4Allocation']['OK'] = 12;
 $msgcode['updIPv4Allocation']['ERR'] = 100;
 function updIPv4Allocation ()

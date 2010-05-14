@@ -398,7 +398,9 @@ INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdef
 ('DEFAULT_VDOM_ID','','uint','yes','no','yes','Default VLAN domain ID'),
 ('DEFAULT_VST_ID','','uint','yes','no','yes','Default VLAN switch template ID'),
 ('DB_VERSION','0.17.10','string','no','yes','no','Database version.'),
-('STATIC_FILTER','yes','string','no','no','yes','Enable Filter Caching');
+('STATIC_FILTER','yes','string','no','no','yes','Enable Filter Caching'),
+('ENABLE_BULKPORT_FORM','yes','string','no','no','yes','Enable "Bulk Port" form'),
+;
 
 INSERT INTO `Script` VALUES ('RackCode','allow {$userid_1}');
 

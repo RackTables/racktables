@@ -128,6 +128,7 @@ $ophandler['object']['ports']['editPort'] = 'editPortForObject';
 $ophandler['object']['ports']['linkPort'] = 'linkPortForObject';
 $ophandler['object']['ports']['unlinkPort'] = 'unlinkPortForObject';
 $ophandler['object']['ports']['addMultiPorts'] = 'addMultiPorts';
+$ophandler['object']['ports']['addBulkPorts'] = 'addBulkPorts';
 $ophandler['object']['ports']['useup'] = 'useupPort';
 $ophandler['object']['ipv4']['updIPv4Allocation'] = 'updIPv4Allocation';
 $ophandler['object']['ipv4']['addIPv4Allocation'] = 'addIPv4Allocation';
