@@ -135,7 +135,7 @@ function assertUIntArg ($argname, $caller = 'N/A', $allow_zero = FALSE)
 		showError ("Parameter '${argname}' is less than zero (calling function is [${caller}]).", __FUNCTION__);
 		die();
 	}
-	if (!$allow_zero and $_REQUEST[$argname] === 0)
+	if (!$allow_zero and $_REQUEST[$argname] == 0)
 	{
 		showError ("Parameter '${argname}' is equal to zero (calling function is [${caller}]).", __FUNCTION__);
 		die();
