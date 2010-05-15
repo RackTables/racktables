@@ -126,7 +126,7 @@ function assertUIntArg ($argname, $allow_zero = FALSE)
 		throw new InvalidRequestArgException($argname, $_REQUEST[$argname], 'parameter is not a number');
 	if ($_REQUEST[$argname] < 0)
 		throw new InvalidRequestArgException($argname, $_REQUEST[$argname], 'parameter is less than zero');
-	if (!$allow_zero and $_REQUEST[$argname] === 0)
+	if (!$allow_zero and $_REQUEST[$argname] == 0)
 		throw new InvalidRequestArgException($argname, $_REQUEST[$argname], 'parameter is zero');
 }
 

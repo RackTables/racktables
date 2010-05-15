@@ -2,6 +2,7 @@
 	update: usual SNMP updates
 	update: Bulk port form (#321)
 	bugfix: updateObject() saves DB records for dict values when not set. (#273)
+	bugfix: argument validation was broken for value of 0 (#272)
 0.17.10 2010-05-05
 	update: make object form messages consistent (by Tyler J. Wagner)
 	update: sort object ports in a more reasonable manner
