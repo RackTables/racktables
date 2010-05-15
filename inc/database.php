@@ -25,6 +25,7 @@ $SQLSchema = array
 			'has_problems' => 'has_problems',
 			'comment' => 'comment',
 			'nports' => '(SELECT COUNT(*) FROM Port WHERE object_id = RackObject.id)',
+			'runs8021Q' => '(SELECT 1 FROM VLANSwitch WHERE object_id = id LIMIT 1)',
 		),
 		'keycolumn' => 'id',
 		'ordcolumns' => array ('RackObject.name'),
