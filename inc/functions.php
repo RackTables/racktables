@@ -2349,6 +2349,11 @@ function formatVLANName ($vlaninfo, $context = 'markup long')
 		if ($vlaninfo['vlan_descr'] != '')
 			$ret .= ' <i>(' . niftyString ($vlaninfo['vlan_descr']) . ')</i>';
 		return $ret;
+	case 'plain long':
+		$ret = 'VLAN' . $vlaninfo['vlan_id'];
+		if ($vlaninfo['vlan_descr'] != '')
+			$ret .= ' (' . niftyString ($vlaninfo['vlan_descr']) . ')';
+		return $ret;
 	case 'markup long':
 	default:
 		$ret = 'VLAN' . $vlaninfo['vlan_id'];

@@ -6368,7 +6368,7 @@ function dynamic_title_decoder ($path_position)
 	case 'vlan':
 		return array
 		(
-			'name' => 'VLAN' . formatVLANName (getVLANInfo ($sic['vlan_ck']), 'label'),
+			'name' => formatVLANName (getVLANInfo ($sic['vlan_ck']), 'plain long'),
 			'params' => array ('vlan_ck' => $sic['vlan_ck'])
 		);
 	case 'vst':
