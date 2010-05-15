@@ -2534,6 +2534,7 @@ function updVSTRule()
 	assertPCREArg ('port_pcre');
 	assertStringArg ('port_role');
 	assertStringArg ('wrt_vlans', TRUE);
+	assertStringArg ('description', TRUE);
 	global $sic;
 	$result = commitUpdateVSTRule
 	(
@@ -2542,7 +2543,8 @@ function updVSTRule()
 		$sic['new_rule_no'],
 		$sic['port_pcre'],
 		$sic['port_role'],
-		$sic['wrt_vlans']
+		$sic['wrt_vlans'],
+		$sic['description']
 	);
 	return buildRedirectURL (__FUNCTION__, $result ? 'OK' : 'ERR');
 }

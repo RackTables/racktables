@@ -7554,7 +7554,7 @@ function renderVST ($vst_id)
 	{
 		startPortlet ('rules (' . count ($vst['rules']) . ')');
 		echo '<table class=cooltable align=center border=0 cellpadding=5 cellspacing=0>';
-		echo '<tr><th>sequence</th><th>regexp</th><th>role</th><th>VLAN IDs</th></tr>';
+		echo '<tr><th>sequence</th><th>regexp</th><th>role</th><th>VLAN IDs</th><th>description</th></tr>';
 		$order = 'odd';
 		foreach ($vst['rules'] as $item)
 		{
