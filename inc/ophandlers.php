@@ -2487,6 +2487,7 @@ function addVSTRule()
 	assertPCREArg ('port_pcre');
 	assertStringArg ('port_role');
 	assertStringArg ('wrt_vlans', TRUE);
+	assertStringArg ('description', TRUE);
 	global $sic;
 	$result = usePreparedInsertBlade
 	(
@@ -2498,6 +2499,7 @@ function addVSTRule()
 			'port_pcre' => $sic['port_pcre'],
 			'port_role' => $sic['port_role'],
 			'wrt_vlans' => $sic['wrt_vlans'],
+			'description' => $sic['description'],
 		)
 	);
 	return buildRedirectURL (__FUNCTION__, $result ? 'OK' : 'ERR');

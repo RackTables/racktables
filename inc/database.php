@@ -3923,7 +3923,7 @@ function getVLANSwitchTemplate ($vst_id)
 		'rules' => array(),
 		'switches' => array(),
 	);
-	$query = 'SELECT rule_no, port_pcre, port_role, wrt_vlans ' .
+	$query = 'SELECT rule_no, port_pcre, port_role, wrt_vlans, description ' .
 		'FROM VLANSTRule WHERE vst_id = ? ORDER BY rule_no';
 	$result = usePreparedSelectBlade ($query, array ($vst_id));
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
@@ -3942,15 +3942,15 @@ function commitUpdateVST ($vst_id, $max_local_vlans, $description)
 	return $prepared->execute (array ($max_local_vlans, $description, $vst_id));
 }
 
-function commitUpdateVSTRule ($vst_id, $rule_no, $new_rule_no, $port_pcre, $port_role, $wrt_vlans)
+function commitUpdateVSTRule ($vst_id, $rule_no, $new_rule_no, $port_pcre, $port_role, $wrt_vlans, $description)
 {
 	global $dbxlink;
 	$prepared = $dbxlink->prepare
 	(
-		'UPDATE VLANSTRule SET rule_no = ?, port_pcre = ?, port_role = ?, wrt_vlans = ? ' .
+		'UPDATE VLANSTRule SET rule_no = ?, port_pcre = ?, port_role = ?, wrt_vlans = ?, description = ? ' .
 		'WHERE vst_id = ? AND rule_no = ?'
 	);
-	return $prepared->execute (array ($new_rule_no, $port_pcre, $port_role, $wrt_vlans, $vst_id, $rule_no));
+	return $prepared->execute (array ($new_rule_no, $port_pcre, $port_role, $wrt_vlans, $description, $vst_id, $rule_no));
 }
 
 function get8021QDeployQueues()

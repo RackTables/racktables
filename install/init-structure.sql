@@ -445,6 +445,7 @@ CREATE TABLE `VLANSTRule` (
   `port_pcre` char(255) NOT NULL,
   `port_role` enum('access','trunk','uplink','downlink','none') NOT NULL default 'none',
   `wrt_vlans` char(255) default NULL,
+  `description` char(255) default NULL,
   UNIQUE KEY `vst-rule` (`vst_id`,`rule_no`),
   CONSTRAINT `VLANSTRule-FK-vst_id` FOREIGN KEY (`vst_id`) REFERENCES `VLANSwitchTemplate` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB;

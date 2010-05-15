@@ -7559,8 +7559,12 @@ function renderVST ($vst_id)
 		foreach ($vst['rules'] as $item)
 		{
 			echo "<tr class=row_${order} align=left>";
-			echo "<td>${item['rule_no']}</td><td><tt>${item['port_pcre']}</tt></td>";
-			echo "<td>${item['port_role']}</td><td>${item['wrt_vlans']}</td></tr>";
+			echo "<td>${item['rule_no']}</td>";
+			echo "<td><tt>${item['port_pcre']}</tt></td>";
+			echo "<td>${item['port_role']}</td>";
+			echo "<td>${item['wrt_vlans']}</td>";
+			echo "<td>${item['description']}</td>";
+			echo '</tr>';
 			$order = $nextorder[$order];
 		}
 		echo '</table>';
@@ -7609,18 +7613,20 @@ function renderVSTRulesEditor ($vst_id)
 	{
 		printOpFormIntro ('add');
 		echo '<tr>';
-		echo '<td>' . getImageHREF ('add', 'add rule', TRUE, 106) . '</td>';
+		echo '<td>' . getImageHREF ('add', 'add rule', TRUE, 110) . '</td>';
 		echo '<td><input type=text tabindex=101 name=rule_no size=3></td>';
 		echo '<td><input type=text tabindex=102 name=port_pcre></td>';
 		echo '<td>' . getSelect ($port_role_options, array ('name' => 'port_role', 'tabindex' => 103), 'none') . '</td>';
 		echo '<td><input type=text tabindex=104 name=wrt_vlans></td>';
-		echo '<td>' . getImageHREF ('add', 'add rule', TRUE, 105) . '</td>';
+		echo '<td><input type=text tabindex=105 name=description></td>';
+		echo '<td>' . getImageHREF ('add', 'add rule', TRUE, 110) . '</td>';
 		echo '</tr></form>';
 	}
 	$vst = getVLANSwitchTemplate ($vst_id);
 	echo '<center><h1>' . niftyString ($vst['description']) . '</h1></center>';
 	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
-	echo '<tr><th>&nbsp;</th><th>sequence</th><th>regexp</th><th>role</th><th>VLAN IDs</th><th>&nbsp;</th></tr>';
+	echo '<tr><th>&nbsp;</th><th>sequence</th><th>regexp</th><th>role</th>';
+	echo '<th>VLAN IDs</th><th>description</th><th>&nbsp;</th></tr>';
 	$port_role_options = array
 	(
 		'none' => 'none',
@@ -7641,6 +7647,7 @@ function renderVSTRulesEditor ($vst_id)
 		echo "<td><input type=text name=port_pcre value='" . niftyString ($item['port_pcre'], 0) . "'></td>";
 		echo '<td>' . getSelect ($port_role_options, array ('name' => 'port_role'), $item['port_role']) . '</td>';
 		echo "<td><input type=text name=wrt_vlans value='${item['wrt_vlans']}'></td>";
+		echo "<td><input type=text name=description value='${item['description']}'></td>";
 		echo '<td>' . getImageHref ('save', 'update rule', TRUE) . '</td>';
 		echo '</tr></form>';
 	}
