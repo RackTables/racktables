@@ -6885,7 +6885,7 @@ function renderObject8021QPorts ($object_id)
 			$trclass =
 			(
 				$port['vst_role'] != $port['mode'] or
-				count (array_diff (array_keys ($port['allowed']), array_keys ($vdom['vlanlist'])))
+				count (array_diff ($port['allowed'], array_keys ($vdom['vlanlist'])))
 			) ? 'trwarning' : 'trbusy';
 			$linkparams = array
 			(
