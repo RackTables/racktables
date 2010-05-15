@@ -3727,7 +3727,7 @@ function exec8021QDeploy ($object_id, $do_push)
 	}
 	if ($conflict)
 	{
-		$prepared = $dbxlink->prepare ("UPDATE VLANSwitch SET last_errno = ?, last_error_ts = NOW() WHERE object_id = ?");
+		$prepared = $dbxlink->prepare ('UPDATE VLANSwitch SET out_of_sync = "yes", last_errno = ?, last_error_ts = NOW() WHERE object_id = ?');
 		$prepared->execute (array (E_8021Q_VERSION_CONFLICT, $vswitch['object_id']));
 	}
 	else
@@ -3759,7 +3759,7 @@ function exec8021QDeploy ($object_id, $do_push)
 			}
 			catch (RuntimeException $r)
 			{
-				$prepared = $dbxlink->prepare ("UPDATE VLANSwitch SET last_error_ts = NOW(), last_errno = ? WHERE object_id = ?");
+				$prepared = $dbxlink->prepare ('UPDATE VLANSwitch SET out_of_sync = "yes", last_error_ts = NOW(), last_errno = ? WHERE object_id = ?');
 				$prepared->execute (E_8021Q_PUSH_REMOTE_ERROR, array ($vswitch['object_id']));
 			}
 		}
