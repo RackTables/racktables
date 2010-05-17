@@ -2223,7 +2223,7 @@ function save8021QPorts ()
 {
 	global $sic, $dbxlink;
 	assertUIntArg ('nports');
-	assertUIntArg ('mutex_rev');
+	assertUIntArg ('mutex_rev', TRUE); // counts from 0
 	if ($sic['nports'] == 1)
 	{
 		assertStringArg ('pn_0');
@@ -2344,7 +2344,7 @@ $msgcode['resolve8021QConflicts']['ERR2'] = 109;
 function resolve8021QConflicts ()
 {
 	global $sic, $dbxlink;
-	assertUIntArg ('mutex_rev');
+	assertUIntArg ('mutex_rev', TRUE); // counts from 0
 	assertUIntArg ('nrows');
 	// Divide submitted radio buttons into 3 groups:
 	// left (saved version wins)
