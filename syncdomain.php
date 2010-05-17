@@ -51,6 +51,17 @@ $todo = array
 	'pullall' => array ('sync', 'resync', 'aging', 'done'),
 );
 
+$filename = '/var/tmp/RackTables-syncdomain-' . $options['vdid'] . '.pid';
+if (FALSE === $fp = @fopen ($filename, 'x+'))
+{
+	echo "Failed to lock ${filename}, already locked by PID " . mb_substr (file_get_contents ($filename), 0, 6);
+	exit (1);
+}
+
+ftruncate ($fp, 0);
+fwrite ($fp, getmypid() . "\n");
+fclose ($fp);
+
 $switchesdone = 0;
 foreach ($mydomain['switchlist'] as $switch)
 	if (in_array (detectVLANSwitchQueue (getVLANSwitchInfo ($switch['object_id'])), $todo[$options['mode']]))
@@ -67,5 +78,10 @@ foreach ($mydomain['switchlist'] as $switch)
 		}
 	}
 
+if (FALSE === unlink ($filename))
+{
+	echo "Failed removing pidfile ${filename}\n";
+	exit (1);
+}
 exit (0);
 ?>
