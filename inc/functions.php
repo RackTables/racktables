@@ -2995,7 +2995,7 @@ function ios12TranslatePushQueue ($queue)
 		}
 	$ret .= "end\n";
 	if (getConfigVar ('8021Q_WRI_AFTER_CONFT') == 'yes')
-		$ret .= "copy running-config startup-config\n";
+		$ret .= "write memory\n";
 	return $ret;
 }
 
