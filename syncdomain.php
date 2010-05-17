@@ -12,10 +12,11 @@ function usage()
 	echo "\t\t--mode=pullall\n";
 	echo "\t\t--mode=push\n";
 	echo "\t\t[--max=<max_to_do>]\n";
+	echo "\t\t[--verbose]\n";
 	exit (1);
 }
 
-$options = getopt ('', array ('push', 'vdid:', 'max::', 'mode:'));
+$options = getopt ('', array ('vdid:', 'max::', 'mode:', 'verbose'));
 if (!array_key_exists ('vdid', $options) or !array_key_exists ('mode', $options))
 	usage();
 
@@ -35,6 +36,7 @@ default:
 }
 
 $max = array_key_exists ('max', $options) ? $options['max'] : 0;
+$verbose = array_key_exists ('verbose', $options);
 
 if (NULL === $mydomain = getVLANDomain ($options['vdid']))
 {
@@ -49,16 +51,18 @@ $todo = array
 	'pullall' => array ('sync', 'resync', 'done'),
 );
 
-$done = 0;
+$switchesdone = 0;
 foreach ($mydomain['switchlist'] as $switch)
 	if (in_array (detectVLANSwitchQueue ($switch), $todo[$options['mode']]))
 	{
 		$object = spotEntity ('object', $switch['object_id']);
-		echo "Processing '${object['dname']}': ";
-		echo exec8021QDeploy ($switch['object_id'], $do_push) . "\n";
-		if (++$done == $max)
+		$portsdone = exec8021QDeploy ($switch['object_id'], $do_push);
+		if ($portsdone or $verbose)
+			echo "Done '${object['dname']}': ${portsdone}\n";
+		if (++$switchesdone == $max)
 		{
-			echo "Maximum of ${max} items reached, terminating\n";
+			if ($verbose)
+				echo "Maximum of ${max} items reached, terminating\n";
 			break;
 		}
 	}
