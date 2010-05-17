@@ -53,7 +53,7 @@ $todo = array
 
 $switchesdone = 0;
 foreach ($mydomain['switchlist'] as $switch)
-	if (in_array (detectVLANSwitchQueue ($switch), $todo[$options['mode']]))
+	if (in_array (detectVLANSwitchQueue (getVLANSwitchInfo ($switch['object_id'])), $todo[$options['mode']]))
 	{
 		$object = spotEntity ('object', $switch['object_id']);
 		$portsdone = exec8021QDeploy ($switch['object_id'], $do_push);
