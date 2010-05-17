@@ -397,10 +397,13 @@ INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdef
 ('IPV4_TREE_SHOW_VLAN','yes','string','no','no','yes','Show VLAN for each network in IPv4 tree'),
 ('DEFAULT_VDOM_ID','','uint','yes','no','yes','Default VLAN domain ID'),
 ('DEFAULT_VST_ID','','uint','yes','no','yes','Default VLAN switch template ID'),
-('DB_VERSION','0.17.10','string','no','yes','no','Database version.'),
+('8021Q_DEPLOY_MINAGE','300','uint','no','no','no','802.1Q deploy minimum age'),
+('8021Q_DEPLOY_MAXAGE','3600','uint','no','no','no','802.1Q deploy maximum age'),
+('8021Q_DEPLOY_RETRY','10800','uint','no','no','no','802.1Q deploy retry timer'),
+('8021Q_WRI_AFTER_CONFT','no','string','no','no','no','802.1Q: save device configuration after deploy'),
 ('STATIC_FILTER','yes','string','no','no','yes','Enable Filter Caching'),
 ('ENABLE_BULKPORT_FORM','yes','string','no','no','yes','Enable "Bulk Port" form'),
-;
+('DB_VERSION','0.17.10','string','no','yes','no','Database version.');
 
 INSERT INTO `Script` VALUES ('RackCode','allow {$userid_1}');
 

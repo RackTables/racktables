@@ -1088,12 +1088,15 @@ function resetUIConfig()
 	setConfigVar ('IPV4_TREE_RTR_AS_CELL', 'yes');
 	setConfigVar ('PROXIMITY_RANGE', 0);
 	setConfigVar ('IPV4_TREE_SHOW_VLAN', 'yes');
+	setConfigVar ('VLANSWITCH_LISTSRC', '');
+	setConfigVar ('VLANIPV4NET_LISTSRC', '');
 	setConfigVar ('DEFAULT_VDOM_ID', '');
 	setConfigVar ('DEFAULT_VST_ID', '');
 	setConfigVar ('STATIC_FILTER', 'yes');
 	setConfigVar ('8021Q_DEPLOY_MINAGE', '300');
 	setConfigVar ('8021Q_DEPLOY_MAXAGE', '3600');
 	setConfigVar ('8021Q_DEPLOY_RETRY', '10800');
+	setConfigVar ('8021Q_WRI_AFTER_CONFT', 'no');
 	return buildRedirectURL (__FUNCTION__, 'OK');
 }
 

@@ -2994,6 +2994,8 @@ function ios12TranslatePushQueue ($queue)
 			break;
 		}
 	$ret .= "end\n";
+	if (getConfigVar ('8021Q_WRI_AFTER_CONFT') == 'yes')
+		$ret .= "copy running-config startup-config\n";
 	return $ret;
 }
 
@@ -3033,6 +3035,8 @@ function fdry5TranslatePushQueue ($queue)
 			break;
 		}
 	$ret .= "end\n";
+	if (getConfigVar ('8021Q_WRI_AFTER_CONFT') == 'yes')
+		$ret .= "write memory\n";
 	return $ret;
 }
 
@@ -3075,6 +3079,8 @@ function vrp53TranslatePushQueue ($queue)
 			break;
 		}
 	$ret .= "return\n";
+	if (getConfigVar ('8021Q_WRI_AFTER_CONFT') == 'yes')
+		$ret .= "save\n";
 	return $ret;
 }
 
