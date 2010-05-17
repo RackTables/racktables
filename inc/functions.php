@@ -3893,9 +3893,17 @@ function detectVLANSwitchQueue ($vswitch)
 	switch ($vswitch['last_errno'])
 	{
 	case E_8021Q_NOERROR:
-		return $vswitch['age_seconds'] < 300 ? 'aging' : 'sync';
+		if ($vswitch['last_change_age_seconds'] > getConfigVar ('8021Q_DEPLOY_MAXAGE'))
+			return 'sync';
+		elseif ($vswitch['last_change_age_seconds'] < getConfigVar ('8021Q_DEPLOY_MINAGE'))
+			return 'aging';
+		else
+			return 'sync';
 	case E_8021Q_VERSION_CONFLICT:
-		return 'resync';
+		if ($vswitch['last_error_age_seconds'] < getConfigVar ('8021Q_DEPLOY_RETRY'))
+			return 'aging';
+		else
+			return 'resync';
 	case E_8021Q_PULL_REMOTE_ERROR:
 	case E_8021Q_PUSH_REMOTE_ERROR:
 		return 'failed';
@@ -3903,6 +3911,26 @@ function detectVLANSwitchQueue ($vswitch)
 		return 'disabled';
 	}
 	return '';
+}
+
+function get8021QDeployQueues()
+{
+	$ret = array
+	(
+		'aging' => array(),
+		'sync' => array(),
+		'resync' => array(),
+		'failed' => array(),
+		'disabled' => array(),
+		'done' => array(),
+	);
+	foreach (getVLANSwitches() as $object_id)
+	{
+		$vswitch = getVLANSwitchInfo ($object_id);
+		if ('' != $qcode = detectVLANSwitchQueue ($vswitch))
+			$ret[$qcode][] = $vswitch;
+	}
+	return $ret;
 }
 
 function acceptable8021QConfig ($port)

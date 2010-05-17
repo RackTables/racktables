@@ -46,9 +46,9 @@ if (NULL === $mydomain = getVLANDomain ($options['vdid']))
 
 $todo = array
 (
-	'pull' => array ('sync'),
+	'pull' => array ('sync', 'resync'),
 	'push' => array ('sync'),
-	'pullall' => array ('sync', 'resync', 'done'),
+	'pullall' => array ('sync', 'resync', 'aging', 'done'),
 );
 
 $switchesdone = 0;

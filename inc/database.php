@@ -3682,7 +3682,9 @@ function getVLANSwitchInfo ($object_id, $extrasql = '')
 		'SELECT object_id, domain_id, template_id, mutex_rev, out_of_sync, last_errno, ' .
 		'TIMESTAMPDIFF(SECOND, last_push_started, last_push_finished) AS last_push_lasted, ' .
 		'SEC_TO_TIME(TIMESTAMPDIFF(SECOND, last_change, NOW())) AS last_change_age, ' .
+		'TIMESTAMPDIFF(SECOND, last_change, NOW()) AS last_change_age_seconds, ' .
 		'SEC_TO_TIME(TIMESTAMPDIFF(SECOND, last_error_ts, NOW())) AS last_error_age, ' .
+		'TIMESTAMPDIFF(SECOND, last_error_ts, NOW()) AS last_error_age_seconds, ' .
 		'SEC_TO_TIME(TIMESTAMPDIFF(SECOND, last_push_finished, NOW())) AS last_push_age, ' .
 		'last_change, last_push_finished, last_error_ts ' .
 		'FROM VLANSwitch WHERE object_id = ? ' . $extrasql,
@@ -3952,28 +3954,6 @@ function commitUpdateVSTRule ($vst_id, $rule_no, $new_rule_no, $port_pcre, $port
 		'WHERE vst_id = ? AND rule_no = ?'
 	);
 	return $prepared->execute (array ($new_rule_no, $port_pcre, $port_role, $wrt_vlans, $description, $vst_id, $rule_no));
-}
-
-function get8021QDeployQueues()
-{
-	$ret = array
-	(
-		'aging' => array(),
-		'sync' => array(),
-		'resync' => array(),
-		'failed' => array(),
-		'disabled' => array(),
-		'done' => array(),
-	);
-	$query = 'SELECT object_id, TIMESTAMPDIFF(SECOND, last_change, NOW()) AS age_seconds, ' .
-		'SEC_TO_TIME(TIMESTAMPDIFF(SECOND, last_change, NOW())) AS age, ' .
-		'last_errno, last_error_ts, out_of_sync ' .
-		'FROM VLANSwitch ORDER BY age DESC';
-	$result = usePreparedSelectBlade ($query);
-	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-		if ('' != $qcode = detectVLANSwitchQueue ($row))
-			$ret[$qcode][] = $row;
-	return $ret;
 }
 
 function getIPv4Network8021QBindings ($ipv4net_id)

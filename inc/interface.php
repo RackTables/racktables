@@ -6752,7 +6752,7 @@ function renderVLANDomain ($vdom_id)
 			echo '</td><td class=tdleft>';
 			echo $vstlist[$switchinfo['template_id']]['description'];
 			echo '</td><td>';
-			$qcode = detectVLANSwitchQueue ($switchinfo);
+			$qcode = detectVLANSwitchQueue (getVLANSwitchInfo ($switchinfo['object_id']));
 			printImageHREF ("DQUEUE ${qcode}", $dqtitle[$qcode]);
 			echo '</td></tr>';
 			$order = $nextorder[$order];
@@ -7667,7 +7667,7 @@ function renderDeployQueue ($dqcode)
 	{
 		echo "<tr class=row_${order}><td>";
 		renderCell (spotEntity ('object', $item['object_id']));
-		echo "</td><td>${item['age']}</td></tr>";
+		echo "</td><td>${item['last_change_age']}</td></tr>";
 		$order = $nextorder[$order];
 	}
 	echo '</table>';

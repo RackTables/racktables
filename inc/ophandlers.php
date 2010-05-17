@@ -1091,6 +1091,9 @@ function resetUIConfig()
 	setConfigVar ('DEFAULT_VDOM_ID', '');
 	setConfigVar ('DEFAULT_VST_ID', '');
 	setConfigVar ('STATIC_FILTER', 'yes');
+	setConfigVar ('8021Q_DEPLOY_MINAGE', '300');
+	setConfigVar ('8021Q_DEPLOY_MAXAGE', '3600');
+	setConfigVar ('8021Q_DEPLOY_RETRY', '10800');
 	return buildRedirectURL (__FUNCTION__, 'OK');
 }
 
