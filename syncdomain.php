@@ -46,9 +46,9 @@ if (NULL === $mydomain = getVLANDomain ($options['vdid']))
 
 $todo = array
 (
-	'pull' => array ('sync', 'resync'),
-	'push' => array ('sync'),
-	'pullall' => array ('sync', 'resync', 'aging', 'done'),
+	'pull' => array ('sync_ready', 'resync_ready'),
+	'push' => array ('sync_ready'),
+	'pullall' => array ('sync_ready', 'resync_ready', 'sync_aging', 'resync_aging', 'done'),
 );
 
 $filename = '/var/tmp/RackTables-syncdomain-' . $options['vdid'] . '.pid';
