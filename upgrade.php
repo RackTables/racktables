@@ -494,6 +494,7 @@ CREATE TABLE `UserConfig` (
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdefined, description) VALUES ('8021Q_DEPLOY_MAXAGE','3600','uint','no','no','no','802.1Q deploy maximum age')";
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdefined, description) VALUES ('8021Q_DEPLOY_RETRY','10800','uint','no','no','no','802.1Q deploy retry timer')";
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdefined, description) VALUES ('8021Q_WRI_AFTER_CONFT','no','string','no','no','no','802.1Q: save device configuration after deploy')";
+			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdefined, description) VALUES ('8021Q_INSTANT_DEPLOY','no','string','no','no','yes','802.1Q: instant deploy')";
 			$query[] = "ALTER TABLE IPv4Network ENGINE=InnoDB";
 			// FIXME: add tables CachedPAV, CachedPNV, CachedPVM, PortAllowedVLAN, PortNativeVLAN, PortVLANMode, VLANDescription, VLANDomain, VLANIPv4, VLANSTRule, VLANSwitch, VLANSwitchTemplate, VLANValidID
 			for ($i = 1; $i <= 4094; $i++)

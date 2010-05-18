@@ -1532,7 +1532,7 @@ function showMessageOrError ()
 				38 => array ('code' => 'success', 'format' => '%u real server(s) were successfully (de)activated'),
 				39 => array ('code' => 'success', 'format' => 'User account %s updated.'),
 				40 => array ('code' => 'success', 'format' => 'User account %s created.'),
-// ...
+				41 => array ('code' => 'success', 'format' => 'uplink ports reverb queued'),
 // ...
 				43 => array ('code' => 'success', 'format' => 'Saved successfully.'),
 				44 => array ('code' => 'success', 'format' => '%s failures and %s successfull changes.'),

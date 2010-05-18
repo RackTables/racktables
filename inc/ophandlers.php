@@ -1097,6 +1097,7 @@ function resetUIConfig()
 	setConfigVar ('8021Q_DEPLOY_MAXAGE', '3600');
 	setConfigVar ('8021Q_DEPLOY_RETRY', '10800');
 	setConfigVar ('8021Q_WRI_AFTER_CONFT', 'no');
+	setConfigVar ('8021Q_INSTANT_DEPLOY', 'no');
 	return buildRedirectURL (__FUNCTION__, 'OK');
 }
 
@@ -2222,7 +2223,8 @@ function updateVLANDomain ()
 	return buildRedirectURL (__FUNCTION__, $result ? 'OK' : 'ERR');
 }
 
-$msgcode['save8021QPorts']['OK'] = 63;
+$msgcode['save8021QPorts']['OK1'] = 63;
+$msgcode['save8021QPorts']['OK2'] = 41;
 $msgcode['save8021QPorts']['ERR1'] = 160;
 $msgcode['save8021QPorts']['ERR2'] = 109;
 function save8021QPorts ()
@@ -2300,9 +2302,27 @@ function save8021QPorts ()
 		$query->execute (array ($sic['object_id']));
 	}
 	$dbxlink->commit();
+	$log = oneLiner (63, array ($npulled + $nsaved_uplinks));
 	if ($nsaved_uplinks)
+	{
 		initiateUplinksReverb ($vswitch['object_id'], $new_uplinks);
-	return buildRedirectURL (__FUNCTION__, 'OK', array ($npulled + $nsaved_uplinks), NULL, NULL, $extra);
+		$log = mergeLogs ($log, oneLiner (41));
+	}
+	if ($npulled + $nsaved_uplinks > 0 and getConfigVar ('8021Q_INSTANT_DEPLOY') == 'yes')
+	{
+		try
+		{
+			if (FALSE === $done = exec8021QDeploy ($sic['object_id'], TRUE))
+				$log = mergeLogs ($log, oneLiner (191));
+			else
+				$log = mergeLogs ($log, oneLiner (63, array ($done)));
+		}
+		catch (Exception $e)
+		{
+			$log = mergeLogs ($log, oneLiner (109));
+		}
+	}
+	return buildWideRedirectURL ($log, NULL, NULL, $extra);
 }
 
 $msgcode['bindVLANtoIPv4']['OK'] = 48;
