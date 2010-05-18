@@ -6859,7 +6859,7 @@ function renderObject8021QPorts ($object_id)
 	// port list
 	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
 	echo '<tr><th>port</th><th>last&nbsp;saved&nbsp;config</th>';
-	echo $req_port_name == '' ? '<th>new&nbsp;config</th></tr>' : '</tr>';
+	echo $req_port_name == '' ? '<th>new&nbsp;config</th></tr>' : '<th>(zooming)</th></tr>';
 	if ($req_port_name == '');
 		printOpFormIntro ('save8021QConfig', array ('mutex_rev' => $vswitch['mutex_rev']));
 	$nports = 0; // count only access ports
