@@ -495,6 +495,7 @@ CREATE TABLE `UserConfig` (
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdefined, description) VALUES ('8021Q_DEPLOY_RETRY','10800','uint','no','no','no','802.1Q deploy retry timer')";
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdefined, description) VALUES ('8021Q_WRI_AFTER_CONFT','no','string','no','no','no','802.1Q: save device configuration after deploy')";
 			$query[] = "ALTER TABLE IPv4Network ENGINE=InnoDB";
+			// FIXME: add tables CachedPAV, CachedPNV, CachedPVM, PortAllowedVLAN, PortNativeVLAN, PortVLANMode, VLANDescription, VLANDomain, VLANIPv4, VLANSTRule, VLANSwitch, VLANSwitchTemplate, VLANValidID
 			for ($i = 1; $i <= 4094; $i++)
 				usePreparedInsertBlade ('VLANValidID', array ('vlan_id' => $i));
 			$query[] = "UPDATE Config SET varvalue = '0.18.0' WHERE varname = 'DB_VERSION'";
