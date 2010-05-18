@@ -6986,8 +6986,7 @@ function renderObject8021QPorts ($object_id)
 		}
 		else
 		{
-			if (count ($sockets[$port_name]) > 1)
-				$td_extra = ' rowspan=' . count ($sockets[$port_name]);
+			$td_extra = count ($sockets[$port_name]) > 1 ? (' rowspan=' . count ($sockets[$port_name])) : '';
 			$socket_columns = '';
 			foreach ($sockets[$port_name][0] as $tmp)
 				$socket_columns .= '<td>' . $tmp . '</td>';
