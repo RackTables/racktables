@@ -6855,13 +6855,38 @@ function renderObject8021QPorts ($object_id)
 	$cached_config = getStored8021QConfig ($object_id, 'cached');
 	uksort ($desired_config, 'sortTokenize');
 	$uplinks = filter8021QChangeRequests ($vdom['vlanlist'], $desired_config, produceUplinkPorts ($vdom['vlanlist'], $desired_config));
-	echo '<table border=0 width="100%"><tr valign=top><td class=tdleft width="30%">';
+	echo '<table border=0 width="100%"><tr valign=top><td class=tdleft width="50%">';
 	// port list
 	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
-	echo '<tr><th>port</th><th>last&nbsp;saved&nbsp;config</th>';
-	echo $req_port_name == '' ? '<th>new&nbsp;config</th></tr>' : '<th>(zooming)</th></tr>';
+	echo '<tr><th>port</th><th>interface</th><th>link</th><th width="25%">last&nbsp;saved&nbsp;config</th>';
+	echo $req_port_name == '' ? '<th width="25%">new&nbsp;config</th></tr>' : '<th>(zooming)</th></tr>';
 	if ($req_port_name == '');
 		printOpFormIntro ('save8021QConfig', array ('mutex_rev' => $vswitch['mutex_rev']));
+	$object = spotEntity ('object', $object_id);
+	amplifyCell ($object);
+	$sockets = array();
+	foreach ($object['ports'] as $port)
+		if (mb_strlen ($port['name']) and array_key_exists ($port['name'], $desired_config))
+		{
+			$socket = array ('interface' => ($port['iif_id'] == 1 ? '' : $port['iif_name'] . '/') . $port['oif_name']);
+			if ($port['remote_object_id'])
+			{
+				$remote_object = spotEntity ('object', $port['remote_object_id']);
+				$socket['link'] = '<a href="' . makeHref (array (
+					'page' => 'object',
+					'tab' => 'default',
+					'object_id' => $port['remote_object_id'],
+					'hl_port_id' => $port['remote_id']
+				));
+				$socket['link'] .= '">' . $remote_object['dname'] . '</a>&nbsp;' . $port['remote_name'];
+			}
+			elseif (strlen ($port['reservation_comment']))
+				$socket['link'] = '<b>Rsv:</b> ' . $port['reservation_comment'];
+			else
+				$socket['link'] = '&nbsp;';
+			$sockets[$port['name']][] = $socket;
+		}
+	unset ($object);
 	$nports = 0; // count only access ports
 	foreach ($desired_config as $port_name => $port)
 	{
@@ -6954,11 +6979,38 @@ function renderObject8021QPorts ($object_id)
 			$nports++;
 			break;
 		}
-		echo "<tr class=${trclass} valign=top><td>${port_name}</td><td>${text_left}</td><td>${text_right}</td></tr>";
+		if (!array_key_exists ($port_name, $sockets))
+		{
+			$socket_columns = '<td>&nbsp;</td><td>&nbsp;</td>';
+			$td_extra = '';
+		}
+		else
+		{
+			if (count ($sockets[$port_name]) > 1)
+				$td_extra = ' rowspan=' . count ($sockets[$port_name]);
+			$socket_columns = '';
+			foreach ($sockets[$port_name][0] as $tmp)
+				$socket_columns .= '<td>' . $tmp . '</td>';
+		}
+		echo "<tr class=${trclass} valign=top><td${td_extra}>${port_name}</td>" . $socket_columns;
+		echo "<td${td_extra}>${text_left}</td><td${td_extra}>${text_right}</td></tr>";
+		if (!array_key_exists ($port_name, $sockets))
+			continue;
+		$first_socket = TRUE;
+		foreach ($sockets[$port_name] as $socket)
+			if ($first_socket)
+				$first_socket = FALSE;
+			else
+			{
+				echo "<tr class=${trclass} valign=top>";
+				foreach ($socket as $tmp)
+					echo '<td>' . $tmp . '</td>';
+				echo '</tr>';
+			}
 	}
 	if ($req_port_name == '' and $nports)
 		echo "<input type=hidden name=nports value=${nports}>" .
-			'<tr><td colspan=3 class=tdcenter>' .
+			'<tr><td colspan=5 class=tdcenter>' .
 			getImageHREF ('SAVE', 'save configuration', TRUE) .
 			'</td></tr></form>';
 	echo '</table>';
