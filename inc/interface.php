@@ -750,6 +750,14 @@ function getSelect ($optionList, $select_attrs = array(), $selected_id = NULL)
 	$ret = '';
 	if (!array_key_exists ('name', $select_attrs))
 		return '';
+	// handle two corner cases in a specific way
+	if (count ($optionList) == 0)
+		return '';
+	if (count ($optionList) == 1)
+	{
+		$value = current (array_keys ($optionList));
+		return "<input type=hidden name=${select_attrs['name']} value=${value}>" . current ($optionList);
+	}
 	if (!array_key_exists ('id', $select_attrs))
 		$select_attrs['id'] = $select_attrs['name'];
 	$ret .= '<select';
