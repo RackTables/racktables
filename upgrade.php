@@ -496,7 +496,148 @@ CREATE TABLE `UserConfig` (
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdefined, description) VALUES ('8021Q_WRI_AFTER_CONFT','no','string','no','no','no','802.1Q: save device configuration after deploy')";
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdefined, description) VALUES ('8021Q_INSTANT_DEPLOY','no','string','no','no','yes','802.1Q: instant deploy')";
 			$query[] = "ALTER TABLE IPv4Network ENGINE=InnoDB";
-			// FIXME: add tables CachedPAV, CachedPNV, CachedPVM, PortAllowedVLAN, PortNativeVLAN, PortVLANMode, VLANDescription, VLANDomain, VLANIPv4, VLANSTRule, VLANSwitch, VLANSwitchTemplate, VLANValidID
+			$query[] = "SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0";
+			$query[] = "
+CREATE TABLE `CachedPAV` (
+  `object_id` int(10) unsigned NOT NULL,
+  `port_name` char(255) NOT NULL,
+  `vlan_id` int(10) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`object_id`,`port_name`,`vlan_id`),
+  KEY `vlan_id` (`vlan_id`),
+  CONSTRAINT `CachedPAV-FK-object-port` FOREIGN KEY (`object_id`, `port_name`) REFERENCES `CachedPVM` (`object_id`, `port_name`) ON DELETE CASCADE,
+  CONSTRAINT `CachedPAV-FK-vlan_id` FOREIGN KEY (`vlan_id`) REFERENCES `VLANValidID` (`vlan_id`)
+) ENGINE=InnoDB
+";
+			$query[] = "
+CREATE TABLE `CachedPNV` (
+  `object_id` int(10) unsigned NOT NULL,
+  `port_name` char(255) NOT NULL,
+  `vlan_id` int(10) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`object_id`,`port_name`,`vlan_id`),
+  UNIQUE KEY `port_id` (`object_id`,`port_name`),
+  CONSTRAINT `CachedPNV-FK-compound` FOREIGN KEY (`object_id`, `port_name`, `vlan_id`) REFERENCES `CachedPAV` (`object_id`, `port_name`, `vlan_id`) ON DELETE CASCADE
+) ENGINE=InnoDB
+";
+			$query[] = "
+CREATE TABLE `CachedPVM` (
+  `object_id` int(10) unsigned NOT NULL,
+  `port_name` char(255) NOT NULL,
+  `vlan_mode` enum('access','trunk') NOT NULL default 'access',
+  PRIMARY KEY  (`object_id`,`port_name`),
+  CONSTRAINT `CachedPVM-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `RackObject` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB
+";
+			$query[] = "
+CREATE TABLE `PortAllowedVLAN` (
+  `object_id` int(10) unsigned NOT NULL,
+  `port_name` char(255) NOT NULL,
+  `vlan_id` int(10) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`object_id`,`port_name`,`vlan_id`),
+  KEY `vlan_id` (`vlan_id`),
+  CONSTRAINT `PortAllowedVLAN-FK-object-port` FOREIGN KEY (`object_id`, `port_name`) REFERENCES `PortVLANMode` (`object_id`, `port_name`) ON DELETE CASCADE,
+  CONSTRAINT `PortAllowedVLAN-FK-vlan_id` FOREIGN KEY (`vlan_id`) REFERENCES `VLANValidID` (`vlan_id`)
+) ENGINE=InnoDB
+";
+			$query[] = "
+CREATE TABLE `PortNativeVLAN` (
+  `object_id` int(10) unsigned NOT NULL,
+  `port_name` char(255) NOT NULL,
+  `vlan_id` int(10) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`object_id`,`port_name`,`vlan_id`),
+  UNIQUE KEY `port_id` (`object_id`,`port_name`),
+  CONSTRAINT `PortNativeVLAN-FK-compound` FOREIGN KEY (`object_id`, `port_name`, `vlan_id`) REFERENCES `PortAllowedVLAN` (`object_id`, `port_name`, `vlan_id`) ON DELETE CASCADE
+) ENGINE=InnoDB
+";
+			$query[] = "
+CREATE TABLE `PortVLANMode` (
+  `object_id` int(10) unsigned NOT NULL,
+  `port_name` char(255) NOT NULL,
+  `vlan_mode` enum('access','trunk') NOT NULL default 'access',
+  PRIMARY KEY  (`object_id`,`port_name`),
+  CONSTRAINT `PortVLANMode-FK-object-port` FOREIGN KEY (`object_id`, `port_name`) REFERENCES `CachedPVM` (`object_id`, `port_name`)
+) ENGINE=InnoDB
+";
+			$query[] = "
+CREATE TABLE `VLANDescription` (
+  `domain_id` int(10) unsigned NOT NULL,
+  `vlan_id` int(10) unsigned NOT NULL default '0',
+  `vlan_type` enum('ondemand','compulsory','alien') NOT NULL default 'ondemand',
+  `vlan_descr` char(255) default NULL,
+  PRIMARY KEY  (`domain_id`,`vlan_id`),
+  KEY `vlan_id` (`vlan_id`),
+  CONSTRAINT `VLANDescription-FK-domain_id` FOREIGN KEY (`domain_id`) REFERENCES `VLANDomain` (`id`),
+  CONSTRAINT `VLANDescription-FK-vlan_id` FOREIGN KEY (`vlan_id`) REFERENCES `VLANValidID` (`vlan_id`)
+) ENGINE=InnoDB
+";
+			$query[] = "
+CREATE TABLE `VLANDomain` (
+  `id` int(10) unsigned NOT NULL auto_increment,
+  `description` char(255) default NULL,
+  PRIMARY KEY  (`id`),
+  UNIQUE KEY `description` (`description`)
+) ENGINE=InnoDB
+";
+			$query[] = "
+CREATE TABLE `VLANIPv4` (
+  `domain_id` int(10) unsigned NOT NULL,
+  `vlan_id` int(10) unsigned NOT NULL,
+  `ipv4net_id` int(10) unsigned NOT NULL,
+  UNIQUE KEY `network-domain` (`ipv4net_id`,`domain_id`),
+  KEY `VLANIPv4-FK-compound` (`domain_id`,`vlan_id`),
+  CONSTRAINT `VLANIPv4-FK-compound` FOREIGN KEY (`domain_id`, `vlan_id`) REFERENCES `VLANDescription` (`domain_id`, `vlan_id`) ON DELETE CASCADE,
+  CONSTRAINT `VLANIPv4-FK-ipv4net_id` FOREIGN KEY (`ipv4net_id`) REFERENCES `IPv4Network` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB
+";
+			$query[] = "
+CREATE TABLE `VLANSTRule` (
+  `vst_id` int(10) unsigned NOT NULL,
+  `rule_no` int(10) unsigned NOT NULL,
+  `port_pcre` char(255) NOT NULL,
+  `port_role` enum('access','trunk','uplink','downlink','none') NOT NULL default 'none',
+  `wrt_vlans` char(255) default NULL,
+  `description` char(255) default NULL,
+  UNIQUE KEY `vst-rule` (`vst_id`,`rule_no`),
+  CONSTRAINT `VLANSTRule-FK-vst_id` FOREIGN KEY (`vst_id`) REFERENCES `VLANSwitchTemplate` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB
+";
+			$query[] = "
+CREATE TABLE `VLANSwitch` (
+  `object_id` int(10) unsigned NOT NULL,
+  `domain_id` int(10) unsigned NOT NULL,
+  `template_id` int(10) unsigned NOT NULL,
+  `mutex_rev` int(10) unsigned NOT NULL default '0',
+  `out_of_sync` enum('yes','no') NOT NULL default 'yes',
+  `last_errno` int(10) unsigned NOT NULL default '0',
+  `last_change` timestamp NOT NULL default '0000-00-00 00:00:00',
+  `last_push_started` timestamp NOT NULL default '0000-00-00 00:00:00',
+  `last_push_finished` timestamp NOT NULL default '0000-00-00 00:00:00',
+  `last_error_ts` timestamp NOT NULL default '0000-00-00 00:00:00',
+  UNIQUE KEY `object_id` (`object_id`),
+  KEY `domain_id` (`domain_id`),
+  KEY `template_id` (`template_id`),
+  KEY `out_of_sync` (`out_of_sync`),
+  KEY `last_errno` (`last_errno`),
+  CONSTRAINT `VLANSwitch-FK-domain_id` FOREIGN KEY (`domain_id`) REFERENCES `VLANDomain` (`id`),
+  CONSTRAINT `VLANSwitch-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `RackObject` (`id`),
+  CONSTRAINT `VLANSwitch-FK-template_id` FOREIGN KEY (`template_id`) REFERENCES `VLANSwitchTemplate` (`id`)
+) ENGINE=InnoDB
+";
+			$query[] = "
+CREATE TABLE `VLANSwitchTemplate` (
+  `id` int(10) unsigned NOT NULL auto_increment,
+  `max_local_vlans` int(10) unsigned default NULL,
+  `description` char(255) default NULL,
+  PRIMARY KEY  (`id`),
+  UNIQUE KEY `description` (`description`)
+) ENGINE=InnoDB
+";
+			$query[] = "
+CREATE TABLE `VLANValidID` (
+  `vlan_id` int(10) unsigned NOT NULL default '1',
+  PRIMARY KEY  (`vlan_id`)
+) ENGINE=InnoDB
+";
+			$query[] = "SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS";
 			for ($i = 1; $i <= 4094; $i++)
 				usePreparedInsertBlade ('VLANValidID', array ('vlan_id' => $i));
 			$query[] = "UPDATE Config SET varvalue = '0.18.0' WHERE varname = 'DB_VERSION'";
