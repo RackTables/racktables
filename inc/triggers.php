@@ -223,4 +223,9 @@ function trigger_object_8021qsync ()
 	return $vswitch['out_of_sync'] == 'yes' ? 'attn' : 'std';
 }
 
+function trigger_LiveCDP ()
+{
+	return 'ios12' == detectDeviceBreed ($_REQUEST['object_id']) ? 'std' : '';
+}
+
 ?>

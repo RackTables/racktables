@@ -2379,19 +2379,24 @@ function ios12ReadVLANConfig ($input)
 	return $ret;
 }
 
+// map interface name
+function ios12ShortenIfName ($ifname)
+{
+	$ifname = preg_replace ('@^Ethernet(.+)$@', 'et\\1', $ifname);
+	$ifname = preg_replace ('@^FastEthernet(.+)$@', 'fa\\1', $ifname);
+	$ifname = preg_replace ('@^GigabitEthernet(.+)$@', 'gi\\1', $ifname);
+	$ifname = preg_replace ('@^TenGigabitEthernet(.+)$@', 'te\\1', $ifname);
+	$ifname = preg_replace ('@^Port-channel(.+)$@', 'po\\1', $ifname);
+	return $ifname;
+}
+
 function ios12ScanTopLevel (&$work, $line)
 {
 	$matches = array();
 	switch (TRUE)
 	{
 	case (preg_match ('@^interface ((Ethernet|FastEthernet|GigabitEthernet|TenGigabitEthernet|Port-channel)[[:digit:]]+(/[[:digit:]]+)*)$@', $line, $matches)):
-		// map interface name
-		$matches[1] = preg_replace ('@^Ethernet(.+)$@', 'et\\1', $matches[1]);
-		$matches[1] = preg_replace ('@^FastEthernet(.+)$@', 'fa\\1', $matches[1]);
-		$matches[1] = preg_replace ('@^GigabitEthernet(.+)$@', 'gi\\1', $matches[1]);
-		$matches[1] = preg_replace ('@^TenGigabitEthernet(.+)$@', 'te\\1', $matches[1]);
-		$matches[1] = preg_replace ('@^Port-channel(.+)$@', 'po\\1', $matches[1]);
-		$work['current'] = array ('port_name' => $matches[1]);
+		$work['current'] = array ('port_name' => ios12ShortenIfName ($matches[1]));
 		return 'ios12PickSwitchportCommand'; // switch to interface block reading
 	case (preg_match ('/^VLAN Name                             Status    Ports$/', $line, $matches)):
 		return 'ios12PickVLANCommand';
@@ -3082,6 +3087,61 @@ function vrp53TranslatePushQueue ($queue)
 	if (getConfigVar ('8021Q_WRI_AFTER_CONFT') == 'yes')
 		$ret .= "save\n";
 	return $ret;
+}
+
+// Read provided output of "show cdp neighbors detail" command and
+// return a list of records with (translated) local port name,
+// remote device name and (translated) remote port name.
+function ios12ReadCDPStatus ($input)
+{
+	$ret = array();
+	$procfunc = 'ios12ScanCDPTopLevel';
+	foreach (explode ("\n", $input) as $line)
+		$procfunc = $procfunc ($ret, $line);
+	unset ($ret['current']);
+	return $ret;
+}
+
+function ios12ScanCDPTopLevel (&$work, $line)
+{
+	$matches = array();
+	switch (TRUE)
+	{
+	case preg_match ('/^Device ID: (.+)$/', $line, $matches):
+		$work['current'] = array ('remote_device' => $matches[1]);
+		return 'ios12ScanCDPEntry';
+	default:
+		return __FUNCTION__; // continue scan
+	}
+}
+
+function ios12ScanCDPEntry (&$work, $line)
+{
+	if (preg_match ('/^-+$/', $line))
+	{
+		if
+		(
+			array_key_exists ('local_port', $work['current']) and
+			array_key_exists ('remote_port', $work['current'])
+		)
+			$work[$work['current']['local_port']] = array
+			(
+				'device' => $work['current']['remote_device'],
+				'port' => $work['current']['remote_port'],
+			);
+		unset ($work['current']);
+		return 'ios12ScanCDPTopLevel';
+	}
+	$matches = array();
+	switch (TRUE)
+	{
+	case preg_match ('/^Interface: (.+),  Port ID \(outgoing port\): (.+)$/', $line, $matches):
+		$work['current']['local_port'] = ios12ShortenIfName ($matches[1]);
+		$work['current']['remote_port'] = ios12ShortenIfName ($matches[2]);
+		break;
+	default:
+	}
+	return __FUNCTION__;
 }
 
 // Return TRUE, if every value of A1 is present in A2 and vice versa,
@@ -3966,6 +4026,15 @@ function authorize8021QChangeRequests ($before, $changes)
 		if (permitted (NULL, NULL, NULL, $annex))
 			$ret[$pn] = $change;
 	}
+	return $ret;
+}
+
+function formatPortIIFOIF ($port)
+{
+	$ret = '';
+	if ($port['iif_id'] != 1)
+		$ret .= $port['iif_name'] . '/';
+	$ret .= $port['oif_name'];
 	return $ret;
 }
 

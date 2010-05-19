@@ -322,12 +322,19 @@ function getRunning8021QConfig ($object_id)
 		'vrp53' => 'vrp53ReadVLANConfig',
 		'nxos4' => 'nxos4Read8021QConfig',
 	);
-	$ret = $reader[$breed] (dos2unix (gwRetrieveDeviceConfig ($object_id, $breed)));
+	$ret = $reader[$breed] (dos2unix (gwRetrieveDeviceConfig ($object_id, $breed, 'retrieve')));
 	// Once there is no default VLAN in the parsed data, it means
 	// something else was parsed instead of config text.
 	if (!in_array (VLAN_DFL_ID, $ret['vlanlist']))
 		throw new RuntimeException ('communication with device failed');
 	return $ret;
+}
+
+function getRunningCDPStatus ($object_id)
+{
+	if ('' == $breed = detectDeviceBreed ($object_id))
+		throw new RuntimeException ('cannot pick handler for this device');
+	return ios12ReadCDPStatus (dos2unix (gwRetrieveDeviceConfig ($object_id, $breed, 'getcdpstatus')));
 }
 
 function setDevice8021QConfig ($object_id, $pseudocode)
@@ -344,7 +351,7 @@ function setDevice8021QConfig ($object_id, $pseudocode)
 	gwDeployDeviceConfig ($object_id, $breed, unix2dos ($xlator[$breed] ($pseudocode)));
 }
 
-function gwRetrieveDeviceConfig ($object_id, $breed)
+function gwRetrieveDeviceConfig ($object_id, $breed, $command = 'retrieve')
 {
 	$objectInfo = spotEntity ('object', $object_id);
 	$endpoints = findAllEndpoints ($object_id, $objectInfo['name']);
@@ -357,7 +364,7 @@ function gwRetrieveDeviceConfig ($object_id, $breed)
 	$outputlines = queryGateway
 	(
 		'deviceconfig',
-		array ("retrieve ${endpoint} ${breed} ${tmpfilename}")
+		array ("${command} ${endpoint} ${breed} ${tmpfilename}")
 	);
 	$configtext = file_get_contents ($tmpfilename);
 	unlink ($tmpfilename);

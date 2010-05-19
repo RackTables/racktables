@@ -1674,17 +1674,24 @@ function getObjectNATSearchResults ($what)
 }
 
 // This function returns either port ID or NULL for specified arguments.
-// This function returns either port ID or NULL for specified arguments.
-function getPortID ($object_id, $port_name)
+function getPortIDs ($object_id, $port_name)
 {
-	$query = "select id from Port where object_id=${object_id} and name='${port_name}' limit 2";
-	$result = useSelectBlade ($query);
+	$ret = array();
+	$result = usePreparedSelectBlade ('SELECT id FROM Port WHERE object_id = ? AND name = ?', array ($object_id, $port_name));
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
+		$ret[] = $row['id'];
+	return $ret;
+}
+
+// Search in "FQDN" attribute only, and return object ID, when there is exactly
+// one result found (and NULL in any other case).
+function searchByMgmtHostname ($string)
+{
+	$result = usePreparedSelectBlade ('SELECT object_id FROM AttributeValue WHERE attr_id = 3 AND string_value = ? LIMIT 2', array ($string));
 	$rows = $result->fetchAll (PDO::FETCH_NUM);
 	if (count ($rows) != 1)
 		return NULL;
-	$ret = $rows[0][0];
-	$result->closeCursor();
-	return $ret;
+	return $rows[0][0];
 }
 
 function commitCreateUserAccount ($username, $realname, $password)

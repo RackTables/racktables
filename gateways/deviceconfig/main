@@ -56,6 +56,10 @@ do_work()
 		echo 'ERR!too few arguments to connect'
 		return
 	fi
+	if [ "$command" = "getcdpstatus" and "$handler" != "ios12" ]; then
+		echo 'ERR!getcdpstatus only works for ios12'
+		return
+	fi
 	[ -x "$MYDIR/$handler.connector" ] || {
 		echo "ERR!Handler '$handler' is not available"
 		exit 1
@@ -73,7 +77,7 @@ do_work()
 
 while read cmd args; do
 	case $cmd in
-		retrieve|deploy)
+		retrieve|deploy|getcdpstatus)
 			do_work $cmd $args
 			;;
 		*)

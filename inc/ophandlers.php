@@ -333,8 +333,8 @@ http://www.cisco.com/en/US/products/hw/routers/ps274/products_tech_note09186a008
 	$added_count = $updated_count = $error_count = 0;
 	foreach ($ports as $port)
 	{
-		$port_id = getPortID ($object_id, $port['name']);
-		if ($port_id === NULL)
+		$port_ids = getPortIDs ($object_id, $port['name']);
+		if (!count ($port_ids))
 		{
 			$result = commitAddPort ($object_id, $port['name'], $port_type, $port['label'], $port['l2address']);
 			if ($result == '')
@@ -342,9 +342,9 @@ http://www.cisco.com/en/US/products/hw/routers/ps274/products_tech_note09186a008
 			else
 				$error_count++;
 		}
-		else
+		elseif (count ($port_ids) == 1) // update only single-socket ports
 		{
-			$result = commitUpdatePort ($object_id, $port_id, $port['name'], $port_type, $port['label'], $port['l2address']);
+			$result = commitUpdatePort ($object_id, $port_ids[0], $port['name'], $port_type, $port['label'], $port['l2address']);
 			if ($result == '')
 				$updated_count++;
 			else

@@ -986,9 +986,7 @@ function renderRackObject ($object_id)
 			if ($hl_port_id == $port['id'])
 				echo ' class=port_highlight';
 			echo "><td class=tdleft>${port['name']}</td><td class=tdleft>${port['label']}</td><td class=tdleft>";
-			if ($port['iif_id'] != 1)
-				echo $port['iif_name'] . '/';
-			echo $port['oif_name'] . "</td><td class=tdleft><tt>${port['l2address']}</tt></td>";
+			echo formatPortIIFOIF ($port) . "</td><td class=tdleft><tt>${port['l2address']}</tt></td>";
 			if ($port['remote_object_id'])
 			{
 				$remote_object = spotEntity ('object', $port['remote_object_id']);
@@ -1270,9 +1268,7 @@ function renderPortsForObject ($object_id)
 		else
 		{
 			echo "<input type=hidden name=port_type_id value='${port['oif_id']}'><td class=tdleft>";
-			if ($port['iif_id'] != 1)
-				echo $port['iif_name'] . '/';
-			echo "${port['oif_name']}</td>\n";
+			echo formatPortIIFOIF ($port) . '</td>';
 		}
 		// 18 is enough to fit 6-byte MAC address in its longest form,
 		// while 24 should be Ok for WWN
@@ -6876,7 +6872,7 @@ function renderObject8021QPorts ($object_id)
 	foreach ($object['ports'] as $port)
 		if (mb_strlen ($port['name']) and array_key_exists ($port['name'], $desired_config))
 		{
-			$socket = array ('interface' => ($port['iif_id'] == 1 ? '' : $port['iif_name'] . '/') . $port['oif_name']);
+			$socket = array ('interface' => formatPortIIFOIF ($port));
 			if ($port['remote_object_id'])
 			{
 				$remote_object = spotEntity ('object', $port['remote_object_id']);
@@ -7734,6 +7730,70 @@ function renderDeployQueue ($dqcode)
 		$order = $nextorder[$order];
 	}
 	echo '</table>';
+}
+
+function renderLiveCDP ($object_id)
+{
+	$CDP_status = getRunningCDPStatus ($object_id);
+	uksort ($CDP_status, 'sortTokenize');
+	$mydevice = spotEntity ('object', $object_id);
+	amplifyCell ($mydevice);
+	// reindex by port name
+	$myports = array();
+	foreach ($mydevice['ports'] as $port)
+		if (mb_strlen ($port['name']))
+			$myports[$port['name']][] = $port;
+	unset ($mydevice);
+	printOpFormIntro ('importCDPData');
+	echo '<br><table cellspacing=0 cellpadding=5 align=center class=widetable>';
+	echo '<tr><th colspan=2>local port</th><th>remote device</th><th colspan=2>remote port</th><th>&nbsp;</th></tr>';
+	$inputno = 0;
+	foreach ($CDP_status as $local_port => $remote)
+	{
+		if
+		(
+			!array_key_exists ($local_port, $myports) or
+			NULL === $remote_id = searchByMgmtHostname ($remote['device']) or
+			!count ($remote_port_ids = getPortIDs ($remote_id, $remote['port']))
+		)
+		{
+			echo "<tr class=trerror><td>${local_port}</td><td>&nbsp;</td>";
+			echo "<td>${remote['device']}</td>";
+			echo "<td>${remote['port']}</td><td>&nbsp;</td>";
+			echo "<td>&nbsp;</td></tr>";
+			continue;
+		}
+		// Link already installed?
+		foreach ($myports[$local_port] as $socket)
+			if (in_array ($socket['remote_id'], $remote_port_ids))
+			{
+				echo "<tr class=trok><td>${local_port}</td><td>";
+				echo formatPortIIFOIF ($socket) . "</td>";
+				echo "<td>${remote['device']}</td>";
+				echo "<td>${remote['port']}</td><td>";
+				echo formatPortIIFOIF (getPortInfo ($socket['remote_id'])) . "</td>";
+				echo "<td>&nbsp;</td></tr>";
+				continue 2;
+			}
+		$local_options = $remote_options = array();
+		foreach ($myports[$local_port] as $port)
+			$local_options[$port['id']] = formatPortIIFOIF ($port);
+		foreach ($remote_port_ids as $remote_port_id)
+			$remote_options[$remote_port_id] = formatPortIIFOIF (getPortInfo ($remote_port_id));
+		echo "<tr class=trwarning><td>${local_port}</td><td>";
+		printSelect ($local_options, array ('name' => "pid2_${inputno}"));
+		echo "</td><td>${remote['device']}</td>";
+		echo "<td>${remote['port']}</td><td>";
+		printSelect ($remote_options, array ('name' => "pid2_${inputno}"));
+		echo "</td><td><input type=checkbox name=do_${inputno}></td></tr>";
+		$inputno++;
+	}
+	if ($inputno)
+	{
+		echo "<input type=hidden name=nports value=${inputno}>";
+		echo '<tr><td colspan=6 align=center>' . getImageHREF ('CREATE', 'import selected', TRUE) . '</td></tr>';
+	}
+	echo '</table></form>';
 }
 
 ?>
