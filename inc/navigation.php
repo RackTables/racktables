@@ -157,7 +157,6 @@ $ophandler['object']['8021qsync']['exec8021QPull'] = 'process8021QSyncRequest';
 $ophandler['object']['8021qsync']['exec8021QPush'] = 'process8021QSyncRequest';
 $ophandler['object']['8021qsync']['resolve8021QConflicts'] = 'resolve8021QConflicts';
 $delayauth['object']['8021qports']['save8021QConfig'] = TRUE;
-#$delayauth['object']['8021qsync']['resolve8021QConflicts'] = TRUE;
 $delayauth['object']['livevlans']['setPortVLAN'] = TRUE;
 
 $page['ipv4space']['title'] = 'IPv4 space';
