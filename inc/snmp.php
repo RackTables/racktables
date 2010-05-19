@@ -1009,4 +1009,46 @@ class APCPowerSwitch extends SNMPDevice {
 	}
 }
 
+// Take address in the form XX:XX:XX:XX:XX:XX and return the next
+// address in the same form.
+function nextMACAddress ($addr)
+{
+	$bytes = array();
+	foreach (explode (':', $addr) as $hex)
+		$bytes[] = hexdec ($hex);
+	for ($i = 5; $i >= 0; $i--)
+	{
+		$bytes[$i] += 1;
+		if ($bytes[$i] <= 255) // FF
+			break; // no roll over
+		$bytes[$i] = 0;
+	}
+	foreach (array_keys ($bytes) as $key)
+		$bytes[$key] = sprintf ('%02X', $bytes[$key]);
+	return implode (':', $bytes);
+}
+
+function generatePortsForCatModule ($object_id, $slotno = 1, $mtype = 'X6748', $mac_address = '')
+{
+	global $dbxlink;
+	$mac_address = l2addressFromDatabase (l2addressForDatabase ($mac_address));
+	switch ($mtype)
+	{
+	case 'X6748':
+		$dbxlink->beginTransaction();
+		for ($i = 1; $i <= 48; $i++)
+		{
+			if ('' != commitAddPort ($object_id, "gi${slotno}/${i}", '1-24', "slot ${slotno} port ${i}", $mac_address))
+			{
+				$dbxlink->rollBack();
+				break 2;
+			}
+			if ($mac_address != '')
+				$mac_address = nextMACAddress ($mac_address);
+		}
+		$dbxlink->commit();
+		break;
+	}
+}
+
 ?>
