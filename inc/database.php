@@ -3608,14 +3608,14 @@ function getDomainVLANs ($vdom_id)
 	$query = $dbxlink->prepare
 	(
 		'SELECT vlan_id, vlan_type, vlan_descr, ' .
-		'(SELECT COUNT(*) FROM VLANIPv4 WHERE domain_id = VD.domain_id AND vlan_id = VD.vlan_id) AS netc, ' .
-		'(SELECT COUNT(port_name) AS portc FROM VLANSwitch AS VS INNER JOIN PortAllowedVLAN AS PAV ' .
-		'ON VS.object_id = PAV.object_id WHERE domain_id = VD.domain_id AND PAV.vlan_id = VD.vlan_id GROUP BY PAV.vlan_id) AS portc ' .
+		'(SELECT COUNT(ipv4net_id) FROM VLANIPv4 WHERE domain_id = ? AND vlan_id = VD.vlan_id) AS netc, ' .
+		'(SELECT COUNT(port_name) FROM VLANSwitch AS VS INNER JOIN PortAllowedVLAN AS PAV ' .
+		'ON VS.object_id = PAV.object_id WHERE domain_id = ? AND PAV.vlan_id = VD.vlan_id GROUP BY PAV.vlan_id) AS portc ' .
 		'FROM VLANDescription AS VD ' .
 		'WHERE domain_id = ? ' .
 		'ORDER BY vlan_id'
 	);
-	$result = $query->execute (array ($vdom_id));
+	$result = $query->execute (array ($vdom_id, $vdom_id, $vdom_id));
 	$ret = array();
 	while ($row = $query->fetch (PDO::FETCH_ASSOC))
 		$ret[$row['vlan_id']] = $row;
