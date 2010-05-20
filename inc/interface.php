@@ -7228,8 +7228,8 @@ function renderVLANIPv4 ($some_id)
 		if (!count ($options))
 			return;
 		printOpFormIntro ('bind');
-		echo '<tr><td>' . getNiftySelect ($options, array ('name' => $sname, 'tabindex' => 101, 'id' => $sname), Null, true);
-		echo '</td><td>' . getImageHREF ('Attach', 'bind', TRUE, 102) . '</td></tr></form>';
+		echo '<tr><td>' . getNiftySelect ($options, array ('name' => $sname, 'tabindex' => 101, 'size' => getConfigVar ('MAXSELSIZE')));
+		echo '</td><td>' . getImageHREF ('ATTACH', 'bind', TRUE, 102) . '</td></tr></form>';
 	}
 	global $pageno;
 	$minuslines = array();
