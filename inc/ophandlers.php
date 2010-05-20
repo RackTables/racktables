@@ -2581,6 +2581,7 @@ function importCDPData()
 	global $sic;
 	assertUIntArg ('nports');
 	$nignored = $ndone = 0;
+	$POIFC = getPortOIFCompat();
 	for ($i = 0; $i < $sic['nports']; $i++)
 		if (array_key_exists ("do_${i}", $sic))
 		{
@@ -2598,8 +2599,14 @@ function importCDPData()
 				$nignored++;
 				continue;
 			}
-			linkPorts ($_REQUEST["pid1_${i}"], $_REQUEST["pid2_${i}"]);
-			$ndone++;
+			foreach ($POIFC as $item)
+				if ($item['type1'] == $porta['oif_id'] and $item['type2'] == $portb['oif_id'])
+				{
+					linkPorts ($_REQUEST["pid1_${i}"], $_REQUEST["pid2_${i}"]);
+					$ndone++;
+					continue;
+				}
+			$nignored++;
 		}
 	return buildRedirectURL (__FUNCTION__, 'OK', array ($nignored, $ndone));
 }
