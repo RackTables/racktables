@@ -7781,7 +7781,7 @@ function renderLiveCDP ($object_id)
 		foreach ($remote_port_ids as $remote_port_id)
 			$remote_options[$remote_port_id] = formatPortIIFOIF (getPortInfo ($remote_port_id));
 		echo "<tr class=trwarning><td>${local_port}</td><td>";
-		printSelect ($local_options, array ('name' => "pid2_${inputno}"));
+		printSelect ($local_options, array ('name' => "pid1_${inputno}"));
 		echo "</td><td>${remote['device']}</td>";
 		echo "<td>${remote['port']}</td><td>";
 		printSelect ($remote_options, array ('name' => "pid2_${inputno}"));

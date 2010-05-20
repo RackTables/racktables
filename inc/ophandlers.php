@@ -2575,4 +2575,33 @@ function updVSTRule()
 	return buildRedirectURL (__FUNCTION__, $result ? 'OK' : 'ERR');
 }
 
+$msgcode['importCDPData']['OK'] = 44;
+function importCDPData()
+{
+	global $sic;
+	assertUIntArg ('nports');
+	$nignored = $ndone = 0;
+	for ($i = 0; $i < $sic['nports']; $i++)
+		if (array_key_exists ("do_${i}", $sic))
+		{
+			assertUIntArg ("pid1_${i}");
+			assertUIntArg ("pid2_${i}");
+			$porta = getPortInfo ($_REQUEST["pid1_${i}"]);
+			$portb = getPortInfo ($_REQUEST["pid2_${i}"]);
+			if
+			(
+				$porta['linked'] or
+				$portb['linked'] or
+				($porta['object_id'] != $sic['object_id'] and $portb['object_id'] != $sic['object_id'])
+			)
+			{
+				$nignored++;
+				continue;
+			}
+			linkPorts ($_REQUEST["pid1_${i}"], $_REQUEST["pid2_${i}"]);
+			$ndone++;
+		}
+	return buildRedirectURL (__FUNCTION__, 'OK', array ($nignored, $ndone));
+}
+
 ?>

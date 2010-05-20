@@ -3576,6 +3576,7 @@ function getPortInfo ($port_id)
 {
 	$query = "SELECT object_id, name, iif_id, type AS oif_id, l2address, ".
 		"(SELECT dict_value FROM Dictionary WHERE dict_key = type) AS oif_name, " .
+		"(SELECT COUNT(*) FROM Link WHERE id IN (porta, portb)) AS linked, " .
 		"(SELECT iif_name FROM PortInnerInterface WHERE id = iif_id) AS iif_name " .
 		"FROM Port WHERE id = ?";
 	$result = usePreparedSelectBlade ($query, array ($port_id));

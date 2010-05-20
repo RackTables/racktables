@@ -3098,7 +3098,6 @@ function ios12ReadCDPStatus ($input)
 	$procfunc = 'ios12ScanCDPTopLevel';
 	foreach (explode ("\n", $input) as $line)
 		$procfunc = $procfunc ($ret, $line);
-	unset ($ret['current']);
 	return $ret;
 }
 
@@ -3108,7 +3107,7 @@ function ios12ScanCDPTopLevel (&$work, $line)
 	switch (TRUE)
 	{
 	case preg_match ('/^Device ID: (.+)$/', $line, $matches):
-		$work['current'] = array ('remote_device' => $matches[1]);
+		$work['current'] = array ('device' => $matches[1]);
 		return 'ios12ScanCDPEntry';
 	default:
 		return __FUNCTION__; // continue scan
@@ -3117,28 +3116,17 @@ function ios12ScanCDPTopLevel (&$work, $line)
 
 function ios12ScanCDPEntry (&$work, $line)
 {
-	if (preg_match ('/^-+$/', $line))
-	{
-		if
-		(
-			array_key_exists ('local_port', $work['current']) and
-			array_key_exists ('remote_port', $work['current'])
-		)
-			$work[$work['current']['local_port']] = array
-			(
-				'device' => $work['current']['remote_device'],
-				'port' => $work['current']['remote_port'],
-			);
-		unset ($work['current']);
-		return 'ios12ScanCDPTopLevel';
-	}
 	$matches = array();
 	switch (TRUE)
 	{
 	case preg_match ('/^Interface: (.+),  Port ID \(outgoing port\): (.+)$/', $line, $matches):
-		$work['current']['local_port'] = ios12ShortenIfName ($matches[1]);
-		$work['current']['remote_port'] = ios12ShortenIfName ($matches[2]);
-		break;
+		$work[ios12ShortenIfName ($matches[1])] = array
+		(
+			'device' => $work['current']['device'],
+			'port' => ios12ShortenIfName ($matches[2]),
+		);
+		unset ($work['current']);
+		return 'ios12ScanCDPTopLevel';
 	default:
 	}
 	return __FUNCTION__;
