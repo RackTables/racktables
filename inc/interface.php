@@ -756,7 +756,7 @@ function getSelect ($optionList, $select_attrs = array(), $selected_id = NULL)
 	if (count ($optionList) == 1)
 	{
 		$value = current (array_keys ($optionList));
-		return "<input type=hidden name=${select_attrs['name']} value=${value}>" . current ($optionList);
+		return "<input type=hidden name=${select_attrs['name']} id=${select_attrs['name']} value=${value}>" . current ($optionList);
 	}
 	if (!array_key_exists ('id', $select_attrs))
 		$select_attrs['id'] = $select_attrs['name'];
