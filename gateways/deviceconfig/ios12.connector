@@ -64,6 +64,6 @@ deploy)
 	;;
 esac
 printf 'quit\n' >> "$SESSION"
-nc $ENDPOINT 23 < "$SESSION" > "$outfile"
+nc -w 30 $ENDPOINT 23 < "$SESSION" > "$outfile"
 rm -f "$SESSION"
 exit 0
