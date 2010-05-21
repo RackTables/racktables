@@ -1048,6 +1048,23 @@ function generatePortsForCatModule ($object_id, $slotno = 1, $mtype = 'X6748', $
 		}
 		$dbxlink->commit();
 		break;
+	case '3750G-24TS':
+		// MAC address of 1st port is the next one after switch's address
+		if ($mac_address != '')
+			$mac_address = nextMACAddress ($mac_address);
+		for ($i = 1; $i <= 24; $i++)
+		{
+			commitAddPort ($object_id, "gi${slotno}/0/${i}", '1-24', "unit ${slotno} port ${i}", $mac_address);
+			if ($mac_address != '')
+				$mac_address = nextMACAddress ($mac_address);
+		}
+		for ($i = 25; $i <= 28; $i++)
+		{
+			commitAddPort ($object_id, "gi${slotno}/0/${i}", '4-1077', "unit ${slotno} port ${i}", $mac_address);
+			if ($mac_address != '')
+				$mac_address = nextMACAddress ($mac_address);
+		}
+		break;
 	}
 }
 
