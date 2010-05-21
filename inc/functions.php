@@ -3085,7 +3085,7 @@ function vrp53TranslatePushQueue ($queue)
 		}
 	$ret .= "return\n";
 	if (getConfigVar ('8021Q_WRI_AFTER_CONFT') == 'yes')
-		$ret .= "save\n";
+		$ret .= "save\nY\n";
 	return $ret;
 }
 
