@@ -6629,24 +6629,27 @@ function render8021QStatus ()
 	{
 		startPortlet ('VLAN domains (' . count ($vdlist) . ')');
 		echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
-		echo '<tr><th>description</th><th>VLANs</th><th>switches</th><th>';
+		echo '<tr><th>description</th><th>VLANs</th><th>switches</th><th>ports</th><th>';
 		echo getImageHREF ('net') . '</th></tr>';
 		$stats = array();
-		foreach (array ('vlanc', 'switchc', 'ipv4netc') as $cname)
+		$columns = array ('vlanc', 'switchc', 'ipv4netc', 'portc');
+		foreach ($columns as $cname)
 			$stats[$cname] = 0;
 		foreach (getVLANDomainList() as $vdom_id => $dominfo)
 		{
-			foreach (array ('vlanc', 'switchc', 'ipv4netc') as $cname)
+			foreach ($columns as $cname)
 				$stats[$cname] += $dominfo[$cname];
 			echo "<tr align=left><td><a href='";
 			echo makeHref (array ('page' => 'vlandomain', 'vdom_id' => $vdom_id)) . "'>";
-			echo niftyString ($dominfo['description']) . "</a></td><td>${dominfo['vlanc']}</td>";
-			echo "<td>${dominfo['switchc']}</td><td>${dominfo['ipv4netc']}</td></tr>";
+			echo niftyString ($dominfo['description']) . '</a></td>';
+			foreach ($columns as $cname)
+				echo '<td>' . $dominfo[$cname] . '</td>';
+			echo '</tr>';
 		}
 		if (count ($vdlist) > 1)
 		{
 			echo '<tr align=left><td>total:</td>';
-			foreach (array ('vlanc', 'switchc', 'ipv4netc') as $cname)
+			foreach ($columns as $cname)
 				echo '<td>' . $stats[$cname] . '</td>';
 			echo '</tr>';
 		}

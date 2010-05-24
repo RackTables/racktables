@@ -3588,7 +3588,8 @@ function getVLANDomainList ()
 	$query = 'SELECT id, description, ' .
 		'(SELECT COUNT(vlan_id) FROM VLANDescription WHERE domain_id = id) AS vlanc, ' .
 		'(SELECT COUNT(ipv4net_id) FROM VLANIPv4 WHERE domain_id = id) AS ipv4netc, ' .
-		'(SELECT COUNT(object_id) FROM VLANSwitch WHERE domain_id = id) AS switchc ' .
+		'(SELECT COUNT(object_id) FROM VLANSwitch WHERE domain_id = id) AS switchc, ' .
+		'(SELECT COUNT(port_name) FROM VLANSwitch AS VS INNER JOIN PortVLANMode AS PVM ON VS.object_id = PVM.object_id WHERE domain_id = id) AS portc ' .
 		'FROM VLANDomain ORDER BY description';
 	$result = useSelectBlade ($query, __FUNCTION__);
 	$ret = array();
