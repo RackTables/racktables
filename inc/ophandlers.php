@@ -2604,7 +2604,7 @@ function importCDPData()
 				{
 					linkPorts ($_REQUEST["pid1_${i}"], $_REQUEST["pid2_${i}"]);
 					$ndone++;
-					continue;
+					continue 2; // next port
 				}
 			$nignored++;
 		}
