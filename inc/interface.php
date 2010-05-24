@@ -6629,8 +6629,8 @@ function render8021QStatus ()
 	{
 		startPortlet ('VLAN domains (' . count ($vdlist) . ')');
 		echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
-		echo '<tr><th>description</th><th>VLANs</th><th>switches</th><th>ports</th><th>';
-		echo getImageHREF ('net') . '</th></tr>';
+		echo '<tr><th>description</th><th>VLANs</th><th>switches</th><th>';
+		echo getImageHREF ('net') . '</th><th>ports</th></tr>';
 		$stats = array();
 		$columns = array ('vlanc', 'switchc', 'ipv4netc', 'portc');
 		foreach ($columns as $cname)
