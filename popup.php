@@ -97,7 +97,6 @@ header ('Content-Type: text/html; charset=UTF-8');
 			$spare_ports = findSparePorts ($port_id, $only_racks);
 
 			printSelect ($spare_ports, array ('name' => 'ports', 'id' => 'ports'));
-			comboFromSelect (array ('ports'));
 			echo '<br><br>';
 			echo "<input type='submit' value='Link' onclick='".
 			"if (getElementById(\"ports\").value != \"\") {".
