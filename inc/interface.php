@@ -6713,7 +6713,7 @@ function renderVLANDomainListEditor ()
 	{
 		printOpFormIntro ('upd', array ('vdom_id' => $vdom_id));
 		echo '<tr><td>';
-		if ($dominfo['switchc'] or $dominfo['vlanc'])
+		if ($dominfo['switchc'] or $dominfo['vlanc'] > 1)
 			printImageHREF ('nodestroy', 'domain used elsewhere');
 		else
 		{
@@ -6824,7 +6824,7 @@ function renderVLANDomainVLANList ($vdom_id)
 	{
 		printOpFormIntro ('upd', array ('vlan_id' => $vlan_id));
 		echo '<tr><td>';
-		if ($vlan_info['portc'])
+		if ($vlan_info['portc'] or $vlan_id == VLAN_DFL_ID)
 			printImageHREF ('nodestroy', $vlan_info['portc'] . ' ports configured');
 		else
 		{

@@ -2172,7 +2172,7 @@ function delVLANDescription ()
 	assertUIntArg ('vlan_id');
 	global $sic;
 	if ($sic['vlan_id'] == VLAN_DFL_ID)
-		buildRedirectURL (__FUNCTION__, 'ERR1');
+		return buildRedirectURL (__FUNCTION__, 'ERR1');
 	$result = commitReduceVLANDescription ($sic['vdom_id'], $sic['vlan_id']);
 	return buildRedirectURL (__FUNCTION__, $result ? 'OK' : 'ERR2');
 }
@@ -2187,7 +2187,7 @@ function updVLANDescription ()
 	assertStringArg ('vlan_descr', TRUE);
 	global $sic;
 	if ($sic['vlan_id'] == VLAN_DFL_ID)
-		buildRedirectURL (__FUNCTION__, 'ERR1');
+		return buildRedirectURL (__FUNCTION__, 'ERR1');
 	$result = commitUpdateVLANDescription
 	(
 		$sic['vdom_id'],
