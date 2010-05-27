@@ -37,15 +37,15 @@ $aac2 = array
 $vtdecoder = array
 (
 	'ondemand' => '',
-	'compulsory' => 'MH',
-	'alien' => 'NT',
+	'compulsory' => 'P',
+#	'alien' => 'NT',
 );
 
 $vtoptions = array
 (
-	'ondemand' => 'on demand',
-	'compulsory' => 'must have',
-	'alien' => 'never touch',
+	'ondemand' => 'auto',
+	'compulsory' => 'permanent',
+#	'alien' => 'never touch',
 );
 
 // 802.1Q deploy queue titles
