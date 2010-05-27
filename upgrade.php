@@ -566,7 +566,7 @@ CREATE TABLE `VLANDescription` (
   `vlan_descr` char(255) default NULL,
   PRIMARY KEY  (`domain_id`,`vlan_id`),
   KEY `vlan_id` (`vlan_id`),
-  CONSTRAINT `VLANDescription-FK-domain_id` FOREIGN KEY (`domain_id`) REFERENCES `VLANDomain` (`id`),
+  CONSTRAINT `VLANDescription-FK-domain_id` FOREIGN KEY (`domain_id`) REFERENCES `VLANDomain` (`id`) ON DELETE CASCADE,
   CONSTRAINT `VLANDescription-FK-vlan_id` FOREIGN KEY (`vlan_id`) REFERENCES `VLANValidID` (`vlan_id`)
 ) ENGINE=InnoDB
 ";
