@@ -7568,12 +7568,11 @@ function renderVSTListEditor()
 		echo '<tr>';
 		echo '<td>' . getImageHREF ('create', 'create template', TRUE, 104) . '</td>';
 		echo '<td><input type=text name=vst_descr tabindex=101></td>';
-		echo '<td><input type=text name=vst_maxvlans tabindex=102></td>';
 		echo '<td>' . getImageHREF ('create', 'create domain', TRUE, 103) . '</td>';
 		echo '</tr></form>';
 	}
 	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
-	echo '<tr><th>&nbsp;</th><th>description</th><th>max local VLANs on a switch</th><th>&nbsp</th></tr>';
+	echo '<tr><th>&nbsp;</th><th>description</th><th>&nbsp</th></tr>';
 	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
 		printNewItemTR();
 	foreach (getVLANSwitchTemplates() as $vst_id => $vst_info)
@@ -7589,7 +7588,6 @@ function renderVSTListEditor()
 		}
 		echo '</td>';
 		echo '<td><input name=vst_descr type=text value="' . niftyString ($vst_info['description'], 0) . '"></td>';
-		echo "<td><input name=vst_maxvlans type=text value=${vst_info['max_local_vlans']}></td>";
 		echo '<td>' . getImageHREF ('save', 'update template', TRUE) . '</td>';
 		echo '</tr></form>';
 	}
