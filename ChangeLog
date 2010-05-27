@@ -1,4 +1,4 @@
-0.18.0
+0.18.0 2010-05-27
 	update: usual SNMP updates
 	update: Bulk port form (#321)
 	bugfix: updateObject() saves DB records for dict values when not set. (#273)

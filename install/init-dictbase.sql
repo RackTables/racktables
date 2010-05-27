@@ -404,7 +404,7 @@ INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdef
 ('8021Q_INSTANT_DEPLOY','no','string','no','no','yes','802.1Q: instant deploy'),
 ('STATIC_FILTER','yes','string','no','no','yes','Enable Filter Caching'),
 ('ENABLE_BULKPORT_FORM','yes','string','no','no','yes','Enable "Bulk Port" form'),
-('DB_VERSION','0.17.10','string','no','yes','no','Database version.');
+('DB_VERSION','0.18.0','string','no','yes','no','Database version.');
 
 INSERT INTO `Script` VALUES ('RackCode','allow {$userid_1}');
 
