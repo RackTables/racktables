@@ -3916,6 +3916,7 @@ function getVLANSwitchTemplates()
 		'(SELECT COUNT(rule_no) FROM VLANSTRule WHERE vst_id = id) AS rulec ' .
 		'FROM VLANSwitchTemplate ORDER BY description';
 	$result = usePreparedSelectBlade ($query);
+	$ret = array();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 		$ret[$row['id']] = $row;
 	return $ret;

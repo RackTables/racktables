@@ -7150,7 +7150,7 @@ function renderVLANInfo ($vlan_ck)
 	global $vtoptions, $nextorder;
 	$vlan = getVLANInfo ($vlan_ck);
 	echo '<table border=0 class=objectview cellspacing=0 cellpadding=0>';
-	echo "<tr><td colspan=2 align=center><h1>${mydomain['description']}</h1></td></tr>";
+	echo '<tr><td colspan=2 align=center><h1>' . formatVLANName ($vlan, 'markup long') . '</h1></td></tr>';
 	echo "<tr><td class=pcleft width='50%'>";
 	startPortlet ('summary');
 	echo "<table border=0 cellspacing=0 cellpadding=3 width='100%'>";
