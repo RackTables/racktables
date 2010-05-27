@@ -142,7 +142,14 @@ function addPortForObject ()
 	assertStringArg ('port_name', TRUE);
 	if (!strlen ($_REQUEST['port_name']))
 		return buildRedirectURL (__FUNCTION__, 'ERR1');
-	$error = commitAddPort ($_REQUEST['object_id'], $_REQUEST['port_name'], $_REQUEST['port_type_id'], $_REQUEST['port_label'], $_REQUEST['port_l2address']);
+	$error = commitAddPort
+	(
+		$_REQUEST['object_id'],
+		trim ($_REQUEST['port_name']),
+		$_REQUEST['port_type_id'],
+		trim ($_REQUEST['port_label']),
+		trim ($_REQUEST['port_l2address'])
+	);
 	if ($error != '')
 		return buildRedirectURL (__FUNCTION__, 'ERR2', array ($error));
 	else
