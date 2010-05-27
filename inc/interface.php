@@ -2703,7 +2703,7 @@ function renderIPv4AddressAllocations ($dottedquad)
 		echo "<tr><td>";
 		printImageHREF ('add', 'allocate', TRUE);
 		echo "</td><td>";
-		printSelect (getNarrowObjectList ('IPV4OBJ_LISTSRC'), array ('name' => 'object_id', 'tabindex' => 100, 'id' => 'object_id'), Null, true);
+		printSelect (getNarrowObjectList ('IPV4OBJ_LISTSRC'), array ('name' => 'object_id', 'tabindex' => 100, 'id' => 'object_id'));
 		echo "</td><td><input type=text tabindex=101 name=bond_name size=10></td><td>";
 		printSelect ($aat, array ('name' => 'bond_type', 'tabindex' => 102, 'regular'));
 		echo "</td><td>";
@@ -3397,7 +3397,6 @@ function renderPortOIFCompatEditor()
 		printSelect (readChapter (CHAP_PORTTYPE), array ('name' => 'type1'));
 		echo '</th><th class=tdleft>';
 		printSelect (readChapter (CHAP_PORTTYPE), array ('name' => 'type2'));
-		comboFromSelect (array ('type1', 'type2'));
 		echo '</th></tr></form>';
 	}
 
@@ -4388,11 +4387,11 @@ function renderRSPoolLBForm ($pool_id)
 		echo "<table cellspacing=0 cellpadding=5 align=center>";
 		printOpFormIntro ('addLB');
 		echo "<tr valign=top><th class=tdright>Load balancer</th><td class=tdleft>";
-		printSelect (getNarrowObjectList ('IPV4LB_LISTSRC'), array ('name' => 'object_id', 'tabindex' => 1, 'id' => 'object_id'), Null, true);
+		printSelect (getNarrowObjectList ('IPV4LB_LISTSRC'), array ('name' => 'object_id', 'tabindex' => 1, 'id' => 'object_id'));
 		echo '</td><td class=tdcenter valign=middle rowspan=2>';
 		printImageHREF ('ADD', 'Configure LB', TRUE, 5);
 		echo '</td></tr><tr><th class=tdright>Virtual service</th><td class=tdleft>';
-		printSelect (getIPv4VSOptions(), array ('name' => 'vs_id', 'tabindex' => 2, 'id' => 'vs_id'),Null,true);
+		printSelect (getIPv4VSOptions(), array ('name' => 'vs_id', 'tabindex' => 2, 'id' => 'vs_id'));
 		echo "</td></tr>\n";
 		echo "<tr><th class=tdright>VS config</th><td colspan=2><textarea tabindex=3 name=vsconfig rows=10 cols=80></textarea></td></tr>";
 		echo "<tr><th class=tdright>RS config</th><td colspan=2><textarea tabindex=4 name=rsconfig rows=10 cols=80></textarea></td></tr>";
@@ -4447,11 +4446,11 @@ function renderVServiceLBForm ($vs_id)
 		echo '<table cellspacing=0 cellpadding=5 align=center>';
 		printOpFormIntro ('addLB');
 		echo '<tr valign=top><th class=tdright>Load balancer</th><td class=tdleft>';
-		printSelect (getNarrowObjectList ('IPV4LB_LISTSRC'), array ('name' => 'object_id', 'tabindex' => 101, 'id' => 'object_id'),Null,true);
+		printSelect (getNarrowObjectList ('IPV4LB_LISTSRC'), array ('name' => 'object_id', 'tabindex' => 101, 'id' => 'object_id'));
 		echo '</td><td rowspan=2 class=tdcenter valign=middle>';
 		printImageHREF ('ADD', 'Configure LB', TRUE, 105);
 		echo '</td></tr><tr><th class=tdright>RS pool</th><td class=tdleft>';
-		printSelect (getIPv4RSPoolOptions(), array ('name' => 'pool_id', 'tabindex' => 102, 'id' => 'pool_id'),Null,true);
+		printSelect (getIPv4RSPoolOptions(), array ('name' => 'pool_id', 'tabindex' => 102, 'id' => 'pool_id'));
 		echo '</td></tr>';
 		echo '<tr><th class=tdright>VS config</th><td colspan=2><textarea tabindex=103 name=vsconfig rows=10 cols=80></textarea></td></tr>';
 		echo '<tr><th class=tdright>RS config</th><td colspan=2><textarea tabindex=104 name=rsconfig rows=10 cols=80></textarea></td></tr>';
@@ -5259,12 +5258,12 @@ function renderObjectSLB ($object_id)
 		echo '<table cellspacing=0 cellpadding=5 align=center>';
 		printOpFormIntro ('addLB');
 		echo '<tr><th class=tdright>Virtual service</th><td class=tdleft>';
-		printSelect (getIPv4VSOptions(), array ('name' => 'vs_id', 'tabindex' => 101, 'id' => 'vs_id'),Null,true);
+		printSelect (getIPv4VSOptions(), array ('name' => 'vs_id', 'tabindex' => 101, 'id' => 'vs_id'));
 		echo '</td><td class=tdcenter valign=middle rowspan=2>';
 		printImageHREF ('ADD', 'Configure LB', TRUE, 105);
 		echo '</td></tr>';
 		echo '</tr><th class=tdright>RS pool</th><td class=tdleft>';
-		printSelect (getIPv4RSPoolOptions(), array ('name' => 'pool_id', 'tabindex' => 102, 'id' => 'pool_id'),Null,true);
+		printSelect (getIPv4RSPoolOptions(), array ('name' => 'pool_id', 'tabindex' => 102, 'id' => 'pool_id'));
 		echo "</td></tr>";
 		echo '<tr><th class=tdright>VS config</th><td colspan=2><textarea tabindex=103 name=vsconfig rows=10 cols=80></textarea></td></tr>';
 		echo '<tr><th class=tdright>RS config</th><td colspan=2><textarea tabindex=104 name=rsconfig rows=10 cols=80></textarea></td></tr>';
@@ -6429,9 +6428,9 @@ function renderPortIFCompatEditor()
 		echo '<tr><th class=tdleft>';
 		printImageHREF ('add', 'add pair', TRUE);
 		echo '</th><th class=tdleft>';
-		printSelect (getPortIIFOptions(), array ('name' => 'iif_id', 'id' => 'iif_id'),Null,true);
+		printSelect (getPortIIFOptions(), array ('name' => 'iif_id', 'id' => 'iif_id'));
 		echo '</th><th class=tdleft>';
-		printSelect (readChapter (CHAP_PORTTYPE), array ('name' => 'oif_id', 'id' => 'oif_id'),Null,true);
+		printSelect (readChapter (CHAP_PORTTYPE), array ('name' => 'oif_id', 'id' => 'oif_id'));
 		echo '</th></tr></form>';
 	}
 
