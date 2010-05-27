@@ -96,7 +96,7 @@ header ('Content-Type: text/html; charset=UTF-8');
 			}
 			$spare_ports = findSparePorts ($port_id, $only_racks);
 
-			printSelect ($spare_ports, array ('name' => 'ports', 'id' => 'ports'));
+			printSelect ($spare_ports, array ('name' => 'ports', 'size' => getConfigVar ('MAXSELSIZE')));
 			echo '<br><br>';
 			echo "<input type='submit' value='Link' onclick='".
 			"if (getElementById(\"ports\").value != \"\") {".
