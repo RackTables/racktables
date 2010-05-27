@@ -2158,23 +2158,29 @@ function addVLANDescription ()
 }
 
 $msgcode['delVLANDescription']['OK'] = 49;
-$msgcode['delVLANDescription']['ERR'] = 111;
+$msgcode['delVLANDescription']['ERR1'] = 105;
+$msgcode['delVLANDescription']['ERR2'] = 111;
 function delVLANDescription ()
 {
 	assertUIntArg ('vlan_id');
 	global $sic;
+	if ($sic['vlan_id'] == VLAN_DFL_ID)
+		buildRedirectURL (__FUNCTION__, 'ERR1');
 	$result = commitReduceVLANDescription ($sic['vdom_id'], $sic['vlan_id']);
-	return buildRedirectURL (__FUNCTION__, $result ? 'OK' : 'ERR');
+	return buildRedirectURL (__FUNCTION__, $result ? 'OK' : 'ERR2');
 }
 
 $msgcode['updVLANDescription']['OK'] = 51;
-$msgcode['updVLANDescription']['ERR'] = 109;
+$msgcode['updVLANDescription']['ERR1'] = 105;
+$msgcode['updVLANDescription']['ERR2'] = 109;
 function updVLANDescription ()
 {
 	assertUIntArg ('vlan_id');
 	assertStringArg ('vlan_type');
 	assertStringArg ('vlan_descr', TRUE);
 	global $sic;
+	if ($sic['vlan_id'] == VLAN_DFL_ID)
+		buildRedirectURL (__FUNCTION__, 'ERR1');
 	$result = commitUpdateVLANDescription
 	(
 		$sic['vdom_id'],
@@ -2182,7 +2188,7 @@ function updVLANDescription ()
 		$sic['vlan_type'],
 		$sic['vlan_descr']
 	);
-	return buildRedirectURL (__FUNCTION__, $result ? 'OK' : 'ERR');
+	return buildRedirectURL (__FUNCTION__, $result ? 'OK' : 'ERR2');
 }
 
 $msgcode['createVLANDomain']['OK'] = 48;
@@ -2207,7 +2213,7 @@ function createVLANDomain ()
 			'domain_id' => lastInsertID(),
 			'vlan_id' => VLAN_DFL_ID,
 			'vlan_type' => 'compulsory',
-			'description' => 'default',
+			'vlan_descr' => 'default',
 		)
 	);
 	return buildRedirectURL (__FUNCTION__, $result ? 'OK' : 'ERR');
