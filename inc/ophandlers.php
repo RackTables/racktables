@@ -2199,6 +2199,17 @@ function createVLANDomain ()
 			'description' => $sic['vdom_descr'],
 		)
 	);
+	$result = $result and usePreparedInsertBlade
+	(
+		'VLANDescription',
+		array
+		(
+			'domain_id' => lastInsertID(),
+			'vlan_id' => VLAN_DFL_ID,
+			'vlan_type' => 'compulsory',
+			'description' => 'default',
+		)
+	);
 	return buildRedirectURL (__FUNCTION__, $result ? 'OK' : 'ERR');
 }
 
