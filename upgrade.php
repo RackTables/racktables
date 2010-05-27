@@ -641,7 +641,7 @@ CREATE TABLE `VLANValidID` (
 ";
 			$query[] = "SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS";
 			for ($i = 1; $i <= 4094; $i++)
-				usePreparedInsertBlade ('VLANValidID', array ('vlan_id' => $i));
+				$query[] = "INSERT INTO VLANValidID (vlan_id) VALUES (${i})";
 			$query[] = "UPDATE Config SET varvalue = '0.18.0' WHERE varname = 'DB_VERSION'";
 			break;
 		default:
