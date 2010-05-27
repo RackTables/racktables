@@ -643,6 +643,7 @@ CREATE TABLE `VLANValidID` (
 			for ($i = 1; $i <= 4094; $i++)
 				usePreparedInsertBlade ('VLANValidID', array ('vlan_id' => $i));
 			$query[] = "UPDATE Config SET varvalue = '0.18.0' WHERE varname = 'DB_VERSION'";
+			break;
 		default:
 			showFailure ("executeUpgradeBatch () failed, because batch '${batchid}' isn't defined", __FILE__);
 			die;
