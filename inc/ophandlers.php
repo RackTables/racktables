@@ -2148,7 +2148,7 @@ function addVLANDescription ()
 	assertStringArg ('vlan_type', TRUE);
 	assertStringArg ('vlan_descr', TRUE);
 	global $sic;
-	if (!($sic['vlan_id'] >= VLAN_MIN_ID and $sic['vlan_id'] <= VLAN_MAX_ID))
+	if (!($sic['vlan_id'] >= VLAN_MIN_ID + 1 and $sic['vlan_id'] <= VLAN_MAX_ID))
 		return buildRedirectURL (__FUNCTION__, 'ERR1', array ($sic['vlan_id']));
 	$result = usePreparedInsertBlade
 	(
