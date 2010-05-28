@@ -114,16 +114,16 @@ CREATE TABLE `FileLink` (
 ) ENGINE=InnoDB;
 
 CREATE TABLE `IPv4Address` (
-  `ip` int(10) unsigned NOT NULL,
-  `name` char(255) NOT NULL,
+  `ip` int(10) unsigned NOT NULL default '0',
+  `name` char(255) NOT NULL default '',
   `reserved` enum('yes','no') default NULL,
   PRIMARY KEY  (`ip`)
 ) ENGINE=MyISAM;
 
 CREATE TABLE `IPv4Allocation` (
-  `object_id` int(10) unsigned NOT NULL,
-  `ip` int(10) unsigned NOT NULL,
-  `name` char(255) NOT NULL,
+  `object_id` int(10) unsigned NOT NULL default '0',
+  `ip` int(10) unsigned NOT NULL default '0',
+  `name` char(255) NOT NULL default '',
   `type` enum('regular','shared','virtual','router') default NULL,
   PRIMARY KEY  (`object_id`,`ip`)
 ) ENGINE=MyISAM;
@@ -143,12 +143,12 @@ CREATE TABLE `IPv4LB` (
 ) ENGINE=InnoDB;
 
 CREATE TABLE `IPv4NAT` (
-  `object_id` int(10) unsigned NOT NULL,
-  `proto` enum('TCP','UDP') not null default 'TCP',
-  `localip` int(10) unsigned NOT NULL,
-  `localport` smallint(5) unsigned NOT NULL,
-  `remoteip` int(10) unsigned NOT NULL,
-  `remoteport` smallint(5) unsigned NOT NULL,
+  `object_id` int(10) unsigned NOT NULL default '0',
+  `proto` enum('TCP','UDP') NOT NULL default 'TCP',
+  `localip` int(10) unsigned NOT NULL default '0',
+  `localport` smallint(5) unsigned NOT NULL default '0',
+  `remoteip` int(10) unsigned NOT NULL default '0',
+  `remoteport` smallint(5) unsigned NOT NULL default '0',
   `description` char(255) default NULL,
   PRIMARY KEY  (`object_id`,`proto`,`localip`,`localport`,`remoteip`,`remoteport`),
   KEY `localip` (`localip`),
@@ -159,8 +159,8 @@ CREATE TABLE `IPv4NAT` (
 
 CREATE TABLE `IPv4Network` (
   `id` int(10) unsigned NOT NULL auto_increment,
-  `ip` int(10) unsigned NOT NULL,
-  `mask` int(10) unsigned NOT NULL,
+  `ip` int(10) unsigned NOT NULL default '0',
+  `mask` int(10) unsigned NOT NULL default '0',
   `name` char(255) default NULL,
   `comment` text,
   PRIMARY KEY  (`id`),
@@ -210,8 +210,8 @@ CREATE TABLE `LDAPCache` (
 ) ENGINE=InnoDB;
 
 CREATE TABLE `Link` (
-  `porta` int(10) unsigned NOT NULL,
-  `portb` int(10) unsigned NOT NULL,
+  `porta` int(10) unsigned NOT NULL default '0',
+  `portb` int(10) unsigned NOT NULL default '0',
   PRIMARY KEY  (`porta`,`portb`),
   UNIQUE KEY `porta` (`porta`),
   UNIQUE KEY `portb` (`portb`),
@@ -226,8 +226,8 @@ CREATE TABLE `Molecule` (
 
 CREATE TABLE `MountOperation` (
   `id` int(10) unsigned NOT NULL auto_increment,
-  `object_id` int(10) unsigned NOT NULL,
-  `ctime` timestamp NOT NULL,
+  `object_id` int(10) unsigned NOT NULL default '0',
+  `ctime` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
   `user_name` char(64) default NULL,
   `old_molecule_id` int(10) unsigned default NULL,
   `new_molecule_id` int(10) unsigned default NULL,
@@ -238,10 +238,10 @@ CREATE TABLE `MountOperation` (
 
 CREATE TABLE `Port` (
   `id` int(10) unsigned NOT NULL auto_increment,
-  `object_id` int(10) unsigned NOT NULL,
-  `name` char(255) NOT NULL,
+  `object_id` int(10) unsigned NOT NULL default '0',
+  `name` char(255) NOT NULL default '',
   `iif_id` int(10) unsigned NOT NULL,
-  `type` int(10) unsigned NOT NULL,
+  `type` int(10) unsigned NOT NULL default '0',
   `l2address` char(64) default NULL,
   `reservation_comment` char(255) default NULL,
   `label` char(255) default NULL,
@@ -266,8 +266,8 @@ CREATE TABLE `PortAllowedVLAN` (
 ) ENGINE=InnoDB;
 
 CREATE TABLE `PortCompat` (
-  `type1` int(10) unsigned NOT NULL,
-  `type2` int(10) unsigned NOT NULL,
+  `type1` int(10) unsigned NOT NULL default '0',
+  `type2` int(10) unsigned NOT NULL default '0',
   UNIQUE KEY `type1_2` (`type1`,`type2`),
   KEY `type2` (`type2`)
 ) ENGINE=MyISAM;
@@ -321,7 +321,7 @@ CREATE TABLE `RackHistory` (
   `height` tinyint(3) unsigned default NULL,
   `comment` text,
   `thumb_data` blob,
-  `ctime` timestamp NOT NULL,
+  `ctime` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
   `user_name` char(64) default NULL
 ) ENGINE=MyISAM;
 
@@ -349,7 +349,7 @@ CREATE TABLE `RackObjectHistory` (
   `asset_no` char(64) default NULL,
   `has_problems` enum('yes','no') NOT NULL default 'no',
   `comment` text,
-  `ctime` timestamp NOT NULL,
+  `ctime` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
   `user_name` char(64) default NULL
 ) ENGINE=MyISAM;
 
@@ -378,7 +378,7 @@ CREATE TABLE `Script` (
 CREATE TABLE `TagStorage` (
   `entity_realm` enum('file','ipv4net','ipv4vs','ipv4rspool','object','rack','user') NOT NULL default 'object',
   `entity_id` int(10) unsigned NOT NULL,
-  `tag_id` int(10) unsigned NOT NULL,
+  `tag_id` int(10) unsigned NOT NULL default '0',
   UNIQUE KEY `entity_tag` (`entity_realm`,`entity_id`,`tag_id`),
   KEY `entity_id` (`entity_id`),
   KEY `TagStorage-FK-tag_id` (`tag_id`),
@@ -397,7 +397,7 @@ CREATE TABLE `TagTree` (
 
 CREATE TABLE `UserAccount` (
   `user_id` int(10) unsigned NOT NULL auto_increment,
-  `user_name` char(64) NOT NULL,
+  `user_name` char(64) NOT NULL default '',
   `user_password_hash` char(40) default NULL,
   `user_realname` char(64) default NULL,
   PRIMARY KEY  (`user_id`),
