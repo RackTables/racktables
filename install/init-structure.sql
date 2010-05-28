@@ -20,7 +20,7 @@ CREATE TABLE `Attribute` (
 CREATE TABLE `AttributeMap` (
   `objtype_id` int(10) unsigned NOT NULL default '1',
   `attr_id` int(10) unsigned NOT NULL default '1',
-  `chapter_id` int(10) unsigned NULL,
+  `chapter_id` int(10) unsigned default NULL,
   UNIQUE KEY `objtype_id` (`objtype_id`,`attr_id`)
 ) ENGINE=MyISAM;
 
