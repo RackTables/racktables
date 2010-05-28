@@ -1013,6 +1013,8 @@ class APCPowerSwitch extends SNMPDevice {
 // address in the same form.
 function nextMACAddress ($addr)
 {
+	if ($addr == '')
+		return '';
 	$bytes = array();
 	foreach (explode (':', $addr) as $hex)
 		$bytes[] = hexdec ($hex);
@@ -1034,7 +1036,7 @@ function generatePortsForCatModule ($object_id, $slotno = 1, $mtype = 'X6748', $
 	$mac_address = l2addressFromDatabase (l2addressForDatabase ($mac_address));
 	switch ($mtype)
 	{
-	case 'X6748':
+	case 'WS-X6748-GE-TX':
 		$dbxlink->beginTransaction();
 		for ($i = 1; $i <= 48; $i++)
 		{
@@ -1043,26 +1045,40 @@ function generatePortsForCatModule ($object_id, $slotno = 1, $mtype = 'X6748', $
 				$dbxlink->rollBack();
 				break 2;
 			}
-			if ($mac_address != '')
-				$mac_address = nextMACAddress ($mac_address);
+			$mac_address = nextMACAddress ($mac_address);
 		}
 		$dbxlink->commit();
 		break;
+	case 'WS-X6708-10GE':
+		for ($i = 1; $i <= 8; $i++)
+		{
+			commitAddPort ($object_id, "te${slotno}/${i}", '6-1080', "slot ${slotno} port ${i}", $mac_address);
+			$mac_address = nextMACAddress ($mac_address);
+		}
+		break;
+	case 'VS-S720-10G':
+		commitAddPort ($object_id, "gi${slotno}/1", '4-1077', "slot ${slotno} port 1", $mac_address);
+		$mac_address = nextMACAddress ($mac_address);
+		commitAddPort ($object_id, "gi${slotno}/2", '4-1077', "slot ${slotno} port 2", $mac_address);
+		$mac_address = nextMACAddress ($mac_address);
+		commitAddPort ($object_id, "gi${slotno}/3", '1-24',   "slot ${slotno} port 3", $mac_address);
+		$mac_address = nextMACAddress ($mac_address);
+		commitAddPort ($object_id, "te${slotno}/4", '6-1080', "slot ${slotno} port 4", $mac_address);
+		$mac_address = nextMACAddress ($mac_address);
+		commitAddPort ($object_id, "te${slotno}/5", '6-1080', "slot ${slotno} port 5", $mac_address);
+		break;
 	case '3750G-24TS':
 		// MAC address of 1st port is the next one after switch's address
-		if ($mac_address != '')
-			$mac_address = nextMACAddress ($mac_address);
+		$mac_address = nextMACAddress ($mac_address);
 		for ($i = 1; $i <= 24; $i++)
 		{
 			commitAddPort ($object_id, "gi${slotno}/0/${i}", '1-24', "unit ${slotno} port ${i}", $mac_address);
-			if ($mac_address != '')
-				$mac_address = nextMACAddress ($mac_address);
+			$mac_address = nextMACAddress ($mac_address);
 		}
 		for ($i = 25; $i <= 28; $i++)
 		{
 			commitAddPort ($object_id, "gi${slotno}/0/${i}", '4-1077', "unit ${slotno} port ${i}", $mac_address);
-			if ($mac_address != '')
-				$mac_address = nextMACAddress ($mac_address);
+			$mac_address = nextMACAddress ($mac_address);
 		}
 		break;
 	}
