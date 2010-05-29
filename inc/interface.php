@@ -7726,8 +7726,7 @@ function renderDeployQueue ($dqcode)
 
 function renderLiveCDP ($object_id)
 {
-	$CDP_status = getRunningCDPStatus ($object_id);
-	uksort ($CDP_status, 'sortTokenize');
+	$CDP_status = sortPortList (getRunningCDPStatus ($object_id));
 	$mydevice = spotEntity ('object', $object_id);
 	amplifyCell ($mydevice);
 	// reindex by port name

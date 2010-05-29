@@ -4026,4 +4026,62 @@ function formatPortIIFOIF ($port)
 	return $ret;
 }
 
+function compareDecomposedPortNames ($porta, $portb)
+{
+	if (0 != $cmp = strcmp ($porta['prefix'], $portb['prefix']))
+		return $cmp;
+	if ($porta['numidx'] != $portb['numidx'])
+		return $porta['numidx'] - $portb['numidx'];
+	// Below assumes both arrays be indexed from 0 onwards.
+	for ($i = 0; $i < $porta['numidx']; $i++)
+		if ($porta['index'][$i] != $portb['index'][$i])
+			return $porta['index'][$i] - $portb['index'][$i];
+	return 0;
+}
+
+// Sort provided port list in a way based on natural. For example,
+// switches can have ports:
+// * fa0/1~48, gi0/1~4 (in this case 'gi' should come after 'fa'
+// * fa1, gi0/1~48, te1/49~50 (type matters, then index)
+// * gi5/1~3, te5/4~5 (here index matters more, than type)
+// This implementation makes port type (prefix) matter for all
+// interfaces, which have less, than 2 indices, but for other ports
+// their indices matter more, than type (unless there is a clash
+// of indices).
+function sortPortList ($plist)
+{
+	$ret = array();
+	$seen = array();
+	$intersects = FALSE;
+	$prefix_re = '/^([^0-9]+)[0-9].*$/';
+	foreach (array_keys ($plist) as $pn)
+	{
+		$numbers = preg_split ('/[^0-9]+/', $pn, -1, PREG_SPLIT_NO_EMPTY);
+		$ret[$pn] = array
+		(
+			'prefix' => '',
+			'numidx' => count ($numbers),
+			'index' => $numbers,
+		);
+		if ($ret[$pn]['numidx'] <= 1)
+			$ret[$pn]['prefix'] = preg_replace ($prefix_re, '\\1', $pn);
+		elseif (!$intersects)
+		{
+			$coord = implode ('-', $numbers);
+			if (array_key_exists ($coord, $seen))
+				$intersects = TRUE;
+			$seen[$coord] = TRUE;
+		}
+	}
+	unset ($seen);
+	if ($intersects)
+		foreach (array_keys ($ret) as $pn)
+			if ($ret[$pn]['numidx'] > 1)
+				$ret[$pn]['prefix'] = preg_replace ($prefix_re, '\\1', $pn);
+	uasort ($ret, 'compareDecomposedPortNames');
+	foreach (array_keys ($ret) as $pn)
+		$ret[$pn] = $plist[$pn];
+	return $ret;
+}
+
 ?>
