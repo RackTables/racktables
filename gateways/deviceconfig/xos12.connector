@@ -1,0 +1,66 @@
+#!/bin/sh
+
+[ $# = 3 ] || exit 1
+
+ENDPOINT=$1
+COMMAND=$2
+WORKFILE=$3
+
+prepare_connect_commands()
+{
+	[ $# = 1 ] || exit 2
+	local skip=yes cval found=no MYDIR=`dirname $0`
+	while read line; do
+		if [ "$skip" = "yes" -a "$line" = "# S-T-A-R-T" ]; then
+			skip=no
+			continue
+		fi
+		if [ "$skip" = "no" -a "$line" = "# S-T-O-P" ]; then
+			skip=yes
+			continue
+		fi
+		[ "$skip" = "yes" ] && continue
+		# ignore comments
+		[ -z "${line###*}" ] && continue
+
+		# First endpoint string/regexp match is sufficient for us.
+		cval=`echo $line | cut -s -d' ' -f1`
+		if [ -z "${1##$cval}" ]; then
+			found=yes
+			username=`echo $line | cut -s -d' ' -f5`
+			[ "$username" != "-" ] && echo $username > "$SESSION"
+			# access password
+			access_password=`echo $line | cut -s -d' ' -f6`
+			[ "$access_password" != "-" ] && echo "$access_password" >> "$SESSION"
+			break
+		fi
+	done < "$MYDIR/switch.secrets.php"
+	[ "$found" = "yes" ] && return
+	exit 3
+}
+
+MYNAME=`basename $0`
+SESSION=`mktemp /tmp/$MYNAME.XXXX`
+[ -f "$SESSION" ] || exit 5
+prepare_connect_commands $ENDPOINT
+case $COMMAND in
+retrieve)
+	printf 'disable clipaging\nshow configuration "vlan"\n' >> "$SESSION"
+	outfile="$WORKFILE"
+	;;
+getlldpstatus)
+	printf 'disable clipaging\nshow lldp neighbors detailed\n' >> "$SESSION"
+	outfile="$WORKFILE"
+	;;
+deploy)
+	cat "$WORKFILE" >> "$SESSION"
+	outfile=/dev/null
+	;;
+*)
+	outfile=/dev/null
+esac
+# quit, but don't save, if asked
+printf 'quit\nn\n' >> "$SESSION"
+nc -w30 $ENDPOINT 23 < "$SESSION" > "$outfile"
+rm -f "$SESSION"
+exit 0
