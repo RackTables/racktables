@@ -390,6 +390,42 @@ $iftable_processors['fgs-uplinks'] = array
 	'try_next_proc' => FALSE,
 );
 
+$iftable_processors['summit-25-to-26-XFP-uplinks'] = array
+(
+	'pattern' => '@^.+ Port (25|26)$@',
+	'replacement' => '\\1',
+	'dict_key' => '8-1082',
+	'label' => '\\1',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['summit-21-to-24-comboSFP'] = array
+(
+	'pattern' => '@^.+ Port (21|22|23|24)$@',
+	'replacement' => '\\1',
+	'dict_key' => '4-1077',
+	'label' => '\\1',
+	'try_next_proc' => TRUE,
+);
+
+$iftable_processors['summit-any-1000T'] = array
+(
+	'pattern' => '@^.+ Port ([[:digit:]]+)$@',
+	'replacement' => '\\1',
+	'dict_key' => '1-24',
+	'label' => '\\1',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['summit-management'] = array
+(
+	'pattern' => '@^Management Port$@',
+	'replacement' => 'mgmt',
+	'dict_key' => '1-19',
+	'label' => 'mgmt',
+	'try_next_proc' => FALSE,
+);
+
 $known_switches = array // key is system OID w/o "enterprises" prefix
 (
 	'9.1.248' => array
@@ -662,6 +698,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'FGS648P-POE: 48 RJ-45/10-100-1000T(X) + 4 combo-gig + uplink slot',
 		'processors' => array ('fgs-1-to-4-comboSFP', 'fgs-any-1000T', 'fgs-uplinks'),
 	),
+	'1916.2.71' => array
+	(
+		'dict_key' => 694,
+		'text' => 'X450a-24t: 20 RJ-45/10-100-1000T(X) + 4 combo-gig + XFP uplinks slot',
+		'processors' => array ('summit-25-to-26-XFP-uplinks', 'summit-21-to-24-comboSFP', 'summit-any-1000T', 'summit-management'),
+	),
 );
 
 function updateStickerForCell ($cell, $attr_id, $new_value)
@@ -845,6 +887,22 @@ function doSwitchSNMPmining ($objectInfo, $hostname, $community)
 		checkPIC ('1-681');
 		commitAddPort ($objectInfo['id'], 'console', '1-681', 'console', ''); // DB-9 RS-232 console
 		$log = mergeLogs ($log, oneLiner (81, array ('brocade-generic')));
+		break;
+	case preg_match ('/^1916\.2\./', $sysObjectID): // Extreme Networks Summit
+		$xos_release = preg_replace ('/^ExtremeXOS version ([[:digit:]]+)\..*$/', '\\1', $sysDescr);
+		$xos_codes = array
+		(
+			'10' => 1350,
+			'11' => 1351,
+			'12' => 1352,
+		);
+		if (array_key_exists ($xos_release, $xos_codes))
+			updateStickerForCell ($objectInfo, 4, $xos_codes[$xos_release]);
+		checkPIC ('1-681');
+		commitAddPort ($objectInfo['id'], 'console', '1-681', 'console', ''); // DB-9 RS-232
+		checkPIC ('1-16');
+		commitAddPort ($objectInfo['id'], 'AC-in', '1-16', '', '');
+		$log = mergeLogs ($log, oneLiner (81, array ('summit-generic')));
 		break;
 	default: // Nortel...
 		break;
