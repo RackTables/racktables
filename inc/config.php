@@ -52,6 +52,7 @@ define ('E_8021Q_PUSH_REMOTE_ERROR', 103);
 define ('E_8021Q_SYNC_DISABLED', 104);
 define ('E_BAD_RACKCODE', 1);
 define ('E_INTERNAL', 2);
+define ('E_DB_WRITE_FAILED', 3);
 define ('VLAN_MIN_ID', 1);
 define ('VLAN_MAX_ID', 4094);
 define ('VLAN_DFL_ID', 1);

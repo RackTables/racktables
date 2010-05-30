@@ -3834,7 +3834,7 @@ function add8021QPort ($object_id, $port_name, $port)
 			array ('object_id' => $object_id, 'port_name' => $port_name, 'vlan_mode' => $port['mode'])
 		)
 	)
-		throw new RuntimeException();
+		throw new Exception ('', E_DB_WRITE_FAILED);
 	upd8021QPort ('cached', $object_id, $port_name, $port);
 	upd8021QPort ('desired', $object_id, $port_name, $port);
 	return 1;
@@ -3856,7 +3856,7 @@ function del8021QPort ($object_id, $port_name)
 			array ('object_id' => $object_id, 'port_name' => $port_name)
 		)
 	)
-		throw new RuntimeException();
+		throw new Exception ('', E_DB_WRITE_FAILED);
 	return 1;
 }
 
@@ -3876,17 +3876,17 @@ function upd8021QPort ($instance = 'desired', $object_id, $port_name, $port)
 	$prepared = $dbxlink->prepare ('UPDATE ' . $tablemap_8021q[$instance]['pvm'] . ' SET vlan_mode = ? WHERE object_id = ? AND port_name = ?');
 	$prepared->execute (array ($port['mode'], $object_id, $port_name));
 	if (FALSE === usePreparedDeleteBlade ($tablemap_8021q[$instance]['pav'], array ('object_id' => $object_id, 'port_name' => $port_name)))
-		throw new RuntimeException();
+		throw new Exception ('', E_DB_WRITE_FAILED);
 	foreach ($port['allowed'] as $vlan_id)
 		if (!usePreparedInsertBlade ($tablemap_8021q[$instance]['pav'], array ('object_id' => $object_id, 'port_name' => $port_name, 'vlan_id' => $vlan_id)))
-			throw new RuntimeException();
+			throw new Exception ('', E_DB_WRITE_FAILED);
 	if
 	(
 		$port['native'] and
 		in_array ($port['native'], $port['allowed']) and
 		!usePreparedInsertBlade ($tablemap_8021q[$instance]['pnv'], array ('object_id' => $object_id, 'port_name' => $port_name, 'vlan_id' => $port['native']))
 	)
-		throw new RuntimeException();
+		throw new Exception ('', E_DB_WRITE_FAILED);
 	return 1;
 }
 
