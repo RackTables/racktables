@@ -658,7 +658,6 @@ function commitDeleteObject ($object_id = 0)
 	$dbxlink->query("DELETE FROM RackSpace WHERE object_id = ${object_id}");
 	$dbxlink->query("DELETE FROM Atom WHERE molecule_id IN (SELECT new_molecule_id FROM MountOperation WHERE object_id = ${object_id})");
 	$dbxlink->query("DELETE FROM Molecule WHERE id IN (SELECT new_molecule_id FROM MountOperation WHERE object_id = ${object_id})");
-	$dbxlink->query("DELETE FROM MountOperation WHERE object_id = ${object_id}");
 	$dbxlink->query("DELETE FROM RackObject WHERE id = ${object_id}");
 
 	return '';

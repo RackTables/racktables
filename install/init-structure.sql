@@ -233,7 +233,8 @@ CREATE TABLE `MountOperation` (
   `new_molecule_id` int(10) unsigned default NULL,
   `comment` text,
   PRIMARY KEY  (`id`),
-  KEY `object_id` (`object_id`)
+  KEY `object_id` (`object_id`),
+  CONSTRAINT `MountOperation-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `RackObject` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
 CREATE TABLE `Port` (
