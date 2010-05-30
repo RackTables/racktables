@@ -1,14 +1,15 @@
 0.18.1
 	update: initial SNMP support of Summit switches
 	update: switch from deprecated ereg extension to PCRE (#262)
-	bugfix: "Add/update multiple ports" did not work (#326)
 0.18.0 2010-05-27
+	new feature: Live CDP (#58)
+	new feature: 802.1Q management (#182, original idea by Justin Ellison)
+0.17.11
 	update: usual SNMP updates
 	update: Bulk port form (#321)
 	bugfix: updateObject() saves DB records for dict values when not set. (#273)
 	bugfix: argument validation was broken for value of 0 (#272)
-	new feature: Live CDP (#58)
-	new feature: 802.1Q management (#182, original idea by Justin Ellison)
+	bugfix: "Add/update multiple ports" did not work (#326)
 0.17.10 2010-05-05
 	update: make object form messages consistent (by Tyler J. Wagner)
 	update: sort object ports in a more reasonable manner
@@ -18,7 +19,6 @@
 	update: also list WS-C3524-XL (#320)
 	update: better support of Nexus switches
 	update: maintain filter per page load and isolated per realm (#217)
-	bugfix: PHP5.3.0 set_magic_quotes_runtime deprecated (#315)
 	bugfix: ldap cache timestamp fix (#332)
 	bugfix: completely fix ticket:211
 	bugfix: declare charset in HTTP header (#312)
