@@ -128,7 +128,7 @@ header ('Content-Type: text/html; charset=UTF-8');
 			echo '</form></div>';
 			break;
 		default:
-			throw new RuntimeException ('Invalid parameter or internal error');
+			throw new InvalidRequestArgException ('helper', $_REQUEST['helper']);
 	}
 ?>
 </body>
