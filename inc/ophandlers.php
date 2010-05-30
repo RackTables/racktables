@@ -245,7 +245,7 @@ function addMultiPorts ()
 {
 	assertStringArg ('format', __FUNCTION__);
 	assertStringArg ('input', __FUNCTION__);
-	assertUIntArg ('port_type', __FUNCTION__);
+	assertStringArg ('port_type', __FUNCTION__);
 	assertUIntArg ('object_id', __FUNCTION__);
 	$format = $_REQUEST['format'];
 	$port_type = $_REQUEST['port_type'];
