@@ -350,7 +350,9 @@ CREATE TABLE `RackObjectHistory` (
   `has_problems` enum('yes','no') NOT NULL default 'no',
   `comment` text,
   `ctime` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
-  `user_name` char(64) default NULL
+  `user_name` char(64) default NULL,
+  KEY `id` (`id`),
+  CONSTRAINT `RackObjectHistory-FK-object_id` FOREIGN KEY (`id`) REFERENCES `RackObject` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
 CREATE TABLE `RackRow` (
