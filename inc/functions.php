@@ -1667,9 +1667,7 @@ function iptree_embed (&$node, $pfx)
 		return;
 	}
 	if ($node['mask'] == $pfx['mask'])
-	{
-		throw new RuntimeException('Internal error, the recurring loop lost control');
-	}
+		throw new Exception ('the recurring loop lost control', E_INTERNAL);
 
 	// split?
 	if (!isset ($node['right']))
@@ -1692,9 +1690,7 @@ function iptree_embed (&$node, $pfx)
 	elseif (($node['right']['ip_bin'] & binMaskFromDec ($node['right']['mask'])) == ($pfx['ip_bin'] & binMaskFromDec ($node['left']['mask'])))
 		$self ($node['right'], $pfx);
 	else
-	{
-		throw new RuntimeException ('Internal error, cannot decide between left and right');
-	}
+		throw new Exception ('cannot decide between left and right', E_INTERNAL);
 }
 
 function treeApplyFunc (&$tree, $func = '', $stopfunc = '')
@@ -3347,7 +3343,7 @@ function exportSwitch8021QConfig
 				);
 			break;
 		default:
-			throw new RuntimeException ('error in ports_to_do structure');
+			throw new InvalidArgException ('ports_to_do', '(hidden)', 'error in structure');
 		}
 	// Now it is safe to unconfigure VLANs, which still exist on device,
 	// but are not present on the "new" list.
@@ -3437,7 +3433,7 @@ function exportSwitch8021QConfig
 			);
 			break;
 		default:
-			throw new RuntimeException ('error in ports_to_do structure');
+			throw new InvalidArgException ('ports_to_do', '(hidden)', 'error in structure');
 		}
 	setDevice8021QConfig ($vswitch['object_id'], $crq);
 	return count ($crq);
@@ -3818,7 +3814,7 @@ function exec8021QDeploy ($object_id, $do_push)
 				$prepared = $dbxlink->prepare ('UPDATE VLANSwitch SET last_push_finished = NOW(), out_of_sync = "no", last_errno = ? WHERE object_id = ?');
 				$prepared->execute (array (E_8021Q_NOERROR, $vswitch['object_id']));
 			}
-			catch (RuntimeException $r)
+			catch (Exception $r)
 			{
 				$prepared = $dbxlink->prepare ('UPDATE VLANSwitch SET out_of_sync = "yes", last_error_ts = NOW(), last_errno = ? WHERE object_id = ?');
 				$prepared->execute (E_8021Q_PUSH_REMOTE_ERROR, array ($vswitch['object_id']));
