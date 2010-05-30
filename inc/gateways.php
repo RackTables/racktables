@@ -163,11 +163,11 @@ function setSwitchVLANs ($object_id = 0, $setcmd)
 		return oneLiner (165); // protocol violation
 	// Finally we can parse the response into message array.
 	$log_m = array();
-	foreach (split (';', substr ($data[1], strlen ('OK!'))) as $text)
+	foreach (explode (';', substr ($data[1], strlen ('OK!'))) as $text)
 	{
 		if (strpos ($text, 'C!') === 0)
 		{
-			$tmp = split ('!', $text);
+			$tmp = explode ('!', $text);
 			array_shift ($tmp);
 			$code = array_shift ($tmp);
 			$log_m[] = count ($tmp) ? array ('c' => $code, 'a' => $tmp) : array ('c' => $code); // gateway-encoded message
