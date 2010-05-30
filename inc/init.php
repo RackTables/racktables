@@ -59,11 +59,12 @@ if (file_exists ('inc/secret.php'))
 	require_once 'inc/secret.php';
 else
 {
-	throw new RuntimeException
+	throw new Exception
 	(
 		"Database connection parameters are read from inc/secret.php file, " .
 		"which cannot be found.\nYou probably need to complete the installation " .
-		"procedure by following <a href='install.php'>this link</a>."
+		"procedure by following <a href='install.php'>this link</a>.",
+		E_INTERNAL
 	);
 }
 
@@ -74,7 +75,7 @@ try
 }
 catch (PDOException $e)
 {
-	throw new RuntimeException ("Database connection failed:\n\n" . $e->getMessage());
+	throw new Exception ("Database connection failed:\n\n" . $e->getMessage(), E_INTERNAL);
 }
 $dbxlink->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 $dbxlink->exec ("set names 'utf8'");
@@ -106,9 +107,7 @@ if ($dbver != CODE_VERSION)
 }
 
 if (!mb_internal_encoding ('UTF-8') or !mb_regex_encoding ('UTF-8'))
-{
-	throw new RuntimeException('Failed setting multibyte string encoding to UTF-8');
-}
+	throw new Exception ('Failed setting multibyte string encoding to UTF-8', E_INTERNAL);
 
 loadConfigDefaults();
 
@@ -132,10 +131,7 @@ else
 // Depending on the 'result' value the 'load' carries either the
 // parse tree or error message.
 if ($rackCode['result'] != 'ACK')
-{
-	// FIXME: display a message with an option to reset RackCode text
-	throw new RuntimeException('Could not load the RackCode due to error: ' . $rackCode['load']);
-}
+	throw new Exception ($rackCode['load'], E_BAD_RACKCODE);
 $rackCode = $rackCode['load'];
 // Only call buildPredicateTable() once and save the result, because it will remain
 // constant during one execution for constraints processing.
