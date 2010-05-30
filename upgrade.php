@@ -666,6 +666,7 @@ CREATE TABLE `VLANValidID` (
 			$query[] = "ALTER TABLE RackObjectHistory ADD KEY (id)";
 			$query[] = "ALTER TABLE RackObjectHistory ADD CONSTRAINT `RackObjectHistory-FK-object_id` FOREIGN KEY (id) REFERENCES `RackObject` (`id`) ON DELETE CASCADE";
 			$query[] = "ALTER TABLE MountOperation ADD CONSTRAINT `MountOperation-FK-object_id` FOREIGN KEY (object_id) REFERENCES RackObject (id) ON DELETE CASCADE";
+			$query[] = "ALTER TABLE RackSpace ADD CONSTRAINT `RackSpace-FK-object_id` FOREIGN KEY (object_id) REFERENCES RackObject (id) ON DELETE CASCADE";
 			$query[] = "UPDATE Config SET varvalue = '0.18.1' WHERE varname = 'DB_VERSION'";
 			break;
 		default:

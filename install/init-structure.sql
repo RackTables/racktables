@@ -369,7 +369,8 @@ CREATE TABLE `RackSpace` (
   `state` enum('A','U','T','W') NOT NULL default 'A',
   `object_id` int(10) unsigned default NULL,
   PRIMARY KEY  (`rack_id`,`unit_no`,`atom`),
-  KEY `RackSpace_object_id` (`object_id`)
+  KEY `RackSpace_object_id` (`object_id`),
+  CONSTRAINT `RackSpace-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `RackObject` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
 CREATE TABLE `Script` (
