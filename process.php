@@ -11,23 +11,12 @@ assertStringArg ('op');
 $op = $_REQUEST['op'];
 prepareNavigation();
 // FIXME: find a better way to handle this error
-if ($op == 'addFile' && !isset($_FILES['file']['error'])) {
-	throw new RuntimeException("File upload error, it's size probably exceeds upload_max_filesize directive in php.ini");
-}
+if ($op == 'addFile' && !isset($_FILES['file']['error']))
+	throw new Exception ('File upload error, check upload_max_filesize in php.ini', E_INTERNAL);
 fixContext();
 
-
-if (!isset ($ophandler[$pageno][$tabno][$op]))
-{
-	throw new RuntimeException("Invalid request in operation broker: page '${pageno}', tab '${tabno}', op '${op}'");
-}
-
-if (!function_exists ($ophandler[$pageno][$tabno][$op]))
-	throw new RuntimeException
-	(
-		"Dispatching error at position '${pageno}-${tabno}-${op}': function '" .
-		$ophandler[$pageno][$tabno][$op] . "' does not exist."
-	);
+if (!isset ($ophandler[$pageno][$tabno][$op]) or !function_exists ($ophandler[$pageno][$tabno][$op]))
+	throw new Exception ("Invalid navigation data for '${pageno}-${tabno}-${op}'", E_INTERNAL);
 
 // We have a chance to handle an error before starting HTTP header.
 if (!isset ($delayauth[$pageno][$tabno][$op]) and !permitted())
@@ -36,9 +25,7 @@ else
 {
 	$location = call_user_func ($ophandler[$pageno][$tabno][$op]);
 	if (!strlen ($location))
-	{
-		throw new RuntimeException('Operation handler failed to return its status');
-	}
+		throw new Exception ('Operation handler failed to return its status', E_INTERNAL);
 }
 header ("Location: " . $location);
 ob_end_flush();
