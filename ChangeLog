@@ -1,6 +1,7 @@
 0.18.1
 	update: initial SNMP support of Summit switches
 	update: switch from deprecated ereg extension to PCRE (#262)
+	bugfix: "Add/update multiple ports" did not work (#326)
 0.18.0 2010-05-27
 	update: usual SNMP updates
 	update: Bulk port form (#321)
