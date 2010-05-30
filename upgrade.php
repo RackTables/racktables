@@ -661,6 +661,8 @@ CREATE TABLE `VLANValidID` (
 			$query[] = "ALTER TABLE RackRow ENGINE=InnoDB";
 			$query[] = "ALTER TABLE RackSpace ENGINE=InnoDB";
 			$query[] = "ALTER TABLE Script ENGINE=InnoDB";
+			$query[] = "ALTER TABLE AttributeValue DROP FOREIGN KEY `AttributeValue-FK-object_id`";
+			$query[] = "ALTER TABLE AttributeValue ADD CONSTRAINT `AttributeValue-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `RackObject` (`id`) ON DELETE CASCADE";
 			$query[] = "UPDATE Config SET varvalue = '0.18.1' WHERE varname = 'DB_VERSION'";
 			break;
 		default:

@@ -650,7 +650,6 @@ function commitDeleteObject ($object_id = 0)
 	global $dbxlink;
 	releaseFiles ('object', $object_id);
 	destroyTagsForEntity ('object', $object_id);
-	$dbxlink->query("DELETE FROM AttributeValue WHERE object_id = ${object_id}");
 	$dbxlink->query("DELETE FROM IPv4LB WHERE object_id = ${object_id}");
 	$dbxlink->query("DELETE FROM IPv4Allocation WHERE object_id = ${object_id}");
 	$dbxlink->query("DELETE FROM Link WHERE porta IN (SELECT id FROM Port WHERE object_id = ${object_id}) OR portb IN (SELECT id FROM Port WHERE object_id = ${object_id})");

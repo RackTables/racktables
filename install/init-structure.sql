@@ -31,7 +31,7 @@ CREATE TABLE `AttributeValue` (
   `uint_value` int(10) unsigned default NULL,
   `float_value` float default NULL,
   UNIQUE KEY `object_id` (`object_id`,`attr_id`),
-  CONSTRAINT `AttributeValue-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `RackObject` (`id`)
+  CONSTRAINT `AttributeValue-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `RackObject` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
 CREATE TABLE `CachedPAV` (
