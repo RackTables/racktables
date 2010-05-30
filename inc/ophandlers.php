@@ -843,7 +843,6 @@ function updateObject ()
 				$oldvalue = $oldvalues[$attr_id]['key'];
 				break;
 			default:
-				throw new RuntimeException('Internal structure error');
 		}
 		if ($value === $oldvalue) // ('' == 0), but ('' !== 0)
 			continue;
@@ -2269,7 +2268,7 @@ function save8021QPorts ()
 		if (NULL === $vswitch = getVLANSwitchInfo ($sic['object_id'], 'FOR UPDATE'))
 			throw new InvalidArgException ('object_id', $object_id, 'VLAN domain is not set for this object');
 		if ($vswitch['mutex_rev'] != $sic['mutex_rev'])
-			throw new RuntimeException ('expired form data');
+			throw new InvalidRequestArgException ('mutex_rev', $sic['mutex_rev'], 'expired form data');
 		$changes = array();
 		for ($i = 0; $i < $sic['nports']; $i++)
 		{
@@ -2428,9 +2427,7 @@ function resolve8021QConflicts ()
 		if (NULL === $vswitch = getVLANSwitchInfo ($sic['object_id'], 'FOR UPDATE'))
 			throw new InvalidArgException ('object_id', $sic['object_id'], 'VLAN domain is not set for this object');
 		if ($vswitch['mutex_rev'] != $sic['mutex_rev'])
-		{
-			throw new RuntimeException ('expired form (table data has changed)');
-		}
+			throw new InvalidRequestArgException ('mutex_rev', $sic['mutex_rev'], 'expired form (table data has changed)');
 		$D = getStored8021QConfig ($vswitch['object_id'], 'desired');
 		$C = getStored8021QConfig ($vswitch['object_id'], 'cached');
 		$R = getRunning8021QConfig ($vswitch['object_id']);
@@ -2444,7 +2441,7 @@ function resolve8021QConflicts ()
 			{
 				// for R neither mutex nor revisions can be emulated, but revision change can be
 				if (!same8021QConfigs ($port, $R['portdata'][$port_name]))
-					throw new RuntimeException ('expired form (switch data has changed)');
+					throw new InvalidRequestArgException ("port ${port_name}", '(hidden)', 'expired form (switch data has changed)');
 				if ($port['decision'] == 'right') // D wins, frame R by writing value of R to C
 					$ndone += upd8021QPort ('cached', $vswitch['object_id'], $port_name, $port);
 				elseif ($port['decision'] == 'left') // R wins, cross D up
@@ -2463,7 +2460,7 @@ function resolve8021QConflicts ()
 			// otherwise ignore a decision, which doesn't address a conflict
 		}
 	}
-	catch (RuntimeException $e)
+	catch (InvalidRequestArgException $e)
 	{
 		$dbxlink->rollBack();
 		return buildRedirectURL (__FUNCTION__, 'ERR1');
