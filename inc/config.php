@@ -50,6 +50,7 @@ define ('E_8021Q_VERSION_CONFLICT', 101);
 define ('E_8021Q_PULL_REMOTE_ERROR', 102);
 define ('E_8021Q_PUSH_REMOTE_ERROR', 103);
 define ('E_8021Q_SYNC_DISABLED', 104);
+define ('E_BAD_RACKCODE', 1);
 define ('VLAN_MIN_ID', 1);
 define ('VLAN_MAX_ID', 4094);
 define ('VLAN_DFL_ID', 1);

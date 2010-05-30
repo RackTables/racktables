@@ -869,7 +869,7 @@ function processAdjustmentSentence ($modlist, &$chain)
 				$didChanges = TRUE;
 				break;
 			default: // HCF
-				throw new CodeCompilationError('Internal error');
+				throw new Exception ('', E_BAD_RACKCODE);
 		}
 	return $didChanges;
 }

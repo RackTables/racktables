@@ -4,12 +4,6 @@ class NotAuthorizedException extends RuntimeException {
 
 }
 
-class CodeCompilationError extends RuntimeException {
-/*
- * This class probably needs references to code exerpt where the error occured
- */
-}
-
 class EntityNotFoundException extends Exception {
 	private $entity;
 	private $id;
