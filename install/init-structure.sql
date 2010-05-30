@@ -7,7 +7,7 @@ CREATE TABLE `Atom` (
   `rack_id` int(10) unsigned default NULL,
   `unit_no` int(10) unsigned default NULL,
   `atom` enum('front','interior','rear') default NULL
-) ENGINE=MyISAM;
+) ENGINE=InnoDB;
 
 CREATE TABLE `Attribute` (
   `id` int(10) unsigned NOT NULL auto_increment,
@@ -22,7 +22,7 @@ CREATE TABLE `AttributeMap` (
   `attr_id` int(10) unsigned NOT NULL default '1',
   `chapter_id` int(10) unsigned default NULL,
   UNIQUE KEY `objtype_id` (`objtype_id`,`attr_id`)
-) ENGINE=MyISAM;
+) ENGINE=InnoDB;
 
 CREATE TABLE `AttributeValue` (
   `object_id` int(10) unsigned default NULL,
@@ -78,7 +78,7 @@ CREATE TABLE `Config` (
   `is_userdefined` enum('yes','no') NOT NULL default 'no',
   `description` text,
   PRIMARY KEY  (`varname`)
-) ENGINE=MyISAM;
+) ENGINE=InnoDB;
 
 CREATE TABLE `Dictionary` (
   `chapter_id` int(10) unsigned NOT NULL,
@@ -118,7 +118,7 @@ CREATE TABLE `IPv4Address` (
   `name` char(255) NOT NULL default '',
   `reserved` enum('yes','no') default NULL,
   PRIMARY KEY  (`ip`)
-) ENGINE=MyISAM;
+) ENGINE=InnoDB;
 
 CREATE TABLE `IPv4Allocation` (
   `object_id` int(10) unsigned NOT NULL default '0',
@@ -126,7 +126,7 @@ CREATE TABLE `IPv4Allocation` (
   `name` char(255) NOT NULL default '',
   `type` enum('regular','shared','virtual','router') default NULL,
   PRIMARY KEY  (`object_id`,`ip`)
-) ENGINE=MyISAM;
+) ENGINE=InnoDB;
 
 CREATE TABLE `IPv4LB` (
   `object_id` int(10) unsigned default NULL,
@@ -222,7 +222,7 @@ CREATE TABLE `Link` (
 CREATE TABLE `Molecule` (
   `id` int(10) unsigned NOT NULL auto_increment,
   PRIMARY KEY  (`id`)
-) ENGINE=MyISAM;
+) ENGINE=InnoDB;
 
 CREATE TABLE `MountOperation` (
   `id` int(10) unsigned NOT NULL auto_increment,
@@ -234,7 +234,7 @@ CREATE TABLE `MountOperation` (
   `comment` text,
   PRIMARY KEY  (`id`),
   KEY `object_id` (`object_id`)
-) ENGINE=MyISAM;
+) ENGINE=InnoDB;
 
 CREATE TABLE `Port` (
   `id` int(10) unsigned NOT NULL auto_increment,
@@ -270,7 +270,7 @@ CREATE TABLE `PortCompat` (
   `type2` int(10) unsigned NOT NULL default '0',
   UNIQUE KEY `type1_2` (`type1`,`type2`),
   KEY `type2` (`type2`)
-) ENGINE=MyISAM;
+) ENGINE=InnoDB;
 
 CREATE TABLE `PortInnerInterface` (
   `id` int(10) unsigned NOT NULL,
@@ -312,7 +312,7 @@ CREATE TABLE `Rack` (
   `thumb_data` blob,
   PRIMARY KEY  (`id`),
   UNIQUE KEY `name_in_row` (`row_id`,`name`)
-) ENGINE=MyISAM;
+) ENGINE=InnoDB;
 
 CREATE TABLE `RackHistory` (
   `id` int(10) unsigned default NULL,
@@ -323,7 +323,7 @@ CREATE TABLE `RackHistory` (
   `thumb_data` blob,
   `ctime` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
   `user_name` char(64) default NULL
-) ENGINE=MyISAM;
+) ENGINE=InnoDB;
 
 CREATE TABLE `RackObject` (
   `id` int(10) unsigned NOT NULL auto_increment,
@@ -351,13 +351,13 @@ CREATE TABLE `RackObjectHistory` (
   `comment` text,
   `ctime` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
   `user_name` char(64) default NULL
-) ENGINE=MyISAM;
+) ENGINE=InnoDB;
 
 CREATE TABLE `RackRow` (
   `id` int(10) unsigned NOT NULL auto_increment,
   `name` char(255) NOT NULL,
   PRIMARY KEY  (`id`)
-) ENGINE=MyISAM;
+) ENGINE=InnoDB;
 
 CREATE TABLE `RackSpace` (
   `rack_id` int(10) unsigned NOT NULL default '0',
@@ -367,13 +367,13 @@ CREATE TABLE `RackSpace` (
   `object_id` int(10) unsigned default NULL,
   PRIMARY KEY  (`rack_id`,`unit_no`,`atom`),
   KEY `RackSpace_object_id` (`object_id`)
-) ENGINE=MyISAM;
+) ENGINE=InnoDB;
 
 CREATE TABLE `Script` (
   `script_name` char(64) NOT NULL,
   `script_text` longtext,
   PRIMARY KEY  (`script_name`)
-) ENGINE=MyISAM;
+) ENGINE=InnoDB;
 
 CREATE TABLE `TagStorage` (
   `entity_realm` enum('file','ipv4net','ipv4vs','ipv4rspool','object','rack','user') NOT NULL default 'object',
