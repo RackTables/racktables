@@ -59,9 +59,8 @@ define ('VLAN_DFL_ID', 1);
 function loadConfigDefaults() {
 	global $configCache;
 	$configCache = loadConfigCache();
-	if (!count ($configCache)) {
-		throw new RuntimeException('Failed to load configuration from the database.');
-	}
+	if (!count ($configCache))
+		throw new Exception ('Failed to load configuration from the database.', E_INTERNAL);
 	foreach ($configCache as $varname => &$row) {
 		$row['is_altered'] = 'no';
 		if ($row['vartype'] == 'uint') $row['varvalue'] = 0 + $row['varvalue'];
@@ -86,7 +85,7 @@ function alterConfigWithUserPreferences() {
 function isConfigVarChanged($varname, $varvalue) {
 	global $configCache;
 	if (!isset ($configCache))
-		throw new RuntimeException ("Configuration cache is unavailable");
+		throw new Exception ('configuration cache is unavailable', E_INTERNAL);
 	if ($varname == '')
 		throw new InvalidArgException('$varname', $varname, 'Empty variable name');
 	if (!isset ($configCache[$varname])) return true;
@@ -102,18 +101,11 @@ function getConfigVar ($varname = '')
 	// We assume the only point of cache init, and it is init.php. If it
 	// has failed, we don't retry loading.
 	if (!isset ($configCache))
-	{
-		throw new RuntimeException ("Configuration cache is unavailable");
-	}
+		throw new Exception ('configuration cache is unavailable', E_INTERNAL);
 	if ($varname == '')
-	{
 		throw new InvalidArgException('$varname', $varname, 'Empty variable name');
-	}
 	if (isset ($configCache[$varname]))
-	{
-		// Try casting to int, if possible.
 		return $configCache[$varname]['varvalue'];
-	}
 	return NULL;
 }
 
@@ -123,7 +115,7 @@ function setConfigVar ($varname = '', $varvalue = '', $softfail = FALSE)
 {
 	global $configCache;
 	if (!isset ($configCache))
-		throw new RuntimeException ("Configuration cache is unavailable");
+		throw new Exception ('configuration cache is unavailable', E_INTERNAL);
 	if (!strlen ($varname))
 		throw new InvalidArgException('$varname', $varname, 'Empty variable name');
 	// We don't operate on unknown data.
@@ -145,7 +137,7 @@ function setUserConfigVar ($varname = '', $varvalue = '')
 	global $configCache;
 	global $remote_username;
 	if (!isset ($configCache))
-		throw new RuntimeException ("Configuration cache is unavailable");
+		throw new Exception ('configuration cache is unavailable', E_INTERNAL);
 	if (!strlen ($varname))
 		throw new InvalidArgException('$varname', $varname, 'Empty variable name');
 	// We don't operate on unknown data.
@@ -169,7 +161,7 @@ function resetUserConfigVar ($varname = '')
 	global $configCache;
 	global $remote_username;
 	if (!isset ($configCache))
-		throw new RuntimeException ("Configuration cache is unavailable");
+		throw new Exception ('configuration cache is unavailable', E_INTERNAL);
 	if (!strlen ($varname))
 		throw new InvalidArgException('$varname', $varname, 'Empty variable name');
 	// We don't operate on unknown data.
