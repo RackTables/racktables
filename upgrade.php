@@ -647,20 +647,20 @@ CREATE TABLE `VLANValidID` (
 			break;
 		case '0.18.1':
 			$query = array_merge ($query, reloadDictionary ($batchid));
-			$query = "ALTER TABLE Atom ENGINE=InnoDB";
-			$query = "ALTER TABLE AttributeMap ENGINE=InnoDB";
-			$query = "ALTER TABLE Config ENGINE=InnoDB";
-			$query = "ALTER TABLE IPv4Address ENGINE=InnoDB";
-			$query = "ALTER TABLE IPv4Allocation ENGINE=InnoDB";
-			$query = "ALTER TABLE Molecule ENGINE=InnoDB";
-			$query = "ALTER TABLE MountOperation ENGINE=InnoDB";
-			$query = "ALTER TABLE PortCompat ENGINE=InnoDB";
-			$query = "ALTER TABLE Rack ENGINE=InnoDB";
-			$query = "ALTER TABLE RackHistory ENGINE=InnoDB";
-			$query = "ALTER TABLE RackObjectHistory ENGINE=InnoDB";
-			$query = "ALTER TABLE RackRow ENGINE=InnoDB";
-			$query = "ALTER TABLE RackSpace ENGINE=InnoDB";
-			$query = "ALTER TABLE Script ENGINE=InnoDB";
+			$query[] = "ALTER TABLE Atom ENGINE=InnoDB";
+			$query[] = "ALTER TABLE AttributeMap ENGINE=InnoDB";
+			$query[] = "ALTER TABLE Config ENGINE=InnoDB";
+			$query[] = "ALTER TABLE IPv4Address ENGINE=InnoDB";
+			$query[] = "ALTER TABLE IPv4Allocation ENGINE=InnoDB";
+			$query[] = "ALTER TABLE Molecule ENGINE=InnoDB";
+			$query[] = "ALTER TABLE MountOperation ENGINE=InnoDB";
+			$query[] = "ALTER TABLE PortCompat ENGINE=InnoDB";
+			$query[] = "ALTER TABLE Rack ENGINE=InnoDB";
+			$query[] = "ALTER TABLE RackHistory ENGINE=InnoDB";
+			$query[] = "ALTER TABLE RackObjectHistory ENGINE=InnoDB";
+			$query[] = "ALTER TABLE RackRow ENGINE=InnoDB";
+			$query[] = "ALTER TABLE RackSpace ENGINE=InnoDB";
+			$query[] = "ALTER TABLE Script ENGINE=InnoDB";
 			$query[] = "UPDATE Config SET varvalue = '0.18.1' WHERE varname = 'DB_VERSION'";
 			break;
 		default:
