@@ -3897,7 +3897,7 @@ function renderReports ($what)
 				echo "</td></tr>\n";
 				break;
 			default:
-				throw new RuntimeException ('Internal data error');
+				throw new InvalidArgException ('type', $item['type']);
 		}
 		echo "<tr><td colspan=2><hr></td></tr>\n";
 	}
