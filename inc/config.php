@@ -55,6 +55,8 @@ define ('E_INTERNAL', 2);
 define ('E_DB_WRITE_FAILED', 3);
 define ('E_NOT_AUTHENTICATED', 4);
 define ('E_NOT_AUTHORIZED', 5);
+define ('E_MISCONFIGURED', 6);
+define ('E_GW_FAILURE', 7);
 define ('VLAN_MIN_ID', 1);
 define ('VLAN_MAX_ID', 4094);
 define ('VLAN_DFL_ID', 1);

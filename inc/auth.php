@@ -20,9 +20,7 @@ function authenticate ()
 		$user_auth_src,
 		$require_local_account;
 	if (!isset ($user_auth_src) or !isset ($require_local_account))
-	{
-		throw new RuntimeException('secret.php misconfiguration: either user_auth_src or require_local_account are missing');
-	}
+		throw new Exception ('secret.php: either user_auth_src or require_local_account are missing', E_MISCONFIGURED);
 	if (isset ($_REQUEST['logout']))
 		throw new Exception ('', E_NOT_AUTHENTICATED); // Reset browser credentials cache.
 	switch ($user_auth_src)
@@ -45,13 +43,11 @@ function authenticate ()
 				!isset ($_SERVER['REMOTE_USER']) or
 				!strlen ($_SERVER['REMOTE_USER'])
 			)
-			{
-				throw new RuntimeException('System misconfiguration. The web-server didn\'t authenticate the user, although ought to do.');
-			}
+				throw new Exception ('The web-server didn\'t authenticate the user, although ought to do.', E_MISCONFIGURED);
 			$remote_username = $_SERVER['REMOTE_USER'];
 			break;
 		default:
-			throw new RuntimeException('Invalid authentication source!');
+			throw new Exception ('Invalid authentication source!', E_MISCONFIGURED);
 			die;
 	}
 	$userinfo = constructUserCell ($remote_username);
@@ -85,8 +81,7 @@ function authenticate ()
 				(strlen ($ldap_dispname) ? $ldap_dispname : $remote_username); // then one from LDAP
 			return; // success
 		default:
-			throw new RuntimeException('Invalid authentication source!');
-			die;
+			throw new Exception ('Invalid authentication source!', E_MISCONFIGURED);
 	}
 	throw new Exception ('', E_NOT_AUTHENTICATED);
 }
@@ -248,8 +243,7 @@ function authenticated_via_ldap_cache ($username, $password, &$ldap_displayname)
 		discardLDAPCache ($LDAP_options['cache_expiry']);
 		return TRUE;
 	default:
-		throw new RuntimeException('Internal error during LDAP cache dispatching');
-		die;
+		throw new InvalidArgException ('result', $newinfo['result'], 'Internal error during LDAP cache dispatching');
 	}
 	// This is never reached.
 	return FALSE;
@@ -297,9 +291,7 @@ function queryLDAPServer ($username, $password)
 		$auth_user_name = $info[0]['dn'];
 	}
 	else
-	{
-		throw new RuntimeException('LDAP misconfiguration. Cannon build username for authentication.');
-	}
+		throw new Exception ('LDAP misconfiguration. Cannon build username for authentication.', E_MISCONFIGURED);
 	if (array_key_exists ('options', $LDAP_options) and is_array ($LDAP_options['options']))
 		foreach ($LDAP_options['options'] as $opt_code => $opt_value)
 			ldap_set_option ($connect, $opt_code, $opt_value);
