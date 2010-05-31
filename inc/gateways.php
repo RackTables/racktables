@@ -380,4 +380,732 @@ function gwDeployDeviceConfig ($object_id, $breed, $text)
 	unlink ($tmpfilename);
 }
 
+// Read provided output of "show cdp neighbors detail" command and
+// return a list of records with (translated) local port name,
+// remote device name and (translated) remote port name.
+function ios12ReadCDPStatus ($input)
+{
+	$ret = array();
+	$procfunc = 'ios12ScanCDPTopLevel';
+	foreach (explode ("\n", $input) as $line)
+		$procfunc = $procfunc ($ret, $line);
+	return $ret;
+}
+
+function ios12ReadVLANConfig ($input)
+{
+	$ret = array
+	(
+		'vlanlist' => array(),
+		'portdata' => array(),
+	);
+	$procfunc = 'ios12ScanTopLevel';
+	foreach (explode ("\n", $input) as $line)
+		$procfunc = $procfunc ($ret, $line);
+	return $ret;
+}
+
+function ios12ScanTopLevel (&$work, $line)
+{
+	$matches = array();
+	switch (TRUE)
+	{
+	case (preg_match ('@^interface ((Ethernet|FastEthernet|GigabitEthernet|TenGigabitEthernet|Port-channel)[[:digit:]]+(/[[:digit:]]+)*)$@', $line, $matches)):
+		$work['current'] = array ('port_name' => ios12ShortenIfName ($matches[1]));
+		return 'ios12PickSwitchportCommand'; // switch to interface block reading
+	case (preg_match ('/^VLAN Name                             Status    Ports$/', $line, $matches)):
+		return 'ios12PickVLANCommand';
+	default:
+		return __FUNCTION__; // continue scan
+	}
+}
+
+function ios12PickSwitchportCommand (&$work, $line)
+{
+	if ($line[0] != ' ') // end of interface section
+	{
+		// save work, if it makes sense
+		switch (TRUE)
+		{
+		case $work['current']['ignore']:
+			$work['portdata'][$work['current']['port_name']] = array
+			(
+				'mode' => 'none',
+				'allowed' => array(),
+				'native' => 0,
+			);
+			break;
+		case 'access' == $work['current']['mode']:
+			if (!array_key_exists ('access vlan', $work['current']))
+				$work['current']['access vlan'] = 1;
+			$work['portdata'][$work['current']['port_name']] = array
+			(
+				'mode' => 'access',
+				'allowed' => array ($work['current']['access vlan']),
+				'native' => $work['current']['access vlan'],
+			);
+			break;
+		case 'trunk' == $work['current']['mode']:
+			if (!array_key_exists ('trunk native vlan', $work['current']))
+				$work['current']['trunk native vlan'] = 1;
+			if (!array_key_exists ('trunk allowed vlan', $work['current']))
+				$work['current']['trunk allowed vlan'] = range (VLAN_MIN_ID, VLAN_MAX_ID);
+			// Having configured VLAN as "native" doesn't mean anything
+			// as long as it's not listed on the "allowed" line.
+			$effective_native = in_array
+			(
+				$work['current']['trunk native vlan'],
+				$work['current']['trunk allowed vlan']
+			) ? $work['current']['trunk native vlan'] : 0;
+			$work['portdata'][$work['current']['port_name']] = array
+			(
+				'mode' => 'trunk',
+				'allowed' => $work['current']['trunk allowed vlan'],
+				'native' => $effective_native,
+			);
+			break;
+		default:
+			// dot1q-tunnel, dynamic, private-vlan or even none --
+			// show in returned config and let user decide, if they
+			// want to fix device config or work around these ports
+			// by means of VST.
+			$work['portdata'][$work['current']['port_name']] = array
+			(
+				'mode' => 'none',
+				'allowed' => array(),
+				'native' => 0,
+			);
+			break;
+		}
+		unset ($work['current']);
+		return 'ios12ScanTopLevel';
+	}
+	// not yet
+	$matches = array();
+	switch (TRUE)
+	{
+	case (preg_match ('@^ switchport mode (.+)$@', $line, $matches)):
+		$work['current']['mode'] = $matches[1];
+		break;
+	case (preg_match ('@^ switchport access vlan (.+)$@', $line, $matches)):
+		$work['current']['access vlan'] = $matches[1];
+		break;
+	case (preg_match ('@^ switchport trunk native vlan (.+)$@', $line, $matches)):
+		$work['current']['trunk native vlan'] = $matches[1];
+		break;
+	case (preg_match ('@^ switchport trunk allowed vlan add (.+)$@', $line, $matches)):
+		$work['current']['trunk allowed vlan'] = array_merge
+		(
+			$work['current']['trunk allowed vlan'],
+			iosParseVLANString ($matches[1])
+		);
+		break;
+	case (preg_match ('@^ switchport trunk allowed vlan (.+)$@', $line, $matches)):
+		$work['current']['trunk allowed vlan'] = iosParseVLANString ($matches[1]);
+		break;
+	case preg_match ('@^ channel-group @', $line):
+	// port-channel subinterface config follows that of the master interface
+	case preg_match ('@^ ip address @', $line):
+	// L3 interface does no switchport functions
+		$work['current']['ignore'] = TRUE;
+		break;
+	default: // suppress warning on irrelevant config clause
+	}
+	return __FUNCTION__;
+}
+
+function ios12PickVLANCommand (&$work, $line)
+{
+	$matches = array();
+	switch (TRUE)
+	{
+	case ($line == '---- -------------------------------- --------- -------------------------------'):
+		// ignore the rest of VLAN table header;
+		break;
+	case (preg_match ('@! END OF VLAN LIST$@', $line)):
+		return 'ios12ScanTopLevel';
+	case (preg_match ('@^([[:digit:]]+) {1,4}.{32} active    @', $line, $matches)):
+		if (!array_key_exists ($matches[1], $work['vlanlist']))
+			$work['vlanlist'][] = $matches[1];
+		break;
+	default:
+	}
+	return __FUNCTION__;
+}
+
+// Another finite automata to read a dialect of Foundry configuration.
+function fdry5ReadVLANConfig ($input)
+{
+	$ret = array
+	(
+		'vlanlist' => array(),
+		'portdata' => array(),
+	);
+	$procfunc = 'fdry5ScanTopLevel';
+	foreach (explode ("\n", $input) as $line)
+		$procfunc = $procfunc ($ret, $line);
+	return $ret;
+}
+
+function fdry5ScanTopLevel (&$work, $line)
+{
+	$matches = array();
+	switch (TRUE)
+	{
+	case (preg_match ('@^vlan ([[:digit:]]+)( name .+)? (by port)$@', $line, $matches)):
+		if (!array_key_exists ($matches[1], $work['vlanlist']))
+			$work['vlanlist'][] = $matches[1];
+		$work['current'] = array ('vlan_id' => $matches[1]);
+		return 'fdry5PickVLANSubcommand';
+	case (preg_match ('@^interface ethernet ([[:digit:]]+/[[:digit:]]+/[[:digit:]]+)$@', $line, $matches)):
+		$work['current'] = array ('port_name' => 'e' . $matches[1]);
+		return 'fdry5PickInterfaceSubcommand';
+	default:
+		return __FUNCTION__;
+	}
+}
+
+function fdry5PickVLANSubcommand (&$work, $line)
+{
+	if ($line[0] != ' ') // end of VLAN section
+	{
+		unset ($work['current']);
+		return 'fdry5ScanTopLevel';
+	}
+	// not yet
+	$matches = array();
+	switch (TRUE)
+	{
+	case (preg_match ('@^ tagged (.+)$@', $line, $matches)):
+		// add current VLAN to 'allowed' list of each mentioned port
+		foreach (fdry5ParsePortString ($matches[1]) as $port_name)
+			if (array_key_exists ($port_name, $work['portdata']))
+				$work['portdata'][$port_name]['allowed'][] = $work['current']['vlan_id'];
+			else
+				$work['portdata'][$port_name] = array
+				(
+					'mode' => 'trunk',
+					'allowed' => array ($work['current']['vlan_id']),
+					'native' => 0, // can be updated later
+				);
+			$work['portdata'][$port_name]['mode'] = 'trunk';
+		break;
+	case (preg_match ('@^ untagged (.+)$@', $line, $matches)):
+		// replace 'native' column of each mentioned port with current VLAN ID
+		foreach (fdry5ParsePortString ($matches[1]) as $port_name)
+		{
+			if (array_key_exists ($port_name, $work['portdata']))
+			{
+				$work['portdata'][$port_name]['native'] = $work['current']['vlan_id'];
+				$work['portdata'][$port_name]['allowed'][] = $work['current']['vlan_id'];
+			}
+			else
+				$work['portdata'][$port_name] = array
+				(
+					'mode' => 'access',
+					'allowed' => array ($work['current']['vlan_id']),
+					'native' => $work['current']['vlan_id'],
+				);
+			// Untagged ports are initially assumed to be access ports, and
+			// when this assumption is right, this is the final port mode state.
+			// When the port is dual-mode one, this is detected and justified
+			// later in "interface" section of config text.
+			$work['portdata'][$port_name]['mode'] = 'access';
+		}
+		break;
+	default: // nom-nom
+	}
+	return __FUNCTION__;
+}
+
+function fdry5PickInterfaceSubcommand (&$work, $line)
+{
+	if ($line[0] != ' ') // end of interface section
+	{
+		if (array_key_exists ('dual-mode', $work['current']))
+		{
+			if (array_key_exists ($work['current']['port_name'], $work['portdata']))
+				// update existing record
+				$work['portdata'][$work['current']['port_name']]['native'] = $work['current']['dual-mode'];
+			else
+				// add new
+				$work['portdata'][$work['current']['port_name']] = array
+				(
+					'allowed' => array ($work['current']['dual-mode']),
+					'native' => $work['current']['dual-mode'],
+				);
+			// a dual-mode port is always considered a trunk port
+			// (but not in the IronWare's meaning of "trunk") regardless of
+			// number of assigned tagged VLANs
+			$work['portdata'][$work['current']['port_name']]['mode'] = 'trunk';
+		}
+		unset ($work['current']);
+		return 'fdry5ScanTopLevel';
+	}
+	$matches = array();
+	switch (TRUE)
+	{
+	case (preg_match ('@^ dual-mode( +[[:digit:]]+ *)?$@', $line, $matches)):
+		// default VLAN ID for dual-mode command is 1
+		$work['current']['dual-mode'] = strlen (trim ($matches[1])) ? trim ($matches[1]) : 1;
+		break;
+	// FIXME: trunk/link-aggregate/ip address pulls port from 802.1Q field
+	default: // nom-nom
+	}
+	return __FUNCTION__;
+}
+
+function fdry5ParsePortString ($string)
+{
+	$ret = array();
+	$tokens = explode (' ', trim ($string));
+	while (count ($tokens))
+	{
+		$letters = array_shift ($tokens); // "ethe", "to"
+		$numbers = array_shift ($tokens); // "x", "x/x", "x/x/x"
+		switch ($letters)
+		{
+		case 'ethe':
+			if ($prev_numbers != NULL)
+				$ret[] = 'e' . $prev_numbers;
+			$prev_numbers = $numbers;
+			break;
+		case 'to':
+			$ret = array_merge ($ret, fdry5GenPortRange ($prev_numbers, $numbers));
+			$prev_numbers = NULL; // no action on next token
+			break;
+		default: // ???
+			return array();
+		}
+	}
+	// flush delayed item
+	if ($prev_numbers != NULL)
+		$ret[] = 'e' . $prev_numbers;
+	return $ret;
+}
+
+// Take two indices in form "x", "x/x" or "x/x/x" and return the range of
+// ports spanning from the first to the last. The switch software makes it
+// easier to perform, because "ethe x/x/x to y/y/y" ranges never cross
+// unit/slot boundary (every index except the last remains constant).
+function fdry5GenPortRange ($from, $to)
+{
+	$matches = array();
+	if (1 !== preg_match ('@^([[:digit:]]+/)?([[:digit:]]+/)?([[:digit:]]+)$@', $from, $matches))
+		return array();
+	$prefix = 'e' . $matches[1] . $matches[2];
+	$from_idx = $matches[3];
+	if (1 !== preg_match ('@^([[:digit:]]+/)?([[:digit:]]+/)?([[:digit:]]+)$@', $to, $matches))
+		return array();
+	$to_idx = $matches[3];
+	for ($i = $from_idx; $i <= $to_idx; $i++)
+		$ret[] = $prefix . $i;
+	return $ret;
+}
+
+// an implementation for Huawei syntax
+function vrp53ReadVLANConfig ($input)
+{
+	$ret = array
+	(
+		'vlanlist' => array(),
+		'portdata' => array(),
+	);
+	$procfunc = 'vrp53ScanTopLevel';
+	foreach (explode ("\n", $input) as $line)
+		$procfunc = $procfunc ($ret, $line);
+	return $ret;
+}
+
+function vrp53ScanTopLevel (&$work, $line)
+{
+	$matches = array();
+	switch (TRUE)
+	{
+	case (preg_match ('@^ vlan batch (.+)$@', $line, $matches)):
+		foreach (vrp53ParseVLANString ($matches[1]) as $vlan_id)
+			$work['vlanlist'][] = $vlan_id;
+		return __FUNCTION__;
+	case (preg_match ('@^interface ((GigabitEthernet|XGigabitEthernet|Eth-Trunk)([[:digit:]]+(/[[:digit:]]+)*))$@', $line, $matches)):
+		$matches[1] = preg_replace ('@^GigabitEthernet(.+)$@', 'gi\\1', $matches[1]);
+		$matches[1] = preg_replace ('@^XGigabitEthernet(.+)$@', 'xg\\1', $matches[1]);
+		$matches[1] = preg_replace ('@^Eth-Trunk(.+)$@', 'et\\1', $matches[1]);
+		$work['current'] = array ('port_name' => $matches[1]);
+		return 'vrp53PickInterfaceSubcommand';
+	default:
+		return __FUNCTION__;
+	}
+}
+
+function vrp53ParseVLANString ($string)
+{
+	$string = preg_replace ('/ to /', '-', $string);
+	$string = preg_replace ('/ /', ',', $string);
+	return iosParseVLANString ($string);
+}
+
+function vrp53PickInterfaceSubcommand (&$work, $line)
+{
+	if ($line[0] == '#') // end of interface section
+	{
+		// Configuration Guide - Ethernet 3.3.4:
+		// "By default, the interface type is hybrid."
+		if (!array_key_exists ('link-type', $work['current']))
+			$work['current']['link-type'] = 'hybrid';
+		if (!array_key_exists ('allowed', $work['current']))
+			$work['current']['allowed'] = array();
+		if (!array_key_exists ('native', $work['current']))
+			$work['current']['native'] = 0;
+		switch ($work['current']['link-type'])
+		{
+		case 'access':
+			// VRP does not assign access ports to VLAN1 by default,
+			// leaving them blocked.
+			$work['portdata'][$work['current']['port_name']] =
+				$work['current']['native'] ? array
+				(
+					'allowed' => $work['current']['allowed'],
+					'native' => $work['current']['native'],
+					'mode' => 'access',
+				) : array
+				(
+					'mode' => 'none',
+					'allowed' => array(),
+					'native' => 0,
+				);
+			break;
+		case 'trunk':
+			$work['portdata'][$work['current']['port_name']] = array
+			(
+				'allowed' => $work['current']['allowed'],
+				'native' => 0,
+				'mode' => 'trunk',
+			);
+			break;
+		case 'hybrid':
+			$work['portdata'][$work['current']['port_name']] = array
+			(
+				'allowed' => $work['current']['allowed'],
+				'native' => $work['current']['native'],
+				'mode' => 'trunk',
+			);
+			break;
+		default: // dot1q-tunnel ?
+		}
+		unset ($work['current']);
+		return 'vrp53ScanTopLevel';
+	}
+	$matches = array();
+	switch (TRUE)
+	{
+	case (preg_match ('@^ port default vlan ([[:digit:]]+)$@', $line, $matches)):
+		$work['current']['native'] = $matches[1];
+		if (!array_key_exists ('allowed', $work['current']))
+			$work['current']['allowed'] = array();
+		if (!in_array ($matches[1], $work['current']['allowed']))
+			$work['current']['allowed'][] = $matches[1];
+		break;
+	case (preg_match ('@^ port link-type (.+)$@', $line, $matches)):
+		$work['current']['link-type'] = $matches[1];
+		break;
+	case (preg_match ('@^ port trunk allow-pass vlan (.+)$@', $line, $matches)):
+		if (!array_key_exists ('allowed', $work['current']))
+			$work['current']['allowed'] = array();
+		foreach (vrp53ParseVLANString ($matches[1]) as $vlan_id)
+			if (!in_array ($vlan_id, $work['current']['allowed']))
+				$work['current']['allowed'][] = $vlan_id;
+		break;
+	// TODO: make sure, that a port with "eth-trunk" clause always ends up in "none" mode
+	default: // nom-nom
+	}
+	return __FUNCTION__;
+}
+
+function nxos4Read8021QConfig ($input)
+{
+	$ret = array
+	(
+		'vlanlist' => array(),
+		'portdata' => array(),
+	);
+	$procfunc = 'nxos4ScanTopLevel';
+	foreach (explode ("\n", $input) as $line)
+		$procfunc = $procfunc ($ret, $line);
+	return $ret;
+}
+
+function nxos4ScanTopLevel (&$work, $line)
+{
+	$matches = array();
+	switch (TRUE)
+	{
+	case (preg_match ('@^interface ((Ethernet)[[:digit:]]+(/[[:digit:]]+)*)$@', $line, $matches)):
+		$matches[1] = preg_replace ('@^Ethernet(.+)$@', 'e\\1', $matches[1]);
+		$work['current'] = array ('port_name' => $matches[1]);
+		return 'nxos4PickSwitchportCommand';
+	case (preg_match ('@^vlan ([[:digit:]]+)$@', $line, $matches)):
+		$work['vlanlist'][] = $matches[1];
+		return 'nxos4PickVLANs';
+	default:
+		return __FUNCTION__; // continue scan
+	}
+}
+
+function nxos4PickVLANs (&$work, $line)
+{
+	switch (TRUE)
+	{
+	case ($line == ''): // end of VLAN list
+		return 'nxos4ScanTopLevel';
+	case (preg_match ('@^vlan ([[:digit:]]+)$@', $line, $matches)):
+		$work['vlanlist'][] = $matches[1];
+	default: // VLAN name or any other text
+		return __FUNCTION__;
+	}
+}
+
+function nxos4PickSwitchportCommand (&$work, $line)
+{
+	if ($line == '') // end of interface section
+	{
+		// fill in defaults
+		// below assumes "system default switchport" mode set on the device
+		if (!array_key_exists ('mode', $work['current']))
+			$work['current']['mode'] = 'access';
+		// save work, if it makes sense
+		switch ($work['current']['mode'])
+		{
+		case 'access':
+			if (!array_key_exists ('access vlan', $work['current']))
+				$work['current']['access vlan'] = 1;
+			$work['portdata'][$work['current']['port_name']] = array
+			(
+				'mode' => 'access',
+				'allowed' => array ($work['current']['access vlan']),
+				'native' => $work['current']['access vlan'],
+			);
+			break;
+		case 'trunk':
+			if (!array_key_exists ('trunk native vlan', $work['current']))
+				$work['current']['trunk native vlan'] = 1;
+			if (!array_key_exists ('trunk allowed vlan', $work['current']))
+				$work['current']['trunk allowed vlan'] = range (VLAN_MIN_ID, VLAN_MAX_ID);
+			// Having configured VLAN as "native" doesn't mean anything
+			// as long as it's not listed on the "allowed" line.
+			$effective_native = in_array
+			(
+				$work['current']['trunk native vlan'],
+				$work['current']['trunk allowed vlan']
+			) ? $work['current']['trunk native vlan'] : 0;
+			$work['portdata'][$work['current']['port_name']] = array
+			(
+				'mode' => 'trunk',
+				'allowed' => $work['current']['trunk allowed vlan'],
+				'native' => $effective_native,
+			);
+			break;
+		default:
+			// dot1q-tunnel, dynamic, private-vlan --- skip these
+		}
+		unset ($work['current']);
+		return 'nxos4ScanTopLevel';
+	}
+	// not yet
+	$matches = array();
+	switch (TRUE)
+	{
+	case (preg_match ('@^  switchport mode (.+)$@', $line, $matches)):
+		$work['current']['mode'] = $matches[1];
+		break;
+	case (preg_match ('@^  switchport access vlan (.+)$@', $line, $matches)):
+		$work['current']['access vlan'] = $matches[1];
+		break;
+	case (preg_match ('@^  switchport trunk native vlan (.+)$@', $line, $matches)):
+		$work['current']['trunk native vlan'] = $matches[1];
+		break;
+	case (preg_match ('@^  switchport trunk allowed vlan add (.+)$@', $line, $matches)):
+		$work['current']['trunk allowed vlan'] = array_merge
+		(
+			$work['current']['trunk allowed vlan'],
+			iosParseVLANString ($matches[1])
+		);
+		break;
+	case (preg_match ('@^  switchport trunk allowed vlan (.+)$@', $line, $matches)):
+		$work['current']['trunk allowed vlan'] = iosParseVLANString ($matches[1]);
+		break;
+	default: // suppress warning on irrelevant config clause
+	}
+	return __FUNCTION__;
+}
+
+// Get a list of VLAN management pseudo-commands and return a text
+// of real vendor-specific commands, which implement the work.
+// This work is done in two rounds:
+// 1. For "add allowed" and "rem allowed" commands detect continuous
+//    sequences of VLAN IDs and replace them with ranges of form "A-B",
+//    where B>A.
+// 2. Iterate over the resulting list and produce real CLI commands.
+function ios12TranslatePushQueue ($queue)
+{
+	$ret = "configure terminal\n";
+	foreach ($queue as $cmd)
+		switch ($cmd['opcode'])
+		{
+		case 'create VLAN':
+			$ret .= "vlan ${cmd['arg1']}\nexit\n";
+			break;
+		case 'destroy VLAN':
+			$ret .= "no vlan ${cmd['arg1']}\n";
+			break;
+		case 'add allowed':
+		case 'rem allowed':
+			$clause = $cmd['opcode'] == 'add allowed' ? 'add' : 'remove';
+			$ret .= "interface ${cmd['port']}\n";
+			foreach (listToRanges ($cmd['vlans']) as $range)
+				$ret .= "switchport trunk allowed vlan ${clause} " .
+					($range['from'] == $range['to'] ? $range['to'] : "${range['from']}-${range['to']}") .
+					"\n";
+			$ret .= "exit\n";
+			break;
+		case 'set native':
+			$ret .= "interface ${cmd['arg1']}\nswitchport trunk native vlan ${cmd['arg2']}\nexit\n";
+			break;
+		case 'unset native':
+			$ret .= "interface ${cmd['arg1']}\nno switchport trunk native vlan ${cmd['arg2']}\nexit\n";
+			break;
+		case 'set access':
+			$ret .= "interface ${cmd['arg1']}\nswitchport access vlan ${cmd['arg2']}\nexit\n";
+			break;
+		case 'unset access':
+			$ret .= "interface ${cmd['arg1']}\nno switchport access vlan\nexit\n";
+			break;
+		case 'set mode':
+			$ret .= "interface ${cmd['arg1']}\nswitchport mode ${cmd['arg2']}\n";
+			if ($cmd['arg2'] == 'trunk')
+				$ret .= "no switchport trunk native vlan\nswitchport trunk allowed vlan none\n";
+			$ret .= "exit\n";
+			break;
+		}
+	$ret .= "end\n";
+	if (getConfigVar ('8021Q_WRI_AFTER_CONFT') == 'yes')
+		$ret .= "write memory\n";
+	return $ret;
+}
+
+function fdry5TranslatePushQueue ($queue)
+{
+	$ret = "conf t\n";
+	foreach ($queue as $cmd)
+		switch ($cmd['opcode'])
+		{
+		case 'create VLAN':
+			$ret .= "vlan ${cmd['arg1']}\nexit\n";
+			break;
+		case 'destroy VLAN':
+			$ret .= "no vlan ${cmd['arg1']}\n";
+			break;
+		case 'add allowed':
+			foreach ($cmd['vlans'] as $vlan_id)
+				$ret .= "vlan ${vlan_id}\ntagged ${cmd['port']}\nexit\n";
+			break;
+		case 'rem allowed':
+			foreach ($cmd['vlans'] as $vlan_id)
+				$ret .= "vlan ${vlan_id}\nno tagged ${cmd['port']}\nexit\n";
+			break;
+		case 'set native':
+			$ret .= "interface ${cmd['arg1']}\ndual-mode ${cmd['arg2']}\nexit\n";
+			break;
+		case 'unset native':
+			$ret .= "interface ${cmd['arg1']}\nno dual-mode ${cmd['arg2']}\nexit\n";
+			break;
+		case 'set access':
+			$ret .= "vlan ${cmd['arg2']}\nuntagged ${cmd['arg1']}\nexit\n";
+			break;
+		case 'unset access':
+			$ret .= "vlan ${cmd['arg2']}\nno untagged ${cmd['arg1']}\nexit\n";
+			break;
+		case 'set mode': // NOP
+			break;
+		}
+	$ret .= "end\n";
+	if (getConfigVar ('8021Q_WRI_AFTER_CONFT') == 'yes')
+		$ret .= "write memory\n";
+	return $ret;
+}
+
+function vrp53TranslatePushQueue ($queue)
+{
+	$ret = "system-view\n";
+	foreach ($queue as $cmd)
+		switch ($cmd['opcode'])
+		{
+		case 'create VLAN':
+			$ret .= "vlan ${cmd['arg1']}\nquit\n";
+			break;
+		case 'destroy VLAN':
+			$ret .= "undo vlan ${cmd['arg1']}\n";
+			break;
+		case 'add allowed':
+		case 'rem allowed':
+			$clause = $cmd['opcode'] == 'add allowed' ? '' : 'undo ';
+			$ret .= "interface ${cmd['port']}\n";
+			foreach (listToRanges ($cmd['vlans']) as $range)
+				$ret .=  "${clause}port trunk allow-pass vlan " .
+					($range['from'] == $range['to'] ? $range['to'] : "${range['from']} to ${range['to']}") .
+					"\n";
+			$ret .= "quit\n";
+			break;
+		case 'set native':
+		case 'set access':
+			$ret .= "interface ${cmd['arg1']}\nport default vlan ${cmd['arg2']}\nquit\n";
+			break;
+		case 'unset native':
+		case 'unset access':
+			$ret .= "interface ${cmd['arg1']}\nundo port default vlan\nquit\n";
+			break;
+		case 'set mode':
+			$modemap = array ('access' => 'access', 'trunk' => 'hybrid');
+			$ret .= "interface ${cmd['arg1']}\nport link-type " . $modemap[$cmd['arg2']] . "\n";
+			if ($cmd['arg2'] == 'hybrid')
+				$ret .= "undo port default vlan\nundo port trunk allow-pass vlan all\n";
+			$ret .= "quit\n";
+			break;
+		}
+	$ret .= "return\n";
+	if (getConfigVar ('8021Q_WRI_AFTER_CONFT') == 'yes')
+		$ret .= "save\nY\n";
+	return $ret;
+}
+
+function ios12ScanCDPTopLevel (&$work, $line)
+{
+	$matches = array();
+	switch (TRUE)
+	{
+	case preg_match ('/^Device ID: (.+)$/', $line, $matches):
+		$work['current'] = array ('device' => $matches[1]);
+		return 'ios12ScanCDPEntry';
+	default:
+		return __FUNCTION__; // continue scan
+	}
+}
+
+function ios12ScanCDPEntry (&$work, $line)
+{
+	$matches = array();
+	switch (TRUE)
+	{
+	case preg_match ('/^Interface: (.+),  Port ID \(outgoing port\): (.+)$/', $line, $matches):
+		$work[ios12ShortenIfName ($matches[1])] = array
+		(
+			'device' => $work['current']['device'],
+			'port' => ios12ShortenIfName ($matches[2]),
+		);
+		unset ($work['current']);
+		return 'ios12ScanCDPTopLevel';
+	default:
+	}
+	return __FUNCTION__;
+}
+
 ?>
