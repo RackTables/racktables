@@ -199,14 +199,11 @@ function gwSendFile ($endpoint, $handlername, $filetext = array())
 	{
 		$name = tempnam ('', 'RackTables-sendfile-');
 		$tmpnames[] = $name;
-		$tmpfile = fopen ($name, 'wb');
-		$failed = FALSE === fwrite ($tmpfile, $text);
-		$failed = FALSE === fclose ($tmpfile) or $fail;
-		if ($failed)
+		if (FALSE === $name or FALSE === file_put_contents ($name, $text))
 		{
 			foreach ($tmpnames as $name)
 				unlink ($name);
-			return oneLiner (164, array ('file write error')); // gateway failure
+			throw new Exception ('failed to write to temporary file', E_GW_FAILURE);
 		}
 		$command .= " ${name}";
 	}
@@ -217,8 +214,6 @@ function gwSendFile ($endpoint, $handlername, $filetext = array())
 	);
 	foreach ($tmpnames as $name)
 		unlink ($name);
-	// Being here means having 'OK!' in the response.
-	return oneLiner (66, array ($handlername)); // ignore provided "Ok" text
 }
 
 // Query something through a gateway and get some text in return. Return that text.
@@ -246,7 +241,7 @@ function gwSendFileToObject ($object_id = 0, $handlername, $filetext = '')
 		throw new Exception ('no management address set', E_GW_FAILURE);
 	if (count ($endpoints) > 1)
 		throw new Exception ('cannot pick management address', E_GW_FAILURE);
-	return gwSendFile (str_replace (' ', '+', $endpoints[0]), $handlername, array ($filetext));
+	gwSendFile (str_replace (' ', '+', $endpoints[0]), $handlername, array ($filetext));
 }
 
 function gwRecvFileFromObject ($object_id = 0, $handlername, &$output)
@@ -367,7 +362,10 @@ function gwDeployDeviceConfig ($object_id, $breed, $text)
 	$endpoint = str_replace (' ', '\ ', str_replace (' ', '+', $endpoints[0]));
 	$tmpfilename = tempnam ('', 'RackTables-deviceconfig-');
 	if (FALSE === file_put_contents ($tmpfilename, $text))
-		throw new Exception ('failed to write to temporary file', E_INTERNAL);
+	{
+		unlink ($tmpfilename);
+		throw new Exception ('failed to write to temporary file', E_GW_FAILURE);
+	}
 	$outputlines = queryGateway
 	(
 		'deviceconfig',
