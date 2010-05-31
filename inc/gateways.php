@@ -55,7 +55,14 @@ function queryGateway ($gwname, $questions)
 
 	$retval = proc_close ($gateway);
 	if ($retval != 0)
-		return array ("ERR gateway '${gwname}' returned ${retval}");
+		throw new Exception ("gateway failed with code ${retval}", E_GW_FAILURE);
+	if (!count ($answers))
+		throw new Exception ('no response from gateway', E_GW_FAILURE);
+	if (count ($answers) != count ($questions))
+		throw new Exception ('protocol violation', E_GW_FAILURE);
+	foreach ($answers as $a)
+		if (strpos (a, 'OK!') !== 0)
+			throw new Exception ("subcommand failed with status: ${a}", E_GW_FAILURE);
 	return $answers;
 }
 
@@ -68,14 +75,12 @@ function queryGateway ($gwname, $questions)
 function getSwitchVLANs ($object_id = 0)
 {
 	global $remote_username;
-	if ($object_id <= 0)
-		throw new InvalidArgException('$object_id', $object_id);
 	$objectInfo = spotEntity ('object', $object_id);
 	$endpoints = findAllEndpoints ($object_id, $objectInfo['name']);
 	if (count ($endpoints) == 0)
-		throw new RuntimeException('Can\'t find any mean to reach current object. Please either set FQDN attribute or assign an IP address to the object.');
+		throw new Exception ('no management address set', E_GW_FAILURE);
 	if (count ($endpoints) > 1)
-		throw new RuntimeException('More than one IP address is assigned to this object, please configure FQDN attribute.');
+		throw new Exception ('cannot pick management address', E_GW_FAILURE);
 	$hwtype = $swtype = 'unknown';
 	foreach (getAttrValues ($object_id) as $record)
 	{
@@ -93,16 +98,12 @@ function getSwitchVLANs ($object_id = 0)
 		'listmacs'
 	);
 	$data = queryGateway ('switchvlans', $commands);
-	if ($data == NULL)
-		throw new RuntimeException('Failed to get any response from queryGateway() or the gateway died');
 	if (strpos ($data[0], 'OK!') !== 0)
-		throw new RuntimeException("Gateway failure: ${data[0]}.");
-	if (count ($data) != count ($commands))
-		throw new RuntimeException("Gateway failure: malformed reply.");
+		throw new Exception ("gateway failed with status: ${data[0]}.", E_GW_FAILURE);
 	// Now we have VLAN list in $data[1] and port list in $data[2]. Let's sort this out.
 	$tmp = array_unique (explode (';', substr ($data[1], strlen ('OK!'))));
 	if (count ($tmp) == 0)
-		throw new RuntimeException("Gateway succeeded, but returned no VLAN records.");
+		throw new Exception ('gateway returned no records', E_GW_FAILURE);
 	$vlanlist = array();
 	foreach ($tmp as $record)
 	{
@@ -117,7 +118,7 @@ function getSwitchVLANs ($object_id = 0)
 		$portlist[] = array ('portname' => $portname, 'status' => $status, 'vlanid' => $vlanid);
 	}
 	if (count ($portlist) == 0)
-		throw new RuntimeException("Gateway succeeded, but returned no port records.");
+		throw new Exception ('gateway returned no records', E_GW_FAILURE);
 	$maclist = array();
 	foreach (explode (';', substr ($data[3], strlen ('OK!'))) as $pair)
 	{
@@ -155,12 +156,6 @@ function setSwitchVLANs ($object_id = 0, $setcmd)
 		'switchvlans',
 		array ("connect ${endpoint} ${hwtype} ${swtype} ${remote_username}", $setcmd)
 	);
-	if ($data == NULL)
-		return oneLiner (163); // unknown gateway failure
-	if (strpos ($data[0], 'OK!') !== 0)
-		return oneLiner (164, array ($data[0])); // gateway failure
-	if (count ($data) != 2)
-		return oneLiner (165); // protocol violation
 	// Finally we can parse the response into message array.
 	$log_m = array();
 	foreach (explode (';', substr ($data[1], strlen ('OK!'))) as $text)
@@ -212,12 +207,6 @@ function gwSendFile ($endpoint, $handlername, $filetext = array())
 	);
 	foreach ($tmpnames as $name)
 		unlink ($name);
-	if ($outputlines == NULL)
-		return oneLiner (163); // unknown gateway failure
-	if (count ($outputlines) != 1)
-		return oneLiner (165); // protocol violation
-	if (strpos ($outputlines[0], 'OK!') !== 0)
-		return oneLiner (164, array ($outputlines[0])); // gateway failure
 	// Being here means having 'OK!' in the response.
 	return oneLiner (66, array ($handlername)); // ignore provided "Ok" text
 }
@@ -235,12 +224,6 @@ function gwRecvFile ($endpoint, $handlername, &$output)
 	);
 	$output = file_get_contents ($tmpfilename);
 	unlink ($tmpfilename);
-	if ($outputlines == NULL)
-		return oneLiner (163); // unknown gateway failure
-	if (count ($outputlines) != 1)
-		return oneLiner (165); // protocol violation
-	if (strpos ($outputlines[0], 'OK!') !== 0)
-		return oneLiner (164, array ($outputlines[0])); // gateway failure
 	// Being here means having 'OK!' in the response.
 	return oneLiner (66, array ($handlername)); // ignore provided "Ok" text
 }
@@ -314,7 +297,7 @@ function detectDeviceBreed ($object_id)
 function getRunning8021QConfig ($object_id)
 {
 	if ('' == $breed = detectDeviceBreed ($object_id))
-		throw new RuntimeException ('cannot pick handler for this device');
+		throw new Exception ('device breed unknown', E_GW_FAILURE);
 	$reader = array
 	(
 		'ios12' => 'ios12ReadVLANConfig',
@@ -326,21 +309,21 @@ function getRunning8021QConfig ($object_id)
 	// Once there is no default VLAN in the parsed data, it means
 	// something else was parsed instead of config text.
 	if (!in_array (VLAN_DFL_ID, $ret['vlanlist']))
-		throw new RuntimeException ('communication with device failed');
+		throw new Exception ('communication with device failed', E_GW_FAILURE);
 	return $ret;
 }
 
 function getRunningCDPStatus ($object_id)
 {
 	if ('' == $breed = detectDeviceBreed ($object_id))
-		throw new RuntimeException ('cannot pick handler for this device');
+		throw new Exception ('device breed unknown', E_GW_FAILURE);
 	return ios12ReadCDPStatus (dos2unix (gwRetrieveDeviceConfig ($object_id, $breed, 'getcdpstatus')));
 }
 
 function setDevice8021QConfig ($object_id, $pseudocode)
 {
 	if ('' == $breed = detectDeviceBreed ($object_id))
-		throw new RuntimeException ('cannot pick handler for this device');
+		throw new Exception ('device breed unknown', E_GW_FAILURE);
 	$xlator = array
 	(
 		'ios12' => 'ios12TranslatePushQueue',
@@ -356,9 +339,9 @@ function gwRetrieveDeviceConfig ($object_id, $breed, $command = 'retrieve')
 	$objectInfo = spotEntity ('object', $object_id);
 	$endpoints = findAllEndpoints ($object_id, $objectInfo['name']);
 	if (count ($endpoints) == 0)
-		throw new RuntimeException ('endpoint not found');
+		throw new Exception ('no management address set', E_GW_FAILURE);
 	if (count ($endpoints) > 1)
-		throw new RuntimeException ('cannot pick endpoint');
+		throw new Exception ('cannot pick management address', E_GW_FAILURE);
 	$endpoint = str_replace (' ', '\ ', str_replace (' ', '+', $endpoints[0]));
 	$tmpfilename = tempnam ('', 'RackTables-deviceconfig-');
 	$outputlines = queryGateway
@@ -368,12 +351,6 @@ function gwRetrieveDeviceConfig ($object_id, $breed, $command = 'retrieve')
 	);
 	$configtext = file_get_contents ($tmpfilename);
 	unlink ($tmpfilename);
-	if ($outputlines == NULL)
-		throw new RuntimeException ('unknown gateway failure');
-	if (count ($outputlines) != 1)
-		throw new RuntimeException ('gateway protocol violation');
-	if (strpos ($outputlines[0], 'OK!') !== 0)
-		throw new RuntimeException ("gateway failure: ${outputlines[0]}");
 	// Being here means it was alright.
 	return $configtext;
 }
@@ -383,25 +360,19 @@ function gwDeployDeviceConfig ($object_id, $breed, $text)
 	$objectInfo = spotEntity ('object', $object_id);
 	$endpoints = findAllEndpoints ($object_id, $objectInfo['name']);
 	if (count ($endpoints) == 0)
-		throw new RuntimeException ('endpoint not found');
+		throw new Exception ('no management address set', E_GW_FAILURE);
 	if (count ($endpoints) > 1)
-		throw new RuntimeException ('cannot pick endpoint');
+		throw new Exception ('cannot pick management address', E_GW_FAILURE);
 	$endpoint = str_replace (' ', '\ ', str_replace (' ', '+', $endpoints[0]));
 	$tmpfilename = tempnam ('', 'RackTables-deviceconfig-');
 	if (FALSE === file_put_contents ($tmpfilename, $text))
-		throw new RuntimeException ('failed to write to temporary file');
+		throw new Exception ('failed to write to temporary file', E_INTERNAL);
 	$outputlines = queryGateway
 	(
 		'deviceconfig',
 		array ("deploy ${endpoint} ${breed} ${tmpfilename}")
 	);
 	unlink ($tmpfilename);
-	if ($outputlines == NULL)
-		throw new RuntimeException ('unknown gateway failure');
-	if (count ($outputlines) != 1)
-		throw new RuntimeException ('gateway protocol violation');
-	if (strpos ($outputlines[0], 'OK!') !== 0)
-		throw new RuntimeException ("gateway failure: ${outputlines[0]}");
 }
 
 ?>
