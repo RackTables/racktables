@@ -71,7 +71,7 @@ function queryGateway ($gwname, $questions)
 	if (count ($answers) != count ($questions))
 		throw new Exception ('protocol violation', E_GW_FAILURE);
 	foreach ($answers as $a)
-		if (strpos (a, 'OK!') !== 0)
+		if (strpos ($a, 'OK!') !== 0)
 			throw new Exception ("subcommand failed with status: ${a}", E_GW_FAILURE);
 	return $answers;
 }
@@ -333,7 +333,7 @@ function setDevice8021QConfig ($object_id, $pseudocode)
 	gwDeployDeviceConfig ($object_id, $breed, unix2dos ($xlator[$breed] ($pseudocode)));
 }
 
-function gwRetrieveDeviceConfig ($object_id)
+function gwRetrieveDeviceConfig ($object_id, $command)
 {
 	global $gwrxlator;
 	if (!array_key_exists ($command, $gwrxlator))
