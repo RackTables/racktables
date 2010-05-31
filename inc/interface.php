@@ -6507,7 +6507,10 @@ function render8021QOrderForm ($some_id)
 			foreach (getNarrowObjectList ('VLANSWITCH_LISTSRC') as $object_id => $object_dname)
 				if (!in_array ($object_id, $all_vswitches))
 					$options[$object_id] = $object_dname;
-			printSelect ($options, array ('name' => 'object_id', 'tabindex' => 101, 'size' => getConfigVar ('MAXSELSIZE')));
+			if (count ($options))
+				printSelect ($options, array ('name' => 'object_id', 'tabindex' => 101, 'size' => getConfigVar ('MAXSELSIZE')));
+			else
+				echo '(none available)';
 			echo '</td>';
 		}
 		if ($pageno != 'vlandomain')
@@ -6515,14 +6518,24 @@ function render8021QOrderForm ($some_id)
 			$options = array();
 			foreach (getVLANDomainList() as $vdom_id => $vdom_info)
 				$options[$vdom_id] = $vdom_info['description'];
-			echo '<td>' . getSelect ($options, array ('name' => 'vdom_id', 'tabindex' => 102, 'size' => getConfigVar ('MAXSELSIZE')), getConfigVar ('DEFAULT_VDOM_ID')) . '</td>';
+			echo '<td>';
+			if (count ($options))
+				printSelect ($options, array ('name' => 'vdom_id', 'tabindex' => 102, 'size' => getConfigVar ('MAXSELSIZE')), getConfigVar ('DEFAULT_VDOM_ID'));
+			else
+				echo '(none available)';
+			echo '</td>';
 		}
 		if ($pageno != 'vst')
 		{
 			$options = array();
 			foreach (getVLANSwitchTemplates() as $vst_id => $vst_info)
 				$options[$vst_id] = $vst_info['description'];
-			echo '<td>' . getSelect ($options, array ('name' => 'vst_id', 'tabindex' => 103, 'size' => getConfigVar ('MAXSELSIZE')), getConfigVar ('DEFAULT_VST_ID')) . '</td>';
+			echo '<td>';
+			if (count ($options))
+				printSelect ($options, array ('name' => 'vst_id', 'tabindex' => 103, 'size' => getConfigVar ('MAXSELSIZE')), getConfigVar ('DEFAULT_VST_ID'));
+			else
+				echo '(none available)';
+			echo '</td>';
 		}
 		echo '<td>' . getImageHREF ('Attach', 'set', TRUE, 104) . '</td></tr></form>';
 	}
