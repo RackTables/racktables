@@ -326,6 +326,15 @@ $iftable_processors['quidway-21-to-24-comboSFP'] = array
 	'try_next_proc' => TRUE,
 );
 
+$iftable_processors['quidway-slot1-SFP'] = array
+(
+	'pattern' => '@^GigabitEthernet0/1/([[:digit:]]+)$@',
+	'replacement' => 'gi0/1/\\1',
+	'dict_key' => '4-1077',
+	'label' => 'SFP\\1',
+	'try_next_proc' => FALSE,
+);
+
 $iftable_processors['quidway-any-1000SFP'] = array
 (
 	'pattern' => '@^GigabitEthernet([[:digit:]]+/[[:digit:]]+/)([[:digit:]]+)$@',
@@ -680,6 +689,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'S5328C-EI-24S: 20 SFP-1000 + 4 combo-gig + 2 XFP slots',
 		'processors' => array ('quidway-21-to-24-comboT', 'quidway-any-1000SFP', 'quidway-XFP', 'quidway-mgmt'),
 	),
+	'2011.2.23.103' => array
+	(
+		'dict_key' => 1341,
+		'text' => 'S5352C-SI: 48 RJ-45/10-100-1000T(X) + optional 2xXFP/4xSFP slots',
+		'processors' => array ('quidway-slot1-SFP', 'quidway-any-1000T', 'quidway-XFP', 'quidway-mgmt'),
+	),
 	'2011.2.23.102' => array
 	(
 		'dict_key' => 1339,
@@ -840,7 +855,7 @@ function doSwitchSNMPmining ($objectInfo, $hostname, $community)
 		break;
 	case preg_match ('/^2011\.2\.23\./', $sysObjectID): // Huawei
 		checkPIC ('1-681');
-		commitAddPort ($objectInfo['id'], 'console', '1-681', 'console', ''); // DB-9 RS-232 console
+		commitAddPort ($objectInfo['id'], 'con0', '1-681', 'console', ''); // DB-9 RS-232 console
 		$log = mergeLogs ($log, oneLiner (81, array ('huawei-generic')));
 		break;
 	case preg_match ('/^2636\.1\.1\.1\.2\./', $sysObjectID): // Juniper
