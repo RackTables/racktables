@@ -46,7 +46,7 @@ SESSION=`mktemp /tmp/fdry5.connector.XXXX`
 [ -f "$SESSION" ] || exit 5
 prepare_connect_commands $ENDPOINT
 case $COMMAND in
-retrieve)
+get8021q)
 	printf 'skip-page-display\r\nshow running-config\r\n' >> "$SESSION"
 	outfile="$WORKFILE"
 	;;

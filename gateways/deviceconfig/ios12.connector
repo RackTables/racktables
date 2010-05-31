@@ -47,7 +47,7 @@ SESSION=`mktemp /tmp/ios12.connector.XXXX`
 [ -f "$SESSION" ] || exit 5
 prepare_connect_commands $ENDPOINT
 case $COMMAND in
-retrieve)
+get8021q)
 	printf 'term len 0\nshow run\n! END OF CONFIG\nshow vlan brief\n! END OF VLAN LIST\n' >> "$SESSION"
 	outfile="$WORKFILE"
 	;;

@@ -16,7 +16,7 @@
 // translating functions maps
 $gwrxlator = array();
 $gwrxlator['getcdpstatus']['ios12'] = 'ios12ReadCDPStatus';
-$gwrxlator['retrieve'] = array
+$gwrxlator['get8021q'] = array
 (
 	'ios12' => 'ios12ReadVLANConfig',
 	'fdry5' => 'fdry5ReadVLANConfig',
@@ -306,7 +306,7 @@ function detectDeviceBreed ($object_id)
 
 function getRunning8021QConfig ($object_id)
 {
-	$ret = gwRetrieveDeviceConfig ($object_id, 'retrieve');
+	$ret = gwRetrieveDeviceConfig ($object_id, 'get8021q');
 	// Once there is no default VLAN in the parsed data, it means
 	// something else was parsed instead of config text.
 	if (!in_array (VLAN_DFL_ID, $ret['vlanlist']))
@@ -333,7 +333,7 @@ function setDevice8021QConfig ($object_id, $pseudocode)
 	gwDeployDeviceConfig ($object_id, $breed, unix2dos ($xlator[$breed] ($pseudocode)));
 }
 
-function gwRetrieveDeviceConfig ($object_id, $command = 'retrieve')
+function gwRetrieveDeviceConfig ($object_id)
 {
 	global $gwrxlator;
 	if (!array_key_exists ($command, $gwrxlator))

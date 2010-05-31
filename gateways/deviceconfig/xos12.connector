@@ -44,7 +44,7 @@ SESSION=`mktemp /tmp/$MYNAME.XXXX`
 [ -f "$SESSION" ] || exit 5
 prepare_connect_commands $ENDPOINT
 case $COMMAND in
-retrieve)
+get8021q)
 	printf 'disable clipaging\nshow configuration "vlan"\n' >> "$SESSION"
 	outfile="$WORKFILE"
 	;;

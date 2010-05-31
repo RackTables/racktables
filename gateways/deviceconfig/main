@@ -4,8 +4,11 @@
 # equivalent) and prints it onto stdout. When run, it accepts the
 # following commands on stdin:
 #
-# * retrieve <endpoint> <handler> <outputfile>
+# * get8021q <endpoint> <handler> <outputfile>
 #   (save remote config text into provided local file)
+#
+# * getcdpstatus <endpoint> <handler> <outputfile>
+#   (save remote status text into provided local file)
 #
 # * deploy <endpoint> <handler> <inputfile>
 #   (execute given text in privileged mode)
@@ -77,7 +80,7 @@ do_work()
 
 while read cmd args; do
 	case $cmd in
-		retrieve|deploy|getcdpstatus)
+		get8021q|deploy|getcdpstatus)
 			do_work $cmd $args
 			;;
 		*)

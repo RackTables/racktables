@@ -47,7 +47,7 @@ $session->login($username, $password);
 if ($enable_password ne "-") {
     $session->enable($enable_password);
 }
-if ($command eq "retrieve") {
+if ($command eq "get8021q") {
     open(WORKFILE, ">$workfile") || die "$workfile: $!";
     $session->cmd ('terminal length 0');
     $session->cmd ('terminal no monitor');

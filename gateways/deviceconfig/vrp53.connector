@@ -47,7 +47,7 @@ SESSION=`mktemp /tmp/$MYNAME.XXXX`
 [ -f "$SESSION" ] || exit 5
 prepare_connect_commands $ENDPOINT
 case $COMMAND in
-retrieve)
+get8021q)
 	printf 'display current-configuration\n' >> "$SESSION"
 	outfile="$WORKFILE"
 	;;
