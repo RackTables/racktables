@@ -24,7 +24,7 @@ function authenticate ()
 		throw new RuntimeException('secret.php misconfiguration: either user_auth_src or require_local_account are missing');
 	}
 	if (isset ($_REQUEST['logout']))
-		dieWith401(); // Reset browser credentials cache.
+		throw new Exception ('', E_NOT_AUTHENTICATED); // Reset browser credentials cache.
 	switch ($user_auth_src)
 	{
 		case 'database':
@@ -36,7 +36,7 @@ function authenticate ()
 				!isset ($_SERVER['PHP_AUTH_PW']) or
 				!strlen ($_SERVER['PHP_AUTH_PW'])
 			)
-				dieWith401();
+				throw new Exception ('', E_NOT_AUTHENTICATED);
 			$remote_username = $_SERVER['PHP_AUTH_USER'];
 			break;
 		case 'httpd':
@@ -56,7 +56,7 @@ function authenticate ()
 	}
 	$userinfo = constructUserCell ($remote_username);
 	if ($require_local_account and !isset ($userinfo['user_id']))
-		dieWith401();
+		throw new Exception ('', E_NOT_AUTHENTICATED);
 	$user_given_tags = $userinfo['etags'];
 	$auto_tags = array_merge ($auto_tags, $userinfo['atags']);
 	switch (TRUE)
@@ -88,13 +88,7 @@ function authenticate ()
 			throw new RuntimeException('Invalid authentication source!');
 			die;
 	}
-	dieWith401();
-}
-
-function dieWith401 ()
-{
-	header ('WWW-Authenticate: Basic realm="' . getConfigVar ('enterprise') . ' RackTables access"');
-	throw new NotAuthorizedException('This system requires authentication. You should use a username and a password.');
+	throw new Exception ('', E_NOT_AUTHENTICATED);
 }
 
 // Merge accumulated tags into a single chain, add location-specific

@@ -2934,14 +2934,9 @@ function renderSearchResults ()
 {
 	$terms = trim ($_REQUEST['q']);
 	if (!strlen ($terms))
-	{
 		throw new InvalidRequestArgException('q', $_REQUEST['q'], 'Search string cannot be empty.');
-		return;
-	}
 	if (!permitted ('depot', 'default'))
-	{
-		throw new NotAuthorizedException('You are not authorized for viewing information about objects.');
-	}
+		throw new Exception ('You are not authorized for viewing information about objects.', E_NOT_AUTHORIZED);
 	$nhits = 0;
 	if (preg_match (RE_IP4_ADDR, $terms))
 	// Search for IPv4 address.

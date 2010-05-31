@@ -1,9 +1,5 @@
 <?php
 
-class NotAuthorizedException extends RuntimeException {
-
-}
-
 class EntityNotFoundException extends Exception {
 	private $entity;
 	private $id;
@@ -148,19 +144,6 @@ function print404($e)
 
 }
 
-function printNotAuthorizedException($e)
-{
-	header("HTTP/1.1 401 Unauthorized");
-	header ('Content-Type: text/html; charset=UTF-8');
-	echo '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">'."\n";
-	echo '<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">'."\n";
-	echo "<head><title> Unauthorized </title>\n";
-	printPageHeaders();
-	echo '</head> <body>';
-	echo '<h2>'.$e->getMessage().'</h2>';
-	echo '</body></html>';
-}
-
 function printPDOException($e)
 {
 	header("HTTP/1.1 500 Internal Server Error");
@@ -216,10 +199,23 @@ function printGenericException($e)
 
 function printException($e)
 {
+	if (get_class ($e) == 'Exception')
+		switch ($e->getCode())
+		{
+		case E_NOT_AUTHENTICATED:
+			header ('WWW-Authenticate: Basic realm="' . getConfigVar ('enterprise') . ' RackTables access"');
+			header ("HTTP/1.1 401 Unauthorized");
+			header ('Content-Type: text/html; charset=UTF-8');
+			echo '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">'."\n";
+			echo '<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">'."\n";
+			echo "<head><title>Not authenticated</title>\n";
+			printPageHeaders();
+			echo '</head><body><h2>This system requires authentication. You should use a username and a password.</h2></body></html>';
+			return;
+		default:
+		}
 	if (get_class($e) == 'EntityNotFoundException')
 		print404($e);
-	elseif (get_class($e) == 'NotAuthorizedException')
-		printNotAuthorizedException($e);
 	elseif (get_class($e) == 'PDOException')
 		printPDOException($e);
 	else
