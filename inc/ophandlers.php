@@ -1680,12 +1680,24 @@ function setPortVLAN ()
 	return buildWideRedirectURL ($log);
 }
 
+$msgcode['submitSLBConfig']['OK'] = 66;
+$msgcode['submitSLBConfig']['ERR'] = 164;
 function submitSLBConfig ()
 {
 	assertUIntArg ('object_id');
 	$newconfig = buildLVSConfig ($_REQUEST['object_id']);
-	$msglog = gwSendFileToObject ($_REQUEST['object_id'], 'slbconfig', html_entity_decode ($newconfig, ENT_QUOTES, 'UTF-8'));
-	return buildWideRedirectURL ($msglog);
+	try
+	{
+		gwSendFileToObject ($_REQUEST['object_id'], 'slbconfig', html_entity_decode ($newconfig, ENT_QUOTES, 'UTF-8'));
+	}
+	catch (Exception $e)
+	{
+		if ($e->getCode() == E_GW_FAILURE)
+			return buildRedirectURL (__FUNCTION__, 'ERR', array ($e->getMessage()));
+		else
+			throw $e;
+	}
+	return buildRedirectURL (__FUNCTION__, 'OK', array ('slbconfig'));
 }
 
 $msgcode['addRow']['OK'] = 74;

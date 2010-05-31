@@ -240,17 +240,13 @@ function gwRecvFile ($endpoint, $handlername, &$output)
 
 function gwSendFileToObject ($object_id = 0, $handlername, $filetext = '')
 {
-	global $remote_username;
-	if ($object_id <= 0 or !strlen ($handlername))
-		return oneLiner (160); // invalid arguments
 	$objectInfo = spotEntity ('object', $object_id);
 	$endpoints = findAllEndpoints ($object_id, $objectInfo['name']);
 	if (count ($endpoints) == 0)
-		return oneLiner (161); // endpoint not found
+		throw new Exception ('no management address set', E_GW_FAILURE);
 	if (count ($endpoints) > 1)
-		return oneLiner (162); // can't pick an address
-	$endpoint = str_replace (' ', '+', $endpoints[0]);
-	return gwSendFile ($endpoint, $handlername, array ($filetext));
+		throw new Exception ('cannot pick management address', E_GW_FAILURE);
+	return gwSendFile (str_replace (' ', '+', $endpoints[0]), $handlername, array ($filetext));
 }
 
 function gwRecvFileFromObject ($object_id = 0, $handlername, &$output)
