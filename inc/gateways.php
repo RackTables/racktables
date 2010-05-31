@@ -13,6 +13,16 @@
 *
 */
 
+// translating functions maps
+$gwrxlator = array();
+$gwrxlator['getcdpstatus']['ios12'] = 'ios12ReadCDPStatus';
+$gwrxlator['retrieve'] = array
+(
+	'ios12' => 'ios12ReadVLANConfig',
+	'fdry5' => 'fdry5ReadVLANConfig',
+	'vrp53' => 'vrp53ReadVLANConfig',
+	'nxos4' => 'nxos4Read8021QConfig',
+);
 
 // This function launches specified gateway with specified
 // command-line arguments and feeds it with the commands stored
@@ -296,16 +306,7 @@ function detectDeviceBreed ($object_id)
 
 function getRunning8021QConfig ($object_id)
 {
-	if ('' == $breed = detectDeviceBreed ($object_id))
-		throw new Exception ('device breed unknown', E_GW_FAILURE);
-	$reader = array
-	(
-		'ios12' => 'ios12ReadVLANConfig',
-		'fdry5' => 'fdry5ReadVLANConfig',
-		'vrp53' => 'vrp53ReadVLANConfig',
-		'nxos4' => 'nxos4Read8021QConfig',
-	);
-	$ret = $reader[$breed] (dos2unix (gwRetrieveDeviceConfig ($object_id, $breed, 'retrieve')));
+	$ret = gwRetrieveDeviceConfig ($object_id, 'retrieve');
 	// Once there is no default VLAN in the parsed data, it means
 	// something else was parsed instead of config text.
 	if (!in_array (VLAN_DFL_ID, $ret['vlanlist']))
@@ -315,9 +316,7 @@ function getRunning8021QConfig ($object_id)
 
 function getRunningCDPStatus ($object_id)
 {
-	if ('' == $breed = detectDeviceBreed ($object_id))
-		throw new Exception ('device breed unknown', E_GW_FAILURE);
-	return ios12ReadCDPStatus (dos2unix (gwRetrieveDeviceConfig ($object_id, $breed, 'getcdpstatus')));
+	return gwRetrieveDeviceConfig ($object_id, 'getcdpstatus');
 }
 
 function setDevice8021QConfig ($object_id, $pseudocode)
@@ -334,8 +333,14 @@ function setDevice8021QConfig ($object_id, $pseudocode)
 	gwDeployDeviceConfig ($object_id, $breed, unix2dos ($xlator[$breed] ($pseudocode)));
 }
 
-function gwRetrieveDeviceConfig ($object_id, $breed, $command = 'retrieve')
+function gwRetrieveDeviceConfig ($object_id, $command = 'retrieve')
 {
+	global $gwrxlator;
+	if (!array_key_exists ($command, $gwrxlator))
+		throw new Exception ('command unknown', E_GW_FAILURE);
+	$breed = detectDeviceBreed ($object_id);
+	if (!array_key_exists ($breed, $gwrxlator[$command]))
+		throw new Exception ('device breed unknown', E_GW_FAILURE);
 	$objectInfo = spotEntity ('object', $object_id);
 	$endpoints = findAllEndpoints ($object_id, $objectInfo['name']);
 	if (count ($endpoints) == 0)
@@ -349,10 +354,10 @@ function gwRetrieveDeviceConfig ($object_id, $breed, $command = 'retrieve')
 		'deviceconfig',
 		array ("${command} ${endpoint} ${breed} ${tmpfilename}")
 	);
-	$configtext = file_get_contents ($tmpfilename);
+	$configtext = dos2unix (file_get_contents ($tmpfilename));
 	unlink ($tmpfilename);
 	// Being here means it was alright.
-	return $configtext;
+	return $gwrxlator[$command][$breed] ($configtext);
 }
 
 function gwDeployDeviceConfig ($object_id, $breed, $text)
