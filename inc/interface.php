@@ -337,30 +337,25 @@ function renderIndexItem ($ypageno) {
 
 function renderIndex ()
 {
+	global $indexlayout;
 ?>
 <table border=0 cellpadding=0 cellspacing=0 width='100%'>
 	<tr>
 		<td>
 			<div style='text-align: center; margin: 10px; '>
 			<table width='100%' cellspacing=0 cellpadding=20 class=mainmenu border=0>
-				<tr>
 <?php
-renderIndexItem('rackspace');
-renderIndexItem('depot');
-renderIndexItem('ipv4space');
-renderIndexItem('files');
-renderIndexItem('8021q');
-?>          
-				</tr>
-				<tr>
-<?php
-renderIndexItem('config');
-renderIndexItem('reports');
-renderIndexItem('ipv4slb');
-print "          <td>&nbsp;</td>";
-print "          <td>&nbsp;</td>";
-?>          
-				</tr>
+foreach ($indexlayout as $row)
+{
+	echo '<tr>';
+	foreach ($row as $column)
+		if ($column === NULL)
+			echo '<td>&nbsp;</td>';
+		else
+			renderIndexItem ($column);
+	echo '</tr>';
+}
+?>
 			</table>
 			</div>
 		</td>

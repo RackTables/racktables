@@ -12,6 +12,12 @@ $ophandler = array();
 $tabhandler = array();
 $delayauth = array();
 
+$indexlayout = array
+(
+	array ('rackspace', 'depot', 'ipv4space', 'files', '8021q'),
+	array ('config', 'reports', 'ipv4slb', NULL, NULL),
+);
+
 $page['index']['title'] = 'Main page';
 $page['index']['handler'] = 'renderIndex';
 
