@@ -3,6 +3,7 @@
 	update: switch from deprecated ereg extension to PCRE (#262)
 	update: don't use deprecated magic_quoes extension (#315)
 	update: switch more tables to InnoDB engine
+	update: removed dependency on SPL extension, which 0.18.0 had introduced
 0.18.0 2010-05-27
 	new feature: Live CDP (#58)
 	new feature: 802.1Q management (#182, original idea by Justin Ellison)
