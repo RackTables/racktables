@@ -7308,7 +7308,7 @@ function renderObject8021QSync ($object_id)
 	{
 		$R = getRunning8021QConfig ($object_id);
 	}
-	catch (RuntimeException $re)
+	catch (Exception $re)
 	{
 		showWarning ('Device configuration unavailable:<br>' . $re->getMessage(), __FUNCTION__);
 		return;
