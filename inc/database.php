@@ -3577,7 +3577,7 @@ function getPortInfo ($port_id)
 	return $result->fetch (PDO::FETCH_ASSOC);
 }
 
-function getVLANDomainList ()
+function getVLANDomainStats ()
 {
 	$query = 'SELECT id, description, ' .
 		'(SELECT COUNT(vlan_id) FROM VLANDescription WHERE domain_id = id) AS vlanc, ' .

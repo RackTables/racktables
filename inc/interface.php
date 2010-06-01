@@ -6604,7 +6604,7 @@ function render8021QStatus ()
 	global $dqtitle;
 	echo '<table border=0 class=objectview cellspacing=0 cellpadding=0>';
 	echo '<tr valign=top><td class=pcleft width="40%">';
-	if (!count ($vdlist = getVLANDomainList()))
+	if (!count ($vdlist = getVLANDomainStats()))
 		startPortlet ('no VLAN domains');
 	else
 	{
@@ -6616,7 +6616,7 @@ function render8021QStatus ()
 		$columns = array ('vlanc', 'switchc', 'ipv4netc', 'portc');
 		foreach ($columns as $cname)
 			$stats[$cname] = 0;
-		foreach (getVLANDomainList() as $vdom_id => $dominfo)
+		foreach ($vdlist as $vdom_id => $dominfo)
 		{
 			foreach ($columns as $cname)
 				$stats[$cname] += $dominfo[$cname];
@@ -6690,7 +6690,7 @@ function renderVLANDomainListEditor ()
 	echo '<tr><th>&nbsp;</th><th>description</th><th>&nbsp</th></tr>';
 	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
 		printNewItemTR();
-	foreach (getVLANDomainList() as $vdom_id => $dominfo)
+	foreach (getVLANDomainStats() as $vdom_id => $dominfo)
 	{
 		printOpFormIntro ('upd', array ('vdom_id' => $vdom_id));
 		echo '<tr><td>';
@@ -7250,7 +7250,7 @@ function renderVLANIPv4 ($some_id)
 				'vlan_id' => $item['vlan_id'],
 			);
 		// offer all other
-		foreach (getVLANDomainList() as $dominfo)
+		foreach (getVLANDomainStats() as $dominfo)
 			if (NULL === scanArrayForItem ($minuslines, 'domain_id', $dominfo['id']))
 				foreach (getDomainVLANs ($dominfo['id']) as $vlaninfo)
 					$plusoptions[$dominfo['description']][$dominfo['id']. '-' . $vlaninfo['vlan_id']] =
