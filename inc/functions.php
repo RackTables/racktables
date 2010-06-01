@@ -3279,7 +3279,7 @@ function authorize8021QChangeRequests ($before, $changes)
 			$annex[] = array ('tag' => '$tovlan_' . $added_id);
 		foreach (array_diff ($before[$pn]['allowed'], $change['allowed']) as $removed_id)
 			$annex[] = array ('tag' => '$fromvlan_' . $removed_id);
-		if (permitted (NULL, NULL, NULL, $annex))
+		if (!count ($annex) or permitted (NULL, NULL, NULL, $annex))
 			$ret[$pn] = $change;
 	}
 	return $ret;
