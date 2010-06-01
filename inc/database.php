@@ -3601,17 +3601,15 @@ function getVLANDomainOptions()
 	return $ret;
 }
 
-function getVLANDomainInfo ($vdom_id)
+function getVLANDomain ($vdid)
 {
-	global $dbxlink;
-	$query = $dbxlink->prepare ('SELECT id, description FROM VLANDomain WHERE id = ?');
-	$result = $query->execute (array ($vdom_id));
-	if ($row = $query->fetch (PDO::FETCH_ASSOC))
-	{
-		$ret = $row;
-		return $ret;
-	}
-	return NULL;
+	$result = usePreparedSelectBlade ('SELECT id, description FROM VLANDomain WHERE id = ?', array ($vdid));
+	if (!$ret = $result->fetch (PDO::FETCH_ASSOC))
+		throw new EntityNotFoundException ('VLAN domain', $vdid);
+	unset ($result);
+	$ret['vlanlist'] = getDomainVLANs ($vdid);
+	$ret['switchlist'] = getVLANDomainSwitches ($vdid);
+	return $ret;
 }
 
 function getDomainVLANs ($vdom_id)

@@ -2254,16 +2254,6 @@ function getNewPortTypeOptions()
 	return $ret;
 }
 
-function getVLANDomain ($vdid)
-{
-	$ret = getVLANDomainInfo ($vdid);
-	$ret['vlanlist'] = array();
-	foreach (getDomainVLANs ($vdid) as $vlan_id => $vlan_descr)
-		$ret['vlanlist'][$vlan_id] = $vlan_descr;
-	$ret['switchlist'] = getVLANDomainSwitches ($vdid);
-	return $ret;
-}
-
 // Return a serialized version of VLAN configuration for a port.
 // If a native VLAN is defined, print it first. All other VLANs
 // are tagged and are listed after a plus sign. When no configuration
