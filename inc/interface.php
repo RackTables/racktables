@@ -2060,7 +2060,7 @@ function renderIPv4SpaceRecords ($tree, $baseurl, $target = 0, $level = 1)
 	$self = __FUNCTION__;
 	static $vdomlist = NULL;
 	if ($vdomlist == NULL and getConfigVar ('IPV4_TREE_SHOW_VLAN') == 'yes')
-		$vdomlist = getVLANDomainList();
+		$vdomlist = getVLANDomainOptions();
 	foreach ($tree as $item)
 	{
 		if (getConfigVar ('IPV4_TREE_SHOW_USAGE') == 'yes')
@@ -2103,7 +2103,8 @@ function renderIPv4SpaceRecords ($tree, $baseurl, $target = 0, $level = 1)
 					foreach ($item['8021q'] as $binding)
 					{
 						echo '<li><a href="' . makeHref (array ('page' => 'vlan', 'vlan_ck' => $binding['domain_id'] . '-' . $binding['vlan_id'])) . '">';
-						echo $binding['vlan_id'] . '@' . niftyString ($vdomlist[$binding['domain_id']]['description'], 15) . '</a></li>';
+						// FIXME: would formatVLANName() do this?
+						echo $binding['vlan_id'] . '@' . niftyString ($vdomlist[$binding['domain_id']], 15) . '</a></li>';
 					}
 					echo '</ul>';
 				}
@@ -6353,10 +6354,12 @@ function dynamic_title_decoder ($path_position)
 			);
 			
 		}
-		$dominfo = getVLANDomainInfo ($vdom_id);
+		$vdlist = getVLANDomainOptions();
+		if (!array_key_exists ($vdom_id, $vdlist))
+			throw new EntityNotFoundException ('VLAN domain', $vdom_id);
 		return array
 		(
-			'name' => niftyString ("domain '${dominfo['description']}'"),
+			'name' => niftyString ("domain '" . $vdlist[$vdom_id] . "'"),
 			'params' => array ('vdom_id' => $vdom_id)
 		);
 	case 'vlan':
@@ -6508,14 +6511,7 @@ function render8021QOrderForm ($some_id)
 			echo '</td>';
 		}
 		if ($pageno != 'vlandomain')
-		{
-			$options = array();
-			foreach (getVLANDomainList() as $vdom_id => $vdom_info)
-				$options[$vdom_id] = $vdom_info['description'];
-			echo '<td>';
-			printSelect ($options, array ('name' => 'vdom_id', 'tabindex' => 102, 'size' => getConfigVar ('MAXSELSIZE')), getConfigVar ('DEFAULT_VDOM_ID'));
-			echo '</td>';
-		}
+			echo '<td>' . getSelect (getVLANDomainOptions(), array ('name' => 'vdom_id', 'tabindex' => 102, 'size' => getConfigVar ('MAXSELSIZE')), getConfigVar ('DEFAULT_VDOM_ID')) . '</td>';
 		if ($pageno != 'vst')
 			echo '<td>' . getSelect (getVSTOptions(), array ('name' => 'vst_id', 'tabindex' => 103, 'size' => getConfigVar ('MAXSELSIZE')), getConfigVar ('DEFAULT_VST_ID')) . '</td>';
 		echo '<td>' . getImageHREF ('Attach', 'set', TRUE, 104) . '</td></tr></form>';
@@ -6569,7 +6565,7 @@ function render8021QOrderForm ($some_id)
 		($pageno != 'object' or !count ($minuslines))
 	)
 		printNewItemTR();
-	$vdomlist = getVLANDomainList();
+	$vdomlist = getVLANDomainOptions();
 	$vstlist = getVSTOptions();
 	foreach ($minuslines as $item_object_id => $item)
 	{
@@ -6580,7 +6576,7 @@ function render8021QOrderForm ($some_id)
 			echo "<td>${object['dname']}</td>";
 		}
 		if ($pageno != 'vlandomain')
-			echo '<td>' . $vdomlist[$item['vdom_id']]['description'] . '</td>';
+			echo '<td>' . $vdomlist[$item['vdom_id']] . '</td>';
 		if ($pageno != 'vst')
 			echo '<td>' . $vstlist[$item['vst_id']] . '</td>';
 		echo '<td><a href="' . makeHrefProcess (array

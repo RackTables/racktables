@@ -3592,6 +3592,15 @@ function getVLANDomainList ()
 	return $ret;
 }
 
+function getVLANDomainOptions()
+{
+	$result = useSelectBlade ('SELECT id, description FROM VLANDomain ORDER BY description');
+	$ret = array();
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
+		$ret[$row['id']] = $row['description'];
+	return $ret;
+}
+
 function getVLANDomainInfo ($vdom_id)
 {
 	global $dbxlink;
