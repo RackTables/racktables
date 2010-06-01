@@ -744,7 +744,7 @@ function getSelect ($optionList, $select_attrs = array(), $selected_id = NULL)
 		return '';
 	// handle two corner cases in a specific way
 	if (count ($optionList) == 0)
-		return '';
+		return '(none)';
 	if (count ($optionList) == 1)
 	{
 		$value = current (array_keys ($optionList));
@@ -6366,11 +6366,13 @@ function dynamic_title_decoder ($path_position)
 			'params' => array ('vlan_ck' => $sic['vlan_ck'])
 		);
 	case 'vst':
-		$vst = getVLANSwitchTemplate ($sic['vst_id']);
+		$vstlist = getVSTOptions();
+		if (!array_key_exists ($sic['vst_id'], $vstlist))
+			throw new EntityNotFoundException ('VST', $sic['vst_id']);
 		return array
 		(
-			'name' => niftyString ("template '${vst['description']}'", 50),
-			'params' => array ('vst_id' => $vst['id'])
+			'name' => niftyString ("template '" . $vstlist[$sic['vst_id']] . "'", 50),
+			'params' => array ('vst_id' => $sic['vst_id'])
 		);
 	case 'dqueue':
 		global $dqtitle;
@@ -6502,10 +6504,7 @@ function render8021QOrderForm ($some_id)
 			foreach (getNarrowObjectList ('VLANSWITCH_LISTSRC') as $object_id => $object_dname)
 				if (!in_array ($object_id, $all_vswitches))
 					$options[$object_id] = $object_dname;
-			if (count ($options))
-				printSelect ($options, array ('name' => 'object_id', 'tabindex' => 101, 'size' => getConfigVar ('MAXSELSIZE')));
-			else
-				echo '(none available)';
+			printSelect ($options, array ('name' => 'object_id', 'tabindex' => 101, 'size' => getConfigVar ('MAXSELSIZE')));
 			echo '</td>';
 		}
 		if ($pageno != 'vlandomain')
@@ -6514,24 +6513,11 @@ function render8021QOrderForm ($some_id)
 			foreach (getVLANDomainList() as $vdom_id => $vdom_info)
 				$options[$vdom_id] = $vdom_info['description'];
 			echo '<td>';
-			if (count ($options))
-				printSelect ($options, array ('name' => 'vdom_id', 'tabindex' => 102, 'size' => getConfigVar ('MAXSELSIZE')), getConfigVar ('DEFAULT_VDOM_ID'));
-			else
-				echo '(none available)';
+			printSelect ($options, array ('name' => 'vdom_id', 'tabindex' => 102, 'size' => getConfigVar ('MAXSELSIZE')), getConfigVar ('DEFAULT_VDOM_ID'));
 			echo '</td>';
 		}
 		if ($pageno != 'vst')
-		{
-			$options = array();
-			foreach (getVLANSwitchTemplates() as $vst_id => $vst_info)
-				$options[$vst_id] = $vst_info['description'];
-			echo '<td>';
-			if (count ($options))
-				printSelect ($options, array ('name' => 'vst_id', 'tabindex' => 103, 'size' => getConfigVar ('MAXSELSIZE')), getConfigVar ('DEFAULT_VST_ID'));
-			else
-				echo '(none available)';
-			echo '</td>';
-		}
+			echo '<td>' . getSelect (getVSTOptions(), array ('name' => 'vst_id', 'tabindex' => 103, 'size' => getConfigVar ('MAXSELSIZE')), getConfigVar ('DEFAULT_VST_ID')) . '</td>';
 		echo '<td>' . getImageHREF ('Attach', 'set', TRUE, 104) . '</td></tr></form>';
 	}
 	global $pageno;
@@ -6584,7 +6570,7 @@ function render8021QOrderForm ($some_id)
 	)
 		printNewItemTR();
 	$vdomlist = getVLANDomainList();
-	$vstlist = getVLANSwitchTemplates();
+	$vstlist = getVSTOptions();
 	foreach ($minuslines as $item_object_id => $item)
 	{
 		echo '<tr>';
@@ -6596,7 +6582,7 @@ function render8021QOrderForm ($some_id)
 		if ($pageno != 'vlandomain')
 			echo '<td>' . $vdomlist[$item['vdom_id']]['description'] . '</td>';
 		if ($pageno != 'vst')
-			echo '<td>' . $vstlist[$item['vst_id']]['description'] . '</td>';
+			echo '<td>' . $vstlist[$item['vst_id']] . '</td>';
 		echo '<td><a href="' . makeHrefProcess (array
 		(
 			'op' => 'del',
@@ -6658,14 +6644,14 @@ function render8021QStatus ()
 
 	echo '</td><td class=pcleft width="40%">';
 
-	if (!count ($vstlist = getVLANSwitchTemplates()))
+	if (!count ($vstlist = getVSTStats()))
 		startPortlet ('no switch templates');
 	else
 	{
 		startPortlet ('switch templates (' . count ($vstlist) . ')');
 		echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
 		echo '<tr><th>description</th><th>rules</th><th>switches</th></tr>';
-		foreach (getVLANSwitchTemplates() as $vst_id => $vst_info)
+		foreach ($vstlist as $vst_id => $vst_info)
 		{
 			echo "<tr align=left><td><a href='";
 			echo makeHref (array ('page' => 'vst', 'vst_id' => $vst_id)) . "'>";
@@ -6748,14 +6734,14 @@ function renderVLANDomain ($vdom_id)
 		echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
 		echo '<tr><th>switch</th><th>template</th><th>status</th></tr>';
 		$order = 'odd';
-		$vstlist = getVLANSwitchTemplates();
+		$vstlist = getVSTOptions();
 		global $dqtitle;
 		foreach ($mydomain['switchlist'] as $switchinfo)
 		{
 			echo "<tr class=row_${order}><td>";
 			renderCell (spotEntity ('object', $switchinfo['object_id']));
 			echo '</td><td class=tdleft>';
-			echo $vstlist[$switchinfo['template_id']]['description'];
+			echo $vstlist[$switchinfo['template_id']];
 			echo '</td><td>';
 			$qcode = detectVLANSwitchQueue (getVLANSwitchInfo ($switchinfo['object_id']));
 			printImageHREF ("DQUEUE ${qcode}", $dqtitle[$qcode]);
@@ -7574,7 +7560,7 @@ function renderVSTListEditor()
 	echo '<tr><th>&nbsp;</th><th>description</th><th>&nbsp</th></tr>';
 	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
 		printNewItemTR();
-	foreach (getVLANSwitchTemplates() as $vst_id => $vst_info)
+	foreach (getVSTOptions() as $vst_id => $vst_description)
 	{
 		printOpFormIntro ('upd', array ('vst_id' => $vst_id));
 		echo '<tr><td>';
@@ -7586,7 +7572,7 @@ function renderVSTListEditor()
 			echo getImageHREF ('destroy', 'delete template') . '</a>';
 		}
 		echo '</td>';
-		echo '<td><input name=vst_descr type=text value="' . niftyString ($vst_info['description'], 0) . '"></td>';
+		echo '<td><input name=vst_descr type=text value="' . niftyString ($vst_description, 0) . '"></td>';
 		echo '<td>' . getImageHREF ('save', 'update template', TRUE) . '</td>';
 		echo '</tr></form>';
 	}

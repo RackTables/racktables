@@ -3903,7 +3903,7 @@ function replace8021QPorts ($instance = 'desired', $object_id, $before, $changes
 	return $done;
 }
 
-function getVLANSwitchTemplates()
+function getVSTStats()
 {
 	$query = 'SELECT id, max_local_vlans, description, ' .
 		'(SELECT COUNT(object_id) FROM VLANSwitch WHERE template_id = id) AS switchc, ' .
@@ -3913,6 +3913,15 @@ function getVLANSwitchTemplates()
 	$ret = array();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 		$ret[$row['id']] = $row;
+	return $ret;
+}
+
+function getVSTOptions()
+{
+	$result = useSelectBlade ('SELECT id, description FROM VLANSwitchTemplate ORDER BY description');
+	$ret = array();
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
+		$ret[$row['id']] = $row['description'];
 	return $ret;
 }
 
