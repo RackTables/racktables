@@ -3878,6 +3878,9 @@ function upd8021QPort ($instance = 'desired', $object_id, $port_name, $port)
 	$prepared->execute (array ($port['mode'], $object_id, $port_name));
 	if (FALSE === usePreparedDeleteBlade ($tablemap_8021q[$instance]['pav'], array ('object_id' => $object_id, 'port_name' => $port_name)))
 		throw new Exception ('', E_DB_WRITE_FAILED);
+	// FIXME: The goal is to INSERT as many rows as there are values in 'allowed' list
+	// without wrapping each row with own INSERT (otherwise the SQL connection
+	// instantly becomes the bottleneck).
 	foreach ($port['allowed'] as $vlan_id)
 		if (!usePreparedInsertBlade ($tablemap_8021q[$instance]['pav'], array ('object_id' => $object_id, 'port_name' => $port_name, 'vlan_id' => $vlan_id)))
 			throw new Exception ('', E_DB_WRITE_FAILED);
