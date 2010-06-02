@@ -198,6 +198,8 @@ function trigger_object_8021qorder ()
 // implement similar logic for IPv4 networks
 function trigger_ipv4net_vlanconfig ()
 {
+	if (!count (getVLANDomainOptions())) // no domains -- no VLANs to bind with
+		return '';
 	$netinfo = spotEntity ('ipv4net', $_REQUEST['id']);
 	if ($netinfo['vlanc'])
 		return 'std';
