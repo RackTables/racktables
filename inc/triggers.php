@@ -189,10 +189,11 @@ function trigger_object_8021qorder ()
 {
 	if (NULL !== getVLANSwitchInfo ($_REQUEST['object_id']))
 		return 'std';
-	elseif (considerConfiguredConstraint (spotEntity ('object', $_REQUEST['object_id']), 'VLANSWITCH_LISTSRC'))
-		return 'attn';
-	else
+	if (!count (getVLANDomainOptions()) or !count (getVSTOptions()))
 		return '';
+	if (considerConfiguredConstraint (spotEntity ('object', $_REQUEST['object_id']), 'VLANSWITCH_LISTSRC'))
+		return 'attn';
+	return '';
 }
 
 // implement similar logic for IPv4 networks
