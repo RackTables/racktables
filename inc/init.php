@@ -80,6 +80,13 @@ catch (PDOException $e)
 $dbxlink->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 $dbxlink->exec ("set names 'utf8'");
 
+// Magic quotes feature is deprecated, but just in case the local system
+// still has it activated, reverse its effect.
+if (function_exists ('get_magic_quotes_gpc') and get_magic_quotes_gpc())
+	foreach ($_REQUEST as $key => $value)
+		if (gettype ($value) == 'string')
+			$_REQUEST[$key] = stripslashes ($value);
+
 // Escape any globals before we ever try to use them, but keep a copy of originals.
 $sic = array();
 foreach ($_REQUEST as $key => $value)
