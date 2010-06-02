@@ -3608,7 +3608,16 @@ function getVLANDomain ($vdid)
 		throw new EntityNotFoundException ('VLAN domain', $vdid);
 	unset ($result);
 	$ret['vlanlist'] = getDomainVLANs ($vdid);
-	$ret['switchlist'] = getVLANDomainSwitches ($vdid);
+	$ret['switchlist'] = array();
+	$result = usePreparedSelectBlade
+	(
+		'SELECT object_id, template_id, last_errno, out_of_sync, ' .
+		'TIMESTAMPDIFF(SECOND, last_change, NOW()) AS age_seconds ' .
+		'FROM VLANSwitch WHERE domain_id = ? ORDER BY object_id',
+		array ($vdid)
+	);
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
+		$ret['switchlist'][$row['object_id']] = $row;
 	return $ret;
 }
 
@@ -3629,21 +3638,6 @@ function getDomainVLANs ($vdom_id)
 	$ret = array();
 	while ($row = $query->fetch (PDO::FETCH_ASSOC))
 		$ret[$row['vlan_id']] = $row;
-	return $ret;
-}
-
-function getVLANDomainSwitches ($vdom_id)
-{
-	$result = usePreparedSelectBlade
-	(
-		'SELECT object_id, template_id, last_errno, out_of_sync, ' .
-		'TIMESTAMPDIFF(SECOND, last_change, NOW()) AS age_seconds ' .
-		'FROM VLANSwitch WHERE domain_id = ? ORDER BY object_id',
-		array ($vdom_id)
-	);
-	$ret = array();
-	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-		$ret[$row['object_id']] = $row;
 	return $ret;
 }
 

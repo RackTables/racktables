@@ -6529,7 +6529,8 @@ function render8021QOrderForm ($some_id)
 			);
 		break;
 	case 'vlandomain':
-		foreach (getVLANDomainSwitches ($some_id) as $vswitch)
+		$vlandomain = getVLANDomain ($some_id);
+		foreach ($vlandomain['switchlist'] as $vswitch)
 			$minuslines[$vswitch['object_id']] = array
 			(
 				'vdom_id' => $some_id,
