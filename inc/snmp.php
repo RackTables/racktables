@@ -83,6 +83,15 @@ $iftable_processors['catalyst-chassis-1-to-2-combo-1000SFP'] = array
 	'try_next_proc' => TRUE,
 );
 
+$iftable_processors['catalyst-chassis-8-combo-1000SFP'] = array
+(
+	'pattern' => '@^GigabitEthernet([[:digit:]]+/)?(8)$@',
+	'replacement' => 'gi\\1\\2',
+	'dict_key' => '4-1077',
+	'label' => '\\2',
+	'try_next_proc' => TRUE,
+);
+
 $iftable_processors['catalyst-chassis-21-to-24-combo-1000SFP'] = array
 (
 	'pattern' => '@^GigabitEthernet([[:digit:]]+/)?(21|22|23|24)$@',
@@ -460,6 +469,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'dict_key' => 140,
 		'text' => 'WS-C2960-48TC-L: 48 RJ-45/10-100TX + 2 combo-gig',
 		'processors' => array ('catalyst-chassis-1-to-2-combo-1000SFP', 'catalyst-chassis-any-1000T', 'catalyst-chassis-any-100TX'),
+	),
+	'9.1.799' => array
+	(
+		'dict_key' => 168,
+		'text' => 'WS-C2960G-8TC-L: 7 RJ-45/10-100-1000T(X) + 1 combo-gig',
+		'processors' => array ('catalyst-chassis-8-combo-1000SFP', 'catalyst-chassis-any-1000T'),
 	),
 	'9.1.696' => array
 	(
