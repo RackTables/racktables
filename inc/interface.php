@@ -7557,7 +7557,7 @@ function renderVSTListEditor()
 	echo '<tr><th>&nbsp;</th><th>description</th><th>&nbsp</th></tr>';
 	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
 		printNewItemTR();
-	foreach (getVSTOptions() as $vst_id => $vst_description)
+	foreach (getVSTStats() as $vst_id => $vst_info)
 	{
 		printOpFormIntro ('upd', array ('vst_id' => $vst_id));
 		echo '<tr><td>';
@@ -7569,7 +7569,7 @@ function renderVSTListEditor()
 			echo getImageHREF ('destroy', 'delete template') . '</a>';
 		}
 		echo '</td>';
-		echo '<td><input name=vst_descr type=text value="' . niftyString ($vst_description, 0) . '"></td>';
+		echo '<td><input name=vst_descr type=text value="' . niftyString ($vst_info['description'], 0) . '"></td>';
 		echo '<td>' . getImageHREF ('save', 'update template', TRUE) . '</td>';
 		echo '</tr></form>';
 	}
