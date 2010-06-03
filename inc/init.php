@@ -62,9 +62,9 @@ else
 	throw new Exception
 	(
 		"Database connection parameters are read from inc/secret.php file, " .
-		"which cannot be found.\nYou probably need to complete the installation " .
+		"which cannot be found.<br>You probably need to complete the installation " .
 		"procedure by following <a href='install.php'>this link</a>.",
-		E_INTERNAL
+		E_MISCONFIGURED
 	);
 }
 
