@@ -1,4 +1,4 @@
-0.18.1
+0.18.1 2010-06-03
 	update: initial SNMP support of Summit switches
 	update: switch from deprecated ereg extension to PCRE (#262)
 	update: don't use deprecated magic_quoes extension (#315)
