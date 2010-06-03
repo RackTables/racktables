@@ -673,9 +673,6 @@ CREATE TABLE `VLANValidID` (
 			$query[] = "ALTER TABLE Link ADD CONSTRAINT `Link-FK-b` FOREIGN KEY (`portb`) REFERENCES `Port` (`id`) ON DELETE CASCADE";
 			$query[] = "ALTER TABLE Port DROP FOREIGN KEY `Port-FK-object_id`";
 			$query[] = "ALTER TABLE Port ADD CONSTRAINT `Port-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `RackObject` (`id`) ON DELETE CASCADE";
-			$query[] = "";
-			$query[] = "";
-			$query[] = "";
 			$query[] = "UPDATE Config SET varvalue = '0.18.1' WHERE varname = 'DB_VERSION'";
 			break;
 		default:

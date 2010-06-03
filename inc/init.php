@@ -106,9 +106,9 @@ if ($dbver != CODE_VERSION)
 {
 	echo '<p align=justify>This Racktables installation seems to be ' .
 		'just upgraded to version ' . CODE_VERSION . ', while the '.
-		'database version is ' . $dbver . '. No user will be ' .
+		'database version is ' . $dbver . '.<br>No user will be ' .
 		'either authenticated or shown any page until the upgrade is ' .
-		"finished. Follow <a href='upgrade.php'>this link</a> and " .
+		"finished.<br>Follow <a href='upgrade.php'>this link</a> and " .
 		'authenticate as administrator to finish the upgrade.</p>';
 	exit (1);
 }
