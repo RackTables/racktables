@@ -440,7 +440,7 @@ $iftable_processors['summit-management'] = array
 	'pattern' => '@^Management Port$@',
 	'replacement' => 'mgmt',
 	'dict_key' => '1-19',
-	'label' => 'mgmt',
+	'label' => 'management',
 	'try_next_proc' => FALSE,
 );
 
