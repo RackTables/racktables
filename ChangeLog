@@ -1,3 +1,5 @@
+0.18.2
+	bugfix: don't restore last opened tab, which won't be permitted anyway
 0.18.1 2010-06-03
 	update: initial SNMP support of Summit switches
 	update: switch from deprecated ereg extension to PCRE (#262)

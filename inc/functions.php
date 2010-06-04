@@ -1129,7 +1129,8 @@ function redirectIfNecessary ()
 		redirectUser ($pageno, 'default');
 }
 
-function prepareNavigation() {
+function prepareNavigation()
+{
 	global
 		$pageno,
 		$tabno;
@@ -1140,13 +1141,18 @@ function prepareNavigation() {
 // Always show explicitly requested tab, substitute the last used name in case
 // it is awailable, fall back to the default one.
 
-	if (isset ($_REQUEST['tab'])) {
+	if (isset ($_REQUEST['tab']))
 		$tabno = $_REQUEST['tab'];
-	} elseif (basename($_SERVER['PHP_SELF']) == 'index.php' and getConfigVar ('SHOW_LAST_TAB') == 'yes' and isset ($_SESSION['RTLT'][$pageno])) {
+	elseif
+	(
+		basename($_SERVER['PHP_SELF']) == 'index.php' and
+		getConfigVar ('SHOW_LAST_TAB') == 'yes' and
+		isset ($_SESSION['RTLT'][$pageno]) and
+		permitted ($pageno, $_SESSION['RTLT'][$pageno])
+	)
 		redirectUser ($pageno, $_SESSION['RTLT'][$pageno]);
-	} else {
+	else
 		$tabno = 'default';
-	}
 }
 
 function fixContext ($target = NULL)
