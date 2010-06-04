@@ -305,11 +305,6 @@ function getRunning8021QConfig ($object_id)
 	return $ret;
 }
 
-function getRunningCDPStatus ($object_id)
-{
-	return gwRetrieveDeviceConfig ($object_id, 'getcdpstatus');
-}
-
 function setDevice8021QConfig ($object_id, $pseudocode)
 {
 	if ('' == $breed = detectDeviceBreed ($object_id))

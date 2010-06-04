@@ -2608,8 +2608,8 @@ function updVSTRule()
 	return buildRedirectURL (__FUNCTION__, $result ? 'OK' : 'ERR');
 }
 
-$msgcode['importCDPData']['OK'] = 44;
-function importCDPData()
+$msgcode['importDPData']['OK'] = 44;
+function importDPData()
 {
 	global $sic;
 	assertUIntArg ('nports');

@@ -7710,9 +7710,23 @@ function renderDeployQueue ($dqcode)
 	echo '</table>';
 }
 
-function renderLiveCDP ($object_id)
+function renderDiscoveredNeighbors ($object_id)
 {
-	$CDP_status = sortPortList (getRunningCDPStatus ($object_id));
+	global $tabno;
+	$opcode_by_tabno = array ('livecdp' => 'getcdpstatus', 'livelldp' => 'getlldpstatus');
+	try
+	{
+		$neighbors = gwRetrieveDeviceConfig ($object_id, $opcode_by_tabno[$tabno]);
+	}
+	catch (Exception $e)
+	{
+		if ($e->getCode() == E_GW_FAILURE)
+		{
+			showWarning ($e->getMessage(), __FUNCTION__);
+			return;
+		}
+		throw $e;
+	}
 	$mydevice = spotEntity ('object', $object_id);
 	amplifyCell ($mydevice);
 	// reindex by port name
@@ -7721,11 +7735,11 @@ function renderLiveCDP ($object_id)
 		if (mb_strlen ($port['name']))
 			$myports[$port['name']][] = $port;
 	unset ($mydevice);
-	printOpFormIntro ('importCDPData');
+	printOpFormIntro ('importDPData');
 	echo '<br><table cellspacing=0 cellpadding=5 align=center class=widetable>';
 	echo '<tr><th colspan=2>local port</th><th>remote device</th><th colspan=2>remote port</th><th>&nbsp;</th></tr>';
 	$inputno = 0;
-	foreach ($CDP_status as $local_port => $remote)
+	foreach ($neighbors as $local_port => $remote)
 	{
 		if
 		(
