@@ -312,7 +312,8 @@ CREATE TABLE `Rack` (
   `comment` text,
   `thumb_data` blob,
   PRIMARY KEY  (`id`),
-  UNIQUE KEY `name_in_row` (`row_id`,`name`)
+  UNIQUE KEY `name_in_row` (`row_id`,`name`),
+  CONSTRAINT `Rack-FK-row_id` FOREIGN KEY (`row_id`) REFERENCES `RackRow` (`id`)
 ) ENGINE=InnoDB;
 
 CREATE TABLE `RackHistory` (

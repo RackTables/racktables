@@ -45,6 +45,7 @@ function getDBUpgradePath ($v1, $v2)
 		'0.17.11',
 		'0.18.0',
 		'0.18.1',
+		'0.18.2',
 	);
 	if (!in_array ($v1, $versionhistory) or !in_array ($v2, $versionhistory))
 		return NULL;
@@ -701,6 +702,10 @@ CREATE TABLE `VLANValidID` (
 			$query[] = "ALTER TABLE TagStorage MODIFY `tag_id` int(10) unsigned NOT NULL default '0'";
 			$query[] = "ALTER TABLE UserAccount MODIFY `user_name` char(64) NOT NULL default ''";
 			$query[] = "UPDATE Config SET varvalue = '0.18.1' WHERE varname = 'DB_VERSION'";
+			break;
+		case '0.18.2':
+			$query = array_merge ($query, reloadDictionary ($batchid));
+			$query[] = "ALTER TABLE Rack ADD CONSTRAINT `Rack-FK-row_id` FOREIGN KEY (row_id) REFERENCES RackRow (id)";
 			break;
 		default:
 			showFailure ("executeUpgradeBatch () failed, because batch '${batchid}' isn't defined", __FILE__);

@@ -190,9 +190,9 @@ function getRackRowInfo ($rackrow_id)
 		"select RackRow.id as id, RackRow.name as name, count(Rack.id) as count, " .
 		"if(isnull(sum(Rack.height)),0,sum(Rack.height)) as sum " .
 		"from RackRow left join Rack on Rack.row_id = RackRow.id " .
-		"where RackRow.id = ${rackrow_id} " .
+		"where RackRow.id = ? " .
 		"group by RackRow.id";
-	$result = useSelectBlade ($query);
+	$result = usePreparedSelectBlade ($query, array ($rackrow_id));
 	if ($row = $result->fetch (PDO::FETCH_ASSOC))
 		return $row;
 	else
@@ -201,7 +201,7 @@ function getRackRowInfo ($rackrow_id)
 
 function getRackRows ()
 {
-	$result = useSelectBlade ('SELECT id, name FROM RackRow ORDER BY name', __FUNCTION__);
+	$result = usePreparedSelectBlade ('SELECT id, name FROM RackRow ORDER BY name', __FUNCTION__);
 	$rows = array();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 		$rows[$row['id']] = $row['name'];
@@ -210,7 +210,7 @@ function getRackRows ()
 
 function commitAddRow($rackrow_name)
 {
-	return useInsertBlade('RackRow', array('name'=>"'$rackrow_name'"));
+	return usePreparedInsertBlade ('RackRow', array ('name' => $rackrow_name));
 }
 
 function commitUpdateRow($rackrow_id, $rackrow_name)
@@ -224,19 +224,7 @@ function commitUpdateRow($rackrow_id, $rackrow_name)
 
 function commitDeleteRow($rackrow_id)
 {
-	global $dbxlink;
-	$query = "select count(*) from Rack where row_id=${rackrow_id}";
-	$result = $dbxlink->query ($query);
-	if ($row = $result->fetch(PDO::FETCH_NUM))
-	{
-		if ($row[0] == 0)
-		{
-			$result->closeCursor();
-			$query = "delete from RackRow where id=${rackrow_id}";
-			$result = $dbxlink->query ($query);
-		}
-	}
-	return TRUE;
+	return usePreparedDeleteBlade ('RackRow', array ('id' => $rackrow_id));
 }
 
 // Return a simple object list w/o related information, so that the returned value
@@ -528,9 +516,9 @@ function getObjectPortsAndLinks ($object_id)
 {
 	$query = "SELECT id, name, label, l2address, iif_id, (SELECT iif_name FROM PortInnerInterface WHERE id = iif_id) AS iif_name, " .
 		"type AS oif_id, (SELECT dict_value FROM Dictionary WHERE dict_key = type) AS oif_name, reservation_comment " .
-		"FROM Port WHERE object_id = ${object_id}";
+		"FROM Port WHERE object_id = ?";
 	// list and decode all ports of the current object
-	$result = useSelectBlade ($query);
+	$result = usePreparedSelectBlade ($query, array ($object_id));
 	$ret=array();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
@@ -547,8 +535,8 @@ function getObjectPortsAndLinks ($object_id)
 	{
 		$portid = $ret[$tmpkey]['id'];
 		$remote_id = NULL;
-		$query = "select porta, portb from Link where porta = {$portid} or portb = ${portid}";
-		$result = useSelectBlade ($query);
+		$query = "select porta, portb from Link where porta = ? or portb = ?";
+		$result = usePreparedSelectBlade ($query, array ($portid, $portid));
 		if ($row = $result->fetch (PDO::FETCH_ASSOC))
 		{
 			if ($portid != $row['porta'])
@@ -559,8 +547,8 @@ function getObjectPortsAndLinks ($object_id)
 		unset ($result);
 		if ($remote_id) // there's a remote end here
 		{
-			$query = "SELECT name, object_id FROM Port WHERE id = ${remote_id}";
-			$result = useSelectBlade ($query);
+			$query = "SELECT name, object_id FROM Port WHERE id = ?";
+			$result = usePreparedSelectBlade ($query, array ($remote_id));
 			if ($row = $result->fetch (PDO::FETCH_ASSOC))
 			{
 				$ret[$tmpkey]['remote_name'] = $row['name'];
@@ -578,15 +566,15 @@ function commitAddRack ($name, $height = 0, $row_id = 0, $comment, $taglist)
 {
 	if ($row_id <= 0 or $height <= 0 or !strlen ($name))
 		return FALSE;
-	$result = useInsertBlade
+	$result = usePreparedInsertBlade
 	(
 		'Rack',
 		array
 		(
 			'row_id' => $row_id,
-			'name' => "'${name}'",
+			'name' => $name,
 			'height' =>  $height,
-			'comment' => "'${comment}'"
+			'comment' => $comment
 		)
 	);
 	$last_insert_id = lastInsertID();
@@ -595,19 +583,18 @@ function commitAddRack ($name, $height = 0, $row_id = 0, $comment, $taglist)
 
 function commitAddObject ($new_name, $new_label, $new_barcode, $new_type_id, $new_asset_no, $taglist = array())
 {
-	global $dbxlink;
 	// Maintain UNIQUE INDEX for common names and asset tags by
 	// filtering out empty strings (not NULLs).
-	$result1 = useInsertBlade
+	$result1 = usePreparedInsertBlade
 	(
 		'RackObject',
 		array
 		(
-			'name' => !strlen ($new_name) ? 'NULL' : "'${new_name}'",
+			'name' => !strlen ($new_name) ? NULL : $new_name,
 			'label' => "'${new_label}'",
-			'barcode' => !strlen ($new_barcode) ? 'NULL' : "'${new_barcode}'",
+			'barcode' => !strlen ($new_barcode) ? NULL : $new_barcode,
 			'objtype_id' => $new_type_id,
-			'asset_no' => !strlen ($new_asset_no) ? 'NULL' : "'${new_asset_no}'"
+			'asset_no' => !strlen ($new_asset_no) ? NULL : $new_asset_no,
 		)
 	);
 	$last_insert_id = lastInsertID();
@@ -640,8 +627,7 @@ function commitUpdateObject ($object_id = 0, $new_name = '', $new_label = '', $n
 // Remove file links related to the entity, but leave the entity and file(s) intact.
 function releaseFiles ($entity_realm, $entity_id)
 {
-	global $dbxlink;
-	$dbxlink->exec ("DELETE FROM FileLink WHERE entity_type = '${entity_realm}' AND entity_id = ${entity_id}");
+	usePreparedDeleteBlade ('FileLink', array ('entity_type' => $entity_realm, 'entity_id' => $entity_id));
 }
 
 // There are times when you want to delete all traces of an object
@@ -650,27 +636,22 @@ function commitDeleteObject ($object_id = 0)
 	global $dbxlink;
 	releaseFiles ('object', $object_id);
 	destroyTagsForEntity ('object', $object_id);
-	$dbxlink->query("DELETE FROM IPv4LB WHERE object_id = ${object_id}");
-	$dbxlink->query("DELETE FROM IPv4Allocation WHERE object_id = ${object_id}");
-	$dbxlink->query("DELETE FROM IPv4NAT WHERE object_id = ${object_id}");
+	usePreparedDeleteBlade ('IPv4LB', array ('object_id' => $object_id));
+	usePreparedDeleteBlade ('IPv4Allocation', array ('object_id' => $object_id));
+	usePreparedDeleteBlade ('IPv4NAT', array ('object_id' => $object_id));
 	$dbxlink->query("DELETE FROM Atom WHERE molecule_id IN (SELECT new_molecule_id FROM MountOperation WHERE object_id = ${object_id})");
 	$dbxlink->query("DELETE FROM Molecule WHERE id IN (SELECT new_molecule_id FROM MountOperation WHERE object_id = ${object_id})");
-	$dbxlink->query("DELETE FROM RackObject WHERE id = ${object_id}");
-
+	usePreparedDeleteBlade ('RackObject', array ('id' => $object_id));
 	return '';
 }
 
 function commitDeleteRack($rack_id)
 {
-	global $dbxlink;
 	releaseFiles ('rack', $rack_id);
 	destroyTagsForEntity ('rack', $rack_id);
-	$query = "delete from RackSpace where rack_id = '${rack_id}'";
-	$dbxlink->query ($query);
-	$query = "delete from RackHistory where id = '${rack_id}'";
-	$dbxlink->query ($query);
-	$query = "delete from Rack where id = '${rack_id}'";
-	$dbxlink->query ($query);
+	usePreparedDeleteBlade ('RackSpace', array ('rack_id' => $rack_id));
+	usePreparedDeleteBlade ('RackHistory', array ('id' => $rack_id));
+	usePreparedDeleteBlade ('Rack', array ('id' => $rack_id));
 	return TRUE;
 }
 
@@ -685,8 +666,7 @@ function commitUpdateRack ($rack_id, $new_name, $new_height, $new_row_id, $new_c
 	global $dbxlink;
 
 	// Can't shrink a rack if rows being deleted contain mounted objects
-	$check_sql = "SELECT COUNT(*) AS count FROM RackSpace WHERE rack_id = '${rack_id}' AND unit_no > '{$new_height}'";
-	$check_result = $dbxlink->query($check_sql);
+	$check_result = usePreparedSelectBlade ('SELECT COUNT(*) AS count FROM RackSpace WHERE rack_id = ? AND unit_no > ?', array ($rack_id, $new_height));
 	$check_row = $check_result->fetch (PDO::FETCH_ASSOC);
 	unset ($check_result);
 	if ($check_row['count'] > 0) {
@@ -773,27 +753,22 @@ function processGridForm (&$rackData, $unchecked_state, $checked_state, $object_
 
 // This function builds a list of rack-unit-atom records, which are assigned to
 // the requested object.
-function getMoleculeForObject ($object_id = 0)
+function getMoleculeForObject ($object_id)
 {
-	$query =
-		"select rack_id, unit_no, atom from RackSpace " .
-		"where state = 'T' and object_id = ${object_id} order by rack_id, unit_no, atom";
-	$result = useSelectBlade ($query);
-	$ret = $result->fetchAll (PDO::FETCH_ASSOC);
-	$result->closeCursor();
-	return $ret;
+	$result = usePreparedSelectBlade
+	(
+		'SELECT rack_id, unit_no, atom FROM RackSpace ' .
+		'WHERE state = "T" AND object_id = ? ORDER BY rack_id, unit_no, atom',
+		array ($object_id)
+	);
+	return $result->fetchAll (PDO::FETCH_ASSOC);
 }
 
 // This function builds a list of rack-unit-atom records for requested molecule.
 function getMolecule ($mid = 0)
 {
-	$query =
-		"select rack_id, unit_no, atom from Atom " .
-		"where molecule_id=${mid}";
-	$result = useSelectBlade ($query);
-	$ret = $result->fetchAll (PDO::FETCH_ASSOC);
-	$result->closeCursor();
-	return $ret;
+	$result = usePreparedSelectBlade ('SELECT rack_id, unit_no, atom FROM Atom WHERE molecule_id = ?', array ($mid));
+	return $result->fetchAll (PDO::FETCH_ASSOC);
 }
 
 // returns exactly what is's named after
@@ -809,19 +784,20 @@ function lastInsertID ()
 function createMolecule ($molData)
 {
 	global $dbxlink;
-	$query = "insert into Molecule values()";
-	$dbxlink->exec ($query);
+	$dbxlink->exec ('INSERT INTO Molecule VALUES()');
 	$molecule_id = lastInsertID();
 	foreach ($molData as $rua)
-	{
-		$rack_id = $rua['rack_id'];
-		$unit_no = $rua['unit_no'];
-		$atom = $rua['atom'];
-		$query =
-			"insert into Atom(molecule_id, rack_id, unit_no, atom) " .
-			"values (${molecule_id}, ${rack_id}, ${unit_no}, '${atom}')";
-		$dbxlink->exec ($query);
-	}
+		usePreparedInsertBlade
+		(
+			'Atom',
+			array
+			(
+				'molecule_id' => $molecule_id,
+				'rack_id' => $rua['rack_id'],
+				'unit_no' => $rua['unit_no'],
+				'atom' => $rua['atom'],
+			)
+		);
 	return $molecule_id;
 }
 
@@ -840,30 +816,26 @@ function recordHistory ($tableName, $whereClause)
 
 function getRackspaceHistory ()
 {
-	$query =
+	$result = usePreparedSelectBlade
+	(
 		"SELECT id as mo_id, object_id as ro_id, ctime, comment, user_name FROM " .
-		"MountOperation ORDER BY ctime DESC";
-	$result = useSelectBlade ($query);
+		"MountOperation ORDER BY ctime DESC"
+	);
 	return $result->fetchAll (PDO::FETCH_ASSOC);
 }
 
 // This function is used in renderRackspaceHistory()
 function getOperationMolecules ($op_id = 0)
 {
-	$query = "select old_molecule_id, new_molecule_id from MountOperation where id = ${op_id}";
-	$result = useSelectBlade ($query);
+	$result = usePreparedSelectBlade ('SELECT old_molecule_id, new_molecule_id FROM MountOperation WHERE id = ?', array ($op_id));
 	// We expect one row.
 	$row = $result->fetch (PDO::FETCH_ASSOC);
-	$omid = $row['old_molecule_id'];
-	$nmid = $row['new_molecule_id'];
-	$result->closeCursor();
-	return array ($omid, $nmid);
+	return array ($row['old_molecule_id'], $row['new_molecule_id']);
 }
 
 function getResidentRacksData ($object_id = 0, $fetch_rackdata = TRUE)
 {
-	$query = "select distinct rack_id from RackSpace where object_id = ${object_id} order by rack_id";
-	$result = useSelectBlade ($query);
+	$result = usePreparedSelectBlade ('SELECT DISTINCT rack_id FROM RackSpace WHERE object_id = ? ORDER BY rack_id', array ($object_id));
 	$rows = $result->fetchAll (PDO::FETCH_NUM);
 	unset ($result);
 	$ret = array();
@@ -907,17 +879,17 @@ function commitAddPort ($object_id = 0, $port_name, $port_type_id, $port_label, 
 		$dbxlink->exec ('UNLOCK TABLES');
 		return "invalid port type id '${port_type_id}'";
 	}
-	$result = useInsertBlade
+	$result = usePreparedInsertBlade
 	(
 		'Port',
 		array
 		(
-			'name' => "'${port_name}'",
+			'name' => $port_name,
 			'object_id' => $object_id,
-			'label' => "'${port_label}'",
+			'label' => $port_label,
 			'iif_id' => $iif_id,
 			'type' => $oif_id,
-			'l2address' => ($db_l2address === '') ? 'NULL' : "'${db_l2address}'"
+			'l2address' => ($db_l2address === '') ? NULL : $db_l2address,
 		)
 	);
 	$dbxlink->exec ('UNLOCK TABLES');
@@ -960,33 +932,24 @@ function commitUpdatePort ($object_id, $port_id, $port_name, $port_type_id, $por
 
 function delObjectPort ($port_id)
 {
-	if (unlinkPort ($port_id) != '')
-		return __FUNCTION__ . ': unlinkPort() failed';
-	if (useDeleteBlade ('Port', 'id', $port_id) != TRUE)
-		return __FUNCTION__ . ': useDeleteBlade() failed';
+	if (usePreparedDeleteBlade ('Port', array ('id' => $port_id)) != TRUE)
+		return __FUNCTION__ . ': usePreparedDeleteBlade() failed';
 	return '';
 }
 
 function getAllIPv4Allocations ()
 {
-	$query =
+	$result = usePreparedSelectBlade
+	(
 		"select object_id as object_id, ".
 		"RackObject.name as object_name, ".
 		"IPv4Allocation.name as name, ".
 		"INET_NTOA(ip) as ip ".
-		"from IPv4Allocation join RackObject on id=object_id ";
-	$result = useSelectBlade ($query);
+		"from IPv4Allocation join RackObject on id=object_id "
+	);
 	$ret = array();
-	$count=0;
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-	{
-		$ret[$count]['object_id']=$row['object_id'];
-		$ret[$count]['object_name']=$row['object_name'];
-		$ret[$count]['name']=$row['name'];
-		$ret[$count]['ip']=$row['ip'];
-		$count++;
-	}
-	$result->closeCursor();
+		$ret[] = $row;
 	return $ret;
 }
 
@@ -1011,8 +974,7 @@ function linkPorts ($porta, $portb)
 
 function unlinkPort ($port_id)
 {
-	global $dbxlink;
-	$dbxlink->exec ("DELETE FROM Link WHERE porta = ${port_id} OR portb = ${port_id}");
+	usePreparedDeleteBlade ('Link', array ('porta' => $port_id, 'portb' => $port_id), 'OR');
 	return '';
 }
 
@@ -1022,10 +984,12 @@ function unlinkPort ($port_id)
 function getObjectIPv4Allocations ($object_id = 0)
 {
 	$ret = array();
-	$query = 'select name as osif, type, inet_ntoa(ip) as dottedquad from IPv4Allocation ' .
-		"where object_id = ${object_id} " .
-		'order by ip';
-	$result = useSelectBlade ($query);
+	$result = usePreparedSelectBlade
+	(
+		'SELECT name AS osif, type, inet_ntoa(ip) AS dottedquad FROM IPv4Allocation ' .
+		'WHERE object_id = ? ORDER BY ip',
+		array ($object_id)
+	)
 	// don't spawn a sub-query with unfetched buffer, it may fail
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 		$ret[$row['dottedquad']] = array ('osif' => $row['osif'], 'type' => $row['type']);
@@ -1267,10 +1231,10 @@ function getIPv4AddressNetworkId ($dottedquad, $masklen = 32)
 // 'order by mask desc limit 1';
 
 	$query = 'select id from IPv4Network where ' .
-		"inet_aton('${dottedquad}') & (4294967295 >> (32 - mask)) << (32 - mask) = ip " .
-		"and mask < ${masklen} " .
+		"inet_aton('?') & (4294967295 >> (32 - mask)) << (32 - mask) = ip " .
+		"and mask < ? " .
 		'order by mask desc limit 1';
-	$result = useSelectBlade ($query);
+	$result = usePreparedSelectBlade ($query, array ($dottedquad, $masklen));
 	if ($row = $result->fetch (PDO::FETCH_ASSOC))
 		return $row['id'];
 	return NULL;
