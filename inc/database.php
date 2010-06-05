@@ -3191,7 +3191,7 @@ function getFileStats ()
 	(
 		'SELECT COUNT(*) ' .
 		'FROM File ' .
-		'WHERE id NOT IN (SELECT file_id FROM FileLink)',
+		'WHERE id NOT IN (SELECT file_id FROM FileLink)'
 	);
 	$ret["Unattached files"] = $result->fetchColumn ();
 	unset ($result);
