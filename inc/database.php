@@ -1659,9 +1659,9 @@ function commitCreateUserAccount ($username, $realname, $password)
 		'UserAccount',
 		array
 		(
-			'user_name' => "'${username}'",
-			'user_realname' => "'${realname}'",
-			'user_password_hash' => "'${password}'"
+			'user_name' => $username,
+			'user_realname' => $realname,
+			'user_password_hash' => $password,
 		)
 	);
 }

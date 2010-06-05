@@ -3532,7 +3532,7 @@ function renderChapterEditor ($tgt_chapter_no)
 			echo "</a>";
 		}
 		echo '</td>';
-		echo "<td class=tdright><input type=text name=dict_value size=64 value='${value}'></td><td>";
+		echo "<td class=tdleft><input type=text name=dict_value size=64 value='${value}'></td><td>";
 		printImageHREF ('save', 'Save changes', TRUE);
 		echo "</td></tr></form>";
 	}

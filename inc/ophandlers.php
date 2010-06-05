@@ -686,7 +686,7 @@ function supplementAttrMap ()
 		if (0 == ($chapter_id = $_REQUEST['chapter_no']))
 			return buildRedirectURL (__FUNCTION__, 'ERR1', array ('chapter not selected'));
 	}
-	if (commitSupplementAttrMap ($_REQUEST['attr_id'], $_REQUEST['objtype_id'], $chapter_id) === TRUE)
+	if (commitSupplementAttrMap ($_REQUEST['attr_id'], $_REQUEST['objtype_id'], $chapter_id) !== FALSE)
 		return buildRedirectURL (__FUNCTION__, 'OK');
 	else
 		return buildRedirectURL (__FUNCTION__, 'ERR2');
@@ -698,7 +698,7 @@ function reduceAttrMap ()
 {
 	assertUIntArg ('attr_id');
 	assertUIntArg ('objtype_id');
-	if (commitReduceAttrMap ($_REQUEST['attr_id'], $_REQUEST['objtype_id']) === TRUE)
+	if (commitReduceAttrMap ($_REQUEST['attr_id'], $_REQUEST['objtype_id']) !== FALSE)
 		return buildRedirectURL (__FUNCTION__, 'OK');
 	else
 		return buildRedirectURL (__FUNCTION__, 'ERR');
@@ -710,7 +710,7 @@ function clearSticker ()
 {
 	assertUIntArg ('attr_id');
 	assertUIntArg ('object_id');
-	if (commitResetAttrValue ($_REQUEST['object_id'], $_REQUEST['attr_id']) === TRUE)
+	if (commitResetAttrValue ($_REQUEST['object_id'], $_REQUEST['attr_id']) !== FALSE)
 		return buildRedirectURL (__FUNCTION__, 'OK');
 	else
 		return buildRedirectURL (__FUNCTION__, 'ERR');
@@ -1370,7 +1370,7 @@ $msgcode['deleteRSPool']['ERR'] = 138;
 function deleteRSPool ()
 {
 	assertUIntArg ('pool_id');
-	if (!commitDeleteRSPool ($_REQUEST['pool_id']))
+	if (commitDeleteRSPool ($_REQUEST['pool_id']) === FALSE)
 		return buildRedirectURL (__FUNCTION__, 'ERR');
 	else
 		return buildRedirectURL (__FUNCTION__, 'OK');
@@ -2107,7 +2107,7 @@ function delPortOIFCompat ()
 {
 	assertUIntArg('type1');
 	assertUIntArg('type2');
-	if (commitReducePOIFC ($_REQUEST['type1'], $_REQUEST['type2']))
+	if (commitReducePOIFC ($_REQUEST['type1'], $_REQUEST['type2']) !== FALSE)
 		return buildRedirectURL (__FUNCTION__, 'OK');
 	return buildRedirectURL (__FUNCTION__, 'ERR');
 
