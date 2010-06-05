@@ -2403,7 +2403,7 @@ function commitDeleteRS ($id = 0)
 function commitDeleteVS ($id = 0)
 {
 	releaseFiles ('ipv4vs', $id);
-	return usePreparedDeleteBlade ('IPv4VS', array ('id' => $id)) && destroyTagsForEntity ('ipv4vs', $id);
+	return FALSE !== usePreparedDeleteBlade ('IPv4VS', array ('id' => $id)) && FALSE !== destroyTagsForEntity ('ipv4vs', $id);
 }
 
 function commitDeleteLB ($object_id = 0, $pool_id = 0, $vs_id = 0)
@@ -2892,7 +2892,7 @@ function destroyIPv4Prefix ($id = 0)
 	releaseFiles ('ipv4net', $id);
 	if (FALSE === usePreparedDeleteBlade ('IPv4Network', array ('id' => $id)))
 		return __FUNCTION__ . ': SQL query #1 failed';
-	if (!destroyTagsForEntity ('ipv4net', $id))
+	if (FALSE === destroyTagsForEntity ('ipv4net', $id))
 		return __FUNCTION__ . ': SQL query #2 failed';
 	return '';
 }
