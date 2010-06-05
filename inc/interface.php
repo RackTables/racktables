@@ -1561,7 +1561,7 @@ function showMessageOrError ()
 				71 => array ('code' => 'success', 'format' => 'File "%s" was linked successfully'),
 				72 => array ('code' => 'success', 'format' => 'File was unlinked successfully'),
 				73 => array ('code' => 'success', 'format' => 'File "%s" was deleted successfully'),
-				74 => array ('code' => 'success', 'format' => 'Row "%s" was added successfully'),
+				74 => array ('code' => 'success', 'format' => 'Record "%s" was added successfully'),
 				75 => array ('code' => 'success', 'format' => 'Row "%s" was updated successfully'),
 				76 => array ('code' => 'success', 'format' => 'Object "%s" was deleted successfully'),
 				77 => array ('code' => 'success', 'format' => 'Record "%s" was deleted successfully'),
