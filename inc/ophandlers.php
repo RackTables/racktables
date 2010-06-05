@@ -1726,16 +1726,12 @@ function updateRow ()
 }
 
 $msgcode['deleteRow']['OK'] = 77;
-$msgcode['deleteRow']['ERR'] = 100;
+$msgcode['deleteRow']['ERR'] = 146;
 function deleteRow ()
 {
 	assertUIntArg ('row_id');
 	$rowinfo = getRackRowInfo ($_REQUEST['row_id']);
-
-	if (TRUE === commitDeleteRow ($_REQUEST['row_id']))
-		return buildRedirectURL (__FUNCTION__, 'OK', array ($rowinfo['name']));
-	else
-		return buildRedirectURL (__FUNCTION__, 'ERR', array ($rowinfo['name']));
+	return buildRedirectURL (__FUNCTION__, FALSE === commitDeleteRow ($_REQUEST['row_id']) ? 'ERR' : 'OK', array ($rowinfo['name']));
 }
 
 $msgcode['addRack']['OK'] = 65;

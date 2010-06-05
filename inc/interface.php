@@ -1564,7 +1564,7 @@ function showMessageOrError ()
 				74 => array ('code' => 'success', 'format' => 'Row "%s" was added successfully'),
 				75 => array ('code' => 'success', 'format' => 'Row "%s" was updated successfully'),
 				76 => array ('code' => 'success', 'format' => 'Object "%s" was deleted successfully'),
-				77 => array ('code' => 'success', 'format' => 'Row "%s" was deleted successfully'),
+				77 => array ('code' => 'success', 'format' => 'Record "%s" was deleted successfully'),
 				78 => array ('code' => 'success', 'format' => 'File "%s" saved Ok'),
 				79 => array ('code' => 'success', 'format' => 'Rack "%s" was deleted successfully'),
 				80 => array ('code' => 'success', 'format' => "Added new object '%s'"),
@@ -1617,7 +1617,7 @@ function showMessageOrError ()
 				143 => array ('code' => 'error', 'format' => 'Tried chaining %u tags, but experienced %u errors.'),
 				144 => array ('code' => 'error', 'format' => "Error deleting tag: '%s'"),
 				145 => array ('code' => 'error', 'format' => "Invalid tag name '%s'"),
-// ...
+				146 => array ('code' => 'error', 'format' => 'Error deleting record "%s"'),
 				147 => array ('code' => 'error', 'format' => "Could not create tag '%s': %s"),
 				148 => array ('code' => 'error', 'format' => "Could not update tag '%s': %s"),
 				149 => array ('code' => 'error', 'format' => 'Turing test failed'),
