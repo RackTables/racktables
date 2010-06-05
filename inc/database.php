@@ -201,7 +201,7 @@ function getRackRowInfo ($rackrow_id)
 
 function getRackRows ()
 {
-	$result = usePreparedSelectBlade ('SELECT id, name FROM RackRow ORDER BY name', __FUNCTION__);
+	$result = usePreparedSelectBlade ('SELECT id, name FROM RackRow ORDER BY name');
 	$rows = array();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 		$rows[$row['id']] = $row['name'];
@@ -591,7 +591,7 @@ function commitAddObject ($new_name, $new_label, $new_barcode, $new_type_id, $ne
 		array
 		(
 			'name' => !strlen ($new_name) ? NULL : $new_name,
-			'label' => "'${new_label}'",
+			'label' => $new_label,
 			'barcode' => !strlen ($new_barcode) ? NULL : $new_barcode,
 			'objtype_id' => $new_type_id,
 			'asset_no' => !strlen ($new_asset_no) ? NULL : $new_asset_no,
@@ -989,7 +989,7 @@ function getObjectIPv4Allocations ($object_id = 0)
 		'SELECT name AS osif, type, inet_ntoa(ip) AS dottedquad FROM IPv4Allocation ' .
 		'WHERE object_id = ? ORDER BY ip',
 		array ($object_id)
-	)
+	);
 	// don't spawn a sub-query with unfetched buffer, it may fail
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 		$ret[$row['dottedquad']] = array ('osif' => $row['osif'], 'type' => $row['type']);
@@ -1231,7 +1231,7 @@ function getIPv4AddressNetworkId ($dottedquad, $masklen = 32)
 // 'order by mask desc limit 1';
 
 	$query = 'select id from IPv4Network where ' .
-		"inet_aton('?') & (4294967295 >> (32 - mask)) << (32 - mask) = ip " .
+		"inet_aton(?) & (4294967295 >> (32 - mask)) << (32 - mask) = ip " .
 		"and mask < ? " .
 		'order by mask desc limit 1';
 	$result = usePreparedSelectBlade ($query, array ($dottedquad, $masklen));
