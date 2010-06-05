@@ -1963,7 +1963,7 @@ function updateFile ()
 	if ($error != '')
 		return buildRedirectURL (__FUNCTION__, 'ERR', array ($error));
 
-	return buildRedirectURL (__FUNCTION__, 'OK', array ($_REQUEST['name']));
+	return buildRedirectURL (__FUNCTION__, 'OK', array ($_REQUEST['file_name']));
 }
 
 $msgcode['unlinkFile']['OK'] = 72;
