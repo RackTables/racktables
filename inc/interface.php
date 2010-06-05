@@ -5614,7 +5614,6 @@ function renderFileDownloader ($file_id)
 function renderFileProperties ($file_id)
 {
 	$file = spotEntity ('file', $file_id);
-	if ($file === NULL)
 	echo '<table border=0 align=center>';
 	printOpFormIntro ('updateFile');
 	echo "<tr><th class=tdright>MIME-type:</th><td class=tdleft><input tabindex=101 type=text name=file_type value='";
