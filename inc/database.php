@@ -1654,7 +1654,7 @@ function searchByMgmtHostname ($string)
 
 function commitCreateUserAccount ($username, $realname, $password)
 {
-	return useInsertBlade
+	return usePreparedInsertBlade
 	(
 		'UserAccount',
 		array
@@ -1684,7 +1684,7 @@ function getPortOIFCompat ()
 		"PortCompat as pc inner join Dictionary as d1 on pc.type1 = d1.dict_key " .
 		"inner join Dictionary as d2 on pc.type2 = d2.dict_key " .
 		'ORDER BY type1name, type2name';
-	$result = useSelectBlade ($query);
+	$result = usePreparedSelectBlade ($query);
 	return $result->fetchAll (PDO::FETCH_ASSOC);
 }
 
@@ -1695,7 +1695,7 @@ function commitSupplementPOIFC ($type1, $type2)
 		throw new InvalidArgException ('type1', $type1);
 	if ($type2 <= 0)
 		throw new InvalidArgException ('type2', $type2);
-	return useInsertBlade
+	return usePreparedInsertBlade
 	(
 		'PortCompat',
 		array ('type1' => $type1, 'type2' => $type2)
@@ -1705,21 +1705,17 @@ function commitSupplementPOIFC ($type1, $type2)
 // Remove a pair from the PortCompat table.
 function commitReducePOIFC ($type1, $type2)
 {
-	if ($type1 <= 0)
-		throw new InvalidArgException ('type1', $type1);
-	if ($type2 <= 0)
-		throw new InvalidArgException ('type2', $type2);
-	global $dbxlink;
-	return 1 === $dbxlink->exec ("DELETE FROM PortCompat WHERE type1 = ${type1} AND type2 = ${type2}");
+	return usePreparedDeleteBlade ('PortCompat', array ('type1' => $type1, 'type2' => $type2));
 }
 
 function getDictStats ()
 {
 	$stock_chapters = array (1, 2, 11, 12, 13, 14, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28);
-	$query =
+	$result = usePreparedSelectBlade
+	(
 		"select Chapter.id as chapter_no, Chapter.name as chapter_name, count(dict_key) as wc from " .
-		"Chapter left join Dictionary on Chapter.id = Dictionary.chapter_id group by Chapter.id";
-	$result = useSelectBlade ($query);
+		"Chapter left join Dictionary on Chapter.id = Dictionary.chapter_id group by Chapter.id"
+	);
 	$tc = $tw = $uc = $uw = 0;
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
@@ -1732,9 +1728,11 @@ function getDictStats ()
 	}
 	$result->closeCursor();
 	unset ($result);
-	$query = "select count(object_id) as attrc from RackObject as ro left join " .
-		"AttributeValue as av on ro.id = av.object_id group by ro.id";
-	$result = useSelectBlade ($query);
+	$result = usePreparedSelectBlade
+	(
+		"select count(object_id) as attrc from RackObject as ro left join " .
+		"AttributeValue as av on ro.id = av.object_id group by ro.id"
+	);
 	$to = $ta = $so = 0;
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
@@ -1772,7 +1770,7 @@ function getIPv4Stats ()
 
 	foreach ($subject as $item)
 	{
-		$result = useSelectBlade ($item['q']);
+		$result = usePreparedSelectBlade ($item['q']);
 		$row = $result->fetch (PDO::FETCH_NUM);
 		$ret[$item['txt']] = $row[0];
 		$result->closeCursor();
@@ -1792,7 +1790,7 @@ function getRackspaceStats ()
 
 	foreach ($subject as $item)
 	{
-		$result = useSelectBlade ($item['q']);
+		$result = usePreparedSelectBlade ($item['q']);
 		$row = $result->fetch (PDO::FETCH_NUM);
 		$ret[$item['txt']] = !strlen ($row[0]) ? 0 : $row[0];
 		$result->closeCursor();
@@ -1843,10 +1841,10 @@ function commitSupplementDictionary ($chapter_no = 0, $dict_value = '')
 		throw new InvalidArgException ('$chapter_no', $chapter_no);
 	if (!strlen ($dict_value))
 		throw new InvalidArgException ('$dict_value', $dict_value);
-	return useInsertBlade
+	return usePreparedInsertBlade
 	(
 		'Dictionary',
-		array ('chapter_id' => $chapter_no, 'dict_value' => "'${dict_value}'")
+		array ('chapter_id' => $chapter_no, 'dict_value' => $dict_value)
 	);
 }
 
@@ -1855,22 +1853,17 @@ function commitSupplementDictionary ($chapter_no = 0, $dict_value = '')
 // chapter, which authorization was granted for.
 function commitReduceDictionary ($chapter_no = 0, $dict_key = 0)
 {
-	global $dbxlink;
-	$query =
-		"delete from Dictionary where chapter_id=${chapter_no} " .
-		"and dict_key=${dict_key} limit 1";
-	$result = $dbxlink->query ($query);
-	return TRUE;
+	return usePreparedDeleteBlade ('Dictionary', array ('chapter_id' => $chapter_no, 'dict_key' => $dict_key));
 }
 
 function commitAddChapter ($chapter_name = '')
 {
 	if (!strlen ($chapter_name))
 		throw new InvalidArgException ('$chapter_name', $chapter_name);
-	return useInsertBlade
+	return usePreparedInsertBlade
 	(
 		'Chapter',
-		array ('name' => "'${chapter_name}'")
+		array ('name' => $chapter_name)
 	);
 }
 
@@ -1888,23 +1881,19 @@ function commitUpdateChapter ($chapter_no = 0, $chapter_name = '')
 
 function commitDeleteChapter ($chapter_no = 0)
 {
-	global $dbxlink;
-	$query =
-		"delete from Chapter where id = ${chapter_no} and sticky = 'no' limit 1";
-	$result = $dbxlink->query ($query);
-	return TRUE;
+	return usePreparedDeleteBlade ('Chapter', array ('id' => $chapter_no, 'sticky' => 'no'));
 }
 
 // This is a dictionary accessor. We perform link rendering, so the user sees
 // nice <select> drop-downs.
 function readChapter ($chapter_id = 0, $style = '')
 {
-	if ($chapter_id <= 0)
-		throw new InvalidArgException ('$chapter_id', $chapter_id);
-	$query =
+	$result = usePreparedSelectBlade
+	(
 		"select dict_key, dict_value from Dictionary " .
-		"where chapter_id = ${chapter_id}";
-	$result = useSelectBlade ($query);
+		"where chapter_id = ?",
+		array ($chapter_id)
+	);
 	$chapter = array();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 		$chapter[$row['dict_key']] = $style == '' ? $row['dict_value'] : parseWikiLink ($row['dict_value'], $style);
@@ -1925,13 +1914,13 @@ function getChapterRefc ($chapter_id, $keylist)
 	case CHAP_OBJTYPE:
 		// RackObjectType chapter is referenced by AttributeMap and RackObject tables
 		$query = 'select dict_key as uint_value, (select count(*) from AttributeMap where objtype_id = dict_key) + ' .
-			"(select count(*) from RackObject where objtype_id = dict_key) as refcnt from Dictionary where chapter_id = ${chapter_id}";
+			"(select count(*) from RackObject where objtype_id = dict_key) as refcnt from Dictionary where chapter_id = ?";
 		break;
 	case CHAP_PORTTYPE:
 		// PortOuterInterface chapter is referenced by PortCompat, PortInterfaceCompat and Port tables
 		$query = 'select dict_key as uint_value, (select count(*) from PortCompat where type1 = dict_key or type2 = dict_key) + ' .
 			'(select count(*) from Port where type = dict_key) + (SELECT COUNT(*) FROM PortInterfaceCompat WHERE oif_id = dict_key) as refcnt ' .
-			"from Dictionary where chapter_id = ${chapter_id}";
+			"from Dictionary where chapter_id = ?";
 		break;
 	default:
 		// Find the list of all assigned values of dictionary-addressed attributes, each with
@@ -1940,10 +1929,10 @@ function getChapterRefc ($chapter_id, $keylist)
 			"from Attribute as a inner join AttributeMap as am on a.id = am.attr_id " .
 			"inner join AttributeValue as av on a.id = av.attr_id " .
 			"inner join Dictionary as d on am.chapter_id = d.chapter_id and av.uint_value = d.dict_key " .
-			"where a.type = 'dict' and am.chapter_id = ${chapter_id} group by uint_value";
+			"where a.type = 'dict' and am.chapter_id = ? group by uint_value";
 		break;
 	}
-	$result = useSelectBlade ($query);
+	$result = usePreparedSelectBlade ($query, array ($chapter_id));
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 		$ret[$row['uint_value']] = $row['refcnt'];
 	return $ret;
@@ -1953,13 +1942,14 @@ function getChapterRefc ($chapter_id, $keylist)
 // list all its ways on the map with refcnt set.
 function getAttrMap ()
 {
-	$query =
+	$result = usePreparedSelectBlade
+	(
 		'SELECT id, type, name, chapter_id, (SELECT dict_value FROM Dictionary WHERE dict_key = objtype_id) '.
 		'AS objtype_name, (SELECT name FROM Chapter WHERE id = chapter_id) ' .
 		'AS chapter_name, objtype_id, (SELECT COUNT(object_id) FROM AttributeValue AS av INNER JOIN RackObject AS ro ' .
 		'ON av.object_id = ro.id WHERE av.attr_id = Attribute.id AND ro.objtype_id = AttributeMap.objtype_id) ' .
-		'AS refcnt FROM Attribute LEFT JOIN AttributeMap ON id = attr_id ORDER BY Attribute.name, objtype_name';
-	$result = useSelectBlade ($query);
+		'AS refcnt FROM Attribute LEFT JOIN AttributeMap ON id = attr_id ORDER BY Attribute.name, objtype_name'
+	);
 	$ret = array();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
@@ -1990,8 +1980,6 @@ function getAttrMap ()
 
 function commitUpdateAttribute ($attr_id = 0, $attr_name = '')
 {
-	if ($attr_id <= 0)
-		throw new InvalidArgException ('$attr_id', $attr_id);
  	if (!strlen ($attr_name))
 		throw new InvalidArgException ('$attr_name', $attr_name);
 
@@ -2017,18 +2005,16 @@ function commitAddAttribute ($attr_name = '', $attr_type = '')
 		default:
 			throw new InvalidArgException ('$attr_type', $attr_type, 'Attribute type not supported');
 	}
-	return useInsertBlade
+	return usePreparedInsertBlade
 	(
 		'Attribute',
-		array ('name' => "'${attr_name}'", 'type' => "'${attr_type}'")
+		array ('name' => $attr_name, 'type' => $attr_type)
 	);
 }
 
 function commitDeleteAttribute ($attr_id = 0)
 {
-	if ($attr_id <= 0)
-		throw new InvalidArgException ('$attr_id', $attr_id);
-	return useDeleteBlade ('Attribute', 'id', $attr_id);
+	return usePreparedDeleteBlade ('Attribute', array ('id' => $attr_id));
 }
 
 // FIXME: don't store garbage in chapter_no for non-dictionary types.
@@ -2039,7 +2025,7 @@ function commitSupplementAttrMap ($attr_id = 0, $objtype_id = 0, $chapter_no = 0
 	if ($objtype_id <= 0)
 		throw new InvalidArgException ('$objtype_id', $objtype_id);
 
-	return useInsertBlade
+	return usePreparedInsertBlade
 	(
 		'AttributeMap',
 		array
@@ -2053,16 +2039,7 @@ function commitSupplementAttrMap ($attr_id = 0, $objtype_id = 0, $chapter_no = 0
 
 function commitReduceAttrMap ($attr_id = 0, $objtype_id)
 {
-	if ($attr_id <= 0)
-		throw new InvalidArgException ('$attr_id', $attr_id);
-	if ($objtype_id <= 0)
-		throw new InvalidArgException ('$objtype_id', $objtype_id);
-	global $dbxlink;
-	$query =
-		"delete from AttributeMap where attr_id=${attr_id} " .
-		"and objtype_id=${objtype_id} limit 1";
-	$result = $dbxlink->query ($query);
-	return TRUE;
+	return usePreparedDeleteBlade ('AttributeMap', array ('attr_id' => $attr_id, 'objtype_id' => $objtype_id));
 }
 
 // This function returns all optional attributes for requested object
@@ -2070,10 +2047,9 @@ function commitReduceAttrMap ($attr_id = 0, $objtype_id)
 // is returned, if there are no attributes found.
 function getAttrValues ($object_id)
 {
-	if ($object_id <= 0)
-		throw new InvalidArgException ('$objtype_id', $objtype_id);
 	$ret = array();
-	$query =
+	$result = usePreparedSelectBlade
+	(
 		"select A.id as attr_id, A.name as attr_name, A.type as attr_type, C.name as chapter_name, " .
 		"C.id as chapter_id, AV.uint_value, AV.float_value, AV.string_value, D.dict_value from " .
 		"RackObject as RO inner join AttributeMap as AM on RO.objtype_id = AM.objtype_id " .
@@ -2081,8 +2057,9 @@ function getAttrValues ($object_id)
 		"left join AttributeValue as AV on AV.attr_id = AM.attr_id and AV.object_id = RO.id " .
 		"left join Dictionary as D on D.dict_key = AV.uint_value and AM.chapter_id = D.chapter_id " .
 		"left join Chapter as C on AM.chapter_id = C.id " .
-		"where RO.id = ${object_id} order by A.name, A.type";
-	$result = useSelectBlade ($query);
+		"where RO.id = ? order by A.name, A.type",
+		array ($object_id)
+	);
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
 		$record = array();
@@ -2115,17 +2092,9 @@ function getAttrValues ($object_id)
 
 function commitResetAttrValue ($object_id = 0, $attr_id = 0)
 {
-	if ($object_id <= 0)
-		throw new InvalidArgException ('$objtype_id', $objtype_id);
-	if ($attr_id <= 0)
-		throw new InvalidArgException ('$attr_id', $attr_id);
-	global $dbxlink;
-	$query = "delete from AttributeValue where object_id = ${object_id} and attr_id = ${attr_id} limit 1";
-	$result = $dbxlink->query ($query);
-	return TRUE;
+	return usePreparedDeleteBlade ('AttributeValue', array ('object_id' => $object_id, 'attr_id' => $attr_id));
 }
 
-// FIXME: don't share common code with use commitResetAttrValue()
 function commitUpdateAttrValue ($object_id = 0, $attr_id = 0, $value = '')
 {
 	if ($object_id <= 0)
@@ -2134,12 +2103,10 @@ function commitUpdateAttrValue ($object_id = 0, $attr_id = 0, $value = '')
 		throw new InvalidArgException ('$attr_id', $attr_id);
 	if (!strlen ($value))
 		return commitResetAttrValue ($object_id, $attr_id);
-	global $dbxlink;
-	$query1 = "select type as attr_type from Attribute where id = ${attr_id}";
-	$result = $dbxlink->query ($query1);
+	$result = usePreparedSelectBlade ('select type as attr_type from Attribute where id = ?', array ($attr_id));
 	$row = $result->fetch (PDO::FETCH_NUM);
 	$attr_type = $row[0];
-	$result->closeCursor();
+	unset ($result);
 	switch ($attr_type)
 	{
 		case 'uint':
@@ -2153,15 +2120,18 @@ function commitUpdateAttrValue ($object_id = 0, $attr_id = 0, $value = '')
 		default:
 			throw new InvalidArgException ('$attr_type', $attr_type, 'Unknown attribute type found in object #'.$object_id.', attribute #'.$attr_id);
 	}
-	$query2 =
-		"delete from AttributeValue where " .
-		"object_id = ${object_id} and attr_id = ${attr_id} limit 1";
-	$result = $dbxlink->query ($query2);
+	usePreparedDeleteBlade ('AttributeValue', array ('object_id' => $object_id, 'attr_id' => $attr_id));
 	// We know $value isn't empty here.
-	$query3 =
-		"insert into AttributeValue set ${column} = '${value}', " .
-		"object_id = ${object_id}, attr_id = ${attr_id} ";
-	$result = $dbxlink->query ($query3);
+	usePreparedInsertBlade
+	(
+		'AttributeValue',
+		array
+		(
+			$column => $value,
+			'object_id' => $object_id,
+			'attr_id' => $attr_id,
+		)
+	);
 	return TRUE;
 }
 
@@ -2253,13 +2223,10 @@ function usePreparedSelectBlade ($query, $args = array())
 
 function loadConfigCache ()
 {
-	$query = 'SELECT varname, varvalue, vartype, is_hidden, emptyok, description, is_userdefined FROM Config ORDER BY varname';
-	$result = useSelectBlade ($query);
+	$result = usePreparedSelectBlade ('SELECT varname, varvalue, vartype, is_hidden, emptyok, description, is_userdefined FROM Config ORDER BY varname');
 	$cache = array();
-	while ($row = $result->fetch (PDO::FETCH_ASSOC)) {
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 		$cache[$row['varname']] = $row;
-	}
-	$result->closeCursor();
 	return $cache;
 }
 
@@ -2267,25 +2234,16 @@ function loadUserConfigCache ($username = NULL)
 {
 	if (!strlen ($username))
 		throw new InvalidArgException ('$username', $username);
-	$query = "SELECT varname, varvalue FROM UserConfig WHERE user = '$username'";
-	$result = useSelectBlade ($query);
+	$result = usePreparedSelectBlade ('SELECT varname, varvalue FROM UserConfig WHERE user = ?', array ($username));
 	$cache = array();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 		$cache[$row['varname']] = $row;
-	$result->closeCursor();
 	return $cache;
 }
 
 function deleteUserConfigVar ($username = NULL, $varname = NULL)
 {
-        global $dbxlink;
-        if (!strlen ($username))
-                throw new InvalidArgException ('$username', $username);
-        if (!strlen ($varname))
-                throw new InvalidArgException ('$varname', $varname);
-        $query = "delete from UserConfig where varname='${varname}' and user='${username}'";
-        $result = $dbxlink->query ($query);
-        $result->closeCursor();
+        usePreparedDeleteBlade ('UserConfig', array ('varname' => $varname, 'user' => $username));
 }
 
 function storeUserConfigVar ($username = NULL, $varname = NULL, $varvalue = NULL)
@@ -2344,13 +2302,15 @@ function getDatabaseVersion ()
 // with their load balancers and other stats.
 function getSLBSummary ()
 {
-	$query = 'select vs.id as vsid, inet_ntoa(vip) as vip, vport, proto, vs.name, object_id, ' .
+	$result = usePreparedSelectBlade
+	(
+		'select vs.id as vsid, inet_ntoa(vip) as vip, vport, proto, vs.name, object_id, ' .
 		'lb.rspool_id, pool.name as pool_name, count(rs.id) as rscount ' .
 		'from IPv4VS as vs inner join IPv4LB as lb on vs.id = lb.vs_id ' .
 		'inner join IPv4RSPool as pool on lb.rspool_id = pool.id ' .
 		'left join IPv4RS as rs on rs.rspool_id = lb.rspool_id ' .
-		'group by vs.id, object_id order by vs.vip, object_id';
-	$result = useSelectBlade ($query);
+		'group by vs.id, object_id order by vs.vip, object_id'
+	);
 	$ret = array();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
@@ -2371,7 +2331,6 @@ function getSLBSummary ()
 			'name' => $row['pool_name']
 		);
 	}
-	$result->closeCursor();
 	return $ret;
 }
 
@@ -2422,13 +2381,7 @@ function commitCreateVS ($vip = '', $vport = 0, $proto = '', $name = '', $vsconf
 
 function addLBtoRSPool ($pool_id = 0, $object_id = 0, $vs_id = 0, $vsconfig = '', $rsconfig = '')
 {
-	if ($pool_id <= 0)
-		throw new InvalidArgException ('$pool_id', $pool_id);
-	if ($object_id <= 0)
-		throw new InvalidArgException ('$object_id', $object_id);
-	if ($vs_id <= 0)
-		throw new InvalidArgException ('$vs_id', $vs_id);
-	return useInsertBlade
+	return usePreparedInsertBlade
 	(
 		'IPv4LB',
 		array
@@ -2436,39 +2389,26 @@ function addLBtoRSPool ($pool_id = 0, $object_id = 0, $vs_id = 0, $vsconfig = ''
 			'object_id' => $object_id,
 			'rspool_id' => $pool_id,
 			'vs_id' => $vs_id,
-			'vsconfig' => (!strlen ($vsconfig) ? 'NULL' : "'${vsconfig}'"),
-			'rsconfig' => (!strlen ($rsconfig) ? 'NULL' : "'${rsconfig}'")
+			'vsconfig' => (!strlen ($vsconfig) ? NULL : $vsconfig),
+			'rsconfig' => (!strlen ($rsconfig) ? NULL : $rsconfig)
 		)
 	);
 }
 
 function commitDeleteRS ($id = 0)
 {
-	if ($id <= 0)
-		return FALSE;
-	return useDeleteBlade ('IPv4RS', 'id', $id);
+	return usePreparedDeleteBlade ('IPv4RS', array ('id' => $id));
 }
 
 function commitDeleteVS ($id = 0)
 {
 	releaseFiles ('ipv4vs', $id);
-	return useDeleteBlade ('IPv4VS', 'id', $id) && destroyTagsForEntity ('ipv4vs', $id);
+	return usePreparedDeleteBlade ('IPv4VS', array ('id' => $id)) && destroyTagsForEntity ('ipv4vs', $id);
 }
 
 function commitDeleteLB ($object_id = 0, $pool_id = 0, $vs_id = 0)
 {
-	global $dbxlink;
-	if ($object_id <= 0 or $pool_id <= 0 or $vs_id <= 0)
-		return FALSE;
-	$query = "delete from IPv4LB where object_id = ${object_id} and " .
-		"rspool_id = ${pool_id} and vs_id = ${vs_id} limit 1";
-	$result = $dbxlink->exec ($query);
-	if ($result === NULL)
-		return FALSE;
-	elseif ($result != 1)
-		return FALSE;
-	else
-		return TRUE;
+	return usePreparedDeleteBlade ('IPv4LB', array ('object_id' => $object_id, 'rspool_id' => $pool_id, 'vs_id' => $vs_id));
 }
 
 function commitUpdateRS ($rsid = 0, $rsip = '', $rsport = 0, $rsconfig = '')
@@ -2524,12 +2464,10 @@ function commitUpdateVS ($vsid = 0, $vip = '', $vport = 0, $proto = '', $name = 
 function loadThumbCache ($rack_id = 0)
 {
 	$ret = NULL;
-	$query = "select thumb_data from Rack where id = ${rack_id} and thumb_data is not null limit 1";
-	$result = useSelectBlade ($query);
+	$result = usePreparedSelectBlade ("SELECT thumb_data FROM Rack WHERE id = ? AND thumb_data IS NOT NULL", array ($rack_id));
 	$row = $result->fetch (PDO::FETCH_ASSOC);
 	if ($row)
 		$ret = base64_decode ($row['thumb_data']);
-	$result->closeCursor();
 	return $ret;
 }
 
@@ -2556,19 +2494,21 @@ function resetThumbCache ($rack_id = 0)
 // current object.
 function getRSPoolsForObject ($object_id = 0)
 {
-	$query = 'select vs_id, inet_ntoa(vip) as vip, vport, proto, vs.name, pool.id as pool_id, ' .
+	$result = usePreparedSelectBlade
+	(
+		'select vs_id, inet_ntoa(vip) as vip, vport, proto, vs.name, pool.id as pool_id, ' .
 		'pool.name as pool_name, count(rsip) as rscount, lb.vsconfig, lb.rsconfig from ' .
 		'IPv4LB as lb inner join IPv4RSPool as pool on lb.rspool_id = pool.id ' .
 		'inner join IPv4VS as vs on lb.vs_id = vs.id ' .
 		'left join IPv4RS as rs on lb.rspool_id = rs.rspool_id ' .
-		"where lb.object_id = ${object_id} " .
-		'group by lb.rspool_id, lb.vs_id order by vs.vip, vport, proto, pool.name';
-	$result = useSelectBlade ($query);
+		'where lb.object_id = ? ' .
+		'group by lb.rspool_id, lb.vs_id order by vs.vip, vport, proto, pool.name',
+		array ($object_id)
+	);
 	$ret = array ();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 		foreach (array ('vip', 'vport', 'proto', 'name', 'pool_id', 'pool_name', 'rscount', 'vsconfig', 'rsconfig') as $cname)
 			$ret[$row['vs_id']][$cname] = $row[$cname];
-	$result->closeCursor();
 	return $ret;
 }
 
@@ -2576,14 +2516,14 @@ function commitCreateRSPool ($name = '', $vsconfig = '', $rsconfig = '', $taglis
 {
 	if (!strlen ($name))
 		throw new InvalidArgException ('$name', $name);
-	if (!useInsertBlade
+	if (!usePreparedInsertBlade
 	(
 		'IPv4RSPool',
 		array
 		(
-			'name' => (!strlen ($name) ? 'NULL' : "'${name}'"),
-			'vsconfig' => (!strlen ($vsconfig) ? 'NULL' : "'${vsconfig}'"),
-			'rsconfig' => (!strlen ($rsconfig) ? 'NULL' : "'${rsconfig}'")
+			'name' => (!strlen ($name) ? NULL : $name),
+			'vsconfig' => (!strlen ($vsconfig) ? NULL : $vsconfig),
+			'rsconfig' => (!strlen ($rsconfig) ? NULL : $rsconfig)
 		)
 	))
 		return __FUNCTION__ . ': SQL insertion failed';
@@ -2592,11 +2532,8 @@ function commitCreateRSPool ($name = '', $vsconfig = '', $rsconfig = '', $taglis
 
 function commitDeleteRSPool ($pool_id = 0)
 {
-	global $dbxlink;
-	if ($pool_id <= 0)
-		return FALSE;
 	releaseFiles ('ipv4rspool', $pool_id);
-	return useDeleteBlade ('IPv4RSPool', 'id', $pool_id) && destroyTagsForEntity ('ipv4rspool', $pool_id);
+	return usePreparedDeleteBlade ('IPv4RSPool', array ('id' => $pool_id)) && destroyTagsForEntity ('ipv4rspool', $pool_id);
 }
 
 function commitUpdateRSPool ($pool_id = 0, $name = '', $vsconfig = '', $rsconfig = '')
@@ -2616,27 +2553,29 @@ function commitUpdateRSPool ($pool_id = 0, $name = '', $vsconfig = '', $rsconfig
 
 function getRSList ()
 {
-	$query = "select id, inservice, inet_ntoa(rsip) as rsip, rsport, rspool_id, rsconfig " .
-		"from IPv4RS order by rspool_id, IPv4RS.rsip, rsport";
-	$result = useSelectBlade ($query);
+	$result = usePreparedSelectBlade
+	(
+		"select id, inservice, inet_ntoa(rsip) as rsip, rsport, rspool_id, rsconfig " .
+		"from IPv4RS order by rspool_id, IPv4RS.rsip, rsport"
+	);
 	$ret = array ();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 		foreach (array ('inservice', 'rsip', 'rsport', 'rspool_id', 'rsconfig') as $cname)
 			$ret[$row['id']][$cname] = $row[$cname];
-	$result->closeCursor();
 	return $ret;
 }
 
 // Return the list of all currently configured load balancers with their pool count.
 function getLBList ()
 {
-	$query = "select object_id, count(rspool_id) as poolcount " .
-		"from IPv4LB group by object_id order by object_id";
-	$result = useSelectBlade ($query);
+	$result = usePreparedSelectBlade
+	(
+		"select object_id, count(rspool_id) as poolcount " .
+		"from IPv4LB group by object_id order by object_id"
+	);
 	$ret = array ();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 		$ret[$row['object_id']] = $row['poolcount'];
-	$result->closeCursor();
 	return $ret;
 }
 
