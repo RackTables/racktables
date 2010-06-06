@@ -228,7 +228,25 @@ function trigger_object_8021qsync ()
 
 function trigger_LiveCDP ()
 {
-	return 'ios12' == detectDeviceBreed ($_REQUEST['object_id']) ? 'std' : '';
+	return trigger_anyDP ('getcdpstatus', 'CDP_RUNNERS_LISTSRC');
+}
+
+function trigger_LiveLLDP ()
+{
+	return trigger_anyDP ('getlldpstatus', 'LLDP_RUNNERS_LISTSRC');
+}
+
+function trigger_anyDP ($command, $constraint)
+{
+	global $gwrxlator;
+	if (!array_key_exists ($command, $gwrxlator))
+		return '';
+	if (!array_key_exists (detectDeviceBreed ($_REQUEST['object_id']), $gwrxlator[$command]))
+		return '';
+	$object = spotEntity ('object', $_REQUEST['object_id']);
+	if (considerConfiguredConstraint (spotEntity ('object', $_REQUEST['object_id']), $constraint))
+		return 'std';
+	return '';
 }
 
 ?>
