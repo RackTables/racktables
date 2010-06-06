@@ -53,7 +53,7 @@ while read command endpoint handler conftext; do
 		exit 1
 	}
 	"$MYDIR/$handler.connector" $endpoint $command "$conftext"
-	local ret=$?
+	ret=$?
 	if [ $ret = 0 ]; then
 		echo "OK!request '$command' complete for $endpoint"
 	else
