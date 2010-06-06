@@ -25,6 +25,15 @@ $gwrxlator['get8021q'] = array
 	'xos12' => 'xos12Read8021QConfig',
 );
 
+$gwpushxlator = array
+(
+	'ios12' => 'ios12TranslatePushQueue',
+	'fdry5' => 'fdry5TranslatePushQueue',
+	'vrp53' => 'vrp53TranslatePushQueue',
+	'nxos4' => 'ios12TranslatePushQueue', // employ syntax compatibility
+	'xos12' => 'xos12TranslatePushQueue',
+);
+
 // This function launches specified gateway with specified
 // command-line arguments and feeds it with the commands stored
 // in the second arg as array.
@@ -316,14 +325,8 @@ function setDevice8021QConfig ($object_id, $pseudocode)
 {
 	if ('' == $breed = detectDeviceBreed ($object_id))
 		throw new Exception ('device breed unknown', E_GW_FAILURE);
-	$xlator = array
-	(
-		'ios12' => 'ios12TranslatePushQueue',
-		'fdry5' => 'fdry5TranslatePushQueue',
-		'vrp53' => 'vrp53TranslatePushQueue',
-		'nxos4' => 'ios12TranslatePushQueue', // employ syntax compatibility
-	);
-	gwDeployDeviceConfig ($object_id, $breed, unix2dos ($xlator[$breed] ($pseudocode)));
+	global $gwpushxlator;
+	gwDeployDeviceConfig ($object_id, $breed, unix2dos ($gwpushxlator[$breed] ($pseudocode)));
 }
 
 function gwRetrieveDeviceConfig ($object_id, $command)
@@ -1070,6 +1073,59 @@ function vrp53TranslatePushQueue ($queue)
 	$ret .= "return\n";
 	if (getConfigVar ('8021Q_WRI_AFTER_CONFT') == 'yes')
 		$ret .= "save\nY\n";
+	return $ret;
+}
+
+function xos12TranslatePushQueue ($queue)
+{
+	$ret = '';
+	foreach ($queue as $cmd)
+		switch ($cmd['opcode'])
+		{
+		case 'create VLAN':
+			$ret .= "create vlan VLAN${cmd['arg1']}\n";
+			$ret .= "configure vlan VLAN${cmd['arg1']} tag ${cmd['arg1']}\n";
+			break;
+		case 'destroy VLAN':
+			$ret .= "delete vlan VLAN${cmd['arg1']}\n";
+			break;
+		case 'add allowed':
+			foreach ($cmd['vlans'] as $vlan_id)
+			{
+				$vlan_name = $vlan_id == 1 ? 'Default' : "VLAN${vlan_id}";
+				$ret .= "configure vlan ${vlan_name} add ports ${cmd['port']} tagged\n";
+			}
+			break;
+		case 'rem allowed':
+			foreach ($cmd['vlans'] as $vlan_id)
+			{
+				$vlan_name = $vlan_id == 1 ? 'Default' : "VLAN${vlan_id}";
+				$ret .= "configure vlan ${vlan_name} delete ports ${cmd['port']}\n";
+			}
+			break;
+		case 'set native':
+			$vlan_name = $cmd['arg2'] == 1 ? 'Default' : "VLAN${cmd['arg2']}";
+			$ret .= "configure vlan ${vlan_name} delete ports ${cmd['arg1']}\n";
+			$ret .= "configure vlan ${vlan_name} add ports ${cmd['arg1']} untagged\n";
+			break;
+		case 'unset native':
+			$vlan_name = $cmd['arg2'] == 1 ? 'Default' : "VLAN${cmd['arg2']}";
+			$ret .= "configure vlan ${vlan_name} delete ports ${cmd['arg1']}\n";
+			$ret .= "configure vlan ${vlan_name} add ports ${cmd['arg1']} tagged\n";
+			break;
+		case 'set access':
+			$vlan_name = $cmd['arg2'] == 1 ? 'Default' : "VLAN${cmd['arg2']}";
+			$ret .= "configure vlan ${vlan_name} add ports ${cmd['arg1']} untagged\n";
+			break;
+		case 'unset access':
+			$vlan_name = $cmd['arg2'] == 1 ? 'Default' : "VLAN${cmd['arg2']}";
+			$ret .= "configure vlan ${vlan_name} delete ports ${cmd['arg1']}\n";
+			break;
+		case 'set mode': // NOP
+			break;
+		}
+	if (getConfigVar ('8021Q_WRI_AFTER_CONFT') == 'yes')
+		$ret .= "save configuration\ny\n";
 	return $ret;
 }
 
