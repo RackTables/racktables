@@ -1097,4 +1097,36 @@ function ios12ScanCDPEntry (&$work, $line)
 	return __FUNCTION__;
 }
 
+function xos12Read8021QConfig ($input)
+{
+	$ret = array
+	(
+		'vlanlist' => array (1),
+		'portdata' => array(),
+	);
+	$procfunc = 'xos12ScanTopLevel';
+	foreach (explode ("\n", $input) as $line)
+	{
+		$matches = array();
+		switch (TRUE)
+		{
+		case (preg_match ('/^create vlan "([[:alnum:]]+)"$/', $line, $matches)):
+			if (!preg_match ('/VLAN[[:digit:]]+$/', $matches[1]))
+				throw new Exception ('unsupported VLAN name ' . $matches[1], E_GW_FAILURE);
+			break;
+		case (preg_match ('/^configure vlan ([[:alnum:]]+) tag ([[:digit:]]+)$/', $line, $matches)):
+			if (strtolower ($matches[1]) == 'default')
+				throw new Exception ('default VLAN tag must be 1', E_GW_FAILURE);
+			if ($matches[1] != 'VLAN' . $matches[2])
+				throw new Exception ("VLAN name ${matches[1]} does not match its tag ${matches[2]}", E_GW_FAILURE);
+			$work['vlanlist'][] = $matches[2];
+			break;
+		case (preg_match ('/^configure vlan ([[:alnum:]]+) add ports (.+) (tagged|untagged)$/', $line, $matches)):
+			break;
+		default:
+		}
+	}
+	return $ret;
+}
+
 ?>
