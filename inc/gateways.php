@@ -22,6 +22,7 @@ $gwrxlator['get8021q'] = array
 	'fdry5' => 'fdry5ReadVLANConfig',
 	'vrp53' => 'vrp53ReadVLANConfig',
 	'nxos4' => 'nxos4Read8021QConfig',
+	'xos12' => 'xos12Read8021QConfig',
 );
 
 // This function launches specified gateway with specified
@@ -277,6 +278,12 @@ function detectDeviceBreed ($object_id)
 			preg_match ('/^Cisco NX-OS 4\./', execGMarker ($record['o_value']))
 		)
 			return 'nxos4';
+		if
+		(
+			$record['id'] == 4 &&
+			$record['key'] == 1352
+		)
+			return 'xos12';
 		if
 		(
 			$record['name'] == 'HW type' &&
@@ -1104,14 +1111,13 @@ function xos12Read8021QConfig ($input)
 		'vlanlist' => array (1),
 		'portdata' => array(),
 	);
-	$procfunc = 'xos12ScanTopLevel';
 	foreach (explode ("\n", $input) as $line)
 	{
 		$matches = array();
 		switch (TRUE)
 		{
 		case (preg_match ('/^create vlan "([[:alnum:]]+)"$/', $line, $matches)):
-			if (!preg_match ('/VLAN[[:digit:]]+$/', $matches[1]))
+			if (!preg_match ('/^VLAN[[:digit:]]+$/', $matches[1]))
 				throw new Exception ('unsupported VLAN name ' . $matches[1], E_GW_FAILURE);
 			break;
 		case (preg_match ('/^configure vlan ([[:alnum:]]+) tag ([[:digit:]]+)$/', $line, $matches)):
@@ -1119,9 +1125,28 @@ function xos12Read8021QConfig ($input)
 				throw new Exception ('default VLAN tag must be 1', E_GW_FAILURE);
 			if ($matches[1] != 'VLAN' . $matches[2])
 				throw new Exception ("VLAN name ${matches[1]} does not match its tag ${matches[2]}", E_GW_FAILURE);
-			$work['vlanlist'][] = $matches[2];
+			$ret['vlanlist'][] = $matches[2];
 			break;
-		case (preg_match ('/^configure vlan ([[:alnum:]]+) add ports (.+) (tagged|untagged)$/', $line, $matches)):
+		case (preg_match ('/^configure vlan ([[:alnum:]]+) add ports (.+) (tagged|untagged) */', $line, $matches)):
+			$submatch = array();
+			if ($matches[1] == 'Default')
+				$matches[1] = 'VLAN1';
+			if (!preg_match ('/^VLAN([[:digit:]]+)$/', $matches[1], $submatch))
+				throw new Exception ('unsupported VLAN name ' . $matches[1], E_GW_FAILURE);
+			$vlan_id = $submatch[1];
+			foreach (iosParseVLANString ($matches[2]) as $port_name)
+			{
+				if (!array_key_exists ($port_name, $ret['portdata']))
+					$ret['portdata'][$port_name] = array
+					(
+						'mode' => 'trunk',
+						'allowed' => array(),
+						'native' => 0,
+					);
+				$ret['portdata'][$port_name]['allowed'][] = $vlan_id;
+				if ($matches[3] == 'untagged')
+					$ret['portdata'][$port_name]['native'] = $vlan_id;
+			}
 			break;
 		default:
 		}
