@@ -51,6 +51,10 @@ get8021q)
 	printf 'display current-configuration\n' >> "$SESSION"
 	outfile="$WORKFILE"
 	;;
+getlldpstatus)
+	printf 'display lldp neighbor\n' >> "$SESSION"
+	outfile="$WORKFILE"
+	;;
 deploy)
 	cat "$WORKFILE" >> "$SESSION"
 	outfile=/dev/null
