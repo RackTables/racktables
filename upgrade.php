@@ -706,6 +706,7 @@ CREATE TABLE `VLANValidID` (
 		case '0.18.2':
 			$query = array_merge ($query, reloadDictionary ($batchid));
 			$query[] = "ALTER TABLE Rack ADD CONSTRAINT `Rack-FK-row_id` FOREIGN KEY (row_id) REFERENCES RackRow (id)";
+			$query[] = "UPDATE Config SET varvalue = '0.18.2' WHERE varname = 'DB_VERSION'";
 			break;
 		default:
 			showFailure ("executeUpgradeBatch () failed, because batch '${batchid}' isn't defined", __FILE__);
