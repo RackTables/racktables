@@ -42,7 +42,8 @@ prepare_connect_commands()
 	exit 3
 }
 
-SESSION=`mktemp /tmp/fdry5.connector.XXXX`
+MYNAME=`basename $0`
+SESSION=`mktemp /tmp/$MYNAME.XXXX`
 [ -f "$SESSION" ] || exit 5
 prepare_connect_commands $ENDPOINT
 case $COMMAND in
@@ -55,9 +56,12 @@ deploy)
 	outfile=/dev/null
 	;;
 *)
-	outfile=/dev/null
+	rm -f "$SESSION"
+	exit 6
+	;;
 esac
 printf 'exit\r\nexit\r\n' >> "$SESSION"
-nc -w 30 -i 1 $ENDPOINT 23 < "$SESSION" > "$outfile"
+rc=0
+nc -w 30 -i 1 $ENDPOINT 23 < "$SESSION" > "$outfile" || rc=4
 rm -f "$SESSION"
-exit 0
+exit $rc

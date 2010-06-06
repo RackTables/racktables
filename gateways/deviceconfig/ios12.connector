@@ -43,7 +43,8 @@ prepare_connect_commands()
 	exit 3
 }
 
-SESSION=`mktemp /tmp/ios12.connector.XXXX`
+MYNAME=`basename $0`
+SESSION=`mktemp /tmp/$MYNAME.XXXX`
 [ -f "$SESSION" ] || exit 5
 prepare_connect_commands $ENDPOINT
 case $COMMAND in
@@ -60,10 +61,12 @@ deploy)
 	outfile=/dev/null
 	;;
 *)
-	outfile=/dev/null
+	rm -f "$SESSION"
+	exit 6
 	;;
 esac
 printf 'quit\n' >> "$SESSION"
-nc -w 30 $ENDPOINT 23 < "$SESSION" > "$outfile"
+rc=0
+nc -w 30 $ENDPOINT 23 < "$SESSION" > "$outfile" || rc=4
 rm -f "$SESSION"
-exit 0
+exit $rc

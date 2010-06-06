@@ -57,10 +57,13 @@ deploy)
 	outfile=/dev/null
 	;;
 *)
-	outfile=/dev/null
+	rm -f "$SESSION"
+	exit 6
+	;;
 esac
 # quit, but don't save, if asked
 printf 'quit\nn\n' >> "$SESSION"
-nc -w30 $ENDPOINT 23 < "$SESSION" > "$outfile"
+rc=0
+nc -w30 $ENDPOINT 23 < "$SESSION" > "$outfile" || rc=4
 rm -f "$SESSION"
-exit 0
+exit $rc

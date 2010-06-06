@@ -18,11 +18,8 @@ MYDIR=`dirname $0`
 decode_error()
 {
 	case "$1" in
-		0)
-			echo -n 'success'
-		;;
 		1)
-			echo -n 'internal error 1'
+			echo -n 'invalid connector args'
 		;;
 		2)
 			echo -n 'internal error 2'
@@ -31,40 +28,28 @@ decode_error()
 			echo -n 'password not found'
 		;;
 		4)
-			echo -n 'invalid password'
+			echo -n 'netcat failed'
 		;;
 		5)
 			echo -n 'cannot create temporary files'
 		;;
 		6)
-			echo -n 'invalid command'
-		;;
-		7)
-			echo -n 'unknown host OS'
+			echo -n 'command not supported by device'
 		;;
 		*)
-			echo -n 'unknown error'
+			echo -n "unknown error $1"
 		;;
 	esac
 }
 
-do_work()
-{
-	local command=$1
-	local endpoint=$2
-	local handler=$3
-	local conftext=$4
+while read command endpoint handler conftext; do
 	# sanity checks
 	if [ -z "$endpoint" -o -z "$conftext" -o -z "$handler" -o -z "$command" ]; then
-		echo 'ERR!too few arguments to connect'
-		return
-	fi
-	if [ "$command" = "getcdpstatus" and "$handler" != "ios12" ]; then
-		echo 'ERR!getcdpstatus only works for ios12'
+		echo 'ERR!too few arguments in command'
 		return
 	fi
 	[ -x "$MYDIR/$handler.connector" ] || {
-		echo "ERR!Handler '$handler' is not available"
+		echo "ERR!Connector '$handler' is not available"
 		exit 1
 	}
 	"$MYDIR/$handler.connector" $endpoint $command "$conftext"
@@ -72,20 +57,11 @@ do_work()
 	if [ $ret = 0 ]; then
 		echo "OK!request '$command' complete for $endpoint"
 	else
-		echo -n "ERR!Cannot connect to $endpoint ("
+		echo -n "ERR!connector error ("
 		decode_error $ret
 		echo ')'
 	fi
-}
-
-while read cmd args; do
-	case $cmd in
-		get8021q|deploy|getcdpstatus)
-			do_work $cmd $args
-			;;
-		*)
-			echo "ERR!unknown command $cmd"
-	esac
 done
 
+# all error messages have been sent to stdout
 exit 0
