@@ -3542,7 +3542,7 @@ function getDomainVLANs ($vdom_id)
 		array ($vdom_id, $vdom_id, $vdom_id)
 	);
 	$ret = array();
-	while ($row = $query->fetch (PDO::FETCH_ASSOC))
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 		$ret[$row['vlan_id']] = $row;
 	return $ret;
 }
