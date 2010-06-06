@@ -16,7 +16,11 @@
 // translating functions maps
 $gwrxlator = array();
 $gwrxlator['getcdpstatus']['ios12'] = 'ios12ReadCDPStatus';
-$gwrxlator['getlldpstatus']['xos12'] = 'xos12ReadLLDPStatus';
+$gwrxlator['getlldpstatus'] = array
+(
+	'xos12' => 'xos12ReadLLDPStatus',
+	'vrp53' => 'vrp53ReadLLDPStatus',
+);
 $gwrxlator['get8021q'] = array
 (
 	'ios12' => 'ios12ReadVLANConfig',
@@ -419,6 +423,43 @@ function xos12ReadLLDPStatus ($input)
 					'port' => $ret['current']['remote_port'],
 				);
 			unset ($ret['current']);
+		default:
+		}
+	}
+	unset ($ret['current']);
+	return $ret;
+}
+
+function vrp53ReadLLDPStatus ($input)
+{
+	$ret = array();
+	foreach (explode ("\n", $input) as $line)
+	{
+		$matches = array();
+		switch (TRUE)
+		{
+		case preg_match ('/^(.+) has 1 neighbors:$/', $line, $matches):
+			$ret['current']['local_port'] = ios12ShortenIfName ($matches[1]);
+			break;
+		case preg_match ('/^(PortIdSubtype|PortId): ([^ ]+)/', $line, $matches):
+			$ret['current'][$matches[1]] = $matches[2];
+			break;
+		case preg_match ('/^SysName: (.+)$/', $line, $matches):
+			if
+			(
+				array_key_exists ('current', $ret) and
+				array_key_exists ('PortIdSubtype', $ret['current']) and
+				($ret['current']['PortIdSubtype'] == 'interfaceAlias' or $ret['current']['PortIdSubtype'] == 'interfaceName') and
+				array_key_exists ('PortId', $ret['current']) and
+				array_key_exists ('local_port', $ret['current'])
+			)
+				$ret[$ret['current']['local_port']] = array
+				(
+					'device' => $matches[1],
+					'port' => ios12ShortenIfName ($ret['current']['PortId']),
+				);
+			unset ($ret['current']);
+			break;
 		default:
 		}
 	}
