@@ -16,6 +16,7 @@
 // translating functions maps
 $gwrxlator = array();
 $gwrxlator['getcdpstatus']['ios12'] = 'ios12ReadCDPStatus';
+$gwrxlator['getlldpstatus']['xos12'] = 'xos12ReadLLDPStatus';
 $gwrxlator['get8021q'] = array
 (
 	'ios12' => 'ios12ReadVLANConfig',
@@ -388,6 +389,40 @@ function ios12ReadCDPStatus ($input)
 	$procfunc = 'ios12ScanCDPTopLevel';
 	foreach (explode ("\n", $input) as $line)
 		$procfunc = $procfunc ($ret, $line);
+	return $ret;
+}
+
+function xos12ReadLLDPStatus ($input)
+{
+	$ret = array();
+	foreach (explode ("\n", $input) as $line)
+	{
+		$matches = array();
+		switch (TRUE)
+		{
+		case preg_match ('/^LLDP Port ([[:digit:]]+) detected 1 neighbor$/', $line, $matches):
+			$ret['current']['local_port'] = ios12ShortenIfName ($matches[1]);
+			break;
+		case preg_match ('/^      Port ID     : "(.+)"$/', $line, $matches):
+			$ret['current']['remote_port'] = ios12ShortenIfName ($matches[1]);
+			break;
+		case preg_match ('/^    - System Name: "(.+)"$/', $line, $matches):
+			if
+			(
+				array_key_exists ('current', $ret) and
+				array_key_exists ('local_port', $ret['current']) and
+				array_key_exists ('remote_port', $ret['current'])
+			)
+				$ret[$ret['current']['local_port']] = array
+				(
+					'device' => $matches[1],
+					'port' => $ret['current']['remote_port'],
+				);
+			unset ($ret['current']);
+		default:
+		}
+	}
+	unset ($ret['current']);
 	return $ret;
 }
 
