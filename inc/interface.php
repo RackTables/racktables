@@ -299,6 +299,9 @@ $image['DQUEUE failed']['height'] = 32;
 $image['DQUEUE disabled']['path'] = 'pix/tango-emblem-readonly-32x32.png';
 $image['DQUEUE disabled']['width'] = 32;
 $image['DQUEUE disabled']['height'] = 32;
+$image['COPY']['path'] = 'pix/tango-edit-copy-32x32.png';
+$image['COPY']['width'] = 32;
+$image['COPY']['height'] = 32;
 
 // This may be populated later onsite, report rendering function will use it.
 // See the $systemreport for structure.
@@ -6844,7 +6847,7 @@ function renderObject8021QPorts ($object_id)
 	echo '<tr><th>port</th><th>interface</th><th>link</th><th width="25%">last&nbsp;saved&nbsp;config</th>';
 	echo $req_port_name == '' ? '<th width="25%">new&nbsp;config</th></tr>' : '<th>(zooming)</th></tr>';
 	if ($req_port_name == '');
-		printOpFormIntro ('save8021QConfig', array ('mutex_rev' => $vswitch['mutex_rev']));
+		printOpFormIntro ('save8021QConfig', array ('mutex_rev' => $vswitch['mutex_rev'], 'form_mode' => 'save'));
 	$object = spotEntity ('object', $object_id);
 	amplifyCell ($object);
 	$sockets = array();
@@ -6996,10 +6999,29 @@ function renderObject8021QPorts ($object_id)
 			getImageHREF ('SAVE', 'save configuration', TRUE) .
 			'</td></tr></form>';
 	echo '</table>';
+	if ($req_port_name == '');
+		echo '</form>';
 	echo '</td>';
 	// configuration of currently selected port, if any
 	if (!array_key_exists ($req_port_name, $desired_config))
-		echo '<td colspan=2>&nbsp;</td>';
+	{
+		echo '<td>';
+		startPortlet ('port duplicator');
+		echo '<table border=0 align=center>';
+		printOpFormIntro ('save8021QConfig', array ('mutex_rev' => $vswitch['mutex_rev'], 'form_mode' => 'duplicate'));
+		$port_options = array();
+		foreach ($desired_config as $pn => $portinfo)
+			if ($portinfo['vst_role'] == 'trunk' or $portinfo['vst_role'] == 'access')
+				$port_options[$pn] = same8021QConfigs ($desired_config[$pn], $cached_config[$pn]) ?
+					$pn : "${pn} (*)";
+		echo '<tr><td>' . getSelect ($port_options, array ('name' => 'from_port')) . '</td></tr>';
+		echo '<tr><td>&darr; &darr; &darr;</td></tr>';
+		echo '<tr><td>' . getSelect ($port_options, array ('name' => 'to_ports[]', 'size' => getConfigVar ('MAXSELSIZE'), 'multiple' => 1)) . '</td></tr>';
+		echo '<tr><td>' . getImageHREF ('COPY', 'duplicate', TRUE) . '</td></tr>';
+		echo '</form></table>';
+		finishPortlet();
+		echo '</td>';
+	}
 	else
 		renderTrunkPortControls
 		(
@@ -7024,8 +7046,9 @@ function renderTrunkPortControls ($vswitch, $vdom, $port_name, $vlanport)
 		'nports' => 1,
 		'pn_0' => $port_name,
 		'pm_0' => 'trunk',
+		'form_mode' => 'save',
 	);
-	printOpFormIntro ('save', $formextra);
+	printOpFormIntro ('save8021QConfig', $formextra);
 	echo '<td width="35%">';
 	echo '<table border=0 cellspacing=0 cellpadding=3 align=center>';
 	echo '<tr><th colspan=2>allowed</th></tr>';

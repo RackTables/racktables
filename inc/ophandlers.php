@@ -2263,15 +2263,11 @@ $msgcode['save8021QPorts']['ERR2'] = 109;
 function save8021QPorts ()
 {
 	global $sic, $dbxlink;
-	assertUIntArg ('nports');
 	assertUIntArg ('mutex_rev', TRUE); // counts from 0
-	if ($sic['nports'] == 1)
-	{
-		assertStringArg ('pn_0');
-		$extra = array ('port_name' => $sic['pn_0']);
-	}
-	else
-		$extra = array();
+	assertStringArg ('form_mode');
+	if ($sic['form_mode'] != 'save' and $sic['form_mode'] != 'duplicate')
+		throw new InvalidRequestArgException ('form_mode', $sic['form_mode']);
+	$extra = array();
 	$dbxlink->beginTransaction();
 	try
 	{
@@ -2279,38 +2275,60 @@ function save8021QPorts ()
 			throw new InvalidArgException ('object_id', $object_id, 'VLAN domain is not set for this object');
 		if ($vswitch['mutex_rev'] != $sic['mutex_rev'])
 			throw new InvalidRequestArgException ('mutex_rev', $sic['mutex_rev'], 'expired form data');
+		$after = $before = apply8021QOrder ($vswitch['template_id'], getStored8021QConfig ($sic['object_id'], 'desired'));
 		$changes = array();
-		for ($i = 0; $i < $sic['nports']; $i++)
+		switch ($sic['form_mode'])
 		{
-			assertStringArg ('pn_' . $i);
-			assertStringArg ('pm_' . $i);
-			// An access port only generates form input for its native VLAN,
-			// which we derive allowed VLAN list from.
-			$native = isset ($sic['pnv_' . $i]) ? $sic['pnv_' . $i] : 0;
-			switch ($sic["pm_${i}"])
+		case 'save':
+			assertUIntArg ('nports');
+			if ($sic['nports'] == 1)
 			{
-			case 'trunk':
-#				assertArrayArg ('pav_' . $i);
-				$allowed = isset ($sic['pav_' . $i]) ? $sic['pav_' . $i] : array();
-				break;
-			case 'access':
-				if ($native == 'same')
-					continue 2;
-				assertUIntArg ('pnv_' . $i);
-				$allowed = array ($native);
-				break;
-			default:
-				throw new InvalidRequestArgException ("pm_${i}", $_REQUEST["pm_${i}"], 'unknown port mode');
+				assertStringArg ('pn_0');
+				$extra = array ('port_name' => $sic['pn_0']);
 			}
-			$changes[$sic['pn_' . $i]] = array
-			(
-				'mode' => $sic['pm_' . $i],
-				'allowed' => $allowed,
-				'native' => $native,
-			);
+			for ($i = 0; $i < $sic['nports']; $i++)
+			{
+				assertStringArg ('pn_' . $i);
+				assertStringArg ('pm_' . $i);
+				// An access port only generates form input for its native VLAN,
+				// which we derive allowed VLAN list from.
+				$native = isset ($sic['pnv_' . $i]) ? $sic['pnv_' . $i] : 0;
+				switch ($sic["pm_${i}"])
+				{
+				case 'trunk':
+#				assertArrayArg ('pav_' . $i);
+					$allowed = isset ($sic['pav_' . $i]) ? $sic['pav_' . $i] : array();
+					break;
+				case 'access':
+					if ($native == 'same')
+						continue 2;
+					assertUIntArg ('pnv_' . $i);
+					$allowed = array ($native);
+					break;
+				default:
+					throw new InvalidRequestArgException ("pm_${i}", $_REQUEST["pm_${i}"], 'unknown port mode');
+				}
+				$changes[$sic['pn_' . $i]] = array
+				(
+					'mode' => $sic['pm_' . $i],
+					'allowed' => $allowed,
+					'native' => $native,
+				);
+			}
+			break;
+		case 'duplicate':
+			assertStringArg ('from_port');
+#			assertArrayArg ('to_ports');
+			if (!array_key_exists ($sic['from_port'], $before))
+				throw new InvalidArgException ('from_port', $sic['from_port'], 'this port does not exist');
+			foreach ($sic['to_ports'] as $tpn)
+				if (!array_key_exists ($tpn, $before))
+					throw new InvalidArgException ('to_ports[]', $tpn, 'this port does not exist');
+				elseif ($tpn != $sic['from_port'])
+					$changes[$tpn] = $before[$sic['from_port']];
+			break;
 		}
 		$domain_vlanlist = getDomainVLANs ($vswitch['domain_id']);
-		$after = $before = apply8021QOrder ($vswitch['template_id'], getStored8021QConfig ($sic['object_id'], 'desired'));
 		$changes = filter8021QChangeRequests
 		(
 			$domain_vlanlist,
