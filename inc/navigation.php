@@ -166,7 +166,6 @@ $ophandler['object']['snmpportfinder']['querySNMPData'] = 'querySNMPData';
 $ophandler['object']['8021qorder']['add'] = 'add8021QOrder';
 $ophandler['object']['8021qorder']['del'] = 'del8021QOrder';
 $ophandler['object']['8021qports']['save8021QConfig'] = 'save8021QPorts';
-$ophandler['object']['8021qports']['sync'] = 'sync8021QPorts';
 $ophandler['object']['8021qsync']['exec8021QPull'] = 'process8021QSyncRequest';
 $ophandler['object']['8021qsync']['exec8021QPush'] = 'process8021QSyncRequest';
 $ophandler['object']['8021qsync']['resolve8021QConflicts'] = 'resolve8021QConflicts';
