@@ -2175,9 +2175,30 @@ function usePreparedInsertBlade ($tablename, $columns)
 	// Now the query should be as follows:
 	// INSERT INTO table (c1, c2, c3) VALUES (?, ?, ?)
 	$prepared = $dbxlink->prepare ($query);
-	if (!$prepared->execute (array_values ($columns)))
-		return FALSE;
-	return $prepared->rowCount() == 1;
+	try
+	{
+		if (!$prepared->execute (array_values ($columns)))
+			return FALSE;
+		return $prepared->rowCount() == 1;
+	}
+	catch (PDOException $e)
+	{
+		if ($e->getCode() != 23000)
+			throw $e;
+		switch ($e->errorInfo[1])
+		{
+		case 1062:
+			$text = 'such record already exists';
+			break;
+		case 1452:
+			$text = 'foreign key violation';
+			break;
+		default:
+			$text = 'unknown error code ' . $e->errorInfo[1];
+			break;
+		}
+		throw new Exception ($text, E_DB_CONSTRAINT);
+	}
 }
 
 // This swiss-knife blade deletes one record from the specified table
@@ -2200,9 +2221,27 @@ function usePreparedDeleteBlade ($tablename, $columns, $conjunction = 'AND')
 		$conj = $conjunction;
 	}
 	$prepared = $dbxlink->prepare ($query);
-	if (!$prepared->execute (array_values ($columns)))
-		return FALSE;
-	return $prepared->rowCount(); // FALSE !== 0
+	try
+	{
+		if (!$prepared->execute (array_values ($columns)))
+			return FALSE;
+		return $prepared->rowCount(); // FALSE !== 0
+	}
+	catch (PDOException $e)
+	{
+		if ($e->getCode() != 23000)
+			throw $e;
+		switch ($e->errorInfo[1])
+		{
+		case 1451:
+			$text = 'foreign key violation';
+			break;
+		default:
+			$text = 'unknown error code ' . $e->errorInfo[1];
+			break;
+		}
+		throw new Exception ($text, E_DB_CONSTRAINT);
+	}
 }
 
 function useSelectBlade ($query)

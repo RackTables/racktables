@@ -206,6 +206,7 @@ function printException($e)
 			header ('WWW-Authenticate: Basic realm="' . getConfigVar ('enterprise') . ' RackTables access"');
 			header ("HTTP/1.1 401 Unauthorized");
 		case E_MISCONFIGURED:
+		case E_DB_CONSTRAINT:
 			header ('Content-Type: text/html; charset=UTF-8');
 			echo '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">'."\n";
 			echo '<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">'."\n";
@@ -213,11 +214,13 @@ function printException($e)
 			(
 				E_NOT_AUTHENTICATED => 'Not authenticated',
 				E_MISCONFIGURED => 'Configuration error',
+				E_DB_CONSTRAINT => 'Constraint violation',
 			);
 			$msgbody = array
 			(
 				E_NOT_AUTHENTICATED => '<h2>This system requires authentication. You should use a username and a password.</h2>',
 				E_MISCONFIGURED => '<h2>Configuration error</h2><br>' . $e->getMessage(),
+				E_DB_CONSTRAINT => '<h2>Constraint violation</h2><br>' . $e->getMessage(),
 			);
 			echo '<head><title>' . $msgheader[$e->getCode()] . '</title>';
 			echo '</head><body>' . $msgbody[$e->getCode()] . '</body></html>';
