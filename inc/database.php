@@ -258,18 +258,22 @@ function listCells ($realm, $parent_id = 0)
 	if (!isset ($SQLSchema[$realm]))
 		throw new RealmNotFoundException ($realm);
 	$SQLinfo = $SQLSchema[$realm];
+	$qparams = array ($realm);
 	$query = 'SELECT tag_id';
 	foreach ($SQLinfo['columns'] as $alias => $expression)
 		// Automatically prepend table name to each single column, but leave all others intact.
 		$query .= ', ' . ($alias == $expression ? "${SQLinfo['table']}.${alias}" : "${expression} as ${alias}");
-	$query .= " FROM ${SQLinfo['table']} LEFT JOIN TagStorage on entity_realm = '${realm}' and entity_id = ${SQLinfo['table']}.${SQLinfo['keycolumn']}";
+	$query .= " FROM ${SQLinfo['table']} LEFT JOIN TagStorage on entity_realm = ? and entity_id = ${SQLinfo['table']}.${SQLinfo['keycolumn']}";
 	if (isset ($SQLinfo['pidcolumn']) and $parent_id)
-		$query .= " WHERE ${SQLinfo['table']}.${SQLinfo['pidcolumn']} = ${parent_id}";
+	{
+		$query .= " WHERE ${SQLinfo['table']}.${SQLinfo['pidcolumn']} = ?";
+		$qparams[] = $parent_id;
+	}
 	$query .= " ORDER BY ";
 	foreach ($SQLinfo['ordcolumns'] as $oc)
 		$query .= "${oc}, ";
 	$query .= " tag_id";
-	$result = useSelectBlade ($query);
+	$result = usePreparedSelectBlade ($query, $qparams);
 	$ret = array();
 	global $taglist;
 	// Index returned result by the value of key column.
@@ -352,10 +356,10 @@ function spotEntity ($realm, $id)
 	foreach ($SQLinfo['columns'] as $alias => $expression)
 		// Automatically prepend table name to each single column, but leave all others intact.
 		$query .= ', ' . ($alias == $expression ? "${SQLinfo['table']}.${alias}" : "${expression} as ${alias}");
-	$query .= " FROM ${SQLinfo['table']} LEFT JOIN TagStorage on entity_realm = '${realm}' and entity_id = ${SQLinfo['table']}.${SQLinfo['keycolumn']}";
-	$query .= " WHERE ${SQLinfo['table']}.${SQLinfo['keycolumn']} = ${id}";
+	$query .= " FROM ${SQLinfo['table']} LEFT JOIN TagStorage on entity_realm = ? and entity_id = ${SQLinfo['table']}.${SQLinfo['keycolumn']}";
+	$query .= " WHERE ${SQLinfo['table']}.${SQLinfo['keycolumn']} = ?";
 	$query .= " ORDER BY tag_id";
-	$result = useSelectBlade ($query);
+	$result = usePreparedSelectBlade ($query, array ($realm, $id));
 	$ret = array();
 	global $taglist;
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
@@ -424,8 +428,8 @@ function amplifyCell (&$record, $dummy = NULL)
 		$record['lblist'] = array();
 		$query = "select object_id, vs_id, lb.vsconfig, lb.rsconfig from " .
 			"IPv4LB as lb inner join IPv4VS as vs on lb.vs_id = vs.id " .
-			"where rspool_id = ${record['id']} order by object_id, vip, vport";
-		$result = useSelectBlade ($query);
+			"where rspool_id = ? order by object_id, vip, vport";
+		$result = usePreparedSelectBlade ($query, array ($record['id']));
 		while ($row = $result->fetch (PDO::FETCH_ASSOC))
 			$record['lblist'][$row['object_id']][$row['vs_id']] = array
 			(
@@ -435,8 +439,8 @@ function amplifyCell (&$record, $dummy = NULL)
 		unset ($result);
 		$record['rslist'] = array();
 		$query = "select id, inservice, inet_ntoa(rsip) as rsip, rsport, rsconfig from " .
-			"IPv4RS where rspool_id = ${record['id']} order by IPv4RS.rsip, rsport";
-		$result = useSelectBlade ($query);
+			"IPv4RS where rspool_id = ? order by IPv4RS.rsip, rsport";
+		$result = usePreparedSelectBlade ($query, array ($record['id']));
 		while ($row = $result->fetch (PDO::FETCH_ASSOC))
 			$record['rslist'][$row['id']] = array
 			(
@@ -455,8 +459,8 @@ function amplifyCell (&$record, $dummy = NULL)
 		$query = "select pool.id, name, pool.vsconfig, pool.rsconfig, object_id, " .
 			"lb.vsconfig as lb_vsconfig, lb.rsconfig as lb_rsconfig from " .
 			"IPv4RSPool as pool left join IPv4LB as lb on pool.id = lb.rspool_id " .
-			"where vs_id = ${record['id']} order by pool.name, object_id";
-		$result = useSelectBlade ($query);
+			"where vs_id = ? order by pool.name, object_id";
+		$result = usePreparedSelectBlade ($query, array ($record['id']));
 		while ($row = $result->fetch (PDO::FETCH_ASSOC))
 		{
 			if (!isset ($record['rspool'][$row['id']]))
@@ -486,9 +490,9 @@ function amplifyCell (&$record, $dummy = NULL)
 		// load difference
 		$query =
 			"select unit_no, atom, state, object_id " .
-			"from RackSpace where rack_id = ${record['id']} and " .
-			"unit_no between 1 and " . $record['height'] . " order by unit_no";
-		$result = useSelectBlade ($query);
+			"from RackSpace where rack_id = ? and " .
+			"unit_no between 1 and ? order by unit_no";
+		$result = usePreparedSelectBlade ($query, array ($record['id'], $record['height']));
 		global $loclist;
 		$mounted_objects = array();
 		while ($row = $result->fetch (PDO::FETCH_ASSOC))
@@ -776,7 +780,7 @@ function getMolecule ($mid = 0)
 // returns exactly what is's named after
 function lastInsertID ()
 {
-	$result = useSelectBlade ('select last_insert_id()');
+	$result = usePreparedSelectBlade ('select last_insert_id()');
 	$row = $result->fetch (PDO::FETCH_NUM);
 	return $row[0];
 }
@@ -1306,12 +1310,14 @@ function getIPv4AddressSearchResult ($terms)
 {
 	$query = "select inet_ntoa(ip) as ip, name from IPv4Address where ";
 	$or = '';
+	$qparams = array();
 	foreach (explode (' ', $terms) as $term)
 	{
-		$query .= $or . "name like '%${term}%'";
+		$query .= $or . "name like ?";
 		$or = ' or ';
+		$qparams[] = "%${term}%";
 	}
-	$result = useSelectBlade ($query);
+	$result = usePreparedSelectBlade ($query, $qparams);
 	$ret = array();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 		$ret[] = $row;
@@ -1451,6 +1457,7 @@ function getSearchResultByField ($tname, $rcolumns, $scolumn, $terms, $ocolumn =
 {
 	$pfx = '';
 	$query = 'select ';
+	$qparams = array();
 	foreach ($rcolumns as $col)
 	{
 		$query .= $pfx . $col;
@@ -1463,20 +1470,23 @@ function getSearchResultByField ($tname, $rcolumns, $scolumn, $terms, $ocolumn =
 		switch ($exactness)
 		{
 		case 2: // does this work as expected?
-			$query .= $pfx . "binary ${scolumn} = '${term}'";
+			$query .= $pfx . "binary ${scolumn} = ?";
+			$qparams[] = $term;
 			break;
 		case 1:
-			$query .= $pfx . "${scolumn} = '${term}'";
+			$query .= $pfx . "${scolumn} = ?";
+			$qparams[] = $term;
 			break;
 		default:
-			$query .= $pfx . "${scolumn} like '%${term}%'";
+			$query .= $pfx . "${scolumn} like ?";
+			$qparams[] = "%${term}%";
 			break;
 		}
 		$pfx = ' or ';
 	}
 	if ($ocolumn != '')
 		$query .= " order by ${ocolumn}";
-	$result = useSelectBlade ($query);
+	$result = usePreparedSelectBlade ($query, $qparams);
 	$ret = array();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 		$ret[] = $row;
