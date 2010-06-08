@@ -608,7 +608,7 @@ function commitUpdateObject ($object_id = 0, $new_name = '', $new_label = '', $n
 {
 	if ($new_type_id == 0)
 		throw new InvalidArgException ('$new_type_id', $new_type_id);
-	$ret == FALSE != usePreparedExecuteBlade
+	$ret = FALSE !== usePreparedExecuteBlade
 	(
 		'UPDATE RackObject SET name=?, label=?, barcode=?, objtype_id=?, has_problems=?, ' .
 		'asset_no=?, comment=? WHERE id=?',
