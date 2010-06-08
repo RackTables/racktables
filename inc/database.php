@@ -578,7 +578,7 @@ function commitAddRack ($name, $height = 0, $row_id = 0, $comment, $taglist)
 		)
 	);
 	$last_insert_id = lastInsertID();
-	return (produceTagsForLastRecord ('rack', $taglist, $last_insert_id) == '') and recordHistory ('Rack', "id = ${last_insert_id}");
+	return (produceTagsForLastRecord ('rack', $taglist, $last_insert_id) == '') and recordHistory ('Rack', $last_insert_id);
 }
 
 function commitAddObject ($new_name, $new_label, $new_barcode, $new_type_id, $new_asset_no, $taglist = array())
@@ -603,7 +603,7 @@ function commitAddObject ($new_name, $new_label, $new_barcode, $new_type_id, $ne
 	// Now tags...
 	$error = produceTagsForLastRecord ('object', $taglist, $last_insert_id);
 
-	recordHistory ('RackObject', "id = ${last_insert_id}");
+	recordHistory ('RackObject', $last_insert_id);
 
 	return $last_insert_id;
 }
@@ -628,7 +628,7 @@ function commitUpdateObject ($object_id = 0, $new_name = '', $new_label = '', $n
 			$object_id
 		)
 	);
-	return $ret and recordHistory ('RackObject', "id = ${object_id}");
+	return $ret and recordHistory ('RackObject', $object_id);
 }
 
 // Remove file links related to the entity, but leave the entity and file(s) intact.
@@ -682,7 +682,7 @@ function commitUpdateRack ($rack_id, $new_name, $new_height, $new_row_id, $new_c
 			$rack_id,
 		)
 	);
-	return recordHistory ('Rack', "id = ${rack_id}");
+	return recordHistory ('Rack', $rack_id);
 }
 
 // This function accepts rack data returned by amplifyCell(), validates and applies changes
@@ -693,7 +693,7 @@ function commitUpdateRack ($rack_id, $new_name, $new_height, $new_row_id, $new_c
 // The function returns the modified rack upon success.
 function processGridForm (&$rackData, $unchecked_state, $checked_state, $object_id = 0)
 {
-	global $loclist, $dbxlink;
+	global $loclist;
 	$rack_id = $rackData['id'];
 	$rack_name = $rackData['name'];
 	$rackchanged = FALSE;
@@ -723,28 +723,21 @@ function processGridForm (&$rackData, $unchecked_state, $checked_state, $object_
 				return array ('code' => 500, 'message' => "${rack_name}: Rack ID ${rack_id}, unit ${unit_no}, 'atom ${atom}', cannot change state from '${state}' to '${newstate}'");
 			// Here we avoid using ON DUPLICATE KEY UPDATE by first performing DELETE
 			// anyway and then looking for probable need of INSERT.
-			$query =
-				"delete from RackSpace where rack_id = ${rack_id} and " .
-				"unit_no = ${unit_no} and atom = '${atom}' limit 1";
-			$r = $dbxlink->query ($query);
+			usePreparedDeleteBlade ('RackSpace', array ('rack_id' => $rack_id, 'unit_no' => $unit_no, 'atom' => $atom));
 			if ($newstate != 'F')
-			{
-				$query =
-					"insert into RackSpace(rack_id, unit_no, atom, state) " .
-					"values(${rack_id}, ${unit_no}, '${atom}', '${newstate}') ";
-				$r = $dbxlink->query ($query);
-			}
+				usePreparedInsertBlade ('RackSpace', array ('rack_id' => $rack_id, 'unit_no' => $unit_no, 'atom' => $atom, 'state' => $newstate));
 			if ($newstate == 'T' and $object_id != 0)
 			{
 				// At this point we already have a record in RackSpace.
-				$query =
-					"update RackSpace set object_id=${object_id} " .
-					"where rack_id=${rack_id} and unit_no=${unit_no} and atom='${atom}' limit 1";
-				$r = $dbxlink->query ($query);
-				if ($r->rowCount() == 1)
-					$rackData[$unit_no][$locidx]['object_id'] = $object_id;
-				else
+				$r = usePreparedExecuteBlade
+				(
+					'UPDATE RackSpace SET object_id=? ' .
+					'WHERE rack_id=? AND unit_no=? AND atom=?',
+					array ($object_id, $rack_id, $unit_no, $atom)
+				);
+				if ($r === FALSE)
 					return array ('code' => 500, 'message' => "${rack_name}: Rack ID ${rack_id}, unit ${unit_no}, atom '${atom}' failed to set object_id to '${object_id}'");
+				$rackData[$unit_no][$locidx]['object_id'] = $object_id;
 			}
 		}
 	}
@@ -789,8 +782,7 @@ function lastInsertID ()
 // R-U-A records in Atom.
 function createMolecule ($molData)
 {
-	global $dbxlink;
-	$dbxlink->exec ('INSERT INTO Molecule VALUES()');
+	usePreparedExecuteBlade ('INSERT INTO Molecule VALUES()');
 	$molecule_id = lastInsertID();
 	foreach ($molData as $rua)
 		usePreparedInsertBlade
@@ -812,12 +804,15 @@ function createMolecule ($molData)
 // 1. History table name equals to dictionary table name plus 'History'.
 // 2. History table must have the same row set (w/o keys) plus one row named
 // 'ctime' of type 'timestamp'.
-function recordHistory ($tableName, $whereClause)
+function recordHistory ($tableName, $orig_id)
 {
-	global $dbxlink, $remote_username;
-	$query = "insert into ${tableName}History select *, current_timestamp(), '${remote_username}' from ${tableName} where ${whereClause}";
-	$result = $dbxlink->query ($query);
-	return TRUE;
+	global $remote_username;
+	return FALSE !== usePreparedExecuteBlade
+	(
+		"INSERT INTO ${tableName}History SELECT *, CURRENT_TIMESTAMP(), ? " .
+		"FROM ${tableName} WHERE id=?",
+		array ($remote_username, $orig_id)
+	);
 }
 
 function getRackspaceHistory ()
@@ -962,20 +957,20 @@ function getAllIPv4Allocations ()
 function linkPorts ($porta, $portb)
 {
 	if ($porta == $portb)
-		return "Ports can't be the same";
+		throw new InvalidArgException ('porta/portb', $porta, "Ports can't be the same");
 	if ($porta > $portb)
 	{
 		$tmp = $porta;
 		$porta = $portb;
 		$portb = $tmp;
 	}
-	global $dbxlink;
-	$query1 = "insert into Link set porta='${porta}', portb='{$portb}'";
-	$query2 = "update Port set reservation_comment = NULL where id = ${porta} or id = ${portb} limit 2";
-	// FIXME: who cares about the return value?
-	$result = $dbxlink->exec ($query1);
-	$result = $dbxlink->exec ($query2);
-	return '';
+	$ret = FALSE !== usePreparedInsertBlade ('Link', array ('porta' => $porta, 'portb' => $portb));
+	$ret = $ret and FALSE !== usePreparedExecuteBlade
+	(
+		'UPDATE Port SET reservation_comment=NULL WHERE id IN(?, ?)',
+		array ($porta, $portb)
+	);
+	return $ret ? '' : 'query failed';
 }
 
 function unlinkPort ($port_id)
@@ -1259,35 +1254,34 @@ function updateIPv4Network_real ($id = 0, $name = '', $comment = '')
 // (MySQL 4.0 workaround).
 function updateAddress ($ip = 0, $name = '', $reserved = 'no')
 {
-	// DELETE may safely fail.
-	$r = useDeleteBlade ('IPv4Address', 'ip', "INET_ATON('${ip}')");
+	usePreparedExecuteBlade ('DELETE FROM IPv4Address WHERE ip = INET_ATON(?)', array ($ip));
 	// INSERT may appear not necessary.
 	if ($name == '' and $reserved == 'no')
 		return '';
-	if (useInsertBlade ('IPv4Address', array ('name' => "'${name}'", 'reserved' => "'${reserved}'", 'ip' => "INET_ATON('${ip}')")))
-		return '';
-	else
-		return __FUNCTION__ . '(): useInsertBlade() failed';
+	$ret = usePreparedExecuteBlade
+	(
+		'INSERT INTO IPv4Address (name, reserved, ip) VALUES (?, ?, INET_ATON(?))',
+		array ($name, $reserved, $ip)
+	);
+	return $ret !== FALSE ? '' : (__FUNCTION__ . 'query failed');
 }
 
 function updateBond ($ip='', $object_id=0, $name='', $type='')
 {
-	global $dbxlink;
-
-	$query =
-		"update IPv4Allocation set name='$name', type='$type' where ip=INET_ATON('$ip') and object_id='$object_id'";
-	$result = $dbxlink->exec ($query);
-	return '';
+	return usePreparedExecuteBlade
+	(
+		'UPDATE IPv4Allocation SET name=?, type=? WHERE ip=INET_ATON(?) AND object_id=?',
+		array ($name, $type, $ip, $object_id)
+	);
 }
 
 function unbindIpFromObject ($ip='', $object_id=0)
 {
-	global $dbxlink;
-
-	$query =
-		"delete from IPv4Allocation where ip=INET_ATON('$ip') and object_id='$object_id'";
-	$result = $dbxlink->exec ($query);
-	return '';
+	return usePreparedExecuteBlade
+	(
+		'DELETE FROM IPv4Allocation WHERE ip=INET_ATON(?) AND object_id=?',
+		array ($ip, $object_id)
+	);
 }
 
 function getIPv4PrefixSearchResult ($terms)
@@ -1680,12 +1674,12 @@ function commitCreateUserAccount ($username, $realname, $password)
 
 function commitUpdateUserAccount ($id, $new_username, $new_realname, $new_password)
 {
-	global $dbxlink;
-	$query =
-		"update UserAccount set user_name = '${new_username}', user_realname = '${new_realname}', " .
-		"user_password_hash = '${new_password}' where user_id = ${id} limit 1";
-	$result = $dbxlink->query ($query);
-	return TRUE;
+	return usePreparedExecuteBlade
+	(
+		'UPDATE UserAccount SET user_name=?, user_realname=?, user_password_hash=? ' .
+		'WHERE user_id=?',
+		array ($new_username, $new_realname, $new_password, $id)
+	);
 }
 
 // This function returns an array of all port type pairs from PortCompat table.
@@ -1832,19 +1826,11 @@ mysql> select tag_id from TagStorage left join TagTree on tag_id = id where id i
 // chapter_no is a must, see at @commitReduceDictionary() why
 function commitUpdateDictionary ($chapter_no = 0, $dict_key = 0, $dict_value = '')
 {
-	if ($chapter_no <= 0)
-		throw new InvalidArgException ('$chapter_no', $chapter_no);
-	if ($dict_key <= 0)
-		throw new InvalidArgException ('$dict_key', $dict_key);
-	if (!strlen ($dict_value))
-		throw new InvalidArgException ('$dict_value', $dict_value);
-
-	global $dbxlink;
-	$query =
-		"update Dictionary set dict_value = '${dict_value}' where chapter_id=${chapter_no} " .
-		"and dict_key=${dict_key} limit 1";
-	$result = $dbxlink->query ($query);
-	return TRUE;
+	return usePreparedExecuteBlade
+	(
+		'UPDATE Dictionary SET dict_value=? WHERE chapter_id=? AND dict_key=?',
+		array ($dict_value, $chapter_no, $dict_key)
+	);
 }
 
 function commitSupplementDictionary ($chapter_no = 0, $dict_value = '')
@@ -1883,12 +1869,11 @@ function commitUpdateChapter ($chapter_no = 0, $chapter_name = '')
 {
 	if (!strlen ($chapter_name))
 		throw new InvalidArgException ('$chapter_name', $chapter_name);
-	global $dbxlink;
-	$query =
-		"update Chapter set name = '${chapter_name}' where id = ${chapter_no} " .
-		"and sticky = 'no' limit 1";
-	$result = $dbxlink->query ($query);
-	return TRUE;
+	return usePreparedExecuteBlade
+	(
+		'UPDATE Chapter SET name=? WHERE id=? AND sticky="no"',
+		array ($chapter_name, $chapter_no)
+	);
 }
 
 function commitDeleteChapter ($chapter_no = 0)
@@ -1992,15 +1977,7 @@ function getAttrMap ()
 
 function commitUpdateAttribute ($attr_id = 0, $attr_name = '')
 {
- 	if (!strlen ($attr_name))
-		throw new InvalidArgException ('$attr_name', $attr_name);
-
-	global $dbxlink;
-	$query =
-		"update Attribute set name = '${attr_name}' " .
-		"where id = ${attr_id} limit 1";
-	$result = $dbxlink->query ($query);
-	return TRUE;
+	return usePreparedExecuteBlade ('UPDATE Attribute SET name=? WHERE id=?', array ($attr_name, $attr_id));
 }
 
 function commitAddAttribute ($attr_name = '', $attr_type = '')
@@ -2149,13 +2126,7 @@ function commitUpdateAttrValue ($object_id = 0, $attr_id = 0, $value = '')
 
 function commitUseupPort ($port_id = 0)
 {
-	if ($port_id <= 0)
-		throw new InvalidArgException ('$port_id', $port_id);
-	global $dbxlink;
-	$query = "update Port set reservation_comment = NULL where id = ${port_id} limit 1";
-	$result = $dbxlink->exec ($query);
-	return TRUE;
-	
+	return usePreparedExecuteBlade ('UPDATE Port SET reservation_comment=NULL WHERE id=?', array ($port_id));
 }
 
 // This is a swiss-knife blade to insert a record into a table.
@@ -2311,29 +2282,29 @@ function deleteUserConfigVar ($username = NULL, $varname = NULL)
 
 function storeUserConfigVar ($username = NULL, $varname = NULL, $varvalue = NULL)
 {
-	global $dbxlink;
 	if (!strlen ($username))
 		throw new InvalidArgException ('$username', $username);
 	if (!strlen ($varname))
 		throw new InvalidArgException ('$varname', $varname);
 	if ($varvalue === NULL)
 		throw new InvalidArgException ('$varvalue', $varvalue);
-	$query = "replace UserConfig set varvalue='${varvalue}', varname='${varname}', user='${username}'";
-	$result = $dbxlink->query ($query);
-	$result->closeCursor();
+	return usePreparedExecuteBlade
+	(
+		'REPLACE UserConfig SET varvalue=?, varname=?, user=?',
+		array ($varvalue, $varname, $username)
+	)
 }
 
 // setConfigVar() is expected to perform all necessary filtering
 function storeConfigVar ($varname = NULL, $varvalue = NULL)
 {
-	global $dbxlink;
-	if (!strlen ($varname))
-		throw new InvalidArgException ('$varname', $varname);
 	if ($varvalue === NULL)
 		throw new InvalidArgException ('$varvalue', $varvalue);
-	$query = "update Config set varvalue='${varvalue}' where varname='${varname}' limit 1";
-	$result = $dbxlink->query ($query);
-	$result->closeCursor();
+	return usePreparedExecuteBlade
+	(
+		'UPDATE Config SET varvalue=? WHERE varname=?',
+		array ($varvalue, $varname)
+	);
 }
 
 // Database version detector. Should behave corretly on any

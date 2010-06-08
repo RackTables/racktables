@@ -399,7 +399,7 @@ function addBulkPorts ()
 
 
 $msgcode['updIPv4Allocation']['OK'] = 12;
-$msgcode['updIPv4Allocation']['ERR'] = 100;
+$msgcode['updIPv4Allocation']['ERR'] = 109;
 function updIPv4Allocation ()
 {
 	assertIPv4Arg ('ip');
@@ -407,25 +407,19 @@ function updIPv4Allocation ()
 	assertStringArg ('bond_name', TRUE);
 	assertStringArg ('bond_type');
 
-	$error = updateBond ($_REQUEST['ip'], $_REQUEST['object_id'], $_REQUEST['bond_name'], $_REQUEST['bond_type']);
-	if ($error != '')
-		return buildRedirectURL (__FUNCTION__, 'ERR', array ($error));
-	else
-		return buildRedirectURL (__FUNCTION__, 'OK');
+	$result = updateBond ($_REQUEST['ip'], $_REQUEST['object_id'], $_REQUEST['bond_name'], $_REQUEST['bond_type']);
+	return buildRedirectURL (__FUNCTION__, $result === FALSE ? 'ERR' : 'OK');
 }
 
 $msgcode['delIPv4Allocation']['OK'] = 14;
-$msgcode['delIPv4Allocation']['ERR'] = 100;
+$msgcode['delIPv4Allocation']['ERR'] = 111;
 function delIPv4Allocation ()
 {
 	assertIPv4Arg ('ip');
 	assertUIntArg ('object_id');
 
-	$error = unbindIpFromObject ($_REQUEST['ip'], $_REQUEST['object_id']);
-	if ($error != '')
-		return buildRedirectURL (__FUNCTION__, 'ERR', array ($error));
-	else
-		return buildRedirectURL (__FUNCTION__, 'OK');
+	$result = unbindIpFromObject ($_REQUEST['ip'], $_REQUEST['object_id']);
+	return buildRedirectURL (__FUNCTION__, $result === FALSE ? 'ERR' : 'OK');
 }
 
 $msgcode['addIPv4Allocation']['OK'] = 13;
@@ -558,7 +552,7 @@ function updateUser ()
 	if ($new_password != $userinfo['user_password_hash'])
 		$new_password = sha1 ($new_password);
 	$result = commitUpdateUserAccount ($_REQUEST['user_id'], $username, $_REQUEST['realname'], $new_password);
-	if ($result == TRUE)
+	if ($result !== FALSE)
 		return buildRedirectURL (__FUNCTION__, 'OK', array ($username));
 	else
 		return buildRedirectURL (__FUNCTION__, 'ERR2', array ($username));
@@ -571,7 +565,7 @@ function updateDictionary ()
 	assertUIntArg ('chapter_no');
 	assertUIntArg ('dict_key');
 	assertStringArg ('dict_value');
-	if (commitUpdateDictionary ($_REQUEST['chapter_no'], $_REQUEST['dict_key'], $_REQUEST['dict_value']) === TRUE)
+	if (FALSE !== commitUpdateDictionary ($_REQUEST['chapter_no'], $_REQUEST['dict_key'], $_REQUEST['dict_value']))
 		return buildRedirectURL (__FUNCTION__, 'OK');
 	else
 		return buildRedirectURL (__FUNCTION__, 'ERR');
@@ -618,7 +612,7 @@ function updateChapter ()
 {
 	assertUIntArg ('chapter_no');
 	assertStringArg ('chapter_name');
-	if (commitUpdateChapter ($_REQUEST['chapter_no'], $_REQUEST['chapter_name']) === TRUE)
+	if (FALSE !== commitUpdateChapter ($_REQUEST['chapter_no'], $_REQUEST['chapter_name']))
 		return buildRedirectURL (__FUNCTION__, 'OK');
 	else
 		return buildRedirectURL (__FUNCTION__, 'ERR');
@@ -641,7 +635,7 @@ function changeAttribute ()
 {
 	assertUIntArg ('attr_id');
 	assertStringArg ('attr_name');
-	if (commitUpdateAttribute ($_REQUEST['attr_id'], $_REQUEST['attr_name']))
+	if (FALSE !== commitUpdateAttribute ($_REQUEST['attr_id'], $_REQUEST['attr_name']))
 		return buildRedirectURL (__FUNCTION__, 'OK');
 	else
 		return buildRedirectURL (__FUNCTION__, 'ERR');
@@ -963,7 +957,7 @@ $msgcode['useupPort']['ERR'] = 124;
 function useupPort ()
 {
 	assertUIntArg ('port_id');
-	if (commitUseupPort ($_REQUEST['port_id']) === TRUE)
+	if (FALSE !== commitUseupPort ($_REQUEST['port_id']))
 		return buildRedirectURL (__FUNCTION__, 'OK');
 	else
 		return buildRedirectURL (__FUNCTION__, 'ERR');
@@ -1600,7 +1594,7 @@ function changeMyPassword ()
 		return buildRedirectURL (__FUNCTION__, 'ERR2');
 	if ($_REQUEST['newpassword1'] != $_REQUEST['newpassword2'])
 		return buildRedirectURL (__FUNCTION__, 'ERR3');
-	if (commitUpdateUserAccount ($remote_userid, $userinfo['user_name'], $userinfo['user_realname'], sha1 ($_REQUEST['newpassword1'])))
+	if (FALSE !== commitUpdateUserAccount ($remote_userid, $userinfo['user_name'], $userinfo['user_realname'], sha1 ($_REQUEST['newpassword1'])))
 		return buildRedirectURL (__FUNCTION__, 'OK');
 	else
 		return buildRedirectURL (__FUNCTION__, 'ERR4');
