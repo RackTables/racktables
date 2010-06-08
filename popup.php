@@ -34,17 +34,21 @@ function getProximateRacks ($rack_id, $proximity = 0)
 
 function findSparePorts ($port_id, $only_racks = array())
 {
+	$qparams = array ($port_id, $port_id);
 	$query = "SELECT id, object_id, name FROM Port WHERE " .
-		"id <> ${port_id} " .
-		"AND type IN (SELECT type2 FROM PortCompat WHERE type1 = (SELECT type FROM Port WHERE id = ${port_id})) " .
+		"id <> ? " .
+		"AND type IN (SELECT type2 FROM PortCompat WHERE type1 = (SELECT type FROM Port WHERE id = ?)) " .
 		"AND reservation_comment IS NULL " .
 		"AND id NOT IN (SELECT porta FROM Link) " .
 		"AND id NOT IN (SELECT portb FROM Link) ";
 	if (count ($only_racks))
+	{
 		$query .= 'AND object_id IN (SELECT DISTINCT object_id FROM RackSpace WHERE rack_id IN (' .
-			implode (', ', $only_racks) . '))';
+			implode (', ', array_fill (0, count ($only_racks), '?')) . '))';
+		$qparams = array_merge ($qparams, $only_racks);
+	}
 	$query .= ' ORDER BY object_id, name';
-	$result = useSelectBlade ($query);
+	$result = usePreparedSelectBlade ($query, $qparams);
 	// avoid nested queries
 	$rows = $result->fetchAll (PDO::FETCH_ASSOC);
 	unset ($result);
