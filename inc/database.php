@@ -213,13 +213,9 @@ function commitAddRow($rackrow_name)
 	return usePreparedInsertBlade ('RackRow', array ('name' => $rackrow_name));
 }
 
-function commitUpdateRow($rackrow_id, $rackrow_name)
+function commitUpdateRow ($rackrow_id, $rackrow_name)
 {
-	global $dbxlink;
-	$query = "update RackRow set name = '${rackrow_name}' where id=${rackrow_id}";
-	$result = $dbxlink->query ($query);
-	$result->closeCursor();
-	return TRUE;
+	return usePreparedExecuteBlade ('UPDATE RackRow SET name = ? WHERE id = ?', array ($rackrow_name, $rackrow_id));
 }
 
 function commitDeleteRow($rackrow_id)
@@ -612,16 +608,23 @@ function commitUpdateObject ($object_id = 0, $new_name = '', $new_label = '', $n
 {
 	if ($new_type_id == 0)
 		throw new InvalidArgException ('$new_type_id', $new_type_id);
-	global $dbxlink;
-	$new_asset_no = !strlen ($new_asset_no) ? 'NULL' : "'${new_asset_no}'";
-	$new_barcode = !strlen ($new_barcode) ? 'NULL' : "'${new_barcode}'";
-	$new_name = !strlen ($new_name) ? 'NULL' : "'${new_name}'";
-	$query = "update RackObject set name=${new_name}, label='${new_label}', barcode=${new_barcode}, objtype_id='${new_type_id}', " .
-		"has_problems='${new_has_problems}', asset_no=${new_asset_no}, comment='${new_comment}' " .
-		"where id='${object_id}' limit 1";
-	$result = $dbxlink->query ($query);
-	$result->closeCursor();
-	return recordHistory ('RackObject', "id = ${object_id}");
+	$ret == FALSE != usePreparedExecuteBlade
+	(
+		'UPDATE RackObject SET name=?, label=?, barcode=?, objtype_id=?, has_problems=?, ' .
+		'asset_no=?, comment=? WHERE id=?',
+		array
+		(
+			!strlen ($new_name) ? NULL : $new_name,
+			$new_label,
+			!strlen ($new_barcode) ? NULL : $new_barcode,
+			$new_type_id,
+			$new_has_problems,
+			!strlen ($new_asset_no) ? NULL : $new_asset_no,
+			$new_comment,
+			$object_id
+		)
+	);
+	return $ret and recordHistory ('RackObject', "id = ${object_id}");
 }
 
 // Remove file links related to the entity, but leave the entity and file(s) intact.
@@ -633,14 +636,13 @@ function releaseFiles ($entity_realm, $entity_id)
 // There are times when you want to delete all traces of an object
 function commitDeleteObject ($object_id = 0)
 {
-	global $dbxlink;
 	releaseFiles ('object', $object_id);
 	destroyTagsForEntity ('object', $object_id);
 	usePreparedDeleteBlade ('IPv4LB', array ('object_id' => $object_id));
 	usePreparedDeleteBlade ('IPv4Allocation', array ('object_id' => $object_id));
 	usePreparedDeleteBlade ('IPv4NAT', array ('object_id' => $object_id));
-	$dbxlink->query("DELETE FROM Atom WHERE molecule_id IN (SELECT new_molecule_id FROM MountOperation WHERE object_id = ${object_id})");
-	$dbxlink->query("DELETE FROM Molecule WHERE id IN (SELECT new_molecule_id FROM MountOperation WHERE object_id = ${object_id})");
+	usePreparedExecuteBlade ('DELETE FROM Atom WHERE molecule_id IN (SELECT new_molecule_id FROM MountOperation WHERE object_id = ?)', array ($object_id));
+	usePreparedExecuteBlade ('DELETE FROM Molecule WHERE id IN (SELECT new_molecule_id FROM MountOperation WHERE object_id = ?)', array ($object_id));
 	usePreparedDeleteBlade ('RackObject', array ('id' => $object_id));
 	return '';
 }
@@ -657,25 +659,25 @@ function commitDeleteRack($rack_id)
 
 function commitUpdateRack ($rack_id, $new_name, $new_height, $new_row_id, $new_comment)
 {
-	if (!strlen ($rack_id)) 
-		throw new InvalidArgException ('rack_id', $rack_id, 'Must not be empty');
-	if (!strlen ($new_name))
-		throw new InvalidArgException ('new_name', $new_name, 'Must not be empty');
-	if (!strlen ($new_height))
-		throw new InvalidArgException ('new_height', $new_height, 'Must not be empty');
-	global $dbxlink;
-
 	// Can't shrink a rack if rows being deleted contain mounted objects
 	$check_result = usePreparedSelectBlade ('SELECT COUNT(*) AS count FROM RackSpace WHERE rack_id = ? AND unit_no > ?', array ($rack_id, $new_height));
 	$check_row = $check_result->fetch (PDO::FETCH_ASSOC);
 	unset ($check_result);
-	if ($check_row['count'] > 0) {
+	if ($check_row['count'] > 0)
 		throw new InvalidArgException ('new_height', $new_height, 'Cannot shrink rack, objects are still mounted there');
-	}
 
-	$update_sql = "update Rack set name='${new_name}', height='${new_height}', comment='${new_comment}', row_id=${new_row_id} " .
-		"where id='${rack_id}' limit 1";
-	$dbxlink->exec ($update_sql);
+	usePreparedExecuteBlade
+	(
+		'UPDATE Rack SET name=?, height=?, comment=?, row_id=? WHERE id=?',
+		array
+		(
+			$new_name,
+			$new_height,
+			$new_comment,
+			$new_row_id,
+			$rack_id,
+		)
+	);
 	return recordHistory ('Rack', "id = ${rack_id}");
 }
 
@@ -2258,6 +2260,18 @@ function usePreparedSelectBlade ($query, $args = array())
 	if (!$prepared->execute ($args))
 		return FALSE;
 	return $prepared;
+}
+
+// Prepare and execute the statement with parameters, then return number of
+// rows affected (or FALSE in case of an error).
+function usePreparedExecuteBlade ($query, $args = array())
+{
+	global $dbxlink;
+	if (!$prepared = $dbxlink->prepare ($query))
+		return FALSE;
+	if (!$prepared->execute ($args))
+		return FALSE;
+	return $prepared->rowCount();
 }
 
 function loadConfigCache ()

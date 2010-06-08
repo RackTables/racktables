@@ -1721,7 +1721,7 @@ function updateRow ()
 	assertUIntArg ('row_id');
 	assertStringArg ('name');
 
-	if (TRUE === commitUpdateRow ($_REQUEST['row_id'], $_REQUEST['name']))
+	if (FALSE !== commitUpdateRow ($_REQUEST['row_id'], $_REQUEST['name']))
 		return buildRedirectURL (__FUNCTION__, 'OK', array ($_REQUEST['name']));
 	else
 		return buildRedirectURL (__FUNCTION__, 'ERR', array ($_REQUEST['name']));
