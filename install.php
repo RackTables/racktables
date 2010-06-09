@@ -83,16 +83,26 @@ function not_already_installed()
 	}
 }
 
-function extension_issues ($funcname, $extname)
+function platform_function_test ($funcname, $extname, $what_if_not = 'not found', $error_class = 'msg_error')
 {
-	echo "<tr><td>${extname}</td>";
-	if (function_exists ($funcname))
+	return platform_generic_test (function_exists ($funcname), $extname, 'NOT PRESENT', $error_class);
+}
+
+function platform_generic_test ($is_ok, $topic, $what_if_not = 'FAILED', $error_class = 'msg_error')
+{
+	echo "<tr><th>${topic}</th>";
+	if ($is_ok)
 	{
-		echo '<td class=msg_success>Ok</td></tr>';
+		echo '<td class=msg_success>PASSED</td></tr>';
 		return 0;
 	}
-	echo '<td class=msg_error>not found</td></tr>';
+	echo "<td class=${error_class}>${what_if_not}</td></tr>";
 	return 1;
+}
+
+function pcre8_with_properties()
+{
+	return FALSE === @preg_match ('/\p{L}/u', 'a') ? FALSE : TRUE;
 }
 
 // Check for PHP extensions.
@@ -100,57 +110,21 @@ function platform_is_ok ()
 {
 	$nerrs = 0;
 	echo "<table border=1><tr><th>check item</th><th>result</th></tr>\n";
-
-	echo '<tr><td>PDO extension</td>';
-	if (class_exists ('PDO'))
-		echo '<td class=msg_success>Ok';
-	else
-	{
-		echo '<td class=msg_error>not found';
-		$nerrs++;
-	}
-	echo '</td></tr>';
-
-	echo '<tr><td>PDO-MySQL</td>';
-	if (defined ('PDO::MYSQL_ATTR_READ_DEFAULT_FILE'))
-		echo '<td class=msg_success>Ok';
-	else
-	{
-		echo '<td class=msg_error>not found';
-		$nerrs++;
-	}
-	echo '</td></tr>';
-
-	$nerrs += extension_issues ('sha1', 'hash function');
-	$nerrs += extension_issues ('preg_match', 'PCRE extension');
-
-	echo '<tr><td>SNMP extension</td>';
-	if (defined ('SNMP_NULL'))
-		echo '<td class=msg_success>Ok';
-	else
-		echo '<td class=msg_warning>Not found. Live SNMP tab will not function properly until the extension is installed.';
-	echo '</td></tr>';
-
-	$nerrs += extension_issues ('gd_info', 'GD extension');
-
-	echo '<tr><td>HTTP scheme</td>';
-	if (!empty($_SERVER['HTTPS']) and $_SERVER['HTTPS'] != 'off')
-		echo '<td class=msg_success>HTTPs';
-	else
-		echo '<td class=msg_warning>HTTP (all your passwords will be transmitted in cleartext)';
-	echo '</td></tr>';
-
-	$nerrs += extension_issues ('mb_strlen', 'Multibyte string extension');
-
-	echo '<tr><td>LDAP extension</td>';
-	if (defined ('LDAP_OPT_DEREF'))
-		echo '<td class=msg_success>Ok';
-	else
-	{
-		echo '<td class=msg_warning>not found, LDAP authentication will not work';
-	}
-	echo '</td></tr>';
-
+	$nerrs += platform_generic_test (class_exists ('PDO'), 'PDO extension');
+	$nerrs += platform_generic_test (defined ('PDO::MYSQL_ATTR_READ_DEFAULT_FILE'), 'PDO-MySQL extension');
+	$nerrs += platform_function_test ('preg_match', 'PCRE extension');
+	$nerrs += platform_generic_test (pcre8_with_properties(), 'PCRE compiled with --enable-unicode-properties');
+	platform_function_test ('snmpwalk', 'SNMP extension', 'Not found, Live SNMP feature will not work.', 'msg_warning');
+	$nerrs += platform_function_test ('gd_info', 'GD extension');
+	$nerrs += platform_function_test ('mb_strlen', 'Multibyte string extension');
+	platform_function_test ('ldap_connect', 'LDAP extension', 'Not found, LDAP authentication will not work.', 'msg_warning');
+	platform_generic_test
+	(
+		(!empty($_SERVER['HTTPS']) and $_SERVER['HTTPS'] != 'off'),
+		'accessed over HTTPS',
+		'No! (all your passwords will be transmitted in cleartext)',
+		'msg_warning'
+	);
 	echo "</table>\n";
 	return !$nerrs;
 }
