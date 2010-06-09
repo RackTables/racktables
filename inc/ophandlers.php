@@ -80,7 +80,7 @@ function addPortForwarding ()
 }
 
 $msgcode['delPortForwarding']['OK'] = 3;
-$msgcode['delPortForwarding']['ERR'] = 100;
+$msgcode['delPortForwarding']['ERR'] = 111;
 function delPortForwarding ()
 {
 	assertUIntArg ('object_id');
@@ -90,7 +90,7 @@ function delPortForwarding ()
 	assertUIntArg ('remoteport');
 	assertStringArg ('proto');
 
-	$error = deletePortForwarding
+	$result = deletePortForwarding
 	(
 		$_REQUEST['object_id'],
 		$_REQUEST['localip'],
@@ -99,14 +99,11 @@ function delPortForwarding ()
 		$_REQUEST['remoteport'],
 		$_REQUEST['proto']
 	);
-	if ($error == '')
-		return buildRedirectURL (__FUNCTION__, 'OK');
-	else
-		return buildRedirectURL (__FUNCTION__, 'ERR', array ($error));
+	buildRedirectURL (__FUNCTION__, $result !== FALSE ? 'OK' : 'ERR');
 }
 
 $msgcode['updPortForwarding']['OK'] = 4;
-$msgcode['updPortForwarding']['ERR'] = 100;
+$msgcode['updPortForwarding']['ERR'] = 109;
 function updPortForwarding ()
 {
 	assertUIntArg ('object_id');
@@ -117,7 +114,7 @@ function updPortForwarding ()
 	assertStringArg ('proto');
 	assertStringArg ('description');
 
-	$error = updatePortForwarding
+	$result = updatePortForwarding
 	(
 		$_REQUEST['object_id'],
 		$_REQUEST['localip'],
@@ -127,10 +124,7 @@ function updPortForwarding ()
 		$_REQUEST['proto'],
 		$_REQUEST['description']
 	);
-	if ($error == '')
-		return buildRedirectURL (__FUNCTION__, 'OK');
-	else
-		return buildRedirectURL (__FUNCTION__, 'ERR', array ($error));
+	buildRedirectURL (__FUNCTION__, $result !== FALSE ? 'OK' : 'ERR');
 }
 
 $msgcode['addPortForObject']['OK'] = 5;
@@ -1263,7 +1257,7 @@ function updateRealServer ()
 	assertIPv4Arg ('rsip');
 	assertStringArg ('rsport', TRUE);
 	assertStringArg ('rsconfig', TRUE);
-	if (!commitUpdateRS (
+	if (FALSE === commitUpdateRS (
 		$_REQUEST['rs_id'],
 		$_REQUEST['rsip'],
 		$_REQUEST['rsport'],
@@ -1283,7 +1277,7 @@ function updateLoadBalancer ()
 	assertUIntArg ('vs_id');
 	assertStringArg ('vsconfig', TRUE);
 	assertStringArg ('rsconfig', TRUE);
-	if (!commitUpdateLB (
+	if (FALSE === commitUpdateLB (
 		$_REQUEST['object_id'],
 		$_REQUEST['pool_id'],
 		$_REQUEST['vs_id'],
@@ -1306,7 +1300,7 @@ function updateVService ()
 	assertStringArg ('name', TRUE);
 	assertStringArg ('vsconfig', TRUE);
 	assertStringArg ('rsconfig', TRUE);
-	if (!commitUpdateVS (
+	if (FALSE === commitUpdateVS (
 		$_REQUEST['vs_id'],
 		$_REQUEST['vip'],
 		$_REQUEST['vport'],
@@ -1380,7 +1374,7 @@ function updateRSPool ()
 	assertStringArg ('name', TRUE);
 	assertStringArg ('vsconfig', TRUE);
 	assertStringArg ('rsconfig', TRUE);
-	if (!commitUpdateRSPool ($_REQUEST['pool_id'], $_REQUEST['name'], $_REQUEST['vsconfig'], $_REQUEST['rsconfig']))
+	if (FALSE === commitUpdateRSPool ($_REQUEST['pool_id'], $_REQUEST['name'], $_REQUEST['vsconfig'], $_REQUEST['rsconfig']))
 		return buildRedirectURL (__FUNCTION__, 'ERR');
 	else
 		return buildRedirectURL (__FUNCTION__, 'OK');
@@ -1404,7 +1398,7 @@ function updateRSInService ()
 			$newval = 'no';
 		if ($newval != $orig['rslist'][$rs_id]['inservice'])
 		{
-			if (commitSetInService ($rs_id, $newval))
+			if (FALSE !== commitSetInService ($rs_id, $newval))
 				$ngood++;
 			else
 				$nbad++;
@@ -1528,7 +1522,7 @@ function createTag ()
 
 $msgcode['updateTag']['OK'] = 60;
 $msgcode['updateTag']['ERR1'] = 145;
-$msgcode['updateTag']['ERR2'] = 148;
+$msgcode['updateTag']['ERR2'] = 109;
 function updateTag ()
 {
 	assertUIntArg ('tag_id');
@@ -1539,11 +1533,11 @@ function updateTag ()
 		return buildRedirectURL (__FUNCTION__, 'ERR1', array ($tagname));
 	if (($parent_id = $_REQUEST['parent_id']) <= 0)
 		$parent_id = 'NULL';
-	if (($ret = commitUpdateTag ($_REQUEST['tag_id'], $tagname, $parent_id)) == '')
+	if (FALSE !== commitUpdateTag ($_REQUEST['tag_id'], $tagname, $parent_id))
 		return buildRedirectURL (__FUNCTION__, 'OK', array ($tagname));
 	// Use old name in the message, cause update failed.
 	global $taglist;
-	return buildRedirectURL (__FUNCTION__, 'ERR2', array ($taglist[$_REQUEST['tag_id']]['tag'], $ret));
+	return buildRedirectURL (__FUNCTION__, 'ERR2', array ($taglist[$_REQUEST['tag_id']]['tag']));
 }
 
 $msgcode['rollTags']['OK'] = 67;

@@ -1622,7 +1622,7 @@ function showMessageOrError ()
 				145 => array ('code' => 'error', 'format' => "Invalid tag name '%s'"),
 				146 => array ('code' => 'error', 'format' => 'Error deleting record "%s"'),
 				147 => array ('code' => 'error', 'format' => "Could not create tag '%s': %s"),
-				148 => array ('code' => 'error', 'format' => "Could not update tag '%s': %s"),
+				148 => array ('code' => 'error', 'format' => "Could not update tag '%s'"),
 				149 => array ('code' => 'error', 'format' => 'Turing test failed'),
 				150 => array ('code' => 'error', 'format' => 'Can only change password under DB authentication.'),
 				151 => array ('code' => 'error', 'format' => 'Old password doesn\'t match.'),
@@ -1946,7 +1946,7 @@ function renderHistory ($object_type, $object_id)
 	switch ($object_type)
 	{
 		case 'row':
-			$query = "select ctime, user_name, name, comment from RackRowHistory where id = ${object_id} order by ctime";
+			$query = "select ctime, user_name, name, comment from RackRowHistory where id = ? order by ctime";
 			$header = '<tr><th>change time</th><th>author</th><th>rack row name</th><th>rack row comment</th></tr>';
 			$extra = 3;
 			break;
@@ -1954,7 +1954,7 @@ function renderHistory ($object_type, $object_id)
 			$query =
 				"select ctime, user_name, rh.name, rr.name as name, rh.height, rh.comment " .
 				"from RackHistory as rh left join RackRow as rr on rh.row_id = rr.id " .
-				"where rh.id = ${object_id} order by ctime";
+				"where rh.id = ? order by ctime";
 			$header = '<tr><th>change time</th><th>author</th><th>rack name</th><th>rack row name</th><th>rack height</th><th>rack comment</th></tr>';
 			$extra = 5;
 			break;
@@ -1962,15 +1962,14 @@ function renderHistory ($object_type, $object_id)
 			$query =
 				"select ctime, user_name, RackObjectHistory.name as name, label, barcode, asset_no, has_problems, dict_value, comment " .
 				"from RackObjectHistory inner join Dictionary on objtype_id = dict_key join Chapter on Dictionary.chapter_id = Chapter.id " .
-				"where Chapter.name = 'RackObjectType' and RackObjectHistory.id=${object_id} order by ctime";
+				"where Chapter.name = 'RackObjectType' and RackObjectHistory.id=? order by ctime";
 			$header = '<tr><th>change time</th><th>author</th><th>common name</th><th>visible label</th><th>barcode</th><th>asset no</th><th>has problems?</th><th>object type</th><th>comment</th></tr>';
 			$extra = 8;
 			break;
 		default:
 			throw new RealmNotFoundException($object_type);
 	}
-	global $dbxlink;
-	$result = $dbxlink->query ($query);
+	$result = usePreparedSelectBlade ($query, array ($object_id));
 	echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
 	$order = 'odd';
 	global $nextorder;

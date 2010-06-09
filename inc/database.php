@@ -905,7 +905,6 @@ function commitAddPort ($object_id = 0, $port_name, $port_type_id, $port_label, 
 // It would be nice to simplify this semantics later.
 function commitUpdatePort ($object_id, $port_id, $port_name, $port_type_id, $port_label, $port_l2address, $port_reservation_comment = 'reservation_comment')
 {
-	global $dbxlink;
 	if (NULL === ($db_l2address = l2addressForDatabase ($port_l2address)))
 		return "Invalid L2 address ${port_l2address}";
 	global $dbxlink;
@@ -915,12 +914,21 @@ function commitUpdatePort ($object_id, $port_id, $port_name, $port_type_id, $por
 		$dbxlink->exec ('UNLOCK TABLES');
 		return "address ${db_l2address} belongs to another object";
 	}
-	$query =
-		"update Port set name='$port_name', type=$port_type_id, label='$port_label', " .
-		"reservation_comment = ${port_reservation_comment}, l2address=" .
-		(($db_l2address === '') ? 'NULL' : "'${db_l2address}'") .
-		" WHERE id='$port_id' and object_id=${object_id}";
-	$result = $dbxlink->exec ($query);
+	$result = usePreparedExecuteBlade
+	(
+		'UPDATE Port SET name=?, type=?, label=?, reservation_comment=?, ' .
+		'l2address=? WHERE id=? AND object_id=?',
+		array
+		(
+			$port_name,
+			$port_type_id,
+			$port_label,
+			$port_reservation_comment,
+			($db_l2address === '') ? NULL : $db_l2address,
+			$port_id,
+			$object_id
+		)
+	);
 	$dbxlink->exec ('UNLOCK TABLES');
 	if ($result == 1)
 		return '';
@@ -1036,17 +1044,20 @@ function scanIPv4Space ($pairlist)
 	$whereexpr4 = '(';
 	$whereexpr5a = '(';
 	$whereexpr5b = '(';
+	$qparams = array();
 	foreach ($pairlist as $tmp)
 	{
 		$db_first = sprintf ('%u', 0x00000000 + $tmp['i32_first']);
 		$db_last = sprintf ('%u', 0x00000000 + $tmp['i32_last']);
-		$whereexpr1 .= $or . "ip between ${db_first} and ${db_last}";
-		$whereexpr2 .= $or . "ip between ${db_first} and ${db_last}";
-		$whereexpr3 .= $or . "vip between ${db_first} and ${db_last}";
-		$whereexpr4 .= $or . "rsip between ${db_first} and ${db_last}";
-		$whereexpr5a .= $or . "remoteip between ${db_first} and ${db_last}";
-		$whereexpr5b .= $or . "localip between ${db_first} and ${db_last}";
+		$whereexpr1 .= $or . "ip between ? and ?";
+		$whereexpr2 .= $or . "ip between ? and ?";
+		$whereexpr3 .= $or . "vip between ? and ?";
+		$whereexpr4 .= $or . "rsip between ? and ?";
+		$whereexpr5a .= $or . "remoteip between ? and ?";
+		$whereexpr5b .= $or . "localip between ? and ?";
 		$or = ' or ';
+		$qparams[] = $db_first;
+		$qparams[] = $db_last;
 	}
 	$whereexpr1 .= ')';
 	$whereexpr2 .= ')';
@@ -1058,7 +1069,7 @@ function scanIPv4Space ($pairlist)
 	// 1. collect labels and reservations
 	$query = "select INET_NTOA(ip) as ip, name, reserved from IPv4Address ".
 		"where ${whereexpr1} and (reserved = 'yes' or name != '')";
-	$result = useSelectBlade ($query);
+	$result = usePreparedSelectBlade ($query, $qparams);
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
 		$ip_bin = ip2long ($row['ip']);
@@ -1073,7 +1084,7 @@ function scanIPv4Space ($pairlist)
 	$query =
 		"select INET_NTOA(ip) as ip, object_id, name, type " .
 		"from IPv4Allocation where ${whereexpr2} order by type";
-	$result = useSelectBlade ($query);
+	$result = usePreparedSelectBlade ($query, $qparams);
 	// release DBX early to avoid issues with nested spotEntity() calls
 	$allRows = $result->fetchAll (PDO::FETCH_ASSOC);
 	unset ($result);
@@ -1096,7 +1107,7 @@ function scanIPv4Space ($pairlist)
 	$query = "select vs_id, inet_ntoa(vip) as ip, vport, proto, vs.name, object_id " .
 		"from IPv4VS as vs inner join IPv4LB as lb on vs.id = lb.vs_id " .
 		"where ${whereexpr3} order by vport, proto, object_id";
-	$result = useSelectBlade ($query);
+	$result = usePreparedSelectBlade ($query, $qparams);
 	$allRows = $result->fetchAll (PDO::FETCH_ASSOC);
 	unset ($result);
 	foreach ($allRows as $row)
@@ -1122,7 +1133,7 @@ function scanIPv4Space ($pairlist)
 		"IPv4RS as rs inner join IPv4RSPool as rsp on rs.rspool_id = rsp.id " .
 		"where ${whereexpr4} " .
 		"order by ip, rsport, rspool_id";
-	$result = useSelectBlade ($query);
+	$result = usePreparedSelectBlade ($query, $qparams);
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
 		$ip_bin = ip2long ($row['ip']);
@@ -1147,7 +1158,7 @@ function scanIPv4Space ($pairlist)
 		"from IPv4NAT " .
 		"where ${whereexpr5a} " .
 		"order by localip, localport, remoteip, remoteport, proto";
-	$result = useSelectBlade ($query);
+	$result = usePreparedSelectBlade ($query, $qparams);
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
 		$remoteip_bin = ip2long ($row['remoteip']);
@@ -1168,7 +1179,7 @@ function scanIPv4Space ($pairlist)
 		"from IPv4NAT " .
 		"where ${whereexpr5b} " .
 		"order by localip, localport, remoteip, remoteport, proto";
-	$result = useSelectBlade ($query);
+	$result = usePreparedSelectBlade ($query, $qparams);
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
 		$localip_bin = ip2long ($row['localip']);
@@ -1195,18 +1206,12 @@ function getIPv4Address ($dottedquad = '')
 
 function bindIpToObject ($ip = '', $object_id = 0, $name = '', $type = '')
 {
-	$result = useInsertBlade
+	$result = usePreparedExecuteBlade
 	(
-		'IPv4Allocation',
-		array
-		(
-			'ip' => "INET_ATON('$ip')",
-			'object_id' => "'${object_id}'",
-			'name' => "'${name}'",
-			'type' => "'${type}'"
-		)
+		'INSERT INTO IPv4Allocation (ip, object_id, name, type) VALUES (INET_ATON(?), ?, ?, ?)',
+		array ($ip, $object_id, $name, $type)
 	);
-	return $result ? '' : (__FUNCTION__ . '(): useInsertBlade() failed');
+	return $result ? '' : (__FUNCTION__ . '(): query failed');
 }
 
 // Return the id of the smallest IPv4 network containing the given IPv4 address
@@ -2311,11 +2316,10 @@ function storeConfigVar ($varname = NULL, $varvalue = NULL)
 // working dataset a user might have.
 function getDatabaseVersion ()
 {
-	global $dbxlink;
-	$query = "select varvalue from Config where varname = 'DB_VERSION' and vartype = 'string'";
-	$result = $dbxlink->query ($query);
+	$result = usePreparedSelectBlade ('SELECT varvalue FROM Config WHERE varname = "DB_VERSION" and vartype = "string"');
 	if ($result == NULL)
 	{
+		global $dbxlink;
 		$errorInfo = $dbxlink->errorInfo();
 		if ($errorInfo[0] == '42S02') // ER_NO_SUCH_TABLE
 			return '0.14.4';
@@ -2370,20 +2374,16 @@ function getSLBSummary ()
 
 function addRStoRSPool ($pool_id = 0, $rsip = '', $rsport = 0, $inservice = 'no', $rsconfig = '')
 {
-	if ($pool_id <= 0)
-		throw new InvalidArgException ('$pool_id', $pool_id);
-	if (!strlen ($rsport) or $rsport === 0)
-		$rsport = 'NULL';
-	return useInsertBlade
+	return usePreparedExecuteBlade
 	(
-		'IPv4RS',
+		'INSERT INTO IPv4RS (rsip, rsport, rspool_id, inservice, rsconfig) VALUES (INET_ATON(?), ?, ?, ?, ?)',
 		array
 		(
-			'rsip' => "inet_aton('${rsip}')",
-			'rsport' => $rsport,
-			'rspool_id' => $pool_id,
-			'inservice' => ($inservice == 'yes' ? "'yes'" : "'no'"),
-			'rsconfig' => (!strlen ($rsconfig) ? 'NULL' : "'${rsconfig}'")
+			$rsip,
+			(!strlen ($rsport) or $rsport === 0) ? NULL : $rsport,
+			$pool_id,
+			$inservice == 'yes' ? 'yes' : 'no',
+			!strlen ($rsconfig) ? NULL : $rsconfig
 		)
 	);
 }
@@ -2396,17 +2396,17 @@ function commitCreateVS ($vip = '', $vport = 0, $proto = '', $name = '', $vsconf
 		throw new InvalidArgException ('$vport', $vport);
 	if (!strlen ($proto))
 		throw new InvalidArgException ('$proto', $proto);
-	if (!useInsertBlade
+	if (FALSE === usePreparedExecuteBlade
 	(
-		'IPv4VS',
+		'INSERT INTO IPv4VS (vip, vport, proto, name, vsconfig, rsconfig) VALUES (INET_ATON(?), ?, ?, ?, ?, ?)',
 		array
 		(
-			'vip' => "inet_aton('${vip}')",
-			'vport' => $vport,
-			'proto' => "'${proto}'",
-			'name' => (!strlen ($name) ? 'NULL' : "'${name}'"),
-			'vsconfig' => (!strlen ($vsconfig) ? 'NULL' : "'${vsconfig}'"),
-			'rsconfig' => (!strlen ($rsconfig) ? 'NULL' : "'${rsconfig}'")
+			$vip,
+			$vport,
+			$proto,
+			!strlen ($name) ? NULL : $name,
+			!strlen ($vsconfig) ? NULL : $vsconfig,
+			!strlen ($rsconfig) ? NULL : $rsconfig,
 		)
 	))
 		return __FUNCTION__ . ': SQL insertion failed';
@@ -2449,29 +2449,33 @@ function commitUpdateRS ($rsid = 0, $rsip = '', $rsport = 0, $rsconfig = '')
 {
 	if (long2ip (ip2long ($rsip)) !== $rsip)
 		throw new InvalidArgException ('$rsip', $rsip);
-	if (!strlen ($rsport) or $rsport === 0)
-		$rsport = 'NULL';
-	global $dbxlink;
-	$query =
-		"update IPv4RS set rsip = inet_aton('${rsip}'), rsport = ${rsport}, rsconfig = " .
-		(!strlen ($rsconfig) ? 'NULL' : "'${rsconfig}'") .
-		" where id = ${rsid} limit 1";
-	$result = $dbxlink->query ($query);
-	return TRUE;
+	return usePreparedExecuteBlade
+	(
+		'UPDATE IPv4RS SET rsip=INET_ATON(?), rsport=?, rsconfig=? WHERE id=?',
+		array
+		(
+			$rsip,
+			(!strlen ($rsport) or $rsport === 0) ? NULL : $rsport,
+			!strlen ($rsconfig) ? NULL : $rsconfig,
+			$rsid,
+		)
+	);
 }
 
 function commitUpdateLB ($object_id = 0, $pool_id = 0, $vs_id = 0, $vsconfig = '', $rsconfig = '')
 {
-	global $dbxlink;
-	$query =
-		"update IPv4LB set vsconfig = " .
-		(!strlen ($vsconfig) ? 'NULL' : "'${vsconfig}'") .
-		', rsconfig = ' .
-		(!strlen ($rsconfig) ? 'NULL' : "'${rsconfig}'") .
-		" where object_id = ${object_id} and rspool_id = ${pool_id} " .
-		"and vs_id = ${vs_id} limit 1";
-	$result = $dbxlink->exec ($query);
-	return TRUE;
+	return usePreparedExecuteBlade
+	(
+		'UPDATE IPv4LB SET vsconfig=?, rsconfig=? WHERE object_id=? AND rspool_id=? AND vs_id=?',
+		array
+		(
+			!strlen ($vsconfig) ? NULL : $vsconfig,
+			!strlen ($rsconfig) ? NULL : $rsconfig,
+			$object_id,
+			$pool_id,
+			$vs_id,
+		)
+	);
 }
 
 function commitUpdateVS ($vsid = 0, $vip = '', $vport = 0, $proto = '', $name = '', $vsconfig = '', $rsconfig = '')
@@ -2482,17 +2486,20 @@ function commitUpdateVS ($vsid = 0, $vip = '', $vport = 0, $proto = '', $name = 
 		throw new InvalidArgException ('$vport', $vport);
 	if (!strlen ($proto))
 		throw new InvalidArgException ('$proto', $proto);
-	global $dbxlink;
-	$query = "update IPv4VS set " .
-		"vip = inet_aton('${vip}'), " .
-		"vport = ${vport}, " .
-		"proto = '${proto}', " .
-		'name = ' . (!strlen ($name) ? 'NULL,' : "'${name}', ") .
-		'vsconfig = ' . (!strlen ($vsconfig) ? 'NULL,' : "'${vsconfig}', ") .
-		'rsconfig = ' . (!strlen ($rsconfig) ? 'NULL' : "'${rsconfig}'") .
-		" where id = ${vsid} limit 1";
-	$result = $dbxlink->exec ($query);
-	return TRUE;
+	return usePreparedExecuteBlade
+	(
+		'UPDATE IPv4VS SET vip=INET_ATON(?), vport=?, proto=?, name=?, vsconfig=?, rsconfig=? WHERE id=?',
+		array
+		(
+			$vip,
+			$vport,
+			$proto,
+			!strlen ($name) ? NULL : $name,
+			!strlen ($vsconfig) ? NULL : $vsconfig,
+			!strlen ($rsconfig) ? NULL : $rsconfig,
+			$vsid,
+		)
+	);
 }
 
 function loadThumbCache ($rack_id = 0)
@@ -2507,19 +2514,14 @@ function loadThumbCache ($rack_id = 0)
 
 function saveThumbCache ($rack_id = 0, $cache = NULL)
 {
-	global $dbxlink;
 	if ($cache == NULL)
 		throw new InvalidArgException ('$cache', $cache);
-	$data = base64_encode ($cache);
-	$query = "update Rack set thumb_data = '${data}' where id = ${rack_id} limit 1";
-	$result = $dbxlink->exec ($query);
+	usePreparedExecuteBlade ('UPDATE Rack SET thumb_data=? WHERE id=?', array (base64_encode ($cache), $rack_id));
 }
 
 function resetThumbCache ($rack_id = 0)
 {
-	global $dbxlink;
-	$query = "update Rack set thumb_data = NULL where id = ${rack_id} limit 1";
-	$result = $dbxlink->exec ($query);
+	usePreparedExecuteBlade ('UPDATE Rack SET thumb_data=NULL WHERE id=?', array ($rack_id));
 }
 
 // Return the list of attached RS pools for the given object. As long as we have
@@ -2572,17 +2574,17 @@ function commitDeleteRSPool ($pool_id = 0)
 
 function commitUpdateRSPool ($pool_id = 0, $name = '', $vsconfig = '', $rsconfig = '')
 {
-	global $dbxlink;
-	$query = "update IPv4RSPool set " .
-		'name = ' . (!strlen ($name) ? 'NULL,' : "'${name}', ") .
-		'vsconfig = ' . (!strlen ($vsconfig) ? 'NULL,' : "'${vsconfig}', ") .
-		'rsconfig = ' . (!strlen ($rsconfig) ? 'NULL' : "'${rsconfig}'") .
-		" where id = ${pool_id} limit 1";
-	$result = $dbxlink->exec ($query);
-	if ($result != 1)
-		return FALSE;
-	else
-		return TRUE;
+	return usePreparedExecuteBlade
+	(
+		'UPDATE IPv4RSPool SET name=?, vsconfig=?, rsconfig=? WHERE id=?',
+		array
+		(
+			!strlen ($name) ? NULL : $name,
+			!strlen ($vsconfig) ? NULL : $vsconfig,
+			!strlen ($rsconfig) ? NULL : $rsconfig,
+			$pool_id,
+		)
+	);
 }
 
 function getRSList ()
@@ -2653,15 +2655,7 @@ function commitSetInService ($rs_id = 0, $inservice = '')
 {
 	if (!strlen ($inservice))
 		throw new InvalidArgException ('$inservice', $inservice);
-	if ($rs_id <= 0)
-		throw new InvalidArgException ('$rs_id', $rs_id);
-	global $dbxlink;
-	$query = "update IPv4RS set inservice = '${inservice}' where id = ${rs_id} limit 1";
-	$result = $dbxlink->exec ($query);
-	if ($result != 1)
-		return FALSE;
-	else
-		return TRUE;
+	return usePreparedExecuteBlade ('UPDATE IPv4RS SET inservice=? WHERE id=?', array ($inservice, $rs_id));
 }
 
 function executeAutoPorts ($object_id = 0, $type_id = 0)
@@ -2764,23 +2758,16 @@ function commitDestroyTag ($tagid = 0)
 
 function commitUpdateTag ($tag_id, $tag_name, $parent_id)
 {
-	if ($parent_id == 0)
-		$parent_id = 'NULL';
-	global $dbxlink;
-	$query = "update TagTree set tag = '${tag_name}', parent_id = ${parent_id} " .
-		"where id = ${tag_id} limit 1";
-	$result = $dbxlink->exec ($query);
-	if ($result !== FALSE)
-		return '';
-	if ($dbxlink->errorCode() == 23000)
-	{
-		$ei = $dbxlink->errorInfo();
-		if ($ei[1] == 1062)
-			return 'tag name must be unique';
-		if ($ei[1] == 1452)
-			return "parent tag id ${parent_id} does not exist";
-	}
-	return 'SQL query failed in ' . __FUNCTION__;
+	return usePreparedExecuteBlade
+	(
+		'UPDATE TagTree SET tag=?, parent_id=? WHERE id=?',
+		array
+		(
+			$tag_name,
+			$parent_id == 0 ? NULL : $parent_id,
+			$tag_id,
+		)
+	);
 }
 
 // Drop the whole chain stored.
@@ -2969,44 +2956,42 @@ function newPortForwarding ($object_id, $localip, $localport, $remoteip, $remote
 	if ( ($remoteport <= 0) or ($remoteport >= 65536) )
 		return "$remoteport: invaild port";
 
-	$result = useInsertBlade
+	$result = usePreparedExecuteBlade
 	(
-		'IPv4NAT',
+		'INSERT INTO IPv4NAT (object_id, localip, remoteip, localport, remoteport, proto, description) ' .
+		'VALUES (?, INET_ATON(?), INET_ATON(?), ?, ?, ?, ?)',
 		array
 		(
-			'object_id' => $object_id,
-			'localip' => "INET_ATON('${localip}')",
-			'remoteip' => "INET_ATON('$remoteip')",
-			'localport' => $localport,
-			'remoteport' => $remoteport,
-			'proto' => "'${proto}'",
-			'description' => "'${description}'",
+			$object_id,
+			$localip,
+			$remoteip,
+			$localport,
+			$remoteport,
+			$proto,
+			$description,
 		)
 	);
-	if ($result)
-		return '';
-	else
-		return __FUNCTION__ . ': Failed to insert the rule.';
+	return $result !== FALSE ? '' : (__FUNCTION__ . '(): failed to insert the rule');
 }
 
 function deletePortForwarding ($object_id, $localip, $localport, $remoteip, $remoteport, $proto)
 {
-	global $dbxlink;
-
-	$query =
-		"delete from IPv4NAT where object_id='$object_id' and localip=INET_ATON('$localip') and remoteip=INET_ATON('$remoteip') and localport='$localport' and remoteport='$remoteport' and proto='$proto'";
-	$result = $dbxlink->exec ($query);
-	return '';
+	return usePreparedExecuteBlade
+	(
+		'DELETE FROM IPv4NAT WHERE object_id=? AND localip=INET_ATON(?) AND ' .
+		'remoteip=INET_ATON(?) AND localport=? AND remoteport=? AND proto=?',
+		array ($object_id, $localip, $remoteip, $localport, $remoteport, $proto)
+	);
 }
 
 function updatePortForwarding ($object_id, $localip, $localport, $remoteip, $remoteport, $proto, $description)
 {
-	global $dbxlink;
-
-	$query =
-		"update IPv4NAT set description='$description' where object_id='$object_id' and localip=INET_ATON('$localip') and remoteip=INET_ATON('$remoteip') and localport='$localport' and remoteport='$remoteport' and proto='$proto'";
-	$result = $dbxlink->exec ($query);
-	return '';
+	return usePreparedExecuteBlade
+	(
+		'UPDATE IPv4NAT SET description=? WHERE object_id=? AND localip=INET_ATON(?) AND remoteip=INET_ATON(?) ' .
+		'AND localport=? AND remoteport=? AND proto=?',
+		array ($description, $object_id, $localip, $remoteip, $localport, $remoteport, $proto)
+	);
 }
 
 function getNATv4ForObject ($object_id)
@@ -3380,9 +3365,7 @@ function releaseLDAPCache ()
 // This actually changes only last_retry.
 function touchLDAPCacheRecord ($form_username)
 {
-	global $dbxlink;
-	$query = "update LDAPCache set last_retry = NOW() where presented_username = '${form_username}'";
-	$dbxlink->exec ($query);
+	return usePreparedExecuteBlade ('UPDATE LDAPCache SET last_retry=NOW() WHERE presented_username=?', array ($form_username));
 }
 
 function replaceLDAPCacheRecord ($form_username, $password_hash, $dname, $memberof)
@@ -3408,8 +3391,7 @@ function deleteLDAPCacheRecord ($form_username)
 // Calling this function w/o argument purges the whole LDAP cache.
 function discardLDAPCache ($maxage = 0)
 {
-	global $dbxlink;
-	$dbxlink->exec ("DELETE from LDAPCache WHERE TIMESTAMPDIFF(SECOND, first_success, NOW()) >= ${maxage} or NOW() < first_success");
+	return usePreparedExecuteBlade ('DELETE from LDAPCache WHERE TIMESTAMPDIFF(SECOND, first_success, NOW()) >= ? or NOW() < first_success', array ($maxage));
 }
 
 function getUserIDByUsername ($username)
@@ -3745,7 +3727,6 @@ function commitReduceVLANIPv4 ($vlan_ck, $ipv4net_id)
 // any port (each switch with the list of such ports).
 function getVLANConfiguredPorts ($vlan_ck)
 {
-	global $dbxlink;
 	$result = usePreparedSelectBlade
 	(
 		'SELECT PAV.object_id, PAV.port_name ' .
