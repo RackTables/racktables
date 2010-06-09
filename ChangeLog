@@ -1,6 +1,6 @@
 0.18.2
 	bugfix: don't restore last opened tab, which won't be permitted anyway
-	update: use prepared SQL queries more often
+	update: completely switch to PDO prepared queries (#120)
 	new feature: Live LLDP
 0.18.1 2010-06-03
 	update: initial SNMP support of Summit switches
