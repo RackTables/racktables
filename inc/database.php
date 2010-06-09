@@ -2137,24 +2137,6 @@ function commitUseupPort ($port_id = 0)
 // This is a swiss-knife blade to insert a record into a table.
 // The first argument is table name.
 // The second argument is an array of "name" => "value" pairs.
-// The function returns either TRUE or FALSE (we expect one row
-// to be inserted).
-function useInsertBlade ($tablename, $values)
-{
-	global $dbxlink;
-	$namelist = $valuelist = '';
-	foreach ($values as $name => $value)
-	{
-		$namelist = $namelist . ($namelist == '' ? "(${name}" : ", ${name}");
-		$valuelist = $valuelist . ($valuelist == '' ? "(${value}" : ", ${value}");
-	}
-	$query = "insert into ${tablename} ${namelist}) values ${valuelist})";
-	$result = $dbxlink->exec ($query);
-	if ($result != 1)
-		return FALSE;
-	return TRUE;
-}
-
 function usePreparedInsertBlade ($tablename, $columns)
 {
 	global $dbxlink;
@@ -2189,15 +2171,8 @@ function usePreparedInsertBlade ($tablename, $columns)
 	}
 }
 
-// This swiss-knife blade deletes one record from the specified table
-// using the specified key name and value.
-function useDeleteBlade ($tablename, $keyname, $keyvalue)
-{
-	global $dbxlink;
-	return 1 === $dbxlink->exec ("delete from ${tablename} where ${keyname}=${keyvalue} limit 1");
-}
-
-// Prepared version of above, but note the difference in returned value.
+// This swiss-knife blade deletes any number of records from the specified table
+// using the specified key names and values.
 function usePreparedDeleteBlade ($tablename, $columns, $conjunction = 'AND')
 {
 	global $dbxlink;
@@ -2230,13 +2205,6 @@ function usePreparedDeleteBlade ($tablename, $columns, $conjunction = 'AND')
 		}
 		throw new Exception ($text, E_DB_CONSTRAINT);
 	}
-}
-
-function useSelectBlade ($query)
-{
-	global $dbxlink;
-	$result = $dbxlink->query ($query);
-	return $result;
 }
 
 function usePreparedSelectBlade ($query, $args = array())
@@ -3297,7 +3265,7 @@ function commitUpdateFile ($file_id = 0, $new_name = '', $new_type = '', $new_co
 function commitUnlinkFile ($link_id)
 {
 	if (usePreparedDeleteBlade ('FileLink', array ('id' => $link_id)) === FALSE)
-		return __FUNCTION__ . ': useDeleteBlade() failed';
+		return __FUNCTION__ . '(): query failed';
 	return '';
 }
 
@@ -3305,7 +3273,7 @@ function commitDeleteFile ($file_id)
 {
 	destroyTagsForEntity ('file', $file_id);
 	if (usePreparedDeleteBlade ('File', array ('id' => $file_id)) === FALSE)
-		return __FUNCTION__ . ': useDeleteBlade() failed';
+		return __FUNCTION__ . '(): query failed';
 	return '';
 }
 
