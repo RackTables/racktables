@@ -2134,6 +2134,26 @@ function commitUseupPort ($port_id = 0)
 	return usePreparedExecuteBlade ('UPDATE Port SET reservation_comment=NULL WHERE id=?', array ($port_id));
 }
 
+function convertPDOException ($e)
+{
+	if ($e->getCode() != 23000)
+		return $e;
+	switch ($e->errorInfo[1])
+	{
+	case 1062:
+		$text = 'such record already exists';
+		break;
+	case 1451:
+	case 1452:
+		$text = 'foreign key violation';
+		break;
+	default:
+		$text = 'unknown error code ' . $e->errorInfo[1];
+		break;
+	}
+	return new Exception ($text, E_DB_CONSTRAINT);
+}
+
 // This is a swiss-knife blade to insert a record into a table.
 // The first argument is table name.
 // The second argument is an array of "name" => "value" pairs.
@@ -2144,30 +2164,16 @@ function usePreparedInsertBlade ($tablename, $columns)
 	$query .= ') VALUES (' . implode (', ', array_fill (0, count ($columns), '?')) . ')';
 	// Now the query should be as follows:
 	// INSERT INTO table (c1, c2, c3) VALUES (?, ?, ?)
-	$prepared = $dbxlink->prepare ($query);
 	try
 	{
+		$prepared = $dbxlink->prepare ($query);
 		if (!$prepared->execute (array_values ($columns)))
 			return FALSE;
 		return $prepared->rowCount() == 1;
 	}
 	catch (PDOException $e)
 	{
-		if ($e->getCode() != 23000)
-			throw $e;
-		switch ($e->errorInfo[1])
-		{
-		case 1062:
-			$text = 'such record already exists';
-			break;
-		case 1452:
-			$text = 'foreign key violation';
-			break;
-		default:
-			$text = 'unknown error code ' . $e->errorInfo[1];
-			break;
-		}
-		throw new Exception ($text, E_DB_CONSTRAINT);
+		throw convertPDOException ($e);
 	}
 }
 
@@ -2183,27 +2189,16 @@ function usePreparedDeleteBlade ($tablename, $columns, $conjunction = 'AND')
 		$query .= " ${conj} ${colname}=?";
 		$conj = $conjunction;
 	}
-	$prepared = $dbxlink->prepare ($query);
 	try
 	{
+		$prepared = $dbxlink->prepare ($query);
 		if (!$prepared->execute (array_values ($columns)))
 			return FALSE;
 		return $prepared->rowCount(); // FALSE !== 0
 	}
 	catch (PDOException $e)
 	{
-		if ($e->getCode() != 23000)
-			throw $e;
-		switch ($e->errorInfo[1])
-		{
-		case 1451:
-			$text = 'foreign key violation';
-			break;
-		default:
-			$text = 'unknown error code ' . $e->errorInfo[1];
-			break;
-		}
-		throw new Exception ($text, E_DB_CONSTRAINT);
+		throw convertPDOException ($e);
 	}
 }
 
@@ -2221,11 +2216,18 @@ function usePreparedSelectBlade ($query, $args = array())
 function usePreparedExecuteBlade ($query, $args = array())
 {
 	global $dbxlink;
-	if (!$prepared = $dbxlink->prepare ($query))
-		return FALSE;
-	if (!$prepared->execute ($args))
-		return FALSE;
-	return $prepared->rowCount();
+	try
+	{
+		if (!$prepared = $dbxlink->prepare ($query))
+			return FALSE;
+		if (!$prepared->execute ($args))
+			return FALSE;
+		return $prepared->rowCount();
+	}
+	catch (PDOException $e)
+	{
+		throw convertPDOException ($e);
+	}
 }
 
 function loadConfigCache ()
