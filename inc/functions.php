@@ -2996,8 +2996,11 @@ function exec8021QDeploy ($object_id, $do_push)
 	}
 	catch (Exception $e)
 	{
-		$prepared = $dbxlink->prepare ("UPDATE VLANSwitch SET last_errno = ?, last_error_ts = NOW() WHERE object_id = ?");
-		$prepared->execute (array (E_8021Q_PULL_REMOTE_ERROR, $vswitch['object_id']));
+		usePreparedExecuteBlade
+		(
+			'UPDATE VLANSwitch SET last_errno=?, last_error_ts=NOW() WHERE object_id=?',
+			array (E_8021Q_PULL_REMOTE_ERROR, $vswitch['object_id'])
+		);
 		$dbxlink->commit();
 		return 0;
 	}
@@ -3048,18 +3051,25 @@ function exec8021QDeploy ($object_id, $do_push)
 	{
 		// saved configuration has changed (either "user" ports have changed,
 		// or uplinks, or both), so bump revision number up)
-		$prepared = $dbxlink->prepare ('UPDATE VLANSwitch SET mutex_rev = mutex_rev + 1, last_change = NOW(), out_of_sync = "yes" WHERE object_id = ?');
-		$prepared->execute (array ($vswitch['object_id']));
+		usePreparedExecuteBlade
+		(
+			'UPDATE VLANSwitch SET mutex_rev=mutex_rev+1, last_change=NOW(), out_of_sync="yes" WHERE object_id=?',
+			array ($vswitch['object_id'])
+		);
 	}
 	if ($conflict)
-	{
-		$prepared = $dbxlink->prepare ('UPDATE VLANSwitch SET out_of_sync = "yes", last_errno = ?, last_error_ts = NOW() WHERE object_id = ?');
-		$prepared->execute (array (E_8021Q_VERSION_CONFLICT, $vswitch['object_id']));
-	}
+		usePreparedExecuteBlade
+		(
+			'UPDATE VLANSwitch SET out_of_sync="yes", last_errno=?, last_error_ts=NOW() WHERE object_id=?',
+			array (E_8021Q_VERSION_CONFLICT, $vswitch['object_id'])
+		);
 	else
 	{
-		$prepared = $dbxlink->prepare ("UPDATE VLANSwitch SET last_errno = ?, last_error_ts = NOW() WHERE object_id = ?");
-		$prepared->execute (array (E_8021Q_NOERROR, $vswitch['object_id']));
+		usePreparedExecuteBlade
+		(
+			'UPDATE VLANSwitch SET last_errno=?, last_error_ts=NOW() WHERE object_id=?',
+			array (E_8021Q_NOERROR, $vswitch['object_id'])
+		);
 		// Modified uplinks are very likely to differ from those in R-copy,
 		// so don't mark device as clean, if this happened. This can cost
 		// us an additional, empty round of sync, but at least out_of_sync
@@ -3067,26 +3077,36 @@ function exec8021QDeploy ($object_id, $do_push)
 		// FIXME: A cleaner way of coupling pull and push operations would
 		// be to split this function into two.
 		if (!count ($ok_to_push) and !$nsaved_uplinks)
-		{
-			$prepared = $dbxlink->prepare ("UPDATE VLANSwitch SET out_of_sync = 'no' WHERE object_id = ?");
-			$prepared->execute (array ($vswitch['object_id']));
-		}
+			usePreparedExecuteBlade
+			(
+				'UPDATE VLANSwitch SET out_of_sync="no" WHERE object_id=?',
+				array ($vswitch['object_id'])
+			);
 		elseif ($do_push)
 		{
-			$prepared = $dbxlink->prepare ("UPDATE VLANSwitch SET last_push_started = NOW() WHERE object_id = ?");
-			$prepared->execute (array ($vswitch['object_id']));
+			usePreparedExecuteBlade
+			(
+				'UPDATE VLANSwitch SET last_push_started=NOW() WHERE object_id=?',
+				array ($vswitch['object_id'])
+			);
 			try
 			{
 				$npushed += exportSwitch8021QConfig ($vswitch, $R['vlanlist'], $R['portdata'], $ok_to_push);
 				// update cache for ports deployed
 				replace8021QPorts ('cached', $vswitch['object_id'], $R['portdata'], $ok_to_push);
-				$prepared = $dbxlink->prepare ('UPDATE VLANSwitch SET last_push_finished = NOW(), out_of_sync = "no", last_errno = ? WHERE object_id = ?');
-				$prepared->execute (array (E_8021Q_NOERROR, $vswitch['object_id']));
+				usePreparedExecuteBlade
+				(
+					'UPDATE VLANSwitch SET last_push_finished=NOW(), out_of_sync="no", last_errno=? WHERE object_id=?',
+					array (E_8021Q_NOERROR, $vswitch['object_id'])
+				);
 			}
 			catch (Exception $r)
 			{
-				$prepared = $dbxlink->prepare ('UPDATE VLANSwitch SET out_of_sync = "yes", last_error_ts = NOW(), last_errno = ? WHERE object_id = ?');
-				$prepared->execute (E_8021Q_PUSH_REMOTE_ERROR, array ($vswitch['object_id']));
+				usePreparedExecuteBlade
+				(
+					'UPDATE VLANSwitch SET out_of_sync="yes", last_error_ts=NOW(), last_errno=? WHERE object_id=?',
+					array (E_8021Q_PUSH_REMOTE_ERROR, $vswitch['object_id'])
+				);
 			}
 		}
 	}
@@ -3171,10 +3191,11 @@ function saveDownlinksReverb ($object_id, $requested_changes)
 		if (!same8021QConfigs ($finalconfig, $before[$pn]))
 			$nsaved += upd8021QPort ('desired', $vswitch['object_id'], $pn, $finalconfig);
 	if ($nsaved)
-	{
-		$prepared = $dbxlink->prepare ('UPDATE VLANSwitch SET mutex_rev = mutex_rev + 1, last_change = NOW(), out_of_sync = "yes" WHERE object_id = ?');
-		$prepared->execute (array ($vswitch['object_id']));
-	}
+		usePreparedExecuteBlade
+		(
+			'UPDATE VLANSwitch SET mutex_rev=mutex_rev+1, last_change=NOW(), out_of_sync="yes" WHERE object_id=?',
+			array ($vswitch['object_id'])
+		);
 	$dbxlink->commit();
 }
 

@@ -2088,20 +2088,14 @@ function add8021QOrder ()
 	assertUIntArg ('vdom_id');
 	assertUIntArg ('object_id');
 	assertUIntArg ('vst_id');
-	global $sic, $dbxlink;
-	$result = usePreparedInsertBlade
+	global $sic;
+	$result = usePreparedExecuteBlade
 	(
-		'VLANSwitch',
-		array
-		(
-			'domain_id' => $sic['vdom_id'],
-			'object_id' => $sic['object_id'],
-			'template_id' => $sic['vst_id'],
-		)
+		'INSERT INTO VLANSwitch (domain_id, object_id, template_id, last_change, out_of_sync) ' .
+		'VALUES (?, ?, ?, NOW(), "yes")',
+		array ($sic['vdom_id'], $sic['object_id'], $sic['vst_id'])
 	);
-	$query = $dbxlink->prepare ('UPDATE VLANSwitch SET last_change = NOW(), out_of_sync = "yes" WHERE object_id = ?');
-	$query->execute (array ($sic['object_id']));
-	return buildRedirectURL (__FUNCTION__, $result ? 'OK' : 'ERR');
+	return buildRedirectURL (__FUNCTION__, $result !== FALSE ? 'OK' : 'ERR');
 }
 
 $msgcode['del8021QOrder']['OK'] = 49;
@@ -2314,10 +2308,11 @@ function save8021QPorts ()
 		return buildRedirectURL (__FUNCTION__, 'ERR2', array(), NULL, NULL, $extra);
 	}
 	if ($npulled + $nsaved_uplinks)
-	{
-		$query = $dbxlink->prepare ('UPDATE VLANSwitch SET mutex_rev = mutex_rev + 1, last_change = NOW(), out_of_sync = "yes" WHERE object_id = ?');
-		$query->execute (array ($sic['object_id']));
-	}
+		$result = usePreparedExecuteBlade
+		(
+			'UPDATE VLANSwitch SET mutex_rev=mutex_rev+1, last_change=NOW(), out_of_sync="yes" WHERE object_id=?',
+			array ($sic['object_id'])
+		);
 	$dbxlink->commit();
 	$log = oneLiner (63, array ($npulled + $nsaved_uplinks));
 	if ($nsaved_uplinks)
