@@ -16,8 +16,7 @@ if (!permitted())
 switch ($_REQUEST['ac'])
 {
 	case 'verifyCode':
-		$code = str_replace ('\r', '', str_replace ('\n', "\n", $_REQUEST['code']));
-		$result = getRackCode($code);
+		$result = getRackCode (dos2unix ($_REQUEST['code']));
 		if ($result['result'] == 'ACK')
 			echo "ACK\n";
 		else
