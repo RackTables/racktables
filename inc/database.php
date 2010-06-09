@@ -172,7 +172,7 @@ function isInnoDBSupported ($dbh = FALSE) {
 	return FALSE;
 }
 
-function escapeString ($value, $do_db_escape = TRUE)
+function escapeString ($value, $do_db_escape = FALSE)
 {
 	$ret = htmlspecialchars ($value, ENT_QUOTES, 'UTF-8');
 	if ($do_db_escape)
