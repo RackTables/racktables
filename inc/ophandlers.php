@@ -481,17 +481,15 @@ function delIPv4Prefix ()
 }
 
 $msgcode['updIPv4Prefix']['OK'] = 25;
-$msgcode['updIPv4Prefix']['ERR'] = 100;
+$msgcode['updIPv4Prefix']['ERR'] = 109;
 function updIPv4Prefix ()
 {
 	assertUIntArg ('id');
 	assertStringArg ('name', TRUE);
 	assertStringArg ('comment', TRUE);
 	global $sic;
-	if (strlen ($error = updateIPv4Network_real ($sic['id'], $sic['name'], $sic['comment'])))
-		return buildRedirectURL (__FUNCTION__, 'ERR', array ($error));
-	else
-		return buildRedirectURL (__FUNCTION__, 'OK');
+	$result = updateIPv4Network_real ($sic['id'], $sic['name'], $sic['comment']);
+	return buildRedirectURL (__FUNCTION__, $result !== FALSE ? 'OK' : 'ERR');
 }
 
 $msgcode['editAddress']['OK'] = 27;
@@ -1512,11 +1510,10 @@ function createTag ()
 	if (!validTagName ($tagname))
 		return buildRedirectURL (__FUNCTION__, 'ERR1', array ($tagname));
 	if (($parent_id = $_REQUEST['parent_id']) <= 0)
-		$parent_id = 'NULL';
-	if (($ret = commitCreateTag ($tagname, $parent_id)) == '')
-		return buildRedirectURL (__FUNCTION__, 'OK', array ($tagname));
-	else
-		return buildRedirectURL (__FUNCTION__, 'ERR3', array ($tagname, $ret));
+		$parent_id = NULL;
+	if (FALSE === commitCreateTag ($tagname, $parent_id))
+		return buildRedirectURL (__FUNCTION__, 'ERR3', array (niftyString ($tagname)));
+	return buildRedirectURL (__FUNCTION__, 'OK', array (niftyString ($tagname)));
 }
 
 $msgcode['updateTag']['OK'] = 60;
@@ -1803,12 +1800,10 @@ function updateRack ()
 		return buildRedirectURL (__FUNCTION__, 'ERR');
 }
 
-$msgcode['updateRackDesign']['ERR'] = 100;
 function updateRackDesign ()
 {
 	assertUIntArg ('rack_id');
-	if (NULL == ($rackData = spotEntity ('rack', $_REQUEST['rack_id'])))
-		return buildRedirectURL (__FUNCTION__, 'ERR', array ('Rack not found'), 'rackspace', 'default');
+	$rackData = spotEntity ('rack', $_REQUEST['rack_id']);
 	amplifyCell ($rackData);
 	applyRackDesignMask($rackData);
 	markupObjectProblems ($rackData);
@@ -1816,12 +1811,10 @@ function updateRackDesign ()
 	return buildWideRedirectURL (array($response));
 }
 
-$msgcode['updateRackProblems']['ERR'] = 100;
 function updateRackProblems ()
 {
 	assertUIntArg ('rack_id');
-	if (NULL == ($rackData = spotEntity ('rack', $_REQUEST['rack_id'])))
-		return buildRedirectURL (__FUNCTION__, 'ERR', array ('Rack not found'), 'rackspace', 'default');
+	$rackData = spotEntity ('rack', $_REQUEST['rack_id']);
 	amplifyCell ($rackData);
 	applyRackProblemMask($rackData);
 	markupObjectProblems ($rackData);
@@ -1837,7 +1830,8 @@ function querySNMPData ()
 }
 
 $msgcode['addFileWithoutLink']['OK'] = 69;
-$msgcode['addFileWithoutLink']['ERR'] = 100;
+$msgcode['addFileWithoutLink']['ERR1'] = 181;
+$msgcode['addFileWithoutLink']['ERR2'] = 110;
 // File-related functions
 function addFileWithoutLink ()
 {
@@ -1845,30 +1839,25 @@ function addFileWithoutLink ()
 
 	// Make sure the file can be uploaded
 	if (get_cfg_var('file_uploads') != 1)
-		return buildRedirectURL (__FUNCTION__, 'ERR', array ("file uploads not allowed, change 'file_uploads' parameter in php.ini"));
+		return buildRedirectURL (__FUNCTION__, 'ERR1');
 
 	$fp = fopen($_FILES['file']['tmp_name'], 'rb');
 	global $sic;
-	// commitAddFile() uses prepared statements
-	$error = commitAddFile ($_FILES['file']['name'], $_FILES['file']['type'], $_FILES['file']['size'], $fp, $sic['comment']);
+	if (FALSE === commitAddFile ($_FILES['file']['name'], $_FILES['file']['type'], $_FILES['file']['size'], $fp, $sic['comment']))
+		return buildRedirectURL (__FUNCTION__, 'ERR2');
 	if (isset ($_REQUEST['taglist']))
 		produceTagsForLastRecord ('file', $_REQUEST['taglist']);
-
-	if ($error != '')
-		return buildRedirectURL (__FUNCTION__, 'ERR', array ($error));
-
-	return buildRedirectURL (__FUNCTION__, 'OK', array ($_FILES['file']['name']));
+	return buildRedirectURL (__FUNCTION__, 'OK', array (htmlspecialchars ($_FILES['file']['name'])));
 }
 
 $msgcode['addFileToEntity']['OK'] = 69;
-$msgcode['addFileToEntity']['ERR1'] = 187;
 $msgcode['addFileToEntity']['ERR2'] = 181;
-$msgcode['addFileToEntity']['ERR3'] = 182;
+$msgcode['addFileToEntity']['ERR3'] = 110;
 function addFileToEntity ()
 {
 	global $page, $pageno, $etype_by_pageno;
 	if (!isset ($etype_by_pageno[$pageno]) or !isset ($page[$pageno]['bypass']))
-		return buildRedirectURL (__FUNCTION__, 'ERR1', array (__FUNCTION__));
+		throw new Exception ('dispatching failure', E_INTERNAL);
 	$realm = $etype_by_pageno[$pageno];
 	$bypass = $page[$pageno]['bypass'];
 	assertUIntArg ($bypass);
@@ -1881,43 +1870,38 @@ function addFileToEntity ()
 
 	$fp = fopen($_FILES['file']['tmp_name'], 'rb');
 	global $sic;
-	// commitAddFile() uses prepared statements
-	$error = commitAddFile ($_FILES['file']['name'], $_FILES['file']['type'], $_FILES['file']['size'], $fp, $sic['comment']);
-	if ($error != '')
-		return buildRedirectURL (__FUNCTION__, 'ERR3', array ($error));
+	if (FALSE === commitAddFile ($_FILES['file']['name'], $_FILES['file']['type'], $_FILES['file']['size'], $fp, $sic['comment']))
+		return buildRedirectURL (__FUNCTION__, 'ERR3');
+	if (FALSE === commitLinkFile (lastInsertID(), $realm, $entity_id))
+		return buildRedirectURL (__FUNCTION__, 'ERR3');
 
-	$error = commitLinkFile (lastInsertID(), $realm, $entity_id);	
-	if ($error != '')
-		return buildRedirectURL (__FUNCTION__, 'ERR3', array ($error));
-
-	return buildRedirectURL (__FUNCTION__, 'OK', array ($_FILES['file']['name']));
+	return buildRedirectURL (__FUNCTION__, 'OK', array (htmlspecialchars ($_FILES['file']['name'])));
 }
 
 $msgcode['linkFileToEntity']['OK'] = 71;
 $msgcode['linkFileToEntity']['ERR1'] = 178;
-$msgcode['linkFileToEntity']['ERR2'] = 100;
+$msgcode['linkFileToEntity']['ERR2'] = 110;
 function linkFileToEntity ()
 {
 	assertUIntArg ('file_id');
 	global $page, $pageno, $etype_by_pageno;
+	if (!isset ($etype_by_pageno[$pageno]) or !isset ($page[$pageno]['bypass']))
+		throw new Exception ('dispatching failure', E_INTERNAL);
 	$entity_type = $etype_by_pageno[$pageno];
 	$bypass_name = $page[$pageno]['bypass'];
 	assertUIntArg ($bypass_name);
 
 	$fi = spotEntity ('file', $_REQUEST['file_id']);
-	if ($fi === NULL)
-		return buildRedirectURL (__FUNCTION__, 'ERR1'); // file not found
-	$error = commitLinkFile ($_REQUEST['file_id'], $entity_type, $_REQUEST[$bypass_name]);
-	if ($error != '')
-		return buildRedirectURL (__FUNCTION__, 'ERR2', array ($error)); // linking failed
+	if (FALSE === commitLinkFile ($_REQUEST['file_id'], $entity_type, $_REQUEST[$bypass_name]))
+		return buildRedirectURL (__FUNCTION__, 'ERR2');
 
-	return buildRedirectURL (__FUNCTION__, 'OK', array ($fi['name']));
+	return buildRedirectURL (__FUNCTION__, 'OK', array (htmlspecialchars ($fi['name'])));
 }
 
 $msgcode['replaceFile']['OK'] = 70;
 $msgcode['replaceFile']['ERR1'] = 181;
 $msgcode['replaceFile']['ERR2'] = 207;
-$msgcode['replaceFile']['ERR3'] = 182;
+$msgcode['replaceFile']['ERR3'] = 109;
 function replaceFile ()
 {
 	global $sic;
@@ -1931,27 +1915,23 @@ function replaceFile ()
 	$fp = fopen($_FILES['file']['tmp_name'], 'rb');
 	if ($fp === FALSE)
 		return buildRedirectURL (__FUNCTION__, 'ERR2');
-	$error = commitReplaceFile ($sic['file_id'], $fp);
-	if ($error != '')
-		return buildRedirectURL (__FUNCTION__, 'ERR3', array ($error));
+	if (FALSE === commitReplaceFile ($sic['file_id'], $fp))
+		return buildRedirectURL (__FUNCTION__, 'ERR3');
 
 	return buildRedirectURL (__FUNCTION__, 'OK', array (htmlspecialchars ($shortInfo['name'])));
 }
 
 $msgcode['updateFile']['OK'] = 70;
-$msgcode['updateFile']['ERR'] = 100;
+$msgcode['updateFile']['ERR'] = 109;
 function updateFile ()
 {
 	assertUIntArg ('file_id');
 	assertStringArg ('file_name');
 	assertStringArg ('file_type');
 	assertStringArg ('file_comment', TRUE);
-	// prepared statement params below
 	global $sic;
-	$error = commitUpdateFile ($sic['file_id'], $sic['file_name'], $sic['file_type'], $sic['file_comment']);
-	if ($error != '')
-		return buildRedirectURL (__FUNCTION__, 'ERR', array ($error));
-
+	if (FALSE === commitUpdateFile ($sic['file_id'], $sic['file_name'], $sic['file_type'], $sic['file_comment']))
+		return buildRedirectURL (__FUNCTION__, 'ERR');
 	return buildRedirectURL (__FUNCTION__, 'OK', array ($_REQUEST['file_name']));
 }
 
@@ -1994,10 +1974,9 @@ function updateFileText ()
 	if ($shortInfo['mtime'] != $_REQUEST['mtime_copy'])
 		return buildRedirectURL (__FUNCTION__, 'ERR1');
 	global $sic;
-	$error = commitReplaceFile ($sic['file_id'], $sic['file_text']);
-	if ($error == '')
-		return buildRedirectURL (__FUNCTION__, 'OK', array (htmlspecialchars ($shortInfo['name'])));
-	return buildRedirectURL (__FUNCTION__, 'ERR2');
+	if (FALSE === commitReplaceFile ($sic['file_id'], $sic['file_text']))
+		return buildRedirectURL (__FUNCTION__, 'ERR2');
+	return buildRedirectURL (__FUNCTION__, 'OK', array (htmlspecialchars ($shortInfo['name'])));
 }
 
 $msgcode['addPortInterfaceCompat']['OK'] = 48;
@@ -2191,7 +2170,7 @@ function updVLANDescription ()
 		$sic['vlan_type'],
 		$sic['vlan_descr']
 	);
-	return buildRedirectURL (__FUNCTION__, $result ? 'OK' : 'ERR2');
+	return buildRedirectURL (__FUNCTION__, $result !== FALSE ? 'OK' : 'ERR2');
 }
 
 $msgcode['createVLANDomain']['OK'] = 48;
@@ -2537,7 +2516,7 @@ function updVLANSwitchTemplate()
 		$max_local_vlans = $sic['vst_maxvlans'];
 	}
 	$result = commitUpdateVST ($sic['vst_id'], $max_local_vlans, $sic['vst_descr']);
-	return buildRedirectURL (__FUNCTION__, $result ? 'OK' : 'ERR');
+	return buildRedirectURL (__FUNCTION__, $result !== FALSE ? 'OK' : 'ERR');
 }
 
 $msgcode['addVSTRule']['OK'] = 48;
@@ -2608,7 +2587,7 @@ function updVSTRule()
 		$sic['wrt_vlans'],
 		$sic['description']
 	);
-	return buildRedirectURL (__FUNCTION__, $result ? 'OK' : 'ERR');
+	return buildRedirectURL (__FUNCTION__, $result !== FALSE ? 'OK' : 'ERR');
 }
 
 $msgcode['importDPData']['OK'] = 44;

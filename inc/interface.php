@@ -1621,7 +1621,7 @@ function showMessageOrError ()
 				144 => array ('code' => 'error', 'format' => "Error deleting tag: '%s'"),
 				145 => array ('code' => 'error', 'format' => "Invalid tag name '%s'"),
 				146 => array ('code' => 'error', 'format' => 'Error deleting record "%s"'),
-				147 => array ('code' => 'error', 'format' => "Could not create tag '%s': %s"),
+				147 => array ('code' => 'error', 'format' => "Could not create tag '%s'"),
 				148 => array ('code' => 'error', 'format' => "Could not update tag '%s'"),
 				149 => array ('code' => 'error', 'format' => 'Turing test failed'),
 				150 => array ('code' => 'error', 'format' => 'Can only change password under DB authentication.'),

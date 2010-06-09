@@ -1248,10 +1248,7 @@ function getIPv4AddressNetworkId ($dottedquad, $masklen = 32)
 
 function updateIPv4Network_real ($id = 0, $name = '', $comment = '')
 {
-	global $dbxlink;
-	$query = $dbxlink->prepare ('UPDATE IPv4Network SET name = ?, comment = ? WHERE id = ?');
-	// TODO: $dbxlink->setAttribute (PDO::ATTR_ORACLE_NULLS, PDO::NULL_EMPTY_STRING);
-	return $query->execute (array ($name, $comment, $id)) ? '' : 'SQL query failed in ' . __FUNCTION__;
+	return usePreparedExecuteBlade ('UPDATE IPv4Network SET name = ?, comment = ? WHERE id = ?', array ($name, $comment, $id));
 }
 
 // This function is actually used not only to update, but also to create records,
@@ -2694,9 +2691,9 @@ function getTagList ()
 
 function commitCreateTag ($tagname = '', $parent_id = 0)
 {
-	if ($tagname == '' or $parent_id === 0)
-		return "Invalid args to " . __FUNCTION__;
-	$result = usePreparedInsertBlade
+	if ($tagname == '')
+		throw new InvalidArgException ('tagname', $tagname);
+	return usePreparedInsertBlade
 	(
 		'TagTree',
 		array
@@ -2705,18 +2702,6 @@ function commitCreateTag ($tagname = '', $parent_id = 0)
 			'parent_id' => $parent_id
 		)
 	);
-	if ($result)
-		return '';
-	global $dbxlink;
-	if ($dbxlink->errorCode() == 23000) // integrity constraint violation
-	{
-		$ei = $dbxlink->errorInfo();
-		if ($ei[1] == 1062)
-			return 'tag name must be unique';
-		if ($ei[1] == 1452)
-			return "parent tag id ${parent_id} does not exist";
-	}
-	return "SQL query failed in " . __FUNCTION__;
 }
 
 function commitDestroyTag ($tagid = 0)
@@ -3068,10 +3053,12 @@ function getFilesOfEntity ($entity_type = NULL, $entity_id = 0)
 
 function getFile ($file_id = 0)
 {
-	global $dbxlink;
-	$query = $dbxlink->prepare('SELECT * FROM File WHERE id = ?');
-	$query->bindParam(1, $file_id);
-	$query->execute();
+	$query = usePreparedSelectBlade
+	(
+		'SELECT id, name, type, size, ctime, mtime, atime, contents, comment ' .
+		'FROM File WHERE id = ?',
+		array ($file_id)
+	);
 	if (($row = $query->fetch (PDO::FETCH_ASSOC)) == NULL)
 	{
 		showWarning ('Query succeeded, but returned no data', __FUNCTION__);
@@ -3092,20 +3079,19 @@ function getFile ($file_id = 0)
 		$query->closeCursor();
 
 		// Someone accessed this file, update atime
-		$q_atime = $dbxlink->prepare('UPDATE File SET atime = ? WHERE id = ?');
-		$q_atime->bindParam(1, date('YmdHis'));
-		$q_atime->bindParam(2, $file_id);
-		$q_atime->execute();
+		usePreparedExecuteBlade ('UPDATE File SET atime = ? WHERE id = ?', array (date ('YmdHis'), $file_id));
 	}
 	return $ret;
 }
 
 function getFileLinks ($file_id = 0)
 {
-	global $dbxlink;
-	$query = $dbxlink->prepare('SELECT * FROM FileLink WHERE file_id = ? ORDER BY entity_type, entity_id');
-	$query->bindParam(1, $file_id);
-	$query->execute();
+	$query = usePreparedSelectBlade
+	(
+		'SELECT id, file_id, entity_type, entity_id FROM FileLink ' .
+		'WHERE file_id = ? ORDER BY entity_type, entity_id',
+		array ($file_id)
+	);
 	$rows = $query->fetchAll (PDO::FETCH_ASSOC);
 	$ret = array();
 	foreach ($rows as $row)
@@ -3206,32 +3192,23 @@ function commitAddFile ($name, $type, $size, $contents, $comment)
 	$query->bindParam(6, $now);
 	$query->bindParam(7, $contents, PDO::PARAM_LOB);
 	$query->bindParam(8, $comment);
-
-	$result = $query->execute();
-
-
-	if ($result)
-		return '';
-	elseif ($query->errorCode() == 23000)
-		return "commitAddFile: File named '${name}' already exists";
-	else
-		return 'commitAddFile: SQL query failed';
+	try
+	{
+		return $query->execute();
+	}
+	catch (PDOException $e)
+	{
+		throw convertPDOException ($e);
+	}
 }
 
 function commitLinkFile ($file_id, $entity_type, $entity_id)
 {
-	global $dbxlink;
-	$query  = $dbxlink->prepare('INSERT INTO FileLink (file_id, entity_type, entity_id) VALUES (?, ?, ?)');
-	$query->bindParam(1, $file_id);
-	$query->bindParam(2, $entity_type);
-	$query->bindParam(3, $entity_id);
-
-	$result = $query->execute();
-
-	if ($result)
-		return '';
-	else
-		return 'commitLinkFile: SQL query failed';
+	return usePreparedExecuteBlade
+	(
+		'INSERT INTO FileLink (file_id, entity_type, entity_id) VALUES (?, ?, ?)',
+		array ($file_id, $entity_type, $entity_id)
+	);
 }
 
 function commitReplaceFile ($file_id = 0, $contents)
@@ -3241,8 +3218,14 @@ function commitReplaceFile ($file_id = 0, $contents)
 	$query->bindParam(1, $contents, PDO::PARAM_LOB);
 	$query->bindParam(2, $file_id);
 
-	$result = $query->execute();
-	return '';
+	try
+	{
+		return $query->execute();
+	}
+	catch (PDOException $e)
+	{
+		throw convertPDOException ($e);
+	}
 }
 
 function commitUpdateFile ($file_id = 0, $new_name = '', $new_type = '', $new_comment = '')
@@ -3251,17 +3234,11 @@ function commitUpdateFile ($file_id = 0, $new_name = '', $new_type = '', $new_co
 		throw new InvalidArgException ('$new_name', $new_name);
 	if (!strlen ($new_type))
 		throw new InvalidArgException ('$new_type', $new_type);
-	global $dbxlink;
-	$query = $dbxlink->prepare('UPDATE File SET name = ?, type = ?, comment = ? WHERE id = ?');
-	$query->bindParam(1, $new_name);
-	$query->bindParam(2, $new_type);
-	$query->bindParam(3, $new_comment);
-	$query->bindParam(4, $file_id);
-
-	$result = $query->execute();
-	if (!$result)
-		return 'SQL query failed in ' . __FUNCTION__;
-	return '';
+	return usePreparedExecuteBlade
+	(
+		'UPDATE File SET name = ?, type = ?, comment = ? WHERE id = ?',
+		array ($new_name, $new_type, $new_comment, $file_id)
+	);
 }
 
 function commitUnlinkFile ($link_id)
@@ -3296,10 +3273,7 @@ function getChapterList ()
 // Return file id by file name.
 function findFileByName ($filename)
 {
-	global $dbxlink;
-	$query = $dbxlink->prepare('SELECT id FROM File WHERE name = ?');
-	$query->bindParam(1, $filename);
-	$query->execute();
+	$query = usePreparedSelectBlade ('SELECT id FROM File WHERE name = ?', array ($filename));
 	if (($row = $query->fetch (PDO::FETCH_ASSOC)))
 		return $row['id'];
 
@@ -3548,18 +3522,26 @@ function commitReduceVLANDescription ($vdom_id, $vlan_id)
 
 function commitUpdateVLANDescription ($vdom_id, $vlan_id, $vlan_type, $vlan_descr)
 {
-	global $dbxlink;
-	if (!mb_strlen ($vlan_descr))
-		$vlan_descr = NULL;
-	$query = $dbxlink->prepare ('UPDATE VLANDescription SET vlan_descr = ?, vlan_type = ? WHERE domain_id = ? AND vlan_id = ?');
-	return $query->execute (array ($vlan_descr, $vlan_type, $vdom_id, $vlan_id));
+	return usePreparedExecuteBlade
+	(
+		'UPDATE VLANDescription SET vlan_descr=?, vlan_type=? WHERE domain_id=? AND vlan_id=?',
+		array
+		(
+			!mb_strlen ($vlan_descr) ? NULL : $vlan_descr,
+			$vlan_type,
+			$vdom_id,
+			$vlan_id,
+		)
+	);
 }
 
 function commitUpdateVLANDomain ($vdom_id, $vdom_descr)
 {
-	global $dbxlink;
-	$query = $dbxlink->prepare ('UPDATE VLANDomain SET description = ? WHERE id = ?');
-	return $query->execute (array ($vdom_descr, $vdom_id));
+	return usePreparedExecuteBlade
+	(
+		'UPDATE VLANDomain SET description=? WHERE id=?',
+		array ($vdom_descr, $vdom_id)
+	);
 }
 
 function getVLANSwitches()
@@ -3756,7 +3738,7 @@ function del8021QPort ($object_id, $port_name)
 
 function upd8021QPort ($instance = 'desired', $object_id, $port_name, $port)
 {
-	global $tablemap_8021q, $dbxlink;
+	global $tablemap_8021q;
 	if (!array_key_exists ($instance, $tablemap_8021q))
 		throw new InvalidArgException ('instance', $instance);
 	// Replace current port configuration with the provided one. If the new
@@ -3767,8 +3749,11 @@ function upd8021QPort ($instance = 'desired', $object_id, $port_name, $port)
 	// A record on a port with none VLANs allowed makes no sense regardless of port mode.
 	if ($port['mode'] != 'trunk' and !count ($port['allowed']))
 		return 0;
-	$prepared = $dbxlink->prepare ('UPDATE ' . $tablemap_8021q[$instance]['pvm'] . ' SET vlan_mode = ? WHERE object_id = ? AND port_name = ?');
-	$prepared->execute (array ($port['mode'], $object_id, $port_name));
+	usePreparedExecuteBlade
+	(
+		'UPDATE ' . $tablemap_8021q[$instance]['pvm'] . ' SET vlan_mode=? WHERE object_id=? AND port_name=?',
+		array ($port['mode'], $object_id, $port_name)
+	);
 	if (FALSE === usePreparedDeleteBlade ($tablemap_8021q[$instance]['pav'], array ('object_id' => $object_id, 'port_name' => $port_name)))
 		throw new Exception ('', E_DB_WRITE_FAILED);
 	// FIXME: The goal is to INSERT as many rows as there are values in 'allowed' list
@@ -3827,17 +3812,11 @@ function getVSTOptions()
 function getVLANSwitchTemplate ($vst_id)
 {
 	$result = usePreparedSelectBlade ('SELECT id, max_local_vlans, description FROM VLANSwitchTemplate WHERE id = ?', array ($vst_id));
-	if (!($row = $result->fetch (PDO::FETCH_ASSOC)))
+	if (!($ret = $result->fetch (PDO::FETCH_ASSOC)))
 		throw new EntityNotFoundException ('vst', $vst_id);
 	unset ($result);
-	$ret = array
-	(
-		'id' => $row['id'],
-		'max_local_vlans' => $row['max_local_vlans'],
-		'description' => $row['description'],
-		'rules' => array(),
-		'switches' => array(),
-	);
+	$ret['rules'] = array();
+	$ret['switches'] = array();
 	$result = usePreparedSelectBlade
 	(
 		'SELECT rule_no, port_pcre, port_role, wrt_vlans, description ' .
@@ -3855,20 +3834,21 @@ function getVLANSwitchTemplate ($vst_id)
 
 function commitUpdateVST ($vst_id, $max_local_vlans, $description)
 {
-	global $dbxlink;
-	$prepared = $dbxlink->prepare ('UPDATE VLANSwitchTemplate SET max_local_vlans = ?, description = ? WHERE id = ?');
-	return $prepared->execute (array ($max_local_vlans, $description, $vst_id));
+	return usePreparedExecuteBlade
+	(
+		'UPDATE VLANSwitchTemplate SET max_local_vlans=?, description=? WHERE id=?',
+		array ($max_local_vlans, $description, $vst_id)
+	);
 }
 
 function commitUpdateVSTRule ($vst_id, $rule_no, $new_rule_no, $port_pcre, $port_role, $wrt_vlans, $description)
 {
-	global $dbxlink;
-	$prepared = $dbxlink->prepare
+	return usePreparedExecuteBlade
 	(
 		'UPDATE VLANSTRule SET rule_no = ?, port_pcre = ?, port_role = ?, wrt_vlans = ?, description = ? ' .
-		'WHERE vst_id = ? AND rule_no = ?'
+		'WHERE vst_id = ? AND rule_no = ?',
+		array ($new_rule_no, $port_pcre, $port_role, $wrt_vlans, $description, $vst_id, $rule_no)
 	);
-	return $prepared->execute (array ($new_rule_no, $port_pcre, $port_role, $wrt_vlans, $description, $vst_id, $rule_no));
 }
 
 function getIPv4Network8021QBindings ($ipv4net_id)
