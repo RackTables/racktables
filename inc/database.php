@@ -2297,7 +2297,7 @@ function storeUserConfigVar ($username = NULL, $varname = NULL, $varvalue = NULL
 	(
 		'REPLACE UserConfig SET varvalue=?, varname=?, user=?',
 		array ($varvalue, $varname, $username)
-	)
+	);
 }
 
 // setConfigVar() is expected to perform all necessary filtering
