@@ -360,7 +360,8 @@ CREATE TABLE `RackObjectHistory` (
 CREATE TABLE `RackRow` (
   `id` int(10) unsigned NOT NULL auto_increment,
   `name` char(255) NOT NULL,
-  PRIMARY KEY  (`id`)
+  PRIMARY KEY  (`id`),
+  UNIQUE KEY `name` (`name`)
 ) ENGINE=InnoDB;
 
 CREATE TABLE `RackSpace` (

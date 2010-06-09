@@ -1,6 +1,7 @@
 0.18.2
 	bugfix: don't restore last opened tab, which won't be permitted anyway
 	update: completely switch to PDO prepared queries (#120)
+	update: don't allow duplicate rack row names (#344)
 	new feature: Live LLDP
 0.18.1 2010-06-03
 	update: initial SNMP support of Summit switches
