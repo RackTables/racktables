@@ -95,7 +95,7 @@ function init_config ()
 		echo "The inc/secret.php file is not writable by web-server. Make sure it is.";
 		echo "The following commands should suffice:<pre>touch inc/secret.php; chmod 666 inc/secret.php</pre>";
 		echo 'Fedora Linux with SELinux may require this file to be owned by specific user (apache) and/or executing "setenforce 0" for the time of installation. ';
-		echo 'SELinux may be turned back on with "setenforce 1" command.';
+		echo 'SELinux may be turned back on with "setenforce 1" command.<br>';
 		return FALSE;
 	}
 	if
