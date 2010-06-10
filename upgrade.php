@@ -813,11 +813,10 @@ catch (PDOException $e)
 function authenticate_admin ($username, $password)
 {
 	global $dbxlink;
-	$hash = sha1 ($password);
-	$query = "select count(*) from UserAccount where user_id = 1 and user_name = '${username}' and user_password_hash = '${hash}'";
-	if (($result = $dbxlink->query ($query)) == NULL)
+	$prepared = $dbxlink->prepare ('SELECT COUNT(*) FROM UserAccount WHERE user_id=1 AND user_name=? AND user_password_hash=?');
+	if (!$prepared->execute (array ($username, sha1 ($password))))
 		die ('SQL query failed in ' . __FUNCTION__);
-	$rows = $result->fetchAll (PDO::FETCH_NUM);
+	$rows = $prepared->fetchAll (PDO::FETCH_NUM);
 	return $rows[0][0] == 1;
 }
 
