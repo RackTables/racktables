@@ -1008,6 +1008,22 @@ function nxos4PickSwitchportCommand (&$work, $line)
 	return __FUNCTION__;
 }
 
+function ios12TranslatePushQueue ($queue)
+{
+	$ret = "configure terminal\n";
+	$ret .= ciscoCommonTranslator ($queue);
+	if (getConfigVar ('8021Q_WRI_AFTER_CONFT') == 'yes')
+		$ret .= "write memory\n";
+}
+
+function nxos4TranslatePushQueue ($queue)
+{
+	$ret = "configure terminal\n";
+	$ret .= ciscoCommonTranslator ($queue);
+	if (getConfigVar ('8021Q_WRI_AFTER_CONFT') == 'yes')
+		$ret .= "copy running-config startup-config\n";
+}
+
 // Get a list of VLAN management pseudo-commands and return a text
 // of real vendor-specific commands, which implement the work.
 // This work is done in two rounds:
@@ -1015,9 +1031,8 @@ function nxos4PickSwitchportCommand (&$work, $line)
 //    sequences of VLAN IDs and replace them with ranges of form "A-B",
 //    where B>A.
 // 2. Iterate over the resulting list and produce real CLI commands.
-function ios12TranslatePushQueue ($queue)
+function ciscoCommonTranslator ($queue)
 {
-	$ret = "configure terminal\n";
 	foreach ($queue as $cmd)
 		switch ($cmd['opcode'])
 		{
@@ -1057,8 +1072,6 @@ function ios12TranslatePushQueue ($queue)
 			break;
 		}
 	$ret .= "end\n";
-	if (getConfigVar ('8021Q_WRI_AFTER_CONFT') == 'yes')
-		$ret .= "write memory\n";
 	return $ret;
 }
 
