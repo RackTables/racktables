@@ -2262,6 +2262,30 @@ function storeConfigVar ($varname = NULL, $varvalue = NULL)
 	);
 }
 
+// Database version detector. Should behave corretly on any
+// working dataset a user might have.
+function getDatabaseVersion ()
+{
+	$result = usePreparedSelectBlade ('SELECT varvalue FROM Config WHERE varname = "DB_VERSION" and vartype = "string"');
+	if ($result == NULL)
+	{
+		global $dbxlink;
+		$errorInfo = $dbxlink->errorInfo();
+		if ($errorInfo[0] == '42S02') // ER_NO_SUCH_TABLE
+			return '0.14.4';
+		die (__FUNCTION__ . ': SQL query #1 failed with error ' . $errorInfo[2]);
+	}
+	$rows = $result->fetchAll (PDO::FETCH_NUM);
+	if (count ($rows) != 1 || !strlen ($rows[0][0]))
+	{
+		$result->closeCursor();
+		die (__FUNCTION__ . ': Cannot guess database version. Config table is present, but DB_VERSION is missing or invalid. Giving up.');
+	}
+	$ret = $rows[0][0];
+	$result->closeCursor();
+	return $ret;
+}
+
 // Return an array of virtual services. For each of them list real server pools
 // with their load balancers and other stats.
 function getSLBSummary ()
