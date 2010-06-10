@@ -268,7 +268,7 @@ function init_database_static ()
 		echo "<td>${nq}</td><td>${nerrs}</td></tr>\n";
 	}
 	// (re)load dictionary by pure PHP means w/o any external file
-	echo "<tr><th>dictionary</th>";
+	echo "<tr><td>dictionary</td>";
 	$nq = $nerrs = 0;
 	$dictq = array();
 	foreach (reloadDictionary() as $query)
