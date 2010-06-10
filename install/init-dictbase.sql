@@ -400,7 +400,7 @@ INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdef
 ('8021Q_DEPLOY_MINAGE','300','uint','no','no','no','802.1Q deploy minimum age'),
 ('8021Q_DEPLOY_MAXAGE','3600','uint','no','no','no','802.1Q deploy maximum age'),
 ('8021Q_DEPLOY_RETRY','10800','uint','no','no','no','802.1Q deploy retry timer'),
-('8021Q_WRI_AFTER_CONFT','no','string','no','no','no','802.1Q: save device configuration after deploy'),
+('8021Q_WRI_AFTER_CONFT_LISTSRC','false','string','no','no','no','802.1Q: save device configuration after deploy (RackCode)'),
 ('8021Q_INSTANT_DEPLOY','no','string','no','no','yes','802.1Q: instant deploy'),
 ('STATIC_FILTER','yes','string','no','no','yes','Enable Filter Caching'),
 ('ENABLE_BULKPORT_FORM','yes','string','no','no','yes','Enable "Bulk Port" form'),

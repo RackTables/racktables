@@ -331,7 +331,9 @@ function setDevice8021QConfig ($object_id, $pseudocode)
 	if ('' == $breed = detectDeviceBreed ($object_id))
 		throw new Exception ('device breed unknown', E_GW_FAILURE);
 	global $gwpushxlator;
-	gwDeployDeviceConfig ($object_id, $breed, unix2dos ($gwpushxlator[$breed] ($pseudocode)));
+	$do_save = considerConfiguredConstraint (spotEntity ('object', $object_id), '8021Q_WRI_AFTER_CONFT_LISTSRC');
+	// FIXME: is it possible to do $pseudocode[] = array ('opcode' => 'save config') instead?
+	gwDeployDeviceConfig ($object_id, $breed, unix2dos ($gwpushxlator[$breed] ($pseudocode, $do_save)));
 }
 
 function gwRetrieveDeviceConfig ($object_id, $command)
@@ -1008,20 +1010,20 @@ function nxos4PickSwitchportCommand (&$work, $line)
 	return __FUNCTION__;
 }
 
-function ios12TranslatePushQueue ($queue)
+function ios12TranslatePushQueue ($queue, $do_save = FALSE)
 {
 	$ret = "configure terminal\n";
 	$ret .= ciscoCommonTranslator ($queue);
-	if (getConfigVar ('8021Q_WRI_AFTER_CONFT') == 'yes')
+	if ($do_save)
 		$ret .= "write memory\n";
 	return $ret;
 }
 
-function nxos4TranslatePushQueue ($queue)
+function nxos4TranslatePushQueue ($queue, $do_save = FALSE)
 {
 	$ret = "configure terminal\n";
 	$ret .= ciscoCommonTranslator ($queue);
-	if (getConfigVar ('8021Q_WRI_AFTER_CONFT') == 'yes')
+	if ($do_save)
 		$ret .= "copy running-config startup-config\n";
 	return $ret;
 }
@@ -1077,7 +1079,7 @@ function ciscoCommonTranslator ($queue)
 	return $ret;
 }
 
-function fdry5TranslatePushQueue ($queue)
+function fdry5TranslatePushQueue ($queue, $do_save = FALSE)
 {
 	$ret = "conf t\n";
 	foreach ($queue as $cmd)
@@ -1113,12 +1115,12 @@ function fdry5TranslatePushQueue ($queue)
 			break;
 		}
 	$ret .= "end\n";
-	if (getConfigVar ('8021Q_WRI_AFTER_CONFT') == 'yes')
+	if ($do_save)
 		$ret .= "write memory\n";
 	return $ret;
 }
 
-function vrp53TranslatePushQueue ($queue)
+function vrp53TranslatePushQueue ($queue, $do_save = FALSE)
 {
 	$ret = "system-view\n";
 	foreach ($queue as $cmd)
@@ -1157,12 +1159,12 @@ function vrp53TranslatePushQueue ($queue)
 			break;
 		}
 	$ret .= "return\n";
-	if (getConfigVar ('8021Q_WRI_AFTER_CONFT') == 'yes')
+	if ($do_save)
 		$ret .= "save\nY\n";
 	return $ret;
 }
 
-function xos12TranslatePushQueue ($queue)
+function xos12TranslatePushQueue ($queue, $do_save = FALSE)
 {
 	$ret = '';
 	foreach ($queue as $cmd)
@@ -1210,7 +1212,7 @@ function xos12TranslatePushQueue ($queue)
 		case 'set mode': // NOP
 			break;
 		}
-	if (getConfigVar ('8021Q_WRI_AFTER_CONFT') == 'yes')
+	if ($do_save)
 		$ret .= "save configuration\ny\n";
 	return $ret;
 }
