@@ -49,10 +49,8 @@ if ($enable_password ne "-") {
 }
 if ($command eq "get8021q") {
     open(WORKFILE, ">$workfile") || die "$workfile: $!";
-    $session->cmd ('terminal length 0');
-    $session->cmd ('terminal no monitor');
-    $session->cmd ('show running-config vlan 1-4094');
-    $session->cmd ('show running-config interface');
+    $session->put ('terminal length 0');
+    $session->put ('terminal no monitor');
     my @r = $session->cmd ('show running-config vlan 1-4094');
     print WORKFILE @r;
     @r = $session->cmd('show running-config interface');
