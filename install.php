@@ -83,52 +83,6 @@ function not_already_installed()
 	}
 }
 
-function platform_function_test ($funcname, $extname, $what_if_not = 'not found', $error_class = 'msg_error')
-{
-	return platform_generic_test (function_exists ($funcname), $extname, 'NOT PRESENT', $error_class);
-}
-
-function platform_generic_test ($is_ok, $topic, $what_if_not = 'FAILED', $error_class = 'msg_error')
-{
-	echo "<tr><th>${topic}</th>";
-	if ($is_ok)
-	{
-		echo '<td class=msg_success>PASSED</td></tr>';
-		return 0;
-	}
-	echo "<td class=${error_class}>${what_if_not}</td></tr>";
-	return 1;
-}
-
-function pcre8_with_properties()
-{
-	return FALSE === @preg_match ('/\p{L}/u', 'a') ? FALSE : TRUE;
-}
-
-// Check for PHP extensions.
-function platform_is_ok ()
-{
-	$nerrs = 0;
-	echo "<table border=1><tr><th>check item</th><th>result</th></tr>\n";
-	$nerrs += platform_generic_test (class_exists ('PDO'), 'PDO extension');
-	$nerrs += platform_generic_test (defined ('PDO::MYSQL_ATTR_READ_DEFAULT_FILE'), 'PDO-MySQL extension');
-	$nerrs += platform_function_test ('preg_match', 'PCRE extension');
-	$nerrs += platform_generic_test (pcre8_with_properties(), 'PCRE compiled with --enable-unicode-properties');
-	platform_function_test ('snmpwalk', 'SNMP extension', 'Not found, Live SNMP feature will not work.', 'msg_warning');
-	$nerrs += platform_function_test ('gd_info', 'GD extension');
-	$nerrs += platform_function_test ('mb_strlen', 'Multibyte string extension');
-	platform_function_test ('ldap_connect', 'LDAP extension', 'Not found, LDAP authentication will not work.', 'msg_warning');
-	platform_generic_test
-	(
-		(!empty($_SERVER['HTTPS']) and $_SERVER['HTTPS'] != 'off'),
-		'accessed over HTTPS',
-		'No! (all your passwords will be transmitted in cleartext)',
-		'msg_warning'
-	);
-	echo "</table>\n";
-	return !$nerrs;
-}
-
 // Check that we can write to configuration file.
 // If so, ask for DB connection paramaters and test
 // the connection. Neither save the parameters nor allow

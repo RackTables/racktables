@@ -155,23 +155,6 @@ $tablemap_8021q = array
 	),
 );
 
-function isInnoDBSupported ($dbh = FALSE) {
-	global $dbxlink;
-
-	// sometimes db handle isn't available globally, must be passed
-	if (!$dbxlink)
-		$dbxlink = $dbh;
-
-	// create a temp table
-	$dbxlink->query("CREATE TABLE `innodb_test` (`id` int) ENGINE=InnoDB");
-	$row = $dbxlink->query("SHOW TABLE STATUS LIKE 'innodb_test'")->fetch(PDO::FETCH_ASSOC);
-	$dbxlink->query("DROP TABLE `innodb_test`");
-	if ($row['Engine'] == 'InnoDB')
-		return TRUE;
-
-	return FALSE;
-}
-
 function escapeString ($value, $do_db_escape = FALSE)
 {
 	$ret = htmlspecialchars ($value, ENT_QUOTES, 'UTF-8');
