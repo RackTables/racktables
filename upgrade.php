@@ -851,7 +851,7 @@ switch ($user_auth_src)
 			!strlen ($_SERVER['PHP_AUTH_USER']) or
 			!isset ($_SERVER['PHP_AUTH_PW']) or
 			!strlen ($_SERVER['PHP_AUTH_PW']) or
-			!authenticate_admin (escapeString ($_SERVER['PHP_AUTH_USER']), escapeString ($_SERVER['PHP_AUTH_PW']))
+			!authenticate_admin ($_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW'])
 		)
 		{
 			header ('WWW-Authenticate: Basic realm="RackTables upgrade"');
