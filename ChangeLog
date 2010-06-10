@@ -1,4 +1,4 @@
-0.18.2
+0.18.2 2010-06-10
 	bugfix: don't restore last opened tab, which won't be permitted anyway
 	update: completely switch to PDO prepared queries (#120)
 	update: don't allow duplicate rack row names (#344)
