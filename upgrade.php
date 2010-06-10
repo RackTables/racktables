@@ -834,8 +834,22 @@ switch ($user_auth_src)
 		die;
 }
 
+?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head><title>RackTable version upgrade</title>
+<link rel=stylesheet type='text/css' href='css/pi.css' />
+</head>
+<body>
+<h1>Platform check status</h1>
+<?php
+
+if (!platform_is_ok())
+	die ('</body></html>');
+
+echo '<h1>Upgrade status</h1>';
 $dbver = getDatabaseVersion();
-echo '<table border=1>';
+echo '<table border=1 cellpadding=5>';
 echo "<tr><th>Current status</th><td>Data version: ${dbver}<br>Code version: " . CODE_VERSION . "</td></tr>\n";
 
 $path = getDBUpgradePath ($dbver, CODE_VERSION);
@@ -862,5 +876,6 @@ else
 	}
 }
 echo '</table>';
+echo '</body></html>';
 
 ?>

@@ -44,15 +44,15 @@ function platform_function_test ($funcname, $extname, $what_if_not = 'not found'
 	return platform_generic_test (function_exists ($funcname), $extname, 'NOT PRESENT', $error_class);
 }
 
-function platform_generic_test ($is_ok, $topic, $what_if_not = 'FAILED', $error_class = 'msg_error')
+function platform_generic_test ($is_ok, $topic, $what_if_not = 'FAILED', $error_class = 'trerror')
 {
-	echo "<tr><th>${topic}</th>";
+	echo "<tr><th class=tdleft>${topic}</th>";
 	if ($is_ok)
 	{
-		echo '<td class=msg_success>PASSED</td></tr>';
+		echo '<td class="trok tdleft">PASSED</td></tr>';
 		return 0;
 	}
-	echo "<td class=${error_class}>${what_if_not}</td></tr>";
+	echo "<td class='${error_class} tdleft'>${what_if_not}</td></tr>";
 	return 1;
 }
 
@@ -65,21 +65,21 @@ function pcre8_with_properties()
 function platform_is_ok ()
 {
 	$nerrs = 0;
-	echo "<table border=1><tr><th>check item</th><th>result</th></tr>\n";
+	echo "<table border=1 cellpadding=5>\n";
 	$nerrs += platform_generic_test (class_exists ('PDO'), 'PDO extension');
 	$nerrs += platform_generic_test (defined ('PDO::MYSQL_ATTR_READ_DEFAULT_FILE'), 'PDO-MySQL extension');
 	$nerrs += platform_function_test ('preg_match', 'PCRE extension');
-	$nerrs += platform_generic_test (pcre8_with_properties(), 'PCRE compiled with --enable-unicode-properties');
-	platform_function_test ('snmpwalk', 'SNMP extension', 'Not found, Live SNMP feature will not work.', 'msg_warning');
+	$nerrs += platform_generic_test (pcre8_with_properties(), 'PCRE compiled with<br>--enable-unicode-properties');
+	platform_function_test ('snmpwalk', 'SNMP extension', 'Not found, Live SNMP feature will not work.', 'trwarning');
 	$nerrs += platform_function_test ('gd_info', 'GD extension');
 	$nerrs += platform_function_test ('mb_strlen', 'Multibyte string extension');
-	platform_function_test ('ldap_connect', 'LDAP extension', 'Not found, LDAP authentication will not work.', 'msg_warning');
+	platform_function_test ('ldap_connect', 'LDAP extension', 'Not found, LDAP authentication will not work.', 'trwarning');
 	platform_generic_test
 	(
 		(!empty($_SERVER['HTTPS']) and $_SERVER['HTTPS'] != 'off'),
 		'accessed over HTTPS',
 		'No! (all your passwords will be transmitted in cleartext)',
-		'msg_warning'
+		'trwarning'
 	);
 	echo "</table>\n";
 	return !$nerrs;
