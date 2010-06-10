@@ -793,9 +793,7 @@ $user_auth_src = 'database';
 if (file_exists ('inc/secret.php'))
 	require_once 'inc/secret.php';
 else
-	die ("Database connection parameters are read from inc/secret.php file, " .
-		"which cannot be found.\nCopy provided inc/secret-sample.php to " .
-		"inc/secret.php and modify to your setup.\n\nThen reload the page.");
+	die ('<center>There is no working RackTables instance here, <a href="install.php">install</a>?</center>');
 
 try
 {
