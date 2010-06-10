@@ -84,18 +84,18 @@ do_connect()
 	esac
 
 	# prepare temp files
-	PORTINFO=`mktemp /tmp/racktables.XXXX`
+	PORTINFO=`mktemp /tmp/racktables.XXXXXX`
 	if ! [ -f "$PORTINFO" ]; then
 		echo 'ERR!could not create portinfo tmpfile'
 		return
 	fi
-	VLANINFO=`mktemp /tmp/racktables.XXXX`
+	VLANINFO=`mktemp /tmp/racktables.XXXXXX`
 	if ! [ -f "$VLANINFO" ]; then
 		echo 'ERR!could not create vlaninfo tmpfile'
 		rm -f "$PORTINFO"
 		return
 	fi
-	MACINFO=`mktemp /tmp/racktables.XXXX`
+	MACINFO=`mktemp /tmp/racktables.XXXXXX`
 	if ! [ -f "$MACINFO" ]; then
 		echo 'ERR!could not create MACinfo tmpfile'
 		rm -f "$PORTINFO" "$VLANINFO"
@@ -141,8 +141,8 @@ do_set()
 		echo 'ERR!missing set argument'
 		return
 	fi
-	local REQUESTS=`mktemp /tmp/racktables.XXXX`
-	local REPLIES=`mktemp /tmp/racktables.XXXX`
+	local REQUESTS=`mktemp /tmp/racktables.XXXXXX`
+	local REPLIES=`mktemp /tmp/racktables.XXXXXX`
 	echo $1 | tr ';' '\n' | while read setexpr; do
 		portname=`echo $setexpr | cut -s -d'=' -f1`
 		newvlan=`echo $setexpr | cut -s -d'=' -f2`

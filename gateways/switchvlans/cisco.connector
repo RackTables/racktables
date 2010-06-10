@@ -166,17 +166,17 @@ remove_tempfiles()
 create_tempfiles()
 {
 	# This one is for VLAN list.
-	CMDS1=`mktemp /tmp/cisco.connector.XXXX`
+	CMDS1=`mktemp /tmp/cisco.connector.XXXXXX`
 	# And this one holds ports list...
-	CMDS2=`mktemp /tmp/cisco.connector.XXXX`
+	CMDS2=`mktemp /tmp/cisco.connector.XXXXXX`
 	# ...and one more for MAC address table
-	CMDS3=`mktemp /tmp/cisco.connector.XXXX`
+	CMDS3=`mktemp /tmp/cisco.connector.XXXXXX`
 	# The following are buffers to hold the whole switch output
 	# before filtering.
-	OUT1=`mktemp /tmp/cisco.connector.XXXX`
-	OUT2a=`mktemp /tmp/cisco.connector.XXXX`
-	OUT2b=`mktemp /tmp/cisco.connector.XXXX`
-	OUT3=`mktemp /tmp/cisco.connector.XXXX`
+	OUT1=`mktemp /tmp/cisco.connector.XXXXXX`
+	OUT2a=`mktemp /tmp/cisco.connector.XXXXXX`
+	OUT2b=`mktemp /tmp/cisco.connector.XXXXXX`
+	OUT3=`mktemp /tmp/cisco.connector.XXXXXX`
 	[ -f "$CMDS1" -a -f "$CMDS2" -a -f "$CMDS3" -a -f "$OUT1" -a -f "$OUT2a" -a -f "$OUT2b" -a -f "$OUT3" ] && return
 	echo "E!connector cannot create tempfiles" >> "$FILE2"
 	remove_tempfiles

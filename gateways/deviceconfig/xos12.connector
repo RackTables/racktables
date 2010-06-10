@@ -40,7 +40,7 @@ prepare_connect_commands()
 }
 
 MYNAME=`basename $0`
-SESSION=`mktemp /tmp/$MYNAME.XXXX`
+SESSION=`mktemp /tmp/$MYNAME.XXXXXX`
 [ -f "$SESSION" ] || exit 5
 prepare_connect_commands $ENDPOINT
 case $COMMAND in
