@@ -786,7 +786,6 @@ function showFailure ($info = '', $location = 'N/A')
 }
 
 require_once 'inc/config.php'; // for CODE_VERSION
-require_once 'inc/database.php'; // for getDatabaseVersion()
 require_once 'inc/dictionary.php';
 // Enforce default value for now, releases prior to 0.17.0 didn't support 'httpd' auth source.
 $user_auth_src = 'database';
@@ -818,6 +817,28 @@ function authenticate_admin ($username, $password)
 		die ('SQL query failed in ' . __FUNCTION__);
 	$rows = $prepared->fetchAll (PDO::FETCH_NUM);
 	return $rows[0][0] == 1;
+}
+
+function getDatabaseVersion ()
+{
+	global $dbxlink;
+	$result = $dbxlink->query ('SELECT varvalue FROM Config WHERE varname = "DB_VERSION" and vartype = "string"');
+	if ($result == NULL)
+	{
+		$errorInfo = $dbxlink->errorInfo();
+		if ($errorInfo[0] == '42S02') // ER_NO_SUCH_TABLE
+			return '0.14.4';
+		die (__FUNCTION__ . ': SQL query #1 failed with error ' . $errorInfo[2]);
+	}
+	$rows = $result->fetchAll (PDO::FETCH_NUM);
+	if (count ($rows) != 1 || !strlen ($rows[0][0]))
+	{
+		$result->closeCursor();
+		die (__FUNCTION__ . ': Cannot guess database version. Config table is present, but DB_VERSION is missing or invalid. Giving up.');
+	}
+	$ret = $rows[0][0];
+	$result->closeCursor();
+	return $ret;
 }
 
 switch ($user_auth_src)
