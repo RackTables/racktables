@@ -1014,6 +1014,7 @@ function ios12TranslatePushQueue ($queue)
 	$ret .= ciscoCommonTranslator ($queue);
 	if (getConfigVar ('8021Q_WRI_AFTER_CONFT') == 'yes')
 		$ret .= "write memory\n";
+	return $ret;
 }
 
 function nxos4TranslatePushQueue ($queue)
@@ -1022,6 +1023,7 @@ function nxos4TranslatePushQueue ($queue)
 	$ret .= ciscoCommonTranslator ($queue);
 	if (getConfigVar ('8021Q_WRI_AFTER_CONFT') == 'yes')
 		$ret .= "copy running-config startup-config\n";
+	return $ret;
 }
 
 // Get a list of VLAN management pseudo-commands and return a text
