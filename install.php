@@ -145,14 +145,6 @@ function init_config ()
 		return FALSE;
 	}
 
-	// Make sure InnoDB is supported
-	require_once 'inc/database.php';
-	if (!isInnoDBSupported ($dbxlink))
-	{
-		echo 'Error: InnoDB support is disabled.  See the README for details.';
-		return FALSE;
-	}
-
 	$conf = fopen ('inc/secret.php', 'w+');
 	if ($conf === FALSE)
 	{
@@ -221,6 +213,11 @@ function init_database_static ()
 {
 	connect_to_db ();
 	global $dbxlink;
+	if (!isInnoDBSupported())
+	{
+		echo 'InnoDB test failed! Please configure MySQL server properly and retry.';
+		return FALSE;
+	}
 	$result = $dbxlink->query ('show tables');
 	$tables = $result->fetchAll (PDO::FETCH_NUM);
 	$result->closeCursor();
