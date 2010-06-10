@@ -2,19 +2,30 @@
 
 $relnotes = array
 (
-	'0.17.0' => "LDAP options have been moved to LDAP_options array. This means, that if you were<br>" .
-		"using LDAP authentication for users in version 0.16.x, it will break right after<br>" .
-		"upgrade to 0.17.0. To get things working again, adjust existing secret.php file<br>" .
-		"according to secret-sample.php file provided with 0.17.0 release.<br><br>" .
-		"Another change is the addition of support for file uploads.  Files are stored<br>" .
-		"in the database.  There are several settings in php.ini which you may need to modify:<br>" .
-		"<ul><li>file_uploads        - needs to be On</li>" .
-		"<li>upload_max_filesize - max size for uploaded files</li>" .
-		"<li>post_max_size       - max size of all form data submitted via POST (including files)</li></ul><br>" .
-		"Local user accounts used to have 'enabled' flag, which allowed individual blocking and<br>" .
-		"unblocking of each. This flag was dropped in favor of existing mean of access<br>" .
-		"setup (RackCode). An unconditional denying rule is automatically added into RackCode<br>" .
-		"for such blocked account, so the effective security policy remains the same.<br>",
+	'0.17.0' => <<<ENDOFTEXT
+LDAP options have been moved to LDAP_options array. This means, that if you were
+using LDAP authentication for users in version 0.16.x, it will break right after
+upgrade to 0.17.0. To get things working again, adjust existing secret.php file
+according to secret-sample.php file provided with 0.17.0 release.
+
+This release is the first to take advantage of the foreign key support
+provided by the InnoDB storage engine in MySQL.  The installer and
+upgrader scripts check for InnoDB support and cannot complete without it.
+If you have trouble, the first step is to make sure the 'skip-innodb'
+option in my.cnf is commented out.
+
+Another change is the addition of support for file uploads.  Files are stored
+in the database.  There are several settings in php.ini which you may need to modify:
+    file_uploads        - needs to be On
+    upload_max_filesize - max size for uploaded files
+    post_max_size       - max size of all form data submitted via POST (including files)
+
+User accounts used to have 'enabled' flag, which allowed individual blocking and
+unblocking of each. This flag was dropped in favor of existing mean of access
+setup (RackCode). An unconditional denying rule is automatically added into RackCode
+for such blocked account, so the effective security policy remains the same.
+ENDOFTEXT
+,
 	'0.18.2' => <<<ENDOFTEXT
 RackTables from its version 0.18.0 and later is not compatible with
 RHEL/CentOS (at least with versions up to 5.5) Linux distributions
@@ -24,7 +35,7 @@ in their default installation. There are yet options to work around that:
 3. Repair your RHEL/CentOS installation yourself by fixing its PCRE
 RPM as explained here: http://bugs.centos.org/view.php?id=3252
 ENDOFTEXT
-
+,
 );
 
 // At the moment we assume, that for any two releases we can
@@ -881,7 +892,7 @@ else
 		{
 			executeUpgradeBatch ($batchid);
 			if (isset ($relnotes[$batchid]))
-				echo "<tr><th>Release notes for ${batchid}</th><td>" . $relnotes[$batchid] . "</td></tr>\n";
+				echo "<tr><th>Release notes for ${batchid}</th><td><pre>" . $relnotes[$batchid] . "</pre></td></tr>\n";
 		}
 		echo "<tr><th>Summary</th><td>Upgrade complete, it is Ok to <a href='index.php'>enter</a> the system.</td></tr>\n";
 	}
