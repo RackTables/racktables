@@ -918,24 +918,12 @@ function nxos4ScanTopLevel (&$work, $line)
 		$matches[1] = preg_replace ('@^Ethernet(.+)$@', 'e\\1', $matches[1]);
 		$work['current'] = array ('port_name' => $matches[1]);
 		return 'nxos4PickSwitchportCommand';
-	case (preg_match ('@^vlan ([[:digit:]]+)$@', $line, $matches)):
-		$work['vlanlist'][] = $matches[1];
-		return 'nxos4PickVLANs';
+	case (preg_match ('@^vlan (.+)$@', $line, $matches)):
+		foreach (iosParseVLANString ($matches[1]) as $vlan_id)
+			$work['vlanlist'][] = $vlan_id;
+		return __FUNCTION__;
 	default:
 		return __FUNCTION__; // continue scan
-	}
-}
-
-function nxos4PickVLANs (&$work, $line)
-{
-	switch (TRUE)
-	{
-	case ($line == ''): // end of VLAN list
-		return 'nxos4ScanTopLevel';
-	case (preg_match ('@^vlan ([[:digit:]]+)$@', $line, $matches)):
-		$work['vlanlist'][] = $matches[1];
-	default: // VLAN name or any other text
-		return __FUNCTION__;
 	}
 }
 
@@ -944,7 +932,6 @@ function nxos4PickSwitchportCommand (&$work, $line)
 	if ($line == '') // end of interface section
 	{
 		// fill in defaults
-		// below assumes "system default switchport" mode set on the device
 		if (!array_key_exists ('mode', $work['current']))
 			$work['current']['mode'] = 'access';
 		// save work, if it makes sense
@@ -963,6 +950,7 @@ function nxos4PickSwitchportCommand (&$work, $line)
 		case 'trunk':
 			if (!array_key_exists ('trunk native vlan', $work['current']))
 				$work['current']['trunk native vlan'] = 1;
+			// FIXME: NX-OS reserves VLANs 3968 through 4047 plus 4094 for itself
 			if (!array_key_exists ('trunk allowed vlan', $work['current']))
 				$work['current']['trunk allowed vlan'] = range (VLAN_MIN_ID, VLAN_MAX_ID);
 			// Having configured VLAN as "native" doesn't mean anything
@@ -980,7 +968,14 @@ function nxos4PickSwitchportCommand (&$work, $line)
 			);
 			break;
 		default:
-			// dot1q-tunnel, dynamic, private-vlan --- skip these
+			// dot1q-tunnel, dynamic, private-vlan, FEX
+			$work['portdata'][$work['current']['port_name']] = array
+			(
+				'mode' => 'none',
+				'allowed' => array(),
+				'native' => 0,
+			);
+			// unset (routed), dot1q-tunnel, dynamic, private-vlan --- skip these
 		}
 		unset ($work['current']);
 		return 'nxos4ScanTopLevel';
