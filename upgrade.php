@@ -15,6 +15,16 @@ $relnotes = array
 		"unblocking of each. This flag was dropped in favor of existing mean of access<br>" .
 		"setup (RackCode). An unconditional denying rule is automatically added into RackCode<br>" .
 		"for such blocked account, so the effective security policy remains the same.<br>",
+	'0.18.2' => <<<ENDOFTEXT
+RackTables from its version 0.18.0 and later is not compatible with
+RHEL/CentOS (at least with versions up to 5.5) Linux distributions
+in their default installation. There are yet options to work around that:
+1. Install RackTables on a server with a different distribution/OS.
+2. Request Linux distribution vendor to fix the bug with PCRE.
+3. Repair your RHEL/CentOS installation yourself by fixing its PCRE
+RPM as explained here: http://bugs.centos.org/view.php?id=3252
+ENDOFTEXT
+
 );
 
 // At the moment we assume, that for any two releases we can

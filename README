@@ -97,35 +97,15 @@ should be sufficient:
 *                                                     *
 *******************************************************
 
-*** Upgrading to 0.14.12 ***
+*** Upgrading to 0.18.x ***
 
-The upgrade may show a failed query "alter database character set utf8", in
-this case the user should issue the query manually from the mysql command
-line.
-
-*** Upgrading to 0.16.0 ***
-
-This release features a completely new authorization system, RackCode,
-which brings the tags feature (introduced in 0.15.0) to its full potential.
-The old-style user permissions are converted during upgrade automatically,
-but the result may appear not what you would expect. Review the RackCode
-after upgrade (Main page -> Configuration -> Permissions) and adjust,
-if necessary.
-
-Another important change is a new dependency on "multibyte string" PHP
-extension. Normally one should get it working before starting the upgrade,
-this is typically achieved by installing a particular PHP RPM from the
-standard package repository (and restarting Apache after that):
-
-Fedora: yum install php-mbstring
-ALTLinux: apt-get install php5-mbstring
-
-*** Upgrading to 0.16.3 ***
-
-This release fixes a missing UNIQUE KEY in a table. The upgrade script may
-find it necessary first to transform some records. Because of this it is
-normal to see several "update TagStorage ... Duplicate entry" failed queries
-during the upgrade.
+RackTables from its version 0.18.0 and later is not compatible with
+RHEL/CentOS (at least with versions up to 5.5) Linux distributions
+in their default installation. There are yet options to work around that:
+1. Install RackTables on a server with a different distribution/OS.
+2. Request Linux distribution vendor to fix the bug with PCRE.
+3. Repair your RHEL/CentOS installation yourself by fixing its PCRE
+RPM as explained here: http://bugs.centos.org/view.php?id=3252
 
 *** Upgrading to 0.17.0 ***
 
