@@ -101,7 +101,8 @@ if (isset ($_SERVER['PHP_AUTH_USER']))
 if (isset ($_SERVER['REMOTE_USER']))
 	$_SERVER['REMOTE_USER'] = escapeString ($_SERVER['REMOTE_USER']);
 
-$dbver = getDatabaseVersion();
+loadConfigDefaults();
+$dbver = getConfigVar ('DB_VERSION');
 if ($dbver != CODE_VERSION)
 {
 	echo '<p align=justify>This Racktables installation seems to be ' .
@@ -113,10 +114,8 @@ if ($dbver != CODE_VERSION)
 	exit (1);
 }
 
-if (!mb_internal_encoding ('UTF-8') or !mb_regex_encoding ('UTF-8'))
+if (!mb_internal_encoding ('UTF-8'))
 	throw new Exception ('Failed setting multibyte string encoding to UTF-8', E_INTERNAL);
-
-loadConfigDefaults();
 
 require_once 'inc/code.php'; // for getRackCode()
 $rackCodeCache = loadScript ('RackCodeCache');
