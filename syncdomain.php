@@ -66,7 +66,7 @@ if (FALSE === $fp = @fopen ($filename, 'x+'))
 		exit (1);
 	}
 	// don't indicate failure unless the pidfile is 15 minutes or more old
-	if ($current_time < $pidfile + 15 * 60)
+	if ($current_time < $pidfile_mtime + 15 * 60)
 		exit (0);
 	echo "Failed to lock ${filename}, already locked by PID " . mb_substr (file_get_contents ($filename), 0, 6) . "\n";
 	exit (1);
