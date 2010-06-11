@@ -7737,7 +7737,7 @@ function renderDiscoveredNeighbors ($object_id)
 	$opcode_by_tabno = array ('livecdp' => 'getcdpstatus', 'livelldp' => 'getlldpstatus');
 	try
 	{
-		$neighbors = gwRetrieveDeviceConfig ($object_id, $opcode_by_tabno[$tabno]);
+		$neighbors = sortPortList (gwRetrieveDeviceConfig ($object_id, $opcode_by_tabno[$tabno]));
 	}
 	catch (Exception $e)
 	{
