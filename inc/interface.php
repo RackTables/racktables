@@ -1272,7 +1272,7 @@ function renderPortsForObject ($object_id)
 		{
 			$remote_object = spotEntity ('object', $port['remote_object_id']);
 			echo "<td><a href='".makeHref(array('page'=>'object', 'object_id'=>$port['remote_object_id']))."'>${remote_object['dname']}</a></td>";
-			echo "<td>${port['remote_name']}</td>";
+			echo "<td>${port['remote_name']}<input type=hidden name=reservation_comment value=''></td>";
 			echo "<td class=tdcenter><a href='".
 				makeHrefProcess(array(
 					'op'=>'unlinkPort', 
