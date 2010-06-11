@@ -15,7 +15,11 @@
 
 // translating functions maps
 $gwrxlator = array();
-$gwrxlator['getcdpstatus']['ios12'] = 'ios12ReadCDPStatus';
+$gwrxlator['getcdpstatus'] = array
+(
+	'ios12' => 'ios12ReadCDPStatus',
+	'nxos4' => 'ios12ReadCDPStatus',
+);
 $gwrxlator['getlldpstatus'] = array
 (
 	'xos12' => 'xos12ReadLLDPStatus',
@@ -392,9 +396,28 @@ function gwDeployDeviceConfig ($object_id, $breed, $text)
 function ios12ReadCDPStatus ($input)
 {
 	$ret = array();
-	$procfunc = 'ios12ScanCDPTopLevel';
 	foreach (explode ("\n", $input) as $line)
-		$procfunc = $procfunc ($ret, $line);
+	{
+		$matches = array();
+		switch (TRUE)
+		{
+		case preg_match ('/^Device ID: ?(.+)$/', $line, $matches):
+		case preg_match ('/^System Name: (.+)$/', $line, $matches):
+			$ret['current']['device'] = $matches[1];
+			break;
+		case preg_match ('/^Interface: (.+),  ?Port ID \(outgoing port\): (.+)$/', $line, $matches):
+			if (array_key_exists ('device', $ret['current']))
+				$ret[ios12ShortenIfName ($matches[1])] = array
+				(
+					'device' => $ret['current']['device'],
+					'port' => ios12ShortenIfName ($matches[2]),
+				);
+			unset ($ret['current']);
+			break;
+		default:
+		}
+	}
+	unset ($ret['current']);
 	return $ret;
 }
 
@@ -1215,37 +1238,6 @@ function xos12TranslatePushQueue ($queue, $do_save = FALSE)
 	if ($do_save)
 		$ret .= "save configuration\ny\n";
 	return $ret;
-}
-
-function ios12ScanCDPTopLevel (&$work, $line)
-{
-	$matches = array();
-	switch (TRUE)
-	{
-	case preg_match ('/^Device ID: (.+)$/', $line, $matches):
-		$work['current'] = array ('device' => $matches[1]);
-		return 'ios12ScanCDPEntry';
-	default:
-		return __FUNCTION__; // continue scan
-	}
-}
-
-function ios12ScanCDPEntry (&$work, $line)
-{
-	$matches = array();
-	switch (TRUE)
-	{
-	case preg_match ('/^Interface: (.+),  Port ID \(outgoing port\): (.+)$/', $line, $matches):
-		$work[ios12ShortenIfName ($matches[1])] = array
-		(
-			'device' => $work['current']['device'],
-			'port' => ios12ShortenIfName ($matches[2]),
-		);
-		unset ($work['current']);
-		return 'ios12ScanCDPTopLevel';
-	default:
-	}
-	return __FUNCTION__;
 }
 
 function xos12Read8021QConfig ($input)

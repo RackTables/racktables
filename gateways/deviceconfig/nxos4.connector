@@ -57,6 +57,14 @@ if ($command eq "get8021q") {
     print WORKFILE @r;
     exit(0);
 }
+if ($command eq "getcdpstatus") {
+    open(WORKFILE, ">$workfile") || die "$workfile: $!";
+    $session->cmd ('terminal length 0');
+    $session->cmd ('terminal no monitor');
+    my @r = $session->cmd ('show cdp neighbors detail');
+    print WORKFILE @r;
+    exit(0);
+}
 if ($command eq "deploy") {
     open(WORKFILE, "<$workfile") || die "$workfile: $!";
     while (<WORKFILE>) {
