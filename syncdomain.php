@@ -54,7 +54,21 @@ $todo = array
 $filename = '/var/tmp/RackTables-syncdomain-' . $options['vdid'] . '.pid';
 if (FALSE === $fp = @fopen ($filename, 'x+'))
 {
-	echo "Failed to lock ${filename}, already locked by PID " . mb_substr (file_get_contents ($filename), 0, 6);
+	if (FALSE === $pidfile_mtime = filemtime ($filename))
+	{
+		echo "Failed to obtain mtime of ${filename}\n";
+		exit (1);
+	}
+	$current_time = time();
+	if ($current_time < $pidfile_mtime)
+	{
+		echo "Warning: pidfile ${filename} mtime is in future!\n";
+		exit (1);
+	}
+	// don't indicate failure unless the pidfile is 15 minutes or more old
+	if ($current_time < $pidfile + 15 * 60)
+		exit (0);
+	echo "Failed to lock ${filename}, already locked by PID " . mb_substr (file_get_contents ($filename), 0, 6) . "\n";
 	exit (1);
 }
 
