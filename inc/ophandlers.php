@@ -158,16 +158,13 @@ function editPortForObject ()
 	assertUIntArg ('object_id');
 	assertUIntArg ('port_id');
 	assertUIntArg ('port_type_id');
+	assertStringArg ('reservation_comment', TRUE);
 	// tolerate empty value now to produce custom informative message later
 	assertStringArg ('name', TRUE);
 	if (!strlen ($_REQUEST['name']))
 		return buildRedirectURL (__FUNCTION__, 'ERR1');
 
-	if (isset ($_REQUEST['reservation_comment']) and strlen ($_REQUEST['reservation_comment']))
-		$port_rc = '"' . $_REQUEST['reservation_comment'] . '"';
-	else
-		$port_rc = 'NULL';
-	$error = commitUpdatePort ($_REQUEST['object_id'], $_REQUEST['port_id'], $_REQUEST['name'], $_REQUEST['port_type_id'], $_REQUEST['label'], $_REQUEST['l2address'], $port_rc);
+	$error = commitUpdatePort ($_REQUEST['object_id'], $_REQUEST['port_id'], $_REQUEST['name'], $_REQUEST['port_type_id'], $_REQUEST['label'], $_REQUEST['l2address'], $_REQUEST['reservation_comment']);
 	if ($error != '')
 		return buildRedirectURL (__FUNCTION__, 'ERR2', array ($error));
 	else

@@ -906,7 +906,7 @@ function commitUpdatePort ($object_id, $port_id, $port_name, $port_type_id, $por
 			$port_name,
 			$port_type_id,
 			$port_label,
-			$port_reservation_comment,
+			mb_strlen ($port_reservation_comment) ? $port_reservation_comment : NULL,
 			($db_l2address === '') ? NULL : $db_l2address,
 			$port_id,
 			$object_id
