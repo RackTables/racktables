@@ -162,7 +162,7 @@ $user_given_tags = array();
 // This also can be modified in local.php.
 $pageheaders = array
 (
-	100 => "<link rel='STYLESHEET' type='text/css' href='css/pi.css' />",
+	100 => "<link rel='STYLESHEET' type='text/css' href='pi.css' />",
 	102 => "<link rel='ICON' type='image/x-icon' href='pix/racktables.ico' />",
 	200 => "<script language='javascript' type='text/javascript' src='js/racktables.js'></script>",
 	201 => "<script language='javascript' type='text/javascript' src='js/jquery-1.3.1.min.js'></script>",
