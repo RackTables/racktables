@@ -1144,6 +1144,13 @@ function generatePortsForCatModule ($object_id, $slotno = 1, $mtype = 'X6748', $
 			$mac_address = nextMACAddress ($mac_address);
 		}
 		break;
+	case 'WS-X6704-10GE':
+		for ($i = 1; $i <= 4; $i++)
+		{
+			commitAddPort ($object_id, "te${slotno}/${i}", '5-1079', "slot ${slotno} port ${i}", $mac_address);
+			$mac_address = nextMACAddress ($mac_address);
+		}
+		break;
 	case 'VS-S720-10G':
 		commitAddPort ($object_id, "gi${slotno}/1", '4-1077', "slot ${slotno} port 1", $mac_address);
 		$mac_address = nextMACAddress ($mac_address);
