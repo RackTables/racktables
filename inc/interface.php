@@ -796,29 +796,6 @@ function getNiftySelect ($groupList, $select_attrs, $selected_id = NULL)
 	return $ret;
 }
 
-function comboFromSelect ($elem_ids = array())
-{
-	
-	echo '<script>$(document).ready(function() {';
-	$i = 1;
-	foreach ($elem_ids as $elem_id)
-	{
-		echo "var z${i}=dhtmlXComboFromSelect('${elem_id}');";
-		echo "z${i}.setComboText('');";
-		echo "z${i}.enableFilteringMode(true);";
-		echo "z${i}.enableOptionAutoPositioning();";
-//		echo "z${i}.attachEvent('onKeyPressed', function(keyCode){ z${i}.enableFilteringMode(true); });";
-//		echo "z${i}.attachEvent('onOpen', function(){z${i}.enableFilteringMode(false);});";
-//		echo "z${i}.attachEvent('onOpen', function(){ window.setTimeout(function(){var text = z${i}.getComboText();z${i}.setComboText('');z${i}.filterSelf();z${i}.setComboText(text);}); return true;});";
-		echo "z${i}.attachEvent('onOpen', function(){ z${i}.setComboText('');return true;});";
-//		echo "z${i}.attachEvent('onBlur', function(){ alert(z${i}.getSelectedValue())});";
-		echo "z${i}.enableOptionAutoHeight(true, 250);";
-//		echo "z${i}.readonly(true,true);";
-		$i++;
-	}
-	echo '})</script>';
-}
-
 // used by renderGridForm() and renderRackPage()
 function renderRackInfoPortlet ($rackData)
 {
@@ -2698,7 +2675,7 @@ function renderIPv4AddressAllocations ($dottedquad)
 		echo "<tr><td>";
 		printImageHREF ('add', 'allocate', TRUE);
 		echo "</td><td>";
-		printSelect (getNarrowObjectList ('IPV4OBJ_LISTSRC'), array ('name' => 'object_id', 'tabindex' => 100, 'id' => 'object_id'));
+		printSelect (getNarrowObjectList ('IPV4OBJ_LISTSRC'), array ('name' => 'object_id', 'tabindex' => 100));
 		echo "</td><td><input type=text tabindex=101 name=bond_name size=10></td><td>";
 		printSelect ($aat, array ('name' => 'bond_type', 'tabindex' => 102, 'regular'));
 		echo "</td><td>";
@@ -4377,11 +4354,11 @@ function renderRSPoolLBForm ($pool_id)
 		echo "<table cellspacing=0 cellpadding=5 align=center>";
 		printOpFormIntro ('addLB');
 		echo "<tr valign=top><th class=tdright>Load balancer</th><td class=tdleft>";
-		printSelect (getNarrowObjectList ('IPV4LB_LISTSRC'), array ('name' => 'object_id', 'tabindex' => 1, 'id' => 'object_id'));
+		printSelect (getNarrowObjectList ('IPV4LB_LISTSRC'), array ('name' => 'object_id', 'tabindex' => 1));
 		echo '</td><td class=tdcenter valign=middle rowspan=2>';
 		printImageHREF ('ADD', 'Configure LB', TRUE, 5);
 		echo '</td></tr><tr><th class=tdright>Virtual service</th><td class=tdleft>';
-		printSelect (getIPv4VSOptions(), array ('name' => 'vs_id', 'tabindex' => 2, 'id' => 'vs_id'));
+		printSelect (getIPv4VSOptions(), array ('name' => 'vs_id', 'tabindex' => 2));
 		echo "</td></tr>\n";
 		echo "<tr><th class=tdright>VS config</th><td colspan=2><textarea tabindex=3 name=vsconfig rows=10 cols=80></textarea></td></tr>";
 		echo "<tr><th class=tdright>RS config</th><td colspan=2><textarea tabindex=4 name=rsconfig rows=10 cols=80></textarea></td></tr>";
@@ -4436,11 +4413,11 @@ function renderVServiceLBForm ($vs_id)
 		echo '<table cellspacing=0 cellpadding=5 align=center>';
 		printOpFormIntro ('addLB');
 		echo '<tr valign=top><th class=tdright>Load balancer</th><td class=tdleft>';
-		printSelect (getNarrowObjectList ('IPV4LB_LISTSRC'), array ('name' => 'object_id', 'tabindex' => 101, 'id' => 'object_id'));
+		printSelect (getNarrowObjectList ('IPV4LB_LISTSRC'), array ('name' => 'object_id', 'tabindex' => 101));
 		echo '</td><td rowspan=2 class=tdcenter valign=middle>';
 		printImageHREF ('ADD', 'Configure LB', TRUE, 105);
 		echo '</td></tr><tr><th class=tdright>RS pool</th><td class=tdleft>';
-		printSelect (getIPv4RSPoolOptions(), array ('name' => 'pool_id', 'tabindex' => 102, 'id' => 'pool_id'));
+		printSelect (getIPv4RSPoolOptions(), array ('name' => 'pool_id', 'tabindex' => 102));
 		echo '</td></tr>';
 		echo '<tr><th class=tdright>VS config</th><td colspan=2><textarea tabindex=103 name=vsconfig rows=10 cols=80></textarea></td></tr>';
 		echo '<tr><th class=tdright>RS config</th><td colspan=2><textarea tabindex=104 name=rsconfig rows=10 cols=80></textarea></td></tr>';
@@ -5248,12 +5225,12 @@ function renderObjectSLB ($object_id)
 		echo '<table cellspacing=0 cellpadding=5 align=center>';
 		printOpFormIntro ('addLB');
 		echo '<tr><th class=tdright>Virtual service</th><td class=tdleft>';
-		printSelect (getIPv4VSOptions(), array ('name' => 'vs_id', 'tabindex' => 101, 'id' => 'vs_id'));
+		printSelect (getIPv4VSOptions(), array ('name' => 'vs_id', 'tabindex' => 101));
 		echo '</td><td class=tdcenter valign=middle rowspan=2>';
 		printImageHREF ('ADD', 'Configure LB', TRUE, 105);
 		echo '</td></tr>';
 		echo '</tr><th class=tdright>RS pool</th><td class=tdleft>';
-		printSelect (getIPv4RSPoolOptions(), array ('name' => 'pool_id', 'tabindex' => 102, 'id' => 'pool_id'));
+		printSelect (getIPv4RSPoolOptions(), array ('name' => 'pool_id', 'tabindex' => 102));
 		echo "</td></tr>";
 		echo '<tr><th class=tdright>VS config</th><td colspan=2><textarea tabindex=103 name=vsconfig rows=10 cols=80></textarea></td></tr>';
 		echo '<tr><th class=tdright>RS config</th><td colspan=2><textarea tabindex=104 name=rsconfig rows=10 cols=80></textarea></td></tr>';
@@ -6421,9 +6398,9 @@ function renderPortIFCompatEditor()
 		echo '<tr><th class=tdleft>';
 		printImageHREF ('add', 'add pair', TRUE);
 		echo '</th><th class=tdleft>';
-		printSelect (getPortIIFOptions(), array ('name' => 'iif_id', 'id' => 'iif_id'));
+		printSelect (getPortIIFOptions(), array ('name' => 'iif_id'));
 		echo '</th><th class=tdleft>';
-		printSelect (readChapter (CHAP_PORTTYPE), array ('name' => 'oif_id', 'id' => 'oif_id'));
+		printSelect (readChapter (CHAP_PORTTYPE), array ('name' => 'oif_id'));
 		echo '</th></tr></form>';
 	}
 

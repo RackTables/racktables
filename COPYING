@@ -92,9 +92,3 @@ released under GNU LGPL.
 RackTables uses icons from pgAdmin III, which is copyright 2002-2009,
 The pgAdmin Development Team. pgAdmin is released under the BSD license.
 
-----------------------8<----------------------8<----------------------
-
-RackTables includes dhtmlxCombo, an AJAX-driven JavaScript ComboBox with
-autocomplete, which is copyright DHTMLX LTD. dhtmlxCombo is licensed under
-GNU GPL version 2.
-
