@@ -1270,6 +1270,11 @@ function getCellFilter ()
 		$_REQUEST['cft'] = $_REQUEST['tagfilter'];
 		unset ($_REQUEST['tagfilter']);
 	}
+	//if the page is submitted we get an andor value so we know they are trying to start a new filter or clearing the existing one.
+	if(isset($_REQUEST['andor']))
+	{
+		unset($_SESSION[$pageno]);
+	}
 	if (isset ($_SESSION[$pageno]['tagfilter']) and is_array ($_SESSION[$pageno]['tagfilter']) and !(isset($_REQUEST['cft'])) and $staticFilter == 'yes')
 	{
 		$_REQUEST['cft'] = $_SESSION[$pageno]['tagfilter'];
