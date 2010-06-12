@@ -734,6 +734,7 @@ CREATE TABLE `VLANValidID` (
 			$query[] = "UPDATE Config SET varvalue = '0.18.2' WHERE varname = 'DB_VERSION'";
 			break;
 		case '0.18.3':
+			$query = array_merge ($query, reloadDictionary ($batchid));
 			$query[] = "UPDATE Config SET varname='8021Q_WRI_AFTER_CONFT_LISTSRC', varvalue='false', description='802.1Q: save device configuration after deploy (RackCode)' WHERE varname='8021Q_WRI_AFTER_CONFT'";
 			$query[] = "UPDATE Config SET varvalue = '0.18.3' WHERE varname = 'DB_VERSION'";
 			break;

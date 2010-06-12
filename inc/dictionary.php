@@ -1430,6 +1430,10 @@ $dictionary = array
 	1350 => array ('chapter_id' => 14, 'dict_value' => 'ExtremeXOS 10'),
 	1351 => array ('chapter_id' => 14, 'dict_value' => 'ExtremeXOS 11'),
 	1352 => array ('chapter_id' => 14, 'dict_value' => 'ExtremeXOS 12'),
+	1353 => array ('chapter_id' => 12, 'dict_value' => '[[Extreme Networks%GPASS%Summit X480-24x | http://extremenetworks.com/products/summit-X480.aspx]]'),
+	1354 => array ('chapter_id' => 12, 'dict_value' => '[[Extreme Networks%GPASS%Summit X480-48t | http://extremenetworks.com/products/summit-X480.aspx]]'),
+	1355 => array ('chapter_id' => 12, 'dict_value' => '[[Extreme Networks%GPASS%Summit X480-48x | http://extremenetworks.com/products/summit-X480.aspx]]'),
+	1356 => array ('chapter_id' => 12, 'dict_value' => '[[Extreme Networks%GPASS%Summit X650 | http://extremenetworks.com/products/summit-x650.aspx]]'),
 );
 
 ?>
