@@ -2709,6 +2709,13 @@ function exportSwitch8021QConfig
 		default:
 			throw new InvalidArgException ('ports_to_do', '(hidden)', 'error in structure');
 		}
+	if (count ($crq))
+	{
+		array_unshift ($crq, array ('opcode' => 'begin configuration'));
+		$crq[] = array ('opcode' => 'end configuration');
+		if (considerConfiguredConstraint (spotEntity ('object', $vswitch['object_id']), '8021Q_WRI_AFTER_CONFT_LISTSRC'))
+			$crq[] = array ('opcode' => 'save configuration');
+	}
 	setDevice8021QConfig ($vswitch['object_id'], $crq);
 	return count ($crq);
 }

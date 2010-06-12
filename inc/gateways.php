@@ -335,9 +335,7 @@ function setDevice8021QConfig ($object_id, $pseudocode)
 	if ('' == $breed = detectDeviceBreed ($object_id))
 		throw new Exception ('device breed unknown', E_GW_FAILURE);
 	global $gwpushxlator;
-	$do_save = considerConfiguredConstraint (spotEntity ('object', $object_id), '8021Q_WRI_AFTER_CONFT_LISTSRC');
-	// FIXME: is it possible to do $pseudocode[] = array ('opcode' => 'save config') instead?
-	gwDeployDeviceConfig ($object_id, $breed, unix2dos ($gwpushxlator[$breed] ($pseudocode, $do_save)));
+	gwDeployDeviceConfig ($object_id, $breed, unix2dos ($gwpushxlator[$breed] ($pseudocode)));
 }
 
 function gwRetrieveDeviceConfig ($object_id, $command)
@@ -1033,24 +1031,6 @@ function nxos4PickSwitchportCommand (&$work, $line)
 	return __FUNCTION__;
 }
 
-function ios12TranslatePushQueue ($queue, $do_save = FALSE)
-{
-	$ret = "configure terminal\n";
-	$ret .= ciscoCommonTranslator ($queue);
-	if ($do_save)
-		$ret .= "write memory\n";
-	return $ret;
-}
-
-function nxos4TranslatePushQueue ($queue, $do_save = FALSE)
-{
-	$ret = "configure terminal\n";
-	$ret .= ciscoCommonTranslator ($queue);
-	if ($do_save)
-		$ret .= "copy running-config startup-config\n";
-	return $ret;
-}
-
 // Get a list of VLAN management pseudo-commands and return a text
 // of real vendor-specific commands, which implement the work.
 // This work is done in two rounds:
@@ -1058,8 +1038,9 @@ function nxos4TranslatePushQueue ($queue, $do_save = FALSE)
 //    sequences of VLAN IDs and replace them with ranges of form "A-B",
 //    where B>A.
 // 2. Iterate over the resulting list and produce real CLI commands.
-function ciscoCommonTranslator ($queue)
+function ios12TranslatePushQueue ($queue)
 {
+	$ret = '';
 	foreach ($queue as $cmd)
 		switch ($cmd['opcode'])
 		{
@@ -1097,14 +1078,24 @@ function ciscoCommonTranslator ($queue)
 				$ret .= "no switchport trunk native vlan\nswitchport trunk allowed vlan none\n";
 			$ret .= "exit\n";
 			break;
+		case 'begin configuration':
+			$ret .= "configure terminal\n";
+			break;
+		case 'end configuration':
+			$ret .= "end\n";
+			break;
+		case 'save configuration':
+			$ret .= "copy running-config startup-config\n";
+			break;
+		default:
+			throw new InvalidArgException ('opcode', $cmd['opcode']);
 		}
-	$ret .= "end\n";
 	return $ret;
 }
 
-function fdry5TranslatePushQueue ($queue, $do_save = FALSE)
+function fdry5TranslatePushQueue ($queue)
 {
-	$ret = "conf t\n";
+	$ret = '';
 	foreach ($queue as $cmd)
 		switch ($cmd['opcode'])
 		{
@@ -1136,16 +1127,24 @@ function fdry5TranslatePushQueue ($queue, $do_save = FALSE)
 			break;
 		case 'set mode': // NOP
 			break;
+		case 'begin configuration':
+			$ret .= "conf t\n";
+			break;
+		case 'end configuration':
+			$ret .= "end\n";
+			break;
+		case 'save configuration':
+			$ret .= "write memory\n";
+			break;
+		default:
+			throw new InvalidArgException ('opcode', $cmd['opcode']);
 		}
-	$ret .= "end\n";
-	if ($do_save)
-		$ret .= "write memory\n";
 	return $ret;
 }
 
-function vrp53TranslatePushQueue ($queue, $do_save = FALSE)
+function vrp53TranslatePushQueue ($queue)
 {
-	$ret = "system-view\n";
+	$ret = '';
 	foreach ($queue as $cmd)
 		switch ($cmd['opcode'])
 		{
@@ -1180,14 +1179,22 @@ function vrp53TranslatePushQueue ($queue, $do_save = FALSE)
 				$ret .= "undo port default vlan\nundo port trunk allow-pass vlan all\n";
 			$ret .= "quit\n";
 			break;
+		case 'begin configuration':
+			$ret .= "system-view\n";
+			break;
+		case 'end configuration':
+			$ret .= "return\n";
+			break;
+		case 'save configuration':
+			$ret .= "save\nY\n";
+			break;
+		default:
+			throw new InvalidArgException ('opcode', $cmd['opcode']);
 		}
-	$ret .= "return\n";
-	if ($do_save)
-		$ret .= "save\nY\n";
 	return $ret;
 }
 
-function xos12TranslatePushQueue ($queue, $do_save = FALSE)
+function xos12TranslatePushQueue ($queue)
 {
 	$ret = '';
 	foreach ($queue as $cmd)
@@ -1232,11 +1239,16 @@ function xos12TranslatePushQueue ($queue, $do_save = FALSE)
 			$vlan_name = $cmd['arg2'] == 1 ? 'Default' : "VLAN${cmd['arg2']}";
 			$ret .= "configure vlan ${vlan_name} delete ports ${cmd['arg1']}\n";
 			break;
-		case 'set mode': // NOP
+		case 'set mode':
+		case 'begin configuration':
+		case 'end configuration':
+			break; // NOP
+		case 'save configuration':
+			$ret .= "save configuration\ny\n";
 			break;
+		default:
+			throw new InvalidArgException ('opcode', $cmd['opcode']);
 		}
-	if ($do_save)
-		$ret .= "save configuration\ny\n";
 	return $ret;
 }
 
