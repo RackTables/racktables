@@ -1,0 +1,514 @@
+td.submit {
+	text-align: center;
+}
+
+th.rack {
+	font: bold 12px Verdana, sans-serif;
+}
+
+body {
+  font-family: Arial, Sans-Serif, sans-serif;
+  font-size : small;
+}
+
+table.molecule {
+	width: 200px;
+}
+
+.molecule {
+	font: bold 12px Verdana, sans-serif;
+	border: 1px solid black;
+	border-top: 0px solid black;
+	border-right: 0px solid black;
+	text-align: center;
+}
+
+.molecule th {
+	border-top: 1px solid black;
+	border-right: 1px solid black;
+}
+
+.molecule td {
+	border-top: 1px solid black;
+	border-right: 1px solid black;
+}
+
+.portlet {
+	text-align: center;
+	background-color: #ffffff;
+	border: 1px dashed #3c78b5;
+	padding: 5px;
+	margin: 5px;
+}
+
+.dragon {
+	background-color: #000033;
+	text-align: left;
+}
+
+.tdright {
+	text-align: right;
+}
+
+.tdleft {
+	text-align: left;
+}
+.tdcenter {
+	text-align: center;
+}
+table.objectview {
+	width: 100%;
+}
+
+td.pcleft {
+	vertical-align: top;
+	text-align: center;
+}
+
+td.pcright {
+	vertical-align: top;
+	text-align: center;
+}
+
+.msg_error, .msg_success, .msg_warning, .msg_neutral, .msg_200, .msg_300, .msg_500 {
+	text-align: left;
+	border: 1px solid;
+	padding: 2px;
+	margin: 5px;
+	text-align: center;
+}
+
+.msg_error, .msg_500 {
+	background-color: #ffa0a0;
+	border-color: red;
+	font-weight: bold;
+}
+
+.msg_success, .msg_200 {
+	background-color: #a0ffa0;
+	border-color: green;
+	font-weight: bold;
+}
+
+.msg_300, .msg_neutral {
+	background-color: #c0c0c0;
+	border-color: black;
+	font-weight: bold;
+}
+
+.msg_warning {
+	background-color: #ff9966;
+	border-color: #ff3300;
+	font-weight: bold;
+}
+
+th.tagchain {
+	background-color: #a0ffa0;
+	text-align: right;
+}
+
+td.tagchain {
+	text-align: left;
+}
+
+th.sticker {
+	background-color: #ffffa0;
+	text-align: right;
+}
+
+td.tagbox {
+	text-align: left;
+}
+
+td.seltagbox {
+	text-align: left;
+	background-color: #a0ffa0;
+}
+
+td.sticker {
+	text-align: left;
+}
+
+.widetable th {
+	padding-left: 5px;
+	padding-right: 5px;
+}
+
+.widetable td {
+	border-top: 1px solid #a0a0a0;
+	padding-left: 5px;
+	padding-right: 5px;
+}
+
+tr.port_highlight, td.port_highlight {
+	background-color: lime;
+}
+
+.row_even {
+	background-color: #d0d0d0;
+}
+
+.row_odd {
+	background-color: #e8e8e8;
+}
+
+table.cooltable {
+	border: 1px solid black;
+}
+
+table.cooltable th {
+	border-bottom: 1px solid black;
+}
+
+th.vert_th {
+	border-right: 1px solid black;
+}
+
+tr.hl {
+	background-color: #505050;
+	font-weight: bold;
+}
+
+.description {
+	font-size: 9px;
+}
+
+.trok {
+	background-color: #80FF80;
+}
+
+.trwarning {
+	background-color: #FFFF80;
+}
+
+.trerror {
+	background-color: #FF8080;
+}
+
+.trbusy {
+	background-color: #D0D0FF;
+}
+
+.trnull {
+	background-color: #c0c0c0;
+}
+
+tr.mainheader {
+	background-color: black;
+}
+
+div.greeting {
+	color: white;
+	text-align: right;
+}
+
+/* Contents of original static.css end here, the rest is pi.css */
+
+body {
+  margin: 0px;
+  background-attachment : fixed;
+  background-color : #FCFCFC;
+  font-family: Arial, Sans-Serif, sans-serif;
+  font-size : small;
+}
+/* collapse space between headings, and where paragraph follows heading */
+hr {
+  height : 1px;
+}
+
+a {
+	font-family: Verdana, sans-serif;
+	color: #3c78b5;
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+/* anchors  must be defined in order (link,visited,active,hover) 
+   to avoid unpredictable results */
+
+input {
+	background-color : #f0f0f0;
+	border-width : 1px;
+	border-style : solid;
+	border-color : #000000;
+}
+input [type="text"] {
+}
+input.icon {
+	background-color : transparent;
+	border-width: 0px;
+}
+textarea {
+	background-color : #f0f0f0;
+	border-width : 1px;
+	border-style : solid;
+	border-color : #000000;
+}
+.menubar, .menubar a {
+	font-family: Verdana, arial, sans-serif;
+	font-size: 17px;
+	line-height: 20px;
+	background-color : #3c78b5;
+	color : #ffffff;
+	text-decoration : none;
+}
+
+.activemenuitem, .activemenuitem a {
+	background-color : #3c78b5;
+}
+.activemenuitem a:hover {
+	text-decoration: underline;
+}
+
+.maintable {
+	height : 100%;
+}
+
+#foldertab {
+padding: 3px 0px 3px 8px;
+margin-left: 0;
+border-bottom: 1px solid #3c78b5;
+font: bold 11px Verdana, sans-serif;
+}
+
+#foldertab li {
+list-style: none;
+margin: 0;
+display: inline;
+}
+
+#foldertab li a {
+padding: 3px 0.5em;
+margin-left: 3px;
+border: 1px solid #3c78b5;
+text-decoration: none;
+}
+
+/* Standard tab, inactive. */
+#foldertab li a.std {
+border-bottom: none;
+background: #3c78b5;
+}
+#foldertab li a.std:link { color: white; }
+#foldertab li a.std:visited { color: white; }
+#foldertab li a.std:hover {
+color: white;
+background: #003366;
+border-color: #003366;
+}
+
+/* Standard tab, selected. */
+#foldertab li a.current {
+background: white;
+border-bottom: 1px solid white;
+color: black;
+}
+#foldertab li a.current:link { color: black; }
+#foldertab li a.current:visited { color: black; }
+#foldertab li a.current:hover {
+background: white;
+border-bottom: 1px solid white;
+color: black;
+}
+
+/* "Attention" tab, inactive. */
+#foldertab li a.attn {
+border-bottom: none;
+background: #ffa500;
+border-color: #ffa500;
+}
+#foldertab li a.attn:link { color: white; }
+#foldertab li a.attn:visited { color: white; }
+#foldertab li a.attn:hover {
+color: white;
+background: #ff8c00;
+border-color: #ff8c00;
+}
+
+.greynavbar {background-color: #f0f0f0; border-top: 1px solid #3c78b5; margin-top: 0px}
+
+.rack {
+	font: bold 12px Verdana, sans-serif;
+	border: 1px solid black;
+	border-top: 0px solid black;
+	border-right: 0px solid black;
+	text-align: center;
+}
+
+.rack th {
+	border-top: 1px solid black;
+	border-right: 1px solid black;
+}
+
+.rack td {
+	border-top: 1px solid black;
+	border-right: 1px solid black;
+}
+
+.rack a {
+	font: bold 10px Verdana, sans-serif;
+	color: #000;
+	text-decoration: none;
+}
+
+.rack a:hover {
+	text-decoration: underline;
+}
+
+.rackspace {
+}
+
+.rackspace img {
+	border: 0;
+	display: inline;
+	margin: 0;
+	padding: 0;
+}
+
+.rackspace h2 {
+	font: bold 25px Verdana, sans-serif;
+}
+
+.rackspace h3 {
+	font: bold 20px Verdana, sans-serif;
+}
+
+.rackspace a {
+	color: #000;
+	text-decoration: none;
+}
+
+.rackspace a:hover {
+	color: #000;
+	text-decoration: underline;
+}
+
+.mainmenu a {
+	color: #254a6f;
+	text-decoration: none;
+}
+
+.mainmenu a:hover {
+	text-decoration: underline;
+}
+
+.mainmenu img {
+	border: 0px;
+}
+
+.visible {
+	display: block;
+}
+
+.invisible {
+	display: none;
+}
+
+.allobjects {
+	vertical-align: top;
+}
+
+.allobjects select {
+        background-color : #f0f0f0;
+        border-width : 1px;
+        border-style : solid;
+        border-color : #000000;
+}
+
+div.commentblock {
+	white-space: pre;
+	text-align: left;
+}
+
+.port_connected_none {
+	background-color: #bfffbf;
+}
+
+.port_connected_single {
+	background-color: #00ff00;
+}
+
+.port_connected_multi {
+	background-color: #ffff00;
+}
+
+.port_notconnect {
+	background-color: #c0c0c0;
+}
+
+.port_disabled {
+	background-color: #606060;
+}
+
+.port_unknown {
+	background-color: #ff0000;
+}
+
+.validation-error {
+	border:2px solid red;
+}
+
+.validation-success {
+	border:2px solid green;
+}
+
+.sparenetwork {
+	color: silver;
+}
+
+th.slbconf {
+	width: 50%;
+	text-align: right;
+}
+
+td.slbconf {
+	text-align: left;
+	white-space: pre;
+}
+
+table.slbcell {
+	border: 1px;
+	border-style: outset;
+	width: 100%;
+	height: 100%;
+	empty-cells: hide;
+}
+
+table.slbcell td {
+	border-top: 0px;
+	text-align: center;
+}
+
+table.vscell {
+	empty-cells: show;
+}
+
+table.vscell td {
+	text-align: left;
+}
+
+td.dashed {
+	border: 1px dashed gray;
+}
+
+div.tagselector {
+	overflow: auto;
+	max-height: 400px;
+	min-width: 150px;
+	background-color : #f0f0f0;
+	border-width : 1px;
+	border-style : solid;
+	border-color : #000000;
+}
+
+/* prevent tag selector in a "cooltable" against a series of horizintal lines */
+div.tagselector td {
+	border-width: 0px;
+}
+
+.rsvtext {
+	font-style: italic;
+}
