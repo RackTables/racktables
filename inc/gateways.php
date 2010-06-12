@@ -335,6 +335,7 @@ function setDevice8021QConfig ($object_id, $pseudocode)
 	if ('' == $breed = detectDeviceBreed ($object_id))
 		throw new Exception ('device breed unknown', E_GW_FAILURE);
 	global $gwpushxlator;
+	// FIXME: this is a perfect place to log intended changes
 	gwDeployDeviceConfig ($object_id, $breed, unix2dos ($gwpushxlator[$breed] ($pseudocode)));
 }
 
@@ -367,6 +368,8 @@ function gwRetrieveDeviceConfig ($object_id, $command)
 
 function gwDeployDeviceConfig ($object_id, $breed, $text)
 {
+	if ($text == '')
+		throw new InvalidArgException ('text', '', 'deploy text is empty');
 	$objectInfo = spotEntity ('object', $object_id);
 	$endpoints = findAllEndpoints ($object_id, $objectInfo['name']);
 	if (count ($endpoints) == 0)

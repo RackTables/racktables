@@ -2715,8 +2715,8 @@ function exportSwitch8021QConfig
 		$crq[] = array ('opcode' => 'end configuration');
 		if (considerConfiguredConstraint (spotEntity ('object', $vswitch['object_id']), '8021Q_WRI_AFTER_CONFT_LISTSRC'))
 			$crq[] = array ('opcode' => 'save configuration');
+		setDevice8021QConfig ($vswitch['object_id'], $crq);
 	}
-	setDevice8021QConfig ($vswitch['object_id'], $crq);
 	return count ($crq);
 }
 
@@ -3024,6 +3024,7 @@ function exec8021QDeploy ($object_id, $do_push)
 		switch ($port['status'])
 		{
 		case 'ok_to_merge':
+			// FIXME: this can be logged
 			upd8021QPort ('cached', $vswitch['object_id'], $pn, $port['both']);
 			break;
 		case 'ok_to_delete':
@@ -3039,6 +3040,7 @@ function exec8021QDeploy ($object_id, $do_push)
 			$conflict = TRUE;
 			break;
 		case 'ok_to_pull':
+			// FIXME: this can be logged
 			upd8021QPort ('desired', $vswitch['object_id'], $pn, $port['right']);
 			upd8021QPort ('cached', $vswitch['object_id'], $pn, $port['right']);
 			$nsaved++;
