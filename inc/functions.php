@@ -646,21 +646,6 @@ function sortByName ($a, $b)
 	return $a['id'] - $b['id'];
 }
 
-function sortObjectAddressesAndNames ($a, $b)
-{
-	$objname_cmp = sortTokenize($a['object_name'], $b['object_name']);
-	if ($objname_cmp == 0)
-	{
-		$name_a = (isset ($a['port_name'])) ? $a['port_name'] : '';
-		$name_b = (isset ($b['port_name'])) ? $b['port_name'] : '';
-		$objname_cmp = sortTokenize($name_a, $name_b);
-		if ($objname_cmp == 0)
-			sortTokenize($a['ip'], $b['ip']);
-		return $objname_cmp;
-	}
-	return $objname_cmp;
-}
-
 // This function returns an array of single element of object's FQDN attribute,
 // if FQDN is set. The next choice is object's common name, if it looks like a
 // hostname. Otherwise an array of all 'regular' IP addresses of the

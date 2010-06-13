@@ -62,6 +62,21 @@ function findSparePorts ($port_id, $only_racks = array())
 	return $ret;
 }
 
+function sortObjectAddressesAndNames ($a, $b)
+{
+	$objname_cmp = sortTokenize($a['object_name'], $b['object_name']);
+	if ($objname_cmp == 0)
+	{
+		$name_a = (isset ($a['port_name'])) ? $a['port_name'] : '';
+		$name_b = (isset ($b['port_name'])) ? $b['port_name'] : '';
+		$objname_cmp = sortTokenize($name_a, $name_b);
+		if ($objname_cmp == 0)
+			sortTokenize($a['ip'], $b['ip']);
+		return $objname_cmp;
+	}
+	return $objname_cmp;
+}
+
 header ('Content-Type: text/html; charset=UTF-8');
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
