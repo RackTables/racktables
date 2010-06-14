@@ -26,6 +26,7 @@
 	bugfix: "Add/update multiple ports" did not work (#326)
 	bugfix: "bulk ports" form added more ports, than requested (#340)
 	bugfix: improve compatibility with eDirectory (by Joep van Ingen)
+	bugfix: static filter was hard to reset (#343)
 0.17.10 2010-05-05
 	update: make object form messages consistent (by Tyler J. Wagner)
 	update: sort object ports in a more reasonable manner
