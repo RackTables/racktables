@@ -17,7 +17,7 @@
 0.18.0 2010-05-27
 	new feature: Live CDP (#58)
 	new feature: 802.1Q management (#182, original idea by Justin Ellison)
-0.17.11
+0.17.11 2010-06-14
 	update: usual SNMP updates
 	update: Bulk port form (#321)
 	update: 2960G-8TC SNMP patch by Jonathan Stanton
