@@ -55,6 +55,10 @@ getlldpstatus)
 	printf 'display lldp neighbor\n' >> "$SESSION"
 	outfile="$WORKFILE"
 	;;
+gethndp)
+	printf 'display ndp\n' >> "$SESSION"
+	outfile="$WORKFILE"
+	;;
 deploy)
 	cat "$WORKFILE" >> "$SESSION"
 	outfile=/dev/null
