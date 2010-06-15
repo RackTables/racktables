@@ -59,6 +59,7 @@ function findSparePorts ($port_id, $only_racks = array())
 		$ret[$rows[$rkey]['id']] = $object['dname'] . ' ' . $rows[$rkey]['name'];
 		unset ($rows[$rkey]);
 	}
+	natsort($ret);
 	return $ret;
 }
 
