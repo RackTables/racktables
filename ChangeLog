@@ -1,4 +1,4 @@
-0.18.3
+0.18.3 2010-06-15
 	bugfix: fix mktemp not working on Slackware (by Rafael Ganascim)
 	bugfix: Nexus 802.1Q fixes
 	bugfix: fix incorrect quoting of port reservation comment
