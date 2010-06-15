@@ -7695,7 +7695,12 @@ function renderDeployQueue ($dqcode)
 function renderDiscoveredNeighbors ($object_id)
 {
 	global $tabno;
-	$opcode_by_tabno = array ('livecdp' => 'getcdpstatus', 'livelldp' => 'getlldpstatus');
+	$opcode_by_tabno = array
+	(
+		'livecdp' => 'getcdpstatus',
+		'livelldp' => 'getlldpstatus',
+		'livehndp' => 'gethndp',
+	);
 	try
 	{
 		$neighbors = sortPortList (gwRetrieveDeviceConfig ($object_id, $opcode_by_tabno[$tabno]));

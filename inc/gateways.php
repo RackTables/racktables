@@ -34,6 +34,8 @@ $gwrxlator['get8021q'] = array
 	'xos12' => 'xos12Read8021QConfig',
 );
 
+$gwrxlator['gethndp']['vrp53'] = 'vrp53ReadHNDPStatus';
+
 $gwpushxlator = array
 (
 	'ios12' => 'ios12TranslatePushQueue',
@@ -483,6 +485,41 @@ function vrp53ReadLLDPStatus ($input)
 				(
 					'device' => $matches[1],
 					'port' => ios12ShortenIfName ($ret['current']['PortId']),
+				);
+			unset ($ret['current']);
+			break;
+		default:
+		}
+	}
+	unset ($ret['current']);
+	return $ret;
+}
+
+function vrp53ReadHNDPStatus ($input)
+{
+	$ret = array();
+	foreach (explode ("\n", $input) as $line)
+	{
+		$matches = array();
+		switch (TRUE)
+		{
+		case preg_match ('/^ Interface: (.+)$/', $line, $matches):
+			$ret['current']['local_port'] = ios12ShortenIfName ($matches[1]);
+			break;
+		case preg_match ('/^       Port Name   : (.+)$/', $line, $matches):
+			$ret['current']['remote_port'] = ios12ShortenIfName ($matches[1]);
+			break;
+		case preg_match ('/^       Device Name : (.+)$/', $line, $matches):
+			if
+			(
+				array_key_exists ('current', $ret) and
+				array_key_exists ('local_port', $ret['current']) and
+				array_key_exists ('remote_port', $ret['current'])
+			)
+				$ret[$ret['current']['local_port']] = array
+				(
+					'device' => $matches[1],
+					'port' => $ret['current']['remote_port'],
 				);
 			unset ($ret['current']);
 			break;

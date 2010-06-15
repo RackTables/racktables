@@ -1089,6 +1089,7 @@ function resetUIConfig()
 	setConfigVar ('8021Q_INSTANT_DEPLOY', 'no');
 	setConfigVar ('CDP_RUNNERS_LISTSRC', '');
 	setConfigVar ('LLDP_RUNNERS_LISTSRC', '');
+	setConfigVar ('HNDP_RUNNERS_LISTSRC', '');
 	return buildRedirectURL (__FUNCTION__, 'OK');
 }
 

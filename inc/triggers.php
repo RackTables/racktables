@@ -236,6 +236,11 @@ function trigger_LiveLLDP ()
 	return trigger_anyDP ('getlldpstatus', 'LLDP_RUNNERS_LISTSRC');
 }
 
+function trigger_LiveHNDP ()
+{
+	return trigger_anyDP ('gethndp', 'HNDP_RUNNERS_LISTSRC');
+}
+
 function trigger_anyDP ($command, $constraint)
 {
 	global $gwrxlator;

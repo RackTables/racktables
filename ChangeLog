@@ -3,6 +3,7 @@
 	bugfix: Nexus 802.1Q fixes
 	bugfix: fix incorrect quoting of port reservation comment
 	new feature: "Live CDP" now works with Nexus devices
+	new feature: Huawei NDP support
 0.18.2 2010-06-10
 	bugfix: don't restore last opened tab, which won't be permitted anyway
 	update: completely switch to PDO prepared queries (#120)
