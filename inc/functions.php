@@ -3369,4 +3369,20 @@ function sortPortList ($plist)
 	return $ret;
 }
 
+// This is a dual-purpose formating function:
+// 1. Replace empty strings with nbsp.
+// 2. Cut strings, which are too long, append "cut here" indicator and provide a mouse hint.
+function niftyString ($string, $maxlen = 30)
+{
+	$cutind = '&hellip;'; // length is 1
+	if (!mb_strlen ($string))
+		return '&nbsp;';
+	// a tab counts for a space
+	$string = preg_replace ("/\t/", ' ', $string);
+	if (!$maxlen or mb_strlen ($string) <= $maxlen)
+		return htmlspecialchars ($string, ENT_QUOTES, 'UTF-8');
+	return "<span title='" . htmlspecialchars ($string, ENT_QUOTES, 'UTF-8') . "'>" .
+		str_replace (' ', '&nbsp;', htmlspecialchars (mb_substr ($string, 0, $maxlen - 1), ENT_QUOTES, 'UTF-8')) . $cutind . '</span>';
+}
+
 ?>
