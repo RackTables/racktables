@@ -1599,11 +1599,12 @@ function saveRackCode ()
 	$parseTree = getRackCode ($newcode);
 	if ($parseTree['result'] != 'ACK')
 		return buildRedirectURL (__FUNCTION__, 'ERR1', array ($parseTree['load']));
-	saveScript ('RackCodeCache', '');
-	if (saveScript ('RackCode', $newcode))
+	if (FALSE !== saveScript ('RackCode', $newcode))
+	{
+		saveScript ('RackCodeCache', base64_encode (serialize ($parseTree)));
 		return buildRedirectURL (__FUNCTION__, 'OK');
-	else
-		return buildRedirectURL (__FUNCTION__, 'ERR2');
+	}
+	return buildRedirectURL (__FUNCTION__, 'ERR2');
 }
 
 $msgcode['setPortVLAN']['ERR1'] = 156;
