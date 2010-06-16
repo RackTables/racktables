@@ -2870,16 +2870,11 @@ function saveScript ($name = '', $text)
 {
 	if (!strlen ($name))
 		throw new InvalidArgException ('$name', $name);
-	// delete regardless of existence
-	usePreparedDeleteBlade ('Script', array ('script_name' => $name));
-	return usePreparedInsertBlade
+	return usePreparedExecuteBlade
 	(
-		'Script',
-		array
-		(
-			'script_name' => $name,
-			'script_text' => $text,
-		)
+		'INSERT INTO Script (script_name, script_text) VALUES (?, ?) ' .
+		'ON DUPLICATE KEY UPDATE script_text=?',
+		array ($name, $text, $text)
 	);
 }
 
