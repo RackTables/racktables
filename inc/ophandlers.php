@@ -2210,7 +2210,7 @@ function updateVLANDomain ()
 	assertUIntArg ('vdom_id');
 	assertStringArg ('vdom_descr');
 	global $sic;
-	$result = commitUpdateVLANDomain ($sic['vdom_id'], $sic['vdom_descr']);
+	$result = FALSE !== commitUpdateVLANDomain ($sic['vdom_id'], $sic['vdom_descr']);
 	return buildRedirectURL (__FUNCTION__, $result ? 'OK' : 'ERR');
 }
 
