@@ -6511,7 +6511,7 @@ function render8021QOrderForm ($some_id)
 	default:
 		throw new InvalidArgException ('pageno', $pageno, 'this function only works for a fixed set of values');
 	}
-	echo "<br><table border=0 cellspacing=0 cellpadding=3 align=center>";
+	echo "<br><table border=0 cellspacing=0 cellpadding=5 align=center>";
 	echo '<tr>';
 	if ($pageno != 'object')
 		echo '<th>switch</th>';
@@ -6536,12 +6536,15 @@ function render8021QOrderForm ($some_id)
 		if ($pageno != 'object')
 		{
 			$object = spotEntity ('object', $item_object_id);
-			echo "<td>${object['dname']}</td>";
+			echo '<td><a href="' . makeHREF (array ('page' => 'object', 'object_id' => $object['id'])) . '">';
+			echo "${object['dname']}</a></td>";
 		}
 		if ($pageno != 'vlandomain')
-			echo '<td>' . $vdomlist[$item['vdom_id']] . '</td>';
+			echo '<td><a href="' . makeHREF (array ('page' => 'vlandomain', 'vdom_id' => $item['vdom_id'])) . '">' .
+				$vdomlist[$item['vdom_id']] . '</a></td>';
 		if ($pageno != 'vst')
-			echo '<td>' . $vstlist[$item['vst_id']] . '</td>';
+			echo '<td><a href="' . makeHREF (array ('page' => 'vst', 'vst_id' => $item['vst_id'])) . '">' .
+				$vstlist[$item['vst_id']] . '</a></td>';
 		echo '<td><a href="' . makeHrefProcess (array
 		(
 			'op' => 'del',
