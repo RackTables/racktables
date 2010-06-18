@@ -417,6 +417,15 @@ $iftable_processors['summit-25-to-26-XFP-uplinks'] = array
 	'try_next_proc' => FALSE,
 );
 
+$iftable_processors['summit-27-to-30-XFP-uplinks'] = array
+(
+	'pattern' => '@^.+ Port (27|28|29|30)$@',
+	'replacement' => '\\1',
+	'dict_key' => '8-1082',
+	'label' => '\\1',
+	'try_next_proc' => FALSE,
+);
+
 $iftable_processors['summit-21-to-24-comboSFP'] = array
 (
 	'pattern' => '@^.+ Port (21|22|23|24)$@',
@@ -426,11 +435,29 @@ $iftable_processors['summit-21-to-24-comboSFP'] = array
 	'try_next_proc' => TRUE,
 );
 
+$iftable_processors['summit-13-to-24-comboT'] = array
+(
+	'pattern' => '@^.+ Port (1[3456789]|2[01234])$@',
+	'replacement' => '\\1',
+	'dict_key' => '1-24',
+	'label' => '\\1',
+	'try_next_proc' => TRUE,
+);
+
 $iftable_processors['summit-any-1000T'] = array
 (
 	'pattern' => '@^.+ Port ([[:digit:]]+)$@',
 	'replacement' => '\\1',
 	'dict_key' => '1-24',
+	'label' => '\\1',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['summit-any-SFP'] = array
+(
+	'pattern' => '@^.+ Port ([[:digit:]]+)$@',
+	'replacement' => '\\1',
+	'dict_key' => '4-1077',
 	'label' => '\\1',
 	'try_next_proc' => FALSE,
 );
@@ -733,6 +760,19 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'dict_key' => 694,
 		'text' => 'X450a-24t: 20 RJ-45/10-100-1000T(X) + 4 combo-gig + XFP uplinks slot',
 		'processors' => array ('summit-25-to-26-XFP-uplinks', 'summit-21-to-24-comboSFP', 'summit-any-1000T', 'summit-management'),
+	),
+	'1916.2.139' => array
+	(
+		'dict_key' => 1353,
+		'text' => 'X480-24x: 12 SFP-1000 + 12 combo-gig + 2 XFP + VIM slot',
+		'processors' => array
+		(
+			'summit-27-to-30-XFP-uplinks',
+			'summit-25-to-26-XFP-uplinks',
+			'summit-13-to-24-comboT',
+			'summit-any-SFP',
+			'summit-management'
+		),
 	),
 );
 
