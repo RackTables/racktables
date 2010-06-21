@@ -1,21 +1,14 @@
 <?php
 
-class EntityNotFoundException extends Exception {
-	private $entity;
-	private $id;
+class EntityNotFoundException extends RackTablesError
+{
 	function __construct($entity, $id)
 	{
 		parent::__construct ("Object '$entity'#'$id' does not exist");
-		$this->entity = $entity;
-		$this->id = $id;
 	}
-	function getEntity()
+	public function dispatch()
 	{
-		return $this->entity;
-	}
-	function getId()
-	{
-		return $this->id;
+		RackTablesError::genHTMLPage ('Missing record', "<h2>Missing record</h2><br>" . $this->message);
 	}
 }
 
@@ -89,20 +82,6 @@ function stringTrace($trace)
 	return $ret;
 }
 
-function print404($e)
-{
-	header("HTTP/1.1 404 Not Found");
-	header ('Content-Type: text/html; charset=UTF-8');
-	echo '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">'."\n";
-	echo '<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">'."\n";
-	echo "<head><title> Exception </title>\n";
-	printPageHeaders();
-	echo '</head> <body>';
-	echo '<h2>Object: '.$e->getEntity().'#'.$e->getId().' not found</h2>';
-	echo '</body></html>';
-
-}
-
 function printPDOException($e)
 {
 	header("HTTP/1.1 500 Internal Server Error");
@@ -160,7 +139,7 @@ class RackTablesError extends Exception
 	const NOT_AUTHENTICATED = 4;
 	const MISCONFIGURED = 6;
 	const DB_CONSTRAINT = 8;
-	public static function genHTMLPage ($title, $text)
+	protected final function genHTMLPage ($title, $text)
 	{
 		header ('Content-Type: text/html; charset=UTF-8');
 		echo '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">'."\n";
@@ -199,10 +178,8 @@ class RackTablesError extends Exception
 
 function printException($e)
 {
-	if (get_class ($e) == 'RackTablesError')
+	if ($e instanceof RackTablesError)
 		$e->dispatch();
-	elseif (get_class($e) == 'EntityNotFoundException')
-		print404($e);
 	elseif (get_class($e) == 'PDOException')
 		printPDOException($e);
 	else
