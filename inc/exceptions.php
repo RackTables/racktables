@@ -184,6 +184,8 @@ function printGenericException($e)
 
 class RackTablesError extends Exception
 {
+	const NOT_AUTHENTICATED = 4;
+	const MISCONFIGURED = 6;
 	const DB_CONSTRAINT = 8;
 	public static function genHTMLPage ($title, $text)
 	{
@@ -203,21 +205,21 @@ function printException($e)
 	if (get_class ($e) == 'Exception')
 		switch ($e->getCode())
 		{
-		case E_NOT_AUTHENTICATED:
+		case RackTablesError::NOT_AUTHENTICATED:
 			header ('WWW-Authenticate: Basic realm="' . getConfigVar ('enterprise') . ' RackTables access"');
 			header ("HTTP/1.1 401 Unauthorized");
-		case E_MISCONFIGURED:
+		case RackTablesError::MISCONFIGURED:
 		case RackTablesError::DB_CONSTRAINT:
 			$msgheader = array
 			(
-				E_NOT_AUTHENTICATED => 'Not authenticated',
-				E_MISCONFIGURED => 'Configuration error',
+				RackTablesError::NOT_AUTHENTICATED => 'Not authenticated',
+				RackTablesError::MISCONFIGURED => 'Configuration error',
 				RackTablesError::DB_CONSTRAINT => 'Constraint violation',
 			);
 			$msgbody = array
 			(
-				E_NOT_AUTHENTICATED => '<h2>This system requires authentication. You should use a username and a password.</h2>',
-				E_MISCONFIGURED => '<h2>Configuration error</h2><br>' . $e->getMessage(),
+				RackTablesError::NOT_AUTHENTICATED => '<h2>This system requires authentication. You should use a username and a password.</h2>',
+				RackTablesError::MISCONFIGURED => '<h2>Configuration error</h2><br>' . $e->getMessage(),
 				RackTablesError::DB_CONSTRAINT => '<h2>Constraint violation</h2><br>' . $e->getMessage(),
 			);
 			RackTablesError::genHTMLPage ($msgheader[$e->getCode()], $msgbody[$e->getCode()]);
