@@ -32,20 +32,6 @@ class RealmNotFoundException extends Exception {
 	}
 }
 
-class NotUniqueException extends Exception
-{
-	private $subject;
-	function __construct ($what = NULL)
-	{
-		$this->subject = $what;
-		parent::__construct ('Cannot add duplicate record' . ($what === NULL ? '' : " (${what} must be unique)"));
-	}
-	function getSubject()
-	{
-		return $this->subject;
-	}
-}
-
 class InvalidArgException extends Exception
 {
 	private $name;
