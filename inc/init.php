@@ -59,7 +59,7 @@ if (file_exists ('inc/secret.php'))
 	require_once 'inc/secret.php';
 else
 {
-	throw new Exception
+	throw new RackTablesError
 	(
 		"Database connection parameters are read from inc/secret.php file, " .
 		"which cannot be found.<br>You probably need to complete the installation " .

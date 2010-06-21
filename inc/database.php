@@ -2131,7 +2131,7 @@ function convertPDOException ($e)
 		$text = 'unknown error code ' . $e->errorInfo[1];
 		break;
 	}
-	return new Exception ($text, RackTablesError::DB_CONSTRAINT);
+	return new RackTablesError ($text, RackTablesError::DB_CONSTRAINT);
 }
 
 // This is a swiss-knife blade to insert a record into a table.
