@@ -30,13 +30,22 @@ else
 header ("Location: " . $location);
 ob_end_flush();
 }
+// "soft" failures only require a short error message
+catch (InvalidRequestArgException $e)
+{
+	ob_end_clean();
+	header ('Location: ' . buildWideRedirectURL (oneLiner (107, array ($e->getMessage()))));
+}
+catch (RTDBConstraintError $e)
+{
+	ob_end_clean();
+	header ('Location: ' . buildWideRedirectURL (oneLiner (108, array ($e->getMessage()))));
+}
+// the rest ends up in a dedicated page
 catch (Exception $e)
 {
 	ob_end_clean();
-	if ($e->getCode() == RackTablesError::DB_CONSTRAINT)
-		header ('Location: ' . buildWideRedirectURL (oneLiner (108, array ($e->getMessage()))));
-	else
-		printException($e);
+	printException ($e);
 }
 
 ?>

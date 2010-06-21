@@ -1558,7 +1558,7 @@ function showMessageOrError ()
 				104 => array ('code' => 'error', 'format' => "Error updating user account '%s'"),
 				105 => array ('code' => 'error', 'format' => 'default VLAN cannot be changed'),
 // ...
-// ...
+				107 => array ('code' => 'error', 'format' => 'Assertion failed: %s'),
 				108 => array ('code' => 'error', 'format' => 'Constraint error: %s'),
 				109 => array ('code' => 'error', 'format' => 'Update failed!'),
 				110 => array ('code' => 'error', 'format' => 'Supplement failed!'),

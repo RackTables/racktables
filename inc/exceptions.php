@@ -23,28 +23,28 @@ class InvalidArgException extends Exception
 	}
 }
 
-class InvalidRequestArgException extends Exception
+// The only purpose of below two classes is to provide a convenient
+// mean to catch "soft" failures in process.php.
+class InvalidRequestArgException extends RackTablesError
 {
-	private $name;
-	private $value;
-	private $reason;
 	function __construct ($name, $value, $reason=NULL)
 	{
 		$message = "Request parameter '${name}' of value '".var_export($value,true)."' is invalid.";
-		if (!is_null($reason)) {
+		if (!is_null($reason))
 			$message .= ' ('.$reason.')';
-		}
 		parent::__construct ($message);
-		$this->name = $name;
-		$this->value = $value;
 	}
-	function getName()
+	public function dispatch()
 	{
-		return $this->name;
+		RackTablesError::genHTMLPage ('Assertion failed', '<h2>Assertion failed</h2><br>' . $this->message);
 	}
-	function getValue()
+}
+
+class RTDBConstraintError extends RackTablesError
+{
+	public function dispatch()
 	{
-		return $this->value;
+		RackTablesError::genHTMLPage ('Database constraint violation', '<h2>Constraint violation</h2><br>' . $this->message);
 	}
 }
 
@@ -138,7 +138,6 @@ class RackTablesError extends Exception
 {
 	const NOT_AUTHENTICATED = 4;
 	const MISCONFIGURED = 6;
-	const DB_CONSTRAINT = 8;
 	protected final function genHTMLPage ($title, $text)
 	{
 		header ('Content-Type: text/html; charset=UTF-8');
@@ -151,27 +150,24 @@ class RackTablesError extends Exception
 	{
 		$msgheader = array
 		(
-			NOT_AUTHENTICATED => 'Not authenticated',
-			MISCONFIGURED => 'Configuration error',
-			DB_CONSTRAINT => 'Constraint violation',
+			self::NOT_AUTHENTICATED => 'Not authenticated',
+			self::MISCONFIGURED => 'Configuration error',
 		);
 		$msgbody = array
 		(
-			NOT_AUTHENTICATED => '<h2>This system requires authentication. You should use a username and a password.</h2>',
-			MISCONFIGURED => '<h2>Configuration error</h2><br>' . $message,
-			DB_CONSTRAINT => '<h2>Constraint violation</h2><br>' . $message,
+			self::NOT_AUTHENTICATED => '<h2>This system requires authentication. You should use a username and a password.</h2>',
+			self::MISCONFIGURED => '<h2>Configuration error</h2><br>' . $this->message,
 		);
-		switch ($code)
+		switch ($this->code)
 		{
-		case NOT_AUTHENTICATED:
+		case self::NOT_AUTHENTICATED:
 			header ('WWW-Authenticate: Basic realm="' . getConfigVar ('enterprise') . ' RackTables access"');
 			header ("HTTP/1.1 401 Unauthorized");
-		case MISCONFIGURED:
-		case DB_CONSTRAINT:
+		case self::MISCONFIGURED:
 			genHTMLPage ($msgheader[$code], $msgbody[$code]);
 			break;
 		default:
-			throw new Exception ("Dispatching error, unknown code ${code}", E_INTERNAL);
+			throw new Exception ('Dispatching error, unknown code ' . $this->code, E_INTERNAL);
 		}
 	}
 }
