@@ -33,7 +33,7 @@ ob_end_flush();
 catch (Exception $e)
 {
 	ob_end_clean();
-	if ($e->getCode() == E_DB_CONSTRAINT)
+	if ($e->getCode() == RackTablesError::DB_CONSTRAINT)
 		header ('Location: ' . buildWideRedirectURL (oneLiner (108, array ($e->getMessage()))));
 	else
 		printException($e);
