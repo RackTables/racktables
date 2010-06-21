@@ -21,26 +21,12 @@ class EntityNotFoundException extends Exception {
 
 class InvalidArgException extends Exception
 {
-	private $name;
-	private $value;
-	private $reason;
 	function __construct ($name, $value, $reason=NULL)
 	{
 		$message = "Argument '${name}' of value '".var_export($value,true)."' is invalid.";
-		if (!is_null($reason)) {
+		if (!is_null($reason))
 			$message .= ' ('.$reason.')';
-		}
 		parent::__construct ($message);
-		$this->name = $name;
-		$this->value = $value;
-	}
-	function getName()
-	{
-		return $this->name;
-	}
-	function getValue()
-	{
-		return $this->value;
 	}
 }
 
