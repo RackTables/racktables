@@ -197,36 +197,38 @@ class RackTablesError extends Exception
 	}
 	public function dispatch()
 	{
+		$msgheader = array
+		(
+			NOT_AUTHENTICATED => 'Not authenticated',
+			MISCONFIGURED => 'Configuration error',
+			DB_CONSTRAINT => 'Constraint violation',
+		);
+		$msgbody = array
+		(
+			NOT_AUTHENTICATED => '<h2>This system requires authentication. You should use a username and a password.</h2>',
+			MISCONFIGURED => '<h2>Configuration error</h2><br>' . $message,
+			DB_CONSTRAINT => '<h2>Constraint violation</h2><br>' . $message,
+		);
+		switch ($code)
+		{
+		case NOT_AUTHENTICATED:
+			header ('WWW-Authenticate: Basic realm="' . getConfigVar ('enterprise') . ' RackTables access"');
+			header ("HTTP/1.1 401 Unauthorized");
+		case MISCONFIGURED:
+		case DB_CONSTRAINT:
+			genHTMLPage ($msgheader[$code], $msgbody[$code]);
+			break;
+		default:
+			throw new Exception ("Dispatching error, unknown code ${code}", E_INTERNAL);
+		}
 	}
 }
 
 function printException($e)
 {
-	if (get_class ($e) == 'Exception')
-		switch ($e->getCode())
-		{
-		case RackTablesError::NOT_AUTHENTICATED:
-			header ('WWW-Authenticate: Basic realm="' . getConfigVar ('enterprise') . ' RackTables access"');
-			header ("HTTP/1.1 401 Unauthorized");
-		case RackTablesError::MISCONFIGURED:
-		case RackTablesError::DB_CONSTRAINT:
-			$msgheader = array
-			(
-				RackTablesError::NOT_AUTHENTICATED => 'Not authenticated',
-				RackTablesError::MISCONFIGURED => 'Configuration error',
-				RackTablesError::DB_CONSTRAINT => 'Constraint violation',
-			);
-			$msgbody = array
-			(
-				RackTablesError::NOT_AUTHENTICATED => '<h2>This system requires authentication. You should use a username and a password.</h2>',
-				RackTablesError::MISCONFIGURED => '<h2>Configuration error</h2><br>' . $e->getMessage(),
-				RackTablesError::DB_CONSTRAINT => '<h2>Constraint violation</h2><br>' . $e->getMessage(),
-			);
-			RackTablesError::genHTMLPage ($msgheader[$e->getCode()], $msgbody[$e->getCode()]);
-			return;
-		default:
-		}
-	if (get_class($e) == 'EntityNotFoundException')
+	if (get_class ($e) == 'RackTablesError')
+		$e->dispatch();
+	elseif (get_class($e) == 'EntityNotFoundException')
 		print404($e);
 	elseif (get_class($e) == 'PDOException')
 		printPDOException($e);
