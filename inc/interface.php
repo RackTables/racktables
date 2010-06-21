@@ -1944,7 +1944,7 @@ function renderHistory ($object_type, $object_id)
 			$extra = 8;
 			break;
 		default:
-			throw new RealmNotFoundException($object_type);
+			throw new InvalidArgException ('object_type', $object_type);
 	}
 	$result = usePreparedSelectBlade ($query, array ($object_id));
 	echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
@@ -5951,7 +5951,7 @@ function renderCell ($cell)
 		echo "</td></tr></table>";
 		break;
 	default:
-		throw new RealmNotFoundException($cell['realm']);
+		throw new InvalidArgException ('realm', $cell['realm']);
 	}
 }
 

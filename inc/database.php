@@ -239,7 +239,7 @@ function listCells ($realm, $parent_id = 0)
 	}
 	global $SQLSchema;
 	if (!isset ($SQLSchema[$realm]))
-		throw new RealmNotFoundException ($realm);
+		throw new InvalidArgException ('realm', $realm);
 	$SQLinfo = $SQLSchema[$realm];
 	$qparams = array ($realm);
 	$query = 'SELECT tag_id';
@@ -333,7 +333,7 @@ function spotEntity ($realm, $id)
 		return $entityCache['partial'][$realm][$id];
 	global $SQLSchema;
 	if (!isset ($SQLSchema[$realm]))
-		throw new RealmNotFoundException ($realm);
+		throw new InvalidArgException ('realm', $realm);
 	$SQLinfo = $SQLSchema[$realm];
 	$query = 'SELECT tag_id';
 	foreach ($SQLinfo['columns'] as $alias => $expression)

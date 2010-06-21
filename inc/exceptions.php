@@ -19,19 +19,6 @@ class EntityNotFoundException extends Exception {
 	}
 }
 
-class RealmNotFoundException extends Exception {
-	private $realm;
-	function __construct($realm)
-	{
-		parent::__construct ("Realm '$realm' does not exist");
-		$this->realm = $realm;
-	}
-	function getRealm()
-	{
-		return $this->realm;
-	}
-}
-
 class InvalidArgException extends Exception
 {
 	private $name;
