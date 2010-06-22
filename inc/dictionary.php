@@ -1434,6 +1434,11 @@ $dictionary = array
 	1354 => array ('chapter_id' => 12, 'dict_value' => '[[Extreme Networks%GPASS%Summit X480-48t | http://extremenetworks.com/products/summit-X480.aspx]]'),
 	1355 => array ('chapter_id' => 12, 'dict_value' => '[[Extreme Networks%GPASS%Summit X480-48x | http://extremenetworks.com/products/summit-X480.aspx]]'),
 	1356 => array ('chapter_id' => 12, 'dict_value' => '[[Extreme Networks%GPASS%Summit X650 | http://extremenetworks.com/products/summit-x650.aspx]]'),
+	1357 => array ('chapter_id' => 12, 'dict_value' => 'Huawei%GPASS%Quidway S9303'),
+	1358 => array ('chapter_id' => 12, 'dict_value' => 'Huawei%GPASS%Quidway S9306'),
+	1359 => array ('chapter_id' => 12, 'dict_value' => 'Huawei%GPASS%Quidway S9312'),
+	1360 => array ('chapter_id' => 14, 'dict_value' => 'Huawei VRP 5.3'),
+	1361 => array ('chapter_id' => 14, 'dict_value' => 'Huawei VRP 5.5'),
 );
 
 ?>
