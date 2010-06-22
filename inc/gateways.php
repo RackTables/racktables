@@ -1125,7 +1125,7 @@ function ios12TranslatePushQueue ($queue)
 			$ret .= "end\n";
 			break;
 		case 'save configuration':
-			$ret .= "copy running-config startup-config\n";
+			$ret .= "copy running-config startup-config\n\n";
 			break;
 		default:
 			throw new InvalidArgException ('opcode', $cmd['opcode']);
