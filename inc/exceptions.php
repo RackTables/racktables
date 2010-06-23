@@ -164,7 +164,7 @@ class RackTablesError extends Exception
 			header ('WWW-Authenticate: Basic realm="' . getConfigVar ('enterprise') . ' RackTables access"');
 			header ("HTTP/1.1 401 Unauthorized");
 		case self::MISCONFIGURED:
-			genHTMLPage ($msgheader[$code], $msgbody[$code]);
+			$this->genHTMLPage ($msgheader[$this->code], $msgbody[$this->code]);
 			break;
 		default:
 			throw new Exception ('Dispatching error, unknown code ' . $this->code, E_INTERNAL);
