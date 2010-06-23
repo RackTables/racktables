@@ -428,8 +428,7 @@ function addIPv4Allocation ()
 	if  (getConfigVar ('IPV4_JAYWALK') != 'yes' and NULL === getIPv4AddressNetworkId ($ip))
 		return buildRedirectURL (__FUNCTION__, 'ERR1', array ($ip));
 	
-	$error = bindIpToObject ($ip, $_REQUEST['object_id'], $_REQUEST['bond_name'], $_REQUEST['bond_type']);
-	if ($error != '')
+	if (FALSE === bindIpToObject ($ip, $_REQUEST['object_id'], $_REQUEST['bond_name'], $_REQUEST['bond_type']))
 		return buildRedirectURL (__FUNCTION__, 'ERR2', array ($error));
 	$address = getIPv4Address ($ip);
 	if ($address['reserved'] == 'yes' or strlen ($address['name']))

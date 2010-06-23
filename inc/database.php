@@ -1189,12 +1189,11 @@ function getIPv4Address ($dottedquad = '')
 
 function bindIpToObject ($ip = '', $object_id = 0, $name = '', $type = '')
 {
-	$result = usePreparedExecuteBlade
+	return usePreparedExecuteBlade
 	(
 		'INSERT INTO IPv4Allocation (ip, object_id, name, type) VALUES (INET_ATON(?), ?, ?, ?)',
 		array ($ip, $object_id, $name, $type)
 	);
-	return $result ? '' : (__FUNCTION__ . '(): query failed');
 }
 
 // Return the id of the smallest IPv4 network containing the given IPv4 address
