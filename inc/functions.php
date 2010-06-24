@@ -1665,7 +1665,7 @@ function iptree_embed (&$node, $pfx)
 		return;
 	}
 	if ($node['mask'] == $pfx['mask'])
-		throw new Exception ('the recurring loop lost control', E_INTERNAL);
+		throw new RackTablesError ('the recurring loop lost control', RackTablesError::INTERNAL);
 
 	// split?
 	if (!isset ($node['right']))
@@ -1688,7 +1688,7 @@ function iptree_embed (&$node, $pfx)
 	elseif (($node['right']['ip_bin'] & binMaskFromDec ($node['right']['mask'])) == ($pfx['ip_bin'] & binMaskFromDec ($node['left']['mask'])))
 		$self ($node['right'], $pfx);
 	else
-		throw new Exception ('cannot decide between left and right', E_INTERNAL);
+		throw new RackTablesError ('cannot decide between left and right', RackTablesError::INTERNAL);
 }
 
 function treeApplyFunc (&$tree, $func = '', $stopfunc = '')
@@ -2993,7 +2993,7 @@ function exec8021QDeploy ($object_id, $do_push)
 	{
 		$R = getRunning8021QConfig ($vswitch['object_id']);
 	}
-	catch (Exception $e)
+	catch (RTGatewayError $e)
 	{
 		usePreparedExecuteBlade
 		(
@@ -3101,7 +3101,7 @@ function exec8021QDeploy ($object_id, $do_push)
 					array (E_8021Q_NOERROR, $vswitch['object_id'])
 				);
 			}
-			catch (Exception $r)
+			catch (RTGatewayError $r)
 			{
 				usePreparedExecuteBlade
 				(

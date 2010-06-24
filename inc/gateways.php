@@ -86,14 +86,14 @@ function queryGateway ($gwname, $questions)
 
 	$retval = proc_close ($gateway);
 	if ($retval != 0)
-		throw new Exception ("gateway failed with code ${retval}", E_GW_FAILURE);
+		throw new RTGatewayError ("gateway failed with code ${retval}");
 	if (!count ($answers))
-		throw new Exception ('no response from gateway', E_GW_FAILURE);
+		throw new RTGatewayError ('no response from gateway');
 	if (count ($answers) != count ($questions))
-		throw new Exception ('protocol violation', E_GW_FAILURE);
+		throw new RTGatewayError ('protocol violation');
 	foreach ($answers as $a)
 		if (strpos ($a, 'OK!') !== 0)
-			throw new Exception ("subcommand failed with status: ${a}", E_GW_FAILURE);
+			throw new RTGatewayError ("subcommand failed with status: ${a}");
 	return $answers;
 }
 
@@ -109,9 +109,9 @@ function getSwitchVLANs ($object_id = 0)
 	$objectInfo = spotEntity ('object', $object_id);
 	$endpoints = findAllEndpoints ($object_id, $objectInfo['name']);
 	if (count ($endpoints) == 0)
-		throw new Exception ('no management address set', E_GW_FAILURE);
+		throw new RTGatewayError ('no management address set');
 	if (count ($endpoints) > 1)
-		throw new Exception ('cannot pick management address', E_GW_FAILURE);
+		throw new RTGatewayError ('cannot pick management address');
 	$hwtype = $swtype = 'unknown';
 	foreach (getAttrValues ($object_id) as $record)
 	{
@@ -130,11 +130,11 @@ function getSwitchVLANs ($object_id = 0)
 	);
 	$data = queryGateway ('switchvlans', $commands);
 	if (strpos ($data[0], 'OK!') !== 0)
-		throw new Exception ("gateway failed with status: ${data[0]}.", E_GW_FAILURE);
+		throw new RTGatewayError ("gateway failed with status: ${data[0]}.");
 	// Now we have VLAN list in $data[1] and port list in $data[2]. Let's sort this out.
 	$tmp = array_unique (explode (';', substr ($data[1], strlen ('OK!'))));
 	if (count ($tmp) == 0)
-		throw new Exception ('gateway returned no records', E_GW_FAILURE);
+		throw new RTGatewayError ('gateway returned no records');
 	$vlanlist = array();
 	foreach ($tmp as $record)
 	{
@@ -149,7 +149,7 @@ function getSwitchVLANs ($object_id = 0)
 		$portlist[] = array ('portname' => $portname, 'status' => $status, 'vlanid' => $vlanid);
 	}
 	if (count ($portlist) == 0)
-		throw new Exception ('gateway returned no records', E_GW_FAILURE);
+		throw new RTGatewayError ('gateway returned no records');
 	$maclist = array();
 	foreach (explode (';', substr ($data[3], strlen ('OK!'))) as $pair)
 	{
@@ -224,7 +224,7 @@ function gwSendFile ($endpoint, $handlername, $filetext = array())
 		{
 			foreach ($tmpnames as $name)
 				unlink ($name);
-			throw new Exception ('failed to write to temporary file', E_GW_FAILURE);
+			throw new RTGatewayError ('failed to write to temporary file');
 		}
 		$command .= " ${name}";
 	}
@@ -259,9 +259,9 @@ function gwSendFileToObject ($object_id = 0, $handlername, $filetext = '')
 	$objectInfo = spotEntity ('object', $object_id);
 	$endpoints = findAllEndpoints ($object_id, $objectInfo['name']);
 	if (count ($endpoints) == 0)
-		throw new Exception ('no management address set', E_GW_FAILURE);
+		throw new RTGatewayError ('no management address set');
 	if (count ($endpoints) > 1)
-		throw new Exception ('cannot pick management address', E_GW_FAILURE);
+		throw new RTGatewayError ('cannot pick management address');
 	gwSendFile (str_replace (' ', '+', $endpoints[0]), $handlername, array ($filetext));
 }
 
@@ -328,14 +328,14 @@ function getRunning8021QConfig ($object_id)
 	// Once there is no default VLAN in the parsed data, it means
 	// something else was parsed instead of config text.
 	if (!in_array (VLAN_DFL_ID, $ret['vlanlist']))
-		throw new Exception ('communication with device failed', E_GW_FAILURE);
+		throw new RTGatewayError ('communication with device failed');
 	return $ret;
 }
 
 function setDevice8021QConfig ($object_id, $pseudocode)
 {
 	if ('' == $breed = detectDeviceBreed ($object_id))
-		throw new Exception ('device breed unknown', E_GW_FAILURE);
+		throw new RTGatewayError ('device breed unknown');
 	global $gwpushxlator;
 	// FIXME: this is a perfect place to log intended changes
 	gwDeployDeviceConfig ($object_id, $breed, unix2dos ($gwpushxlator[$breed] ($pseudocode)));
@@ -345,16 +345,16 @@ function gwRetrieveDeviceConfig ($object_id, $command)
 {
 	global $gwrxlator;
 	if (!array_key_exists ($command, $gwrxlator))
-		throw new Exception ('command unknown', E_GW_FAILURE);
+		throw new RTGatewayError ('command unknown');
 	$breed = detectDeviceBreed ($object_id);
 	if (!array_key_exists ($breed, $gwrxlator[$command]))
-		throw new Exception ('device breed unknown', E_GW_FAILURE);
+		throw new RTGatewayError ('device breed unknown');
 	$objectInfo = spotEntity ('object', $object_id);
 	$endpoints = findAllEndpoints ($object_id, $objectInfo['name']);
 	if (count ($endpoints) == 0)
-		throw new Exception ('no management address set', E_GW_FAILURE);
+		throw new RTGatewayError ('no management address set');
 	if (count ($endpoints) > 1)
-		throw new Exception ('cannot pick management address', E_GW_FAILURE);
+		throw new RTGatewayError ('cannot pick management address');
 	$endpoint = str_replace (' ', '\ ', str_replace (' ', '+', $endpoints[0]));
 	$tmpfilename = tempnam ('', 'RackTables-deviceconfig-');
 	$outputlines = queryGateway
@@ -375,15 +375,15 @@ function gwDeployDeviceConfig ($object_id, $breed, $text)
 	$objectInfo = spotEntity ('object', $object_id);
 	$endpoints = findAllEndpoints ($object_id, $objectInfo['name']);
 	if (count ($endpoints) == 0)
-		throw new Exception ('no management address set', E_GW_FAILURE);
+		throw new RTGatewayError ('no management address set');
 	if (count ($endpoints) > 1)
-		throw new Exception ('cannot pick management address', E_GW_FAILURE);
+		throw new RTGatewayError ('cannot pick management address');
 	$endpoint = str_replace (' ', '\ ', str_replace (' ', '+', $endpoints[0]));
 	$tmpfilename = tempnam ('', 'RackTables-deviceconfig-');
 	if (FALSE === file_put_contents ($tmpfilename, $text))
 	{
 		unlink ($tmpfilename);
-		throw new Exception ('failed to write to temporary file', E_GW_FAILURE);
+		throw new RTGatewayError ('failed to write to temporary file');
 	}
 	$outputlines = queryGateway
 	(
@@ -1306,13 +1306,13 @@ function xos12Read8021QConfig ($input)
 		{
 		case (preg_match ('/^create vlan "([[:alnum:]]+)"$/', $line, $matches)):
 			if (!preg_match ('/^VLAN[[:digit:]]+$/', $matches[1]))
-				throw new Exception ('unsupported VLAN name ' . $matches[1], E_GW_FAILURE);
+				throw new RTGatewayError ('unsupported VLAN name ' . $matches[1]);
 			break;
 		case (preg_match ('/^configure vlan ([[:alnum:]]+) tag ([[:digit:]]+)$/', $line, $matches)):
 			if (strtolower ($matches[1]) == 'default')
-				throw new Exception ('default VLAN tag must be 1', E_GW_FAILURE);
+				throw new RTGatewayError ('default VLAN tag must be 1');
 			if ($matches[1] != 'VLAN' . $matches[2])
-				throw new Exception ("VLAN name ${matches[1]} does not match its tag ${matches[2]}", E_GW_FAILURE);
+				throw new RTGatewayError ("VLAN name ${matches[1]} does not match its tag ${matches[2]}");
 			$ret['vlanlist'][] = $matches[2];
 			break;
 		case (preg_match ('/^configure vlan ([[:alnum:]]+) add ports (.+) (tagged|untagged) */', $line, $matches)):
@@ -1320,7 +1320,7 @@ function xos12Read8021QConfig ($input)
 			if ($matches[1] == 'Default')
 				$matches[1] = 'VLAN1';
 			if (!preg_match ('/^VLAN([[:digit:]]+)$/', $matches[1], $submatch))
-				throw new Exception ('unsupported VLAN name ' . $matches[1], E_GW_FAILURE);
+				throw new RTGatewayError ('unsupported VLAN name ' . $matches[1]);
 			$vlan_id = $submatch[1];
 			foreach (iosParseVLANString ($matches[2]) as $port_name)
 			{

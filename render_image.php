@@ -41,10 +41,8 @@ ob_end_flush();
 catch (Exception $e)
 {
 	ob_end_clean();
-	printException($e);
+	renderError();
 }
-
-
 
 //------------------------------------------------------------------------
 function renderError ()

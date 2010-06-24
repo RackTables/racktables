@@ -20,9 +20,9 @@ function authenticate ()
 		$user_auth_src,
 		$require_local_account;
 	if (!isset ($user_auth_src) or !isset ($require_local_account))
-		throw new Exception ('secret.php: either user_auth_src or require_local_account are missing', E_MISCONFIGURED);
+		throw new RackTablesError ('secret.php: either user_auth_src or require_local_account are missing', RackTablesError::MISCONFIGURED);
 	if (isset ($_REQUEST['logout']))
-		throw new Exception ('', E_NOT_AUTHENTICATED); // Reset browser credentials cache.
+		throw new RackTablesError ('', RackTablesError::NOT_AUTHENTICATED); // Reset browser credentials cache.
 	switch ($user_auth_src)
 	{
 		case 'database':
@@ -34,7 +34,7 @@ function authenticate ()
 				!isset ($_SERVER['PHP_AUTH_PW']) or
 				!strlen ($_SERVER['PHP_AUTH_PW'])
 			)
-				throw new Exception ('', E_NOT_AUTHENTICATED);
+				throw new RackTablesError ('', RackTablesError::NOT_AUTHENTICATED);
 			$remote_username = $_SERVER['PHP_AUTH_USER'];
 			break;
 		case 'httpd':
@@ -43,16 +43,16 @@ function authenticate ()
 				!isset ($_SERVER['REMOTE_USER']) or
 				!strlen ($_SERVER['REMOTE_USER'])
 			)
-				throw new Exception ('The web-server didn\'t authenticate the user, although ought to do.', E_MISCONFIGURED);
+				throw new RackTablesError ('The web-server didn\'t authenticate the user, although ought to do.', RackTablesError::MISCONFIGURED);
 			$remote_username = $_SERVER['REMOTE_USER'];
 			break;
 		default:
-			throw new Exception ('Invalid authentication source!', E_MISCONFIGURED);
+			throw new RackTablesError ('Invalid authentication source!', RackTablesError::MISCONFIGURED);
 			die;
 	}
 	$userinfo = constructUserCell ($remote_username);
 	if ($require_local_account and !isset ($userinfo['user_id']))
-		throw new Exception ('', E_NOT_AUTHENTICATED);
+		throw new RackTablesError ('', RackTablesError::NOT_AUTHENTICATED);
 	$user_given_tags = $userinfo['etags'];
 	$auto_tags = array_merge ($auto_tags, $userinfo['atags']);
 	switch (TRUE)
@@ -81,9 +81,9 @@ function authenticate ()
 				(strlen ($ldap_dispname) ? $ldap_dispname : $remote_username); // then one from LDAP
 			return; // success
 		default:
-			throw new Exception ('Invalid authentication source!', E_MISCONFIGURED);
+			throw new RackTablesError ('Invalid authentication source!', RackTablesError::MISCONFIGURED);
 	}
-	throw new Exception ('', E_NOT_AUTHENTICATED);
+	throw new RackTablesError ('', RackTablesError::NOT_AUTHENTICATED);
 }
 
 // Merge accumulated tags into a single chain, add location-specific
@@ -291,7 +291,7 @@ function queryLDAPServer ($username, $password)
 		$auth_user_name = $info[0]['dn'];
 	}
 	else
-		throw new Exception ('LDAP misconfiguration. Cannon build username for authentication.', E_MISCONFIGURED);
+		throw new RackTablesError ('LDAP misconfiguration. Cannon build username for authentication.', RackTablesError::MISCONFIGURED);
 	if (array_key_exists ('options', $LDAP_options) and is_array ($LDAP_options['options']))
 		foreach ($LDAP_options['options'] as $opt_code => $opt_value)
 			ldap_set_option ($connect, $opt_code, $opt_value);

@@ -28,7 +28,7 @@ ob_end_flush();
 catch (Exception $e)
 {
 	ob_end_clean();
-	printException($e);
+	echo "NAK\nRuntime exception";
 }
 
 ?>

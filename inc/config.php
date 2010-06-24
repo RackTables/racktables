@@ -54,14 +54,6 @@ define ('E_8021Q_VERSION_CONFLICT', 101);
 define ('E_8021Q_PULL_REMOTE_ERROR', 102);
 define ('E_8021Q_PUSH_REMOTE_ERROR', 103);
 define ('E_8021Q_SYNC_DISABLED', 104);
-define ('E_BAD_RACKCODE', 1);
-define ('E_INTERNAL', 2);
-define ('E_DB_WRITE_FAILED', 3);
-define ('E_NOT_AUTHENTICATED', 4);
-define ('E_NOT_AUTHORIZED', 5);
-define ('E_MISCONFIGURED', 6);
-define ('E_GW_FAILURE', 7);
-define ('E_DB_CONSTRAINT', 8);
 define ('VLAN_MIN_ID', 1);
 define ('VLAN_MAX_ID', 4094);
 define ('VLAN_DFL_ID', 1);
@@ -70,7 +62,7 @@ function loadConfigDefaults() {
 	global $configCache;
 	$configCache = loadConfigCache();
 	if (!count ($configCache))
-		throw new Exception ('Failed to load configuration from the database.', E_INTERNAL);
+		throw new RackTablesError ('Failed to load configuration from the database.', RackTablesError::INTERNAL);
 	foreach ($configCache as $varname => &$row) {
 		$row['is_altered'] = 'no';
 		if ($row['vartype'] == 'uint') $row['varvalue'] = 0 + $row['varvalue'];
@@ -95,7 +87,7 @@ function alterConfigWithUserPreferences() {
 function isConfigVarChanged($varname, $varvalue) {
 	global $configCache;
 	if (!isset ($configCache))
-		throw new Exception ('configuration cache is unavailable', E_INTERNAL);
+		throw new RackTablesError ('configuration cache is unavailable', RackTablesError::INTERNAL);
 	if ($varname == '')
 		throw new InvalidArgException('$varname', $varname, 'Empty variable name');
 	if (!isset ($configCache[$varname])) return true;
@@ -111,7 +103,7 @@ function getConfigVar ($varname = '')
 	// We assume the only point of cache init, and it is init.php. If it
 	// has failed, we don't retry loading.
 	if (!isset ($configCache))
-		throw new Exception ('configuration cache is unavailable', E_INTERNAL);
+		throw new RackTablesError ('configuration cache is unavailable', RackTablesError::INTERNAL);
 	if ($varname == '')
 		throw new InvalidArgException('$varname', $varname, 'Empty variable name');
 	if (isset ($configCache[$varname]))
@@ -125,18 +117,18 @@ function setConfigVar ($varname = '', $varvalue = '', $softfail = FALSE)
 {
 	global $configCache;
 	if (!isset ($configCache))
-		throw new Exception ('configuration cache is unavailable', E_INTERNAL);
+		throw new RackTablesError ('configuration cache is unavailable', RackTablesError::INTERNAL);
 	if (!strlen ($varname))
-		throw new InvalidArgException('$varname', $varname, 'Empty variable name');
+		throw new InvalidRequestArgException('$varname', $varname, 'Empty variable name');
 	// We don't operate on unknown data.
 	if (!isset ($configCache[$varname]))
-		throw new InvalidArgException('$varname', $varname, "Don't know how to handle '${varname}'");
+		throw new InvalidRequestArgException('$varname', $varname, "Don't know how to handle '${varname}'");
 	if ($configCache[$varname]['is_hidden'] != 'no')
-		throw new InvalidArgException('$varname', $varname, "'${varname}' is a system variable and cannot be changed by user.");
+		throw new InvalidRequestArgException('$varname', $varname, "'${varname}' is a system variable and cannot be changed by user.");
 	if (!strlen ($varvalue) && $configCache[$varname]['emptyok'] != 'yes')
-		throw new InvalidArgException('$varname', $varname, "'${varname}' is configured to take non-empty value. Perhaps there was a reason to do so.");
+		throw new InvalidRequestArgException('$varname', $varname, "'${varname}' is configured to take non-empty value. Perhaps there was a reason to do so.");
 	if (strlen ($varvalue) && $configCache[$varname]['vartype'] == 'uint' && (!is_numeric ($varvalue) or $varvalue < 0 ))
-		throw new InvalidArgException('$varname', $varname, "'${varname}' can accept UINT values only");
+		throw new InvalidRequestArgException('$varname', $varname, "'${varname}' can accept UINT values only");
 	// Update cache only if the changes went into DB.
 	storeConfigVar ($varname, $varvalue);
 	$configCache[$varname]['varvalue'] = $varvalue;
@@ -147,20 +139,20 @@ function setUserConfigVar ($varname = '', $varvalue = '')
 	global $configCache;
 	global $remote_username;
 	if (!isset ($configCache))
-		throw new Exception ('configuration cache is unavailable', E_INTERNAL);
+		throw new RackTablesError ('configuration cache is unavailable', RackTablesError::INTERNAL);
 	if (!strlen ($varname))
-		throw new InvalidArgException('$varname', $varname, 'Empty variable name');
+		throw new InvalidRequestArgException('$varname', $varname, 'Empty variable name');
 	// We don't operate on unknown data.
 	if (!isset ($configCache[$varname]))
-		throw new InvalidArgException('$varname', $varname, "Don't know how to handle '${varname}'");
+		throw new InvalidRequestArgException('$varname', $varname, "Don't know how to handle '${varname}'");
 	if ($configCache[$varname]['is_userdefined'] != 'yes')
-		throw new InvalidArgException('$varname', $varname, "'${varname}' cannot be changed by user.");
+		throw new InvalidRequestArgException('$varname', $varname, "'${varname}' cannot be changed by user.");
 	if ($configCache[$varname]['is_hidden'] != 'no')
-		throw new InvalidArgException('$varname', $varname, "'${varname}' is a system variable and cannot be changed by user.");
+		throw new InvalidRequestArgException('$varname', $varname, "'${varname}' is a system variable and cannot be changed by user.");
 	if (!strlen ($varvalue) && $configCache[$varname]['emptyok'] != 'yes')
-		throw new InvalidArgException('$varname', $varname, "'${varname}' is configured to take non-empty value. Perhaps there was a reason to do so.");
+		throw new InvalidRequestArgException('$varname', $varname, "'${varname}' is configured to take non-empty value. Perhaps there was a reason to do so.");
 	if (strlen ($varvalue) && $configCache[$varname]['vartype'] == 'uint' && (!is_numeric ($varvalue) or $varvalue < 0 ))
-		throw new InvalidArgException('$varname', $varname, "'${varname}' can accept UINT values only");
+		throw new InvalidRequestArgException('$varname', $varname, "'${varname}' can accept UINT values only");
 	// Update cache only if the changes went into DB.
 	storeUserConfigVar ($remote_username, $varname, $varvalue);
 	$configCache[$varname]['varvalue'] = $varvalue;
@@ -171,16 +163,16 @@ function resetUserConfigVar ($varname = '')
 	global $configCache;
 	global $remote_username;
 	if (!isset ($configCache))
-		throw new Exception ('configuration cache is unavailable', E_INTERNAL);
+		throw new RackTablesError ('configuration cache is unavailable', RackTablesError::INTERNAL);
 	if (!strlen ($varname))
-		throw new InvalidArgException('$varname', $varname, 'Empty variable name');
+		throw new InvalidRequestArgException('$varname', $varname, 'Empty variable name');
 	// We don't operate on unknown data.
 	if (!isset ($configCache[$varname]))
-		throw new InvalidArgException('$varname', $varname, "Don't know how to handle '${varname}'");
+		throw new InvalidRequestArgException('$varname', $varname, "Don't know how to handle '${varname}'");
 	if ($configCache[$varname]['is_userdefined'] != 'yes')
-		throw new InvalidArgException('$varname', $varname, "'${varname}' cannot be changed by user.");
+		throw new InvalidRequestArgException('$varname', $varname, "'${varname}' cannot be changed by user.");
 	if ($configCache[$varname]['is_hidden'] != 'no')
-		throw new InvalidArgException('$varname', $varname, "'${varname}' is a system variable and cannot be changed by user.");
+		throw new InvalidRequestArgException('$varname', $varname, "'${varname}' is a system variable and cannot be changed by user.");
 	// Update cache only if the changes went into DB.
 	deleteUserConfigVar ($remote_username, $varname);
 }

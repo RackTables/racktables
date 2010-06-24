@@ -239,7 +239,7 @@ function listCells ($realm, $parent_id = 0)
 	}
 	global $SQLSchema;
 	if (!isset ($SQLSchema[$realm]))
-		throw new RealmNotFoundException ($realm);
+		throw new InvalidArgException ('realm', $realm);
 	$SQLinfo = $SQLSchema[$realm];
 	$qparams = array ($realm);
 	$query = 'SELECT tag_id';
@@ -333,7 +333,7 @@ function spotEntity ($realm, $id)
 		return $entityCache['partial'][$realm][$id];
 	global $SQLSchema;
 	if (!isset ($SQLSchema[$realm]))
-		throw new RealmNotFoundException ($realm);
+		throw new InvalidArgException ('realm', $realm);
 	$SQLinfo = $SQLSchema[$realm];
 	$query = 'SELECT tag_id';
 	foreach ($SQLinfo['columns'] as $alias => $expression)
@@ -2130,7 +2130,7 @@ function convertPDOException ($e)
 		$text = 'unknown error code ' . $e->errorInfo[1];
 		break;
 	}
-	return new Exception ($text, E_DB_CONSTRAINT);
+	return new RTDBConstraintError ($text);
 }
 
 // This is a swiss-knife blade to insert a record into a table.
@@ -3687,7 +3687,7 @@ function add8021QPort ($object_id, $port_name, $port)
 			array ('object_id' => $object_id, 'port_name' => $port_name, 'vlan_mode' => $port['mode'])
 		)
 	)
-		throw new Exception ('', E_DB_WRITE_FAILED);
+		throw new RackTablesError ('', RackTablesError::DB_WRITE_FAILED);
 	upd8021QPort ('cached', $object_id, $port_name, $port);
 	upd8021QPort ('desired', $object_id, $port_name, $port);
 	return 1;
@@ -3709,7 +3709,7 @@ function del8021QPort ($object_id, $port_name)
 			array ('object_id' => $object_id, 'port_name' => $port_name)
 		)
 	)
-		throw new Exception ('', E_DB_WRITE_FAILED);
+		throw new RackTablesError ('', RackTablesError::DB_WRITE_FAILED);
 	return 1;
 }
 
@@ -3732,20 +3732,20 @@ function upd8021QPort ($instance = 'desired', $object_id, $port_name, $port)
 		array ($port['mode'], $object_id, $port_name)
 	);
 	if (FALSE === usePreparedDeleteBlade ($tablemap_8021q[$instance]['pav'], array ('object_id' => $object_id, 'port_name' => $port_name)))
-		throw new Exception ('', E_DB_WRITE_FAILED);
+		throw new RackTablesError ('', RackTablesError::DB_WRITE_FAILED);
 	// FIXME: The goal is to INSERT as many rows as there are values in 'allowed' list
 	// without wrapping each row with own INSERT (otherwise the SQL connection
 	// instantly becomes the bottleneck).
 	foreach ($port['allowed'] as $vlan_id)
 		if (!usePreparedInsertBlade ($tablemap_8021q[$instance]['pav'], array ('object_id' => $object_id, 'port_name' => $port_name, 'vlan_id' => $vlan_id)))
-			throw new Exception ('', E_DB_WRITE_FAILED);
+			throw new RackTablesError ('', RackTablesError::DB_WRITE_FAILED);
 	if
 	(
 		$port['native'] and
 		in_array ($port['native'], $port['allowed']) and
 		!usePreparedInsertBlade ($tablemap_8021q[$instance]['pnv'], array ('object_id' => $object_id, 'port_name' => $port_name, 'vlan_id' => $port['native']))
 	)
-		throw new Exception ('', E_DB_WRITE_FAILED);
+		throw new RackTablesError ('', RackTablesError::DB_WRITE_FAILED);
 	return 1;
 }
 

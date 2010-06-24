@@ -70,7 +70,7 @@ if (isset ($tabhandler[$pageno][$tabno]))
 				assertStringArg ($page[$pageno]['bypass']);
 				break;
 			default:
-				throw new Exception ('Dispatching error for bypass parameter', E_INTERNAL);
+				throw new RackTablesError ('Dispatching error for bypass parameter', RackTablesError::INTERNAL);
 		}
 		showMessageOrError();
 		call_user_func ($tabhandler[$pageno][$tabno], $_REQUEST[$page[$pageno]['bypass']]);
@@ -87,7 +87,7 @@ elseif (isset ($page[$pageno]['handler']))
 	$page[$pageno]['handler'] ($tabno);
 }
 else
-	throw new Exception ("Failed to find handler for page '${pageno}', tab '${tabno}'", E_INTERNAL);
+	throw new RackTablesError ("Failed to find handler for page '${pageno}', tab '${tabno}'", RackTablesError::INTERNAL);
 ?>
 	</td>
 	</tr>

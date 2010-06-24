@@ -59,12 +59,12 @@ if (file_exists ('inc/secret.php'))
 	require_once 'inc/secret.php';
 else
 {
-	throw new Exception
+	throw new RackTablesError
 	(
 		"Database connection parameters are read from inc/secret.php file, " .
 		"which cannot be found.<br>You probably need to complete the installation " .
 		"procedure by following <a href='install.php'>this link</a>.",
-		E_MISCONFIGURED
+		RackTablesError::MISCONFIGURED
 	);
 }
 
@@ -75,7 +75,7 @@ try
 }
 catch (PDOException $e)
 {
-	throw new Exception ("Database connection failed:\n\n" . $e->getMessage(), E_INTERNAL);
+	throw new RackTablesError ("Database connection failed:\n\n" . $e->getMessage(), RackTablesError::INTERNAL);
 }
 $dbxlink->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 $dbxlink->exec ("set names 'utf8'");
@@ -114,7 +114,7 @@ if ($dbver != CODE_VERSION)
 }
 
 if (!mb_internal_encoding ('UTF-8'))
-	throw new Exception ('Failed setting multibyte string encoding to UTF-8', E_INTERNAL);
+	throw new RackTablesError ('Failed setting multibyte string encoding to UTF-8', RackTablesError::INTERNAL);
 
 loadConfigDefaults();
 
@@ -136,9 +136,10 @@ else
 }
 
 // Depending on the 'result' value the 'load' carries either the
-// parse tree or error message.
+// parse tree or error message. The latter case is a bug, because
+// RackCode saving function was supposed to validate its input.
 if ($rackCode['result'] != 'ACK')
-	throw new Exception ($rackCode['load'], E_BAD_RACKCODE);
+	throw new RackTablesError ($rackCode['load'], RackTablesError::INTERNAL);
 $rackCode = $rackCode['load'];
 // Only call buildPredicateTable() once and save the result, because it will remain
 // constant during one execution for constraints processing.

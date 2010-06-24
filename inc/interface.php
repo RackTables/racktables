@@ -1558,7 +1558,7 @@ function showMessageOrError ()
 				104 => array ('code' => 'error', 'format' => "Error updating user account '%s'"),
 				105 => array ('code' => 'error', 'format' => 'default VLAN cannot be changed'),
 // ...
-// ...
+				107 => array ('code' => 'error', 'format' => 'Assertion failed: %s'),
 				108 => array ('code' => 'error', 'format' => 'Constraint error: %s'),
 				109 => array ('code' => 'error', 'format' => 'Update failed!'),
 				110 => array ('code' => 'error', 'format' => 'Supplement failed!'),
@@ -1944,7 +1944,7 @@ function renderHistory ($object_type, $object_id)
 			$extra = 8;
 			break;
 		default:
-			throw new RealmNotFoundException($object_type);
+			throw new InvalidArgException ('object_type', $object_type);
 	}
 	$result = usePreparedSelectBlade ($query, array ($object_id));
 	echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
@@ -2911,7 +2911,7 @@ function renderSearchResults ()
 	if (!strlen ($terms))
 		throw new InvalidRequestArgException('q', $_REQUEST['q'], 'Search string cannot be empty.');
 	if (!permitted ('depot', 'default'))
-		throw new Exception ('You are not authorized for viewing information about objects.', E_NOT_AUTHORIZED);
+		throw new RackTablesError ('You are not authorized for viewing information about objects.', RackTablesError::NOT_AUTHORIZED);
 	$nhits = 0;
 	if (preg_match (RE_IP4_ADDR, $terms))
 	// Search for IPv4 address.
@@ -5951,7 +5951,7 @@ function renderCell ($cell)
 		echo "</td></tr></table>";
 		break;
 	default:
-		throw new RealmNotFoundException($cell['realm']);
+		throw new InvalidArgException ('realm', $cell['realm']);
 	}
 }
 
@@ -7708,14 +7708,10 @@ function renderDiscoveredNeighbors ($object_id)
 	{
 		$neighbors = sortPortList (gwRetrieveDeviceConfig ($object_id, $opcode_by_tabno[$tabno]));
 	}
-	catch (Exception $e)
+	catch (RTGatewayError $e)
 	{
-		if ($e->getCode() == E_GW_FAILURE)
-		{
-			showWarning ($e->getMessage(), __FUNCTION__);
-			return;
-		}
-		throw $e;
+		showWarning ($e->getMessage(), __FUNCTION__);
+		return;
 	}
 	$mydevice = spotEntity ('object', $object_id);
 	amplifyCell ($mydevice);
