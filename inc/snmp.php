@@ -1225,6 +1225,14 @@ function generatePortsForCatModule ($object_id, $slotno = 1, $mtype = 'X6748', $
 		}
 		commitAddPort ($object_id, "te${slotno}/0/1", '5-1079', "unit ${slotno} port ${i}", $mac_address);
 		break;
+	case 'LE02G48TA':
+		for ($i = 0; $i <= 47; $i++)
+			commitAddPort ($object_id, "gi${slotno}/0/${i}", '1-24', "slot ${slotno} port ${i}", $mac_address);
+		break;
+	case 'LE02X12SA':
+		for ($i = 0; $i <= 11; $i++)
+			commitAddPort ($object_id, "gi${slotno}/0/${i}", '9-1084', "slot ${slotno} port ${i}", $mac_address);
+		break;
 	}
 }
 

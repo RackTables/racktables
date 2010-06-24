@@ -520,6 +520,8 @@ function l2addressForDatabase ($string)
 			return $ret;
 		case (preg_match (RE_L2_CISCO, $string)):
 			return str_replace ('.', '', $string);
+		case (preg_match (RE_L2_HUAWEI, $string)):
+			return str_replace ('-', '', $string);
 		case (preg_match (RE_L2_IPCFG, $string) or preg_match (RE_L2_WWN_HYPHEN, $string)):
 			return str_replace ('-', '', $string);
 		default:

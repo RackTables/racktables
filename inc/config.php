@@ -41,6 +41,7 @@ define ('AUTOTAGNAME_REGEXP', '/^\$[\p{L}0-9]([. _~-]?[\p{L}0-9])*$/u');
 // The latter matches both SunOS and Linux-styled formats.
 define ('RE_L2_IFCFG', '/^[0-9a-f]{1,2}(:[0-9a-f]{1,2}){5}$/i');
 define ('RE_L2_CISCO', '/^[0-9a-f]{4}(\.[0-9a-f]{4}){2}$/i');
+define ('RE_L2_HUAWEI', '/^[0-9a-f]{4}(-[0-9a-f]{4}){2}$/i');
 define ('RE_L2_SOLID', '/^[0-9a-f]{12}$/i');
 define ('RE_L2_IPCFG', '/^[0-9a-f]{2}(-[0-9a-f]{2}){5}$/i');
 define ('RE_L2_WWN_COLON', '/^[0-9a-f]{1,2}(:[0-9a-f]{1,2}){7}$/i');
