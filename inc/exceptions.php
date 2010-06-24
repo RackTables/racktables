@@ -1,5 +1,60 @@
 <?php
 
+// The default approach is to treat an error as fatal, in which case
+// some message is output and the user is left there. Inheriting classes
+// represent more specific cases, some of which can be handled in a
+// "softer" way (see below).
+class RackTablesError extends Exception
+{
+	const INTERNAL = 2;
+	const DB_WRITE_FAILED = 3;
+	const NOT_AUTHENTICATED = 4;
+	const NOT_AUTHORIZED = 5;
+	const MISCONFIGURED = 6;
+	protected final function genHTMLPage ($title, $text)
+	{
+		header ('Content-Type: text/html; charset=UTF-8');
+		echo '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">'."\n";
+		echo '<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">'."\n";
+		echo "<head><title>${title}</title>";
+		echo "</head><body>${text}</body></html>";
+	}
+	public function dispatch()
+	{
+		$msgheader = array
+		(
+			self::NOT_AUTHENTICATED => 'Not authenticated',
+			self::MISCONFIGURED => 'Configuration error',
+			self::INTERNAL => 'Internal error',
+			self::DB_WRITE_FAILED => 'Database write failed',
+			self::NOT_AUTHORIZED => 'Permission denied',
+		);
+		$msgbody = array
+		(
+			self::NOT_AUTHENTICATED => '<h2>This system requires authentication. You should use a username and a password.</h2>',
+			self::MISCONFIGURED => '<h2>Configuration error</h2><br>' . $this->message,
+			self::INTERNAL => '<h2>Internal error</h2><br>' . $this->message,
+			self::DB_WRITE_FAILED => '<h2>Database write failed</h2><br>' . $this->message,
+			self::NOT_AUTHORIZED => '<h2>Permission denied</h2><br>' . $this->message,
+		);
+		switch ($this->code)
+		{
+		case self::NOT_AUTHENTICATED:
+			header ('WWW-Authenticate: Basic realm="' . getConfigVar ('enterprise') . ' RackTables access"');
+			header ("HTTP/1.1 401 Unauthorized");
+		case self::MISCONFIGURED:
+		case self::INTERNAL:
+		case self::DB_WRITE_FAILED:
+		case self::NOT_AUTHORIZED:
+			$this->genHTMLPage ($msgheader[$this->code], $msgbody[$this->code]);
+			break;
+		default:
+			throw new RackTablesError ('Dispatching error, unknown code ' . $this->code, RackTablesError::INTERNAL);
+		}
+	}
+}
+
+// this simplifies construction of RackTablesError, but is never caught
 class EntityNotFoundException extends RackTablesError
 {
 	function __construct($entity, $id)
@@ -12,19 +67,20 @@ class EntityNotFoundException extends RackTablesError
 	}
 }
 
-class InvalidArgException extends Exception
+// this simplifies construction of RackTablesError, but is never caught
+class InvalidArgException extends RackTablesError
 {
 	function __construct ($name, $value, $reason=NULL)
 	{
 		$message = "Argument '${name}' of value '".var_export($value,true)."' is invalid.";
 		if (!is_null($reason))
 			$message .= ' ('.$reason.')';
-		parent::__construct ($message);
+		parent::__construct ($message, parent::INTERNAL);
 	}
 }
 
-// The only purpose of below two classes is to provide a convenient
-// mean to catch "soft" failures in process.php.
+// this simplifies construction and helps in catching "soft"
+// errors (invalid input from the user)
 class InvalidRequestArgException extends RackTablesError
 {
 	function __construct ($name, $value, $reason=NULL)
@@ -40,11 +96,22 @@ class InvalidRequestArgException extends RackTablesError
 	}
 }
 
+// this wraps certain known PDO errors and is caught in process.php
+// as a "soft" error
 class RTDBConstraintError extends RackTablesError
 {
 	public function dispatch()
 	{
 		RackTablesError::genHTMLPage ('Database constraint violation', '<h2>Constraint violation</h2><br>' . $this->message);
+	}
+}
+
+// gateway failure is a common case of a "soft" error, some functions do catch this
+class RTGatewayError extends RackTablesError
+{
+	public function dispatch()
+	{
+		RackTablesError::genHTMLPage ('Gateway error', '<h2>Gateway error</h2><br>' . $this->message);
 	}
 }
 
@@ -132,44 +199,6 @@ function printGenericException($e)
 	dumpArray($_COOKIE);
 	echo '</body></html>';
 
-}
-
-class RackTablesError extends Exception
-{
-	const NOT_AUTHENTICATED = 4;
-	const MISCONFIGURED = 6;
-	protected final function genHTMLPage ($title, $text)
-	{
-		header ('Content-Type: text/html; charset=UTF-8');
-		echo '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">'."\n";
-		echo '<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">'."\n";
-		echo "<head><title>${title}</title>";
-		echo "</head><body>${text}</body></html>";
-	}
-	public function dispatch()
-	{
-		$msgheader = array
-		(
-			self::NOT_AUTHENTICATED => 'Not authenticated',
-			self::MISCONFIGURED => 'Configuration error',
-		);
-		$msgbody = array
-		(
-			self::NOT_AUTHENTICATED => '<h2>This system requires authentication. You should use a username and a password.</h2>',
-			self::MISCONFIGURED => '<h2>Configuration error</h2><br>' . $this->message,
-		);
-		switch ($this->code)
-		{
-		case self::NOT_AUTHENTICATED:
-			header ('WWW-Authenticate: Basic realm="' . getConfigVar ('enterprise') . ' RackTables access"');
-			header ("HTTP/1.1 401 Unauthorized");
-		case self::MISCONFIGURED:
-			$this->genHTMLPage ($msgheader[$this->code], $msgbody[$this->code]);
-			break;
-		default:
-			throw new Exception ('Dispatching error, unknown code ' . $this->code, E_INTERNAL);
-		}
-	}
 }
 
 function printException($e)

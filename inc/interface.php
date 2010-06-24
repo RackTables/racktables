@@ -2911,7 +2911,7 @@ function renderSearchResults ()
 	if (!strlen ($terms))
 		throw new InvalidRequestArgException('q', $_REQUEST['q'], 'Search string cannot be empty.');
 	if (!permitted ('depot', 'default'))
-		throw new Exception ('You are not authorized for viewing information about objects.', E_NOT_AUTHORIZED);
+		throw new RackTablesError ('You are not authorized for viewing information about objects.', RackTablesError::NOT_AUTHORIZED);
 	$nhits = 0;
 	if (preg_match (RE_IP4_ADDR, $terms))
 	// Search for IPv4 address.
@@ -7708,14 +7708,10 @@ function renderDiscoveredNeighbors ($object_id)
 	{
 		$neighbors = sortPortList (gwRetrieveDeviceConfig ($object_id, $opcode_by_tabno[$tabno]));
 	}
-	catch (Exception $e)
+	catch (RTGatewayError $e)
 	{
-		if ($e->getCode() == E_GW_FAILURE)
-		{
-			showWarning ($e->getMessage(), __FUNCTION__);
-			return;
-		}
-		throw $e;
+		showWarning ($e->getMessage(), __FUNCTION__);
+		return;
 	}
 	$mydevice = spotEntity ('object', $object_id);
 	amplifyCell ($mydevice);

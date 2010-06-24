@@ -952,7 +952,6 @@ function useupPort ()
 }
 
 $msgcode['updateUI']['OK'] = 56;
-$msgcode['updateUI']['ERR'] = 125;
 function updateUI ()
 {
 	assertUIntArg ('num_vars');
@@ -967,19 +966,13 @@ function updateUI ()
 		// If form value = value in DB, don't bother updating DB
 		if (!isConfigVarChanged($varname, $varvalue))
 			continue;
-
-		// Note if the queries succeed or not, it determines which page they see.
-		try {
-			setConfigVar ($varname, $varvalue, TRUE);
-		} catch (InvalidArgException $e) {
-			return buildRedirectURL (__FUNCTION__, 'ERR', array ($e->getMessage()));
-		}
+		// any exceptions will be handled by process.php
+		setConfigVar ($varname, $varvalue, TRUE);
 	}
 	return buildRedirectURL (__FUNCTION__, 'OK');
 }
 
 $msgcode['saveMyPreferences']['OK'] = 56;
-$msgcode['saveMyPreferences']['ERR'] = 125;
 function saveMyPreferences ()
 {
 	assertUIntArg ('num_vars');
@@ -994,33 +987,18 @@ function saveMyPreferences ()
 		// If form value = value in DB, don't bother updating DB
 		if (!isConfigVarChanged($varname, $varvalue))
 			continue;
-		// Note if the queries succeed or not, it determines which page they see.
-		try {
-			setUserConfigVar ($varname, $varvalue);
-		} catch (InvalidArgException $e) {
-			return buildRedirectURL (__FUNCTION__, 'ERR', array ($e->getMessage()));
-		}
+		setUserConfigVar ($varname, $varvalue);
 	}
 	return buildRedirectURL (__FUNCTION__, 'OK');
 }
 
 $msgcode['resetMyPreference']['OK'] = 56;
-$msgcode['resetMyPreference']['ERR'] = 125;
 function resetMyPreference ()
 {
 	assertStringArg ("varname");
-	$varname = $_REQUEST["varname"];
-
-	try {
-		resetUserConfigVar ($varname);
-	} catch (InvalidArgException $e) {
-		return buildRedirectURL (__FUNCTION__, 'ERR', array ($e->getMessage()));
-	}
+	resetUserConfigVar ($_REQUEST["varname"]);
 	return buildRedirectURL (__FUNCTION__, 'OK');
 }
-
-
-
 
 $msgcode['resetUIConfig']['OK'] = 57;
 function resetUIConfig()
@@ -1674,12 +1652,9 @@ function submitSLBConfig ()
 	{
 		gwSendFileToObject ($_REQUEST['object_id'], 'slbconfig', html_entity_decode ($newconfig, ENT_QUOTES, 'UTF-8'));
 	}
-	catch (Exception $e)
+	catch (RTGatewayError $e)
 	{
-		if ($e->getCode() == E_GW_FAILURE)
-			return buildRedirectURL (__FUNCTION__, 'ERR', array ($e->getMessage()));
-		else
-			throw $e;
+		return buildRedirectURL (__FUNCTION__, 'ERR', array ($e->getMessage()));
 	}
 	return buildRedirectURL (__FUNCTION__, 'OK', array ('slbconfig'));
 }
@@ -1855,7 +1830,7 @@ function addFileToEntity ()
 {
 	global $page, $pageno, $etype_by_pageno;
 	if (!isset ($etype_by_pageno[$pageno]) or !isset ($page[$pageno]['bypass']))
-		throw new Exception ('dispatching failure', E_INTERNAL);
+		throw new RackTablesError ('dispatching failure', RackTablesError::INTERNAL);
 	$realm = $etype_by_pageno[$pageno];
 	$bypass = $page[$pageno]['bypass'];
 	assertUIntArg ($bypass);
@@ -1884,7 +1859,7 @@ function linkFileToEntity ()
 	assertUIntArg ('file_id');
 	global $page, $pageno, $etype_by_pageno;
 	if (!isset ($etype_by_pageno[$pageno]) or !isset ($page[$pageno]['bypass']))
-		throw new Exception ('dispatching failure', E_INTERNAL);
+		throw new RackTablesError ('dispatching failure', RackTablesError::INTERNAL);
 	$entity_type = $etype_by_pageno[$pageno];
 	$bypass_name = $page[$pageno]['bypass'];
 	assertUIntArg ($bypass_name);

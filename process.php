@@ -12,11 +12,11 @@ $op = $_REQUEST['op'];
 prepareNavigation();
 // FIXME: find a better way to handle this error
 if ($op == 'addFile' && !isset($_FILES['file']['error']))
-	throw new Exception ('File upload error, check upload_max_filesize in php.ini', E_INTERNAL);
+	throw new RackTablesError ('File upload error, check upload_max_filesize in php.ini', RackTablesError::MISCONFIGURED);
 fixContext();
 
 if (!isset ($ophandler[$pageno][$tabno][$op]) or !function_exists ($ophandler[$pageno][$tabno][$op]))
-	throw new Exception ("Invalid navigation data for '${pageno}-${tabno}-${op}'", E_INTERNAL);
+	throw new RackTablesError ("Invalid navigation data for '${pageno}-${tabno}-${op}'", RackTablesError::INTERNAL);
 
 // We have a chance to handle an error before starting HTTP header.
 if (!isset ($delayauth[$pageno][$tabno][$op]) and !permitted())
@@ -25,7 +25,7 @@ else
 {
 	$location = call_user_func ($ophandler[$pageno][$tabno][$op]);
 	if (!strlen ($location))
-		throw new Exception ('Operation handler failed to return its status', E_INTERNAL);
+		throw new RackTablesError ('Operation handler failed to return its status', RackTablesError::INTERNAL);
 }
 header ("Location: " . $location);
 ob_end_flush();
