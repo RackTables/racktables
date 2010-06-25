@@ -2446,16 +2446,31 @@ function buildVLANFilter ($role, $string)
 
 // pack set of integers into list of integer ranges
 // e.g. (1, 2, 3, 5, 6, 7, 9, 11) => ((1, 3), (5, 7), (9, 9), (11, 11))
-function listToRanges ($vlanidlist)
+// The second argument, when it is different from 0, limits amount of
+// items in each generated range.
+function listToRanges ($vlanidlist, $limit = 0)
 {
 	sort ($vlanidlist);
 	$ret = array();
 	$from = $to = NULL;
 	foreach ($vlanidlist as $vlan_id)
 		if ($from == NULL)
-			$from = $to = $vlan_id;
+		{
+			if ($limit == 1)
+				$ret[] = array ('from' => $vlan_id, 'to' => $vlan_id);
+			else
+				$from = $to = $vlan_id;
+		}
 		elseif ($to + 1 == $vlan_id)
+		{
 			$to = $vlan_id;
+			if ($to - $from + 1 == $limit)
+			{
+				// cut accumulated range and start over
+				$ret[] = array ('from' => $from, 'to' => $to);
+				$from = $to = NULL;
+			}
+		}
 		else
 		{
 			$ret[] = array ('from' => $from, 'to' => $to);
