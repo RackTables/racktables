@@ -3387,4 +3387,10 @@ function niftyString ($string, $maxlen = 30)
 		str_replace (' ', '&nbsp;', htmlspecialchars (mb_substr ($string, 0, $maxlen - 1), ENT_QUOTES, 'UTF-8')) . $cutind . '</span>';
 }
 
+// return a "?, ?, ?, ... ?, ?" string consisting of N question marks
+function questionMarks ($count = 0)
+{
+	return implode (', ', array_fill (0, $count, '?'));
+}
+
 ?>

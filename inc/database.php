@@ -2140,7 +2140,7 @@ function usePreparedInsertBlade ($tablename, $columns)
 {
 	global $dbxlink;
 	$query = "INSERT INTO ${tablename} (" . implode (', ', array_keys ($columns));
-	$query .= ') VALUES (' . implode (', ', array_fill (0, count ($columns), '?')) . ')';
+	$query .= ') VALUES (' . questionMarks (count ($columns)) . ')';
 	// Now the query should be as follows:
 	// INSERT INTO table (c1, c2, c3) VALUES (?, ?, ?)
 	try
