@@ -6865,25 +6865,7 @@ function renderObject8021QPorts ($object_id)
 				$port['vst_role'] != $port['mode'] or
 				count (array_diff ($port['allowed'], array_keys ($vdom['vlanlist'])))
 			) ? 'trwarning' : 'trbusy';
-			$linkparams = array
-			(
-				'page' => $pageno,
-				'tab' => $tabno,
-				'object_id' => $object_id,
-			);
-			if ($port_name == $req_port_name)
-			{
-				$imagename = 'Zooming';
-				$imagetext = 'zoom out';
-			}
-			else
-			{
-				$imagename = 'Zoom';
-				$imagetext = 'zoom in';
-				$linkparams['port_name'] = $port_name;
-			}
-			$text_right = "<a href='" . makeHref ($linkparams) . "'>"  .
-				getImageHREF ($imagename, $imagetext) . '</a>';
+			$text_right = getTrunkPortCursorCode ($object_id, $port_name, $req_port_name);
 			break;
 		case 'access':
 			$trclass =
@@ -6891,42 +6873,18 @@ function renderObject8021QPorts ($object_id)
 				$port['vst_role'] != $port['mode'] or
 				!array_key_exists ($port['native'], $vdom['vlanlist'])
 			) ? 'trwarning' : 'trbusy';
-			if ($req_port_name != '')
-			{
-				// don't render a form for access ports, when a trunk port is zoomed
-				$text_right = '&nbsp;';
-				break;
-			}
-			if
-			(
-				array_key_exists ($port['native'], $vdom['vlanlist']) and
-				$vdom['vlanlist'][$port['native']]['vlan_type'] == 'alien'
-			)
-			{
-				$text_right = formatVLANName ($vdom['vlanlist'][$port['native']], 'label');
-				break;
-			}
-			$text_right = "<input type=hidden name=pn_${nports} value=${port_name}>";
-			$text_right .= "<input type=hidden name=pm_${nports} value=access>";
-			$options = array();
-			// Offer only options, which are listed in domain and fit into VST.
-			// Never offer immune VLANs regardless of VST filter for this port.
-			// Also exclude current VLAN from the options, unless current port
-			// mode is "trunk" (in this case it should be possible to set VST-
-			// approved mode without changing native VLAN ID).
-			foreach ($vdom['vlanlist'] as $vlan_id => $vlan_info)
-				if
-				(
-					($vlan_id != $port['native'] or $port['mode'] == 'trunk') and
-					$vlan_info['vlan_type'] != 'alien' and
-					matchVLANFilter ($vlan_id, $port['wrt_vlans'])
-				)
-					$options[$vlan_id] = formatVLANName ($vlan_info, 'option');
-			ksort ($options);
-			$options['same'] = '-- no change --';
-			$text_right .= getSelect ($options, array ('name' => "pnv_${nports}"), 'same');
-			$nports++;
+			// ---
+			$text_right = getAccessPortControlCode ($req_port_name, $vdom, $port_name, $port, $nports);
 			break;
+		case 'anymode':
+			$trclass = count (array_diff ($port['allowed'], array_keys ($vdom['vlanlist']))) ?
+				'trwarning' : 'trbusy';
+			$text_right = getAccessPortControlCode ($req_port_name, $vdom, $port_name, $port, $nports);
+			$text_right .= '&nbsp;';
+			$text_right .= getTrunkPortCursorCode ($object_id, $port_name, $req_port_name);
+			break;
+		default:
+			throw new InvalidArgException ('vst_role', $port['vst_role']);
 		}
 		if (!array_key_exists ($port_name, $sockets))
 		{
@@ -6941,7 +6899,7 @@ function renderObject8021QPorts ($object_id)
 				$socket_columns .= '<td>' . $tmp . '</td>';
 		}
 		echo "<tr class=${trclass} valign=top><td${td_extra}>${port_name}</td>" . $socket_columns;
-		echo "<td${td_extra}>${text_left}</td><td${td_extra}>${text_right}</td></tr>";
+		echo "<td${td_extra}>${text_left}</td><td class=tdright nowrap${td_extra}>${text_right}</td></tr>";
 		if (!array_key_exists ($port_name, $sockets))
 			continue;
 		$first_socket = TRUE;
@@ -6994,6 +6952,67 @@ function renderObject8021QPorts ($object_id)
 			$desired_config[$req_port_name]
 		);
 	echo '</tr></table>';
+}
+
+// Return the text to place into control column of VLAN ports list
+// and modify $nports, when this text was a series of INPUTs.
+function getAccessPortControlCode ($req_port_name, $vdom, $port_name, $port, &$nports)
+{
+	// don't render a form for access ports, when a trunk port is zoomed
+	if ($req_port_name != '')
+		return '&nbsp;';
+	if
+	(
+		array_key_exists ($port['native'], $vdom['vlanlist']) and
+		$vdom['vlanlist'][$port['native']]['vlan_type'] == 'alien'
+	)
+		return formatVLANName ($vdom['vlanlist'][$port['native']], 'label');
+
+	$ret = "<input type=hidden name=pn_${nports} value=${port_name}>";
+	$ret .= "<input type=hidden name=pm_${nports} value=access>";
+	$options = array();
+	// Offer only options, which are listed in domain and fit into VST.
+	// Never offer immune VLANs regardless of VST filter for this port.
+	// Also exclude current VLAN from the options, unless current port
+	// mode is "trunk" (in this case it should be possible to set VST-
+	// approved mode without changing native VLAN ID).
+	foreach ($vdom['vlanlist'] as $vlan_id => $vlan_info)
+		if
+		(
+			($vlan_id != $port['native'] or $port['mode'] == 'trunk') and
+			$vlan_info['vlan_type'] != 'alien' and
+			matchVLANFilter ($vlan_id, $port['wrt_vlans'])
+		)
+			$options[$vlan_id] = formatVLANName ($vlan_info, 'option');
+	ksort ($options);
+	$options['same'] = '-- no change --';
+	$ret .= getSelect ($options, array ('name' => "pnv_${nports}"), 'same');
+	$nports++;
+	return $ret;
+}
+
+function getTrunkPortCursorCode ($object_id, $port_name, $req_port_name)
+{
+	global $pageno, $tabno;
+	$linkparams = array
+	(
+		'page' => $pageno,
+		'tab' => $tabno,
+		'object_id' => $object_id,
+	);
+	if ($port_name == $req_port_name)
+	{
+		$imagename = 'Zooming';
+		$imagetext = 'zoom out';
+	}
+	else
+	{
+		$imagename = 'Zoom';
+		$imagetext = 'zoom in';
+		$linkparams['port_name'] = $port_name;
+	}
+	return "<a href='" . makeHref ($linkparams) . "'>"  .
+		getImageHREF ($imagename, $imagetext) . '</a>';
 }
 
 function renderTrunkPortControls ($vswitch, $vdom, $port_name, $vlanport)

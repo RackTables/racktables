@@ -2428,6 +2428,7 @@ function buildVLANFilter ($role, $string)
 	case 'trunk': // 2-4094
 	case 'uplink':
 	case 'downlink':
+	case 'anymode':
 		$min = VLAN_MIN_ID + 1;
 		$max = VLAN_MAX_ID;
 		break;
