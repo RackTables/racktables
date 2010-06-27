@@ -2739,10 +2739,15 @@ function filter8021QChangeRequests
 	foreach ($changes as $port_name => $port)
 	{
 		// find and cancel any changes regarding immune VLANs
-		switch ($port['vst_role'])
+		switch ($port['mode'])
 		{
 		case 'access':
-			if ($port['mode'] != 'access') // VST violation
+			// VST violation ?
+			if
+			(
+				$port['vst_role'] != 'access' and
+				$port['vst_role'] != 'anymode'
+			)
 				continue 2; // ignore change request
 			foreach ($domain_immune_vlans as $immune)
 				// Reverting an attempt to set an access port from
@@ -2763,9 +2768,13 @@ function filter8021QChangeRequests
 				}
 			break;
 		case 'trunk':
-		case 'uplink':
-		case 'downlink':
-			if ($port['mode'] != 'trunk')
+			if
+			(
+				$port['vst_role'] != 'trunk' and
+				$port['vst_role'] != 'uplink' and
+				$port['vst_role'] != 'downlink' and
+				$port['vst_role'] != 'anymode'
+			)
 				continue 2;
 			foreach ($domain_immune_vlans as $immune)
 				if (in_array ($immune, $before[$port_name]['allowed'])) // was allowed before
@@ -2784,7 +2793,7 @@ function filter8021QChangeRequests
 				}
 			break;
 		default:
-			continue 2;
+			throw new InvalidArgException ('mode', $port['mode']);
 		}
 		// save work
 		$ret[$port_name] = $port;
@@ -2983,7 +2992,12 @@ function get8021QSyncOptions
 		else // D != C, C != R, D != R: version conflict
 			$ret[$pn] = array
 			(
-				'status' => ($port['vst_role'] == 'access' or $port['vst_role'] == 'trunk') ?
+				'status' =>
+				(
+					$port['vst_role'] == 'access' or
+					$port['vst_role'] == 'trunk' or
+					$port['vst_role'] == 'anymode'
+				) ?
 					// In case the port is normally updated by user, let him
 					// resolve the conflict. If the system manages this port,
 					// arrange the data to let remote version go down.
