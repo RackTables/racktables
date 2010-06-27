@@ -7067,7 +7067,7 @@ function renderTrunkPortControls ($vswitch, $vdom, $port_name, $vlanport)
 		// particular port, but it cannot be changed by user.
 		if ($option['vlan_type'] == 'alien')
 			$selected .= ' disabled';
-		echo "<tr><td colspan=2 class=${class}>";
+		echo "<tr><td nowrap colspan=2 class=${class}>";
 		echo "<label><input type=checkbox name='pav_0[]' value='${vlan_id}'${selected}> ";
 		echo $option['text'] . "</label></td></tr>";
 	}
@@ -7115,7 +7115,7 @@ function renderTrunkPortControls ($vswitch, $vdom, $port_name, $vlanport)
 				$option['vlan_type'] == 'alien'
 			)
 				$selected .= ' disabled';
-			echo "<tr><td colspan=2 class=${class}>";
+			echo "<tr><td nowrap colspan=2 class=${class}>";
 			echo "<label><input type=radio name='pnv_0' value='${vlan_id}'${selected}> ";
 			echo $option['text'] . "</label></td></tr>";
 		}
