@@ -2738,17 +2738,13 @@ function filter8021QChangeRequests
 	$ret = array();
 	foreach ($changes as $port_name => $port)
 	{
+		// VST violation ?
+		if (!goodModeForVSTRole ($port['mode'], $port['vst_role']))
+			continue; // ignore change request
 		// find and cancel any changes regarding immune VLANs
 		switch ($port['mode'])
 		{
 		case 'access':
-			// VST violation ?
-			if
-			(
-				$port['vst_role'] != 'access' and
-				$port['vst_role'] != 'anymode'
-			)
-				continue 2; // ignore change request
 			foreach ($domain_immune_vlans as $immune)
 				// Reverting an attempt to set an access port from
 				// "normal" VLAN to immune one (or vice versa) requires
@@ -2768,14 +2764,6 @@ function filter8021QChangeRequests
 				}
 			break;
 		case 'trunk':
-			if
-			(
-				$port['vst_role'] != 'trunk' and
-				$port['vst_role'] != 'uplink' and
-				$port['vst_role'] != 'downlink' and
-				$port['vst_role'] != 'anymode'
-			)
-				continue 2;
 			foreach ($domain_immune_vlans as $immune)
 				if (in_array ($immune, $before[$port_name]['allowed'])) // was allowed before
 				{
@@ -2837,6 +2825,27 @@ function same8021QConfigs ($a, $b)
 	return	$a['mode'] == $b['mode'] &&
 		array_values_same ($a['allowed'], $b['allowed']) &&
 		$a['native'] == $b['native'];
+}
+
+// Return TRUE, if the port can be edited by the user.
+function editable8021QPort ($port)
+{
+	return in_array ($port['vst_role'], array ('trunk', 'access', 'anymode'));
+}
+
+// Decide, whether the given 802.1Q port mode is permitted by
+// VST port role.
+function goodModeForVSTRole ($mode, $role)
+{
+	switch ($mode)
+	{
+	case 'access':
+		return in_array ($role, array ('access', 'anymode'));
+	case 'trunk':
+		return in_array ($role, array ('trunk', 'uplink', 'downlink', 'anymode'));
+	default:
+		throw new InvalidArgException ('mode', $mode);
+	}
 }
 
 /*
@@ -2992,12 +3001,7 @@ function get8021QSyncOptions
 		else // D != C, C != R, D != R: version conflict
 			$ret[$pn] = array
 			(
-				'status' =>
-				(
-					$port['vst_role'] == 'access' or
-					$port['vst_role'] == 'trunk' or
-					$port['vst_role'] == 'anymode'
-				) ?
+				'status' => editable8021QPort ($port) ?
 					// In case the port is normally updated by user, let him
 					// resolve the conflict. If the system manages this port,
 					// arrange the data to let remote version go down.

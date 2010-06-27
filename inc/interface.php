@@ -6932,7 +6932,7 @@ function renderObject8021QPorts ($object_id)
 		printOpFormIntro ('save8021QConfig', array ('mutex_rev' => $vswitch['mutex_rev'], 'form_mode' => 'duplicate'));
 		$port_options = array();
 		foreach ($desired_config as $pn => $portinfo)
-			if ($portinfo['vst_role'] == 'trunk' or $portinfo['vst_role'] == 'access')
+			if (editable8021QPort ($portinfo))
 				$port_options[$pn] = same8021QConfigs ($desired_config[$pn], $cached_config[$pn]) ?
 					$pn : "${pn} (*)";
 		echo '<tr><td>' . getSelect ($port_options, array ('name' => 'from_port')) . '</td></tr>';
@@ -7466,7 +7466,7 @@ function renderObject8021QSync ($object_id)
 			(
 				!acceptable8021QConfig ($item['right']) or
 				count (array_diff ($item['right']['allowed'], $domvlans)) or
-				$item['vst_role'] != $item['right']['mode']
+				!goodModeForVSTRole ($item['right']['mode'], $item['vst_role'])
 			)
 				$radio_attrs['left'] = ' disabled';
 			break;
