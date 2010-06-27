@@ -7671,10 +7671,11 @@ function renderVSTRulesEditor ($vst_id)
 	$port_role_options = array
 	(
 		'none' => 'none',
-		'access' => 'access',
-		'trunk' => 'trunk',
-		'uplink' => 'uplink',
-		'downlink' => 'downlink',
+		'access' => 'user: access only',
+		'trunk' => 'user: trunk only',
+		'anymode' => 'user: any mode',
+		'uplink' => 'system: uplink trunk',
+		'downlink' => 'system: downlink trunk',
 	);
 	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
 		printNewItemTR ($port_role_options);
