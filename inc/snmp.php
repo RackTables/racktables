@@ -408,6 +408,24 @@ $iftable_processors['fgs-uplinks'] = array
 	'try_next_proc' => FALSE,
 );
 
+$iftable_processors['fcx-uplinks'] = array
+(
+	'pattern' => '@^10GigabitEthernet1/2/([[:digit:]]+)$@',
+	'replacement' => 'e1/2/\\1',
+	'dict_key' => '9-1084',
+	'label' => 'X\\1',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['fcx-management'] = array
+(
+	'pattern' => '@^Management$@',
+	'replacement' => 'management1',
+	'dict_key' => '1-24',
+	'label' => 'Management',
+	'try_next_proc' => FALSE,
+);
+
 $iftable_processors['summit-25-to-26-XFP-uplinks'] = array
 (
 	'pattern' => '@^.+ Port (25|26)$@',
@@ -755,6 +773,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'FGS648P-POE: 48 RJ-45/10-100-1000T(X) + 4 combo-gig + uplink slot',
 		'processors' => array ('fgs-1-to-4-comboSFP', 'fgs-any-1000T', 'fgs-uplinks'),
 	),
+	'1991.1.3.54.2.4.1.1' => array
+	(
+		'dict_key' => 1362,
+		'text' => 'FCX 648: 48 RJ-45/10-100-1000T(X) + uplink slot with 4 SFP+',
+		'processors' => array ('fgs-any-1000T', 'fcx-uplinks', 'fcx-management'),
+	),
 	'1916.2.71' => array
 	(
 		'dict_key' => 694,
@@ -919,6 +943,7 @@ function doSwitchSNMPmining ($objectInfo, $hostname, $community)
 		$log = mergeLogs ($log, oneLiner (81, array ('juniper-generic')));
 		break;
 	case preg_match ('/^1991\.1\.3\.45\./', $sysObjectID): // snFGSFamily
+	case preg_match ('/^1991\.1\.3\.54\.2\.4\.1\.1$/', $sysObjectID): // FCX 648
 		$exact_release = preg_replace ('/^.*, IronWare Version ([^ ]+) .*$/', '\\1', $sysDescr);
 		updateStickerForCell ($objectInfo, 5, $exact_release);
 		# FOUNDRY-SN-AGENT-MIB::snChasSerNum.0
