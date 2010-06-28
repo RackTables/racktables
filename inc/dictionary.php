@@ -1439,6 +1439,9 @@ $dictionary = array
 	1359 => array ('chapter_id' => 12, 'dict_value' => 'Huawei%GPASS%Quidway S9312'),
 	1360 => array ('chapter_id' => 14, 'dict_value' => 'Huawei VRP 5.3'),
 	1361 => array ('chapter_id' => 14, 'dict_value' => 'Huawei VRP 5.5'),
+	1362 => array ('chapter_id' => 12, 'dict_value' => '[[Brocade%GPASS%FCX 648 | http://www.brocade.com/sites/dotcom/products-solutions/products/ethernet-switches-routers/enterprise-mobility/product-details/fcx-series-data-center/index.page ]]'),
+	1363 => array ('chapter_id' => 14, 'dict_value' => 'IronWare 5'),
+	1364 => array ('chapter_id' => 14, 'dict_value' => 'IronWare 7'),
 );
 
 ?>

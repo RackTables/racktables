@@ -306,9 +306,9 @@ function detectDeviceBreed ($object_id)
 			return 'xos12';
 		if
 		(
-			$record['name'] == 'HW type' &&
+			$record['name'] == 'SW type' &&
 			strlen ($record['o_value']) &&
-			preg_match ('/^Foundry FastIron GS /', execGMarker ($record['o_value']))
+			preg_match ('/^IronWare [57]$/', execGMarker ($record['o_value']))
 		)
 			return 'fdry5';
 		if
