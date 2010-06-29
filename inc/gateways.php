@@ -250,6 +250,8 @@ function gwRecvFile ($endpoint, $handlername, &$output)
 	);
 	$output = file_get_contents ($tmpfilename);
 	unlink ($tmpfilename);
+	if ($output === FALSE)
+		throw new RTGatewayError ('failed to read temporary file');
 	// Being here means having 'OK!' in the response.
 	return oneLiner (66, array ($handlername)); // ignore provided "Ok" text
 }
@@ -362,10 +364,12 @@ function gwRetrieveDeviceConfig ($object_id, $command)
 		'deviceconfig',
 		array ("${command} ${endpoint} ${breed} ${tmpfilename}")
 	);
-	$configtext = dos2unix (file_get_contents ($tmpfilename));
+	$configtext = file_get_contents ($tmpfilename);
 	unlink ($tmpfilename);
+	if ($configtext === FALSE)
+		throw new RTGatewayError ('failed to read temporary file');
 	// Being here means it was alright.
-	return $gwrxlator[$command][$breed] ($configtext);
+	return $gwrxlator[$command][$breed] (dos2unix ($configtext));
 }
 
 function gwDeployDeviceConfig ($object_id, $breed, $text)
