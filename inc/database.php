@@ -2115,22 +2115,25 @@ function commitUseupPort ($port_id = 0)
 
 function convertPDOException ($e)
 {
-	if ($e->getCode() != 23000)
-		return $e;
-	switch ($e->errorInfo[1])
+	switch ($e->getCode() . '-' . $e->errorInfo[1])
 	{
-	case 1062:
+	case '23000-1062':
 		$text = 'such record already exists';
 		break;
-	case 1451:
-	case 1452:
+	case '23000-1205':
+		$text = 'such record already exists';
+		break;
+	case '23000-1451':
+	case '23000-1452':
 		$text = 'foreign key violation';
 		break;
-	default:
-		$text = 'unknown error code ' . $e->errorInfo[1];
+	case 'HY000-1205':
+		$text = 'lock wait timeout';
 		break;
+	default:
+		return $e;
 	}
-	return new RTDBConstraintError ($text);
+	return new RTDatabaseError ($text);
 }
 
 // This is a swiss-knife blade to insert a record into a table.
@@ -2185,9 +2188,16 @@ function usePreparedSelectBlade ($query, $args = array())
 {
 	global $dbxlink;
 	$prepared = $dbxlink->prepare ($query);
-	if (!$prepared->execute ($args))
-		return FALSE;
-	return $prepared;
+	try
+	{
+		if (!$prepared->execute ($args))
+			return FALSE;
+		return $prepared;
+	}
+	catch (PDOException $e)
+	{
+		throw convertPDOException ($e);
+	}
 }
 
 // Prepare and execute the statement with parameters, then return number of

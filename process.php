@@ -36,7 +36,7 @@ catch (InvalidRequestArgException $e)
 	ob_end_clean();
 	header ('Location: ' . buildWideRedirectURL (oneLiner (107, array ($e->getMessage()))));
 }
-catch (RTDBConstraintError $e)
+catch (RTDatabaseError $e)
 {
 	ob_end_clean();
 	header ('Location: ' . buildWideRedirectURL (oneLiner (108, array ($e->getMessage()))));
