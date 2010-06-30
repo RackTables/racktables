@@ -315,9 +315,9 @@ function detectDeviceBreed ($object_id)
 			return 'fdry5';
 		if
 		(
-			$record['name'] == 'HW type' &&
+			$record['name'] == 'SW type' &&
 			strlen ($record['o_value']) &&
-			preg_match ('/^Huawei Quidway S53/', execGMarker ($record['o_value']))
+			preg_match ('/^Huawei VRP 5\.3$/', execGMarker ($record['o_value']))
 		)
 			return 'vrp53';
 	}
