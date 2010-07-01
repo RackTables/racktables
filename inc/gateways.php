@@ -1340,20 +1340,6 @@ function xos12Read8021QConfig ($input)
 					$ret['portdata'][$port_name]['native'] = $vlan_id;
 			}
 			break;
-		case (preg_match ('/^enable sharing (.+) grouping (.+) algorithm /', $line, $matches)):
-			// An aggregated link in XOS only leaves the master port visible
-			// to VLAN configuration commands. This trick restores the
-			// hidden ports in "none" mode to suppress gaps in user's
-			// picture of what is happening on the device.
-			foreach (iosParseVLANString ($matches[2]) as $port_name)
-				if ($matches[1] != $port_name)
-					$ret['portdata'][$port_name] = array
-					(
-						'mode' => 'none',
-						'allowed' => array(),
-						'native' => 0,
-					);
-			break;
 		default:
 		}
 	}
