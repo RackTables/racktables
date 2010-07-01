@@ -30,6 +30,7 @@ $gwrxlator['get8021q'] = array
 	'ios12' => 'ios12ReadVLANConfig',
 	'fdry5' => 'fdry5ReadVLANConfig',
 	'vrp53' => 'vrp53ReadVLANConfig',
+	'vrp55' => 'vrp55Read8021QConfig',
 	'nxos4' => 'nxos4Read8021QConfig',
 	'xos12' => 'xos12Read8021QConfig',
 );
@@ -293,6 +294,7 @@ function detectDeviceBreed ($object_id)
 		964 => 'nxos4',
 		1352 => 'xos12',
 		1360 => 'vrp53',
+		1361 => 'vrp55',
 		1363 => 'fdry5',
 	);
 	foreach (getAttrValues ($object_id) as $record)
@@ -938,6 +940,124 @@ function vrp53PickInterfaceSubcommand (&$work, $line)
 	default: // nom-nom
 	}
 	return __FUNCTION__;
+}
+
+function vrp55Read8021QConfig ($input)
+{
+	$ret = array
+	(
+		'vlanlist' => array (1), // VRP 5.50 hides VLAN1 from config text
+		'portdata' => array(),
+	);
+	foreach (explode ("\n", $input) as $line)
+	{
+		$matches = array();
+		// top level
+		if (!array_key_exists ('current', $ret))
+			switch (TRUE)
+			{
+			case (preg_match ('@^ vlan batch (.+)$@', $line, $matches)):
+				foreach (vrp53ParseVLANString ($matches[1]) as $vlan_id)
+					$ret['vlanlist'][] = $vlan_id;
+				continue 2;
+			case (preg_match ('@^interface ((GigabitEthernet|Eth-Trunk)([[:digit:]]+(/[[:digit:]]+)*))$@', $line, $matches)):
+				$matches[1] = preg_replace ('@^GigabitEthernet(.+)$@', 'gi\\1', $matches[1]);
+				$ret['current'] = array ('port_name' => $matches[1]);
+				continue 2;
+			default:
+				continue 2;
+			}
+		// inside an interface block
+		switch (TRUE)
+		{
+		case preg_match ('/^ port hybrid untagged vlan /', $line):
+			throw new RTGatewayError ("unsupported configuration: ${line}");
+		case preg_match ('/^ port link-type (.+)$/', $line, $matches):
+			$ret['current']['link-type'] = $matches[1];
+			break;
+		// Native VLAN is configured differently for each link-type case, but
+		// VRP is known to filter off clauses, which don't make sense for
+		// current link-type. This way any interface section should contain
+		// only one kind of "set native" clause (but if this constraint breaks,
+		// we get a problem).
+		case preg_match ('/^ port (default|trunk pvid|hybrid pvid) vlan ([[:digit:]]+)$/', $line, $matches):
+			$ret['current']['native'] = $matches[2];
+			if (!array_key_exists ('allowed', $ret['current']))
+				$ret['current']['allowed'] = array();
+			if (!in_array ($ret['current']['native'], $ret['current']['allowed']))
+				$ret['current']['allowed'][] = $ret['current']['native'];
+			break;
+		case preg_match ('/^ port (trunk allow-pass|hybrid tagged) vlan (.+)$/', $line, $matches):
+			if (!array_key_exists ('allowed', $ret['current']))
+				$ret['current']['allowed'] = array();
+			foreach (vrp53ParseVLANString ($matches[2]) as $vlan_id)
+				if (!in_array ($vlan_id, $ret['current']['allowed']))
+					$ret['current']['allowed'][] = $vlan_id;
+			break;
+		case $line == ' undo portswitch':
+		case preg_match ('/^ ip address /', $line):
+			$ret['current']['link-type'] = 'IP';
+			break;
+		case preg_match ('/^ eth-trunk /', $line):
+			$ret['current']['link-type'] = 'SKIP';
+			break;
+		case substr ($line, 0, 1) == '#': // end of interface section
+			if (!array_key_exists ('link-type', $ret['current']))
+			$ret['current']['link-type'] = 'hybrid';
+			if (!array_key_exists ('allowed', $ret['current']))
+				$ret['current']['allowed'] = array();
+			if (!array_key_exists ('native', $ret['current']))
+				$ret['current']['native'] = 0;
+			switch ($ret['current']['link-type'])
+			{
+			case 'access':
+				// In VRP 5.50 an access port has default VLAN ID == 1
+				$ret['portdata'][$ret['current']['port_name']] =
+					$ret['current']['native'] ? array
+					(
+						'mode' => 'access',
+						'allowed' => $ret['current']['allowed'],
+						'native' => $ret['current']['native'],
+					) : array
+					(
+						'mode' => 'access',
+						'allowed' => array (VLAN_DFL_ID),
+						'native' => VLAN_DFL_ID,
+					);
+				break;
+			case 'trunk':
+				$ret['portdata'][$ret['current']['port_name']] = array
+				(
+					'mode' => 'trunk',
+					'allowed' => $ret['current']['allowed'],
+					'native' => 0,
+				);
+				break;
+			case 'hybrid':
+				$ret['portdata'][$ret['current']['port_name']] = array
+				(
+					'mode' => 'trunk',
+					'allowed' => $ret['current']['allowed'],
+					'native' => $ret['current']['native'],
+				);
+				break;
+			case 'IP':
+				$ret['portdata'][$ret['current']['port_name']] = array
+				(
+					'mode' => 'none',
+					'allowed' => array(),
+					'native' => 0,
+				);
+				break;
+			case 'SKIP':
+			default: // dot1q-tunnel ?
+			}
+			unset ($ret['current']);
+			break;
+		default: // nom-nom
+		}
+	}
+	return $ret;
 }
 
 function nxos4Read8021QConfig ($input)
