@@ -284,43 +284,20 @@ function gwRecvFileFromObject ($object_id = 0, $handlername, &$output)
 
 function detectDeviceBreed ($object_id)
 {
+	$breed_by_swcode = array
+	(
+		251 => 'ios12',
+		252 => 'ios12',
+		254 => 'ios12',
+		963 => 'nxos4',
+		964 => 'nxos4',
+		1352 => 'xos12',
+		1360 => 'vrp53',
+		1363 => 'fdry5',
+	);
 	foreach (getAttrValues ($object_id) as $record)
-	{
-		if
-		(
-			$record['name'] == 'SW type' &&
-			strlen ($record['o_value']) &&
-			preg_match ('/^Cisco IOS 12\./', execGMarker ($record['o_value']))
-		)
-			return 'ios12';
-		if
-		(
-			$record['name'] == 'SW type' &&
-			strlen ($record['o_value']) &&
-			preg_match ('/^Cisco NX-OS 4\./', execGMarker ($record['o_value']))
-		)
-			return 'nxos4';
-		if
-		(
-			$record['id'] == 4 &&
-			$record['key'] == 1352
-		)
-			return 'xos12';
-		if
-		(
-			$record['name'] == 'SW type' &&
-			strlen ($record['o_value']) &&
-			preg_match ('/^IronWare [57]$/', execGMarker ($record['o_value']))
-		)
-			return 'fdry5';
-		if
-		(
-			$record['name'] == 'SW type' &&
-			strlen ($record['o_value']) &&
-			preg_match ('/^Huawei VRP 5\.3$/', execGMarker ($record['o_value']))
-		)
-			return 'vrp53';
-	}
+		if ($record['id'] == 4 and array_key_exists ($record['key'], $breed_by_swcode))
+			return $breed_by_swcode[$record['key']];
 	return '';
 }
 
