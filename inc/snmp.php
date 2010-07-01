@@ -939,6 +939,17 @@ function doSwitchSNMPmining ($objectInfo, $hostname, $community)
 		$log = mergeLogs ($log, oneLiner (81, array ('netgear-generic')));
 		break;
 	case preg_match ('/^2011\.2\.23\./', $sysObjectID): // Huawei
+		$swtype_pcre = array
+		(
+			'/Huawei Versatile Routing Platform Software.+VRP.+Software, Version 5.30 /s' => 1360,
+			'/Huawei Versatile Routing Platform Software.+VRP.+Software, Version 5.50 /s' => 1361,
+		);
+		foreach ($swtype_pcre as $pattern => $dict_key)
+			if (preg_match ($pattern, $sysDescr))
+			{
+				updateStickerForCell ($objectInfo, 4, $dict_key);
+				break;
+			}
 		checkPIC ('1-681');
 		commitAddPort ($objectInfo['id'], 'con0', '1-681', 'console', ''); // DB-9 RS-232 console
 		$log = mergeLogs ($log, oneLiner (81, array ('huawei-generic')));
