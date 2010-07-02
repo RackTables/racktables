@@ -971,7 +971,7 @@ function vrp55Read8021QConfig ($input)
 		// inside an interface block
 		switch (TRUE)
 		{
-		case preg_match ('/^ port hybrid untagged vlan /', $line):
+		case preg_match ('/^ port (link-type )?hybrid /', $line):
 			throw new RTGatewayError ("unsupported configuration: ${line}");
 		case preg_match ('/^ port link-type (.+)$/', $line, $matches):
 			$ret['current']['link-type'] = $matches[1];
@@ -981,17 +981,17 @@ function vrp55Read8021QConfig ($input)
 		// current link-type. This way any interface section should contain
 		// only one kind of "set native" clause (but if this constraint breaks,
 		// we get a problem).
-		case preg_match ('/^ port (default|trunk pvid|hybrid pvid) vlan ([[:digit:]]+)$/', $line, $matches):
+		case preg_match ('/^ port (default|trunk pvid) vlan ([[:digit:]]+)$/', $line, $matches):
 			$ret['current']['native'] = $matches[2];
 			if (!array_key_exists ('allowed', $ret['current']))
 				$ret['current']['allowed'] = array();
 			if (!in_array ($ret['current']['native'], $ret['current']['allowed']))
 				$ret['current']['allowed'][] = $ret['current']['native'];
 			break;
-		case preg_match ('/^ port (trunk allow-pass|hybrid tagged) vlan (.+)$/', $line, $matches):
+		case preg_match ('/^ port trunk allow-pass vlan (.+)$/', $line, $matches):
 			if (!array_key_exists ('allowed', $ret['current']))
 				$ret['current']['allowed'] = array();
-			foreach (vrp53ParseVLANString ($matches[2]) as $vlan_id)
+			foreach (vrp53ParseVLANString ($matches[1]) as $vlan_id)
 				if (!in_array ($vlan_id, $ret['current']['allowed']))
 					$ret['current']['allowed'][] = $vlan_id;
 			break;
@@ -1004,7 +1004,7 @@ function vrp55Read8021QConfig ($input)
 			break;
 		case substr ($line, 0, 1) == '#': // end of interface section
 			if (!array_key_exists ('link-type', $ret['current']))
-			$ret['current']['link-type'] = 'hybrid';
+				throw new RTGatewayError ('unsupported configuration: link-type is neither trunk nor access for ' . $ret['current']['port_name']);
 			if (!array_key_exists ('allowed', $ret['current']))
 				$ret['current']['allowed'] = array();
 			if (!array_key_exists ('native', $ret['current']))
@@ -1027,14 +1027,6 @@ function vrp55Read8021QConfig ($input)
 					);
 				break;
 			case 'trunk':
-				$ret['portdata'][$ret['current']['port_name']] = array
-				(
-					'mode' => 'trunk',
-					'allowed' => $ret['current']['allowed'],
-					'native' => 0,
-				);
-				break;
-			case 'hybrid':
 				$ret['portdata'][$ret['current']['port_name']] = array
 				(
 					'mode' => 'trunk',
