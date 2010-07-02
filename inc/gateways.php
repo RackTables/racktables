@@ -42,6 +42,7 @@ $gwpushxlator = array
 	'ios12' => 'ios12TranslatePushQueue',
 	'fdry5' => 'fdry5TranslatePushQueue',
 	'vrp53' => 'vrp53TranslatePushQueue',
+	'vrp55' => 'vrp55TranslatePushQueue',
 	'nxos4' => 'ios12TranslatePushQueue', // employ syntax compatibility
 	'xos12' => 'xos12TranslatePushQueue',
 );
@@ -1319,6 +1320,72 @@ function vrp53TranslatePushQueue ($queue)
 			if ($cmd['arg2'] == 'hybrid')
 				$ret .= "undo port default vlan\nundo port trunk allow-pass vlan all\n";
 			$ret .= "quit\n";
+			break;
+		case 'begin configuration':
+			$ret .= "system-view\n";
+			break;
+		case 'end configuration':
+			$ret .= "return\n";
+			break;
+		case 'save configuration':
+			$ret .= "save\nY\n";
+			break;
+		default:
+			throw new InvalidArgException ('opcode', $cmd['opcode']);
+		}
+	return $ret;
+}
+
+function vrp55TranslatePushQueue ($queue)
+{
+	$ret = '';
+	foreach ($queue as $cmd)
+		switch ($cmd['opcode'])
+		{
+		case 'create VLAN':
+			if ($cmd['arg1'] != 1)
+				$ret .= "vlan ${cmd['arg1']}\nquit\n";
+			break;
+		case 'destroy VLAN':
+			if ($cmd['arg1'] != 1)
+				$ret .= "undo vlan ${cmd['arg1']}\n";
+			break;
+		case 'add allowed':
+		case 'rem allowed':
+			$undo = $cmd['opcode'] == 'add allowed' ? '' : 'undo ';
+			$ret .= "interface ${cmd['port']}\n";
+			foreach (listToRanges ($cmd['vlans']) as $range)
+				$ret .=  "${undo}port trunk allow-pass vlan " .
+					($range['from'] == $range['to'] ? $range['to'] : "${range['from']} to ${range['to']}") .
+					"\n";
+			$ret .= "quit\n";
+			break;
+		case 'set native':
+			$ret .= "interface ${cmd['arg1']}\nport trunk pvid vlan ${cmd['arg2']}\nquit\n";
+			break;
+		case 'set access':
+			$ret .= "interface ${cmd['arg1']}\nport default vlan ${cmd['arg2']}\nquit\n";
+			break;
+		case 'unset native':
+			$ret .= "interface ${cmd['arg1']}\nundo port trunk pvid vlan\nquit\n";
+			break;
+		case 'unset access':
+			$ret .= "interface ${cmd['arg1']}\nundo port default vlan\nquit\n";
+			break;
+		case 'set mode':
+			// VRP 5.50's meaning of "trunk" is much like the one of IOS
+			// (unlike the way VRP 5.30 defines "trunk" and "hybrid"),
+			// but it is necessary to undo configured VLANs on a port
+			// for mode change command to succeed.
+			$undo = array
+			(
+				'access' => "undo port trunk allow-pass vlan all\n" .
+					"port trunk allow-pass vlan 1\n" .
+					"undo port trunk pvid vlan\n",
+				'trunk' => "undo port default vlan\n",
+			);
+			$ret .= "interface ${cmd['arg1']}\n" . $undo[$cmd['arg2']];
+			$ret .= "port link-type ${cmd['arg2']}\nquit\n";
 			break;
 		case 'begin configuration':
 			$ret .= "system-view\n";
