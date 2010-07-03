@@ -2331,22 +2331,14 @@ function unbindVLANfromIPv4 ()
 }
 
 $msgcode['process8021QSyncRequest']['OK'] = 63;
-$msgcode['process8021QSyncRequest']['ERR1'] = 109;
-$msgcode['process8021QSyncRequest']['ERR2'] = 191;
+$msgcode['process8021QSyncRequest']['ERR'] = 191;
 function process8021QSyncRequest ()
 {
 	// behave depending on current operation: exec8021QPull or exec8021QPush
 	global $sic, $op;
-	try
-	{
-		if (FALSE === $done = exec8021QDeploy ($sic['object_id'], $op == 'exec8021QPush'))
-			return buildRedirectURL (__FUNCTION__, 'ERR2'); // specific case
-		return buildRedirectURL (__FUNCTION__, 'OK', array ($done));
-	}
-	catch (Exception $e)
-	{
-		return buildRedirectURL (__FUNCTION__, 'ERR1'); // generic failure
-	}
+	if (FALSE === $done = exec8021QDeploy ($sic['object_id'], $op == 'exec8021QPush'))
+		return buildRedirectURL (__FUNCTION__, 'ERR');
+	return buildRedirectURL (__FUNCTION__, 'OK', array ($done));
 }
 
 $msgcode['resolve8021QConflicts']['OK'] = 63;

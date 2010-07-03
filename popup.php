@@ -44,7 +44,7 @@ function findSparePorts ($port_id, $only_racks = array())
 	if (count ($only_racks))
 	{
 		$query .= 'AND object_id IN (SELECT DISTINCT object_id FROM RackSpace WHERE rack_id IN (' .
-			implode (', ', array_fill (0, count ($only_racks), '?')) . '))';
+			questionMarks (count ($only_racks)) . '))';
 		$qparams = array_merge ($qparams, $only_racks);
 	}
 	$query .= ' ORDER BY object_id, name';

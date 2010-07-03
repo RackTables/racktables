@@ -2428,6 +2428,7 @@ function buildVLANFilter ($role, $string)
 	case 'trunk': // 2-4094
 	case 'uplink':
 	case 'downlink':
+	case 'anymode':
 		$min = VLAN_MIN_ID + 1;
 		$max = VLAN_MAX_ID;
 		break;
@@ -2446,16 +2447,31 @@ function buildVLANFilter ($role, $string)
 
 // pack set of integers into list of integer ranges
 // e.g. (1, 2, 3, 5, 6, 7, 9, 11) => ((1, 3), (5, 7), (9, 9), (11, 11))
-function listToRanges ($vlanidlist)
+// The second argument, when it is different from 0, limits amount of
+// items in each generated range.
+function listToRanges ($vlanidlist, $limit = 0)
 {
 	sort ($vlanidlist);
 	$ret = array();
 	$from = $to = NULL;
 	foreach ($vlanidlist as $vlan_id)
 		if ($from == NULL)
-			$from = $to = $vlan_id;
+		{
+			if ($limit == 1)
+				$ret[] = array ('from' => $vlan_id, 'to' => $vlan_id);
+			else
+				$from = $to = $vlan_id;
+		}
 		elseif ($to + 1 == $vlan_id)
+		{
 			$to = $vlan_id;
+			if ($to - $from + 1 == $limit)
+			{
+				// cut accumulated range and start over
+				$ret[] = array ('from' => $from, 'to' => $to);
+				$from = $to = NULL;
+			}
+		}
 		else
 		{
 			$ret[] = array ('from' => $from, 'to' => $to);
@@ -2722,12 +2738,13 @@ function filter8021QChangeRequests
 	$ret = array();
 	foreach ($changes as $port_name => $port)
 	{
+		// VST violation ?
+		if (!goodModeForVSTRole ($port['mode'], $port['vst_role']))
+			continue; // ignore change request
 		// find and cancel any changes regarding immune VLANs
-		switch ($port['vst_role'])
+		switch ($port['mode'])
 		{
 		case 'access':
-			if ($port['mode'] != 'access') // VST violation
-				continue 2; // ignore change request
 			foreach ($domain_immune_vlans as $immune)
 				// Reverting an attempt to set an access port from
 				// "normal" VLAN to immune one (or vice versa) requires
@@ -2747,10 +2764,6 @@ function filter8021QChangeRequests
 				}
 			break;
 		case 'trunk':
-		case 'uplink':
-		case 'downlink':
-			if ($port['mode'] != 'trunk')
-				continue 2;
 			foreach ($domain_immune_vlans as $immune)
 				if (in_array ($immune, $before[$port_name]['allowed'])) // was allowed before
 				{
@@ -2768,7 +2781,7 @@ function filter8021QChangeRequests
 				}
 			break;
 		default:
-			continue 2;
+			throw new InvalidArgException ('mode', $port['mode']);
 		}
 		// save work
 		$ret[$port_name] = $port;
@@ -2812,6 +2825,27 @@ function same8021QConfigs ($a, $b)
 	return	$a['mode'] == $b['mode'] &&
 		array_values_same ($a['allowed'], $b['allowed']) &&
 		$a['native'] == $b['native'];
+}
+
+// Return TRUE, if the port can be edited by the user.
+function editable8021QPort ($port)
+{
+	return in_array ($port['vst_role'], array ('trunk', 'access', 'anymode'));
+}
+
+// Decide, whether the given 802.1Q port mode is permitted by
+// VST port role.
+function goodModeForVSTRole ($mode, $role)
+{
+	switch ($mode)
+	{
+	case 'access':
+		return in_array ($role, array ('access', 'anymode'));
+	case 'trunk':
+		return in_array ($role, array ('trunk', 'uplink', 'downlink', 'anymode'));
+	default:
+		throw new InvalidArgException ('mode', $mode);
+	}
 }
 
 /*
@@ -2967,7 +3001,7 @@ function get8021QSyncOptions
 		else // D != C, C != R, D != R: version conflict
 			$ret[$pn] = array
 			(
-				'status' => ($port['vst_role'] == 'access' or $port['vst_role'] == 'trunk') ?
+				'status' => editable8021QPort ($port) ?
 					// In case the port is normally updated by user, let him
 					// resolve the conflict. If the system manages this port,
 					// arrange the data to let remote version go down.
@@ -3385,6 +3419,12 @@ function niftyString ($string, $maxlen = 30)
 		return htmlspecialchars ($string, ENT_QUOTES, 'UTF-8');
 	return "<span title='" . htmlspecialchars ($string, ENT_QUOTES, 'UTF-8') . "'>" .
 		str_replace (' ', '&nbsp;', htmlspecialchars (mb_substr ($string, 0, $maxlen - 1), ENT_QUOTES, 'UTF-8')) . $cutind . '</span>';
+}
+
+// return a "?, ?, ?, ... ?, ?" string consisting of N question marks
+function questionMarks ($count = 0)
+{
+	return implode (', ', array_fill (0, $count, '?'));
 }
 
 ?>

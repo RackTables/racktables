@@ -2115,22 +2115,25 @@ function commitUseupPort ($port_id = 0)
 
 function convertPDOException ($e)
 {
-	if ($e->getCode() != 23000)
-		return $e;
-	switch ($e->errorInfo[1])
+	switch ($e->getCode() . '-' . $e->errorInfo[1])
 	{
-	case 1062:
+	case '23000-1062':
 		$text = 'such record already exists';
 		break;
-	case 1451:
-	case 1452:
+	case '23000-1205':
+		$text = 'such record already exists';
+		break;
+	case '23000-1451':
+	case '23000-1452':
 		$text = 'foreign key violation';
 		break;
-	default:
-		$text = 'unknown error code ' . $e->errorInfo[1];
+	case 'HY000-1205':
+		$text = 'lock wait timeout';
 		break;
+	default:
+		return $e;
 	}
-	return new RTDBConstraintError ($text);
+	return new RTDatabaseError ($text);
 }
 
 // This is a swiss-knife blade to insert a record into a table.
@@ -2140,7 +2143,7 @@ function usePreparedInsertBlade ($tablename, $columns)
 {
 	global $dbxlink;
 	$query = "INSERT INTO ${tablename} (" . implode (', ', array_keys ($columns));
-	$query .= ') VALUES (' . implode (', ', array_fill (0, count ($columns), '?')) . ')';
+	$query .= ') VALUES (' . questionMarks (count ($columns)) . ')';
 	// Now the query should be as follows:
 	// INSERT INTO table (c1, c2, c3) VALUES (?, ?, ?)
 	try
@@ -2185,9 +2188,16 @@ function usePreparedSelectBlade ($query, $args = array())
 {
 	global $dbxlink;
 	$prepared = $dbxlink->prepare ($query);
-	if (!$prepared->execute ($args))
-		return FALSE;
-	return $prepared;
+	try
+	{
+		if (!$prepared->execute ($args))
+			return FALSE;
+		return $prepared;
+	}
+	catch (PDOException $e)
+	{
+		throw convertPDOException ($e);
+	}
 }
 
 // Prepare and execute the statement with parameters, then return number of
@@ -3733,12 +3743,16 @@ function upd8021QPort ($instance = 'desired', $object_id, $port_name, $port)
 	);
 	if (FALSE === usePreparedDeleteBlade ($tablemap_8021q[$instance]['pav'], array ('object_id' => $object_id, 'port_name' => $port_name)))
 		throw new RackTablesError ('', RackTablesError::DB_WRITE_FAILED);
-	// FIXME: The goal is to INSERT as many rows as there are values in 'allowed' list
+	// The goal is to INSERT as many rows as there are values in 'allowed' list
 	// without wrapping each row with own INSERT (otherwise the SQL connection
 	// instantly becomes the bottleneck).
-	foreach ($port['allowed'] as $vlan_id)
-		if (!usePreparedInsertBlade ($tablemap_8021q[$instance]['pav'], array ('object_id' => $object_id, 'port_name' => $port_name, 'vlan_id' => $vlan_id)))
-			throw new RackTablesError ('', RackTablesError::DB_WRITE_FAILED);
+	foreach (listToRanges ($port['allowed']) as $range)
+		usePreparedExecuteBlade
+		(
+			'INSERT INTO ' . $tablemap_8021q[$instance]['pav'] . ' (object_id, port_name, vlan_id) ' .
+			'SELECT ?, ?, vlan_id FROM VLANValidID WHERE vlan_id BETWEEN ? AND ?',
+			array ($object_id, $port_name, $range['from'], $range['to'])
+		);
 	if
 	(
 		$port['native'] and

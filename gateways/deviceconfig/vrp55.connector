@@ -1,0 +1,76 @@
+#!/bin/sh
+
+[ $# = 3 ] || exit 1
+
+ENDPOINT=$1
+COMMAND=$2
+WORKFILE=$3
+
+prepare_connect_commands()
+{
+	[ $# = 1 ] || exit 2
+	local skip=yes cval found=no MYDIR=`dirname $0`
+	while read line; do
+		if [ "$skip" = "yes" -a "$line" = "# S-T-A-R-T" ]; then
+			skip=no
+			continue
+		fi
+		if [ "$skip" = "no" -a "$line" = "# S-T-O-P" ]; then
+			skip=yes
+			continue
+		fi
+		[ "$skip" = "yes" ] && continue
+		# ignore comments
+		[ -z "${line###*}" ] && continue
+
+		# First endpoint string/regexp match is sufficient for us.
+		cval=`echo $line | cut -s -d' ' -f1`
+		if [ -z "${1##$cval}" ]; then
+			found=yes
+			username=`echo $line | cut -s -d' ' -f5`
+			[ "$username" != "-" ] && echo $username > "$SESSION"
+			# access password
+			access_password=`echo $line | cut -s -d' ' -f6`
+			[ "$access_password" != "-" ] && echo "$access_password" >> "$SESSION"
+			printf "super\n" >> "$SESSION"
+			enable_password=`echo $line | cut -s -d' ' -f7`
+			[ "$enable_password" != "-" ] && echo $enable_password >> "$SESSION"
+			break
+		fi
+	done < "$MYDIR/switch.secrets.php"
+	[ "$found" = "yes" ] && return
+	exit 3
+}
+
+MYNAME=`basename $0`
+SESSION=`mktemp /tmp/$MYNAME.XXXXXX`
+[ -f "$SESSION" ] || exit 5
+prepare_connect_commands $ENDPOINT
+case $COMMAND in
+get8021q)
+	printf 'display current-configuration\n' >> "$SESSION"
+	outfile="$WORKFILE"
+	;;
+getlldpstatus)
+	printf 'display lldp neighbor\n' >> "$SESSION"
+	outfile="$WORKFILE"
+	;;
+gethndp)
+	printf 'display ndp\n' >> "$SESSION"
+	outfile="$WORKFILE"
+	;;
+deploy)
+	cat "$WORKFILE" >> "$SESSION"
+	outfile=/dev/null
+	;;
+*)
+	rm -f "$SESSION"
+	exit 6
+	;;
+esac
+printf 'quit\n' >> "$SESSION"
+rc=0
+# VRP 5.50 telnet server is broken, hence -i
+nc -w 30 -i1 $ENDPOINT 23 < "$SESSION" > "$outfile" || rc=4
+rm -f "$SESSION"
+exit $rc

@@ -408,6 +408,24 @@ $iftable_processors['fgs-uplinks'] = array
 	'try_next_proc' => FALSE,
 );
 
+$iftable_processors['fcx-uplinks'] = array
+(
+	'pattern' => '@^10GigabitEthernet1/2/([[:digit:]]+)$@',
+	'replacement' => 'e1/2/\\1',
+	'dict_key' => '9-1084',
+	'label' => 'X\\1',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['fcx-management'] = array
+(
+	'pattern' => '@^Management$@',
+	'replacement' => 'management1',
+	'dict_key' => '1-24',
+	'label' => 'Management',
+	'try_next_proc' => FALSE,
+);
+
 $iftable_processors['summit-25-to-26-XFP-uplinks'] = array
 (
 	'pattern' => '@^.+ Port (25|26)$@',
@@ -526,6 +544,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'dict_key' => 162,
 		'text' => 'WS-C2960-48TT-L: 48 RJ-45/10-100TX + 2 RJ-45/10-100-1000T(X)',
 		'processors' => array ('catalyst-chassis-any-100TX', 'catalyst-chassis-any-1000T'),
+	),
+	'9.1.950' => array
+	(
+		'dict_key' => 1347,
+		'text' => 'WS-C2960-24PC: 44 RJ-45/10-100TX + 2 combo-gig',
+		'processors' => array ('catalyst-chassis-1-to-2-combo-1000SFP', 'catalyst-chassis-any-1000T', 'catalyst-chassis-any-100TX'),
 	),
 	'9.1.527' => array
 	(
@@ -755,6 +779,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'FGS648P-POE: 48 RJ-45/10-100-1000T(X) + 4 combo-gig + uplink slot',
 		'processors' => array ('fgs-1-to-4-comboSFP', 'fgs-any-1000T', 'fgs-uplinks'),
 	),
+	'1991.1.3.54.2.4.1.1' => array
+	(
+		'dict_key' => 1362,
+		'text' => 'FCX 648: 48 RJ-45/10-100-1000T(X) + uplink slot with 4 SFP+',
+		'processors' => array ('fgs-any-1000T', 'fcx-uplinks', 'fcx-management'),
+	),
 	'1916.2.71' => array
 	(
 		'dict_key' => 694,
@@ -909,6 +939,17 @@ function doSwitchSNMPmining ($objectInfo, $hostname, $community)
 		$log = mergeLogs ($log, oneLiner (81, array ('netgear-generic')));
 		break;
 	case preg_match ('/^2011\.2\.23\./', $sysObjectID): // Huawei
+		$swtype_pcre = array
+		(
+			'/Huawei Versatile Routing Platform Software.+VRP.+Software, Version 5.30 /s' => 1360,
+			'/Huawei Versatile Routing Platform Software.+VRP.+Software, Version 5.50 /s' => 1361,
+		);
+		foreach ($swtype_pcre as $pattern => $dict_key)
+			if (preg_match ($pattern, $sysDescr))
+			{
+				updateStickerForCell ($objectInfo, 4, $dict_key);
+				break;
+			}
 		checkPIC ('1-681');
 		commitAddPort ($objectInfo['id'], 'con0', '1-681', 'console', ''); // DB-9 RS-232 console
 		$log = mergeLogs ($log, oneLiner (81, array ('huawei-generic')));
@@ -919,6 +960,7 @@ function doSwitchSNMPmining ($objectInfo, $hostname, $community)
 		$log = mergeLogs ($log, oneLiner (81, array ('juniper-generic')));
 		break;
 	case preg_match ('/^1991\.1\.3\.45\./', $sysObjectID): // snFGSFamily
+	case preg_match ('/^1991\.1\.3\.54\.2\.4\.1\.1$/', $sysObjectID): // FCX 648
 		$exact_release = preg_replace ('/^.*, IronWare Version ([^ ]+) .*$/', '\\1', $sysDescr);
 		updateStickerForCell ($objectInfo, 5, $exact_release);
 		# FOUNDRY-SN-AGENT-MIB::snChasSerNum.0

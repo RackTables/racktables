@@ -30,6 +30,7 @@ $gwrxlator['get8021q'] = array
 	'ios12' => 'ios12ReadVLANConfig',
 	'fdry5' => 'fdry5ReadVLANConfig',
 	'vrp53' => 'vrp53ReadVLANConfig',
+	'vrp55' => 'vrp55Read8021QConfig',
 	'nxos4' => 'nxos4Read8021QConfig',
 	'xos12' => 'xos12Read8021QConfig',
 );
@@ -41,6 +42,7 @@ $gwpushxlator = array
 	'ios12' => 'ios12TranslatePushQueue',
 	'fdry5' => 'fdry5TranslatePushQueue',
 	'vrp53' => 'vrp53TranslatePushQueue',
+	'vrp55' => 'vrp55TranslatePushQueue',
 	'nxos4' => 'ios12TranslatePushQueue', // employ syntax compatibility
 	'xos12' => 'xos12TranslatePushQueue',
 );
@@ -250,6 +252,8 @@ function gwRecvFile ($endpoint, $handlername, &$output)
 	);
 	$output = file_get_contents ($tmpfilename);
 	unlink ($tmpfilename);
+	if ($output === FALSE)
+		throw new RTGatewayError ('failed to read temporary file');
 	// Being here means having 'OK!' in the response.
 	return oneLiner (66, array ($handlername)); // ignore provided "Ok" text
 }
@@ -282,43 +286,21 @@ function gwRecvFileFromObject ($object_id = 0, $handlername, &$output)
 
 function detectDeviceBreed ($object_id)
 {
+	$breed_by_swcode = array
+	(
+		251 => 'ios12',
+		252 => 'ios12',
+		254 => 'ios12',
+		963 => 'nxos4',
+		964 => 'nxos4',
+		1352 => 'xos12',
+		1360 => 'vrp53',
+		1361 => 'vrp55',
+		1363 => 'fdry5',
+	);
 	foreach (getAttrValues ($object_id) as $record)
-	{
-		if
-		(
-			$record['name'] == 'SW type' &&
-			strlen ($record['o_value']) &&
-			preg_match ('/^Cisco IOS 12\./', execGMarker ($record['o_value']))
-		)
-			return 'ios12';
-		if
-		(
-			$record['name'] == 'SW type' &&
-			strlen ($record['o_value']) &&
-			preg_match ('/^Cisco NX-OS 4\./', execGMarker ($record['o_value']))
-		)
-			return 'nxos4';
-		if
-		(
-			$record['id'] == 4 &&
-			$record['key'] == 1352
-		)
-			return 'xos12';
-		if
-		(
-			$record['name'] == 'HW type' &&
-			strlen ($record['o_value']) &&
-			preg_match ('/^Foundry FastIron GS /', execGMarker ($record['o_value']))
-		)
-			return 'fdry5';
-		if
-		(
-			$record['name'] == 'HW type' &&
-			strlen ($record['o_value']) &&
-			preg_match ('/^Huawei Quidway S53/', execGMarker ($record['o_value']))
-		)
-			return 'vrp53';
-	}
+		if ($record['id'] == 4 and array_key_exists ($record['key'], $breed_by_swcode))
+			return $breed_by_swcode[$record['key']];
 	return '';
 }
 
@@ -362,10 +344,12 @@ function gwRetrieveDeviceConfig ($object_id, $command)
 		'deviceconfig',
 		array ("${command} ${endpoint} ${breed} ${tmpfilename}")
 	);
-	$configtext = dos2unix (file_get_contents ($tmpfilename));
+	$configtext = file_get_contents ($tmpfilename);
 	unlink ($tmpfilename);
+	if ($configtext === FALSE)
+		throw new RTGatewayError ('failed to read temporary file');
 	// Being here means it was alright.
-	return $gwrxlator[$command][$breed] ($configtext);
+	return $gwrxlator[$command][$breed] (dos2unix ($configtext));
 }
 
 function gwDeployDeviceConfig ($object_id, $breed, $text)
@@ -959,6 +943,116 @@ function vrp53PickInterfaceSubcommand (&$work, $line)
 	return __FUNCTION__;
 }
 
+function vrp55Read8021QConfig ($input)
+{
+	$ret = array
+	(
+		'vlanlist' => array (1), // VRP 5.50 hides VLAN1 from config text
+		'portdata' => array(),
+	);
+	foreach (explode ("\n", $input) as $line)
+	{
+		$matches = array();
+		// top level
+		if (!array_key_exists ('current', $ret))
+			switch (TRUE)
+			{
+			case (preg_match ('@^ vlan batch (.+)$@', $line, $matches)):
+				foreach (vrp53ParseVLANString ($matches[1]) as $vlan_id)
+					$ret['vlanlist'][] = $vlan_id;
+				continue 2;
+			case (preg_match ('@^interface ((GigabitEthernet|Eth-Trunk)([[:digit:]]+(/[[:digit:]]+)*))$@', $line, $matches)):
+				$matches[1] = preg_replace ('@^GigabitEthernet(.+)$@', 'gi\\1', $matches[1]);
+				$ret['current'] = array ('port_name' => $matches[1]);
+				continue 2;
+			default:
+				continue 2;
+			}
+		// inside an interface block
+		switch (TRUE)
+		{
+		case preg_match ('/^ port (link-type )?hybrid /', $line):
+			throw new RTGatewayError ("unsupported configuration: ${line}");
+		case preg_match ('/^ port link-type (.+)$/', $line, $matches):
+			$ret['current']['link-type'] = $matches[1];
+			break;
+		// Native VLAN is configured differently for each link-type case, but
+		// VRP is known to filter off clauses, which don't make sense for
+		// current link-type. This way any interface section should contain
+		// only one kind of "set native" clause (but if this constraint breaks,
+		// we get a problem).
+		case preg_match ('/^ port (default|trunk pvid) vlan ([[:digit:]]+)$/', $line, $matches):
+			$ret['current']['native'] = $matches[2];
+			if (!array_key_exists ('allowed', $ret['current']))
+				$ret['current']['allowed'] = array();
+			if (!in_array ($ret['current']['native'], $ret['current']['allowed']))
+				$ret['current']['allowed'][] = $ret['current']['native'];
+			break;
+		case preg_match ('/^ port trunk allow-pass vlan (.+)$/', $line, $matches):
+			if (!array_key_exists ('allowed', $ret['current']))
+				$ret['current']['allowed'] = array();
+			foreach (vrp53ParseVLANString ($matches[1]) as $vlan_id)
+				if (!in_array ($vlan_id, $ret['current']['allowed']))
+					$ret['current']['allowed'][] = $vlan_id;
+			break;
+		case $line == ' undo portswitch':
+		case preg_match ('/^ ip address /', $line):
+			$ret['current']['link-type'] = 'IP';
+			break;
+		case preg_match ('/^ eth-trunk /', $line):
+			$ret['current']['link-type'] = 'SKIP';
+			break;
+		case substr ($line, 0, 1) == '#': // end of interface section
+			if (!array_key_exists ('link-type', $ret['current']))
+				throw new RTGatewayError ('unsupported configuration: link-type is neither trunk nor access for ' . $ret['current']['port_name']);
+			if (!array_key_exists ('allowed', $ret['current']))
+				$ret['current']['allowed'] = array();
+			if (!array_key_exists ('native', $ret['current']))
+				$ret['current']['native'] = 0;
+			switch ($ret['current']['link-type'])
+			{
+			case 'access':
+				// In VRP 5.50 an access port has default VLAN ID == 1
+				$ret['portdata'][$ret['current']['port_name']] =
+					$ret['current']['native'] ? array
+					(
+						'mode' => 'access',
+						'allowed' => $ret['current']['allowed'],
+						'native' => $ret['current']['native'],
+					) : array
+					(
+						'mode' => 'access',
+						'allowed' => array (VLAN_DFL_ID),
+						'native' => VLAN_DFL_ID,
+					);
+				break;
+			case 'trunk':
+				$ret['portdata'][$ret['current']['port_name']] = array
+				(
+					'mode' => 'trunk',
+					'allowed' => $ret['current']['allowed'],
+					'native' => $ret['current']['native'],
+				);
+				break;
+			case 'IP':
+				$ret['portdata'][$ret['current']['port_name']] = array
+				(
+					'mode' => 'none',
+					'allowed' => array(),
+					'native' => 0,
+				);
+				break;
+			case 'SKIP':
+			default: // dot1q-tunnel ?
+			}
+			unset ($ret['current']);
+			break;
+		default: // nom-nom
+		}
+	}
+	return $ret;
+}
+
 function nxos4Read8021QConfig ($input)
 {
 	$ret = array
@@ -1218,6 +1312,72 @@ function vrp53TranslatePushQueue ($queue)
 			if ($cmd['arg2'] == 'hybrid')
 				$ret .= "undo port default vlan\nundo port trunk allow-pass vlan all\n";
 			$ret .= "quit\n";
+			break;
+		case 'begin configuration':
+			$ret .= "system-view\n";
+			break;
+		case 'end configuration':
+			$ret .= "return\n";
+			break;
+		case 'save configuration':
+			$ret .= "save\nY\n";
+			break;
+		default:
+			throw new InvalidArgException ('opcode', $cmd['opcode']);
+		}
+	return $ret;
+}
+
+function vrp55TranslatePushQueue ($queue)
+{
+	$ret = '';
+	foreach ($queue as $cmd)
+		switch ($cmd['opcode'])
+		{
+		case 'create VLAN':
+			if ($cmd['arg1'] != 1)
+				$ret .= "vlan ${cmd['arg1']}\nquit\n";
+			break;
+		case 'destroy VLAN':
+			if ($cmd['arg1'] != 1)
+				$ret .= "undo vlan ${cmd['arg1']}\n";
+			break;
+		case 'add allowed':
+		case 'rem allowed':
+			$undo = $cmd['opcode'] == 'add allowed' ? '' : 'undo ';
+			$ret .= "interface ${cmd['port']}\n";
+			foreach (listToRanges ($cmd['vlans']) as $range)
+				$ret .=  "${undo}port trunk allow-pass vlan " .
+					($range['from'] == $range['to'] ? $range['to'] : "${range['from']} to ${range['to']}") .
+					"\n";
+			$ret .= "quit\n";
+			break;
+		case 'set native':
+			$ret .= "interface ${cmd['arg1']}\nport trunk pvid vlan ${cmd['arg2']}\nquit\n";
+			break;
+		case 'set access':
+			$ret .= "interface ${cmd['arg1']}\nport default vlan ${cmd['arg2']}\nquit\n";
+			break;
+		case 'unset native':
+			$ret .= "interface ${cmd['arg1']}\nundo port trunk pvid vlan\nquit\n";
+			break;
+		case 'unset access':
+			$ret .= "interface ${cmd['arg1']}\nundo port default vlan\nquit\n";
+			break;
+		case 'set mode':
+			// VRP 5.50's meaning of "trunk" is much like the one of IOS
+			// (unlike the way VRP 5.30 defines "trunk" and "hybrid"),
+			// but it is necessary to undo configured VLANs on a port
+			// for mode change command to succeed.
+			$undo = array
+			(
+				'access' => "undo port trunk allow-pass vlan all\n" .
+					"port trunk allow-pass vlan 1\n" .
+					"undo port trunk pvid vlan\n",
+				'trunk' => "undo port default vlan\n",
+			);
+			$ret .= "interface ${cmd['arg1']}\n" . $undo[$cmd['arg2']];
+			$ret .= "port link-type ${cmd['arg2']}\nquit\n";
 			break;
 		case 'begin configuration':
 			$ret .= "system-view\n";

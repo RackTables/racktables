@@ -98,11 +98,11 @@ class InvalidRequestArgException extends RackTablesError
 
 // this wraps certain known PDO errors and is caught in process.php
 // as a "soft" error
-class RTDBConstraintError extends RackTablesError
+class RTDatabaseError extends RackTablesError
 {
 	public function dispatch()
 	{
-		RackTablesError::genHTMLPage ('Database constraint violation', '<h2>Constraint violation</h2><br>' . $this->message);
+		RackTablesError::genHTMLPage ('Database soft error', '<h2>Database soft error</h2><br>' . $this->message);
 	}
 }
 

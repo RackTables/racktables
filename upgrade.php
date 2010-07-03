@@ -742,6 +742,7 @@ CREATE TABLE `VLANValidID` (
 			break;
 		case '0.18.4':
 			$query = array_merge ($query, reloadDictionary ($batchid));
+			$query[] = "ALTER TABLE VLANSTRule MODIFY port_role enum('access','trunk','anymode','uplink','downlink','none') NOT NULL default 'none'";
 			$query[] = "UPDATE Config SET varvalue = '0.18.4' WHERE varname = 'DB_VERSION'";
 			break;
 		default:

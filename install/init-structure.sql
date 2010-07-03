@@ -449,7 +449,7 @@ CREATE TABLE `VLANSTRule` (
   `vst_id` int(10) unsigned NOT NULL,
   `rule_no` int(10) unsigned NOT NULL,
   `port_pcre` char(255) NOT NULL,
-  `port_role` enum('access','trunk','uplink','downlink','none') NOT NULL default 'none',
+  `port_role` enum('access','trunk','anymode','uplink','downlink','none') NOT NULL default 'none',
   `wrt_vlans` char(255) default NULL,
   `description` char(255) default NULL,
   UNIQUE KEY `vst-rule` (`vst_id`,`rule_no`),
