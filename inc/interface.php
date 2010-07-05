@@ -1643,7 +1643,6 @@ function showMessageOrError ()
 				189 => array ('code' => 'error', 'format' => "Unknown OID '%s'"),
 				190 => array ('code' => 'error', 'format' => "Invalid VLAN ID '%s'"),
 				191 => array ('code' => 'error', 'format' => "deploy was blocked due to conflicting configuration versions"),
-				192 => array ('code' => 'error', 'format' => "You have to supply all the information for the bulk port function to be successful."), 
 
 // records 200~299 with warnings
 				200 => array ('code' => 'warning', 'format' => '%s'),
