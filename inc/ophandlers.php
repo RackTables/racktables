@@ -1616,11 +1616,11 @@ function setPortVLAN ()
 			$portname = $_REQUEST['portname_' . $i];
 			$oldvlanid = $portlist[$i]['vlanid'];
 			$newvlanid = $_REQUEST['vlanid_' . $i];
-			// Finish the security context and evaluate it.
-			$annex = array();
-			$annex[] = array ('tag' => '$fromvlan_' . $oldvlanid);
-			$annex[] = array ('tag' => '$tovlan_' . $newvlanid);
-			if (!permitted (NULL, NULL, NULL, $annex))
+			if
+			(
+				!permitted (NULL, NULL, NULL, array (array ('tag' => '$fromvlan_' . $oldvlanid))) or
+				!permitted (NULL, NULL, NULL, array (array ('tag' => '$tovlan_' . $newvlanid)))
+			)
 			{
 				$log['m'][] = array ('c' => 159, 'a' => array ($portname, $oldvlanid, $newvlanid));
 				continue;
