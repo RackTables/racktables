@@ -7127,7 +7127,7 @@ function renderTrunkPortControls ($vswitch, $vdom, $port_name, $vlanport)
 		printImageHREF ('CLEAR gray');
 	else
 	{
-		printOpFormIntro ('save', $formextra);
+		printOpFormIntro ('save8021QConfig', $formextra);
 		printImageHREF ('CLEAR', 'Unassign all VLANs', TRUE);
 		echo '</form>';
 	}
