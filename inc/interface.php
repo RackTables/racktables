@@ -3996,13 +3996,12 @@ function renderVLANMembership ($object_id)
 			continue;
 		$vlanpermissions[$port['vlanid']] = array();
 		foreach (array_keys ($vlanlist) as $to)
-		{
-			$annex = array();
-			$annex[] = array ('tag' => '$fromvlan_' . $port['vlanid']);
-			$annex[] = array ('tag' => '$tovlan_' . $to);
-			if (permitted (NULL, NULL, 'setPortVLAN', $annex))
+			if
+			(
+				permitted (NULL, NULL, 'setPortVLAN', array (array ('tag' => '$fromvlan_' . $port['vlanid']))) and
+				permitted (NULL, NULL, 'setPortVLAN', array (array ('tag' => '$tovlan_' . $to)))
+			)
 				$vlanpermissions[$port['vlanid']][] = $to;
-		}
 	}
 
 	echo '<table border=0 width="100%"><tr><td colspan=3>';
