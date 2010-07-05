@@ -3940,7 +3940,7 @@ function renderUIConfig ()
 {
 	global $configCache, $nextorder;
 	startPortlet ('Current configuration');
-	echo '<table class=cooltable border=0 cellpadding=5 cellspacing=0 align=center width="50%">';
+	echo '<table class=cooltable border=0 cellpadding=5 cellspacing=0 align=center width="70%">';
 	echo '<tr><th class=tdleft>Option</th><th class=tdleft>Value</th></tr>';
 	$order = 'odd';
 	foreach ($configCache as $v)
@@ -3948,8 +3948,8 @@ function renderUIConfig ()
 		if ($v['is_hidden'] != 'no')
 			continue;
 		echo "<tr class=row_${order}>";
-		echo "<td class=tdright>${v['description']}</td>\n";
-		echo "<td class=tdleft>${v['varvalue']}</td></tr>";
+		echo "<td nowrap valign=top class=tdright>${v['description']}</td>";
+		echo "<td valign=top class=tdleft>${v['varvalue']}</td></tr>";
 		$order = $nextorder[$order];
 	}
 	echo "</table>\n";
