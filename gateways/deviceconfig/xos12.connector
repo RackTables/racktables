@@ -64,6 +64,6 @@ esac
 # quit, but don't save, if asked
 printf 'quit\nn\n' >> "$SESSION"
 rc=0
-nc -w30 $ENDPOINT 23 < "$SESSION" > "$outfile" || rc=4
+nc -w30 -i1 $ENDPOINT 23 < "$SESSION" > "$outfile" || rc=4
 rm -f "$SESSION"
 exit $rc
