@@ -353,15 +353,14 @@ http://www.cisco.com/en/US/products/hw/routers/ps274/products_tech_note09186a008
 }
 
 $msgcode['addBulkPorts']['OK'] = 82;
-$msgcode['addBulkPorts']['ERR'] = 192;
-
 function addBulkPorts ()
 {
-	assertUIntArg ('object_id', __FUNCTION__);
-	assertStringArg ('port_name', __FUNCTION__, TRUE);
-	assertStringArg ('port_label', __FUNCTION__, TRUE);
-	assertUIntArg('port_numbering_start', __FUNCTION__);
-	assertUIntArg('port_numbering_count', __FUNCTION__);
+	assertUIntArg ('object_id');
+	assertStringArg ('port_type_id');
+	assertStringArg ('port_name');
+	assertStringArg ('port_label', TRUE);
+	assertUIntArg ('port_numbering_start');
+	assertUIntArg ('port_numbering_count');
 	
 	$object_id = $_REQUEST['object_id'];
 	$port_name = $_REQUEST['port_name'];
@@ -370,10 +369,6 @@ function addBulkPorts ()
 	$port_numbering_start = $_REQUEST['port_numbering_start'];
 	$port_numbering_count = $_REQUEST['port_numbering_count'];
 	
-	if ($object_id == 0 or $port_type_id == 0 or $port_name == '' or $port_numbering_count == 0)
-	{
-		return buildRedirectURL (__FUNCTION__, 'ERR');
-	}
 	$added_count = $error_count = 0;
 	if(strrpos($port_name, "%u") === false )
 		$port_name .= '%u';
@@ -387,7 +382,6 @@ function addBulkPorts ()
 	}
 	return buildRedirectURL (__FUNCTION__, 'OK', array ($added_count, $error_count));
 }
-
 
 $msgcode['updIPv4Allocation']['OK'] = 12;
 $msgcode['updIPv4Allocation']['ERR'] = 109;
@@ -1622,11 +1616,11 @@ function setPortVLAN ()
 			$portname = $_REQUEST['portname_' . $i];
 			$oldvlanid = $portlist[$i]['vlanid'];
 			$newvlanid = $_REQUEST['vlanid_' . $i];
-			// Finish the security context and evaluate it.
-			$annex = array();
-			$annex[] = array ('tag' => '$fromvlan_' . $oldvlanid);
-			$annex[] = array ('tag' => '$tovlan_' . $newvlanid);
-			if (!permitted (NULL, NULL, NULL, $annex))
+			if
+			(
+				!permitted (NULL, NULL, NULL, array (array ('tag' => '$fromvlan_' . $oldvlanid))) or
+				!permitted (NULL, NULL, NULL, array (array ('tag' => '$tovlan_' . $newvlanid)))
+			)
 			{
 				$log['m'][] = array ('c' => 159, 'a' => array ($portname, $oldvlanid, $newvlanid));
 				continue;

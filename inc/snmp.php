@@ -961,6 +961,17 @@ function doSwitchSNMPmining ($objectInfo, $hostname, $community)
 		break;
 	case preg_match ('/^1991\.1\.3\.45\./', $sysObjectID): // snFGSFamily
 	case preg_match ('/^1991\.1\.3\.54\.2\.4\.1\.1$/', $sysObjectID): // FCX 648
+		$swtype_pcre = array
+		(
+			// FIXME: get sysDescr for IronWare 5 and add a pattern
+			'/^Brocade Communications Systems.+, IronWare Version 07\./' => 1364,
+		);
+		foreach ($swtype_pcre as $pattern => $dict_key)
+			if (preg_match ($pattern, $sysDescr))
+			{
+				updateStickerForCell ($objectInfo, 4, $dict_key);
+				break;
+			}
 		$exact_release = preg_replace ('/^.*, IronWare Version ([^ ]+) .*$/', '\\1', $sysDescr);
 		updateStickerForCell ($objectInfo, 5, $exact_release);
 		# FOUNDRY-SN-AGENT-MIB::snChasSerNum.0

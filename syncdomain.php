@@ -81,9 +81,16 @@ foreach ($mydomain['switchlist'] as $switch)
 	if (in_array (detectVLANSwitchQueue (getVLANSwitchInfo ($switch['object_id'])), $todo[$options['mode']]))
 	{
 		$object = spotEntity ('object', $switch['object_id']);
-		$portsdone = exec8021QDeploy ($switch['object_id'], $do_push);
-		if ($portsdone or $verbose)
-			echo "Done '${object['dname']}': ${portsdone}\n";
+		try
+		{
+			$portsdone = exec8021QDeploy ($switch['object_id'], $do_push);
+			if ($portsdone or $verbose)
+				echo "Done '${object['dname']}': ${portsdone}\n";
+		}
+		catch (RackTablesError $e)
+		{
+			echo "FAILED '${object['dname']}': " . $e->getMessage() . "\n";
+		}
 		if (++$switchesdone == $max)
 		{
 			if ($verbose)
