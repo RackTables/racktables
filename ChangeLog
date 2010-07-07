@@ -1,6 +1,8 @@
 0.18.4
 	bugfix: a race condition could be triggered in permissions editor
 	new feature: "any mode" of user port in VLAN switch template
+	update: improved error handling code
+	update: fixes in 802.1Q
 0.18.3 2010-06-15
 	bugfix: fix mktemp not working on Slackware (by Rafael Ganascim)
 	bugfix: Nexus 802.1Q fixes
