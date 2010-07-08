@@ -6971,6 +6971,18 @@ function getAccessPortControlCode ($req_port_name, $vdom, $port_name, $port, &$n
 	)
 		return formatVLANName ($vdom['vlanlist'][$port['native']], 'label');
 
+	static $vlanpermissions = array();
+	if (!array_key_exists ($port['native'], $vlanpermissions))
+	{
+		$vlanpermissions[$port['native']] = array();
+		foreach (array_keys ($vdom['vlanlist']) as $to)
+			if
+			(
+				permitted (NULL, NULL, 'save8021QConfig', array (array ('tag' => '$fromvlan_' . $port['native']))) and
+				permitted (NULL, NULL, 'save8021QConfig', array (array ('tag' => '$tovlan_' . $to)))
+			)
+				$vlanpermissions[$port['native']][] = $to;
+	}
 	$ret = "<input type=hidden name=pn_${nports} value=${port_name}>";
 	$ret .= "<input type=hidden name=pm_${nports} value=access>";
 	$options = array();
@@ -6984,6 +6996,7 @@ function getAccessPortControlCode ($req_port_name, $vdom, $port_name, $port, &$n
 		(
 			($vlan_id != $port['native'] or $port['mode'] == 'trunk') and
 			$vlan_info['vlan_type'] != 'alien' and
+			in_array ($vlan_id, $vlanpermissions[$port['native']]) and
 			matchVLANFilter ($vlan_id, $port['wrt_vlans'])
 		)
 			$options[$vlan_id] = formatVLANName ($vlan_info, 'option');
