@@ -346,13 +346,17 @@ function gwRetrieveDeviceConfig ($object_id, $command)
 		throw new RTGatewayError ('cannot pick management address');
 	$endpoint = str_replace (' ', '\ ', str_replace (' ', '+', $endpoints[0]));
 	$tmpfilename = tempnam ('', 'RackTables-deviceconfig-');
-	$outputlines = queryGateway
-	(
-		'deviceconfig',
-		array ("${command} ${endpoint} ${breed} ${tmpfilename}")
-	);
-	$configtext = file_get_contents ($tmpfilename);
-	unlink ($tmpfilename);
+	try
+	{
+		queryGateway ('deviceconfig', array ("${command} ${endpoint} ${breed} ${tmpfilename}"));
+		$configtext = file_get_contents ($tmpfilename);
+		unlink ($tmpfilename);
+	}
+	catch (RTGatewayError $e)
+	{
+		unlink ($tmpfilename);
+		throw $e;
+	}
 	if ($configtext === FALSE)
 		throw new RTGatewayError ('failed to read temporary file');
 	// Being here means it was alright.
@@ -376,12 +380,16 @@ function gwDeployDeviceConfig ($object_id, $breed, $text)
 		unlink ($tmpfilename);
 		throw new RTGatewayError ('failed to write to temporary file');
 	}
-	$outputlines = queryGateway
-	(
-		'deviceconfig',
-		array ("deploy ${endpoint} ${breed} ${tmpfilename}")
-	);
-	unlink ($tmpfilename);
+	try
+	{
+		queryGateway ('deviceconfig', array ("deploy ${endpoint} ${breed} ${tmpfilename}"));
+		unlink ($tmpfilename);
+	}
+	catch (RTGatewayError $e)
+	{
+		unlink ($tmpfilename);
+		throw $e;
+	}
 }
 
 // Read provided output of "show cdp neighbors detail" command and
