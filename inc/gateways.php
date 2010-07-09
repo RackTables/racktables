@@ -24,6 +24,7 @@ $gwrxlator['getlldpstatus'] = array
 (
 	'xos12' => 'xos12ReadLLDPStatus',
 	'vrp53' => 'vrp53ReadLLDPStatus',
+	'vrp55' => 'vrp55ReadLLDPStatus',
 );
 $gwrxlator['get8021q'] = array
 (
@@ -472,6 +473,46 @@ function vrp53ReadLLDPStatus ($input)
 			$ret['current'][$matches[1]] = $matches[2];
 			break;
 		case preg_match ('/^SysName: (.+)$/', $line, $matches):
+			if
+			(
+				array_key_exists ('current', $ret) and
+				array_key_exists ('PortIdSubtype', $ret['current']) and
+				($ret['current']['PortIdSubtype'] == 'interfaceAlias' or $ret['current']['PortIdSubtype'] == 'interfaceName') and
+				array_key_exists ('PortId', $ret['current']) and
+				array_key_exists ('local_port', $ret['current'])
+			)
+				$ret[$ret['current']['local_port']] = array
+				(
+					'device' => $matches[1],
+					'port' => ios12ShortenIfName ($ret['current']['PortId']),
+				);
+			unset ($ret['current']);
+			break;
+		default:
+		}
+	}
+	unset ($ret['current']);
+	return $ret;
+}
+
+function vrp55ReadLLDPStatus ($input)
+{
+	$ret = array();
+	foreach (explode ("\n", $input) as $line)
+	{
+		$matches = array();
+		switch (TRUE)
+		{
+		case preg_match ('/^(.+) has 1 neighbors:$/', $line, $matches):
+			$ret['current']['local_port'] = ios12ShortenIfName ($matches[1]);
+			break;
+		case preg_match ('/^Port ID type   :([^ ]+)/', $line, $matches):
+			$ret['current']['PortIdSubtype'] = $matches[1];
+			break;
+		case preg_match ('/^Port ID        :(.+)$/', $line, $matches):
+			$ret['current']['PortId'] = $matches[1];
+			break;
+		case preg_match ('/^System name         :(.+)$/', $line, $matches):
 			if
 			(
 				array_key_exists ('current', $ret) and
