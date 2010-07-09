@@ -230,13 +230,18 @@ function gwSendFile ($endpoint, $handlername, $filetext = array())
 		}
 		$command .= " ${name}";
 	}
-	$outputlines = queryGateway
-	(
-		'sendfile',
-		array ($command)
-	);
-	foreach ($tmpnames as $name)
-		unlink ($name);
+	try
+	{
+		queryGateway ('sendfile', array ($command));
+		foreach ($tmpnames as $name)
+			unlink ($name);
+	}
+	catch (RTGatewayError $e)
+	{
+		foreach ($tmpnames as $name)
+			unlink ($name);
+		throw $e;
+	}
 }
 
 // Query something through a gateway and get some text in return. Return that text.
@@ -245,17 +250,19 @@ function gwRecvFile ($endpoint, $handlername, &$output)
 	global $remote_username;
 	$tmpfilename = tempnam ('', 'RackTables-sendfile-');
 	$endpoint = str_replace (' ', '\ ', $endpoint); // the gateway dispatcher uses read (1) to assign arguments
-	$outputlines = queryGateway
-	(
-		'sendfile',
-		array ("submit ${remote_username} ${endpoint} ${handlername} ${tmpfilename}")
-	);
-	$output = file_get_contents ($tmpfilename);
-	unlink ($tmpfilename);
+	try
+	{
+		queryGateway ('sendfile', array ("submit ${remote_username} ${endpoint} ${handlername} ${tmpfilename}"));
+		$output = file_get_contents ($tmpfilename);
+		unlink ($tmpfilename);
+	}
+	catch (RTGatewayError $e)
+	{
+		unlink ($tmpfilename);
+		throw $e;
+	}
 	if ($output === FALSE)
 		throw new RTGatewayError ('failed to read temporary file');
-	// Being here means having 'OK!' in the response.
-	return oneLiner (66, array ($handlername)); // ignore provided "Ok" text
 }
 
 function gwSendFileToObject ($object_id = 0, $handlername, $filetext = '')
@@ -281,7 +288,7 @@ function gwRecvFileFromObject ($object_id = 0, $handlername, &$output)
 	if (count ($endpoints) > 1)
 		return oneLiner (162); // can't pick an address
 	$endpoint = str_replace (' ', '+', $endpoints[0]);
-	return gwRecvFile ($endpoint, $handlername, $output);
+	gwRecvFile ($endpoint, $handlername, $output);
 }
 
 function detectDeviceBreed ($object_id)
