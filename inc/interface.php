@@ -7766,7 +7766,10 @@ function renderDiscoveredNeighbors ($object_id)
 		if
 		(
 			!array_key_exists ($local_port, $myports) or
-			NULL === $remote_id = searchByMgmtHostname ($remote['device']) or
+			(
+				NULL === $remote_id = searchByMgmtHostname ($remote['device']) and
+				NULL === $remote_id = lookupEntityByString ('object', $remote['device'])
+			) or
 			!count ($remote_port_ids = getPortIDs ($remote_id, $remote['port']))
 		)
 		{
