@@ -562,17 +562,9 @@ function ios12PickSwitchportCommand (&$work, $line)
 	if ($line[0] != ' ') // end of interface section
 	{
 		// save work, if it makes sense
-		switch (TRUE)
+		switch ($work['current']['mode'])
 		{
-		case $work['current']['ignore']:
-			$work['portdata'][$work['current']['port_name']] = array
-			(
-				'mode' => 'none',
-				'allowed' => array(),
-				'native' => 0,
-			);
-			break;
-		case 'access' == $work['current']['mode']:
+		case 'access':
 			if (!array_key_exists ('access vlan', $work['current']))
 				$work['current']['access vlan'] = 1;
 			$work['portdata'][$work['current']['port_name']] = array
@@ -582,7 +574,7 @@ function ios12PickSwitchportCommand (&$work, $line)
 				'native' => $work['current']['access vlan'],
 			);
 			break;
-		case 'trunk' == $work['current']['mode']:
+		case 'trunk':
 			if (!array_key_exists ('trunk native vlan', $work['current']))
 				$work['current']['trunk native vlan'] = 1;
 			if (!array_key_exists ('trunk allowed vlan', $work['current']))
@@ -601,6 +593,9 @@ function ios12PickSwitchportCommand (&$work, $line)
 				'native' => $effective_native,
 			);
 			break;
+		case 'SKIP':
+			break;
+		case 'IP':
 		default:
 			// dot1q-tunnel, dynamic, private-vlan or even none --
 			// show in returned config and let user decide, if they
@@ -642,9 +637,11 @@ function ios12PickSwitchportCommand (&$work, $line)
 		break;
 	case preg_match ('@^ channel-group @', $line):
 	// port-channel subinterface config follows that of the master interface
+		$work['current']['mode'] = 'SKIP';
+		break;
 	case preg_match ('@^ ip address @', $line):
 	// L3 interface does no switchport functions
-		$work['current']['ignore'] = TRUE;
+		$work['current']['mode'] = 'IP';
 		break;
 	default: // suppress warning on irrelevant config clause
 	}
