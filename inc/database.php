@@ -3853,4 +3853,20 @@ function getIPv4Network8021QBindings ($ipv4net_id)
 	return $prepared->fetchAll (PDO::FETCH_ASSOC);
 }
 
+// Return entity ID, if its 'name' column equals to provided string, or NULL otherwise (nothing
+// found or more, than one row returned by query due to some odd reason).
+function lookupEntityByString ($realm, $value, $column = 'name')
+{
+	global $SQLSchema;
+	if (!isset ($SQLSchema[$realm]))
+		throw new InvalidArgException ('realm', $realm);
+	$SQLinfo = $SQLSchema[$realm];
+	$query = "SELECT ${SQLinfo['keycolumn']} AS id FROM ${SQLinfo['table']} WHERE ${SQLinfo['table']}.${column}=? LIMIT 2";
+	$result = usePreparedSelectBlade ($query, array ($value));
+	$rows = $result->fetchAll (PDO::FETCH_ASSOC);	
+	if (count ($rows) != 1)
+		return NULL;
+	return $rows[0]['id'];
+}
+
 ?>

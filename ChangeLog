@@ -1,6 +1,7 @@
 0.18.4
 	bugfix: a race condition could be triggered in permissions editor
 	new feature: "any mode" of user port in VLAN switch template
+	new feature: LLDP support for VRP 5.50 software
 	update: improved error handling code
 	update: fixes in 802.1Q
 0.18.3 2010-06-15

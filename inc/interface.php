@@ -6925,20 +6925,25 @@ function renderObject8021QPorts ($object_id)
 	if (!array_key_exists ($req_port_name, $desired_config))
 	{
 		echo '<td>';
-		startPortlet ('port duplicator');
-		echo '<table border=0 align=center>';
-		printOpFormIntro ('save8021QConfig', array ('mutex_rev' => $vswitch['mutex_rev'], 'form_mode' => 'duplicate'));
 		$port_options = array();
 		foreach ($desired_config as $pn => $portinfo)
 			if (editable8021QPort ($portinfo))
 				$port_options[$pn] = same8021QConfigs ($desired_config[$pn], $cached_config[$pn]) ?
 					$pn : "${pn} (*)";
-		echo '<tr><td>' . getSelect ($port_options, array ('name' => 'from_port')) . '</td></tr>';
-		echo '<tr><td>&darr; &darr; &darr;</td></tr>';
-		echo '<tr><td>' . getSelect ($port_options, array ('name' => 'to_ports[]', 'size' => getConfigVar ('MAXSELSIZE'), 'multiple' => 1)) . '</td></tr>';
-		echo '<tr><td>' . getImageHREF ('COPY', 'duplicate', TRUE) . '</td></tr>';
-		echo '</form></table>';
-		finishPortlet();
+		if (count ($port_options) < 2)
+			echo '&nbsp;';
+		else
+		{
+			startPortlet ('port duplicator');
+			echo '<table border=0 align=center>';
+			printOpFormIntro ('save8021QConfig', array ('mutex_rev' => $vswitch['mutex_rev'], 'form_mode' => 'duplicate'));
+			echo '<tr><td>' . getSelect ($port_options, array ('name' => 'from_port')) . '</td></tr>';
+			echo '<tr><td>&darr; &darr; &darr;</td></tr>';
+			echo '<tr><td>' . getSelect ($port_options, array ('name' => 'to_ports[]', 'size' => getConfigVar ('MAXSELSIZE'), 'multiple' => 1)) . '</td></tr>';
+			echo '<tr><td>' . getImageHREF ('COPY', 'duplicate', TRUE) . '</td></tr>';
+			echo '</form></table>';
+			finishPortlet();
+		}
 		echo '</td>';
 	}
 	else
@@ -6966,6 +6971,18 @@ function getAccessPortControlCode ($req_port_name, $vdom, $port_name, $port, &$n
 	)
 		return formatVLANName ($vdom['vlanlist'][$port['native']], 'label');
 
+	static $vlanpermissions = array();
+	if (!array_key_exists ($port['native'], $vlanpermissions))
+	{
+		$vlanpermissions[$port['native']] = array();
+		foreach (array_keys ($vdom['vlanlist']) as $to)
+			if
+			(
+				permitted (NULL, NULL, 'save8021QConfig', array (array ('tag' => '$fromvlan_' . $port['native']))) and
+				permitted (NULL, NULL, 'save8021QConfig', array (array ('tag' => '$tovlan_' . $to)))
+			)
+				$vlanpermissions[$port['native']][] = $to;
+	}
 	$ret = "<input type=hidden name=pn_${nports} value=${port_name}>";
 	$ret .= "<input type=hidden name=pm_${nports} value=access>";
 	$options = array();
@@ -6979,6 +6996,7 @@ function getAccessPortControlCode ($req_port_name, $vdom, $port_name, $port, &$n
 		(
 			($vlan_id != $port['native'] or $port['mode'] == 'trunk') and
 			$vlan_info['vlan_type'] != 'alien' and
+			in_array ($vlan_id, $vlanpermissions[$port['native']]) and
 			matchVLANFilter ($vlan_id, $port['wrt_vlans'])
 		)
 			$options[$vlan_id] = formatVLANName ($vlan_info, 'option');
@@ -7748,7 +7766,10 @@ function renderDiscoveredNeighbors ($object_id)
 		if
 		(
 			!array_key_exists ($local_port, $myports) or
-			NULL === $remote_id = searchByMgmtHostname ($remote['device']) or
+			(
+				NULL === $remote_id = searchByMgmtHostname ($remote['device']) and
+				NULL === $remote_id = lookupEntityByString ('object', $remote['device'])
+			) or
 			!count ($remote_port_ids = getPortIDs ($remote_id, $remote['port']))
 		)
 		{

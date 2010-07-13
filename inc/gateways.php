@@ -24,6 +24,7 @@ $gwrxlator['getlldpstatus'] = array
 (
 	'xos12' => 'xos12ReadLLDPStatus',
 	'vrp53' => 'vrp53ReadLLDPStatus',
+	'vrp55' => 'vrp55ReadLLDPStatus',
 );
 $gwrxlator['get8021q'] = array
 (
@@ -230,13 +231,18 @@ function gwSendFile ($endpoint, $handlername, $filetext = array())
 		}
 		$command .= " ${name}";
 	}
-	$outputlines = queryGateway
-	(
-		'sendfile',
-		array ($command)
-	);
-	foreach ($tmpnames as $name)
-		unlink ($name);
+	try
+	{
+		queryGateway ('sendfile', array ($command));
+		foreach ($tmpnames as $name)
+			unlink ($name);
+	}
+	catch (RTGatewayError $e)
+	{
+		foreach ($tmpnames as $name)
+			unlink ($name);
+		throw $e;
+	}
 }
 
 // Query something through a gateway and get some text in return. Return that text.
@@ -245,17 +251,19 @@ function gwRecvFile ($endpoint, $handlername, &$output)
 	global $remote_username;
 	$tmpfilename = tempnam ('', 'RackTables-sendfile-');
 	$endpoint = str_replace (' ', '\ ', $endpoint); // the gateway dispatcher uses read (1) to assign arguments
-	$outputlines = queryGateway
-	(
-		'sendfile',
-		array ("submit ${remote_username} ${endpoint} ${handlername} ${tmpfilename}")
-	);
-	$output = file_get_contents ($tmpfilename);
-	unlink ($tmpfilename);
+	try
+	{
+		queryGateway ('sendfile', array ("submit ${remote_username} ${endpoint} ${handlername} ${tmpfilename}"));
+		$output = file_get_contents ($tmpfilename);
+		unlink ($tmpfilename);
+	}
+	catch (RTGatewayError $e)
+	{
+		unlink ($tmpfilename);
+		throw $e;
+	}
 	if ($output === FALSE)
 		throw new RTGatewayError ('failed to read temporary file');
-	// Being here means having 'OK!' in the response.
-	return oneLiner (66, array ($handlername)); // ignore provided "Ok" text
 }
 
 function gwSendFileToObject ($object_id = 0, $handlername, $filetext = '')
@@ -281,7 +289,7 @@ function gwRecvFileFromObject ($object_id = 0, $handlername, &$output)
 	if (count ($endpoints) > 1)
 		return oneLiner (162); // can't pick an address
 	$endpoint = str_replace (' ', '+', $endpoints[0]);
-	return gwRecvFile ($endpoint, $handlername, $output);
+	gwRecvFile ($endpoint, $handlername, $output);
 }
 
 function detectDeviceBreed ($object_id)
@@ -339,13 +347,17 @@ function gwRetrieveDeviceConfig ($object_id, $command)
 		throw new RTGatewayError ('cannot pick management address');
 	$endpoint = str_replace (' ', '\ ', str_replace (' ', '+', $endpoints[0]));
 	$tmpfilename = tempnam ('', 'RackTables-deviceconfig-');
-	$outputlines = queryGateway
-	(
-		'deviceconfig',
-		array ("${command} ${endpoint} ${breed} ${tmpfilename}")
-	);
-	$configtext = file_get_contents ($tmpfilename);
-	unlink ($tmpfilename);
+	try
+	{
+		queryGateway ('deviceconfig', array ("${command} ${endpoint} ${breed} ${tmpfilename}"));
+		$configtext = file_get_contents ($tmpfilename);
+		unlink ($tmpfilename);
+	}
+	catch (RTGatewayError $e)
+	{
+		unlink ($tmpfilename);
+		throw $e;
+	}
 	if ($configtext === FALSE)
 		throw new RTGatewayError ('failed to read temporary file');
 	// Being here means it was alright.
@@ -369,12 +381,16 @@ function gwDeployDeviceConfig ($object_id, $breed, $text)
 		unlink ($tmpfilename);
 		throw new RTGatewayError ('failed to write to temporary file');
 	}
-	$outputlines = queryGateway
-	(
-		'deviceconfig',
-		array ("deploy ${endpoint} ${breed} ${tmpfilename}")
-	);
-	unlink ($tmpfilename);
+	try
+	{
+		queryGateway ('deviceconfig', array ("deploy ${endpoint} ${breed} ${tmpfilename}"));
+		unlink ($tmpfilename);
+	}
+	catch (RTGatewayError $e)
+	{
+		unlink ($tmpfilename);
+		throw $e;
+	}
 }
 
 // Read provided output of "show cdp neighbors detail" command and
@@ -479,6 +495,46 @@ function vrp53ReadLLDPStatus ($input)
 	return $ret;
 }
 
+function vrp55ReadLLDPStatus ($input)
+{
+	$ret = array();
+	foreach (explode ("\n", $input) as $line)
+	{
+		$matches = array();
+		switch (TRUE)
+		{
+		case preg_match ('/^(.+) has 1 neighbors:$/', $line, $matches):
+			$ret['current']['local_port'] = ios12ShortenIfName ($matches[1]);
+			break;
+		case preg_match ('/^Port ID type   :([^ ]+)/', $line, $matches):
+			$ret['current']['PortIdSubtype'] = $matches[1];
+			break;
+		case preg_match ('/^Port ID        :(.+)$/', $line, $matches):
+			$ret['current']['PortId'] = $matches[1];
+			break;
+		case preg_match ('/^System name         :(.+)$/', $line, $matches):
+			if
+			(
+				array_key_exists ('current', $ret) and
+				array_key_exists ('PortIdSubtype', $ret['current']) and
+				($ret['current']['PortIdSubtype'] == 'interfaceAlias' or $ret['current']['PortIdSubtype'] == 'interfaceName') and
+				array_key_exists ('PortId', $ret['current']) and
+				array_key_exists ('local_port', $ret['current'])
+			)
+				$ret[$ret['current']['local_port']] = array
+				(
+					'device' => $matches[1],
+					'port' => ios12ShortenIfName ($ret['current']['PortId']),
+				);
+			unset ($ret['current']);
+			break;
+		default:
+		}
+	}
+	unset ($ret['current']);
+	return $ret;
+}
+
 function vrp53ReadHNDPStatus ($input)
 {
 	$ret = array();
@@ -547,17 +603,9 @@ function ios12PickSwitchportCommand (&$work, $line)
 	if ($line[0] != ' ') // end of interface section
 	{
 		// save work, if it makes sense
-		switch (TRUE)
+		switch ($work['current']['mode'])
 		{
-		case $work['current']['ignore']:
-			$work['portdata'][$work['current']['port_name']] = array
-			(
-				'mode' => 'none',
-				'allowed' => array(),
-				'native' => 0,
-			);
-			break;
-		case 'access' == $work['current']['mode']:
+		case 'access':
 			if (!array_key_exists ('access vlan', $work['current']))
 				$work['current']['access vlan'] = 1;
 			$work['portdata'][$work['current']['port_name']] = array
@@ -567,7 +615,7 @@ function ios12PickSwitchportCommand (&$work, $line)
 				'native' => $work['current']['access vlan'],
 			);
 			break;
-		case 'trunk' == $work['current']['mode']:
+		case 'trunk':
 			if (!array_key_exists ('trunk native vlan', $work['current']))
 				$work['current']['trunk native vlan'] = 1;
 			if (!array_key_exists ('trunk allowed vlan', $work['current']))
@@ -586,6 +634,9 @@ function ios12PickSwitchportCommand (&$work, $line)
 				'native' => $effective_native,
 			);
 			break;
+		case 'SKIP':
+			break;
+		case 'IP':
 		default:
 			// dot1q-tunnel, dynamic, private-vlan or even none --
 			// show in returned config and let user decide, if they
@@ -627,9 +678,11 @@ function ios12PickSwitchportCommand (&$work, $line)
 		break;
 	case preg_match ('@^ channel-group @', $line):
 	// port-channel subinterface config follows that of the master interface
+		$work['current']['mode'] = 'SKIP';
+		break;
 	case preg_match ('@^ ip address @', $line):
 	// L3 interface does no switchport functions
-		$work['current']['ignore'] = TRUE;
+		$work['current']['mode'] = 'IP';
 		break;
 	default: // suppress warning on irrelevant config clause
 	}
