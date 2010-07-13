@@ -407,7 +407,7 @@ INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdef
 ('CDP_RUNNERS_LISTSRC', '', 'string', 'yes', 'no', 'no', 'List of devices running CDP'),
 ('LLDP_RUNNERS_LISTSRC', '', 'string', 'yes', 'no', 'no', 'List of devices running LLDP'),
 ('HNDP_RUNNERS_LISTSRC', '', 'string', 'yes', 'no', 'no', 'List of devices running HNDP (RackCode)'),
-('DB_VERSION','0.18.3','string','no','yes','no','Database version.');
+('DB_VERSION','0.18.4','string','no','yes','no','Database version.');
 
 INSERT INTO `Script` VALUES ('RackCode','allow {$userid_1}');
 
