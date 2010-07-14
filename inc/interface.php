@@ -7570,7 +7570,7 @@ function renderVSTListEditor()
 		echo '<tr>';
 		echo '<td>' . getImageHREF ('create', 'create template', TRUE, 104) . '</td>';
 		echo '<td><input type=text name=vst_descr tabindex=101></td>';
-		echo '<td>' . getImageHREF ('create', 'create domain', TRUE, 103) . '</td>';
+		echo '<td>' . getImageHREF ('create', 'create template', TRUE, 103) . '</td>';
 		echo '</tr></form>';
 	}
 	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
