@@ -7611,7 +7611,7 @@ function renderVST ($vst_id)
 	{
 		startPortlet ('rules (' . count ($vst['rules']) . ')');
 		echo '<table class=cooltable align=center border=0 cellpadding=5 cellspacing=0>';
-		echo '<tr><th>sequence</th><th>regexp</th><th>role</th><th>VLAN IDs</th><th>description</th></tr>';
+		echo '<tr><th>sequence</th><th>regexp</th><th>role</th><th>VLAN IDs</th><th>comment</th></tr>';
 		$order = 'odd';
 		foreach ($vst['rules'] as $item)
 		{
@@ -7683,7 +7683,7 @@ function renderVSTRulesEditor ($vst_id)
 	echo '<center><h1>' . niftyString ($vst['description']) . '</h1></center>';
 	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
 	echo '<tr><th>&nbsp;</th><th>sequence</th><th>regexp</th><th>role</th>';
-	echo '<th>VLAN IDs</th><th>description</th><th>&nbsp;</th></tr>';
+	echo '<th>VLAN IDs</th><th>comment</th><th>&nbsp;</th></tr>';
 	$port_role_options = array
 	(
 		'none' => 'none',
