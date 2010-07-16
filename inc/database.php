@@ -839,6 +839,7 @@ function getResidentRacksData ($object_id = 0, $fetch_rackdata = TRUE)
 
 function commitAddPort ($object_id = 0, $port_name, $port_type_id, $port_label, $port_l2address)
 {
+	// FIXME: use InvalidRequestArgException and return nothing
 	if (NULL === ($db_l2address = l2addressForDatabase ($port_l2address)))
 		return "Invalid L2 address ${port_l2address}";
 	global $dbxlink;
@@ -2278,6 +2279,7 @@ function getDatabaseVersion ()
 	$result = usePreparedSelectBlade ('SELECT varvalue FROM Config WHERE varname = "DB_VERSION" and vartype = "string"');
 	if ($result == NULL)
 	{
+		// FIXME: this code is never executed, but an exception thrown instead
 		global $dbxlink;
 		$errorInfo = $dbxlink->errorInfo();
 		if ($errorInfo[0] == '42S02') // ER_NO_SUCH_TABLE
