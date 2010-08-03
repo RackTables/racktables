@@ -7284,7 +7284,7 @@ function renderVLANIPv4 ($some_id)
 		printNewItemTR ($select_name, $plusoptions);
 	foreach ($minuslines as $item)
 	{
-		echo '<tr><td>';
+		echo '<tr class=trbusy><td>';
 		switch ($pageno)
 		{
 		case 'vlan':
