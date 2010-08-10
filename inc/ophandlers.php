@@ -655,12 +655,18 @@ function supplementAttrMap ()
 	assertUIntArg ('objtype_id');
 	$attrMap = getAttrMap();
 	if ($attrMap[$_REQUEST['attr_id']]['type'] != 'dict')
-		$chapter_id = 'NULL';
+		$chapter_id = NULL;
 	else
 	{
-		assertUIntArg ('chapter_no'); // FIXME: this doesn't fail on 0 (ticket:272)
-		if (0 == ($chapter_id = $_REQUEST['chapter_no']))
+		try
+		{
+			assertUIntArg ('chapter_no');
+		}
+		catch (InvalidRequestArgException $e)
+		{
 			return buildRedirectURL (__FUNCTION__, 'ERR1', array ('chapter not selected'));
+		}
+		$chapter_id = $_REQUEST['chapter_no'];
 	}
 	if (commitSupplementAttrMap ($_REQUEST['attr_id'], $_REQUEST['objtype_id'], $chapter_id) !== FALSE)
 		return buildRedirectURL (__FUNCTION__, 'OK');
