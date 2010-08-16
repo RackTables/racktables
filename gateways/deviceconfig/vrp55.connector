@@ -70,7 +70,6 @@ deploy)
 esac
 printf 'quit\n' >> "$SESSION"
 rc=0
-# VRP 5.50 telnet server is broken, hence -i
 nc -w 30 $ENDPOINT 23 < "$SESSION" > "$outfile" || rc=4
 rm -f "$SESSION"
 exit $rc
