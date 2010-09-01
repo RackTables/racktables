@@ -3482,10 +3482,17 @@ function getDomainVLANs ($vdom_id)
 	$result = usePreparedSelectBlade
 	(
 		'SELECT vlan_id, vlan_type, vlan_descr, ' .
-		'(SELECT COUNT(ipv4net_id) FROM VLANIPv4 WHERE domain_id = ? AND vlan_id = VD.vlan_id) AS netc, ' .
-		'(SELECT COUNT(port_name) FROM VLANSwitch AS VS INNER JOIN PortAllowedVLAN AS PAV ' .
-		'ON VS.object_id = PAV.object_id WHERE domain_id = ? AND PAV.vlan_id = VD.vlan_id GROUP BY PAV.vlan_id) AS portc ' .
+		'ifNull(NETS.C, 0) as netc, ' .
+		'ifNull(PORTS.C, 0) as portc ' .
 		'FROM VLANDescription AS VD ' .
+		'LEFT JOIN (SELECT vlan_id, COUNT(ipv4net_id) AS C FROM VLANIPv4 WHERE domain_id = ? GROUP BY domain_id, vlan_id) AS NETS USING(vlan_id) ' .
+		'LEFT JOIN ' .
+		'(   SELECT PAV.vlan_id AS vlan_id, COUNT(port_name) AS C ' .
+		'    FROM VLANSwitch AS VS ' .
+		'    INNER JOIN PortAllowedVLAN AS PAV ON VS.object_id = PAV.object_id ' .
+		'    WHERE VS.domain_id = ? ' . 
+		'    GROUP BY VS.domain_id, PAV.vlan_id ' .
+		') AS PORTS USING(vlan_id) ' .
 		'WHERE domain_id = ? ' .
 		'ORDER BY vlan_id',
 		array ($vdom_id, $vdom_id, $vdom_id)
