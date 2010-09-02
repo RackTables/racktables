@@ -1283,7 +1283,7 @@ function renderPortsForObject ($object_id)
 				'in_rack' => 'n',
 			);
 			$popup_args = 'height=700, width=400, location=no, menubar=no, '.
-				'resizable=yes, scrollbars=no, status=no, titlebar=no, toolbar=no';
+				'resizable=yes, scrollbars=yes, status=no, titlebar=no, toolbar=no';
 			echo " ondblclick='window.open(\"" . makeHrefForHelper ('portlist', $helper_args);
 			echo "\",\"findlink\",\"${popup_args}\");'";
 			// end of onclick=
