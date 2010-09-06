@@ -6118,7 +6118,7 @@ function showTabs ($pageno, $tabno)
 		elseif (!strlen ($tabclass = call_user_func ($trigger[$pageno][$tabidx])))
 			continue;
 		if ($tabidx == $tabno)
-			$tabclass = 'current'; // override any class for an an active selection
+			$tabclass = 'current'; // override any class for an active selection
 		echo "<li><a class=${tabclass}";
 		echo " href='index.php?page=${pageno}&tab=${tabidx}";
 		if (isset ($page[$pageno]['bypass']) and isset ($_REQUEST[$page[$pageno]['bypass']]))
