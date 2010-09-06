@@ -237,6 +237,9 @@ input {
 }
 input [type="text"] {
 }
+input[type=checkbox] , input[type=radio] {
+	border-style: none;
+}
 input.icon {
 	background-color : transparent;
 	border-width: 0px;
