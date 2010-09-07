@@ -3,6 +3,7 @@
 	bugfix: speed up IPv4 VLAN selector (by Boris Lytochkin)
 	bugfix: suppress inputs borders in MSIE (by Alexey Andrianov)
 	update: allow scrollbars in port selector (#361)
+	new feature: enable IMS caching of progress bars (by Alexey Andrianov)
 0.18.4 2010-07-13
 	bugfix: a race condition could be triggered in permissions editor
 	new feature: "any mode" of user port in VLAN switch template
