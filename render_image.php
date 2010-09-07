@@ -1,5 +1,23 @@
 <?php
 
+define ('CACHE_DURATION', 604800); // 7 * 24 * 3600
+if ( // 'progressbar's never change, force cache hit before loading init.php
+	isset ($_SERVER['HTTP_IF_MODIFIED_SINCE'])
+	&& $_REQUEST['img'] == 'progressbar'
+)
+{
+	$client_time = strtotime ($_SERVER['HTTP_IF_MODIFIED_SINCE']);
+	if ($client_time !== FALSE && $client_time !== -1) // readable
+	{
+		$server_time = time();
+		// not in future and not yet expired
+		if ($client_time <= $server_time && $client_time + CACHE_DURATION >= $server_time)
+		{
+			header ('Last-Modified: ' . $_SERVER['HTTP_IF_MODIFIED_SINCE'], TRUE, 304);
+			exit;
+		}
+	}
+}
 
 ob_start();
 try {
@@ -20,6 +38,9 @@ switch ($_REQUEST['img'])
 		break;
 	case 'progressbar': // no security context
 		assertUIntArg ('done', TRUE);
+		// 'progressbar's never change, make browser cache the result
+		header ('Cache-Control: private, max-age=' . CACHE_DURATION . ', pre-check=' . CACHE_DURATION);
+		header ('Last-Modified: ' . date (DATE_RFC1123, time()));
 		renderProgressBarImage ($_REQUEST['done']);
 		break;
 	case 'preview': // file security context
