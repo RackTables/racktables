@@ -369,9 +369,21 @@ foreach ($indexlayout as $row)
 
 function renderRackspace ()
 {
-	echo "<table class=objview border=0 width='100%'><tr><td class=pcleft>";
+	$found_racks = array();
+	$rows = array();
 	$cellfilter = getCellFilter();
-	renderCellFilterPortlet ($cellfilter, 'rack');
+	foreach (getRackRows() as $row_id => $row_name) {
+		$rackList = filterCellList (listCells ('rack', $row_id), $cellfilter['expression']);
+		$found_racks = array_merge($found_racks, $rackList);
+		$rows[] = array(
+			'row_id' => $row_id,
+			'row_name' => $row_name,
+			'racks' => $rackList
+		);
+	}
+	
+	echo "<table class=objview border=0 width='100%'><tr><td class=pcleft>";
+	renderCellFilterPortlet ($cellfilter, 'rack', $found_racks);
 	echo '</td><td class=pcright>';
 	echo '<table border=0 cellpadding=10 cellpadding=1>';
 	// generate thumb gallery
@@ -380,9 +392,12 @@ function renderRackspace ()
 	// Zero value effectively disables the limit.
 	$maxPerRow = getConfigVar ('RACKS_PER_ROW');
 	$order = 'odd';
-	foreach (getRackRows() as $row_id => $row_name)
+	foreach ($rows as $row)
 	{
-		$rackList = filterCellList (listCells ('rack', $row_id), $cellfilter['expression']);
+		$row_id = $row['row_id'];
+		$row_name = $row['row_name'];
+		$rackList = $row['racks'];
+		
 		if (!count ($rackList) and count ($cellfilter['expression']))
 			continue;
 		$rackListIdx = 0;
@@ -472,7 +487,7 @@ function renderRow ($row_id)
 	echo "</td></tr>\n";
 	echo "</table><br>\n";
 	finishPortlet();
-	renderCellFilterPortlet ($cellfilter, 'rack', 'row_id', $row_id);
+	renderCellFilterPortlet ($cellfilter, 'rack', $rackList, 'row_id', $row_id);
 
 	echo "</td><td class=pcright>";
 
@@ -1912,7 +1927,7 @@ function renderDepot ()
 
 	echo "</td><td class=pcright width='25%'>";
 
-	renderCellFilterPortlet ($cellfilter, 'object');
+	renderCellFilterPortlet ($cellfilter, 'object', $objects);
 	echo "</td></tr></table>\n";
 }
 
@@ -2157,7 +2172,7 @@ function renderIPv4Space ()
 	echo "</table>\n";
 	finishPortlet();
 	echo '</td><td class=pcright>';
-	renderCellFilterPortlet ($cellfilter, 'ipv4net');
+	renderCellFilterPortlet ($cellfilter, 'ipv4net', $netlist);
 	echo "</td></tr></table>\n";
 }
 
@@ -3283,7 +3298,7 @@ function renderCellList ($realm = NULL, $title = 'items', $do_amplify = FALSE)
 	echo '</table>';
 	finishPortlet();
 	echo '</td><td class=pcright>';
-	renderCellFilterPortlet ($cellfilter, $realm);
+	renderCellFilterPortlet ($cellfilter, $realm, $celllist);
 	echo "</td></tr></table>\n";
 }
 
@@ -4973,7 +4988,7 @@ function renderTagCheckbox ($inputname, $preselect, $taginfo, $refcnt_realm = ''
 		$class = 'tagbox';
 	}
 	echo "<tr><td colspan=2 class=${class} style='padding-left: " . ($level * 16) . "px;'>";
-	echo "<label><input type=checkbox name='${inputname}[]' value='${taginfo['id']}'${selected}> ";
+	echo "<label><input type=checkbox class='tag-cb' name='${inputname}[]' value='${taginfo['id']}'${selected}> ";
 	echo $taginfo['tag'];
 	if (strlen ($refcnt_realm) and isset ($taginfo['refcnt'][$refcnt_realm]))
 		echo ' <i>(' . $taginfo['refcnt'][$refcnt_realm] . ')</i>';
@@ -5050,7 +5065,7 @@ function printTagTRs ($cell, $baseurl = '')
 }
 
 // This one is going to replace the tag filter.
-function renderCellFilterPortlet ($preselect, $realm, $bypass_name = '', $bypass_value = '')
+function renderCellFilterPortlet ($preselect, $realm, $cell_list = array(), $bypass_name = '', $bypass_value = '')
 {
 	global $pageno, $tabno, $taglist, $tagtree;
 	$filterc =
@@ -5091,9 +5106,9 @@ function renderCellFilterPortlet ($preselect, $realm, $bypass_name = '', $bypass
 			$enable_reset = TRUE;
 		echo $hr;
 		$hr = $ruler;
+
 		// Show a tree of tags, pre-select according to currently requested list filter.
-		global $tagtree;
-		$objectivetags = getObjectiveTagTree ($tagtree, $realm, $preselect['tagidlist']);
+		$objectivetags = getShrinkedTagTree($cell_list, $realm, $preselect);
 		if (!count ($objectivetags))
 			echo "<tr><td colspan=2 class='tagbox sparenetwork'>(nothing is tagged yet)</td></tr>";
 		else
@@ -5102,6 +5117,9 @@ function renderCellFilterPortlet ($preselect, $realm, $bypass_name = '', $bypass
 			foreach ($objectivetags as $taginfo)
 				renderTagCheckbox ('cft', buildTagChainFromIds ($preselect['tagidlist']), $taginfo, $realm);
 		}
+		
+		if (getConfigVar('SHRINK_TAG_TREE_ON_CLICK') == 'yes')
+			echo "\n" . '<script type="text/javascript">init_cb_click();</script>' . "\n";
 	}
 	// predicates block
 	if (getConfigVar ('FILTER_SUGGEST_PREDICATES') == 'yes' or count ($preselect['pnamelist']))

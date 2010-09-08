@@ -746,6 +746,10 @@ CREATE TABLE `VLANValidID` (
 			$query[] = "ALTER TABLE VLANSTRule MODIFY port_role enum('access','trunk','anymode','uplink','downlink','none') NOT NULL default 'none'";
 			$query[] = "UPDATE Config SET varvalue = '0.18.4' WHERE varname = 'DB_VERSION'";
 			break;
+		case '0.18.5':
+			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdefined, description) VALUES ('SHRINK_TAG_TREE_ON_CLICK','yes','string','no','no','yes','Dynamically hide useless tags in tagtree')";
+			$query[] = "UPDATE Config SET varvalue = '0.18.5' WHERE varname = 'DB_VERSION'";
+			break;
 		default:
 			showFailure ("executeUpgradeBatch () failed, because batch '${batchid}' isn't defined", __FILE__);
 			die;

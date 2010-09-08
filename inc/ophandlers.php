@@ -1067,6 +1067,7 @@ function resetUIConfig()
 	setConfigVar ('CDP_RUNNERS_LISTSRC', '');
 	setConfigVar ('LLDP_RUNNERS_LISTSRC', '');
 	setConfigVar ('HNDP_RUNNERS_LISTSRC', '');
+	setConfigVar ('SHRINK_TAG_TREE_ON_CLICK', 'yes');
 	return buildRedirectURL (__FUNCTION__, 'OK');
 }
 
