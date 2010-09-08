@@ -1223,6 +1223,57 @@ function getObjectiveTagTree ($tree, $realm, $preselect)
 	return $ret;
 }
 
+// Preprocess tag tree to get only tags which can effectively reduce given filter result,
+// than passes shrinked tag tree to getObjectiveTagTree and return its result.
+// This makes sense only if andor mode is 'and', otherwhise function does not modify tree.
+// 'Given filter' is a pair of $entity_list(filter result) and $preselect(filter data).
+// 'Effectively' means reduce to non-empty result.
+function getShrinkedTagTree($entity_list, $realm, $preselect) {
+	global $tagtree;
+	if ($preselect['andor'] != 'and' || empty($entity_list))
+		return getObjectiveTagTree($tagtree, $realm, $preselect['tagidlist']);
+	
+	$used_tags = array(); //associative, keys - tag ids, values - taginfos
+	foreach ($entity_list as $entity)
+	{
+		foreach ($entity['etags'] as $etag)
+			if (! array_key_exists($etag['id'], $used_tags))
+				$used_tags[$etag['id']] = 1;
+			else
+				$used_tags[$etag['id']]++;
+	
+		foreach ($entity['itags'] as $itag)
+			if (! array_key_exists($itag['id'], $used_tags))
+				$used_tags[$itag['id']] = 0;
+	}
+	
+	$shrinked_tree = shrinkSubtree($tagtree, $used_tags, $preselect, $realm);
+	return getObjectiveTagTree($shrinked_tree, $realm, $preselect['tagidlist']);
+}
+
+// deletes item from tag subtree unless it exists in $used_tags and not preselected
+function shrinkSubtree($tree, $used_tags, $preselect, $realm) {
+	$self = __FUNCTION__;
+	
+	foreach($tree as $i => &$item) {
+		$item['kids'] = $self($item['kids'], $used_tags, $preselect, $realm);
+		$item['kidc'] = count($item['kids']);
+		if
+		(
+			! array_key_exists($item['id'], $used_tags) && 
+			! in_array($item['id'], $preselect['tagidlist']) &&
+			! $item['kidc']
+		)
+			unset($tree[$i]);
+		else {
+			$item['refcnt'][$realm] = $used_tags[$item['id']];
+			if (! $item['refcnt'][$realm])
+				unset($item['refcnt'][$realm]);
+		}
+	}
+	return $tree;
+}
+
 // Get taginfo record by tag name, return NULL, if record doesn't exist.
 function getTagByName ($target_name)
 {

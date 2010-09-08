@@ -62,3 +62,22 @@ function checkColumnOfRadios (prefix, numRows, suffix)
 		document.getElementById(elemId).checked = true;
 	}
 }
+
+// called from interface.php:renderCellFilterPortlet() if SHRINK_TAG_TREE_ON_CLICK is set
+function init_cb_click() {
+	$(document).ready(function () {
+		$('.tag-cb , input[name=andor]').click(function (event) {
+			var or_check = $('input[name=andor][value=or]')[0];
+			if
+			(
+				event.target.type == 'checkbox' &&
+				or_check.checked
+				|| event.target.type == 'radio' &&
+				$('.tag-cb:checked').size() == 0
+			)
+				return;
+			
+			$(event.target).closest('form')[0].submit();
+		});
+	});
+}
