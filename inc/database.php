@@ -3303,6 +3303,10 @@ function touchLDAPCacheRecord ($form_username)
 
 function replaceLDAPCacheRecord ($form_username, $password_hash, $dname, $memberof)
 {
+	// FIXME: This sequence is able to trigger a deadlock, namely, when executed
+	// in parallel from multiple working copies of the same user, which for some
+	// reason has no valid record in LDAPCache. Perhaps, using REPLACE INTO can
+	// lower the chances of this.
 	deleteLDAPCacheRecord ($form_username);
 	usePreparedInsertBlade ('LDAPCache',
 		array

@@ -2,6 +2,7 @@
 	bugfix: attribute map editor was broken (#353)
 	bugfix: speed up IPv4 VLAN selector (by Boris Lytochkin)
 	bugfix: suppress inputs borders in MSIE (by Alexey Andrianov)
+	bugfix: handle locking failure in LDAP caching code
 	update: allow scrollbars in port selector (#361)
 	new feature: enable IMS caching of progress bars (by Alexey Andrianov)
 	new feature: rebuild tag filter as soon as user changes it (by Alexey Andrianov)
