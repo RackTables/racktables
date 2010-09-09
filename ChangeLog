@@ -3,6 +3,7 @@
 	bugfix: speed up IPv4 VLAN selector (by Boris Lytochkin)
 	bugfix: suppress inputs borders in MSIE (by Alexey Andrianov)
 	bugfix: handle locking failure in LDAP caching code
+	bugfix: enable deletion of initialized 802.1Q switch
 	update: allow scrollbars in port selector (#361)
 	new feature: enable IMS caching of progress bars (by Alexey Andrianov)
 	new feature: rebuild tag filter as soon as user changes it (by Alexey Andrianov)
