@@ -1627,6 +1627,9 @@ function taginfoCmp ($tagA, $tagB)
 // equal to, or greater than the second." (c) PHP manual
 function IPv4NetworkCmp ($netA, $netB)
 {
+	// On 64-bit systems this function can be reduced to just this:
+	if (PHP_INT_SIZE == 8)
+		return $netA['ip_bin'] - $netB['ip_bin'];
 	// There's a problem just substracting one u32 integer from another,
 	// because the result may happen big enough to become a negative i32
 	// integer itself (PHP tries to cast everything it sees to signed int)
