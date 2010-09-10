@@ -6337,7 +6337,7 @@ function dynamic_title_decoder ($path_position)
 			throw new EntityNotFoundException ('VLAN domain', $vdom_id);
 		return array
 		(
-			'name' => niftyString ("domain '" . $vdlist[$vdom_id] . "'"),
+			'name' => niftyString ("domain '" . $vdlist[$vdom_id] . "'", 20, FALSE),
 			'params' => array ('vdom_id' => $vdom_id)
 		);
 	case 'vlan':

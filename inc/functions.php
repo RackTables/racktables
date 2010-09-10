@@ -2392,7 +2392,7 @@ function formatVLANName ($vlaninfo, $context = 'markup long')
 	case 'plain long':
 		$ret = 'VLAN' . $vlaninfo['vlan_id'];
 		if ($vlaninfo['vlan_descr'] != '')
-			$ret .= ' (' . niftyString ($vlaninfo['vlan_descr']) . ')';
+			$ret .= ' (' . niftyString ($vlaninfo['vlan_descr'], 20, FALSE) . ')';
 		return $ret;
 	case 'markup long':
 	default:
@@ -3462,7 +3462,7 @@ function sortPortList ($plist)
 // This is a dual-purpose formating function:
 // 1. Replace empty strings with nbsp.
 // 2. Cut strings, which are too long, append "cut here" indicator and provide a mouse hint.
-function niftyString ($string, $maxlen = 30)
+function niftyString ($string, $maxlen = 30, $usetags = TRUE)
 {
 	$cutind = '&hellip;'; // length is 1
 	if (!mb_strlen ($string))
@@ -3471,8 +3471,11 @@ function niftyString ($string, $maxlen = 30)
 	$string = preg_replace ("/\t/", ' ', $string);
 	if (!$maxlen or mb_strlen ($string) <= $maxlen)
 		return htmlspecialchars ($string, ENT_QUOTES, 'UTF-8');
-	return "<span title='" . htmlspecialchars ($string, ENT_QUOTES, 'UTF-8') . "'>" .
-		str_replace (' ', '&nbsp;', htmlspecialchars (mb_substr ($string, 0, $maxlen - 1), ENT_QUOTES, 'UTF-8')) . $cutind . '</span>';
+	return
+		($usetags ? ("<span title='" . htmlspecialchars ($string, ENT_QUOTES, 'UTF-8') . "'>") : '') .
+		str_replace (' ', '&nbsp;', htmlspecialchars (mb_substr ($string, 0, $maxlen - 1), ENT_QUOTES, 'UTF-8')) .
+		$cutind .
+		($usetags ? '</span>' : '');
 }
 
 // return a "?, ?, ?, ... ?, ?" string consisting of N question marks
