@@ -5933,12 +5933,25 @@ function renderCell ($cell)
 		echo "<table class='slbcell vscell'><tr><td rowspan=3 width='5%'>";
 		printImageHREF ('NET');
 		echo '</td>';
-		echo "<td><a href='index.php?page=ipv4net&id=${cell['id']}'>${cell['ip']}/${cell['mask']}</a></td></tr>";
+		echo "<td><a href='index.php?page=ipv4net&id=${cell['id']}'>${cell['ip']}/${cell['mask']}</a>";
+		if (getConfigVar ('IPV4_TREE_SHOW_USAGE') == 'yes')
+		{
+			countOwnIPv4Addresses ($cell);
+			loadOwnIPv4Addresses ($cell);
+			$used = $cell['addrc'];
+			$maxdirect = $cell['addrt'];
+			echo '<div class="net-usage">';
+			echo "<small>$used/$maxdirect</small> ";
+			renderProgressBar ($maxdirect ? $used/$maxdirect : 0);
+			echo '</div>';
+		}
+		echo '</td></tr>';
+
 		if (strlen ($cell['name']))
 			echo "<tr><td><strong>" . niftyString ($cell['name']) . "</strong></td></tr>";
 		else
 			echo "<tr><td class=sparenetwork>no name</td></tr>";
-		echo '<td>';
+		echo '<tr><td>';
 		echo count ($cell['etags']) ? ("<small>" . serializeTags ($cell['etags']) . "</small>") : '&nbsp;';
 		echo "</td></tr></table>";
 		break;

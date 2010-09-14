@@ -515,3 +515,8 @@ div.tagselector td {
 .rsvtext {
 	font-style: italic;
 }
+
+.net-usage {
+		float: right;
+		margin-left: 15px;
+}
