@@ -3007,6 +3007,12 @@ function renderSearchResults ()
 			$lasthit = 'rack';
 			$summary['rack'] = $tmp;
 		}
+		if (count ($tmp = getVLANSearchResult ($terms)))
+		{
+			$nhits += count ($tmp);
+			$lasthit = 'vlan';
+			$summary['vlan'] = $tmp;
+		}
 	}
 	if ($nhits == 0)
 		echo "<center><h2>Nothing found for '${terms}'</h2></center>";
@@ -3055,6 +3061,9 @@ function renderSearchResults ()
 				break;
 			case 'rack':
 				echo "<script language='Javascript'>document.location='index.php?page=rack&rack_id=${record['id']}';//</script>";
+				break;
+			case 'vlan':
+				echo "<script language='Javascript'>document.location='index.php?page=vlan&vlan_ck=${record}';//</script>";
 				break;
 		}
 		return;
@@ -3228,6 +3237,18 @@ function renderSearchResults ()
 						echo "<tr class=row_${order}><td class=tdleft>";
 						renderCell ($cell);
 						echo "</td></tr>";
+						$order = $nextorder[$order];
+					}
+					echo '</table>';
+					finishPortlet();
+					break;
+				case 'vlan':
+					startPortlet ("<a href='index.php?page=8021q'>VLANs</a>");
+					echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
+					foreach ($what as $vlan_ck)
+					{
+						echo "<tr class=row_${order}><td class=tdleft>";
+						echo formatVLANName (getVLANInfo ($vlan_ck), 'hyperlink') . "</td></tr>";
 						$order = $nextorder[$order];
 					}
 					echo '</table>';

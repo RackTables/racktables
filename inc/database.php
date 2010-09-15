@@ -1434,6 +1434,40 @@ function getRackSearchResult ($terms)
 	return $ret;
 }
 
+function getVLANSearchResult ($terms)
+{
+	$ret = array();
+	$matches = array();
+	if (preg_match ('/^vlan([[:digit:]]+)$/i', $terms, $matches))
+	{
+		$byID = getSearchResultByField
+		(
+			'VLANDescription',
+			array ('domain_id', 'vlan_id'),
+			'vlan_id',
+			$matches[1],
+			'domain_id',
+			1
+		);
+		foreach ($byID as $row)
+			$ret[] = $row['domain_id'] . '-' . $row['vlan_id'];
+	}
+	$byDescr = getSearchResultByField
+	(
+		'VLANDescription',
+		array ('domain_id', 'vlan_id'),
+		'vlan_descr',
+		$terms
+	);
+	foreach ($byDescr as $row)
+	{
+		$vlan_ck = $row['domain_id'] . '-' . $row['vlan_id'];
+		if (!in_array ($vlan_ck, $ret))
+			$ret[] = $vlan_ck;
+	}
+	return $ret;
+}
+
 function getSearchResultByField ($tname, $rcolumns, $scolumn, $terms, $ocolumn = '', $exactness = 0)
 {
 	$pfx = '';

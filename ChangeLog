@@ -6,6 +6,7 @@
 	bugfix: enable deletion of initialized 802.1Q switch
 	update: allow scrollbars in port selector (#361)
 	update: make IPv4 utilization bar a standard element (by Alexey Andrianov)
+	update: make 802.1Q VLANs searchable
 	new feature: enable IMS caching of progress bars (by Alexey Andrianov)
 	new feature: rebuild tag filter as soon as user changes it (by Alexey Andrianov)
 0.18.4 2010-07-13
