@@ -3452,7 +3452,7 @@ function renderRackPage ($rack_id)
 	echo '</td>';
 
 	// Right column with rendered rack.
-	echo '<td>';
+	echo '<td class=pcright>';
 	startPortlet ('Rack diagram');
 	renderRack ($rack_id);
 	finishPortlet();

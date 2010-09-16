@@ -4,6 +4,7 @@
 	bugfix: suppress inputs borders in MSIE (by Alexey Andrianov)
 	bugfix: handle locking failure in LDAP caching code
 	bugfix: enable deletion of initialized 802.1Q switch
+	bugfix: justify table alignment in rack view (#367)
 	update: allow scrollbars in port selector (#361)
 	update: make IPv4 utilization bar a standard element (by Alexey Andrianov)
 	update: make 802.1Q VLANs searchable
