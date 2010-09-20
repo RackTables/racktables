@@ -1058,6 +1058,11 @@ function doSwitchSNMPmining ($objectInfo, $hostname, $community)
 		foreach ($known_switches[$sysObjectID]['processors'] as $processor_name)
 		{
 			$newname = preg_replace ($iftable_processors[$processor_name]['pattern'], $iftable_processors[$processor_name]['replacement'], $iface['ifDescr'], 1, $count);
+			if ($newname === NULL)
+			{
+				$log = mergeLogs ($log, oneLiner (100, array ('PCRE pattern error, terminating')));
+				break 2;
+			}
 			if (!$count)
 				continue; // try next processor on current port
 			$newlabel = preg_replace ($iftable_processors[$processor_name]['pattern'], $iftable_processors[$processor_name]['label'], $iface['ifDescr'], 1, $count);
