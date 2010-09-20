@@ -806,6 +806,16 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 	),
 );
 
+$swtype_pcre = array
+(
+	'/Huawei Versatile Routing Platform Software.+VRP.+Software, Version 5.30 /s' => 1360,
+	'/Huawei Versatile Routing Platform Software.+VRP.+Software, Version 5.50 /s' => 1361,
+	// FIXME: get sysDescr for IronWare 5 and add a pattern
+	'/^Brocade Communications Systems.+, IronWare Version 07\./' => 1364,
+	'/^Juniper Networks,.+JUNOS 9\./' => 1366,
+	'/^Juniper Networks,.+JUNOS 10\./' => 1367,
+);
+
 function updateStickerForCell ($cell, $attr_id, $new_value)
 {
 	if (!strlen ($cell['attrs'][$attr_id]['value']) && strlen ($new_value))
@@ -939,39 +949,20 @@ function doSwitchSNMPmining ($objectInfo, $hostname, $community)
 		$log = mergeLogs ($log, oneLiner (81, array ('netgear-generic')));
 		break;
 	case preg_match ('/^2011\.2\.23\./', $sysObjectID): // Huawei
-		$swtype_pcre = array
-		(
-			'/Huawei Versatile Routing Platform Software.+VRP.+Software, Version 5.30 /s' => 1360,
-			'/Huawei Versatile Routing Platform Software.+VRP.+Software, Version 5.50 /s' => 1361,
-		);
-		foreach ($swtype_pcre as $pattern => $dict_key)
-			if (preg_match ($pattern, $sysDescr))
-			{
-				updateStickerForCell ($objectInfo, 4, $dict_key);
-				break;
-			}
+		detectSoftwareType ($objectInfo, $sysDescr);
 		checkPIC ('1-681');
 		commitAddPort ($objectInfo['id'], 'con0', '1-681', 'console', ''); // DB-9 RS-232 console
 		$log = mergeLogs ($log, oneLiner (81, array ('huawei-generic')));
 		break;
 	case preg_match ('/^2636\.1\.1\.1\.2\./', $sysObjectID): // Juniper
+		detectSoftwareType ($objectInfo, $sysDescr);
 		checkPIC ('1-681');
 		commitAddPort ($objectInfo['id'], 'console', '1-681', 'console', ''); // DB-9 RS-232 console
 		$log = mergeLogs ($log, oneLiner (81, array ('juniper-generic')));
 		break;
 	case preg_match ('/^1991\.1\.3\.45\./', $sysObjectID): // snFGSFamily
 	case preg_match ('/^1991\.1\.3\.54\.2\.4\.1\.1$/', $sysObjectID): // FCX 648
-		$swtype_pcre = array
-		(
-			// FIXME: get sysDescr for IronWare 5 and add a pattern
-			'/^Brocade Communications Systems.+, IronWare Version 07\./' => 1364,
-		);
-		foreach ($swtype_pcre as $pattern => $dict_key)
-			if (preg_match ($pattern, $sysDescr))
-			{
-				updateStickerForCell ($objectInfo, 4, $dict_key);
-				break;
-			}
+		detectSoftwareType ($objectInfo, $sysDescr);
 		$exact_release = preg_replace ('/^.*, IronWare Version ([^ ]+) .*$/', '\\1', $sysDescr);
 		updateStickerForCell ($objectInfo, 5, $exact_release);
 		# FOUNDRY-SN-AGENT-MIB::snChasSerNum.0
@@ -1289,4 +1280,14 @@ function generatePortsForCatModule ($object_id, $slotno = 1, $mtype = 'X6748', $
 	}
 }
 
+function detectSoftwareType ($objectInfo, $sysDescr)
+{
+	global $swtype_pcre;
+	foreach ($swtype_pcre as $pattern => $dict_key)
+		if (preg_match ($pattern, $sysDescr))
+		{
+			updateStickerForCell ($objectInfo, 4, $dict_key);
+			return;
+		}
+}
 ?>
