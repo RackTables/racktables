@@ -317,6 +317,24 @@ $iftable_processors['juniper-DPCE-R-4XGE-XFP'] = array
 	'try_next_proc' => FALSE,
 );
 
+$iftable_processors['juniper-ex-pic0-1000T'] = array
+(
+	'pattern' => '@^ge-([[:digit:]]+)/0/([[:digit:]]+)$@',
+	'replacement' => '\\0',
+	'dict_key' => '1-24',
+	'label' => 'unit \\1 port \\2',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['juniper-ex-mgmt'] = array
+(
+	'pattern' => '/^me0$/',
+	'replacement' => 'me0',
+	'dict_key' => '1-24',
+	'label' => 'MGMT',
+	'try_next_proc' => FALSE,
+);
+
 $iftable_processors['quidway-21-to-24-comboT'] = array
 (
 	'pattern' => '@^GigabitEthernet([[:digit:]]+/[[:digit:]]+/)(21|22|23|24)$@',
@@ -749,6 +767,19 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'MX240 modular router',
 		'processors' => array ('juniper-DPCE-R-4XGE-XFP'),
 	),
+	// Juniper Networks assigns single SNMP OID per series:
+	// EX2200 2636.1.1.1.1.43
+	// EX3200 2636.1.1.1.2.30
+	// EX4200 2636.1.1.1.2.31
+	// EX4500 2636.1.1.1.1.44
+	// There is a special workaround in code below to derive specific
+	// product number from sysDescr string.
+	'2636.1.1.1.2.31' => array
+	(
+		'dict_key' => 905,
+		'text' => 'Juniper EX4200 series',
+		'processors' => array ('juniper-ex-pic0-1000T', 'juniper-ex-mgmt'),
+	),
 	'2011.2.23.96' => array
 	(
 		'dict_key' => 1321,
@@ -953,6 +984,15 @@ function doSwitchSNMPmining ($objectInfo, $hostname, $community)
 		checkPIC ('1-681');
 		commitAddPort ($objectInfo['id'], 'con0', '1-681', 'console', ''); // DB-9 RS-232 console
 		$log = mergeLogs ($log, oneLiner (81, array ('huawei-generic')));
+		break;
+	case '2636.1.1.1.2.31' == $sysObjectID: // Juniper EX4200
+		detectSoftwareType ($objectInfo, $sysDescr);
+		checkPIC ('1-29');
+		commitAddPort ($objectInfo['id'], 'con', '1-29', 'CON', ''); // RJ-45 RS-232 console
+		// EX4200-24T is already in DB
+		if (preg_match ('/^Juniper Networks, Inc. ex4200-48t internet router/', $sysDescr))
+			updateStickerForCell ($objectInfo, 2, 907);
+		$log = mergeLogs ($log, oneLiner (81, array ('juniper-ex')));
 		break;
 	case preg_match ('/^2636\.1\.1\.1\.2\./', $sysObjectID): // Juniper
 		detectSoftwareType ($objectInfo, $sysDescr);
