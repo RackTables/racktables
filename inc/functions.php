@@ -1230,7 +1230,7 @@ function getObjectiveTagTree ($tree, $realm, $preselect)
 // 'Effectively' means reduce to non-empty result.
 function getShrinkedTagTree($entity_list, $realm, $preselect) {
 	global $tagtree;
-	if ($preselect['andor'] != 'and' || empty($entity_list))
+	if ($preselect['andor'] != 'and' || empty($entity_list) && $preselect['is_empty'])
 		return getObjectiveTagTree($tagtree, $realm, $preselect['tagidlist']);
 	
 	$used_tags = array(); //associative, keys - tag ids, values - taginfos
@@ -1308,9 +1308,11 @@ function getCellFilter ()
 		$_REQUEST['cft'] = $_REQUEST['tagfilter'];
 		unset ($_REQUEST['tagfilter']);
 	}
+	$andor_used = FALSE;
 	//if the page is submitted we get an andor value so we know they are trying to start a new filter or clearing the existing one.
 	if(isset($_REQUEST['andor']))
 	{
+		$andor_used = TRUE;
 		unset($_SESSION[$pageno]);
 	}
 	if (isset ($_SESSION[$pageno]['tagfilter']) and is_array ($_SESSION[$pageno]['tagfilter']) and !(isset($_REQUEST['cft'])) and $staticFilter == 'yes')
@@ -1337,6 +1339,7 @@ function getCellFilter ()
 		'extratext' => '',
 		'expression' => array(),
 		'urlextra' => '', // Just put text here and let makeHref call urlencode().
+		'is_empty' => TRUE,
 	);
 	switch (TRUE)
 	{
@@ -1347,7 +1350,6 @@ function getCellFilter ()
 	case ($_REQUEST['andor'] == 'or'):
 		$_SESSION[$pageno]['andor'] = $_REQUEST['andor'];
 		$ret['andor'] = $andor2 = $_REQUEST['andor'];
-		$ret['urlextra'] .= '&andor=' . $ret['andor'];
 		break;
 	default:
 		showWarning ('Invalid and/or switch value in submitted form', __FUNCTION__);
@@ -1365,6 +1367,7 @@ function getCellFilter ()
 			{
 				$ret['tagidlist'][] = $req_id;
 				$ret['tnamelist'][] = $taglist[$req_id]['tag'];
+				$andor_used = $andor_used || (trim($andor1) != '');
 				$ret['text'] .= $andor1 . '{' . $taglist[$req_id]['tag'] . '}';
 				$andor1 = ' ' . $andor2 . ' ';
 				$ret['urlextra'] .= '&cft[]=' . $req_id;
@@ -1377,6 +1380,7 @@ function getCellFilter ()
 			if (isset ($pTable[$req_name]))
 			{
 				$ret['pnamelist'][] = $req_name;
+				$andor_used = $andor_used || (trim($andor1) != '');
 				$ret['text'] .= $andor1 . '[' . $req_name . ']';
 				$andor1 = ' ' . $andor2 . ' ';
 				$ret['urlextra'] .= '&cfp[]=' . $req_name;
@@ -1399,9 +1403,11 @@ function getCellFilter ()
 		$finaltext[] = '(' . $ret['text'] . ')';
 	if (strlen ($ret['extratext']))
 		$finaltext[] = '(' . $ret['extratext'] . ')';
+	$andor_used = $andor_used || (count($finaltext) > 1);
 	$finaltext = implode (' ' . $andor2 . ' ', $finaltext);
 	if (strlen ($finaltext))
 	{
+		$ret['is_empty'] = FALSE;
 		$parse = spotPayload ($finaltext, 'SYNT_EXPR');
 		$ret['expression'] = $parse['result'] == 'ACK' ? $parse['load'] : NULL;
 		// It's not quite fair enough to put the blame of the whole text onto
@@ -1410,6 +1416,10 @@ function getCellFilter ()
 		if (strlen ($ret['extratext']))
 			$ret['extraclass'] = $parse['result'] == 'ACK' ? 'validation-success' : 'validation-error';
 	}
+	if (! $andor_used)
+		$ret['andor'] = getConfigVar ('FILTER_DEFAULT_ANDOR');
+	else
+		$ret['urlextra'] .= '&andor=' . $ret['andor'];
 	return $ret;
 }
 
