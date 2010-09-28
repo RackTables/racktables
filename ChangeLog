@@ -11,6 +11,7 @@
 	update: another round of SNMP enhancements
 	new feature: enable IMS caching of progress bars (by Alexey Andrianov)
 	new feature: rebuild tag filter as soon as user changes it (by Alexey Andrianov)
+	new feature: default SLB configuration lines stored in DB (by Alexey Andrianov)
 0.18.4 2010-07-13
 	bugfix: a race condition could be triggered in permissions editor
 	new feature: "any mode" of user port in VLAN switch template

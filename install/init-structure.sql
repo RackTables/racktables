@@ -132,6 +132,7 @@ CREATE TABLE `IPv4LB` (
   `object_id` int(10) unsigned default NULL,
   `rspool_id` int(10) unsigned default NULL,
   `vs_id` int(10) unsigned default NULL,
+  `prio` int(10) unsigned default NULL,
   `vsconfig` text,
   `rsconfig` text,
   UNIQUE KEY `LB-VS` (`object_id`,`vs_id`),

@@ -1222,6 +1222,20 @@ function deleteVService ()
 		return buildRedirectURL (__FUNCTION__, 'OK');
 }
 
+$msgcode['updateSLBDefConfig']['OK'] = 43;
+$msgcode['updateSLBDefConfig']['ERR'] = 109;
+function updateSLBDefConfig ()
+{
+	$data = array(
+		'vs' => $_REQUEST['vsconfig'],
+		'rs' => $_REQUEST['rsconfig']
+	);
+	if (!commitUpdateSLBDefConf ($data))
+		return buildRedirectURL (__FUNCTION__, 'ERR');
+	else
+		return buildRedirectURL (__FUNCTION__, 'OK');
+}
+
 $msgcode['updateRealServer']['OK'] = 36;
 $msgcode['updateRealServer']['ERR'] = 133;
 function updateRealServer ()
@@ -1250,12 +1264,16 @@ function updateLoadBalancer ()
 	assertUIntArg ('vs_id');
 	assertStringArg ('vsconfig', TRUE);
 	assertStringArg ('rsconfig', TRUE);
+	if (! empty($_REQUEST['prio']))
+		assertUIntArg('prio', TRUE);
+
 	if (FALSE === commitUpdateLB (
 		$_REQUEST['object_id'],
 		$_REQUEST['pool_id'],
 		$_REQUEST['vs_id'],
 		$_REQUEST['vsconfig'],
-		$_REQUEST['rsconfig']
+		$_REQUEST['rsconfig'],
+		$_REQUEST['prio']
 	))
 		return buildRedirectURL (__FUNCTION__, 'ERR');
 	else
@@ -1296,12 +1314,16 @@ function addLoadBalancer ()
 	assertUIntArg ('vs_id');
 	assertStringArg ('vsconfig', TRUE);
 	assertStringArg ('rsconfig', TRUE);
+	if (! empty($_REQUEST['prio']))
+		assertUIntArg('prio', TRUE);
+
 	if (!addLBtoRSPool (
 		$_REQUEST['pool_id'],
 		$_REQUEST['object_id'],
 		$_REQUEST['vs_id'],
 		$_REQUEST['vsconfig'],
-		$_REQUEST['rsconfig']
+		$_REQUEST['rsconfig'],
+		$_REQUEST['prio']
 	))
 		return buildRedirectURL (__FUNCTION__, 'ERR');
 	else
@@ -1347,7 +1369,14 @@ function updateRSPool ()
 	assertStringArg ('name', TRUE);
 	assertStringArg ('vsconfig', TRUE);
 	assertStringArg ('rsconfig', TRUE);
-	if (FALSE === commitUpdateRSPool ($_REQUEST['pool_id'], $_REQUEST['name'], $_REQUEST['vsconfig'], $_REQUEST['rsconfig']))
+	if (FALSE === commitUpdateRSPool
+		(
+			$_REQUEST['pool_id'],
+			$_REQUEST['name'],
+			$_REQUEST['vsconfig'],
+			$_REQUEST['rsconfig']
+		)
+	)
 		return buildRedirectURL (__FUNCTION__, 'ERR');
 	else
 		return buildRedirectURL (__FUNCTION__, 'OK');

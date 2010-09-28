@@ -409,7 +409,7 @@ function amplifyCell (&$record, $dummy = NULL)
 		break;
 	case 'ipv4rspool':
 		$record['lblist'] = array();
-		$query = "select object_id, vs_id, lb.vsconfig, lb.rsconfig from " .
+		$query = "select object_id, vs_id, lb.vsconfig, lb.rsconfig, lb.prio from " .
 			"IPv4LB as lb inner join IPv4VS as vs on lb.vs_id = vs.id " .
 			"where rspool_id = ? order by object_id, vip, vport";
 		$result = usePreparedSelectBlade ($query, array ($record['id']));
@@ -418,6 +418,7 @@ function amplifyCell (&$record, $dummy = NULL)
 			(
 				'rsconfig' => $row['rsconfig'],
 				'vsconfig' => $row['vsconfig'],
+				'prio' => $row['prio'],
 			);
 		unset ($result);
 		$record['rslist'] = array();
@@ -440,7 +441,7 @@ function amplifyCell (&$record, $dummy = NULL)
 		// will be returned as well.
 		$record['rspool'] = array();
 		$query = "select pool.id, name, pool.vsconfig, pool.rsconfig, object_id, " .
-			"lb.vsconfig as lb_vsconfig, lb.rsconfig as lb_rsconfig from " .
+			"lb.vsconfig as lb_vsconfig, lb.rsconfig as lb_rsconfig, lb.prio from " .
 			"IPv4RSPool as pool left join IPv4LB as lb on pool.id = lb.rspool_id " .
 			"where vs_id = ? order by pool.name, object_id";
 		$result = usePreparedSelectBlade ($query, array ($record['id']));
@@ -460,6 +461,7 @@ function amplifyCell (&$record, $dummy = NULL)
 			(
 				'vsconfig' => $row['lb_vsconfig'],
 				'rsconfig' => $row['lb_rsconfig'],
+				'prio' => $row['prio'],
 			);
 		}
 		unset ($result);
@@ -2459,15 +2461,16 @@ function commitUpdateRS ($rsid = 0, $rsip = '', $rsport = 0, $rsconfig = '')
 	);
 }
 
-function commitUpdateLB ($object_id = 0, $pool_id = 0, $vs_id = 0, $vsconfig = '', $rsconfig = '')
+function commitUpdateLB ($object_id = 0, $pool_id = 0, $vs_id = 0, $vsconfig = '', $rsconfig = '', $prio = '')
 {
 	return usePreparedExecuteBlade
 	(
-		'UPDATE IPv4LB SET vsconfig=?, rsconfig=? WHERE object_id=? AND rspool_id=? AND vs_id=?',
+		'UPDATE IPv4LB SET vsconfig=?, rsconfig=?, prio=? WHERE object_id=? AND rspool_id=? AND vs_id=?',
 		array
 		(
 			!strlen ($vsconfig) ? NULL : $vsconfig,
 			!strlen ($rsconfig) ? NULL : $rsconfig,
+			!strlen ($prio) ? NULL : $prio,
 			$object_id,
 			$pool_id,
 			$vs_id,
@@ -2530,7 +2533,7 @@ function getRSPoolsForObject ($object_id = 0)
 	$result = usePreparedSelectBlade
 	(
 		'select vs_id, inet_ntoa(vip) as vip, vport, proto, vs.name, pool.id as pool_id, ' .
-		'pool.name as pool_name, count(rsip) as rscount, lb.vsconfig, lb.rsconfig from ' .
+		'pool.name as pool_name, count(rsip) as rscount, lb.vsconfig, lb.rsconfig, lb.prio from ' .
 		'IPv4LB as lb inner join IPv4RSPool as pool on lb.rspool_id = pool.id ' .
 		'inner join IPv4VS as vs on lb.vs_id = vs.id ' .
 		'left join IPv4RS as rs on lb.rspool_id = rs.rspool_id ' .
@@ -2540,7 +2543,7 @@ function getRSPoolsForObject ($object_id = 0)
 	);
 	$ret = array ();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-		foreach (array ('vip', 'vport', 'proto', 'name', 'pool_id', 'pool_name', 'rscount', 'vsconfig', 'rsconfig') as $cname)
+		foreach (array ('vip', 'vport', 'proto', 'name', 'pool_id', 'pool_name', 'rscount', 'vsconfig', 'rsconfig', 'prio') as $cname)
 			$ret[$row['vs_id']][$cname] = $row[$cname];
 	return $ret;
 }
@@ -2623,7 +2626,7 @@ function getSLBConfig ($object_id)
 	(
 		'select vs_id, inet_ntoa(vip) as vip, vport, proto, vs.name as vs_name, ' .
 		'vs.vsconfig as vs_vsconfig, vs.rsconfig as vs_rsconfig, ' .
-		'lb.vsconfig as lb_vsconfig, lb.rsconfig as lb_rsconfig, pool.id as pool_id, pool.name as pool_name, ' .
+		'lb.vsconfig as lb_vsconfig, lb.rsconfig as lb_rsconfig, lb.prio as prio, pool.id as pool_id, pool.name as pool_name, ' .
 		'pool.vsconfig as pool_vsconfig, pool.rsconfig as pool_rsconfig, ' .
 		'rs.id as rs_id, inet_ntoa(rsip) as rsip, rsport, rs.rsconfig as rs_rsconfig from ' .
 		'IPv4LB as lb inner join IPv4RSPool as pool on lb.rspool_id = pool.id ' .
@@ -2638,13 +2641,32 @@ function getSLBConfig ($object_id)
 		$vs_id = $row['vs_id'];
 		if (!isset ($ret[$vs_id]))
 		{
-			foreach (array ('vip', 'vport', 'proto', 'vs_name', 'vs_vsconfig', 'vs_rsconfig', 'lb_vsconfig', 'lb_rsconfig', 'pool_vsconfig', 'pool_rsconfig', 'pool_id', 'pool_name') as $c)
+			foreach (array ('vip', 'vport', 'proto', 'vs_name', 'vs_vsconfig', 'vs_rsconfig', 'lb_vsconfig', 'lb_rsconfig', 'pool_vsconfig', 'pool_rsconfig', 'pool_id', 'pool_name', 'prio') as $c)
 				$ret[$vs_id][$c] = $row[$c];
 			$ret[$vs_id]['rslist'] = array();
 		}
 		foreach (array ('rsip', 'rsport', 'rs_rsconfig') as $c)
 			$ret[$vs_id]['rslist'][$row['rs_id']][$c] = $row[$c];
 	}
+	return $ret;
+}
+
+function commitUpdateSLBDefConf ($data)
+{
+	return saveScript('DefaultVSConfig', $data['vs']) &&
+		saveScript('DefaultRSConfig', $data['rs']);
+}
+
+function getSLBDefaults ($do_cache_result = FALSE) {
+	static $ret = array();
+
+	if (! $do_cache_result)
+		$ret = array();
+	elseif (! empty ($ret))
+		return $ret;
+
+	$ret['vs'] = loadScript('DefaultVSConfig');
+	$ret['rs'] = loadScript('DefaultRSConfig');
 	return $ret;
 }
 

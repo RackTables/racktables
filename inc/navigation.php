@@ -227,6 +227,10 @@ $ophandler['ipaddress']['assignment']['addIPv4Allocation'] = 'addIPv4Allocation'
 $page['ipv4slb']['title'] = 'IPv4 SLB';
 $page['ipv4slb']['parent'] = 'index';
 $page['ipv4slb']['handler'] = 'renderIPv4SLB';
+$tab['ipv4slb']['default'] = 'Browse';
+$tab['ipv4slb']['defconfig'] = 'Default configs';
+$tabhandler['ipv4slb']['defconfig'] = 'renderSLBDefConfig';
+$ophandler['ipv4slb']['defconfig']['save'] = 'updateSLBDefConfig';
 
 $page['ipv4vslist']['title'] = 'Virtual services';
 $page['ipv4vslist']['parent'] = 'ipv4slb';
