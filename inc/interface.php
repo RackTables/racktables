@@ -6826,7 +6826,7 @@ function renderVLANDomain ($vdom_id)
 		global $vtdecoder;
 		echo '<table class=cooltable align=center border=0 cellpadding=5 cellspacing=0>';
 		echo '<tr><th>VLAN ID</th><th>propagation</th><th>';
-		printImageHREF ('net');
+		printImageHREF ('net', 'IPv4 networks linked');
 		echo '</th><th>ports</th><th>description</th></tr>';
 		foreach ($myvlans as $vlan_id => $vlan_info)
 		{
