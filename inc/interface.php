@@ -60,6 +60,17 @@ $dqtitle = array
 	'done' => 'Up to date',
 );
 
+// VST roles
+$port_role_options = array
+(
+	'none' => 'none',
+	'access' => 'user: access only',
+	'trunk' => 'user: trunk only',
+	'anymode' => 'user: any mode',
+	'uplink' => 'system: uplink trunk',
+	'downlink' => 'system: downlink trunk',
+);
+
 // Let's have it here, so extensions can add their own images.
 $image = array();
 $image['error']['path'] = 'pix/error.png';
@@ -7712,6 +7723,7 @@ function renderVST ($vst_id)
 		startPortlet ('no rules');
 	else
 	{
+		global $port_role_options;
 		startPortlet ('rules (' . count ($vst['rules']) . ')');
 		echo '<table class=cooltable align=center border=0 cellpadding=5 cellspacing=0>';
 		echo '<tr><th>sequence</th><th>regexp</th><th>role</th><th>VLAN IDs</th><th>comment</th></tr>';
@@ -7721,7 +7733,7 @@ function renderVST ($vst_id)
 			echo "<tr class=row_${order} align=left>";
 			echo "<td>${item['rule_no']}</td>";
 			echo "<td><tt>${item['port_pcre']}</tt></td>";
-			echo "<td>${item['port_role']}</td>";
+			echo '<td>' . $port_role_options[$item['port_role']] . '</td>';
 			echo "<td>${item['wrt_vlans']}</td>";
 			echo "<td>${item['description']}</td>";
 			echo '</tr>';
@@ -7787,15 +7799,7 @@ function renderVSTRulesEditor ($vst_id)
 	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
 	echo '<tr><th>&nbsp;</th><th>sequence</th><th>regexp</th><th>role</th>';
 	echo '<th>VLAN IDs</th><th>comment</th><th>&nbsp;</th></tr>';
-	$port_role_options = array
-	(
-		'none' => 'none',
-		'access' => 'user: access only',
-		'trunk' => 'user: trunk only',
-		'anymode' => 'user: any mode',
-		'uplink' => 'system: uplink trunk',
-		'downlink' => 'system: downlink trunk',
-	);
+	global $port_role_options;
 	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
 		printNewItemTR ($port_role_options);
 	foreach ($vst['rules'] as $item)
