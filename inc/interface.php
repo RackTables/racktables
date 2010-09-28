@@ -2320,7 +2320,10 @@ function renderIPv4SpaceEditor ()
 			}
 			echo '</td><td class=tdleft><a href="' . makeHref (array ('page' => 'ipv4net', 'id' => $netinfo['id'])) . '">';
 			echo "${netinfo['ip']}/${netinfo['mask']}</a></td>";
-			echo '<td class=tdleft>' . htmlspecialchars ($netinfo['name']) . '</td><td>';
+			echo '<td class=tdleft>' . niftyString ($netinfo['name']);
+			if (count ($netinfo['etags']))
+				echo '<br><small>' . serializeTags ($netinfo['etags']) . '</small>';
+			echo '</td><td>';
 			renderProgressBar ($maxdirect ? $used/$maxdirect : 0);
 			echo "<br><small>${used}/${maxdirect}" . ($maxdirect == $maxtotal ? '' : "/${maxtotal}") . '</small></td>';
 			echo '</tr>';
