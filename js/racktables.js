@@ -81,3 +81,63 @@ function init_cb_click() {
 		});
 	});
 }
+
+// uses global tagShortList array
+function compactTreeMode() {
+	// reconfigure toggle link
+	var link = $('a.toggleTreeMode')[0];
+	if ($(link).filter(':visible')) {
+		$(link).after('<p>');
+	}
+	link.onclick = function () {fullTreeMode(); return false;};
+	$(link).html('show full tree').show();
+	
+	$('.tagtree').addClass('compact'); // disable hierachical padding
+	
+	var separator = false; // next visible row is separator
+	var bPrevSeparator = true; // prev visible row was separator
+	$('input.tag-cb').each(function (i, item) {
+		var tr = $(item).closest('tr');
+		
+		if ($(item).hasClass('root'))
+			separator = true;
+		
+		if (! item.checked && ! tagShortList[item.value]) {
+			tr.hide();
+			return;
+		}
+		
+		if (separator && ! bPrevSeparator) { // do not draw two separators together or very first separator
+			tr.addClass('separator');
+			bPrevSeparator = true;
+		}
+		else {
+			tr.removeClass('separator');
+			bPrevSeparator = false;
+		}
+		separator = false;
+	});
+}
+
+// uses global tagShortList array
+function fullTreeMode() {
+	// reconfigure toggle link
+	var link = $('a.toggleTreeMode')[0];
+	link.onclick = function () {compactTreeMode(); return false;};
+	$(link).html('show compact tree').show();
+	
+	$('.tagtree').removeClass('compact'); // restore hierachical padding
+	
+	var bPrevSeparator = true; // prev visible row was separator
+	$('input.tag-cb').each(function (i, item) { // // do not draw two separators together or very first separator
+		var tr = $(item).closest('tr');
+		tr.removeClass('separator');
+
+		var separator = $(item).hasClass('root');
+		if (separator && ! bPrevSeparator)
+			tr.addClass('separator');
+		bPrevSeparator = separator;
+
+		tr.show();
+	});
+}

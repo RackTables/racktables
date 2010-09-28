@@ -5103,15 +5103,21 @@ function renderTagCheckbox ($inputname, $preselect, $taginfo, $refcnt_realm = ''
 	if (tagOnChain ($taginfo, $preselect))
 	{
 		$selected = ' checked';
-		$class = 'seltagbox';
+		$td_class = 'seltagbox';
 	}
 	else
 	{
 		$selected = '';
-		$class = 'tagbox';
+		$td_class = 'tagbox';
 	}
-	echo "<tr><td colspan=2 class=${class} style='padding-left: " . ($level * 16) . "px;'>";
-	echo "<label><input type=checkbox class='tag-cb' name='${inputname}[]' value='${taginfo['id']}'${selected}> ";
+	// calculate html classnames for separators feature 
+	static $is_first_time = TRUE;
+	$input_class = 'tag-cb' . ($level == 0 ? ' root' : '');
+	$tr_class = ($level == 0 && $taginfo['id'] > 0 && !$is_first_time ? 'separator' : '');
+	$is_first_time = FALSE;
+	
+	echo "<tr class='$tr_class'><td colspan=2 class='$td_class' style='padding-left: " . ($level * 16) . "px;'>";
+	echo "<label><input type=checkbox class='$input_class' name='${inputname}[]' value='${taginfo['id']}'${selected}> ";
 	echo $taginfo['tag'];
 	if (strlen ($refcnt_realm) and isset ($taginfo['refcnt'][$refcnt_realm]))
 		echo ' <i>(' . $taginfo['refcnt'][$refcnt_realm] . ')</i>';
@@ -5124,7 +5130,8 @@ function renderTagCheckbox ($inputname, $preselect, $taginfo, $refcnt_realm = ''
 function renderEntityTagsPortlet ($title, $tags, $preselect, $realm)
 {
 	startPortlet ($title);
-	echo '<table border=0 cellspacing=0 cellpadding=3 align=center>';
+	echo  '<a class="toggleTreeMode" style="display:none" href="#"></a>';
+	echo '<table border=0 cellspacing=0 cellpadding=3 align=center class="tagtree">';
 	printOpFormIntro ('saveTags');
 	foreach ($tags as $taginfo)
 		renderTagCheckbox ('taglist', $preselect, $taginfo, $realm);
@@ -5154,15 +5161,22 @@ function renderEntityTags ($entity_id)
 		// It could happen, that none of existing tags have been used in the current realm.
 		if (count ($minilist))
 		{
-			echo '<td class=pcleft width="50%">';
-			renderEntityTagsPortlet ('Quick list', $minilist, $target_given_tags, $etype_by_pageno[$pageno]);
-			echo '</td>';
+			$js_code = "<script type=\"text/javascript\">\ntagShortList = {";
+			$is_first = TRUE;
+			foreach($minilist as $tag) {
+				if (! $is_first)
+					$js_code .= ",";
+				$is_first = FALSE;
+				$js_code .= "\n\t${tag['id']} : 1";
+			}
+			$js_code .= "\n};\n$(document).ready(compactTreeMode);\n</script>";
+			echo $js_code;
 		}
 	}
 
 	// do not do anything about empty tree, trigger function ought to work this out
 	echo '<td class=pcright>';
-	renderEntityTagsPortlet ('Full tree', $tagtree, $target_given_tags, $etype_by_pageno[$pageno]);
+	renderEntityTagsPortlet ('Tag tree', $tagtree, $target_given_tags, $etype_by_pageno[$pageno]);
 	echo '</td>';
 
 	echo '</tr></table>';
@@ -5200,7 +5214,7 @@ function renderCellFilterPortlet ($preselect, $realm, $cell_list = array(), $byp
 	$title = $filterc ? "filters (${filterc})" : 'filters';
 	startPortlet ($title);
 	echo "<form method=get>\n";
-	echo '<table border=0 align=center>';
+	echo '<table border=0 align=center cellspacing=0 class="tagtree">';
 	$ruler = "<tr><td colspan=2 class=tagbox><hr></td></tr>\n";
 	$hr = '';
 	// "reset filter" button only gets active when a filter is applied
@@ -5332,7 +5346,7 @@ function renderNewEntityTags ($for_realm = '')
 		echo "No tags defined";
 		return;
 	}
-	echo '<div class=tagselector><table border=0 align=center>';
+	echo '<div class=tagselector><table border=0 align=center cellspacing=0 class="tagtree">';
 	foreach ($tagtree as $taginfo)
 		renderTagCheckbox ('taglist', array(), $taginfo, $for_realm);
 	echo '</table></div>';

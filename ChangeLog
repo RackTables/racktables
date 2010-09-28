@@ -9,6 +9,7 @@
 	update: make IPv4 utilization bar a standard element (by Alexey Andrianov)
 	update: make 802.1Q VLANs searchable
 	update: another round of SNMP enhancements
+	update: tag "quick list" redesign (by Alexey Andrianov)
 	new feature: enable IMS caching of progress bars (by Alexey Andrianov)
 	new feature: rebuild tag filter as soon as user changes it (by Alexey Andrianov)
 	new feature: default SLB configuration lines stored in DB (by Alexey Andrianov)
