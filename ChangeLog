@@ -3,9 +3,18 @@
 	bugfix: speed up IPv4 VLAN selector (by Boris Lytochkin)
 	bugfix: suppress inputs borders in MSIE (by Alexey Andrianov)
 	bugfix: justify table alignment in rack view (#367)
+	bugfix: handle locking failure in LDAP caching code
+	bugfix: enable deletion of initialized 802.1Q switch
 	update: allow scrollbars in port selector (#361)
+	update: make IPv4 utilization bar a standard element (by Alexey Andrianov)
+	update: make 802.1Q VLANs searchable
+	update: another round of SNMP enhancements
+	update: tag "quick list" redesign (by Alexey Andrianov)
+	update: disable knight button for a filtered IPv4 tree view
 	new feature: enable IMS caching of progress bars (by Alexey Andrianov)
 	new feature: rebuild tag filter as soon as user changes it (by Alexey Andrianov)
+	new feature: default SLB configuration lines stored in DB (by Alexey Andrianov)
+	new feature: {$attr_X_Y} autotags (by Alexey Andrianov)
 0.18.4 2010-07-13
 	bugfix: a race condition could be triggered in permissions editor
 	new feature: "any mode" of user port in VLAN switch template

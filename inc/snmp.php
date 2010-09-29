@@ -317,6 +317,24 @@ $iftable_processors['juniper-DPCE-R-4XGE-XFP'] = array
 	'try_next_proc' => FALSE,
 );
 
+$iftable_processors['juniper-ex-pic0-1000T'] = array
+(
+	'pattern' => '@^ge-([[:digit:]]+)/0/([[:digit:]]+)$@',
+	'replacement' => '\\0',
+	'dict_key' => '1-24',
+	'label' => 'unit \\1 port \\2',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['juniper-ex-mgmt'] = array
+(
+	'pattern' => '/^me0$/',
+	'replacement' => 'me0',
+	'dict_key' => '1-24',
+	'label' => 'MGMT',
+	'try_next_proc' => FALSE,
+);
+
 $iftable_processors['quidway-21-to-24-comboT'] = array
 (
 	'pattern' => '@^GigabitEthernet([[:digit:]]+/[[:digit:]]+/)(21|22|23|24)$@',
@@ -749,6 +767,19 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'MX240 modular router',
 		'processors' => array ('juniper-DPCE-R-4XGE-XFP'),
 	),
+	// Juniper Networks assigns single SNMP OID per series:
+	// EX2200 2636.1.1.1.1.43
+	// EX3200 2636.1.1.1.2.30
+	// EX4200 2636.1.1.1.2.31
+	// EX4500 2636.1.1.1.1.44
+	// There is a special workaround in code below to derive specific
+	// product number from sysDescr string.
+	'2636.1.1.1.2.31' => array
+	(
+		'dict_key' => 905,
+		'text' => 'Juniper EX4200 series',
+		'processors' => array ('juniper-ex-pic0-1000T', 'juniper-ex-mgmt'),
+	),
 	'2011.2.23.96' => array
 	(
 		'dict_key' => 1321,
@@ -804,6 +835,16 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 			'summit-management'
 		),
 	),
+);
+
+$swtype_pcre = array
+(
+	'/Huawei Versatile Routing Platform Software.+VRP.+Software, Version 5.30 /s' => 1360,
+	'/Huawei Versatile Routing Platform Software.+VRP.+Software, Version 5.50 /s' => 1361,
+	// FIXME: get sysDescr for IronWare 5 and add a pattern
+	'/^Brocade Communications Systems.+, IronWare Version 07\./' => 1364,
+	'/^Juniper Networks,.+JUNOS 9\./' => 1366,
+	'/^Juniper Networks,.+JUNOS 10\./' => 1367,
 );
 
 function updateStickerForCell ($cell, $attr_id, $new_value)
@@ -939,39 +980,29 @@ function doSwitchSNMPmining ($objectInfo, $hostname, $community)
 		$log = mergeLogs ($log, oneLiner (81, array ('netgear-generic')));
 		break;
 	case preg_match ('/^2011\.2\.23\./', $sysObjectID): // Huawei
-		$swtype_pcre = array
-		(
-			'/Huawei Versatile Routing Platform Software.+VRP.+Software, Version 5.30 /s' => 1360,
-			'/Huawei Versatile Routing Platform Software.+VRP.+Software, Version 5.50 /s' => 1361,
-		);
-		foreach ($swtype_pcre as $pattern => $dict_key)
-			if (preg_match ($pattern, $sysDescr))
-			{
-				updateStickerForCell ($objectInfo, 4, $dict_key);
-				break;
-			}
+		detectSoftwareType ($objectInfo, $sysDescr);
 		checkPIC ('1-681');
 		commitAddPort ($objectInfo['id'], 'con0', '1-681', 'console', ''); // DB-9 RS-232 console
 		$log = mergeLogs ($log, oneLiner (81, array ('huawei-generic')));
 		break;
+	case '2636.1.1.1.2.31' == $sysObjectID: // Juniper EX4200
+		detectSoftwareType ($objectInfo, $sysDescr);
+		checkPIC ('1-29');
+		commitAddPort ($objectInfo['id'], 'con', '1-29', 'CON', ''); // RJ-45 RS-232 console
+		// EX4200-24T is already in DB
+		if (preg_match ('/^Juniper Networks, Inc. ex4200-48t internet router/', $sysDescr))
+			updateStickerForCell ($objectInfo, 2, 907);
+		$log = mergeLogs ($log, oneLiner (81, array ('juniper-ex')));
+		break;
 	case preg_match ('/^2636\.1\.1\.1\.2\./', $sysObjectID): // Juniper
+		detectSoftwareType ($objectInfo, $sysDescr);
 		checkPIC ('1-681');
 		commitAddPort ($objectInfo['id'], 'console', '1-681', 'console', ''); // DB-9 RS-232 console
 		$log = mergeLogs ($log, oneLiner (81, array ('juniper-generic')));
 		break;
 	case preg_match ('/^1991\.1\.3\.45\./', $sysObjectID): // snFGSFamily
 	case preg_match ('/^1991\.1\.3\.54\.2\.4\.1\.1$/', $sysObjectID): // FCX 648
-		$swtype_pcre = array
-		(
-			// FIXME: get sysDescr for IronWare 5 and add a pattern
-			'/^Brocade Communications Systems.+, IronWare Version 07\./' => 1364,
-		);
-		foreach ($swtype_pcre as $pattern => $dict_key)
-			if (preg_match ($pattern, $sysDescr))
-			{
-				updateStickerForCell ($objectInfo, 4, $dict_key);
-				break;
-			}
+		detectSoftwareType ($objectInfo, $sysDescr);
 		$exact_release = preg_replace ('/^.*, IronWare Version ([^ ]+) .*$/', '\\1', $sysDescr);
 		updateStickerForCell ($objectInfo, 5, $exact_release);
 		# FOUNDRY-SN-AGENT-MIB::snChasSerNum.0
@@ -1067,6 +1098,11 @@ function doSwitchSNMPmining ($objectInfo, $hostname, $community)
 		foreach ($known_switches[$sysObjectID]['processors'] as $processor_name)
 		{
 			$newname = preg_replace ($iftable_processors[$processor_name]['pattern'], $iftable_processors[$processor_name]['replacement'], $iface['ifDescr'], 1, $count);
+			if ($newname === NULL)
+			{
+				$log = mergeLogs ($log, oneLiner (100, array ('PCRE pattern error, terminating')));
+				break 2;
+			}
 			if (!$count)
 				continue; // try next processor on current port
 			$newlabel = preg_replace ($iftable_processors[$processor_name]['pattern'], $iftable_processors[$processor_name]['label'], $iface['ifDescr'], 1, $count);
@@ -1289,4 +1325,14 @@ function generatePortsForCatModule ($object_id, $slotno = 1, $mtype = 'X6748', $
 	}
 }
 
+function detectSoftwareType ($objectInfo, $sysDescr)
+{
+	global $swtype_pcre;
+	foreach ($swtype_pcre as $pattern => $dict_key)
+		if (preg_match ($pattern, $sysDescr))
+		{
+			updateStickerForCell ($objectInfo, 4, $dict_key);
+			return;
+		}
+}
 ?>

@@ -747,7 +747,9 @@ CREATE TABLE `VLANValidID` (
 			$query[] = "UPDATE Config SET varvalue = '0.18.4' WHERE varname = 'DB_VERSION'";
 			break;
 		case '0.18.5':
+			$query = array_merge ($query, reloadDictionary ($batchid));
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdefined, description) VALUES ('SHRINK_TAG_TREE_ON_CLICK','yes','string','no','no','yes','Dynamically hide useless tags in tagtree')";
+			$query[] = "ALTER TABLE `IPv4LB` ADD COLUMN `prio` int(10) unsigned DEFAULT NULL AFTER `vs_id`";
 			$query[] = "UPDATE Config SET varvalue = '0.18.5' WHERE varname = 'DB_VERSION'";
 			break;
 		default:

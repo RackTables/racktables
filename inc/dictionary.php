@@ -1442,6 +1442,9 @@ $dictionary = array
 	1362 => array ('chapter_id' => 12, 'dict_value' => '[[Brocade%GPASS%FCX 648 | http://www.brocade.com/sites/dotcom/products-solutions/products/ethernet-switches-routers/enterprise-mobility/product-details/fcx-series-data-center/index.page ]]'),
 	1363 => array ('chapter_id' => 14, 'dict_value' => 'IronWare 5'),
 	1364 => array ('chapter_id' => 14, 'dict_value' => 'IronWare 7'),
+	1365 => array ('chapter_id' => 14, 'dict_value' => 'Cisco NX-OS 4.2'),
+	1366 => array ('chapter_id' => 14, 'dict_value' => 'JunOS 9'),
+	1367 => array ('chapter_id' => 14, 'dict_value' => 'JunOS 10'),
 );
 
 ?>

@@ -515,3 +515,19 @@ div.tagselector td {
 .rsvtext {
 	font-style: italic;
 }
+
+.tagtree.compact td {
+	padding-left: 0px !important;
+}
+
+.tagtree tr.separator td {
+	border-top: 2px solid gray;
+}
+
+a.toggleTreeMode {
+}
+
+.net-usage {
+		float: right;
+		margin-left: 15px;
+}

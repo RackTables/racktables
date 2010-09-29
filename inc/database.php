@@ -155,6 +155,8 @@ $tablemap_8021q = array
 	),
 );
 
+$object_attribute_cache = array();
+
 function escapeString ($value, $do_db_escape = FALSE)
 {
 	$ret = htmlspecialchars ($value, ENT_QUOTES, 'UTF-8');
@@ -241,12 +243,13 @@ function listCells ($realm, $parent_id = 0)
 	if (!isset ($SQLSchema[$realm]))
 		throw new InvalidArgException ('realm', $realm);
 	$SQLinfo = $SQLSchema[$realm];
-	$qparams = array ($realm);
-	$query = 'SELECT tag_id';
+	$qparams = array ();
+	$query = 'SELECT ';
 	foreach ($SQLinfo['columns'] as $alias => $expression)
 		// Automatically prepend table name to each single column, but leave all others intact.
-		$query .= ', ' . ($alias == $expression ? "${SQLinfo['table']}.${alias}" : "${expression} as ${alias}");
-	$query .= " FROM ${SQLinfo['table']} LEFT JOIN TagStorage on entity_realm = ? and entity_id = ${SQLinfo['table']}.${SQLinfo['keycolumn']}";
+		$query .= ($alias == $expression ? "${SQLinfo['table']}.${alias}" : "${expression} as ${alias}") . ', ';
+	$query = trim($query, ', ');
+	$query .= " FROM ${SQLinfo['table']}";
 	if (isset ($SQLinfo['pidcolumn']) and $parent_id)
 	{
 		$query .= " WHERE ${SQLinfo['table']}.${SQLinfo['pidcolumn']} = ?";
@@ -255,32 +258,27 @@ function listCells ($realm, $parent_id = 0)
 	$query .= " ORDER BY ";
 	foreach ($SQLinfo['ordcolumns'] as $oc)
 		$query .= "${oc}, ";
-	$query .= " tag_id";
+	$query = trim($query, ', ');
 	$result = usePreparedSelectBlade ($query, $qparams);
 	$ret = array();
-	global $taglist;
 	// Index returned result by the value of key column.
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
 		$entity_id = $row[$SQLinfo['keycolumn']];
-		// Init the first record anyway, but store tag only if there is one.
-		if (!isset ($ret[$entity_id]))
-		{
-			$ret[$entity_id] = array ('realm' => $realm);
-			foreach (array_keys ($SQLinfo['columns']) as $alias)
-				$ret[$entity_id][$alias] = $row[$alias];
-			$ret[$entity_id]['etags'] = array();
-			if ($row['tag_id'] != NULL && isset ($taglist[$row['tag_id']]))
-				$ret[$entity_id]['etags'][] = array
-				(
-					'id' => $row['tag_id'],
-					'tag' => $taglist[$row['tag_id']]['tag'],
-					'parent_id' => $taglist[$row['tag_id']]['parent_id'],
-				);
-		}
-		elseif (isset ($taglist[$row['tag_id']]))
-			// Meeting existing key later is always more tags on existing list.
-			$ret[$entity_id]['etags'][] = array
+		$ret[$entity_id] = array ('realm' => $realm);
+		$ret[$entity_id]['etags'] = array();
+		foreach (array_keys ($SQLinfo['columns']) as $alias)
+			$ret[$entity_id][$alias] = $row[$alias];
+	}
+
+	// select tags and link them to previosly fetched entities
+	$query = 'SELECT entity_id, tag_id FROM TagStorage WHERE entity_realm = ?';
+	$result = usePreparedSelectBlade ($query, array($realm));
+	global $taglist;
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
+	{
+		if (array_key_exists($row['entity_id'], $ret))
+			$ret[$row['entity_id']]['etags'][] = array
 			(
 				'id' => $row['tag_id'],
 				'tag' => $taglist[$row['tag_id']]['tag'],
@@ -290,6 +288,8 @@ function listCells ($realm, $parent_id = 0)
 	// Add necessary finish to the list before returning it. Maintain caches.
 	if (!$parent_id)
 		unset ($entityCache['partial'][$realm]);
+	if ($realm == 'object') // cache all attributes of all objects to speed up autotags calculation
+		cacheAllObjectsAttributes();
 	foreach (array_keys ($ret) as $entity_id)
 	{
 		$ret[$entity_id]['etags'] = getExplicitTagsOnly ($ret[$entity_id]['etags']);
@@ -409,7 +409,7 @@ function amplifyCell (&$record, $dummy = NULL)
 		break;
 	case 'ipv4rspool':
 		$record['lblist'] = array();
-		$query = "select object_id, vs_id, lb.vsconfig, lb.rsconfig from " .
+		$query = "select object_id, vs_id, lb.vsconfig, lb.rsconfig, lb.prio from " .
 			"IPv4LB as lb inner join IPv4VS as vs on lb.vs_id = vs.id " .
 			"where rspool_id = ? order by object_id, vip, vport";
 		$result = usePreparedSelectBlade ($query, array ($record['id']));
@@ -418,6 +418,7 @@ function amplifyCell (&$record, $dummy = NULL)
 			(
 				'rsconfig' => $row['rsconfig'],
 				'vsconfig' => $row['vsconfig'],
+				'prio' => $row['prio'],
 			);
 		unset ($result);
 		$record['rslist'] = array();
@@ -440,7 +441,7 @@ function amplifyCell (&$record, $dummy = NULL)
 		// will be returned as well.
 		$record['rspool'] = array();
 		$query = "select pool.id, name, pool.vsconfig, pool.rsconfig, object_id, " .
-			"lb.vsconfig as lb_vsconfig, lb.rsconfig as lb_rsconfig from " .
+			"lb.vsconfig as lb_vsconfig, lb.rsconfig as lb_rsconfig, lb.prio from " .
 			"IPv4RSPool as pool left join IPv4LB as lb on pool.id = lb.rspool_id " .
 			"where vs_id = ? order by pool.name, object_id";
 		$result = usePreparedSelectBlade ($query, array ($record['id']));
@@ -460,6 +461,7 @@ function amplifyCell (&$record, $dummy = NULL)
 			(
 				'vsconfig' => $row['lb_vsconfig'],
 				'rsconfig' => $row['lb_rsconfig'],
+				'prio' => $row['prio'],
 			);
 		}
 		unset ($result);
@@ -630,6 +632,8 @@ function commitDeleteObject ($object_id = 0)
 	usePreparedDeleteBlade ('IPv4NAT', array ('object_id' => $object_id));
 	usePreparedExecuteBlade ('DELETE FROM Atom WHERE molecule_id IN (SELECT new_molecule_id FROM MountOperation WHERE object_id = ?)', array ($object_id));
 	usePreparedExecuteBlade ('DELETE FROM Molecule WHERE id IN (SELECT new_molecule_id FROM MountOperation WHERE object_id = ?)', array ($object_id));
+	usePreparedDeleteBlade ('PortVLANMode', array ('object_id' => $object_id));
+	usePreparedDeleteBlade ('VLANSwitch', array ('object_id' => $object_id));
 	usePreparedDeleteBlade ('RackObject', array ('id' => $object_id));
 	return '';
 }
@@ -1432,6 +1436,40 @@ function getRackSearchResult ($terms)
 	return $ret;
 }
 
+function getVLANSearchResult ($terms)
+{
+	$ret = array();
+	$matches = array();
+	if (preg_match ('/^vlan([[:digit:]]+)$/i', $terms, $matches))
+	{
+		$byID = getSearchResultByField
+		(
+			'VLANDescription',
+			array ('domain_id', 'vlan_id'),
+			'vlan_id',
+			$matches[1],
+			'domain_id',
+			1
+		);
+		foreach ($byID as $row)
+			$ret[] = $row['domain_id'] . '-' . $row['vlan_id'];
+	}
+	$byDescr = getSearchResultByField
+	(
+		'VLANDescription',
+		array ('domain_id', 'vlan_id'),
+		'vlan_descr',
+		$terms
+	);
+	foreach ($byDescr as $row)
+	{
+		$vlan_ck = $row['domain_id'] . '-' . $row['vlan_id'];
+		if (!in_array ($vlan_ck, $ret))
+			$ret[] = $vlan_ck;
+	}
+	return $ret;
+}
+
 function getSearchResultByField ($tname, $rcolumns, $scolumn, $terms, $ocolumn = '', $exactness = 0)
 {
 	$pfx = '';
@@ -2016,26 +2054,44 @@ function commitReduceAttrMap ($attr_id = 0, $objtype_id)
 	return usePreparedDeleteBlade ('AttributeMap', array ('attr_id' => $attr_id, 'objtype_id' => $objtype_id));
 }
 
-// This function returns all optional attributes for requested object
-// as an array of records. NULL is returned on error and empty array
-// is returned, if there are no attributes found.
-function getAttrValues ($object_id)
+function cacheAllObjectsAttributes()
+{
+	global $object_attribute_cache;
+	$object_attribute_cache = fetchAttrsForObjects(NULL);
+}
+
+// Fetches a list of attributes for each object in $object_set array.
+// If $object_set is not set, returns attributes for all objects in DB
+// Returns an array with object_id keys
+function fetchAttrsForObjects($object_set)
 {
 	$ret = array();
-	$result = usePreparedSelectBlade
-	(
-		"select A.id as attr_id, A.name as attr_name, A.type as attr_type, C.name as chapter_name, " .
-		"C.id as chapter_id, AV.uint_value, AV.float_value, AV.string_value, D.dict_value from " .
-		"RackObject as RO inner join AttributeMap as AM on RO.objtype_id = AM.objtype_id " .
-		"inner join Attribute as A on AM.attr_id = A.id " .
+	$query =
+		"select AV.attr_id, A.name as attr_name, A.type as attr_type, C.name as chapter_name, " .
+		"C.id as chapter_id, AV.uint_value, AV.float_value, AV.string_value, D.dict_value, RO.id as object_id from " .
+		"RackObject as RO left join AttributeMap as AM on RO.objtype_id = AM.objtype_id " .
+		"left join Attribute as A on AM.attr_id = A.id " .
 		"left join AttributeValue as AV on AV.attr_id = AM.attr_id and AV.object_id = RO.id " .
 		"left join Dictionary as D on D.dict_key = AV.uint_value and AM.chapter_id = D.chapter_id " .
-		"left join Chapter as C on AM.chapter_id = C.id " .
-		"where RO.id = ? order by A.name, A.type",
-		array ($object_id)
-	);
+		"left join Chapter as C on AM.chapter_id = C.id";
+	if (is_array ($object_set) && !empty ($object_set))
+	{
+		$query .= ' WHERE RO.id IN (';
+		foreach ($object_set as $object_id)
+			$query .= intval ($object_id) . ', ';
+		$query = trim ($query, ', ') . ')';
+	}
+
+	$result = usePreparedSelectBlade ($query);
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
+		$object_id = $row['object_id'];
+		$attr_id = $row['attr_id'];
+		if (!array_key_exists ($object_id, $ret))
+			$ret[$object_id] = array();
+		if (! isset($attr_id))
+			continue;
+
 		$record = array();
 		$record['id'] = $row['attr_id'];
 		$record['name'] = $row['attr_name'];
@@ -2058,10 +2114,31 @@ function getAttrValues ($object_id)
 				$record['value'] = NULL;
 				break;
 		}
-		$ret[$row['attr_id']] = $record;
+		$ret[$object_id][$attr_id] = $record;
 	}
 	$result->closeCursor();
 	return $ret;
+}
+
+// This function returns all optional attributes for requested object
+// as an array of records. NULL is returned on error and empty array
+// is returned, if there are no attributes found.
+function getAttrValues ($object_id)
+{
+	global $object_attribute_cache;
+	if (isset ($object_attribute_cache[$object_id]))
+		return $object_attribute_cache[$object_id];
+
+	$ret = fetchAttrsForObjects(array($object_id));
+	$attrs = array();
+	if (empty($ret))
+		return NULL;
+	else
+	{
+		$attrs = $ret[$object_id];
+		$object_attribute_cache[$object_id] = $attrs;
+		return $attrs;
+	}
 }
 
 function commitResetAttrValue ($object_id = 0, $attr_id = 0)
@@ -2423,15 +2500,16 @@ function commitUpdateRS ($rsid = 0, $rsip = '', $rsport = 0, $rsconfig = '')
 	);
 }
 
-function commitUpdateLB ($object_id = 0, $pool_id = 0, $vs_id = 0, $vsconfig = '', $rsconfig = '')
+function commitUpdateLB ($object_id = 0, $pool_id = 0, $vs_id = 0, $vsconfig = '', $rsconfig = '', $prio = '')
 {
 	return usePreparedExecuteBlade
 	(
-		'UPDATE IPv4LB SET vsconfig=?, rsconfig=? WHERE object_id=? AND rspool_id=? AND vs_id=?',
+		'UPDATE IPv4LB SET vsconfig=?, rsconfig=?, prio=? WHERE object_id=? AND rspool_id=? AND vs_id=?',
 		array
 		(
 			!strlen ($vsconfig) ? NULL : $vsconfig,
 			!strlen ($rsconfig) ? NULL : $rsconfig,
+			!strlen ($prio) ? NULL : $prio,
 			$object_id,
 			$pool_id,
 			$vs_id,
@@ -2494,7 +2572,7 @@ function getRSPoolsForObject ($object_id = 0)
 	$result = usePreparedSelectBlade
 	(
 		'select vs_id, inet_ntoa(vip) as vip, vport, proto, vs.name, pool.id as pool_id, ' .
-		'pool.name as pool_name, count(rsip) as rscount, lb.vsconfig, lb.rsconfig from ' .
+		'pool.name as pool_name, count(rsip) as rscount, lb.vsconfig, lb.rsconfig, lb.prio from ' .
 		'IPv4LB as lb inner join IPv4RSPool as pool on lb.rspool_id = pool.id ' .
 		'inner join IPv4VS as vs on lb.vs_id = vs.id ' .
 		'left join IPv4RS as rs on lb.rspool_id = rs.rspool_id ' .
@@ -2504,7 +2582,7 @@ function getRSPoolsForObject ($object_id = 0)
 	);
 	$ret = array ();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-		foreach (array ('vip', 'vport', 'proto', 'name', 'pool_id', 'pool_name', 'rscount', 'vsconfig', 'rsconfig') as $cname)
+		foreach (array ('vip', 'vport', 'proto', 'name', 'pool_id', 'pool_name', 'rscount', 'vsconfig', 'rsconfig', 'prio') as $cname)
 			$ret[$row['vs_id']][$cname] = $row[$cname];
 	return $ret;
 }
@@ -2587,7 +2665,7 @@ function getSLBConfig ($object_id)
 	(
 		'select vs_id, inet_ntoa(vip) as vip, vport, proto, vs.name as vs_name, ' .
 		'vs.vsconfig as vs_vsconfig, vs.rsconfig as vs_rsconfig, ' .
-		'lb.vsconfig as lb_vsconfig, lb.rsconfig as lb_rsconfig, pool.id as pool_id, pool.name as pool_name, ' .
+		'lb.vsconfig as lb_vsconfig, lb.rsconfig as lb_rsconfig, lb.prio as prio, pool.id as pool_id, pool.name as pool_name, ' .
 		'pool.vsconfig as pool_vsconfig, pool.rsconfig as pool_rsconfig, ' .
 		'rs.id as rs_id, inet_ntoa(rsip) as rsip, rsport, rs.rsconfig as rs_rsconfig from ' .
 		'IPv4LB as lb inner join IPv4RSPool as pool on lb.rspool_id = pool.id ' .
@@ -2602,13 +2680,32 @@ function getSLBConfig ($object_id)
 		$vs_id = $row['vs_id'];
 		if (!isset ($ret[$vs_id]))
 		{
-			foreach (array ('vip', 'vport', 'proto', 'vs_name', 'vs_vsconfig', 'vs_rsconfig', 'lb_vsconfig', 'lb_rsconfig', 'pool_vsconfig', 'pool_rsconfig', 'pool_id', 'pool_name') as $c)
+			foreach (array ('vip', 'vport', 'proto', 'vs_name', 'vs_vsconfig', 'vs_rsconfig', 'lb_vsconfig', 'lb_rsconfig', 'pool_vsconfig', 'pool_rsconfig', 'pool_id', 'pool_name', 'prio') as $c)
 				$ret[$vs_id][$c] = $row[$c];
 			$ret[$vs_id]['rslist'] = array();
 		}
 		foreach (array ('rsip', 'rsport', 'rs_rsconfig') as $c)
 			$ret[$vs_id]['rslist'][$row['rs_id']][$c] = $row[$c];
 	}
+	return $ret;
+}
+
+function commitUpdateSLBDefConf ($data)
+{
+	return saveScript('DefaultVSConfig', $data['vs']) &&
+		saveScript('DefaultRSConfig', $data['rs']);
+}
+
+function getSLBDefaults ($do_cache_result = FALSE) {
+	static $ret = array();
+
+	if (! $do_cache_result)
+		$ret = array();
+	elseif (! empty ($ret))
+		return $ret;
+
+	$ret['vs'] = loadScript('DefaultVSConfig');
+	$ret['rs'] = loadScript('DefaultRSConfig');
 	return $ret;
 }
 
@@ -3303,6 +3400,10 @@ function touchLDAPCacheRecord ($form_username)
 
 function replaceLDAPCacheRecord ($form_username, $password_hash, $dname, $memberof)
 {
+	// FIXME: This sequence is able to trigger a deadlock, namely, when executed
+	// in parallel from multiple working copies of the same user, which for some
+	// reason has no valid record in LDAPCache. Perhaps, using REPLACE INTO can
+	// lower the chances of this.
 	deleteLDAPCacheRecord ($form_username);
 	usePreparedInsertBlade ('LDAPCache',
 		array

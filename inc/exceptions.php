@@ -115,6 +115,26 @@ class RTGatewayError extends RackTablesError
 	}
 }
 
+class RTBuildLVSConfigError extends RackTablesError
+{
+	public $message_list;
+	public $config_to_display;
+	public $balancer_id;
+	function __construct($message_list, $config_to_display, $object_id) {
+		$this->code = parent::INTERNAL;
+		$this->message_list = $message_list;
+		$this->config_to_display = $config_to_display;
+		$this->balancer_id = $object_id;
+		parent::__construct("LVS config build error for balancer $object_id: " . implode("\n", $message_list));
+	}
+	public function dispatch()
+	{
+		// redirect user to a page with config errors highlighted
+		header ("Location: index.php?page=object&tab=lvsconfig&object_id=" . urlencode ($this->balancer_id));
+		die;
+	}
+}
+
 function dumpArray($arr)
 {
 	echo '<table class="exceptionParametersDump">';

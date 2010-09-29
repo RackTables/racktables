@@ -988,6 +988,12 @@ function generateEntityAutoTags ($cell)
 				$ret[] = array ('tag' => '$no_asset_tag');
 			if ($cell['runs8021Q'])
 				$ret[] = array ('tag' => '$runs_8021Q');
+
+			// dictionary attribute autotags '$attr_X_Y'
+			$attrs = getAttrValues($cell['id']);
+			foreach ($attrs as $attr_id => $attr_record)
+				if (isset($attr_record['chapter_id']))
+					$ret[] = array ('tag' => "\$attr_{$attr_id}_{$attr_record['key']}");
 			break;
 		case 'ipv4net':
 			$ret[] = array ('tag' => '$ip4netid_' . $cell['id']);
@@ -1509,14 +1515,42 @@ function getRackImageHeight ($units)
 
 // Perform substitutions and return resulting string
 // used solely by buildLVSConfig()
-function apply_macros ($macros, $subject)
+function apply_macros ($macros, $subject, &$error_macro_stat)
 {
-	$ret = $subject;
+	// clear all text before last %RESET% macro
+	$reset_keyword = '%RESET%';
+	$reset_position = mb_strpos($subject, $reset_keyword, 0);
+	if ($reset_position === FALSE)
+		$ret = $subject;
+	else
+		$ret = trim
+		(
+			mb_substr($subject, $reset_position + mb_strlen($reset_keyword)),
+			"\n\r"
+		);
+
 	foreach ($macros as $search => $replace)
-		$ret = str_replace ($search, $replace, $ret);
+	{
+		if (empty($replace))
+		{
+			$replace = "<span class=\"msg_error\">$search</span>";
+			$count = 0;
+			$ret = str_replace ($search, $replace, $ret, $count);
+			if ($count)
+			{
+				if (array_key_exists($search, $error_macro_stat))
+					$error_macro_stat[$search] += $count;
+				else
+					$error_macro_stat[$search] = $count;
+			}
+		}
+		else
+			$ret = str_replace ($search, $replace, $ret);
+	}
 	return $ret;
 }
 
+// throws RTBuildLVSConfigError exception if undefined macros found
 function buildLVSConfig ($object_id = 0)
 {
 	if ($object_id <= 0)
@@ -1525,6 +1559,7 @@ function buildLVSConfig ($object_id = 0)
 		return;
 	}
 	$oInfo = spotEntity ('object', $object_id);
+	$defaults = getSLBDefaults (TRUE);
 	$lbconfig = getSLBConfig ($object_id);
 	if ($lbconfig === NULL)
 	{
@@ -1533,6 +1568,8 @@ function buildLVSConfig ($object_id = 0)
 	}
 	$newconfig = "#\n#\n# This configuration has been generated automatically by RackTables\n";
 	$newconfig .= "# for object_id == ${object_id}\n# object name: ${oInfo['name']}\n#\n#\n\n\n";
+	
+	$error_stat = array();
 	foreach ($lbconfig as $vs_id => $vsinfo)
 	{
 		$newconfig .=  "########################################################\n" .
@@ -1546,17 +1583,20 @@ function buildLVSConfig ($object_id = 0)
 			'%VPORT%' => $vsinfo['vport'],
 			'%PROTO%' => $vsinfo['proto'],
 			'%VNAME%' =>  $vsinfo['vs_name'],
-			'%RSPOOLNAME%' => $vsinfo['pool_name']
+			'%RSPOOLNAME%' => $vsinfo['pool_name'],
+			'%PRIO%' => $vsinfo['prio']
 		);
 		$newconfig .=  "virtual_server ${vsinfo['vip']} ${vsinfo['vport']} {\n";
 		$newconfig .=  "\tprotocol ${vsinfo['proto']}\n";
-		$newconfig .= apply_macros
+		$newconfig .= lf_wrap (apply_macros
 		(
 			$macros,
+			lf_wrap ($defaults['vs']) .
 			lf_wrap ($vsinfo['vs_vsconfig']) .
 			lf_wrap ($vsinfo['lb_vsconfig']) .
-			lf_wrap ($vsinfo['pool_vsconfig'])
-		);
+			lf_wrap ($vsinfo['pool_vsconfig']),
+			$error_stat
+		));
 		foreach ($vsinfo['rslist'] as $rs)
 		{
 			if (!strlen ($rs['rsport']))
@@ -1564,18 +1604,28 @@ function buildLVSConfig ($object_id = 0)
 			$macros['%RSIP%'] = $rs['rsip'];
 			$macros['%RSPORT%'] = $rs['rsport'];
 			$newconfig .=  "\treal_server ${rs['rsip']} ${rs['rsport']} {\n";
-			$newconfig .= apply_macros
+			$newconfig .= lf_wrap (apply_macros
 			(
 				$macros,
+				lf_wrap ($defaults['rs']) .
 				lf_wrap ($vsinfo['vs_rsconfig']) .
 				lf_wrap ($vsinfo['lb_rsconfig']) .
 				lf_wrap ($vsinfo['pool_rsconfig']) .
-				lf_wrap ($rs['rs_rsconfig'])
-			);
+				lf_wrap ($rs['rs_rsconfig']),
+				$error_stat
+			));
 			$newconfig .=  "\t}\n";
 		}
 		$newconfig .=  "}\n\n\n";
 	}
+	if (! empty($error_stat))
+	{
+		$error_messages = array();
+		foreach ($error_stat as $macro => $count)
+			$error_messages[] = "Error: macro $macro can not be empty ($count occurences)";
+		throw new RTBuildLVSConfigError($error_messages, $newconfig, $object_id);
+	}
+	
 	// FIXME: deal somehow with Mac-styled text, the below replacement will screw it up
 	return dos2unix ($newconfig);
 }
@@ -2402,7 +2452,12 @@ function formatVLANName ($vlaninfo, $context = 'markup long')
 	case 'plain long':
 		$ret = 'VLAN' . $vlaninfo['vlan_id'];
 		if ($vlaninfo['vlan_descr'] != '')
-			$ret .= ' (' . niftyString ($vlaninfo['vlan_descr']) . ')';
+			$ret .= ' (' . niftyString ($vlaninfo['vlan_descr'], 20, FALSE) . ')';
+		return $ret;
+	case 'hyperlink':
+		$ret = '<a href="';
+		$ret .= makeHref (array ('page' => 'vlan', 'vlan_ck' => $vlaninfo['domain_id'] . '-' . $vlaninfo['vlan_id']));
+		$ret .= '">' . formatVLANName ($vlaninfo, 'markup long') . '</a>';
 		return $ret;
 	case 'markup long':
 	default:
@@ -3472,7 +3527,7 @@ function sortPortList ($plist)
 // This is a dual-purpose formating function:
 // 1. Replace empty strings with nbsp.
 // 2. Cut strings, which are too long, append "cut here" indicator and provide a mouse hint.
-function niftyString ($string, $maxlen = 30)
+function niftyString ($string, $maxlen = 30, $usetags = TRUE)
 {
 	$cutind = '&hellip;'; // length is 1
 	if (!mb_strlen ($string))
@@ -3481,8 +3536,11 @@ function niftyString ($string, $maxlen = 30)
 	$string = preg_replace ("/\t/", ' ', $string);
 	if (!$maxlen or mb_strlen ($string) <= $maxlen)
 		return htmlspecialchars ($string, ENT_QUOTES, 'UTF-8');
-	return "<span title='" . htmlspecialchars ($string, ENT_QUOTES, 'UTF-8') . "'>" .
-		str_replace (' ', '&nbsp;', htmlspecialchars (mb_substr ($string, 0, $maxlen - 1), ENT_QUOTES, 'UTF-8')) . $cutind . '</span>';
+	return
+		($usetags ? ("<span title='" . htmlspecialchars ($string, ENT_QUOTES, 'UTF-8') . "'>") : '') .
+		str_replace (' ', '&nbsp;', htmlspecialchars (mb_substr ($string, 0, $maxlen - 1), ENT_QUOTES, 'UTF-8')) .
+		$cutind .
+		($usetags ? '</span>' : '');
 }
 
 // return a "?, ?, ?, ... ?, ?" string consisting of N question marks

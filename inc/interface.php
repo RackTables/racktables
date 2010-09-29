@@ -60,6 +60,17 @@ $dqtitle = array
 	'done' => 'Up to date',
 );
 
+// VST roles
+$port_role_options = array
+(
+	'none' => 'none',
+	'access' => 'user: access only',
+	'trunk' => 'user: trunk only',
+	'anymode' => 'user: any mode',
+	'uplink' => 'system: uplink trunk',
+	'downlink' => 'system: downlink trunk',
+);
+
 // Let's have it here, so extensions can add their own images.
 $image = array();
 $image['error']['path'] = 'pix/error.png';
@@ -1134,7 +1145,7 @@ function renderRackObject ($object_id)
 		$order = 'odd';
 		startPortlet ('Real server pools (' . count ($pools) . ')');
 		echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
-		echo "<tr><th>VS</th><th>RS pool</th><th>RS</th><th>VS config</th><th>RS config</th></tr>\n";
+		echo "<tr><th>VS</th><th>RS pool</th><th>RS</th><th>VS config</th><th>RS config</th><th>Prio</th></tr>\n";
 		foreach ($pools as $vs_id => $info)
 		{
  			echo "<tr valign=top class=row_${order}><td class=tdleft>";
@@ -1144,6 +1155,7 @@ function renderRackObject ($object_id)
  			echo '</td><td class=tdleft>' . $info['rscount'] . '</td>';
  			echo "<td class=slbconf>${info['vsconfig']}</td>";
  			echo "<td class=slbconf>${info['rsconfig']}</td>";
+			echo "<td class=slbconf>${info['prio']}</td>";
 			echo "</tr>\n";
 			$order = $nextorder[$order];
 		}
@@ -2048,7 +2060,7 @@ function renderRackspaceHistory ()
 	echo '</td></tr></table>';
 }
 
-function renderIPv4SpaceRecords ($tree, $baseurl, $target = 0, $level = 1)
+function renderIPv4SpaceRecords ($tree, $baseurl, $target = 0, $knight, $level = 1)
 {
 	$self = __FUNCTION__;
 	static $vdomlist = NULL;
@@ -2068,14 +2080,13 @@ function renderIPv4SpaceRecords ($tree, $baseurl, $target = 0, $level = 1)
 		$maxtotal = binInvMaskFromDec ($item['mask']) + 1;
 		if (isset ($item['id']))
 		{
+			$decor = array ('indent' => $level);
 			if ($item['symbol'] == 'node-collapsed')
-				$expandurl = "${baseurl}&eid=" . $item['id'] . "#netid" . $item['id'];
+				$decor['symbolurl'] = "${baseurl}&eid=" . $item['id'] . "#netid" . $item['id'];
 			elseif ($item['symbol'] == 'node-expanded')
-				$expandurl = $baseurl . ($item['parent_id'] ? "&eid=${item['parent_id']}#netid${item['parent_id']}" : '');
-			else
-				$expandurl = '';
+				$decor['symbolurl'] = $baseurl . ($item['parent_id'] ? "&eid=${item['parent_id']}#netid${item['parent_id']}" : '');
 			echo "<tr valign=top>";
-			printIPv4NetInfoTDs ($item, 'tdleft', $level, $item['symbol'], $expandurl);
+			printIPv4NetInfoTDs ($item, $decor);
 			echo "<td class=tdcenter>";
 			if ($target == $item['id'])
 				echo "<a name=netid${target}></a>";
@@ -2107,12 +2118,12 @@ function renderIPv4SpaceRecords ($tree, $baseurl, $target = 0, $level = 1)
 				printRoutersTD (findRouters ($item['addrlist']), getConfigVar ('IPV4_TREE_RTR_AS_CELL'));
 			echo "</tr>";
 			if ($item['symbol'] == 'node-expanded' or $item['symbol'] == 'node-expanded-static')
-				$self ($item['kids'], $baseurl, $target, $level + 1);
+				$self ($item['kids'], $baseurl, $target, $knight, $level + 1);
 		}
 		else
 		{
 			echo "<tr valign=top>";
-			printIPv4NetInfoTDs ($item, 'tdleft sparenetwork', $level, $item['symbol']);
+			printIPv4NetInfoTDs ($item, array ('indent' => $level, 'knight' => $knight, 'tdclass' => 'sparenetwork'));
 			echo "<td class=tdcenter>";
 			if (getConfigVar ('IPV4_TREE_SHOW_USAGE') == 'yes')
 			{
@@ -2132,7 +2143,9 @@ function renderIPv4Space ()
 {
 	global $pageno, $tabno;
 	$cellfilter = getCellFilter();
-	$netlist = filterCellList (listCells ('ipv4net'), $cellfilter['expression']);
+	$netlist = listCells ('ipv4net');
+	$allcount = count ($netlist);
+	$netlist = filterCellList ($netlist, $cellfilter['expression']);
 	array_walk ($netlist, 'amplifyCell');
 
 	$netcount = count ($netlist);
@@ -2168,12 +2181,27 @@ function renderIPv4Space ()
 		echo "<th>routed by</th>";
 	echo "</tr>\n";
 	$baseurl = makeHref(array('page'=>$pageno, 'tab'=>$tabno)) . $cellfilter['urlextra'];
-	renderIPv4SpaceRecords ($tree, $baseurl, $eid);
+	renderIPv4SpaceRecords ($tree, $baseurl, $eid, $netcount == $allcount and getConfigVar ('IPV4_ENABLE_KNIGHT') == 'yes');
 	echo "</table>\n";
 	finishPortlet();
 	echo '</td><td class=pcright>';
 	renderCellFilterPortlet ($cellfilter, 'ipv4net', $netlist);
 	echo "</td></tr></table>\n";
+}
+
+function renderSLBDefConfig()
+{
+	$defaults = getSLBDefaults ();
+	startPortlet ('SLB default configs');
+	echo '<table cellspacing=0 cellpadding=5 align=center>';
+	printOpFormIntro ('save');
+	echo '<tr><th class=tdright>VS config</th><td colspan=2><textarea tabindex=103 name=vsconfig rows=10 cols=80>' . htmlspecialchars($defaults['vs']) . '</textarea></td>';
+	echo '<td rowspan=2>';
+	printImageHREF ('SAVE', 'Save changes', TRUE);
+	echo '</td></tr>';
+	echo '<tr><th class=tdright>RS config</th><td colspan=2><textarea tabindex=104 name=rsconfig rows=10 cols=80>' . htmlspecialchars($defaults['rs']) . '</textarea></td></tr>';
+	echo '</form></table>';
+	finishPortlet();
 }
 
 function renderIPv4SLB ()
@@ -2320,7 +2348,10 @@ function renderIPv4SpaceEditor ()
 			}
 			echo '</td><td class=tdleft><a href="' . makeHref (array ('page' => 'ipv4net', 'id' => $netinfo['id'])) . '">';
 			echo "${netinfo['ip']}/${netinfo['mask']}</a></td>";
-			echo '<td class=tdleft>' . htmlspecialchars ($netinfo['name']) . '</td><td>';
+			echo '<td class=tdleft>' . niftyString ($netinfo['name']);
+			if (count ($netinfo['etags']))
+				echo '<br><small>' . serializeTags ($netinfo['etags']) . '</small>';
+			echo '</td><td>';
 			renderProgressBar ($maxdirect ? $used/$maxdirect : 0);
 			echo "<br><small>${used}/${maxdirect}" . ($maxdirect == $maxtotal ? '' : "/${maxtotal}") . '</small></td>';
 			echo '</tr>';
@@ -3007,6 +3038,12 @@ function renderSearchResults ()
 			$lasthit = 'rack';
 			$summary['rack'] = $tmp;
 		}
+		if (count ($tmp = getVLANSearchResult ($terms)))
+		{
+			$nhits += count ($tmp);
+			$lasthit = 'vlan';
+			$summary['vlan'] = $tmp;
+		}
 	}
 	if ($nhits == 0)
 		echo "<center><h2>Nothing found for '${terms}'</h2></center>";
@@ -3055,6 +3092,9 @@ function renderSearchResults ()
 				break;
 			case 'rack':
 				echo "<script language='Javascript'>document.location='index.php?page=rack&rack_id=${record['id']}';//</script>";
+				break;
+			case 'vlan':
+				echo "<script language='Javascript'>document.location='index.php?page=vlan&vlan_ck=${record}';//</script>";
 				break;
 		}
 		return;
@@ -3228,6 +3268,18 @@ function renderSearchResults ()
 						echo "<tr class=row_${order}><td class=tdleft>";
 						renderCell ($cell);
 						echo "</td></tr>";
+						$order = $nextorder[$order];
+					}
+					echo '</table>';
+					finishPortlet();
+					break;
+				case 'vlan':
+					startPortlet ("<a href='index.php?page=8021q'>VLANs</a>");
+					echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
+					foreach ($what as $vlan_ck)
+					{
+						echo "<tr class=row_${order}><td class=tdleft>";
+						echo formatVLANName (getVLANInfo ($vlan_ck), 'hyperlink') . "</td></tr>";
 						$order = $nextorder[$order];
 					}
 					echo '</table>';
@@ -4187,12 +4239,21 @@ function renderUIResetForm()
 function renderLVSConfig ($object_id)
 {
 	echo '<br>';
-	printOpFormIntro ('submitSLBConfig');
-	echo "<center><input type=submit value='Submit for activation'></center>";
-	echo "</form>";
-	echo '<pre>';
-	echo buildLVSConfig ($object_id);
-	echo '</pre>';
+	try
+	{
+		$config = buildLVSConfig ($object_id);
+
+		printOpFormIntro ('submitSLBConfig');
+		echo "<center><input type=submit value='Submit for activation'></center>";
+		echo "</form>";
+	}
+	catch(RTBuildLVSConfigError $e)
+	{
+		$config = $e->config_to_display;
+		foreach ($e->message_list as $msg)
+			echo '<div class="msg_error">' . $msg . '</div>';
+	}
+	echo "<pre>$config</pre>";
 }
 
 function renderVirtualService ($vsid)
@@ -4262,6 +4323,9 @@ function renderVirtualService ($vsid)
 					echo "<tr><th>VS config</th><td class='dashed slbconf'>${lbInfo['vsconfig']}</td></tr>";
 				if (strlen ($lbInfo['rsconfig']))
 					echo "<tr><th>RS config</th><td class='dashed slbconf'>${lbInfo['rsconfig']}</td></tr>";
+				if (strlen ($lbInfo['prio']))
+					echo "<tr><th>Prio</th><td class='dashed slbconf'>${lbInfo['prio']}</td></tr>";
+
 			}
 			echo '</table>';
 		}
@@ -4360,115 +4424,174 @@ function renderRSPoolLBForm ($pool_id)
 {
 	$poolInfo = spotEntity ('ipv4rspool', $pool_id);
 	amplifyCell ($poolInfo);
-
-	function printNewItemTR ()
+	$triplets = array();
+	$display_count = 0;
+	foreach ($poolInfo['lblist'] as $object_id => $vslist)
 	{
-		startPortlet ('Add new');
-		echo "<table cellspacing=0 cellpadding=5 align=center>";
-		printOpFormIntro ('addLB');
-		echo "<tr valign=top><th class=tdright>Load balancer</th><td class=tdleft>";
-		printSelect (getNarrowObjectList ('IPV4LB_LISTSRC'), array ('name' => 'object_id', 'tabindex' => 1));
-		echo '</td><td class=tdcenter valign=middle rowspan=2>';
-		printImageHREF ('ADD', 'Configure LB', TRUE, 5);
-		echo '</td></tr><tr><th class=tdright>Virtual service</th><td class=tdleft>';
-		printSelect (getIPv4VSOptions(), array ('name' => 'vs_id', 'tabindex' => 2));
-		echo "</td></tr>\n";
-		echo "<tr><th class=tdright>VS config</th><td colspan=2><textarea tabindex=3 name=vsconfig rows=10 cols=80></textarea></td></tr>";
-		echo "<tr><th class=tdright>RS config</th><td colspan=2><textarea tabindex=4 name=rsconfig rows=10 cols=80></textarea></td></tr>";
-
-
-		echo "</form></table>\n";
-		finishPortlet();
+		++$display_count;
+		foreach ($vslist as $vs_id => $configs)
+			$triplets[] = array(
+				'ids' => array(
+					object_id => $object_id,
+					vs_id => $vs_id,
+					pool_id => $pool_id
+				),
+				'rsconfig' => $configs['rsconfig'],
+				'vsconfig' => $configs['vsconfig'],
+				'prio' => $configs['prio']
+			);
 	}
-	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
-		printNewItemTR();
-	if (count ($poolInfo['lblist']))
-	{
-		startPortlet ('Manage existing (' . count ($poolInfo['lblist']) . ')');
-		echo "<table cellspacing=0 cellpadding=5 align=center class=cooltable>\n";
-		global $nextorder;
-		$order = 'odd';
-		foreach ($poolInfo['lblist'] as $object_id => $vslist)
-			foreach ($vslist as $vs_id => $configs)
-			{
-				printOpFormIntro ('updLB', array ('vs_id' => $vs_id, 'object_id' => $object_id));
-				echo "<tr valign=top class=row_${order}><td rowspan=2 class=tdright valign=middle><a href='".makeHrefProcess(array('op'=>'delLB', 'pool_id'=>$pool_id, 'object_id'=>$object_id, 'vs_id'=>$vs_id))."'>";
-				printImageHREF ('DELETE', 'Unconfigure');
-				echo "</a></td>";
-				echo "<td class=tdleft valign=bottom>";
-				renderLBCell ($object_id);
-				echo "</td><td>VS config &darr;<br><textarea name=vsconfig rows=5 cols=70>${configs['vsconfig']}</textarea></td>";
-				echo '<td class=tdleft rowspan=2 valign=middle>';
-				printImageHREF ('SAVE', 'Save changes', TRUE);
-				echo "</td></tr><tr class=row_${order}><td class=tdleft valign=top>";
-				renderCell (spotEntity ('ipv4vs', $vs_id));
-				echo '</td><td>';
-				echo "<textarea name=rsconfig rows=5 cols=70>${configs['rsconfig']}</textarea><br>RS config &uarr;";
-				echo '</td></tr></form>';
-				$order = $nextorder[$order];
-			}
-		echo "</table>\n";
-		finishPortlet();
-	}
-	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')
-		printNewItemTR();
+	renderSLBTriplets('object', 'ipv4vs', $triplets, $display_count);
 }
 
 function renderVServiceLBForm ($vs_id)
 {
-	global $nextorder;
 	$vsinfo = spotEntity ('ipv4vs', $vs_id);
 	amplifyCell ($vsinfo);
+	$triplets = array();
+	$display_count = 0;
+	foreach ($vsinfo['rspool'] as $pool_id => $rspinfo)
+	{
+		++$display_count;
+		foreach ($rspinfo['lblist'] as $object_id => $configs)
+			$triplets[] = array(
+				'ids' => array(
+					object_id => $object_id,
+					vs_id => $vs_id,
+					pool_id => $pool_id
+				),
+				'rsconfig' => $configs['rsconfig'],
+				'vsconfig' => $configs['vsconfig'],
+				'prio' => $configs['prio']
+			);
+	}
+	renderSLBTriplets('object', 'ipv4rspool', $triplets, $display_count);
+}
 
-	function printNewItemTR ()
+function renderObjectSLB ($object_id)
+{
+	$focus = spotEntity ('object', $object_id);
+	amplifyCell ($focus);
+	$triplets = array();
+	foreach ($focus['ipv4rspools'] as $vs_id => $vsinfo)
+		$triplets[] = array(
+			'ids' => array(
+				object_id => $object_id,
+				vs_id => $vs_id,
+				pool_id => $vsinfo['pool_id']
+			),
+			'rsconfig' => $vsinfo['rsconfig'],
+			'vsconfig' => $vsinfo['vsconfig'],
+			'prio' => $vsinfo['prio']
+		);
+	$display_count = count($triplets);
+	renderSLBTriplets('ipv4vs', 'ipv4rspool', $triplets, $display_count);
+}
+
+// called exclusively by renderSLBTriplets. Renders form to add new SLB link.
+// realms 1 and 2 are realms to draw inputs for
+function renderNewSLBItemForm ($realm1, $realm2)
+{
+	function print_realm_select_input($realm)
 	{
-		startPortlet ('Add new');
-		echo '<table cellspacing=0 cellpadding=5 align=center>';
-		printOpFormIntro ('addLB');
-		echo '<tr valign=top><th class=tdright>Load balancer</th><td class=tdleft>';
-		printSelect (getNarrowObjectList ('IPV4LB_LISTSRC'), array ('name' => 'object_id', 'tabindex' => 101));
-		echo '</td><td rowspan=2 class=tdcenter valign=middle>';
-		printImageHREF ('ADD', 'Configure LB', TRUE, 105);
-		echo '</td></tr><tr><th class=tdright>RS pool</th><td class=tdleft>';
-		printSelect (getIPv4RSPoolOptions(), array ('name' => 'pool_id', 'tabindex' => 102));
-		echo '</td></tr>';
-		echo '<tr><th class=tdright>VS config</th><td colspan=2><textarea tabindex=103 name=vsconfig rows=10 cols=80></textarea></td></tr>';
-		echo '<tr><th class=tdright>RS config</th><td colspan=2><textarea tabindex=104 name=rsconfig rows=10 cols=80></textarea></td></tr>';
-		echo '</form></table>';
-		finishPortlet();
+		switch ($realm)
+		{
+			case 'object':
+				echo "<tr valign=top><th class=tdright>Load balancer</th><td class=tdleft>";
+				printSelect (getNarrowObjectList ('IPV4LB_LISTSRC'), array ('name' => 'object_id', 'tabindex' => 1));
+				break;
+			case 'ipv4vs':
+				echo '</td></tr><tr><th class=tdright>Virtual service</th><td class=tdleft>';
+				printSelect (getIPv4VSOptions(), array ('name' => 'vs_id', 'tabindex' => 2));
+				break;
+			case 'ipv4rspool':
+				echo '</td></tr><tr><th class=tdright>RS pool</th><td class=tdleft>';
+				printSelect (getIPv4RSPoolOptions(), array ('name' => 'pool_id', 'tabindex' => 102));
+				break;
+			default:
+				throw new InvalidArgException('realm', $realm);
+		}
 	}
+
+	startPortlet ('Add new');
+	echo "<table cellspacing=0 cellpadding=5 align=center>";
+	printOpFormIntro ('addLB');
+	print_realm_select_input($realm1);
+	echo '</td><td class=tdcenter valign=middle rowspan=2>';
+	printImageHREF ('ADD', 'Configure LB', TRUE, 5);
+	print_realm_select_input($realm2);
+	echo "</td></tr>\n";
+	echo "<tr><th class=tdright>VS config</th><td colspan=2><textarea tabindex=3 name=vsconfig rows=10 cols=80></textarea></td></tr>";
+	echo "<tr><th class=tdright>RS config</th><td colspan=2><textarea tabindex=4 name=rsconfig rows=10 cols=80></textarea></td></tr>";
+	echo "<tr><th class=tdright>Priority</th><td class=tdleft colspan=2><input tabindex=5 name=prio size=10></td></tr>";
+	echo "</form></table>\n";
+	finishPortlet();
+}
+
+// renders a list of slb links. it is called from 3 different pages, wich compute their links lists differently.
+// each triplet in $triplets array contains balancer id, pool id, VS id and config values for triplet: RS, VS configs and pair.
+// realms 1 and 2 are needed to indicate the order of displaying cells in left column.
+// e.g. if we draw a RS pool page, realm1 should be set to 'object'(balancer), realm2 - to 'ipv4vs'
+function renderSLBTriplets ($realm1, $realm2, $triplets, $display_count) {
+	function get_object_id_by_realm($realm, $triplet)
+	{
+		switch ($realm) {
+			case 'object':
+				$key ='object_id';
+				break;
+			case 'ipv4vs':
+				$key = 'vs_id';
+				break;
+			case 'ipv4rspool':
+				$key = 'pool_id';
+				break;
+			default:
+				throw new InvalidArgException('realm', $realm);
+		}
+		return $triplet['ids'][$key];
+	}
+
 	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
-		printNewItemTR();
-	if (count ($vsinfo['rspool']))
-	{
-		startPortlet ('Manage existing (' . count ($vsinfo['rspool']) . ')');
-		echo '<table cellspacing=0 cellpadding=5 align=center class=cooltable>';
+		renderNewSLBItemForm($realm1, $realm2);
+
+	if (count($triplets)) {
+		startPortlet ('Manage existing (' . $display_count . ')');
+		echo "<table cellspacing=0 cellpadding=5 align=center class=cooltable>\n";
+
+		echo "<table cellspacing=0 cellpadding=5 align=center class=cooltable>\n";
+		global $nextorder;
 		$order = 'odd';
-		foreach ($vsinfo['rspool'] as $pool_id => $rspinfo)
-			foreach ($rspinfo['lblist'] as $object_id => $configs)
-			{
-				printOpFormIntro ('updLB', array ('pool_id' => $pool_id, 'object_id' => $object_id));
-				echo "<tr valign=middle class=row_${order}><td rowspan=2>";
-				echo "<a href='".makeHrefProcess(array('op'=>'delLB', 'pool_id'=>$pool_id, 'object_id'=>$object_id, 'vs_id'=>$vs_id))."'>";
-				printImageHREF ('DELETE', 'Unconfigure');
-				echo "</a></td>";
-				echo '<td class=tdleft valign=bottom>';
-				renderLBCell ($object_id);
-				echo "</td><td>VS config &darr;<br><textarea name=vsconfig rows=5 cols=70>${configs['vsconfig']}</textarea></td>";
-				echo '<td rowspan=2>';
-				printImageHREF ('SAVE', 'Save changes', TRUE);
-				echo '</td></tr>';
-				echo "<tr class=row_${order}><td valign=top>";
-				renderCell (spotEntity ('ipv4rspool', $pool_id));
-				echo "</td><td><textarea name=rsconfig rows=5 cols=70>${configs['rsconfig']}</textarea><br>";
-				echo 'RS config &uarr;</td></tr></form>';
-				$order = $nextorder[$order];
-			}
-		echo '</table>';
+		$i = 0;
+		foreach ($triplets as $slb)
+		{
+			++$i;
+			$del_params = $slb['ids'];
+			$del_params['op'] = 'delLB';
+			printOpFormIntro ('updLB', $slb['ids']);
+			echo "<tr valign=top class=row_${order}><td rowspan=2 class=tdright valign=middle><a href='".makeHrefProcess($del_params)."'>";
+			printImageHREF ('DELETE', 'Unconfigure');
+			echo "</a></td>";
+			echo "<td class=tdleft valign=bottom>";
+			renderSLBEntityCell ($realm1, get_object_id_by_realm($realm1, $slb));
+			echo "</td><td>VS config &darr;<br><textarea name=vsconfig rows=5 cols=70>${slb['vsconfig']}</textarea></td>";
+			echo '<td class=tdleft rowspan=2 valign=middle>';
+			printImageHREF ('SAVE', 'Save changes', TRUE);
+			echo "</td></tr><tr class=row_${order}><td class=tdleft valign=top>";
+			renderSLBEntityCell ($realm2, get_object_id_by_realm($realm2, $slb));
+			echo '</td><td>';
+			echo "<textarea name=rsconfig rows=5 cols=70>${slb['rsconfig']}</textarea><br>RS config &uarr;";
+			$prio_id = "prio-$i";
+			$prio_value = htmlspecialchars($slb['prio']);
+			echo "<div style='float:left; margin-top:10px'><input name=prio type=text size=10 id=\"$prio_id\" value=\"$prio_value\"><label for=\"$prio_id\"> &larr; Priority (integer)</label></div>";
+			echo '</td></tr></form>';
+			$order = $nextorder[$order];
+		}
+		echo "</table>\n";
 		finishPortlet();
 	}
+
 	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')
-		printNewItemTR();
+		renderNewSLBItemForm($realm1, $realm2);
 }
 
 function renderRSPool ($pool_id)
@@ -4504,7 +4627,7 @@ function renderRSPool ($pool_id)
 
 	startPortlet ('Load balancers (' . count ($poolInfo['lblist']) . ')');
 	echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
-	echo "<tr><th>VS</th><th>LB</th><th>VS config</th><th>RS config</th></tr>";
+	echo "<tr><th>VS</th><th>LB</th><th>VS config</th><th>RS config</th><th>Prio</th></tr>";
 	$order = 'odd';
 	foreach ($poolInfo['lblist'] as $object_id => $vslist)
 		foreach ($vslist as $vs_id => $configs)
@@ -4514,7 +4637,8 @@ function renderRSPool ($pool_id)
 		echo "</td><td>";
 		renderLBCell ($object_id);
 		echo "</td><td class=slbconf>${configs['vsconfig']}</td>";
-		echo "<td class=slbconf>${configs['rsconfig']}</td></tr>\n";
+		echo "<td class=slbconf>${configs['rsconfig']}</td>\n";
+		echo "<td class=slbconf>${configs['prio']}</td></tr>\n";
 		$order = $nextorder[$order];
 	}
 	echo "</table>\n";
@@ -4980,15 +5104,21 @@ function renderTagCheckbox ($inputname, $preselect, $taginfo, $refcnt_realm = ''
 	if (tagOnChain ($taginfo, $preselect))
 	{
 		$selected = ' checked';
-		$class = 'seltagbox';
+		$td_class = 'seltagbox';
 	}
 	else
 	{
 		$selected = '';
-		$class = 'tagbox';
+		$td_class = 'tagbox';
 	}
-	echo "<tr><td colspan=2 class=${class} style='padding-left: " . ($level * 16) . "px;'>";
-	echo "<label><input type=checkbox class='tag-cb' name='${inputname}[]' value='${taginfo['id']}'${selected}> ";
+	// calculate html classnames for separators feature 
+	static $is_first_time = TRUE;
+	$input_class = 'tag-cb' . ($level == 0 ? ' root' : '');
+	$tr_class = ($level == 0 && $taginfo['id'] > 0 && !$is_first_time ? 'separator' : '');
+	$is_first_time = FALSE;
+	
+	echo "<tr class='$tr_class'><td colspan=2 class='$td_class' style='padding-left: " . ($level * 16) . "px;'>";
+	echo "<label><input type=checkbox class='$input_class' name='${inputname}[]' value='${taginfo['id']}'${selected}> ";
 	echo $taginfo['tag'];
 	if (strlen ($refcnt_realm) and isset ($taginfo['refcnt'][$refcnt_realm]))
 		echo ' <i>(' . $taginfo['refcnt'][$refcnt_realm] . ')</i>';
@@ -5001,7 +5131,8 @@ function renderTagCheckbox ($inputname, $preselect, $taginfo, $refcnt_realm = ''
 function renderEntityTagsPortlet ($title, $tags, $preselect, $realm)
 {
 	startPortlet ($title);
-	echo '<table border=0 cellspacing=0 cellpadding=3 align=center>';
+	echo  '<a class="toggleTreeMode" style="display:none" href="#"></a>';
+	echo '<table border=0 cellspacing=0 cellpadding=3 align=center class="tagtree">';
 	printOpFormIntro ('saveTags');
 	foreach ($tags as $taginfo)
 		renderTagCheckbox ('taglist', $preselect, $taginfo, $realm);
@@ -5031,15 +5162,22 @@ function renderEntityTags ($entity_id)
 		// It could happen, that none of existing tags have been used in the current realm.
 		if (count ($minilist))
 		{
-			echo '<td class=pcleft width="50%">';
-			renderEntityTagsPortlet ('Quick list', $minilist, $target_given_tags, $etype_by_pageno[$pageno]);
-			echo '</td>';
+			$js_code = "<script type=\"text/javascript\">\ntagShortList = {";
+			$is_first = TRUE;
+			foreach($minilist as $tag) {
+				if (! $is_first)
+					$js_code .= ",";
+				$is_first = FALSE;
+				$js_code .= "\n\t${tag['id']} : 1";
+			}
+			$js_code .= "\n};\n$(document).ready(compactTreeMode);\n</script>";
+			echo $js_code;
 		}
 	}
 
 	// do not do anything about empty tree, trigger function ought to work this out
 	echo '<td class=pcright>';
-	renderEntityTagsPortlet ('Full tree', $tagtree, $target_given_tags, $etype_by_pageno[$pageno]);
+	renderEntityTagsPortlet ('Tag tree', $tagtree, $target_given_tags, $etype_by_pageno[$pageno]);
 	echo '</td>';
 
 	echo '</tr></table>';
@@ -5077,7 +5215,7 @@ function renderCellFilterPortlet ($preselect, $realm, $cell_list = array(), $byp
 	$title = $filterc ? "filters (${filterc})" : 'filters';
 	startPortlet ($title);
 	echo "<form method=get>\n";
-	echo '<table border=0 align=center>';
+	echo '<table border=0 align=center cellspacing=0 class="tagtree">';
 	$ruler = "<tr><td colspan=2 class=tagbox><hr></td></tr>\n";
 	$hr = '';
 	// "reset filter" button only gets active when a filter is applied
@@ -5209,7 +5347,7 @@ function renderNewEntityTags ($for_realm = '')
 		echo "No tags defined";
 		return;
 	}
-	echo '<div class=tagselector><table border=0 align=center>';
+	echo '<div class=tagselector><table border=0 align=center cellspacing=0 class="tagtree">';
 	foreach ($tagtree as $taginfo)
 		renderTagCheckbox ('taglist', array(), $taginfo, $for_realm);
 	echo '</table></div>';
@@ -5231,63 +5369,6 @@ function renderTagRollerForRow ($row_id)
 	echo "<tr><th>Control question: the sum of ${a} and ${b}</th><td><input type=text name=sum></td></tr>";
 	echo "<tr><td colspan=2 align=center><input type=submit value='Go!'></td></tr>";
 	echo "</table></form>";
-}
-
-function renderObjectSLB ($object_id)
-{
-	function printNewItemTR ()
-	{
-		startPortlet ('Add new');
-		echo '<table cellspacing=0 cellpadding=5 align=center>';
-		printOpFormIntro ('addLB');
-		echo '<tr><th class=tdright>Virtual service</th><td class=tdleft>';
-		printSelect (getIPv4VSOptions(), array ('name' => 'vs_id', 'tabindex' => 101));
-		echo '</td><td class=tdcenter valign=middle rowspan=2>';
-		printImageHREF ('ADD', 'Configure LB', TRUE, 105);
-		echo '</td></tr>';
-		echo '</tr><th class=tdright>RS pool</th><td class=tdleft>';
-		printSelect (getIPv4RSPoolOptions(), array ('name' => 'pool_id', 'tabindex' => 102));
-		echo "</td></tr>";
-		echo '<tr><th class=tdright>VS config</th><td colspan=2><textarea tabindex=103 name=vsconfig rows=10 cols=80></textarea></td></tr>';
-		echo '<tr><th class=tdright>RS config</th><td colspan=2><textarea tabindex=104 name=rsconfig rows=10 cols=80></textarea></td></tr>';
-		echo '</form></table>';
-		finishPortlet();
-	}
-	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
-		printNewItemTR();
-
-	$focus = spotEntity ('object', $object_id);
-	amplifyCell ($focus);
-	if (count ($focus['ipv4rspools']))
-	{
-		startPortlet ('Manage existing (' . count ($focus['ipv4rspools']) . ')');
-		echo '<table cellspacing=0 cellpadding=5 align=center class=cooltable>';
-		$order = 'odd';
-		global $nextorder;
-		foreach ($focus['ipv4rspools'] as $vs_id => $vsinfo)
-		{
-			printOpFormIntro ('updLB', array ('vs_id' => $vs_id, 'pool_id' => $vsinfo['pool_id']));
-			echo "<tr class=row_${order}><td rowspan=2 valign=center><a href='".makeHrefProcess(array('op'=>'delLB', 'pool_id'=>$vsinfo['pool_id'], 'object_id'=>$object_id, 'vs_id'=>$vs_id))."'>";
-			printImageHREF ('DELETE', 'Unconfigure');
-			echo "</a></td>";
-			echo "</td><td class=tdleft valign=bottom>";
-			renderCell (spotEntity ('ipv4vs', $vs_id));
-			echo '</td>';
-			echo "<td>VS config &darr;<br><textarea name=vsconfig rows=5 cols=70>${vsinfo['vsconfig']}</textarea></td>";
-			echo "<td rowspan=2 valign=middle>";
-			printImageHREF ('SAVE', 'Save changes', TRUE);
-			echo '</td></tr>';
-			echo "<tr class=row_${order}><td valign=top>";
-			renderCell (spotEntity ('ipv4rspool', $vsinfo['pool_id']));
-			echo "</td><td><textarea name=rsconfig rows=5 cols=70>${vsinfo['rsconfig']}</textarea><br>RS config &uarr;</td></tr>";
-			echo '</form>';
-			$order = $nextorder[$order];
-		}
-		echo "</table>\n";
-		finishPortlet();
-	}
-	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')
-		printNewItemTR();
 }
 
 function renderEditRSPool ($pool_id)
@@ -5809,20 +5890,23 @@ function printRoutersTD ($rlist, $as_cell = 'yes')
 }
 
 // Same as for routers, but produce two TD cells to lay the content out better.
-function printIPv4NetInfoTDs ($netinfo, $tdclass = 'tdleft', $indent = 0, $symbol = 'spacer', $symbolurl = '')
+function printIPv4NetInfoTDs ($netinfo, $decor = array())
 {
-	if ($symbol == 'spacer')
+	if ($netinfo['symbol'] == 'spacer')
 	{
-		$indent++;
-		$symbol = '';
+		$decor['indent']++;
+		$netinfo['symbol'] = '';
 	}
-	echo "<td class='${tdclass}' style='padding-left: " . ($indent * 16) . "px;'>";
-	if (strlen ($symbol))
+	echo '<td class="tdleft';
+	if (array_key_exists ('tdclass', $decor))
+		echo ' ' . $decor['tdclass'];
+	echo '" style="padding-left: ' . ($decor['indent'] * 16) . 'px;">';
+	if (strlen ($netinfo['symbol']))
 	{
-		if (strlen ($symbolurl))
-			echo "<a href='${symbolurl}'>";
-		printImageHREF ($symbol, $symbolurl);
-		if (strlen ($symbolurl))
+		if (array_key_exists ('symbolurl', $decor))
+			echo "<a href='${decor['symbolurl']}'>";
+		printImageHREF ($netinfo['symbol']);
+		if (array_key_exists ('symbolurl', $decor))
 			echo '</a>';
 	}
 	if (isset ($netinfo['id']))
@@ -5830,11 +5914,14 @@ function printIPv4NetInfoTDs ($netinfo, $tdclass = 'tdleft', $indent = 0, $symbo
 	echo "${netinfo['ip']}/${netinfo['mask']}";
 	if (isset ($netinfo['id']))
 		echo '</a>';
-	echo "</td><td class='${tdclass}'>";
+	echo '</td><td class="tdleft';
+	if (array_key_exists ('tdclass', $decor))
+		echo ' ' . $decor['tdclass'];
+	echo '">';
 	if (!isset ($netinfo['id']))
 	{
 		printImageHREF ('dragons', 'Here be dragons.');
-		if (getConfigVar ('IPV4_ENABLE_KNIGHT') == 'yes')
+		if ($decor['knight'])
 		{
 			echo '<a href="' . makeHref (array
 			(
@@ -5933,12 +6020,25 @@ function renderCell ($cell)
 		echo "<table class='slbcell vscell'><tr><td rowspan=3 width='5%'>";
 		printImageHREF ('NET');
 		echo '</td>';
-		echo "<td><a href='index.php?page=ipv4net&id=${cell['id']}'>${cell['ip']}/${cell['mask']}</a></td></tr>";
+		echo "<td><a href='index.php?page=ipv4net&id=${cell['id']}'>${cell['ip']}/${cell['mask']}</a>";
+		if (getConfigVar ('IPV4_TREE_SHOW_USAGE') == 'yes')
+		{
+			countOwnIPv4Addresses ($cell);
+			loadOwnIPv4Addresses ($cell);
+			$used = $cell['addrc'];
+			$maxdirect = $cell['addrt'];
+			echo '<div class="net-usage">';
+			echo "<small>$used/$maxdirect</small> ";
+			renderProgressBar ($maxdirect ? $used/$maxdirect : 0);
+			echo '</div>';
+		}
+		echo '</td></tr>';
+
 		if (strlen ($cell['name']))
 			echo "<tr><td><strong>" . niftyString ($cell['name']) . "</strong></td></tr>";
 		else
 			echo "<tr><td class=sparenetwork>no name</td></tr>";
-		echo '<td>';
+		echo '<tr><td>';
 		echo count ($cell['etags']) ? ("<small>" . serializeTags ($cell['etags']) . "</small>") : '&nbsp;';
 		echo "</td></tr></table>";
 		break;
@@ -5982,6 +6082,23 @@ function renderLBCell ($object_id)
 	if (count ($oi['etags']))
 		echo '<small>' . serializeTags ($oi['etags']) . '</small>';
 	echo "</td></tr></table>";
+}
+
+function renderSLBEntityCell ($realm, $object_id)
+{
+	switch($realm)
+	{
+		case 'object':
+			renderLBCell($object_id);
+			break;
+		case 'ipv4vs':
+		case 'ipv4rspool':
+			$cell = spotEntity ($realm, $object_id);
+			renderCell($cell);
+			break;
+		default:
+			throw new InvalidArgException('realm', $realm);
+	}
 }
 
 function renderRouterCell ($dottedquad, $ifname, $cell)
@@ -6337,7 +6454,7 @@ function dynamic_title_decoder ($path_position)
 			throw new EntityNotFoundException ('VLAN domain', $vdom_id);
 		return array
 		(
-			'name' => niftyString ("domain '" . $vdlist[$vdom_id] . "'"),
+			'name' => niftyString ("domain '" . $vdlist[$vdom_id] . "'", 20, FALSE),
 			'params' => array ('vdom_id' => $vdom_id)
 		);
 	case 'vlan':
@@ -6741,7 +6858,7 @@ function renderVLANDomain ($vdom_id)
 		global $vtdecoder;
 		echo '<table class=cooltable align=center border=0 cellpadding=5 cellspacing=0>';
 		echo '<tr><th>VLAN ID</th><th>propagation</th><th>';
-		printImageHREF ('net');
+		printImageHREF ('net', 'IPv4 networks linked');
 		echo '</th><th>ports</th><th>description</th></tr>';
 		foreach ($myvlans as $vlan_id => $vlan_info)
 		{
@@ -7627,6 +7744,7 @@ function renderVST ($vst_id)
 		startPortlet ('no rules');
 	else
 	{
+		global $port_role_options;
 		startPortlet ('rules (' . count ($vst['rules']) . ')');
 		echo '<table class=cooltable align=center border=0 cellpadding=5 cellspacing=0>';
 		echo '<tr><th>sequence</th><th>regexp</th><th>role</th><th>VLAN IDs</th><th>comment</th></tr>';
@@ -7636,7 +7754,7 @@ function renderVST ($vst_id)
 			echo "<tr class=row_${order} align=left>";
 			echo "<td>${item['rule_no']}</td>";
 			echo "<td><tt>${item['port_pcre']}</tt></td>";
-			echo "<td>${item['port_role']}</td>";
+			echo '<td>' . $port_role_options[$item['port_role']] . '</td>';
 			echo "<td>${item['wrt_vlans']}</td>";
 			echo "<td>${item['description']}</td>";
 			echo '</tr>';
@@ -7702,15 +7820,7 @@ function renderVSTRulesEditor ($vst_id)
 	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
 	echo '<tr><th>&nbsp;</th><th>sequence</th><th>regexp</th><th>role</th>';
 	echo '<th>VLAN IDs</th><th>comment</th><th>&nbsp;</th></tr>';
-	$port_role_options = array
-	(
-		'none' => 'none',
-		'access' => 'user: access only',
-		'trunk' => 'user: trunk only',
-		'anymode' => 'user: any mode',
-		'uplink' => 'system: uplink trunk',
-		'downlink' => 'system: downlink trunk',
-	);
+	global $port_role_options;
 	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
 		printNewItemTR ($port_role_options);
 	foreach ($vst['rules'] as $item)
