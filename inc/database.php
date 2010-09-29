@@ -155,6 +155,8 @@ $tablemap_8021q = array
 	),
 );
 
+$object_attribute_cache = array();
+
 function escapeString ($value, $do_db_escape = FALSE)
 {
 	$ret = htmlspecialchars ($value, ENT_QUOTES, 'UTF-8');
@@ -241,12 +243,13 @@ function listCells ($realm, $parent_id = 0)
 	if (!isset ($SQLSchema[$realm]))
 		throw new InvalidArgException ('realm', $realm);
 	$SQLinfo = $SQLSchema[$realm];
-	$qparams = array ($realm);
-	$query = 'SELECT tag_id';
+	$qparams = array ();
+	$query = 'SELECT ';
 	foreach ($SQLinfo['columns'] as $alias => $expression)
 		// Automatically prepend table name to each single column, but leave all others intact.
-		$query .= ', ' . ($alias == $expression ? "${SQLinfo['table']}.${alias}" : "${expression} as ${alias}");
-	$query .= " FROM ${SQLinfo['table']} LEFT JOIN TagStorage on entity_realm = ? and entity_id = ${SQLinfo['table']}.${SQLinfo['keycolumn']}";
+		$query .= ($alias == $expression ? "${SQLinfo['table']}.${alias}" : "${expression} as ${alias}") . ', ';
+	$query = trim($query, ', ');
+	$query .= " FROM ${SQLinfo['table']}";
 	if (isset ($SQLinfo['pidcolumn']) and $parent_id)
 	{
 		$query .= " WHERE ${SQLinfo['table']}.${SQLinfo['pidcolumn']} = ?";
@@ -255,32 +258,27 @@ function listCells ($realm, $parent_id = 0)
 	$query .= " ORDER BY ";
 	foreach ($SQLinfo['ordcolumns'] as $oc)
 		$query .= "${oc}, ";
-	$query .= " tag_id";
+	$query = trim($query, ', ');
 	$result = usePreparedSelectBlade ($query, $qparams);
 	$ret = array();
-	global $taglist;
 	// Index returned result by the value of key column.
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
 		$entity_id = $row[$SQLinfo['keycolumn']];
-		// Init the first record anyway, but store tag only if there is one.
-		if (!isset ($ret[$entity_id]))
-		{
-			$ret[$entity_id] = array ('realm' => $realm);
-			foreach (array_keys ($SQLinfo['columns']) as $alias)
-				$ret[$entity_id][$alias] = $row[$alias];
-			$ret[$entity_id]['etags'] = array();
-			if ($row['tag_id'] != NULL && isset ($taglist[$row['tag_id']]))
-				$ret[$entity_id]['etags'][] = array
-				(
-					'id' => $row['tag_id'],
-					'tag' => $taglist[$row['tag_id']]['tag'],
-					'parent_id' => $taglist[$row['tag_id']]['parent_id'],
-				);
-		}
-		elseif (isset ($taglist[$row['tag_id']]))
-			// Meeting existing key later is always more tags on existing list.
-			$ret[$entity_id]['etags'][] = array
+		$ret[$entity_id] = array ('realm' => $realm);
+		$ret[$entity_id]['etags'] = array();
+		foreach (array_keys ($SQLinfo['columns']) as $alias)
+			$ret[$entity_id][$alias] = $row[$alias];
+	}
+
+	// select tags and link them to previosly fetched entities
+	$query = 'SELECT entity_id, tag_id FROM TagStorage WHERE entity_realm = ?';
+	$result = usePreparedSelectBlade ($query, array($realm));
+	global $taglist;
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
+	{
+		if (array_key_exists($row['entity_id'], $ret))
+			$ret[$row['entity_id']]['etags'][] = array
 			(
 				'id' => $row['tag_id'],
 				'tag' => $taglist[$row['tag_id']]['tag'],
@@ -290,6 +288,8 @@ function listCells ($realm, $parent_id = 0)
 	// Add necessary finish to the list before returning it. Maintain caches.
 	if (!$parent_id)
 		unset ($entityCache['partial'][$realm]);
+	if ($realm == 'object') // cache all attributes of all objects to speed up autotags calculation
+		cacheAllObjectsAttributes();
 	foreach (array_keys ($ret) as $entity_id)
 	{
 		$ret[$entity_id]['etags'] = getExplicitTagsOnly ($ret[$entity_id]['etags']);
@@ -2054,26 +2054,44 @@ function commitReduceAttrMap ($attr_id = 0, $objtype_id)
 	return usePreparedDeleteBlade ('AttributeMap', array ('attr_id' => $attr_id, 'objtype_id' => $objtype_id));
 }
 
-// This function returns all optional attributes for requested object
-// as an array of records. NULL is returned on error and empty array
-// is returned, if there are no attributes found.
-function getAttrValues ($object_id)
+function cacheAllObjectsAttributes()
+{
+	global $object_attribute_cache;
+	$object_attribute_cache = fetchAttrsForObjects(NULL);
+}
+
+// Fetches a list of attributes for each object in $object_set array.
+// If $object_set is not set, returns attributes for all objects in DB
+// Returns an array with object_id keys
+function fetchAttrsForObjects($object_set)
 {
 	$ret = array();
-	$result = usePreparedSelectBlade
-	(
-		"select A.id as attr_id, A.name as attr_name, A.type as attr_type, C.name as chapter_name, " .
-		"C.id as chapter_id, AV.uint_value, AV.float_value, AV.string_value, D.dict_value from " .
-		"RackObject as RO inner join AttributeMap as AM on RO.objtype_id = AM.objtype_id " .
-		"inner join Attribute as A on AM.attr_id = A.id " .
+	$query =
+		"select AV.attr_id, A.name as attr_name, A.type as attr_type, C.name as chapter_name, " .
+		"C.id as chapter_id, AV.uint_value, AV.float_value, AV.string_value, D.dict_value, RO.id as object_id from " .
+		"RackObject as RO left join AttributeMap as AM on RO.objtype_id = AM.objtype_id " .
+		"left join Attribute as A on AM.attr_id = A.id " .
 		"left join AttributeValue as AV on AV.attr_id = AM.attr_id and AV.object_id = RO.id " .
 		"left join Dictionary as D on D.dict_key = AV.uint_value and AM.chapter_id = D.chapter_id " .
-		"left join Chapter as C on AM.chapter_id = C.id " .
-		"where RO.id = ? order by A.name, A.type",
-		array ($object_id)
-	);
+		"left join Chapter as C on AM.chapter_id = C.id";
+	if (is_array ($object_set) && !empty ($object_set))
+	{
+		$query .= ' WHERE RO.id IN (';
+		foreach ($object_set as $object_id)
+			$query .= intval ($object_id) . ', ';
+		$query = trim ($query, ', ') . ')';
+	}
+
+	$result = usePreparedSelectBlade ($query);
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
+		$object_id = $row['object_id'];
+		$attr_id = $row['attr_id'];
+		if (!array_key_exists ($object_id, $ret))
+			$ret[$object_id] = array();
+		if (! isset($attr_id))
+			continue;
+
 		$record = array();
 		$record['id'] = $row['attr_id'];
 		$record['name'] = $row['attr_name'];
@@ -2096,10 +2114,31 @@ function getAttrValues ($object_id)
 				$record['value'] = NULL;
 				break;
 		}
-		$ret[$row['attr_id']] = $record;
+		$ret[$object_id][$attr_id] = $record;
 	}
 	$result->closeCursor();
 	return $ret;
+}
+
+// This function returns all optional attributes for requested object
+// as an array of records. NULL is returned on error and empty array
+// is returned, if there are no attributes found.
+function getAttrValues ($object_id)
+{
+	global $object_attribute_cache;
+	if (isset ($object_attribute_cache[$object_id]))
+		return $object_attribute_cache[$object_id];
+
+	$ret = fetchAttrsForObjects(array($object_id));
+	$attrs = array();
+	if (empty($ret))
+		return NULL;
+	else
+	{
+		$attrs = $ret[$object_id];
+		$object_attribute_cache[$object_id] = $attrs;
+		return $attrs;
+	}
 }
 
 function commitResetAttrValue ($object_id = 0, $attr_id = 0)

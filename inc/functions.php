@@ -988,6 +988,12 @@ function generateEntityAutoTags ($cell)
 				$ret[] = array ('tag' => '$no_asset_tag');
 			if ($cell['runs8021Q'])
 				$ret[] = array ('tag' => '$runs_8021Q');
+
+			// dictionary attribute autotags '$attr_X_Y'
+			$attrs = getAttrValues($cell['id']);
+			foreach ($attrs as $attr_id => $attr_record)
+				if (isset($attr_record['chapter_id']))
+					$ret[] = array ('tag' => "\$attr_{$attr_id}_{$attr_record['key']}");
 			break;
 		case 'ipv4net':
 			$ret[] = array ('tag' => '$ip4netid_' . $cell['id']);
