@@ -2060,7 +2060,7 @@ function renderRackspaceHistory ()
 	echo '</td></tr></table>';
 }
 
-function renderIPv4SpaceRecords ($tree, $baseurl, $target = 0, $level = 1)
+function renderIPv4SpaceRecords ($tree, $baseurl, $target = 0, $knight, $level = 1)
 {
 	$self = __FUNCTION__;
 	static $vdomlist = NULL;
@@ -2080,14 +2080,13 @@ function renderIPv4SpaceRecords ($tree, $baseurl, $target = 0, $level = 1)
 		$maxtotal = binInvMaskFromDec ($item['mask']) + 1;
 		if (isset ($item['id']))
 		{
+			$decor = array ('indent' => $level);
 			if ($item['symbol'] == 'node-collapsed')
-				$expandurl = "${baseurl}&eid=" . $item['id'] . "#netid" . $item['id'];
+				$decor['symbolurl'] = "${baseurl}&eid=" . $item['id'] . "#netid" . $item['id'];
 			elseif ($item['symbol'] == 'node-expanded')
-				$expandurl = $baseurl . ($item['parent_id'] ? "&eid=${item['parent_id']}#netid${item['parent_id']}" : '');
-			else
-				$expandurl = '';
+				$decor['symbolurl'] = $baseurl . ($item['parent_id'] ? "&eid=${item['parent_id']}#netid${item['parent_id']}" : '');
 			echo "<tr valign=top>";
-			printIPv4NetInfoTDs ($item, 'tdleft', $level, $item['symbol'], $expandurl);
+			printIPv4NetInfoTDs ($item, $decor);
 			echo "<td class=tdcenter>";
 			if ($target == $item['id'])
 				echo "<a name=netid${target}></a>";
@@ -2119,12 +2118,12 @@ function renderIPv4SpaceRecords ($tree, $baseurl, $target = 0, $level = 1)
 				printRoutersTD (findRouters ($item['addrlist']), getConfigVar ('IPV4_TREE_RTR_AS_CELL'));
 			echo "</tr>";
 			if ($item['symbol'] == 'node-expanded' or $item['symbol'] == 'node-expanded-static')
-				$self ($item['kids'], $baseurl, $target, $level + 1);
+				$self ($item['kids'], $baseurl, $target, $knight, $level + 1);
 		}
 		else
 		{
 			echo "<tr valign=top>";
-			printIPv4NetInfoTDs ($item, 'tdleft sparenetwork', $level, $item['symbol']);
+			printIPv4NetInfoTDs ($item, array ('indent' => $level, 'knight' => $knight, 'tdclass' => 'sparenetwork'));
 			echo "<td class=tdcenter>";
 			if (getConfigVar ('IPV4_TREE_SHOW_USAGE') == 'yes')
 			{
@@ -2144,7 +2143,9 @@ function renderIPv4Space ()
 {
 	global $pageno, $tabno;
 	$cellfilter = getCellFilter();
-	$netlist = filterCellList (listCells ('ipv4net'), $cellfilter['expression']);
+	$netlist = listCells ('ipv4net');
+	$allcount = count ($netlist);
+	$netlist = filterCellList ($netlist, $cellfilter['expression']);
 	array_walk ($netlist, 'amplifyCell');
 
 	$netcount = count ($netlist);
@@ -2180,7 +2181,7 @@ function renderIPv4Space ()
 		echo "<th>routed by</th>";
 	echo "</tr>\n";
 	$baseurl = makeHref(array('page'=>$pageno, 'tab'=>$tabno)) . $cellfilter['urlextra'];
-	renderIPv4SpaceRecords ($tree, $baseurl, $eid);
+	renderIPv4SpaceRecords ($tree, $baseurl, $eid, $netcount == $allcount and getConfigVar ('IPV4_ENABLE_KNIGHT') == 'yes');
 	echo "</table>\n";
 	finishPortlet();
 	echo '</td><td class=pcright>';
@@ -5889,20 +5890,23 @@ function printRoutersTD ($rlist, $as_cell = 'yes')
 }
 
 // Same as for routers, but produce two TD cells to lay the content out better.
-function printIPv4NetInfoTDs ($netinfo, $tdclass = 'tdleft', $indent = 0, $symbol = 'spacer', $symbolurl = '')
+function printIPv4NetInfoTDs ($netinfo, $decor = array())
 {
-	if ($symbol == 'spacer')
+	if ($netinfo['symbol'] == 'spacer')
 	{
-		$indent++;
-		$symbol = '';
+		$decor['indent']++;
+		$netinfo['symbol'] = '';
 	}
-	echo "<td class='${tdclass}' style='padding-left: " . ($indent * 16) . "px;'>";
-	if (strlen ($symbol))
+	echo '<td class="tdleft';
+	if (array_key_exists ('tdclass', $decor))
+		echo ' ' . $decor['tdclass'];
+	echo '" style="padding-left: ' . ($decor['indent'] * 16) . 'px;">';
+	if (strlen ($netinfo['symbol']))
 	{
-		if (strlen ($symbolurl))
-			echo "<a href='${symbolurl}'>";
-		printImageHREF ($symbol, $symbolurl);
-		if (strlen ($symbolurl))
+		if (array_key_exists ('symbolurl', $decor))
+			echo "<a href='${decor['symbolurl']}'>";
+		printImageHREF ($netinfo['symbol']);
+		if (array_key_exists ('symbolurl', $decor))
 			echo '</a>';
 	}
 	if (isset ($netinfo['id']))
@@ -5910,11 +5914,14 @@ function printIPv4NetInfoTDs ($netinfo, $tdclass = 'tdleft', $indent = 0, $symbo
 	echo "${netinfo['ip']}/${netinfo['mask']}";
 	if (isset ($netinfo['id']))
 		echo '</a>';
-	echo "</td><td class='${tdclass}'>";
+	echo '</td><td class="tdleft';
+	if (array_key_exists ('tdclass', $decor))
+		echo ' ' . $decor['tdclass'];
+	echo '">';
 	if (!isset ($netinfo['id']))
 	{
 		printImageHREF ('dragons', 'Here be dragons.');
-		if (getConfigVar ('IPV4_ENABLE_KNIGHT') == 'yes')
+		if ($decor['knight'])
 		{
 			echo '<a href="' . makeHref (array
 			(
