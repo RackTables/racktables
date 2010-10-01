@@ -2067,10 +2067,10 @@ function fetchAttrsForObjects($object_set)
 {
 	$ret = array();
 	$query =
-		"select AV.attr_id, A.name as attr_name, A.type as attr_type, C.name as chapter_name, " .
+		"select A.id as attr_id, A.name as attr_name, A.type as attr_type, C.name as chapter_name, " .
 		"C.id as chapter_id, AV.uint_value, AV.float_value, AV.string_value, D.dict_value, RO.id as object_id from " .
-		"RackObject as RO left join AttributeMap as AM on RO.objtype_id = AM.objtype_id " .
-		"left join Attribute as A on AM.attr_id = A.id " .
+		"RackObject as RO inner join AttributeMap as AM on RO.objtype_id = AM.objtype_id " .
+		"inner join Attribute as A on AM.attr_id = A.id " .
 		"left join AttributeValue as AV on AV.attr_id = AM.attr_id and AV.object_id = RO.id " .
 		"left join Dictionary as D on D.dict_key = AV.uint_value and AM.chapter_id = D.chapter_id " .
 		"left join Chapter as C on AM.chapter_id = C.id";
@@ -2081,6 +2081,7 @@ function fetchAttrsForObjects($object_set)
 			$query .= intval ($object_id) . ', ';
 		$query = trim ($query, ', ') . ')';
 	}
+	$query .= " order by A.name, A.type";
 
 	$result = usePreparedSelectBlade ($query);
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
@@ -2089,8 +2090,6 @@ function fetchAttrsForObjects($object_set)
 		$attr_id = $row['attr_id'];
 		if (!array_key_exists ($object_id, $ret))
 			$ret[$object_id] = array();
-		if (! isset($attr_id))
-			continue;
 
 		$record = array();
 		$record['id'] = $row['attr_id'];
@@ -2121,8 +2120,8 @@ function fetchAttrsForObjects($object_set)
 }
 
 // This function returns all optional attributes for requested object
-// as an array of records. NULL is returned on error and empty array
-// is returned, if there are no attributes found.
+// as an array of records. 
+// Empty array is returned, if there are no attributes found.
 function getAttrValues ($object_id)
 {
 	global $object_attribute_cache;
@@ -2131,14 +2130,12 @@ function getAttrValues ($object_id)
 
 	$ret = fetchAttrsForObjects(array($object_id));
 	$attrs = array();
-	if (empty($ret))
-		return NULL;
-	else
+	if (isset ($ret[$object_id]))
 	{
 		$attrs = $ret[$object_id];
 		$object_attribute_cache[$object_id] = $attrs;
-		return $attrs;
 	}
+	return $attrs;
 }
 
 function commitResetAttrValue ($object_id = 0, $attr_id = 0)
