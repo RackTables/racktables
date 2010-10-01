@@ -992,7 +992,7 @@ function generateEntityAutoTags ($cell)
 			// dictionary attribute autotags '$attr_X_Y'
 			$attrs = getAttrValues($cell['id']);
 			foreach ($attrs as $attr_id => $attr_record)
-				if (isset($attr_record['chapter_id']))
+				if (isset ($attr_record['key']))
 					$ret[] = array ('tag' => "\$attr_{$attr_id}_{$attr_record['key']}");
 			break;
 		case 'ipv4net':
