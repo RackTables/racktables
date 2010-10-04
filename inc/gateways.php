@@ -1179,9 +1179,10 @@ function nxos4PickSwitchportCommand (&$work, $line)
 			);
 			break;
 		case 'SKIP':
+		case 'fex-fabric': // associated port-channel
 			break;
 		default:
-			// dot1q-tunnel, dynamic, private-vlan, FEX
+			// dot1q-tunnel, dynamic, private-vlan
 			$work['portdata'][$work['current']['port_name']] = array
 			(
 				'mode' => 'none',
