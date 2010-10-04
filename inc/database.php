@@ -2448,7 +2448,7 @@ function commitCreateVS ($vip = '', $vport = 0, $proto = '', $name = '', $vsconf
 	return produceTagsForLastRecord ('ipv4vs', $taglist);
 }
 
-function addLBtoRSPool ($pool_id = 0, $object_id = 0, $vs_id = 0, $vsconfig = '', $rsconfig = '')
+function addLBtoRSPool ($pool_id = 0, $object_id = 0, $vs_id = 0, $vsconfig = '', $rsconfig = '', $prio = '')
 {
 	return usePreparedInsertBlade
 	(
@@ -2459,7 +2459,8 @@ function addLBtoRSPool ($pool_id = 0, $object_id = 0, $vs_id = 0, $vsconfig = ''
 			'rspool_id' => $pool_id,
 			'vs_id' => $vs_id,
 			'vsconfig' => (!strlen ($vsconfig) ? NULL : $vsconfig),
-			'rsconfig' => (!strlen ($rsconfig) ? NULL : $rsconfig)
+			'rsconfig' => (!strlen ($rsconfig) ? NULL : $rsconfig),
+			'prio' => (!strlen ($prio) ? NULL : $prio),
 		)
 	);
 }
