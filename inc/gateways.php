@@ -404,8 +404,8 @@ function ios12ReadCDPStatus ($input)
 		$matches = array();
 		switch (TRUE)
 		{
-		case preg_match ('/^Device ID: ?(.+)$/', $line, $matches):
-		case preg_match ('/^System Name: (.+)$/', $line, $matches):
+		case preg_match ('/^Device ID: ?([A-Za-z0-9][A-Za-z0-9\.\-]*)/', $line, $matches):
+		case preg_match ('/^System Name: ([A-Za-z0-9][A-Za-z0-9\.\-]*)/', $line, $matches):
 			$ret['current']['device'] = $matches[1];
 			break;
 		case preg_match ('/^Interface: (.+),  ?Port ID \(outgoing port\): (.+)$/', $line, $matches):
