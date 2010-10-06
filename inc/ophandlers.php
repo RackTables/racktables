@@ -922,20 +922,15 @@ function addLotOfObjects()
 }
 
 $msgcode['deleteObject']['OK'] = 76;
-$msgcode['deleteObject']['ERR'] = 100;
 function deleteObject ()
 {
 	assertUIntArg ('object_id');
-	if (NULL === ($oinfo = spotEntity ('object', $_REQUEST['object_id'])))
-		return buildRedirectURL (__FUNCTION__, 'ERR', array ('object not found'));
+	$oinfo = spotEntity ('object', $_REQUEST['object_id']);
 
 	$racklist = getResidentRacksData ($_REQUEST['object_id'], FALSE);
-	$error = commitDeleteObject ($_REQUEST['object_id']);
+	commitDeleteObject ($_REQUEST['object_id']);
 	foreach ($racklist as $rack_id)
 		resetThumbCache ($rack_id);
-
-	if ($error != '')
-		return buildRedirectURL (__FUNCTION__, 'ERR', array ($error));
 
 	return buildRedirectURL (__FUNCTION__, 'OK', array ($oinfo['dname']));
 }

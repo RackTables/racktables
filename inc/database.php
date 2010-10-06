@@ -635,7 +635,6 @@ function commitDeleteObject ($object_id = 0)
 	usePreparedDeleteBlade ('CachedPVM', array ('object_id' => $object_id));
 	usePreparedDeleteBlade ('VLANSwitch', array ('object_id' => $object_id));
 	usePreparedDeleteBlade ('RackObject', array ('id' => $object_id));
-	return '';
 }
 
 function commitDeleteRack($rack_id)
