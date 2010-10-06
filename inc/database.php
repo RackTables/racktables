@@ -632,7 +632,7 @@ function commitDeleteObject ($object_id = 0)
 	usePreparedDeleteBlade ('IPv4NAT', array ('object_id' => $object_id));
 	usePreparedExecuteBlade ('DELETE FROM Atom WHERE molecule_id IN (SELECT new_molecule_id FROM MountOperation WHERE object_id = ?)', array ($object_id));
 	usePreparedExecuteBlade ('DELETE FROM Molecule WHERE id IN (SELECT new_molecule_id FROM MountOperation WHERE object_id = ?)', array ($object_id));
-	usePreparedDeleteBlade ('CachedPVM', array ('object_id' => $object_id));
+	usePreparedDeleteBlade ('PortVLANMode', array ('object_id' => $object_id));
 	usePreparedDeleteBlade ('VLANSwitch', array ('object_id' => $object_id));
 	usePreparedDeleteBlade ('RackObject', array ('id' => $object_id));
 }
