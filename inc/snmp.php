@@ -1305,6 +1305,14 @@ function generatePortsForCatModule ($object_id, $slotno = 1, $mtype = 'X6748', $
 			$mac_address = nextMACAddress ($mac_address);
 		}
 		break;
+	case '3750G-24T':
+		$mac_address = nextMACAddress ($mac_address);
+		for ($i = 1; $i <= 24; $i++)
+		{
+			commitAddPort ($object_id, "gi${slotno}/0/${i}", '1-24', "unit ${slotno} port ${i}", $mac_address);
+			$mac_address = nextMACAddress ($mac_address);
+		}
+		break;
 	case '3750G-16TD':
 		$mac_address = nextMACAddress ($mac_address);
 		for ($i = 1; $i <= 16; $i++)
