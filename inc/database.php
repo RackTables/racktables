@@ -625,16 +625,36 @@ function releaseFiles ($entity_realm, $entity_id)
 // There are times when you want to delete all traces of an object
 function commitDeleteObject ($object_id = 0)
 {
+	// Reset most of stuff
+	commitResetObject ($object_id);
+	// Object itself
+	usePreparedDeleteBlade ('RackObject', array ('id' => $object_id));
+}
+
+function commitResetObject ($object_id = 0)
+{
 	releaseFiles ('object', $object_id);
 	destroyTagsForEntity ('object', $object_id);
 	usePreparedDeleteBlade ('IPv4LB', array ('object_id' => $object_id));
 	usePreparedDeleteBlade ('IPv4Allocation', array ('object_id' => $object_id));
 	usePreparedDeleteBlade ('IPv4NAT', array ('object_id' => $object_id));
+	// Rack space
 	usePreparedExecuteBlade ('DELETE FROM Atom WHERE molecule_id IN (SELECT new_molecule_id FROM MountOperation WHERE object_id = ?)', array ($object_id));
 	usePreparedExecuteBlade ('DELETE FROM Molecule WHERE id IN (SELECT new_molecule_id FROM MountOperation WHERE object_id = ?)', array ($object_id));
+	usePreparedExecuteBlade ('DELETE FROM MountOperation WHERE object_id = ?', array ($object_id));
+	usePreparedExecuteBlade ('DELETE FROM RackSpace WHERE object_id = ?', array ($object_id));
+	// 802.1Q
 	usePreparedDeleteBlade ('PortVLANMode', array ('object_id' => $object_id));
+	usePreparedDeleteBlade ('CachedPVM', array ('object_id' => $object_id));
 	usePreparedDeleteBlade ('VLANSwitch', array ('object_id' => $object_id));
-	usePreparedDeleteBlade ('RackObject', array ('id' => $object_id));
+	// Ports & links
+	usePreparedDeleteBlade ('Port', array ('object_id' => $object_id));
+	// CN
+	usePreparedExecuteBlade ('UPDATE RackObject SET name=NULL,label="" WHERE id = ?',array ($object_id) );
+	// FQDN
+	commitUpdateAttrValue ($object_id, 3, "");
+	// log history
+	recordHistory ('RackObject', $object_id);
 }
 
 function commitDeleteRack($rack_id)
