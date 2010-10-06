@@ -150,6 +150,7 @@ $ophandler['object']['ipv4']['addIPv4Allocation'] = 'addIPv4Allocation';
 $ophandler['object']['ipv4']['delIPv4Allocation'] = 'delIPv4Allocation';
 $ophandler['object']['edit']['clearSticker'] = 'clearSticker';
 $ophandler['object']['edit']['update'] = 'updateObject';
+$ophandler['object']['edit']['resetObject'] = 'resetObject';
 $ophandler['object']['nat4']['addNATv4Rule'] = 'addPortForwarding';
 $ophandler['object']['nat4']['delNATv4Rule'] = 'delPortForwarding';
 $ophandler['object']['nat4']['updNATv4Rule'] = 'updPortForwarding';

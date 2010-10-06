@@ -1124,8 +1124,9 @@ function nxos4ScanTopLevel (&$work, $line)
 	$matches = array();
 	switch (TRUE)
 	{
-	case (preg_match ('@^interface ((Ethernet)[[:digit:]]+(/[[:digit:]]+)*)$@', $line, $matches)):
-		$matches[1] = preg_replace ('@^Ethernet(.+)$@', 'e\\1', $matches[1]);
+	case (preg_match ('@^interface ((Ethernet|Port-channel)[[:digit:]]+(/[[:digit:]]+)*)$@i', $line, $matches)):
+		$matches[1] = preg_replace ('@^Ethernet(.+)$@i', 'e\\1', $matches[1]);
+		$matches[1] = preg_replace ('@^Port-channel(.+)$@i', 'po\\1', $matches[1]);
 		$work['current'] = array ('port_name' => $matches[1]);
 		return 'nxos4PickSwitchportCommand';
 	case (preg_match ('@^vlan (.+)$@', $line, $matches)):
@@ -1177,8 +1178,11 @@ function nxos4PickSwitchportCommand (&$work, $line)
 				'native' => $effective_native,
 			);
 			break;
+		case 'SKIP':
+		case 'fex-fabric': // associated port-channel
+			break;
 		default:
-			// dot1q-tunnel, dynamic, private-vlan, FEX
+			// dot1q-tunnel, dynamic, private-vlan
 			$work['portdata'][$work['current']['port_name']] = array
 			(
 				'mode' => 'none',
@@ -1212,6 +1216,9 @@ function nxos4PickSwitchportCommand (&$work, $line)
 		break;
 	case (preg_match ('@^  switchport trunk allowed vlan (.+)$@', $line, $matches)):
 		$work['current']['trunk allowed vlan'] = iosParseVLANString ($matches[1]);
+		break;
+	case preg_match ('/^ +channel-group /', $line):
+		$work['current']['mode'] = 'SKIP';
 		break;
 	default: // suppress warning on irrelevant config clause
 	}

@@ -5,6 +5,7 @@
 	bugfix: handle locking failure in LDAP caching code
 	bugfix: enable deletion of initialized 802.1Q switch
 	bugfix: justify table alignment in rack view (#367)
+	bugfix: recognize Nexus portchannel interfaces in 802.1Q
 	update: allow scrollbars in port selector (#361)
 	update: make IPv4 utilization bar a standard element (by Alexey Andrianov)
 	update: make 802.1Q VLANs searchable
@@ -15,6 +16,7 @@
 	new feature: rebuild tag filter as soon as user changes it (by Alexey Andrianov)
 	new feature: default SLB configuration lines stored in DB (by Alexey Andrianov)
 	new feature: {$attr_X_Y} autotags (by Alexey Andrianov)
+	new feature: action "reset object" deleting it's non-hardware properties (Boris Lytochkin)
 	bugfix: fixed an issue with LiveCDP remote device names of Nexus switches
 0.18.4 2010-07-13
 	bugfix: a race condition could be triggered in permissions editor

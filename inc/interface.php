@@ -710,9 +710,15 @@ function renderEditObjectForm ($object_id)
 	if ($object['has_problems'] == 'yes')
 		echo ' checked';
 	echo "></td></tr>\n";
-	echo "<tr><td>&nbsp;</td><th class=tdright>Actions:</th><td class=tdleft><a href='".
+	echo "<tr><td>&nbsp;</td><th class=tdright>Actions:</th><td class=tdleft>"; 
+	echo "<a href='".
 		makeHrefProcess(array('op'=>'deleteObject', 'page'=>'depot', 'tab'=>'addmore', 'object_id'=>$object_id)).
-		"' onclick=\"javascript:return confirm('Are you sure you want to delete the object?')\">Delete object</a></td></tr>\n";
+		"' onclick=\"javascript:return confirm('Are you sure you want to delete the object?')\">" . getImageHREF ('destroy', 'Delete object') . "</a>";
+	echo "&nbsp;";
+	echo "<a href='".
+		makeHrefProcess(array ('op'=>'resetObject', 'page' => 'object', 'tab' => 'edit', 'object_id' => $object_id)).
+		"' onclick=\"javascript:return confirm('Are you sure you want to reset most of object properties?')\">" . getImageHREF ('clear', 'Reset (cleanup) object') . "</a>";
+	echo "</td></tr>\n";
 	echo "<tr><td colspan=3><b>Comment:</b><br><textarea name=object_comment rows=10 cols=80>${object['comment']}</textarea></td></tr>";
 
 	echo "<tr><th class=submit colspan=3>";
@@ -1577,6 +1583,7 @@ function showMessageOrError ()
 				80 => array ('code' => 'success', 'format' => "Added new object '%s'"),
 				81 => array ('code' => 'success', 'format' => "SNMP: completed '%s' work"),
 				82 => array ('code' => 'success', 'format' => "Bulk port creation was successful. %u ports created, %u failed"),
+				83 => array ('code' => 'success', 'format' => 'Object "%s" was reset successfully'),
 // records 100~199 with fatal error messages
 				100 => array ('code' => 'error', 'format' => '%s'),
 				101 => array ('code' => 'error', 'format' => 'Port name cannot be empty'),

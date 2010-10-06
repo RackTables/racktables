@@ -931,7 +931,20 @@ function deleteObject ()
 	commitDeleteObject ($_REQUEST['object_id']);
 	foreach ($racklist as $rack_id)
 		resetThumbCache ($rack_id);
+	return buildRedirectURL (__FUNCTION__, 'OK', array ($oinfo['dname']));
+}
 
+$msgcode['resetObject']['OK'] = 83;
+$msgcode['resetObject']['ERR'] = 100;
+function resetObject ()
+{
+	assertUIntArg ('object_id');
+	$oinfo = spotEntity ('object', $_REQUEST['object_id']);
+
+	$racklist = getResidentRacksData ($_REQUEST['object_id'], FALSE);
+	commitResetObject ($_REQUEST['object_id']);
+	foreach ($racklist as $rack_id)
+		resetThumbCache ($rack_id);
 	return buildRedirectURL (__FUNCTION__, 'OK', array ($oinfo['dname']));
 }
 
