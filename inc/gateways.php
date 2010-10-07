@@ -301,6 +301,7 @@ function detectDeviceBreed ($object_id)
 		254 => 'ios12',
 		963 => 'nxos4',
 		964 => 'nxos4',
+		1365 => 'nxos4',
 		1352 => 'xos12',
 		1360 => 'vrp53',
 		1361 => 'vrp55',
