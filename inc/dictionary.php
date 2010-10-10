@@ -1446,6 +1446,7 @@ $dictionary = array
 	1366 => array ('chapter_id' => 14, 'dict_value' => 'JunOS 9'),
 	1367 => array ('chapter_id' => 14, 'dict_value' => 'JunOS 10'),
 	1368 => array ('chapter_id' => 17, 'dict_value' => '[[Juniper%GPASS%MX80 | http://www.juniper.net/products_and_services/mx_series/index.html]]'),
+	1369 => array ('chapter_id' => 14, 'dict_value' => 'Huawei VRP 5.7'),
 );
 
 ?>
