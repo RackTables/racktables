@@ -22,6 +22,7 @@ $gwrxlator['getcdpstatus'] = array
 );
 $gwrxlator['getlldpstatus'] = array
 (
+	'ios12' => 'ios12ReadLLDPStatus',
 	'xos12' => 'xos12ReadLLDPStatus',
 	'vrp53' => 'vrp53ReadLLDPStatus',
 	'vrp55' => 'vrp55ReadLLDPStatus',
@@ -423,6 +424,31 @@ function ios12ReadCDPStatus ($input)
 		}
 	}
 	unset ($ret['current']);
+	return $ret;
+}
+
+function ios12ReadLLDPStatus ($input)
+{
+	$ret = array();
+	foreach (explode ("\n", $input) as $line)
+	{
+		$matches = preg_split ('/\s+/', $line);
+		
+		switch (count ($matches))
+		{
+		case 5:
+			list ($remote_name, $local_port, $ttl, $caps, $remote_port) = $matches;
+			$local_port = ios12ShortenIfName ($local_port);
+			$remote_port = ios12ShortenIfName ($remote_port);
+			$ret[$local_port] = array
+			(
+				'device' => $remote_name,
+				'port' => $remote_port,
+			);
+			break;
+		default:
+		}
+	}
 	return $ret;
 }
 
