@@ -3996,4 +3996,12 @@ function lookupEntityByString ($realm, $value, $column = 'name')
 	return $rows[0]['id'];
 }
 
+// returns an array of attribute_id`s wich use specified chapter id.  
+function getChapterAttributes($chapter_id)
+{
+	$prepared = usePreparedSelectBlade ('SELECT DISTINCT attr_id FROM AttributeMap WHERE chapter_id = ?', array ($chapter_id));
+	$rows = $prepared->fetchAll (PDO::FETCH_COLUMN);
+	return is_array($rows) ? $rows : array();
+}
+
 ?>

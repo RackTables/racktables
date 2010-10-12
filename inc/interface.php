@@ -942,9 +942,13 @@ function renderRackObject ($object_id)
 		echo "<tr><th width='50%' class=tdright>Barcode:</th><td class=tdleft>${info['barcode']}</td></tr>\n";
 	if ($info['has_problems'] == 'yes')
 		echo "<tr><td colspan=2 class=msg_error>Has problems</td></tr>\n";
-	foreach (getAttrValues ($object_id) as $record)
+	foreach (getAttrValues ($object_id) as $attr_id => $record)
 		if (strlen ($record['value']))
-			echo "<tr><th width='50%' class=sticker>${record['name']}:</th><td class=sticker>${record['a_value']}</td></tr>\n";
+		{
+			echo "<tr><th width='50%' class=sticker>${record['name']}:</th><td class=sticker>" .
+				formatAttributeValue($attr_id, $record) .
+				"</td></tr>\n";
+		}
 	printTagTRs
 	(
 		$info,
@@ -3139,13 +3143,9 @@ function renderSearchResults ()
 							$aval = getAttrValues ($obj['id']);
 							foreach ($obj['by_sticker'] as $attr_id)
 							{
-								$record = array
-								(
-									'name' => $aval[$attr_id]['name'],
-									'a_value' => $aval[$attr_id]['a_value']
-								);
+								$record = $aval[$attr_id];
 								echo "<tr><th width='50%' class=sticker>${record['name']}:</th>";
-								echo "<td class=sticker>${record['a_value']}</td></tr>";
+								echo "<td class=sticker>" . formatAttributeValue($attr_id, $record) . "</td></tr>";
 							}
 							echo '</table>';
 						}
@@ -3523,6 +3523,7 @@ function renderChapter ($tgt_chapter_no)
 		return;
 	}
 	$refcnt = getChapterRefc ($tgt_chapter_no, array_keys ($words));
+	$attrs = getChapterAttributes($tgt_chapter_no);
 	echo "<br><table class=cooltable border=0 cellpadding=5 cellspacing=0 align=center>\n";
 	echo "<tr><th colspan=3>${wc} record(s)</th></tr>\n";
 	echo "<tr><th>Origin</th><th>Refcnt</th><th>Word</th></tr>\n";
@@ -3533,7 +3534,32 @@ function renderChapter ($tgt_chapter_no)
 		printImageHREF (($key <= $max_dict_key[CODE_VERSION]) ? 'computer' : 'favorite');
 		echo '</td><td>';
 		if ($refcnt[$key])
-			echo $refcnt[$key];
+		{
+			$cfe = '';
+			foreach ($attrs as $attr_id)
+			{
+				if (! empty($cfe))
+					$cfe .= ' or ';
+				$cfe .= '{$attr_' . $attr_id . '_' . $key . '}';
+			}
+			
+			if (! empty($cfe))
+			{
+				$href = makeHref
+				(
+					array
+					(
+						'page'=>'depot',
+						'tab'=>'default',
+						'andor' => 'and',
+						'cfe' => $cfe
+					)
+				);
+				echo '<a href="' . $href . '">' . $refcnt[$key] . '</a>';
+			}
+			else
+				echo $refcnt[$key];
+		}
 		echo "</td><td><div title='key=${key}'>${value}</div></td></tr>\n";
 		$order = $nextorder[$order];
 	}
@@ -7945,6 +7971,22 @@ function renderDiscoveredNeighbors ($object_id)
 		echo '<tr><td colspan=6 align=center>' . getImageHREF ('CREATE', 'import selected', TRUE) . '</td></tr>';
 	}
 	echo '</table></form>';
+}
+
+function formatAttributeValue($attribute_id, $record)
+{
+	if (isset ($record['key'])) // if record is a dictionary value, generate href with autotag in cfe
+		$href = makeHref
+		(
+			array
+			(
+				'page'=>'depot',
+				'tab'=>'default',
+				'andor' => 'and',
+				'cfe' => '{$attr_' . $attribute_id . '_' . $record['key'] . '}',
+			)
+		);
+	return isset($href) ? "<a href=\"$href\">${record['a_value']}</a>" : $record['a_value'];	
 }
 
 ?>
