@@ -383,6 +383,7 @@ function renderRackspace ()
 	$found_racks = array();
 	$rows = array();
 	$cellfilter = getCellFilter();
+	$rackCount = 0;
 	foreach (getRackRows() as $row_id => $row_name) {
 		$rackList = filterCellList (listCells ('rack', $row_id), $cellfilter['expression']);
 		$found_racks = array_merge($found_racks, $rackList);
@@ -391,53 +392,58 @@ function renderRackspace ()
 			'row_name' => $row_name,
 			'racks' => $rackList
 		);
+		$rackCount += count($rackList);
 	}
-	
+
 	echo "<table class=objview border=0 width='100%'><tr><td class=pcleft>";
 	renderCellFilterPortlet ($cellfilter, 'rack', $found_racks);
 	echo '</td><td class=pcright>';
-	echo '<table border=0 cellpadding=10 cellpadding=1>';
-	// generate thumb gallery
-	global $nextorder;
-	$rackwidth = getRackImageWidth();
-	// Zero value effectively disables the limit.
-	$maxPerRow = getConfigVar ('RACKS_PER_ROW');
-	$order = 'odd';
-	foreach ($rows as $row)
+
+	if (! renderEmptyResults($cellfilter, 'racks', $rackCount))
 	{
-		$row_id = $row['row_id'];
-		$row_name = $row['row_name'];
-		$rackList = $row['racks'];
-		
-		if (!count ($rackList) and count ($cellfilter['expression']))
-			continue;
-		$rackListIdx = 0;
-		echo "<tr class=row_${order}><th class=tdleft>";
-		echo "<a href='".makeHref(array('page'=>'row', 'row_id'=>$row_id))."${cellfilter['urlextra']}'>";
-		echo "${row_name}</a></th><td><table border=0 cellspacing=5><tr>";
-		if (!count ($rackList))
-			echo "<td>(empty row)</td>";
-		else
-			foreach ($rackList as $rack)
-			{
-				if ($rackListIdx > 0 and $maxPerRow > 0 and $rackListIdx % $maxPerRow == 0)
+		echo '<table border=0 cellpadding=10 cellpadding=1>';
+		// generate thumb gallery
+		global $nextorder;
+		$rackwidth = getRackImageWidth();
+		// Zero value effectively disables the limit.
+		$maxPerRow = getConfigVar ('RACKS_PER_ROW');
+		$order = 'odd';
+		foreach ($rows as $row)
+		{
+			$row_id = $row['row_id'];
+			$row_name = $row['row_name'];
+			$rackList = $row['racks'];
+
+			if (!count ($rackList) and count ($cellfilter['expression']))
+				continue;
+			$rackListIdx = 0;
+			echo "<tr class=row_${order}><th class=tdleft>";
+			echo "<a href='".makeHref(array('page'=>'row', 'row_id'=>$row_id))."${cellfilter['urlextra']}'>";
+			echo "${row_name}</a></th><td><table border=0 cellspacing=5><tr>";
+			if (!count ($rackList))
+				echo "<td>(empty row)</td>";
+			else
+				foreach ($rackList as $rack)
 				{
-					echo '</tr></table></tr>';
-					echo "<tr class=row_${order}><th class=tdleft>${row_name} (continued)";
-					echo "</th><td><table border=0 cellspacing=5><tr>";
+					if ($rackListIdx > 0 and $maxPerRow > 0 and $rackListIdx % $maxPerRow == 0)
+					{
+						echo '</tr></table></tr>';
+						echo "<tr class=row_${order}><th class=tdleft>${row_name} (continued)";
+						echo "</th><td><table border=0 cellspacing=5><tr>";
+					}
+					echo "<td align=center><a href='".makeHref(array('page'=>'rack', 'rack_id'=>$rack['id']))."'>";
+					echo "<img border=0 width=${rackwidth} height=";
+					echo getRackImageHeight ($rack['height']);
+					echo " title='${rack['height']} units'";
+					echo "src='render_image.php?img=minirack&rack_id=${rack['id']}'>";
+					echo "<br>${rack['name']}</a></td>";
+					$rackListIdx++;
 				}
-				echo "<td align=center><a href='".makeHref(array('page'=>'rack', 'rack_id'=>$rack['id']))."'>";
-				echo "<img border=0 width=${rackwidth} height=";
-				echo getRackImageHeight ($rack['height']);
-				echo " title='${rack['height']} units'";
-				echo "src='render_image.php?img=minirack&rack_id=${rack['id']}'>";
-				echo "<br>${rack['name']}</a></td>";
-				$rackListIdx++;
-			}
-		$order = $nextorder[$order];
-		echo "</tr></table></tr>\n";
+			$order = $nextorder[$order];
+			echo "</tr></table></tr>\n";
+		}
+		echo "</table>\n";
 	}
-	echo "</table>\n";
 	echo "</td></tr></table>\n";
 }
 
@@ -1922,36 +1928,61 @@ function renderDepot ()
 	echo "<table border=0 class=objectview>\n";
 	echo "<tr><td class=pcleft>";
 
-	startPortlet ('Objects (' . count ($objects) . ')');
-	echo '<br><br><table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
-	echo '<tr><th>Common name</th><th>Visible label</th><th>Asset tag</th><th>Barcode</th><th>Row/Rack</th></tr>';
-	$order = 'odd';
-	foreach ($objects as $obj)
+	if (! renderEmptyResults ($cellfilter, 'objects', count($objects)))
 	{
-		if (isset ($_REQUEST['hl_object_id']) and $_REQUEST['hl_object_id'] == $obj['id'])
-			$secondclass = 'tdleft port_highlight';
-		else
-			$secondclass = 'tdleft';
-		echo "<tr class=row_${order} valign=top><td class='${secondclass}'><a href='".makeHref(array('page'=>'object', 'object_id'=>$obj['id']))."'><strong>${obj['dname']}</strong></a>";
-		if (count ($obj['etags']))
-			echo '<br><small>' . serializeTags ($obj['etags'], makeHref(array('page'=>$pageno, 'tab'=>'default')) . '&') . '</small>';
-		echo "</td><td class='${secondclass}'>${obj['label']}</td>";
-		echo "<td class='${secondclass}'>${obj['asset_no']}</td>";
-		echo "<td class='${secondclass}'>${obj['barcode']}</td>";
-		if ($obj['rack_id'])
-			echo "<td class='${secondclass}'><a href='".makeHref(array('page'=>'row', 'row_id'=>$obj['row_id']))."'>${obj['Row_name']}</a>/<a href='".makeHref(array('page'=>'rack', 'rack_id'=>$obj['rack_id']))."'>${obj['Rack_name']}</a></td>";
-		else
-			echo "<td class='${secondclass}'>Unmounted</td>";
-		echo '</tr>';
-		$order = $nextorder[$order];
+		startPortlet ('Objects (' . count ($objects) . ')');
+		echo '<br><br><table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
+		echo '<tr><th>Common name</th><th>Visible label</th><th>Asset tag</th><th>Barcode</th><th>Row/Rack</th></tr>';
+		$order = 'odd';
+		foreach ($objects as $obj)
+		{
+			if (isset ($_REQUEST['hl_object_id']) and $_REQUEST['hl_object_id'] == $obj['id'])
+				$secondclass = 'tdleft port_highlight';
+			else
+				$secondclass = 'tdleft';
+			echo "<tr class=row_${order} valign=top><td class='${secondclass}'><a href='".makeHref(array('page'=>'object', 'object_id'=>$obj['id']))."'><strong>${obj['dname']}</strong></a>";
+			if (count ($obj['etags']))
+				echo '<br><small>' . serializeTags ($obj['etags'], makeHref(array('page'=>$pageno, 'tab'=>'default')) . '&') . '</small>';
+			echo "</td><td class='${secondclass}'>${obj['label']}</td>";
+			echo "<td class='${secondclass}'>${obj['asset_no']}</td>";
+			echo "<td class='${secondclass}'>${obj['barcode']}</td>";
+			if ($obj['rack_id'])
+				echo "<td class='${secondclass}'><a href='".makeHref(array('page'=>'row', 'row_id'=>$obj['row_id']))."'>${obj['Row_name']}</a>/<a href='".makeHref(array('page'=>'rack', 'rack_id'=>$obj['rack_id']))."'>${obj['Rack_name']}</a></td>";
+			else
+				echo "<td class='${secondclass}'>Unmounted</td>";
+			echo '</tr>';
+			$order = $nextorder[$order];
+		}
+		echo '</table>';
+		finishPortlet();
 	}
-	echo '</table>';
-	finishPortlet();
 
 	echo "</td><td class=pcright width='25%'>";
 
 	renderCellFilterPortlet ($cellfilter, 'object', $objects);
 	echo "</td></tr></table>\n";
+}
+
+// This function returns TRUE if the result set is too big to be rendered, and no filter is set.
+// In this case it renders the describing message instead.
+function renderEmptyResults($cellfilter, $entities_name, $count = NULL)
+{
+	if (!$cellfilter['is_empty'])
+		return FALSE;
+	if (isset ($_REQUEST['show_all_objects']))
+		return FALSE;
+	$max = intval(getConfigVar('MAX_UNFILTERED_ENTITIES'));
+	if (0 == $max || $count <= $max)
+		return FALSE;
+
+	$href_show_all = trim($_SERVER['REQUEST_URI'], '&');
+	$href_show_all .= htmlspecialchars('&show_all_objects=1');
+	$suffix = isset ($count) ? " ($count)" : '';
+	echo <<<END
+<p>Please set a filter to display the corresponging $entities_name.
+<br><a href="$href_show_all">Show all $entities_name$suffix</a>
+END;
+	return TRUE;
 }
 
 // History viewer for history-enabled simple dictionaries.
@@ -2166,35 +2197,39 @@ function renderIPv4Space ()
 
 	echo "<table border=0 class=objectview>\n";
 	echo "<tr><td class=pcleft>";
-	startPortlet ("networks (${netcount})");
-	echo '<h4>';
-	if ($eid === 0)
-		echo 'auto-collapsing at threshold ' . getConfigVar ('TREE_THRESHOLD') .
-			" (<a href='".makeHref(array('page'=>$pageno, 'tab'=>$tabno, 'eid'=>'ALL')) .
-			$cellfilter['urlextra'] . "'>expand all</a>)";
-	elseif ($eid === 'ALL')
-		echo "expanding all (<a href='".makeHref(array('page'=>$pageno, 'tab'=>$tabno)) .
-			$cellfilter['urlextra'] . "'>auto-collapse</a>)";
-	else
+	if (! renderEmptyResults($cellfilter, 'IPv4 nets', count($tree)))
 	{
-		$netinfo = spotEntity ('ipv4net', $eid);
-		echo "expanding ${netinfo['ip']}/${netinfo['mask']} (<a href='" .
-			makeHref (array ('page' => $pageno, 'tab' => $tabno)) .
-			$cellfilter['urlextra'] . "'>auto-collapse</a> / <a href='" .
-			makeHref (array ('page' => $pageno, 'tab' => $tabno, 'eid' => 'ALL')) .
-			$cellfilter['urlextra'] . "'>expand&nbsp;all</a>)";
+		startPortlet ("networks (${netcount})");
+		echo '<h4>';
+		if ($eid === 0)
+			echo 'auto-collapsing at threshold ' . getConfigVar ('TREE_THRESHOLD') .
+				" (<a href='".makeHref(array('page'=>$pageno, 'tab'=>$tabno, 'eid'=>'ALL')) .
+				$cellfilter['urlextra'] . "'>expand all</a>)";
+		elseif ($eid === 'ALL')
+			echo "expanding all (<a href='".makeHref(array('page'=>$pageno, 'tab'=>$tabno)) .
+				$cellfilter['urlextra'] . "'>auto-collapse</a>)";
+		else
+		{
+			$netinfo = spotEntity ('ipv4net', $eid);
+			echo "expanding ${netinfo['ip']}/${netinfo['mask']} (<a href='" .
+				makeHref (array ('page' => $pageno, 'tab' => $tabno)) .
+				$cellfilter['urlextra'] . "'>auto-collapse</a> / <a href='" .
+				makeHref (array ('page' => $pageno, 'tab' => $tabno, 'eid' => 'ALL')) .
+				$cellfilter['urlextra'] . "'>expand&nbsp;all</a>)";
+		}
+		echo "</h4><table class='widetable' border=0 cellpadding=5 cellspacing=0 align='center'>\n";
+		echo "<tr><th>prefix</th><th>name/tags</th><th>capacity</th>";
+		if (getConfigVar ('IPV4_TREE_SHOW_VLAN') == 'yes')
+			echo '<th>VLAN</th>';
+		if (getConfigVar ('EXT_IPV4_VIEW') == 'yes')
+			echo "<th>routed by</th>";
+		echo "</tr>\n";
+		$baseurl = makeHref(array('page'=>$pageno, 'tab'=>$tabno)) . $cellfilter['urlextra'];
+		renderIPv4SpaceRecords ($tree, $baseurl, $eid, $netcount == $allcount and getConfigVar ('IPV4_ENABLE_KNIGHT') == 'yes');
+		echo "</table>\n";
+		finishPortlet();
 	}
-	echo "</h4><table class='widetable' border=0 cellpadding=5 cellspacing=0 align='center'>\n";
-	echo "<tr><th>prefix</th><th>name/tags</th><th>capacity</th>";
-	if (getConfigVar ('IPV4_TREE_SHOW_VLAN') == 'yes')
-		echo '<th>VLAN</th>';
-	if (getConfigVar ('EXT_IPV4_VIEW') == 'yes')
-		echo "<th>routed by</th>";
-	echo "</tr>\n";
-	$baseurl = makeHref(array('page'=>$pageno, 'tab'=>$tabno)) . $cellfilter['urlextra'];
-	renderIPv4SpaceRecords ($tree, $baseurl, $eid, $netcount == $allcount and getConfigVar ('IPV4_ENABLE_KNIGHT') == 'yes');
-	echo "</table>\n";
-	finishPortlet();
+
 	echo '</td><td class=pcright>';
 	renderCellFilterPortlet ($cellfilter, 'ipv4net', $netlist);
 	echo "</td></tr></table>\n";
@@ -3341,21 +3376,26 @@ function renderCellList ($realm = NULL, $title = 'items', $do_amplify = FALSE)
 	$order = 'odd';
 	$cellfilter = getCellFilter();
 	$celllist = filterCellList (listCells ($realm), $cellfilter['expression']);
-	if ($do_amplify)
-		array_walk ($celllist, 'amplifyCell');
+
 	echo "<table border=0 class=objectview>\n";
 	echo "<tr><td class=pcleft>";
-	startPortlet ($title . ' (' . count ($celllist) . ')');
-	echo "<table class=cooltable border=0 cellpadding=5 cellspacing=0 align=center>\n";
-	foreach ($celllist as $cell)
+
+	if ($realm != 'file' || ! renderEmptyResults ($cellfilter, 'files', count($celllist)))
 	{
-		echo "<tr class=row_${order}><td>";
-		renderCell ($cell);
-		echo "</td></tr>\n";
-		$order = $nextorder[$order];
+		if ($do_amplify)
+			array_walk ($celllist, 'amplifyCell');
+		startPortlet ($title . ' (' . count ($celllist) . ')');
+		echo "<table class=cooltable border=0 cellpadding=5 cellspacing=0 align=center>\n";
+		foreach ($celllist as $cell)
+		{
+			echo "<tr class=row_${order}><td>";
+			renderCell ($cell);
+			echo "</td></tr>\n";
+			$order = $nextorder[$order];
+		}
+		echo '</table>';
+		finishPortlet();
 	}
-	echo '</table>';
-	finishPortlet();
 	echo '</td><td class=pcright>';
 	renderCellFilterPortlet ($cellfilter, $realm, $celllist);
 	echo "</td></tr></table>\n";
