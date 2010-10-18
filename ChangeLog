@@ -21,6 +21,7 @@
 	new feature: Links added for displaying object lists filtered by dictionary keys (Alexey Andrianov)
 	bugfix: fixed an issue with LiveCDP remote device names of Nexus switches
 	update: users could set MAX_UNFILTERED_ENTITIES cfg var to suppress display of entire entity sets before filters are applied (Alexey Andrianov)
+	update: objects' ports are now sorted by module numbers in all tabs
 0.18.4 2010-07-13
 	bugfix: a race condition could be triggered in permissions editor
 	new feature: "any mode" of user port in VLAN switch template
