@@ -440,7 +440,7 @@ function ios12ReadLLDPStatus ($input)
 			list ($remote_name, $local_port, $ttl, $caps, $remote_port) = $matches;
 			$local_port = ios12ShortenIfName ($local_port);
 			$remote_port = ios12ShortenIfName ($remote_port);
-			$ret[$local_port] = array
+			$ret[$local_port][] = array
 			(
 				'device' => $remote_name,
 				'port' => $remote_port,

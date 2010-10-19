@@ -8095,8 +8095,19 @@ function renderDiscoveredNeighbors ($object_id)
 				$error_message = "There is an ambiguity between local port media types";
 			elseif (count ($remote_port_ids) > 1)
 				$error_message = "There is an ambiguity between remote port media types";
-			else // link does not match
-				$tr_class = "trwarning";
+			else // no link found
+			{
+				$POIFC = getPortOIFCompat();
+				foreach ($POIFC as $item)
+					if ($item['type1'] == $local_port_struct['oif_id'] and $item['type2'] == $remote_port['oif_id'])
+					{
+						// no link found and ports are compatible, let user create link
+						$tr_class = "trwarning";
+						break;
+					}
+				if ($tr_class == 'trerror')
+					$error_message = "Incompatible port types";
+			}
 
 			echo "<tr class=\"$tr_class\">";
 			if ($initial_row)
