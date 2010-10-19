@@ -7008,7 +7008,7 @@ function renderObject8021QPorts ($object_id)
 	$req_port_name = array_key_exists ('port_name', $sic) ? $sic['port_name'] : '';
 	$desired_config = apply8021QOrder ($vswitch['template_id'], getStored8021QConfig ($object_id, 'desired'));
 	$cached_config = getStored8021QConfig ($object_id, 'cached');
-	uksort_portlist ($desired_config);
+	$desired_config = sortPortList	($desired_config);
 	$uplinks = filter8021QChangeRequests ($vdom['vlanlist'], $desired_config, produceUplinkPorts ($vdom['vlanlist'], $desired_config));
 	echo '<table border=0 width="100%"><tr valign=top><td class=tdleft width="50%">';
 	// port list
@@ -7607,7 +7607,7 @@ function renderObject8021QSync ($object_id)
 	}
 	echo '<th width="40%">running&nbsp;version</th></tr>';
 	$rownum = 0;
-	uksort_portlist ($plan);
+	$plan = sortPortList ($plan);
 	$domvlans = array_keys (getDomainVLANs ($vswitch['domain_id']));
 	$default_port = array
 	(
@@ -7960,7 +7960,7 @@ function renderDiscoveredNeighbors ($object_id)
 	try
 	{
 		$neighbors = gwRetrieveDeviceConfig ($object_id, $opcode_by_tabno[$tabno]);
-		uksort_portlist ($neighbors);
+		$neighbors = sortPortList ($neighbors);
 	}
 	catch (RTGatewayError $e)
 	{
