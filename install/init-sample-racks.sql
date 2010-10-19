@@ -223,9 +223,9 @@ INSERT INTO `IPv4RSPool` VALUES (2,'Resin servers',NULL,NULL);
 INSERT INTO `IPv4VS` VALUES (1,180879877,80,'TCP','virtual web','lvs_sched wlc\r\nlvs_method NAT\r\ndelay_loop 3\r\nalpha\r\nomega\r\nquorum 3\r\nhysteresis 1\r\n\r\n# this is a comment\r\n# VS name is %VNAME%\r\n#\r\n','HTTP_GET {\r\nurl {\r\npath /\r\nstatus_code 200\r\n}\r\nconnect_timeout 1\r\n}');
 INSERT INTO `IPv4VS` VALUES (2,180879878,80,'TCP','virtual app','lvs_sched wlc\r\nlvs_method NAT\r\ndelay_loop 3\r\nalpha\r\nomega\r\nquorum 3\r\nhysteresis 1\r\n\r\n','HTTP_GET {\r\nurl {\r\npath /\r\nstatus_code 200\r\n}\r\nconnect_timeout 1\r\n}');
 
-INSERT INTO `IPv4LB` VALUES (928,1,1,NULL,NULL);
-INSERT INTO `IPv4LB` VALUES (929,1,1,NULL,NULL);
-INSERT INTO `IPv4LB` VALUES (929,2,2,NULL,NULL);
+INSERT INTO `IPv4LB` VALUES (928,1,1,NULL,NULL,NULL);
+INSERT INTO `IPv4LB` VALUES (929,1,1,NULL,NULL,NULL);
+INSERT INTO `IPv4LB` VALUES (929,2,2,NULL,NULL,NULL);
 
 INSERT INTO `IPv4RS` VALUES (1,'yes',180879973,80,1,NULL);
 INSERT INTO `IPv4RS` VALUES (2,'yes',180879974,80,1,NULL);

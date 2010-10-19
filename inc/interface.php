@@ -4549,9 +4549,9 @@ function renderObjectSLB ($object_id)
 	foreach ($focus['ipv4rspools'] as $vs_id => $vsinfo)
 		$triplets[] = array(
 			'ids' => array(
-				object_id => $object_id,
-				vs_id => $vs_id,
-				pool_id => $vsinfo['pool_id']
+				'object_id' => $object_id,
+				'vs_id' => $vs_id,
+				'pool_id' => $vsinfo['pool_id']
 			),
 			'rsconfig' => $vsinfo['rsconfig'],
 			'vsconfig' => $vsinfo['vsconfig'],
