@@ -8092,9 +8092,9 @@ function renderDiscoveredNeighbors ($object_id)
 			elseif ($link_matches)
 				$tr_class = "trok";
 			elseif (count($myports[$local_port]) > 1)
-				$error_message = "There is an ambiguity between local port media types. Please set the link manualy";
+				$error_message = "There is an ambiguity between local port media types";
 			elseif (count ($remote_port_ids) > 1)
-				$error_message = "There is an ambiguity between remote port media types. Please set the link manualy";
+				$error_message = "There is an ambiguity between remote port media types";
 			else // link does not match
 				$tr_class = "trwarning";
 
