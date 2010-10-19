@@ -18,6 +18,7 @@
 	new feature: {$attr_X_Y} autotags (by Alexey Andrianov)
 	new feature: action "reset object" deleting it's non-hardware properties (Boris Lytochkin)
 	new feature: LLDP neighbour support on Cisco IOS switches (by Boris Lytochkin)
+	new feature: Links added for displaying object lists filtered by dictionary keys (Alexey Andrianov)
 	bugfix: fixed an issue with LiveCDP remote device names of Nexus switches
 	update: users could set MAX_UNFILTERED_ENTITIES cfg var to suppress display of entire entity sets before filters are applied (Alexey Andrianov)
 	update: objects' ports are now sorted by module numbers in all tabs
