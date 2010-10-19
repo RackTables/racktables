@@ -56,6 +56,10 @@ getcdpstatus)
 	printf 'term len 0\nshow cdp neighbors detail\n' >> "$SESSION"
 	outfile="$WORKFILE"
 	;;
+getlldpstatus)
+	printf 'term len 0\nshow lldp neighbors\n' >> "$SESSION"
+	outfile="$WORKFILE"
+	;;
 deploy)
 	cat "$WORKFILE" >> "$SESSION"
 	outfile=/dev/null

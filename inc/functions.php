@@ -632,22 +632,6 @@ function sortTokenize ($a, $b)
 	return 0;
 }
 
-function sortByName ($a, $b)
-{
-	$result = sortTokenize ($a['name'], $b['name']);
-	if ($result != 0)
-		return $result;
-	if ($a['iif_id'] != $b['iif_id'])
-		return $a['iif_id'] - $b['iif_id'];
-	$result = strcmp ($a['label'], $b['label']);
-	if ($result != 0)
-		return $result;
-	$result = strcmp ($a['l2address'], $b['l2address']);
-	if ($result != 0)
-		return $result;
-	return $a['id'] - $b['id'];
-}
-
 // This function returns an array of single element of object's FQDN attribute,
 // if FQDN is set. The next choice is object's common name, if it looks like a
 // hostname. Otherwise an array of all 'regular' IP addresses of the
@@ -2478,6 +2462,7 @@ function ios12ShortenIfName ($ifname)
 	$ifname = preg_replace ('@^TenGigabitEthernet(.+)$@', 'te\\1', $ifname);
 	$ifname = preg_replace ('@^Port-channel(.+)$@', 'po\\1', $ifname);
 	$ifname = preg_replace ('@^XGigabitEthernet(.+)$@', 'xg\\1', $ifname);
+	$ifname = strtolower ($ifname);
 	return $ifname;
 }
 
@@ -3476,7 +3461,14 @@ function compareDecomposedPortNames ($porta, $portb)
 	for ($i = 0; $i < $porta['numidx']; $i++)
 		if ($porta['index'][$i] != $portb['index'][$i])
 			return $porta['index'][$i] - $portb['index'][$i];
-	return 0;
+	// if all of name fields are equal, compare by some additional port fields
+	if ($porta['iif_id'] != $portb['iif_id'])
+		return $porta['iif_id'] - $portb['iif_id'];
+	if (0 != $result = strcmp ($porta['label'], $portb['label']))
+		return $result;
+	if (0 != $result = strcmp ($porta['l2address'], $portb['l2address']))
+		return $result;
+	return $porta['id'] - $portb['id'];
 }
 
 // Sort provided port list in a way based on natural. For example,
@@ -3488,23 +3480,31 @@ function compareDecomposedPortNames ($porta, $portb)
 // interfaces, which have less, than 2 indices, but for other ports
 // their indices matter more, than type (unless there is a clash
 // of indices).
-function sortPortList ($plist)
+// When $name_in_value is TRUE, port name is determines as $plist[$key]['name']
+// Otherwise portname is the key of $plist
+function sortPortList ($plist, $name_in_value = FALSE)
 {
 	$ret = array();
 	$seen = array();
 	$intersects = FALSE;
 	$prefix_re = '/^([^0-9]+)[0-9].*$/';
-	foreach (array_keys ($plist) as $pn)
+	foreach ($plist as $pkey => $pvalue)
 	{
+		$pn = $name_in_value ? $pvalue['name'] : $pkey;
 		$numbers = preg_split ('/[^0-9]+/', $pn, -1, PREG_SPLIT_NO_EMPTY);
-		$ret[$pn] = array
+		$ret[$pkey] = array
 		(
 			'prefix' => '',
 			'numidx' => count ($numbers),
 			'index' => $numbers,
+			'iif_id' => isset($plist[$pn]['iif_id']) ? $plist[$pn] : 0,
+			'label' => isset($plist[$pn]['label']) ? $plist[$pn]['label'] : '',
+			'l2address' => isset($plist[$pn]['l2address']) ? $plist[$pn]['l2address'] : '',
+			'id' => isset($plist[$pn]['id']) ? $plist[$pn]['id'] : 0,
+			'name' => $pn,
 		);
-		if ($ret[$pn]['numidx'] <= 1)
-			$ret[$pn]['prefix'] = preg_replace ($prefix_re, '\\1', $pn);
+		if ($ret[$pkey]['numidx'] <= 1)
+			$ret[$pkey]['prefix'] = preg_replace ($prefix_re, '\\1', $pn);
 		elseif (!$intersects)
 		{
 			$coord = implode ('-', $numbers);
@@ -3515,13 +3515,22 @@ function sortPortList ($plist)
 	}
 	unset ($seen);
 	if ($intersects)
-		foreach (array_keys ($ret) as $pn)
-			if ($ret[$pn]['numidx'] > 1)
-				$ret[$pn]['prefix'] = preg_replace ($prefix_re, '\\1', $pn);
+		foreach ($ret as $pkey => $pvalue)
+			if ($ret[$pkey]['numidx'] > 1)
+				$ret[$pkey]['prefix'] = preg_replace ($prefix_re, '\\1', $ret[$pkey]['name']);
 	uasort ($ret, 'compareDecomposedPortNames');
-	foreach (array_keys ($ret) as $pn)
-		$ret[$pn] = $plist[$pn];
+	foreach ($ret as $pkey => $pvalue)
+		$ret[$pkey] = $plist[$pkey];
 	return $ret;
+}
+
+// This function works like standard php usort function and uses sortPortList.
+function usort_portlist(&$array)
+{
+	$temp_array = array();
+	foreach($array as $portname)
+		$temp_array[$portname] = 1;
+	$array = array_keys(sortPortList($temp_array), FALSE);
 }
 
 // This is a dual-purpose formating function:

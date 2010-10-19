@@ -543,8 +543,7 @@ function getObjectPortsAndLinks ($object_id)
 			unset ($result);
 		}
 	}
-	usort ($ret, 'sortByName');
-	return $ret;
+	return sortPortList ($ret, TRUE);
 }
 
 function commitAddRack ($name, $height = 0, $row_id = 0, $comment, $taglist)

@@ -22,6 +22,7 @@ $gwrxlator['getcdpstatus'] = array
 );
 $gwrxlator['getlldpstatus'] = array
 (
+	'ios12' => 'ios12ReadLLDPStatus',
 	'xos12' => 'xos12ReadLLDPStatus',
 	'vrp53' => 'vrp53ReadLLDPStatus',
 	'vrp55' => 'vrp55ReadLLDPStatus',
@@ -406,13 +407,13 @@ function ios12ReadCDPStatus ($input)
 		$matches = array();
 		switch (TRUE)
 		{
-		case preg_match ('/^Device ID: ?([A-Za-z0-9][A-Za-z0-9\.\-]*)/', $line, $matches):
-		case preg_match ('/^System Name: ([A-Za-z0-9][A-Za-z0-9\.\-]*)/', $line, $matches):
+		case preg_match ('/^Device ID:\s*([A-Za-z0-9][A-Za-z0-9\.\-]*)/', $line, $matches):
+		case preg_match ('/^System Name:\s*([A-Za-z0-9][A-Za-z0-9\.\-]*)/', $line, $matches):
 			$ret['current']['device'] = $matches[1];
 			break;
 		case preg_match ('/^Interface: (.+),  ?Port ID \(outgoing port\): (.+)$/', $line, $matches):
 			if (array_key_exists ('device', $ret['current']))
-				$ret[ios12ShortenIfName ($matches[1])] = array
+				$ret[ios12ShortenIfName ($matches[1])][] = array
 				(
 					'device' => $ret['current']['device'],
 					'port' => ios12ShortenIfName ($matches[2]),
@@ -426,6 +427,31 @@ function ios12ReadCDPStatus ($input)
 	return $ret;
 }
 
+function ios12ReadLLDPStatus ($input)
+{
+	$ret = array();
+	foreach (explode ("\n", $input) as $line)
+	{
+		$matches = preg_split ('/\s+/', $line);
+		
+		switch (count ($matches))
+		{
+		case 5:
+			list ($remote_name, $local_port, $ttl, $caps, $remote_port) = $matches;
+			$local_port = ios12ShortenIfName ($local_port);
+			$remote_port = ios12ShortenIfName ($remote_port);
+			$ret[$local_port] = array
+			(
+				'device' => $remote_name,
+				'port' => $remote_port,
+			);
+			break;
+		default:
+		}
+	}
+	return $ret;
+}
+
 function xos12ReadLLDPStatus ($input)
 {
 	$ret = array();
@@ -434,7 +460,7 @@ function xos12ReadLLDPStatus ($input)
 		$matches = array();
 		switch (TRUE)
 		{
-		case preg_match ('/^LLDP Port ([[:digit:]]+) detected 1 neighbor$/', $line, $matches):
+		case preg_match ('/^LLDP Port ([[:digit:]]+) detected \d+ neighbor$/', $line, $matches):
 			$ret['current']['local_port'] = ios12ShortenIfName ($matches[1]);
 			break;
 		case preg_match ('/^      Port ID     : "(.+)"$/', $line, $matches):
@@ -447,7 +473,7 @@ function xos12ReadLLDPStatus ($input)
 				array_key_exists ('local_port', $ret['current']) and
 				array_key_exists ('remote_port', $ret['current'])
 			)
-				$ret[$ret['current']['local_port']] = array
+				$ret[$ret['current']['local_port']][] = array
 				(
 					'device' => $matches[1],
 					'port' => $ret['current']['remote_port'],
@@ -468,7 +494,7 @@ function vrp53ReadLLDPStatus ($input)
 		$matches = array();
 		switch (TRUE)
 		{
-		case preg_match ('/^(.+) has 1 neighbors:$/', $line, $matches):
+		case preg_match ('/^(.+) has \d+ neighbors:$/', $line, $matches):
 			$ret['current']['local_port'] = ios12ShortenIfName ($matches[1]);
 			break;
 		case preg_match ('/^(PortIdSubtype|PortId): ([^ ]+)/', $line, $matches):
@@ -483,7 +509,7 @@ function vrp53ReadLLDPStatus ($input)
 				array_key_exists ('PortId', $ret['current']) and
 				array_key_exists ('local_port', $ret['current'])
 			)
-				$ret[$ret['current']['local_port']] = array
+				$ret[$ret['current']['local_port']][] = array
 				(
 					'device' => $matches[1],
 					'port' => ios12ShortenIfName ($ret['current']['PortId']),
@@ -505,7 +531,7 @@ function vrp55ReadLLDPStatus ($input)
 		$matches = array();
 		switch (TRUE)
 		{
-		case preg_match ('/^(.+) has 1 neighbors:$/', $line, $matches):
+		case preg_match ('/^(.+) has \d+ neighbors:$/', $line, $matches):
 			$ret['current']['local_port'] = ios12ShortenIfName ($matches[1]);
 			break;
 		case preg_match ('/^Port ID type   :([^ ]+)/', $line, $matches):
@@ -523,7 +549,7 @@ function vrp55ReadLLDPStatus ($input)
 				array_key_exists ('PortId', $ret['current']) and
 				array_key_exists ('local_port', $ret['current'])
 			)
-				$ret[$ret['current']['local_port']] = array
+				$ret[$ret['current']['local_port']][] = array
 				(
 					'device' => $matches[1],
 					'port' => ios12ShortenIfName ($ret['current']['PortId']),
@@ -558,7 +584,7 @@ function vrp53ReadHNDPStatus ($input)
 				array_key_exists ('local_port', $ret['current']) and
 				array_key_exists ('remote_port', $ret['current'])
 			)
-				$ret[$ret['current']['local_port']] = array
+				$ret[$ret['current']['local_port']][] = array
 				(
 					'device' => $matches[1],
 					'port' => $ret['current']['remote_port'],

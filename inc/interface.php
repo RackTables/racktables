@@ -383,6 +383,7 @@ function renderRackspace ()
 	$found_racks = array();
 	$rows = array();
 	$cellfilter = getCellFilter();
+	$rackCount = 0;
 	foreach (getRackRows() as $row_id => $row_name) {
 		$rackList = filterCellList (listCells ('rack', $row_id), $cellfilter['expression']);
 		$found_racks = array_merge($found_racks, $rackList);
@@ -391,53 +392,58 @@ function renderRackspace ()
 			'row_name' => $row_name,
 			'racks' => $rackList
 		);
+		$rackCount += count($rackList);
 	}
-	
+
 	echo "<table class=objview border=0 width='100%'><tr><td class=pcleft>";
 	renderCellFilterPortlet ($cellfilter, 'rack', $found_racks);
 	echo '</td><td class=pcright>';
-	echo '<table border=0 cellpadding=10 cellpadding=1>';
-	// generate thumb gallery
-	global $nextorder;
-	$rackwidth = getRackImageWidth();
-	// Zero value effectively disables the limit.
-	$maxPerRow = getConfigVar ('RACKS_PER_ROW');
-	$order = 'odd';
-	foreach ($rows as $row)
+
+	if (! renderEmptyResults($cellfilter, 'racks', $rackCount))
 	{
-		$row_id = $row['row_id'];
-		$row_name = $row['row_name'];
-		$rackList = $row['racks'];
-		
-		if (!count ($rackList) and count ($cellfilter['expression']))
-			continue;
-		$rackListIdx = 0;
-		echo "<tr class=row_${order}><th class=tdleft>";
-		echo "<a href='".makeHref(array('page'=>'row', 'row_id'=>$row_id))."${cellfilter['urlextra']}'>";
-		echo "${row_name}</a></th><td><table border=0 cellspacing=5><tr>";
-		if (!count ($rackList))
-			echo "<td>(empty row)</td>";
-		else
-			foreach ($rackList as $rack)
-			{
-				if ($rackListIdx > 0 and $maxPerRow > 0 and $rackListIdx % $maxPerRow == 0)
+		echo '<table border=0 cellpadding=10 cellpadding=1>';
+		// generate thumb gallery
+		global $nextorder;
+		$rackwidth = getRackImageWidth();
+		// Zero value effectively disables the limit.
+		$maxPerRow = getConfigVar ('RACKS_PER_ROW');
+		$order = 'odd';
+		foreach ($rows as $row)
+		{
+			$row_id = $row['row_id'];
+			$row_name = $row['row_name'];
+			$rackList = $row['racks'];
+
+			if (!count ($rackList) and count ($cellfilter['expression']))
+				continue;
+			$rackListIdx = 0;
+			echo "<tr class=row_${order}><th class=tdleft>";
+			echo "<a href='".makeHref(array('page'=>'row', 'row_id'=>$row_id))."${cellfilter['urlextra']}'>";
+			echo "${row_name}</a></th><td><table border=0 cellspacing=5><tr>";
+			if (!count ($rackList))
+				echo "<td>(empty row)</td>";
+			else
+				foreach ($rackList as $rack)
 				{
-					echo '</tr></table></tr>';
-					echo "<tr class=row_${order}><th class=tdleft>${row_name} (continued)";
-					echo "</th><td><table border=0 cellspacing=5><tr>";
+					if ($rackListIdx > 0 and $maxPerRow > 0 and $rackListIdx % $maxPerRow == 0)
+					{
+						echo '</tr></table></tr>';
+						echo "<tr class=row_${order}><th class=tdleft>${row_name} (continued)";
+						echo "</th><td><table border=0 cellspacing=5><tr>";
+					}
+					echo "<td align=center><a href='".makeHref(array('page'=>'rack', 'rack_id'=>$rack['id']))."'>";
+					echo "<img border=0 width=${rackwidth} height=";
+					echo getRackImageHeight ($rack['height']);
+					echo " title='${rack['height']} units'";
+					echo "src='render_image.php?img=minirack&rack_id=${rack['id']}'>";
+					echo "<br>${rack['name']}</a></td>";
+					$rackListIdx++;
 				}
-				echo "<td align=center><a href='".makeHref(array('page'=>'rack', 'rack_id'=>$rack['id']))."'>";
-				echo "<img border=0 width=${rackwidth} height=";
-				echo getRackImageHeight ($rack['height']);
-				echo " title='${rack['height']} units'";
-				echo "src='render_image.php?img=minirack&rack_id=${rack['id']}'>";
-				echo "<br>${rack['name']}</a></td>";
-				$rackListIdx++;
-			}
-		$order = $nextorder[$order];
-		echo "</tr></table></tr>\n";
+			$order = $nextorder[$order];
+			echo "</tr></table></tr>\n";
+		}
+		echo "</table>\n";
 	}
-	echo "</table>\n";
 	echo "</td></tr></table>\n";
 }
 
@@ -1918,36 +1924,61 @@ function renderDepot ()
 	echo "<table border=0 class=objectview>\n";
 	echo "<tr><td class=pcleft>";
 
-	startPortlet ('Objects (' . count ($objects) . ')');
-	echo '<br><br><table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
-	echo '<tr><th>Common name</th><th>Visible label</th><th>Asset tag</th><th>Barcode</th><th>Row/Rack</th></tr>';
-	$order = 'odd';
-	foreach ($objects as $obj)
+	if (! renderEmptyResults ($cellfilter, 'objects', count($objects)))
 	{
-		if (isset ($_REQUEST['hl_object_id']) and $_REQUEST['hl_object_id'] == $obj['id'])
-			$secondclass = 'tdleft port_highlight';
-		else
-			$secondclass = 'tdleft';
-		echo "<tr class=row_${order} valign=top><td class='${secondclass}'><a href='".makeHref(array('page'=>'object', 'object_id'=>$obj['id']))."'><strong>${obj['dname']}</strong></a>";
-		if (count ($obj['etags']))
-			echo '<br><small>' . serializeTags ($obj['etags'], makeHref(array('page'=>$pageno, 'tab'=>'default')) . '&') . '</small>';
-		echo "</td><td class='${secondclass}'>${obj['label']}</td>";
-		echo "<td class='${secondclass}'>${obj['asset_no']}</td>";
-		echo "<td class='${secondclass}'>${obj['barcode']}</td>";
-		if ($obj['rack_id'])
-			echo "<td class='${secondclass}'><a href='".makeHref(array('page'=>'row', 'row_id'=>$obj['row_id']))."'>${obj['Row_name']}</a>/<a href='".makeHref(array('page'=>'rack', 'rack_id'=>$obj['rack_id']))."'>${obj['Rack_name']}</a></td>";
-		else
-			echo "<td class='${secondclass}'>Unmounted</td>";
-		echo '</tr>';
-		$order = $nextorder[$order];
+		startPortlet ('Objects (' . count ($objects) . ')');
+		echo '<br><br><table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
+		echo '<tr><th>Common name</th><th>Visible label</th><th>Asset tag</th><th>Barcode</th><th>Row/Rack</th></tr>';
+		$order = 'odd';
+		foreach ($objects as $obj)
+		{
+			if (isset ($_REQUEST['hl_object_id']) and $_REQUEST['hl_object_id'] == $obj['id'])
+				$secondclass = 'tdleft port_highlight';
+			else
+				$secondclass = 'tdleft';
+			echo "<tr class=row_${order} valign=top><td class='${secondclass}'><a href='".makeHref(array('page'=>'object', 'object_id'=>$obj['id']))."'><strong>${obj['dname']}</strong></a>";
+			if (count ($obj['etags']))
+				echo '<br><small>' . serializeTags ($obj['etags'], makeHref(array('page'=>$pageno, 'tab'=>'default')) . '&') . '</small>';
+			echo "</td><td class='${secondclass}'>${obj['label']}</td>";
+			echo "<td class='${secondclass}'>${obj['asset_no']}</td>";
+			echo "<td class='${secondclass}'>${obj['barcode']}</td>";
+			if ($obj['rack_id'])
+				echo "<td class='${secondclass}'><a href='".makeHref(array('page'=>'row', 'row_id'=>$obj['row_id']))."'>${obj['Row_name']}</a>/<a href='".makeHref(array('page'=>'rack', 'rack_id'=>$obj['rack_id']))."'>${obj['Rack_name']}</a></td>";
+			else
+				echo "<td class='${secondclass}'>Unmounted</td>";
+			echo '</tr>';
+			$order = $nextorder[$order];
+		}
+		echo '</table>';
+		finishPortlet();
 	}
-	echo '</table>';
-	finishPortlet();
 
 	echo "</td><td class=pcright width='25%'>";
 
 	renderCellFilterPortlet ($cellfilter, 'object', $objects);
 	echo "</td></tr></table>\n";
+}
+
+// This function returns TRUE if the result set is too big to be rendered, and no filter is set.
+// In this case it renders the describing message instead.
+function renderEmptyResults($cellfilter, $entities_name, $count = NULL)
+{
+	if (!$cellfilter['is_empty'])
+		return FALSE;
+	if (isset ($_REQUEST['show_all_objects']))
+		return FALSE;
+	$max = intval(getConfigVar('MAX_UNFILTERED_ENTITIES'));
+	if (0 == $max || $count <= $max)
+		return FALSE;
+
+	$href_show_all = trim($_SERVER['REQUEST_URI'], '&');
+	$href_show_all .= htmlspecialchars('&show_all_objects=1');
+	$suffix = isset ($count) ? " ($count)" : '';
+	echo <<<END
+<p>Please set a filter to display the corresponging $entities_name.
+<br><a href="$href_show_all">Show all $entities_name$suffix</a>
+END;
+	return TRUE;
 }
 
 // History viewer for history-enabled simple dictionaries.
@@ -2162,35 +2193,39 @@ function renderIPv4Space ()
 
 	echo "<table border=0 class=objectview>\n";
 	echo "<tr><td class=pcleft>";
-	startPortlet ("networks (${netcount})");
-	echo '<h4>';
-	if ($eid === 0)
-		echo 'auto-collapsing at threshold ' . getConfigVar ('TREE_THRESHOLD') .
-			" (<a href='".makeHref(array('page'=>$pageno, 'tab'=>$tabno, 'eid'=>'ALL')) .
-			$cellfilter['urlextra'] . "'>expand all</a>)";
-	elseif ($eid === 'ALL')
-		echo "expanding all (<a href='".makeHref(array('page'=>$pageno, 'tab'=>$tabno)) .
-			$cellfilter['urlextra'] . "'>auto-collapse</a>)";
-	else
+	if (! renderEmptyResults($cellfilter, 'IPv4 nets', count($tree)))
 	{
-		$netinfo = spotEntity ('ipv4net', $eid);
-		echo "expanding ${netinfo['ip']}/${netinfo['mask']} (<a href='" .
-			makeHref (array ('page' => $pageno, 'tab' => $tabno)) .
-			$cellfilter['urlextra'] . "'>auto-collapse</a> / <a href='" .
-			makeHref (array ('page' => $pageno, 'tab' => $tabno, 'eid' => 'ALL')) .
-			$cellfilter['urlextra'] . "'>expand&nbsp;all</a>)";
+		startPortlet ("networks (${netcount})");
+		echo '<h4>';
+		if ($eid === 0)
+			echo 'auto-collapsing at threshold ' . getConfigVar ('TREE_THRESHOLD') .
+				" (<a href='".makeHref(array('page'=>$pageno, 'tab'=>$tabno, 'eid'=>'ALL')) .
+				$cellfilter['urlextra'] . "'>expand all</a>)";
+		elseif ($eid === 'ALL')
+			echo "expanding all (<a href='".makeHref(array('page'=>$pageno, 'tab'=>$tabno)) .
+				$cellfilter['urlextra'] . "'>auto-collapse</a>)";
+		else
+		{
+			$netinfo = spotEntity ('ipv4net', $eid);
+			echo "expanding ${netinfo['ip']}/${netinfo['mask']} (<a href='" .
+				makeHref (array ('page' => $pageno, 'tab' => $tabno)) .
+				$cellfilter['urlextra'] . "'>auto-collapse</a> / <a href='" .
+				makeHref (array ('page' => $pageno, 'tab' => $tabno, 'eid' => 'ALL')) .
+				$cellfilter['urlextra'] . "'>expand&nbsp;all</a>)";
+		}
+		echo "</h4><table class='widetable' border=0 cellpadding=5 cellspacing=0 align='center'>\n";
+		echo "<tr><th>prefix</th><th>name/tags</th><th>capacity</th>";
+		if (getConfigVar ('IPV4_TREE_SHOW_VLAN') == 'yes')
+			echo '<th>VLAN</th>';
+		if (getConfigVar ('EXT_IPV4_VIEW') == 'yes')
+			echo "<th>routed by</th>";
+		echo "</tr>\n";
+		$baseurl = makeHref(array('page'=>$pageno, 'tab'=>$tabno)) . $cellfilter['urlextra'];
+		renderIPv4SpaceRecords ($tree, $baseurl, $eid, $netcount == $allcount and getConfigVar ('IPV4_ENABLE_KNIGHT') == 'yes');
+		echo "</table>\n";
+		finishPortlet();
 	}
-	echo "</h4><table class='widetable' border=0 cellpadding=5 cellspacing=0 align='center'>\n";
-	echo "<tr><th>prefix</th><th>name/tags</th><th>capacity</th>";
-	if (getConfigVar ('IPV4_TREE_SHOW_VLAN') == 'yes')
-		echo '<th>VLAN</th>';
-	if (getConfigVar ('EXT_IPV4_VIEW') == 'yes')
-		echo "<th>routed by</th>";
-	echo "</tr>\n";
-	$baseurl = makeHref(array('page'=>$pageno, 'tab'=>$tabno)) . $cellfilter['urlextra'];
-	renderIPv4SpaceRecords ($tree, $baseurl, $eid, $netcount == $allcount and getConfigVar ('IPV4_ENABLE_KNIGHT') == 'yes');
-	echo "</table>\n";
-	finishPortlet();
+
 	echo '</td><td class=pcright>';
 	renderCellFilterPortlet ($cellfilter, 'ipv4net', $netlist);
 	echo "</td></tr></table>\n";
@@ -3341,21 +3376,26 @@ function renderCellList ($realm = NULL, $title = 'items', $do_amplify = FALSE)
 	$order = 'odd';
 	$cellfilter = getCellFilter();
 	$celllist = filterCellList (listCells ($realm), $cellfilter['expression']);
-	if ($do_amplify)
-		array_walk ($celllist, 'amplifyCell');
+
 	echo "<table border=0 class=objectview>\n";
 	echo "<tr><td class=pcleft>";
-	startPortlet ($title . ' (' . count ($celllist) . ')');
-	echo "<table class=cooltable border=0 cellpadding=5 cellspacing=0 align=center>\n";
-	foreach ($celllist as $cell)
+
+	if ($realm != 'file' || ! renderEmptyResults ($cellfilter, 'files', count($celllist)))
 	{
-		echo "<tr class=row_${order}><td>";
-		renderCell ($cell);
-		echo "</td></tr>\n";
-		$order = $nextorder[$order];
+		if ($do_amplify)
+			array_walk ($celllist, 'amplifyCell');
+		startPortlet ($title . ' (' . count ($celllist) . ')');
+		echo "<table class=cooltable border=0 cellpadding=5 cellspacing=0 align=center>\n";
+		foreach ($celllist as $cell)
+		{
+			echo "<tr class=row_${order}><td>";
+			renderCell ($cell);
+			echo "</td></tr>\n";
+			$order = $nextorder[$order];
+		}
+		echo '</table>';
+		finishPortlet();
 	}
-	echo '</table>';
-	finishPortlet();
 	echo '</td><td class=pcright>';
 	renderCellFilterPortlet ($cellfilter, $realm, $celllist);
 	echo "</td></tr></table>\n";
@@ -6942,7 +6982,7 @@ function renderObject8021QPorts ($object_id)
 	$req_port_name = array_key_exists ('port_name', $sic) ? $sic['port_name'] : '';
 	$desired_config = apply8021QOrder ($vswitch['template_id'], getStored8021QConfig ($object_id, 'desired'));
 	$cached_config = getStored8021QConfig ($object_id, 'cached');
-	uksort ($desired_config, 'sortTokenize');
+	uksort_portlist ($desired_config);
 	$uplinks = filter8021QChangeRequests ($vdom['vlanlist'], $desired_config, produceUplinkPorts ($vdom['vlanlist'], $desired_config));
 	echo '<table border=0 width="100%"><tr valign=top><td class=tdleft width="50%">';
 	// port list
@@ -7348,7 +7388,7 @@ function renderVLANInfo ($vlan_ck)
 		echo '<tr><th>switch</th><th>ports</th></tr>';
 		foreach ($confports as $switch_id => $portlist)
 		{
-			usort ($portlist, 'sortTokenize');
+			usort_portlist ($portlist);
 			echo "<tr class=row_${order} valign=top><td>";
 			renderCell (spotEntity ('object', $switch_id));
 			echo '</td><td class=tdleft><ul>';
@@ -7541,7 +7581,7 @@ function renderObject8021QSync ($object_id)
 	}
 	echo '<th width="40%">running&nbsp;version</th></tr>';
 	$rownum = 0;
-	uksort ($plan, 'sortTokenize');
+	uksort_portlist ($plan);
 	$domvlans = array_keys (getDomainVLANs ($vswitch['domain_id']));
 	$default_port = array
 	(
@@ -7866,6 +7906,22 @@ function renderDeployQueue ($dqcode)
 	echo '</table>';
 }
 
+// returns '<a...</a>' html string containing a link to specified port or object.
+// link title is "hostname portname" if both parts are defined
+function formatPortLink($host_id, $hostname, $port_id, $portname)
+{
+	$href = 'index.php?page=object&object_id=' . urlencode($host_id);
+	if (isset ($port_id))
+		$href .= '&hl_port_id=' . urlencode($port_id);
+	
+	$text_items = array();
+	if (isset ($hostname))
+		$text_items[] = $hostname;
+	if (isset ($portname))
+		$text_items[] = $portname;
+	return "<a href=\"$href\">" . implode(' ', $text_items) . '</a>';
+}
+
 function renderDiscoveredNeighbors ($object_id)
 {
 	global $tabno;
@@ -7877,7 +7933,8 @@ function renderDiscoveredNeighbors ($object_id)
 	);
 	try
 	{
-		$neighbors = sortPortList (gwRetrieveDeviceConfig ($object_id, $opcode_by_tabno[$tabno]));
+		$neighbors = gwRetrieveDeviceConfig ($object_id, $opcode_by_tabno[$tabno]);
+		uksort_portlist ($neighbors);
 	}
 	catch (RTGatewayError $e)
 	{
@@ -7886,58 +7943,166 @@ function renderDiscoveredNeighbors ($object_id)
 	}
 	$mydevice = spotEntity ('object', $object_id);
 	amplifyCell ($mydevice);
+
 	// reindex by port name
 	$myports = array();
 	foreach ($mydevice['ports'] as $port)
 		if (mb_strlen ($port['name']))
 			$myports[$port['name']][] = $port;
-	unset ($mydevice);
+
 	printOpFormIntro ('importDPData');
 	echo '<br><table cellspacing=0 cellpadding=5 align=center class=widetable>';
 	echo '<tr><th colspan=2>local port</th><th>remote device</th><th colspan=2>remote port</th><th>&nbsp;</th></tr>';
 	$inputno = 0;
-	foreach ($neighbors as $local_port => $remote)
+	foreach ($neighbors as $local_port => $remote_list)
 	{
-		if
-		(
-			!array_key_exists ($local_port, $myports) or
-			(
-				NULL === $remote_id = searchByMgmtHostname ($remote['device']) and
-				NULL === $remote_id = lookupEntityByString ('object', $remote['device'])
-			) or
-			!count ($remote_port_ids = getPortIDs ($remote_id, $remote['port']))
-		)
+		$initial_row = TRUE;
+		foreach ($remote_list as $remote)
 		{
-			echo "<tr class=trerror><td>${local_port}</td><td>&nbsp;</td>";
-			echo "<td>${remote['device']}</td>";
-			echo "<td>${remote['port']}</td><td>&nbsp;</td>";
-			echo "<td>&nbsp;</td></tr>";
-			continue;
-		}
-		// Link already installed?
-		foreach ($myports[$local_port] as $socket)
-			if (in_array ($socket['remote_id'], $remote_port_ids))
+			$is_our_port = array_key_exists ($local_port, $myports);
+			$remote_id = NULL; // id of remote object found by CDP name
+			$local_port_id = NULL; // first id of local port for formatting html links
+			$remote_port = NULL; // remote port struct (by cdp or link)
+			$remote_remote_port = NULL;
+			$link_matches = FALSE; // base link completeli matches CDP link
+			$remote_port_ids = array();
+
+			if ($is_our_port)
 			{
-				echo "<tr class=trok><td>${local_port}</td><td>";
-				echo formatPortIIFOIF ($socket) . "</td>";
-				echo "<td>${remote['device']}</td>";
-				echo "<td>${remote['port']}</td><td>";
-				echo formatPortIIFOIF (getPortInfo ($socket['remote_id'])) . "</td>";
-				echo "<td>&nbsp;</td></tr>";
-				continue 2;
+				$local_port_struct = $myports[$local_port][0];
+				if (isset ($local_port_struct))
+					$local_port_id = $local_port_struct['id'];
+				$local_port_html = formatPortLink($object_id, NULL, $local_port_id, $local_port);
+				// find remote device id
+				$remote_id = searchByMgmtHostname ($remote['device']);
+				if (! $remote_id)
+					$remote_id = lookupEntityByString ('object', $remote['device']);
+
+				if ($remote_id)
+				{
+					$cdp_remote_cell = spotEntity ('object', $remote_id);
+					$remote_host_html = formatPortLink ($remote_id, $cdp_remote_cell['name'], NULL, NULL);
+
+					// get port list which names match CDP portname
+					$remote_port_ids = getPortIDs ($remote_id, $remote['port']);
+					if (! empty ($remote_port_ids))
+					{
+						$remote_port_html = formatPortLink ($remote_id, $cdp_remote_cell['name'], $remote_port_ids[0], $remote['port']);
+						$remote_portname_html = formatPortLink ($remote_id, NULL, $remote_port_ids[0], $remote['port']);
+					}
+				}
+
+				// find remote port connected to local port, and calculate $link_matches
+				foreach ($myports[$local_port] as $socket)
+				{
+					$remote_port_id = $socket['remote_id'];
+					if (! $remote_port_id)
+						continue;
+					if (in_array ($remote_port_id, $remote_port_ids))
+					{
+						$remote_port = getPortInfo ($remote_port_id);
+						$remote_port['id'] = $remote_port_id;
+						$link_matches = TRUE;
+						break;
+					}
+					if (! isset ($remote_port))
+					{
+						$remote_port = getPortInfo ($remote_port_id);
+						$remote_port['id'] = $remote_port_id;
+					}
+				}
+				if (isset ($remote_port))
+				{
+					$remote_object = $link_matches ? $cdp_remote_cell : spotEntity ('object', $remote_port['object_id']);
+					$local_link_html = formatPortLink ($remote_port['object_id'], $remote_object['name'], $remote_port['id'], $remote_port['name']);
+				}
+				else
+				{ // no local link. Search for links on the remote side
+					$remote_remote_port = NULL;
+					if (! empty ($remote_port_ids))
+					{
+						$remote_port_id = $remote_port_ids[count($remote_port_ids)-1];  // get the very first port (discard others)
+						$remote_port = GetPortInfo ($remote_port_id);
+						$remote_port['id'] = $remote_port_id;
+						if ($remote_port['linked']) // there is a link on that port
+						{
+							//search for remote side of that link
+							amplifyCell ($cdp_remote_cell);
+							foreach ($cdp_remote_cell['ports'] as $port)
+								if ($port['id'] == $remote_port['id'])
+								{
+									//print "FOUND {$port['id']}";
+									$remote_port['remote_id'] = $port['remote_id'];
+									break;
+								}
+							if (isset ($remote_port['remote_id']))
+							{
+								$remote_remote_port = getPortInfo ($remote_port['remote_id']);
+								$remote_remote_port['id'] = $remote_port['remote_id'];
+								$remote_remote_object_id = $remote_remote_port['object_id'];
+								$remote_remote_object = spotEntity('object', $remote_remote_object_id);
+								$remote_link_html = formatPortLink ($remote_remote_object['id'], $remote_remote_object['name'], $remote_remote_port['id'], $remote_remote_port['name']);
+							}
+						}
+					}
+				}
 			}
-		$local_options = $remote_options = array();
-		foreach ($myports[$local_port] as $port)
-			$local_options[$port['id']] = formatPortIIFOIF ($port);
-		foreach ($remote_port_ids as $remote_port_id)
-			$remote_options[$remote_port_id] = formatPortIIFOIF (getPortInfo ($remote_port_id));
-		echo "<tr class=trwarning><td>${local_port}</td><td>";
-		printSelect ($local_options, array ('name' => "pid1_${inputno}"));
-		echo "</td><td>${remote['device']}</td>";
-		echo "<td>${remote['port']}</td><td>";
-		printSelect ($remote_options, array ('name' => "pid2_${inputno}"));
-		echo "</td><td><input type=checkbox name=do_${inputno}></td></tr>";
-		$inputno++;
+
+			$error_message = '';
+			$tr_class = "trerror";
+
+			if (! $is_our_port)
+				$error_message = "No such local port <i>$local_port</i>";
+			elseif (! $remote_id)
+				$error_message = "No such neighbor <i>${remote['device']}</i>";
+			elseif (empty ($remote_port_ids))
+				$error_message = "No such port on $remote_host_html";
+			elseif (isset ($remote_port) and $remote_port['object_id'] != $remote_id)
+				$error_message = "Remote device mismatch - port linked to $local_link_html";
+			elseif (isset ($remote_port) and $remote_port['name'] != $remote['port'])
+				$error_message = "Remote port mismatch - port linked to $local_link_html";
+			elseif (isset ($remote_remote_port))
+				$error_message = "Remote port $remote_port_html is already linked to $remote_link_html";
+			elseif ($link_matches)
+				$tr_class = "trok";
+			elseif (count($myports[$local_port]) > 1)
+				$error_message = "There is an ambiguity between local port media types. Please set the link manualy";
+			elseif (count ($remote_port_ids) > 1)
+				$error_message = "There is an ambiguity between remote port media types. Please set the link manualy";
+			else // link does not match
+				$tr_class = "trwarning";
+
+			echo "<tr class=\"$tr_class\">";
+			if ($initial_row)
+			{
+				$count = count ($remote_list);
+				echo "<td rowspan=\"$count\">" .
+					($is_our_port ? $local_port_html : $local_port) .
+					($count > 1 ? " ($count neighbors)" : '') .
+					'</td>';
+				$initial_row = FALSE;
+			}
+			echo "<td>" . ($is_our_port ?  formatPortIIFOIF($socket) : '&nbsp') . "</td>";
+			echo "<td>${remote['device']}</td>";
+			echo "<td>" . (is_array ($remote_port) ? $remote_portname_html : $remote['port'] ) . "</td>";
+			echo "<td>" . (is_array ($remote_port) ? formatPortIIFOIF($remote_port) : '&nbsp') . "</td>";
+			echo "<td>";
+			if ($error_message || $link_matches)
+				echo '&nbsp;';
+			else
+			{
+				echo "<input type=hidden name=\"pid1_${inputno}\" value=\"{$local_port_id}\">";
+				echo "<input type=hidden name=\"pid2_${inputno}\" value=\"{$remote_port['id']}\">";
+				echo "<input type=checkbox name=do_${inputno}>";
+				$inputno++;
+			}
+			echo "</td>";
+				
+			if ($error_message)
+				echo "<td style=\"background-color: white; border-top: none\">$error_message</td>";
+			echo "</tr>";
+			$initial_row = FALSE;
+		}
 	}
 	if ($inputno)
 	{
