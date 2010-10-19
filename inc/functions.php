@@ -3487,7 +3487,7 @@ function sortPortList ($plist, $name_in_value = FALSE)
 	$ret = array();
 	$seen = array();
 	$intersects = FALSE;
-	$prefix_re = '/^([^0-9]+)[0-9].*$/';
+	$prefix_re = '/^([^0-9]*)[0-9].*$/';
 	foreach ($plist as $pkey => $pvalue)
 	{
 		$pn = $name_in_value ? $pvalue['name'] : $pkey;
