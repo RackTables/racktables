@@ -3497,10 +3497,10 @@ function sortPortList ($plist, $name_in_value = FALSE)
 			'prefix' => '',
 			'numidx' => count ($numbers),
 			'index' => $numbers,
-			'iif_id' => isset($plist[$pn]['iif_id']) ? $plist[$pn] : 0,
-			'label' => isset($plist[$pn]['label']) ? $plist[$pn]['label'] : '',
-			'l2address' => isset($plist[$pn]['l2address']) ? $plist[$pn]['l2address'] : '',
-			'id' => isset($plist[$pn]['id']) ? $plist[$pn]['id'] : 0,
+			'iif_id' => isset($plist[$pkey]['iif_id']) ? $plist[$pkey]['iif_id'] : 0,
+			'label' => isset($plist[$pkey]['label']) ? $plist[$pkey]['label'] : '',
+			'l2address' => isset($plist[$pkey]['l2address']) ? $plist[$pkey]['l2address'] : '',
+			'id' => isset($plist[$pkey]['id']) ? $plist[$pkey]['id'] : 0,
 			'name' => $pn,
 		);
 		if ($ret[$pkey]['numidx'] <= 1)
