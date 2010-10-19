@@ -1,4 +1,4 @@
-0.18.5
+0.18.5 2010-10-19
 	bugfix: attribute map editor was broken (#353)
 	bugfix: speed up IPv4 VLAN selector (by Boris Lytochkin)
 	bugfix: suppress inputs borders in MSIE (by Alexey Andrianov)

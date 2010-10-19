@@ -1817,7 +1817,7 @@ function countOwnIPv4Addresses (&$node)
 	$node['mask_bin_inv'] = binInvMaskFromDec ($node['mask']);
 	$node['db_first'] = sprintf ('%u', 0x00000000 + $node['ip_bin'] & $node['mask_bin']);
 	$node['db_last'] = sprintf ('%u', 0x00000000 + $node['ip_bin'] | ($node['mask_bin_inv']));
-	if (!count ($node['kids']))
+	if (empty ($node['kids']))
 	{
 		$toscan[] = array ('i32_first' => $node['db_first'], 'i32_last' => $node['db_last']);
 		$node['addrt'] = binInvMaskFromDec ($node['mask']) + 1;
