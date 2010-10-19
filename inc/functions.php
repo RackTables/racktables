@@ -3530,7 +3530,7 @@ function usort_portlist(&$array)
 	$temp_array = array();
 	foreach($array as $portname)
 		$temp_array[$portname] = 1;
-	$array = array_keys(sortPortList($temp_array), FALSE);
+	$array = array_keys (sortPortList ($temp_array, FALSE));
 }
 
 // This is a dual-purpose formating function:
