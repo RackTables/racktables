@@ -1042,8 +1042,9 @@ function vrp55Read8021QConfig ($input)
 				foreach (vrp53ParseVLANString ($matches[1]) as $vlan_id)
 					$ret['vlanlist'][] = $vlan_id;
 				continue 2;
-			case (preg_match ('@^interface ((GigabitEthernet|Eth-Trunk)([[:digit:]]+(/[[:digit:]]+)*))$@', $line, $matches)):
+			case (preg_match ('@^interface ((GigabitEthernet|XGigabitEthernet|Eth-Trunk)([[:digit:]]+(/[[:digit:]]+)*))$@', $line, $matches)):
 				$matches[1] = preg_replace ('@^GigabitEthernet(.+)$@', 'gi\\1', $matches[1]);
+				$matches[1] = preg_replace ('@^XGigabitEthernet(.+)$@', 'xg\\1', $matches[1]);
 				$ret['current'] = array ('port_name' => $matches[1]);
 				continue 2;
 			default:
