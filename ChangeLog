@@ -12,6 +12,7 @@
 	update: another round of SNMP enhancements
 	update: tag "quick list" redesign (by Alexey Andrianov)
 	update: disable knight button for a filtered IPv4 tree view
+	update: initial support of VRP version 5.70
 	new feature: enable IMS caching of progress bars (by Alexey Andrianov)
 	new feature: rebuild tag filter as soon as user changes it (by Alexey Andrianov)
 	new feature: default SLB configuration lines stored in DB (by Alexey Andrianov)
