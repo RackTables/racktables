@@ -430,8 +430,15 @@ function ios12ReadCDPStatus ($input)
 function ios12ReadLLDPStatus ($input)
 {
 	$ret = array();
+	$got_header = FALSE;
 	foreach (explode ("\n", $input) as $line)
 	{
+		if (preg_match ("/^Device ID/", $line))
+			$got_header = TRUE;
+
+		if (!$got_header)
+			continue;
+
 		$matches = preg_split ('/\s+/', $line);
 		
 		switch (count ($matches))
