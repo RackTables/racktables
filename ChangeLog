@@ -1,3 +1,6 @@
+0.18.6
+	bugfix: draw administrator's attention to missing LDAP extension (by
+	Matt Mills)
 0.18.5 2010-10-25
 	bugfix: attribute map editor was broken (#353)
 	bugfix: speed up IPv4 VLAN selector (by Boris Lytochkin)
