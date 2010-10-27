@@ -8033,6 +8033,7 @@ function renderDiscoveredNeighbors ($object_id)
 				// determine match or mismatch of local link
 				foreach ($local_ports as $portinfo_local)
 					if ($portinfo_local['remote_id'])
+					{
 						if
 						(
 							$portinfo_local['remote_object_id'] == $dp_remote_object_id
@@ -8045,23 +8046,18 @@ function renderDiscoveredNeighbors ($object_id)
 									break;
 							$link_matches = TRUE;
 							unset ($error_message);
-							break 2;
 						}
 						elseif ($portinfo_local['remote_object_id'] != $dp_remote_object_id)
 						{
 							$remote_object = spotEntity('object', $portinfo_local['remote_object_id']);
 							$error_message = "Remote device mismatch - port linked to "
 								. formatPortLink ($remote_object['id'], $remote_object['name'], $portinfo_local['remote_id'], $portinfo_local['remote_name']);
-							// do not break. Maybe there is another local port that matches
 						}
-						elseif ($portinfo_local['remote_name'] != $dp_neighbor['port'])
-						{
+						else // ($portinfo_local['remote_name'] != $dp_neighbor['port'])
 							$error_message = "Remote port mismatch - port linked to "
 								. formatPortLink ($portinfo_local['remote_object_id'], NULL, $portinfo_local['remote_id'], $portinfo_local['remote_name']);;
-							break 2;
-						}
-				if ($error_message)
-					break; // remote device mismatch
+						break 2;
+					}
 
 				// no local links found, try to search for remote links
 				foreach ($remote_ports as $portinfo_remote)
