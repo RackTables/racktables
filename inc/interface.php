@@ -7982,154 +7982,132 @@ function renderDiscoveredNeighbors ($object_id)
 	$inputno = 0;
 	foreach ($neighbors as $local_port => $remote_list)
 	{
-		$initial_row = TRUE;
-		foreach ($remote_list as $remote)
+		$initial_row = TRUE; // if port has multiple neighbors, the first table row is initial
+		// array of local ports with the name specified by DP
+		$local_ports = isset($myports[$local_port]) ? $myports[$local_port] : array(); 
+		foreach ($remote_list as $dp_neighbor) // step over DP neighbors
 		{
-			$is_our_port = array_key_exists ($local_port, $myports);
-			$remote_id = NULL; // id of remote object found by CDP name
-			$local_port_id = NULL; // first id of local port for formatting html links
-			$remote_port = NULL; // remote port struct (by cdp or link)
-			$remote_remote_port = NULL;
-			$link_matches = FALSE; // base link completeli matches CDP link
-			$remote_port_ids = array();
+			$error_message = NULL;
+			$link_matches = FALSE;
+			$portinfo_local = NULL;
+			$portinfo_remote = NULL;
 
-			if ($is_our_port)
-			{
-				$local_port_struct = $myports[$local_port][0];
-				if (isset ($local_port_struct))
-					$local_port_id = $local_port_struct['id'];
-				$local_port_html = formatPortLink($object_id, NULL, $local_port_id, $local_port);
-				// find remote device id
-				$remote_id = searchByMgmtHostname ($remote['device']);
-				if (! $remote_id)
-					$remote_id = lookupEntityByString ('object', $remote['device']);
+			do { // once-cyle fake loop used only to break out of it
+				if (! empty($local_ports))
+					$portinfo_local = $local_ports[0];
 
-				if ($remote_id)
+				// find remote object by DP information
+				$dp_remote_object_id = searchByMgmtHostname ($dp_neighbor['device']);
+				if (! $dp_remote_object_id)
+					$dp_remote_object_id = lookupEntityByString ('object', $dp_neighbor['device']);
+				if (! $dp_remote_object_id)
 				{
-					$cdp_remote_cell = spotEntity ('object', $remote_id);
-					$remote_host_html = formatPortLink ($remote_id, $cdp_remote_cell['name'], NULL, NULL);
+					$error_message = "No such neighbor <i>${dp_neighbor['device']}</i>";
+					break;
+				}
+				$dp_remote_object = spotEntity ('object', $dp_remote_object_id);
+				amplifyCell($dp_remote_object);
 
-					// get port list which names match CDP portname
-					$remote_port_ids = getPortIDs ($remote_id, $remote['port']);
-					if (! empty ($remote_port_ids))
+				// get port list which names match CDP portname
+				$remote_ports = array(); // list of remote (by DP info) ports
+				foreach ($dp_remote_object['ports'] as $port)
+					if ($port['name'] == $dp_neighbor['port'])
 					{
-						$remote_port_html = formatPortLink ($remote_id, $cdp_remote_cell['name'], $remote_port_ids[0], $remote['port']);
-						$remote_portname_html = formatPortLink ($remote_id, NULL, $remote_port_ids[0], $remote['port']);
+						$portinfo_remote = $port;
+						$remote_ports[] = $port;
 					}
+
+				// check if ports with such names exist on devices
+				if (empty ($local_ports))
+				{
+					$error_message = "No such local port <i>$local_port</i>";
+					break;
+				}
+				if (empty ($remote_ports))
+				{
+					$error_message = "No such port on "
+						. formatPortLink ($dp_remote_object['id'], $dp_remote_object['name'], NULL, NULL);
+					break;
 				}
 
-				// find remote port connected to local port, and calculate $link_matches
-				foreach ($myports[$local_port] as $socket)
-				{
-					$remote_port_id = $socket['remote_id'];
-					if (! $remote_port_id)
-						continue;
-					if (in_array ($remote_port_id, $remote_port_ids))
-					{
-						$remote_port = getPortInfo ($remote_port_id);
-						$remote_port['id'] = $remote_port_id;
-						$link_matches = TRUE;
-						break;
-					}
-					if (! isset ($remote_port))
-					{
-						$remote_port = getPortInfo ($remote_port_id);
-						$remote_port['id'] = $remote_port_id;
-					}
-				}
-				if (isset ($remote_port))
-				{
-					$remote_object = $link_matches ? $cdp_remote_cell : spotEntity ('object', $remote_port['object_id']);
-					$local_link_html = formatPortLink ($remote_port['object_id'], $remote_object['name'], $remote_port['id'], $remote_port['name']);
-				}
-				else
-				{ // no local link. Search for links on the remote side
-					$remote_remote_port = NULL;
-					if (! empty ($remote_port_ids))
-					{
-						$remote_port_id = $remote_port_ids[count($remote_port_ids)-1];  // get the very first port (discard others)
-						$remote_port = GetPortInfo ($remote_port_id);
-						$remote_port['id'] = $remote_port_id;
-						if ($remote_port['linked']) // there is a link on that port
+				// determine match or mismatch of local link
+				foreach ($local_ports as $portinfo_local)
+					if ($portinfo_local['remote_id'])
+						if
+						(
+							$portinfo_local['remote_object_id'] == $dp_remote_object_id
+							and $portinfo_local['remote_name'] == $dp_neighbor['port']
+						)
 						{
-							//search for remote side of that link
-							amplifyCell ($cdp_remote_cell);
-							foreach ($cdp_remote_cell['ports'] as $port)
-								if ($port['id'] == $remote_port['id'])
-								{
-									//print "FOUND {$port['id']}";
-									$remote_port['remote_id'] = $port['remote_id'];
+							// set $portinfo_remote to corresponding remote port
+							foreach ($remote_ports as $portinfo_remote)
+								if ($portinfo_remote['id'] == $portinfo_local['remote_id'])
 									break;
-								}
-							if (isset ($remote_port['remote_id']))
-							{
-								$remote_remote_port = getPortInfo ($remote_port['remote_id']);
-								$remote_remote_port['id'] = $remote_port['remote_id'];
-								$remote_remote_object_id = $remote_remote_port['object_id'];
-								$remote_remote_object = spotEntity('object', $remote_remote_object_id);
-								$remote_link_html = formatPortLink ($remote_remote_object['id'], $remote_remote_object['name'], $remote_remote_port['id'], $remote_remote_port['name']);
-							}
+							$link_matches = TRUE;
+							unset ($error_message);
+							break 2;
 						}
-					}
-				}
-			}
+						elseif ($portinfo_local['remote_object_id'] != $dp_remote_object_id)
+						{
+							$remote_object = spotEntity('object', $portinfo_local['remote_object_id']);
+							$error_message = "Remote device mismatch - port linked to "
+								. formatPortLink ($remote_object['id'], $remote_object['name'], $portinfo_local['remote_id'], $portinfo_local['remote_name']);
+							// do not break. Maybe there is another local port that matches
+						}
+						elseif ($portinfo_local['remote_name'] != $dp_neighbor['port'])
+						{
+							$error_message = "Remote port mismatch - port linked to "
+								. formatPortLink ($portinfo_local['remote_object_id'], NULL, $portinfo_local['remote_id'], $portinfo_local['remote_name']);;
+							break 2;
+						}
+				if ($error_message)
+					break; // remote device mismatch
 
-			$error_message = '';
-			$tr_class = "trerror";
-
-			if (! $is_our_port)
-				$error_message = "No such local port <i>$local_port</i>";
-			elseif (! $remote_id)
-				$error_message = "No such neighbor <i>${remote['device']}</i>";
-			elseif (empty ($remote_port_ids))
-				$error_message = "No such port on $remote_host_html";
-			elseif (isset ($remote_port) and $remote_port['object_id'] != $remote_id)
-				$error_message = "Remote device mismatch - port linked to $local_link_html";
-			elseif (isset ($remote_port) and $remote_port['name'] != $remote['port'])
-				$error_message = "Remote port mismatch - port linked to $local_link_html";
-			elseif (isset ($remote_remote_port))
-				$error_message = "Remote port $remote_port_html is already linked to $remote_link_html";
-			elseif ($link_matches)
-				$tr_class = "trok";
-			elseif (count($myports[$local_port]) > 1)
-				$error_message = "There is an ambiguity between local port media types";
-			elseif (count ($remote_port_ids) > 1)
-				$error_message = "There is an ambiguity between remote port media types";
-			else // no link found
-			{
-				$POIFC = getPortOIFCompat();
-				foreach ($POIFC as $item)
-					if ($item['type1'] == $local_port_struct['oif_id'] and $item['type2'] == $remote_port['oif_id'])
+				// no local links found, try to search for remote links
+				foreach ($remote_ports as $portinfo_remote)
+					if ($portinfo_remote['remote_id'])
 					{
-						// no link found and ports are compatible, let user create link
-						$tr_class = "trwarning";
-						break;
+						$remote_remote_object = spotEntity('object', $portinfo_remote['remote_object_id']);
+						$remote_link_html = formatPortLink($remote_remote_object['id'], $remote_remote_object['name'], $portinfo_remote['remote_id'], $portinfo_remote['remote_name']);
+						$remote_port_html = formatPortLink(NULL, NULL, $portinfo_remote['id'], $portinfo_remote['name']);
+						$error_message = "Remote port $remote_port_html is already linked to $remote_link_html";
+						break 2;
 					}
-				if ($tr_class == 'trerror')
-					$error_message = "Incompatible port types";
-			}
 
+				// no links found on both sides, search for a compatible port pair
+				$POIFC = getPortOIFCompat();
+				foreach ($local_ports as $portinfo_local)
+					foreach ($remote_ports as $portinfo_remote)
+						foreach ($POIFC as $item)
+							if ($item['type1'] == $portinfo_local['oif_id'] and $item['type2'] == $portinfo_remote['oif_id'])
+								break 4;
+
+				// no compatible ports found
+				$error_message = "Incompatible port types";
+			} while (FALSE); // do {
+
+			$tr_class = $link_matches ? 'trok' : ($error_message ? 'trerror' : 'trwarning');
 			echo "<tr class=\"$tr_class\">";
 			if ($initial_row)
 			{
 				$count = count ($remote_list);
 				echo "<td rowspan=\"$count\">" .
-					($is_our_port ? $local_port_html : $local_port) .
+					($portinfo_local ? formatPortLink ($mydevice['id'], NULL, $portinfo_local['id'], $portinfo_local['name']) : $local_port) .
 					($count > 1 ? " ($count neighbors)" : '') .
 					'</td>';
 				$initial_row = FALSE;
 			}
-			echo "<td>" . ($is_our_port ?  formatPortIIFOIF($socket) : '&nbsp') . "</td>";
-			echo "<td>${remote['device']}</td>";
-			echo "<td>" . (is_array ($remote_port) ? $remote_portname_html : $remote['port'] ) . "</td>";
-			echo "<td>" . (is_array ($remote_port) ? formatPortIIFOIF($remote_port) : '&nbsp') . "</td>";
+			echo "<td>" . ($portinfo_local ?  formatPortIIFOIF($portinfo_local) : '&nbsp') . "</td>";
+			echo "<td>${dp_neighbor['device']}</td>";
+			echo "<td>" . ($portinfo_remote ? formatPortLink ($dp_remote_object_id, NULL, $portinfo_remote['id'], $portinfo_remote['name']) : $dp_neighbor['port'] ) . "</td>";
+			echo "<td>" . ($portinfo_remote ? formatPortIIFOIF($portinfo_remote) : '&nbsp') . "</td>";
 			echo "<td>";
 			if ($error_message || $link_matches)
 				echo '&nbsp;';
 			else
 			{
-				echo "<input type=hidden name=\"pid1_${inputno}\" value=\"{$local_port_id}\">";
-				echo "<input type=hidden name=\"pid2_${inputno}\" value=\"{$remote_port['id']}\">";
+				echo "<input type=hidden name=\"pid1_${inputno}\" value=\"{$portinfo_local['id']}\">";
+				echo "<input type=hidden name=\"pid2_${inputno}\" value=\"{$portinfo_remote['id']}\">";
 				echo "<input type=checkbox name=do_${inputno}>";
 				$inputno++;
 			}
@@ -8138,7 +8116,6 @@ function renderDiscoveredNeighbors ($object_id)
 			if ($error_message)
 				echo "<td style=\"background-color: white; border-top: none\">$error_message</td>";
 			echo "</tr>";
-			$initial_row = FALSE;
 		}
 	}
 	if ($inputno)
