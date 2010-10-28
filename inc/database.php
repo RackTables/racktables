@@ -3186,6 +3186,38 @@ function getFile ($file_id = 0)
 	return $ret;
 }
 
+function getFileCache ($file_id = 0)
+{
+	$query = usePreparedSelectBlade
+	(
+		'SELECT File.thumbnail FROM File ' .
+		'WHERE File.id = ? and File.thumbnail IS NOT NULL',
+		array ($file_id)
+	);
+	if (($row = $query->fetch (PDO::FETCH_ASSOC)) == NULL)
+		return FALSE;
+	$ret = $row['contents'];
+	$query->CloseCursor();
+	usePreparedExecuteBlade ('UPDATE File SET atime = ? WHERE id = ?', array (date ('YmdHis'), $file_id));
+	return $ret;
+}
+
+function commitAddFileCache ($file_id, $contents)
+{               
+	global $dbxlink;
+	$query = $dbxlink->prepare('UPDATE File SET thumbnail = ? WHERE id = ?');
+	$query->bindParam(1, $contents, PDO::PARAM_LOB);
+	$query->bindParam(2, $file_id);
+	try     
+	{
+		return $query->execute();
+	}
+	catch (PDOException $e)
+	{
+		throw convertPDOException ($e);
+	}
+}               
+
 function getFileLinks ($file_id = 0)
 {
 	$query = usePreparedSelectBlade

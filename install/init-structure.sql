@@ -96,6 +96,7 @@ CREATE TABLE `File` (
   `ctime` datetime NOT NULL,
   `mtime` datetime NOT NULL,
   `atime` datetime NOT NULL,
+  `thumbnail` longblob,
   `contents` longblob NOT NULL,
   `comment` text,
   PRIMARY KEY  (`id`),

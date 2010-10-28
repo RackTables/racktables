@@ -219,14 +219,21 @@ function renderFilePreview ($file_id = 0, $mode = 'view')
 		echo $file['contents'];
 		break;
 	case 'preview':
+		if($image = getFileCache($file_id)){ //Cache Hit
+			header("Content-type: image/jpeg"); 
+			echo $image;
+			break;
+		}
+
+		//Cache Miss
 		$file = getFile ($file_id);
 		$image = imagecreatefromstring ($file['contents']);
-		unset ($file);
+		unset ($file['contents']);
 		$width = imagesx ($image);
 		$height = imagesy ($image);
+		header ('Content-type: image/jpeg');
 		if ($width > getConfigVar ('PREVIEW_IMAGE_MAXPXS') or $height > getConfigVar ('PREVIEW_IMAGE_MAXPXS'))
 		{
-			// TODO: cache thumbs for faster page generation
 			$ratio = getConfigVar ('PREVIEW_IMAGE_MAXPXS') / max ($width, $height);
 			$newwidth = $width * $ratio;
 			$newheight = $height * $ratio;
@@ -234,11 +241,15 @@ function renderFilePreview ($file_id = 0, $mode = 'view')
 			imagecopyresampled ($resampled, $image, 0, 0, 0, 0, $newwidth, $newheight, $width, $height);
 			imagedestroy ($image);
 			$image = $resampled;
+
+			//TODO: Find a better way to save the stream of the image... Output buffer seems silly.
+			ob_start();
+			imagejpeg ($image);
+			commitAddFileCache ($file_id, ob_get_flush());
+			imagedestroy ($image);
+			unset ($file);
 			unset ($resampled);
 		}
-		header("Content-type: image/png"); // don't announce content-length, it may have changed after resampling
-		imagepng ($image);
-		imagedestroy ($image);
 		break;
 	default:
 		showError ('Invalid argument', __FUNCTION__);
