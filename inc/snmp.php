@@ -419,10 +419,38 @@ $iftable_processors['fgs-1-to-4-comboSFP'] = array
 
 $iftable_processors['fgs-any-1000T'] = array
 (
-	'pattern' => '@^GigabitEthernet1/1/([[:digit:]]+)$@',
-	'replacement' => 'e1/1/\\1',
+	'pattern' => '@^GigabitEthernet(0|1)/1/([[:digit:]]+)$@',
+	'replacement' => 'e\\1/1/\\2',
 	'dict_key' => '1-24',
+	'label' => '\\2',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['fls624-combo'] = array
+(
+	'pattern' => '@^GigabitEthernet0/1/(21|22|23|24)$@',
+	'replacement' => 'e0/1/\\1',
+	'dict_key' => '4-1077',
 	'label' => '\\1',
+	'try_next_proc' => TRUE,
+);
+
+$iftable_processors['fls648-combo'] = array
+(
+	'pattern' => '@^GigabitEthernet0/1/(45|46|47|48)$@',
+	'replacement' => 'e0/1/\\1',
+	'dict_key' => '4-1077',
+	'label' => '\\1',
+	'try_next_proc' => TRUE,
+);
+
+# These can be CX4, but that is not handled here.
+$iftable_processors['fls-uplinks'] = array
+(
+	'pattern' => '@^10GigabitEthernet0/([234])/1$@',
+	'replacement' => 'e0/\\1/1',
+	'dict_key' => '8-1082',
+	'label' => 'Slot \\1',
 	'try_next_proc' => FALSE,
 );
 
@@ -836,6 +864,18 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'FCX 648: 48 RJ-45/10-100-1000T(X) + uplink slot with 4 SFP+',
 		'processors' => array ('fgs-any-1000T', 'fcx-uplinks', 'fcx-management'),
 	),
+	'1991.1.3.46.1.1.1.1' => array
+	(
+		'dict_key' => 413,
+		'text' => 'FLS 624: 20 RJ-45/10-100-1000T(X) + 4 combo-gig + 3 optional 10G modules',
+		'processors' => array ('fls624-combo', 'fgs-any-1000T', 'fls-uplinks'),
+	),
+	'1991.1.3.46.2.1.1.1' => array
+	(
+		'dict_key' => 414,
+		'text' => 'FLS 648: 44 RJ-45/10-100-1000T(X) + 4 combo-gig + 2 optional 10G modules',
+		'processors' => array ('fls648-combo', 'fgs-any-1000T', 'fls-uplinks'),
+	),
 	'1916.2.71' => array
 	(
 		'dict_key' => 694,
@@ -1021,6 +1061,7 @@ function doSwitchSNMPmining ($objectInfo, $hostname, $community)
 		$log = mergeLogs ($log, oneLiner (81, array ('juniper-generic')));
 		break;
 	case preg_match ('/^1991\.1\.3\.45\./', $sysObjectID): // snFGSFamily
+	case preg_match ('/^1991\.1\.3\.46\./', $sysObjectID): // snFLSFamily
 	case preg_match ('/^1991\.1\.3\.54\.2\.4\.1\.1$/', $sysObjectID): // FCX 648
 		detectSoftwareType ($objectInfo, $sysDescr);
 		$exact_release = preg_replace ('/^.*, IronWare Version ([^ ]+) .*$/', '\\1', $sysDescr);
@@ -1036,6 +1077,12 @@ function doSwitchSNMPmining ($objectInfo, $hostname, $community)
 		# FGS-1XG1XGC (one fixed CX4 port)
 		# FGS-2XGC (two fixed CX4 ports)
 		# FGS-2XG (two XFP slots)
+		# And for FLS result (which is not handled here) would be:
+		# 1991.1.1.2.2.1.1.2.1 = STRING: "FLS-24G 24-port Management Module"
+		# 1991.1.1.2.2.1.1.2.3 = STRING: "FLS-1XG 1-port 10G Module (1-XFP)"
+		# 1991.1.1.2.2.1.1.2.4 = STRING: "FLS-1XG 1-port 10G Module (1-XFP)"
+		# (assuming, that the device has 2 XFP modules in slots 3 and 4).
+
 		foreach (@snmpwalkoid ($hostname, $community, 'enterprises.1991.1.1.2.2.1.1.2') as $module_raw)
 			if (preg_match ('/^STRING: "(FGS-1XG1XGC|FGS-2XGC) /i', $module_raw))
 			{
