@@ -270,6 +270,7 @@ function listCells ($realm, $parent_id = 0)
 		foreach (array_keys ($SQLinfo['columns']) as $alias)
 			$ret[$entity_id][$alias] = $row[$alias];
 	}
+	unset($result);
 
 	// select tags and link them to previosly fetched entities
 	$query = 'SELECT entity_id, tag_id FROM TagStorage WHERE entity_realm = ?';
@@ -285,6 +286,7 @@ function listCells ($realm, $parent_id = 0)
 				'parent_id' => $taglist[$row['tag_id']]['parent_id'],
 			);
 	}
+	unset($result);
 	// Add necessary finish to the list before returning it. Maintain caches.
 	if (!$parent_id)
 		unset ($entityCache['partial'][$realm]);
@@ -1773,7 +1775,6 @@ function getDictStats ()
 		$uc++;
 		$uw += $row['wc'];;
 	}
-	$result->closeCursor();
 	unset ($result);
 	$result = usePreparedSelectBlade
 	(
@@ -1790,7 +1791,7 @@ function getDictStats ()
 			$ta += $row['attrc'];
 		}
 	}
-	$result->closeCursor();
+	unset ($result);
 	$ret = array();
 	$ret['Total chapters in dictionary'] = $tc;
 	$ret['Total words in dictionary'] = $tw;
@@ -1820,7 +1821,6 @@ function getIPv4Stats ()
 		$result = usePreparedSelectBlade ($item['q']);
 		$row = $result->fetch (PDO::FETCH_NUM);
 		$ret[$item['txt']] = $row[0];
-		$result->closeCursor();
 		unset ($result);
 	}
 	return $ret;
@@ -1840,7 +1840,6 @@ function getRackspaceStats ()
 		$result = usePreparedSelectBlade ($item['q']);
 		$row = $result->fetch (PDO::FETCH_NUM);
 		$ret[$item['txt']] = !strlen ($row[0]) ? 0 : $row[0];
-		$result->closeCursor();
 		unset ($result);
 	}
 	return $ret;
@@ -1935,7 +1934,6 @@ function readChapter ($chapter_id = 0, $style = '')
 	$chapter = array();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 		$chapter[$row['dict_key']] = $style == '' ? $row['dict_value'] : parseWikiLink ($row['dict_value'], $style);
-	$result->closeCursor();
 	// SQL ORDER BY had no sense, because we need to sort after link rendering, not before.
 	asort ($chapter);
 	return $chapter;
@@ -2133,7 +2131,6 @@ function fetchAttrsForObjects($object_set)
 		}
 		$ret[$object_id][$attr_id] = $record;
 	}
-	$result->closeCursor();
 	return $ret;
 }
 
@@ -2379,13 +2376,10 @@ function getDatabaseVersion ()
 		die (__FUNCTION__ . ': SQL query #1 failed with error ' . $errorInfo[2]);
 	}
 	$rows = $result->fetchAll (PDO::FETCH_NUM);
+	unset ($result);
 	if (count ($rows) != 1 || !strlen ($rows[0][0]))
-	{
-		$result->closeCursor();
 		die (__FUNCTION__ . ': Cannot guess database version. Config table is present, but DB_VERSION is missing or invalid. Giving up.');
-	}
 	$ret = $rows[0][0];
-	$result->closeCursor();
 	return $ret;
 }
 
@@ -3178,7 +3172,7 @@ function getFile ($file_id = 0)
 		$ret['atime'] = $row['atime'];
 		$ret['contents'] = $row['contents'];
 		$ret['comment'] = $row['comment'];
-		$query->closeCursor();
+		unset ($query);
 
 		// Someone accessed this file, update atime
 		usePreparedExecuteBlade ('UPDATE File SET atime = ? WHERE id = ?', array (date ('YmdHis'), $file_id));
