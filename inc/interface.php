@@ -6665,6 +6665,18 @@ function render8021QOrderForm ($some_id)
 	{
 		$all_vswitches = getVLANSwitches();
 		global $pageno;
+		$hintcodes = array ('prev_vdid' => 'DEFAULT_VDOM_ID', 'prev_vstid' => 'DEFAULT_VST_ID', 'prev_objid' => NULL);
+		$focus = array();
+		foreach ($hintcodes as $hint_code => $option_name)
+		if (array_key_exists ($hint_code, $_REQUEST))
+		{
+			assertUIntArg ($hint_code);
+			$focus[$hint_code] = $_REQUEST[$hint_code];
+		}
+		elseif ($option_name != NULL)
+			$focus[$hint_code] = getConfigVar ($option_name);
+		else
+			$focus[$hint_code] = NULL;
 		printOpFormIntro ('add');
 		echo '<tr>';
 		if ($pageno != 'object')
@@ -6675,13 +6687,13 @@ function render8021QOrderForm ($some_id)
 			foreach (getNarrowObjectList ('VLANSWITCH_LISTSRC') as $object_id => $object_dname)
 				if (!in_array ($object_id, $all_vswitches))
 					$options[$object_id] = $object_dname;
-			printSelect ($options, array ('name' => 'object_id', 'tabindex' => 101, 'size' => getConfigVar ('MAXSELSIZE')));
+			printSelect ($options, array ('name' => 'object_id', 'tabindex' => 101, 'size' => getConfigVar ('MAXSELSIZE')), $focus['prev_objid']);
 			echo '</td>';
 		}
 		if ($pageno != 'vlandomain')
-			echo '<td>' . getSelect (getVLANDomainOptions(), array ('name' => 'vdom_id', 'tabindex' => 102, 'size' => getConfigVar ('MAXSELSIZE')), getConfigVar ('DEFAULT_VDOM_ID')) . '</td>';
+			echo '<td>' . getSelect (getVLANDomainOptions(), array ('name' => 'vdom_id', 'tabindex' => 102, 'size' => getConfigVar ('MAXSELSIZE')), $focus['prev_vdid']) . '</td>';
 		if ($pageno != 'vst')
-			echo '<td>' . getSelect (getVSTOptions(), array ('name' => 'vst_id', 'tabindex' => 103, 'size' => getConfigVar ('MAXSELSIZE')), getConfigVar ('DEFAULT_VST_ID')) . '</td>';
+			echo '<td>' . getSelect (getVSTOptions(), array ('name' => 'vst_id', 'tabindex' => 103, 'size' => getConfigVar ('MAXSELSIZE')), $focus['prev_vstid']) . '</td>';
 		echo '<td>' . getImageHREF ('Attach', 'set', TRUE, 104) . '</td></tr></form>';
 	}
 	global $pageno;

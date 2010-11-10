@@ -2121,9 +2121,17 @@ $msgcode['del8021QOrder']['ERR'] = 119;
 function del8021QOrder ()
 {
 	assertUIntArg ('object_id');
+	assertUIntArg ('vdom_id');
+	assertUIntArg ('vst_id');
 	global $sic;
 	$result = usePreparedDeleteBlade ('VLANSwitch', array ('object_id' => $sic['object_id']));
-	return buildRedirectURL (__FUNCTION__, $result ? 'OK' : 'ERR');
+	$focus_hints = array
+	(
+		'prev_objid' => $_REQUEST['object_id'],
+		'prev_vstid' => $_REQUEST['vst_id'],
+		'prev_vdid' => $_REQUEST['vdom_id'],
+	);
+	return buildRedirectURL (__FUNCTION__, $result ? 'OK' : 'ERR', array(), NULL, NULL, $focus_hints);
 }
 
 $msgcode['addVLANDescription']['OK'] = 48;
