@@ -2,6 +2,7 @@
 	update: cache image files thumbnails and make them JPEGs (#369, by Matt Mills)
 0.18.6
 	bugfix: draw administrator's attention to missing LDAP extension (by Matt Mills)
+	bugfix: minor issues on LiveCDP/LLDP tab
 	bugfix: SQL error issue on some versions of PHP introduced in 0.18.5
 0.18.5 2010-10-25
 	bugfix: attribute map editor was broken (#353)
