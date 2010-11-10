@@ -7826,8 +7826,8 @@ function renderVST ($vst_id)
 		{
 			echo "<tr class=row_${order} align=left>";
 			echo "<td>${item['rule_no']}</td>";
-			echo "<td><tt>${item['port_pcre']}</tt></td>";
-			echo '<td>' . $port_role_options[$item['port_role']] . '</td>';
+			echo "<td nowrap><tt>${item['port_pcre']}</tt></td>";
+			echo '<td nowrap>' . $port_role_options[$item['port_role']] . '</td>';
 			echo "<td>${item['wrt_vlans']}</td>";
 			echo "<td>${item['description']}</td>";
 			echo '</tr>';
