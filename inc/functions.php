@@ -28,6 +28,7 @@ $templateWidth[5] = 1;
 $etype_by_pageno = array
 (
 	'ipv4net' => 'ipv4net',
+	'ipv6net' => 'ipv6net',
 	'ipv4rspool' => 'ipv4rspool',
 	'ipv4vs' => 'ipv4vs',
 	'object' => 'object',
@@ -152,11 +153,42 @@ function assertBoolArg ($argname, $ok_if_empty = FALSE)
 		throw new InvalidRequestArgException($argname, $_REQUEST[$argname], 'parameter is an empty string');
 }
 
+// function returns IPv6Address object, null if arg is correct IPv4, or throws an exception
+function assertIPArg ($argname, $ok_if_empty = FALSE)
+{
+	assertStringArg ($argname, $ok_if_empty);
+	$ip = $_REQUEST[$argname];
+	if (FALSE !== strpos ($ip, ':'))
+	{
+		$v6address = new IPv6Address;
+		$result = $v6address->parse ($ip);
+		$ret = $v6address;
+	}
+	else
+	{
+		$result = long2ip (ip2long ($ip)) === $ip;
+		$ret = NULL;
+	}
+	if (! $result)
+		throw new InvalidRequestArgException ($argname, $ip, 'parameter is not a valid IPv4 or IPv6 address');
+	return $ret;
+}
+
 function assertIPv4Arg ($argname, $ok_if_empty = FALSE)
 {
 	assertStringArg ($argname, $ok_if_empty);
 	if (strlen ($_REQUEST[$argname]) and long2ip (ip2long ($_REQUEST[$argname])) !== $_REQUEST[$argname])
 		throw new InvalidRequestArgException($argname, $_REQUEST[$argname], 'parameter is not a valid ipv4 address');
+}
+
+// function returns IPv6Address object, or throws an exception
+function assertIPv6Arg ($argname, $ok_if_empty = FALSE)
+{
+	assertStringArg ($argname, $ok_if_empty);
+	$ipv6 = new IPv6Address;
+	if (strlen ($_REQUEST[$argname]) and ! $ok_if_empty and ! $ipv6->parse ($_REQUEST[$argname]))
+		throw new InvalidRequestArgException($argname, $_REQUEST[$argname], 'parameter is not a valid ipv6 address');
+	return $ipv6;
 }
 
 function assertPCREArg ($argname)
@@ -995,6 +1027,11 @@ function generateEntityAutoTags ($cell)
 			$ret[] = array ('tag' => '$any_ip4net');
 			$ret[] = array ('tag' => '$any_net');
 			break;
+		case 'ipv6net':
+			$ret[] = array ('tag' => '$ip6netid_' . $cell['id']);
+			$ret[] = array ('tag' => '$any_ip6net');
+			$ret[] = array ('tag' => '$any_net');
+			break;
 		case 'ipv4vs':
 			$ret[] = array ('tag' => '$ipv4vsid_' . $cell['id']);
 			$ret[] = array ('tag' => '$any_ipv4vs');
@@ -1215,7 +1252,7 @@ function getObjectiveTagTree ($tree, $realm, $preselect)
 
 // Preprocess tag tree to get only tags which can effectively reduce given filter result,
 // than passes shrinked tag tree to getObjectiveTagTree and return its result.
-// This makes sense only if andor mode is 'and', otherwhise function does not modify tree.
+// This makes sense only if andor mode is 'and', otherwise function does not modify tree.
 // 'Given filter' is a pair of $entity_list(filter result) and $preselect(filter data).
 // 'Effectively' means reduce to non-empty result.
 function getShrinkedTagTree($entity_list, $realm, $preselect) {
@@ -1615,7 +1652,7 @@ function buildLVSConfig ($object_id = 0)
 }
 
 // Indicate occupation state of each IP address: none, ordinary or problematic.
-function markupIPv4AddrList (&$addrlist)
+function markupIPAddrList (&$addrlist)
 {
 	foreach (array_keys ($addrlist) as $ip_bin)
 	{
@@ -1641,7 +1678,7 @@ function markupIPv4AddrList (&$addrlist)
 	}
 }
 
-// Scan the given address list (returned by scanIPv4Space) and return a list of all routers found.
+// Scan the given address list (returned by scanIPv4Space/scanIPv6Space) and return a list of all routers found.
 function findRouters ($addrlist)
 {
 	$ret = array();
@@ -1704,6 +1741,11 @@ function IPv4NetworkCmp ($netA, $netB)
 	}
 }
 
+function IPv6NetworkCmp ($netA, $netB)
+{
+	return strcmp ($netA['ip_bin'], $netB['ip_bin']);
+}
+
 // Modify the given tag tree so, that each level's items are sorted alphabetically.
 function sortTree (&$tree, $sortfunc = '')
 {
@@ -1733,6 +1775,22 @@ function iptree_fill (&$netdata)
 	$netdata['kidc'] = count ($netdata['kids']);
 }
 
+function ipv6tree_fill (&$netdata)
+{
+	if (!isset ($netdata['kids']) or !count ($netdata['kids']))
+		return;
+	// If we really have nested prefixes, they must fit into the tree.
+	$worktree = array
+	(
+		'ip_bin' => $netdata['ip_bin'],
+		'mask' => $netdata['mask']
+	);
+	foreach ($netdata['kids'] as $pfx)
+		ipv6tree_embed ($worktree, $pfx);
+	$netdata['kids'] = ipv6tree_construct ($worktree);
+	$netdata['kidc'] = count ($netdata['kids']);
+}
+
 function iptree_construct ($node)
 {
 	$self = __FUNCTION__;
@@ -1742,6 +1800,25 @@ function iptree_construct ($node)
 		if (!isset ($node['ip']))
 		{
 			$node['ip'] = long2ip ($node['ip_bin']);
+			$node['kids'] = array();
+			$node['kidc'] = 0;
+			$node['name'] = '';
+		}
+		return array ($node);
+	}
+	else
+		return array_merge ($self ($node['left']), $self ($node['right']));
+}
+
+function ipv6tree_construct ($node)
+{
+	$self = __FUNCTION__;
+
+	if (!isset ($node['right']))
+	{
+		if (!isset ($node['ip']))
+		{
+			$node['ip'] = $node['ip_bin']->format();
 			$node['kids'] = array();
 			$node['kidc'] = 0;
 			$node['name'] = '';
@@ -1768,22 +1845,49 @@ function iptree_embed (&$node, $pfx)
 	// split?
 	if (!isset ($node['right']))
 	{
-		// Fill in db_first/db_last to make it possible to run scanIPv4Space() on the node.
 		$node['left']['mask'] = $node['mask'] + 1;
 		$node['left']['ip_bin'] = $node['ip_bin'];
-		$node['left']['db_first'] = sprintf ('%u', $node['left']['ip_bin']);
-		$node['left']['db_last'] = sprintf ('%u', $node['left']['ip_bin'] | binInvMaskFromDec ($node['left']['mask']));
 
 		$node['right']['mask'] = $node['mask'] + 1;
 		$node['right']['ip_bin'] = $node['ip_bin'] + binInvMaskFromDec ($node['mask'] + 1) + 1;
-		$node['right']['db_first'] = sprintf ('%u', $node['right']['ip_bin']);
-		$node['right']['db_last'] = sprintf ('%u', $node['right']['ip_bin'] | binInvMaskFromDec ($node['right']['mask']));
 	}
 
 	// repeat!
 	if (($node['left']['ip_bin'] & binMaskFromDec ($node['left']['mask'])) == ($pfx['ip_bin'] & binMaskFromDec ($node['left']['mask'])))
 		$self ($node['left'], $pfx);
 	elseif (($node['right']['ip_bin'] & binMaskFromDec ($node['right']['mask'])) == ($pfx['ip_bin'] & binMaskFromDec ($node['left']['mask'])))
+		$self ($node['right'], $pfx);
+	else
+		throw new RackTablesError ('cannot decide between left and right', RackTablesError::INTERNAL);
+}
+
+function ipv6tree_embed (&$node, $pfx)
+{
+	$self = __FUNCTION__;
+
+	// hit?
+	if ($node['ip_bin'] == $pfx['ip_bin'] and $node['mask'] == $pfx['mask'])
+	{
+		$node = $pfx;
+		return;
+	}
+	if ($node['mask'] == $pfx['mask'])
+		throw new RackTablesError ('the recurring loop lost control', RackTablesError::INTERNAL);
+
+	// split?
+	if (!isset ($node['right']))
+	{
+		$node['left']['mask'] = $node['mask'] + 1;
+		$node['left']['ip_bin'] = $node['ip_bin'];
+
+		$node['right']['mask'] = $node['mask'] + 1;
+		$node['right']['ip_bin'] = $node['ip_bin']->get_last_subnet_address ($node['mask'] + 1)->next();
+	}
+
+	// repeat!
+	if (($node['left']['ip_bin']->get_first_subnet_address ($node['left']['mask'])) == ($pfx['ip_bin']->get_first_subnet_address ($node['left']['mask'])))
+		$self ($node['left'], $pfx);
+	elseif (($node['right']['ip_bin']->get_first_subnet_address ($node['right']['mask'])) == ($pfx['ip_bin']->get_first_subnet_address ($node['left']['mask'])))
 		$self ($node['right'], $pfx);
 	else
 		throw new RackTablesError ('cannot decide between left and right', RackTablesError::INTERNAL);
@@ -1806,32 +1910,18 @@ function treeApplyFunc (&$tree, $func = '', $stopfunc = '')
 function loadIPv4AddrList (&$netinfo)
 {
 	loadOwnIPv4Addresses ($netinfo);
-	markupIPv4AddrList ($netinfo['addrlist']);
+	markupIPAddrList ($netinfo['addrlist']);
 }
 
 function countOwnIPv4Addresses (&$node)
 {
-	$toscan = array();
 	$node['addrt'] = 0;
-	$node['mask_bin'] = binMaskFromDec ($node['mask']);
-	$node['mask_bin_inv'] = binInvMaskFromDec ($node['mask']);
-	$node['db_first'] = sprintf ('%u', 0x00000000 + $node['ip_bin'] & $node['mask_bin']);
-	$node['db_last'] = sprintf ('%u', 0x00000000 + $node['ip_bin'] | ($node['mask_bin_inv']));
 	if (empty ($node['kids']))
-	{
-		$toscan[] = array ('i32_first' => $node['db_first'], 'i32_last' => $node['db_last']);
 		$node['addrt'] = binInvMaskFromDec ($node['mask']) + 1;
-	}
 	else
 		foreach ($node['kids'] as $nested)
 			if (!isset ($nested['id'])) // spare
-			{
-				$toscan[] = array ('i32_first' => $nested['db_first'], 'i32_last' => $nested['db_last']);
 				$node['addrt'] += binInvMaskFromDec ($nested['mask']) + 1;
-			}
-	// Don't do anything more, because the displaying function will load the addresses anyway.
-	return;
-	$node['addrc'] = count (scanIPv4Space ($toscan));
 }
 
 function nodeIsCollapsed ($node)
@@ -1839,16 +1929,52 @@ function nodeIsCollapsed ($node)
 	return $node['symbol'] == 'node-collapsed';
 }
 
+// implies countOwnIPv4Addresses
 function loadOwnIPv4Addresses (&$node)
 {
 	$toscan = array();
-	if (!isset ($node['kids']) or !count ($node['kids']))
-		$toscan[] = array ('i32_first' => $node['db_first'], 'i32_last' => $node['db_last']);
+	$node['addrt'] = 0;
+	if (empty ($node['kids']))
+	{
+		$mask_bin = binMaskFromDec ($node['mask']);
+		$mask_bin_inv = binInvMaskFromDec ($node['mask']);
+		$db_first = sprintf ('%u', 0x00000000 + $node['ip_bin'] & $mask_bin);
+		$db_last  = sprintf ('%u', 0x00000000 + $node['ip_bin'] | $mask_bin_inv);
+		$node['addrt'] = $mask_bin_inv + 1;
+		$toscan[] = array ('i32_first' => $db_first, 'i32_last' => $db_last);
+	}
 	else
 		foreach ($node['kids'] as $nested)
 			if (!isset ($nested['id'])) // spare
-				$toscan[] = array ('i32_first' => $nested['db_first'], 'i32_last' => $nested['db_last']);
+			{
+				$mask_bin = binMaskFromDec ($nested['mask']);
+				$mask_bin_inv = binInvMaskFromDec ($nested['mask']);
+				$db_first = sprintf ('%u', 0x00000000 + $nested['ip_bin'] & $mask_bin);
+				$db_last  = sprintf ('%u', 0x00000000 + $nested['ip_bin'] | $mask_bin_inv);
+				$node['addrt'] += $mask_bin_inv + 1;
+				$toscan[] = array ('i32_first' => $db_first, 'i32_last' => $db_last);
+			}
 	$node['addrlist'] = scanIPv4Space ($toscan);
+	$node['addrc'] = count ($node['addrlist']);
+}
+
+function loadIPv6AddrList (&$netinfo)
+{
+	loadOwnIPv6Addresses ($netinfo);
+	markupIPAddrList ($netinfo['addrlist']);
+}
+
+function loadOwnIPv6Addresses (&$node)
+{
+	$toscan = array();
+	$node['addrt'] = 0;
+	if (empty ($node['kids']))
+		$toscan[] = array ('first' => $node['ip_bin'], 'last' => $node['ip_bin']->get_last_subnet_address ($node['mask']));
+	else
+		foreach ($node['kids'] as $nested)
+			if (!isset ($nested['id'])) // spare
+				$toscan[] = array ('first' => $nested['ip_bin'], 'last' => $nested['ip_bin']->get_last_subnet_address ($nested['mask']));
+	$node['addrlist'] = scanIPv6Space ($toscan);
 	$node['addrc'] = count ($node['addrlist']);
 }
 
@@ -1868,6 +1994,23 @@ function prepareIPv4Tree ($netlist, $expanded_id = 0)
 	iptree_markup_collapsion ($tree, getConfigVar ('TREE_THRESHOLD'), $expanded_id);
 	// count addresses after the markup to skip computation for hidden tree nodes
 	treeApplyFunc ($tree, 'countOwnIPv4Addresses', 'nodeIsCollapsed');
+	return $tree;
+}
+
+function prepareIPv6Tree ($netlist, $expanded_id = 0)
+{
+	// treeFromList() requires parent_id to be correct for an item to get onto the tree,
+	// so perform necessary pre-processing to make orphans belong to root. This trick
+	// was earlier performed by getIPv4NetworkList().
+	$netids = array_keys ($netlist);
+	foreach ($netids as $cid)
+		if (!in_array ($netlist[$cid]['parent_id'], $netids))
+			$netlist[$cid]['parent_id'] = NULL;
+	$tree = treeFromList ($netlist); // medium call
+	sortTree ($tree, 'IPv6NetworkCmp');
+	// complement the tree before markup to make the spare networks have "symbol" set
+	treeApplyFunc ($tree, 'ipv6tree_fill');
+	iptree_markup_collapsion ($tree, getConfigVar ('TREE_THRESHOLD'), $expanded_id);
 	return $tree;
 }
 

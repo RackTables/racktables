@@ -106,7 +106,7 @@ CREATE TABLE `File` (
 CREATE TABLE `FileLink` (
   `id` int(10) unsigned NOT NULL auto_increment,
   `file_id` int(10) unsigned NOT NULL,
-  `entity_type` enum('ipv4net','ipv4rspool','ipv4vs','object','rack','user') NOT NULL default 'object',
+  `entity_type` enum('ipv4net','ipv4rspool','ipv4vs','object','rack','user','ipv6net') NOT NULL default 'object',
   `entity_id` int(10) NOT NULL,
   PRIMARY KEY  (`id`),
   KEY `FileLink-file_id` (`file_id`),
@@ -198,6 +198,32 @@ CREATE TABLE `IPv4VS` (
   `vsconfig` text,
   `rsconfig` text,
   PRIMARY KEY  (`id`)
+) ENGINE=InnoDB;
+
+CREATE TABLE `IPv6Address` (
+  `ip` binary(16) NOT NULL,
+  `name` char(255) NOT NULL default '',
+  `reserved` enum('yes','no') default NULL,
+  PRIMARY KEY  (`ip`)
+) ENGINE=InnoDB;
+
+CREATE TABLE `IPv6Allocation` (
+  `object_id` int(10) unsigned NOT NULL default '0',
+  `ip` binary(16) NOT NULL,
+  `name` char(255) NOT NULL default '',
+  `type` enum('regular','shared','virtual','router') default NULL,
+  PRIMARY KEY  (`object_id`,`ip`)
+) ENGINE=InnoDB;
+
+CREATE TABLE `IPv6Network` (
+  `id` int(10) unsigned NOT NULL auto_increment,
+  `ip` binary(16) NOT NULL,
+  `mask` int(10) unsigned NOT NULL,
+  `last_ip` binary(16) NOT NULL,
+  `name` char(255) default NULL,
+  `comment` text,
+  PRIMARY KEY  (`id`),
+  UNIQUE KEY `ip` (`ip`,`mask`)
 ) ENGINE=InnoDB;
 
 CREATE TABLE `LDAPCache` (
@@ -384,7 +410,7 @@ CREATE TABLE `Script` (
 ) ENGINE=InnoDB;
 
 CREATE TABLE `TagStorage` (
-  `entity_realm` enum('file','ipv4net','ipv4vs','ipv4rspool','object','rack','user') NOT NULL default 'object',
+  `entity_realm` enum('file','ipv4net','ipv4vs','ipv4rspool','object','rack','user','ipv6net') NOT NULL default 'object',
   `entity_id` int(10) unsigned NOT NULL,
   `tag_id` int(10) unsigned NOT NULL default '0',
   UNIQUE KEY `entity_tag` (`entity_realm`,`entity_id`,`tag_id`),
@@ -445,6 +471,16 @@ CREATE TABLE `VLANIPv4` (
   KEY `VLANIPv4-FK-compound` (`domain_id`,`vlan_id`),
   CONSTRAINT `VLANIPv4-FK-compound` FOREIGN KEY (`domain_id`, `vlan_id`) REFERENCES `VLANDescription` (`domain_id`, `vlan_id`) ON DELETE CASCADE,
   CONSTRAINT `VLANIPv4-FK-ipv4net_id` FOREIGN KEY (`ipv4net_id`) REFERENCES `IPv4Network` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE `VLANIPv6` (
+  `domain_id` int(10) unsigned NOT NULL,
+  `vlan_id` int(10) unsigned NOT NULL,
+  `ipv6net_id` int(10) unsigned NOT NULL,
+  UNIQUE KEY `network-domain` (`ipv6net_id`,`domain_id`),
+  KEY `VLANIPv6-FK-compound` (`domain_id`,`vlan_id`),
+  CONSTRAINT `VLANIPv6-FK-compound` FOREIGN KEY (`domain_id`, `vlan_id`) REFERENCES `VLANDescription` (`domain_id`, `vlan_id`) ON DELETE CASCADE,
+  CONSTRAINT `VLANIPv6-FK-ipv6net_id` FOREIGN KEY (`ipv6net_id`) REFERENCES `IPv6Network` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
 CREATE TABLE `VLANSTRule` (

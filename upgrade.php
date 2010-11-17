@@ -756,6 +756,48 @@ CREATE TABLE `VLANValidID` (
 			break;
 		case '0.19.0':
 			$query[] = 'ALTER TABLE `File` ADD `thumbnail` LONGBLOB NULL AFTER `atime`';
+			$query[] = "
+CREATE TABLE `IPv6Address` (
+  `ip` binary(16) NOT NULL,
+  `name` char(255) NOT NULL default '',
+  `reserved` enum('yes','no') default NULL,
+  PRIMARY KEY  (`ip`)
+) ENGINE=InnoDB
+";
+			$query[] = "
+CREATE TABLE `IPv6Allocation` (
+  `object_id` int(10) unsigned NOT NULL default '0',
+  `ip` binary(16) NOT NULL,
+  `name` char(255) NOT NULL default '',
+  `type` enum('regular','shared','virtual','router') default NULL,
+  PRIMARY KEY  (`object_id`,`ip`)
+) ENGINE=InnoDB
+";
+			$query[] = "
+CREATE TABLE `IPv6Network` (
+  `id` int(10) unsigned NOT NULL auto_increment,
+  `ip` binary(16) NOT NULL,
+  `mask` int(10) unsigned NOT NULL,
+  `last_ip` binary(16) NOT NULL,
+  `name` char(255) default NULL,
+  `comment` text,
+  PRIMARY KEY  (`id`),
+  UNIQUE KEY `ip` (`ip`,`mask`)
+) ENGINE=InnoDB
+";
+			$query[] = "
+CREATE TABLE `VLANIPv6` (
+  `domain_id` int(10) unsigned NOT NULL,
+  `vlan_id` int(10) unsigned NOT NULL,
+  `ipv6net_id` int(10) unsigned NOT NULL,
+  UNIQUE KEY `network-domain` (`ipv6net_id`,`domain_id`),
+  KEY `VLANIPv6-FK-compound` (`domain_id`,`vlan_id`),
+  CONSTRAINT `VLANIPv6-FK-compound` FOREIGN KEY (`domain_id`, `vlan_id`) REFERENCES `VLANDescription` (`domain_id`, `vlan_id`) ON DELETE CASCADE,
+  CONSTRAINT `VLANIPv6-FK-ipv6net_id` FOREIGN KEY (`ipv6net_id`) REFERENCES `IPv6Network` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB
+";
+			$query[] = "ALTER TABLE `TagStorage` CHANGE COLUMN `entity_realm` `entity_realm` ENUM('file','ipv4net','ipv4vs','ipv4rspool','object','rack','user','ipv6net') NOT NULL DEFAULT 'object' FIRST";
+			$query[] = "ALTER TABLE `FileLink` CHANGE COLUMN `entity_type` `entity_type` ENUM('ipv4net','ipv4rspool','ipv4vs','object','rack','user','ipv6net') NOT NULL DEFAULT 'object' AFTER `file_id`";
 			$query[] = "UPDATE Config SET varvalue = '0.19.0' WHERE varname = 'DB_VERSION'";
 			break;
 		default:

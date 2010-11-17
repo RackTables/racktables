@@ -207,4 +207,6 @@ $impl_tags = array();
 // Initial chain for the current target.
 $target_given_tags = array();
 
+require_once 'inc/IPv6.php';
+
 ?>

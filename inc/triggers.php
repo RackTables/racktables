@@ -124,6 +124,15 @@ function trigger_ipv4 ()
 	return considerConfiguredConstraint (spotEntity ('object', $_REQUEST['object_id']), 'IPV4OBJ_LISTSRC') ? 'std' : '';
 }
 
+function trigger_ipv6 ()
+{
+	assertUIntArg ('object_id');
+	if (count (getObjectIPv6Allocations ($_REQUEST['object_id'])))
+		return 'std';
+	// Only hide the tab, if there are no addresses allocated.
+	return considerConfiguredConstraint (spotEntity ('object', $_REQUEST['object_id']), 'IPV4OBJ_LISTSRC') ? 'std' : '';
+}
+
 function trigger_natv4 ()
 {
 	assertUIntArg ('object_id');
@@ -208,6 +217,32 @@ function trigger_ipv4net_vlanconfig ()
 		return 'attn';
 	else
 		return '';
+}
+
+// implement similar logic for IPv6 networks
+function trigger_ipv6net_vlanconfig ()
+{
+	if (!count (getVLANDomainOptions())) // no domains -- no VLANs to bind with
+		return '';
+	$netinfo = spotEntity ('ipv6net', $_REQUEST['id']);
+	if ($netinfo['vlanc'])
+		return 'std';
+	elseif (considerConfiguredConstraint ($netinfo, 'VLANIPV4NET_LISTSRC'))
+		return 'attn';
+	else
+		return '';
+}
+
+function trigger_vlan_ipv4net ()
+{
+	$vlan_info = getVLANInfo ($_REQUEST['vlan_ck']);
+	return count ($vlan_info['ipv4nets']) ? 'std' : 'attn';
+}
+
+function trigger_vlan_ipv6net ()
+{
+	$vlan_info = getVLANInfo ($_REQUEST['vlan_ck']);
+	return count ($vlan_info['ipv6nets']) ? 'std' : 'attn';
 }
 
 function trigger_object_8021qports ()

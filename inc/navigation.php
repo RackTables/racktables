@@ -14,8 +14,9 @@ $delayauth = array();
 
 $indexlayout = array
 (
-	array ('rackspace', 'depot', 'ipv4space', 'files'),
-	array ('config', 'reports', 'ipv4slb', '8021q'),
+	array ('rackspace', 'depot', 'ipv4space', 'ipv6space'),
+	array ('files', 'reports', 'ipv4slb', '8021q'),
+	array ('config'),
 );
 
 $page['index']['title'] = 'Main page';
@@ -88,6 +89,7 @@ $tab['object']['edit'] = 'Properties';
 $tab['object']['rackspace'] = 'Rackspace';
 $tab['object']['ports'] = 'Ports';
 $tab['object']['ipv4'] = 'IPv4';
+$tab['object']['ipv6'] = 'IPv6';
 $tab['object']['nat4'] = 'NATv4';
 $tab['object']['livevlans'] = 'Live VLANs';
 $tab['object']['livecdp'] = 'Live CDP';
@@ -107,6 +109,7 @@ $tabhandler['object']['edit'] = 'renderEditObjectForm';
 $tabhandler['object']['rackspace'] = 'renderRackSpaceForObject';
 $tabhandler['object']['ports'] = 'renderPortsForObject';
 $tabhandler['object']['ipv4'] = 'renderIPv4ForObject';
+$tabhandler['object']['ipv6'] = 'renderIPv6ForObject';
 $tabhandler['object']['nat4'] = 'renderNATv4ForObject';
 $tabhandler['object']['livevlans'] = 'renderVLANMembership';
 $tabhandler['object']['livecdp'] = 'renderDiscoveredNeighbors';
@@ -123,6 +126,7 @@ $tabhandler['object']['8021qports'] = 'renderObject8021QPorts';
 $tabhandler['object']['8021qsync'] = 'renderObject8021QSync';
 $trigger['object']['rackspace'] = 'trigger_rackspace';
 $trigger['object']['ipv4'] = 'trigger_ipv4';
+$trigger['object']['ipv6'] = 'trigger_ipv6';
 $trigger['object']['nat4'] = 'trigger_natv4';
 $trigger['object']['livevlans'] = 'trigger_livevlans';
 $trigger['object']['livecdp'] = 'trigger_LiveCDP';
@@ -148,6 +152,9 @@ $ophandler['object']['ports']['useup'] = 'useupPort';
 $ophandler['object']['ipv4']['updIPv4Allocation'] = 'updIPv4Allocation';
 $ophandler['object']['ipv4']['addIPv4Allocation'] = 'addIPv4Allocation';
 $ophandler['object']['ipv4']['delIPv4Allocation'] = 'delIPv4Allocation';
+$ophandler['object']['ipv6']['updIPv6Allocation'] = 'updIPv6Allocation';
+$ophandler['object']['ipv6']['addIPv6Allocation'] = 'addIPv6Allocation';
+$ophandler['object']['ipv6']['delIPv6Allocation'] = 'delIPv6Allocation';
 $ophandler['object']['edit']['clearSticker'] = 'clearSticker';
 $ophandler['object']['edit']['update'] = 'updateObject';
 $ophandler['object']['edit']['resetObject'] = 'resetObject';
@@ -176,7 +183,6 @@ $ophandler['object']['8021qsync']['resolve8021QConflicts'] = 'resolve8021QConfli
 $delayauth['object']['8021qports']['save8021QConfig'] = TRUE;
 $delayauth['object']['livevlans']['setPortVLAN'] = TRUE;
 
-$page['ipv4space']['title'] = 'IPv4 space';
 $page['ipv4space']['parent'] = 'index';
 $tab['ipv4space']['default'] = 'Browse';
 $tab['ipv4space']['newrange'] = 'Manage';
@@ -184,6 +190,14 @@ $tabhandler['ipv4space']['default'] = 'renderIPv4Space';
 $tabhandler['ipv4space']['newrange'] = 'renderIPv4SpaceEditor';
 $ophandler['ipv4space']['newrange']['addIPv4Prefix'] = 'addIPv4Prefix';
 $ophandler['ipv4space']['newrange']['delIPv4Prefix'] = 'delIPv4Prefix';
+
+$page['ipv6space']['parent'] = 'index';
+$tab['ipv6space']['default'] = 'Browse';
+$tab['ipv6space']['newrange'] = 'Manage';
+$tabhandler['ipv6space']['default'] = 'renderIPv6Space';
+$tabhandler['ipv6space']['newrange'] = 'renderIPv6SpaceEditor';
+$ophandler['ipv6space']['newrange']['addIPv6Prefix'] = 'addIPv6Prefix';
+$ophandler['ipv6space']['newrange']['delIPv6Prefix'] = 'delIPv6Prefix';
 
 $page['ipv4net']['parent'] = 'ipv4space';
 $page['ipv4net']['bypass'] = 'id';
@@ -195,11 +209,11 @@ $tab['ipv4net']['tags'] = 'Tags';
 $tab['ipv4net']['files'] = 'Files';
 $tab['ipv4net']['8021q'] = '802.1Q';
 $tabhandler['ipv4net']['default'] = 'renderIPv4Network';
-$tabhandler['ipv4net']['properties'] = 'renderIPv4NetworkProperties';
+$tabhandler['ipv4net']['properties'] = 'renderIPNetworkProperties';
 $tabhandler['ipv4net']['liveptr'] = 'renderLivePTR';
 $tabhandler['ipv4net']['tags'] = 'renderEntityTags';
 $tabhandler['ipv4net']['files'] = 'renderFilesForEntity';
-$tabhandler['ipv4net']['8021q'] = 'renderVLANIPv4';
+$tabhandler['ipv4net']['8021q'] = 'renderVLANIPLinks';
 $trigger['ipv4net']['tags'] = 'trigger_tags';
 $trigger['ipv4net']['8021q'] = 'trigger_ipv4net_vlanconfig';
 $ophandler['ipv4net']['properties']['editRange'] = 'updIPv4Prefix';
@@ -211,19 +225,56 @@ $ophandler['ipv4net']['files']['unlinkFile'] = 'unlinkFile';
 $ophandler['ipv4net']['8021q']['bind'] = 'bindVLANtoIPv4';
 $ophandler['ipv4net']['8021q']['unbind'] = 'unbindVLANfromIPv4';
 
+$page['ipv6net']['parent'] = 'ipv6space';
+$page['ipv6net']['bypass'] = 'id';
+$page['ipv6net']['bypass_type'] = 'uint';
+$tab['ipv6net']['default'] = 'Browse';
+$tab['ipv6net']['properties'] = 'Properties';
+$tab['ipv6net']['tags'] = 'Tags';
+$tab['ipv6net']['files'] = 'Files';
+$tab['ipv6net']['8021q'] = '802.1Q';
+$tabhandler['ipv6net']['default'] = 'renderIPv6Network';
+$tabhandler['ipv6net']['properties'] = 'renderIPNetworkProperties';
+$tabhandler['ipv6net']['tags'] = 'renderEntityTags';
+$tabhandler['ipv6net']['files'] = 'renderFilesForEntity';
+$tabhandler['ipv6net']['8021q'] = 'renderVLANIPLinks';
+$trigger['ipv6net']['tags'] = 'trigger_tags';
+$trigger['ipv6net']['8021q'] = 'trigger_ipv6net_vlanconfig';
+$ophandler['ipv6net']['properties']['editRange'] = 'updIPv6Prefix';
+$ophandler['ipv6net']['tags']['saveTags'] = 'saveEntityTags';
+$ophandler['ipv6net']['files']['addFile'] = 'addFileToEntity';
+$ophandler['ipv6net']['files']['linkFile'] = 'linkFileToEntity';
+$ophandler['ipv6net']['files']['unlinkFile'] = 'unlinkFile';
+$ophandler['ipv6net']['8021q']['bind'] = 'bindVLANtoIPv6';
+$ophandler['ipv6net']['8021q']['unbind'] = 'unbindVLANfromIPv6';
+
 $page['ipaddress']['parent'] = 'ipv4net';
 $page['ipaddress']['bypass'] = 'ip';
 $page['ipaddress']['bypass_type'] = 'inet4';
 $tab['ipaddress']['default'] = 'Browse';
 $tab['ipaddress']['properties'] = 'Properties';
 $tab['ipaddress']['assignment'] = 'Allocation';
-$tabhandler['ipaddress']['default'] = 'renderIPv4Address';
-$tabhandler['ipaddress']['properties'] = 'renderIPv4AddressProperties';
-$tabhandler['ipaddress']['assignment'] = 'renderIPv4AddressAllocations';
+$tabhandler['ipaddress']['default'] = 'renderIPAddress';
+$tabhandler['ipaddress']['properties'] = 'renderIPAddressProperties';
+$tabhandler['ipaddress']['assignment'] = 'renderIPAddressAllocations';
 $ophandler['ipaddress']['properties']['editAddress'] = 'editAddress';
 $ophandler['ipaddress']['assignment']['delIPv4Allocation'] = 'delIPv4Allocation';
 $ophandler['ipaddress']['assignment']['updIPv4Allocation'] = 'updIPv4Allocation';
 $ophandler['ipaddress']['assignment']['addIPv4Allocation'] = 'addIPv4Allocation';
+
+$page['ipv6address']['parent'] = 'ipv6net';
+$page['ipv6address']['bypass'] = 'ip';
+$page['ipv6address']['bypass_type'] = 'string';
+$tab['ipv6address']['default'] = 'Browse';
+$tab['ipv6address']['properties'] = 'Properties';
+$tab['ipv6address']['assignment'] = 'Allocation';
+$tabhandler['ipv6address']['default'] = 'renderIPAddress';
+$tabhandler['ipv6address']['properties'] = 'renderIPAddressProperties';
+$tabhandler['ipv6address']['assignment'] = 'renderIPAddressAllocations';
+$ophandler['ipv6address']['properties']['editAddress'] = 'editv6Address';
+$ophandler['ipv6address']['assignment']['delIPv6Allocation'] = 'delIPv6Allocation';
+$ophandler['ipv6address']['assignment']['updIPv6Allocation'] = 'updIPv6Allocation';
+$ophandler['ipv6address']['assignment']['addIPv6Allocation'] = 'addIPv6Allocation';
 
 $page['ipv4slb']['title'] = 'IPv4 SLB';
 $page['ipv4slb']['parent'] = 'index';
@@ -448,12 +499,14 @@ $page['reports']['parent'] = 'index';
 $tab['reports']['default'] = 'System';
 $tab['reports']['rackcode'] = 'RackCode';
 $tab['reports']['ipv4'] = 'IPv4';
+$tab['reports']['ipv6'] = 'IPv6';
 $tab['reports']['ports'] = 'Ports';
 $tab['reports']['local'] = getConfigVar ('enterprise');
 $trigger['reports']['local'] = 'trigger_localreports';
 $tabhandler['reports']['default'] = 'renderSystemReports';
 $tabhandler['reports']['rackcode'] = 'renderRackCodeReports';
 $tabhandler['reports']['ipv4'] = 'renderIPv4Reports';
+$tabhandler['reports']['ipv6'] = 'renderIPv6Reports';
 $tabhandler['reports']['ports'] = 'renderPortsReport';
 $tabhandler['reports']['local'] = 'renderLocalReports';
 
@@ -524,10 +577,16 @@ $page['vlan']['bypass'] = 'vlan_ck';
 $page['vlan']['bypass_type'] = 'string';
 $tab['vlan']['default'] = 'View';
 $tab['vlan']['ipv4'] = 'IPv4';
+$tab['vlan']['ipv6'] = 'IPv6';
+$trigger['vlan']['ipv4'] = 'trigger_vlan_ipv4net';
+$trigger['vlan']['ipv6'] = 'trigger_vlan_ipv6net';
 $tabhandler['vlan']['default'] = 'renderVLANInfo';
-$tabhandler['vlan']['ipv4'] = 'renderVLANIPv4';
+$tabhandler['vlan']['ipv4'] = 'renderVLANIPLinks';
+$tabhandler['vlan']['ipv6'] = 'renderVLANIPLinks';
 $ophandler['vlan']['ipv4']['bind'] = 'bindVLANtoIPv4';
 $ophandler['vlan']['ipv4']['unbind'] = 'unbindVLANfromIPv4';
+$ophandler['vlan']['ipv6']['bind'] = 'bindVLANtoIPv6';
+$ophandler['vlan']['ipv6']['unbind'] = 'unbindVLANfromIPv6';
 
 $page['vst']['parent'] = '8021q';
 $page['vst']['bypass'] = 'vst_id';

@@ -396,6 +396,19 @@ function updIPv4Allocation ()
 	return buildRedirectURL (__FUNCTION__, $result === FALSE ? 'ERR' : 'OK');
 }
 
+$msgcode['updIPv6Allocation']['OK'] = 12;
+$msgcode['updIv6PAllocation']['ERR'] = 109;
+function updIPv6Allocation ()
+{
+	$ipv6 = assertIPv6Arg ('ip');
+	assertUIntArg ('object_id');
+	assertStringArg ('bond_name', TRUE);
+	assertStringArg ('bond_type');
+
+	$result = updateIPv6Bond ($ipv6, $_REQUEST['object_id'], $_REQUEST['bond_name'], $_REQUEST['bond_type']);
+	return buildRedirectURL (__FUNCTION__, $result === FALSE ? 'ERR' : 'OK');
+}
+
 $msgcode['delIPv4Allocation']['OK'] = 14;
 $msgcode['delIPv4Allocation']['ERR'] = 111;
 function delIPv4Allocation ()
@@ -404,6 +417,16 @@ function delIPv4Allocation ()
 	assertUIntArg ('object_id');
 
 	$result = unbindIpFromObject ($_REQUEST['ip'], $_REQUEST['object_id']);
+	return buildRedirectURL (__FUNCTION__, $result === FALSE ? 'ERR' : 'OK');
+}
+
+$msgcode['delIPv6Allocation']['OK'] = 14;
+$msgcode['delIPv6Allocation']['ERR'] = 111;
+function delIPv6Allocation ()
+{
+	assertUIntArg ('object_id');
+	$ipv6 = assertIPv6Arg ('ip');
+	$result = unbindIPv6FromObject ($ipv6, $_REQUEST['object_id']);
 	return buildRedirectURL (__FUNCTION__, $result === FALSE ? 'ERR' : 'OK');
 }
 
@@ -437,6 +460,38 @@ function addIPv4Allocation ()
 	return buildRedirectURL (__FUNCTION__, 'OK');
 }
 
+$msgcode['addIPv6Allocation']['OK'] = 13;
+$msgcode['addIPv6Allocation']['ERR1'] = 170;
+$msgcode['addIPv6Allocation']['ERR2'] = 100;
+function addIPv6Allocation ()
+{
+	assertUIntArg ('object_id');
+	assertStringArg ('bond_name', TRUE);
+	assertStringArg ('bond_type');
+
+	// Strip masklen.
+	$ipv6 = new IPv6Address;
+	if (! $ipv6->parse (preg_replace ('@/\d+$@', '', $_REQUEST['ip'])))
+		throw new InvalidRequestArgException('ip', $_REQUEST['ip'], 'parameter is not a valid ipv6 address');
+
+	if  (getConfigVar ('IPV4_JAYWALK') != 'yes' and NULL === getIPv6AddressNetworkId ($ipv6))
+		return buildRedirectURL (__FUNCTION__, 'ERR1', array ($ip));
+
+	if (FALSE === bindIPv6ToObject ($ipv6, $_REQUEST['object_id'], $_REQUEST['bond_name'], $_REQUEST['bond_type']))
+		return buildRedirectURL (__FUNCTION__, 'ERR2', array ($error));
+	$address = getIPv6Address ($ipv6);
+	if ($address['reserved'] == 'yes' or strlen ($address['name']))
+	{
+		$release = getConfigVar ('IPV4_AUTO_RELEASE');
+		if ($release >= 1)
+			$address['reserved'] = 'no';
+		if ($release >= 2)
+			$address['name'] = '';
+		updateAddress ($ipv6, $address['name'], $address['reserved']);
+	}
+	return buildRedirectURL (__FUNCTION__, 'OK');
+}
+
 $msgcode['addIPv4Prefix']['OK'] = 23;
 $msgcode['addIPv4Prefix']['ERR'] = 100;
 $msgcode['addIPv4Prefix']['ERR1'] = 173;
@@ -458,12 +513,44 @@ function addIPv4Prefix ()
 		return buildRedirectURL (__FUNCTION__, 'OK');
 }
 
+$msgcode['addIPv6Prefix']['OK'] = 86;
+$msgcode['addIPv6Prefix']['ERR'] = 100;
+$msgcode['addIPv6Prefix']['ERR1'] = 173;
+$msgcode['addIPv6Prefix']['ERR2'] = 174;
+$msgcode['addIPv6Prefix']['ERR3'] = 175;
+$msgcode['addIPv6Prefix']['ERR4'] = 176;
+function addIPv6Prefix ()
+{
+	assertStringArg ('range');
+	assertStringArg ('name', TRUE);
+
+	$taglist = isset ($_REQUEST['taglist']) ? $_REQUEST['taglist'] : array();
+	global $sic;
+	$error = createIPv6Prefix ($_REQUEST['range'], $sic['name'], $taglist);
+	if ($error != '')
+		return buildRedirectURL (__FUNCTION__, 'ERR', array ($error));
+	else
+		return buildRedirectURL (__FUNCTION__, 'OK');
+}
+
 $msgcode['delIPv4Prefix']['OK'] = 24;
 $msgcode['delIPv4Prefix']['ERR'] = 100;
 function delIPv4Prefix ()
 {
 	assertUIntArg ('id');
 	$error = destroyIPv4Prefix ($_REQUEST['id']);
+	if ($error != '')
+		return buildRedirectURL (__FUNCTION__, 'ERR', array ($error));
+	else
+		return buildRedirectURL (__FUNCTION__, 'OK');
+}
+
+$msgcode['delIPv6Prefix']['OK'] = 85;
+$msgcode['delIPv6Prefix']['ERR'] = 100;
+function delIPv6Prefix ()
+{
+	assertUIntArg ('id');
+	$error = destroyIPv6Prefix ($_REQUEST['id']);
 	if ($error != '')
 		return buildRedirectURL (__FUNCTION__, 'ERR', array ($error));
 	else
@@ -482,6 +569,18 @@ function updIPv4Prefix ()
 	return buildRedirectURL (__FUNCTION__, $result !== FALSE ? 'OK' : 'ERR');
 }
 
+$msgcode['updIPv6Prefix']['OK'] = 86;
+$msgcode['updIPv6Prefix']['ERR'] = 109;
+function updIPv6Prefix ()
+{
+	assertUIntArg ('id');
+	assertStringArg ('name', TRUE);
+	assertStringArg ('comment', TRUE);
+	global $sic;
+	$result = updateIPv6Network_real ($sic['id'], $sic['name'], $sic['comment']);
+	return buildRedirectURL (__FUNCTION__, $result !== FALSE ? 'OK' : 'ERR');
+}
+
 $msgcode['editAddress']['OK'] = 27;
 $msgcode['editAddress']['ERR'] = 100;
 function editAddress ()
@@ -494,6 +593,24 @@ function editAddress ()
 	else
 		$reserved = 'off';
 	$error = updateAddress ($_REQUEST['ip'], $_REQUEST['name'], $reserved == 'on' ? 'yes' : 'no');
+	if ($error != '')
+		return buildRedirectURL (__FUNCTION__, 'ERR', array ($error));
+	else
+		return buildRedirectURL (__FUNCTION__, 'OK');
+}
+
+$msgcode['editv6Address']['OK'] = 27;
+$msgcode['editv6Address']['ERR'] = 100;
+function editv6Address ()
+{
+	$ipv6 = assertIPArg ('ip');
+	assertStringArg ('name', TRUE);
+
+	if (isset ($_REQUEST['reserved']))
+		$reserved = $_REQUEST['reserved'];
+	else
+		$reserved = 'off';
+	$error = updateAddress ($ipv6, $_REQUEST['name'], $reserved == 'on' ? 'yes' : 'no');
 	if ($error != '')
 		return buildRedirectURL (__FUNCTION__, 'ERR', array ($error));
 	else
@@ -2373,6 +2490,16 @@ function bindVLANtoIPv4 ()
 	return buildRedirectURL (__FUNCTION__, $result ? 'OK' : 'ERR');
 }
 
+$msgcode['bindVLANtoIPv6']['OK'] = 48;
+$msgcode['bindVLANtoIPv6']['ERR'] = 110;
+function bindVLANtoIPv6 ()
+{
+	assertUIntArg ('id'); // network id
+	global $sic;
+	$result = commitSupplementVLANIPv6 ($sic['vlan_ck'], $_REQUEST['id']);
+	return buildRedirectURL (__FUNCTION__, $result ? 'OK' : 'ERR');
+}
+
 $msgcode['unbindVLANfromIPv4']['OK'] = 49;
 $msgcode['unbindVLANfromIPv4']['ERR'] = 111;
 function unbindVLANfromIPv4 ()
@@ -2380,6 +2507,16 @@ function unbindVLANfromIPv4 ()
 	assertUIntArg ('id'); // network id
 	global $sic;
 	$result = commitReduceVLANIPv4 ($sic['vlan_ck'], $sic['id']);
+	return buildRedirectURL (__FUNCTION__, $result ? 'OK' : 'ERR');
+}
+
+$msgcode['unbindVLANfromIPv6']['OK'] = 49;
+$msgcode['unbindVLANfromIPv6']['ERR'] = 111;
+function unbindVLANfromIPv6 ()
+{
+	assertUIntArg ('id'); // network id
+	global $sic;
+	$result = commitReduceVLANIPv6 ($sic['vlan_ck'], $sic['id']);
 	return buildRedirectURL (__FUNCTION__, $result ? 'OK' : 'ERR');
 }
 

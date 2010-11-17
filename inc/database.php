@@ -59,6 +59,22 @@ $SQLSchema = array
 		'keycolumn' => 'id',
 		'ordcolumns' => array ('IPv4Network.ip', 'IPv4Network.mask'),
 	),
+	'ipv6net' => array
+	(
+		'table' => 'IPv6Network',
+		'columns' => array
+		(
+			'id' => 'id',
+			'ip_bin' => 'ip',
+			'mask' => 'mask',
+			'name' => 'name',
+			'comment' => 'comment',
+			'parent_id' => '(SELECT id FROM IPv6Network AS subt WHERE IPv6Network.ip >= subt.ip AND IPv6Network.last_ip <= subt.last_ip AND IPv6Network.mask > subt.mask ORDER BY subt.mask DESC limit 1)',
+			'vlanc' => '(SELECT COUNT(*) FROM VLANIPv6 WHERE ipv6net_id = id)',
+		),
+		'keycolumn' => 'id',
+		'ordcolumns' => array ('IPv6Network.ip', 'IPv6Network.mask'),
+	),
 	'file' => array
 	(
 		'table' => 'File',
@@ -306,8 +322,10 @@ function listCells ($realm, $parent_id = 0)
 			$ret[$entity_id]['ip_bin'] = ip2long ($ret[$entity_id]['ip']);
 			$ret[$entity_id]['mask_bin'] = binMaskFromDec ($ret[$entity_id]['mask']);
 			$ret[$entity_id]['mask_bin_inv'] = binInvMaskFromDec ($ret[$entity_id]['mask']);
-			$ret[$entity_id]['db_first'] = sprintf ('%u', 0x00000000 + $ret[$entity_id]['ip_bin'] & $ret[$entity_id]['mask_bin']);
-			$ret[$entity_id]['db_last'] = sprintf ('%u', 0x00000000 + $ret[$entity_id]['ip_bin'] | ($ret[$entity_id]['mask_bin_inv']));
+			break;
+		case 'ipv6net':
+			$ret[$entity_id]['ip_bin'] = new IPv6Address ($ret[$entity_id]['ip_bin']);
+			$ret[$entity_id]['ip'] = $ret[$entity_id]['ip_bin']->format();
 			break;
 		default:
 			break;
@@ -384,8 +402,10 @@ function spotEntity ($realm, $id)
 		$ret['ip_bin'] = ip2long ($ret['ip']);
 		$ret['mask_bin'] = binMaskFromDec ($ret['mask']);
 		$ret['mask_bin_inv'] = binInvMaskFromDec ($ret['mask']);
-		$ret['db_first'] = sprintf ('%u', 0x00000000 + $ret['ip_bin'] & $ret['mask_bin']);
-		$ret['db_last'] = sprintf ('%u', 0x00000000 + $ret['ip_bin'] | ($ret['mask_bin_inv']));
+		break;
+	case 'ipv6net':
+		$ret['ip_bin'] = new IPv6Address ($ret['ip_bin']);
+		$ret['ip'] = $ret['ip_bin']->format();
 		break;
 	default:
 		break;
@@ -402,6 +422,7 @@ function amplifyCell (&$record, $dummy = NULL)
 	case 'object':
 		$record['ports'] = getObjectPortsAndLinks ($record['id']);
 		$record['ipv4'] = getObjectIPv4Allocations ($record['id']);
+		$record['ipv6'] = getObjectIPv6Allocations ($record['id']);
 		$record['nat4'] = getNATv4ForObject ($record['id']);
 		$record['ipv4rspools'] = getRSPoolsForObject ($record['id']);
 		$record['files'] = getFilesOfEntity ($record['realm'], $record['id']);
@@ -494,6 +515,9 @@ function amplifyCell (&$record, $dummy = NULL)
 		break;
 	case 'ipv4net':
 		$record['8021q'] = getIPv4Network8021QBindings ($record['id']);
+		break;
+	case 'ipv6net':
+		$record['8021q'] = getIPv6Network8021QBindings ($record['id']);
 		break;
 	default:
 	}
@@ -1016,11 +1040,31 @@ function getObjectIPv4Allocations ($object_id = 0)
 	return $ret;
 }
 
+// Return all IPv6 addresses allocated to the objects. Attach detailed
+// info about address to each alocation records. Index result by binary string of IPv6
+function getObjectIPv6Allocations ($object_id = 0)
+{
+	$ret = array();
+	$result = usePreparedSelectBlade
+	(
+		'SELECT name AS osif, type, ip AS ip FROM IPv6Allocation ' .
+		'WHERE object_id = ? ORDER BY ip',
+		array ($object_id)
+	);
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
+		$ret[$row['ip']] = array ('osif' => $row['osif'], 'type' => $row['type']);
+	unset ($result);
+	foreach (array_keys ($ret) as $ip_bin)
+		$ret[$ip_bin]['addrinfo'] = getIPv6Address (new IPv6Address ($ip_bin));
+	return $ret;
+}
+
 // Return minimal IPv4 address, optionally with "ip" key set, if requested.
 function constructIPv4Address ($dottedquad = NULL)
 {
 	$ret = array
 	(
+		'version' => 4,
 		'name' => '',
 		'reserved' => 'no',
 		'outpf' => array(),
@@ -1031,6 +1075,21 @@ function constructIPv4Address ($dottedquad = NULL)
 	);
 	if ($dottedquad != NULL)
 		$ret['ip'] = $dottedquad;
+	return $ret;
+}
+
+// Return minimal IPv6 address, optionally with "ip" key set, if requested.
+function constructIPv6Address ($bin_ip = NULL)
+{
+	$ret = array
+	(
+		'version' => 6,
+		'name' => '',
+		'reserved' => 'no',
+		'allocs' => array(),
+	);
+	if ($bin_ip != NULL)
+		$ret['ip'] = $bin_ip->format();
 	return $ret;
 }
 
@@ -1199,17 +1258,100 @@ function scanIPv4Space ($pairlist)
 	return $ret;
 }
 
+// Check the range requested for meaningful IPv6 records, build them
+// into a list and return. Return an empty list if nothing matched.
+// Both arguments are expected as instances of IPv6Address class. The resulting list
+// is keyed by uint32 form of each IP address, items aren't sorted.
+function scanIPv6Space ($pairlist)
+{
+	$ret = array();
+	$wheres = array();
+	foreach ($pairlist as $pair)
+	{
+		$wheres[] = "ip >= ? AND ip <= ?";
+		$qparams[] = (string) $pair['first'];
+		$qparams[] = (string) $pair['last'];
+	}
+	if (! count ($wheres))  // this is normal for a network completely divided into smaller parts
+		return $ret;
+	$whereexpr = '(' .implode (' OR ', $wheres) . ')';
+
+	// 1. collect labels and reservations
+	$query = "select ip, name, reserved from IPv6Address ".
+		"where ${whereexpr} and (reserved = 'yes' or name != '')";
+	$result = usePreparedSelectBlade ($query, $qparams);
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
+	{
+		$ip_bin = new IPv6Address ($row['ip']);
+		$key = (string)$ip_bin;
+		if (!isset ($ret[$key]))
+			$ret[$key] = constructIPv6Address ($ip_bin);
+		$ret[$key]['name'] = $row['name'];
+		$ret[$key]['reserved'] = $row['reserved'];
+	}
+	unset ($result);
+
+	// 2. check for allocations
+	$query =
+		"select ip, object_id, name, type " .
+		"from IPv6Allocation where ${whereexpr} order by type";
+	$result = usePreparedSelectBlade ($query, $qparams);
+	// release DBX early to avoid issues with nested spotEntity() calls
+	$allRows = $result->fetchAll (PDO::FETCH_ASSOC);
+	unset ($result);
+	foreach ($allRows as $row)
+	{
+		$ip_bin = new IPv6Address ($row['ip']);
+		$key = (string)$ip_bin;
+		if (!isset ($ret[$key]))
+			$ret[$key] = constructIPv6Address ($ip_bin);
+		$oinfo = spotEntity ('object', $row['object_id']);
+		$ret[$key]['allocs'][] = array
+		(
+			'type' => $row['type'],
+			'name' => $row['name'],
+			'object_id' => $row['object_id'],
+			'object_name' => $oinfo['dname'],
+		);
+	}
+	return $ret;
+}
+
+// this is a wrapper around getIPv4Address and getIPv6Address
+// You can pass dotted IPv4, human representation of IPv6, or instance of IPv6Address
+function getIPAddress ($ip)
+{
+	if (is_a ($ip, 'IPv6Address'))
+		return getIPv6Address ($ip);
+	$ipv6 = new IPv6Address;
+	if ($ipv6->parse ($ip))
+		return getIPv6Address ($ipv6);
+	return getIPv4Address ($ip);
+}
+
 function getIPv4Address ($dottedquad = '')
 {
 	if ($dottedquad == '')
 		throw new InvalidArgException ('$dottedquad', $dottedquad);
 	$i32 = ip2long ($dottedquad); // signed 32 bit
 	$scanres = scanIPv4Space (array (array ('i32_first' => $i32, 'i32_last' => $i32)));
-	if (!isset ($scanres[$i32]))
+	if (empty ($scanres))
 		//$scanres[$i32] = constructIPv4Address ($dottedquad); // XXX: this should be verified to not break things
 		return constructIPv4Address ($dottedquad);
-	markupIPv4AddrList ($scanres);
+	markupIPAddrList ($scanres);
 	return $scanres[$i32];
+}
+
+// returns the array of structure described by constructIPv6Address
+function getIPv6Address ($v6addr)
+{
+	if (! is_object ($v6addr))
+		throw new InvalidArgException ('$v6addr', $v6addr);
+	$scanres = scanIPv6Space (array (array ('first' => $v6addr, 'last' => $v6addr)));
+	if (empty ($scanres))
+		return constructIPv6Address ($v6addr);
+	markupIPAddrList ($scanres);
+	return array_shift ($scanres);
 }
 
 function bindIpToObject ($ip = '', $object_id = 0, $name = '', $type = '')
@@ -1221,28 +1363,21 @@ function bindIpToObject ($ip = '', $object_id = 0, $name = '', $type = '')
 	);
 }
 
+function bindIPv6ToObject ($ip = '', $object_id = 0, $name = '', $type = '')
+{
+	return usePreparedExecuteBlade
+	(
+		'INSERT INTO IPv6Allocation (ip, object_id, name, type) VALUES (?, ?, ?, ?)',
+		array ($ip, $object_id, $name, $type)
+	);
+}
+
 // Return the id of the smallest IPv4 network containing the given IPv4 address
 // or NULL, if nothing was found. When finding the covering network for
 // another network, it is important to filter out matched records with longer
 // masks (they aren't going to be the right pick).
 function getIPv4AddressNetworkId ($dottedquad, $masklen = 32)
 {
-// N.B. To perform the same for IPv6 address and networks, some pre-requisites
-// are necessary and a different query. IPv6 addresses are 128 bit long, which
-// is too much for both PHP and MySQL data types. These values must be split
-// into 4 32-byte long parts (b_u32_0, b_u32_1, b_u32_2, b_u32_3).
-// Then each network must have its 128-bit netmask split same way and either
-// stored right in its record or JOINed from decoder and accessible as m_u32_0,
-// m_u32_1, m_u32_2, m_u32_3. After that the query to pick the smallest network
-// covering the given address would look as follows:
-// $query = 'select id from IPv6Network as n where ' .
-// "(${b_u32_0} & n.m_u32_0 = n.b_u32_0) and " .
-// "(${b_u32_1} & n.m_u32_1 = n.b_u32_1) and " .
-// "(${b_u32_2} & n.m_u32_2 = n.b_u32_2) and " .
-// "(${b_u32_3} & n.m_u32_3 = n.b_u32_3) and " .
-// "mask < ${masklen} " .
-// 'order by mask desc limit 1';
-
 	$query = 'select id from IPv4Network where ' .
 		"inet_aton(?) & (4294967295 >> (32 - mask)) << (32 - mask) = ip " .
 		"and mask < ? " .
@@ -1253,15 +1388,44 @@ function getIPv4AddressNetworkId ($dottedquad, $masklen = 32)
 	return NULL;
 }
 
+// Return the id of the smallest IPv6 network containing the given IPv6 address
+// ($ip is an instance of IPv4Address class) or NULL, if nothing was found.
+function getIPv6AddressNetworkId ($ip, $masklen = 128)
+{
+	$query = 'select id from IPv6Network where ip <= ? AND last_ip >= ? and mask < ? order by mask desc limit 1';
+	$result = usePreparedSelectBlade ($query, array ((string)$ip, (string)$ip, $masklen));
+	if ($row = $result->fetch (PDO::FETCH_ASSOC))
+		return $row['id'];
+	return NULL;
+}
+
+
 function updateIPv4Network_real ($id = 0, $name = '', $comment = '')
 {
 	return usePreparedExecuteBlade ('UPDATE IPv4Network SET name = ?, comment = ? WHERE id = ?', array ($name, $comment, $id));
 }
 
+function updateIPv6Network_real ($id = 0, $name = '', $comment = '')
+{
+	return usePreparedExecuteBlade ('UPDATE IPv6Network SET name = ?, comment = ? WHERE id = ?', array ($name, $comment, $id));
+}
+
+// It is a wrapper around updateV4Address and updateV6Address.
+// You can pass dotted IPv4, human representation of IPv6, or instance of IPv6Address
+function updateAddress ($ip = 0, $name = '', $reserved = 'no')
+{
+	if (is_a ($ip, 'IPv6Address'))
+		return updateV6Address ($ip, $name, $reserved);
+	$ipv6 = new IPv6Address;
+	if ($ipv6->parse ($ip))
+		return updateV6Address ($ipv6, $name, $reserved);
+	return updateV4Address ($ip, $name, $reserved);
+}
+
 // This function is actually used not only to update, but also to create records,
 // that's why ON DUPLICATE KEY UPDATE was replaced by DELETE-INSERT pair
 // (MySQL 4.0 workaround).
-function updateAddress ($ip = 0, $name = '', $reserved = 'no')
+function updateV4Address ($ip = 0, $name = '', $reserved = 'no')
 {
 	usePreparedExecuteBlade ('DELETE FROM IPv4Address WHERE ip = INET_ATON(?)', array ($ip));
 	// INSERT may appear not necessary.
@@ -1270,6 +1434,20 @@ function updateAddress ($ip = 0, $name = '', $reserved = 'no')
 	$ret = usePreparedExecuteBlade
 	(
 		'INSERT INTO IPv4Address (name, reserved, ip) VALUES (?, ?, INET_ATON(?))',
+		array ($name, $reserved, $ip)
+	);
+	return $ret !== FALSE ? '' : (__FUNCTION__ . 'query failed');
+}
+
+function updateV6Address ($ip, $name = '', $reserved = 'no')
+{
+	usePreparedExecuteBlade ('DELETE FROM IPv6Address WHERE ip = ?', array ($ip));
+	// INSERT may appear not necessary.
+	if ($name == '' and $reserved == 'no')
+		return '';
+	$ret = usePreparedExecuteBlade
+	(
+		'INSERT INTO IPv6Address (name, reserved, ip) VALUES (?, ?, ?)',
 		array ($name, $reserved, $ip)
 	);
 	return $ret !== FALSE ? '' : (__FUNCTION__ . 'query failed');
@@ -1284,11 +1462,29 @@ function updateBond ($ip='', $object_id=0, $name='', $type='')
 	);
 }
 
-function unbindIpFromObject ($ip='', $object_id=0)
+function updateIPv6Bond ($ip='', $object_id=0, $name='', $type='')
+{
+	return usePreparedExecuteBlade
+	(
+		'UPDATE IPv6Allocation SET name=?, type=? WHERE ip=? AND object_id=?',
+		array ($name, $type, $ip, $object_id)
+	);
+}
+
+function unbindIpFromObject ($ip, $object_id)
 {
 	return usePreparedExecuteBlade
 	(
 		'DELETE FROM IPv4Allocation WHERE ip=INET_ATON(?) AND object_id=?',
+		array ($ip, $object_id)
+	);
+}
+
+function unbindIPv6FromObject ($ip, $object_id)
+{
+	return usePreparedExecuteBlade
+	(
+		'DELETE FROM IPv6Allocation WHERE ip=? AND object_id=?',
 		array ($ip, $object_id)
 	);
 }
@@ -1309,9 +1505,43 @@ function getIPv4PrefixSearchResult ($terms)
 	return $ret;
 }
 
+function getIPv6PrefixSearchResult ($terms)
+{
+	$byname = getSearchResultByField
+	(
+		'IPv6Network',
+		array ('id'),
+		'name',
+		$terms,
+		'ip'
+	);
+	$ret = array();
+	foreach ($byname as $row)
+		$ret[] = spotEntity ('ipv6net', $row['id']);
+	return $ret;
+}
+
 function getIPv4AddressSearchResult ($terms)
 {
 	$query = "select inet_ntoa(ip) as ip, name from IPv4Address where ";
+	$or = '';
+	$qparams = array();
+	foreach (explode (' ', $terms) as $term)
+	{
+		$query .= $or . "name like ?";
+		$or = ' or ';
+		$qparams[] = "%${term}%";
+	}
+	$result = usePreparedSelectBlade ($query, $qparams);
+	$ret = array();
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
+		$ret[] = $row;
+	return $ret;
+}
+
+function getIPv6AddressSearchResult ($terms)
+{
+	$query = "select ip, name from IPv6Address where ";
 	$or = '';
 	$qparams = array();
 	foreach (explode (' ', $terms) as $term)
@@ -1645,7 +1875,7 @@ function getPortSearchResults ($what)
 function getObjectIfacesSearchResults ($what)
 {
 	$ret = array();
-	$ifaces = getSearchResultByField
+	$ifaces4 = getSearchResultByField
 	(
 		'IPv4Allocation',
 		array ('object_id', 'name'),
@@ -1653,7 +1883,15 @@ function getObjectIfacesSearchResults ($what)
 		$what,
 		'object_id'
 	);
-	foreach ($ifaces as $row)
+	$ifaces6 = getSearchResultByField
+	(
+		'IPv6Allocation',
+		array ('object_id', 'name'),
+		'name',
+		$what,
+		'object_id'
+	);
+	foreach (array_merge ($ifaces4, $ifaces6) as $row)
 	{
 		$ret[$row['object_id']]['id'] = $row['object_id'];
 		$ret[$row['object_id']]['by_iface'][] = $row['name'];
@@ -1815,6 +2053,24 @@ function getIPv4Stats ()
 	$subject[] = array ('q' => 'select count(id) from IPv4RSPool', 'txt' => 'Real server pools');
 	$subject[] = array ('q' => 'select count(id) from IPv4RS', 'txt' => 'Real servers');
 	$subject[] = array ('q' => 'select count(distinct object_id) from IPv4LB', 'txt' => 'Load balancers');
+
+	foreach ($subject as $item)
+	{
+		$result = usePreparedSelectBlade ($item['q']);
+		$row = $result->fetch (PDO::FETCH_NUM);
+		$ret[$item['txt']] = $row[0];
+		unset ($result);
+	}
+	return $ret;
+}
+
+function getIPv6Stats ()
+{
+	$ret = array();
+	$subject = array();
+	$subject[] = array ('q' => 'select count(id) from IPv6Network', 'txt' => 'Networks');
+	$subject[] = array ('q' => 'select count(ip) from IPv6Address', 'txt' => 'Addresses commented/reserved');
+	$subject[] = array ('q' => 'select count(ip) from IPv6Allocation', 'txt' => 'Addresses allocated');
 
 	foreach ($subject as $item)
 	{
@@ -2785,6 +3041,12 @@ function getTagList ()
 		{
 			$ret[$row['id']]['refcnt'][$row['realm']] = $row['refcnt'];
 			$ret[$row['id']]['refcnt']['total'] += $row['refcnt'];
+			// introduce the 'pseudo'-ream 'ipnet' which combines 'ipv4net' and 'ipv6net' realms.
+			if ($row['realm'] == 'ipv4net' || $row['realm'] == 'ipv6net')
+				if (isset ($ret[$row['id']]['refcnt']['ipnet']))
+					$ret[$row['id']]['refcnt']['ipnet'] += $row['refcnt'];
+				else
+					$ret[$row['id']]['refcnt']['ipnet'] = $row['refcnt'];
 		}
 	}
 	return $ret;
@@ -2843,7 +3105,8 @@ function deleteTagForEntity ($entity_realm, $entity_id, $tag_id)
 // Push a record into TagStorage unconditionally.
 function addTagForEntity ($realm = '', $entity_id, $tag_id)
 {
-	if (!in_array ($realm, array ('file', 'ipv4net', 'ipv4vs', 'ipv4rspool', 'object', 'rack', 'user')))
+	global $SQLSchema;
+	if (! isset ($SQLSchema[$realm]))
 		return FALSE;
 	return usePreparedInsertBlade
 	(
@@ -2957,10 +3220,42 @@ function createIPv4Prefix ($range = '', $name = '', $is_bcast = FALSE, $taglist 
 	{
 		$network_addr = long2ip ($ipL);
 		$broadcast_addr = long2ip ($ipL | binInvMaskFromDec ($maskL));
-		updateAddress ($network_addr, 'network', 'yes');
-		updateAddress ($broadcast_addr, 'broadcast', 'yes');
+		updateV4Address ($network_addr, 'network', 'yes');
+		updateV4Address ($broadcast_addr, 'broadcast', 'yes');
 	}
 	return produceTagsForLastRecord ('ipv4net', $taglist);
+}
+
+function createIPv6Prefix ($range = '', $name = '', $taglist = array())
+{
+	// $range is in aaa0:b::c:d/x format, split into ip/mask vars
+	$rangeArray = explode ('/', $range);
+	if (count ($rangeArray) != 2)
+		return "Invalid IPv6 prefix '${range}'";
+	$ip = $rangeArray[0];
+	$mask = $rangeArray[1];
+	$address = new IPv6Address;
+	if (!strlen ($ip) or !strlen ($mask) or ! $address->parse ($ip))
+		return "Invalid IPv6 prefix '${range}'";
+	$network_addr = $address->get_first_subnet_address ($mask);
+	$broadcast_addr = $address->get_last_subnet_address ($mask);
+	if (! $network_addr || ! $broadcast_addr)
+		return 'Invalid netmask';
+	$result = usePreparedInsertBlade
+	(
+		'IPv6Network',
+		array
+		(
+			'ip' => $network_addr,
+			'last_ip' => $broadcast_addr,
+			'mask' => $mask,
+			'name' => $name
+		)
+	);
+	if ($result != TRUE)
+		return "Could not add ${range} (already exists?).";
+
+	return produceTagsForLastRecord ('ipv6net', $taglist);
 }
 
 // FIXME: This function doesn't wipe relevant records from IPv4Address table.
@@ -2970,6 +3265,17 @@ function destroyIPv4Prefix ($id = 0)
 	if (FALSE === usePreparedDeleteBlade ('IPv4Network', array ('id' => $id)))
 		return __FUNCTION__ . ': SQL query #1 failed';
 	if (FALSE === destroyTagsForEntity ('ipv4net', $id))
+		return __FUNCTION__ . ': SQL query #2 failed';
+	return '';
+}
+
+// FIXME: This function doesn't wipe relevant records from IPv6Address table.
+function destroyIPv6Prefix ($id = 0)
+{
+	releaseFiles ('ipv6net', $id);
+	if (FALSE === usePreparedDeleteBlade ('IPv6Network', array ('id' => $id)))
+		return __FUNCTION__ . ': SQL query #1 failed';
+	if (FALSE === destroyTagsForEntity ('ipv6net', $id))
 		return __FUNCTION__ . ': SQL query #2 failed';
 	return '';
 }
@@ -3227,8 +3533,8 @@ function getFileLinks ($file_id = 0)
 		// get info of the parent
 		switch ($row['entity_type'])
 		{
-			case 'ipv4net':
-				$page = 'ipv4net';
+			case 'ipv4net': case 'ipv6net':
+				$page = $row['entity_type'];
 				$id_name = 'id';
 				$parent = spotEntity ($row['entity_type'], $row['entity_id']);
 				$name = sprintf("%s (%s/%s)", $parent['name'], $parent['ip'], $parent['mask']);
@@ -3625,10 +3931,11 @@ function getDomainVLANs ($vdom_id)
 	$result = usePreparedSelectBlade
 	(
 		'SELECT vlan_id, vlan_type, vlan_descr, ' .
-		'ifNull(NETS.C, 0) as netc, ' .
+		'ifNull(NETS4.C, 0) + ifNull(NETS6.C, 0) as netc, ' .
 		'ifNull(PORTS.C, 0) as portc ' .
 		'FROM VLANDescription AS VD ' .
-		'LEFT JOIN (SELECT vlan_id, COUNT(ipv4net_id) AS C FROM VLANIPv4 WHERE domain_id = ? GROUP BY domain_id, vlan_id) AS NETS USING(vlan_id) ' .
+		'LEFT JOIN (SELECT vlan_id, COUNT(ipv4net_id) AS C FROM VLANIPv4 WHERE domain_id = ? GROUP BY domain_id, vlan_id) AS NETS4 USING(vlan_id) ' .
+		'LEFT JOIN (SELECT vlan_id, COUNT(ipv6net_id) AS C FROM VLANIPv6 WHERE domain_id = ? GROUP BY domain_id, vlan_id) AS NETS6 USING(vlan_id) ' .
 		'LEFT JOIN ' .
 		'(   SELECT PAV.vlan_id AS vlan_id, COUNT(port_name) AS C ' .
 		'    FROM VLANSwitch AS VS ' .
@@ -3638,7 +3945,7 @@ function getDomainVLANs ($vdom_id)
 		') AS PORTS USING(vlan_id) ' .
 		'WHERE domain_id = ? ' .
 		'ORDER BY vlan_id',
-		array ($vdom_id, $vdom_id, $vdom_id)
+		array ($vdom_id, $vdom_id, $vdom_id, $vdom_id)
 	);
 	$ret = array();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
@@ -3760,11 +4067,18 @@ function getVLANInfo ($vlan_ck)
 		throw new EntityNotFoundException ('VLAN', $vlan_ck);
 	$ret['vlan_ck'] = $vlan_ck;
 	$ret['ipv4nets'] = array();
+	$ret['ipv6nets'] = array();
 	unset ($result);
 	$query = 'SELECT ipv4net_id FROM VLANIPv4 WHERE domain_id = ? AND vlan_id = ? ORDER BY ipv4net_id';
 	$result = usePreparedSelectBlade ($query, array ($vdom_id, $vlan_id));
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 		$ret['ipv4nets'][] = $row['ipv4net_id'];
+	unset ($result);
+	$query = 'SELECT ipv6net_id FROM VLANIPv6 WHERE domain_id = ? AND vlan_id = ? ORDER BY ipv6net_id';
+	$result = usePreparedSelectBlade ($query, array ($vdom_id, $vlan_id));
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
+		$ret['ipv6nets'][] = $row['ipv6net_id'];
+
 	return $ret;
 }
 
@@ -3776,6 +4090,22 @@ function getVLANIPv4Options ($except_vdid)
 	(
 		'SELECT id FROM IPv4Network WHERE id NOT IN ' .
 		'(SELECT ipv4net_id FROM VLANIPv4 WHERE domain_id = ?)' .
+		'ORDER BY ip, mask',
+		array ($except_vdid)
+	);
+	while ($row = $prepared->fetch (PDO::FETCH_ASSOC))
+		$ret[] = $row['id'];
+	return $ret;
+}
+
+// return list of network IDs, which are not bound to the given VLAN domain
+function getVLANIPv6Options ($except_vdid)
+{
+	$ret = array();
+	$prepared = usePreparedSelectBlade
+	(
+		'SELECT id FROM IPv6Network WHERE id NOT IN ' .
+		'(SELECT ipv6net_id FROM VLANIPv6 WHERE domain_id = ?)' .
 		'ORDER BY ip, mask',
 		array ($except_vdid)
 	);
@@ -3799,6 +4129,21 @@ function commitSupplementVLANIPv4 ($vlan_ck, $ipv4net_id)
 	);
 }
 
+function commitSupplementVLANIPv6 ($vlan_ck, $ipv6net_id)
+{
+	list ($vdom_id, $vlan_id) = decodeVLANCK ($vlan_ck);
+	return usePreparedInsertBlade
+	(
+		'VLANIPv6',
+		array
+		(
+			'domain_id' => $vdom_id,
+			'vlan_id' => $vlan_id,
+			'ipv6net_id' => $ipv6net_id,
+		)
+	);
+}
+
 function commitReduceVLANIPv4 ($vlan_ck, $ipv4net_id)
 {
 	list ($vdom_id, $vlan_id) = decodeVLANCK ($vlan_ck);
@@ -3810,6 +4155,21 @@ function commitReduceVLANIPv4 ($vlan_ck, $ipv4net_id)
 			'domain_id' => $vdom_id,
 			'vlan_id' => $vlan_id,
 			'ipv4net_id' => $ipv4net_id,
+		)
+	);
+}
+
+function commitReduceVLANIPv6 ($vlan_ck, $ipv6net_id)
+{
+	list ($vdom_id, $vlan_id) = decodeVLANCK ($vlan_ck);
+	return usePreparedDeleteBlade
+	(
+		'VLANIPv6',
+		array
+		(
+			'domain_id' => $vdom_id,
+			'vlan_id' => $vlan_id,
+			'ipv6net_id' => $ipv6net_id,
 		)
 	);
 }
@@ -4001,6 +4361,17 @@ function getIPv4Network8021QBindings ($ipv4net_id)
 		'SELECT domain_id, vlan_id FROM VLANIPv4 ' .
 		'WHERE ipv4net_id = ? ORDER BY domain_id',
 		array ($ipv4net_id)
+	);
+	return $prepared->fetchAll (PDO::FETCH_ASSOC);
+}
+
+function getIPv6Network8021QBindings ($ipv6net_id)
+{
+	$prepared = usePreparedSelectBlade
+	(
+		'SELECT domain_id, vlan_id FROM VLANIPv6 ' .
+		'WHERE ipv6net_id = ? ORDER BY domain_id',
+		array ($ipv6net_id)
 	);
 	return $prepared->fetchAll (PDO::FETCH_ASSOC);
 }
