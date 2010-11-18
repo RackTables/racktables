@@ -322,10 +322,14 @@ function listCells ($realm, $parent_id = 0)
 			$ret[$entity_id]['ip_bin'] = ip2long ($ret[$entity_id]['ip']);
 			$ret[$entity_id]['mask_bin'] = binMaskFromDec ($ret[$entity_id]['mask']);
 			$ret[$entity_id]['mask_bin_inv'] = binInvMaskFromDec ($ret[$entity_id]['mask']);
+			$ret[$entity_id]['db_first'] = sprintf ('%u', 0x00000000 + $ret[$entity_id]['ip_bin'] & $ret[$entity_id]['mask_bin']);
+			$ret[$entity_id]['db_last'] = sprintf ('%u', 0x00000000 + $ret[$entity_id]['ip_bin'] | ($ret[$entity_id]['mask_bin_inv']));
 			break;
 		case 'ipv6net':
 			$ret[$entity_id]['ip_bin'] = new IPv6Address ($ret[$entity_id]['ip_bin']);
 			$ret[$entity_id]['ip'] = $ret[$entity_id]['ip_bin']->format();
+			$ret[$entity_id]['db_first'] = $ret[$entity_id]['ip_bin']->get_first_subnet_address($ret[$entity_id]['mask']);
+			$ret[$entity_id]['db_last'] = $ret[$entity_id]['ip_bin']->get_last_subnet_address($ret[$entity_id]['mask']);
 			break;
 		default:
 			break;
@@ -402,10 +406,14 @@ function spotEntity ($realm, $id)
 		$ret['ip_bin'] = ip2long ($ret['ip']);
 		$ret['mask_bin'] = binMaskFromDec ($ret['mask']);
 		$ret['mask_bin_inv'] = binInvMaskFromDec ($ret['mask']);
+		$ret['db_first'] = sprintf ('%u', 0x00000000 + $ret['ip_bin'] & $ret['mask_bin']);
+		$ret['db_last'] = sprintf ('%u', 0x00000000 + $ret['ip_bin'] | ($ret['mask_bin_inv']));
 		break;
 	case 'ipv6net':
 		$ret['ip_bin'] = new IPv6Address ($ret['ip_bin']);
 		$ret['ip'] = $ret['ip_bin']->format();
+		$ret['db_first'] = $ret['ip_bin']->get_first_subnet_address($ret['mask']);
+		$ret['db_last'] = $ret['ip_bin']->get_last_subnet_address($ret['mask']);
 		break;
 	default:
 		break;

@@ -1845,11 +1845,16 @@ function iptree_embed (&$node, $pfx)
 	// split?
 	if (!isset ($node['right']))
 	{
+		// Fill in db_first/db_last to make it possible to run scanIPv4Space() on the node.
 		$node['left']['mask'] = $node['mask'] + 1;
 		$node['left']['ip_bin'] = $node['ip_bin'];
+		$node['left']['db_first'] = sprintf ('%u', $node['left']['ip_bin']);
+		$node['left']['db_last'] = sprintf ('%u', $node['left']['ip_bin'] | binInvMaskFromDec ($node['left']['mask']));
 
 		$node['right']['mask'] = $node['mask'] + 1;
 		$node['right']['ip_bin'] = $node['ip_bin'] + binInvMaskFromDec ($node['mask'] + 1) + 1;
+		$node['right']['db_first'] = sprintf ('%u', $node['right']['ip_bin']);
+		$node['right']['db_last'] = sprintf ('%u', $node['right']['ip_bin'] | binInvMaskFromDec ($node['right']['mask']));
 	}
 
 	// repeat!
@@ -1879,15 +1884,19 @@ function ipv6tree_embed (&$node, $pfx)
 	{
 		$node['left']['mask'] = $node['mask'] + 1;
 		$node['left']['ip_bin'] = $node['ip_bin'];
+		$node['left']['db_first'] = $node['ip_bin']->get_first_subnet_address ($node['mask'] + 1);
+		$node['left']['db_last'] = $node['ip_bin']->get_last_subnet_address ($node['mask'] + 1);
 
 		$node['right']['mask'] = $node['mask'] + 1;
 		$node['right']['ip_bin'] = $node['ip_bin']->get_last_subnet_address ($node['mask'] + 1)->next();
+		$node['right']['db_first'] = $node['right']['ip_bin'];
+		$node['right']['db_last'] = $node['right']['ip_bin']->get_last_subnet_address ($node['mask'] + 1);
 	}
 
 	// repeat!
-	if (($node['left']['ip_bin']->get_first_subnet_address ($node['left']['mask'])) == ($pfx['ip_bin']->get_first_subnet_address ($node['left']['mask'])))
+	if ($node['left']['db_first'] == $pfx['ip_bin']->get_first_subnet_address ($node['left']['mask']))
 		$self ($node['left'], $pfx);
-	elseif (($node['right']['ip_bin']->get_first_subnet_address ($node['right']['mask'])) == ($pfx['ip_bin']->get_first_subnet_address ($node['left']['mask'])))
+	elseif ($node['right']['db_first'] == $pfx['ip_bin']->get_first_subnet_address ($node['left']['mask']))
 		$self ($node['right'], $pfx);
 	else
 		throw new RackTablesError ('cannot decide between left and right', RackTablesError::INTERNAL);
@@ -1934,26 +1943,21 @@ function loadOwnIPv4Addresses (&$node)
 {
 	$toscan = array();
 	$node['addrt'] = 0;
-	if (empty ($node['kids']))
+	if (!isset ($node['kids']) or !count ($node['kids']))
 	{
-		$mask_bin = binMaskFromDec ($node['mask']);
-		$mask_bin_inv = binInvMaskFromDec ($node['mask']);
-		$db_first = sprintf ('%u', 0x00000000 + $node['ip_bin'] & $mask_bin);
-		$db_last  = sprintf ('%u', 0x00000000 + $node['ip_bin'] | $mask_bin_inv);
-		$node['addrt'] = $mask_bin_inv + 1;
-		$toscan[] = array ('i32_first' => $db_first, 'i32_last' => $db_last);
+		$toscan[] = array ('i32_first' => $node['db_first'], 'i32_last' => $node['db_last']);
+		$node['addrt'] = $node['db_last'] - $node['db_first'] + 1;
 	}
 	else
+	{
+		$node['addrt'] = 0;
 		foreach ($node['kids'] as $nested)
 			if (!isset ($nested['id'])) // spare
 			{
-				$mask_bin = binMaskFromDec ($nested['mask']);
-				$mask_bin_inv = binInvMaskFromDec ($nested['mask']);
-				$db_first = sprintf ('%u', 0x00000000 + $nested['ip_bin'] & $mask_bin);
-				$db_last  = sprintf ('%u', 0x00000000 + $nested['ip_bin'] | $mask_bin_inv);
-				$node['addrt'] += $mask_bin_inv + 1;
-				$toscan[] = array ('i32_first' => $db_first, 'i32_last' => $db_last);
+				$toscan[] = array ('i32_first' => $nested['db_first'], 'i32_last' => $nested['db_last']);
+				$node['addrt'] += $node['db_last'] - $node['db_first'] + 1;
 			}
+	}
 	$node['addrlist'] = scanIPv4Space ($toscan);
 	$node['addrc'] = count ($node['addrlist']);
 }
