@@ -528,6 +528,15 @@ a.toggleTreeMode {
 }
 
 .net-usage {
-		float: right;
-		margin-left: 15px;
+	float: right;
+	margin-left: 15px;
+}
+
+.btns-8021q-sync li {
+	display: inline;
+	list-style-type: none;
+	padding-right: 40px;
+}
+.btns-8021q-sync li form {
+	display: inline;
 }

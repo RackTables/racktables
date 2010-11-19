@@ -3512,6 +3512,162 @@ function initiateUplinksReverb ($object_id, $uplink_ports)
 		saveDownlinksReverb ($remote_object_id, $remote_ports);
 }
 
+// checks if the desired config of all uplink/downlink ports of that switch, and
+// his neighbors, equals to the recalculated config. If not, and $check_only is FALSE,
+// sets the recalculated configs as desired and puts switches into out-of-sync state.
+// Returns an array with object_id as key and portname subkey
+function recalc8021QPorts ($switch_id, $check_only = FALSE)
+{
+	function find_connected_portinfo ($ports, $name)
+	{
+		foreach ($ports as $portinfo)
+			if ($portinfo['name'] == $name and $portinfo['remote_object_id'] != '' and $portinfo['remote_name'] != '')
+				return $portinfo;
+	}
+
+	$ret = array
+	(
+		'switches' => 0,
+		'ports' => 0,
+	);
+	global $dbxlink;
+
+	$object = spotEntity ('object', $switch_id);
+	amplifyCell ($object);
+	$vlan_config = getStored8021QConfig ($switch_id, 'desired');
+	$vswitch = getVLANSwitchInfo ($switch_id);
+	if (! $vswitch) {
+		return $ret;
+	}
+	$domain_vlanlist = getDomainVLANs ($vswitch['domain_id']);
+	$order = apply8021QOrder ($vswitch['template_id'], $vlan_config);
+	$before = $order;
+
+	$dbxlink->beginTransaction();
+	// calculate remote uplinks and copy them to local downlinks
+	foreach ($order as $pn => &$local_port_order)
+	{
+		if ($local_port_order['vst_role'] != 'downlink')
+			continue;
+
+		// if there is a link with remote side type 'uplink', use its vlan mask
+		if ($portinfo = find_connected_portinfo ($object['ports'], $pn))
+		{
+			$remote_pn = $portinfo['remote_name'];
+			$remote_vlan_config = getStored8021QConfig ($portinfo['remote_object_id'], 'desired');
+			$remote_vswitch = getVLANSwitchInfo ($portinfo['remote_object_id']);
+			if (! $remote_vswitch)
+				continue;
+			$remote_domain_vlanlist = getDomainVLANs ($remote_vswitch['domain_id']);
+			$remote_order = apply8021QOrder ($remote_vswitch['template_id'], $remote_vlan_config);
+			$remote_before = $remote_order;
+			if ($remote_order[$remote_pn]['vst_role'] == 'uplink')
+			{
+				$remote_uplinks = filter8021QChangeRequests ($remote_domain_vlanlist, $remote_before, produceUplinkPorts ($remote_domain_vlanlist, $remote_order));
+				$remote_port_order = $remote_uplinks[$remote_pn];
+				$new_order = produceDownlinkPort ($domain_vlanlist, $pn, array ($pn => $local_port_order), $remote_port_order);
+				$local_port_order = $new_order[$pn]; // this updates $order
+
+				// queue changes in D-config of remote switch
+				if ($changed = queueChangesToSwitch ($portinfo['remote_object_id'], array ($remote_pn => $remote_port_order), $remote_before, $check_only))
+				{
+					$ret['switches'] ++;
+					$ret['ports'] += $changed;
+				}
+			}
+		}
+	}
+
+	// calculate local uplinks, store changes in $order
+	foreach (filter8021QChangeRequests ($domain_vlanlist, $before, produceUplinkPorts ($domain_vlanlist, $order)) as $pn => $portorder)
+		$order[$pn] = $portorder;
+	// queue changes in D-config of local switch
+	if ($changed = queueChangesToSwitch ($switch_id, $order, $before, $check_only))
+	{
+		$ret['switches'] ++;
+		$ret['ports'] += $changed;
+	}
+
+	// calculate the remote side of local uplinks
+	foreach ($order as $pn => &$local_port_order)
+	{
+		if ($local_port_order['vst_role'] != 'uplink')
+			continue;
+
+		// if there is a link with remote side type 'downlink', replace its vlan mask
+		if ($portinfo = find_connected_portinfo ($object['ports'], $pn))
+		{
+			$remote_pn = $portinfo['remote_name'];
+			$remote_vlan_config = getStored8021QConfig ($portinfo['remote_object_id'], 'desired');
+			$remote_vswitch = getVLANSwitchInfo ($portinfo['remote_object_id']);
+			if (! $remote_vswitch)
+				continue;
+			$remote_domain_vlanlist = getDomainVLANs ($remote_vswitch['domain_id']);
+			$remote_order = apply8021QOrder ($remote_vswitch['template_id'], $remote_vlan_config);
+			$remote_before = $remote_order;
+			if ($remote_order[$remote_pn]['vst_role'] == 'downlink')
+			{
+				$new_order = produceDownlinkPort ($remote_domain_vlanlist, $remote_pn, $remote_order, $local_port_order);
+				// queue changes in D-config of remote switch
+				if ($changed = queueChangesToSwitch ($portinfo['remote_object_id'], $new_order, $remote_before, $check_only))
+				{
+					$ret['switches'] ++;
+					$ret['ports'] += $changed;
+				}
+			}
+		}
+	}
+	$dbxlink->commit();
+	return $ret;
+}
+
+// This function takes 802.1q order and the order of corresponding remote uplink port.
+// It returns assotiative array with single row. Key = $portname, value - produced port
+// order based on $order, and having vlan list replaced based on $uplink_order, but filtered.
+function produceDownlinkPort ($domain_vlanlist, $portname, $order, $uplink_order)
+{
+	$new_order = array ($portname => $order[$portname]);
+	$new_order[$portname]['mode'] = 'trunk';
+	$new_order[$portname]['allowed'] = array();
+	$new_order[$portname]['native'] = 0;
+	foreach ($uplink_order['allowed'] as $vlan_id)
+	{
+		if (matchVLANFilter ($vlan_id, $new_order[$portname]['wrt_vlans']))
+		$new_order[$portname]['allowed'][] = $vlan_id;	
+	}
+	return filter8021QChangeRequests ($domain_vlanlist, $remote_before, $new_order);
+}
+
+// does upd8021QPort on any port from $order array which is not equal to the corresponding $before port.
+// returns changed port count.
+// If $check_only is TRUE, return port count that could be changed unless $check_only, does nothing to DB.
+function queueChangesToSwitch ($switch_id, $order, $before, $check_only = FALSE)
+{
+	global $script_mode;
+	$ret = array();
+	$nsaved = 0;
+	foreach ($order as $portname => $portorder)
+		if (! same8021QConfigs ($portorder, $before[$portname]))
+		{
+			if ($script_mode)
+			{
+				$object = spotEntity ('object', $switch_id);
+				print $object['name'] . " $portname: " . serializeVLANPack ($before[$portname]) . ' -> ' . serializeVLANPack ($portorder) . "\n";
+				$nsaved++;
+			}
+			if (! $check_only)
+				$nsaved += upd8021QPort ('desired', $switch_id, $portname, $portorder);
+		}
+	
+	if (! $check_only && $nsaved)
+		usePreparedExecuteBlade
+		(
+			'UPDATE VLANSwitch SET mutex_rev=mutex_rev+1, last_change=NOW(), out_of_sync="yes" WHERE object_id=?',
+			array ($switch_id)
+		);
+	return $nsaved;
+}
+
 function detectVLANSwitchQueue ($vswitch)
 {
 	if ($vswitch['out_of_sync'] == 'no')
