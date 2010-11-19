@@ -2388,6 +2388,19 @@ function process8021QSyncRequest ()
 	return buildRedirectURL (__FUNCTION__, 'OK', array ($done));
 }
 
+$msgcode['process8021QRecalcRequest']['CHANGED'] = 87;
+$msgcode['process8021QRecalcRequest']['NO_CHANGES'] = 300;
+function process8021QRecalcRequest ()
+{
+	assertUIntArg ('object_id');
+	global $sic;
+	$counters = recalc8021QPorts ($sic['object_id']);
+	if ($counters['ports'])
+		return buildRedirectURL (__FUNCTION__, 'CHANGED', array ($counters['ports'], $counters['switches']));
+	else
+		return buildRedirectURL (__FUNCTION__, 'NO_CHANGES', array ('No changes were made'));
+}
+
 $msgcode['resolve8021QConflicts']['OK'] = 63;
 $msgcode['resolve8021QConflicts']['ERR1'] = 179;
 $msgcode['resolve8021QConflicts']['ERR2'] = 109;

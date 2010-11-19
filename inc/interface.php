@@ -172,6 +172,9 @@ $image['COMMIT']['height'] = 32;
 $image['COMMIT gray']['path'] = 'pix/tango-go-prev-next-gray-32x32.png';
 $image['COMMIT gray']['width'] = 32;
 $image['COMMIT gray']['height'] = 32;
+$image['RECALC']['path'] = 'pix/tango-view-refresh-32x32.png';
+$image['RECALC']['width'] = 32;
+$image['RECALC']['height'] = 32;
 $image['clear']['path'] = 'pix/tango-edit-clear.png';
 $image['clear']['width'] = 16;
 $image['clear']['height'] = 16;
@@ -1594,6 +1597,7 @@ function showMessageOrError ()
 				81 => array ('code' => 'success', 'format' => "SNMP: completed '%s' work"),
 				82 => array ('code' => 'success', 'format' => "Bulk port creation was successful. %u ports created, %u failed"),
 				83 => array ('code' => 'success', 'format' => 'Object "%s" was reset successfully'),
+				87 => array ('code' => 'success', 'format' => '802.1Q recalculate: %d ports changed on %d switches'),
 // records 100~199 with fatal error messages
 				100 => array ('code' => 'error', 'format' => '%s'),
 				101 => array ('code' => 'error', 'format' => 'Port name cannot be empty'),
@@ -7133,10 +7137,16 @@ function renderObject8021QPorts ($object_id)
 			}
 	}
 	if ($req_port_name == '' and $nports)
-		echo "<input type=hidden name=nports value=${nports}>" .
-			'<tr><td colspan=5 class=tdcenter>' .
-			getImageHREF ('SAVE', 'save configuration', TRUE) .
-			'</td></tr></form>';
+	{
+		echo "<input type=hidden name=nports value=${nports}>";
+		echo '<tr><td colspan=5 class=tdcenter><ul class="btns-8021q-sync">';
+		echo '<li>' . getImageHREF ('SAVE', 'save configuration', TRUE, 100) . '</form></li>';
+
+		echo '<li>';
+		printOpFormIntro ('exec8021QRecalc');
+		echo getImageHREF ('RECALC', 'Recalculate uplinks and downlinks', TRUE, 101) .
+			'</form></li></ul></td></tr>';
+	}
 	echo '</table>';
 	if ($req_port_name == '');
 		echo '</form>';
