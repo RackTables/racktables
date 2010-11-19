@@ -1842,6 +1842,7 @@ function showMessageOrError ()
 				189 => array ('code' => 'error', 'format' => "Unknown OID '%s'"),
 				190 => array ('code' => 'error', 'format' => "Invalid VLAN ID '%s'"),
 				191 => array ('code' => 'error', 'format' => "deploy was blocked due to conflicting configuration versions"),
+				192 => array ('code' => 'error', 'format' => "Permission denied"),
 
 // records 200~299 with warnings
 				200 => array ('code' => 'warning', 'format' => '%s'),
@@ -7918,10 +7919,13 @@ function renderObject8021QPorts ($object_id)
 		echo '<tr><td colspan=5 class=tdcenter><ul class="btns-8021q-sync">';
 		echo '<li>' . getImageHREF ('SAVE', 'save configuration', TRUE, 100) . '</form></li>';
 
-		echo '<li>';
-		printOpFormIntro ('exec8021QRecalc');
-		echo getImageHREF ('RECALC', 'Recalculate uplinks and downlinks', TRUE, 101) .
-			'</form></li></ul></td></tr>';
+		if (permitted (NULL, NULL, NULL, array (array ('tag' => '$op_recalc8021Q'))))
+		{
+			echo '<li>';
+			printOpFormIntro ('exec8021QRecalc');
+			echo getImageHREF ('RECALC', 'Recalculate uplinks and downlinks', TRUE, 101) . '</form></li>';
+		}
+		echo '</ul></td></tr>';
 	}
 	echo '</table>';
 	if ($req_port_name == '');
