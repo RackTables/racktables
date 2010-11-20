@@ -240,6 +240,7 @@ CREATE TABLE `LDAPCache` (
 CREATE TABLE `Link` (
   `porta` int(10) unsigned NOT NULL default '0',
   `portb` int(10) unsigned NOT NULL default '0',
+  `cable` char(64) DEFAULT NULL,
   PRIMARY KEY  (`porta`,`portb`),
   UNIQUE KEY `porta` (`porta`),
   UNIQUE KEY `portb` (`portb`),

@@ -117,10 +117,12 @@ header ('Content-Type: text/html; charset=UTF-8');
 			$spare_ports = findSparePorts ($port_id, $only_racks);
 
 			printSelect ($spare_ports, array ('name' => 'ports', 'size' => getConfigVar ('MAXSELSIZE')));
-			echo '<br><br>';
+			echo '<br>';
+			echo "Cable ID: <input type=text id=cable>";
+			echo '<br>';
 			echo "<input type='submit' value='Link' onclick='".
 			"if (getElementById(\"ports\").value != \"\") {".
-			"	opener.location=\"process.php?page=object&tab=ports&op=linkPort&object_id=${port_info['object_id']}&port_id=$port_id&remote_port_id=\"+getElementById(\"ports\").value; ".
+			"	opener.location=\"process.php?page=object&tab=ports&op=linkPort&object_id=${port_info['object_id']}&port_id=$port_id&remote_port_id=\"+getElementById(\"ports\").value+\"&cable=\"+getElementById(\"cable\").value; ".
 			"	window.close();}'>";
 			echo '</form></div>';
 			break;

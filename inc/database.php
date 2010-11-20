@@ -554,14 +554,16 @@ function getObjectPortsAndLinks ($object_id)
 	{
 		$portid = $ret[$tmpkey]['id'];
 		$remote_id = NULL;
-		$query = "select porta, portb from Link where porta = ? or portb = ?";
+		$query = "select porta, portb, cable from Link where porta = ? or portb = ?";
 		$result = usePreparedSelectBlade ($query, array ($portid, $portid));
+		$cable = "CableID n/a";
 		if ($row = $result->fetch (PDO::FETCH_ASSOC))
 		{
 			if ($portid != $row['porta'])
 				$remote_id = $row['porta'];
 			elseif ($portid != $row['portb'])
 				$remote_id = $row['portb'];
+			$cable = $row['cable'];
 		}
 		unset ($result);
 		if ($remote_id) // there's a remote end here
@@ -572,6 +574,7 @@ function getObjectPortsAndLinks ($object_id)
 			{
 				$ret[$tmpkey]['remote_name'] = $row['name'];
 				$ret[$tmpkey]['remote_object_id'] = $row['object_id'];
+				$ret[$tmpkey]['cableid'] = $cable;
 			}
 			$ret[$tmpkey]['remote_id'] = $remote_id;
 			unset ($result);
@@ -1002,7 +1005,7 @@ function getAllIPv4Allocations ()
 	return $ret;
 }
 
-function linkPorts ($porta, $portb)
+function linkPorts ($porta, $portb, $cable = NULL)
 {
 	if ($porta == $portb)
 		throw new InvalidArgException ('porta/portb', $porta, "Ports can't be the same");
@@ -1012,7 +1015,7 @@ function linkPorts ($porta, $portb)
 		$porta = $portb;
 		$portb = $tmp;
 	}
-	$ret = FALSE !== usePreparedInsertBlade ('Link', array ('porta' => $porta, 'portb' => $portb));
+	$ret = FALSE !== usePreparedInsertBlade ('Link', array ('porta' => $porta, 'portb' => $portb, 'cable' => $cable));
 	$ret = $ret and FALSE !== usePreparedExecuteBlade
 	(
 		'UPDATE Port SET reservation_comment=NULL WHERE id IN(?, ?)',

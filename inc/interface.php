@@ -1002,7 +1002,8 @@ function renderRackObject ($object_id)
 		echo "<table cellspacing=0 cellpadding='5' align='center' class='widetable'>";
 		echo '<tr><th class=tdleft>Local name</th><th class=tdleft>Visible label</th>';
 		echo '<th class=tdleft>Interface</th><th class=tdleft>L2 address</th>';
-		echo '<th class=tdcenter colspan=2>Remote object and port</th></tr>';
+		echo '<th class=tdcenter colspan=2>Remote object and port</th>';
+		echo '<th class=tdleft>Cable ID</th></tr>';
 		foreach ($info['ports'] as $port)
 		{
 			echo '<tr';
@@ -1015,6 +1016,7 @@ function renderRackObject ($object_id)
 				$remote_object = spotEntity ('object', $port['remote_object_id']);
 				echo "<td class=tdleft><a href='".makeHref(array('page'=>'object', 'object_id'=>$port['remote_object_id'], 'hl_port_id'=>$port['remote_id']))."'>${remote_object['dname']}</a></td>";
 				echo "<td class=tdleft>${port['remote_name']}</td>";
+				echo "<td class='tdleft rsvtext'>${port['cableid']}</td>";
 			}
 			elseif (strlen ($port['reservation_comment']))
 			{
@@ -1304,7 +1306,7 @@ function renderPortsForObject ($object_id)
 	
 	echo "<table cellspacing=0 cellpadding='5' align='center' class='widetable'>\n";
 	echo "<tr><th>&nbsp;</th><th class=tdleft>Local name</th><th class=tdleft>Visible label</th><th class=tdleft>Interface</th><th class=tdleft>L2 address</th>";
-	echo "<th class=tdcenter colspan=2>Remote object and port</th><th class=tdcenter>(Un)link or (un)reserve</th><th>&nbsp;</th></tr>\n";
+	echo "<th class=tdcenter colspan=2>Cable, Remote object and port</th><th class=tdcenter>(Un)link or (un)reserve</th><th>&nbsp;</th></tr>\n";
 	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
 		printNewItemTR ($prefs);
 	foreach ($object['ports'] as $port)
@@ -1336,7 +1338,7 @@ function renderPortsForObject ($object_id)
 		if ($port['remote_object_id'])
 		{
 			$remote_object = spotEntity ('object', $port['remote_object_id']);
-			echo "<td><a href='".makeHref(array('page'=>'object', 'object_id'=>$port['remote_object_id']))."'>${remote_object['dname']}</a></td>";
+			echo "<td>${port['cableid']}&nbsp;<a href='".makeHref(array('page'=>'object', 'object_id'=>$port['remote_object_id']))."'>${remote_object['dname']}</a></td>";
 			echo "<td>${port['remote_name']}<input type=hidden name=reservation_comment value=''></td>";
 			echo "<td class=tdcenter><a href='".
 				makeHrefProcess(array(

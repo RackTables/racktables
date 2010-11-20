@@ -190,9 +190,10 @@ function linkPortForObject ()
 {
 	assertUIntArg ('port_id');
 	assertUIntArg ('remote_port_id');
+	assertStringArg ('cable', TRUE);
 
 	// FIXME: ensure, that at least one of these ports belongs to the current object
-	$error = linkPorts ($_REQUEST['port_id'], $_REQUEST['remote_port_id']);
+	$error = linkPorts ($_REQUEST['port_id'], $_REQUEST['remote_port_id'], $_REQUEST['cable']);
 	if ($error != '')
 		return buildRedirectURL (__FUNCTION__, 'ERR', array ($error));
 	global $sic;
