@@ -1920,47 +1920,26 @@ function showMessageOrError ()
 }
 
 /*
-The following conditions must be followed:
+The following conditions must be met:
 1. We can mount onto free atoms only. This means: if any record for an atom
 already exists in RackSpace, it can't be used for mounting.
 2. We can't unmount from 'W' atoms. Operator should review appropriate comments
 and either delete them before unmounting or refuse to unmount the object.
 */
-
-// We extensively use $_REQUEST in the function.
 function renderRackSpaceForObject ($object_id)
 {
-	$is_update = isset ($_REQUEST['rackmulti'][0]);
-	$info = spotEntity ('object', $object_id);
 	// Always process occupied racks plus racks chosen by user. First get racks with
 	// already allocated rackspace...
-	if (NULL === ($workingRacksData = getResidentRacksData ($object_id)))
-		die; // some error already shown
-
+	$workingRacksData = getResidentRacksData ($object_id);
 	// ...and then add those chosen by user (if any).
 	if (isset($_REQUEST['rackmulti']))
 		foreach ($_REQUEST['rackmulti'] as $cand_id)
-		{
 			if (!isset ($workingRacksData[$cand_id]))
 			{
 				$rackData = spotEntity ('rack', $cand_id);
 				amplifyCell ($rackData);
 				$workingRacksData[$cand_id] = $rackData;
 			}
-		}
-
-	printOpFormIntro ('updateObjectAllocation');
-
-	// Do it only once...
-	foreach ($workingRacksData as $rackId => &$rackData)
-	{
-		applyObjectMountMask ($rackData, $object_id);
-		echo "<input type=\"hidden\" name=\"rackmulti[]\" value=\"$rackId\">";
-	}
-	// Now we workaround an old caveat: http://bugs.php.net/bug.php?id=37410
-	unset ($rackData);
-
-	// This is the time for rendering.
 
 	// Main layout starts.
 	echo "<table border=0 class=objectview cellspacing=0 cellpadding=0><tr>";
@@ -1970,19 +1949,17 @@ function renderRackSpaceForObject ($object_id)
 	startPortlet ('Racks');
 	$allRacksData = listCells ('rack');
 	if (count ($allRacksData) <= getConfigVar ('RACK_PRESELECT_THRESHOLD'))
-	{
 		foreach ($allRacksData as $rack)
-		{
-			amplifyCell ($rack);
-			$workingRacksData[$rack['id']] = $rack;
-		}
-		foreach ($workingRacksData as &$rackData)
-			applyObjectMountMask ($rackData, $object_id);
-		unset ($rackData);
-	}
+			if (!array_key_exists ($rack['id'], $workingRacksData))
+			{
+				amplifyCell ($rack);
+				$workingRacksData[$rack['id']] = $rack;
+			}
+	foreach (array_keys ($workingRacksData) as $rackId)
+		applyObjectMountMask ($workingRacksData[$rackId], $object_id);
+	printOpFormIntro ('updateObjectAllocation');
 	renderRackMultiSelect ('rackmulti[]', $allRacksData, array_keys ($workingRacksData));
-	echo "<br>";
-	echo "<br>";
+	echo "<br><br>";
 	finishPortlet();
 	echo "</td>";
 
@@ -1991,8 +1968,7 @@ function renderRackSpaceForObject ($object_id)
 	startPortlet ('Comment');
 	echo "<textarea name=comment rows=10 cols=40></textarea><br>\n";
 	echo "<input type=submit value='Save' name=got_atoms>\n";
-	echo "<br>";
-	echo "<br>";
+	echo "<br><br>";
 	finishPortlet();
 	echo "</td>";
 
@@ -2008,7 +1984,7 @@ function renderRackSpaceForObject ($object_id)
 		markupAtomGrid ($rackData, 'T');
 		// If we have a form processed, discard user input and show new database
 		// contents.
-		if ($is_update)
+		if (isset ($_REQUEST['rackmulti'][0])) // is an update
 			mergeGridFormToRack ($rackData);
 		echo "<td valign=top>";
 		echo "<center>\n<h2>${rackData['name']}</h2>\n";
@@ -2028,7 +2004,6 @@ function renderRackSpaceForObject ($object_id)
 	echo "</tr></table>";
 	finishPortlet();
 	echo "</td>\n";
-
 
 	echo "</form>\n";
 	echo "</tr></table>\n";
