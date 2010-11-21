@@ -1021,10 +1021,10 @@ function renderRackObject ($object_id)
 			elseif (strlen ($port['reservation_comment']))
 			{
 				echo "<td class=tdleft><b>Reserved:</b></td>";
-				echo "<td class='tdleft rsvtext'>${port['reservation_comment']}</td>";
+				echo "<td class='tdleft rsvtext'>${port['reservation_comment']}</td><td>&nbsp;</td>";
 			}
 			else
-				echo '<td>&nbsp;</td><td>&nbsp;</td>';
+				echo '<td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>';
 			echo "</tr>";
 		}
 		echo "</table><br>";
