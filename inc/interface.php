@@ -7930,21 +7930,19 @@ function renderObject8021QPorts ($object_id)
 				echo '</tr>';
 			}
 	}
+	echo '<tr><td colspan=5 class=tdcenter><ul class="btns-8021q-sync">';
 	if ($req_port_name == '' and $nports)
 	{
 		echo "<input type=hidden name=nports value=${nports}>";
-		echo '<tr><td colspan=5 class=tdcenter><ul class="btns-8021q-sync">';
 		echo '<li>' . getImageHREF ('SAVE', 'save configuration', TRUE, 100) . '</form></li>';
-
-		if (permitted (NULL, NULL, NULL, array (array ('tag' => '$op_recalc8021Q'))))
-		{
-			echo '<li>';
-			printOpFormIntro ('exec8021QRecalc');
-			echo getImageHREF ('RECALC', 'Recalculate uplinks and downlinks', TRUE, 101) . '</form></li>';
-		}
-		echo '</ul></td></tr>';
 	}
-	echo '</table>';
+	if (permitted (NULL, NULL, NULL, array (array ('tag' => '$op_recalc8021Q'))))
+	{
+		echo '<li>';
+		printOpFormIntro ('exec8021QRecalc');
+		echo getImageHREF ('RECALC', 'Recalculate uplinks and downlinks', TRUE, 101) . '</form></li>';
+	}
+	echo '</ul></td></tr></table>';
 	if ($req_port_name == '');
 		echo '</form>';
 	echo '</td>';
