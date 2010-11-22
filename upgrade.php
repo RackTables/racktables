@@ -771,7 +771,8 @@ CREATE TABLE `IPv6Allocation` (
   `ip` binary(16) NOT NULL,
   `name` char(255) NOT NULL default '',
   `type` enum('regular','shared','virtual','router') default NULL,
-  PRIMARY KEY  (`object_id`,`ip`)
+  PRIMARY KEY  (`object_id`,`ip`),
+  CONSTRAINT `IPv6Allocation-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `RackObject` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB
 ";
 			$query[] = "
@@ -801,6 +802,7 @@ CREATE TABLE `VLANIPv6` (
 			$query[] = "ALTER TABLE `FileLink` CHANGE COLUMN `entity_type` `entity_type` ENUM('ipv4net','ipv4rspool','ipv4vs','object','rack','user','ipv6net') NOT NULL DEFAULT 'object' AFTER `file_id`";
 			$query[] = 'ALTER TABLE Link ADD COLUMN cable char(64) NULL AFTER portb';
 			$query[] = 'ALTER TABLE RackSpace ADD CONSTRAINT `RackSpace-FK-rack_id` FOREIGN KEY (rack_id) REFERENCES Rack (id)';
+			$query[] = "ALTER TABLE `IPv4Allocation` ADD CONSTRAINT `IPv4Allocation-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `RackObject` (`id`) ON DELETE CASCADE";
 			$query[] = "UPDATE Config SET varvalue = '0.19.0' WHERE varname = 'DB_VERSION'";
 			break;
 		default:

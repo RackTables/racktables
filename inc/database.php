@@ -673,6 +673,7 @@ function commitResetObject ($object_id = 0)
 	destroyTagsForEntity ('object', $object_id);
 	usePreparedDeleteBlade ('IPv4LB', array ('object_id' => $object_id));
 	usePreparedDeleteBlade ('IPv4Allocation', array ('object_id' => $object_id));
+	usePreparedDeleteBlade ('IPv6Allocation', array ('object_id' => $object_id));
 	usePreparedDeleteBlade ('IPv4NAT', array ('object_id' => $object_id));
 	// Rack space
 	usePreparedExecuteBlade ('DELETE FROM Atom WHERE molecule_id IN (SELECT new_molecule_id FROM MountOperation WHERE object_id = ?)', array ($object_id));

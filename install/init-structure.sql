@@ -126,7 +126,8 @@ CREATE TABLE `IPv4Allocation` (
   `ip` int(10) unsigned NOT NULL default '0',
   `name` char(255) NOT NULL default '',
   `type` enum('regular','shared','virtual','router') default NULL,
-  PRIMARY KEY  (`object_id`,`ip`)
+  PRIMARY KEY  (`object_id`,`ip`),
+  CONSTRAINT `IPv4Allocation-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `RackObject` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
 CREATE TABLE `IPv4LB` (
@@ -212,7 +213,8 @@ CREATE TABLE `IPv6Allocation` (
   `ip` binary(16) NOT NULL,
   `name` char(255) NOT NULL default '',
   `type` enum('regular','shared','virtual','router') default NULL,
-  PRIMARY KEY  (`object_id`,`ip`)
+  PRIMARY KEY  (`object_id`,`ip`),
+  CONSTRAINT `IPv6Allocation-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `RackObject` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
 CREATE TABLE `IPv6Network` (
