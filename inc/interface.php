@@ -7934,14 +7934,12 @@ function renderObject8021QPorts ($object_id)
 	if ($req_port_name == '' and $nports)
 	{
 		echo "<input type=hidden name=nports value=${nports}>";
-		echo '<li>' . getImageHREF ('SAVE', 'save configuration', TRUE, 100) . '</form></li>';
+		echo '<li>' . getImageHREF ('SAVE', 'save configuration', TRUE, 100) . '</li>';
 	}
+	echo '</form>';
 	if (permitted (NULL, NULL, NULL, array (array ('tag' => '$op_recalc8021Q'))))
-	{
-		echo '<li>';
-		printOpFormIntro ('exec8021QRecalc');
-		echo getImageHREF ('RECALC', 'Recalculate uplinks and downlinks', TRUE, 101) . '</form></li>';
-	}
+		echo '<li><a href="' . makeHrefProcess (array ('op' => 'exec8021QRecalc', 'object_id' => $object_id)) . '">' .
+			getImageHREF ('RECALC', 'Recalculate uplinks and downlinks') . '</a></li>';
 	echo '</ul></td></tr></table>';
 	if ($req_port_name == '');
 		echo '</form>';
