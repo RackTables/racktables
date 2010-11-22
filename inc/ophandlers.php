@@ -1955,8 +1955,30 @@ function updateRackProblems ()
 function querySNMPData ()
 {
 	assertUIntArg ('object_id');
-	assertStringArg ('community');
-	return doSNMPmining ($_REQUEST['object_id'], $_REQUEST['community']);
+	assertStringArg ('community', TRUE);
+
+	$snmpsetup = array ();
+	if ( strlen($_REQUEST['community']) == 0 ) {
+		assertStringArg ('sec_name');
+		assertStringArg ('sec_level');
+		assertStringArg ('auth_protocol');
+		assertStringArg ('auth_passphrase', TRUE);
+		assertStringArg ('priv_protocol');
+		assertStringArg ('priv_passphrase', TRUE);
+
+		$snmpsetup['sec_name'] = $_REQUEST['sec_name'];
+		$snmpsetup['sec_level'] = $_REQUEST['sec_level'];
+		$snmpsetup['auth_protocol'] = $_REQUEST['auth_protocol'];
+		$snmpsetup['auth_passphrase'] = $_REQUEST['auth_passphrase'];
+		$snmpsetup['priv_protocol'] = $_REQUEST['priv_protocol'];
+		$snmpsetup['priv_passphrase'] = $_REQUEST['priv_passphrase'];
+	}
+	else {
+		$snmpsetup['community'] = $_REQUEST['community'];
+	}
+
+
+	return doSNMPmining ($_REQUEST['object_id'], $snmpsetup);
 }
 
 $msgcode['addFileWithoutLink']['OK'] = 69;

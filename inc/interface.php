@@ -4988,10 +4988,50 @@ function renderSNMPPortFinder ($object_id)
 			$snmpcomm = 'public';
 
 		echo "<p align=center>
-This object has no ports listed, that's why you see this form. If you supply a SNMP community,
-I can try to automatically harvest the data. As soon as at least one port is added,
-this tab will not be seen any more. Good luck.<br>\n";
-		echo "<input type=text name=community value='" . $snmpcomm . "'>\n";
+This object has no ports listed, that's why you see this form. I can try to automatically harvest the data.
+As soon as at least one port is added, this tab will not be seen any more. Good luck.
+<br />
+You may enter just the snmp community and use SNMPv3 (leave community empty and fill the other fields)
+<br />\n";
+
+		echo "<input type=text name=community value='" . $snmpcomm . "'><br /><br />\n";
+
+		echo '
+		<label for="sec_name">Security User</label>
+		<input type="text" id="sec_name" name="sec_name"><br />
+
+		
+		<label for="sec_level">Security Level</label>
+		<select id="sec_level" name="sec_level"> 
+			<option value="noAuthNoPriv" selected="selected">noAuth and no Priv</option>
+			<option value="authNoPriv" >auth without Priv</option>
+			<option value="authPriv" >auth with Priv</option>
+		</select>
+		<br />
+
+		<label for="auth_protocol_1">Auth Type</label>
+		<input id="auth_protocol_1" name="auth_protocol" type="radio" value="md5" />
+		<label for="auth_protocol_1">MD5</label>
+		<input id="auth_protocol_2" name="auth_protocol" type="radio" value="sha" />
+		<label for="auth_protocol_2">SHA</label>
+		<br />
+
+		<label for="auth_passphrase">Auth Key</label>
+		<input type="text" id="auth_passphrase" name="auth_passphrase">
+		<br />
+
+		<label for="priv_protocol_1">Priv Type</label>
+		<input id="priv_protocol_1" name="priv_protocol" type="radio" value="DES" />
+		<label for="priv_protocol_1">DES</label>
+		<input id="priv_protocol_2" name="priv_protocol" type="radio" value="AES" />
+		<label for="priv_protocol_2">AES</label>
+		<br />
+
+		<label for="priv_passphrase">Priv Key</label>
+		<input type="text" id="priv_passphrase" name="priv_passphrase">
+		<br />';
+		
+
 		echo "<input type=submit name='do_scan' value='Go!'> \n";
 		echo "</form></p>\n";
 	}

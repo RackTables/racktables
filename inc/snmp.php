@@ -940,7 +940,7 @@ function checkPIC ($port_type_id)
 $msgcode['doSNMPmining']['ERR1'] = 161;
 $msgcode['doSNMPmining']['ERR2'] = 162;
 $msgcode['doSNMPmining']['OK'] = 81;
-function doSNMPmining ($object_id, $community)
+function doSNMPmining ($object_id, $snmpsetup)
 {
 	$objectInfo = spotEntity ('object', $object_id);
 	$objectInfo['attrs'] = getAttrValues ($object_id);
@@ -950,28 +950,30 @@ function doSNMPmining ($object_id, $community)
 	if (count ($endpoints) > 1)
 		return buildRedirectURL (__FUNCTION__, 'ERR2'); // can't pick an address
 
+	$device = new SNMPDevice($endpoints[0], $snmpsetup);
+
 	switch ($objectInfo['objtype_id'])
 	{
 	case 7:
 	case 8:
-		return doSwitchSNMPmining ($objectInfo, $endpoints[0], $community);
+		return doSwitchSNMPmining ($objectInfo, $device);
 	case 2:
-		return doPDUSNMPmining ($objectInfo, $endpoints[0], $community);
+		return doPDUSNMPmining ($objectInfo, $device);
 	}	
 }
 
 $msgcode['doSwitchSNMPmining']['ERR3'] = 188;
 $msgcode['doSwitchSNMPmining']['ERR4'] = 189;
-function doSwitchSNMPmining ($objectInfo, $hostname, $community)
+function doSwitchSNMPmining ($objectInfo, $device)
 {
 	$log = emptyLog();
 	global $known_switches, $iftable_processors;
 	
-	if (FALSE === ($sysObjectID = @snmpget ($hostname, $community, 'sysObjectID.0')))
+	if (FALSE === ($sysObjectID = $device->snmpget ('sysObjectID.0')))
 		return buildRedirectURL (__FUNCTION__, 'ERR3'); // // fatal SNMP failure
 	$sysObjectID = preg_replace ('/^.*(enterprises\.)([\.[:digit:]]+)$/', '\\2', $sysObjectID);
-	$sysName = substr (@snmpget ($hostname, $community, 'sysName.0'), strlen ('STRING: '));
-	$sysDescr = substr (@snmpget ($hostname, $community, 'sysDescr.0'), strlen ('STRING: '));
+	$sysName = substr ($device->snmpget ('sysName.0'), strlen ('STRING: '));
+	$sysDescr = substr ($device->snmpget ('sysDescr.0'), strlen ('STRING: '));
 	$sysDescr = str_replace (array ("\n", "\r"), " ", $sysDescr);  // Make it one line
 	if (!isset ($known_switches[$sysObjectID]))
 		return buildRedirectURL (__FUNCTION__, 'ERR4', array ($sysObjectID)); // unknown OID
@@ -998,7 +1000,7 @@ function doSwitchSNMPmining ($objectInfo, $hostname, $community)
 		updateStickerForCell ($objectInfo, 5, $exact_release);
 		if (array_key_exists ($major_line, $ios_codes))
 			updateStickerForCell ($objectInfo, 4, $ios_codes[$major_line]);
-		$sysChassi = @snmpget ($hostname, $community, '1.3.6.1.4.1.9.3.6.3.0');
+		$sysChassi = $device->snmpget ('1.3.6.1.4.1.9.3.6.3.0');
 		if ($sysChassi !== FALSE or $sysChassi !== NULL)
 			updateStickerForCell ($objectInfo, 1, str_replace ('"', '', substr ($sysChassi, strlen ('STRING: '))));
 		checkPIC ('1-29');
@@ -1067,7 +1069,7 @@ function doSwitchSNMPmining ($objectInfo, $hostname, $community)
 		$exact_release = preg_replace ('/^.*, IronWare Version ([^ ]+) .*$/', '\\1', $sysDescr);
 		updateStickerForCell ($objectInfo, 5, $exact_release);
 		# FOUNDRY-SN-AGENT-MIB::snChasSerNum.0
-		$sysChassi = @snmpget ($hostname, $community, 'enterprises.1991.1.1.1.1.2.0');
+		$sysChassi = $device->snmpget ('enterprises.1991.1.1.1.1.2.0');
 		if ($sysChassi !== FALSE or $sysChassi !== NULL)
 			updateStickerForCell ($objectInfo, 1, str_replace ('"', '', substr ($sysChassi, strlen ('STRING: '))));
 
@@ -1083,7 +1085,7 @@ function doSwitchSNMPmining ($objectInfo, $hostname, $community)
 		# 1991.1.1.2.2.1.1.2.4 = STRING: "FLS-1XG 1-port 10G Module (1-XFP)"
 		# (assuming, that the device has 2 XFP modules in slots 3 and 4).
 
-		foreach (@snmpwalkoid ($hostname, $community, 'enterprises.1991.1.1.2.2.1.1.2') as $module_raw)
+		foreach ($device->snmpwalkoid ('enterprises.1991.1.1.2.2.1.1.2') as $module_raw)
 			if (preg_match ('/^STRING: "(FGS-1XG1XGC|FGS-2XGC) /i', $module_raw))
 			{
 				$iftable_processors['fgs-uplinks']['dict_key'] = '1-40'; // CX4
@@ -1094,7 +1096,7 @@ function doSwitchSNMPmining ($objectInfo, $hostname, $community)
 		# table: FOUNDRY-SN-AGENT-MIB::snChasPwrSupplyDescription
 		# "Power supply 1 "
 		# "Power supply 2 "
-		foreach (@snmpwalkoid ($hostname, $community, 'enterprises.1991.1.1.1.2.1.1.2') as $PSU_raw)
+		foreach ($device->snmpwalkoid ('enterprises.1991.1.1.1.2.1.1.2') as $PSU_raw)
 		{
 			$count = 0;
 			$PSU_cooked = trim (preg_replace ('/^string: "(.+)"$/i', '\\1', $PSU_raw, 1, $count));
@@ -1130,14 +1132,14 @@ function doSwitchSNMPmining ($objectInfo, $hostname, $community)
 	}
 	$ifInfo = array();
 	$tablename = 'ifDescr';
-	foreach (snmpwalkoid ($hostname, $community, $tablename) as $oid => $value)
+	foreach ($device->snmpwalkoid ($tablename) as $oid => $value)
 	{
 		$randomindex = preg_replace ("/^.*${tablename}\.(.+)\$/", '\\1', $oid);
 		$value = trim (preg_replace ('/^.+: (.+)$/', '\\1', $value), '"');
 		$ifInfo[$randomindex][$tablename] = $value;
 	}
 	$tablename = 'ifPhysAddress';
-	foreach (snmpwalkoid ($hostname, $community, $tablename) as $oid => $value)
+	foreach ($device->snmpwalkoid ($tablename) as $oid => $value)
 	{
 		$randomindex = preg_replace ("/^.*${tablename}\.(.+)\$/", '\\1', $oid);
 		$value = trim ($value);
@@ -1174,7 +1176,10 @@ function doSwitchSNMPmining ($objectInfo, $hostname, $community)
 				continue; // try next processor on current port
 			$newlabel = preg_replace ($iftable_processors[$processor_name]['pattern'], $iftable_processors[$processor_name]['label'], $iface['ifDescr'], 1, $count);
 			checkPIC ($iftable_processors[$processor_name]['dict_key']);
-			commitAddPort ($objectInfo['id'], $newname, $iftable_processors[$processor_name]['dict_key'], $newlabel, $iface['ifPhysAddress']);
+			$msg = commitAddPort ($objectInfo['id'], $newname, $iftable_processors[$processor_name]['dict_key'], $newlabel, $iface['ifPhysAddress']);
+			if (!empty($msg)) {
+				$log = mergeLogs($log, oneLiner(100, array("Error adding port " . $iface['ifDescr'] . ": $processor_name: $msg")));
+			}
 			if (!$iftable_processors[$processor_name]['try_next_proc']) // done with this port
 				continue 2;
 		}
@@ -1185,11 +1190,11 @@ function doSwitchSNMPmining ($objectInfo, $hostname, $community)
 }
 
 $msgcode['doPDUSNMPmining']['OK'] = 0;
-function doPDUSNMPmining ($objectInfo, $hostname, $community)
+function doPDUSNMPmining ($objectInfo, $hostname, $snmpsetup)
 {
 	$log = emptyLog();
 	global $known_APC_SKUs;
-	$switch = new APCPowerSwitch ($hostname, $community);
+	$switch = new APCPowerSwitch ($hostname, $snmpsetup);
 	if (FALSE !== ($dict_key = array_search ($switch->getHWModel(), $known_APC_SKUs)))
 		updateStickerForCell ($objectInfo, 2, $dict_key);
 	updateStickerForCell ($objectInfo, 1, $switch->getHWSerial());
@@ -1215,12 +1220,16 @@ define('APC_STATUS_OFF', 2);
 define('APC_STATUS_REBOOT', 3);
 
 class SNMPDevice {
-    protected $hostname;
-    protected $community;
+    protected $snmp;
 
-    function __construct($hostname, $community) {
-        $this->hostname = $hostname;
-        $this->community = $community;
+    function __construct($hostname, $snmpsetup) {
+	if( isset($snmpsetup['community']) ) {
+	    $this->snmp = new SNMPv2($hostname, $snmpsetup);
+	}
+	else {
+	    $this->snmp = new SNMPv3($hostname, $snmpsetup);
+	}
+
     }
 
     function getName() {
@@ -1230,13 +1239,63 @@ class SNMPDevice {
     function getDescription() {
 	return $this->getString('sysDescr.0');
     }
+    
+    function snmpget($oid) {
+	return $this->snmp->snmpget($oid);
+    }
+    
+    function snmpwalkoid($oid) {
+	return $this->snmp->snmpwalkoid($oid);
+    }
 
     protected function snmpSet($oid, $type, $value) {
-        return snmpset($this->hostname, $this->community, $oid, $type, $value);
+        return $this->snmp->snmpset($oid, $type, $value);
     }
 
     protected function getString($oid) {
-	return trim(str_replace('STRING: ', '', snmpget($this->hostname, $this->community, $oid)), '"');
+	return trim(str_replace('STRING: ', '', $this->snmp->snmpget($oid)), '"');
+    }
+}
+
+abstract class SNMP {
+    protected $hostname;
+    protected $snmpsetup;
+
+    function __construct($hostname, $snmpsetup) {
+	$this->hostname = $hostname;
+	$this->snmpsetup = $snmpsetup;
+    }
+    
+    abstract function snmpget($oid);
+    abstract function snmpset($oid, $type, $value);
+    abstract function snmpwalkoid($oid);
+}
+
+class SNMPv2 extends SNMP {
+    function snmpget($oid) {
+	return snmpget($this->hostname, $this->snmpsetup['community'], $oid);
+    }
+
+    function snmpset($oid, $type, $value) {
+	return snmpset($this->hostname, $this->snmpsetup['community'], $oid, $type, $value);
+    }
+    
+    function snmpwalkoid($oid) {
+	return snmpwalkoid($this->hostname, $this->snmpsetup['community'], $oid);
+    }
+}
+
+class SNMPv3 extends SNMP {
+    function snmpget($oid) {
+	return snmp3_get($this->hostname, $this->snmpsetup['sec_name'], $this->snmpsetup['sec_level'], $this->snmpsetup['auth_protocol'], $this->snmpsetup['auth_passphrase'], $this->snmpsetup['priv_protocol'], $this->snmpsetup['priv_passphrase'], $oid);
+    }
+
+    function snmpset($oid, $type, $value) {
+	return snmp3_set($this->hostname, $this->snmpsetup['sec_name'], $this->snmpsetup['sec_level'], $this->snmpsetup['auth_protocol'], $this->snmpsetup['auth_passphrase'], $this->snmpsetup['priv_protocol'], $this->snmpsetup['priv_passphrase'], $oid, $type, $value);
+    }
+    
+    function snmpwalkoid($oid) {
+	return snmp3_real_walk($this->hostname, $this->snmpsetup['sec_name'], $this->snmpsetup['sec_level'], $this->snmpsetup['auth_protocol'], $this->snmpsetup['auth_passphrase'], $this->snmpsetup['priv_protocol'], $this->snmpsetup['priv_passphrase'], $oid);
     }
 }
 
@@ -1244,8 +1303,8 @@ class APCPowerSwitch extends SNMPDevice {
     protected $snmpMib = 'SNMPv2-SMI::enterprises.318';
 
     function getPorts() {
-        $data = snmpwalk($this->hostname, $this->community, "{$this->snmpMib}.1.1.12.3.3.1.1.2");
-        $status = snmpwalk($this->hostname, $this->community, "{$this->snmpMib}.1.1.12.3.3.1.1.4");
+        $data = $this->snmpwalk("{$this->snmpMib}.1.1.12.3.3.1.1.2");
+        $status = $this->snmpwalk("{$this->snmpMib}.1.1.12.3.3.1.1.4");
         $out = array();
         foreach ($data as $id => $d) {
             $out[$id + 1] = array(trim(str_replace('STRING: ', '', $d), '"'), str_replace('INTEGER: ', '', $status[$id]));
@@ -1254,15 +1313,15 @@ class APCPowerSwitch extends SNMPDevice {
     }
     
     function getPortStatus($id) {
-        return trim(snmpget($this->hostname, $this->community, "{$this->snmpMib}.1.1.12.3.3.1.1.4.$id"), 'INTEGER: ');
+        return trim($this->snmpget("{$this->snmpMib}.1.1.12.3.3.1.1.4.$id"), 'INTEGER: ');
     }
 
     function getPortName($id) {
-        return trim(str_replace('STRING: ', '', snmpget($this->hostname, $this->community, "{$this->snmpMib}.1.1.12.3.3.1.1.2.$id")), '"');
+        return trim(str_replace('STRING: ', '', $this->snmpget("{$this->snmpMib}.1.1.12.3.3.1.1.2.$id")), '"');
     }
 
     function setPortName($id, $name) {
-        return snmpset($this->hostname, $this->community, "{$this->snmpMib}.1.1.4.5.2.1.3.$id", 's', $name);
+        return $this->snmpset("{$this->snmpMib}.1.1.4.5.2.1.3.$id", 's', $name);
     }
 
     function portOff($id) {
@@ -1279,17 +1338,17 @@ class APCPowerSwitch extends SNMPDevice {
 	// rPDUIdentFirmwareRev.0 == .1.3.6.1.4.1.318.1.1.12.1.3.0 = STRING: "vN.N.N"
 	function getFWRev()
 	{
-		return preg_replace ('/^STRING: "(.+)"$/', '\\1', snmpget ($this->hostname, $this->community, "{$this->snmpMib}.1.1.12.1.3.0"));
+		return preg_replace ('/^STRING: "(.+)"$/', '\\1', $this->snmpget ("{$this->snmpMib}.1.1.12.1.3.0"));
 	}
 	// rPDUIdentSerialNumber.0 == .1.3.6.1.4.1.318.1.1.12.1.6.0 = STRING: "XXXXXXXXXXX"
 	function getHWSerial()
 	{
-		return preg_replace ('/^STRING: "(.+)"$/', '\\1', snmpget ($this->hostname, $this->community, "{$this->snmpMib}.1.1.12.1.6.0"));
+		return preg_replace ('/^STRING: "(.+)"$/', '\\1', $this->snmpget ("{$this->snmpMib}.1.1.12.1.6.0"));
 	}
 	// rPDUIdentModelNumber.0 == .1.3.6.1.4.1.318.1.1.12.1.5.0 = STRING: "APnnnn"
 	function getHWModel()
 	{
-		return preg_replace ('/^STRING: "(.*)"$/', '\\1', snmpget ($this->hostname, $this->community, "{$this->snmpMib}.1.1.12.1.5.0"));
+		return preg_replace ('/^STRING: "(.*)"$/', '\\1', $this->snmpget ("{$this->snmpMib}.1.1.12.1.5.0"));
 	}
 }
 
