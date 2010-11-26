@@ -11,7 +11,7 @@
 
 
 // Current code version is subject to change with each new release.
-define ('CODE_VERSION', '0.18.5');
+define ('CODE_VERSION', '0.18.6');
 define ('CHAP_OBJTYPE', 1);
 define ('CHAP_PORTTYPE', 2);
 
@@ -35,6 +35,7 @@ $max_dict_key = array
 	'0.18.3' => 1356,
 	'0.18.4' => 1364,
 	'0.18.5' => 1370,
+	'0.18.6' => 1370,
 );
 
 define ('TAGNAME_REGEXP', '/^[\p{L}0-9]([. _~-]?[\p{L}0-9])*$/u');

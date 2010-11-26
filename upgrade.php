@@ -70,6 +70,7 @@ function getDBUpgradePath ($v1, $v2)
 		'0.18.3',
 		'0.18.4',
 		'0.18.5',
+		'0.18.6',
 	);
 	if (!in_array ($v1, $versionhistory) or !in_array ($v2, $versionhistory))
 		return NULL;
@@ -753,6 +754,10 @@ CREATE TABLE `VLANValidID` (
 			$query[] = "ALTER TABLE `IPv4LB` ADD COLUMN `prio` int(10) unsigned DEFAULT NULL AFTER `vs_id`";
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdefined, description) VALUES ('MAX_UNFILTERED_ENTITIES','0','uint','no','no','yes','Max item count to display on unfiltered result page')";
 			$query[] = "UPDATE Config SET varvalue = '0.18.5' WHERE varname = 'DB_VERSION'";
+			break;
+		case '0.18.6':
+			$query = array_merge ($query, reloadDictionary ($batchid));
+			$query[] = "UPDATE Config SET varvalue = '0.18.6' WHERE varname = 'DB_VERSION'";
 			break;
 		default:
 			showFailure ("executeUpgradeBatch () failed, because batch '${batchid}' isn't defined", __FILE__);
