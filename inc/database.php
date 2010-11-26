@@ -646,6 +646,8 @@ function commitResetObject ($object_id = 0)
 	usePreparedExecuteBlade ('DELETE FROM RackSpace WHERE object_id = ?', array ($object_id));
 	// 802.1Q
 	usePreparedDeleteBlade ('PortVLANMode', array ('object_id' => $object_id));
+	usePreparedDeleteBlade ('PortNativeVLAN', array ('object_id' => $object_id));
+	usePreparedDeleteBlade ('PortAllowedVLAN', array ('object_id' => $object_id));
 	usePreparedDeleteBlade ('CachedPVM', array ('object_id' => $object_id));
 	usePreparedDeleteBlade ('VLANSwitch', array ('object_id' => $object_id));
 	// Ports & links

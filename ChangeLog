@@ -5,6 +5,7 @@
 	update: upon deleting 802.1Q order record focus SELECTs on the deleted values
 	bugfix: SQL error issue on some versions of PHP introduced in 0.18.5
 	new feature: 802.1Q: ability to recalculate the switch uplinks and downlinks by pressing a button on 8021q ports page
+	bugfix: when clearing object, allowed VLANs are also cleared now
 0.18.5 2010-10-25
 	bugfix: attribute map editor was broken (#353)
 	bugfix: speed up IPv4 VLAN selector (by Boris Lytochkin)
