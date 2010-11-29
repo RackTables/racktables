@@ -141,3 +141,33 @@ function fullTreeMode() {
 		tr.show();
 	});
 }
+
+function blockToggleRowOfAtoms (rackId, rowId) {
+	var checkboxId;
+	var toSet;
+	toSet = null;
+	for (var i=0; i<=2; i++) {
+		checkboxId = "atom_" + rackId + "_" + rowId + "_" + i;
+		// Abort if the box is disabled
+		if (document.getElementById(checkboxId).disabled == true) continue;
+		if (toSet == null) {
+			toSet = !document.getElementById(checkboxId).checked;
+		}
+		document.getElementById(checkboxId).checked = toSet;
+	}
+}
+
+function blockToggleColumnOfAtoms (rackId, columnId, numRows) {
+	var checkboxId;
+	var toSet;
+	toSet = null;
+	for (var i=1; i<numRows+1; i++) {
+		checkboxId = "atom_" + rackId + "_" + i + "_" + columnId;
+		// Abort if the box is disabled
+		if (document.getElementById(checkboxId).disabled == true) continue;
+		if (toSet == null) {
+			toSet = !document.getElementById(checkboxId).checked;
+		}
+		document.getElementById(checkboxId).checked = toSet;
+	}
+}
