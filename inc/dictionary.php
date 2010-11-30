@@ -62,7 +62,7 @@ function platform_is_ok ()
 	$nerrs = 0;
 	echo "<table border=1 cellpadding=5>\n";
 	$nerrs += platform_generic_test (class_exists ('PDO'), 'PDO extension');
-	$nerrs += platform_generic_test (defined ('PDO::MYSQL_ATTR_READ_DEFAULT_FILE'), 'PDO-MySQL extension');
+	$nerrs += platform_generic_test (defined ('PDO::MYSQL_ATTR_FOUND_ROWS'), 'PDO-MySQL extension');
 	$nerrs += platform_function_test ('preg_match', 'PCRE extension');
 	$nerrs += platform_generic_test (pcre8_with_properties(), 'PCRE compiled with<br>--enable-unicode-properties');
 	platform_function_test ('snmpwalk', 'SNMP extension', 'Not found, Live SNMP feature will not work.', 'trwarning');
