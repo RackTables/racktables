@@ -6,6 +6,7 @@
 	update: enhance rackspace click helpers (by Jeroen Benda)
 0.18.7
 	bugfix: adjust 802.1Q command generation
+	bugfix: fixed telnet session hanging in NX-OS4 connector
 0.18.6 2010-11-26
 	bugfix: draw administrator's attention to missing LDAP extension (by Matt Mills)
 	bugfix: minor issues on LiveCDP/LLDP tab

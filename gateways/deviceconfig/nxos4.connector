@@ -41,8 +41,9 @@ if (!defined($username)) {
 }
 
 my $session = Net::Telnet::Cisco->new('Host' => $endpoint, 
-  Prompt => ' /(?m:^\015?\000?[\w.-]+(?:\(config[^\)]*\))?\s?[\$#>]\s?)/'
+  Prompt => ' /(?:^|[\x0a\x0d0\0]+)[\w.-]+\s?(?:\(config[^\)]*\))?\s?[\$#>]\s?(?:\(enable\))?\s*$/',
 );
+$session->more_prompt('/(?:^|[\x0a\x0d\0]+)\s*(?:\x1b\S{1,3})?\s*--More--/');
 $session->login($username, $password);
 if ($enable_password ne "-") {
     $session->enable($enable_password);
