@@ -279,9 +279,9 @@ $ophandler['ipv6address']['assignment']['addIPv6Allocation'] = 'addIPv6Allocatio
 
 $page['ipv4slb']['title'] = 'IPv4 SLB';
 $page['ipv4slb']['parent'] = 'index';
-$page['ipv4slb']['handler'] = 'renderIPv4SLB';
 $tab['ipv4slb']['default'] = 'Browse';
 $tab['ipv4slb']['defconfig'] = 'Default configs';
+$tabhandler['ipv4slb']['default'] = 'renderIPv4SLB';
 $tabhandler['ipv4slb']['defconfig'] = 'renderSLBDefConfig';
 $ophandler['ipv4slb']['defconfig']['save'] = 'updateSLBDefConfig';
 

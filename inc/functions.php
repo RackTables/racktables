@@ -24,6 +24,8 @@ $templateWidth[3] = 1;
 $templateWidth[4] = 1;
 $templateWidth[5] = 1;
 
+define ('TAB_REMEMBER_TIMEOUT', 300);
+
 // Entity type by page number mapping is 1:1 atm, but may change later.
 $etype_by_pageno = array
 (
@@ -1134,13 +1136,27 @@ function redirectIfNecessary ()
 		redirectUser ($pmap[$pageno], $tabno);
 	if (isset ($tmap[$pageno][$tabno]))
 		redirectUser ($pageno, $tmap[$pageno][$tabno]);
+
+	if
+	(
+		! isset ($_REQUEST['tab']) and
+		isset ($_SESSION['RTLT'][$pageno]) and
+		getConfigVar ('SHOW_LAST_TAB') == 'yes' and
+		permitted ($pageno, $_SESSION['RTLT'][$pageno]['tabname']) and
+		time() - $_SESSION['RTLT'][$pageno]['time'] <= TAB_REMEMBER_TIMEOUT
+	)
+		redirectUser ($pageno, $_SESSION['RTLT'][$pageno]['tabname']);
+
 	// check if we accidentaly got on a dynamic tab that shouldn't be shown for this object
 	if
 	(
 		isset ($trigger[$pageno][$tabno]) and
 		!strlen (call_user_func ($trigger[$pageno][$tabno]))
 	)
+	{
+		$_SESSION['RTLT'][$pageno]['dont_remember'] = 1;
 		redirectUser ($pageno, 'default');
+	}
 }
 
 function prepareNavigation()
@@ -1148,23 +1164,10 @@ function prepareNavigation()
 	global
 		$pageno,
 		$tabno;
-
 	$pageno = (isset ($_REQUEST['page'])) ? $_REQUEST['page'] : 'index';
-
-// Special handling of tab number to substitute the "last" index where applicable.
-// Always show explicitly requested tab, substitute the last used name in case
-// it is awailable, fall back to the default one.
 
 	if (isset ($_REQUEST['tab']))
 		$tabno = $_REQUEST['tab'];
-	elseif
-	(
-		basename($_SERVER['PHP_SELF']) == 'index.php' and
-		getConfigVar ('SHOW_LAST_TAB') == 'yes' and
-		isset ($_SESSION['RTLT'][$pageno]) and
-		permitted ($pageno, $_SESSION['RTLT'][$pageno])
-	)
-		redirectUser ($pageno, $_SESSION['RTLT'][$pageno]);
 	else
 		$tabno = 'default';
 }
@@ -1491,6 +1494,10 @@ function redirectUser ($p, $t)
 	$l = "index.php?page=${p}&tab=${t}";
 	if (isset ($page[$p]['bypass']) and isset ($_REQUEST[$page[$p]['bypass']]))
 		$l .= '&' . $page[$p]['bypass'] . '=' . $_REQUEST[$page[$p]['bypass']];
+	if (isset ($page[$p]['bypass_tabs']))
+		foreach ($page[$p]['bypass_tabs'] as $param_name)
+			if (isset ($_REQUEST[$param_name]))
+				$l .= '&' . urlencode ($param_name) . '=' . urlencode ($_REQUEST[$param_name]);
 	header ("Location: " . $l);
 	die;
 }

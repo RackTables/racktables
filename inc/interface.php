@@ -7104,6 +7104,11 @@ function showTabs ($pageno, $tabno)
 			$bpval = $_REQUEST[$bpname];
 			echo "&${bpname}=${bpval}";
 		}
+		if (isset ($page[$pageno]['bypass_tabs']))
+			foreach ($page[$pageno]['bypass_tabs'] as $param_name)
+				if (isset ($_REQUEST[$param_name]))
+					echo "&" . urlencode ($param_name) . '=' . urlencode ($_REQUEST[$param_name]);
+		
 		echo "'>${tabtitle}</a></li>\n";
 	}
 	echo "</ul></div></td>\n";
