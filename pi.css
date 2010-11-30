@@ -540,3 +540,7 @@ a.toggleTreeMode {
 .btns-8021q-sync li form {
 	display: inline;
 }
+
+.border_highlight {
+	border: solid 4px lime !important;
+}

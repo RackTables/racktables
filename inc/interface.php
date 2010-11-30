@@ -998,6 +998,7 @@ function renderRackObject ($object_id)
 		{
 			assertUIntArg ('hl_port_id');
 			$hl_port_id = $_REQUEST['hl_port_id'];
+			echo getAutoScrollScript ("port-$hl_port_id");
 		}
 		echo "<table cellspacing=0 cellpadding='5' align='center' class='widetable'>";
 		echo '<tr><th class=tdleft>Local name</th><th class=tdleft>Visible label</th>';
@@ -1009,7 +1010,7 @@ function renderRackObject ($object_id)
 			echo '<tr';
 			if ($hl_port_id == $port['id'])
 				echo ' class=port_highlight';
-			echo "><td class=tdleft>${port['name']}</td><td class=tdleft>${port['label']}</td><td class=tdleft>";
+			echo "><td class=tdleft>${port['name']}<a name='port-${port['id']}'>&nbsp;</a></td><td class=tdleft>${port['label']}</td><td class=tdleft>";
 			echo formatPortIIFOIF ($port) . "</td><td class=tdleft><tt>${port['l2address']}</tt></td>";
 			if ($port['remote_object_id'])
 			{
@@ -1047,6 +1048,8 @@ function renderRackObject ($object_id)
 		}
 		elseif (isset ($_REQUEST['hl_ipv4_addr']))
 			$hl_ip_addr = $_REQUEST['hl_ipv4_addr'];
+		if ($hl_ip_addr)
+			echo getAutoScrollScript ("ip-$hl_ip_addr");
 
 		// group IP allocations by interface name instead of address family
 		$allocs_by_iface = array();
@@ -1094,7 +1097,7 @@ function renderRackObject ($object_id)
 				}
 				echo "<td class='${secondclass}'>";
 				if (NULL !== $netid)
-					echo "<a href='index.php?page=$addr_page_name&hl_object_id=$object_id&ip=$dottedquad'>${dottedquad}</a>";
+					echo "<a name='ip-$dottedquad' href='index.php?page=$addr_page_name&hl_object_id=$object_id&ip=$dottedquad'>${dottedquad}</a>";
 				else
 					echo $dottedquad;
 				if (getConfigVar ('EXT_IPV4_VIEW') != 'yes')
@@ -1309,10 +1312,17 @@ function renderPortsForObject ($object_id)
 	echo "<th class=tdcenter colspan=2>Cable, Remote object and port</th><th class=tdcenter>(Un)link or (un)reserve</th><th>&nbsp;</th></tr>\n";
 	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
 		printNewItemTR ($prefs);
+	if (isset ($_REQUEST['hl_port_id']))
+	{
+		assertUIntArg ('hl_port_id');
+		$hl_port_id = intval ($_REQUEST['hl_port_id']);
+		echo getAutoScrollScript ("port-$hl_port_id");
+	}
 	foreach ($object['ports'] as $port)
 	{
+		$tr_class = isset ($hl_port_id) && $hl_port_id == $port['id'] ? 'class="port_highlight"' : '';
 		printOpFormIntro ('editPort', array ('port_id' => $port['id']));
-		echo "<tr><td><a href='".makeHrefProcess(array('op'=>'delPort', 'port_id'=>$port['id'], 'object_id'=>$object_id, 'port_name'=>$port['name']))."'>";
+		echo "<tr $tr_class><td><a name='port-${port['id']}' href='".makeHrefProcess(array('op'=>'delPort', 'port_id'=>$port['id'], 'object_id'=>$object_id, 'port_name'=>$port['name']))."'>";
 		printImageHREF ('delete', 'Unlink and Delete this port');
 		echo "</a></td>\n";
 		echo "<td><input type=text name=name value='${port['name']}' size=8></td>";
@@ -2241,6 +2251,11 @@ function renderIPv4SpaceRecords ($tree, $baseurl, $target = 0, $knight, $level =
 	static $vdomlist = NULL;
 	if ($vdomlist == NULL and getConfigVar ('IPV4_TREE_SHOW_VLAN') == 'yes')
 		$vdomlist = getVLANDomainOptions();
+
+	// scroll page to the highlighted item
+	if ($target && isset ($_REQUEST['hl_net']))
+		echo getAutoScrollScript ("net-$target");
+
 	foreach ($tree as $item)
 	{
 		if (getConfigVar ('IPV4_TREE_SHOW_USAGE') == 'yes')
@@ -2257,16 +2272,14 @@ function renderIPv4SpaceRecords ($tree, $baseurl, $target = 0, $knight, $level =
 		{
 			$decor = array ('indent' => $level);
 			if ($item['symbol'] == 'node-collapsed')
-				$decor['symbolurl'] = "${baseurl}&eid=" . $item['id'] . "#netid" . $item['id'];
+				$decor['symbolurl'] = "${baseurl}&eid=" . $item['id'];
 			elseif ($item['symbol'] == 'node-expanded')
-				$decor['symbolurl'] = $baseurl . ($item['parent_id'] ? "&eid=${item['parent_id']}#netid${item['parent_id']}" : '');
+				$decor['symbolurl'] = $baseurl . ($item['parent_id'] ? "&eid=${item['parent_id']}" : '');
 			echo "<tr valign=top>";
 			if ($target == $item['id'] && isset ($_REQUEST['hl_net']))
 				$decor['tdclass'] .= ' port_highlight';
 			printIPNetInfoTDs ($item, $decor);
 			echo "<td class=tdcenter>";
-			if ($target == $item['id'])
-				echo "<a name=netid${target}></a>";
 			if (getConfigVar ('IPV4_TREE_SHOW_USAGE') == 'yes')
 			{
 				renderProgressBar ($maxdirect ? $used/$maxdirect : 0);
@@ -2322,6 +2335,11 @@ function renderIPv6SpaceRecords ($tree, $baseurl, $target = 0, $knight, $level =
 	static $vdomlist = NULL;
 	if ($vdomlist == NULL and getConfigVar ('IPV4_TREE_SHOW_VLAN') == 'yes')
 		$vdomlist = getVLANDomainOptions();
+
+	// scroll page to the highlighted item
+	if ($target && isset ($_REQUEST['hl_net']))
+		echo getAutoScrollScript ("net-$target");
+
 	foreach ($tree as $item)
 	{
 		if (getConfigVar ('IPV4_TREE_SHOW_USAGE') == 'yes')
@@ -2335,7 +2353,7 @@ function renderIPv6SpaceRecords ($tree, $baseurl, $target = 0, $knight, $level =
 		{
 			$decor = array ('indent' => $level);
 			if ($item['symbol'] == 'node-collapsed')
-				$decor['symbolurl'] = "${baseurl}&eid=" . $item['id'] . "#netid" . $item['id'];
+				$decor['symbolurl'] = "${baseurl}&eid=" . $item['id'];
 			elseif ($item['symbol'] == 'node-expanded')
 				$decor['symbolurl'] = $baseurl . ($item['parent_id'] ? "&eid=${item['parent_id']}#net6id${item['parent_id']}" : '');
 			echo "<tr valign=top>";
@@ -2343,8 +2361,6 @@ function renderIPv6SpaceRecords ($tree, $baseurl, $target = 0, $knight, $level =
 				$decor['tdclass'] .= ' port_highlight';
 			printIPNetInfoTDs ($item, $decor);
 			echo "<td class=tdcenter>";
-			if ($target == $item['id'])
-				echo "<a name=netid${target}></a>";
 			// show net usage
 			echo formatIPv6NetUsage ($item['addrc'], $item['mask']);
 			echo "</td>";
@@ -2897,25 +2913,30 @@ function renderIPv4Network ($id)
 	}
 	echo "</center>";
 
+	if (isset ($_REQUEST['hl_ipv4_addr']))
+	{
+		$hl_ip = ip2long ($_REQUEST['hl_ipv4_addr']);
+		$hl_dottedquad = ip_long2quad ($hl_ip);
+		echo getAutoScrollScript ("ip-$hl_dottedquad"); // scroll page to highlighted ip
+	}
+
 	echo "<table class='widetable' border=0 cellspacing=0 cellpadding=5 align='center' width='100%'>\n";
 	echo "<tr><th>Address</th><th>Name</th><th>Allocation</th></tr>\n";
 
 
 	for ($ip = $startip; $ip <= $endip; $ip++) :
-		if (isset ($_REQUEST['hl_ipv4_addr']) and ip2long ($_REQUEST['hl_ipv4_addr']) == $ip)
-			$secondstyle = 'tdleft port_highlight';
-		else
-			$secondstyle = 'tdleft';
+		$dottedquad = ip_long2quad($ip);
+		$secondstyle = 'tdleft' . (isset ($hl_ip) && $hl_ip == $ip ? ' port_highlight' : '');
 		if (!isset ($range['addrlist'][$ip]))
 		{
-			echo "<tr><td class=tdleft><a href='".makeHref(array('page'=>'ipaddress', 'ip'=>ip_long2quad($ip)))."'>" . ip_long2quad($ip);
-			echo "</a></td><td class='${secondstyle}'>&nbsp;</td><td class='${secondstyle}'>&nbsp;</td></tr>\n";
+			echo "<tr><td class=tdleft><a name='ip-$dottedquad' href='" . makeHref(array('page'=>'ipaddress', 'ip' => $dottedquad)) . "'>$dottedquad</a></td>";
+			echo "<td class='${secondstyle}'>&nbsp;</td><td class='${secondstyle}'>&nbsp;</td></tr>\n";
 			continue;
 		}
 		$addr = $range['addrlist'][$ip];
 		echo "<tr class='${addr['class']}'>";
 
-		echo "<td class=tdleft><a href='".makeHref(array('page'=>'ipaddress', 'ip'=>$addr['ip']))."'>${addr['ip']}</a></td>";
+		echo "<td class=tdleft><a name='ip-$dottedquad' href='".makeHref(array('page'=>'ipaddress', 'ip'=>$addr['ip']))."'>${addr['ip']}</a></td>";
 		echo "<td class='${secondstyle}'>${addr['name']}</td><td class='${secondstyle}'>";
 		$delim = '';
 		$prologue = '';
@@ -3056,7 +3077,7 @@ function renderEmptyIPv6 ($ip, $hl_ip)
 	if (isset ($hl_ip) && $ip == $hl_ip)
 		$class .= ' port_highlight';
 	$fmt = $ip->format();
-	echo "<tr><td class=tdleft><a href='" . makeHref (array ('page' => 'ipv6address', 'ip' => $fmt)) . "'>" . $fmt;
+	echo "<tr><td class=tdleft><a name='ip-$fmt' href='" . makeHref (array ('page' => 'ipv6address', 'ip' => $fmt)) . "'>" . $fmt;
 	echo "</a></td><td class='${class}'>&nbsp;</td><td class='${class}'>&nbsp;</td></tr>\n";
 }
 
@@ -3103,6 +3124,8 @@ function renderIPv6NetworkAddresses ($netinfo)
 	$hl_ip = new IPv6Address;
 	if (! isset ($_REQUEST['hl_ipv6_addr']) || ! $hl_ip->parse ($_REQUEST['hl_ipv6_addr']))
 		$hl_ip = NULL;
+	else
+		echo getAutoScrollScript('ip-' . $hl_ip->format());
 
 	$prev_ip = $netinfo['ip_bin']; // really this is the next to previosly seen ip.
 	$addresses = $netinfo['addrlist'];
@@ -3150,7 +3173,7 @@ function renderIPv6NetworkAddresses ($netinfo)
 		if (isset ($hl_ip) && $hl_ip == $ipv6)
 			$secondstyle .= ' port_highlight';
 		echo "<tr class='${addr['class']}'>";
-		echo "<td class=tdleft><a href='" . makeHref (array ('page' => 'ipv6address', 'ip' => $addr['ip'])) . "'>${addr['ip']}</a></td>";
+		echo "<td class=tdleft><a name='ip-${addr['ip']}' href='" . makeHref (array ('page' => 'ipv6address', 'ip' => $addr['ip'])) . "'>${addr['ip']}</a></td>";
 		echo "<td class='${secondstyle}'>${addr['name']}</td><td class='${secondstyle}'>";
 		$delim = '';
 		$prologue = '';
@@ -4840,8 +4863,21 @@ function renderVLANMembership ($object_id)
 				$vlanpermissions[$port['vlanid']][] = $to;
 	}
 
-	echo '<table border=0 width="100%"><tr><td colspan=3>';
+	if (isset ($_REQUEST['hl_port_id']))
+	{
+		assertUIntArg ('hl_port_id');
+		$hl_port_id = intval ($_REQUEST['hl_port_id']);
+		$object = spotEntity ('object', $object_id);
+		amplifyCell ($object);
+		foreach ($object['ports'] as $port)
+			if (mb_strlen ($port['name']) && $port['id'] == $hl_port_id)
+			{
+				$hl_port_name = $port['name'];
+				break;
+			}
+	}
 
+	echo '<table border=0 width="100%"><tr><td colspan=3>';
 	startPortlet ('Current status');
 	echo "<table class=widetable cellspacing=3 cellpadding=5 align=center width='100%'><tr>";
 	printOpFormIntro ('setPortVLAN');
@@ -4858,26 +4894,28 @@ function renderVLANMembership ($object_id)
 				echo "</tr>\n";
 			echo "<tr><th>" . ($portno + 1) . "-" . ($portno + $ports_per_row > $portcount ? $portcount : $portno + $ports_per_row) . "</th>";
 		}
-		echo '<td class=port_';
+		$td_class = 'port_';
 		if ($port['status'] == 'notconnect')
-			echo 'notconnect';
+			$td_class .= 'notconnect';
 		elseif ($port['status'] == 'disabled')
-			echo 'disabled';
+			$td_class .= 'disabled';
 		elseif ($port['status'] != 'connected')
-			echo 'unknown';
+			$td_class .= 'unknown';
 		elseif (!isset ($maclist[$port['portname']]))
-			echo 'connected_none';
+			$td_class .= 'connected_none';
 		else
 		{
 			$maccount = 0;
 			foreach ($maclist[$port['portname']] as $vlanid => $addrs)
 				$maccount += count ($addrs);
 			if ($maccount == 1)
-				echo 'connected_single';
+				$td_class .= 'connected_single';
 			else
-				echo 'connected_multi';
+				$td_class .= 'connected_multi';
 		}
-		echo '>' . $port['portname'] . '<br>';
+		if (isset ($hl_port_name) and strcasecmp ($hl_port_name, $port['portname']) == 0)
+			$td_class .= (strlen($td_class) ? ' ' : '') . 'border_highlight';
+		echo "<td class='$td_class'>" . $port['portname'] . '<br>';
 		echo "<input type=hidden name=portname_${portno} value=" . $port['portname'] . '>';
 		if ($port['vlanid'] == 'trunk')
 		{
@@ -6721,7 +6759,7 @@ function printIPNetInfoTDs ($netinfo, $decor = array())
 			echo '</a>';
 	}
 	if (isset ($netinfo['id']))
-		echo "<a href='index.php?page=ipv${ip_ver}net&id=${netinfo['id']}'>";
+		echo "<a name='net-${netinfo['id']}' href='index.php?page=ipv${ip_ver}net&id=${netinfo['id']}'>";
 	echo $formatted;
 	if (isset ($netinfo['id']))
 		echo '</a>';
@@ -7273,7 +7311,7 @@ function dynamic_title_decoder ($path_position)
 	case 'ipv6space':
 		global $pageno;
 		$ip_ver = preg_replace ('/[^\d]*/', '', $path_position);
-		$params = isset ($net_id) ? array ('eid' => $net_id, 'hl_net' => 1, '#' => "netid${net_id}") : array();
+		$params = isset ($net_id) ? array ('eid' => $net_id, 'hl_net' => 1) : array();
 		unset ($net_id);
 		return array
 		(
@@ -7835,10 +7873,19 @@ function renderObject8021QPorts ($object_id)
 	$object = spotEntity ('object', $object_id);
 	amplifyCell ($object);
 	$sockets = array();
+	if (isset ($_REQUEST['hl_port_id']))
+	{
+		assertUIntArg ('hl_port_id');
+		$hl_port_id = intval ($_REQUEST['hl_port_id']);
+		$hl_port_name = NULL;
+		echo getAutoScrollScript ("port-$hl_port_id");
+	}
 	foreach ($object['ports'] as $port)
 		if (mb_strlen ($port['name']) and array_key_exists ($port['name'], $desired_config))
 		{
-			$socket = array ('interface' => formatPortIIFOIF ($port));
+			if (isset ($hl_port_id) and $hl_port_id == $port['id'])
+				$hl_port_name = $port['name'];
+			$socket = array ('interface' => formatPortIIFOIF ($port), 'port_id' => $port['id']);
 			if ($port['remote_object_id'])
 			{
 				$remote_object = spotEntity ('object', $port['remote_object_id']);
@@ -7919,7 +7966,14 @@ function renderObject8021QPorts ($object_id)
 			foreach ($sockets[$port_name][0] as $tmp)
 				$socket_columns .= '<td>' . $tmp . '</td>';
 		}
-		echo "<tr class=${trclass} valign=top><td${td_extra}>${port_name}</td>" . $socket_columns;
+		$ancor = '';
+		$tdclass = '';
+		if ($hl_port_name == $port_name)
+		{
+			$tdclass .= 'class="border_highlight"';
+			$ancor = "<a name='port-$hl_port_id'>&nbsp;</a>";
+		}
+		echo "<tr class='${trclass}' valign=top><td${td_extra} ${tdclass}>${port_name}${ancor}</td>" . $socket_columns;
 		echo "<td${td_extra}>${text_left}</td><td class=tdright nowrap${td_extra}>${text_right}</td></tr>";
 		if (!array_key_exists ($port_name, $sockets))
 			continue;
@@ -8378,6 +8432,23 @@ function renderObject8021QSync ($object_id)
 		)
 			$maxdecisions++;
 
+	if (isset ($_REQUEST['hl_port_id']))
+	{
+		assertUIntArg ('hl_port_id');
+		$hl_port_id = intval ($_REQUEST['hl_port_id']);
+		$hl_port_name = NULL;
+		echo getAutoScrollScript ("port-$hl_port_id");
+
+		$object = spotEntity ('object', $object_id);
+		amplifyCell ($object);
+		foreach ($object['ports'] as $port)
+			if (mb_strlen ($port['name']) && $port['id'] == $hl_port_id)
+			{
+				$hl_port_name = $port['name'];
+				break;
+			}
+	}
+	
 	echo '<table border=0 class=objectview cellspacing=0 cellpadding=0>';
 	echo '<tr><td class=pcleft width="50%">';
 
@@ -8562,7 +8633,15 @@ function renderObject8021QSync ($object_id)
 			$left_text = $right_text = 'internal rendering error';
 			break;
 		}
-		echo "<tr class='${trclass}'><td class=tdleft>${port_name}</td>";
+		
+		$ancor = '';
+		$td_class = '';
+		if (isset ($hl_port_id) && $hl_port_name == $port_name)
+		{
+			$ancor = "<a name='port-$hl_port_id'>&nbsp;</a>";
+			$td_class = ' border_highlight';
+		}
+		echo "<tr class='${trclass}'><td class='tdleft${td_class}'>${port_name}${ancor}</td>";
 		if (!count ($radio_attrs))
 		{
 			echo "<td class='tdleft${left_extra}'>${left_text}</td>";
@@ -8769,15 +8848,20 @@ function renderDeployQueue ($dqcode)
 function formatPortLink($host_id, $hostname, $port_id, $portname)
 {
 	$href = 'index.php?page=object&object_id=' . urlencode($host_id);
+	$additional = '';
 	if (isset ($port_id))
+	{
 		$href .= '&hl_port_id=' . urlencode($port_id);
+		$additional = "name=\"port-$port_id\"";
+	}
 	
 	$text_items = array();
 	if (isset ($hostname))
 		$text_items[] = $hostname;
 	if (isset ($portname))
 		$text_items[] = $portname;
-	return "<a href=\"$href\">" . implode(' ', $text_items) . '</a>';
+		
+	return "<a $additional href=\"$href\">" . implode(' ', $text_items) . '</a>';
 }
 
 function renderDiscoveredNeighbors ($object_id)
@@ -8807,6 +8891,14 @@ function renderDiscoveredNeighbors ($object_id)
 	foreach ($mydevice['ports'] as $port)
 		if (mb_strlen ($port['name']))
 			$myports[$port['name']][] = $port;
+
+	// scroll to selected port
+	if (isset ($_REQUEST['hl_port_id']))
+	{
+		assertUIntArg('hl_port_id');
+		$hl_port_id = intval ($_REQUEST['hl_port_id']);
+		echo getAutoScrollScript ("port-$hl_port_id");
+	}
 
 	printOpFormIntro ('importDPData');
 	echo '<br><table cellspacing=0 cellpadding=5 align=center class=widetable>';
@@ -8919,7 +9011,10 @@ function renderDiscoveredNeighbors ($object_id)
 			if ($initial_row)
 			{
 				$count = count ($remote_list);
-				echo "<td rowspan=\"$count\">" .
+				$td_class = '';
+				if (isset ($hl_port_id) and $hl_port_id == $portinfo_local['id'])
+					$td_class = "class='border_highlight'";
+				echo "<td rowspan=\"$count\" $td_class>" .
 					($portinfo_local ? formatPortLink ($mydevice['id'], NULL, $portinfo_local['id'], $portinfo_local['name']) : $local_port) .
 					($count > 1 ? " ($count neighbors)" : '') .
 					'</td>';
@@ -8968,6 +9063,19 @@ function formatAttributeValue($attribute_id, $record)
 			)
 		);
 	return isset($href) ? "<a href=\"$href\">${record['a_value']}</a>" : $record['a_value'];	
+}
+
+function getAutoScrollScript ($ancor_name)
+{
+	echo <<<END
+<script type="text/javascript">
+	$(document).ready(function() {
+		var ancor = document.getElementsByName('$ancor_name')[0];
+		if (ancor)
+			ancor.scrollIntoView(false);
+	});
+</script>
+END;
 }
 
 ?>

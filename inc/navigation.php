@@ -83,6 +83,7 @@ $ophandler['rack']['files']['unlinkFile'] = 'unlinkFile';
 
 $page['object']['bypass'] = 'object_id';
 $page['object']['bypass_type'] = 'uint';
+$page['object']['bypass_tabs'] = array ('hl_port_id');
 $page['object']['parent'] = 'depot';
 $tab['object']['default'] = 'View';
 $tab['object']['edit'] = 'Properties';

@@ -5,6 +5,7 @@
 	update: cache image files thumbnails and make them JPEGs (#369, by Matt Mills)
 	update: enhance rackspace click helpers (by Jeroen Benda)
 	bugfix: the feature of remembering last opened tab of realm page is now working
+	update: UI: ports/IPs/nets highlighting enhancements
 0.18.7
 	bugfix: adjust 802.1Q command generation
 	bugfix: fixed telnet session hanging in NX-OS4 connector
