@@ -1704,7 +1704,7 @@ function getVLANSearchResult ($terms)
 {
 	$ret = array();
 	$matches = array();
-	if (preg_match ('/^vlan([[:digit:]]+)$/i', $terms, $matches))
+	if (preg_match ('/^vlan\s*(\d+)$/i', $terms, $matches))
 	{
 		$byID = getSearchResultByField
 		(
@@ -1718,18 +1718,21 @@ function getVLANSearchResult ($terms)
 		foreach ($byID as $row)
 			$ret[] = $row['domain_id'] . '-' . $row['vlan_id'];
 	}
-	$byDescr = getSearchResultByField
-	(
-		'VLANDescription',
-		array ('domain_id', 'vlan_id'),
-		'vlan_descr',
-		$terms
-	);
-	foreach ($byDescr as $row)
+	else
 	{
-		$vlan_ck = $row['domain_id'] . '-' . $row['vlan_id'];
-		if (!in_array ($vlan_ck, $ret))
-			$ret[] = $vlan_ck;
+		$byDescr = getSearchResultByField
+		(
+			'VLANDescription',
+			array ('domain_id', 'vlan_id'),
+			'vlan_descr',
+			$terms
+		);
+		foreach ($byDescr as $row)
+		{
+			$vlan_ck = $row['domain_id'] . '-' . $row['vlan_id'];
+			if (!in_array ($vlan_ck, $ret))
+				$ret[] = $vlan_ck;
+		}
 	}
 	return $ret;
 }
