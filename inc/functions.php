@@ -2709,12 +2709,13 @@ function exportSwitch8021QConfig
 			);
 			break;
 		case 'trunk->access':
-			$crq[] = array
-			(
-				'opcode' => 'unset native',
-				'arg1' => $port_name,
-				'arg2' => $port['old_native'],
-			);
+			if ($port['old_native'])
+				$crq[] = array
+				(
+					'opcode' => 'unset native',
+					'arg1' => $port_name,
+					'arg2' => $port['old_native'],
+				);
 			if (count ($port['old_allowed']))
 				$crq[] = array
 				(
@@ -2792,12 +2793,13 @@ function exportSwitch8021QConfig
 					'port' => $port_name,
 					'vlans' => $port['new_allowed'],
 				);
-			$crq[] = array
-			(
-				'opcode' => 'set native',
-				'arg1' => $port_name,
-				'arg2' => $port['new_native'],
-			);
+			if ($port['new_native'])
+				$crq[] = array
+				(
+					'opcode' => 'set native',
+					'arg1' => $port_name,
+					'arg2' => $port['new_native'],
+				);
 			break;
 		case 'trunk->access':
 			$crq[] = array
