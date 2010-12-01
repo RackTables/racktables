@@ -2794,11 +2794,6 @@ function renderIPv6SpaceEditor ()
 function renderIPv4Network ($id)
 {
 	global $pageno, $tabno, $aac2, $netmaskbylen, $wildcardbylen;
-	$maxperpage = getConfigVar ('IPV4_ADDRS_PER_PAGE');
-	if (isset($_REQUEST['pg']))
-		$page = $_REQUEST['pg'];
-	else
-		$page=0;
 
 	$range = spotEntity ('ipv4net', $id);
 	amplifyCell ($range);
@@ -2894,24 +2889,6 @@ function renderIPv4Network ($id)
 	$endip = $range['ip_bin'] | $range['mask_bin_inv'];
 	$realstartip = $startip;
 	$realendip = $endip;
-	$numpages = 0;
-	if($endip - $startip > $maxperpage)
-	{
-		$numpages = ($endip - $startip)/$maxperpage;
-		$startip = $startip + $page * $maxperpage;
-		$endip = $startip + $maxperpage-1;
-	}
-	echo "<center>";
-	if ($numpages)
-		echo '<h3>' . long2ip ($startip) . ' ~ ' . long2ip ($endip) . '</h3>';
-	for ($i=0; $i<$numpages; $i++)
-	{
-		if ($i == $page)
-			echo "<b>$i</b> ";
-		else
-			echo "<a href='".makeHref(array('page'=>$pageno, 'tab'=>$tabno, 'id'=>$id, 'pg'=>$i))."'>$i</a> ";
-	}
-	echo "</center>";
 
 	if (isset ($_REQUEST['hl_ipv4_addr']))
 	{
@@ -2920,9 +2897,30 @@ function renderIPv4Network ($id)
 		echo getAutoScrollScript ("ip-$hl_dottedquad"); // scroll page to highlighted ip
 	}
 
+	// pager
+	$maxperpage = getConfigVar ('IPV4_ADDRS_PER_PAGE');
+	$address_count = $endip - $startip + 1;
+	$page = 0;
+	if ($address_count > $maxperpage && $maxperpage > 0)
+	{
+		$page = isset ($_REQUEST['pg']) ? $_REQUEST['pg'] : (isset ($hl_ip) ? intval (($hl_ip - $startip) / $maxperpage) : 0);
+		if ($numpages = ceil ($address_count / $maxperpage))
+		{
+			echo "<center>";
+			echo '<h3>' . long2ip ($startip) . ' ~ ' . long2ip ($endip) . '</h3>';
+			for ($i = 0; $i < $numpages; $i++)
+				if ($i == $page)
+					echo "<b>$i</b> ";
+				else
+					echo "<a href='".makeHref (array ('page' => $pageno, 'tab' => $tabno, 'id' => $id, 'pg' => $i)) . "'>$i</a> ";
+			echo "</center>";
+		}
+		$startip = $startip + $page * $maxperpage;
+		$endip = min ($startip + $maxperpage - 1, $endip);
+	}
+
 	echo "<table class='widetable' border=0 cellspacing=0 cellpadding=5 align='center' width='100%'>\n";
 	echo "<tr><th>Address</th><th>Name</th><th>Allocation</th></tr>\n";
-
 
 	for ($ip = $startip; $ip <= $endip; $ip++) :
 		$dottedquad = ip_long2quad($ip);
