@@ -7908,7 +7908,7 @@ function renderObject8021QPorts ($object_id)
 		{
 			if (isset ($hl_port_id) and $hl_port_id == $port['id'])
 				$hl_port_name = $port['name'];
-			$socket = array ('interface' => formatPortIIFOIF ($port), 'port_id' => $port['id']);
+			$socket = array ('interface' => formatPortIIFOIF ($port));
 			if ($port['remote_object_id'])
 			{
 				$remote_object = spotEntity ('object', $port['remote_object_id']);
