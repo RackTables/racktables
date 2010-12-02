@@ -317,6 +317,15 @@ $iftable_processors['nortel-any-1000T'] = array
 	'try_next_proc' => FALSE,
 );
 
+$iftable_processors['smc-combo-45-to-48'] = array
+(
+	'pattern' => '@^Ethernet Port on unit 1, port (45|46|47|48)$@',
+	'replacement' => '\\1',
+	'dict_key' => '4-1077',
+	'label' => '\\1',
+	'try_next_proc' => TRUE,
+);
+
 $iftable_processors['juniper-DPCE-R-4XGE-XFP'] = array
 (
 	'pattern' => '@^xe-([[:digit:]]+)/([[:digit:]]+/[[:digit:]]+)$@',
@@ -894,6 +903,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 			'summit-any-SFP',
 			'summit-management'
 		),
+	),
+	'202.20.68' => array
+	(
+		'dict_key' => 1374,
+		'text' => 'SMC8150L2: 46 RJ-45/10-100-1000T(X) + 4 combo ports',
+		'processors' => array ('smc-combo-45-to-48', 'nortel-any-1000T'),
 	),
 );
 

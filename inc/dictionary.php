@@ -1448,6 +1448,16 @@ $dictionary = array
 	1368 => array ('chapter_id' => 17, 'dict_value' => '[[Juniper%GPASS%MX80 | http://www.juniper.net/products_and_services/mx_series/index.html]]'),
 	1369 => array ('chapter_id' => 14, 'dict_value' => 'Huawei VRP 5.7'),
 	1370 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 2960-48PST-L'),
+	1371 => array ('chapter_id' => 12, 'dict_value' => 'SMC%GPASS%8024L2'),
+	1372 => array ('chapter_id' => 12, 'dict_value' => 'SMC%GPASS%8124PL2'),
+	1373 => array ('chapter_id' => 12, 'dict_value' => 'SMC%GPASS%8126L2'),
+	1374 => array ('chapter_id' => 12, 'dict_value' => 'SMC%GPASS%8150L2'),
+	1375 => array ('chapter_id' => 12, 'dict_value' => 'SMC%GPASS%8612XL3'),
+	1376 => array ('chapter_id' => 12, 'dict_value' => 'SMC%GPASS%8708L2'),
+	1377 => array ('chapter_id' => 12, 'dict_value' => 'SMC%GPASS%8824M'),
+	1378 => array ('chapter_id' => 12, 'dict_value' => 'SMC%GPASS%8848M'),
+	1379 => array ('chapter_id' => 12, 'dict_value' => 'SMC%GPASS%8926EM'),
+	1380 => array ('chapter_id' => 12, 'dict_value' => 'SMC%GPASS%8950EM'),
 );
 
 ?>
