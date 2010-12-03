@@ -3678,20 +3678,23 @@ function renderSearchResults ()
 			$nhits += count ($tmp);
 			$lasthit = 'vlan';
 			$summary['vlan'] = $tmp;
-	
+
+			$seen_networks = array();
 			// find IP networks connected to vlan
 			foreach ($tmp as $vlan_ck)
 			{
 				$vlan_info = getVLANInfo ($vlan_ck);
 				foreach (array (4, 6) as $ipv)
 					foreach ($vlan_info["ipv${ipv}nets"] as $net_id)
-					{
-						++$nhits;
-						$lasthit = "ipv${ipv}network";
-						if (! isset ($summary["ipv${ipv}network"]))
-							$summary["ipv${ipv}network"] = array();
-						$summary["ipv${ipv}network"][] = spotEntity ("ipv${ipv}net", $net_id);
-					}
+						if (! isset ($seen_networks["$ipv-$net_id"]))
+						{
+							$seen_networks["$ipv-$net_id"] = 1;
+							++$nhits;
+							$lasthit = "ipv${ipv}network";
+							if (! isset ($summary["ipv${ipv}network"]))
+								$summary["ipv${ipv}network"] = array();
+							$summary["ipv${ipv}network"][] = spotEntity ("ipv${ipv}net", $net_id);
+						}
 			}
 		}
 	}
