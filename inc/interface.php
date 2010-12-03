@@ -3670,7 +3670,7 @@ function renderSearchResults ()
 			$summary['ipv6network'][] = spotEntity ('ipv6net', $tmp);
 		}
 	}
-	elseif (preg_match ('@^vlan\s*(\d+)$@', $terms, $matches))
+	elseif (preg_match ('/^vlan\s*(\d+)$/i', $terms, $matches))
 	{
 		$tmp = getVLANSearchResult ($terms);
 		if (count ($tmp))
