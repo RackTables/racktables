@@ -62,7 +62,7 @@ function platform_is_ok ()
 	$nerrs = 0;
 	echo "<table border=1 cellpadding=5>\n";
 	$nerrs += platform_generic_test (class_exists ('PDO'), 'PDO extension');
-	$nerrs += platform_generic_test (defined ('PDO::MYSQL_ATTR_FOUND_ROWS'), 'PDO-MySQL extension');
+	$nerrs += platform_generic_test (in_array  ('pdo_mysql', get_loaded_extensions()), 'PDO-MySQL extension');
 	$nerrs += platform_function_test ('preg_match', 'PCRE extension');
 	$nerrs += platform_generic_test (pcre8_with_properties(), 'PCRE compiled with<br>--enable-unicode-properties');
 	platform_function_test ('snmpwalk', 'SNMP extension', 'Not found, Live SNMP feature will not work.', 'trwarning');
@@ -1074,8 +1074,8 @@ $dictionary = array
 	992 => array ('chapter_id' => 11, 'dict_value' => 'Dell PowerEdge%GPASS%R805'),
 	993 => array ('chapter_id' => 11, 'dict_value' => 'Dell PowerEdge%GPASS%R905'),
 	994 => array ('chapter_id' => 11, 'dict_value' => 'Dell PowerEdge%GPASS%M1000e'),
-	995 => array ('chapter_id' => 18, 'dict_value' => 'Dell PowerVault MD1000'),
-	996 => array ('chapter_id' => 18, 'dict_value' => 'Dell PowerVault MD1120'),
+	995 => array ('chapter_id' => 18, 'dict_value' => 'Dell PowerVault%GPASS%MD1000'),
+	996 => array ('chapter_id' => 18, 'dict_value' => 'Dell PowerVault%GPASS%MD1120'),
 	997 => array ('chapter_id' => 18, 'dict_value' => 'Dell EqualLogic PS5000'),
 	998 => array ('chapter_id' => 18, 'dict_value' => 'Dell EqualLogic PS6000'),
 	999 => array ('chapter_id' => 18, 'dict_value' => '[[EMC CLARiiON CX4-120 SPE | http://www.emc.com/products/detail/hardware/clariion-cx4-model-120.htm]]'),
@@ -1458,6 +1458,8 @@ $dictionary = array
 	1378 => array ('chapter_id' => 12, 'dict_value' => 'SMC%GPASS%8848M'),
 	1379 => array ('chapter_id' => 12, 'dict_value' => 'SMC%GPASS%8926EM'),
 	1380 => array ('chapter_id' => 12, 'dict_value' => 'SMC%GPASS%8950EM'),
+	1381 => array ('chapter_id' => 11, 'dict_value' => 'Dell PowerEdge%GPASS%R910'),
+	1382 => array ('chapter_id' => 18, 'dict_value' => 'Dell PowerVault%GPASS%MD1220'),
 );
 
 ?>
