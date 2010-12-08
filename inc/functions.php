@@ -3870,4 +3870,143 @@ function questionMarks ($count = 0)
 	return implode (', ', array_fill (0, $count, '?'));
 }
 
+// returns search results as an array with 'nhits', 'lasthit', 'summary' keys
+// groups found entities by realms in 'summary'
+function searchEntitiesByText ($terms)
+{
+	$result = array
+	(
+		'nhits' => 0,
+		'lasthit' => NULL,
+		'summary' => array(),
+	);
+	$nhits = &$result['nhits'];
+	$lasthit = &$result['lasthit'];
+	$summary = &$result['summary'];
+	
+	$ipv6 = new IPv6Address;
+	if (preg_match (RE_IP4_ADDR, $terms))
+	// Search for IPv4 address.
+	{
+		if (NULL !== getIPv4AddressNetworkId ($terms))
+		{
+			$nhits++;
+			$lasthit = 'ipv4addressbydq';
+			$summary['ipv4addressbydq'][] = $terms;
+		}
+	}
+	elseif ($ipv6->parse ($terms))
+	// Search for IPv6 address
+	{
+		if (NULL !== $net_id = getIPv6AddressNetworkId ($ipv6))
+		{
+			$nhits++;
+			$lasthit = 'ipv6addressbydq';
+			$summary['ipv6addressbydq'][] = array ('net_id' => $net_id, 'ip' => $ipv6);
+		}
+	}
+	elseif (preg_match (RE_IP4_NET, $terms))
+	// Search for IPv4 network
+	{
+		list ($base, $len) = explode ('/', $terms);
+		if (NULL !== ($tmp = getIPv4AddressNetworkId ($base, $len + 1)))
+		{
+			$nhits++;
+			$lasthit = 'ipv4network';
+			$summary['ipv4network'][] = spotEntity ('ipv4net', $tmp);
+		}
+	}
+	elseif (preg_match ('@(.*)/(\d+)$@', $terms, $matches) && $ipv6->parse ($matches[1]))
+	// Search for IPv6 network
+	{
+		if (NULL !== ($tmp = getIPv6AddressNetworkId ($ipv6, $matches[2] + 1)))
+		{
+			$nhits++;
+			$lasthit = 'ipv6network';
+			$summary['ipv6network'][] = spotEntity ('ipv6net', $tmp);
+		}
+	}
+	else
+	// Search for objects, addresses, networks, virtual services and RS pools by their description.
+	{
+		$tmp = getObjectSearchResults ($terms);
+		if (count ($tmp))
+		{
+			$nhits += count ($tmp);
+			$lasthit = 'object';
+			$summary['object'] = $tmp;
+		}
+		$tmp = getIPv4AddressSearchResult ($terms);
+		if (count ($tmp))
+		{
+			$nhits += count ($tmp);
+			$lasthit = 'ipv4addressbydescr';
+			$summary['ipv4addressbydescr'] = $tmp;
+		}
+		$tmp = getIPv6AddressSearchResult ($terms);
+		if (count ($tmp))
+		{
+			$nhits += count ($tmp);
+			$lasthit = 'ipv6addressbydescr';
+			$summary['ipv6addressbydescr'] = $tmp;
+		}
+		$tmp = getIPv4PrefixSearchResult ($terms);
+		if (count ($tmp))
+		{
+			$nhits += count ($tmp);
+			$lasthit = 'ipv4network';
+			$summary['ipv4network'] = $tmp;
+		}
+		$tmp = getIPv6PrefixSearchResult ($terms);
+		if (count ($tmp))
+		{
+			$nhits += count ($tmp);
+			$lasthit = 'ipv6network';
+			$summary['ipv6network'] = $tmp;
+		}
+		$tmp = getIPv4RSPoolSearchResult ($terms);
+		if (count ($tmp))
+		{
+			$nhits += count ($tmp);
+			$lasthit = 'ipv4rspool';
+			$summary['ipv4rspool'] = $tmp;
+		}
+		$tmp = getIPv4VServiceSearchResult ($terms);
+		if (count ($tmp))
+		{
+			$nhits += count ($tmp);
+			$lasthit = 'ipv4vs';
+			$summary['ipv4vs'] = $tmp;
+		}
+		$tmp = getAccountSearchResult ($terms);
+		if (count ($tmp))
+		{
+			$nhits += count ($tmp);
+			$lasthit = 'user';
+			$summary['user'] = $tmp;
+		}
+		$tmp = getFileSearchResult ($terms);
+		if (count ($tmp))
+		{
+			$nhits += count ($tmp);
+			$lasthit = 'file';
+			$summary['file'] = $tmp;
+		}
+		$tmp = getRackSearchResult ($terms);
+		if (count ($tmp))
+		{
+			$nhits += count ($tmp);
+			$lasthit = 'rack';
+			$summary['rack'] = $tmp;
+		}
+		if (count ($tmp = getVLANSearchResult ($terms)))
+		{
+			$nhits += count ($tmp);
+			$lasthit = 'vlan';
+			$summary['vlan'] = $tmp;
+		}
+	}
+	return $result;
+}
+
 ?>

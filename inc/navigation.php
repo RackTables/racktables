@@ -368,7 +368,7 @@ $page['lbs']['title'] = 'Load balancers';
 $page['lbs']['parent'] = 'ipv4slb';
 $page['lbs']['handler'] = 'renderLBList';
 
-$page['search']['handler'] = 'renderSearchResults';
+$page['search']['handler'] = 'searchHandler';
 $page['search']['parent'] = 'index';
 $page['search']['bypass'] = 'q';
 

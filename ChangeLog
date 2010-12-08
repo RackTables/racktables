@@ -6,7 +6,6 @@
 	update: enhance rackspace click helpers (by Jeroen Benda)
 	bugfix: the feature of remembering last opened tab of realm page is now working
 	update: UI: ports/IPs/nets highlighting enhancements
-	update: ability to search for IP networks by vlan id
 	bugfix: UI: pager in ipv4net shows appropriate page when IP is highlighted
 0.18.7
 	bugfix: adjust 802.1Q command generation

@@ -3620,164 +3620,23 @@ function printGreeting ()
 		". Click <a href='index.php?logout'>here</a> to logout.";
 }
 
-function renderSearchResults ()
-{
+function searchHandler () {
 	$terms = trim ($_REQUEST['q']);
 	if (!strlen ($terms))
 		throw new InvalidRequestArgException('q', $_REQUEST['q'], 'Search string cannot be empty.');
 	if (!permitted ('depot', 'default'))
 		throw new RackTablesError ('You are not authorized for viewing information about objects.', RackTablesError::NOT_AUTHORIZED);
-	$nhits = 0;
-	$ipv6 = new IPv6Address;
-	if (preg_match (RE_IP4_ADDR, $terms))
-	// Search for IPv4 address.
-	{
-		if (NULL !== getIPv4AddressNetworkId ($terms))
-		{
-			$nhits++;
-			$lasthit = 'ipv4addressbydq';
-			$summary['ipv4addressbydq'][] = $terms;
-		}
-	}
-	elseif ($ipv6->parse ($terms))
-	// Search for IPv6 address
-	{
-		if (NULL !== $net_id = getIPv6AddressNetworkId ($ipv6))
-		{
-			$nhits++;
-			$lasthit = 'ipv6addressbydq';
-			$summary['ipv6addressbydq'][] = array ('net_id' => $net_id, 'ip' => $ipv6);
-		}
-	}
-	elseif (preg_match (RE_IP4_NET, $terms))
-	// Search for IPv4 network
-	{
-		list ($base, $len) = explode ('/', $terms);
-		if (NULL !== ($tmp = getIPv4AddressNetworkId ($base, $len + 1)))
-		{
-			$nhits++;
-			$lasthit = 'ipv4network';
-			$summary['ipv4network'][] = spotEntity ('ipv4net', $tmp);
-		}
-	}
-	elseif (preg_match ('@(.*)/(\d+)$@', $terms, $matches) && $ipv6->parse ($matches[1]))
-	// Search for IPv6 network
-	{
-		if (NULL !== ($tmp = getIPv6AddressNetworkId ($ipv6, $matches[2] + 1)))
-		{
-			$nhits++;
-			$lasthit = 'ipv6network';
-			$summary['ipv6network'][] = spotEntity ('ipv6net', $tmp);
-		}
-	}
-	elseif (preg_match ('/^vlan\s*(\d+)$/i', $terms, $matches))
-	{
-		$tmp = getVLANSearchResult ($terms);
-		if (count ($tmp))
-		{
-			$nhits += count ($tmp);
-			$lasthit = 'vlan';
-			$summary['vlan'] = $tmp;
+	
+	$results = searchEntitiesByText ($terms);
+	renderSearchResults ($terms, $results);
+}
 
-			$seen_networks = array();
-			// find IP networks connected to vlan
-			foreach ($tmp as $vlan_ck)
-			{
-				$vlan_info = getVLANInfo ($vlan_ck);
-				foreach (array (4, 6) as $ipv)
-					foreach ($vlan_info["ipv${ipv}nets"] as $net_id)
-						if (! isset ($seen_networks["$ipv-$net_id"]))
-						{
-							$seen_networks["$ipv-$net_id"] = 1;
-							++$nhits;
-							$lasthit = "ipv${ipv}network";
-							if (! isset ($summary["ipv${ipv}network"]))
-								$summary["ipv${ipv}network"] = array();
-							$summary["ipv${ipv}network"][] = spotEntity ("ipv${ipv}net", $net_id);
-						}
-			}
-		}
-	}
-	else
-	// Search for objects, addresses, networks, virtual services and RS pools by their description.
-	{
-		$tmp = getObjectSearchResults ($terms);
-		if (count ($tmp))
-		{
-			$nhits += count ($tmp);
-			$lasthit = 'object';
-			$summary['object'] = $tmp;
-		}
-		$tmp = getIPv4AddressSearchResult ($terms);
-		if (count ($tmp))
-		{
-			$nhits += count ($tmp);
-			$lasthit = 'ipv4addressbydescr';
-			$summary['ipv4addressbydescr'] = $tmp;
-		}
-		$tmp = getIPv6AddressSearchResult ($terms);
-		if (count ($tmp))
-		{
-			$nhits += count ($tmp);
-			$lasthit = 'ipv6addressbydescr';
-			$summary['ipv6addressbydescr'] = $tmp;
-		}
-		$tmp = getIPv4PrefixSearchResult ($terms);
-		if (count ($tmp))
-		{
-			$nhits += count ($tmp);
-			$lasthit = 'ipv4network';
-			$summary['ipv4network'] = $tmp;
-		}
-		$tmp = getIPv6PrefixSearchResult ($terms);
-		if (count ($tmp))
-		{
-			$nhits += count ($tmp);
-			$lasthit = 'ipv6network';
-			$summary['ipv6network'] = $tmp;
-		}
-		$tmp = getIPv4RSPoolSearchResult ($terms);
-		if (count ($tmp))
-		{
-			$nhits += count ($tmp);
-			$lasthit = 'ipv4rspool';
-			$summary['ipv4rspool'] = $tmp;
-		}
-		$tmp = getIPv4VServiceSearchResult ($terms);
-		if (count ($tmp))
-		{
-			$nhits += count ($tmp);
-			$lasthit = 'ipv4vs';
-			$summary['ipv4vs'] = $tmp;
-		}
-		$tmp = getAccountSearchResult ($terms);
-		if (count ($tmp))
-		{
-			$nhits += count ($tmp);
-			$lasthit = 'user';
-			$summary['user'] = $tmp;
-		}
-		$tmp = getFileSearchResult ($terms);
-		if (count ($tmp))
-		{
-			$nhits += count ($tmp);
-			$lasthit = 'file';
-			$summary['file'] = $tmp;
-		}
-		$tmp = getRackSearchResult ($terms);
-		if (count ($tmp))
-		{
-			$nhits += count ($tmp);
-			$lasthit = 'rack';
-			$summary['rack'] = $tmp;
-		}
-		if (count ($tmp = getVLANSearchResult ($terms)))
-		{
-			$nhits += count ($tmp);
-			$lasthit = 'vlan';
-			$summary['vlan'] = $tmp;
-		}
-	}
+function renderSearchResults ($terms, $results)
+{
+	$nhits = &$results['nhits'];
+	$lasthit = &$results['lasthit'];
+	$summary = &$results['summary'];
+	
 	if ($nhits == 0)
 		echo "<center><h2>Nothing found for '${terms}'</h2></center>";
 	elseif ($nhits == 1)
