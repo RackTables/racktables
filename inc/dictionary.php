@@ -1460,6 +1460,18 @@ $dictionary = array
 	1380 => array ('chapter_id' => 12, 'dict_value' => 'SMC%GPASS%8950EM'),
 	1381 => array ('chapter_id' => 11, 'dict_value' => 'Dell PowerEdge%GPASS%R910'),
 	1382 => array ('chapter_id' => 18, 'dict_value' => 'Dell PowerVault%GPASS%MD1220'),
+	1383 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 2960S-48TD-L'),
+	1384 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 2960S-24TD-L'),
+	1385 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 2960S-48FPD-L'),
+	1386 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 2960S-48LPD-L'),
+	1387 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 2960S-24PD-L'),
+	1388 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 2960S-48TS-L'),
+	1389 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 2960S-24TS-L'),
+	1390 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 2960S-48TS-S'),
+	1391 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 2960S-24TS-S'),
+	1392 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 2960S-48FPS-L'),
+	1393 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 2960S-48LPS-L'),
+	1394 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 2960S-24PS-L'),
 );
 
 ?>
