@@ -1515,7 +1515,7 @@ function getIPv4PrefixSearchResult ($terms)
 	);
 	$ret = array();
 	foreach ($byname as $row)
-		$ret[] = spotEntity ('ipv4net', $row['id']);
+		$ret[$row['id']] = spotEntity ('ipv4net', $row['id']);
 	return $ret;
 }
 
@@ -1531,7 +1531,7 @@ function getIPv6PrefixSearchResult ($terms)
 	);
 	$ret = array();
 	foreach ($byname as $row)
-		$ret[] = spotEntity ('ipv6net', $row['id']);
+		$ret[$row['id']] = spotEntity ('ipv6net', $row['id']);
 	return $ret;
 }
 
@@ -1549,7 +1549,7 @@ function getIPv4AddressSearchResult ($terms)
 	$result = usePreparedSelectBlade ($query, $qparams);
 	$ret = array();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-		$ret[] = $row;
+		$ret[$row['ip']] = $row;
 	return $ret;
 }
 
@@ -1567,7 +1567,7 @@ function getIPv6AddressSearchResult ($terms)
 	$result = usePreparedSelectBlade ($query, $qparams);
 	$ret = array();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-		$ret[] = $row;
+		$ret[$row['ip']] = $row;
 	return $ret;
 }
 
@@ -1583,7 +1583,7 @@ function getIPv4RSPoolSearchResult ($terms)
 	);
 	$ret = array();
 	foreach ($byname as $row)
-		$ret[] = spotEntity ('ipv4rspool', $row['id']);
+		$ret[$row['id']] = spotEntity ('ipv4rspool', $row['id']);
 	return $ret;
 }
 
@@ -1599,7 +1599,7 @@ function getIPv4VServiceSearchResult ($terms)
 	);
 	$ret = array();
 	foreach ($byname as $row)
-		$ret[] = spotEntity ('ipv4vs', $row['id']);
+		$ret[$row['id']] = spotEntity ('ipv4vs', $row['id']);
 	return $ret;
 }
 
@@ -1621,18 +1621,13 @@ function getAccountSearchResult ($terms)
 		$terms,
 		'user_name'
 	);
-	// Filter out dupes.
-	foreach ($byUsername as $res1)
-		foreach (array_keys ($byRealname) as $key2)
-			if ($res1['user_id'] == $byRealname[$key2]['user_id'])
-			{
-				unset ($byRealname[$key2]);
-				continue 2;
-			}
-	$ret = array_merge ($byUsername, $byRealname);
-	// Set realm, so it's renderable.
-	foreach (array_keys ($ret) as $key)
-		$ret[$key]['realm'] = 'user';
+	// Merge it together, if duplicates persist, byUsername wins
+	foreach (array ($byRealname, $byUsername) as $array)
+		foreach ($array as $user)
+		{
+			$user['realm'] = 'user';
+			$ret[$user['user_id']] = $user;
+		}
 	return $ret;
 }
 
@@ -1664,7 +1659,7 @@ function getFileSearchResult ($terms)
 			}
 	$ret = array();
 	foreach (array_merge ($byName, $byComment) as $row)
-		$ret[] = spotEntity ('file', $row['id']);
+		$ret[$row['id']] = spotEntity ('file', $row['id']);
 	return $ret;
 }
 
@@ -1696,7 +1691,7 @@ function getRackSearchResult ($terms)
 			}
 	$ret = array();
 	foreach (array_merge ($byName, $byComment) as $row)
-		$ret[] = spotEntity ('rack', $row['id']);
+		$ret[$row['id']] = spotEntity ('rack', $row['id']);
 	return $ret;
 }
 
@@ -1716,7 +1711,10 @@ function getVLANSearchResult ($terms)
 			1
 		);
 		foreach ($byID as $row)
-			$ret[] = $row['domain_id'] . '-' . $row['vlan_id'];
+		{
+			$vlan_ck = $row['domain_id'] . '-' . $row['vlan_id'];
+			$ret[$vlan_ck] = $vlan_ck;
+		}
 	}
 	else
 	{
@@ -1730,8 +1728,7 @@ function getVLANSearchResult ($terms)
 		foreach ($byDescr as $row)
 		{
 			$vlan_ck = $row['domain_id'] . '-' . $row['vlan_id'];
-			if (!in_array ($vlan_ck, $ret))
-				$ret[] = $vlan_ck;
+			$ret[$vlan_ck] = $vlan_ck;
 		}
 	}
 	return $ret;

@@ -3631,36 +3631,34 @@ function searchHandler () {
 	renderSearchResults ($terms, $results);
 }
 
-function renderSearchResults ($terms, $results)
+function renderSearchResults ($terms, $summary)
 {
-	$nhits = &$results['nhits'];
-	$lasthit = &$results['lasthit'];
-	$summary = &$results['summary'];
-	
+	// calculate the number of found objects
+	$nhits = 0;
+	foreach ($summary as $realm => $list)
+		$nhits += count ($list);
+
 	if ($nhits == 0)
 		echo "<center><h2>Nothing found for '${terms}'</h2></center>";
 	elseif ($nhits == 1)
 	{
-		$record = current ($summary[$lasthit]);
-		switch ($lasthit)
+		$realm = key ($summary);
+		$record = current (current ($summary));
+		switch ($realm)
 		{
 			case 'ipv4addressbydq':
-				$parentnet = getIPv4AddressNetworkId ($record);
-				if ($parentnet !== NULL)
-					echo "<script language='Javascript'>document.location='index.php?page=ipv4net&tab=default&id=${parentnet}&hl_ipv4_addr=${record}';//</script>";
-				else
-					echo "<script language='Javascript'>document.location='index.php?page=ipaddress&ip=${record}';//</script>";
+				if ($record['net_id'] !== NULL)
+					echo "<script language='Javascript'>document.location='index.php?page=ipv4net&tab=default&id=${record['net_id']}&hl_ipv4_addr=${record['ip']}';//</script>";
 				break;
 			case 'ipv6addressbydq':
 				$v6_ip_dq = $record['ip']->format();
-				echo "<script language='Javascript'>document.location='index.php?page=ipv6net&tab=default&id=${record['net_id']}&hl_ipv6_addr=${v6_ip_dq}';//</script>";
+				if ($record['net_id'] !== NULL)
+					echo "<script language='Javascript'>document.location='index.php?page=ipv6net&tab=default&id=${record['net_id']}&hl_ipv6_addr=${v6_ip_dq}';//</script>";
 				break;
 			case 'ipv4addressbydescr':
 				$parentnet = getIPv4AddressNetworkId ($record['ip']);
 				if ($parentnet !== NULL)
 					echo "<script language='Javascript'>document.location='index.php?page=ipv4net&tab=default&id=${parentnet}&hl_ipv4_addr=${record['ip']}';//</script>";
-				else
-					echo "<script language='Javascript'>document.location='index.php?page=ipaddress&ip=${record['ip']}';//</script>";
 				break;
 			case 'ipv6addressbydescr':
 				$v6_ip = new IPv6Address ($record['ip']);
@@ -3668,8 +3666,6 @@ function renderSearchResults ($terms, $results)
 				$parentnet = getIPv6AddressNetworkId ($v6_ip);
 				if ($parentnet !== NULL)
 					echo "<script language='Javascript'>document.location='index.php?page=ipv4net&tab=default&id=${parentnet}&hl_ipv6_addr=${v6_ip_dq}';//</script>";
-				else
-					echo "<script language='Javascript'>document.location='index.php?page=ipaddress&ip=${v6_ip_dq}';//</script>";
 				break;
 			case 'ipv4network':
 				echo "<script language='Javascript'>document.location='index.php?page=ipv4net";
@@ -3756,7 +3752,13 @@ function renderSearchResults ($terms, $results)
 								foreach ($object['ports'] as $port)
 									if ($port['id'] == $port_id)
 									{
-										echo "<tr><td>port ${port['name']}:</td>";
+										$port_href = '<a href="' . makeHref (array
+										(
+											'page' => 'object',
+											'object_id' => $object['id'],
+											'hl_port_id' => $port_id
+										)) . '">port ' . $port['name'] . '</a>';
+										echo "<tr><td>${port_href}:</td>";
 										echo "<td class=tdleft>${text}</td></tr>";
 										break; // next reason
 									}
@@ -3916,6 +3918,10 @@ function renderSearchResults ($terms, $results)
 					echo '</table>';
 					finishPortlet();
 					break;
+				default: // you can use that in your plugins to add some non-standard search results
+					startPortlet($where);
+					echo $what;
+					finishPortlet();
 			}
 	}
 }
@@ -4085,7 +4091,7 @@ function renderPortOIFCompatEditor()
 		}
 		echo "<tr class=row_${order}><td>";
 		echo '<a href="' . makeHrefProcess (array ('op' => 'del', 'type1' => $pair['type1'], 'type2' => $pair['type2'])) . '">';
-		printImageHREF ('delete', 'remove pair', TRUE);
+		printImageHREF ('delete', 'remove pair');
 		echo "</a></td><td class=tdleft>${pair['type1name']}</td><td class=tdleft>${pair['type2name']}</td></tr>";
 	}
 	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')
@@ -6663,7 +6669,7 @@ function printIPNetInfoTDs ($netinfo, $decor = array())
 				'tab' => 'newrange',
 				'set-prefix' => $formatted,
 			)) . '">';
-			printImageHREF ('knight', 'create network here', TRUE);
+			printImageHREF ('knight', 'create network here');
 			echo '</a>';
 		}
 	}
@@ -7376,7 +7382,7 @@ function renderPortIFCompatEditor()
 		}
 		echo "<tr class=row_${order}><td>";
 		echo '<a href="' . makeHrefProcess (array ('op' => 'del', 'iif_id' => $record['iif_id'], 'oif_id' => $record['oif_id'])) . '">';
-		printImageHREF ('delete', 'remove pair', TRUE);
+		printImageHREF ('delete', 'remove pair');
 		echo "</a></td><td class=tdleft>${record['iif_name']}</td><td class=tdleft>${record['oif_name']}</td></tr>";
 	}
 	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')
