@@ -11,6 +11,7 @@
 	bugfix: when searching for IP not belonging to any known network, the ugly assertion failed page was shown.
 	update: links to ports added to object search results
 	update: custom rearch results provided by users' plugins now supported
+	new feature: syncdomain.php now can create child processes to speed up 802.1Q sync
 0.18.7
 	bugfix: adjust 802.1Q command generation
 	bugfix: fixed telnet session hanging in NX-OS4 connector

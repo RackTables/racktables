@@ -53,7 +53,23 @@ function showWarning ($info = '', $location = 'N/A')
 		echo "Additional information:<br><p>\n<pre>\n${info}\n</pre></p>";
 }
 
-
+// (re)connects to DB, stores PDO object in $dbxlink global var
+function connectDB()
+{
+	global $dbxlink, $pdo_dsn, $db_username, $db_password;
+	$dbxlink = NULL;
+	// Now try to connect...
+	try
+	{
+		$dbxlink = new PDO ($pdo_dsn, $db_username, $db_password);
+	}
+	catch (PDOException $e)
+	{
+		throw new RackTablesError ("Database connection failed:\n\n" . $e->getMessage(), RackTablesError::INTERNAL);
+	}
+	$dbxlink->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+	$dbxlink->exec ("set names 'utf8'");
+}
 
 if (file_exists ('inc/secret.php'))
 	require_once 'inc/secret.php';
@@ -67,18 +83,7 @@ else
 		RackTablesError::MISCONFIGURED
 	);
 }
-
-// Now try to connect...
-try
-{
-	$dbxlink = new PDO ($pdo_dsn, $db_username, $db_password);
-}
-catch (PDOException $e)
-{
-	throw new RackTablesError ("Database connection failed:\n\n" . $e->getMessage(), RackTablesError::INTERNAL);
-}
-$dbxlink->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-$dbxlink->exec ("set names 'utf8'");
+connectDB();
 
 // Magic quotes feature is deprecated, but just in case the local system
 // still has it activated, reverse its effect.

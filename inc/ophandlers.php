@@ -1195,6 +1195,7 @@ function resetUIConfig()
 	setConfigVar ('HNDP_RUNNERS_LISTSRC', '');
 	setConfigVar ('SHRINK_TAG_TREE_ON_CLICK', 'yes');
 	setConfigVar ('MAX_UNFILTERED_ENTITIES', '0');
+	setConfigVar ('SYNCDOMAIN_MAX_PROCESSES', '0');
 	return buildRedirectURL (__FUNCTION__, 'OK');
 }
 

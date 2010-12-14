@@ -76,14 +76,40 @@ ftruncate ($fp, 0);
 fwrite ($fp, getmypid() . "\n");
 fclose ($fp);
 
-$switchesdone = 0;
+// fetch all the needed data from DB (preparing for DB connection loss)
+$switch_queue = array();
 foreach ($mydomain['switchlist'] as $switch)
 	if (in_array (detectVLANSwitchQueue (getVLANSwitchInfo ($switch['object_id'])), $todo[$options['mode']]))
+		$switch_queue[] = spotEntity ('object', $switch['object_id']);
+
+// YOU SHOULD NOT USE DB FUNCTIONS BELOW IN THE PARENT PROCESS
+// THE PARENT'S DB CONNECTION IS LOST DUE TO RECONNECTING IN THE CHILD
+$fork_slots = getConfigVar ('SYNCDOMAIN_MAX_PROCESSES');
+$do_fork = ($fork_slots > 1) and extension_loaded ('pcntl');
+if ($fork_slots > 1 and ! $do_fork)
+	throw new RackTablesError ('PHP extension \'pcntl\' not found, can not use childs', RackTablesError::MISCONFIGURED);
+$switches_working = 0;
+$switchesdone = 0;
+foreach ($switch_queue as $object)
+{
+	if ($do_fork)
 	{
-		$object = spotEntity ('object', $switch['object_id']);
+		// wait for the next free slot
+		while ($fork_slots <= $switches_working)
+		{
+			pcntl_waitpid (-1, $wait_status);
+			--$switches_working;
+		}
+		$i_am_child = (0 === $fork_res = pcntl_fork());
+	}
+	if (! $do_fork or $i_am_child)
+	{
 		try
 		{
-			$portsdone = exec8021QDeploy ($switch['object_id'], $do_push);
+			// make a separate DB connection for correct concurrent transactions handling
+			if ($i_am_child)
+				connectDB();
+			$portsdone = exec8021QDeploy ($object['id'], $do_push);
 			if ($portsdone or $verbose)
 				echo "Done '${object['dname']}': ${portsdone}\n";
 		}
@@ -91,13 +117,26 @@ foreach ($mydomain['switchlist'] as $switch)
 		{
 			echo "FAILED '${object['dname']}': " . $e->getMessage() . "\n";
 		}
-		if (++$switchesdone == $max)
-		{
-			if ($verbose)
-				echo "Maximum of ${max} items reached, terminating\n";
-			break;
-		}
+		if ($i_am_child)
+			exit (0);
 	}
+	if (isset ($fork_res) and $fork_res > 0)
+		++$switches_working;
+
+	if (++$switchesdone == $max)
+	{
+		if ($verbose)
+			echo "Maximum of ${max} items reached, terminating\n";
+		break;
+	}
+}
+
+// wait for all childs to exit
+while ($switches_working > 0)
+{
+	--$switches_working;
+	pcntl_waitpid (-1, $wait_status);
+}
 
 if (FALSE === unlink ($filename))
 {
