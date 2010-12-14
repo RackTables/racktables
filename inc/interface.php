@@ -7780,13 +7780,7 @@ function renderObject8021QPorts ($object_id)
 			if ($port['remote_object_id'])
 			{
 				$remote_object = spotEntity ('object', $port['remote_object_id']);
-				$socket['link'] = '<a href="' . makeHref (array (
-					'page' => 'object',
-					'tab' => 'default',
-					'object_id' => $port['remote_object_id'],
-					'hl_port_id' => $port['remote_id']
-				));
-				$socket['link'] .= '">' . $remote_object['dname'] . '</a>&nbsp;' . $port['remote_name'];
+				$socket['link'] = formatPortLink ($remote_object['id'], $remote_object['dname'], $port['remote_id'], $port['remote_name']);
 			}
 			elseif (strlen ($port['reservation_comment']))
 				$socket['link'] = '<b>Rsv:</b> ' . $port['reservation_comment'];
