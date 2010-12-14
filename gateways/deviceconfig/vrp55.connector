@@ -46,6 +46,7 @@ MYNAME=`basename $0`
 SESSION=`mktemp /tmp/$MYNAME.XXXXXX`
 [ -f "$SESSION" ] || exit 5
 prepare_connect_commands $ENDPOINT
+printf 'screen-length 0 temporary\n' >> "$SESSION"
 case $COMMAND in
 get8021q)
 	printf 'display current-configuration\n' >> "$SESSION"
