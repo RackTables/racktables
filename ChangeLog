@@ -2,6 +2,7 @@
 	new feature: IPv6 support, except of LivePTR, NAT and SLB functionality (by Alexey Andriyanov)
 	new feature: cable ID column for links (#328, by Giovani Zamboni and Jens Weibler)
 	new feature: SNMPv3 support (#379, by Jens Weibler)
+	new feature: 802.1Q template copier
 	update: cache image files thumbnails and make them JPEGs (#369, by Matt Mills)
 	update: enhance rackspace click helpers (by Jeroen Benda)
 	bugfix: the feature of remembering last opened tab of realm page is now working

@@ -2710,30 +2710,53 @@ function updVLANSwitchTemplate()
 }
 
 $msgcode['addVSTRule']['OK'] = 48;
-$msgcode['addVSTRule']['ERR'] = 110;
+$msgcode['addVSTRule']['ERR1'] = 110;
+$msgcode['addVSTRule']['ERR2'] = 179;
 function addVSTRule()
 {
 	assertUIntArg ('vst_id');
-	assertUIntArg ('rule_no');
-	assertPCREArg ('port_pcre');
-	assertStringArg ('port_role');
-	assertStringArg ('wrt_vlans', TRUE);
-	assertStringArg ('description', TRUE);
-	global $sic;
-	$result = usePreparedInsertBlade
-	(
-		'VLANSTRule',
-		array
+	assertStringArg ('submode');
+	switch ($_REQUEST['submode'])
+	{
+	case 'addnew':
+		assertUIntArg ('rule_no');
+		assertPCREArg ('port_pcre');
+		assertStringArg ('port_role');
+		assertStringArg ('wrt_vlans', TRUE);
+		assertStringArg ('description', TRUE);
+		global $sic;
+		$result = usePreparedInsertBlade
 		(
-			'vst_id' => $sic['vst_id'],
-			'rule_no' => $sic['rule_no'],
-			'port_pcre' => $sic['port_pcre'],
-			'port_role' => $sic['port_role'],
-			'wrt_vlans' => $sic['wrt_vlans'],
-			'description' => $sic['description'],
-		)
-	);
-	return buildRedirectURL (__FUNCTION__, $result ? 'OK' : 'ERR');
+			'VLANSTRule',
+			array
+			(
+				'vst_id' => $sic['vst_id'],
+				'rule_no' => $sic['rule_no'],
+				'port_pcre' => $sic['port_pcre'],
+				'port_role' => $sic['port_role'],
+				'wrt_vlans' => $sic['wrt_vlans'],
+				'description' => $sic['description'],
+			)
+		);
+		return buildRedirectURL (__FUNCTION__, $result ? 'OK' : 'ERR1');
+		break;
+	case 'copyfrom':
+		$dst_vst = getVLANSwitchTemplate ($_REQUEST['vst_id']);
+		// FIXME: this is a race condition, which is better handled with proper locking
+		if (count ($dst_vst['rules']))
+			return buildRedirectURL (__FUNCTION__, $result ? 'OK' : 'ERR2');
+		assertUIntArg ('from_id');
+		$src_vst = getVLANSwitchTemplate ($_REQUEST['from_id']);
+		foreach ($src_vst['rules'] as $rule)
+		{
+			$rule['vst_id'] = $_REQUEST['vst_id'];
+			usePreparedInsertBlade ('VLANSTRule', $rule);
+		}
+		return buildRedirectURL (__FUNCTION__, 'OK');
+		break;
+	default:
+		throw new InvalidArgException ('submode', $_REQUEST['submode']);
+	}
 }
 
 $msgcode['delVSTRule']['OK'] = 49;

@@ -8673,7 +8673,7 @@ function renderVSTRulesEditor ($vst_id)
 {
 	function printNewItemTR ($port_role_options)
 	{
-		printOpFormIntro ('add');
+		printOpFormIntro ('add', array ('submode' => 'addnew'));
 		echo '<tr>';
 		echo '<td>' . getImageHREF ('add', 'add rule', TRUE, 110) . '</td>';
 		echo '<td><input type=text tabindex=101 name=rule_no size=3></td>';
@@ -8685,7 +8685,27 @@ function renderVSTRulesEditor ($vst_id)
 		echo '</tr></form>';
 	}
 	$vst = getVLANSwitchTemplate ($vst_id);
+	if (count ($vst['rules']))
+		$source_options = array();
+	else
+	{
+		$vstlist = getVSTStats();
+		$source_options = array();
+		foreach (getVSTStats() as $vst_id => $vst_info)
+			if ($vst_info['rulec'])
+				$source_options[$vst_id] = niftyString ('(' . $vst_info['rulec'] . ') ' . $vst_info['description']);
+	}
 	echo '<center><h1>' . niftyString ($vst['description']) . '</h1></center>';
+	if (count ($source_options))
+	{
+		startPortlet ('clone another template');
+		printOpFormIntro ('add', array ('submode' => 'copyfrom'));
+		echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
+		echo '<tr><td>' . getSelect ($source_options, array ('name' => 'from_id')) . '</td>';
+		echo '<td>' . getImageHREF ('COPY', 'copy from selected', TRUE) . '</td></tr></table></form>';
+		finishPortlet();
+		startPortlet ('add rules one by one');
+	}
 	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
 	echo '<tr><th>&nbsp;</th><th>sequence</th><th>regexp</th><th>role</th>';
 	echo '<th>VLAN IDs</th><th>comment</th><th>&nbsp;</th></tr>';
@@ -8709,6 +8729,8 @@ function renderVSTRulesEditor ($vst_id)
 	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')
 		printNewItemTR ($port_role_options);
 	echo '</table>';
+	if (count ($source_options))
+		finishPortlet();
 }
 
 function renderDeployQueue ($dqcode)
