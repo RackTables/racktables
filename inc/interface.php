@@ -3643,7 +3643,9 @@ function renderSearchResults ($terms, $summary)
 	elseif ($nhits == 1)
 	{
 		$realm = key ($summary);
-		$record = current (current ($summary));
+		$record = current ($summary);
+		if (is_array ($record))
+			$record = current ($record);
 		switch ($realm)
 		{
 			case 'ipv4addressbydq':
@@ -3702,6 +3704,10 @@ function renderSearchResults ($terms, $summary)
 			case 'vlan':
 				echo "<script language='Javascript'>document.location='index.php?page=vlan&vlan_ck=${record}';//</script>";
 				break;
+			default:
+				startPortlet($realm);
+				echo $record;
+				finishPortlet();
 		}
 		return;
 	}
