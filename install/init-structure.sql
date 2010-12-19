@@ -268,6 +268,18 @@ CREATE TABLE `MountOperation` (
   CONSTRAINT `MountOperation-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `RackObject` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
+CREATE TABLE `ObjectLog` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `object_id` int(10) unsigned NOT NULL,
+  `user` char(64) NOT NULL,
+  `date` datetime NOT NULL,
+  `content` text NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `object_id` (`object_id`),
+  KEY `date` (`date`),
+  CONSTRAINT `ObjectLog-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `RackObject` (`id`)
+) ENGINE=InnoDB;
+
 CREATE TABLE `Port` (
   `id` int(10) unsigned NOT NULL auto_increment,
   `object_id` int(10) unsigned NOT NULL default '0',

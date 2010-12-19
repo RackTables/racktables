@@ -109,6 +109,9 @@ $image['reports']['height'] = 200;
 $image['8021q']['path'] = 'pix/8021q.png';
 $image['8021q']['width'] = 218;
 $image['8021q']['height'] = 200;
+$image['objectlog']['path'] = 'pix/crystal-mimetypes-shellscript-218x200.png';
+$image['objectlog']['width'] = 218;
+$image['objectlog']['height'] = 200;
 $image['download']['path'] = 'pix/download.png';
 $image['download']['width'] = 16;
 $image['download']['height'] = 16;
@@ -986,6 +989,23 @@ function renderRackObject ($object_id)
 		startPortlet ('Comment');
 		echo '<div class=commentblock>' . string_insert_hrefs ($info['comment']) . '</div>';
 		finishPortlet ();
+	}
+
+	if (count ($logrecords = getLogRecordsForObject ($_REQUEST['object_id'])))
+	{
+		startPortlet ('log records');
+		echo "<table cellspacing=0 cellpadding=5 align=center class=widetable width='100%'>";
+		$order = 'odd';
+		foreach (getLogRecordsForObject ($_REQUEST['object_id']) as $row)
+		{
+			echo "<tr class=row_${order} valign=top>";
+			echo '<td class=tdleft>' . $row['date'] . '<br>' . $row['user'] . '</td>';
+			echo '<td class="slbconf rsvtext">' . string_insert_hrefs ($row['content']) . '</td>';
+			echo '</tr>';
+			$order = $nextorder[$order];
+		}
+		echo '</table>';
+		finishPortlet();
 	}
 
 	renderFilesPortlet ('object', $object_id);
@@ -8989,6 +9009,72 @@ function getAutoScrollScript ($ancor_name)
 	});
 </script>
 END;
+}
+
+//
+// Display object level logs
+//
+function renderObjectLogEditor ()
+{
+	global $nextorder;
+
+	echo '<center><h3>log records for this object (<a href=?page=objectlog>complete list</a>)</h3></center>';
+
+	printOpFormIntro ('add');
+	echo "<table with=80% align=center border=0 cellpadding=5 cellspacing=0 align=center class=cooltable><tr valign=top class=row_odd>";
+	echo '<td class=tdcenter>' . getImageHREF ('CREATE', 'add record', TRUE, 101) . '</td>';
+	echo '<td><textarea name=logentry rows=10 cols=80 tabindex=100></textarea></td>';
+	echo '<td class=tdcenter>' . getImageHREF ('CREATE', 'add record', TRUE, 101) . '</td>' ;
+	echo '</tr></form>';
+
+	$order = 'even';
+	foreach (getLogRecordsForObject ($_REQUEST['object_id']) as $row)
+	{
+		echo "<tr class=row_${order} valign=top>";
+		echo '<td class=tdleft>' . $row['date'] . '<br>' . $row['user'] . '</td>';
+		echo '<td class="slbconf rsvtext">' . string_insert_hrefs ($row['content']) . '</td>';
+		echo "<td class=tdleft><a href=\"".makeHrefProcess(array('op'=>'del', 'logid'=>$row['id'], 'object_id'=>$_REQUEST['object_id']))."\">";
+		echo getImageHREF ('DESTROY', 'Delete log entry') . '</a></td>';
+		echo '</tr>';
+		$order = $nextorder[$order];
+	}
+	echo '</table>';
+}
+
+//
+// Display form and All log entries
+//
+function allObjectLogs ()
+{
+	global $nextorder;
+
+	echo "<br><table width='80%' align=center border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>";
+	echo '<tr valign=top><th class=tdleft>Object</th><th class=tdleft>Date/user</th>';
+	echo '<th class=tdcenter>' . getImageHREF ('text') . '</th></tr>';
+
+	$order = 'odd';
+	foreach (getLogRecords() as $row)
+	{
+		echo "<tr class=row_${order} valign=top>";
+		echo "<td align=left><a href='".makeHref(array('page'=>'object', 'tab'=>'log', 'object_id'=>$row['object_id']))."'>${row['name']}</a></td>";
+		echo '<td class=tdleft>' . $row['date'] . '<br>' . $row['user'] . '</td>';
+		echo '<td class="slbconf rsvtext">' . string_insert_hrefs ($row['content']) . '</td>';
+		echo '</tr>';
+		$order = $nextorder[$order];
+	}
+	echo '</table>';
+}
+
+function renderGlobalLogEditor()
+{
+	echo "<table with='80%' align=center border=0 cellpadding=5 cellspacing=0 align=center class=cooltable><tr valign=top>";
+	printOpFormIntro ('add');
+	echo '<th align=left>Name: ' . getSelect (getNarrowObjectList(), array ('name' => 'object_id')) . '</th>';
+	echo "<tr><td align=left><table with=100% border=0 cellpadding=0 cellspacing=0><tr><td colspan=2><textarea name=logentry rows=3 cols=80></textarea></td></tr>";
+	echo '<tr><td align=left></td><td align=right>' . getImageHREF ('CREATE', 'add record', TRUE) . '</td>';
+	echo '</tr></table></td></tr>';
+	echo '</form>';
+	echo '</table>';
 }
 
 ?>

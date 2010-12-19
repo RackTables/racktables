@@ -2839,4 +2839,24 @@ function importDPData()
 	return buildRedirectURL (__FUNCTION__, 'OK', array ($nignored, $ndone));
 }
 
+$msgcode['deleteObjectLog']['OK'] = 77;
+function deleteObjectLog ()
+{
+	assertUIntArg ('logid');
+	usePreparedDeleteBlade ('ObjectLog', array ('id' => $_REQUEST['logid']));
+	return buildRedirectURL (__FUNCTION__, 'OK', array ('log entry'));
+}
+
+$msgcode['addObjectlog']['OK'] = 0;
+function addObjectlog ()
+{
+	assertUIntArg ('object_id');
+	assertStringArg ('logentry');
+	global $remote_username, $sic;
+	$oi = spotEntity ('object', $sic['object_id']);
+	usePreparedExecuteBlade ('INSERT INTO ObjectLog SET object_id=?, user=?, date=NOW(), content=?', array ($sic['object_id'], $remote_username, $sic['logentry']));
+	$ob_url = makeHref (array ('page' => 'object', 'tab' => 'objectlog', 'object_id' => $sic['object_id']));
+	return buildRedirectURL (__FUNCTION__, 'OK', array ("Log entry for <a href=" . ${ob_url} . ">${oi['dname']}</a> added by ${remote_username}"));
+}
+
 ?>

@@ -798,6 +798,19 @@ CREATE TABLE `VLANIPv6` (
   CONSTRAINT `VLANIPv6-FK-ipv6net_id` FOREIGN KEY (`ipv6net_id`) REFERENCES `IPv6Network` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB
 ";
+			$query[] = "
+CREATE TABLE `ObjectLog` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `object_id` int(10) unsigned NOT NULL,
+  `user` char(64) NOT NULL,
+  `date` datetime NOT NULL,
+  `content` text NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `object_id` (`object_id`),
+  KEY `date` (`date`),
+  CONSTRAINT `ObjectLog-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `RackObject` (`id`)
+) ENGINE=InnoDB
+";
 			$query[] = "ALTER TABLE `TagStorage` CHANGE COLUMN `entity_realm` `entity_realm` ENUM('file','ipv4net','ipv4vs','ipv4rspool','object','rack','user','ipv6net') NOT NULL DEFAULT 'object' FIRST";
 			$query[] = "ALTER TABLE `FileLink` CHANGE COLUMN `entity_type` `entity_type` ENUM('ipv4net','ipv4rspool','ipv4vs','object','rack','user','ipv6net') NOT NULL DEFAULT 'object' AFTER `file_id`";
 			$query[] = 'ALTER TABLE Link ADD COLUMN cable char(64) NULL AFTER portb';

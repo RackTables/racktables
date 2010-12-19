@@ -16,7 +16,7 @@ $indexlayout = array
 (
 	array ('rackspace', 'depot', 'ipv4space', 'ipv6space'),
 	array ('files', 'reports', 'ipv4slb', '8021q'),
-	array ('config'),
+	array ('config', 'objectlog'),
 );
 
 $page['index']['title'] = 'Main page';
@@ -87,6 +87,7 @@ $page['object']['bypass_tabs'] = array ('hl_port_id');
 $page['object']['parent'] = 'depot';
 $tab['object']['default'] = 'View';
 $tab['object']['edit'] = 'Properties';
+$tab['object']['log'] = 'Log';
 $tab['object']['rackspace'] = 'Rackspace';
 $tab['object']['ports'] = 'Ports';
 $tab['object']['ipv4'] = 'IPv4';
@@ -107,6 +108,7 @@ $tab['object']['8021qports'] = '802.1Q ports';
 $tab['object']['8021qsync'] = '802.1Q sync';
 $tabhandler['object']['default'] = 'renderRackObject';
 $tabhandler['object']['edit'] = 'renderEditObjectForm';
+$tabhandler['object']['log'] = 'renderObjectLogEditor';
 $tabhandler['object']['rackspace'] = 'renderRackSpaceForObject';
 $tabhandler['object']['ports'] = 'renderPortsForObject';
 $tabhandler['object']['ipv4'] = 'renderIPv4ForObject';
@@ -159,6 +161,8 @@ $ophandler['object']['ipv6']['delIPv6Allocation'] = 'delIPv6Allocation';
 $ophandler['object']['edit']['clearSticker'] = 'clearSticker';
 $ophandler['object']['edit']['update'] = 'updateObject';
 $ophandler['object']['edit']['resetObject'] = 'resetObject';
+$ophandler['object']['log']['add'] = 'addObjectlog';
+$ophandler['object']['log']['del'] = 'deleteObjectLog';
 $ophandler['object']['nat4']['addNATv4Rule'] = 'addPortForwarding';
 $ophandler['object']['nat4']['delNATv4Rule'] = 'delPortForwarding';
 $ophandler['object']['nat4']['updNATv4Rule'] = 'updPortForwarding';
@@ -613,5 +617,12 @@ $page['dqueue']['bypass'] = 'dqcode';
 $page['dqueue']['bypass_type'] = 'string';
 $tab['dqueue']['default'] = 'View';
 $tabhandler['dqueue']['default'] = 'renderDeployQueue';
+
+$page['objectlog']['title'] = 'Log records';
+$page['objectlog']['parent'] = 'index';
+$tab['objectlog']['default'] = 'View';
+#$tab['objectlog']['add'] = 'Add'; // FIXME: finish, then enable
+$tabhandler['objectlog']['default'] = 'allObjectLogs';
+#$tabhandler['objectlog']['add'] = 'renderGlobalLogEditor';
 
 ?>

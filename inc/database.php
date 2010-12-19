@@ -4414,4 +4414,21 @@ function getChapterAttributes($chapter_id)
 	return is_array($rows) ? $rows : array();
 }
 
+function getLogRecordsForObject ($object_id)
+{
+	$result = usePreparedSelectBlade ('SELECT id, content, date, user FROM ObjectLog WHERE object_id = ? ORDER BY date DESC', array ($object_id));
+	return $result->fetchAll (PDO::FETCH_ASSOC);
+}
+
+function getLogRecords()
+{
+	$result = usePreparedSelectBlade
+	(
+		'SELECT o.id as logid, r.name, o.content, o.date, o.user, r.id as object_id ' .
+		'FROM ObjectLog o Left JOIN RackObject r ON o.object_id = r.id ' .
+		'ORDER BY o.date DESC'
+	);
+	return $result->fetchAll (PDO::FETCH_ASSOC);
+}
+
 ?>
