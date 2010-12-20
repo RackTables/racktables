@@ -277,7 +277,7 @@ CREATE TABLE `ObjectLog` (
   PRIMARY KEY (`id`),
   KEY `object_id` (`object_id`),
   KEY `date` (`date`),
-  CONSTRAINT `ObjectLog-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `RackObject` (`id`)
+  CONSTRAINT `ObjectLog-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `RackObject` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
 CREATE TABLE `Port` (
