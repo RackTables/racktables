@@ -784,7 +784,7 @@ function renderEditRackForm ($rack_id)
 	finishPortlet();
 }
 
-function printSelect ($optionList, $select_attrs = array(), $selected_id = NULL, $autocomplete = false)
+function printSelect ($optionList, $select_attrs = array(), $selected_id = NULL)
 {
 	echo getSelect ($optionList, $select_attrs, $selected_id);
 }
