@@ -43,6 +43,7 @@ prepare_connect_commands()
 }
 
 MYNAME=`basename $0`
+MYDIR=`dirname $0`
 SESSION=`mktemp /tmp/$MYNAME.XXXXXX`
 [ -f "$SESSION" ] || exit 5
 prepare_connect_commands $ENDPOINT
@@ -71,6 +72,6 @@ deploy)
 esac
 printf 'quit\n' >> "$SESSION"
 rc=0
-nc -w 30 $ENDPOINT 23 < "$SESSION" > "$outfile" || rc=4
+$MYDIR/nc.pl --putwhen='(^Username:$|^Password:$)|^<[^<>]*>$|^\[[^\[\]]*\]$' --stopwhen='^Now saving the current configuration' -w 30 $ENDPOINT 23 < "$SESSION" > "$outfile" || rc=4
 rm -f "$SESSION"
 exit $rc
