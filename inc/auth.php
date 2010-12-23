@@ -164,8 +164,7 @@ function gotClearanceForTagChain ($const_base)
 						case 'LEX_DENY':
 							return FALSE;
 						default:
-							showWarning ("Condition match for unknown grant decision '${sentence['decision']}'", __FUNCTION__);
-							break;
+							throw new RackTablesError ("Condition match for unknown grant decision '${sentence['decision']}'", RackTablesError::INTERNAL)
 					}
 				break;
 			case 'SYNT_ADJUSTMENT':
@@ -177,8 +176,7 @@ function gotClearanceForTagChain ($const_base)
 					$impl_tags = getImplicitTags ($expl_tags); // recalculate
 				break;
 			default:
-				showWarning ("Can't process sentence of unknown type '${sentence['type']}'", __FUNCTION__);
-				break;
+				throw new RackTablesError ("Can't process sentence of unknown type '${sentence['type']}'", RackTablesError::INTERNAL)
 		}
 	}
 	return FALSE;

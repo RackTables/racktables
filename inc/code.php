@@ -67,6 +67,7 @@ function lexError4 ($s, $ln = 'N/A')
  * LEX_REMOVE
  * LEX_ON
  *
+ * FIXME: would these work better as normal (integer) constants?
  */
 function getLexemsFromRawText ($text)
 {

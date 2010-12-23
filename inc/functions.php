@@ -295,13 +295,8 @@ function markSpan (&$rackData, $startRow, $maxheight, $template_idx)
 // This function sets rowspan/solspan/skipped atom attributes for renderRack()
 // What we actually have to do is to find _all_ possible rectangles for each unit
 // and then select the widest of those with the maximal square.
-function markAllSpans (&$rackData = NULL)
+function markAllSpans (&$rackData)
 {
-	if ($rackData == NULL)
-	{
-		showWarning ('Invalid rackData', __FUNCTION__);
-		return;
-	}
 	for ($i = $rackData['height']; $i > 0; $i--)
 		while (markBestSpan ($rackData, $i));
 }
@@ -581,13 +576,8 @@ function l2addressFromDatabase ($string)
 // The following 2 functions return previous and next rack IDs for
 // a given rack ID. The order of racks is the same as in renderRackspace()
 // or renderRow().
-function getPrevIDforRack ($row_id = 0, $rack_id = 0)
+function getPrevIDforRack ($row_id, $rack_id)
 {
-	if ($row_id <= 0 or $rack_id <= 0)
-	{
-		showWarning ('Invalid arguments passed', __FUNCTION__);
-		return NULL;
-	}
 	$rackList = listCells ('rack', $row_id);
 	doubleLink ($rackList);
 	if (isset ($rackList[$rack_id]['prev_key']))
@@ -595,13 +585,8 @@ function getPrevIDforRack ($row_id = 0, $rack_id = 0)
 	return NULL;
 }
 
-function getNextIDforRack ($row_id = 0, $rack_id = 0)
+function getNextIDforRack ($row_id, $rack_id)
 {
-	if ($row_id <= 0 or $rack_id <= 0)
-	{
-		showWarning ('Invalid arguments passed', __FUNCTION__);
-		return NULL;
-	}
 	$rackList = listCells ('rack', $row_id);
 	doubleLink ($rackList);
 	if (isset ($rackList[$rack_id]['next_key']))
@@ -720,13 +705,8 @@ function execGMarker ($line)
 
 // rackspace usage for a single rack
 // (T + W + U) / (height * 3 - A)
-function getRSUforRack ($data = NULL)
+function getRSUforRack ($data)
 {
-	if ($data == NULL)
-	{
-		showWarning ('Invalid argument', __FUNCTION__);
-		return NULL;
-	}
 	$counter = array ('A' => 0, 'U' => 0, 'T' => 0, 'W' => 0, 'F' => 0);
 	for ($unit_no = $data['height']; $unit_no > 0; $unit_no--)
 		for ($locidx = 0; $locidx < 3; $locidx++)
@@ -735,13 +715,8 @@ function getRSUforRack ($data = NULL)
 }
 
 // Same for row.
-function getRSUforRackRow ($rowData = NULL)
+function getRSUforRackRow ($rowData)
 {
-	if ($rowData === NULL)
-	{
-		showWarning ('Invalid argument', __FUNCTION__);
-		return NULL;
-	}
 	if (!count ($rowData))
 		return 0;
 	$counter = array ('A' => 0, 'U' => 0, 'T' => 0, 'W' => 0, 'F' => 0);
@@ -1579,13 +1554,8 @@ function apply_macros ($macros, $subject, &$error_macro_stat)
 }
 
 // throws RTBuildLVSConfigError exception if undefined macros found
-function buildLVSConfig ($object_id = 0)
+function buildLVSConfig ($object_id)
 {
-	if ($object_id <= 0)
-	{
-		showWarning ('Invalid argument', __FUNCTION__);
-		return;
-	}
 	$oInfo = spotEntity ('object', $object_id);
 	$defaults = getSLBDefaults (TRUE);
 	$lbconfig = getSLBConfig ($object_id);

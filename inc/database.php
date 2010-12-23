@@ -3467,7 +3467,7 @@ function getFilesOfEntity ($entity_type = NULL, $entity_id = 0)
 	return $ret;
 }
 
-function getFile ($file_id = 0)
+function getFile ($file_id)
 {
 	$query = usePreparedSelectBlade
 	(
@@ -3476,10 +3476,8 @@ function getFile ($file_id = 0)
 		array ($file_id)
 	);
 	if (($row = $query->fetch (PDO::FETCH_ASSOC)) == NULL)
-	{
-		showWarning ('Query succeeded, but returned no data', __FUNCTION__);
-		$ret = NULL;
-	}
+		// FIXME: isn't this repeating the code already in spotEntity()?
+		throw new EntityNotFoundException ('file', $file_id);
 	else
 	{
 		$ret = array();
@@ -3500,7 +3498,7 @@ function getFile ($file_id = 0)
 	return $ret;
 }
 
-function getFileCache ($file_id = 0)
+function getFileCache ($file_id)
 {
 	$query = usePreparedSelectBlade
 	(
@@ -3532,7 +3530,7 @@ function commitAddFileCache ($file_id, $contents)
 	}
 }               
 
-function getFileLinks ($file_id = 0)
+function getFileLinks ($file_id)
 {
 	$query = usePreparedSelectBlade
 	(
