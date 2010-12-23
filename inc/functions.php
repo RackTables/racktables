@@ -2283,6 +2283,55 @@ function filterCellList ($list_in, $expression = array())
 	return $list_out;
 }
 
+function eval_expression ($expr, $tagchain, $ptable, $silent = FALSE)
+{
+	$self = __FUNCTION__;
+	switch ($expr['type'])
+	{
+		// Return true, if given tag is present on the tag chain.
+		case 'LEX_TAG':
+		case 'LEX_AUTOTAG':
+			foreach ($tagchain as $tagInfo)
+				if ($expr['load'] == $tagInfo['tag'])
+					return TRUE;
+			return FALSE;
+		case 'LEX_PREDICATE': // Find given predicate in the symbol table and evaluate it.
+			$pname = $expr['load'];
+			if (!isset ($ptable[$pname]))
+			{
+				if (!$silent)
+					showWarning ("Predicate '${pname}' is referenced before declaration", __FUNCTION__);
+				return NULL;
+			}
+			return $self ($ptable[$pname], $tagchain, $ptable);
+		case 'LEX_TRUE':
+			return TRUE;
+		case 'LEX_FALSE':
+			return FALSE;
+		case 'SYNT_NOT_EXPR':
+			$tmp = $self ($expr['load'], $tagchain, $ptable);
+			if ($tmp === TRUE)
+				return FALSE;
+			elseif ($tmp === FALSE)
+				return TRUE;
+			else
+				return $tmp;
+		case 'SYNT_AND_EXPR': // binary AND
+			if (FALSE == $self ($expr['left'], $tagchain, $ptable))
+				return FALSE; // early failure
+			return $self ($expr['right'], $tagchain, $ptable);
+		case 'SYNT_EXPR': // binary OR
+			if (TRUE == $self ($expr['left'], $tagchain, $ptable))
+				return TRUE; // early success
+			return $self ($expr['right'], $tagchain, $ptable);
+		default:
+			if (!$silent)
+				showWarning ("Evaluation error, cannot process expression type '${expr['type']}'", __FUNCTION__);
+			return NULL;
+			break;
+	}
+}
+
 // Tell, if the given expression is true for the given entity. Take complete record on input.
 function judgeCell ($cell, $expression)
 {
@@ -3941,6 +3990,152 @@ function searchEntitiesByText ($terms)
 			$summary['vlan'] = $tmp;
 	}
 	return $summary;
+}
+
+function getRackCodeWarnings ()
+{
+	require_once 'inc/code.php';
+	$ret = array();
+	global $rackCode;
+	// tags
+	foreach ($rackCode as $sentence)
+		switch ($sentence['type'])
+		{
+			case 'SYNT_DEFINITION':
+				$ret = array_merge ($ret, findTagWarnings ($sentence['definition']));
+				break;
+			case 'SYNT_ADJUSTMENT':
+				$ret = array_merge ($ret, findTagWarnings ($sentence['condition']));
+				$ret = array_merge ($ret, findCtxModWarnings ($sentence['modlist']));
+				break;
+			case 'SYNT_GRANT':
+				$ret = array_merge ($ret, findTagWarnings ($sentence['condition']));
+				break;
+			default:
+				$ret[] = array
+				(
+					'header' => 'internal error',
+					'class' => 'error',
+					'text' => "Skipped sentence of unknown type '${sentence['type']}'"
+				);
+		}
+	// autotags
+	foreach ($rackCode as $sentence)
+		switch ($sentence['type'])
+		{
+			case 'SYNT_DEFINITION':
+				$ret = array_merge ($ret, findAutoTagWarnings ($sentence['definition']));
+				break;
+			case 'SYNT_GRANT':
+			case 'SYNT_ADJUSTMENT':
+				$ret = array_merge ($ret, findAutoTagWarnings ($sentence['condition']));
+				break;
+			default:
+				$ret[] = array
+				(
+					'header' => 'internal error',
+					'class' => 'error',
+					'text' => "Skipped sentence of unknown type '${sentence['type']}'"
+				);
+		}
+	// predicates
+	$plist = array();
+	foreach ($rackCode as $sentence)
+		if ($sentence['type'] == 'SYNT_DEFINITION')
+			$plist[$sentence['term']] = $sentence['lineno'];
+	foreach ($plist as $pname => $lineno)
+	{
+		foreach ($rackCode as $sentence)
+			switch ($sentence['type'])
+			{
+				case 'SYNT_DEFINITION':
+					if (referencedPredicate ($pname, $sentence['definition']))
+						continue 3; // clear, next term
+					break;
+				case 'SYNT_GRANT':
+				case 'SYNT_ADJUSTMENT':
+					if (referencedPredicate ($pname, $sentence['condition']))
+						continue 3; // idem
+					break;
+			}
+		$ret[] = array
+		(
+			'header' => refRCLineno ($lineno),
+			'class' => 'warning',
+			'text' => "Predicate '${pname}' is defined, but never used."
+		);
+	}
+	// expressions
+	foreach ($rackCode as $sentence)
+		switch (invariantExpression ($sentence))
+		{
+			case 'always true':
+				$ret[] = array
+				(
+					'header' => refRCLineno ($sentence['lineno']),
+					'class' => 'warning',
+					'text' => "Expression is always true."
+				);
+				break;
+			case 'always false':
+				$ret[] = array
+				(
+					'header' => refRCLineno ($sentence['lineno']),
+					'class' => 'warning',
+					'text' => "Expression is always false."
+				);
+				break;
+			default:
+				break;
+		}
+	// bail out
+	$nwarnings = count ($ret);
+	$ret[] = array
+	(
+		'header' => 'summary',
+		'class' => $nwarnings ? 'error' : 'success',
+		'text' => "Analysis complete, ${nwarnings} issues discovered."
+	);
+	return $ret;
+}
+
+// Take a parse tree and figure out if it is a valid payload or not.
+// Depending on that return either NULL or an array filled with the load
+// of that expression.
+function spotPayload ($text, $reqtype = 'SYNT_CODETEXT')
+{
+	require_once 'inc/code.php';
+	$lex = getLexemsFromRawText ($text);
+	if ($lex['result'] != 'ACK')
+		return $lex;
+	$stack = getParseTreeFromLexems ($lex['load']);
+	// The only possible way to "accept" is to have sole starting
+	// nonterminal on the stack (and it must be of the requested class).
+	if (count ($stack) == 1 and $stack[0]['type'] == $reqtype)
+		return array ('result' => 'ACK', 'load' => isset ($stack[0]['load']) ? $stack[0]['load'] : $stack[0]);
+	// No luck. Prepare to complain.
+	if ($lineno = locateSyntaxError ($stack))
+		return array ('result' => 'NAK', 'load' => "Syntax error for type '${reqtype}' near line ${lineno}");
+	// HCF!
+	return array ('result' => 'NAK', 'load' => "Syntax error for type '${reqtype}', line number unknown");
+}
+
+// Top-level wrapper for most of the code in this file. Get a text, return a parse tree
+// (or error message).
+function getRackCode ($text)
+{
+	if (!mb_strlen ($text))
+		return array ('result' => 'NAK', 'load' => 'The RackCode text was found empty in ' . __FUNCTION__);
+	$text = str_replace ("\r", '', $text) . "\n";
+	$synt = spotPayload ($text, 'SYNT_CODETEXT');
+	if ($synt['result'] != 'ACK')
+		return $synt;
+	// An empty sentence list is semantically valid, yet senseless,
+	// so checking intermediate result once more won't hurt.
+	if (!count ($synt['load']))
+		return array ('result' => 'NAK', 'load' => 'Empty parse tree found in ' . __FUNCTION__);
+	require_once 'inc/code.php'; // for semanticFilter()
+	return semanticFilter ($synt['load']);
 }
 
 ?>

@@ -141,6 +141,89 @@ function permitted ($p = NULL, $t = NULL, $o = NULL, $annex = array())
 	return gotClearanceForTagChain ($subject);
 }
 
+// The argument doesn't include explicit and implicit tags. This allows us to derive implicit chain
+// each time we modify the given argument (and work with the modified copy from now on).
+// After the work is done the global $impl_tags is silently modified
+function gotClearanceForTagChain ($const_base)
+{
+	global $rackCode, $expl_tags, $impl_tags;
+	$ptable = array();
+	foreach ($rackCode as $sentence)
+	{
+		switch ($sentence['type'])
+		{
+			case 'SYNT_DEFINITION':
+				$ptable[$sentence['term']] = $sentence['definition'];
+				break;
+			case 'SYNT_GRANT':
+				if (eval_expression ($sentence['condition'], array_merge ($const_base, $expl_tags, $impl_tags), $ptable))
+					switch ($sentence['decision'])
+					{
+						case 'LEX_ALLOW':
+							return TRUE;
+						case 'LEX_DENY':
+							return FALSE;
+						default:
+							showWarning ("Condition match for unknown grant decision '${sentence['decision']}'", __FUNCTION__);
+							break;
+					}
+				break;
+			case 'SYNT_ADJUSTMENT':
+				if
+				(
+					eval_expression ($sentence['condition'], array_merge ($const_base, $expl_tags, $impl_tags), $ptable) and
+					processAdjustmentSentence ($sentence['modlist'], $expl_tags)
+				) // recalculate implicit chain only after actual change, not just on matched condition
+					$impl_tags = getImplicitTags ($expl_tags); // recalculate
+				break;
+			default:
+				showWarning ("Can't process sentence of unknown type '${sentence['type']}'", __FUNCTION__);
+				break;
+		}
+	}
+	return FALSE;
+}
+
+// Process a context adjustment request, update given chain accordingly,
+// return TRUE on any changes done.
+// The request is a sequence of clear/insert/remove requests exactly as cooked
+// for each SYNT_CTXMODLIST node.
+function processAdjustmentSentence ($modlist, &$chain)
+{
+	global $rackCode;
+	$didChanges = FALSE;
+	foreach ($modlist as $mod)
+		switch ($mod['op'])
+		{
+			case 'insert':
+				foreach ($chain as $etag)
+					if ($etag['tag'] == $mod['tag']) // already there, next request
+						break 2;
+				$search = getTagByName ($mod['tag']);
+				if ($search === NULL) // skip martians silently
+					break;
+				$chain[] = $search;
+				$didChanges = TRUE;
+				break;
+			case 'remove':
+				foreach ($chain as $key => $etag)
+					if ($etag['tag'] == $mod['tag']) // drop first match and return
+					{
+						unset ($chain[$key]);
+						$didChanges = TRUE;
+						break 2;
+					}
+				break;
+			case 'clear':
+				$chain = array();
+				$didChanges = TRUE;
+				break;
+			default: // HCF
+				throw new RackTablesError ('invalid structure', RackTablesError::INTERNAL);
+		}
+	return $didChanges;
+}
+
 // a wrapper for two LDAP auth methods below
 function authenticated_via_ldap ($username, $password, &$ldap_displayname)
 {

@@ -123,7 +123,6 @@ if (!mb_internal_encoding ('UTF-8'))
 
 loadConfigDefaults();
 
-require_once 'inc/code.php'; // for getRackCode()
 $rackCodeCache = loadScript ('RackCodeCache');
 if ($rackCodeCache == NULL or !strlen ($rackCodeCache))
 {
