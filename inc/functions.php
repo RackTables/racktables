@@ -124,7 +124,7 @@ $wildcardbylen = array
 function assertUIntArg ($argname, $allow_zero = FALSE)
 {
 	if (!isset ($_REQUEST[$argname]))
-		throw new InvalidRequestArgException($argname, $_REQUEST[$argname], 'parameter is missing');
+		throw new InvalidRequestArgException($argname, '', 'parameter is missing');
 	if (!is_numeric ($_REQUEST[$argname]))
 		throw new InvalidRequestArgException($argname, $_REQUEST[$argname], 'parameter is not a number');
 	if ($_REQUEST[$argname] < 0)
@@ -138,7 +138,7 @@ function assertUIntArg ($argname, $allow_zero = FALSE)
 function assertStringArg ($argname, $ok_if_empty = FALSE)
 {
 	if (!isset ($_REQUEST[$argname]))
-		throw new InvalidRequestArgException($argname, $_REQUEST[$argname], 'parameter is missing');
+		throw new InvalidRequestArgException($argname, '', 'parameter is missing');
 	if (!is_string ($_REQUEST[$argname]))
 		throw new InvalidRequestArgException($argname, $_REQUEST[$argname], 'parameter is not a string');
 	if (!$ok_if_empty and !strlen ($_REQUEST[$argname]))
@@ -148,7 +148,7 @@ function assertStringArg ($argname, $ok_if_empty = FALSE)
 function assertBoolArg ($argname, $ok_if_empty = FALSE)
 {
 	if (!isset ($_REQUEST[$argname]))
-		throw new InvalidRequestArgException($argname, $_REQUEST[$argname], 'parameter is missing');
+		throw new InvalidRequestArgException($argname, '', 'parameter is missing');
 	if (!is_string ($_REQUEST[$argname]) or $_REQUEST[$argname] != 'on')
 		throw new InvalidRequestArgException($argname, $_REQUEST[$argname], 'parameter is not a string');
 	if (!$ok_if_empty and !strlen ($_REQUEST[$argname]))
