@@ -9046,23 +9046,29 @@ function renderObjectLogEditor ()
 //
 function allObjectLogs ()
 {
-	global $nextorder;
+	$logs = getLogRecords ();
 
-	echo "<br><table width='80%' align=center border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>";
-	echo '<tr valign=top><th class=tdleft>Object</th><th class=tdleft>Date/user</th>';
-	echo '<th class=tdcenter>' . getImageHREF ('text') . '</th></tr>';
-
-	$order = 'odd';
-	foreach (getLogRecords() as $row)
+	if (count($logs) > 0)
 	{
-		echo "<tr class=row_${order} valign=top>";
-		echo "<td align=left><a href='".makeHref(array('page'=>'object', 'tab'=>'log', 'object_id'=>$row['object_id']))."'>${row['name']}</a></td>";
-		echo '<td class=tdleft>' . $row['date'] . '<br>' . $row['user'] . '</td>';
-		echo '<td class="slbconf rsvtext">' . string_insert_hrefs ($row['content']) . '</td>';
-		echo '</tr>';
-		$order = $nextorder[$order];
+		global $nextorder;
+		echo "<br><table width='80%' align=center border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>";
+		echo '<tr valign=top><th class=tdleft>Object</th><th class=tdleft>Date/user</th>';
+		echo '<th class=tdcenter>' . getImageHREF ('text') . '</th></tr>';
+
+		$order = 'odd';
+		foreach ($logs as $row)
+		{
+			echo "<tr class=row_${order} valign=top>";
+			echo "<td align=left><a href='".makeHref(array('page'=>'object', 'tab'=>'log', 'object_id'=>$row['object_id']))."'>${row['name']}</a></td>";
+			echo '<td class=tdleft>' . $row['date'] . '<br>' . $row['user'] . '</td>';
+			echo '<td class="slbconf rsvtext">' . string_insert_hrefs ($row['content']) . '</td>';
+			echo '</tr>';
+			$order = $nextorder[$order];
+		}
+		echo '</table>';
 	}
-	echo '</table>';
+	else
+		echo '<center><h2>No logs exist</h2></center>';
 }
 
 function renderGlobalLogEditor()
