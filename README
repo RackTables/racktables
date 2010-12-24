@@ -98,6 +98,11 @@ should be sufficient:
 *                                                     *
 *******************************************************
 
+*** Upgrading to 0.19.x ***
+
+This release utilizes database triggers, which are only available in
+MySQL >= 5.0.2.
+
 *** Upgrading to 0.18.x ***
 
 RackTables from its version 0.18.0 and later is not compatible with

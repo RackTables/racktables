@@ -756,6 +756,23 @@ CREATE TABLE `VLANValidID` (
 			$query[] = "UPDATE Config SET varvalue = '0.18.5' WHERE varname = 'DB_VERSION'";
 			break;
 		case '0.19.0':
+			if (!isInnoDBSupported ())
+			{
+				showFailure ("Cannot upgrade because triggers are not supported by your MySQL server.", __FILE__);
+				die;
+			}
+
+			// search for invalid Links
+			$result = $dbxlink->query ("SELECT * FROM Link WHERE porta=portb OR porta IN (SELECT portb FROM Link) OR portb IN (SELECT porta FROM Link);");
+			$rows = $result->fetchAll (PDO::FETCH_ASSOC);
+			if (count($rows) > 0)
+			{
+				foreach ($rows as $row)
+					$invalid_msg .= sprintf("porta: %s, portb: %s\n", $row['porta'], $row['portb']);
+				showFailure("Cannot upgrade because one or more invalid port links exist:\n{$invalid_msg}", __FILE__);
+				die;	
+			}
+
 			$query[] = 'ALTER TABLE `File` ADD `thumbnail` LONGBLOB NULL AFTER `atime`';
 			$query[] = "
 CREATE TABLE `IPv6Address` (
@@ -810,6 +827,42 @@ CREATE TABLE `ObjectLog` (
   KEY `date` (`date`),
   CONSTRAINT `ObjectLog-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `RackObject` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB
+";
+			$query[] = "
+CREATE TRIGGER `checkForDuplicateLinksBeforeInsert` BEFORE INSERT ON `Link`
+  FOR EACH ROW
+BEGIN
+  DECLARE count INTEGER;
+
+  IF NEW.porta = NEW.portb THEN
+    SET NEW.porta = NULL;
+  END IF;
+
+  SELECT COUNT(*) INTO count FROM Link WHERE porta IN (NEW.porta,NEW.portb) OR portb IN (NEW.porta,NEW.portb);
+
+  IF count > 0 THEN
+    SET NEW.porta = NULL;
+  END IF;
+END;
+";
+			$query[] = "
+CREATE TRIGGER `checkForDuplicateLinksBeforeUpdate` BEFORE UPDATE ON `Link`
+  FOR EACH ROW
+BEGIN
+  DECLARE count INTEGER;
+
+  IF NEW.porta = NEW.portb THEN
+    SET NEW.porta = NULL;
+  END IF;
+
+  SELECT COUNT(*) INTO count FROM Link WHERE
+  (NEW.porta IN (porta,portb) AND NEW.porta != porta) OR
+  (NEW.portb IN (porta,portb) AND NEW.portb != portb);
+ 
+  IF count > 0 THEN
+    SET NEW.porta = NULL;
+  END IF;
+END;
 ";
 			$query[] = "ALTER TABLE `TagStorage` CHANGE COLUMN `entity_realm` `entity_realm` ENUM('file','ipv4net','ipv4vs','ipv4rspool','object','rack','user','ipv6net') NOT NULL DEFAULT 'object' FIRST";
 			$query[] = "ALTER TABLE `FileLink` CHANGE COLUMN `entity_type` `entity_type` ENUM('ipv4net','ipv4rspool','ipv4vs','object','rack','user','ipv6net') NOT NULL DEFAULT 'object' AFTER `file_id`";

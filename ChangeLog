@@ -11,6 +11,7 @@
 	bugfix: UI: pager in ipv4net shows appropriate page when IP is highlighted
 	bugfix: create IPv4 network button, if pressed to open in a new window, was redirecting the parent window, too
 	bugfix: when searching for IP not belonging to any known network, the ugly assertion failed page was shown.
+	bugfix: add DB triggers to prevent invalid port links (#363, by Aaron Dummer)
 	update: links to ports added to object search results
 	update: custom rearch results provided by users' plugins now supported
 	new feature: syncdomain.php now can create child processes to speed up 802.1Q sync
