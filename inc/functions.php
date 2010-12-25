@@ -2126,6 +2126,29 @@ function ip_long2quad ($quad)
       return long2ip($quad);
 }
 
+function mkA ($text, $nextpage, $bypass = NULL, $nexttab = NULL)
+{
+	global $page, $tab;
+	if (!mb_strlen ($text))
+		throw new InvalidArgException ('text', $text);
+	if (!array_key_exists ($nextpage, $page))
+		throw new InvalidArgException ('nextpage', $nextpage);
+	$args = array ('page' => $nextpage);
+	if ($nexttab !== NULL)
+	{
+		if (!array_key_exists ($nexttab, $tab[$nextpage]))
+			throw new InvalidArgException ('nexttab', $nexttab);
+		$args['tab'] = $nexttab;
+	}
+	if (array_key_exists ('bypass', $page[$nextpage]))
+	{
+		if ($bypass === NULL)
+			throw new InvalidArgException ('bypass', $bypass);
+		$args[$page[$nextpage]['bypass']] = $bypass;
+	}
+	return '<a href="' . makeHref ($args) . '">' . $text . '</a>';
+}
+
 function makeHref($params = array())
 {
 	$ret = 'index.php?';

@@ -4602,6 +4602,70 @@ function renderPortsReport ()
 	renderReports ($tmp);
 }
 
+function render8021QReport ()
+{
+	if (!count ($domains = getVLANDomainOptions()))
+	{
+		echo '<center><h3>(no VLAN configuration exists)</h3></center>';
+		return;
+	}
+	$vlanstats = array();
+	for ($i = VLAN_MIN_ID; $i <= VLAN_MAX_ID; $i++)
+		$vlanstats[$i] = array();
+	$header = '<tr><th>&nbsp;</th>';
+	foreach ($domains as $domain_id => $domain_name)
+	{
+		foreach (getDomainVLANs ($domain_id) as $vlan_id => $vlan_info)
+			$vlanstats[$vlan_id][$domain_id] = $vlan_info;
+		$header .= '<th>' . mkA ($domain_name, 'vlandomain', $domain_id) . '</th>';
+	}
+	$header .= '</tr>';
+	$output = $available = array();
+	for ($i = VLAN_MIN_ID; $i <= VLAN_MAX_ID; $i++)
+		if (!count ($vlanstats[$i]))
+			$available[] = $i;
+		else
+			$output[$i] = FALSE;
+	foreach (listToRanges ($available) as $span)
+	{
+		if ($span['to'] - $span['from'] < 4)
+			for ($i = $span['from']; $i <= $span['to']; $i++)
+				$output[$i] = FALSE;
+		else
+		{
+			$output[$span['from']] = TRUE;
+			$output[$span['to']] = FALSE;
+		}
+	}
+	ksort ($output, SORT_NUMERIC);
+	$header_delay = 0;
+	startPortlet ('VLAN existence per domain');
+	echo '<table border=1 cellspacing=0 cellpadding=5 align=center>';
+	foreach ($output as $vlan_id => $tbc)
+	{
+		if (--$header_delay <= 0)
+		{
+			echo $header;
+			$header_delay = 50;
+		}
+		echo '<tr><th class=tdright>' . $vlan_id . '</th>';
+		foreach (array_keys ($domains) as $domain_id)
+		{
+			echo '<td class=tdcenter>';
+			if (array_key_exists ($domain_id, $vlanstats[$vlan_id]))
+				echo mkA ('&exist;', 'vlan', "${domain_id}-${vlan_id}");
+			else
+				echo '&nbsp;';
+			echo '</td>';
+		}
+		echo '</tr>';
+		if ($tbc)
+			echo '<tr><th>...</th><td colspan=' . count ($domains) . '>&nbsp;</td></tr>';
+	}
+	echo '</table>';
+	finishPortlet();
+}
+
 function renderReports ($what)
 {
 	if (!count ($what))
