@@ -14,13 +14,7 @@ header ('Content-Type: text/html; charset=UTF-8');
 if (isset ($_REQUEST['tab']) and ! isset ($_SESSION['RTLT'][$pageno]['dont_remember']))
 	$_SESSION['RTLT'][$pageno] = array ('tabname' => $tabno, 'time' => time());
 
-echo '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">'."\n";
-echo '<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">'."\n";
-echo '<head><title>' . getTitle ($pageno) . "</title>\n";
-printPageHeaders();
 ?>
-</head>
-<body>
  <table border=0 cellpadding=0 cellspacing=0 width='100%' height='100%' class=maintable>
  <tr class=mainheader>
   <td colspan=2>
@@ -93,11 +87,19 @@ else
 	</td>
 	</tr>
 	</table>
-</body>
-</html>
 <?php
-	ob_end_flush();
+	$body = ob_get_clean();
+	ob_start();
+	echo '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">'."\n";
+	echo '<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">'."\n";
+	echo '<head><title>' . getTitle ($pageno) . "</title>\n";
+	printPageHeaders();
+	echo "</head>\n";
+	echo "<body>\n$body</body>\n";
+	echo '</html>';
+	ob_flush();
 } catch (Exception $e) {
 	ob_end_clean();
 	printException($e);
 }
+

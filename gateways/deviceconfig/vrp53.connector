@@ -55,6 +55,14 @@ getlldpstatus)
 	printf 'display lldp neighbor\n' >> "$SESSION"
 	outfile="$WORKFILE"
 	;;
+getportstatus)
+	printf 'display interface brief\n' >> "$SESSION"
+	outfile="$WORKFILE"
+	;;
+getmaclist)
+	printf 'display mac-address dynamic\n' >> "$SESSION"
+	outfile="$WORKFILE"
+	;;
 gethndp)
 	printf 'display ndp\n' >> "$SESSION"
 	outfile="$WORKFILE"

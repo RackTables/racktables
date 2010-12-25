@@ -36,6 +36,20 @@ $gwrxlator['get8021q'] = array
 	'nxos4' => 'nxos4Read8021QConfig',
 	'xos12' => 'xos12Read8021QConfig',
 );
+$gwrxlator['getportstatus'] = array
+(
+	'ios12' => 'ciscoReadInterfaceStatus',
+	'vrp53' => 'vrpReadInterfaceStatus',
+	'vrp55' => 'vrpReadInterfaceStatus',
+	'nxos4' => 'ciscoReadInterfaceStatus',
+);
+$gwrxlator['getmaclist'] = array
+(
+	'ios12' => 'ios12ReadMacList',
+	'vrp53' => 'vrp53ReadMacList',
+	'vrp55' => 'vrp55ReadMacList',
+	'nxos4' => 'nxos4ReadMacList',
+);
 
 $gwrxlator['gethndp']['vrp53'] = 'vrp53ReadHNDPStatus';
 
@@ -625,6 +639,7 @@ function ios12ScanTopLevel (&$work, $line)
 	{
 	case (preg_match ('@^interface ((Ethernet|FastEthernet|GigabitEthernet|TenGigabitEthernet|Port-channel)[[:digit:]]+(/[[:digit:]]+)*)$@', $line, $matches)):
 		$work['current'] = array ('port_name' => ios12ShortenIfName ($matches[1]));
+		$work['current']['config'][] = array ('type' => 'line-header', 'line' => $line);
 		return 'ios12PickSwitchportCommand'; // switch to interface block reading
 	case (preg_match ('/^VLAN Name                             Status    Ports$/', $line, $matches)):
 		return 'ios12PickVLANCommand';
@@ -685,11 +700,14 @@ function ios12PickSwitchportCommand (&$work, $line)
 			);
 			break;
 		}
+		if (isset ($work['portdata'][$work['current']['port_name']]))
+			$work['portdata'][$work['current']['port_name']]['config'] = $work['current']['config'];
 		unset ($work['current']);
 		return 'ios12ScanTopLevel';
 	}
 	// not yet
 	$matches = array();
+	$line_class = 'line-8021q';
 	switch (TRUE)
 	{
 	case (preg_match ('@^ switchport mode (.+)$@', $line, $matches)):
@@ -720,7 +738,9 @@ function ios12PickSwitchportCommand (&$work, $line)
 		$work['current']['mode'] = 'IP';
 		break;
 	default: // suppress warning on irrelevant config clause
+		$line_class = 'line-other';
 	}
+	$work['current']['config'][] = array ('type' => $line_class, 'line' => $line);
 	return __FUNCTION__;
 }
 
@@ -941,6 +961,7 @@ function vrp53ScanTopLevel (&$work, $line)
 		$matches[1] = preg_replace ('@^XGigabitEthernet(.+)$@', 'xg\\1', $matches[1]);
 		$matches[1] = preg_replace ('@^Eth-Trunk(.+)$@', 'et\\1', $matches[1]);
 		$work['current'] = array ('port_name' => $matches[1]);
+		$work['current']['config'][] = array ('type' => 'line-header', 'line' => $line);
 		return 'vrp53PickInterfaceSubcommand';
 	default:
 		return __FUNCTION__;
@@ -1002,10 +1023,13 @@ function vrp53PickInterfaceSubcommand (&$work, $line)
 			break;
 		default: // dot1q-tunnel ?
 		}
+		if (isset ($work['portdata'][$work['current']['port_name']]))
+			$work['portdata'][$work['current']['port_name']]['config'] = $work['current']['config'];
 		unset ($work['current']);
 		return 'vrp53ScanTopLevel';
 	}
 	$matches = array();
+	$line_class = 'line-8021q';
 	switch (TRUE)
 	{
 	case (preg_match ('@^ port default vlan ([[:digit:]]+)$@', $line, $matches)):
@@ -1027,7 +1051,9 @@ function vrp53PickInterfaceSubcommand (&$work, $line)
 		break;
 	// TODO: make sure, that a port with "eth-trunk" clause always ends up in "none" mode
 	default: // nom-nom
+		$line_class = 'line-other';
 	}
+	$work['current']['config'][] = array('type' => $line_class, 'line' => $line);
 	return __FUNCTION__;
 }
 
@@ -1043,21 +1069,24 @@ function vrp55Read8021QConfig ($input)
 		$matches = array();
 		// top level
 		if (!array_key_exists ('current', $ret))
+		{
 			switch (TRUE)
 			{
 			case (preg_match ('@^ vlan batch (.+)$@', $line, $matches)):
 				foreach (vrp53ParseVLANString ($matches[1]) as $vlan_id)
 					$ret['vlanlist'][] = $vlan_id;
-				continue 2;
+				break;
 			case (preg_match ('@^interface ((GigabitEthernet|XGigabitEthernet|Eth-Trunk)([[:digit:]]+(/[[:digit:]]+)*))$@', $line, $matches)):
 				$matches[1] = preg_replace ('@^GigabitEthernet(.+)$@', 'gi\\1', $matches[1]);
 				$matches[1] = preg_replace ('@^XGigabitEthernet(.+)$@', 'xg\\1', $matches[1]);
 				$ret['current'] = array ('port_name' => $matches[1]);
-				continue 2;
-			default:
-				continue 2;
+				$ret['current']['config'][] = array ('type' => 'line-header', 'line' => $line);
+				break;
 			}
+			continue;
+		}
 		// inside an interface block
+		$line_class = 'line-8021q';
 		switch (TRUE)
 		{
 		case preg_match ('/^ port (link-type )?hybrid /', $line):
@@ -1134,10 +1163,14 @@ function vrp55Read8021QConfig ($input)
 			case 'SKIP':
 			default: // dot1q-tunnel ?
 			}
+			if (isset ($ret['portdata'][$ret['current']['port_name']]))
+				$ret['portdata'][$ret['current']['port_name']]['config'] = $ret['current']['config'];
 			unset ($ret['current']);
-			break;
+			continue 2;
 		default: // nom-nom
+			$line_class = 'line-other';
 		}
+		$ret['current']['config'][] = array ('type' => $line_class, 'line' => $line);
 	}
 	return $ret;
 }
@@ -1164,6 +1197,7 @@ function nxos4ScanTopLevel (&$work, $line)
 		$matches[1] = preg_replace ('@^Ethernet(.+)$@i', 'e\\1', $matches[1]);
 		$matches[1] = preg_replace ('@^Port-channel(.+)$@i', 'po\\1', $matches[1]);
 		$work['current'] = array ('port_name' => $matches[1]);
+		$work['current']['config'][] = array ('type' => 'line-header', 'line' => $line);
 		return 'nxos4PickSwitchportCommand';
 	case (preg_match ('@^vlan (.+)$@', $line, $matches)):
 		foreach (iosParseVLANString ($matches[1]) as $vlan_id)
@@ -1227,11 +1261,14 @@ function nxos4PickSwitchportCommand (&$work, $line)
 			);
 			// unset (routed), dot1q-tunnel, dynamic, private-vlan --- skip these
 		}
+		if (isset ($work['portdata'][$work['current']['port_name']]))
+			$work['portdata'][$work['current']['port_name']]['config'] = $work['current']['config'];
 		unset ($work['current']);
 		return 'nxos4ScanTopLevel';
 	}
 	// not yet
 	$matches = array();
+	$line_class = 'line-8021q';
 	switch (TRUE)
 	{
 	case (preg_match ('@^  switchport mode (.+)$@', $line, $matches)):
@@ -1257,7 +1294,9 @@ function nxos4PickSwitchportCommand (&$work, $line)
 		$work['current']['mode'] = 'SKIP';
 		break;
 	default: // suppress warning on irrelevant config clause
+		$line_class = 'line-other';
 	}
+	$work['current']['config'][] = array ('type' => $line_class, 'line' => $line);
 	return __FUNCTION__;
 }
 
@@ -1596,6 +1635,205 @@ function xos12Read8021QConfig ($input)
 		}
 	}
 	return $ret;
+}
+
+function ciscoReadInterfaceStatus ($text)
+{
+	$result = array();
+	$state = 'headerSearch';
+	foreach (explode ("\n", $text) as $line)
+	{
+		switch ($state)
+		{
+			case 'headerSearch':
+				if (preg_match('/^Port\s+Name\s+Status/', $line))
+				{
+					$name_field_borders = getColumnCoordinates($line, 'Name');
+					if (isset ($name_field_borders['from']))
+						$state = 'readPort';
+				}
+				break;
+			case 'readPort':
+				$portname = ios12ShortenIfName (trim (substr ($line, 0, $name_field_borders['from'])));
+				$rest = trim (substr ($line, $name_field_borders['from'] + $name_field_borders['length'] + 1));
+				$field_list = preg_split('/\s+/', $rest);
+				if (count ($field_list) < 4)
+					break;
+				list ($status_raw, $vlan, $duplex, $speed, $type) = $field_list;
+				if ($status_raw == 'connected' || $status_raw == 'up')
+					$status = 'up';
+				elseif ($status_raw == 'notconnect' || $status_raw == 'down')
+					$status = 'down';
+				else
+					$status = 'disabled';
+				$result[$portname] = array
+				(
+					'status' => $status,
+					'speed' => $speed,
+					'duplex' => $duplex,
+				);
+				break;
+		}
+	}
+	return $result;
+}
+
+function vrpReadInterfaceStatus ($text)
+{
+	$result = array();
+	$state = 'headerSearch';
+	foreach (explode ("\n", $text) as $line)
+	{
+		switch ($state)
+		{
+			case 'headerSearch':
+				if (preg_match('/^Interface\s+Phy\w*\s+Protocol/i', $line))
+					$state = 'readPort';
+				break;
+			case 'readPort':
+				if (preg_match('/[\$><\]]/', $line))
+					break 2;
+				$field_list = preg_split('/\s+/', $line);
+				if (count ($field_list) < 7)
+					break;
+				list ($portname, $status_raw) = $field_list;
+				$portname = ios12ShortenIfName ($portname);
+
+				if ($status_raw == 'up' || $status_raw == 'down')
+					$status = $status_raw;
+				else
+					$status = 'disabled';
+				$result[$portname] = array
+				(
+					'status' => $status,
+				);
+				break;
+		}
+	}
+	return $result;
+}
+
+function maclist_sort ($a, $b)
+{
+	if ($a['vid'] == $b['vid'])
+		return 0;
+	return ($a['vid'] < $b['vid']) ? -1 : 1;
+}
+
+function ios12ReadMacList ($text)
+{
+	$result = array();
+	$state = 'headerSearch';
+	foreach (explode ("\n", $text) as $line)
+	{
+		switch ($state)
+		{
+			case 'headerSearch':
+				if (preg_match('/Vlan\s+Mac Address\s+Type.*Ports?\s*$/i', $line))
+					$state = 'readPort';
+				break;
+			case 'readPort':
+				if (! preg_match ('/(\d+)\s+([a-f0-9]{4}\.[a-f0-9]{4}\.[a-f0-9]{4})\s.*?(\S+)$/', trim ($line), $matches))
+					break;
+				$portname = ios12ShortenIfName ($matches[3]);
+				$result[$portname][] = array
+				(
+					'mac' => $matches[2],
+					'vid' => $matches[1],
+				);
+				break;
+		}
+	}
+	foreach ($result as $portname => &$maclist)
+		usort ($maclist, 'maclist_sort');
+	return $result;
+}
+
+function nxos4ReadMacList ($text)
+{
+	$result = array();
+	$state = 'headerSearch';
+	foreach (explode ("\n", $text) as $line)
+	{
+		switch ($state)
+		{
+			case 'headerSearch':
+				if (preg_match('/VLAN\s+MAC Address\s+Type\s+age\s+Secure\s+NTFY\s+Ports/i', $line))
+					$state = 'readPort';
+				break;
+			case 'readPort':
+				if (! preg_match ('/(\d+)\s+([a-f0-9]{4}\.[a-f0-9]{4}\.[a-f0-9]{4})\s.*?(\S+)$/', trim ($line), $matches))
+					break;
+				$portname = ios12ShortenIfName ($matches[3]);
+				$result[$portname][] = array
+				(
+					'mac' => $matches[2],
+					'vid' => $matches[1],
+				);
+				break;
+		}
+	}
+	foreach ($result as $portname => &$maclist)
+		usort ($maclist, 'maclist_sort');
+	return $result;
+}
+
+function vrp53ReadMacList ($text)
+{
+	$result = array();
+	$state = 'headerSearch';
+	foreach (explode ("\n", $text) as $line)
+	{
+		switch ($state)
+		{
+			case 'headerSearch':
+				if (preg_match('/MAC Address\s+VLAN\/VSI\s+Port/i', $line))
+					$state = 'readPort';
+				break;
+			case 'readPort':
+				if (! preg_match ('/([a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4})\s+(\d+)\s+(\S+)/', trim ($line), $matches))
+					break;
+				$portname = ios12ShortenIfName ($matches[3]);
+				$result[$portname][] = array
+				(
+					'mac' => str_replace ('-', '.', $matches[1]),
+					'vid' => $matches[2],
+				);
+				break;
+		}
+	}
+	foreach ($result as $portname => &$maclist)
+		usort ($maclist, 'maclist_sort');
+	return $result;
+}
+
+function vrp55ReadMacList ($text)
+{
+	$result = array();
+	$state = 'headerSearch';
+	foreach (explode ("\n", $text) as $line)
+	{
+		switch ($state)
+		{
+			case 'headerSearch':
+				if (preg_match('/MAC Address\s+VLAN\/\S*\s+PEVLAN\s+CEVLAN\s+Port/i', $line))
+					$state = 'readPort';
+				break;
+			case 'readPort':
+				if (! preg_match ('/([a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4})\s+(\d+)(?:\s+\S+){2}\s+(\S+)/', trim ($line), $matches))
+					break;
+				$portname = ios12ShortenIfName ($matches[3]);
+				$result[$portname][] = array
+				(
+					'mac' => str_replace ('-', '.', $matches[1]),
+					'vid' => $matches[2],
+				);
+				break;
+		}
+	}
+	foreach ($result as $portname => &$maclist)
+		usort ($maclist, 'maclist_sort');
+	return $result;
 }
 
 ?>

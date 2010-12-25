@@ -2654,10 +2654,10 @@ function ios12ShortenIfName ($ifname)
 {
 	$ifname = preg_replace ('@^Eth(?:ernet)?(.+)$@', 'e\\1', $ifname);
 	$ifname = preg_replace ('@^FastEthernet(.+)$@', 'fa\\1', $ifname);
-	$ifname = preg_replace ('@^GigabitEthernet(.+)$@', 'gi\\1', $ifname);
+	$ifname = preg_replace ('@^(?:GigabitEthernet|GE)(.+)$@', 'gi\\1', $ifname);
 	$ifname = preg_replace ('@^TenGigabitEthernet(.+)$@', 'te\\1', $ifname);
 	$ifname = preg_replace ('@^Port-channel(.+)$@', 'po\\1', $ifname);
-	$ifname = preg_replace ('@^XGigabitEthernet(.+)$@', 'xg\\1', $ifname);
+	$ifname = preg_replace ('@^(?:XGigabitEthernet|XGE)(.+)$@', 'xg\\1', $ifname);
 	$ifname = strtolower ($ifname);
 	return $ifname;
 }
@@ -3462,16 +3462,21 @@ function printPageHeaders ()
 	ksort ($pageheaders);
 	foreach ($pageheaders as $s)
 		echo $s . "\n";
-	echo "<style type='text/css'>\n";
-	foreach (array ('F', 'A', 'U', 'T', 'Th', 'Tw', 'Thw') as $statecode)
-	{
-		echo "td.state_${statecode} {\n";
-		echo "\ttext-align: center;\n";
-		echo "\tbackground-color: #" . (getConfigVar ('color_' . $statecode)) . ";\n";
-		echo "\tfont: bold 10px Verdana, sans-serif;\n";
-		echo "}\n\n";
-	}
-	echo '</style>';
+
+	// add CSS styles
+	foreach (addCSS (NULL) as $item)
+		if ($item['type'] == 'inline')
+			echo '<style type="text/css">' . "\n" . trim ($item['style'], "\r\n") . "\n</style>\n";
+		elseif ($item['type'] == 'file')
+			echo '<link rel="stylesheet" type="text/css" href="' . htmlspecialchars ($item['style']) . "\" />\n";
+
+	// add JS scripts
+	foreach (addJS (NULL) as $group_name => $js_list)
+		foreach ($js_list as $item)
+			if ($item['type'] == 'inline')
+				echo '<script type="text/javascript">' . "\n" . trim ($item['script'], "\r\n") . "\n</script>\n";
+			elseif ($item['type'] == 'file')
+				echo '<script type="text/javascript" src="' . htmlspecialchars($item['script']) . "\"></script>\n";
 }
 
 function strerror8021Q ($errno)
@@ -4129,6 +4134,128 @@ function getRackCode ($text)
 		return array ('result' => 'NAK', 'load' => 'Empty parse tree found in ' . __FUNCTION__);
 	require_once 'inc/code.php'; // for semanticFilter()
 	return semanticFilter ($synt['load']);
+}
+
+// returns array with 'from', 'length' keys.
+// if not found, 'from' is NULL;
+// if length is not defined (to the end of line), length is -1
+function getColumnCoordinates ($line, $column_name, $align = 'left')
+{
+	$result = array ('from' => NULL, 'length' => -1);
+	$items = preg_split('/\s+/', $line);
+	for ($i = 0; $i < count ($items); $i++)
+	{
+		$item = $items[$i];
+		if ($column_name == $item)
+		{
+			$current_start = strpos ($line, $items[$i]);
+			if ($align == 'left')
+			{
+				$result['from'] = $current_start;
+				if ($i < count ($items) - 1)
+				{
+					$next_start = strpos ($line, $items[$i + 1]);
+					$result['length'] = $next_start - $result['from'] - 1;
+				}
+				else
+					$result['length'] = -1;
+			}
+			elseif ($align == 'right')
+			{
+				if ($i > 0)
+					$prev_end = strpos ($line, $items[$i - 1]) + strlen ($items[$i - 1]);
+				else
+					$prev_end = -1;
+				$result['from'] = $prev_end + 1;
+				$result['length'] = $current_start - $result['from'] + strlen ($column_name);
+			}
+			break;
+		}
+	}
+	return $result;
+}
+
+// JS scripts should be included through this function.
+// They automatically appear in the <head> of your page.
+// $data is a JS filename, or JS code w/o tags around, if $inline = TRUE
+// Scripts are included in the order of adding within the same group, and groups are sorted alphabetically.
+function addJS ($data, $inline = FALSE, $group = 'default')
+{
+	static $javascript = array();
+	static $seen_filenames = array();
+	
+	if (! isset ($data))
+	{
+		ksort ($javascript);
+		return $javascript;
+	}
+	// Add jquery.js and racktables.js the first time a Javascript file is added.
+	if (empty($javascript))
+	{
+		$javascript = array
+		(
+			'a_core' => array
+			(
+				array('type' => 'file', 'script' => 'js/jquery-1.4.4.min.js'),
+				array('type' => 'file', 'script' => 'js/racktables.js'),
+			),
+		);
+
+		// initialize core js filelist
+		foreach ($javascript as $group_name => $group_array)
+			foreach ($group_array as $item)
+				if ($item['type'] == 'file')
+					$seen_filenames[$item['script']] = 1;
+	}
+
+	if ($inline)
+		$javascript[$group][] = array
+		(
+			'type' => 'inline',
+			'script' => $data,
+		);
+	elseif (! isset ($seen_filenames[$data]))
+	{
+		$javascript[$group][] = array
+		(
+			'type' => 'file',
+			'script' => $data,
+		);
+		$seen_filenames[$data] = 1;
+	}
+}
+
+// CSS styles should be included through this function.
+// They automatically appear in the <head> of your page.
+// $data is a CSS filename, or CSS code w/o tags around, if $inline = TRUE
+// Styles are included in the order of adding.
+function addCSS ($data, $inline = FALSE)
+{
+	static $styles = array();
+	static $seen_filenames = array();
+	
+	if (! isset ($data))
+		return $styles;
+	if ($inline)
+		$styles[] = array
+		(
+			'type' => 'inline',
+			'style' => $data,
+		);
+	elseif (! isset ($seen_filenames[$data]))
+	{
+		$styles[] = array
+		(
+			'type' => 'file',
+			'style' => $data,
+		);
+		$seen_filenames[$data] = 1;
+	}
+}
+
+function isEthernetPort($port)
+{
+	return ($port['iif_id'] != 1 or preg_match('/Base|LACP/i', $port['oif_name']));
 }
 
 ?>

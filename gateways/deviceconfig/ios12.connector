@@ -60,6 +60,14 @@ getlldpstatus)
 	printf 'term len 0\nshow lldp neighbors\n' >> "$SESSION"
 	outfile="$WORKFILE"
 	;;
+getportstatus)
+	printf 'term len 0\nshow int status\n' >> "$SESSION"
+	outfile="$WORKFILE"
+	;;
+getmaclist)
+	printf 'term len 0\nshow mac address-table dynamic\n' >> "$SESSION"
+	outfile="$WORKFILE"
+	;;
 deploy)
 	cat "$WORKFILE" >> "$SESSION"
 	outfile=/dev/null

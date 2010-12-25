@@ -66,6 +66,22 @@ if ($command eq "getcdpstatus") {
     print WORKFILE @r, "\n\n";;
     exit(0);
 }
+if ($command eq "getportstatus") {
+    open(WORKFILE, ">$workfile") || die "$workfile: $!";
+    $session->cmd ('terminal length 0');
+    $session->cmd ('terminal no monitor');
+    my @r = $session->cmd ('show int status');
+    print WORKFILE @r, "\n\n";;
+    exit(0);
+}
+if ($command eq "getmaclist") {
+    open(WORKFILE, ">$workfile") || die "$workfile: $!";
+    $session->cmd ('terminal length 0');
+    $session->cmd ('terminal no monitor');
+    my @r = $session->cmd ('show mac address-table dynamic');
+    print WORKFILE @r, "\n\n";;
+    exit(0);
+}
 if ($command eq "deploy") {
     open(WORKFILE, "<$workfile") || die "$workfile: $!";
     while (<WORKFILE>) {

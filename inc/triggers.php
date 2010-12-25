@@ -79,6 +79,15 @@ function trigger_livevlans ()
 	);
 }
 
+// This trigger is on when any of the (get_mac_list, get_link_status) ops permitted
+function trigger_liveports ()
+{
+	if (permitted (NULL, 'liveports', 'get_mac_list') or
+		permitted (NULL, 'liveports', 'get_link_status'))
+		return 'std';
+	return '';
+}
+
 // SNMP port finder tab trigger. At the moment we decide on showing it
 // for pristine switches/PDUs only. Once a user has begun
 // filling the data in, we stop showing the tab.

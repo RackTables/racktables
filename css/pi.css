@@ -208,8 +208,6 @@ body {
   margin: 0px;
   background-attachment : fixed;
   background-color : #FCFCFC;
-  font-family: Arial, Sans-Serif, sans-serif;
-  font-size : small;
 }
 /* collapse space between headings, and where paragraph follows heading */
 hr {
@@ -544,3 +542,85 @@ a.toggleTreeMode {
 .border_highlight {
 	border: solid 4px lime !important;
 }
+
+/*this style is used for <a>s which does not contain href (ancors), to make them look like plain text*/
+.nolink {
+	text-decoration: none;
+	color: black;
+	font-family: Arial,Sans-Serif,sans-serif;
+	font-size: small;
+}
+.nolink:hover {
+	text-decoration: none;
+}
+
+/*this class controls popup switch info. It should be on the element which contains portname in plain text*/
+.interactive-portname {
+	cursor: default;
+}
+
+/*item to the left of portname (link indicator)*/
+.port-link {
+	margin-right: 10px;
+}
+
+/*item to the right of portname (mac count)*/
+.mac-count {
+	display: inline;
+	margin-left: 3px;
+	font-size: 80%;
+}
+
+/*general class for popup div*/
+.popup-box {
+	display: none;
+	border: 1px solid #000000;
+	background: #FFFFFF;
+	padding: 0px 5px;
+}
+
+/*popup div with MAC list*/
+.mac-list {
+	font-family: monospace;
+	overflow: auto;
+	max-height: 200px;
+	min-width: 200px;
+}
+
+/*popup div with port configuration lines*/
+.port-config {
+	display: none;
+	border: 1px solid #000000;
+	background-color: #FFFFFF;
+	padding: 5px;
+	font-family: monospace;
+}
+
+/*header line in port conf popup div*/
+.port-config .line-header {
+	font-weight: bold;
+	font-size: 105%;
+}
+
+/*8021q line in port conf popup div*/
+.port-config .line-8021q {
+	color: #9b9b9b
+}
+
+/*other lines in port conf popup div*/
+.port-config .line-other {
+	color: #f52328
+}
+
+/*link to popup menu (...) showed on td hover*/
+.port-popup {
+	margin-left: 3px;
+	font-family: Arial,Sans-Serif,sans-serif;
+}
+
+/*common rack item attributes*/
+.atom {
+	text-align: center;
+	font: bold 10px Verdana, sans-serif;
+}
+
