@@ -133,6 +133,15 @@ function assertUIntArg ($argname, $allow_zero = FALSE)
 		throw new InvalidRequestArgException($argname, $_REQUEST[$argname], 'parameter is zero');
 }
 
+function isInteger ($arg, $allow_zero = FALSE)
+{
+	if (! is_numeric ($arg))
+		return FALSE;
+	if (! $allow_zero and ! $arg)
+		return FALSE;
+	return TRUE;
+}
+
 // This function assures that specified argument was passed
 // and is a non-empty string.
 function assertStringArg ($argname, $ok_if_empty = FALSE)
@@ -198,6 +207,13 @@ function assertPCREArg ($argname)
 	assertStringArg ($argname, TRUE); // empty pattern is Ok
 	if (FALSE === preg_match ($_REQUEST[$argname], 'test'))
 		throw new InvalidRequestArgException($argname, $_REQUEST[$argname], 'PCRE validation failed');
+}
+
+function isPCRE ($arg)
+{
+	if (! isset ($arg) or FALSE === preg_match ($arg, 'test'))
+		return FALSE;
+	return TRUE;
 }
 
 // Objects of some types should be explicitly shown as

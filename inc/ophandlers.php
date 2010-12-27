@@ -2709,98 +2709,86 @@ function updVLANSwitchTemplate()
 	return buildRedirectURL (__FUNCTION__, $result !== FALSE ? 'OK' : 'ERR');
 }
 
-$msgcode['addVSTRule']['OK'] = 48;
-$msgcode['addVSTRule']['ERR1'] = 110;
-$msgcode['addVSTRule']['ERR2'] = 179;
-function addVSTRule()
+$msgcode['cloneVSTRule']['OK'] = 48;
+$msgcode['cloneVSTRule']['ERR'] = 179;
+function cloneVSTRule()
 {
+	global $dbxlink;
+	$message = '';
 	assertUIntArg ('vst_id');
-	assertStringArg ('submode');
-	switch ($_REQUEST['submode'])
+	assertUIntArg ('mutex_rev', TRUE);
+	$dst_vst = getVLANSwitchTemplate ($_REQUEST['vst_id']);
+	if ($dst_vst['mutex_rev'] != $_REQUEST['mutex_rev'])
+		$message = "User ${dst_vst['saved_by']} saved this template after you started to edit it. Please concern differencies";
+	else
 	{
-	case 'addnew':
-		assertUIntArg ('rule_no');
-		assertPCREArg ('port_pcre');
-		assertStringArg ('port_role');
-		assertStringArg ('wrt_vlans', TRUE);
-		assertStringArg ('description', TRUE);
-		global $sic;
-		$result = usePreparedInsertBlade
-		(
-			'VLANSTRule',
-			array
-			(
-				'vst_id' => $sic['vst_id'],
-				'rule_no' => $sic['rule_no'],
-				'port_pcre' => $sic['port_pcre'],
-				'port_role' => $sic['port_role'],
-				'wrt_vlans' => $sic['wrt_vlans'],
-				'description' => $sic['description'],
-			)
-		);
-		return buildRedirectURL (__FUNCTION__, $result ? 'OK' : 'ERR1');
-		break;
-	case 'copyfrom':
-		$dst_vst = getVLANSwitchTemplate ($_REQUEST['vst_id']);
-		// FIXME: this is a race condition, which is better handled with proper locking
-		if (count ($dst_vst['rules']))
-			return buildRedirectURL (__FUNCTION__, $result ? 'OK' : 'ERR2');
 		assertUIntArg ('from_id');
 		$src_vst = getVLANSwitchTemplate ($_REQUEST['from_id']);
-		foreach ($src_vst['rules'] as $rule)
-		{
-			$rule['vst_id'] = $_REQUEST['vst_id'];
-			usePreparedInsertBlade ('VLANSTRule', $rule);
-		}
-		return buildRedirectURL (__FUNCTION__, 'OK');
-		break;
-	default:
-		throw new InvalidArgException ('submode', $_REQUEST['submode']);
+		if (! commitUpdateVSTRules ($_REQUEST['vst_id'], $src_vst['rules']))
+			$message = 'DB error';
 	}
+	$result = !(BOOL) $message;
+	if ($result)
+		$message = 'Supplement succeeded';
+	return buildWideRedirectURL (array (array ('code' => $result ? 'success' : 'error', 'message' => $message)));
 }
 
-$msgcode['delVSTRule']['OK'] = 49;
-$msgcode['delVSTRule']['ERR'] = 111;
-function delVSTRule()
-{
-	assertUIntArg ('vst_id');
-	assertUIntArg ('rule_no');
-	global $sic;
-	$result = FALSE !== usePreparedDeleteBlade
-	(
-		'VLANSTRule',
-		array
-		(
-			'vst_id' => $sic['vst_id'],
-			'rule_no' => $sic['rule_no']
-		)
-	);
-	return buildRedirectURL (__FUNCTION__, $result ? 'OK' : 'ERR');
-}
-
-$msgcode['updVSTRule']['OK'] = 51;
-$msgcode['updVSTRule']['ERR'] = 109;
 function updVSTRule()
 {
+	global $port_role_options;
 	assertUIntArg ('vst_id');
-	assertUIntArg ('rule_no');
-	assertUIntArg ('new_rule_no');
-	assertPCREArg ('port_pcre');
-	assertStringArg ('port_role');
-	assertStringArg ('wrt_vlans', TRUE);
-	assertStringArg ('description', TRUE);
-	global $sic;
-	$result = commitUpdateVSTRule
-	(
-		$sic['vst_id'],
-		$sic['rule_no'],
-		$sic['new_rule_no'],
-		$sic['port_pcre'],
-		$sic['port_role'],
-		$sic['wrt_vlans'],
-		$sic['description']
-	);
-	return buildRedirectURL (__FUNCTION__, $result !== FALSE ? 'OK' : 'ERR');
+	assertUIntArg ('mutex_rev', TRUE);
+	assertStringArg ('template_json');
+	$message = '';
+	$data = json_decode ($_POST['template_json'], TRUE);
+	if (! isset ($data) or ! is_array ($data))
+		$message = 'Invalid JSON code received from client';
+	else
+	{
+		$rule_no = 0;
+		foreach ($data as $rule)
+		{
+			$rule_no++;
+			if (! isInteger ($rule['rule_no']))
+				$message = 'Invalid rule number';
+			elseif (! isPCRE ($rule['port_pcre']))
+				$message = 'Invalid port regexp';
+			elseif (! isset ($rule['port_role']) or ! array_key_exists ($rule['port_role'], $port_role_options))
+				$message = 'Invalid port role';
+			elseif (! isset ($rule['wrt_vlans']) or ! preg_match ('/^[ 0-9\-,]*$/', $rule['wrt_vlans']))
+				$message = 'Invalid port vlan mask';
+			elseif (! isset ($rule['description']))
+				$message = 'Invalid description';
+
+			if ($message)
+			{
+				$message .= " in rule $rule_no";
+				break;
+			}
+		}
+		if (! $message)
+		{
+			$vst = getVLANSwitchTemplate ($_REQUEST['vst_id']);
+			if ($vst['mutex_rev'] != $_REQUEST['mutex_rev'])
+				$message = "User ${vst['saved_by']} saved this template after you started to edit it. Please concern differencies";
+		}
+		if (! $message)
+			if (! commitUpdateVSTRules ($_REQUEST['vst_id'], $data))
+				$message = 'DB update error';
+		if ($message)
+			$_SESSION['vst_edited'] = $data;
+	}
+	if ($message)
+	{
+		$result = FALSE;
+		$message = "Template update failed: $message";
+	}
+	else
+	{
+		$result = TRUE;
+		$message = "Update success";
+	}
+	return buildWideRedirectURL (array (array ('code' => $result ? 'success' : 'error', 'message' => $message)));
 }
 
 $msgcode['importDPData']['OK'] = 44;

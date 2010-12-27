@@ -62,17 +62,6 @@ $dqtitle = array
 	'done' => 'Up to date',
 );
 
-// VST roles
-$port_role_options = array
-(
-	'none' => 'none',
-	'access' => 'user: access only',
-	'trunk' => 'user: trunk only',
-	'anymode' => 'user: any mode',
-	'uplink' => 'system: uplink trunk',
-	'downlink' => 'system: downlink trunk',
-);
-
 // Let's have it here, so extensions can add their own images.
 $image = array();
 $image['error']['path'] = 'pix/error.png';
@@ -8795,23 +8784,18 @@ function renderVSTListEditor()
 	echo '</table>';
 }
 
-function renderVST ($vst_id)
+function renderVSTRules ($rules, $title = NULL)
 {
-	global $nextorder;
-	$vst = getVLANSwitchTemplate ($vst_id);
-	echo '<table border=0 class=objectview cellspacing=0 cellpadding=0>';
-	echo "<tr><td colspan=2 align=center><h1>${vst['description']}</h1><h2>";
-	echo "<tr><td class=pcleft width='50%'>";
-	if (!count ($vst['rules']))
-		startPortlet ('no rules');
+	if (!count ($rules))
+		startPortlet (isset ($title) ? $title : 'no rules');
 	else
 	{
 		global $port_role_options;
-		startPortlet ('rules (' . count ($vst['rules']) . ')');
+		startPortlet (isset ($title) ? $title : 'rules (' . count ($rules) . ')');
 		echo '<table class=cooltable align=center border=0 cellpadding=5 cellspacing=0>';
 		echo '<tr><th>sequence</th><th>regexp</th><th>role</th><th>VLAN IDs</th><th>comment</th></tr>';
 		$order = 'odd';
-		foreach ($vst['rules'] as $item)
+		foreach ($rules as $item)
 		{
 			echo "<tr class=row_${order} align=left>";
 			echo "<td>${item['rule_no']}</td>";
@@ -8825,6 +8809,15 @@ function renderVST ($vst_id)
 		echo '</table>';
 	}
 	finishPortlet();
+}
+
+function renderVST ($vst_id)
+{
+	$vst = getVLANSwitchTemplate ($vst_id);
+	echo '<table border=0 class=objectview cellspacing=0 cellpadding=0>';
+	echo "<tr><td colspan=2 align=center><h1>${vst['description']}</h1><h2>";
+	echo "<tr><td class=pcleft width='50%'>";
+	renderVSTRules ($vst['rules']);
 	echo '</td><td class=pcright>';
 	if (!count ($vst['switches']))
 		startPortlet ('no orders');
@@ -8864,19 +8857,6 @@ function renderVSTEditor ($vst_id)
 
 function renderVSTRulesEditor ($vst_id)
 {
-	function printNewItemTR ($port_role_options)
-	{
-		printOpFormIntro ('add', array ('submode' => 'addnew'));
-		echo '<tr>';
-		echo '<td>' . getImageHREF ('add', 'add rule', TRUE, 110) . '</td>';
-		echo '<td><input type=text tabindex=101 name=rule_no size=3></td>';
-		echo '<td><input type=text tabindex=102 name=port_pcre></td>';
-		echo '<td>' . getSelect ($port_role_options, array ('name' => 'port_role', 'tabindex' => 103), 'none') . '</td>';
-		echo '<td><input type=text tabindex=104 name=wrt_vlans></td>';
-		echo '<td><input type=text tabindex=105 name=description></td>';
-		echo '<td>' . getImageHREF ('add', 'add rule', TRUE, 110) . '</td>';
-		echo '</tr></form>';
-	}
 	$vst = getVLANSwitchTemplate ($vst_id);
 	if (count ($vst['rules']))
 		$source_options = array();
@@ -8888,40 +8868,46 @@ function renderVSTRulesEditor ($vst_id)
 			if ($vst_info['rulec'])
 				$source_options[$vst_id] = niftyString ('(' . $vst_info['rulec'] . ') ' . $vst_info['description']);
 	}
+	addJS ('js/vst_editor.js');
 	echo '<center><h1>' . niftyString ($vst['description']) . '</h1></center>';
 	if (count ($source_options))
 	{
 		startPortlet ('clone another template');
-		printOpFormIntro ('add', array ('submode' => 'copyfrom'));
+		printOpFormIntro ('clone');
+		echo '<input type=hidden name="mutex_rev" value="' . $vst['mutex_rev'] . '">';
 		echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
 		echo '<tr><td>' . getSelect ($source_options, array ('name' => 'from_id')) . '</td>';
 		echo '<td>' . getImageHREF ('COPY', 'copy from selected', TRUE) . '</td></tr></table></form>';
 		finishPortlet();
 		startPortlet ('add rules one by one');
 	}
-	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
-	echo '<tr><th>&nbsp;</th><th>sequence</th><th>regexp</th><th>role</th>';
-	echo '<th>VLAN IDs</th><th>comment</th><th>&nbsp;</th></tr>';
+	echo '<table cellspacing=0 cellpadding=5 align=center class="widetable template-rules">';
+	echo '<tr><th></th><th>sequence</th><th>regexp</th><th>role</th>';
+	echo '<th>VLAN IDs</th><th>comment</th><th><a href="#" class="vst-add-rule initial">' . getImageHREF ('add', 'add rule') . '</a></th></tr>';
 	global $port_role_options;
-	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
-		printNewItemTR ($port_role_options);
-	foreach ($vst['rules'] as $item)
-	{
-		printOpFormIntro ('upd', array ('rule_no' => $item['rule_no']));
-		echo '<tr>';
-		echo '<td><a href="' . makeHrefProcess (array ('op' => 'del', 'vst_id' => $vst_id, 'rule_no' => $item['rule_no'])) . '">';
-		echo getImageHREF ('destroy', 'delete rule') . '</a></td>';
-		echo "<td><input type=text name=new_rule_no value=${item['rule_no']} size=3></td>";
-		echo "<td><input type=text name=port_pcre value='" . niftyString ($item['port_pcre'], 0) . "'></td>";
-		echo '<td>' . getSelect ($port_role_options, array ('name' => 'port_role'), $item['port_role']) . '</td>';
-		echo "<td><input type=text name=wrt_vlans value='${item['wrt_vlans']}'></td>";
-		echo "<td><input type=text name=description value='${item['description']}'></td>";
-		echo '<td>' . getImageHref ('save', 'update rule', TRUE) . '</td>';
-		echo '</tr></form>';
-	}
-	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')
-		printNewItemTR ($port_role_options);
+	$row_html  = '<td><a href="#" class="vst-del-rule">' . getImageHREF ('destroy', 'delete rule') . '</a></td>';
+	$row_html .= '<td><input type=text name=rule_no value="%s" size=3></td>';
+	$row_html .= '<td><input type=text name=port_pcre value="%s"></td>';
+	$row_html .= '<td>%s</td>';
+	$row_html .= '<td><input type=text name=wrt_vlans value="%s"></td>';
+	$row_html .= '<td><input type=text name=description value="%s"></td>';
+	$row_html .= '<td><a href="#" class="vst-add-rule">' . getImageHREF ('add', 'add rule') . '</a></td>';
+	addJS ("var new_vst_row = '" . addslashes (sprintf ($row_html, '', '', getSelect ($port_role_options, array ('name' => 'port_role'), 'anymode'), '', '')) . "';", TRUE);
+	foreach (isset ($_SESSION['vst_edited']) ? $_SESSION['vst_edited'] : $vst['rules'] as $item)
+		printf ('<tr>' . $row_html . '</tr>', $item['rule_no'],  niftyString ($item['port_pcre'], 0),  getSelect ($port_role_options, array ('name' => 'port_role'), $item['port_role']), $item['wrt_vlans'], $item['description']);
 	echo '</table>';
+	printOpFormIntro ('upd');
+	echo '<input type=hidden name="template_json">';
+	echo '<input type=hidden name="mutex_rev" value="' . $vst['mutex_rev'] . '">';
+	echo '<center>' . getImageHref ('SAVE', 'Save template', TRUE) . '</center>';
+	echo '</form>';
+	if (isset ($_SESSION['vst_edited']))
+	{
+		// draw current template
+		renderVSTRules ($vst['rules'], 'currently saved tamplate');
+		unset ($_SESSION['vst_edited']);
+	}
+	
 	if (count ($source_options))
 		finishPortlet();
 }

@@ -171,6 +171,17 @@ $tablemap_8021q = array
 	),
 );
 
+// VST roles
+$port_role_options = array
+(
+	'none' => 'none',
+	'access' => 'user: access only',
+	'trunk' => 'user: trunk only',
+	'anymode' => 'user: any mode',
+	'uplink' => 'system: uplink trunk',
+	'downlink' => 'system: downlink trunk',
+);
+
 $object_attribute_cache = array();
 
 function escapeString ($value, $do_db_escape = FALSE)
@@ -4326,7 +4337,7 @@ function getVSTOptions()
 
 function getVLANSwitchTemplate ($vst_id)
 {
-	$result = usePreparedSelectBlade ('SELECT id, max_local_vlans, description FROM VLANSwitchTemplate WHERE id = ?', array ($vst_id));
+	$result = usePreparedSelectBlade ('SELECT * FROM VLANSwitchTemplate WHERE id = ?', array ($vst_id));
 	if (!($ret = $result->fetch (PDO::FETCH_ASSOC)))
 		throw new EntityNotFoundException ('vst', $vst_id);
 	unset ($result);
@@ -4364,6 +4375,26 @@ function commitUpdateVSTRule ($vst_id, $rule_no, $new_rule_no, $port_pcre, $port
 		'WHERE vst_id = ? AND rule_no = ?',
 		array ($new_rule_no, $port_pcre, $port_role, $wrt_vlans, $description, $vst_id, $rule_no)
 	);
+}
+
+function commitUpdateVSTRules ($vst_id, $rules)
+{
+	global $dbxlink, $remote_username;
+	$dbxlink->beginTransaction();
+	try
+	{
+		usePreparedDeleteBlade ('VLANSTRule', array ('vst_id' => $vst_id));
+		foreach ($rules as $rule)
+			usePreparedInsertBlade ('VLANSTRule', array_merge (array ('vst_id' => $vst_id), $rule));
+		usePreparedExecuteBlade ('UPDATE VLANSwitchTemplate SET mutex_rev=mutex_rev+1, saved_by=? WHERE id=?', array ($remote_username, $vst_id));
+	}
+	catch (Exception $e)
+	{
+		$dbxlink->rollBack();
+		return FALSE;
+	}
+	$dbxlink->commit();
+	return TRUE;
 }
 
 function getIPv4Network8021QBindings ($ipv4net_id)

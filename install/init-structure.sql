@@ -571,6 +571,8 @@ CREATE TABLE `VLANSwitchTemplate` (
   `id` int(10) unsigned NOT NULL auto_increment,
   `max_local_vlans` int(10) unsigned default NULL,
   `description` char(255) default NULL,
+  `mutex_rev` int(10) NOT NULL,
+  `saved_by` char(64) NOT NULL,
   PRIMARY KEY  (`id`),
   UNIQUE KEY `description` (`description`)
 ) ENGINE=InnoDB;

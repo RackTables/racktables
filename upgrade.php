@@ -870,6 +870,8 @@ END;
 			$query[] = 'ALTER TABLE RackSpace ADD CONSTRAINT `RackSpace-FK-rack_id` FOREIGN KEY (rack_id) REFERENCES Rack (id)';
 			$query[] = "ALTER TABLE `IPv4Allocation` ADD CONSTRAINT `IPv4Allocation-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `RackObject` (`id`) ON DELETE CASCADE";
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('SYNCDOMAIN_MAX_PROCESSES','0','uint','yes','no', 'How many worker proceses syncdomain cron script should create')";
+			$query[] = "ALTER TABLE `VLANSwitchTemplate` ADD COLUMN `mutex_rev` int(10) NOT NULL AFTER `max_local_vlans`";
+			$query[] = "ALTER TABLE `VLANSwitchTemplate` ADD COLUMN `saved_by` char(64) NOT NULL AFTER `description`";
 			$query[] = "UPDATE Config SET varvalue = '0.19.0' WHERE varname = 'DB_VERSION'";
 			break;
 		default:
