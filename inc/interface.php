@@ -8790,7 +8790,7 @@ function renderVSTRules ($rules, $title = NULL)
 		startPortlet (isset ($title) ? $title : 'no rules');
 	else
 	{
-		global $port_role_options;
+		global $port_role_options, $nextorder;
 		startPortlet (isset ($title) ? $title : 'rules (' . count ($rules) . ')');
 		echo '<table class=cooltable align=center border=0 cellpadding=5 cellspacing=0>';
 		echo '<tr><th>sequence</th><th>regexp</th><th>role</th><th>VLAN IDs</th><th>comment</th></tr>';
