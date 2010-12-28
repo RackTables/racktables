@@ -8881,9 +8881,10 @@ function renderVSTRulesEditor ($vst_id)
 		finishPortlet();
 		startPortlet ('add rules one by one');
 	}
+	printOpFormIntro ('upd');
 	echo '<table cellspacing=0 cellpadding=5 align=center class="widetable template-rules">';
 	echo '<tr><th></th><th>sequence</th><th>regexp</th><th>role</th>';
-	echo '<th>VLAN IDs</th><th>comment</th><th><a href="#" class="vst-add-rule initial">' . getImageHREF ('add', 'add rule') . '</a></th></tr>';
+	echo '<th>VLAN IDs</th><th>comment</th><th><a href="#" class="vst-add-rule initial">' . getImageHREF ('add', 'Add rule') . '</a></th></tr>';
 	global $port_role_options;
 	$row_html  = '<td><a href="#" class="vst-del-rule">' . getImageHREF ('destroy', 'delete rule') . '</a></td>';
 	$row_html .= '<td><input type=text name=rule_no value="%s" size=3></td>';
@@ -8891,12 +8892,11 @@ function renderVSTRulesEditor ($vst_id)
 	$row_html .= '<td>%s</td>';
 	$row_html .= '<td><input type=text name=wrt_vlans value="%s"></td>';
 	$row_html .= '<td><input type=text name=description value="%s"></td>';
-	$row_html .= '<td><a href="#" class="vst-add-rule">' . getImageHREF ('add', 'add rule') . '</a></td>';
+	$row_html .= '<td><a href="#" class="vst-add-rule">' . getImageHREF ('add', 'Duplicate rule') . '</a></td>';
 	addJS ("var new_vst_row = '" . addslashes (sprintf ($row_html, '', '', getSelect ($port_role_options, array ('name' => 'port_role'), 'anymode'), '', '')) . "';", TRUE);
 	foreach (isset ($_SESSION['vst_edited']) ? $_SESSION['vst_edited'] : $vst['rules'] as $item)
 		printf ('<tr>' . $row_html . '</tr>', $item['rule_no'],  niftyString ($item['port_pcre'], 0),  getSelect ($port_role_options, array ('name' => 'port_role'), $item['port_role']), $item['wrt_vlans'], $item['description']);
 	echo '</table>';
-	printOpFormIntro ('upd');
 	echo '<input type=hidden name="template_json">';
 	echo '<input type=hidden name="mutex_rev" value="' . $vst['mutex_rev'] . '">';
 	echo '<center>' . getImageHref ('SAVE', 'Save template', TRUE) . '</center>';
