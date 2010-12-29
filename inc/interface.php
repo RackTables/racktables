@@ -7849,8 +7849,8 @@ function renderVLANDomain ($vdom_id)
 			echo makeHref (array ('page' => 'vlan', 'vlan_ck' => "${vdom_id}-${vlan_id}"));
 			echo "'>${vlan_id}</a></td>";
 			echo '<td>' . $vtdecoder[$vlan_info['vlan_type']] . '</td>';
-			echo '<td>' . ($vlan_info['netc'] ? $vlan_info['netc'] : '&nbsp;') . '</td>';
-			echo '<td>' . ($vlan_info['portc'] ? $vlan_info['portc'] : '&nbsp;') . '</td>';
+			echo '<td class=tdright>' . ($vlan_info['netc'] ? $vlan_info['netc'] : '&nbsp;') . '</td>';
+			echo '<td class=tdright>' . ($vlan_info['portc'] ? $vlan_info['portc'] : '&nbsp;') . '</td>';
 			echo "<td class=tdleft>${vlan_info['vlan_descr']}</td></tr>";
 			$order = $nextorder[$order];
 		}
