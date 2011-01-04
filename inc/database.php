@@ -2242,11 +2242,12 @@ function getChapterRefc ($chapter_id, $keylist)
 	default:
 		// Find the list of all assigned values of dictionary-addressed attributes, each with
 		// chapter/word keyed reference counters.
-		$query = "select uint_value, count(object_id) as refcnt " .
-			"from Attribute as a inner join AttributeMap as am on a.id = am.attr_id " .
-			"inner join AttributeValue as av on a.id = av.attr_id " .
-			"inner join Dictionary as d on am.chapter_id = d.chapter_id and av.uint_value = d.dict_key " .
-			"where a.type = 'dict' and am.chapter_id = ? group by uint_value";
+		$query = "select uint_value, count(object_id) as refcnt 
+			from AttributeMap am 
+			inner join AttributeValue av on am.attr_id = av.attr_id
+			inner join RackObject ro on ro.id = av.object_id
+			where am.chapter_id = ? and ro.objtype_id = am.objtype_id
+			group by uint_value";
 		break;
 	}
 	$result = usePreparedSelectBlade ($query, array ($chapter_id));
