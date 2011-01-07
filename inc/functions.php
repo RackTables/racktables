@@ -223,6 +223,9 @@ function genericAssertion ($argname, $argtype)
 	case 'string':
 		assertStringArg ($argname);
 		break;
+	case 'string0':
+		assertStringArg ($argname, TRUE);
+		break;
 	case 'uint':
 		assertUIntArg ($argname);
 		break;

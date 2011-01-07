@@ -2252,31 +2252,6 @@ function del8021QOrder ()
 	return buildRedirectURL (__FUNCTION__, $result ? 'OK' : 'ERR', array(), NULL, NULL, $focus_hints);
 }
 
-$msgcode['addVLANDescription']['OK'] = 48;
-$msgcode['addVLANDescription']['ERR1'] = 190;
-$msgcode['addVLANDescription']['ERR2'] = 110;
-function addVLANDescription ()
-{
-	assertUIntArg ('vlan_id');
-	assertStringArg ('vlan_type', TRUE);
-	assertStringArg ('vlan_descr', TRUE);
-	global $sic;
-	if (!($sic['vlan_id'] >= VLAN_MIN_ID + 1 and $sic['vlan_id'] <= VLAN_MAX_ID))
-		return buildRedirectURL (__FUNCTION__, 'ERR1', array ($sic['vlan_id']));
-	$result = usePreparedInsertBlade
-	(
-		'VLANDescription',
-		array
-		(
-			'domain_id' => $sic['vdom_id'],
-			'vlan_id' => $sic['vlan_id'],
-			'vlan_type' => $sic['vlan_type'],
-			'vlan_descr' => mb_strlen ($sic['vlan_descr']) ? $sic['vlan_descr'] : NULL
-		)
-	);
-	return buildRedirectURL (__FUNCTION__, $result ? 'OK' : 'ERR2');
-}
-
 $msgcode['delVLANDescription']['OK'] = 49;
 $msgcode['delVLANDescription']['ERR1'] = 105;
 $msgcode['delVLANDescription']['ERR2'] = 111;
@@ -2833,7 +2808,31 @@ function tableHandler ($opspec)
 	foreach ($opspec['arglist'] as $argspec)
 	{
 		genericAssertion ($argspec['url_argname'], $argspec['assertion']);
-		$columns[$argspec['table_colname']] = $sic[$argspec['url_argname']];
+		// "table_colname" is normally used for an override, if it is not
+		// set, use the URL argument name
+		$table_colname = array_key_exists ('table_colname', $argspec) ?
+			$argspec['table_colname'] :
+			$argspec['url_argname'];
+		$arg_value = $sic[$argspec['url_argname']];
+		if
+		(
+			($argspec['assertion'] == 'uint0' and $arg_value == 0)
+			or ($argspec['assertion'] == 'string0' and $arg_value == '')
+		)
+			switch (TRUE)
+			{
+			case !array_key_exists ('if_empty', $argspec): // no action requested
+				break;
+			case $argspec['if_empty'] == 'NULL':
+				$arg_value = NULL;
+				break;
+// A trick below is likely to break non-INSERT queries.
+//			case $argspec['if_empty'] == 'omit':
+//				continue 2;
+			default:
+				throw new InvalidArgException ('opspec', '(malformed array structure)', '"if_empty" not recognized');
+			}
+		$columns[$table_colname] = $arg_value;
 	}
 	switch ($opspec['action'])
 	{

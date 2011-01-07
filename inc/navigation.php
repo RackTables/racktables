@@ -38,7 +38,7 @@ $ophandler['rackspace']['edit']['addRow'] = array
 	'action' => 'INSERT',
 	'arglist' => array
 	(
-		array ('url_argname' => 'name', 'table_colname' => 'name', 'assertion' => 'string')
+		array ('url_argname' => 'name', 'assertion' => 'string')
 	),
 );
 
@@ -595,9 +595,20 @@ $tabhandler['vlandomain']['8021qorder'] = 'render8021QOrderForm';
 $tabhandler['vlandomain']['vlanlist'] = 'renderVLANDomainVLANList';
 $ophandler['vlandomain']['8021qorder']['add'] = 'add8021QOrder';
 $ophandler['vlandomain']['8021qorder']['del'] = 'del8021QOrder';
-$ophandler['vlandomain']['vlanlist']['add'] = 'addVLANDescription';
 $ophandler['vlandomain']['vlanlist']['del'] = 'delVLANDescription';
 $ophandler['vlandomain']['vlanlist']['upd'] = 'updVLANDescription';
+$ophandler['vlandomain']['vlanlist']['add'] = array
+(
+	'table' => 'VLANDescription',
+	'action' => 'INSERT',
+	'arglist' => array
+	(
+		array ('url_argname' => 'vdom_id', 'table_colname' => 'domain_id', 'assertion' => 'uint'),
+		array ('url_argname' => 'vlan_id', 'assertion' => 'uint'),
+		array ('url_argname' => 'vlan_type', 'assertion' => 'string'), // ENUM actually
+		array ('url_argname' => 'vlan_descr', 'assertion' => 'string0', 'if_empty' => 'NULL'),
+	),
+);
 
 $page['vlan']['parent'] = 'vlandomain';
 $page['vlan']['bypass'] = 'vlan_ck';
