@@ -1817,18 +1817,6 @@ function submitSLBConfig ()
 	return buildRedirectURL (__FUNCTION__, 'OK', array ('slbconfig'));
 }
 
-$msgcode['addRow']['OK'] = 74;
-$msgcode['addRow']['ERR'] = 100;
-function addRow ()
-{
-	assertStringArg ('name');
-
-	if (commitAddRow ($_REQUEST['name']) === TRUE)
-		return buildRedirectURL (__FUNCTION__, 'OK', array ($_REQUEST['name']));
-	else
-		return buildRedirectURL (__FUNCTION__, 'ERR', array ($_REQUEST['name']));
-}
-
 $msgcode['updateRow']['OK'] = 75;
 $msgcode['updateRow']['ERR'] = 100;
 function updateRow ()
@@ -2845,6 +2833,28 @@ function addObjectlog ()
 	usePreparedExecuteBlade ('INSERT INTO ObjectLog SET object_id=?, user=?, date=NOW(), content=?', array ($sic['object_id'], $remote_username, $sic['logentry']));
 	$ob_url = makeHref (array ('page' => 'object', 'tab' => 'objectlog', 'object_id' => $sic['object_id']));
 	return buildRedirectURL (__FUNCTION__, 'OK', array ("Log entry for <a href=" . ${ob_url} . ">${oi['dname']}</a> added by ${remote_username}"));
+}
+
+function tableHandler ($opspec)
+{
+	global $sic;
+	if (!array_key_exists ('table', $opspec))
+		throw new InvalidArgException ('opspec', '(malformed array structure)', '"table" not set');
+	$columns = array();
+	foreach ($opspec['arglist'] as $argspec)
+	{
+		genericAssertion ($argspec['url_argname'], $argspec['assertion']);
+		$columns[$argspec['table_colname']] = $sic[$argspec['url_argname']];
+	}
+	switch ($opspec['action'])
+	{
+	case 'INSERT':
+		$retcode = TRUE === usePreparedInsertBlade ($opspec['table'], $columns) ? 48 : 110;
+		break;
+	default:
+		throw new InvalidArgException ('opspec/action', '(malformed array structure)');
+	}
+	return buildWideRedirectURL (oneLiner ($retcode));
 }
 
 ?>

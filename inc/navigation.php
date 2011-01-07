@@ -30,9 +30,22 @@ $tab['rackspace']['history'] = 'History';
 $tabhandler['rackspace']['default'] = 'renderRackspace';
 $tabhandler['rackspace']['edit'] = 'renderRackspaceRowEditor';
 $tabhandler['rackspace']['history'] = 'renderRackspaceHistory';
-$ophandler['rackspace']['edit']['addRow'] = 'addRow';
 $ophandler['rackspace']['edit']['updateRow'] = 'updateRow';
 $ophandler['rackspace']['edit']['delete'] = 'deleteRow';
+$ophandler['rackspace']['edit']['addRow'] = array
+(
+	'table' => 'RackRow',
+	'action' => 'INSERT',
+	'arglist' => array
+	(
+		array
+		(
+			'url_argname' => 'name',
+			'table_colname' => 'name',
+			'assertion' => 'string',
+		)
+	),
+);
 
 $page['depot']['parent'] = 'index';
 $page['depot']['title'] = 'Objects';

@@ -48,33 +48,11 @@ if (isset ($_REQUEST['tab']) and ! isset ($_SESSION['RTLT'][$pageno]['dont_remem
 <?php
 if (isset ($tabhandler[$pageno][$tabno]))
 {
-	if (isset ($page[$pageno]['bypass']) && isset ($page[$pageno]['bypass_type']))
-	{
-		switch ($page[$pageno]['bypass_type'])
-		{
-			case 'uint':
-				assertUIntArg ($page[$pageno]['bypass']);
-				break;
-			case 'uint0':
-				assertUIntArg ($page[$pageno]['bypass'], TRUE);
-				break;
-			case 'inet4':
-				assertIPv4Arg ($page[$pageno]['bypass']);
-				break;
-			case 'string':
-				assertStringArg ($page[$pageno]['bypass']);
-				break;
-			default:
-				throw new RackTablesError ('Dispatching error for bypass parameter', RackTablesError::INTERNAL);
-		}
-		showMessageOrError();
-		call_user_func ($tabhandler[$pageno][$tabno], $_REQUEST[$page[$pageno]['bypass']]);
-	}
+	showMessageOrError();
+	if (NULL !== ($bypass = getBypassValue()))
+		call_user_func ($tabhandler[$pageno][$tabno], $bypass);
 	else
-	{
-		showMessageOrError();
 		call_user_func ($tabhandler[$pageno][$tabno]);
-	}
 }
 elseif (isset ($page[$pageno]['handler']))
 {

@@ -216,6 +216,40 @@ function isPCRE ($arg)
 	return TRUE;
 }
 
+function genericAssertion ($argname, $argtype)
+{
+	switch ($argtype)
+	{
+	case 'string':
+		assertStringArg ($argname);
+		break;
+	case 'uint':
+		assertUIntArg ($argname);
+		break;
+	case 'uint0':
+		assertUIntArg ($argname, TRUE);
+		break;
+	case 'inet4':
+		assertIPv4Arg ($argname);
+		break;
+	default:
+		throw new InvalidArgException ('argtype', $argtype); // comes not from user's input
+	}
+}
+
+// Validate and return "bypass" value for the current context, if one is
+// defined for it, or NULL otherwise.
+function getBypassValue()
+{
+	global $page, $pageno, $sic;
+	if (!array_key_exists ('bypass', $page[$pageno]))
+		return NULL;
+	if (!array_key_exists ('bypass_type', $page[$pageno]))
+		throw new RackTablesError ("Internal structure error at node '${pageno}' (bypass_type is not set)", RackTablesError::INTERNAL);
+	genericAssertion ($page[$pageno]['bypass'], $page[$pageno]['bypass_type']);
+	return $sic[$page[$pageno]['bypass']];
+}
+
 // Objects of some types should be explicitly shown as
 // anonymous (labelless). This function is a single place where the
 // decision about displayed name is made.

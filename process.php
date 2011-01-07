@@ -15,7 +15,11 @@ if ($op == 'addFile' && !isset($_FILES['file']['error']))
 	throw new RackTablesError ('File upload error, check upload_max_filesize in php.ini', RackTablesError::MISCONFIGURED);
 fixContext();
 
-if (!isset ($ophandler[$pageno][$tabno][$op]) or !function_exists ($ophandler[$pageno][$tabno][$op]))
+if
+(
+	!isset ($ophandler[$pageno][$tabno][$op]) or
+	(!is_array ($ophandler[$pageno][$tabno][$op]) and !function_exists ($ophandler[$pageno][$tabno][$op]))
+)
 	throw new RackTablesError ("Invalid navigation data for '${pageno}-${tabno}-${op}'", RackTablesError::INTERNAL);
 
 // We have a chance to handle an error before starting HTTP header.
@@ -23,7 +27,10 @@ if (!isset ($delayauth[$pageno][$tabno][$op]) and !permitted())
 	$location = buildWideRedirectURL (oneLiner (157)); // operation not permitted
 else
 {
-	$location = call_user_func ($ophandler[$pageno][$tabno][$op]);
+	if (!is_array ($ophandler[$pageno][$tabno][$op]))
+		$location = call_user_func ($ophandler[$pageno][$tabno][$op]);
+	else
+		$location = tableGateway ($ophandler[$pageno][$tabno][$op]);
 	if (!strlen ($location))
 		throw new RackTablesError ('Operation handler failed to return its status', RackTablesError::INTERNAL);
 }

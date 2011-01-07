@@ -220,11 +220,6 @@ function getRackRows ()
 	return $rows;
 }
 
-function commitAddRow($rackrow_name)
-{
-	return usePreparedInsertBlade ('RackRow', array ('name' => $rackrow_name));
-}
-
 function commitUpdateRow ($rackrow_id, $rackrow_name)
 {
 	return usePreparedExecuteBlade ('UPDATE RackRow SET name = ? WHERE id = ?', array ($rackrow_name, $rackrow_id));
