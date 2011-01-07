@@ -30,7 +30,7 @@ else
 	if (!is_array ($ophandler[$pageno][$tabno][$op]))
 		$location = call_user_func ($ophandler[$pageno][$tabno][$op]);
 	else
-		$location = tableGateway ($ophandler[$pageno][$tabno][$op]);
+		$location = tableHandler ($ophandler[$pageno][$tabno][$op]);
 	if (!strlen ($location))
 		throw new RackTablesError ('Operation handler failed to return its status', RackTablesError::INTERNAL);
 }

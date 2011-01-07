@@ -2170,17 +2170,6 @@ function commitReduceDictionary ($chapter_no = 0, $dict_key = 0)
 	return usePreparedDeleteBlade ('Dictionary', array ('chapter_id' => $chapter_no, 'dict_key' => $dict_key));
 }
 
-function commitAddChapter ($chapter_name = '')
-{
-	if (!strlen ($chapter_name))
-		throw new InvalidArgException ('$chapter_name', $chapter_name);
-	return usePreparedInsertBlade
-	(
-		'Chapter',
-		array ('name' => $chapter_name)
-	);
-}
-
 function commitUpdateChapter ($chapter_no = 0, $chapter_name = '')
 {
 	if (!strlen ($chapter_name))

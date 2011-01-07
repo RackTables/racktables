@@ -38,12 +38,7 @@ $ophandler['rackspace']['edit']['addRow'] = array
 	'action' => 'INSERT',
 	'arglist' => array
 	(
-		array
-		(
-			'url_argname' => 'name',
-			'table_colname' => 'name',
-			'assertion' => 'string',
-		)
+		array ('url_argname' => 'name', 'table_colname' => 'name', 'assertion' => 'string')
 	),
 );
 
@@ -469,7 +464,15 @@ $tabhandler['dict']['default'] = 'renderDictionary';
 $tabhandler['dict']['chapters'] = 'renderChaptersEditor';
 $ophandler['dict']['chapters']['del'] = 'delChapter';
 $ophandler['dict']['chapters']['upd'] = 'updateChapter';
-$ophandler['dict']['chapters']['add'] = 'addChapter';
+$ophandler['dict']['chapters']['add'] = array
+(
+	'table' => 'Chapter',
+	'action' => 'INSERT',
+	'arglist' => array
+	(
+		array ('url_argname' => 'chapter_name', 'table_colname' => 'name', 'assertion' => 'string')
+	),
+);
 
 $page['chapter']['parent'] = 'dict';
 $page['chapter']['bypass'] = 'chapter_no';

@@ -695,17 +695,6 @@ function reduceDictionary ()
 		return buildRedirectURL (__FUNCTION__, 'ERR');
 }
 
-$msgcode['addChapter']['OK'] = 55;
-$msgcode['addChapter']['ERR'] = 112;
-function addChapter ()
-{
-	assertStringArg ('chapter_name');
-	if (commitAddChapter ($_REQUEST['chapter_name']) === TRUE)
-		return buildRedirectURL (__FUNCTION__, 'OK');
-	else
-		return buildRedirectURL (__FUNCTION__, 'ERR');
-}
-
 $msgcode['updateChapter']['OK'] = 54;
 $msgcode['updateChapter']['ERR'] = 113;
 function updateChapter ()
