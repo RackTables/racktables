@@ -503,8 +503,17 @@ $tab['tagtree']['edit'] = 'Edit';
 $tabhandler['tagtree']['default'] = 'renderTagTree';
 $tabhandler['tagtree']['edit'] = 'renderTagTreeEditor';
 $ophandler['tagtree']['edit']['destroyTag'] = 'destroyTag';
-$ophandler['tagtree']['edit']['createTag'] = 'createTag';
 $ophandler['tagtree']['edit']['updateTag'] = 'updateTag';
+$ophandler['tagtree']['edit']['createTag'] = array
+(
+	'table' => 'TagTree',
+	'action' => 'INSERT',
+	'arglist' => array
+	(
+		array ('url_argname' => 'tag_name', 'table_colname' => 'tag', 'assertion' => 'tag'),
+		array ('url_argname' => 'parent_id', 'assertion' => 'uint0', 'if_empty' => 'NULL'),
+	),
+);
 
 $page['myaccount']['title'] = 'My account';
 $page['myaccount']['parent'] = 'config';

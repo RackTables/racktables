@@ -3062,21 +3062,6 @@ function getTagList ()
 	return $ret;
 }
 
-function commitCreateTag ($tagname = '', $parent_id = 0)
-{
-	if ($tagname == '')
-		throw new InvalidArgException ('tagname', $tagname);
-	return usePreparedInsertBlade
-	(
-		'TagTree',
-		array
-		(
-			'tag' => $tagname,
-			'parent_id' => $parent_id
-		)
-	);
-}
-
 function commitDestroyTag ($tagid = 0)
 {
 	if (usePreparedDeleteBlade ('TagTree', array ('id' => $tagid)))

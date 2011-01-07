@@ -218,6 +218,7 @@ function isPCRE ($arg)
 
 function genericAssertion ($argname, $argtype)
 {
+	global $sic;
 	switch ($argtype)
 	{
 	case 'string':
@@ -234,6 +235,11 @@ function genericAssertion ($argname, $argtype)
 		break;
 	case 'inet4':
 		assertIPv4Arg ($argname);
+		break;
+	case 'tag':
+		assertStringArg ($argname);
+		if (!validTagName ($sic[$argname]))
+			throw new InvalidRequestArgException ($argname, $sic[$argname], 'Invalid tag name');
 		break;
 	default:
 		throw new InvalidArgException ('argtype', $argtype); // comes not from user's input

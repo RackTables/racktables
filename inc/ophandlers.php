@@ -1621,23 +1621,6 @@ function destroyTag ()
 		return buildRedirectURL (__FUNCTION__, 'ERR2');
 }
 
-$msgcode['createTag']['OK'] = 59;
-$msgcode['createTag']['ERR1'] = 145;
-$msgcode['createTag']['ERR3'] = 147;
-function createTag ()
-{
-	assertStringArg ('tag_name');
-	assertUIntArg ('parent_id', TRUE);
-	$tagname = trim ($_REQUEST['tag_name']);
-	if (!validTagName ($tagname))
-		return buildRedirectURL (__FUNCTION__, 'ERR1', array ($tagname));
-	if (($parent_id = $_REQUEST['parent_id']) <= 0)
-		$parent_id = NULL;
-	if (FALSE === commitCreateTag ($tagname, $parent_id))
-		return buildRedirectURL (__FUNCTION__, 'ERR3', array (niftyString ($tagname)));
-	return buildRedirectURL (__FUNCTION__, 'OK', array (niftyString ($tagname)));
-}
-
 $msgcode['updateTag']['OK'] = 60;
 $msgcode['updateTag']['ERR1'] = 145;
 $msgcode['updateTag']['ERR2'] = 109;
