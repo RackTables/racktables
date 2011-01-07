@@ -3474,7 +3474,7 @@ function getFile ($file_id)
 		unset ($query);
 
 		// Someone accessed this file, update atime
-		usePreparedExecuteBlade ('UPDATE File SET atime = ? WHERE id = ?', array (date ('YmdHis'), $file_id));
+		usePreparedExecuteBlade ('UPDATE File SET atime = NOW() WHERE id = ?', array ($file_id));
 	}
 	return $ret;
 }
@@ -3489,9 +3489,9 @@ function getFileCache ($file_id)
 	);
 	if (($row = $query->fetch (PDO::FETCH_ASSOC)) == NULL)
 		return FALSE;
-	$ret = $row['contents'];
+	$ret = $row['thumbnail'];
 	$query->CloseCursor();
-	usePreparedExecuteBlade ('UPDATE File SET atime = ? WHERE id = ?', array (date ('YmdHis'), $file_id));
+	usePreparedExecuteBlade ('UPDATE File SET atime = NOW() WHERE id = ?', array ($file_id));
 	return $ret;
 }
 
