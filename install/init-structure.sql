@@ -250,42 +250,6 @@ CREATE TABLE `Link` (
   CONSTRAINT `Link-FK-b` FOREIGN KEY (`portb`) REFERENCES `Port` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
-DELIMITER ;;
-CREATE TRIGGER `checkForDuplicateLinksBeforeInsert` BEFORE INSERT ON `Link`
-  FOR EACH ROW
-BEGIN
-  DECLARE count INTEGER;
-
-  IF NEW.porta = NEW.portb THEN
-    SET NEW.porta = NULL;
-  END IF;
-
-  SELECT COUNT(*) INTO count FROM Link WHERE porta IN (NEW.porta,NEW.portb) OR portb IN (NEW.porta,NEW.portb);
-
-  IF count > 0 THEN
-    SET NEW.porta = NULL;
-  END IF;
-END;;
-
-CREATE TRIGGER `checkForDuplicateLinksBeforeUpdate` BEFORE UPDATE ON `Link`
-  FOR EACH ROW
-BEGIN
-  DECLARE count INTEGER;
-
-  IF NEW.porta = NEW.portb THEN
-    SET NEW.porta = NULL;
-  END IF;
-
-  SELECT COUNT(*) INTO count FROM Link WHERE
-  (NEW.porta IN (porta,portb) AND NEW.porta != porta) OR
-  (NEW.portb IN (porta,portb) AND NEW.portb != portb);
- 
-  IF count > 0 THEN
-    SET NEW.porta = NULL;
-  END IF;
-END;;
-DELIMITER ;
-
 CREATE TABLE `Molecule` (
   `id` int(10) unsigned NOT NULL auto_increment,
   PRIMARY KEY  (`id`)

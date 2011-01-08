@@ -26,12 +26,9 @@ function isInnoDBSupported ()
 	global $dbxlink;
 	// create a temp table
 	$dbxlink->query("CREATE TABLE `innodb_test` (`id` int) ENGINE=InnoDB");
-	$innodb_row = $dbxlink->query("SHOW TABLE STATUS LIKE 'innodb_test'")->fetch(PDO::FETCH_ASSOC);
-	// create a trigger
-	$dbxlink->query("CREATE TRIGGER `trigger_test` BEFORE INSERT ON `innodb_test` FOR EACH ROW BEGIN END");
-	$trigger_row = $dbxlink->query("SELECT COUNT(*) AS count FROM information_schema.TRIGGERS WHERE TRIGGER_SCHEMA = SCHEMA() AND TRIGGER_NAME = 'trigger_test'")->fetch(PDO::FETCH_ASSOC);
+	$row = $dbxlink->query("SHOW TABLE STATUS LIKE 'innodb_test'")->fetch(PDO::FETCH_ASSOC);
 	$dbxlink->query("DROP TABLE `innodb_test`");
-	if ($innodb_row['Engine'] == 'InnoDB' && $trigger_row['count'] == 1)
+	if ($row['Engine'] == 'InnoDB')
 		return TRUE;
 
 	return FALSE;

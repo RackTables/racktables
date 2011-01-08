@@ -100,9 +100,6 @@ should be sufficient:
 
 *** Upgrading to 0.19.x ***
 
-This release utilizes database triggers, which are only available in
-MySQL >= 5.0.2.
-
 RackTables is now using PHP JSON extension which is included in the PHP core since 5.2.0.
 Installation process does not check for this extension because the lack of it does not affect
 base functionality. If some of ajax features are not working correctly, check if JSON extension

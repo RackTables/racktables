@@ -1018,6 +1018,19 @@ function linkPorts ($porta, $portb, $cable = NULL)
 {
 	if ($porta == $portb)
 		throw new InvalidArgException ('porta/portb', $porta, "Ports can't be the same");
+
+	global $dbxlink;
+	$dbxlink->exec ('LOCK TABLES Link WRITE');
+	$result = usePreparedSelectBlade
+	(
+		'SELECT COUNT(*) FROM Link WHERE porta IN (?,?) OR portb IN (?,?)',
+		array ($porta, $portb, $porta, $portb)
+	);
+	if ($result->fetchColumn () != 0)
+	{
+		$dbxlink->exec ('UNLOCK TABLES');		
+		return "Port ${porta} or ${portb} is already linked";
+	}
 	if ($porta > $portb)
 	{
 		$tmp = $porta;
@@ -1025,6 +1038,7 @@ function linkPorts ($porta, $portb, $cable = NULL)
 		$portb = $tmp;
 	}
 	$ret = FALSE !== usePreparedInsertBlade ('Link', array ('porta' => $porta, 'portb' => $portb, 'cable' => $cable));
+	$dbxlink->exec ('UNLOCK TABLES');
 	$ret = $ret and FALSE !== usePreparedExecuteBlade
 	(
 		'UPDATE Port SET reservation_comment=NULL WHERE id IN(?, ?)',
