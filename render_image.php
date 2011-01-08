@@ -40,7 +40,7 @@ switch ($_REQUEST['img'])
 		assertUIntArg ('done', TRUE);
 		// 'progressbar's never change, make browser cache the result
 		header ('Cache-Control: private, max-age=' . CACHE_DURATION . ', pre-check=' . CACHE_DURATION);
-		header ('Last-Modified: ' . date (DATE_RFC1123, time()));
+		header ('Last-Modified: ' . gmdate (DATE_RFC1123));
 		renderProgressBarImage ($_REQUEST['done']);
 		break;
 	case 'preview': // file security context
