@@ -241,6 +241,11 @@ function genericAssertion ($argname, $argtype)
 		if (!validTagName ($sic[$argname]))
 			throw new InvalidRequestArgException ($argname, $sic[$argname], 'Invalid tag name');
 		break;
+	case 'enum/attr_type':
+		assertStringArg ($argname);
+		if (!in_array ($sic[$argname], array ('uint', 'float', 'string', 'dict')))
+			throw new InvalidRequestArgException ($argname, $sic[$argname], 'Unknown value');
+		break;
 	default:
 		throw new InvalidArgException ('argtype', $argtype); // comes not from user's input
 	}

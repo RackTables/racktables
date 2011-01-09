@@ -2283,27 +2283,6 @@ function commitUpdateAttribute ($attr_id = 0, $attr_name = '')
 	return usePreparedExecuteBlade ('UPDATE Attribute SET name=? WHERE id=?', array ($attr_name, $attr_id));
 }
 
-function commitAddAttribute ($attr_name = '', $attr_type = '')
-{
-	if (!strlen ($attr_name))
-		throw new InvalidArgException ('$attr_name', $attr_name);
-	switch ($attr_type)
-	{
-		case 'uint':
-		case 'float':
-		case 'string':
-		case 'dict':
-			break;
-		default:
-			throw new InvalidArgException ('$attr_type', $attr_type, 'Attribute type not supported');
-	}
-	return usePreparedInsertBlade
-	(
-		'Attribute',
-		array ('name' => $attr_name, 'type' => $attr_type)
-	);
-}
-
 function commitDeleteAttribute ($attr_id = 0)
 {
 	return usePreparedDeleteBlade ('Attribute', array ('id' => $attr_id));

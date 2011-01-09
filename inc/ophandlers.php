@@ -718,18 +718,6 @@ function changeAttribute ()
 		return buildRedirectURL (__FUNCTION__, 'ERR');
 }
 
-$msgcode['createAttribute']['OK'] = 45;
-$msgcode['createAttribute']['ERR'] = 116;
-function createAttribute ()
-{
-	assertStringArg ('attr_name');
-	assertStringArg ('attr_type');
-	if (commitAddAttribute ($_REQUEST['attr_name'], $_REQUEST['attr_type']))
-		return buildRedirectURL (__FUNCTION__, 'OK', array ($_REQUEST['attr_name']));
-	else
-		return buildRedirectURL (__FUNCTION__, 'ERR');
-}
-
 $msgcode['deleteAttribute']['OK'] = 47;
 $msgcode['deleteAttribute']['ERR'] = 117;
 function deleteAttribute ()

@@ -450,11 +450,20 @@ $tab['attrs']['editmap'] = 'Edit map';
 $tabhandler['attrs']['default'] = 'renderAttributes';
 $tabhandler['attrs']['editattrs'] = 'renderEditAttributesForm';
 $tabhandler['attrs']['editmap'] = 'renderEditAttrMapForm';
-$ophandler['attrs']['editattrs']['add'] = 'createAttribute';
 $ophandler['attrs']['editattrs']['upd'] = 'changeAttribute';
 $ophandler['attrs']['editattrs']['del'] = 'deleteAttribute';
 $ophandler['attrs']['editmap']['add'] = 'supplementAttrMap';
 $ophandler['attrs']['editmap']['del'] = 'reduceAttrMap';
+$ophandler['attrs']['editattrs']['add'] = array
+(
+	'table' => 'Attribute',
+	'action' => 'INSERT',
+	'arglist' => array
+	(
+		array ('url_argname' => 'attr_type', 'table_colname' => 'type', 'assertion' => 'enum/attr_type'),
+		array ('url_argname' => 'attr_name', 'table_colname' => 'name', 'assertion' => 'string'),
+	),
+);
 
 $page['dict']['title'] = 'Dictionary';
 $page['dict']['parent'] = 'config';
