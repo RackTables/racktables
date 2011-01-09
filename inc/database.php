@@ -635,20 +635,17 @@ function commitAddObject ($new_name, $new_label, $new_barcode, $new_type_id, $ne
 	return $last_insert_id;
 }
 
-function commitUpdateObject ($object_id = 0, $new_name = '', $new_label = '', $new_barcode = '', $new_type_id = 0, $new_has_problems = 'no', $new_asset_no = '', $new_comment = '')
+function commitUpdateObject ($object_id = 0, $new_name = '', $new_label = '', $new_barcode = '', $new_has_problems = 'no', $new_asset_no = '', $new_comment = '')
 {
-	if ($new_type_id == 0)
-		throw new InvalidArgException ('$new_type_id', $new_type_id);
 	$ret = FALSE !== usePreparedExecuteBlade
 	(
-		'UPDATE RackObject SET name=?, label=?, barcode=?, objtype_id=?, has_problems=?, ' .
+		'UPDATE RackObject SET name=?, label=?, barcode=?, has_problems=?, ' .
 		'asset_no=?, comment=? WHERE id=?',
 		array
 		(
 			!strlen ($new_name) ? NULL : $new_name,
 			$new_label,
 			!strlen ($new_barcode) ? NULL : $new_barcode,
-			$new_type_id,
 			$new_has_problems,
 			!strlen ($new_asset_no) ? NULL : $new_asset_no,
 			$new_comment,

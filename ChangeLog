@@ -6,6 +6,7 @@
 	new feature: merge "objectlog" extension (by Ernest Shaffer)
 	update: cache image files thumbnails and make them JPEGs (#369, by Matt Mills)
 	update: enhance rackspace click helpers (by Jeroen Benda)
+	update: object type cannot be changed after the object is created
 	bugfix: the feature of remembering last opened tab of realm page is now working
 	update: UI: ports/IPs/nets highlighting enhancements
 	bugfix: UI: pager in ipv4net shows appropriate page when IP is highlighted

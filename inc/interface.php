@@ -671,9 +671,6 @@ function renderEditObjectForm ($object_id)
 	// static attributes
 	echo '<table border=0 cellspacing=0 cellpadding=3 align=center>';
 	echo "<tr><td>&nbsp;</td><th colspan=2><h2>Attributes</h2></th></tr>";
-	echo "<tr><td>&nbsp;</td><th class=tdright>Type:</th><td class=tdleft>";
-	printNiftySelect (cookOptgroups (readChapter (CHAP_OBJTYPE, 'o')), array ('name' => 'object_type_id'), $object['objtype_id']);
-	echo "</td></tr>\n";
 	// baseline info
 	echo "<tr><td>&nbsp;</td><th class=tdright>Common name:</th><td class=tdleft><input type=text name=object_name value='${object['name']}'></td></tr>\n";
 	echo "<tr><td>&nbsp;</td><th class=tdright>Visible label:</th><td class=tdleft><input type=text name=object_label value='${object['label']}'></td></tr>\n";

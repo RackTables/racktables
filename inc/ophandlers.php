@@ -879,7 +879,6 @@ function updateObject ()
 {
 	assertUIntArg ('num_attrs', TRUE);
 	assertUIntArg ('object_id');
-	assertUIntArg ('object_type_id');
 	assertStringArg ('object_name', TRUE);
 	assertStringArg ('object_label', TRUE);
 	assertStringArg ('object_barcode', TRUE);
@@ -894,7 +893,6 @@ function updateObject ()
 		$_REQUEST['object_name'],
 		$_REQUEST['object_label'],
 		$_REQUEST['object_barcode'],
-		$_REQUEST['object_type_id'],
 		$has_problems,
 		$_REQUEST['object_asset_no'],
 		$_REQUEST['object_comment']
