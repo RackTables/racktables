@@ -4311,7 +4311,7 @@ function renderChapterEditor ($tgt_chapter_no)
 		echo '<tr><td>&nbsp;</td><td>';
 		printImageHREF ('add', 'Add new', TRUE);
 		echo "</td>";
-		echo "<td class=tdleft><input type=text name=dict_value size=32 tabindex=100></td><td>";
+		echo "<td class=tdleft><input type=text name=dict_value size=64 tabindex=100></td><td>";
 		printImageHREF ('add', 'Add new', TRUE, 101);
 		echo '</td></tr></form>';
 	}

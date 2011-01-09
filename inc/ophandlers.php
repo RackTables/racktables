@@ -671,18 +671,6 @@ function updateDictionary ()
 		return buildRedirectURL (__FUNCTION__, 'ERR');
 }
 
-$msgcode['supplementDictionary']['OK'] = 52;
-$msgcode['supplementDictionary']['ERR'] = 110;
-function supplementDictionary ()
-{
-	assertUIntArg ('chapter_no');
-	assertStringArg ('dict_value');
-	if (commitSupplementDictionary ($_REQUEST['chapter_no'], $_REQUEST['dict_value']) === TRUE)
-		return buildRedirectURL (__FUNCTION__, 'OK');
-	else
-		return buildRedirectURL (__FUNCTION__, 'ERR');
-}
-
 $msgcode['reduceDictionary']['OK'] = 50;
 $msgcode['reduceDictionary']['ERR'] = 111;
 function reduceDictionary ()

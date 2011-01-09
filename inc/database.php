@@ -2160,19 +2160,6 @@ function commitUpdateDictionary ($chapter_no = 0, $dict_key = 0, $dict_value = '
 	);
 }
 
-function commitSupplementDictionary ($chapter_no = 0, $dict_value = '')
-{
-	if ($chapter_no <= 0)
-		throw new InvalidArgException ('$chapter_no', $chapter_no);
-	if (!strlen ($dict_value))
-		throw new InvalidArgException ('$dict_value', $dict_value);
-	return usePreparedInsertBlade
-	(
-		'Dictionary',
-		array ('chapter_id' => $chapter_no, 'dict_value' => $dict_value)
-	);
-}
-
 // Technically dict_key is enough to delete, but including chapter_id into
 // WHERE clause makes sure, that the action actually happends for the same
 // chapter, which authorization was granted for.

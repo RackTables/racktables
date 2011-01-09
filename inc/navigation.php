@@ -483,7 +483,16 @@ $tabhandler['chapter']['default'] = 'renderChapter';
 $tabhandler['chapter']['edit'] = 'renderChapterEditor';
 $ophandler['chapter']['edit']['del'] = 'reduceDictionary';
 $ophandler['chapter']['edit']['upd'] = 'updateDictionary';
-$ophandler['chapter']['edit']['add'] = 'supplementDictionary';
+$ophandler['chapter']['edit']['add'] = array
+(
+	'table' => 'Dictionary',
+	'action' => 'INSERT',
+	'arglist' => array
+	(
+		array ('url_argname' => 'chapter_no', 'table_colname' => 'chapter_id', 'assertion' => 'uint'),
+		array ('url_argname' => 'dict_value', 'assertion' => 'string'),
+	),
+);
 
 $page['ui']['title'] = 'User interface';
 $page['ui']['parent'] = 'config';
