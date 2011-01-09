@@ -7305,7 +7305,7 @@ function dynamic_title_decoder ($path_position)
 			);
 		return array
 		(
-			'name' => niftyString ($file['name']),
+			'name' => niftyString ($file['name'], 30, FALSE),
 			'params' => array ('file_id' => $_REQUEST['file_id'])
 		);
 	case 'ipaddress':
@@ -7440,7 +7440,7 @@ function dynamic_title_decoder ($path_position)
 			throw new EntityNotFoundException ('VST', $sic['vst_id']);
 		return array
 		(
-			'name' => niftyString ("template '" . $vstlist[$sic['vst_id']] . "'", 50),
+			'name' => niftyString ("template '" . $vstlist[$sic['vst_id']] . "'", 50, FALSE),
 			'params' => array ('vst_id' => $sic['vst_id'])
 		);
 	case 'dqueue':
