@@ -132,7 +132,6 @@ $msgcode['addPortForObject']['ERR1'] = 101;
 $msgcode['addPortForObject']['ERR2'] = 100;
 function addPortForObject ()
 {
-	assertUIntArg ('object_id');
 	assertStringArg ('port_name', TRUE);
 	if (!strlen ($_REQUEST['port_name']))
 		return buildRedirectURL (__FUNCTION__, 'ERR1');
@@ -155,7 +154,6 @@ $msgcode['editPortForObject']['ERR1'] = 101;
 $msgcode['editPortForObject']['ERR2'] = 100;
 function editPortForObject ()
 {
-	assertUIntArg ('object_id');
 	assertUIntArg ('port_id');
 	assertUIntArg ('port_type_id');
 	assertStringArg ('reservation_comment', TRUE);
@@ -247,7 +245,6 @@ function addMultiPorts ()
 	assertStringArg ('format');
 	assertStringArg ('input');
 	assertStringArg ('port_type');
-	assertUIntArg ('object_id');
 	$format = $_REQUEST['format'];
 	$port_type = $_REQUEST['port_type'];
 	$object_id = $_REQUEST['object_id'];
@@ -356,7 +353,6 @@ http://www.cisco.com/en/US/products/hw/routers/ps274/products_tech_note09186a008
 $msgcode['addBulkPorts']['OK'] = 82;
 function addBulkPorts ()
 {
-	assertUIntArg ('object_id');
 	assertStringArg ('port_type_id');
 	assertStringArg ('port_name');
 	assertStringArg ('port_label', TRUE);
@@ -586,7 +582,6 @@ $msgcode['editAddress']['OK'] = 27;
 $msgcode['editAddress']['ERR'] = 100;
 function editAddress ()
 {
-	assertIPv4Arg ('ip');
 	assertStringArg ('name', TRUE);
 
 	if (isset ($_REQUEST['reserved']))
@@ -640,7 +635,6 @@ $msgcode['updateUser']['ERR1'] = 103;
 $msgcode['updateUser']['ERR1'] = 104;
 function updateUser ()
 {
-	assertUIntArg ('user_id');
 	assertStringArg ('username');
 	assertStringArg ('realname', TRUE);
 	assertStringArg ('password');
@@ -662,7 +656,6 @@ $msgcode['updateDictionary']['OK'] = 51;
 $msgcode['updateDictionary']['ERR'] = 109;
 function updateDictionary ()
 {
-	assertUIntArg ('chapter_no');
 	assertUIntArg ('dict_key');
 	assertStringArg ('dict_value');
 	if (FALSE !== commitUpdateDictionary ($_REQUEST['chapter_no'], $_REQUEST['dict_key'], $_REQUEST['dict_value']))
@@ -675,7 +668,6 @@ $msgcode['reduceDictionary']['OK'] = 50;
 $msgcode['reduceDictionary']['ERR'] = 111;
 function reduceDictionary ()
 {
-	assertUIntArg ('chapter_no');
 	assertUIntArg ('dict_key');
 	if (commitReduceDictionary ($_REQUEST['chapter_no'], $_REQUEST['dict_key']) === TRUE)
 		return buildRedirectURL (__FUNCTION__, 'OK');
@@ -774,7 +766,6 @@ $msgcode['clearSticker']['ERR'] = 120;
 function clearSticker ()
 {
 	assertUIntArg ('attr_id');
-	assertUIntArg ('object_id');
 	if (commitResetAttrValue ($_REQUEST['object_id'], $_REQUEST['attr_id']) !== FALSE)
 		return buildRedirectURL (__FUNCTION__, 'OK');
 	else
@@ -784,8 +775,6 @@ function clearSticker ()
 $msgcode['updateObjectAllocation']['OK'] = 63;
 function updateObjectAllocation ()
 {
-	assertUIntArg ('object_id');
-
 	if (!isset ($_REQUEST['got_atoms']))
 	{
 		unset($_GET['page']);
@@ -854,7 +843,6 @@ $msgcode['updateObject']['ERR'] = 121;
 function updateObject ()
 {
 	assertUIntArg ('num_attrs', TRUE);
-	assertUIntArg ('object_id');
 	assertStringArg ('object_name', TRUE);
 	assertStringArg ('object_label', TRUE);
 	assertStringArg ('object_barcode', TRUE);
@@ -1019,7 +1007,6 @@ $msgcode['resetObject']['OK'] = 83;
 $msgcode['resetObject']['ERR'] = 100;
 function resetObject ()
 {
-	assertUIntArg ('object_id');
 	$oinfo = spotEntity ('object', $_REQUEST['object_id']);
 
 	$racklist = getResidentRacksData ($_REQUEST['object_id'], FALSE);
@@ -1189,7 +1176,6 @@ $msgcode['addRealServers']['ERR2'] = 127;
 // Parse textarea submitted and try adding a real server for each line.
 function addRealServers ()
 {
-	assertUIntArg ('pool_id');
 	assertStringArg ('format');
 	assertStringArg ('rawtext');
 	$ngood = $nbad = 0;
@@ -1456,7 +1442,6 @@ $msgcode['updateRSPool']['OK'] = 33;
 $msgcode['updateRSPool']['ERR'] = 139;
 function updateRSPool ()
 {
-	assertUIntArg ('pool_id');
 	assertStringArg ('name', TRUE);
 	assertStringArg ('vsconfig', TRUE);
 	assertStringArg ('rsconfig', TRUE);
@@ -1539,7 +1524,6 @@ $msgcode['generateAutoPorts']['ERR'] = 142;
 function generateAutoPorts ()
 {
 	global $pageno;
-	assertUIntArg ('object_id');
 	$info = spotEntity ('object', $_REQUEST['object_id']);
 	// Navigate away in case of success, stay at the place otherwise.
 	if (executeAutoPorts ($_REQUEST['object_id'], $info['objtype_id']))
@@ -1550,17 +1534,14 @@ function generateAutoPorts ()
 
 $msgcode['saveEntityTags']['OK'] = 22;
 $msgcode['saveEntityTags']['ERR1'] = 143;
-$msgcode['saveEntityTags']['ERR2'] = 187;
 // Filter out implicit tags before storing the new tag set.
 function saveEntityTags ()
 {
-	global $page, $pageno, $etype_by_pageno;
-	if (!isset ($etype_by_pageno[$pageno]) or !isset ($page[$pageno]['bypass']))
-		return buildRedirectURL (__FUNCTION__, 'ERR2', array (__FUNCTION__));
+	global $pageno, $etype_by_pageno;
+	if (!isset ($etype_by_pageno[$pageno]))
+		throw new RackTablesError ('key not found in etype_by_pageno', RackTablesError::INTERNAL);
 	$realm = $etype_by_pageno[$pageno];
-	$bypass = $page[$pageno]['bypass'];
-	assertUIntArg ($bypass);
-	$entity_id = $_REQUEST[$bypass];
+	$entity_id = getBypassValue();
 	$taglist = isset ($_REQUEST['taglist']) ? $_REQUEST['taglist'] : array();
 	// Build a chain from the submitted data, minimize it,
 	// then wipe existing records and store the new set instead.
@@ -1619,7 +1600,6 @@ $msgcode['rollTags']['OK'] = 67;
 $msgcode['rollTags']['ERR'] = 149;
 function rollTags ()
 {
-	assertUIntArg ('row_id');
 	assertStringArg ('sum', TRUE);
 	assertUIntArg ('realsum');
 	if ($_REQUEST['sum'] != $_REQUEST['realsum'])
@@ -1750,7 +1730,6 @@ $msgcode['submitSLBConfig']['OK'] = 66;
 $msgcode['submitSLBConfig']['ERR'] = 164;
 function submitSLBConfig ()
 {
-	assertUIntArg ('object_id');
 	$newconfig = buildLVSConfig ($_REQUEST['object_id']);
 	try
 	{
@@ -1790,7 +1769,6 @@ $msgcode['addRack']['ERR1'] = 171;
 $msgcode['addRack']['ERR2'] = 172;
 function addRack ()
 {
-	assertUIntArg ('row_id');
 	$taglist = isset ($_REQUEST['taglist']) ? $_REQUEST['taglist'] : array();
 	if (isset ($_REQUEST['got_data']))
 	{
@@ -1852,7 +1830,6 @@ $msgcode['updateRack']['OK'] = 68;
 $msgcode['updateRack']['ERR'] = 177;
 function updateRack ()
 {
-	assertUIntArg ('rack_id');
 	assertUIntArg ('rack_row_id');
 	assertUIntArg ('rack_height');
 	assertStringArg ('rack_name');
@@ -1867,7 +1844,6 @@ function updateRack ()
 
 function updateRackDesign ()
 {
-	assertUIntArg ('rack_id');
 	$rackData = spotEntity ('rack', $_REQUEST['rack_id']);
 	amplifyCell ($rackData);
 	applyRackDesignMask($rackData);
@@ -1878,7 +1854,6 @@ function updateRackDesign ()
 
 function updateRackProblems ()
 {
-	assertUIntArg ('rack_id');
 	$rackData = spotEntity ('rack', $_REQUEST['rack_id']);
 	amplifyCell ($rackData);
 	applyRackProblemMask($rackData);
@@ -1889,7 +1864,6 @@ function updateRackProblems ()
 
 function querySNMPData ()
 {
-	assertUIntArg ('object_id');
 	assertStringArg ('community', TRUE);
 
 	$snmpsetup = array ();
@@ -1942,13 +1916,11 @@ $msgcode['addFileToEntity']['ERR2'] = 181;
 $msgcode['addFileToEntity']['ERR3'] = 110;
 function addFileToEntity ()
 {
-	global $page, $pageno, $etype_by_pageno;
-	if (!isset ($etype_by_pageno[$pageno]) or !isset ($page[$pageno]['bypass']))
-		throw new RackTablesError ('dispatching failure', RackTablesError::INTERNAL);
+	global $pageno, $etype_by_pageno;
+	if (!isset ($etype_by_pageno[$pageno]))
+		throw new RackTablesError ('key not found in etype_by_pageno', RackTablesError::INTERNAL);
 	$realm = $etype_by_pageno[$pageno];
-	$bypass = $page[$pageno]['bypass'];
-	assertUIntArg ($bypass);
-	$entity_id = $_REQUEST[$bypass];
+	$entity_id = getBypassValue();
 	assertStringArg ('comment', TRUE);
 
 	// Make sure the file can be uploaded
@@ -1971,15 +1943,12 @@ $msgcode['linkFileToEntity']['ERR2'] = 110;
 function linkFileToEntity ()
 {
 	assertUIntArg ('file_id');
-	global $page, $pageno, $etype_by_pageno;
-	if (!isset ($etype_by_pageno[$pageno]) or !isset ($page[$pageno]['bypass']))
-		throw new RackTablesError ('dispatching failure', RackTablesError::INTERNAL);
-	$entity_type = $etype_by_pageno[$pageno];
-	$bypass_name = $page[$pageno]['bypass'];
-	assertUIntArg ($bypass_name);
+	global $pageno, $etype_by_pageno;
+	if (!isset ($etype_by_pageno[$pageno]))
+		throw new RackTablesError ('key not found in etype_by_pageno', RackTablesError::INTERNAL);
 
 	$fi = spotEntity ('file', $_REQUEST['file_id']);
-	if (FALSE === commitLinkFile ($_REQUEST['file_id'], $entity_type, $_REQUEST[$bypass_name]))
+	if (FALSE === commitLinkFile ($_REQUEST['file_id'], $etype_by_pageno[$pageno], getBypassValue()))
 		return buildRedirectURL (__FUNCTION__, 'ERR2');
 
 	return buildRedirectURL (__FUNCTION__, 'OK', array (htmlspecialchars ($fi['name'])));
@@ -1992,7 +1961,6 @@ $msgcode['replaceFile']['ERR3'] = 109;
 function replaceFile ()
 {
 	global $sic;
-	assertUIntArg ('file_id');
 
 	// Make sure the file can be uploaded
 	if (get_cfg_var('file_uploads') != 1)
@@ -2018,7 +1986,6 @@ $msgcode['updateFile']['OK'] = 70;
 $msgcode['updateFile']['ERR'] = 109;
 function updateFile ()
 {
-	assertUIntArg ('file_id');
 	assertStringArg ('file_name');
 	assertStringArg ('file_type');
 	assertStringArg ('file_comment', TRUE);
@@ -2060,7 +2027,6 @@ $msgcode['updateFileText']['ERR1'] = 179;
 $msgcode['updateFileText']['ERR2'] = 180;
 function updateFileText ()
 {
-	assertUIntArg ('file_id');
 	assertStringArg ('mtime_copy');
 	assertStringArg ('file_text', TRUE); // it's Ok to save empty
 	$shortInfo = spotEntity ('file', $_REQUEST['file_id']);
@@ -2469,7 +2435,6 @@ $msgcode['process8021QRecalcRequest']['NO_CHANGES'] = 300;
 $msgcode['process8021QRecalcRequest']['ERR'] = 192;
 function process8021QRecalcRequest ()
 {
-	assertUIntArg ('object_id');
 	global $sic;
 	if (! permitted (NULL, NULL, NULL, array (array ('tag' => '$op_recalc8021Q'))))
 		return buildRedirectURL (__FUNCTION__, 'ERR');
@@ -2624,7 +2589,6 @@ function cloneVSTRule()
 {
 	global $dbxlink;
 	$message = '';
-	assertUIntArg ('vst_id');
 	assertUIntArg ('mutex_rev', TRUE);
 	$dst_vst = getVLANSwitchTemplate ($_REQUEST['vst_id']);
 	if ($dst_vst['mutex_rev'] != $_REQUEST['mutex_rev'])
@@ -2645,7 +2609,6 @@ function cloneVSTRule()
 function updVSTRule()
 {
 	global $port_role_options;
-	assertUIntArg ('vst_id');
 	assertUIntArg ('mutex_rev', TRUE);
 	assertStringArg ('template_json');
 	$message = '';
@@ -2747,7 +2710,6 @@ function deleteObjectLog ()
 $msgcode['addObjectlog']['OK'] = 0;
 function addObjectlog ()
 {
-	assertUIntArg ('object_id');
 	assertStringArg ('logentry');
 	global $remote_username, $sic;
 	$oi = spotEntity ('object', $sic['object_id']);

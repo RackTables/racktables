@@ -27,6 +27,11 @@ if (!isset ($delayauth[$pageno][$tabno][$op]) and !permitted())
 	$location = buildWideRedirectURL (oneLiner (157)); // operation not permitted
 else
 {
+	// Call below does the job of bypass argument assertion, if such is required,
+	// so the ophandler function doesn't have to re-assert this portion of its
+	// arguments. And it would be even better to pass returned value to ophandler,
+	// so it is not necessary to remember the name of bypass in it.
+	getBypassValue();
 	if (!is_array ($ophandler[$pageno][$tabno][$op]))
 		$location = call_user_func ($ophandler[$pageno][$tabno][$op]);
 	else
