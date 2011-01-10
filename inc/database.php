@@ -225,11 +225,6 @@ function commitUpdateRow ($rackrow_id, $rackrow_name)
 	return usePreparedExecuteBlade ('UPDATE RackRow SET name = ? WHERE id = ?', array ($rackrow_name, $rackrow_id));
 }
 
-function commitDeleteRow($rackrow_id)
-{
-	return usePreparedDeleteBlade ('RackRow', array ('id' => $rackrow_id));
-}
-
 // Return a simple object list w/o related information, so that the returned value
 // can be directly used by printSelect(). An optional argument is the name of config
 // option with constraint in RackCode.
@@ -988,13 +983,6 @@ function commitUpdatePort ($object_id, $port_id, $port_name, $port_type_id, $por
 	return $errorInfo[2];
 }
 
-function delObjectPort ($port_id)
-{
-	if (usePreparedDeleteBlade ('Port', array ('id' => $port_id)) != TRUE)
-		return __FUNCTION__ . ': usePreparedDeleteBlade() failed';
-	return '';
-}
-
 function getAllIPv4Allocations ()
 {
 	$result = usePreparedSelectBlade
@@ -1042,12 +1030,6 @@ function linkPorts ($porta, $portb, $cable = NULL)
 		array ($porta, $portb)
 	);
 	return $ret ? '' : 'query failed';
-}
-
-function unlinkPort ($port_id)
-{
-	usePreparedDeleteBlade ('Link', array ('porta' => $port_id, 'portb' => $port_id), 'OR');
-	return '';
 }
 
 // Return all IPv4 addresses allocated to the objects. Attach detailed
@@ -2006,26 +1988,6 @@ function getPortOIFCompat ()
 	return $result->fetchAll (PDO::FETCH_ASSOC);
 }
 
-// Add a pair to the PortCompat table.
-function commitSupplementPOIFC ($type1, $type2)
-{
-	if ($type1 <= 0)
-		throw new InvalidArgException ('type1', $type1);
-	if ($type2 <= 0)
-		throw new InvalidArgException ('type2', $type2);
-	return usePreparedInsertBlade
-	(
-		'PortCompat',
-		array ('type1' => $type1, 'type2' => $type2)
-	);
-}
-
-// Remove a pair from the PortCompat table.
-function commitReducePOIFC ($type1, $type2)
-{
-	return usePreparedDeleteBlade ('PortCompat', array ('type1' => $type1, 'type2' => $type2));
-}
-
 function getDictStats ()
 {
 	$stock_chapters = array (1, 2, 11, 12, 13, 14, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28);
@@ -2160,14 +2122,6 @@ function commitUpdateDictionary ($chapter_no = 0, $dict_key = 0, $dict_value = '
 	);
 }
 
-// Technically dict_key is enough to delete, but including chapter_id into
-// WHERE clause makes sure, that the action actually happends for the same
-// chapter, which authorization was granted for.
-function commitReduceDictionary ($chapter_no = 0, $dict_key = 0)
-{
-	return usePreparedDeleteBlade ('Dictionary', array ('chapter_id' => $chapter_no, 'dict_key' => $dict_key));
-}
-
 function commitUpdateChapter ($chapter_no = 0, $chapter_name = '')
 {
 	if (!strlen ($chapter_name))
@@ -2283,11 +2237,6 @@ function commitUpdateAttribute ($attr_id = 0, $attr_name = '')
 	return usePreparedExecuteBlade ('UPDATE Attribute SET name=? WHERE id=?', array ($attr_name, $attr_id));
 }
 
-function commitDeleteAttribute ($attr_id = 0)
-{
-	return usePreparedDeleteBlade ('Attribute', array ('id' => $attr_id));
-}
-
 // FIXME: don't store garbage in chapter_no for non-dictionary types.
 function commitSupplementAttrMap ($attr_id = 0, $objtype_id = 0, $chapter_no = 0)
 {
@@ -2306,11 +2255,6 @@ function commitSupplementAttrMap ($attr_id = 0, $objtype_id = 0, $chapter_no = 0
 			'chapter_id' => $chapter_no
 		)
 	);
-}
-
-function commitReduceAttrMap ($attr_id = 0, $objtype_id)
-{
-	return usePreparedDeleteBlade ('AttributeMap', array ('attr_id' => $attr_id, 'objtype_id' => $objtype_id));
 }
 
 function cacheAllObjectsAttributes()
@@ -2720,20 +2664,10 @@ function addLBtoRSPool ($pool_id = 0, $object_id = 0, $vs_id = 0, $vsconfig = ''
 	);
 }
 
-function commitDeleteRS ($id = 0)
-{
-	return usePreparedDeleteBlade ('IPv4RS', array ('id' => $id));
-}
-
 function commitDeleteVS ($id = 0)
 {
 	releaseFiles ('ipv4vs', $id);
 	return FALSE !== usePreparedDeleteBlade ('IPv4VS', array ('id' => $id)) && FALSE !== destroyTagsForEntity ('ipv4vs', $id);
-}
-
-function commitDeleteLB ($object_id = 0, $pool_id = 0, $vs_id = 0)
-{
-	return usePreparedDeleteBlade ('IPv4LB', array ('object_id' => $object_id, 'rspool_id' => $pool_id, 'vs_id' => $vs_id));
 }
 
 function commitUpdateRS ($rsid = 0, $rsip = '', $rsport = 0, $rsconfig = '')
@@ -3037,13 +2971,6 @@ function getTagList ()
 		}
 	}
 	return $ret;
-}
-
-function commitDestroyTag ($tagid = 0)
-{
-	if (usePreparedDeleteBlade ('TagTree', array ('id' => $tagid)))
-		return '';
-	return 'usePreparedDeleteBlade() failed in ' . __FUNCTION__;
 }
 
 function commitUpdateTag ($tag_id, $tag_name, $parent_id)
@@ -3815,11 +3742,6 @@ function commitSupplementPIC ($iif_id, $oif_id)
 		'PortInterfaceCompat',
 		array ('iif_id' => $iif_id, 'oif_id' => $oif_id)
 	);
-}
-
-function commitReducePIC ($iif_id, $oif_id)
-{
-	return usePreparedDeleteBlade ('PortInterfaceCompat', array ('iif_id' => $iif_id, 'oif_id' => $oif_id));
 }
 
 function getPortIIFStats ($args)

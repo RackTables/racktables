@@ -31,7 +31,6 @@ $tabhandler['rackspace']['default'] = 'renderRackspace';
 $tabhandler['rackspace']['edit'] = 'renderRackspaceRowEditor';
 $tabhandler['rackspace']['history'] = 'renderRackspaceHistory';
 $ophandler['rackspace']['edit']['updateRow'] = 'updateRow';
-$ophandler['rackspace']['edit']['delete'] = 'deleteRow';
 $ophandler['rackspace']['edit']['addRow'] = array
 (
 	'table' => 'RackRow',
@@ -39,6 +38,15 @@ $ophandler['rackspace']['edit']['addRow'] = array
 	'arglist' => array
 	(
 		array ('url_argname' => 'name', 'assertion' => 'string')
+	),
+);
+$ophandler['rackspace']['edit']['delete'] = array
+(
+	'table' => 'RackRow',
+	'action' => 'DELETE',
+	'arglist' => array
+	(
+		array ('url_argname' => 'row_id', 'table_colname' => 'id', 'assertion' => 'uint')
 	),
 );
 
@@ -156,10 +164,8 @@ $trigger['object']['8021qports'] = 'trigger_object_8021qports';
 $trigger['object']['8021qsync'] = 'trigger_object_8021qsync';
 $ophandler['object']['rackspace']['updateObjectAllocation'] = 'updateObjectAllocation';
 $ophandler['object']['ports']['addPort'] = 'addPortForObject';
-$ophandler['object']['ports']['delPort'] = 'delPortFromObject';
 $ophandler['object']['ports']['editPort'] = 'editPortForObject';
 $ophandler['object']['ports']['linkPort'] = 'linkPortForObject';
-$ophandler['object']['ports']['unlinkPort'] = 'unlinkPortForObject';
 $ophandler['object']['ports']['addMultiPorts'] = 'addMultiPorts';
 $ophandler['object']['ports']['addBulkPorts'] = 'addBulkPorts';
 $ophandler['object']['ports']['useup'] = 'useupPort';
@@ -173,7 +179,6 @@ $ophandler['object']['edit']['clearSticker'] = 'clearSticker';
 $ophandler['object']['edit']['update'] = 'updateObject';
 $ophandler['object']['edit']['resetObject'] = 'resetObject';
 $ophandler['object']['log']['add'] = 'addObjectlog';
-$ophandler['object']['log']['del'] = 'deleteObjectLog';
 $ophandler['object']['nat4']['addNATv4Rule'] = 'addPortForwarding';
 $ophandler['object']['nat4']['delNATv4Rule'] = 'delPortForwarding';
 $ophandler['object']['nat4']['updNATv4Rule'] = 'updPortForwarding';
@@ -186,7 +191,6 @@ $ophandler['object']['files']['addFile'] = 'addFileToEntity';
 $ophandler['object']['files']['linkFile'] = 'linkFileToEntity';
 $ophandler['object']['files']['unlinkFile'] = 'unlinkFile';
 $ophandler['object']['editrspvs']['addLB'] = 'addLoadBalancer';
-$ophandler['object']['editrspvs']['delLB'] = 'deleteLoadBalancer';
 $ophandler['object']['editrspvs']['updLB'] = 'updateLoadBalancer';
 $ophandler['object']['lvsconfig']['submitSLBConfig'] = 'submitSLBConfig';
 $ophandler['object']['snmpportfinder']['querySNMPData'] = 'querySNMPData';
@@ -199,6 +203,48 @@ $ophandler['object']['8021qsync']['exec8021QPush'] = 'process8021QSyncRequest';
 $ophandler['object']['8021qsync']['resolve8021QConflicts'] = 'resolve8021QConflicts';
 $delayauth['object']['8021qports']['save8021QConfig'] = TRUE;
 $delayauth['object']['livevlans']['setPortVLAN'] = TRUE;
+$ophandler['object']['ports']['delPort'] = array
+(
+	'table' => 'Port',
+	'action' => 'DELETE',
+	'arglist' => array
+	(
+		array ('url_argname' => 'port_id', 'table_colname' => 'id', 'assertion' => 'uint'),
+		array ('url_argname' => 'object_id', 'assertion' => 'uint'),
+	),
+);
+$ophandler['object']['ports']['unlinkPort'] = array
+(
+	'table' => 'Link',
+	'action' => 'DELETE',
+	'arglist' => array
+	(
+		array ('url_argname' => 'port_id', 'table_colname' => 'porta', 'assertion' => 'uint'),
+		array ('url_argname' => 'port_id', 'table_colname' => 'portb', 'assertion' => 'uint'),
+	),
+	'conjunction' => 'OR',
+);
+$ophandler['object']['log']['del'] = array
+(
+	'table' => 'ObjectLog',
+	'action' => 'DELETE',
+	'arglist' => array
+	(
+		array ('url_argname' => 'logid', 'table_colname' => 'id', 'assertion' => 'uint'),
+		array ('url_argname' => 'object_id', 'assertion' => 'uint'),
+	),
+);
+$ophandler['object']['editrspvs']['delLB'] = array
+(
+	'table' => 'IPv4LB',
+	'action' => 'DELETE',
+	'arglist' => array
+	(
+		array ('url_argname' => 'object_id', 'assertion' => 'uint'),
+		array ('url_argname' => 'pool_id', 'table_colname' => 'rspool_id', 'assertion' => 'uint'),
+		array ('url_argname' => 'vs_id', 'assertion' => 'uint'),
+	),
+);
 
 $page['ipv4space']['parent'] = 'index';
 $tab['ipv4space']['default'] = 'Browse';
@@ -326,7 +372,7 @@ $tabhandler['ipv4vs']['files'] = 'renderFilesForEntity';
 $trigger['ipv4vs']['tags'] = 'trigger_tags';
 $ophandler['ipv4vs']['edit']['updIPv4VS'] = 'updateVService';
 $ophandler['ipv4vs']['editlblist']['addLB'] = 'addLoadBalancer';
-$ophandler['ipv4vs']['editlblist']['delLB'] = 'deleteLoadBalancer';
+$ophandler['ipv4vs']['editlblist']['delLB'] = $ophandler['object']['editrspvs']['delLB'];
 $ophandler['ipv4vs']['editlblist']['updLB'] = 'updateLoadBalancer';
 $ophandler['ipv4vs']['tags']['saveTags'] = 'saveEntityTags';
 $ophandler['ipv4vs']['files']['addFile'] = 'addFileToEntity';
@@ -363,17 +409,25 @@ $tabhandler['ipv4rspool']['tags'] = 'renderEntityTags';
 $tabhandler['ipv4rspool']['files'] = 'renderFilesForEntity';
 $ophandler['ipv4rspool']['edit']['updIPv4RSP'] = 'updateRSPool';
 $ophandler['ipv4rspool']['editrslist']['addRS'] = 'addRealServer';
-$ophandler['ipv4rspool']['editrslist']['delRS'] = 'deleteRealServer';
 $ophandler['ipv4rspool']['editrslist']['updRS'] = 'updateRealServer';
 $ophandler['ipv4rspool']['editrslist']['addMany'] = 'addRealServers';
 $ophandler['ipv4rspool']['editlblist']['addLB'] = 'addLoadBalancer';
-$ophandler['ipv4rspool']['editlblist']['delLB'] = 'deleteLoadBalancer';
+$ophandler['ipv4rspool']['editlblist']['delLB'] = $ophandler['object']['editrspvs']['delLB'];
 $ophandler['ipv4rspool']['editlblist']['updLB'] = 'updateLoadBalancer';
 $ophandler['ipv4rspool']['rsinservice']['upd'] = 'updateRSInService';
 $ophandler['ipv4rspool']['tags']['saveTags'] = 'saveEntityTags';
 $ophandler['ipv4rspool']['files']['addFile'] = 'addFileToEntity';
 $ophandler['ipv4rspool']['files']['linkFile'] = 'linkFileToEntity';
 $ophandler['ipv4rspool']['files']['unlinkFile'] = 'unlinkFile';
+$ophandler['ipv4rspool']['editrslist']['delRS'] = array
+(
+	'table' => 'IPv4RS',
+	'action' => 'DELETE',
+	'arglist' => array
+	(
+		array ('url_argname' => 'id', 'assertion' => 'uint'),
+	),
+);
 
 $page['rservers']['title'] = 'Real servers';
 $page['rservers']['parent'] = 'ipv4slb';
@@ -428,8 +482,26 @@ $tab['portmap']['default'] = 'View';
 $tab['portmap']['edit'] = 'Edit';
 $tabhandler['portmap']['default'] = 'renderPortOIFCompatViewer';
 $tabhandler['portmap']['edit'] = 'renderPortOIFCompatEditor';
-$ophandler['portmap']['edit']['add'] = 'addPortOIFCompat';
-$ophandler['portmap']['edit']['del'] = 'delPortOIFCompat';
+$ophandler['portmap']['edit']['add'] = array
+(
+	'table' => 'PortCompat',
+	'action' => 'INSERT',
+	'arglist' => array
+	(
+		array ('url_argname' => 'type1', 'assertion' => 'uint'),
+		array ('url_argname' => 'type2', 'assertion' => 'uint'),
+	),
+);
+$ophandler['portmap']['edit']['del'] = array
+(
+	'table' => 'PortCompat',
+	'action' => 'DELETE',
+	'arglist' => array
+	(
+		array ('url_argname' => 'type1', 'assertion' => 'uint'),
+		array ('url_argname' => 'type2', 'assertion' => 'uint'),
+	),
+);
 
 $page['portifcompat']['title'] = 'Enabled port types';
 $page['portifcompat']['parent'] = 'config';
@@ -438,9 +510,18 @@ $tab['portifcompat']['edit'] = 'Edit';
 $tabhandler['portifcompat']['default'] = 'renderPortIFCompat';
 $tabhandler['portifcompat']['edit'] = 'renderPortIFCompatEditor';
 $ophandler['portifcompat']['edit']['add'] = 'addPortInterfaceCompat';
-$ophandler['portifcompat']['edit']['del'] = 'delPortInterfaceCompat';
 $ophandler['portifcompat']['edit']['addPack'] = 'addPortInterfaceCompatPack';
 $ophandler['portifcompat']['edit']['delPack'] = 'delPortInterfaceCompatPack';
+$ophandler['portifcompat']['edit']['del'] = array
+(
+	'table' => 'PortInterfaceCompat',
+	'action' => 'DELETE',
+	'arglist' => array
+	(
+		array ('url_argname' => 'iif_id', 'assertion' => 'uint'),
+		array ('url_argname' => 'oif_id', 'assertion' => 'uint'),
+	),
+);
 
 $page['attrs']['title'] = 'Attributes';
 $page['attrs']['parent'] = 'config';
@@ -451,9 +532,17 @@ $tabhandler['attrs']['default'] = 'renderAttributes';
 $tabhandler['attrs']['editattrs'] = 'renderEditAttributesForm';
 $tabhandler['attrs']['editmap'] = 'renderEditAttrMapForm';
 $ophandler['attrs']['editattrs']['upd'] = 'changeAttribute';
-$ophandler['attrs']['editattrs']['del'] = 'deleteAttribute';
 $ophandler['attrs']['editmap']['add'] = 'supplementAttrMap';
-$ophandler['attrs']['editmap']['del'] = 'reduceAttrMap';
+$ophandler['attrs']['editmap']['del'] = array
+(
+	'table' => 'AttributeMap',
+	'action' => 'DELETE',
+	'arglist' => array
+	(
+		array ('url_argname' => 'attr_id', 'assertion' => 'uint'),
+		array ('url_argname' => 'objtype_id', 'assertion' => 'uint'),
+	),
+);
 $ophandler['attrs']['editattrs']['add'] = array
 (
 	'table' => 'Attribute',
@@ -462,6 +551,15 @@ $ophandler['attrs']['editattrs']['add'] = array
 	(
 		array ('url_argname' => 'attr_type', 'table_colname' => 'type', 'assertion' => 'enum/attr_type'),
 		array ('url_argname' => 'attr_name', 'table_colname' => 'name', 'assertion' => 'string'),
+	),
+);
+$ophandler['attrs']['editattrs']['del'] = array
+(
+	'table' => 'Attribute',
+	'action' => 'DELETE',
+	'arglist' => array
+	(
+		array ('url_argname' => 'attr_id', 'table_colname' => 'id', 'assertion' => 'uint'),
 	),
 );
 
@@ -490,7 +588,6 @@ $tab['chapter']['default'] = 'View';
 $tab['chapter']['edit'] = 'Edit';
 $tabhandler['chapter']['default'] = 'renderChapter';
 $tabhandler['chapter']['edit'] = 'renderChapterEditor';
-$ophandler['chapter']['edit']['del'] = 'reduceDictionary';
 $ophandler['chapter']['edit']['upd'] = 'updateDictionary';
 $ophandler['chapter']['edit']['add'] = array
 (
@@ -500,6 +597,19 @@ $ophandler['chapter']['edit']['add'] = array
 	(
 		array ('url_argname' => 'chapter_no', 'table_colname' => 'chapter_id', 'assertion' => 'uint'),
 		array ('url_argname' => 'dict_value', 'assertion' => 'string'),
+	),
+);
+$ophandler['chapter']['edit']['del'] = array
+(
+	'table' => 'Dictionary',
+	'action' => 'DELETE',
+	'arglist' => array
+	(
+		// Technically dict_key is enough to delete, but including chapter_id into
+		// WHERE clause makes sure, that the action actually happends for the same
+		// chapter, which authorization was granted for.
+		array ('url_argname' => 'chapter_no', 'table_colname' => 'chapter_id', 'assertion' => 'uint'),
+		array ('url_argname' => 'dict_key', 'assertion' => 'uint'),
 	),
 );
 
@@ -520,7 +630,6 @@ $tab['tagtree']['default'] = 'View';
 $tab['tagtree']['edit'] = 'Edit';
 $tabhandler['tagtree']['default'] = 'renderTagTree';
 $tabhandler['tagtree']['edit'] = 'renderTagTreeEditor';
-$ophandler['tagtree']['edit']['destroyTag'] = 'destroyTag';
 $ophandler['tagtree']['edit']['updateTag'] = 'updateTag';
 $ophandler['tagtree']['edit']['createTag'] = array
 (
@@ -530,6 +639,15 @@ $ophandler['tagtree']['edit']['createTag'] = array
 	(
 		array ('url_argname' => 'tag_name', 'table_colname' => 'tag', 'assertion' => 'tag'),
 		array ('url_argname' => 'parent_id', 'assertion' => 'uint0', 'if_empty' => 'NULL'),
+	),
+);
+$ophandler['tagtree']['edit']['destroyTag'] = array
+(
+	'table' => 'TagTree',
+	'action' => 'DELETE',
+	'arglist' => array
+	(
+		array ('url_argname' => 'tag_id', 'table_colname' => 'id', 'assertion' => 'tag'),
 	),
 );
 
@@ -632,7 +750,7 @@ $ophandler['vlandomain']['vlanlist']['add'] = array
 	(
 		array ('url_argname' => 'vdom_id', 'table_colname' => 'domain_id', 'assertion' => 'uint'),
 		array ('url_argname' => 'vlan_id', 'assertion' => 'uint'),
-		array ('url_argname' => 'vlan_type', 'assertion' => 'string'), // ENUM actually
+		array ('url_argname' => 'vlan_type', 'assertion' => 'enum/vlan_type'),
 		array ('url_argname' => 'vlan_descr', 'assertion' => 'string0', 'if_empty' => 'NULL'),
 	),
 );

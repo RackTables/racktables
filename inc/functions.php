@@ -246,6 +246,12 @@ function genericAssertion ($argname, $argtype)
 		if (!in_array ($sic[$argname], array ('uint', 'float', 'string', 'dict')))
 			throw new InvalidRequestArgException ($argname, $sic[$argname], 'Unknown value');
 		break;
+	case 'enum/vlan_type':
+		assertStringArg ($argname);
+		// "Alien" type is not valid until the logic is fixed to implement it in full.
+		if (!in_array ($sic[$argname], array ('ondemand', 'compulsory')))
+			throw new InvalidRequestArgException ($argname, $sic[$argname], 'Unknown value');
+		break;
 	default:
 		throw new InvalidArgException ('argtype', $argtype); // comes not from user's input
 	}

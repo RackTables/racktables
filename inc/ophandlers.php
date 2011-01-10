@@ -169,19 +169,6 @@ function editPortForObject ()
 		return buildRedirectURL (__FUNCTION__, 'OK', array ($_REQUEST['name']));
 }
 
-$msgcode['delPortFromObject']['OK'] = 7;
-$msgcode['delPortFromObject']['ERR'] = 100;
-function delPortFromObject ()
-{
-	assertUIntArg ('port_id');
-	$error = delObjectPort ($_REQUEST['port_id']);
-
-	if ($error != '')
-		return buildRedirectURL (__FUNCTION__, 'ERR', array ($error));
-	else
-		return buildRedirectURL (__FUNCTION__, 'OK', array ($_REQUEST['port_name']));
-}
-
 $msgcode['linkPortForObject']['OK'] = 8;
 $msgcode['linkPortForObject']['ERR'] = 100;
 function linkPortForObject ()
@@ -198,33 +185,6 @@ function linkPortForObject ()
 	$local_port_info = getPortInfo ($sic['port_id']);
 	$remote_port_info = getPortInfo ($sic['remote_port_id']);
 	$remote_object = spotEntity ('object', $remote_port_info['object_id']);
-	return buildRedirectURL
-	(
-		__FUNCTION__,
-		'OK',
-		array
-		(
-			$local_port_info['name'],
-			$remote_port_info['name'],
-			$remote_object['dname'],
-		)
-	);
-}
-
-$msgcode['unlinkPortForObject']['OK'] = 9;
-$msgcode['unlinkPortForObject']['ERR'] = 100;
-function unlinkPortForObject ()
-{
-	assertUIntArg ('port_id');
-	assertUIntArg ('remote_port_id');
-
-	global $sic;
-	$local_port_info = getPortInfo ($sic['port_id']);
-	$remote_port_info = getPortInfo ($sic['remote_port_id']);
-	$remote_object = spotEntity ('object', $remote_port_info['object_id']);
-	$error = unlinkPort ($_REQUEST['port_id']);
-	if ($error != '')
-		return buildRedirectURL (__FUNCTION__, 'ERR', array ($error));
 	return buildRedirectURL
 	(
 		__FUNCTION__,
@@ -664,17 +624,6 @@ function updateDictionary ()
 		return buildRedirectURL (__FUNCTION__, 'ERR');
 }
 
-$msgcode['reduceDictionary']['OK'] = 50;
-$msgcode['reduceDictionary']['ERR'] = 111;
-function reduceDictionary ()
-{
-	assertUIntArg ('dict_key');
-	if (commitReduceDictionary ($_REQUEST['chapter_no'], $_REQUEST['dict_key']) === TRUE)
-		return buildRedirectURL (__FUNCTION__, 'OK');
-	else
-		return buildRedirectURL (__FUNCTION__, 'ERR');
-}
-
 $msgcode['updateChapter']['OK'] = 54;
 $msgcode['updateChapter']['ERR'] = 113;
 function updateChapter ()
@@ -710,17 +659,6 @@ function changeAttribute ()
 		return buildRedirectURL (__FUNCTION__, 'ERR');
 }
 
-$msgcode['deleteAttribute']['OK'] = 47;
-$msgcode['deleteAttribute']['ERR'] = 117;
-function deleteAttribute ()
-{
-	assertUIntArg ('attr_id');
-	if (commitDeleteAttribute ($_REQUEST['attr_id']))
-		return buildRedirectURL (__FUNCTION__, 'OK');
-	else
-		return buildRedirectURL (__FUNCTION__, 'ERR');
-}
-
 $msgcode['supplementAttrMap']['OK'] = 48;
 $msgcode['supplementAttrMap']['ERR1'] = 154;
 $msgcode['supplementAttrMap']['ERR2'] = 118;
@@ -747,18 +685,6 @@ function supplementAttrMap ()
 		return buildRedirectURL (__FUNCTION__, 'OK');
 	else
 		return buildRedirectURL (__FUNCTION__, 'ERR2');
-}
-
-$msgcode['reduceAttrMap']['OK'] = 49;
-$msgcode['reduceAttrMap']['ERR'] = 119;
-function reduceAttrMap ()
-{
-	assertUIntArg ('attr_id');
-	assertUIntArg ('objtype_id');
-	if (commitReduceAttrMap ($_REQUEST['attr_id'], $_REQUEST['objtype_id']) !== FALSE)
-		return buildRedirectURL (__FUNCTION__, 'OK');
-	else
-		return buildRedirectURL (__FUNCTION__, 'ERR');
 }
 
 $msgcode['clearSticker']['OK'] = 15;
@@ -1260,34 +1186,6 @@ function addVService ()
 		return buildRedirectURL (__FUNCTION__, 'OK');
 }
 
-$msgcode['deleteRealServer']['OK'] = 35;
-$msgcode['deleteRealServer']['ERR'] = 128;
-function deleteRealServer ()
-{
-	assertUIntArg ('id');
-	if (!commitDeleteRS ($_REQUEST['id']))
-		return buildRedirectURL (__FUNCTION__, 'ERR');
-	else
-		return buildRedirectURL (__FUNCTION__, 'OK');
-}
-
-$msgcode['deleteLoadBalancer']['OK'] = 19;
-$msgcode['deleteLoadBalancer']['ERR'] = 129;
-function deleteLoadBalancer ()
-{
-	assertUIntArg ('object_id');
-	assertUIntArg ('pool_id');
-	assertUIntArg ('vs_id');
-	if (!commitDeleteLB (
-		$_REQUEST['object_id'],
-		$_REQUEST['pool_id'],
-		$_REQUEST['vs_id']
-	))
-		return buildRedirectURL (__FUNCTION__, 'ERR');
-	else
-		return buildRedirectURL (__FUNCTION__, 'OK');
-}
-
 $msgcode['deleteVService']['OK'] = 29;
 $msgcode['deleteVService']['ERR'] = 130;
 function deleteVService ()
@@ -1561,21 +1459,6 @@ function saveEntityTags ()
 		return buildRedirectURL (__FUNCTION__, 'OK', array ($n_succeeds));
 }
 
-$msgcode['destroyTag']['OK'] = 58;
-$msgcode['destroyTag']['ERR1'] = 183;
-$msgcode['destroyTag']['ERR2'] = 144;
-function destroyTag ()
-{
-	assertUIntArg ('tag_id');
-	global $taglist;
-	if (!isset ($taglist[$_REQUEST['tag_id']]))
-		return buildRedirectURL (__FUNCTION__, 'ERR1', array ($_REQUEST['tag_id']));
-	if (($ret = commitDestroyTag ($_REQUEST['tag_id'])) == '')
-		return buildRedirectURL (__FUNCTION__, 'OK', array ($taglist[$_REQUEST['tag_id']]['tag']));
-	else
-		return buildRedirectURL (__FUNCTION__, 'ERR2');
-}
-
 $msgcode['updateTag']['OK'] = 60;
 $msgcode['updateTag']['ERR1'] = 145;
 $msgcode['updateTag']['ERR2'] = 109;
@@ -1753,15 +1636,6 @@ function updateRow ()
 		return buildRedirectURL (__FUNCTION__, 'OK', array ($_REQUEST['name']));
 	else
 		return buildRedirectURL (__FUNCTION__, 'ERR', array ($_REQUEST['name']));
-}
-
-$msgcode['deleteRow']['OK'] = 77;
-$msgcode['deleteRow']['ERR'] = 146;
-function deleteRow ()
-{
-	assertUIntArg ('row_id');
-	$rowinfo = getRackRowInfo ($_REQUEST['row_id']);
-	return buildRedirectURL (__FUNCTION__, FALSE === commitDeleteRow ($_REQUEST['row_id']) ? 'ERR' : 'OK', array ($rowinfo['name']));
 }
 
 $msgcode['addRack']['OK'] = 65;
@@ -2049,17 +1923,6 @@ function addPortInterfaceCompat ()
 	return buildRedirectURL (__FUNCTION__, 'ERR');
 }
 
-$msgcode['delPortInterfaceCompat']['OK'] = 49;
-$msgcode['delPortInterfaceCompat']['ERR'] = 111;
-function delPortInterfaceCompat ()
-{
-	assertUIntArg ('iif_id');
-	assertUIntArg ('oif_id');
-	if (commitReducePIC ($_REQUEST['iif_id'], $_REQUEST['oif_id']))
-		return buildRedirectURL (__FUNCTION__, 'OK');
-	return buildRedirectURL (__FUNCTION__, 'ERR');
-}
-
 $ifcompatpack = array
 (
 	'1000cwdm80' => array (1209, 1210, 1211, 1212, 1213, 1214, 1215, 1216),
@@ -2105,39 +1968,16 @@ function delPortInterfaceCompatPack ()
 {
 	assertStringArg ('standard');
 	assertUIntArg ('iif_id');
-	global $ifcompatpack;
-	if (!array_key_exists ($_REQUEST['standard'], $ifcompatpack) or !array_key_exists ($_REQUEST['iif_id'], getPortIIFOptions()))
+	global $ifcompatpack, $sic;
+	if (!array_key_exists ($sic['standard'], $ifcompatpack) or !array_key_exists ($sic['iif_id'], getPortIIFOptions()))
 		return buildRedirectURL (__FUNCTION__, 'ERR');
 	$ngood = $nbad = 0;
-	foreach ($ifcompatpack[$_REQUEST['standard']] as $oif_id)
-		if (commitReducePIC ($_REQUEST['iif_id'], $oif_id))
+	foreach ($ifcompatpack[$sic['standard']] as $oif_id)
+		if (usePreparedDeleteBlade ('PortInterfaceCompat', array ('iif_id' => $sic['iif_id'], 'oif_id' => $oif_id)))
 			$ngood++;
 		else
 			$nbad++;
 	return buildRedirectURL (__FUNCTION__, 'OK', array ($nbad, $ngood));
-}
-
-$msgcode['addPortOIFCompat']['OK'] = 48;
-$msgcode['addPortOIFCompat']['ERR'] = 110;
-function addPortOIFCompat()
-{
-	assertUIntArg('type1');
-	assertUIntArg('type2');
-	if (commitSupplementPOIFC($_REQUEST['type1'], $_REQUEST['type2']))
-		return buildRedirectURL(__FUNCTION__, 'OK');
-	return buildRedirectURL(__FUNCTION__, 'ERR');
-}
-
-$msgcode['delPortOIFCompat']['OK'] = 49;
-$msgcode['delPortOIFCompat']['ERR'] = 111;
-function delPortOIFCompat ()
-{
-	assertUIntArg('type1');
-	assertUIntArg('type2');
-	if (commitReducePOIFC ($_REQUEST['type1'], $_REQUEST['type2']) !== FALSE)
-		return buildRedirectURL (__FUNCTION__, 'OK');
-	return buildRedirectURL (__FUNCTION__, 'ERR');
-
 }
 
 $msgcode['add8021QOrder']['OK'] = 48;
@@ -2699,14 +2539,6 @@ function importDPData()
 	return buildRedirectURL (__FUNCTION__, 'OK', array ($nignored, $ndone));
 }
 
-$msgcode['deleteObjectLog']['OK'] = 77;
-function deleteObjectLog ()
-{
-	assertUIntArg ('logid');
-	usePreparedDeleteBlade ('ObjectLog', array ('id' => $_REQUEST['logid']));
-	return buildRedirectURL (__FUNCTION__, 'OK', array ('log entry'));
-}
-
 $msgcode['addObjectlog']['OK'] = 0;
 function addObjectlog ()
 {
@@ -2757,6 +2589,10 @@ function tableHandler ($opspec)
 	{
 	case 'INSERT':
 		$retcode = TRUE === usePreparedInsertBlade ($opspec['table'], $columns) ? 48 : 110;
+		break;
+	case 'DELETE':
+		$conjunction = array_key_exists ('conjunction', $opspec) ? $opspec['conjunction'] : 'AND';
+		$retcode = FALSE !== usePreparedDeleteBlade ($opspec['table'], $columns, $conjunction) ? 49 : 111;
 		break;
 	default:
 		throw new InvalidArgException ('opspec/action', '(malformed array structure)');

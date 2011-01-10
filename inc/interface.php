@@ -1337,7 +1337,7 @@ function renderPortsForObject ($object_id)
 	{
 		$tr_class = isset ($hl_port_id) && $hl_port_id == $port['id'] ? 'class="port_highlight"' : '';
 		printOpFormIntro ('editPort', array ('port_id' => $port['id']));
-		echo "<tr $tr_class><td><a name='port-${port['id']}' href='".makeHrefProcess(array('op'=>'delPort', 'port_id'=>$port['id'], 'object_id'=>$object_id, 'port_name'=>$port['name']))."'>";
+		echo "<tr $tr_class><td><a name='port-${port['id']}' href='".makeHrefProcess(array('op'=>'delPort', 'port_id'=>$port['id'], 'object_id'=>$object_id))."'>";
 		printImageHREF ('delete', 'Unlink and Delete this port');
 		echo "</a></td>\n";
 		$a_class = isEthernetPort ($port) ? 'port-menu' : '';
@@ -1370,7 +1370,6 @@ function renderPortsForObject ($object_id)
 				makeHrefProcess(array(
 					'op'=>'unlinkPort', 
 					'port_id'=>$port['id'],
-					'remote_port_id' => $port['remote_id'],
 					'object_id'=>$object_id)).
 			"'>";
 			printImageHREF ('cut', 'Unlink this port');
