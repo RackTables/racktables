@@ -133,6 +133,7 @@ $msgcode['addPortForObject']['ERR2'] = 100;
 function addPortForObject ()
 {
 	assertStringArg ('port_name', TRUE);
+	genericAssertion ('port_l2address', 'l2address0');
 	if (!strlen ($_REQUEST['port_name']))
 		return buildRedirectURL (__FUNCTION__, 'ERR1');
 	$error = commitAddPort
@@ -157,6 +158,7 @@ function editPortForObject ()
 	assertUIntArg ('port_id');
 	assertUIntArg ('port_type_id');
 	assertStringArg ('reservation_comment', TRUE);
+	genericAssertion ('l2address', 'l2address0');
 	// tolerate empty value now to produce custom informative message later
 	assertStringArg ('name', TRUE);
 	if (!strlen ($_REQUEST['name']))

@@ -899,9 +899,7 @@ function getResidentRacksData ($object_id = 0, $fetch_rackdata = TRUE)
 
 function commitAddPort ($object_id = 0, $port_name, $port_type_id, $port_label, $port_l2address)
 {
-	// FIXME: use InvalidRequestArgException and return nothing
-	if (NULL === ($db_l2address = l2addressForDatabase ($port_l2address)))
-		return "Invalid L2 address ${port_l2address}";
+	$db_l2address = l2addressForDatabase ($port_l2address);
 	global $dbxlink;
 	$dbxlink->exec ('LOCK TABLES Port WRITE');
 	if (alreadyUsedL2Address ($db_l2address, $object_id))
@@ -949,8 +947,7 @@ function commitAddPort ($object_id = 0, $port_name, $port_type_id, $port_label, 
 // It would be nice to simplify this semantics later.
 function commitUpdatePort ($object_id, $port_id, $port_name, $port_type_id, $port_label, $port_l2address, $port_reservation_comment)
 {
-	if (NULL === ($db_l2address = l2addressForDatabase ($port_l2address)))
-		return "Invalid L2 address ${port_l2address}";
+	$db_l2address = l2addressForDatabase ($port_l2address);
 	global $dbxlink;
 	$dbxlink->exec ('LOCK TABLES Port WRITE');
 	if (alreadyUsedL2Address ($db_l2address, $object_id))
@@ -1865,8 +1862,14 @@ function getPortSearchResults ($what)
 		$ret[$port['object_id']]['id'] = $port['object_id'];
 		$ret[$port['object_id']]['by_port'][$port['id']] = $port['label'];
 	}
-	if (NULL === ($db_l2address = l2addressForDatabase ($what)))
+	try
+	{
+		$db_l2address = l2addressForDatabase ($what);
+	}
+	catch (InvalidArgException $e)
+	{
 		return $ret;
+	}
 	$ports = getSearchResultByField
 	(
 		'Port',

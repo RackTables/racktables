@@ -236,10 +236,29 @@ function genericAssertion ($argname, $argtype)
 	case 'inet4':
 		assertIPv4Arg ($argname);
 		break;
+	case 'inet6':
+		assertIPv6Arg ($argname);
+		break;
+	case 'l2address':
+		assertStringArg ($argname);
+	case 'l2address0':
+		assertStringArg ($argname, TRUE);
+		try
+		{
+			l2addressForDatabase ($sic[$argname]);
+		}
+		catch (InvalidArgException $e)
+		{
+			throw new InvalidRequestArgException ($argname, $sic[$argname], 'malformed MAC/WWN address');
+		}
+		break;
 	case 'tag':
 		assertStringArg ($argname);
 		if (!validTagName ($sic[$argname]))
 			throw new InvalidRequestArgException ($argname, $sic[$argname], 'Invalid tag name');
+		break;
+	case 'pcre':
+		assertPCREArg ($argname);
 		break;
 	case 'enum/attr_type':
 		assertStringArg ($argname);
@@ -603,7 +622,7 @@ function markupObjectProblems (&$rackData)
 }
 
 // Return a uniformly (010203040506 or 0102030405060708) formatted address, if it is present
-// in the provided string, an empty string for an empty string or NULL for error.
+// in the provided string, an empty string for an empty string or raise an exception.
 function l2addressForDatabase ($string)
 {
 	$string = strtoupper ($string);
@@ -624,7 +643,7 @@ function l2addressForDatabase ($string)
 		case (preg_match (RE_L2_IPCFG, $string) or preg_match (RE_L2_WWN_HYPHEN, $string)):
 			return str_replace ('-', '', $string);
 		default:
-			return NULL;
+			throw new InvalidArgException ('$string', $string, 'malformed MAC/WWN address');
 	}
 }
 
