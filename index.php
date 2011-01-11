@@ -50,9 +50,10 @@ ob_start();
 </table>
 </body>
 </html>
-<?
+<?php
 	ob_flush();
 } catch (Exception $e) {
 	ob_end_clean();
 	printException($e);
 }
+?>
