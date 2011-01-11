@@ -90,7 +90,7 @@ function buildRedirectURL ($callfunc, $status, $log_args = array(), $nextpage = 
 	return buildWideRedirectURL (oneLiner ($msgcode[$callfunc][$status], $log_args), $nextpage, $nexttab, $url_args);
 }
 
-$msgcode['addPortForwarding']['OK'] = 2;
+$msgcode['addPortForwarding']['OK'] = 48;
 $msgcode['addPortForwarding']['ERR'] = 100;
 function addPortForwarding ()
 {
@@ -121,7 +121,7 @@ function addPortForwarding ()
 		return buildRedirectURL (__FUNCTION__, 'ERR', array ($error));
 }
 
-$msgcode['delPortForwarding']['OK'] = 3;
+$msgcode['delPortForwarding']['OK'] = 49;
 $msgcode['delPortForwarding']['ERR'] = 111;
 function delPortForwarding ()
 {
@@ -144,7 +144,7 @@ function delPortForwarding ()
 	buildRedirectURL (__FUNCTION__, $result !== FALSE ? 'OK' : 'ERR');
 }
 
-$msgcode['updPortForwarding']['OK'] = 4;
+$msgcode['updPortForwarding']['OK'] = 51;
 $msgcode['updPortForwarding']['ERR'] = 109;
 function updPortForwarding ()
 {
@@ -169,7 +169,7 @@ function updPortForwarding ()
 	buildRedirectURL (__FUNCTION__, $result !== FALSE ? 'OK' : 'ERR');
 }
 
-$msgcode['addPortForObject']['OK'] = 5;
+$msgcode['addPortForObject']['OK'] = 48;
 $msgcode['addPortForObject']['ERR1'] = 101;
 $msgcode['addPortForObject']['ERR2'] = 100;
 function addPortForObject ()
@@ -192,7 +192,7 @@ function addPortForObject ()
 		return buildRedirectURL (__FUNCTION__, 'OK', array ($_REQUEST['port_name']));
 }
 
-$msgcode['editPortForObject']['OK'] = 6;
+$msgcode['editPortForObject']['OK'] = 7;
 $msgcode['editPortForObject']['ERR1'] = 101;
 $msgcode['editPortForObject']['ERR2'] = 100;
 function editPortForObject ()
@@ -384,7 +384,7 @@ function addBulkPorts ()
 	return buildRedirectURL (__FUNCTION__, 'OK', array ($added_count, $error_count));
 }
 
-$msgcode['updIPv4Allocation']['OK'] = 12;
+$msgcode['updIPv4Allocation']['OK'] = 51;
 $msgcode['updIPv4Allocation']['ERR'] = 109;
 function updIPv4Allocation ()
 {
@@ -397,7 +397,7 @@ function updIPv4Allocation ()
 	return buildRedirectURL (__FUNCTION__, $result === FALSE ? 'ERR' : 'OK');
 }
 
-$msgcode['updIPv6Allocation']['OK'] = 12;
+$msgcode['updIPv6Allocation']['OK'] = 51;
 $msgcode['updIv6PAllocation']['ERR'] = 109;
 function updIPv6Allocation ()
 {
@@ -410,7 +410,7 @@ function updIPv6Allocation ()
 	return buildRedirectURL (__FUNCTION__, $result === FALSE ? 'ERR' : 'OK');
 }
 
-$msgcode['delIPv4Allocation']['OK'] = 14;
+$msgcode['delIPv4Allocation']['OK'] = 49;
 $msgcode['delIPv4Allocation']['ERR'] = 111;
 function delIPv4Allocation ()
 {
@@ -421,7 +421,7 @@ function delIPv4Allocation ()
 	return buildRedirectURL (__FUNCTION__, $result === FALSE ? 'ERR' : 'OK');
 }
 
-$msgcode['delIPv6Allocation']['OK'] = 14;
+$msgcode['delIPv6Allocation']['OK'] = 49;
 $msgcode['delIPv6Allocation']['ERR'] = 111;
 function delIPv6Allocation ()
 {
@@ -431,7 +431,7 @@ function delIPv6Allocation ()
 	return buildRedirectURL (__FUNCTION__, $result === FALSE ? 'ERR' : 'OK');
 }
 
-$msgcode['addIPv4Allocation']['OK'] = 13;
+$msgcode['addIPv4Allocation']['OK'] = 48;
 $msgcode['addIPv4Allocation']['ERR1'] = 170;
 $msgcode['addIPv4Allocation']['ERR2'] = 100;
 function addIPv4Allocation ()
@@ -461,7 +461,7 @@ function addIPv4Allocation ()
 	return buildRedirectURL (__FUNCTION__, 'OK');
 }
 
-$msgcode['addIPv6Allocation']['OK'] = 13;
+$msgcode['addIPv6Allocation']['OK'] = 48;
 $msgcode['addIPv6Allocation']['ERR1'] = 170;
 $msgcode['addIPv6Allocation']['ERR2'] = 100;
 function addIPv6Allocation ()
@@ -493,12 +493,8 @@ function addIPv6Allocation ()
 	return buildRedirectURL (__FUNCTION__, 'OK');
 }
 
-$msgcode['addIPv4Prefix']['OK'] = 23;
+$msgcode['addIPv4Prefix']['OK'] = 48;
 $msgcode['addIPv4Prefix']['ERR'] = 100;
-$msgcode['addIPv4Prefix']['ERR1'] = 173;
-$msgcode['addIPv4Prefix']['ERR2'] = 174;
-$msgcode['addIPv4Prefix']['ERR3'] = 175;
-$msgcode['addIPv4Prefix']['ERR4'] = 176;
 function addIPv4Prefix ()
 {
 	assertStringArg ('range');
@@ -514,12 +510,8 @@ function addIPv4Prefix ()
 		return buildRedirectURL (__FUNCTION__, 'OK');
 }
 
-$msgcode['addIPv6Prefix']['OK'] = 86;
+$msgcode['addIPv6Prefix']['OK'] = 48;
 $msgcode['addIPv6Prefix']['ERR'] = 100;
-$msgcode['addIPv6Prefix']['ERR1'] = 173;
-$msgcode['addIPv6Prefix']['ERR2'] = 174;
-$msgcode['addIPv6Prefix']['ERR3'] = 175;
-$msgcode['addIPv6Prefix']['ERR4'] = 176;
 function addIPv6Prefix ()
 {
 	assertStringArg ('range');
@@ -534,7 +526,7 @@ function addIPv6Prefix ()
 		return buildRedirectURL (__FUNCTION__, 'OK');
 }
 
-$msgcode['delIPv4Prefix']['OK'] = 24;
+$msgcode['delIPv4Prefix']['OK'] = 49;
 $msgcode['delIPv4Prefix']['ERR'] = 100;
 function delIPv4Prefix ()
 {
@@ -546,7 +538,7 @@ function delIPv4Prefix ()
 		return buildRedirectURL (__FUNCTION__, 'OK');
 }
 
-$msgcode['delIPv6Prefix']['OK'] = 85;
+$msgcode['delIPv6Prefix']['OK'] = 49;
 $msgcode['delIPv6Prefix']['ERR'] = 100;
 function delIPv6Prefix ()
 {
@@ -558,7 +550,7 @@ function delIPv6Prefix ()
 		return buildRedirectURL (__FUNCTION__, 'OK');
 }
 
-$msgcode['updIPv4Prefix']['OK'] = 25;
+$msgcode['updIPv4Prefix']['OK'] = 51;
 $msgcode['updIPv4Prefix']['ERR'] = 109;
 function updIPv4Prefix ()
 {
@@ -570,7 +562,7 @@ function updIPv4Prefix ()
 	return buildRedirectURL (__FUNCTION__, $result !== FALSE ? 'OK' : 'ERR');
 }
 
-$msgcode['updIPv6Prefix']['OK'] = 86;
+$msgcode['updIPv6Prefix']['OK'] = 51;
 $msgcode['updIPv6Prefix']['ERR'] = 109;
 function updIPv6Prefix ()
 {
@@ -582,7 +574,7 @@ function updIPv6Prefix ()
 	return buildRedirectURL (__FUNCTION__, $result !== FALSE ? 'OK' : 'ERR');
 }
 
-$msgcode['editAddress']['OK'] = 27;
+$msgcode['editAddress']['OK'] = 51;
 $msgcode['editAddress']['ERR'] = 100;
 function editAddress ()
 {
@@ -599,7 +591,7 @@ function editAddress ()
 		return buildRedirectURL (__FUNCTION__, 'OK');
 }
 
-$msgcode['editv6Address']['OK'] = 27;
+$msgcode['editv6Address']['OK'] = 51;
 $msgcode['editv6Address']['ERR'] = 100;
 function editv6Address ()
 {
@@ -617,7 +609,7 @@ function editv6Address ()
 		return buildRedirectURL (__FUNCTION__, 'OK');
 }
 
-$msgcode['createUser']['OK'] = 40;
+$msgcode['createUser']['OK'] = 5;
 $msgcode['createUser']['ERR'] = 102;
 function createUser ()
 {
@@ -634,9 +626,8 @@ function createUser ()
 	return buildRedirectURL (__FUNCTION__, 'OK', array ($username));
 }
 
-$msgcode['updateUser']['OK'] = 39;
-$msgcode['updateUser']['ERR1'] = 103;
-$msgcode['updateUser']['ERR1'] = 104;
+$msgcode['updateUser']['OK'] = 7;
+$msgcode['updateUser']['ERR2'] = 104;
 function updateUser ()
 {
 	assertStringArg ('username');
@@ -644,8 +635,7 @@ function updateUser ()
 	assertStringArg ('password');
 	$username = $_REQUEST['username'];
 	$new_password = $_REQUEST['password'];
-	if (NULL == ($userinfo = spotEntity ('user', $_REQUEST['user_id'])))
-		return buildRedirectURL (__FUNCTION__, 'ERR1');
+	$userinfo = spotEntity ('user', $_REQUEST['user_id']));
 	// Update user password only if provided password is not the same as current password hash.
 	if ($new_password != $userinfo['user_password_hash'])
 		$new_password = sha1 ($new_password);
@@ -668,8 +658,8 @@ function updateDictionary ()
 		return buildRedirectURL (__FUNCTION__, 'ERR');
 }
 
-$msgcode['updateChapter']['OK'] = 54;
-$msgcode['updateChapter']['ERR'] = 113;
+$msgcode['updateChapter']['OK'] = 51;
+$msgcode['updateChapter']['ERR'] = 109;
 function updateChapter ()
 {
 	assertUIntArg ('chapter_no');
@@ -680,8 +670,8 @@ function updateChapter ()
 		return buildRedirectURL (__FUNCTION__, 'ERR');
 }
 
-$msgcode['delChapter']['OK'] = 53;
-$msgcode['delChapter']['ERR'] = 114;
+$msgcode['delChapter']['OK'] = 49;
+$msgcode['delChapter']['ERR'] = 111;
 function delChapter ()
 {
 	assertUIntArg ('chapter_no');
@@ -691,8 +681,8 @@ function delChapter ()
 		return buildRedirectURL (__FUNCTION__, 'ERR');
 }
 
-$msgcode['changeAttribute']['OK'] = 46;
-$msgcode['changeAttribute']['ERR'] = 115;
+$msgcode['changeAttribute']['OK'] = 51;
+$msgcode['changeAttribute']['ERR'] = 109;
 function changeAttribute ()
 {
 	assertUIntArg ('attr_id');
@@ -705,7 +695,7 @@ function changeAttribute ()
 
 $msgcode['supplementAttrMap']['OK'] = 48;
 $msgcode['supplementAttrMap']['ERR1'] = 154;
-$msgcode['supplementAttrMap']['ERR2'] = 118;
+$msgcode['supplementAttrMap']['ERR2'] = 110;
 function supplementAttrMap ()
 {
 	assertUIntArg ('attr_id');
@@ -731,7 +721,7 @@ function supplementAttrMap ()
 		return buildRedirectURL (__FUNCTION__, 'ERR2');
 }
 
-$msgcode['clearSticker']['OK'] = 15;
+$msgcode['clearSticker']['OK'] = 49;
 $msgcode['clearSticker']['ERR'] = 120;
 function clearSticker ()
 {
@@ -808,8 +798,8 @@ function updateObjectAllocation ()
 	return buildWideRedirectURL ($log);
 }
 
-$msgcode['updateObject']['OK'] = 16;
-$msgcode['updateObject']['ERR'] = 121;
+$msgcode['updateObject']['OK'] = 51;
+$msgcode['updateObject']['ERR'] = 109;
 function updateObject ()
 {
 	assertUIntArg ('num_attrs', TRUE);
@@ -916,9 +906,9 @@ function addMultipleObjects()
 			$info = spotEntity ('object', $object_id);
 			// FIXME: employ amplifyCell() instead of calling loader functions directly
 			amplifyCell ($info);
-			$log = mergeLogs ($log, oneLiner (80, array ('<a href="' . makeHref (array ('page' => 'object', 'tab' => 'default', 'object_id' => $object_id)) . '">' . $info['dname'] . '</a>')));
+			$log = mergeLogs ($log, oneLiner (5, array ('<a href="' . makeHref (array ('page' => 'object', 'tab' => 'default', 'object_id' => $object_id)) . '">' . $info['dname'] . '</a>')));
 		}else{
-			$log = mergeLogs ($log, oneLiner (185, array ($name)));
+			$log = mergeLogs ($log, oneLiner (147, array ($name)));
 		}
 	}
 	return buildWideRedirectURL ($log);
@@ -952,15 +942,15 @@ function addLotOfObjects()
 			{
 				$info = spotEntity ('object', $object_id);
 				amplifyCell ($info);
-				$log = mergeLogs ($log, oneLiner (80, array ('<a href="' . makeHref (array ('page' => 'object', 'tab' => 'default', 'object_id' => $object_id)) . '">' . $info['dname'] . '</a>')));
+				$log = mergeLogs ($log, oneLiner (5, array ('<a href="' . makeHref (array ('page' => 'object', 'tab' => 'default', 'object_id' => $object_id)) . '">' . $info['dname'] . '</a>')));
 			}
 			else
-				$log = mergeLogs ($log, oneLiner (185, array ($name)));
+				$log = mergeLogs ($log, oneLiner (147, array ($name)));
 	}
 	return buildWideRedirectURL ($log);
 }
 
-$msgcode['deleteObject']['OK'] = 76;
+$msgcode['deleteObject']['OK'] = 6;
 function deleteObject ()
 {
 	assertUIntArg ('object_id');
@@ -973,8 +963,7 @@ function deleteObject ()
 	return buildRedirectURL (__FUNCTION__, 'OK', array ($oinfo['dname']));
 }
 
-$msgcode['resetObject']['OK'] = 83;
-$msgcode['resetObject']['ERR'] = 100;
+$msgcode['resetObject']['OK'] = 57;
 function resetObject ()
 {
 	$oinfo = spotEntity ('object', $_REQUEST['object_id']);
@@ -983,11 +972,11 @@ function resetObject ()
 	commitResetObject ($_REQUEST['object_id']);
 	foreach ($racklist as $rack_id)
 		resetThumbCache ($rack_id);
-	return buildRedirectURL (__FUNCTION__, 'OK', array ($oinfo['dname']));
+	return buildRedirectURL (__FUNCTION__, 'OK');
 }
 
-$msgcode['useupPort']['OK'] = 11;
-$msgcode['useupPort']['ERR'] = 124;
+$msgcode['useupPort']['OK'] = 49;
+$msgcode['useupPort']['ERR'] = 111;
 function useupPort ()
 {
 	assertUIntArg ('port_id');
@@ -997,7 +986,7 @@ function useupPort ()
 		return buildRedirectURL (__FUNCTION__, 'ERR');
 }
 
-$msgcode['updateUI']['OK'] = 56;
+$msgcode['updateUI']['OK'] = 51;
 function updateUI ()
 {
 	assertUIntArg ('num_vars');
@@ -1119,8 +1108,8 @@ function resetUIConfig()
 	return buildRedirectURL (__FUNCTION__, 'OK');
 }
 
-$msgcode['addRealServer']['OK'] = 34;
-$msgcode['addRealServer']['ERR'] = 126;
+$msgcode['addRealServer']['OK'] = 48;
+$msgcode['addRealServer']['ERR'] = 110;
 // Add single record.
 function addRealServer ()
 {
@@ -1201,7 +1190,7 @@ function addRealServers ()
 		return buildRedirectURL (__FUNCTION__, 'ERR2', array ($ngood, $nbad));
 }
 
-$msgcode['addVService']['OK'] = 28;
+$msgcode['addVService']['OK'] = 48;
 $msgcode['addVService']['ERR1'] = 132;
 $msgcode['addVService']['ERR2'] = 100;
 function addVService ()
@@ -1230,8 +1219,8 @@ function addVService ()
 		return buildRedirectURL (__FUNCTION__, 'OK');
 }
 
-$msgcode['deleteVService']['OK'] = 29;
-$msgcode['deleteVService']['ERR'] = 130;
+$msgcode['deleteVService']['OK'] = 49;
+$msgcode['deleteVService']['ERR'] = 111;
 function deleteVService ()
 {
 	assertUIntArg ('vs_id');
@@ -1255,8 +1244,8 @@ function updateSLBDefConfig ()
 		return buildRedirectURL (__FUNCTION__, 'OK');
 }
 
-$msgcode['updateRealServer']['OK'] = 36;
-$msgcode['updateRealServer']['ERR'] = 133;
+$msgcode['updateRealServer']['OK'] = 51;
+$msgcode['updateRealServer']['ERR'] = 109;
 function updateRealServer ()
 {
 	assertUIntArg ('rs_id');
@@ -1274,8 +1263,8 @@ function updateRealServer ()
 		return buildRedirectURL (__FUNCTION__, 'OK');
 }
 
-$msgcode['updateLoadBalancer']['OK'] = 20;
-$msgcode['updateLoadBalancer']['ERR'] = 134;
+$msgcode['updateLoadBalancer']['OK'] = 51;
+$msgcode['updateLoadBalancer']['ERR'] = 109;
 function updateLoadBalancer ()
 {
 	assertUIntArg ('object_id');
@@ -1299,8 +1288,8 @@ function updateLoadBalancer ()
 		return buildRedirectURL (__FUNCTION__, 'OK');
 }
 
-$msgcode['updateVService']['OK'] = 30;
-$msgcode['updateVService']['ERR'] = 135;
+$msgcode['updateVService']['OK'] = 51;
+$msgcode['updateVService']['ERR'] = 109;
 function updateVService ()
 {
 	assertUIntArg ('vs_id');
@@ -1324,8 +1313,8 @@ function updateVService ()
 		return buildRedirectURL (__FUNCTION__, 'OK');
 }
 
-$msgcode['addLoadBalancer']['OK'] = 18;
-$msgcode['addLoadBalancer']['ERR'] = 137;
+$msgcode['addLoadBalancer']['OK'] = 48;
+$msgcode['addLoadBalancer']['ERR'] = 110;
 function addLoadBalancer ()
 {
 	assertUIntArg ('pool_id');
@@ -1349,7 +1338,7 @@ function addLoadBalancer ()
 		return buildRedirectURL (__FUNCTION__, 'OK');
 }
 
-$msgcode['addRSPool']['OK'] = 31;
+$msgcode['addRSPool']['OK'] = 48;
 $msgcode['addRSPool']['ERR'] = 100;
 function addRSPool ()
 {
@@ -1369,8 +1358,8 @@ function addRSPool ()
 		return buildRedirectURL (__FUNCTION__, 'OK');
 }
 
-$msgcode['deleteRSPool']['OK'] = 32;
-$msgcode['deleteRSPool']['ERR'] = 138;
+$msgcode['deleteRSPool']['OK'] = 49;
+$msgcode['deleteRSPool']['ERR'] = 111;
 function deleteRSPool ()
 {
 	assertUIntArg ('pool_id');
@@ -1380,8 +1369,8 @@ function deleteRSPool ()
 		return buildRedirectURL (__FUNCTION__, 'OK');
 }
 
-$msgcode['updateRSPool']['OK'] = 33;
-$msgcode['updateRSPool']['ERR'] = 139;
+$msgcode['updateRSPool']['OK'] = 51;
+$msgcode['updateRSPool']['ERR'] = 109;
 function updateRSPool ()
 {
 	assertStringArg ('name', TRUE);
@@ -1400,8 +1389,8 @@ function updateRSPool ()
 		return buildRedirectURL (__FUNCTION__, 'OK');
 }
 
-$msgcode['updateRSInService']['OK'] = 38;
-$msgcode['updateRSInService']['ERR'] = 140;
+$msgcode['updateRSInService']['OK'] = 26;
+$msgcode['updateRSInService']['ERR'] = 141;
 function updateRSInService ()
 {
 	assertUIntArg ('rscount');
@@ -1474,7 +1463,7 @@ function generateAutoPorts ()
 		return buildRedirectURL (__FUNCTION__, 'ERR');
 }
 
-$msgcode['saveEntityTags']['OK'] = 22;
+$msgcode['saveEntityTags']['OK'] = 26;
 $msgcode['saveEntityTags']['ERR1'] = 143;
 // Filter out implicit tags before storing the new tag set.
 function saveEntityTags ()
@@ -1503,17 +1492,13 @@ function saveEntityTags ()
 		return buildRedirectURL (__FUNCTION__, 'OK', array ($n_succeeds));
 }
 
-$msgcode['updateTag']['OK'] = 60;
-$msgcode['updateTag']['ERR1'] = 145;
+$msgcode['updateTag']['OK'] = 7;
 $msgcode['updateTag']['ERR2'] = 109;
 function updateTag ()
 {
 	assertUIntArg ('tag_id');
 	assertUIntArg ('parent_id', TRUE);
-	assertStringArg ('tag_name');
-	$tagname = trim ($_REQUEST['tag_name']);
-	if (!validTagName ($tagname))
-		return buildRedirectURL (__FUNCTION__, 'ERR1', array ($tagname));
+	genericAssertion ('tag_name', 'tag');
 	if (($parent_id = $_REQUEST['parent_id']) <= 0)
 		$parent_id = 'NULL';
 	if (FALSE !== commitUpdateTag ($_REQUEST['tag_id'], $tagname, $parent_id))
@@ -1551,7 +1536,7 @@ function rollTags ()
 	return buildRedirectURL (__FUNCTION__, 'OK', array ($n_ok));
 }
 
-$msgcode['changeMyPassword']['OK'] = 61;
+$msgcode['changeMyPassword']['OK'] = 51;
 $msgcode['changeMyPassword']['ERR1'] = 150;
 $msgcode['changeMyPassword']['ERR2'] = 151;
 $msgcode['changeMyPassword']['ERR3'] = 152;
@@ -1669,7 +1654,7 @@ function submitSLBConfig ()
 	return buildRedirectURL (__FUNCTION__, 'OK', array ('slbconfig'));
 }
 
-$msgcode['updateRow']['OK'] = 75;
+$msgcode['updateRow']['OK'] = 7;
 $msgcode['updateRow']['ERR'] = 100;
 function updateRow ()
 {
@@ -1682,8 +1667,7 @@ function updateRow ()
 		return buildRedirectURL (__FUNCTION__, 'ERR', array ($_REQUEST['name']));
 }
 
-$msgcode['addRack']['OK'] = 65;
-$msgcode['addRack']['ERR1'] = 171;
+$msgcode['addRack']['OK'] = 51;
 $msgcode['addRack']['ERR2'] = 172;
 function addRack ()
 {
@@ -1693,11 +1677,8 @@ function addRack ()
 		assertStringArg ('rack_name');
 		assertUIntArg ('rack_height1');
 		assertStringArg ('rack_comment', TRUE);
-
-		if (commitAddRack ($_REQUEST['rack_name'], $_REQUEST['rack_height1'], $_REQUEST['row_id'], $_REQUEST['rack_comment'], $taglist) === TRUE)
-			return buildRedirectURL (__FUNCTION__, 'OK', array ($_REQUEST['rack_name']));
-		else
-			return buildRedirectURL (__FUNCTION__, 'ERR1', array ($_REQUEST['rack_name']));
+		commitAddRack ($_REQUEST['rack_name'], $_REQUEST['rack_height1'], $_REQUEST['row_id'], $_REQUEST['rack_comment'], $taglist);
+		return buildRedirectURL (__FUNCTION__, 'OK', array ($_REQUEST['rack_name']));
 	}
 	elseif (isset ($_REQUEST['got_mdata']))
 	{
@@ -1728,7 +1709,7 @@ function addRack ()
 		return buildRedirectURL (__FUNCTION__, 'ERR2');
 }
 
-$msgcode['deleteRack']['OK'] = 79;
+$msgcode['deleteRack']['OK'] = 6;
 $msgcode['deleteRack']['ERR'] = 100;
 $msgcode['deleteRack']['ERR1'] = 206;
 function deleteRack ()
@@ -1744,8 +1725,8 @@ function deleteRack ()
 	return buildRedirectURL (__FUNCTION__, 'OK', array ($rackData['name']), 'rackspace', 'default');
 }
 
-$msgcode['updateRack']['OK'] = 68;
-$msgcode['updateRack']['ERR'] = 177;
+$msgcode['updateRack']['OK'] = 7;
+$msgcode['updateRack']['ERR'] = 109;
 function updateRack ()
 {
 	assertUIntArg ('rack_row_id');
@@ -1808,8 +1789,7 @@ function querySNMPData ()
 	return doSNMPmining ($_REQUEST['object_id'], $snmpsetup);
 }
 
-$msgcode['addFileWithoutLink']['OK'] = 69;
-$msgcode['addFileWithoutLink']['ERR1'] = 181;
+$msgcode['addFileWithoutLink']['OK'] = 5;
 $msgcode['addFileWithoutLink']['ERR2'] = 110;
 // File-related functions
 function addFileWithoutLink ()
@@ -1818,7 +1798,7 @@ function addFileWithoutLink ()
 
 	// Make sure the file can be uploaded
 	if (get_cfg_var('file_uploads') != 1)
-		return buildRedirectURL (__FUNCTION__, 'ERR1');
+		throw new RackTablesError ('file uploads not allowed, change "file_uploads" parameter in php.ini', RackTablesError::MISCONFIGURED);
 
 	$fp = fopen($_FILES['file']['tmp_name'], 'rb');
 	global $sic;
@@ -1829,7 +1809,7 @@ function addFileWithoutLink ()
 	return buildRedirectURL (__FUNCTION__, 'OK', array (htmlspecialchars ($_FILES['file']['name'])));
 }
 
-$msgcode['addFileToEntity']['OK'] = 69;
+$msgcode['addFileToEntity']['OK'] = 5;
 $msgcode['addFileToEntity']['ERR2'] = 181;
 $msgcode['addFileToEntity']['ERR3'] = 110;
 function addFileToEntity ()
@@ -1856,7 +1836,6 @@ function addFileToEntity ()
 }
 
 $msgcode['linkFileToEntity']['OK'] = 71;
-$msgcode['linkFileToEntity']['ERR1'] = 178;
 $msgcode['linkFileToEntity']['ERR2'] = 110;
 function linkFileToEntity ()
 {
@@ -1872,7 +1851,7 @@ function linkFileToEntity ()
 	return buildRedirectURL (__FUNCTION__, 'OK', array (htmlspecialchars ($fi['name'])));
 }
 
-$msgcode['replaceFile']['OK'] = 70;
+$msgcode['replaceFile']['OK'] = 7;
 $msgcode['replaceFile']['ERR1'] = 181;
 $msgcode['replaceFile']['ERR2'] = 207;
 $msgcode['replaceFile']['ERR3'] = 109;
@@ -1914,19 +1893,14 @@ function updateFile ()
 }
 
 $msgcode['unlinkFile']['OK'] = 72;
-$msgcode['unlinkFile']['ERR'] = 182;
+$msgcode['unlinkFile']['ERR'] = 111;
 function unlinkFile ()
 {
 	assertUIntArg ('link_id');
-	$error = commitUnlinkFile ($_REQUEST['link_id']);
-
-	if ($error != '')
-		return buildRedirectURL (__FUNCTION__, 'ERR', array ($error));
-
-	return buildRedirectURL (__FUNCTION__, 'OK');
+	return buildRedirectURL (__FUNCTION__, commitUnlinkFile ($_REQUEST['link_id']) === FALSE ? 'ERR' : 'OK');
 }
 
-$msgcode['deleteFile']['OK'] = 73;
+$msgcode['deleteFile']['OK'] = 6;
 $msgcode['deleteFile']['ERR'] = 100;
 function deleteFile ()
 {
@@ -1940,9 +1914,9 @@ function deleteFile ()
 	return buildRedirectURL (__FUNCTION__, 'OK', array (htmlspecialchars ($shortInfo['name'])));
 }
 
-$msgcode['updateFileText']['OK'] = 78;
+$msgcode['updateFileText']['OK'] = 7;
 $msgcode['updateFileText']['ERR1'] = 179;
-$msgcode['updateFileText']['ERR2'] = 180;
+$msgcode['updateFileText']['ERR2'] = 155;
 function updateFileText ()
 {
 	assertStringArg ('mtime_copy');
@@ -1989,14 +1963,11 @@ $ifcompatpack = array
 );
 
 $msgcode['addPortInterfaceCompatPack']['OK'] = 44;
-$msgcode['addPortInterfaceCompatPack']['ERR'] = 123;
 function addPortInterfaceCompatPack ()
 {
-	assertStringArg ('standard');
-	assertUIntArg ('iif_id');
+	genericAssertion ('standard', 'enum/wdmstd');
+	genericAssertion ('iif_id', 'iif');
 	global $ifcompatpack;
-	if (!array_key_exists ($_REQUEST['standard'], $ifcompatpack) or !array_key_exists ($_REQUEST['iif_id'], getPortIIFOptions()))
-		return buildRedirectURL (__FUNCTION__, 'ERR');
 	$ngood = $nbad = 0;
 	foreach ($ifcompatpack[$_REQUEST['standard']] as $oif_id)
 		if (commitSupplementPIC ($_REQUEST['iif_id'], $oif_id))
@@ -2025,7 +1996,7 @@ function delPortInterfaceCompatPack ()
 }
 
 $msgcode['add8021QOrder']['OK'] = 48;
-$msgcode['add8021QOrder']['ERR'] = 118;
+$msgcode['add8021QOrder']['ERR'] = 110;
 function add8021QOrder ()
 {
 	assertUIntArg ('vdom_id');
@@ -2042,7 +2013,7 @@ function add8021QOrder ()
 }
 
 $msgcode['del8021QOrder']['OK'] = 49;
-$msgcode['del8021QOrder']['ERR'] = 119;
+$msgcode['del8021QOrder']['ERR'] = 111;
 function del8021QOrder ()
 {
 	assertUIntArg ('object_id');
@@ -2144,7 +2115,6 @@ function updateVLANDomain ()
 
 $msgcode['save8021QPorts']['OK1'] = 63;
 $msgcode['save8021QPorts']['OK2'] = 41;
-$msgcode['save8021QPorts']['ERR1'] = 160;
 $msgcode['save8021QPorts']['ERR2'] = 109;
 function save8021QPorts ()
 {
@@ -2316,7 +2286,7 @@ function process8021QSyncRequest ()
 
 $msgcode['process8021QRecalcRequest']['CHANGED'] = 87;
 $msgcode['process8021QRecalcRequest']['NO_CHANGES'] = 300;
-$msgcode['process8021QRecalcRequest']['ERR'] = 192;
+$msgcode['process8021QRecalcRequest']['ERR'] = 157;
 function process8021QRecalcRequest ()
 {
 	global $sic;

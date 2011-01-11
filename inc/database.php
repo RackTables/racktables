@@ -3577,9 +3577,7 @@ function commitUpdateFile ($file_id = 0, $new_name = '', $new_type = '', $new_co
 
 function commitUnlinkFile ($link_id)
 {
-	if (usePreparedDeleteBlade ('FileLink', array ('id' => $link_id)) === FALSE)
-		return __FUNCTION__ . '(): query failed';
-	return '';
+	return usePreparedDeleteBlade ('FileLink', array ('id' => $link_id));
 }
 
 function commitDeleteFile ($file_id)
