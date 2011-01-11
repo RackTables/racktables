@@ -871,7 +871,6 @@ function updateObject ()
 	return buildRedirectURL (__FUNCTION__, 'OK');
 }
 
-
 function addMultipleObjects()
 {
 	$log = emptyLog();
@@ -1292,7 +1291,7 @@ function updateVService ()
 	assertUIntArg ('vs_id');
 	assertIPv4Arg ('vip');
 	assertUIntArg ('vport');
-	assertStringArg ('proto');
+	genericAssertion ('proto', 'enum/ipproto');
 	assertStringArg ('name', TRUE);
 	assertStringArg ('vsconfig', TRUE);
 	assertStringArg ('rsconfig', TRUE);
@@ -1622,17 +1621,26 @@ function setPortVLAN ()
 			!permitted (NULL, NULL, NULL, array (array ('tag' => '$tovlan_' . $newvlanid)))
 		)
 		{
-			$log['m'][] = array ('c' => 159, 'a' => array ($portname, $oldvlanid, $newvlanid));
+			$log = mergeLogs ($log, oneLiner (159, array ($portname, $oldvlanid, $newvlanid)));
 			continue;
 		}
 		$setcmd .= $prefix . $portname . '=' . $newvlanid;
 		$prefix = ';';
 	}
 	// Feed the gateway and interpret its (non)response.
-	if ($setcmd != '')
-		$log['m'] = array_merge ($log['m'], setSwitchVLANs ($_REQUEST['object_id'], $setcmd));
+	if ($setcmd == '')
+		$log = mergeLogs ($log, oneLiner (201));
 	else
-		$log['m'][] = array ('c' => 201);
+	{
+		try
+		{
+			$log = mergeLogs ($log, setSwitchVLANs ($_REQUEST['object_id'], $setcmd));
+		}
+		catch (RTGatewayError $e)
+		{
+			$log = mergeLogs ($log, oneLiner (164, $e->getMessage()));
+		}
+	}
 	return buildWideRedirectURL ($log);
 }
 
@@ -1697,10 +1705,10 @@ function addRack ()
 		}
 		global $msgcode;
 		foreach ($names2 as $cname)
-			if (commitAddRack ($cname, $_REQUEST['rack_height2'], $_REQUEST['row_id'], '', $taglist) === TRUE)
-				$log['m'][] = array ('c' => $msgcode[__FUNCTION__]['OK'], 'a' => array ($cname));
-			else
-				$log['m'][] = array ('c' => $msgcode[__FUNCTION__]['ERR1'], 'a' => array ($cname));
+		{
+			commitAddRack ($cname, $_REQUEST['rack_height2'], $_REQUEST['row_id'], '', $taglist);
+			$log['m'][] = array ('c' => $msgcode[__FUNCTION__]['OK'], 'a' => array ($cname));
+		}
 		return buildWideRedirectURL ($log);
 	}
 	else
@@ -1713,8 +1721,7 @@ $msgcode['deleteRack']['ERR1'] = 206;
 function deleteRack ()
 {
 	assertUIntArg ('rack_id');
-	if (NULL == ($rackData = spotEntity ('rack', $_REQUEST['rack_id'])))
-		return buildRedirectURL (__FUNCTION__, 'ERR', array ('Rack not found'), 'rackspace', 'default');
+	$rackData = spotEntity ('rack', $_REQUEST['rack_id']));
 	amplifyCell ($rackData);
 	if (count ($rackData['mountedObjects']))
 		return buildRedirectURL (__FUNCTION__, 'ERR1');
@@ -1764,7 +1771,10 @@ function querySNMPData ()
 	assertStringArg ('community', TRUE);
 
 	$snmpsetup = array ();
-	if ( strlen($_REQUEST['community']) == 0 ) {
+	if ($_REQUEST['community']) != '')
+		$snmpsetup['community'] = $_REQUEST['community'];
+	else
+	{
 		assertStringArg ('sec_name');
 		assertStringArg ('sec_level');
 		assertStringArg ('auth_protocol');
@@ -1779,11 +1789,6 @@ function querySNMPData ()
 		$snmpsetup['priv_protocol'] = $_REQUEST['priv_protocol'];
 		$snmpsetup['priv_passphrase'] = $_REQUEST['priv_passphrase'];
 	}
-	else {
-		$snmpsetup['community'] = $_REQUEST['community'];
-	}
-
-
 	return doSNMPmining ($_REQUEST['object_id'], $snmpsetup);
 }
 
@@ -1899,7 +1904,7 @@ function unlinkFile ()
 }
 
 $msgcode['deleteFile']['OK'] = 6;
-$msgcode['deleteFile']['ERR'] = 100;
+$msgcode['deleteFile']['ERR'] = 111;
 function deleteFile ()
 {
 	assertUIntArg ('file_id');

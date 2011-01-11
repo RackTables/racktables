@@ -260,6 +260,11 @@ function genericAssertion ($argname, $argtype)
 	case 'pcre':
 		assertPCREArg ($argname);
 		break;
+	case 'json':
+		assertStringArg ($argname);
+		if (NULL === json_decode ($_REQUEST[$argname], TRUE))
+			throw new InvalidRequestArgException ($argname, '(omitted)', 'Invalid JSON code received from client');
+		break;
 	case 'enum/attr_type':
 		assertStringArg ($argname);
 		if (!in_array ($sic[$argname], array ('uint', 'float', 'string', 'dict')))
