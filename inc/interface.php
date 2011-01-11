@@ -1745,9 +1745,7 @@ function showMessageOrError ()
 				153 => array ('code' => 'error', 'format' => 'Password change failed.'),
 				154 => array ('code' => 'error', 'format' => "Verification error: %s"),
 				155 => array ('code' => 'error', 'format' => 'Save failed.'),
-				156 => array ('code' => 'error', 'format' => 'getSwitchVLANs() failed'),
 				157 => array ('code' => 'error', 'format' => 'operation not permitted'),
-				158 => array ('code' => 'error', 'format' => 'Ignoring malformed record #%u in form submit'),
 				159 => array ('code' => 'error', 'format' => 'Permission denied moving port %s from VLAN%u to VLAN%u'),
 				160 => array ('code' => 'error', 'format' => 'Invalid arguments'),
 				161 => array ('code' => 'error', 'format' => 'Endpoint not found. Please either set FQDN attribute or assign an IP address to the object.'),
@@ -4799,7 +4797,15 @@ function renderUIConfigEditForm ()
 // renders a form suitable for submit. Ah, and it does submit processing as well.
 function renderVLANMembership ($object_id)
 {
-	$data = getSwitchVLANs ($object_id);
+	try
+	{
+		$data = getSwitchVLANs ($object_id);
+	}
+	catch (RTGatewayError $re)
+	{
+		showWarning ('Device configuration unavailable:<br>' . $re->getMessage());
+		return;
+	}
 	list ($vlanlist, $portlist, $maclist) = $data;
 	$vlanpermissions = array();
 	foreach ($portlist as $port)

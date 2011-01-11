@@ -1580,16 +1580,21 @@ function saveRackCode ()
 	return buildRedirectURL (__FUNCTION__, 'ERR2');
 }
 
-$msgcode['setPortVLAN']['ERR1'] = 156;
+$msgcode['setPortVLAN']['ERR'] = 164;
 // This handler's context is pre-built, but not authorized. It is assumed, that the
 // handler will take existing context and before each commit check authorization
 // on the base chain plus necessary context added.
 function setPortVLAN ()
 {
 	assertUIntArg ('portcount');
-	$data = getSwitchVLANs ($_REQUEST['object_id']);
-	if ($data === NULL)
-		return buildRedirectURL (__FUNCTION__, 'ERR1');
+	try
+	{
+		$data = getSwitchVLANs ($_REQUEST['object_id']);
+	}
+	catch (RTGatewayError $re)
+	{
+		return buildRedirectURL (__FUNCTION__, 'ERR', array ($re->getMessage()));
+	}
 	list ($vlanlist, $portlist) = $data;
 	// Here we just build up 1 set command for the gateway with all of the ports
 	// included. The gateway is expected to filter unnecessary changes silently
@@ -1600,36 +1605,32 @@ function setPortVLAN ()
 	$log = emptyLog();
 	$setcmd = '';
 	for ($i = 0; $i < $nports; $i++)
+	{
+		genericAssertion ('portname_' . $i, 'string');
+		genericAssertion ('vlanid_' . $i, 'string');
+		if ($_REQUEST['portname_' . $i] != $portlist[$i]['portname'])
+			throw new InvalidRequestArgException ('portname_' . $i, $_REQUEST['portname_' . $i], 'expected to be ' . $portlist[$i]['portname']);
 		if
-		(
-			!isset ($_REQUEST['portname_' . $i]) ||
-			!isset ($_REQUEST['vlanid_' . $i]) ||
-			$_REQUEST['portname_' . $i] != $portlist[$i]['portname']
-		)
-			$log['m'][] = array ('c' => 158, 'a' => array ($i));
-		elseif
 		(
 			$_REQUEST['vlanid_' . $i] == $portlist[$i]['vlanid'] ||
 			$portlist[$i]['vlaind'] == 'TRUNK'
 		)
 			continue;
-		else
+		$portname = $_REQUEST['portname_' . $i];
+		$oldvlanid = $portlist[$i]['vlanid'];
+		$newvlanid = $_REQUEST['vlanid_' . $i];
+		if
+		(
+			!permitted (NULL, NULL, NULL, array (array ('tag' => '$fromvlan_' . $oldvlanid))) or
+			!permitted (NULL, NULL, NULL, array (array ('tag' => '$tovlan_' . $newvlanid)))
+		)
 		{
-			$portname = $_REQUEST['portname_' . $i];
-			$oldvlanid = $portlist[$i]['vlanid'];
-			$newvlanid = $_REQUEST['vlanid_' . $i];
-			if
-			(
-				!permitted (NULL, NULL, NULL, array (array ('tag' => '$fromvlan_' . $oldvlanid))) or
-				!permitted (NULL, NULL, NULL, array (array ('tag' => '$tovlan_' . $newvlanid)))
-			)
-			{
-				$log['m'][] = array ('c' => 159, 'a' => array ($portname, $oldvlanid, $newvlanid));
-				continue;
-			}
-			$setcmd .= $prefix . $portname . '=' . $newvlanid;
-			$prefix = ';';
+			$log['m'][] = array ('c' => 159, 'a' => array ($portname, $oldvlanid, $newvlanid));
+			continue;
 		}
+		$setcmd .= $prefix . $portname . '=' . $newvlanid;
+		$prefix = ';';
+	}
 	// Feed the gateway and interpret its (non)response.
 	if ($setcmd != '')
 		$log['m'] = array_merge ($log['m'], setSwitchVLANs ($_REQUEST['object_id'], $setcmd));

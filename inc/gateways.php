@@ -186,9 +186,9 @@ function setSwitchVLANs ($object_id = 0, $setcmd)
 	$objectInfo = spotEntity ('object', $object_id);
 	$endpoints = findAllEndpoints ($object_id, $objectInfo['name']);
 	if (count ($endpoints) == 0)
-		return oneLiner (161); // endpoint not found
+		throw new RTGatewayError ('no management address set');
 	if (count ($endpoints) > 1)
-		return oneLiner (162); // can't pick an address
+		throw new RTGatewayError ('cannot pick management address');
 	$hwtype = $swtype = 'unknown';
 	foreach (getAttrValues ($object_id) as $record)
 	{
@@ -279,8 +279,10 @@ function gwRecvFile ($endpoint, $handlername, &$output)
 		throw new RTGatewayError ('failed to read temporary file');
 }
 
-function gwSendFileToObject ($object_id = 0, $handlername, $filetext = '')
+function gwSendFileToObject ($object_id, $handlername, $filetext = '')
 {
+	if (!mb_strlen ($handlername))
+		throw new InvalidArgException ('$handlername');
 	$objectInfo = spotEntity ('object', $object_id);
 	$endpoints = findAllEndpoints ($object_id, $objectInfo['name']);
 	if (count ($endpoints) == 0)
@@ -290,19 +292,17 @@ function gwSendFileToObject ($object_id = 0, $handlername, $filetext = '')
 	gwSendFile (str_replace (' ', '+', $endpoints[0]), $handlername, array ($filetext));
 }
 
-function gwRecvFileFromObject ($object_id = 0, $handlername, &$output)
+function gwRecvFileFromObject ($object_id, $handlername, &$output)
 {
-	global $remote_username;
-	if ($object_id <= 0 or !strlen ($handlername))
-		return oneLiner (160); // invalid arguments
+	if (!mb_strlen ($handlername))
+		throw new InvalidArgException ('$handlername');
 	$objectInfo = spotEntity ('object', $object_id);
 	$endpoints = findAllEndpoints ($object_id, $objectInfo['name']);
 	if (count ($endpoints) == 0)
-		return oneLiner (161); // endpoint not found
+		throw new RTGatewayError ('no management address set');
 	if (count ($endpoints) > 1)
-		return oneLiner (162); // can't pick an address
-	$endpoint = str_replace (' ', '+', $endpoints[0]);
-	gwRecvFile ($endpoint, $handlername, $output);
+		throw new RTGatewayError ('cannot pick management address');
+	gwRecvFile (str_replace (' ', '+', $endpoints[0]), $handlername, $output);
 }
 
 function detectDeviceBreed ($object_id)
