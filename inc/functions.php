@@ -271,6 +271,16 @@ function genericAssertion ($argname, $argtype)
 		if (!in_array ($sic[$argname], array ('ondemand', 'compulsory')))
 			throw new InvalidRequestArgException ($argname, $sic[$argname], 'Unknown value');
 		break;
+	case 'enum/wdmstd':
+		assertStringArg ($argname);
+		global $ifcompatpack;
+		if (!array_key_exists ($sic[$argname], $ifcompatpack))
+			throw new InvalidRequestArgException ($argname, $sic[$argname], 'Unknown value');
+		break;
+	case 'iif':
+		if (!array_key_exists ($sic[$argname], getPortIIFOptions()))
+			throw new InvalidRequestArgException ($argname, $sic[$argname], 'Unknown value');
+		break;
 	default:
 		throw new InvalidArgException ('argtype', $argtype); // comes not from user's input
 	}
