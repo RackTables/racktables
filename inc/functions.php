@@ -277,6 +277,11 @@ function genericAssertion ($argname, $argtype)
 		if (!array_key_exists ($sic[$argname], $ifcompatpack))
 			throw new InvalidRequestArgException ($argname, $sic[$argname], 'Unknown value');
 		break;
+	case 'enum/ipproto':
+		assertStringArg ($argname);
+		if (!in_array ($sic[$argname], array ('TCP', 'UDP')))
+			throw new InvalidRequestArgException ($argname, $sic[$argname], 'Unknown value');
+		break;
 	case 'iif':
 		if (!array_key_exists ($sic[$argname], getPortIIFOptions()))
 			throw new InvalidRequestArgException ($argname, $sic[$argname], 'Unknown value');

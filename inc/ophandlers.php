@@ -635,7 +635,7 @@ function updateUser ()
 	assertStringArg ('password');
 	$username = $_REQUEST['username'];
 	$new_password = $_REQUEST['password'];
-	$userinfo = spotEntity ('user', $_REQUEST['user_id']));
+	$userinfo = spotEntity ('user', $_REQUEST['user_id']);
 	// Update user password only if provided password is not the same as current password hash.
 	if ($new_password != $userinfo['user_password_hash'])
 		$new_password = sha1 ($new_password);
@@ -1191,32 +1191,29 @@ function addRealServers ()
 }
 
 $msgcode['addVService']['OK'] = 48;
-$msgcode['addVService']['ERR1'] = 132;
-$msgcode['addVService']['ERR2'] = 100;
 function addVService ()
 {
 	assertIPv4Arg ('vip');
 	assertUIntArg ('vport');
-	assertStringArg ('proto');
-	if ($_REQUEST['proto'] != 'TCP' and $_REQUEST['proto'] != 'UDP')
-		return buildRedirectURL (__FUNCTION__, 'ERR1');
+	genericAssertion ('proto', 'enum/ipproto');
 	assertStringArg ('name', TRUE);
 	assertStringArg ('vsconfig', TRUE);
 	assertStringArg ('rsconfig', TRUE);
-	$error = commitCreateVS
+	usePreparedExecuteBlade
 	(
-		$_REQUEST['vip'],
-		$_REQUEST['vport'],
-		$_REQUEST['proto'],
-		$_REQUEST['name'],
-		$_REQUEST['vsconfig'],
-		$_REQUEST['rsconfig'],
-		isset ($_REQUEST['taglist']) ? $_REQUEST['taglist'] : array()
+		'INSERT INTO IPv4VS (vip, vport, proto, name, vsconfig, rsconfig) VALUES (INET_ATON(?), ?, ?, ?, ?, ?)',
+		array
+		(
+			$_REQUEST['vip'],
+			$_REQUEST['vport'],
+			$_REQUEST['proto'],
+			!mb_strlen ($_REQUEST['name']) ? NULL : $_REQUEST['name'],
+			!strlen ($_REQUEST['vsconfig']) ? NULL : $_REQUEST['vsconfig'],
+			!strlen ($_REQUEST['rsconfig']) ? NULL : $_REQUEST['rsconfig'],
+		)
 	);
-	if ($error != '')
-		return buildRedirectURL (__FUNCTION__, 'ERR2', array ($error));
-	else
-		return buildRedirectURL (__FUNCTION__, 'OK');
+	produceTagsForLastRecord ('ipv4vs', isset ($_REQUEST['taglist']) ? $_REQUEST['taglist'] : array());
+	return buildRedirectURL (__FUNCTION__, 'OK');
 }
 
 $msgcode['deleteVService']['OK'] = 49;

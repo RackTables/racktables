@@ -2625,31 +2625,6 @@ function addRStoRSPool ($pool_id = 0, $rsip = '', $rsport = 0, $inservice = 'no'
 	);
 }
 
-function commitCreateVS ($vip = '', $vport = 0, $proto = '', $name = '', $vsconfig, $rsconfig, $taglist = array())
-{
-	if (!strlen ($vip))
-		throw new InvalidArgException ('$vip', $vip);
-	if ($vport <= 0)
-		throw new InvalidArgException ('$vport', $vport);
-	if (!strlen ($proto))
-		throw new InvalidArgException ('$proto', $proto);
-	if (FALSE === usePreparedExecuteBlade
-	(
-		'INSERT INTO IPv4VS (vip, vport, proto, name, vsconfig, rsconfig) VALUES (INET_ATON(?), ?, ?, ?, ?, ?)',
-		array
-		(
-			$vip,
-			$vport,
-			$proto,
-			!strlen ($name) ? NULL : $name,
-			!strlen ($vsconfig) ? NULL : $vsconfig,
-			!strlen ($rsconfig) ? NULL : $rsconfig,
-		)
-	))
-		return __FUNCTION__ . ': SQL insertion failed';
-	return produceTagsForLastRecord ('ipv4vs', $taglist);
-}
-
 function addLBtoRSPool ($pool_id = 0, $object_id = 0, $vs_id = 0, $vsconfig = '', $rsconfig = '', $prio = '')
 {
 	return usePreparedInsertBlade

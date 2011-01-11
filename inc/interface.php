@@ -1732,7 +1732,6 @@ function showMessageOrError ()
 				120 => array ('code' => 'error', 'format' => 'Reset failed!'),
 				127 => array ('code' => 'error', 'format' => 'Added %u real servers and encountered %u errors'),
 				131 => array ('code' => 'error', 'format' => 'invalid format requested'),
-				132 => array ('code' => 'error', 'format' => 'invalid protocol'),
 				141 => array ('code' => 'error', 'format' => 'Encountered %u errors, updated %u record(s)'),
 				142 => array ('code' => 'error', 'format' => 'executeAutoPorts() failed'),
 				143 => array ('code' => 'error', 'format' => 'Tried chaining %u tags, but experienced %u errors.'),
