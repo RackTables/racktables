@@ -1771,7 +1771,7 @@ function querySNMPData ()
 	assertStringArg ('community', TRUE);
 
 	$snmpsetup = array ();
-	if ($_REQUEST['community']) != '')
+	if ($_REQUEST['community'] != '')
 		$snmpsetup['community'] = $_REQUEST['community'];
 	else
 	{
