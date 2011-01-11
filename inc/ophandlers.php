@@ -1721,7 +1721,7 @@ $msgcode['deleteRack']['ERR1'] = 206;
 function deleteRack ()
 {
 	assertUIntArg ('rack_id');
-	$rackData = spotEntity ('rack', $_REQUEST['rack_id']));
+	$rackData = spotEntity ('rack', $_REQUEST['rack_id']);
 	amplifyCell ($rackData);
 	if (count ($rackData['mountedObjects']))
 		return buildRedirectURL (__FUNCTION__, 'ERR1');
