@@ -212,7 +212,7 @@ function renderFilePreview ($file_id = 0, $mode = 'view')
 		$file = getFile ($file_id);
 		if (!in_array ($file['type'], array ('image/jpeg', 'image/png', 'image/gif')))
 		{
-			showError ('Invalid MIME type on file', __FUNCTION__);
+			showError ('Invalid MIME type on file', 'inline');
 			break;
 		}
 		header("Content-type: ${file['type']}");
@@ -252,7 +252,7 @@ function renderFilePreview ($file_id = 0, $mode = 'view')
 		}
 		break;
 	default:
-		showError ('Invalid argument', __FUNCTION__);
+		showError ('Invalid argument', 'inline');
 		break;
 	}
 }

@@ -1446,7 +1446,7 @@ function getCellFilter ()
 		$ret['andor'] = $andor2 = $_REQUEST['andor'];
 		break;
 	default:
-		showWarning ('Invalid and/or switch value in submitted form', __FUNCTION__);
+		showWarning ('Invalid and/or switch value in submitted form');
 		return NULL;
 	}
 	$andor1 = '';
@@ -1650,7 +1650,7 @@ function buildLVSConfig ($object_id)
 	$lbconfig = getSLBConfig ($object_id);
 	if ($lbconfig === NULL)
 	{
-		showWarning ('getSLBConfig() failed', __FUNCTION__);
+		showWarning ('getSLBConfig() failed');
 		return;
 	}
 	$newconfig = "#\n#\n# This configuration has been generated automatically by RackTables\n";
@@ -2382,7 +2382,7 @@ function eval_expression ($expr, $tagchain, $ptable, $silent = FALSE)
 			if (!isset ($ptable[$pname]))
 			{
 				if (!$silent)
-					showWarning ("Predicate '${pname}' is referenced before declaration", __FUNCTION__);
+					showWarning ("Predicate '${pname}' is referenced before declaration");
 				return NULL;
 			}
 			return $self ($ptable[$pname], $tagchain, $ptable);
@@ -2408,7 +2408,7 @@ function eval_expression ($expr, $tagchain, $ptable, $silent = FALSE)
 			return $self ($expr['right'], $tagchain, $ptable);
 		default:
 			if (!$silent)
-				showWarning ("Evaluation error, cannot process expression type '${expr['type']}'", __FUNCTION__);
+				showWarning ("Evaluation error, cannot process expression type '${expr['type']}'");
 			return NULL;
 			break;
 	}
@@ -4339,6 +4339,38 @@ function addCSS ($data, $inline = FALSE)
 			'style' => $data,
 		);
 		$seen_filenames[$data] = 1;
+	}
+}
+
+// Messages in the top of the page should be shown using these functions.
+// You can call them multiple times to show multiple messages.
+// $option can be 'inline' to echo message div, instead of putting it into $_SESSION and draw on next index page show
+// These functions always return NULL
+function showError   ($message, $option = '') { setMessage ($message, 'error',   $option == 'inline'); }
+function showWarning ($message, $option = '') { setMessage ($message, 'warning', $option == 'inline'); }
+function showSuccess ($message, $option = '') { setMessage ($message, 'success', $option == 'inline'); }
+function showNotice  ($message, $option = '') { setMessage ($message, 'neutral', $option == 'inline'); }
+
+// do not call this directly, use showError and its siblings instead
+// $type could be 'error', 'warning', 'success' or 'neutral'
+function setMessage ($message, $type, $direct_rendering)
+{
+	if ($direct_rendering)
+		echo '<div class="msg_' . $type . '">' . $message . '</div>';
+	else
+	{
+		if (! isset ($_SESSION['log']['v']))
+			$_SESSION['log'] = array('v' => 1);
+		switch ($_SESSION['log']['v'])
+		{
+			case 1:
+				$_SESSION['log'][] = array ('code' => $type, 'message' => $message);
+				break;
+			case 2:
+				$code = ($type == 'error' ? 100 : $type == 'warning' ? 200 : $type == 'success' ? 0 : NULL);
+				$_SESSION['log']['m'][] = array ('c' => $code, 'a' => array ($message));
+				break;
+		}
 	}
 }
 

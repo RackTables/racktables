@@ -10,6 +10,8 @@ require 'inc/init.php';
 assertStringArg ('op');
 $op = $_REQUEST['op'];
 prepareNavigation();
+$location = buildWideRedirectURL();
+
 // FIXME: find a better way to handle this error
 if ($op == 'addFile' && !isset($_FILES['file']['error']))
 	throw new RackTablesError ('File upload error, check upload_max_filesize in php.ini', RackTablesError::MISCONFIGURED);
@@ -24,7 +26,7 @@ if
 
 // We have a chance to handle an error before starting HTTP header.
 if (!isset ($delayauth[$pageno][$tabno][$op]) and !permitted())
-	$location = buildWideRedirectURL (oneLiner (157)); // operation not permitted
+	showError ('Operation not permitted');
 else
 {
 	// Call below does the job of bypass argument assertion, if such is required,
@@ -33,11 +35,11 @@ else
 	// so it is not necessary to remember the name of bypass in it.
 	getBypassValue();
 	if (!is_array ($ophandler[$pageno][$tabno][$op]))
-		$location = call_user_func ($ophandler[$pageno][$tabno][$op]);
+		$redirect_to = call_user_func ($ophandler[$pageno][$tabno][$op]);
 	else
-		$location = tableHandler ($ophandler[$pageno][$tabno][$op]);
-	if (!strlen ($location))
-		throw new RackTablesError ('Operation handler failed to return its status', RackTablesError::INTERNAL);
+		$redirect_to = tableHandler ($ophandler[$pageno][$tabno][$op]);
+	if (strlen ($redirect_to))
+		$location = $redirect_to;
 }
 header ("Location: " . $location);
 ob_end_flush();
@@ -46,12 +48,14 @@ ob_end_flush();
 catch (InvalidRequestArgException $e)
 {
 	ob_end_clean();
-	header ('Location: ' . buildWideRedirectURL (oneLiner (107, array ($e->getMessage()))));
+	showError ('Assertion failed: ' . $e->getMessage());
+	header ('Location: ' . $location);
 }
 catch (RTDatabaseError $e)
 {
 	ob_end_clean();
-	header ('Location: ' . buildWideRedirectURL (oneLiner (108, array ($e->getMessage()))));
+	showError ('Database error: ' . $e->getMessage());
+	header ('Location: ' . $location);
 }
 // the rest ends up in a dedicated page
 catch (Exception $e)

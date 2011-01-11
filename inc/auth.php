@@ -231,7 +231,7 @@ function authenticated_via_ldap ($username, $password, &$ldap_displayname)
 		$LDAP_options['cache_refresh'] > $LDAP_options['cache_expiry']
 	)
 	{
-		showError ('Fatal LDAP configuration error, check secret.php options.', __FUNCTION__);
+		showError ('Fatal LDAP configuration error, check secret.php options.', 'inline');
 		die;
 	}
 	if ($LDAP_options['cache_expiry'] == 0) // immediate expiry set means disabled cache

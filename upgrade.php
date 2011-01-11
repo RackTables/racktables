@@ -113,7 +113,7 @@ function executeUpgradeBatch ($batchid)
 			// create tables for storing files (requires InnoDB support)
 			if (!isInnoDBSupported ())
 			{
-				showFailure ("Cannot upgrade because InnoDB tables are not supported by your MySQL server. See the README for details.", __FILE__);
+				showError ("Cannot upgrade because InnoDB tables are not supported by your MySQL server. See the README for details.", 'inline');
 				die;
 			}
 
@@ -822,7 +822,7 @@ CREATE TABLE `ObjectLog` (
 			$query[] = "UPDATE Config SET varvalue = '0.19.0' WHERE varname = 'DB_VERSION'";
 			break;
 		default:
-			showFailure ("executeUpgradeBatch () failed, because batch '${batchid}' isn't defined", __FILE__);
+			showError ("executeUpgradeBatch () failed, because batch '${batchid}' isn't defined", 'inline');
 			die;
 			break;
 	}
@@ -858,22 +858,8 @@ CREATE TABLE `ObjectLog` (
 //
 // ******************************************************************
 
-// a clone of showError() to drop dependency on interface.php
-function showFailure ($info = '', $location = 'N/A')
-{
-	if (preg_match ('/\.php$/', $location))
-		$location = basename ($location);
-	elseif ($location != 'N/A')
-		$location = $location . '()';
-	echo "<div class=msg_error>An error has occured in [${location}]. ";
-	if (empty ($info))
-		echo 'No additional information is available.';
-	else
-		echo "Additional information:<br><p>\n<pre>\n${info}\n</pre></p>";
-	echo "This failure is most probably fatal.<br></div>\n";
-}
-
 require_once 'inc/config.php'; // for CODE_VERSION
+require_once 'inc/functions.php'; // for showError()
 require_once 'inc/database.php'; // for getDatabaseVersion()
 require_once 'inc/dictionary.php';
 // Enforce default value for now, releases prior to 0.17.0 didn't support 'httpd' auth source.
@@ -921,7 +907,7 @@ switch ($user_auth_src)
 		{
 			header ('WWW-Authenticate: Basic realm="RackTables upgrade"');
 			header ('HTTP/1.0 401 Unauthorized');
-			showFailure ('You must be authenticated as an administrator to complete the upgrade.', __FILE__);
+			showError ('You must be authenticated as an administrator to complete the upgrade.', 'inline');
 			die;
 		}
 		break; // cleared
@@ -932,12 +918,12 @@ switch ($user_auth_src)
 			!strlen ($_SERVER['REMOTE_USER'])
 		)
 		{
-			showFailure ('System misconfiguration. The web-server didn\'t authenticate the user, although ought to do.');
+			showError ('System misconfiguration. The web-server didn\'t authenticate the user, although ought to do.', 'inline');
 			die;
 		}
 		break; // cleared
 	default:
-		showFailure ('authentication source misconfiguration', __FILE__);
+		showError ('authentication source misconfiguration', 'inline');
 		die;
 }
 

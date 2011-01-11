@@ -21,38 +21,6 @@ require_once 'inc/database.php';
 $user_auth_src = 'database';
 $require_local_account = TRUE;
 
-function showError ($info = '', $location = 'N/A')
-{
-	if (preg_match ('/\.php$/', $location))
-		$location = basename ($location);
-	elseif ($location != 'N/A')
-		$location = $location . '()';
-	echo "<div class=msg_error>An error has occured in [${location}]. ";
-	if (!strlen ($info))
-		echo 'No additional information is available.';
-	else
-		echo "Additional information:<br><p>\n<pre>\n${info}\n</pre></p>";
-	echo "Go back or try starting from <a href='".makeHref()."'>index page</a>.<br></div>\n";
-}
-
-/*
- * This is almost a clone of showError(). This is added to get rid of 
- * cases when script dies after showError() is shown.
- */
-
-function showWarning ($info = '', $location = 'N/A')
-{
-	if (preg_match ('/\.php$/', $location))
-		$location = basename ($location);
-	elseif ($location != 'N/A')
-		$location = $location . '()';
-	echo "<div class=msg_error>Warning event at [${location}]. ";
-	if (!strlen ($info))
-		echo 'No additional information is available.';
-	else
-		echo "Additional information:<br><p>\n<pre>\n${info}\n</pre></p>";
-}
-
 // (re)connects to DB, stores PDO object in $dbxlink global var
 function connectDB()
 {

@@ -5,9 +5,13 @@
 *
 */
 
+// This array is deprecated. Please do not add new message constants to it.
+// use the new showError, showWarning, showSuccess functions instead
 $msgcode = array();
 
-function buildWideRedirectURL ($log, $nextpage = NULL, $nexttab = NULL, $moreArgs = array())
+// This function is DEPRECATED. Show messages through showError and showSuccess,
+// you dont need to return anything from an ophandler to redirect user back to the page containing submit form
+function buildWideRedirectURL ($log = NULL, $nextpage = NULL, $nexttab = NULL, $moreArgs = array())
 {
 	global $page, $pageno, $tabno;
 	if ($nextpage === NULL)
@@ -34,10 +38,48 @@ function buildWideRedirectURL ($log, $nextpage = NULL, $nexttab = NULL, $moreArg
 		}
 	}
 
-	$_SESSION['log'] = $log;
+	if (! empty ($log))
+	{
+		if (empty ($_SESSION['log']))
+			$_SESSION['log'] = $log;
+		elseif ($_SESSION['log']['v'] == $log['v'])
+			$_SESSION['log'] = array_merge_recursive($log, $_SESSION['log']);
+		elseif ($log['v'] == 1 and $_SESSION['log']['v'] == 2)
+			foreach ($log['m'] as $msg)
+				setMessage($msg['message'], $msg['code'], FALSE);
+		elseif ($log['v'] == 2 and $_SESSION['log']['v'] == 1)
+		{
+			foreach ($_SESSION['log'] as $msg)
+			{
+				if (! is_array ($msg))
+					continue;
+				var_dump ($msg);
+				$new_v2_item = array('c' => '', 'a' => array());
+				switch ($msg['code'])
+				{
+					case 'error':
+						$new_v2_item['c'] = 100;
+						break;
+					case 'success':
+						$new_v2_item['c'] = 0;
+						break;
+					case 'warning':
+						$new_v2_item['c'] = 200;
+						break;
+					default:
+						$new_v2_item['c'] = 300;
+				}
+				$new_v2_item['a'][] = $msg['message'];
+				$log['m'][] = $new_v2_item;
+			}
+			$_SESSION['log'] = $log; // substitute v1 log structure with merged v2
+		}
+	}
 	return $url;
 }
 
+// This function is DEPRECATED. Show messages through showError and showSuccess,
+// you dont need to return anything from an ophandler to redirect user back to the page containing submit form
 function buildRedirectURL ($callfunc, $status, $log_args = array(), $nextpage = NULL, $nexttab = NULL, $url_args = array())
 {
 	global $pageno, $tabno, $msgcode;

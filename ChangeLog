@@ -21,6 +21,7 @@
 	update: selective including of JS and CSS files. No more unneeded js code loaded.
 	update: 802.1Q template editor now supports single-submit edit and concerns concurrent submits
 	bugfix: the 'Refcnt' counter on Configuration: Dictionary page was sometimes broken (closes mantis:0000381)
+	update: new API for dispaying messages (showError, showWarning, showSuccess)
 0.18.7
 	bugfix: adjust 802.1Q command generation
 	bugfix: fixed telnet session hanging in NX-OS4 connector

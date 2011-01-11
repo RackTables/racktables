@@ -1667,6 +1667,9 @@ function renderIPv6ForObject ($object_id)
 
 }
 
+// This function is deprecated. Do not rely on its internals,
+// it will probably be removed in the next major relese.
+// Use new showError, showWarning, showSuccess functions.
 // Log structure versions:
 // 1: the whole structure is a list of code-message pairs
 // 2 and later: there's a "v" field set, which indicates the version
@@ -7174,7 +7177,7 @@ function showTabs ($pageno, $tabno)
 	global $tab, $page, $trigger;
 	if (!isset ($tab[$pageno]['default']))
 		return;
-	echo "<td><div class=greynavbar><ul id=foldertab style='margin-bottom: 0px; padding-top: 10px;'>";
+	echo "<div class=greynavbar><ul id=foldertab style='margin-bottom: 0px; padding-top: 10px;'>";
 	foreach ($tab[$pageno] as $tabidx => $tabtitle)
 	{
 		// Hide forbidden tabs.
@@ -7202,7 +7205,7 @@ function showTabs ($pageno, $tabno)
 		
 		echo "'>${tabtitle}</a></li>\n";
 	}
-	echo "</ul></div></td>\n";
+	echo "</ul></div>";
 }
 
 // Arg is path page number, which can be different from the primary page number,
@@ -8463,7 +8466,7 @@ function renderObject8021QSync ($object_id)
 	}
 	catch (Exception $re)
 	{
-		showWarning ('Device configuration unavailable:<br>' . $re->getMessage(), __FUNCTION__);
+		showWarning ('Device configuration unavailable:<br>' . $re->getMessage());
 		return;
 	}
 	$D = getStored8021QConfig ($vswitch['object_id'], 'desired');
@@ -8964,7 +8967,7 @@ function renderDiscoveredNeighbors ($object_id)
 	}
 	catch (RTGatewayError $e)
 	{
-		showWarning ($e->getMessage(), __FUNCTION__);
+		showWarning ($e->getMessage());
 		return;
 	}
 	$mydevice = spotEntity ('object', $object_id);
