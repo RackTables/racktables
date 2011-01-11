@@ -183,8 +183,6 @@ function getSwitchVLANs ($object_id = 0)
 function setSwitchVLANs ($object_id = 0, $setcmd)
 {
 	global $remote_username;
-	if ($object_id <= 0)
-		return oneLiner (160); // invalid arguments
 	$objectInfo = spotEntity ('object', $object_id);
 	$endpoints = findAllEndpoints ($object_id, $objectInfo['name']);
 	if (count ($endpoints) == 0)
