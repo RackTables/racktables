@@ -8721,6 +8721,7 @@ function renderVST ($vst_id)
 		startPortlet ('no orders');
 	else
 	{
+		global $nextorder;
 		startPortlet ('orders (' . count ($vst['switches']) . ')');
 		echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
 		$order = 'odd';
