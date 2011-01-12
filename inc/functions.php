@@ -262,7 +262,7 @@ function genericAssertion ($argname, $argtype)
 		break;
 	case 'json':
 		assertStringArg ($argname);
-		if (NULL === json_decode ($_REQUEST[$argname], TRUE))
+		if (NULL === json_decode ($sic[$argname], TRUE))
 			throw new InvalidRequestArgException ($argname, '(omitted)', 'Invalid JSON code received from client');
 		break;
 	case 'enum/attr_type':

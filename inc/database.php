@@ -4182,7 +4182,7 @@ function getVSTOptions()
 
 function getVLANSwitchTemplate ($vst_id)
 {
-	$result = usePreparedSelectBlade ('SELECT * FROM VLANSwitchTemplate WHERE id = ?', array ($vst_id));
+	$result = usePreparedSelectBlade ('SELECT id, description, mutex_rev, saved_by FROM VLANSwitchTemplate WHERE id = ?', array ($vst_id));
 	if (!($ret = $result->fetch (PDO::FETCH_ASSOC)))
 		throw new EntityNotFoundException ('vst', $vst_id);
 	unset ($result);
@@ -4222,24 +4222,25 @@ function commitUpdateVSTRule ($vst_id, $rule_no, $new_rule_no, $port_pcre, $port
 	);
 }
 
-function commitUpdateVSTRules ($vst_id, $rules)
+function commitUpdateVSTRules ($vst_id, $mutex_rev, $rules)
 {
 	global $dbxlink, $remote_username;
 	$dbxlink->beginTransaction();
-	try
-	{
-		usePreparedDeleteBlade ('VLANSTRule', array ('vst_id' => $vst_id));
-		foreach ($rules as $rule)
-			usePreparedInsertBlade ('VLANSTRule', array_merge (array ('vst_id' => $vst_id), $rule));
-		usePreparedExecuteBlade ('UPDATE VLANSwitchTemplate SET mutex_rev=mutex_rev+1, saved_by=? WHERE id=?', array ($remote_username, $vst_id));
-	}
-	catch (Exception $e)
-	{
-		$dbxlink->rollBack();
-		return FALSE;
-	}
+	$result = usePreparedSelectBlade
+	(
+		'SELECT mutex_rev, saved_by FROM VLANSwitchTemplate ' .
+		'WHERE id = ? FOR UPDATE',
+		array ($vst_id)
+	);
+	$vst = $result->fetch (PDO::FETCH_ASSOC);
+	unset ($result);
+	if ($vst['mutex_rev'] != $mutex_rev)
+		throw new InvalidArgException ('mutex_rev', $mutex_rev, "already saved by ${vst['saved_by']}");
+	usePreparedDeleteBlade ('VLANSTRule', array ('vst_id' => $vst_id));
+	foreach ($rules as $rule)
+		usePreparedInsertBlade ('VLANSTRule', array_merge (array ('vst_id' => $vst_id), $rule));
+	usePreparedExecuteBlade ('UPDATE VLANSwitchTemplate SET mutex_rev=mutex_rev+1, saved_by=? WHERE id=?', array ($remote_username, $vst_id));
 	$dbxlink->commit();
-	return TRUE;
 }
 
 function getIPv4Network8021QBindings ($ipv4net_id)

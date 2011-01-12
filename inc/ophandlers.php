@@ -2463,61 +2463,41 @@ function cloneVSTRule()
 	return buildWideRedirectURL (array (array ('code' => $result ? 'success' : 'error', 'message' => $message)));
 }
 
+$msgcode['updVSTRule']['OK'] = 43;
 function updVSTRule()
 {
-	global $port_role_options;
+	global $port_role_options, $sic;
 	assertUIntArg ('mutex_rev', TRUE);
-	assertStringArg ('template_json');
-	$message = '';
-	$data = json_decode ($_POST['template_json'], TRUE);
-	if (! isset ($data) or ! is_array ($data))
-		$message = 'Invalid JSON code received from client';
-	else
+	genericAssertion ('template_json', 'json');
+	$data = json_decode ($sic['template_json'], TRUE);
+	$rule_no = 0;
+	try
 	{
-		$rule_no = 0;
 		foreach ($data as $rule)
 		{
 			$rule_no++;
-			if (! isInteger ($rule['rule_no']))
-				$message = 'Invalid rule number';
-			elseif (! isPCRE ($rule['port_pcre']))
-				$message = 'Invalid port regexp';
-			elseif (! isset ($rule['port_role']) or ! array_key_exists ($rule['port_role'], $port_role_options))
-				$message = 'Invalid port role';
-			elseif (! isset ($rule['wrt_vlans']) or ! preg_match ('/^[ 0-9\-,]*$/', $rule['wrt_vlans']))
-				$message = 'Invalid port vlan mask';
-			elseif (! isset ($rule['description']))
-				$message = 'Invalid description';
-
-			if ($message)
-			{
-				$message .= " in rule $rule_no";
-				break;
-			}
+			if
+			(
+				! isInteger ($rule['rule_no'])
+				or ! isPCRE ($rule['port_pcre'])
+				or ! isset ($rule['port_role'])
+				or ! array_key_exists ($rule['port_role'], $port_role_options)
+				or ! isset ($rule['wrt_vlans'])
+				or ! preg_match ('/^[ 0-9\-,]*$/', $rule['wrt_vlans'])
+				or ! isset ($rule['description'])
+			)
+				throw new InvalidRequestArgException ('form', '(JSON)', "invalid rule #$rule_no");
 		}
-		if (! $message)
-		{
-			$vst = getVLANSwitchTemplate ($_REQUEST['vst_id']);
-			if ($vst['mutex_rev'] != $_REQUEST['mutex_rev'])
-				$message = "User ${vst['saved_by']} saved this template after you started to edit it. Please concern differencies";
-		}
-		if (! $message)
-			if (! commitUpdateVSTRules ($_REQUEST['vst_id'], $data))
-				$message = 'DB update error';
-		if ($message)
+		commitUpdateVSTRules ($_REQUEST['vst_id'], $_REQUEST['mutex_rev'], $data);
+	}
+	catch (Exception $e)
+	{
+		// Every case, which is soft-processed in process.php, will have the working copy available for a retry.
+		if ($e instanceof InvalidRequestArgException or $e instanceof RTDatabaseError)
 			$_SESSION['vst_edited'] = $data;
+		throw $e;
 	}
-	if ($message)
-	{
-		$result = FALSE;
-		$message = "Template update failed: $message";
-	}
-	else
-	{
-		$result = TRUE;
-		$message = "Update success";
-	}
-	return buildWideRedirectURL (array (array ('code' => $result ? 'success' : 'error', 'message' => $message)));
+	return buildRedirectURL (__FUNCTION__, 'OK');
 }
 
 $msgcode['importDPData']['OK'] = 44;
