@@ -3,7 +3,9 @@
 $(document).ready(function() {
 	$('a.vst-add-rule').click(AddVSTRule)
 	$('a.vst-del-rule').click(RemoveVSTRule)
-	$('form#upd').submit(VSTSubmit);
+	$('form#upd')
+		.submit(VSTSubmit)
+		.change(highlightUnsavedVST);
 });
 
 function AddVSTRule(event) {
@@ -17,11 +19,13 @@ function AddVSTRule(event) {
 	new_tr.find('a.vst-add-rule').click(AddVSTRule);
 	new_tr.find('a.vst-del-rule').click(RemoveVSTRule);
 
+	highlightUnsavedVST();
 	return false;
 }
 
 function RemoveVSTRule(event) {
 	$(this).closest('tr').remove();
+	highlightUnsavedVST();
 	return false;
 }
 
@@ -37,4 +41,13 @@ function VSTSubmit() {
 		return false;
 	$(this).find('input[name|="template_json"]').val(JSON.stringify(result));
 	return true;
+}
+
+function highlightUnsavedVST() {
+    // highlight only on first call of this function
+    if ( typeof highlightUnsavedVST.isAlreadyCalled == 'undefined' ) {
+        highlightUnsavedVST.isAlreadyCalled = true;
+		$('input[name|="submit"]').before('<div class="msg_warning">Template is unsaved. Click here to save it</div>');
+		console.log('a');
+    }
 }
