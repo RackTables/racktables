@@ -1660,19 +1660,6 @@ function submitSLBConfig ()
 	return buildRedirectURL (__FUNCTION__, 'OK', array ('slbconfig'));
 }
 
-$msgcode['updateRow']['OK'] = 7;
-$msgcode['updateRow']['ERR'] = 100;
-function updateRow ()
-{
-	assertUIntArg ('row_id');
-	assertStringArg ('name');
-
-	if (FALSE !== commitUpdateRow ($_REQUEST['row_id'], $_REQUEST['name']))
-		return buildRedirectURL (__FUNCTION__, 'OK', array ($_REQUEST['name']));
-	else
-		return buildRedirectURL (__FUNCTION__, 'ERR', array ($_REQUEST['name']));
-}
-
 $msgcode['addRack']['OK'] = 51;
 $msgcode['addRack']['ERR2'] = 172;
 function addRack ()
@@ -2553,43 +2540,51 @@ function tableHandler ($opspec)
 	if (!array_key_exists ('table', $opspec))
 		throw new InvalidArgException ('opspec', '(malformed array structure)', '"table" not set');
 	$columns = array();
-	foreach ($opspec['arglist'] as $argspec)
-	{
-		genericAssertion ($argspec['url_argname'], $argspec['assertion']);
-		// "table_colname" is normally used for an override, if it is not
-		// set, use the URL argument name
-		$table_colname = array_key_exists ('table_colname', $argspec) ?
-			$argspec['table_colname'] :
-			$argspec['url_argname'];
-		$arg_value = $sic[$argspec['url_argname']];
-		if
-		(
-			($argspec['assertion'] == 'uint0' and $arg_value == 0)
-			or ($argspec['assertion'] == 'string0' and $arg_value == '')
-		)
-			switch (TRUE)
-			{
-			case !array_key_exists ('if_empty', $argspec): // no action requested
-				break;
-			case $argspec['if_empty'] == 'NULL':
-				$arg_value = NULL;
-				break;
-// A trick below is likely to break non-INSERT queries.
-//			case $argspec['if_empty'] == 'omit':
-//				continue 2;
-			default:
-				throw new InvalidArgException ('opspec', '(malformed array structure)', '"if_empty" not recognized');
-			}
-		$columns[$table_colname] = $arg_value;
-	}
+	foreach (array ('arglist', 'set_arglist', 'where_arglist') as $listname)
+		foreach ($opspec[$listname] as $argspec)
+		{
+			genericAssertion ($argspec['url_argname'], $argspec['assertion']);
+			// "table_colname" is normally used for an override, if it is not
+			// set, use the URL argument name
+			$table_colname = array_key_exists ('table_colname', $argspec) ?
+				$argspec['table_colname'] :
+				$argspec['url_argname'];
+			$arg_value = $sic[$argspec['url_argname']];
+			if
+			(
+				($argspec['assertion'] == 'uint0' and $arg_value == 0)
+				or ($argspec['assertion'] == 'string0' and $arg_value == '')
+			)
+				switch (TRUE)
+				{
+				case !array_key_exists ('if_empty', $argspec): // no action requested
+					break;
+				case $argspec['if_empty'] == 'NULL':
+					$arg_value = NULL;
+					break;
+				default:
+					throw new InvalidArgException ('opspec', '(malformed array structure)', '"if_empty" not recognized');
+				}
+			$columns[$listname][$table_colname] = $arg_value;
+		}
 	switch ($opspec['action'])
 	{
 	case 'INSERT':
-		$retcode = TRUE === usePreparedInsertBlade ($opspec['table'], $columns) ? 48 : 110;
+		$retcode = TRUE === usePreparedInsertBlade ($opspec['table'], $columns['arglist']) ? 48 : 110;
 		break;
 	case 'DELETE':
 		$conjunction = array_key_exists ('conjunction', $opspec) ? $opspec['conjunction'] : 'AND';
-		$retcode = FALSE !== usePreparedDeleteBlade ($opspec['table'], $columns, $conjunction) ? 49 : 111;
+		$retcode = FALSE !== usePreparedDeleteBlade ($opspec['table'], $columns['arglist'], $conjunction) ? 49 : 111;
+		break;
+	case 'UPDATE':
+		usePreparedUpdateBlade
+		(
+			$opspec['table'],
+			$columns['set_arglist'],
+			$columns['where_arglist'],
+			array_key_exists ('conjunction', $opspec) ? $opspec['conjunction'] : 'AND'
+		);
+		$retcode = 51;
 		break;
 	default:
 		throw new InvalidArgException ('opspec/action', '(malformed array structure)');

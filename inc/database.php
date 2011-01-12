@@ -220,11 +220,6 @@ function getRackRows ()
 	return $rows;
 }
 
-function commitUpdateRow ($rackrow_id, $rackrow_name)
-{
-	return usePreparedExecuteBlade ('UPDATE RackRow SET name = ? WHERE id = ?', array ($rackrow_name, $rackrow_id));
-}
-
 // Return a simple object list w/o related information, so that the returned value
 // can be directly used by printSelect(). An optional argument is the name of config
 // option with constraint in RackCode.
@@ -2473,6 +2468,34 @@ function usePreparedSelectBlade ($query, $args = array())
 		if (!$prepared->execute ($args))
 			return FALSE;
 		return $prepared;
+	}
+	catch (PDOException $e)
+	{
+		throw convertPDOException ($e);
+	}
+}
+
+function usePreparedUpdateBlade ($tablename, $set_columns, $where_columns, $conjunction = 'AND')
+{
+	global $dbxlink;
+	$conj = '';
+	$query = "UPDATE ${tablename} SET ";
+	foreach (array_keys ($set_columns) as $colname)
+	{
+		$query .= "${conj}${colname}=?";
+		$conj = ', ';
+	}
+	$conj = '';
+	$query .= ' WHERE ';
+	foreach (array_keys ($where_columns) as $colname)
+	{
+		$query .= "${conj} ${colname}=?";
+		$conj = $conjunction;
+	}
+	try
+	{
+		$prepared = $dbxlink->prepare ($query);
+		$prepared->execute (array_merge (array_values ($set_columns), array_values ($where_columns)));
 	}
 	catch (PDOException $e)
 	{
