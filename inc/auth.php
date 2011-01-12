@@ -226,14 +226,12 @@ function processAdjustmentSentence ($modlist, &$chain)
 function authenticated_via_ldap ($username, $password, &$ldap_displayname)
 {
 	global $LDAP_options;
-	if (
+	if
+	(
 		$LDAP_options['cache_retry'] > $LDAP_options['cache_refresh'] or
 		$LDAP_options['cache_refresh'] > $LDAP_options['cache_expiry']
 	)
-	{
-		showError ('Fatal LDAP configuration error, check secret.php options.', 'inline');
-		die;
-	}
+		throw new RackTablesError ('LDAP misconfiguration: refresh/retry/expiry mismatch', RackTablesError::MISCONFIGURED);
 	if ($LDAP_options['cache_expiry'] == 0) // immediate expiry set means disabled cache
 		return authenticated_via_ldap_nocache ($username, $password, $ldap_displayname);
 	// authenticated_via_ldap_cache()'s way of locking can sometimes result in

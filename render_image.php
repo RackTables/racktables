@@ -144,7 +144,7 @@ function colorFromHex ($image, $hex)
 function renderRackThumb ($rack_id = 0)
 {
 	// Don't call DB extra times, hence we are most probably not the
-	// only script wishing to acces the same data now.
+	// only script wishing to access the same data now.
 	if (NULL !== ($thumbcache = loadThumbCache ($rack_id)))
 	{
 		header("Content-type: image/png");
@@ -264,19 +264,19 @@ function renderFilePreview ($file_id = 0, $mode = 'view')
 		$file = getFile ($file_id);
 		if (!in_array ($file['type'], array ('image/jpeg', 'image/png', 'image/gif')))
 		{
-			showError ('Invalid MIME type on file', 'inline');
+			renderError();
 			break;
 		}
 		header("Content-type: ${file['type']}");
 		echo $file['contents'];
 		break;
 	case 'preview':
-		if($image = getFileCache($file_id)){ //Cache Hit
+		if ($image = getFileCache ($file_id)) //Cache Hit
+		{
 			header("Content-type: image/jpeg"); 
 			echo $image;
 			break;
 		}
-
 		//Cache Miss
 		$file = getFile ($file_id);
 		$image = imagecreatefromstring ($file['contents']);
@@ -304,7 +304,7 @@ function renderFilePreview ($file_id = 0, $mode = 'view')
 		}
 		break;
 	default:
-		showError ('Invalid argument', 'inline');
+		renderError();
 		break;
 	}
 }

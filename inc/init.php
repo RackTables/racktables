@@ -9,11 +9,8 @@
 *
 */
 
-// This is the first thing we need to do.
 require_once 'inc/exceptions.php';
 require_once 'inc/config.php';
-
-// What we need first is database and interface functions.
 require_once 'inc/functions.php';
 require_once 'inc/database.php';
 // Always have default values for these options, so if a user didn't
