@@ -287,6 +287,12 @@ function genericAssertion ($argname, $argtype)
 		if (!in_array ($sic[$argname], array ('TCP', 'UDP')))
 			throw new InvalidRequestArgException ($argname, $sic[$argname], 'Unknown value');
 		break;
+	case 'enum/inet4alloc':
+	case 'enum/inet6alloc':
+		assertStringArg ($argname);
+		if (!in_array ($sic[$argname], array ('regular', 'shared', 'virtual', 'router')))
+			throw new InvalidRequestArgException ($argname, $sic[$argname], 'Unknown value');
+		break;
 	case 'iif':
 		if (!array_key_exists ($sic[$argname], getPortIIFOptions()))
 			throw new InvalidRequestArgException ($argname, $sic[$argname], 'Unknown value');

@@ -391,7 +391,7 @@ function updIPv4Allocation ()
 	assertIPv4Arg ('ip');
 	assertUIntArg ('object_id');
 	assertStringArg ('bond_name', TRUE);
-	assertStringArg ('bond_type');
+	genericAssertion ('bond_type', 'enum/inet4alloc');
 
 	$result = updateBond ($_REQUEST['ip'], $_REQUEST['object_id'], $_REQUEST['bond_name'], $_REQUEST['bond_type']);
 	return buildRedirectURL (__FUNCTION__, $result === FALSE ? 'ERR' : 'OK');
@@ -404,7 +404,7 @@ function updIPv6Allocation ()
 	$ipv6 = assertIPv6Arg ('ip');
 	assertUIntArg ('object_id');
 	assertStringArg ('bond_name', TRUE);
-	assertStringArg ('bond_type');
+	genericAssertion ('bond_type', 'enum/inet6alloc');
 
 	$result = updateIPv6Bond ($ipv6, $_REQUEST['object_id'], $_REQUEST['bond_name'], $_REQUEST['bond_type']);
 	return buildRedirectURL (__FUNCTION__, $result === FALSE ? 'ERR' : 'OK');
@@ -439,7 +439,7 @@ function addIPv4Allocation ()
 	assertIPv4Arg ('ip');
 	assertUIntArg ('object_id');
 	assertStringArg ('bond_name', TRUE);
-	assertStringArg ('bond_type');
+	genericAssertion ('bond_type', 'enum/inet4alloc');
 
 	// Strip masklen.
 	$ip = preg_replace ('@/[[:digit:]]+$@', '', $_REQUEST['ip']);
@@ -468,7 +468,7 @@ function addIPv6Allocation ()
 {
 	assertUIntArg ('object_id');
 	assertStringArg ('bond_name', TRUE);
-	assertStringArg ('bond_type');
+	genericAssertion ('bond_type', 'enum/inet6alloc');
 
 	// Strip masklen.
 	$ipv6 = new IPv6Address;
