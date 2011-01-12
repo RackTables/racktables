@@ -2900,17 +2900,10 @@ function matchVLANFilter ($vlan_id, $vfilter)
 	return FALSE;
 }
 
-function exportSwitch8021QConfig
-(
-	$vswitch,
-	$device_vlanlist,
-	$before,
-	$changes
-)
+function generate8021QDeployOps ($domain_vlanlist, $device_vlanlist, $before, $changes)
 {
 	// only ignore VLANs, which exist and are explicitly shown as "alien"
 	$old_managed_vlans = array();
-	$domain_vlanlist = getDomainVLANs ($vswitch['domain_id']);
 	foreach ($device_vlanlist as $vlan_id)
 		if
 		(
@@ -3123,6 +3116,19 @@ function exportSwitch8021QConfig
 		default:
 			throw new InvalidArgException ('ports_to_do', '(hidden)', 'error in structure');
 		}
+	return $crq;
+}
+
+function exportSwitch8021QConfig
+(
+	$vswitch,
+	$device_vlanlist,
+	$before,
+	$changes
+)
+{
+	$domain_vlanlist = getDomainVLANs ($vswitch['domain_id']);
+	$crq = generate8021QDeployOps ($domain_vlanlist, $device_vlanlist, $before, $changes);
 	if (count ($crq))
 	{
 		array_unshift ($crq, array ('opcode' => 'begin configuration'));
