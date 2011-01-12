@@ -1749,7 +1749,6 @@ function showMessageOrError ()
 				160 => array ('code' => 'error', 'format' => 'Invalid arguments'),
 				161 => array ('code' => 'error', 'format' => 'Endpoint not found. Please either set FQDN attribute or assign an IP address to the object.'),
 				162 => array ('code' => 'error', 'format' => 'More than one IP address is assigned to this object, please configure FQDN attribute.'),
-				163 => array ('code' => 'error', 'format' => 'Failed to get any response from queryGateway() or the gateway died'),
 				164 => array ('code' => 'error', 'format' => 'Gateway failure: %s.'),
 				165 => array ('code' => 'error', 'format' => 'Gateway failure: malformed reply.'),
 				166 => array ('code' => 'error', 'format' => 'gw: %s'),
