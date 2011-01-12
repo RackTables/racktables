@@ -1836,7 +1836,7 @@ function showMessageOrError ()
 			echo '<div class=msg_error>' . __FUNCTION__ . ': internal error</div>';
 			break;
 	}
-	unset($_SESSION['log']);
+	clearMessages();
 }
 
 // renders two tables: port link status and learned MAC list

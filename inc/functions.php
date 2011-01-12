@@ -4394,6 +4394,12 @@ function setMessage ($message, $type, $direct_rendering)
 	}
 }
 
+// clear message list set by showError, its siblings, buildWideRedirectURL
+function clearMessages()
+{
+	unset ($_SESSION['log']);
+}
+
 function isEthernetPort($port)
 {
 	return ($port['iif_id'] != 1 or preg_match('/Base|LACP/i', $port['oif_name']));

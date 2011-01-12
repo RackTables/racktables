@@ -14,14 +14,22 @@ header ('Content-Type: text/html; charset=UTF-8');
 if (isset ($_REQUEST['tab']) and ! isset ($_SESSION['RTLT'][$pageno]['dont_remember']))
 	$_SESSION['RTLT'][$pageno] = array ('tabname' => $tabno, 'time' => time());
 
+// call the main handler - page or tab handler.
+// catch exception and show its error message instead of page/tab content
+try {
 if (isset ($tabhandler[$pageno][$tabno]))
 	call_user_func ($tabhandler[$pageno][$tabno], getBypassValue());
 elseif (isset ($page[$pageno]['handler']))
 	$page[$pageno]['handler'] ($tabno);
 else
-	throw new RackTablesError ("Failed to find handler for page '${pageno}', tab '${tabno}'", RackTablesError::INTERNAL);
-
+	showError ("Failed to find handler for page '${pageno}', tab '${tabno}'");
 $content = ob_get_clean();
+} catch (Exception $e) {
+	ob_clean();
+	$content = '';
+	showError ("Unhandled exception: " . $e->getMessage());
+}
+
 ob_start();
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -45,7 +53,7 @@ ob_start();
   </table>
  </td></tr>
  <tr><td><?php showTabs ($pageno, $tabno); ?></td></tr>
- <tr><td><?php $output_is_buffered = FALSE; showMessageOrError(); ?></td></tr>
+ <tr><td><?php showMessageOrError(); ?></td></tr>
  <tr><td><?php echo $content; ?></td></tr>
 </table>
 </body>
@@ -56,4 +64,5 @@ ob_start();
 	ob_end_clean();
 	printException($e);
 }
+clearMessages(); // prevent message appearing in foreign tab
 ?>
