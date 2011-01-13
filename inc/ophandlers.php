@@ -954,6 +954,7 @@ function clearSticker ()
 $msgcode['updateObjectAllocation']['OK'] = 63;
 function updateObjectAllocation ()
 {
+	global $remote_username, $sic;
 	if (!isset ($_REQUEST['got_atoms']))
 	{
 		unset($_GET['page']);
@@ -999,7 +1000,6 @@ function updateObjectAllocation ()
 		return buildRedirectURL (__FUNCTION__, 'OK', $changecnt);
 	// Log a record.
 	$newMolecule = getMoleculeForObject ($object_id);
-	global $remote_username;
 	usePreparedInsertBlade
 	(
 		'MountOperation', 
@@ -1009,7 +1009,7 @@ function updateObjectAllocation ()
 			'old_molecule_id' => count ($oldMolecule) ? createMolecule ($oldMolecule) : NULL,
 			'new_molecule_id' => count ($newMolecule) ? createMolecule ($newMolecule) : NULL,
 			'user_name' => $remote_username,
-			'comment' => empty ($_REQUEST['comment']) ? NULL : $_REQUEST['comment'],
+			'comment' => empty ($sic['comment']) ? NULL : $sic['comment'],
 		)
 	);
 	$log[] = array ('code' => 200, 'message' => 'history logged');
