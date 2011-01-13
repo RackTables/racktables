@@ -2763,7 +2763,7 @@ function getOpspec()
 
 function tableHandler()
 {
-	$opspec = getOpspec;
+	$opspec = getOpspec();
 	global $sic;
 	$columns = array();
 	foreach (array ('arglist', 'set_arglist', 'where_arglist') as $listname)
@@ -2813,7 +2813,7 @@ function tableHandler()
 		$retcode = 51;
 		break;
 	default:
-		throw new InvalidArgException ('opspec/action', '(malformed array structure)');
+		throw new InvalidArgException ('opspec/action', $opspec['action']);
 	}
 	return buildWideRedirectURL (oneLiner ($retcode));
 }
