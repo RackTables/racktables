@@ -2963,20 +2963,6 @@ function getTagList ()
 	return $ret;
 }
 
-function commitUpdateTag ($tag_id, $tag_name, $parent_id)
-{
-	return usePreparedExecuteBlade
-	(
-		'UPDATE TagTree SET tag=?, parent_id=? WHERE id=?',
-		array
-		(
-			$tag_name,
-			$parent_id == 0 ? NULL : $parent_id,
-			$tag_id,
-		)
-	);
-}
-
 // Drop the whole chain stored.
 function destroyTagsForEntity ($entity_realm, $entity_id)
 {

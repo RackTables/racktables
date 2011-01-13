@@ -488,7 +488,7 @@ $tabhandler['tagtree']['default'] = 'renderTagTree';
 $tabhandler['tagtree']['edit'] = 'renderTagTreeEditor';
 $ophandler['tagtree']['edit']['createTag'] = 'tableHandler';
 $ophandler['tagtree']['edit']['destroyTag'] = 'tableHandler';
-$ophandler['tagtree']['edit']['updateTag'] = 'updateTag';
+$ophandler['tagtree']['edit']['updateTag'] = 'tableHandler';
 
 $page['myaccount']['title'] = 'My account';
 $page['myaccount']['parent'] = 'config';

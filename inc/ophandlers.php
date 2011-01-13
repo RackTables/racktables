@@ -230,7 +230,21 @@ $opspec_list['tagtree-edit-destroyTag'] = array
 	'action' => 'DELETE',
 	'arglist' => array
 	(
-		array ('url_argname' => 'tag_id', 'table_colname' => 'id', 'assertion' => 'tag'),
+		array ('url_argname' => 'tag_id', 'table_colname' => 'id', 'assertion' => 'uint'),
+	),
+);
+$opspec_list['tagtree-edit-updateTag'] = array
+(
+	'table' => 'TagTree',
+	'action' => 'UPDATE',
+	'set_arglist' => array
+	(
+		array ('url_argname' => 'tag_name', 'table_colname' => 'tag', 'assertion' => 'tag'),
+		array ('url_argname' => 'parent_id', 'assertion' => 'uint0', 'if_empty' => 'NULL'),
+	),
+	'where_arglist' => array
+	(
+		array ('url_argname' => 'tag_id', 'table_colname' => 'id', 'assertion' => 'uint'),
 	),
 );
 $opspec_list['vlandomain-vlanlist-add'] = array
@@ -1699,22 +1713,6 @@ function saveEntityTags ()
 		return buildRedirectURL (__FUNCTION__, 'ERR1', array ($n_succeeds, $n_errors));
 	else
 		return buildRedirectURL (__FUNCTION__, 'OK', array ($n_succeeds));
-}
-
-$msgcode['updateTag']['OK'] = 7;
-$msgcode['updateTag']['ERR2'] = 109;
-function updateTag ()
-{
-	assertUIntArg ('tag_id');
-	assertUIntArg ('parent_id', TRUE);
-	genericAssertion ('tag_name', 'tag');
-	if (($parent_id = $_REQUEST['parent_id']) <= 0)
-		$parent_id = 'NULL';
-	if (FALSE !== commitUpdateTag ($_REQUEST['tag_id'], $tagname, $parent_id))
-		return buildRedirectURL (__FUNCTION__, 'OK', array ($tagname));
-	// Use old name in the message, cause update failed.
-	global $taglist;
-	return buildRedirectURL (__FUNCTION__, 'ERR2', array ($taglist[$_REQUEST['tag_id']]['tag']));
 }
 
 $msgcode['rollTags']['OK'] = 67;
