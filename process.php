@@ -20,7 +20,7 @@ fixContext();
 if
 (
 	!isset ($ophandler[$pageno][$tabno][$op]) or
-	(!is_array ($ophandler[$pageno][$tabno][$op]) and !function_exists ($ophandler[$pageno][$tabno][$op]))
+	!function_exists ($ophandler[$pageno][$tabno][$op])
 )
 	throw new RackTablesError ("Invalid navigation data for '${pageno}-${tabno}-${op}'", RackTablesError::INTERNAL);
 
