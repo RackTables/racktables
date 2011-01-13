@@ -4212,16 +4212,6 @@ function commitUpdateVST ($vst_id, $max_local_vlans, $description)
 	);
 }
 
-function commitUpdateVSTRule ($vst_id, $rule_no, $new_rule_no, $port_pcre, $port_role, $wrt_vlans, $description)
-{
-	return usePreparedExecuteBlade
-	(
-		'UPDATE VLANSTRule SET rule_no = ?, port_pcre = ?, port_role = ?, wrt_vlans = ?, description = ? ' .
-		'WHERE vst_id = ? AND rule_no = ?',
-		array ($new_rule_no, $port_pcre, $port_role, $wrt_vlans, $description, $vst_id, $rule_no)
-	);
-}
-
 function commitUpdateVSTRules ($vst_id, $mutex_rev, $rules)
 {
 	global $dbxlink, $remote_username;
