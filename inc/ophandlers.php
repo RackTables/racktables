@@ -273,21 +273,13 @@ function buildWideRedirectURL ($log = NULL, $nextpage = NULL, $nexttab = NULL, $
 	if (isset ($page[$nextpage]['bypass']))
 		$url .= '&' . $page[$nextpage]['bypass'] . '=' . $_REQUEST[$page[$nextpage]['bypass']];
 
-	if (count($moreArgs)>0)
-	{
-		foreach($moreArgs as $arg=>$value)
-		{
-			if (gettype($value) == 'array')
-			{
-				foreach ($value as $v)
-				{
-					$url .= '&'.urlencode($arg.'[]').'='.urlencode($v);
-				}
-			}
+	if (count ($moreArgs) > 0)
+		foreach ($moreArgs as $arg => $value)
+			if (gettype ($value) != 'array')
+				$url .= '&' . urlencode ($arg) . '=' . urlencode ($value);
 			else
-				$url .= '&'.urlencode($arg).'='.urlencode($value);
-		}
-	}
+				foreach ($value as $v)
+					$url .= '&' . urlencode ($arg . '[]') . '=' . urlencode ($v);
 
 	if (! empty ($log))
 	{
