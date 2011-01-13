@@ -999,21 +999,20 @@ function updateObjectAllocation ()
 		return buildRedirectURL (__FUNCTION__, 'OK', $changecnt);
 	// Log a record.
 	$newMolecule = getMoleculeForObject ($object_id);
-	$oc = count ($oldMolecule);
-	$nc = count ($newMolecule);
-	$omid = $oc ? createMolecule ($oldMolecule) : 'NULL';
-	$nmid = $nc ? createMolecule ($newMolecule) : 'NULL';
 	global $remote_username;
-	$comment = empty ($_REQUEST['comment']) ? 'NULL' : "'${_REQUEST['comment']}'";
-	$query =
-		"insert into MountOperation(object_id, old_molecule_id, new_molecule_id, user_name, comment) " .
-		"values (${object_id}, ${omid}, ${nmid}, '${remote_username}', ${comment})";
-	global $dbxlink;
-	$result = $dbxlink->query ($query);
-	if ($result == NULL)
-		$log[] = array ('code' => 500, 'message' => 'SQL query failed during history logging.');
-	else
-		$log[] = array ('code' => 200, 'message' => 'History logged.');
+	usePreparedInsertBlade
+	(
+		'MountOperation', 
+		array
+		(
+			'object_id' => $object_id,
+			'old_molecule_id' => count ($oldMolecule) ? createMolecule ($oldMolecule) : NULL,
+			'new_molecule_id' => count ($newMolecule) ? createMolecule ($newMolecule) : NULL,
+			'user_name' => $remote_username,
+			'comment' => empty ($_REQUEST['comment']) ? NULL : $_REQUEST['comment'],
+		)
+	);
+	$log[] = array ('code' => 200, 'message' => 'history logged');
 	return buildWideRedirectURL ($log);
 }
 
