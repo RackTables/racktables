@@ -550,30 +550,6 @@ function delIPv6Prefix ()
 		return buildRedirectURL (__FUNCTION__, 'OK');
 }
 
-$msgcode['updIPv4Prefix']['OK'] = 51;
-$msgcode['updIPv4Prefix']['ERR'] = 109;
-function updIPv4Prefix ()
-{
-	assertUIntArg ('id');
-	assertStringArg ('name', TRUE);
-	assertStringArg ('comment', TRUE);
-	global $sic;
-	$result = updateIPv4Network_real ($sic['id'], $sic['name'], $sic['comment']);
-	return buildRedirectURL (__FUNCTION__, $result !== FALSE ? 'OK' : 'ERR');
-}
-
-$msgcode['updIPv6Prefix']['OK'] = 51;
-$msgcode['updIPv6Prefix']['ERR'] = 109;
-function updIPv6Prefix ()
-{
-	assertUIntArg ('id');
-	assertStringArg ('name', TRUE);
-	assertStringArg ('comment', TRUE);
-	global $sic;
-	$result = updateIPv6Network_real ($sic['id'], $sic['name'], $sic['comment']);
-	return buildRedirectURL (__FUNCTION__, $result !== FALSE ? 'OK' : 'ERR');
-}
-
 $msgcode['editAddress']['OK'] = 51;
 $msgcode['editAddress']['ERR'] = 100;
 function editAddress ()

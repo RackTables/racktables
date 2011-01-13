@@ -1404,17 +1404,6 @@ function getIPv6AddressNetworkId ($ip, $masklen = 128)
 	return NULL;
 }
 
-
-function updateIPv4Network_real ($id = 0, $name = '', $comment = '')
-{
-	return usePreparedExecuteBlade ('UPDATE IPv4Network SET name = ?, comment = ? WHERE id = ?', array ($name, $comment, $id));
-}
-
-function updateIPv6Network_real ($id = 0, $name = '', $comment = '')
-{
-	return usePreparedExecuteBlade ('UPDATE IPv6Network SET name = ?, comment = ? WHERE id = ?', array ($name, $comment, $id));
-}
-
 // It is a wrapper around updateV4Address and updateV6Address.
 // You can pass dotted IPv4, human representation of IPv6, or instance of IPv6Address
 function updateAddress ($ip = 0, $name = '', $reserved = 'no')

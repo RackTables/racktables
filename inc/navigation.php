@@ -291,7 +291,6 @@ $tabhandler['ipv4net']['files'] = 'renderFilesForEntity';
 $tabhandler['ipv4net']['8021q'] = 'renderVLANIPLinks';
 $trigger['ipv4net']['tags'] = 'trigger_tags';
 $trigger['ipv4net']['8021q'] = 'trigger_ipv4net_vlanconfig';
-$ophandler['ipv4net']['properties']['editRange'] = 'updIPv4Prefix';
 $ophandler['ipv4net']['liveptr']['importPTRData'] = 'importPTRData';
 $ophandler['ipv4net']['tags']['saveTags'] = 'saveEntityTags';
 $ophandler['ipv4net']['files']['addFile'] = 'addFileToEntity';
@@ -299,6 +298,20 @@ $ophandler['ipv4net']['files']['linkFile'] = 'linkFileToEntity';
 $ophandler['ipv4net']['files']['unlinkFile'] = 'unlinkFile';
 $ophandler['ipv4net']['8021q']['bind'] = 'bindVLANtoIPv4';
 $ophandler['ipv4net']['8021q']['unbind'] = 'unbindVLANfromIPv4';
+$ophandler['ipv4net']['properties']['editRange'] = array
+(
+	'table' => 'IPv4Network',
+	'action' => 'UPDATE',
+	'set_arglist' => array
+	(
+		array ('url_argname' => 'name', 'assertion' => 'string0'),
+		array ('url_argname' => 'comment', 'assertion' => 'string0'),
+	),
+	'where_arglist' => array
+	(
+		array ('url_argname' => 'id', 'assertion' => 'uint')
+	),
+);
 
 $page['ipv6net']['parent'] = 'ipv6space';
 $page['ipv6net']['bypass'] = 'id';
@@ -315,13 +328,26 @@ $tabhandler['ipv6net']['files'] = 'renderFilesForEntity';
 $tabhandler['ipv6net']['8021q'] = 'renderVLANIPLinks';
 $trigger['ipv6net']['tags'] = 'trigger_tags';
 $trigger['ipv6net']['8021q'] = 'trigger_ipv6net_vlanconfig';
-$ophandler['ipv6net']['properties']['editRange'] = 'updIPv6Prefix';
 $ophandler['ipv6net']['tags']['saveTags'] = 'saveEntityTags';
 $ophandler['ipv6net']['files']['addFile'] = 'addFileToEntity';
 $ophandler['ipv6net']['files']['linkFile'] = 'linkFileToEntity';
 $ophandler['ipv6net']['files']['unlinkFile'] = 'unlinkFile';
 $ophandler['ipv6net']['8021q']['bind'] = 'bindVLANtoIPv6';
 $ophandler['ipv6net']['8021q']['unbind'] = 'unbindVLANfromIPv6';
+$ophandler['ipv6net']['properties']['editRange'] = array
+(
+	'table' => 'IPv6Network',
+	'action' => 'UPDATE',
+	'set_arglist' => array
+	(
+		array ('url_argname' => 'name', 'assertion' => 'string0'),
+		array ('url_argname' => 'comment', 'assertion' => 'string0'),
+	),
+	'where_arglist' => array
+	(
+		array ('url_argname' => 'id', 'assertion' => 'uint')
+	),
+);
 
 $page['ipaddress']['parent'] = 'ipv4net';
 $page['ipaddress']['bypass'] = 'ip';
