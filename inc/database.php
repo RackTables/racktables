@@ -2978,11 +2978,13 @@ function deleteTagForEntity ($entity_realm, $entity_id, $tag_id)
 }
 
 // Push a record into TagStorage unconditionally.
-function addTagForEntity ($realm = '', $entity_id, $tag_id)
+function addTagForEntity ($realm, $entity_id, $tag_id)
 {
 	global $SQLSchema;
-	if (! isset ($SQLSchema[$realm]))
-		return FALSE;
+	if (! array_key_exists ($realm, $SQLSchema))
+		throw new InvalidArgException ('realm', $realm);
+	// spotEntity ($realm, $entity_id) would be a more expensive way
+	// to validate two parameters
 	return usePreparedInsertBlade
 	(
 		'TagStorage',
