@@ -134,7 +134,6 @@ $pageheaders = array
 (
 	100 => "<link rel='ICON' type='image/x-icon' href='favicon.ico' />",
 );
-$opspec_list = array();
 addCSS ('css/pi.css');
 
 if (!isset ($script_mode) or $script_mode !== TRUE)

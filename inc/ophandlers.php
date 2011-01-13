@@ -9,6 +9,8 @@
 // use the new showError, showWarning, showSuccess functions instead
 $msgcode = array();
 
+$opspec_list = array();
+
 $opspec_list['rackspace-edit-addRow'] = array
 (
 	'table' => 'RackRow',
