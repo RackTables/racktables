@@ -8649,7 +8649,7 @@ function renderVSTListEditor()
 {
 	function printNewItemTR ()
 	{
-		printOpFormIntro ('add');
+		printOpFormIntro ('add', array ('vst_maxvlans' => 0));
 		echo '<tr>';
 		echo '<td>' . getImageHREF ('create', 'create template', TRUE, 104) . '</td>';
 		echo '<td><input type=text name=vst_descr tabindex=101></td>';
@@ -8662,7 +8662,7 @@ function renderVSTListEditor()
 		printNewItemTR();
 	foreach (getVSTStats() as $vst_id => $vst_info)
 	{
-		printOpFormIntro ('upd', array ('vst_id' => $vst_id));
+		printOpFormIntro ('upd', array ('vst_id' => $vst_id, 'vst_maxvlans' => 0));
 		echo '<tr><td>';
 		if ($vst_info['switchc'])
 			printImageHREF ('nodestroy', 'template used elsewhere');

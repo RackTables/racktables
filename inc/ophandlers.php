@@ -86,6 +86,25 @@ $opspec_list['object-editrspvs-delLB'] = array
 		array ('url_argname' => 'vs_id', 'assertion' => 'uint'),
 	),
 );
+$opspec_list['ipv4vs-editlblist-updLB'] =
+$opspec_list['ipv4rspool-editlblist-updLB'] =
+$opspec_list['object-editrspvs-updLB'] = array
+(
+	'table' => 'IPv4LB',
+	'action' => 'UPDATE',
+	'set_arglist' => array
+	(
+		array ('url_argname' => 'vsconfig', 'assertion' => 'string0', 'if_empty' => 'NULL'),
+		array ('url_argname' => 'rsconfig', 'assertion' => 'string0', 'if_empty' => 'NULL'),
+		array ('url_argname' => 'prio', 'assertion' => 'uint0', 'if_empty' => 'NULL'),
+	),
+	'where_arglist' => array
+	(
+		array ('url_argname' => 'object_id', 'assertion' => 'uint'),
+		array ('url_argname' => 'pool_id', 'table_colname' => 'rspool_id', 'assertion' => 'uint'),
+		array ('url_argname' => 'vs_id', 'assertion' => 'uint'),
+	),
+);
 $opspec_list['ipv4net-properties-editRange'] = array
 (
 	'table' => 'IPv4Network',
@@ -121,6 +140,36 @@ $opspec_list['ipv4rspool-editrslist-delRS'] = array
 	'arglist' => array
 	(
 		array ('url_argname' => 'id', 'assertion' => 'uint'),
+	),
+);
+$opspec_list['ipv4rspool-edit-updIPv4RSP'] = array
+(
+	'table' => 'IPv4RSPool',
+	'action' => 'UPDATE',
+	'set_arglist' => array
+	(
+		array ('url_argname' => 'name', 'assertion' => 'string0', 'if_empty' => 'NULL'),
+		array ('url_argname' => 'vsconfig', 'assertion' => 'string0', 'if_empty' => 'NULL'),
+		array ('url_argname' => 'rsconfig', 'assertion' => 'string0', 'if_empty' => 'NULL'),
+	),
+	'where_arglist' => array
+	(
+		array ('url_argname' => 'pool_id', 'table_colname' => 'id', 'assertion' => 'uint')
+	),
+);
+$opspec_list['file-edit-updateFile'] = array
+(
+	'table' => 'File',
+	'action' => 'UPDATE',
+	'set_arglist' => array
+	(
+		array ('url_argname' => 'file_name', 'table_colname' => 'name', 'assertion' => 'string'),
+		array ('url_argname' => 'file_type', 'table_colname' => 'type', 'assertion' => 'string'),
+		array ('url_argname' => 'file_comment', 'table_colname' => 'comment', 'assertion' => 'string0', 'if_empty' => 'NULL'),
+	),
+	'where_arglist' => array
+	(
+		array ('url_argname' => 'file_id', 'table_colname' => 'id', 'assertion' => 'uint')
 	),
 );
 $opspec_list['portmap-edit-add'] = array
@@ -245,6 +294,33 @@ $opspec_list['tagtree-edit-updateTag'] = array
 	'where_arglist' => array
 	(
 		array ('url_argname' => 'tag_id', 'table_colname' => 'id', 'assertion' => 'uint'),
+	),
+);
+$opspec_list['8021q-vstlist-upd'] = array
+(
+	'table' => 'VLANSwitchTemplate',
+	'action' => 'UPDATE',
+	'set_arglist' => array
+	(
+		array ('url_argname' => 'vst_maxvlans', 'table_colname' => 'max_local_vlans', 'assertion' => 'uint0', 'if_empty' => 'NULL'),
+		array ('url_argname' => 'vst_descr', 'table_colname' => 'description', 'assertion' => 'string'),
+	),
+	'where_arglist' => array
+	(
+		array ('url_argname' => 'vst_id', 'table_colname' => 'id', 'assertion' => 'uint'),
+	),
+);
+$opspec_list['8021q-vdlist-upd'] = array
+(
+	'table' => 'VLANDomain',
+	'action' => 'UPDATE',
+	'set_arglist' => array
+	(
+		array ('url_argname' => 'vdom_descr', 'table_colname' => 'description', 'assertion' => 'string'),
+	),
+	'where_arglist' => array
+	(
+		array ('url_argname' => 'vdom_id', 'table_colname' => 'id', 'assertion' => 'uint'),
 	),
 );
 $opspec_list['vlandomain-vlanlist-add'] = array
@@ -1477,31 +1553,6 @@ function updateRealServer ()
 		return buildRedirectURL (__FUNCTION__, 'OK');
 }
 
-$msgcode['updateLoadBalancer']['OK'] = 51;
-$msgcode['updateLoadBalancer']['ERR'] = 109;
-function updateLoadBalancer ()
-{
-	assertUIntArg ('object_id');
-	assertUIntArg ('pool_id');
-	assertUIntArg ('vs_id');
-	assertStringArg ('vsconfig', TRUE);
-	assertStringArg ('rsconfig', TRUE);
-	if (! empty($_REQUEST['prio']))
-		assertUIntArg('prio', TRUE);
-
-	if (FALSE === commitUpdateLB (
-		$_REQUEST['object_id'],
-		$_REQUEST['pool_id'],
-		$_REQUEST['vs_id'],
-		$_REQUEST['vsconfig'],
-		$_REQUEST['rsconfig'],
-		$_REQUEST['prio']
-	))
-		return buildRedirectURL (__FUNCTION__, 'ERR');
-	else
-		return buildRedirectURL (__FUNCTION__, 'OK');
-}
-
 $msgcode['updateVService']['OK'] = 51;
 $msgcode['updateVService']['ERR'] = 109;
 function updateVService ()
@@ -1578,26 +1629,6 @@ function deleteRSPool ()
 {
 	assertUIntArg ('pool_id');
 	if (commitDeleteRSPool ($_REQUEST['pool_id']) === FALSE)
-		return buildRedirectURL (__FUNCTION__, 'ERR');
-	else
-		return buildRedirectURL (__FUNCTION__, 'OK');
-}
-
-$msgcode['updateRSPool']['OK'] = 51;
-$msgcode['updateRSPool']['ERR'] = 109;
-function updateRSPool ()
-{
-	assertStringArg ('name', TRUE);
-	assertStringArg ('vsconfig', TRUE);
-	assertStringArg ('rsconfig', TRUE);
-	if (FALSE === commitUpdateRSPool
-		(
-			$_REQUEST['pool_id'],
-			$_REQUEST['name'],
-			$_REQUEST['vsconfig'],
-			$_REQUEST['rsconfig']
-		)
-	)
 		return buildRedirectURL (__FUNCTION__, 'ERR');
 	else
 		return buildRedirectURL (__FUNCTION__, 'OK');
@@ -2021,7 +2052,7 @@ function addFileToEntity ()
 	global $sic;
 	if (FALSE === commitAddFile ($_FILES['file']['name'], $_FILES['file']['type'], $_FILES['file']['size'], $fp, $sic['comment']))
 		return buildRedirectURL (__FUNCTION__, 'ERR3');
-	if (FALSE === commitLinkFile (lastInsertID(), $realm, $entity_id))
+	if (FALSE === usePreparedInsertBlade ('FileLink', array ('file_id' => lastInsertID(), 'entity_type' => $realm, 'entity_id' => $entity_id)))
 		return buildRedirectURL (__FUNCTION__, 'ERR3');
 
 	return buildRedirectURL (__FUNCTION__, 'OK', array (htmlspecialchars ($_FILES['file']['name'])));
@@ -2032,12 +2063,12 @@ $msgcode['linkFileToEntity']['ERR2'] = 110;
 function linkFileToEntity ()
 {
 	assertUIntArg ('file_id');
-	global $pageno, $etype_by_pageno;
+	global $pageno, $etype_by_pageno, $sic;
 	if (!isset ($etype_by_pageno[$pageno]))
 		throw new RackTablesError ('key not found in etype_by_pageno', RackTablesError::INTERNAL);
 
-	$fi = spotEntity ('file', $_REQUEST['file_id']);
-	if (FALSE === commitLinkFile ($_REQUEST['file_id'], $etype_by_pageno[$pageno], getBypassValue()))
+	$fi = spotEntity ('file', $sic['file_id']);
+	if (FALSE === usePreparedInsertBlade ('FileLink', array ('file_id' => $sic['file_id'], 'entity_type' => $etype_by_pageno[$pageno], 'entity_id' => getBypassValue())))
 		return buildRedirectURL (__FUNCTION__, 'ERR2');
 
 	return buildRedirectURL (__FUNCTION__, 'OK', array (htmlspecialchars ($fi['name'])));
@@ -2069,19 +2100,6 @@ function replaceFile ()
 	);
 
 	return buildRedirectURL (__FUNCTION__, 'OK', array (htmlspecialchars ($shortInfo['name'])));
-}
-
-$msgcode['updateFile']['OK'] = 70;
-$msgcode['updateFile']['ERR'] = 109;
-function updateFile ()
-{
-	assertStringArg ('file_name');
-	assertStringArg ('file_type');
-	assertStringArg ('file_comment', TRUE);
-	global $sic;
-	if (FALSE === commitUpdateFile ($sic['file_id'], $sic['file_name'], $sic['file_type'], $sic['file_comment']))
-		return buildRedirectURL (__FUNCTION__, 'ERR');
-	return buildRedirectURL (__FUNCTION__, 'OK', array ($_REQUEST['file_name']));
 }
 
 $msgcode['unlinkFile']['OK'] = 72;
@@ -2291,17 +2309,6 @@ function destroyVLANDomain ()
 	assertUIntArg ('vdom_id');
 	global $sic;
 	$result = FALSE !== usePreparedDeleteBlade ('VLANDomain', array ('id' => $sic['vdom_id']));
-	return buildRedirectURL (__FUNCTION__, $result ? 'OK' : 'ERR');
-}
-
-$msgcode['updateVLANDomain']['OK'] = 51;
-$msgcode['updateVLANDomain']['ERR'] = 109;
-function updateVLANDomain ()
-{
-	assertUIntArg ('vdom_id');
-	assertStringArg ('vdom_descr');
-	global $sic;
-	$result = FALSE !== commitUpdateVLANDomain ($sic['vdom_id'], $sic['vdom_descr']);
 	return buildRedirectURL (__FUNCTION__, $result ? 'OK' : 'ERR');
 }
 
@@ -2610,23 +2617,6 @@ function delVLANSwitchTemplate()
 	global $sic;
 	$result = FALSE !== usePreparedDeleteBlade ('VLANSwitchTemplate', array ('id' => $sic['vst_id']));
 	return buildRedirectURL (__FUNCTION__, $result ? 'OK' : 'ERR');
-}
-
-$msgcode['updVLANSwitchTemplate']['OK'] = 51;
-$msgcode['updVLANSwitchTemplate']['ERR'] = 109;
-function updVLANSwitchTemplate()
-{
-	assertUIntArg ('vst_id');
-	assertStringArg ('vst_descr');
-	global $sic;
-	$max_local_vlans = NULL;
-	if (array_key_exists ('vst_maxvlans', $sic) && mb_strlen ($sic['vst_maxvlans']))
-	{
-		assertUIntArg ('vst_maxvlans');
-		$max_local_vlans = $sic['vst_maxvlans'];
-	}
-	$result = commitUpdateVST ($sic['vst_id'], $max_local_vlans, $sic['vst_descr']);
-	return buildRedirectURL (__FUNCTION__, $result !== FALSE ? 'OK' : 'ERR');
 }
 
 $msgcode['cloneVSTRule']['OK'] = 48;

@@ -2677,23 +2677,6 @@ function commitUpdateRS ($rsid = 0, $rsip = '', $rsport = 0, $rsconfig = '')
 	);
 }
 
-function commitUpdateLB ($object_id = 0, $pool_id = 0, $vs_id = 0, $vsconfig = '', $rsconfig = '', $prio = '')
-{
-	return usePreparedExecuteBlade
-	(
-		'UPDATE IPv4LB SET vsconfig=?, rsconfig=?, prio=? WHERE object_id=? AND rspool_id=? AND vs_id=?',
-		array
-		(
-			!strlen ($vsconfig) ? NULL : $vsconfig,
-			!strlen ($rsconfig) ? NULL : $rsconfig,
-			!strlen ($prio) ? NULL : $prio,
-			$object_id,
-			$pool_id,
-			$vs_id,
-		)
-	);
-}
-
 function commitUpdateVS ($vsid = 0, $vip = '', $vport = 0, $proto = '', $name = '', $vsconfig = '', $rsconfig = '')
 {
 	if (!strlen ($vip))
@@ -2786,21 +2769,6 @@ function commitDeleteRSPool ($pool_id = 0)
 {
 	releaseFiles ('ipv4rspool', $pool_id);
 	return usePreparedDeleteBlade ('IPv4RSPool', array ('id' => $pool_id)) && destroyTagsForEntity ('ipv4rspool', $pool_id);
-}
-
-function commitUpdateRSPool ($pool_id = 0, $name = '', $vsconfig = '', $rsconfig = '')
-{
-	return usePreparedExecuteBlade
-	(
-		'UPDATE IPv4RSPool SET name=?, vsconfig=?, rsconfig=? WHERE id=?',
-		array
-		(
-			!strlen ($name) ? NULL : $name,
-			!strlen ($vsconfig) ? NULL : $vsconfig,
-			!strlen ($rsconfig) ? NULL : $rsconfig,
-			$pool_id,
-		)
-	);
 }
 
 function getRSList ()
@@ -3511,15 +3479,6 @@ function commitAddFile ($name, $type, $size, $contents, $comment)
 	}
 }
 
-function commitLinkFile ($file_id, $entity_type, $entity_id)
-{
-	return usePreparedExecuteBlade
-	(
-		'INSERT INTO FileLink (file_id, entity_type, entity_id) VALUES (?, ?, ?)',
-		array ($file_id, $entity_type, $entity_id)
-	);
-}
-
 function commitReplaceFile ($file_id = 0, $contents)
 {
 	global $dbxlink;
@@ -3535,19 +3494,6 @@ function commitReplaceFile ($file_id = 0, $contents)
 	{
 		throw convertPDOException ($e);
 	}
-}
-
-function commitUpdateFile ($file_id = 0, $new_name = '', $new_type = '', $new_comment = '')
-{
-	if (!strlen ($new_name))
-		throw new InvalidArgException ('$new_name', $new_name);
-	if (!strlen ($new_type))
-		throw new InvalidArgException ('$new_type', $new_type);
-	return usePreparedExecuteBlade
-	(
-		'UPDATE File SET name = ?, type = ?, comment = ? WHERE id = ?',
-		array ($new_name, $new_type, $new_comment, $file_id)
-	);
 }
 
 function commitUnlinkFile ($link_id)
@@ -3849,15 +3795,6 @@ function commitUpdateVLANDescription ($vdom_id, $vlan_id, $vlan_type, $vlan_desc
 	);
 }
 
-function commitUpdateVLANDomain ($vdom_id, $vdom_descr)
-{
-	return usePreparedExecuteBlade
-	(
-		'UPDATE VLANDomain SET description=? WHERE id=?',
-		array ($vdom_descr, $vdom_id)
-	);
-}
-
 function getVLANSwitches()
 {
 	$ret = array();
@@ -4116,10 +4053,11 @@ function upd8021QPort ($instance = 'desired', $object_id, $port_name, $port)
 	// A record on a port with none VLANs allowed makes no sense regardless of port mode.
 	if ($port['mode'] != 'trunk' and !count ($port['allowed']))
 		return 0;
-	usePreparedExecuteBlade
+	usePreparedUpdateBlade
 	(
-		'UPDATE ' . $tablemap_8021q[$instance]['pvm'] . ' SET vlan_mode=? WHERE object_id=? AND port_name=?',
-		array ($port['mode'], $object_id, $port_name)
+		$tablemap_8021q[$instance]['pvm'],
+		array ('vlan_mode' => $port['mode']),
+		array ('object_id' => $object_id, 'port_name' => $port_name)
 	);
 	if (FALSE === usePreparedDeleteBlade ($tablemap_8021q[$instance]['pav'], array ('object_id' => $object_id, 'port_name' => $port_name)))
 		throw new RackTablesError ('', RackTablesError::DB_WRITE_FAILED);
@@ -4201,15 +4139,6 @@ function getVLANSwitchTemplate ($vst_id)
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 		$ret['switches'][$row['object_id']] = $row;
 	return $ret;
-}
-
-function commitUpdateVST ($vst_id, $max_local_vlans, $description)
-{
-	return usePreparedExecuteBlade
-	(
-		'UPDATE VLANSwitchTemplate SET max_local_vlans=?, description=? WHERE id=?',
-		array ($max_local_vlans, $description, $vst_id)
-	);
 }
 
 function commitUpdateVSTRules ($vst_id, $mutex_rev, $rules)
