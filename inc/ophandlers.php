@@ -9,6 +9,241 @@
 // use the new showError, showWarning, showSuccess functions instead
 $msgcode = array();
 
+$opspec_list['rackspace-edit-addRow'] = array
+(
+	'table' => 'RackRow',
+	'action' => 'INSERT',
+	'arglist' => array
+	(
+		array ('url_argname' => 'name', 'assertion' => 'string')
+	),
+);
+$opspec_list['rackspace-edit-delete'] = array
+(
+	'table' => 'RackRow',
+	'action' => 'DELETE',
+	'arglist' => array
+	(
+		array ('url_argname' => 'row_id', 'table_colname' => 'id', 'assertion' => 'uint')
+	),
+);
+$opspec_list['rackspace-edit-updateRow'] = array
+(
+	'table' => 'RackRow',
+	'action' => 'UPDATE',
+	'set_arglist' => array
+	(
+		array ('url_argname' => 'name', 'assertion' => 'string')
+	),
+	'where_arglist' => array
+	(
+		array ('url_argname' => 'row_id', 'table_colname' => 'id', 'assertion' => 'uint')
+	),
+);
+$opspec_list['object-ports-delPort'] = array
+(
+	'table' => 'Port',
+	'action' => 'DELETE',
+	'arglist' => array
+	(
+		array ('url_argname' => 'port_id', 'table_colname' => 'id', 'assertion' => 'uint'),
+		array ('url_argname' => 'object_id', 'assertion' => 'uint'),
+	),
+);
+$opspec_list['object-ports-unlinkPort'] = array
+(
+	'table' => 'Link',
+	'action' => 'DELETE',
+	'arglist' => array
+	(
+		array ('url_argname' => 'port_id', 'table_colname' => 'porta', 'assertion' => 'uint'),
+		array ('url_argname' => 'port_id', 'table_colname' => 'portb', 'assertion' => 'uint'),
+	),
+	'conjunction' => 'OR',
+);
+$opspec_list['object-log-del'] = array
+(
+	'table' => 'ObjectLog',
+	'action' => 'DELETE',
+	'arglist' => array
+	(
+		array ('url_argname' => 'logid', 'table_colname' => 'id', 'assertion' => 'uint'),
+		array ('url_argname' => 'object_id', 'assertion' => 'uint'),
+	),
+);
+$opspec_list['ipv4vs-editlblist-delLB'] =
+$opspec_list['ipv4rspool-editlblist-delLB'] =
+$opspec_list['object-editrspvs-delLB'] = array
+(
+	'table' => 'IPv4LB',
+	'action' => 'DELETE',
+	'arglist' => array
+	(
+		array ('url_argname' => 'object_id', 'assertion' => 'uint'),
+		array ('url_argname' => 'pool_id', 'table_colname' => 'rspool_id', 'assertion' => 'uint'),
+		array ('url_argname' => 'vs_id', 'assertion' => 'uint'),
+	),
+);
+$opspec_list['ipv4net-properties-editRange'] = array
+(
+	'table' => 'IPv4Network',
+	'action' => 'UPDATE',
+	'set_arglist' => array
+	(
+		array ('url_argname' => 'name', 'assertion' => 'string0'),
+		array ('url_argname' => 'comment', 'assertion' => 'string0'),
+	),
+	'where_arglist' => array
+	(
+		array ('url_argname' => 'id', 'assertion' => 'uint')
+	),
+);
+$opspec_list['ipv6net-properties-editRange'] = array
+(
+	'table' => 'IPv6Network',
+	'action' => 'UPDATE',
+	'set_arglist' => array
+	(
+		array ('url_argname' => 'name', 'assertion' => 'string0'),
+		array ('url_argname' => 'comment', 'assertion' => 'string0'),
+	),
+	'where_arglist' => array
+	(
+		array ('url_argname' => 'id', 'assertion' => 'uint')
+	),
+);
+$opspec_list['ipv4rspool-editrslist-delRS'] = array
+(
+	'table' => 'IPv4RS',
+	'action' => 'DELETE',
+	'arglist' => array
+	(
+		array ('url_argname' => 'id', 'assertion' => 'uint'),
+	),
+);
+$opspec_list['portmap-edit-add'] = array
+(
+	'table' => 'PortCompat',
+	'action' => 'INSERT',
+	'arglist' => array
+	(
+		array ('url_argname' => 'type1', 'assertion' => 'uint'),
+		array ('url_argname' => 'type2', 'assertion' => 'uint'),
+	),
+);
+$opspec_list['portmap-edit-del'] = array
+(
+	'table' => 'PortCompat',
+	'action' => 'DELETE',
+	'arglist' => array
+	(
+		array ('url_argname' => 'type1', 'assertion' => 'uint'),
+		array ('url_argname' => 'type2', 'assertion' => 'uint'),
+	),
+);
+$opspec_list['portifcompat-edit-del'] = array
+(
+	'table' => 'PortInterfaceCompat',
+	'action' => 'DELETE',
+	'arglist' => array
+	(
+		array ('url_argname' => 'iif_id', 'assertion' => 'uint'),
+		array ('url_argname' => 'oif_id', 'assertion' => 'uint'),
+	),
+);
+$opspec_list['attrs-editmap-del'] = array
+(
+	'table' => 'AttributeMap',
+	'action' => 'DELETE',
+	'arglist' => array
+	(
+		array ('url_argname' => 'attr_id', 'assertion' => 'uint'),
+		array ('url_argname' => 'objtype_id', 'assertion' => 'uint'),
+	),
+);
+$opspec_list['attrs-editattrs-add'] = array
+(
+	'table' => 'Attribute',
+	'action' => 'INSERT',
+	'arglist' => array
+	(
+		array ('url_argname' => 'attr_type', 'table_colname' => 'type', 'assertion' => 'enum/attr_type'),
+		array ('url_argname' => 'attr_name', 'table_colname' => 'name', 'assertion' => 'string'),
+	),
+);
+$opspec_list['attrs-editattrs-del'] = array
+(
+	'table' => 'Attribute',
+	'action' => 'DELETE',
+	'arglist' => array
+	(
+		array ('url_argname' => 'attr_id', 'table_colname' => 'id', 'assertion' => 'uint'),
+	),
+);
+$opspec_list['dict-chapters-add'] = array
+(
+	'table' => 'Chapter',
+	'action' => 'INSERT',
+	'arglist' => array
+	(
+		array ('url_argname' => 'chapter_name', 'table_colname' => 'name', 'assertion' => 'string')
+	),
+);
+$opspec_list['chapter-edit-add'] = array
+(
+	'table' => 'Dictionary',
+	'action' => 'INSERT',
+	'arglist' => array
+	(
+		array ('url_argname' => 'chapter_no', 'table_colname' => 'chapter_id', 'assertion' => 'uint'),
+		array ('url_argname' => 'dict_value', 'assertion' => 'string'),
+	),
+);
+$opspec_list['chapter-edit-del'] = array
+(
+	'table' => 'Dictionary',
+	'action' => 'DELETE',
+	'arglist' => array
+	(
+		// Technically dict_key is enough to delete, but including chapter_id into
+		// WHERE clause makes sure, that the action actually happends for the same
+		// chapter, which authorization was granted for.
+		array ('url_argname' => 'chapter_no', 'table_colname' => 'chapter_id', 'assertion' => 'uint'),
+		array ('url_argname' => 'dict_key', 'assertion' => 'uint'),
+	),
+);
+$opspec_list['tagtree-edit-createTag'] = array
+(
+	'table' => 'TagTree',
+	'action' => 'INSERT',
+	'arglist' => array
+	(
+		array ('url_argname' => 'tag_name', 'table_colname' => 'tag', 'assertion' => 'tag'),
+		array ('url_argname' => 'parent_id', 'assertion' => 'uint0', 'if_empty' => 'NULL'),
+	),
+);
+$opspec_list['tagtree-edit-destroyTag'] = array
+(
+	'table' => 'TagTree',
+	'action' => 'DELETE',
+	'arglist' => array
+	(
+		array ('url_argname' => 'tag_id', 'table_colname' => 'id', 'assertion' => 'tag'),
+	),
+);
+$opspec_list['vlandomain-vlanlist-add'] = array
+(
+	'table' => 'VLANDescription',
+	'action' => 'INSERT',
+	'arglist' => array
+	(
+		array ('url_argname' => 'vdom_id', 'table_colname' => 'domain_id', 'assertion' => 'uint'),
+		array ('url_argname' => 'vlan_id', 'assertion' => 'uint'),
+		array ('url_argname' => 'vlan_type', 'assertion' => 'enum/vlan_type'),
+		array ('url_argname' => 'vlan_descr', 'assertion' => 'string0', 'if_empty' => 'NULL'),
+	),
+);
+
 // This function is DEPRECATED. Show messages through showError and showSuccess,
 // you dont need to return anything from an ophandler to redirect user back to the page containing submit form
 function buildWideRedirectURL ($log = NULL, $nextpage = NULL, $nexttab = NULL, $moreArgs = array())
@@ -2510,11 +2745,26 @@ function addObjectlog ()
 	return buildRedirectURL (__FUNCTION__, 'OK', array ("Log entry for <a href=" . ${ob_url} . ">${oi['dname']}</a> added by ${remote_username}"));
 }
 
-function tableHandler ($opspec)
+function getOpspec()
 {
+	global $pageno, $tabno, $op, $opspec_list;
+	if (!array_key_exists ($pageno . '-' . $tabno . '-' . $op, $opspec_list))
+		throw new RackTablesError ('key not found in opspec_list', RackTablesError::INTERNAL);
+	$ret = $opspec_list[$pageno . '-' . $tabno . '-' . $op];
+	if
+	(
+		!array_key_exists ('table', $ret)
+		or !array_key_exists ('action', $ret)
+		// add further checks here
+	)
+		throw new RackTablesError ('malformed array structure in opspec_list', RackTablesError::INTERNAL);
+	return $ret;
+}
+
+function tableHandler()
+{
+	$opspec = getOpspec;
 	global $sic;
-	if (!array_key_exists ('table', $opspec))
-		throw new InvalidArgException ('opspec', '(malformed array structure)', '"table" not set');
 	$columns = array();
 	foreach (array ('arglist', 'set_arglist', 'where_arglist') as $listname)
 		foreach ($opspec[$listname] as $argspec)

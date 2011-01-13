@@ -34,11 +34,7 @@ else
 	// arguments. And it would be even better to pass returned value to ophandler,
 	// so it is not necessary to remember the name of bypass in it.
 	getBypassValue();
-	if (!is_array ($ophandler[$pageno][$tabno][$op]))
-		$redirect_to = call_user_func ($ophandler[$pageno][$tabno][$op]);
-	else
-		$redirect_to = tableHandler ($ophandler[$pageno][$tabno][$op]);
-	if (strlen ($redirect_to))
+	if (strlen ($redirect_to = call_user_func ($ophandler[$pageno][$tabno][$op])))
 		$location = $redirect_to;
 }
 header ("Location: " . $location);
