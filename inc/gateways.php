@@ -14,6 +14,7 @@
 */
 
 // translating functions maps
+global $gwrxlator;
 $gwrxlator = array();
 $gwrxlator['getcdpstatus'] = array
 (
@@ -53,6 +54,7 @@ $gwrxlator['getmaclist'] = array
 
 $gwrxlator['gethndp']['vrp53'] = 'vrp53ReadHNDPStatus';
 
+global $gwpushxlator;
 $gwpushxlator = array
 (
 	'ios12' => 'ios12TranslatePushQueue',
