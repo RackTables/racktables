@@ -685,7 +685,6 @@ function commitResetObject ($object_id = 0)
 	usePreparedDeleteBlade ('Port', array ('object_id' => $object_id));
 	// CN
 	usePreparedUpdateBlade ('RackObject', array ('name' => NULL, 'label' => ''), array ('id' => $object_id));
-	);
 	// FQDN
 	commitUpdateAttrValue ($object_id, 3, "");
 	// log history
