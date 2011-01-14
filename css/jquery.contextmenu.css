@@ -37,7 +37,7 @@
 .context-menu-theme-xp {
 	border:1px solid #666;
 	padding:1px;
-	background:#F9F8F7 url(cmenu-xp-bg.gif) repeat-y top left;
+	background:#F9F8F7 repeat-y top left;
 }
 .context-menu-theme-xp .context-menu-separator {
 	margin:4px 2px;
@@ -65,7 +65,7 @@
 /* Windows Vista Theme */
 /* =================== */
 .context-menu-theme-vista {
-	background:#FAFAFA url(cmenu-vista-bg.gif) repeat-y left top;
+	background:#FAFAFA repeat-y left top;
 	border:1px solid #868686;
 }
 .context-menu-theme-vista .context-menu-item {
@@ -82,7 +82,7 @@
 	border-bottom:1px solid #F5F5F5;
 }
 .context-menu-theme-vista .context-menu-item-hover {
-	background:transparent url(cmenu-vista-menu-item-hover.gif) repeat-x left center;
+	background:transparent repeat-x left center;
 	border:1px solid #D7D0B3;
 }
 .context-menu-theme-vista .context-menu-item .context-menu-item-inner {
@@ -166,7 +166,7 @@
 	border-bottom:1px solid #F5F5F5;
 }
 .context-menu-theme-human .context-menu-item-hover {
-	background:transparent url(cmenu-human-menu-item-hover.gif) repeat-x left center;
+	background:transparent repeat-x left center;
 	border-color:#963;
 }
 .context-menu-theme-human .context-menu-item .context-menu-item-inner {
@@ -186,7 +186,7 @@
 /* Gloss Theme */
 /* =========== */
 .context-menu-theme-gloss {
-	background:#f4f4f4 url(cmenu-gloss-bg.gif) repeat-y left center;
+	background:#f4f4f4 repeat-y left center;
 	border:1px solid #f4f4f4;
 	padding:1px;
 	padding-right:0;
@@ -208,7 +208,7 @@
 	border-bottom:1px solid #F5F5F5;
 }
 .context-menu-theme-gloss .context-menu-item-hover {
-	background:transparent url(cmenu-gloss-menu-item-hover.gif) repeat-x left center;
+	background:transparent repeat-x left center;
 	color:#fff;
 	border-color:#000;
 	border-radius: 3px;
@@ -230,12 +230,10 @@
 }
 
 .context-menu-theme-gloss-cyan .context-menu-item-hover {
-	background-image:url(cmenu-gloss-cyan-menu-item-hover.gif);
 	border-color:#00c;
 }
 
 .context-menu-theme-gloss-semitransparent .context-menu-item-hover {
-	background-image:url(cmenu-item-gloss-semitransparent-menu-item-hover.png);
 	border-color:#00c;
 	background-color:#30f;
 }
