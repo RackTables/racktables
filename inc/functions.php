@@ -4399,7 +4399,11 @@ function setMessage ($message, $type, $direct_rendering)
 				$_SESSION['log'][] = array ('code' => $type, 'message' => $message);
 				break;
 			case 2:
-				$code = ($type == 'error' ? 100 : $type == 'warning' ? 200 : $type == 'success' ? 0 : NULL);
+				$code = ($type == 'error' ? 100 :
+						 $type == 'warning' ? 200 :
+						 $type == 'success' ? 0 :
+						 $type == 'neutral' ? 300 :
+						 NULL);
 				$_SESSION['log']['m'][] = array ('c' => $code, 'a' => array ($message));
 				break;
 		}
