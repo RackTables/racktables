@@ -2097,8 +2097,7 @@ function renderRackspaceHistory ()
 		echo "<tr class=${class}><td><a href='".makeHref(array('page'=>$pageno, 'tab'=>$tabno, 'op_id'=>$row['mo_id']))."'>${row['ctime']}</a></td>";
 		echo "<td>${row['user_name']}</td><td>";
 		renderCell (spotEntity ('object', $row['ro_id']));
-		echo "</td><td>${row['comment']}</td>\n";
-		echo "</tr>\n";
+		echo '</td><td>' . niftyString ($row['comment'], 0) . '</td></tr>';
 		$order = $nextorder[$order];
 	}
 	echo "</table>\n";
