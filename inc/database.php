@@ -625,24 +625,26 @@ function commitAddObject ($new_name, $new_label, $new_barcode, $new_type_id, $ne
 	return $last_insert_id;
 }
 
-function commitUpdateObject ($object_id = 0, $new_name = '', $new_label = '', $new_barcode = '', $new_has_problems = 'no', $new_asset_no = '', $new_comment = '')
+function commitUpdateObject ($object_id, $new_name, $new_label, $new_barcode, $new_has_problems, $new_asset_no, $new_comment)
 {
-	$ret = FALSE !== usePreparedExecuteBlade
+	usePreparedUpdateBlade
 	(
-		'UPDATE RackObject SET name=?, label=?, barcode=?, has_problems=?, ' .
-		'asset_no=?, comment=? WHERE id=?',
+		'RackObject',
 		array
 		(
-			!strlen ($new_name) ? NULL : $new_name,
-			$new_label,
-			!strlen ($new_barcode) ? NULL : $new_barcode,
-			$new_has_problems,
-			!strlen ($new_asset_no) ? NULL : $new_asset_no,
-			$new_comment,
-			$object_id
+			'name' => !mb_strlen ($new_name) ? NULL : $new_name,
+			'label' => $new_label,
+			'barcode' => !mb_strlen ($new_barcode) ? NULL : $new_barcode,
+			'has_problems' => $new_has_problems,
+			'asset_no' => !mb_strlen ($new_asset_no) ? NULL : $new_asset_no,
+			'comment' => $new_comment,
+		),
+		array
+		(
+			'id' => $object_id
 		)
 	);
-	return $ret and recordHistory ('RackObject', $object_id);
+	return recordHistory ('RackObject', $object_id);
 }
 
 // Remove file links related to the entity, but leave the entity and file(s) intact.
@@ -682,7 +684,8 @@ function commitResetObject ($object_id = 0)
 	// Ports & links
 	usePreparedDeleteBlade ('Port', array ('object_id' => $object_id));
 	// CN
-	usePreparedExecuteBlade ('UPDATE RackObject SET name=NULL,label="" WHERE id = ?',array ($object_id) );
+	usePreparedUpdateBlade ('RackObject', array ('name' => NULL, 'label' => ''), array ('id' => $object_id));
+	);
 	// FQDN
 	commitUpdateAttrValue ($object_id, 3, "");
 	// log history
@@ -707,17 +710,19 @@ function commitUpdateRack ($rack_id, $new_name, $new_height, $new_row_id, $new_c
 	unset ($check_result);
 	if ($check_row['count'] > 0)
 		throw new InvalidArgException ('new_height', $new_height, 'Cannot shrink rack, objects are still mounted there');
-
-	usePreparedExecuteBlade
+	usePreparedUpdateBlade
 	(
-		'UPDATE Rack SET name=?, height=?, comment=?, row_id=? WHERE id=?',
+		'Rack',
 		array
 		(
-			$new_name,
-			$new_height,
-			$new_comment,
-			$new_row_id,
-			$rack_id,
+			'name' => $new_name,
+			'height' => $new_height,
+			'comment' => $new_comment,
+			'row_id' => $new_row_id,
+		),
+		array
+		(
+			'id' => $rack_id,
 		)
 	);
 	return recordHistory ('Rack', $rack_id);
