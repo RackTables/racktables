@@ -1,5 +1,6 @@
 <?php
 
+global $iftable_processors;
 $iftable_processors = array();
 
 $iftable_processors['catalyst-chassis-mgmt'] = array
@@ -553,6 +554,7 @@ $iftable_processors['summit-management'] = array
 	'try_next_proc' => FALSE,
 );
 
+global $known_switches;
 $known_switches = array // key is system OID w/o "enterprises" prefix
 (
 	'9.1.248' => array
@@ -912,6 +914,7 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 	),
 );
 
+global $swtype_pcre;
 $swtype_pcre = array
 (
 	'/Huawei Versatile Routing Platform Software.+VRP.+Software, Version 5.30 /s' => 1360,

@@ -7,8 +7,10 @@
 
 // This array is deprecated. Please do not add new message constants to it.
 // use the new showError, showWarning, showSuccess functions instead
+global $msgcode;
 $msgcode = array();
 
+global $opspec_list;
 $opspec_list = array();
 
 $opspec_list['rackspace-edit-addRow'] = array
