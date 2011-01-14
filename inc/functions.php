@@ -4399,11 +4399,24 @@ function setMessage ($message, $type, $direct_rendering)
 				$_SESSION['log'][] = array ('code' => $type, 'message' => $message);
 				break;
 			case 2:
-				$code = ($type == 'error' ? 100 :
-						 $type == 'warning' ? 200 :
-						 $type == 'success' ? 0 :
-						 $type == 'neutral' ? 300 :
-						 NULL);
+				switch ($type)
+				{
+					case 'error':
+						$code = 100;
+						break;
+					case 'warning':
+						$code = 200;
+						break;
+					case 'success';
+						$code = 0;
+						break;
+					case 'neutral':
+						$code = 300;
+						break;
+					default:
+						$message = "Lost message: $message";
+						$code = 300;
+				}
 				$_SESSION['log']['m'][] = array ('c' => $code, 'a' => array ($message));
 				break;
 		}
