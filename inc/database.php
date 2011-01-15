@@ -952,31 +952,29 @@ function commitUpdatePort ($object_id, $port_id, $port_name, $port_type_id, $por
 	if (alreadyUsedL2Address ($db_l2address, $object_id))
 	{
 		$dbxlink->exec ('UNLOCK TABLES');
-		return "address ${db_l2address} belongs to another object";
+		// FIXME: it is more correct to throw InvalidArgException here
+		// and convert it to InvalidRequestArgException at upper level,
+		// when there is a mean to do that.
+		throw new InvalidRequestArgException ('port_l2address', $db_l2address, 'address belongs to another object');
 	}
-	$result = usePreparedExecuteBlade
+	usePreparedUpdateBlade
 	(
-		'UPDATE Port SET name=?, type=?, label=?, reservation_comment=?, ' .
-		'l2address=? WHERE id=? AND object_id=?',
+		'Port',
 		array
 		(
-			$port_name,
-			$port_type_id,
-			$port_label,
-			mb_strlen ($port_reservation_comment) ? $port_reservation_comment : NULL,
-			($db_l2address === '') ? NULL : $db_l2address,
-			$port_id,
-			$object_id
+			'name' => $port_name,
+			'type' => $port_type_id,
+			'label' => $port_label,
+			'reservation_comment' => mb_strlen ($port_reservation_comment) ? $port_reservation_comment : NULL,
+			'l2address' => ($db_l2address === '') ? NULL : $db_l2address,
+		),
+		array
+		(
+			'id' => $port_id,
+			'object_id' => $object_id
 		)
 	);
 	$dbxlink->exec ('UNLOCK TABLES');
-	if ($result == 1)
-		return '';
-	$errorInfo = $dbxlink->errorInfo();
-	// We could update nothing.
-	if ($errorInfo[0] == '00000')
-		return '';
-	return $errorInfo[2];
 }
 
 function getAllIPv4Allocations ()

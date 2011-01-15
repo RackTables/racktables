@@ -491,14 +491,12 @@ function updPortForwarding ()
 }
 
 $msgcode['addPortForObject']['OK'] = 48;
-$msgcode['addPortForObject']['ERR1'] = 101;
 $msgcode['addPortForObject']['ERR2'] = 100;
 function addPortForObject ()
 {
 	assertStringArg ('port_name', TRUE);
 	genericAssertion ('port_l2address', 'l2address0');
-	if (!strlen ($_REQUEST['port_name']))
-		return buildRedirectURL (__FUNCTION__, 'ERR1');
+	genericAssertion ('port_name', 'string');
 	$error = commitAddPort
 	(
 		$_REQUEST['object_id'],
@@ -514,24 +512,16 @@ function addPortForObject ()
 }
 
 $msgcode['editPortForObject']['OK'] = 7;
-$msgcode['editPortForObject']['ERR1'] = 101;
-$msgcode['editPortForObject']['ERR2'] = 100;
 function editPortForObject ()
 {
+	global $sic;
 	assertUIntArg ('port_id');
 	assertUIntArg ('port_type_id');
 	assertStringArg ('reservation_comment', TRUE);
 	genericAssertion ('l2address', 'l2address0');
-	// tolerate empty value now to produce custom informative message later
-	assertStringArg ('name', TRUE);
-	if (!strlen ($_REQUEST['name']))
-		return buildRedirectURL (__FUNCTION__, 'ERR1');
-
-	$error = commitUpdatePort ($_REQUEST['object_id'], $_REQUEST['port_id'], $_REQUEST['name'], $_REQUEST['port_type_id'], $_REQUEST['label'], $_REQUEST['l2address'], $_REQUEST['reservation_comment']);
-	if ($error != '')
-		return buildRedirectURL (__FUNCTION__, 'ERR2', array ($error));
-	else
-		return buildRedirectURL (__FUNCTION__, 'OK', array ($_REQUEST['name']));
+	genericAssertion ('name', 'string');
+	commitUpdatePort ($sic['object_id'], $sic['port_id'], $sic['name'], $sic['port_type_id'], $sic['label'], $sic['l2address'], $sic['reservation_comment']);
+	return buildRedirectURL (__FUNCTION__, 'OK', array ($_REQUEST['name']));
 }
 
 $msgcode['linkPortForObject']['OK'] = 8;

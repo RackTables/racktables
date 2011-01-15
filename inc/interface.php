@@ -1720,7 +1720,6 @@ function showMessageOrError ()
 				87 => array ('code' => 'success', 'format' => '802.1Q recalculate: %d ports changed on %d switches'),
 // records 100~199 with fatal error messages
 				100 => array ('code' => 'error', 'format' => '%s'),
-				101 => array ('code' => 'error', 'format' => 'Port name cannot be empty'),
 				102 => array ('code' => 'error', 'format' => "Error creating user account '%s'"),
 				104 => array ('code' => 'error', 'format' => "failed updating record '%s'"),
 				105 => array ('code' => 'error', 'format' => 'default VLAN cannot be changed'),
