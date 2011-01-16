@@ -233,6 +233,19 @@ $opspec_list['attrs-editattrs-del'] = array
 		array ('url_argname' => 'attr_id', 'table_colname' => 'id', 'assertion' => 'uint'),
 	),
 );
+$opspec_list['attrs-editattrs-upd'] = array
+(
+	'table' => 'Attribute',
+	'action' => 'UPDATE',
+	'set_arglist' => array
+	(
+		array ('url_argname' => 'attr_name', 'table_colname' => 'name', 'assertion' => 'string'),
+	),
+	'where_arglist' => array
+	(
+		array ('url_argname' => 'attr_id', 'table_colname' => 'id', 'assertion' => 'uint'),
+	),
+);
 $opspec_list['dict-chapters-add'] = array
 (
 	'table' => 'Chapter',
@@ -934,27 +947,43 @@ function updateUser ()
 }
 
 $msgcode['updateDictionary']['OK'] = 51;
-$msgcode['updateDictionary']['ERR'] = 109;
 function updateDictionary ()
 {
 	assertUIntArg ('dict_key');
 	assertStringArg ('dict_value');
-	if (FALSE !== commitUpdateDictionary ($_REQUEST['chapter_no'], $_REQUEST['dict_key'], $_REQUEST['dict_value']))
-		return buildRedirectURL (__FUNCTION__, 'OK');
-	else
-		return buildRedirectURL (__FUNCTION__, 'ERR');
+	// this request must be built with chapter_no
+	usePreparedUpdateBlade
+	(
+		'Dictionary',
+		array ('dict_value' => $sic['dict_value']),
+		array
+		(
+			'chapter_id' => $sic['chapter_no'],
+			'dict_key' => $sic['dict_key'],
+		)
+	);
+	return buildRedirectURL (__FUNCTION__, 'OK');
 }
 
 $msgcode['updateChapter']['OK'] = 51;
-$msgcode['updateChapter']['ERR'] = 109;
 function updateChapter ()
 {
 	assertUIntArg ('chapter_no');
 	assertStringArg ('chapter_name');
-	if (FALSE !== commitUpdateChapter ($_REQUEST['chapter_no'], $_REQUEST['chapter_name']))
-		return buildRedirectURL (__FUNCTION__, 'OK');
-	else
-		return buildRedirectURL (__FUNCTION__, 'ERR');
+	usePreparedUpdateBlade
+	(
+		'Chapter',
+		array
+		(
+			'name' => $chapter_name,
+		),
+		array
+		(
+			'id' => $chapter_no,
+			'sticky' => 'no', // note this constant, it protects system chapters
+		)
+	);
+	return buildRedirectURL (__FUNCTION__, 'OK');
 }
 
 $msgcode['delChapter']['OK'] = 49;
@@ -963,18 +992,6 @@ function delChapter ()
 {
 	assertUIntArg ('chapter_no');
 	if (commitDeleteChapter ($_REQUEST['chapter_no']))
-		return buildRedirectURL (__FUNCTION__, 'OK');
-	else
-		return buildRedirectURL (__FUNCTION__, 'ERR');
-}
-
-$msgcode['changeAttribute']['OK'] = 51;
-$msgcode['changeAttribute']['ERR'] = 109;
-function changeAttribute ()
-{
-	assertUIntArg ('attr_id');
-	assertStringArg ('attr_name');
-	if (FALSE !== commitUpdateAttribute ($_REQUEST['attr_id'], $_REQUEST['attr_name']))
 		return buildRedirectURL (__FUNCTION__, 'OK');
 	else
 		return buildRedirectURL (__FUNCTION__, 'ERR');
@@ -1152,7 +1169,7 @@ function updateObject ()
 
 	// Invalidate thumb cache of all racks objects could occupy.
 	foreach (getResidentRacksData ($_REQUEST['object_id'], FALSE) as $rack_id)
-		resetThumbCache ($rack_id);
+		usePreparedUpdateBlade ('Rack', array ('thumb_data' => NULL), array ('id' => $rack_id));
 
 	return buildRedirectURL (__FUNCTION__, 'OK');
 }
@@ -1244,7 +1261,7 @@ function deleteObject ()
 	$racklist = getResidentRacksData ($_REQUEST['object_id'], FALSE);
 	commitDeleteObject ($_REQUEST['object_id']);
 	foreach ($racklist as $rack_id)
-		resetThumbCache ($rack_id);
+		usePreparedUpdateBlade ('Rack', array ('thumb_data' => NULL), array ('id' => $rack_id));
 	return buildRedirectURL (__FUNCTION__, 'OK', array ($oinfo['dname']));
 }
 
@@ -1256,19 +1273,29 @@ function resetObject ()
 	$racklist = getResidentRacksData ($_REQUEST['object_id'], FALSE);
 	commitResetObject ($_REQUEST['object_id']);
 	foreach ($racklist as $rack_id)
-		resetThumbCache ($rack_id);
+		usePreparedUpdateBlade ('Rack', array ('thumb_data' => NULL), array ('id' => $rack_id));
 	return buildRedirectURL (__FUNCTION__, 'OK');
 }
 
 $msgcode['useupPort']['OK'] = 49;
-$msgcode['useupPort']['ERR'] = 111;
 function useupPort ()
 {
+	global $sic;
 	assertUIntArg ('port_id');
-	if (FALSE !== commitUseupPort ($_REQUEST['port_id']))
-		return buildRedirectURL (__FUNCTION__, 'OK');
-	else
-		return buildRedirectURL (__FUNCTION__, 'ERR');
+	usePreparedUpdateBlade
+	(
+		'Port',
+		array
+		(
+			'reservation_comment' => NULL,
+		),
+		array
+		(
+			'object_id' => $sic['object_id'],
+			'id' => $sic['port_id'],
+		)
+	);
+	return buildRedirectURL (__FUNCTION__, 'OK');
 }
 
 $msgcode['updateUI']['OK'] = 51;
@@ -1951,7 +1978,8 @@ function updateRack ()
 	assertStringArg ('rack_name');
 	assertStringArg ('rack_comment', TRUE);
 
-	resetThumbCache ($_REQUEST['rack_id']);
+	global $sic;
+	usePreparedUpdateBlade ('Rack', array ('thumb_data' => NULL), array ('id' => $sic['rack_id']));
 	if (TRUE === commitUpdateRack ($_REQUEST['rack_id'], $_REQUEST['rack_name'], $_REQUEST['rack_height'], $_REQUEST['rack_row_id'], $_REQUEST['rack_comment']))
 		return buildRedirectURL (__FUNCTION__, 'OK', array ($_REQUEST['rack_name']));
 	else
@@ -2247,7 +2275,6 @@ function delVLANDescription ()
 
 $msgcode['updVLANDescription']['OK'] = 51;
 $msgcode['updVLANDescription']['ERR1'] = 105;
-$msgcode['updVLANDescription']['ERR2'] = 109;
 function updVLANDescription ()
 {
 	assertUIntArg ('vlan_id');
@@ -2256,14 +2283,21 @@ function updVLANDescription ()
 	global $sic;
 	if ($sic['vlan_id'] == VLAN_DFL_ID)
 		return buildRedirectURL (__FUNCTION__, 'ERR1');
-	$result = commitUpdateVLANDescription
+	usePreparedUpdateBlade
 	(
-		$sic['vdom_id'],
-		$sic['vlan_id'],
-		$sic['vlan_type'],
-		$sic['vlan_descr']
+		'VLANDescription',
+		array
+		(
+			'vlan_descr' => !mb_strlen ($sic['vlan_descr']) ? NULL : $sic['vlan_descr'],
+			'vlan_type' => $sic['vlan_type'],
+		),
+		array
+		(
+			'domain_id' => $sic['vdom_id'],
+			'vlan_id' => $sic['vlan_id'],
+		)
 	);
-	return buildRedirectURL (__FUNCTION__, $result !== FALSE ? 'OK' : 'ERR2');
+	return buildRedirectURL (__FUNCTION__, 'OK');
 }
 
 $msgcode['createVLANDomain']['OK'] = 48;

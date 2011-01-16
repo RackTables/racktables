@@ -444,7 +444,7 @@ $tabhandler['attrs']['editattrs'] = 'renderEditAttributesForm';
 $tabhandler['attrs']['editmap'] = 'renderEditAttrMapForm';
 $ophandler['attrs']['editattrs']['add'] = 'tableHandler';
 $ophandler['attrs']['editattrs']['del'] = 'tableHandler';
-$ophandler['attrs']['editattrs']['upd'] = 'changeAttribute';
+$ophandler['attrs']['editattrs']['upd'] = 'tableHandler';
 $ophandler['attrs']['editmap']['add'] = 'supplementAttrMap';
 $ophandler['attrs']['editmap']['del'] = 'tableHandler';
 

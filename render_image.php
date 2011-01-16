@@ -157,7 +157,7 @@ function renderRackThumb ($rack_id = 0)
 		$capture = ob_get_clean();
 		header("Content-type: image/png");
 		echo $capture;
-		saveThumbCache ($rack_id, $capture);
+		usePreparedUpdateBlade ('Rack', array ('thumb_data' => base64_encode ($capture)), array ('id' => $rack_id));
 		return;
 	}
 	// error text in the buffer

@@ -673,8 +673,8 @@ function commitResetObject ($object_id = 0)
 	// Rack space
 	usePreparedExecuteBlade ('DELETE FROM Atom WHERE molecule_id IN (SELECT new_molecule_id FROM MountOperation WHERE object_id = ?)', array ($object_id));
 	usePreparedExecuteBlade ('DELETE FROM Molecule WHERE id IN (SELECT new_molecule_id FROM MountOperation WHERE object_id = ?)', array ($object_id));
-	usePreparedExecuteBlade ('DELETE FROM MountOperation WHERE object_id = ?', array ($object_id));
-	usePreparedExecuteBlade ('DELETE FROM RackSpace WHERE object_id = ?', array ($object_id));
+	usePreparedDeleteBlade ('MountOperation', array ('object_id' => $object_id));
+	usePreparedDeleteBlade ('RackSpace', array ('object_id' => $object_id));
 	// 802.1Q
 	usePreparedDeleteBlade ('PortVLANMode', array ('object_id' => $object_id));
 	usePreparedDeleteBlade ('PortNativeVLAN', array ('object_id' => $object_id));
@@ -771,11 +771,16 @@ function processGridForm (&$rackData, $unchecked_state, $checked_state, $object_
 			if ($newstate == 'T' and $object_id != 0)
 			{
 				// At this point we already have a record in RackSpace.
-				$r = usePreparedExecuteBlade
+				$r = usePreparedUpdateBlade
 				(
-					'UPDATE RackSpace SET object_id=? ' .
-					'WHERE rack_id=? AND unit_no=? AND atom=?',
-					array ($object_id, $rack_id, $unit_no, $atom)
+					'RackSpace',
+					array ('object_id' => $object_id),
+					array
+					(
+						'rack_id' => $rack_id,
+						'unit_no' => $unit_no,
+						'atom' => $atom,
+					)
 				);
 				if ($r === FALSE)
 					return array ('code' => 500, 'message' => "${rack_name}: Rack ID ${rack_id}, unit ${unit_no}, atom '${atom}' failed to set object_id to '${object_id}'");
@@ -785,7 +790,7 @@ function processGridForm (&$rackData, $unchecked_state, $checked_state, $object_
 	}
 	if ($rackchanged)
 	{
-		resetThumbCache ($rack_id);
+		usePreparedUpdateBlade ('Rack', array ('thumb_data' => NULL), array ('id' => $rack_id));
 		return array ('code' => 200, 'message' => "${rack_name}: All changes were successfully saved.");
 	}
 	else
@@ -1372,10 +1377,10 @@ function bindIpToObject ($ip = '', $object_id = 0, $name = '', $type = '')
 
 function bindIPv6ToObject ($ip = '', $object_id = 0, $name = '', $type = '')
 {
-	return usePreparedExecuteBlade
+	return usePreparedInsertBlade
 	(
-		'INSERT INTO IPv6Allocation (ip, object_id, name, type) VALUES (?, ?, ?, ?)',
-		array ($ip, $object_id, $name, $type)
+		'IPv6Allocation',
+		array ('ip' => $ip, 'object_id' => $object_id, 'name' => $name, 'type' => $type)
 	);
 }
 
@@ -1437,14 +1442,14 @@ function updateV4Address ($ip = 0, $name = '', $reserved = 'no')
 
 function updateV6Address ($ip, $name = '', $reserved = 'no')
 {
-	usePreparedExecuteBlade ('DELETE FROM IPv6Address WHERE ip = ?', array ($ip));
+	usePreparedDeleteBlade ('IPv6Address', array ('ip' => $ip));
 	// INSERT may appear not necessary.
 	if ($name == '' and $reserved == 'no')
 		return '';
-	$ret = usePreparedExecuteBlade
+	$ret = usePreparedInsertBlade
 	(
-		'INSERT INTO IPv6Address (name, reserved, ip) VALUES (?, ?, ?)',
-		array ($name, $reserved, $ip)
+		'IPv6Address',
+		array ('name' => $name, 'reserved' => $reserved, 'ip' => $ip)
 	);
 	return $ret !== FALSE ? '' : (__FUNCTION__ . 'query failed');
 }
@@ -1460,10 +1465,19 @@ function updateBond ($ip='', $object_id=0, $name='', $type='')
 
 function updateIPv6Bond ($ip='', $object_id=0, $name='', $type='')
 {
-	return usePreparedExecuteBlade
+	return usePreparedUpdateBlade
 	(
-		'UPDATE IPv6Allocation SET name=?, type=? WHERE ip=? AND object_id=?',
-		array ($name, $type, $ip, $object_id)
+		'IPv6Allocation',
+		array
+		(
+			'name' => $name,
+			'type' => $type,
+		),
+		array
+		(
+			'ip' => $ip,
+			'object_id' => $object_id,
+		)
 	);
 }
 
@@ -1478,10 +1492,10 @@ function unbindIpFromObject ($ip, $object_id)
 
 function unbindIPv6FromObject ($ip, $object_id)
 {
-	return usePreparedExecuteBlade
+	return usePreparedDeleteBlade
 	(
-		'DELETE FROM IPv6Allocation WHERE ip=? AND object_id=?',
-		array ($ip, $object_id)
+		'IPv6Allocation',
+		array ('ip' => $ip, 'object_id' => $object_id)
 	);
 }
 
@@ -1957,11 +1971,16 @@ function commitCreateUserAccount ($username, $realname, $password)
 
 function commitUpdateUserAccount ($id, $new_username, $new_realname, $new_password)
 {
-	return usePreparedExecuteBlade
+	return usePreparedUpdateBlade
 	(
-		'UPDATE UserAccount SET user_name=?, user_realname=?, user_password_hash=? ' .
-		'WHERE user_id=?',
-		array ($new_username, $new_realname, $new_password, $id)
+		'UserAccount',
+		array
+		(
+			'user_name' => $new_username,
+			'user_realname' => $new_realname,
+			'user_password_hash' => $new_password,
+		),
+		array ('user_id' => $id)
 	);
 }
 
@@ -2101,27 +2120,6 @@ mysql> select tag_id from TagStorage left join TagTree on tag_id = id where id i
 
 */
 
-// chapter_no is a must, see at @commitReduceDictionary() why
-function commitUpdateDictionary ($chapter_no = 0, $dict_key = 0, $dict_value = '')
-{
-	return usePreparedExecuteBlade
-	(
-		'UPDATE Dictionary SET dict_value=? WHERE chapter_id=? AND dict_key=?',
-		array ($dict_value, $chapter_no, $dict_key)
-	);
-}
-
-function commitUpdateChapter ($chapter_no = 0, $chapter_name = '')
-{
-	if (!strlen ($chapter_name))
-		throw new InvalidArgException ('$chapter_name', $chapter_name);
-	return usePreparedExecuteBlade
-	(
-		'UPDATE Chapter SET name=? WHERE id=? AND sticky="no"',
-		array ($chapter_name, $chapter_no)
-	);
-}
-
 function commitDeleteChapter ($chapter_no = 0)
 {
 	return usePreparedDeleteBlade ('Chapter', array ('id' => $chapter_no, 'sticky' => 'no'));
@@ -2219,11 +2217,6 @@ function getAttrMap ()
 		$ret[$row['id']]['application'][] = $application;
 	}
 	return $ret;
-}
-
-function commitUpdateAttribute ($attr_id = 0, $attr_name = '')
-{
-	return usePreparedExecuteBlade ('UPDATE Attribute SET name=? WHERE id=?', array ($attr_name, $attr_id));
 }
 
 // FIXME: don't store garbage in chapter_no for non-dictionary types.
@@ -2372,11 +2365,6 @@ function commitUpdateAttrValue ($object_id = 0, $attr_id = 0, $value = '')
 		)
 	);
 	return TRUE;
-}
-
-function commitUseupPort ($port_id = 0)
-{
-	return usePreparedExecuteBlade ('UPDATE Port SET reservation_comment=NULL WHERE id=?', array ($port_id));
 }
 
 function convertPDOException ($e)
@@ -2533,38 +2521,6 @@ function loadUserConfigCache ($username = NULL)
 	return $cache;
 }
 
-function deleteUserConfigVar ($username = NULL, $varname = NULL)
-{
-        usePreparedDeleteBlade ('UserConfig', array ('varname' => $varname, 'user' => $username));
-}
-
-function storeUserConfigVar ($username = NULL, $varname = NULL, $varvalue = NULL)
-{
-	if (!strlen ($username))
-		throw new InvalidArgException ('$username', $username);
-	if (!strlen ($varname))
-		throw new InvalidArgException ('$varname', $varname);
-	if ($varvalue === NULL)
-		throw new InvalidArgException ('$varvalue', $varvalue);
-	return usePreparedExecuteBlade
-	(
-		'REPLACE UserConfig SET varvalue=?, varname=?, user=?',
-		array ($varvalue, $varname, $username)
-	);
-}
-
-// setConfigVar() is expected to perform all necessary filtering
-function storeConfigVar ($varname = NULL, $varvalue = NULL)
-{
-	if ($varvalue === NULL)
-		throw new InvalidArgException ('$varvalue', $varvalue);
-	return usePreparedExecuteBlade
-	(
-		'UPDATE Config SET varvalue=? WHERE varname=?',
-		array ($varvalue, $varname)
-	);
-}
-
 // Database version detector. Should behave corretly on any
 // working dataset a user might have.
 function getDatabaseVersion ()
@@ -2713,18 +2669,6 @@ function loadThumbCache ($rack_id = 0)
 	return $ret;
 }
 
-function saveThumbCache ($rack_id = 0, $cache = NULL)
-{
-	if ($cache == NULL)
-		throw new InvalidArgException ('$cache', $cache);
-	usePreparedExecuteBlade ('UPDATE Rack SET thumb_data=? WHERE id=?', array (base64_encode ($cache), $rack_id));
-}
-
-function resetThumbCache ($rack_id = 0)
-{
-	usePreparedExecuteBlade ('UPDATE Rack SET thumb_data=NULL WHERE id=?', array ($rack_id));
-}
-
 // Return the list of attached RS pools for the given object. As long as we have
 // the LB-VS UNIQUE in IPv4LB table, it is Ok to key returned records
 // by vs_id, because there will be only one RS pool listed for each VS of the
@@ -2858,9 +2802,9 @@ function getSLBDefaults ($do_cache_result = FALSE) {
 
 function commitSetInService ($rs_id = 0, $inservice = '')
 {
-	if (!strlen ($inservice))
+	if (! in_array ($inservice, array ('yes', 'no')))
 		throw new InvalidArgException ('$inservice', $inservice);
-	return usePreparedExecuteBlade ('UPDATE IPv4RS SET inservice=? WHERE id=?', array ($inservice, $rs_id));
+	return usePreparedUpdateBlade ('IPv4RS', array ('inservice' => $inservice), array ('id' => $rs_id));
 }
 
 function executeAutoPorts ($object_id = 0, $type_id = 0)
@@ -3778,21 +3722,6 @@ function commitReduceVLANDescription ($vdom_id, $vlan_id)
 		(
 			'domain_id' => $vdom_id,
 			'vlan_id' => $vlan_id,
-		)
-	);
-}
-
-function commitUpdateVLANDescription ($vdom_id, $vlan_id, $vlan_type, $vlan_descr)
-{
-	return usePreparedExecuteBlade
-	(
-		'UPDATE VLANDescription SET vlan_descr=?, vlan_type=? WHERE domain_id=? AND vlan_id=?',
-		array
-		(
-			!mb_strlen ($vlan_descr) ? NULL : $vlan_descr,
-			$vlan_type,
-			$vdom_id,
-			$vlan_id,
 		)
 	);
 }

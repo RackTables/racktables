@@ -135,7 +135,7 @@ function setConfigVar ($varname = '', $varvalue = '', $softfail = FALSE)
 	if (mb_strlen ($varvalue) && $configCache[$varname]['vartype'] == 'uint' && (!is_numeric ($varvalue) or $varvalue < 0 ))
 		throw new InvalidRequestArgException ('$varvalue', $varvalue, "'${varname}' can accept UINT values only");
 	// Update cache only if the changes went into DB.
-	storeConfigVar ($varname, $varvalue);
+	usePreparedUpdateBlade ('Config', array ('varvalue' => $varvalue), array ('varname' => $varname));
 	$configCache[$varname]['varvalue'] = $varvalue;
 }
 
@@ -160,7 +160,11 @@ function setUserConfigVar ($varname = '', $varvalue = '')
 	if (mb_strlen ($varvalue) && $configCache[$varname]['vartype'] == 'uint' && (!is_numeric ($varvalue) or $varvalue < 0 ))
 		throw new InvalidRequestArgException ('$varvalue', $varvalue, "'${varname}' can accept UINT values only");
 	// Update cache only if the changes went into DB.
-	storeUserConfigVar ($remote_username, $varname, $varvalue);
+	usePreparedExecuteBlade
+	(
+		'REPLACE UserConfig SET varvalue=?, varname=?, user=?',
+		array ($varvalue, $varname, $remote_username)
+	);
 	$configCache[$varname]['varvalue'] = $varvalue;
 }
 
@@ -181,7 +185,7 @@ function resetUserConfigVar ($varname = '')
 	if ($configCache[$varname]['is_hidden'] != 'no')
 		throw new InvalidRequestArgException ('$varname', $varname, 'a hidden variable cannot be changed by user');
 	// Update cache only if the changes went into DB.
-	deleteUserConfigVar ($remote_username, $varname);
+	usePreparedDeleteBlade ('UserConfig', array ('varname' => $varname, 'user' => $remote_username));
 }
 
 ?>
