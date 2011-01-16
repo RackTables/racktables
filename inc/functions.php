@@ -4426,7 +4426,8 @@ function setMessage ($message, $type, $direct_rendering)
 // clear message list set by showError, its siblings, buildWideRedirectURL
 function clearMessages()
 {
-	unset ($_SESSION['log']);
+	if (isset ($_SESSION['log']))
+		unset ($_SESSION['log']);
 }
 
 function isEthernetPort($port)
