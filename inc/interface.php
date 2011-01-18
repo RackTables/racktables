@@ -5143,9 +5143,17 @@ function renderVirtualService ($vsid)
 
 function renderProgressBar ($percentage = 0, $theme = '')
 {
+	echo getProgressBar ($percentage, $theme);
+}
+
+function getProgressBar ($percentage = 0, $theme = '')
+{
 	$done = ((int) ($percentage * 100));
-	echo "<img width=100 height=10 border=0 title='${done}%' src='render_image.php?img=progressbar&done=${done}";
-	echo (!strlen ($theme) ? '' : "&theme=${theme}") . "'>";
+	$ret = "<img width=100 height=10 border=0 title='${done}%' src='render_image.php?img=progressbar&done=${done}";
+	if ($theme != '')
+		$ret .= "&theme=${theme}";
+	$ret .= "'>";
+	return $ret;
 }
 
 function renderRSPoolServerForm ($pool_id)
