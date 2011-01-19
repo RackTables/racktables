@@ -4423,6 +4423,40 @@ function setMessage ($message, $type, $direct_rendering)
 	}
 }
 
+// function returns integer count of unshown messages in log buffer.
+// message_type can be 'all', 'success', 'error', 'warning', 'neutral'.
+function getMessagesCount ($message_type = 'all')
+{
+	$result = 0;
+	if (isset ($_SESSION['log']))
+	{
+		if ($_SESSION['log']['v'] == 1)
+		{
+			foreach ($_SESSION['log'] as $msg)
+				if ($message_type == 'all' or $msg['code'] == $message_type)
+					++$result;
+		}
+		elseif ($_SESSION['log']['v'] == 2)
+			foreach ($_SESSION['log']['m'] as $msg)
+			{
+				if ($message_type == 'all')
+				{
+					++$result;
+					continue;
+				}
+				if ($message_type == 'success' and $msg['c'] < 100)
+					++$result;
+				elseif ($message_type == 'error' and $msg['c'] < 200)
+					++$result;
+				elseif ($message_type == 'warning' and $msg['c'] < 300)
+					++$result;
+				elseif ($message_type == 'neutral')
+					++$result;
+			}
+	}
+	return $result;
+}
+
 // clear message list set by showError, its siblings, buildWideRedirectURL
 function clearMessages()
 {
