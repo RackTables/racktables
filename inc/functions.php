@@ -265,6 +265,12 @@ function genericAssertion ($argname, $argtype)
 		if (NULL === json_decode ($sic[$argname], TRUE))
 			throw new InvalidRequestArgException ($argname, '(omitted)', 'Invalid JSON code received from client');
 		break;
+	case 'array':
+		if (! array_key_exists ($argname, $_REQUEST))
+			throw new InvalidRequestArgException ($argname, '(missing argument)');
+		if (! is_array ($_REQUEST[$argname]))
+			throw new InvalidRequestArgException ($argname, '(omitted)', 'argument is not an array');
+		break;
 	case 'enum/attr_type':
 		assertStringArg ($argname);
 		if (!in_array ($sic[$argname], array ('uint', 'float', 'string', 'dict')))
