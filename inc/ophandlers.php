@@ -1319,7 +1319,7 @@ function updateUI ()
 	return buildRedirectURL (__FUNCTION__, 'OK');
 }
 
-$msgcode['saveMyPreferences']['OK'] = 56;
+$msgcode['saveMyPreferences']['OK'] = 51;
 function saveMyPreferences ()
 {
 	assertUIntArg ('num_vars');
@@ -1339,7 +1339,7 @@ function saveMyPreferences ()
 	return buildRedirectURL (__FUNCTION__, 'OK');
 }
 
-$msgcode['resetMyPreference']['OK'] = 56;
+$msgcode['resetMyPreference']['OK'] = 51;
 function resetMyPreference ()
 {
 	assertStringArg ("varname");
