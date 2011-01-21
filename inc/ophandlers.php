@@ -2671,6 +2671,13 @@ function cloneVSTRule()
 $msgcode['updVSTRule']['OK'] = 43;
 function updVSTRule()
 {
+	// this is used for making throwing an invalid argument exception easier.
+	function updVSTRule_get_named_param ($name, $haystack, &$last_used_name)
+	{
+		$last_used_name = $name;
+		return isset ($haystack[$name]) ? $haystack[$name] : NULL;
+	}
+
 	global $port_role_options, $sic;
 	assertUIntArg ('mutex_rev', TRUE);
 	genericAssertion ('template_json', 'json');
@@ -2678,20 +2685,21 @@ function updVSTRule()
 	$rule_no = 0;
 	try
 	{
+		$last_field = '';
 		foreach ($data as $rule)
 		{
 			$rule_no++;
 			if
 			(
-				! isInteger ($rule['rule_no'])
-				or ! isPCRE ($rule['port_pcre'])
-				or ! isset ($rule['port_role'])
-				or ! array_key_exists ($rule['port_role'], $port_role_options)
-				or ! isset ($rule['wrt_vlans'])
-				or ! preg_match ('/^[ 0-9\-,]*$/', $rule['wrt_vlans'])
-				or ! isset ($rule['description'])
+				! isInteger (updVSTRule_get_named_param ('rule_no', $rule, $last_field))
+				or ! isPCRE (updVSTRule_get_named_param ('port_pcre', $rule, $last_field))
+				or NULL === updVSTRule_get_named_param ('port_role', $rule, $last_field)
+				or ! array_key_exists (updVSTRule_get_named_param ('port_role', $rule, $last_field), $port_role_options)
+				or NULL ===  updVSTRule_get_named_param ('wrt_vlans', $rule, $last_field)
+				or ! preg_match ('/^[ 0-9\-,]*$/',  updVSTRule_get_named_param ('wrt_vlans', $rule, $last_field))
+				or NULL ===  updVSTRule_get_named_param ('description', $rule, $last_field)
 			)
-				throw new InvalidRequestArgException ('form', '(JSON)', "invalid rule #$rule_no");
+				throw new InvalidRequestArgException ($last_field, $rule[$last_field], "rule #$rule_no");
 		}
 		commitUpdateVSTRules ($_REQUEST['vst_id'], $_REQUEST['mutex_rev'], $data);
 	}
