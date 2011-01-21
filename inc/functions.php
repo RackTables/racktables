@@ -956,8 +956,7 @@ function peekNode ($tree, $trace, $target_id)
 			if (array_key_exists ('id', $node) and $node['id'] == $next) // warmer
 				return $self ($node['kids'], $trace, $target_id);
 	}
-	// HCF
-	return NULL;
+	throw new RackTablesError ('inconsistent tree data', RackTablesError::INTERNAL);
 }
 
 // Build a tree from the item list and return it. Input and output data is
@@ -1082,6 +1081,8 @@ function getExplicitTagsOnly ($chain)
 function generateEntityAutoTags ($cell)
 {
 	$ret = array();
+	if (! array_key_exists ('realm', $cell))
+		throw new InvalidArgException ('cell', '(array)', 'malformed structure');
 	switch ($cell['realm'])
 	{
 		case 'rack':
@@ -1151,7 +1152,8 @@ function generateEntityAutoTags ($cell)
 			$ret[] = array ('tag' => '$fileid_' . $cell['id']);
 			$ret[] = array ('tag' => '$any_file');
 			break;
-		default: // HCF!
+		default:
+			throw new InvalidArgException ('cell', '(array)', 'this input does not belong here');
 			break;
 	}
 	// {$tagless} doesn't apply to users
