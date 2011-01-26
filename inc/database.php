@@ -579,11 +579,9 @@ function getObjectPortsAndLinks ($object_id)
 	return sortPortList ($ret, TRUE);
 }
 
-function commitAddRack ($name, $height = 0, $row_id = 0, $comment, $taglist)
+function commitAddRack ($name, $height, $row_id, $comment, $taglist)
 {
-	if ($row_id <= 0 or $height <= 0 or !strlen ($name))
-		return FALSE;
-	$result = usePreparedInsertBlade
+	usePreparedInsertBlade
 	(
 		'Rack',
 		array
@@ -595,7 +593,8 @@ function commitAddRack ($name, $height = 0, $row_id = 0, $comment, $taglist)
 		)
 	);
 	$last_insert_id = lastInsertID();
-	return (produceTagsForLastRecord ('rack', $taglist, $last_insert_id) == '') and recordHistory ('Rack', $last_insert_id);
+	produceTagsForLastRecord ('rack', $taglist, $last_insert_id);
+	recordHistory ('Rack', $last_insert_id);
 }
 
 function commitAddObject ($new_name, $new_label, $new_barcode, $new_type_id, $new_asset_no, $taglist = array())
@@ -618,7 +617,7 @@ function commitAddObject ($new_name, $new_label, $new_barcode, $new_type_id, $ne
 	// Do AutoPorts magic
 	executeAutoPorts ($last_insert_id, $new_type_id);
 	// Now tags...
-	$error = produceTagsForLastRecord ('object', $taglist, $last_insert_id);
+	produceTagsForLastRecord ('object', $taglist, $last_insert_id);
 
 	recordHistory ('RackObject', $last_insert_id);
 
@@ -2695,9 +2694,7 @@ function getRSPoolsForObject ($object_id = 0)
 
 function commitCreateRSPool ($name = '', $vsconfig = '', $rsconfig = '', $taglist = array())
 {
-	if (!strlen ($name))
-		throw new InvalidArgException ('$name', $name);
-	if (!usePreparedInsertBlade
+	usePreparedInsertBlade
 	(
 		'IPv4RSPool',
 		array
@@ -2706,9 +2703,8 @@ function commitCreateRSPool ($name = '', $vsconfig = '', $rsconfig = '', $taglis
 			'vsconfig' => (!strlen ($vsconfig) ? NULL : $vsconfig),
 			'rsconfig' => (!strlen ($rsconfig) ? NULL : $rsconfig)
 		)
-	))
-		return __FUNCTION__ . ': SQL insertion failed';
-	return produceTagsForLastRecord ('ipv4rspool', $taglist);
+	);
+	produceTagsForLastRecord ('ipv4rspool', $taglist);
 }
 
 function commitDeleteRSPool ($pool_id = 0)
@@ -2941,18 +2937,10 @@ function rebuildTagChainForEntity ($realm, $entity_id, $extrachain = array())
 // Presume, that the target record has no tags attached.
 function produceTagsForLastRecord ($realm, $tagidlist, $last_insert_id = 0)
 {
-	if (!count ($tagidlist))
-		return '';
 	if (!$last_insert_id)
 		$last_insert_id = lastInsertID();
-	$errcount = 0;
 	foreach (getExplicitTagsOnly (buildTagChainFromIds ($tagidlist)) as $taginfo)
-		if (addTagForEntity ($realm, $last_insert_id, $taginfo['id']) == FALSE)
-			$errcount++;	
-	if (!$errcount)
-		return '';
-	else
-		return "Experienced ${errcount} errors adding tags in realm '${realm}' for entity ID == ${last_insert_id}";
+		addTagForEntity ($realm, $last_insert_id, $taginfo['id']);
 }
 
 function createIPv4Prefix ($range = '', $name = '', $is_bcast = FALSE, $taglist = array())
@@ -2960,23 +2948,23 @@ function createIPv4Prefix ($range = '', $name = '', $is_bcast = FALSE, $taglist 
 	// $range is in x.x.x.x/x format, split into ip/mask vars
 	$rangeArray = explode('/', $range);
 	if (count ($rangeArray) != 2)
-		return "Invalid IPv4 prefix '${range}'";
+		throw new InvalidRequestArgException ('range', $range, 'Invalid IPv4 prefix');
 	$ip = $rangeArray[0];
 	$mask = $rangeArray[1];
 
 	if (!strlen ($ip) or !strlen ($mask))
-		return "Invalid IPv4 prefix '${range}'";
+		throw new InvalidRequestArgException ('range', $range, 'Invalid IPv4 prefix');
 	$ipL = ip2long($ip);
 	$maskL = ip2long($mask);
 	if ($ipL == -1 || $ipL === FALSE)
-		return 'Bad IPv4 address';
+		throw new InvalidRequestArgException ('range', $range, 'Invalid IPv4 address');
 	if ($mask < 32 && $mask > 0)
 		$maskL = $mask;
 	else
 	{
 		$maskB = decbin($maskL);
 		if (strlen($maskB)!=32)
-			return 'Invalid netmask';
+			throw new InvalidRequestArgException ('range', $range, 'Invalid netmask');
 		$ones=0;
 		$zeroes=FALSE;
 		foreach( str_split ($maskB) as $digit)
@@ -2987,14 +2975,14 @@ function createIPv4Prefix ($range = '', $name = '', $is_bcast = FALSE, $taglist 
 			{
 				$ones++;
 				if ($zeroes == TRUE)
-					return 'Invalid netmask';
+					throw new InvalidRequestArgException ('range', $range, 'Invalid netmask');
 			}
 		}
 		$maskL = $ones;
 	}
 	$binmask = binMaskFromDec($maskL);
 	$ipL = $ipL & $binmask;
-	$result = usePreparedInsertBlade
+	usePreparedInsertBlade
 	(
 		'IPv4Network',
 		array
@@ -3004,8 +2992,6 @@ function createIPv4Prefix ($range = '', $name = '', $is_bcast = FALSE, $taglist 
 			'name' => $name
 		)
 	);
-	if ($result != TRUE)
-		return "Could not add ${range} (already exists?).";
 
 	if ($is_bcast and $maskL < 31)
 	{
@@ -3014,7 +3000,7 @@ function createIPv4Prefix ($range = '', $name = '', $is_bcast = FALSE, $taglist 
 		updateV4Address ($network_addr, 'network', 'yes');
 		updateV4Address ($broadcast_addr, 'broadcast', 'yes');
 	}
-	return produceTagsForLastRecord ('ipv4net', $taglist);
+	produceTagsForLastRecord ('ipv4net', $taglist);
 }
 
 function createIPv6Prefix ($range = '', $name = '', $taglist = array())
@@ -3022,17 +3008,17 @@ function createIPv6Prefix ($range = '', $name = '', $taglist = array())
 	// $range is in aaa0:b::c:d/x format, split into ip/mask vars
 	$rangeArray = explode ('/', $range);
 	if (count ($rangeArray) != 2)
-		return "Invalid IPv6 prefix '${range}'";
+		throw new InvalidRequestArgException ('range', $range, 'Invalid IPv6 prefix');
 	$ip = $rangeArray[0];
 	$mask = $rangeArray[1];
 	$address = new IPv6Address;
 	if (!strlen ($ip) or !strlen ($mask) or ! $address->parse ($ip))
-		return "Invalid IPv6 prefix '${range}'";
+		throw new InvalidRequestArgException ('range', $range, 'Invalid IPv4 prefix');
 	$network_addr = $address->get_first_subnet_address ($mask);
 	$broadcast_addr = $address->get_last_subnet_address ($mask);
 	if (! $network_addr || ! $broadcast_addr)
-		return 'Invalid netmask';
-	$result = usePreparedInsertBlade
+		throw new InvalidRequestArgException ('range', $range, 'Invalid netmask');
+	usePreparedInsertBlade
 	(
 		'IPv6Network',
 		array
@@ -3043,32 +3029,23 @@ function createIPv6Prefix ($range = '', $name = '', $taglist = array())
 			'name' => $name
 		)
 	);
-	if ($result != TRUE)
-		return "Could not add ${range} (already exists?).";
-
-	return produceTagsForLastRecord ('ipv6net', $taglist);
+	produceTagsForLastRecord ('ipv6net', $taglist);
 }
 
 // FIXME: This function doesn't wipe relevant records from IPv4Address table.
-function destroyIPv4Prefix ($id = 0)
+function destroyIPv4Prefix ($id)
 {
 	releaseFiles ('ipv4net', $id);
-	if (FALSE === usePreparedDeleteBlade ('IPv4Network', array ('id' => $id)))
-		return __FUNCTION__ . ': SQL query #1 failed';
-	if (FALSE === destroyTagsForEntity ('ipv4net', $id))
-		return __FUNCTION__ . ': SQL query #2 failed';
-	return '';
+	usePreparedDeleteBlade ('IPv4Network', array ('id' => $id));
+	destroyTagsForEntity ('ipv4net', $id);
 }
 
 // FIXME: This function doesn't wipe relevant records from IPv6Address table.
-function destroyIPv6Prefix ($id = 0)
+function destroyIPv6Prefix ($id)
 {
 	releaseFiles ('ipv6net', $id);
-	if (FALSE === usePreparedDeleteBlade ('IPv6Network', array ('id' => $id)))
-		return __FUNCTION__ . ': SQL query #1 failed';
-	if (FALSE === destroyTagsForEntity ('ipv6net', $id))
-		return __FUNCTION__ . ': SQL query #2 failed';
-	return '';
+	usePreparedDeleteBlade ('IPv6Network', array ('id' => $id));
+	destroyTagsForEntity ('ipv6net', $id);
 }
 
 function loadScript ($name)
@@ -3445,9 +3422,7 @@ function commitUnlinkFile ($link_id)
 function commitDeleteFile ($file_id)
 {
 	destroyTagsForEntity ('file', $file_id);
-	if (usePreparedDeleteBlade ('File', array ('id' => $file_id)) === FALSE)
-		return __FUNCTION__ . '(): query failed';
-	return '';
+	usePreparedDeleteBlade ('File', array ('id' => $file_id));
 }
 
 function getChapterList ()

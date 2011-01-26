@@ -818,7 +818,6 @@ function addIPv6Allocation ()
 }
 
 $msgcode['addIPv4Prefix']['OK'] = 48;
-$msgcode['addIPv4Prefix']['ERR'] = 100;
 function addIPv4Prefix ()
 {
 	assertStringArg ('range');
@@ -827,15 +826,11 @@ function addIPv4Prefix ()
 	$is_bcast = isset ($_REQUEST['is_bcast']) ? $_REQUEST['is_bcast'] : 'off';
 	$taglist = isset ($_REQUEST['taglist']) ? $_REQUEST['taglist'] : array();
 	global $sic;
-	$error = createIPv4Prefix ($_REQUEST['range'], $sic['name'], $is_bcast == 'on', $taglist);
-	if ($error != '')
-		return buildRedirectURL (__FUNCTION__, 'ERR', array ($error));
-	else
-		return buildRedirectURL (__FUNCTION__, 'OK');
+	createIPv4Prefix ($_REQUEST['range'], $sic['name'], $is_bcast == 'on', $taglist);
+	return buildRedirectURL (__FUNCTION__, 'OK');
 }
 
 $msgcode['addIPv6Prefix']['OK'] = 48;
-$msgcode['addIPv6Prefix']['ERR'] = 100;
 function addIPv6Prefix ()
 {
 	assertStringArg ('range');
@@ -843,35 +838,24 @@ function addIPv6Prefix ()
 
 	$taglist = isset ($_REQUEST['taglist']) ? $_REQUEST['taglist'] : array();
 	global $sic;
-	$error = createIPv6Prefix ($_REQUEST['range'], $sic['name'], $taglist);
-	if ($error != '')
-		return buildRedirectURL (__FUNCTION__, 'ERR', array ($error));
-	else
-		return buildRedirectURL (__FUNCTION__, 'OK');
+	createIPv6Prefix ($_REQUEST['range'], $sic['name'], $taglist);
+	return buildRedirectURL (__FUNCTION__, 'OK');
 }
 
 $msgcode['delIPv4Prefix']['OK'] = 49;
-$msgcode['delIPv4Prefix']['ERR'] = 100;
 function delIPv4Prefix ()
 {
 	assertUIntArg ('id');
-	$error = destroyIPv4Prefix ($_REQUEST['id']);
-	if ($error != '')
-		return buildRedirectURL (__FUNCTION__, 'ERR', array ($error));
-	else
-		return buildRedirectURL (__FUNCTION__, 'OK');
+	destroyIPv4Prefix ($_REQUEST['id']);
+	return buildRedirectURL (__FUNCTION__, 'OK');
 }
 
 $msgcode['delIPv6Prefix']['OK'] = 49;
-$msgcode['delIPv6Prefix']['ERR'] = 100;
 function delIPv6Prefix ()
 {
 	assertUIntArg ('id');
-	$error = destroyIPv6Prefix ($_REQUEST['id']);
-	if ($error != '')
-		return buildRedirectURL (__FUNCTION__, 'ERR', array ($error));
-	else
-		return buildRedirectURL (__FUNCTION__, 'OK');
+	destroyIPv6Prefix ($_REQUEST['id']);
+	return buildRedirectURL (__FUNCTION__, 'OK');
 }
 
 $msgcode['editAddress']['OK'] = 51;
@@ -1623,23 +1607,19 @@ function addLoadBalancer ()
 }
 
 $msgcode['addRSPool']['OK'] = 48;
-$msgcode['addRSPool']['ERR'] = 100;
 function addRSPool ()
 {
-	assertStringArg ('name', TRUE);
+	assertStringArg ('name');
 	assertStringArg ('vsconfig', TRUE);
 	assertStringArg ('rsconfig', TRUE);
-	$error = commitCreateRSPool
+	commitCreateRSPool
 	(
 		$_REQUEST['name'],
 		$_REQUEST['vsconfig'],
 		$_REQUEST['rsconfig'],
 		isset ($_REQUEST['taglist']) ? $_REQUEST['taglist'] : array()
 	);
-	if ($error != '')
-		return buildRedirectURL (__FUNCTION__, 'ERR', array ($error));
-	else
-		return buildRedirectURL (__FUNCTION__, 'OK');
+	return buildRedirectURL (__FUNCTION__, 'OK');
 }
 
 $msgcode['deleteRSPool']['OK'] = 49;
@@ -2033,7 +2013,6 @@ function querySNMPData ()
 }
 
 $msgcode['addFileWithoutLink']['OK'] = 5;
-$msgcode['addFileWithoutLink']['ERR2'] = 110;
 // File-related functions
 function addFileWithoutLink ()
 {
@@ -2045,41 +2024,42 @@ function addFileWithoutLink ()
 
 	$fp = fopen($_FILES['file']['tmp_name'], 'rb');
 	global $sic;
-	if (FALSE === commitAddFile ($_FILES['file']['name'], $_FILES['file']['type'], $fp, $sic['comment']))
-		return buildRedirectURL (__FUNCTION__, 'ERR2');
+	commitAddFile ($_FILES['file']['name'], $_FILES['file']['type'], $fp, $sic['comment']);
 	if (isset ($_REQUEST['taglist']))
 		produceTagsForLastRecord ('file', $_REQUEST['taglist']);
 	return buildRedirectURL (__FUNCTION__, 'OK', array (htmlspecialchars ($_FILES['file']['name'])));
 }
 
 $msgcode['addFileToEntity']['OK'] = 5;
-$msgcode['addFileToEntity']['ERR2'] = 181;
-$msgcode['addFileToEntity']['ERR3'] = 110;
 function addFileToEntity ()
 {
 	global $pageno, $etype_by_pageno;
 	if (!isset ($etype_by_pageno[$pageno]))
 		throw new RackTablesError ('key not found in etype_by_pageno', RackTablesError::INTERNAL);
 	$realm = $etype_by_pageno[$pageno];
-	$entity_id = getBypassValue();
 	assertStringArg ('comment', TRUE);
 
 	// Make sure the file can be uploaded
 	if (get_cfg_var('file_uploads') != 1)
-		return buildRedirectURL (__FUNCTION__, 'ERR2');
+		throw new RackTablesError ('file uploads not allowed, change "file_uploads" parameter in php.ini', RackTablesError::MISCONFIGURED);
 
 	$fp = fopen($_FILES['file']['tmp_name'], 'rb');
 	global $sic;
-	if (FALSE === commitAddFile ($_FILES['file']['name'], $_FILES['file']['type'], $fp, $sic['comment']))
-		return buildRedirectURL (__FUNCTION__, 'ERR3');
-	if (FALSE === usePreparedInsertBlade ('FileLink', array ('file_id' => lastInsertID(), 'entity_type' => $realm, 'entity_id' => $entity_id)))
-		return buildRedirectURL (__FUNCTION__, 'ERR3');
-
+	commitAddFile ($_FILES['file']['name'], $_FILES['file']['type'], $fp, $sic['comment']);
+	usePreparedInsertBlade
+	(
+		'FileLink',
+		array
+		(
+			'file_id' => lastInsertID(),
+			'entity_type' => $realm,
+			'entity_id' => getBypassValue(),
+		)
+	);
 	return buildRedirectURL (__FUNCTION__, 'OK', array (htmlspecialchars ($_FILES['file']['name'])));
 }
 
 $msgcode['linkFileToEntity']['OK'] = 71;
-$msgcode['linkFileToEntity']['ERR2'] = 110;
 function linkFileToEntity ()
 {
 	assertUIntArg ('file_id');
@@ -2088,14 +2068,20 @@ function linkFileToEntity ()
 		throw new RackTablesError ('key not found in etype_by_pageno', RackTablesError::INTERNAL);
 
 	$fi = spotEntity ('file', $sic['file_id']);
-	if (FALSE === usePreparedInsertBlade ('FileLink', array ('file_id' => $sic['file_id'], 'entity_type' => $etype_by_pageno[$pageno], 'entity_id' => getBypassValue())))
-		return buildRedirectURL (__FUNCTION__, 'ERR2');
-
+	usePreparedInsertBlade
+	(
+		'FileLink',
+		array
+		(
+			'file_id' => $sic['file_id'],
+			'entity_type' => $etype_by_pageno[$pageno],
+			'entity_id' => getBypassValue(),
+		)
+	);
 	return buildRedirectURL (__FUNCTION__, 'OK', array (htmlspecialchars ($fi['name'])));
 }
 
 $msgcode['replaceFile']['OK'] = 7;
-$msgcode['replaceFile']['ERR1'] = 181;
 $msgcode['replaceFile']['ERR2'] = 207;
 $msgcode['replaceFile']['ERR3'] = 109;
 function replaceFile ()
@@ -2104,7 +2090,7 @@ function replaceFile ()
 
 	// Make sure the file can be uploaded
 	if (get_cfg_var('file_uploads') != 1)
-		return buildRedirectURL (__FUNCTION__, 'ERR1');
+		throw new RackTablesError ('file uploads not allowed, change "file_uploads" parameter in php.ini', RackTablesError::MISCONFIGURED);
 	$shortInfo = spotEntity ('file', $sic['file_id']);
 
 	$fp = fopen($_FILES['file']['tmp_name'], 'rb');
@@ -2131,16 +2117,11 @@ function unlinkFile ()
 }
 
 $msgcode['deleteFile']['OK'] = 6;
-$msgcode['deleteFile']['ERR'] = 111;
 function deleteFile ()
 {
 	assertUIntArg ('file_id');
 	$shortInfo = spotEntity ('file', $_REQUEST['file_id']);
-	$error = commitDeleteFile ($_REQUEST['file_id']);
-
-	if ($error != '')
-		return buildRedirectURL (__FUNCTION__, 'ERR', array ($error));
-
+	commitDeleteFile ($_REQUEST['file_id']);
 	return buildRedirectURL (__FUNCTION__, 'OK', array (htmlspecialchars ($shortInfo['name'])));
 }
 
