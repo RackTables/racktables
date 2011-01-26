@@ -2045,7 +2045,7 @@ function addFileWithoutLink ()
 
 	$fp = fopen($_FILES['file']['tmp_name'], 'rb');
 	global $sic;
-	if (FALSE === commitAddFile ($_FILES['file']['name'], $_FILES['file']['type'], $_FILES['file']['size'], $fp, $sic['comment']))
+	if (FALSE === commitAddFile ($_FILES['file']['name'], $_FILES['file']['type'], $fp, $sic['comment']))
 		return buildRedirectURL (__FUNCTION__, 'ERR2');
 	if (isset ($_REQUEST['taglist']))
 		produceTagsForLastRecord ('file', $_REQUEST['taglist']);
@@ -2070,7 +2070,7 @@ function addFileToEntity ()
 
 	$fp = fopen($_FILES['file']['tmp_name'], 'rb');
 	global $sic;
-	if (FALSE === commitAddFile ($_FILES['file']['name'], $_FILES['file']['type'], $_FILES['file']['size'], $fp, $sic['comment']))
+	if (FALSE === commitAddFile ($_FILES['file']['name'], $_FILES['file']['type'], $fp, $sic['comment']))
 		return buildRedirectURL (__FUNCTION__, 'ERR3');
 	if (FALSE === usePreparedInsertBlade ('FileLink', array ('file_id' => lastInsertID(), 'entity_type' => $realm, 'entity_id' => $entity_id)))
 		return buildRedirectURL (__FUNCTION__, 'ERR3');

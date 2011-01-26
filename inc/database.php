@@ -3401,23 +3401,20 @@ function getFileStats ()
 	return $ret;
 }
 
-function commitAddFile ($name, $type, $size, $contents, $comment)
+function commitAddFile ($name, $type, $contents, $comment)
 {
-	$now = date('YmdHis');
-
 	global $dbxlink;
-	$query  = $dbxlink->prepare('INSERT INTO File (name, type, size, ctime, mtime, atime, contents, comment) VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
-	$query->bindParam(1, $name);
-	$query->bindParam(2, $type);
-	$query->bindParam(3, $size);
-	$query->bindParam(4, $now);
-	$query->bindParam(5, $now);
-	$query->bindParam(6, $now);
-	$query->bindParam(7, $contents, PDO::PARAM_LOB);
-	$query->bindParam(8, $comment);
 	try
 	{
-		return $query->execute();
+		$dbxlink->beginTransaction();
+		$query = $dbxlink->prepare ('INSERT INTO File (name, type, ctime, mtime, atime, contents, comment) VALUES (?, ?, NOW(), NOW(), NOW(), ?, ?)');
+		$query->bindParam (1, $name);
+		$query->bindParam (2, $type);
+		$query->bindParam (3, $contents, PDO::PARAM_LOB);
+		$query->bindParam (4, $comment);
+		$query->execute();
+		usePreparedExecuteBlade ('UPDATE File SET size = LENGTH(contents) WHERE id = ?', array (lastInsertID()));
+		$dbxlink->commit();
 	}
 	catch (PDOException $e)
 	{
