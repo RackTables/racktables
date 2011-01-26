@@ -64,9 +64,6 @@ $dqtitle = array
 
 // Let's have it here, so extensions can add their own images.
 $image = array();
-$image['error']['path'] = 'pix/error.png';
-$image['error']['width'] = 76;
-$image['error']['height'] = 17;
 $image['logo']['path'] = 'pix/defaultlogo.png';
 $image['logo']['width'] = 210;
 $image['logo']['height'] = 40;

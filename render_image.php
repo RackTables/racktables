@@ -120,11 +120,16 @@ function HTTPDateToUnixTime ($string)
 
 function renderError ()
 {
-	// A hardcoded value is worth of saving lots of code here.
-	$img = imagecreatefrompng ('pix/error.png');
 	header("Content-type: image/png");
-	imagepng ($img);
-	imagedestroy ($img);
+	// "ERROR", 76x17, red on white
+	echo base64_decode
+	(
+		'iVBORw0KGgoAAAANSUhEUgAAAEwAAAARCAYAAAB3h0oCAAAAAXNSR0IArs4c6QAAALBJREFUWMPt' .
+		'WFsOwCAIG4v3vzL7WEyWxQdVwM1A4l/F2iHVETPzESGOMyTAInURRP0suUhb2FIho/jWXO38w4KN' .
+		'LPDGEt2jlgPBZxFKc2o8UT7Lj6SkAmfw1nx+28MkVWQlcjT9EOwjLqnpaNImi+I1j/YSl5RY/gx+' .
+		'VCCF/MnkCz4JZQtvEUXx1nyW9jCUlPVLbTJ/3MO2dsnWRq2Nwl2wTarM51rhsVEnDhT/w7C4APaJ' .
+		'ZhkIGYaUAAAAAElFTkSuQmCC'
+	);
 }
 
 // Having a local caching array speeds things up. A little.
