@@ -4386,14 +4386,14 @@ function addCSS ($data, $inline = FALSE)
 // You can call them multiple times to show multiple messages.
 // $option can be 'inline' to echo message div, instead of putting it into $_SESSION and draw on next index page show
 // These functions always return NULL
-function showError   ($message, $option = '') { setMessage ($message, 'error',   $option == 'inline'); }
-function showWarning ($message, $option = '') { setMessage ($message, 'warning', $option == 'inline'); }
-function showSuccess ($message, $option = '') { setMessage ($message, 'success', $option == 'inline'); }
-function showNotice  ($message, $option = '') { setMessage ($message, 'neutral', $option == 'inline'); }
+function showError   ($message, $option = '') { setMessage ('error',   $message, $option == 'inline'); }
+function showWarning ($message, $option = '') { setMessage ('warning', $message, $option == 'inline'); }
+function showSuccess ($message, $option = '') { setMessage ('success', $message, $option == 'inline'); }
+function showNotice  ($message, $option = '') { setMessage ('neutral', $message, $option == 'inline'); }
 
 // do not call this directly, use showError and its siblings instead
 // $type could be 'error', 'warning', 'success' or 'neutral'
-function setMessage ($message, $type, $direct_rendering)
+function setMessage ($type, $message, $direct_rendering)
 {
 	if ($direct_rendering)
 		echo '<div class="msg_' . $type . '">' . $message . '</div>';

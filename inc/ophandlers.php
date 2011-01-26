@@ -380,7 +380,7 @@ function buildWideRedirectURL ($log = NULL, $nextpage = NULL, $nexttab = NULL, $
 			$_SESSION['log'] = array_merge_recursive($log, $_SESSION['log']);
 		elseif ($log['v'] == 1 and $_SESSION['log']['v'] == 2)
 			foreach ($log['m'] as $msg)
-				setMessage($msg['message'], $msg['code'], FALSE);
+				setMessage ($msg['code'], $msg['message'], FALSE);
 		elseif ($log['v'] == 2 and $_SESSION['log']['v'] == 1)
 		{
 			foreach ($_SESSION['log'] as $msg)
