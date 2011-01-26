@@ -3406,7 +3406,6 @@ function commitAddFile ($name, $type, $contents, $comment)
 	global $dbxlink;
 	try
 	{
-		$dbxlink->beginTransaction();
 		$query = $dbxlink->prepare ('INSERT INTO File (name, type, ctime, mtime, atime, contents, comment) VALUES (?, ?, NOW(), NOW(), NOW(), ?, ?)');
 		$query->bindParam (1, $name);
 		$query->bindParam (2, $type);
@@ -3414,7 +3413,6 @@ function commitAddFile ($name, $type, $contents, $comment)
 		$query->bindParam (4, $comment);
 		$query->execute();
 		usePreparedExecuteBlade ('UPDATE File SET size = LENGTH(contents) WHERE id = ?', array (lastInsertID()));
-		$dbxlink->commit();
 	}
 	catch (PDOException $e)
 	{
