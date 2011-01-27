@@ -5,7 +5,7 @@
 *
 */
 
-include_once 'ajax-interface.php';
+require_once 'ajax-interface.php';
 
 // Interface function's special.
 $nextorder['odd'] = 'even';

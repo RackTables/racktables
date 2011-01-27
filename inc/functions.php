@@ -4170,7 +4170,7 @@ function searchEntitiesByText ($terms)
 
 function getRackCodeWarnings ()
 {
-	require_once 'inc/code.php';
+	require_once 'code.php';
 	$ret = array();
 	global $rackCode;
 	// tags
@@ -4280,7 +4280,7 @@ function getRackCodeWarnings ()
 // of that expression.
 function spotPayload ($text, $reqtype = 'SYNT_CODETEXT')
 {
-	require_once 'inc/code.php';
+	require_once 'code.php';
 	$lex = getLexemsFromRawText ($text);
 	if ($lex['result'] != 'ACK')
 		return $lex;
@@ -4310,7 +4310,7 @@ function getRackCode ($text)
 	// so checking intermediate result once more won't hurt.
 	if (!count ($synt['load']))
 		return array ('result' => 'NAK', 'load' => 'Empty parse tree found in ' . __FUNCTION__);
-	require_once 'inc/code.php'; // for semanticFilter()
+	require_once 'code.php'; // for semanticFilter()
 	return semanticFilter ($synt['load']);
 }
 

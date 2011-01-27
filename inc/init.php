@@ -9,10 +9,10 @@
 *
 */
 
-require_once 'inc/exceptions.php';
-require_once 'inc/config.php';
-require_once 'inc/functions.php';
-require_once 'inc/database.php';
+require_once 'exceptions.php';
+require_once 'config.php';
+require_once 'functions.php';
+require_once 'database.php';
 // Always have default values for these options, so if a user didn't
 // care to set, something would be working anyway.
 $user_auth_src = 'database';
@@ -124,7 +124,7 @@ $taglist = getTagList();
 $tagtree = treeFromList ($taglist);
 sortTree ($tagtree, 'taginfoCmp');
 
-require_once 'inc/auth.php';
+require_once 'auth.php';
 $auto_tags = array();
 // Initial chain for the current user.
 $user_given_tags = array();
@@ -157,12 +157,12 @@ else
 
 alterConfigWithUserPreferences();
 
-require_once 'inc/navigation.php';
-require_once 'inc/triggers.php';
+require_once 'navigation.php';
+require_once 'triggers.php';
 
 
 $op = '';
-require_once 'inc/gateways.php';
+require_once 'gateways.php';
 if (file_exists ('inc/local.php'))
 	require_once 'inc/local.php';
 
@@ -172,6 +172,6 @@ $impl_tags = array();
 // Initial chain for the current target.
 $target_given_tags = array();
 
-require_once 'inc/IPv6.php';
+require_once 'IPv6.php';
 
 ?>
