@@ -156,6 +156,18 @@ $masklenByDQ = array
 	'0.0.0.0' => 0,
 );
 
+// 802.1Q deploy queue titles
+$dqtitle = array
+(
+	'sync_aging' => 'Normal, aging',
+	'resync_aging' => 'Version conflict, aging',
+	'sync_ready' => 'Normal, ready for sync',
+	'resync_ready' => 'Version conflict, ready for retry',
+	'failed' => 'Failed',
+	'disabled' => 'Sync disabled',
+	'done' => 'Up to date',
+);
+
 // This function assures that specified argument was passed
 // and is a number greater than zero.
 function assertUIntArg ($argname, $allow_zero = FALSE)

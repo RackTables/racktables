@@ -50,18 +50,6 @@ $vtoptions = array
 #	'alien' => 'never touch',
 );
 
-// 802.1Q deploy queue titles
-$dqtitle = array
-(
-	'sync_aging' => 'Normal, aging',
-	'resync_aging' => 'Version conflict, aging',
-	'sync_ready' => 'Normal, ready for sync',
-	'resync_ready' => 'Version conflict, ready for retry',
-	'failed' => 'Failed',
-	'disabled' => 'Sync disabled',
-	'done' => 'Up to date',
-);
-
 // Let's have it here, so extensions can add their own images.
 $image = array();
 $image['logo']['path'] = 'pix/defaultlogo.png';
