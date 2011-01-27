@@ -38,9 +38,14 @@ default:
 $max = array_key_exists ('max', $options) ? $options['max'] : 0;
 $verbose = array_key_exists ('verbose', $options);
 
-if (NULL === $mydomain = getVLANDomain ($options['vdid']))
+try
+{
+	$mydomain = getVLANDomain ($options['vdid']);
+}
+catch (RackTablesError $e)
 {
 	echo "Cannot load domain data with ID ${options['vdid']}\n";
+	echo $e->getMessage() . "\n";
 	exit (1);
 }
 
