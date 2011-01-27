@@ -504,13 +504,12 @@ function updPortForwarding ()
 }
 
 $msgcode['addPortForObject']['OK'] = 48;
-$msgcode['addPortForObject']['ERR2'] = 100;
 function addPortForObject ()
 {
 	assertStringArg ('port_name', TRUE);
 	genericAssertion ('port_l2address', 'l2address0');
 	genericAssertion ('port_name', 'string');
-	$error = commitAddPort
+	commitAddPort
 	(
 		$_REQUEST['object_id'],
 		trim ($_REQUEST['port_name']),
@@ -518,10 +517,7 @@ function addPortForObject ()
 		trim ($_REQUEST['port_label']),
 		trim ($_REQUEST['port_l2address'])
 	);
-	if ($error != '')
-		return buildRedirectURL (__FUNCTION__, 'ERR2', array ($error));
-	else
-		return buildRedirectURL (__FUNCTION__, 'OK', array ($_REQUEST['port_name']));
+	return buildRedirectURL (__FUNCTION__, 'OK', array ($_REQUEST['port_name']));
 }
 
 $msgcode['editPortForObject']['OK'] = 7;
@@ -660,19 +656,13 @@ http://www.cisco.com/en/US/products/hw/routers/ps274/products_tech_note09186a008
 		$port_ids = getPortIDs ($object_id, $port['name']);
 		if (!count ($port_ids))
 		{
-			$result = commitAddPort ($object_id, $port['name'], $port_type, $port['label'], $port['l2address']);
-			if ($result == '')
-				$added_count++;
-			else
-				$error_count++;
+			commitAddPort ($object_id, $port['name'], $port_type, $port['label'], $port['l2address']);
+			$added_count++;
 		}
 		elseif (count ($port_ids) == 1) // update only single-socket ports
 		{
-			$result = commitUpdatePort ($object_id, $port_ids[0], $port['name'], $port_type, $port['label'], $port['l2address']);
-			if ($result == '')
-				$updated_count++;
-			else
-				$error_count++;
+			commitUpdatePort ($object_id, $port_ids[0], $port['name'], $port_type, $port['label'], $port['l2address']);
+			$updated_count++;
 		}
 	}
 	return buildRedirectURL (__FUNCTION__, 'OK', array ($added_count, $updated_count, $error_count));
@@ -699,11 +689,8 @@ function addBulkPorts ()
 		$port_name .= '%u';
 	for ($i=0,$c=$port_numbering_start; $i<$port_numbering_count; $i++,$c++)
 	{
-		$result = commitAddPort ($object_id, @sprintf($port_name,$c), $port_type_id, @sprintf($port_label,$c), '');
-		if ($result == '')
-			$added_count++;
-		else
-			$error_count++;
+		commitAddPort ($object_id, @sprintf($port_name,$c), $port_type_id, @sprintf($port_label,$c), '');
+		$added_count++;
 	}
 	return buildRedirectURL (__FUNCTION__, 'OK', array ($added_count, $error_count));
 }

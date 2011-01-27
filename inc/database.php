@@ -908,7 +908,7 @@ function commitAddPort ($object_id = 0, $port_name, $port_type_id, $port_label, 
 	if (alreadyUsedL2Address ($db_l2address, $object_id))
 	{
 		$dbxlink->exec ('UNLOCK TABLES');
-		return "address ${db_l2address} belongs to another object";
+		throw new InvalidRequestArgException ('port_l2address', $port_l2address, 'address belongs to another object');
 	}
 	$matches = array();
 	switch (1)
@@ -923,7 +923,7 @@ function commitAddPort ($object_id = 0, $port_name, $port_type_id, $port_label, 
 		break;
 	default:
 		$dbxlink->exec ('UNLOCK TABLES');
-		return "invalid port type id '${port_type_id}'";
+		throw new InvalidArgException ('port_type_id', $port_type_id, 'format error');
 	}
 	$result = usePreparedInsertBlade
 	(
@@ -939,10 +939,6 @@ function commitAddPort ($object_id = 0, $port_name, $port_type_id, $port_label, 
 		)
 	);
 	$dbxlink->exec ('UNLOCK TABLES');
-	if ($result)
-		return '';
-	else
-		return 'SQL query failed';
 }
 
 // The fifth argument may be either explicit 'NULL' or some (already quoted by the upper layer)
@@ -2809,10 +2805,8 @@ function executeAutoPorts ($object_id = 0, $type_id = 0)
 		throw new InvalidArgException ('$object_id', $object_id);
 	if ($type_id == 0)
 		throw new InvalidArgException ('$type_id', $type_id);
-	$ret = TRUE;
 	foreach (getAutoPorts ($type_id) as $autoport)
-		$ret = $ret and '' == commitAddPort ($object_id, $autoport['name'], $autoport['type'], '', '');
-	return $ret;
+		commitAddPort ($object_id, $autoport['name'], $autoport['type'], '', '');
 }
 
 // Return only implicitly listed tags, the rest of the chain will be

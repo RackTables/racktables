@@ -1195,10 +1195,7 @@ function doSwitchSNMPmining ($objectInfo, $device)
 				continue; // try next processor on current port
 			$newlabel = preg_replace ($iftable_processors[$processor_name]['pattern'], $iftable_processors[$processor_name]['label'], $iface['ifDescr'], 1, $count);
 			checkPIC ($iftable_processors[$processor_name]['dict_key']);
-			$msg = commitAddPort ($objectInfo['id'], $newname, $iftable_processors[$processor_name]['dict_key'], $newlabel, $iface['ifPhysAddress']);
-			if (!empty($msg)) {
-				$log = mergeLogs($log, oneLiner(100, array("Error adding port " . $iface['ifDescr'] . ": $processor_name: $msg")));
-			}
+			commitAddPort ($objectInfo['id'], $newname, $iftable_processors[$processor_name]['dict_key'], $newlabel, $iface['ifPhysAddress']);
 			if (!$iftable_processors[$processor_name]['try_next_proc']) // done with this port
 				continue 2;
 		}
@@ -1402,11 +1399,7 @@ function generatePortsForCatModule ($object_id, $slotno = 1, $mtype = 'X6748', $
 		$dbxlink->beginTransaction();
 		for ($i = 1; $i <= 48; $i++)
 		{
-			if ('' != commitAddPort ($object_id, "gi${slotno}/${i}", '1-24', "slot ${slotno} port ${i}", $mac_address))
-			{
-				$dbxlink->rollBack();
-				break 2;
-			}
+			commitAddPort ($object_id, "gi${slotno}/${i}", '1-24', "slot ${slotno} port ${i}", $mac_address);
 			$mac_address = nextMACAddress ($mac_address);
 		}
 		$dbxlink->commit();
