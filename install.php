@@ -878,10 +878,6 @@ END_OF_FILE;
 ##########################################################################
 	case 'dictbase':
 		return <<<END_OF_FILE
--- This file is intentionally kept in extended INSERT syntax
--- (1 query = N rows) to generate less diff noise on column
--- name change.
-
 INSERT INTO `Attribute` (`id`, `type`, `name`) VALUES
 (1,'string','OEM S/N 1'),
 (2,'dict','HW type'),
