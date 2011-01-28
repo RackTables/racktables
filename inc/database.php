@@ -632,7 +632,7 @@ function commitUpdateObject ($object_id, $new_name, $new_label, $new_barcode, $n
 		array
 		(
 			'name' => !mb_strlen ($new_name) ? NULL : $new_name,
-			'label' => $new_label,
+			'label' => !mb_strlen ($new_label) ? NULL : $new_label,
 			'barcode' => !mb_strlen ($new_barcode) ? NULL : $new_barcode,
 			'has_problems' => $new_has_problems,
 			'asset_no' => !mb_strlen ($new_asset_no) ? NULL : $new_asset_no,
