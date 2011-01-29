@@ -174,6 +174,26 @@ $opspec_list['file-edit-updateFile'] = array
 		array ('url_argname' => 'file_id', 'table_colname' => 'id', 'assertion' => 'uint')
 	),
 );
+$opspec_list['parentmap-edit-add'] = array
+(
+	'table' => 'ObjectParentCompat',
+	'action' => 'INSERT',
+	'arglist' => array
+	(
+		array ('url_argname' => 'parent_objtype_id', 'assertion' => 'uint'),
+		array ('url_argname' => 'child_objtype_id', 'assertion' => 'uint'),
+	),
+);
+$opspec_list['parentmap-edit-del'] = array
+(
+	'table' => 'ObjectParentCompat',
+	'action' => 'DELETE',
+	'arglist' => array
+	(
+		array ('url_argname' => 'parent_objtype_id', 'assertion' => 'uint'),
+		array ('url_argname' => 'child_objtype_id', 'assertion' => 'uint'),
+	),
+);
 $opspec_list['portmap-edit-add'] = array
 (
 	'table' => 'PortCompat',
@@ -1157,6 +1177,15 @@ function addMultipleObjects()
 			$log = mergeLogs ($log, oneLiner (184, array ($i + 1)));
 			break;
 		}
+
+		// set to empty values for virtual objects
+		if (isset ($_REQUEST['virtual_objects']))
+		{
+			$_REQUEST["${i}_object_label"] = '';
+			$_REQUEST["${i}_object_barcode"] = '';
+			$_REQUEST["${i}_object_asset_no"] = '';
+		}
+
 		assertUIntArg ("${i}_object_type_id", TRUE);
 		assertStringArg ("${i}_object_name", TRUE);
 		assertStringArg ("${i}_object_label", TRUE);
@@ -1321,7 +1350,7 @@ function resetMyPreference ()
 $msgcode['resetUIConfig']['OK'] = 57;
 function resetUIConfig()
 {
-	setConfigVar ('MASSCOUNT','15');
+	setConfigVar ('MASSCOUNT','8');
 	setConfigVar ('MAXSELSIZE','30');
 	setConfigVar ('ROW_SCALE','2');
 	setConfigVar ('PORTS_PER_ROW','12');
@@ -1350,7 +1379,7 @@ function resetUIConfig()
 	setConfigVar ('PREVIEW_IMAGE_MAXPXS', '320');
 	setConfigVar ('VENDOR_SIEVE', '');
 	setConfigVar ('IPV4LB_LISTSRC', '{$typeid_4}');
-	setConfigVar ('IPV4OBJ_LISTSRC','{$typeid_4} or {$typeid_7} or {$typeid_8} or {$typeid_12} or {$typeid_445} or {$typeid_447} or {$typeid_798}');
+	setConfigVar ('IPV4OBJ_LISTSRC','{$typeid_4} or {$typeid_7} or {$typeid_8} or {$typeid_12} or {$typeid_445} or {$typeid_447} or {$typeid_798} or {$typeid_1504}');
 	setConfigVar ('IPV4NAT_LISTSRC','{$typeid_4} or {$typeid_7} or {$typeid_8} or {$typeid_798}');
 	setConfigVar ('ASSETWARN_LISTSRC','{$typeid_4} or {$typeid_7} or {$typeid_8}');
 	setConfigVar ('NAMEWARN_LISTSRC','{$typeid_4} or {$typeid_7} or {$typeid_8}');
@@ -1388,6 +1417,8 @@ function resetUIConfig()
 	setConfigVar ('SHRINK_TAG_TREE_ON_CLICK', 'yes');
 	setConfigVar ('MAX_UNFILTERED_ENTITIES', '0');
 	setConfigVar ('SYNCDOMAIN_MAX_PROCESSES', '0');
+    setConfigVar ('VIRTUAL_OBJ_LISTSRC', '{$typeid_1504} or {$typeid_1505} or {$typeid_1506} or {$typeid_1507}');
+    setConfigVar ('PORT_EXCLUSION_LISTSRC', '{$typeid_3} or {$typeid_10} or {$typeid_11} or {$typeid_1505} or {$typeid_1506}');
 	return buildRedirectURL (__FUNCTION__, 'OK');
 }
 
@@ -1997,6 +2028,38 @@ function querySNMPData ()
 		$snmpsetup['priv_passphrase'] = $_REQUEST['priv_passphrase'];
 	}
 	return doSNMPmining ($_REQUEST['object_id'], $snmpsetup);
+}
+
+$msgcode['linkEntities']['OK'] = 51;
+$msgcode['linkEntities']['ERR2'] = 109;
+function linkEntities ()
+{
+	assertStringArg ('parent_entity_type');
+	assertUIntArg ('parent_entity_id');
+	assertStringArg ('child_entity_type');
+	assertUIntArg ('child_entity_id');
+	$result = usePreparedInsertBlade
+	(
+		'EntityLink',
+		array
+		(
+			'parent_entity_type' => $_REQUEST['parent_entity_type'],
+			'parent_entity_id' => $_REQUEST['parent_entity_id'],
+			'child_entity_type' => $_REQUEST['child_entity_type'],
+			'child_entity_id' => $_REQUEST['child_entity_id'],
+		)
+	);
+	if ($result === FALSE)
+		return buildRedirectURL (__FUNCTION__, 'ERR2');
+	return buildRedirectURL (__FUNCTION__, 'OK');
+}
+
+$msgcode['unlinkEntities']['OK'] = 49;
+$msgcode['unlinkEntities']['ERR'] = 111;
+function unlinkEntities ()
+{
+	assertUIntArg ('link_id');
+	return buildRedirectURL (__FUNCTION__, commitUnlinkEntities ($_REQUEST['link_id']) === FALSE ? 'ERR' : 'OK');
 }
 
 $msgcode['addFileWithoutLink']['OK'] = 5;

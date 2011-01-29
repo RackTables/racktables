@@ -88,6 +88,9 @@ $image['8021q']['height'] = 200;
 $image['objectlog']['path'] = 'pix/crystal-mimetypes-shellscript-218x200.png';
 $image['objectlog']['width'] = 218;
 $image['objectlog']['height'] = 200;
+$image['virtual']['path'] = 'pix/virtualresources.png';
+$image['virtual']['width'] = 218;
+$image['virtual']['height'] = 200;
 $image['download']['path'] = 'pix/download.png';
 $image['download']['width'] = 16;
 $image['download']['height'] = 16;
@@ -214,12 +217,15 @@ $image['object']['height'] = 16;
 $image['OBJECT']['path'] = 'pix/bracket-32x32.png';
 $image['OBJECT']['width'] = 32;
 $image['OBJECT']['height'] = 32;
-$image['ATTACH']['path'] = 'pix/tango-mail-attachment-32x32.png';
-$image['ATTACH']['width'] = 32;
-$image['ATTACH']['height'] = 32;
+$image['attach']['path'] = 'pix/tango-mail-attachment-16x16.png';
+$image['attach']['width'] = 16;
+$image['attach']['height'] = 16;
 $image['Attach']['path'] = 'pix/tango-mail-attachment-22x22.png';
 $image['Attach']['width'] = 22;
 $image['Attach']['height'] = 22;
+$image['ATTACH']['path'] = 'pix/tango-mail-attachment-32x32.png';
+$image['ATTACH']['width'] = 32;
+$image['ATTACH']['height'] = 32;
 $image['favorite']['path'] = 'pix/tango-emblem-favorite.png';
 $image['favorite']['width'] = 16;
 $image['favorite']['height'] = 16;
@@ -583,11 +589,21 @@ function renderRack ($rack_id, $hl_obj_id = 0)
 					else
 						$prefix = "<div title='no asset tag";
 					// Don't tell about label, if it matches common name.
+					$body = '';
 					if ($objectData['name'] != $objectData['label'] and strlen ($objectData['label']))
-						$suffix = ", visible label is \"${objectData['label']}\"'>";
+						$body = ", visible label is \"${objectData['label']}\"";
+					// Display list of child objects, if any
+					$objectChildren = getEntityRelatives ('children', 'object', $objectData['id']);
+					if (count($objectChildren) > 0)
+					{
+						foreach ($objectChildren as $child)
+							$childNames[] = $child['name'];
+						natsort($childNames);
+						$suffix = sprintf(", contains %s'>", implode(', ', $childNames));
+					}
 					else
 						$suffix = "'>";
-					echo $prefix . $suffix;
+					echo $prefix . $body . $suffix;
 					echo "<a href='".makeHref(array('page'=>'object', 'object_id'=>$objectData['id']))."'>${objectData['dname']}</a></div>";
 					break;
 				case 'A':
@@ -658,9 +674,54 @@ function renderEditObjectForm ($object_id)
 	echo "<tr><td>&nbsp;</td><th colspan=2><h2>Attributes</h2></th></tr>";
 	// baseline info
 	echo "<tr><td>&nbsp;</td><th class=tdright>Common name:</th><td class=tdleft><input type=text name=object_name value='${object['name']}'></td></tr>\n";
-	echo "<tr><td>&nbsp;</td><th class=tdright>Visible label:</th><td class=tdleft><input type=text name=object_label value='${object['label']}'></td></tr>\n";
-	echo "<tr><td>&nbsp;</td><th class=tdright>Asset tag:</th><td class=tdleft><input type=text name=object_asset_no value='${object['asset_no']}'></td></tr>\n";
-	echo "<tr><td>&nbsp;</td><th class=tdright>Barcode:</th><td class=tdleft><input type=text name=object_barcode value='${object['barcode']}'></td></tr>\n";
+	if (considerConfiguredConstraint ($object, 'VIRTUAL_OBJ_LISTSRC'))
+	{
+		echo "<input type=hidden name=object_label value=''>\n";
+		echo "<input type=hidden name=object_asset_no value=''>\n";
+		echo "<input type=hidden name=object_barcode value=''>\n";
+	}
+	else
+	{
+		echo "<tr><td>&nbsp;</td><th class=tdright>Visible label:</th><td class=tdleft><input type=text name=object_label value='${object['label']}'></td></tr>\n";
+		echo "<tr><td>&nbsp;</td><th class=tdright>Asset tag:</th><td class=tdleft><input type=text name=object_asset_no value='${object['asset_no']}'></td></tr>\n";
+		echo "<tr><td>&nbsp;</td><th class=tdright>Barcode:</th><td class=tdleft><input type=text name=object_barcode value='${object['barcode']}'></td></tr>\n";
+	}
+	// parent selection
+	if (rackObjectTypeMayHaveParent ($object['objtype_id']))
+	{
+		$parents = getEntityRelatives ('parents', 'object', $object_id);
+		foreach ($parents as $link_id => $parent_details)
+		{
+			if (!isset($label))
+				$label = count($parents) > 1 ? 'Containers:' : 'Container:';
+			echo "<tr><td>&nbsp;</td>";
+			echo "<th class=tdright>${label}</th><td class=tdleft>";
+			echo "<a href='".makeHref(array('page'=>'object', 'object_id'=>$parent_details['entity_id']))."'>${parent_details['name']}</a>";
+			echo "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+			echo "<a href='".
+				makeHrefProcess(array(
+					'op'=>'unlinkEntities', 
+					'link_id'=>$link_id,
+					'object_id'=>$object_id,
+					'page='=>'object',
+					'tab'=>'edit')).
+			"'>";
+			printImageHREF ('cut', 'Unlink container');
+			echo "</a>";
+			echo "</td></tr>\n";
+			$label = '&nbsp;';
+		}
+		echo "<tr><td>&nbsp;</td>";
+		echo "<th class=tdright>Select container:</th><td class=tdleft>";
+		echo "<span";
+		$helper_args = array ('object_id' => $object_id);
+		$popup_args = 'height=700, width=400, location=no, menubar=no, '.
+			'resizable=yes, scrollbars=yes, status=no, titlebar=no, toolbar=no';
+		echo " onclick='window.open(\"" . makeHrefForHelper ('objlist', $helper_args);
+		echo "\",\"findlink\",\"${popup_args}\");'>";
+		printImageHREF ('attach', 'Select a container');
+		echo "</span></td></tr>\n";
+	}
 	// optional attributes
 	$values = getAttrValues ($object_id);
 	echo '<input type=hidden name=num_attrs value=' . count($values) . ">\n";
@@ -934,6 +995,31 @@ function renderRackObject ($object_id)
 		echo "<tr><th width='50%' class=tdright>Visible label:</th><td class=tdleft>${info['label']}</td></tr>\n";
 	if (strlen ($info['barcode']))
 		echo "<tr><th width='50%' class=tdright>Barcode:</th><td class=tdleft>${info['barcode']}</td></tr>\n";
+	if ($parents = getEntityRelatives ('parents', 'object', $object_id))
+	{
+		foreach ($parents as $parent)
+		{
+			if (!isset($label))
+				$label = count($parents) > 1 ? 'Containers:' : 'Container:';
+			echo "<tr><th width='50%' class=tdright>${label}</th><td class=tdleft>";
+			echo "<a href='".makeHref(array('page'=>'object', 'object_id'=>$parent['entity_id']))."'>${parent['name']}</a>";
+			echo "</td></tr>\n";
+			$label = '&nbsp;';
+		}
+		unset ($label);
+	}
+	if ($children = getEntityRelatives ('children', 'object', $object_id))
+	{
+		foreach ($children as $child)
+		{
+			if (!isset($label))
+				$label = 'Contains:';
+			echo "<tr><th width='50%' class=tdright>${label}</th><td class=tdleft>";
+			echo "<a href='".makeHref(array('page'=>'object', 'object_id'=>$child['entity_id']))."'>${child['name']}</a>";
+			echo "</td></tr>\n";
+			$label = '&nbsp;';
+		}
+	}
 	if ($info['has_problems'] == 'yes')
 		echo "<tr><td colspan=2 class=msg_error>Has problems</td></tr>\n";
 	foreach (getAttrValues ($object_id) as $attr_id => $record)
@@ -1231,12 +1317,15 @@ function renderRackObject ($object_id)
 
 	// After left column we have (surprise!) right column with rackspace portlet only.
 	echo "<td class=pcright>";
-	// rackspace portlet
-	startPortlet ('rackspace allocation');
-	foreach (getResidentRacksData ($object_id, FALSE) as $rack_id)
-		renderRack ($rack_id, $object_id);
-	echo '<br>';
-	finishPortlet();
+	if (!considerConfiguredConstraint ($info, 'VIRTUAL_OBJ_LISTSRC'))
+	{
+		// rackspace portlet
+		startPortlet ('rackspace allocation');
+		foreach (getResidentRacksData ($object_id, FALSE) as $rack_id)
+			renderRack ($rack_id, $object_id);
+		echo '<br>';
+		finishPortlet();
+	}
 	echo "</td></tr>";
 	echo "</table>\n";
 }
@@ -3541,8 +3630,17 @@ function renderAddMultipleObjectsForm ()
 	$typelist = cookOptgroups ($typelist);
 	$max = getConfigVar ('MASSCOUNT');
 	$tabindex = 100;
+	$virt_obj_listsrc = getConfigVar ('VIRTUAL_OBJ_LISTSRC');
 
-	startPortlet ('Distinct types, same tags');
+	// create a list containing only physical object types
+	// FIXME: find a cleaner way of checking whether or not an object type exists in the config var
+	$phys_typelist = $typelist;
+	foreach ($phys_typelist['other'] as $key => $value)
+	{
+		if ($key > 0 && substr_count($virt_obj_listsrc, 'typeid_'.$key.'}') > 0)
+			unset($phys_typelist['other'][$key]);
+	}
+	startPortlet ('Physcial objects');
 	printOpFormIntro ('addObjects');
 	echo '<table border=0 align=center>';
 	echo "<tr><th>Object type</th><th>Common name</th><th>Visible label</th>";
@@ -3551,12 +3649,45 @@ function renderAddMultipleObjectsForm ()
 	{
 		echo '<tr><td>';
 		// Don't employ DEFAULT_OBJECT_TYPE to avoid creating ghost records for pre-selected empty rows.
-		printNiftySelect ($typelist, array ('name' => "${i}_object_type_id", 'tabindex' => $tabindex), 0);
+		printNiftySelect ($phys_typelist, array ('name' => "${i}_object_type_id", 'tabindex' => $tabindex), 0);
 		echo '</td>';
 		echo "<td><input type=text size=30 name=${i}_object_name tabindex=${tabindex}></td>";
 		echo "<td><input type=text size=30 name=${i}_object_label tabindex=${tabindex}></td>";
 		echo "<td><input type=text size=20 name=${i}_object_asset_no tabindex=${tabindex}></td>";
 		echo "<td><input type=text size=10 name=${i}_object_barcode tabindex=${tabindex}></td>";
+		if ($i == 0)
+		{
+			echo "<td valign=top rowspan=${max}>";
+			renderNewEntityTags ('object');
+			echo "</td>\n";
+		}
+		echo "</tr>\n";
+		$tabindex++;
+	}
+	echo "<tr><td class=submit colspan=5><input type=submit name=got_fast_data value='Go!'></td></tr>\n";
+	echo "</form></table>\n";
+	finishPortlet();
+
+	// create a list containing only virtual object types
+	// FIXME: find a cleaner way of checking whether or not an object type exists in the config var
+	$virt_typelist = $typelist;
+	foreach ($virt_typelist['other'] as $key => $value)
+	{
+		if ($key > 0 && substr_count($virt_obj_listsrc, 'typeid_'.$key.'}') == 0)
+			unset($virt_typelist['other'][$key]);
+	}
+	startPortlet ('Virtual objects');
+	printOpFormIntro ('addObjects');
+	echo "<input type=hidden name=virtual_objects value=''>\n";
+	echo '<table border=0 align=center>';
+	echo "<tr><th>Object type</th><th>Common name</th><th>Tags</th></tr>\n";
+	for ($i = 0; $i < $max; $i++)
+	{
+		echo '<tr><td>';
+		// Don't employ DEFAULT_OBJECT_TYPE to avoid creating ghost records for pre-selected empty rows.
+		printNiftySelect ($virt_typelist, array ('name' => "${i}_object_type_id", 'tabindex' => $tabindex), 0);
+		echo '</td>';
+		echo "<td><input type=text size=30 name=${i}_object_name tabindex=${tabindex}></td>";
 		if ($i == 0)
 		{
 			echo "<td valign=top rowspan=${max}>";
@@ -4075,6 +4206,63 @@ function renderPortOIFCompatEditor()
 		echo '<a href="' . makeHrefProcess (array ('op' => 'del', 'type1' => $pair['type1'], 'type2' => $pair['type2'])) . '">';
 		printImageHREF ('delete', 'remove pair');
 		echo "</a></td><td class=tdleft>${pair['type1name']}</td><td class=tdleft>${pair['type2name']}</td></tr>";
+	}
+	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')
+		printNewitemTR();
+	echo '</table>';
+}
+
+function renderObjectParentCompatViewer()
+{
+	global $nextorder;
+	$order = 'odd';
+	$last_left_parent_id = NULL;
+	echo '<br><table class=cooltable border=0 cellpadding=5 cellspacing=0 align=center>';
+	echo '<tr><th>Parent</th><th>Child</th></tr>';
+	foreach (getObjectParentCompat() as $pair)
+	{
+		if ($last_left_parent_id != $pair['parent_objtype_id'])
+		{
+			$order = $nextorder[$order];
+			$last_left_parent_id = $pair['parent_objtype_id'];
+		}
+		echo "<tr class=row_${order}><td>${pair['parent_name']}</td><td>${pair['child_name']}</td></tr>\n";
+	}
+	echo '</table>';
+}
+
+function renderObjectParentCompatEditor()
+{
+	function printNewitemTR()
+	{
+		printOpFormIntro ('add');
+		echo '<tr><th class=tdleft>';
+		printImageHREF ('add', 'add pair', TRUE);
+		echo '</th><th class=tdleft>';
+		printSelect (readChapter (CHAP_OBJTYPE), array ('name' => 'parent_objtype_id'));
+		echo '</th><th class=tdleft>';
+		printSelect (readChapter (CHAP_OBJTYPE), array ('name' => 'child_objtype_id'));
+		echo "</th></tr></form>\n";
+	}
+
+	global $nextorder;
+	$last_left_parent_id = NULL;
+	$order = 'odd';
+	echo '<br><table class=cooltable align=center border=0 cellpadding=5 cellspacing=0>';
+	echo '<tr><th>&nbsp;</th><th>Parent</th><th>Child</th></tr>';
+	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
+		printNewitemTR();
+	foreach (getObjectParentCompat() as $pair)
+	{
+		if ($last_left_parent_id != $pair['parent_objtype_id'])
+		{
+			$order = $nextorder[$order];
+			$last_left_parent_id = $pair['parent_objtype_id'];
+		}
+		echo "<tr class=row_${order}><td>";
+		echo '<a href="' . makeHrefProcess (array ('op' => 'del', 'parent_objtype_id' => $pair['parent_objtype_id'], 'child_objtype_id' => $pair['child_objtype_id'])) . '">';
+		printImageHREF ('delete', 'remove pair');
+		echo "</a></td><td class=tdleft>${pair['parent_name']}</td><td class=tdleft>${pair['child_name']}</td></tr>\n";
 	}
 	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')
 		printNewitemTR();
@@ -9134,6 +9322,104 @@ function renderGlobalLogEditor()
 	echo '</tr></table></td></tr>';
 	echo '</form>';
 	echo '</table>';
+}
+
+function renderVirtualResourcesSummary ()
+{
+	global $pageno, $nextorder;
+
+	echo "<table border=0 class=objectview>\n";
+	echo "<tr><td class=pcleft>";
+
+	$clusters = getVMClusterSummary ();
+	startPortlet ('Clusters (' . count ($clusters) . ')');
+	if (count($clusters) > 0)
+	{
+		echo "<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>\n";
+		echo "<tr><th>Cluster</th><th>Hypervisors</th><th>VMs</th></tr>\n";
+		$order = 'odd';
+		foreach ($clusters as $cluster)
+		{
+			echo "<tr class=row_${order} valign=top><td class='tdleft'><a href='".makeHref(array('page'=>'object', 'object_id'=>$cluster['id']))."'><strong>${cluster['name']}</strong></a></td>";
+			echo "<td class='tdleft'>${cluster['hypervisors']}</td>";
+			echo "<td class='tdleft'>${cluster['VMs']}</td>";
+			echo "</tr>\n";
+			$order = $nextorder[$order];
+		}
+		echo "</table>\n";
+	}
+	else
+		echo '<b>No clusters exist</b>';
+	finishPortlet();
+
+	echo "</td><td class=pcright>";
+
+	$pools = getVMResourcePoolSummary ();
+	startPortlet ('Resource Pools (' . count ($pools) . ')');
+	if (count($pools) > 0)
+	{
+		echo "<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>\n";
+		echo "<tr><th>Pool</th><th>Cluster</th><th>VMs</th></tr>\n";
+		$order = 'odd';
+		foreach ($pools as $pool)
+		{
+			echo "<tr class=row_${order} valign=top><td class='tdleft'><a href='".makeHref(array('page'=>'object', 'object_id'=>$pool['id']))."'><strong>${pool['name']}</strong></a></td>";
+			echo "<td class='tdleft'><a href='".makeHref(array('page'=>'object', 'object_id'=>$pool['cluster_id']))."'><strong>${pool['cluster_name']}</strong></a></td>";
+			echo "<td class='tdleft'>${pool['VMs']}</td>";
+			echo "</tr>\n";
+			$order = $nextorder[$order];
+		}
+		echo "</table>\n";
+	}
+	else
+		echo '<b>No pools exist</b>';
+	finishPortlet();
+
+	echo "</td></tr><tr><td class=pcleft>";
+
+	$hypervisors = getVMHypervisorSummary ();
+	startPortlet ('Hypervisors (' . count ($hypervisors) . ')');
+	if (count($hypervisors) > 0)
+	{
+		echo "<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>\n";
+		echo "<tr><th>Pool</th><th>Cluster</th><th>VMs</th></tr>\n";
+		$order = 'odd';
+		foreach ($hypervisors as $hypervisor)
+		{
+			echo "<tr class=row_${order} valign=top><td class='tdleft'><a href='".makeHref(array('page'=>'object', 'object_id'=>$hypervisor['id']))."'><strong>${hypervisor['name']}</strong></a></td>";
+			echo "<td class='tdleft'><a href='".makeHref(array('page'=>'object', 'object_id'=>$hypervisor['cluster_id']))."'><strong>${hypervisor['cluster_name']}</strong></a></td>";
+			echo "<td class='tdleft'>${hypervisor['VMs']}</td>";
+			echo "</tr>\n";
+			$order = $nextorder[$order];
+		}
+		echo "</table>\n";
+	}
+	else
+		echo '<b>No hypervisors exist</b>';
+	finishPortlet();
+
+	echo "</td><td class=pcright>";
+
+	$switches = getVMSwitchSummary ();
+	startPortlet ('Virtual Switches (' . count ($switches) . ')');
+	if (count($switches) > 0)
+	{
+		echo "<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>\n";
+		echo "<tr><th>Name</th></tr>\n";
+		$order = 'odd';
+		foreach ($switches as $switch)
+		{
+			echo "<tr class=row_${order} valign=top><td class='tdleft'><a href='".makeHref(array('page'=>'object', 'object_id'=>$switch['id']))."'><strong>${switch['name']}</strong></a></td>";
+			echo "</tr>\n";
+			$order = $nextorder[$order];
+		}
+		echo "</table>\n";
+	}
+	else
+		echo '<b>No virtual switches exist</b>';
+	finishPortlet();
+
+	echo "</td></tr></table>\n";
 }
 
 function switchportInfoJS($object_id)

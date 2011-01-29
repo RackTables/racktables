@@ -16,7 +16,7 @@ $indexlayout = array
 (
 	array ('rackspace', 'depot', 'ipv4space', 'ipv6space'),
 	array ('files', 'reports', 'ipv4slb', '8021q'),
-	array ('config', 'objectlog'),
+	array ('config', 'objectlog', 'virtual'),
 );
 
 $page['index']['title'] = 'Main page';
@@ -130,6 +130,7 @@ $tabhandler['object']['8021qorder'] = 'render8021QOrderForm';
 $tabhandler['object']['8021qports'] = 'renderObject8021QPorts';
 $tabhandler['object']['8021qsync'] = 'renderObject8021QSync';
 $trigger['object']['rackspace'] = 'trigger_rackspace';
+$trigger['object']['ports'] = 'trigger_ports';
 $trigger['object']['ipv4'] = 'trigger_ipv4';
 $trigger['object']['ipv6'] = 'trigger_ipv6';
 $trigger['object']['nat4'] = 'trigger_natv4';
@@ -146,6 +147,8 @@ $trigger['object']['tags'] = 'trigger_tags';
 $trigger['object']['8021qorder'] = 'trigger_object_8021qorder';
 $trigger['object']['8021qports'] = 'trigger_object_8021qports';
 $trigger['object']['8021qsync'] = 'trigger_object_8021qsync';
+$ophandler['object']['edit']['linkEntities'] = 'linkEntities';
+$ophandler['object']['edit']['unlinkEntities'] = 'unlinkEntities';
 $ophandler['object']['rackspace']['updateObjectAllocation'] = 'updateObjectAllocation';
 $ophandler['object']['ports']['addPort'] = 'addPortForObject';
 $ophandler['object']['ports']['editPort'] = 'editPortForObject';
@@ -414,6 +417,15 @@ $tabhandler['perms']['default'] = 'renderRackCodeViewer';
 $tabhandler['perms']['edit'] = 'renderRackCodeEditor';
 $ophandler['perms']['edit']['saveRackCode'] = 'saveRackCode';
 
+$page['parentmap']['title'] = 'Object container compatibility';
+$page['parentmap']['parent'] = 'config';
+$tab['parentmap']['default'] = 'View';
+$tab['parentmap']['edit'] = 'Edit';
+$tabhandler['parentmap']['default'] = 'renderObjectParentCompatViewer';
+$tabhandler['parentmap']['edit'] = 'renderObjectParentCompatEditor';
+$ophandler['parentmap']['edit']['add'] = 'tableHandler';
+$ophandler['parentmap']['edit']['del'] = 'tableHandler';
+
 $page['portmap']['title'] = 'Port compatibility';
 $page['portmap']['parent'] = 'config';
 $tab['portmap']['default'] = 'View';
@@ -628,5 +640,10 @@ $tab['objectlog']['default'] = 'View';
 #$tab['objectlog']['add'] = 'Add'; // FIXME: finish, then enable
 $tabhandler['objectlog']['default'] = 'allObjectLogs';
 #$tabhandler['objectlog']['add'] = 'renderGlobalLogEditor';
+
+$page['virtual']['title'] = 'Virtual Resources';
+$page['virtual']['parent'] = 'index';
+$tab['virtual']['default'] = 'Summary';
+$tabhandler['virtual']['default'] = 'renderVirtualResourcesSummary';
 
 ?>

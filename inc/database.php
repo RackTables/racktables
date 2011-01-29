@@ -646,6 +646,176 @@ function commitUpdateObject ($object_id, $new_name, $new_label, $new_barcode, $n
 	return recordHistory ('RackObject', $object_id);
 }
 
+// find either parents or children of a record
+function getEntityRelatives ($type, $entity_type, $entity_id)
+{
+	if ($type == 'parents')
+	{
+		// searching for parents
+		$sql =
+			'SELECT id, parent_entity_type AS entity_type, parent_entity_id AS entity_id FROM EntityLink ' .
+			'WHERE child_entity_type = ? AND child_entity_id = ?';
+	}
+	else
+	{
+		// searching for children
+		$sql =
+			'SELECT id, child_entity_type AS entity_type, child_entity_id AS entity_id FROM EntityLink ' .
+			'WHERE parent_entity_type = ? AND parent_entity_id = ?';
+	}
+	$query = usePreparedSelectBlade ($sql, array ($entity_type, $entity_id));
+	$rows = $query->fetchAll (PDO::FETCH_ASSOC);
+	$ret = array();
+	foreach ($rows as $row)
+	{
+		// get info of the relative (only objects supported now, others may be added later)
+		switch ($row['entity_type'])
+		{
+			case 'object':
+				$page = 'object';
+				$id_name = 'object_id';
+				$relative = spotEntity ($row['entity_type'], $row['entity_id']);
+				$name = $relative['dname'];
+				break;
+		}
+
+		// name needs to have some value for hrefs to work
+        if (!strlen ($name))
+			$name = sprintf("[Unnamed %s]", formatEntityName($row['entity_type']));
+
+		$ret[$row['id']] = array(
+				'page' => $page,
+				'id_name' => $id_name,
+				'entity_type' => $row['entity_type'],
+				'entity_id' => $row['entity_id'],
+				'name' => $name
+		);
+	}
+	// FIXME: .amd - doesn't work when getEntityRelatives is called twice
+	/*
+	// sort by name
+	function compare_name ($a, $b)
+	{
+		return strnatcmp($a['name'], $b['name']);
+	}
+	uasort($ret, 'compare_name');
+	*/
+	return $ret;
+}
+
+function commitUnlinkEntities ($link_id)
+{
+	return usePreparedDeleteBlade ('EntityLink', array ('id' => $link_id));
+}
+
+// The following functions return stats about VM-related info.
+// TODO: simplify the queries
+function getVMClusterSummary ()
+{
+	$result = usePreparedSelectBlade
+	(
+		"SELECT RO.id, RO.name, " .
+		"(SELECT COUNT(*) FROM EntityLink EL " .
+		"LEFT JOIN RackObject RO_H ON EL.child_entity_id = RO_H.id " .
+		"LEFT JOIN AttributeValue AV ON RO_H.id = AV.object_id " .
+		"WHERE EL.parent_entity_type = 'object' " .
+		"AND EL.child_entity_type = 'object' " .
+		"AND EL.parent_entity_id = RO.id " .
+		"AND RO_H.objtype_id = 4 " .
+		"AND AV.attr_id = 26 " .
+		"AND AV.uint_value = 1501) AS hypervisors, " .
+		"(SELECT COUNT(*) FROM EntityLink EL " .
+		"LEFT JOIN RackObject RO_VM ON EL.child_entity_id = RO_VM.id " .
+		"WHERE EL.parent_entity_type = 'object' " .
+		"AND EL.child_entity_type = 'object' " .
+		"AND EL.parent_entity_id = RO.id " .
+		"AND RO_VM.objtype_id = 1504) AS VMs " .
+		"FROM RackObject RO " .
+		"WHERE RO.objtype_id = 1505 " .
+		"ORDER BY RO.name"
+	);
+	return $result->fetchAll (PDO::FETCH_ASSOC);
+}
+
+function getVMResourcePoolSummary ()
+{
+	$result = usePreparedSelectBlade
+	(
+		"SELECT RO.id, RO.name, " .
+		"(SELECT RO_C.id " .
+		"FROM EntityLink EL " .
+		"LEFT JOIN RackObject RO_C ON EL.parent_entity_id = RO_C.id " .
+		"WHERE EL.child_entity_id = RO.id " .
+		"AND EL.parent_entity_type = 'object' " .
+		"AND EL.child_entity_type = 'object' " .
+		"AND RO_C.objtype_id = 1505) AS cluster_id, " .
+		"(SELECT RO_C.name " .
+		"FROM EntityLink EL " .
+		"LEFT JOIN RackObject RO_C ON EL.parent_entity_id = RO_C.id " .
+		"WHERE EL.child_entity_id = RO.id " .
+		"AND EL.parent_entity_type = 'object' " .
+		"AND EL.child_entity_type = 'object' " .
+		"AND RO_C.objtype_id = 1505) AS cluster_name, " .
+		"(SELECT COUNT(*) FROM EntityLink EL " .
+		"LEFT JOIN RackObject RO_VM ON EL.child_entity_id = RO_VM.id " .
+		"WHERE EL.parent_entity_type = 'object' " .
+		"AND EL.child_entity_type = 'object' " .
+		"AND EL.parent_entity_id = RO.id " .
+		"AND RO_VM.objtype_id = 1504) AS VMs " .
+		"FROM RackObject RO " .
+		"WHERE RO.objtype_id = 1506 " .
+		"ORDER BY RO.name"
+	);
+	return $result->fetchAll (PDO::FETCH_ASSOC);
+}
+
+function getVMHypervisorSummary ()
+{
+	$result = usePreparedSelectBlade
+	(
+		"SELECT RO.id, RO.name, " .
+		"(SELECT RO_C.id " .
+		"FROM EntityLink EL " .
+		"LEFT JOIN RackObject RO_C ON EL.parent_entity_id = RO_C.id " .
+		"WHERE EL.child_entity_id = RO.id " .
+		"AND EL.parent_entity_type = 'object' " .
+		"AND EL.child_entity_type = 'object' " .
+		"AND RO_C.objtype_id = 1505) AS cluster_id, " .
+		"(SELECT RO_C.name " .
+		"FROM EntityLink EL " .
+		"LEFT JOIN RackObject RO_C ON EL.parent_entity_id = RO_C.id " .
+		"WHERE EL.child_entity_id = RO.id " .
+		"AND EL.parent_entity_type = 'object' " .
+		"AND EL.child_entity_type = 'object' " .
+		"AND RO_C.objtype_id = 1505) AS cluster_name, " .
+		"(SELECT COUNT(*) FROM EntityLink EL " .
+		"LEFT JOIN RackObject RO_VM ON EL.child_entity_id = RO_VM.id " .
+		"WHERE EL.parent_entity_type = 'object' " .
+		"AND EL.child_entity_type = 'object' " .
+		"AND EL.parent_entity_id = RO.id " .
+		"AND RO_VM.objtype_id = 1504) AS VMs " .
+		"FROM RackObject RO " .
+		"LEFT JOIN AttributeValue AV ON RO.id = AV.object_id " .
+		"WHERE RO.objtype_id = 4 " .
+		"AND AV.attr_id = 26 " .
+		"AND AV.uint_value = 1501 " .
+		"ORDER BY RO.name"
+	);
+	return $result->fetchAll (PDO::FETCH_ASSOC);
+}
+
+function getVMSwitchSummary ()
+{
+	$result = usePreparedSelectBlade
+	(
+		"SELECT RO.id, RO.name " .
+		"FROM RackObject RO " .
+		"WHERE RO.objtype_id = 1507 " .
+		"ORDER BY RO.name"
+	);
+	return $result->fetchAll (PDO::FETCH_ASSOC);
+}
+
 // Remove file links related to the entity, but leave the entity and file(s) intact.
 function releaseFiles ($entity_realm, $entity_id)
 {
@@ -1989,6 +2159,48 @@ function getPortOIFCompat ()
 		'ORDER BY type1name, type2name';
 	$result = usePreparedSelectBlade ($query);
 	return $result->fetchAll (PDO::FETCH_ASSOC);
+}
+
+// Returns an array of all object type pairs from the ObjectParentCompat table.
+function getObjectParentCompat ()
+{
+	$query =
+		'SELECT parent_objtype_id, child_objtype_id, d1.dict_value AS parent_name, d2.dict_value AS child_name FROM ' .
+		'ObjectParentCompat AS pc INNER JOIN Dictionary AS d1 ON pc.parent_objtype_id = d1.dict_key ' .
+		'INNER JOIN Dictionary AS d2 ON pc.child_objtype_id = d2.dict_key ' .
+		'ORDER BY parent_name, child_name';
+	$result = usePreparedSelectBlade ($query);
+	return $result->fetchAll (PDO::FETCH_ASSOC);
+}
+
+// Used to determine if a type of object may have a parent or not
+function rackObjectTypeMayHaveParent ($objtype_id)
+{
+	$result = usePreparedSelectBlade ('SELECT COUNT(*) FROM ObjectParentCompat WHERE child_objtype_id = ?', array ($objtype_id));
+	$row = $result->fetch (PDO::FETCH_NUM);
+	if ($row[0] > 0)
+		return TRUE;
+	return FALSE;
+}
+
+// Add a pair to the ObjectParentCompat table.
+function commitSupplementOPC ($parent_objtype_id, $child_objtype_id)
+{
+	if ($parent_objtype_id <= 0)
+		throw new InvalidArgException ('parent_objtype_id', $parent_objtype_id);
+	if ($child_objtype_id <= 0)
+		throw new InvalidArgException ('child_objtype_id', $child_objtype_id);
+	return usePreparedInsertBlade
+	(
+		'ObjectParentCompat',
+		array ('parent_objtype_id' => $parent_objtype_id, 'child_objtype_id' => $child_objtype_id)
+	);
+}
+
+// Remove a pair from the ObjectParentCompat table.
+function commitReduceOPC ($parent_objtype_id, $child_objtype_id)
+{
+	return usePreparedDeleteBlade ('ObjectParentCompat', array ('parent_objtype_id' => $parent_objtype_id, 'child_objtype_id' => $child_objtype_id));
 }
 
 function getDictStats ()

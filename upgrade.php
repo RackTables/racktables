@@ -756,6 +756,7 @@ CREATE TABLE `VLANValidID` (
 			$query[] = "UPDATE Config SET varvalue = '0.18.5' WHERE varname = 'DB_VERSION'";
 			break;
 		case '0.19.0':
+			$query = array_merge ($query, reloadDictionary ($batchid));
 			$query[] = 'ALTER TABLE `File` ADD `thumbnail` LONGBLOB NULL AFTER `atime`';
 			$query[] = "
 CREATE TABLE `IPv6Address` (
@@ -811,6 +812,24 @@ CREATE TABLE `ObjectLog` (
   CONSTRAINT `ObjectLog-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `RackObject` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB
 ";
+			$query[] = "
+CREATE TABLE `ObjectParentCompat` (
+  `parent_objtype_id` int(10) unsigned NOT NULL,
+  `child_objtype_id` int(10) unsigned NOT NULL,
+  UNIQUE KEY `parent_child` (`parent_objtype_id`,`child_objtype_id`)
+) ENGINE=InnoDB
+";
+			$query[] = "
+CREATE TABLE `EntityLink` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `parent_entity_type` enum('ipv4net','ipv4rspool','ipv4vs','ipv6net','object','rack','user') NOT NULL,
+  `parent_entity_id` int(10) unsigned NOT NULL,
+  `child_entity_type` enum('file','object') NOT NULL,
+  `child_entity_id` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `EntityLink-unique` (`parent_entity_type`,`parent_entity_id`,`child_entity_type`,`child_entity_id`)
+) ENGINE=InnoDB
+";
 			$query[] = "ALTER TABLE `TagStorage` CHANGE COLUMN `entity_realm` `entity_realm` ENUM('file','ipv4net','ipv4vs','ipv4rspool','object','rack','user','ipv6net') NOT NULL DEFAULT 'object' FIRST";
 			$query[] = "ALTER TABLE `FileLink` CHANGE COLUMN `entity_type` `entity_type` ENUM('ipv4net','ipv4rspool','ipv4vs','object','rack','user','ipv6net') NOT NULL DEFAULT 'object' AFTER `file_id`";
 			$query[] = 'ALTER TABLE Link ADD COLUMN cable char(64) NULL AFTER portb';
@@ -819,6 +838,60 @@ CREATE TABLE `ObjectLog` (
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('SYNCDOMAIN_MAX_PROCESSES','0','uint','yes','no', 'How many worker proceses syncdomain cron script should create')";
 			$query[] = "ALTER TABLE `VLANSwitchTemplate` ADD COLUMN `mutex_rev` int(10) NOT NULL AFTER `max_local_vlans`";
 			$query[] = "ALTER TABLE `VLANSwitchTemplate` ADD COLUMN `saved_by` char(64) NOT NULL AFTER `description`";
+			$query[] = "INSERT INTO `Attribute` (`id`, `type`, `name`) VALUES (26,'dict','Hypervisor')";
+			$query[] = "INSERT INTO `Chapter` (`id`, `sticky`, `name`) VALUES (29,'no','Yes/No')";
+			$query[] = "INSERT INTO `Chapter` (`id`, `sticky`, `name`) VALUES (30,'no','network chassis models')";
+			$query[] = "INSERT INTO `Chapter` (`id`, `sticky`, `name`) VALUES (31,'no','server chassis models')";
+			$query[] = "INSERT INTO `Chapter` (`id`, `sticky`, `name`) VALUES (32,'no','virtual switch models')";
+			$query[] = "INSERT INTO `Chapter` (`id`, `sticky`, `name`) VALUES (33,'no','virtual switch OS type')";
+			$query[] = "INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_id`) VALUES (4,26,29)";
+			$query[] = "INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_id`) VALUES (1502,1,NULL)";
+			$query[] = "INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_id`) VALUES (1502,2,31)";
+			$query[] = "INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_id`) VALUES (1502,3,NULL)";
+			$query[] = "INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_id`) VALUES (1502,14,NULL)";
+			$query[] = "INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_id`) VALUES (1502,20,NULL)";
+			$query[] = "INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_id`) VALUES (1502,21,NULL)";
+			$query[] = "INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_id`) VALUES (1502,22,NULL)";
+			$query[] = "INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_id`) VALUES (1503,1,NULL)";
+			$query[] = "INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_id`) VALUES (1503,2,30)";
+			$query[] = "INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_id`) VALUES (1503,3,NULL)";
+			$query[] = "INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_id`) VALUES (1503,14,NULL)";
+			$query[] = "INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_id`) VALUES (1503,20,NULL)";
+			$query[] = "INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_id`) VALUES (1503,21,NULL)";
+			$query[] = "INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_id`) VALUES (1503,22,NULL)";
+			$query[] = "INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_id`) VALUES (1504,3,NULL)";
+			$query[] = "INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_id`) VALUES (1504,4,13)";
+			$query[] = "INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_id`) VALUES (1504,14,NULL)";
+			$query[] = "INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_id`) VALUES (1504,24,NULL)";
+			$query[] = "INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_id`) VALUES (1505,14,NULL)";
+			$query[] = "INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_id`) VALUES (1506,14,NULL)";
+			$query[] = "INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_id`) VALUES (1506,17,NULL)";
+			$query[] = "INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_id`) VALUES (1506,18,NULL)";
+			$query[] = "INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_id`) VALUES (1507,1,NULL)";
+			$query[] = "INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_id`) VALUES (1507,2,32)";
+			$query[] = "INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_id`) VALUES (1507,3,NULL)";
+			$query[] = "INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_id`) VALUES (1507,4,33)";
+			$query[] = "INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_id`) VALUES (1507,5,NULL)";
+			$query[] = "INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_id`) VALUES (1507,14,NULL)";
+			$query[] = "INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_id`) VALUES (1507,20,NULL)";
+			$query[] = "INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_id`) VALUES (1507,21,NULL)";
+			$query[] = "INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_id`) VALUES (1507,22,NULL)";
+			$query[] = "INSERT INTO `ObjectParentCompat` (`parent_objtype_id`, `child_objtype_id`) VALUES (3,13)";
+			$query[] = "INSERT INTO `ObjectParentCompat` (`parent_objtype_id`, `child_objtype_id`) VALUES (4,1504)";
+			$query[] = "INSERT INTO `ObjectParentCompat` (`parent_objtype_id`, `child_objtype_id`) VALUES (4,1507)";
+			$query[] = "INSERT INTO `ObjectParentCompat` (`parent_objtype_id`, `child_objtype_id`) VALUES (1502,4)";
+			$query[] = "INSERT INTO `ObjectParentCompat` (`parent_objtype_id`, `child_objtype_id`) VALUES (1503,8)";
+			$query[] = "INSERT INTO `ObjectParentCompat` (`parent_objtype_id`, `child_objtype_id`) VALUES (1505,4)";
+			$query[] = "INSERT INTO `ObjectParentCompat` (`parent_objtype_id`, `child_objtype_id`) VALUES (1505,1504)";
+			$query[] = "INSERT INTO `ObjectParentCompat` (`parent_objtype_id`, `child_objtype_id`) VALUES (1505,1506)";
+			$query[] = "INSERT INTO `ObjectParentCompat` (`parent_objtype_id`, `child_objtype_id`) VALUES (1505,1507)";
+			$query[] = "INSERT INTO `ObjectParentCompat` (`parent_objtype_id`, `child_objtype_id`) VALUES (1506,1504)";
+			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdefined, description) VALUES ('VIRTUAL_OBJ_LISTSRC','{\$typeid_1504} or {\$typeid_1505} or {\$typeid_1506} or {\$typeid_1507}','string','yes','no','no','List source: virtual objects')";
+			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdefined, description) VALUES ('PORT_EXCLUSION_LISTSRC','{\$typeid_3} or {\$typeid_10} or {\$typeid_11} or {\$typeid_1505} or {\$typeid_1506}','string','yes','no','no','List source: objects without ports')";
+			$query[] = "UPDATE RackObject SET objtype_id = 1502 WHERE id IN (SELECT object_id FROM AttributeValue WHERE attr_id = 2 AND uint_value = 994)";
+			$query[] = "UPDATE RackObject SET objtype_id = 1503 WHERE id IN (SELECT object_id FROM AttributeValue WHERE attr_id = 2 AND (uint_value BETWEEN 148 AND 158 OR uint_value = 369 OR uint_value = 1150))";
+			$query[] = "UPDATE Config SET varvalue = CONCAT(varvalue, ' or {\$typeid_2} or {\$typeid_6} or {\$typeid_1502} or {\$typeid_1503} or {\$typeid_1504} or {\$typeid_1507}') WHERE varname = 'IPV4OBJ_LISTSRC'";
+			$query[] = "UPDATE Config SET varvalue = '8' WHERE varname = 'MASSCOUNT'";
 			$query[] = "UPDATE RackObject SET label = NULL WHERE label = ''";
 			$query[] = "UPDATE Config SET varvalue = '0.19.0' WHERE varname = 'DB_VERSION'";
 			break;

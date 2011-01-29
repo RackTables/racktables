@@ -415,6 +415,16 @@ CREATE TABLE `Dictionary` (
   UNIQUE KEY `chap_to_val` (`chapter_id`,`dict_value`)
 ) ENGINE=MyISAM AUTO_INCREMENT=50000;
 
+CREATE TABLE `EntityLink` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `parent_entity_type` enum('ipv4net','ipv4rspool','ipv4vs','ipv6net','object','rack','user') NOT NULL,
+  `parent_entity_id` int(10) unsigned NOT NULL,
+  `child_entity_type` enum('file','object') NOT NULL,
+  `child_entity_id` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `EntityLink-unique` (`parent_entity_type`,`parent_entity_id`,`child_entity_type`,`child_entity_id`)
+) ENGINE=InnoDB;
+
 CREATE TABLE `File` (
   `id` int(10) unsigned NOT NULL auto_increment,
   `name` char(255) NOT NULL,
@@ -605,6 +615,12 @@ CREATE TABLE `ObjectLog` (
   KEY `object_id` (`object_id`),
   KEY `date` (`date`),
   CONSTRAINT `ObjectLog-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `RackObject` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE `ObjectParentCompat` (
+  `parent_objtype_id` int(10) unsigned NOT NULL,
+  `child_objtype_id` int(10) unsigned NOT NULL,
+  UNIQUE KEY `parent_child` (`parent_objtype_id`,`child_objtype_id`)
 ) ENGINE=InnoDB;
 
 CREATE TABLE `Port` (
@@ -896,7 +912,8 @@ INSERT INTO `Attribute` (`id`, `type`, `name`) VALUES
 (21,'string','support contract expiration'),
 (22,'string','HW warranty expiration'),
 (24,'string','SW warranty expiration'),
-(25,'string','UUID');
+(25,'string','UUID'),
+(26,'dict','Hypervisor');
 
 INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_id`) VALUES
 (2,1,NULL),
@@ -910,8 +927,9 @@ INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_id`) VALUES
 (4,14,NULL),
 (4,21,NULL),
 (4,22,NULL),
-(4,25,NULL),
 (4,24,NULL),
+(4,25,NULL),
+(4,26,29),
 (5,1,NULL),
 (5,2,18),
 (6,1,NULL),
@@ -981,7 +999,38 @@ INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_id`) VALUES
 (1323,1,NULL),
 (1323,2,28),
 (1323,3,NULL),
-(1323,5,NULL);
+(1323,5,NULL),
+(1502,1,NULL),
+(1502,2,31),
+(1502,3,NULL),
+(1502,14,NULL),
+(1502,20,NULL),
+(1502,21,NULL),
+(1502,22,NULL),
+(1503,1,NULL),
+(1503,2,30),
+(1503,3,NULL),
+(1503,14,NULL),
+(1503,20,NULL),
+(1503,21,NULL),
+(1503,22,NULL),
+(1504,3,NULL),
+(1504,4,13),
+(1504,14,NULL),
+(1504,24,NULL),
+(1505,14,NULL),
+(1506,14,NULL),
+(1506,17,NULL),
+(1506,18,NULL),
+(1507,1,NULL),
+(1507,2,32),
+(1507,3,NULL),
+(1507,4,33),
+(1507,5,NULL),
+(1507,14,NULL),
+(1507,20,NULL),
+(1507,21,NULL),
+(1507,22,NULL);
 
 INSERT INTO `Chapter` (`id`, `sticky`, `name`) VALUES
 (1,'yes','RackObjectType'),
@@ -1001,7 +1050,12 @@ INSERT INTO `Chapter` (`id`, `sticky`, `name`) VALUES
 (25,'no','wireless models'),
 (26,'no','fibre channel switch models'),
 (27,'no','PDU models'),
-(28,'no','Voice/video hardware');
+(28,'no','Voice/video hardware'),
+(29,'no','Yes/No'),
+(30,'no','network chassis models'),
+(31,'no','server chassis models'),
+(32,'no','virtual switch models'),
+(33,'no','virtual switch OS type');
 
 INSERT INTO `PortInnerInterface` VALUES
 (1,'hardwired'),
@@ -1013,6 +1067,18 @@ INSERT INTO `PortInnerInterface` VALUES
 (7,'XPAK'),
 (8,'XFP'),
 (9,'SFP+');
+
+INSERT INTO `ObjectParentCompat` VALUES
+(3,13),
+(4,1504),
+(4,1507),
+(1502,4),
+(1503,8),
+(1505,4),
+(1505,1504),
+(1505,1506),
+(1505,1507),
+(1506,1504);
 
 INSERT INTO `PortInterfaceCompat` VALUES
 (2,1208),(2,1195),(2,1196),(2,1197),(2,1198),(2,1199),(2,1200),(2,1201),
@@ -1217,7 +1283,7 @@ INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdef
 ('color_Th','80ffff','string','no','yes','no','HSV: 180-50-100. Taken atoms with highlight. They are not stored in the database and are only used for highlighting.'),
 ('color_Tw','804040','string','no','yes','no','HSV: 0-50-50. Taken atoms with object problem. This is detected at runtime.'),
 ('color_Thw','ff8080','string','no','yes','no','HSV: 0-50-100. An object can be both current and problematic. We run highlightObject() first and markupObjectProblems() second.'),
-('MASSCOUNT','15','uint','no','no','yes','&quot;Fast&quot; form is this many records tall'),
+('MASSCOUNT','8','uint','no','no','yes','&quot;Fast&quot; form is this many records tall'),
 ('MAXSELSIZE','30','uint','no','no','yes','&lt;SELECT&gt; lists height'),
 ('enterprise','MyCompanyName','string','no','no','no','Organization name'),
 ('ROW_SCALE','2','uint','no','no','yes','Picture scale for rack row display'),
@@ -1247,7 +1313,7 @@ INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdef
 ('PREVIEW_IMAGE_MAXPXS','320','uint','yes','no','yes','Max pixels per axis for image file preview'),
 ('VENDOR_SIEVE','','string','yes','no','yes','Vendor sieve configuration'),
 ('IPV4LB_LISTSRC','{\$typeid_4}','string','yes','no','no','List source: IPv4 load balancers'),
-('IPV4OBJ_LISTSRC','{\$typeid_4} or {\$typeid_7} or {\$typeid_8} or {\$typeid_12} or {\$typeid_445} or {\$typeid_447} or {\$typeid_798}','string','yes','no','no','List source: IPv4-enabled objects'),
+('IPV4OBJ_LISTSRC','{\$typeid_4} or {\$typeid_7} or {\$typeid_8} or {\$typeid_12} or {\$typeid_445} or {\$typeid_447} or {\$typeid_798} or {\$typeid_1502} or {\$typeid_1503} or {\$typeid_1504} or {\$typeid_1507}','string','yes','no','no','List source: IPv4-enabled objects'),
 ('IPV4NAT_LISTSRC','{\$typeid_4} or {\$typeid_7} or {\$typeid_8} or {\$typeid_798}','string','yes','no','no','List source: IPv4 NAT performers'),
 ('ASSETWARN_LISTSRC','{\$typeid_4} or {\$typeid_7} or {\$typeid_8}','string','yes','no','no','List source: object, for which asset tag should be set'),
 ('NAMEWARN_LISTSRC','{\$typeid_4} or {\$typeid_7} or {\$typeid_8}','string','yes','no','no','List source: object, for which common name should be set'),
@@ -1286,6 +1352,8 @@ INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdef
 ('SHRINK_TAG_TREE_ON_CLICK','yes','string','no','no','yes','Dynamically hide useless tags in tagtree'),
 ('MAX_UNFILTERED_ENTITIES','0','uint','no','no','yes','Max item count to display on unfiltered result page'),
 ('SYNCDOMAIN_MAX_PROCESSES','0','uint','yes','no', 'no', 'How many worker proceses syncdomain cron script should create'),
+('VIRTUAL_OBJ_LISTSRC','{\$typeid_1504} or {\$typeid_1505} or {\$typeid_1506} or {\$typeid_1507}','string','yes','no','no','List source: virtual objects'),
+('PORT_EXCLUSION_LISTSRC','{\$typeid_3} or {\$typeid_10} or {\$typeid_11} or {\$typeid_1505} or {\$typeid_1506}','string','yes','no','no','List source: objects without ports'),
 ('DB_VERSION','0.19.0','string','no','yes','no','Database version.');
 
 INSERT INTO `Script` VALUES ('RackCode','allow {\$userid_1}');

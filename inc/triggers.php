@@ -195,9 +195,24 @@ function trigger_file_editText ()
 
 function trigger_rackspace ()
 {
+	// Hide the tab if the object type exists in the virtual config option
+	assertUIntArg ('object_id');
+	if (considerConfiguredConstraint (spotEntity ('object', $_REQUEST['object_id']), 'VIRTUAL_OBJ_LISTSRC')) 
+		return '';
+
 	$rackspace = getRackspaceStats();
 	if ($rackspace['Racks'] > 0) return 'std';
 	return '';
+}
+
+function trigger_ports ()
+{
+	assertUIntArg ('object_id');
+	// Hide the tab if the object type exists in the exclusion config option
+	if (considerConfiguredConstraint (spotEntity ('object', $_REQUEST['object_id']), 'PORT_EXCLUSION_LISTSRC')) 
+		return '';
+
+	return 'std';
 }
 
 // Offer the generic VLAN setup tab for every object, which already
