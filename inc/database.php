@@ -4310,4 +4310,77 @@ function getLogRecords()
 	return $result->fetchAll (PDO::FETCH_ASSOC);
 }
 
+// In softfail mode die only on fatal errors, letting the user check
+// and resubmit his input.
+function setConfigVar ($varname = '', $varvalue = '', $softfail = FALSE)
+{
+	global $configCache;
+	if (!isset ($configCache))
+		throw new RackTablesError ('configuration cache is unavailable', RackTablesError::INTERNAL);
+	if
+	(
+		$varname == ''
+		or ! array_key_exists ($varname, $configCache)
+	)
+		throw new InvalidArgException ('$varname', $varname);
+	if ($configCache[$varname]['is_hidden'] != 'no')
+		throw new InvalidRequestArgException ('$varname', $varname, 'a hidden variable cannot be changed by user');
+	if (!mb_strlen ($varvalue) && $configCache[$varname]['emptyok'] != 'yes')
+		throw new InvalidRequestArgException ('$varvalue', $varvalue, "'${varname}' is required to have a non-empty value");
+	if (mb_strlen ($varvalue) && $configCache[$varname]['vartype'] == 'uint' && (!is_numeric ($varvalue) or $varvalue < 0 ))
+		throw new InvalidRequestArgException ('$varvalue', $varvalue, "'${varname}' can accept UINT values only");
+	// Update cache only if the changes went into DB.
+	usePreparedUpdateBlade ('Config', array ('varvalue' => $varvalue), array ('varname' => $varname));
+	$configCache[$varname]['varvalue'] = $varvalue;
+}
+
+function setUserConfigVar ($varname = '', $varvalue = '')
+{
+	global $configCache;
+	global $remote_username;
+	if (!isset ($configCache))
+		throw new RackTablesError ('configuration cache is unavailable', RackTablesError::INTERNAL);
+	if
+	(
+		$varname == ''
+		or ! array_key_exists ($varname, $configCache)
+	)
+		throw new InvalidArgException ('$varname', $varname);
+	if ($configCache[$varname]['is_userdefined'] != 'yes')
+		throw new InvalidRequestArgException ('$varname', $varname, 'a system-wide setting cannot be changed by user');
+	if ($configCache[$varname]['is_hidden'] != 'no')
+		throw new InvalidRequestArgException ('$varname', $varname, 'a hidden variable cannot be changed by user');
+	if (!mb_strlen ($varvalue) && $configCache[$varname]['emptyok'] != 'yes')
+		throw new InvalidRequestArgException ('$varvalue', $varvalue, "'${varname}' is required to have a non-empty value");
+	if (mb_strlen ($varvalue) && $configCache[$varname]['vartype'] == 'uint' && (!is_numeric ($varvalue) or $varvalue < 0 ))
+		throw new InvalidRequestArgException ('$varvalue', $varvalue, "'${varname}' can accept UINT values only");
+	// Update cache only if the changes went into DB.
+	usePreparedExecuteBlade
+	(
+		'REPLACE UserConfig SET varvalue=?, varname=?, user=?',
+		array ($varvalue, $varname, $remote_username)
+	);
+	$configCache[$varname]['varvalue'] = $varvalue;
+}
+
+function resetUserConfigVar ($varname = '')
+{
+	global $configCache;
+	global $remote_username;
+	if (!isset ($configCache))
+		throw new RackTablesError ('configuration cache is unavailable', RackTablesError::INTERNAL);
+	if
+	(
+		$varname == ''
+		or ! array_key_exists ($varname, $configCache)
+	)
+		throw new InvalidArgException ('$varname', $varname);
+	if ($configCache[$varname]['is_userdefined'] != 'yes')
+		throw new InvalidRequestArgException ('$varname', $varname, 'a system-wide setting cannot be changed by user');
+	if ($configCache[$varname]['is_hidden'] != 'no')
+		throw new InvalidRequestArgException ('$varname', $varname, 'a hidden variable cannot be changed by user');
+	// Update cache only if the changes went into DB.
+	usePreparedDeleteBlade ('UserConfig', array ('varname' => $varname, 'user' => $remote_username));
+}
+
 ?>
