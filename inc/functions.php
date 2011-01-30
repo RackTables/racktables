@@ -887,7 +887,7 @@ function parseWikiLink ($line, $which)
 		return $o_value;
 	$o_value = preg_replace ('/^.+%GSKIP%/', '', preg_replace ('/^(.+)%GPASS%/', '\\1 ', $o_value));
 	$a_value = trim ($s[1]);
-	return "<a href='${a_value}'>${o_value}</a>";
+	return $o_value . " <a class='img-link' href='${a_value}'>" . getImageHREF ('html', 'vendor`s info page') . "</a>";
 }
 
 // FIXME: should this be saved as "P-data"?

@@ -624,3 +624,7 @@ a.toggleTreeMode {
 	font: bold 10px Verdana, sans-serif;
 }
 
+/* link with single image as body */
+a.img-link {
+	vertical-align: bottom;
+}

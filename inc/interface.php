@@ -304,6 +304,9 @@ $image['DQUEUE disabled']['height'] = 32;
 $image['COPY']['path'] = 'pix/tango-edit-copy-32x32.png';
 $image['COPY']['width'] = 32;
 $image['COPY']['height'] = 32;
+$image['html']['path'] = 'pix/tango-text-html.png';
+$image['html']['width'] = 16;
+$image['html']['height'] = 16;
 
 // This may be populated later onsite, report rendering function will use it.
 // See the $systemreport for structure.
@@ -9210,7 +9213,10 @@ function renderDiscoveredNeighbors ($object_id)
 
 function formatAttributeValue($attribute_id, $record)
 {
-	if (isset ($record['key'])) // if record is a dictionary value, generate href with autotag in cfe
+	if (! isset ($record['key'])) // if record is a dictionary value, generate href with autotag in cfe
+		return $record['a_value'];	
+	else
+	{
 		$href = makeHref
 		(
 			array
@@ -9221,7 +9227,11 @@ function formatAttributeValue($attribute_id, $record)
 				'cfe' => '{$attr_' . $attribute_id . '_' . $record['key'] . '}',
 			)
 		);
-	return isset($href) ? "<a href=\"$href\">${record['a_value']}</a>" : $record['a_value'];	
+		if (preg_match ('#(.*?)\s*(<a[^<]+.*</a>)$#', $record['a_value'], $matches))
+			return "<a href=\"$href\">${matches[1]}</a>&nbsp;${matches[2]}";
+		else
+			return "<a href=\"$href\">${matches[1]}</a>";
+	}
 }
 
 function addAutoScrollScript ($ancor_name)
