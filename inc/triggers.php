@@ -82,9 +82,16 @@ function trigger_livevlans ()
 // This trigger is on when any of the (get_mac_list, get_link_status) ops permitted
 function trigger_liveports ()
 {
-	if (permitted (NULL, 'liveports', 'get_mac_list') or
-		permitted (NULL, 'liveports', 'get_link_status'))
-		return 'std';
+	global $gwrxlator;
+	$breed = detectDeviceBreed (getBypassValue());
+	foreach (array ('getportstatus', 'getmaclist') as $command)
+		if
+		(
+			array_key_exists ($command, $gwrxlator) and
+			array_key_exists ($breed, $gwrxlator[$command]) and
+			permitted (NULL, 'liveports', $command)
+		)
+			return 'std';
 	return '';
 }
 
