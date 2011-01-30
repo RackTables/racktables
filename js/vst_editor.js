@@ -47,7 +47,7 @@ function highlightUnsavedVST() {
     // highlight only on first call of this function
     if ( typeof highlightUnsavedVST.isAlreadyCalled == 'undefined' ) {
         highlightUnsavedVST.isAlreadyCalled = true;
-		$('input[name|="submit"]').before('<div class="msg_warning">Template is unsaved. Click here to save it</div>');
+		$('form#upd input[name|="submit"]').before('<div class="msg_warning">Template is unsaved. Click here to save it</div>');
 		console.log('a');
     }
 }
