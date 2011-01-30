@@ -337,7 +337,6 @@ $opspec_list['8021q-vstlist-upd'] = array
 	'action' => 'UPDATE',
 	'set_arglist' => array
 	(
-		array ('url_argname' => 'vst_maxvlans', 'table_colname' => 'max_local_vlans', 'assertion' => 'uint0', 'if_empty' => 'NULL'),
 		array ('url_argname' => 'vst_descr', 'table_colname' => 'description', 'assertion' => 'string'),
 	),
 	'where_arglist' => array
@@ -2648,18 +2647,11 @@ function addVLANSwitchTemplate()
 {
 	assertStringArg ('vst_descr');
 	global $sic;
-	$max_local_vlans = NULL;
-	if (array_key_exists ('vst_maxvlans', $sic) && mb_strlen ($sic['vst_maxvlans']))
-	{
-		assertUIntArg ('vst_maxvlans');
-		$max_local_vlans = $sic['vst_maxvlans'];
-	}
 	$result = usePreparedInsertBlade
 	(
 		'VLANSwitchTemplate',
 		array
 		(
-			'max_local_vlans' => $max_local_vlans,
 			'description' => $sic['vst_descr'],
 		)
 	);

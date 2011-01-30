@@ -836,7 +836,7 @@ CREATE TABLE `EntityLink` (
 			$query[] = 'ALTER TABLE RackSpace ADD CONSTRAINT `RackSpace-FK-rack_id` FOREIGN KEY (rack_id) REFERENCES Rack (id)';
 			$query[] = "ALTER TABLE `IPv4Allocation` ADD CONSTRAINT `IPv4Allocation-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `RackObject` (`id`) ON DELETE CASCADE";
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('SYNCDOMAIN_MAX_PROCESSES','0','uint','yes','no', 'How many worker proceses syncdomain cron script should create')";
-			$query[] = "ALTER TABLE `VLANSwitchTemplate` ADD COLUMN `mutex_rev` int(10) NOT NULL AFTER `max_local_vlans`";
+			$query[] = "ALTER TABLE `VLANSwitchTemplate` ADD COLUMN `mutex_rev` int(10) NOT NULL AFTER `id`";
 			$query[] = "ALTER TABLE `VLANSwitchTemplate` ADD COLUMN `saved_by` char(64) NOT NULL AFTER `description`";
 			$query[] = "INSERT INTO `Attribute` (`id`, `type`, `name`) VALUES (26,'dict','Hypervisor')";
 			$query[] = "INSERT INTO `Chapter` (`id`, `sticky`, `name`) VALUES (29,'no','Yes/No')";
@@ -894,6 +894,7 @@ CREATE TABLE `EntityLink` (
 			$query[] = "UPDATE Config SET varvalue = '8' WHERE varname = 'MASSCOUNT'";
 			$query[] = "UPDATE RackObject SET label = NULL WHERE label = ''";
 			$query[] = "UPDATE Config SET varvalue = '0.19.0' WHERE varname = 'DB_VERSION'";
+			$query[] = 'ALTER TABLE `VLANSwitchTemplate` DROP COLUMN `max_local_vlans`';
 			break;
 		default:
 			showError ("executeUpgradeBatch () failed, because batch '${batchid}' isn't defined");

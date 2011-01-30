@@ -8834,7 +8834,7 @@ function renderVSTListEditor()
 {
 	function printNewItemTR ()
 	{
-		printOpFormIntro ('add', array ('vst_maxvlans' => 0));
+		printOpFormIntro ('add');
 		echo '<tr>';
 		echo '<td>' . getImageHREF ('create', 'create template', TRUE, 104) . '</td>';
 		echo '<td><input type=text name=vst_descr tabindex=101></td>';
@@ -8847,7 +8847,7 @@ function renderVSTListEditor()
 		printNewItemTR();
 	foreach (getVSTStats() as $vst_id => $vst_info)
 	{
-		printOpFormIntro ('upd', array ('vst_id' => $vst_id, 'vst_maxvlans' => 0));
+		printOpFormIntro ('upd', array ('vst_id' => $vst_id));
 		echo '<tr><td>';
 		if ($vst_info['switchc'])
 			printImageHREF ('nodestroy', 'template used elsewhere');
@@ -8920,22 +8920,6 @@ function renderVST ($vst_id)
 	}
 	finishPortlet();
 	echo '</td></tr></table>';
-}
-
-function renderVSTEditor ($vst_id)
-{
-	$vst = getVLANSwitchTemplate ($vst_id);
-	echo '<center><h1>' . niftyString ($vst['description']) . '</h1></center>';
-	echo '<table border=0 cellpadding=10 cellpadding=1 align=center>';
-	printOpFormIntro ('upd');
-	echo '<tr><td class=tdright><label for=input1>Description:</label></td>';
-	echo "<td class=tdleft><input type=text name=vst_descr id=input1 maxlength=255 value='";
-	echo niftyString ($vst['description'], 0) . "'></td></tr>";
-	echo '<tr><td class=tdright><label for=input2>Max local VLANs:</label></td>';
-	echo "<td class=tdleft><input type=text name=vst_maxvlans id=input2 value=";
-	echo $vst['max_local_vlans'] . '></td></tr>';
-	echo '<tr><td colspan=2 class=tdcenter>' . getImageHREF ('SAVE', 'Save changes', TRUE) . '</td></tr>';
-	echo '</form></table>';
 }
 
 function renderVSTRulesEditor ($vst_id)

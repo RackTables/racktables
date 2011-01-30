@@ -4183,7 +4183,7 @@ function getVSTStats()
 {
 	$result = usePreparedSelectBlade
 	(
-		'SELECT id, max_local_vlans, description, ' .
+		'SELECT id, description, ' .
 		'(SELECT COUNT(object_id) FROM VLANSwitch WHERE template_id = id) AS switchc, ' .
 		'(SELECT COUNT(rule_no) FROM VLANSTRule WHERE vst_id = id) AS rulec ' .
 		'FROM VLANSwitchTemplate ORDER BY description'
