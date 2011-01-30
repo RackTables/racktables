@@ -71,12 +71,13 @@ if (isset ($_SERVER['PHP_AUTH_USER']))
 if (isset ($_SERVER['REMOTE_USER']))
 	$_SERVER['REMOTE_USER'] = escapeString ($_SERVER['REMOTE_USER']);
 
-$dbver = getDatabaseVersion();
-if ($dbver != CODE_VERSION)
+loadConfigDefaults();
+
+if (getConfigVar ('DB_VERSION') != CODE_VERSION)
 {
 	echo '<p align=justify>This Racktables installation seems to be ' .
 		'just upgraded to version ' . CODE_VERSION . ', while the '.
-		'database version is ' . $dbver . '.<br>No user will be ' .
+		'database version is ' . getConfigVar ('DB_VERSION') . '.<br>No user will be ' .
 		'either authenticated or shown any page until the upgrade is ' .
 		"finished.<br>Follow <a href='upgrade.php'>this link</a> and " .
 		'authenticate as administrator to finish the upgrade.</p>';
@@ -85,8 +86,6 @@ if ($dbver != CODE_VERSION)
 
 if (!mb_internal_encoding ('UTF-8'))
 	throw new RackTablesError ('Failed setting multibyte string encoding to UTF-8', RackTablesError::INTERNAL);
-
-loadConfigDefaults();
 
 $rackCodeCache = loadScript ('RackCodeCache');
 if ($rackCodeCache == NULL or !strlen ($rackCodeCache))

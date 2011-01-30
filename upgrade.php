@@ -113,7 +113,7 @@ function executeUpgradeBatch ($batchid)
 			// create tables for storing files (requires InnoDB support)
 			if (!isInnoDBSupported ())
 			{
-				showError ("Cannot upgrade because InnoDB tables are not supported by your MySQL server. See the README for details.", 'inline');
+				showError ("Cannot upgrade because InnoDB tables are not supported by your MySQL server. See the README for details.");
 				die;
 			}
 
@@ -896,7 +896,7 @@ CREATE TABLE `EntityLink` (
 			$query[] = "UPDATE Config SET varvalue = '0.19.0' WHERE varname = 'DB_VERSION'";
 			break;
 		default:
-			showError ("executeUpgradeBatch () failed, because batch '${batchid}' isn't defined", 'inline');
+			showError ("executeUpgradeBatch () failed, because batch '${batchid}' isn't defined");
 			die;
 			break;
 	}
@@ -933,8 +933,6 @@ CREATE TABLE `EntityLink` (
 // ******************************************************************
 
 require_once 'inc/config.php'; // for CODE_VERSION
-require_once 'inc/functions.php'; // for showError()
-require_once 'inc/database.php'; // for getDatabaseVersion()
 require_once 'inc/dictionary.php';
 // Enforce default value for now, releases prior to 0.17.0 didn't support 'httpd' auth source.
 $user_auth_src = 'database';
@@ -966,6 +964,42 @@ function authenticate_admin ($username, $password)
 	return $rows[0][0] == 1;
 }
 
+// Database version detector. Should behave corretly on any
+// working dataset a user might have.
+function getDatabaseVersion ()
+{
+	$result = usePreparedSelectBlade ('SELECT varvalue FROM Config WHERE varname = "DB_VERSION" and vartype = "string"');
+	if ($result == NULL)
+	{
+		// FIXME: this code is never executed, but an exception thrown instead
+		global $dbxlink;
+		$errorInfo = $dbxlink->errorInfo();
+		if ($errorInfo[0] == '42S02') // ER_NO_SUCH_TABLE
+			return '0.14.4';
+		die (__FUNCTION__ . ': SQL query #1 failed with error ' . $errorInfo[2]);
+	}
+	$rows = $result->fetchAll (PDO::FETCH_NUM);
+	unset ($result);
+	if (count ($rows) != 1 || !strlen ($rows[0][0]))
+		die (__FUNCTION__ . ': Cannot guess database version. Config table is present, but DB_VERSION is missing or invalid. Giving up.');
+	$ret = $rows[0][0];
+	return $ret;
+}
+
+function showError ($info = '', $location = 'upgrade.php')
+{
+	if (preg_match ('/\.php$/', $location))
+		$location = basename ($location);
+	elseif ($location != 'N/A')
+		$location = $location . '()';
+	echo "<div class=msg_error>An error has occured in [${location}]. ";
+	if (!strlen ($info))
+		echo 'No additional information is available.';
+	else
+		echo "Additional information:<br><p>\n<pre>\n${info}\n</pre></p>";
+	echo "Go back or try starting from <a href='".makeHref()."'>index page</a>.<br></div>\n";
+}
+
 switch ($user_auth_src)
 {
 	case 'database':
@@ -981,7 +1015,7 @@ switch ($user_auth_src)
 		{
 			header ('WWW-Authenticate: Basic realm="RackTables upgrade"');
 			header ('HTTP/1.0 401 Unauthorized');
-			showError ('You must be authenticated as an administrator to complete the upgrade.', 'inline');
+			showError ('You must be authenticated as an administrator to complete the upgrade.');
 			die;
 		}
 		break; // cleared
@@ -992,12 +1026,12 @@ switch ($user_auth_src)
 			!strlen ($_SERVER['REMOTE_USER'])
 		)
 		{
-			showError ('System misconfiguration. The web-server didn\'t authenticate the user, although ought to do.', 'inline');
+			showError ('System misconfiguration. The web-server didn\'t authenticate the user, although ought to do.');
 			die;
 		}
 		break; // cleared
 	default:
-		showError ('authentication source misconfiguration', 'inline');
+		showError ('authentication source misconfiguration');
 		die;
 }
 
