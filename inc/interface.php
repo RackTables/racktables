@@ -1300,16 +1300,16 @@ function renderRackObject ($object_id)
 		startPortlet ('Real server pools (' . count ($pools) . ')');
 		echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
 		echo "<tr><th>VS</th><th>RS pool</th><th>RS</th><th>VS config</th><th>RS config</th><th>Prio</th></tr>\n";
-		foreach ($pools as $vs_id => $info)
+		foreach ($pools as $vs_id => $vs_info)
 		{
  			echo "<tr valign=top class=row_${order}><td class=tdleft>";
  			renderCell (spotEntity ('ipv4vs', $vs_id));
  			echo "</td><td class=tdleft>";
- 			renderCell (spotEntity ('ipv4rspool', $info['pool_id']));
- 			echo '</td><td class=tdleft>' . $info['rscount'] . '</td>';
- 			echo "<td class=slbconf>${info['vsconfig']}</td>";
- 			echo "<td class=slbconf>${info['rsconfig']}</td>";
-			echo "<td class=slbconf>${info['prio']}</td>";
+ 			renderCell (spotEntity ('ipv4rspool', $vs_info['pool_id']));
+ 			echo '</td><td class=tdleft>' . $vs_info['rscount'] . '</td>';
+ 			echo "<td class=slbconf>${vs_info['vsconfig']}</td>";
+ 			echo "<td class=slbconf>${vs_info['rsconfig']}</td>";
+			echo "<td class=slbconf>${vs_info['prio']}</td>";
 			echo "</tr>\n";
 			$order = $nextorder[$order];
 		}
