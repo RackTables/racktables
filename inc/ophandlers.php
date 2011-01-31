@@ -2682,7 +2682,7 @@ function cloneVSTRule()
 	{
 		assertUIntArg ('from_id');
 		$src_vst = getVLANSwitchTemplate ($_REQUEST['from_id']);
-		if (! commitUpdateVSTRules ($_REQUEST['vst_id'], $src_vst['rules']))
+		if (! commitUpdateVSTRules ($_REQUEST['vst_id'], $_REQUEST['mutex_rev'], $src_vst['rules']))
 			$message = 'DB error';
 	}
 	$result = !(BOOL) $message;
