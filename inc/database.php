@@ -2338,13 +2338,16 @@ function readChapter ($chapter_id = 0, $style = '')
 {
 	$result = usePreparedSelectBlade
 	(
-		"select dict_key, dict_value from Dictionary " .
+		"select dict_key, dict_value as value from Dictionary " .
 		"where chapter_id = ?",
 		array ($chapter_id)
 	);
 	$chapter = array();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-		$chapter[$row['dict_key']] = $style == '' ? $row['dict_value'] : parseWikiLink ($row['dict_value'], $style);
+	{
+		parseWikiLink ($row);
+		$chapter[$row['dict_key']] = ($style == 'a' ? $row['a_value'] : $row['o_value']);
+	}
 	// SQL ORDER BY had no sense, because we need to sort after link rendering, not before.
 	asort ($chapter);
 	return $chapter;
@@ -2498,8 +2501,7 @@ function fetchAttrsForObjects($object_set)
 			case 'float':
 			case 'string':
 				$record['value'] = $row[$row['attr_type'] . '_value'];
-				$record['o_value'] = parseWikiLink ($record['value'], 'o');
-				$record['a_value'] = parseWikiLink ($record['value'], 'a');
+				parseWikiLink ($record);
 				break;
 			default:
 				$record['value'] = NULL;

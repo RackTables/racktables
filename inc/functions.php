@@ -867,27 +867,22 @@ function findAllEndpoints ($object_id, $fallback = '')
 // 1. word
 // 2. [[word URL]] // FIXME: this isn't working
 // 3. [[word word word | URL]]
-// This function parses the line and returns text suitable for either A
-// (rendering <A HREF>) or O (for <OPTION>).
-function parseWikiLink ($line, $which)
+// This function parses the line in $record['value'] and modifies $record:
+// $record['o_value'] is set to be the first part of link (word word word)
+// $record['a_value'] is the same, but with %GPASS and %GSKIP macros applied
+// $record['href'] is set to URL if it is specified in the input value
+function parseWikiLink (&$record)
 {
-	if (preg_match ('/^\[\[.+\]\]$/', $line) == 0)
+	if (! preg_match ('/^\[\[(.+)\]\]$/', $record['value'], $matches))
+		$record['o_value'] = $record['value'];
+	else
 	{
-		// always strip the marker for A-data, but let cookOptgroup()
-		// do this later (otherwise it can't sort groups out)
-		if ($which == 'a')
-			return preg_replace ('/^.+%GSKIP%/', '', preg_replace ('/^(.+)%GPASS%/', '\\1 ', $line));
-		else
-			return $line;
+		$s = explode ('|', $matches[1]);
+		if (isset ($s[1]))
+			$record['href'] = trim ($s[1]);
+		$record['o_value'] = trim ($s[0]);
 	}
-	$line = preg_replace ('/^\[\[(.+)\]\]$/', '$1', $line);
-	$s = explode ('|', $line);
-	$o_value = trim ($s[0]);
-	if ($which == 'o')
-		return $o_value;
-	$o_value = preg_replace ('/^.+%GSKIP%/', '', preg_replace ('/^(.+)%GPASS%/', '\\1 ', $o_value));
-	$a_value = trim ($s[1]);
-	return $o_value . " <a class='img-link' href='${a_value}'>" . getImageHREF ('html', 'vendor`s info page') . "</a>";
+	$record['a_value'] = execGMarker ($record['o_value']);
 }
 
 // FIXME: should this be saved as "P-data"?

@@ -1025,11 +1025,11 @@ function renderRackObject ($object_id)
 	}
 	if ($info['has_problems'] == 'yes')
 		echo "<tr><td colspan=2 class=msg_error>Has problems</td></tr>\n";
-	foreach (getAttrValues ($object_id) as $attr_id => $record)
+	foreach (getAttrValues ($object_id) as $record)
 		if (strlen ($record['value']))
 		{
 			echo "<tr><th width='50%' class=sticker>${record['name']}:</th><td class=sticker>" .
-				formatAttributeValue($attr_id, $record) .
+				formatAttributeValue ($record) .
 				"</td></tr>\n";
 		}
 	printTagTRs
@@ -3854,7 +3854,7 @@ function renderSearchResults ($terms, $summary)
 							{
 								$record = $aval[$attr_id];
 								echo "<tr><th width='50%' class=sticker>${record['name']}:</th>";
-								echo "<td class=sticker>" . formatAttributeValue($attr_id, $record) . "</td></tr>";
+								echo "<td class=sticker>" . formatAttributeValue ($record) . "</td></tr>";
 							}
 							echo '</table>';
 						}
@@ -9211,10 +9211,10 @@ function renderDiscoveredNeighbors ($object_id)
 	echo '</table></form>';
 }
 
-function formatAttributeValue($attribute_id, $record)
+function formatAttributeValue ($record)
 {
 	if (! isset ($record['key'])) // if record is a dictionary value, generate href with autotag in cfe
-		return $record['a_value'];	
+		return execGMarker ($record['o_value']);
 	else
 	{
 		$href = makeHref
@@ -9224,13 +9224,13 @@ function formatAttributeValue($attribute_id, $record)
 				'page'=>'depot',
 				'tab'=>'default',
 				'andor' => 'and',
-				'cfe' => '{$attr_' . $attribute_id . '_' . $record['key'] . '}',
+				'cfe' => '{$attr_' . $record['id'] . '_' . $record['key'] . '}',
 			)
 		);
-		if (preg_match ('#(.*?)\s*(<a[^<]+.*</a>)$#', $record['a_value'], $matches))
-			return "<a href=\"$href\">${matches[1]}</a>&nbsp;${matches[2]}";
-		else
-			return "<a href=\"$href\">${matches[1]}</a>";
+		$result = "<a href='$href'>" . $record['a_value'] . "</a>";
+		if (isset ($record['href']))
+			$result .= "&nbsp;<a class='img-link' href='${record['href']}'>" . getImageHREF ('html', 'vendor`s info page') . "</a>";
+		return $result;
 	}
 }
 
