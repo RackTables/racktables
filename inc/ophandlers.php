@@ -916,7 +916,7 @@ function createUser ()
 	return buildRedirectURL (__FUNCTION__, 'OK', array ($username));
 }
 
-$msgcode['updateUser']['OK'] = 7;
+$msgcode['updateUser']['OK'] = 6;
 $msgcode['updateUser']['ERR2'] = 104;
 function updateUser ()
 {
