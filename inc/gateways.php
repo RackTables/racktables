@@ -340,6 +340,7 @@ function getRunning8021QConfig ($object_id)
 
 function setDevice8021QConfig ($object_id, $pseudocode)
 {
+	require_once 'deviceconfig.php';
 	if ('' == $breed = detectDeviceBreed ($object_id))
 		throw new RTGatewayError ('device breed unknown');
 	global $gwpushxlator;
@@ -383,7 +384,6 @@ function gwRetrieveDeviceConfig ($object_id, $command)
 
 function gwDeployDeviceConfig ($object_id, $breed, $text)
 {
-	require_once 'deviceconfig.php';
 	if ($text == '')
 		throw new InvalidArgException ('text', '', 'deploy text is empty');
 	$objectInfo = spotEntity ('object', $object_id);
