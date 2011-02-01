@@ -539,7 +539,7 @@ function addPortForObject ()
 	return buildRedirectURL (__FUNCTION__, 'OK', array ($_REQUEST['port_name']));
 }
 
-$msgcode['editPortForObject']['OK'] = 7;
+$msgcode['editPortForObject']['OK'] = 6;
 function editPortForObject ()
 {
 	global $sic;
