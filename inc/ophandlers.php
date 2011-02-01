@@ -2668,27 +2668,15 @@ function delVLANSwitchTemplate()
 	return buildRedirectURL (__FUNCTION__, $result ? 'OK' : 'ERR');
 }
 
-$msgcode['cloneVSTRule']['OK'] = 48;
-$msgcode['cloneVSTRule']['ERR'] = 179;
-function cloneVSTRule()
+$msgcode['cloneVST']['OK'] = 48;
+$msgcode['cloneVST']['ERR'] = 179;
+function cloneVST()
 {
-	global $dbxlink;
-	$message = '';
 	assertUIntArg ('mutex_rev', TRUE);
-	$dst_vst = getVLANSwitchTemplate ($_REQUEST['vst_id']);
-	if ($dst_vst['mutex_rev'] != $_REQUEST['mutex_rev'])
-		$message = "User ${dst_vst['saved_by']} saved this template after you started to edit it. Please concern differencies";
-	else
-	{
-		assertUIntArg ('from_id');
-		$src_vst = getVLANSwitchTemplate ($_REQUEST['from_id']);
-		if (! commitUpdateVSTRules ($_REQUEST['vst_id'], $_REQUEST['mutex_rev'], $src_vst['rules']))
-			$message = 'DB error';
-	}
-	$result = !(BOOL) $message;
-	if ($result)
-		$message = 'Supplement succeeded';
-	return buildWideRedirectURL (array (array ('code' => $result ? 'success' : 'error', 'message' => $message)));
+	assertUIntArg ('from_id');
+	$src_vst = getVLANSwitchTemplate ($_REQUEST['from_id']);
+	commitUpdateVSTRules (getBypassValue(), $_REQUEST['mutex_rev'], $src_vst['rules']);
+	return buildRedirectURL (__FUNCTION__, 'OK');
 }
 
 $msgcode['updVSTRule']['OK'] = 43;

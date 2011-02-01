@@ -236,6 +236,13 @@ function trigger_object_8021qorder ()
 	return '';
 }
 
+function trigger_8021q_configured ()
+{
+	if (!count (getVLANDomainOptions()) or !count (getVSTOptions()))
+		return '';
+	return 'std';
+}
+
 // implement similar logic for IPv4 networks
 function trigger_ipv4net_vlanconfig ()
 {

@@ -4241,7 +4241,7 @@ function commitUpdateVSTRules ($vst_id, $mutex_rev, $rules)
 	$vst = $result->fetch (PDO::FETCH_ASSOC);
 	unset ($result);
 	if ($vst['mutex_rev'] != $mutex_rev)
-		throw new InvalidArgException ('mutex_rev', $mutex_rev, "already saved by ${vst['saved_by']}");
+		throw new InvalidRequestArgException ('mutex_rev', $mutex_rev, "already saved by ${vst['saved_by']}");
 	usePreparedDeleteBlade ('VLANSTRule', array ('vst_id' => $vst_id));
 	foreach ($rules as $rule)
 		usePreparedInsertBlade ('VLANSTRule', array_merge (array ('vst_id' => $vst_id), $rule));
