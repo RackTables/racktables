@@ -70,6 +70,7 @@ function getDBUpgradePath ($v1, $v2)
 		'0.18.3',
 		'0.18.4',
 		'0.18.5',
+		'0.18.6',
 		'0.19.0',
 	);
 	if (!in_array ($v1, $versionhistory) or !in_array ($v2, $versionhistory))
@@ -973,17 +974,14 @@ function authenticate_admin ($username, $password)
 // working dataset a user might have.
 function getDatabaseVersion ()
 {
-	$result = usePreparedSelectBlade ('SELECT varvalue FROM Config WHERE varname = "DB_VERSION" and vartype = "string"');
-	if ($result == NULL)
+	global $dbxlink;
+	$prepared = $dbxlink->prepare ('SELECT varvalue FROM Config WHERE varname = "DB_VERSION" and vartype = "string"');
+	if (! $prepared->execute())
 	{
-		// FIXME: this code is never executed, but an exception thrown instead
-		global $dbxlink;
 		$errorInfo = $dbxlink->errorInfo();
-		if ($errorInfo[0] == '42S02') // ER_NO_SUCH_TABLE
-			return '0.14.4';
-		die (__FUNCTION__ . ': SQL query #1 failed with error ' . $errorInfo[2]);
+		die (__FUNCTION__ . ': SQL query failed with error ' . $errorInfo[2]);
 	}
-	$rows = $result->fetchAll (PDO::FETCH_NUM);
+	$rows = $prepared->fetchAll (PDO::FETCH_NUM);
 	unset ($result);
 	if (count ($rows) != 1 || !strlen ($rows[0][0]))
 		die (__FUNCTION__ . ': Cannot guess database version. Config table is present, but DB_VERSION is missing or invalid. Giving up.');
@@ -1002,7 +1000,7 @@ function showError ($info = '', $location = 'upgrade.php')
 		echo 'No additional information is available.';
 	else
 		echo "Additional information:<br><p>\n<pre>\n${info}\n</pre></p>";
-	echo "Go back or try starting from <a href='".makeHref()."'>index page</a>.<br></div>\n";
+	echo "Go back or try starting from <a href='index.php'>index page</a>.<br></div>\n";
 }
 
 switch ($user_auth_src)
@@ -1044,7 +1042,7 @@ switch ($user_auth_src)
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head><title>RackTables upgrade script</title>
-<link rel=stylesheet type='text/css' href='pi.css' />
+<link rel=stylesheet type='text/css' href='css/pi.css' />
 </head>
 <body>
 <h1>Platform check status</h1>
