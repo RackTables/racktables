@@ -5489,11 +5489,11 @@ function renderNewSLBItemForm ($realm1, $realm2)
 		{
 			case 'object':
 				echo "<tr valign=top><th class=tdright>Load balancer</th><td class=tdleft>";
-				printSelect (getNarrowObjectList ('IPV4LB_LISTSRC'), array ('name' => 'object_id', 'tabindex' => 1));
+				printSelect (getNarrowObjectList ('IPV4LB_LISTSRC'), array ('name' => 'object_id', 'tabindex' => 100));
 				break;
 			case 'ipv4vs':
 				echo '</td></tr><tr><th class=tdright>Virtual service</th><td class=tdleft>';
-				printSelect (getIPv4VSOptions(), array ('name' => 'vs_id', 'tabindex' => 2));
+				printSelect (getIPv4VSOptions(), array ('name' => 'vs_id', 'tabindex' => 101));
 				break;
 			case 'ipv4rspool':
 				echo '</td></tr><tr><th class=tdright>RS pool</th><td class=tdleft>';
@@ -5509,12 +5509,12 @@ function renderNewSLBItemForm ($realm1, $realm2)
 	printOpFormIntro ('addLB');
 	print_realm_select_input($realm1);
 	echo '</td><td class=tdcenter valign=middle rowspan=2>';
-	printImageHREF ('ADD', 'Configure LB', TRUE, 5);
+	printImageHREF ('ADD', 'Configure LB', TRUE, 120);
 	print_realm_select_input($realm2);
 	echo "</td></tr>\n";
-	echo "<tr><th class=tdright>VS config</th><td colspan=2><textarea tabindex=3 name=vsconfig rows=10 cols=80></textarea></td></tr>";
-	echo "<tr><th class=tdright>RS config</th><td colspan=2><textarea tabindex=4 name=rsconfig rows=10 cols=80></textarea></td></tr>";
-	echo "<tr><th class=tdright>Priority</th><td class=tdleft colspan=2><input tabindex=5 name=prio size=10></td></tr>";
+	echo "<tr><th class=tdright>VS config</th><td colspan=2><textarea tabindex=110 name=vsconfig rows=10 cols=80></textarea></td></tr>";
+	echo "<tr><th class=tdright>RS config</th><td colspan=2><textarea tabindex=111 name=rsconfig rows=10 cols=80></textarea></td></tr>";
+	echo "<tr><th class=tdright>Priority</th><td class=tdleft colspan=2><input tabindex=112 name=prio size=10></td></tr>";
 	echo "</form></table>\n";
 	finishPortlet();
 }
