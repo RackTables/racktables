@@ -415,7 +415,6 @@ function buildWideRedirectURL ($log = NULL, $nextpage = NULL, $nexttab = NULL, $
 			{
 				if (! is_array ($msg))
 					continue;
-				var_dump ($msg);
 				$new_v2_item = array('c' => '', 'a' => array());
 				switch ($msg['code'])
 				{
