@@ -3485,7 +3485,8 @@ function getFileLinks ($file_id)
 		// get info of the parent
 		switch ($row['entity_type'])
 		{
-			case 'ipv4net': case 'ipv6net':
+			case 'ipv4net':
+			case 'ipv6net':
 				$page = $row['entity_type'];
 				$id_name = 'id';
 				$parent = spotEntity ($row['entity_type'], $row['entity_id']);

@@ -1229,6 +1229,7 @@ function generateEntityAutoTags ($cell)
 		case 'rack':
 		case 'object':
 		case 'ipv4net':
+		case 'ipv6net':
 		case 'ipv4vs':
 		case 'ipv4rspool':
 		case 'file':
@@ -2229,6 +2230,8 @@ function formatEntityName ($name) {
 	{
 		case 'ipv4net':
 			return 'IPv4 Network';
+		case 'ipv6net':
+			return 'IPv6 Network';
 		case 'ipv4rspool':
 			return 'IPv4 RS Pool';
 		case 'ipv4vs':
@@ -2260,6 +2263,9 @@ function serializeFileLinks ($links, $scissors = FALSE)
 		{
 			case 'ipv4net':
 				$params = "page=ipv4net&id=";
+				break;
+			case 'ipv6net':
+				$params = "page=ipv6net&id=";
 				break;
 			case 'ipv4rspool':
 				$params = "page=ipv4rspool&pool_id=";
@@ -2576,6 +2582,7 @@ function scanRealmByText ($realm = NULL, $ftext = '')
 	case 'object':
 	case 'user':
 	case 'ipv4net':
+	case 'ipv6net':
 	case 'file':
 	case 'ipv4vs':
 	case 'ipv4rspool':
