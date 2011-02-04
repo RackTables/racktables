@@ -919,7 +919,7 @@ $swtype_pcre = array
 (
 	'/Huawei Versatile Routing Platform Software.+VRP.+Software, Version 5.30 /s' => 1360,
 	'/Huawei Versatile Routing Platform Software.+VRP.+Software, Version 5.50 /s' => 1361,
-	'/Huawei Versatile Routing Platform Software.+VRP.+Software, Version 5.70 /s' => 1369,
+	'/Huawei Versatile Routing Platform Software.+VRP.+Software,\s*Version 5.70 /is' => 1369,
 	// FIXME: get sysDescr for IronWare 5 and add a pattern
 	'/^Brocade Communications Systems.+, IronWare Version 07\./' => 1364,
 	'/^Juniper Networks,.+JUNOS 9\./' => 1366,
