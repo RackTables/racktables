@@ -2185,6 +2185,20 @@ function prepareIPv6Tree ($netlist, $expanded_id = 0)
 	return $tree;
 }
 
+# Traverse IPv4/IPv6 tree and return a list of all networks, which
+# exist in DB and don't have any sub-networks.
+function getTerminalNetworks ($tree)
+{
+	$self = __FUNCTION__;
+	$ret = array();
+	foreach ($tree as $node)
+		if ($node['kidc'] == 0 and isset ($node['realm']))
+			$ret[] = $node;
+		else
+			$ret = array_merge ($ret, $self ($node['kids']));
+	return $ret;
+}
+
 // Check all items of the tree recursively, until the requested target id is
 // found. Mark all items leading to this item as "expanded", collapsing all
 // the rest, which exceed the given threshold (if the threshold is given).
