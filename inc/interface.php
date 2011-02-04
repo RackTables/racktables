@@ -1403,6 +1403,12 @@ function renderPortsForObject ($object_id)
 	echo "<th class=tdcenter colspan=2>Cable, Remote object and port</th><th class=tdcenter>(Un)link or (un)reserve</th><th>&nbsp;</th></tr>\n";
 	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
 		printNewItemTR ($prefs);
+
+	// clear ports link
+	echo "<a href='".
+		makeHrefProcess(array ('op'=>'deleteAll', 'page' => 'object', 'tab' => 'ports', 'object_id' => $object_id)).
+		"' onclick=\"javascript:return confirm('Are you sure you want to delete all existing ports?')\">" . getImageHREF ('clear', 'Clear port list') . " Clear port list</a>";
+
 	if (isset ($_REQUEST['hl_port_id']))
 	{
 		assertUIntArg ('hl_port_id');

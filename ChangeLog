@@ -24,6 +24,7 @@
 	bugfix: the 'Refcnt' counter on Configuration: Dictionary page was sometimes broken (closes mantis:0000381)
 	update: new API for dispaying messages (showError, showWarning, showSuccess)
 	update: dictionary attribute values with external links are formatted differently to distinguish the filter and external info links
+	update: UI: ability to clear object ports list at one blow
 0.18.7
 	bugfix: adjust 802.1Q command generation
 	bugfix: fixed telnet session hanging in NX-OS4 connector

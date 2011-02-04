@@ -54,6 +54,15 @@ $opspec_list['object-ports-delPort'] = array
 		array ('url_argname' => 'object_id', 'assertion' => 'uint'),
 	),
 );
+$opspec_list['object-ports-deleteAll'] = array
+(
+	'table' => 'Port',
+	'action' => 'DELETE',
+	'arglist' => array
+	(
+		array ('url_argname' => 'object_id', 'assertion' => 'uint'),
+	),
+);
 $opspec_list['object-ports-unlinkPort'] = array
 (
 	'table' => 'Link',

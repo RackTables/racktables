@@ -157,6 +157,7 @@ $ophandler['object']['ports']['addMultiPorts'] = 'addMultiPorts';
 $ophandler['object']['ports']['addBulkPorts'] = 'addBulkPorts';
 $ophandler['object']['ports']['useup'] = 'useupPort';
 $ophandler['object']['ports']['delPort'] = 'tableHandler';
+$ophandler['object']['ports']['deleteAll'] = 'tableHandler';
 $ophandler['object']['ports']['unlinkPort'] = 'tableHandler';
 $ophandler['object']['ipv4']['updIPv4Allocation'] = 'updIPv4Allocation';
 $ophandler['object']['ipv4']['addIPv4Allocation'] = 'addIPv4Allocation';
