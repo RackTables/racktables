@@ -2,7 +2,6 @@
 <?php
 
 $script_mode = TRUE;
-chdir ('wwwroot');
 require 'inc/init.php';
 
 function usage()
