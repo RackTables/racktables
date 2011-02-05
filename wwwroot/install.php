@@ -109,8 +109,8 @@ function init_config ()
 	{
 		echo "<input type=hidden name=save_config value=1>\n";
 		echo '<h3>Hint on setting up a database:</h3><pre>';
-		echo "mysql&gt; CREATE DATABASE racktables_db CHARACTER SET utf8 COLLATE utf8_general_ci;\n";
-		echo "mysql&gt; GRANT ALL PRIVILEGES ON racktables_db.* TO racktables_user@localhost IDENTIFIED BY 'MY_SECRET_PASSWORD';\n</pre>";
+		echo "mysql&gt;\nCREATE DATABASE racktables_db CHARACTER SET utf8 COLLATE utf8_general_ci;\n";
+		echo "GRANT ALL PRIVILEGES ON racktables_db.* TO racktables_user@localhost IDENTIFIED BY 'MY_SECRET_PASSWORD';\n</pre>";
 		echo '<table>';
 		echo "<tr><td><label for=mysql_host>MySQL host:</label></td>";
 		echo "<td><input type=text name=mysql_host id=mysql_host value=localhost></td></tr>\n";
