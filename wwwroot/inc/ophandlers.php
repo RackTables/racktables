@@ -1106,7 +1106,6 @@ function updateObject ()
 	assertUIntArg ('num_attrs', TRUE);
 	assertStringArg ('object_name', TRUE);
 	assertStringArg ('object_label', TRUE);
-	assertStringArg ('object_barcode', TRUE);
 	assertStringArg ('object_asset_no', TRUE);
 	if (isset ($_REQUEST['object_has_problems']) and $_REQUEST['object_has_problems'] == 'on')
 		$has_problems = 'yes';
@@ -1117,7 +1116,6 @@ function updateObject ()
 		$_REQUEST['object_id'],
 		$_REQUEST['object_name'],
 		$_REQUEST['object_label'],
-		$_REQUEST['object_barcode'],
 		$has_problems,
 		$_REQUEST['object_asset_no'],
 		$_REQUEST['object_comment']
@@ -1189,7 +1187,6 @@ function addMultipleObjects()
 		if (isset ($_REQUEST['virtual_objects']))
 		{
 			$_REQUEST["${i}_object_label"] = '';
-			$_REQUEST["${i}_object_barcode"] = '';
 			$_REQUEST["${i}_object_asset_no"] = '';
 		}
 
@@ -1197,7 +1194,6 @@ function addMultipleObjects()
 		assertStringArg ("${i}_object_name", TRUE);
 		assertStringArg ("${i}_object_label", TRUE);
 		assertStringArg ("${i}_object_asset_no", TRUE);
-		assertStringArg ("${i}_object_barcode", TRUE);
 		$name = $_REQUEST["${i}_object_name"];
 
 		// It's better to skip silently, than to print a notice.
@@ -1207,7 +1203,6 @@ function addMultipleObjects()
 		(
 			$name,
 			$_REQUEST["${i}_object_label"],
-			$_REQUEST["${i}_object_barcode"],
 			$_REQUEST["${i}_object_type_id"],
 			$_REQUEST["${i}_object_asset_no"],
 			$taglist

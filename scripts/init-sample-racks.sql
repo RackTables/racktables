@@ -1,64 +1,64 @@
 set names 'utf8';
 
-INSERT INTO `RackObject` (id, name, label, barcode, objtype_id, asset_no, has_problems, comment) VALUES 
-(905,'london router','bbrtr1',NULL,7,'net247','no',''),
-(906,'londonswitch1','',NULL,8,NULL,'no',''),
-(907,'New-York router 1','bbrtr2a',NULL,7,'net55','no',''),
-(908,'moscow router','bbrtr3',NULL,7,NULL,'no',NULL),
-(909,'tokyo router','bbrtr4',NULL,7,NULL,'no',NULL),
-(910,'London server 1','lserver01',NULL,4,'srv500','no',''),
-(911,'London server 2','lserver02',NULL,4,'srv501','no',''),
-(912,'London server 3','lserver03',NULL,4,'srv502','no',''),
-(913,'London server 4','lserver04',NULL,4,'srv503','yes','this one needs replacement'),
-(914,'London server 5','lserver05',NULL,4,'srv504','no',''),
-(915,'london LB','llb',NULL,8,'net1000','no',''),
-(916,'shared storage','',NULL,5,NULL,'no',''),
-(917,'london-NAS','',NULL,7,'net1001','no',''),
-(918,'London server 6','lserver06',NULL,4,'srv505','no',NULL),
-(919,'London server 7','lserver07',NULL,4,'srv506','no',NULL),
-(920,'backup library','lbackup',NULL,6,'misc200','no',NULL),
-(921,'lserver06 array','lserver06 array',NULL,5,NULL,'no',NULL),
-(922,'lserver07 array','lserver07 array',NULL,5,NULL,'no',NULL),
-(923,'Tokyo server 1','tserver01',NULL,4,'srv654','no',NULL),
-(924,'Tokyo server 2','tserver02',NULL,4,'srv848','no',NULL),
-(925,'Tokyo server 3','tserver03',NULL,4,'srv139','no',NULL),
-(926,'Tokyo switch','tswitch',NULL,8,'net385','no',NULL),
-(927,'New-York router 2','bbrtr2b',NULL,7,'net498','no',NULL),
-(928,'New-York IPVS LB A','nylba',NULL,4,'net554','no',NULL),
-(929,'New-York IPVS LB B','nylbb',NULL,4,'net555','no',NULL),
-(930,'New-York server switch A','nyswitcha',NULL,8,'net084','no',NULL),
-(931,'New-York server switch B','nyswitchb',NULL,8,'net486','no',NULL),
-(932,'New-York server 1A','nysrv1a',NULL,4,'srv287','no',NULL),
-(933,'New-York server 1B','nysrv1b',NULL,4,'srv288','no',NULL),
-(934,'New-York server 2A','nysrv2a',NULL,4,NULL,'no',NULL),
-(935,'New-York server 2B','nysrv2b',NULL,4,NULL,'no',NULL),
-(936,'New-York server 3A','nysrv3a',NULL,4,NULL,'no',NULL),
-(937,'New-York server 3B','nysrv3b',NULL,4,NULL,'no',NULL),
-(938,'New-York server 4A','nysrv4a',NULL,4,NULL,'no',NULL),
-(939,'New-York server 4B','nysrv4b',NULL,4,NULL,'no',NULL),
-(940,'New-York server 5A','nysrv5a',NULL,4,NULL,'no',NULL),
-(941,'New-York server 5B','nysrv5b',NULL,4,NULL,'no',NULL),
-(942,'wing A UPS','',NULL,12,NULL,'no',NULL),
-(943,'wing B UPS','',NULL,12,NULL,'no',NULL),
-(944,'network UPS','',NULL,12,NULL,'no',NULL),
-(945,NULL,'',NULL,9,NULL,'no',NULL),
-(946,NULL,'',NULL,9,NULL,'no',NULL),
-(947,NULL,'',NULL,2,NULL,'no',NULL),
-(948,NULL,'',NULL,2,NULL,'no',NULL),
-(949,NULL,'',NULL,2,NULL,'no',NULL),
-(950,NULL,'',NULL,2,NULL,'no',NULL),
-(951,NULL,'',NULL,2,NULL,'no',NULL),
-(952,NULL,'',NULL,2,NULL,'no',NULL),
-(953,NULL,'',NULL,2,NULL,'no',NULL),
-(954,NULL,'',NULL,2,NULL,'no',NULL),
-(955,NULL,'',NULL,2,NULL,'no',NULL),
-(956,'mps1','','200161',4,NULL,'no',NULL),
-(957,'mps2','','200283',4,NULL,'no',NULL),
-(958,'mps3','','200881',4,NULL,'no',NULL),
-(959,'mps4','','200458',4,NULL,'no',NULL),
-(960,'mps5','','200112',4,NULL,'no',NULL),
-(961,'mskswitch','',NULL,8,'sw0001','no',NULL),
-(962,'moscow kvm switch','','300221',445,'sw0002','no',NULL);
+INSERT INTO `RackObject` (id, name, label, objtype_id, asset_no, has_problems, comment) VALUES 
+(905,'london router','bbrtr1',7,'net247','no',''),
+(906,'londonswitch1','',8,NULL,'no',''),
+(907,'New-York router 1','bbrtr2a',7,'net55','no',''),
+(908,'moscow router','bbrtr3',7,NULL,'no',NULL),
+(909,'tokyo router','bbrtr4',7,NULL,'no',NULL),
+(910,'London server 1','lserver01',4,'srv500','no',''),
+(911,'London server 2','lserver02',4,'srv501','no',''),
+(912,'London server 3','lserver03',4,'srv502','no',''),
+(913,'London server 4','lserver04',4,'srv503','yes','this one needs replacement'),
+(914,'London server 5','lserver05',4,'srv504','no',''),
+(915,'london LB','llb',8,'net1000','no',''),
+(916,'shared storage','',5,NULL,'no',''),
+(917,'london-NAS','',7,'net1001','no',''),
+(918,'London server 6','lserver06',4,'srv505','no',NULL),
+(919,'London server 7','lserver07',4,'srv506','no',NULL),
+(920,'backup library','lbackup',6,'misc200','no',NULL),
+(921,'lserver06 array','lserver06 array',5,NULL,'no',NULL),
+(922,'lserver07 array','lserver07 array',5,NULL,'no',NULL),
+(923,'Tokyo server 1','tserver01',4,'srv654','no',NULL),
+(924,'Tokyo server 2','tserver02',4,'srv848','no',NULL),
+(925,'Tokyo server 3','tserver03',4,'srv139','no',NULL),
+(926,'Tokyo switch','tswitch',8,'net385','no',NULL),
+(927,'New-York router 2','bbrtr2b',7,'net498','no',NULL),
+(928,'New-York IPVS LB A','nylba',4,'net554','no',NULL),
+(929,'New-York IPVS LB B','nylbb',4,'net555','no',NULL),
+(930,'New-York server switch A','nyswitcha',8,'net084','no',NULL),
+(931,'New-York server switch B','nyswitchb',8,'net486','no',NULL),
+(932,'New-York server 1A','nysrv1a',4,'srv287','no',NULL),
+(933,'New-York server 1B','nysrv1b',4,'srv288','no',NULL),
+(934,'New-York server 2A','nysrv2a',4,NULL,'no',NULL),
+(935,'New-York server 2B','nysrv2b',4,NULL,'no',NULL),
+(936,'New-York server 3A','nysrv3a',4,NULL,'no',NULL),
+(937,'New-York server 3B','nysrv3b',4,NULL,'no',NULL),
+(938,'New-York server 4A','nysrv4a',4,NULL,'no',NULL),
+(939,'New-York server 4B','nysrv4b',4,NULL,'no',NULL),
+(940,'New-York server 5A','nysrv5a',4,NULL,'no',NULL),
+(941,'New-York server 5B','nysrv5b',4,NULL,'no',NULL),
+(942,'wing A UPS','',12,NULL,'no',NULL),
+(943,'wing B UPS','',12,NULL,'no',NULL),
+(944,'network UPS','',12,NULL,'no',NULL),
+(945,NULL,'',9,NULL,'no',NULL),
+(946,NULL,'',9,NULL,'no',NULL),
+(947,NULL,'',2,NULL,'no',NULL),
+(948,NULL,'',2,NULL,'no',NULL),
+(949,NULL,'',2,NULL,'no',NULL),
+(950,NULL,'',2,NULL,'no',NULL),
+(951,NULL,'',2,NULL,'no',NULL),
+(952,NULL,'',2,NULL,'no',NULL),
+(953,NULL,'',2,NULL,'no',NULL),
+(954,NULL,'',2,NULL,'no',NULL),
+(955,NULL,'',2,NULL,'no',NULL),
+(956,'mps1','',4,NULL,'no',NULL),
+(957,'mps2','',4,NULL,'no',NULL),
+(958,'mps3','',4,NULL,'no',NULL),
+(959,'mps4','',4,NULL,'no',NULL),
+(960,'mps5','',4,NULL,'no',NULL),
+(961,'mskswitch','',8,'sw0001','no',NULL),
+(962,'moscow kvm switch','',445,'sw0002','no',NULL);
 
 INSERT INTO `AttributeValue` VALUES (905,2,NULL,269,NULL);
 INSERT INTO `AttributeValue` VALUES (906,2,NULL,165,NULL);
@@ -705,10 +705,10 @@ INSERT INTO `TagTree` (`id`, `parent_id`, `tag`) VALUES (3,NULL,'testing');
 INSERT INTO `TagTree` (`id`, `parent_id`, `tag`) VALUES (4,NULL,'production');
 INSERT INTO `TagTree` (`id`, `parent_id`, `tag`) VALUES (5,1,'far east');
 INSERT INTO `TagTree` (`id`, `parent_id`, `tag`) VALUES (6,2,'far west');
-INSERT INTO `TagTree` (`id`, `parent_id`, `tag`) VALUES (7,1,'Москва');
+INSERT INTO `TagTree` (`id`, `parent_id`, `tag`) VALUES (7,1,'ÐœÐ¾Ñ�ÐºÐ²Ð°');
 INSERT INTO `TagTree` (`id`, `parent_id`, `tag`) VALUES (8,2,'London');
 INSERT INTO `TagTree` (`id`, `parent_id`, `tag`) VALUES (9,6,'New-York');
-INSERT INTO `TagTree` (`id`, `parent_id`, `tag`) VALUES (10,5,'東京');
+INSERT INTO `TagTree` (`id`, `parent_id`, `tag`) VALUES (10,5,'æ�±äº¬');
 INSERT INTO `TagTree` (`id`, `parent_id`, `tag`) VALUES (11,17,'WAN link');
 INSERT INTO `TagTree` (`id`, `parent_id`, `tag`) VALUES (12,NULL,'racks');
 INSERT INTO `TagTree` (`id`, `parent_id`, `tag`) VALUES (13,12,'tall racks');
@@ -716,9 +716,9 @@ INSERT INTO `TagTree` (`id`, `parent_id`, `tag`) VALUES (14,12,'low racks');
 INSERT INTO `TagTree` (`id`, `parent_id`, `tag`) VALUES (15,NULL,'load balancer');
 INSERT INTO `TagTree` (`id`, `parent_id`, `tag`) VALUES (18,17,'small network');
 INSERT INTO `TagTree` (`id`, `parent_id`, `tag`) VALUES (19,17,'medium network');
-INSERT INTO `TagTree` (`id`, `parent_id`, `tag`) VALUES (20,5,'北京');
-INSERT INTO `TagTree` (`id`, `parent_id`, `tag`) VALUES (21,5,'서울');
-INSERT INTO `TagTree` (`id`, `parent_id`, `tag`) VALUES (22,5,'Владивосток');
+INSERT INTO `TagTree` (`id`, `parent_id`, `tag`) VALUES (20,5,'åŒ—äº¬');
+INSERT INTO `TagTree` (`id`, `parent_id`, `tag`) VALUES (21,5,'ì„œìš¸');
+INSERT INTO `TagTree` (`id`, `parent_id`, `tag`) VALUES (22,5,'Ð’Ð»Ð°Ð´Ð¸Ð²Ð¾Ñ�Ñ‚Ð¾Ðº');
 INSERT INTO `TagTree` (`id`, `parent_id`, `tag`) VALUES (23,NULL,'XKCD');
 INSERT INTO `TagTree` (`id`, `parent_id`, `tag`) VALUES (24,23,'romance');
 INSERT INTO `TagTree` (`id`, `parent_id`, `tag`) VALUES (25,23,'sarcasm');

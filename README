@@ -105,6 +105,10 @@ Installation process does not check for this extension because the lack of it do
 base functionality. If some of ajax features are not working correctly, check if JSON extension
 is availible in your installation of PHP.
 
+The barcode attribute was removed.  The upgrade script attempts to preserve the data by moving
+it to either the 'OEM S/N 1' attribute or to a Log entry.  You should backup your database
+beforehand anyway.
+
 *** Upgrading to 0.18.x ***
 
 RackTables from its version 0.18.0 and later is not compatible with

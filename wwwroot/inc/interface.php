@@ -681,13 +681,11 @@ function renderEditObjectForm ($object_id)
 	{
 		echo "<input type=hidden name=object_label value=''>\n";
 		echo "<input type=hidden name=object_asset_no value=''>\n";
-		echo "<input type=hidden name=object_barcode value=''>\n";
 	}
 	else
 	{
 		echo "<tr><td>&nbsp;</td><th class=tdright>Visible label:</th><td class=tdleft><input type=text name=object_label value='${object['label']}'></td></tr>\n";
 		echo "<tr><td>&nbsp;</td><th class=tdright>Asset tag:</th><td class=tdleft><input type=text name=object_asset_no value='${object['asset_no']}'></td></tr>\n";
-		echo "<tr><td>&nbsp;</td><th class=tdright>Barcode:</th><td class=tdleft><input type=text name=object_barcode value='${object['barcode']}'></td></tr>\n";
 	}
 	// parent selection
 	if (rackObjectTypeMayHaveParent ($object['objtype_id']))
@@ -996,8 +994,6 @@ function renderRackObject ($object_id)
 		echo "<tr><td colspan=2 class=msg_error>Asset tag is missing.</td></tr>\n";
 	if (strlen ($info['label']))
 		echo "<tr><th width='50%' class=tdright>Visible label:</th><td class=tdleft>${info['label']}</td></tr>\n";
-	if (strlen ($info['barcode']))
-		echo "<tr><th width='50%' class=tdright>Barcode:</th><td class=tdleft>${info['barcode']}</td></tr>\n";
 	if ($parents = getEntityRelatives ('parents', 'object', $object_id))
 	{
 		foreach ($parents as $parent)
@@ -2147,7 +2143,7 @@ function renderDepot ()
 		{
 			startPortlet ('Objects (' . count ($objects) . ')');
 			echo '<br><br><table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
-			echo '<tr><th>Common name</th><th>Visible label</th><th>Asset tag</th><th>Barcode</th><th>Row/Rack</th></tr>';
+			echo '<tr><th>Common name</th><th>Visible label</th><th>Asset tag</th><th>Row/Rack</th></tr>';
 			$order = 'odd';
 			foreach ($objects as $obj)
 			{
@@ -2160,7 +2156,6 @@ function renderDepot ()
 					echo '<br><small>' . serializeTags ($obj['etags'], makeHref(array('page'=>$pageno, 'tab'=>'default')) . '&') . '</small>';
 				echo "</td><td class='${secondclass}'>${obj['label']}</td>";
 				echo "<td class='${secondclass}'>${obj['asset_no']}</td>";
-				echo "<td class='${secondclass}'>${obj['barcode']}</td>";
 				if ($obj['rack_id'])
 					echo "<td class='${secondclass}'><a href='".makeHref(array('page'=>'row', 'row_id'=>$obj['row_id']))."'>${obj['Row_name']}</a>/<a href='".makeHref(array('page'=>'rack', 'rack_id'=>$obj['rack_id']))."'>${obj['Rack_name']}</a></td>";
 				else
@@ -2223,10 +2218,10 @@ function renderHistory ($object_type, $object_id)
 			break;
 		case 'object':
 			$query =
-				"select ctime, user_name, RackObjectHistory.name as name, label, barcode, asset_no, has_problems, dict_value, comment " .
+				"select ctime, user_name, RackObjectHistory.name as name, label, asset_no, has_problems, dict_value, comment " .
 				"from RackObjectHistory inner join Dictionary on objtype_id = dict_key join Chapter on Dictionary.chapter_id = Chapter.id " .
 				"where Chapter.name = 'RackObjectType' and RackObjectHistory.id=? order by ctime";
-			$header = '<tr><th>change time</th><th>author</th><th>common name</th><th>visible label</th><th>barcode</th><th>asset no</th><th>has problems?</th><th>object type</th><th>comment</th></tr>';
+			$header = '<tr><th>change time</th><th>author</th><th>common name</th><th>visible label</th><th>asset no</th><th>has problems?</th><th>object type</th><th>comment</th></tr>';
 			$extra = 8;
 			break;
 		default:
@@ -3663,7 +3658,6 @@ function renderAddMultipleObjectsForm ()
 		echo "<td><input type=text size=30 name=${i}_object_name tabindex=${tabindex}></td>";
 		echo "<td><input type=text size=30 name=${i}_object_label tabindex=${tabindex}></td>";
 		echo "<td><input type=text size=20 name=${i}_object_asset_no tabindex=${tabindex}></td>";
-		echo "<td><input type=text size=10 name=${i}_object_barcode tabindex=${tabindex}></td>";
 		if ($i == 0)
 		{
 			echo "<td valign=top rowspan=${max}>";

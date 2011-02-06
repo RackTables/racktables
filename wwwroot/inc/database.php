@@ -15,7 +15,6 @@ $SQLSchema = array
 			'id' => 'id',
 			'name' => 'name',
 			'label' => 'label',
-			'barcode' => 'barcode',
 			'asset_no' => 'asset_no',
 			'objtype_id' => 'objtype_id',
 			'rack_id' => '(select rack_id from RackSpace where object_id = id order by rack_id asc limit 1)',
@@ -597,7 +596,7 @@ function commitAddRack ($name, $height, $row_id, $comment, $taglist)
 	recordHistory ('Rack', $last_insert_id);
 }
 
-function commitAddObject ($new_name, $new_label, $new_barcode, $new_type_id, $new_asset_no, $taglist = array())
+function commitAddObject ($new_name, $new_label, $new_type_id, $new_asset_no, $taglist = array())
 {
 	// Maintain UNIQUE INDEX for common names and asset tags by
 	// filtering out empty strings (not NULLs).
@@ -608,7 +607,6 @@ function commitAddObject ($new_name, $new_label, $new_barcode, $new_type_id, $ne
 		(
 			'name' => !strlen ($new_name) ? NULL : $new_name,
 			'label' => $new_label,
-			'barcode' => !strlen ($new_barcode) ? NULL : $new_barcode,
 			'objtype_id' => $new_type_id,
 			'asset_no' => !strlen ($new_asset_no) ? NULL : $new_asset_no,
 		)
@@ -624,7 +622,7 @@ function commitAddObject ($new_name, $new_label, $new_barcode, $new_type_id, $ne
 	return $last_insert_id;
 }
 
-function commitUpdateObject ($object_id, $new_name, $new_label, $new_barcode, $new_has_problems, $new_asset_no, $new_comment)
+function commitUpdateObject ($object_id, $new_name, $new_label, $new_has_problems, $new_asset_no, $new_comment)
 {
 	usePreparedUpdateBlade
 	(
@@ -633,7 +631,6 @@ function commitUpdateObject ($object_id, $new_name, $new_label, $new_barcode, $n
 		(
 			'name' => !mb_strlen ($new_name) ? NULL : $new_name,
 			'label' => !mb_strlen ($new_label) ? NULL : $new_label,
-			'barcode' => !mb_strlen ($new_barcode) ? NULL : $new_barcode,
 			'has_problems' => $new_has_problems,
 			'asset_no' => !mb_strlen ($new_asset_no) ? NULL : $new_asset_no,
 			'comment' => $new_comment,
@@ -1951,7 +1948,7 @@ function getObjectSearchResults ($what)
 function getObjectAttrsSearchResults ($what)
 {
 	$ret = array();
-	foreach (array ('name', 'label', 'asset_no', 'barcode') as $column)
+	foreach (array ('name', 'label', 'asset_no') as $column)
 	{
 		$tmp = getSearchResultByField
 		(

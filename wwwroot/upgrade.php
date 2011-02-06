@@ -902,8 +902,34 @@ CREATE TABLE `EntityLink` (
 			$query[] = "UPDATE Config SET varvalue = CONCAT(varvalue, ' or {\$typeid_2} or {\$typeid_6} or {\$typeid_1502} or {\$typeid_1503} or {\$typeid_1504} or {\$typeid_1507}') WHERE varname = 'IPV4OBJ_LISTSRC'";
 			$query[] = "UPDATE Config SET varvalue = '8' WHERE varname = 'MASSCOUNT'";
 			$query[] = "UPDATE RackObject SET label = NULL WHERE label = ''";
-			$query[] = "UPDATE Config SET varvalue = '0.19.0' WHERE varname = 'DB_VERSION'";
+			// Move barcode data so the column can be dropped
+			$result = $dbxlink->query ('SELECT id, objtype_id, barcode FROM RackObject WHERE barcode IS NOT NULL');
+			while ($row = $result->fetch (PDO::FETCH_ASSOC))
+			{
+				// Determine if this object type has the 'OEM S/N 1' attribute associated with it, and if it's set
+				$sn_query  = "SELECT (SELECT COUNT(*) FROM AttributeMap WHERE objtype_id=${row['objtype_id']} AND attr_id=1) AS AM_count, ";
+				$sn_query .= "(SELECT COUNT(*) FROM AttributeValue WHERE object_id=${row['id']} AND attr_id=1) AS AV_count";
+				$sn_result = $dbxlink->query ($sn_query);
+				$sn_row = $sn_result->fetch (PDO::FETCH_ASSOC);
+				if ($sn_row['AM_count'] == 1 && $sn_row['AV_count'] == 0)
+				{
+					// 'OEM S/N 1' attribute is mapped to this object type, but it is not set.  Good!
+					// Copy the barcode value to the attribute.
+					$query[] = "INSERT INTO AttributeValue (`object_id`, `attr_id`, `string_value`) VALUES (${row['id']}, 1, '${row['barcode']}')";
+				}
+				else
+				{
+					// Some other set of circumstances.  Not as good!
+					// Copy the barcode value to a new ObjectLog record.
+					$query[] = "INSERT INTO ObjectLog (`object_id`, `user`, `date`, `content`) VALUES (${row['id']}, '${_SERVER['PHP_AUTH_USER']}', NOW(), 'Upgrade to 0.19 dropped the barcode column. Value was: ${row['barcode']}')";
+				}
+				unset ($sn_query, $sn_result, $sn_row);
+			}
+			unset ($result);
+			$query[] = 'ALTER TABLE RackObject DROP COLUMN `barcode`';
+			$query[] = 'ALTER TABLE RackObjectHistory DROP COLUMN `barcode`';
 			$query[] = 'ALTER TABLE `VLANSwitchTemplate` DROP COLUMN `max_local_vlans`';
+			$query[] = "UPDATE Config SET varvalue = '0.19.0' WHERE varname = 'DB_VERSION'";
 			break;
 		default:
 			showError ("executeUpgradeBatch () failed, because batch '${batchid}' isn't defined");
