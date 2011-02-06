@@ -643,6 +643,12 @@ function commitUpdateObject ($object_id, $new_name, $new_label, $new_has_problem
 	return recordHistory ('RackObject', $object_id);
 }
 
+// used by getEntityRelatives for sorting
+function compare_name ($a, $b)
+{
+	return strnatcmp($a['name'], $b['name']);
+}
+
 // find either parents or children of a record
 function getEntityRelatives ($type, $entity_type, $entity_id)
 {
@@ -688,15 +694,8 @@ function getEntityRelatives ($type, $entity_type, $entity_id)
 				'name' => $name
 		);
 	}
-	// FIXME: .amd - doesn't work when getEntityRelatives is called twice
-	/*
 	// sort by name
-	function compare_name ($a, $b)
-	{
-		return strnatcmp($a['name'], $b['name']);
-	}
 	uasort($ret, 'compare_name');
-	*/
 	return $ret;
 }
 
