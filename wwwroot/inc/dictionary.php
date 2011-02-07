@@ -70,7 +70,7 @@ function platform_is_ok ()
 	$nerrs += platform_function_test ('mb_strlen', 'Multibyte string extension');
 	platform_function_test ('ldap_connect', 'LDAP extension', 'Not found, LDAP authentication will not work.', 'trwarning');
 	platform_function_test ('pcntl_waitpid', 'PCNTL extension', '802.1Q parallel sync is unavailable.', 'trwarning');
-	platform_function_test ('json_encode', 'JSON extension', 'JavaScript interface bits may fail.', 'trwarning');
+	$nerrs += platform_function_test ('json_encode', 'JSON extension', 'JavaScript interface bits may fail.');
 	platform_generic_test
 	(
 		(!empty($_SERVER['HTTPS']) and $_SERVER['HTTPS'] != 'off'),

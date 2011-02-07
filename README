@@ -101,9 +101,6 @@ should be sufficient:
 *** Upgrading to 0.19.x ***
 
 RackTables is now using PHP JSON extension which is included in the PHP core since 5.2.0.
-Installation process does not check for this extension because the lack of it does not affect
-base functionality. If some of ajax features are not working correctly, check if JSON extension
-is availible in your installation of PHP.
 
 The barcode attribute was removed.  The upgrade script attempts to preserve the data by moving
 it to either the 'OEM S/N 1' attribute or to a Log entry.  You should backup your database

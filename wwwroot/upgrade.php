@@ -36,6 +36,14 @@ in their default installation. There are yet options to work around that:
 RPM as explained here: http://bugs.centos.org/view.php?id=3252
 ENDOFTEXT
 ,
+	'0.19.0' => <<<ENDOFTEXT
+RackTables is now using PHP JSON extension which is included in the PHP core since 5.2.0.
+
+The barcode attribute was removed.  The upgrade script attempts to preserve the data by moving
+it to either the 'OEM S/N 1' attribute or to a Log entry.  You should backup your database
+beforehand anyway.
+ENDOFTEXT
+,
 );
 
 // At the moment we assume, that for any two releases we can
@@ -71,6 +79,7 @@ function getDBUpgradePath ($v1, $v2)
 		'0.18.4',
 		'0.18.5',
 		'0.18.6',
+		'0.18.7',
 		'0.19.0',
 	);
 	if (!in_array ($v1, $versionhistory) or !in_array ($v2, $versionhistory))
@@ -759,6 +768,10 @@ CREATE TABLE `VLANValidID` (
 		case '0.18.6':
 			$query = array_merge ($query, reloadDictionary ($batchid));
 			$query[] = "UPDATE Config SET varvalue = '0.18.6' WHERE varname = 'DB_VERSION'";
+			break;
+		case '0.18.7':
+			$query = array_merge ($query, reloadDictionary ($batchid));
+			$query[] = "UPDATE Config SET varvalue = '0.18.7' WHERE varname = 'DB_VERSION'";
 			break;
 		case '0.19.0':
 			$query = array_merge ($query, reloadDictionary ($batchid));
