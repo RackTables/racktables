@@ -1474,7 +1474,7 @@ $dictionary = array
 	1392 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 2960S-48FPS-L'),
 	1393 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 2960S-48LPS-L'),
 	1394 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 2960S-24PS-L'),
-
+	1395 => array ('chapter_id' => 13, 'dict_value' => '[[Linux%GSKIP%Debian 6.0 (squeeze) | http://debian.org/releases/squeeze/]]'),
 //                                     ^
 //                                     ^
 // add new dictionary entries up here  ^
