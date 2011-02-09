@@ -1,10 +1,14 @@
 RackTables - datacenter and server room management framework
+
+Copyright (c) 2011 Denis Ovsienko, Alexey Andriyanov, Aaron Dummer
+                   and contributors
 Copyright (c) 2010 Denis Ovsienko, Ryan Farrington, Alexey Andriyanov,
                    Aaron Dummer and contributors
 Copyright (c) 2009 Denis Ovsienko, Denis Yeldandi, Aaron Dummer,
                    Jonathan Thurman and contributors
 Copyright (c) 2008 Denis Ovsienko, Aaron Dummer and contributors
 Copyright (c) 2006-2007 Denis Ovsienko, Denis Yeldandi and contributors
+
 All trademarks and brand names are the rightful properties of their
 respective owners and are used in this software for the sole purpose
 of description or identification.

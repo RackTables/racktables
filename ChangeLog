@@ -5,24 +5,24 @@
 	new feature: 802.1Q template copier
 	new feature: merge "objectlog" extension (by Ernest Shaffer)
 	new feature: add support for "container" objects to handle blades, VMs, etc. (by Aaron Dummer)
-	update: cache image files thumbnails and make them JPEGs (#369, by Matt Mills)
-	update: enhance rackspace click helpers (by Jeroen Benda)
-	update: object type cannot be changed after the object is created
-	update: drop barcode column (by Aaron Dummer)
+	new feature: syncdomain.php now can create child processes to speed up 802.1Q sync
+	new feature: UI: live switchport info (port config, link status, learned mac list) showed inline on any object tab
 	bugfix: the feature of remembering last opened tab of realm page is now working
-	update: UI: ports/IPs/nets highlighting enhancements
 	bugfix: UI: pager in ipv4net shows appropriate page when IP is highlighted
 	bugfix: create IPv4 network button, if pressed to open in a new window, was redirecting the parent window, too
 	bugfix: when searching for IP not belonging to any known network, the ugly assertion failed page was shown.
 	bugfix: prevent invalid port links (#363, by Aaron Dummer)
+	bugfix: the 'Refcnt' counter on Configuration: Dictionary page was sometimes broken (closes mantis:0000381)
+	update: cache image files thumbnails and make them JPEGs (#369, by Matt Mills)
+	update: enhance rackspace click helpers (by Jeroen Benda)
+	update: object type cannot be changed after the object is created
+	update: drop barcode column (by Aaron Dummer)
+	update: UI: ports/IPs/nets highlighting enhancements
 	update: links to ports added to object search results
-	update: custom rearch results provided by users' plugins now supported
-	new feature: syncdomain.php now can create child processes to speed up 802.1Q sync
+	update: custom search results provided by users' plugins now supported
 	update: Huawei VRP 5.70 pseudo-interactive telnet support (fixes multiple problems caused by fast commands post through netcat)
-	new feature: UI: live switchport info (port config, link status, learned mac list) showed inline on any object tab
 	update: selective including of JS and CSS files. No more unneeded js code loaded.
 	update: 802.1Q template editor now supports single-submit edit and concerns concurrent submits
-	bugfix: the 'Refcnt' counter on Configuration: Dictionary page was sometimes broken (closes mantis:0000381)
 	update: new API for dispaying messages (showError, showWarning, showSuccess)
 	update: dictionary attribute values with external links are formatted differently to distinguish the filter and external info links
 	update: UI: ability to clear object ports list at one blow
