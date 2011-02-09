@@ -1363,7 +1363,6 @@ INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdef
 ('SHRINK_TAG_TREE_ON_CLICK','yes','string','no','no','yes','Dynamically hide useless tags in tagtree'),
 ('MAX_UNFILTERED_ENTITIES','0','uint','no','no','yes','Max item count to display on unfiltered result page'),
 ('SYNCDOMAIN_MAX_PROCESSES','0','uint','yes','no', 'no', 'How many worker proceses syncdomain cron script should create'),
-('VIRTUAL_OBJ_LISTSRC','{\$typeid_1504} or {\$typeid_1505} or {\$typeid_1506} or {\$typeid_1507}','string','yes','no','no','List source: virtual objects'),
 ('PORT_EXCLUSION_LISTSRC','{\$typeid_3} or {\$typeid_10} or {\$typeid_11} or {\$typeid_1505} or {\$typeid_1506}','string','yes','no','no','List source: objects without ports'),
 ('DB_VERSION','0.19.0','string','no','yes','no','Database version.');
 

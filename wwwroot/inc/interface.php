@@ -667,7 +667,7 @@ function renderNewRackForm ($row_id)
 
 function renderEditObjectForm ($object_id)
 {
-	global $pageno;
+	global $pageno, $virtual_obj_types;
 	$object = spotEntity ('object', $object_id);
 	startPortlet ();
 	printOpFormIntro ('update');
@@ -677,7 +677,7 @@ function renderEditObjectForm ($object_id)
 	echo "<tr><td>&nbsp;</td><th colspan=2><h2>Attributes</h2></th></tr>";
 	// baseline info
 	echo "<tr><td>&nbsp;</td><th class=tdright>Common name:</th><td class=tdleft><input type=text name=object_name value='${object['name']}'></td></tr>\n";
-	if (considerConfiguredConstraint ($object, 'VIRTUAL_OBJ_LISTSRC'))
+	if (in_array($object['objtype_id'], $virtual_obj_types))
 	{
 		echo "<input type=hidden name=object_label value=''>\n";
 		echo "<input type=hidden name=object_asset_no value=''>\n";
@@ -964,7 +964,7 @@ function finishPortlet ()
 
 function renderRackObject ($object_id)
 {
-	global $nextorder, $aac;
+	global $nextorder, $aac, $virtual_obj_types;
 	$info = spotEntity ('object', $object_id);
 	// FIXME: employ amplifyCell() instead of calling loader functions directly
 	amplifyCell ($info);
@@ -1316,7 +1316,7 @@ function renderRackObject ($object_id)
 
 	// After left column we have (surprise!) right column with rackspace portlet only.
 	echo "<td class=pcright>";
-	if (!considerConfiguredConstraint ($info, 'VIRTUAL_OBJ_LISTSRC'))
+	if (!in_array($info['objtype_id'], $virtual_obj_types))
 	{
 		// rackspace portlet
 		startPortlet ('rackspace allocation');
@@ -3629,19 +3629,18 @@ function renderNATv4ForObject ($object_id)
 
 function renderAddMultipleObjectsForm ()
 {
+	global $virtual_obj_types;
 	$typelist = readChapter (CHAP_OBJTYPE, 'o');
 	$typelist[0] = 'select type...';
 	$typelist = cookOptgroups ($typelist);
 	$max = getConfigVar ('MASSCOUNT');
 	$tabindex = 100;
-	$virt_obj_listsrc = getConfigVar ('VIRTUAL_OBJ_LISTSRC');
 
 	// create a list containing only physical object types
-	// FIXME: find a cleaner way of checking whether or not an object type exists in the config var
 	$phys_typelist = $typelist;
 	foreach ($phys_typelist['other'] as $key => $value)
 	{
-		if ($key > 0 && substr_count($virt_obj_listsrc, 'typeid_'.$key.'}') > 0)
+		if ($key > 0 && in_array($key, $virtual_obj_types))
 			unset($phys_typelist['other'][$key]);
 	}
 	startPortlet ('Physcial objects');
@@ -3672,11 +3671,10 @@ function renderAddMultipleObjectsForm ()
 	finishPortlet();
 
 	// create a list containing only virtual object types
-	// FIXME: find a cleaner way of checking whether or not an object type exists in the config var
 	$virt_typelist = $typelist;
 	foreach ($virt_typelist['other'] as $key => $value)
 	{
-		if ($key > 0 && substr_count($virt_obj_listsrc, 'typeid_'.$key.'}') == 0)
+		if ($key > 0 && !in_array($key, $virtual_obj_types))
 			unset($virt_typelist['other'][$key]);
 	}
 	startPortlet ('Virtual objects');

@@ -1419,7 +1419,6 @@ function resetUIConfig()
 	setConfigVar ('SHRINK_TAG_TREE_ON_CLICK', 'yes');
 	setConfigVar ('MAX_UNFILTERED_ENTITIES', '0');
 	setConfigVar ('SYNCDOMAIN_MAX_PROCESSES', '0');
-    setConfigVar ('VIRTUAL_OBJ_LISTSRC', '{$typeid_1504} or {$typeid_1505} or {$typeid_1506} or {$typeid_1507}');
     setConfigVar ('PORT_EXCLUSION_LISTSRC', '{$typeid_3} or {$typeid_10} or {$typeid_11} or {$typeid_1505} or {$typeid_1506}');
 	return buildRedirectURL (__FUNCTION__, 'OK');
 }
