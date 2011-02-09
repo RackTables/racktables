@@ -71,6 +71,7 @@ function getDBUpgradePath ($v1, $v2)
 		'0.18.4',
 		'0.18.5',
 		'0.18.6',
+		'0.18.7',
 	);
 	if (!in_array ($v1, $versionhistory) or !in_array ($v2, $versionhistory))
 		return NULL;
@@ -758,6 +759,10 @@ CREATE TABLE `VLANValidID` (
 		case '0.18.6':
 			$query = array_merge ($query, reloadDictionary ($batchid));
 			$query[] = "UPDATE Config SET varvalue = '0.18.6' WHERE varname = 'DB_VERSION'";
+			break;
+		case '0.18.7':
+			$query = array_merge ($query, reloadDictionary ($batchid));
+			$query[] = "UPDATE Config SET varvalue = '0.18.7' WHERE varname = 'DB_VERSION'";
 			break;
 		default:
 			showFailure ("executeUpgradeBatch () failed, because batch '${batchid}' isn't defined", __FILE__);

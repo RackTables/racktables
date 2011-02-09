@@ -1,4 +1,4 @@
-0.18.7
+0.18.7 2011-02-09
 	bugfix: adjust 802.1Q command generation
 	bugfix: fixed telnet session hanging in NX-OS4 connector
 	bugfix: adjust installer check for mysqlnd
