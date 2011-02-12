@@ -42,6 +42,12 @@ now in the "wwwroot" directory of the tar.gz archive. Files outside of
 that directory are not directly intended for httpd environment and should
 not be copied to the server.
 
+This release incorporates ObjectLog functionality, which used to be
+available as a separate plugin. For the best results it is advised to
+disable (through local.php) external ObjectLog plugin permanently before
+the new version is installed. All previously accumulated ObjectLog records
+will be available through the updated standard interface.
+
 RackTables is now using PHP JSON extension which is included in the PHP
 core since 5.2.0.
 
@@ -824,18 +830,24 @@ CREATE TABLE `VLANIPv6` (
 ) ENGINE=InnoDB
 ";
 			$query[] = "
-CREATE TABLE `ObjectLog` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `object_id` int(10) unsigned NOT NULL,
-  `user` char(64) NOT NULL,
+CREATE TABLE IF NOT EXISTS `ObjectLog` (
+  `id` int(10) NOT NULL AUTO_INCREMENT,
+  `object_id` int(10) NOT NULL,
+  `user` varchar(64) NOT NULL,
   `date` datetime NOT NULL,
   `content` text NOT NULL,
-  PRIMARY KEY (`id`),
-  KEY `object_id` (`object_id`),
-  KEY `date` (`date`),
-  CONSTRAINT `ObjectLog-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `RackObject` (`id`) ON DELETE CASCADE
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB
 ";
+			# Now we have the same structure of ObjectLog table, which objectlog.php
+			# could have left. Subsequent column updates will handle any existing data.
+			$query[] = "ALTER TABLE ObjectLog MODIFY COLUMN `id` int(10) unsigned NOT NULL AUTO_INCREMENT";
+			$query[] = "ALTER TABLE ObjectLog MODIFY COLUMN `object_id` int(10) unsigned NOT NULL";
+			$query[] = "ALTER TABLE ObjectLog MODIFY COLUMN `user` char(64) NOT NULL";
+			$query[] = "ALTER TABLE ObjectLog ADD KEY `object_id` (`object_id`)";
+			$query[] = "ALTER TABLE ObjectLog ADD KEY `date` (`date`)";
+			$query[] = "ALTER TABLE ObjectLog ADD CONSTRAINT `ObjectLog-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `RackObject` (`id`) ON DELETE CASCADE";
+			# Now it's the way 0.19.0 is expecting it to be.
 			$query[] = "
 CREATE TABLE `ObjectParentCompat` (
   `parent_objtype_id` int(10) unsigned NOT NULL,
