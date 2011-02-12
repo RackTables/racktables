@@ -929,7 +929,7 @@ CREATE TABLE `EntityLink` (
 			$query[] = "INSERT INTO `ObjectParentCompat` (`parent_objtype_id`, `child_objtype_id`) VALUES (1505,1507)";
 			$query[] = "INSERT INTO `ObjectParentCompat` (`parent_objtype_id`, `child_objtype_id`) VALUES (1506,1504)";
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdefined, description) VALUES ('PORT_EXCLUSION_LISTSRC','{\$typeid_3} or {\$typeid_10} or {\$typeid_11} or {\$typeid_1505} or {\$typeid_1506}','string','yes','no','no','List source: objects without ports')";
-			$query[] = "UPDATE Config SET varvalue = CONCAT(varvalue, ' or {\$typeid_2} or {\$typeid_6} or {\$typeid_1502} or {\$typeid_1503} or {\$typeid_1504} or {\$typeid_1507}') WHERE varname = 'IPV4OBJ_LISTSRC'";
+			$query[] = "UPDATE Config SET varvalue = CONCAT(varvalue, ' or {\$typeid_1502} or {\$typeid_1503} or {\$typeid_1504} or {\$typeid_1507}') WHERE varname = 'IPV4OBJ_LISTSRC'";
 			$query[] = "UPDATE Config SET varvalue = '8' WHERE varname = 'MASSCOUNT'";
 			$query[] = "UPDATE RackObject SET label = NULL WHERE label = ''";
 			// Move barcode data so the column can be dropped

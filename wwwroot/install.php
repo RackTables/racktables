@@ -882,8 +882,8 @@ CREATE TABLE `VLANSwitch` (
 
 CREATE TABLE `VLANSwitchTemplate` (
   `id` int(10) unsigned NOT NULL auto_increment,
-  `description` char(255) default NULL,
   `mutex_rev` int(10) NOT NULL,
+  `description` char(255) default NULL,
   `saved_by` char(64) NOT NULL,
   PRIMARY KEY  (`id`),
   UNIQUE KEY `description` (`description`)
