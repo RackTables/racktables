@@ -37,11 +37,17 @@ RPM as explained here: http://bugs.centos.org/view.php?id=3252
 ENDOFTEXT
 ,
 	'0.19.0' => <<<ENDOFTEXT
-RackTables is now using PHP JSON extension which is included in the PHP core since 5.2.0.
+The files, which are intended for the httpd (web-server) directory, are
+now in the "wwwroot" directory of the tar.gz archive. Files outside of
+that directory are not directly intended for httpd environment and should
+not be copied to the server.
 
-The barcode attribute was removed.  The upgrade script attempts to preserve the data by moving
-it to either the 'OEM S/N 1' attribute or to a Log entry.  You should backup your database
-beforehand anyway.
+RackTables is now using PHP JSON extension which is included in the PHP
+core since 5.2.0.
+
+The barcode attribute was removed. The upgrade script attempts to
+preserve the data by moving it to either the 'OEM S/N 1' attribute or to
+a Log entry. You should backup your database beforehand anyway.
 ENDOFTEXT
 ,
 );
