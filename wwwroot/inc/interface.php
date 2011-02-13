@@ -8135,7 +8135,7 @@ function renderObject8021QPorts ($object_id)
 		}
 		$ancor = '';
 		$tdclass = '';
-		if ($hl_port_name == $port_name)
+		if (isset ($hl_port_name) and $hl_port_name == $port_name)
 		{
 			$tdclass .= 'class="border_highlight"';
 			$ancor = "name='port-$hl_port_id'";
@@ -8818,7 +8818,7 @@ END
 
 		$ancor = '';
 		$td_class = '';
-		if (isset ($hl_port_id) && $hl_port_name == $port_name)
+		if (isset ($hl_port_name) and $hl_port_name == $port_name)
 		{
 			$ancor = "name='port-$hl_port_id'";
 			$td_class = ' border_highlight';
