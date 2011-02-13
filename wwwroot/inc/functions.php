@@ -3317,10 +3317,37 @@ function filter8021QChangeRequests
 }
 
 // take port list with order applied and return uplink ports in the same format
-function produceUplinkPorts ($domain_vlanlist, $portlist)
+function produceUplinkPorts ($domain_vlanlist, $portlist, $object_id)
 {
 	$ret = array();
 	$employed = array();
+
+	// find VLANs for object's L3 allocations
+	$cell = spotEntity ('object', $object_id);
+	amplifyCell ($cell);
+	foreach (array ('ipv4', 'ipv6') as $family)
+	{
+		$seen_nets = array();
+		foreach ($cell[$family] as $ip => $allocation)
+		{
+			if ($family == 'ipv6')
+				$ip = new IPv6Address ($ip);
+			if ($net_id = ($family == 'ipv6' ? getIPv6AddressNetworkId ($ip) : getIPv4AddressNetworkId ($ip)))
+			{
+				if (! isset($seen_nets[$net_id]))
+					$seen_nets[$net_id]	= 1;
+				else
+					continue;
+				$net = spotEntity ("${family}net", $net_id);
+				amplifyCell ($net);
+				foreach ($net['8021q'] as $vlan)
+					if (! in_array ($vlan['vlan_id'], $employed))
+						$employed[] = $vlan['vlan_id'];
+
+			}
+		}
+	}
+
 	foreach ($domain_vlanlist as $vlan_id => $vlan)
 		if ($vlan['vlan_type'] == 'compulsory')
 			$employed[] = $vlan_id;
@@ -3607,7 +3634,7 @@ function exec8021QDeploy ($object_id, $do_push)
 	// Take new "desired" configuration and derive uplink port configuration
 	// from it. Then cancel changes to immune VLANs and save resulting
 	// changes (if any left).
-	$new_uplinks = filter8021QChangeRequests ($domain_vlanlist, $Dnew, produceUplinkPorts ($domain_vlanlist, $Dnew));
+	$new_uplinks = filter8021QChangeRequests ($domain_vlanlist, $Dnew, produceUplinkPorts ($domain_vlanlist, $Dnew, $vswitch['object_id']));
 	$nsaved_uplinks += replace8021QPorts ('desired', $vswitch['object_id'], $Dnew, $new_uplinks);
 	if ($nsaved + $nsaved_uplinks)
 	{
@@ -3844,7 +3871,7 @@ function recalc8021QPorts ($switch_id, $check_only = FALSE)
 			$remote_before = $remote_order;
 			if ($remote_order[$remote_pn]['vst_role'] == 'uplink')
 			{
-				$remote_uplinks = filter8021QChangeRequests ($remote_domain_vlanlist, $remote_before, produceUplinkPorts ($remote_domain_vlanlist, $remote_order));
+				$remote_uplinks = filter8021QChangeRequests ($remote_domain_vlanlist, $remote_before, produceUplinkPorts ($remote_domain_vlanlist, $remote_order, $remote_vswitch['object_id']));
 				$remote_port_order = $remote_uplinks[$remote_pn];
 				$new_order = produceDownlinkPort ($domain_vlanlist, $pn, array ($pn => $local_port_order), $remote_port_order);
 				$local_port_order = $new_order[$pn]; // this updates $order
@@ -3860,7 +3887,7 @@ function recalc8021QPorts ($switch_id, $check_only = FALSE)
 	}
 
 	// calculate local uplinks, store changes in $order
-	foreach (filter8021QChangeRequests ($domain_vlanlist, $before, produceUplinkPorts ($domain_vlanlist, $order)) as $pn => $portorder)
+	foreach (filter8021QChangeRequests ($domain_vlanlist, $before, produceUplinkPorts ($domain_vlanlist, $order, $vswitch['object_id'])) as $pn => $portorder)
 		$order[$pn] = $portorder;
 	// queue changes in D-config of local switch
 	if ($changed = queueChangesToSwitch ($switch_id, $order, $before, $check_only))

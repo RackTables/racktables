@@ -2452,7 +2452,7 @@ function save8021QPorts ()
 		$changes = authorize8021QChangeRequests ($before, $changes);
 		foreach ($changes as $port_name => $port)
 			$after[$port_name] = $port;
-		$new_uplinks = filter8021QChangeRequests ($domain_vlanlist, $after, produceUplinkPorts ($domain_vlanlist, $after));
+		$new_uplinks = filter8021QChangeRequests ($domain_vlanlist, $after, produceUplinkPorts ($domain_vlanlist, $after, $vswitch['object_id']));
 		$npulled = replace8021QPorts ('desired', $vswitch['object_id'], $before, $changes);
 		$nsaved_uplinks = replace8021QPorts ('desired', $vswitch['object_id'], $before, $new_uplinks);
 	}
