@@ -961,6 +961,11 @@ CREATE TABLE `EntityLink` (
 			$query[] = 'ALTER TABLE `VLANSwitchTemplate` DROP COLUMN `max_local_vlans`';
 			$query[] = "UPDATE Config SET varvalue = '0.19.0' WHERE varname = 'DB_VERSION'";
 			break;
+		case '0.19.1':
+			$query = array_merge ($query, reloadDictionary ($batchid));
+			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdefined, description) VALUES ('FILTER_RACKLIST_BY_TAGS','yes','string','yes','no','yes','Rackspace: show only racks matching the current object\'s tags')";
+			$query[] = "UPDATE Config SET varvalue = '0.19.1' WHERE varname = 'DB_VERSION'";
+			break;
 		default:
 			showError ("executeUpgradeBatch () failed, because batch '${batchid}' isn't defined");
 			die;

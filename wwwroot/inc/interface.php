@@ -2022,6 +2022,38 @@ function renderRackSpaceForObject ($object_id)
 	echo "<td class=pcleft height='1%'>";
 	startPortlet ('Racks');
 	$allRacksData = listCells ('rack');
+
+	// filter rack list to match only racks having common tags with the object (reducing $allRacksData)
+	if (! isset ($_REQUEST['show_all_racks']) and getConfigVar ('FILTER_RACKLIST_BY_TAGS') == 'yes')
+	{
+		$matching_racks = array();
+		$object = spotEntity ('object', $object_id);
+		$matched_tags = array();
+		foreach ($allRacksData as $rack)
+			foreach ($object['etags'] as $tag)
+				if (tagOnChain ($tag, $rack['etags']) or tagOnChain ($tag, $rack['itags']))
+				{
+					$matching_racks[$rack['id']] = $rack;
+					$matched_tags[$tag['id']] = $tag;
+					break;
+				}
+		// add current object's racks even if they dont match filter
+		foreach ($workingRacksData as $rack_id => $rack)
+			if (! isset ($matching_racks[$rack_id]))
+				$matching_racks[$rack_id] = $rack;
+		// if matching racks found, and rack list is reduced, show 'show all' link
+		if (count ($matching_racks) and count ($matching_racks) != count ($allRacksData))
+		{
+			$filter_text = '';
+			foreach ($matched_tags as $tag)
+				$filter_text .= (empty ($filter_text) ? '' : ' or ') . '{' . $tag['tag'] . '}';
+			$href_show_all = trim($_SERVER['REQUEST_URI'], '&');
+			$href_show_all .= htmlspecialchars('&show_all_racks=1');
+			echo "(filtered by <span class='filter-text'>$filter_text</span>, <a href='$href_show_all'>show all</a>)<p>";
+			$allRacksData = $matching_racks;
+		}
+	}
+
 	if (count ($allRacksData) <= getConfigVar ('RACK_PRESELECT_THRESHOLD'))
 		foreach ($allRacksData as $rack)
 			if (!array_key_exists ($rack['id'], $workingRacksData))

@@ -1,3 +1,5 @@
+0.19.1
+	update: UI: rack lists are now reduced by common tags with object on Rackspace tab (FILTER_RACKLIST_BY_TAGS config var)
 0.19.0 2011-02-12
 	new feature: IPv6 support, except of LivePTR, NAT and SLB functionality (by Alexey Andriyanov)
 	new feature: cable ID column for links (#328, by Giovani Zamboni and Jens Weibler)

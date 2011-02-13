@@ -628,3 +628,8 @@ a.toggleTreeMode {
 a.img-link {
 	vertical-align: bottom;
 }
+
+/* text label with rackcode (object-rackspace tab) */
+.filter-text {
+	font-family: "Courier New",Courier,monospace;
+}	
