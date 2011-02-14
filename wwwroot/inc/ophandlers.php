@@ -2795,6 +2795,9 @@ function tableHandler()
 	global $sic;
 	$columns = array();
 	foreach (array ('arglist', 'set_arglist', 'where_arglist') as $listname)
+	{
+		if (! is_array ($opspec[$listname]))
+			continue;
 		foreach ($opspec[$listname] as $argspec)
 		{
 			genericAssertion ($argspec['url_argname'], $argspec['assertion']);
@@ -2821,6 +2824,7 @@ function tableHandler()
 				}
 			$columns[$listname][$table_colname] = $arg_value;
 		}
+	}
 	switch ($opspec['action'])
 	{
 	case 'INSERT':
