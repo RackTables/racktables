@@ -1242,7 +1242,7 @@ function addLotOfObjects()
 				$names2[] = rtrim ($parts[0]);
 		}
 		foreach ($names2 as $name)
-			if (($object_id = commitAddObject ($name, '', '', $global_type_id, '', $taglist)) !== FALSE)
+			if (($object_id = commitAddObject ($name, '', $global_type_id, '', $taglist)) !== FALSE)
 			{
 				$info = spotEntity ('object', $object_id);
 				amplifyCell ($info);
