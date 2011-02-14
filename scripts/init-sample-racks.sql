@@ -205,8 +205,8 @@ INSERT INTO `IPv4Allocation` VALUES (927,180879998,'','shared');
 INSERT INTO `IPv4Allocation` VALUES (908,180880446,'fa1/0','router');
 INSERT INTO `IPv4Allocation` VALUES (961,180880385,'','regular');
 
-INSERT INTO `IPv6Allocation` VALUES ('908', 0x2A0014500001BEEF0000000000000001, 'fa1/0', 'router');
-INSERT INTO `IPv6Allocation` VALUES ('919', 0x2A0014500001DEAD0000000000000001, 'bge1', 'router');
+INSERT INTO `IPv6Allocation` VALUES ('908', 0xFC0014500001BEEF0000000000000001, 'fa1/0', 'router');
+INSERT INTO `IPv6Allocation` VALUES ('919', 0xFC0014500001DEAD0000000000000001, 'bge1', 'router');
 
 INSERT INTO `IPv4Network` (`id`, `ip`, `mask`, `name`) VALUES (96,180879616,26,'London network devices and VIPs');
 INSERT INTO `IPv4Network` (`id`, `ip`, `mask`, `name`) VALUES (97,180879680,26,'London HA server farm');
@@ -220,11 +220,11 @@ INSERT INTO `IPv4Network` (`id`, `ip`, `mask`, `name`) VALUES (105,180879366,31,
 INSERT INTO `IPv4Network` (`id`, `ip`, `mask`, `name`) VALUES (106,180880384,26,'Moscow network devices');
 INSERT INTO `IPv4Network` (`id`, `ip`, `mask`, `name`) VALUES (107,180880448,26,'Moscow servers');
 
-INSERT INTO `IPv6Network` (`id`, `ip`, `mask`, `last_ip`, `name`, `comment`) VALUES ('1', 0x2A001450000000000000000000000000, '32', 0x2A001450FFFFFFFFFFFFFFFFFFFFFFFF, 'Google IPv6', null);
-INSERT INTO `IPv6Network` (`id`, `ip`, `mask`, `last_ip`, `name`, `comment`) VALUES ('2', 0x2A001450000100000000000000000000, '48', 0x2A0014500001FFFFFFFFFFFFFFFFFFFF, 'v6 Suballoc 1', null);
-INSERT INTO `IPv6Network` (`id`, `ip`, `mask`, `last_ip`, `name`, `comment`) VALUES ('3', 0x2A001450000200000000000000000000, '48', 0x2A0014500002FFFFFFFFFFFFFFFFFFFF, 'v6 Suballoc 2', null);
-INSERT INTO `IPv6Network` (`id`, `ip`, `mask`, `last_ip`, `name`, `comment`) VALUES ('4', 0x2A0014500001DEAD0000000000000000, '64', 0x2A0014500001DEADFFFFFFFFFFFFFFFF, 'dead net', null);
-INSERT INTO `IPv6Network` (`id`, `ip`, `mask`, `last_ip`, `name`, `comment`) VALUES ('5', 0x2A0014500001BEEF0000000000000000, '64', 0x2A0014500001BEEFFFFFFFFFFFFFFFFF, 'beef net', null);
+INSERT INTO `IPv6Network` (`id`, `ip`, `mask`, `last_ip`, `name`, `comment`) VALUES ('1', 0xFC000000000000000000000000000000, '7', 0xFDFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF, 'Local IPv6', null);
+INSERT INTO `IPv6Network` (`id`, `ip`, `mask`, `last_ip`, `name`, `comment`) VALUES ('2', 0xFC001450000100000000000000000000, '48', 0xFC0014500001FFFFFFFFFFFFFFFFFFFF, 'v6 Suballoc 1', null);
+INSERT INTO `IPv6Network` (`id`, `ip`, `mask`, `last_ip`, `name`, `comment`) VALUES ('3', 0xFC001450000200000000000000000000, '48', 0xFC0014500002FFFFFFFFFFFFFFFFFFFF, 'v6 Suballoc 2', null);
+INSERT INTO `IPv6Network` (`id`, `ip`, `mask`, `last_ip`, `name`, `comment`) VALUES ('4', 0xFC0014500001DEAD0000000000000000, '64', 0xFC0014500001DEADFFFFFFFFFFFFFFFF, 'dead net', null);
+INSERT INTO `IPv6Network` (`id`, `ip`, `mask`, `last_ip`, `name`, `comment`) VALUES ('5', 0xFC0014500001BEEF0000000000000000, '64', 0xFC0014500001BEEFFFFFFFFFFFFFFFFF, 'beef net', null);
 
 INSERT INTO `IPv4RSPool` VALUES (1,'Apache servers',NULL,NULL);
 INSERT INTO `IPv4RSPool` VALUES (2,'Resin servers',NULL,NULL);
