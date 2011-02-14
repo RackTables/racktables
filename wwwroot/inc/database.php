@@ -3774,7 +3774,7 @@ function getPortIIFStats ($args)
 		'SUM((SELECT COUNT(*) FROM Link WHERE id IN (porta, portb))) AS current ' .
 		'FROM Port INNER JOIN Dictionary ON type = dict_key ' .
 		'WHERE iif_id = ? GROUP BY type',
-		array (current ($args))
+		array_slice ($args, 0, 1) // array with only the first argument
 	);
 	return $result->fetchAll (PDO::FETCH_ASSOC);
 }

@@ -837,8 +837,8 @@ function getSelect ($optionList, $select_attrs = array(), $selected_id = NULL)
 		return '(none)';
 	if (count ($optionList) == 1)
 	{
-		$value = current (array_keys ($optionList));
-		return "<input type=hidden name=${select_attrs['name']} id=${select_attrs['name']} value=${value}>" . current ($optionList);
+		foreach ($optionList as $key => $value) { break; }
+		return "<input type=hidden name=${select_attrs['name']} id=${select_attrs['name']} value=${key}>" . $value;
 	}
 	if (!array_key_exists ('id', $select_attrs))
 		$select_attrs['id'] = $select_attrs['name'];
@@ -3780,10 +3780,8 @@ function renderSearchResults ($terms, $summary)
 		echo "<center><h2>Nothing found for '${terms}'</h2></center>";
 	elseif ($nhits == 1)
 	{
-		$realm = key ($summary);
-		$record = current ($summary);
-		if (is_array ($record))
-			$record = current ($record);
+		foreach ($summary as $realm => $container)
+			$record = array_shift ($container);
 		switch ($realm)
 		{
 			case 'ipv4addressbydq':
@@ -3819,7 +3817,10 @@ function renderSearchResults ($terms, $summary)
 				break;
 			case 'object':
 				if (isset ($record['by_port']) and 1 == count ($record['by_port']))
-					$hl = '&hl_port_id=' . key ($record['by_port']);
+				{
+					$found_ports_ids = array_keys ($record['by_port']);
+					$hl = '&hl_port_id=' . $found_ports_ids[0];
+				}
 				else
 					$hl = '';
 				echo "<script language='Javascript'>document.location='index.php?page=object&object_id=${record['id']}${hl}';//</script>";
