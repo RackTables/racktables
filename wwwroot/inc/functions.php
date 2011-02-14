@@ -3349,7 +3349,7 @@ function produceUplinkPorts ($domain_vlanlist, $portlist, $object_id)
 	}
 
 	foreach ($domain_vlanlist as $vlan_id => $vlan)
-		if ($vlan['vlan_type'] == 'compulsory')
+		if ($vlan['vlan_type'] == 'compulsory' and ! in_array ($vlan_id, $employed))
 			$employed[] = $vlan_id;
 	foreach ($portlist as $port_name => $port)
 		if ($port['vst_role'] != 'uplink')
