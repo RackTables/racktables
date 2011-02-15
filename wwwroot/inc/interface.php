@@ -3780,8 +3780,12 @@ function renderSearchResults ($terms, $summary)
 		echo "<center><h2>Nothing found for '${terms}'</h2></center>";
 	elseif ($nhits == 1)
 	{
-		foreach ($summary as $realm => $container)
-			$record = array_shift ($container);
+		foreach ($summary as $realm => $record)
+		{
+			if (is_array ($record))
+				$record = array_shift ($record);
+			break;
+		}
 		switch ($realm)
 		{
 			case 'ipv4addressbydq':
