@@ -1919,7 +1919,7 @@ function IPv4NetworkCmp ($netA, $netB)
 
 function IPv6NetworkCmp ($netA, $netB)
 {
-	return strcmp ($netA['ip_bin'], $netB['ip_bin']);
+	return strcmp ($netA['ip_bin']->getBin(), $netB['ip_bin']->getBin());
 }
 
 // Modify the given tag tree so, that each level's items are sorted alphabetically.

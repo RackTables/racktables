@@ -3185,11 +3185,11 @@ function renderEmptyIPv6 ($ip, $hl_ip)
 function renderSeparator ($first, $after, $hl_ip)
 {
 	$self = __FUNCTION__;
-	if (strcmp ($first, $after) >= 0)
+	if (strcmp ($first->getBin(), $after->getBin()) >= 0)
 		return;
 	if ($first->next() == $after)
 		renderEmptyIPv6 ($first, $hl_ip);
-	elseif (isset ($hl_ip) && strcmp ($hl_ip, $first) >= 0 && strcmp ($hl_ip, $after) < 0)
+	elseif (isset ($hl_ip) && strcmp ($hl_ip->getBin(), $first->getBin()) >= 0 && strcmp ($hl_ip->getBin(), $after->getBin()) < 0)
 	{ // $hl_ip is inside the range $first - ($after-1)
 		$self ($first, $hl_ip, $hl_ip);
 		renderEmptyIPv6 ($hl_ip, $hl_ip);
@@ -3204,7 +3204,7 @@ function getPageNumOfIPv6 ($list, $ip, $maxperpage)
 {
 	if (intval ($maxperpage) <= 0 || count ($list) <= $maxperpage)
 		return 0;
-	$bin_ip = (string)$ip;
+	$bin_ip = $ip->getBin();
 	$keys = array_keys ($list);
 	for ($i = 1; $i <= count ($keys); $i++)
 		if (strcmp ($keys[$i-1], $bin_ip) >= 0)

@@ -14,10 +14,18 @@ function __construct ($bin_str = self::zero_address)
 	$this->words = $bin_str;
 }
 
-// object in string context interpolates as 16-byte binary string 
-function __toString ()
+// returns 16-byte binary string
+function getBin ()
 {
 	return $this->words;
+}
+
+// FIXME: remove this debug procedure before release
+function __toString ()
+{
+	echo '<pre>';
+	debug_print_backtrace();
+	exit;
 }
 
 private static function set_word_value (&$haystack, $nword, $hexvalue)

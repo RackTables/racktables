@@ -1442,8 +1442,8 @@ function scanIPv6Space ($pairlist)
 	foreach ($pairlist as $pair)
 	{
 		$wheres[] = "ip >= ? AND ip <= ?";
-		$qparams[] = (string) $pair['first'];
-		$qparams[] = (string) $pair['last'];
+		$qparams[] = $pair['first']->getBin();
+		$qparams[] = $pair['last']->getBin();
 	}
 	if (! count ($wheres))  // this is normal for a network completely divided into smaller parts
 		return $ret;
@@ -1456,7 +1456,7 @@ function scanIPv6Space ($pairlist)
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
 		$ip_bin = new IPv6Address ($row['ip']);
-		$key = (string)$ip_bin;
+		$key = $ip_bin->getBin();
 		if (!isset ($ret[$key]))
 			$ret[$key] = constructIPv6Address ($ip_bin);
 		$ret[$key]['name'] = $row['name'];
@@ -1475,7 +1475,7 @@ function scanIPv6Space ($pairlist)
 	foreach ($allRows as $row)
 	{
 		$ip_bin = new IPv6Address ($row['ip']);
-		$key = (string)$ip_bin;
+		$key = $ip_bin->getBin();
 		if (!isset ($ret[$key]))
 			$ret[$key] = constructIPv6Address ($ip_bin);
 		$oinfo = spotEntity ('object', $row['object_id']);
@@ -1536,12 +1536,12 @@ function bindIpToObject ($ip = '', $object_id = 0, $name = '', $type = '')
 	);
 }
 
-function bindIPv6ToObject ($ip = '', $object_id = 0, $name = '', $type = '')
+function bindIPv6ToObject ($ip, $object_id = 0, $name = '', $type = '')
 {
 	return usePreparedInsertBlade
 	(
 		'IPv6Allocation',
-		array ('ip' => $ip, 'object_id' => $object_id, 'name' => $name, 'type' => $type)
+		array ('ip' => $ip->getBin(), 'object_id' => $object_id, 'name' => $name, 'type' => $type)
 	);
 }
 
@@ -1566,7 +1566,7 @@ function getIPv4AddressNetworkId ($dottedquad, $masklen = 32)
 function getIPv6AddressNetworkId ($ip, $masklen = 128)
 {
 	$query = 'select id from IPv6Network where ip <= ? AND last_ip >= ? and mask < ? order by mask desc limit 1';
-	$result = usePreparedSelectBlade ($query, array ((string)$ip, (string)$ip, $masklen));
+	$result = usePreparedSelectBlade ($query, array ($ip->getBin(), $ip->getBin(), $masklen));
 	if ($row = $result->fetch (PDO::FETCH_ASSOC))
 		return $row['id'];
 	return NULL;
@@ -1603,14 +1603,14 @@ function updateV4Address ($ip = 0, $name = '', $reserved = 'no')
 
 function updateV6Address ($ip, $name = '', $reserved = 'no')
 {
-	usePreparedDeleteBlade ('IPv6Address', array ('ip' => $ip));
+	usePreparedDeleteBlade ('IPv6Address', array ('ip' => $ip->getBin()));
 	// INSERT may appear not necessary.
 	if ($name == '' and $reserved == 'no')
 		return '';
 	$ret = usePreparedInsertBlade
 	(
 		'IPv6Address',
-		array ('name' => $name, 'reserved' => $reserved, 'ip' => $ip)
+		array ('name' => $name, 'reserved' => $reserved, 'ip' => $ip->getBin())
 	);
 	return $ret !== FALSE ? '' : (__FUNCTION__ . 'query failed');
 }
@@ -1624,7 +1624,7 @@ function updateBond ($ip='', $object_id=0, $name='', $type='')
 	);
 }
 
-function updateIPv6Bond ($ip='', $object_id=0, $name='', $type='')
+function updateIPv6Bond ($ip, $object_id=0, $name='', $type='')
 {
 	return usePreparedUpdateBlade
 	(
@@ -1636,7 +1636,7 @@ function updateIPv6Bond ($ip='', $object_id=0, $name='', $type='')
 		),
 		array
 		(
-			'ip' => $ip,
+			'ip' => $ip->getBin(),
 			'object_id' => $object_id,
 		)
 	);
@@ -1656,7 +1656,7 @@ function unbindIPv6FromObject ($ip, $object_id)
 	return usePreparedDeleteBlade
 	(
 		'IPv6Allocation',
-		array ('ip' => $ip, 'object_id' => $object_id)
+		array ('ip' => $ip->getBin(), 'object_id' => $object_id)
 	);
 }
 
@@ -3205,8 +3205,8 @@ function createIPv6Prefix ($range = '', $name = '', $taglist = array())
 		'IPv6Network',
 		array
 		(
-			'ip' => $network_addr,
-			'last_ip' => $broadcast_addr,
+			'ip' => $network_addr->getBin(),
+			'last_ip' => $broadcast_addr->getBin(),
 			'mask' => $mask,
 			'name' => $name
 		)
