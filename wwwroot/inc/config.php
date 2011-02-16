@@ -1,6 +1,20 @@
 <?php
 
-define ('CODE_VERSION', '0.19.1'); //0.19.1: FIXME: remove __toString from IPv6Address before the release of 0.19.1!
+/*
+Bumping up of CODE_VERSION requires precise timing as described in the
+Developer's Guide. Otherwise working copies updated from SVN (for example,
+committers' copies) can run into issues:
+1. The source is rendered unfunctional after "svn update", asking users to
+   finish the "upgrade".
+2. Once the batch for the "upgrade" is executed, the queries, which get added
+   to the batch later, are likely to receive no real execution.
+3. In case the executed part of such partial batch is found incorrect later,
+   but before the release, fixing the wrong queries will be harder, hence they
+   have already been executed.
+*/
+
+define ('CODE_VERSION', '0.19.0');
+//0.19.1: FIXME: remove __toString from IPv6Address before the release of 0.19.1!
 
 $max_dict_key = array
 (
