@@ -93,6 +93,7 @@ function getDBUpgradePath ($v1, $v2)
 		'0.18.6',
 		'0.18.7',
 		'0.19.0',
+		'0.19.1',
 	);
 	if (!in_array ($v1, $versionhistory) or !in_array ($v2, $versionhistory))
 		return NULL;
@@ -963,6 +964,8 @@ CREATE TABLE `EntityLink` (
 			break;
 		case '0.19.1':
 			$query = array_merge ($query, reloadDictionary ($batchid));
+			$query[] = "ALTER TABLE `Config` CHANGE COLUMN `varvalue` `varvalue` text NOT NULL";
+			$query[] = "ALTER TABLE `UserConfig` CHANGE COLUMN `varvalue` `varvalue` text NOT NULL";
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdefined, description) VALUES ('FILTER_RACKLIST_BY_TAGS','yes','string','yes','no','yes','Rackspace: show only racks matching the current object\'s tags')";
 			$query[] = "UPDATE Config SET varvalue = '0.19.1' WHERE varname = 'DB_VERSION'";
 			break;

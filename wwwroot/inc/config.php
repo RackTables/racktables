@@ -1,6 +1,6 @@
 <?php
 
-define ('CODE_VERSION', '0.19.0'); //0.19.1: FIXME: remove __toString from IPv6Address before the release of 0.19.1!
+define ('CODE_VERSION', '0.19.1'); //0.19.1: FIXME: remove __toString from IPv6Address before the release of 0.19.1!
 
 $max_dict_key = array
 (
@@ -25,6 +25,7 @@ $max_dict_key = array
 	'0.18.6' => 1370,
 	'0.18.7' => 1370,
 	'0.19.0' => 1559,
+	'0.19.1' => 1559,
 );
 
 ?>
