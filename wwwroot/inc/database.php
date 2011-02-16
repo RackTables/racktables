@@ -835,6 +835,13 @@ function commitResetObject ($object_id = 0)
 	usePreparedDeleteBlade ('IPv4Allocation', array ('object_id' => $object_id));
 	usePreparedDeleteBlade ('IPv6Allocation', array ('object_id' => $object_id));
 	usePreparedDeleteBlade ('IPv4NAT', array ('object_id' => $object_id));
+	// Parent-child relationships
+	usePreparedExecuteBlade
+	(
+		'DELETE FROM EntityLink WHERE ' .
+		"(parent_entity_type = 'object' AND parent_entity_id = ?) OR (child_entity_type = 'object' AND child_entity_id = ?)",
+		array ($object_id, $object_id)
+	);
 	// Rack space
 	usePreparedExecuteBlade ('DELETE FROM Atom WHERE molecule_id IN (SELECT new_molecule_id FROM MountOperation WHERE object_id = ?)', array ($object_id));
 	usePreparedExecuteBlade ('DELETE FROM Molecule WHERE id IN (SELECT new_molecule_id FROM MountOperation WHERE object_id = ?)', array ($object_id));

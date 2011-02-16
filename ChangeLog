@@ -5,6 +5,7 @@
 	bugfix: adding object throw "Same type, same tags" was broken since 0.19.0 (#394)
 	bugfix: IPv6 functionality was not working with PHP prior to 5.2 (#396)
 	bugfix: change Config.varvalue column type to accommodate contents > 255 characters (#397)
+	bugfix: delete container relationships when an object is deleted (#398)
 0.19.0 2011-02-12
 	new feature: IPv6 support, except of LivePTR, NAT and SLB functionality (by Alexey Andriyanov)
 	new feature: cable ID column for links (#328, by Giovani Zamboni and Jens Weibler)
