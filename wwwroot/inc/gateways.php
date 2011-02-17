@@ -229,6 +229,8 @@ function setSwitchVLANs ($object_id = 0, $setcmd)
 // installer script.
 function gwSendFile ($endpoint, $handlername, $filetext = array())
 {
+	if (! is_array ($filetext))
+		throw new InvalidArgException ('filetext', '(suppressed)', 'is not an array');
 	global $remote_username;
 	$tmpnames = array();
 	$endpoint = str_replace (' ', '\ ', $endpoint); // the gateway dispatcher uses read (1) to assign arguments
