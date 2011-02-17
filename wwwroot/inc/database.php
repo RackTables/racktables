@@ -2680,7 +2680,7 @@ function usePreparedUpdateBlade ($tablename, $set_columns, $where_columns, $conj
 	$query .= ' WHERE ';
 	foreach (array_keys ($where_columns) as $colname)
 	{
-		$query .= "${conj} ${colname}=?";
+		$query .= " ${conj} ${colname}=?";
 		$conj = $conjunction;
 	}
 	try
