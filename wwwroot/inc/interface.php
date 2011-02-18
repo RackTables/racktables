@@ -2254,7 +2254,7 @@ function renderHistory ($object_type, $object_id)
 				"from RackObjectHistory inner join Dictionary on objtype_id = dict_key join Chapter on Dictionary.chapter_id = Chapter.id " .
 				"where Chapter.name = 'RackObjectType' and RackObjectHistory.id=? order by ctime";
 			$header = '<tr><th>change time</th><th>author</th><th>common name</th><th>visible label</th><th>asset no</th><th>has problems?</th><th>object type</th><th>comment</th></tr>';
-			$extra = 8;
+			$extra = 7;
 			break;
 		default:
 			throw new InvalidArgException ('object_type', $object_type);

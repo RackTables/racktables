@@ -1786,6 +1786,7 @@ function getAccountSearchResult ($terms)
 		'user_name'
 	);
 	// Merge it together, if duplicates persist, byUsername wins
+	$ret = array();
 	foreach (array ($byRealname, $byUsername) as $array)
 		foreach ($array as $user)
 		{
