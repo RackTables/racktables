@@ -1,13 +1,6 @@
-Thank you for selecting RackTables as your datacenter management
-solution. Feel free to address your questions to the mailing list
-before contacting the developers directly.
-
-Project homepage: http://racktables.org/
-Project SF page: http://sourceforge.net/projects/racktables/
-Documentation: http://sourceforge.net/apps/mediawiki/racktables/index.php?title=Main_Page
-Users mailing list: <racktables-users/=@=/freelists.org>
-Mailing list archive: http://www.freelists.org/archive/racktables-users
-Developers: <info/=@=/racktables.org>
+Thank you for selecting RackTables as your datacenter management solution!
+If you are looking for documentation or wish to send feedback, please
+look for the respective links at project's web-site (racktables.org).
 
 *******************************************************
 *                                                     *
@@ -15,34 +8,35 @@ Developers: <info/=@=/racktables.org>
 *                                                     *
 *******************************************************
 
-I. Install dependencies.
+*** I. SERVER ***
 
-For database you must have a MySQL server installation
-version 4.x or 5.x. InnoDB support must be enabled.
-It is a good idea to make it use UTF-8 by default.
+RackTables requires a MySQL server version 5.x built with InnoDB and
+Unicode support and configured appropriately. It also requires an Apache
+httpd with PHP 5 module and several PHP extensions. Below is a list of
+know-good distributions with respective setup notes.
 
-* Fedora 13: yum install mysql-server mysql
-Make sure to have "character-set-server=utf8" line in "[mysqld]" section
-of /etc/my.cnf file!
+*** Fedora 14
+* MySQL: yum install mysql-server mysql
+* Apache/PHP: yum install httpd php php-mysql php-pdo php-gd php-snmp php-mbstring
+* To enable Unicode, add "character-set-server=utf8" line to "[mysqld]"
+section of "/etc/my.cnf" file and restart mysqld.
 
-* ALTLinux Desktop 4.0: apt-get install MySQL-server 
-put "CHSET=utf8" into /etc/sysconfig/mysqld
-
-* openSUSE 11.0: YaST -> Software -> software management -> Web and LAMP server -> mysql
-put "default-character-set=utf8" into /etc/my.cnf
-
-For web-frontend you must have Apache and PHP 5 with PDO and multibyte
-extensions:
-
-* Fedora 13: yum install httpd php php-mysql php-pdo php-gd php-snmp php-mbstring
-
-* ALTLinux Server 4.0: apt-get install apache2-httpd-prefork php5-gd2 \
+*** ALTLinux 4.0
+* MySQL: apt-get install MySQL-server
+* Apache/PHP: apt-get install apache2-httpd-prefork php5-gd2 \
 php5-pdo_mysql php5-pdo apache2-mod_php5 php5-mbstring
+* To enable Unicode, add "CHSET=utf8" line to "/etc/sysconfig/mysqld" file
+and restart mysqld.
 
-* openSUSE 11.0: use YaST to apache2-mod_php5, php5-gd, php5-mbstring, php5-mysql,
-php5-snmp and php5-ldap
+*** openSUSE 11.0
+* MySQL: YaST -> Software -> software management -> Web and LAMP server -> mysql
+* Apache/PHP: use YaST to install apache2-mod_php5, php5-gd, php5-mbstring,
+php5-mysql, php5-snmp and php5-ldap
+* To enable Unicode, add "default-character-set=utf8" line to "[mysql]"
+section of "/etc/my.cnf" file and restart mysqld.
 
-* FreeBSD 7:
+*** FreeBSD 8
+* Apache/PHP:
 # make -C /usr/ports/www/apache13-modssl install
 # make -C /usr/ports/www/php5-session install
 [X] CLI        Build CLI version
@@ -60,18 +54,13 @@ php5-snmp and php5-ldap
 # make -C /usr/ports/net-mgmt/php5-snmp install
 # make -C /usr/ports/net/php5-ldap install
 
-II. Prepare the files and database.
-1. Unpack the tarball and make it web-accessible, e.g. http://yourcompany.com/racktables
-or http://racktables.mysite.org.
+*** II. FILES ***
+Place the contents of "wwwroot" directory into desired directory on the
+web-server. Update Apache httpd configuration as necessary.
 
-2. Setup MySQL database:
-mysql> CREATE DATABASE racktables_db CHARACTER SET utf8 COLLATE utf8_general_ci;
-mysql> grant all privileges on racktables_db.* to XXX@YYY identified by 'ZZZ';
-
-
-III. Finish the installation.
-Open your RackTables URL and follow the instructions. In a suitable
-environment everything should take a minute or so.
+*** III. INSTALLER ***
+Open your configured RackTables URL and you will be prompted to configure
+and initialize the application.
 
 *******************************************************
 *                                                     *
@@ -82,15 +71,16 @@ RackTables (since 0.14.6) provides an automatic database upgrade feature.
 If you already have a working installation, the following procedure
 should be sufficient:
 
-0. BACKUP YOUR DATABASE
+0. BACKUP YOUR DATABASE and check the release notes (below) before actually
+   starting the upgrade,.
 1. Remove all existing files except inc/secret.php, gateways'
    configuration (in the gateways directory) and local mod (inc/local.php).
 2. Unpack the new tarball into the place.
-3. Open the RackTables page in your browser. The software detects version
+3. Open your RackTables page in a browser. The software detects version
    mismatch and displays a message telling to log in as admin to finish
    the upgrade.
 4. Do that. Normally, everything should be Ok. If there are
-   errors displayed, copy and send them to us for review.
+   errors displayed, send these in a bug report.
 
 *******************************************************
 *                                                     *
