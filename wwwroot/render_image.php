@@ -87,6 +87,9 @@ function HTTPDateToUnixTime ($string)
 	);
 
 	$formats = array();
+	# RFC2616 dictates exchanged timestamps to be in GMT TZ, and RFC822
+	# (which RFC1123 relies on) explicitly defines, that "GMT" is equivalent
+	# to "-0000" and "+0000".
 	$formats['rfc1123'] = '/^(Sun|Mon|Tue|Wed|Thu|Fri|Sat), (\d{2}) (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) (\d{4}) (\d{2}):(\d{2}):(\d{2}) (?:GMT|[-+]0000)$/';
 	$formats['rfc850'] = '/^(Sunday|Monday|Tuesday|Wednesday|Thursday|Friday|Saturday), (\d{2})-(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)-(\d{2}) (\d{2}):(\d{2}):(\d{2}) (?:GMT|[-+]0000)$/';
 	$formats['asctime'] = '/^(Sun|Mon|Tue|Wed|Thu|Fri|Sat) (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) (\d{2}|\d{1}) (\d{2}):(\d{2}):(\d{2}) (\d{4})$/';
