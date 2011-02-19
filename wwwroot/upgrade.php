@@ -967,6 +967,25 @@ CREATE TABLE `EntityLink` (
 			$query[] = "ALTER TABLE `Config` CHANGE COLUMN `varvalue` `varvalue` text NOT NULL";
 			$query[] = "ALTER TABLE `UserConfig` CHANGE COLUMN `varvalue` `varvalue` text NOT NULL";
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdefined, description) VALUES ('FILTER_RACKLIST_BY_TAGS','yes','string','yes','no','yes','Rackspace: show only racks matching the current object\'s tags')";
+			$result = $dbxlink->query ("SHOW TABLES LIKE 'Objectlog'");
+			$rows = $result->fetchAll (PDO::FETCH_ASSOC);
+			unset ($result);
+			if (count ($rows))
+			{
+				# Now the ObjectLog merge... again, because the original table is named
+				# "Objectlog". The job is to merge contents of Objectlog and ObjectLog
+				# into the latter.
+				$query[] = "INSERT INTO ObjectLog (object_id, user, date, content) SELECT object_id, user, date, content FROM Objectlog WHERE object_id IN(SELECT id FROM RackObject)";
+				$query[] = "DELETE FROM Objectlog WHERE object_id IN(SELECT id FROM RackObject)";
+				# Don't delete the old table, if the merge wasn't exhaustive.
+				$result = $dbxlink->query ('SELECT COUNT(*) AS c FROM Objectlog WHERE object_id NOT IN(SELECT id FROM RackObject)');
+				$row = $result->fetch (PDO::FETCH_ASSOC);
+				unset ($result);
+				if ($row['c'] == 0)
+					$query[] = 'DROP TABLE Objectlog';
+				else
+					$query[] = 'ALTER TABLE Objectlog RENAME TO Objectlog_old_unmerged';
+			}
 			$query[] = "UPDATE Config SET varvalue = '0.19.1' WHERE varname = 'DB_VERSION'";
 			break;
 		default:
