@@ -20,14 +20,6 @@ function getBin ()
 	return $this->words;
 }
 
-// FIXME: remove this debug procedure before release
-function __toString ()
-{
-	echo '<pre>';
-	debug_print_backtrace();
-	exit;
-}
-
 private static function set_word_value (&$haystack, $nword, $hexvalue)
 {
 	// check that $hexvalue is like /^[0-9a-fA-F]*$/
