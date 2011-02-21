@@ -935,7 +935,9 @@ CREATE TABLE `EntityLink` (
 			$query[] = "UPDATE RackObject SET label = NULL WHERE label = ''";
 			// Move barcode data so the column can be dropped
 			$result = $dbxlink->query ('SELECT id, objtype_id, barcode FROM RackObject WHERE barcode IS NOT NULL');
-			while ($row = $result->fetch (PDO::FETCH_ASSOC))
+			$rows = $result->fetchAll (PDO::FETCH_ASSOC);
+			unset ($result);
+			foreach ($rows as $row)
 			{
 				// Determine if this object type has the 'OEM S/N 1' attribute associated with it, and if it's set
 				$sn_query  = "SELECT (SELECT COUNT(*) FROM AttributeMap WHERE objtype_id=${row['objtype_id']} AND attr_id=1) AS AM_count, ";
@@ -956,7 +958,6 @@ CREATE TABLE `EntityLink` (
 				}
 				unset ($sn_query, $sn_result, $sn_row);
 			}
-			unset ($result);
 			$query[] = 'ALTER TABLE RackObject DROP COLUMN `barcode`';
 			$query[] = 'ALTER TABLE RackObjectHistory DROP COLUMN `barcode`';
 			$query[] = 'ALTER TABLE `VLANSwitchTemplate` DROP COLUMN `max_local_vlans`';
