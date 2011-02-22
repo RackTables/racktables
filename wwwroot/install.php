@@ -1365,7 +1365,7 @@ INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdef
 ('SYNCDOMAIN_MAX_PROCESSES','0','uint','yes','no', 'no', 'How many worker proceses syncdomain cron script should create'),
 ('PORT_EXCLUSION_LISTSRC','{\$typeid_3} or {\$typeid_10} or {\$typeid_11} or {\$typeid_1505} or {\$typeid_1506}','string','yes','no','no','List source: objects without ports'),
 ('FILTER_RACKLIST_BY_TAGS','yes','string','yes','no','yes','Rackspace: show only racks matching the current object\'s tags'),
-('DB_VERSION','0.19.0','string','no','yes','no','Database version.');
+('DB_VERSION','0.19.1','string','no','yes','no','Database version.');
 
 INSERT INTO `Script` VALUES ('RackCode','allow {\$userid_1}');
 
