@@ -2462,7 +2462,7 @@ function save8021QPorts ()
 		return buildRedirectURL (__FUNCTION__, 'ERR2', array(), NULL, NULL, $extra);
 	}
 	if ($npulled + $nsaved_uplinks)
-		$result = usePreparedExecuteBlade
+		usePreparedExecuteBlade
 		(
 			'UPDATE VLANSwitch SET mutex_rev=mutex_rev+1, last_change=NOW(), out_of_sync="yes" WHERE object_id=?',
 			array ($sic['object_id'])
