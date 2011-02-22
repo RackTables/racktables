@@ -1183,6 +1183,7 @@ function linkPorts ($porta, $portb, $cable = NULL)
 		$dbxlink->exec ('UNLOCK TABLES');		
 		return "Port ${porta} or ${portb} is already linked";
 	}
+	$result->closeCursor ();
 	if ($porta > $portb)
 	{
 		$tmp = $porta;
