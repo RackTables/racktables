@@ -6449,13 +6449,12 @@ function renderRackCodeEditor ()
 {
 	addJS ('js/codepress/codepress.js');
 	addJS (<<<ENDJAVASCRIPT
-var prevCode = '';
 function verify()
 {
 	$.ajax({
 		type: "POST",
 		url: "ajax.php",
-		data: "ac=verifyCode&code="+RCTA.getCode(),
+		data: {'ac': 'verifyCode', 'code': RCTA.getCode()},
 		success: function (data)
 		{
 			arr = data.split("\\n");
@@ -6471,19 +6470,14 @@ function verify()
 				$("#ShowMessage")[0].innerHTML = arr[1];
 				$("#ShowMessage")[0].className = "msg_warning";
 			}
-			prevCode = RCTA.getCode();
 		}
 	});
 }
 
 $(document).ready(function() {
-	if (prevCode != RCTA.getCode())
-	{
-		prevCode = RCTA.getCode();
-		$("#SaveChanges")[0].disabled = "disabled";
-		$("#ShowMessage")[0].innerHTML = "";
-		$("#ShowMessage")[0].className = "";
-	}
+	$("#SaveChanges")[0].disabled = "disabled";
+	$("#ShowMessage")[0].innerHTML = "";
+	$("#ShowMessage")[0].className = "";
 });
 ENDJAVASCRIPT
 	, TRUE);
