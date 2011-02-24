@@ -73,7 +73,8 @@ $gwpushxlator = array
 // which explains the reason.
 function queryGateway ($gwname, $questions)
 {
-	$execpath = "./gateways/{$gwname}/main";
+	global $racktables_gwdir;
+	$execpath = "${racktables_gwdir}/gateways/{$gwname}/main";
 	$dspec = array
 	(
 		0 => array ("pipe", "r"),
