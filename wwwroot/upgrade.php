@@ -56,6 +56,17 @@ preserve the data by moving it to either the 'OEM S/N 1' attribute or to
 a Log entry. You should backup your database beforehand anyway.
 ENDOFTEXT
 ,
+	'0.19.2' => <<<ENDOFTEXT
+This release is different in filesystem layout. The "gateways" directory
+has been moved from "wwwroot" directory. This improves security, but may
+lead to gateways extension not working by default. If you need any of the
+gateway-dependent features (802.1Q, live ports, sendfile) working, the
+recommended way is to put "racktables_gwdir" variable to secret.php file
+with the full filesystem path to "gateways" directory on the server, e.g.:
+
+\$racktables_gwdir = '/usr/local/racktables/gateways';
+ENDOFTEXT
+,
 );
 
 // At the moment we assume, that for any two releases we can
