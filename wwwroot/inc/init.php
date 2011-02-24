@@ -37,9 +37,8 @@ function connectDB()
 	$dbxlink->exec ("set names 'utf8'");
 }
 
-if (file_exists ('inc/secret.php'))
-	require_once 'inc/secret.php';
-else
+// secret.php may be missing, in which case this is a special fatal error
+if (FALSE === @include_once 'secret.php')
 {
 	throw new RackTablesError
 	(
@@ -163,8 +162,9 @@ require_once 'triggers.php';
 
 $op = '';
 require_once 'gateways.php';
-if (file_exists ('inc/local.php'))
-	require_once 'inc/local.php';
+// local.php may be missing, this case requires no special treatment
+// and must not generate any warnings
+@include_once 'local.php';
 
 // These will be filled in by fixContext()
 $expl_tags = array();
