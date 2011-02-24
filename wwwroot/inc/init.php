@@ -17,7 +17,7 @@ require_once 'database.php';
 // care to set, something would be working anyway.
 $user_auth_src = 'database';
 $require_local_account = TRUE;
-$racktables_gwdir = '..';
+$racktables_gwdir = '../gateways';
 
 // (re)connects to DB, stores PDO object in $dbxlink global var
 function connectDB()
