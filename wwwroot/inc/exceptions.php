@@ -85,9 +85,10 @@ class InvalidRequestArgException extends RackTablesError
 {
 	function __construct ($name, $value, $reason=NULL)
 	{
-		$message = "Request parameter '${name}' of value '".var_export($value,true)."' is invalid.";
+		$message = "Argument '${name}' of value " . var_export ($value, TRUE) . " is invalid";
 		if (!is_null($reason))
 			$message .= ' ('.$reason.')';
+		$message .= '.';
 		parent::__construct ($message);
 	}
 	public function dispatch()

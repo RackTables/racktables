@@ -44,7 +44,7 @@ ob_end_flush();
 catch (InvalidRequestArgException $e)
 {
 	ob_end_clean();
-	showError ('Assertion failed: ' . $e->getMessage());
+	showError ($e->getMessage());
 	header ('Location: ' . $location);
 }
 catch (RTDatabaseError $e)
