@@ -594,8 +594,8 @@ $tabhandler['vlandomain']['vlanlist'] = 'renderVLANDomainVLANList';
 $ophandler['vlandomain']['8021qorder']['add'] = 'add8021QOrder';
 $ophandler['vlandomain']['8021qorder']['del'] = 'del8021QOrder';
 $ophandler['vlandomain']['vlanlist']['add'] = 'tableHandler';
-$ophandler['vlandomain']['vlanlist']['del'] = 'delVLANDescription';
-$ophandler['vlandomain']['vlanlist']['upd'] = 'updVLANDescription';
+$ophandler['vlandomain']['vlanlist']['del'] = 'tableHandler';
+$ophandler['vlandomain']['vlanlist']['upd'] = 'tableHandler';
 
 $page['vlan']['parent'] = 'vlandomain';
 $page['vlan']['bypass'] = 'vlan_ck';

@@ -373,9 +373,34 @@ $opspec_list['vlandomain-vlanlist-add'] = array
 	'arglist' => array
 	(
 		array ('url_argname' => 'vdom_id', 'table_colname' => 'domain_id', 'assertion' => 'uint'),
-		array ('url_argname' => 'vlan_id', 'assertion' => 'uint'),
+		array ('url_argname' => 'vlan_id', 'assertion' => 'vlan'),
 		array ('url_argname' => 'vlan_type', 'assertion' => 'enum/vlan_type'),
 		array ('url_argname' => 'vlan_descr', 'assertion' => 'string0', 'if_empty' => 'NULL'),
+	),
+);
+$opspec_list['vlandomain-vlanlist-del'] = array
+(
+	'table' => 'VLANDescription',
+	'action' => 'DELETE',
+	'arglist' => array
+	(
+		array ('url_argname' => 'vdom_id', 'table_colname' => 'domain_id', 'assertion' => 'uint'),
+		array ('url_argname' => 'vlan_id', 'assertion' => 'vlan'),
+	),
+);
+$opspec_list['vlandomain-vlanlist-upd'] = array
+(
+	'table' => 'VLANDescription',
+	'action' => 'UPDATE',
+	'set_arglist' => array
+	(
+		array ('url_argname' => 'vlan_type', 'assertion' => 'enum/vlan_type'),
+		array ('url_argname' => 'vlan_descr', 'assertion' => 'string0', 'if_empty' => 'NULL'),
+	),
+	'where_arglist' => array
+	(
+		array ('url_argname' => 'vdom_id', 'table_colname' => 'domain_id', 'assertion' => 'uint'),
+		array ('url_argname' => 'vlan_id', 'assertion' => 'vlan'),
 	),
 );
 
@@ -2291,46 +2316,6 @@ function del8021QOrder ()
 		'prev_vdid' => $_REQUEST['vdom_id'],
 	);
 	return buildRedirectURL (__FUNCTION__, $result ? 'OK' : 'ERR', array(), NULL, NULL, $focus_hints);
-}
-
-$msgcode['delVLANDescription']['OK'] = 49;
-$msgcode['delVLANDescription']['ERR1'] = 105;
-$msgcode['delVLANDescription']['ERR2'] = 111;
-function delVLANDescription ()
-{
-	assertUIntArg ('vlan_id');
-	global $sic;
-	if ($sic['vlan_id'] == VLAN_DFL_ID)
-		return buildRedirectURL (__FUNCTION__, 'ERR1');
-	$result = commitReduceVLANDescription ($sic['vdom_id'], $sic['vlan_id']);
-	return buildRedirectURL (__FUNCTION__, $result ? 'OK' : 'ERR2');
-}
-
-$msgcode['updVLANDescription']['OK'] = 51;
-$msgcode['updVLANDescription']['ERR1'] = 105;
-function updVLANDescription ()
-{
-	assertUIntArg ('vlan_id');
-	assertStringArg ('vlan_type');
-	assertStringArg ('vlan_descr', TRUE);
-	global $sic;
-	if ($sic['vlan_id'] == VLAN_DFL_ID)
-		return buildRedirectURL (__FUNCTION__, 'ERR1');
-	usePreparedUpdateBlade
-	(
-		'VLANDescription',
-		array
-		(
-			'vlan_descr' => !mb_strlen ($sic['vlan_descr']) ? NULL : $sic['vlan_descr'],
-			'vlan_type' => $sic['vlan_type'],
-		),
-		array
-		(
-			'domain_id' => $sic['vdom_id'],
-			'vlan_id' => $sic['vlan_id'],
-		)
-	);
-	return buildRedirectURL (__FUNCTION__, 'OK');
 }
 
 $msgcode['createVLANDomain']['OK'] = 48;

@@ -3875,19 +3875,6 @@ function getDomainVLANs ($vdom_id)
 	return $ret;
 }
 
-function commitReduceVLANDescription ($vdom_id, $vlan_id)
-{
-	return usePreparedDeleteBlade
-	(
-		'VLANDescription',
-		array
-		(
-			'domain_id' => $vdom_id,
-			'vlan_id' => $vlan_id,
-		)
-	);
-}
-
 function getVLANSwitches()
 {
 	$ret = array();

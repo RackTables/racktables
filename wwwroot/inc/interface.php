@@ -1801,7 +1801,6 @@ function showMessageOrError ()
 				100 => array ('code' => 'error', 'format' => '%s'),
 				102 => array ('code' => 'error', 'format' => "Error creating user account '%s'"),
 				104 => array ('code' => 'error', 'format' => "failed updating record '%s'"),
-				105 => array ('code' => 'error', 'format' => 'default VLAN cannot be changed'),
 				107 => array ('code' => 'error', 'format' => 'Assertion failed: %s'),
 				108 => array ('code' => 'error', 'format' => 'Database error: %s'),
 				109 => array ('code' => 'error', 'format' => 'failed updating a record'),
