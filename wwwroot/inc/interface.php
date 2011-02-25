@@ -7876,7 +7876,7 @@ function renderVLANDomainListEditor ()
 		echo '<tr><td>';
 		printImageHREF ('create', 'create domain', TRUE, 104);
 		echo '</td><td>';
-		echo '<input type=text name=vdom_descr tabindex=102>';
+		echo '<input type=text size=48 name=vdom_descr tabindex=102>';
 		echo '</td><td>';
 		printImageHREF ('create', 'create domain', TRUE, 103);
 		echo '</td></tr></form>';
@@ -7898,7 +7898,7 @@ function renderVLANDomainListEditor ()
 			printImageHREF ('destroy', 'delete domain');
 			echo '</a>';
 		}
-		echo '</td><td><input name=vdom_descr type=text value="';
+		echo '</td><td><input name=vdom_descr type=text size=48 value="';
 		echo niftyString ($dominfo['description'], 0) . '">';
 		echo '</td><td>';
 		printImageHREF ('save', 'update description', TRUE);
@@ -8868,7 +8868,7 @@ function renderVSTListEditor()
 		printOpFormIntro ('add');
 		echo '<tr>';
 		echo '<td>' . getImageHREF ('create', 'create template', TRUE, 104) . '</td>';
-		echo '<td><input type=text name=vst_descr tabindex=101></td>';
+		echo '<td><input type=text size=48 name=vst_descr tabindex=101></td>';
 		echo '<td>' . getImageHREF ('create', 'create template', TRUE, 103) . '</td>';
 		echo '</tr></form>';
 	}
@@ -8888,7 +8888,7 @@ function renderVSTListEditor()
 			echo getImageHREF ('destroy', 'delete template') . '</a>';
 		}
 		echo '</td>';
-		echo '<td><input name=vst_descr type=text value="' . niftyString ($vst_info['description'], 0) . '"></td>';
+		echo '<td><input name=vst_descr type=text size=48 value="' . niftyString ($vst_info['description'], 0) . '"></td>';
 		echo '<td>' . getImageHREF ('save', 'update template', TRUE) . '</td>';
 		echo '</tr></form>';
 	}
