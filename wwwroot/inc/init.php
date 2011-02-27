@@ -38,8 +38,10 @@ function connectDB()
 }
 
 // secret.php may be missing, in which case this is a special fatal error
+ob_start();
 if (FALSE === @include_once 'secret.php')
 {
+	ob_end_clean();
 	throw new RackTablesError
 	(
 		"Database connection parameters are read from inc/secret.php file, " .
@@ -48,6 +50,9 @@ if (FALSE === @include_once 'secret.php')
 		RackTablesError::MISCONFIGURED
 	);
 }
+$tmp = ob_get_clean();
+if ($tmp != '' and ! preg_match ("/^\n+$/D", $tmp))
+	echo $tmp;
 connectDB();
 
 // Magic quotes feature is deprecated, but just in case the local system
@@ -164,7 +169,12 @@ $op = '';
 require_once 'gateways.php';
 // local.php may be missing, this case requires no special treatment
 // and must not generate any warnings
+ob_start();
 @include_once 'local.php';
+$tmp = ob_get_clean();
+if ($tmp != '' and ! preg_match ("/^\n+$/D", $tmp))
+	echo $tmp;
+unset ($tmp);
 
 // These will be filled in by fixContext()
 $expl_tags = array();
