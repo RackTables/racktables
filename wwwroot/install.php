@@ -473,6 +473,7 @@ CREATE TABLE `IPv4Allocation` (
   `name` char(255) NOT NULL default '',
   `type` enum('regular','shared','virtual','router') default NULL,
   PRIMARY KEY  (`object_id`,`ip`),
+  KEY `ip` (`ip`),
   CONSTRAINT `IPv4Allocation-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `RackObject` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
@@ -524,6 +525,7 @@ CREATE TABLE `IPv4RS` (
   `rspool_id` int(10) unsigned default NULL,
   `rsconfig` text,
   PRIMARY KEY  (`id`),
+  KEY `rsip` (`rsip`),
   UNIQUE KEY `pool-endpoint` (`rspool_id`,`rsip`,`rsport`),
   CONSTRAINT `IPv4RS-FK` FOREIGN KEY (`rspool_id`) REFERENCES `IPv4RSPool` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB;
@@ -544,7 +546,8 @@ CREATE TABLE `IPv4VS` (
   `name` char(255) default NULL,
   `vsconfig` text,
   `rsconfig` text,
-  PRIMARY KEY  (`id`)
+  PRIMARY KEY  (`id`),
+  KEY `vip` (`vip`)
 ) ENGINE=InnoDB;
 
 CREATE TABLE `IPv6Address` (
@@ -560,6 +563,7 @@ CREATE TABLE `IPv6Allocation` (
   `name` char(255) NOT NULL default '',
   `type` enum('regular','shared','virtual','router') default NULL,
   PRIMARY KEY  (`object_id`,`ip`),
+  KEY `ip` (`ip`),
   CONSTRAINT `IPv6Allocation-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `RackObject` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 

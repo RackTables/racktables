@@ -1000,6 +1000,14 @@ CREATE TABLE `EntityLink` (
 			}
 			$query[] = "UPDATE Config SET varvalue = '0.19.1' WHERE varname = 'DB_VERSION'";
 			break;
+		case '0.19.2':
+			$query = array_merge ($query, reloadDictionary ($batchid));
+			$query[] = "ALTER TABLE IPv4Allocation ADD KEY `ip` (`ip`)";
+			$query[] = "ALTER TABLE IPv6Allocation ADD KEY `ip` (`ip`)";
+			$query[] = "ALTER TABLE IPv4VS ADD KEY `vip` (`vip`)";
+			$query[] = "ALTER TABLE IPv4RS ADD KEY `rsip` (`rsip`)";
+			$query[] = "UPDATE Config SET varvalue = '0.19.1' WHERE varname = 'DB_VERSION'";
+			break;
 		default:
 			showError ("executeUpgradeBatch () failed, because batch '${batchid}' isn't defined");
 			die;
