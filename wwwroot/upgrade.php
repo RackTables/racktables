@@ -105,6 +105,7 @@ function getDBUpgradePath ($v1, $v2)
 		'0.18.7',
 		'0.19.0',
 		'0.19.1',
+		'0.19.2',
 	);
 	if (!in_array ($v1, $versionhistory) or !in_array ($v2, $versionhistory))
 		return NULL;
@@ -1006,7 +1007,7 @@ CREATE TABLE `EntityLink` (
 			$query[] = "ALTER TABLE IPv6Allocation ADD KEY `ip` (`ip`)";
 			$query[] = "ALTER TABLE IPv4VS ADD KEY `vip` (`vip`)";
 			$query[] = "ALTER TABLE IPv4RS ADD KEY `rsip` (`rsip`)";
-			$query[] = "UPDATE Config SET varvalue = '0.19.1' WHERE varname = 'DB_VERSION'";
+			$query[] = "UPDATE Config SET varvalue = '0.19.2' WHERE varname = 'DB_VERSION'";
 			break;
 		default:
 			showError ("executeUpgradeBatch () failed, because batch '${batchid}' isn't defined");
