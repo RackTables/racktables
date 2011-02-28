@@ -52,7 +52,7 @@ catch (RackTablesError $e)
 $todo = array
 (
 	'pull' => array ('sync_ready', 'resync_ready'),
-	'push' => array ('sync_ready'),
+	'push' => array ('sync_ready', 'resync_ready'),
 	'pullall' => array ('sync_ready', 'resync_ready', 'sync_aging', 'resync_aging', 'done'),
 );
 
