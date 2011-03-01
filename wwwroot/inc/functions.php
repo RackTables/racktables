@@ -379,6 +379,12 @@ function genericAssertion ($argname, $argtype)
 		if (!in_array ($sic[$argname], array ('regular', 'shared', 'virtual', 'router')))
 			throw new InvalidRequestArgException ($argname, $sic[$argname], 'Unknown value');
 		break;
+	case 'enum/dqcode':
+		assertStringArg ($argname);
+		global $dqtitle;
+		if (! array_key_exists ($sic[$argname], $dqtitle))
+			throw new InvalidRequestArgException ($argname, $sic[$argname], 'Unknown value');
+		break;
 	case 'iif':
 		if (!array_key_exists ($sic[$argname], getPortIIFOptions()))
 			throw new InvalidRequestArgException ($argname, $sic[$argname], 'Unknown value');
@@ -390,6 +396,14 @@ function genericAssertion ($argname, $argtype)
 			throw new InvalidRequestArgException ($argname, $sic[$argname], 'default VLAN cannot be changed');
 		if ($sic[$argname] > VLAN_MAX_ID or $sic[$argname] < VLAN_MIN_ID)
 			throw new InvalidRequestArgException ($argname, $sic[$argname], 'out of valid range');
+		break;
+	case 'rackcode/expr':
+		genericAssertion ($argname, 'string0');
+		if ($sic[$argname] == '')
+			return;
+		$parse = spotPayload ($sic[$argname], 'SYNT_EXPR');
+		if ($parse['result'] != 'ACK')
+			throw new InvalidRequestArgException ($argname, $sic[$argname], 'RackCode parsing error');
 		break;
 	default:
 		throw new InvalidArgException ('argtype', $argtype); // comes not from user's input

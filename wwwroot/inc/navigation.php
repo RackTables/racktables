@@ -631,7 +631,7 @@ $ophandler['vst']['8021qorder']['del'] = 'del8021QOrder';
 
 $page['dqueue']['parent'] = '8021q';
 $page['dqueue']['bypass'] = 'dqcode';
-$page['dqueue']['bypass_type'] = 'string';
+$page['dqueue']['bypass_type'] = 'enum/dqcode';
 $tab['dqueue']['default'] = 'View';
 $tabhandler['dqueue']['default'] = 'renderDeployQueue';
 

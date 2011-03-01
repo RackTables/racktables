@@ -9010,10 +9010,11 @@ function renderVSTRulesEditor ($vst_id)
 		finishPortlet();
 }
 
-function renderDeployQueue ($dqcode)
+function renderDeployQueue()
 {
 	global $nextorder;
 	$order = 'odd';
+	$dqcode = getBypassValue();
 	$allq = get8021QDeployQueues();
 	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
 	echo '<tr><th>switch</th><th>age</th><th>';
