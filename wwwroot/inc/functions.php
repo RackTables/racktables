@@ -4603,21 +4603,26 @@ function getMessagesCount ($message_type = 'all')
 		}
 		elseif ($_SESSION['log']['v'] == 2)
 			foreach ($_SESSION['log']['m'] as $msg)
-			{
-				if ($message_type == 'all')
+				if ($msg['c'] < 100)
 				{
-					++$result;
-					continue;
+					if ($message_type == 'success' || $message_type == 'all')
+						++$result;
 				}
-				if ($message_type == 'success' and $msg['c'] < 100)
-					++$result;
-				elseif ($message_type == 'error' and $msg['c'] < 200)
-					++$result;
-				elseif ($message_type == 'warning' and $msg['c'] < 300)
-					++$result;
-				elseif ($message_type == 'neutral')
-					++$result;
-			}
+				elseif ($msg['c'] < 200)
+				{
+					if ($message_type == 'error' || $message_type == 'all')
+						++$result;
+				}
+				elseif ($msg['c'] < 300)
+				{
+					if ($message_type == 'warning' || $message_type == 'all')
+						++$result;
+				}
+				else
+				{
+					if ($message_type == 'neutral' || $message_type == 'all')
+						++$result;
+				}
 	}
 	return $result;
 }
