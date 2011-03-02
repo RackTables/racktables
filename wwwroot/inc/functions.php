@@ -4689,4 +4689,15 @@ function getConfigVar ($varname = '')
 	return $configCache[$varname]['varvalue'];
 }
 
+// return portinfo array if object has a port with such name, or NULL
+function getPortinfoByName (&$object, $portname)
+{
+	if (! isset ($object['ports']))
+		amplifyCell ($object);
+	foreach ($object['ports'] as $portinfo)
+		if ($portinfo['name'] == $portname)
+			return $portinfo;
+	return NULL;
+}
+
 ?>

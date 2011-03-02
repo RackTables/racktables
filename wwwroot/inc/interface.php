@@ -8462,10 +8462,18 @@ function renderVLANInfo ($vlan_ck)
 		{
 			usort_portlist ($portlist);
 			echo "<tr class=row_${order} valign=top><td>";
-			renderCell (spotEntity ('object', $switch_id));
+			$object = spotEntity ('object', $switch_id);
+			renderCell ($object);
 			echo '</td><td class=tdleft><ul>';
 			foreach ($portlist as $port_name)
-				echo "<li>${port_name}</li>";
+			{
+				echo '<li>';
+				if ($portinfo = getPortinfoByName ($object, $port_name))
+					echo formatPortLink ($object['id'], NULL, $portinfo['id'], $portinfo['name']);
+				else
+					echo $port_name;
+				echo '</li>';
+			}
 			echo '</ul></td></tr>';
 			$order = $nextorder[$order];
 		}
