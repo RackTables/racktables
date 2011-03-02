@@ -2193,7 +2193,7 @@ function unlinkFile ()
 	return buildRedirectURL (__FUNCTION__, commitUnlinkFile ($_REQUEST['link_id']) === FALSE ? 'ERR' : 'OK');
 }
 
-$msgcode['deleteFile']['OK'] = 6;
+$msgcode['deleteFile']['OK'] = 7;
 function deleteFile ()
 {
 	assertUIntArg ('file_id');

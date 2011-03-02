@@ -6714,6 +6714,12 @@ function renderFileProperties ($file_id)
 	echo htmlspecialchars ($file['name']) . "'></td></tr>\n";
 	echo "<tr><th class=tdright>Comment:</th><td class=tdleft><textarea tabindex=103 name=file_comment rows=10 cols=80>\n";
 	echo htmlspecialchars ($file['comment']) . "</textarea></td></tr>\n";
+	echo "<tr><th class=tdright>Actions:</th><td class=tdleft>";
+	echo "<a href='".
+		makeHrefProcess (array ('op'=>'deleteFile', 'page'=>'files', 'tab'=>'manage', 'file_id'=>$file_id)).
+		"' onclick=\"javascript:return confirm('Are you sure you want to delete the file?')\">" .
+		getImageHREF ('destroy', 'Delete file') . "</a>";
+	echo '</td></tr>';
 	echo "<tr><th class=submit colspan=2>";
 	printImageHREF ('SAVE', 'Save changes', TRUE, 102);
 	echo '</th></tr></form></table>';
