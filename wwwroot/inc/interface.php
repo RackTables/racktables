@@ -6041,7 +6041,7 @@ function renderTagRowForEditor ($taginfo, $level = 0)
 	}
 	echo "</td>\n<td>";
 	printOpFormIntro ('updateTag', array ('tag_id' => $taginfo['id']));
-	echo "<input type=text name=tag_name ";
+	echo "<input type=text size=48 name=tag_name ";
 	echo "value='${taginfo['tag']}'></td><td><select name=parent_id>";
 	echo "<option value=0>-- NONE --</option>\n";
 	foreach ($taglist as $tlinfo)
@@ -6077,7 +6077,7 @@ function renderTagTreeEditor ()
 		printOpFormIntro ('createTag');
 		echo "<tr><td align=left style='padding-left: 16px;'>";
 		printImageHREF ('create', 'Create tag', TRUE);
-		echo '</td><td><input type=text name=tag_name tabindex=100></td><td><select name=parent_id tabindex=101>';
+		echo '</td><td><input type=text size=48 name=tag_name tabindex=100></td><td><select name=parent_id tabindex=101>';
 		echo "<option value=0>-- NONE --</option>\n";
 		foreach ($taglist as $taginfo)
 			echo "<option value=${taginfo['id']}>${taginfo['tag']}</option>";
