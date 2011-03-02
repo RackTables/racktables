@@ -4827,7 +4827,7 @@ function render8021QReport ()
 		if (--$header_delay <= 0)
 		{
 			echo $header;
-			$header_delay = 50;
+			$header_delay = 25;
 		}
 		echo '<tr><th class=tdright>' . $vlan_id . '</th>';
 		foreach (array_keys ($domains) as $domain_id)
