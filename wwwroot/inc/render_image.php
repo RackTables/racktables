@@ -1,11 +1,16 @@
 <?php
 
 define ('CACHE_DURATION', 604800); // 7 * 24 * 3600
-if ( // 'progressbar's never change, force cache hit before loading init.php
-	isset ($_SERVER['HTTP_IF_MODIFIED_SINCE'])
-	&& $_REQUEST['img'] == 'progressbar'
-)
+
+function checkIMSCondition()
 {
+	if
+	(
+		! array_key_exists ('HTTP_IF_MODIFIED_SINCE', $_SERVER)
+		or ! array_key_exists ('img', $_REQUEST)
+		or $_REQUEST['img'] != 'progressbar'
+	)
+		return;
 	$client_time = HTTPDateToUnixTime ($_SERVER['HTTP_IF_MODIFIED_SINCE']);
 	if ($client_time !== FALSE && $client_time !== -1) // readable
 	{
@@ -19,22 +24,20 @@ if ( // 'progressbar's never change, force cache hit before loading init.php
 	}
 }
 
-ob_start();
-try {
-require 'inc/init.php';
-
-assertStringArg ('img');
-switch ($_REQUEST['img'])
+function dispatchImageRequest()
 {
+	genericAssertion ('img', 'string');
+	global $pageno, $tabno;
+	switch ($_REQUEST['img'])
+	{
 	case 'minirack': // rack security context
-		assertUIntArg ('rack_id');
 		$pageno = 'rack';
 		$tabno = 'default';
 		fixContext();
 		if (!permitted())
 			renderAccessDeniedImage();
 		else
-			renderRackThumb ($_REQUEST['rack_id']);
+			renderRackThumb (getBypassValue());
 		break;
 	case 'progressbar': // no security context
 		assertUIntArg ('done', TRUE);
@@ -44,25 +47,17 @@ switch ($_REQUEST['img'])
 		renderProgressBarImage ($_REQUEST['done']);
 		break;
 	case 'preview': // file security context
-		assertUIntArg ('file_id');
 		$pageno = 'file';
 		$tabno = 'download';
 		fixContext();
 		if (!permitted())
 			renderAccessDeniedImage();
 		else
-			renderFilePreview ($_REQUEST['file_id'], $_REQUEST['img']);
+			renderFilePreview (getBypassValue());
 		break;
 	default:
 		renderError();
-}
-
-ob_end_flush();
-}
-catch (Exception $e)
-{
-	ob_end_clean();
-	renderError();
+	}
 }
 
 //------------------------------------------------------------------------
@@ -261,60 +256,36 @@ function renderAccessDeniedImage ()
 	die;
 }
 
-function renderFilePreview ($file_id = 0, $mode = 'view')
+function renderFilePreview ($file_id)
 {
-	switch ($mode)
+	if ($image = getFileCache ($file_id)) //Cache Hit
 	{
-	case 'view':
-		// GFX files can become really big, if we uncompress them in memory just to
-		// provide a PNG version of a file. To keep things working, just send the
-		// contents as is for known MIME types.
-		$file = getFile ($file_id);
-		if (!in_array ($file['type'], array ('image/jpeg', 'image/png', 'image/gif')))
-		{
-			renderError();
-			break;
-		}
-		header("Content-type: ${file['type']}");
-		echo $file['contents'];
-		break;
-	case 'preview':
-		if ($image = getFileCache ($file_id)) //Cache Hit
-		{
-			header("Content-type: image/jpeg"); 
-			echo $image;
-			break;
-		}
-		//Cache Miss
-		$file = getFile ($file_id);
-		$image = imagecreatefromstring ($file['contents']);
-		unset ($file['contents']);
-		$width = imagesx ($image);
-		$height = imagesy ($image);
-		header ('Content-type: image/jpeg');
-		if ($width > getConfigVar ('PREVIEW_IMAGE_MAXPXS') or $height > getConfigVar ('PREVIEW_IMAGE_MAXPXS'))
-		{
-			$ratio = getConfigVar ('PREVIEW_IMAGE_MAXPXS') / max ($width, $height);
-			$newwidth = $width * $ratio;
-			$newheight = $height * $ratio;
-			$resampled = imagecreatetruecolor ($newwidth, $newheight);
-			imagecopyresampled ($resampled, $image, 0, 0, 0, 0, $newwidth, $newheight, $width, $height);
-			imagedestroy ($image);
-			$image = $resampled;
-
-			//TODO: Find a better way to save the stream of the image... Output buffer seems silly.
-			ob_start();
-			imagejpeg ($image);
-			commitAddFileCache ($file_id, ob_get_flush());
-			imagedestroy ($image);
-			unset ($file);
-			unset ($resampled);
-		}
-		break;
-	default:
-		renderError();
-		break;
+		header("Content-type: image/jpeg"); 
+		echo $image;
+		return;
 	}
+	//Cache Miss
+	$file = getFile ($file_id);
+	$image = imagecreatefromstring ($file['contents']);
+	unset ($file);
+	$width = imagesx ($image);
+	$height = imagesy ($image);
+	if ($width > getConfigVar ('PREVIEW_IMAGE_MAXPXS') or $height > getConfigVar ('PREVIEW_IMAGE_MAXPXS'))
+	{
+		$ratio = getConfigVar ('PREVIEW_IMAGE_MAXPXS') / max ($width, $height);
+		$newwidth = $width * $ratio;
+		$newheight = $height * $ratio;
+		$resampled = imagecreatetruecolor ($newwidth, $newheight);
+		imagecopyresampled ($resampled, $image, 0, 0, 0, 0, $newwidth, $newheight, $width, $height);
+		imagedestroy ($image);
+		$image = $resampled;
+		unset ($resampled);
+	}
+	header ('Content-type: image/jpeg');
+	ob_start();
+	imagejpeg ($image);
+	imagedestroy ($image);
+	commitAddFileCache ($file_id, ob_get_flush());
 }
 
 ?>

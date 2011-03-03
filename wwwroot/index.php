@@ -3,14 +3,15 @@ ob_start();
 try {
 if (array_key_exists ('module', $_REQUEST))
 {
-	require_once 'inc/init.php';
 	switch ($_REQUEST['module'])
 	{
 	case 'tsuri':
+		require_once 'inc/init.php';
 		genericAssertion ('uri', 'string');
 		proxyStaticURI ($_REQUEST['uri']);
 		break;
 	case 'download':
+		require_once 'inc/init.php';
 		$pageno = 'file';
 		$tabno = 'download';
 		fixContext();
@@ -27,6 +28,20 @@ if (array_key_exists ('module', $_REQUEST))
 		if ($asattach)
 			header("Content-Disposition: attachment; filename={$file['name']}");
 		echo $file['contents'];
+		break;
+	case 'image':
+		require_once 'inc/render_image.php';
+		// 'progressbar's never change, attempt an IMS chortcut before loading init.php
+		checkIMSCondition();
+		require_once 'inc/init.php';
+		try
+		{
+			dispatchImageRequest();
+		}
+		catch (Exception $e)
+		{
+			renderError();
+		}
 		break;
 	default:
 		throw new InvalidRequestArgException ('module', $_REQUEST['module']);

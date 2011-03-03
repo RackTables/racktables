@@ -432,7 +432,7 @@ function renderRackspace ()
 					echo "<img border=0 width=${rackwidth} height=";
 					echo getRackImageHeight ($rack['height']);
 					echo " title='${rack['height']} units'";
-					echo "src='render_image.php?img=minirack&rack_id=${rack['id']}'>";
+					echo "src='?module=image&img=minirack&rack_id=${rack['id']}'>";
 					echo "<br>${rack['name']}</a></td>";
 					$rackListIdx++;
 				}
@@ -524,7 +524,7 @@ function renderRow ($row_id)
 		echo "<td align=center class=row_${order}><a href='".makeHref(array('page'=>'rack', 'rack_id'=>$rack['id']))."'>";
 		echo "<img border=0 width=${rackwidth} height=" . (getRackImageHeight ($rack['height']) * getConfigVar ('ROW_SCALE'));
 		echo " title='${rack['height']} units'";
-		echo "src='render_image.php?img=minirack&rack_id=${rack['id']}'>";
+		echo "src='?module=image&img=minirack&rack_id=${rack['id']}'>";
 		echo "<br>${rack['name']}</a></td>";
 		$order = $nextorder[$order];
 		$rackListIdx++;
@@ -5366,7 +5366,7 @@ function renderProgressBar ($percentage = 0, $theme = '')
 function getProgressBar ($percentage = 0, $theme = '')
 {
 	$done = ((int) ($percentage * 100));
-	$ret = "<img width=100 height=10 border=0 title='${done}%' src='render_image.php?img=progressbar&done=${done}";
+	$ret = "<img width=100 height=10 border=0 title='${done}%' src='?module=image&img=progressbar&done=${done}";
 	if ($theme != '')
 		$ret .= "&theme=${theme}";
 	$ret .= "'>";
@@ -7085,7 +7085,7 @@ function renderCell ($cell)
 		$thumbwidth = getRackImageWidth();
 		$thumbheight = getRackImageHeight ($cell['height']);
 		echo "<img border=0 width=${thumbwidth} height=${thumbheight} title='${cell['height']} units' ";
-		echo "src='render_image.php?img=minirack&rack_id=${cell['id']}'>";
+		echo "src='?module=image&img=minirack&rack_id=${cell['id']}'>";
 		echo "</td><td>";
 		printf ("<a href='index.php?page=rack&rack_id=%s'><strong>%s</strong></a>", $cell['id'], niftyString ($cell['name']));
 		echo "</td></tr><tr><td>";
@@ -7182,7 +7182,7 @@ function getFilePreviewCode ($file)
 			}
 			if ($resampled)
 				$ret .= "<a href='?module=download&file_id=${file['id']}&asattach=no'>";
-			$ret .= "<img width=${width} height=${height} src='render_image.php?img=preview&file_id=${file['id']}'>";
+			$ret .= "<img width=${width} height=${height} src='?module=image&img=preview&file_id=${file['id']}'>";
 			if ($resampled)
 				$ret .= '</a><br>(click to zoom)';
 			break;
