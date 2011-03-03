@@ -2366,6 +2366,16 @@ function ip_long2quad ($quad)
       return long2ip($quad);
 }
 
+// translate static URI
+function TSURI ($URI)
+{
+	global $racktables_static_dir;
+	if (! isset ($racktables_static_dir))
+		return $URI;
+	return "?module=tsuri&uri=${URI}";
+}
+
+// make "A" HTML element
 function mkA ($text, $nextpage, $bypass = NULL, $nexttab = NULL)
 {
 	global $page, $tab;
@@ -2389,6 +2399,7 @@ function mkA ($text, $nextpage, $bypass = NULL, $nexttab = NULL)
 	return '<a href="' . makeHref ($args) . '">' . $text . '</a>';
 }
 
+// make "HREF" HTML attribute
 function makeHref($params = array())
 {
 	$ret = 'index.php?';
@@ -3754,7 +3765,7 @@ function printPageHeaders ()
 		if ($item['type'] == 'inline')
 			echo '<style type="text/css">' . "\n" . trim ($item['style'], "\r\n") . "\n</style>\n";
 		elseif ($item['type'] == 'file')
-			echo '<link rel="stylesheet" type="text/css" href="' . htmlspecialchars ($item['style']) . "\" />\n";
+			echo '<link rel="stylesheet" type="text/css" href="' . TSURI ($item['style']) . "\" />\n";
 
 	// add JS scripts
 	foreach (addJS (NULL) as $group_name => $js_list)
@@ -3762,7 +3773,7 @@ function printPageHeaders ()
 			if ($item['type'] == 'inline')
 				echo '<script type="text/javascript">' . "\n" . trim ($item['script'], "\r\n") . "\n</script>\n";
 			elseif ($item['type'] == 'file')
-				echo '<script type="text/javascript" src="' . htmlspecialchars($item['script']) . "\"></script>\n";
+				echo '<script type="text/javascript" src="' . TSURI ($item['script']) . "\"></script>\n";
 }
 
 function strerror8021Q ($errno)
@@ -4703,6 +4714,38 @@ function getPortinfoByName (&$object, $portname)
 		if ($portinfo['name'] == $portname)
 			return $portinfo;
 	return NULL;
+}
+
+function proxyStaticURI ($URI)
+{
+	$content_type = array
+	(
+		'css' => 'text/css',
+		'js' => 'text/javascript',
+		'html' => 'text/html',
+		'png' => 'image/png',
+		'gif' => 'image/gif',
+	);
+	global $racktables_static_dir;
+	$my_static_root = isset ($racktables_static_dir) ? $racktables_static_dir : '.';
+	$file_path = $my_static_root . '/' . $URI;
+	if (! file_exists ($file_path))
+	{
+		header ('404 Not Found');
+?><!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
+<html><head>
+<title>404 Not Found</title>
+</head><body>
+<h1>Not Found</h1>
+<p>The requested file was not found in this instance.</p>
+<hr>
+<address>RackTables static content proxy</address>
+</body></html><?php
+		exit;
+	}
+	$extension = preg_replace ('/^.+\.([a-z]+)$/', '$1', $URI);
+	header ('Content-type: ' . $content_type[$extension]);
+	readfile ($file_path);
 }
 
 ?>

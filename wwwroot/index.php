@@ -1,8 +1,22 @@
 <?php
 ob_start();
 try {
-require 'inc/interface.php';
 require 'inc/init.php';
+if (array_key_exists ('module', $_REQUEST))
+{
+	switch ($_REQUEST['module'])
+	{
+	case 'tsuri':
+		genericAssertion ('uri', 'string');
+		proxyStaticURI ($_REQUEST['uri']);
+		break;
+	default:
+		throw new InvalidRequestArgException ('module', $_REQUEST['module']);
+	}
+	exit;
+}
+
+require 'inc/interface.php';
 prepareNavigation();
 // no ctx override is necessary
 fixContext();

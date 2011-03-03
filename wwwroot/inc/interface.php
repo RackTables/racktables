@@ -4657,12 +4657,14 @@ function printImageHREF ($tag, $title = '', $do_input = FALSE, $tabindex = 0)
 	echo getImageHREF ($tag, $title, $do_input, $tabindex);
 }
 
+// this would be better called mkIMG(), make "IMG" HTML element
 function getImageHREF ($tag, $title = '', $do_input = FALSE, $tabindex = 0)
 {
 	global $image;
 	if (!isset ($image[$tag]))
 		$tag = 'error';
 	$img = $image[$tag];
+	$img['path'] = TSURI ($img['path']);
 	if ($do_input == TRUE)
 		return
 			"<input type=image name=submit class=icon " .
