@@ -3437,6 +3437,7 @@ function getFile ($file_id)
 		// FIXME: isn't this repeating the code already in spotEntity()?
 		throw new EntityNotFoundException ('file', $file_id);
 
+	unset ($query);
 	// Someone accessed this file, update atime
 	usePreparedExecuteBlade ('UPDATE File SET atime = NOW() WHERE id = ?', array ($file_id));
 	return $row;
