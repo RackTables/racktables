@@ -3436,24 +3436,10 @@ function getFile ($file_id)
 	if (($row = $query->fetch (PDO::FETCH_ASSOC)) == NULL)
 		// FIXME: isn't this repeating the code already in spotEntity()?
 		throw new EntityNotFoundException ('file', $file_id);
-	else
-	{
-		$ret = array();
-		$ret['id'] = $row['id'];
-		$ret['name'] = $row['name'];
-		$ret['type'] = $row['type'];
-		$ret['size'] = $row['size'];
-		$ret['ctime'] = $row['ctime'];
-		$ret['mtime'] = $row['mtime'];
-		$ret['atime'] = $row['atime'];
-		$ret['contents'] = $row['contents'];
-		$ret['comment'] = $row['comment'];
-		unset ($query);
 
-		// Someone accessed this file, update atime
-		usePreparedExecuteBlade ('UPDATE File SET atime = NOW() WHERE id = ?', array ($file_id));
-	}
-	return $ret;
+	// Someone accessed this file, update atime
+	usePreparedExecuteBlade ('UPDATE File SET atime = NOW() WHERE id = ?', array ($file_id));
+	return $row;
 }
 
 function getFileCache ($file_id)
