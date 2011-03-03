@@ -1,9 +1,9 @@
 <?php
 ob_start();
 try {
-require 'inc/init.php';
 if (array_key_exists ('module', $_REQUEST))
 {
+	require_once 'inc/init.php';
 	switch ($_REQUEST['module'])
 	{
 	case 'tsuri':
@@ -35,7 +35,10 @@ if (array_key_exists ('module', $_REQUEST))
 	exit;
 }
 
-require 'inc/interface.php';
+require_once 'inc/interface.php';
+# init.php has to be included after interface.php, otherwise the bits
+# set by local.php get lost
+require_once 'inc/init.php';
 prepareNavigation();
 // no ctx override is necessary
 fixContext();
