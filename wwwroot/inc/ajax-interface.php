@@ -88,4 +88,56 @@ function formatPortConfigHints ($object_id, $R = NULL)
 	return $result;
 }
 
+function dispatchAJAXRequest()
+{
+	genericAssertion ('ac', 'string');
+	switch ($_REQUEST['ac'])
+	{
+	case 'verifyCode':
+		global $pageno, $tabno;
+		$pageno = 'perms';
+		$tabno = 'edit';
+		fixContext();
+		if (!permitted())
+		{
+			echo "NAK\nPermission denied";
+			return;
+		}
+		genericAssertion ('code', 'string');
+		$result = getRackCode (dos2unix ($_REQUEST['code']));
+		if ($result['result'] == 'ACK')
+			echo "ACK\n";
+		else
+			echo "NAK\n" . $result['load'];
+		break;
+	case 'get-port-link': // returns JSON-encoded text
+		genericAssertion ('object_id', 'uint');
+		$object = spotEntity ('object', $_REQUEST['object_id']);
+		fixContext ($object);
+		if (! permitted ('object', 'liveports', 'get_link_status'))
+			throw new RacktablesError ('Permission denied: $op_get_link_status check failed');
+		$data = formatPortLinkHints ($_REQUEST['object_id']);
+		echo json_encode ($data);
+		break;
+	case 'get-port-mac': // returns JSON-encoded text
+		genericAssertion ('object_id', 'uint');
+		fixContext (spotEntity ('object', $_REQUEST['object_id']));
+		if (! permitted ('object', 'liveports', 'get_mac_list'))
+			throw new RacktablesError ('Permission denied: $op_get_mac_list check failed');
+		$data = formatPortMacHints ($_REQUEST['object_id']);
+		echo json_encode ($data);
+		break;
+	case 'get-port-conf': // returns JSON-encoded text
+		genericAssertion ('object_id', 'uint');
+		fixContext (spotEntity ('object', $_REQUEST['object_id']));
+		if (! permitted ('object', 'liveports', 'get_port_conf'))
+			throw new RacktablesError ('Permission denied: $op_get_port_conf check failed');
+		$data = formatPortConfigHints ($_REQUEST['object_id']);
+		echo json_encode ($data);
+		break;
+	default:
+		throw new InvalidRequestArgException ('ac', $_REQUEST['ac']);
+	}
+}
+
 ?>

@@ -99,8 +99,9 @@ function menuItemClicked(menuItem, menu) {
 				setItemIcon(menuItem, '');
 		},
 		type: 'GET',
-		url: 'ajax.php',
+		url: 'index.php',
 		data: {
+			'module': 'ajax',
 			'ac': 'get-port-' + type,
 			'object_id': getQueryString('object_id')
 		},

@@ -6454,8 +6454,8 @@ function verify()
 {
 	$.ajax({
 		type: "POST",
-		url: "ajax.php",
-		data: {'ac': 'verifyCode', 'code': RCTA.getCode()},
+		url: "index.php",
+		data: {'module': 'ajax', 'ac': 'verifyCode', 'code': RCTA.getCode()},
 		success: function (data)
 		{
 			arr = data.split("\\n");

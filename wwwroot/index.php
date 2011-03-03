@@ -43,6 +43,24 @@ if (array_key_exists ('module', $_REQUEST))
 			renderError();
 		}
 		break;
+	case 'ajax':
+		require_once 'inc/ajax-interface.php';
+		require_once 'inc/init.php';
+		try
+		{
+			dispatchAJAXRequest();
+		}
+		catch (InvalidRequestArgException $e)
+		{
+			ob_clean();
+			echo "NAK\nMalformed request";
+		}
+		catch (Exception $e)
+		{
+			ob_clean();
+			echo "NAK\nRuntime exception: ". $e->getMessage();
+		}
+		break;
 	default:
 		throw new InvalidRequestArgException ('module', $_REQUEST['module']);
 	}
