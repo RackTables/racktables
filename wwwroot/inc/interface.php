@@ -9044,29 +9044,6 @@ function renderDeployQueue()
 	echo '</table>';
 }
 
-// returns '<a...</a>' html string containing a link to specified port or object.
-// link title is "hostname portname" if both parts are defined
-function formatPortLink($host_id, $hostname, $port_id, $portname, $a_class = '')
-{
-	$href = 'index.php?page=object&object_id=' . urlencode($host_id);
-	$additional = '';
-	if (isset ($port_id))
-	{
-		$href .= '&hl_port_id=' . urlencode($port_id);
-		$additional = "name=\"port-$port_id\"";
-	}
-	if (! empty($a_class))
-		$additional .= (empty($additional) ? '' : ' '). "class='$a_class'";
-	
-	$text_items = array();
-	if (isset ($hostname))
-		$text_items[] = $hostname;
-	if (isset ($portname))
-		$text_items[] = $portname;
-		
-	return "<a $additional href=\"$href\">" . implode(' ', $text_items) . '</a>';
-}
-
 function renderDiscoveredNeighbors ($object_id)
 {
 	global $tabno;
