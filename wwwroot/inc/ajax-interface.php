@@ -36,7 +36,7 @@ function formatPortLinkHints ($object_id)
 			$hidden_lines[] = 'Duplex: ' . $link_info['duplex'];
 		if (count ($hidden_lines))
 			$result[$portname]['popup'] = implode ('<br>', $hidden_lines);
-		$visible_part = '<img width="16" height="16" src="pix/' . $img_filename . '">';
+		$visible_part = '<img width="16" height="16" src="' . TSURI ("pix/${img_filename}") . '">';
 		$result[$portname]['inline'] = $visible_part;
 	}
 	// put empty pictures for not-found ports
@@ -44,7 +44,7 @@ function formatPortLinkHints ($object_id)
 	amplifyCell ($object);
 	foreach ($object['ports'] as $port)
 		if (! isset ($result[$port['name']]))
-			$result[$port['name']]['inline'] = '<img width="16" height="16" src="pix/1x1t.gif">';
+			$result[$port['name']]['inline'] = '<img width="16" height="16" src="' . TSURI ('pix/1x1t.gif') . ' ">';
 	return $result;
 }
 
