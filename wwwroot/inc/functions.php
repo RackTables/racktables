@@ -39,6 +39,7 @@ define ('RE_L2_WWN_HYPHEN', '/^[0-9a-f]{2}(-[0-9a-f]{2}){7}$/i');
 define ('RE_L2_WWN_SOLID', '/^[0-9a-f]{16}$/i');
 define ('RE_IP4_ADDR', '#^[0-9]{1,3}(\.[0-9]{1,3}){3}$#');
 define ('RE_IP4_NET', '#^[0-9]{1,3}(\.[0-9]{1,3}){3}/[0-9]{1,2}$#');
+define ('RE_STATIC_URI', '#^([[:alpha:]]+)/(?:[[:alpha:]]+/)*[[:alnum:]\._-]*\.([[:alpha:]]+)$#');
 define ('E_8021Q_NOERROR', 0);
 define ('E_8021Q_VERSION_CONFLICT', 101);
 define ('E_8021Q_PULL_REMOTE_ERROR', 102);
@@ -4739,6 +4740,21 @@ function getPortinfoByName (&$object, $portname)
 	return NULL;
 }
 
+function printStatic404()
+{
+	header ('404 Not Found');
+?><!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
+<html><head>
+<title>404 Not Found</title>
+</head><body>
+<h1>Not Found</h1>
+<p>The requested file was not found in this instance.</p>
+<hr>
+<address>RackTables static content proxy</address>
+</body></html><?php
+	exit;
+}
+
 function proxyStaticURI ($URI)
 {
 	$content_type = array
@@ -4749,25 +4765,19 @@ function proxyStaticURI ($URI)
 		'png' => 'image/png',
 		'gif' => 'image/gif',
 	);
+	$matches = array();
+	if
+	(
+		! preg_match (RE_STATIC_URI, $URI, $matches)
+		or ! in_array ($matches[1], array ('pix', 'css', 'js'))
+		or ! array_key_exists ($matches[2], $content_type)
+	)
+		printStatic404();
 	global $racktables_static_dir;
-	$my_static_root = isset ($racktables_static_dir) ? $racktables_static_dir : '.';
-	$file_path = $my_static_root . '/' . $URI;
+	$file_path = (isset ($racktables_static_dir) ? $racktables_static_dir : '.') . '/' . $URI;
 	if (! file_exists ($file_path))
-	{
-		header ('404 Not Found');
-?><!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
-<html><head>
-<title>404 Not Found</title>
-</head><body>
-<h1>Not Found</h1>
-<p>The requested file was not found in this instance.</p>
-<hr>
-<address>RackTables static content proxy</address>
-</body></html><?php
-		exit;
-	}
-	$extension = preg_replace ('/^.+\.([a-z]+)$/', '$1', $URI);
-	header ('Content-type: ' . $content_type[$extension]);
+		printStatic404();
+	header ('Content-type: ' . $content_type[$matches[2]]);
 	readfile ($file_path);
 }
 
