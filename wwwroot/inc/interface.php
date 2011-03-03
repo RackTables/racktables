@@ -6625,7 +6625,7 @@ function renderFile ($file_id)
 	echo "<tr><th width='50%' class=tdright>Size:</th><td class=tdleft>";
 	if (isolatedPermission ('file', 'download', $file))
 	{
-		echo "<a href='download.php?file_id=${file_id}'>";
+		echo "<a href='?module=download&file_id=${file_id}'>";
 		printImageHREF ('download', 'Download file');
 		echo '</a>&nbsp;';
 	}
@@ -6700,7 +6700,7 @@ function renderFileReuploader ()
 
 function renderFileDownloader ($file_id)
 {
-	echo "<br><center><a target='_blank' href='download.php?file_id=${file_id}&asattach=1'>";
+	echo "<br><center><a target='_blank' href='?module=download&file_id=${file_id}&asattach=1'>";
 	printImageHREF ('DOWNLOAD');
 	echo '</a></center>';
 }
@@ -7013,7 +7013,8 @@ function renderCell ($cell)
 		echo '</td></tr><tr><td>';
 		if (isolatedPermission ('file', 'download', $cell))
 		{
-			echo "<a href='download.php?file_id=${cell['id']}'>";
+			// FIXME: reuse renderFileDownloader()
+			echo "<a href='?module=download&file_id=${cell['id']}'>";
 			printImageHREF ('download', 'Download file');
 			echo '</a>&nbsp;';
 		}
@@ -7180,7 +7181,7 @@ function getFilePreviewCode ($file)
 				$resampled = TRUE;
 			}
 			if ($resampled)
-				$ret .= "<a href='download.php?file_id=${file['id']}&asattach=no'>";
+				$ret .= "<a href='?module=download&file_id=${file['id']}&asattach=no'>";
 			$ret .= "<img width=${width} height=${height} src='render_image.php?img=preview&file_id=${file['id']}'>";
 			if ($resampled)
 				$ret .= '</a><br>(click to zoom)';

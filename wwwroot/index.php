@@ -10,9 +10,28 @@ if (array_key_exists ('module', $_REQUEST))
 		genericAssertion ('uri', 'string');
 		proxyStaticURI ($_REQUEST['uri']);
 		break;
+	case 'download':
+		$pageno = 'file';
+		$tabno = 'download';
+		fixContext();
+		if (!permitted())
+		{
+			require_once 'inc/interface.php';
+			renderAccessDenied();
+		}
+
+		$asattach = (isset ($_REQUEST['asattach']) and $_REQUEST['asattach'] == 'no') ? FALSE : TRUE;
+		$file = getFile (getBypassValue());
+		header("Content-Type: {$file['type']}");
+		header("Content-Length: {$file['size']}");
+		if ($asattach)
+			header("Content-Disposition: attachment; filename={$file['name']}");
+		echo $file['contents'];
+		break;
 	default:
 		throw new InvalidRequestArgException ('module', $_REQUEST['module']);
 	}
+	ob_end_flush();
 	exit;
 }
 
