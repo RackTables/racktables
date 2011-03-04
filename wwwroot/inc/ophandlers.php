@@ -2781,7 +2781,7 @@ function tableHandler()
 	$columns = array();
 	foreach (array ('arglist', 'set_arglist', 'where_arglist') as $listname)
 	{
-		if (! is_array ($opspec[$listname]))
+		if (! array_key_exists ($listname, $opspec))
 			continue;
 		foreach ($opspec[$listname] as $argspec)
 		{
