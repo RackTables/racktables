@@ -6877,7 +6877,7 @@ function printOpFormIntro ($opname, $extra = array(), $upload = FALSE)
 {
 	global $pageno, $tabno, $page;
 
-	echo "<form method=post id=${opname} name=${opname} action='process.php?page=${pageno}&tab=${tabno}&op=${opname}'";
+	echo "<form method=post id=${opname} name=${opname} action='?module=redirect&page=${pageno}&tab=${tabno}&op=${opname}'";
 	if ($upload)
 		echo " enctype='multipart/form-data'";
 	echo ">";

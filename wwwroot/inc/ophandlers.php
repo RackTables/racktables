@@ -419,7 +419,7 @@ function buildWideRedirectURL ($log = NULL, $nextpage = NULL, $nexttab = NULL, $
 
 	if (count ($moreArgs) > 0)
 		foreach ($moreArgs as $arg => $value)
-			if (gettype ($value) != 'array')
+			if (gettype ($value) != 'array' and $arg != 'module')
 				$url .= '&' . urlencode ($arg) . '=' . urlencode ($value);
 			else
 				foreach ($value as $v)

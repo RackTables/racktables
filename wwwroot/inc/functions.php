@@ -2418,7 +2418,7 @@ function makeHref($params = array())
 function makeHrefProcess($params = array())
 {
 	global $pageno, $tabno;
-	$ret = 'process.php?';
+	$ret = '?module=redirect&';
 	$first = true;
 	if (!isset($params['page']))
 		$params['page'] = $pageno;
