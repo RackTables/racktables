@@ -111,6 +111,9 @@ function getDBUpgradePath ($v1, $v2)
 		return NULL;
 	$skip = TRUE;
 	$path = NULL;
+	// foreach() below cannot handle this specific case
+	if ($v1 == $v2)
+		return array();
 	// Now collect all versions > $v1 and <= $v2
 	foreach ($versionhistory as $v)
 	{
