@@ -2415,7 +2415,7 @@ function makeHrefProcess($params = array())
 
 function makeHrefForHelper ($helper_name, $params = array())
 {
-	$ret = 'popup.php?helper=' . $helper_name;
+	$ret = '?module=popup&helper=' . $helper_name;
 	foreach($params as $key=>$value)
 		$ret .= '&'.urlencode($key).'='.urlencode($value);
 	return $ret;

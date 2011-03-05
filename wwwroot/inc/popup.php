@@ -1,9 +1,4 @@
 <?php
-ob_start();
-try {
-
-	require 'inc/interface.php';
-	require 'inc/init.php';
 
 // Return a list of rack IDs, which are P or less positions
 // far from the given rack in its row.
@@ -115,9 +110,11 @@ function sortObjectAddressesAndNames ($a, $b)
 	return $objname_cmp;
 }
 
+function renderPopupHTML()
+{
+	global $pageno, $tabno;
 header ('Content-Type: text/html; charset=UTF-8');
-?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en" style="height: 100%;">
 <head>
 <?php
@@ -132,9 +129,11 @@ header ('Content-Type: text/html; charset=UTF-8');
 			$tabno = 'default';
 			fixContext();
 			if (!permitted())
-				renderAccessDenied();
-			assertUIntArg ('object_id');
-			$object_id = $_REQUEST['object_id'];
+			{
+				renderAccessDenied (FALSE);
+				return;
+			}
+			$object_id = getBypassValue();
 			echo '<div style="background-color: #f0f0f0; border: 1px solid #3c78b5; padding: 10px; height: 100%; text-align: center; margin: 5px;">';
 			echo '<h2>Choose a container:</h2>';
 			echo '<form action="javascript:;">';
@@ -159,8 +158,8 @@ header ('Content-Type: text/html; charset=UTF-8');
 			$port_id = $_REQUEST['port'];
 			echo '<div style="background-color: #f0f0f0; border: 1px solid #3c78b5; padding: 10px; height: 100%; text-align: center; margin: 5px;"><h2>';
 			echo $localchoice ?
-				('Nearest spare ports (<a href="popup.php?helper=portlist&port=' . $port_id . '&in_rack=n">show all</a>)') :
-				('All spare ports (<a href="popup.php?helper=portlist&port=' . $port_id . '&in_rack=y">show nearest</a>)');
+				('Nearest spare ports (<a href="?module=popup&helper=portlist&port=' . $port_id . '&in_rack=n">show all</a>)') :
+				('All spare ports (<a href="?module=popup&helper=portlist&port=' . $port_id . '&in_rack=y">show nearest</a>)');
 			echo '</h2><form action="javascript:;" id="portform">';
 			$only_racks = array();
 			global $sic;
@@ -213,11 +212,5 @@ header ('Content-Type: text/html; charset=UTF-8');
 </body>
 </html>
 <?php
-ob_end_flush();
-}
-catch (Exception $e)
-{
-        ob_end_clean();
-        printException($e);
 }
 ?>

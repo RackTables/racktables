@@ -149,6 +149,12 @@ try {
 		}
 		// any other error requires no special handling and will be caught outside
 		break;
+	case 'popup' == $_REQUEST['module']:
+		require_once 'inc/popup.php';
+		require_once 'inc/interface.php';
+		require_once 'inc/init.php';
+		renderPopupHTML();
+		break;
 	default:
 		throw new InvalidRequestArgException ('module', $_REQUEST['module']);
 	}
