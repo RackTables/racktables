@@ -329,6 +329,37 @@ $attrtypes = array
 	'dict' => '[D] dictionary record'
 );
 
+function renderInterfaceHTML ($pageno, $tabno, $payload)
+{
+?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head><title><?php echo getTitle ($pageno); ?></title>
+<?php printPageHeaders(); ?>
+</head>
+<body>
+<table border=0 cellpadding=0 cellspacing=0 width="100%" height="100%" class="maintable">
+ <tr class="mainheader"><td>
+   <table width="100%" cellspacing="0" cellpadding="2" border="0">
+   <tr>
+    <td valign=top><a href="http://racktables.org/"><?php printImageHREF ('logo'); ?></a></td>
+    <td valign=top><div class=greeting><?php printGreeting(); ?></div></td>
+   </tr>
+   </table>
+ </td></tr>
+ <tr><td class="menubar">
+  <table border="0" width="100%" cellpadding="3" cellspacing="0">
+  <tr><?php showPathAndSearch ($pageno); ?></tr>
+  </table>
+ </td></tr>
+ <tr><td><?php showTabs ($pageno, $tabno); ?></td></tr>
+ <tr><td><?php showMessageOrError(); ?></td></tr>
+ <tr><td><?php echo $payload; ?></td></tr>
+</table>
+</body>
+</html>
+<?php
+}
+
 // Main menu.
 function renderIndexItem ($ypageno) {
   global $page;
