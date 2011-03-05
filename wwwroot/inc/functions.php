@@ -1312,27 +1312,6 @@ function redirectIfNecessary ()
 		$trigger,
 		$pageno,
 		$tabno;
-	$pmap = array
-	(
-		'accounts' => 'userlist',
-		'rspools' => 'ipv4rsplist',
-		'rspool' => 'ipv4rsp',
-		'vservices' => 'ipv4vslist',
-		'vservice' => 'ipv4vs',
-		'objects' => 'depot',
-		'objgroup' => 'depot',
-	);
-	$tmap = array();
-	$tmap['objects']['newmulti'] = 'addmore';
-	$tmap['objects']['newobj'] = 'addmore';
-	$tmap['object']['switchvlans'] = 'livevlans';
-	$tmap['object']['slb'] = 'editrspvs';
-	$tmap['object']['portfwrd'] = 'nat4';
-	$tmap['object']['network'] = 'ipv4';
-	if (isset ($pmap[$pageno]))
-		redirectUser ($pmap[$pageno], $tabno);
-	if (isset ($tmap[$pageno][$tabno]))
-		redirectUser ($pageno, $tmap[$pageno][$tabno]);
 
 	if
 	(
