@@ -3,16 +3,47 @@ ob_start();
 try {
 // Code block below is a module request dispatcher. Turning it into a
 // function will break things because of the way require() works.
-if (array_key_exists ('module', $_REQUEST))
-{
-	switch ($_REQUEST['module'])
+	switch (TRUE)
 	{
-	case 'tsuri':
+	case ! array_key_exists ('module', $_REQUEST):
+	case 'interface' == $_REQUEST['module']:
+		require_once 'inc/interface.php';
+		// init.php has to be included after interface.php, otherwise the bits
+		// set by local.php get lost
+		require_once 'inc/init.php';
+		prepareNavigation();
+		// Security context is built on the requested page/tab/bypass data,
+		// do not override.
+		fixContext();
+		redirectIfNecessary();
+		if (! permitted())
+		{
+			renderAccessDenied (FALSE);
+			break;
+		}
+		header ('Content-Type: text/html; charset=UTF-8');
+		// Only store the tab name after clearance is got. Any failure is unhandleable.
+		if (isset ($_REQUEST['tab']) and ! isset ($_SESSION['RTLT'][$pageno]['dont_remember']))
+			$_SESSION['RTLT'][$pageno] = array ('tabname' => $tabno, 'time' => time());
+		// call the main handler - page or tab handler.
+		if (isset ($tabhandler[$pageno][$tabno]))
+			call_user_func ($tabhandler[$pageno][$tabno], getBypassValue());
+		elseif (isset ($page[$pageno]['handler']))
+			$page[$pageno]['handler'] ($tabno);
+		else
+			throw new RackTablesError ("Failed to find handler for page '${pageno}', tab '${tabno}'", RackTablesError::INTERNAL);
+		// Embed the current text in OB into interface layout (the latter also
+		// empties color message buffer).
+		$contents = ob_get_contents();
+		ob_clean();
+		renderInterfaceHTML ($pageno, $tabno, $contents);
+		break;
+	case 'tsuri' == $_REQUEST['module']:
 		require_once 'inc/init.php';
 		genericAssertion ('uri', 'string');
 		proxyStaticURI ($_REQUEST['uri']);
 		break;
-	case 'download':
+	case 'download' == $_REQUEST['module']:
 		require_once 'inc/init.php';
 		$pageno = 'file';
 		$tabno = 'download';
@@ -32,7 +63,7 @@ if (array_key_exists ('module', $_REQUEST))
 			header("Content-Disposition: attachment; filename={$file['name']}");
 		echo $file['contents'];
 		break;
-	case 'image':
+	case 'image' == $_REQUEST['module']:
 		require_once 'inc/render_image.php';
 		// 'progressbar's never change, attempt an IMS chortcut before loading init.php
 		checkIMSCondition();
@@ -47,7 +78,7 @@ if (array_key_exists ('module', $_REQUEST))
 			renderError();
 		}
 		break;
-	case 'ajax':
+	case 'ajax' == $_REQUEST['module']:
 		require_once 'inc/ajax-interface.php';
 		require_once 'inc/init.php';
 		try
@@ -65,7 +96,7 @@ if (array_key_exists ('module', $_REQUEST))
 			echo "NAK\nRuntime exception: ". $e->getMessage();
 		}
 		break;
-	case 'redirect':
+	case 'redirect' == $_REQUEST['module']:
 		// Include init after ophandlers/snmp, not before, so local.php can redefine things.
 		require_once 'inc/ophandlers.php';
 		// snmp.php is an exception, it is treated by a special hack
@@ -124,44 +155,10 @@ if (array_key_exists ('module', $_REQUEST))
 	ob_end_flush();
 	exit;
 }
-
-require_once 'inc/interface.php';
-# init.php has to be included after interface.php, otherwise the bits
-# set by local.php get lost
-require_once 'inc/init.php';
-prepareNavigation();
-// no ctx override is necessary
-fixContext();
-redirectIfNecessary();
-if (!permitted())
-	renderAccessDenied();
-header ('Content-Type: text/html; charset=UTF-8');
-// Only store the tab name after clearance is got. Any failure is unhandleable.
-if (isset ($_REQUEST['tab']) and ! isset ($_SESSION['RTLT'][$pageno]['dont_remember']))
-	$_SESSION['RTLT'][$pageno] = array ('tabname' => $tabno, 'time' => time());
-
-// call the main handler - page or tab handler.
-// catch exception and show its error message instead of page/tab content
-try {
-if (isset ($tabhandler[$pageno][$tabno]))
-	call_user_func ($tabhandler[$pageno][$tabno], getBypassValue());
-elseif (isset ($page[$pageno]['handler']))
-	$page[$pageno]['handler'] ($tabno);
-else
-	showError ("Failed to find handler for page '${pageno}', tab '${tabno}'");
-$content = ob_get_clean();
-} catch (Exception $e) {
-	ob_clean();
-	$content = '';
-	showError ("Unhandled exception: " . $e->getMessage());
-}
-
-ob_start();
-renderInterfaceHTML ($pageno, $tabno, $content);
-	ob_flush();
-} catch (Exception $e) {
+catch (Exception $e)
+{
 	ob_end_clean();
-	printException($e);
+	printException ($e);
 }
 clearMessages(); // prevent message appearing in foreign tab
 ?>
