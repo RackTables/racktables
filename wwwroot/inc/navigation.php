@@ -1,8 +1,18 @@
 <?php
 /*
-*
-*  This file implements generic navigation for RackTables.
-*
+
+This file contains a series of arrays, which define RackTables as a tree
+of discrete views ("pages"). Each such page may be in turn split info a set of
+"tabs". In the latter case it is also possible to define a set of "operations"
+for a particular combination of page and tab (location). These operations
+represent actions requested by the user and often expect additional data
+provided to be executed correctly (constraints on the additional data are
+defined and validated in ophandlers.php).
+
+Every page split into tabs must define a tab internally named "default". It is
+assumed, that this default tab never defines any operations and thus remains
+read-only.
+
 */
 
 $page = array();
