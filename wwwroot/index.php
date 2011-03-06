@@ -50,7 +50,6 @@ try {
 		fixContext();
 		if (!permitted())
 		{
-			require_once 'inc/interface.php';
 			renderAccessDenied (FALSE);
 			break;
 		}
