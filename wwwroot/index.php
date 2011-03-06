@@ -135,7 +135,7 @@ try {
 			header ("Location: " . $location);
 		}
 		// known "soft" failures require a short error message
-		catch (InvalidRequestArgException2 $e)
+		catch (InvalidRequestArgException $e)
 		{
 			ob_clean();
 			showError ($e->getMessage());
@@ -159,12 +159,11 @@ try {
 		throw new InvalidRequestArgException ('module', $_REQUEST['module']);
 	}
 	ob_end_flush();
-	exit;
 }
 catch (Exception $e)
 {
 	ob_end_clean();
+	clearMessages(); // prevent message appearing in foreign tab
 	printException ($e);
 }
-clearMessages(); // prevent message appearing in foreign tab
 ?>
