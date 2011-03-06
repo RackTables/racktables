@@ -13,6 +13,12 @@ require_once 'exceptions.php';
 require_once 'config.php';
 require_once 'functions.php';
 require_once 'database.php';
+require_once 'auth.php';
+require_once 'navigation.php';
+require_once 'triggers.php';
+require_once 'gateways.php';
+require_once 'IPv6.php';
+require_once 'interface-lib.php';
 // Always have default values for these options, so if a user didn't
 // care to set, something would be working anyway.
 $user_auth_src = 'database';
@@ -77,6 +83,7 @@ if (isset ($_SERVER['REMOTE_USER']))
 	$_SERVER['REMOTE_USER'] = escapeString ($_SERVER['REMOTE_USER']);
 
 loadConfigDefaults();
+$tab['reports']['local'] = getConfigVar ('enterprise');
 
 if (getConfigVar ('DB_VERSION') != CODE_VERSION)
 {
@@ -128,7 +135,6 @@ $taglist = getTagList();
 $tagtree = treeFromList ($taglist);
 sortTree ($tagtree, 'taginfoCmp');
 
-require_once 'auth.php';
 $auto_tags = array();
 // Initial chain for the current user.
 $user_given_tags = array();
@@ -160,13 +166,7 @@ else
 }
 
 alterConfigWithUserPreferences();
-
-require_once 'navigation.php';
-require_once 'triggers.php';
-
-
 $op = '';
-require_once 'gateways.php';
 // local.php may be missing, this case requires no special treatment
 // and must not generate any warnings
 ob_start();
@@ -181,7 +181,5 @@ $expl_tags = array();
 $impl_tags = array();
 // Initial chain for the current target.
 $target_given_tags = array();
-
-require_once 'IPv6.php';
 
 ?>
