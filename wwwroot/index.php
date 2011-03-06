@@ -75,7 +75,7 @@ try {
 		catch (Exception $e)
 		{
 			ob_clean();
-			renderError();
+			renderErrorImage();
 		}
 		break;
 	case 'ajax' == $_REQUEST['module']:

@@ -56,7 +56,7 @@ function dispatchImageRequest()
 			renderFilePreview (getBypassValue());
 		break;
 	default:
-		renderError();
+		renderErrorImage();
 	}
 }
 
@@ -116,7 +116,7 @@ function HTTPDateToUnixTime ($string)
 	return gmmktime ($hours, $minutes, $seconds, $month, $day, $year);
 }
 
-function renderError ()
+function renderErrorImage ()
 {
 	header("Content-type: image/png");
 	// "ERROR", 76x17, red on white
