@@ -39,7 +39,7 @@ define ('RE_L2_WWN_HYPHEN', '/^[0-9a-f]{2}(-[0-9a-f]{2}){7}$/i');
 define ('RE_L2_WWN_SOLID', '/^[0-9a-f]{16}$/i');
 define ('RE_IP4_ADDR', '#^[0-9]{1,3}(\.[0-9]{1,3}){3}$#');
 define ('RE_IP4_NET', '#^[0-9]{1,3}(\.[0-9]{1,3}){3}/[0-9]{1,2}$#');
-define ('RE_STATIC_URI', '#^([[:alpha:]]+)/(?:[[:alpha:]]+/)*[[:alnum:]\._-]*\.([[:alpha:]]+)$#');
+define ('RE_STATIC_URI', '#^([[:alpha:]]+)/(?:[[:alpha:]]+/)*[[:alnum:]\._-]+\.([[:alpha:]]+)$#');
 define ('E_8021Q_NOERROR', 0);
 define ('E_8021Q_VERSION_CONFLICT', 101);
 define ('E_8021Q_PULL_REMOTE_ERROR', 102);
@@ -2346,15 +2346,6 @@ function ip_long2quad ($quad)
       return long2ip($quad);
 }
 
-// translate static URI
-function TSURI ($URI)
-{
-	global $racktables_static_dir;
-	if (! isset ($racktables_static_dir))
-		return $URI;
-	return "?module=tsuri&uri=${URI}";
-}
-
 // make "A" HTML element
 function mkA ($text, $nextpage, $bypass = NULL, $nexttab = NULL)
 {
@@ -3745,7 +3736,7 @@ function printPageHeaders ()
 		if ($item['type'] == 'inline')
 			echo '<style type="text/css">' . "\n" . trim ($item['style'], "\r\n") . "\n</style>\n";
 		elseif ($item['type'] == 'file')
-			echo '<link rel="stylesheet" type="text/css" href="' . TSURI ($item['style']) . "\" />\n";
+			echo "<link rel=stylesheet type='text/css' href='?module=chrome&uri=${item['style']}' />\n";
 
 	// add JS scripts
 	foreach (addJS (NULL) as $group_name => $js_list)
@@ -4752,12 +4743,11 @@ function proxyStaticURI ($URI)
 		or ! array_key_exists ($matches[2], $content_type)
 	)
 		printStatic404();
-	global $racktables_static_dir;
-	$file_path = (isset ($racktables_static_dir) ? $racktables_static_dir : '.') . '/' . $URI;
-	if (! file_exists ($file_path))
+	global $racktables_staticdir;
+	if (! file_exists ("${racktables_staticdir}/${URI}"))
 		printStatic404();
 	header ('Content-type: ' . $content_type[$matches[2]]);
-	readfile ($file_path);
+	readfile ("${racktables_staticdir}/${URI}");
 }
 
 ?>

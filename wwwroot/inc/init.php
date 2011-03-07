@@ -24,6 +24,7 @@ require_once 'interface-lib.php';
 $user_auth_src = 'database';
 $require_local_account = TRUE;
 $racktables_gwdir = '../gateways';
+$racktables_staticdir = '.';
 
 // (re)connects to DB, stores PDO object in $dbxlink global var
 function connectDB()

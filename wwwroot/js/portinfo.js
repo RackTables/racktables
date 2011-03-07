@@ -38,7 +38,7 @@ $(document).ready(function () {
 		port_cmenu = $.contextMenu.create(port_cmenu_items, {theme:'vista'});
 		// add popup button after every portname
 		$('.interactive-portname.port-menu').after('<a title="Show info from switch" class="port-popup" href="#">&#133;</a>');
-		$('<div />').hide().addClass('cursor-shadow').css('position', 'absolute').css('width', 16).css('height', 16).css("background-image", "url(pix/ajax-loader.gif").appendTo('body');
+		$('<div />').hide().addClass('cursor-shadow').css('position', 'absolute').css('width', 16).css('height', 16).css("background-image", "url(index.php?module=chrome&uri=pix/ajax-loader.gif").appendTo('body');
 
 		// bind popup menu to every link with class port-popup
 		$('a.port-popup').bind('click', function(e){port_cmenu.show(this,e);return false;});
@@ -60,9 +60,9 @@ function disableMenuItem(menuItem) {
 function setItemIcon(menuItem, iconName) {
 	var iconURL;
 	if (iconName == 'wait')
-		iconURL = 'pix/ajax-loader.gif';
+		iconURL = 'index.php?module=chrome&uri=pix/ajax-loader.gif';
 	else if (iconName == 'ok')
-		iconURL = 'pix/checkbox_yes.png';
+		iconURL = 'index.php?module=chrome&uri=pix/checkbox_yes.png';
 	$(menuItem).children('.' + $.contextMenu.innerDivClassName).css("background-image", "url(" + iconURL + ")");
 }
 

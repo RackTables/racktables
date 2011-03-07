@@ -38,7 +38,7 @@ try {
 		ob_clean();
 		renderInterfaceHTML ($pageno, $tabno, $contents);
 		break;
-	case 'tsuri' == $_REQUEST['module']:
+	case 'chrome' == $_REQUEST['module']:
 		require_once 'inc/init.php';
 		genericAssertion ('uri', 'string');
 		proxyStaticURI ($_REQUEST['uri']);

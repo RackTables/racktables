@@ -332,7 +332,7 @@ function getImageHREF ($tag, $title = '', $do_input = FALSE, $tabindex = 0)
 	if (!isset ($image[$tag]))
 		$tag = 'error';
 	$img = $image[$tag];
-	$img['path'] = TSURI ($img['path']);
+	$img['path'] = '?module=chrome&uri=' . $img['path'];
 	if ($do_input == TRUE)
 		return
 			"<input type=image name=submit class=icon " .
