@@ -153,6 +153,24 @@ try {
 		require_once 'inc/init.php';
 		renderPopupHTML();
 		break;
+	case 'upgrade' == $_REQUEST['module']:
+		require_once 'inc/config.php'; // for CODE_VERSION
+		require_once 'inc/dictionary.php';
+		require_once 'inc/upgrade.php';
+		// Enforce default value for now, releases prior to 0.17.0 didn't support 'httpd' auth source.
+		$user_auth_src = 'database';
+		if (FALSE === @include_once 'inc/secret.php')
+			die ('<center>There is no working RackTables instance here, <a href="install.php">install</a>?</center>');
+		try
+		{
+			$dbxlink = new PDO ($pdo_dsn, $db_username, $db_password);
+		}
+		catch (PDOException $e)
+		{
+			die ("Database connection failed:\n\n" . $e->getMessage());
+		}
+		renderUpgraderHTML();
+		break;
 	default:
 		throw new InvalidRequestArgException ('module', $_REQUEST['module']);
 	}

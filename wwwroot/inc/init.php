@@ -92,7 +92,7 @@ if (getConfigVar ('DB_VERSION') != CODE_VERSION)
 		'just upgraded to version ' . CODE_VERSION . ', while the '.
 		'database version is ' . getConfigVar ('DB_VERSION') . '.<br>No user will be ' .
 		'either authenticated or shown any page until the upgrade is ' .
-		"finished.<br>Follow <a href='upgrade.php'>this link</a> and " .
+		"finished.<br>Follow <a href='?module=upgrade'>this link</a> and " .
 		'authenticate as administrator to finish the upgrade.</p>';
 	exit (1);
 }

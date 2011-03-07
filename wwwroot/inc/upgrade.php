@@ -151,7 +151,7 @@ function executeUpgradeBatch ($batchid)
 			// create tables for storing files (requires InnoDB support)
 			if (!isInnoDBSupported ())
 			{
-				showError ("Cannot upgrade because InnoDB tables are not supported by your MySQL server. See the README for details.");
+				showError ("Cannot upgrade because InnoDB tables are not supported by your MySQL server. See the README for details.", __FUNCTION__);
 				die;
 			}
 
@@ -1013,7 +1013,7 @@ CREATE TABLE `EntityLink` (
 			$query[] = "UPDATE Config SET varvalue = '0.19.2' WHERE varname = 'DB_VERSION'";
 			break;
 		default:
-			showError ("executeUpgradeBatch () failed, because batch '${batchid}' isn't defined");
+			showError ("executeUpgradeBatch () failed, because batch '${batchid}' isn't defined", __FUNCTION__);
 			die;
 			break;
 	}
@@ -1042,34 +1042,6 @@ CREATE TABLE `EntityLink` (
 	}
 	echo '</td></tr>';
 }
-
-// ******************************************************************
-//
-//                  Execution starts here
-//
-// ******************************************************************
-
-require_once 'inc/config.php'; // for CODE_VERSION
-require_once 'inc/dictionary.php';
-// Enforce default value for now, releases prior to 0.17.0 didn't support 'httpd' auth source.
-$user_auth_src = 'database';
-
-if (file_exists ('inc/secret.php'))
-	require_once 'inc/secret.php';
-else
-	die ('<center>There is no working RackTables instance here, <a href="install.php">install</a>?</center>');
-
-try
-{
-	$dbxlink = new PDO ($pdo_dsn, $db_username, $db_password);
-}
-catch (PDOException $e)
-{
-	die ("Database connection failed:\n\n" . $e->getMessage());
-}
-
-// Now we need to be sure that the current user is the administrator.
-// The rest doesn't matter within this context.
 
 function authenticate_admin ($username, $password)
 {
@@ -1100,7 +1072,7 @@ function getDatabaseVersion ()
 	return $ret;
 }
 
-function showError ($info = '', $location = 'upgrade.php')
+function showError ($info = '', $location = 'N/A')
 {
 	if (preg_match ('/\.php$/', $location))
 		$location = basename ($location);
@@ -1114,8 +1086,11 @@ function showError ($info = '', $location = 'upgrade.php')
 	echo "Go back or try starting from <a href='index.php'>index page</a>.<br></div>\n";
 }
 
-switch ($user_auth_src)
+function renderUpgraderHTML()
 {
+	global $user_auth_src;
+	switch ($user_auth_src)
+	{
 	case 'database':
 	case 'ldap': // authenticate against DB as well
 		if
@@ -1129,7 +1104,7 @@ switch ($user_auth_src)
 		{
 			header ('WWW-Authenticate: Basic realm="RackTables upgrade"');
 			header ('HTTP/1.0 401 Unauthorized');
-			showError ('You must be authenticated as an administrator to complete the upgrade.');
+			showError ('You must be authenticated as an administrator to complete the upgrade.', __FUNCTION__);
 			die;
 		}
 		break; // cleared
@@ -1140,20 +1115,35 @@ switch ($user_auth_src)
 			!strlen ($_SERVER['REMOTE_USER'])
 		)
 		{
-			showError ('System misconfiguration. The web-server didn\'t authenticate the user, although ought to do.');
+			showError ('System misconfiguration. The web-server didn\'t authenticate the user, although ought to do.', __FUNCTION__);
 			die;
 		}
 		break; // cleared
 	default:
-		showError ('authentication source misconfiguration');
+		showError ('authentication source misconfiguration', __FUNCTION__);
 		die;
-}
+	}
 
-?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head><title>RackTables upgrade script</title>
-<link rel=stylesheet type='text/css' href='css/pi.css' />
+<style type="text/css">
+.tdleft {
+	text-align: left;
+}
+
+.trok {
+	background-color: #80FF80;
+}
+
+.trwarning {
+	background-color: #FFFF80;
+}
+
+.trerror {
+	background-color: #FF8080;
+}
+</style>
 </head>
 <body>
 <h1>Platform check status</h1>
@@ -1192,5 +1182,6 @@ else
 }
 echo '</table>';
 echo '</body></html>';
+}
 
 ?>

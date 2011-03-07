@@ -34,7 +34,7 @@ function isInnoDBSupported ()
 	return FALSE;
 }
 
-function platform_function_test ($funcname, $extname, $what_if_not = 'not found', $error_class = 'msg_error')
+function platform_function_test ($funcname, $extname, $what_if_not = 'not found', $error_class = 'trerror')
 {
 	return platform_generic_test (function_exists ($funcname), $extname, 'NOT PRESENT', $error_class);
 }
