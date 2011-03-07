@@ -40,7 +40,7 @@ CodePress = function(obj) {
 		if(obj) self.textarea.value = document.getElementById(obj) ? document.getElementById(obj).value : obj;
 		if(!self.textarea.disabled) return;
 		self.language = language ? language : self.getLanguage();
-		self.src = CodePress.path+'codepress.html?language='+self.language+'&ts='+(new Date).getTime();
+		self.src = CodePress.path+'codepress.html&language='+self.language+'&ts='+(new Date).getTime();
 		if(self.attachEvent) self.attachEvent('onload',self.initialize);
 		else self.addEventListener('load',self.initialize,false);
 	}

@@ -3744,7 +3744,7 @@ function printPageHeaders ()
 			if ($item['type'] == 'inline')
 				echo '<script type="text/javascript">' . "\n" . trim ($item['script'], "\r\n") . "\n</script>\n";
 			elseif ($item['type'] == 'file')
-				echo '<script type="text/javascript" src="' . htmlspecialchars ($item['script']) . "\"></script>\n";
+				echo "<script type='text/javascript' src='?module=chrome&uri=${item['script']}'></script>\n";
 }
 
 function strerror8021Q ($errno)
