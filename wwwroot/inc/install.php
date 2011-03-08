@@ -1,9 +1,7 @@
 <?php
 
-// This script is intended for execution through a web-browser, e.g.:
-// https://example.com/racktables/install.php
-// See README file for more information.
-
+function renderInstallerHTML()
+{
 $stepfunc[1] = 'not_already_installed';
 $stepfunc[2] = 'platform_is_ok';
 $stepfunc[3] = 'init_config';
@@ -33,13 +31,27 @@ if ($step > count ($stepfunc))
 	exit;
 }
 $title = "RackTables installation: step ${step} of " . count ($stepfunc);
-require_once ('inc/dictionary.php');
 header ('Content-Type: text/html; charset=UTF-8');
-?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head><title><?php echo $title; ?></title>
-<link rel=stylesheet type='text/css' href='css/pi.css' />
+<style type="text/css">
+.tdleft {
+	text-align: left;
+}
+
+.trok {
+	background-color: #80FF80;
+}
+
+.trwarning {
+	background-color: #FFFF80;
+}
+
+.trerror {
+	background-color: #FF8080;
+}
+</style>
 </head>
 <body>
 <center>
@@ -67,6 +79,8 @@ echo "<input type=hidden name=step value='${next_step}'>\n";
 </html>
 
 <?php
+}
+
 // Check if the software is already installed.
 function not_already_installed()
 {

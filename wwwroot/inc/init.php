@@ -53,7 +53,7 @@ if (FALSE === @include_once 'secret.php')
 	(
 		"Database connection parameters are read from inc/secret.php file, " .
 		"which cannot be found.<br>You probably need to complete the installation " .
-		"procedure by following <a href='install.php'>this link</a>.",
+		"procedure by following <a href='?module=installer'>this link</a>.",
 		RackTablesError::MISCONFIGURED
 	);
 }

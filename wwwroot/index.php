@@ -160,7 +160,7 @@ try {
 		// Enforce default value for now, releases prior to 0.17.0 didn't support 'httpd' auth source.
 		$user_auth_src = 'database';
 		if (FALSE === @include_once 'inc/secret.php')
-			die ('<center>There is no working RackTables instance here, <a href="install.php">install</a>?</center>');
+			die ('<center>There is no working RackTables instance here, <a href="?module=installer">install</a>?</center>');
 		try
 		{
 			$dbxlink = new PDO ($pdo_dsn, $db_username, $db_password);
@@ -170,6 +170,11 @@ try {
 			die ("Database connection failed:\n\n" . $e->getMessage());
 		}
 		renderUpgraderHTML();
+		break;
+	case 'installer':
+		require_once 'inc/dictionary.php';
+		require_once 'inc/install.php';
+		renderInstallerHTML();
 		break;
 	default:
 		throw new InvalidRequestArgException ('module', $_REQUEST['module']);
