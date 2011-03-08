@@ -3385,7 +3385,7 @@ function renderAddMultipleObjectsForm ()
 		if ($key > 0 && in_array($key, $virtual_obj_types))
 			unset($phys_typelist['other'][$key]);
 	}
-	startPortlet ('Physcial objects');
+	startPortlet ('Physical objects');
 	printOpFormIntro ('addObjects');
 	echo '<table border=0 align=center>';
 	echo "<tr><th>Object type</th><th>Common name</th><th>Visible label</th>";
