@@ -4734,13 +4734,15 @@ function proxyStaticURI ($URI)
 		'html' => 'text/html',
 		'png' => 'image/png',
 		'gif' => 'image/gif',
+		'jpg' => 'image/jpeg',
+		'jpeg' => 'image/jpeg',
 	);
 	$matches = array();
 	if
 	(
 		! preg_match (RE_STATIC_URI, $URI, $matches)
 		or ! in_array ($matches[1], array ('pix', 'css', 'js'))
-		or ! array_key_exists ($matches[2], $content_type)
+		or ! array_key_exists (strtolower ($matches[2]), $content_type)
 	)
 		printStatic404();
 	global $racktables_staticdir;
