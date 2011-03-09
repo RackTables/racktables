@@ -2,9 +2,10 @@ DESTDIR ?=
 prefix  ?= /usr/local
 
 docdir    ?= $(prefix)/share/doc/racktables
-datadir   ?= $(prefix)/share/racktables
-staticdir ?= $(datadir)/static
-codedir   ?= $(datadir)/code
+datadir   ?= $(prefix)/share
+staticdir ?= $(datadir)/racktables/static
+codedir   ?= $(datadir)/racktables/code
+scriptdir ?= $(datadir)/racktables
 
 INSTALL         := install
 INSTALL_DATA    := $(INSTALL) -m 644
@@ -16,10 +17,10 @@ install-docs: COPYING ChangeLog LICENSE README
 	$(INSTALL_DATA) $^ $(DESTDIR)$(docdir)
 
 install-helpers: scripts gateways
-	$(INSTALL_DIR) $(DESTDIR)$(datadir)
-	cp -r $^ $(DESTDIR)$(datadir)
-	find $(DESTDIR)$(datadir)/scripts -type d -a -name '.svn' -exec rm -rf \{\} \; -prune
-	find $(DESTDIR)$(datadir)/gateways -type d -a -name '.svn' -exec rm -rf \{\} \; -prune
+	$(INSTALL_DIR) $(DESTDIR)$(scriptdir)
+	cp -r $^ $(DESTDIR)$(scriptdir)
+	find $(DESTDIR)$(scriptdir)/scripts -type d -a -name '.svn' -exec rm -rf \{\} \; -prune
+	find $(DESTDIR)$(scriptdir)/gateways -type d -a -name '.svn' -exec rm -rf \{\} \; -prune
 
 install-static: wwwroot/css wwwroot/js wwwroot/pix
 	$(INSTALL_DIR) $(DESTDIR)$(staticdir)
