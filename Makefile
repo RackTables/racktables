@@ -1,11 +1,10 @@
-DESTDIR ?=
-prefix  ?= /usr/local
-
-docdir    ?= $(prefix)/share/doc/racktables
+DESTDIR   ?=
+prefix    ?= /usr/local
+docdir    ?= $(prefix)/share/doc/RackTables
 datadir   ?= $(prefix)/share
-staticdir ?= $(datadir)/racktables/static
-codedir   ?= $(datadir)/racktables/code
-scriptdir ?= $(datadir)/racktables
+staticdir ?= $(datadir)/RackTables/static
+codedir   ?= $(datadir)/RackTables/code
+scriptdir ?= $(datadir)/RackTables
 
 INSTALL         := install
 INSTALL_DATA    := $(INSTALL) -m 644
