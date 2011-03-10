@@ -1442,7 +1442,7 @@ function ciscoReadInterfaceStatus ($text)
 				$field_list = preg_split('/\s+/', $rest);
 				if (count ($field_list) < 4)
 					break;
-				list ($status_raw, $vlan, $duplex, $speed, $type) = $field_list;
+				list ($status_raw, $vlan, $duplex, $speed) = $field_list;
 				if ($status_raw == 'connected' || $status_raw == 'up')
 					$status = 'up';
 				elseif ($status_raw == 'notconnect' || $status_raw == 'down')

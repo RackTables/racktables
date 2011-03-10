@@ -5138,9 +5138,9 @@ function renderRSPoolLBForm ($pool_id)
 		foreach ($vslist as $vs_id => $configs)
 			$triplets[] = array(
 				'ids' => array(
-					object_id => $object_id,
-					vs_id => $vs_id,
-					pool_id => $pool_id
+					'object_id' => $object_id,
+					'vs_id' => $vs_id,
+					'pool_id' => $pool_id
 				),
 				'rsconfig' => $configs['rsconfig'],
 				'vsconfig' => $configs['vsconfig'],
@@ -5162,9 +5162,9 @@ function renderVServiceLBForm ($vs_id)
 		foreach ($rspinfo['lblist'] as $object_id => $configs)
 			$triplets[] = array(
 				'ids' => array(
-					object_id => $object_id,
-					vs_id => $vs_id,
-					pool_id => $pool_id
+					'object_id' => $object_id,
+					'vs_id' => $vs_id,
+					'pool_id' => $pool_id
 				),
 				'rsconfig' => $configs['rsconfig'],
 				'vsconfig' => $configs['vsconfig'],
