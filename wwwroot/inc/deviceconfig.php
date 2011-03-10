@@ -1366,15 +1366,18 @@ function jun10Read8021QConfig ($input)
 				$ret['portdata'][$current['name']] = $current['config'];
 			}
 
-			$current['is_ethernet'] = FALSE;
-			$current['is_range'] = (TRUE == $m[1]);
-			$current['name'] = $m[2];
-			$current['config'] = array (
-				'mode' => NULL,
-				'allowed' => NULL,
-				'native' => NULL,
-			);
-			$current['indent'] = NULL;
+			if (! empty ($m[2]))
+			{ // new interface section begins
+				$current['is_ethernet'] = FALSE;
+				$current['is_range'] = ! empty ($m[1]);
+				$current['name'] = $m[2];
+				$current['config'] = array (
+					'mode' => NULL,
+					'allowed' => NULL,
+					'native' => NULL,
+				);
+				$current['indent'] = NULL;
+			}
 		}
 		elseif (preg_match ('/^(\s+)family ethernet-switching\b/', $line, $m))
 		{
@@ -1383,7 +1386,7 @@ function jun10Read8021QConfig ($input)
 			$current['is_ethernet'] = TRUE;
 			$current['indent'] = $m[1];
 		}
-		elseif (isset ($current['indent']) and $line == $config_indent . '}')
+		elseif (isset ($current['indent']) and $line == $current['indent'] . '}')
 			$current['indent'] = NULL;
 		elseif ($current['is_ethernet'] and isset ($current['indent']))
 		{
