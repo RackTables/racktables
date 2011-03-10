@@ -2,8 +2,12 @@ DESTDIR   ?=
 prefix    ?= /usr/local
 docdir    ?= $(prefix)/share/doc/RackTables
 datadir   ?= $(prefix)/share
-staticdir ?= $(datadir)/RackTables/static
-codedir   ?= $(datadir)/RackTables/code
+# Default values reproduce the layout present in tar.gz, which concurs with
+# the default values of $racktables_gwdir and $racktables_staticdir. But
+# once the latter are patched for a shared deploy, it is enough to execute
+# "make install" with appropriate arguments to split the filesystem.
+staticdir ?= $(datadir)/RackTables/wwwroot
+codedir   ?= $(datadir)/RackTables/wwwroot
 scriptdir ?= $(datadir)/RackTables
 
 INSTALL         := install

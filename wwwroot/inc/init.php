@@ -23,8 +23,17 @@ require_once 'interface-lib.php';
 // care to set, something would be working anyway.
 $user_auth_src = 'database';
 $require_local_account = TRUE;
+# Below are default values for two paths. The right way to change these
+# is to add respective line(s) to secret.php, unless this is a "shared
+# code, multiple instances" deploy.
 $racktables_gwdir = '../gateways';
 $racktables_staticdir = '.';
+# Set both paths at once before actually including secret.php, this way
+# both files will always be included from the same directory.
+$path_to_secret_php = $path_to_local_php = isset ($racktables_confdir) ?
+	"${racktables_confdir}/" : '';
+$path_to_secret_php .= 'secret.php';
+$path_to_local_php .= 'local.php';
 
 // (re)connects to DB, stores PDO object in $dbxlink global var
 function connectDB()
@@ -46,12 +55,12 @@ function connectDB()
 
 // secret.php may be missing, in which case this is a special fatal error
 ob_start();
-if (FALSE === @include_once 'secret.php')
+if (FALSE === @include_once $path_to_secret_php)
 {
 	ob_end_clean();
 	throw new RackTablesError
 	(
-		"Database connection parameters are read from inc/secret.php file, " .
+		"Database connection parameters are read from ${path_to_secret_php} file, " .
 		"which cannot be found.<br>You probably need to complete the installation " .
 		"procedure by following <a href='?module=installer'>this link</a>.",
 		RackTablesError::MISCONFIGURED
@@ -171,7 +180,7 @@ $op = '';
 // local.php may be missing, this case requires no special treatment
 // and must not generate any warnings
 ob_start();
-@include_once 'local.php';
+@include_once $path_to_local_php;
 $tmp = ob_get_clean();
 if ($tmp != '' and ! preg_match ("/^\n+$/D", $tmp))
 	echo $tmp;
