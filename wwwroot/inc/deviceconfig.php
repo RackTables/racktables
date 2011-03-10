@@ -1211,9 +1211,19 @@ function jun10TranslatePushQueue ($queue, $vlan_names)
 			break;
 		case 'set native':
 			$ret .= "set interfaces ${cmd['arg1']} unit 0 family ethernet-switching native-vlan-id ${cmd['arg2']}\n";
+			$pre = "delete interfaces ${cmd['arg1']} unit 0 family ethernet-switching vlan members";
+			$vlan = $cmd['arg2'];
+			$ret .= "$pre $vlan\n";
+			if (isset ($vlan_names[$vlan]))
+				$ret .= "$pre ${vlan_names[$vlan]}\n";
 			break;
 		case 'unset native':
 			$ret .= "delete interfaces ${cmd['arg1']} unit 0 family ethernet-switching native-vlan-id\n";
+			$pre = "interfaces ${cmd['arg1']} unit 0 family ethernet-switching vlan members";
+			$vlan = $cmd['arg2'];
+			if (isset ($vlan_names[$vlan]))
+				$ret .= "delete $pre ${vlan_names[$vlan]}\n";
+			$ret .= "set $pre $vlan\n";
 			break;
 		case 'set access':
 			$ret .= "set interfaces ${cmd['arg1']} unit 0 family ethernet-switching vlan members ${cmd['arg2']}\n";
