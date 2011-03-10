@@ -1886,7 +1886,7 @@ function setPortVLAN ()
 		if
 		(
 			$_REQUEST['vlanid_' . $i] == $portlist[$i]['vlanid'] ||
-			$portlist[$i]['vlaind'] == 'TRUNK'
+			$portlist[$i]['vlanid'] == 'TRUNK'
 		)
 			continue;
 		$portname = $_REQUEST['portname_' . $i];
