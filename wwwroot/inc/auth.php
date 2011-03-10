@@ -436,7 +436,10 @@ function queryLDAPServer ($username, $password)
 			for ($i = 0; $i < $info[0]['memberof']['count']; $i++)
 				foreach (explode (',', $info[0]['memberof'][$i]) as $pair)
 				{
-					list ($attr_name, $attr_value) = explode ('=', $pair);
+					$items = explode ('=', $pair);
+					if (count ($items) != 2)
+						continue;
+					list ($attr_name, $attr_value) = $items;
 					if (strtoupper ($attr_name) == 'CN' and validTagName ('$lgcn_' . $attr_value, TRUE))
 						$ret['memberof'][] = '$lgcn_' . $attr_value;
 				}
