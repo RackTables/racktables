@@ -2088,7 +2088,7 @@ function renderIPv4SpaceRecords ($tree, $baseurl, $target = 0, $knight, $level =
 				$decor['symbolurl'] = $baseurl . ($item['parent_id'] ? "&eid=${item['parent_id']}" : '');
 			echo "<tr valign=top>";
 			if ($target == $item['id'] && isset ($_REQUEST['hl_net']))
-				$decor['tdclass'] .= ' port_highlight';
+				$decor['tdclass'] = 'port_highlight';
 			printIPNetInfoTDs ($item, $decor);
 			echo "<td class=tdcenter>";
 			if (getConfigVar ('IPV4_TREE_SHOW_USAGE') == 'yes')
