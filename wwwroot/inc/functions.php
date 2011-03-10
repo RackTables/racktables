@@ -3961,7 +3961,7 @@ function produceDownlinkPort ($domain_vlanlist, $portname, $order, $uplink_order
 		if (matchVLANFilter ($vlan_id, $new_order[$portname]['wrt_vlans']))
 		$new_order[$portname]['allowed'][] = $vlan_id;	
 	}
-	return filter8021QChangeRequests ($domain_vlanlist, $remote_before, $new_order);
+	return filter8021QChangeRequests ($domain_vlanlist, $order, $new_order);
 }
 
 // does upd8021QPort on any port from $order array which is not equal to the corresponding $before port.
