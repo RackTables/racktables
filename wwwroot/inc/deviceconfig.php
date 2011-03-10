@@ -243,7 +243,7 @@ function ios12PickSwitchportCommand (&$work, $line)
 	if ($line[0] != ' ') // end of interface section
 	{
 		// save work, if it makes sense
-		switch ($work['current']['mode'])
+		switch (@$work['current']['mode'])
 		{
 		case 'access':
 			if (!array_key_exists ('access vlan', $work['current']))
