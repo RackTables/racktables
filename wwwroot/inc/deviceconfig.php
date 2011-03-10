@@ -1177,6 +1177,67 @@ function xos12TranslatePushQueue ($queue)
 	return $ret;
 }
 
+function jun10TranslatePushQueue ($queue, $vlan_names)
+{
+	$ret = '';
+	if (! isset ($vlan_names))
+		$vlan_names = array();
+
+	foreach ($queue as $cmd)
+		switch ($cmd['opcode'])
+		{
+		case 'create VLAN':
+			$ret .= "set vlans VLAN${cmd['arg1']} vlan-id ${cmd['arg1']}\n";
+			break;
+		case 'destroy VLAN':
+			if (isset ($vlan_names[$cmd['arg1']]))
+				$ret .= "delete vlans " . $vlan_names[$cmd['arg1']] . "\n";
+			break;
+		case 'add allowed':
+		case 'rem allowed':
+			$del = ($cmd['opcode'] == 'rem allowed');
+			$pre = ($del ? 'delete' : 'set') .
+				" interfaces ${cmd['port']} unit 0 family ethernet-switching vlan members";
+			if (count ($cmd['vlans']) > VLAN_MAX_ID - VLAN_MIN_ID)
+				$ret .= "$pre " . ($del ? '' : 'all') . "\n";
+			else
+				while (! empty ($cmd['vlans']))
+				{
+					$vlan = array_shift ($cmd['vlans']);
+					$ret .= "$pre $vlan\n";
+					if ($del and isset ($vlan_names[$vlan]))
+						$ret .= "$pre ${vlan_names[$vlan]}\n";
+				}
+			break;
+		case 'set native':
+			$ret .= "set interfaces ${cmd['arg1']} unit 0 family ethernet-switching native-vlan-id ${cmd['arg2']}\n";
+			break;
+		case 'unset native':
+			$ret .= "delete interfaces ${cmd['arg1']} unit 0 family ethernet-switching native-vlan-id\n";
+			break;
+		case 'set access':
+			$ret .= "set interfaces ${cmd['arg1']} unit 0 family ethernet-switching vlan members ${cmd['arg2']}\n";
+			break;
+		case 'unset access':
+			$ret .= "delete interfaces ${cmd['arg1']} unit 0 family ethernet-switching vlan members\n";
+			break;
+		case 'set mode':
+			$ret .= "set interfaces ${cmd['arg1']} unit 0 family ethernet-switching port-mode ${cmd['arg2']}\n";
+			break;
+		case 'begin configuration':
+			$ret .= "configure exclusive\n";
+			break;
+		case 'end configuration':
+			$ret .= "commit confirmed 120\n";
+			break;
+		case 'save configuration':
+			break; // JunOS can`t apply configuration without saving it
+		default:
+			throw new InvalidArgException ('opcode', $cmd['opcode']);
+		}
+	return $ret;
+}
+
 function xos12Read8021QConfig ($input)
 {
 	$ret = array
@@ -1224,6 +1285,135 @@ function xos12Read8021QConfig ($input)
 		default:
 		}
 	}
+	return $ret;
+}
+
+function jun10Read8021QConfig ($input)
+{
+	$ret = array
+	(
+		'vlanlist' => array (1),
+		'vlannames' => array (1 => 'default'),
+		'portdata' => array(),
+	);
+	$lines = explode ("\n", $input);
+	
+	// get vlan list
+	$vlans = array('default' => 1);
+	$names = array();
+	while (count ($lines))
+	{
+		$line = trim (array_shift ($lines));
+		if (FALSE !== strpos ($line, '# END OF VLAN LIST'))
+			break;
+		if (preg_match ('/^VLAN: (.*), 802.1Q Tag: (\d+)/', $line, $m))
+		{
+			$ret['vlannames'][$m[2]] = $m[1];
+			$vlans[$m[1]] = $m[2];
+		}
+	}
+	$ret['vlanlist'] = array_values	($vlans);
+
+	// get config groups list - throw an exception if a group contains ether-switching config
+	$current_group = NULL;
+	while (count ($lines))
+	{
+		$line = array_shift ($lines);
+		if (FALSE !== strpos ($line, '# END OF GROUP LIST'))
+			break;
+		elseif (preg_match ('/^(\S+)(?:\s+{|;)$/', $line, $m))
+			$current_group = $m[1];
+		elseif (isset ($current_group) and preg_match ('/^\s*family ethernet-switching\b/', $line))
+			throw new RTGatewayError ("Config-group '$current_group' contains switchport commands, which is not supported");
+	}
+
+	// get interfaces config
+	$current = array
+	(
+		'is_range' => FALSE,
+		'is_ethernet' => FALSE,
+		'name' => NULL,
+		'config' => NULL,
+		'indent' => NULL,
+	);
+	while (count ($lines))
+	{
+		$line = array_shift ($lines);
+		if (preg_match ('/# END OF CONFIG|^(interface-range )?(\S+)\s+{$/', $line, $m)) // line starts with interface name
+		{ // found interface section opening, or end-of-file
+			if (isset ($current['name']) and $current['is_ethernet'])
+			{ 
+				// add previous interface to the results
+				if (! isset ($current['config']['mode']))
+					$current['config']['mode'] = 'access';
+				if (! isset ($current['config']['native']))
+					$current['config']['native'] = $current['config']['native'] = 0;
+				if (! isset ($current['config']['allowed']))
+				{
+					if ($current['config']['mode'] == 'access')
+						$current['config']['allowed'] = array (1);
+					else
+						$current['config']['allowed'] = array();
+				}
+				if (
+					$current['config']['mode'] == 'trunk' and
+					$current['config']['native'] != 0 and
+					! in_array ($current['config']['native'], $current['config']['allowed'])
+				)
+					$current['config']['allowed'][] = $current['config']['native'];
+				elseif ($current['config']['mode'] == 'access')
+					$current['config']['native'] = $current['config']['allowed'][0];
+				$ret['portdata'][$current['name']] = $current['config'];
+			}
+
+			$current['is_ethernet'] = FALSE;
+			$current['is_range'] = (TRUE == $m[1]);
+			$current['name'] = $m[2];
+			$current['config'] = array (
+				'mode' => NULL,
+				'allowed' => NULL,
+				'native' => NULL,
+			);
+			$current['indent'] = NULL;
+		}
+		elseif (preg_match ('/^(\s+)family ethernet-switching\b/', $line, $m))
+		{
+			if ($current['is_range'])
+				throw new RTGatewayError ("interface-range '${current['name']}' contains switchport commands, which is not supported");
+			$current['is_ethernet'] = TRUE;
+			$current['indent'] = $m[1];
+		}
+		elseif (isset ($current['indent']) and $line == $config_indent . '}')
+			$current['indent'] = NULL;
+		elseif ($current['is_ethernet'] and isset ($current['indent']))
+		{
+			if (preg_match ('/^\s+port-mode (trunk|access);/', $line, $m))
+				$current['config']['mode'] = $m[1];
+			elseif (preg_match ('/^\s+native-vlan-id (\d+);/', $line, $m))
+				$current['config']['native'] = $m[1];
+			elseif (preg_match ('/^\s+members \[?(.*)\]?;$/', $line, $m))
+			{
+				$members = array();
+				foreach (explode (' ', $m[1]) as $item)
+				{
+					$item = trim ($item);
+					if (preg_match ('/^(\d+)(?:-(\d+))?$/', $item, $m))
+					{
+						if (isset ($m[2]) and $m[2] > $m[1])
+							$members = array_merge (range ($m[1], $m[2]), $members);
+						else
+							$members[] = $m[1];
+					}
+					elseif (isset ($vlans[$item]))
+						$members[] = $vlans[$item];
+					elseif ($item == 'all')
+						$members = array_merge (range (VLAN_MIN_ID, VLAN_MAX_ID), $members);
+				}
+				$current['config']['allowed'] = array_unique ($members);
+			}
+		}
+	}
+	
 	return $ret;
 }
 

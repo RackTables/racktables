@@ -35,6 +35,7 @@ $gwrxlator['get8021q'] = array
 	'vrp55' => 'vrp55Read8021QConfig',
 	'nxos4' => 'nxos4Read8021QConfig',
 	'xos12' => 'xos12Read8021QConfig',
+	'jun10' => 'jun10Read8021QConfig',
 );
 $gwrxlator['getportstatus'] = array
 (
@@ -61,6 +62,7 @@ $gwpushxlator = array
 	'vrp55' => 'vrp55TranslatePushQueue',
 	'nxos4' => 'ios12TranslatePushQueue', // employ syntax compatibility
 	'xos12' => 'xos12TranslatePushQueue',
+	'jun10' => 'jun10TranslatePushQueue',
 );
 
 // This function launches specified gateway with specified
@@ -324,6 +326,7 @@ function detectDeviceBreed ($object_id)
 		1361 => 'vrp55',
 		1369 => 'vrp55', // VRP versions 5.5 and 5.7 seem to be compatible
 		1363 => 'fdry5',
+		1367 => 'jun10',
 	);
 	foreach (getAttrValues ($object_id) as $record)
 		if ($record['id'] == 4 and array_key_exists ($record['key'], $breed_by_swcode))
@@ -341,14 +344,14 @@ function getRunning8021QConfig ($object_id)
 	return $ret;
 }
 
-function setDevice8021QConfig ($object_id, $pseudocode)
+function setDevice8021QConfig ($object_id, $pseudocode, $vlan_names)
 {
 	require_once 'deviceconfig.php';
 	if ('' == $breed = detectDeviceBreed ($object_id))
 		throw new RTGatewayError ('device breed unknown');
 	global $gwpushxlator;
 	// FIXME: this is a perfect place to log intended changes
-	gwDeployDeviceConfig ($object_id, $breed, unix2dos ($gwpushxlator[$breed] ($pseudocode)));
+	gwDeployDeviceConfig ($object_id, $breed, unix2dos ($gwpushxlator[$breed] ($pseudocode, $vlan_names)));
 }
 
 function gwRetrieveDeviceConfig ($object_id, $command)
