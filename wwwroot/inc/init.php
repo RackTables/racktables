@@ -152,7 +152,7 @@ $user_given_tags = array();
 // This also can be modified in local.php.
 $pageheaders = array
 (
-	100 => "<link rel='ICON' type='image/x-icon' href='favicon.ico' />",
+	100 => "<link rel='ICON' type='image/x-icon' href='?module=chrome&uri=pix/favicon.ico' />",
 );
 addCSS ('css/pi.css');
 

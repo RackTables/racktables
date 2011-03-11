@@ -4738,6 +4738,7 @@ function proxyStaticURI ($URI)
 		'gif' => 'image/gif',
 		'jpg' => 'image/jpeg',
 		'jpeg' => 'image/jpeg',
+		'ico' => 'image/x-icon',
 	);
 	$matches = array();
 	if
