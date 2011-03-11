@@ -173,13 +173,12 @@ function getSwitchVLANs ($object_id = 0)
 		throw new RTGatewayError ('gateway returned no records');
 	$maclist = array();
 	foreach (explode (';', substr ($data[3], strlen ('OK!'))) as $pair)
-	{
-		list ($macaddr, $pair2) = explode ('=', $pair);
-		if (!strlen ($pair2))
-			continue;
-		list ($vlanid, $ifname) = explode ('@', $pair2);
-		$maclist[$ifname][$vlanid][] = $macaddr;
-	}
+		if (preg_match ('/^([^=]+)=(.+)/', $pair, $m))
+		{
+			$macaddr = $m[1];
+			list ($vlanid, $ifname) = explode ('@', $m[2]);
+			$maclist[$ifname][$vlanid][] = $macaddr;
+		}
 	return array ($vlanlist, $portlist, $maclist);
 }
 
