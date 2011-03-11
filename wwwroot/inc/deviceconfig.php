@@ -897,7 +897,7 @@ function nxos4PickSwitchportCommand (&$work, $line)
 //    sequences of VLAN IDs and replace them with ranges of form "A-B",
 //    where B>A.
 // 2. Iterate over the resulting list and produce real CLI commands.
-function ios12TranslatePushQueue ($queue)
+function ios12TranslatePushQueue ($queue, $dummy)
 {
 	$ret = '';
 	foreach ($queue as $cmd)
@@ -952,7 +952,7 @@ function ios12TranslatePushQueue ($queue)
 	return $ret;
 }
 
-function fdry5TranslatePushQueue ($queue)
+function fdry5TranslatePushQueue ($queue, $dummy)
 {
 	$ret = '';
 	foreach ($queue as $cmd)
@@ -1001,7 +1001,7 @@ function fdry5TranslatePushQueue ($queue)
 	return $ret;
 }
 
-function vrp53TranslatePushQueue ($queue)
+function vrp53TranslatePushQueue ($queue, $dummy)
 {
 	$ret = '';
 	foreach ($queue as $cmd)
@@ -1053,7 +1053,7 @@ function vrp53TranslatePushQueue ($queue)
 	return $ret;
 }
 
-function vrp55TranslatePushQueue ($queue)
+function vrp55TranslatePushQueue ($queue, $dummy)
 {
 	$ret = '';
 	foreach ($queue as $cmd)
@@ -1119,7 +1119,7 @@ function vrp55TranslatePushQueue ($queue)
 	return $ret;
 }
 
-function xos12TranslatePushQueue ($queue)
+function xos12TranslatePushQueue ($queue, $dummy)
 {
 	$ret = '';
 	foreach ($queue as $cmd)
@@ -1177,11 +1177,9 @@ function xos12TranslatePushQueue ($queue)
 	return $ret;
 }
 
-function jun10TranslatePushQueue ($queue, $vlan_names)
+function jun10TranslatePushQueue ($queue, $vlan_names = array())
 {
 	$ret = '';
-	if (! isset ($vlan_names))
-		$vlan_names = array();
 
 	foreach ($queue as $cmd)
 		switch ($cmd['opcode'])

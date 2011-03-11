@@ -344,7 +344,7 @@ function getRunning8021QConfig ($object_id)
 	return $ret;
 }
 
-function setDevice8021QConfig ($object_id, $pseudocode, $vlan_names)
+function setDevice8021QConfig ($object_id, $pseudocode, $vlan_names = array())
 {
 	require_once 'deviceconfig.php';
 	if ('' == $breed = detectDeviceBreed ($object_id))

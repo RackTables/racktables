@@ -3697,7 +3697,7 @@ function exec8021QDeploy ($object_id, $do_push)
 			);
 			try
 			{
-				$vlan_names = isset ($R['vlannames']) ? $R['vlannames'] : NULL;
+				$vlan_names = isset ($R['vlannames']) ? $R['vlannames'] : array();
 				$npushed += exportSwitch8021QConfig ($vswitch, $R['vlanlist'], $R['portdata'], $ok_to_push, $vlan_names);
 				// update cache for ports deployed
 				replace8021QPorts ('cached', $vswitch['object_id'], $R['portdata'], $ok_to_push);
