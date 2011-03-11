@@ -680,7 +680,7 @@ function vrp55Read8021QConfig ($input)
 		switch (TRUE)
 		{
 		case preg_match ('/^ port (link-type )?hybrid /', $line):
-			throw new RTGatewayError ("unsupported configuration: ${line}");
+			throw new RTGatewayError ('unsupported hybrid link-type for ' . $ret['current']['port_name'] . ": ${line}");
 		case preg_match ('/^ port link-type (.+)$/', $line, $matches):
 			$ret['current']['link-type'] = $matches[1];
 			break;
