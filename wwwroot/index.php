@@ -1,5 +1,8 @@
 <?php
 ob_start();
+# Neither "throw/catch" for custom exceptions nor printException() will
+# work without first loading exceptions.php.
+require_once 'inc/exceptions.php';
 try {
 // Code block below is a module request dispatcher. Turning it into a
 // function will break things because of the way require() works.
@@ -171,7 +174,7 @@ try {
 		}
 		renderUpgraderHTML();
 		break;
-	case 'installer':
+	case 'installer' == $_REQUEST['module']:
 		require_once 'inc/dictionary.php';
 		require_once 'inc/install.php';
 		renderInstallerHTML();
@@ -184,7 +187,9 @@ try {
 catch (Exception $e)
 {
 	ob_end_clean();
-	clearMessages(); // prevent message appearing in foreign tab
+	# prevent message appearing in foreign tab
+	if (isset ($_SESSION['log']))
+		unset ($_SESSION['log']);
 	printException ($e);
 }
 ?>
