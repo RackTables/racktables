@@ -1177,7 +1177,7 @@ function xos12TranslatePushQueue ($queue, $dummy)
 	return $ret;
 }
 
-function jun10TranslatePushQueue ($queue, $vlan_names = array())
+function jun10TranslatePushQueue ($queue, $vlan_names)
 {
 	$ret = '';
 
