@@ -8827,7 +8827,7 @@ function renderDiscoveredNeighbors ($object_id)
 				$error_message = "Incompatible port types";
 			} while (FALSE); // do {
 
-			$tr_class = $link_matches ? 'trok' : ($error_message ? 'trerror' : 'trwarning');
+			$tr_class = $link_matches ? 'trok' : (isset ($error_message) ? 'trerror' : 'trwarning');
 			echo "<tr class=\"$tr_class\">";
 			if ($initial_row)
 			{
@@ -8849,7 +8849,7 @@ function renderDiscoveredNeighbors ($object_id)
 			echo "<td>" . ($portinfo_remote ? formatPortLink ($dp_remote_object_id, NULL, $portinfo_remote['id'], $portinfo_remote['name']) : $dp_neighbor['port'] ) . "</td>";
 			echo "<td>" . ($portinfo_remote ? formatPortIIFOIF($portinfo_remote) : '&nbsp') . "</td>";
 			echo "<td>";
-			if ($error_message || $link_matches)
+			if (isset ($error_message) || $link_matches)
 				echo '&nbsp;';
 			else
 			{
@@ -8860,7 +8860,7 @@ function renderDiscoveredNeighbors ($object_id)
 			}
 			echo "</td>";
 				
-			if ($error_message)
+			if (isset ($error_message))
 				echo "<td style=\"background-color: white; border-top: none\">$error_message</td>";
 			echo "</tr>";
 		}
