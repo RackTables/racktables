@@ -772,7 +772,7 @@ function renderRackObject ($object_id)
 		{
 			echo "<tr class=row_${order} valign=top>";
 			echo '<td class=tdleft>' . $row['date'] . '<br>' . $row['user'] . '</td>';
-			echo '<td class="slbconf rsvtext">' . string_insert_hrefs ($row['content']) . '</td>';
+			echo '<td class="slbconf rsvtext">' . string_insert_hrefs (htmlspecialchars ($row['content'], ENT_NOQUOTES)) . '</td>';
 			echo '</tr>';
 			$order = $nextorder[$order];
 		}
@@ -8929,7 +8929,7 @@ function renderObjectLogEditor ()
 	{
 		echo "<tr class=row_${order} valign=top>";
 		echo '<td class=tdleft>' . $row['date'] . '<br>' . $row['user'] . '</td>';
-		echo '<td class="slbconf rsvtext">' . string_insert_hrefs ($row['content']) . '</td>';
+		echo '<td class="slbconf rsvtext">' . string_insert_hrefs (htmlspecialchars ($row['content'], ENT_NOQUOTES)) . '</td>';
 		echo "<td class=tdleft><a href=\"".makeHrefProcess(array('op'=>'del', 'logid'=>$row['id'], 'object_id'=>$_REQUEST['object_id']))."\">";
 		echo getImageHREF ('DESTROY', 'Delete log entry') . '</a></td>';
 		echo '</tr>';
@@ -8958,7 +8958,7 @@ function allObjectLogs ()
 			echo "<tr class=row_${order} valign=top>";
 			echo "<td align=left><a href='".makeHref(array('page'=>'object', 'tab'=>'log', 'object_id'=>$row['object_id']))."'>${row['name']}</a></td>";
 			echo '<td class=tdleft>' . $row['date'] . '<br>' . $row['user'] . '</td>';
-			echo '<td class="slbconf rsvtext">' . string_insert_hrefs ($row['content']) . '</td>';
+			echo '<td class="slbconf rsvtext">' . string_insert_hrefs (htmlspecialchars ($row['content'], ENT_NOQUOTES)) . '</td>';
 			echo '</tr>';
 			$order = $nextorder[$order];
 		}
