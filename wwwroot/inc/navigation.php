@@ -648,9 +648,7 @@ $tabhandler['dqueue']['default'] = 'renderDeployQueue';
 $page['objectlog']['title'] = 'Log records';
 $page['objectlog']['parent'] = 'index';
 $tab['objectlog']['default'] = 'View';
-#$tab['objectlog']['add'] = 'Add'; // FIXME: finish, then enable
 $tabhandler['objectlog']['default'] = 'allObjectLogs';
-#$tabhandler['objectlog']['add'] = 'renderGlobalLogEditor';
 
 $page['virtual']['title'] = 'Virtual Resources';
 $page['virtual']['parent'] = 'index';
