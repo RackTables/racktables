@@ -7,7 +7,8 @@ datadir   ?= $(prefix)/share
 # once the latter are patched for a shared deploy, it is enough to execute
 # "make install" with appropriate arguments to split the filesystem.
 staticdir ?= $(datadir)/RackTables/wwwroot
-codedir   ?= $(datadir)/RackTables/wwwroot
+applibdir ?= $(datadir)/RackTables/wwwroot/inc
+indexdir  ?= $(datadir)/RackTables/wwwroot
 scriptdir ?= $(datadir)/RackTables
 
 INSTALL         := install
@@ -30,9 +31,12 @@ install-static: wwwroot/css wwwroot/js wwwroot/pix
 	cp -r $^ $(DESTDIR)$(staticdir)
 	find $(DESTDIR)$(staticdir) -type d -a -name '.svn' -exec rm -rf \{\} \; -prune
 
-install-code: wwwroot/inc wwwroot/favicon.ico wwwroot/index.php
-	$(INSTALL_DIR) $(DESTDIR)$(codedir)/inc
-	$(INSTALL_DATA) wwwroot/favicon.ico wwwroot/index.php $(DESTDIR)$(codedir)
-	$(INSTALL_DATA) wwwroot/inc/*.php $(DESTDIR)$(codedir)/inc
+install-applib: wwwroot/inc
+	$(INSTALL_DIR) $(DESTDIR)$(applibdir)/inc
+	$(INSTALL_DATA) wwwroot/inc/*.php $(DESTDIR)$(applibdir)
 
-install: install-helpers install-static install-code
+install-index: wwwroot/index.php
+	$(INSTALL_DIR) $(DESTDIR)$(indexdir)
+	$(INSTALL_DATA) wwwroot/index.php $(DESTDIR)$(indexdir)
+
+install: install-helpers install-static install-applib install-index
