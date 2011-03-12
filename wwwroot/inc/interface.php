@@ -5710,29 +5710,30 @@ function renderTagRowForEditor ($taginfo, $level = 0)
 	if (!count ($taginfo['kids']))
 		$level++; // Idem
 	echo "<tr><td align=left style='padding-left: " . ($level * 16) . "px;'>";
-	if (count ($taginfo['kids']))
+	if ($taginfo['kidc'])
 		printImageHREF ('node-expanded-static');
-	if ($taginfo['refcnt']['total'] > 0 or count ($taginfo['kids']) > 0)
-		printImageHREF ('nodestroy', $taginfo['refcnt']['total'] . ' references, ' . count ($taginfo['kids']) . ' sub-tags');
+	if ($taginfo['refcnt']['total'] > 0 or $taginfo['kidc'])
+		printImageHREF ('nodestroy', $taginfo['refcnt']['total'] . ' references, ' . $taginfo['kidc'] . ' sub-tags');
 	else
-	{
-		echo "<a href='".makeHrefProcess(array('op'=>'destroyTag', 'tag_id'=>$taginfo['id']))."'>";
-		printImageHREF ('destroy', 'Delete tag');
-		echo "</a>";
-	}
-	echo "</td>\n<td>";
+		echo '<a href="' . makeHrefProcess (array ('op' => 'destroyTag', 'tag_id' => $taginfo['id']))
+			. '">' . getImageHREF ('destroy', 'Delete tag') . '</a>';
+	echo '</td><td>';
 	printOpFormIntro ('updateTag', array ('tag_id' => $taginfo['id']));
 	echo "<input type=text size=48 name=tag_name ";
-	echo "value='${taginfo['tag']}'></td><td><select name=parent_id>";
-	echo "<option value=0>-- NONE --</option>\n";
-	foreach ($taglist as $tlinfo)
-	{
-		echo "<option value=${tlinfo['id']}" . ($tlinfo['id'] == $taginfo['parent_id'] ? ' selected' : '');
-		echo ">${tlinfo['tag']}</option>";
-	}
-	echo "</select></td><td>";
-	printImageHREF ('save', 'Save changes', TRUE);
-	echo "</form></td></tr>\n";
+	echo "value='${taginfo['tag']}'></td><td class=tdleft>";
+	$options = array (0 => '-- NONE --');
+	# The call below works, because taginfo is actually a tree node, not a
+	# pure "taginfo" structure.
+	$hidden = getTagIDListForNode ($taginfo);
+	# Exclude the current tag itself and all of its sub-tags from the "new parent
+	# tag" list of options, because setting any of these as the new parent will
+	# introduce a dependency loop into the tree. This hint does not prevent loops
+	# as such, but lowers the chances they are created unintentionally.
+	foreach ($taglist as $nominee)
+		if (! in_array ($nominee['id'], $hidden))
+			$options[$nominee['id']] = $nominee['tag'];
+	printSelect ($options, array ('name' => 'parent_id'), $taginfo['parent_id']);
+	echo '</td><td>' . getImageHREF ('save', 'Save changes', TRUE) . '</form></td></tr>';
 	foreach ($taginfo['kids'] as $kid)
 		$self ($kid, $level + 1);
 }
@@ -5773,7 +5774,7 @@ function renderTagTreeEditor ()
 	{
 		startPortlet ('fallen leaves');
 		echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
-		echo "<tr><th>tag</th><th>parent</th><th>&nbsp;</th></tr>\n";
+		echo '<tr><th>tag name</th><th>parent tag</th><th>&nbsp;</th></tr>';
 		foreach ($otags as $taginfo)
 		{
 			printOpFormIntro ('updateTag', array ('tag_id' => $taginfo['id'], 'tag_name' => $taginfo['tag']));
@@ -5794,7 +5795,7 @@ function renderTagTreeEditor ()
 
 	startPortlet ('tag tree');
 	echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
-	echo "<tr><th>&nbsp;</th><th>tag</th><th>parent</th><th>&nbsp;</th></tr>\n";
+	echo '<tr><th>&nbsp;</th><th>tag name</th><th>parent tag</th><th>&nbsp;</th></tr>';
 	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
 		printNewItemTR();
 	foreach ($tagtree as $taginfo)

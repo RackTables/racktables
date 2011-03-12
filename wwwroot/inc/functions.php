@@ -1504,6 +1504,17 @@ function mergeTagChains ($chainA, $chainB)
 	return $ret;
 }
 
+# Return a list consisting of tag ID of the given tree node and IDs of all
+# nodes it contains.
+function getTagIDListForNode ($treenode)
+{
+	$self = __FUNCTION__;
+	$ret = array ($treenode['id']);
+	foreach ($treenode['kids'] as $item)
+		$ret = array_merge ($ret, $self ($item));
+	return $ret;
+}
+
 function getCellFilter ()
 {
 	global $sic;
