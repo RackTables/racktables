@@ -66,10 +66,13 @@ try {
 		echo $file['contents'];
 		break;
 	case 'image' == $_REQUEST['module']:
+		require_once 'inc/caching.php';
+		// 'progressbar's never change, attempt an IMS shortcut before loading init.php
+		if (@$_REQUEST['img'] == 'progressbar')
+			if (checkCachedResponse (0, 604800)) // 7 * 24 * 3600
+				exit;
+		require_once 'inc/init.php'; // for authentication check
 		require_once 'inc/render_image.php';
-		// 'progressbar's never change, attempt an IMS chortcut before loading init.php
-		checkIMSCondition();
-		require_once 'inc/init.php';
 		try
 		{
 			dispatchImageRequest();

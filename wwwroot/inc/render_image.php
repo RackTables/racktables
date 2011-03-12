@@ -1,29 +1,5 @@
 <?php
 
-define ('CACHE_DURATION', 604800); // 7 * 24 * 3600
-
-function checkIMSCondition()
-{
-	if
-	(
-		! array_key_exists ('HTTP_IF_MODIFIED_SINCE', $_SERVER)
-		or ! array_key_exists ('img', $_REQUEST)
-		or $_REQUEST['img'] != 'progressbar'
-	)
-		return;
-	$client_time = HTTPDateToUnixTime ($_SERVER['HTTP_IF_MODIFIED_SINCE']);
-	if ($client_time !== FALSE && $client_time !== -1) // readable
-	{
-		$server_time = time();
-		// not in future and not yet expired
-		if ($client_time <= $server_time && $client_time + CACHE_DURATION >= $server_time)
-		{
-			header ('Last-Modified: ' . $_SERVER['HTTP_IF_MODIFIED_SINCE'], TRUE, 304);
-			exit;
-		}
-	}
-}
-
 function dispatchImageRequest()
 {
 	genericAssertion ('img', 'string');
@@ -42,8 +18,6 @@ function dispatchImageRequest()
 	case 'progressbar': // no security context
 		assertUIntArg ('done', TRUE);
 		// 'progressbar's never change, make browser cache the result
-		header ('Cache-Control: private, max-age=' . CACHE_DURATION . ', pre-check=' . CACHE_DURATION);
-		header ('Last-Modified: ' . gmdate (DATE_RFC1123));
 		renderProgressBarImage ($_REQUEST['done']);
 		break;
 	case 'preview': // file security context
@@ -58,62 +32,6 @@ function dispatchImageRequest()
 	default:
 		renderErrorImage();
 	}
-}
-
-//------------------------------------------------------------------------
-function HTTPDateToUnixTime ($string)
-{
-	//Written per RFC 2616 3.3.1 - Full Date
-	//http://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html
-	$month_number = array
-	(
-		'Jan' => 1,
-		'Feb' => 2,
-		'Mar' => 3,
-		'Apr' => 4,
-		'May' => 5,
-		'Jun' => 6,
-		'Jul' => 7,
-		'Aug' => 8,
-		'Sep' => 9,
-		'Oct' => 10,
-		'Nov' => 11,
-		'Dec' => 12,
-	);
-
-	$formats = array();
-	# RFC2616 dictates exchanged timestamps to be in GMT TZ, and RFC822
-	# (which RFC1123 relies on) explicitly defines, that "GMT" is equivalent
-	# to "-0000" and "+0000".
-	$formats['rfc1123'] = '/^(Sun|Mon|Tue|Wed|Thu|Fri|Sat), (\d{2}) (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) (\d{4}) (\d{2}):(\d{2}):(\d{2}) (?:GMT|[-+]0000)$/';
-	$formats['rfc850'] = '/^(Sunday|Monday|Tuesday|Wednesday|Thursday|Friday|Saturday), (\d{2})-(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)-(\d{2}) (\d{2}):(\d{2}):(\d{2}) (?:GMT|[-+]0000)$/';
-	$formats['asctime'] = '/^(Sun|Mon|Tue|Wed|Thu|Fri|Sat) (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) (\d{2}|\d{1}) (\d{2}):(\d{2}):(\d{2}) (\d{4})$/';
-
-	$matches = array();
-	if (preg_match ($formats['rfc1123'], $string, $matches)) {
-		$hours = $matches[5];
-		$minutes = $matches[6];
-		$seconds = $matches[7];
-		$month = $month_number[$matches[3]];
-		$day = $matches[2];
-		$year = $matches[4];
-	} elseif (preg_match ($formats['rfc850'], $string, $matches)) {
-		$hours = $matches[5];
-		$minutes = $matches[6];
-		$seconds = $matches[7];
-		$month = $month_number[substr($matches[3],0,3)];
-		$day = $matches[2];
-		$year = $matches[4];
-	} elseif (preg_match ($formats['asctime'], $string, $matches)) {
-		$hours = $matches[4];
-		$minutes = $matches[5];
-		$seconds = $matches[6];
-		$month = $month_number[$matches[2]];
-		$day = $matches[3];
-		$year = $matches[7];
-	} else
-		return false;
-	return gmmktime ($hours, $minutes, $seconds, $month, $day, $year);
 }
 
 function renderErrorImage ()

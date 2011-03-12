@@ -4760,10 +4760,20 @@ function proxyStaticURI ($URI)
 	)
 		printStatic404();
 	global $racktables_staticdir;
-	if (! file_exists ("${racktables_staticdir}/${URI}"))
+	if (FALSE === $fh = fopen ("${racktables_staticdir}/${URI}", 'r'))
 		printStatic404();
-	header ('Content-type: ' . $content_type[$matches[2]]);
-	readfile ("${racktables_staticdir}/${URI}");
+	else
+	{
+		if (FALSE !== $stat = fstat ($fh))
+		{
+			require_once 'inc/caching.php';
+			if (checkCachedResponse (max ($stat['mtime'], $stat['ctime']), 0))
+				exit;
+		}
+		header ('Content-type: ' . $content_type[$matches[2]]);
+		fpassthru ($fh);
+		fclose ($fh);	
+	}
 }
 
 ?>
