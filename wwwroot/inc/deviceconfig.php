@@ -1347,6 +1347,7 @@ function jun10Read8021QConfig ($input)
 	while (count ($lines))
 	{
 		$line = array_shift ($lines);
+		$line_class = 'line-other';
 		if (preg_match ('/# END OF CONFIG|^(interface-range )?(\S+)\s+{$/', $line, $m)) // line starts with interface name
 		{ // found interface section opening, or end-of-file
 			if (isset ($current['name']) and $current['is_ethernet'])
@@ -1383,7 +1384,9 @@ function jun10Read8021QConfig ($input)
 					'mode' => NULL,
 					'allowed' => NULL,
 					'native' => NULL,
+					'config' => array(),
 				);
+				$line_class = 'line-header';
 				$current['indent'] = NULL;
 			}
 		}
@@ -1398,6 +1401,7 @@ function jun10Read8021QConfig ($input)
 			$current['indent'] = NULL;
 		elseif ($current['is_ethernet'] and isset ($current['indent']))
 		{
+			$line_class = 'line-8021q';
 			if (preg_match ('/^\s+port-mode (trunk|access);/', $line, $m))
 				$current['config']['mode'] = $m[1];
 			elseif (preg_match ('/^\s+native-vlan-id (\d+);/', $line, $m))
@@ -1422,7 +1426,11 @@ function jun10Read8021QConfig ($input)
 				}
 				$current['config']['allowed'] = array_unique ($members);
 			}
+			else
+				$line_class = 'line-other';
 		}
+		if (is_array ($current['config']))
+			$current['config']['config'][] = array ('type' => $line_class, 'line' => $line);
 	}
 	
 	return $ret;
