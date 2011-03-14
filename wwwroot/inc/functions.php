@@ -4765,11 +4765,8 @@ function proxyStaticURI ($URI)
 	else
 	{
 		if (FALSE !== $stat = fstat ($fh))
-		{
-			require_once 'inc/caching.php';
 			if (checkCachedResponse (max ($stat['mtime'], $stat['ctime']), 0))
 				exit;
-		}
 		header ('Content-type: ' . $content_type[$matches[2]]);
 		fpassthru ($fh);
 		fclose ($fh);	

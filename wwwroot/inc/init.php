@@ -19,6 +19,7 @@ require_once 'triggers.php';
 require_once 'gateways.php';
 require_once 'IPv6.php';
 require_once 'interface-lib.php';
+require_once 'caching.php';
 // Always have default values for these options, so if a user didn't
 // care to set, something would be working anyway.
 $user_auth_src = 'database';
