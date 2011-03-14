@@ -1476,6 +1476,19 @@ $dictionary = array
 	1394 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 2960S-24PS-L'),
 	1395 => array ('chapter_id' => 13, 'dict_value' => '[[Linux%GSKIP%Debian 6.0 (squeeze) | http://debian.org/releases/squeeze/]]'),
 	1396 => array ('chapter_id' => 13, 'dict_value' => 'Linux%GSKIP%RHEL6'),
+	1397 => array ('chapter_id' => 1, 'dict_value' => 'Power supply chassis'),
+	1398 => array ('chapter_id' => 1, 'dict_value' => 'Power supply'),
+	1399 => array ('chapter_id' => 2, 'dict_value' => 'DC'),
+	1400 => array ('chapter_id' => 34, 'dict_value' => 'Cisco%GPASS%RPS 2300'),
+	1401 => array ('chapter_id' => 34, 'dict_value' => 'D-Link%GPASS%DPS-800'),
+	1402 => array ('chapter_id' => 34, 'dict_value' => 'D-Link%GPASS%DPS-900'),
+	1403 => array ('chapter_id' => 35, 'dict_value' => 'Cisco%GPASS%RPS 675'),
+	1404 => array ('chapter_id' => 35, 'dict_value' => 'Cisco%GPASS%C3K-PWR-750WAC'),
+	1405 => array ('chapter_id' => 35, 'dict_value' => 'Cisco%GPASS%C3K-PWR-1150WAC'),
+	1406 => array ('chapter_id' => 35, 'dict_value' => 'D-Link%GPASS%DPS-200'),
+	1407 => array ('chapter_id' => 35, 'dict_value' => 'D-Link%GPASS%DPS-500'),
+	1408 => array ('chapter_id' => 35, 'dict_value' => 'D-Link%GPASS%DPS-510'),
+	1409 => array ('chapter_id' => 35, 'dict_value' => 'D-Link%GPASS%DPS-600'),
 //                                     ^
 //                                     ^
 // add new dictionary entries up here  ^

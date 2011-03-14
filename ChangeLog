@@ -5,7 +5,8 @@
 	update: new DB table indexes speeding up IP tree operations
 	update: tolerate user-visible newlines in secret.php and local.php
 	update: ability to delete a file entity from the Edit tab of the File page
-	update: 802.1q: links to swithports allowing the vlan added in page Vlan info
+	update: 802.1q: links to switchports allowing the vlan added in page Vlan info
+	update: new object types: power supply chassis, power supply (#409)
 0.19.1 2011-02-22
 	update: UI: rack lists are now reduced by common tags with object on Rackspace tab (FILTER_RACKLIST_BY_TAGS config var)
 	update: 802.1q: If switch has IP interface in some VLAN linked to IP subnet, this VLAN is not pruned from switch's uplink

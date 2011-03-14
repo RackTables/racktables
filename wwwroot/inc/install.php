@@ -1023,6 +1023,16 @@ INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_id`) VALUES
 (1323,2,28),
 (1323,3,NULL),
 (1323,5,NULL),
+(1397,1,NULL),
+(1397,2,34),
+(1397,14,NULL),
+(1397,21,NULL),
+(1397,22,NULL),
+(1398,1,NULL),
+(1398,2,35),
+(1398,14,NULL),
+(1398,21,NULL),
+(1398,22,NULL),
 (1502,1,NULL),
 (1502,2,31),
 (1502,3,NULL),
@@ -1084,7 +1094,9 @@ INSERT INTO `Chapter` (`id`, `sticky`, `name`) VALUES
 (30,'no','network chassis models'),
 (31,'no','server chassis models'),
 (32,'no','virtual switch models'),
-(33,'no','virtual switch OS type');
+(33,'no','virtual switch OS type'),
+(34,'no','power supply chassis models'),
+(35,'no','power supply models');
 
 INSERT INTO `PortInnerInterface` VALUES
 (1,'hardwired'),
@@ -1101,6 +1113,7 @@ INSERT INTO `ObjectParentCompat` VALUES
 (3,13),
 (4,1504),
 (4,1507),
+(1397,1398),
 (1502,4),
 (1503,8),
 (1505,4),
@@ -1118,7 +1131,7 @@ INSERT INTO `PortInterfaceCompat` VALUES
 (7,1081),(7,30),(7,35),(7,36),(7,37),(7,38),(7,39),(7,40),
 (8,1082),(8,30),(8,35),(8,36),(8,37),(8,38),(8,39),(8,40),
 (9,1084),(9,30),(9,35),(9,36),(9,37),(9,38),(9,39),(9,40),
-(1,16),(1,19),(1,24),(1,29),(1,31),(1,33),(1,446),(1,681),(1,682),(1,1322);
+(1,16),(1,19),(1,24),(1,29),(1,31),(1,33),(1,446),(1,681),(1,682),(1,1322),(1,1399);
 
 INSERT INTO `PortCompat` (`type1`, `type2`) VALUES
 (17,17),
@@ -1302,7 +1315,8 @@ INSERT INTO `PortCompat` (`type1`, `type2`) VALUES
 (1298,1298),
 (1299,1299),
 (1300,1300),
-(1316,1316);
+(1316,1316),
+(1399,1399);
 
 INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdefined, description) VALUES
 ('color_F','8fbfbf','string','no','yes','no','HSV: 180-25-75. Free atoms, they are available for allocation to objects.'),
@@ -1342,7 +1356,7 @@ INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdef
 ('PREVIEW_IMAGE_MAXPXS','320','uint','yes','no','yes','Max pixels per axis for image file preview'),
 ('VENDOR_SIEVE','','string','yes','no','yes','Vendor sieve configuration'),
 ('IPV4LB_LISTSRC','{\$typeid_4}','string','yes','no','no','List source: IPv4 load balancers'),
-('IPV4OBJ_LISTSRC','{\$typeid_4} or {\$typeid_7} or {\$typeid_8} or {\$typeid_12} or {\$typeid_445} or {\$typeid_447} or {\$typeid_798} or {\$typeid_1502} or {\$typeid_1503} or {\$typeid_1504} or {\$typeid_1507}','string','yes','no','no','List source: IPv4-enabled objects'),
+('IPV4OBJ_LISTSRC','{\$typeid_4} or {\$typeid_7} or {\$typeid_8} or {\$typeid_12} or {\$typeid_445} or {\$typeid_447} or {\$typeid_798} or {\$typeid_1397} or {\$typeid_1502} or {\$typeid_1503} or {\$typeid_1504} or {\$typeid_1507}','string','yes','no','no','List source: IPv4-enabled objects'),
 ('IPV4NAT_LISTSRC','{\$typeid_4} or {\$typeid_7} or {\$typeid_8} or {\$typeid_798}','string','yes','no','no','List source: IPv4 NAT performers'),
 ('ASSETWARN_LISTSRC','{\$typeid_4} or {\$typeid_7} or {\$typeid_8}','string','yes','no','no','List source: object, for which asset tag should be set'),
 ('NAMEWARN_LISTSRC','{\$typeid_4} or {\$typeid_7} or {\$typeid_8}','string','yes','no','no','List source: object, for which common name should be set'),

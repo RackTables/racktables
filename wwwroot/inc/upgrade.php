@@ -1010,6 +1010,22 @@ CREATE TABLE `EntityLink` (
 			$query[] = "ALTER TABLE IPv6Allocation ADD KEY `ip` (`ip`)";
 			$query[] = "ALTER TABLE IPv4VS ADD KEY `vip` (`vip`)";
 			$query[] = "ALTER TABLE IPv4RS ADD KEY `rsip` (`rsip`)";
+			$query[] = "INSERT INTO `Chapter` (`id`, `sticky`, `name`) VALUES (34,'no','power supply chassis models')";
+			$query[] = "INSERT INTO `Chapter` (`id`, `sticky`, `name`) VALUES (35,'no','power supply models')";
+			$query[] = "INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_id`) VALUES (1397,1,NULL)";
+			$query[] = "INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_id`) VALUES (1397,2,34)";
+			$query[] = "INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_id`) VALUES (1397,14,NULL)";
+			$query[] = "INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_id`) VALUES (1397,21,NULL)";
+			$query[] = "INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_id`) VALUES (1397,22,NULL)";
+			$query[] = "INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_id`) VALUES (1398,1,NULL)";
+			$query[] = "INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_id`) VALUES (1398,2,35)";
+			$query[] = "INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_id`) VALUES (1398,14,NULL)";
+			$query[] = "INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_id`) VALUES (1398,21,NULL)";
+			$query[] = "INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_id`) VALUES (1398,22,NULL)";
+			$query[] = "INSERT INTO `ObjectParentCompat` (`parent_objtype_id`, `child_objtype_id`) VALUES (1397,1398)";
+			$query[] = "INSERT INTO `PortCompat` (`type1`, `type2`) VALUES (1399,1399)";
+			$query[] = "INSERT INTO `PortInterfaceCompat` (`iif_id`, `oif_id`) VALUES (1,1399)";
+			$query[] = "UPDATE Config SET varvalue = CONCAT(varvalue, ' or {\$typeid_1397}') WHERE varname = 'IPV4OBJ_LISTSRC'";
 			$query[] = "UPDATE Config SET varvalue = '0.19.2' WHERE varname = 'DB_VERSION'";
 			break;
 		default:
