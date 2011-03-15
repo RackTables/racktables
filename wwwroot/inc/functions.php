@@ -2576,6 +2576,23 @@ function judgeCell ($cell, $expression)
 	);
 }
 
+function judgeContext ($expression)
+{
+	global $pTable, $expl_tags, $impl_tags, $auto_tags;
+	return eval_expression
+	(
+		$expression,
+		array_merge
+		(
+			$expl_tags,
+			$impl_tags,
+			$auto_tags
+		),
+		$pTable,
+		TRUE
+	);
+}
+
 // Tell, if a constraint from config option permits given record.
 function considerConfiguredConstraint ($cell, $varname)
 {
