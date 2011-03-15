@@ -1740,16 +1740,11 @@ function importPTRData ()
 }
 
 $msgcode['generateAutoPorts']['OK'] = 21;
-$msgcode['generateAutoPorts']['ERR'] = 142;
 function generateAutoPorts ()
 {
-	global $pageno;
-	$info = spotEntity ('object', $_REQUEST['object_id']);
-	// Navigate away in case of success, stay at the place otherwise.
-	if (executeAutoPorts ($_REQUEST['object_id'], $info['objtype_id']))
-		return buildRedirectURL (__FUNCTION__, 'OK', array(), $pageno, 'ports');
-	else
-		return buildRedirectURL (__FUNCTION__, 'ERR');
+	$object = spotEntity ('object', getBypassValue());
+	executeAutoPorts ($object['id'], $object['objtype_id']);
+	return buildRedirectURL (__FUNCTION__, 'OK', array(), NULL, 'ports');
 }
 
 $msgcode['saveEntityTags']['OK'] = 26;
