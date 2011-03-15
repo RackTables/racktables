@@ -2610,6 +2610,7 @@ function considerConfiguredConstraint ($cell, $varname)
 
 // Tell, if the given arbitrary RackCode text addresses the given record
 // (an empty text matches any record).
+// An undefined $cell means current context.
 function considerGivenConstraint ($cell, $filtertext)
 {
 	if ($filtertext == '')
@@ -2617,7 +2618,10 @@ function considerGivenConstraint ($cell, $filtertext)
 	$parse = spotPayload ($filtertext, 'SYNT_EXPR');
 	if ($parse['result'] != 'ACK')
 		throw new InvalidRequestArgException ('filtertext', $filtertext, 'RackCode parsing error');
-	return judgeCell ($cell, $parse['load']);
+	if (isset ($cell))
+		return judgeCell ($cell, $parse['load']);
+	else
+		return judgeContext ($parse['load']);
 }
 
 // Return list of records in the given realm, which conform to
