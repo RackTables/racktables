@@ -2171,12 +2171,6 @@ function replaceFile ()
 	if (FALSE === commitReplaceFile ($sic['file_id'], $fp))
 		return buildRedirectURL (__FUNCTION__, 'ERR3');
 
-	usePreparedExecuteBlade
-	(
-		'UPDATE File SET thumbnail = NULL WHERE id = ?',
-		$sic['file_id']
-	);
-
 	return buildRedirectURL (__FUNCTION__, 'OK', array (htmlspecialchars ($shortInfo['name'])));
 }
 

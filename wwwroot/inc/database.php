@@ -3592,7 +3592,7 @@ function commitAddFile ($name, $type, $contents, $comment)
 function commitReplaceFile ($file_id = 0, $contents)
 {
 	global $dbxlink;
-	$query = $dbxlink->prepare('UPDATE File SET mtime = NOW(), contents = ?, size = LENGTH(contents) WHERE id = ?');
+	$query = $dbxlink->prepare('UPDATE File SET mtime = NOW(), contents = ?, size = LENGTH(contents), thumbnail = NULL WHERE id = ?');
 	$query->bindParam(1, $contents, PDO::PARAM_LOB);
 	$query->bindParam(2, $file_id);
 
