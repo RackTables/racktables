@@ -2636,6 +2636,7 @@ function scanRealmByText ($realm = NULL, $ftext = '')
 	switch ($realm)
 	{
 	case 'object':
+	case 'rack':
 	case 'user':
 	case 'ipv4net':
 	case 'ipv6net':
