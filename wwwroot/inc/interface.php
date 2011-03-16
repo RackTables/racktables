@@ -6269,11 +6269,11 @@ function renderFile ($file_id)
 	}
 	printf("%s</td></tr>", formatFileSize($file['size']));
 	echo "<tr><th width='50%' class=tdright>Created:</th>";
-	printf("<td class=tdleft>%s</td></tr>", formatTimestamp($file['ctime']));
+	printf("<td class=tdleft>%s</td></tr>", $file['ctime']);
 	echo "<tr><th width='50%' class=tdright>Modified:</th>";
-	printf("<td class=tdleft>%s</td></tr>", formatTimestamp($file['mtime']));
+	printf("<td class=tdleft>%s</td></tr>", $file['mtime']);
 	echo "<tr><th width='50%' class=tdright>Accessed:</th>";
-	printf("<td class=tdleft>%s</td></tr>", formatTimestamp($file['atime']));
+	printf("<td class=tdleft>%s</td></tr>", $file['atime']);
 
 	printTagTRs ($file, makeHref(array('page'=>'files', 'tab'=>'default'))."&");
 	if (strlen ($file['comment']))

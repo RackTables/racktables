@@ -2267,11 +2267,6 @@ function formatEntityName ($name) {
 	return 'invalid';
 }
 
-// Take a MySQL or other generic timestamp and make it prettier
-function formatTimestamp ($timestamp) {
-	return date('n/j/y g:iA', strtotime($timestamp));
-}
-
 // Display hrefs for all of a file's parents. If scissors are requested,
 // prepend cutting button to each of them.
 function serializeFileLinks ($links, $scissors = FALSE)
