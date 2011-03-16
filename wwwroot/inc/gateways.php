@@ -26,6 +26,7 @@ $gwrxlator['getlldpstatus'] = array
 	'xos12' => 'xos12ReadLLDPStatus',
 	'vrp53' => 'vrp53ReadLLDPStatus',
 	'vrp55' => 'vrp55ReadLLDPStatus',
+	'nxos4' => 'nxos4ReadLLDPStatus',
 );
 $gwrxlator['get8021q'] = array
 (
@@ -317,9 +318,11 @@ function detectDeviceBreed ($object_id)
 		251 => 'ios12',
 		252 => 'ios12',
 		254 => 'ios12',
-		963 => 'nxos4',
-		964 => 'nxos4',
-		1365 => 'nxos4',
+		963 => 'nxos4', // NX-OS 4.0
+		964 => 'nxos4', // NX-OS 4.1
+		1365 => 'nxos4', // NX-OS 4.2
+		1410 => 'nxos4', // NX-OS 5.0, seems compatible
+		1411 => 'nxos4', // NX-OS 5.1
 		1352 => 'xos12',
 		1360 => 'vrp53',
 		1361 => 'vrp55',
