@@ -228,7 +228,7 @@ function printException($e)
 {
 	if ($e instanceof RackTablesError)
 		$e->dispatch();
-	elseif (get_class($e) == 'PDOException')
+	elseif ($e instanceof PDOException)
 		printPDOException($e);
 	else
 		printGenericException($e);
