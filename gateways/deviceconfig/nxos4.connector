@@ -82,6 +82,14 @@ if ($command eq "getmaclist") {
     print WORKFILE @r, "\n\n";;
     exit(0);
 }
+if ($command eq "getlldpstatus") {
+    open(WORKFILE, ">$workfile") || die "$workfile: $!";
+    $session->cmd ('terminal length 0');
+    $session->cmd ('terminal no monitor');
+    my @r = $session->cmd ('show lldp neighbors detail');
+    print WORKFILE @r, "\n\n";;
+    exit(0);
+}
 if ($command eq "deploy") {
     open(WORKFILE, "<$workfile") || die "$workfile: $!";
     while (<WORKFILE>) {

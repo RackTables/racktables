@@ -1489,6 +1489,8 @@ $dictionary = array
 	1407 => array ('chapter_id' => 35, 'dict_value' => 'D-Link%GPASS%DPS-500'),
 	1408 => array ('chapter_id' => 35, 'dict_value' => 'D-Link%GPASS%DPS-510'),
 	1409 => array ('chapter_id' => 35, 'dict_value' => 'D-Link%GPASS%DPS-600'),
+	1410 => array ('chapter_id' => 14, 'dict_value' => 'Cisco NX-OS 5.0'),
+	1411 => array ('chapter_id' => 14, 'dict_value' => 'Cisco NX-OS 5.1'),
 //                                     ^
 //                                     ^
 // add new dictionary entries up here  ^
@@ -1552,7 +1554,7 @@ $dictionary = array
 	1557 => array ('chapter_id' => 32, 'dict_value' => 'VMware%GPASS%Distributed vSwitch'),
 	1558 => array ('chapter_id' => 32, 'dict_value' => 'Cisco%GPASS%Nexus 1000V'),
 	1559 => array ('chapter_id' => 33, 'dict_value' => 'NS-OS 4.0'),
-// NOTICE: do not add new dictionary entries here, add them to the gap above (~1395)!
+// NOTICE: do not add new dictionary entries here, add them to the gap above (~1411)!
 );
 
 ?>

@@ -174,6 +174,46 @@ function vrp55ReadLLDPStatus ($input)
 	return $ret;
 }
 
+function nxos4ReadLLDPStatus ($input)
+{
+	$ret = array();
+	$current = array();
+	$if_name = NULL;
+	foreach (explode ("\n", $input) as $line)
+	{
+		$line = trim ($line);
+		if ($line == '')
+		{
+			if (isset ($if_name) and isset ($current['port']) and isset ($current['device']))
+				$ret[$if_name][] = $current;
+			$current = array();
+			$if_name = NULL;
+		}
+		else
+		{
+			$pair = explode (': ', $line);
+			if (count ($pair) == 2 and isset ($pair[1]))
+			{
+				list ($key, $value) = $pair;
+				$value = trim ($value, "\x06\x10\x13");
+				switch ($key)
+				{
+					case 'Port id':
+						$current['port'] = ios12ShortenIfName ($value);
+						break;
+					case 'System Name':
+						$current['device'] = $value;
+						break;
+					case 'Local Port id':
+						$if_name = ios12ShortenIfName ($value);
+						break;
+				}
+			}
+		}
+	}
+	return $ret;
+}
+
 function vrp53ReadHNDPStatus ($input)
 {
 	$ret = array();
