@@ -71,28 +71,7 @@ $tmp = ob_get_clean();
 if ($tmp != '' and ! preg_match ("/^\n+$/D", $tmp))
 	echo $tmp;
 connectDB();
-
-// Magic quotes feature is deprecated, but just in case the local system
-// still has it activated, reverse its effect.
-if (function_exists ('get_magic_quotes_gpc') and get_magic_quotes_gpc())
-	foreach ($_REQUEST as $key => $value)
-		if (gettype ($value) == 'string')
-			$_REQUEST[$key] = stripslashes ($value);
-
-// Escape any globals before we ever try to use them, but keep a copy of originals.
-$sic = array();
-foreach ($_REQUEST as $key => $value)
-{
-	$sic[$key] = dos2unix ($value);
-	if (gettype ($value) == 'string')
-		$_REQUEST[$key] = escapeString (dos2unix ($value));
-}
-
-if (isset ($_SERVER['PHP_AUTH_USER']))
-	$_SERVER['PHP_AUTH_USER'] = escapeString ($_SERVER['PHP_AUTH_USER']);
-if (isset ($_SERVER['REMOTE_USER']))
-	$_SERVER['REMOTE_USER'] = escapeString ($_SERVER['REMOTE_USER']);
-
+transformRequestData();
 loadConfigDefaults();
 $tab['reports']['local'] = getConfigVar ('enterprise');
 

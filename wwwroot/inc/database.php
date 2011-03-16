@@ -183,17 +183,6 @@ $port_role_options = array
 
 $object_attribute_cache = array();
 
-function escapeString ($value, $do_db_escape = FALSE)
-{
-	$ret = htmlspecialchars ($value, ENT_QUOTES, 'UTF-8');
-	if ($do_db_escape)
-	{
-		global $dbxlink;
-		$ret = substr ($dbxlink->quote ($ret), 1, -1);
-	}
-	return $ret;
-}
-
 // Return detailed information about one rack row.
 function getRackRowInfo ($rackrow_id)
 {
