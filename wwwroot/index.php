@@ -56,12 +56,10 @@ try {
 			renderAccessDenied (FALSE);
 			break;
 		}
-
-		$asattach = (isset ($_REQUEST['asattach']) and $_REQUEST['asattach'] == 'no') ? FALSE : TRUE;
 		$file = getFile (getBypassValue());
 		header("Content-Type: {$file['type']}");
 		header("Content-Length: {$file['size']}");
-		if ($asattach)
+		if (! array_key_exists ('asattach', $_REQUEST) or $_REQUEST['asattach'] != 'no')
 			header("Content-Disposition: attachment; filename={$file['name']}");
 		echo $file['contents'];
 		break;
