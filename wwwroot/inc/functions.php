@@ -2920,6 +2920,8 @@ function formatVLANName ($vlaninfo, $context = 'markup long')
 // map interface name
 function ios12ShortenIfName ($ifname)
 {
+	if (preg_match ('@^eth-trunk(\d+)$@i', $ifname, $m))
+		return "Eth-Trunk${m[1]}";
 	$ifname = preg_replace ('@^Eth(?:ernet)?(.+)$@', 'e\\1', $ifname);
 	$ifname = preg_replace ('@^FastEthernet(.+)$@', 'fa\\1', $ifname);
 	$ifname = preg_replace ('@^(?:GigabitEthernet|GE)(.+)$@', 'gi\\1', $ifname);

@@ -1535,6 +1535,8 @@ function vrpReadInterfaceStatus ($text)
 				$field_list = preg_split('/\s+/', $line);
 				if (count ($field_list) < 7)
 					break;
+				if ($field_list[0] == '')
+					array_shift ($field_list);
 				list ($portname, $status_raw) = $field_list;
 				$portname = ios12ShortenIfName ($portname);
 
