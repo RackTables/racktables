@@ -1173,105 +1173,6 @@ function getExplicitTagsOnly ($chain)
 	return $ret;
 }
 
-// Universal autotags generator, a complementing function for loadEntityTags().
-// Bypass key isn't strictly typed, but interpreted depending on the realm.
-function generateEntityAutoTags ($cell)
-{
-	$ret = array();
-	if (! array_key_exists ('realm', $cell))
-		throw new InvalidArgException ('cell', '(array)', 'malformed structure');
-	switch ($cell['realm'])
-	{
-		case 'rack':
-			$ret[] = array ('tag' => '$rackid_' . $cell['id']);
-			$ret[] = array ('tag' => '$any_rack');
-			break;
-		case 'object':
-			$ret[] = array ('tag' => '$id_' . $cell['id']);
-			$ret[] = array ('tag' => '$typeid_' . $cell['objtype_id']);
-			$ret[] = array ('tag' => '$any_object');
-			if (validTagName ('$cn_' . $cell['name'], TRUE))
-				$ret[] = array ('tag' => '$cn_' . $cell['name']);
-			if (!strlen ($cell['rack_id']))
-				$ret[] = array ('tag' => '$unmounted');
-			if (!$cell['nports'])
-				$ret[] = array ('tag' => '$portless');
-			if ($cell['asset_no'] == '')
-				$ret[] = array ('tag' => '$no_asset_tag');
-			if ($cell['runs8021Q'])
-				$ret[] = array ('tag' => '$runs_8021Q');
-
-			// dictionary attribute autotags '$attr_X_Y'
-			$attrs = getAttrValues($cell['id']);
-			foreach ($attrs as $attr_id => $attr_record)
-				if (isset ($attr_record['key']))
-					$ret[] = array ('tag' => "\$attr_{$attr_id}_{$attr_record['key']}");
-			break;
-		case 'ipv4net':
-			$ret[] = array ('tag' => '$ip4netid_' . $cell['id']);
-			$ret[] = array ('tag' => '$ip4net-' . str_replace ('.', '-', $cell['ip']) . '-' . $cell['mask']);
-			for ($i = 8; $i < 32; $i++)
-			{
-				// these conditions hit 1 to 3 times per each i
-				if ($cell['mask'] >= $i)
-					$ret[] = array ('tag' => '$masklen_ge_' . $i);
-				if ($cell['mask'] <= $i)
-					$ret[] = array ('tag' => '$masklen_le_' . $i);
-				if ($cell['mask'] == $i)
-					$ret[] = array ('tag' => '$masklen_eq_' . $i);
-			}
-			$ret[] = array ('tag' => '$any_ip4net');
-			$ret[] = array ('tag' => '$any_net');
-			break;
-		case 'ipv6net':
-			$ret[] = array ('tag' => '$ip6netid_' . $cell['id']);
-			$ret[] = array ('tag' => '$any_ip6net');
-			$ret[] = array ('tag' => '$any_net');
-			break;
-		case 'ipv4vs':
-			$ret[] = array ('tag' => '$ipv4vsid_' . $cell['id']);
-			$ret[] = array ('tag' => '$any_ipv4vs');
-			$ret[] = array ('tag' => '$any_vs');
-			break;
-		case 'ipv4rspool':
-			$ret[] = array ('tag' => '$ipv4rspid_' . $cell['id']);
-			$ret[] = array ('tag' => '$any_ipv4rsp');
-			$ret[] = array ('tag' => '$any_rsp');
-			break;
-		case 'user':
-			// {$username_XXX} autotag is generated always, but {$userid_XXX}
-			// appears only for accounts, which exist in local database.
-			$ret[] = array ('tag' => '$username_' . $cell['user_name']);
-			if (isset ($cell['user_id']))
-				$ret[] = array ('tag' => '$userid_' . $cell['user_id']);
-			break;
-		case 'file':
-			$ret[] = array ('tag' => '$fileid_' . $cell['id']);
-			$ret[] = array ('tag' => '$any_file');
-			break;
-		default:
-			throw new InvalidArgException ('cell', '(array)', 'this input does not belong here');
-			break;
-	}
-	// {$tagless} doesn't apply to users
-	switch ($cell['realm'])
-	{
-		case 'rack':
-		case 'object':
-		case 'ipv4net':
-		case 'ipv6net':
-		case 'ipv4vs':
-		case 'ipv4rspool':
-		case 'file':
-			if (!count ($cell['etags']))
-				$ret[] = array ('tag' => '$untagged');
-			break;
-		default:
-			break;
-	}
-	return $ret;
-}
-
 // Check, if the given tag is present on the chain (will only work
 // for regular tags with tag ID set.
 function tagOnChain ($taginfo, $tagchain)
@@ -2661,24 +2562,6 @@ function getIPv4RSPoolOptions ()
 	$ret = array();
 	foreach (listCells ('ipv4rspool') as $pool_id => $poolInfo)
 		$ret[$pool_id] = $poolInfo['name'];
-	return $ret;
-}
-
-// Derive a complete cell structure from the given username regardless
-// if it is a local account or not.
-function constructUserCell ($username)
-{
-	if (NULL !== ($userid = getUserIDByUsername ($username)))
-		return spotEntity ('user', $userid);
-	$ret = array
-	(
-		'realm' => 'user',
-		'user_name' => $username,
-		'user_realname' => '',
-		'etags' => array(),
-		'itags' => array(),
-	);
-	$ret['atags'] = generateEntityAutoTags ($ret);
 	return $ret;
 }
 
