@@ -48,6 +48,17 @@ function renderErrorImage ()
 	);
 }
 
+function renderAccessDeniedImage()
+{
+	header ('Content-type: image/png');
+	// 1x1, single black pixel
+	echo base64_decode
+	(
+		'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAAAXNSR0IArs4c6QAAAAxJREFUCNdj' .
+		'YGBgAAAABAABJzQnCgAAAABJRU5ErkJggg=='
+	);
+}
+
 // Having a local caching array speeds things up. A little.
 function colorFromHex ($image, $hex)
 {
@@ -162,16 +173,6 @@ function renderProgressBarImage ($done)
 	header("Content-type: image/png");
 	imagepng ($img);
 	imagedestroy ($img);
-}
-
-function renderAccessDeniedImage ()
-{
-	$img = @imagecreatetruecolor (1, 1);
-	imagefilledrectangle ($img, 0, 0, 1, 1, colorFromHex ($img, '000000'));
-	header("Content-type: image/png");
-	imagepng ($img);
-	imagedestroy ($img);
-	die;
 }
 
 function renderFilePreview ($file_id)
