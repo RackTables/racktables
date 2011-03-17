@@ -26,8 +26,6 @@ $templateWidth[5] = 1;
 
 define ('CHAP_OBJTYPE', 1);
 define ('CHAP_PORTTYPE', 2);
-define ('TAGNAME_REGEXP', '/^[\p{L}0-9]([. _~-]?[\p{L}0-9])*$/u');
-define ('AUTOTAGNAME_REGEXP', '/^\$[\p{L}0-9]([. _~-]?[\p{L}0-9])*$/u');
 // The latter matches both SunOS and Linux-styled formats.
 define ('RE_L2_IFCFG', '/^[0-9a-f]{1,2}(:[0-9a-f]{1,2}){5}$/i');
 define ('RE_L2_CISCO', '/^[0-9a-f]{4}(\.[0-9a-f]{4}){2}$/i');
@@ -1564,15 +1562,6 @@ function mergeLogs ($log1, $log2)
 	$ret = emptyLog();
 	$ret['m'] = array_merge ($log1['m'], $log2['m']);
 	return $ret;
-}
-
-function validTagName ($s, $allow_autotag = FALSE)
-{
-	if (1 == preg_match (TAGNAME_REGEXP, $s))
-		return TRUE;
-	if ($allow_autotag and 1 == preg_match (AUTOTAGNAME_REGEXP, $s))
-		return TRUE;
-	return FALSE;
 }
 
 function redirectUser ($p, $t)
