@@ -1119,21 +1119,6 @@ function getOrphanedTags ()
 	return treeFromList ($taglist, 0, FALSE);
 }
 
-function serializeTags ($chain, $baseurl = '')
-{
-	$comma = '';
-	$ret = '';
-	foreach ($chain as $taginfo)
-	{
-		$ret .= $comma .
-			($baseurl == '' ? '' : "<a href='${baseurl}cft[]=${taginfo['id']}'>") .
-			$taginfo['tag'] .
-			($baseurl == '' ? '' : '</a>');
-		$comma = ', ';
-	}
-	return $ret;
-}
-
 // Return the list of missing implicit tags.
 function getImplicitTags ($oldtags)
 {

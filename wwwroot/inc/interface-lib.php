@@ -355,45 +355,6 @@ function getImageHREF ($tag, $title = '', $do_input = FALSE, $tabindex = 0)
 			">";
 }
 
-function renderAccessDenied ($and_exit = TRUE)
-{
-	header ('Content-Type: text/html; charset=UTF-8');
-	echo '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">'."\n";
-	echo '<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">'."\n";
-	echo "<head><title>RackTables: access denied</title>\n";
-	printPageHeaders();
-	echo "</head><body>";
-	global $pageno, $tabno,
-		$user_given_tags,
-		$target_given_tags,
-		$auto_tags,
-		$expl_tags,
-		$impl_tags;
-	echo "<table border=1 cellspacing=0 cellpadding=3 width='50%' align=center>\n";
-	echo '<tr><th colspan=2><h3>';
-	printImageHREF ('DENIED');
-	echo ' access denied ';
-	printImageHREF ('DENIED');
-	echo '</h3></th></tr>';
-	echo "<tr><th width='50%' class=tagchain>User given tags:</th><td class=tagchain>";
-	echo serializeTags ($user_given_tags) . "&nbsp;</td></tr>\n";
-	echo "<tr><th width='50%' class=tagchain>Target given tags:</th><td class=tagchain>";
-	echo serializeTags ($target_given_tags) . "&nbsp;</td></tr>\n";
-	echo "<tr><th width='50%' class=tagchain>Effective explicit tags:</th><td class=tagchain>";
-	echo serializeTags ($expl_tags) . "&nbsp;</td></tr>\n";
-	echo "<tr><th width='50%' class=tagchain>Effective implicit tags:</th><td class=tagchain>";
-	echo serializeTags ($impl_tags) . "&nbsp;</td></tr>\n";
-	echo "<tr><th width='50%' class=tagchain>Automatic tags:</th><td class=tagchain>";
-	echo serializeTags ($auto_tags) . "&nbsp;</td></tr>\n";
-	echo "<tr><th width='50%' class=tdright>Requested page:</th><td class=tdleft>${pageno}</td></tr>\n";
-	echo "<tr><th width='50%' class=tdright>Requested tab:</th><td class=tdleft>${tabno}</td></tr>\n";
-	echo "<tr><td colspan=2 align=center>Click <a href='index.php?logout'>here</a> to logout.</td></tr>\n";
-	echo "</table>\n";
-	echo "</body></html>";
-	if ($and_exit)
-		exit;
-}
-
 function dos2unix ($text)
 {
 	return str_replace ("\r\n", "\n", $text);
@@ -543,6 +504,17 @@ function validTagName ($s, $allow_autotag = FALSE)
 	if ($allow_autotag and 1 == preg_match (AUTOTAGNAME_REGEXP, $s))
 		return TRUE;
 	return FALSE;
+}
+
+function serializeTags ($chain, $baseurl = '')
+{
+	$tmp = array();
+	foreach ($chain as $taginfo)
+		$tmp[] =
+			($baseurl == '' ? '' : "<a href='${baseurl}cft[]=${taginfo['id']}'>") .
+			$taginfo['tag'] .
+			($baseurl == '' ? '' : '</a>');
+	return implode (', ', $tmp);
 }
 
 ?>
