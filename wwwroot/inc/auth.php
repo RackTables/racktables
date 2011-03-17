@@ -141,6 +141,13 @@ function permitted ($p = NULL, $t = NULL, $o = NULL, $annex = array())
 	return gotClearanceForTagChain ($subject);
 }
 
+# a "throwing" wrapper for above
+function assertPermission ($p = NULL, $t = NULL, $o = NULL, $annex = array())
+{
+	if (! permitted ($p, $t, $o, $annex))
+		throw new RTPermissionDenied();
+}
+
 // The argument doesn't include explicit and implicit tags. This allows us to derive implicit chain
 // each time we modify the given argument (and work with the modified copy from now on).
 // After the work is done the global $impl_tags is silently modified

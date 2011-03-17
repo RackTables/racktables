@@ -128,11 +128,7 @@ header ('Content-Type: text/html; charset=UTF-8');
 			$pageno = 'object';
 			$tabno = 'default';
 			fixContext();
-			if (!permitted())
-			{
-				renderAccessDenied (FALSE);
-				return;
-			}
+			assertPermission();
 			$object_id = getBypassValue();
 			echo '<div style="background-color: #f0f0f0; border: 1px solid #3c78b5; padding: 10px; height: 100%; text-align: center; margin: 5px;">';
 			echo '<h2>Choose a container:</h2>';
@@ -150,8 +146,7 @@ header ('Content-Type: text/html; charset=UTF-8');
 			$pageno = 'depot';
 			$tabno = 'default';
 			fixContext();
-			if (!permitted())
-				renderAccessDenied();
+			assertPermission();
 			assertUIntArg ('port');
 			assertStringArg ('in_rack');
 			$localchoice = $_REQUEST['in_rack'] == 'y';
@@ -186,8 +181,7 @@ header ('Content-Type: text/html; charset=UTF-8');
 			$pageno = 'ipv4space';
 			$tabno = 'default';
 			fixContext();
-			if (!permitted())
-				renderAccessDenied();
+			assertPermission();
 			echo '<div style="background-color: #f0f0f0; border: 1px solid #3c78b5; padding: 10px; height: 100%; text-align: center; margin: 5px;">';
 			echo '<h2>Choose a port:</h2><br><br>';
 			echo '<form action="javascript:;">';

@@ -3471,7 +3471,7 @@ function searchHandler () {
 	if (!strlen ($terms))
 		throw new InvalidRequestArgException('q', $_REQUEST['q'], 'Search string cannot be empty.');
 	if (!permitted ('depot', 'default'))
-		throw new RackTablesError ('You are not authorized for viewing information about objects.', RackTablesError::NOT_AUTHORIZED);
+		throw new RTPermissionDenied();
 	
 	$results = searchEntitiesByText ($terms);
 	renderSearchResults ($terms, $results);

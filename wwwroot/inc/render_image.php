@@ -10,10 +10,8 @@ function dispatchImageRequest()
 		$pageno = 'rack';
 		$tabno = 'default';
 		fixContext();
-		if (!permitted())
-			renderAccessDeniedImage();
-		else
-			renderRackThumb (getBypassValue());
+		assertPermission()
+		renderRackThumb (getBypassValue());
 		break;
 	case 'progressbar': // no security context
 		assertUIntArg ('done', TRUE);
@@ -24,10 +22,8 @@ function dispatchImageRequest()
 		$pageno = 'file';
 		$tabno = 'download';
 		fixContext();
-		if (!permitted())
-			renderAccessDeniedImage();
-		else
-			renderFilePreview (getBypassValue());
+		assertPermission();
+		renderFilePreview (getBypassValue());
 		break;
 	default:
 		renderErrorImage();

@@ -9,7 +9,6 @@ class RackTablesError extends Exception
 	const INTERNAL = 2;
 	const DB_WRITE_FAILED = 3;
 	const NOT_AUTHENTICATED = 4;
-	const NOT_AUTHORIZED = 5;
 	const MISCONFIGURED = 6;
 	protected final function genHTMLPage ($title, $text)
 	{
@@ -27,7 +26,6 @@ class RackTablesError extends Exception
 			self::MISCONFIGURED => 'Configuration error',
 			self::INTERNAL => 'Internal error',
 			self::DB_WRITE_FAILED => 'Database write failed',
-			self::NOT_AUTHORIZED => 'Permission denied',
 		);
 		$msgbody = array
 		(
@@ -35,7 +33,6 @@ class RackTablesError extends Exception
 			self::MISCONFIGURED => '<h2>Configuration error</h2><br>' . $this->message,
 			self::INTERNAL => '<h2>Internal error</h2><br>' . $this->message,
 			self::DB_WRITE_FAILED => '<h2>Database write failed</h2><br>' . $this->message,
-			self::NOT_AUTHORIZED => '<h2>Permission denied</h2><br>' . $this->message,
 		);
 		switch ($this->code)
 		{
@@ -45,7 +42,6 @@ class RackTablesError extends Exception
 		case self::MISCONFIGURED:
 		case self::INTERNAL:
 		case self::DB_WRITE_FAILED:
-		case self::NOT_AUTHORIZED:
 			$this->genHTMLPage ($msgheader[$this->code], $msgbody[$this->code]);
 			break;
 		default:
@@ -133,6 +129,16 @@ class RTBuildLVSConfigError extends RackTablesError
 		// redirect user to a page with config errors highlighted
 		header ("Location: index.php?page=object&tab=lvsconfig&object_id=" . urlencode ($this->balancer_id));
 		die;
+	}
+}
+
+# "Permission denied" is a very common case, which in some situations is
+# treated as a "soft" error.
+class RTPermissionDenied extends RackTablesError
+{
+	public function dispatch()
+	{
+		renderAccessDenied (FALSE);
 	}
 }
 

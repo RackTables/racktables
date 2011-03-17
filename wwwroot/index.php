@@ -19,11 +19,7 @@ try {
 		// do not override.
 		fixContext();
 		redirectIfNecessary();
-		if (! permitted())
-		{
-			renderAccessDenied (FALSE);
-			break;
-		}
+		assertPermission();
 		header ('Content-Type: text/html; charset=UTF-8');
 		// Only store the tab name after clearance is got. Any failure is unhandleable.
 		if (isset ($_REQUEST['tab']) and ! isset ($_SESSION['RTLT'][$pageno]['dont_remember']))
@@ -51,11 +47,7 @@ try {
 		$pageno = 'file';
 		$tabno = 'download';
 		fixContext();
-		if (!permitted())
-		{
-			renderAccessDenied (FALSE);
-			break;
-		}
+		assertPermission();
 		$file = getFile (getBypassValue());
 		header("Content-Type: {$file['type']}");
 		header("Content-Length: {$file['size']}");
@@ -79,6 +71,11 @@ try {
 		try
 		{
 			dispatchImageRequest();
+		}
+		catch (RTPermissionDenied $e)
+		{
+			ob_clean();
+			renderAccessDeniedImage();
 		}
 		catch (Exception $e)
 		{
@@ -128,33 +125,33 @@ try {
 			)
 				throw new RackTablesError ("Invalid navigation data for '${pageno}-${tabno}-${op}'", RackTablesError::INTERNAL);
 			// We have a chance to handle an error before starting HTTP header.
-			if (!isset ($delayauth[$pageno][$tabno][$op]) and !permitted())
-				showError ('Operation not permitted');
-			else
-			{
-				// Call below does the job of bypass argument assertion, if such is required,
-				// so the ophandler function doesn't have to re-assert this portion of its
-				// arguments. And it would be even better to pass returned value to ophandler,
-				// so it is not necessary to remember the name of bypass in it.
-				getBypassValue();
-				if (strlen ($redirect_to = call_user_func ($ophandler[$pageno][$tabno][$op])))
-					$location = $redirect_to;
-			}
-			header ("Location: " . $location);
+			if (!isset ($delayauth[$pageno][$tabno][$op]))
+				assertPermission();
+			# Call below does the job of bypass argument assertion, if such is required,
+			# so the ophandler function doesn't have to re-assert this portion of its
+			# arguments. And it would be even better to pass returned value to ophandler,
+			# so it is not necessary to remember the name of bypass in it.
+			getBypassValue();
+			if (strlen ($redirect_to = call_user_func ($ophandler[$pageno][$tabno][$op])))
+				$location = $redirect_to;
 		}
 		// known "soft" failures require a short error message
 		catch (InvalidRequestArgException $e)
 		{
 			ob_clean();
 			showError ($e->getMessage());
-			header ('Location: ' . $location);
 		}
 		catch (RTDatabaseError $e)
 		{
 			ob_clean();
 			showError ('Database error: ' . $e->getMessage());
-			header ('Location: ' . $location);
 		}
+		catch (RTPermissionDenied $e)
+		{
+			ob_clean();
+			showError ('Operation not permitted');
+		}
+		header ('Location: ' . $location);
 		// any other error requires no special handling and will be caught outside
 		break;
 	case 'popup' == $_REQUEST['module']:
