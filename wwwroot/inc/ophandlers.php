@@ -2509,13 +2509,10 @@ function process8021QSyncRequest ()
 
 $msgcode['process8021QRecalcRequest']['CHANGED'] = 87;
 $msgcode['process8021QRecalcRequest']['NO_CHANGES'] = 300;
-$msgcode['process8021QRecalcRequest']['ERR'] = 157;
 function process8021QRecalcRequest ()
 {
-	global $sic;
-	if (! permitted (NULL, NULL, NULL, array (array ('tag' => '$op_recalc8021Q'))))
-		return buildRedirectURL (__FUNCTION__, 'ERR');
-	$counters = recalc8021QPorts ($sic['object_id']);
+	assertPermission (NULL, NULL, NULL, array (array ('tag' => '$op_recalc8021Q')));
+	$counters = recalc8021QPorts (getBypassValue());
 	if ($counters['ports'])
 		return buildRedirectURL (__FUNCTION__, 'CHANGED', array ($counters['ports'], $counters['switches']));
 	else

@@ -1530,7 +1530,6 @@ function showMessageOrError ()
 				153 => array ('code' => 'error', 'format' => 'Password change failed.'),
 				154 => array ('code' => 'error', 'format' => "Verification error: %s"),
 				155 => array ('code' => 'error', 'format' => 'Save failed.'),
-				157 => array ('code' => 'error', 'format' => 'operation not permitted'),
 				159 => array ('code' => 'error', 'format' => 'Permission denied moving port %s from VLAN%u to VLAN%u'),
 				160 => array ('code' => 'error', 'format' => 'Invalid arguments'),
 				161 => array ('code' => 'error', 'format' => 'Endpoint not found. Please either set FQDN attribute or assign an IP address to the object.'),
@@ -3466,15 +3465,12 @@ function printGreeting ()
 		". Click <a href='index.php?logout'>here</a> to logout.";
 }
 
-function searchHandler () {
+function searchHandler()
+{
 	$terms = trim ($_REQUEST['q']);
 	if (!strlen ($terms))
 		throw new InvalidRequestArgException('q', $_REQUEST['q'], 'Search string cannot be empty.');
-	if (!permitted ('depot', 'default'))
-		throw new RTPermissionDenied();
-	
-	$results = searchEntitiesByText ($terms);
-	renderSearchResults ($terms, $results);
+	renderSearchResults ($terms, searchEntitiesByText ($terms));
 }
 
 function renderSearchResults ($terms, $summary)
