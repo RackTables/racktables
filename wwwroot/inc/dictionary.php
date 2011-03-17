@@ -1495,6 +1495,7 @@ $dictionary = array
 	1413 => array ('chapter_id' => 12, 'dict_value' => '[[Cisco%GPASS%Nexus 2224TP | http://cisco.com/en/US/products/ps11045/index.html]]'),
 	1414 => array ('chapter_id' => 12, 'dict_value' => '[[Cisco%GPASS%Nexus 2248TP | http://cisco.com/en/US/products/ps10783/index.html]]'),
 	1415 => array ('chapter_id' => 12, 'dict_value' => '[[Cisco%GPASS%Nexus 2232PP | http://cisco.com/en/US/products/ps10784/index.html]]'),
+	1416 => array ('chapter_id' => 13, 'dict_value' => 'BSD%GSKIP%FreeBSD 8.x'),
 //                                     ^
 //                                     ^
 // add new dictionary entries up here  ^
