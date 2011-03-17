@@ -39,6 +39,7 @@ try {
 		break;
 	case 'chrome' == $_REQUEST['module']:
 		require_once 'inc/init.php';
+		require_once 'inc/solutions.php';
 		genericAssertion ('uri', 'string');
 		proxyStaticURI ($_REQUEST['uri']);
 		break;
@@ -67,7 +68,7 @@ try {
 		if (@$_REQUEST['img'] == 'progressbar')
 			if (checkCachedResponse (0, CACHE_DURATION))
 				exit;
-		require_once 'inc/render_image.php';
+		require_once 'inc/solutions.php';
 		try
 		{
 			dispatchImageRequest();

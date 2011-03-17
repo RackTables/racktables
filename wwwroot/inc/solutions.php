@@ -1,4 +1,14 @@
 <?php
+/*
+
+The purpose of this file is to contain functions, which generate a complete
+HTTP response body and are either "dead ends" or depend on just a small
+amount of other code (which should eventually be placed in a sort of
+"first order" library file).
+
+*/
+
+define ('RE_STATIC_URI', '#^([[:alpha:]]+)/(?:[[:alpha:]]+/)*[[:alnum:]\._-]+\.([[:alpha:]]+)$#');
 
 function dispatchImageRequest()
 {
@@ -201,6 +211,53 @@ function renderFilePreview ($file_id)
 	imagejpeg ($image);
 	imagedestroy ($image);
 	commitAddFileCache ($file_id, ob_get_flush());
+}
+
+function printStatic404()
+{
+	header ('404 Not Found');
+?><!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
+<html><head>
+<title>404 Not Found</title>
+</head><body>
+<h1>Not Found</h1>
+<p>The requested file was not found in this instance.</p>
+<hr>
+<address>RackTables static content proxy</address>
+</body></html><?php
+	exit;
+}
+
+function proxyStaticURI ($URI)
+{
+	$content_type = array
+	(
+		'css' => 'text/css',
+		'js' => 'text/javascript',
+		'html' => 'text/html',
+		'png' => 'image/png',
+		'gif' => 'image/gif',
+		'jpg' => 'image/jpeg',
+		'jpeg' => 'image/jpeg',
+		'ico' => 'image/x-icon',
+	);
+	$matches = array();
+	if
+	(
+		! preg_match (RE_STATIC_URI, $URI, $matches)
+		or ! in_array ($matches[1], array ('pix', 'css', 'js'))
+		or ! array_key_exists (strtolower ($matches[2]), $content_type)
+	)
+		printStatic404();
+	global $racktables_staticdir;
+	if (FALSE === $fh = fopen ("${racktables_staticdir}/${URI}", 'r'))
+		printStatic404();
+	if (FALSE !== $stat = fstat ($fh))
+		if (checkCachedResponse (max ($stat['mtime'], $stat['ctime']), 0))
+			exit;
+	header ('Content-type: ' . $content_type[$matches[2]]);
+	fpassthru ($fh);
+	fclose ($fh);	
 }
 
 ?>
