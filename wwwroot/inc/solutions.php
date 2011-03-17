@@ -20,7 +20,7 @@ function dispatchImageRequest()
 		$pageno = 'rack';
 		$tabno = 'default';
 		fixContext();
-		assertPermission()
+		assertPermission();
 		renderRackThumb (getBypassValue());
 		break;
 	case 'progressbar': // no security context
