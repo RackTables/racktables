@@ -1,7 +1,9 @@
 <?php
 /*
 
-Authentication library for RackTables.
+Below is a mix of authentication (confirming user's identity) and authorization
+(access controlling) functions of RackTables. The former set is expected to
+be working with only database.php file included.
 
 */
 
@@ -9,7 +11,6 @@ Authentication library for RackTables.
 // username and password (also make sure, that both are present, this
 // is especially useful for LDAP auth code to not deceive itself with
 // anonymous binding). It also initializes $remote_* and $*_tags vars.
-// Fatal errors are followed by exit (1) to aid in script debugging.
 function authenticate ()
 {
 	global
@@ -340,7 +341,7 @@ function authenticated_via_ldap_cache ($username, $password, &$ldap_displayname)
 		discardLDAPCache ($LDAP_options['cache_expiry']);
 		return TRUE;
 	default:
-		throw new InvalidArgException ('result', $newinfo['result'], 'Internal error during LDAP cache dispatching');
+		throw new RackTablesError ('structure error', RackTablesError::INTERNAL);
 	}
 	// This is never reached.
 	return FALSE;
