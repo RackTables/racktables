@@ -953,6 +953,7 @@ $msgcode['updateUser']['OK'] = 6;
 $msgcode['updateUser']['ERR2'] = 104;
 function updateUser ()
 {
+	genericAssertion ('user_id', 'uint');
 	assertStringArg ('username');
 	assertStringArg ('realname', TRUE);
 	assertStringArg ('password');
@@ -1073,7 +1074,7 @@ function updateObjectAllocation ()
 		unset($_POST['op']);
 		return buildWideRedirectURL (array(), NULL, NULL, array_merge ($_GET, $_POST));
 	}
-	$object_id = $_REQUEST['object_id'];
+	$object_id = getBypassValue();
 	$workingRacksData = array();
 	foreach ($_REQUEST['rackmulti'] as $cand_id)
 	{
@@ -1295,10 +1296,8 @@ function deleteObject ()
 $msgcode['resetObject']['OK'] = 57;
 function resetObject ()
 {
-	$oinfo = spotEntity ('object', $_REQUEST['object_id']);
-
-	$racklist = getResidentRacksData ($_REQUEST['object_id'], FALSE);
-	commitResetObject ($_REQUEST['object_id']);
+	$racklist = getResidentRacksData (getBypassValue(), FALSE);
+	commitResetObject (getBypassValue());
 	foreach ($racklist as $rack_id)
 		usePreparedUpdateBlade ('Rack', array ('thumb_data' => NULL), array ('id' => $rack_id));
 	return buildRedirectURL (__FUNCTION__, 'OK');
@@ -1318,7 +1317,7 @@ function useupPort ()
 		),
 		array
 		(
-			'object_id' => $sic['object_id'],
+			'object_id' => getBypassValue(),
 			'id' => $sic['port_id'],
 		)
 	);
@@ -1454,12 +1453,11 @@ $msgcode['addRealServer']['ERR'] = 110;
 // Add single record.
 function addRealServer ()
 {
-	assertUIntArg ('pool_id');
 	assertIPv4Arg ('remoteip');
 	assertStringArg ('rsport', TRUE);
 	assertStringArg ('rsconfig', TRUE);
 	if (!addRStoRSPool (
-		$_REQUEST['pool_id'],
+		getBypassValue(),
 		$_REQUEST['remoteip'],
 		$_REQUEST['rsport'],
 		getConfigVar ('DEFAULT_IPV4_RS_INSERVICE'),
@@ -1491,7 +1489,7 @@ function addRealServers ()
 			case 'ipvs_2': // address and port only
 				if (!preg_match ('/^  -&gt; ([0-9\.]+):([0-9]+) /', $line, $match))
 					continue;
-				if (addRStoRSPool ($_REQUEST['pool_id'], $match[1], $match[2], getConfigVar ('DEFAULT_IPV4_RS_INSERVICE'), ''))
+				if (addRStoRSPool (getBypassValue(), $match[1], $match[2], getConfigVar ('DEFAULT_IPV4_RS_INSERVICE'), ''))
 					$ngood++;
 				else
 					$nbad++;
@@ -1499,7 +1497,7 @@ function addRealServers ()
 			case 'ipvs_3': // address, port and weight
 				if (!preg_match ('/^  -&gt; ([0-9\.]+):([0-9]+) +[a-zA-Z]+ +([0-9]+) /', $line, $match))
 					continue;
-				if (addRStoRSPool ($_REQUEST['pool_id'], $match[1], $match[2], getConfigVar ('DEFAULT_IPV4_RS_INSERVICE'), 'weight ' . $match[3]))
+				if (addRStoRSPool (getBypassValue(), $match[1], $match[2], getConfigVar ('DEFAULT_IPV4_RS_INSERVICE'), 'weight ' . $match[3]))
 					$ngood++;
 				else
 					$nbad++;
@@ -1507,7 +1505,7 @@ function addRealServers ()
 			case 'ssv_2': // IP address and port
 				if (!preg_match ('/^([0-9\.]+) ([0-9]+)$/', $line, $match))
 					continue;
-				if (addRStoRSPool ($_REQUEST['pool_id'], $match[1], $match[2], getConfigVar ('DEFAULT_IPV4_RS_INSERVICE'), ''))
+				if (addRStoRSPool (getBypassValue(), $match[1], $match[2], getConfigVar ('DEFAULT_IPV4_RS_INSERVICE'), ''))
 					$ngood++;
 				else
 					$nbad++;
@@ -1515,7 +1513,7 @@ function addRealServers ()
 			case 'ssv_1': // IP address
 				if (!preg_match ('/^([0-9\.]+)$/', $line, $match))
 					continue;
-				if (addRStoRSPool ($_REQUEST['pool_id'], $match[1], 0, getConfigVar ('DEFAULT_IPV4_RS_INSERVICE'), ''))
+				if (addRStoRSPool (getBypassValue(), $match[1], 0, getConfigVar ('DEFAULT_IPV4_RS_INSERVICE'), ''))
 					$ngood++;
 				else
 					$nbad++;
@@ -1683,8 +1681,7 @@ $msgcode['updateRSInService']['ERR'] = 141;
 function updateRSInService ()
 {
 	assertUIntArg ('rscount');
-	$pool_id = $_REQUEST['pool_id'];
-	$orig = spotEntity ('ipv4rspool', $pool_id);
+	$orig = spotEntity ('ipv4rspool', getBypassValue());
 	amplifyCell ($orig);
 	$nbad = $ngood = 0;
 	for ($i = 1; $i <= $_REQUEST['rscount']; $i++)
@@ -1792,7 +1789,7 @@ function rollTags ()
 	// Minimizing the extra chain early, so that tag rebuilder doesn't have to
 	// filter out the same tag again and again. It will have own noise to cancel.
 	$extrachain = getExplicitTagsOnly (buildTagChainFromIds ($extratags));
-	foreach (listCells ('rack', $_REQUEST['row_id']) as $rack)
+	foreach (listCells ('rack', getBypassValue()) as $rack)
 	{
 		if (rebuildTagChainForEntity ('rack', $rack['id'], $extrachain))
 			$n_ok++;
@@ -1920,10 +1917,10 @@ $msgcode['submitSLBConfig']['OK'] = 66;
 $msgcode['submitSLBConfig']['ERR'] = 164;
 function submitSLBConfig ()
 {
-	$newconfig = buildLVSConfig ($_REQUEST['object_id']);
+	$newconfig = buildLVSConfig (getBypassValue());
 	try
 	{
-		gwSendFileToObject ($_REQUEST['object_id'], 'slbconfig', html_entity_decode ($newconfig, ENT_QUOTES, 'UTF-8'));
+		gwSendFileToObject (getBypassValue(), 'slbconfig', html_entity_decode ($newconfig, ENT_QUOTES, 'UTF-8'));
 	}
 	catch (RTGatewayError $e)
 	{
@@ -1998,9 +1995,9 @@ function updateRack ()
 	assertStringArg ('rack_name');
 	assertStringArg ('rack_comment', TRUE);
 
-	global $sic;
-	usePreparedUpdateBlade ('Rack', array ('thumb_data' => NULL), array ('id' => $sic['rack_id']));
-	if (TRUE === commitUpdateRack ($_REQUEST['rack_id'], $_REQUEST['rack_name'], $_REQUEST['rack_height'], $_REQUEST['rack_row_id'], $_REQUEST['rack_comment']))
+	$rack_id = getBypassValue();
+	usePreparedUpdateBlade ('Rack', array ('thumb_data' => NULL), array ('id' => $rack_id));
+	if (TRUE === commitUpdateRack ($rack_id, $_REQUEST['rack_name'], $_REQUEST['rack_height'], $_REQUEST['rack_row_id'], $_REQUEST['rack_comment']))
 		return buildRedirectURL (__FUNCTION__, 'OK', array ($_REQUEST['rack_name']));
 	else
 		return buildRedirectURL (__FUNCTION__, 'ERR');
@@ -2008,7 +2005,7 @@ function updateRack ()
 
 function updateRackDesign ()
 {
-	$rackData = spotEntity ('rack', $_REQUEST['rack_id']);
+	$rackData = spotEntity ('rack', getBypassValue());
 	amplifyCell ($rackData);
 	applyRackDesignMask($rackData);
 	markupObjectProblems ($rackData);
@@ -2018,7 +2015,7 @@ function updateRackDesign ()
 
 function updateRackProblems ()
 {
-	$rackData = spotEntity ('rack', $_REQUEST['rack_id']);
+	$rackData = spotEntity ('rack', getBypassValue());
 	amplifyCell ($rackData);
 	applyRackProblemMask($rackData);
 	markupObjectProblems ($rackData);
@@ -2049,7 +2046,7 @@ function querySNMPData ()
 		$snmpsetup['priv_protocol'] = $_REQUEST['priv_protocol'];
 		$snmpsetup['priv_passphrase'] = $_REQUEST['priv_passphrase'];
 	}
-	return doSNMPmining ($_REQUEST['object_id'], $snmpsetup);
+	return doSNMPmining (getBypassValue(), $snmpsetup);
 }
 
 $msgcode['linkEntities']['OK'] = 51;
@@ -2155,21 +2152,16 @@ function linkFileToEntity ()
 
 $msgcode['replaceFile']['OK'] = 7;
 $msgcode['replaceFile']['ERR2'] = 207;
-$msgcode['replaceFile']['ERR3'] = 109;
 function replaceFile ()
 {
-	global $sic;
-
 	// Make sure the file can be uploaded
 	if (get_cfg_var('file_uploads') != 1)
 		throw new RackTablesError ('file uploads not allowed, change "file_uploads" parameter in php.ini', RackTablesError::MISCONFIGURED);
-	$shortInfo = spotEntity ('file', $sic['file_id']);
+	$shortInfo = spotEntity ('file', getBypassValue());
 
-	$fp = fopen($_FILES['file']['tmp_name'], 'rb');
-	if ($fp === FALSE)
+	if (FALSE === $fp = fopen ($_FILES['file']['tmp_name'], 'rb'))
 		return buildRedirectURL (__FUNCTION__, 'ERR2');
-	if (FALSE === commitReplaceFile ($sic['file_id'], $fp))
-		return buildRedirectURL (__FUNCTION__, 'ERR3');
+	commitReplaceFile ($shortInfo['id'], $fp);
 
 	return buildRedirectURL (__FUNCTION__, 'OK', array (htmlspecialchars ($shortInfo['name'])));
 }
@@ -2198,12 +2190,11 @@ function updateFileText ()
 {
 	assertStringArg ('mtime_copy');
 	assertStringArg ('file_text', TRUE); // it's Ok to save empty
-	$shortInfo = spotEntity ('file', $_REQUEST['file_id']);
+	$shortInfo = spotEntity ('file', getBypassValue());
 	if ($shortInfo['mtime'] != $_REQUEST['mtime_copy'])
 		return buildRedirectURL (__FUNCTION__, 'ERR1');
 	global $sic;
-	if (FALSE === commitReplaceFile ($sic['file_id'], $sic['file_text']))
-		return buildRedirectURL (__FUNCTION__, 'ERR2');
+	commitReplaceFile ($shortInfo['id'], $sic['file_text']);
 	return buildRedirectURL (__FUNCTION__, 'OK', array (htmlspecialchars ($shortInfo['name'])));
 }
 
