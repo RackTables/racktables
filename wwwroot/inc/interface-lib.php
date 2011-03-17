@@ -264,7 +264,7 @@ function printSelect ($optionList, $select_attrs = array(), $selected_id = NULL)
 }
 
 // Input array keys are OPTION VALUEs and input array values are OPTION text.
-function getSelect ($optionList, $select_attrs = array(), $selected_id = NULL)
+function getSelect ($optionList, $select_attrs = array(), $selected_id = NULL, $treat_single_special = TRUE)
 {
 	$ret = '';
 	if (!array_key_exists ('name', $select_attrs))
@@ -272,7 +272,7 @@ function getSelect ($optionList, $select_attrs = array(), $selected_id = NULL)
 	// handle two corner cases in a specific way
 	if (count ($optionList) == 0)
 		return '(none)';
-	if (count ($optionList) == 1)
+	if (count ($optionList) == 1 && $treat_single_special)
 	{
 		foreach ($optionList as $key => $value) { break; }
 		return "<input type=hidden name=${select_attrs['name']} id=${select_attrs['name']} value=${key}>" . $value;

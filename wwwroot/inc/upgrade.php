@@ -1026,6 +1026,8 @@ CREATE TABLE `EntityLink` (
 			$query[] = "INSERT INTO `PortCompat` (`type1`, `type2`) VALUES (1399,1399)";
 			$query[] = "INSERT INTO `PortInterfaceCompat` (`iif_id`, `oif_id`) VALUES (1,1399)";
 			$query[] = "UPDATE Config SET varvalue = CONCAT(varvalue, ' or {\$typeid_1397}') WHERE varname = 'IPV4OBJ_LISTSRC'";
+			$query[] = "ALTER TABLE AttributeValue ADD KEY `attr_id-uint_value` (`attr_id`,`uint_value`)";
+			$query[] = "ALTER TABLE AttributeValue ADD KEY `attr_id-string_value` (`attr_id`,`string_value`(12))";
 			$query[] = "UPDATE Config SET varvalue = '0.19.2' WHERE varname = 'DB_VERSION'";
 			break;
 		default:

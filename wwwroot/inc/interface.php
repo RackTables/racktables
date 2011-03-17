@@ -8686,6 +8686,8 @@ function renderDeployQueue()
 function renderDiscoveredNeighbors ($object_id)
 {
 	global $tabno;
+	static $POIFC;
+	
 	$opcode_by_tabno = array
 	(
 		'livecdp' => 'getcdpstatus',
@@ -8722,7 +8724,7 @@ function renderDiscoveredNeighbors ($object_id)
 	switchportInfoJS($object_id); // load JS code to make portnames interactive
 	printOpFormIntro ('importDPData');
 	echo '<br><table cellspacing=0 cellpadding=5 align=center class=widetable>';
-	echo '<tr><th colspan=2>local port</th><th>remote device</th><th colspan=2>remote port</th><th>&nbsp;</th></tr>';
+	echo '<tr><th colspan=2>local port</th><th></th><th>remote device</th><th colspan=2>remote port</th><th><input type="checkbox" id="cb-toggle"></th></tr>';
 	$inputno = 0;
 	foreach ($neighbors as $local_port => $remote_list)
 	{
@@ -8735,6 +8737,7 @@ function renderDiscoveredNeighbors ($object_id)
 			$link_matches = FALSE;
 			$portinfo_local = NULL;
 			$portinfo_remote = NULL;
+			$variants = array();
 
 			do { // once-cyle fake loop used only to break out of it
 				if (! empty($local_ports))
@@ -8815,15 +8818,34 @@ function renderDiscoveredNeighbors ($object_id)
 					}
 
 				// no links found on both sides, search for a compatible port pair
-				$POIFC = getPortOIFCompat();
-				foreach ($local_ports as $portinfo_local)
-					foreach ($remote_ports as $portinfo_remote)
-						foreach ($POIFC as $item)
-							if ($item['type1'] == $portinfo_local['oif_id'] and $item['type2'] == $portinfo_remote['oif_id'])
-								break 4;
-
-				// no compatible ports found
-				$error_message = "Incompatible port types";
+				$left_types = array();
+				foreach ($local_ports as $portinfo)
+					if (! isTranceiverEmpty ($portinfo))
+						$left_types[$portinfo['oif_id']] = array ('id' => $portinfo['oif_id'], 'name' => $portinfo['oif_name'], 'portinfo' => $portinfo);
+					else
+						foreach (getExistingPortTypeOptions ($portinfo['id']) as $oif_id => $oif_name)
+							$left_types[$oif_id] = array ('id' => $oif_id, 'name' => $oif_name, 'portinfo' => $portinfo);
+				$right_types = array();
+				foreach ($remote_ports as $portinfo)
+					if (! isTranceiverEmpty ($portinfo))
+						$right_types[$portinfo['oif_id']] = array ('id' => $portinfo['oif_id'], 'name' => $portinfo['oif_name'], 'portinfo' => $portinfo);
+					else
+						foreach (getExistingPortTypeOptions ($portinfo['id']) as $oif_id => $oif_name)
+							$right_types[$oif_id] = array ('id' => $oif_id, 'name' => $oif_name, 'portinfo' => $portinfo);
+				if (! isset ($POIFC))
+				{
+					$POIFC = array();
+					foreach (getPortOIFCompat() as $item)
+					{
+						$POIFC[$item['type1']][$item['type2']] = TRUE;
+						$POIFC[$item['type2']][$item['type1']] = TRUE;
+					}
+				}
+				foreach ($left_types as $left_id => $left) foreach ($right_types as $right_id => $right)
+					if (isset ($POIFC[$left_id][$right_id]))
+						$variants["${left_id}:${right_id}"] = array ('left' => $left, 'right' => $right);
+				if (! count ($variants)) // no compatible ports found
+					$error_message = "Incompatible port types";
 			} while (FALSE); // do {
 
 			$tr_class = $link_matches ? 'trok' : (isset ($error_message) ? 'trerror' : 'trwarning');
@@ -8843,18 +8865,15 @@ function renderDiscoveredNeighbors ($object_id)
 					'</td>';
 				$initial_row = FALSE;
 			}
-			echo "<td>" . ($portinfo_local ?  formatPortIIFOIF($portinfo_local) : '&nbsp') . "</td>";
+			echo "<td>" . ($portinfo_local ?  formatPortIIFOIF ($portinfo_local) : '&nbsp') . "</td>";
+			echo "<td>" . formatIfTypeVariants ($variants, "ports_${inputno}") . "</td>";
 			echo "<td>${dp_neighbor['device']}</td>";
 			echo "<td>" . ($portinfo_remote ? formatPortLink ($dp_remote_object_id, NULL, $portinfo_remote['id'], $portinfo_remote['name']) : $dp_neighbor['port'] ) . "</td>";
-			echo "<td>" . ($portinfo_remote ? formatPortIIFOIF($portinfo_remote) : '&nbsp') . "</td>";
+			echo "<td>" . ($portinfo_remote ?  formatPortIIFOIF ($portinfo_remote) : '&nbsp') . "</td>";
 			echo "<td>";
-			if (isset ($error_message) || $link_matches)
-				echo '&nbsp;';
-			else
+			if (! empty ($variants))
 			{
-				echo "<input type=hidden name=\"pid1_${inputno}\" value=\"{$portinfo_local['id']}\">";
-				echo "<input type=hidden name=\"pid2_${inputno}\" value=\"{$portinfo_remote['id']}\">";
-				echo "<input type=checkbox name=do_${inputno}>";
+				echo "<input type=checkbox name=do_${inputno} class='cb-makelink'>";
 				$inputno++;
 			}
 			echo "</td>";
@@ -8870,6 +8889,91 @@ function renderDiscoveredNeighbors ($object_id)
 		echo '<tr><td colspan=6 align=center>' . getImageHREF ('CREATE', 'import selected', TRUE) . '</td></tr>';
 	}
 	echo '</table></form>';
+
+	addJS (<<<END
+$(document).ready(function () {
+	$('#cb-toggle').click(function (event) {
+		var list = $('.cb-makelink');
+		for (var i in list) {
+			var cb = list[i];
+			cb.checked = event.target.checked;
+		}
+	});
+});
+END
+		, TRUE
+	);
+}
+
+function formatIfTypeVariants ($variants, $select_name)
+{
+	if (empty ($variants))
+		return;
+	static $tranceivers_hint_shown = FALSE;
+	static $oif_usage_stat = NULL;
+	$select = array();
+	$creting_tranceivers = FALSE;
+	$most_used_count = 0;
+	$selected_key = NULL;
+
+	if (! isset ($oif_usage_stat))
+		$oif_usage_stat = getPortTypeUsageStatistics();
+
+	foreach ($variants as $item)
+	{
+		$params = array
+		(
+			'a_id' => $item['left']['portinfo']['id'],
+			'b_id' => $item['right']['portinfo']['id'],
+		);
+		$text = '';
+		if ($item['left']['id'] == $item['right']['id'])
+			$text = $item['left']['name'];
+		else
+			$text = $item['left']['name'] . ' | ' . $item['right']['name'];
+		
+		$popularity_count = 0;
+		if (isTranceiverEmpty ($item['left']['portinfo']))
+		{
+			$creting_tranceivers = TRUE;
+			$text = '← ' . $text;
+			$params['a_oif'] = $item['left']['id'];
+			if (isset ($oif_usage_stat[$item['left']['id']]))
+				$popularity_count += $oif_usage_stat[$item['left']['id']];
+		}
+		if (isTranceiverEmpty ($item['right']['portinfo']))
+		{
+			$creting_tranceivers = TRUE;
+			$text = $text . ' →';
+			$params['b_oif'] = $item['right']['id'];
+			if (isset ($oif_usage_stat[$item['right']['id']]))
+				$popularity_count += $oif_usage_stat[$item['right']['id']];
+		}
+		// a_id:id,a_oif:id,b_id:id,b_oif:id
+		$key = '';
+		foreach ($params as $i => $j)
+			$key .= ",$i:$j";
+		$key = trim($key, ",");
+		$select[$key] = $text;
+		if ($popularity_count > $most_used_count)
+		{
+			$most_used_count = $popularity_count;
+			$selected_key = $key;
+		}
+	}
+
+	if ($creting_tranceivers and ! $tranceivers_hint_shown)
+	{
+		$tranceivers_hint_shown = TRUE;
+		showNotice ('The arrow (← or →) means to create a tranceiver in the suitable port');
+	}
+
+	return getSelect ($select, array('name' => $select_name), $selected_key, !$creting_tranceivers);
+}
+
+function isTranceiverEmpty ($portinfo)
+{
+	return (0 === strpos ($portinfo['oif_name'], 'empty '));
 }
 
 function formatAttributeValue ($record)

@@ -2695,17 +2695,28 @@ function updVSTRule()
 $msgcode['importDPData']['OK'] = 44;
 function importDPData()
 {
-	global $sic;
+	global $sic, $dbxlink;
 	assertUIntArg ('nports');
 	$nignored = $ndone = 0;
 	$POIFC = getPortOIFCompat();
 	for ($i = 0; $i < $sic['nports']; $i++)
 		if (array_key_exists ("do_${i}", $sic))
 		{
-			assertUIntArg ("pid1_${i}");
-			assertUIntArg ("pid2_${i}");
-			$porta = getPortInfo ($_REQUEST["pid1_${i}"]);
-			$portb = getPortInfo ($_REQUEST["pid2_${i}"]);
+			$params = array();
+			assertStringArg ("ports_${i}");
+			foreach (explode (',', $_REQUEST["ports_${i}"]) as $item)
+			{
+				$pair = explode (':', $item);
+				if (count ($pair) != 2)
+					continue;
+				$params[$pair[0]] = $pair[1];
+			}
+			if (! isset ($params['a_id']) || ! isset ($params['b_id']) ||
+				! intval ($params['a_id']) || ! intval ($params['b_id']))
+				throw new InvalidArgException ("ports_${i}", $_REQUEST["ports_${i}"], "can not unpack port ids");
+			
+			$porta = getPortInfo ($params['a_id']);
+			$portb = getPortInfo ($params['b_id']);
 			if
 			(
 				$porta['linked'] or
@@ -2716,14 +2727,42 @@ function importDPData()
 				$nignored++;
 				continue;
 			}
+			$oif_a = intval (@$params['a_oif']); // these parameters are optional
+			$oif_b = intval (@$params['b_oif']);
+			
+			$dbxlink->beginTransaction();
+			if ($oif_a || $oif_b)
+				try
+				{
+					if ($oif_a)
+						if (commitUpdatePortOIF ($params['a_id'], $oif_a))
+							$porta['oif_id'] = $oif_a;
+					if ($oif_b)
+						if (commitUpdatePortOIF ($params['b_id'], $oif_b))
+							$portb['oif_id'] = $oif_b;
+				}
+				catch (RTDatabaseError $e)
+				{
+					$dbxlink->rollBack();
+					$nignored++;
+					continue;
+				}
+
 			foreach ($POIFC as $item)
 				if ($item['type1'] == $porta['oif_id'] and $item['type2'] == $portb['oif_id'])
 				{
-					linkPorts ($_REQUEST["pid1_${i}"], $_REQUEST["pid2_${i}"]);
-					$ndone++;
-					continue 2; // next port
+					$ret = linkPorts ($params['a_id'], $params['b_id']);
+					if (empty ($ret))
+					{
+						$ndone++;
+						$dbxlink->commit();
+						continue 2; //next port
+					}
+					else
+						$nignored++;
+					break;
 				}
-			$nignored++;
+			$dbxlink->rollback();
 		}
 	return buildRedirectURL (__FUNCTION__, 'OK', array ($nignored, $ndone));
 }

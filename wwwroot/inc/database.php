@@ -1139,6 +1139,16 @@ function commitUpdatePort ($object_id, $port_id, $port_name, $port_type_id, $por
 	$dbxlink->exec ('UNLOCK TABLES');
 }
 
+function commitUpdatePortOIF ($port_id, $port_type_id)
+{
+	return usePreparedUpdateBlade
+	(
+		'Port',
+		array ('type' => $port_type_id),
+		array ('id' => $port_id)
+	);
+}
+
 function getAllIPv4Allocations ()
 {
 	$result = usePreparedSelectBlade
@@ -2122,6 +2132,13 @@ function searchByMgmtHostname ($string)
 {
 	$result = usePreparedSelectBlade ('SELECT object_id FROM AttributeValue WHERE attr_id = 3 AND string_value = ? LIMIT 2', array ($string));
 	$rows = $result->fetchAll (PDO::FETCH_NUM);
+	if (count ($rows) == 1)
+		return $rows[0][0];
+	unset ($result);
+
+	// second attempt: search for FQDN part, separated by dot.
+	$result = usePreparedSelectBlade ('SELECT object_id FROM AttributeValue WHERE attr_id = 3 AND string_value LIKE ? LIMIT 2', array ("$string.%"));
+	$rows = $result->fetchAll (PDO::FETCH_NUM);
 	if (count ($rows) != 1)
 		return NULL;
 	return $rows[0][0];
@@ -2690,7 +2707,9 @@ function usePreparedUpdateBlade ($tablename, $set_columns, $where_columns, $conj
 	try
 	{
 		$prepared = $dbxlink->prepare ($query);
-		$prepared->execute (array_merge (array_values ($set_columns), array_values ($where_columns)));
+		if (! $prepared->execute (array_merge (array_values ($set_columns), array_values ($where_columns))))
+			return FALSE;
+		return $prepared->rowCount();
 	}
 	catch (PDOException $e)
 	{
@@ -3742,6 +3761,19 @@ function getExistingPortTypeOptions ($port_id)
 	$ret = array();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 		$ret[$row['oif_id']] = $row['oif_name'];
+	return $ret;
+}
+
+function getPortTypeUsageStatistics()
+{
+	$result = usePreparedSelectBlade
+	(
+		'SELECT p.type, COUNT(p.id) AS count FROM Port p INNER JOIN Link l '.
+		'ON (p.id = l.porta or p.id = l.portb) WHERE p.type <> 0 GROUP BY type'
+	);
+	$ret = array();
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
+		$ret[$row['type']] = $row['count'];
 	return $ret;
 }
 
