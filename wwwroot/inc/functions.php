@@ -3750,30 +3750,6 @@ function exec8021QDeploy ($object_id, $do_push)
 	return $nsaved + $npushed + $nsaved_uplinks;
 }
 
-// print part of HTML HEAD block
-function printPageHeaders ()
-{
-	global $pageheaders;
-	ksort ($pageheaders);
-	foreach ($pageheaders as $s)
-		echo $s . "\n";
-
-	// add CSS styles
-	foreach (addCSS (NULL) as $item)
-		if ($item['type'] == 'inline')
-			echo '<style type="text/css">' . "\n" . trim ($item['style'], "\r\n") . "\n</style>\n";
-		elseif ($item['type'] == 'file')
-			echo "<link rel=stylesheet type='text/css' href='?module=chrome&uri=${item['style']}' />\n";
-
-	// add JS scripts
-	foreach (addJS (NULL) as $group_name => $js_list)
-		foreach ($js_list as $item)
-			if ($item['type'] == 'inline')
-				echo '<script type="text/javascript">' . "\n" . trim ($item['script'], "\r\n") . "\n</script>\n";
-			elseif ($item['type'] == 'file')
-				echo "<script type='text/javascript' src='?module=chrome&uri=${item['script']}'></script>\n";
-}
-
 function strerror8021Q ($errno)
 {
 	switch ($errno)
@@ -4491,84 +4467,6 @@ function getColumnCoordinates ($line, $column_name, $align = 'left')
 		}
 	}
 	return $result;
-}
-
-// JS scripts should be included through this function.
-// They automatically appear in the <head> of your page.
-// $data is a JS filename, or JS code w/o tags around, if $inline = TRUE
-// Scripts are included in the order of adding within the same group, and groups are sorted alphabetically.
-function addJS ($data, $inline = FALSE, $group = 'default')
-{
-	static $javascript = array();
-	static $seen_filenames = array();
-	
-	if (! isset ($data))
-	{
-		ksort ($javascript);
-		return $javascript;
-	}
-	// Add jquery.js and racktables.js the first time a Javascript file is added.
-	if (empty($javascript))
-	{
-		$javascript = array
-		(
-			'a_core' => array
-			(
-				array('type' => 'file', 'script' => 'js/jquery-1.4.4.min.js'),
-				array('type' => 'file', 'script' => 'js/racktables.js'),
-			),
-		);
-
-		// initialize core js filelist
-		foreach ($javascript as $group_name => $group_array)
-			foreach ($group_array as $item)
-				if ($item['type'] == 'file')
-					$seen_filenames[$item['script']] = 1;
-	}
-
-	if ($inline)
-		$javascript[$group][] = array
-		(
-			'type' => 'inline',
-			'script' => $data,
-		);
-	elseif (! isset ($seen_filenames[$data]))
-	{
-		$javascript[$group][] = array
-		(
-			'type' => 'file',
-			'script' => $data,
-		);
-		$seen_filenames[$data] = 1;
-	}
-}
-
-// CSS styles should be included through this function.
-// They automatically appear in the <head> of your page.
-// $data is a CSS filename, or CSS code w/o tags around, if $inline = TRUE
-// Styles are included in the order of adding.
-function addCSS ($data, $inline = FALSE)
-{
-	static $styles = array();
-	static $seen_filenames = array();
-	
-	if (! isset ($data))
-		return $styles;
-	if ($inline)
-		$styles[] = array
-		(
-			'type' => 'inline',
-			'style' => $data,
-		);
-	elseif (! isset ($seen_filenames[$data]))
-	{
-		$styles[] = array
-		(
-			'type' => 'file',
-			'style' => $data,
-		);
-		$seen_filenames[$data] = 1;
-	}
 }
 
 // Messages in the top of the page should be shown using these functions.
