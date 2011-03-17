@@ -103,6 +103,12 @@ try {
 			ob_clean();
 			echo "NAK\nMalformed request";
 		}
+		catch (RTPermissionDenied $e)
+		{
+			ob_clean();
+			# FIXME: the remote client could be expecting JSON data instead
+			echo "NAK\nPermission denied";
+		}
 		catch (Exception $e)
 		{
 			ob_clean();
