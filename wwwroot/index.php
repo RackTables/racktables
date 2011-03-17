@@ -64,10 +64,6 @@ try {
 		# built images, and "download" can return a full-fledged "permission
 		# denied" or "exception" HTML page instead of the file requested.
 		require_once 'inc/init.php'; // for authentication check
-		// 'progressbar's never change, attempt an IMS shortcut before loading init.php
-		if (@$_REQUEST['img'] == 'progressbar')
-			if (checkCachedResponse (0, CACHE_DURATION))
-				exit;
 		require_once 'inc/solutions.php';
 		try
 		{
@@ -83,6 +79,17 @@ try {
 			ob_clean();
 			renderErrorImage();
 		}
+		break;
+	case 'progressbar' == $_REQUEST['module']:
+		# Unlike images (and like static content), progress bars are processed
+		# without a permission check, but only for authenticated users.
+		require_once 'inc/init.php';
+		require_once 'inc/solutions.php';
+		genericAssertion ('done', 'uint0');
+		// 'progressbar's never change, make browser cache the result
+		if (checkCachedResponse (0, CACHE_DURATION))
+			break;
+		renderProgressBarImage ($_REQUEST['done']);
 		break;
 	case 'ajax' == $_REQUEST['module']:
 		require_once 'inc/ajax-interface.php';

@@ -23,11 +23,6 @@ function dispatchImageRequest()
 		assertPermission();
 		renderRackThumb (getBypassValue());
 		break;
-	case 'progressbar': // no security context
-		assertUIntArg ('done', TRUE);
-		// 'progressbar's never change, make browser cache the result
-		renderProgressBarImage ($_REQUEST['done']);
-		break;
 	case 'preview': // file security context
 		$pageno = 'file';
 		$tabno = 'download';

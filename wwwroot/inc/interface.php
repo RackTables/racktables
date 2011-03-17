@@ -5039,7 +5039,7 @@ function renderProgressBar ($percentage = 0, $theme = '')
 function getProgressBar ($percentage = 0, $theme = '')
 {
 	$done = ((int) ($percentage * 100));
-	$ret = "<img width=100 height=10 border=0 title='${done}%' src='?module=image&img=progressbar&done=${done}";
+	$ret = "<img width=100 height=10 border=0 title='${done}%' src='?module=progressbar&done=${done}";
 	if ($theme != '')
 		$ret .= "&theme=${theme}";
 	$ret .= "'>";
