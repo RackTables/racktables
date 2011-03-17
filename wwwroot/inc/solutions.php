@@ -147,6 +147,8 @@ function generateMiniRack ($rack_id)
 
 function renderProgressBarImage ($done)
 {
+	if ($done > 100)
+		throw new InvalidArgException ('done', $done);
 	$img = @imagecreatetruecolor (100, 10);
 	switch (isset ($_REQUEST['theme']) ? $_REQUEST['theme'] : 'rackspace')
 	{
@@ -174,6 +176,21 @@ function renderProgressBarImage ($done)
 	header("Content-type: image/png");
 	imagepng ($img);
 	imagedestroy ($img);
+}
+
+function renderProgressBarError()
+{
+	header ('Content-type: image/png');
+	// 100x10, red on pink, "progr. bar error"
+	echo base64_decode
+	(
+		'iVBORw0KGgoAAAANSUhEUgAAAGQAAAAKCAYAAABCHPt+AAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A' .
+		'/wD/oL2nkwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB9sDERYTJrBhF8sAAACvSURBVEjH' .
+		'7VdRDoAgCMXmQbz/qbhJfdnMQQiDTZ3vL6MHvEA03Yg3rIRSABBhV1xwMBXyp/JatFVYq7La1Hft' .
+		'N709xcXxWLqE4tbGr+GXdNDqw8STxSS0z9S695ZD+e05pXhHt8RRHqtebIdoRPASM2K+ePi18Gjz' .
+		'Yuwz7AKpM2cpmjPUVx3qf0OIqyLKvl+POMp6+R3Jy9oxnD4C0nsPiTrfb35viO2QiOF6foYKD57g' .
+		'f1uXQb2mAAAAAElFTkSuQmCC'
+	);
 }
 
 function renderFilePreview ($file_id)

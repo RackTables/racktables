@@ -85,11 +85,19 @@ try {
 		# without a permission check, but only for authenticated users.
 		require_once 'inc/init.php';
 		require_once 'inc/solutions.php';
-		genericAssertion ('done', 'uint0');
-		// 'progressbar's never change, make browser cache the result
-		if (checkCachedResponse (0, CACHE_DURATION))
-			break;
-		renderProgressBarImage ($_REQUEST['done']);
+		try
+		{
+			genericAssertion ('done', 'uint0');
+			// 'progressbar's never change, make browser cache the result
+			if (checkCachedResponse (0, CACHE_DURATION))
+				break;
+			renderProgressBarImage ($_REQUEST['done']);
+		}
+		catch (Exception $e)
+		{
+			ob_clean();
+			renderProgressBarError();
+		}
 		break;
 	case 'ajax' == $_REQUEST['module']:
 		require_once 'inc/ajax-interface.php';
