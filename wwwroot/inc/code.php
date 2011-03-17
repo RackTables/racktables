@@ -886,34 +886,52 @@ function findAutoTagWarnings ($expr)
 			{
 				case (preg_match ('/^\$id_/', $expr['load'])):
 					$recid = preg_replace ('/^\$id_/', '', $expr['load']);
-					if (NULL !== spotEntity ('object', $recid))
+					try
+					{
+						spotEntity ('object', $recid);
 						return array();
-					return array (array
-					(
-						'header' => refRCLineno ($expr['lineno']),
-						'class' => 'warning',
-						'text' => "An object with ID '${recid}' does not exist."
-					));
+					}
+					catch (EntityNotFoundException $e)
+					{
+						return array (array
+						(
+							'header' => refRCLineno ($expr['lineno']),
+							'class' => 'warning',
+							'text' => "An object with ID '${recid}' does not exist."
+						));
+					}
 				case (preg_match ('/^\$ipv4netid_/', $expr['load'])):
 					$recid = preg_replace ('/^\$ipv4netid_/', '', $expr['load']);
-					if (NULL != spotEntity ('ipv4net', $recid))
+					try
+					{
+						spotEntity ('ipv4net', $recid);
 						return array();
-					return array (array
-					(
-						'header' => refRCLineno ($expr['lineno']),
-						'class' => 'warning',
-						'text' => "IPv4 network with ID '${recid}' does not exist."
-					));
+					}
+					catch (EntityNotFoundException $e)
+					{
+						return array (array
+						(
+							'header' => refRCLineno ($expr['lineno']),
+							'class' => 'warning',
+							'text' => "IPv4 network with ID '${recid}' does not exist."
+						));
+					}
 				case (preg_match ('/^\$userid_/', $expr['load'])):
 					$recid = preg_replace ('/^\$userid_/', '', $expr['load']);
-					if (NULL !== spotEntity ('user', $recid))
+					try
+					{
+						spotEntity ('user', $recid);
 						return array();
-					return array (array
-					(
-						'header' => refRCLineno ($expr['lineno']),
-						'class' => 'warning',
-						'text' => "User account with ID '${recid}' does not exist."
-					));
+					}
+					catch (EntityNotFoundException $e)
+					{
+						return array (array
+						(
+							'header' => refRCLineno ($expr['lineno']),
+							'class' => 'warning',
+							'text' => "User account with ID '${recid}' does not exist."
+						));
+					}
 				case (preg_match ('/^\$username_/', $expr['load'])):
 					$recid = preg_replace ('/^\$username_/', '', $expr['load']);
 					global $require_local_account;
