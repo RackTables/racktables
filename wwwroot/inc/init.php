@@ -31,10 +31,8 @@ $racktables_gwdir = '../gateways';
 $racktables_staticdir = '.';
 # Set both paths at once before actually including secret.php, this way
 # both files will always be included from the same directory.
-$path_to_secret_php = $path_to_local_php = isset ($racktables_confdir) ?
-	"${racktables_confdir}/" : '';
-$path_to_secret_php .= 'secret.php';
-$path_to_local_php .= 'local.php';
+$path_to_secret_php = getFileFullPath ('secret.php');
+$path_to_local_php = getFileFullPath ('local.php');
 
 // (re)connects to DB, stores PDO object in $dbxlink global var
 function connectDB()
@@ -56,7 +54,7 @@ function connectDB()
 
 // secret.php may be missing, in which case this is a special fatal error
 ob_start();
-if (FALSE === @include_once $path_to_secret_php)
+if (! file_exists ($path_to_secret_php) || FALSE === include_once $path_to_secret_php)
 {
 	ob_end_clean();
 	throw new RackTablesError
@@ -160,7 +158,8 @@ $op = '';
 // local.php may be missing, this case requires no special treatment
 // and must not generate any warnings
 ob_start();
-@include_once $path_to_local_php;
+if (file_exists ($path_to_local_php))
+	include_once $path_to_local_php;
 $tmp = ob_get_clean();
 if ($tmp != '' and ! preg_match ("/^\n+$/D", $tmp))
 	echo $tmp;
@@ -171,5 +170,18 @@ $expl_tags = array();
 $impl_tags = array();
 // Initial chain for the current target.
 $target_given_tags = array();
+
+
+// first tries $racktables_confdir
+// then - the dirname of current file (__FILE__)
+// then - the current working directory (./)
+function getFileFullPath ($filename)
+{
+	global $racktables_confdir;
+	$dir = $racktables_confdir;
+	if (! isset ($dir) and preg_match ('#(.*)/#', __FILE__, $m))
+		$dir = $m[1];
+	return (isset ($dir) ? "${dir}/" : './') . $filename;
+}
 
 ?>
