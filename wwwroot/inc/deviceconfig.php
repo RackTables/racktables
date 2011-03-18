@@ -1501,7 +1501,7 @@ function ciscoReadInterfaceStatus ($text)
 				list ($status_raw, $vlan, $duplex, $speed) = $field_list;
 				if ($status_raw == 'connected' || $status_raw == 'up')
 					$status = 'up';
-				elseif ($status_raw == 'notconnect' || $status_raw == 'down')
+				elseif (0 === strpos ($status_raw, 'notconn') || $status_raw == 'down' || $status_raw == 'sfpAbsent')
 					$status = 'down';
 				else
 					$status = 'disabled';
