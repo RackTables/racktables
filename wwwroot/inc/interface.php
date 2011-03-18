@@ -8817,17 +8817,17 @@ function renderDiscoveredNeighbors ($object_id)
 				$left_types = array();
 				foreach ($local_ports as $portinfo)
 					if (! isTranceiverEmpty ($portinfo))
-						$left_types[$portinfo['oif_id']] = array ('id' => $portinfo['oif_id'], 'name' => $portinfo['oif_name'], 'portinfo' => $portinfo);
+						$left_types[$portinfo['oif_id']][] = array ('id' => $portinfo['oif_id'], 'name' => $portinfo['oif_name'], 'portinfo' => $portinfo);
 					else
 						foreach (getExistingPortTypeOptions ($portinfo['id']) as $oif_id => $oif_name)
-							$left_types[$oif_id] = array ('id' => $oif_id, 'name' => $oif_name, 'portinfo' => $portinfo);
+							$left_types[$oif_id][] = array ('id' => $oif_id, 'name' => $oif_name, 'portinfo' => $portinfo);
 				$right_types = array();
 				foreach ($remote_ports as $portinfo)
 					if (! isTranceiverEmpty ($portinfo))
-						$right_types[$portinfo['oif_id']] = array ('id' => $portinfo['oif_id'], 'name' => $portinfo['oif_name'], 'portinfo' => $portinfo);
+						$right_types[$portinfo['oif_id']][] = array ('id' => $portinfo['oif_id'], 'name' => $portinfo['oif_name'], 'portinfo' => $portinfo);
 					else
 						foreach (getExistingPortTypeOptions ($portinfo['id']) as $oif_id => $oif_name)
-							$right_types[$oif_id] = array ('id' => $oif_id, 'name' => $oif_name, 'portinfo' => $portinfo);
+							$right_types[$oif_id][] = array ('id' => $oif_id, 'name' => $oif_name, 'portinfo' => $portinfo);
 				if (! isset ($POIFC))
 				{
 					$POIFC = array();
@@ -8837,9 +8837,12 @@ function renderDiscoveredNeighbors ($object_id)
 						$POIFC[$item['type2']][$item['type1']] = TRUE;
 					}
 				}
-				foreach ($left_types as $left_id => $left) foreach ($right_types as $right_id => $right)
+				foreach ($left_types as $left_id => $left)
+				foreach ($right_types as $right_id => $right)
 					if (isset ($POIFC[$left_id][$right_id]))
-						$variants["${left_id}:${right_id}"] = array ('left' => $left, 'right' => $right);
+						foreach ($left as $left_port)
+						foreach ($right as $right_port)
+							$variants[] = array ('left' => $left_port, 'right' => $right_port);
 				if (! count ($variants)) // no compatible ports found
 					$error_message = "Incompatible port types";
 			} while (FALSE); // do {
@@ -8911,23 +8914,46 @@ function formatIfTypeVariants ($variants, $select_name)
 	$creting_tranceivers = FALSE;
 	$most_used_count = 0;
 	$selected_key = NULL;
+	$multiple_left = FALSE;
+	$multiple_right = FALSE;
+
+	$seen_ports = array();
+	foreach ($variants as $item)
+	{
+		if (isset ($seen_ports['left']) && $item['left']['portinfo']['id'] != $seen_ports['left'])
+			$multiple_left = TRUE;
+		if (isset ($seen_ports['right']) && $item['right']['portinfo']['id'] != $seen_ports['right'])
+			$multiple_right = TRUE;
+		$seen_ports['left'] = $item['left']['portinfo']['id'];
+		$seen_ports['right'] = $item['right']['portinfo']['id'];
+	}
 
 	if (! isset ($oif_usage_stat))
 		$oif_usage_stat = getPortTypeUsageStatistics();
 
 	foreach ($variants as $item)
 	{
+		// format text label for selectbox item
+		$left_text = ($multiple_left ? $item['left']['portinfo']['iif_name'] . '/' : '') . $item['left']['name'];
+		if (! $multiple_left && ! isTranceiverEmpty ($item['left']['portinfo']))
+			$left_text = '';
+		$right_text = ($multiple_right ? $item['right']['portinfo']['iif_name'] . '/' : '') . $item['right']['name'];
+		if (! $multiple_right && ! isTranceiverEmpty ($item['right']['portinfo']))
+			$right_text = '';
+		$text = $left_text;
+		if ($left_text != $right_text && strlen ($right_text))
+		{
+			if (strlen ($text))
+				$text .= " | ";
+			$text .= $right_text;
+		}
+
+		// fill the $params: port ids and port types
 		$params = array
 		(
 			'a_id' => $item['left']['portinfo']['id'],
 			'b_id' => $item['right']['portinfo']['id'],
 		);
-		$text = '';
-		if ($item['left']['id'] == $item['right']['id'])
-			$text = $item['left']['name'];
-		else
-			$text = $item['left']['name'] . ' | ' . $item['right']['name'];
-		
 		$popularity_count = 0;
 		if (isTranceiverEmpty ($item['left']['portinfo']))
 		{
@@ -8945,12 +8971,12 @@ function formatIfTypeVariants ($variants, $select_name)
 			if (isset ($oif_usage_stat[$item['right']['id']]))
 				$popularity_count += $oif_usage_stat[$item['right']['id']];
 		}
-		// a_id:id,a_oif:id,b_id:id,b_oif:id
-		$key = '';
+
+		$key = ''; // key sample: a_id:id,a_oif:id,b_id:id,b_oif:id
 		foreach ($params as $i => $j)
 			$key .= ",$i:$j";
 		$key = trim($key, ",");
-		$select[$key] = $text;
+		$select[$key] = (count ($variants) == 1 && ! $creting_tranceivers ? '' : $text); // empty string if there is simple single variant
 		if ($popularity_count > $most_used_count)
 		{
 			$most_used_count = $popularity_count;
