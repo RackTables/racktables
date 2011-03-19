@@ -1179,7 +1179,7 @@ function linkPorts ($porta, $portb, $cable = NULL)
 	);
 	if ($result->fetchColumn () != 0)
 	{
-		$dbxlink->exec ('UNLOCK TABLES');		
+		$dbxlink->exec ('UNLOCK TABLES');
 		return "Port ${porta} or ${portb} is already linked";
 	}
 	$result->closeCursor ();
