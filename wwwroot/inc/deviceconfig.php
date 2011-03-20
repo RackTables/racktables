@@ -340,6 +340,11 @@ function ios12PickSwitchportCommand (&$work, $line)
 	$line_class = 'line-8021q';
 	switch (TRUE)
 	{
+	case (preg_match ('@^\s*switchport\s*$@', $line, $matches)):
+		// treat switchport-only interfaces as access ports by default
+		if (! isset ($work['current']['mode']))
+			$work['current']['mode'] = 'access';
+		break;
 	case (preg_match ('@^ switchport mode (.+)$@', $line, $matches)):
 		$work['current']['mode'] = $matches[1];
 		break;
