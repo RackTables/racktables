@@ -7715,9 +7715,7 @@ function renderObject8021QPorts ($object_id)
 	switchportInfoJS ($object_id); // load JS code to make portnames interactive
 	foreach ($desired_config as $port_name => $port)
 	{
-		$text_left = same8021QConfigs ($cached_config[$port_name], $port) ? '' :
-			('<s>' . serializeVLANPack ($cached_config[$port_name]) . '</s><br>');
-		$text_left .= serializeVLANPack ($port);
+		$text_left = formatVLANPackDiff ($cached_config[$port_name], $port);
 		// decide on row class
 		switch ($port['vst_role'])
 		{
@@ -8365,9 +8363,7 @@ END
 			$trclass = 'trbusy';
 			$left_extra = ' trerror'; // can be fixed on request
 			$right_extra = ' trnull';
-			$left_text = same8021QConfigs ($item['left'], $item['lastseen']) ?
-				'' : ('<s>' . serializeVLANPack ($item['lastseen']) . '</s><br>');
-			$left_text .= serializeVLANPack ($item['left']);
+			$left_text = formatVLANPackDiff ($item['lastseen'], $item['left']);
 			$right_text = '&nbsp;';
 			$radio_attrs = array ('left' => '', 'asis' => ' checked', 'right' => ' disabled');
 			// dummy setting to suppress warnings in resolve8021QConflicts()
@@ -8404,16 +8400,14 @@ END
 		case 'ok_to_push':
 			$trclass = ' trbusy';
 			$left_extra = ' trok';
-			$left_text = '<s>' . serializeVLANPack ($C[$port_name]) . '</s><br>' .
-				serializeVLANPack ($item['left']);
+			$left_text = formatVLANPackDiff ($C[$port_name], $item['left']);
 			$right_text = serializeVLANPack ($item['right']);
 			break;
 		case 'merge_conflict':
 			$trclass = 'trbusy';
 			$left_extra = ' trerror';
 			$right_extra = ' trerror';
-			$left_text = '<s>' . serializeVLANPack ($C[$port_name]) . '</s><br>' .
-				serializeVLANPack ($item['left']);
+			$left_text = formatVLANPackDiff ($C[$port_name], $item['left']);
 			$right_text = serializeVLANPack ($item['right']);
 			// enable, but consider each option independently
 			// Don't accept running VLANs not in domain, and
@@ -8432,8 +8426,7 @@ END
 			$trclass = 'trbusy';
 			$left_extra = ' trok';
 			$right_extra = ' trwarning';
-			$left_text = '<s>' . serializeVLANPack ($C[$port_name]) . '</s><br>' .
-				serializeVLANPack ($item['left']);
+			$left_text = formatVLANPackDiff ($C[$port_name], $item['left']);
 			$right_text = serializeVLANPack ($item['right']);
 			break;
 		case 'none':
@@ -9252,4 +9245,31 @@ function addAtomCSS()
 	addCSS ($style, TRUE);
 }
 
+// Formats VLAN packs: if they are different, the old appears stroken, and the new appears below it
+// If comparing the two sets seems being complicated for human, this function generates a diff between old and new packs
+function formatVLANPackDiff ($old, $current)
+{
+	$ret = '';
+	$new_pack = serializeVLANPack ($current);
+	$new_size = substr_count ($new_pack, ',');
+	if (! same8021QConfigs ($old, $current))
+	{
+		$old_pack = serializeVLANPack ($old);
+		$old_size = substr_count ($old_pack, ',');
+		$ret .= '<s>' . $old_pack . '</s><br>';
+		// make diff
+		$added = groupIntsToRanges (array_diff ($current['allowed'], $old['allowed']));
+		$removed = groupIntsToRanges (array_diff ($old['allowed'], $current['allowed']));
+		$diff_size = count ($added) + count ($removed); 
+		if ($old['mode'] == $current['mode'] and $diff_size < $old_size / 2 and $diff_size < $new_size / 2)
+		{
+			if (! empty ($added))
+				$ret .= '<span class="vlan-diff diff-add">+ ' . implode (', ', $added) . '</span><br>';
+			if (! empty ($removed))
+				$ret .= '<span class="vlan-diff diff-rem">- ' . implode (', ', $removed) . '</span><br>';
+		}
+	}
+	$ret .= $new_pack;
+	return $ret;
+}
 ?>

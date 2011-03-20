@@ -2687,34 +2687,29 @@ function serializeVLANPack ($vlanport)
 	default:
 		return 'error';
 	}
-	$tagged = array();
-	foreach ($vlanport['allowed'] as $vlan_id)
-		if ($vlan_id != $vlanport['native'])
-			$tagged[] = $vlan_id;
-	sort ($tagged);
-	$ret .= $vlanport['native'] ? $vlanport['native'] : '';
-	$tagged_bits = array();
-	$id_from = $id_to = 0;
-	foreach ($tagged as $next_id)
-	{
-		if ($id_to)
-		{
-			if ($next_id == $id_to + 1) // merge
-			{
-				$id_to = $next_id;
-				continue;
-			}
-			// flush
-			$tagged_bits[] = $id_from == $id_to ? $id_from : "${id_from}-${id_to}";
-		}
-		$id_from = $id_to = $next_id; // start next pair
-	}
-	// pull last pair
-	if ($id_to)
-		$tagged_bits[] = $id_from == $id_to ? $id_from : "${id_from}-${id_to}";
-	if (count ($tagged))
+	$tagged_bits = groupIntsToRanges ($vlanport['allowed'], $vlanport['native']);
+	if (count ($tagged_bits))
 		$ret .= '+' . implode (', ', $tagged_bits);
 	return strlen ($ret) ? $ret : 'default';
+}
+
+function groupIntsToRanges ($list, $exclude_value = NULL)
+{
+	$result = array();
+	sort ($list);
+	$id_from = $id_to = 0;
+	$list[] = -1;
+	foreach ($list as $next_id)
+		if (!isset ($exclude_value) or $next_id != $exclude_value)
+			if ($id_to && $next_id == $id_to + 1)
+				$id_to = $next_id; // merge
+			else
+			{
+				if ($id_to)
+					$result[] = $id_from == $id_to ? $id_from : "${id_from}-${id_to}"; // flush
+				$id_from = $id_to = $next_id; // start next pair
+			}
+	return $result;
 }
 
 // Decode VLAN compound key (which is a string formatted DOMAINID-VLANID) and

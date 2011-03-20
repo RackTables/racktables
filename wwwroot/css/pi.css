@@ -634,3 +634,15 @@ a.img-link {
 .filter-text {
 	font-family: "Courier New",Courier,monospace;
 }	
+
+/* VLAN lists diff formatting (8021Q Ports and 8021Q Sync pages) */
+.vlan-diff {
+	font-weight: bold;
+	float: right;
+}
+.vlan-diff.diff-add {
+	color: green;
+}
+.vlan-diff.diff-rem {
+	color: #A00000;
+}
