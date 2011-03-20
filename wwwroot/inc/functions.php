@@ -2687,6 +2687,8 @@ function serializeVLANPack ($vlanport)
 	default:
 		return 'error';
 	}
+	if ($vlanport['native'])
+		$ret .= $vlanport['native'];
 	$tagged_bits = groupIntsToRanges ($vlanport['allowed'], $vlanport['native']);
 	if (count ($tagged_bits))
 		$ret .= '+' . implode (', ', $tagged_bits);
