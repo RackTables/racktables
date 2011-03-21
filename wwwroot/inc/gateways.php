@@ -230,8 +230,11 @@ function setSwitchVLANs ($object_id = 0, $setcmd)
 
 // Drop a file off RackTables platform. The gateway will catch the file and pass it to the given
 // installer script.
+// On success returns the text string printed by sendfile handler
+// On failure throws an exception
 function gwSendFile ($endpoint, $handlername, $filetext = array())
 {
+	$result = '';
 	if (! is_array ($filetext))
 		throw new InvalidArgException ('filetext', '(suppressed)', 'is not an array');
 	global $remote_username;
@@ -252,7 +255,8 @@ function gwSendFile ($endpoint, $handlername, $filetext = array())
 	}
 	try
 	{
-		queryGateway ('sendfile', array ($command));
+		$answers = queryGateway ('sendfile', array ($command));
+		$result = preg_replace ('/^OK!\s*/', '', array_shift ($answers));
 		foreach ($tmpnames as $name)
 			unlink ($name);
 	}
@@ -260,8 +264,9 @@ function gwSendFile ($endpoint, $handlername, $filetext = array())
 	{
 		foreach ($tmpnames as $name)
 			unlink ($name);
-		throw $e;
+		throw new RTGatewayError ("Sending $handlername to $endpoint: " . $e->getMessage());
 	}
+	return $result;
 }
 
 // Query something through a gateway and get some text in return. Return that text.
@@ -295,7 +300,7 @@ function gwSendFileToObject ($object_id, $handlername, $filetext = '')
 		throw new RTGatewayError ('no management address set');
 	if (count ($endpoints) > 1)
 		throw new RTGatewayError ('cannot pick management address');
-	gwSendFile (str_replace (' ', '+', $endpoints[0]), $handlername, array ($filetext));
+	return gwSendFile (str_replace (' ', '+', $endpoints[0]), $handlername, array ($filetext));
 }
 
 function gwRecvFileFromObject ($object_id, $handlername, &$output)

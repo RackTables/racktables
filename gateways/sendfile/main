@@ -39,10 +39,10 @@ do_submit()
 		echo "ERR!Cannot execute $MYDIR/$handler.install"
 		return
 	fi
-	"$MYDIR/$handler.install" "$user" "$endpoint" $files
+	message=$("$MYDIR/$handler.install" "$user" "$endpoint" $files)
 	ret=$?
 	if [ $ret = 0 ]; then
-		echo "OK!"
+		echo "OK!" "$message"
 	else
 		echo "ERR!Main dispatcher: handler '$handler' returned code $ret"
 	fi
