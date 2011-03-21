@@ -12,6 +12,7 @@
 	new feature: Cisco NX-OS v4, v5 LLDP gateway
 	bugfix: VRP linkstatus gateway now properly handles port-channels
 	update: LiveCDP, LiveLLDP, etc: ability to install tranceivers into ports in-place, while linking the ports
+	bugfix: LiveLLDP now supports 'local' port type with Huawei VRP v5 devices
 0.19.1 2011-02-22
 	update: UI: rack lists are now reduced by common tags with object on Rackspace tab (FILTER_RACKLIST_BY_TAGS config var)
 	update: 802.1q: If switch has IP interface in some VLAN linked to IP subnet, this VLAN is not pruned from switch's uplink

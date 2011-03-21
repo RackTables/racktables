@@ -24,8 +24,8 @@ $gwrxlator['getlldpstatus'] = array
 (
 	'ios12' => 'ios12ReadLLDPStatus',
 	'xos12' => 'xos12ReadLLDPStatus',
-	'vrp53' => 'vrp53ReadLLDPStatus',
-	'vrp55' => 'vrp55ReadLLDPStatus',
+	'vrp53' => 'vrp5xReadLLDPStatus',
+	'vrp55' => 'vrp5xReadLLDPStatus',
 	'nxos4' => 'nxos4ReadLLDPStatus',
 );
 $gwrxlator['get8021q'] = array

@@ -97,9 +97,15 @@ function xos12ReadLLDPStatus ($input)
 	return $ret;
 }
 
-function vrp53ReadLLDPStatus ($input)
+function vrp5xReadLLDPStatus ($input)
 {
 	$ret = array();
+	$valid_subtypes = array
+	(
+		'interfaceName',
+		'interfaceAlias',
+		'local',
+	);
 	foreach (explode ("\n", $input) as $line)
 	{
 		$matches = array();
@@ -108,55 +114,18 @@ function vrp53ReadLLDPStatus ($input)
 		case preg_match ('/^(.+) has \d+ neighbors:$/', $line, $matches):
 			$ret['current']['local_port'] = ios12ShortenIfName ($matches[1]);
 			break;
-		case preg_match ('/^(PortIdSubtype|PortId): ([^ ]+)/', $line, $matches):
-			$ret['current'][$matches[1]] = $matches[2];
-			break;
-		case preg_match ('/^SysName: (.+)$/', $line, $matches):
-			if
-			(
-				array_key_exists ('current', $ret) and
-				array_key_exists ('PortIdSubtype', $ret['current']) and
-				($ret['current']['PortIdSubtype'] == 'interfaceAlias' or $ret['current']['PortIdSubtype'] == 'interfaceName') and
-				array_key_exists ('PortId', $ret['current']) and
-				array_key_exists ('local_port', $ret['current'])
-			)
-				$ret[$ret['current']['local_port']][] = array
-				(
-					'device' => $matches[1],
-					'port' => ios12ShortenIfName ($ret['current']['PortId']),
-				);
-			unset ($ret['current']);
-			break;
-		default:
-		}
-	}
-	unset ($ret['current']);
-	return $ret;
-}
-
-function vrp55ReadLLDPStatus ($input)
-{
-	$ret = array();
-	foreach (explode ("\n", $input) as $line)
-	{
-		$matches = array();
-		switch (TRUE)
-		{
-		case preg_match ('/^(.+) has \d+ neighbors:$/', $line, $matches):
-			$ret['current']['local_port'] = ios12ShortenIfName ($matches[1]);
-			break;
-		case preg_match ('/^Port ID type   :([^ ]+)/', $line, $matches):
+		case preg_match ('/^Port ?ID ?(?:sub)?type\s*:\s*([^ ]+)/i', $line, $matches):
 			$ret['current']['PortIdSubtype'] = $matches[1];
 			break;
-		case preg_match ('/^Port ID        :(.+)$/', $line, $matches):
+		case preg_match ('/^Port ?ID\s*:\s*(.+)$/i', $line, $matches):
 			$ret['current']['PortId'] = $matches[1];
 			break;
-		case preg_match ('/^System name         :(.+)$/', $line, $matches):
+		case preg_match ('/^Sys(?:tem)? ?name\s*:\s*(.+)$/i', $line, $matches):
 			if
 			(
 				array_key_exists ('current', $ret) and
 				array_key_exists ('PortIdSubtype', $ret['current']) and
-				($ret['current']['PortIdSubtype'] == 'interfaceAlias' or $ret['current']['PortIdSubtype'] == 'interfaceName') and
+				in_array ($ret['current']['PortIdSubtype'], $valid_subtypes) and
 				array_key_exists ('PortId', $ret['current']) and
 				array_key_exists ('local_port', $ret['current'])
 			)
