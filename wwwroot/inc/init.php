@@ -31,8 +31,10 @@ $racktables_gwdir = '../gateways';
 $racktables_staticdir = '.';
 # Set both paths at once before actually including secret.php, this way
 # both files will always be included from the same directory.
-$path_to_secret_php = getFileFullPath ('secret.php');
-$path_to_local_php = getFileFullPath ('local.php');
+if (! isset ($path_to_secret_php))
+	$path_to_secret_php = getFileFullPath ('secret.php');
+if (! isset ($path_to_local_php))
+	$path_to_local_php = getFileFullPath ('local.php');
 
 // (re)connects to DB, stores PDO object in $dbxlink global var
 function connectDB()
@@ -54,7 +56,7 @@ function connectDB()
 
 // secret.php may be missing, in which case this is a special fatal error
 ob_start();
-if (! file_exists ($path_to_secret_php) || FALSE === include_once $path_to_secret_php)
+if (! file_exists ($path_to_secret_php))
 {
 	ob_end_clean();
 	throw new RackTablesError
@@ -64,6 +66,10 @@ if (! file_exists ($path_to_secret_php) || FALSE === include_once $path_to_secre
 		"procedure by following <a href='?module=installer'>this link</a>.",
 		RackTablesError::MISCONFIGURED
 	);
+}
+else
+{
+	require_once $path_to_secret_php;
 }
 $tmp = ob_get_clean();
 if ($tmp != '' and ! preg_match ("/^\n+$/D", $tmp))
@@ -178,10 +184,13 @@ $target_given_tags = array();
 function getFileFullPath ($filename)
 {
 	global $racktables_confdir;
-	$dir = $racktables_confdir;
-	if (! isset ($dir) and preg_match ('#(.*)/#', __FILE__, $m))
-		$dir = $m[1];
-	return (isset ($dir) ? "${dir}/" : './') . $filename;
+	if (isset ($racktables_confdir))
+		$dir = $racktables_confdir;
+	else
+		$dir = dirname (__FILE__);
+	if (! strlen ($dir))
+		$dir = '.';
+	return $dir . '/' . $filename;
 }
 
 ?>
