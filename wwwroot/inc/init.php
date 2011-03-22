@@ -24,19 +24,22 @@ require_once 'caching.php';
 // care to set, something would be working anyway.
 $user_auth_src = 'database';
 $require_local_account = TRUE;
-# Below are default values for two paths. The right way to change these
+
+$racktables_rootdir = realpath (dirname (__FILE__) . '/..'); // you can not override this
+# Below are default values for several paths. The right way to change these
 # is to add respective line(s) to secret.php, unless this is a "shared
-# code, multiple instances" deploy.
-if (! isset ($racktables_gwdir))
-	$racktables_gwdir = realpath (dirname (__FILE__) . '/../gateways');
-if (! isset ($racktables_staticdir))
-	$racktables_staticdir = realpath (dirname (__FILE__) . '/..');
-# Set both paths at once before actually including secret.php, this way
-# both files will always be included from the same directory.
+# code, multiple instances" deploy, in which case the paths could be changed
+# in the custom entry point wrapper (like own index.php)
+if (! isset ($racktables_staticdir)) // the directory containing 'pix', 'js', 'css' dirs
+	$racktables_staticdir = $racktables_rootdir;
+if (! isset ($racktables_gwdir)) // the directory containing 'deviceconfig', 'sendfile' dirs, etc
+	$racktables_gwdir = $racktables_rootdir . '/gateways';
+if (! isset ($racktables_confdir)) // the directory containing local.php and secret.php (default is wwwroot/inc)
+	$racktables_confdir = dirname (__FILE__);
 if (! isset ($path_to_secret_php))
-	$path_to_secret_php = getFileFullPath ('secret.php');
+	$path_to_secret_php = $racktables_confdir . '/secret.php';
 if (! isset ($path_to_local_php))
-	$path_to_local_php = getFileFullPath ('local.php');
+	$path_to_local_php = $racktables_confdir . '/local.php';
 
 // (re)connects to DB, stores PDO object in $dbxlink global var
 function connectDB()
@@ -58,7 +61,7 @@ function connectDB()
 
 // secret.php may be missing, in which case this is a special fatal error
 ob_start();
-if (! file_exists ($path_to_secret_php))
+if (! fileSearchExists ($path_to_secret_php))
 {
 	ob_end_clean();
 	throw new RackTablesError
@@ -166,7 +169,7 @@ $op = '';
 // local.php may be missing, this case requires no special treatment
 // and must not generate any warnings
 ob_start();
-if (file_exists ($path_to_local_php))
+if (fileSearchExists ($path_to_local_php))
 	include_once $path_to_local_php;
 $tmp = ob_get_clean();
 if ($tmp != '' and ! preg_match ("/^\n+$/D", $tmp))
@@ -179,20 +182,18 @@ $impl_tags = array();
 // Initial chain for the current target.
 $target_given_tags = array();
 
-
-// first tries $racktables_confdir
-// then - the dirname of current file (__FILE__)
-// then - the current working directory (./)
-function getFileFullPath ($filename)
+// tries to guess the existance of the file before the php's include using the same searching method.
+// in addition to calling file_exists, searches the current file's directory if the path is not looks
+// like neither absolute nor relative.
+function fileSearchExists ($filename)
 {
-	global $racktables_confdir;
-	if (isset ($racktables_confdir))
-		$dir = $racktables_confdir;
-	else
-		$dir = dirname (__FILE__);
-	if (! strlen ($dir))
-		$dir = realpath ('.');
-	return $dir . '/' . $filename;
+	if (! preg_match ('@^(\.+)?/@', $filename))
+	{
+		$this_file_dir = dirname (__FILE__);
+		if (file_exists ($this_file_dir . '/' . $filename))
+			return TRUE;
+	}
+	return file_exists ($filename);
 }
 
 ?>
