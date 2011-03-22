@@ -27,8 +27,10 @@ $require_local_account = TRUE;
 # Below are default values for two paths. The right way to change these
 # is to add respective line(s) to secret.php, unless this is a "shared
 # code, multiple instances" deploy.
-$racktables_gwdir = '../gateways';
-$racktables_staticdir = '.';
+if (! isset ($racktables_gwdir))
+	$racktables_gwdir = realpath (dirname (__FILE__) . '/../gateways');
+if (! isset ($racktables_staticdir))
+	$racktables_staticdir = realpath (dirname (__FILE__) . '/..');
 # Set both paths at once before actually including secret.php, this way
 # both files will always be included from the same directory.
 if (! isset ($path_to_secret_php))
@@ -189,7 +191,7 @@ function getFileFullPath ($filename)
 	else
 		$dir = dirname (__FILE__);
 	if (! strlen ($dir))
-		$dir = '.';
+		$dir = realpath ('.');
 	return $dir . '/' . $filename;
 }
 
