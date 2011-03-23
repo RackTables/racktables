@@ -1558,7 +1558,6 @@ function showMessageOrError ()
 				204 => array ('code' => 'warning', 'format' => 'Check uplink/downlink configuration for proper operation.'),
 				205 => array ('code' => 'warning', 'format' => '%u change request(s) have been ignored'),
 				206 => array ('code' => 'warning', 'format' => 'Rack is not empty'),
-				207 => array ('code' => 'warning', 'format' => 'Ignored empty request'),
 
 // records 300~399 with notices
 				300 => array ('code' => 'neutral', 'format' => '%s'),

@@ -2151,7 +2151,7 @@ function linkFileToEntity ()
 }
 
 $msgcode['replaceFile']['OK'] = 7;
-$msgcode['replaceFile']['ERR2'] = 207;
+$msgcode['replaceFile']['ERR2'] = 201;
 function replaceFile ()
 {
 	// Make sure the file can be uploaded
