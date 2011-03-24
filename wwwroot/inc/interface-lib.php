@@ -382,7 +382,10 @@ function transformRequestData()
 				$_REQUEST[$key] = stripslashes ($value);
 	// Escape any globals before we ever try to use them, but keep a copy of originals.
 	$sic = array();
-	foreach ($_REQUEST as $key => $value)
+	// walk through merged GET and POST instead of REQUEST array because it
+	// can contain cookies with data which could not be decoded from UTF-8
+	//foreach (array_merge($_GET, $_POST) as $key => $value)
+	foreach (array_merge($_GET, $_POST) as $key => $value)
 	{
 		$sic[$key] = dos2unix ($value);
 		if (gettype ($value) == 'string')
