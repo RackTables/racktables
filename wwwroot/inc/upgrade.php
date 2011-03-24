@@ -58,13 +58,25 @@ ENDOFTEXT
 ,
 	'0.19.2' => <<<ENDOFTEXT
 This release is different in filesystem layout. The "gateways" directory
-has been moved from "wwwroot" directory. This improves security, but may
-lead to gateways extension not working by default. If you need any of the
-gateway-dependent features (802.1Q, live ports, sendfile) working, the
-recommended way is to put "racktables_gwdir" variable to secret.php file
-with the full filesystem path to "gateways" directory on the server, e.g.:
+has been moved from "wwwroot" directory. This improves security a bit.
+You can also separate your local settings and add-ons from the core RackTables code.
+To do that, put a single index.php file into the DocumentRoot of your http server:
 
-\$racktables_gwdir = '/usr/local/racktables/gateways';
+<?php
+\$racktables_confdir='/directory/where/your/secret.php/and/local.php/files/are/stored';
+require '/directory_where_you_extracted_racktables_distro/wwwroot/index.php';
+?>
+
+No more files are needed to be available directly over the HTTP.
+Full list of filesystem paths which could be specified in custom index.php or secret.php:
+ \$racktables_gwdir:      path to the gateways directory;
+ \$racktables_staticdir:  path to the directory containing 'pix', 'js', 'css' dirs;
+ \$racktables_confdir:    path where secret.php and local.php are located. It is not
+                         recommended to define it in secret.php, cause only the path to
+                         local.php will be affected;
+ \$path_to_secret_php:    Ignore \$racktables_confdir when locating secret.php and use
+                         the specified path;
+ \$path_to_local_php:     idem for local.php.
 ENDOFTEXT
 ,
 );
