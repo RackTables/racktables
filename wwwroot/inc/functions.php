@@ -2964,6 +2964,7 @@ function generate8021QDeployOps ($domain_vlanlist, $device_vlanlist, $before, $c
 		foreach ($port['allowed'] as $vlan_id)
 			if
 			(
+				isset ($domain_vlanlist[$vlan_id]) and
 				$domain_vlanlist[$vlan_id]['vlan_type'] == 'ondemand' and
 				!in_array ($vlan_id, $new_managed_vlans)
 			)
