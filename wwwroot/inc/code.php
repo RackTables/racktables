@@ -962,7 +962,7 @@ function findAutoTagWarnings ($expr)
 				case (preg_match ('/^\$typeid_[[:digit:]]+$/', $expr['load'])): // FIXME: check value validity
 				case (preg_match ('/^\$cn_.+$/', $expr['load'])): // FIXME: check name validity and asset existence
 				case (preg_match ('/^\$lgcn_.+$/', $expr['load'])): // FIXME: check name validity
-				case (preg_match ('/^\$(fromvlan|tovlan)_[[:digit:]]+$/', $expr['load'])):
+				case (preg_match ('/^\$(vlan|fromvlan|tovlan)_[[:digit:]]+$/', $expr['load'])):
 				case (preg_match ('/^\$(unmounted|untagged|no_asset_tag|runs_8021Q)$/', $expr['load'])):
 				case (preg_match ('/^\$masklen_(eq|le|ge)_[[:digit:]][[:digit:]]?$/', $expr['load'])):
 				case (preg_match ('/^\$attr_\d+_\d+$/', $expr['load'])):

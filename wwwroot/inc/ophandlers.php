@@ -1886,8 +1886,8 @@ function setPortVLAN ()
 		$newvlanid = $_REQUEST['vlanid_' . $i];
 		if
 		(
-			!permitted (NULL, NULL, NULL, array (array ('tag' => '$fromvlan_' . $oldvlanid))) or
-			!permitted (NULL, NULL, NULL, array (array ('tag' => '$tovlan_' . $newvlanid)))
+			!permitted (NULL, NULL, NULL, array (array ('tag' => '$fromvlan_' . $oldvlanid), array ('tag' => '$vlan_' . $oldvlanid))) or
+			!permitted (NULL, NULL, NULL, array (array ('tag' => '$tovlan_' . $newvlanid), array ('tag' => '$vlan_' . $newvlanid)))
 		)
 		{
 			$log = mergeLogs ($log, oneLiner (159, array ($portname, $oldvlanid, $newvlanid)));

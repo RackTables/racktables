@@ -4701,8 +4701,8 @@ function renderVLANMembership ($object_id)
 		foreach (array_keys ($vlanlist) as $to)
 			if
 			(
-				permitted (NULL, NULL, 'setPortVLAN', array (array ('tag' => '$fromvlan_' . $port['vlanid']))) and
-				permitted (NULL, NULL, 'setPortVLAN', array (array ('tag' => '$tovlan_' . $to)))
+				permitted (NULL, NULL, 'setPortVLAN', array (array ('tag' => '$fromvlan_' . $port['vlanid']), array ('tag' => '$vlan_' . $port['vlanid']))) and
+				permitted (NULL, NULL, 'setPortVLAN', array (array ('tag' => '$tovlan_' . $to), array ('tag' => '$vlan_' . $to)))
 			)
 				$vlanpermissions[$port['vlanid']][] = $to;
 	}

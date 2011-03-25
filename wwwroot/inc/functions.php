@@ -3916,10 +3916,10 @@ function authorize8021QChangeRequests ($before, $changes)
 	foreach ($changes as $pn => $change)
 	{
 		foreach (array_diff ($before[$pn]['allowed'], $change['allowed']) as $removed_id)
-			if (!permitted (NULL, NULL, NULL, array (array ('tag' => '$fromvlan_' . $removed_id))))
+			if (!permitted (NULL, NULL, NULL, array (array ('tag' => '$fromvlan_' . $removed_id), array ('tag' => '$vlan_' . $removed_id))))
 				continue 2; // next port
 		foreach (array_diff ($change['allowed'], $before[$pn]['allowed']) as $added_id)
-			if (!permitted (NULL, NULL, NULL, array (array ('tag' => '$tovlan_' . $added_id))))
+			if (!permitted (NULL, NULL, NULL, array (array ('tag' => '$tovlan_' . $added_id), array ('tag' => '$vlan_' . $added_id))))
 				continue 2; // next port
 		$ret[$pn] = $change;
 	}
