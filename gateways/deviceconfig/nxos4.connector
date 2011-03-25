@@ -93,7 +93,16 @@ if ($command eq "getlldpstatus") {
 if ($command eq "deploy") {
     open(WORKFILE, "<$workfile") || die "$workfile: $!";
     while (<WORKFILE>) {
-        $session->cmd($_);
+		my $prev_timeout;
+		if ($_ =~ /^copy running-config startup-config/) {
+			$prev_timeout = $session->timeout(60);
+		}
+
+		$session->cmd($_);
+
+		if (defined $prev_timeout) {
+			$session->timeout($prev_timeout);
+		}
     }
     exit(0);
 }
