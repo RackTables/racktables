@@ -1042,6 +1042,11 @@ CREATE TABLE `EntityLink` (
 			$query[] = "ALTER TABLE AttributeValue ADD KEY `attr_id-string_value` (`attr_id`,`string_value`(12))";
 			$query[] = "UPDATE Config SET varvalue = '0.19.2' WHERE varname = 'DB_VERSION'";
 			break;
+		case '0.19.3':
+			$query = array_merge ($query, reloadDictionary ($batchid));
+			$query[] = "DELETE FROM RackSpace WHERE object_id IS NULL AND state = 'T'";
+			$query[] = "UPDATE Config SET varvalue = '0.19.3' WHERE varname = 'DB_VERSION'";
+			break;
 		default:
 			showError ("executeUpgradeBatch () failed, because batch '${batchid}' isn't defined", __FUNCTION__);
 			die;

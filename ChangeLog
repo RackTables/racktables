@@ -1,5 +1,6 @@
 0.19.3
 	update: when searching for object by its hostname (FQDN attr) and single match is found, no searching by other fields is done
+	bugfix: handle SQL remnants of bug 399/415
 0.19.2 2011-03-24
 	new feature: JunOS10 802.1q gateway
 	bugfix: port linking was broken for some users due to open PDO cursor (#413)
