@@ -4098,6 +4098,14 @@ function searchEntitiesByText ($terms)
 		if (NULL !== ($net_id = getIPv6AddressNetworkId ($ipv6, $matches[2] + 1)))
 			$summary['ipv6network'][$net_id] = spotEntity('ipv6net', $net_id);
 	}
+	elseif ($found_id = searchByMgmtHostname ($terms))
+	{
+		$summary['object'][$found_id] = array
+		(
+			'id' => $found_id,
+			'method' => 'fqdn',
+		);
+	}
 	else
 	// Search for objects, addresses, networks, virtual services and RS pools by their description.
 	{
