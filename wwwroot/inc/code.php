@@ -957,7 +957,7 @@ function findAutoTagWarnings ($expr)
 						'class' => 'warning',
 						'text' => "Page number '${recid}' does not exist."
 					));
-				case (preg_match ('/^\$(tab|op)_[\p{L}0-9]+$/u', $expr['load'])):
+				case (preg_match ('/^\$(tab|op)_[\p{L}0-9_]+$/u', $expr['load'])):
 				case (preg_match ('/^\$any_(op|rack|object|ip4net|net|ipv4vs|vs|ipv4rsp|rsp|file)$/', $expr['load'])):
 				case (preg_match ('/^\$typeid_[[:digit:]]+$/', $expr['load'])): // FIXME: check value validity
 				case (preg_match ('/^\$cn_.+$/', $expr['load'])): // FIXME: check name validity and asset existence
