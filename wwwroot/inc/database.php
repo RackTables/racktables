@@ -896,10 +896,11 @@ function commitUpdateRack ($rack_id, $new_name, $new_height, $new_row_id, $new_c
 // The function returns the modified rack upon success.
 function processGridForm (&$rackData, $unchecked_state, $checked_state, $object_id = 0)
 {
-	global $loclist;
+	global $loclist, $dbxlink;
 	$rack_id = $rackData['id'];
 	$rack_name = $rackData['name'];
 	$rackchanged = FALSE;
+	$dbxlink->beginTransaction();
 	for ($unit_no = $rackData['height']; $unit_no > 0; $unit_no--)
 	{
 		for ($locidx = 0; $locidx < 3; $locidx++)
@@ -952,10 +953,11 @@ function processGridForm (&$rackData, $unchecked_state, $checked_state, $object_
 	if ($rackchanged)
 	{
 		usePreparedUpdateBlade ('Rack', array ('thumb_data' => NULL), array ('id' => $rack_id));
+		$dbxlink->commit();
 		return array ('code' => 200, 'message' => "${rack_name}: All changes were successfully saved.");
 	}
-	else
-		return array ('code' => 300, 'message' => "${rack_name}: No changes.");
+	$dbxlink->rollBack();
+	return array ('code' => 300, 'message' => "${rack_name}: No changes.");
 }
 
 // This function builds a list of rack-unit-atom records, which are assigned to
