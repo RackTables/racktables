@@ -1,8 +1,43 @@
 <?php
 /*
-*
-*  This file is a library of operation handlers for RackTables.
-*
+
+"Ophandler" in RackTables stands for "operation handler", or a function,
+which handles execution of "operation" (in the meaning explained in
+navigation.php). Most of the ophandlers are meant to perform one specific
+action, for example, to set a name of an object. Each such action often
+requires a set of parameters (e. g. ID of the object and the new name),
+and it is responsibility of each ophandler function to verify, that all
+necessary parameters are provided by the user and have proper values. There
+is a number of helper functions to make such verification simple.
+
+Errors occuring in ophandlers are typically indicated with exceptions of
+assorted classes. Namely, an "InvalidRequestArgException" class means, that
+at least one of the parameters provided by the user is not acceptable. This
+is a "soft" error, which gets displayed in the standard message area of
+otherwise usual interface. A different case is "InvalidArgException", which
+means, that one of the internal functions detected its argument(s) invalid
+or currupted, and that argument(s) did not come from user's input (and thus
+cannot be fixed without fixing a bug in the code). Such "hard" errors don't
+get special early handling and end up in the default catching block. The
+latter may print a detailed stack trace instead of the interface HTML to
+help a developer debug the issue.
+
+As long as an ophandler makes through its request (extracting arguments,
+performing validation and actually updating records in the database), it
+may queue up messages (often referred to as "green" and "red" bars) by
+means of showError() and showSuccess() function. The messages are not
+displayed immediately, because successfull ophandlers are expected to
+return only the new URL, where the user will be immediately redirected to
+(it is also possible to return an empty string to mean, that the current
+logical location remains the same). The page at the "next" location is
+supposed to translate message buffer into the standard message area.
+
+A very special case of an ophandler is tableHandler(). This generic
+function handles the most trivial actions, which map to a single INSERT,
+UPDATE or DELETE SQL statement with a fixed number of arguments. The rules
+of argument validation and mapping are listed in $opspec_list (operation
+specifications list) array.
+
 */
 
 // This array is deprecated. Please do not add new message constants to it.
