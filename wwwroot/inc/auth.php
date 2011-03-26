@@ -149,9 +149,14 @@ function assertPermission ($p = NULL, $t = NULL, $o = NULL, $annex = array())
 		throw new RTPermissionDenied();
 }
 
-// The argument doesn't include explicit and implicit tags. This allows us to derive implicit chain
-// each time we modify the given argument (and work with the modified copy from now on).
-// After the work is done the global $impl_tags is silently modified
+# Process a (globally available) RackCode permissions parse tree (which
+# stands for a sequence of rules), evaluating each rule against a list of
+# tags. This list of tags consists of (globally available) explicit and
+# implicit tags plus some extra tags, available through the argument of the
+# function. The latter tags are referred to as "constant" tags, because
+# RackCode syntax allows for "context modifier" constructs, which result in
+# implicit and explicit tags being assigned or unassigned. Such context
+# changes remain in effect even upon return from this function.
 function gotClearanceForTagChain ($const_base)
 {
 	global $rackCode, $expl_tags, $impl_tags;
