@@ -2021,7 +2021,7 @@ function deleteRack ()
 	return buildRedirectURL (__FUNCTION__, 'OK', array ($rackData['name']), 'rackspace', 'default');
 }
 
-$msgcode['updateRack']['OK'] = 7;
+$msgcode['updateRack']['OK'] = 6;
 $msgcode['updateRack']['ERR'] = 109;
 function updateRack ()
 {
