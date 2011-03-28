@@ -3385,7 +3385,7 @@ function renderAddMultipleObjectsForm ()
 	printOpFormIntro ('addObjects');
 	echo '<table border=0 align=center>';
 	echo "<tr><th>Object type</th><th>Common name</th><th>Visible label</th>";
-	echo "<th>Asset tag</th><th>Barcode</th><th>Tags</th></tr>\n";
+	echo "<th>Asset tag</th><th>Tags</th></tr>\n";
 	for ($i = 0; $i < $max; $i++)
 	{
 		echo '<tr><td>';
