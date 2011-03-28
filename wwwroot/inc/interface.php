@@ -7865,8 +7865,8 @@ function getAccessPortControlCode ($req_port_name, $vdom, $port_name, $port, &$n
 		foreach (array_keys ($vdom['vlanlist']) as $to)
 			if
 			(
-				permitted (NULL, NULL, 'save8021QConfig', array (array ('tag' => '$fromvlan_' . $port['native']))) and
-				permitted (NULL, NULL, 'save8021QConfig', array (array ('tag' => '$tovlan_' . $to)))
+				permitted (NULL, NULL, 'save8021QConfig', array (array ('tag' => '$fromvlan_' . $port['native']), array ('tag' => '$vlan_' . $port['native']))) and
+				permitted (NULL, NULL, 'save8021QConfig', array (array ('tag' => '$tovlan_' . $to), array ('tag' => '$vlan_' . $to)))
 			)
 				$vlanpermissions[$port['native']][] = $to;
 	}
