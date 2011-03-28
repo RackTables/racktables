@@ -719,6 +719,7 @@ function vrp55Read8021QConfig ($input)
 			break;
 		case $line == ' undo portswitch':
 		case preg_match ('/^ ip address /', $line):
+		case preg_match ('/^ service type /', $line):
 			$ret['current']['link-type'] = 'IP';
 			break;
 		case preg_match ('/^ eth-trunk /', $line):
