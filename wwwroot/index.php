@@ -215,12 +215,6 @@ catch (Exception $e)
 	# prevent message appearing in foreign tab
 	if (isset ($_SESSION['log']))
 		unset ($_SESSION['log']);
-	if (isset ($_SERVER['HTTP_REFERER']))
-	{
-		header('Location: ' . $_SERVER['HTTP_REFERER']);
-		showError ($e->getMessage());
-	}
-	else
-		printException ($e);
+	printException ($e);
 }
 ?>
