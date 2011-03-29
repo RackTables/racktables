@@ -1209,7 +1209,7 @@ function getObjectIPv4AllocationList ($object_id)
 	$result = usePreparedSelectBlade
 	(
 		'SELECT name AS osif, type, inet_ntoa(ip) AS dottedquad FROM IPv4Allocation ' .
-		'WHERE object_id = ? ORDER BY ip',
+		'WHERE object_id = ?',
 		array ($object_id)
 	);
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
@@ -1217,18 +1217,25 @@ function getObjectIPv4AllocationList ($object_id)
 	return $ret;
 }
 
-// Return all IPv4 addresses allocated to the objects. Attach detailed
-// info about address to each alocation records. Index result by dotted-quad
-// address.
+// Return all IPv4 addresses allocated to the objects sorted by allocation name.
+// Attach detailed info about address to each alocation records.
+// Index result by dotted-quad address.
 function getObjectIPv4Allocations ($object_id = 0)
 {
-	$ret = getObjectIPv4AllocationList ($object_id);
-	foreach (array_keys ($ret) as $dottedquad)
-		$ret[$dottedquad]['addrinfo'] = getIPv4Address ($dottedquad);
+	$ret = array();
+	$sorted = array();
+	foreach (getObjectIPv4AllocationList ($object_id) as $dottedquad => $alloc)
+		$sorted[$alloc['osif']][$dottedquad] = $alloc;
+	foreach (sortPortList ($sorted) as $osif => $subarray)
+		foreach ($subarray as $dottedquad => $alloc)
+		{
+			$alloc['addrinfo'] = getIPv4Address ($dottedquad);
+			$ret[$dottedquad] = $alloc;
+		}
 	return $ret;
 }
 
-// Returns all IPv4 addresses allocated to object, but does not attach detailed info about address
+// Returns all IPv6 addresses allocated to object, but does not attach detailed info about address
 // Used instead of getObjectIPv6Allocations if you need perfomance but 'addrinfo' value
 function getObjectIPv6AllocationList ($object_id)
 {
@@ -1236,7 +1243,7 @@ function getObjectIPv6AllocationList ($object_id)
 	$result = usePreparedSelectBlade
 	(
 		'SELECT name AS osif, type, ip AS ip FROM IPv6Allocation ' .
-		'WHERE object_id = ? ORDER BY ip',
+		'WHERE object_id = ?',
 		array ($object_id)
 	);
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
@@ -1244,13 +1251,21 @@ function getObjectIPv6AllocationList ($object_id)
 	return $ret;
 }
 
-// Return all IPv6 addresses allocated to the objects. Attach detailed
-// info about address to each alocation records. Index result by binary string of IPv6
+// Return all IPv6 addresses allocated to the objects sorted by allocation name.
+// Attach detailed info about address to each alocation records.
+// Index result by binary string of IPv6 address
 function getObjectIPv6Allocations ($object_id = 0)
 {
-	$ret = getObjectIPv6AllocationList ($object_id);
-	foreach (array_keys ($ret) as $ip_bin)
-		$ret[$ip_bin]['addrinfo'] = getIPv6Address (new IPv6Address ($ip_bin));
+	$ret = array();
+	$sorted = array();
+	foreach (getObjectIPv6AllocationList ($object_id) as $ip_bin => $alloc)
+		$sorted[$alloc['osif']][$ip_bin] = $alloc;
+	foreach (sortPortList ($sorted) as $osif => $subarray)
+		foreach ($subarray as $ip_bin => $alloc)
+		{
+			$alloc['addrinfo'] = getIPv6Address (new IPv6Address ($ip_bin));
+			$ret[$ip_bin] = $alloc;
+		}
 	return $ret;
 }
 
