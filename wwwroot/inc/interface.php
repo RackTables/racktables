@@ -8054,6 +8054,20 @@ function renderVLANInfo ($vlan_ck)
 		echo "<tr><th width='50%' class=tdright>Description:</th><td class=tdleft>" .
 			niftyString ($vlan['vlan_descr'], 0) . "</td></tr>";
 	echo "<tr><th width='50%' class=tdright>Propagation:</th><td class=tdleft>" . $vtoptions[$vlan['vlan_prop']] . "</td></tr>";
+	$others = getSearchResultByField
+	(
+		'VLANDescription',
+		array ('domain_id'),
+		'vlan_id',
+		$vlan['vlan_id'],
+		'domain_id',
+		1
+	);
+	foreach ($others as $other)
+		if ($other['domain_id'] != $vlan['domain_id'])
+			echo '<tr><th class=tdright>Counterpart:</th><td class=tdleft>' .
+				formatVLANName (getVLANInfo ("${other['domain_id']}-${vlan['vlan_id']}"), 'hyperlink') .
+				'</td></tr>';
 	echo '</table>';
 	finishPortlet();
 	if (0 == count ($vlan['ipv4nets']) + count ($vlan['ipv6nets']))
