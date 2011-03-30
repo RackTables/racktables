@@ -376,21 +376,27 @@ function transformRequestData()
 	global $sic;
 	// Magic quotes feature is deprecated, but just in case the local system
 	// still has it activated, reverse its effect.
-	if (function_exists ('get_magic_quotes_gpc') and get_magic_quotes_gpc())
-		foreach ($_REQUEST as $key => $value)
-			if (gettype ($value) == 'string')
-				$_REQUEST[$key] = stripslashes ($value);
+	$do_magic_quotes = (function_exists ('get_magic_quotes_gpc') and get_magic_quotes_gpc());
+	$seen_keys = array();
+
 	// Escape any globals before we ever try to use them, but keep a copy of originals.
 	$sic = array();
 	// walk through merged GET and POST instead of REQUEST array because it
 	// can contain cookies with data which could not be decoded from UTF-8
-	//foreach (array_merge($_GET, $_POST) as $key => $value)
 	foreach (array_merge($_GET, $_POST) as $key => $value)
 	{
+		$seen_keys[$key] = 1;
+		if ($do_magic_quotes)
+			$value = stripslashes ($value);
 		$sic[$key] = dos2unix ($value);
 		if (gettype ($value) == 'string')
 			$_REQUEST[$key] = escapeString (dos2unix ($value));
 	}
+
+	// delete cookie information from the $_REQUEST array
+	foreach (array_keys ($_REQUEST) as $key)
+		if (! isset ($seen_keys[$key]))
+			unset ($_REQUEST[$key]);
 
 	if (isset ($_SERVER['PHP_AUTH_USER']))
 		$_SERVER['PHP_AUTH_USER'] = escapeString ($_SERVER['PHP_AUTH_USER']);
