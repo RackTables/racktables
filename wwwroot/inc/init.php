@@ -33,7 +33,7 @@ $racktables_rootdir = realpath (dirname (__FILE__) . '/..'); // you can not over
 if (! isset ($racktables_staticdir)) // the directory containing 'pix', 'js', 'css' dirs
 	$racktables_staticdir = $racktables_rootdir;
 if (! isset ($racktables_gwdir)) // the directory containing 'deviceconfig', 'sendfile' dirs, etc
-	$racktables_gwdir = $racktables_rootdir . '/gateways';
+	$racktables_gwdir = realpath ($racktables_rootdir . '/../gateways');
 if (! isset ($racktables_confdir)) // the directory containing local.php and secret.php (default is wwwroot/inc)
 	$racktables_confdir = dirname (__FILE__);
 if (! isset ($path_to_secret_php))
