@@ -1502,7 +1502,7 @@ $dictionary = array
 	1420 => array ('chapter_id' => 13, 'dict_value' => '[[SciLin%GSKIP%SL5.2 | https://www.scientificlinux.org/]]'),
 	1421 => array ('chapter_id' => 13, 'dict_value' => '[[SciLin%GSKIP%SL5.3 | https://www.scientificlinux.org/]]'),
 	1422 => array ('chapter_id' => 13, 'dict_value' => '[[SciLin%GSKIP%SL5.4 | https://www.scientificlinux.org/]]'),
-
+	1423 => array ('chapter_id' => 12, 'dict_value' => 'HP ProCurve%GPASS%2600-8-PWR'),
 //                                     ^
 //                                     ^
 // add new dictionary entries up here  ^
