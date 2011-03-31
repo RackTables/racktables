@@ -2,6 +2,7 @@
 	update: when searching for object by its hostname (FQDN attr) and single match is found, no searching by other fields is done
 	update: introduce "{$vlan_NNNN}" autotag to convoy both {$fromvlan_NNNN} and {$tovlan_NNNN}
 	update: remove extraneous barcode column header from 'add objects' form (by Tyler J. Wagner)
+	update: refresh dictionary record groups (by Michael C Tiernan)
 	bugfix: handle SQL remnants of bug 399/415
 	bugfix: magic_quotes-eliminating code was broken (e.g. VST editor was not working with PHP's magic_quotes enabled)
 	update: 802.1q: if something goes wrong and RT is going to remove needed VLANs from port, now it's more likely to firstly remove management VLAN, keeping the others working
