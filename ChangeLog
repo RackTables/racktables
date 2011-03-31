@@ -4,6 +4,7 @@
 	update: remove extraneous barcode column header from 'add objects' form (by Tyler J. Wagner)
 	bugfix: handle SQL remnants of bug 399/415
 	bugfix: magic_quotes-eliminating code was broken (e.g. VST editor was not working with PHP's magic_quotes enabled)
+	update: 802.1q: if something goes wrong and RT is going to remove needed VLANs from port, now it's more likely to firstly remove management VLAN, keeping the others working
 0.19.2 2011-03-24
 	new feature: JunOS10 802.1q gateway
 	bugfix: port linking was broken for some users due to open PDO cursor (#413)

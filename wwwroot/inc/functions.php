@@ -2904,8 +2904,11 @@ function matchVLANFilter ($vlan_id, $vfilter)
 	return FALSE;
 }
 
-function generate8021QDeployOps ($domain_vlanlist, $device_vlanlist, $before, $changes)
+function generate8021QDeployOps ($vswitch, $device_vlanlist, $before, $changes)
 {
+	$domain_vlanlist = getDomainVLANs ($vswitch['domain_id']);
+	$employed_vlans = getEmployedVlans ($vswitch['object_id'], $domain_vlanlist);
+
 	// only ignore VLANs, which exist and are explicitly shown as "alien"
 	$old_managed_vlans = array();
 	foreach ($device_vlanlist as $vlan_id)
@@ -2916,10 +2919,12 @@ function generate8021QDeployOps ($domain_vlanlist, $device_vlanlist, $before, $c
 		)
 			$old_managed_vlans[] = $vlan_id;
 	$ports_to_do = array();
+	$ports_to_do_queue1 = array();
+	$ports_to_do_queue2 = array();
 	$after = $before;
 	foreach ($changes as $port_name => $port)
 	{
-		$ports_to_do[$port_name] = array
+		$changeset = array
 		(
 			'old_mode' => $before[$port_name]['mode'],
 			'old_allowed' => $before[$port_name]['allowed'],
@@ -2928,8 +2933,14 @@ function generate8021QDeployOps ($domain_vlanlist, $device_vlanlist, $before, $c
 			'new_allowed' => $port['allowed'],
 			'new_native' => $port['native'],
 		);
+		// put the ports with employed vlans first, the others - below them
+		if (! count (array_intersect ($changeset['old_allowed'], $employed_vlans)))
+			$ports_to_do_queue2[$port_name] = $changeset; 
+		else
+			$ports_to_do_queue1[$port_name] = $changeset;
 		$after[$port_name] = $port;
 	}
+	$ports_to_do = array_merge ($ports_to_do_queue1, $ports_to_do_queue2);
 	// New VLAN table is a union of:
 	// 1. all compulsory VLANs
 	// 2. all "current" non-alien allowed VLANs of those ports, which are left
@@ -2986,13 +2997,18 @@ function generate8021QDeployOps ($domain_vlanlist, $device_vlanlist, $before, $c
 					'arg1' => $port_name,
 					'arg2' => $port['old_native'],
 				);
-			if (count ($tmp = array_diff ($port['old_allowed'], $port['new_allowed'])))
-				$crq[] = array
-				(
-					'opcode' => 'rem allowed',
-					'port' => $port_name,
-					'vlans' => $tmp,
-				);
+			$vlans_to_remove = array_diff ($port['old_allowed'], $port['new_allowed']);
+			$queues = array();
+			$queues[] = array_intersect ($employed_vlans, $vlans_to_remove); // remove employed vlans first
+			$queues[] = array_diff ($vlans_to_remove, $employed_vlans);// remove other vlans afterwards
+			foreach ($queues as $queue)
+				if (! empty ($queue))
+					$crq[] = array
+					(
+						'opcode' => 'rem allowed',
+						'port' => $port_name,
+						'vlans' => $queue,
+					);
 			break;
 		case 'access->access':
 			if ($port['old_native'] and $port['old_native'] != $port['new_native'])
@@ -3019,13 +3035,18 @@ function generate8021QDeployOps ($domain_vlanlist, $device_vlanlist, $before, $c
 					'arg1' => $port_name,
 					'arg2' => $port['old_native'],
 				);
-			if (count ($port['old_allowed']))
-				$crq[] = array
-				(
-					'opcode' => 'rem allowed',
-					'port' => $port_name,
-					'vlans' => $port['old_allowed'],
-				);
+			$vlans_to_remove = $port['old_allowed'];
+			$queues = array();
+			$queues[] = array_intersect ($employed_vlans, $vlans_to_remove); // remove employed vlans first
+			$queues[] = array_diff ($vlans_to_remove, $employed_vlans);// remove other vlans afterwards
+			foreach ($queues as $queue)
+				if (! empty ($queue))
+					$crq[] = array
+					(
+						'opcode' => 'rem allowed',
+						'port' => $port_name,
+						'vlans' => $queue,
+					);
 			break;
 		default:
 			throw new InvalidArgException ('ports_to_do', '(hidden)', 'error in structure');
@@ -3133,8 +3154,7 @@ function exportSwitch8021QConfig
 	$vlan_names
 )
 {
-	$domain_vlanlist = getDomainVLANs ($vswitch['domain_id']);
-	$crq = generate8021QDeployOps ($domain_vlanlist, $device_vlanlist, $before, $changes);
+	$crq = generate8021QDeployOps ($vswitch, $device_vlanlist, $before, $changes);
 	if (count ($crq))
 	{
 		array_unshift ($crq, array ('opcode' => 'begin configuration'));
@@ -3212,11 +3232,13 @@ function filter8021QChangeRequests
 	return $ret;
 }
 
-// take port list with order applied and return uplink ports in the same format
-function produceUplinkPorts ($domain_vlanlist, $portlist, $object_id)
+function getEmployedVlans ($object_id, $domain_vlanlist)
 {
-	$ret = array();
-	$employed = array();
+	$employed = array(); // keyed by vlan_id. Value is dummy int
+	// find persistent VLANs in domain
+	foreach ($domain_vlanlist as $vlan_id => $vlan)
+		if ($vlan['vlan_type'] == 'compulsory')
+			$employed[$vlan_id] = 1;
 
 	// find VLANs for object's L3 allocations
 	$cell = spotEntity ('object', $object_id);
@@ -3237,21 +3259,26 @@ function produceUplinkPorts ($domain_vlanlist, $portlist, $object_id)
 				$net = spotEntity ("${family}net", $net_id);
 				amplifyCell ($net);
 				foreach ($net['8021q'] as $vlan)
-					if (! in_array ($vlan['vlan_id'], $employed))
-						$employed[] = $vlan['vlan_id'];
-
+					if (! isset ($employed[$vlan['vlan_id']]))
+						$employed[$vlan['vlan_id']] = 1;
 			}
 		}
 	}
+	return array_keys ($employed);
+}
 
-	foreach ($domain_vlanlist as $vlan_id => $vlan)
-		if ($vlan['vlan_type'] == 'compulsory' and ! in_array ($vlan_id, $employed))
-			$employed[] = $vlan_id;
+// take port list with order applied and return uplink ports in the same format
+function produceUplinkPorts ($domain_vlanlist, $portlist, $object_id)
+{
+	$ret = array();
+
+	$employed = getEmployedVlans ($object_id, $domain_vlanlist);
 	foreach ($portlist as $port_name => $port)
 		if ($port['vst_role'] != 'uplink')
 			foreach ($port['allowed'] as $vlan_id)
 				if (!in_array ($vlan_id, $employed))
 					$employed[] = $vlan_id;
+
 	foreach ($portlist as $port_name => $port)
 		if ($port['vst_role'] == 'uplink')
 		{
