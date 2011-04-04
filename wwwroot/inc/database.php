@@ -2707,9 +2707,9 @@ function usePreparedDeleteBlade ($tablename, $columns, $conjunction = 'AND')
 function usePreparedSelectBlade ($query, $args = array())
 {
 	global $dbxlink;
-	$prepared = $dbxlink->prepare ($query);
 	try
 	{
+		$prepared = $dbxlink->prepare ($query);
 		if (!$prepared->execute ($args))
 			return FALSE;
 		return $prepared;
@@ -2757,8 +2757,7 @@ function usePreparedExecuteBlade ($query, $args = array())
 	global $dbxlink;
 	try
 	{
-		if (!$prepared = $dbxlink->prepare ($query))
-			return FALSE;
+		$prepared = $dbxlink->prepare ($query);
 		if (!$prepared->execute ($args))
 			return FALSE;
 		return $prepared->rowCount();
@@ -3602,11 +3601,11 @@ function getFileCache ($file_id)
 function commitAddFileCache ($file_id, $contents)
 {               
 	global $dbxlink;
-	$query = $dbxlink->prepare('UPDATE File SET thumbnail = ? WHERE id = ?');
-	$query->bindParam(1, $contents, PDO::PARAM_LOB);
-	$query->bindParam(2, $file_id);
 	try     
 	{
+		$query = $dbxlink->prepare ('UPDATE File SET thumbnail = ? WHERE id = ?');
+		$query->bindParam (1, $contents, PDO::PARAM_LOB);
+		$query->bindParam (2, $file_id);
 		return $query->execute();
 	}
 	catch (PDOException $e)
