@@ -4524,4 +4524,40 @@ function getPortinfoByName (&$object, $portname)
 	return NULL;
 }
 
+# For the given object ID return a getSelect-suitable list of object types
+# compatible with the object's attributes, which have an assigned value in
+# AttributeValue (no assigned values mean full compatibility). Being compatible
+# with an attribute means having a record in AttributeMap (with the same chapter
+# ID, if the attribute is dictionary-based). This knowledge is required to allow
+# the user changing object type ID in a way, which leaves data in AttributeValue
+# meeting constraints in AttributeMap upon the change.
+function getObjectTypeChangeOptions ($object_id)
+{
+	$map = getAttrMap();
+	$used = array();
+	$ret = array();
+	foreach (getAttrValues ($object_id) as $attr)
+	{
+		if (! array_key_exists ($attr['id'], $map))
+			return array(); // inconsistent current data
+		if ($attr['value'] != '')
+			$used[] = $attr;
+	}
+	foreach (readChapter (CHAP_OBJTYPE) as $test_id => $text)
+	{
+		foreach ($used as $attr)
+		{
+			$app = $map[$attr['id']]['application'];
+			if
+			(
+				(NULL === $appidx = scanArrayForItem ($app, 'objtype_id', $test_id)) or
+				($attr['type'] == 'dict' and $attr['chapter_id'] != $app[$appidx]['chapter_no'])
+			)
+				continue 2; // next type ID
+		}
+		$ret[$test_id] = $text;
+	}
+	return $ret;
+}
+
 ?>
