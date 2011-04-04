@@ -142,7 +142,7 @@ function dispatchAJAXRequest()
 		assertStringArg ('comment', TRUE);
 		$port_info = getPortInfo ($sic['id']);
 		fixContext (spotEntity ('object', $port_info['object_id']));
-		assertPermission ('object', NULL, 'set_reserve_comment');
+		assertPermission ('object', 'ports', 'set_reserve_comment');
 		if ($port_info['linked'])
 			throw new RackTablesError ('Cant update port comment: port is already linked');
 		if (! isset ($port_info['reservation_comment']))
