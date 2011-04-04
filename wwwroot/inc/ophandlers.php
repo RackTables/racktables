@@ -1341,21 +1341,8 @@ function resetObject ()
 $msgcode['useupPort']['OK'] = 49;
 function useupPort ()
 {
-	global $sic;
 	assertUIntArg ('port_id');
-	usePreparedUpdateBlade
-	(
-		'Port',
-		array
-		(
-			'reservation_comment' => NULL,
-		),
-		array
-		(
-			'object_id' => getBypassValue(),
-			'id' => $sic['port_id'],
-		)
-	);
+	commitUpdatePortComment ($_REQUEST['port_id'], '');
 	return buildRedirectURL (__FUNCTION__, 'OK');
 }
 

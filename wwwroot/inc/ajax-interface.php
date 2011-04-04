@@ -88,6 +88,15 @@ function formatPortConfigHints ($object_id, $R = NULL)
 	return $result;
 }
 
+// returns an array with two items - each is HTML-formatted <TD> tag
+function formatPortReservation ($port)
+{
+	$ret = array();
+	$ret[] = '<td class=tdleft>' . (strlen ($port['reservation_comment']) ? '<b>Reserved:</b>' : '') . '</td>';
+	$ret[] = "<td class='rsv-port tdleft'><span class='rsvtext'>${port['reservation_comment']}</span></td>";
+	return $ret;
+}
+
 function dispatchAJAXRequest()
 {
 	genericAssertion ('ac', 'string');
@@ -126,6 +135,47 @@ function dispatchAJAXRequest()
 		fixContext (spotEntity ('object', $_REQUEST['object_id']));
 		assertPermission ('object', 'liveports', $opmap[$_REQUEST['ac']]);
 		echo json_encode ($funcmap[$_REQUEST['ac']] ($_REQUEST['object_id']));
+		break;
+	case 'upd-reservation-port':
+		global $sic;
+		assertUIntArg ('id');
+		assertStringArg ('comment', TRUE);
+		$port_info = getPortInfo ($sic['id']);
+		fixContext (spotEntity ('object', $port_info['object_id']));
+		assertPermission ('object', NULL, 'set_reserve_comment');
+		if ($port_info['linked'])
+			throw new RackTablesError ('Cant update port comment: port is already linked');
+		if (! isset ($port_info['reservation_comment']))
+			$port_info['reservation_comment'] = '';
+		if ($port_info['reservation_comment'] !== $sic['comment'])
+			if (commitUpdatePortComment ($sic['id'], $sic['comment']))
+				$port_info['reservation_comment'] = $sic['comment'];
+		$tds = formatPortReservation ($port_info);
+		echo json_encode ($tds);
+		break;
+	case 'upd-reservation-ip':
+		global $sic;
+		assertStringArg ('comment', TRUE);
+		$ip = assertIPArg ('id');
+		if (isset ($ip))
+		{
+			$net_realm = 'ipv6net';
+			$net_id = getIPv6AddressNetworkId ($ip);
+		}
+		else
+		{
+			$ip = $sic['id'];
+			$net_realm = 'ipv4net';
+			$net_id = getIPv4AddressNetworkId ($ip);
+		}
+		$addr = getIPAddress ($ip);
+		if (! empty ($addr['allocs']) && empty ($addr['name']))
+			throw new RackTablesError ('Cant update IP comment: address is allocated');
+		if (isset ($net_id))
+			fixContext (spotEntity ($net_realm, $net_id));
+		assertPermission ($net_realm, NULL, 'set_reserve_comment');
+		if ('' === updateAddress ($ip, $sic['comment'], $addr['reserved']))
+			echo json_encode ('OK');
 		break;
 	default:
 		throw new InvalidRequestArgException ('ac', $_REQUEST['ac']);

@@ -804,7 +804,7 @@ function renderRackObject ($object_id)
 			if ($hl_port_id == $port['id'])
 				echo ' class=port_highlight';
 			$a_class = isEthernetPort ($port) ? 'port-menu' : '';
-			echo "><td class='tdleft' NOWRAP><a name='port-${port['id']}' class='interactive-portname nolink $a_class'>${port['name']}</a></td>";
+			echo "><td class='tdleft' NOWRAP><a name='port-${port['id']}' class='ancor interactive-portname nolink $a_class'>${port['name']}</a></td>";
 			echo "<td class=tdleft>${port['label']}</td>";
 			echo "<td class=tdleft>" . formatPortIIFOIF ($port) . "</td><td class=tdleft><tt>${port['l2address']}</tt></td>";
 			if ($port['remote_object_id'])
@@ -814,15 +814,12 @@ function renderRackObject ($object_id)
 				echo "<td class=tdleft>${port['remote_name']}</td>";
 				echo "<td class='tdleft rsvtext'>${port['cableid']}</td>";
 			}
-			elseif (strlen ($port['reservation_comment']))
-			{
-				echo "<td class=tdleft><b>Reserved:</b></td>";
-				echo "<td class='tdleft rsvtext'>${port['reservation_comment']}</td><td>&nbsp;</td>";
-			}
 			else
-				echo '<td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>';
+				echo implode ('', formatPortReservation ($port)) . '<td></td>';
 			echo "</tr>";
 		}
+		if (permitted (NULL, NULL, 'set_reserve_comment'))
+			addJS ('js/inplace-edit.js');
 		echo "</table><br>";
 		finishPortlet();
 	}
@@ -2732,15 +2729,17 @@ function renderIPv4Network ($id)
 		$secondstyle = 'tdleft' . (isset ($hl_ip) && $hl_ip == $ip ? ' port_highlight' : '');
 		if (!isset ($range['addrlist'][$ip]))
 		{
-			echo "<tr><td class=tdleft><a name='ip-$dottedquad' href='" . makeHref(array('page'=>'ipaddress', 'ip' => $dottedquad)) . "'>$dottedquad</a></td>";
-			echo "<td class='${secondstyle}'>&nbsp;</td><td class='${secondstyle}'>&nbsp;</td></tr>\n";
+			echo "<tr><td class=tdleft><a class='ancor' name='ip-$dottedquad' href='" . makeHref(array('page'=>'ipaddress', 'ip' => $dottedquad)) . "'>$dottedquad</a></td>";
+			echo "<td class='rsv-port ${secondstyle}'><span class='rsvtext'></span></td><td class='${secondstyle}'>&nbsp;</td></tr>\n";
 			continue;
 		}
 		$addr = $range['addrlist'][$ip];
 		echo "<tr class='${addr['class']}'>";
 
 		echo "<td class=tdleft><a name='ip-$dottedquad' href='".makeHref(array('page'=>'ipaddress', 'ip'=>$addr['ip']))."'>${addr['ip']}</a></td>";
-		echo "<td class='${secondstyle}'>${addr['name']}</td><td class='${secondstyle}'>";
+		echo "<td class='${secondstyle} " .
+			(empty ($addr['allocs']) || !empty ($addr['name']) ? 'rsv-port' : '') .
+			"'><span class='rsvtext'>${addr['name']}</span></td><td class='${secondstyle}'>";
 		$delim = '';
 		$prologue = '';
 		if ( $addr['reserved'] == 'yes')
@@ -2786,6 +2785,8 @@ function renderIPv4Network ($id)
 		echo "</td></tr>\n";
 	endfor;
 	// end of iteration
+	if (permitted (NULL, NULL, 'set_reserve_comment'))
+		addJS ('js/inplace-edit.js');
 
 	echo "</table>";
 	finishPortlet();
@@ -2880,8 +2881,8 @@ function renderEmptyIPv6 ($ip, $hl_ip)
 	if (isset ($hl_ip) && $ip == $hl_ip)
 		$class .= ' port_highlight';
 	$fmt = $ip->format();
-	echo "<tr><td class=tdleft><a name='ip-$fmt' href='" . makeHref (array ('page' => 'ipv6address', 'ip' => $fmt)) . "'>" . $fmt;
-	echo "</a></td><td class='${class}'>&nbsp;</td><td class='${class}'>&nbsp;</td></tr>\n";
+	echo "<tr><td class=tdleft><a class='ancor' name='ip-$fmt' href='" . makeHref (array ('page' => 'ipv6address', 'ip' => $fmt)) . "'>" . $fmt;
+	echo "</a></td><td class='${class} rsv-port'><span class='rsvtext'></span></td><td class='${class}'>&nbsp;</td></tr>\n";
 }
 
 // Renders empty table line to shrink empty IPv6 address ranges.
@@ -2976,8 +2977,10 @@ function renderIPv6NetworkAddresses ($netinfo)
 		if (isset ($hl_ip) && $hl_ip == $ipv6)
 			$secondstyle .= ' port_highlight';
 		echo "<tr class='${addr['class']}'>";
-		echo "<td class=tdleft><a name='ip-${addr['ip']}' href='" . makeHref (array ('page' => 'ipv6address', 'ip' => $addr['ip'])) . "'>${addr['ip']}</a></td>";
-		echo "<td class='${secondstyle}'>${addr['name']}</td><td class='${secondstyle}'>";
+		echo "<td class=tdleft><a class='ancor' name='ip-${addr['ip']}' href='" . makeHref (array ('page' => 'ipv6address', 'ip' => $addr['ip'])) . "'>${addr['ip']}</a></td>";
+		echo "<td class='${secondstyle} " .
+			(empty ($addr['allocs']) || !empty ($addr['name']) ? 'rsv-port' : '') .
+			"'><span class='rsvtext'>${addr['name']}</span></td><td class='${secondstyle}'>";
 		$delim = '';
 		$prologue = '';
 		if ( $addr['reserved'] == 'yes')
@@ -3012,6 +3015,8 @@ function renderIPv6NetworkAddresses ($netinfo)
 		echo "</td></tr>";
 	}
 	echo "</table>";
+	if (permitted (NULL, NULL, 'set_reserve_comment'))
+		addJS ('js/inplace-edit.js');
 }
 
 function renderIPNetworkProperties ($id)

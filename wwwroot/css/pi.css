@@ -514,6 +514,11 @@ div.tagselector td {
 	font-style: italic;
 }
 
+.edit-btn {
+	margin-left: 10px;
+	display: none;
+}
+
 .tagtree.compact td {
 	padding-left: 0px !important;
 }

@@ -1141,6 +1141,22 @@ function commitUpdatePort ($object_id, $port_id, $port_name, $port_type_id, $por
 	$dbxlink->exec ('UNLOCK TABLES');
 }
 
+function commitUpdatePortComment ($port_id, $port_reservation_comment)
+{
+	return usePreparedUpdateBlade
+	(
+		'Port',
+		array 
+		(
+			'reservation_comment' => mb_strlen ($port_reservation_comment) ? $port_reservation_comment : NULL,
+		),
+		array
+		(
+			'id' => $port_id,
+		)
+	);
+}
+
 function commitUpdatePortOIF ($port_id, $port_type_id)
 {
 	return usePreparedUpdateBlade
@@ -3947,7 +3963,7 @@ function getPortInfo ($port_id)
 {
 	$result = usePreparedSelectBlade
 	(
-		"SELECT object_id, name, iif_id, type AS oif_id, l2address, ".
+		"SELECT id, object_id, name, iif_id, type AS oif_id, l2address, reservation_comment, ".
 		"(SELECT dict_value FROM Dictionary WHERE dict_key = type) AS oif_name, " .
 		"(SELECT COUNT(*) FROM Link WHERE id IN (porta, portb)) AS linked, " .
 		"(SELECT iif_name FROM PortInnerInterface WHERE id = iif_id) AS iif_name " .

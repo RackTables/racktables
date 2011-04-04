@@ -82,7 +82,7 @@ personal and business use from medievalresources.com
 
 ----------------------8<----------------------8<----------------------
 
-RackTables is shipped with an exact copy of jQuery JavaScript Library v1.3.1
+RackTables is shipped with an exact copy of jQuery JavaScript Library v1.4.4
 (http://jquery.com/), which is dual licensed under the MIT and GPL licenses.
 jQuery is copyright (c) 2009 John Resig.
 
@@ -96,4 +96,14 @@ released under GNU LGPL.
 
 RackTables uses icons from pgAdmin III, which is copyright 2002-2009,
 The pgAdmin Development Team. pgAdmin is released under the BSD license.
+
+----------------------8<----------------------8<----------------------
+
+RackTables uses icons from Sweetie icon set, http://sweetie.sublink.ca
+Sweetie icon set is licenced under the Creative Commons Attribution Share-alike 3.0.
+
+----------------------8<----------------------8<----------------------
+
+RackTables uses JS library jquery.contextmenu written by Matt Kruse
+http://javascripttoolbox.com. This library is licenced under the MIT/GPL.
 
