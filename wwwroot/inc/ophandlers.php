@@ -1161,48 +1161,51 @@ function updateObjectAllocation ()
 }
 
 $msgcode['updateObject']['OK'] = 51;
-$msgcode['updateObject']['ERR'] = 109;
 function updateObject ()
 {
-	assertUIntArg ('num_attrs', TRUE);
-	assertStringArg ('object_name', TRUE);
-	assertStringArg ('object_label', TRUE);
-	assertStringArg ('object_asset_no', TRUE);
-	if (isset ($_REQUEST['object_has_problems']) and $_REQUEST['object_has_problems'] == 'on')
+	genericAssertion ('num_attrs', 'uint0');
+	genericAssertion ('object_name', 'string0');
+	genericAssertion ('object_label', 'string0');
+	genericAssertion ('object_asset_no', 'string0');
+	genericAssertion ('object_comment', 'string0');
+	if (array_key_exists ('object_has_problems', $_REQUEST) and $_REQUEST['object_has_problems'] == 'on')
 		$has_problems = 'yes';
 	else
 		$has_problems = 'no';
+	$object_id = getBypassValue();
 
-	if (commitUpdateObject (
-		$_REQUEST['object_id'],
+	global $dbxlink;
+	$dbxlink->beginTransaction();
+	commitUpdateObject
+	(
+		$object_id,
 		$_REQUEST['object_name'],
 		$_REQUEST['object_label'],
 		$has_problems,
 		$_REQUEST['object_asset_no'],
 		$_REQUEST['object_comment']
-	) !== TRUE)
-		return buildRedirectURL (__FUNCTION__, 'ERR');
-
+	);
 	// Update optional attributes
-	$oldvalues = getAttrValues ($_REQUEST['object_id']);
-	$result = array();
-	$num_attrs = isset ($_REQUEST['num_attrs']) ? $_REQUEST['num_attrs'] : 0;
-	for ($i = 0; $i < $num_attrs; $i++)
+	$oldvalues = getAttrValues ($object_id);
+	for ($i = 0; $i < $_REQUEST['num_attrs']; $i++)
 	{
-		assertUIntArg ("${i}_attr_id");
+		genericAssertion ("${i}_attr_id", 'uint');
 		$attr_id = $_REQUEST["${i}_attr_id"];
+		if (! array_key_exists ($attr_id, $oldvalues))
+			throw new InvalidRequestArgException ('attr_id', $attr_id, 'malformed request');
+		$value = $_REQUEST["${i}_value"];
 
-		// Field is empty, delete attribute and move on. OR if the field type is a dictionary and it is the --NOT SET-- value of 0
-		if (!strlen ($_REQUEST["${i}_value"]) || ($oldvalues[$attr_id]['type']=='dict' && $_REQUEST["${i}_value"] == 0))
+		# Delete attribute and move on, when the field is empty or if the field
+		# type is a dictionary and it is the "--NOT SET--" value of 0.
+		if ($value == '' || ($oldvalues[$attr_id]['type'] == 'dict' && $value == 0))
 		{
-			commitResetAttrValue ($_REQUEST['object_id'], $attr_id);
+			commitResetAttrValue ($object_id, $attr_id);
 			continue;
 		}
 
 		// The value could be uint/float, but we don't know ATM. Let SQL
 		// server check this and complain.
 		assertStringArg ("${i}_value");
-		$value = $_REQUEST["${i}_value"];
 		switch ($oldvalues[$attr_id]['type'])
 		{
 			case 'uint':
@@ -1217,17 +1220,12 @@ function updateObject ()
 		}
 		if ($value === $oldvalue) // ('' == 0), but ('' !== 0)
 			continue;
-
-		// Note if the queries succeed or not, it determines which page they see.
-		$result[] = commitUpdateAttrValue ($_REQUEST['object_id'], $attr_id, $value);
+		commitUpdateAttrValue ($object_id, $attr_id, $value);
 	}
-	if (in_array (FALSE, $result))
-		return buildRedirectURL (__FUNCTION__, 'ERR');
-
 	// Invalidate thumb cache of all racks objects could occupy.
-	foreach (getResidentRacksData ($_REQUEST['object_id'], FALSE) as $rack_id)
+	foreach (getResidentRacksData ($object_id, FALSE) as $rack_id)
 		usePreparedUpdateBlade ('Rack', array ('thumb_data' => NULL), array ('id' => $rack_id));
-
+	$dbxlink->commit();
 	return buildRedirectURL (__FUNCTION__, 'OK');
 }
 
