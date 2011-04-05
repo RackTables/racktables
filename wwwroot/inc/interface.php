@@ -677,7 +677,6 @@ function renderRackObject ($object_id)
 {
 	global $nextorder, $aac, $virtual_obj_types;
 	$info = spotEntity ('object', $object_id);
-	// FIXME: employ amplifyCell() instead of calling loader functions directly
 	amplifyCell ($info);
 	// Main layout starts.
 	echo "<table border=0 class=objectview cellspacing=0 cellpadding=0>";
