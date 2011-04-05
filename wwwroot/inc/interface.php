@@ -438,9 +438,10 @@ function renderNewRackForm ($row_id)
 	finishPortlet();
 }
 
-function renderEditObjectForm ($object_id)
+function renderEditObjectForm()
 {
 	global $pageno, $virtual_obj_types;
+	$object_id = getBypassValue();
 	$object = spotEntity ('object', $object_id);
 	startPortlet ();
 	printOpFormIntro ('update');
@@ -448,6 +449,9 @@ function renderEditObjectForm ($object_id)
 	// static attributes
 	echo '<table border=0 cellspacing=0 cellpadding=3 align=center>';
 	echo "<tr><td>&nbsp;</td><th colspan=2><h2>Attributes</h2></th></tr>";
+	echo '<tr><td>&nbsp;</td><th class=tdright>Type:</th><td class=tdleft>';
+	printSelect (getObjectTypeChangeOptions ($object['id']), array ('name' => 'object_type_id'), $object['objtype_id']);
+	echo '</td></tr>';
 	// baseline info
 	echo "<tr><td>&nbsp;</td><th class=tdright>Common name:</th><td class=tdleft><input type=text name=object_name value='${object['name']}'></td></tr>\n";
 	if (in_array($object['objtype_id'], $virtual_obj_types))

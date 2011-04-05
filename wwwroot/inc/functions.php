@@ -4543,7 +4543,7 @@ function getObjectTypeChangeOptions ($object_id)
 		if ($attr['value'] != '')
 			$used[] = $attr;
 	}
-	foreach (readChapter (CHAP_OBJTYPE) as $test_id => $text)
+	foreach (readChapter (CHAP_OBJTYPE, 'o') as $test_id => $text)
 	{
 		foreach ($used as $attr)
 		{

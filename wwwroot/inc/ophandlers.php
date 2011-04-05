@@ -1165,13 +1165,14 @@ function updateObject ()
 	genericAssertion ('object_label', 'string0');
 	genericAssertion ('object_asset_no', 'string0');
 	genericAssertion ('object_comment', 'string0');
+	genericAssertion ('object_type_id', 'uint');
 	if (array_key_exists ('object_has_problems', $_REQUEST) and $_REQUEST['object_has_problems'] == 'on')
 		$has_problems = 'yes';
 	else
 		$has_problems = 'no';
 	$object_id = getBypassValue();
 
-	global $dbxlink;
+	global $dbxlink, $sic;
 	$dbxlink->beginTransaction();
 	commitUpdateObject
 	(
@@ -1218,6 +1219,13 @@ function updateObject ()
 		if ($value === $oldvalue) // ('' == 0), but ('' !== 0)
 			continue;
 		commitUpdateAttrValue ($object_id, $attr_id, $value);
+	}
+	$object = spotEntity ('object', $object_id);
+	if ($sic['object_type_id'] != $object['objtype_id'])
+	{
+		if (! array_key_exists ($sic['object_type_id'], getObjectTypeChangeOptions ($object_id)))
+			throw new InvalidRequestArgException ('new type_id', $sic['object_type_id'], 'incompatible with requested attribute values');
+		usePreparedUpdateBlade ('RackObject', array ('objtype_id' => $sic['object_type_id']), array ('id' => $object_id));
 	}
 	// Invalidate thumb cache of all racks objects could occupy.
 	foreach (getResidentRacksData ($object_id, FALSE) as $rack_id)
