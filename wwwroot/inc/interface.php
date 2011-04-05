@@ -688,7 +688,6 @@ function renderRackObject ($object_id)
 	echo "<table border=0 cellspacing=0 cellpadding=3 width='100%'>\n";
 	if (strlen ($info['name']))
 		echo "<tr><th width='50%' class=tdright>Common name:</th><td class=tdleft>${info['name']}</td></tr>\n";
-	// FIXME: don't call spotEntity() each time, do it once in the beginning.
 	elseif (considerConfiguredConstraint ($info, 'NAMEWARN_LISTSRC'))
 		echo "<tr><td colspan=2 class=msg_error>Common name is missing.</td></tr>\n";
 	echo "<tr><th width='50%' class=tdright>Object type:</th><td class=tdleft><a href='";
@@ -700,7 +699,6 @@ function renderRackObject ($object_id)
 	echo "'>" . decodeObjectType ($info['objtype_id'], 'o') . '</a></td></tr>';
 	if (strlen ($info['asset_no']))
 		echo "<tr><th width='50%' class=tdright>Asset tag:</th><td class=tdleft>${info['asset_no']}</td></tr>\n";
-	// FIXME: ditto
 	elseif (considerConfiguredConstraint ($info, 'ASSETWARN_LISTSRC'))
 		echo "<tr><td colspan=2 class=msg_error>Asset tag is missing.</td></tr>\n";
 	if (strlen ($info['label']))
