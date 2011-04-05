@@ -381,6 +381,8 @@ CREATE TABLE `AttributeValue` (
   `uint_value` int(10) unsigned default NULL,
   `float_value` float default NULL,
   UNIQUE KEY `object_id` (`object_id`,`attr_id`),
+  KEY `attr_id-uint_value` (`attr_id`,`uint_value`),
+  KEY `attr_id-string_value` (`attr_id`,`string_value`(12)),
   CONSTRAINT `AttributeValue-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `RackObject` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
@@ -1397,7 +1399,7 @@ INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdef
 ('SYNCDOMAIN_MAX_PROCESSES','0','uint','yes','no', 'no', 'How many worker proceses syncdomain cron script should create'),
 ('PORT_EXCLUSION_LISTSRC','{\$typeid_3} or {\$typeid_10} or {\$typeid_11} or {\$typeid_1505} or {\$typeid_1506}','string','yes','no','no','List source: objects without ports'),
 ('FILTER_RACKLIST_BY_TAGS','yes','string','yes','no','yes','Rackspace: show only racks matching the current object\'s tags'),
-('DB_VERSION','0.19.2','string','no','yes','no','Database version.');
+('DB_VERSION','0.19.3','string','no','yes','no','Database version.');
 
 INSERT INTO `Script` VALUES ('RackCode','allow {\$userid_1}');
 
