@@ -1085,14 +1085,11 @@ function supplementAttrMap ()
 }
 
 $msgcode['clearSticker']['OK'] = 49;
-$msgcode['clearSticker']['ERR'] = 120;
 function clearSticker ()
 {
+	global $sic;
 	assertUIntArg ('attr_id');
-	if (commitResetAttrValue ($_REQUEST['object_id'], $_REQUEST['attr_id']) !== FALSE)
-		return buildRedirectURL (__FUNCTION__, 'OK');
-	else
-		return buildRedirectURL (__FUNCTION__, 'ERR');
+	commitUpdateAttrValue (getBypassValue(), $sic['attr_id']);
 }
 
 $msgcode['updateObjectAllocation']['OK'] = 63;
@@ -1199,7 +1196,7 @@ function updateObject ()
 		# type is a dictionary and it is the "--NOT SET--" value of 0.
 		if ($value == '' || ($oldvalues[$attr_id]['type'] == 'dict' && $value == 0))
 		{
-			commitResetAttrValue ($object_id, $attr_id);
+			commitUpdateAttrValue ($object_id, $attr_id);
 			continue;
 		}
 

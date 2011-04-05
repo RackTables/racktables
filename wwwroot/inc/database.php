@@ -2588,19 +2588,11 @@ function getAttrValues ($object_id)
 	return $attrs;
 }
 
-function commitResetAttrValue ($object_id = 0, $attr_id = 0)
+function commitUpdateAttrValue ($object_id, $attr_id, $value = '')
 {
-	return usePreparedDeleteBlade ('AttributeValue', array ('object_id' => $object_id, 'attr_id' => $attr_id));
-}
-
-function commitUpdateAttrValue ($object_id = 0, $attr_id = 0, $value = '')
-{
-	if ($object_id <= 0)
-		throw new InvalidArgException ('$objtype_id', $objtype_id);
-	if ($attr_id <= 0)
-		throw new InvalidArgException ('$attr_id', $attr_id);
-	if (!strlen ($value))
-		return commitResetAttrValue ($object_id, $attr_id);
+	global $object_attribute_cache;
+	if (isset ($object_attribute_cache[$object_id]))
+		unset ($object_attribute_cache[$object_id]);
 	$result = usePreparedSelectBlade ('select type as attr_type from Attribute where id = ?', array ($attr_id));
 	$row = $result->fetch (PDO::FETCH_NUM);
 	$attr_type = $row[0];
@@ -2619,7 +2611,8 @@ function commitUpdateAttrValue ($object_id = 0, $attr_id = 0, $value = '')
 			throw new InvalidArgException ('$attr_type', $attr_type, 'Unknown attribute type found in object #'.$object_id.', attribute #'.$attr_id);
 	}
 	usePreparedDeleteBlade ('AttributeValue', array ('object_id' => $object_id, 'attr_id' => $attr_id));
-	// We know $value isn't empty here.
+	if ($value == '')
+		return;
 	usePreparedInsertBlade
 	(
 		'AttributeValue',
@@ -2630,7 +2623,6 @@ function commitUpdateAttrValue ($object_id = 0, $attr_id = 0, $value = '')
 			'attr_id' => $attr_id,
 		)
 	);
-	return TRUE;
 }
 
 function convertPDOException ($e)
