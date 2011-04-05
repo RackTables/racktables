@@ -85,7 +85,7 @@ function onPencilClick (event) {
 		.appendTo(group);
 	span.after(group);
 	input[0].focus();
-	input[0].setSelectionRange(255, 255);
+	doSetCaretPosition (input[0], input[0].value.length);
 
 	group.click(function(event) { event.stopPropagation();	});
 	$('body').one('click',
@@ -95,6 +95,18 @@ function onPencilClick (event) {
 			onTDMouseOver(event);
 		});
 	event.stopPropagation(); // prevent the initial click to immediately close edit form
+}
+
+function doSetCaretPosition (input, iCaretPos) {
+	if (input.setSelectionRange) {
+		input.setSelectionRange(iCaretPos, iCaretPos);
+	}
+	else if (input.createTextRange) {
+		var range = input.createTextRange();
+		range.moveEnd("character", iCaretPos);
+		range.moveStart("character", iCaretPos);
+		range.select();
+	}
 }
 
 function onFormSubmit () {
