@@ -1,4 +1,4 @@
-0.19.3
+0.19.3 2011-04-05
 	update: when searching for object by its hostname (FQDN attr) and single match is found, no searching by other fields is done
 	update: introduce "{$vlan_NNNN}" autotag to convoy both {$fromvlan_NNNN} and {$tovlan_NNNN}
 	update: remove extraneous barcode column header from 'add objects' form (by Tyler J. Wagner)
