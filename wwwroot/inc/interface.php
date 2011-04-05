@@ -819,7 +819,7 @@ function renderRackObject ($object_id)
 				echo implode ('', formatPortReservation ($port)) . '<td></td>';
 			echo "</tr>";
 		}
-		if (permitted (NULL, NULL, 'set_reserve_comment'))
+		if (permitted (NULL, 'ports', 'set_reserve_comment'))
 			addJS ('js/inplace-edit.js');
 		echo "</table><br>";
 		finishPortlet();
