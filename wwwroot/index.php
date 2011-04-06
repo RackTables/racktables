@@ -1,8 +1,6 @@
 <?php
 ob_start();
-# Neither "throw/catch" for custom exceptions nor printException() will
-# work without first loading exceptions.php.
-require_once 'inc/exceptions.php';
+require_once 'inc/pre-init.php';
 try {
 // Code block below is a module request dispatcher. Turning it into a
 // function will break things because of the way require() works.
@@ -185,18 +183,6 @@ try {
 		require_once 'inc/config.php'; // for CODE_VERSION
 		require_once 'inc/dictionary.php';
 		require_once 'inc/upgrade.php';
-		// Enforce default value for now, releases prior to 0.17.0 didn't support 'httpd' auth source.
-		$user_auth_src = 'database';
-		if (FALSE === @include_once 'inc/secret.php')
-			die ('<center>There is no working RackTables instance here, <a href="?module=installer">install</a>?</center>');
-		try
-		{
-			$dbxlink = new PDO ($pdo_dsn, $db_username, $db_password);
-		}
-		catch (PDOException $e)
-		{
-			die ("Database connection failed:\n\n" . $e->getMessage());
-		}
 		renderUpgraderHTML();
 		break;
 	case 'installer' == $_REQUEST['module']:
