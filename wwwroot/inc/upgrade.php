@@ -1124,39 +1124,31 @@ function showError ($info = '', $location = 'N/A')
 
 function renderUpgraderHTML()
 {
-	global $user_auth_src;
-	switch ($user_auth_src)
+	global $found_secret_file;
+	if (! $found_secret_file)
+		die ('<center>There is no working RackTables instance here, <a href="?module=installer">install</a>?</center>');
+
+	try
 	{
-	case 'database':
-	case 'ldap': // authenticate against DB as well
-		if
-		(
-			!isset ($_SERVER['PHP_AUTH_USER']) or
-			!strlen ($_SERVER['PHP_AUTH_USER']) or
-			!isset ($_SERVER['PHP_AUTH_PW']) or
-			!strlen ($_SERVER['PHP_AUTH_PW']) or
-			!authenticate_admin ($_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW'])
-		)
-		{
-			header ('WWW-Authenticate: Basic realm="RackTables upgrade"');
-			header ('HTTP/1.0 401 Unauthorized');
-			showError ('You must be authenticated as an administrator to complete the upgrade.', __FUNCTION__);
-			die;
-		}
-		break; // cleared
-	case 'httpd':
-		if
-		(
-			!isset ($_SERVER['REMOTE_USER']) or
-			!strlen ($_SERVER['REMOTE_USER'])
-		)
-		{
-			showError ('System misconfiguration. The web-server didn\'t authenticate the user, although ought to do.', __FUNCTION__);
-			die;
-		}
-		break; // cleared
-	default:
-		showError ('authentication source misconfiguration', __FUNCTION__);
+		connectDB();
+	}
+	catch (RackTablesError $e)
+	{
+		die ("Database connection failed:\n\n" . $e->getMessage());
+	}
+	
+	if
+	(
+		!isset ($_SERVER['PHP_AUTH_USER']) or
+		!strlen ($_SERVER['PHP_AUTH_USER']) or
+		!isset ($_SERVER['PHP_AUTH_PW']) or
+		!strlen ($_SERVER['PHP_AUTH_PW']) or
+		!authenticate_admin ($_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW'])
+	)
+	{
+		header ('WWW-Authenticate: Basic realm="RackTables upgrade"');
+		header ('HTTP/1.0 401 Unauthorized');
+		showError ('You must be authenticated as an administrator to complete the upgrade.', __FUNCTION__);
 		die;
 	}
 

@@ -8,7 +8,6 @@ $stepfunc[3] = 'init_config';
 $stepfunc[4] = 'init_database_static';
 $stepfunc[5] = 'init_database_dynamic';
 $stepfunc[6] = 'congrats';
-$dbxlink = NULL;
 
 if (isset ($_REQUEST['step']))
 	$step = $_REQUEST['step'];
@@ -84,8 +83,8 @@ echo "<input type=hidden name=step value='${next_step}'>\n";
 // Check if the software is already installed.
 function not_already_installed()
 {
-	@include ('inc/secret.php');
-	if (isset ($pdo_dsn))
+	global $found_secret_file, $pdo_dsn;
+	if ($found_secret_file and isset ($pdo_dsn))
 	{
 		echo 'Your configuration file exists and seems to hold necessary data already.<br>';
 		return FALSE;
@@ -104,10 +103,11 @@ function not_already_installed()
 // credentials.
 function init_config ()
 {
-	if (!is_writable ('inc/secret.php'))
+	global $path_to_secret_php;
+	if (!is_writable ($path_to_secret_php))
 	{
-		echo "The inc/secret.php file is not writable by web-server. Make sure it is.";
-		echo "The following commands should suffice:<pre>touch inc/secret.php; chmod 666 inc/secret.php</pre>";
+		echo "The $path_to_secret_php file is not writable by web-server. Make sure it is.";
+		echo "The following commands should suffice:<pre>touch '$path_to_secret_php'; chmod 666 '$path_to_secret_php'</pre>";
 		echo 'Fedora Linux with SELinux may require this file to be owned by specific user (apache) and/or executing "setenforce 0" for the time of installation. ';
 		echo 'SELinux may be turned back on with "setenforce 1" command.<br>';
 		return FALSE;
@@ -159,10 +159,10 @@ function init_config ()
 		return FALSE;
 	}
 
-	$conf = fopen ('inc/secret.php', 'w+');
+	$conf = fopen ($path_to_secret_php, 'w+');
 	if ($conf === FALSE)
 	{
-		echo "Error: failed to open inc/secret.php for writing";
+		echo "Error: failed to open $path_to_secret_php for writing";
 		return FALSE;
 	}
 	fwrite ($conf, "<?php\n/* This file has been generated automatically by RackTables installer.\n");
@@ -218,15 +218,13 @@ ENDOFTEXT
 	return TRUE;
 }
 
-function connect_to_db ()
+function connect_to_db_or_die ()
 {
-	require ('inc/secret.php');
-	global $dbxlink;
 	try
 	{
-		$dbxlink = new PDO ($pdo_dsn, $db_username, $db_password);
+		connectDB();
 	}
-	catch (PDOException $e)
+	catch (RackTablesError $e)
 	{
 		die ('Error connecting to the database');
 	}
@@ -234,7 +232,7 @@ function connect_to_db ()
 
 function init_database_static ()
 {
-	connect_to_db ();
+	connect_to_db_or_die();
 	global $dbxlink;
 	if (!isInnoDBSupported())
 	{
@@ -303,7 +301,7 @@ function init_database_static ()
 
 function init_database_dynamic ()
 {
-	connect_to_db();
+	connect_to_db_or_die();
 	global $dbxlink;
 	if (!isset ($_REQUEST['password']) or empty ($_REQUEST['password']))
 	{
