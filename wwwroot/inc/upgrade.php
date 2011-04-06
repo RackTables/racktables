@@ -1048,6 +1048,12 @@ CREATE TABLE `EntityLink` (
 			$query[] = "DELETE FROM RackSpace WHERE object_id IS NULL AND state = 'T'";
 			$query[] = "UPDATE Config SET varvalue = '0.19.3' WHERE varname = 'DB_VERSION'";
 			break;
+		case '0.20.0':
+			$query = array_merge ($query, reloadDictionary ($batchid));
+			$query[] = "INSERT INTO `PortInterfaceCompat` (`iif_id`, `oif_id`) VALUES (4,1424)";
+			$query[] = "INSERT INTO `PortCompat` (`type1`, `type2`) VALUES (1424,1424)";
+			$query[] = "UPDATE Config SET varvalue = '0.20.0' WHERE varname = 'DB_VERSION'";
+			break;
 		default:
 			showError ("executeUpgradeBatch () failed, because batch '${batchid}' isn't defined", __FUNCTION__);
 			die;
