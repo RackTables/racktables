@@ -2737,7 +2737,7 @@ function renderIPv4Network ($id)
 		$addr = $range['addrlist'][$ip];
 		echo "<tr class='${addr['class']}'>";
 
-		echo "<td class=tdleft><a name='ip-$dottedquad' href='".makeHref(array('page'=>'ipaddress', 'ip'=>$addr['ip']))."'>${addr['ip']}</a></td>";
+		echo "<td class=tdleft><a class='ancor' name='ip-$dottedquad' href='".makeHref(array('page'=>'ipaddress', 'ip'=>$addr['ip']))."'>${addr['ip']}</a></td>";
 		echo "<td class='${secondstyle} " .
 			(empty ($addr['allocs']) || !empty ($addr['name']) ? 'rsv-port' : '') .
 			"'><span class='rsvtext'>${addr['name']}</span></td><td class='${secondstyle}'>";
