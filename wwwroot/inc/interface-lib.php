@@ -385,12 +385,17 @@ function transformRequestData()
 	// can contain cookies with data which could not be decoded from UTF-8
 	foreach (array_merge($_GET, $_POST) as $key => $value)
 	{
+		if (is_array ($value))
+			$_REQUEST[$key] = $value;
+		else
+		{
+			$value = dos2unix ($value);
+			if ($do_magic_quotes)
+				$value = stripslashes ($value);
+			$_REQUEST[$key] = escapeString ($value);
+		}
+		$sic[$key] = $value;
 		$seen_keys[$key] = 1;
-		if ($do_magic_quotes)
-			$value = stripslashes ($value);
-		$sic[$key] = dos2unix ($value);
-		if (gettype ($value) == 'string')
-			$_REQUEST[$key] = escapeString (dos2unix ($value));
 	}
 
 	// delete cookie information from the $_REQUEST array
