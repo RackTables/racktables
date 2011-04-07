@@ -7220,7 +7220,7 @@ function dynamic_title_decoder ($path_position)
 	}
 }
 
-function renderPortIFCompat()
+function renderIIFOIFCompat()
 {
 	global $nextorder;
 	echo '<br><table class=cooltable align=center border=0 cellpadding=5 cellspacing=0>';
@@ -7239,7 +7239,7 @@ function renderPortIFCompat()
 	echo '</table>';
 }
 
-function renderPortIFCompatEditor()
+function renderIIFOIFCompatEditor()
 {
 	function printNewitemTR()
 	{
@@ -7254,29 +7254,11 @@ function renderPortIFCompatEditor()
 	}
 
 	startPortlet ('WDM standard by interface');
-	$packs = array
-	(
-		'1000cwdm80' => array
-		(
-			'title' => '1000Base-CWDM80 (8 channels)',
-			'iif_ids' => array (3, 4),
-		),
-		'1000dwdm80' => array
-		(
-			'title' => '1000Base-DWDM80 (42 channels)',
-			'iif_ids' => array (3, 4),
-		),
-		'10000dwdm80' => array
-		(
-			'title' => '10GBase-ZR-DWDM80 (42 channels)',
-			'iif_ids' => array (9, 6, 5, 8, 7),
-		),
-	);
 	$iif = getPortIIFOptions();
-	global $nextorder;
+	global $nextorder, $wdm_packs;
 	$order = 'odd';
 	echo '<table border=0 align=center cellspacing=0 cellpadding=5>';
-	foreach ($packs as $codename => $packinfo)
+	foreach ($wdm_packs as $codename => $packinfo)
 	{
 		echo "<tr><th>&nbsp;</th><th colspan=2>${packinfo['title']}</th></tr>";
 		foreach ($packinfo['iif_ids'] as $iif_id)

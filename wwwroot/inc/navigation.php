@@ -450,12 +450,12 @@ $page['portifcompat']['title'] = 'Enabled port types';
 $page['portifcompat']['parent'] = 'config';
 $tab['portifcompat']['default'] = 'View';
 $tab['portifcompat']['edit'] = 'Edit';
-$tabhandler['portifcompat']['default'] = 'renderPortIFCompat';
-$tabhandler['portifcompat']['edit'] = 'renderPortIFCompatEditor';
+$tabhandler['portifcompat']['default'] = 'renderIIFOIFCompat';
+$tabhandler['portifcompat']['edit'] = 'renderIIFOIFCompatEditor';
 $ophandler['portifcompat']['edit']['add'] = 'addPortInterfaceCompat';
 $ophandler['portifcompat']['edit']['del'] = 'tableHandler';
-$ophandler['portifcompat']['edit']['addPack'] = 'addPortInterfaceCompatPack';
-$ophandler['portifcompat']['edit']['delPack'] = 'delPortInterfaceCompatPack';
+$ophandler['portifcompat']['edit']['addPack'] = 'addOIFCompatPack';
+$ophandler['portifcompat']['edit']['delPack'] = 'delOIFCompatPack';
 
 $page['attrs']['title'] = 'Attributes';
 $page['attrs']['parent'] = 'config';
