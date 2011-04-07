@@ -2223,9 +2223,9 @@ function updateFileText ()
 	return buildRedirectURL (__FUNCTION__, 'OK', array (htmlspecialchars ($shortInfo['name'])));
 }
 
-$msgcode['addPortInterfaceCompat']['OK'] = 48;
-$msgcode['addPortInterfaceCompat']['ERR'] = 110;
-function addPortInterfaceCompat ()
+$msgcode['addIIFOIFCompat']['OK'] = 48;
+$msgcode['addIIFOIFCompat']['ERR'] = 110;
+function addIIFOIFCompat ()
 {
 	assertUIntArg ('iif_id');
 	assertUIntArg ('oif_id');
@@ -2234,8 +2234,8 @@ function addPortInterfaceCompat ()
 	return buildRedirectURL (__FUNCTION__, 'ERR');
 }
 
-$msgcode['addOIFCompatPack']['OK'] = 44;
-function addOIFCompatPack ()
+$msgcode['addIIFOIFCompatPack']['OK'] = 44;
+function addIIFOIFCompatPack ()
 {
 	genericAssertion ('standard', 'enum/wdmstd');
 	genericAssertion ('iif_id', 'iif');
@@ -2249,8 +2249,8 @@ function addOIFCompatPack ()
 	return buildRedirectURL (__FUNCTION__, 'OK', array ($nbad, $ngood));
 }
 
-$msgcode['delOIFCompatPack']['OK'] = 44;
-function delOIFCompatPack ()
+$msgcode['delIIFOIFCompatPack']['OK'] = 44;
+function delIIFOIFCompatPack ()
 {
 	genericAssertion ('standard', 'enum/wdmstd');
 	genericAssertion ('iif_id', 'iif');
@@ -2262,6 +2262,41 @@ function delOIFCompatPack ()
 		else
 			$nbad++;
 	return buildRedirectURL (__FUNCTION__, 'OK', array ($nbad, $ngood));
+}
+
+$msgcode['addOIFCompatPack']['OK'] = 21;
+function addOIFCompatPack ()
+{
+	genericAssertion ('standard', 'enum/wdmstd');
+	global $wdm_packs;
+	$oifs = $wdm_packs[$_REQUEST['standard']]['oif_ids'];
+	foreach ($oifs as $oif_id_1)
+	{
+		$args = $qmarks = array();
+		$query = 'REPLACE INTO PortCompat (type1, type2) VALUES ';
+		foreach ($oifs as $oif_id_2)
+		{
+			$qmarks[] = '(?, ?)';
+			$args[] = $oif_id_1;
+			$args[] = $oif_id_2;
+		}
+		$query .= implode (', ', $qmarks);
+		usePreparedExecuteBlade ($query, $args);
+	}
+	return buildRedirectURL (__FUNCTION__, 'OK');
+}
+
+$msgcode['delOIFCompatPack']['OK'] = 21;
+function delOIFCompatPack ()
+{
+	genericAssertion ('standard', 'enum/wdmstd');
+	global $wdm_packs;
+	$oifs = $wdm_packs[$_REQUEST['standard']]['oif_ids'];
+	foreach ($oifs as $oif_id_1)
+		foreach ($oifs as $oif_id_2)
+			if ($oif_id_1 != $oif_id_2) # leave narrow-band mapping intact
+				usePreparedDeleteBlade ('PortCompat', array ('type1' => $oif_id_1, 'type2' => $oif_id_2));
+	return buildRedirectURL (__FUNCTION__, 'OK');
 }
 
 $msgcode['add8021QOrder']['OK'] = 48;

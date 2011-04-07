@@ -3902,7 +3902,7 @@ function renderUserListEditor ()
 		printNewItemTR();
 }
 
-function renderPortOIFCompatViewer()
+function renderOIFCompatViewer()
 {
 	global $nextorder;
 	$order = 'odd';
@@ -3921,7 +3921,7 @@ function renderPortOIFCompatViewer()
 	echo '</table>';
 }
 
-function renderPortOIFCompatEditor()
+function renderOIFCompatEditor()
 {
 	function printNewitemTR()
 	{
@@ -3935,9 +3935,26 @@ function renderPortOIFCompatEditor()
 		echo '</th></tr></form>';
 	}
 
-	global $nextorder;
-	$last_left_oif_id = NULL;
+	global $nextorder, $wdm_packs;
+
+	startPortlet ('WDM wideband receivers');
+	echo '<table border=0 align=center cellspacing=0 cellpadding=5>';
+	echo '<tr><th>&nbsp;</th><th>enable</th><th>disable</th></tr>';
 	$order = 'odd';
+	foreach ($wdm_packs as $codename => $packinfo)
+	{
+		echo "<tr class=row_${order}><td class=tdleft>" . $packinfo['title'] . '</td><td><a href="';
+		echo makeHrefProcess (array ('op' => 'addPack', 'standard' => $codename));
+		echo '">' . getImageHREF ('add') . '</a></td><td><a href="';
+		echo makeHrefProcess (array ('op' => 'delPack', 'standard' => $codename));
+		echo '">' . getImageHREF ('delete') . '</a></td></tr>';
+		$order = $nextorder[$order];
+	}
+	echo '</table>';
+	finishPortlet();
+
+	startPortlet ('interface by interface');
+	$last_left_oif_id = NULL;
 	echo '<br><table class=cooltable align=center border=0 cellpadding=5 cellspacing=0>';
 	echo '<tr><th>&nbsp;</th><th>From Interface</th><th>To Interface</th></tr>';
 	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
@@ -3957,6 +3974,7 @@ function renderPortOIFCompatEditor()
 	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')
 		printNewitemTR();
 	echo '</table>';
+	finishPortlet();
 }
 
 function renderObjectParentCompatViewer()
