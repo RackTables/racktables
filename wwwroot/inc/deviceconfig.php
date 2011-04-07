@@ -947,7 +947,10 @@ function ios12TranslatePushQueue ($queue, $dummy)
 			$ret .= "interface ${cmd['arg1']}\nno switchport access vlan\nexit\n";
 			break;
 		case 'set mode':
-			$ret .= "interface ${cmd['arg1']}\nswitchport mode ${cmd['arg2']}\n";
+			$ret .= "interface ${cmd['arg1']}\n";
+			if ($cmd['arg2'] == 'trunk')
+				$ret .= "switchport trunk encapsulation dot1q\n";
+			$ret .= "switchport mode ${cmd['arg2']}\n";
 			if ($cmd['arg2'] == 'trunk')
 				$ret .= "no switchport trunk native vlan\nswitchport trunk allowed vlan none\n";
 			$ret .= "exit\n";
