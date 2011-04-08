@@ -17,7 +17,7 @@ $(document).ready(function() {
 
 function initCommentTD (jqSet) {
 	jqSet
-		.append('<img class="edit-btn" src="?module=chrome&uri=pix/pencil-icon.png" title="Edit reservation comment" />')
+		.append('<div class="empty" style="margin-left: 10px; width:12px; height:12px;"><img class="edit-btn" src="?module=chrome&uri=pix/pencil-icon.png" title="Edit reservation comment" /></div>')
 		.mouseover(onTDMouseOver);
 	jqSet.find('.edit-btn')
 		.css('cursor', 'pointer')
@@ -54,7 +54,7 @@ function hideEditForm () {
 
 function onPencilClick (event) {
 	// hide original plain text comment
-	span = $(event.target).siblings('.rsvtext');
+	span = $(event.target).closest('.rsv-port').find('.rsvtext');
 	var width = span[0].offsetWidth + 50;
 	if (width < 150)
 		width = 150;

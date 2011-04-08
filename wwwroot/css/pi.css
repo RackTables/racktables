@@ -52,6 +52,15 @@ table.molecule {
 	border-bottom: dashed 1px;
 }
 
+.empty {
+	display:inline-block;
+	margin:0;
+	padding:0;
+	background:url(?module=chrome&uri=pix/1x1t.gif) repeat-y 0% 0%;
+	font-size:0;
+	line-height:0;
+}
+
 .dragon {
 	background-color: #000033;
 	text-align: left;
@@ -526,7 +535,6 @@ div.tagselector td {
 }
 
 .edit-btn {
-	margin-left: 10px;
 	display: none;
 }
 
