@@ -1050,6 +1050,18 @@ CREATE TABLE `EntityLink` (
 			break;
 		case '0.20.0':
 			$query = array_merge ($query, reloadDictionary ($batchid));
+			$query[] = "
+CREATE TABLE `PortLog` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `port_id` int(10) unsigned NOT NULL,
+  `user` char(64) NOT NULL,
+  `date` datetime NOT NULL,
+  `content` text NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `port_id-date` (`port_id`,`date`),
+  CONSTRAINT `PortLog_ibfk_1` FOREIGN KEY (`port_id`) REFERENCES `Port` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB;
+";
 			$query[] = "INSERT INTO `PortInterfaceCompat` (`iif_id`, `oif_id`) VALUES (4,1424)";
 			$query[] = "INSERT INTO `PortCompat` (`type1`, `type2`) VALUES (1424,1424)";
 			$query[] = "UPDATE Config SET varvalue = '0.20.0' WHERE varname = 'DB_VERSION'";

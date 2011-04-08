@@ -1,6 +1,7 @@
 0.20.0
 	update: handle wide-band WDM transceivers
 	update: 802.1q: config deploy to Cisco IOS switches is no more requiring 'switchport trunk encapsulation dot1q' pre-set
+	new feature: you can obtain who has made a port reservation or a port link by hovering cursor on dashed text
 0.19.4
 	update: new techniques of changing the directory layout are now supported by installer and upgrader
 	bugfix: in-place editing of unallocated IPv4 address was not working

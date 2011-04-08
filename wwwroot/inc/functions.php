@@ -4021,6 +4021,19 @@ function formatPortLink($host_id, $hostname, $port_id, $portname, $a_class = '')
 	return "<a $additional href=\"$href\">" . implode(' ', $text_items) . '</a>';
 }
 
+// function returns a HTML-formatted link to remote port, connected to the specified port
+function formatLinkedPort ($port_info, $a_class = '')
+{
+	return formatPortLink
+	(
+		$port_info['remote_object_id'],
+		$port_info['remote_object_name'],
+		$port_info['remote_id'],
+		$port_info['remote_name'],
+		$a_class
+	);
+}
+
 function compareDecomposedPortNames ($porta, $portb)
 {
 	if (0 != $cmp = strcmp ($porta['prefix'], $portb['prefix']))

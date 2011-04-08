@@ -41,6 +41,17 @@ table.molecule {
 	margin: 5px;
 }
 
+.strong {
+	font-weight: bold;
+}
+
+.hover-history {
+	cursor: help;
+}
+.hover-history.underline {
+	border-bottom: dashed 1px;
+}
+
 .dragon {
 	background-color: #000033;
 	text-align: left;

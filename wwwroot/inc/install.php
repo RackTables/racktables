@@ -700,6 +700,17 @@ CREATE TABLE `PortInterfaceCompat` (
   CONSTRAINT `PortInterfaceCompat-FK-iif_id` FOREIGN KEY (`iif_id`) REFERENCES `PortInnerInterface` (`id`)
 ) ENGINE=InnoDB;
 
+CREATE TABLE `PortLog` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `port_id` int(10) unsigned NOT NULL,
+  `user` char(64) NOT NULL,
+  `date` datetime NOT NULL,
+  `content` text NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `port_id-date` (`port_id`,`date`),
+  CONSTRAINT `PortLog_ibfk_1` FOREIGN KEY (`port_id`) REFERENCES `Port` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
 CREATE TABLE `PortNativeVLAN` (
   `object_id` int(10) unsigned NOT NULL,
   `port_name` char(255) NOT NULL,

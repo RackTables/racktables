@@ -810,9 +810,10 @@ function renderRackObject ($object_id)
 			echo "<td class=tdleft>" . formatPortIIFOIF ($port) . "</td><td class=tdleft><tt>${port['l2address']}</tt></td>";
 			if ($port['remote_object_id'])
 			{
-				$remote_object = spotEntity ('object', $port['remote_object_id']);
-				echo "<td class=tdleft><a href='".makeHref(array('page'=>'object', 'object_id'=>$port['remote_object_id'], 'hl_port_id'=>$port['remote_id']))."'>${remote_object['dname']}</a></td>";
-				echo "<td class=tdleft>${port['remote_name']}</td>";
+				echo "<td class=tdleft>" .
+					formatPortLink ($port['remote_object_id'], $port['remote_object_name'], NULL, NULL) . 
+					"</td>";
+				echo "<td class=tdleft>" . formatLoggedSpan ($port['last_log'], $port['remote_name'], 'underline') . "</td>";
 				echo "<td class='tdleft rsvtext'>${port['cableid']}</td>";
 			}
 			else
@@ -1151,9 +1152,11 @@ function renderPortsForObject ($object_id)
 		echo "<td><input type=text name=l2address value='${port['l2address']}' size=18 maxlength=24></td>\n";
 		if ($port['remote_object_id'])
 		{
-			$remote_object = spotEntity ('object', $port['remote_object_id']);
-			echo "<td>${port['cableid']}&nbsp;<a href='".makeHref(array('page'=>'object', 'object_id'=>$port['remote_object_id']))."'>${remote_object['dname']}</a></td>";
-			echo "<td>${port['remote_name']}<input type=hidden name=reservation_comment value=''></td>";
+			echo "<td>${port['cableid']} " .
+				formatLoggedSpan ($port['last_log'], formatPortLink ($port['remote_object_id'], $port['remote_object_name'], NULL, NULL)) .
+				"</td>";
+			echo "<td> " . formatLoggedSpan ($port['last_log'], $port['remote_name'], 'underline') .
+				"<input type=hidden name=reservation_comment value=''></td>";
 			echo "<td class=tdcenter><a href='".
 				makeHrefProcess(array(
 					'op'=>'unlinkPort', 
@@ -1165,7 +1168,7 @@ function renderPortsForObject ($object_id)
 		}
 		elseif (strlen ($port['reservation_comment']))
 		{
-			echo "<td><b>Reserved:</b></td>";
+			echo "<td>" . formatLoggedSpan ($port['last_log'], 'Reserved:', 'strong underline') . "</td>";
 			echo "<td><input type=text name=reservation_comment value='${port['reservation_comment']}'></td>";
 			echo "<td class=tdcenter><a href='".
 				makeHrefProcess(array(
@@ -1480,7 +1483,7 @@ function showMessageOrError ()
 			(
 // records 0~99 with success messages
 				0 => array ('code' => 'success', 'format' => '%s'),
-				8 => array ('code' => 'success', 'format' => 'Port %s successfully linked with port %s at object %s'),
+				8 => array ('code' => 'success', 'format' => 'Port %s successfully linked with %s'),
 				5 => array ('code' => 'success', 'format' => 'added record "%s" successfully'),
 				6 => array ('code' => 'success', 'format' => 'updated record "%s" successfully'),
 				7 => array ('code' => 'success', 'format' => 'deleted record "%s" successfully'),
@@ -7705,12 +7708,10 @@ function renderObject8021QPorts ($object_id)
 				$hl_port_name = $port['name'];
 			$socket = array ('interface' => formatPortIIFOIF ($port));
 			if ($port['remote_object_id'])
-			{
-				$remote_object = spotEntity ('object', $port['remote_object_id']);
-				$socket['link'] = formatPortLink ($remote_object['id'], $remote_object['dname'], $port['remote_id'], $port['remote_name']);
-			}
+				$socket['link'] = formatLoggedSpan ($port['last_log'], formatLinkedPort ($port));
 			elseif (strlen ($port['reservation_comment']))
-				$socket['link'] = '<b>Rsv:</b> ' . $port['reservation_comment'];
+				$socket['link'] = formatLoggedSpan ($port['last_log'], 'Rsv:', 'strong underline') . ' ' .
+				formatLoggedSpan ($port['last_log'], $port['reservation_comment']);
 			else
 				$socket['link'] = '&nbsp;';
 			$sockets[$port['name']][] = $socket;
@@ -8803,11 +8804,8 @@ function renderDiscoveredNeighbors ($object_id)
 							unset ($error_message);
 						}
 						elseif ($portinfo_local['remote_object_id'] != $dp_remote_object_id)
-						{
-							$remote_object = spotEntity('object', $portinfo_local['remote_object_id']);
 							$error_message = "Remote device mismatch - port linked to "
-								. formatPortLink ($remote_object['id'], $remote_object['name'], $portinfo_local['remote_id'], $portinfo_local['remote_name']);
-						}
+								. formatLinkedPort ($portinfo_local);
 						else // ($portinfo_local['remote_name'] != $dp_neighbor['port'])
 							$error_message = "Remote port mismatch - port linked to "
 								. formatPortLink ($portinfo_local['remote_object_id'], NULL, $portinfo_local['remote_id'], $portinfo_local['remote_name']);;
@@ -8818,9 +8816,8 @@ function renderDiscoveredNeighbors ($object_id)
 				foreach ($remote_ports as $portinfo_remote)
 					if ($portinfo_remote['remote_id'])
 					{
-						$remote_remote_object = spotEntity('object', $portinfo_remote['remote_object_id']);
-						$remote_link_html = formatPortLink($remote_remote_object['id'], $remote_remote_object['name'], $portinfo_remote['remote_id'], $portinfo_remote['remote_name']);
-						$remote_port_html = formatPortLink(NULL, NULL, $portinfo_remote['id'], $portinfo_remote['name']);
+						$remote_link_html = formatLinkedPort ($portinfo_remote);
+						$remote_port_html = formatPortLink (NULL, NULL, $portinfo_remote['id'], $portinfo_remote['name']);
 						$error_message = "Remote port $remote_port_html is already linked to $remote_link_html";
 						break 2;
 					}

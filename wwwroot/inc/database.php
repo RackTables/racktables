@@ -515,55 +515,86 @@ function amplifyCell (&$record, $dummy = NULL)
 	}
 }
 
-function getObjectPortsAndLinks ($object_id)
+function fetchPortList ($sql_where_clause, $query_params = array())
 {
-	$query = "SELECT id, name, label, l2address, iif_id, (SELECT iif_name FROM PortInnerInterface WHERE id = iif_id) AS iif_name, " .
-		"type AS oif_id, (SELECT dict_value FROM Dictionary WHERE dict_key = type) AS oif_name, reservation_comment " .
-		"FROM Port WHERE object_id = ?";
-	// list and decode all ports of the current object
-	$result = usePreparedSelectBlade ($query, array ($object_id));
-	$ret=array();
+	$query = <<<END
+SELECT
+	Port.id,
+	Port.object_id,
+	Port.name,
+	Port.l2address,
+	Port.label,
+	Port.reservation_comment,
+	Port.iif_id,
+	Port.type AS oif_id,
+	(SELECT PortInnerInterface.iif_name FROM PortInnerInterface WHERE PortInnerInterface.id = Port.iif_id) AS iif_name,
+	(SELECT Dictionary.dict_value FROM Dictionary WHERE Dictionary.dict_key = Port.type) AS oif_name,
+	(SELECT COUNT(*) FROM PortLog WHERE PortLog.port_id = Port.id) AS log_count,
+	(SELECT name FROM RackObject WHERE Port.object_id = RackObject.id) AS object_name,
+	Link.cable as cableid,
+	pa.id as pa_id,
+	pa.name as pa_name,
+	pa.object_id as pa_object_id,
+	oa.name as pa_object_name,
+	pb.id as pb_id,
+	pb.name as pb_name,
+	pb.object_id as pb_object_id,
+	ob.name as pb_object_name,
+	PortLog.user,
+	UNIX_TIMESTAMP(PortLog.date) as time
+FROM
+	Port
+	LEFT JOIN
+	(
+		Link
+		INNER JOIN Port AS pa ON Link.porta = pa.id
+		INNER JOIN Port AS pb ON Link.portb = pb.id
+		INNER JOIN RackObject AS oa ON pa.object_id = oa.id
+		INNER JOIN RackObject AS ob ON pb.object_id = ob.id
+	) ON (Port.id = Link.porta OR Port.id = Link.portb)
+	LEFT JOIN PortLog ON PortLog.id = (SELECT id FROM PortLog WHERE PortLog.port_id = Port.id ORDER BY date DESC LIMIT 1)
+WHERE
+	$sql_where_clause
+END;
+
+	$result = usePreparedSelectBlade ($query, $query_params);
+	$ret = array();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
 		$row['l2address'] = l2addressFromDatabase ($row['l2address']);
-		$row['remote_id'] = NULL;
-		$row['remote_name'] = NULL;
-		$row['remote_object_id'] = NULL;
+		
+		// link
+		$row['remote_id'] = ($row['id'] === $row['pa_id'] ? $row['pb_id'] : ($row['id'] === $row['pb_id'] ? $row['pa_id'] : NULL));
+		$row['remote_name'] = ($row['id'] === $row['pa_id'] ? $row['pb_name'] : ($row['id'] === $row['pb_id'] ? $row['pa_name'] : NULL));
+		$row['remote_object_id'] = ($row['id'] === $row['pa_id'] ? $row['pb_object_id'] : ($row['id'] === $row['pb_id'] ? $row['pa_object_id'] : NULL));
+		$row['remote_object_name'] = ($row['id'] === $row['pa_id'] ? $row['pb_object_name'] : ($row['id'] === $row['pb_id'] ? $row['pa_object_name'] : NULL));
+		$row['linked'] = isset ($row['remote_id']) ? 1 : 0;
+		unset ($row['pa_id']);
+		unset ($row['pb_id']);
+		unset ($row['pa_name']);
+		unset ($row['pa_object_name']);
+		unset ($row['pb_name']);
+		unset ($row['pa_object_id']);
+		unset ($row['pb_object_name']);
+
+		// lsat changed log
+		$row['last_log'] = array();
+		if ($row['log_count'])
+		{
+			$row['last_log']['user'] = $row['user'];
+			$row['last_log']['time'] = $row['time'];
+		}
+		unset ($row['user']);
+		unset ($row['time']);
+
 		$ret[] = $row;
 	}
-	unset ($result);
-	// now find and decode remote ends for all locally terminated connections
-	// FIXME: can't this data be extracted in one pass with sub-queries?
-	foreach (array_keys ($ret) as $tmpkey)
-	{
-		$portid = $ret[$tmpkey]['id'];
-		$remote_id = NULL;
-		$query = "select porta, portb, cable from Link where porta = ? or portb = ?";
-		$result = usePreparedSelectBlade ($query, array ($portid, $portid));
-		$cable = "CableID n/a";
-		if ($row = $result->fetch (PDO::FETCH_ASSOC))
-		{
-			if ($portid != $row['porta'])
-				$remote_id = $row['porta'];
-			elseif ($portid != $row['portb'])
-				$remote_id = $row['portb'];
-			$cable = $row['cable'];
-		}
-		unset ($result);
-		if ($remote_id) // there's a remote end here
-		{
-			$query = "SELECT name, object_id FROM Port WHERE id = ?";
-			$result = usePreparedSelectBlade ($query, array ($remote_id));
-			if ($row = $result->fetch (PDO::FETCH_ASSOC))
-			{
-				$ret[$tmpkey]['remote_name'] = $row['name'];
-				$ret[$tmpkey]['remote_object_id'] = $row['object_id'];
-				$ret[$tmpkey]['cableid'] = $cable;
-			}
-			$ret[$tmpkey]['remote_id'] = $remote_id;
-			unset ($result);
-		}
-	}
+	return $ret;
+}
+
+function getObjectPortsAndLinks ($object_id)
+{
+	$ret = fetchPortList ("Port.object_id = ?", array ($object_id));
 	return sortPortList ($ret, TRUE);
 }
 
@@ -1105,6 +1136,12 @@ function commitAddPort ($object_id = 0, $port_name, $port_type_id, $port_label, 
 	$dbxlink->exec ('UNLOCK TABLES');
 }
 
+function getPortReservationComment ($port_id)
+{
+	$result = usePreparedSelectBlade ('SELECT reservation_comment FROM Port WHERE id = ?', array ($port_id));
+	return $result->fetchColumn();
+}
+
 // The fifth argument may be either explicit 'NULL' or some (already quoted by the upper layer)
 // string value. In case it is omitted, we just assign it its current value.
 // It would be nice to simplify this semantics later.
@@ -1121,7 +1158,9 @@ function commitUpdatePort ($object_id, $port_id, $port_name, $port_type_id, $por
 		// when there is a mean to do that.
 		throw new InvalidRequestArgException ('port_l2address', $db_l2address, 'address belongs to another object');
 	}
-	usePreparedUpdateBlade
+	$prev_comment = getPortReservationComment ($port_id);
+	$reservation_comment = mb_strlen ($port_reservation_comment) ? $port_reservation_comment : NULL;
+	$res = usePreparedUpdateBlade
 	(
 		'Port',
 		array
@@ -1129,7 +1168,7 @@ function commitUpdatePort ($object_id, $port_id, $port_name, $port_type_id, $por
 			'name' => $port_name,
 			'type' => $port_type_id,
 			'label' => $port_label,
-			'reservation_comment' => mb_strlen ($port_reservation_comment) ? $port_reservation_comment : NULL,
+			'reservation_comment' => $reservation_comment,
 			'l2address' => ($db_l2address === '') ? NULL : $db_l2address,
 		),
 		array
@@ -1139,22 +1178,33 @@ function commitUpdatePort ($object_id, $port_id, $port_name, $port_type_id, $por
 		)
 	);
 	$dbxlink->exec ('UNLOCK TABLES');
+	if ($res && $prev_comment !== $reservation_comment)
+		addPortLogEntry ($port_id, sprintf ("Reservation changed from '%s' to '%s'", $prev_comment, $reservation_comment));
+	return $res;
 }
 
 function commitUpdatePortComment ($port_id, $port_reservation_comment)
 {
-	return usePreparedUpdateBlade
+	global $dbxlink;
+	$dbxlink->exec ('LOCK TABLES Port WRITE');
+	$prev_comment = getPortReservationComment ($port_id);
+	$reservation_comment = mb_strlen ($port_reservation_comment) ? $port_reservation_comment : NULL;
+	$res = usePreparedUpdateBlade
 	(
 		'Port',
 		array 
 		(
-			'reservation_comment' => mb_strlen ($port_reservation_comment) ? $port_reservation_comment : NULL,
+			'reservation_comment' => $reservation_comment,
 		),
 		array
 		(
 			'id' => $port_id,
 		)
 	);
+	$dbxlink->exec ('UNLOCK TABLES');
+	if ($res && $prev_comment !== $reservation_comment)
+		addPortLogEntry ($port_id, sprintf ("Reservation changed from '%s' to '%s'", $prev_comment, $reservation_comment));
+	return $res;
 }
 
 function commitUpdatePortOIF ($port_id, $port_type_id)
@@ -1214,7 +1264,59 @@ function linkPorts ($porta, $portb, $cable = NULL)
 		'UPDATE Port SET reservation_comment=NULL WHERE id IN(?, ?)',
 		array ($porta, $portb)
 	);
+
+	// log new links
+	$result = usePreparedSelectBlade
+	(
+		"SELECT Port.id, Port.name as port_name, RackObject.name as obj_name FROM Port " .
+		"INNER JOIN RackObject ON Port.object_id = RackObject.id WHERE Port.id IN (?, ?)",
+		array ($porta, $portb)
+	);
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
+	{
+		$pair_id = ($row['id'] == $porta ? $portb : $porta);
+		addPortLogEntry ($pair_id, sprintf ("linked to %s %s", $row['obj_name'], $row['port_name']));
+	}
+	unset ($result);
+
 	return $ret ? '' : 'query failed';
+}
+
+function commitUnlinkPort ($port_id)
+{
+	// fetch and log existing link
+	$result = usePreparedSelectBlade
+	(
+		"SELECT	pa.id AS id_a, pa.name AS port_name_a, oa.name AS obj_name_a, " .
+		"pb.id AS id_b, pb.name AS port_name_b, ob.name AS obj_name_b " .
+		"FROM " .
+		"Link INNER JOIN Port pa ON pa.id = Link.porta " .
+		"INNER JOIN Port pb ON pb.id = Link.portb " .
+		"INNER JOIN RackObject oa ON pa.object_id = oa.id " .
+		"INNER JOIN RackObject ob ON pb.object_id = ob.id " .
+		"WHERE " .
+		"Link.porta = ? OR Link.portb = ?",
+		array ($port_id, $port_id)
+	);
+	if ($row = $result->fetch (PDO::FETCH_ASSOC))
+	{
+		addPortLogEntry ($row['id_a'], sprintf ("unlinked from %s %s", $row['obj_name_b'], $row['port_name_b']));
+		addPortLogEntry ($row['id_b'], sprintf ("unlinked from %s %s", $row['obj_name_a'], $row['port_name_a']));
+	}
+	unset ($result);
+	
+	// remove existing link
+	return usePreparedDeleteBlade ('Link', array ('porta' => $port_id, 'portb' => $port_id), 'OR');
+}
+
+function addPortLogEntry ($port_id, $message)
+{
+	global $remote_username;
+	return usePreparedExecuteBlade
+	(
+		"INSERT INTO PortLog (port_id, user, date, content) VALUES (?, ?, NOW(), ?)",
+		array ($port_id, $remote_username, $message)
+	);
 }
 
 // Returns all IPv4 addresses allocated to object, but does not attach detailed info about address
@@ -3952,16 +4054,8 @@ function getPortIIFStats ($args)
 
 function getPortInfo ($port_id)
 {
-	$result = usePreparedSelectBlade
-	(
-		"SELECT id, object_id, name, iif_id, type AS oif_id, l2address, reservation_comment, ".
-		"(SELECT dict_value FROM Dictionary WHERE dict_key = type) AS oif_name, " .
-		"(SELECT COUNT(*) FROM Link WHERE id IN (porta, portb)) AS linked, " .
-		"(SELECT iif_name FROM PortInnerInterface WHERE id = iif_id) AS iif_name " .
-		"FROM Port WHERE id = ?",
-		array ($port_id)
-	);
-	return $result->fetch (PDO::FETCH_ASSOC);
+	$result = fetchPortList ('Port.id = ?', array ($port_id));
+	return empty ($result) ? NULL : $result[0];
 }
 
 function getVLANDomainStats ()

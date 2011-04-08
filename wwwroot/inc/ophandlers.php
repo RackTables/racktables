@@ -98,17 +98,6 @@ $opspec_list['object-ports-deleteAll'] = array
 		array ('url_argname' => 'object_id', 'assertion' => 'uint'),
 	),
 );
-$opspec_list['object-ports-unlinkPort'] = array
-(
-	'table' => 'Link',
-	'action' => 'DELETE',
-	'arglist' => array
-	(
-		array ('url_argname' => 'port_id', 'table_colname' => 'porta', 'assertion' => 'uint'),
-		array ('url_argname' => 'port_id', 'table_colname' => 'portb', 'assertion' => 'uint'),
-	),
-	'conjunction' => 'OR',
-);
 $opspec_list['object-log-del'] = array
 (
 	'table' => 'ObjectLog',
@@ -633,18 +622,15 @@ function linkPortForObject ()
 	if ($error != '')
 		return buildRedirectURL (__FUNCTION__, 'ERR', array ($error));
 	global $sic;
-	$local_port_info = getPortInfo ($sic['port_id']);
-	$remote_port_info = getPortInfo ($sic['remote_port_id']);
-	$remote_object = spotEntity ('object', $remote_port_info['object_id']);
+	$port_info = getPortInfo ($sic['port_id']);
 	return buildRedirectURL
 	(
 		__FUNCTION__,
 		'OK',
 		array
 		(
-			$local_port_info['name'],
-			$remote_port_info['name'],
-			$remote_object['dname'],
+			formatPortLink ($port_info['id'], $port_info['name'], NULL, NULL),
+			formatLinkedPort ($port_info),
 		)
 	);
 }
@@ -2824,6 +2810,15 @@ function getOpspec()
 	)
 		throw new RackTablesError ('malformed array structure in opspec_list', RackTablesError::INTERNAL);
 	return $ret;
+}
+
+function unlinkPort ()
+{
+	assertUIntArg ('port_id');
+	if (commitUnlinkPort ($_REQUEST['port_id']))
+		showSuccess ("Port unlinked successfully");
+	else
+		showError ("Error unlinking port");
 }
 
 function tableHandler()
