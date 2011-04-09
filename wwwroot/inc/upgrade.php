@@ -119,6 +119,7 @@ function getDBUpgradePath ($v1, $v2)
 		'0.19.1',
 		'0.19.2',
 		'0.19.3',
+		'0.19.4',
 	);
 	if (!in_array ($v1, $versionhistory) or !in_array ($v2, $versionhistory))
 		return NULL;
@@ -1047,6 +1048,10 @@ CREATE TABLE `EntityLink` (
 			$query = array_merge ($query, reloadDictionary ($batchid));
 			$query[] = "DELETE FROM RackSpace WHERE object_id IS NULL AND state = 'T'";
 			$query[] = "UPDATE Config SET varvalue = '0.19.3' WHERE varname = 'DB_VERSION'";
+			break;
+		case '0.19.4':
+			$query = array_merge ($query, reloadDictionary ($batchid));
+			$query[] = "UPDATE Config SET varvalue = '0.19.4' WHERE varname = 'DB_VERSION'";
 			break;
 		default:
 			showError ("executeUpgradeBatch () failed, because batch '${batchid}' isn't defined", __FUNCTION__);
