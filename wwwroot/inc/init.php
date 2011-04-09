@@ -18,7 +18,6 @@ require_once 'navigation.php';
 require_once 'triggers.php';
 require_once 'gateways.php';
 require_once 'IPv6.php';
-require_once 'interface-lib.php';
 require_once 'caching.php';
 
 // secret.php may be missing, in which case this is a special fatal error

@@ -7,6 +7,7 @@
 */
 
 require_once 'exceptions.php';
+require_once 'interface-lib.php';
 
 // Always have default values for these options, so if a user didn't
 // care to set, something would be working anyway.
