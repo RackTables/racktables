@@ -25,7 +25,7 @@ $iftable_processors['catalyst-chassis-25-to-26-100FX/MT-RJ'] = array
 (
 	'pattern' => '@^FastEthernet([[:digit:]]+/)?(25|26)$@',
 	'replacement' => 'fa\\1\\2',
-	'dict_key' => 1083,
+	'dict_key' => 1195,
 	'label' => '\\2',
 	'try_next_proc' => FALSE,
 );
