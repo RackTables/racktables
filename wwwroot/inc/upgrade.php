@@ -1063,7 +1063,6 @@ CREATE TABLE `PortLog` (
   CONSTRAINT `PortLog_ibfk_1` FOREIGN KEY (`port_id`) REFERENCES `Port` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 ";
-			$query[] = "INSERT INTO `PortInterfaceCompat` (`iif_id`, `oif_id`) VALUES (4,1424)";
 			for ($i = 1424; $i <= 1466; $i++) # CX, then 42 ER channels
 				$query[] = "INSERT INTO `PortCompat` (`type1`, `type2`) VALUES (${i},${i})";
 			# Dismiss some overly-specific OIF types in favour of more generic counterparts.
