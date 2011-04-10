@@ -2018,7 +2018,7 @@ function loadOwnIPv4Addresses (&$node)
 			if (!isset ($nested['id'])) // spare
 			{
 				$toscan[] = array ('i32_first' => $nested['db_first'], 'i32_last' => $nested['db_last']);
-				$node['addrt'] += $node['db_last'] - $node['db_first'] + 1;
+				$node['addrt'] += $nested['db_last'] - $nested['db_first'] + 1;
 			}
 	}
 	$node['addrlist'] = scanIPv4Space ($toscan);
