@@ -1,4 +1,5 @@
 0.19.4
+ 	bugfix: tag selector was not working with magic_quotes enabled
 	update: new techniques of changing the directory layout are now supported by installer and upgrader
 	bugfix: in-place editing of unallocated IPv4 address was not working
 0.19.3 2011-04-05
