@@ -338,7 +338,7 @@ function assertPCREArg ($argname)
 
 function isPCRE ($arg)
 {
-	if (! isset ($arg) or FALSE === preg_match ($arg, 'test'))
+	if (! isset ($arg) or FALSE === @preg_match ($arg, 'test'))
 		return FALSE;
 	return TRUE;
 }
