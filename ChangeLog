@@ -3,6 +3,7 @@
 	update: new techniques of changing the directory layout are now supported by installer and upgrader
 	bugfix: in-place editing of unallocated IPv4 address was not working
 	bugfix: wrong calculation of total IPv4 address count in networks with spare blocks (by Jens Rosenboom)
+	bugfix: VST editor: unsaved regexps were sometimes undesirably modified
 0.19.3 2011-04-05
 	update: when searching for object by its hostname (FQDN attr) and single match is found, no searching by other fields is done
 	update: introduce "{$vlan_NNNN}" autotag to convoy both {$fromvlan_NNNN} and {$tovlan_NNNN}
