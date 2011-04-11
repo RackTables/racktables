@@ -8624,7 +8624,6 @@ function renderVSTRulesEditor ($vst_id)
 		$source_options = array();
 	else
 	{
-		$vstlist = getVSTStats();
 		$source_options = array();
 		foreach (getVSTStats() as $vst_id => $vst_info)
 			if ($vst_info['rulec'])
