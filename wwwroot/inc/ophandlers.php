@@ -2656,7 +2656,6 @@ function delVLANSwitchTemplate()
 }
 
 $msgcode['cloneVST']['OK'] = 48;
-$msgcode['cloneVST']['ERR'] = 179;
 function cloneVST()
 {
 	assertUIntArg ('mutex_rev', TRUE);
