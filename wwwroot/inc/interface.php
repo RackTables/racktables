@@ -9023,7 +9023,7 @@ function formatAttributeValue ($record)
 				'telnet' => 'TELNET_OBJS_LISTSRC',
 			);
 			foreach ($protos_to_try as $proto => $cfgvar)
-				if (considerConfiguredConstraintInContext ($cfgvar))
+				if (considerConfiguredConstraint (NULL, $cfgvar))
 					return "<a title='Open $proto session' class='mgmt-link' href='" . $proto . '://' . $record['a_value'] . "'>${record['a_value']}</a>";
 		}
 		return $record['a_value'];
