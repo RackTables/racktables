@@ -333,8 +333,8 @@ function trigger_anyDP ($command, $constraint)
 // tease rules editor tab, when the VST has no rules
 function trigger_vst_editrules()
 {
-	$vst = getVLANSwitchTemplate ($_REQUEST['vst_id']);
-	return count ($vst['rules']) ? 'std' : 'attn';
+	$vst = spotEntity ('vst', getBypassValue());
+	return $vst['rulec'] ? 'std' : 'attn';
 }
 
 ?>

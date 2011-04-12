@@ -7380,7 +7380,8 @@ function render8021QOrderForm ($some_id)
 			);
 		break;
 	case 'vst':
-		$vst = getVLANSwitchTemplate ($some_id);
+		$vst = spotEntity ('vst', $some_id);
+		amplifyCell ($vst);
 		foreach ($vst['switches'] as $vswitch)
 			$minuslines[$vswitch['object_id']] = array
 			(
@@ -7486,7 +7487,7 @@ function render8021QStatus ()
 
 	echo '</td><td class=pcleft width="40%">';
 
-	if (!count ($vstlist = getVSTStats()))
+	if (!count ($vstlist = listCells ('vst')))
 		startPortlet ('no switch templates');
 	else
 	{
@@ -8540,7 +8541,7 @@ function renderVSTListEditor()
 	echo '<tr><th>&nbsp;</th><th>description</th><th>&nbsp</th></tr>';
 	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
 		printNewItemTR();
-	foreach (getVSTStats() as $vst_id => $vst_info)
+	foreach (listCells ('vst') as $vst_id => $vst_info)
 	{
 		printOpFormIntro ('upd', array ('vst_id' => $vst_id));
 		echo '<tr><td>';
@@ -8590,10 +8591,16 @@ function renderVSTRules ($rules, $title = NULL)
 
 function renderVST ($vst_id)
 {
-	$vst = getVLANSwitchTemplate ($vst_id);
+	$vst = spotEntity ('vst', $vst_id);
+	amplifyCell ($vst);
 	echo '<table border=0 class=objectview cellspacing=0 cellpadding=0>';
 	echo "<tr><td colspan=2 align=center><h1>${vst['description']}</h1><h2>";
 	echo "<tr><td class=pcleft width='50%'>";
+	startPortlet ('summary');
+	echo '<table border=0 cellspacing=0 cellpadding=3 width="100%">';
+	printTagTRs ($vst);
+	echo '</table>';
+	finishPortlet();
 	renderVSTRules ($vst['rules']);
 	echo '</td><td class=pcright>';
 	if (!count ($vst['switches']))
@@ -8619,13 +8626,14 @@ function renderVST ($vst_id)
 
 function renderVSTRulesEditor ($vst_id)
 {
-	$vst = getVLANSwitchTemplate ($vst_id);
-	if (count ($vst['rules']))
+	$vst = spotEntity ('vst', $vst_id);
+	amplifyCell ($vst);
+	if ($vst['rulec'])
 		$source_options = array();
 	else
 	{
 		$source_options = array();
-		foreach (getVSTStats() as $vst_id => $vst_info)
+		foreach (listCells ('vst') as $vst_id => $vst_info)
 			if ($vst_info['rulec'])
 				$source_options[$vst_id] = niftyString ('(' . $vst_info['rulec'] . ') ' . $vst_info['description']);
 	}

@@ -2662,7 +2662,8 @@ function cloneVST()
 {
 	assertUIntArg ('mutex_rev', TRUE);
 	assertUIntArg ('from_id');
-	$src_vst = getVLANSwitchTemplate ($_REQUEST['from_id']);
+	$src_vst = spotEntity ('vst', $_REQUEST['from_id']);
+	amplifyCell ($src_vst);
 	commitUpdateVSTRules (getBypassValue(), $_REQUEST['mutex_rev'], $src_vst['rules']);
 	return buildRedirectURL (__FUNCTION__, 'OK');
 }

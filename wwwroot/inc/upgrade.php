@@ -1100,6 +1100,7 @@ CREATE TABLE `PortLog` (
 			}
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdefined, description) VALUES ('SSH_OBJS_LISTSRC','none','string','yes','no','yes','Rackcode filter for SSH-managed objects')";
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdefined, description) VALUES ('TELNET_OBJS_LISTSRC','none','string','yes','no','yes','Rackcode filter for telnet-managed objects')";
+			$query[] = "ALTER TABLE TagStorage MODIFY COLUMN entity_realm ENUM('file','ipv4net','ipv4vs','ipv4rspool','object','rack','user','ipv6net','vst') NOT NULL default 'object'";
 			$query[] = "UPDATE Config SET varvalue = '0.20.0' WHERE varname = 'DB_VERSION'";
 			break;
 		default:

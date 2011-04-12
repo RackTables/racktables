@@ -140,6 +140,21 @@ $SQLSchema = array
 		'ordcolumns' => array ('row_name', 'Rack.name'),
 		'pidcolumn' => 'row_id',
 	),
+	'vst' => array
+	(
+		'table' => 'VLANSwitchTemplate',
+		'columns' => array
+		(
+			'id' => 'id',
+			'description' => 'description',
+			'mutex_rev' => 'mutex_rev',
+			'saved_by' => 'saved_by',
+			'switchc' => '(SELECT COUNT(object_id) FROM VLANSwitch WHERE template_id = id)',
+			'rulec' => '(SELECT COUNT(rule_no) FROM VLANSTRule WHERE vst_id = id)',
+		),
+		'keycolumn' => 'id',
+		'ordcolumns' => array ('description'),
+	),
 );
 
 $searchfunc = array
@@ -510,6 +525,22 @@ function amplifyCell (&$record, $dummy = NULL)
 		break;
 	case 'ipv6net':
 		$record['8021q'] = getIPv6Network8021QBindings ($record['id']);
+		break;
+	case 'vst':
+		$record['rules'] = array();
+		$record['switches'] = array();
+		$result = usePreparedSelectBlade
+		(
+			'SELECT rule_no, port_pcre, port_role, wrt_vlans, description ' .
+			'FROM VLANSTRule WHERE vst_id = ? ORDER BY rule_no',
+			array ($record['id'])
+		);
+		while ($row = $result->fetch (PDO::FETCH_ASSOC))
+			$record['rules'][$row['rule_no']] = $row;
+		unset ($result);
+		$result = usePreparedSelectBlade ('SELECT object_id, domain_id FROM VLANSwitch WHERE template_id = ?', array ($record['id']));
+		while ($row = $result->fetch (PDO::FETCH_ASSOC))
+			$record['switches'][$row['object_id']] = $row;
 		break;
 	default:
 	}
@@ -3248,6 +3279,10 @@ function generateEntityAutoTags ($cell)
 			$ret[] = array ('tag' => '$fileid_' . $cell['id']);
 			$ret[] = array ('tag' => '$any_file');
 			break;
+		case 'vst':
+			$ret[] = array ('tag' => '$vstid_' . $cell['id']);
+			$ret[] = array ('tag' => '$any_vst');
+			break;
 		default:
 			throw new InvalidArgException ('cell', '(array)', 'this input does not belong here');
 			break;
@@ -3262,6 +3297,7 @@ function generateEntityAutoTags ($cell)
 		case 'ipv4vs':
 		case 'ipv4rspool':
 		case 'file':
+		case 'vst':
 			if (!count ($cell['etags']))
 				$ret[] = array ('tag' => '$untagged');
 			break;
@@ -4442,15 +4478,6 @@ function getVSTStats()
 	$ret = array();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 		$ret[$row['id']] = $row;
-	return $ret;
-}
-
-function getVSTOptions()
-{
-	$result = usePreparedSelectBlade ('SELECT id, description FROM VLANSwitchTemplate ORDER BY description');
-	$ret = array();
-	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-		$ret[$row['id']] = $row['description'];
 	return $ret;
 }
 

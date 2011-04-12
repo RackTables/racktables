@@ -58,6 +58,7 @@ $etype_by_pageno = array
 	'rack' => 'rack',
 	'user' => 'user',
 	'file' => 'file',
+	'vst' => 'vst',
 );
 
 // Rack thumbnail image width summands: "front", "interior" and "rear" elements w/o surrounding border.
@@ -2603,6 +2604,14 @@ function getIPv4RSPoolOptions ()
 	return $ret;
 }
 
+function getVSTOptions()
+{
+	$ret = array();
+	foreach (listCells ('vst') as $vst)
+		$ret[$vst['id']] = niftyString ($vst['description'], 30, FALSE);
+	return $ret;
+}
+
 // Let's have this debug helper here to enable debugging of process.php w/o interface.php.
 function dump ($var)
 {
@@ -2877,7 +2886,8 @@ function array_values_same ($a1, $a2)
 // the provided list. Return resulting list.
 function apply8021QOrder ($vst_id, $portlist)
 {
-	$vst = getVLANSwitchTemplate ($vst_id);
+	$vst = spotEntity ('vst', $vst_id);
+	amplifyCell ($vst);
 	foreach (array_keys ($portlist) as $port_name)
 	{
 		foreach ($vst['rules'] as $rule)
