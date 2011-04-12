@@ -7217,12 +7217,10 @@ function dynamic_title_decoder ($path_position)
 			'params' => array ('vlan_ck' => $sic['vlan_ck'])
 		);
 	case 'vst':
-		$vstlist = getVSTOptions();
-		if (!array_key_exists ($sic['vst_id'], $vstlist))
-			throw new EntityNotFoundException ('VST', $sic['vst_id']);
+		$vst = spotEntity ('vst', $sic['vst_id']);
 		return array
 		(
-			'name' => niftyString ("template '" . $vstlist[$sic['vst_id']] . "'", 50, FALSE),
+			'name' => niftyString ("template '" . $vst['description'] . "'", 50, FALSE),
 			'params' => array ('vst_id' => $sic['vst_id'])
 		);
 	case 'dqueue':
@@ -8594,7 +8592,7 @@ function renderVST ($vst_id)
 	$vst = spotEntity ('vst', $vst_id);
 	amplifyCell ($vst);
 	echo '<table border=0 class=objectview cellspacing=0 cellpadding=0>';
-	echo "<tr><td colspan=2 align=center><h1>${vst['description']}</h1><h2>";
+	echo '<tr><td colspan=2 align=center><h1>' . niftyString ($vst['description'], 0) . '</h1><h2>';
 	echo "<tr><td class=pcleft width='50%'>";
 	startPortlet ('summary');
 	echo '<table border=0 cellspacing=0 cellpadding=3 width="100%">';
