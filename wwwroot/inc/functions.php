@@ -1319,6 +1319,54 @@ function fixContext ($target = NULL)
 	$impl_tags = getImplicitTags ($expl_tags);
 }
 
+# Merge e/i/a-tags of the given cell structures into current context, when
+# these aren't there yet.
+function spreadContext ($extracell)
+{
+	global
+		$auto_tags,
+		$expl_tags,
+		$impl_tags,
+		$target_given_tags,
+		$user_given_tags;
+	foreach ($extracell['atags'] as $taginfo)
+		if (! tagNameOnChain ($taginfo['tag'], $auto_tags))
+			$auto_tags[] = $taginfo;
+	$target_given_tags = mergeTagChains ($target_given_tags, $extracell['etags']);
+	$expl_tags = mergeTagChains ($user_given_tags, $target_given_tags);
+	$impl_tags = getImplicitTags ($expl_tags);
+}
+
+# return a structure suitable for feeding into restoreContext()
+function getContext()
+{
+	global
+		$auto_tags,
+		$expl_tags,
+		$impl_tags,
+		$target_given_tags;
+	return array
+	(
+		'auto_tags' => $auto_tags,
+		'expl_tags' => $expl_tags,
+		'impl_tags' => $impl_tags,
+		'target_given_tags' => $target_given_tags,
+	);
+}
+
+function restoreContext ($ctx)
+{
+	global
+		$auto_tags,
+		$expl_tags,
+		$impl_tags,
+		$target_given_tags;
+	$auto_tags = $ctx['auto_tags'];
+	$expl_tags = $ctx['expl_tags'];
+	$impl_tags = $ctx['impl_tags'];
+	$target_given_tags = $ctx['target_given_tags'];
+}
+
 // Take a list of user-supplied tag IDs to build a list of valid taginfo
 // records indexed by tag IDs (tag chain).
 function buildTagChainFromIds ($tagidlist)

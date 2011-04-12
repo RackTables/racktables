@@ -2288,38 +2288,48 @@ function delOIFCompatPack ()
 }
 
 $msgcode['add8021QOrder']['OK'] = 48;
-$msgcode['add8021QOrder']['ERR'] = 110;
 function add8021QOrder ()
 {
 	assertUIntArg ('vdom_id');
 	assertUIntArg ('object_id');
 	assertUIntArg ('vst_id');
-	global $sic;
+	global $sic, $pageno;
+	fixContext();
+	if ($pageno != 'object')
+		spreadContext (spotEntity ('object', $sic['object_id']));
+	if ($pageno != 'vst')
+		spreadContext (spotEntity ('vst', $sic['vst_id']));
+	assertPermission();
 	$result = usePreparedExecuteBlade
 	(
 		'INSERT INTO VLANSwitch (domain_id, object_id, template_id, last_change, out_of_sync) ' .
 		'VALUES (?, ?, ?, NOW(), "yes")',
 		array ($sic['vdom_id'], $sic['object_id'], $sic['vst_id'])
 	);
-	return buildRedirectURL (__FUNCTION__, $result !== FALSE ? 'OK' : 'ERR');
+	return buildRedirectURL (__FUNCTION__, 'OK');
 }
 
 $msgcode['del8021QOrder']['OK'] = 49;
-$msgcode['del8021QOrder']['ERR'] = 111;
 function del8021QOrder ()
 {
 	assertUIntArg ('object_id');
 	assertUIntArg ('vdom_id');
 	assertUIntArg ('vst_id');
-	global $sic;
-	$result = usePreparedDeleteBlade ('VLANSwitch', array ('object_id' => $sic['object_id']));
+	global $sic, $pageno;
+	fixContext();
+	if ($pageno != 'object')
+		spreadContext (spotEntity ('object', $sic['object_id']));
+	if ($pageno != 'vst')
+		spreadContext (spotEntity ('vst', $sic['vst_id']));
+	assertPermission();
+	usePreparedDeleteBlade ('VLANSwitch', array ('object_id' => $sic['object_id']));
 	$focus_hints = array
 	(
 		'prev_objid' => $_REQUEST['object_id'],
 		'prev_vstid' => $_REQUEST['vst_id'],
 		'prev_vdid' => $_REQUEST['vdom_id'],
 	);
-	return buildRedirectURL (__FUNCTION__, $result ? 'OK' : 'ERR', array(), NULL, NULL, $focus_hints);
+	return buildRedirectURL (__FUNCTION__, 'OK', array(), NULL, NULL, $focus_hints);
 }
 
 $msgcode['createVLANDomain']['OK'] = 48;

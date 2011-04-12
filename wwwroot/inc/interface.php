@@ -7346,14 +7346,33 @@ function render8021QOrderForm ($some_id)
 			$options = array();
 			foreach (getNarrowObjectList ('VLANSWITCH_LISTSRC') as $object_id => $object_dname)
 				if (!in_array ($object_id, $all_vswitches))
-					$options[$object_id] = $object_dname;
+				{
+					$ctx = getContext();
+					spreadContext (spotEntity ('object', $object_id));
+					$decision = permitted (NULL, NULL, 'del');
+					restoreContext ($ctx);
+					if ($decision)
+						$options[$object_id] = $object_dname;
+				}
 			printSelect ($options, array ('name' => 'object_id', 'tabindex' => 101, 'size' => getConfigVar ('MAXSELSIZE')), $focus['prev_objid']);
 			echo '</td>';
 		}
 		if ($pageno != 'vlandomain')
 			echo '<td>' . getSelect (getVLANDomainOptions(), array ('name' => 'vdom_id', 'tabindex' => 102, 'size' => getConfigVar ('MAXSELSIZE')), $focus['prev_vdid']) . '</td>';
 		if ($pageno != 'vst')
-			echo '<td>' . getSelect (getVSTOptions(), array ('name' => 'vst_id', 'tabindex' => 103, 'size' => getConfigVar ('MAXSELSIZE')), $focus['prev_vstid']) . '</td>';
+		{
+			$options = array();
+			foreach (listCells ('vst') as $nominee)
+			{
+				$ctx = getContext();
+				spreadContext ($nominee);
+				$decision = permitted (NULL, NULL, 'add');
+				restoreContext ($ctx);
+				if ($decision)
+					$options[$nominee['id']] = niftyString ($nominee['description'], 30, FALSE);
+			}
+			echo '<td>' . getSelect ($options, array ('name' => 'vst_id', 'tabindex' => 103, 'size' => getConfigVar ('MAXSELSIZE')), $focus['prev_vstid']) . '</td>';
+		}
 		echo '<td>' . getImageHREF ('Attach', 'set', TRUE, 104) . '</td></tr></form>';
 	}
 	global $pageno;
@@ -7411,6 +7430,28 @@ function render8021QOrderForm ($some_id)
 	$vstlist = getVSTOptions();
 	foreach ($minuslines as $item_object_id => $item)
 	{
+		$ctx = getContext();
+		if ($pageno != 'object')
+			spreadContext (spotEntity ('object', $item_object_id));
+		if ($pageno != 'vst')
+			spreadContext (spotEntity ('vst', $item['vst_id']));
+		if (! permitted (NULL, NULL, 'del'))
+			$cutblock = getImageHREF ('Cut gray', 'permission denied');
+		else
+		{
+			$args = array
+			(
+				'op' => 'del',
+				'object_id' => $item_object_id,
+				# Extra args below are only necessary for redirect and permission
+				# check to work, actual deletion uses object_id only.
+				'vdom_id' => $item['vdom_id'],
+				'vst_id' => $item['vst_id'],
+			);
+			$cutblock = '<a href="' . makeHrefProcess ($args) . '">';
+			$cutblock .= getImageHREF ('Cut', 'unbind') . '</a>';
+		}
+		restoreContext ($ctx);
 		echo '<tr>';
 		if ($pageno != 'object')
 		{
@@ -7424,16 +7465,7 @@ function render8021QOrderForm ($some_id)
 		if ($pageno != 'vst')
 			echo '<td><a href="' . makeHREF (array ('page' => 'vst', 'vst_id' => $item['vst_id'])) . '">' .
 				$vstlist[$item['vst_id']] . '</a></td>';
-		echo '<td><a href="' . makeHrefProcess (array
-		(
-			'op' => 'del',
-			'object_id' => $item_object_id,
-			// These below are only necessary for redirect to work,
-			// actual deletion uses object_id only.
-			'vdom_id' => $item['vdom_id'],
-			'vst_id' => $item['vst_id'],
-		)) . '">';
-		echo getImageHREF ('Cut', 'unset') . '</a></td></tr>';
+		echo "<td>${cutblock}</td></tr>";
 	}
 	if
 	(

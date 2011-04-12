@@ -205,6 +205,8 @@ $ophandler['object']['8021qsync']['exec8021QPush'] = 'process8021QSyncRequest';
 $ophandler['object']['8021qsync']['resolve8021QConflicts'] = 'resolve8021QConflicts';
 $delayauth['object-8021qports-save8021QConfig'] = TRUE;
 $delayauth['object-livevlans-setPortVLAN'] = TRUE;
+$delayauth['object-8021qorder-add'] = TRUE;
+$delayauth['object-8021qorder-del'] = TRUE;
 
 $page['ipv4space']['parent'] = 'index';
 $tab['ipv4space']['default'] = 'Browse';
@@ -608,6 +610,8 @@ $ophandler['vlandomain']['8021qorder']['del'] = 'del8021QOrder';
 $ophandler['vlandomain']['vlanlist']['add'] = 'tableHandler';
 $ophandler['vlandomain']['vlanlist']['del'] = 'tableHandler';
 $ophandler['vlandomain']['vlanlist']['upd'] = 'tableHandler';
+$delayauth['vlandomain-8021qorder-add'] = TRUE;
+$delayauth['vlandomain-8021qorder-del'] = TRUE;
 
 $page['vlan']['parent'] = 'vlandomain';
 $page['vlan']['bypass'] = 'vlan_ck';
@@ -644,6 +648,8 @@ $ophandler['vst']['editrules']['upd'] = 'updVSTRule';
 $ophandler['vst']['8021qorder']['add'] = 'add8021QOrder';
 $ophandler['vst']['8021qorder']['del'] = 'del8021QOrder';
 $ophandler['vst']['tags']['saveTags'] = 'saveEntityTags';
+$delayauth['vst-8021qorder-add'] = TRUE;
+$delayauth['vst-8021qorder-del'] = TRUE;
 
 $page['dqueue']['parent'] = '8021q';
 $page['dqueue']['bypass'] = 'dqcode';
