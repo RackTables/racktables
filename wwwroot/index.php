@@ -145,7 +145,7 @@ try {
 			)
 				throw new RackTablesError ("Invalid navigation data for '${pageno}-${tabno}-${op}'", RackTablesError::INTERNAL);
 			// We have a chance to handle an error before starting HTTP header.
-			if (!isset ($delayauth[$pageno][$tabno][$op]))
+			if (!isset ($delayauth["${pageno}-${tabno}-${op}"]))
 				assertPermission();
 			# Call below does the job of bypass argument assertion, if such is required,
 			# so the ophandler function doesn't have to re-assert this portion of its
