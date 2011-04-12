@@ -4466,44 +4466,6 @@ function replace8021QPorts ($instance = 'desired', $object_id, $before, $changes
 	return $done;
 }
 
-function getVSTStats()
-{
-	$result = usePreparedSelectBlade
-	(
-		'SELECT id, description, ' .
-		'(SELECT COUNT(object_id) FROM VLANSwitch WHERE template_id = id) AS switchc, ' .
-		'(SELECT COUNT(rule_no) FROM VLANSTRule WHERE vst_id = id) AS rulec ' .
-		'FROM VLANSwitchTemplate ORDER BY description'
-	);
-	$ret = array();
-	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-		$ret[$row['id']] = $row;
-	return $ret;
-}
-
-function getVLANSwitchTemplate ($vst_id)
-{
-	$result = usePreparedSelectBlade ('SELECT id, description, mutex_rev, saved_by FROM VLANSwitchTemplate WHERE id = ?', array ($vst_id));
-	if (!($ret = $result->fetch (PDO::FETCH_ASSOC)))
-		throw new EntityNotFoundException ('vst', $vst_id);
-	unset ($result);
-	$ret['rules'] = array();
-	$ret['switches'] = array();
-	$result = usePreparedSelectBlade
-	(
-		'SELECT rule_no, port_pcre, port_role, wrt_vlans, description ' .
-		'FROM VLANSTRule WHERE vst_id = ? ORDER BY rule_no',
-		array ($vst_id)
-	);
-	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-		$ret['rules'][$row['rule_no']] = $row;
-	unset ($result);
-	$result = usePreparedSelectBlade ('SELECT object_id, domain_id FROM VLANSwitch WHERE template_id = ?', array ($vst_id));
-	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-		$ret['switches'][$row['object_id']] = $row;
-	return $ret;
-}
-
 function commitUpdateVSTRules ($vst_id, $mutex_rev, $rules)
 {
 	global $dbxlink, $remote_username;
