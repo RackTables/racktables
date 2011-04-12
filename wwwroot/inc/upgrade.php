@@ -1098,6 +1098,8 @@ CREATE TABLE `PortLog` (
 				$query[] = "UPDATE Port SET type = ${stays} WHERE type IN(${csv})";
 				$query[] = "DELETE FROM PortInterfaceCompat WHERE oif_id IN(${csv})";
 			}
+			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdefined, description) VALUES ('SSH_OBJS_LISTSRC','none','string','yes','no','yes','Rackcode filter for SSH-managed objects')";
+			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdefined, description) VALUES ('TELNET_OBJS_LISTSRC','none','string','yes','no','yes','Rackcode filter for telnet-managed objects')";
 			$query[] = "UPDATE Config SET varvalue = '0.20.0' WHERE varname = 'DB_VERSION'";
 			break;
 		default:

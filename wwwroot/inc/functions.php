@@ -2506,6 +2506,21 @@ function judgeContext ($expression)
 	);
 }
 
+// Tell, if a constraint from config option permits current context.
+function considerConfiguredConstraintInContext ($varname)
+{
+	if (!strlen (getConfigVar ($varname)))
+		return TRUE; // no restriction
+	global $parseCache;
+	if (!isset ($parseCache[$varname]))
+		// getConfigVar() doesn't re-read the value from DB because of its
+		// own cache, so there is no race condition here between two calls.
+		$parseCache[$varname] = spotPayload (getConfigVar ($varname), 'SYNT_EXPR');
+	if ($parseCache[$varname]['result'] != 'ACK')
+		return FALSE; // constraint set, but cannot be used due to compilation error
+	return judgeContext ($parseCache[$varname]['load']);
+}
+
 // Tell, if a constraint from config option permits given record.
 function considerConfiguredConstraint ($cell, $varname)
 {

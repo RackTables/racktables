@@ -2,6 +2,7 @@
 	update: handle wide-band WDM transceivers and ER DWDM
 	update: 802.1q: config deploy to Cisco IOS switches is no more requiring 'switchport trunk encapsulation dot1q' pre-set
 	new feature: you can obtain who has made a port reservation or a port link by hovering cursor on dashed text
+	new feature: ability to open a terminal session to a device by clicking on its FQDN
 0.19.4
 	bugfix: tag selector was not working with magic_quotes enabled
 	update: new techniques of changing the directory layout are now supported by installer and upgrader

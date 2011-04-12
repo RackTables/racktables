@@ -670,3 +670,11 @@ a.img-link {
 .vlan-diff.diff-rem {
 	color: #A00000;
 }
+
+/* link to host via telnet or ssh */
+.mgmt-link {
+	background: url("?module=chrome&uri=pix/kterm-16x16.png") no-repeat scroll right center transparent;
+	padding-right: 20px;
+	font-family: monospace;
+	color: black;
+}
