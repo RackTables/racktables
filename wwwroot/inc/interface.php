@@ -9272,21 +9272,12 @@ function switchportInfoJS($object_id)
 	$breed = detectDeviceBreed ($object_id);
 	$allowed_ops = array();
 	foreach ($availible_ops as $prefix => $data)
-	{
-		// do not add item unless permitted
-		if (! permitted ('object', 'liveports', $data['op']))
-			continue;
-		// do not add item unless command is supported
-		try
-		{
-			assertBreedFunction ($breed, $data['gw']);
+		if
+		(
+			permitted ('object', 'liveports', $data['op']) and
+			validBreedFunction ($breed, $data['gw'])
+		)
 			$allowed_ops[] = $prefix;
-		}
-		catch (RTGatewayError $e)
-		{
-			continue;
-		}
-	}
 
 	// make JS array with allowed items
 	$list = '';

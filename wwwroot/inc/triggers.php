@@ -84,22 +84,12 @@ function trigger_liveports ()
 {
 	$breed = detectDeviceBreed (getBypassValue());
 	foreach (array ('getportstatus', 'getmaclist') as $command)
-	{
-		try
-		{
-			assertBreedFunction ($breed, $command);
-			assertPermission (NULL, 'liveports', $command);
+		if
+		(
+			validBreedFunction ($breed, $command) and
+			permitted (NULL, 'liveports', $command)
+		)
 			return 'std';
-		}
-		catch (RTGatewayError $e)
-		{
-			continue;
-		}
-		catch (RTPermissionDenied $e)
-		{
-			continue;
-		}
-	}
 	return '';
 }
 
@@ -327,8 +317,11 @@ function trigger_LiveHNDP ()
 
 function trigger_anyDP ($command, $constraint)
 {
-	assertBreedFunction (detectDeviceBreed (getBypassValue()), $command);
-	if (considerConfiguredConstraint (spotEntity ('object', getBypassValue()), $constraint))
+	if
+	(
+		validBreedFunction (detectDeviceBreed (getBypassValue()), $command) and
+		considerConfiguredConstraint (spotEntity ('object', getBypassValue()), $constraint)
+	)
 		return 'std';
 	return '';
 }
