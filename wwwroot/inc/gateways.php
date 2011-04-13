@@ -361,7 +361,7 @@ function setDevice8021QConfig ($object_id, $pseudocode, $vlan_names)
 {
 	require_once 'deviceconfig.php';
 	global $breedfunc;
-	$breed = detectDeviceBreed ($object_id),
+	$breed = detectDeviceBreed ($object_id);
 	assertBreedFunction ($breed, 'xlatepushq');
 	// FIXME: this is a perfect place to log intended changes
 	gwDeployDeviceConfig ($object_id, $breed, unix2dos ($breedfunc["${breed}-xlatepushq-main"] ($pseudocode, $vlan_names)));
