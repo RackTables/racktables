@@ -341,6 +341,15 @@ function detectDeviceBreed ($object_id)
 	return '';
 }
 
+function assertBreedFunc ($breed, $command)
+{
+	global $gwrxlator;
+	if (! array_key_exists ($command, $gwrxlator))
+		throw new RTGatewayError ('command unknown');
+	if (! array_key_exists ($breed, $gwrxlator[$command]))
+		throw new RTGatewayError ('device breed unknown');
+}
+
 function getRunning8021QConfig ($object_id)
 {
 	$ret = gwRetrieveDeviceConfig ($object_id, 'get8021q');

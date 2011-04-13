@@ -9263,24 +9263,29 @@ function renderVirtualResourcesSummary ()
 
 function switchportInfoJS($object_id)
 {
-	global $gwrxlator;
 	$availible_ops = array
 	(
 		'link' => array ('op' => 'get_link_status', 'gw' => 'getportstatus'),
 		'conf' => array ('op' => 'get_port_conf', 'gw' => 'get8021q'),
 		'mac' =>  array ('op' => 'get_mac_list', 'gw' => 'getmaclist'),
 	);
+	$breed = detectDeviceBreed ($object_id);
 	$allowed_ops = array();
 	foreach ($availible_ops as $prefix => $data)
 	{
 		// do not add item unless permitted
 		if (! permitted ('object', 'liveports', $data['op']))
 			continue;
-		// do not add item unless gwrxlator exists
-		$breed = detectDeviceBreed ($object_id);
-		if (! isset ($breed) || ! isset ($gwrxlator[$data['gw']][$breed]))
+		// do not add item unless command is supported
+		try
+		{
+			assertBreedFunction ($breed, $data['gw']);
+			$allowed_ops[] = $prefix;
+		}
+		catch (RTGatewayError $e)
+		{
 			continue;
-		$allowed_ops[] = $prefix;
+		}
 	}
 
 	// make JS array with allowed items

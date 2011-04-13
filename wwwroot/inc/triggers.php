@@ -82,16 +82,24 @@ function trigger_livevlans ()
 // This trigger is on when any of the (get_mac_list, get_link_status) ops permitted
 function trigger_liveports ()
 {
-	global $gwrxlator;
 	$breed = detectDeviceBreed (getBypassValue());
 	foreach (array ('getportstatus', 'getmaclist') as $command)
-		if
-		(
-			array_key_exists ($command, $gwrxlator) and
-			array_key_exists ($breed, $gwrxlator[$command]) and
-			permitted (NULL, 'liveports', $command)
-		)
+	{
+		try
+		{
+			assertBreedFunction ($breed, $command);
+			assertPermission (NULL, 'liveports', $command);
 			return 'std';
+		}
+		catch (RTGatewayError $e)
+		{
+			continue;
+		}
+		catch (RTPermissionDenied $e)
+		{
+			continue;
+		}
+	}
 	return '';
 }
 
@@ -319,13 +327,8 @@ function trigger_LiveHNDP ()
 
 function trigger_anyDP ($command, $constraint)
 {
-	global $gwrxlator;
-	if (!array_key_exists ($command, $gwrxlator))
-		return '';
-	if (!array_key_exists (detectDeviceBreed ($_REQUEST['object_id']), $gwrxlator[$command]))
-		return '';
-	$object = spotEntity ('object', $_REQUEST['object_id']);
-	if (considerConfiguredConstraint (spotEntity ('object', $_REQUEST['object_id']), $constraint))
+	assertBreedFunction (detectDeviceBreed (getBypassValue()), $command);
+	if (considerConfiguredConstraint (spotEntity ('object', getBypassValue()), $constraint))
 		return 'std';
 	return '';
 }
