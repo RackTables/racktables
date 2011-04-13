@@ -341,7 +341,7 @@ function detectDeviceBreed ($object_id)
 	return '';
 }
 
-function assertBreedFunc ($breed, $command)
+function assertBreedFunction ($breed, $command)
 {
 	global $gwrxlator;
 	if (! array_key_exists ($command, $gwrxlator))
