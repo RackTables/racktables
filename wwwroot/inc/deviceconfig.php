@@ -225,9 +225,10 @@ function ios12ReadVLANConfig ($input)
 		'vlanlist' => array(),
 		'portdata' => array(),
 	);
-	$procfunc = 'ios12ScanTopLevel';
+	global $breedfunc;
+	$nextfunc = 'ios12-get8021q-top';
 	foreach (explode ("\n", $input) as $line)
-		$procfunc = $procfunc ($ret, $line);
+		$nextfunc = $breedfunc[$nextfunc] ($ret, $line);
 	return $ret;
 }
 
@@ -239,11 +240,11 @@ function ios12ScanTopLevel (&$work, $line)
 	case (preg_match ('@^interface ((Ethernet|FastEthernet|GigabitEthernet|TenGigabitEthernet|Port-channel)[[:digit:]]+(/[[:digit:]]+)*)$@', $line, $matches)):
 		$work['current'] = array ('port_name' => ios12ShortenIfName ($matches[1]));
 		$work['current']['config'][] = array ('type' => 'line-header', 'line' => $line);
-		return 'ios12PickSwitchportCommand'; // switch to interface block reading
+		return 'ios12-get8021q-readport'; // switch to interface block reading
 	case (preg_match ('/^VLAN Name                             Status    Ports$/', $line, $matches)):
-		return 'ios12PickVLANCommand';
+		return 'ios12-get8021q-readvlan';
 	default:
-		return __FUNCTION__; // continue scan
+		return 'ios12-get8021q-top'; // continue scan
 	}
 }
 
@@ -302,7 +303,7 @@ function ios12PickSwitchportCommand (&$work, $line)
 		if (isset ($work['portdata'][$work['current']['port_name']]))
 			$work['portdata'][$work['current']['port_name']]['config'] = $work['current']['config'];
 		unset ($work['current']);
-		return 'ios12ScanTopLevel';
+		return 'ios12-get8021q-top';
 	}
 	// not yet
 	$matches = array();
@@ -345,7 +346,7 @@ function ios12PickSwitchportCommand (&$work, $line)
 		$line_class = 'line-other';
 	}
 	$work['current']['config'][] = array ('type' => $line_class, 'line' => $line);
-	return __FUNCTION__;
+	return 'ios12-get8021q-readport';
 }
 
 function ios12PickVLANCommand (&$work, $line)
@@ -357,14 +358,14 @@ function ios12PickVLANCommand (&$work, $line)
 		// ignore the rest of VLAN table header;
 		break;
 	case (preg_match ('@! END OF VLAN LIST$@', $line)):
-		return 'ios12ScanTopLevel';
+		return 'ios12-get8021q-top';
 	case (preg_match ('@^([[:digit:]]+) {1,4}.{32} active    @', $line, $matches)):
 		if (!array_key_exists ($matches[1], $work['vlanlist']))
 			$work['vlanlist'][] = $matches[1];
 		break;
 	default:
 	}
-	return __FUNCTION__;
+	return 'ios12-get8021q-readvlan';
 }
 
 // Another finite automata to read a dialect of Foundry configuration.
@@ -375,9 +376,10 @@ function fdry5ReadVLANConfig ($input)
 		'vlanlist' => array(),
 		'portdata' => array(),
 	);
-	$procfunc = 'fdry5ScanTopLevel';
+	global $breedfunc;
+	$nextfunc = 'fdry5-get8021q-top';
 	foreach (explode ("\n", $input) as $line)
-		$procfunc = $procfunc ($ret, $line);
+		$nextfunc = $breedfunc[$nextfunc] ($ret, $line);
 	return $ret;
 }
 
@@ -390,12 +392,12 @@ function fdry5ScanTopLevel (&$work, $line)
 		if (!array_key_exists ($matches[1], $work['vlanlist']))
 			$work['vlanlist'][] = $matches[1];
 		$work['current'] = array ('vlan_id' => $matches[1]);
-		return 'fdry5PickVLANSubcommand';
+		return 'fdry5-get8021q-readvlan';
 	case (preg_match ('@^interface ethernet ([[:digit:]]+/[[:digit:]]+/[[:digit:]]+)$@', $line, $matches)):
 		$work['current'] = array ('port_name' => 'e' . $matches[1]);
-		return 'fdry5PickInterfaceSubcommand';
+		return 'fdry5-get8021q-readport';
 	default:
-		return __FUNCTION__;
+		return 'fdry5-get8021q-top';
 	}
 }
 
@@ -404,7 +406,7 @@ function fdry5PickVLANSubcommand (&$work, $line)
 	if ($line[0] != ' ') // end of VLAN section
 	{
 		unset ($work['current']);
-		return 'fdry5ScanTopLevel';
+		return 'fdry5-get8021q-top';
 	}
 	// not yet
 	$matches = array();
@@ -449,7 +451,7 @@ function fdry5PickVLANSubcommand (&$work, $line)
 		break;
 	default: // nom-nom
 	}
-	return __FUNCTION__;
+	return 'fdry5-get8021q-readvlan';
 }
 
 function fdry5PickInterfaceSubcommand (&$work, $line)
@@ -474,7 +476,7 @@ function fdry5PickInterfaceSubcommand (&$work, $line)
 			$work['portdata'][$work['current']['port_name']]['mode'] = 'trunk';
 		}
 		unset ($work['current']);
-		return 'fdry5ScanTopLevel';
+		return 'fdry5-get8021q-top';
 	}
 	$matches = array();
 	switch (TRUE)
@@ -486,7 +488,7 @@ function fdry5PickInterfaceSubcommand (&$work, $line)
 	// FIXME: trunk/link-aggregate/ip address pulls port from 802.1Q field
 	default: // nom-nom
 	}
-	return __FUNCTION__;
+	return 'fdry5-get8021q-readport';
 }
 
 function fdry5ParsePortString ($string)
@@ -545,9 +547,10 @@ function vrp53ReadVLANConfig ($input)
 		'vlanlist' => array(),
 		'portdata' => array(),
 	);
-	$procfunc = 'vrp53ScanTopLevel';
+	global $breedfunc;
+	$nextfunc = 'vrp53-get8021q-top';
 	foreach (explode ("\n", $input) as $line)
-		$procfunc = $procfunc ($ret, $line);
+		$nextfunc = $breedfunc[$nextfunc] ($ret, $line);
 	return $ret;
 }
 
@@ -559,16 +562,16 @@ function vrp53ScanTopLevel (&$work, $line)
 	case (preg_match ('@^ vlan batch (.+)$@', $line, $matches)):
 		foreach (vrp53ParseVLANString ($matches[1]) as $vlan_id)
 			$work['vlanlist'][] = $vlan_id;
-		return __FUNCTION__;
+		return 'vrp53-get8021q-top';
 	case (preg_match ('@^interface ((GigabitEthernet|XGigabitEthernet|Eth-Trunk)([[:digit:]]+(/[[:digit:]]+)*))$@', $line, $matches)):
 		$matches[1] = preg_replace ('@^GigabitEthernet(.+)$@', 'gi\\1', $matches[1]);
 		$matches[1] = preg_replace ('@^XGigabitEthernet(.+)$@', 'xg\\1', $matches[1]);
 		$matches[1] = preg_replace ('@^Eth-Trunk(.+)$@', 'et\\1', $matches[1]);
 		$work['current'] = array ('port_name' => $matches[1]);
 		$work['current']['config'][] = array ('type' => 'line-header', 'line' => $line);
-		return 'vrp53PickInterfaceSubcommand';
+		return 'vrp53-get8021q-readport';
 	default:
-		return __FUNCTION__;
+		return 'vrp53-get8021q-top';
 	}
 }
 
@@ -630,7 +633,7 @@ function vrp53PickInterfaceSubcommand (&$work, $line)
 		if (isset ($work['portdata'][$work['current']['port_name']]))
 			$work['portdata'][$work['current']['port_name']]['config'] = $work['current']['config'];
 		unset ($work['current']);
-		return 'vrp53ScanTopLevel';
+		return 'vrp53-get8021q-top';
 	}
 	$matches = array();
 	$line_class = 'line-8021q';
@@ -658,7 +661,7 @@ function vrp53PickInterfaceSubcommand (&$work, $line)
 		$line_class = 'line-other';
 	}
 	$work['current']['config'][] = array('type' => $line_class, 'line' => $line);
-	return __FUNCTION__;
+	return 'vrp53-get8021q-readport';
 }
 
 function vrp55Read8021QConfig ($input)
@@ -787,9 +790,10 @@ function nxos4Read8021QConfig ($input)
 		'vlanlist' => array(),
 		'portdata' => array(),
 	);
-	$procfunc = 'nxos4ScanTopLevel';
+	global $breedfunc;
+	$nextfunc = 'nxos4-get8021q-top';
 	foreach (explode ("\n", $input) as $line)
-		$procfunc = $procfunc ($ret, $line);
+		$nextfunc = $breedfunc[$nextfunc] ($ret, $line);
 	return $ret;
 }
 
@@ -803,13 +807,13 @@ function nxos4ScanTopLevel (&$work, $line)
 		$matches[1] = preg_replace ('@^Port-channel(.+)$@i', 'po\\1', $matches[1]);
 		$work['current'] = array ('port_name' => $matches[1]);
 		$work['current']['config'][] = array ('type' => 'line-header', 'line' => $line);
-		return 'nxos4PickSwitchportCommand';
+		return 'nxos4-get8021q-readport';
 	case (preg_match ('@^vlan (.+)$@', $line, $matches)):
 		foreach (iosParseVLANString ($matches[1]) as $vlan_id)
 			$work['vlanlist'][] = $vlan_id;
-		return __FUNCTION__;
+		return 'nxos4-get8021q-top';
 	default:
-		return __FUNCTION__; // continue scan
+		return 'nxos4-get8021q-top'; // continue scan
 	}
 }
 
@@ -869,7 +873,7 @@ function nxos4PickSwitchportCommand (&$work, $line)
 		if (isset ($work['portdata'][$work['current']['port_name']]))
 			$work['portdata'][$work['current']['port_name']]['config'] = $work['current']['config'];
 		unset ($work['current']);
-		return 'nxos4ScanTopLevel';
+		return 'nxos4-get8021q-top';
 	}
 	// not yet
 	$matches = array();
@@ -902,7 +906,7 @@ function nxos4PickSwitchportCommand (&$work, $line)
 		$line_class = 'line-other';
 	}
 	$work['current']['config'][] = array ('type' => $line_class, 'line' => $line);
-	return __FUNCTION__;
+	return 'nxos4-get8021q-readport';
 }
 
 // Get a list of VLAN management pseudo-commands and return a text

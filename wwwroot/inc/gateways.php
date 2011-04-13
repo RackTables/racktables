@@ -14,56 +14,49 @@
 */
 
 // translating functions maps
-$gwrxlator = array();
-$gwrxlator['getcdpstatus'] = array
+$breedfunc = array
 (
-	'ios12' => 'ios12ReadCDPStatus',
-	'nxos4' => 'ios12ReadCDPStatus',
-);
-$gwrxlator['getlldpstatus'] = array
-(
-	'ios12' => 'ios12ReadLLDPStatus',
-	'xos12' => 'xos12ReadLLDPStatus',
-	'vrp53' => 'vrp5xReadLLDPStatus',
-	'vrp55' => 'vrp5xReadLLDPStatus',
-	'nxos4' => 'nxos4ReadLLDPStatus',
-);
-$gwrxlator['get8021q'] = array
-(
-	'ios12' => 'ios12ReadVLANConfig',
-	'fdry5' => 'fdry5ReadVLANConfig',
-	'vrp53' => 'vrp53ReadVLANConfig',
-	'vrp55' => 'vrp55Read8021QConfig',
-	'nxos4' => 'nxos4Read8021QConfig',
-	'xos12' => 'xos12Read8021QConfig',
-	'jun10' => 'jun10Read8021QConfig',
-);
-$gwrxlator['getportstatus'] = array
-(
-	'ios12' => 'ciscoReadInterfaceStatus',
-	'vrp53' => 'vrpReadInterfaceStatus',
-	'vrp55' => 'vrpReadInterfaceStatus',
-	'nxos4' => 'ciscoReadInterfaceStatus',
-);
-$gwrxlator['getmaclist'] = array
-(
-	'ios12' => 'ios12ReadMacList',
-	'vrp53' => 'vrp53ReadMacList',
-	'vrp55' => 'vrp55ReadMacList',
-	'nxos4' => 'nxos4ReadMacList',
-);
-
-$gwrxlator['gethndp']['vrp53'] = 'vrp53ReadHNDPStatus';
-
-$gwpushxlator = array
-(
-	'ios12' => 'ios12TranslatePushQueue',
-	'fdry5' => 'fdry5TranslatePushQueue',
-	'vrp53' => 'vrp53TranslatePushQueue',
-	'vrp55' => 'vrp55TranslatePushQueue',
-	'nxos4' => 'ios12TranslatePushQueue', // employ syntax compatibility
-	'xos12' => 'xos12TranslatePushQueue',
-	'jun10' => 'jun10TranslatePushQueue',
+	'ios12-getcdpstatus-main' => 'ios12ReadCDPStatus',
+	'ios12-getlldpstatus-main' => 'ios12ReadLLDPStatus',
+	'ios12-get8021q-main' => 'ios12ReadVLANConfig',
+	'ios12-get8021q-top' => 'ios12ScanTopLevel',
+	'ios12-get8021q-readport' => 'ios12PickSwitchportCommand',
+	'ios12-get8021q-readvlan' => 'ios12PickVLANCommand',
+	'ios12-getportstatus-main' => 'ciscoReadInterfaceStatus',
+	'ios12-getmaclist-main' => 'ios12ReadMacList',
+	'ios12-xlatepushq-main' => 'ios12TranslatePushQueue',
+	'fdry5-get8021q-main' => 'fdry5ReadVLANConfig',
+	'fdry5-get8021q-top' => 'fdry5ScanTopLevel',
+	'fdry5-get8021q-readvlan' => 'fdry5PickVLANSubcommand',
+	'fdry5-get8021q-readport' => 'fdry5PickInterfaceSubcommand',
+	'fdry5-xlatepushq-main' => 'fdry5TranslatePushQueue',
+	'vrp53-getlldpstatus-main' => 'vrp5xReadLLDPStatus',
+	'vrp53-get8021q-main' => 'vrp53ReadVLANConfig',
+	'vrp53-get8021q-top' => 'vrp53ScanTopLevel',
+	'vrp53-get8021q-readport' => 'vrp53PickInterfaceSubcommand',
+	'vrp53-getportstatus-main' => 'vrpReadInterfaceStatus',
+	'vrp53-getmaclist-main' => 'vrp53ReadMacList',
+	'vrp53-gethndp-main' => 'vrp53ReadHNDPStatus',
+	'vrp53-xlatepushq-main' => 'vrp53TranslatePushQueue',
+	'vrp53-gethndp-main' => 'vrp53ReadHNDPStatus',
+	'vrp55-getlldpstatus-main' => 'vrp5xReadLLDPStatus',
+	'vrp55-get8021q-main' => 'vrp55Read8021QConfig',
+	'vrp55-getportstatus-main' => 'vrpReadInterfaceStatus',
+	'vrp55-getmaclist-main' => 'vrp55ReadMacList',
+	'vrp55-xlatepushq-main' => 'vrp55TranslatePushQueue',
+	'nxos4-getcdpstatus-main' => 'ios12ReadCDPStatus',
+	'nxos4-getlldpstatus-main' => 'nxos4ReadLLDPStatus',
+	'nxos4-get8021q-main' => 'nxos4Read8021QConfig',
+	'nxos4-get8021q-top' => 'nxos4ScanTopLevel',
+	'nxos4-get8021q-readport' => 'nxos4PickSwitchportCommand',
+	'nxos4-getportstatus-main' => 'ciscoReadInterfaceStatus',
+	'nxos4-getmaclist-main' => 'nxos4ReadMacList',
+	'nxos4-xlatepushq-main' => 'ios12TranslatePushQueue',
+	'xos12-getlldpstatus-main' => 'xos12ReadLLDPStatus',
+	'xos12-get8021q-main' => 'xos12Read8021QConfig',
+	'xos12-xlatepushq-main' => 'xos12TranslatePushQueue',
+	'jun10-get8021q-main' => 'jun10Read8021QConfig',
+	'jun10-xlatepushq-main' => 'jun10TranslatePushQueue',
 );
 
 // This function launches specified gateway with specified
@@ -343,18 +336,15 @@ function detectDeviceBreed ($object_id)
 
 function validBreedFunction ($breed, $command)
 {
-	global $gwrxlator;
-	return array_key_exists ($command, $gwrxlator)
-		and array_key_exists ($breed, $gwrxlator[$command]);
+	global $breedfunc;
+	return array_key_exists ("${breed}-${command}-main", $breedfunc);
 }
 
 function assertBreedFunction ($breed, $command)
 {
-	global $gwrxlator;
-	if (! array_key_exists ($command, $gwrxlator))
-		throw new RTGatewayError ('command unknown');
-	if (! array_key_exists ($breed, $gwrxlator[$command]))
-		throw new RTGatewayError ('device breed unknown');
+	global $breedfunc;
+	if (! array_key_exists ("${breed}-${command}-main", $breedfunc))
+		throw new RTGatewayError ('unsupported command for this breed');
 }
 
 function getRunning8021QConfig ($object_id)
@@ -370,22 +360,19 @@ function getRunning8021QConfig ($object_id)
 function setDevice8021QConfig ($object_id, $pseudocode, $vlan_names)
 {
 	require_once 'deviceconfig.php';
-	if ('' == $breed = detectDeviceBreed ($object_id))
-		throw new RTGatewayError ('device breed unknown');
-	global $gwpushxlator;
+	global $breedfunc;
+	$breed = detectDeviceBreed ($object_id),
+	assertBreedFunction ($breed, 'xlatepushq');
 	// FIXME: this is a perfect place to log intended changes
-	gwDeployDeviceConfig ($object_id, $breed, unix2dos ($gwpushxlator[$breed] ($pseudocode, $vlan_names)));
+	gwDeployDeviceConfig ($object_id, $breed, unix2dos ($breedfunc["${breed}-xlatepushq-main"] ($pseudocode, $vlan_names)));
 }
 
 function gwRetrieveDeviceConfig ($object_id, $command)
 {
 	require_once 'deviceconfig.php';
-	global $gwrxlator;
-	if (!array_key_exists ($command, $gwrxlator))
-		throw new RTGatewayError ('command unknown');
+	global $breedfunc;
 	$breed = detectDeviceBreed ($object_id);
-	if (!array_key_exists ($breed, $gwrxlator[$command]))
-		throw new RTGatewayError ('device breed unknown');
+	assertBreedFunction ($breed, $command);
 	$objectInfo = spotEntity ('object', $object_id);
 	$endpoints = findAllEndpoints ($object_id, $objectInfo['name']);
 	if (count ($endpoints) == 0)
@@ -408,7 +395,7 @@ function gwRetrieveDeviceConfig ($object_id, $command)
 	if ($configtext === FALSE)
 		throw new RTGatewayError ('failed to read temporary file');
 	// Being here means it was alright.
-	return $gwrxlator[$command][$breed] (dos2unix ($configtext));
+	return $breedfunc["${breed}-${command}-main"] (dos2unix ($configtext));
 }
 
 function gwDeployDeviceConfig ($object_id, $breed, $text)
