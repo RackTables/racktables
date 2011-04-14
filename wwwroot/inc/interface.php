@@ -811,7 +811,7 @@ function renderRackObject ($object_id)
 			if ($port['remote_object_id'])
 			{
 				echo "<td class=tdleft>" .
-					formatPortLink ($port['remote_object_id'], $port['remote_object_name'], NULL, NULL) . 
+					formatPortLink ($port['remote_object_id'], $port['remote_object_name'], $port['remote_id'], NULL) . 
 					"</td>";
 				echo "<td class=tdleft>" . formatLoggedSpan ($port['last_log'], $port['remote_name'], 'underline') . "</td>";
 				echo "<td class='tdleft rsvtext'>${port['cableid']}</td>";
@@ -1153,7 +1153,7 @@ function renderPortsForObject ($object_id)
 		if ($port['remote_object_id'])
 		{
 			echo "<td>${port['cableid']} " .
-				formatLoggedSpan ($port['last_log'], formatPortLink ($port['remote_object_id'], $port['remote_object_name'], NULL, NULL)) .
+				formatLoggedSpan ($port['last_log'], formatPortLink ($port['remote_object_id'], $port['remote_object_name'], $port['remote_id'], NULL)) .
 				"</td>";
 			echo "<td> " . formatLoggedSpan ($port['last_log'], $port['remote_name'], 'underline') .
 				"<input type=hidden name=reservation_comment value=''></td>";
@@ -8854,7 +8854,7 @@ function renderDiscoveredNeighbors ($object_id)
 					if ($portinfo_remote['remote_id'])
 					{
 						$remote_link_html = formatLinkedPort ($portinfo_remote);
-						$remote_port_html = formatPortLink (NULL, NULL, $portinfo_remote['id'], $portinfo_remote['name']);
+						$remote_port_html = formatPortLink ($portinfo_remote['object_id'], NULL, $portinfo_remote['id'], $portinfo_remote['name']);
 						$error_message = "Remote port $remote_port_html is already linked to $remote_link_html";
 						break 2;
 					}
