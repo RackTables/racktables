@@ -2196,7 +2196,7 @@ function deleteFile ()
 	return buildRedirectURL (__FUNCTION__, 'OK', array (htmlspecialchars ($shortInfo['name'])));
 }
 
-$msgcode['updateFileText']['OK'] = 7;
+$msgcode['updateFileText']['OK'] = 6;
 $msgcode['updateFileText']['ERR1'] = 179;
 $msgcode['updateFileText']['ERR2'] = 155;
 function updateFileText ()
