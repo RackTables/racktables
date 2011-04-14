@@ -343,17 +343,20 @@ function listCells ($realm, $parent_id = 0)
 
 // Very much like listCells(), but return only one record requested (or NULL,
 // if it does not exist).
-function spotEntity ($realm, $id)
+function spotEntity ($realm, $id, $ignore_cache = FALSE)
 {
 	global $entityCache;
-	if (isset ($entityCache['complete'][$realm]))
-	// Emphasize the absence of record, if listCells() has already been called.
-		if (isset ($entityCache['complete'][$realm][$id]))
-			return $entityCache['complete'][$realm][$id];
-		else
-			throw new EntityNotFoundException ($realm, $id);
-	elseif (isset ($entityCache['partial'][$realm][$id]))
-		return $entityCache['partial'][$realm][$id];
+	if (! $ignore_cache)
+	{
+		if (isset ($entityCache['complete'][$realm]))
+		// Emphasize the absence of record, if listCells() has already been called.
+			if (isset ($entityCache['complete'][$realm][$id]))
+				return $entityCache['complete'][$realm][$id];
+			else
+				throw new EntityNotFoundException ($realm, $id);
+		elseif (isset ($entityCache['partial'][$realm][$id]))
+			return $entityCache['partial'][$realm][$id];
+	}
 	global $SQLSchema;
 	if (!isset ($SQLSchema[$realm]))
 		throw new InvalidArgException ('realm', $realm);
