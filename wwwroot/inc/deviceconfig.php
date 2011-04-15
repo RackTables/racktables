@@ -968,6 +968,9 @@ function ios12TranslatePushQueue ($queue, $dummy)
 		case 'save configuration':
 			$ret .= "copy running-config startup-config\n\n";
 			break;
+		case 'cite':
+			$ret .= $cmd['arg1'];
+			break;
 		default:
 			throw new InvalidArgException ('opcode', $cmd['opcode']);
 		}
@@ -1016,6 +1019,9 @@ function fdry5TranslatePushQueue ($queue, $dummy)
 			break;
 		case 'save configuration':
 			$ret .= "write memory\n";
+			break;
+		case 'cite':
+			$ret .= $cmd['arg1'];
 			break;
 		default:
 			throw new InvalidArgException ('opcode', $cmd['opcode']);
@@ -1068,6 +1074,9 @@ function vrp53TranslatePushQueue ($queue, $dummy)
 			break;
 		case 'save configuration':
 			$ret .= "save\nY\n";
+			break;
+		case 'cite':
+			$ret .= $cmd['arg1'];
 			break;
 		default:
 			throw new InvalidArgException ('opcode', $cmd['opcode']);
@@ -1135,6 +1144,9 @@ function vrp55TranslatePushQueue ($queue, $dummy)
 		case 'save configuration':
 			$ret .= "save\nY\n";
 			break;
+		case 'cite':
+			$ret .= $cmd['arg1'];
+			break;
 		default:
 			throw new InvalidArgException ('opcode', $cmd['opcode']);
 		}
@@ -1192,6 +1204,9 @@ function xos12TranslatePushQueue ($queue, $dummy)
 			break; // NOP
 		case 'save configuration':
 			$ret .= "save configuration\ny\n";
+			break;
+		case 'cite':
+			$ret .= $cmd['arg1'];
 			break;
 		default:
 			throw new InvalidArgException ('opcode', $cmd['opcode']);
@@ -1262,6 +1277,9 @@ function jun10TranslatePushQueue ($queue, $vlan_names)
 			break;
 		case 'save configuration':
 			break; // JunOS can`t apply configuration without saving it
+		case 'cite':
+			$ret .= $cmd['arg1'];
+			break;
 		default:
 			throw new InvalidArgException ('opcode', $cmd['opcode']);
 		}
