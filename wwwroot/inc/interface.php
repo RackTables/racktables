@@ -7668,7 +7668,7 @@ function renderVLANDomainVLANList ($vdom_id)
 		echo '</td><td>';
 		printSelect ($vtoptions, array ('name' => 'vlan_type', 'tabindex' => 102), 'ondemand');
 		echo '</td><td>';
-		echo '<input type=text name=vlan_descr tabindex=103>';
+		echo '<input type=text size=48 name=vlan_descr tabindex=103>';
 		echo '</td><td>';
 		printImageHREF ('create', 'add VLAN', TRUE, 110);
 		echo '</td></tr></form>';
@@ -7693,7 +7693,7 @@ function renderVLANDomainVLANList ($vdom_id)
 		echo '</td><td class=tdright><tt>' . $vlan_id . '</tt></td><td>';
 		printSelect ($vtoptions, array ('name' => 'vlan_type'), $vlan_info['vlan_type']);
 		echo '</td><td>';
-		echo '<input name=vlan_descr type=text value="' . htmlspecialchars ($vlan_info['vlan_descr']) . '">';
+		echo '<input name=vlan_descr type=text size=48 value="' . htmlspecialchars ($vlan_info['vlan_descr']) . '">';
 		echo '</td><td>';
 		printImageHREF ('save', 'update description', TRUE);
 		echo '</td></tr></form>';
