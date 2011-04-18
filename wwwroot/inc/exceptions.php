@@ -171,6 +171,21 @@ class RTPermissionDenied extends RackTablesError
 	}
 }
 
+class RackCodeError extends RackTablesError
+{
+	protected $lineno;
+	function __construct ($message, $lineno = 'unknown')
+	{
+		# RackCodeError without a catch-block is very likely an internal error
+		parent::__construct ($message, parent::INTERNAL);
+		$this->lineno = $lineno;
+	}
+	public function dispatch()
+	{
+		parent::genHTMLPage ('RackCode error', "<h2>RackCode error on line ${lineno}</h2><br>" . $message);
+	}
+}
+
 function dumpArray($arr)
 {
 	echo '<table class="exceptionParametersDump">';
