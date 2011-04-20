@@ -154,6 +154,7 @@ function onFormSubmit () {
 			alert ('Error updating port: ' + textStatus);
 		},
 		complete: function() {
+			hideEditForm();
 			waiting_response = false;
 		}
 	});
