@@ -1422,7 +1422,6 @@ function resetUIConfig()
 	setConfigVar ('8021Q_INSTANT_DEPLOY', 'no');
 	setConfigVar ('CDP_RUNNERS_LISTSRC', '');
 	setConfigVar ('LLDP_RUNNERS_LISTSRC', '');
-	setConfigVar ('HNDP_RUNNERS_LISTSRC', '');
 	setConfigVar ('SHRINK_TAG_TREE_ON_CLICK', 'yes');
 	setConfigVar ('MAX_UNFILTERED_ENTITIES', '0');
 	setConfigVar ('SYNCDOMAIN_MAX_PROCESSES', '0');

@@ -8732,7 +8732,6 @@ function renderDiscoveredNeighbors ($object_id)
 	(
 		'livecdp' => 'getcdpstatus',
 		'livelldp' => 'getlldpstatus',
-		'livehndp' => 'gethndp',
 	);
 	try
 	{
