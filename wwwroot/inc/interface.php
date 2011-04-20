@@ -7518,10 +7518,12 @@ function render8021QStatus ()
 		echo '<tr><th>description</th><th>rules</th><th>switches</th></tr>';
 		foreach ($vstlist as $vst_id => $vst_info)
 		{
-			echo "<tr align=left><td><a href='";
-			echo makeHref (array ('page' => 'vst', 'vst_id' => $vst_id)) . "'>";
-			echo niftyString ($vst_info['description']) . "</a></td><td>${vst_info['rulec']}</td>";
-			echo "<td>${vst_info['switchc']}</td></tr>";
+			echo '<tr align=left valign=top><td>';
+			echo mkA (niftyString ($vst_info['description']), 'vst', $vst_id);
+			if (count ($vst_info['etags']))
+				echo '<br><small>' . serializeTags ($vst_info['etags']) . '</small>';
+			echo '</td>';
+			echo "<td>${vst_info['rulec']}</td><td>${vst_info['switchc']}</td></tr>";
 		}
 		echo '</table>';
 	}
