@@ -2328,58 +2328,46 @@ function ip_long2quad ($quad)
 function mkA ($text, $nextpage, $bypass = NULL, $nexttab = NULL)
 {
 	global $page, $tab;
-	if (!mb_strlen ($text))
+	if ($text == '')
 		throw new InvalidArgException ('text', $text);
-	if (!array_key_exists ($nextpage, $page))
-		throw new InvalidArgException ('nextpage', $nextpage);
+	if (! array_key_exists ($nextpage, $page))
+		throw new InvalidArgException ('nextpage', $nextpage, 'not found');
 	$args = array ('page' => $nextpage);
 	if ($nexttab !== NULL)
 	{
-		if (!array_key_exists ($nexttab, $tab[$nextpage]))
-			throw new InvalidArgException ('nexttab', $nexttab);
+		if (! array_key_exists ($nexttab, $tab[$nextpage]))
+			throw new InvalidArgException ('nexttab', $nexttab, 'not found');
 		$args['tab'] = $nexttab;
 	}
 	if (array_key_exists ('bypass', $page[$nextpage]))
 	{
 		if ($bypass === NULL)
-			throw new InvalidArgException ('bypass', $bypass);
+			throw new InvalidArgException ('bypass', '(NULL)');
 		$args[$page[$nextpage]['bypass']] = $bypass;
 	}
 	return '<a href="' . makeHref ($args) . '">' . $text . '</a>';
 }
 
 // make "HREF" HTML attribute
-function makeHref($params = array())
+function makeHref ($params = array())
 {
-	$ret = 'index.php?';
-	$first = true;
-	foreach($params as $key=>$value)
-	{
-		if (!$first)
-			$ret.='&';
-		$ret .= urlencode($key).'='.urlencode($value);
-		$first = false;
-	}
-	return $ret;
+	$tmp = array();
+	foreach ($params as $key => $value)
+		$tmp[] = urlencode ($key) . '=' . urlencode ($value);
+	return 'index.php?' . implode ('&', $tmp);
 }
 
-function makeHrefProcess($params = array())
+function makeHrefProcess ($params = array())
 {
 	global $pageno, $tabno;
-	$ret = '?module=redirect&';
-	$first = true;
-	if (!isset($params['page']))
+	$tmp = array();
+	if (! array_key_exists ('page', $params))
 		$params['page'] = $pageno;
-	if (!isset($params['tab']))
+	if (! array_key_exists ('tab', $params))
 		$params['tab'] = $tabno;
-	foreach($params as $key=>$value)
-	{
-		if (!$first)
-			$ret.='&';
-		$ret .= urlencode($key).'='.urlencode($value);
-		$first = false;
-	}
-	return $ret;
+	foreach ($params as $key => $value)
+		$tmp[] = urlencode ($key) . '=' . urlencode ($value);
+	return '?module=redirect&' . implode ('&', $tmp);
 }
 
 function makeHrefForHelper ($helper_name, $params = array())
