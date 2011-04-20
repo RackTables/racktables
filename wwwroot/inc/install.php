@@ -807,6 +807,8 @@ CREATE TABLE `TagStorage` (
   `entity_realm` enum('file','ipv4net','ipv4vs','ipv4rspool','object','rack','user','ipv6net','vst') NOT NULL default 'object',
   `entity_id` int(10) unsigned NOT NULL,
   `tag_id` int(10) unsigned NOT NULL default '0',
+  `user` char(64) DEFAULT NULL,
+  `date` datetime DEFAULT NULL,
   UNIQUE KEY `entity_tag` (`entity_realm`,`entity_id`,`tag_id`),
   KEY `entity_id` (`entity_id`),
   KEY `TagStorage-FK-tag_id` (`tag_id`),

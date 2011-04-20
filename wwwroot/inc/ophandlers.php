@@ -1689,8 +1689,7 @@ function generateAutoPorts ()
 	return buildRedirectURL (__FUNCTION__, 'OK', array(), NULL, 'ports');
 }
 
-$msgcode['saveEntityTags']['OK'] = 26;
-// Filter out implicit tags before storing the new tag set.
+$msgcode['saveEntityTags']['OK'] = 43;
 function saveEntityTags ()
 {
 	global $pageno, $etype_by_pageno;
@@ -1699,19 +1698,8 @@ function saveEntityTags ()
 	$realm = $etype_by_pageno[$pageno];
 	$entity_id = getBypassValue();
 	$taglist = isset ($_REQUEST['taglist']) ? $_REQUEST['taglist'] : array();
-	// Build a chain from the submitted data, minimize it,
-	// then wipe existing records and store the new set instead.
-	destroyTagsForEntity ($realm, $entity_id);
-	// TODO: these actions are very close to what rebuildTagChainForEntity() does,
-	// so why not use it?
-	$newchain = getExplicitTagsOnly (buildTagChainFromIds ($taglist));
-	$n_succeeds = 0;
-	foreach ($newchain as $taginfo)
-	{
-		addTagForEntity ($realm, $entity_id, $taginfo['id']);
-		$n_succeeds++;
-	}
-	return buildRedirectURL (__FUNCTION__, 'OK', array ($n_succeeds));
+	rebuildTagChainForEntity ($realm, $entity_id, buildTagChainFromIds ($taglist), TRUE);
+	return buildRedirectURL (__FUNCTION__, 'OK');
 }
 
 $msgcode['rollTags']['OK'] = 67;

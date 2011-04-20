@@ -288,7 +288,7 @@ function listCells ($realm, $parent_id = 0)
 	unset($result);
 
 	// select tags and link them to previosly fetched entities
-	$query = 'SELECT entity_id, tag_id FROM TagStorage WHERE entity_realm = ?';
+	$query = 'SELECT entity_id, tag_id, user AS tag_user, UNIX_TIMESTAMP(date) AS tag_time FROM TagStorage WHERE entity_realm = ?';
 	$result = usePreparedSelectBlade ($query, array($realm));
 	global $taglist;
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
@@ -299,6 +299,8 @@ function listCells ($realm, $parent_id = 0)
 				'id' => $row['tag_id'],
 				'tag' => $taglist[$row['tag_id']]['tag'],
 				'parent_id' => $taglist[$row['tag_id']]['parent_id'],
+				'user' => $row['tag_user'],
+				'time' => $row['tag_time'],
 			);
 	}
 	unset($result);
@@ -361,7 +363,7 @@ function spotEntity ($realm, $id, $ignore_cache = FALSE)
 	if (!isset ($SQLSchema[$realm]))
 		throw new InvalidArgException ('realm', $realm);
 	$SQLinfo = $SQLSchema[$realm];
-	$query = 'SELECT tag_id';
+	$query = 'SELECT tag_id, TagStorage.user as tag_user, UNIX_TIMESTAMP(TagStorage.date) AS tag_time';
 	foreach ($SQLinfo['columns'] as $alias => $expression)
 		// Automatically prepend table name to each single column, but leave all others intact.
 		$query .= ', ' . ($alias == $expression ? "${SQLinfo['table']}.${alias}" : "${expression} as ${alias}");
@@ -384,6 +386,8 @@ function spotEntity ($realm, $id, $ignore_cache = FALSE)
 					'id' => $row['tag_id'],
 					'tag' => $taglist[$row['tag_id']]['tag'],
 					'parent_id' => $taglist[$row['tag_id']]['parent_id'],
+					'user' => $row['tag_user'],
+					'time' => $row['tag_time'],
 				);
 		}
 		elseif (isset ($taglist[$row['tag_id']]))
@@ -392,6 +396,8 @@ function spotEntity ($realm, $id, $ignore_cache = FALSE)
 				'id' => $row['tag_id'],
 				'tag' => $taglist[$row['tag_id']]['tag'],
 				'parent_id' => $taglist[$row['tag_id']]['parent_id'],
+				'user' => $row['tag_user'],
+				'time' => $row['tag_time'],
 			);
 	unset ($result);
 	if (!isset ($ret['realm'])) // no rows were returned
@@ -3356,18 +3362,20 @@ function deleteTagForEntity ($entity_realm, $entity_id, $tag_id)
 function addTagForEntity ($realm, $entity_id, $tag_id)
 {
 	global $SQLSchema;
+	global $remote_username;
 	if (! array_key_exists ($realm, $SQLSchema))
 		throw new InvalidArgException ('realm', $realm);
 	// spotEntity ($realm, $entity_id) would be a more expensive way
 	// to validate two parameters
-	usePreparedInsertBlade
+	usePreparedExecuteBlade
 	(
-		'TagStorage',
+		'INSERT INTO TagStorage (entity_realm, entity_id, tag_id, user, date) VALUES (?, ?, ?, ?, NOW())',
 		array
 		(
-			'entity_realm' => $realm,
-			'entity_id' => $entity_id,
-			'tag_id' => $tag_id,
+			$realm,
+			$entity_id,
+			$tag_id,
+			$remote_username,
 		)
 	);
 }
@@ -3378,25 +3386,32 @@ function addTagForEntity ($realm, $entity_id, $tag_id)
 // that both the tag base is still minimal and all requested tags appear on
 // the resulting tag chain.
 // Return TRUE, if any changes were committed.
-function rebuildTagChainForEntity ($realm, $entity_id, $extrachain = array())
+function rebuildTagChainForEntity ($realm, $entity_id, $extrachain = array(), $replace = FALSE)
 {
 	// Put the current explicit sub-chain into a buffer and merge all tags from
 	// the extra chain, which aren't there yet.
-	$newchain = $oldchain = loadEntityTags ($realm, $entity_id);
+	$oldchain = array();
+	foreach (loadEntityTags ($realm, $entity_id) as $oldtag)
+		$oldchain[$oldtag['id']] = $oldtag;
+	$tmpchain = $replace ? array() : $oldchain;
 	foreach ($extrachain as $extratag)
-		if (!tagOnChain ($extratag, $newchain))
-			$newchain[] = $extratag;
-	// Then minimize the working buffer and check if it differs from the original
-	// chain we started with. If it is so, save the work and signal the upper layer.
-	$newchain = getExplicitTagsOnly ($newchain);
-	if (tagChainCmp ($oldchain, $newchain))
+		$tmpchain[$extratag['id']] = $extratag;
+	// minimize the working buffer
+	foreach (getExplicitTagsOnly ($tmpchain) as $taginfo)
+		$newchain[$taginfo['id']] = $taginfo;
+
+	$result = FALSE;
+	foreach (array_diff (array_keys($oldchain), array_keys ($newchain)) as $tag_id)
 	{
-		destroyTagsForEntity ($realm, $entity_id);
-		foreach ($newchain as $taginfo)
-			addTagForEntity ($realm, $entity_id, $taginfo['id']);
-		return TRUE;
+		deleteTagForEntity ($realm, $entity_id, $tag_id);
+		$result = TRUE;
 	}
-	return FALSE;
+	foreach (array_diff (array_keys($newchain), array_keys ($oldchain)) as $tag_id)
+	{
+		addTagForEntity ($realm, $entity_id, $tag_id);
+		$result = TRUE;
+	}
+	return $result;
 }
 
 // Presume, that the target record has no tags attached.
