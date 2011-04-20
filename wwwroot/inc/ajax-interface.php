@@ -215,8 +215,10 @@ function dispatchAJAXRequest()
 		if (! isset ($port_info['reservation_comment']))
 			$port_info['reservation_comment'] = '';
 		if ($port_info['reservation_comment'] !== $sic['comment'])
-			if (commitUpdatePortComment ($sic['id'], $sic['comment']))
-				$port_info = getPortInfo ($sic['id']);
+		{
+			commitUpdatePortComment ($sic['id'], $sic['comment']);
+			$port_info = getPortInfo ($sic['id']);
+		}
 		$tds = formatPortReservation ($port_info);
 		echo json_encode ($tds);
 		break;

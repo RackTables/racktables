@@ -3637,10 +3637,12 @@ function exec8021QDeploy ($object_id, $do_push)
 			upd8021QPort ('cached', $vswitch['object_id'], $pn, $port['both']);
 			break;
 		case 'ok_to_delete':
-			$nsaved += del8021QPort ($vswitch['object_id'], $pn);
+			del8021QPort ($vswitch['object_id'], $pn);
+			$nsaved++;
 			break;
 		case 'ok_to_add':
-			$nsaved += add8021QPort ($vswitch['object_id'], $pn, $port['right']);
+			add8021QPort ($vswitch['object_id'], $pn, $port['right']);
+			$nsaved++;
 			break;
 		case 'delete_conflict':
 		case 'merge_conflict':
@@ -3794,7 +3796,10 @@ function saveDownlinksReverb ($object_id, $requested_changes)
 	// immune VLANs filter
 	foreach (filter8021QChangeRequests ($domain_vlanlist, $before, $changes_to_save) as $pn => $finalconfig)
 		if (!same8021QConfigs ($finalconfig, $before[$pn]))
-			$nsaved += upd8021QPort ('desired', $vswitch['object_id'], $pn, $finalconfig);
+		{
+			upd8021QPort ('desired', $vswitch['object_id'], $pn, $finalconfig);
+			$nsaved++;
+		}
 	if ($nsaved)
 		usePreparedExecuteBlade
 		(
@@ -3972,10 +3977,12 @@ function queueChangesToSwitch ($switch_id, $order, $before, $check_only = FALSE)
 			{
 				$object = spotEntity ('object', $switch_id);
 				print $object['name'] . " $portname: " . serializeVLANPack ($before[$portname]) . ' -> ' . serializeVLANPack ($portorder) . "\n";
-				$nsaved++;
 			}
 			if (! $check_only)
-				$nsaved += upd8021QPort ('desired', $switch_id, $portname, $portorder);
+			{
+				upd8021QPort ('desired', $switch_id, $portname, $portorder);
+				$nsaved++;
+			}
 		}
 	
 	if (! $check_only && $nsaved)

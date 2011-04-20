@@ -501,7 +501,6 @@ function buildRedirectURL ($callfunc, $status, $log_args = array(), $nextpage = 
 }
 
 $msgcode['addPortForwarding']['OK'] = 48;
-$msgcode['addPortForwarding']['ERR'] = 100;
 function addPortForwarding ()
 {
 	assertUIntArg ('object_id');
@@ -514,7 +513,7 @@ function addPortForwarding ()
 	if (!strlen ($remoteport))
 		$remoteport = $_REQUEST['localport'];
 
-	$error = newPortForwarding
+	newPortForwarding
 	(
 		$_REQUEST['object_id'],
 		$_REQUEST['localip'],
@@ -525,14 +524,10 @@ function addPortForwarding ()
 		$_REQUEST['description']
 	);
 
-	if ($error == '')
-		return buildRedirectURL (__FUNCTION__, 'OK');
-	else
-		return buildRedirectURL (__FUNCTION__, 'ERR', array ($error));
+	return buildRedirectURL (__FUNCTION__, 'OK');
 }
 
 $msgcode['delPortForwarding']['OK'] = 49;
-$msgcode['delPortForwarding']['ERR'] = 111;
 function delPortForwarding ()
 {
 	assertUIntArg ('object_id');
@@ -542,7 +537,7 @@ function delPortForwarding ()
 	assertUIntArg ('remoteport');
 	assertStringArg ('proto');
 
-	$result = deletePortForwarding
+	deletePortForwarding
 	(
 		$_REQUEST['object_id'],
 		$_REQUEST['localip'],
@@ -551,11 +546,10 @@ function delPortForwarding ()
 		$_REQUEST['remoteport'],
 		$_REQUEST['proto']
 	);
-	buildRedirectURL (__FUNCTION__, $result !== FALSE ? 'OK' : 'ERR');
+	buildRedirectURL (__FUNCTION__, 'OK');
 }
 
 $msgcode['updPortForwarding']['OK'] = 51;
-$msgcode['updPortForwarding']['ERR'] = 109;
 function updPortForwarding ()
 {
 	assertUIntArg ('object_id');
@@ -566,7 +560,7 @@ function updPortForwarding ()
 	assertStringArg ('proto');
 	assertStringArg ('description');
 
-	$result = updatePortForwarding
+	updatePortForwarding
 	(
 		$_REQUEST['object_id'],
 		$_REQUEST['localip'],
@@ -576,7 +570,7 @@ function updPortForwarding ()
 		$_REQUEST['proto'],
 		$_REQUEST['description']
 	);
-	buildRedirectURL (__FUNCTION__, $result !== FALSE ? 'OK' : 'ERR');
+	buildRedirectURL (__FUNCTION__, 'OK');
 }
 
 $msgcode['addPortForObject']['OK'] = 48;
@@ -618,11 +612,8 @@ function linkPortForObject ()
 	assertStringArg ('cable', TRUE);
 
 	// FIXME: ensure, that at least one of these ports belongs to the current object
-	$error = linkPorts ($_REQUEST['port_id'], $_REQUEST['remote_port_id'], $_REQUEST['cable']);
-	if ($error != '')
-		return buildRedirectURL (__FUNCTION__, 'ERR', array ($error));
-	global $sic;
-	$port_info = getPortInfo ($sic['port_id']);
+	linkPorts ($_REQUEST['port_id'], $_REQUEST['remote_port_id'], $_REQUEST['cable']);
+	$port_info = getPortInfo ($_REQUEST['port_id']);
 	return buildRedirectURL
 	(
 		__FUNCTION__,
@@ -769,7 +760,6 @@ function addBulkPorts ()
 }
 
 $msgcode['updIPv4Allocation']['OK'] = 51;
-$msgcode['updIPv4Allocation']['ERR'] = 109;
 function updIPv4Allocation ()
 {
 	assertIPv4Arg ('ip');
@@ -777,12 +767,11 @@ function updIPv4Allocation ()
 	assertStringArg ('bond_name', TRUE);
 	genericAssertion ('bond_type', 'enum/inet4alloc');
 
-	$result = updateBond ($_REQUEST['ip'], $_REQUEST['object_id'], $_REQUEST['bond_name'], $_REQUEST['bond_type']);
-	return buildRedirectURL (__FUNCTION__, $result === FALSE ? 'ERR' : 'OK');
+	updateBond ($_REQUEST['ip'], $_REQUEST['object_id'], $_REQUEST['bond_name'], $_REQUEST['bond_type']);
+	return buildRedirectURL (__FUNCTION__, 'OK');
 }
 
 $msgcode['updIPv6Allocation']['OK'] = 51;
-$msgcode['updIv6PAllocation']['ERR'] = 109;
 function updIPv6Allocation ()
 {
 	$ipv6 = assertIPv6Arg ('ip');
@@ -790,34 +779,31 @@ function updIPv6Allocation ()
 	assertStringArg ('bond_name', TRUE);
 	genericAssertion ('bond_type', 'enum/inet6alloc');
 
-	$result = updateIPv6Bond ($ipv6, $_REQUEST['object_id'], $_REQUEST['bond_name'], $_REQUEST['bond_type']);
-	return buildRedirectURL (__FUNCTION__, $result === FALSE ? 'ERR' : 'OK');
+	updateIPv6Bond ($ipv6, $_REQUEST['object_id'], $_REQUEST['bond_name'], $_REQUEST['bond_type']);
+	return buildRedirectURL (__FUNCTION__, 'OK');
 }
 
 $msgcode['delIPv4Allocation']['OK'] = 49;
-$msgcode['delIPv4Allocation']['ERR'] = 111;
 function delIPv4Allocation ()
 {
 	assertIPv4Arg ('ip');
 	assertUIntArg ('object_id');
 
-	$result = unbindIpFromObject ($_REQUEST['ip'], $_REQUEST['object_id']);
-	return buildRedirectURL (__FUNCTION__, $result === FALSE ? 'ERR' : 'OK');
+	unbindIpFromObject ($_REQUEST['ip'], $_REQUEST['object_id']);
+	return buildRedirectURL (__FUNCTION__, 'OK');
 }
 
 $msgcode['delIPv6Allocation']['OK'] = 49;
-$msgcode['delIPv6Allocation']['ERR'] = 111;
 function delIPv6Allocation ()
 {
 	assertUIntArg ('object_id');
 	$ipv6 = assertIPv6Arg ('ip');
-	$result = unbindIPv6FromObject ($ipv6, $_REQUEST['object_id']);
-	return buildRedirectURL (__FUNCTION__, $result === FALSE ? 'ERR' : 'OK');
+	unbindIPv6FromObject ($ipv6, $_REQUEST['object_id']);
+	return buildRedirectURL (__FUNCTION__, 'OK');
 }
 
 $msgcode['addIPv4Allocation']['OK'] = 48;
 $msgcode['addIPv4Allocation']['ERR1'] = 170;
-$msgcode['addIPv4Allocation']['ERR2'] = 100;
 function addIPv4Allocation ()
 {
 	assertIPv4Arg ('ip');
@@ -830,8 +816,7 @@ function addIPv4Allocation ()
 	if  (getConfigVar ('IPV4_JAYWALK') != 'yes' and NULL === getIPv4AddressNetworkId ($ip))
 		return buildRedirectURL (__FUNCTION__, 'ERR1', array ($ip));
 	
-	if (FALSE === bindIpToObject ($ip, $_REQUEST['object_id'], $_REQUEST['bond_name'], $_REQUEST['bond_type']))
-		return buildRedirectURL (__FUNCTION__, 'ERR2', array ($error));
+	bindIpToObject ($ip, $_REQUEST['object_id'], $_REQUEST['bond_name'], $_REQUEST['bond_type']);
 	$address = getIPv4Address ($ip);
 	if ($address['reserved'] == 'yes' or strlen ($address['name']))
 	{
@@ -847,7 +832,6 @@ function addIPv4Allocation ()
 
 $msgcode['addIPv6Allocation']['OK'] = 48;
 $msgcode['addIPv6Allocation']['ERR1'] = 170;
-$msgcode['addIPv6Allocation']['ERR2'] = 100;
 function addIPv6Allocation ()
 {
 	assertUIntArg ('object_id');
@@ -862,8 +846,7 @@ function addIPv6Allocation ()
 	if  (getConfigVar ('IPV4_JAYWALK') != 'yes' and NULL === getIPv6AddressNetworkId ($ipv6))
 		return buildRedirectURL (__FUNCTION__, 'ERR1', array ($ip));
 
-	if (FALSE === bindIPv6ToObject ($ipv6, $_REQUEST['object_id'], $_REQUEST['bond_name'], $_REQUEST['bond_type']))
-		return buildRedirectURL (__FUNCTION__, 'ERR2', array ($error));
+	bindIPv6ToObject ($ipv6, $_REQUEST['object_id'], $_REQUEST['bond_name'], $_REQUEST['bond_type']);
 	$address = getIPv6Address ($ipv6);
 	if ($address['reserved'] == 'yes' or strlen ($address['name']))
 	{
@@ -954,7 +937,6 @@ function editv6Address ()
 }
 
 $msgcode['createUser']['OK'] = 5;
-$msgcode['createUser']['ERR'] = 102;
 function createUser ()
 {
 	assertStringArg ('username');
@@ -962,16 +944,13 @@ function createUser ()
 	assertStringArg ('password');
 	$username = $_REQUEST['username'];
 	$password = sha1 ($_REQUEST['password']);
-	$result = commitCreateUserAccount ($username, $_REQUEST['realname'], $password);
-	if ($result != TRUE)
-		return buildRedirectURL (__FUNCTION__, 'ERR', array ($username));
+	commitCreateUserAccount ($username, $_REQUEST['realname'], $password);
 	if (isset ($_REQUEST['taglist']))
 		produceTagsForLastRecord ('user', $_REQUEST['taglist']);
 	return buildRedirectURL (__FUNCTION__, 'OK', array ($username));
 }
 
 $msgcode['updateUser']['OK'] = 6;
-$msgcode['updateUser']['ERR2'] = 104;
 function updateUser ()
 {
 	genericAssertion ('user_id', 'uint');
@@ -984,11 +963,8 @@ function updateUser ()
 	// Update user password only if provided password is not the same as current password hash.
 	if ($new_password != $userinfo['user_password_hash'])
 		$new_password = sha1 ($new_password);
-	$result = commitUpdateUserAccount ($_REQUEST['user_id'], $username, $_REQUEST['realname'], $new_password);
-	if ($result !== FALSE)
-		return buildRedirectURL (__FUNCTION__, 'OK', array ($username));
-	else
-		return buildRedirectURL (__FUNCTION__, 'ERR2', array ($username));
+	commitUpdateUserAccount ($_REQUEST['user_id'], $username, $_REQUEST['realname'], $new_password);
+	return buildRedirectURL (__FUNCTION__, 'OK', array ($username));
 }
 
 $msgcode['updateDictionary']['OK'] = 51;
@@ -1032,19 +1008,15 @@ function updateChapter ()
 }
 
 $msgcode['delChapter']['OK'] = 49;
-$msgcode['delChapter']['ERR'] = 111;
 function delChapter ()
 {
 	assertUIntArg ('chapter_no');
-	if (commitDeleteChapter ($_REQUEST['chapter_no']))
-		return buildRedirectURL (__FUNCTION__, 'OK');
-	else
-		return buildRedirectURL (__FUNCTION__, 'ERR');
+	commitDeleteChapter ($_REQUEST['chapter_no']);
+	return buildRedirectURL (__FUNCTION__, 'OK');
 }
 
 $msgcode['supplementAttrMap']['OK'] = 48;
 $msgcode['supplementAttrMap']['ERR1'] = 154;
-$msgcode['supplementAttrMap']['ERR2'] = 110;
 function supplementAttrMap ()
 {
 	assertUIntArg ('attr_id');
@@ -1064,10 +1036,8 @@ function supplementAttrMap ()
 		}
 		$chapter_id = $_REQUEST['chapter_no'];
 	}
-	if (commitSupplementAttrMap ($_REQUEST['attr_id'], $_REQUEST['objtype_id'], $chapter_id) !== FALSE)
-		return buildRedirectURL (__FUNCTION__, 'OK');
-	else
-		return buildRedirectURL (__FUNCTION__, 'ERR2');
+	commitSupplementAttrMap ($_REQUEST['attr_id'], $_REQUEST['objtype_id'], $chapter_id);
+	return buildRedirectURL (__FUNCTION__, 'OK');
 }
 
 $msgcode['clearSticker']['OK'] = 49;
@@ -1222,16 +1192,12 @@ function updateObject ()
 
 function addMultipleObjects()
 {
-	$log = emptyLog();
 	$taglist = isset ($_REQUEST['taglist']) ? $_REQUEST['taglist'] : array();
 	$max = getConfigVar ('MASSCOUNT');
 	for ($i = 0; $i < $max; $i++)
 	{
 		if (!isset ($_REQUEST["${i}_object_type_id"]))
-		{
-			$log = mergeLogs ($log, oneLiner (184, array ($i + 1)));
-			break;
-		}
+			return showError ('Submitted form is invalid at line ' . ($i + 1));
 
 		// set to empty values for virtual objects
 		if (isset ($_REQUEST['virtual_objects']))
@@ -1249,34 +1215,37 @@ function addMultipleObjects()
 		// It's better to skip silently, than to print a notice.
 		if ($_REQUEST["${i}_object_type_id"] == 0)
 			continue;
-		if (($object_id = commitAddObject
-		(
-			$name,
-			$_REQUEST["${i}_object_label"],
-			$_REQUEST["${i}_object_type_id"],
-			$_REQUEST["${i}_object_asset_no"],
-			$taglist
-		)) !== FALSE){
+		try
+		{
+			$object_id = commitAddObject
+			(
+				$name,
+				$_REQUEST["${i}_object_label"],
+				$_REQUEST["${i}_object_type_id"],
+				$_REQUEST["${i}_object_asset_no"],
+				$taglist
+			);
 			$info = spotEntity ('object', $object_id);
 			// FIXME: employ amplifyCell() instead of calling loader functions directly
 			amplifyCell ($info);
-			$log = mergeLogs ($log, oneLiner (5, array ('<a href="' . makeHref (array ('page' => 'object', 'tab' => 'default', 'object_id' => $object_id)) . '">' . $info['dname'] . '</a>')));
-		}else{
-			$log = mergeLogs ($log, oneLiner (147, array ($name)));
+			showSuccess ("added object " . formatPortLink ($info['id'], $info['dname'], NULL, NULL));
+		}
+		catch (RTDatabaseError $e)
+		{
+			showError ("Error creating object '$name': " . $e->getMessage());
+			continue;
 		}
 	}
-	return buildWideRedirectURL ($log);
 }
 
 function addLotOfObjects()
 {
-	$log = emptyLog();
 	$taglist = isset ($_REQUEST['taglist']) ? $_REQUEST['taglist'] : array();
 	assertUIntArg ('global_type_id', TRUE);
 	assertStringArg ('namelist', TRUE);
 	$global_type_id = $_REQUEST['global_type_id'];
 	if ($global_type_id == 0 or !strlen ($_REQUEST['namelist']))
-		$log = mergeLogs ($log, oneLiner (186));
+		return showError ('Incomplete form has been ignored. Cheers.');
 	else
 	{
 		// The name extractor below was stolen from ophandlers.php:addMultiPorts()
@@ -1292,16 +1261,19 @@ function addLotOfObjects()
 				$names2[] = rtrim ($parts[0]);
 		}
 		foreach ($names2 as $name)
-			if (($object_id = commitAddObject ($name, '', $global_type_id, '', $taglist)) !== FALSE)
+			try
 			{
+				$object_id = commitAddObject ($name, '', $global_type_id, '', $taglist);
 				$info = spotEntity ('object', $object_id);
 				amplifyCell ($info);
-				$log = mergeLogs ($log, oneLiner (5, array ('<a href="' . makeHref (array ('page' => 'object', 'tab' => 'default', 'object_id' => $object_id)) . '">' . $info['dname'] . '</a>')));
+				showSuccess ("added object " . formatPortLink ($info['id'], $info['dname'], NULL, NULL));
 			}
-			else
-				$log = mergeLogs ($log, oneLiner (147, array ($name)));
+			catch (RTDatabaseError $e)
+			{
+				showError ("Error creating object '$name': " . $e->getMessage());
+				continue;
+			}
 	}
-	return buildWideRedirectURL ($log);
 }
 
 $msgcode['deleteObject']['OK'] = 6;
@@ -1462,34 +1434,31 @@ function resetUIConfig()
 }
 
 $msgcode['addRealServer']['OK'] = 48;
-$msgcode['addRealServer']['ERR'] = 110;
 // Add single record.
 function addRealServer ()
 {
 	assertIPv4Arg ('remoteip');
 	assertStringArg ('rsport', TRUE);
 	assertStringArg ('rsconfig', TRUE);
-	if (!addRStoRSPool (
+	addRStoRSPool
+	(
 		getBypassValue(),
 		$_REQUEST['remoteip'],
 		$_REQUEST['rsport'],
 		getConfigVar ('DEFAULT_IPV4_RS_INSERVICE'),
 		$_REQUEST['rsconfig']
-	))
-		return buildRedirectURL (__FUNCTION__, 'ERR');
-	else
-		return buildRedirectURL (__FUNCTION__, 'OK');
+	);
+	return buildRedirectURL (__FUNCTION__, 'OK');
 }
 
 $msgcode['addRealServers']['OK'] = 37;
 $msgcode['addRealServers']['ERR1'] = 131;
-$msgcode['addRealServers']['ERR2'] = 127;
 // Parse textarea submitted and try adding a real server for each line.
 function addRealServers ()
 {
 	assertStringArg ('format');
 	assertStringArg ('rawtext');
-	$ngood = $nbad = 0;
+	$ngood = 0;
 	$rsconfig = '';
 	// Keep in mind, that the text will have HTML entities (namely '>') escaped.
 	foreach (explode ("\n", dos2unix ($_REQUEST['rawtext'])) as $line)
@@ -1502,44 +1471,29 @@ function addRealServers ()
 			case 'ipvs_2': // address and port only
 				if (!preg_match ('/^  -&gt; ([0-9\.]+):([0-9]+) /', $line, $match))
 					continue;
-				if (addRStoRSPool (getBypassValue(), $match[1], $match[2], getConfigVar ('DEFAULT_IPV4_RS_INSERVICE'), ''))
-					$ngood++;
-				else
-					$nbad++;
+				addRStoRSPool (getBypassValue(), $match[1], $match[2], getConfigVar ('DEFAULT_IPV4_RS_INSERVICE'), '');
 				break;
 			case 'ipvs_3': // address, port and weight
 				if (!preg_match ('/^  -&gt; ([0-9\.]+):([0-9]+) +[a-zA-Z]+ +([0-9]+) /', $line, $match))
 					continue;
-				if (addRStoRSPool (getBypassValue(), $match[1], $match[2], getConfigVar ('DEFAULT_IPV4_RS_INSERVICE'), 'weight ' . $match[3]))
-					$ngood++;
-				else
-					$nbad++;
+				addRStoRSPool (getBypassValue(), $match[1], $match[2], getConfigVar ('DEFAULT_IPV4_RS_INSERVICE'), 'weight ' . $match[3]);
 				break;
 			case 'ssv_2': // IP address and port
 				if (!preg_match ('/^([0-9\.]+) ([0-9]+)$/', $line, $match))
 					continue;
-				if (addRStoRSPool (getBypassValue(), $match[1], $match[2], getConfigVar ('DEFAULT_IPV4_RS_INSERVICE'), ''))
-					$ngood++;
-				else
-					$nbad++;
+				addRStoRSPool (getBypassValue(), $match[1], $match[2], getConfigVar ('DEFAULT_IPV4_RS_INSERVICE'), '');
 				break;
 			case 'ssv_1': // IP address
 				if (!preg_match ('/^([0-9\.]+)$/', $line, $match))
 					continue;
-				if (addRStoRSPool (getBypassValue(), $match[1], 0, getConfigVar ('DEFAULT_IPV4_RS_INSERVICE'), ''))
-					$ngood++;
-				else
-					$nbad++;
+				addRStoRSPool (getBypassValue(), $match[1], 0, getConfigVar ('DEFAULT_IPV4_RS_INSERVICE'), '');
 				break;
 			default:
 				return buildRedirectURL (__FUNCTION__, 'ERR1');
-				break;
 		}
+		$ngood++;
 	}
-	if ($nbad == 0 and $ngood > 0)
-		return buildRedirectURL (__FUNCTION__, 'OK', array ($ngood));
-	else
-		return buildRedirectURL (__FUNCTION__, 'ERR2', array ($ngood, $nbad));
+	return buildRedirectURL (__FUNCTION__, 'OK', array ($ngood));
 }
 
 $msgcode['addVService']['OK'] = 48;
@@ -1569,51 +1523,44 @@ function addVService ()
 }
 
 $msgcode['deleteVService']['OK'] = 49;
-$msgcode['deleteVService']['ERR'] = 111;
 function deleteVService ()
 {
 	assertUIntArg ('vs_id');
-	if (!commitDeleteVS ($_REQUEST['vs_id']))
-		return buildRedirectURL (__FUNCTION__, 'ERR');
-	else
-		return buildRedirectURL (__FUNCTION__, 'OK');
+	commitDeleteVS ($_REQUEST['vs_id']);
+	return buildRedirectURL (__FUNCTION__, 'OK');
 }
 
 $msgcode['updateSLBDefConfig']['OK'] = 43;
-$msgcode['updateSLBDefConfig']['ERR'] = 109;
 function updateSLBDefConfig ()
 {
-	$data = array(
-		'vs' => $_REQUEST['vsconfig'],
-		'rs' => $_REQUEST['rsconfig']
+	commitUpdateSLBDefConf
+	(
+		array
+		(
+			'vs' => $_REQUEST['vsconfig'],
+			'rs' => $_REQUEST['rsconfig'],
+		)
 	);
-	if (!commitUpdateSLBDefConf ($data))
-		return buildRedirectURL (__FUNCTION__, 'ERR');
-	else
-		return buildRedirectURL (__FUNCTION__, 'OK');
+	return buildRedirectURL (__FUNCTION__, 'OK');
 }
 
 $msgcode['updateRealServer']['OK'] = 51;
-$msgcode['updateRealServer']['ERR'] = 109;
 function updateRealServer ()
 {
 	assertUIntArg ('rs_id');
 	assertIPv4Arg ('rsip');
 	assertStringArg ('rsport', TRUE);
 	assertStringArg ('rsconfig', TRUE);
-	if (FALSE === commitUpdateRS (
+	commitUpdateRS (
 		$_REQUEST['rs_id'],
 		$_REQUEST['rsip'],
 		$_REQUEST['rsport'],
 		$_REQUEST['rsconfig']
-	))
-		return buildRedirectURL (__FUNCTION__, 'ERR');
-	else
-		return buildRedirectURL (__FUNCTION__, 'OK');
+	);
+	return buildRedirectURL (__FUNCTION__, 'OK');
 }
 
 $msgcode['updateVService']['OK'] = 51;
-$msgcode['updateVService']['ERR'] = 109;
 function updateVService ()
 {
 	assertUIntArg ('vs_id');
@@ -1623,7 +1570,7 @@ function updateVService ()
 	assertStringArg ('name', TRUE);
 	assertStringArg ('vsconfig', TRUE);
 	assertStringArg ('rsconfig', TRUE);
-	if (FALSE === commitUpdateVS (
+	commitUpdateVS (
 		$_REQUEST['vs_id'],
 		$_REQUEST['vip'],
 		$_REQUEST['vport'],
@@ -1631,14 +1578,11 @@ function updateVService ()
 		$_REQUEST['name'],
 		$_REQUEST['vsconfig'],
 		$_REQUEST['rsconfig']
-	))
-		return buildRedirectURL (__FUNCTION__, 'ERR');
-	else
-		return buildRedirectURL (__FUNCTION__, 'OK');
+	);
+	return buildRedirectURL (__FUNCTION__, 'OK');
 }
 
 $msgcode['addLoadBalancer']['OK'] = 48;
-$msgcode['addLoadBalancer']['ERR'] = 110;
 function addLoadBalancer ()
 {
 	assertUIntArg ('pool_id');
@@ -1649,17 +1593,15 @@ function addLoadBalancer ()
 	if (! empty($_REQUEST['prio']))
 		assertUIntArg('prio', TRUE);
 
-	if (!addLBtoRSPool (
+	addLBtoRSPool (
 		$_REQUEST['pool_id'],
 		$_REQUEST['object_id'],
 		$_REQUEST['vs_id'],
 		$_REQUEST['vsconfig'],
 		$_REQUEST['rsconfig'],
 		$_REQUEST['prio']
-	))
-		return buildRedirectURL (__FUNCTION__, 'ERR');
-	else
-		return buildRedirectURL (__FUNCTION__, 'OK');
+	);
+	return buildRedirectURL (__FUNCTION__, 'OK');
 }
 
 $msgcode['addRSPool']['OK'] = 48;
@@ -1679,24 +1621,20 @@ function addRSPool ()
 }
 
 $msgcode['deleteRSPool']['OK'] = 49;
-$msgcode['deleteRSPool']['ERR'] = 111;
 function deleteRSPool ()
 {
 	assertUIntArg ('pool_id');
-	if (commitDeleteRSPool ($_REQUEST['pool_id']) === FALSE)
-		return buildRedirectURL (__FUNCTION__, 'ERR');
-	else
-		return buildRedirectURL (__FUNCTION__, 'OK');
+	commitDeleteRSPool ($_REQUEST['pool_id']);
+	return buildRedirectURL (__FUNCTION__, 'OK');
 }
 
 $msgcode['updateRSInService']['OK'] = 26;
-$msgcode['updateRSInService']['ERR'] = 141;
 function updateRSInService ()
 {
 	assertUIntArg ('rscount');
 	$orig = spotEntity ('ipv4rspool', getBypassValue());
 	amplifyCell ($orig);
-	$nbad = $ngood = 0;
+	$ngood = 0;
 	for ($i = 1; $i <= $_REQUEST['rscount']; $i++)
 	{
 		$rs_id = $_REQUEST["rsid_${i}"];
@@ -1706,16 +1644,11 @@ function updateRSInService ()
 			$newval = 'no';
 		if ($newval != $orig['rslist'][$rs_id]['inservice'])
 		{
-			if (FALSE !== commitSetInService ($rs_id, $newval))
-				$ngood++;
-			else
-				$nbad++;
+			commitSetInService ($rs_id, $newval);
+			$ngood++;
 		}
 	}
-	if (!$nbad)
-		return buildRedirectURL (__FUNCTION__, 'OK', array ($ngood));
-	else
-		return buildRedirectURL (__FUNCTION__, 'ERR', array ($nbad, $ngood));
+	return buildRedirectURL (__FUNCTION__, 'OK', array ($ngood));
 }
 
 $msgcode['importPTRData']['OK'] = 26;
@@ -1758,7 +1691,6 @@ function generateAutoPorts ()
 }
 
 $msgcode['saveEntityTags']['OK'] = 26;
-$msgcode['saveEntityTags']['ERR1'] = 143;
 // Filter out implicit tags before storing the new tag set.
 function saveEntityTags ()
 {
@@ -1774,16 +1706,13 @@ function saveEntityTags ()
 	// TODO: these actions are very close to what rebuildTagChainForEntity() does,
 	// so why not use it?
 	$newchain = getExplicitTagsOnly (buildTagChainFromIds ($taglist));
-	$n_succeeds = $n_errors = 0;
+	$n_succeeds = 0;
 	foreach ($newchain as $taginfo)
-		if (addTagForEntity ($realm, $entity_id, $taginfo['id']))
-			$n_succeeds++;
-		else
-			$n_errors++;
-	if ($n_errors)
-		return buildRedirectURL (__FUNCTION__, 'ERR1', array ($n_succeeds, $n_errors));
-	else
-		return buildRedirectURL (__FUNCTION__, 'OK', array ($n_succeeds));
+	{
+		addTagForEntity ($realm, $entity_id, $taginfo['id']);
+		$n_succeeds++;
+	}
+	return buildRedirectURL (__FUNCTION__, 'OK', array ($n_succeeds));
 }
 
 $msgcode['rollTags']['OK'] = 67;
@@ -1818,7 +1747,6 @@ $msgcode['changeMyPassword']['OK'] = 51;
 $msgcode['changeMyPassword']['ERR1'] = 150;
 $msgcode['changeMyPassword']['ERR2'] = 151;
 $msgcode['changeMyPassword']['ERR3'] = 152;
-$msgcode['changeMyPassword']['ERR4'] = 153;
 function changeMyPassword ()
 {
 	global $remote_username, $user_auth_src;
@@ -1833,15 +1761,12 @@ function changeMyPassword ()
 		return buildRedirectURL (__FUNCTION__, 'ERR2');
 	if ($_REQUEST['newpassword1'] != $_REQUEST['newpassword2'])
 		return buildRedirectURL (__FUNCTION__, 'ERR3');
-	if (FALSE !== commitUpdateUserAccount ($remote_userid, $userinfo['user_name'], $userinfo['user_realname'], sha1 ($_REQUEST['newpassword1'])))
-		return buildRedirectURL (__FUNCTION__, 'OK');
-	else
-		return buildRedirectURL (__FUNCTION__, 'ERR4');
+	commitUpdateUserAccount ($remote_userid, $userinfo['user_name'], $userinfo['user_realname'], sha1 ($_REQUEST['newpassword1']));
+	return buildRedirectURL (__FUNCTION__, 'OK');
 }
 
 $msgcode['saveRackCode']['OK'] = 43;
 $msgcode['saveRackCode']['ERR1'] = 154;
-$msgcode['saveRackCode']['ERR2'] = 155;
 function saveRackCode ()
 {
 	assertStringArg ('rackcode');
@@ -1850,12 +1775,9 @@ function saveRackCode ()
 	$parseTree = getRackCode ($newcode);
 	if ($parseTree['result'] != 'ACK')
 		return buildRedirectURL (__FUNCTION__, 'ERR1', array ($parseTree['load']));
-	if (FALSE !== saveScript ('RackCode', $newcode))
-	{
-		saveScript ('RackCodeCache', base64_encode (serialize ($parseTree)));
-		return buildRedirectURL (__FUNCTION__, 'OK');
-	}
-	return buildRedirectURL (__FUNCTION__, 'ERR2');
+	saveScript ('RackCode', $newcode);
+	saveScript ('RackCodeCache', base64_encode (serialize ($parseTree)));
+	return buildRedirectURL (__FUNCTION__, 'OK');
 }
 
 $msgcode['setPortVLAN']['ERR'] = 164;
@@ -1985,7 +1907,6 @@ function addRack ()
 }
 
 $msgcode['deleteRack']['OK'] = 6;
-$msgcode['deleteRack']['ERR'] = 100;
 $msgcode['deleteRack']['ERR1'] = 206;
 function deleteRack ()
 {
@@ -1994,13 +1915,11 @@ function deleteRack ()
 	amplifyCell ($rackData);
 	if (count ($rackData['mountedObjects']))
 		return buildRedirectURL (__FUNCTION__, 'ERR1');
-	if (TRUE !== commitDeleteRack ($_REQUEST['rack_id']))
-		return buildRedirectURL (__FUNCTION__, 'ERR', array(), 'rackspace', 'default');
+	commitDeleteRack ($_REQUEST['rack_id']);
 	return buildRedirectURL (__FUNCTION__, 'OK', array ($rackData['name']), 'rackspace', 'default');
 }
 
 $msgcode['updateRack']['OK'] = 6;
-$msgcode['updateRack']['ERR'] = 109;
 function updateRack ()
 {
 	assertUIntArg ('rack_row_id');
@@ -2010,10 +1929,8 @@ function updateRack ()
 
 	$rack_id = getBypassValue();
 	usePreparedUpdateBlade ('Rack', array ('thumb_data' => NULL), array ('id' => $rack_id));
-	if (TRUE === commitUpdateRack ($rack_id, $_REQUEST['rack_name'], $_REQUEST['rack_height'], $_REQUEST['rack_row_id'], $_REQUEST['rack_comment']))
-		return buildRedirectURL (__FUNCTION__, 'OK', array ($_REQUEST['rack_name']));
-	else
-		return buildRedirectURL (__FUNCTION__, 'ERR');
+	commitUpdateRack ($rack_id, $_REQUEST['rack_name'], $_REQUEST['rack_height'], $_REQUEST['rack_row_id'], $_REQUEST['rack_comment']);
+	return buildRedirectURL (__FUNCTION__, 'OK', array ($_REQUEST['rack_name']));
 }
 
 function updateRackDesign ()
@@ -2063,14 +1980,13 @@ function querySNMPData ()
 }
 
 $msgcode['linkEntities']['OK'] = 51;
-$msgcode['linkEntities']['ERR2'] = 109;
 function linkEntities ()
 {
 	assertStringArg ('parent_entity_type');
 	assertUIntArg ('parent_entity_id');
 	assertStringArg ('child_entity_type');
 	assertUIntArg ('child_entity_id');
-	$result = usePreparedInsertBlade
+	usePreparedInsertBlade
 	(
 		'EntityLink',
 		array
@@ -2081,17 +1997,15 @@ function linkEntities ()
 			'child_entity_id' => $_REQUEST['child_entity_id'],
 		)
 	);
-	if ($result === FALSE)
-		return buildRedirectURL (__FUNCTION__, 'ERR2');
 	return buildRedirectURL (__FUNCTION__, 'OK');
 }
 
 $msgcode['unlinkEntities']['OK'] = 49;
-$msgcode['unlinkEntities']['ERR'] = 111;
 function unlinkEntities ()
 {
 	assertUIntArg ('link_id');
-	return buildRedirectURL (__FUNCTION__, commitUnlinkEntities ($_REQUEST['link_id']) === FALSE ? 'ERR' : 'OK');
+	commitUnlinkEntities ($_REQUEST['link_id']);
+	return buildRedirectURL (__FUNCTION__,  'OK');
 }
 
 $msgcode['addFileWithoutLink']['OK'] = 5;
@@ -2180,11 +2094,11 @@ function replaceFile ()
 }
 
 $msgcode['unlinkFile']['OK'] = 72;
-$msgcode['unlinkFile']['ERR'] = 111;
 function unlinkFile ()
 {
 	assertUIntArg ('link_id');
-	return buildRedirectURL (__FUNCTION__, commitUnlinkFile ($_REQUEST['link_id']) === FALSE ? 'ERR' : 'OK');
+	commitUnlinkFile ($_REQUEST['link_id']);
+	return buildRedirectURL (__FUNCTION__, 'OK');
 }
 
 $msgcode['deleteFile']['OK'] = 7;
@@ -2212,44 +2126,42 @@ function updateFileText ()
 }
 
 $msgcode['addIIFOIFCompat']['OK'] = 48;
-$msgcode['addIIFOIFCompat']['ERR'] = 110;
 function addIIFOIFCompat ()
 {
 	assertUIntArg ('iif_id');
 	assertUIntArg ('oif_id');
-	if (commitSupplementPIC ($_REQUEST['iif_id'], $_REQUEST['oif_id']))
-		return buildRedirectURL (__FUNCTION__, 'OK');
-	return buildRedirectURL (__FUNCTION__, 'ERR');
+	commitSupplementPIC ($_REQUEST['iif_id'], $_REQUEST['oif_id']);
+	return buildRedirectURL (__FUNCTION__, 'OK');
 }
 
-$msgcode['addIIFOIFCompatPack']['OK'] = 44;
+$msgcode['addIIFOIFCompatPack']['OK'] = 37;
 function addIIFOIFCompatPack ()
 {
 	genericAssertion ('standard', 'enum/wdmstd');
 	genericAssertion ('iif_id', 'iif');
 	global $wdm_packs, $sic;
-	$ngood = $nbad = 0;
+	$ngood = 0;
 	foreach ($wdm_packs[$sic['standard']]['oif_ids'] as $oif_id)
-		if (commitSupplementPIC ($sic['iif_id'], $oif_id))
-			$ngood++;
-		else
-			$nbad++;
-	return buildRedirectURL (__FUNCTION__, 'OK', array ($nbad, $ngood));
+	{
+		commitSupplementPIC ($sic['iif_id'], $oif_id);
+		$ngood++;
+	}
+	return buildRedirectURL (__FUNCTION__, 'OK', array ($ngood));
 }
 
-$msgcode['delIIFOIFCompatPack']['OK'] = 44;
+$msgcode['delIIFOIFCompatPack']['OK'] = 38;
 function delIIFOIFCompatPack ()
 {
 	genericAssertion ('standard', 'enum/wdmstd');
 	genericAssertion ('iif_id', 'iif');
 	global $wdm_packs, $sic;
-	$ngood = $nbad = 0;
+	$ngood = 0;
 	foreach ($wdm_packs[$sic['standard']]['oif_ids'] as $oif_id)
-		if (usePreparedDeleteBlade ('PortInterfaceCompat', array ('iif_id' => $sic['iif_id'], 'oif_id' => $oif_id)))
-			$ngood++;
-		else
-			$nbad++;
-	return buildRedirectURL (__FUNCTION__, 'OK', array ($nbad, $ngood));
+	{
+		usePreparedDeleteBlade ('PortInterfaceCompat', array ('iif_id' => $sic['iif_id'], 'oif_id' => $oif_id));
+		$ngood++;
+	}
+	return buildRedirectURL (__FUNCTION__, 'OK', array ($ngood));
 }
 
 $msgcode['addOIFCompatPack']['OK'] = 21;
@@ -2300,7 +2212,7 @@ function add8021QOrder ()
 	if ($pageno != 'vst')
 		spreadContext (spotEntity ('vst', $sic['vst_id']));
 	assertPermission();
-	$result = usePreparedExecuteBlade
+	usePreparedExecuteBlade
 	(
 		'INSERT INTO VLANSwitch (domain_id, object_id, template_id, last_change, out_of_sync) ' .
 		'VALUES (?, ?, ?, NOW(), "yes")',
@@ -2333,12 +2245,11 @@ function del8021QOrder ()
 }
 
 $msgcode['createVLANDomain']['OK'] = 48;
-$msgcode['createVLANDomain']['ERR'] = 110;
 function createVLANDomain ()
 {
 	assertStringArg ('vdom_descr');
 	global $sic;
-	$result = usePreparedInsertBlade
+	usePreparedInsertBlade
 	(
 		'VLANDomain',
 		array
@@ -2346,7 +2257,7 @@ function createVLANDomain ()
 			'description' => $sic['vdom_descr'],
 		)
 	);
-	$result = $result and usePreparedInsertBlade
+	usePreparedInsertBlade
 	(
 		'VLANDescription',
 		array
@@ -2357,17 +2268,16 @@ function createVLANDomain ()
 			'vlan_descr' => 'default',
 		)
 	);
-	return buildRedirectURL (__FUNCTION__, $result ? 'OK' : 'ERR');
+	return buildRedirectURL (__FUNCTION__, 'OK');
 }
 
 $msgcode['destroyVLANDomain']['OK'] = 49;
-$msgcode['destroyVLANDomain']['ERR'] = 111;
 function destroyVLANDomain ()
 {
 	assertUIntArg ('vdom_id');
 	global $sic;
-	$result = FALSE !== usePreparedDeleteBlade ('VLANDomain', array ('id' => $sic['vdom_id']));
-	return buildRedirectURL (__FUNCTION__, $result ? 'OK' : 'ERR');
+	usePreparedDeleteBlade ('VLANDomain', array ('id' => $sic['vdom_id']));
+	return buildRedirectURL (__FUNCTION__, 'OK');
 }
 
 $msgcode['save8021QPorts']['OK1'] = 63;
@@ -2491,43 +2401,39 @@ function save8021QPorts ()
 }
 
 $msgcode['bindVLANtoIPv4']['OK'] = 48;
-$msgcode['bindVLANtoIPv4']['ERR'] = 110;
 function bindVLANtoIPv4 ()
 {
 	assertUIntArg ('id'); // network id
 	global $sic;
-	$result = commitSupplementVLANIPv4 ($sic['vlan_ck'], $sic['id']);
-	return buildRedirectURL (__FUNCTION__, $result ? 'OK' : 'ERR');
+	commitSupplementVLANIPv4 ($sic['vlan_ck'], $sic['id']);
+	return buildRedirectURL (__FUNCTION__, 'OK');
 }
 
 $msgcode['bindVLANtoIPv6']['OK'] = 48;
-$msgcode['bindVLANtoIPv6']['ERR'] = 110;
 function bindVLANtoIPv6 ()
 {
 	assertUIntArg ('id'); // network id
 	global $sic;
-	$result = commitSupplementVLANIPv6 ($sic['vlan_ck'], $_REQUEST['id']);
-	return buildRedirectURL (__FUNCTION__, $result ? 'OK' : 'ERR');
+	commitSupplementVLANIPv6 ($sic['vlan_ck'], $_REQUEST['id']);
+	return buildRedirectURL (__FUNCTION__, 'OK');
 }
 
 $msgcode['unbindVLANfromIPv4']['OK'] = 49;
-$msgcode['unbindVLANfromIPv4']['ERR'] = 111;
 function unbindVLANfromIPv4 ()
 {
 	assertUIntArg ('id'); // network id
 	global $sic;
-	$result = commitReduceVLANIPv4 ($sic['vlan_ck'], $sic['id']);
-	return buildRedirectURL (__FUNCTION__, $result ? 'OK' : 'ERR');
+	commitReduceVLANIPv4 ($sic['vlan_ck'], $sic['id']);
+	return buildRedirectURL (__FUNCTION__, 'OK');
 }
 
 $msgcode['unbindVLANfromIPv6']['OK'] = 49;
-$msgcode['unbindVLANfromIPv6']['ERR'] = 111;
 function unbindVLANfromIPv6 ()
 {
 	assertUIntArg ('id'); // network id
 	global $sic;
-	$result = commitReduceVLANIPv6 ($sic['vlan_ck'], $sic['id']);
-	return buildRedirectURL (__FUNCTION__, $result ? 'OK' : 'ERR');
+	commitReduceVLANIPv6 ($sic['vlan_ck'], $sic['id']);
+	return buildRedirectURL (__FUNCTION__, 'OK');
 }
 
 $msgcode['process8021QSyncRequest']['OK'] = 63;
@@ -2609,9 +2515,15 @@ function resolve8021QConflicts ()
 				if (!same8021QConfigs ($port, $R['portdata'][$port_name]))
 					throw new InvalidRequestArgException ("port ${port_name}", '(hidden)', 'expired form (switch data has changed)');
 				if ($port['decision'] == 'right') // D wins, frame R by writing value of R to C
-					$ndone += upd8021QPort ('cached', $vswitch['object_id'], $port_name, $port);
+				{
+					upd8021QPort ('cached', $vswitch['object_id'], $port_name, $port);
+					$ndone++;
+				}
 				elseif ($port['decision'] == 'left') // R wins, cross D up
-					$ndone += upd8021QPort ('cached', $vswitch['object_id'], $port_name, $D[$port_name]);
+				{
+					upd8021QPort ('cached', $vswitch['object_id'], $port_name, $D[$port_name]);
+					$ndone++;
+				}
 				// otherwise there was no decision made
 			}
 			elseif
@@ -2619,11 +2531,13 @@ function resolve8021QConflicts ()
 				$plan[$port_name]['status'] == 'delete_conflict' or
 				$plan[$port_name]['status'] == 'martian_conflict'
 			)
-			{
-				if ($port['decision'] == 'left') // confirm deletion of local copy
-					$ndone += del8021QPort ($vswitch['object_id'], $port_name);
-			}
-			// otherwise ignore a decision, which doesn't address a conflict
+				if ($port['decision'] == 'left')
+				{
+					// confirm deletion of local copy
+					del8021QPort ($vswitch['object_id'], $port_name);
+					$ndone++;
+				}
+				// otherwise ignore a decision, which doesn't address a conflict
 		}
 	}
 	catch (InvalidRequestArgException $e)
@@ -2641,12 +2555,11 @@ function resolve8021QConflicts ()
 }
 
 $msgcode['addVLANSwitchTemplate']['OK'] = 48;
-$msgcode['addVLANSwitchTemplate']['ERR'] = 110;
 function addVLANSwitchTemplate()
 {
 	assertStringArg ('vst_descr');
 	global $sic;
-	$result = usePreparedInsertBlade
+	usePreparedInsertBlade
 	(
 		'VLANSwitchTemplate',
 		array
@@ -2654,17 +2567,16 @@ function addVLANSwitchTemplate()
 			'description' => $sic['vst_descr'],
 		)
 	);
-	return buildRedirectURL (__FUNCTION__, $result ? 'OK' : 'ERR');
+	return buildRedirectURL (__FUNCTION__, 'OK');
 }
 
 $msgcode['delVLANSwitchTemplate']['OK'] = 49;
-$msgcode['delVLANSwitchTemplate']['ERR'] = 111;
 function delVLANSwitchTemplate()
 {
 	assertUIntArg ('vst_id');
 	global $sic;
-	$result = FALSE !== usePreparedDeleteBlade ('VLANSwitchTemplate', array ('id' => $sic['vst_id']));
-	return buildRedirectURL (__FUNCTION__, $result ? 'OK' : 'ERR');
+	usePreparedDeleteBlade ('VLANSwitchTemplate', array ('id' => $sic['vst_id']));
+	return buildRedirectURL (__FUNCTION__, 'OK');
 }
 
 $msgcode['cloneVST']['OK'] = 48;
@@ -2766,11 +2678,15 @@ function importDPData()
 				try
 				{
 					if ($oif_a)
-						if (commitUpdatePortOIF ($params['a_id'], $oif_a))
-							$porta['oif_id'] = $oif_a;
+					{
+						commitUpdatePortOIF ($params['a_id'], $oif_a);
+						$porta['oif_id'] = $oif_a;
+					}
 					if ($oif_b)
-						if (commitUpdatePortOIF ($params['b_id'], $oif_b))
-							$portb['oif_id'] = $oif_b;
+					{
+						commitUpdatePortOIF ($params['b_id'], $oif_b);
+						$portb['oif_id'] = $oif_b;
+					}
 				}
 				catch (RTDatabaseError $e)
 				{
@@ -2782,16 +2698,10 @@ function importDPData()
 			foreach ($POIFC as $item)
 				if ($item['type1'] == $porta['oif_id'] and $item['type2'] == $portb['oif_id'])
 				{
-					$ret = linkPorts ($params['a_id'], $params['b_id']);
-					if (empty ($ret))
-					{
-						$ndone++;
-						$dbxlink->commit();
-						continue 2; //next port
-					}
-					else
-						$nignored++;
-					break;
+					linkPorts ($params['a_id'], $params['b_id']);
+					$ndone++;
+					$dbxlink->commit();
+					continue 2; //next port
 				}
 			$dbxlink->rollback();
 		}
@@ -2827,10 +2737,8 @@ function getOpspec()
 function unlinkPort ()
 {
 	assertUIntArg ('port_id');
-	if (commitUnlinkPort ($_REQUEST['port_id']))
-		showSuccess ("Port unlinked successfully");
-	else
-		showError ("Error unlinking port");
+	commitUnlinkPort ($_REQUEST['port_id']);
+	showSuccess ("Port unlinked successfully");
 }
 
 function tableHandler()
@@ -2872,11 +2780,11 @@ function tableHandler()
 	switch ($opspec['action'])
 	{
 	case 'INSERT':
-		$retcode = TRUE === usePreparedInsertBlade ($opspec['table'], $columns['arglist']) ? 48 : 110;
+		usePreparedInsertBlade ($opspec['table'], $columns['arglist']);
 		break;
 	case 'DELETE':
 		$conjunction = array_key_exists ('conjunction', $opspec) ? $opspec['conjunction'] : 'AND';
-		$retcode = FALSE !== usePreparedDeleteBlade ($opspec['table'], $columns['arglist'], $conjunction) ? 49 : 111;
+		usePreparedDeleteBlade ($opspec['table'], $columns['arglist'], $conjunction);
 		break;
 	case 'UPDATE':
 		usePreparedUpdateBlade
@@ -2886,12 +2794,11 @@ function tableHandler()
 			$columns['where_arglist'],
 			array_key_exists ('conjunction', $opspec) ? $opspec['conjunction'] : 'AND'
 		);
-		$retcode = 51;
 		break;
 	default:
 		throw new InvalidArgException ('opspec/action', $opspec['action']);
 	}
-	return buildWideRedirectURL (oneLiner ($retcode));
+	return buildWideRedirectURL (oneLiner (51));
 }
 
 ?>

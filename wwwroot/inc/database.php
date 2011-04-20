@@ -652,9 +652,7 @@ function commitAddRack ($name, $height, $row_id, $comment, $taglist)
 
 function commitAddObject ($new_name, $new_label, $new_type_id, $new_asset_no, $taglist = array())
 {
-	// Maintain UNIQUE INDEX for common names and asset tags by
-	// filtering out empty strings (not NULLs).
-	$result1 = usePreparedInsertBlade
+	usePreparedInsertBlade
 	(
 		'RackObject',
 		array
@@ -694,7 +692,7 @@ function commitUpdateObject ($object_id, $new_name, $new_label, $new_has_problem
 			'id' => $object_id
 		)
 	);
-	return recordHistory ('RackObject', $object_id);
+	recordHistory ('RackObject', $object_id);
 }
 
 // used by getEntityRelatives for sorting
@@ -755,7 +753,7 @@ function getEntityRelatives ($type, $entity_type, $entity_id)
 
 function commitUnlinkEntities ($link_id)
 {
-	return usePreparedDeleteBlade ('EntityLink', array ('id' => $link_id));
+	usePreparedDeleteBlade ('EntityLink', array ('id' => $link_id));
 }
 
 // The following functions return stats about VM-related info.
@@ -924,7 +922,6 @@ function commitDeleteRack($rack_id)
 	usePreparedDeleteBlade ('RackSpace', array ('rack_id' => $rack_id));
 	usePreparedDeleteBlade ('RackHistory', array ('id' => $rack_id));
 	usePreparedDeleteBlade ('Rack', array ('id' => $rack_id));
-	return TRUE;
 }
 
 function commitUpdateRack ($rack_id, $new_name, $new_height, $new_row_id, $new_comment)
@@ -950,7 +947,7 @@ function commitUpdateRack ($rack_id, $new_name, $new_height, $new_row_id, $new_c
 			'id' => $rack_id,
 		)
 	);
-	return recordHistory ('Rack', $rack_id);
+	recordHistory ('Rack', $rack_id);
 }
 
 // This function accepts rack data returned by amplifyCell(), validates and applies changes
@@ -998,7 +995,7 @@ function processGridForm (&$rackData, $unchecked_state, $checked_state, $object_
 			if ($newstate == 'T' and $object_id != 0)
 			{
 				// At this point we already have a record in RackSpace.
-				$r = usePreparedUpdateBlade
+				usePreparedUpdateBlade
 				(
 					'RackSpace',
 					array ('object_id' => $object_id),
@@ -1009,8 +1006,6 @@ function processGridForm (&$rackData, $unchecked_state, $checked_state, $object_
 						'atom' => $atom,
 					)
 				);
-				if ($r === FALSE)
-					return array ('code' => 500, 'message' => "${rack_name}: Rack ID ${rack_id}, unit ${unit_no}, atom '${atom}' failed to set object_id to '${object_id}'");
 				$rackData[$unit_no][$locidx]['object_id'] = $object_id;
 			}
 		}
@@ -1082,7 +1077,7 @@ function createMolecule ($molData)
 function recordHistory ($tableName, $orig_id)
 {
 	global $remote_username;
-	return FALSE !== usePreparedExecuteBlade
+	usePreparedExecuteBlade
 	(
 		"INSERT INTO ${tableName}History SELECT *, CURRENT_TIMESTAMP(), ? " .
 		"FROM ${tableName} WHERE id=?",
@@ -1154,7 +1149,7 @@ function commitAddPort ($object_id = 0, $port_name, $port_type_id, $port_label, 
 		$dbxlink->exec ('UNLOCK TABLES');
 		throw new InvalidArgException ('port_type_id', $port_type_id, 'format error');
 	}
-	$result = usePreparedInsertBlade
+	usePreparedInsertBlade
 	(
 		'Port',
 		array
@@ -1194,7 +1189,7 @@ function commitUpdatePort ($object_id, $port_id, $port_name, $port_type_id, $por
 	}
 	$prev_comment = getPortReservationComment ($port_id);
 	$reservation_comment = mb_strlen ($port_reservation_comment) ? $port_reservation_comment : NULL;
-	$res = usePreparedUpdateBlade
+	usePreparedUpdateBlade
 	(
 		'Port',
 		array
@@ -1212,9 +1207,8 @@ function commitUpdatePort ($object_id, $port_id, $port_name, $port_type_id, $por
 		)
 	);
 	$dbxlink->exec ('UNLOCK TABLES');
-	if ($res && $prev_comment !== $reservation_comment)
+	if ($prev_comment !== $reservation_comment)
 		addPortLogEntry ($port_id, sprintf ("Reservation changed from '%s' to '%s'", $prev_comment, $reservation_comment));
-	return $res;
 }
 
 function commitUpdatePortComment ($port_id, $port_reservation_comment)
@@ -1223,7 +1217,7 @@ function commitUpdatePortComment ($port_id, $port_reservation_comment)
 	$dbxlink->exec ('LOCK TABLES Port WRITE');
 	$prev_comment = getPortReservationComment ($port_id);
 	$reservation_comment = mb_strlen ($port_reservation_comment) ? $port_reservation_comment : NULL;
-	$res = usePreparedUpdateBlade
+	usePreparedUpdateBlade
 	(
 		'Port',
 		array 
@@ -1236,14 +1230,13 @@ function commitUpdatePortComment ($port_id, $port_reservation_comment)
 		)
 	);
 	$dbxlink->exec ('UNLOCK TABLES');
-	if ($res && $prev_comment !== $reservation_comment)
+	if ($prev_comment !== $reservation_comment)
 		addPortLogEntry ($port_id, sprintf ("Reservation changed from '%s' to '%s'", $prev_comment, $reservation_comment));
-	return $res;
 }
 
 function commitUpdatePortOIF ($port_id, $port_type_id)
 {
-	return usePreparedUpdateBlade
+	usePreparedUpdateBlade
 	(
 		'Port',
 		array ('type' => $port_type_id),
@@ -1284,16 +1277,16 @@ function linkPorts ($porta, $portb, $cable = NULL)
 		$dbxlink->exec ('UNLOCK TABLES');
 		return "Port ${porta} or ${portb} is already linked";
 	}
-	$result->closeCursor ();
+	unset ($result);
 	if ($porta > $portb)
 	{
 		$tmp = $porta;
 		$porta = $portb;
 		$portb = $tmp;
 	}
-	$ret = FALSE !== usePreparedInsertBlade ('Link', array ('porta' => $porta, 'portb' => $portb, 'cable' => $cable));
+	usePreparedInsertBlade ('Link', array ('porta' => $porta, 'portb' => $portb, 'cable' => $cable));
 	$dbxlink->exec ('UNLOCK TABLES');
-	$ret = $ret and FALSE !== usePreparedExecuteBlade
+	usePreparedExecuteBlade
 	(
 		'UPDATE Port SET reservation_comment=NULL WHERE id IN(?, ?)',
 		array ($porta, $portb)
@@ -1312,8 +1305,6 @@ function linkPorts ($porta, $portb, $cable = NULL)
 		addPortLogEntry ($pair_id, sprintf ("linked to %s %s", $row['obj_name'], $row['port_name']));
 	}
 	unset ($result);
-
-	return $ret ? '' : 'query failed';
 }
 
 function commitUnlinkPort ($port_id)
@@ -1340,13 +1331,13 @@ function commitUnlinkPort ($port_id)
 	unset ($result);
 	
 	// remove existing link
-	return usePreparedDeleteBlade ('Link', array ('porta' => $port_id, 'portb' => $port_id), 'OR');
+	usePreparedDeleteBlade ('Link', array ('porta' => $port_id, 'portb' => $port_id), 'OR');
 }
 
 function addPortLogEntry ($port_id, $message)
 {
 	global $remote_username;
-	return usePreparedExecuteBlade
+	usePreparedExecuteBlade
 	(
 		"INSERT INTO PortLog (port_id, user, date, content) VALUES (?, ?, NOW(), ?)",
 		array ($port_id, $remote_username, $message)
@@ -1718,7 +1709,7 @@ function getIPv6Address ($v6addr)
 
 function bindIpToObject ($ip = '', $object_id = 0, $name = '', $type = '')
 {
-	return usePreparedExecuteBlade
+	usePreparedExecuteBlade
 	(
 		'INSERT INTO IPv4Allocation (ip, object_id, name, type) VALUES (INET_ATON(?), ?, ?, ?)',
 		array ($ip, $object_id, $name, $type)
@@ -1727,7 +1718,7 @@ function bindIpToObject ($ip = '', $object_id = 0, $name = '', $type = '')
 
 function bindIPv6ToObject ($ip, $object_id = 0, $name = '', $type = '')
 {
-	return usePreparedInsertBlade
+	usePreparedInsertBlade
 	(
 		'IPv6Allocation',
 		array ('ip' => $ip->getBin(), 'object_id' => $object_id, 'name' => $name, 'type' => $type)
@@ -1781,13 +1772,12 @@ function updateV4Address ($ip = 0, $name = '', $reserved = 'no')
 	usePreparedExecuteBlade ('DELETE FROM IPv4Address WHERE ip = INET_ATON(?)', array ($ip));
 	// INSERT may appear not necessary.
 	if ($name == '' and $reserved == 'no')
-		return '';
-	$ret = usePreparedExecuteBlade
+		return;
+	usePreparedExecuteBlade
 	(
 		'INSERT INTO IPv4Address (name, reserved, ip) VALUES (?, ?, INET_ATON(?))',
 		array ($name, $reserved, $ip)
 	);
-	return $ret !== FALSE ? '' : (__FUNCTION__ . 'query failed');
 }
 
 function updateV6Address ($ip, $name = '', $reserved = 'no')
@@ -1795,18 +1785,17 @@ function updateV6Address ($ip, $name = '', $reserved = 'no')
 	usePreparedDeleteBlade ('IPv6Address', array ('ip' => $ip->getBin()));
 	// INSERT may appear not necessary.
 	if ($name == '' and $reserved == 'no')
-		return '';
-	$ret = usePreparedInsertBlade
+		return;
+	usePreparedInsertBlade
 	(
 		'IPv6Address',
 		array ('name' => $name, 'reserved' => $reserved, 'ip' => $ip->getBin())
 	);
-	return $ret !== FALSE ? '' : (__FUNCTION__ . 'query failed');
 }
 
 function updateBond ($ip='', $object_id=0, $name='', $type='')
 {
-	return usePreparedExecuteBlade
+	usePreparedExecuteBlade
 	(
 		'UPDATE IPv4Allocation SET name=?, type=? WHERE ip=INET_ATON(?) AND object_id=?',
 		array ($name, $type, $ip, $object_id)
@@ -1815,7 +1804,7 @@ function updateBond ($ip='', $object_id=0, $name='', $type='')
 
 function updateIPv6Bond ($ip, $object_id=0, $name='', $type='')
 {
-	return usePreparedUpdateBlade
+	usePreparedUpdateBlade
 	(
 		'IPv6Allocation',
 		array
@@ -1833,7 +1822,7 @@ function updateIPv6Bond ($ip, $object_id=0, $name='', $type='')
 
 function unbindIpFromObject ($ip, $object_id)
 {
-	return usePreparedExecuteBlade
+	usePreparedExecuteBlade
 	(
 		'DELETE FROM IPv4Allocation WHERE ip=INET_ATON(?) AND object_id=?',
 		array ($ip, $object_id)
@@ -1842,7 +1831,7 @@ function unbindIpFromObject ($ip, $object_id)
 
 function unbindIPv6FromObject ($ip, $object_id)
 {
-	return usePreparedDeleteBlade
+	usePreparedDeleteBlade
 	(
 		'IPv6Allocation',
 		array ('ip' => $ip->getBin(), 'object_id' => $object_id)
@@ -2315,7 +2304,7 @@ function searchByMgmtHostname ($string)
 
 function commitCreateUserAccount ($username, $realname, $password)
 {
-	return usePreparedInsertBlade
+	usePreparedInsertBlade
 	(
 		'UserAccount',
 		array
@@ -2329,7 +2318,7 @@ function commitCreateUserAccount ($username, $realname, $password)
 
 function commitUpdateUserAccount ($id, $new_username, $new_realname, $new_password)
 {
-	return usePreparedUpdateBlade
+	usePreparedUpdateBlade
 	(
 		'UserAccount',
 		array
@@ -2383,7 +2372,7 @@ function commitSupplementOPC ($parent_objtype_id, $child_objtype_id)
 		throw new InvalidArgException ('parent_objtype_id', $parent_objtype_id);
 	if ($child_objtype_id <= 0)
 		throw new InvalidArgException ('child_objtype_id', $child_objtype_id);
-	return usePreparedInsertBlade
+	usePreparedInsertBlade
 	(
 		'ObjectParentCompat',
 		array ('parent_objtype_id' => $parent_objtype_id, 'child_objtype_id' => $child_objtype_id)
@@ -2393,7 +2382,7 @@ function commitSupplementOPC ($parent_objtype_id, $child_objtype_id)
 // Remove a pair from the ObjectParentCompat table.
 function commitReduceOPC ($parent_objtype_id, $child_objtype_id)
 {
-	return usePreparedDeleteBlade ('ObjectParentCompat', array ('parent_objtype_id' => $parent_objtype_id, 'child_objtype_id' => $child_objtype_id));
+	usePreparedDeleteBlade ('ObjectParentCompat', array ('parent_objtype_id' => $parent_objtype_id, 'child_objtype_id' => $child_objtype_id));
 }
 
 function getDictStats ()
@@ -2522,7 +2511,7 @@ mysql> select tag_id from TagStorage left join TagTree on tag_id = id where id i
 
 function commitDeleteChapter ($chapter_no = 0)
 {
-	return usePreparedDeleteBlade ('Chapter', array ('id' => $chapter_no, 'sticky' => 'no'));
+	usePreparedDeleteBlade ('Chapter', array ('id' => $chapter_no, 'sticky' => 'no'));
 }
 
 // This is a dictionary accessor. We perform link rendering, so the user sees
@@ -2630,7 +2619,7 @@ function commitSupplementAttrMap ($attr_id = 0, $objtype_id = 0, $chapter_no = 0
 	if ($objtype_id <= 0)
 		throw new InvalidArgException ('$objtype_id', $objtype_id);
 
-	return usePreparedInsertBlade
+	usePreparedInsertBlade
 	(
 		'AttributeMap',
 		array
@@ -2787,6 +2776,7 @@ function convertPDOException ($e)
 // This is a swiss-knife blade to insert a record into a table.
 // The first argument is table name.
 // The second argument is an array of "name" => "value" pairs.
+// returns integer - affected rows count. Throws exception on error
 function usePreparedInsertBlade ($tablename, $columns)
 {
 	global $dbxlink;
@@ -2797,9 +2787,8 @@ function usePreparedInsertBlade ($tablename, $columns)
 	try
 	{
 		$prepared = $dbxlink->prepare ($query);
-		if (!$prepared->execute (array_values ($columns)))
-			return FALSE;
-		return $prepared->rowCount() == 1;
+		$prepared->execute (array_values ($columns));
+		return $prepared->rowCount();
 	}
 	catch (PDOException $e)
 	{
@@ -2809,6 +2798,7 @@ function usePreparedInsertBlade ($tablename, $columns)
 
 // This swiss-knife blade deletes any number of records from the specified table
 // using the specified key names and values.
+// returns integer - affected rows count. Throws exception on error
 function usePreparedDeleteBlade ($tablename, $columns, $conjunction = 'AND')
 {
 	global $dbxlink;
@@ -2822,9 +2812,8 @@ function usePreparedDeleteBlade ($tablename, $columns, $conjunction = 'AND')
 	try
 	{
 		$prepared = $dbxlink->prepare ($query);
-		if (!$prepared->execute (array_values ($columns)))
-			return FALSE;
-		return $prepared->rowCount(); // FALSE !== 0
+		$prepared->execute (array_values ($columns));
+		return $prepared->rowCount();
 	}
 	catch (PDOException $e)
 	{
@@ -2838,8 +2827,7 @@ function usePreparedSelectBlade ($query, $args = array())
 	try
 	{
 		$prepared = $dbxlink->prepare ($query);
-		if (!$prepared->execute ($args))
-			return FALSE;
+		$prepared->execute ($args);
 		return $prepared;
 	}
 	catch (PDOException $e)
@@ -2848,6 +2836,7 @@ function usePreparedSelectBlade ($query, $args = array())
 	}
 }
 
+// returns integer - affected rows count. Throws exception on error
 function usePreparedUpdateBlade ($tablename, $set_columns, $where_columns, $conjunction = 'AND')
 {
 	global $dbxlink;
@@ -2868,8 +2857,7 @@ function usePreparedUpdateBlade ($tablename, $set_columns, $where_columns, $conj
 	try
 	{
 		$prepared = $dbxlink->prepare ($query);
-		if (! $prepared->execute (array_merge (array_values ($set_columns), array_values ($where_columns))))
-			return FALSE;
+		$prepared->execute (array_merge (array_values ($set_columns), array_values ($where_columns)));
 		return $prepared->rowCount();
 	}
 	catch (PDOException $e)
@@ -2878,16 +2866,15 @@ function usePreparedUpdateBlade ($tablename, $set_columns, $where_columns, $conj
 	}
 }
 
-// Prepare and execute the statement with parameters, then return number of
-// rows affected (or FALSE in case of an error).
+// Prepare and execute the statement with parameters
+// returns integer - affected rows count. Throws exception on error
 function usePreparedExecuteBlade ($query, $args = array())
 {
 	global $dbxlink;
 	try
 	{
 		$prepared = $dbxlink->prepare ($query);
-		if (!$prepared->execute ($args))
-			return FALSE;
+		$prepared->execute ($args);
 		return $prepared->rowCount();
 	}
 	catch (PDOException $e)
@@ -2954,7 +2941,7 @@ function getSLBSummary ()
 
 function addRStoRSPool ($pool_id = 0, $rsip = '', $rsport = 0, $inservice = 'no', $rsconfig = '')
 {
-	return usePreparedExecuteBlade
+	usePreparedExecuteBlade
 	(
 		'INSERT INTO IPv4RS (rsip, rsport, rspool_id, inservice, rsconfig) VALUES (INET_ATON(?), ?, ?, ?, ?)',
 		array
@@ -2970,7 +2957,7 @@ function addRStoRSPool ($pool_id = 0, $rsip = '', $rsport = 0, $inservice = 'no'
 
 function addLBtoRSPool ($pool_id = 0, $object_id = 0, $vs_id = 0, $vsconfig = '', $rsconfig = '', $prio = '')
 {
-	return usePreparedInsertBlade
+	usePreparedInsertBlade
 	(
 		'IPv4LB',
 		array
@@ -2988,14 +2975,15 @@ function addLBtoRSPool ($pool_id = 0, $object_id = 0, $vs_id = 0, $vsconfig = ''
 function commitDeleteVS ($id = 0)
 {
 	releaseFiles ('ipv4vs', $id);
-	return FALSE !== usePreparedDeleteBlade ('IPv4VS', array ('id' => $id)) && FALSE !== destroyTagsForEntity ('ipv4vs', $id);
+	destroyTagsForEntity ('ipv4vs', $id);
+	usePreparedDeleteBlade ('IPv4VS', array ('id' => $id));
 }
 
 function commitUpdateRS ($rsid = 0, $rsip = '', $rsport = 0, $rsconfig = '')
 {
 	if (long2ip (ip2long ($rsip)) !== $rsip)
 		throw new InvalidArgException ('$rsip', $rsip);
-	return usePreparedExecuteBlade
+	usePreparedExecuteBlade
 	(
 		'UPDATE IPv4RS SET rsip=INET_ATON(?), rsport=?, rsconfig=? WHERE id=?',
 		array
@@ -3016,7 +3004,7 @@ function commitUpdateVS ($vsid = 0, $vip = '', $vport = 0, $proto = '', $name = 
 		throw new InvalidArgException ('$vport', $vport);
 	if (!strlen ($proto))
 		throw new InvalidArgException ('$proto', $proto);
-	return usePreparedExecuteBlade
+	usePreparedExecuteBlade
 	(
 		'UPDATE IPv4VS SET vip=INET_ATON(?), vport=?, proto=?, name=?, vsconfig=?, rsconfig=? WHERE id=?',
 		array
@@ -3084,7 +3072,8 @@ function commitCreateRSPool ($name = '', $vsconfig = '', $rsconfig = '', $taglis
 function commitDeleteRSPool ($pool_id = 0)
 {
 	releaseFiles ('ipv4rspool', $pool_id);
-	return usePreparedDeleteBlade ('IPv4RSPool', array ('id' => $pool_id)) && destroyTagsForEntity ('ipv4rspool', $pool_id);
+	destroyTagsForEntity ('ipv4rspool', $pool_id);
+	usePreparedDeleteBlade ('IPv4RSPool', array ('id' => $pool_id));
 }
 
 function getRSList ()
@@ -3153,8 +3142,8 @@ function getSLBConfig ($object_id)
 
 function commitUpdateSLBDefConf ($data)
 {
-	return saveScript('DefaultVSConfig', $data['vs']) &&
-		saveScript('DefaultRSConfig', $data['rs']);
+	saveScript('DefaultVSConfig', $data['vs']);
+	saveScript('DefaultRSConfig', $data['rs']);
 }
 
 function getSLBDefaults ($do_cache_result = FALSE) {
@@ -3174,7 +3163,7 @@ function commitSetInService ($rs_id = 0, $inservice = '')
 {
 	if (! in_array ($inservice, array ('yes', 'no')))
 		throw new InvalidArgException ('$inservice', $inservice);
-	return usePreparedUpdateBlade ('IPv4RS', array ('inservice' => $inservice), array ('id' => $rs_id));
+	usePreparedUpdateBlade ('IPv4RS', array ('inservice' => $inservice), array ('id' => $rs_id));
 }
 
 function executeAutoPorts ($object_id = 0, $type_id = 0)
@@ -3352,7 +3341,7 @@ function getTagList ()
 // Drop the whole chain stored.
 function destroyTagsForEntity ($entity_realm, $entity_id)
 {
-	return usePreparedDeleteBlade ('TagStorage', array ('entity_realm' => $entity_realm, 'entity_id' => $entity_id));
+	usePreparedDeleteBlade ('TagStorage', array ('entity_realm' => $entity_realm, 'entity_id' => $entity_id));
 }
 
 // Drop only one record. This operation doesn't involve retossing other tags, unlike when adding.
@@ -3360,7 +3349,7 @@ function destroyTagsForEntity ($entity_realm, $entity_id)
 // but not now.
 function deleteTagForEntity ($entity_realm, $entity_id, $tag_id)
 {
-	return usePreparedDeleteBlade ('TagStorage', array ('entity_realm' => $entity_realm, 'entity_id' => $entity_id, 'tag_id' => $tag_id));
+	usePreparedDeleteBlade ('TagStorage', array ('entity_realm' => $entity_realm, 'entity_id' => $entity_id, 'tag_id' => $tag_id));
 }
 
 // Push a record into TagStorage unconditionally.
@@ -3371,7 +3360,7 @@ function addTagForEntity ($realm, $entity_id, $tag_id)
 		throw new InvalidArgException ('realm', $realm);
 	// spotEntity ($realm, $entity_id) would be a more expensive way
 	// to validate two parameters
-	return usePreparedInsertBlade
+	usePreparedInsertBlade
 	(
 		'TagStorage',
 		array
@@ -3538,7 +3527,7 @@ function saveScript ($name = '', $text)
 {
 	if (!strlen ($name))
 		throw new InvalidArgException ('$name', $name);
-	return usePreparedExecuteBlade
+	usePreparedExecuteBlade
 	(
 		'INSERT INTO Script (script_name, script_text) VALUES (?, ?) ' .
 		'ON DUPLICATE KEY UPDATE script_text=?',
@@ -3549,15 +3538,15 @@ function saveScript ($name = '', $text)
 function newPortForwarding ($object_id, $localip, $localport, $remoteip, $remoteport, $proto, $description)
 {
 	if (NULL === getIPv4AddressNetworkId ($localip))
-		return "$localip: Non existant ip";
+		throw new InvalidArgException ('localip', $localip, "Non existant ip");
 	if (NULL === getIPv4AddressNetworkId ($remoteip))
-		return "$remoteip: Non existant ip";
+		throw new InvalidArgException ('remoteip', $remoteip, "Non existant ip");
 	if ( ($localport <= 0) or ($localport >= 65536) )
-		return "$localport: invaild port";
+		throw new InvalidArgException ('localport', $localport, "invaild port");
 	if ( ($remoteport <= 0) or ($remoteport >= 65536) )
-		return "$remoteport: invaild port";
+		throw new InvalidArgException ('remoteport', $remoteport, "invaild port");
 
-	$result = usePreparedExecuteBlade
+	usePreparedExecuteBlade
 	(
 		'INSERT INTO IPv4NAT (object_id, localip, remoteip, localport, remoteport, proto, description) ' .
 		'VALUES (?, INET_ATON(?), INET_ATON(?), ?, ?, ?, ?)',
@@ -3572,12 +3561,11 @@ function newPortForwarding ($object_id, $localip, $localport, $remoteip, $remote
 			$description,
 		)
 	);
-	return $result !== FALSE ? '' : (__FUNCTION__ . '(): failed to insert the rule');
 }
 
 function deletePortForwarding ($object_id, $localip, $localport, $remoteip, $remoteport, $proto)
 {
-	return usePreparedExecuteBlade
+	usePreparedExecuteBlade
 	(
 		'DELETE FROM IPv4NAT WHERE object_id=? AND localip=INET_ATON(?) AND ' .
 		'remoteip=INET_ATON(?) AND localport=? AND remoteport=? AND proto=?',
@@ -3587,7 +3575,7 @@ function deletePortForwarding ($object_id, $localip, $localport, $remoteip, $rem
 
 function updatePortForwarding ($object_id, $localip, $localport, $remoteip, $remoteport, $proto, $description)
 {
-	return usePreparedExecuteBlade
+	usePreparedExecuteBlade
 	(
 		'UPDATE IPv4NAT SET description=? WHERE object_id=? AND localip=INET_ATON(?) AND remoteip=INET_ATON(?) ' .
 		'AND localport=? AND remoteport=? AND proto=?',
@@ -3880,7 +3868,7 @@ function commitReplaceFile ($file_id = 0, $contents)
 
 function commitUnlinkFile ($link_id)
 {
-	return usePreparedDeleteBlade ('FileLink', array ('id' => $link_id));
+	usePreparedDeleteBlade ('FileLink', array ('id' => $link_id));
 }
 
 function commitDeleteFile ($file_id)
@@ -3942,7 +3930,7 @@ function releaseLDAPCache ()
 // This actually changes only last_retry.
 function touchLDAPCacheRecord ($form_username)
 {
-	return usePreparedExecuteBlade ('UPDATE LDAPCache SET last_retry=NOW() WHERE presented_username=?', array ($form_username));
+	usePreparedExecuteBlade ('UPDATE LDAPCache SET last_retry=NOW() WHERE presented_username=?', array ($form_username));
 }
 
 function replaceLDAPCacheRecord ($form_username, $password_hash, $dname, $memberof)
@@ -3965,14 +3953,14 @@ function replaceLDAPCacheRecord ($form_username, $password_hash, $dname, $member
 
 function deleteLDAPCacheRecord ($form_username)
 {
-	return usePreparedDeleteBlade ('LDAPCache', array ('presented_username' => $form_username));
+	usePreparedDeleteBlade ('LDAPCache', array ('presented_username' => $form_username));
 }
 
 // Age all records older, than cache_expiry seconds, and all records made in future.
 // Calling this function w/o argument purges the whole LDAP cache.
 function discardLDAPCache ($maxage = 0)
 {
-	return usePreparedExecuteBlade ('DELETE from LDAPCache WHERE TIMESTAMPDIFF(SECOND, first_success, NOW()) >= ? or NOW() < first_success', array ($maxage));
+	usePreparedExecuteBlade ('DELETE from LDAPCache WHERE TIMESTAMPDIFF(SECOND, first_success, NOW()) >= ? or NOW() < first_success', array ($maxage));
 }
 
 function getUserIDByUsername ($username)
@@ -4070,7 +4058,7 @@ function getPortIIFOptions()
 
 function commitSupplementPIC ($iif_id, $oif_id)
 {
-	return usePreparedInsertBlade
+	usePreparedInsertBlade
 	(
 		'PortInterfaceCompat',
 		array ('iif_id' => $iif_id, 'oif_id' => $oif_id)
@@ -4297,7 +4285,7 @@ function getVLANIPv6Options ($except_vdid)
 function commitSupplementVLANIPv4 ($vlan_ck, $ipv4net_id)
 {
 	list ($vdom_id, $vlan_id) = decodeVLANCK ($vlan_ck);
-	return usePreparedInsertBlade
+	usePreparedInsertBlade
 	(
 		'VLANIPv4',
 		array
@@ -4312,7 +4300,7 @@ function commitSupplementVLANIPv4 ($vlan_ck, $ipv4net_id)
 function commitSupplementVLANIPv6 ($vlan_ck, $ipv6net_id)
 {
 	list ($vdom_id, $vlan_id) = decodeVLANCK ($vlan_ck);
-	return usePreparedInsertBlade
+	usePreparedInsertBlade
 	(
 		'VLANIPv6',
 		array
@@ -4327,7 +4315,7 @@ function commitSupplementVLANIPv6 ($vlan_ck, $ipv6net_id)
 function commitReduceVLANIPv4 ($vlan_ck, $ipv4net_id)
 {
 	list ($vdom_id, $vlan_id) = decodeVLANCK ($vlan_ck);
-	return usePreparedDeleteBlade
+	usePreparedDeleteBlade
 	(
 		'VLANIPv4',
 		array
@@ -4342,7 +4330,7 @@ function commitReduceVLANIPv4 ($vlan_ck, $ipv4net_id)
 function commitReduceVLANIPv6 ($vlan_ck, $ipv6net_id)
 {
 	list ($vdom_id, $vlan_id) = decodeVLANCK ($vlan_ck);
-	return usePreparedDeleteBlade
+	usePreparedDeleteBlade
 	(
 		'VLANIPv6',
 		array
@@ -4376,43 +4364,34 @@ function getVLANConfiguredPorts ($vlan_ck)
 function add8021QPort ($object_id, $port_name, $port)
 {
 	global $tablemap_8021q;
-	if
+	usePreparedInsertBlade
 	(
-		!usePreparedInsertBlade
-		(
-			$tablemap_8021q['cached']['pvm'],
-			array ('object_id' => $object_id, 'port_name' => $port_name, 'vlan_mode' => $port['mode'])
-		) or
-		!usePreparedInsertBlade
-		(
-			$tablemap_8021q['desired']['pvm'],
-			array ('object_id' => $object_id, 'port_name' => $port_name, 'vlan_mode' => $port['mode'])
-		)
-	)
-		throw new RackTablesError ('', RackTablesError::DB_WRITE_FAILED);
+		$tablemap_8021q['cached']['pvm'],
+		array ('object_id' => $object_id, 'port_name' => $port_name, 'vlan_mode' => $port['mode'])
+	);
+	usePreparedInsertBlade
+	(
+		$tablemap_8021q['desired']['pvm'],
+		array ('object_id' => $object_id, 'port_name' => $port_name, 'vlan_mode' => $port['mode'])
+	);
 	upd8021QPort ('cached', $object_id, $port_name, $port);
 	upd8021QPort ('desired', $object_id, $port_name, $port);
-	return 1;
 }
 
 function del8021QPort ($object_id, $port_name)
 {
 	// rely on ON DELETE CASCADE for PortAllowedVLAN and PortNativeVLAN
 	global $tablemap_8021q;
-	if
-	(	FALSE === usePreparedDeleteBlade
-		(
-			$tablemap_8021q['desired']['pvm'],
-			array ('object_id' => $object_id, 'port_name' => $port_name)
-		) or
-		FALSE === usePreparedDeleteBlade
-		(
-			$tablemap_8021q['cached']['pvm'],
-			array ('object_id' => $object_id, 'port_name' => $port_name)
-		)
-	)
-		throw new RackTablesError ('', RackTablesError::DB_WRITE_FAILED);
-	return 1;
+	usePreparedDeleteBlade
+	(
+		$tablemap_8021q['desired']['pvm'],
+		array ('object_id' => $object_id, 'port_name' => $port_name)
+	);
+	usePreparedDeleteBlade
+	(
+		$tablemap_8021q['cached']['pvm'],
+		array ('object_id' => $object_id, 'port_name' => $port_name)
+	);
 }
 
 function upd8021QPort ($instance = 'desired', $object_id, $port_name, $port)
@@ -4434,8 +4413,10 @@ function upd8021QPort ($instance = 'desired', $object_id, $port_name, $port)
 		array ('vlan_mode' => $port['mode']),
 		array ('object_id' => $object_id, 'port_name' => $port_name)
 	);
-	if (FALSE === usePreparedDeleteBlade ($tablemap_8021q[$instance]['pav'], array ('object_id' => $object_id, 'port_name' => $port_name)))
-		throw new RackTablesError ('', RackTablesError::DB_WRITE_FAILED);
+	usePreparedDeleteBlade (
+		$tablemap_8021q[$instance]['pav'],
+		array ('object_id' => $object_id, 'port_name' => $port_name)
+	);
 	// The goal is to INSERT as many rows as there are values in 'allowed' list
 	// without wrapping each row with own INSERT (otherwise the SQL connection
 	// instantly becomes the bottleneck).
@@ -4449,10 +4430,13 @@ function upd8021QPort ($instance = 'desired', $object_id, $port_name, $port)
 	if
 	(
 		$port['native'] and
-		in_array ($port['native'], $port['allowed']) and
-		!usePreparedInsertBlade ($tablemap_8021q[$instance]['pnv'], array ('object_id' => $object_id, 'port_name' => $port_name, 'vlan_id' => $port['native']))
+		in_array ($port['native'], $port['allowed'])
 	)
-		throw new RackTablesError ('', RackTablesError::DB_WRITE_FAILED);
+		usePreparedInsertBlade
+		(
+			$tablemap_8021q[$instance]['pnv'],
+			array ('object_id' => $object_id, 'port_name' => $port_name, 'vlan_id' => $port['native'])
+		);
 	return 1;
 }
 
@@ -4465,7 +4449,10 @@ function replace8021QPorts ($instance = 'desired', $object_id, $before, $changes
 			!array_key_exists ($port_name, $before) or
 			!same8021QConfigs ($port, $before[$port_name])
 		)
-			$done += upd8021QPort ($instance, $object_id, $port_name, $port);
+		{
+			upd8021QPort ($instance, $object_id, $port_name, $port);
+			$done++;
+		}
 	return $done;
 }
 
