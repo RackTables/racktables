@@ -528,14 +528,15 @@ function serializeTags ($chain, $baseurl = '')
 	$tmp = array();
 	foreach ($chain as $taginfo)
 	{
-		if (isset ($taginfo['user']) and isset ($taginfo['time']))
-			$title = 'title="' . htmlspecialchars ($taginfo['user'] . ', ' . formatAge ($taginfo['time']), ENT_QUOTES) . '"';
+		if ($baseurl == '')
+			$tmp[] = $taginfo['tag'];
 		else
+		{
 			$title = '';
-		$tmp[] =
-			($baseurl == '' ? '' : "<a $title href='${baseurl}cft[]=${taginfo['id']}'>") .
-			$taginfo['tag'] .
-			($baseurl == '' ? '' : '</a>');
+			if (isset ($taginfo['user']) and isset ($taginfo['time']))
+				$title = 'title="' . htmlspecialchars ($taginfo['user'] . ', ' . formatAge ($taginfo['time']), ENT_QUOTES) . '"';
+			$tmp[] = "<a $title href='${baseurl}cft[]=${taginfo['id']}'>" . $taginfo['tag'] . "</a>";
+		}
 	}
 	return implode (', ', $tmp);
 }

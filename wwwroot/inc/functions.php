@@ -4679,4 +4679,48 @@ function getObjectTypeChangeOptions ($object_id)
 	return $ret;
 }
 
+// Gets the timestamp and returns human-friendly short message describing the time difference
+// between the current system time and the specified timestamp (like '2d 5h ago')
+function formatAge ($timestamp)
+{
+	$seconds = time() - $timestamp;
+	switch (TRUE)
+	{
+		case $seconds < 1:
+			return 'just now';
+		case $seconds < 60:
+			return "${seconds}s" . ' ago';
+		case $seconds <= 300:
+			$mins = intval ($seconds / 60);
+			$secs = $seconds % 60;
+			return ($secs ? "{$mins}min ${secs}s" : "{$mins}m") . ' ago';
+		case $seconds < 3600:
+			return round ($seconds / 60) . 'min' . ' ago';
+		case $seconds < 3 * 3600:
+			$hrs = intval ($seconds / 3600);
+			$mins = round (($seconds % 3600) / 60) . '';
+			return ($mins ? "${hrs}h ${mins}min" : "${hrs}h") . ' ago';
+		case $seconds < 86400:
+			return round ($seconds / 3600) . 'h' . ' ago';
+		case $seconds < 86400 * 3:
+			$days = intval ($seconds / 86400);
+			$hrs = round (($seconds - $days * 86400) / 3600);
+			return ($hrs ? "${days}d ${hrs}h" : "${days}d") . ' ago';
+		case $seconds < 86400 * 30.4375:
+			return round ($seconds / 86400) . 'd' . ' ago';
+		case $seconds < 86400 * 30.4375 * 4 :
+			$mon = intval ($seconds / 86400 / 30.4375);
+			$days = round (($seconds - $mon * 86400 * 30.4375) / 86400);
+			return ($days ? "${mon}m ${days}d" : "${mon}m") . ' ago';
+		case $seconds < 365.25 * 86400:
+			return (round ($seconds / 86400 / 30.4375) . 'm') . ' ago';
+		case $seconds < 2 * 365.25 * 86400:
+			$yrs = intval ($seconds / 86400 / 365.25);
+			$mon = round (($seconds - $yrs * 86400 * 365.25) / 86400 / 30.4375);
+			return ($mon ? "${yrs}y ${mon}m" : "${yrs}y") . ' ago';
+		default:
+			return (round ($seconds / 86400 / 365.25) . 'y') . ' ago';
+	}
+}
+
 ?>
