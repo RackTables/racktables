@@ -4727,4 +4727,22 @@ function formatAge ($timestamp)
 	}
 }
 
+// proxy function returning the output of another function. Takes any number of additional parameters
+function getOutputOf ($func_name)
+{
+	ob_start();
+	try
+	{
+		$params = func_get_args();
+		array_shift($params);
+		call_user_func_array ($func_name, $params);
+		return ob_get_clean();
+	}
+	catch (Exception $e)
+	{
+		ob_clean();
+		throw $e;
+	}
+}
+
 ?>

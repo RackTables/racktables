@@ -148,6 +148,123 @@ foreach ($indexlayout as $row)
 <?php
 }
 
+function getRenderedAlloc ($object_id, $alloc)
+{
+	$ret = array
+	(
+		'tr_class' => '',
+		'td_ip' => '',
+		'td_network' => '',
+		'td_routed_by' => '',
+		'td_peers' => '',
+	);
+	$dottedquad = $alloc['addrinfo']['ip'];
+
+	$hl_ip_addr = '';
+	if (isset ($_REQUEST['hl_ipv6_addr']))
+	{
+		if ($hl_ipv6 = assertIPv6Arg ('hl_ipv6_addr'))
+			$hl_ip_addr = $hl_ipv6->format();
+	}
+	elseif (isset ($_REQUEST['hl_ipv4_addr']))
+		$hl_ip_addr = $_REQUEST['hl_ipv4_addr'];
+	if ($hl_ip_addr)
+		addAutoScrollScript ("ip-$hl_ip_addr");
+
+	// prepare realm and network info
+	if ($alloc['addrinfo']['version'] == 6)
+	{
+		$ipv6_address = new IPv6Address();
+		$ipv6_address->parse ($dottedquad);
+		$addr_page_name = 'ipv6address';
+		if ($netid = getIPv6AddressNetworkId ($ipv6_address))
+		{
+			$netinfo = spotEntity ('ipv6net', $netid);
+			loadIPv6AddrList ($netinfo);
+		}
+	}
+	else
+	{
+		$addr_page_name = 'ipaddress';
+		if ($netid = getIPv4AddressNetworkId ($dottedquad))
+		{
+			$netinfo = spotEntity ('ipv4net', $netid);
+			loadIPv4AddrList ($netinfo);
+		}
+	}
+
+	$ret['tr_class'] = $alloc['addrinfo']['class'];
+	$td_class = 'tdleft';
+	if ($hl_ip_addr == $dottedquad)
+		$td_class .= ' port_highlight';
+	
+	// render IP address td
+	global $aac;
+	$ret['td_ip'] = "<td class='$td_class'>";
+	if (NULL !== $netid)
+		$ret['td_ip'] .= "<a name='ip-$dottedquad' href='" .
+			makeHref (
+				array
+				(
+					'page' => $addr_page_name,
+					'hl_object_id' => $object_id,
+					'ip' => $dottedquad,
+				)
+			) . "'>" . $dottedquad . "</a>";
+	else
+		$ret['td_ip'] .= $dottedquad;
+	if (getConfigVar ('EXT_IPV4_VIEW') != 'yes')
+		$ret['td_ip'] .= '<small>/' . (NULL === $netid ? '??' : $netinfo['mask']) . '</small>';
+	$ret['td_ip'] .= '&nbsp;' . $aac[$alloc['type']];
+	if (strlen ($alloc['addrinfo']['name']))
+		$ret['td_ip'] .= ' (' . niftyString ($alloc['addrinfo']['name']) . ')';
+	$ret['td_ip'] .= '</td>';
+
+	// render network and routed_by tds
+	if (NULL === $netid)
+	{
+		$ret['td_network'] = "<td class='$td_class sparenetwork'>N/A</td>";
+		$ret['td_routed_by'] = $ret['td_network'];
+	}
+	else
+	{
+		$ret['td_network'] = "<td class='$td_class'>" .
+			getOutputOf ('renderCell', $netinfo) . '</td>';
+
+		// filter out self-allocation
+		$other_routers = array();
+		foreach (findRouters ($netinfo['addrlist']) as $router)
+			if ($router['id'] != $object_id)
+				$other_routers[] = $router;
+		if (count ($other_routers))
+			$ret['td_routed_by'] = getOutputOf ('printRoutersTD', $other_routers);
+		else
+			$ret['td_routed_by'] = "<td class='$td_class'>&nbsp;</td>";
+	}
+	
+	// render peers td
+	$ret['td_peers'] = "<td class='$td_class'>";
+	$prefix = '';
+	if ($alloc['addrinfo']['reserved'] == 'yes')
+	{
+		$ret['td_peers'] .= $prefix . '<strong>RESERVED</strong>';
+		$prefix = '; ';
+	}
+	foreach ($alloc['addrinfo']['allocs'] as $allocpeer)
+	{
+		if ($allocpeer['object_id'] == $object_id)
+			continue;
+		$ret['td_peers'] .= $prefix . "<a href='" . makeHref (array ('page' => 'object', 'object_id' => $allocpeer['object_id'])) . "'>";
+		if (isset ($allocpeer['osif']) and strlen ($allocpeer['osif']))
+			$ret['td_peers'] .= $allocpeer['osif'] . '@';
+		$ret['td_peers'] .= $allocpeer['object_name'] . '</a>';
+		$prefix = '; ';
+	}
+	$ret['td_peers'] .= '</td>';
+
+	return $ret;
+}
+
 function renderRackspace ()
 {
 	$found_racks = array();
@@ -679,7 +796,7 @@ function finishPortlet ()
 
 function renderRackObject ($object_id)
 {
-	global $nextorder, $aac, $virtual_obj_types;
+	global $nextorder, $virtual_obj_types;
 	$info = spotEntity ('object', $object_id);
 	amplifyCell ($info);
 	// Main layout starts.
@@ -834,16 +951,6 @@ function renderRackObject ($object_id)
 			echo "<tr><th>OS interface</th><th>IP address</th><th>network</th><th>routed by</th><th>peers</th></tr>\n";
 		else
 			echo "<tr><th>OS interface</th><th>IP address</th><th>peers</th></tr>\n";
-		$hl_ip_addr = '';
-		if (isset ($_REQUEST['hl_ipv6_addr']))
-		{
-			if ($hl_ipv6 = assertIPv6Arg ('hl_ipv6_addr'))
-				$hl_ip_addr = $hl_ipv6->format();
-		}
-		elseif (isset ($_REQUEST['hl_ipv4_addr']))
-			$hl_ip_addr = $_REQUEST['hl_ipv4_addr'];
-		if ($hl_ip_addr)
-			addAutoScrollScript ("ip-$hl_ip_addr");
 
 		// group IP allocations by interface name instead of address family
 		$allocs_by_iface = array();
@@ -855,90 +962,27 @@ function renderRackObject ($object_id)
 		foreach (sortPortList ($allocs_by_iface) as $iface_name => $alloclist)
 		{
 			$is_first_row = TRUE;
-			foreach ($alloclist as $dottedquad => $alloc)
+			foreach ($alloclist as $alloc)
 			{
-				if ($alloc['addrinfo']['version'] == 6)
-				{
-					$addr_page_name = 'ipv6address';
-					$ipv6_address = new IPv6Address ($dottedquad);
-					$dottedquad = $ipv6_address->format();
-					if ($netid = getIPv6AddressNetworkId ($ipv6_address))
-					{
-						$netinfo = spotEntity ('ipv6net', $netid);
-						loadIPv6AddrList ($netinfo);
-					}
-				}
-				else
-				{
-					$addr_page_name = 'ipaddress';
-					if ($netid = getIPv4AddressNetworkId ($dottedquad))
-					{
-						$netinfo = spotEntity ('ipv4net', $netid);
-						loadIPv4AddrList ($netinfo);
-					}
-				}
-				$address_name = niftyString ($alloc['addrinfo']['name']);
-				$class = $alloc['addrinfo']['class'];
-				$secondclass = ($hl_ip_addr == $dottedquad) ? 'tdleft port_highlight' : 'tdleft';
-				echo "<tr class='${class}' valign=top>";
+				$rendered_alloc = getRenderedAlloc ($object_id, $alloc);
+				echo "<tr class='${rendered_alloc['tr_class']}' valign=top>";
 
-				// display iface name (common cell for both address families)
+				// display iface name, same values are grouped into single cell
 				if ($is_first_row)
 				{
 					$rowspan = count ($alloclist) > 1 ? 'rowspan="' . count ($alloclist) . '"' : '';
 					echo "<td class=tdleft $rowspan>$iface_name</td>";
 					$is_first_row = FALSE;
 				}
-				echo "<td class='${secondclass}'>";
-				if (NULL !== $netid)
-					echo "<a name='ip-$dottedquad' href='index.php?page=$addr_page_name&hl_object_id=$object_id&ip=$dottedquad'>${dottedquad}</a>";
-				else
-					echo $dottedquad;
-				if (getConfigVar ('EXT_IPV4_VIEW') != 'yes')
-					echo '<small>/' . (NULL === $netid ? '??' : $netinfo['mask']) . '</small>';
-				echo '&nbsp;' . $aac[$alloc['type']];
-				if (strlen ($alloc['addrinfo']['name']))
-					echo ' (' . niftyString ($alloc['addrinfo']['name']) . ')';
-				echo '</td>';
+				echo $rendered_alloc['td_ip'];
 				if (getConfigVar ('EXT_IPV4_VIEW') == 'yes')
 				{
-					if (NULL === $netid)
-						echo '<td class=sparenetwork>N/A</td><td class=sparenetwork>N/A</td>';
-					else
-					{
-						echo "<td class='${secondclass}'>";
-						renderCell ($netinfo);
-						echo "</td>";
-						// filter out self-allocation
-						$other_routers = array();
-						foreach (findRouters ($netinfo['addrlist']) as $router)
-							if ($router['id'] != $object_id)
-								$other_routers[] = $router;
-						if (count ($other_routers))
-							printRoutersTD ($other_routers);
-						else
-							echo "<td class='${secondclass}'>&nbsp;</td>";
-					}
+					echo $rendered_alloc['td_network'];
+					echo $rendered_alloc['td_routed_by'];
 				}
-				// peers
-				echo "<td class='${secondclass}'>\n";
-				$prefix = '';
-				if ($alloc['addrinfo']['reserved'] == 'yes')
-				{
-					echo $prefix . '<strong>RESERVED</strong>';
-					$prefix = '; ';
-				}
-				foreach ($alloc['addrinfo']['allocs'] as $allocpeer)
-				{
-					if ($allocpeer['object_id'] == $object_id)
-						continue;
-					echo $prefix . "<a href='" . makeHref (array ('page' => 'object', 'object_id' => $allocpeer['object_id'])) . "'>";
-					if (isset ($allocpeer['osif']) and strlen ($allocpeer['osif']))
-						echo $allocpeer['osif'] . '@';
-					echo $allocpeer['object_name'] . '</a>';
-					$prefix = '; ';
-				}
-				echo "</td></tr>\n";
+				echo $rendered_alloc['td_peers'];
+
+				echo "</tr>\n";
 			}
 		}
 		echo "</table><br>\n";
@@ -1248,12 +1292,26 @@ function renderPortsForObject ($object_id)
 	finishPortlet();
 }
 
-function renderIPv4ForObject ($object_id)
+function renderIPTabForObject ($object_id, $ip_v)
 {
-	function printNewItemTR ()
+	function getOpnameByIPFamily ($opname, $ip_v)
+	{
+		// do not assemble opnames from the peaces to be able to grep the code by opnames
+		switch ($opname . '-'. $ip_v)
+		{
+			case 'add-4': return 'addIPv4Allocation';
+			case 'add-6': return 'addIPv6Allocation';
+			case 'upd-4': return 'updIPv4Allocation';
+			case 'upd-6': return 'updIPv6Allocation';
+			case 'del-4': return 'delIPv4Allocation';
+			case 'del-6': return 'delIPv6Allocation';
+			default: throw new InvalidArgException ('$opname or $ip_v', "$opname or $ip_v");
+		}
+	}
+	function printNewItemTR ($ip_v)
 	{
 		global $aat;
-		printOpFormIntro ('addIPv4Allocation');
+		printOpFormIntro (getOpnameByIPFamily ('add', $ip_v));
 		echo "<tr><td>";
 		printImageHREF ('add', 'allocate', TRUE);
 		echo "</td>";
@@ -1276,186 +1334,53 @@ function renderIPv4ForObject ($object_id)
 	echo '<th>type</th><th>misc</th><th>&nbsp</th></tr>';
 
 	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
-		printNewItemTR();
-	foreach ($focus['ipv4'] as $dottedquad => $alloc)
+		printNewItemTR ($ip_v);
+	foreach ($focus['ipv' . $ip_v] as $alloc) // ['ipv4'] or ['ipv6']
 	{
-		$class = $alloc['addrinfo']['class'];
-		$netid = getIPv4AddressNetworkId ($dottedquad);
-		if (NULL !== $netid)
-		{
-			$netinfo = spotEntity ('ipv4net', $netid);
-			loadIPv4AddrList ($netinfo);
-		}
-		printOpFormIntro ('updIPv4Allocation', array ('ip' => $dottedquad));
-		echo "<tr class='$class' valign=top><td><a href='".makeHrefProcess(array('op'=>'delIPv4Allocation', 'ip'=>$dottedquad, 'object_id'=>$object_id))."'>";
-		printImageHREF ('delete', 'Delete this IPv4 address');
-		echo "</a></td>";
-		echo "<td class=tdleft><input type='text' name='bond_name' value='${alloc['osif']}' size=10></td><td class=tdleft>";
-		if (NULL !== $netid)
-			echo "<a href='".makeHref(array('page'=>'ipaddress', 'ip'=>$dottedquad))."'>${dottedquad}</a>";
-		else
-			echo $dottedquad;
-		if (getConfigVar ('EXT_IPV4_VIEW') != 'yes')
-			echo '<small>/' . (NULL === $netid ? '??' : $netinfo['mask']) . '</small>';
-		if (strlen ($alloc['addrinfo']['name']))
-			echo ' (' . niftyString ($alloc['addrinfo']['name']) . ')';
-		echo '</td>';
-		// FIXME: this a copy-and-paste from renderRackObject()
+		$rendered_alloc = getRenderedAlloc ($object_id, $alloc);
+		printOpFormIntro (getOpnameByIPFamily ('upd', $ip_v), array ('ip' => $alloc['addrinfo']['ip']));
+		echo "<tr class='${rendered_alloc['tr_class']}' valign=top>";
+
+		echo "<td><a href='" .
+			makeHrefProcess
+			(
+				array
+				(
+					'op' => getOpnameByIPFamily ('del', $ip_v),
+					'ip' => $alloc['addrinfo']['ip'],
+					'object_id' => $object_id
+				)
+			) . "'>" . 
+			getImageHREF ('delete', 'Delete this IP address') .
+			"</a></td>";
+		echo "<td class=tdleft><input type='text' name='bond_name' value='${alloc['osif']}' size=10></td>";
+		echo $rendered_alloc['td_ip'];
 		if (getConfigVar ('EXT_IPV4_VIEW') == 'yes')
 		{
-			if (NULL === $netid)
-				echo '<td class=sparenetwork>N/A</td><td class=sparenetwork>N/A</td>';
-			else
-			{
-				echo '<td>';
-				renderCell ($netinfo);
-				echo '</td>';
-				// filter out self-allocation
-				$other_routers = array();
-				foreach (findRouters ($netinfo['addrlist']) as $router)
-					if ($router['id'] != $object_id)
-						$other_routers[] = $router;
-				if (count ($other_routers))
-					printRoutersTD ($other_routers);
-				else
-					echo "<td>&nbsp;</td>";
-			}
+			echo $rendered_alloc['td_network'];
+			echo $rendered_alloc['td_routed_by'];
 		}
-		echo '<td>';
-		printSelect ($aat, array ('name' => 'bond_type'), $alloc['type']);
-		echo "</td><td>";
-		$prefix = '';
-		if ($alloc['addrinfo']['reserved'] == 'yes')
-		{
-			echo $prefix . '<strong>RESERVED</strong>';
-			$prefix = '; ';
-		}
-		foreach ($alloc['addrinfo']['allocs'] as $allocpeer)
-		{
-			if ($allocpeer['object_id'] == $object_id)
-				continue;
-			echo $prefix . "<a href='".makeHref(array('page'=>'object', 'object_id'=>$allocpeer['object_id']))."'>";
-			if (isset ($allocpeer['osif']) and strlen ($allocpeer['osif']))
-				echo $allocpeer['osif'] . '@';
-			echo $allocpeer['object_name'] . '</a>';
-			$prefix = '; ';
-		}
-		echo "</td><td>";
-		printImageHREF ('save', 'Save changes', TRUE);
-		echo "</td></form></tr>\n";
+		echo '<td>' . getSelect ($aat, array ('name' => 'bond_type'), $alloc['type']) . "</td>";
+		echo $rendered_alloc['td_peers'];
+		echo "<td>" .getImageHREF ('save', 'Save changes', TRUE) . "</td>";
+
+		echo "</form></tr>\n";
 	}
 	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')
-		printNewItemTR();
+		printNewItemTR ($ip_v);
 
 	echo "</table><br>\n";
 	finishPortlet();
+}
 
+function renderIPv4ForObject ($object_id)
+{
+	renderIPTabForObject ($object_id, '4');
 }
 
 function renderIPv6ForObject ($object_id)
 {
-	function printNewItemTR ()
-	{
-		global $aat;
-		printOpFormIntro ('addIPv6Allocation');
-		echo "<tr><td>";
-		printImageHREF ('add', 'allocate', TRUE);
-		echo "</td>";
-		echo "<td class=tdleft><input type='text' size='10' name='bond_name' tabindex=100></td>\n";
-		echo "<td class=tdleft><input type=text name='ip' tabindex=101></td>\n";
-		echo "<td colspan=2>&nbsp;</td><td>";
-		printSelect ($aat, array ('name' => 'bond_type', 'tabindex' => 102), 'regular');
-		echo "</td><td>&nbsp;</td><td>";
-		printImageHREF ('add', 'allocate', TRUE, 103);
-		echo "</td></tr></form>";
-	}
-	$focus = spotEntity ('object', $object_id);
-	amplifyCell ($focus);
-	global $aat;
-	startPortlet ('Allocations');
-	echo "<table cellspacing=0 cellpadding='5' align='center' class='widetable'>\n";
-	echo '<tr><th>&nbsp;</th><th>OS interface</th><th>IP address</th>';
-	if (getConfigVar ('EXT_IPV4_VIEW') == 'yes')
-		echo '<th>network</th><th>routed by</th>';
-	echo '<th>type</th><th>misc</th><th>&nbsp</th></tr>';
-
-	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
-		printNewItemTR();
-	foreach ($focus['ipv6'] as $bin_str => $alloc)
-	{
-		$ipv6 = new IPv6Address ($bin_str);
-		$dottedquad = $ipv6->format();
-		$class = $alloc['addrinfo']['class'];
-		$netid = getIPv6AddressNetworkId ($ipv6);
-		if (NULL !== $netid)
-		{
-			$netinfo = spotEntity ('ipv6net', $netid);
-			loadIPv6AddrList ($netinfo);
-		}
-		printOpFormIntro ('updIPv6Allocation', array ('ip' => $dottedquad));
-		echo "<tr class='$class' valign=top><td><a href='".makeHrefProcess(array('op'=>'delIPv6Allocation', 'ip'=>$dottedquad, 'object_id'=>$object_id))."'>";
-		printImageHREF ('delete', 'Delete this IPv6 address');
-		echo "</a></td>";
-		echo "<td class=tdleft><input type='text' name='bond_name' value='${alloc['osif']}' size=10></td><td class=tdleft>";
-		if (NULL !== $netid)
-			echo "<a href='index.php?page=ipv6address&ip=$dottedquad'>$dottedquad</a>";
-		else
-			echo $dottedquad;
-		if (getConfigVar ('EXT_IPV4_VIEW') != 'yes')
-			echo '<small>/' . (NULL === $netid ? '??' : $netinfo['mask']) . '</small>';
-		if (strlen ($alloc['addrinfo']['name']))
-			echo ' (' . niftyString ($alloc['addrinfo']['name']) . ')';
-		echo '</td>';
-		// FIXME: this a copy-and-paste from renderRackObject()
-		if (getConfigVar ('EXT_IPV4_VIEW') == 'yes')
-		{
-			if (NULL === $netid)
-				echo '<td class=sparenetwork>N/A</td><td class=sparenetwork>N/A</td>';
-			else
-			{
-				echo '<td>';
-				renderCell ($netinfo);
-				echo '</td>';
-				// filter out self-allocation
-				$other_routers = array();
-				foreach (findRouters ($netinfo['addrlist']) as $router)
-					if ($router['id'] != $object_id)
-						$other_routers[] = $router;
-				if (count ($other_routers))
-					printRoutersTD ($other_routers);
-				else
-					echo "<td>&nbsp;</td>";
-			}
-		}
-		echo '<td>';
-		printSelect ($aat, array ('name' => 'bond_type'), $alloc['type']);
-		echo "</td><td>";
-		$prefix = '';
-		if ($alloc['addrinfo']['reserved'] == 'yes')
-		{
-			echo $prefix . '<strong>RESERVED</strong>';
-			$prefix = '; ';
-		}
-		foreach ($alloc['addrinfo']['allocs'] as $allocpeer)
-		{
-			if ($allocpeer['object_id'] == $object_id)
-				continue;
-			echo $prefix . "<a href='".makeHref(array('page'=>'object', 'object_id'=>$allocpeer['object_id']))."'>";
-			if (isset ($allocpeer['osif']) and strlen ($allocpeer['osif']))
-				echo $allocpeer['osif'] . '@';
-			echo $allocpeer['object_name'] . '</a>';
-			$prefix = '; ';
-		}
-		echo "</td><td>";
-		printImageHREF ('save', 'Save changes', TRUE);
-		echo "</td></form></tr>\n";
-	}
-	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')
-		printNewItemTR();
-
-	echo "</table><br>\n";
-	finishPortlet();
-
+	renderIPTabForObject ($object_id, '6');
 }
 
 // This function is deprecated. Do not rely on its internals,
