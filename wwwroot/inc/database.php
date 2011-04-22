@@ -1345,9 +1345,29 @@ function addPortLogEntry ($port_id, $message)
 	global $remote_username;
 	usePreparedExecuteBlade
 	(
-		"INSERT INTO PortLog (port_id, user, date, content) VALUES (?, ?, NOW(), ?)",
+		"INSERT INTO PortLog (port_id, user, date, message) VALUES (?, ?, NOW(), ?)",
 		array ($port_id, $remote_username, $message)
 	);
+}
+
+function addIPv4LogEntry ($ip, $message)
+{
+	global $remote_username;
+	usePreparedExecuteBlade
+	(
+		"INSERT INTO IPv4Log (ip, date, user, message) VALUES (INET_ATON(?), NOW(), ?, ?)",
+		array ($ip, $remote_username, $message)
+	);
+}
+
+function fetchIPv4LogEntry ($ip)
+{
+	$result = usePreparedSelectBlade
+	(
+		"SELECT INET_NTOA(ip) as ip, date, user, message FROM IPv4Log WHERE ip = INET_ATON(?) ORDER BY date ASC",
+		array ($ip)
+	);
+	return $result->fetchAll (PDO::FETCH_ASSOC);
 }
 
 // Returns all IPv4 addresses allocated to object, but does not attach detailed info about address
@@ -1470,6 +1490,7 @@ function scanIPv4Space ($pairlist)
 	$whereexpr4 = '(';
 	$whereexpr5a = '(';
 	$whereexpr5b = '(';
+	$whereexpr6 = '(';
 	$qparams = array();
 	foreach ($pairlist as $tmp)
 	{
@@ -1481,6 +1502,7 @@ function scanIPv4Space ($pairlist)
 		$whereexpr4 .= $or . "rsip between ? and ?";
 		$whereexpr5a .= $or . "remoteip between ? and ?";
 		$whereexpr5b .= $or . "localip between ? and ?";
+		$whereexpr6 .= $or . "ip between ? and ?";
 		$or = ' or ';
 		$qparams[] = $db_first;
 		$qparams[] = $db_last;
@@ -1491,6 +1513,7 @@ function scanIPv4Space ($pairlist)
 	$whereexpr4 .= ')';
 	$whereexpr5a .= ')';
 	$whereexpr5b .= ')';
+	$whereexpr6 .= ')';
 
 	// 1. collect labels and reservations
 	$query = "select INET_NTOA(ip) as ip, name, reserved from IPv4Address ".
@@ -1614,6 +1637,21 @@ function scanIPv4Space ($pairlist)
 		$ret[$localip_bin]['outpf'][] = $row;
 	}
 	unset ($result);
+	// 6. collect last log message
+	$query = "select INET_NTOA(l.ip) AS ip, l.user, UNIX_TIMESTAMP(l.date) AS time from IPv4Log l INNER JOIN " .
+		" (SELECT MAX(id) as id FROM IPv4Log GROUP BY ip) v USING (id)";
+	$result = usePreparedSelectBlade ($query, $qparams);
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
+	{
+		$ip_bin = ip2long ($row['ip']);
+		if (isset ($ret[$ip_bin]))
+		{
+			unset ($row['ip']);
+			$ret[$ip_bin]['last_log'] = $row;
+		}
+	}
+	unset ($result);
+
 	return $ret;
 }
 
@@ -1720,6 +1758,10 @@ function bindIpToObject ($ip = '', $object_id = 0, $name = '', $type = '')
 		'INSERT INTO IPv4Allocation (ip, object_id, name, type) VALUES (INET_ATON(?), ?, ?, ?)',
 		array ($ip, $object_id, $name, $type)
 	);
+	// store history line
+	$cell = spotEntity ('object', $object_id);
+	setDisplayedName ($cell);
+	addIPv4LogEntry ($ip, "Binded with ${cell['dname']}, ifname=$name");
 }
 
 function bindIPv6ToObject ($ip, $object_id = 0, $name = '', $type = '')
@@ -1775,15 +1817,34 @@ function updateAddress ($ip = 0, $name = '', $reserved = 'no')
 // (MySQL 4.0 workaround).
 function updateV4Address ($ip = 0, $name = '', $reserved = 'no')
 {
+	// compute update log message
+	$result = usePreparedSelectBlade ('SELECT name FROM IPv4Address WHERE ip = INET_ATON(?)', array ($ip));
+	$old_name = '';
+	if ($row = $result->fetch (PDO::FETCH_ASSOC))
+		$old_name = $row['name'];
+	unset ($result);
+	$message = NULL;
+	if ($name != $old_name)
+	{
+		if ($name == '')
+			$message = "Reservation '$old_name' removed";
+		elseif ($old_name == '')
+			$message = "Reservation set to '$name'";
+		else
+			$message = "Reservation changed from '$old_name' to '$name'";
+	}
+	
 	usePreparedExecuteBlade ('DELETE FROM IPv4Address WHERE ip = INET_ATON(?)', array ($ip));
 	// INSERT may appear not necessary.
-	if ($name == '' and $reserved == 'no')
-		return;
-	usePreparedExecuteBlade
-	(
-		'INSERT INTO IPv4Address (name, reserved, ip) VALUES (?, ?, INET_ATON(?))',
-		array ($name, $reserved, $ip)
-	);
+	if ($name != '' or $reserved != 'no')
+		usePreparedExecuteBlade
+		(
+			'INSERT INTO IPv4Address (name, reserved, ip) VALUES (?, ?, INET_ATON(?))',
+			array ($name, $reserved, $ip)
+		);
+	// store history line
+	if (isset ($message))
+		addIPv4LogEntry ($ip, $message);
 }
 
 function updateV6Address ($ip, $name = '', $reserved = 'no')
@@ -1828,11 +1889,18 @@ function updateIPv6Bond ($ip, $object_id=0, $name='', $type='')
 
 function unbindIpFromObject ($ip, $object_id)
 {
-	usePreparedExecuteBlade
+	$n_deleted = usePreparedExecuteBlade
 	(
 		'DELETE FROM IPv4Allocation WHERE ip=INET_ATON(?) AND object_id=?',
 		array ($ip, $object_id)
 	);
+	if ($n_deleted)
+	{
+		// store history line
+		$cell = spotEntity ('object', $object_id);
+		setDisplayedName ($cell);
+		addIPv4LogEntry ($ip, "Removed from ${cell['dname']}");
+	}
 }
 
 function unbindIPv6FromObject ($ip, $object_id)

@@ -2,7 +2,7 @@
 	update: handle wide-band WDM transceivers and ER DWDM
 	update: 802.1q: config deploy to Cisco IOS switches is no more requiring 'switchport trunk encapsulation dot1q' pre-set
 	update: dismiss HNDP support
-	new feature: you can obtain who has made a port reservation, or a port link or tag set by hovering cursor on it
+	new feature: you can obtain who has made tag assignment, object's ports or IPv4 address changes by hovering cursor on these entities
 	new feature: ability to open a terminal session to a device by clicking on its FQDN
 0.19.4
 	bugfix: tag selector was not working with magic_quotes enabled

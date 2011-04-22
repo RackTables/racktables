@@ -328,4 +328,14 @@ function trigger_vst_editrules()
 	return $vst['rulec'] ? 'std' : 'attn';
 }
 
+function triggerIPv4AddressLog ()
+{
+	assertIPv4Arg ('ip');
+	$result = usePreparedSelectBlade ("SELECT COUNT(id) FROM IPv4Log WHERE ip = INET_ATON(?)", array ($_REQUEST['ip']));
+	if ($row = $result->fetch(PDO::FETCH_NUM))
+		if ($row[0] > 0)
+			return 'std';
+	return '';
+}
+
 ?>

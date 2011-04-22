@@ -506,6 +506,16 @@ CREATE TABLE `IPv4LB` (
   CONSTRAINT `IPv4LB-FK-rspool_id` FOREIGN KEY (`rspool_id`) REFERENCES `IPv4RSPool` (`id`)
 ) ENGINE=InnoDB;
 
+CREATE TABLE `IPv4Log` (
+  `id` int(10) NOT NULL AUTO_INCREMENT,
+  `ip` int(10) unsigned NOT NULL,
+  `date` datetime NOT NULL,
+  `user` varchar(64) NOT NULL,
+  `message` text NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `ip-date` (`ip`,`date`)
+) ENGINE=InnoDB;
+
 CREATE TABLE `IPv4NAT` (
   `object_id` int(10) unsigned NOT NULL default '0',
   `proto` enum('TCP','UDP') NOT NULL default 'TCP',
@@ -703,9 +713,9 @@ CREATE TABLE `PortInterfaceCompat` (
 CREATE TABLE `PortLog` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `port_id` int(10) unsigned NOT NULL,
-  `user` char(64) NOT NULL,
   `date` datetime NOT NULL,
-  `content` text NOT NULL,
+  `user` varchar(64) NOT NULL,
+  `message` text NOT NULL,
   PRIMARY KEY (`id`),
   KEY `port_id-date` (`port_id`,`date`),
   CONSTRAINT `PortLog_ibfk_1` FOREIGN KEY (`port_id`) REFERENCES `Port` (`id`) ON DELETE CASCADE

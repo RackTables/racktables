@@ -1055,12 +1055,23 @@ CREATE TABLE `EntityLink` (
 CREATE TABLE `PortLog` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `port_id` int(10) unsigned NOT NULL,
-  `user` char(64) NOT NULL,
   `date` datetime NOT NULL,
-  `content` text NOT NULL,
+  `user` varchar(64) NOT NULL,
+  `message` text NOT NULL,
   PRIMARY KEY (`id`),
   KEY `port_id-date` (`port_id`,`date`),
   CONSTRAINT `PortLog_ibfk_1` FOREIGN KEY (`port_id`) REFERENCES `Port` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB;
+";
+			$query[] = "
+CREATE TABLE `IPv4Log` (
+  `id` int(10) NOT NULL AUTO_INCREMENT,
+  `ip` int(10) unsigned NOT NULL,
+  `date` datetime NOT NULL,
+  `user` varchar(64) NOT NULL,
+  `message` text NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `ip-date` (`ip`,`date`)
 ) ENGINE=InnoDB;
 ";
 			for ($i = 1424; $i <= 1466; $i++) # CX, then 42 ER channels

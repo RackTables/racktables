@@ -198,11 +198,26 @@ function getRenderedAlloc ($object_id, $alloc)
 	if ($hl_ip_addr == $dottedquad)
 		$td_class .= ' port_highlight';
 	
+	// render IP change history
+	$ip_title = '';
+	$ip_class = '';
+	if (isset ($alloc['addrinfo']['last_log']))
+	{
+		$log = $alloc['addrinfo']['last_log'];
+		$ip_title = "title='" .
+			htmlspecialchars
+			(
+				$log['user'] . ', ' . formatAge ($log['time']),
+				ENT_QUOTES
+			) . "'";
+		$ip_class = 'hover-history underline';
+	}
+
 	// render IP address td
 	global $aac;
 	$ret['td_ip'] = "<td class='$td_class'>";
 	if (NULL !== $netid)
-		$ret['td_ip'] .= "<a name='ip-$dottedquad' href='" .
+		$ret['td_ip'] .= "<a name='ip-$dottedquad' class='$ip_class' $ip_title href='" .
 			makeHref (
 				array
 				(
@@ -212,7 +227,7 @@ function getRenderedAlloc ($object_id, $alloc)
 				)
 			) . "'>" . $dottedquad . "</a>";
 	else
-		$ret['td_ip'] .= $dottedquad;
+		$ret['td_ip'] .= "<span class='$ip_class' $ip_title>$dottedquad</span>";
 	if (getConfigVar ('EXT_IPV4_VIEW') != 'yes')
 		$ret['td_ip'] .= '<small>/' . (NULL === $netid ? '??' : $netinfo['mask']) . '</small>';
 	$ret['td_ip'] .= '&nbsp;' . $aac[$alloc['type']];
@@ -2655,9 +2670,16 @@ function renderIPv4Network ($id)
 			continue;
 		}
 		$addr = $range['addrlist'][$ip];
+		// render IP change history
+		$title = '';
+		$history_class = '';
+		if (isset ($addr['last_log']))
+		{
+			$title = ' title="' . htmlspecialchars ($addr['last_log']['user'] . ', ' . formatAge ($addr['last_log']['time']) , ENT_QUOTES) . '"';
+			$history_class = 'hover-history underline';
+		}
 		echo "<tr class='${addr['class']}'>";
-
-		echo "<td class=tdleft><a class='ancor' name='ip-$dottedquad' href='".makeHref(array('page'=>'ipaddress', 'ip'=>$addr['ip']))."'>${addr['ip']}</a></td>";
+		echo "<td class=tdleft><a class='ancor $history_class' $title name='ip-$dottedquad' href='".makeHref(array('page'=>'ipaddress', 'ip'=>$addr['ip']))."'>${addr['ip']}</a></td>";
 		echo "<td class='${secondstyle} " .
 			(empty ($addr['allocs']) || !empty ($addr['name']) ? 'rsv-port' : '') .
 			"'><span class='rsvtext'>${addr['name']}</span></td><td class='${secondstyle}'>";
@@ -2671,7 +2693,7 @@ function renderIPv4Network ($id)
 		foreach ($range['addrlist'][$ip]['allocs'] as $ref)
 		{
 			echo $delim . $aac2[$ref['type']];
-			echo "<a href='".makeHref(array('page'=>'object', 'object_id'=>$ref['object_id'], 'hl_ipv4_addr'=>$addr['ip']))."'>";
+			echo "<a href='".makeHref(array('page'=>'object', 'object_id'=>$ref['object_id'], 'tab' => 'default', 'hl_ipv4_addr'=>$addr['ip']))."'>";
 			echo $ref['name'] . (!strlen ($ref['name']) ? '' : '@');
 			echo "${ref['object_name']}</a>";
 			$delim = '; ';
@@ -2998,7 +3020,7 @@ function renderIPAddress ($dottedquad)
 				$secondclass = 'tdleft port_highlight';
 			else
 				$secondclass = 'tdleft';
-			echo "<tr class='$class'><td class=tdleft><a href='" . makeHref (array ('page' => 'object', 'object_id' => $bond['object_id'], 'hl_ipv' . $address['version'] . '_addr' => $address['ip'])) . "'>${bond['object_name']}</td><td class='${secondclass}'>${bond['name']}</td><td class='${secondclass}'><strong>";
+			echo "<tr class='$class'><td class=tdleft><a href='" . makeHref (array ('page' => 'object', 'object_id' => $bond['object_id'], 'tab' => 'default', 'hl_ipv' . $address['version'] . '_addr' => $address['ip'])) . "'>${bond['object_name']}</td><td class='${secondclass}'>${bond['name']}</td><td class='${secondclass}'><strong>";
 			echo $aat[$bond['type']];
 			echo "</strong></td></tr>\n";
 		}
@@ -9251,4 +9273,29 @@ function formatVLANPackDiff ($old, $current)
 	$ret .= $new_pack;
 	return $ret;
 }
+
+function renderIPv4AddressLog ()
+{
+	assertIPv4Arg('ip');
+	startPortlet ('Log messages');
+	echo '<table class="widetable" cellspacing="0" cellpadding="5" align="center" width="50%"><tr>';
+	echo '<th>Date &uarr;</th>';
+	echo '<th>User</th>';
+	echo '<th>Log message</th>';
+	echo '</tr>';
+	$odd = FALSE;
+	foreach (array_reverse (fetchIPv4LogEntry($_REQUEST['ip'])) as $line)
+	{
+		$tr_class = $odd ? 'row_odd' : 'row_even';
+		echo "<tr class='$tr_class'>";
+		echo '<td>' . $line['date'] . '</td>';
+		echo '<td>' . $line['user'] . '</td>';
+		echo '<td>' . $line['message'] . '</td>';
+		echo '</tr>';
+		$odd = !$odd;
+	}
+	echo '</table>';
+	finishPortlet();
+}
+
 ?>
