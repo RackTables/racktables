@@ -3039,7 +3039,11 @@ function generate8021QDeployOps ($vswitch, $device_vlanlist, $before, $changes)
 			$ports_to_do_queue1[$port_name] = $changeset;
 		$after[$port_name] = $port;
 	}
-	$ports_to_do = array_merge ($ports_to_do_queue1, $ports_to_do_queue2);
+	# Two arrays without common keys get merged with "+" operator just fine,
+	# with an important difference from array_merge() in that the latter
+	# renumbers numeric keys, and "+" does not. This matters, when port name
+	# is a number (like in XOS12 system).
+	$ports_to_do = $ports_to_do_queue1 + $ports_to_do_queue2;
 	// New VLAN table is a union of:
 	// 1. all compulsory VLANs
 	// 2. all "current" non-alien allowed VLANs of those ports, which are left
