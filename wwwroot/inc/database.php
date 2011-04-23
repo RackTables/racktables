@@ -961,7 +961,7 @@ function commitUpdateRack ($rack_id, $new_name, $new_height, $new_row_id, $new_c
 // correspond to current rack ID.
 // 1st arg is rackdata, 2nd arg is unchecked state, 3rd arg is checked state.
 // If 4th arg is present, object_id fields will be updated accordingly to the new state.
-// The function returns the modified rack upon success.
+// The function returns TRUE if the DB was successfully changed, FALSE otherwise
 function processGridForm (&$rackData, $unchecked_state, $checked_state, $object_id = 0)
 {
 	global $loclist, $dbxlink;
@@ -992,7 +992,10 @@ function processGridForm (&$rackData, $unchecked_state, $checked_state, $object_
 				!($state == $checked_state && $newstate == $unchecked_state) &&
 				!($state == $unchecked_state && $newstate == $checked_state)
 			)
-				return array ('code' => 500, 'message' => "${rack_name}: Rack ID ${rack_id}, unit ${unit_no}, 'atom ${atom}', cannot change state from '${state}' to '${newstate}'");
+			{
+				showError ("${rack_name}: Rack ID ${rack_id}, unit ${unit_no}, 'atom ${atom}', cannot change state from '${state}' to '${newstate}'");
+				return FALSE;
+			}
 			// Here we avoid using ON DUPLICATE KEY UPDATE by first performing DELETE
 			// anyway and then looking for probable need of INSERT.
 			usePreparedDeleteBlade ('RackSpace', array ('rack_id' => $rack_id, 'unit_no' => $unit_no, 'atom' => $atom));
@@ -1020,10 +1023,10 @@ function processGridForm (&$rackData, $unchecked_state, $checked_state, $object_
 	{
 		usePreparedUpdateBlade ('Rack', array ('thumb_data' => NULL), array ('id' => $rack_id));
 		$dbxlink->commit();
-		return array ('code' => 200, 'message' => "${rack_name}: All changes were successfully saved.");
+		return TRUE;
 	}
 	$dbxlink->rollBack();
-	return array ('code' => 300, 'message' => "${rack_name}: No changes.");
+	return FALSE;
 }
 
 // This function builds a list of rack-unit-atom records, which are assigned to

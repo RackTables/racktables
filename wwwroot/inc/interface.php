@@ -1401,158 +1401,127 @@ function renderIPv6ForObject ($object_id)
 // This function is deprecated. Do not rely on its internals,
 // it will probably be removed in the next major relese.
 // Use new showError, showWarning, showSuccess functions.
-// Log structure versions:
-// 1: the whole structure is a list of code-message pairs
-// 2 and later: there's a "v" field set, which indicates the version
-// 2: there's a "m" list set to hold message code and optional arguments
+// Log array is stored in $_SESSION['log']. Its format is simple: plain ordered array 
+// with values having keys 'c' (both message code and severity) and 'a' (sprintf arguments array)
 function showMessageOrError ()
 {
-	if (!isset ($_SESSION['log']))
+	if (empty ($_SESSION['log']))
 		return;
-	$log = $_SESSION['log'];
-	switch (TRUE)
-	{
-		case !isset ($log['v']):
-		case $log['v'] == 1:
-			foreach ($log as $key => $record)
-				if ($key !== 'v')
-					echo "<div class=msg_${record['code']}>${record['message']}</div>";
-			break;
-		case $log['v'] == 2:
-			$msginfo = array
-			(
-// records 0~99 with success messages
-				0 => array ('code' => 'success', 'format' => '%s'),
-				8 => array ('code' => 'success', 'format' => 'Port %s successfully linked with %s'),
-				5 => array ('code' => 'success', 'format' => 'added record "%s" successfully'),
-				6 => array ('code' => 'success', 'format' => 'updated record "%s" successfully'),
-				7 => array ('code' => 'success', 'format' => 'deleted record "%s" successfully'),
-				10 => array ('code' => 'success', 'format' => 'Added %u ports, updated %u ports, encountered %u errors.'),
-				21 => array ('code' => 'success', 'format' => 'Generation complete'),
-				26 => array ('code' => 'success', 'format' => 'updated %u records successfully'),
-				37 => array ('code' => 'success', 'format' => 'added %u records successfully'),
-				38 => array ('code' => 'success', 'format' => 'removed %u records successfully'),
-				41 => array ('code' => 'success', 'format' => 'uplink ports reverb queued'),
-				43 => array ('code' => 'success', 'format' => 'Saved successfully.'),
-				44 => array ('code' => 'success', 'format' => '%s failures and %s successfull changes.'),
-				48 => array ('code' => 'success', 'format' => 'added a record successfully'),
-				49 => array ('code' => 'success', 'format' => 'deleted a record successfully'),
-				51 => array ('code' => 'success', 'format' => 'updated a record successfully'),
-				57 => array ('code' => 'success', 'format' => 'Reset complete'),
-				62 => array ('code' => 'success', 'format' => 'gw: %s'),
-				63 => array ('code' => 'success', 'format' => '%u change request(s) have been processed'),
-				64 => array ('code' => 'success', 'format' => 'Port %s@%s has been assigned to VLAN %u'),
-				66 => array ('code' => 'success', 'format' => "File sent Ok via handler '%s'"),
-				67 => array ('code' => 'success', 'format' => "Tag rolling done, %u objects involved"),
-				71 => array ('code' => 'success', 'format' => 'File "%s" was linked successfully'),
-				72 => array ('code' => 'success', 'format' => 'File was unlinked successfully'),
-				81 => array ('code' => 'success', 'format' => "SNMP: completed '%s' work"),
-				82 => array ('code' => 'success', 'format' => "Bulk port creation was successful. %u ports created, %u failed"),
-				87 => array ('code' => 'success', 'format' => '802.1Q recalculate: %d ports changed on %d switches'),
+	$msginfo = array
+	(
+// records 0~99 with success messages 
+		0 => array ('code' => 'success', 'format' => '%s'),
+		5 => array ('code' => 'success', 'format' => 'added record "%s" successfully'),
+		6 => array ('code' => 'success', 'format' => 'updated record "%s" successfully'),
+		7 => array ('code' => 'success', 'format' => 'deleted record "%s" successfully'),
+		8 => array ('code' => 'success', 'format' => 'Port %s successfully linked with %s'),
+		10 => array ('code' => 'success', 'format' => 'Added %u ports, updated %u ports, encountered %u errors.'),
+		21 => array ('code' => 'success', 'format' => 'Generation complete'),
+		26 => array ('code' => 'success', 'format' => 'updated %u records successfully'),
+		37 => array ('code' => 'success', 'format' => 'added %u records successfully'),
+		38 => array ('code' => 'success', 'format' => 'removed %u records successfully'),
+		41 => array ('code' => 'success', 'format' => 'uplink ports reverb queued'),
+		43 => array ('code' => 'success', 'format' => 'Saved successfully.'),
+		44 => array ('code' => 'success', 'format' => '%s failures and %s successfull changes.'),
+		48 => array ('code' => 'success', 'format' => 'added a record successfully'),
+		49 => array ('code' => 'success', 'format' => 'deleted a record successfully'),
+		51 => array ('code' => 'success', 'format' => 'updated a record successfully'),
+		57 => array ('code' => 'success', 'format' => 'Reset complete'),
+		62 => array ('code' => 'success', 'format' => 'gw: %s'),
+		63 => array ('code' => 'success', 'format' => '%u change request(s) have been processed'),
+		66 => array ('code' => 'success', 'format' => "File sent Ok via handler '%s'"),
+		67 => array ('code' => 'success', 'format' => "Tag rolling done, %u objects involved"),
+		71 => array ('code' => 'success', 'format' => 'File "%s" was linked successfully'),
+		72 => array ('code' => 'success', 'format' => 'File was unlinked successfully'),
+		81 => array ('code' => 'success', 'format' => "SNMP: completed '%s' work"),
+		82 => array ('code' => 'success', 'format' => "Bulk port creation was successful. %u ports created, %u failed"),
+		87 => array ('code' => 'success', 'format' => '802.1Q recalculate: %d ports changed on %d switches'),
 // records 100~199 with fatal error messages
-				100 => array ('code' => 'error', 'format' => '%s'),
-				107 => array ('code' => 'error', 'format' => 'Assertion failed: %s'),
-				108 => array ('code' => 'error', 'format' => 'Database error: %s'),
-				109 => array ('code' => 'error', 'format' => 'failed updating a record'),
-				120 => array ('code' => 'error', 'format' => 'Reset failed!'),
-				131 => array ('code' => 'error', 'format' => 'invalid format requested'),
-				141 => array ('code' => 'error', 'format' => 'Encountered %u errors, updated %u record(s)'),
-				144 => array ('code' => 'error', 'format' => "Error deleting tag: '%s'"),
-				149 => array ('code' => 'error', 'format' => 'Turing test failed'),
-				150 => array ('code' => 'error', 'format' => 'Can only change password under DB authentication.'),
-				151 => array ('code' => 'error', 'format' => 'Old password doesn\'t match.'),
-				152 => array ('code' => 'error', 'format' => 'New passwords don\'t match.'),
-				154 => array ('code' => 'error', 'format' => "Verification error: %s"),
-				155 => array ('code' => 'error', 'format' => 'Save failed.'),
-				159 => array ('code' => 'error', 'format' => 'Permission denied moving port %s from VLAN%u to VLAN%u'),
-				160 => array ('code' => 'error', 'format' => 'Invalid arguments'),
-				161 => array ('code' => 'error', 'format' => 'Endpoint not found. Please either set FQDN attribute or assign an IP address to the object.'),
-				162 => array ('code' => 'error', 'format' => 'More than one IP address is assigned to this object, please configure FQDN attribute.'),
-				164 => array ('code' => 'error', 'format' => 'Gateway failure: %s.'),
-				165 => array ('code' => 'error', 'format' => 'Gateway failure: malformed reply.'),
-				166 => array ('code' => 'error', 'format' => 'gw: %s'),
-				167 => array ('code' => 'error', 'format' => 'Could not find port %s'),
-				168 => array ('code' => 'error', 'format' => 'Port %s is a trunk'),
-				169 => array ('code' => 'error', 'format' => 'Failed to configure %s, connector returned code %u'),
-				170 => array ('code' => 'error', 'format' => 'There is no network for IP address "%s"'),
-				172 => array ('code' => 'error', 'format' => 'Malformed request'),
-				179 => array ('code' => 'error', 'format' => 'Expired form has been declined.'),
-				184 => array ('code' => 'error', 'format' => 'Submitted form is invalid at line %u'),
-				188 => array ('code' => 'error', 'format' => "Fatal SNMP failure"),
-				189 => array ('code' => 'error', 'format' => "Unknown OID '%s'"),
-				190 => array ('code' => 'error', 'format' => "Invalid VLAN ID '%s'"),
-				191 => array ('code' => 'error', 'format' => "deploy was blocked due to conflicting configuration versions"),
+		100 => array ('code' => 'error', 'format' => '%s'),
+		109 => array ('code' => 'error', 'format' => 'failed updating a record'),
+//		123
+		131 => array ('code' => 'error', 'format' => 'invalid format requested'),
+		141 => array ('code' => 'error', 'format' => 'Encountered %u errors, updated %u record(s)'),
+		149 => array ('code' => 'error', 'format' => 'Turing test failed'),
+		150 => array ('code' => 'error', 'format' => 'Can only change password under DB authentication.'),
+		151 => array ('code' => 'error', 'format' => 'Old password doesn\'t match.'),
+		152 => array ('code' => 'error', 'format' => 'New passwords don\'t match.'),
+		154 => array ('code' => 'error', 'format' => "Verification error: %s"),
+		155 => array ('code' => 'error', 'format' => 'Save failed.'),
+		159 => array ('code' => 'error', 'format' => 'Permission denied moving port %s from VLAN%u to VLAN%u'),
+		161 => array ('code' => 'error', 'format' => 'Endpoint not found. Please either set FQDN attribute or assign an IP address to the object.'),
+		162 => array ('code' => 'error', 'format' => 'More than one IP address is assigned to this object, please configure FQDN attribute.'),
+		164 => array ('code' => 'error', 'format' => 'Gateway failure: %s.'),
+		166 => array ('code' => 'error', 'format' => 'gw: %s'),
+		170 => array ('code' => 'error', 'format' => 'There is no network for IP address "%s"'),
+		172 => array ('code' => 'error', 'format' => 'Malformed request'),
+		179 => array ('code' => 'error', 'format' => 'Expired form has been declined.'),
+		188 => array ('code' => 'error', 'format' => "Fatal SNMP failure"),
+		189 => array ('code' => 'error', 'format' => "Unknown OID '%s'"),
+		191 => array ('code' => 'error', 'format' => "deploy was blocked due to conflicting configuration versions"),
 
 // records 200~299 with warnings
-				200 => array ('code' => 'warning', 'format' => '%s'),
-				201 => array ('code' => 'warning', 'format' => 'nothing happened...'),
-				202 => array ('code' => 'warning', 'format' => 'gw: %s'),
-				203 => array ('code' => 'warning', 'format' => 'Port %s seems to be the first in VLAN %u at this switch.'),
-				204 => array ('code' => 'warning', 'format' => 'Check uplink/downlink configuration for proper operation.'),
-				205 => array ('code' => 'warning', 'format' => '%u change request(s) have been ignored'),
-				206 => array ('code' => 'warning', 'format' => 'Rack is not empty'),
+		200 => array ('code' => 'warning', 'format' => '%s'),
+		201 => array ('code' => 'warning', 'format' => 'nothing happened...'),
+		202 => array ('code' => 'warning', 'format' => 'gw: %s'),
+		206 => array ('code' => 'warning', 'format' => 'Rack is not empty'),
 
 // records 300~399 with notices
-				300 => array ('code' => 'neutral', 'format' => '%s'),
+		300 => array ('code' => 'neutral', 'format' => '%s'),
 
-			);
-			// Handle the arguments. Is there any better way to do it?
-			foreach ($log['m'] as $record)
+	);
+	// Handle the arguments. Is there any better way to do it?
+	foreach ($_SESSION['log'] as $record)
+	{
+		if (!isset ($record['c']) or !isset ($msginfo[$record['c']]))
+		{
+			echo '<div class=msg_neutral>(this message was lost)</div>';
+			continue;
+		}
+		if (isset ($record['a']))
+			switch (count ($record['a']))
 			{
-				if (!isset ($record['c']) or !isset ($msginfo[$record['c']]))
-				{
-					echo '<div class=msg_neutral>(this message was lost)</div>';
-					continue;
-				}
-				if (isset ($record['a']))
-					switch (count ($record['a']))
-					{
-						case 1:
-							$msgtext = sprintf
-							(
-								$msginfo[$record['c']]['format'],
-								$record['a'][0]
-							);
-							break;
-						case 2:
-							$msgtext = sprintf
-							(
-								$msginfo[$record['c']]['format'],
-								$record['a'][0],
-								$record['a'][1]
-							);
-							break;
-						case 3:
-							$msgtext = sprintf
-							(
-								$msginfo[$record['c']]['format'],
-								$record['a'][0],
-								$record['a'][1],
-								$record['a'][2]
-							);
-							break;
-						case 4:
-						default:
-							$msgtext = sprintf
-							(
-								$msginfo[$record['c']]['format'],
-								$record['a'][0],
-								$record['a'][1],
-								$record['a'][2],
-								$record['a'][3]
-							);
-							break;
-					}
-				else
-					$msgtext = $msginfo[$record['c']]['format'];
-				echo '<div class=msg_' . $msginfo[$record['c']]['code'] . ">${msgtext}</div>";
+				case 1:
+					$msgtext = sprintf
+					(
+						$msginfo[$record['c']]['format'],
+						$record['a'][0]
+					);
+					break;
+				case 2:
+					$msgtext = sprintf
+					(
+						$msginfo[$record['c']]['format'],
+						$record['a'][0],
+						$record['a'][1]
+					);
+					break;
+				case 3:
+					$msgtext = sprintf
+					(
+						$msginfo[$record['c']]['format'],
+						$record['a'][0],
+						$record['a'][1],
+						$record['a'][2]
+					);
+					break;
+				case 4:
+				default:
+					$msgtext = sprintf
+					(
+						$msginfo[$record['c']]['format'],
+						$record['a'][0],
+						$record['a'][1],
+						$record['a'][2],
+						$record['a'][3]
+					);
+					break;
 			}
-			break;
-		default:
-			echo '<div class=msg_error>' . __FUNCTION__ . ': internal error</div>';
-			break;
+		else
+			$msgtext = $msginfo[$record['c']]['format'];
+		echo '<div class=msg_' . $msginfo[$record['c']]['code'] . ">${msgtext}</div>";
 	}
-	clearMessages();
+	unset ($_SESSION['log']);
 }
 
 // renders two tables: port link status and learned MAC list

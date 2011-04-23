@@ -971,9 +971,9 @@ function doSNMPmining ($object_id, $snmpsetup)
 	$objectInfo['attrs'] = getAttrValues ($object_id);
 	$endpoints = findAllEndpoints ($object_id, $objectInfo['name']);
 	if (count ($endpoints) == 0)
-		return buildRedirectURL (__FUNCTION__, 'ERR1'); // endpoint not found
+		return showFuncMessage (__FUNCTION__, 'ERR1'); // endpoint not found
 	if (count ($endpoints) > 1)
-		return buildRedirectURL (__FUNCTION__, 'ERR2'); // can't pick an address
+		return showFuncMessage (__FUNCTION__, 'ERR2'); // can't pick an address
 
 	$device = new SNMPDevice($endpoints[0], $snmpsetup);
 
@@ -991,26 +991,25 @@ $msgcode['doSwitchSNMPmining']['ERR3'] = 188;
 $msgcode['doSwitchSNMPmining']['ERR4'] = 189;
 function doSwitchSNMPmining ($objectInfo, $device)
 {
-	$log = emptyLog();
 	global $known_switches, $iftable_processors;
 	
 	if (FALSE === ($sysObjectID = $device->snmpget ('sysObjectID.0')))
-		return buildRedirectURL (__FUNCTION__, 'ERR3'); // // fatal SNMP failure
+		return showFuncMessage (__FUNCTION__, 'ERR3'); // // fatal SNMP failure
 	$sysObjectID = preg_replace ('/^.*(enterprises\.)([\.[:digit:]]+)$/', '\\2', $sysObjectID);
 	$sysName = substr ($device->snmpget ('sysName.0'), strlen ('STRING: '));
 	$sysDescr = substr ($device->snmpget ('sysDescr.0'), strlen ('STRING: '));
 	$sysDescr = str_replace (array ("\n", "\r"), " ", $sysDescr);  // Make it one line
 	if (!isset ($known_switches[$sysObjectID]))
-		return buildRedirectURL (__FUNCTION__, 'ERR4', array ($sysObjectID)); // unknown OID
+		return showFuncMessage (__FUNCTION__, 'ERR4', array ($sysObjectID)); // unknown OID
 	foreach (array_keys ($known_switches[$sysObjectID]['processors']) as $pkey)
 		if (!array_key_exists ($known_switches[$sysObjectID]['processors'][$pkey], $iftable_processors))
 		{
-			$log = mergeLogs ($log, oneLiner (200, array ('processor "' . $known_switches[$sysObjectID]['processors'][$pkey] . '" not found')));
+			showWarning ('processor "' . $known_switches[$sysObjectID]['processors'][$pkey] . '" not found');
 			unset ($known_switches[$sysObjectID]['processors'][$pkey]);
 		}
 	updateStickerForCell ($objectInfo, 2, $known_switches[$sysObjectID]['dict_key']);
 	updateStickerForCell ($objectInfo, 3, $sysName);
-	$log = mergeLogs ($log, oneLiner (81, array ('generic')));
+	showOneLiner (81, array ('generic'));
 	switch (1)
 	{
 	case preg_match ('/^9\.1\./', $sysObjectID): // Catalyst
@@ -1036,7 +1035,7 @@ function doSwitchSNMPmining ($objectInfo, $device)
 			checkPIC ('1-16'); // AC input
 			commitAddPort ($objectInfo['id'], 'AC-in', '1-16', '', '');
 		}
-		$log = mergeLogs ($log, oneLiner (81, array ('catalyst-generic')));
+		showOneLiner (81, array ('catalyst-generic'));
 		break;
 	case preg_match ('/^9\.12\.3\.1\.3\./', $sysObjectID): // Nexus
 		$exact_release = preg_replace ('/^.*, Version ([^ ]+), .*$/', '\\1', $sysDescr);
@@ -1054,23 +1053,23 @@ function doSwitchSNMPmining ($objectInfo, $device)
 		checkPIC ('1-16'); // AC input
 		commitAddPort ($objectInfo['id'], 'AC-in-1', '1-16', 'AC1', '');
 		commitAddPort ($objectInfo['id'], 'AC-in-2', '1-16', 'AC2', '');
-		$log = mergeLogs ($log, oneLiner (81, array ('nexus-generic')));
+		showOneLiner (81, array ('nexus-generic'));
 		break;
 	case preg_match ('/^11\.2\.3\.7\.11\./', $sysObjectID): // ProCurve
 		$exact_release = preg_replace ('/^.* revision ([^ ]+), .*$/', '\\1', $sysDescr);
 		updateStickerForCell ($objectInfo, 5, $exact_release);
-		$log = mergeLogs ($log, oneLiner (81, array ('procurve-generic')));
+		showOneLiner (81, array ('procurve-generic'));
 		break;
 	case preg_match ('/^4526\.100\.2\./', $sysObjectID): // NETGEAR
 		checkPIC ('1-681');
 		commitAddPort ($objectInfo['id'], 'console', '1-681', 'console', ''); // DB-9 RS-232 console
-		$log = mergeLogs ($log, oneLiner (81, array ('netgear-generic')));
+		showOneLiner (81, array ('netgear-generic'));
 		break;
 	case preg_match ('/^2011\.2\.23\./', $sysObjectID): // Huawei
 		detectSoftwareType ($objectInfo, $sysDescr);
 		checkPIC ('1-681');
 		commitAddPort ($objectInfo['id'], 'con0', '1-681', 'console', ''); // DB-9 RS-232 console
-		$log = mergeLogs ($log, oneLiner (81, array ('huawei-generic')));
+		showOneLiner (81, array ('huawei-generic'));
 		break;
 	case '2636.1.1.1.2.31' == $sysObjectID: // Juniper EX4200
 		detectSoftwareType ($objectInfo, $sysDescr);
@@ -1079,13 +1078,13 @@ function doSwitchSNMPmining ($objectInfo, $device)
 		// EX4200-24T is already in DB
 		if (preg_match ('/^Juniper Networks, Inc. ex4200-48t internet router/', $sysDescr))
 			updateStickerForCell ($objectInfo, 2, 907);
-		$log = mergeLogs ($log, oneLiner (81, array ('juniper-ex')));
+		showOneLiner (81, array ('juniper-ex'));
 		break;
 	case preg_match ('/^2636\.1\.1\.1\.2\./', $sysObjectID): // Juniper
 		detectSoftwareType ($objectInfo, $sysDescr);
 		checkPIC ('1-681');
 		commitAddPort ($objectInfo['id'], 'console', '1-681', 'console', ''); // DB-9 RS-232 console
-		$log = mergeLogs ($log, oneLiner (81, array ('juniper-generic')));
+		showOneLiner (81, array ('juniper-generic'));
 		break;
 	case preg_match ('/^1991\.1\.3\.45\./', $sysObjectID): // snFGSFamily
 	case preg_match ('/^1991\.1\.3\.46\./', $sysObjectID): // snFLSFamily
@@ -1134,7 +1133,7 @@ function doSwitchSNMPmining ($objectInfo, $device)
 		# fixed console port
 		checkPIC ('1-681');
 		commitAddPort ($objectInfo['id'], 'console', '1-681', 'console', ''); // DB-9 RS-232 console
-		$log = mergeLogs ($log, oneLiner (81, array ('brocade-generic')));
+		showOneLiner (81, array ('brocade-generic'));
 		break;
 	case preg_match ('/^1916\.2\./', $sysObjectID): // Extreme Networks Summit
 		$xos_release = preg_replace ('/^ExtremeXOS version ([[:digit:]]+)\..*$/', '\\1', $sysDescr);
@@ -1150,7 +1149,7 @@ function doSwitchSNMPmining ($objectInfo, $device)
 		commitAddPort ($objectInfo['id'], 'console', '1-681', 'console', ''); // DB-9 RS-232
 		checkPIC ('1-16');
 		commitAddPort ($objectInfo['id'], 'AC-in', '1-16', '', '');
-		$log = mergeLogs ($log, oneLiner (81, array ('summit-generic')));
+		showOneLiner (81, array ('summit-generic'));
 		break;
 	default: // Nortel...
 		break;
@@ -1194,7 +1193,7 @@ function doSwitchSNMPmining ($objectInfo, $device)
 			$newname = preg_replace ($iftable_processors[$processor_name]['pattern'], $iftable_processors[$processor_name]['replacement'], $iface['ifDescr'], 1, $count);
 			if ($newname === NULL)
 			{
-				$log = mergeLogs ($log, oneLiner (100, array ('PCRE pattern error, terminating')));
+				showError ('PCRE pattern error, terminating');
 				break 2;
 			}
 			if (!$count)
@@ -1206,15 +1205,13 @@ function doSwitchSNMPmining ($objectInfo, $device)
 				continue 2;
 		}
 	foreach ($known_switches[$sysObjectID]['processors'] as $processor_name)
-		$log = mergeLogs ($log, oneLiner (81, array ($processor_name)));
+		showOneLiner (81, array ($processor_name));
 	// No failure up to this point, thus leave current tab for the "Ports" one.
-	return buildWideRedirectURL ($log, NULL, 'ports');
+	return buildRedirectURL (NULL, 'ports');
 }
 
-$msgcode['doPDUSNMPmining']['OK'] = 0;
 function doPDUSNMPmining ($objectInfo, $hostname, $snmpsetup)
 {
-	$log = emptyLog();
 	global $known_APC_SKUs;
 	$switch = new APCPowerSwitch ($hostname, $snmpsetup);
 	if (FALSE !== ($dict_key = array_search ($switch->getHWModel(), $known_APC_SKUs)))
@@ -1232,8 +1229,8 @@ function doPDUSNMPmining ($objectInfo, $hostname, $snmpsetup)
 		commitAddPort ($objectInfo['id'], $portno, '1-1322', $port[0], '');
 		$portno++;
 	}
-	$log = mergeLogs ($log, oneLiner (0, array ("Added ${portno} port(s)")));
-	return buildWideRedirectURL ($log, NULL, 'ports');
+	showSuccess ("Added ${portno} port(s)");
+	return buildRedirectURL (NULL, 'ports');
 }
 
 // APC SNMP code by Russ Garrett

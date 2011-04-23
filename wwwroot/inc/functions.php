@@ -1621,32 +1621,6 @@ function getCellFilter ()
 	return $ret;
 }
 
-// Return an empty message log.
-function emptyLog ()
-{
-	return array
-	(
-		'v' => 2,
-		'm' => array()
-	);
-}
-
-// Return a message log consisting of only one message.
-function oneLiner ($code, $args = array())
-{
-	$ret = emptyLog();
-	$ret['m'][] = count ($args) ? array ('c' => $code, 'a' => $args) : array ('c' => $code);
-	return $ret;
-}
-
-// Merge message payload from two message logs given and return the result.
-function mergeLogs ($log1, $log2)
-{
-	$ret = emptyLog();
-	$ret['m'] = array_merge ($log1['m'], $log2['m']);
-	return $ret;
-}
-
 function redirectUser ($p, $t)
 {
 	global $page;
@@ -4498,36 +4472,43 @@ function setMessage ($type, $message, $direct_rendering)
 		echo '<div class="msg_' . $type . '">' . $message . '</div>';
 	else
 	{
-		if (! isset ($_SESSION['log']['v']))
-			$_SESSION['log'] = array('v' => 1);
-		switch ($_SESSION['log']['v'])
+		switch ($type)
 		{
-			case 1:
-				$_SESSION['log'][] = array ('code' => $type, 'message' => $message);
+			case 'error':
+				$code = 100;
 				break;
-			case 2:
-				switch ($type)
-				{
-					case 'error':
-						$code = 100;
-						break;
-					case 'warning':
-						$code = 200;
-						break;
-					case 'success';
-						$code = 0;
-						break;
-					case 'neutral':
-						$code = 300;
-						break;
-					default:
-						$message = "Lost message: $message";
-						$code = 300;
-				}
-				$_SESSION['log']['m'][] = array ('c' => $code, 'a' => array ($message));
+			case 'warning':
+				$code = 200;
+				break;
+			case 'success';
+				$code = 0;
+				break;
+			case 'neutral':
+			default:
+				$code = 300;
 				break;
 		}
+		showOneLiner ($code, array ($message));
 	}
+}
+
+function showOneLiner ($code, $args = array())
+{
+	$line = array ('c' => $code);
+	if (! empty ($args))
+		$line['a'] = $args;
+	if (! isset ($_SESSION['log']))
+		$_SESSION['log'] = array();
+	$_SESSION['log'][] = $line;
+}
+
+function showFuncMessage ($callfunc, $status, $log_args = array())
+{
+	global $msgcode;
+	if (isset ($msgcode[$callfunc][$status]))
+		showOneLiner ($msgcode[$callfunc][$status], $log_args);
+	else
+		showWarning ("Message '$status' is lost in $callfunc");
 }
 
 // function returns integer count of unshown messages in log buffer.
@@ -4536,44 +4517,28 @@ function getMessagesCount ($message_type = 'all')
 {
 	$result = 0;
 	if (isset ($_SESSION['log']))
-	{
-		if ($_SESSION['log']['v'] == 1)
-		{
-			foreach ($_SESSION['log'] as $msg)
-				if ($message_type == 'all' or $msg['code'] == $message_type)
+		foreach ($_SESSION['log'] as $msg)
+			if ($msg['c'] < 100)
+			{
+				if ($message_type == 'success' || $message_type == 'all')
 					++$result;
-		}
-		elseif ($_SESSION['log']['v'] == 2)
-			foreach ($_SESSION['log']['m'] as $msg)
-				if ($msg['c'] < 100)
-				{
-					if ($message_type == 'success' || $message_type == 'all')
-						++$result;
-				}
-				elseif ($msg['c'] < 200)
-				{
-					if ($message_type == 'error' || $message_type == 'all')
-						++$result;
-				}
-				elseif ($msg['c'] < 300)
-				{
-					if ($message_type == 'warning' || $message_type == 'all')
-						++$result;
-				}
-				else
-				{
-					if ($message_type == 'neutral' || $message_type == 'all')
-						++$result;
-				}
-	}
+			}
+			elseif ($msg['c'] < 200)
+			{
+				if ($message_type == 'error' || $message_type == 'all')
+					++$result;
+			}
+			elseif ($msg['c'] < 300)
+			{
+				if ($message_type == 'warning' || $message_type == 'all')
+					++$result;
+			}
+			else
+			{
+				if ($message_type == 'neutral' || $message_type == 'all')
+					++$result;
+			}
 	return $result;
-}
-
-// clear message list set by showError, its siblings, buildWideRedirectURL
-function clearMessages()
-{
-	if (isset ($_SESSION['log']))
-		unset ($_SESSION['log']);
 }
 
 function isEthernetPort($port)

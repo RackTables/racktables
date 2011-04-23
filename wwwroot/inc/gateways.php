@@ -198,7 +198,6 @@ function setSwitchVLANs ($object_id = 0, $setcmd)
 		array ("connect ${endpoint} ${hwtype} ${swtype} ${remote_username}", $setcmd)
 	);
 	// Finally we can parse the response into message array.
-	$log = emptyLog();
 	foreach (explode (';', substr ($data[1], strlen ('OK!'))) as $text)
 	{
 		if (strpos ($text, 'C!') === 0)
@@ -207,16 +206,15 @@ function setSwitchVLANs ($object_id = 0, $setcmd)
 			$tmp = explode ('!', $text);
 			array_shift ($tmp);
 			$code = array_shift ($tmp);
-			$log = mergeLogs ($log, oneLiner ($code, $tmp));
+			showOneLiner ($code, $tmp);
 		}
 		elseif (strpos ($text, 'I!') === 0)
-			$log = mergeLogs ($log, oneLiner (62, array (substr ($text, 2)))); // generic gateway success
+			showOneLiner (62, array (substr ($text, 2))); // generic gateway success
 		elseif (strpos ($text, 'W!') === 0)
-			$log = mergeLogs ($log, oneLiner (202, array (substr ($text, 2)))); // generic gateway warning
+			showOneLiner (202, array (substr ($text, 2))); // generic gateway warning
 		else // All improperly formatted messages must be treated as error conditions.
-			$log = mergeLogs ($log, oneLiner (166, array (substr ($text, 2)))); // generic gateway error
+			showOneLiner (166, array (substr ($text, 2))); // generic gateway error
 	}
-	return $log;
 }
 
 // Drop a file off RackTables platform. The gateway will catch the file and pass it to the given

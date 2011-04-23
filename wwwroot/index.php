@@ -141,7 +141,7 @@ try {
 			genericAssertion ('op', 'string');
 			$op = $_REQUEST['op'];
 			prepareNavigation();
-			$location = buildWideRedirectURL();
+			$location = buildRedirectURL();
 			// FIXME: find a better way to handle this error
 			if ($op == 'addFile' && !isset($_FILES['file']['error']))
 				throw new RackTablesError ('File upload error, check upload_max_filesize in php.ini', RackTablesError::MISCONFIGURED);
