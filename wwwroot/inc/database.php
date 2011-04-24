@@ -1345,6 +1345,9 @@ function commitUnlinkPort ($port_id)
 
 function addPortLogEntry ($port_id, $message)
 {
+	global $disable_logging;
+	if (isset ($disable_logging) && $disable_logging)
+		return;
 	global $remote_username;
 	usePreparedExecuteBlade
 	(
@@ -1355,6 +1358,9 @@ function addPortLogEntry ($port_id, $message)
 
 function addIPv4LogEntry ($ip, $message)
 {
+	global $disable_logging;
+	if (isset ($disable_logging) && $disable_logging)
+		return;
 	global $remote_username;
 	usePreparedExecuteBlade
 	(
