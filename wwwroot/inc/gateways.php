@@ -360,7 +360,9 @@ function setDevice8021QConfig ($object_id, $pseudocode, $vlan_names)
 	$breed = detectDeviceBreed ($object_id);
 	assertBreedFunction ($breed, 'xlatepushq');
 	// FIXME: this is a perfect place to log intended changes
-	gwDeployDeviceConfig ($object_id, $breed, unix2dos ($breedfunc["${breed}-xlatepushq-main"] ($pseudocode, $vlan_names)));
+	// $object_id argument isn't used by default translating functions, but
+	// may come in handy for overloaded versions of these.
+	gwDeployDeviceConfig ($object_id, $breed, unix2dos ($breedfunc["${breed}-xlatepushq-main"] ($object_id, $pseudocode, $vlan_names)));
 }
 
 function gwRetrieveDeviceConfig ($object_id, $command)
