@@ -1323,7 +1323,7 @@ function renderIPTabForObject ($object_id, $ip_v)
 			default: throw new InvalidArgException ('$opname or $ip_v', "$opname or $ip_v");
 		}
 	}
-	function printNewItemTR ($ip_v)
+	function printNewItemTR ($ip_v, $default_type)
 	{
 		global $aat;
 		printOpFormIntro (getOpnameByIPFamily ('add', $ip_v));
@@ -1333,7 +1333,7 @@ function renderIPTabForObject ($object_id, $ip_v)
 		echo "<td class=tdleft><input type='text' size='10' name='bond_name' tabindex=100></td>\n";
 		echo "<td class=tdleft><input type=text name='ip' tabindex=101></td>\n";
 		echo "<td colspan=2>&nbsp;</td><td>";
-		printSelect ($aat, array ('name' => 'bond_type', 'tabindex' => 102), 'regular');
+		printSelect ($aat, array ('name' => 'bond_type', 'tabindex' => 102), $default_type);
 		echo "</td><td>&nbsp;</td><td>";
 		printImageHREF ('add', 'allocate', TRUE, 103);
 		echo "</td></tr></form>";
@@ -1348,15 +1348,19 @@ function renderIPTabForObject ($object_id, $ip_v)
 		echo '<th>network</th><th>routed by</th>';
 	echo '<th>type</th><th>misc</th><th>&nbsp</th></tr>';
 
-	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
-		printNewItemTR ($ip_v);
+	$alloc_list = ''; // most of the output is stored here
+	$used_alloc_types = array();
 	foreach ($focus['ipv' . $ip_v] as $alloc) // ['ipv4'] or ['ipv6']
 	{
-		$rendered_alloc = getRenderedAlloc ($object_id, $alloc);
-		printOpFormIntro (getOpnameByIPFamily ('upd', $ip_v), array ('ip' => $alloc['addrinfo']['ip']));
-		echo "<tr class='${rendered_alloc['tr_class']}' valign=top>";
+		if (! isset ($used_alloc_types[$alloc['type']]))
+			$used_alloc_types[$alloc['type']] = 0;
+		$used_alloc_types[$alloc['type']]++;
 
-		echo "<td><a href='" .
+		$rendered_alloc = getRenderedAlloc ($object_id, $alloc);
+		$alloc_list .= getOutputOf ('printOpFormIntro', getOpnameByIPFamily ('upd', $ip_v), array ('ip' => $alloc['addrinfo']['ip']));
+		$alloc_list .= "<tr class='${rendered_alloc['tr_class']}' valign=top>";
+
+		$alloc_list .= "<td><a href='" .
 			makeHrefProcess
 			(
 				array
@@ -1368,21 +1372,27 @@ function renderIPTabForObject ($object_id, $ip_v)
 			) . "'>" . 
 			getImageHREF ('delete', 'Delete this IP address') .
 			"</a></td>";
-		echo "<td class=tdleft><input type='text' name='bond_name' value='${alloc['osif']}' size=10></td>";
-		echo $rendered_alloc['td_ip'];
+		$alloc_list .= "<td class=tdleft><input type='text' name='bond_name' value='${alloc['osif']}' size=10></td>";
+		$alloc_list .= $rendered_alloc['td_ip'];
 		if (getConfigVar ('EXT_IPV4_VIEW') == 'yes')
 		{
-			echo $rendered_alloc['td_network'];
-			echo $rendered_alloc['td_routed_by'];
+			$alloc_list .= $rendered_alloc['td_network'];
+			$alloc_list .= $rendered_alloc['td_routed_by'];
 		}
-		echo '<td>' . getSelect ($aat, array ('name' => 'bond_type'), $alloc['type']) . "</td>";
-		echo $rendered_alloc['td_peers'];
-		echo "<td>" .getImageHREF ('save', 'Save changes', TRUE) . "</td>";
+		$alloc_list .= '<td>' . getSelect ($aat, array ('name' => 'bond_type'), $alloc['type']) . "</td>";
+		$alloc_list .= $rendered_alloc['td_peers'];
+		$alloc_list .= "<td>" .getImageHREF ('save', 'Save changes', TRUE) . "</td>";
 
-		echo "</form></tr>\n";
+		$alloc_list .= "</form></tr>\n";
 	}
-	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')
-		printNewItemTR ($ip_v);
+	asort ($used_alloc_types, SORT_NUMERIC);
+	$most_popular_type = empty ($used_alloc_types) ? 'regular' : array_pop (array_keys ($used_alloc_types));
+
+	if ($list_on_top = (getConfigVar ('ADDNEW_AT_TOP') != 'yes'))
+		echo $alloc_list;
+	printNewItemTR ($ip_v, $most_popular_type);
+	if (! $list_on_top)
+		echo $alloc_list;
 
 	echo "</table><br>\n";
 	finishPortlet();
