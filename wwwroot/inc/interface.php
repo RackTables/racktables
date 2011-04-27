@@ -8054,12 +8054,46 @@ function renderVLANInfo ($vlan_ck)
 		echo '</table>';
 	}
 	finishPortlet();
+
+	$confports = getVLANConfiguredPorts ($vlan_ck);
+
+	// get non-switch device list
+	$foreign_devices = array();
+	foreach ($confports as $switch_id => $portlist)
+	{
+		$object = spotEntity ('object', $switch_id);
+		foreach ($portlist as $port_name)
+			if ($portinfo = getPortinfoByName ($object, $port_name))
+				if ($portinfo['linked'] && ! isset ($confports[$portinfo['remote_object_id']]))
+					$foreign_devices[$portinfo['remote_object_id']][] = $portinfo;
+	}
+	if (! empty ($foreign_devices))
+	{
+		startPortlet ("Non-switch devices");
+		echo "<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>";
+		echo '<tr><th>device</th><th>ports</th></tr>';
+		$order = 'odd';
+		foreach ($foreign_devices as $cell_id => $ports) 
+		{
+			echo "<tr class=row_${order} valign=top><td>";
+			$cell = spotEntity ('object', $cell_id);
+			renderCell ($cell);
+			echo "</td><td><ul>";
+			foreach ($ports as $portinfo)
+				echo "<li>" . formatPortLink ($portinfo['remote_object_id'], NULL, $portinfo['remote_id'], $portinfo['remote_name']) . ' &mdash; ' . formatPort ($portinfo) . "</li>";
+			echo "</ul></td></tr>";
+			$order = $nextorder[$order];
+		}
+		echo '</table>';
+		finishPortlet();
+	}
+
 	echo '</td><td class=pcright>';
-	if (!count ($confports = getVLANConfiguredPorts ($vlan_ck)))
+	if (!count ($confports))
 		startPortlet ('no ports');
 	else
 	{
-		startPortlet ('ports (' . count ($confports) . ')');
+		startPortlet ('Switch ports (' . count ($confports) . ')');
 		global $nextorder;
 		$order = 'odd';
 		echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
