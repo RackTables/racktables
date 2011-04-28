@@ -1485,7 +1485,8 @@ function showMessageOrError ()
 	{
 		if (!isset ($record['c']) or !isset ($msginfo[$record['c']]))
 		{
-			echo '<div class=msg_neutral>(this message was lost)</div>';
+			$prefix = isset ($record['c']) ? $record['c'] . ': ' : '';
+			echo "<div class=msg_neutral>(${prefix}this message was lost)</div>";
 			continue;
 		}
 		if (isset ($record['a']))
