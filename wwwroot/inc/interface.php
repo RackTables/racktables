@@ -7013,14 +7013,14 @@ function dynamic_title_decoder ($path_position)
 		$address = getIPv4Address ($_REQUEST['ip']);
 		return array
 		(
-			'name' => $_REQUEST['ip'] . ($address['name'] != '' ? ' (' . $address['name'] . ')' : ''),
+			'name' => niftyString ($_REQUEST['ip'] . ($address['name'] != '' ? ' (' . $address['name'] . ')' : '')),
 			'params' => array ('ip' => $_REQUEST['ip'])
 		);
 	case 'ipv6address':
 		$address = getIPv6Address (assertIPArg ('ip'));
 		return array
 		(
-			'name' => $address['ip'] . ($address['name'] != '' ? ' (' . $address['name'] . ')' : ''),
+			'name' => niftyString ($address['ip'] . ($address['name'] != '' ? ' (' . $address['name'] . ')' : '')),
 			'params' => array ('ip' => $address['ip'])
 		);
 	case 'ipv4net':
