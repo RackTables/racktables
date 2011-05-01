@@ -827,8 +827,9 @@ function addIPv6Prefix ()
 	assertStringArg ('name', TRUE);
 
 	$taglist = isset ($_REQUEST['taglist']) ? $_REQUEST['taglist'] : array();
+	$is_connected = isset ($_REQUEST['is_connected']) ? ($_REQUEST['is_connected'] == 'on') : FALSE;
 	global $sic;
-	createIPv6Prefix ($_REQUEST['range'], $sic['name'], $taglist);
+	createIPv6Prefix ($_REQUEST['range'], $sic['name'], $is_connected, $taglist);
 	return showFuncMessage (__FUNCTION__, 'OK');
 }
 

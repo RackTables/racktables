@@ -3560,7 +3560,7 @@ function createIPv4Prefix ($range = '', $name = '', $is_bcast = FALSE, $taglist 
 	produceTagsForLastRecord ('ipv4net', $taglist);
 }
 
-function createIPv6Prefix ($range = '', $name = '', $taglist = array())
+function createIPv6Prefix ($range = '', $name = '', $is_connected = FALSE, $taglist = array())
 {
 	// $range is in aaa0:b::c:d/x format, split into ip/mask vars
 	$rangeArray = explode ('/', $range);
@@ -3570,7 +3570,7 @@ function createIPv6Prefix ($range = '', $name = '', $taglist = array())
 	$mask = $rangeArray[1];
 	$address = new IPv6Address;
 	if (!strlen ($ip) or !strlen ($mask) or ! $address->parse ($ip))
-		throw new InvalidRequestArgException ('range', $range, 'Invalid IPv4 prefix');
+		throw new InvalidRequestArgException ('range', $range, 'Invalid IPv6 prefix');
 	$network_addr = $address->get_first_subnet_address ($mask);
 	$broadcast_addr = $address->get_last_subnet_address ($mask);
 	if (! $network_addr || ! $broadcast_addr)
@@ -3586,6 +3586,9 @@ function createIPv6Prefix ($range = '', $name = '', $taglist = array())
 			'name' => $name
 		)
 	);
+	# RFC3513 2.6.1 - Subnet-Router anycast
+	if ($is_connected)
+		updateV6Address ($network_addr, 'Subnet-Router anycast', 'yes');
 	produceTagsForLastRecord ('ipv6net', $taglist);
 }
 
