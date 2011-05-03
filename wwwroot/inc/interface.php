@@ -1437,7 +1437,6 @@ function showMessageOrError ()
 		49 => array ('code' => 'success', 'format' => 'deleted a record successfully'),
 		51 => array ('code' => 'success', 'format' => 'updated a record successfully'),
 		57 => array ('code' => 'success', 'format' => 'Reset complete'),
-		62 => array ('code' => 'success', 'format' => 'gw: %s'),
 		63 => array ('code' => 'success', 'format' => '%u change request(s) have been processed'),
 		66 => array ('code' => 'success', 'format' => "File sent Ok via handler '%s'"),
 		67 => array ('code' => 'success', 'format' => "Tag rolling done, %u objects involved"),
@@ -1449,7 +1448,6 @@ function showMessageOrError ()
 // records 100~199 with fatal error messages
 		100 => array ('code' => 'error', 'format' => '%s'),
 		109 => array ('code' => 'error', 'format' => 'failed updating a record'),
-//		123
 		131 => array ('code' => 'error', 'format' => 'invalid format requested'),
 		141 => array ('code' => 'error', 'format' => 'Encountered %u errors, updated %u record(s)'),
 		149 => array ('code' => 'error', 'format' => 'Turing test failed'),
@@ -1462,7 +1460,6 @@ function showMessageOrError ()
 		161 => array ('code' => 'error', 'format' => 'Endpoint not found. Please either set FQDN attribute or assign an IP address to the object.'),
 		162 => array ('code' => 'error', 'format' => 'More than one IP address is assigned to this object, please configure FQDN attribute.'),
 		164 => array ('code' => 'error', 'format' => 'Gateway failure: %s.'),
-		166 => array ('code' => 'error', 'format' => 'gw: %s'),
 		170 => array ('code' => 'error', 'format' => 'There is no network for IP address "%s"'),
 		172 => array ('code' => 'error', 'format' => 'Malformed request'),
 		179 => array ('code' => 'error', 'format' => 'Expired form has been declined.'),
@@ -1473,7 +1470,6 @@ function showMessageOrError ()
 // records 200~299 with warnings
 		200 => array ('code' => 'warning', 'format' => '%s'),
 		201 => array ('code' => 'warning', 'format' => 'nothing happened...'),
-		202 => array ('code' => 'warning', 'format' => 'gw: %s'),
 		206 => array ('code' => 'warning', 'format' => 'Rack is not empty'),
 
 // records 300~399 with notices

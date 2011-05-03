@@ -200,20 +200,15 @@ function setSwitchVLANs ($object_id = 0, $setcmd)
 	// Finally we can parse the response into message array.
 	foreach (explode (';', substr ($data[1], strlen ('OK!'))) as $text)
 	{
-		if (strpos ($text, 'C!') === 0)
-		{
-			// gateway-encoded message
-			$tmp = explode ('!', $text);
-			array_shift ($tmp);
-			$code = array_shift ($tmp);
-			showOneLiner ($code, $tmp);
-		}
-		elseif (strpos ($text, 'I!') === 0)
-			showOneLiner (62, array (substr ($text, 2))); // generic gateway success
+		$message = 'gw: ' . substr ($text, 2);
+		if (strpos ($text, 'I!') === 0)
+			showSuccess ($message); // generic gateway success
 		elseif (strpos ($text, 'W!') === 0)
-			showOneLiner (202, array (substr ($text, 2))); // generic gateway warning
+			showWarning ($message); // generic gateway warning
+		elseif (strpos ($text, 'E!') === 0)
+			showError ($message); // generic gateway error
 		else // All improperly formatted messages must be treated as error conditions.
-			showOneLiner (166, array (substr ($text, 2))); // generic gateway error
+			showError ('unexpected line from gw: ' . $text);
 	}
 }
 

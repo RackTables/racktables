@@ -1766,7 +1766,7 @@ function setPortVLAN ()
 		}
 		catch (RTGatewayError $e)
 		{
-			showOneLiner (164, $e->getMessage());
+			showFuncMessage (__FUNCTION__, 'ERR', array ($e->getMessage()));
 		}
 	}
 }
