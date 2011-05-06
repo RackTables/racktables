@@ -1623,7 +1623,7 @@ function generateAutoPorts ()
 {
 	$object = spotEntity ('object', getBypassValue());
 	executeAutoPorts ($object['id'], $object['objtype_id']);
-	showOneLiner (__FUNCTION__, 'OK');
+	showFuncMessage (__FUNCTION__, 'OK');
 	return buildRedirectURL (NULL, 'ports');
 }
 
@@ -1836,7 +1836,7 @@ function deleteRack ()
 	if (count ($rackData['mountedObjects']))
 		return showFuncMessage (__FUNCTION__, 'ERR1');
 	commitDeleteRack ($_REQUEST['rack_id']);
-	showOneLiner (__FUNCTION__, 'OK', array ($rackData['name']));
+	showFuncMessage (__FUNCTION__, 'OK', array ($rackData['name']));
 	return buildRedirectURL ('rackspace', 'default');
 }
 
@@ -2166,7 +2166,7 @@ function del8021QOrder ()
 		'prev_vstid' => $_REQUEST['vst_id'],
 		'prev_vdid' => $_REQUEST['vdom_id'],
 	);
-	showOneLiner (__FUNCTION__, 'OK');
+	showFuncMessage (__FUNCTION__, 'OK');
 	return buildRedirectURL (NULL, NULL, $focus_hints);
 }
 
@@ -2294,7 +2294,7 @@ function save8021QPorts ()
 	catch (Exception $e)
 	{
 		$dbxlink->rollBack();
-		showOneLiner (__FUNCTION__, 'ERR2');
+		showFuncMessage (__FUNCTION__, 'ERR2');
 		return buildRedirectURL (NULL, NULL, $extra);
 	}
 	if ($npulled + $nsaved_uplinks)
