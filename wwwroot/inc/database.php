@@ -18,9 +18,9 @@ $SQLSchema = array
 			'asset_no' => 'asset_no',
 			'objtype_id' => 'objtype_id',
 			'rack_id' => '(select rack_id from RackSpace where object_id = id order by rack_id asc limit 1)',
-			'Rack_name' => '(select name from Rack where id = rack_id)',
+			'rack_name' => '(select name from Rack where id = rack_id)',
 			'row_id' => '(select row_id from Rack where id = rack_id)',
-			'Row_name' => '(select name from RackRow where id = row_id)',
+			'row_name' => '(select name from Row where id = row_id)',
 			'has_problems' => 'has_problems',
 			'comment' => 'comment',
 			'nports' => '(SELECT COUNT(*) FROM Port WHERE object_id = RackObject.id)',
@@ -132,13 +132,27 @@ $SQLSchema = array
 			'id' => 'id',
 			'name' => 'name',
 			'height' => 'height',
+			'label' => 'label',
+			'asset_no' => 'asset_no',
+			'has_problems' => 'has_problems',
 			'comment' => 'comment',
 			'row_id' => 'row_id',
-			'row_name' => '(select name from RackRow where RackRow.id = row_id)',
+			'row_name' => 'row_name',
 		),
 		'keycolumn' => 'id',
 		'ordcolumns' => array ('row_name', 'Rack.name'),
 		'pidcolumn' => 'row_id',
+	),
+	'row' => array
+	(
+		'table' => 'Row',
+		'columns' => array
+		(
+			'id' => 'id',
+			'name' => 'name',
+		),
+		'keycolumn' => 'id',
+		'ordcolumns' => array ('name'),
 	),
 	'vst' => array
 	(
@@ -199,28 +213,48 @@ $port_role_options = array
 $object_attribute_cache = array();
 
 // Return detailed information about one rack row.
-function getRackRowInfo ($rackrow_id)
+function getRowInfo ($row_id)
 {
 	$query =
-		"select RackRow.id as id, RackRow.name as name, count(Rack.id) as count, " .
+		"select Row.id as id, Row.name as name, count(Rack.id) as count, " .
 		"if(isnull(sum(Rack.height)),0,sum(Rack.height)) as sum " .
-		"from RackRow left join Rack on Rack.row_id = RackRow.id " .
-		"where RackRow.id = ? " .
-		"group by RackRow.id";
-	$result = usePreparedSelectBlade ($query, array ($rackrow_id));
+		"from Row left join Rack on Rack.row_id = Row.id " .
+		"where Row.id = ? " .
+		"group by Row.id";
+	$result = usePreparedSelectBlade ($query, array ($row_id));
 	if ($row = $result->fetch (PDO::FETCH_ASSOC))
 		return $row;
 	else
-		throw new EntityNotFoundException ('rackrow', $rackrow_id);
+		throw new EntityNotFoundException ('rackrow', $row_id);
 }
 
-function getRackRows ()
+function getRows ()
 {
-	$result = usePreparedSelectBlade ('SELECT id, name FROM RackRow ORDER BY name');
+	$result = usePreparedSelectBlade ('SELECT id, name FROM Row ORDER BY name');
 	$rows = array();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 		$rows[$row['id']] = $row['name'];
 	return $rows;
+}
+
+function getRacks ($row_id)
+{
+	$query = usePreparedSelectBlade
+	(
+		'SELECT  id, name, label, asset_no, height, comment, row_name FROM Rack WHERE row_id = ?',
+		array ($row_id)
+	);
+	$ret = array();
+	while ($row = $query->fetch (PDO::FETCH_ASSOC))
+		$ret[$row['rack_id']] = array (
+			'name' => $row['name'],
+			'label' => $row['type'],
+			'asset_no' => $row['size'],
+			'height' => $row['ctime'],
+			'comment' => $row['mtime'],
+			'row_name' => $row['atime'],
+		);
+	return $ret;
 }
 
 // Return a simple object list w/o related information, so that the returned value
@@ -505,6 +539,8 @@ function amplifyCell (&$record, $dummy = NULL)
 		}
 		unset ($result);
 		break;
+	case 'row':
+		$record['racks'] = getRacks ($record['id']);
 	case 'rack':
 		$record['mountedObjects'] = array();
 		// start with default rackspace
@@ -570,7 +606,7 @@ SELECT
 	(SELECT PortInnerInterface.iif_name FROM PortInnerInterface WHERE PortInnerInterface.id = Port.iif_id) AS iif_name,
 	(SELECT Dictionary.dict_value FROM Dictionary WHERE Dictionary.dict_key = Port.type) AS oif_name,
 	(SELECT COUNT(*) FROM PortLog WHERE PortLog.port_id = Port.id) AS log_count,
-	(SELECT name FROM RackObject WHERE Port.object_id = RackObject.id) AS object_name,
+	(SELECT name FROM Object WHERE Port.object_id = Object.id) AS object_name,
 	Link.cable as cableid,
 	pa.id as pa_id,
 	pa.name as pa_name,
@@ -589,8 +625,8 @@ FROM
 		Link
 		INNER JOIN Port AS pa ON Link.porta = pa.id
 		INNER JOIN Port AS pb ON Link.portb = pb.id
-		INNER JOIN RackObject AS oa ON pa.object_id = oa.id
-		INNER JOIN RackObject AS ob ON pb.object_id = ob.id
+		INNER JOIN Object AS oa ON pa.object_id = oa.id
+		INNER JOIN Object AS ob ON pb.object_id = ob.id
 	) ON (Port.id = Link.porta OR Port.id = Link.portb)
 	LEFT JOIN PortLog ON PortLog.id = (SELECT id FROM PortLog WHERE PortLog.port_id = Port.id ORDER BY date DESC LIMIT 1)
 WHERE
@@ -638,53 +674,33 @@ function getObjectPortsAndLinks ($object_id)
 	return sortPortList ($ret, TRUE);
 }
 
-function commitAddRack ($name, $height, $row_id, $comment, $taglist)
-{
-	usePreparedInsertBlade
-	(
-		'Rack',
-		array
-		(
-			'row_id' => $row_id,
-			'name' => $name,
-			'height' =>  $height,
-			'comment' => $comment
-		)
-	);
-	$last_insert_id = lastInsertID();
-	produceTagsForLastRecord ('rack', $taglist, $last_insert_id);
-	recordHistory ('Rack', $last_insert_id);
-}
-
 function commitAddObject ($new_name, $new_label, $new_type_id, $new_asset_no, $taglist = array())
 {
 	usePreparedInsertBlade
 	(
-		'RackObject',
+		'Object',
 		array
 		(
 			'name' => !strlen ($new_name) ? NULL : $new_name,
-			'label' => $new_label,
+			'label' => !strlen ($new_label) ? NULL : $new_label,
 			'objtype_id' => $new_type_id,
 			'asset_no' => !strlen ($new_asset_no) ? NULL : $new_asset_no,
 		)
 	);
-	$last_insert_id = lastInsertID();
+	$object_id = lastInsertID();
 	// Do AutoPorts magic
-	executeAutoPorts ($last_insert_id, $new_type_id);
+	executeAutoPorts ($object_id, $new_type_id);
 	// Now tags...
-	produceTagsForLastRecord ('object', $taglist, $last_insert_id);
-
-	recordHistory ('RackObject', $last_insert_id);
-
-	return $last_insert_id;
+	produceTagsForLastRecord ('object', $taglist, $object_id);
+	recordObjectHistory ($object_id);
+	return $object_id;
 }
 
 function commitUpdateObject ($object_id, $new_name, $new_label, $new_has_problems, $new_asset_no, $new_comment)
 {
 	usePreparedUpdateBlade
 	(
-		'RackObject',
+		'Object',
 		array
 		(
 			'name' => !mb_strlen ($new_name) ? NULL : $new_name,
@@ -698,7 +714,7 @@ function commitUpdateObject ($object_id, $new_name, $new_label, $new_has_problem
 			'id' => $object_id
 		)
 	);
-	recordHistory ('RackObject', $object_id);
+	recordObjectHistory ($object_id);
 }
 
 // used by getEntityRelatives for sorting
@@ -757,6 +773,30 @@ function getEntityRelatives ($type, $entity_type, $entity_id)
 	return $ret;
 }
 
+function commitLinkEntities ($parent_entity_type, $parent_entity_id, $child_entity_type, $child_entity_id)
+{
+	usePreparedInsertBlade
+	(
+		'EntityLink',
+		array
+		(
+			'parent_entity_type' => $parent_entity_type,
+			'parent_entity_id' => $parent_entity_id,
+			'child_entity_type' => $child_entity_type,
+			'child_entity_id' => $child_entity_id,
+		)
+	);
+}
+
+function commitUpdateEntityLink ($link_id, $parent_entity_type, $parent_entity_id, $child_entity_type, $child_entity_id)
+{
+	usePreparedExecuteBlade
+	(
+		'UPDATE EntityLink SET parent_entity_type=?, parent_entity_id=?, child_entity_type=?, child_entity_id=? WHERE id=?',
+		array ($parent_entity_type, $parent_entity_id, $child_entity_type, $child_entity_id, $link_id)
+	);
+}
+
 function commitUnlinkEntities ($link_id)
 {
 	usePreparedDeleteBlade ('EntityLink', array ('id' => $link_id));
@@ -768,25 +808,25 @@ function getVMClusterSummary ()
 {
 	$result = usePreparedSelectBlade
 	(
-		"SELECT RO.id, RO.name, " .
+		"SELECT O.id, O.name, " .
 		"(SELECT COUNT(*) FROM EntityLink EL " .
-		"LEFT JOIN RackObject RO_H ON EL.child_entity_id = RO_H.id " .
-		"LEFT JOIN AttributeValue AV ON RO_H.id = AV.object_id " .
+		"LEFT JOIN Object O_H ON EL.child_entity_id = O_H.id " .
+		"LEFT JOIN AttributeValue AV ON O_H.id = AV.object_id " .
 		"WHERE EL.parent_entity_type = 'object' " .
 		"AND EL.child_entity_type = 'object' " .
-		"AND EL.parent_entity_id = RO.id " .
-		"AND RO_H.objtype_id = 4 " .
+		"AND EL.parent_entity_id = O.id " .
+		"AND O_H.objtype_id = 4 " .
 		"AND AV.attr_id = 26 " .
 		"AND AV.uint_value = 1501) AS hypervisors, " .
 		"(SELECT COUNT(*) FROM EntityLink EL " .
-		"LEFT JOIN RackObject RO_VM ON EL.child_entity_id = RO_VM.id " .
+		"LEFT JOIN Object O_VM ON EL.child_entity_id = O_VM.id " .
 		"WHERE EL.parent_entity_type = 'object' " .
 		"AND EL.child_entity_type = 'object' " .
-		"AND EL.parent_entity_id = RO.id " .
-		"AND RO_VM.objtype_id = 1504) AS VMs " .
-		"FROM RackObject RO " .
-		"WHERE RO.objtype_id = 1505 " .
-		"ORDER BY RO.name"
+		"AND EL.parent_entity_id = O.id " .
+		"AND O_VM.objtype_id = 1504) AS VMs " .
+		"FROM Object O " .
+		"WHERE O.objtype_id = 1505 " .
+		"ORDER BY O.name"
 	);
 	return $result->fetchAll (PDO::FETCH_ASSOC);
 }
@@ -795,30 +835,30 @@ function getVMResourcePoolSummary ()
 {
 	$result = usePreparedSelectBlade
 	(
-		"SELECT RO.id, RO.name, " .
-		"(SELECT RO_C.id " .
+		"SELECT O.id, O.name, " .
+		"(SELECT O_C.id " .
 		"FROM EntityLink EL " .
-		"LEFT JOIN RackObject RO_C ON EL.parent_entity_id = RO_C.id " .
-		"WHERE EL.child_entity_id = RO.id " .
+		"LEFT JOIN Object O_C ON EL.parent_entity_id = O_C.id " .
+		"WHERE EL.child_entity_id = O.id " .
 		"AND EL.parent_entity_type = 'object' " .
 		"AND EL.child_entity_type = 'object' " .
-		"AND RO_C.objtype_id = 1505) AS cluster_id, " .
-		"(SELECT RO_C.name " .
+		"AND O_C.objtype_id = 1505) AS cluster_id, " .
+		"(SELECT O_C.name " .
 		"FROM EntityLink EL " .
-		"LEFT JOIN RackObject RO_C ON EL.parent_entity_id = RO_C.id " .
-		"WHERE EL.child_entity_id = RO.id " .
+		"LEFT JOIN Object O_C ON EL.parent_entity_id = O_C.id " .
+		"WHERE EL.child_entity_id = O.id " .
 		"AND EL.parent_entity_type = 'object' " .
 		"AND EL.child_entity_type = 'object' " .
-		"AND RO_C.objtype_id = 1505) AS cluster_name, " .
+		"AND O_C.objtype_id = 1505) AS cluster_name, " .
 		"(SELECT COUNT(*) FROM EntityLink EL " .
-		"LEFT JOIN RackObject RO_VM ON EL.child_entity_id = RO_VM.id " .
+		"LEFT JOIN Object O_VM ON EL.child_entity_id = O_VM.id " .
 		"WHERE EL.parent_entity_type = 'object' " .
 		"AND EL.child_entity_type = 'object' " .
-		"AND EL.parent_entity_id = RO.id " .
-		"AND RO_VM.objtype_id = 1504) AS VMs " .
-		"FROM RackObject RO " .
-		"WHERE RO.objtype_id = 1506 " .
-		"ORDER BY RO.name"
+		"AND EL.parent_entity_id = O.id " .
+		"AND O_VM.objtype_id = 1504) AS VMs " .
+		"FROM Object O " .
+		"WHERE O.objtype_id = 1506 " .
+		"ORDER BY O.name"
 	);
 	return $result->fetchAll (PDO::FETCH_ASSOC);
 }
@@ -827,33 +867,33 @@ function getVMHypervisorSummary ()
 {
 	$result = usePreparedSelectBlade
 	(
-		"SELECT RO.id, RO.name, " .
-		"(SELECT RO_C.id " .
+		"SELECT O.id, O.name, " .
+		"(SELECT O_C.id " .
 		"FROM EntityLink EL " .
-		"LEFT JOIN RackObject RO_C ON EL.parent_entity_id = RO_C.id " .
-		"WHERE EL.child_entity_id = RO.id " .
+		"LEFT JOIN Object O_C ON EL.parent_entity_id = O_C.id " .
+		"WHERE EL.child_entity_id = O.id " .
 		"AND EL.parent_entity_type = 'object' " .
 		"AND EL.child_entity_type = 'object' " .
-		"AND RO_C.objtype_id = 1505) AS cluster_id, " .
-		"(SELECT RO_C.name " .
+		"AND O_C.objtype_id = 1505) AS cluster_id, " .
+		"(SELECT O_C.name " .
 		"FROM EntityLink EL " .
-		"LEFT JOIN RackObject RO_C ON EL.parent_entity_id = RO_C.id " .
-		"WHERE EL.child_entity_id = RO.id " .
+		"LEFT JOIN Object O_C ON EL.parent_entity_id = O_C.id " .
+		"WHERE EL.child_entity_id = O.id " .
 		"AND EL.parent_entity_type = 'object' " .
 		"AND EL.child_entity_type = 'object' " .
-		"AND RO_C.objtype_id = 1505) AS cluster_name, " .
+		"AND O_C.objtype_id = 1505) AS cluster_name, " .
 		"(SELECT COUNT(*) FROM EntityLink EL " .
-		"LEFT JOIN RackObject RO_VM ON EL.child_entity_id = RO_VM.id " .
+		"LEFT JOIN Object O_VM ON EL.child_entity_id = O_VM.id " .
 		"WHERE EL.parent_entity_type = 'object' " .
 		"AND EL.child_entity_type = 'object' " .
-		"AND EL.parent_entity_id = RO.id " .
-		"AND RO_VM.objtype_id = 1504) AS VMs " .
-		"FROM RackObject RO " .
-		"LEFT JOIN AttributeValue AV ON RO.id = AV.object_id " .
-		"WHERE RO.objtype_id = 4 " .
+		"AND EL.parent_entity_id = O.id " .
+		"AND O_VM.objtype_id = 1504) AS VMs " .
+		"FROM Object O " .
+		"LEFT JOIN AttributeValue AV ON O.id = AV.object_id " .
+		"WHERE O.objtype_id = 4 " .
 		"AND AV.attr_id = 26 " .
 		"AND AV.uint_value = 1501 " .
-		"ORDER BY RO.name"
+		"ORDER BY O.name"
 	);
 	return $result->fetchAll (PDO::FETCH_ASSOC);
 }
@@ -862,10 +902,10 @@ function getVMSwitchSummary ()
 {
 	$result = usePreparedSelectBlade
 	(
-		"SELECT RO.id, RO.name " .
-		"FROM RackObject RO " .
-		"WHERE RO.objtype_id = 1507 " .
-		"ORDER BY RO.name"
+		"SELECT O.id, O.name " .
+		"FROM Object O " .
+		"WHERE O.objtype_id = 1507 " .
+		"ORDER BY O.name"
 	);
 	return $result->fetchAll (PDO::FETCH_ASSOC);
 }
@@ -882,7 +922,7 @@ function commitDeleteObject ($object_id = 0)
 	// Reset most of stuff
 	commitResetObject ($object_id);
 	// Object itself
-	usePreparedDeleteBlade ('RackObject', array ('id' => $object_id));
+	usePreparedDeleteBlade ('Object', array ('id' => $object_id));
 }
 
 function commitResetObject ($object_id = 0)
@@ -914,11 +954,11 @@ function commitResetObject ($object_id = 0)
 	// Ports & links
 	usePreparedDeleteBlade ('Port', array ('object_id' => $object_id));
 	// CN
-	usePreparedUpdateBlade ('RackObject', array ('name' => NULL, 'label' => ''), array ('id' => $object_id));
+	usePreparedUpdateBlade ('Object', array ('name' => NULL, 'label' => ''), array ('id' => $object_id));
 	// FQDN
 	commitUpdateAttrValue ($object_id, 3, "");
 	// log history
-	recordHistory ('RackObject', $object_id);
+	recordObjectHistory ($object_id);
 }
 
 function commitDeleteRack($rack_id)
@@ -930,7 +970,7 @@ function commitDeleteRack($rack_id)
 	usePreparedDeleteBlade ('Rack', array ('id' => $rack_id));
 }
 
-function commitUpdateRack ($rack_id, $new_name, $new_height, $new_row_id, $new_comment)
+function commitUpdateRack ($rack_id, $new_row_id, $new_name, $new_height, $new_label, $new_has_problems, $new_asset_no, $new_comment)
 {
 	// Can't shrink a rack if rows being deleted contain mounted objects
 	$check_result = usePreparedSelectBlade ('SELECT COUNT(*) AS count FROM RackSpace WHERE rack_id = ? AND unit_no > ?', array ($rack_id, $new_height));
@@ -938,22 +978,33 @@ function commitUpdateRack ($rack_id, $new_name, $new_height, $new_row_id, $new_c
 	unset ($check_result);
 	if ($check_row['count'] > 0)
 		throw new InvalidArgException ('new_height', $new_height, 'Cannot shrink rack, objects are still mounted there');
+
+	// Update the row
 	usePreparedUpdateBlade
 	(
-		'Rack',
+		'EntityLink',
+		array ('parent_entity_id' => $new_row_id),
+		array ('child_entity_type' => 'object', 'child_entity_id' => $rack_id)
+	);
+
+	// Update the height
+	commitUpdateAttrValue ($rack_id, 27, $new_height);
+
+	// Update the rack
+	usePreparedUpdateBlade
+	(
+		'Object',
 		array
 		(
 			'name' => $new_name,
-			'height' => $new_height,
+			'label' => !mb_strlen ($new_label) ? NULL : $new_label,
+			'has_problems' => $new_has_problems,
+			'asset_no' => !mb_strlen ($new_asset_no) ? NULL : $new_asset_no,
 			'comment' => $new_comment,
-			'row_id' => $new_row_id,
 		),
-		array
-		(
-			'id' => $rack_id,
-		)
+		array ('id' => $rack_id)
 	);
-	recordHistory ('Rack', $rack_id);
+	recordObjectHistory ($rack_id);
 }
 
 // This function accepts rack data returned by amplifyCell(), validates and applies changes
@@ -1021,7 +1072,7 @@ function processGridForm (&$rackData, $unchecked_state, $checked_state, $object_
 	}
 	if ($rackchanged)
 	{
-		usePreparedUpdateBlade ('Rack', array ('thumb_data' => NULL), array ('id' => $rack_id));
+		usePreparedDeleteBlade ('RackThumbnail', array ('rack_id' => $rack_id));
 		$dbxlink->commit();
 		return TRUE;
 	}
@@ -1080,17 +1131,15 @@ function createMolecule ($molData)
 
 // History logger. This function assumes certain table naming convention and
 // column design:
-// 1. History table name equals to dictionary table name plus 'History'.
-// 2. History table must have the same row set (w/o keys) plus one row named
-// 'ctime' of type 'timestamp'.
-function recordHistory ($tableName, $orig_id)
+// - History table must have the same row set (w/o keys) plus one row named
+//   'ctime' of type 'timestamp'.
+function recordObjectHistory ($object_id)
 {
 	global $remote_username;
 	usePreparedExecuteBlade
 	(
-		"INSERT INTO ${tableName}History SELECT *, CURRENT_TIMESTAMP(), ? " .
-		"FROM ${tableName} WHERE id=?",
-		array ($remote_username, $orig_id)
+		"INSERT INTO ObjectHistory SELECT *, CURRENT_TIMESTAMP(), ? FROM Object WHERE id=?",
+		array ($remote_username, $object_id)
 	);
 }
 
@@ -1258,10 +1307,10 @@ function getAllIPv4Allocations ()
 	$result = usePreparedSelectBlade
 	(
 		"select object_id as object_id, ".
-		"RackObject.name as object_name, ".
+		"Object.name as object_name, ".
 		"IPv4Allocation.name as name, ".
 		"INET_NTOA(ip) as ip ".
-		"from IPv4Allocation join RackObject on id=object_id "
+		"from IPv4Allocation join Object on id=object_id "
 	);
 	$ret = array();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
@@ -1304,8 +1353,8 @@ function linkPorts ($porta, $portb, $cable = NULL)
 	// log new links
 	$result = usePreparedSelectBlade
 	(
-		"SELECT Port.id, Port.name as port_name, RackObject.name as obj_name FROM Port " .
-		"INNER JOIN RackObject ON Port.object_id = RackObject.id WHERE Port.id IN (?, ?)",
+		"SELECT Port.id, Port.name as port_name, Object.name as obj_name FROM Port " .
+		"INNER JOIN Object ON Port.object_id = Object.id WHERE Port.id IN (?, ?)",
 		array ($porta, $portb)
 	);
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
@@ -2100,16 +2149,37 @@ function getRackSearchResult ($terms)
 		$terms,
 		'name'
 	);
+	$byLabel = getSearchResultByField
+	(
+		'Rack',
+		array ('id'),
+		'label',
+		$terms,
+		'name'
+	);
+	$byAssetNo = getSearchResultByField
+	(
+		'Rack',
+		array ('id'),
+		'asset_no',
+		$terms,
+		'name'
+	);
 	// Filter out dupes.
 	foreach ($byName as $res1)
+	{
 		foreach (array_keys ($byComment) as $key2)
 			if ($res1['id'] == $byComment[$key2]['id'])
-			{
 				unset ($byComment[$key2]);
-				continue 2;
-			}
+		foreach (array_keys ($byLabel) as $key3)
+			if ($res1['id'] == $byLabel[$key3]['id'])
+				unset ($byLabel[$key3]);
+		foreach (array_keys ($byAssetNo) as $key4)
+			if ($res1['id'] == $byAssetNo[$key4]['id'])
+				unset ($byAssetNo[$key4]);
+	}
 	$ret = array();
-	foreach (array_merge ($byName, $byComment) as $row)
+	foreach (array_merge ($byName, $byComment, $byLabel, $byAssetNo) as $row)
 		$ret[$row['id']] = spotEntity ('rack', $row['id']);
 	return $ret;
 }
@@ -2439,7 +2509,7 @@ function getObjectParentCompat ()
 }
 
 // Used to determine if a type of object may have a parent or not
-function rackObjectTypeMayHaveParent ($objtype_id)
+function objectTypeMayHaveParent ($objtype_id)
 {
 	$result = usePreparedSelectBlade ('SELECT COUNT(*) FROM ObjectParentCompat WHERE child_objtype_id = ?', array ($objtype_id));
 	$row = $result->fetch (PDO::FETCH_NUM);
@@ -2559,7 +2629,7 @@ function getRackspaceStats ()
 {
 	$ret = array();
 	$subject = array();
-	$subject[] = array ('q' => 'select count(*) from RackRow', 'txt' => 'Rack rows');
+	$subject[] = array ('q' => 'select count(*) from Row', 'txt' => 'Rows');
 	$subject[] = array ('q' => 'select count(*) from Rack', 'txt' => 'Racks');
 	$subject[] = array ('q' => 'select avg(height) from Rack', 'txt' => 'Average rack height');
 	$subject[] = array ('q' => 'select sum(height) from Rack', 'txt' => 'Total rack units in field');
@@ -2580,8 +2650,7 @@ The following allows figuring out records in TagStorage, which refer to non-exis
 
 mysql> select entity_id from TagStorage left join Files on entity_id = id where entity_realm = 'file' and id is null;
 mysql> select entity_id from TagStorage left join IPv4Network on entity_id = id where entity_realm = 'ipv4net' and id is null;
-mysql> select entity_id from TagStorage left join RackObject on entity_id = id where entity_realm = 'object' and id is null;
-mysql> select entity_id from TagStorage left join Rack on entity_id = id where entity_realm = 'rack' and id is null;
+mysql> select entity_id from TagStorage left join Object on entity_id = id where entity_realm = 'object' and id is null;
 mysql> select entity_id from TagStorage left join IPv4VS on entity_id = id where entity_realm = 'ipv4vs' and id is null;
 mysql> select entity_id from TagStorage left join IPv4RSPool on entity_id = id where entity_realm = 'ipv4rspool' and id is null;
 mysql> select entity_id from TagStorage left join UserAccount on entity_id = user_id where entity_realm = 'user' and user_id is null;
@@ -2627,9 +2696,9 @@ function getChapterRefc ($chapter_id, $keylist)
 	switch ($chapter_id)
 	{
 	case CHAP_OBJTYPE:
-		// RackObjectType chapter is referenced by AttributeMap and RackObject tables
+		// ObjectType chapter is referenced by AttributeMap and Object tables
 		$query = 'select dict_key as uint_value, (select count(*) from AttributeMap where objtype_id = dict_key) + ' .
-			"(select count(*) from RackObject where objtype_id = dict_key) as refcnt from Dictionary where chapter_id = ?";
+			"(select count(*) from Object where objtype_id = dict_key) as refcnt from Dictionary where chapter_id = ?";
 		break;
 	case CHAP_PORTTYPE:
 		// PortOuterInterface chapter is referenced by PortCompat, PortInterfaceCompat and Port tables
@@ -2643,8 +2712,8 @@ function getChapterRefc ($chapter_id, $keylist)
 		$query = "select uint_value, count(object_id) as refcnt 
 			from AttributeMap am 
 			inner join AttributeValue av on am.attr_id = av.attr_id
-			inner join RackObject ro on ro.id = av.object_id
-			where am.chapter_id = ? and ro.objtype_id = am.objtype_id
+			inner join Object o on o.id = av.object_id
+			where am.chapter_id = ? and o.objtype_id = am.objtype_id
 			group by uint_value";
 		break;
 	}
@@ -2662,8 +2731,8 @@ function getAttrMap ()
 	(
 		'SELECT id, type, name, chapter_id, (SELECT dict_value FROM Dictionary WHERE dict_key = objtype_id) '.
 		'AS objtype_name, (SELECT name FROM Chapter WHERE id = chapter_id) ' .
-		'AS chapter_name, objtype_id, (SELECT COUNT(object_id) FROM AttributeValue AS av INNER JOIN RackObject AS ro ' .
-		'ON av.object_id = ro.id WHERE av.attr_id = Attribute.id AND ro.objtype_id = AttributeMap.objtype_id) ' .
+		'AS chapter_name, objtype_id, (SELECT COUNT(object_id) FROM AttributeValue AS av INNER JOIN Object AS o ' .
+		'ON av.object_id = o.id WHERE av.attr_id = Attribute.id AND o.objtype_id = AttributeMap.objtype_id) ' .
 		'AS refcnt FROM Attribute LEFT JOIN AttributeMap ON id = attr_id ORDER BY Attribute.name, objtype_name'
 	);
 	$ret = array();
@@ -2728,15 +2797,15 @@ function fetchAttrsForObjects($object_set)
 	$ret = array();
 	$query =
 		"select A.id as attr_id, A.name as attr_name, A.type as attr_type, C.name as chapter_name, " .
-		"C.id as chapter_id, AV.uint_value, AV.float_value, AV.string_value, D.dict_value, RO.id as object_id from " .
-		"RackObject as RO inner join AttributeMap as AM on RO.objtype_id = AM.objtype_id " .
+		"C.id as chapter_id, AV.uint_value, AV.float_value, AV.string_value, D.dict_value, O.id as object_id from " .
+		"Object as O inner join AttributeMap as AM on O.objtype_id = AM.objtype_id " .
 		"inner join Attribute as A on AM.attr_id = A.id " .
-		"left join AttributeValue as AV on AV.attr_id = AM.attr_id and AV.object_id = RO.id " .
+		"left join AttributeValue as AV on AV.attr_id = AM.attr_id and AV.object_id = O.id " .
 		"left join Dictionary as D on D.dict_key = AV.uint_value and AM.chapter_id = D.chapter_id " .
 		"left join Chapter as C on AM.chapter_id = C.id";
 	if (is_array ($object_set) && !empty ($object_set))
 	{
-		$query .= ' WHERE RO.id IN (';
+		$query .= ' WHERE O.id IN (';
 		foreach ($object_set as $object_id)
 			$query .= intval ($object_id) . ', ';
 		$query = trim ($query, ', ') . ')';
@@ -3106,7 +3175,7 @@ function commitUpdateVS ($vsid = 0, $vip = '', $vport = 0, $proto = '', $name = 
 function loadThumbCache ($rack_id = 0)
 {
 	$ret = NULL;
-	$result = usePreparedSelectBlade ("SELECT thumb_data FROM Rack WHERE id = ? AND thumb_data IS NOT NULL", array ($rack_id));
+	$result = usePreparedSelectBlade ('SELECT thumb_data FROM RackThumbnail WHERE rack_id = ? AND thumb_data IS NOT NULL', array ($rack_id));
 	$row = $result->fetch (PDO::FETCH_ASSOC);
 	if ($row)
 		$ret = base64_decode ($row['thumb_data']);
@@ -3719,9 +3788,9 @@ function getNATv4ForObject ($object_id)
 		"INET_NTOA(remoteip) as remoteip, ".
 		"remoteport, ".
 		"IPv4NAT.object_id as object_id, ".
-		"RackObject.name as object_name, ".
+		"Object.name as object_name, ".
 		"description ".
-		"from ((IPv4NAT join IPv4Allocation on remoteip=IPv4Allocation.ip) join RackObject on IPv4NAT.object_id=RackObject.id) ".
+		"from ((IPv4NAT join IPv4Allocation on remoteip=IPv4Allocation.ip) join Object on IPv4NAT.object_id=Object.id) ".
 		"where IPv4Allocation.object_id=? ".
 		"order by remoteip, remoteport, proto, localip, localport",
 		array ($object_id)
@@ -4621,9 +4690,9 @@ function getLogRecords()
 {
 	$result = usePreparedSelectBlade
 	(
-		'SELECT o.id as logid, r.name, o.content, o.date, o.user, r.id as object_id ' .
-		'FROM ObjectLog o Left JOIN RackObject r ON o.object_id = r.id ' .
-		'ORDER BY o.date DESC'
+		'SELECT OL.id AS log_id, O.objtype_id, O.name, OL.content, OL.date, OL.user, O.id AS object_id ' .
+		'FROM ObjectLog OL LEFT JOIN Object O ON OL.object_id = O.id ' .
+		'ORDER BY OL.date DESC'
 	);
 	return $result->fetchAll (PDO::FETCH_ASSOC);
 }

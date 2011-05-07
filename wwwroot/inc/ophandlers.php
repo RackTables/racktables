@@ -48,37 +48,6 @@ $msgcode = array();
 global $opspec_list;
 $opspec_list = array();
 
-$opspec_list['rackspace-edit-addRow'] = array
-(
-	'table' => 'RackRow',
-	'action' => 'INSERT',
-	'arglist' => array
-	(
-		array ('url_argname' => 'name', 'assertion' => 'string')
-	),
-);
-$opspec_list['rackspace-edit-delete'] = array
-(
-	'table' => 'RackRow',
-	'action' => 'DELETE',
-	'arglist' => array
-	(
-		array ('url_argname' => 'row_id', 'table_colname' => 'id', 'assertion' => 'uint')
-	),
-);
-$opspec_list['rackspace-edit-updateRow'] = array
-(
-	'table' => 'RackRow',
-	'action' => 'UPDATE',
-	'set_arglist' => array
-	(
-		array ('url_argname' => 'name', 'assertion' => 'string')
-	),
-	'where_arglist' => array
-	(
-		array ('url_argname' => 'row_id', 'table_colname' => 'id', 'assertion' => 'uint')
-	),
-);
 $opspec_list['object-ports-delPort'] = array
 (
 	'table' => 'Port',
@@ -1122,7 +1091,7 @@ function updateObject ()
 	}
 	// Invalidate thumb cache of all racks objects could occupy.
 	foreach (getResidentRacksData ($object_id, FALSE) as $rack_id)
-		usePreparedUpdateBlade ('Rack', array ('thumb_data' => NULL), array ('id' => $rack_id));
+		usePreparedDeleteBlade ('RackThumbnail', array ('rack_id' => $rack_id));
 	$dbxlink->commit();
 	return showFuncMessage (__FUNCTION__, 'OK');
 }
@@ -1222,7 +1191,7 @@ function deleteObject ()
 	$racklist = getResidentRacksData ($_REQUEST['object_id'], FALSE);
 	commitDeleteObject ($_REQUEST['object_id']);
 	foreach ($racklist as $rack_id)
-		usePreparedUpdateBlade ('Rack', array ('thumb_data' => NULL), array ('id' => $rack_id));
+		usePreparedDeleteBlade ('RackThumbnail', array ('rack_id' => $rack_id));
 	return showFuncMessage (__FUNCTION__, 'OK', array ($oinfo['dname']));
 }
 
@@ -1232,7 +1201,7 @@ function resetObject ()
 	$racklist = getResidentRacksData (getBypassValue(), FALSE);
 	commitResetObject (getBypassValue());
 	foreach ($racklist as $rack_id)
-		usePreparedUpdateBlade ('Rack', array ('thumb_data' => NULL), array ('id' => $rack_id));
+		usePreparedDeleteBlade ('RackThumbnail', array ('rack_id' => $rack_id));
 	return showFuncMessage (__FUNCTION__, 'OK');
 }
 
@@ -1794,18 +1763,26 @@ function addRack ()
 	$taglist = isset ($_REQUEST['taglist']) ? $_REQUEST['taglist'] : array();
 	if (isset ($_REQUEST['got_data']))
 	{
-		assertStringArg ('rack_name');
-		assertUIntArg ('rack_height1');
-		assertStringArg ('rack_comment', TRUE);
-		commitAddRack ($_REQUEST['rack_name'], $_REQUEST['rack_height1'], $_REQUEST['row_id'], $_REQUEST['rack_comment'], $taglist);
-		return showFuncMessage (__FUNCTION__, 'OK', array ($_REQUEST['rack_name']));
+		assertStringArg ('name');
+		assertUIntArg ('height1');
+		assertStringArg ('label', TRUE);
+		assertStringArg ('asset_no', TRUE);
+		$rack_id = commitAddObject ($_REQUEST['name'], $_REQUEST['label'], 1560, $_REQUEST['asset_no'], $taglist);
+
+		// Update the height
+		commitUpdateAttrValue ($rack_id, 27, $_REQUEST['height1']);
+
+		// Link it to the row
+		commitLinkEntities ('object', $_REQUEST['row_id'], 'object', $rack_id);
+
+		return showFuncMessage (__FUNCTION__, 'OK', array ($_REQUEST['name']));
 	}
 	elseif (isset ($_REQUEST['got_mdata']))
 	{
-		assertUIntArg ('rack_height2');
-		assertStringArg ('rack_names', TRUE);
+		assertUIntArg ('height2');
+		assertStringArg ('names', TRUE);
 		// copy-and-paste from renderAddMultipleObjectsForm()
-		$names1 = explode ("\n", $_REQUEST['rack_names']);
+		$names1 = explode ("\n", $_REQUEST['names']);
 		$names2 = array();
 		foreach ($names1 as $line)
 		{
@@ -1818,8 +1795,13 @@ function addRack ()
 		}
 		foreach ($names2 as $cname)
 		{
-			commitAddRack ($cname, $_REQUEST['rack_height2'], $_REQUEST['row_id'], '', $taglist);
-			showFuncMessage (__FUNCTION__, 'OK', array ($cname));
+			$rack_id = commitAddObject ($cname, '', 1560, NULL, $taglist);
+
+			// Update the height
+			commitUpdateAttrValue ($rack_id, 27, $_REQUEST['height2']);
+
+			// Link it to the row
+			commitLinkEntities ('object', $_REQUEST['row_id'], 'object', $rack_id);
 		}
 	}
 	else
@@ -1835,7 +1817,7 @@ function deleteRack ()
 	amplifyCell ($rackData);
 	if (count ($rackData['mountedObjects']))
 		return showFuncMessage (__FUNCTION__, 'ERR1');
-	commitDeleteRack ($_REQUEST['rack_id']);
+	commitDeleteObject ($_REQUEST['rack_id']);
 	showFuncMessage (__FUNCTION__, 'OK', array ($rackData['name']));
 	return buildRedirectURL ('rackspace', 'default');
 }
@@ -1843,15 +1825,58 @@ function deleteRack ()
 $msgcode['updateRack']['OK'] = 6;
 function updateRack ()
 {
-	assertUIntArg ('rack_row_id');
-	assertUIntArg ('rack_height');
-	assertStringArg ('rack_name');
-	assertStringArg ('rack_comment', TRUE);
+	assertUIntArg ('row_id');
+	assertStringArg ('name');
+	assertUIntArg ('height');
+	assertStringArg ('label', TRUE);
+	$has_problems = (isset ($_REQUEST['has_problems']) and $_REQUEST['has_problems'] == 'on') ? 'yes' : 'no';
+	assertStringArg ('asset_no', TRUE);
+	assertStringArg ('comment', TRUE);
 
 	$rack_id = getBypassValue();
-	usePreparedUpdateBlade ('Rack', array ('thumb_data' => NULL), array ('id' => $rack_id));
-	commitUpdateRack ($rack_id, $_REQUEST['rack_name'], $_REQUEST['rack_height'], $_REQUEST['rack_row_id'], $_REQUEST['rack_comment']);
-	return showFuncMessage (__FUNCTION__, 'OK', array ($_REQUEST['rack_name']));
+	usePreparedDeleteBlade ('RackThumbnail', array ('rack_id' => $rack_id));
+	commitUpdateRack ($rack_id, $_REQUEST['row_id'], $_REQUEST['name'], $_REQUEST['height'], $_REQUEST['label'], $has_problems, $_REQUEST['asset_no'], $_REQUEST['comment']);
+
+	// Update optional attributes
+	$oldvalues = getAttrValues ($rack_id);
+	$num_attrs = isset ($_REQUEST['num_attrs']) ? $_REQUEST['num_attrs'] : 0;
+	for ($i = 0; $i < $num_attrs; $i++)
+	{
+		assertUIntArg ("${i}_attr_id");
+		$attr_id = $_REQUEST["${i}_attr_id"];
+
+		// Skip the 'height' attribute as it's already handled by commitUpdateRack
+		if ($attr_id == 27)
+			continue;
+
+		// Field is empty, delete attribute and move on. OR if the field type is a dictionary and it is the --NOT SET-- value of 0
+		if (!strlen ($_REQUEST["${i}_value"]) || ($oldvalues[$attr_id]['type']=='dict' && $_REQUEST["${i}_value"] == 0))
+		{
+			commitUpdateAttrValue ($rack_id, $attr_id);
+			continue;
+		}
+
+		// The value could be uint/float, but we don't know ATM. Let SQL
+		// server check this and complain.
+		assertStringArg ("${i}_value");
+		$value = $_REQUEST["${i}_value"];
+		switch ($oldvalues[$attr_id]['type'])
+		{
+			case 'uint':
+			case 'float':
+			case 'string':
+				$oldvalue = $oldvalues[$attr_id]['value'];
+				break;
+			case 'dict':
+				$oldvalue = $oldvalues[$attr_id]['key'];
+				break;
+			default:
+		}
+		if ($value === $oldvalue) // ('' == 0), but ('' !== 0)
+			continue;
+		commitUpdateAttrValue ($rack_id, $attr_id, $value);
+	}
+	return showFuncMessage (__FUNCTION__, 'OK', array ($_REQUEST['name']));
 }
 
 function updateRackDesign ()
@@ -2638,9 +2663,9 @@ function addObjectlog ()
 {
 	assertStringArg ('logentry');
 	global $remote_username, $sic;
-	$oi = spotEntity ('object', $sic['object_id']);
-	usePreparedExecuteBlade ('INSERT INTO ObjectLog SET object_id=?, user=?, date=NOW(), content=?', array ($sic['object_id'], $remote_username, $sic['logentry']));
-	showSuccess ('Log entry for ' . mkA ($oi['dname'], 'object', $sic['object_id'], 'log') . " added by ${remote_username}");
+	$object_id = isset($sic['object_id']) ? $sic['object_id'] : $sic['rack_id'];
+	usePreparedExecuteBlade ('INSERT INTO ObjectLog SET object_id=?, user=?, date=NOW(), content=?', array ($object_id, $remote_username, $sic['logentry']));
+	showSuccess ('Log entry added');
 }
 
 function getOpspec()

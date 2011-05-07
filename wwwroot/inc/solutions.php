@@ -90,7 +90,11 @@ function renderRackThumb ($rack_id = 0)
 		$capture = ob_get_clean();
 		header("Content-type: image/png");
 		echo $capture;
-		usePreparedUpdateBlade ('Rack', array ('thumb_data' => base64_encode ($capture)), array ('id' => $rack_id));
+		usePreparedExecuteBlade
+		(
+			'REPLACE INTO RackThumbnail SET rack_id=?, thumb_data=?',
+			array ($rack_id, base64_encode ($capture))
+		);
 		return;
 	}
 	// error text in the buffer
@@ -119,8 +123,9 @@ function generateMiniRack ($rack_id)
 		$color[$statecode] = colorFromHex ($img, getConfigVar ('color_' . $statecode));
 	$color['black'] = colorFromHex ($img, '000000');
 	$color['gray'] = colorFromHex ($img, 'c0c0c0');
+	$border_color = ($rackData['has_problems'] == 'yes') ? $color['Thw'] : $color['gray'];
 	imagerectangle ($img, 0, 0, $totalwidth - 1, $totalheight - 1, $color['black']);
-	imagerectangle ($img, 1, 1, $totalwidth - 2, $totalheight - 2, $color['gray']);
+	imagerectangle ($img, 1, 1, $totalwidth - 2, $totalheight - 2, $border_color);
 	imagerectangle ($img, 2, 2, $totalwidth - 3, $totalheight - 3, $color['black']);
 	for ($unit_no = 1; $unit_no <= $rackData['height']; $unit_no++)
 	{

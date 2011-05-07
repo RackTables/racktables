@@ -286,7 +286,7 @@ function renderRackspace ()
 	$rows = array();
 	$cellfilter = getCellFilter();
 	$rackCount = 0;
-	foreach (getRackRows() as $row_id => $row_name) {
+	foreach (getRows() as $row_id => $row_name) {
 		$rackList = filterCellList (listCells ('rack', $row_id), $cellfilter['expression']);
 		$found_racks = array_merge($found_racks, $rackList);
 		$rows[] = array(
@@ -365,7 +365,7 @@ function renderRackspaceRowEditor ()
 	echo "<tr><th>&nbsp;</th><th>Name</th><th>&nbsp;</th></tr>\n";
 	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
 		printNewItemTR();
-	foreach (getRackRows() as $row_id => $row_name)
+	foreach (getRows() as $row_id => $row_name)
 	{
 		echo "<tr><td>";
 		if ($rc = count (listCells ('rack', $row_id)))
@@ -389,7 +389,7 @@ function renderRackspaceRowEditor ()
 
 function renderRow ($row_id)
 {
-	$rowInfo = getRackRowInfo ($row_id);
+	$rowInfo = getRowInfo ($row_id);
 	$cellfilter = getCellFilter();
 	$rackList = filterCellList (listCells ('rack', $row_id), $cellfilter['expression']);
 	// Main layout starts.
@@ -401,8 +401,8 @@ function renderRow ($row_id)
 	echo "<table border=0 cellspacing=0 cellpadding=3 width='100%'>\n";
 	echo "<tr><th width='50%' class=tdright>Racks:</th><td class=tdleft>${rowInfo['count']}</td></tr>\n";
 	echo "<tr><th width='50%' class=tdright>Units:</th><td class=tdleft>${rowInfo['sum']}</td></tr>\n";
-	echo "<tr><th width='50%' class=tdright>%% used:</th><td class=tdleft>";
-	renderProgressBar (getRSUforRackRow ($rackList));
+	echo "<tr><th width='50%' class=tdright>% used:</th><td class=tdleft>";
+	renderProgressBar (getRSUforRow ($rackList));
 	echo "</td></tr>\n";
 	echo "</table><br>\n";
 	finishPortlet();
@@ -426,7 +426,8 @@ function renderRow ($row_id)
 				echo '</tr>';
 			echo '<tr>';
 		}
-		echo "<td align=center class=row_${order}><a href='".makeHref(array('page'=>'rack', 'rack_id'=>$rack['id']))."'>";
+		$class = ($rack['has_problems'] == 'yes') ? 'error' : $order;
+		echo "<td align=center class=row_${class}><a href='".makeHref(array('page'=>'rack', 'rack_id'=>$rack['id']))."'>";
 		echo "<img border=0 width=${rackwidth} height=" . (getRackImageHeight ($rack['height']) * getConfigVar ('ROW_SCALE'));
 		echo " title='${rack['height']} units'";
 		echo "src='?module=image&img=minirack&rack_id=${rack['id']}'>";
@@ -536,18 +537,19 @@ function renderRack ($rack_id, $hl_obj_id = 0)
 
 function renderNewRackForm ($row_id)
 {
+	$default_height = getConfigVar ('DEFAULT_RACK_HEIGHT');
+	if ($default_height == 0)
+		$default_height = '';
 	startPortlet ('Add one');
 	printOpFormIntro ('addRack', array ('got_data' => 'TRUE'));
 	echo '<table border=0 align=center>';
-	$defh = getConfigVar ('DEFAULT_RACK_HEIGHT');
-	if ($defh == 0)
-		$defh = '';
-	echo "<tr><th class=tdright>Rack name (*):</th><td class=tdleft><input type=text name=rack_name tabindex=1></td>";
+	echo "<tr><th class=tdright>Name (required):</th><td class=tdleft><input type=text name=name tabindex=1></td>";
 	echo "<td rowspan=4>Assign tags:<br>";
 	renderNewEntityTags ('rack');
 	echo "</td></tr>\n";
-	echo "<tr><th class=tdright>Height in units (*):</th><td class=tdleft><input type=text name=rack_height1 tabindex=2 value='${defh}'></td></tr>\n";
-	echo "<tr><th class=tdright>Comment:</th><td class=tdleft><input type=text name=rack_comment tabindex=3></td></tr>\n";
+	echo "<tr><th class=tdright>Height in units (required):</th><td class=tdleft><input type=text name=height1 tabindex=2 value='${default_height}'></td></tr>\n";
+	echo "<tr><th class=tdright>Visible label:</th><td class=tdleft><input type=text name=label tabindex=3></td></tr>\n";
+	echo "<tr><th class=tdright>Asset tag:</th><td class=tdleft><input type=text name=asset_no tabindex=4></td></tr>\n";
 	echo "<tr><td class=submit colspan=2>";
 	printImageHREF ('CREATE', 'Add', TRUE);
 	echo "</td></tr></table></form>";
@@ -556,14 +558,11 @@ function renderNewRackForm ($row_id)
 	startPortlet ('Add many');
 	printOpFormIntro ('addRack', array ('got_mdata' => 'TRUE'));
 	echo '<table border=0 align=center>';
-	$defh = getConfigVar ('DEFAULT_RACK_HEIGHT');
-	if ($defh == 0)
-		$defh = '';
-	echo "<tr><th class=tdright>Height in units (*):</th><td class=tdleft><input type=text name=rack_height2 value='${defh}'></td>";
+	echo "<tr><th class=tdright>Height in units (*):</th><td class=tdleft><input type=text name=height2 value='${default_height}'></td>";
 	echo "<td rowspan=3 valign=top>Assign tags:<br>";
 	renderNewEntityTags ('rack');
 	echo "</td></tr>\n";
-	echo "<tr><th class=tdright>Rack names (*):</th><td class=tdleft><textarea name=rack_names cols=40 rows=25></textarea></td></tr>\n";
+	echo "<tr><th class=tdright>Rack names (required):</th><td class=tdleft><textarea name=names cols=40 rows=25></textarea></td></tr>\n";
 	echo "<tr><td class=submit colspan=2>";
 	printImageHREF ('CREATE', 'Add', TRUE);
 	echo '</form></table>';
@@ -597,7 +596,7 @@ function renderEditObjectForm()
 		echo "<tr><td>&nbsp;</td><th class=tdright>Asset tag:</th><td class=tdleft><input type=text name=object_asset_no value='${object['asset_no']}'></td></tr>\n";
 	}
 	// parent selection
-	if (rackObjectTypeMayHaveParent ($object['objtype_id']))
+	if (objectTypeMayHaveParent ($object['objtype_id']))
 	{
 		$parents = getEntityRelatives ('parents', 'object', $object_id);
 		foreach ($parents as $link_id => $parent_details)
@@ -692,7 +691,7 @@ function renderEditObjectForm()
 
 	echo '<table border=0 width=100%><tr><td>';
 	startPortlet ('history');
-	renderHistory ($pageno, $object_id);
+	renderObjectHistory ($object_id);
 	finishPortlet();
 	echo '</td></tr></table>';
 }
@@ -704,29 +703,77 @@ function renderEditRackForm ($rack_id)
 	$rack = spotEntity ('rack', $rack_id);
 	amplifyCell ($rack);
 
-	startPortlet ('Rack attributes');
+	startPortlet ('Attributes');
 	printOpFormIntro ('updateRack');
 	echo '<table border=0 align=center>';
-	echo "<tr><th class=tdright>Rack row:</th><td class=tdleft>";
-	printSelect (getRackRows(), array ('name' => 'rack_row_id'), $rack['row_id']);
+	echo "<tr><td>&nbsp;</td><th class=tdright>Rack row:</th><td class=tdleft>";
+	printSelect (getRows(), array ('name' => 'row_id'), $rack['row_id']);
 	echo "</td></tr>\n";
-	echo "<tr><th class=tdright>Name (required):</th><td class=tdleft><input type=text name=rack_name value='${rack['name']}'></td></tr>\n";
-	echo "<tr><th class=tdright>Height (required):</th><td class=tdleft><input type=text name=rack_height value='${rack['height']}'></td></tr>\n";
-	echo "<tr><th class=tdright>Comment:</th><td class=tdleft><input type=text name=rack_comment value='${rack['comment']}'></td></tr>\n";
+	echo "<tr><td>&nbsp;</td><th class=tdright>Name (required):</th><td class=tdleft><input type=text name=name value='${rack['name']}'></td></tr>\n";
+	echo "<tr><td>&nbsp;</td><th class=tdright>Height (required):</th><td class=tdleft><input type=text name=height value='${rack['height']}'></td></tr>\n";
+	echo "<tr><td>&nbsp;</td><th class=tdright>Visible label:</th><td class=tdleft><input type=text name=label value='${rack['label']}'></td></tr>\n";
+	echo "<tr><td>&nbsp;</td><th class=tdright>Asset tag:</th><td class=tdleft><input type=text name=asset_no value='${rack['asset_no']}'></td></tr>\n";
+	// optional attributes
+	$values = getAttrValues ($rack_id);
+	$num_attrs = count($values);
+	$num_attrs = $num_attrs-1; // subtract for the 'height' attribute
+	echo "<input type=hidden name=num_attrs value=${num_attrs}>\n";
+	$i = 0;
+	foreach ($values as $record)
+	{
+		// Skip the 'height' attribute as it's already displayed as a required field
+		if ($record['id'] == 27)
+			continue;
+		echo "<input type=hidden name=${i}_attr_id value=${record['id']}>";
+		echo '<tr><td>';
+		if (strlen ($record['value']))
+		{
+			echo "<a href='".makeHrefProcess(array('op'=>'clearSticker', 'rack_id'=>$rack_id, 'attr_id'=>$record['id']))."'>";
+			printImageHREF ('clear', 'Clear value');
+			echo '</a>';
+		}
+		else
+			echo '&nbsp;';
+		echo '</td>';
+		echo "<th class=sticker>${record['name']}:</th><td class=tdleft>";
+		switch ($record['type'])
+		{
+			case 'uint':
+			case 'float':
+			case 'string':
+				echo "<input type=text name=${i}_value value='${record['value']}'>";
+				break;
+			case 'dict':
+				$chapter = readChapter ($record['chapter_id'], 'o');
+				$chapter[0] = '-- NOT SET --';
+				$chapter = cookOptgroups ($chapter, 1560, $record['key']);
+				printNiftySelect ($chapter, array ('name' => "${i}_value"), $record['key']);
+				break;
+		}
+		echo "</td></tr>\n";
+		$i++;
+	}
+	echo "<tr><td>&nbsp;</td><th class=tdright>Has problems:</th><td class=tdleft><input type=checkbox name=has_problems";
+	if ($rack['has_problems'] == 'yes')
+		echo ' checked';
+	echo "></td></tr>\n";
 	if (count ($rack['mountedObjects']) == 0)
 	{
-		echo "<tr><th class=tdright>Actions:</th><td class=tdleft><a href='".
-        	        makeHrefProcess(array('op'=>'deleteRack', 'rack_id'=>$rack_id)).
-                	"' onclick=\"javascript:return confirm('Are you sure you want to delete the rack?')\">Delete rack</a></td></tr>\n";
+		echo "<tr><td>&nbsp;</td><th class=tdright>Actions:</th><td class=tdleft>"; 
+		echo "<a href='".
+			makeHrefProcess(array('op'=>'deleteRack', 'rack_id'=>$rack_id)).
+			"' onclick=\"javascript:return confirm('Are you sure you want to delete the rack?')\">" . getImageHREF ('destroy', 'Delete rack') . "</a>";
+		echo "&nbsp;</td></tr>\n";
 	}
-	echo "<tr><td class=submit colspan=2>";
+	echo "<tr><td colspan=3><b>Comment:</b><br><textarea name=comment rows=10 cols=80>${rack['comment']}</textarea></td></tr>";
+	echo "<tr><td class=submit colspan=3>";
 	printImageHREF ('SAVE', 'Save changes', TRUE);
 	echo "</td></tr>\n";
 	echo '</form></table><br>';
 	finishPortlet();
 	
 	startPortlet ('History');
-	renderHistory ($pageno, $rack_id);
+	renderObjectHistory ($rack_id);
 	finishPortlet();
 }
 
@@ -738,7 +785,21 @@ function renderRackInfoPortlet ($rackData)
 	echo "<tr><th width='50%' class=tdright>Rack row:</th><td class=tdleft>${rackData['row_name']}</td></tr>\n";
 	echo "<tr><th width='50%' class=tdright>Name:</th><td class=tdleft>${rackData['name']}</td></tr>\n";
 	echo "<tr><th width='50%' class=tdright>Height:</th><td class=tdleft>${rackData['height']}</td></tr>\n";
-	echo "<tr><th width='50%' class=tdright>%% used:</th><td class=tdleft>";
+	if (strlen ($rackData['asset_no']))
+		echo "<tr><th width='50%' class=tdright>Visible label:</th><td class=tdleft>${rackData['label']}</td></tr>\n";
+	if (strlen ($rackData['asset_no']))
+		echo "<tr><th width='50%' class=tdright>Asset tag:</th><td class=tdleft>${rackData['asset_no']}</td></tr>\n";
+	if ($rackData['has_problems'] == 'yes')
+		echo "<tr><td colspan=2 class=msg_error>Has problems</td></tr>\n";
+	// Display populated attributes, but skip Height since it's already displayed above
+	foreach (getAttrValues ($rackData['id']) as $record)
+		if ($record['id'] != 27 && strlen ($record['value']))
+		{
+			echo "<tr><th width='50%' class=sticker>${record['name']}:</th><td class=sticker>" .
+				formatAttributeValue ($record) .
+				"</td></tr>\n";
+		}
+	echo "<tr><th width='50%' class=tdright>% used:</th><td class=tdleft>";
 	renderProgressBar (getRSUforRack ($rackData));
 	echo "</td></tr>\n";
 	echo "<tr><th width='50%' class=tdright>Objects:</th><td class=tdleft>";
@@ -809,7 +870,7 @@ function finishPortlet ()
 	echo "</div>\n";
 }
 
-function renderRackObject ($object_id)
+function renderObject ($object_id)
 {
 	global $nextorder, $virtual_obj_types;
 	$info = spotEntity ('object', $object_id);
@@ -832,12 +893,12 @@ function renderRackObject ($object_id)
 		'cfe' => '{$typeid_' . $info['objtype_id'] . '}'
 	));
 	echo "'>" . decodeObjectType ($info['objtype_id'], 'o') . '</a></td></tr>';
+	if (strlen ($info['label']))
+		echo "<tr><th width='50%' class=tdright>Visible label:</th><td class=tdleft>${info['label']}</td></tr>\n";
 	if (strlen ($info['asset_no']))
 		echo "<tr><th width='50%' class=tdright>Asset tag:</th><td class=tdleft>${info['asset_no']}</td></tr>\n";
 	elseif (considerConfiguredConstraint ($info, 'ASSETWARN_LISTSRC'))
 		echo "<tr><td colspan=2 class=msg_error>Asset tag is missing.</td></tr>\n";
-	if (strlen ($info['label']))
-		echo "<tr><th width='50%' class=tdright>Visible label:</th><td class=tdleft>${info['label']}</td></tr>\n";
 	if ($parents = getEntityRelatives ('parents', 'object', $object_id))
 	{
 		foreach ($parents as $parent)
@@ -1804,7 +1865,7 @@ function renderDepot ()
 				echo "</td><td class='${secondclass}'>${obj['label']}</td>";
 				echo "<td class='${secondclass}'>${obj['asset_no']}</td>";
 				if ($obj['rack_id'])
-					echo "<td class='${secondclass}'><a href='".makeHref(array('page'=>'row', 'row_id'=>$obj['row_id']))."'>${obj['Row_name']}</a>/<a href='".makeHref(array('page'=>'rack', 'rack_id'=>$obj['rack_id']))."'>${obj['Rack_name']}</a></td>";
+					echo "<td class='${secondclass}'><a href='".makeHref(array('page'=>'row', 'row_id'=>$obj['row_id']))."'>${obj['row_name']}</a>/<a href='".makeHref(array('page'=>'rack', 'rack_id'=>$obj['rack_id']))."'>${obj['rack_name']}</a></td>";
 				else
 					echo "<td class='${secondclass}'>Unmounted</td>";
 				echo '</tr>';
@@ -1846,43 +1907,21 @@ END;
 }
 
 // History viewer for history-enabled simple dictionaries.
-function renderHistory ($object_type, $object_id)
+function renderObjectHistory ($object_id)
 {
-	switch ($object_type)
-	{
-		case 'row':
-			$query = "select ctime, user_name, name, comment from RackRowHistory where id = ? order by ctime";
-			$header = '<tr><th>change time</th><th>author</th><th>rack row name</th><th>rack row comment</th></tr>';
-			$extra = 3;
-			break;
-		case 'rack':
-			$query =
-				"select ctime, user_name, rh.name, rr.name as name, rh.height, rh.comment " .
-				"from RackHistory as rh left join RackRow as rr on rh.row_id = rr.id " .
-				"where rh.id = ? order by ctime";
-			$header = '<tr><th>change time</th><th>author</th><th>rack name</th><th>rack row name</th><th>rack height</th><th>rack comment</th></tr>';
-			$extra = 5;
-			break;
-		case 'object':
-			$query =
-				"select ctime, user_name, RackObjectHistory.name as name, label, asset_no, has_problems, dict_value, comment " .
-				"from RackObjectHistory inner join Dictionary on objtype_id = dict_key join Chapter on Dictionary.chapter_id = Chapter.id " .
-				"where Chapter.name = 'RackObjectType' and RackObjectHistory.id=? order by ctime";
-			$header = '<tr><th>change time</th><th>author</th><th>common name</th><th>visible label</th><th>asset no</th><th>has problems?</th><th>object type</th><th>comment</th></tr>';
-			$extra = 7;
-			break;
-		default:
-			throw new InvalidArgException ('object_type', $object_type);
-	}
-	$result = usePreparedSelectBlade ($query, array ($object_id));
-	echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
 	$order = 'odd';
 	global $nextorder;
-	echo $header;
+	echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
+	echo '<tr><th>change time</th><th>author</th><th>name</th><th>visible label</th><th>asset no</th><th>has problems?</th><th>comment</th></tr>';
+	$result = usePreparedSelectBlade
+	(
+		'SELECT ctime, user_name, name, label, asset_no, has_problems, comment FROM ObjectHistory WHERE id=? ORDER BY ctime',
+		array ($object_id)
+	);
 	while ($row = $result->fetch (PDO::FETCH_NUM))
 	{
 		echo "<tr class=row_${order}><td>${row[0]}</td>";
-		for ($i = 1; $i <= $extra; $i++)
+		for ($i = 1; $i <= 6; $i++)
 			echo "<td>" . $row[$i] . "</td>";
 		echo "</tr>\n";
 		$order = $nextorder[$order];
@@ -3292,18 +3331,21 @@ function renderNATv4ForObject ($object_id)
 
 function renderAddMultipleObjectsForm ()
 {
-	global $virtual_obj_types;
+	global $location_obj_types, $virtual_obj_types;
 	$typelist = readChapter (CHAP_OBJTYPE, 'o');
 	$typelist[0] = 'select type...';
 	$typelist = cookOptgroups ($typelist);
 	$max = getConfigVar ('MASSCOUNT');
 	$tabindex = 100;
 
-	// create a list containing only physical object types
+	// create a list of object types to exclude (virtual and location-related ones)
+	$exclude_typelist = array_merge($location_obj_types, $virtual_obj_types);
+
 	$phys_typelist = $typelist;
 	foreach ($phys_typelist['other'] as $key => $value)
 	{
-		if ($key > 0 && in_array($key, $virtual_obj_types))
+		// remove from list if type should be excluded
+		if ($key > 0 && in_array($key, $exclude_typelist))
 			unset($phys_typelist['other'][$key]);
 	}
 	startPortlet ('Physical objects');
@@ -4253,7 +4295,9 @@ function renderEditAttrMapForm ()
 		echo "</select></td><td class=tdleft>";
 		printImageHREF ('add', '', TRUE);
 		echo ' ';
-		printNiftySelect (cookOptgroups (readChapter (CHAP_OBJTYPE, 'o')), array ('name' => 'objtype_id', 'tabindex' => 101));
+		$objtypes = readChapter (CHAP_OBJTYPE, 'o');
+		unset ($objtypes[1561], $objtypes[1562]); // attributes may not be assigned to rows or locations yet
+		printNiftySelect (cookOptgroups ($objtypes), array ('name' => 'objtype_id', 'tabindex' => 101));
 		echo ' <select name=chapter_no tabindex=102><option value=0>-- dictionary chapter for [D] attributes --</option>';
 		foreach (getChapterList() as $chapter)
 			if ($chapter['sticky'] != 'yes')
@@ -7087,7 +7131,7 @@ function dynamic_title_decoder ($path_position)
 			);
 		case 'row':
 			assertUIntArg ('row_id');
-			$rowInfo = getRackRowInfo ($_REQUEST['row_id']);
+			$rowInfo = getRowInfo ($_REQUEST['row_id']);
 			return array
 			(
 				'name' => $rowInfo['name'],
@@ -9049,8 +9093,20 @@ function renderObjectLogEditor ()
 {
 	global $nextorder;
 
-	echo '<center><h3>log records for this object (<a href=?page=objectlog>complete list</a>)</h3></center>';
+	if (isset($_REQUEST['object_id']))
+	{
+		$entity = 'object';
+		$id_name = 'object_id';
+		$object_id = $_REQUEST['object_id'];
+	}
+	else
+	{
+		$entity = 'rack';
+		$id_name = 'rack_id';
+		$object_id = $_REQUEST['rack_id'];
+	}
 
+	echo "<center><h2>Log records for this ${entity} (<a href=?page=objectlog>complete list</a>)</h2></center>";
 	printOpFormIntro ('add');
 	echo "<table with=80% align=center border=0 cellpadding=5 cellspacing=0 align=center class=cooltable><tr valign=top class=row_odd>";
 	echo '<td class=tdcenter>' . getImageHREF ('CREATE', 'add record', TRUE, 101) . '</td>';
@@ -9059,14 +9115,14 @@ function renderObjectLogEditor ()
 	echo '</tr></form>';
 
 	$order = 'even';
-	foreach (getLogRecordsForObject ($_REQUEST['object_id']) as $row)
+	foreach (getLogRecordsForObject ($object_id) as $row)
 	{
 		echo "<tr class=row_${order} valign=top>";
 		echo '<td class=tdleft>' . $row['date'] . '<br>' . $row['user'] . '</td>';
 		echo '<td class="slbconf rsvtext">' . string_insert_hrefs (htmlspecialchars ($row['content'], ENT_NOQUOTES)) . '</td>';
-		echo "<td class=tdleft><a href=\"".makeHrefProcess(array('op'=>'del', 'logid'=>$row['id'], 'object_id'=>$_REQUEST['object_id']))."\">";
+		echo "<td class=tdleft><a href=\"".makeHrefProcess(array('op'=>'del', 'log_id'=>$row['id'], $id_name=>$object_id))."\">";
 		echo getImageHREF ('DESTROY', 'Delete log entry') . '</a></td>';
-		echo '</tr>';
+		echo "</tr>\n";
 		$order = $nextorder[$order];
 	}
 	echo '</table>';
@@ -9089,11 +9145,22 @@ function allObjectLogs ()
 		$order = 'odd';
 		foreach ($logs as $row)
 		{
+			// Link to a different page if the object is a Rack
+			if ($row['objtype_id'] == 1560)
+			{
+				$entity = 'rack';
+				$id_name = 'rack_id';
+			}
+			else
+			{
+				$entity = 'object';
+				$id_name = 'object_id';
+			}
 			echo "<tr class=row_${order} valign=top>";
-			echo "<td align=left><a href='".makeHref(array('page'=>'object', 'tab'=>'log', 'object_id'=>$row['object_id']))."'>${row['name']}</a></td>";
+			echo "<td align=left><a href='".makeHref(array('page'=>$entity, 'tab'=>'log', $id_name=>$row['object_id']))."'>${row['name']}</a></td>";
 			echo '<td class=tdleft>' . $row['date'] . '<br>' . $row['user'] . '</td>';
 			echo '<td class="slbconf rsvtext">' . string_insert_hrefs (htmlspecialchars ($row['content'], ENT_NOQUOTES)) . '</td>';
-			echo '</tr>';
+			echo "</tr>\n";
 			$order = $nextorder[$order];
 		}
 		echo '</table>';

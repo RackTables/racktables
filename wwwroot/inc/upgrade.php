@@ -1114,6 +1114,79 @@ CREATE TABLE `IPv4Log` (
 			$query[] = "DELETE FROM Config WHERE varname = 'HNDP_RUNNERS_LISTSRC'";
 			$query[] = "ALTER TABLE TagStorage MODIFY COLUMN entity_realm ENUM('file','ipv4net','ipv4vs','ipv4rspool','object','rack','user','ipv6net','vst') NOT NULL default 'object'";
 			$query[] = "ALTER TABLE `TagStorage` ADD COLUMN `user` char(64) DEFAULT NULL, ADD COLUMN `date` datetime DEFAULT NULL";
+
+			// Rename object tables and keys
+			$dbxlink->query ('ALTER TABLE `RackObject` RENAME TO `Object`');
+			$dbxlink->query ('ALTER TABLE `RackObjectHistory` RENAME TO `ObjectHistory`');
+			$query[] = 'ALTER TABLE `Object` DROP KEY `RackObject_asset_no`';
+			$query[] = 'ALTER TABLE `Object` ADD UNIQUE KEY `asset_no` (`asset_no`)';
+			$query[] = 'ALTER TABLE `ObjectHistory` DROP FOREIGN KEY `RackObjectHistory-FK-object_id`';
+			$query[] = 'ALTER TABLE `ObjectHistory` ADD CONSTRAINT `ObjectHistory-FK-object_id` FOREIGN KEY (`id`) REFERENCES `Object` (`id`) ON DELETE CASCADE';
+			$query[] = 'ALTER TABLE `RackSpace` DROP FOREIGN KEY `RackSpace-FK-rack_id`';
+			$query[] = 'ALTER TABLE `RackSpace` ADD CONSTRAINT `RackSpace-FK-rack_id` FOREIGN KEY (`rack_id`) REFERENCES `Object` (`id`)';
+			// Rack height is now an attribute
+			$query[] = "INSERT INTO `Attribute` (`id`,`type`,`name`) VALUES (27,'uint','Height')";
+			$query[] = 'INSERT INTO `AttributeMap` (`objtype_id`,`attr_id`,`chapter_id`) VALUES (1560,27,NULL)';
+			// Turn rows into objects
+			$result = $dbxlink->query ('SELECT * FROM RackRow');
+			$rows = $result->fetchAll (PDO::FETCH_ASSOC);
+			unset ($result);
+			foreach ($rows as $row)
+			{
+				$prepared = $dbxlink->prepare ('INSERT INTO `Object` (`name`,`objtype_id`) VALUES (?,?)');
+				$prepared->execute (array($row['name'], 1561));
+				$row_id = $dbxlink->lastInsertId();
+				// Turn all racks in this row into objects
+				$result = $dbxlink->query ("SELECT id, name, height, comment FROM Rack WHERE row_id=${row['id']}");
+				$racks = $result->fetchAll (PDO::FETCH_ASSOC);
+				unset ($result);
+				foreach ($racks as $rack) 
+				{
+					// Add the rack as an object, set the height as an attribute, link the rack to the row,
+					// update rackspace, tags and files to reflect new rack_id, move history
+					$prepared = $dbxlink->prepare ('INSERT INTO `Object` (`name`,`objtype_id`,`comment`) VALUES (?,?,?)');
+					$prepared->execute (array($rack['name'], 1560, $rack['comment']));
+					$rack_id = $dbxlink->lastInsertId();
+					$query[] = "INSERT INTO `AttributeValue` (`object_id`,`attr_id`,`uint_value`) VALUES (${rack_id},27,${rack['height']})";
+					$query[] = "INSERT INTO `EntityLink` (`parent_entity_type`,`parent_entity_id`,`child_entity_type`,`child_entity_id`) VALUES ('object',${row_id},'object',${rack_id})";
+					$query[] = "UPDATE `RackSpace` SET `rack_id`=${rack_id} WHERE `rack_id`=${rack['id']}";
+					$query[] = "UPDATE `TagStorage` SET `entity_realm`='object', `entity_id`=${rack_id} WHERE `entity_realm`='rack' AND `entity_id`=${rack['id']}";
+					$query[] = "UPDATE `FileLink` SET `entity_type`='object', `entity_id`=${rack_id} WHERE `entity_type`='rack' AND `entity_id`=${rack['id']}";
+					$query[] = "INSERT INTO `ObjectHistory` (`id`,`name`,`objtype_id`,`comment`,`ctime`,`user_name`) SELECT ${rack_id},`name`,1560,`comment`,`ctime`,`user_name` FROM `RackHistory` WHERE `id`=${rack['id']}";
+				}
+			}
+			$query[] = 'DROP TABLE `Rack`';
+			$query[] = 'DROP TABLE `RackRow`';
+			$query[] = 'DROP TABLE `RackHistory`';
+			$query[] = "
+CREATE TABLE `RackThumbnail` (
+  `rack_id` int(10) unsigned NOT NULL,
+  `thumb_data` blob,
+  UNIQUE KEY `rack_id` (`rack_id`),
+  CONSTRAINT `RackThumbnail-FK-rack_id` FOREIGN KEY (`rack_id`) REFERENCES `Object` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB
+";
+			$query[] = "
+CREATE VIEW `Row` AS SELECT id, name
+  FROM `Object`
+  WHERE objtype_id = 1561
+";
+			$query[] = "
+CREATE VIEW `Rack` AS SELECT id, name, label, asset_no, has_problems,
+  (SELECT AV.uint_value FROM `AttributeValue` AV WHERE AV.object_id = Object.id AND AV.attr_id = 27) AS height,
+  comment,
+  (SELECT thumb_data FROM `RackThumbnail` WHERE RackThumbnail.rack_id = Object.id) AS thumb_data,
+  (SELECT parent_entity_id FROM `EntityLink` WHERE parent_entity_type = 'object' AND child_entity_type = 'object' AND child_entity_id = Object.id) AS row_id,
+  (SELECT name FROM `Row` WHERE id = row_id) AS row_name
+  FROM `Object`
+  WHERE objtype_id = 1560;
+";
+			$query[] = "
+CREATE VIEW `RackObject` AS SELECT * FROM `Object`
+ WHERE `objtype_id` NOT IN (1560, 1561, 1562)
+";
+			$query[] = "UPDATE `Chapter` SET `name` = 'ObjectType' WHERE `id` = 1";
+			$query[] = "DELETE FROM RackSpace WHERE object_id IS NULL AND state = 'T'";
 			$query[] = "UPDATE Config SET varvalue = '0.20.0' WHERE varname = 'DB_VERSION'";
 			break;
 		default:

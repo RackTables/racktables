@@ -381,7 +381,7 @@ CREATE TABLE `AttributeValue` (
   UNIQUE KEY `object_id` (`object_id`,`attr_id`),
   KEY `attr_id-uint_value` (`attr_id`,`uint_value`),
   KEY `attr_id-string_value` (`attr_id`,`string_value`(12)),
-  CONSTRAINT `AttributeValue-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `RackObject` (`id`) ON DELETE CASCADE
+  CONSTRAINT `AttributeValue-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `Object` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
 CREATE TABLE `CachedPAV` (
@@ -408,7 +408,7 @@ CREATE TABLE `CachedPVM` (
   `port_name` char(255) NOT NULL,
   `vlan_mode` enum('access','trunk') NOT NULL default 'access',
   PRIMARY KEY  (`object_id`,`port_name`),
-  CONSTRAINT `CachedPVM-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `RackObject` (`id`) ON DELETE CASCADE
+  CONSTRAINT `CachedPVM-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `Object` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
 CREATE TABLE `Chapter` (
@@ -488,7 +488,7 @@ CREATE TABLE `IPv4Allocation` (
   `type` enum('regular','shared','virtual','router') default NULL,
   PRIMARY KEY  (`object_id`,`ip`),
   KEY `ip` (`ip`),
-  CONSTRAINT `IPv4Allocation-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `RackObject` (`id`) ON DELETE CASCADE
+  CONSTRAINT `IPv4Allocation-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `Object` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
 CREATE TABLE `IPv4LB` (
@@ -502,7 +502,7 @@ CREATE TABLE `IPv4LB` (
   KEY `IPv4LB-FK-rspool_id` (`rspool_id`),
   KEY `IPv4LB-FK-vs_id` (`vs_id`),
   CONSTRAINT `IPv4LB-FK-vs_id` FOREIGN KEY (`vs_id`) REFERENCES `IPv4VS` (`id`),
-  CONSTRAINT `IPv4LB-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `RackObject` (`id`),
+  CONSTRAINT `IPv4LB-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `Object` (`id`),
   CONSTRAINT `IPv4LB-FK-rspool_id` FOREIGN KEY (`rspool_id`) REFERENCES `IPv4RSPool` (`id`)
 ) ENGINE=InnoDB;
 
@@ -528,7 +528,7 @@ CREATE TABLE `IPv4NAT` (
   KEY `localip` (`localip`),
   KEY `remoteip` (`remoteip`),
   KEY `object_id` (`object_id`),
-  CONSTRAINT `IPv4NAT-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `RackObject` (`id`)
+  CONSTRAINT `IPv4NAT-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `Object` (`id`)
 ) ENGINE=InnoDB;
 
 CREATE TABLE `IPv4Network` (
@@ -588,7 +588,7 @@ CREATE TABLE `IPv6Allocation` (
   `type` enum('regular','shared','virtual','router') default NULL,
   PRIMARY KEY  (`object_id`,`ip`),
   KEY `ip` (`ip`),
-  CONSTRAINT `IPv6Allocation-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `RackObject` (`id`) ON DELETE CASCADE
+  CONSTRAINT `IPv6Allocation-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `Object` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
 CREATE TABLE `IPv6Network` (
@@ -639,7 +639,7 @@ CREATE TABLE `MountOperation` (
   `comment` text,
   PRIMARY KEY  (`id`),
   KEY `object_id` (`object_id`),
-  CONSTRAINT `MountOperation-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `RackObject` (`id`) ON DELETE CASCADE
+  CONSTRAINT `MountOperation-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `Object` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
 CREATE TABLE `ObjectLog` (
@@ -651,7 +651,7 @@ CREATE TABLE `ObjectLog` (
   PRIMARY KEY (`id`),
   KEY `object_id` (`object_id`),
   KEY `date` (`date`),
-  CONSTRAINT `ObjectLog-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `RackObject` (`id`) ON DELETE CASCADE
+  CONSTRAINT `ObjectLog-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `Object` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
 CREATE TABLE `ObjectParentCompat` (
@@ -676,7 +676,7 @@ CREATE TABLE `Port` (
   KEY `l2address` (`l2address`),
   KEY `Port-FK-iif-oif` (`iif_id`,`type`),
   CONSTRAINT `Port-FK-iif-oif` FOREIGN KEY (`iif_id`, `type`) REFERENCES `PortInterfaceCompat` (`iif_id`, `oif_id`),
-  CONSTRAINT `Port-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `RackObject` (`id`) ON DELETE CASCADE
+  CONSTRAINT `Port-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `Object` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
 CREATE TABLE `PortAllowedVLAN` (
@@ -738,30 +738,7 @@ CREATE TABLE `PortVLANMode` (
   CONSTRAINT `PortVLANMode-FK-object-port` FOREIGN KEY (`object_id`, `port_name`) REFERENCES `CachedPVM` (`object_id`, `port_name`)
 ) ENGINE=InnoDB;
 
-CREATE TABLE `Rack` (
-  `id` int(10) unsigned NOT NULL auto_increment,
-  `name` char(255) default NULL,
-  `row_id` int(10) unsigned NOT NULL default '1',
-  `height` tinyint(3) unsigned NOT NULL default '42',
-  `comment` text,
-  `thumb_data` blob,
-  PRIMARY KEY  (`id`),
-  UNIQUE KEY `name_in_row` (`row_id`,`name`),
-  CONSTRAINT `Rack-FK-row_id` FOREIGN KEY (`row_id`) REFERENCES `RackRow` (`id`)
-) ENGINE=InnoDB;
-
-CREATE TABLE `RackHistory` (
-  `id` int(10) unsigned default NULL,
-  `name` char(255) default NULL,
-  `row_id` int(10) unsigned default NULL,
-  `height` tinyint(3) unsigned default NULL,
-  `comment` text,
-  `thumb_data` blob,
-  `ctime` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
-  `user_name` char(64) default NULL
-) ENGINE=InnoDB;
-
-CREATE TABLE `RackObject` (
+CREATE TABLE `Object` (
   `id` int(10) unsigned NOT NULL auto_increment,
   `name` char(255) default NULL,
   `label` char(255) default NULL,
@@ -770,11 +747,11 @@ CREATE TABLE `RackObject` (
   `has_problems` enum('yes','no') NOT NULL default 'no',
   `comment` text,
   PRIMARY KEY  (`id`),
-  UNIQUE KEY `RackObject_asset_no` (`asset_no`),
+  UNIQUE KEY `asset_no` (`asset_no`),
   UNIQUE KEY `name` (`name`)
 ) ENGINE=InnoDB;
 
-CREATE TABLE `RackObjectHistory` (
+CREATE TABLE `ObjectHistory` (
   `id` int(10) unsigned default NULL,
   `name` char(255) default NULL,
   `label` char(255) default NULL,
@@ -785,14 +762,7 @@ CREATE TABLE `RackObjectHistory` (
   `ctime` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
   `user_name` char(64) default NULL,
   KEY `id` (`id`),
-  CONSTRAINT `RackObjectHistory-FK-object_id` FOREIGN KEY (`id`) REFERENCES `RackObject` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB;
-
-CREATE TABLE `RackRow` (
-  `id` int(10) unsigned NOT NULL auto_increment,
-  `name` char(255) NOT NULL,
-  PRIMARY KEY  (`id`),
-  UNIQUE KEY `name` (`name`)
+  CONSTRAINT `ObjectHistory-FK-object_id` FOREIGN KEY (`id`) REFERENCES `Object` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
 CREATE TABLE `RackSpace` (
@@ -803,8 +773,15 @@ CREATE TABLE `RackSpace` (
   `object_id` int(10) unsigned default NULL,
   PRIMARY KEY  (`rack_id`,`unit_no`,`atom`),
   KEY `RackSpace_object_id` (`object_id`),
-  CONSTRAINT `RackSpace-FK-rack_id` FOREIGN KEY (`rack_id`) REFERENCES `Rack` (`id`),
-  CONSTRAINT `RackSpace-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `RackObject` (`id`) ON DELETE CASCADE
+  CONSTRAINT `RackSpace-FK-rack_id` FOREIGN KEY (`rack_id`) REFERENCES `Object` (`id`),
+  CONSTRAINT `RackSpace-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `Object` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE `RackThumbnail` (
+  `rack_id` int(10) unsigned NOT NULL,
+  `thumb_data` blob,
+  UNIQUE KEY `rack_id` (`rack_id`),
+  CONSTRAINT `RackThumbnail-FK-rack_id` FOREIGN KEY (`rack_id`) REFERENCES `Object` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
 CREATE TABLE `Script` (
@@ -917,7 +894,7 @@ CREATE TABLE `VLANSwitch` (
   KEY `out_of_sync` (`out_of_sync`),
   KEY `last_errno` (`last_errno`),
   CONSTRAINT `VLANSwitch-FK-domain_id` FOREIGN KEY (`domain_id`) REFERENCES `VLANDomain` (`id`),
-  CONSTRAINT `VLANSwitch-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `RackObject` (`id`),
+  CONSTRAINT `VLANSwitch-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `Object` (`id`),
   CONSTRAINT `VLANSwitch-FK-template_id` FOREIGN KEY (`template_id`) REFERENCES `VLANSwitchTemplate` (`id`)
 ) ENGINE=InnoDB;
 
@@ -934,6 +911,22 @@ CREATE TABLE `VLANValidID` (
   `vlan_id` int(10) unsigned NOT NULL default '1',
   PRIMARY KEY  (`vlan_id`)
 ) ENGINE=InnoDB;
+
+CREATE VIEW `Row` AS SELECT id, name
+  FROM `Object`
+  WHERE objtype_id = 1561;
+
+CREATE VIEW `Rack` AS SELECT id, name, label, asset_no, has_problems,
+  (SELECT AV.uint_value FROM `AttributeValue` AV WHERE AV.object_id = Object.id AND AV.attr_id = 27) AS height,
+  comment,
+  (SELECT thumb_data FROM `RackThumbnail` WHERE RackThumbnail.rack_id = Object.id) AS thumb_data,
+  (SELECT parent_entity_id FROM `EntityLink` WHERE parent_entity_type = 'object' AND child_entity_type = 'object' AND child_entity_id = Object.id) AS row_id,
+  (SELECT name FROM `Row` WHERE id = row_id) AS row_name
+  FROM `Object`
+  WHERE objtype_id = 1560;
+
+CREATE VIEW `RackObject` AS SELECT * FROM `Object`
+ WHERE `objtype_id` NOT IN (1560, 1561, 1562);
 
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
 END_OF_FILE;
@@ -959,7 +952,8 @@ INSERT INTO `Attribute` (`id`, `type`, `name`) VALUES
 (22,'string','HW warranty expiration'),
 (24,'string','SW warranty expiration'),
 (25,'string','UUID'),
-(26,'dict','Hypervisor');
+(26,'dict','Hypervisor'),
+(27,'uint','Height');
 
 INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_id`) VALUES
 (2,1,NULL),
@@ -1092,10 +1086,11 @@ INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_id`) VALUES
 (1507,14,NULL),
 (1507,20,NULL),
 (1507,21,NULL),
-(1507,22,NULL);
+(1507,22,NULL),
+(1560,27,NULL);
 
 INSERT INTO `Chapter` (`id`, `sticky`, `name`) VALUES
-(1,'yes','RackObjectType'),
+(1,'yes','ObjectType'),
 (2,'yes','PortOuterInterface'),
 (11,'no','server models'),
 (12,'no','network switch models'),

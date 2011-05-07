@@ -88,6 +88,12 @@ should be sufficient:
 *                                                     *
 *******************************************************
 
+*** Upgrading to 0.20.0 ***
+
+Racks and Rows are now stored in the database as Objects.  The RackObject table 
+was renamed to Object.  SQL views were created to ease the migration of custom 
+reports and scripts.
+
 *** Upgrading to 0.19.2 ***
 
 This release is different in filesystem layout. The "gateways" directory

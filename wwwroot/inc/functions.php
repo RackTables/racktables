@@ -69,6 +69,13 @@ $rtwidth = array
 	2 => 9
 );
 
+$location_obj_types = array
+(
+	1560,
+	1561,
+	1562
+);
+
 $virtual_obj_types = array
 (
 	1504,
@@ -981,7 +988,7 @@ function getRSUforRack ($data)
 }
 
 // Same for row.
-function getRSUforRackRow ($rowData)
+function getRSUforRow ($rowData)
 {
 	if (!count ($rowData))
 		return 0;

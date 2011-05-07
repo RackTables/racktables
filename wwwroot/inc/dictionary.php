@@ -1609,6 +1609,9 @@ $dictionary = array
 	1557 => array ('chapter_id' => 32, 'dict_value' => 'VMware%GPASS%Distributed vSwitch'),
 	1558 => array ('chapter_id' => 32, 'dict_value' => 'Cisco%GPASS%Nexus 1000V'),
 	1559 => array ('chapter_id' => 33, 'dict_value' => 'NS-OS 4.0'),
+	1560 => array ('chapter_id' => 1, 'dict_value' => 'Rack'),
+	1561 => array ('chapter_id' => 1, 'dict_value' => 'Row'),
+	1562 => array ('chapter_id' => 1, 'dict_value' => 'Location'),
 // NOTICE: do not add new dictionary entries here, add them to the gap above (~1425)!
 );
 

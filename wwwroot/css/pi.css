@@ -172,6 +172,10 @@ tr.port_highlight, td.port_highlight {
 	background-color: #e8e8e8;
 }
 
+.row_error {
+	background-color: #ffa0a0;
+}
+
 table.cooltable {
 	border: 1px solid black;
 }

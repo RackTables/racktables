@@ -61,30 +61,30 @@ function findSparePorts ($port_id, $only_racks = array())
 // Return a list of all objects which are possible parents
 //    Special case for VMs and VM Virtual Switches
 //        - only select Servers with the Hypervisor attribute set to Yes
-function findRackObjectParentCandidates ($object_id)
+function findObjectParentCandidates ($object_id)
 {
 	$object = spotEntity ('object', $object_id);
 	$args = array ($object['objtype_id'], $object_id, $object_id);
 
-	$query  = "SELECT RO.id, RO.name FROM RackObject RO ";
-	$query .= "LEFT JOIN ObjectParentCompat OPC ON RO.objtype_id = OPC.parent_objtype_id ";
+	$query  = "SELECT O.id, O.name FROM Object O ";
+	$query .= "LEFT JOIN ObjectParentCompat OPC ON O.objtype_id = OPC.parent_objtype_id ";
 	$query .= "WHERE OPC.child_objtype_id = ? ";
-	$query .= "AND RO.id != ? ";
+	$query .= "AND O.id != ? ";
 	// exclude existing parents
-	$query .= "AND RO.id NOT IN (SELECT parent_entity_id FROM EntityLink WHERE parent_entity_type = 'object' AND child_entity_type = 'object' AND child_entity_id = ?) ";
+	$query .= "AND O.id NOT IN (SELECT parent_entity_id FROM EntityLink WHERE parent_entity_type = 'object' AND child_entity_type = 'object' AND child_entity_id = ?) ";
 	if ($object['objtype_id'] == 1504 || $object['objtype_id'] == 1507)
 	{
 		array_push($args, $object['objtype_id'], $object_id, $object_id);
 		$query .= "AND OPC.parent_objtype_id != 4 ";
 		$query .= "UNION ";
-		$query .= "SELECT RO.id, RO.name FROM RackObject RO  ";
-		$query .= "LEFT JOIN ObjectParentCompat OPC ON RO.objtype_id = OPC.parent_objtype_id ";
-		$query .= "LEFT JOIN AttributeValue AV ON RO.id = AV.object_id ";
+		$query .= "SELECT O.id, O.name FROM Object O  ";
+		$query .= "LEFT JOIN ObjectParentCompat OPC ON O.objtype_id = OPC.parent_objtype_id ";
+		$query .= "LEFT JOIN AttributeValue AV ON O.id = AV.object_id ";
 		$query .= "WHERE OPC.child_objtype_id = ? ";
-		$query .= "AND (RO.objtype_id = 4 AND AV.attr_id = 26 AND AV.uint_value = 1501) ";
-		$query .= "AND RO.id != ? ";
+		$query .= "AND (O.objtype_id = 4 AND AV.attr_id = 26 AND AV.uint_value = 1501) ";
+		$query .= "AND O.id != ? ";
 		// exclude existing parents
-		$query .= "AND RO.id NOT IN (SELECT parent_entity_id FROM EntityLink WHERE parent_entity_type = 'object' AND child_entity_type = 'object' AND child_entity_id = ?) ";
+		$query .= "AND O.id NOT IN (SELECT parent_entity_id FROM EntityLink WHERE parent_entity_type = 'object' AND child_entity_type = 'object' AND child_entity_id = ?) ";
 	}
 	$query .= "ORDER BY 2";
 
@@ -133,7 +133,7 @@ header ('Content-Type: text/html; charset=UTF-8');
 			echo '<div style="background-color: #f0f0f0; border: 1px solid #3c78b5; padding: 10px; height: 100%; text-align: center; margin: 5px;">';
 			echo '<h2>Choose a container:</h2>';
 			echo '<form action="javascript:;">';
-			$parents = findRackObjectParentCandidates($object_id);
+			$parents = findObjectParentCandidates($object_id);
 			printSelect ($parents, array ('name' => 'parents', 'size' => getConfigVar ('MAXSELSIZE')));
 			echo '<br>';
 			echo "<input type=submit value='Proceed' onclick='".
