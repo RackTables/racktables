@@ -1123,7 +1123,6 @@ CREATE TABLE `IPv4Log` (
 			$query[] = 'ALTER TABLE `ObjectHistory` DROP FOREIGN KEY `RackObjectHistory-FK-object_id`';
 			$query[] = 'ALTER TABLE `ObjectHistory` ADD CONSTRAINT `ObjectHistory-FK-object_id` FOREIGN KEY (`id`) REFERENCES `Object` (`id`) ON DELETE CASCADE';
 			$query[] = 'ALTER TABLE `RackSpace` DROP FOREIGN KEY `RackSpace-FK-rack_id`';
-			$query[] = 'ALTER TABLE `RackSpace` ADD CONSTRAINT `RackSpace-FK-rack_id` FOREIGN KEY (`rack_id`) REFERENCES `Object` (`id`)';
 			// Rack height is now an attribute
 			$query[] = "INSERT INTO `Attribute` (`id`,`type`,`name`) VALUES (27,'uint','Height')";
 			$query[] = 'INSERT INTO `AttributeMap` (`objtype_id`,`attr_id`,`chapter_id`) VALUES (1560,27,NULL)';
@@ -1143,7 +1142,12 @@ CREATE TABLE `IPv4Log` (
 				foreach ($racks as $rack) 
 				{
 					// Add the rack as an object, set the height as an attribute, link the rack to the row,
-					// update rackspace, tags and files to reflect new rack_id, move history
+					//   update rackspace, tags and files to reflect new rack_id, move history
+					// First see if the rack is using a duplicate name
+					$prepared = $dbxlink->prepare ('SELECT COUNT(*) FROM Rack WHERE name=?');
+					$prepared->execute(array($rack['name']));
+					if ($prepared->fetchColumn() > 1) 
+						$rack['name'] = sprintf("%s %s", $row['name'], $rack['name']);
 					$prepared = $dbxlink->prepare ('INSERT INTO `Object` (`name`,`objtype_id`,`comment`) VALUES (?,?,?)');
 					$prepared->execute (array($rack['name'], 1560, $rack['comment']));
 					$rack_id = $dbxlink->lastInsertId();
@@ -1155,6 +1159,7 @@ CREATE TABLE `IPv4Log` (
 					$query[] = "INSERT INTO `ObjectHistory` (`id`,`name`,`objtype_id`,`comment`,`ctime`,`user_name`) SELECT ${rack_id},`name`,1560,`comment`,`ctime`,`user_name` FROM `RackHistory` WHERE `id`=${rack['id']}";
 				}
 			}
+			$query[] = 'ALTER TABLE `RackSpace` ADD CONSTRAINT `RackSpace-FK-rack_id` FOREIGN KEY (`rack_id`) REFERENCES `Object` (`id`)';
 			$query[] = 'DROP TABLE `Rack`';
 			$query[] = 'DROP TABLE `RackRow`';
 			$query[] = 'DROP TABLE `RackHistory`';
