@@ -17,6 +17,7 @@ $SQLSchema = array
 			'label' => 'label',
 			'asset_no' => 'asset_no',
 			'objtype_id' => 'objtype_id',
+			'rack_id' => '(SELECT rack_id FROM RackSpace WHERE object_id = id ORDER BY rack_id ASC LIMIT 1)',
 			'has_problems' => 'has_problems',
 			'comment' => 'comment',
 			'nports' => '(SELECT COUNT(*) FROM Port WHERE object_id = RackObject.id)',
@@ -3364,6 +3365,7 @@ function loadEntityTags ($entity_realm = '', $entity_id = 0)
 function generateEntityAutoTags ($cell)
 {
 	$ret = array();
+	var_dump($cell);
 	if (! array_key_exists ('realm', $cell))
 		throw new InvalidArgException ('cell', '(array)', 'malformed structure');
 	switch ($cell['realm'])
