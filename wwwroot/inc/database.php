@@ -3365,7 +3365,6 @@ function loadEntityTags ($entity_realm = '', $entity_id = 0)
 function generateEntityAutoTags ($cell)
 {
 	$ret = array();
-	var_dump($cell);
 	if (! array_key_exists ('realm', $cell))
 		throw new InvalidArgException ('cell', '(array)', 'malformed structure');
 	switch ($cell['realm'])
