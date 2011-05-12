@@ -2743,7 +2743,7 @@ function getNewPortTypeOptions()
 // If a native VLAN is defined, print it first. All other VLANs
 // are tagged and are listed after a plus sign. When no configuration
 // is set for a port, return "default" string.
-function serializeVLANPack ($vlanport, $use_html = TRUE)
+function serializeVLANPack ($vlanport)
 {
 	if (!array_key_exists ('mode', $vlanport))
 		return 'error';
@@ -2769,11 +2769,8 @@ function serializeVLANPack ($vlanport, $use_html = TRUE)
 	if ($vlanport['native'])
 		$ret .= $vlanport['native'];
 	$tagged_bits = groupIntsToRanges ($vlanport['allowed'], $vlanport['native']);
-	# 8203 (U+200B) stands for zero-width space character, which allows for
-	# text wrapping (useful in a TD) and still produces a text suitable for
-	# pasting into IOS prompt, when copied from the browser window.
 	if (count ($tagged_bits))
-		$ret .= '+' . implode (($use_html ? ',&#8203;' : ', '), $tagged_bits);
+		$ret .= '+' . implode (', ', $tagged_bits);
 	return strlen ($ret) ? $ret : 'default';
 }
 
@@ -3952,7 +3949,7 @@ function queueChangesToSwitch ($switch_id, $order, $before, $check_only = FALSE)
 			if ($script_mode)
 			{
 				$object = spotEntity ('object', $switch_id);
-				print $object['name'] . " $portname: " . serializeVLANPack ($before[$portname]) . ' -> ' . serializeVLANPack ($portorder, FALSE) . "\n";
+				print $object['name'] . " $portname: " . serializeVLANPack ($before[$portname]) . ' -> ' . serializeVLANPack ($portorder) . "\n";
 			}
 			if (! $check_only)
 			{
