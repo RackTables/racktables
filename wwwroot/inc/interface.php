@@ -1864,8 +1864,9 @@ function renderDepot ()
 					echo '<br><small>' . serializeTags ($obj['etags'], makeHref(array('page'=>$pageno, 'tab'=>'default')) . '&') . '</small>';
 				echo "</td><td class='${secondclass}'>${obj['label']}</td>";
 				echo "<td class='${secondclass}'>${obj['asset_no']}</td>";
-				if ($obj['rack_id'])
-					echo "<td class='${secondclass}'><a href='".makeHref(array('page'=>'row', 'row_id'=>$obj['row_id']))."'>${obj['row_name']}</a>/<a href='".makeHref(array('page'=>'rack', 'rack_id'=>$obj['rack_id']))."'>${obj['rack_name']}</a></td>";
+				$mount = getMountInfo($obj['id']);
+				if ($mount['rack_id'])
+					echo "<td class='${secondclass}'><a href='".makeHref(array('page'=>'row', 'row_id'=>$mount['row_id']))."'>${mount['row_name']}</a>/<a href='".makeHref(array('page'=>'rack', 'rack_id'=>$mount['rack_id']))."'>${mount['rack_name']}</a></td>";
 				else
 					echo "<td class='${secondclass}'>Unmounted</td>";
 				echo '</tr>';

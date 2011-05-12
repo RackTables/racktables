@@ -445,7 +445,8 @@ CREATE TABLE `EntityLink` (
   `child_entity_type` enum('file','object') NOT NULL,
   `child_entity_id` int(10) unsigned NOT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `EntityLink-unique` (`parent_entity_type`,`parent_entity_id`,`child_entity_type`,`child_entity_id`)
+  UNIQUE KEY `EntityLink-unique` (`parent_entity_type`,`parent_entity_id`,`child_entity_type`,`child_entity_id`),
+  KEY `EntityLink-compound` (`parent_entity_type`,`child_entity_type`,`child_entity_id`)
 ) ENGINE=InnoDB;
 
 CREATE TABLE `File` (
@@ -748,7 +749,8 @@ CREATE TABLE `Object` (
   `comment` text,
   PRIMARY KEY  (`id`),
   UNIQUE KEY `asset_no` (`asset_no`),
-  UNIQUE KEY `name` (`name`)
+  UNIQUE KEY `name` (`name`),
+  KEY `type_id` (`objtype_id`,`id`)
 ) ENGINE=InnoDB;
 
 CREATE TABLE `ObjectHistory` (

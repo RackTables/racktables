@@ -17,10 +17,6 @@ $SQLSchema = array
 			'label' => 'label',
 			'asset_no' => 'asset_no',
 			'objtype_id' => 'objtype_id',
-			'rack_id' => '(select rack_id from RackSpace where object_id = id order by rack_id asc limit 1)',
-			'rack_name' => '(select name from Rack where id = rack_id)',
-			'row_id' => '(select row_id from Rack where id = rack_id)',
-			'row_name' => '(select name from Row where id = row_id)',
 			'has_problems' => 'has_problems',
 			'comment' => 'comment',
 			'nports' => '(SELECT COUNT(*) FROM Port WHERE object_id = RackObject.id)',
@@ -255,6 +251,22 @@ function getRacks ($row_id)
 			'row_name' => $row['atime'],
 		);
 	return $ret;
+}
+// Return rack and row details of an object
+function getMountInfo ($object_id)
+{
+	$result = usePreparedSelectBlade
+	(
+		'SELECT rack_id, Rack_.name AS rack_name, parent_entity_id AS row_id, Row_.name AS row_name ' .
+		'FROM RackSpace ' .
+		"LEFT JOIN EntityLink ON (RackSpace.rack_id = child_entity_id AND parent_entity_type = 'object' AND child_entity_type = 'object') " .
+		'LEFT JOIN Object Rack_ ON rack_id = Rack_.id ' .
+		'LEFT JOIN Object Row_ ON parent_entity_id = Row_.id ' .
+		'WHERE RackSpace.object_id = ? ' .
+		'ORDER BY rack_id ASC LIMIT 1',
+		array ($object_id)
+	);
+	return $result->fetch (PDO::FETCH_ASSOC);
 }
 
 // Return a simple object list w/o related information, so that the returned value
