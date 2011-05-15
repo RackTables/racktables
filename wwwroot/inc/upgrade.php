@@ -1125,7 +1125,7 @@ CREATE TABLE `IPv4Log` (
 			$query[] = 'ALTER TABLE `ObjectHistory` ADD CONSTRAINT `ObjectHistory-FK-object_id` FOREIGN KEY (`id`) REFERENCES `Object` (`id`) ON DELETE CASCADE';
 			$query[] = 'ALTER TABLE `RackSpace` DROP FOREIGN KEY `RackSpace-FK-rack_id`';
 			// Rack height is now an attribute
-			$query[] = "INSERT INTO `Attribute` (`id`,`type`,`name`) VALUES (27,'uint','Height')";
+			$query[] = "INSERT INTO `Attribute` (`id`,`type`,`name`) VALUES (27,'uint','Height, units')";
 			$query[] = 'INSERT INTO `AttributeMap` (`objtype_id`,`attr_id`,`chapter_id`) VALUES (1560,27,NULL)';
 			// Turn rows into objects
 			$result = $dbxlink->query ('SELECT * FROM RackRow');
@@ -1144,12 +1144,7 @@ CREATE TABLE `IPv4Log` (
 				{
 					// Add the rack as an object, set the height as an attribute, link the rack to the row,
 					//   update rackspace, tags and files to reflect new rack_id, move history
-					// First see if the rack is using a duplicate name
-					$prepared = $dbxlink->prepare ('SELECT COUNT(*) FROM Rack WHERE name=?');
-					$prepared->execute(array($rack['name']));
-					if ($prepared->fetchColumn() > 1) 
-						$rack['name'] = sprintf("%s %s", $row['name'], $rack['name']);
-					$prepared = $dbxlink->prepare ('INSERT INTO `Object` (`name`,`objtype_id`,`comment`) VALUES (?,?,?)');
+					$prepared = $dbxlink->prepare ('INSERT INTO `Object` (`label`,`objtype_id`,`comment`) VALUES (?,?,?)');
 					$prepared->execute (array($rack['name'], 1560, $rack['comment']));
 					$rack_id = $dbxlink->lastInsertId();
 					$query[] = "INSERT INTO `AttributeValue` (`object_id`,`attr_id`,`uint_value`) VALUES (${rack_id},27,${rack['height']})";
