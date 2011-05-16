@@ -8927,7 +8927,7 @@ function renderDiscoveredNeighbors ($object_id)
 	if ($inputno)
 	{
 		echo "<input type=hidden name=nports value=${inputno}>";
-		echo '<tr><td colspan=6 align=center>' . getImageHREF ('CREATE', 'import selected', TRUE) . '</td></tr>';
+		echo '<tr><td colspan=7 align=center>' . getImageHREF ('CREATE', 'import selected', TRUE) . '</td></tr>';
 	}
 	echo '</table></form>';
 
