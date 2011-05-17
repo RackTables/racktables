@@ -1853,6 +1853,11 @@ function renderDepot ()
 			echo '<br><br><table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
 			echo '<tr><th>Common name</th><th>Visible label</th><th>Asset tag</th><th>Row/Rack</th></tr>';
 			$order = 'odd';
+			# gather IDs of all objects and fetch rackspace info in one pass
+			$idlist = array();
+			foreach ($objects as $obj)
+				$idlist[] = $obj['id'];
+			$mountinfo = getMountInfo ($idlist);
 			foreach ($objects as $obj)
 			{
 				if (isset ($_REQUEST['hl_object_id']) and $_REQUEST['hl_object_id'] == $obj['id'])
@@ -1864,11 +1869,13 @@ function renderDepot ()
 					echo '<br><small>' . serializeTags ($obj['etags'], makeHref(array('page'=>$pageno, 'tab'=>'default')) . '&') . '</small>';
 				echo "</td><td class='${secondclass}'>${obj['label']}</td>";
 				echo "<td class='${secondclass}'>${obj['asset_no']}</td>";
-				$mount = getMountInfo($obj['id']);
-				if ($mount['rack_id'])
-					echo "<td class='${secondclass}'><a href='".makeHref(array('page'=>'row', 'row_id'=>$mount['row_id']))."'>${mount['row_name']}</a>/<a href='".makeHref(array('page'=>'rack', 'rack_id'=>$mount['rack_id']))."'>${mount['rack_name']}</a></td>";
+				$places = array();
+				if (! array_key_exists ($obj['id'], $mountinfo))
+					$places[] = 'Unmounted';
 				else
-					echo "<td class='${secondclass}'>Unmounted</td>";
+					foreach ($mountinfo[$obj['id']] as $mi)
+						$places[] = mkA ($mi['row_name'], 'row', $mi['row_id']) . '/' . mkA ($mi['rack_name'], 'rack', $mi['rack_id']);
+				echo "<td class='${secondclass}'>" . implode (', ', $places) . '</td>';
 				echo '</tr>';
 				$order = $nextorder[$order];
 			}

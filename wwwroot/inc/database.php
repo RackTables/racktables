@@ -253,21 +253,71 @@ function getRacks ($row_id)
 		);
 	return $ret;
 }
-// Return rack and row details of an object
-function getMountInfo ($object_id)
+
+# Return rack and row details for those objects on the list, which have
+# at least one rackspace atom allocated to them.
+function getMountInfo ($object_ids)
 {
+	$ret = array();
+	# In theory number of involved racks can be equal or even greater, than the
+	# number of objects, but in practice it will often be tens times less. Hence
+	# the scope of the 1st pass is to tell IDs of all involved racks without
+	# fetching lots of duplicate data.
 	$result = usePreparedSelectBlade
 	(
-		'SELECT rack_id, Rack_.name AS rack_name, parent_entity_id AS row_id, Row_.name AS row_name ' .
+		'SELECT object_id, rack_id ' .
 		'FROM RackSpace ' .
-		"LEFT JOIN EntityLink ON (RackSpace.rack_id = child_entity_id AND parent_entity_type = 'object' AND child_entity_type = 'object') " .
-		'LEFT JOIN Object Rack_ ON rack_id = Rack_.id ' .
-		'LEFT JOIN Object Row_ ON parent_entity_id = Row_.id ' .
-		'WHERE RackSpace.object_id = ? ' .
-		'ORDER BY rack_id ASC LIMIT 1',
-		array ($object_id)
+		'WHERE object_id IN(' . questionMarks (count ($object_ids)) . ') ' .
+		'GROUP BY object_id, rack_id ' .
+		'ORDER BY rack_id ASC',
+		$object_ids
 	);
-	return $result->fetch (PDO::FETCH_ASSOC);
+	$rackidlist = $objectlist = array();
+	foreach ($result as $row)
+	{
+		$objectlist[$row['object_id']][] = $row['rack_id'];
+		$rackidlist[] = $row['rack_id'];
+	}
+	unset ($result);
+	# Pass 2. Fetch shorter, but better extra data about the rows and racks,
+	# set displayed names for both.
+	$result = usePreparedSelectBlade
+	(
+		'SELECT Rack_.id as rack_id, Rack_.name AS rack_name, Rack_.label as rack_label, ' .
+		'parent_entity_id AS row_id, Row_.name AS row_name, Row_.label as row_label ' .
+		'FROM Object Rack_ ' .
+		"LEFT JOIN EntityLink ON (Rack_.id = child_entity_id AND parent_entity_type = 'object' AND child_entity_type = 'object') " .
+		'LEFT JOIN Object Row_ ON parent_entity_id = Row_.id ' .
+		'WHERE Rack_.id IN(' . questionMarks (count ($rackidlist)) . ') ',
+		$rackidlist
+	);
+	$rackinfo = array();
+	foreach ($result as $row)
+	{
+		$rackinfo[$row['rack_id']] = array
+		(
+			'rack_id'   => $row['rack_id'],
+			'row_id'    => $row['row_id'],
+		);
+		if ('' != $row['rack_name'])
+			$rackinfo[$row['rack_id']]['rack_name'] = $row['rack_name'];
+		elseif ('' != $row['rack_label'])
+			$rackinfo[$row['rack_id']]['rack_name'] = $row['rack_label'];
+		else
+			$rackinfo[$row['rack_id']]['rack_name'] = 'rack#' . $row['rack_id'];
+		if ('' != $row['row_name'])
+			$rackinfo[$row['rack_id']]['row_name'] = $row['row_name'];
+		elseif ('' != $row['row_label'])
+			$rackinfo[$row['rack_id']]['row_name'] = $row['row_label'];
+		else
+			$rackinfo[$row['rack_id']]['row_name'] = 'row#' . $row['row_id'];
+	}
+	unset ($result);
+	# Pass 3. Combine retrieved data into returned array.
+	foreach ($objectlist as $object_id => $racklist)
+		foreach ($racklist as $rack_id)
+			$ret[$object_id][] = $rackinfo[$rack_id];
+	return $ret;
 }
 
 // Return a simple object list w/o related information, so that the returned value
