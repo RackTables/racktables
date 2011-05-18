@@ -4185,7 +4185,7 @@ function discardLDAPCache ($maxage = 0)
 
 function getUserIDByUsername ($username)
 {
-	$result = usePreparedSelectBlade ('SELECT user_id FROM UserAccount WHeRE user_name = ?', array ($username));
+	$result = usePreparedSelectBlade ('SELECT user_id FROM UserAccount WHERE user_name = ?', array ($username));
 	if ($row = $result->fetch (PDO::FETCH_ASSOC))
 		return $row['user_id'];
 	return NULL;
