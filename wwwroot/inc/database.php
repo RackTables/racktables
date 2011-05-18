@@ -258,7 +258,8 @@ function getRacks ($row_id)
 # at least one rackspace atom allocated to them.
 function getMountInfo ($object_ids)
 {
-	$ret = array();
+	if (! count ($object_ids))
+		return array();
 	# In theory number of involved racks can be equal or even greater, than the
 	# number of objects, but in practice it will often be tens times less. Hence
 	# the scope of the 1st pass is to tell IDs of all involved racks without
@@ -279,6 +280,14 @@ function getMountInfo ($object_ids)
 		$rackidlist[] = $row['rack_id'];
 	}
 	unset ($result);
+	# short-cut to exit in case no object had rackspace allocated
+	if (! count ($rackidlist))
+	{
+		$ret = array();
+		foreach ($object_ids as $object_id)
+			$ret[$object_id] = array();
+		return $ret;
+	}
 	# Pass 2. Fetch shorter, but better extra data about the rows and racks,
 	# set displayed names for both.
 	$result = usePreparedSelectBlade
@@ -314,6 +323,7 @@ function getMountInfo ($object_ids)
 	}
 	unset ($result);
 	# Pass 3. Combine retrieved data into returned array.
+	$ret = array();
 	foreach ($objectlist as $object_id => $racklist)
 		foreach ($racklist as $rack_id)
 			$ret[$object_id][] = $rackinfo[$rack_id];
