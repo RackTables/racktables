@@ -1133,7 +1133,7 @@ CREATE TABLE `IPv4Log` (
 			unset ($result);
 			foreach ($rows as $row)
 			{
-				$prepared = $dbxlink->prepare ('INSERT INTO `Object` (`name`,`objtype_id`) VALUES (?,?)');
+				$prepared = $dbxlink->prepare ('INSERT INTO `Object` (`label`,`objtype_id`) VALUES (?,?)');
 				$prepared->execute (array($row['name'], 1561));
 				$row_id = $dbxlink->lastInsertId();
 				// Turn all racks in this row into objects
