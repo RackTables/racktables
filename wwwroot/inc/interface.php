@@ -5791,19 +5791,20 @@ function renderTagTreeEditor ()
 	finishPortlet();
 }
 
-function renderTagCheckbox ($inputname, $preselect, $taginfo, $refcnt_realm = '', $level = 0)
+function renderTagCheckbox ($inputname, $preselect, $taginfo, $refcnt_realm = '', $level = 0, $inverted_preselect = array())
 {
 	$self = __FUNCTION__;
-	if (tagOnChain ($taginfo, $preselect))
+	$td_class = 'tagbox';
+	$inverted = tagOnChain ($taginfo, $inverted_preselect);
+	$selected = tagOnChain ($taginfo, $preselect);
+	$prepared_inputname = $inputname;
+	if ($inverted)
 	{
-		$selected = ' checked';
-		$td_class = 'seltagbox';
+		$td_class .= ' inverted';
+		$prepared_inputname = preg_replace ('/^cf/', 'nf', $prepared_inputname);
 	}
-	else
-	{
-		$selected = '';
-		$td_class = 'tagbox';
-	}
+	if ($selected)
+		$td_class .= ' ' . ($inverted ? 'selected-inverted' : 'selected');
 	// calculate html classnames for separators feature 
 	static $is_first_time = TRUE;
 	$input_class = 'tag-cb' . ($level == 0 ? ' root' : '');
@@ -5811,14 +5812,14 @@ function renderTagCheckbox ($inputname, $preselect, $taginfo, $refcnt_realm = ''
 	$is_first_time = FALSE;
 	
 	echo "<tr class='$tr_class'><td colspan=2 class='$td_class' style='padding-left: " . ($level * 16) . "px;'>";
-	echo "<label><input type=checkbox class='$input_class' name='${inputname}[]' value='${taginfo['id']}'${selected}> ";
+	echo "<label><input type=checkbox class='$input_class' name='${prepared_inputname}[]' value='${taginfo['id']}'" . ($selected ? ' checked' : '') . "> ";
 	echo $taginfo['tag'];
 	if (strlen ($refcnt_realm) and isset ($taginfo['refcnt'][$refcnt_realm]))
 		echo ' <i>(' . $taginfo['refcnt'][$refcnt_realm] . ')</i>';
 	echo "</label></td></tr>";
 	if (isset ($taginfo['kids']))
 		foreach ($taginfo['kids'] as $kid)
-			$self ($inputname, $preselect, $kid, $refcnt_realm, $level + 1);
+			$self ($inputname, $preselect, $kid, $refcnt_realm, $level + 1, $inverted_preselect);
 }
 
 function renderEntityTagsPortlet ($title, $tags, $preselect, $realm)
@@ -5855,7 +5856,7 @@ function renderEntityTags ($entity_id)
 		// It could happen, that none of existing tags have been used in the current realm.
 		if (count ($minilist))
 		{
-			$js_code = "tagShortList = {";
+			$js_code = "tag_cb.setTagShortList ({";
 			$is_first = TRUE;
 			foreach($minilist as $tag) {
 				if (! $is_first)
@@ -5863,7 +5864,8 @@ function renderEntityTags ($entity_id)
 				$is_first = FALSE;
 				$js_code .= "\n\t${tag['id']} : 1";
 			}
-			$js_code .= "\n};\n$(document).ready(compactTreeMode);";
+			$js_code .= "\n});\n$(document).ready(tag_cb.compactTreeMode);";
+			addJS ('js/tag-cb.js');
 			addJS ($js_code, TRUE);
 		}
 	}
@@ -5898,6 +5900,9 @@ function printTagTRs ($cell, $baseurl = '')
 // This one is going to replace the tag filter.
 function renderCellFilterPortlet ($preselect, $realm, $cell_list = array(), $bypass_name = '', $bypass_value = '')
 {
+	addJS ('js/tag-cb.js');
+	addJS ('tag_cb.enableNegation()', TRUE);
+
 	global $pageno, $tabno, $taglist, $tagtree;
 	$filterc =
 	(
@@ -5930,6 +5935,10 @@ function renderCellFilterPortlet ($preselect, $realm, $cell_list = array(), $byp
 			echo $checked . ">${boolop}</input></label></td>";
 		}
 	}
+
+	$negated_chain = array();
+	foreach ($preselect['negatedlist'] as $key)
+		$negated_chain[] = array ('id' => $key);
 	// tags block
 	if (getConfigVar ('FILTER_SUGGEST_TAGS') == 'yes' or count ($preselect['tagidlist']))
 	{
@@ -5946,11 +5955,11 @@ function renderCellFilterPortlet ($preselect, $realm, $cell_list = array(), $byp
 		{
 			$enable_apply = TRUE;
 			foreach ($objectivetags as $taginfo)
-				renderTagCheckbox ('cft', buildTagChainFromIds ($preselect['tagidlist']), $taginfo, $realm);
+				renderTagCheckbox ('cft', buildTagChainFromIds ($preselect['tagidlist']), $taginfo, $realm, 0, $negated_chain);
 		}
-		
+
 		if (getConfigVar('SHRINK_TAG_TREE_ON_CLICK') == 'yes')
-			addJS ('init_cb_click()', TRUE);
+			addJS ('tag_cb.enableSubmitOnClick()', TRUE);
 	}
 	// predicates block
 	if (getConfigVar ('FILTER_SUGGEST_PREDICATES') == 'yes' or count ($preselect['pnamelist']))
@@ -5976,7 +5985,7 @@ function renderCellFilterPortlet ($preselect, $realm, $cell_list = array(), $byp
 			foreach ($preselect['pnamelist'] as $pname)
 				$myPreselect[] = array ('id' => $pname);
 			foreach ($myPredicates as $pinfo)
-				renderTagCheckbox ('cfp', $myPreselect, $pinfo);
+				renderTagCheckbox ('cfp', $myPreselect, $pinfo, '', 0, $negated_chain);
 		}
 	}
 	// extra code
@@ -6019,6 +6028,9 @@ function renderCellFilterPortlet ($preselect, $realm, $cell_list = array(), $byp
 			echo "<input type=hidden name=page value=${pageno}>\n";
 			echo "<input type=hidden name=tab value=${tabno}>\n";
 			echo "<input type=hidden name='cft[]' value=''>\n";
+			echo "<input type=hidden name='cfp[]' value=''>\n";
+			echo "<input type=hidden name='nft[]' value=''>\n";
+			echo "<input type=hidden name='nfp[]' value=''>\n";
 			echo "<input type=hidden name='cfe' value=''>\n";
 			if ($bypass_name != '')
 				echo "<input type=hidden name=${bypass_name} value='${bypass_value}'>\n";

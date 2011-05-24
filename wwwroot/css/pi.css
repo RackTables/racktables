@@ -139,10 +139,14 @@ th.sticker {
 td.tagbox {
 	text-align: left;
 }
-
-td.seltagbox {
-	text-align: left;
+td.tagbox.selected {
 	background-color: #a0ffa0;
+}
+td.tagbox.selected-inverted {
+	background-color: #ffb0b0;
+}
+td.tagbox.inverted {
+	text-decoration: line-through;
 }
 
 td.sticker {

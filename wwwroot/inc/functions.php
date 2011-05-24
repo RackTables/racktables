@@ -1460,8 +1460,9 @@ function shrinkSubtree($tree, $used_tags, $preselect, $realm) {
 		)
 			unset($tree[$i]);
 		else {
-			$item['refcnt'][$realm] = $used_tags[$item['id']];
-			if (! $item['refcnt'][$realm])
+			if (isset ($used_tags[$item['id']]) && $used_tags[$item['id']])
+				$item['refcnt'][$realm] = $used_tags[$item['id']];
+			else
 				unset($item['refcnt'][$realm]);
 		}
 	}
@@ -1507,38 +1508,32 @@ function getCellFilter ()
 {
 	global $sic;
 	global $pageno;
-	$staticFilter = getConfigVar ('STATIC_FILTER');
-	if (isset ($_REQUEST['tagfilter']) and is_array ($_REQUEST['tagfilter']))
-	{
-		$_REQUEST['cft'] = $_REQUEST['tagfilter'];
-		unset ($_REQUEST['tagfilter']);
-	}
 	$andor_used = FALSE;
-	//if the page is submitted we get an andor value so we know they are trying to start a new filter or clearing the existing one.
+	// if the page is submitted we get an andor value so we know they are trying to start a new filter or clearing the existing one.
 	if(isset($_REQUEST['andor']))
 	{
 		$andor_used = TRUE;
-		unset($_SESSION[$pageno]);
+		unset($_SESSION[$pageno]); // delete saved filter
 	}
-	if (isset ($_SESSION[$pageno]['tagfilter']) and is_array ($_SESSION[$pageno]['tagfilter']) and !(isset($_REQUEST['cft'])) and $staticFilter == 'yes')
-	{
-		$_REQUEST['cft'] = $_SESSION[$pageno]['tagfilter'];
-	}
-	if (isset ($_SESSION[$pageno]['cfe']) and !(isset($sic['cfe'])) and $staticFilter == 'yes')
-	{
-		$sic['cfe'] = $_SESSION[$pageno]['cfe'];
-	}
-	if (isset ($_SESSION[$pageno]['andor']) and !(isset($_REQUEST['andor'])) and $staticFilter == 'yes')
-	{
-		$_REQUEST['andor'] = $_SESSION[$pageno]['andor'];
-	}
-
+	// otherwise inject saved filter to the $_REQUEST and $sic vars
+	elseif (isset ($_SESSION[$pageno]['filter']) and is_array ($_SESSION[$pageno]['filter']) and getConfigVar ('STATIC_FILTER') == 'yes')
+		foreach (array('andor', 'cfe', 'cft[]', 'cfp[]', 'nft[]', 'nfp[]') as $param)
+		{
+			$param = str_replace ('[]', '', $param, $is_array);
+			if (! isset ($_REQUEST[$param]) and isset ($_SESSION[$pageno]['filter'][$param]) and (!$is_array or is_array ($_SESSION[$pageno]['filter'][$param])))
+			{
+				$_REQUEST[$param] = $_SESSION[$pageno]['filter'][$param];
+				if (! $is_array)
+					$sic[$param] = $_REQUEST[$param];
+			}
+		}
 
 	$ret = array
 	(
 		'tagidlist' => array(),
 		'tnamelist' => array(),
 		'pnamelist' => array(),
+		'negatedlist' => array(),
 		'andor' => '',
 		'text' => '',
 		'extratext' => '',
@@ -1549,52 +1544,61 @@ function getCellFilter ()
 	switch (TRUE)
 	{
 	case (!isset ($_REQUEST['andor'])):
-		$andor2 = getConfigVar ('FILTER_DEFAULT_ANDOR');
+		$andor = getConfigVar ('FILTER_DEFAULT_ANDOR');
 		break;
 	case ($_REQUEST['andor'] == 'and'):
 	case ($_REQUEST['andor'] == 'or'):
-		$_SESSION[$pageno]['andor'] = $_REQUEST['andor'];
-		$ret['andor'] = $andor2 = $_REQUEST['andor'];
+		$_SESSION[$pageno]['filter']['andor'] = $_REQUEST['andor'];
+		$ret['andor'] = $andor = $_REQUEST['andor'];
 		break;
 	default:
 		showWarning ('Invalid and/or switch value in submitted form');
 		return NULL;
 	}
-	$andor1 = '';
 	// Both tags and predicates, which don't exist, should be
 	// handled somehow. Discard them silently for now.
-	if (isset ($_REQUEST['cft']) and is_array ($_REQUEST['cft']))
-	{
-		$_SESSION[$pageno]['tagfilter'] = $_REQUEST['cft'];
-		global $taglist;
-		foreach ($_REQUEST['cft'] as $req_id)
-			if (isset ($taglist[$req_id]))
+	global $taglist, $pTable;
+	foreach (array ('cft', 'cfp', 'nft', 'nfp') as $param)
+		if (isset ($_REQUEST[$param]) and is_array ($_REQUEST[$param]))
+		{
+			$_SESSION[$pageno]['filter'][$param] = $_REQUEST[$param];
+			foreach ($_REQUEST[$param] as $req_key)
 			{
-				$ret['tagidlist'][] = $req_id;
-				$ret['tnamelist'][] = $taglist[$req_id]['tag'];
-				$andor_used = $andor_used || (trim($andor1) != '');
-				$ret['text'] .= $andor1 . '{' . $taglist[$req_id]['tag'] . '}';
-				$andor1 = ' ' . $andor2 . ' ';
-				$ret['urlextra'] .= '&cft[]=' . $req_id;
+				if (strpos ($param, 'ft') !== FALSE)
+				{
+					// param is a taglist
+					if (! isset ($taglist[$req_key]))
+						continue;
+					$ret['tagidlist'][] = $req_key;
+					$ret['tnamelist'][] = $taglist[$req_key]['tag'];
+					$text = '{' . $taglist[$req_key]['tag'] . '}';
+				}
+				else
+				{
+					// param is a predicate list
+					if (! isset ($pTable[$req_key]))
+						continue;
+					$ret['pnamelist'][] = $req_key;
+					$text = '[' . $req_key . ']';
+				}
+				if (strpos ($param, 'nf') === 0)
+				{
+					$text = "not $text";
+					$ret['negatedlist'][] = $req_key;
+				}
+				if (! empty ($ret['text']))
+				{
+					$andor_used = TRUE;
+					$ret['text'] .= " $andor ";
+				}
+				$ret['text'] .= $text;
+				$ret['urlextra'] .= '&' . $param . '[]=' . $req_key;
 			}
-	}
-	if (isset ($_REQUEST['cfp']) and is_array ($_REQUEST['cfp']))
-	{
-		global $pTable;
-		foreach ($_REQUEST['cfp'] as $req_name)
-			if (isset ($pTable[$req_name]))
-			{
-				$ret['pnamelist'][] = $req_name;
-				$andor_used = $andor_used || (trim($andor1) != '');
-				$ret['text'] .= $andor1 . '[' . $req_name . ']';
-				$andor1 = ' ' . $andor2 . ' ';
-				$ret['urlextra'] .= '&cfp[]=' . $req_name;
-			}
-	}
+		}
 	// Extra text comes from TEXTAREA and is easily screwed by standard escaping function.
 	if (isset ($sic['cfe']))
 	{
-		$_SESSION[$pageno]['cfe'] = $sic['cfe'];
+		$_SESSION[$pageno]['filter']['cfe'] = $sic['cfe'];
 		// Only consider extra text, when it is a correct RackCode expression.
 		$parse = spotPayload ($sic['cfe'], 'SYNT_EXPR');
 		if ($parse['result'] == 'ACK')
@@ -1609,7 +1613,7 @@ function getCellFilter ()
 	if (strlen ($ret['extratext']))
 		$finaltext[] = '(' . $ret['extratext'] . ')';
 	$andor_used = $andor_used || (count($finaltext) > 1);
-	$finaltext = implode (' ' . $andor2 . ' ', $finaltext);
+	$finaltext = implode (' ' . $andor . ' ', $finaltext);
 	if (strlen ($finaltext))
 	{
 		$ret['is_empty'] = FALSE;
