@@ -129,7 +129,6 @@ $SQLSchema = array
 			'id' => 'id',
 			'name' => 'name',
 			'height' => 'height',
-			'label' => 'label',
 			'asset_no' => 'asset_no',
 			'has_problems' => 'has_problems',
 			'comment' => 'comment',
@@ -813,8 +812,8 @@ function getEntityRelatives ($type, $entity_type, $entity_id)
 			'SELECT id, child_entity_type AS entity_type, child_entity_id AS entity_id FROM EntityLink ' .
 			'WHERE parent_entity_type = ? AND parent_entity_id = ?';
 	}
-	$query = usePreparedSelectBlade ($sql, array ($entity_type, $entity_id));
-	$rows = $query->fetchAll (PDO::FETCH_ASSOC);
+	$result = usePreparedSelectBlade ($sql, array ($entity_type, $entity_id));
+	$rows = $result->fetchAll (PDO::FETCH_ASSOC);
 	$ret = array();
 	foreach ($rows as $row)
 	{
@@ -1043,7 +1042,7 @@ function commitDeleteRack($rack_id)
 	usePreparedDeleteBlade ('Rack', array ('id' => $rack_id));
 }
 
-function commitUpdateRack ($rack_id, $new_row_id, $new_name, $new_height, $new_label, $new_has_problems, $new_asset_no, $new_comment)
+function commitUpdateRack ($rack_id, $new_row_id, $new_name, $new_height, $new_has_problems, $new_asset_no, $new_comment)
 {
 	// Can't shrink a rack if rows being deleted contain mounted objects
 	$check_result = usePreparedSelectBlade ('SELECT COUNT(*) AS count FROM RackSpace WHERE rack_id = ? AND unit_no > ?', array ($rack_id, $new_height));
@@ -1069,8 +1068,7 @@ function commitUpdateRack ($rack_id, $new_row_id, $new_name, $new_height, $new_l
 		'Object',
 		array
 		(
-			'name' => $new_name,
-			'label' => !mb_strlen ($new_label) ? NULL : $new_label,
+			'label' => $new_name,
 			'has_problems' => $new_has_problems,
 			'asset_no' => !mb_strlen ($new_asset_no) ? NULL : $new_asset_no,
 			'comment' => $new_comment,

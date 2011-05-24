@@ -48,6 +48,38 @@ $msgcode = array();
 global $opspec_list;
 $opspec_list = array();
 
+$opspec_list['rackspace-edit-addRow'] = array
+(
+	'table' => 'Object',
+	'action' => 'INSERT',
+	'arglist' => array
+	(
+		array ('url_argname' => 'objtype_id', 'assertion' => 'uint'),
+		array ('url_argname' => 'name', 'table_colname' => 'label', 'assertion' => 'string')
+	),
+);
+$opspec_list['rackspace-edit-updateRow'] = array
+(
+	'table' => 'Object',
+	'action' => 'UPDATE',
+	'set_arglist' => array
+	(
+		array ('url_argname' => 'name', 'table_colname' => 'label', 'assertion' => 'string')
+	),
+	'where_arglist' => array
+	(
+		array ('url_argname' => 'row_id', 'table_colname' => 'id', 'assertion' => 'uint')
+	),
+);
+$opspec_list['rackspace-edit-deleteRow'] = array
+(
+	'table' => 'Object',
+	'action' => 'DELETE',
+	'arglist' => array
+	(
+		array ('url_argname' => 'row_id', 'table_colname' => 'id', 'assertion' => 'uint')
+	),
+);
 $opspec_list['object-ports-delPort'] = array
 (
 	'table' => 'Port',
@@ -1169,7 +1201,7 @@ function addLotOfObjects()
 		foreach ($names2 as $name)
 			try
 			{
-				$object_id = commitAddObject ($name, '', $global_type_id, '', $taglist);
+				$object_id = commitAddObject ($name, NULL, $global_type_id, '', $taglist);
 				$info = spotEntity ('object', $object_id);
 				amplifyCell ($info);
 				showSuccess ("added object " . formatPortLink ($info['id'], $info['dname'], NULL, NULL));
@@ -1765,9 +1797,8 @@ function addRack ()
 	{
 		assertStringArg ('name');
 		assertUIntArg ('height1');
-		assertStringArg ('label', TRUE);
 		assertStringArg ('asset_no', TRUE);
-		$rack_id = commitAddObject ($_REQUEST['name'], $_REQUEST['label'], 1560, $_REQUEST['asset_no'], $taglist);
+		$rack_id = commitAddObject (NULL, $_REQUEST['name'], 1560, $_REQUEST['asset_no'], $taglist);
 
 		// Update the height
 		commitUpdateAttrValue ($rack_id, 27, $_REQUEST['height1']);
@@ -1795,7 +1826,7 @@ function addRack ()
 		}
 		foreach ($names2 as $cname)
 		{
-			$rack_id = commitAddObject ($cname, '', 1560, NULL, $taglist);
+			$rack_id = commitAddObject (NULL, $cname, 1560, NULL, $taglist);
 
 			// Update the height
 			commitUpdateAttrValue ($rack_id, 27, $_REQUEST['height2']);
@@ -1828,14 +1859,13 @@ function updateRack ()
 	assertUIntArg ('row_id');
 	assertStringArg ('name');
 	assertUIntArg ('height');
-	assertStringArg ('label', TRUE);
 	$has_problems = (isset ($_REQUEST['has_problems']) and $_REQUEST['has_problems'] == 'on') ? 'yes' : 'no';
 	assertStringArg ('asset_no', TRUE);
 	assertStringArg ('comment', TRUE);
 
 	$rack_id = getBypassValue();
 	usePreparedDeleteBlade ('RackThumbnail', array ('rack_id' => $rack_id));
-	commitUpdateRack ($rack_id, $_REQUEST['row_id'], $_REQUEST['name'], $_REQUEST['height'], $_REQUEST['label'], $has_problems, $_REQUEST['asset_no'], $_REQUEST['comment']);
+	commitUpdateRack ($rack_id, $_REQUEST['row_id'], $_REQUEST['name'], $_REQUEST['height'], $has_problems, $_REQUEST['asset_no'], $_REQUEST['comment']);
 
 	// Update optional attributes
 	$oldvalues = getAttrValues ($rack_id);

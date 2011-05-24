@@ -354,6 +354,7 @@ function renderRackspaceRowEditor ()
 	function printNewItemTR ()
 	{
 		printOpFormIntro ('addRow');
+		echo "<input type=hidden name=objtype_id value=1561>\n";
 		echo "<tr><td>";
 		printImageHREF ('create', 'Add new row', TRUE);
 		echo "</td><td><input type=text name=name tabindex=100></td><td>";
@@ -372,7 +373,7 @@ function renderRackspaceRowEditor ()
 			printImageHREF ('nodestroy', "${rc} rack(s) here");
 		else
 		{
-			echo "<a href=\"".makeHrefProcess(array('op'=>'delete', 'row_id'=>$row_id))."\">";
+			echo "<a href=\"".makeHrefProcess(array('op'=>'deleteRow', 'row_id'=>$row_id))."\">";
 			printImageHREF ('destroy', 'Delete row');
 			echo "</a>";
 		}
@@ -548,7 +549,6 @@ function renderNewRackForm ($row_id)
 	renderNewEntityTags ('rack');
 	echo "</td></tr>\n";
 	echo "<tr><th class=tdright>Height in units (required):</th><td class=tdleft><input type=text name=height1 tabindex=2 value='${default_height}'></td></tr>\n";
-	echo "<tr><th class=tdright>Visible label:</th><td class=tdleft><input type=text name=label tabindex=3></td></tr>\n";
 	echo "<tr><th class=tdright>Asset tag:</th><td class=tdleft><input type=text name=asset_no tabindex=4></td></tr>\n";
 	echo "<tr><td class=submit colspan=2>";
 	printImageHREF ('CREATE', 'Add', TRUE);
@@ -711,7 +711,6 @@ function renderEditRackForm ($rack_id)
 	echo "</td></tr>\n";
 	echo "<tr><td>&nbsp;</td><th class=tdright>Name (required):</th><td class=tdleft><input type=text name=name value='${rack['name']}'></td></tr>\n";
 	echo "<tr><td>&nbsp;</td><th class=tdright>Height (required):</th><td class=tdleft><input type=text name=height value='${rack['height']}'></td></tr>\n";
-	echo "<tr><td>&nbsp;</td><th class=tdright>Visible label:</th><td class=tdleft><input type=text name=label value='${rack['label']}'></td></tr>\n";
 	echo "<tr><td>&nbsp;</td><th class=tdright>Asset tag:</th><td class=tdleft><input type=text name=asset_no value='${rack['asset_no']}'></td></tr>\n";
 	// optional attributes
 	$values = getAttrValues ($rack_id);
@@ -785,8 +784,6 @@ function renderRackInfoPortlet ($rackData)
 	echo "<tr><th width='50%' class=tdright>Rack row:</th><td class=tdleft>${rackData['row_name']}</td></tr>\n";
 	echo "<tr><th width='50%' class=tdright>Name:</th><td class=tdleft>${rackData['name']}</td></tr>\n";
 	echo "<tr><th width='50%' class=tdright>Height:</th><td class=tdleft>${rackData['height']}</td></tr>\n";
-	if (strlen ($rackData['asset_no']))
-		echo "<tr><th width='50%' class=tdright>Visible label:</th><td class=tdleft>${rackData['label']}</td></tr>\n";
 	if (strlen ($rackData['asset_no']))
 		echo "<tr><th width='50%' class=tdright>Asset tag:</th><td class=tdleft>${rackData['asset_no']}</td></tr>\n";
 	if ($rackData['has_problems'] == 'yes')

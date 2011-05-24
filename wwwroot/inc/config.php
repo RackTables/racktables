@@ -13,7 +13,7 @@ committers' copies) can run into issues:
    have already been executed.
 */
 
-define ('CODE_VERSION', '0.19.3');
+define ('CODE_VERSION', '0.19.4');
 
 $max_dict_key = array
 (
@@ -41,6 +41,7 @@ $max_dict_key = array
 	'0.19.1' => 1559,
 	'0.19.2' => 1559,
 	'0.19.3' => 1559,
+	'0.19.4' => 1559,
 	'0.20.0' => 1562,
 );
 

@@ -119,6 +119,7 @@ function getDBUpgradePath ($v1, $v2)
 		'0.19.1',
 		'0.19.2',
 		'0.19.3',
+		'0.19.4',
 		'0.20.0',
 	);
 	if (!in_array ($v1, $versionhistory) or !in_array ($v2, $versionhistory))
@@ -1049,6 +1050,10 @@ CREATE TABLE `EntityLink` (
 			$query[] = "DELETE FROM RackSpace WHERE object_id IS NULL AND state = 'T'";
 			$query[] = "UPDATE Config SET varvalue = '0.19.3' WHERE varname = 'DB_VERSION'";
 			break;
+		case '0.19.4':
+			$query = array_merge ($query, reloadDictionary ($batchid));
+			$query[] = "UPDATE Config SET varvalue = '0.19.4' WHERE varname = 'DB_VERSION'";
+			break;
 		case '0.20.0':
 			$query = array_merge ($query, reloadDictionary ($batchid));
 			$query[] = "
@@ -1150,6 +1155,7 @@ CREATE TABLE `IPv4Log` (
 					$query[] = "INSERT INTO `AttributeValue` (`object_id`,`attr_id`,`uint_value`) VALUES (${rack_id},27,${rack['height']})";
 					$query[] = "INSERT INTO `EntityLink` (`parent_entity_type`,`parent_entity_id`,`child_entity_type`,`child_entity_id`) VALUES ('object',${row_id},'object',${rack_id})";
 					$query[] = "UPDATE `RackSpace` SET `rack_id`=${rack_id} WHERE `rack_id`=${rack['id']}";
+					$query[] = "UPDATE `Atom` SET `rack_id`=${rack_id} WHERE `rack_id`=${rack['id']}";
 					$query[] = "UPDATE `TagStorage` SET `entity_realm`='object', `entity_id`=${rack_id} WHERE `entity_realm`='rack' AND `entity_id`=${rack['id']}";
 					$query[] = "UPDATE `FileLink` SET `entity_type`='object', `entity_id`=${rack_id} WHERE `entity_type`='rack' AND `entity_id`=${rack['id']}";
 					$query[] = "INSERT INTO `ObjectHistory` (`id`,`name`,`objtype_id`,`comment`,`ctime`,`user_name`) SELECT ${rack_id},`name`,1560,`comment`,`ctime`,`user_name` FROM `RackHistory` WHERE `id`=${rack['id']}";
@@ -1168,19 +1174,25 @@ CREATE TABLE `RackThumbnail` (
 ) ENGINE=InnoDB
 ";
 			$query[] = "
-CREATE VIEW `Row` AS SELECT id, name
+CREATE VIEW `Row` AS SELECT id, label AS name
   FROM `Object`
   WHERE objtype_id = 1561
 ";
 			$query[] = "
-CREATE VIEW `Rack` AS SELECT id, name, label, asset_no, has_problems,
-  (SELECT AV.uint_value FROM `AttributeValue` AV WHERE AV.object_id = Object.id AND AV.attr_id = 27) AS height,
-  comment,
-  (SELECT thumb_data FROM `RackThumbnail` WHERE RackThumbnail.rack_id = Object.id) AS thumb_data,
-  (SELECT parent_entity_id FROM `EntityLink` WHERE parent_entity_type = 'object' AND child_entity_type = 'object' AND child_entity_id = Object.id) AS row_id,
-  (SELECT name FROM `Row` WHERE id = row_id) AS row_name
-  FROM `Object`
-  WHERE objtype_id = 1560;
+CREATE VIEW `Rack` AS SELECT O.id, O.label AS name, O.asset_no, O.has_problems, O.comment,
+  AV.uint_value AS height,
+  RT.thumb_data,
+  EL.parent_entity_id AS row_id,
+  Row.name AS row_name
+  FROM `Object` O
+  LEFT JOIN `AttributeValue` AV ON O.id = AV.object_id
+  LEFT JOIN `RackThumbnail` RT ON O.id = RT.rack_id
+  LEFT JOIN `EntityLink` EL ON O.id = EL.child_entity_id
+  LEFT JOIN `Row` ON EL.parent_entity_id = Row.id
+  WHERE O.objtype_id = 1560
+  AND AV.attr_id = 27
+  AND EL.parent_entity_type = 'object'
+  AND EL.child_entity_type = 'object';
 ";
 			$query[] = "
 CREATE VIEW `RackObject` AS SELECT * FROM `Object`

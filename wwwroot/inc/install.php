@@ -914,18 +914,24 @@ CREATE TABLE `VLANValidID` (
   PRIMARY KEY  (`vlan_id`)
 ) ENGINE=InnoDB;
 
-CREATE VIEW `Row` AS SELECT id, name
+CREATE VIEW `Row` AS SELECT id, label AS name
   FROM `Object`
   WHERE objtype_id = 1561;
 
-CREATE VIEW `Rack` AS SELECT id, name, label, asset_no, has_problems,
-  (SELECT AV.uint_value FROM `AttributeValue` AV WHERE AV.object_id = Object.id AND AV.attr_id = 27) AS height,
-  comment,
-  (SELECT thumb_data FROM `RackThumbnail` WHERE RackThumbnail.rack_id = Object.id) AS thumb_data,
-  (SELECT parent_entity_id FROM `EntityLink` WHERE parent_entity_type = 'object' AND child_entity_type = 'object' AND child_entity_id = Object.id) AS row_id,
-  (SELECT name FROM `Row` WHERE id = row_id) AS row_name
-  FROM `Object`
-  WHERE objtype_id = 1560;
+CREATE VIEW `Rack` AS SELECT O.id, O.label AS name, O.asset_no, O.has_problems, O.comment,
+  AV.uint_value AS height,
+  RT.thumb_data,
+  EL.parent_entity_id AS row_id,
+  Row.name AS row_name
+  FROM `Object` O
+  LEFT JOIN `AttributeValue` AV ON O.id = AV.object_id
+  LEFT JOIN `RackThumbnail` RT ON O.id = RT.rack_id
+  LEFT JOIN `EntityLink` EL ON O.id = EL.child_entity_id
+  LEFT JOIN `Row` ON EL.parent_entity_id = Row.id
+  WHERE O.objtype_id = 1560
+  AND AV.attr_id = 27
+  AND EL.parent_entity_type = 'object'
+  AND EL.child_entity_type = 'object';
 
 CREATE VIEW `RackObject` AS SELECT * FROM `Object`
  WHERE `objtype_id` NOT IN (1560, 1561, 1562);

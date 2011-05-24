@@ -40,9 +40,9 @@ $tab['rackspace']['history'] = 'History';
 $tabhandler['rackspace']['default'] = 'renderRackspace';
 $tabhandler['rackspace']['edit'] = 'renderRackspaceRowEditor';
 $tabhandler['rackspace']['history'] = 'renderRackspaceHistory';
-$ophandler['rackspace']['edit']['addRow'] = 'addRow';
-$ophandler['rackspace']['edit']['delete'] = 'deleteRow';
-$ophandler['rackspace']['edit']['updateRow'] = 'updateRow';
+$ophandler['rackspace']['edit']['addRow'] = 'tableHandler';
+$ophandler['rackspace']['edit']['updateRow'] = 'tableHandler';
+$ophandler['rackspace']['edit']['deleteRow'] = 'tableHandler';
 
 $page['depot']['parent'] = 'index';
 $page['depot']['title'] = 'Objects';
