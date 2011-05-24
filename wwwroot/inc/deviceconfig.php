@@ -936,6 +936,27 @@ function ios12TranslatePushQueue ($dummy_object_id, $queue, $dummy_vlan_names)
 		case 'cite':
 			$ret .= $cmd['arg1'];
 			break;
+		// query list
+		case 'get8021q':
+			$ret .=
+'show run
+! END OF CONFIG
+show vlan brief
+! END OF VLAN LIST
+';
+			break;
+		case 'getcdpstatus':
+			$ret .= "show cdp neighbors detail\n";
+			break;
+		case 'getlldpstatus':
+			$ret .= "show lldp neighbors\n";
+			break;
+		case 'getportstatus':
+			$ret .= "show int status\n";
+			break;
+		case 'getmaclist':
+			$ret .= "show mac address-table dynamic\n";
+			break;
 		default:
 			throw new InvalidArgException ('opcode', $cmd['opcode']);
 		}
@@ -987,6 +1008,10 @@ function fdry5TranslatePushQueue ($dummy_object_id, $queue, $dummy_vlan_names)
 			break;
 		case 'cite':
 			$ret .= $cmd['arg1'];
+			break;
+		// query list
+		case 'get8021q':
+			$ret .= "show running-config\n";
 			break;
 		default:
 			throw new InvalidArgException ('opcode', $cmd['opcode']);
@@ -1042,6 +1067,19 @@ function vrp53TranslatePushQueue ($dummy_object_id, $queue, $dummy_vlan_names)
 			break;
 		case 'cite':
 			$ret .= $cmd['arg1'];
+			break;
+		// query list
+		case 'get8021q':
+			$ret .= "display current-configuration\n";
+			break;
+		case 'getlldpstatus':
+			$ret .= "display lldp neighbor\n";
+			break;
+		case 'getportstatus':
+			$ret .= "display interface brief\n";
+			break;
+		case 'getmaclist':
+			$ret .= "display mac-address dynamic\n";
 			break;
 		default:
 			throw new InvalidArgException ('opcode', $cmd['opcode']);
@@ -1112,6 +1150,19 @@ function vrp55TranslatePushQueue ($dummy_object_id, $queue, $dummy_vlan_names)
 		case 'cite':
 			$ret .= $cmd['arg1'];
 			break;
+		// query list
+		case 'get8021q':
+			$ret .= "display current-configuration\n";
+			break;
+		case 'getlldpstatus':
+			$ret .= "display lldp neighbor\n";
+			break;
+		case 'getportstatus':
+			$ret .= "display interface brief\n";
+			break;
+		case 'getmaclist':
+			$ret .= "display mac-address dynamic\n";
+			break;
 		default:
 			throw new InvalidArgException ('opcode', $cmd['opcode']);
 		}
@@ -1172,6 +1223,13 @@ function xos12TranslatePushQueue ($dummy_object_id, $queue, $dummy_vlan_names)
 			break;
 		case 'cite':
 			$ret .= $cmd['arg1'];
+			break;
+		// query list
+		case 'get8021q':
+			$ret .= 'show configuration "vlan"' . "\n";
+			break;
+		case 'getlldpstatus':
+			$ret .= "show lldp neighbors detailed\n";
 			break;
 		default:
 			throw new InvalidArgException ('opcode', $cmd['opcode']);
@@ -1244,6 +1302,17 @@ function jun10TranslatePushQueue ($dummy_object_id, $queue, $vlan_names)
 			break; // JunOS can`t apply configuration without saving it
 		case 'cite':
 			$ret .= $cmd['arg1'];
+			break;
+		// query list
+		case 'get8021q':
+			$ret .=
+'show vlans detail
+# END OF VLAN LIST
+show configuration groups
+# END OF GROUP LIST
+show configuration interfaces
+# END OF CONFIG
+';
 			break;
 		default:
 			throw new InvalidArgException ('opcode', $cmd['opcode']);

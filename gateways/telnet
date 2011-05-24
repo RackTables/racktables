@@ -1,0 +1,73 @@
+#!/usr/bin/perl
+
+use strict;
+use Getopt::Long;
+use Net::Telnet;
+
+# fetch command-line parameters
+my $op_help;
+my $op_port;
+my $op_connect_timeout = 2;
+my $op_timeout = 10;
+my $op_prompt;
+GetOptions (
+    'h' => \$op_help,
+    'port:i' => \$op_port,
+    'connect-timeout:i' => \$op_connect_timeout,
+    'timeout:i' => \$op_timeout,
+    'prompt:s' => \$op_prompt,
+);
+if ($op_help) {
+    &display_help;
+    exit;
+}
+my $op_host = $ARGV[0];
+defined $op_host or die "ERROR: please specify remote host (-h for help)";
+
+sub display_help {
+    print <<END;
+telnet batch client for RackTables.
+Takes commands list in standard input and gives the responses via standard output.
+Login credentials are not specially handled and should be placed as first lines of input
+Usage: 
+$0 {hostname} [--port=X] [--connect-timeout=X] [--prompt=X] [--timeout=X]
+
+port: TCP port number to connect to
+connect-timeout: timeout for giving up connecting process, seconds
+prompt: command prompt regexp for interactive telnet (auth prompts too)
+timeout: wait time for activity of remote telnet peer in seconds
+
+END
+}
+
+my $port = $op_port || 23;
+my $prompt_re;
+if (defined $op_prompt && $op_prompt ne '') {
+    $prompt_re = qr/$op_prompt/;
+}
+
+my $session = Net::Telnet->new (
+    Host => $op_host, 
+    Port => $port,
+    Timeout => $op_connect_timeout,
+);
+$session->timeout($op_timeout);
+
+my $buff = '';
+my $cmd_finished = 0;
+while (! $session->eof) {
+    $buff .= $session->get;
+    print $1 if ($buff =~ s/(.*\n)//s);
+
+    if (! $cmd_finished && (! defined $prompt_re || $buff =~ $prompt_re)) {
+        my $cmd = <STDIN>;
+        if (defined $cmd) {
+            $session->put($cmd);
+        }
+        else {
+            $cmd_finished = 1;
+            $session->shutdown(1); # half-closing TCP connection (nothing to write)
+        }
+    }
+}
+print $buff;

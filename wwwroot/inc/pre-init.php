@@ -21,7 +21,7 @@ $racktables_rootdir = realpath (dirname (__FILE__) . '/..'); // you can not over
 # in the custom entry point wrapper (like own index.php)
 if (! isset ($racktables_staticdir)) // the directory containing 'pix', 'js', 'css' dirs
 	$racktables_staticdir = $racktables_rootdir;
-if (! isset ($racktables_gwdir)) // the directory containing 'deviceconfig', 'sendfile' dirs, etc
+if (! isset ($racktables_gwdir)) // the directory containing the 'telnet' and 'ssh' scripts
 	$racktables_gwdir = realpath ($racktables_rootdir . '/../gateways');
 if (! isset ($racktables_confdir)) // the directory containing local.php and secret.php (default is wwwroot/inc)
 	$racktables_confdir = dirname (__FILE__);
