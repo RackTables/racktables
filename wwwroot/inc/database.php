@@ -2220,14 +2220,6 @@ function getRackSearchResult ($terms)
 		$terms,
 		'name'
 	);
-	$byLabel = getSearchResultByField
-	(
-		'Rack',
-		array ('id'),
-		'label',
-		$terms,
-		'name'
-	);
 	$byAssetNo = getSearchResultByField
 	(
 		'Rack',
@@ -2242,15 +2234,12 @@ function getRackSearchResult ($terms)
 		foreach (array_keys ($byComment) as $key2)
 			if ($res1['id'] == $byComment[$key2]['id'])
 				unset ($byComment[$key2]);
-		foreach (array_keys ($byLabel) as $key3)
-			if ($res1['id'] == $byLabel[$key3]['id'])
-				unset ($byLabel[$key3]);
 		foreach (array_keys ($byAssetNo) as $key4)
 			if ($res1['id'] == $byAssetNo[$key4]['id'])
 				unset ($byAssetNo[$key4]);
 	}
 	$ret = array();
-	foreach (array_merge ($byName, $byComment, $byLabel, $byAssetNo) as $row)
+	foreach (array_merge ($byName, $byComment, $byAssetNo) as $row)
 		$ret[$row['id']] = spotEntity ('rack', $row['id']);
 	return $ret;
 }
