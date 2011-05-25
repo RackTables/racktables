@@ -3442,6 +3442,8 @@ function generateEntityAutoTags ($cell)
 		case 'ipv4net':
 			$ret[] = array ('tag' => '$ip4netid_' . $cell['id']);
 			$ret[] = array ('tag' => '$ip4net-' . str_replace ('.', '-', $cell['ip']) . '-' . $cell['mask']);
+			if ($cell['vlanc'])
+				$ret[] = array ('tag' => '$runs_8021Q');
 			for ($i = 8; $i < 32; $i++)
 			{
 				# these conditions hit 1 to 3 times per each i
@@ -3457,6 +3459,8 @@ function generateEntityAutoTags ($cell)
 			break;
 		case 'ipv6net':
 			$ret[] = array ('tag' => '$ip6netid_' . $cell['id']);
+			if ($cell['vlanc'])
+				$ret[] = array ('tag' => '$runs_8021Q');
 			$ret[] = array ('tag' => '$any_ip6net');
 			$ret[] = array ('tag' => '$any_net');
 			break;
