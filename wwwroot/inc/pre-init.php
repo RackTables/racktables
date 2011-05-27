@@ -29,6 +29,8 @@ if (! isset ($path_to_secret_php))
 	$path_to_secret_php = $racktables_confdir . '/secret.php';
 if (! isset ($path_to_local_php))
 	$path_to_local_php = $racktables_confdir . '/local.php';
+if (! isset ($local_gwdir))
+	$local_gwdir = $racktables_confdir . '/gateways';
 
 // secret.php may be missing, generally it is OK
 if (fileSearchExists ($path_to_secret_php))

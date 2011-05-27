@@ -1772,20 +1772,9 @@ function setPortVLAN ()
 	}
 }
 
-$msgcode['submitSLBConfig']['OK'] = 66;
-$msgcode['submitSLBConfig']['ERR'] = 164;
 function submitSLBConfig ()
 {
-	$newconfig = buildLVSConfig (getBypassValue());
-	try
-	{
-		gwSendFileToObject (getBypassValue(), 'slbconfig', html_entity_decode ($newconfig, ENT_QUOTES, 'UTF-8'));
-	}
-	catch (RTGatewayError $e)
-	{
-		return showFuncMessage (__FUNCTION__, 'ERR', array ($e->getMessage()));
-	}
-	return showFuncMessage (__FUNCTION__, 'OK', array ('slbconfig'));
+	showNotice ("You should redefine submitSLBConfig ophandler in your local extension to install SLB config");
 }
 
 $msgcode['addRack']['OK'] = 48;
