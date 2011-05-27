@@ -133,7 +133,7 @@ function queryTerminal ($object_id, $commands, $tolerate_remote_errors = TRUE)
 			$params_from_settings['connect-timeout'] = 'connect_timeout';
 			break;
 		default:
-			throw RackTablesError ("Invalid terminal protocol '${settings['protocol']}' specified");
+			throw RTGatewayError ("Invalid terminal protocol '${settings['protocol']}' specified");
 	}
 	foreach ($params_from_settings as $param_name => $setting_name)
 		if (isset ($settings[$setting_name]))
@@ -162,7 +162,7 @@ function callScript ($gwname, $params, $in, &$out, &$errors)
 	elseif (isset ($racktables_gwdir) && file_exists ("$racktables_gwdir/$gwname"))
 		$dir = $racktables_gwdir;
 	if (! isset ($dir))
-		throw new RackTablesError ("Could not find the gateway file called '$gwname'");
+		throw new RTGatewayError ("Could not find the gateway file called '$gwname'");
 
 	$cmd_line = "./$gwname";
 	foreach ($params as $key => $value)
@@ -193,7 +193,7 @@ function callScript ($gwname, $params, $in, &$out, &$errors)
 		$dir
 	);
 	if (! is_resource ($child))
-		throw new RacktablesError ("cant execute $dir/$gwname");
+		throw new RTGatewayError ("cant execute $dir/$gwname");
 	fwrite ($pipes[0], $in);
 	fclose ($pipes[0]);
 	$out = stream_get_contents ($pipes[1]);
