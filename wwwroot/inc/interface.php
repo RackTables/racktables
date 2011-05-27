@@ -1597,7 +1597,7 @@ function renderPortsInfo($object_id)
 	{
 		try
 		{
-			$linkStatus = gwRetrieveDeviceConfig ($object_id, 'getportstatus');
+			$linkStatus = queryDevice ($object_id, 'getportstatus');
 		}
 		catch (RackTablesError $e) {}
 		if (! empty ($linkStatus))
@@ -1631,7 +1631,7 @@ function renderPortsInfo($object_id)
 
 	try
 	{
-		$macList = sortPortList (gwRetrieveDeviceConfig ($object_id, 'getmaclist'));
+		$macList = sortPortList (queryDevice ($object_id, 'getmaclist'));
 	}
 	catch (RackTablesError $e) {}	
 	if (! empty ($macList))
@@ -8752,7 +8752,7 @@ function renderDiscoveredNeighbors ($object_id)
 	);
 	try
 	{
-		$neighbors = gwRetrieveDeviceConfig ($object_id, $opcode_by_tabno[$tabno]);
+		$neighbors = queryDevice ($object_id, $opcode_by_tabno[$tabno]);
 		$neighbors = sortPortList ($neighbors);
 	}
 	catch (RTGatewayError $e)

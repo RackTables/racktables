@@ -11,7 +11,7 @@
 function formatPortLinkHints ($object_id)
 {
 	$result = array();
-	$linkStatus = gwRetrieveDeviceConfig ($object_id, 'getportstatus');
+	$linkStatus = queryDevice ($object_id, 'getportstatus');
 	foreach ($linkStatus as $portname => $link_info)
 	{
 		$link_info = $linkStatus[$portname];
@@ -53,7 +53,7 @@ function formatPortLinkHints ($object_id)
 function formatPortMacHints ($object_id)
 {
 	$result = array();
-	$macList = gwRetrieveDeviceConfig ($object_id, 'getmaclist');
+	$macList = queryDevice ($object_id, 'getmaclist');
 	foreach ($macList as $portname => $list)
 	{
 		$list = $macList[$portname];
