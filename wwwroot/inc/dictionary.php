@@ -1546,6 +1546,8 @@ $dictionary = array
 	1464 => array ('chapter_id' => 2, 'dict_value' => '10GBase-ER-DWDM40-30.33 (ITU 59)'),
 	1465 => array ('chapter_id' => 2, 'dict_value' => '10GBase-ER-DWDM40-29.55 (ITU 60)'),
 	1466 => array ('chapter_id' => 2, 'dict_value' => '10GBase-ER-DWDM40-28.77 (ITU 61)'),
+	1467 => array ('chapter_id' => 25, 'dict_value' => 'Cisco%GPASS%AIR-AP1141N'),
+	1468 => array ('chapter_id' => 25, 'dict_value' => 'Cisco%GPASS%AIR-AP1262N'),
 //                                     ^
 //                                     ^
 // add new dictionary entries up here  ^
