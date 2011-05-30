@@ -4492,8 +4492,11 @@ function showNotice  ($message, $option = '') { setMessage ('neutral', $message,
 // $type could be 'error', 'warning', 'success' or 'neutral'
 function setMessage ($type, $message, $direct_rendering)
 {
+	global $script_mode;
 	if ($direct_rendering)
 		echo '<div class="msg_' . $type . '">' . $message . '</div>';
+	elseif (isset ($script_mode) and $script_mode and ($type == 'warning' or $type == 'error'))
+		file_put_contents ('php://stderr', strtoupper ($type) . ': ' . $message . "\n");
 	else
 	{
 		switch ($type)
