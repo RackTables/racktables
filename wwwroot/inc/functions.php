@@ -4292,6 +4292,28 @@ function searchEntitiesByText ($terms)
 		if (count ($tmp))
 			$summary['vlan'] = $tmp;
 	}
+	# Filter search results in a way in some realms to omit records, which the
+	# user would not be able to browse anyway.
+	foreach ($summary['object'] as $key => $record)
+		if (! isolatedPermission ('object', 'default', spotEntity ('object', $record['id'])))
+			unset ($summary['object'][$key]);
+	foreach ($summary['ipv4network'] as $key => $netinfo)
+		if (! isolatedPermission ('ipv4net', 'default', $netinfo))
+			unset ($summary['ipv4network'][$key]);
+	foreach ($summary['ipv6network'] as $key => $netinfo)
+		if (! isolatedPermission ('ipv6net', 'default', $netinfo))
+			unset ($summary['ipv6network'][$key]);
+	foreach ($summary['file'] as $key => $fileinfo)
+		if (! isolatedPermission ('file', 'default', $fileinfo))
+			unset ($summary['file'][$key]);
+	if (! count ($summary['object']))
+		unset ($summary['object']);
+	if (! count ($summary['ipv4network']))
+		unset ($summary['ipv4network']);
+	if (! count ($summary['ipv6network']))
+		unset ($summary['ipv6network']);
+	if (! count ($summary['file']))
+		unset ($summary['file']);
 	return $summary;
 }
 
