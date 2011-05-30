@@ -2582,6 +2582,7 @@ function scanRealmByText ($realm = NULL, $ftext = '')
 	case 'file':
 	case 'ipv4vs':
 	case 'ipv4rspool':
+	case 'vst':
 		if (!strlen ($ftext = trim ($ftext)))
 			$fexpr = array();
 		else
