@@ -9058,7 +9058,7 @@ function formatIfTypeVariants ($variants, $select_name)
 		if (isTranceiverEmpty ($item['right']['portinfo']))
 		{
 			$creting_tranceivers = TRUE;
-			$text = '← ' . $text;
+			$text = $text . ' →';
 			$params['b_oif'] = $item['right']['id'];
 			if (isset ($oif_usage_stat[$item['right']['id']]))
 				$popularity_count += $oif_usage_stat[$item['right']['id']];
