@@ -269,8 +269,13 @@ function getMountInfo ($object_ids)
 		'FROM RackSpace ' .
 		'WHERE object_id IN(' . questionMarks (count ($object_ids)) . ') ' .
 		'GROUP BY object_id, rack_id ' .
+		'UNION ' .
+		'SELECT child_entity_id AS object_id, parent_entity_id AS rack_id ' .
+		'FROM EntityLink ' .
+		'WHERE child_entity_id IN(' . questionMarks (count ($object_ids)) . ') ' .
+		"AND parent_entity_type = 'rack' AND child_entity_type = 'object' " .
 		'ORDER BY rack_id ASC',
-		$object_ids
+		array_merge($object_ids, $object_ids)
 	);
 	$rackidlist = $objectlist = array();
 	foreach ($result as $row)
@@ -818,13 +823,18 @@ function getEntityRelatives ($type, $entity_type, $entity_id)
 	foreach ($rows as $row)
 	{
 		// get info of the relative (only objects supported now, others may be added later)
+		$relative = spotEntity ($row['entity_type'], $row['entity_id']);
 		switch ($row['entity_type'])
 		{
 			case 'object':
 				$page = 'object';
 				$id_name = 'object_id';
-				$relative = spotEntity ($row['entity_type'], $row['entity_id']);
 				$name = $relative['dname'];
+				break;
+			case 'rack':
+				$page = 'rack';
+				$id_name = 'rack_id';
+				$name = $relative['name'];
 				break;
 		}
 
@@ -869,7 +879,22 @@ function commitUpdateEntityLink ($link_id, $parent_entity_type, $parent_entity_i
 	);
 }
 
-function commitUnlinkEntities ($link_id)
+function commitUnlinkEntities ($parent_entity_type, $parent_entity_id, $child_entity_type, $child_entity_id)
+{
+	usePreparedDeleteBlade
+	(
+		'EntityLink',
+		array
+		(
+			'parent_entity_type' => $parent_entity_type,
+			'parent_entity_id' => $parent_entity_id,
+			'child_entity_type' => $child_entity_type,
+			'child_entity_id' => $child_entity_id
+		)
+	);
+}
+
+function commitUnlinkEntitiesByLinkID ($link_id)
 {
 	usePreparedDeleteBlade ('EntityLink', array ('id' => $link_id));
 }
@@ -1235,7 +1260,13 @@ function getOperationMolecules ($op_id = 0)
 
 function getResidentRacksData ($object_id = 0, $fetch_rackdata = TRUE)
 {
-	$result = usePreparedSelectBlade ('SELECT DISTINCT rack_id FROM RackSpace WHERE object_id = ? ORDER BY rack_id', array ($object_id));
+	// Include racks that the object is directly mounted in,
+	// as well as racks that is 'Zero-U' mounted in
+	$result = usePreparedSelectBlade (
+		'SELECT rack_id FROM RackSpace WHERE object_id = ? ' .
+		'UNION ' .
+		"SELECT parent_entity_id AS rack_id FROM EntityLink where parent_entity_type = 'rack' AND child_entity_type = 'object' AND child_entity_id = ?" .
+		'ORDER BY rack_id', array ($object_id, $object_id));
 	$rows = $result->fetchAll (PDO::FETCH_NUM);
 	unset ($result);
 	$ret = array();

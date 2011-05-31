@@ -441,6 +441,33 @@ function renderRow ($row_id)
 	echo "</td></tr></table>";
 }
 
+// Used by renderRack()
+function printObjectDetailsForRenderRack ($object_id)
+{
+	$objectData = spotEntity ('object', $object_id);
+	if (strlen ($objectData['asset_no']))
+		$prefix = "<div title='${objectData['asset_no']}";
+	else
+		$prefix = "<div title='no asset tag";
+	// Don't tell about label, if it matches common name.
+	$body = '';
+	if ($objectData['name'] != $objectData['label'] and strlen ($objectData['label']))
+		$body = ", visible label is \"${objectData['label']}\"";
+	// Display list of child objects, if any
+	$objectChildren = getEntityRelatives ('children', 'object', $objectData['id']);
+	if (count($objectChildren) > 0)
+	{
+		foreach ($objectChildren as $child)
+			$childNames[] = $child['name'];
+		natsort($childNames);
+		$suffix = sprintf(", contains %s'>", implode(', ', $childNames));
+	}
+	else
+		$suffix = "'>";
+	echo $prefix . $body . $suffix;
+	echo "<a href='".makeHref(array('page'=>'object', 'object_id'=>$objectData['id']))."'>${objectData['dname']}</a></div>";
+}
+
 // This function renders rack as HTML table.
 function renderRack ($rack_id, $hl_obj_id = 0)
 {
@@ -493,28 +520,7 @@ function renderRack ($rack_id, $hl_obj_id = 0)
 			switch ($state)
 			{
 				case 'T':
-					$objectData = spotEntity ('object', $rackData[$i][$locidx]['object_id']);
-					if (strlen ($objectData['asset_no']))
-						$prefix = "<div title='${objectData['asset_no']}";
-					else
-						$prefix = "<div title='no asset tag";
-					// Don't tell about label, if it matches common name.
-					$body = '';
-					if ($objectData['name'] != $objectData['label'] and strlen ($objectData['label']))
-						$body = ", visible label is \"${objectData['label']}\"";
-					// Display list of child objects, if any
-					$objectChildren = getEntityRelatives ('children', 'object', $objectData['id']);
-					if (count($objectChildren) > 0)
-					{
-						foreach ($objectChildren as $child)
-							$childNames[] = $child['name'];
-						natsort($childNames);
-						$suffix = sprintf(", contains %s'>", implode(', ', $childNames));
-					}
-					else
-						$suffix = "'>";
-					echo $prefix . $body . $suffix;
-					echo "<a href='".makeHref(array('page'=>'object', 'object_id'=>$objectData['id']))."'>${objectData['dname']}</a></div>";
+					printObjectDetailsForRenderRack($rackData[$i][$locidx]['object_id']);
 					break;
 				case 'A':
 					echo '<div title="This rackspace does not exist">&nbsp;</div>';
@@ -533,7 +539,22 @@ function renderRack ($rack_id, $hl_obj_id = 0)
 		}
 		echo "</tr>\n";
 	}
-	echo "</table></center>\n";
+	echo "</table>\n";
+	// Get a list of all of objects Zero-U mounted to this rack
+	$zeroUObjects = getEntityRelatives('children', 'rack', $rack_id);
+	if (count($zeroUObjects) > 0) {
+		echo "<br><table width='75%' class=rack border=0 cellspacing=0 cellpadding=1>\n";
+		echo "<tr><th>Zero-U:</th></tr>\n";
+		foreach ($zeroUObjects as $zeroUObject)
+		{
+			$state = ($zeroUObject['entity_id'] == $hl_obj_id) ? 'Th' : 'T';
+			echo "<tr><td class='atom state_${state}'>";
+			printObjectDetailsForRenderRack($zeroUObject['entity_id']);
+			echo "</td></tr>\n";
+		}
+		echo "</table>\n";
+	}
+	echo "</center>\n";
 }
 
 function renderNewRackForm ($row_id)
@@ -1686,6 +1707,14 @@ function renderRackSpaceForObject ($object_id)
 				$workingRacksData[$cand_id] = $rackData;
 			}
 
+	// Get a list of all of this object's parents,
+	// then trim the list to only include parents which are racks
+	$objectParents = getEntityRelatives('parents', 'object', $object_id);
+	$parentRacks = array();
+	foreach ($objectParents as $parentData)
+		if ($parentData['entity_type'] == 'rack')
+			$parentRacks[] = $parentData['entity_id'];
+
 	// Main layout starts.
 	echo "<table border=0 class=objectview cellspacing=0 cellpadding=0><tr>";
 
@@ -1776,8 +1805,15 @@ function renderRackSpaceForObject ($object_id)
 		echo "<th width='20%'><a href='javascript:;' oncontextmenu=\"blockToggleColumnOfAtoms('${rack_id}', '0', ${rackData['height']}); return false;\" onclick=\"toggleColumnOfAtoms('${rack_id}', '0', ${rackData['height']})\">Front</a></th>";
 		echo "<th width='50%'><a href='javascript:;' oncontextmenu=\"blockToggleColumnOfAtoms('${rack_id}', '1', ${rackData['height']}); return false;\" onclick=\"toggleColumnOfAtoms('${rack_id}', '1', ${rackData['height']})\">Interior</a></th>";
 		echo "<th width='20%'><a href='javascript:;' oncontextmenu=\"blockToggleColumnOfAtoms('${rack_id}', '2', ${rackData['height']}); return false;\" onclick=\"toggleColumnOfAtoms('${rack_id}', '2', ${rackData['height']})\">Back</a></th></tr>\n";
-		echo "</table></center>\n";
-		echo '</td>';
+		echo "</table>\n<br>\n";
+		// Determine zero-u checkbox status.
+		// If form has been submitted, use form data, otherwise use DB data.
+		if (isset($_REQUEST['op'])) 
+			$checked = isset($_REQUEST['zerou_'.$rack_id]) ? 'checked' : '';
+		else
+			$checked = in_array($rack_id, $parentRacks) ? 'checked' : '';
+		echo "Zero-U: <input type=checkbox ${checked} name=zerou_${rack_id} id=zerou_${rack_id}>";
+		echo '</center></td>';
 	}
 	echo "</tr></table>";
 	finishPortlet();
@@ -9014,7 +9050,7 @@ function formatIfTypeVariants ($variants, $select_name)
 		if (isTranceiverEmpty ($item['left']['portinfo']))
 		{
 			$creting_tranceivers = TRUE;
-			$text = '← ' . $text;
+			$text = 'â†� ' . $text;
 			$params['a_oif'] = $item['left']['id'];
 			if (isset ($oif_usage_stat[$item['left']['id']]))
 				$popularity_count += $oif_usage_stat[$item['left']['id']];
@@ -9022,7 +9058,7 @@ function formatIfTypeVariants ($variants, $select_name)
 		if (isTranceiverEmpty ($item['right']['portinfo']))
 		{
 			$creting_tranceivers = TRUE;
-			$text = $text . ' →';
+			$text = $text . ' â†’';
 			$params['b_oif'] = $item['right']['id'];
 			if (isset ($oif_usage_stat[$item['right']['id']]))
 				$popularity_count += $oif_usage_stat[$item['right']['id']];
@@ -9043,7 +9079,7 @@ function formatIfTypeVariants ($variants, $select_name)
 	if ($creting_tranceivers and ! $tranceivers_hint_shown)
 	{
 		$tranceivers_hint_shown = TRUE;
-		showNotice ('The arrow (← or →) means to create a tranceiver in the suitable port');
+		showNotice ('The arrow (â†� or â†’) means to create a tranceiver in the suitable port');
 	}
 
 	return getSelect ($select, array('name' => $select_name), $selected_key, !$creting_tranceivers);

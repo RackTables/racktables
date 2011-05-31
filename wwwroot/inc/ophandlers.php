@@ -1004,6 +1004,14 @@ function updateObjectAllocation ()
 		return buildRedirectURL (NULL, NULL, $_REQUEST);
 	}
 	$object_id = getBypassValue();
+	$changecnt = 0;
+	// Get a list of all of this object's parents,
+	// then trim the list to only include parents which are racks
+	$objectParents = getEntityRelatives('parents', 'object', $object_id);
+	$parentRacks = array();
+	foreach ($objectParents as $parentData)
+		if ($parentData['entity_type'] == 'rack')
+			$parentRacks[] = $parentData['entity_id'];
 	$workingRacksData = array();
 	foreach ($_REQUEST['rackmulti'] as $cand_id)
 	{
@@ -1013,13 +1021,24 @@ function updateObjectAllocation ()
 			amplifyCell ($rackData);
 			$workingRacksData[$cand_id] = $rackData;
 		}
+		// It's zero-U mounted to this rack on the form, but not in the DB.  Mount it.
+		if (isset($_REQUEST["zerou_${cand_id}"]) && !in_array($cand_id, $parentRacks))
+		{
+			$changecnt++;
+			commitLinkEntities ('rack', $cand_id, 'object', $object_id);
+		}
+		// It's not zero-U mounted to this rack on the form, but it is in the DB.  Unmount it.
+		if (!isset($_REQUEST["zerou_${cand_id}"]) && in_array($cand_id, $parentRacks))
+		{
+			$changecnt++;
+			commitUnlinkEntities ('rack', $cand_id, 'object', $object_id);
+		}
 	}
 
 	foreach ($workingRacksData as &$rd)
 		applyObjectMountMask ($rd, $object_id);
 
 	$oldMolecule = getMoleculeForObject ($object_id);
-	$changecnt = 0;
 	foreach ($workingRacksData as $rack_id => $rackData)
 	{
 		if (! processGridForm ($rackData, 'F', 'T', $object_id))
@@ -1973,7 +1992,7 @@ $msgcode['unlinkEntities']['OK'] = 49;
 function unlinkEntities ()
 {
 	assertUIntArg ('link_id');
-	commitUnlinkEntities ($_REQUEST['link_id']);
+	commitUnlinkEntitiesByLinkID ($_REQUEST['link_id']);
 	return showFuncMessage (__FUNCTION__,  'OK');
 }
 

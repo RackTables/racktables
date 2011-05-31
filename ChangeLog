@@ -5,6 +5,7 @@
 	update: markup IPv6 subnet-router on request (by Jens Weibler)
 	update: convert racks and rows into objects (by Aaron Dummer)
 	update: {$runs_8021Q} works for IPv4/IPv6 networks
+	update: support for mounting zero-U objects (#173, by Aaron Dummer)
 	new feature: you can obtain who has made tag assignment, object's ports or IPv4 address changes by hovering cursor on these entities
 	new feature: ability to open a terminal session to a device by clicking on its FQDN
 	new feature: inverting tags on cell filter pages by clicking the checkboxes with Ctrl key
