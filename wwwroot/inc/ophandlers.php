@@ -911,6 +911,7 @@ function updateUser ()
 $msgcode['updateDictionary']['OK'] = 51;
 function updateDictionary ()
 {
+	global $sic;
 	assertUIntArg ('dict_key');
 	assertStringArg ('dict_value');
 	// this request must be built with chapter_no
@@ -920,7 +921,7 @@ function updateDictionary ()
 		array ('dict_value' => $sic['dict_value']),
 		array
 		(
-			'chapter_id' => $sic['chapter_no'],
+			'chapter_id' => getBypassValue(),
 			'dict_key' => $sic['dict_key'],
 		)
 	);
