@@ -9050,7 +9050,7 @@ function formatIfTypeVariants ($variants, $select_name)
 		if (isTranceiverEmpty ($item['left']['portinfo']))
 		{
 			$creting_tranceivers = TRUE;
-			$text = 'â†� ' . $text;
+			$text = '← ' . $text;
 			$params['a_oif'] = $item['left']['id'];
 			if (isset ($oif_usage_stat[$item['left']['id']]))
 				$popularity_count += $oif_usage_stat[$item['left']['id']];
@@ -9058,7 +9058,7 @@ function formatIfTypeVariants ($variants, $select_name)
 		if (isTranceiverEmpty ($item['right']['portinfo']))
 		{
 			$creting_tranceivers = TRUE;
-			$text = $text . ' â†’';
+			$text = '← ' . $text;
 			$params['b_oif'] = $item['right']['id'];
 			if (isset ($oif_usage_stat[$item['right']['id']]))
 				$popularity_count += $oif_usage_stat[$item['right']['id']];
@@ -9079,7 +9079,7 @@ function formatIfTypeVariants ($variants, $select_name)
 	if ($creting_tranceivers and ! $tranceivers_hint_shown)
 	{
 		$tranceivers_hint_shown = TRUE;
-		showNotice ('The arrow (â†� or â†’) means to create a tranceiver in the suitable port');
+		showNotice ('The arrow (← or →) means to create a tranceiver in the suitable port');
 	}
 
 	return getSelect ($select, array('name' => $select_name), $selected_key, !$creting_tranceivers);
