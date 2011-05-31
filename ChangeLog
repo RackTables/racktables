@@ -1,3 +1,5 @@
+0.19.5
+	bugfix: dictionary record updates did not work (#430)
 0.19.4 2011-04-14
  	bugfix: tag selector was not working with magic_quotes enabled
 	update: new techniques of changing the directory layout are now supported by installer and upgrader
