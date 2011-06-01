@@ -2694,24 +2694,24 @@ function renderIPv4Network ($id)
 	$maxperpage = getConfigVar ('IPV4_ADDRS_PER_PAGE');
 	$address_count = $endip - $startip + 1;
 	$page = 0;
+	$rendered_pager = '';
 	if ($address_count > $maxperpage && $maxperpage > 0)
 	{
 		$page = isset ($_REQUEST['pg']) ? $_REQUEST['pg'] : (isset ($hl_ip) ? intval (($hl_ip - $startip) / $maxperpage) : 0);
 		if ($numpages = ceil ($address_count / $maxperpage))
 		{
-			echo "<center>";
 			echo '<h3>' . long2ip ($startip) . ' ~ ' . long2ip ($endip) . '</h3>';
 			for ($i = 0; $i < $numpages; $i++)
 				if ($i == $page)
-					echo "<b>$i</b> ";
+					$rendered_pager .= "<b>$i</b> ";
 				else
-					echo "<a href='".makeHref (array ('page' => $pageno, 'tab' => $tabno, 'id' => $id, 'pg' => $i)) . "'>$i</a> ";
-			echo "</center>";
+					$rendered_pager .= "<a href='".makeHref (array ('page' => $pageno, 'tab' => $tabno, 'id' => $id, 'pg' => $i)) . "'>$i</a> ";
 		}
 		$startip = $startip + $page * $maxperpage;
 		$endip = min ($startip + $maxperpage - 1, $endip);
 	}
 
+	echo $rendered_pager;
 	echo "<table class='widetable' border=0 cellspacing=0 cellpadding=5 align='center' width='100%'>\n";
 	echo "<tr><th>Address</th><th>Name</th><th>Allocation</th></tr>\n";
 
@@ -2787,6 +2787,9 @@ function renderIPv4Network ($id)
 		addJS ('js/inplace-edit.js');
 
 	echo "</table>";
+	if (! empty ($rendered_pager))
+		echo '<p>' . $rendered_pager . '</p>';
+
 	finishPortlet();
 	echo "</td></tr></table>\n";
 }
@@ -9390,8 +9393,7 @@ function formatVLANPackDiff ($old, $current)
 		// make diff
 		$added = groupIntsToRanges (array_diff ($current['allowed'], $old['allowed']));
 		$removed = groupIntsToRanges (array_diff ($old['allowed'], $current['allowed']));
-		$diff_size = count ($added) + count ($removed); 
-		if ($old['mode'] == $current['mode'] and $diff_size < $old_size / 2 and $diff_size < $new_size / 2)
+		if ($old['mode'] == $current['mode'] && $current['mode'] == 'trunk')
 		{
 			if (! empty ($added))
 				$ret .= '<span class="vlan-diff diff-add">+ ' . implode (', ', $added) . '</span><br>';
