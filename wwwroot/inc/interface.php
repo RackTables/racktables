@@ -9006,7 +9006,7 @@ function formatIfTypeVariants ($variants, $select_name)
 	static $tranceivers_hint_shown = FALSE;
 	static $oif_usage_stat = NULL;
 	$select = array();
-	$creting_tranceivers = FALSE;
+	$creating_tranceivers = FALSE;
 	$most_used_count = 0;
 	$selected_key = NULL;
 	$multiple_left = FALSE;
@@ -9052,16 +9052,16 @@ function formatIfTypeVariants ($variants, $select_name)
 		$popularity_count = 0;
 		if (isTranceiverEmpty ($item['left']['portinfo']))
 		{
-			$creting_tranceivers = TRUE;
-			$text = '← ' . $text;
+			$creating_tranceivers = TRUE;
+			$text = '&larr; ' . $text;
 			$params['a_oif'] = $item['left']['id'];
 			if (isset ($oif_usage_stat[$item['left']['id']]))
 				$popularity_count += $oif_usage_stat[$item['left']['id']];
 		}
 		if (isTranceiverEmpty ($item['right']['portinfo']))
 		{
-			$creting_tranceivers = TRUE;
-			$text = $text . ' →';
+			$creating_tranceivers = TRUE;
+			$text = $text . ' &rarr;';
 			$params['b_oif'] = $item['right']['id'];
 			if (isset ($oif_usage_stat[$item['right']['id']]))
 				$popularity_count += $oif_usage_stat[$item['right']['id']];
@@ -9071,7 +9071,7 @@ function formatIfTypeVariants ($variants, $select_name)
 		foreach ($params as $i => $j)
 			$key .= ",$i:$j";
 		$key = trim($key, ",");
-		$select[$key] = (count ($variants) == 1 && ! $creting_tranceivers ? '' : $text); // empty string if there is simple single variant
+		$select[$key] = (count ($variants) == 1 && ! $creating_tranceivers ? '' : $text); // empty string if there is simple single variant
 		if ($popularity_count > $most_used_count)
 		{
 			$most_used_count = $popularity_count;
@@ -9079,13 +9079,13 @@ function formatIfTypeVariants ($variants, $select_name)
 		}
 	}
 
-	if ($creting_tranceivers and ! $tranceivers_hint_shown)
+	if ($creating_tranceivers and ! $tranceivers_hint_shown)
 	{
 		$tranceivers_hint_shown = TRUE;
-		showNotice ('The arrow (← or →) means to create a tranceiver in the suitable port');
+		showNotice ('The arrow (&larr; or &rarr;) means to create a tranceiver in the suitable port');
 	}
 
-	return getSelect ($select, array('name' => $select_name), $selected_key, !$creting_tranceivers);
+	return getSelect ($select, array('name' => $select_name), $selected_key, !$creating_tranceivers);
 }
 
 function isTranceiverEmpty ($portinfo)
