@@ -987,7 +987,13 @@ function clearSticker ()
 {
 	global $sic;
 	assertUIntArg ('attr_id');
-	commitUpdateAttrValue (getBypassValue(), $sic['attr_id']);
+	if (permitted (NULL, NULL, NULL, array (array ('tag' => '$attr_' . $sic['attr_id']))))
+		commitUpdateAttrValue (getBypassValue(), $sic['attr_id']);
+	else
+	{
+		$oldvalues = getAttrValues (getBypassValue());
+		showError ('Permission denied, "' . $oldvalues[$sic['attr_id']]['name'] . '" left unchanged');
+	}
 }
 
 $msgcode['updateObjectAllocation']['OK'] = 63;
