@@ -1111,7 +1111,10 @@ function updateObject ()
 		# type is a dictionary and it is the "--NOT SET--" value of 0.
 		if ($value == '' || ($oldvalues[$attr_id]['type'] == 'dict' && $value == 0))
 		{
-			commitUpdateAttrValue ($object_id, $attr_id);
+			if (permitted (NULL, NULL, NULL, array (array ('tag' => '$attr_' . $attr_id))))
+				commitUpdateAttrValue ($object_id, $attr_id);
+			else
+				showError ('Permission denied, "' . $oldvalues[$attr_id]['name'] . '" left unchanged');
 			continue;
 		}
 
@@ -1132,7 +1135,10 @@ function updateObject ()
 		}
 		if ($value === $oldvalue) // ('' == 0), but ('' !== 0)
 			continue;
-		commitUpdateAttrValue ($object_id, $attr_id, $value);
+		if (permitted (NULL, NULL, NULL, array (array ('tag' => '$attr_' . $attr_id))))
+			commitUpdateAttrValue ($object_id, $attr_id, $value);
+		else
+			showError ('Permission denied, "' . $oldvalues[$attr_id]['name'] . '" left unchanged');
 	}
 	$object = spotEntity ('object', $object_id);
 	if ($sic['object_type_id'] != $object['objtype_id'])
