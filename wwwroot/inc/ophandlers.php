@@ -813,11 +813,13 @@ function addIPv4Prefix ()
 {
 	assertStringArg ('range');
 	assertStringArg ('name', TRUE);
+	genericAssertion ('vlan_ck', 'string');
 
 	$is_bcast = isset ($_REQUEST['is_bcast']) ? $_REQUEST['is_bcast'] : 'off';
 	$taglist = isset ($_REQUEST['taglist']) ? $_REQUEST['taglist'] : array();
 	global $sic;
-	createIPv4Prefix ($_REQUEST['range'], $sic['name'], $is_bcast == 'on', $taglist);
+	$vlan_ck = $sic['vlan_ck'] == '0-0' ? NULL : $sic['vlan_ck'];
+	createIPv4Prefix ($_REQUEST['range'], $sic['name'], $is_bcast == 'on', $taglist, $vlan_ck);
 	return showFuncMessage (__FUNCTION__, 'OK');
 }
 
@@ -826,11 +828,13 @@ function addIPv6Prefix ()
 {
 	assertStringArg ('range');
 	assertStringArg ('name', TRUE);
+	genericAssertion ('vlan_ck', 'string');
 
 	$taglist = isset ($_REQUEST['taglist']) ? $_REQUEST['taglist'] : array();
 	$is_connected = isset ($_REQUEST['is_connected']) ? ($_REQUEST['is_connected'] == 'on') : FALSE;
 	global $sic;
-	createIPv6Prefix ($_REQUEST['range'], $sic['name'], $is_connected, $taglist);
+	$vlan_ck = $sic['vlan_ck'] == '0-0' ? NULL : $sic['vlan_ck'];
+	createIPv6Prefix ($_REQUEST['range'], $sic['name'], $is_connected, $taglist, $vlan_ck);
 	return showFuncMessage (__FUNCTION__, 'OK');
 }
 

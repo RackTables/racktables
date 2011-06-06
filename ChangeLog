@@ -7,6 +7,7 @@
 	update: {$runs_8021Q} works for IPv4/IPv6 networks
 	update: support for mounting zero-U objects (#173, by Aaron Dummer)
 	update: ability to search a remote port while linking ports together and to resolve port type conflicts in-place
+	update: create network and link to a VLAN at once
 	new feature: you can obtain who has made tag assignment, object's ports or IPv4 address changes by hovering cursor on these entities
 	new feature: ability to open a terminal session to a device by clicking on its FQDN
 	new feature: inverting tags on cell filter pages by clicking the checkboxes with Ctrl key

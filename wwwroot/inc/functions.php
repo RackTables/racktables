@@ -2623,6 +2623,16 @@ function getVSTOptions()
 	return $ret;
 }
 
+function getAllVLANOptions()
+{
+	$ret = array ('other' => array ('0-0' => '-- NONE --'));
+	foreach (getVLANDomainStats() as $dominfo)
+		foreach (getDomainVLANs ($dominfo['id']) as $vlaninfo)
+			$ret[$dominfo['description']]["${dominfo['id']}-${vlaninfo['vlan_id']}"] =
+				"${vlaninfo['vlan_id']} (${vlaninfo['netc']}) ${vlaninfo['vlan_descr']}";
+	return $ret;
+}
+
 // Let's have this debug helper here to enable debugging of process.php w/o interface.php.
 function dump ($var)
 {

@@ -2437,16 +2437,18 @@ END
 		echo "<form method=post name='add_new_range' action='".makeHrefProcess()."'>\n";
 		echo "<input type=hidden name=op value=addIPv4Prefix>\n";
 		// tags column
-		echo '<tr><td rowspan=4><h3>assign tags</h3>';
+		echo '<tr><td rowspan=5><h3>assign tags</h3>';
 		renderNewEntityTags ('ipv4net');
 		echo '</td>';
 		// inputs column
 		$prefix_value = empty ($_REQUEST['set-prefix']) ? '' : $_REQUEST['set-prefix'];
-		echo "<th class=tdright>prefix</th><td class=tdleft><input type=text name='range' size=18 class='live-validate' tabindex=1 value='${prefix_value}'></td>";
-		echo "<tr><th class=tdright>name</th><td class=tdleft><input type=text name='name' size='20' tabindex=2></td></tr>";
-		echo '<tr><td class=tdright><input type=checkbox name="is_bcast" tabindex=3></td><th class=tdleft>reserve network and router addresses</th></tr>';
+		echo "<th class=tdright>prefix</th><td class=tdleft><input type=text name='range' size=18 class='live-validate' tabindex=10 value='${prefix_value}'></td>";
+		echo '<tr><th class=tdright>VLAN</th><td class=tdleft>';
+		echo getNiftySelect (getAllVLANOptions(), array ('name' => 'vlan_ck', 'tabindex' => 20)) . '</td></tr>';
+		echo "<tr><th class=tdright>name</th><td class=tdleft><input type=text name='name' size='20' tabindex=30></td></tr>";
+		echo '<tr><td class=tdright><input type=checkbox name="is_bcast" tabindex=40></td><th class=tdleft>reserve network and router addresses</th></tr>';
 		echo "<tr><td colspan=2>";
-		printImageHREF ('CREATE', 'Add a new network', TRUE, 4);
+		printImageHREF ('CREATE', 'Add a new network', TRUE, 50);
 		echo '</td></tr>';
 		echo "</form></table><br><br>\n";
 		finishPortlet();
@@ -2519,16 +2521,18 @@ END
 		echo "<form method=post name='add_new_range' action='".makeHrefProcess()."'>\n";
 		echo "<input type=hidden name=op value=addIPv6Prefix>\n";
 		// tags column
-		echo '<tr><td rowspan=4><h3>assign tags</h3>';
+		echo '<tr><td rowspan=5><h3>assign tags</h3>';
 		renderNewEntityTags ('ipv4net');
 		echo '</td>';
 		// inputs column
 		$prefix_value = empty ($_REQUEST['set-prefix']) ? '' : $_REQUEST['set-prefix'];
-		echo "<th class=tdright>prefix</th><td class=tdleft><input type=text name='range' size=36 class='live-validate' tabindex=1 value='${prefix_value}'></td>";
-		echo "<tr><th class=tdright>name</th><td class=tdleft><input type=text name='name' size='20' tabindex=2></td></tr>";
-		echo '<tr><td class=tdright><input type=checkbox name="is_connected" tabindex=3></td><th class=tdleft>reserve subnet-router anycast address</th></tr>';
+		echo "<th class=tdright>prefix</th><td class=tdleft><input type=text name='range' size=36 class='live-validate' tabindex=10 value='${prefix_value}'></td>";
+		echo '<tr><th class=tdright>VLAN</th><td class=tdleft>';
+		echo getNiftySelect (getAllVLANOptions(), array ('name' => 'vlan_ck', 'tabindex' => 20)) . '</td></tr>';
+		echo "<tr><th class=tdright>name</th><td class=tdleft><input type=text name='name' size='20' tabindex=30></td></tr>";
+		echo '<tr><td class=tdright><input type=checkbox name="is_connected" tabindex=40></td><th class=tdleft>reserve subnet-router anycast address</th></tr>';
 		echo "<tr><td colspan=2>";
-		printImageHREF ('CREATE', 'Add a new network', TRUE, 4);
+		printImageHREF ('CREATE', 'Add a new network', TRUE, 50);
 		echo '</td></tr>';
 		echo "</form></table><br><br>\n";
 		finishPortlet();
