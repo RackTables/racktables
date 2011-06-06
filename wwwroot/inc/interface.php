@@ -878,16 +878,6 @@ function renderRackProblems ($rack_id)
 	renderGridForm ($rack_id, 'applyRackProblemMask', 'Rack problems', 'Mark unusable atoms', 'F', 'U');
 }
 
-function startPortlet ($title = '')
-{
-	echo "<div class=portlet><h2>${title}</h2>";
-}
-
-function finishPortlet ()
-{
-	echo "</div>\n";
-}
-
 function renderObject ($object_id)
 {
 	global $nextorder, $virtual_obj_types;
