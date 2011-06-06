@@ -202,6 +202,40 @@ function prev ()
 	return $result;
 }
 
+# $a == $b
+public static function eq (IPv6Address $a, IPv6Address $b)
+{
+	return $a->words === $b->words;
+}
+
+# $a > $b
+public static function gt (IPv6Address $a, IPv6Address $b)
+{
+	for ($i = 0; $i < 16; $i++)
+		if ($a->words[$i] > $b->words[$i])
+			return TRUE;
+		elseif ($a->words[$i] < $b->words[$i])
+			return FALSE;
+	return FALSE;
+}
+
+# $a < $b
+public static function lt (IPv6Address $a, IPv6Address $b)
+{
+	return ! self::eq ($a, $b) && ! self::gt ($a, $b);
+}
+
+# $a >= $b
+public static function ge (IPv6Address $a, IPv6Address $b)
+{
+	return self::eq ($a, $b) || self::gt ($a, $b);
+}
+
+# $a <= $b
+public static function le (IPv6Address $a, IPv6Address $b)
+{
+	return self::eq ($a, $b) || ! self::gt ($a, $b);
+}
 
 } // class IPv6Address
 
