@@ -4272,18 +4272,22 @@ function searchEntitiesByText ($terms)
 	}
 	# Filter search results in a way in some realms to omit records, which the
 	# user would not be able to browse anyway.
-	foreach ($summary['object'] as $key => $record)
-		if (! isolatedPermission ('object', 'default', spotEntity ('object', $record['id'])))
-			unset ($summary['object'][$key]);
-	foreach ($summary['ipv4network'] as $key => $netinfo)
-		if (! isolatedPermission ('ipv4net', 'default', $netinfo))
-			unset ($summary['ipv4network'][$key]);
-	foreach ($summary['ipv6network'] as $key => $netinfo)
-		if (! isolatedPermission ('ipv6net', 'default', $netinfo))
-			unset ($summary['ipv6network'][$key]);
-	foreach ($summary['file'] as $key => $fileinfo)
-		if (! isolatedPermission ('file', 'default', $fileinfo))
-			unset ($summary['file'][$key]);
+	if (isset ($summary['object']))
+		foreach ($summary['object'] as $key => $record)
+			if (! isolatedPermission ('object', 'default', spotEntity ('object', $record['id'])))
+				unset ($summary['object'][$key]);
+	if (isset ($summary['ipv4network']))
+		foreach ($summary['ipv4network'] as $key => $netinfo)
+			if (! isolatedPermission ('ipv4net', 'default', $netinfo))
+				unset ($summary['ipv4network'][$key]);
+	if (isset ($summary['ipv6network']))
+		foreach ($summary['ipv6network'] as $key => $netinfo)
+			if (! isolatedPermission ('ipv6net', 'default', $netinfo))
+				unset ($summary['ipv6network'][$key]);
+	if (isset ($summary['file']))
+		foreach ($summary['file'] as $key => $fileinfo)
+			if (! isolatedPermission ('file', 'default', $fileinfo))
+				unset ($summary['file'][$key]);
 
 	// clear empty search result realms
 	foreach ($summary as $key => $data)
