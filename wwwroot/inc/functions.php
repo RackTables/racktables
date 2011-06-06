@@ -4258,39 +4258,17 @@ function searchEntitiesByText ($terms)
 	else
 	// Search for objects, addresses, networks, virtual services and RS pools by their description.
 	{
-		$tmp = getObjectSearchResults ($terms);
-		if (count ($tmp))
-			$summary['object'] = $tmp;
-		$tmp = getIPv4AddressSearchResult ($terms);
-		if (count ($tmp))
-			$summary['ipv4addressbydescr'] = $tmp;
-		$tmp = getIPv6AddressSearchResult ($terms);
-		if (count ($tmp))
-			$summary['ipv6addressbydescr'] = $tmp;
-		$tmp = getIPv4PrefixSearchResult ($terms);
-		if (count ($tmp))
-			$summary['ipv4network'] = $tmp;
-		$tmp = getIPv6PrefixSearchResult ($terms);
-		if (count ($tmp))
-			$summary['ipv6network'] = $tmp;
-		$tmp = getIPv4RSPoolSearchResult ($terms);
-		if (count ($tmp))
-			$summary['ipv4rspool'] = $tmp;
-		$tmp = getIPv4VServiceSearchResult ($terms);
-		if (count ($tmp))
-			$summary['ipv4vs'] = $tmp;
-		$tmp = getAccountSearchResult ($terms);
-		if (count ($tmp))
-			$summary['user'] = $tmp;
-		$tmp = getFileSearchResult ($terms);
-		if (count ($tmp))
-			$summary['file'] = $tmp;
-		$tmp = getRackSearchResult ($terms);
-		if (count ($tmp))
-			$summary['rack'] = $tmp;
-		$tmp = getVLANSearchResult ($terms);
-		if (count ($tmp))
-			$summary['vlan'] = $tmp;
+		$summary['object'] = getObjectSearchResults ($terms);
+		$summary['ipv4addressbydescr'] = getIPv4AddressSearchResult ($terms);
+		$summary['ipv6addressbydescr'] = getIPv6AddressSearchResult ($terms);
+		$summary['ipv4network'] = getIPv4PrefixSearchResult ($terms);
+		$summary['ipv6network'] = getIPv6PrefixSearchResult ($terms);
+		$summary['ipv4rspool'] = getIPv4RSPoolSearchResult ($terms);
+		$summary['ipv4vs'] = getIPv4VServiceSearchResult ($terms);
+		$summary['user'] = getAccountSearchResult ($terms);
+		$summary['file'] = getFileSearchResult ($terms);
+		$summary['rack'] = getRackSearchResult ($terms);
+		$summary['vlan'] = getVLANSearchResult ($terms);
 	}
 	# Filter search results in a way in some realms to omit records, which the
 	# user would not be able to browse anyway.
@@ -4306,14 +4284,11 @@ function searchEntitiesByText ($terms)
 	foreach ($summary['file'] as $key => $fileinfo)
 		if (! isolatedPermission ('file', 'default', $fileinfo))
 			unset ($summary['file'][$key]);
-	if (! count ($summary['object']))
-		unset ($summary['object']);
-	if (! count ($summary['ipv4network']))
-		unset ($summary['ipv4network']);
-	if (! count ($summary['ipv6network']))
-		unset ($summary['ipv6network']);
-	if (! count ($summary['file']))
-		unset ($summary['file']);
+
+	// clear empty search result realms
+	foreach ($summary as $key => $data)
+		if (! count ($data))
+			unset ($summary[$key]);
 	return $summary;
 }
 
