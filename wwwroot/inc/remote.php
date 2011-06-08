@@ -216,7 +216,7 @@ function setDevice8021QConfig ($object_id, $pseudocode, $vlan_names)
 	// FIXME: this is a perfect place to log intended changes
 	// $object_id argument isn't used by default translating functions, but
 	// may come in handy for overloaded versions of these.
-	$commands = unix2dos (translateDeviceCommands ($object_id, $pseudocode, $vlan_names));
+	$commands = translateDeviceCommands ($object_id, $pseudocode, $vlan_names);
 	queryTerminal ($object_id, $commands, FALSE);
 }
 

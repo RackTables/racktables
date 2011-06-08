@@ -62,6 +62,9 @@ while (! $session->eof) {
     if (! $cmd_finished && (! defined $prompt_re || $buff =~ $prompt_re)) {
         my $cmd = <STDIN>;
         if (defined $cmd) {
+            # replace all CR and LF symbols with single trailing LF
+            $cmd =~ s/[\015\012]//g;
+            $cmd .= "\012";
             $session->put($cmd);
         }
         else {
