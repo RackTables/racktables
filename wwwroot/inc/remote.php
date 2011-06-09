@@ -112,7 +112,7 @@ function queryTerminal ($object_id, $commands, $tolerate_remote_errors = TRUE)
 					$commands = "skip-page-display\n" . $commands;
 					break;
 				case 'jun10':
-					$commands = "'set cli screen-length 0\n" . $commands;
+					$commands = "set cli screen-length 0\n" . $commands;
 					break;
 			}
 			// prepend telnet commands by credentials
