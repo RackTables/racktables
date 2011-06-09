@@ -1548,6 +1548,7 @@ $dictionary = array
 	1466 => array ('chapter_id' => 2, 'dict_value' => '10GBase-ER-DWDM40-28.77 (ITU 61)'),
 	1467 => array ('chapter_id' => 25, 'dict_value' => 'Cisco%GPASS%AIR-AP1141N'),
 	1468 => array ('chapter_id' => 25, 'dict_value' => 'Cisco%GPASS%AIR-AP1262N'),
+	1469 => array ('chapter_id' => 2, 'dict_value' => 'virtual port'),
 //                                     ^
 //                                     ^
 // add new dictionary entries up here  ^
@@ -1614,7 +1615,7 @@ $dictionary = array
 	1560 => array ('chapter_id' => 1, 'dict_value' => 'Rack'),
 	1561 => array ('chapter_id' => 1, 'dict_value' => 'Row'),
 	1562 => array ('chapter_id' => 1, 'dict_value' => 'Location'),
-// NOTICE: do not add new dictionary entries here, add them to the gap above (~1425)!
+// NOTICE: do not add new dictionary entries here, add them to the gap above (~1470)!
 );
 
 ?>
