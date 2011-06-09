@@ -4014,11 +4014,12 @@ function get8021QDeployQueues()
 	global $dqtitle;
 	$ret = array();
 	foreach (array_keys ($dqtitle) as $qcode)
-		$ret[$qcode] = array
-		(
-			'enabled' => array(),
-			'disabled' => array(),
-		);
+		if ($qcode != 'disabled')
+			$ret[$qcode] = array
+			(
+				'enabled' => array(),
+				'disabled' => array(),
+			);
 	foreach (getVLANSwitches() as $object_id)
 	{
 		$vswitch = getVLANSwitchInfo ($object_id);
@@ -4026,7 +4027,7 @@ function get8021QDeployQueues()
 		{
 			$cell = spotEntity ('object', $vswitch['object_id']);
 			$enabled_key = considerConfiguredConstraint ($cell, 'SYNC_802Q_LISTSRC') ? 'enabled' : 'disabled';
-				$ret[$qcode][$enabled_key][] = $vswitch;
+			$ret[$qcode][$enabled_key][] = $vswitch;
 		}
 	}
 	return $ret;
