@@ -17,7 +17,7 @@ function usage()
 }
 
 $options = getopt ('', array ('vdid:', 'max::', 'mode:', 'verbose'));
-if (!array_key_exists ('vdid', $options) or !array_key_exists ('mode', $options))
+if (!array_key_exists ('mode', $options))
 	usage();
 
 switch ($options['mode'])
@@ -38,16 +38,22 @@ default:
 $max = array_key_exists ('max', $options) ? $options['max'] : 0;
 $verbose = array_key_exists ('verbose', $options);
 
-try
-{
-	$mydomain = getVLANDomain ($options['vdid']);
-}
-catch (RackTablesError $e)
-{
-	echo "Cannot load domain data with ID ${options['vdid']}\n";
-	echo $e->getMessage() . "\n";
-	exit (1);
-}
+$switch_list = array();
+if (! isset ($options['vdid']))
+	$switch_list = getVLANSwitches();
+else
+	try
+	{
+		$mydomain = getVLANDomain ($options['vdid']);
+		foreach ($mydomain['switchlist'] as $switch)
+			$switch_list[] = $switch['object_id'];
+	}
+	catch (RackTablesError $e)
+	{
+		echo "Cannot load domain data with ID ${options['vdid']}\n";
+		echo $e->getMessage() . "\n";
+		exit (1);
+	}
 
 $todo = array
 (
@@ -56,7 +62,8 @@ $todo = array
 	'pullall' => array ('sync_ready', 'resync_ready', 'sync_aging', 'resync_aging', 'done'),
 );
 
-$filename = '/var/tmp/RackTables-syncdomain-' . $options['vdid'] . '.pid';
+$domain_key = isset ($options['vdid']) ? $options['vdid'] : 0;
+$filename = '/var/tmp/RackTables-syncdomain-' . $domain_key . '.pid';
 if (FALSE === $fp = @fopen ($filename, 'x+'))
 {
 	if (FALSE === $pidfile_mtime = filemtime ($filename))
@@ -83,9 +90,13 @@ fclose ($fp);
 
 // fetch all the needed data from DB (preparing for DB connection loss)
 $switch_queue = array();
-foreach ($mydomain['switchlist'] as $switch)
-	if (in_array (detectVLANSwitchQueue (getVLANSwitchInfo ($switch['object_id'])), $todo[$options['mode']]))
-		$switch_queue[] = spotEntity ('object', $switch['object_id']);
+foreach ($switch_list as $object_id)
+	if (in_array (detectVLANSwitchQueue (getVLANSwitchInfo ($object_id)), $todo[$options['mode']]))
+	{
+		$cell = spotEntity ('object', $object_id);
+		if (considerConfiguredConstraint ($cell, 'SYNC_802Q_LISTSRC'))
+			$switch_queue[] = $cell;
+	}
 
 // YOU SHOULD NOT USE DB FUNCTIONS BELOW IN THE PARENT PROCESS
 // THE PARENT'S DB CONNECTION IS LOST DUE TO RECONNECTING IN THE CHILD

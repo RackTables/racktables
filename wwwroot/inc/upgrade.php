@@ -1205,6 +1205,8 @@ CREATE VIEW `RackObject` AS SELECT * FROM `Object`
 			$query[] = 'ALTER TABLE `EntityLink` ADD KEY `EntityLink-compound` (`parent_entity_type`,`child_entity_type`,`child_entity_id`)';
 			$query[] = "UPDATE `Chapter` SET `name` = 'ObjectType' WHERE `id` = 1";
 			$query[] = "DELETE FROM RackSpace WHERE object_id IS NULL AND state = 'T'";
+			
+			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdefined, description) VALUES ('SYNC_802Q_LISTSRC','','string','yes','no','no','List of VLAN switches sync is enabled on')";
 			$query[] = "UPDATE Config SET varvalue = '0.20.0' WHERE varname = 'DB_VERSION'";
 			break;
 		default:

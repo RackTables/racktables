@@ -21,7 +21,8 @@ $SQLSchema = array
 			'has_problems' => 'has_problems',
 			'comment' => 'comment',
 			'nports' => '(SELECT COUNT(*) FROM Port WHERE object_id = RackObject.id)',
-			'runs8021Q' => '(SELECT 1 FROM VLANSwitch WHERE object_id = id LIMIT 1)',
+			'8021q_domain_id' => '(SELECT domain_id FROM VLANSwitch WHERE object_id = id LIMIT 1)',
+			'8021q_template_id' => '(SELECT template_id FROM VLANSwitch WHERE object_id = id LIMIT 1)',
 		),
 		'keycolumn' => 'id',
 		'ordcolumns' => array ('RackObject.name'),
@@ -3461,8 +3462,13 @@ function generateEntityAutoTags ($cell)
 				$ret[] = array ('tag' => '$portless');
 			if ($cell['asset_no'] == '')
 				$ret[] = array ('tag' => '$no_asset_tag');
-			if ($cell['runs8021Q'])
+			if (isset ($cell['8021q_domain_id']))
+			{
 				$ret[] = array ('tag' => '$runs_8021Q');
+				$ret[] = array ('tag' => '$8021Q_domain_' . $cell['8021q_domain_id']);
+				if (isset ($cell['8021q_template_id']))
+					$ret[] = array ('tag' => '$8021Q_tpl_' . $cell['8021q_template_id']);
+			}
 
 			# dictionary attribute autotags '$attr_X_Y'
 			$attrs = getAttrValues($cell['id']);

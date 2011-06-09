@@ -7549,14 +7549,25 @@ function render8021QStatus ()
 	echo '</td><td class=pcright>';
 
 	startPortlet ('deploy queues');
+	$enabled_total = 0;
+	$disabled_total = 0;
 	echo '<table border=0 cellspacing=0 cellpadding=3 width="100%">';
 	foreach (get8021QDeployQueues() as $qcode => $qitems)
 	{
 		echo '<tr><th width="50%" class=tdright><a href="' . makeHREF (array ('page' => 'dqueue', 'dqcode' => $qcode));
 		echo '">' . $dqtitle[$qcode] . '</a>:</th>';
-		echo '<td class=tdleft>' . count ($qitems) . '</td></tr>';
+	    echo '<td class=tdleft>' . count ($qitems['enabled']) . '</td></tr>';
+
+		$enabled_total += count ($qitems['enabled']);
+		$disabled_total += count ($qitems['disabled']);
 	}
 	echo '</table>';
+	$total = $enabled_total + $disabled_total;
+	echo "<p align=left>$total switches total";
+	if ($disabled_total)
+		echo ', <a href="' . makeHREF (array ('page' => 'dqueue', 'dqcode' => 'disabled')) . '">' .
+		$disabled_total . "</a> disabled";
+	echo '</p>';
 	finishPortlet();
 	echo '</td></tr></table>';
 }
@@ -8319,6 +8330,7 @@ function renderVLANIPLinks ($some_id)
 function renderObject8021QSync ($object_id)
 {
 	$vswitch = getVLANSwitchInfo ($object_id);
+	$object = spotEntity ('object', $object_id);
 	try
 	{
 		$R = getRunning8021QConfig ($object_id);
@@ -8349,7 +8361,6 @@ function renderObject8021QSync ($object_id)
 		$hl_port_name = NULL;
 		addAutoScrollScript ("port-$hl_port_id");
 
-		$object = spotEntity ('object', $object_id);
 		amplifyCell ($object);
 		foreach ($object['ports'] as $port)
 			if (mb_strlen ($port['name']) && $port['id'] == $hl_port_id)
@@ -8366,6 +8377,8 @@ function renderObject8021QSync ($object_id)
 	echo '<table border=0 cellspacing=0 cellpadding=3 align=center>';
 	// FIXME: sort rows newest event last
 	$rows = array();
+	if (! considerConfiguredConstraint ($object, 'SYNC_802Q_LISTSRC'))
+		$rows['auto sync'] = '<span class="trerror">disabled by operator</span>';
 	$rows['last local change'] = $vswitch['last_change'] . ' (' . $vswitch['last_change_age'] . ' ago)';
 	$rows['device out of sync'] = $vswitch['out_of_sync'];
 	if ($vswitch['out_of_sync'] == 'no')
@@ -8758,20 +8771,29 @@ function renderVSTRulesEditor ($vst_id)
 
 function renderDeployQueue()
 {
-	global $nextorder;
+	global $nextorder, $dqtitle;
 	$order = 'odd';
 	$dqcode = getBypassValue();
 	$allq = get8021QDeployQueues();
-	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
-	echo '<tr><th>switch</th><th>age</th><th>';
-	foreach ($allq[$dqcode] as $item)
-	{
-		echo "<tr class=row_${order}><td>";
-		renderCell (spotEntity ('object', $item['object_id']));
-		echo "</td><td>${item['last_change_age']}</td></tr>";
-		$order = $nextorder[$order];
-	}
-	echo '</table>';
+	$en_key = $dqcode == 'disabled' ? 'disabled' : 'enabled';
+	foreach ($allq as $qcode => $data)
+		if ($dqcode == 'disabled' || $dqcode == $qcode)
+		{
+			if (! count ($data[$en_key]))
+				continue;
+			if ($dqcode == 'disabled')
+				echo "<h2 align=center>Queue " . $dqtitle[$qcode] . " (" . count ($data[$en_key]) . ")</h2>";
+			echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
+			echo '<tr><th>switch</th><th>age</th><th>';
+			foreach ($data[$en_key] as $item)
+			{
+				echo "<tr class=row_${order}><td>";
+				renderCell (spotEntity ('object', $item['object_id']));
+				echo "</td><td>${item['last_change_age']}</td></tr>";
+				$order = $nextorder[$order];
+			}
+			echo '</table>';
+		}
 }
 
 function renderDiscoveredNeighbors ($object_id)

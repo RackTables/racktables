@@ -1403,6 +1403,7 @@ function resetUIConfig()
 	setConfigVar ('FILTER_RACKLIST_BY_TAGS', 'yes');
 	setConfigVar ('SSH_OBJS_LISTSRC', 'none');
 	setConfigVar ('TELNET_OBJS_LISTSRC', 'none');
+	setConfigVar ('SYNC_802Q_LISTSRC', '');
 	return showFuncMessage (__FUNCTION__, 'OK');
 }
 
