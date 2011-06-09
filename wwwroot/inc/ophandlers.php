@@ -1200,7 +1200,6 @@ function addMultipleObjects()
 				$taglist
 			);
 			$info = spotEntity ('object', $object_id);
-			// FIXME: employ amplifyCell() instead of calling loader functions directly
 			amplifyCell ($info);
 			showSuccess ("added object " . formatPortLink ($info['id'], $info['dname'], NULL, NULL));
 		}
