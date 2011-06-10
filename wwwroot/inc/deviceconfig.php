@@ -143,6 +143,7 @@ function vrp5xReadLLDPStatus ($input)
 	return $ret;
 }
 
+// FIXME: not used, maybe delete?
 function nxos4ReadLLDPStatus ($input)
 {
 	$ret = array();
