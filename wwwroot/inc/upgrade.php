@@ -1186,17 +1186,14 @@ CREATE VIEW `Row` AS SELECT id, label AS name
 CREATE VIEW `Rack` AS SELECT O.id, O.label AS name, O.asset_no, O.has_problems, O.comment,
   AV.uint_value AS height,
   RT.thumb_data,
-  EL.parent_entity_id AS row_id,
+  Row.id AS row_id,
   Row.name AS row_name
   FROM `Object` O
-  LEFT JOIN `AttributeValue` AV ON O.id = AV.object_id
+  LEFT JOIN `AttributeValue` AV ON O.id = AV.object_id AND AV.attr_id = 27
   LEFT JOIN `RackThumbnail` RT ON O.id = RT.rack_id
-  LEFT JOIN `EntityLink` EL ON O.id = EL.child_entity_id
-  LEFT JOIN `Row` ON EL.parent_entity_id = Row.id
-  WHERE O.objtype_id = 1560
-  AND AV.attr_id = 27
-  AND EL.parent_entity_type = 'object'
-  AND EL.child_entity_type = 'object';
+  LEFT JOIN `EntityLink` EL ON O.id = EL.child_entity_id  AND EL.parent_entity_type = 'object' AND EL.child_entity_type = 'object'
+  INNER JOIN `Row` ON EL.parent_entity_id = Row.id
+  WHERE O.objtype_id = 1560;
 ";
 			$query[] = "
 CREATE VIEW `RackObject` AS SELECT * FROM `Object`
