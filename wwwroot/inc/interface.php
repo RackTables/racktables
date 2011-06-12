@@ -2444,7 +2444,7 @@ END
 		$prefix_value = empty ($_REQUEST['set-prefix']) ? '' : $_REQUEST['set-prefix'];
 		echo "<th class=tdright>prefix</th><td class=tdleft><input type=text name='range' size=18 class='live-validate' tabindex=10 value='${prefix_value}'></td>";
 		echo '<tr><th class=tdright>VLAN</th><td class=tdleft>';
-		echo getNiftySelect (getAllVLANOptions(), array ('name' => 'vlan_ck', 'tabindex' => 20)) . '</td></tr>';
+		echo getNiftySelect (getAllVLANOptions(), array ('name' => 'vlan_ck', 'tabindex' => 20), NULL, TRUE) . '</td></tr>';
 		echo "<tr><th class=tdright>name</th><td class=tdleft><input type=text name='name' size='20' tabindex=30></td></tr>";
 		echo '<tr><td class=tdright><input type=checkbox name="is_bcast" tabindex=40></td><th class=tdleft>reserve network and router addresses</th></tr>';
 		echo "<tr><td colspan=2>";
@@ -8236,8 +8236,7 @@ function renderVLANIPLinks ($some_id)
 		echo '</td><td>' . getImageHREF ('ATTACH', 'bind', TRUE, 102) . '</td></tr></form>';
 	}
 	global $pageno, $tabno;
-	addJs ('js/jquery.optionTree.js');
-	echo '<table border=1 cellspacing=0 cellpadding=5 align=center class=widetable>';
+	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
 	echo '<tr>';
 
 	// fill $minuslines, $plusoptions, $select_name

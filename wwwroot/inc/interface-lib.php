@@ -314,6 +314,8 @@ function getNiftySelect ($groupList, $select_attrs, $selected_id = NULL, $tree =
 		$select_attrs['id'] = $select_attrs['name'];
 	if ($tree)
 	{
+		# it is safe to call many times for the same file
+		addJS ('js/jquery.optionTree.js');
 		$ret  = "<input type=hidden name=${select_attrs['name']}>\n";
 		$ret .= "<script type='text/javascript'>\n";
 		$ret .= "\$(function() {\n";
