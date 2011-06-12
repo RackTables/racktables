@@ -302,7 +302,8 @@ function printNiftySelect ($groupList, $select_attrs = array(), $selected_id = N
 
 // Input is a cooked list of OPTGROUPs, each with own sub-list of OPTIONs in the same
 // format as printSelect() expects.
-function getNiftySelect ($groupList, $select_attrs, $selected_id = NULL)
+// If tree is true, hierarchical drop-boxes are used, otherwise optgroups are used.
+function getNiftySelect ($groupList, $select_attrs, $selected_id = NULL, $tree = false)
 {
 	// special treatment for ungrouped data
 	if (count ($groupList) == 1 and isset ($groupList['other']))
@@ -311,18 +312,40 @@ function getNiftySelect ($groupList, $select_attrs, $selected_id = NULL)
 		return '';
 	if (!array_key_exists ('id', $select_attrs))
 		$select_attrs['id'] = $select_attrs['name'];
-	$ret = '<select';
-	foreach ($select_attrs as $attr_name => $attr_value)
-		$ret .= " ${attr_name}=${attr_value}";
-	$ret .= '>';
-	foreach ($groupList as $groupname => $groupdata)
+	if ($tree)
 	{
-		$ret .= "<optgroup label='${groupname}'>";
-		foreach ($groupdata as $dict_key => $dict_value)
-			$ret .= "<option value='${dict_key}'" . ($dict_key == $selected_id ? ' selected' : '') . ">${dict_value}</option>";
-		$ret .= '</optgroup>';
+		$ret  = "<input type=hidden name=${select_attrs['name']}>\n";
+		$ret .= "<script type='text/javascript'>\n";
+		$ret .= "\$(function() {\n";
+		$ret .= "    var option_tree = {\n";
+		foreach ($groupList as $groupname => $groupdata)
+		{
+			$ret .= "        '${groupname}': {";
+			foreach ($groupdata as $dict_key => $dict_value)
+				$ret .= "\"${dict_value}\":'${dict_key}', ";
+			$ret .= "},\n";
+		}
+		$ret .= "    };\n";
+		$ret .= "    var options = {empty_value: -1, choose: 'select...'};\n";
+		$ret .= "    \$('input[name=${select_attrs['name']}]').optionTree(option_tree, options);\n";
+		$ret .= "});\n";
+		$ret .= "</script>\n";
 	}
-	$ret .= '</select>';
+	else
+	{
+		$ret = '<select';
+		foreach ($select_attrs as $attr_name => $attr_value)
+			$ret .= " ${attr_name}=${attr_value}";
+		$ret .= ">\n";
+		foreach ($groupList as $groupname => $groupdata)
+		{
+			$ret .= "<optgroup label='${groupname}'>\n";
+			foreach ($groupdata as $dict_key => $dict_value)
+				$ret .= "<option value='${dict_key}'" . ($dict_key == $selected_id ? ' selected' : '') . ">${dict_value}</option>\n";
+			$ret .= "</optgroup>\n";
+		}
+		$ret .= "</select>\n";
+	}
 	return $ret;
 }
 

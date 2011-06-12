@@ -100,10 +100,16 @@ The pgAdmin Development Team. pgAdmin is released under the BSD license.
 ----------------------8<----------------------8<----------------------
 
 RackTables uses icons from Sweetie icon set, http://sweetie.sublink.ca
-Sweetie icon set is licenced under the Creative Commons Attribution Share-alike 3.0.
+Sweetie icon set is licensed under the Creative Commons Attribution Share-alike 3.0.
 
 ----------------------8<----------------------8<----------------------
 
-RackTables uses JS library jquery.contextmenu written by Matt Kruse
-http://javascripttoolbox.com. This library is licenced under the MIT/GPL.
+RackTables uses JS library jquery.contextmenu written by Matt Kruse.
+http://javascripttoolbox.com. This library is licensed under the MIT/GPL.
+
+----------------------8<----------------------8<----------------------
+
+RackTables uses JS library jquery.optionTree written by Krzysztof Kotowicz.
+http://code.google.com/p/jquery-option-tree/. This library is released
+under the MIT license.
 

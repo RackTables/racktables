@@ -8232,11 +8232,12 @@ function renderVLANIPLinks ($some_id)
 		if (!count ($options))
 			return;
 		printOpFormIntro ('bind', $extra);
-		echo '<tr><td>' . getNiftySelect ($options, array ('name' => $sname, 'tabindex' => 101, 'size' => getConfigVar ('MAXSELSIZE')));
+		echo "<tr><td>\n" . getNiftySelect ($options, array ('name' => $sname, 'tabindex' => 101, 'size' => getConfigVar ('MAXSELSIZE')), NULL, true);
 		echo '</td><td>' . getImageHREF ('ATTACH', 'bind', TRUE, 102) . '</td></tr></form>';
 	}
 	global $pageno, $tabno;
-	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
+	addJs ('js/jquery.optionTree.js');
+	echo '<table border=1 cellspacing=0 cellpadding=5 align=center class=widetable>';
 	echo '<tr>';
 
 	// fill $minuslines, $plusoptions, $select_name
