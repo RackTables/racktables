@@ -3636,6 +3636,7 @@ function rebuildTagChainForEntity ($realm, $entity_id, $extrachain = array(), $r
 	// Put the current explicit sub-chain into a buffer and merge all tags from
 	// the extra chain, which aren't there yet.
 	$oldchain = array();
+	$newchain = array();
 	foreach (loadEntityTags ($realm, $entity_id) as $oldtag)
 		$oldchain[$oldtag['id']] = $oldtag;
 	$tmpchain = $replace ? array() : $oldchain;
