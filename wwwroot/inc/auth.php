@@ -365,6 +365,10 @@ function authenticated_via_ldap_cache ($username, $password, &$ldap_displayname)
 function queryLDAPServer ($username, $password)
 {
 	global $LDAP_options;
+	if (! array_key_exists ('group_attr', $LDAP_options))
+		$LDAP_options['group_attr'] = 'memberof';
+	if (! array_key_exists ('group_filter', $LDAP_options))
+		$LDAP_options['group_filter'] = '/^[Cc][Nn]=([^,]+)/';
 
 	if(extension_loaded('ldap') === FALSE)
 		throw new RackTablesError ('LDAP misconfiguration. LDAP PHP Module is not installed.', RackTablesError::MISCONFIGURED);
@@ -429,7 +433,7 @@ function queryLDAPServer ($username, $password)
 			$connect,
 			$LDAP_options['search_dn'],
 			'(' . $LDAP_options['search_attr'] . "=${username})",
-			array_merge (array ('memberof'), explode (' ', $LDAP_options['displayname_attrs']))
+			array_merge (array ($LDAP_options['group_attr']), explode (' ', $LDAP_options['displayname_attrs']))
 		);
 		if (@ldap_count_entries ($connect, $results) != 1)
 		{
@@ -445,17 +449,14 @@ function queryLDAPServer ($username, $password)
 			$space = ' ';
 		}
 		// Pull group membership, if any was returned.
-		if (isset ($info[0]['memberof']))
-			for ($i = 0; $i < $info[0]['memberof']['count']; $i++)
-				foreach (explode (',', $info[0]['memberof'][$i]) as $pair)
-				{
-					$items = explode ('=', $pair);
-					if (count ($items) != 2)
-						continue;
-					list ($attr_name, $attr_value) = $items;
-					if (strtoupper ($attr_name) == 'CN' and validTagName ('$lgcn_' . $attr_value, TRUE))
-						$ret['memberof'][] = '$lgcn_' . $attr_value;
-				}
+		if (isset ($info[0][$LDAP_options['group_attr']]))
+			for ($i = 0; $i < $info[0][$LDAP_options['group_attr']]['count']; $i++)
+				if
+				(
+					preg_match ($LDAP_options['group_filter'], $info[0][$LDAP_options['group_attr']][$i], $matches)
+					and validTagName ('$lgcn_' . $matches[1], TRUE)
+				)
+					$ret['memberof'][] = '$lgcn_' . $matches[1];
 	}
 	@ldap_close ($connect);
 	return $ret;

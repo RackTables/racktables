@@ -15,6 +15,7 @@
 	new feature: inverting tags on cell filter pages by clicking the checkboxes with Ctrl key
 0.19.5
 	bugfix: dictionary record updates did not work (#430)
+	update: better eDirectory support by Walery Wysotsky
 0.19.4
 	bugfix: tag selector was not working with magic_quotes enabled
 	update: new techniques of changing the directory layout are now supported by installer and upgrader
