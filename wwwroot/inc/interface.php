@@ -2528,7 +2528,7 @@ END
 		$prefix_value = empty ($_REQUEST['set-prefix']) ? '' : $_REQUEST['set-prefix'];
 		echo "<th class=tdright>prefix</th><td class=tdleft><input type=text name='range' size=36 class='live-validate' tabindex=10 value='${prefix_value}'></td>";
 		echo '<tr><th class=tdright>VLAN</th><td class=tdleft>';
-		echo getNiftySelect (getAllVLANOptions(), array ('name' => 'vlan_ck', 'tabindex' => 20)) . '</td></tr>';
+		echo getNiftySelect (getAllVLANOptions(), array ('name' => 'vlan_ck', 'tabindex' => 20), NULL, TRUE) . '</td></tr>';
 		echo "<tr><th class=tdright>name</th><td class=tdleft><input type=text name='name' size='20' tabindex=30></td></tr>";
 		echo '<tr><td class=tdright><input type=checkbox name="is_connected" tabindex=40></td><th class=tdleft>reserve subnet-router anycast address</th></tr>';
 		echo "<tr><td colspan=2>";
