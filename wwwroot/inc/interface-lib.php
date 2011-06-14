@@ -328,7 +328,7 @@ function getNiftySelect ($groupList, $select_attrs, $selected_id = NULL, $tree =
 			$ret .= "},\n";
 		}
 		$ret .= "    };\n";
-		$ret .= "    var options = {empty_value: -1, choose: 'select...'};\n";
+		$ret .= "    var options = {empty_value: '', choose: 'select...'};\n";
 		$ret .= "    \$('input[name=${select_attrs['name']}]').optionTree(option_tree, options);\n";
 		$ret .= "});\n";
 		$ret .= "</script>\n";
