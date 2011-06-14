@@ -1,0 +1,62 @@
+RUNNING RACKTABLES ON A FEDORA SYSTEM
+=====================================
+
+Most files in Fedora package of RackTables application reside in the
+/usr/share/RackTables directory regardless of package version. It is
+assumed, that this directory is never directly used in httpd's "document
+root" setting. Instead a symlink or a PHP "require" construct should be
+used for the index.php (and ONLY index.php) file based on some other
+directory, which is actually used as wwwroot. This greatly improves
+security and allows for the two use cases described below.
+
+1. Single RackTables instance per server. By default the application
+expects its configuration files (mandatory secret.php and optional
+local.php) in /etc/RackTables directory, which is a part of the RPM. In
+a fresh installation both files are missing, no MySQL database is setup
+and there is no symlink.
+
+Setting up the symlink is simple: one needs to decide on the URL of the
+RackTables system and map it to filesystem path. For example, the commands
+below are likely to enable access through "http://localhost/racktables/":
+
+# mkdir /var/www/html/racktables
+# ln -s /usr/share/RackTables/wwwroot/index.php /var/www/html/racktables
+
+After that opening the URL in a browser will bring up RackTables installer,
+which will fill in /etc/RackTables/secret.php file and the contents of the
+MySQL database. After that the setup is complete.
+
+
+2. Multiple RackTables instances per server. The application is designed
+to be able to serve many independent MySQL databases with the same
+codebase, but different configuration files. This requires a separate
+config directory per each instance. Each of the directories will feature
+an own secret.php file configured for its own MySQL database.
+
+For example, 3 virtual hosts should provide an independent RackTables
+application each. It is assumed, that httpd is already configured for the
+virtual hosts using respective directories:
+
+/var/www/vhosts/racktables.example1.com
+/var/www/vhosts/racktables.example2.com
+/var/www/vhosts/racktables.example3.com
+
+The configuration directories could be:
+
+# mkdir /etc/RackTables/example[123]
+
+The "wwwroot" directories will require a short PHP wrapper file each. The
+wrappers will differ only in the value of $racktables_confdir setting:
+
+# cat > /var/www/vhosts/racktables.example1.com/index.php <<<EOF
+<?php
+
+$racktables_confdir = '/etc/RackTables/example1';
+require '/usr/share/RackTables/wwwroot/index.php';
+
+?>
+EOF
+
+Once the wrapper files are installed, setup of each instance must be
+completed independently through the HTTP installer. Once this is done,
+every instance can be independently maintained, backed up and even deleted.
