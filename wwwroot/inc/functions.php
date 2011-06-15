@@ -4128,22 +4128,39 @@ function formatLinkedPort ($port_info, $a_class = '')
 
 function compareDecomposedPortNames ($porta, $portb)
 {
-	if (0 != $cmp = strcmp ($porta['prefix'], $portb['prefix']))
-		return $cmp;
+	$ret = 0;
 	if ($porta['numidx'] != $portb['numidx'])
-		return $porta['numidx'] - $portb['numidx'];
-	// Below assumes both arrays be indexed from 0 onwards.
-	for ($i = 0; $i < $porta['numidx']; $i++)
-		if ($porta['index'][$i] != $portb['index'][$i])
-			return $porta['index'][$i] - $portb['index'][$i];
-	// if all of name fields are equal, compare by some additional port fields
-	if ($porta['iif_id'] != $portb['iif_id'])
-		return $porta['iif_id'] - $portb['iif_id'];
-	if (0 != $result = strcmp ($porta['label'], $portb['label']))
-		return $result;
-	if (0 != $result = strcmp ($porta['l2address'], $portb['l2address']))
-		return $result;
-	return $porta['id'] - $portb['id'];
+		$ret = ($porta['numidx'] - $portb['numidx'] > 0 ? 1 : -1);
+	else
+	{
+		$prefix_diff = strcmp ($porta['prefix'], $portb['prefix']);
+		if ($prefix_diff != 0)
+			$prefix_diff = ($prefix_diff > 0 ? 1 : -1);
+		$index_diff = 0;
+		for ($i = 0; $i < $porta['numidx']; $i++)
+			if ($porta['index'][$i] != $portb['index'][$i])
+			{
+				$index_diff = ($porta['index'][$i] - $portb['index'][$i] > 0 ? 1 : -1);
+				break;
+			}
+		// compare by portname fields
+		if ($index_diff != 0 && $porta['numidx'] > 1)
+			$ret = $index_diff;
+		elseif ($prefix_diff != 0)
+			$ret = $prefix_diff;
+		elseif ($index_diff != 0)
+			$ret = $index_diff;
+		// if all of name fields are equal, compare by some additional port fields
+		elseif ($porta['iif_id'] != $portb['iif_id'])
+			$ret = ($porta['iif_id'] - $portb['iif_id'] > 0 ? 1 : -1);
+		elseif (0 != $result = strcmp ($porta['label'], $portb['label']))
+			$ret = ($result > 0 ? 1 : -1);
+		elseif (0 != $result = strcmp ($porta['l2address'], $portb['l2address']))
+			$ret = ($result > 0 ? 1 : -1);
+		elseif ($porta['id'] != $portb['id'])
+			$ret = ($porta['id'] - $portb['id'] > 0 ? 1 : -1);
+	}
+	return $ret;
 }
 
 // Sort provided port list in a way based on natural. For example,
