@@ -705,7 +705,7 @@ function vrp55Read8021QConfig ($input)
 		case substr ($line, 0, 1) == '#': // end of interface section
 			$line_class = 'line-header';
 			if (!array_key_exists ('link-type', $ret['current']))
-				throw new RTGatewayError ('unsupported configuration: link-type is neither trunk nor access for ' . $ret['current']['port_name']);
+				$ret['current']['link-type'] = 'hybrid';
 			if (!array_key_exists ('allowed', $ret['current']))
 				$ret['current']['allowed'] = array();
 			if (!array_key_exists ('native', $ret['current']))
@@ -735,6 +735,7 @@ function vrp55Read8021QConfig ($input)
 					'native' => $ret['current']['native'],
 				);
 				break;
+			case 'hybrid': // hybrid ports are not supported
 			case 'IP':
 				$ret['portdata'][$port_name] = array
 				(
