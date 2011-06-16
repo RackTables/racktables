@@ -190,6 +190,7 @@ function ios12ReadVLANConfig ($input)
 	(
 		'vlanlist' => array(),
 		'portdata' => array(),
+		'portconfig' => array(),
 	);
 	global $breedfunc;
 	$nextfunc = 'ios12-get8021q-top';
@@ -204,8 +205,9 @@ function ios12ScanTopLevel (&$work, $line)
 	switch (TRUE)
 	{
 	case (preg_match ('@^interface ((Ethernet|FastEthernet|GigabitEthernet|TenGigabitEthernet|Port-channel)[[:digit:]]+(/[[:digit:]]+)*)$@', $line, $matches)):
-		$work['current'] = array ('port_name' => ios12ShortenIfName ($matches[1]));
-		$work['current']['config'][] = array ('type' => 'line-header', 'line' => $line);
+		$port_name = ios12ShortenIfName ($matches[1]);
+		$work['current'] = array ('port_name' => $port_name);
+		$work['portconfig'][$port_name][] = array ('type' => 'line-header', 'line' => $line);
 		return 'ios12-get8021q-readport'; // switch to interface block reading
 	case (preg_match ('/^VLAN Name                             Status    Ports$/', $line, $matches)):
 		return 'ios12-get8021q-readvlan';
@@ -216,15 +218,17 @@ function ios12ScanTopLevel (&$work, $line)
 
 function ios12PickSwitchportCommand (&$work, $line)
 {
+	$port_name = $work['current']['port_name'];
 	if ($line[0] != ' ') // end of interface section
 	{
+		$work['portconfig'][$port_name][] = array ('type' => 'line-header', 'line' => $line);
 		// save work, if it makes sense
 		switch (@$work['current']['mode'])
 		{
 		case 'access':
 			if (!array_key_exists ('access vlan', $work['current']))
 				$work['current']['access vlan'] = 1;
-			$work['portdata'][$work['current']['port_name']] = array
+			$work['portdata'][$port_name] = array
 			(
 				'mode' => 'access',
 				'allowed' => array ($work['current']['access vlan']),
@@ -243,7 +247,7 @@ function ios12PickSwitchportCommand (&$work, $line)
 				$work['current']['trunk native vlan'],
 				$work['current']['trunk allowed vlan']
 			) ? $work['current']['trunk native vlan'] : 0;
-			$work['portdata'][$work['current']['port_name']] = array
+			$work['portdata'][$port_name] = array
 			(
 				'mode' => 'trunk',
 				'allowed' => $work['current']['trunk allowed vlan'],
@@ -258,7 +262,7 @@ function ios12PickSwitchportCommand (&$work, $line)
 			// show in returned config and let user decide, if they
 			// want to fix device config or work around these ports
 			// by means of VST.
-			$work['portdata'][$work['current']['port_name']] = array
+			$work['portdata'][$port_name] = array
 			(
 				'mode' => 'none',
 				'allowed' => array(),
@@ -266,8 +270,6 @@ function ios12PickSwitchportCommand (&$work, $line)
 			);
 			break;
 		}
-		if (isset ($work['portdata'][$work['current']['port_name']]))
-			$work['portdata'][$work['current']['port_name']]['config'] = $work['current']['config'];
 		unset ($work['current']);
 		return 'ios12-get8021q-top';
 	}
@@ -311,7 +313,7 @@ function ios12PickSwitchportCommand (&$work, $line)
 	default: // suppress warning on irrelevant config clause
 		$line_class = 'line-other';
 	}
-	$work['current']['config'][] = array ('type' => $line_class, 'line' => $line);
+	$work['portconfig'][$port_name][] = array ('type' => $line_class, 'line' => $line);
 	return 'ios12-get8021q-readport';
 }
 
@@ -341,6 +343,7 @@ function fdry5ReadVLANConfig ($input)
 	(
 		'vlanlist' => array(),
 		'portdata' => array(),
+		'portconfig' => array(),
 	);
 	global $breedfunc;
 	$nextfunc = 'fdry5-get8021q-top';
@@ -360,7 +363,9 @@ function fdry5ScanTopLevel (&$work, $line)
 		$work['current'] = array ('vlan_id' => $matches[1]);
 		return 'fdry5-get8021q-readvlan';
 	case (preg_match ('@^interface ethernet ([[:digit:]]+/[[:digit:]]+/[[:digit:]]+)$@', $line, $matches)):
-		$work['current'] = array ('port_name' => 'e' . $matches[1]);
+		$port_name = 'e' . $matches[1];
+		$work['current'] = array ('port_name' => $port_name);
+		$work['portconfig'][$port_name][] = array ('type' => 'line-header', 'line' => $line);
 		return 'fdry5-get8021q-readport';
 	default:
 		return 'fdry5-get8021q-top';
@@ -422,16 +427,18 @@ function fdry5PickVLANSubcommand (&$work, $line)
 
 function fdry5PickInterfaceSubcommand (&$work, $line)
 {
+	$port_name = $work['current']['port_name'];
 	if ($line[0] != ' ') // end of interface section
 	{
+		$work['portconfig'][$port_name][] = array ('type' => 'line-header', 'line' => $line);
 		if (array_key_exists ('dual-mode', $work['current']))
 		{
-			if (array_key_exists ($work['current']['port_name'], $work['portdata']))
+			if (array_key_exists ($port_name, $work['portdata']))
 				// update existing record
-				$work['portdata'][$work['current']['port_name']]['native'] = $work['current']['dual-mode'];
+				$work['portdata'][$port_name]['native'] = $work['current']['dual-mode'];
 			else
 				// add new
-				$work['portdata'][$work['current']['port_name']] = array
+				$work['portdata'][$port_name] = array
 				(
 					'allowed' => array ($work['current']['dual-mode']),
 					'native' => $work['current']['dual-mode'],
@@ -439,7 +446,7 @@ function fdry5PickInterfaceSubcommand (&$work, $line)
 			// a dual-mode port is always considered a trunk port
 			// (but not in the IronWare's meaning of "trunk") regardless of
 			// number of assigned tagged VLANs
-			$work['portdata'][$work['current']['port_name']]['mode'] = 'trunk';
+			$work['portdata'][$port_name]['mode'] = 'trunk';
 		}
 		unset ($work['current']);
 		return 'fdry5-get8021q-top';
@@ -454,6 +461,7 @@ function fdry5PickInterfaceSubcommand (&$work, $line)
 	// FIXME: trunk/link-aggregate/ip address pulls port from 802.1Q field
 	default: // nom-nom
 	}
+	$work['portconfig'][$port_name][] = array ('type' => 'line-other', 'line' => $line);
 	return 'fdry5-get8021q-readport';
 }
 
@@ -512,6 +520,7 @@ function vrp53ReadVLANConfig ($input)
 	(
 		'vlanlist' => array(),
 		'portdata' => array(),
+		'portconfig' => array(),
 	);
 	global $breedfunc;
 	$nextfunc = 'vrp53-get8021q-top';
@@ -530,11 +539,9 @@ function vrp53ScanTopLevel (&$work, $line)
 			$work['vlanlist'][] = $vlan_id;
 		return 'vrp53-get8021q-top';
 	case (preg_match ('@^interface ((GigabitEthernet|XGigabitEthernet|Eth-Trunk)([[:digit:]]+(/[[:digit:]]+)*))$@', $line, $matches)):
-		$matches[1] = preg_replace ('@^GigabitEthernet(.+)$@', 'gi\\1', $matches[1]);
-		$matches[1] = preg_replace ('@^XGigabitEthernet(.+)$@', 'xg\\1', $matches[1]);
-		$matches[1] = preg_replace ('@^Eth-Trunk(.+)$@', 'et\\1', $matches[1]);
-		$work['current'] = array ('port_name' => $matches[1]);
-		$work['current']['config'][] = array ('type' => 'line-header', 'line' => $line);
+		$port_name = ios12ShortenIfName ($matches[1]);
+		$work['current'] = array ('port_name' => $port_name);
+		$work['portconfig'][$port_name][] = array ('type' => 'line-header', 'line' => $line);
 		return 'vrp53-get8021q-readport';
 	default:
 		return 'vrp53-get8021q-top';
@@ -550,8 +557,10 @@ function vrp53ParseVLANString ($string)
 
 function vrp53PickInterfaceSubcommand (&$work, $line)
 {
+	$port_name = $work['current']['port_name'];
 	if ($line[0] == '#') // end of interface section
 	{
+		$work['portconfig'][$port_name][] = array ('type' => 'line-header', 'line' => $line);
 		// Configuration Guide - Ethernet 3.3.4:
 		// "By default, the interface type is hybrid."
 		if (!array_key_exists ('link-type', $work['current']))
@@ -565,7 +574,7 @@ function vrp53PickInterfaceSubcommand (&$work, $line)
 		case 'access':
 			// VRP does not assign access ports to VLAN1 by default,
 			// leaving them blocked.
-			$work['portdata'][$work['current']['port_name']] =
+			$work['portdata'][$port_name] =
 				$work['current']['native'] ? array
 				(
 					'allowed' => $work['current']['allowed'],
@@ -579,7 +588,7 @@ function vrp53PickInterfaceSubcommand (&$work, $line)
 				);
 			break;
 		case 'trunk':
-			$work['portdata'][$work['current']['port_name']] = array
+			$work['portdata'][$port_name] = array
 			(
 				'allowed' => $work['current']['allowed'],
 				'native' => 0,
@@ -587,7 +596,7 @@ function vrp53PickInterfaceSubcommand (&$work, $line)
 			);
 			break;
 		case 'hybrid':
-			$work['portdata'][$work['current']['port_name']] = array
+			$work['portdata'][$port_name] = array
 			(
 				'allowed' => $work['current']['allowed'],
 				'native' => $work['current']['native'],
@@ -596,8 +605,6 @@ function vrp53PickInterfaceSubcommand (&$work, $line)
 			break;
 		default: // dot1q-tunnel ?
 		}
-		if (isset ($work['portdata'][$work['current']['port_name']]))
-			$work['portdata'][$work['current']['port_name']]['config'] = $work['current']['config'];
 		unset ($work['current']);
 		return 'vrp53-get8021q-top';
 	}
@@ -626,7 +633,7 @@ function vrp53PickInterfaceSubcommand (&$work, $line)
 	default: // nom-nom
 		$line_class = 'line-other';
 	}
-	$work['current']['config'][] = array('type' => $line_class, 'line' => $line);
+	$work['portconfig'][$port_name][] = array('type' => $line_class, 'line' => $line);
 	return 'vrp53-get8021q-readport';
 }
 
@@ -636,6 +643,7 @@ function vrp55Read8021QConfig ($input)
 	(
 		'vlanlist' => array (1), // VRP 5.50 hides VLAN1 from config text
 		'portdata' => array(),
+		'portconfig' => array(),
 	);
 	foreach (explode ("\n", $input) as $line)
 	{
@@ -650,20 +658,20 @@ function vrp55Read8021QConfig ($input)
 					$ret['vlanlist'][] = $vlan_id;
 				break;
 			case (preg_match ('@^interface ((GigabitEthernet|XGigabitEthernet|Eth-Trunk)([[:digit:]]+(/[[:digit:]]+)*))$@', $line, $matches)):
-				$matches[1] = preg_replace ('@^GigabitEthernet(.+)$@', 'gi\\1', $matches[1]);
-				$matches[1] = preg_replace ('@^XGigabitEthernet(.+)$@', 'xg\\1', $matches[1]);
-				$ret['current'] = array ('port_name' => $matches[1]);
-				$ret['current']['config'][] = array ('type' => 'line-header', 'line' => $line);
+				$port_name = ios12ShortenIfName ($matches[1]);
+				$ret['current'] = array ('port_name' => $port_name);
+				$ret['portconfig'][$port_name][] = array ('type' => 'line-header', 'line' => $line);
 				break;
 			}
 			continue;
 		}
+		$port_name = $ret['current']['port_name'];
 		// inside an interface block
 		$line_class = 'line-8021q';
 		switch (TRUE)
 		{
 		case preg_match ('/^ port (link-type )?hybrid /', $line):
-			throw new RTGatewayError ('unsupported hybrid link-type for ' . $ret['current']['port_name'] . ": ${line}");
+			throw new RTGatewayError ("unsupported hybrid link-type for $port_name: ${line}");
 		case preg_match ('/^ port link-type (.+)$/', $line, $matches):
 			$ret['current']['link-type'] = $matches[1];
 			break;
@@ -695,6 +703,7 @@ function vrp55Read8021QConfig ($input)
 			$ret['current']['link-type'] = 'SKIP';
 			break;
 		case substr ($line, 0, 1) == '#': // end of interface section
+			$line_class = 'line-header';
 			if (!array_key_exists ('link-type', $ret['current']))
 				throw new RTGatewayError ('unsupported configuration: link-type is neither trunk nor access for ' . $ret['current']['port_name']);
 			if (!array_key_exists ('allowed', $ret['current']))
@@ -705,7 +714,7 @@ function vrp55Read8021QConfig ($input)
 			{
 			case 'access':
 				// In VRP 5.50 an access port has default VLAN ID == 1
-				$ret['portdata'][$ret['current']['port_name']] =
+				$ret['portdata'][$port_name] =
 					$ret['current']['native'] ? array
 					(
 						'mode' => 'access',
@@ -719,7 +728,7 @@ function vrp55Read8021QConfig ($input)
 					);
 				break;
 			case 'trunk':
-				$ret['portdata'][$ret['current']['port_name']] = array
+				$ret['portdata'][$port_name] = array
 				(
 					'mode' => 'trunk',
 					'allowed' => $ret['current']['allowed'],
@@ -727,7 +736,7 @@ function vrp55Read8021QConfig ($input)
 				);
 				break;
 			case 'IP':
-				$ret['portdata'][$ret['current']['port_name']] = array
+				$ret['portdata'][$port_name] = array
 				(
 					'mode' => 'none',
 					'allowed' => array(),
@@ -737,14 +746,12 @@ function vrp55Read8021QConfig ($input)
 			case 'SKIP':
 			default: // dot1q-tunnel ?
 			}
-			if (isset ($ret['portdata'][$ret['current']['port_name']]))
-				$ret['portdata'][$ret['current']['port_name']]['config'] = $ret['current']['config'];
 			unset ($ret['current']);
-			continue 2;
+			break;
 		default: // nom-nom
 			$line_class = 'line-other';
 		}
-		$ret['current']['config'][] = array ('type' => $line_class, 'line' => $line);
+		$ret['portconfig'][$port_name][] = array ('type' => $line_class, 'line' => $line);
 	}
 	return $ret;
 }
@@ -755,6 +762,7 @@ function nxos4Read8021QConfig ($input)
 	(
 		'vlanlist' => array(),
 		'portdata' => array(),
+		'portconfig' => array(),
 	);
 	global $breedfunc;
 	$nextfunc = 'nxos4-get8021q-top';
@@ -769,10 +777,9 @@ function nxos4ScanTopLevel (&$work, $line)
 	switch (TRUE)
 	{
 	case (preg_match ('@^interface ((Ethernet|Port-channel)[[:digit:]]+(/[[:digit:]]+)*)$@i', $line, $matches)):
-		$matches[1] = preg_replace ('@^Ethernet(.+)$@i', 'e\\1', $matches[1]);
-		$matches[1] = preg_replace ('@^Port-channel(.+)$@i', 'po\\1', $matches[1]);
-		$work['current'] = array ('port_name' => $matches[1]);
-		$work['current']['config'][] = array ('type' => 'line-header', 'line' => $line);
+		$port_name = ios12ShortenIfName ($matches[1]);
+		$work['current'] = array ('port_name' => $port_name);
+		$work['portconfig'][$port_name][] = array ('type' => 'line-header', 'line' => $line);
 		return 'nxos4-get8021q-readport';
 	case (preg_match ('@^vlan (.+)$@', $line, $matches)):
 		foreach (iosParseVLANString ($matches[1]) as $vlan_id)
@@ -785,8 +792,10 @@ function nxos4ScanTopLevel (&$work, $line)
 
 function nxos4PickSwitchportCommand (&$work, $line)
 {
+	$port_name = $work['current']['port_name'];
 	if ($line == '') // end of interface section
 	{
+		$work['portconfig'][$port_name][] = array ('type' => 'line-header', 'line' => $line);
 		// fill in defaults
 		if (!array_key_exists ('mode', $work['current']))
 			$work['current']['mode'] = 'access';
@@ -796,7 +805,7 @@ function nxos4PickSwitchportCommand (&$work, $line)
 		case 'access':
 			if (!array_key_exists ('access vlan', $work['current']))
 				$work['current']['access vlan'] = 1;
-			$work['portdata'][$work['current']['port_name']] = array
+			$work['portdata'][$port_name] = array
 			(
 				'mode' => 'access',
 				'allowed' => array ($work['current']['access vlan']),
@@ -816,7 +825,7 @@ function nxos4PickSwitchportCommand (&$work, $line)
 				$work['current']['trunk native vlan'],
 				$work['current']['trunk allowed vlan']
 			) ? $work['current']['trunk native vlan'] : 0;
-			$work['portdata'][$work['current']['port_name']] = array
+			$work['portdata'][$port_name] = array
 			(
 				'mode' => 'trunk',
 				'allowed' => $work['current']['trunk allowed vlan'],
@@ -828,7 +837,7 @@ function nxos4PickSwitchportCommand (&$work, $line)
 			break;
 		default:
 			// dot1q-tunnel, dynamic, private-vlan
-			$work['portdata'][$work['current']['port_name']] = array
+			$work['portdata'][$port_name] = array
 			(
 				'mode' => 'none',
 				'allowed' => array(),
@@ -836,8 +845,6 @@ function nxos4PickSwitchportCommand (&$work, $line)
 			);
 			// unset (routed), dot1q-tunnel, dynamic, private-vlan --- skip these
 		}
-		if (isset ($work['portdata'][$work['current']['port_name']]))
-			$work['portdata'][$work['current']['port_name']]['config'] = $work['current']['config'];
 		unset ($work['current']);
 		return 'nxos4-get8021q-top';
 	}
@@ -871,7 +878,7 @@ function nxos4PickSwitchportCommand (&$work, $line)
 	default: // suppress warning on irrelevant config clause
 		$line_class = 'line-other';
 	}
-	$work['current']['config'][] = array ('type' => $line_class, 'line' => $line);
+	$work['portconfig'][$port_name][] = array ('type' => $line_class, 'line' => $line);
 	return 'nxos4-get8021q-readport';
 }
 
@@ -1327,6 +1334,7 @@ function xos12Read8021QConfig ($input)
 	(
 		'vlanlist' => array (1),
 		'portdata' => array(),
+		'portconfig' => array(),
 	);
 	foreach (explode ("\n", $input) as $line)
 	{
@@ -1378,6 +1386,7 @@ function jun10Read8021QConfig ($input)
 		'vlanlist' => array (1),
 		'vlannames' => array (1 => 'default'),
 		'portdata' => array(),
+		'portconfig' => array(),
 	);
 	$lines = explode ("\n", $input);
 	
@@ -1504,8 +1513,12 @@ function jun10Read8021QConfig ($input)
 			else
 				$line_class = 'line-other';
 		}
-		if (is_array ($current['config']))
-			$current['config']['config'][] = array ('type' => $line_class, 'line' => $line);
+		if (isset ($current['name']))
+		{
+			if ($line == '}')
+				$line_class = 'line-header';
+			$ret['portconfig'][$current['name']][] = array ('type' => $line_class, 'line' => $line);
+		}
 	}
 	
 	return $ret;

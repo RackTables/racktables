@@ -77,14 +77,13 @@ function formatPortConfigHints ($object_id, $R = NULL)
 	$result = array();
 	if (! isset ($R))
 		$R = getRunning8021QConfig ($object_id);
-	foreach ($R['portdata'] as $portname => $portdata)
-		if (isset ($portdata['config']))
-		{
-			$hidden_part = '';
-			foreach ($portdata['config'] as $line)
-				$hidden_part .= '<span class="'. $line['type'] . '">' . htmlentities ($line['line']) . '</span><br />';
-			$result[$portname]['popup'] = $hidden_part;
-		}
+	foreach ($R['portconfig'] as $portname => $portconfig)
+	{
+		$hidden_part = '';
+		foreach ($portconfig as $line)
+			$hidden_part .= '<span class="'. $line['type'] . '">' . htmlentities ($line['line']) . '</span><br />';
+		$result[$portname]['popup'] = $hidden_part;
+	}
 	return $result;
 }
 
