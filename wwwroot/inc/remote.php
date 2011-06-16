@@ -143,7 +143,7 @@ function queryTerminal ($object_id, $commands, $tolerate_remote_errors = TRUE)
 	if ($settings['protocol'] == 'telnet' || ! $tolerate_remote_errors)
 	{
 		if (! empty ($errors))
-			throw new RTGatewayError ("${settings['protocol']} error: $errors");
+			throw new RTGatewayError ("${settings['protocol']} error: " . rtrim ($errors));
 		elseif ($ret_code !== 0)
 			throw new RTGatewayError ("${settings['protocol']} error: result code $ret_code");
 	}
