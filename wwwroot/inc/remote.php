@@ -206,7 +206,7 @@ function getRunning8021QConfig ($object_id)
 	$ret = queryDevice ($object_id, 'get8021q');
 	// Once there is no default VLAN in the parsed data, it means
 	// something else was parsed instead of config text.
-	if (!in_array (VLAN_DFL_ID, $ret['vlanlist']))
+	if (!in_array (VLAN_DFL_ID, $ret['vlanlist']) || empty ($ret['portconfig']))
 		throw new RTGatewayError ('communication with device failed');
 	return $ret;
 }
