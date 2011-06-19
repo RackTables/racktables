@@ -1503,6 +1503,7 @@ $dictionary = array
 	1421 => array ('chapter_id' => 13, 'dict_value' => '[[SciLin%GSKIP%SL5.3 | https://www.scientificlinux.org/]]'),
 	1422 => array ('chapter_id' => 13, 'dict_value' => '[[SciLin%GSKIP%SL5.4 | https://www.scientificlinux.org/]]'),
 	1423 => array ('chapter_id' => 12, 'dict_value' => 'HP ProCurve%GPASS%2600-8-PWR'),
+	1469 => array ('chapter_id' => 2, 'dict_value' => 'virtual port'),
 //                                     ^
 //                                     ^
 // add new dictionary entries up here  ^
@@ -1566,7 +1567,7 @@ $dictionary = array
 	1557 => array ('chapter_id' => 32, 'dict_value' => 'VMware%GPASS%Distributed vSwitch'),
 	1558 => array ('chapter_id' => 32, 'dict_value' => 'Cisco%GPASS%Nexus 1000V'),
 	1559 => array ('chapter_id' => 33, 'dict_value' => 'NS-OS 4.0'),
-// NOTICE: do not add new dictionary entries here, add them to the gap above (~1415)!
+// NOTICE: do not add new dictionary entries here, add them to the gap above (~1470)!
 );
 
 ?>

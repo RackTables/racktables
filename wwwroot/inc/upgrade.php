@@ -1053,6 +1053,13 @@ CREATE TABLE `EntityLink` (
 			$query = array_merge ($query, reloadDictionary ($batchid));
 			$query[] = "UPDATE Config SET varvalue = '0.19.4' WHERE varname = 'DB_VERSION'";
 			break;
+		case '0.19.5':
+			$query = array_merge ($query, reloadDictionary ($batchid));
+			// Add 'virtual port' to 'virtual port' mapping
+			$query[] = "INSERT INTO `PortCompat` (`type1`,`type2`) VALUES (1469,1469)";
+			$query[] = "INSERT INTO `PortInterfaceCompat` (`iif_id`,`oif_id`) VALUES (1,1469)";
+			$query[] = "UPDATE Config SET varvalue = '0.19.5' WHERE varname = 'DB_VERSION'";
+			break;
 		default:
 			showError ("executeUpgradeBatch () failed, because batch '${batchid}' isn't defined", __FUNCTION__);
 			die;

@@ -7073,14 +7073,14 @@ function dynamic_title_decoder ($path_position)
 		$address = getIPv4Address ($_REQUEST['ip']);
 		return array
 		(
-			'name' => $_REQUEST['ip'] . ($address['name'] != '' ? ' (' . $address['name'] . ')' : ''),
+			'name' => niftyString ($_REQUEST['ip'] . ($address['name'] != '' ? ' (' . $address['name'] . ')' : ''), 50, FALSE),
 			'params' => array ('ip' => $_REQUEST['ip'])
 		);
 	case 'ipv6address':
 		$address = getIPv6Address (assertIPArg ('ip'));
 		return array
 		(
-			'name' => $address['ip'] . ($address['name'] != '' ? ' (' . $address['name'] . ')' : ''),
+			'name' => niftyString ($address['ip'] . ($address['name'] != '' ? ' (' . $address['name'] . ')' : ''), 50, FALSE),
 			'params' => array ('ip' => $address['ip'])
 		);
 	case 'ipv4net':
@@ -7634,7 +7634,7 @@ function renderVLANDomainVLANList ($vdom_id)
 		echo '</td><td>';
 		printSelect ($vtoptions, array ('name' => 'vlan_type', 'tabindex' => 102), 'ondemand');
 		echo '</td><td>';
-		echo '<input type=text name=vlan_descr tabindex=103>';
+		echo '<input type=text size=48 name=vlan_descr tabindex=103>';
 		echo '</td><td>';
 		printImageHREF ('create', 'add VLAN', TRUE, 110);
 		echo '</td></tr></form>';
@@ -7659,7 +7659,7 @@ function renderVLANDomainVLANList ($vdom_id)
 		echo '</td><td class=tdright><tt>' . $vlan_id . '</tt></td><td>';
 		printSelect ($vtoptions, array ('name' => 'vlan_type'), $vlan_info['vlan_type']);
 		echo '</td><td>';
-		echo '<input name=vlan_descr type=text value="' . htmlspecialchars ($vlan_info['vlan_descr']) . '">';
+		echo '<input name=vlan_descr type=text size=48 value="' . htmlspecialchars ($vlan_info['vlan_descr']) . '">';
 		echo '</td><td>';
 		printImageHREF ('save', 'update description', TRUE);
 		echo '</td></tr></form>';
@@ -8897,7 +8897,7 @@ function renderDiscoveredNeighbors ($object_id)
 	if ($inputno)
 	{
 		echo "<input type=hidden name=nports value=${inputno}>";
-		echo '<tr><td colspan=6 align=center>' . getImageHREF ('CREATE', 'import selected', TRUE) . '</td></tr>';
+		echo '<tr><td colspan=7 align=center>' . getImageHREF ('CREATE', 'import selected', TRUE) . '</td></tr>';
 	}
 	echo '</table></form>';
 
