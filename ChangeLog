@@ -12,6 +12,7 @@
 	update: restrict search results according to user's permissions
 	new feature: attribute-level access control for objects
 	new feature: ability to open a terminal session to a device by clicking on its FQDN
+	new feature: inverting tags on cell filter pages by clicking the checkboxes with Ctrl key
 0.19.4 2011-04-14
  	bugfix: tag selector was not working with magic_quotes enabled
 	update: new techniques of changing the directory layout are now supported by installer and upgrader
