@@ -3634,6 +3634,13 @@ function renderSearchResults ($terms, $summary)
 								echo "<li>NAT rule: ${comment}</li>";
 							echo '</ul>';
 						}
+						if (isset ($obj['by_cableid']))
+						{
+							echo '<ul>';
+							foreach ($obj['by_cableid'] as $cableid)
+								echo "<li>link cable ID: ${cableid}</li>";
+							echo '</ul>';
+						}
 						echo "</td></tr>";
 						$order = $nextorder[$order];
 					}
