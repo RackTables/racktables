@@ -2458,6 +2458,7 @@ function judgeContext ($expression)
 }
 
 // Tell, if a constraint from config option permits given record.
+// An undefined $cell means current context.
 function considerConfiguredConstraint ($cell, $varname)
 {
 	if (!strlen (getConfigVar ($varname)))
@@ -2469,7 +2470,10 @@ function considerConfiguredConstraint ($cell, $varname)
 		$parseCache[$varname] = spotPayload (getConfigVar ($varname), 'SYNT_EXPR');
 	if ($parseCache[$varname]['result'] != 'ACK')
 		return FALSE; // constraint set, but cannot be used due to compilation error
-	return judgeCell ($cell, $parseCache[$varname]['load']);
+	if (isset ($cell))
+		return judgeCell ($cell, $parseCache[$varname]['load']);
+	else
+		return judgeContext ($parseCache[$varname]['load']);
 }
 
 // Tell, if the given arbitrary RackCode text addresses the given record
