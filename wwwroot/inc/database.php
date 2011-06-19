@@ -151,6 +151,7 @@ $searchfunc = array
 		'by_attr' => 'getObjectAttrsSearchResults',
 		'by_iface' => 'getObjectIfacesSearchResults',
 		'by_nat' => 'getObjectNATSearchResults',
+		'by_cableid' => 'searchCableIDs',
 	),
 );
 
@@ -2145,6 +2146,24 @@ function getObjectNATSearchResults ($what)
 	{
 		$ret[$row['object_id']]['id'] = $row['object_id'];
 		$ret[$row['object_id']]['by_nat'][] = $row['description'];
+	}
+	return $ret;
+}
+
+function searchCableIDs ($what)
+{
+	$ret = array();
+	$result = usePreparedSelectBlade
+	(
+		'SELECT object_id, cable ' .
+		'FROM Link INNER JOIN Port ON porta = Port.id OR portb = Port.id ' .
+		'WHERE cable LIKE ? ORDER BY object_id',
+		array ("%${what}%")
+	);
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
+	{
+		$ret[$row['object_id']]['id'] = $row['object_id'];
+		$ret[$row['object_id']]['by_cableid'][] = $row['cable'];
 	}
 	return $ret;
 }
