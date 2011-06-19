@@ -2509,39 +2509,37 @@ function commitSupplementAttrMap ($attr_id = 0, $objtype_id = 0, $chapter_no = 0
 function cacheAllObjectsAttributes()
 {
 	global $object_attribute_cache;
-	$object_attribute_cache = fetchAttrsForObjects(NULL);
+	$object_attribute_cache = fetchAttrsForObjects();
 }
 
 // Fetches a list of attributes for each object in $object_set array.
 // If $object_set is not set, returns attributes for all objects in DB
 // Returns an array with object_id keys
-function fetchAttrsForObjects($object_set)
+function fetchAttrsForObjects ($object_set = array())
 {
 	$ret = array();
 	$query =
-		"select A.id as attr_id, A.name as attr_name, A.type as attr_type, C.name as chapter_name, " .
+		"select AM.attr_id, A.name as attr_name, A.type as attr_type, C.name as chapter_name, " .
 		"C.id as chapter_id, AV.uint_value, AV.float_value, AV.string_value, D.dict_value, RO.id as object_id from " .
-		"RackObject as RO inner join AttributeMap as AM on RO.objtype_id = AM.objtype_id " .
-		"inner join Attribute as A on AM.attr_id = A.id " .
+		"RackObject as RO left join AttributeMap as AM on RO.objtype_id = AM.objtype_id " .
+		"left join Attribute as A on AM.attr_id = A.id " .
 		"left join AttributeValue as AV on AV.attr_id = AM.attr_id and AV.object_id = RO.id " .
 		"left join Dictionary as D on D.dict_key = AV.uint_value and AM.chapter_id = D.chapter_id " .
 		"left join Chapter as C on AM.chapter_id = C.id";
-	if (is_array ($object_set) && !empty ($object_set))
-	{
-		$query .= ' WHERE RO.id IN (';
-		foreach ($object_set as $object_id)
-			$query .= intval ($object_id) . ', ';
-		$query = trim ($query, ', ') . ')';
-	}
+	if (count ($object_set))
+		$query .= ' WHERE RO.id IN (' . implode (', ', $object_set) . ')';
 	$query .= " order by A.name, A.type";
 
 	$result = usePreparedSelectBlade ($query);
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
 		$object_id = $row['object_id'];
-		$attr_id = $row['attr_id'];
 		if (!array_key_exists ($object_id, $ret))
 			$ret[$object_id] = array();
+		# Objects with zero attributes also matter due to the LEFT JOIN. Create
+		# keys for them too to enable negative caching.
+		if ($row['attr_id'] == NULL)
+			continue;
 
 		$record = array();
 		$record['id'] = $row['attr_id'];
@@ -2564,7 +2562,7 @@ function fetchAttrsForObjects($object_set)
 				$record['value'] = NULL;
 				break;
 		}
-		$ret[$object_id][$attr_id] = $record;
+		$ret[$object_id][$row['attr_id']] = $record;
 	}
 	return $ret;
 }
@@ -3107,6 +3105,8 @@ function generateEntityAutoTags ($cell)
 		case 'ipv4net':
 			$ret[] = array ('tag' => '$ip4netid_' . $cell['id']);
 			$ret[] = array ('tag' => '$ip4net-' . str_replace ('.', '-', $cell['ip']) . '-' . $cell['mask']);
+			if ($cell['vlanc'])
+				$ret[] = array ('tag' => '$runs_8021Q');
 			for ($i = 8; $i < 32; $i++)
 			{
 				# these conditions hit 1 to 3 times per each i
@@ -3122,6 +3122,8 @@ function generateEntityAutoTags ($cell)
 			break;
 		case 'ipv6net':
 			$ret[] = array ('tag' => '$ip6netid_' . $cell['id']);
+			if ($cell['vlanc'])
+				$ret[] = array ('tag' => '$runs_8021Q');
 			$ret[] = array ('tag' => '$any_ip6net');
 			$ret[] = array ('tag' => '$any_net');
 			break;
@@ -3567,10 +3569,6 @@ function getFile ($file_id)
 	if (($row = $query->fetch (PDO::FETCH_ASSOC)) == NULL)
 		// FIXME: isn't this repeating the code already in spotEntity()?
 		throw new EntityNotFoundException ('file', $file_id);
-
-	unset ($query);
-	// Someone accessed this file, update atime
-	usePreparedExecuteBlade ('UPDATE File SET atime = NOW() WHERE id = ?', array ($file_id));
 	return $row;
 }
 
@@ -3584,10 +3582,7 @@ function getFileCache ($file_id)
 	);
 	if (($row = $query->fetch (PDO::FETCH_ASSOC)) == NULL)
 		return FALSE;
-	$ret = $row['thumbnail'];
-	$query->CloseCursor();
-	usePreparedExecuteBlade ('UPDATE File SET atime = NOW() WHERE id = ?', array ($file_id));
-	return $ret;
+	return $row['thumbnail'];
 }
 
 function commitAddFileCache ($file_id, $contents)

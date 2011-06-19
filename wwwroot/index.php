@@ -24,9 +24,17 @@ try {
 			$_SESSION['RTLT'][$pageno] = array ('tabname' => $tabno, 'time' => time());
 		// call the main handler - page or tab handler.
 		if (isset ($tabhandler[$pageno][$tabno]))
+		{
+			if (! function_exists ($tabhandler[$pageno][$tabno]))
+				throw new RackTablesError ("Missing handler function for node '${pageno}-${tabno}'", RackTablesError::INTERNAL);
 			call_user_func ($tabhandler[$pageno][$tabno], getBypassValue());
+		}
 		elseif (isset ($page[$pageno]['handler']))
+		{
+			if (! function_exists ($page[$pageno]['handler']))
+				throw new RackTablesError ("Missing handler function for node '${pageno}'", RackTablesError::INTERNAL);
 			$page[$pageno]['handler'] ($tabno);
+		}
 		else
 			throw new RackTablesError ("Failed to find handler for page '${pageno}', tab '${tabno}'", RackTablesError::INTERNAL);
 		// Embed the current text in OB into interface layout (the latter also

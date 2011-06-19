@@ -734,12 +734,13 @@ function renderRackObject ($object_id)
 	if ($info['has_problems'] == 'yes')
 		echo "<tr><td colspan=2 class=msg_error>Has problems</td></tr>\n";
 	foreach (getAttrValues ($object_id) as $record)
-		if (strlen ($record['value']))
-		{
+		if
+		(
+			strlen ($record['value']) and 
+			permitted (NULL, NULL, NULL, array (array ('tag' => '$attr_' . $record['id'])))
+		)
 			echo "<tr><th width='50%' class=sticker>${record['name']}:</th><td class=sticker>" .
-				formatAttributeValue ($record) .
-				"</td></tr>\n";
-		}
+				formatAttributeValue ($record) . "</td></tr>";
 	printTagTRs
 	(
 		$info,

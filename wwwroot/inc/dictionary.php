@@ -1504,6 +1504,8 @@ $dictionary = array
 	1422 => array ('chapter_id' => 13, 'dict_value' => '[[SciLin%GSKIP%SL5.4 | https://www.scientificlinux.org/]]'),
 	1423 => array ('chapter_id' => 12, 'dict_value' => 'HP ProCurve%GPASS%2600-8-PWR'),
 	1469 => array ('chapter_id' => 2, 'dict_value' => 'virtual port'),
+	1467 => array ('chapter_id' => 25, 'dict_value' => 'Cisco%GPASS%AIR-AP1141N'),
+	1468 => array ('chapter_id' => 25, 'dict_value' => 'Cisco%GPASS%AIR-AP1262N'),
 //                                     ^
 //                                     ^
 // add new dictionary entries up here  ^

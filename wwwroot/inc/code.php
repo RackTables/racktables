@@ -965,7 +965,7 @@ function findAutoTagWarnings ($expr)
 				case (preg_match ('/^\$(vlan|fromvlan|tovlan)_[[:digit:]]+$/', $expr['load'])):
 				case (preg_match ('/^\$(unmounted|untagged|no_asset_tag|runs_8021Q)$/', $expr['load'])):
 				case (preg_match ('/^\$masklen_(eq|le|ge)_[[:digit:]][[:digit:]]?$/', $expr['load'])):
-				case (preg_match ('/^\$attr_\d+_\d+$/', $expr['load'])):
+				case (preg_match ('/^\$attr_\d+(_\d+)?$/', $expr['load'])):
 					return array();
 				default:
 					return array (array

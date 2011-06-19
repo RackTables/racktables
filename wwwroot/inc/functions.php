@@ -2940,7 +2940,11 @@ function generate8021QDeployOps ($vswitch, $device_vlanlist, $before, $changes)
 			$ports_to_do_queue1[$port_name] = $changeset;
 		$after[$port_name] = $port;
 	}
-	$ports_to_do = array_merge ($ports_to_do_queue1, $ports_to_do_queue2);
+	# Two arrays without common keys get merged with "+" operator just fine,
+	# with an important difference from array_merge() in that the latter
+	# renumbers numeric keys, and "+" does not. This matters, when port name
+	# is a number (like in XOS12 system).
+	$ports_to_do = $ports_to_do_queue1 + $ports_to_do_queue2;
 	// New VLAN table is a union of:
 	// 1. all compulsory VLANs
 	// 2. all "current" non-alien allowed VLANs of those ports, which are left
@@ -4170,6 +4174,28 @@ function searchEntitiesByText ($terms)
 		if (count ($tmp))
 			$summary['vlan'] = $tmp;
 	}
+	# Filter search results in a way in some realms to omit records, which the
+	# user would not be able to browse anyway.
+	foreach ($summary['object'] as $key => $record)
+		if (! isolatedPermission ('object', 'default', spotEntity ('object', $record['id'])))
+			unset ($summary['object'][$key]);
+	foreach ($summary['ipv4network'] as $key => $netinfo)
+		if (! isolatedPermission ('ipv4net', 'default', $netinfo))
+			unset ($summary['ipv4network'][$key]);
+	foreach ($summary['ipv6network'] as $key => $netinfo)
+		if (! isolatedPermission ('ipv6net', 'default', $netinfo))
+			unset ($summary['ipv6network'][$key]);
+	foreach ($summary['file'] as $key => $fileinfo)
+		if (! isolatedPermission ('file', 'default', $fileinfo))
+			unset ($summary['file'][$key]);
+	if (! count ($summary['object']))
+		unset ($summary['object']);
+	if (! count ($summary['ipv4network']))
+		unset ($summary['ipv4network']);
+	if (! count ($summary['ipv6network']))
+		unset ($summary['ipv6network']);
+	if (! count ($summary['file']))
+		unset ($summary['file']);
 	return $summary;
 }
 
