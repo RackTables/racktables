@@ -174,8 +174,8 @@ function dispatchAJAXRequest()
 		if (isset ($net_id))
 			fixContext (spotEntity ($net_realm, $net_id));
 		assertPermission ($net_realm, NULL, 'set_reserve_comment');
-		if ('' === updateAddress ($ip, $sic['comment'], $addr['reserved']))
-			echo json_encode ('OK');
+		updateAddress ($ip, $sic['comment'], $addr['reserved']);
+		echo json_encode ('OK');
 		break;
 	default:
 		throw new InvalidRequestArgException ('ac', $_REQUEST['ac']);
