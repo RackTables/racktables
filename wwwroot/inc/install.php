@@ -117,8 +117,7 @@ function init_config ()
 		!isset ($_REQUEST['save_config']) or
 		empty ($_REQUEST['mysql_host']) or
 		empty ($_REQUEST['mysql_db']) or
-		empty ($_REQUEST['mysql_username']) or
-		empty ($_REQUEST['mysql_password'])
+		empty ($_REQUEST['mysql_username'])
 	)
 	{
 		echo "<input type=hidden name=save_config value=1>\n";
