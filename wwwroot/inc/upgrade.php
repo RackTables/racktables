@@ -1054,6 +1054,13 @@ CREATE TABLE `EntityLink` (
 			$query = array_merge ($query, reloadDictionary ($batchid));
 			$query[] = "UPDATE Config SET varvalue = '0.19.4' WHERE varname = 'DB_VERSION'";
 			break;
+		case '0.19.5':
+			$query = array_merge ($query, reloadDictionary ($batchid));
+			// Add 'virtual port' to 'virtual port' mapping
+			$query[] = "INSERT INTO `PortCompat` (`type1`,`type2`) VALUES (1469,1469)";
+			$query[] = "INSERT INTO `PortInterfaceCompat` (`iif_id`,`oif_id`) VALUES (1,1469)";
+			$query[] = "UPDATE Config SET varvalue = '0.19.5' WHERE varname = 'DB_VERSION'";
+			break;
 		case '0.20.0':
 			$query = array_merge ($query, reloadDictionary ($batchid));
 			$query[] = "
@@ -1119,10 +1126,6 @@ CREATE TABLE `IPv4Log` (
 			$query[] = "DELETE FROM Config WHERE varname = 'HNDP_RUNNERS_LISTSRC'";
 			$query[] = "ALTER TABLE TagStorage MODIFY COLUMN entity_realm ENUM('file','ipv4net','ipv4vs','ipv4rspool','object','rack','user','ipv6net','vst') NOT NULL default 'object'";
 			$query[] = "ALTER TABLE `TagStorage` ADD COLUMN `user` char(64) DEFAULT NULL, ADD COLUMN `date` datetime DEFAULT NULL";
-
-			// Add 'virtual port' to 'virtual port' mapping
-			$query[] = "INSERT INTO `PortCompat` (`type1`,`type2`) VALUES (1469,1469)";
-			$query[] = "INSERT INTO `PortInterfaceCompat` (`iif_id`,`oif_id`) VALUES (1,1469)";
 
 			// Rename object tables and keys
 			$dbxlink->query ('ALTER TABLE `RackObject` RENAME TO `Object`');
