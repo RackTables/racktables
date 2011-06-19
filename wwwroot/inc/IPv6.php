@@ -37,6 +37,9 @@ private static function set_word_value (&$haystack, $nword, $hexvalue)
 // return true only if address syntax is completely correct.
 function parse ($str_ipv6)
 {
+	if (empty ($str_ipv6))
+		return FALSE;
+
 	$result = self::zero_address;
 	// remove one of double beginning/tailing colons
 	if (substr ($str_ipv6, 0, 2) == '::')
@@ -45,9 +48,6 @@ function parse ($str_ipv6)
 		$str_ipv6 = substr ($str_ipv6, 0, strlen ($str_ipv6) - 1);
 
 	$tokens = explode (':', $str_ipv6);
-	if (empty ($tokens))
-		return FALSE;
-
 	$last_token = $tokens[count ($tokens) - 1];
 	$split = explode ('.', $last_token);
 	if (count ($split) == 4)

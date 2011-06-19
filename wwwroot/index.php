@@ -20,8 +20,13 @@ try {
 		assertPermission();
 		header ('Content-Type: text/html; charset=UTF-8');
 		// Only store the tab name after clearance is got. Any failure is unhandleable.
-		if (isset ($_REQUEST['tab']) and ! isset ($_SESSION['RTLT'][$pageno]['dont_remember']))
-			$_SESSION['RTLT'][$pageno] = array ('tabname' => $tabno, 'time' => time());
+		if (isset ($_REQUEST['tab']))
+		{
+			if (isset ($_SESSION['RTLT'][$pageno]['dont_remember']))
+				unset ($_SESSION['RTLT'][$pageno]['dont_remember']);
+			else
+				$_SESSION['RTLT'][$pageno] = array ('tabname' => $tabno, 'time' => time());
+		}
 		// call the main handler - page or tab handler.
 		if (isset ($tabhandler[$pageno][$tabno]))
 		{

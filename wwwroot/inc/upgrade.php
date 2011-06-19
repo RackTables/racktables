@@ -1069,8 +1069,11 @@ CREATE TABLE `EntityLink` (
 	echo "<tr><th>Executing batch '${batchid}'</th><td>";
 	foreach ($query as $q)
 	{
-		$result = $dbxlink->query ($q);
-		if ($result == NULL)
+		try
+		{
+			$result = $dbxlink->query ($q);
+		}
+		catch (PDOException $e)
 		{
 			$errorInfo = $dbxlink->errorInfo();
 			$failures[] = array ($q, $errorInfo[2]);

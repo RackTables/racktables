@@ -8829,14 +8829,14 @@ function renderDiscoveredNeighbors ($object_id)
 				// no links found on both sides, search for a compatible port pair
 				$left_types = array();
 				foreach ($local_ports as $portinfo)
-					if (! isTranceiverEmpty ($portinfo))
+					if (! isTransceiverEmpty ($portinfo))
 						$left_types[$portinfo['oif_id']][] = array ('id' => $portinfo['oif_id'], 'name' => $portinfo['oif_name'], 'portinfo' => $portinfo);
 					else
 						foreach (getExistingPortTypeOptions ($portinfo['id']) as $oif_id => $oif_name)
 							$left_types[$oif_id][] = array ('id' => $oif_id, 'name' => $oif_name, 'portinfo' => $portinfo);
 				$right_types = array();
 				foreach ($remote_ports as $portinfo)
-					if (! isTranceiverEmpty ($portinfo))
+					if (! isTransceiverEmpty ($portinfo))
 						$right_types[$portinfo['oif_id']][] = array ('id' => $portinfo['oif_id'], 'name' => $portinfo['oif_name'], 'portinfo' => $portinfo);
 					else
 						foreach (getExistingPortTypeOptions ($portinfo['id']) as $oif_id => $oif_name)
@@ -8921,10 +8921,10 @@ function formatIfTypeVariants ($variants, $select_name)
 {
 	if (empty ($variants))
 		return;
-	static $tranceivers_hint_shown = FALSE;
+	static $transceivers_hint_shown = FALSE;
 	static $oif_usage_stat = NULL;
 	$select = array();
-	$creting_tranceivers = FALSE;
+	$creating_transceivers = FALSE;
 	$most_used_count = 0;
 	$selected_key = NULL;
 	$multiple_left = FALSE;
@@ -8948,10 +8948,10 @@ function formatIfTypeVariants ($variants, $select_name)
 	{
 		// format text label for selectbox item
 		$left_text = ($multiple_left ? $item['left']['portinfo']['iif_name'] . '/' : '') . $item['left']['name'];
-		if (! $multiple_left && ! isTranceiverEmpty ($item['left']['portinfo']))
+		if (! $multiple_left && ! isTransceiverEmpty ($item['left']['portinfo']))
 			$left_text = '';
 		$right_text = ($multiple_right ? $item['right']['portinfo']['iif_name'] . '/' : '') . $item['right']['name'];
-		if (! $multiple_right && ! isTranceiverEmpty ($item['right']['portinfo']))
+		if (! $multiple_right && ! isTransceiverEmpty ($item['right']['portinfo']))
 			$right_text = '';
 		$text = $left_text;
 		if ($left_text != $right_text && strlen ($right_text))
@@ -8968,18 +8968,18 @@ function formatIfTypeVariants ($variants, $select_name)
 			'b_id' => $item['right']['portinfo']['id'],
 		);
 		$popularity_count = 0;
-		if (isTranceiverEmpty ($item['left']['portinfo']))
+		if (isTransceiverEmpty ($item['left']['portinfo']))
 		{
-			$creting_tranceivers = TRUE;
-			$text = '← ' . $text;
+			$creating_transceivers = TRUE;
+			$text = '&larr; ' . $text;
 			$params['a_oif'] = $item['left']['id'];
 			if (isset ($oif_usage_stat[$item['left']['id']]))
 				$popularity_count += $oif_usage_stat[$item['left']['id']];
 		}
-		if (isTranceiverEmpty ($item['right']['portinfo']))
+		if (isTransceiverEmpty ($item['right']['portinfo']))
 		{
-			$creting_tranceivers = TRUE;
-			$text = $text . ' →';
+			$creating_transceivers = TRUE;
+			$text = $text . ' &rarr;';
 			$params['b_oif'] = $item['right']['id'];
 			if (isset ($oif_usage_stat[$item['right']['id']]))
 				$popularity_count += $oif_usage_stat[$item['right']['id']];
@@ -8989,7 +8989,7 @@ function formatIfTypeVariants ($variants, $select_name)
 		foreach ($params as $i => $j)
 			$key .= ",$i:$j";
 		$key = trim($key, ",");
-		$select[$key] = (count ($variants) == 1 && ! $creting_tranceivers ? '' : $text); // empty string if there is simple single variant
+		$select[$key] = (count ($variants) == 1 && ! $creating_transceivers ? '' : $text); // empty string if there is simple single variant
 		if ($popularity_count > $most_used_count)
 		{
 			$most_used_count = $popularity_count;
@@ -8997,16 +8997,16 @@ function formatIfTypeVariants ($variants, $select_name)
 		}
 	}
 
-	if ($creting_tranceivers and ! $tranceivers_hint_shown)
+	if ($creating_transceivers and ! $transceivers_hint_shown)
 	{
-		$tranceivers_hint_shown = TRUE;
-		showNotice ('The arrow (← or →) means to create a tranceiver in the suitable port');
+		$transceivers_hint_shown = TRUE;
+		showNotice ('The arrow (&larr; or &rarr;) means to create a transceiver in the suitable port');
 	}
 
-	return getSelect ($select, array('name' => $select_name), $selected_key, !$creting_tranceivers);
+	return getSelect ($select, array('name' => $select_name), $selected_key, !$creating_transceivers);
 }
 
-function isTranceiverEmpty ($portinfo)
+function isTransceiverEmpty ($portinfo)
 {
 	return (0 === strpos ($portinfo['oif_name'], 'empty '));
 }
