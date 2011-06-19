@@ -9,7 +9,6 @@
 	update: create network and link to a VLAN at once
 	update: 8021Q switch autosync status is now managed by SYNC_802Q_LISTSRC config constraint
 	new feature: you can obtain who has made tag assignment, object's ports or IPv4 address changes by hovering cursor on these entities
-	new feature: inverting tags on cell filter pages by clicking the checkboxes with Ctrl key
 0.19.5
 	bugfix: dictionary record updates did not work (#430)
 	bugfix: fix 802.1Q for XOS12
@@ -24,6 +23,7 @@
 	update: restrict search results according to user's permissions
 	new feature: attribute-level access control for objects
 	new feature: ability to open a terminal session to a device by clicking on its FQDN
+	new feature: inverting tags on cell filter pages by clicking the checkboxes with Ctrl key
 0.19.4 2011-04-14
 	bugfix: tag selector was not working with magic_quotes enabled
 	update: new techniques of changing the directory layout are now supported by installer and upgrader
