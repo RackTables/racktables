@@ -8274,20 +8274,20 @@ function renderVLANIPLinks ($some_id)
 		echo '<th>VLAN</th>';
 		$netinfo = spotEntity ($pageno, $some_id);
 		amplifyCell ($netinfo);
-		// find out list of VLAN domains, where the current network is already linked
+		# find out VLAN domains, where the current network already has a VLAN linked
+		$except_domains = array();
 		foreach ($netinfo['8021q'] as $item)
+		{
+			$except_domains[] = $item['domain_id'];
 			$minuslines[] = array
 			(
 				'net_id' => $netinfo['id'],
 				'domain_id' => $item['domain_id'],
 				'vlan_id' => $item['vlan_id'],
 			);
-		// offer all other
-		foreach (getVLANDomainStats() as $dominfo)
-			if (NULL === scanArrayForItem ($minuslines, 'domain_id', $dominfo['id']))
-				foreach (getDomainVLANs ($dominfo['id']) as $vlaninfo)
-					$plusoptions[$dominfo['description']][$dominfo['id']. '-' . $vlaninfo['vlan_id']] =
-						$vlaninfo['vlan_id'] . ' (' . $vlaninfo['netc'] . ') ' . $vlaninfo['vlan_descr'];
+		}
+		# offer VLANs from all other domains
+		$plusoptions = getAllVLANOptions ($except_domains);
 		$select_name = 'vlan_ck';
 		$extra = array ('id' => $netinfo['id']);
 		break;
