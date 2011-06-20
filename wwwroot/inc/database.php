@@ -2316,44 +2316,34 @@ function getVLANSearchResult ($terms)
 	return $ret;
 }
 
-function getSearchResultByField ($tname, $rcolumns, $scolumn, $terms, $ocolumn = '', $exactness = 0)
+function getSearchResultByField ($tablename, $retcolumns, $scancolumn, $terms, $ordercolumn = '', $exactness = 0)
 {
-	$pfx = '';
-	$query = 'select ';
+	$query = 'SELECT ' . implode (', ', $retcolumns) . " FROM ${tablename} WHERE ";
 	$qparams = array();
-	foreach ($rcolumns as $col)
-	{
-		$query .= $pfx . $col;
-		$pfx = ', ';
-	}
 	$pfx = '';
-	$query .= " from ${tname} where ";
 	foreach (explode (' ', $terms) as $term)
 	{
 		switch ($exactness)
 		{
 		case 2: // does this work as expected?
-			$query .= $pfx . "binary ${scolumn} = ?";
+			$query .= $pfx . "BINARY ${scancolumn} = ?";
 			$qparams[] = $term;
 			break;
 		case 1:
-			$query .= $pfx . "${scolumn} = ?";
+			$query .= $pfx . "${scancolumn} = ?";
 			$qparams[] = $term;
 			break;
 		default:
-			$query .= $pfx . "${scolumn} like ?";
+			$query .= $pfx . "${scancolumn} LIKE ?";
 			$qparams[] = "%${term}%";
 			break;
 		}
-		$pfx = ' or ';
+		$pfx = ' OR ';
 	}
-	if ($ocolumn != '')
-		$query .= " order by ${ocolumn}";
+	if ($ordercolumn != '')
+		$query .= " ORDER BY ${ordercolumn}";
 	$result = usePreparedSelectBlade ($query, $qparams);
-	$ret = array();
-	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-		$ret[] = $row;
-	return $ret;
+	return $result->fetchAll (PDO::FETCH_ASSOC);
 }
 
 function getObjectSearchResults ($what)
