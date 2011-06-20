@@ -31,16 +31,42 @@ function findSparePorts ($port_info, $filter)
 {
 	$qparams = array ();
 	$query = "SELECT p.id, p.object_id, p.name, p.reservation_comment, o.name as object_name FROM Port p INNER JOIN Object o ON o.id = p.object_id ";
+
 	// porttype filter (non-strict match)
-	$query .= "INNER JOIN (SELECT type2 as type FROM PortCompat INNER JOIN PortInterfaceCompat ON type1 = oif_id WHERE ";
-	if ($port_info['iif_id'] == 1)
-		$query .= "oif_id = ? ";
-	else
-		$query .= "iif_id IN (SELECT DISTINCT iif_id FROM PortInterfaceCompat WHERE oif_id = ? AND iif_id <> 1) ";
-	$query .= ') as sub1 USING (type)';
+	$query .= "
+INNER JOIN (
+	SELECT Port.id FROM Port
+	INNER JOIN
+	(
+		SELECT DISTINCT	pic2.iif_id
+		FROM PortInterfaceCompat pic2
+		INNER JOIN PortCompat pc ON pc.type2 = pic2.oif_id
+";
+		if ($port_info['iif_id'] != 1)
+		{
+			$query .= " INNER JOIN PortInterfaceCompat pic ON pic.oif_id = pc.type1 WHERE AND pic.iif_id = ? AND ";
+			$qparams[] = $port_info['iif_id'];
+		}
+		else
+		{
+			$query .= " WHERE pc.type1 = ? AND ";
+			$qparams[] = $port_info['oif_id'];
+		}
+		$query .= "
+			pic2.iif_id <> 1
+	) AS sub1 USING (iif_id)
+	UNION
+	SELECT Port.id
+	FROM Port
+	INNER JOIN PortCompat ON type1 = type
+	WHERE
+		iif_id = 1 and type2 = ?
+) AS sub2 ON sub2.id = p.id
+";
 	$qparams[] = $port_info['oif_id'];
+
 	// self and linked ports filter
-	$query .= "WHERE p.id <> ? " .
+	$query .= " WHERE p.id <> ? " .
 		"AND p.id NOT IN (SELECT porta FROM Link) " .
 		"AND p.id NOT IN (SELECT portb FROM Link) ";
 	$qparams[] = $port_info['id'];
@@ -65,7 +91,7 @@ function findSparePorts ($port_info, $filter)
 	}
 	// ordering
 	$query .= ' ORDER BY p.object_id, p.name';
-
+	echo $query . '<br>';
 	$ret = array();
 	$result = usePreparedSelectBlade ($query, $qparams);
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
@@ -298,7 +324,14 @@ function renderPopupPortSelector()
 		if ($object['rack_id'])
 			$filter['racks'] = getProximateRacks ($object['rack_id'], getConfigVar ('PROXIMITY_RANGE'));
 	}
-	$spare_ports = findSparePorts ($port_info, $filter);
+	$spare_ports = array();
+	if
+	(
+		$in_rack ||
+		! empty ($filter['objects']) ||
+		! empty ($filter['ports'])
+	)
+		$spare_ports = findSparePorts ($port_info, $filter);
 
 	// display search form
 	echo 'Link ' . formatPort ($port_info) . ' to...';
