@@ -91,7 +91,7 @@ INNER JOIN (
 	}
 	// ordering
 	$query .= ' ORDER BY p.object_id, p.name';
-	echo $query . '<br>';
+
 	$ret = array();
 	$result = usePreparedSelectBlade ($query, $qparams);
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
