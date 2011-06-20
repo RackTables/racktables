@@ -365,10 +365,17 @@ function authenticated_via_ldap_cache ($username, $password, &$ldap_displayname)
 function queryLDAPServer ($username, $password)
 {
 	global $LDAP_options;
-	if (! array_key_exists ('group_attr', $LDAP_options))
-		$LDAP_options['group_attr'] = 'memberof';
-	if (! array_key_exists ('group_filter', $LDAP_options))
-		$LDAP_options['group_filter'] = '/^[Cc][Nn]=([^,]+)/';
+	$LDAP_defaults = array
+	(
+		'group_attr' => 'memberof',
+		'group_filter' => '/^[Cc][Nn]=([^,]+)/',
+		'cache_refresh' => 300,
+		'cache_retry' => 15,
+		'cache_expiry' => 600,
+	);
+	foreach ($LDAP_defaults as $option_name => $option_value)
+		if (! array_key_exists ($option_name, $LDAP_options))
+			$LDAP_options[$option_name] = $option_value;
 
 	if(extension_loaded('ldap') === FALSE)
 		throw new RackTablesError ('LDAP misconfiguration. LDAP PHP Module is not installed.', RackTablesError::MISCONFIGURED);

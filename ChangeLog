@@ -22,6 +22,7 @@
 	update: list new wireless APs
 	update: restrict search results according to user's permissions
 	update: make link cable IDs searchable
+	update: set default timeouts for LDAP cache
 	new feature: attribute-level access control for objects
 	new feature: ability to open a terminal session to a device by clicking on its FQDN
 	new feature: inverting tags on cell filter pages by clicking the checkboxes with Ctrl key
