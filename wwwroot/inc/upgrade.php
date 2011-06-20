@@ -1060,6 +1060,7 @@ CREATE TABLE `EntityLink` (
 			$query[] = "INSERT INTO `PortInterfaceCompat` (`iif_id`,`oif_id`) VALUES (1,1469)";
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdefined, description) VALUES ('SSH_OBJS_LISTSRC','none','string','yes','no','yes','Rackcode filter for SSH-managed objects')";
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdefined, description) VALUES ('TELNET_OBJS_LISTSRC','none','string','yes','no','yes','Rackcode filter for telnet-managed objects')";
+			$query[] = "UPDATE Link SET cable = NULL WHERE cable = ''";
 			$query[] = "UPDATE Config SET varvalue = '0.19.5' WHERE varname = 'DB_VERSION'";
 			break;
 		default:

@@ -1208,7 +1208,16 @@ function linkPorts ($porta, $portb, $cable = NULL)
 		$porta = $portb;
 		$portb = $tmp;
 	}
-	$ret = FALSE !== usePreparedInsertBlade ('Link', array ('porta' => $porta, 'portb' => $portb, 'cable' => $cable));
+	$ret = FALSE !== usePreparedInsertBlade
+	(
+		'Link',
+		array
+		(
+			'porta' => $porta,
+			'portb' => $portb,
+			'cable' => mb_strlen ($cable) ? $cable : ''
+		)
+	);
 	$dbxlink->exec ('UNLOCK TABLES');
 	$ret = $ret and FALSE !== usePreparedExecuteBlade
 	(
