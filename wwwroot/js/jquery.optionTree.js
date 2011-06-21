@@ -29,6 +29,7 @@ $.fn.optionTree = function(tree, options) {
         preselect: {},
         loading_image: '', // show an ajax loading graphics (animated gif) while loading ajax (eg. /ajax-loader.gif)
         select_class: '',
+        tabindex: '',
         leaf_class: 'final',
         empty_value: '', // what value to set the input to if no valid option was selected
         on_each_change: false, // URL to lazy load (JSON, 'id' parameter will be added) or function. See default_lazy_load
@@ -157,6 +158,10 @@ $.fn.optionTree = function(tree, options) {
 
             if (options.select_class) {
                 $select.addClass(options.select_class);
+            }
+
+            if (options.tabindex) {
+                $select.attr('tabindex', options.tabindex);
             }
 
             if ( text_to_choose !== '' ) {
