@@ -44,7 +44,7 @@ INNER JOIN (
 ";
 		if ($port_info['iif_id'] != 1)
 		{
-			$query .= " INNER JOIN PortInterfaceCompat pic ON pic.oif_id = pc.type1 WHERE AND pic.iif_id = ? AND ";
+			$query .= " INNER JOIN PortInterfaceCompat pic ON pic.oif_id = pc.type1 WHERE pic.iif_id = ? AND ";
 			$qparams[] = $port_info['iif_id'];
 		}
 		else
