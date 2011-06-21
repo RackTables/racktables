@@ -10,11 +10,13 @@ my $op_port;
 my $op_connect_timeout = 2;
 my $op_timeout = 10;
 my $op_prompt;
+my $op_delay = 0;
 GetOptions (
     'h' => \$op_help,
     'port:i' => \$op_port,
     'connect-timeout:i' => \$op_connect_timeout,
     'timeout:i' => \$op_timeout,
+    'prompt-delay:f' => \$op_delay,
     'prompt:s' => \$op_prompt,
 );
 if ($op_help) {
@@ -53,6 +55,9 @@ my $session = Net::Telnet->new (
 );
 $session->timeout($op_timeout);
 
+use IO::Select;
+my $sel = new IO::Select($session);
+
 my $buff = '';
 my $cmd_finished = 0;
 while (! $session->eof) {
@@ -60,6 +65,11 @@ while (! $session->eof) {
     print $1 if ($buff =~ s/(.*\n)//s);
 
     if (! $cmd_finished && (! defined $prompt_re || $buff =~ $prompt_re)) {
+		if ($op_delay) {
+			if (IO::Select->select ($sel, undef, undef, $op_delay)) {
+				next unless $session->eof;
+			}
+		}
         my $cmd = <STDIN>;
         if (defined $cmd) {
             # replace all CR and LF symbols with single trailing LF

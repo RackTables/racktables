@@ -83,6 +83,7 @@ function queryTerminal ($object_id, $commands, $tolerate_remote_errors = TRUE)
 		'password' => NULL,
 		'timeout' => substr ($breed, 0, 3) == 'vrp' ? 15 : 5,
 		'connect_timeout' => 2,
+		'prompt_delay' => substr ($breed, 0, 3) == 'vrp' ? '0.01' : NULL,
 		'sudo_user' => NULL,
 		'identity_file' => NULL,
 	);
@@ -124,6 +125,7 @@ function queryTerminal ($object_id, $commands, $tolerate_remote_errors = TRUE)
 			$params_from_settings['prompt'] = 'prompt';
 			$params_from_settings['connect-timeout'] = 'connect_timeout';
 			$params_from_settings['timeout'] = 'timeout';
+			$params_from_settings['prompt-delay'] = 'prompt_delay';
 			break;
 		case 'ssh':
 			$params_from_settings['port'] = 'port';
