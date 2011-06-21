@@ -371,7 +371,7 @@ function getOptionTree ($tree_name, $tree_options, $tree_config = array())
 		foreach ($tree_options as $key => $value)
 			$tmp[] = is_array ($value) ?
 				"\"${key}\": " . $self ($value) :
-				"\"${value}\": ${key}";
+				"\"${value}\": \"${key}\"";
 		return '{' . implode (', ', $tmp) . "}\n";
 	}
 
