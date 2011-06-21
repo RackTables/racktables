@@ -531,4 +531,14 @@ function serializeTags ($chain, $baseurl = '')
 	return implode (', ', $tmp);
 }
 
+function startPortlet ($title = '')
+{
+	echo "<div class=portlet><h2>${title}</h2>";
+}
+
+function finishPortlet ()
+{
+	echo "</div>\n";
+}
+
 ?>

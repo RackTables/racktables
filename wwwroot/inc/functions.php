@@ -3997,6 +3997,19 @@ function formatPortLink($host_id, $hostname, $port_id, $portname, $a_class = '')
 	return "<a $additional href=\"$href\">" . implode(' ', $text_items) . '</a>';
 }
 
+// function returns a HTML-formatted link to the specified port
+function formatPort ($port_info, $a_class = '')
+{
+	return formatPortLink
+	(
+		$port_info['object_id'],
+		$port_info['object_name'],
+		$port_info['id'],
+		$port_info['name'],
+		$a_class
+	);
+}
+
 function compareDecomposedPortNames ($porta, $portb)
 {
 	if (0 != $cmp = strcmp ($porta['prefix'], $portb['prefix']))
@@ -4592,6 +4605,24 @@ function getObjectTypeChangeOptions ($object_id)
 		$ret[$test_id] = $text;
 	}
 	return $ret;
+}
+
+// proxy function returning the output of another function. Takes any number of additional parameters
+function getOutputOf ($func_name)
+{
+	ob_start();
+	try
+	{
+		$params = func_get_args();
+		array_shift($params);
+		call_user_func_array ($func_name, $params);
+		return ob_get_clean();
+	}
+	catch (Exception $e)
+	{
+		ob_clean();
+		throw $e;
+	}
 }
 
 ?>

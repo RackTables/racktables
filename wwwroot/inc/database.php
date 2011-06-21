@@ -519,6 +519,7 @@ function amplifyCell (&$record, $dummy = NULL)
 function getObjectPortsAndLinks ($object_id)
 {
 	$query = "SELECT id, name, label, l2address, iif_id, (SELECT iif_name FROM PortInnerInterface WHERE id = iif_id) AS iif_name, " .
+		"(SELECT name FROM RackObject WHERE Port.object_id = RackObject.id) AS object_name, " .
 		"type AS oif_id, (SELECT dict_value FROM Dictionary WHERE dict_key = type) AS oif_name, reservation_comment " .
 		"FROM Port WHERE object_id = ?";
 	// list and decode all ports of the current object
@@ -3978,6 +3979,7 @@ function getPortInfo ($port_id)
 	$result = usePreparedSelectBlade
 	(
 		"SELECT id, object_id, name, iif_id, type AS oif_id, l2address, reservation_comment, ".
+		"(SELECT name FROM RackObject WHERE Port.object_id = RackObject.id) AS object_name, ".
 		"(SELECT dict_value FROM Dictionary WHERE dict_key = type) AS oif_name, " .
 		"(SELECT COUNT(*) FROM Link WHERE id IN (porta, portb)) AS linked, " .
 		"(SELECT iif_name FROM PortInnerInterface WHERE id = iif_id) AS iif_name " .
