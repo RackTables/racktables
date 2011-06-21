@@ -686,3 +686,8 @@ a.img-link {
 	font-family: monospace;
 	color: black;
 }
+
+/* for OptionTree */
+select.vertical {
+	display: block;
+}

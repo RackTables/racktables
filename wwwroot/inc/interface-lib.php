@@ -351,6 +351,37 @@ function getNiftySelect ($groupList, $select_attrs, $selected_id = NULL, $tree =
 	return $ret;
 }
 
+function getOptionTree ($tree_name, $tree_options, $tree_config = array())
+{
+	function serializeJSArray ($tree_options)
+	{
+		$self = __FUNCTION__;
+		$tmp = array();
+		foreach ($tree_options as $option_label => $option_value)
+			$tmp[] = "\"${option_label}\": " . (is_array ($option_value) ? $self ($option_value) : "${option_value}");
+		return '{' . implode (', ', $tmp) . "}\n";
+	}
+
+	$default_config = array
+	(
+		'choose' => 'select...',
+		'empty_value' => '',
+	);
+	foreach ($tree_config as $cfgoption_name => $cfgoption_value)
+		$default_config[$cfgoption_name] = $cfgoption_value;
+	# it is safe to call many times for the same file
+	addJS ('js/jquery.optionTree.js');
+	$ret  = "<input type=hidden name=${tree_name}>\n";
+	$ret .= "<script type='text/javascript'>\n";
+	$ret .= "\$(function() {\n";
+	$ret .= "    var option_tree = " . serializeJSArray ($tree_options) . ";\n";
+	$ret .= "    var options = " . serializeJSArray ($default_config) . ";\n";
+	$ret .= "    \$('input[name=${tree_name}]').optionTree(option_tree, options);\n";
+	$ret .= "});\n";
+	$ret .= "</script>\n";
+	return $ret;
+}
+
 function printImageHREF ($tag, $title = '', $do_input = FALSE, $tabindex = 0)
 {
 	echo getImageHREF ($tag, $title, $do_input, $tabindex);
