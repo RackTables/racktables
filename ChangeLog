@@ -2,6 +2,9 @@
 	bugfix: dictionary record updates did not work (#430)
 	bugfix: fix 802.1Q for XOS12
 	bugfix: don't fail on a read-only connection accessing a file
+	bugfix: pencil editor cell resizing issues
+	bugfix: remeber last tab function fixed
+	bugfix: DB schema updgrade procedure handles SQL errors correctly
 	update: better eDirectory support by Walery Wysotsky
 	update: add new port type for VMs and virtual switches (by Aaron Dummer)
 	update: SNMP support for C2960-48TC-S
