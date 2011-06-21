@@ -32,7 +32,7 @@ $iftable_processors['catalyst-chassis-25-to-26-100FX/MT-RJ'] = array
 
 $iftable_processors['catalyst-chassis-any-1000T'] = array
 (
-	'pattern' => '@^GigabitEthernet((?:[[:digit:]]+/){0,2})([[:digit:]]+)$@',
+	'pattern' => '@^GigabitEthernet([[:digit:]]+/)?([[:digit:]]+)$@',
 	'replacement' => 'gi\\1\\2',
 	'dict_key' => 24,
 	'label' => '\\2X',
@@ -682,12 +682,6 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'dict_key' => 174,
 		'text' => 'WS-C3560G-48TS: 48 RJ-45/10-100-1000T(X) + 4 SFP/1000',
 		'processors' => array ('catalyst-chassis-49-to-52-1000SFP', 'catalyst-chassis-any-1000T'),
-	),
-	'9.1.516' => array
-	(
-		'dict_key' => 181,
-		'text' => 'WS-C3750G-248: 24 RJ-45/10-100-1000T(X)',
-		'processors' => array ( 'catalyst-chassis-any-1000T' ),
 	),
 	'9.1.626' => array
 	(
