@@ -8237,7 +8237,7 @@ function renderVLANIPLinks ($some_id)
 		if (!count ($options))
 			return;
 		printOpFormIntro ('bind', $extra);
-		echo "<tr><td>\n" . getNiftySelect ($options, array ('name' => $sname, 'tabindex' => 101, 'size' => getConfigVar ('MAXSELSIZE')), NULL, true);
+		echo '<tr><td>' . getOptionTree ($sname, $options, array ('tabindex' => 101));
 		echo '</td><td>' . getImageHREF ('ATTACH', 'bind', TRUE, 102) . '</td></tr></form>';
 	}
 	global $pageno, $tabno;
