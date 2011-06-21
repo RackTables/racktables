@@ -353,12 +353,25 @@ function getNiftySelect ($groupList, $select_attrs, $selected_id = NULL, $tree =
 
 function getOptionTree ($tree_name, $tree_options, $tree_config = array())
 {
-	function serializeJSArray ($tree_options)
+	function serializeJSArray ($options)
+	{
+		$tmp = array();
+		foreach ($options as $key => $value)
+			$tmp[] = "'${key}': \"${value}\"";
+		return '{' . implode (', ', $tmp) . "}\n";
+	}
+	function serializeJSTree ($tree_options)
 	{
 		$self = __FUNCTION__;
 		$tmp = array();
-		foreach ($tree_options as $option_label => $option_value)
-			$tmp[] = "\"${option_label}\": " . (is_array ($option_value) ? $self ($option_value) : "${option_value}");
+		# Leaves on the PHP tree are stored "value => label" way,
+		# non-leaves are stored "label => array" way, and the JS
+		# tree is always built "label => value" or "label => array"
+		# way, hence a structure transform is required.
+		foreach ($tree_options as $key => $value)
+			$tmp[] = is_array ($value) ?
+				"\"${key}\": " . $self ($value) :
+				"\"${value}\": ${key}";
 		return '{' . implode (', ', $tmp) . "}\n";
 	}
 
@@ -374,7 +387,7 @@ function getOptionTree ($tree_name, $tree_options, $tree_config = array())
 	$ret  = "<input type=hidden name=${tree_name}>\n";
 	$ret .= "<script type='text/javascript'>\n";
 	$ret .= "\$(function() {\n";
-	$ret .= "    var option_tree = " . serializeJSArray ($tree_options) . ";\n";
+	$ret .= "    var option_tree = " . serializeJSTree ($tree_options) . ";\n";
 	$ret .= "    var options = " . serializeJSArray ($default_config) . ";\n";
 	$ret .= "    \$('input[name=${tree_name}]').optionTree(option_tree, options);\n";
 	$ret .= "});\n";
