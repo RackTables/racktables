@@ -603,6 +603,7 @@ function vrp53PickInterfaceSubcommand (&$work, $line)
 				'mode' => 'trunk',
 			);
 			break;
+		case 'SKIP':
 		default: // dot1q-tunnel ?
 		}
 		unset ($work['current']);
@@ -629,7 +630,9 @@ function vrp53PickInterfaceSubcommand (&$work, $line)
 			if (!in_array ($vlan_id, $work['current']['allowed']))
 				$work['current']['allowed'][] = $vlan_id;
 		break;
-	// TODO: make sure, that a port with "eth-trunk" clause always ends up in "none" mode
+	case preg_match ('/^\s*eth-trunk \d+/', $line):
+		$work['current']['link-type'] = 'SKIP';
+		break;
 	default: // nom-nom
 		$line_class = 'line-other';
 	}
