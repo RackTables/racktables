@@ -1549,6 +1549,9 @@ $dictionary = array
 	1467 => array ('chapter_id' => 25, 'dict_value' => 'Cisco%GPASS%AIR-AP1141N'),
 	1468 => array ('chapter_id' => 25, 'dict_value' => 'Cisco%GPASS%AIR-AP1262N'),
 	1469 => array ('chapter_id' => 2, 'dict_value' => 'virtual port'),
+	1470 => array ('chapter_id' => 12, 'dict_value' => '[[Force10%GPASS%S55 | http://www.force10networks.com/products/s55.asp]]'),
+	1471 => array ('chapter_id' => 12, 'dict_value' => '[[Force10%GPASS%S60 | http://www.force10networks.com/products/s60.asp]]'),
+	1472 => array ('chapter_id' => 12, 'dict_value' => '[[Force10%GPASS%S4810 | http://www.force10networks.com/products/s4810.asp]]'),
 //                                     ^
 //                                     ^
 // add new dictionary entries up here  ^
@@ -1615,7 +1618,7 @@ $dictionary = array
 	1560 => array ('chapter_id' => 1, 'dict_value' => 'Rack'),
 	1561 => array ('chapter_id' => 1, 'dict_value' => 'Row'),
 	1562 => array ('chapter_id' => 1, 'dict_value' => 'Location'),
-// NOTICE: do not add new dictionary entries here, add them to the gap above (~1470)!
+// NOTICE: do not add new dictionary entries here, add them to the gap above (before 1500)!
 );
 
 ?>
