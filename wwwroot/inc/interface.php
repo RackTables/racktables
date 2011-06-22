@@ -5713,13 +5713,31 @@ function renderAutoPortsForm ($object_id)
 function renderTagRowForViewer ($taginfo, $level = 0)
 {
 	$self = __FUNCTION__;
+	$statsdecoder = array
+	(
+		'total' => ' total records linked',
+		'object' => ' object(s)',
+		'rack' => ' rack(s)',
+		'file' => ' file(s)',
+		'user' => ' user account(s)',
+		'ipv6net' => ' IPv6 network(s)',
+		'ipv4net' => ' IPv4 network(s)',
+		'ipv4vs' => ' IPv4 virtual service(s)',
+		'ipv4rspool' => ' IPv4 real server pool(s)',
+		'vst' => ' VLAN switch template(s)',
+	);
 	if (!count ($taginfo['kids']))
 		$level++; // Shift instead of placing a spacer. This won't impact any nested nodes.
 	$refc = $taginfo['refcnt']['total'];
 	echo "<tr><td align=left style='padding-left: " . ($level * 16) . "px;'>";
 	if (count ($taginfo['kids']))
 		printImageHREF ('node-expanded-static');
-	echo '<span title="id = ' . $taginfo['id'] . '">' . $taginfo['tag'];
+	$stats = array ("tag ID = ${taginfo['id']}");
+	if ($taginfo['refcnt']['total'])
+		foreach ($taginfo['refcnt'] as $article => $count)
+			if (array_key_exists ($article, $statsdecoder))
+				$stats[] = $count . $statsdecoder[$article];
+	echo '<span title="' . implode (', ', $stats) . '">' . $taginfo['tag'];
 	echo ($refc ? " <i>(${refc})</i>" : '') . '</span></td></tr>';
 	foreach ($taginfo['kids'] as $kid)
 		$self ($kid, $level + 1);
