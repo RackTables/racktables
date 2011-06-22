@@ -57,7 +57,7 @@ function queryTerminal ($object_id, $commands, $tolerate_remote_errors = TRUE)
 			break;
 		case 'vrp53':
 		case 'vrp55':
-			$prompt = '[>:\]]$';
+			$prompt = '^\[[^[\]]+\]$|^<[^<>]+>$|^(Username|Password):$';
 			break;
 		case 'nxos4':
 			$prompt = '[>:#] $';
@@ -83,7 +83,7 @@ function queryTerminal ($object_id, $commands, $tolerate_remote_errors = TRUE)
 		'password' => NULL,
 		'timeout' => substr ($breed, 0, 3) == 'vrp' ? 15 : 5,
 		'connect_timeout' => 2,
-		'prompt_delay' => substr ($breed, 0, 3) == 'vrp' ? '0.01' : NULL,
+		'prompt_delay' => 0.001, # 1ms
 		'sudo_user' => NULL,
 		'identity_file' => NULL,
 	);
