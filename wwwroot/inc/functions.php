@@ -4137,21 +4137,34 @@ function compareDecomposedPortNames ($porta, $portb)
 		$ret = ($porta['numidx'] - $portb['numidx'] > 0 ? 1 : -1);
 	else
 	{
+		global $portsort_intersections;
 		$prefix_diff = strcmp ($porta['prefix'], $portb['prefix']);
 		if ($prefix_diff != 0)
 			$prefix_diff = ($prefix_diff > 0 ? 1 : -1);
 		$index_diff = 0;
+		$a_parent = $b_parent = ''; // concatenation of 0..(n-1) numeric indices
+		$separator = '';
 		for ($i = 0; $i < $porta['numidx']; $i++)
+		{
+			if ($i < $porta['numidx'] - 1)
+			{
+				$a_parent .= $separator . $porta['index'][$i];
+				$b_parent .= $separator . $portb['index'][$i];
+				$separator = '-';
+			}
 			if ($porta['index'][$i] != $portb['index'][$i])
 			{
 				$index_diff = ($porta['index'][$i] - $portb['index'][$i] > 0 ? 1 : -1);
 				break;
 			}
+		}
 		// compare by portname fields
-		if ($index_diff != 0 && $porta['numidx'] > 1)
-			$ret = $index_diff;
-		elseif ($prefix_diff != 0)
+		if ($prefix_diff != 0 and $porta['numidx'] <= 1) // if index count is lte 1, sort by prefix
 			$ret = $prefix_diff;
+		// if index count > 1 and ports have different prefixes in intersecting index sections, sort by prefix
+		elseif ($prefix_diff != 0 and $a_parent != '' and $a_parent == $b_parent and in_array ($a_parent, $portsort_intersections))
+			$ret = $prefix_diff;
+		// if indices are not equal, sort by index
 		elseif ($index_diff != 0)
 			$ret = $index_diff;
 		// if all of name fields are equal, compare by some additional port fields
@@ -4176,21 +4189,24 @@ function compareDecomposedPortNames ($porta, $portb)
 // interfaces, which have less, than 2 indices, but for other ports
 // their indices matter more, than type (unless there is a clash
 // of indices).
-// When $name_in_value is TRUE, port name is determines as $plist[$key]['name']
+// When $name_in_value is TRUE, port name determines as $plist[$key]['name']
 // Otherwise portname is the key of $plist
 function sortPortList ($plist, $name_in_value = FALSE)
 {
 	$ret = array();
+	$to_sort = array();
 	$seen = array();
-	$intersects = FALSE;
+	global $portsort_intersections;
+	$portsort_intersections = array();
 	$prefix_re = '/^([^0-9]*)[0-9].*$/';
 	foreach ($plist as $pkey => $pvalue)
 	{
 		$pn = $name_in_value ? $pvalue['name'] : $pkey;
 		$numbers = preg_split ('/[^0-9]+/', $pn, -1, PREG_SPLIT_NO_EMPTY);
-		$ret[$pkey] = array
+		$to_sort[] = array
 		(
-			'prefix' => '',
+			'key' => $pkey,
+			'prefix' => preg_replace ($prefix_re, '\\1', $pn),
 			'numidx' => count ($numbers),
 			'index' => $numbers,
 			'iif_id' => isset($plist[$pkey]['iif_id']) ? $plist[$pkey]['iif_id'] : 0,
@@ -4199,24 +4215,15 @@ function sortPortList ($plist, $name_in_value = FALSE)
 			'id' => isset($plist[$pkey]['id']) ? $plist[$pkey]['id'] : 0,
 			'name' => $pn,
 		);
-		if ($ret[$pkey]['numidx'] <= 1)
-			$ret[$pkey]['prefix'] = preg_replace ($prefix_re, '\\1', $pn);
-		elseif (!$intersects)
-		{
-			$coord = implode ('-', $numbers);
-			if (array_key_exists ($coord, $seen))
-				$intersects = TRUE;
-			$seen[$coord] = TRUE;
-		}
+		$parent = implode ('-', array_slice ($numbers, 0, count ($numbers) - 1));
+		if (! isset ($seen[$parent]))
+			$seen[$parent] = 1;
+		else
+			$portsort_intersections[$parent] = $parent;
 	}
-	unset ($seen);
-	if ($intersects)
-		foreach ($ret as $pkey => $pvalue)
-			if ($ret[$pkey]['numidx'] > 1)
-				$ret[$pkey]['prefix'] = preg_replace ($prefix_re, '\\1', $ret[$pkey]['name']);
-	uasort ($ret, 'compareDecomposedPortNames');
-	foreach ($ret as $pkey => $pvalue)
-		$ret[$pkey] = $plist[$pkey];
+	usort ($to_sort, 'compareDecomposedPortNames');
+	foreach ($to_sort as $pvalue)
+		$ret[$pvalue['key']] = $plist[$pvalue['key']];
 	return $ret;
 }
 
