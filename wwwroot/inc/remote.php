@@ -81,7 +81,7 @@ function queryTerminal ($object_id, $commands, $tolerate_remote_errors = TRUE)
 		'prompt' => $prompt,
 		'username' => NULL,
 		'password' => NULL,
-		'timeout' => substr ($breed, 0, 3) == 'vrp' ? 15 : 5,
+		'timeout' => substr ($breed, 0, 3) == 'vrp' ? 15 : 10,
 		'connect_timeout' => 2,
 		'prompt_delay' => 0.001, # 1ms
 		'sudo_user' => NULL,
