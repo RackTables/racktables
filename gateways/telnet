@@ -53,23 +53,32 @@ my $session = Net::Telnet->new (
     Port => $port,
     Timeout => $op_connect_timeout,
 );
-$session->timeout($op_timeout);
 
 use IO::Select;
 my $sel = new IO::Select($session);
 
 my $buff = '';
 my $cmd_finished = 0;
+my $t = $op_timeout;
+my $m = 'die';
 while (! $session->eof) {
-    $buff .= $session->get;
+    $buff .= $session->get (Timeout => $t, Errmode => $m);
+    $t = $op_timeout;
+    $m = 'die';
     print $1 if ($buff =~ s/(.*\n)//s);
 
     if (! $cmd_finished && (! defined $prompt_re || $buff =~ $prompt_re)) {
-		if (defined $prompt_re and $op_delay) {
-			if (IO::Select->select ($sel, undef, undef, $op_delay)) {
-				next unless $session->eof;
-			}
-		}
+        if (defined $prompt_re and $op_delay) {
+            if (IO::Select->select ($sel, undef, undef, $op_delay)) {
+                unless ($session->eof) {
+                    # something is received, no prompt detection at this time
+                    # set NOHANG options for next reading, cause it can be telnet control sequence
+                    $t = 0;
+                    $m = 'return';
+                    next;
+                }
+            }
+        }
         my $cmd = <STDIN>;
         if (defined $cmd) {
             # replace all CR and LF symbols with single trailing LF
