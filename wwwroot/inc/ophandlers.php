@@ -1247,7 +1247,7 @@ function addLotOfObjects()
 	}
 }
 
-$msgcode['deleteObject']['OK'] = 6;
+$msgcode['deleteObject']['OK'] = 7;
 function deleteObject ()
 {
 	assertUIntArg ('object_id');
