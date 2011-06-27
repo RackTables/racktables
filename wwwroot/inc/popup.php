@@ -33,8 +33,22 @@ function getProximateRacks ($rack_id, $proximity = 0)
 function findSparePorts ($port_info, $filter)
 {
 	$qparams = array ();
-	$query = "SELECT p.id, p.object_id, p.name, p.reservation_comment, o.name as object_name FROM Port p INNER JOIN Object o ON o.id = p.object_id ";
-
+	$query = "
+SELECT
+	p.id,
+	p.name,
+	p.reservation_comment,
+	p.iif_id,
+	p.type as oif_id,
+	pii.iif_name,
+	d.dict_value as oif_name,
+	p.object_id,
+	o.name as object_name
+FROM Port p
+INNER JOIN Object o ON o.id = p.object_id
+INNER JOIN PortInnerInterface pii ON p.iif_id = pii.id
+INNER JOIN Dictionary d ON d.dict_key = p.type
+";
 	// porttype filter (non-strict match)
 	$query .= "
 INNER JOIN (
@@ -93,16 +107,43 @@ INNER JOIN (
 		$qparams[] = '%' . $filter['ports'] . '%';
 	}
 	// ordering
-	$query .= ' ORDER BY p.object_id, p.name';
+	$query .= ' ORDER BY o.name';
 
 	$ret = array();
 	$result = usePreparedSelectBlade ($query, $qparams);
-	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-		$ret[$row['id']] = $row['object_name'] . 
-		' --  ' . $row['name'] . 
-		(! empty ($row['reservation_comment']) ? '  --  ' . $row['reservation_comment'] : '');
+	
+	$rows_by_pn = array();
+	$prev_object_id = NULL;
+	
+	// fetch port rows from the DB
+	while (TRUE)
+	{
+		$row = $result->fetch (PDO::FETCH_ASSOC);
+		if (isset ($prev_object_id) and (! $row or $row['object_id'] != $prev_object_id))
+		{
+			// handle sorted object's portlist
+			foreach (sortPortList ($rows_by_pn) as $ports_subarray)
+				foreach ($ports_subarray as $port_row)
+				{
+					$port_description = $port_row['object_name'] . ' --  ' . $port_row['name'];
+					if (count ($ports_subarray) > 1)
+					{
+						$if_type = $port_row['iif_id'] == 1 ? $port_row['oif_name'] : $port_row['iif_name'];
+						$port_description .= " ($if_type)";
+					}
+					if (! empty ($port_row['reservation_comment']))
+						$port_description .= '  --  ' . $port_row['reservation_comment'];
+					$ret[$port_row['id']] = $port_description;
+				}
+			$rows_by_pn = array();
+		}
+		$prev_object_id = $row['object_id'];
+		if ($row)
+			$rows_by_pn[$row['name']][] = $row;
+		else
+			break;
+	}
 
-	natsort($ret);
 	return $ret;
 }
 
