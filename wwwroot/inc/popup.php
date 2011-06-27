@@ -4,25 +4,28 @@
 // far from the given rack in its row.
 function getProximateRacks ($rack_id, $proximity = 0)
 {
-	$rack = spotEntity ('rack', $rack_id);
-	$rackList = listCells ('rack', $rack['row_id']);
-	doubleLink ($rackList);
 	$ret = array ($rack_id);
-	$todo = $proximity;
-	$cur_item = $rackList[$rack_id];
-	while ($todo and array_key_exists ('prev_key', $cur_item))
+	if ($proximity > 0)
 	{
-		$cur_item = $rackList[$cur_item['prev_key']];
-		$ret[] = $cur_item['id'];
-		$todo--;
-	}
-	$todo = $proximity;
-	$cur_item = $rackList[$rack_id];
-	while ($todo and array_key_exists ('next_key', $cur_item))
-	{
-		$cur_item = $rackList[$cur_item['next_key']];
-		$ret[] = $cur_item['id'];
-		$todo--;
+		$rack = spotEntity ('rack', $rack_id);
+		$rackList = listCells ('rack', $rack['row_id']);
+		doubleLink ($rackList);
+		$todo = $proximity;
+		$cur_item = $rackList[$rack_id];
+		while ($todo and array_key_exists ('prev_key', $cur_item))
+		{
+			$cur_item = $rackList[$cur_item['prev_key']];
+			$ret[] = $cur_item['id'];
+			$todo--;
+		}
+		$todo = $proximity;
+		$cur_item = $rackList[$rack_id];
+		while ($todo and array_key_exists ('next_key', $cur_item))
+		{
+			$cur_item = $rackList[$cur_item['next_key']];
+			$ret[] = $cur_item['id'];
+			$todo--;
+		}
 	}
 	return $ret;
 }
@@ -343,7 +346,7 @@ function renderPopupPortSelector()
 	echo '<table align="center" valign="bottom"><tr>';
 	echo '<td class="tdleft"><label>Object name:<br><input type=text size=8 name="filter-obj" value="' . htmlspecialchars ($filter['objects'], ENT_QUOTES) . '"></label></td>';
 	echo '<td class="tdleft"><label>Port name:<br><input type=text size=6 name="filter-port" value="' . htmlspecialchars ($filter['ports'], ENT_QUOTES) . '"></label></td>';
-	echo '<td class="tdleft" valign="bottom"><label><input type=checkbox name="in_rack"' . ($in_rack ? ' checked' : '') . '>Same rack</label></td>';
+	echo '<td class="tdleft" valign="bottom"><label><input type=checkbox name="in_rack"' . ($in_rack ? ' checked' : '') . '>Nearest racks</label></td>';
 	echo '<td valign="bottom"><input type=submit value="show ports"></td>';
 	echo '</tr></table>';
 	finishPortlet();

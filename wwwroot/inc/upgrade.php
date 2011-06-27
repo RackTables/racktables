@@ -1208,6 +1208,7 @@ CREATE VIEW `RackObject` AS SELECT * FROM `Object`
 			$query[] = "DELETE FROM RackSpace WHERE object_id IS NULL AND state = 'T'";
 			
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdefined, description) VALUES ('SYNC_802Q_LISTSRC','','string','yes','no','no','List of VLAN switches sync is enabled on')";
+			$query[] = "UPDATE `Config` SET is_userdefined='yes' WHERE varname='PROXIMITY_RANGE'";
 			$query[] = "UPDATE Config SET varvalue = '0.20.0' WHERE varname = 'DB_VERSION'";
 			break;
 		default:
