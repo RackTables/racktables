@@ -1331,7 +1331,7 @@ function addLotOfObjects()
 	return buildWideRedirectURL ($log);
 }
 
-$msgcode['deleteObject']['OK'] = 6;
+$msgcode['deleteObject']['OK'] = 7;
 function deleteObject ()
 {
 	assertUIntArg ('object_id');
