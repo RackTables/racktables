@@ -59,37 +59,39 @@ my $sel = new IO::Select($session);
 
 my $buff = '';
 my $cmd_finished = 0;
-my $t = $op_timeout;
-my $m = 'die';
+my $nohang_read;
 while (! $session->eof) {
-    $buff .= $session->get (Timeout => $t, Errmode => $m);
-    $t = $op_timeout;
-    $m = 'die';
-    print $1 if ($buff =~ s/(.*\n)//s);
+	# read output from the device
+    $buff .= $session->get (Timeout => $nohang_read ? 0 : $op_timeout, Errmode => $nohang_read ? 'return' : 'die');
+    $nohang_read = 0;
+	print $1 if ($buff =~ s/(.*\n)//s);
+	last if $session->eof;
 
-    if (! $cmd_finished && (! defined $prompt_re || $buff =~ $prompt_re)) {
-        if (defined $prompt_re and $op_delay) {
-            if (IO::Select->select ($sel, undef, undef, $op_delay)) {
-                unless ($session->eof) {
-                    # something is received, no prompt detection at this time
-                    # set NOHANG options for next reading, cause it can be telnet control sequence
-                    $t = 0;
-                    $m = 'return';
-                    next;
-                }
-            }
-        }
-        my $cmd = <STDIN>;
-        if (defined $cmd) {
-            # replace all CR and LF symbols with single trailing LF
-            $cmd =~ s/[\015\012]//g;
-            $cmd .= "\012";
-            $session->put($cmd);
-        }
-        else {
-            $cmd_finished = 1;
-            $session->shutdown(1); # half-closing TCP connection (nothing to write)
-        }
-    }
+	# send pending commands to the device
+	while (! $cmd_finished) {
+		if (defined $prompt_re)
+		{
+			last if $buff !~ $prompt_re;
+			if ($op_delay and IO::Select->select ($sel, undef, undef, $op_delay)) {
+				# something is received, no prompt detection at this time
+				# set NOHANG options for next reading, cause it can be telnet control sequence
+				$nohang_read = 1;
+				last;
+			}
+		}
+
+		my $cmd = <STDIN>;
+		if (defined $cmd) {
+			# replace all CR and LF symbols with single trailing LF
+			$cmd =~ s/[\015\012]//g;
+			$cmd .= "\012";
+			$session->put($cmd);
+		}
+		else {
+			$cmd_finished = 1;
+			$session->shutdown(1); # half-closing TCP connection (nothing to write)
+		}
+		last if defined ($prompt_re);
+	}
 }
 print $buff;
