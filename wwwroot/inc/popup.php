@@ -4,25 +4,28 @@
 // far from the given rack in its row.
 function getProximateRacks ($rack_id, $proximity = 0)
 {
-	$rack = spotEntity ('rack', $rack_id);
-	$rackList = listCells ('rack', $rack['row_id']);
-	doubleLink ($rackList);
 	$ret = array ($rack_id);
-	$todo = $proximity;
-	$cur_item = $rackList[$rack_id];
-	while ($todo and array_key_exists ('prev_key', $cur_item))
+	if ($proximity > 0)
 	{
-		$cur_item = $rackList[$cur_item['prev_key']];
-		$ret[] = $cur_item['id'];
-		$todo--;
-	}
-	$todo = $proximity;
-	$cur_item = $rackList[$rack_id];
-	while ($todo and array_key_exists ('next_key', $cur_item))
-	{
-		$cur_item = $rackList[$cur_item['next_key']];
-		$ret[] = $cur_item['id'];
-		$todo--;
+		$rack = spotEntity ('rack', $rack_id);
+		$rackList = listCells ('rack', $rack['row_id']);
+		doubleLink ($rackList);
+		$todo = $proximity;
+		$cur_item = $rackList[$rack_id];
+		while ($todo and array_key_exists ('prev_key', $cur_item))
+		{
+			$cur_item = $rackList[$cur_item['prev_key']];
+			$ret[] = $cur_item['id'];
+			$todo--;
+		}
+		$todo = $proximity;
+		$cur_item = $rackList[$rack_id];
+		while ($todo and array_key_exists ('next_key', $cur_item))
+		{
+			$cur_item = $rackList[$cur_item['next_key']];
+			$ret[] = $cur_item['id'];
+			$todo--;
+		}
 	}
 	return $ret;
 }
@@ -30,8 +33,22 @@ function getProximateRacks ($rack_id, $proximity = 0)
 function findSparePorts ($port_info, $filter)
 {
 	$qparams = array ();
-	$query = "SELECT p.id, p.object_id, p.name, p.reservation_comment, o.name as object_name FROM Port p INNER JOIN RackObject o ON o.id = p.object_id ";
-
+	$query = "
+SELECT
+	p.id,
+	p.name,
+	p.reservation_comment,
+	p.iif_id,
+	p.type as oif_id,
+	pii.iif_name,
+	d.dict_value as oif_name,
+	p.object_id,
+	o.name as object_name
+FROM Port p
+INNER JOIN Object o ON o.id = p.object_id
+INNER JOIN PortInnerInterface pii ON p.iif_id = pii.id
+INNER JOIN Dictionary d ON d.dict_key = p.type
+";
 	// porttype filter (non-strict match)
 	$query .= "
 INNER JOIN (
@@ -90,16 +107,43 @@ INNER JOIN (
 		$qparams[] = '%' . $filter['ports'] . '%';
 	}
 	// ordering
-	$query .= ' ORDER BY p.object_id, p.name';
+	$query .= ' ORDER BY o.name';
 
 	$ret = array();
 	$result = usePreparedSelectBlade ($query, $qparams);
-	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-		$ret[$row['id']] = $row['object_name'] . 
-		' --  ' . $row['name'] . 
-		(! empty ($row['reservation_comment']) ? '  --  ' . $row['reservation_comment'] : '');
+	
+	$rows_by_pn = array();
+	$prev_object_id = NULL;
+	
+	// fetch port rows from the DB
+	while (TRUE)
+	{
+		$row = $result->fetch (PDO::FETCH_ASSOC);
+		if (isset ($prev_object_id) and (! $row or $row['object_id'] != $prev_object_id))
+		{
+			// handle sorted object's portlist
+			foreach (sortPortList ($rows_by_pn) as $ports_subarray)
+				foreach ($ports_subarray as $port_row)
+				{
+					$port_description = $port_row['object_name'] . ' --  ' . $port_row['name'];
+					if (count ($ports_subarray) > 1)
+					{
+						$if_type = $port_row['iif_id'] == 1 ? $port_row['oif_name'] : $port_row['iif_name'];
+						$port_description .= " ($if_type)";
+					}
+					if (! empty ($port_row['reservation_comment']))
+						$port_description .= '  --  ' . $port_row['reservation_comment'];
+					$ret[$port_row['id']] = $port_description;
+				}
+			$rows_by_pn = array();
+		}
+		$prev_object_id = $row['object_id'];
+		if ($row)
+			$rows_by_pn[$row['name']][] = $row;
+		else
+			break;
+	}
 
-	natsort($ret);
 	return $ret;
 }
 
@@ -343,7 +387,7 @@ function renderPopupPortSelector()
 	echo '<table align="center" valign="bottom"><tr>';
 	echo '<td class="tdleft"><label>Object name:<br><input type=text size=8 name="filter-obj" value="' . htmlspecialchars ($filter['objects'], ENT_QUOTES) . '"></label></td>';
 	echo '<td class="tdleft"><label>Port name:<br><input type=text size=6 name="filter-port" value="' . htmlspecialchars ($filter['ports'], ENT_QUOTES) . '"></label></td>';
-	echo '<td class="tdleft" valign="bottom"><label><input type=checkbox name="in_rack"' . ($in_rack ? ' checked' : '') . '>Same rack</label></td>';
+	echo '<td class="tdleft" valign="bottom"><label><input type=checkbox name="in_rack"' . ($in_rack ? ' checked' : '') . '>Nearest racks</label></td>';
 	echo '<td valign="bottom"><input type=submit value="show ports"></td>';
 	echo '</tr></table>';
 	finishPortlet();
