@@ -5984,9 +5984,9 @@ function renderCellFilterPortlet ($preselect, $realm, $cell_list = array(), $byp
 		echo '<tr>';
 		foreach (array ('and', 'or') as $boolop)
 		{
-			$class = $andor == $boolop ? 'seltagbox' : 'tagbox';
+			$class = 'tagbox' . ($andor == $boolop ? ' selected' : '');
 			$checked = $andor == $boolop ? ' checked' : '';
-			echo "<td class=${class}><label><input type=radio name=andor value=${boolop}";
+			echo "<td class='${class}'><label><input type=radio name=andor value=${boolop}";
 			echo $checked . ">${boolop}</input></label></td>";
 		}
 	}
@@ -8039,21 +8039,18 @@ function renderTrunkPortControls ($vswitch, $vdom, $port_name, $vlanport)
 	ksort ($allowed_options);
 	foreach ($allowed_options as $vlan_id => $option)
 	{
+		$selected = '';
+		$class = 'tagbox';
 		if (in_array ($vlan_id, $vlanport['allowed']))
 		{
 			$selected = ' checked';
-			$class = 'seltagbox';
-		}
-		else
-		{
-			$selected = '';
-			$class = 'tagbox';
+			$class .= ' selected';
 		}
 		// A real relation to an alien VLANs is shown for a
 		// particular port, but it cannot be changed by user.
 		if ($option['vlan_type'] == 'alien')
 			$selected .= ' disabled';
-		echo "<tr><td nowrap colspan=2 class=${class}>";
+		echo "<tr><td nowrap colspan=2 class='${class}'>";
 		echo "<label><input type=checkbox name='pav_0[]' value='${vlan_id}'${selected}> ";
 		echo $option['text'] . "</label></td></tr>";
 	}
@@ -8079,15 +8076,12 @@ function renderTrunkPortControls ($vswitch, $vdom, $port_name, $vlanport)
 				);
 		foreach ($native_options as $vlan_id => $option)
 		{
+			$selected = '';
+			$class = 'tagbox';
 			if ($vlan_id == $vlanport['native'])
 			{
 				$selected = ' checked';
-				$class = 'seltagbox';
-			}
-			else
-			{
-				$selected = '';
-				$class = 'tagbox';
+				$class .= ' selected';
 			}
 			// When one or more alien VLANs are present on port's list of allowed VLANs,
 			// they are shown among radio options, but disabled, so that the user cannot
@@ -8101,7 +8095,7 @@ function renderTrunkPortControls ($vswitch, $vdom, $port_name, $vlanport)
 				$option['vlan_type'] == 'alien'
 			)
 				$selected .= ' disabled';
-			echo "<tr><td nowrap colspan=2 class=${class}>";
+			echo "<tr><td nowrap colspan=2 class='${class}'>";
 			echo "<label><input type=radio name='pnv_0' value='${vlan_id}'${selected}> ";
 			echo $option['text'] . "</label></td></tr>";
 		}
