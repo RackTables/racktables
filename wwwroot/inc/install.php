@@ -374,7 +374,7 @@ CREATE TABLE `AttributeMap` (
 CREATE TABLE `AttributeValue` (
   `object_id` int(10) unsigned default NULL,
   `attr_id` int(10) unsigned default NULL,
-  `string_value` char(128) default NULL,
+  `string_value` char(255) default NULL,
   `uint_value` int(10) unsigned default NULL,
   `float_value` float default NULL,
   UNIQUE KEY `object_id` (`object_id`,`attr_id`),
