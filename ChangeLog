@@ -8,7 +8,7 @@
 	update: create network and link to a VLAN at once
 	update: 8021Q switch autosync status is now managed by SYNC_802Q_LISTSRC config constraint
 	new feature: you can obtain who has made tag assignment, object's ports or IPv4 address changes by hovering cursor on these entities
-0.19.5
+0.19.5 2011-06-29
 	bugfix: dictionary record updates did not work (#430)
 	bugfix: fix 802.1Q for XOS12
 	bugfix: don't fail on a read-only connection accessing a file

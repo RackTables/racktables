@@ -1426,7 +1426,7 @@ INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdef
 ('SSH_OBJS_LISTSRC','none','string','yes','no','yes','Rackcode filter for SSH-managed objects'),
 ('TELNET_OBJS_LISTSRC','none','string','yes','no','yes','Rackcode filter for telnet-managed objects'),
 ('SYNC_802Q_LISTSRC','','string','yes','no','no','List of VLAN switches sync is enabled on'),
-('DB_VERSION','0.19.3','string','no','yes','no','Database version.');
+('DB_VERSION','0.19.5','string','no','yes','no','Database version.');
 
 INSERT INTO `Script` VALUES ('RackCode','allow {\$userid_1}');
 
