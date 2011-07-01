@@ -205,7 +205,7 @@ function renderPopupObjectSelector()
 	echo '<div style="background-color: #f0f0f0; border: 1px solid #3c78b5; padding: 10px; height: 100%; text-align: center; margin: 5px;">';
 	echo '<h2>Choose a container:</h2>';
 	echo '<form action="javascript:;">';
-	$parents = findObjectParentCandidates($object_id);
+	$parents = findRackObjectParentCandidates($object_id);
 	printSelect ($parents, array ('name' => 'parents', 'size' => getConfigVar ('MAXSELSIZE')));
 	echo '<br>';
 	echo "<input type=submit value='Proceed' onclick='".
