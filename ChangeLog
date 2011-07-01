@@ -1,3 +1,5 @@
+0.19.6
+	bugfix: port linker was not working
 0.19.5 2011-06-29
 	bugfix: dictionary record updates did not work (#430)
 	bugfix: fix 802.1Q for XOS12

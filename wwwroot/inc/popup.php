@@ -45,7 +45,7 @@ SELECT
 	p.object_id,
 	o.name as object_name
 FROM Port p
-INNER JOIN Object o ON o.id = p.object_id
+INNER JOIN RackObject o ON o.id = p.object_id
 INNER JOIN PortInnerInterface pii ON p.iif_id = pii.id
 INNER JOIN Dictionary d ON d.dict_key = p.type
 ";
