@@ -121,6 +121,7 @@ function getDBUpgradePath ($v1, $v2)
 		'0.19.3',
 		'0.19.4',
 		'0.19.5',
+		'0.19.6',
 	);
 	if (!in_array ($v1, $versionhistory) or !in_array ($v2, $versionhistory))
 		return NULL;
@@ -1064,6 +1065,10 @@ CREATE TABLE `EntityLink` (
 			$query[] = "UPDATE Link SET cable = NULL WHERE cable = ''";
 			$query[] = "ALTER TABLE AttributeValue MODIFY string_value char(255) DEFAULT NULL";
 			$query[] = "UPDATE Config SET varvalue = '0.19.5' WHERE varname = 'DB_VERSION'";
+			break;
+		case '0.19.6':
+			$query = array_merge ($query, reloadDictionary ($batchid));
+			$query[] = "UPDATE Config SET varvalue = '0.19.6' WHERE varname = 'DB_VERSION'";
 			break;
 		default:
 			showError ("executeUpgradeBatch () failed, because batch '${batchid}' isn't defined", __FUNCTION__);
