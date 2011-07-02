@@ -1543,9 +1543,33 @@ $dictionary = array
 	1470 => array ('chapter_id' => 12, 'dict_value' => '[[Force10%GPASS%S55 | http://www.force10networks.com/products/s55.asp]]'),
 	1471 => array ('chapter_id' => 12, 'dict_value' => '[[Force10%GPASS%S60 | http://www.force10networks.com/products/s60.asp]]'),
 	1472 => array ('chapter_id' => 12, 'dict_value' => '[[Force10%GPASS%S4810 | http://www.force10networks.com/products/s4810.asp]]'),
-//                                     ^
-//                                     ^
-// add new dictionary entries up here  ^
+	1473 => array ('chapter_id' => 31, 'dict_value' => 'IBM%GPASS%BladeCenter S'),
+	1474 => array ('chapter_id' => 31, 'dict_value' => 'IBM%GPASS%BladeCenter H'),
+	1475 => array ('chapter_id' => 31, 'dict_value' => 'IBM%GPASS%BladeCenter E'),
+	1476 => array ('chapter_id' => 31, 'dict_value' => 'IBM%GPASS%BladeCenter T'),
+	1477 => array ('chapter_id' => 31, 'dict_value' => 'IBM%GPASS%BladeCenter HT'),
+	1478 => array ('chapter_id' => 11, 'dict_value' => 'IBM BladeCenter%GPASS%HS12'),
+	1479 => array ('chapter_id' => 11, 'dict_value' => 'IBM BladeCenter%GPASS%HS20'),
+	1480 => array ('chapter_id' => 11, 'dict_value' => 'IBM BladeCenter%GPASS%HS21'),
+	1481 => array ('chapter_id' => 11, 'dict_value' => 'IBM BladeCenter%GPASS%HS21 XM'),
+	1482 => array ('chapter_id' => 11, 'dict_value' => 'IBM BladeCenter%GPASS%HS22'),
+	1483 => array ('chapter_id' => 11, 'dict_value' => 'IBM BladeCenter%GPASS%HS22V'),
+	1484 => array ('chapter_id' => 11, 'dict_value' => 'IBM BladeCenter%GPASS%HX5'),
+	1485 => array ('chapter_id' => 11, 'dict_value' => 'IBM BladeCenter%GPASS%JS12'),
+	1486 => array ('chapter_id' => 11, 'dict_value' => 'IBM BladeCenter%GPASS%JS20'),
+	1487 => array ('chapter_id' => 11, 'dict_value' => 'IBM BladeCenter%GPASS%JS21'),
+	1488 => array ('chapter_id' => 11, 'dict_value' => 'IBM BladeCenter%GPASS%JS22'),
+	1489 => array ('chapter_id' => 11, 'dict_value' => 'IBM BladeCenter%GPASS%JS23'),
+	1490 => array ('chapter_id' => 11, 'dict_value' => 'IBM BladeCenter%GPASS%JS43'),
+	1491 => array ('chapter_id' => 11, 'dict_value' => 'IBM BladeCenter%GPASS%LS20'),
+	1492 => array ('chapter_id' => 11, 'dict_value' => 'IBM BladeCenter%GPASS%LS21'),
+	1493 => array ('chapter_id' => 11, 'dict_value' => 'IBM BladeCenter%GPASS%LS22'),
+	1494 => array ('chapter_id' => 11, 'dict_value' => 'IBM BladeCenter%GPASS%LS41'),
+	1495 => array ('chapter_id' => 11, 'dict_value' => 'IBM BladeCenter%GPASS%LS42'),
+	1496 => array ('chapter_id' => 11, 'dict_value' => 'IBM BladeCenter%GPASS%PS700'),
+	1497 => array ('chapter_id' => 11, 'dict_value' => 'IBM BladeCenter%GPASS%PS701'),
+	1498 => array ('chapter_id' => 11, 'dict_value' => 'IBM BladeCenter%GPASS%PS702'),
+	1499 => array ('chapter_id' => 11, 'dict_value' => 'IBM BladeCenter%GPASS%PS703'),
 	1500 => array ('chapter_id' => 29, 'dict_value' => 'No'),
 	1501 => array ('chapter_id' => 29, 'dict_value' => 'Yes'),
 	1502 => array ('chapter_id' => 1, 'dict_value' => 'Server chassis'),
@@ -1609,7 +1633,9 @@ $dictionary = array
 	1560 => array ('chapter_id' => 1, 'dict_value' => 'Rack'),
 	1561 => array ('chapter_id' => 1, 'dict_value' => 'Row'),
 	1562 => array ('chapter_id' => 1, 'dict_value' => 'Location'),
-// NOTICE: do not add new dictionary entries here, add them to the gap above (before 1500)!
+	1563 => array ('chapter_id' => 11, 'dict_value' => 'IBM BladeCenter%GPASS%PS704'),
+	1564 => array ('chapter_id' => 11, 'dict_value' => 'IBM BladeCenter%GPASS%QS21'),
+	1565 => array ('chapter_id' => 11, 'dict_value' => 'IBM BladeCenter%GPASS%QS22'),
 );
 
 ?>
