@@ -16,6 +16,11 @@ function usage()
 	exit (1);
 }
 
+function print_message_line($text)
+{
+	echo gmdate (DATE_RFC1123) . ": ${text}\n";
+}
+
 $options = getopt ('', array ('vdid:', 'max::', 'mode:', 'verbose'));
 if (!array_key_exists ('mode', $options))
 	usage();
@@ -50,8 +55,8 @@ else
 	}
 	catch (RackTablesError $e)
 	{
-		echo "Cannot load domain data with ID ${options['vdid']}\n";
-		echo $e->getMessage() . "\n";
+		print_message_line ("Cannot load domain data with ID ${options['vdid']}");
+		print_message_line ($e->getMessage());
 		exit (1);
 	}
 
@@ -68,19 +73,19 @@ if (FALSE === $fp = @fopen ($filename, 'x+'))
 {
 	if (FALSE === $pidfile_mtime = filemtime ($filename))
 	{
-		echo "Failed to obtain mtime of ${filename}\n";
+		print_message_line ("Failed to obtain mtime of ${filename}");
 		exit (1);
 	}
 	$current_time = time();
 	if ($current_time < $pidfile_mtime)
 	{
-		echo "Warning: pidfile ${filename} mtime is in future!\n";
+		print_message_line ("Warning: pidfile ${filename} mtime is in future!");
 		exit (1);
 	}
 	// don't indicate failure unless the pidfile is 15 minutes or more old
 	if ($current_time < $pidfile_mtime + 15 * 60)
 		exit (0);
-	echo "Failed to lock ${filename}, already locked by PID " . mb_substr (file_get_contents ($filename), 0, 6) . "\n";
+	print_message_line ("Failed to lock ${filename}, already locked by PID " . mb_substr (file_get_contents ($filename), 0, 6));
 	exit (1);
 }
 
@@ -127,11 +132,11 @@ foreach ($switch_queue as $object)
 				connectDB();
 			$portsdone = exec8021QDeploy ($object['id'], $do_push);
 			if ($portsdone or $verbose)
-				echo "Done '${object['dname']}': ${portsdone}\n";
+				print_message_line ("Done '${object['dname']}': ${portsdone}");
 		}
 		catch (RackTablesError $e)
 		{
-			echo "FAILED '${object['dname']}': " . $e->getMessage() . "\n";
+			print_message_line ("FAILED '${object['dname']}': " . $e->getMessage());
 		}
 		if ($i_am_child)
 			exit (0);
@@ -142,7 +147,7 @@ foreach ($switch_queue as $object)
 	if (++$switchesdone == $max)
 	{
 		if ($verbose)
-			echo "Maximum of ${max} items reached, terminating\n";
+			print_message_line ("Maximum of ${max} items reached, terminating");
 		break;
 	}
 }
@@ -156,7 +161,7 @@ while ($switches_working > 0)
 
 if (FALSE === unlink ($filename))
 {
-	echo "Failed removing pidfile ${filename}\n";
+	print_message_line ("Failed removing pidfile ${filename}");
 	exit (1);
 }
 exit (0);
