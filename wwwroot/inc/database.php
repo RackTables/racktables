@@ -3436,7 +3436,7 @@ function executeAutoPorts ($object_id = 0, $type_id = 0)
 		commitAddPort ($object_id, $autoport['name'], $autoport['type'], '', '');
 }
 
-// Return only implicitly listed tags, the rest of the chain will be
+// Return only explicitly listed tags, the rest of the chain will be
 // generated/deducted later at higher levels.
 // Result is a chain: randomly indexed taginfo list.
 function loadEntityTags ($entity_realm = '', $entity_id = 0)
@@ -3452,7 +3452,7 @@ function loadEntityTags ($entity_realm = '', $entity_id = 0)
 	);
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 		$ret[$row['id']] = $row;
-	return getExplicitTagsOnly ($ret);
+	return $ret;
 }
 
 # Universal autotags generator, a complementing function for loadEntityTags().

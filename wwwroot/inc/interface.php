@@ -6675,7 +6675,7 @@ function renderCell ($cell)
 			echo "<tr><td class=sparenetwork>no name</td></tr>";
 		echo '<td>';
 		if (!isset ($cell['etags']))
-			$cell['etags'] = loadEntityTags ('user', $cell['user_id']);
+			$cell['etags'] = getExplicitTagsOnly (loadEntityTags ('user', $cell['user_id']));
 		echo count ($cell['etags']) ? ("<small>" . serializeTags ($cell['etags']) . "</small>") : '&nbsp;';
 		echo "</td></tr></table>";
 		break;
