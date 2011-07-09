@@ -21,6 +21,12 @@ know-good distributions with respective setup notes.
 * To enable Unicode, add "character-set-server=utf8" line to "[mysqld]"
 section of "/etc/my.cnf" file and restart mysqld.
 
+*** Debian 6
+* MySQL: aptitude install mysql-server-5.1
+* Apache/PHP: aptitude install libapache2-mod-php5 php5-gd php5-mysql php5-snmp
+* To enable Unicode, add "character-set-server=utf8" line to "[mysqld]"
+section of "/etc/mysql/my.cnf" file and restart mysqld.
+
 *** ALTLinux 4.0
 * MySQL: apt-get install MySQL-server
 * Apache/PHP: apt-get install apache2-httpd-prefork php5-gd2 \
