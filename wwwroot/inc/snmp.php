@@ -345,6 +345,15 @@ $iftable_processors['smc2-combo-21-to-24'] = array
 	'try_next_proc' => TRUE,
 );
 
+$iftable_processors['smc2-combo-23-to-24'] = array
+(
+	'pattern' => '@^Port #(23|24)$@',
+	'replacement' => '\\1',
+	'dict_key' => '4-1077',
+	'label' => '\\1',
+	'try_next_proc' => TRUE,
+);
+
 $iftable_processors['smc2-combo-25-to-28'] = array
 (
 	'pattern' => '@^Port #(25|26|27|28)$@',
@@ -838,6 +847,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'N5K-C5010: 20 SFP+/10000',
 		'processors' => array ('nexus-any-10000SFP+', 'nexus-mgmt'),
 	),
+	'11.2.3.7.11.19' => array
+	(
+		'dict_key' => 859,
+		'text' => 'J4813A: 24 RJ-45/10-100TX + 2 modules of varying type',
+		'processors' => array ('procurve-chassis-100TX'),
+	),
 	'11.2.3.7.11.32' => array
 	(
 		'dict_key' => 871,
@@ -861,6 +876,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'dict_key' => 1086,
 		'text' => 'J4121A: modular system',
 		'processors' => array ('procurve-modular-100TX'),
+	),
+	'11.2.3.7.11.65' => array
+	(
+		'dict_key' => 850,
+		'text' => 'J9028A: 22 RJ-45/10-100-1000T(X) + 2 combo-gig',
+		'processors' => array ('smc2-combo-23-to-24', 'smc2-any-1000T'),
 	),
 	'11.2.3.7.11.87' => array
 	(
@@ -1128,11 +1149,18 @@ function doSwitchSNMPmining ($objectInfo, $device)
 		commitAddPort ($objectInfo['id'], 'AC-in-2', '1-16', 'AC2', '');
 		$log = mergeLogs ($log, oneLiner (81, array ('nexus-generic')));
 		break;
-	case preg_match ('/^11\.2\.3\.7\.11\.(79|87)$/', $sysObjectID): // ProCurve
-		checkPIC ('1-29');
-		commitAddPort ($objectInfo['id'], '', '1-29', 'Console', ''); // RJ-45 RS-232 console
-		# fall through
-	case preg_match ('/^11\.2\.3\.7\.11\./', $sysObjectID): // ProCurve
+	case preg_match ('/^11\.2\.3\.7\.11\.(\d+)$/', $sysObjectID, $matches): // ProCurve
+		$console_per_product = array
+		(
+			79 => '1-29', # RJ-45 RS-232
+			87 => '1-29',
+			19 => '1-681', # DB-9 RS-232
+		);
+		if (array_key_exists ($matches[1], $console_per_product))
+		{
+			checkPIC ($console_per_product[$matches[1]]);
+			commitAddPort ($objectInfo['id'], '', $console_per_product[$matches[1]], 'Console', '');
+		}
 		$exact_release = preg_replace ('/^.* revision ([^ ]+), .*$/', '\\1', $sysDescr);
 		updateStickerForCell ($objectInfo, 5, $exact_release);
 		$log = mergeLogs ($log, oneLiner (81, array ('procurve-generic')));
