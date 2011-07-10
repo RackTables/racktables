@@ -941,10 +941,10 @@ $dictionary = array
 	857 => array ('chapter_id' => 12, 'dict_value' => '[[HP ProCurve%GPASS%2510G-48 | http://www.hp.com/rnd/products/switches/ProCurve_Switch_2510_Series/overview.htm]]'),
 	858 => array ('chapter_id' => 12, 'dict_value' => '[[HP ProCurve%GPASS%2512 | http://www.hp.com/rnd/products/switches/switch2524-2512/overview.htm]]'),
 	859 => array ('chapter_id' => 12, 'dict_value' => '[[HP ProCurve%GPASS%2524 | http://www.hp.com/rnd/products/switches/switch2524-2512/overview.htm]]'),
-	860 => array ('chapter_id' => 12, 'dict_value' => '[[HP ProCurve%GPASS%2610-24 | http://www.hp.com/rnd/products/switches/ProCurve_Switch_2610_Series/overview.htm]]'),
-	861 => array ('chapter_id' => 12, 'dict_value' => '[[HP ProCurve%GPASS%2610-24-PWR | http://www.hp.com/rnd/products/switches/ProCurve_Switch_2610_Series/overview.htm]]'),
-	862 => array ('chapter_id' => 12, 'dict_value' => '[[HP ProCurve%GPASS%2610-48 | http://www.hp.com/rnd/products/switches/ProCurve_Switch_2610_Series/overview.htm]]'),
-	863 => array ('chapter_id' => 12, 'dict_value' => '[[HP ProCurve%GPASS%2610-48-PWR | http://www.hp.com/rnd/products/switches/ProCurve_Switch_2610_Series/overview.htm]]'),
+	860 => array ('chapter_id' => 12, 'dict_value' => 'HP ProCurve%GPASS%E2610-24 J9085A'),
+	861 => array ('chapter_id' => 12, 'dict_value' => 'HP ProCurve%GPASS%E2610-24-PoE J9087A'),
+	862 => array ('chapter_id' => 12, 'dict_value' => 'HP ProCurve%GPASS%E2610-48 J9088A'),
+	863 => array ('chapter_id' => 12, 'dict_value' => 'HP ProCurve%GPASS%E2610-48-PoE J9089A'),
 	864 => array ('chapter_id' => 12, 'dict_value' => '[[HP ProCurve%GPASS%2626 | http://www.hp.com/rnd/products/switches/switch2600series/overview.htm]]'),
 	865 => array ('chapter_id' => 12, 'dict_value' => '[[HP ProCurve%GPASS%2626-PWR | http://www.hp.com/rnd/products/switches/switch2600series/overview.htm]]'),
 	866 => array ('chapter_id' => 12, 'dict_value' => '[[HP ProCurve%GPASS%2650 | http://www.hp.com/rnd/products/switches/switch2600series/overview.htm]]'),
@@ -1600,6 +1600,7 @@ $dictionary = array
 	1567 => array ('chapter_id' => 12, 'dict_value' => 'SMC%GPASS%SMC6128L2'),
 	1568 => array ('chapter_id' => 12, 'dict_value' => 'SMC%GPASS%SMC6128PL2'),
 	1569 => array ('chapter_id' => 12, 'dict_value' => 'SMC%GPASS%SMC6152L2'),
+	1570 => array ('chapter_id' => 12, 'dict_value' => 'HP ProCurve%GPASS%E2610-24-PPoE J9086A'),
 );
 
 ?>

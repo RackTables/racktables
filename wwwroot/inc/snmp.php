@@ -282,6 +282,15 @@ $iftable_processors['procurve-49-to-50-1000T'] = array
 	'try_next_proc' => FALSE,
 );
 
+$iftable_processors['procurve-51-to-52-1000SFP'] = array
+(
+	'pattern' => '@^(51|52)$@',
+	'replacement' => '\\1',
+	'dict_key' => '4-1077',
+	'label' => '\\1',
+	'try_next_proc' => FALSE,
+);
+
 $iftable_processors['netgear-chassis-any-1000T'] = array
 (
 	'pattern' => '@^Unit: 1 Slot: 0 Port: ([[:digit:]]+) Gigabit - Level$@',
@@ -859,6 +868,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'J9147A: 44 RJ-45/10-100-1000T(X) + 4 combo-gig)',
 		'processors' => array ('procurve-45-to-48-combo-1000SFP', 'procurve-chassis-1000T'),
 	),
+	'11.2.3.7.11.79' => array
+	(
+		'dict_key' => 863,
+		'text' => 'J9089A: 48 RJ-45/10-100TX PoE + 2 1000T + 2 SFP-1000',
+		'processors' => array ('procurve-49-to-50-1000T', 'procurve-51-to-52-1000SFP', 'procurve-chassis-100TX'),
+	),
 	'4526.100.2.2' => array
 	(
 		'dict_key' => 562,
@@ -1113,6 +1128,10 @@ function doSwitchSNMPmining ($objectInfo, $device)
 		commitAddPort ($objectInfo['id'], 'AC-in-2', '1-16', 'AC2', '');
 		$log = mergeLogs ($log, oneLiner (81, array ('nexus-generic')));
 		break;
+	case preg_match ('/^11\.2\.3\.7\.11\.(79|87)$/', $sysObjectID): // ProCurve
+		checkPIC ('1-29');
+		commitAddPort ($objectInfo['id'], '', '1-29', 'Console', ''); // RJ-45 RS-232 console
+		# fall through
 	case preg_match ('/^11\.2\.3\.7\.11\./', $sysObjectID): // ProCurve
 		$exact_release = preg_replace ('/^.* revision ([^ ]+), .*$/', '\\1', $sysDescr);
 		updateStickerForCell ($objectInfo, 5, $exact_release);
