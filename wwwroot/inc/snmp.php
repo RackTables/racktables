@@ -1001,6 +1001,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'FLS 648: 44 RJ-45/10-100-1000T(X) + 4 combo-gig + 2 optional 10G modules',
 		'processors' => array ('fls648-combo', 'fgs-any-1000T', 'fls-uplinks'),
 	),
+	'1991.1.3.52.2.2.1.1' => array
+	(
+		'dict_key' => 1032,
+		'text' => 'FWS648G: 4 combo-gig + 44 RJ-45/10-100-1000T(X)',
+		'processors' => array ('fgs-1-to-4-comboSFP', 'fgs-any-1000T'),
+	),
 	'1916.2.71' => array
 	(
 		'dict_key' => 694,
