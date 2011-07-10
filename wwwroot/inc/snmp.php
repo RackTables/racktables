@@ -255,6 +255,15 @@ $iftable_processors['procurve-45-to-48-combo-1000SFP'] = array
 	'try_next_proc' => TRUE,
 );
 
+$iftable_processors['procurve-21-to-24-combo-1000SFP'] = array
+(
+	'pattern' => '@^(21|22|23|24)$@',
+	'replacement' => '\\1',
+	'dict_key' => '4-1077',
+	'label' => '\\1',
+	'try_next_proc' => TRUE,
+);
+
 $iftable_processors['procurve-modular-100TX'] = array
 (
 	'pattern' => '@^([A-Z][[:digit:]]+)$@',
@@ -877,6 +886,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'J4121A: modular system',
 		'processors' => array ('procurve-modular-100TX'),
 	),
+	'11.2.3.7.11.63' => array
+	(
+		'dict_key' => 868,
+		'text' => 'J9021A: 20 RJ-45/10-100-1000T(X) + 4 combo-gig',
+		'processors' => array ('procurve-21-to-24-combo-1000SFP', 'procurve-chassis-1000T'),
+	),
 	'11.2.3.7.11.65' => array
 	(
 		'dict_key' => 850,
@@ -1154,6 +1169,7 @@ function doSwitchSNMPmining ($objectInfo, $device)
 		(
 			79 => '1-29', # RJ-45 RS-232
 			87 => '1-29',
+			63 => '1-29',
 			19 => '1-681', # DB-9 RS-232
 		);
 		if (array_key_exists ($matches[1], $console_per_product))
