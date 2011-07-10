@@ -941,14 +941,14 @@ function getVMResourcePoolSummary ()
 		"WHERE EL.child_entity_id = O.id " .
 		"AND EL.parent_entity_type = 'object' " .
 		"AND EL.child_entity_type = 'object' " .
-		"AND O_C.objtype_id = 1505) AS cluster_id, " .
+		"AND O_C.objtype_id = 1505 LIMIT 1) AS cluster_id, " .
 		"(SELECT O_C.name " .
 		"FROM EntityLink EL " .
 		"LEFT JOIN Object O_C ON EL.parent_entity_id = O_C.id " .
 		"WHERE EL.child_entity_id = O.id " .
 		"AND EL.parent_entity_type = 'object' " .
 		"AND EL.child_entity_type = 'object' " .
-		"AND O_C.objtype_id = 1505) AS cluster_name, " .
+		"AND O_C.objtype_id = 1505 LIMIT 1) AS cluster_name, " .
 		"(SELECT COUNT(*) FROM EntityLink EL " .
 		"LEFT JOIN Object O_VM ON EL.child_entity_id = O_VM.id " .
 		"WHERE EL.parent_entity_type = 'object' " .
@@ -973,14 +973,14 @@ function getVMHypervisorSummary ()
 		"WHERE EL.child_entity_id = O.id " .
 		"AND EL.parent_entity_type = 'object' " .
 		"AND EL.child_entity_type = 'object' " .
-		"AND O_C.objtype_id = 1505) AS cluster_id, " .
+		"AND O_C.objtype_id = 1505 LIMIT 1) AS cluster_id, " .
 		"(SELECT O_C.name " .
 		"FROM EntityLink EL " .
 		"LEFT JOIN Object O_C ON EL.parent_entity_id = O_C.id " .
 		"WHERE EL.child_entity_id = O.id " .
 		"AND EL.parent_entity_type = 'object' " .
 		"AND EL.child_entity_type = 'object' " .
-		"AND O_C.objtype_id = 1505) AS cluster_name, " .
+		"AND O_C.objtype_id = 1505 LIMIT 1) AS cluster_name, " .
 		"(SELECT COUNT(*) FROM EntityLink EL " .
 		"LEFT JOIN Object O_VM ON EL.child_entity_id = O_VM.id " .
 		"WHERE EL.parent_entity_type = 'object' " .
