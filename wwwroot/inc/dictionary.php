@@ -1596,6 +1596,10 @@ $dictionary = array
 	1563 => array ('chapter_id' => 11, 'dict_value' => 'IBM BladeCenter%GPASS%PS704'),
 	1564 => array ('chapter_id' => 11, 'dict_value' => 'IBM BladeCenter%GPASS%QS21'),
 	1565 => array ('chapter_id' => 11, 'dict_value' => 'IBM BladeCenter%GPASS%QS22'),
+	1566 => array ('chapter_id' => 12, 'dict_value' => 'SMC%GPASS%SMC6110L2'),
+	1567 => array ('chapter_id' => 12, 'dict_value' => 'SMC%GPASS%SMC6128L2'),
+	1568 => array ('chapter_id' => 12, 'dict_value' => 'SMC%GPASS%SMC6128PL2'),
+	1569 => array ('chapter_id' => 12, 'dict_value' => 'SMC%GPASS%SMC6152L2'),
 );
 
 ?>

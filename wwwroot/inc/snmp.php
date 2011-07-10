@@ -327,6 +327,51 @@ $iftable_processors['smc-combo-45-to-48'] = array
 	'try_next_proc' => TRUE,
 );
 
+$iftable_processors['smc2-combo-21-to-24'] = array
+(
+	'pattern' => '@^Port #(21|22|23|24)$@',
+	'replacement' => '\\1',
+	'dict_key' => '4-1077',
+	'label' => '\\1',
+	'try_next_proc' => TRUE,
+);
+
+$iftable_processors['smc2-combo-25-to-28'] = array
+(
+	'pattern' => '@^Port #(25|26|27|28)$@',
+	'replacement' => '\\1',
+	'dict_key' => '4-1077',
+	'label' => '\\1',
+	'try_next_proc' => TRUE,
+);
+
+$iftable_processors['smc2-1000T-25-to-28'] = array
+(
+	'pattern' => '@^Port #(25|26|27|28)$@',
+	'replacement' => '\\1',
+	'dict_key' => '1-24',
+	'label' => '\\1',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['smc2-any-1000T'] = array
+(
+	'pattern' => '@^Port #(\d+)$@',
+	'replacement' => '\\1',
+	'dict_key' => '1-24',
+	'label' => '\\1',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['smc2-any-100TX'] = array
+(
+	'pattern' => '@^Port #(\d+)$@',
+	'replacement' => '\\1',
+	'dict_key' => '1-19',
+	'label' => '\\1',
+	'try_next_proc' => FALSE,
+);
+
 $iftable_processors['juniper-DPCE-R-4XGE-XFP'] = array
 (
 	'pattern' => '@^xe-([[:digit:]]+)/([[:digit:]]+/[[:digit:]]+)$@',
@@ -918,6 +963,18 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'SMC8150L2: 46 RJ-45/10-100-1000T(X) + 4 combo ports',
 		'processors' => array ('smc-combo-45-to-48', 'nortel-any-1000T'),
 	),
+	'202.20.59' => array
+	(
+		'dict_key' => 1371,
+		'text' => 'SMC8124L2: 20 RJ-45/10-100-1000T(X) + 4 combo ports',
+		'processors' => array ('smc2-combo-21-to-24', 'smc2-any-1000T'),
+	),
+	'202.20.66' => array
+	(
+		'dict_key' => 1567,
+		'text' => 'SMC6128L2: 24 RJ-45/10-100TX + 4 combo-gig ports',
+		'processors' => array ('smc2-combo-25-to-28', 'smc2-1000T-25-to-28', 'smc2-any-100TX'),
+	),
 );
 
 global $swtype_pcre;
@@ -1151,6 +1208,13 @@ function doSwitchSNMPmining ($objectInfo, $device)
 		checkPIC ('1-16');
 		commitAddPort ($objectInfo['id'], 'AC-in', '1-16', '', '');
 		$log = mergeLogs ($log, oneLiner (81, array ('summit-generic')));
+		break;
+	case preg_match ('/^202\.20\./', $sysObjectID): // SMC TigerSwitch
+		checkPIC ('1-681');
+		commitAddPort ($objectInfo['id'], 'console', '1-681', '', ''); // DB-9 RS-232
+		checkPIC ('1-16');
+		commitAddPort ($objectInfo['id'], 'AC-in', '1-16', '', '');
+		$log = mergeLogs ($log, oneLiner (81, array ('smc-generic')));
 		break;
 	default: // Nortel...
 		break;
