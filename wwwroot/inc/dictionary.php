@@ -1428,7 +1428,7 @@ $dictionary = array
 	1346 => array ('chapter_id' => 12, 'dict_value' => 'Huawei%GPASS%Quidway S5348TP-PWR-SI'),
 	1347 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 2960G-24PC'),
 	1348 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 2350-48TD'),
-	1349 => array ('chapter_id' => 12, 'dict_value' => '[[HP ProCurve%GPASS%2910al-48G | http://h10010.www1.hp.com/wwpc/uk/en/sm/WF06b/12883-12883-3445275-427605-427605-3901671-3901675.html]]'),
+	1349 => array ('chapter_id' => 12, 'dict_value' => 'HP ProCurve%GPASS%E2910-48G'),
 	1350 => array ('chapter_id' => 14, 'dict_value' => 'ExtremeXOS 10'),
 	1351 => array ('chapter_id' => 14, 'dict_value' => 'ExtremeXOS 11'),
 	1352 => array ('chapter_id' => 14, 'dict_value' => 'ExtremeXOS 12'),
@@ -1601,6 +1601,7 @@ $dictionary = array
 	1568 => array ('chapter_id' => 12, 'dict_value' => 'SMC%GPASS%SMC6128PL2'),
 	1569 => array ('chapter_id' => 12, 'dict_value' => 'SMC%GPASS%SMC6152L2'),
 	1570 => array ('chapter_id' => 12, 'dict_value' => 'HP ProCurve%GPASS%E2610-24-PPoE J9086A'),
+	1571 => array ('chapter_id' => 12, 'dict_value' => 'HP ProCurve%GPASS%E2910-24G'),
 );
 
 ?>
