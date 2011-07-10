@@ -1606,6 +1606,18 @@ $dictionary = array
 	1573 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 2960-48TT-S'),
 	1574 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 3560E-48TD'),
 	1575 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 3560E-24TD'),
+	1576 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 3560X-24T'),
+	1577 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 3560X-48T'),
+	1578 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 3560X-24P'),
+	1579 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 3560X-48P'),
+	1580 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 3560X-48PF'),
+	1581 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 3750X-24T'),
+	1582 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 3750X-48T'),
+	1583 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 3750X-24P'),
+	1584 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 3750X-48P'),
+	1585 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 3750X-48PF'),
+	1586 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 3750X-12S'),
+	1587 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 3750X-24S'),
 );
 
 ?>
