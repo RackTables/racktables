@@ -4906,4 +4906,18 @@ function resetUserConfigVar ($varname = '')
 	usePreparedDeleteBlade ('UserConfig', array ('varname' => $varname, 'user' => $remote_username));
 }
 
+// parses QUICK_LINK_PAGES config var and returns array with ('href'=>..., 'title'=>...) items
+function getConfiguredQuickLinks()
+{
+	$ret = array();
+	foreach (explode (',', getConfigVar('QUICK_LINK_PAGES')) as $page_code)
+		if (! empty ($page_code))
+		{
+			$title = getPageName ($page_code);
+			if (! empty ($title))
+				$ret[] = array ('href' => makeHref (array ('page' => $page_code)), 'title' => $title);
+		}
+	return $ret;
+}
+
 ?>

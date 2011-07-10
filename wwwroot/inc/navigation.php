@@ -530,6 +530,7 @@ $trigger['myaccount']['mypassword'] = 'trigger_passwdchange';
 $tabhandler['myaccount']['default'] = 'renderMyAccount';
 $tabhandler['myaccount']['mypassword'] = 'renderMyPasswordEditor';
 $tabhandler['myaccount']['interface'] = 'renderMyPreferences';
+$ophandler['myaccount']['default']['save_qlinks'] = 'saveQuickLinks';
 $ophandler['myaccount']['mypassword']['changeMyPassword'] = 'changeMyPassword';
 $ophandler['myaccount']['interface']['upd'] = 'saveMyPreferences';
 $ophandler['myaccount']['interface']['reset'] = 'resetMyPreference';

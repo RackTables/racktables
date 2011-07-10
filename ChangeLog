@@ -8,6 +8,7 @@
 	update: create network and link to a VLAN at once
 	update: 8021Q switch autosync status is now managed by SYNC_802Q_LISTSRC config constraint
 	new feature: you can obtain who has made tag assignment, object's ports or IPv4 address changes by hovering cursor on these entities
+	new feature: adjustable quick links at the top of the page
 0.19.6 2011-07-02
 	bugfix: port linker was not working (#446)
 	bugfix: PHP warning messages appeared when searching (#443)

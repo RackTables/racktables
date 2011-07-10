@@ -1401,6 +1401,7 @@ function resetUIConfig()
 	setConfigVar ('SSH_OBJS_LISTSRC', 'none');
 	setConfigVar ('TELNET_OBJS_LISTSRC', 'none');
 	setConfigVar ('SYNC_802Q_LISTSRC', '');
+	setConfigVar ('QUICK_LINK_PAGES', '');
 	return showFuncMessage (__FUNCTION__, 'OK');
 }
 
@@ -2719,6 +2720,16 @@ function addObjectlog ()
 	$object_id = isset($sic['object_id']) ? $sic['object_id'] : $sic['rack_id'];
 	usePreparedExecuteBlade ('INSERT INTO ObjectLog SET object_id=?, user=?, date=NOW(), content=?', array ($object_id, $remote_username, $sic['logentry']));
 	showSuccess ('Log entry added');
+}
+
+function saveQuickLinks()
+{
+	genericAssertion ('page_list', 'array');
+	if (is_array ($_REQUEST['page_list']))
+	{
+		setUserConfigVar ('QUICK_LINK_PAGES', implode(',', $_REQUEST['page_list']));	
+		showSuccess ('Quick links list is saved');
+	}
 }
 
 function getOpspec()

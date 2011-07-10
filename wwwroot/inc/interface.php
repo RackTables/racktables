@@ -71,6 +71,19 @@ $attrtypes = array
 	'dict' => '[D] dictionary record'
 );
 
+$quick_links = NULL; // you can override this in your local.php, but first initialize it with getConfiguredQuickLinks()
+
+function renderQuickLinks()
+{
+	global $quick_links;
+	if (! isset ($quick_links))
+		$quick_links = getConfiguredQuickLinks();
+	echo '<ul class="qlinks">';
+	foreach ($quick_links as $link)
+		echo '<li><a href="' . $link['href'] . '">' . str_replace (' ', '&nbsp;', $link['title']) . '</a></li>';
+	echo '</ul>';
+}
+
 function renderInterfaceHTML ($pageno, $tabno, $payload)
 {
 ?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -81,12 +94,8 @@ function renderInterfaceHTML ($pageno, $tabno, $payload)
 <body>
 <table border=0 cellpadding=0 cellspacing=0 width="100%" height="100%" class="maintable">
  <tr class="mainheader"><td>
-   <table width="100%" cellspacing="0" cellpadding="2" border="0">
-   <tr>
-    <td valign=top><a href="http://racktables.org/"><?php printImageHREF ('logo'); ?></a></td>
-    <td valign=top><div class=greeting><?php printGreeting(); ?></div></td>
-   </tr>
-   </table>
+ <?php echo getConfigVar ('enterprise') ?> RackTables <a href="http://racktables.org" title="Visit RackTables site"><?php echo CODE_VERSION ?></a><?php renderQuickLinks() ?>
+ <div style="float: right" class=greeting><a href='index.php?page=myaccount&tab=default'><?php global $remote_displayname; echo $remote_displayname ?></a> [ <a href='?logout'>logout</a> ]</div>
  </td></tr>
  <tr><td class="menubar">
   <table border="0" width="100%" cellpadding="3" cellspacing="0">
@@ -106,10 +115,8 @@ function renderInterfaceHTML ($pageno, $tabno, $payload)
 function renderIndexItem ($ypageno) {
   global $page;
   if (permitted($ypageno)) {
-	$title = isset ($page[$ypageno]['title']) ? $page[$ypageno]['title'] : dynamic_title_decoder ($ypageno);
-	if (is_array ($title))
-		$title = $title['name'];
-    print "          <td>\n";          
+	  $title = getPageName ($ypageno);
+	print "          <td>\n";          
     print "            <h1><a href='".makeHref(array('page'=>$ypageno))."'>".$title."<br>\n";
     printImageHREF ($ypageno);
     print "</a></h1>\n";
@@ -3458,14 +3465,6 @@ function renderAddMultipleObjectsForm ()
 	finishPortlet();
 }
 
-function printGreeting ()
-{
-	global $remote_username, $remote_displayname;
-	echo "Hello, <a href='index.php?page=myaccount&tab=default'>${remote_displayname}</a>. This is RackTables " .
-		CODE_VERSION .
-		". Click <a href='index.php?logout'>here</a> to logout.";
-}
-
 function searchHandler()
 {
 	$terms = trim ($_REQUEST['q']);
@@ -6295,11 +6294,30 @@ function renderMyPreferences ()
 
 function renderMyAccount ()
 {
-	global $remote_username, $remote_displayname;
-	echo "<table border=0 class=objectview cellspacing=0 cellpadding=0 width='50%'>";
-	echo "<tr><td colspan=2 align=center><h1>${remote_username}</h1></td></tr>\n";
-	echo "<tr><td colspan=2 align=center><h2>${remote_displayname}</h2></td></tr>\n";
+	global $remote_username, $remote_displayname, $user_given_tags;
+	startPortlet();
+	echo '<div style="text-align: left; display: inline-block;">';
+	echo '<h2>Current user info</h2>';
+	echo "<table>";
+	echo "<tr><th>Login:</th><td>${remote_username}</td></tr>\n";
+	echo "<tr><th>Name:</th><td>${remote_displayname}</td></tr>\n";
+	echo "<tr><th>Tags:</th><td>" . serializeTags ($user_given_tags) . "</td></tr>\n";
 	echo "</table>";
+
+	echo '<h2>Quick links set-up</h2>';
+	echo 'Choose items to display in page header as quick links:';
+	echo '<form action="?module=redirect&page=myaccount&tab=default&op=save_qlinks" method="POST"><ul class="qlinks-form">';
+	$active_items = explode(',', getConfigVar ('QUICK_LINK_PAGES'));
+	global $indexlayout, $page;
+	foreach ($indexlayout as $row)
+		foreach ($row as $ypageno)
+		{
+			$checked_state = in_array ($ypageno, $active_items) ? 'checked' : '';
+			echo "<li><label><input type='checkbox' name='page_list[]' value='$ypageno' $checked_state>" . getPageName ($ypageno) . "</label></li>\n";
+		}
+	echo '</ul>';
+	printImageHREF ('SAVE', 'Save changes', TRUE);
+	echo '</form></div>';
 }
 
 // File-related functions
@@ -6934,7 +6952,7 @@ function showPathAndSearch ($pageno)
 	}
 	global $page;
 	// Path.
-	echo "<td class=activemenuitem width='99%'>" . getConfigVar ('enterprise');
+	echo "<td class=activemenuitem width='99%'>";
 	$path = getPath ($pageno);
 	$items = array();
 	foreach (array_reverse ($path) as $no)
@@ -6968,7 +6986,7 @@ function showPathAndSearch ($pageno)
 		$item .= "'>" . $title['name'] . "</a>";
 		$items[] = $item;
 	}
-	echo ' : ' . implode(' : ', array_reverse ($items));
+	echo implode(' : ', array_reverse ($items));
 	echo "</td>";
 	// Search form.
 	echo "<td><table border=0 cellpadding=0 cellspacing=0><tr><td>Search:</td>";

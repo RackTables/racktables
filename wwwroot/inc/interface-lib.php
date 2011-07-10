@@ -620,4 +620,13 @@ function finishPortlet ()
 	echo "</div>\n";
 }
 
+function getPageName ($page_code)
+{
+	global $page;
+	$title = isset ($page[$page_code]['title']) ? $page[$page_code]['title'] : dynamic_title_decoder ($page_code);
+	if (is_array ($title))
+		$title = $title['name'];
+	return $title;
+}
+
 ?>

@@ -221,10 +221,6 @@ tr.hl {
 	background-color: #c0c0c0;
 }
 
-tr.mainheader {
-	background-color: black;
-}
-
 div.greeting {
 	color: white;
 	text-align: right;
@@ -691,3 +687,36 @@ a.img-link {
 select.vertical {
 	display: block;
 }
+
+/* main header line (black one) */
+tr.mainheader td {
+	background-color: black;
+	color: white;
+	padding: 5px;
+}
+tr.mainheader td a {
+	color: #5C98D5;
+	font-family: Arial,Sans-Serif,sans-serif;
+}
+
+/* quick links within the main header line */
+ul.qlinks {
+	display: inline;
+	list-style: none;
+}
+ul.qlinks li {
+	display: inline;
+	margin: 0 2em;
+}
+ul.qlinks li a {
+	font-size: 14px;
+	font-weight: bold;
+	font-family: Verdana,arial,sans-serif;
+}
+
+/* checkboxes in the MyAccount page */
+ul.qlinks-form {
+	list-style: none;
+	padding: 0;
+}
+
