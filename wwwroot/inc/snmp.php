@@ -626,6 +626,24 @@ $iftable_processors['summit-management'] = array
 	'try_next_proc' => FALSE,
 );
 
+$iftable_processors['C3KX-NM-10000'] = array
+(
+	'pattern' => '@^TenGigabitEthernet1/(\d+)$@',
+	'replacement' => 'te1/\\1',
+	'dict_key' => '9-1084',
+	'label' => 'NM TE\\1',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['C3KX-NM-1000'] = array
+(
+	'pattern' => '@^GigabitEthernet1/(\d+)$@',
+	'replacement' => 'gi1/\\1',
+	'dict_key' => '4-1077',
+	'label' => 'NM G\\1',
+	'try_next_proc' => FALSE,
+);
+
 global $known_switches;
 $known_switches = array // key is system OID w/o "enterprises" prefix
 (
@@ -878,6 +896,18 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 			'catalyst-chassis-any-100TX',
 			'catalyst-chassis-1-to-2-1000SFP',
 			'catalyst-chassis-uplinks-1000T',
+		),
+	),
+	'9.1.1227' => array
+	(
+		'dict_key' => 1577,
+		'text' => 'WS-C3560X-48T: 48 RJ-45/10-100-1000T(X) + network module + OOBM',
+		'processors' => array
+		(
+			'C3KX-NM-10000',
+			'C3KX-NM-1000',
+			'catalyst-chassis-any-1000T',
+			'catalyst-chassis-mgmt',
 		),
 	),
 	'9.12.3.1.3.719' => array
