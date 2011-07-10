@@ -659,6 +659,18 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'WS-C2960-48TC-L: 48 RJ-45/10-100TX + 2 combo-gig',
 		'processors' => array ('catalyst-chassis-1-to-2-combo-1000SFP', 'catalyst-chassis-any-1000T', 'catalyst-chassis-any-100TX'),
 	),
+	'9.1.793' => array
+	(
+		'dict_key' => 1575,
+		'text' => 'WS-C3560E-24TD: 24 RJ-45/10-100-1000T(X) + 2 X2/10000 w/TwinGig + OOBM',
+		'processors' => array
+		(
+			'catalyst-chassis-25-to-28-1000SFP', // TwinGig
+			'catalyst-chassis-any-1000T',
+			'catalyst-chassis-uplinks-10000X2',
+			'catalyst-chassis-mgmt',
+		),
+	),
 	'9.1.794' => array
 	(
 		'dict_key' => 1574,

@@ -1605,6 +1605,7 @@ $dictionary = array
 	1572 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 2960-48TT-L'),
 	1573 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 2960-48TT-S'),
 	1574 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 3560E-48TD'),
+	1575 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 3560E-24TD'),
 );
 
 ?>
