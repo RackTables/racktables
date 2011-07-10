@@ -5,9 +5,6 @@ define ('AUTOTAGNAME_REGEXP', '/^\$[\p{L}0-9]([. _~-]?[\p{L}0-9])*$/u');
 
 // Let's have it here, so extensions can add their own images.
 $image = array();
-$image['logo']['path'] = 'pix/defaultlogo.png';
-$image['logo']['width'] = 210;
-$image['logo']['height'] = 40;
 $image['rackspace']['path'] = 'pix/racks.png';
 $image['rackspace']['width'] = 218;
 $image['rackspace']['height'] = 200;
