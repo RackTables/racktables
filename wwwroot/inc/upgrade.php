@@ -1070,6 +1070,10 @@ CREATE TABLE `EntityLink` (
 			$query = array_merge ($query, reloadDictionary ($batchid));
 			$query[] = "UPDATE Config SET varvalue = '0.19.6' WHERE varname = 'DB_VERSION'";
 			break;
+		case '0.19.7':
+			$query = array_merge ($query, reloadDictionary ($batchid));
+			$query[] = "UPDATE Config SET varvalue = '0.19.7' WHERE varname = 'DB_VERSION'";
+			break;
 		default:
 			showError ("executeUpgradeBatch () failed, because batch '${batchid}' isn't defined", __FUNCTION__);
 			die;

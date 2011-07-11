@@ -1,3 +1,5 @@
+0.19.7
+	update: add SNMP support for several more switches
 0.19.6 2011-07-02
 	bugfix: port linker was not working (#446)
 	bugfix: PHP warning messages appeared when searching (#443)
