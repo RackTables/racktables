@@ -1142,6 +1142,7 @@ INSERT INTO `ObjectParentCompat` VALUES
 (1505,1504),
 (1505,1506),
 (1505,1507),
+(1506,4),
 (1506,1504);
 
 INSERT INTO `PortInterfaceCompat` VALUES
