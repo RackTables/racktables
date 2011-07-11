@@ -2338,7 +2338,14 @@ function makeHref ($params = array())
 {
 	$tmp = array();
 	foreach ($params as $key => $value)
-		$tmp[] = urlencode ($key) . '=' . urlencode ($value);
+	{
+		if (is_array ($value))
+			$key .= "[]";
+		else
+			$value = array ($value);
+		foreach ($value as $sub_value)
+			$tmp[] = urlencode ($key) . '=' . urlencode ($sub_value);
+	}
 	return 'index.php?' . implode ('&', $tmp);
 }
 
