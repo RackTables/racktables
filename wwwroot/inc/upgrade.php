@@ -1072,6 +1072,26 @@ CREATE TABLE `EntityLink` (
 			break;
 		case '0.19.7':
 			$query = array_merge ($query, reloadDictionary ($batchid));
+			# A plain "ALTER TABLE Attribute" can leave AUTO_INCREMENT in an odd
+			# state, hence the table swap.
+			$query[] = "
+CREATE TABLE `Attribute_new` (
+  `id` int(10) unsigned NOT NULL auto_increment,
+  `type` enum('string','uint','float','dict') default NULL,
+  `name` char(64) default NULL,
+  PRIMARY KEY  (`id`),
+  UNIQUE KEY `name` (`name`)
+) ENGINE=InnoDB
+";
+			$query[] = "INSERT INTO Attribute_new SELECT * FROM Attribute";
+			$query[] = "INSERT INTO Attribute_new VALUES (9999, 'string', 'base MAC address')";
+			$query[] = "DROP TABLE Attribute";
+			$query[] = "ALTER TABLE Attribute_new RENAME TO Attribute";
+			$query[] = "ALTER TABLE AttributeMap ADD KEY (attr_id)";
+			$query[] = "DELETE FROM AttributeMap WHERE attr_id NOT IN (SELECT id FROM Attribute)";
+			$query[] = "ALTER TABLE AttributeMap ADD CONSTRAINT `AttributeMap-FK-attr_id` FOREIGN KEY (attr_id) REFERENCES Attribute (id)";
+			$query[] = "DELETE FROM AttributeValue WHERE attr_id NOT IN (SELECT attr_id FROM AttributeMap)";
+			$query[] = "ALTER TABLE AttributeValue ADD CONSTRAINT `AttributeValue-FK-attr_id` FOREIGN KEY (attr_id) REFERENCES AttributeMap (attr_id)";
 			$query[] = "UPDATE Config SET varvalue = '0.19.7' WHERE varname = 'DB_VERSION'";
 			break;
 		default:
