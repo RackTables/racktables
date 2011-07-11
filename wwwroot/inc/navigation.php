@@ -526,14 +526,16 @@ $page['myaccount']['parent'] = 'config';
 $tab['myaccount']['default'] = 'Info';
 $tab['myaccount']['mypassword'] = 'Password change';
 $tab['myaccount']['interface'] = 'Interface preferences';
+$tab['myaccount']['qlinks'] = 'Quick links';
 $trigger['myaccount']['mypassword'] = 'trigger_passwdchange';
 $tabhandler['myaccount']['default'] = 'renderMyAccount';
 $tabhandler['myaccount']['mypassword'] = 'renderMyPasswordEditor';
 $tabhandler['myaccount']['interface'] = 'renderMyPreferences';
-$ophandler['myaccount']['default']['save_qlinks'] = 'saveQuickLinks';
+$tabhandler['myaccount']['qlinks'] = 'renderMyQuickLinks';
 $ophandler['myaccount']['mypassword']['changeMyPassword'] = 'changeMyPassword';
 $ophandler['myaccount']['interface']['upd'] = 'saveMyPreferences';
 $ophandler['myaccount']['interface']['reset'] = 'resetMyPreference';
+$ophandler['myaccount']['qlinks']['save'] = 'saveQuickLinks';
 
 $page['reports']['title'] = 'Reports';
 $page['reports']['parent'] = 'index';

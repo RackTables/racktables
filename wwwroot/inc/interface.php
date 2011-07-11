@@ -6289,26 +6289,28 @@ function renderMyPreferences ()
 	echo "</td></tr>";
 	echo "</form>";
 	finishPortlet();
-
 }
 
 function renderMyAccount ()
 {
 	global $remote_username, $remote_displayname, $user_given_tags;
-	startPortlet();
+	startPortlet ('Current user info');
 	echo '<div style="text-align: left; display: inline-block;">';
-	echo '<h2>Current user info</h2>';
 	echo "<table>";
 	echo "<tr><th>Login:</th><td>${remote_username}</td></tr>\n";
 	echo "<tr><th>Name:</th><td>${remote_displayname}</td></tr>\n";
 	echo "<tr><th>Tags:</th><td>" . serializeTags ($user_given_tags) . "</td></tr>\n";
-	echo "</table>";
+	echo '</table></div>';
+}
 
-	echo '<h2>Quick links set-up</h2>';
-	echo 'Choose items to display in page header as quick links:';
-	echo '<form action="?module=redirect&page=myaccount&tab=default&op=save_qlinks" method="POST"><ul class="qlinks-form">';
-	$active_items = explode(',', getConfigVar ('QUICK_LINK_PAGES'));
+function renderMyQuickLinks ()
+{
 	global $indexlayout, $page;
+	startPortlet ('Items to display in page header');
+	echo '<div style="text-align: left; display: inline-block;">';
+	printOpFormIntro ('save');
+	echo '<ul class="qlinks-form">';
+	$active_items = explode (',', getConfigVar ('QUICK_LINK_PAGES'));
 	foreach ($indexlayout as $row)
 		foreach ($row as $ypageno)
 		{
@@ -6318,6 +6320,7 @@ function renderMyAccount ()
 	echo '</ul>';
 	printImageHREF ('SAVE', 'Save changes', TRUE);
 	echo '</form></div>';
+	finishPortlet();
 }
 
 // File-related functions
