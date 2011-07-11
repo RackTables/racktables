@@ -2343,8 +2343,11 @@ function makeHref ($params = array())
 			$key .= "[]";
 		else
 			$value = array ($value);
-		foreach ($value as $sub_value)
-			$tmp[] = urlencode ($key) . '=' . urlencode ($sub_value);
+		if (!count ($value))
+			$tmp[] = urlencode ($key) . '=';
+		else
+			foreach ($value as $sub_value)
+				$tmp[] = urlencode ($key) . '=' . urlencode ($sub_value);
 	}
 	return 'index.php?' . implode ('&', $tmp);
 }
