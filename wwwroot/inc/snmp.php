@@ -219,6 +219,33 @@ $iftable_processors['nexus-any-10000SFP+'] = array
 	'try_next_proc' => FALSE,
 );
 
+$iftable_processors['ftos-any-1000T'] = array
+(
+	'pattern' => '@^GigabitEthernet 0/(\d+)$@',
+	'replacement' => 'gi0/\\1',
+	'dict_key' => '1-24',
+	'label' => '\\1',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['ftos-44-to-47-1000SFP'] = array
+(
+	'pattern' => '@^GigabitEthernet 0/(44|45|46|47)$@',
+	'replacement' => 'gi0/\\1',
+	'dict_key' => '4-1077',
+	'label' => '\\1',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['ftos-any-10000SFP+'] = array
+(
+	'pattern' => '@^TenGigabitEthernet 0/(\d+)$@',
+	'replacement' => 'te0/\\1',
+	'dict_key' => '9-1084',
+	'label' => '\\1',
+	'try_next_proc' => FALSE,
+);
+
 $iftable_processors['nexus-mgmt'] = array
 (
 	'pattern' => '@^(mgmt[[:digit:]]+)$@',
@@ -1092,6 +1119,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'SMC8150L2: 46 RJ-45/10-100-1000T(X) + 4 combo ports',
 		'processors' => array ('smc-combo-45-to-48', 'nortel-any-1000T'),
 	),
+	'6027.1.3.12' => array
+	(
+		'dict_key' => 1471,
+		'text' => 'Force10 S60: 44 RJ-45/10-100-1000T(X) + 4 SFP-1000 ports + 0/2/4 SFP+ ports',
+		'processors' => array ('ftos-44-to-47-1000SFP', 'ftos-any-1000T', 'ftos-any-10000SFP+'),
+	),
 	'202.20.59' => array
 	(
 		'dict_key' => 1371,
@@ -1350,6 +1383,17 @@ function doSwitchSNMPmining ($objectInfo, $device)
 		checkPIC ('1-16');
 		commitAddPort ($objectInfo['id'], 'AC-in', '1-16', '', '');
 		$log = mergeLogs ($log, oneLiner (81, array ('summit-generic')));
+		break;
+	case preg_match ('/^6027\.1\./', $sysObjectID): # Force10
+		commitAddPort ($objectInfo['id'], 'aux', '1-29', 'RS-232', ''); // RJ-45 RS-232 console
+		commitAddPort ($objectInfo['id'], 'ma0/0', '1-19', 'ETHERNET', '');
+		$m = array();
+		if (preg_match ('/Force10 Application Software Version: ([\d\.]+)/', $sysDescr, $m))
+			updateStickerForCell ($objectInfo, 5, $m[1]);
+		# F10-S-SERIES-CHASSIS-MIB::chStackUnitSerialNumber.1
+		$serialNo = $device->snmpget ('enterprises.6027.3.10.1.2.2.1.12.1');
+		if (strlen ($serialNo))
+			updateStickerForCell ($objectInfo, 1, str_replace ('"', '', substr ($serialNo, strlen ('STRING: '))));
 		break;
 	case preg_match ('/^202\.20\./', $sysObjectID): // SMC TigerSwitch
 		checkPIC ('1-681');
