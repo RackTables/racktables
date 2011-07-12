@@ -1092,6 +1092,7 @@ CREATE TABLE `Attribute_new` (
 			$query[] = "ALTER TABLE AttributeMap ADD CONSTRAINT `AttributeMap-FK-attr_id` FOREIGN KEY (attr_id) REFERENCES Attribute (id)";
 			$query[] = "DELETE FROM AttributeValue WHERE attr_id NOT IN (SELECT attr_id FROM AttributeMap)";
 			$query[] = "ALTER TABLE AttributeValue ADD CONSTRAINT `AttributeValue-FK-attr_id` FOREIGN KEY (attr_id) REFERENCES AttributeMap (attr_id)";
+			$query[] = "INSERT INTO `ObjectParentCompat` (`parent_objtype_id`, `child_objtype_id`) VALUES (1506,4)";
 			$query[] = "UPDATE Config SET varvalue = '0.19.7' WHERE varname = 'DB_VERSION'";
 			break;
 		default:

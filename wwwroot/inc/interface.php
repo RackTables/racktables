@@ -9189,7 +9189,7 @@ function renderVirtualResourcesSummary ()
 	if (count($hypervisors) > 0)
 	{
 		echo "<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>\n";
-		echo "<tr><th>Pool</th><th>Cluster</th><th>VMs</th></tr>\n";
+		echo "<tr><th>Hypervisor</th><th>Cluster</th><th>VMs</th></tr>\n";
 		$order = 'odd';
 		foreach ($hypervisors as $hypervisor)
 		{
