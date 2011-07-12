@@ -282,6 +282,15 @@ $iftable_processors['procurve-45-to-48-combo-1000SFP'] = array
 	'try_next_proc' => TRUE,
 );
 
+$iftable_processors['procurve-21-to-24-combo-1000SFP'] = array
+(
+	'pattern' => '@^(21|22|23|24)$@',
+	'replacement' => '\\1',
+	'dict_key' => '4-1077',
+	'label' => '\\1',
+	'try_next_proc' => TRUE,
+);
+
 $iftable_processors['procurve-modular-100TX'] = array
 (
 	'pattern' => '@^([A-Z][[:digit:]]+)$@',
@@ -305,6 +314,15 @@ $iftable_processors['procurve-49-to-50-1000T'] = array
 	'pattern' => '@^(49|50)$@',
 	'replacement' => '\\1',
 	'dict_key' => 24,
+	'label' => '\\1',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['procurve-51-to-52-1000SFP'] = array
+(
+	'pattern' => '@^(51|52)$@',
+	'replacement' => '\\1',
+	'dict_key' => '4-1077',
 	'label' => '\\1',
 	'try_next_proc' => FALSE,
 );
@@ -352,6 +370,60 @@ $iftable_processors['smc-combo-45-to-48'] = array
 	'dict_key' => '4-1077',
 	'label' => '\\1',
 	'try_next_proc' => TRUE,
+);
+
+$iftable_processors['smc2-combo-21-to-24'] = array
+(
+	'pattern' => '@^Port #(21|22|23|24)$@',
+	'replacement' => '\\1',
+	'dict_key' => '4-1077',
+	'label' => '\\1',
+	'try_next_proc' => TRUE,
+);
+
+$iftable_processors['smc2-combo-23-to-24'] = array
+(
+	'pattern' => '@^Port #(23|24)$@',
+	'replacement' => '\\1',
+	'dict_key' => '4-1077',
+	'label' => '\\1',
+	'try_next_proc' => TRUE,
+);
+
+$iftable_processors['smc2-combo-25-to-28'] = array
+(
+	'pattern' => '@^Port #(25|26|27|28)$@',
+	'replacement' => '\\1',
+	'dict_key' => '4-1077',
+	'label' => '\\1',
+	'try_next_proc' => TRUE,
+);
+
+$iftable_processors['smc2-1000T-25-to-28'] = array
+(
+	'pattern' => '@^Port #(25|26|27|28)$@',
+	'replacement' => '\\1',
+	'dict_key' => '1-24',
+	'label' => '\\1',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['smc2-any-1000T'] = array
+(
+	'pattern' => '@^Port #(\d+)$@',
+	'replacement' => '\\1',
+	'dict_key' => '1-24',
+	'label' => '\\1',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['smc2-any-100TX'] = array
+(
+	'pattern' => '@^Port #(\d+)$@',
+	'replacement' => '\\1',
+	'dict_key' => '1-19',
+	'label' => '\\1',
+	'try_next_proc' => FALSE,
 );
 
 $iftable_processors['juniper-DPCE-R-4XGE-XFP'] = array
@@ -581,6 +653,24 @@ $iftable_processors['summit-management'] = array
 	'try_next_proc' => FALSE,
 );
 
+$iftable_processors['C3KX-NM-10000'] = array
+(
+	'pattern' => '@^TenGigabitEthernet1/(\d+)$@',
+	'replacement' => 'te1/\\1',
+	'dict_key' => '9-1084',
+	'label' => 'NM TE\\1',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['C3KX-NM-1000'] = array
+(
+	'pattern' => '@^GigabitEthernet1/(\d+)$@',
+	'replacement' => 'gi1/\\1',
+	'dict_key' => '4-1077',
+	'label' => 'NM G\\1',
+	'try_next_proc' => FALSE,
+);
+
 global $known_switches;
 $known_switches = array // key is system OID w/o "enterprises" prefix
 (
@@ -602,11 +692,41 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'WS-C2950C-24: 24 RJ-45/10-100TX + 2 MT-RJ/100FX fiber',
 		'processors' => array ('catalyst-chassis-25-to-26-100FX/MT-RJ', 'catalyst-chassis-any-100TX'),
 	),
+	'9.1.559' => array
+	(
+		'dict_key' => 387,
+		'text' => 'WS-C2950T-48: 48 RJ-45/10-100TX + 2 1000T uplinks',
+		'processors' => array ('catalyst-chassis-uplinks-1000T', 'catalyst-chassis-any-100TX'),
+	),
 	'9.1.695' => array
 	(
 		'dict_key' => 140,
 		'text' => 'WS-C2960-48TC-L: 48 RJ-45/10-100TX + 2 combo-gig',
 		'processors' => array ('catalyst-chassis-1-to-2-combo-1000SFP', 'catalyst-chassis-any-1000T', 'catalyst-chassis-any-100TX'),
+	),
+	'9.1.793' => array
+	(
+		'dict_key' => 1575,
+		'text' => 'WS-C3560E-24TD: 24 RJ-45/10-100-1000T(X) + 2 X2/10000 w/TwinGig + OOBM',
+		'processors' => array
+		(
+			'catalyst-chassis-25-to-28-1000SFP', // TwinGig
+			'catalyst-chassis-any-1000T',
+			'catalyst-chassis-uplinks-10000X2',
+			'catalyst-chassis-mgmt',
+		),
+	),
+	'9.1.794' => array
+	(
+		'dict_key' => 1574,
+		'text' => 'WS-C3560E-48TD: 48 RJ-45/10-100-1000T(X) + 2 X2/10000 w/TwinGig + OOBM',
+		'processors' => array
+		(
+			'catalyst-chassis-49-to-52-1000SFP', // TwinGig
+			'catalyst-chassis-any-1000T',
+			'catalyst-chassis-uplinks-10000X2',
+			'catalyst-chassis-mgmt',
+		),
 	),
 	'9.1.799' => array
 	(
@@ -634,7 +754,7 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 	),
 	'9.1.717' => array
 	(
-		'dict_key' => 162,
+		'dict_key' => 1572,
 		'text' => 'WS-C2960-48TT-L: 48 RJ-45/10-100TX + 2 RJ-45/10-100-1000T(X)',
 		'processors' => array ('catalyst-chassis-any-100TX', 'catalyst-chassis-any-1000T'),
 	),
@@ -648,6 +768,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 	(
 		'dict_key' => 140,
 		'text' => 'WS-C2960-48TC: 48 RJ-45/10-100TX + 2 RJ-45/10-100-1000T(X)',
+		'processors' => array ('catalyst-chassis-any-100TX', 'catalyst-chassis-any-1000T'),
+	),
+	'9.1.1005' => array
+	(
+		'dict_key' => 1573,
+		'text' => 'WS-C2960-48TT-S: 48 RJ-45/10-100TX + 2 RJ-45/10-100-1000T(X)',
 		'processors' => array ('catalyst-chassis-any-100TX', 'catalyst-chassis-any-1000T'),
 	),
 	'9.1.527' => array
@@ -799,6 +925,18 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 			'catalyst-chassis-uplinks-1000T',
 		),
 	),
+	'9.1.1227' => array
+	(
+		'dict_key' => 1577,
+		'text' => 'WS-C3560X-48T: 48 RJ-45/10-100-1000T(X) + network module + OOBM',
+		'processors' => array
+		(
+			'C3KX-NM-10000',
+			'C3KX-NM-1000',
+			'catalyst-chassis-any-1000T',
+			'catalyst-chassis-mgmt',
+		),
+	),
 	'9.12.3.1.3.719' => array
 	(
 		'dict_key' => 960,
@@ -810,6 +948,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'dict_key' => 959,
 		'text' => 'N5K-C5010: 20 SFP+/10000',
 		'processors' => array ('nexus-any-10000SFP+', 'nexus-mgmt'),
+	),
+	'11.2.3.7.11.19' => array
+	(
+		'dict_key' => 859,
+		'text' => 'J4813A: 24 RJ-45/10-100TX + 2 modules of varying type',
+		'processors' => array ('procurve-chassis-100TX'),
 	),
 	'11.2.3.7.11.32' => array
 	(
@@ -835,11 +979,35 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'J4121A: modular system',
 		'processors' => array ('procurve-modular-100TX'),
 	),
+	'11.2.3.7.11.63' => array
+	(
+		'dict_key' => 868,
+		'text' => 'J9021A: 20 RJ-45/10-100-1000T(X) + 4 combo-gig',
+		'processors' => array ('procurve-21-to-24-combo-1000SFP', 'procurve-chassis-1000T'),
+	),
+	'11.2.3.7.11.65' => array
+	(
+		'dict_key' => 850,
+		'text' => 'J9028A: 22 RJ-45/10-100-1000T(X) + 2 combo-gig',
+		'processors' => array ('smc2-combo-23-to-24', 'smc2-any-1000T'),
+	),
+	'11.2.3.7.11.86' => array
+	(
+		'dict_key' => 1571,
+		'text' => 'J9145A: 20 RJ-45/10-100-1000T(X) + 4 combo-gig + varying uplinks',
+		'processors' => array ('procurve-21-to-24-combo-1000SFP', 'procurve-chassis-1000T'),
+	),
 	'11.2.3.7.11.87' => array
 	(
 		'dict_key' => 1349,
-		'text' => 'J9147A: 44 RJ-45/10-100-1000T(X) + 4 combo-gig)',
+		'text' => 'J9147A: 44 RJ-45/10-100-1000T(X) + 4 combo-gig + varying uplinks',
 		'processors' => array ('procurve-45-to-48-combo-1000SFP', 'procurve-chassis-1000T'),
+	),
+	'11.2.3.7.11.79' => array
+	(
+		'dict_key' => 863,
+		'text' => 'J9089A: 48 RJ-45/10-100TX PoE + 2 1000T + 2 SFP-1000',
+		'processors' => array ('procurve-49-to-50-1000T', 'procurve-51-to-52-1000SFP', 'procurve-chassis-100TX'),
 	),
 	'4526.100.2.2' => array
 	(
@@ -920,6 +1088,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'FLS 648: 44 RJ-45/10-100-1000T(X) + 4 combo-gig + 2 optional 10G modules',
 		'processors' => array ('fls648-combo', 'fgs-any-1000T', 'fls-uplinks'),
 	),
+	'1991.1.3.52.2.2.1.1' => array
+	(
+		'dict_key' => 1032,
+		'text' => 'FWS648G: 4 combo-gig + 44 RJ-45/10-100-1000T(X)',
+		'processors' => array ('fgs-1-to-4-comboSFP', 'fgs-any-1000T'),
+	),
 	'1916.2.71' => array
 	(
 		'dict_key' => 694,
@@ -950,6 +1124,18 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'dict_key' => 1471,
 		'text' => 'Force10 S60: 44 RJ-45/10-100-1000T(X) + 4 SFP-1000 ports + 0/2/4 SFP+ ports',
 		'processors' => array ('ftos-44-to-47-1000SFP', 'ftos-any-1000T', 'ftos-any-10000SFP+'),
+	),
+	'202.20.59' => array
+	(
+		'dict_key' => 1371,
+		'text' => 'SMC8124L2: 20 RJ-45/10-100-1000T(X) + 4 combo ports',
+		'processors' => array ('smc2-combo-21-to-24', 'smc2-any-1000T'),
+	),
+	'202.20.66' => array
+	(
+		'dict_key' => 1567,
+		'text' => 'SMC6128L2: 24 RJ-45/10-100TX + 4 combo-gig ports',
+		'processors' => array ('smc2-combo-25-to-28', 'smc2-1000T-25-to-28', 'smc2-any-100TX'),
 	),
 );
 
@@ -1088,7 +1274,20 @@ function doSwitchSNMPmining ($objectInfo, $device)
 		commitAddPort ($objectInfo['id'], 'AC-in-2', '1-16', 'AC2', '');
 		showOneLiner (81, array ('nexus-generic'));
 		break;
-	case preg_match ('/^11\.2\.3\.7\.11\./', $sysObjectID): // ProCurve
+	case preg_match ('/^11\.2\.3\.7\.11\.(\d+)$/', $sysObjectID, $matches): // ProCurve
+		$console_per_product = array
+		(
+			79 => '1-29', # RJ-45 RS-232
+			86 => '1-29',
+			87 => '1-29',
+			63 => '1-29',
+			19 => '1-681', # DB-9 RS-232
+		);
+		if (array_key_exists ($matches[1], $console_per_product))
+		{
+			checkPIC ($console_per_product[$matches[1]]);
+			commitAddPort ($objectInfo['id'], '', $console_per_product[$matches[1]], 'Console', '');
+		}
 		$exact_release = preg_replace ('/^.* revision ([^ ]+), .*$/', '\\1', $sysDescr);
 		updateStickerForCell ($objectInfo, 5, $exact_release);
 		showOneLiner (81, array ('procurve-generic'));
@@ -1194,6 +1393,13 @@ function doSwitchSNMPmining ($objectInfo, $device)
 		$serialNo = $device->snmpget ('enterprises.6027.3.10.1.2.2.1.12.1');
 		if (strlen ($serialNo))
 			updateStickerForCell ($objectInfo, 1, str_replace ('"', '', substr ($serialNo, strlen ('STRING: '))));
+		break;
+	case preg_match ('/^202\.20\./', $sysObjectID): // SMC TigerSwitch
+		checkPIC ('1-681');
+		commitAddPort ($objectInfo['id'], 'console', '1-681', '', ''); // DB-9 RS-232
+		checkPIC ('1-16');
+		commitAddPort ($objectInfo['id'], 'AC-in', '1-16', '', '');
+		$log = mergeLogs ($log, oneLiner (81, array ('smc-generic')));
 		break;
 	default: // Nortel...
 		break;
