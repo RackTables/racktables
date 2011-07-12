@@ -1071,6 +1071,31 @@ CREATE TABLE `EntityLink` (
 			$query = array_merge ($query, reloadDictionary ($batchid));
 			$query[] = "UPDATE Config SET varvalue = '0.19.6' WHERE varname = 'DB_VERSION'";
 			break;
+		case '0.19.7':
+			$query = array_merge ($query, reloadDictionary ($batchid));
+			# A plain "ALTER TABLE Attribute" can leave AUTO_INCREMENT in an odd
+			# state, hence the table swap.
+			$query[] = "
+CREATE TABLE `Attribute_new` (
+  `id` int(10) unsigned NOT NULL auto_increment,
+  `type` enum('string','uint','float','dict') default NULL,
+  `name` char(64) default NULL,
+  PRIMARY KEY  (`id`),
+  UNIQUE KEY `name` (`name`)
+) ENGINE=InnoDB
+";
+			$query[] = "INSERT INTO Attribute_new SELECT * FROM Attribute";
+			$query[] = "INSERT INTO Attribute_new VALUES (9999, 'string', 'base MAC address')";
+			$query[] = "DROP TABLE Attribute";
+			$query[] = "ALTER TABLE Attribute_new RENAME TO Attribute";
+			$query[] = "ALTER TABLE AttributeMap ADD KEY (attr_id)";
+			$query[] = "DELETE FROM AttributeMap WHERE attr_id NOT IN (SELECT id FROM Attribute)";
+			$query[] = "ALTER TABLE AttributeMap ADD CONSTRAINT `AttributeMap-FK-attr_id` FOREIGN KEY (attr_id) REFERENCES Attribute (id)";
+			$query[] = "DELETE FROM AttributeValue WHERE attr_id NOT IN (SELECT attr_id FROM AttributeMap)";
+			$query[] = "ALTER TABLE AttributeValue ADD CONSTRAINT `AttributeValue-FK-attr_id` FOREIGN KEY (attr_id) REFERENCES AttributeMap (attr_id)";
+			$query[] = "INSERT INTO `ObjectParentCompat` (`parent_objtype_id`, `child_objtype_id`) VALUES (1506,4)";
+			$query[] = "UPDATE Config SET varvalue = '0.19.7' WHERE varname = 'DB_VERSION'";
+			break;
 		case '0.20.0':
 			$query = array_merge ($query, reloadDictionary ($batchid));
 			$query[] = "
@@ -1214,7 +1239,6 @@ CREATE VIEW `RackObject` AS SELECT * FROM `Object`
 			$query[] = "UPDATE `Chapter` SET `name` = 'ObjectType' WHERE `id` = 1";
 			$query[] = "DELETE FROM RackSpace WHERE object_id IS NULL AND state = 'T'";
 
-			$query[] = "INSERT INTO `ObjectParentCompat` (`parent_objtype_id`, `child_objtype_id`) VALUES (1506,4)";
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdefined, description) VALUES ('SYNC_802Q_LISTSRC','','string','yes','no','no','List of VLAN switches sync is enabled on')";
 			$query[] = "UPDATE `Config` SET is_userdefined='yes' WHERE varname='PROXIMITY_RANGE'";
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdefined, description) VALUES ('QUICK_LINK_PAGES','','string','yes','no','yes','List of pages to dislay in quick links')";
