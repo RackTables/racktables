@@ -246,6 +246,24 @@ $iftable_processors['ftos-any-10000SFP+'] = array
 	'try_next_proc' => FALSE,
 );
 
+$iftable_processors['ftos-any-QSFP+'] = array
+(
+	'pattern' => '@^fortyGigE 0/(\d+)$@',
+	'replacement' => 'fo0/\\1',
+	'dict_key' => '10-1588',
+	'label' => '\\1',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['ftos-mgmt'] = array
+(
+	'pattern' => '@^ManagementEthernet 0/0$@',
+	'replacement' => 'ma0/0',
+	'dict_key' => '1-19',
+	'label' => 'ethernet',
+	'try_next_proc' => FALSE,
+);
+
 $iftable_processors['nexus-mgmt'] = array
 (
 	'pattern' => '@^(mgmt[[:digit:]]+)$@',
@@ -1123,7 +1141,13 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 	(
 		'dict_key' => 1471,
 		'text' => 'Force10 S60: 44 RJ-45/10-100-1000T(X) + 4 SFP-1000 ports + 0/2/4 SFP+ ports',
-		'processors' => array ('ftos-44-to-47-1000SFP', 'ftos-any-1000T', 'ftos-any-10000SFP+'),
+		'processors' => array ('ftos-44-to-47-1000SFP', 'ftos-any-1000T', 'ftos-any-10000SFP+', 'ftos-mgmt'),
+	),
+	'6027.1.3.14' => array
+	(
+		'dict_key' => 1472,
+		'text' => 'Force10 S4810: 48 SFP+-1000/10000 + 4 QSFP-40000 ports',
+		'processors' => array ('ftos-any-10000SFP+', 'ftos-any-QSFP+', 'ftos-mgmt'),
 	),
 	'202.20.59' => array
 	(
@@ -1384,8 +1408,7 @@ function doSwitchSNMPmining ($objectInfo, $device)
 		showOneLiner (81, array ('summit-generic'));
 		break;
 	case preg_match ('/^6027\.1\./', $sysObjectID): # Force10
-		commitAddPort ($objectInfo['id'], 'aux', '1-29', 'RS-232', ''); // RJ-45 RS-232 console
-		commitAddPort ($objectInfo['id'], 'ma0/0', '1-19', 'ETHERNET', '');
+		commitAddPort ($objectInfo['id'], 'aux0', '1-29', 'RS-232', ''); // RJ-45 RS-232 console
 		$m = array();
 		if (preg_match ('/Force10 Application Software Version: ([\d\.]+)/', $sysDescr, $m))
 			updateStickerForCell ($objectInfo, 5, $m[1]);
