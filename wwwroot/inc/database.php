@@ -3754,6 +3754,7 @@ function createIPv4Prefix ($range = '', $name = '', $is_bcast = FALSE, $taglist 
 			commitSupplementVLANIPv4 ($vlan_ck, $network_id);
 		restoreContext ($ctx);
 	}
+	return $network_id;
 }
 
 function createIPv6Prefix ($range = '', $name = '', $is_connected = FALSE, $taglist = array(), $vlan_ck = NULL)
@@ -3795,6 +3796,7 @@ function createIPv6Prefix ($range = '', $name = '', $is_connected = FALSE, $tagl
 			commitSupplementVLANIPv6 ($vlan_ck, $network_id);
 		restoreContext ($ctx);
 	}
+	return $network_id;
 }
 
 // FIXME: This function doesn't wipe relevant records from IPv4Address table.

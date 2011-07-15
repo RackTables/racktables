@@ -808,7 +808,6 @@ function addIPv6Allocation ()
 	return showFuncMessage (__FUNCTION__, 'OK');
 }
 
-$msgcode['addIPv4Prefix']['OK'] = 48;
 function addIPv4Prefix ()
 {
 	assertStringArg ('range');
@@ -818,11 +817,15 @@ function addIPv4Prefix ()
 	$taglist = isset ($_REQUEST['taglist']) ? $_REQUEST['taglist'] : array();
 	global $sic;
 	$vlan_ck = empty ($sic['vlan_ck']) ? NULL : $sic['vlan_ck'];
-	createIPv4Prefix ($_REQUEST['range'], $sic['name'], $is_bcast == 'on', $taglist, $vlan_ck);
-	return showFuncMessage (__FUNCTION__, 'OK');
+	$net_id = createIPv4Prefix ($_REQUEST['range'], $sic['name'], $is_bcast == 'on', $taglist, $vlan_ck);
+	showSuccess
+	(
+		'IP network <a href="' .
+		makeHref (array ('page' => 'ipv4net', 'tab' => 'default', 'id' => $net_id)) .
+		'">' . $_REQUEST['range'] . '</a> has been created'
+	);
 }
 
-$msgcode['addIPv6Prefix']['OK'] = 48;
 function addIPv6Prefix ()
 {
 	assertStringArg ('range');
@@ -832,8 +835,13 @@ function addIPv6Prefix ()
 	$is_connected = isset ($_REQUEST['is_connected']) ? ($_REQUEST['is_connected'] == 'on') : FALSE;
 	global $sic;
 	$vlan_ck = empty ($sic['vlan_ck']) ? NULL : $sic['vlan_ck'];
-	createIPv6Prefix ($_REQUEST['range'], $sic['name'], $is_connected, $taglist, $vlan_ck);
-	return showFuncMessage (__FUNCTION__, 'OK');
+	$net_id = createIPv6Prefix ($_REQUEST['range'], $sic['name'], $is_connected, $taglist, $vlan_ck);
+	showSuccess
+	(
+		'IP network <a href="' .
+		makeHref (array ('page' => 'ipv6net', 'tab' => 'default', 'id' => $net_id)) .
+		'">' . $_REQUEST['range'] . '</a> has been created'
+	);
 }
 
 $msgcode['delIPv4Prefix']['OK'] = 49;
