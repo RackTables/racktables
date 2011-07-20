@@ -62,7 +62,7 @@ my $cmd_finished = 0;
 my $nohang_read;
 while (! $session->eof) {
 	# read output from the device
-    $buff .= $session->get (Timeout => $nohang_read ? 0 : $op_timeout, Errmode => $nohang_read ? 'return' : 'die');
+    $buff .= $session->get (Timeout => $nohang_read ? 0 : $op_timeout, Errmode => $nohang_read || $cmd_finished ? 'return' : 'die');
     $nohang_read = 0;
 	print $1 if ($buff =~ s/(.*\n)//s);
 	last if $session->eof;
