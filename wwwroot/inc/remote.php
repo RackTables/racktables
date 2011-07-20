@@ -57,7 +57,7 @@ function queryTerminal ($object_id, $commands, $tolerate_remote_errors = TRUE)
 			break;
 		case 'vrp53':
 		case 'vrp55':
-			$prompt = '^\[[^[\]]+\]$|^<[^<>]+>$|^(Username|Password):$';
+			$prompt = '^\[[^[\]]+\]$|^<[^<>]+>$|^(Username|Password):$|(?:\[Y\/N\]|\(Y\/N\)\[[YN]\]):?$';
 			break;
 		case 'nxos4':
 			$prompt = '[>:#] $';
