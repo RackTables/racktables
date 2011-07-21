@@ -215,7 +215,7 @@ $dictionary = array
 	137 => array ('chapter_id' => 12, 'dict_value' => 'Foundry%GPASS%FastIron SX 800'),
 	138 => array ('chapter_id' => 12, 'dict_value' => 'Foundry%GPASS%FastIron SX 1600'),
 	139 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 3560-8PC'),
-	140 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 2960-48TC-L'),
+	140 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 2960-48TC-S'),
 	141 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 3560-E'),
 	142 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst Express 500-24LC'),
 	143 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 3750-24TS'),
@@ -1660,7 +1660,7 @@ $dictionary = array
 	1587 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 3750X-24S'),
 	1588 => array ('chapter_id' => 2, 'dict_value' => 'empty QSFP+'),
 	1589 => array ('chapter_id' => 25, 'dict_value' => 'Cisco%GPASS%AIR-AP1261N'),
-	1590 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 2960-48TC-S'),
+	1590 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 2960-48TC-L'),
 );
 
 ?>
