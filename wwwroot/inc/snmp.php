@@ -1218,7 +1218,7 @@ function doSNMPmining ($object_id, $snmpsetup)
 	if (count ($endpoints) > 1)
 		return showFuncMessage (__FUNCTION__, 'ERR2'); // can't pick an address
 
-	$device = new SNMPDevice($endpoints[0], $snmpsetup);
+	$device = new RTSNMPDevice ($endpoints[0], $snmpsetup);
 
 	switch ($objectInfo['objtype_id'])
 	{
@@ -1511,15 +1511,15 @@ define('APC_STATUS_ON', 1);
 define('APC_STATUS_OFF', 2);
 define('APC_STATUS_REBOOT', 3);
 
-class SNMPDevice {
+class RTSNMPDevice {
     protected $snmp;
 
     function __construct($hostname, $snmpsetup) {
 	if( isset($snmpsetup['community']) ) {
-	    $this->snmp = new SNMPv2($hostname, $snmpsetup);
+	    $this->snmp = new RTSNMPv2($hostname, $snmpsetup);
 	}
 	else {
-	    $this->snmp = new SNMPv3($hostname, $snmpsetup);
+	    $this->snmp = new RTSNMPv3($hostname, $snmpsetup);
 	}
 
     }
@@ -1549,7 +1549,7 @@ class SNMPDevice {
     }
 }
 
-abstract class SNMP {
+abstract class RTSNMP {
     protected $hostname;
     protected $snmpsetup;
 
@@ -1563,7 +1563,7 @@ abstract class SNMP {
     abstract function snmpwalkoid($oid);
 }
 
-class SNMPv2 extends SNMP {
+class RTSNMPv2 extends RTSNMP {
     function snmpget($oid) {
 	return snmpget($this->hostname, $this->snmpsetup['community'], $oid);
     }
@@ -1577,7 +1577,7 @@ class SNMPv2 extends SNMP {
     }
 }
 
-class SNMPv3 extends SNMP {
+class RTSNMPv3 extends RTSNMP {
     function snmpget($oid) {
 	return snmp3_get($this->hostname, $this->snmpsetup['sec_name'], $this->snmpsetup['sec_level'], $this->snmpsetup['auth_protocol'], $this->snmpsetup['auth_passphrase'], $this->snmpsetup['priv_protocol'], $this->snmpsetup['priv_passphrase'], $oid);
     }
@@ -1591,7 +1591,7 @@ class SNMPv3 extends SNMP {
     }
 }
 
-class APCPowerSwitch extends SNMPDevice {
+class APCPowerSwitch extends RTSNMPDevice {
     protected $snmpMib = 'SNMPv2-SMI::enterprises.318';
 
     function getPorts() {
