@@ -1621,6 +1621,8 @@ $dictionary = array
 	1585 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 3750X-48PF'),
 	1586 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 3750X-12S'),
 	1587 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 3750X-24S'),
+	// 1588 is free
+	1589 => array ('chapter_id' => 25, 'dict_value' => 'Cisco%GPASS%AIR-AP1261N'),
 );
 
 ?>
