@@ -2873,7 +2873,7 @@ function ios12ShortenIfName ($ifname)
 {
 	if (preg_match ('@^eth-trunk(\d+)$@i', $ifname, $m))
 		return "Eth-Trunk${m[1]}";
-	$ifname = preg_replace ('@^[Ee]th(?:ernet)?(.+)$@', 'e\\1', $ifname);
+	$ifname = preg_replace ('@^(?:[Ee]thernet|Eth)(.+)$@', 'e\\1', $ifname);
 	$ifname = preg_replace ('@^FastEthernet(.+)$@', 'fa\\1', $ifname);
 	$ifname = preg_replace ('@^(?:GigabitEthernet|GE)(.+)$@', 'gi\\1', $ifname);
 	$ifname = preg_replace ('@^TenGigabitEthernet(.+)$@', 'te\\1', $ifname);
