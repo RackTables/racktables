@@ -1143,6 +1143,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'Force10 S60: 44 RJ-45/10-100-1000T(X) + 4 SFP-1000 ports + 0/2/4 SFP+ ports',
 		'processors' => array ('ftos-44-to-47-1000SFP', 'ftos-any-1000T', 'ftos-any-10000SFP+', 'ftos-mgmt'),
 	),
+	'6027.1.3.13' => array
+	(
+		'dict_key' => 1470,
+		'text' => 'Force10 S55: 44 RJ-45/10-100-1000T(X) + 4 SFP-1000 ports + 0/2/4 SFP+ ports',
+		'processors' => array ('ftos-44-to-47-1000SFP', 'ftos-any-1000T', 'ftos-any-10000SFP+', 'ftos-mgmt'),
+	),
 	'6027.1.3.14' => array
 	(
 		'dict_key' => 1472,
@@ -1414,6 +1420,18 @@ function doSwitchSNMPmining ($objectInfo, $device)
 			updateStickerForCell ($objectInfo, 5, $m[1]);
 		# F10-S-SERIES-CHASSIS-MIB::chStackUnitSerialNumber.1
 		$serialNo = $device->snmpget ('enterprises.6027.3.10.1.2.2.1.12.1');
+		# F10-S-SERIES-CHASSIS-MIB::chSysPowerSupplyType.1.1
+		if ($device->snmpget ('enterprises.6027.3.10.1.2.3.1.3.1.1') == 'INTEGER: 1')
+		{
+			checkPIC ('1-16');
+			commitAddPort ($objectInfo['id'], 'PSU0', '1-16', 'PSU0', '');
+		}
+		# F10-S-SERIES-CHASSIS-MIB::chSysPowerSupplyType.1.2
+		if ($device->snmpget ('enterprises.6027.3.10.1.2.3.1.3.1.2') == 'INTEGER: 1')
+		{
+			checkPIC ('1-16');
+			commitAddPort ($objectInfo['id'], 'PSU1', '1-16', 'PSU1', '');
+		}
 		if (strlen ($serialNo))
 			updateStickerForCell ($objectInfo, 1, str_replace ('"', '', substr ($serialNo, strlen ('STRING: '))));
 		break;
