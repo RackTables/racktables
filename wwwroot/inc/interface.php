@@ -9162,7 +9162,7 @@ function formatAttributeValue ($record)
 				if (considerConfiguredConstraint (NULL, $cfgvar))
 					return "<a title='Open $proto session' class='mgmt-link' href='" . $proto . '://' . $record['a_value'] . "'>${record['a_value']}</a>";
 		}
-		return $record['a_value'];
+		return isset ($record['href']) ? "<a href=\"".$record['href']."\">${record['a_value']}</a>" : $record['a_value'];
 	}
 	else
 	{
