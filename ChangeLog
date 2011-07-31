@@ -1,4 +1,4 @@
-0.19.7
+0.19.7 2011-07-31
 	update: add SNMP support for several more switches
 	update: improve consistency of stored attribute data (#449)
 	bugfix: wikilinks (#435, by Stefan Himpich)
