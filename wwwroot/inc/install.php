@@ -362,13 +362,15 @@ CREATE TABLE `Attribute` (
   `name` char(64) default NULL,
   PRIMARY KEY  (`id`),
   UNIQUE KEY `name` (`name`)
-) ENGINE=MyISAM AUTO_INCREMENT=10000;
+) ENGINE=InnoDB;
 
 CREATE TABLE `AttributeMap` (
   `objtype_id` int(10) unsigned NOT NULL default '1',
   `attr_id` int(10) unsigned NOT NULL default '1',
   `chapter_id` int(10) unsigned default NULL,
-  UNIQUE KEY `objtype_id` (`objtype_id`,`attr_id`)
+  UNIQUE KEY `objtype_id` (`objtype_id`,`attr_id`),
+  KEY `attr_id` (`attr_id`),
+  CONSTRAINT `AttributeMap-FK-attr_id` FOREIGN KEY (`attr_id`) REFERENCES `Attribute` (`id`)
 ) ENGINE=InnoDB;
 
 CREATE TABLE `AttributeValue` (
@@ -380,6 +382,7 @@ CREATE TABLE `AttributeValue` (
   UNIQUE KEY `object_id` (`object_id`,`attr_id`),
   KEY `attr_id-uint_value` (`attr_id`,`uint_value`),
   KEY `attr_id-string_value` (`attr_id`,`string_value`(12)),
+  CONSTRAINT `AttributeValue-FK-attr_id` FOREIGN KEY (`attr_id`) REFERENCES `AttributeMap` (`attr_id`),
   CONSTRAINT `AttributeValue-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `Object` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
@@ -957,7 +960,12 @@ INSERT INTO `Attribute` (`id`, `type`, `name`) VALUES
 (24,'string','SW warranty expiration'),
 (25,'string','UUID'),
 (26,'dict','Hypervisor'),
-(27,'uint','Height');
+(27,'uint','Height'),
+-- ^^^^^ Any new "default" attributes must go above this line! ^^^^^
+-- Primary key value 9999 makes sure, that AUTO_INCREMENT on server restart
+-- doesn't drop below 10000 (other code relies on this, site-specific
+-- attributes are assigned IDs starting from 10000).
+(9999,'string','base MAC address');
 
 INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_id`) VALUES
 (2,1,NULL),
