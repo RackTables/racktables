@@ -9,7 +9,7 @@
 	update: 8021Q switch autosync status is now managed by SYNC_802Q_LISTSRC config constraint
 	new feature: you can obtain who has made tag assignment, object's ports or IPv4 address changes by hovering cursor on these entities
 	new feature: adjustable quick links at the top of the page
-0.19.7
+0.19.7 2011-07-31
 	update: add SNMP support for several more switches
 	update: improve consistency of stored attribute data (#449)
 	bugfix: wikilinks (#435, by Stefan Himpich)
