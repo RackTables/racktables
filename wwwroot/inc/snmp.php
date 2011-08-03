@@ -1419,7 +1419,7 @@ function doSwitchSNMPmining ($objectInfo, $device)
 		if (preg_match ('/Force10 Application Software Version: ([\d\.]+)/', $sysDescr, $m))
 		{
 			updateStickerForCell ($objectInfo, 5, $m[1]);
-			$ftos_release = preg_replace ('/^[678]\..+$/', '\\1', $m[1]);
+			$ftos_release = preg_replace ('/^([678])\..+$/', '\\1', $m[1]);
 			$ftos_codes = array
 			(
 				'6' => 1592,
