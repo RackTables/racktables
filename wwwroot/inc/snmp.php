@@ -1417,7 +1417,18 @@ function doSwitchSNMPmining ($objectInfo, $device)
 		commitAddPort ($objectInfo['id'], 'aux0', '1-29', 'RS-232', ''); // RJ-45 RS-232 console
 		$m = array();
 		if (preg_match ('/Force10 Application Software Version: ([\d\.]+)/', $sysDescr, $m))
+		{
 			updateStickerForCell ($objectInfo, 5, $m[1]);
+			$ftos_release = preg_replace ('/^[678]\..+$/', '\\1', $m[1]);
+			$ftos_codes = array
+			(
+				'6' => 1592,
+				'7' => 1593,
+				'8' => 1594,
+			);
+			if (array_key_exists ($ftos_release, $ftos_codes))
+				updateStickerForCell ($objectInfo, 4, $ftos_codes[$ftos_release]);
+		}
 		# F10-S-SERIES-CHASSIS-MIB::chStackUnitSerialNumber.1
 		$serialNo = $device->snmpget ('enterprises.6027.3.10.1.2.2.1.12.1');
 		# F10-S-SERIES-CHASSIS-MIB::chSysPowerSupplyType.1.1

@@ -1661,6 +1661,10 @@ $dictionary = array
 	1588 => array ('chapter_id' => 2, 'dict_value' => 'empty QSFP+'),
 	1589 => array ('chapter_id' => 25, 'dict_value' => 'Cisco%GPASS%AIR-AP1261N'),
 	1590 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 2960-48TC-L'),
+	1591 => array ('chapter_id' => 14, 'dict_value' => 'Force10 SFTOS 2'),
+	1592 => array ('chapter_id' => 14, 'dict_value' => 'Force10 FTOS 6'),
+	1593 => array ('chapter_id' => 14, 'dict_value' => 'Force10 FTOS 7'),
+	1594 => array ('chapter_id' => 14, 'dict_value' => 'Force10 FTOS 8'),
 );
 
 ?>
