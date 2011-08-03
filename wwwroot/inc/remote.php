@@ -59,6 +59,9 @@ function queryTerminal ($object_id, $commands, $tolerate_remote_errors = TRUE)
 		case 'vrp55':
 			$prompt = '^\[[^[\]]+\]$|^<[^<>]+>$|^(Username|Password):$|(?:\[Y\/N\]|\(Y\/N\)\[[YN]\]):?$';
 			break;
+		case 'ftos8':
+			$prompt = '^(Login|Password): |^\S+[>#]$';
+			break;
 		case 'nxos4':
 			$prompt = '[>:#] $';
 			break;
@@ -97,6 +100,7 @@ function queryTerminal ($object_id, $commands, $tolerate_remote_errors = TRUE)
 		case 'telnet':
 			switch ($breed)
 			{
+				case 'ftos8':
 				case 'ios12':
 					$commands = "terminal length 0\n" . $commands;
 					break;

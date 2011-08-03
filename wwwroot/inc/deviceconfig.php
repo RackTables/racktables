@@ -183,6 +183,52 @@ function nxos4ReadLLDPStatus ($input)
 	return $ret;
 }
 
+function ftos8ReadLLDPStatus ($input)
+{
+	$ret = array();
+	$valid_subtypes = array
+	(
+		'Interface name (5)',
+		'Interface Alias (1)',
+	);
+	foreach (explode ("\n", $input) as $line)
+	{
+		$matches = array();
+		switch (TRUE)
+		{
+		case preg_match ('/^ Local Interface (.+) has \d+ neighbor/', $line, $matches):
+			$ret['current']['local_port'] = strtolower (str_replace (' ', '', $matches[1])); # "Gi 0/19" => "gi0/19"
+			break;
+		case preg_match ('/^    Remote Port Subtype:  (.+)$/', $line, $matches):
+			$ret['current']['remote_subtype'] = $matches[1];
+			break;
+		case preg_match ('/^    Remote Port ID:  (.+)$/i', $line, $matches):
+			$ret['current']['remote_port'] = $matches[1];
+			break;
+		case preg_match ('/^    Remote System Name:  (.+)$/', $line, $matches):
+			if
+			(
+				array_key_exists ('current', $ret) and
+				array_key_exists ('remote_subtype', $ret['current']) and
+				in_array ($ret['current']['remote_subtype'], $valid_subtypes) and
+				array_key_exists ('remote_port', $ret['current']) and
+				array_key_exists ('local_port', $ret['current'])
+			)
+				$ret[$ret['current']['local_port']][] = array
+				(
+					'device' => $matches[1],
+					'port' => ios12ShortenIfName ($ret['current']['remote_port']),
+				);
+			unset ($ret['current']['remote_subtype']);
+			unset ($ret['current']['remote_port']);
+			break;
+		default:
+		}
+	}
+	unset ($ret['current']);
+	return $ret;
+}
+
 function ios12ReadVLANConfig ($input)
 {
 	$ret = array
@@ -1343,6 +1389,39 @@ show configuration groups
 show configuration interfaces
 # END OF CONFIG
 ';
+			break;
+		default:
+			throw new InvalidArgException ('opcode', $cmd['opcode']);
+		}
+	return $ret;
+}
+
+function ftos8TranslatePushQueue ($dummy_object_id, $queue, $vlan_names)
+{
+	$ret = '';
+	foreach ($queue as $cmd)
+		switch ($cmd['opcode'])
+		{
+		case 'begin configuration':
+			$ret .= "configure terminal\n";
+			break;
+		case 'end configuration':
+			$ret .= "end\n";
+			break;
+		case 'save configuration':
+			$ret .= "write memory\n";
+			break;
+		case 'cite':
+			$ret .= $cmd['arg1'];
+			break;
+		case 'getlldpstatus':
+			$ret .= "show lldp neighbors detail\n";
+			break;
+		case 'getportstatus':
+			$ret .= "show interfaces status\n";
+			break;
+		case 'getmaclist':
+			$ret .= "show mac-address-table dynamic\n";
 			break;
 		default:
 			throw new InvalidArgException ('opcode', $cmd['opcode']);

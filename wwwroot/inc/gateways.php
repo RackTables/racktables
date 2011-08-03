@@ -55,6 +55,8 @@ $breedfunc = array
 	'xos12-xlatepushq-main'    => 'xos12TranslatePushQueue',
 	'jun10-get8021q-main'      => 'jun10Read8021QConfig',
 	'jun10-xlatepushq-main'    => 'jun10TranslatePushQueue',
+	'ftos8-xlatepushq-main'    => 'ftos8TranslatePushQueue',
+	'ftos8-getlldpstatus-main' => 'ftos8ReadLLDPStatus',
 );
 
 // This function launches specified gateway with specified
@@ -318,6 +320,7 @@ function detectDeviceBreed ($object_id)
 		1369 => 'vrp55', // VRP versions 5.5 and 5.7 seem to be compatible
 		1363 => 'fdry5',
 		1367 => 'jun10',
+		1594 => 'ftos8',
 	);
 	foreach (getAttrValues ($object_id) as $record)
 		if ($record['id'] == 4 and array_key_exists ($record['key'], $breed_by_swcode))
