@@ -132,7 +132,7 @@ $opspec_list['object-editrspvs-updLB'] = array
 	(
 		array ('url_argname' => 'vsconfig', 'assertion' => 'string0', 'if_empty' => 'NULL'),
 		array ('url_argname' => 'rsconfig', 'assertion' => 'string0', 'if_empty' => 'NULL'),
-		array ('url_argname' => 'prio', 'assertion' => 'uint0', 'if_empty' => 'NULL'),
+		array ('url_argname' => 'prio', 'assertion' => 'string0', 'if_empty' => 'NULL'),
 	),
 	'where_arglist' => array
 	(
@@ -1570,8 +1570,7 @@ function addLoadBalancer ()
 	assertUIntArg ('vs_id');
 	assertStringArg ('vsconfig', TRUE);
 	assertStringArg ('rsconfig', TRUE);
-	if (! empty($_REQUEST['prio']))
-		assertUIntArg('prio', TRUE);
+	assertStringArg ('prio', TRUE);
 
 	addLBtoRSPool (
 		$_REQUEST['pool_id'],
