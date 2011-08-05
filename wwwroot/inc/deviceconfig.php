@@ -1423,6 +1423,55 @@ function ftos8TranslatePushQueue ($dummy_object_id, $queue, $vlan_names)
 		case 'getmaclist':
 			$ret .= "show mac-address-table dynamic\n";
 			break;
+		case 'get8021q':
+			$ret .= "show running-config interface\n";
+			break;
+		case 'create VLAN':
+			$ret .= "int vlan ${cmd['arg1']}\nexit\n";
+			break;
+		case 'destroy VLAN':
+			if (isset ($vlan_names[$cmd['arg1']]))
+				$ret .= "no int vlan ${cmd['arg1']}\n";
+			break;
+		case 'rem allowed':
+			while (! empty ($cmd['vlans']))
+			{
+				$vlan = array_shift ($cmd['vlans']);
+				$ret .= "int vlan $vlan\n";
+				$ret .= "no tagged ${cmd['port']}\n";
+				$ret .= "exit\n";
+			}
+			break;
+		case 'add allowed':
+			while (! empty ($cmd['vlans']))
+			{
+				$vlan = array_shift ($cmd['vlans']);
+				$ret .= "int vlan $vlan\n";
+				$ret .= "no untagged ${cmd['port']}\n"; // redundant, switch often responses with error
+				$ret .= "tagged ${cmd['port']}\n";
+				$ret .= "exit\n";
+			}
+			break;
+		case 'unset native':
+			$ret .= "int vlan ${cmd['arg2']}\n";
+			$ret .= "no untagged ${cmd['arg1']}\n";
+			$ret .= "tagged ${cmd['arg1']}\n";
+			$ret .= "exit\n";
+			break;
+		case 'unset access':
+			$ret .= "int vlan ${cmd['arg2']}\n";
+			$ret .= "no untagged ${cmd['arg1']}\n";
+			$ret .= "exit\n";
+			break;
+		case 'set native':
+		case 'set access':
+			$ret .= "int vlan ${cmd['arg2']}\n";
+			$ret .= "no tagged ${cmd['arg1']}\n"; // redundant, switch often responses with error
+			$ret .= "untagged ${cmd['arg1']}\n";
+			$ret .= "exit\n";
+			break;
+		case 'set mode':
+			break;
 		default:
 			throw new InvalidArgException ('opcode', $cmd['opcode']);
 		}
@@ -1625,6 +1674,84 @@ function jun10Read8021QConfig ($input)
 	return $ret;
 }
 
+function ftos8Read8021QConfig ($input)
+{
+	$ret = array
+	(
+		'vlanlist' => array (),
+		'vlannames' => array (),
+		'portdata' => array(),
+		'portconfig' => array(),
+	);
+	$lines = explode ("\n", $input);
+	$iface = NULL;
+	foreach (explode ("\n", $input) as $line)
+	{
+		if (preg_match ('/^interface (\S.*?)\s*$/', $line, $m))
+		{
+			$iface = array
+			(
+				'name' => ios12ShortenIfName (str_replace (' ', '', $m[1])),
+				'lines' => array(),
+				'is_switched' => FALSE,
+				'vlan' => 0,
+			);
+			$name_parts = explode (' ', $m[1]);
+			$iface['vlan'] = (count ($name_parts) == 2 and $name_parts[0] == 'Vlan') ? $name_parts[1] : 0;
+		}
+		if (isset ($iface))
+		{
+			$iface['lines'][] = array ('type' => 'line-other', 'line' => $line);
+
+			if ($line == ' switchport')
+			{
+				$iface['is_switched'] = TRUE;
+				$ret['portdata'][$iface['name']] = array
+				(
+					'allowed' => array (),
+					'native' => 0,
+					'mode' => 'access',
+				);
+			}
+			elseif ($line == '!')
+			{
+				$ret['portconfig'][$iface['name']] = $iface['lines'];
+				unset ($iface);
+			}
+			elseif ($iface['vlan'])
+			{
+				$ret['vlanlist'][] = $iface['vlan'];
+				if (preg_match ('/^[ !](un)?tagged (\S+) (\S+)/', $line, $m))
+				{
+					list ($untagged, $pref, $list) = array ($m[1], $m[2], $m[3]);
+					if (preg_match ('#^(\d+/)#', $list, $m))
+					{
+						$pref .= $m[1];
+						$list = substr ($list, strlen ($m[1]));
+					}
+					foreach (explode (',', $list) as $range)
+					{
+						$constraints = explode ('-', $range);
+						if (count ($constraints) == 1)
+							$constraints[] = $constraints[0];
+						if ($constraints[0] <= $constraints[1])
+							for ($i = $constraints[0]; $i <= $constraints[1]; $i++)
+							{
+								$if_name = ios12ShortenIfName ($pref . $i);
+								$ret['portdata'][$if_name]['allowed'][] = $iface['vlan'];
+								if ($untagged)
+									$ret['portdata'][$if_name]['native'] = $iface['vlan'];
+								else
+									$ret['portdata'][$if_name]['mode'] = 'trunk';
+							}
+					}
+				}
+			}
+		}
+	}
+	return $ret;
+}
+
 function ciscoReadInterfaceStatus ($text)
 {
 	$result = array();
@@ -1700,6 +1827,36 @@ function vrpReadInterfaceStatus ($text)
 				break;
 		}
 	}
+	return $result;
+}
+
+function ftos8ReadInterfaceStatus ($text)
+{
+	$result = array();
+	$table_schema = array();
+	foreach (explode ("\n", $text) as $line)
+		if (empty ($table_schema))
+		{
+			if (preg_match('/^Port\s+Description\s+Status\s+Speed\s+Duplex\b/', $line))
+				$table_schema = guessTableStructure ($line);
+		}
+		else
+		{
+			$fields = explodeTableLine ($line, $table_schema);
+			if (! empty ($fields['Port']) and ! empty ($fields['Speed']) and ! empty ($fields['Duplex']))
+			{
+				$status = strtolower ($fields['Status']);
+				if ($status != 'up' && $status != 'down')
+					$status = 'disabled';
+				$portname = ios12ShortenIfName (str_replace (' ', '', $fields['Port']));
+				$result[$portname] = array
+				(
+					'status' => $status,
+					'speed' => $fields['Speed'],
+					'duplex' => $fields['Duplex'],
+				);
+			}
+		}
 	return $result;
 }
 
@@ -1821,6 +1978,34 @@ function vrp55ReadMacList ($text)
 				break;
 		}
 	}
+	foreach ($result as $portname => &$maclist)
+		usort ($maclist, 'maclist_sort');
+	return $result;
+}
+
+function ftos8ReadMacList ($text)
+{
+	$result = array();
+	$state = 'headerSearch';
+	foreach (explode ("\n", $text) as $line)
+		switch ($state)
+		{
+			case 'headerSearch':
+				if (preg_match('/^VlanId\s+Mac Address\s+Type\s+Interface\s+State/', $line))
+					$state = 'readPort';
+				break;
+			case 'readPort':
+				if (! preg_match ('/^(\d+)\s+((?:[a-f0-9]{2}:){5}[a-f0-9]{2})\s+Dynamic\s+(\S+ (?:\S+)?)/', trim ($line), $matches))
+					break;
+				$portname = ios12ShortenIfName (str_replace (' ', '', $matches[3]));
+				$mac = preg_replace ('/([a-f0-9]{2}):([a-f0-9]{2})/', '$1$2', $matches[2]);
+				$result[$portname][] = array
+				(
+					'mac' => str_replace (':', '.', $mac),
+					'vid' => $matches[1],
+				);
+				break;
+		}
 	foreach ($result as $portname => &$maclist)
 		usort ($maclist, 'maclist_sort');
 	return $result;

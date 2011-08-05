@@ -57,6 +57,9 @@ $breedfunc = array
 	'jun10-xlatepushq-main'    => 'jun10TranslatePushQueue',
 	'ftos8-xlatepushq-main'    => 'ftos8TranslatePushQueue',
 	'ftos8-getlldpstatus-main' => 'ftos8ReadLLDPStatus',
+	'ftos8-getmaclist-main'    => 'ftos8ReadMacList',
+	'ftos8-getportstatus-main' => 'ftos8ReadInterfaceStatus',
+	'ftos8-get8021q-main'      => 'ftos8Read8021QConfig',
 );
 
 // This function launches specified gateway with specified

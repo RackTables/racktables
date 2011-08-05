@@ -119,6 +119,9 @@ function queryTerminal ($object_id, $commands, $tolerate_remote_errors = TRUE)
 				case 'jun10':
 					$commands = "set cli screen-length 0\n" . $commands;
 					break;
+				case 'ftos':
+					$commands = "terminal length 0\n" . $commands;
+					break;
 			}
 			// prepend telnet commands by credentials
 			if (isset ($settings['password']))

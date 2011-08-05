@@ -4796,4 +4796,35 @@ function getOutputOf ($func_name)
 	}
 }
 
+// function to parse text table header, aligned by left side
+// returns array suitable to be used by explodeTableLine
+function guessTableStructure ($line)
+{
+	$ret = array();
+	$i = 0;
+	while (strlen ($line))
+	{
+		if (! preg_match ('/^(\s*\S+\s*)/', $line, $m))
+			break;
+		$header = trim ($m[1]);
+		$ret[$header] = array ('begin' => $i, 'length' => strlen ($m[1]));
+		$line = substr ($line, strlen ($m[1]));
+		$i += strlen ($m[1]);
+	}
+	return $ret;
+}
+
+// takes text-formatted table line and an array returned by guessTableStructure
+// returns array indexed by cell name. Works for left-aligned tables only
+function explodeTableLine ($line, $table_schema)
+{
+	$ret = array();
+	foreach ($table_schema as $header => $constraints)
+	{
+		$value = substr ($line, $constraints['begin'], $constraints['length']);
+		$ret[$header] = trim ($value);
+	}
+	return $ret;
+}
+
 ?>
