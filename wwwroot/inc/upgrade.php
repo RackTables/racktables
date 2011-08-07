@@ -1099,6 +1099,11 @@ CREATE TABLE `Attribute_new` (
 			$query[] = "INSERT INTO PortInterfaceCompat VALUES (10, 1588)";
 			$query[] = "UPDATE Config SET varvalue = '0.19.7' WHERE varname = 'DB_VERSION'";
 			break;
+		case '0.19.8':
+			$query = array_merge ($query, reloadDictionary ($batchid));
+			$query[] = "ALTER TABLE Dictionary ENGINE=InnoDB";
+			$query[] = "UPDATE Config SET varvalue = '0.19.8' WHERE varname = 'DB_VERSION'";
+			break;
 		case '0.20.0':
 			$query = array_merge ($query, reloadDictionary ($batchid));
 			$query[] = "

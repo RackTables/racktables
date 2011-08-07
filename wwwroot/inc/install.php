@@ -438,7 +438,7 @@ CREATE TABLE `Dictionary` (
   `dict_value` char(255) default NULL,
   PRIMARY KEY  (`dict_key`),
   UNIQUE KEY `chap_to_val` (`chapter_id`,`dict_value`)
-) ENGINE=MyISAM AUTO_INCREMENT=50000;
+) ENGINE=InnoDB;
 
 CREATE TABLE `EntityLink` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
