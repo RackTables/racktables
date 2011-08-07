@@ -53,14 +53,13 @@ function queryTerminal ($object_id, $commands, $tolerate_remote_errors = TRUE)
 	$prompt = NULL;
 	switch ($breed = detectDeviceBreed ($object_id))
 	{
-		case 'ios12': // non-interactive, half-opened session
+		case 'ios12': // FIXME: add telnet prompt regexp here
+		case 'fdry5': // FIXME: add telnet prompt regexp here
+		case 'ftos8': // FIXME: add telnet prompt regexp here
 			break;
 		case 'vrp53':
 		case 'vrp55':
 			$prompt = '^\[[^[\]]+\]$|^<[^<>]+>$|^(Username|Password):$|(?:\[Y\/N\]|\(Y\/N\)\[[YN]\]):?$';
-			break;
-		case 'ftos8':
-			$prompt = '^(Login|Password): $|^\S+[>#]$';
 			break;
 		case 'nxos4':
 			$prompt = '[>:#] $';
@@ -71,15 +70,13 @@ function queryTerminal ($object_id, $commands, $tolerate_remote_errors = TRUE)
 		case 'jun10':
 			$prompt = '^login: $|^Password:$|^\S+@\S+[>#] $';
 			break;
-		case 'fdry5': // FIXME: add telnet prompt regexp here
-			break;
 	}
 
 	// set the default settings before calling user-defined callback
 	$settings = array
 	(
 		'hostname' => $endpoints[0],
-		'protocol' => 'telnet',
+		'protocol' => empty ($prompt) ? 'netcat' : 'telnet',
 		'port' => NULL,
 		'prompt' => $prompt,
 		'username' => NULL,
@@ -93,11 +90,16 @@ function queryTerminal ($object_id, $commands, $tolerate_remote_errors = TRUE)
 	if (is_callable ('terminal_settings'))
 		call_user_func ('terminal_settings', $objectInfo, array (&$settings)); // override settings
 
+	if (! isset ($settings['port']) and $settings['protocol'] == 'netcat')
+		$settings['port'] = 23;
+
 	$params = array	( $settings['hostname'] );
 	$params_from_settings = array();
 	switch ($settings['protocol'])
 	{
 		case 'telnet':
+		case 'netcat':
+			// prepend command list with vendor-specific disabling pager command
 			switch ($breed)
 			{
 				case 'ftos8':
@@ -128,11 +130,21 @@ function queryTerminal ($object_id, $commands, $tolerate_remote_errors = TRUE)
 				$commands = $settings['password'] . "\n" . $commands;
 			if (isset ($settings['username']))
 				$commands = $settings['username'] . "\n" . $commands;
-			$params_from_settings['port'] = 'port';
-			$params_from_settings['prompt'] = 'prompt';
-			$params_from_settings['connect-timeout'] = 'connect_timeout';
-			$params_from_settings['timeout'] = 'timeout';
-			$params_from_settings['prompt-delay'] = 'prompt_delay';
+			// command-line options are specific to client: telnet or netcat
+			switch ($settings['protocol'])
+			{
+				case 'telnet':
+					$params_from_settings['port'] = 'port';
+					$params_from_settings['prompt'] = 'prompt';
+					$params_from_settings['connect-timeout'] = 'connect_timeout';
+					$params_from_settings['timeout'] = 'timeout';
+					$params_from_settings['prompt-delay'] = 'prompt_delay';
+					break;
+				case 'netcat':
+					$params_from_settings[] = 'port';
+					$params_from_settings['w'] = 'timeout';
+					break;
+			}
 			break;
 		case 'ssh':
 			$params_from_settings['port'] = 'port';
@@ -146,10 +158,13 @@ function queryTerminal ($object_id, $commands, $tolerate_remote_errors = TRUE)
 	}
 	foreach ($params_from_settings as $param_name => $setting_name)
 		if (isset ($settings[$setting_name]))
-			$params[$param_name] = $settings[$setting_name];
+			if (is_int ($param_name))
+				$params[] = $settings[$setting_name];
+			else
+				$params[$param_name] = $settings[$setting_name];
 
 	$ret_code = callScript ($settings['protocol'], $params, $commands, $out, $errors);
-	if ($settings['protocol'] == 'telnet' || ! $tolerate_remote_errors)
+	if ($settings['protocol'] != 'ssh' || ! $tolerate_remote_errors)
 	{
 		if (! empty ($errors))
 			throw new RTGatewayError ("${settings['protocol']} error: " . rtrim ($errors));
