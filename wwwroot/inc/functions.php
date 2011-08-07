@@ -2917,6 +2917,23 @@ function array_values_same ($a1, $a2)
 	return !count (array_diff ($a1, $a2)) and !count (array_diff ($a2, $a1));
 }
 
+# Reindex provided array of arrays by a column value, which is present in
+# each sub-array and is assumed to be unique. Most often, make "id" column in
+# a list of cells into the key space.
+function reindexById ($input, $column_name = 'id')
+{
+	$ret[] = array();
+	foreach ($input as $item)
+	{
+		if (! array_key_exists ($column_name, $item))
+			throw new InvalidArgException ('input', '(array)', 'ID column missing');
+		if (array_key_exists ($item[$column_name], $ret))
+			throw new InvalidArgException ('column_name', $column_name, 'duplicate ID value ' . $item[$column_name]);
+		$ret[$item[$column_name]] = $item;
+	}
+	return $ret;
+}
+
 // Use the VLAN switch template to set VST role for each port of
 // the provided list. Return resulting list.
 function apply8021QOrder ($vst_id, $portlist)
