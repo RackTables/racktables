@@ -2922,7 +2922,7 @@ function array_values_same ($a1, $a2)
 # a list of cells into the key space.
 function reindexById ($input, $column_name = 'id')
 {
-	$ret[] = array();
+	$ret = array();
 	foreach ($input as $item)
 	{
 		if (! array_key_exists ($column_name, $item))
