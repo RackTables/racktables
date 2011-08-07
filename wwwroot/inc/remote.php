@@ -60,7 +60,7 @@ function queryTerminal ($object_id, $commands, $tolerate_remote_errors = TRUE)
 			$prompt = '^\[[^[\]]+\]$|^<[^<>]+>$|^(Username|Password):$|(?:\[Y\/N\]|\(Y\/N\)\[[YN]\]):?$';
 			break;
 		case 'ftos8':
-			$prompt = '^(Login|Password): |^\S+[>#]$';
+			$prompt = '^(Login|Password): $|^\S+[>#]$';
 			break;
 		case 'nxos4':
 			$prompt = '[>:#] $';
