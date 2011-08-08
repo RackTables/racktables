@@ -2650,7 +2650,6 @@ function commitReduceOPC ($parent_objtype_id, $child_objtype_id)
 
 function getDictStats ()
 {
-	$stock_chapters = array (1, 2, 11, 12, 13, 14, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35);
 	$result = usePreparedSelectBlade
 	(
 		"select Chapter.id as chapter_no, Chapter.name as chapter_name, count(dict_key) as wc from " .
@@ -2661,7 +2660,7 @@ function getDictStats ()
 	{
 		$tc++;
 		$tw += $row['wc'];;
-		if (in_array ($row['chapter_no'], $stock_chapters))
+		if ($row['chapter_no'] < 10000)
 			continue;
 		$uc++;
 		$uw += $row['wc'];;

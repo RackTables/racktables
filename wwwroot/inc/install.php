@@ -370,6 +370,8 @@ CREATE TABLE `AttributeMap` (
   `chapter_id` int(10) unsigned default NULL,
   UNIQUE KEY `objtype_id` (`objtype_id`,`attr_id`),
   KEY `attr_id` (`attr_id`),
+  KEY `chapter_id` (`chapter_id`),
+  CONSTRAINT `AttributeMap-FK-chapter_id` FOREIGN KEY (`chapter_id`) REFERENCES `Chapter` (`id`),
   CONSTRAINT `AttributeMap-FK-attr_id` FOREIGN KEY (`attr_id`) REFERENCES `Attribute` (`id`)
 ) ENGINE=InnoDB;
 
@@ -419,7 +421,7 @@ CREATE TABLE `Chapter` (
   `name` char(128) NOT NULL,
   PRIMARY KEY  (`id`),
   UNIQUE KEY `name` (`name`)
-) ENGINE=MyISAM AUTO_INCREMENT=10000;
+) ENGINE=InnoDB;
 
 CREATE TABLE `Config` (
   `varname` char(32) NOT NULL,
@@ -437,7 +439,8 @@ CREATE TABLE `Dictionary` (
   `dict_key` int(10) unsigned NOT NULL auto_increment,
   `dict_value` char(255) default NULL,
   PRIMARY KEY  (`dict_key`),
-  UNIQUE KEY `chap_to_val` (`chapter_id`,`dict_value`)
+  UNIQUE KEY `chap_to_val` (`chapter_id`,`dict_value`),
+  CONSTRAINT `Dictionary-FK-chapter_id` FOREIGN KEY (`chapter_id`) REFERENCES `Chapter` (`id`)
 ) ENGINE=InnoDB;
 
 CREATE TABLE `EntityLink` (
@@ -823,13 +826,16 @@ CREATE TABLE `UserAccount` (
   `user_realname` char(64) default NULL,
   PRIMARY KEY  (`user_id`),
   UNIQUE KEY `user_name` (`user_name`)
-) ENGINE=MyISAM AUTO_INCREMENT=10000;
+) ENGINE=InnoDB;
 
 CREATE TABLE `UserConfig` (
   `varname` char(32) NOT NULL,
   `varvalue` text NOT NULL,
   `user` char(64) NOT NULL,
-  UNIQUE KEY `user_varname` (`user`,`varname`)
+  UNIQUE KEY `user_varname` (`user`,`varname`),
+  KEY `varname` (`varname`),
+  CONSTRAINT `UserConfig-FK-varname` FOREIGN KEY (`varname`) REFERENCES `Config` (`varname`) ON DELETE CASCADE,
+  CONSTRAINT `UserConfig-FK-user` FOREIGN KEY (`user`) REFERENCES `UserAccount` (`user_name`) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
 CREATE TABLE `VLANDescription` (
@@ -1026,7 +1032,7 @@ INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_id`) VALUES
 (445,14,NULL),
 (445,22,NULL),
 (447,1,NULL),
-(447,2,22),
+(447,2,9999),
 (447,3,NULL),
 (447,5,NULL),
 (447,14,NULL),
@@ -1113,7 +1119,6 @@ INSERT INTO `Chapter` (`id`, `sticky`, `name`) VALUES
 (18,'no','disk array models'),
 (19,'no','tape library models'),
 (21,'no','KVM switch models'),
-(22,'no','multiplexer models'),
 (23,'no','console models'),
 (24,'no','network security models'),
 (25,'no','wireless models'),
@@ -1126,7 +1131,9 @@ INSERT INTO `Chapter` (`id`, `sticky`, `name`) VALUES
 (32,'no','virtual switch models'),
 (33,'no','virtual switch OS type'),
 (34,'no','power supply chassis models'),
-(35,'no','power supply models');
+(35,'no','power supply models'),
+-- Default chapters must have ID less than 10000, add them above this line.
+(9999,'no','multiplexer models');
 
 INSERT INTO `PortInnerInterface` VALUES
 (1,'hardwired'),

@@ -4086,7 +4086,7 @@ function renderDictionary ()
 
 function renderChapter ($tgt_chapter_no)
 {
-	global $nextorder, $max_dict_key;
+	global $nextorder;
 	$words = readChapter ($tgt_chapter_no, 'a');
 	$wc = count ($words);
 	if (!$wc)
@@ -4103,7 +4103,7 @@ function renderChapter ($tgt_chapter_no)
 	foreach ($words as $key => $value)
 	{
 		echo "<tr class=row_${order}><td>";
-		printImageHREF (($key <= $max_dict_key[CODE_VERSION]) ? 'computer' : 'favorite');
+		printImageHREF ($key < 50000 ? 'computer' : 'favorite');
 		echo '</td><td>';
 		if ($refcnt[$key])
 		{
@@ -4140,7 +4140,7 @@ function renderChapter ($tgt_chapter_no)
 
 function renderChapterEditor ($tgt_chapter_no)
 {
-	global $nextorder, $max_dict_key;
+	global $nextorder;
 	function printNewItemTR ()
 	{
 		printOpFormIntro ('add');
@@ -4163,7 +4163,7 @@ function renderChapterEditor ($tgt_chapter_no)
 		echo "<tr class=row_${order}><td>";
 		$order = $nextorder[$order];
 		// Show plain row for stock records, render a form for user's ones.
-		if ($key <= $max_dict_key[CODE_VERSION])
+		if ($key < 50000)
 		{
 			printImageHREF ('computer');
 			echo "</td><td>&nbsp;</td><td>${value}</td><td>&nbsp;</td></tr>";
