@@ -141,8 +141,9 @@ function queryTerminal ($object_id, $commands, $tolerate_remote_errors = TRUE)
 					$params_from_settings['prompt-delay'] = 'prompt_delay';
 					break;
 				case 'netcat':
-					$params_from_settings[] = 'port';
+					$params_from_settings['p'] = 'port';
 					$params_from_settings['w'] = 'timeout';
+					$params_from_settings['b'] = 'ncbin';
 					break;
 			}
 			break;
