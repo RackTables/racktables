@@ -7,12 +7,12 @@ use Getopt::Long;
 my $op_help;
 my $op_port = 23;
 my $op_ncbin = '/usr/bin/nc';
-my $op_connect_timeout = 30;
+my $op_timeout = 30;
 GetOptions (
     'h' => \$op_help,
     'port|p:i' => \$op_port,
     'ncbin|b:s' => \$op_ncbin,
-    'connect-timeout|w:i' => \$op_connect_timeout,
+    'timeout|w:i' => \$op_timeout,
 );
 if ($op_help) {
     &display_help;
@@ -28,12 +28,11 @@ Usage:
 $0 <hostname> [-b </path/to/netcat/binary>] [-p <port>] [--connect-timeout=<seconds>]
  -p, --port             TCP port number to connect to (defaults to 23)
  -b, --ncbin            Full path to netcat binary (defaults to $op_ncbin)
- -w, --connect-timeout  netcat timeout (defaults to $op_connect_timeout)
+ -w, --connect-timeout  netcat timeout (defaults to $op_timeout)
 
 END
 }
 
-my @params;
-push @params, '-w', $op_connect_timeout;
+my @params = ('-w', $op_timeout);
 
 exec ($op_ncbin, $op_host, $op_port, @params) or die "cannot exec $op_ncbin: $!"; 
