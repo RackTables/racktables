@@ -1663,6 +1663,9 @@ $dictionary = array
 	1594 => array ('chapter_id' => 14, 'dict_value' => 'Force10 FTOS 8'),
 	1595 => array ('chapter_id' => 13, 'dict_value' => '[[RH Fedora%GSKIP%Fedora 13 | http://docs.fedoraproject.org/release-notes/f13/en-US/html/]]'),
 	1596 => array ('chapter_id' => 13, 'dict_value' => '[[RH Fedora%GSKIP%Fedora 14 | http://docs.fedoraproject.org/release-notes/f14/en-US/html/]]'),
+	1597 => array ('chapter_id' => 16, 'dict_value' => 'JunOS 10'),
+	1598 => array ('chapter_id' => 16, 'dict_value' => 'JunOS 11'),
+	1599 => array ('chapter_id' => 16, 'dict_value' => 'JunOS 12'),
 
 # Any new "default" dictionary records must go above this line (i.e., with
 # dict_key code less, than 50000). This is necessary to keep AUTO_INCREMENT
