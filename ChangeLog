@@ -13,6 +13,7 @@
 	new feature: adjustable quick links at the top of the page
 0.19.8
 	update: switch to InnoDB completely
+	bugfix: dictionary chapter rename did not work
 0.19.7 2011-07-31
 	update: add SNMP support for several more switches
 	update: improve consistency of stored attribute data (#449)
