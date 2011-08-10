@@ -3,8 +3,6 @@
 use strict;
 use Getopt::Long;
 
-my @orig_params = @ARGV;
-
 # fetch command-line parameters
 my $op_help;
 my $op_port = 23;
