@@ -1101,6 +1101,8 @@ CREATE TABLE `Attribute_new` (
 			break;
 		case '0.19.8':
 			$query = array_merge ($query, reloadDictionary ($batchid));
+			for ($i = 1424; $i <= 1466; $i++) # CX, then 42 ER channels
+				$query[] = "INSERT INTO `PortCompat` (`type1`, `type2`) VALUES (${i},${i})";
 			$query[] = "ALTER TABLE UserAccount ENGINE=InnoDB";
 			$query[] = "DELETE FROM UserConfig WHERE user NOT IN (SELECT user_name FROM UserAccount)";
 			$query[] = "ALTER TABLE UserConfig ADD CONSTRAINT `UserConfig-FK-user` FOREIGN KEY (user) REFERENCES UserAccount (user_name) ON DELETE CASCADE";
@@ -1144,8 +1146,6 @@ CREATE TABLE `IPv4Log` (
   KEY `ip-date` (`ip`,`date`)
 ) ENGINE=InnoDB;
 ";
-			for ($i = 1424; $i <= 1466; $i++) # CX, then 42 ER channels
-				$query[] = "INSERT INTO `PortCompat` (`type1`, `type2`) VALUES (${i},${i})";
 			# Dismiss some overly-specific OIF types in favour of more generic counterparts.
 			$squeeze = array
 			(

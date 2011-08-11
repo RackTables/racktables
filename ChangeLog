@@ -1,5 +1,5 @@
 0.20.0
-	update: handle wide-band WDM transceivers and ER DWDM
+	update: handle wide-band WDM transceivers
 	update: 802.1q: config deploy to Cisco IOS switches is no more requiring 'switchport trunk encapsulation dot1q' pre-set
 	update: dismiss HNDP support
 	update: markup IPv6 subnet-router on request (by Jens Weibler)
@@ -14,6 +14,7 @@
 0.19.8
 	update: switch to InnoDB completely
 	bugfix: dictionary chapter rename did not work
+	update: ER DWDM channel grid
 0.19.7 2011-07-31
 	update: add SNMP support for several more switches
 	update: improve consistency of stored attribute data (#449)
