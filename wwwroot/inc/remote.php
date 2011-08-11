@@ -53,9 +53,13 @@ function queryTerminal ($object_id, $commands, $tolerate_remote_errors = TRUE)
 	$prompt = NULL;
 	switch ($breed = detectDeviceBreed ($object_id))
 	{
-		case 'ios12': // FIXME: add telnet prompt regexp here
-		case 'fdry5': // FIXME: add telnet prompt regexp here
-		case 'ftos8': // FIXME: add telnet prompt regexp here
+		# Correct prompt patterns for the breeds below are sometimes known, but
+		# left unset by intent. This makes "netcat" handling of these the
+		# default option (setting prompt pattern implies "telnet" handling,
+		# unless configured otherwise).
+		case 'ios12':
+		case 'fdry5':
+		case 'ftos8': // '^(Login|Password): $|^\S+[>#]$'
 			break;
 		case 'vrp53':
 		case 'vrp55':
