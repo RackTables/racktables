@@ -1102,6 +1102,22 @@ CREATE TABLE `Attribute_new` (
 			$query = array_merge ($query, reloadDictionary ($batchid));
 			for ($i = 1424; $i <= 1466; $i++) # CX, then 42 ER channels
 				$query[] = "INSERT INTO `PortCompat` (`type1`, `type2`) VALUES (${i},${i})";
+			$query[] = "ALTER TABLE UserAccount ENGINE=InnoDB";
+			$query[] = "DELETE FROM UserConfig WHERE user NOT IN (SELECT user_name FROM UserAccount)";
+			$query[] = "ALTER TABLE UserConfig ADD CONSTRAINT `UserConfig-FK-user` FOREIGN KEY (user) REFERENCES UserAccount (user_name) ON DELETE CASCADE";
+			$query[] = "DELETE FROM UserConfig WHERE varname NOT IN (SELECT varname FROM Config)";
+			$query[] = "ALTER TABLE UserConfig ADD KEY (varname)";
+			$query[] = "ALTER TABLE UserConfig ADD CONSTRAINT `UserConfig-FK-varname` FOREIGN KEY (varname) REFERENCES Config (varname) ON DELETE CASCADE";
+			$query[] = "ALTER TABLE Dictionary ENGINE=InnoDB";
+			$query[] = "ALTER TABLE Chapter ENGINE=InnoDB";
+			$query[] = "UPDATE Chapter SET id = 9999 WHERE id = 22";
+			$query[] = "UPDATE AttributeMap SET chapter_id = 9999 WHERE chapter_id = 22";
+			$query[] = "UPDATE Dictionary SET chapter_id = 9999 WHERE chapter_id = 22";
+			$query[] = "DELETE FROM Dictionary WHERE chapter_id NOT IN (SELECT id FROM Chapter)";
+			$query[] = "ALTER TABLE Dictionary ADD CONSTRAINT `Dictionary-FK-chapter_id` FOREIGN KEY (chapter_id) REFERENCES Chapter (id)";
+			$query[] = "DELETE FROM AttributeMap WHERE chapter_id NOT IN (SELECT id FROM Chapter)";
+			$query[] = "ALTER TABLE AttributeMap ADD KEY (chapter_id)";
+			$query[] = "ALTER TABLE AttributeMap ADD CONSTRAINT `AttributeMap-FK-chapter_id` FOREIGN KEY (chapter_id) REFERENCES Chapter (id)";
 			$query[] = "UPDATE Config SET varvalue = '0.19.8' WHERE varname = 'DB_VERSION'";
 			break;
 		default:

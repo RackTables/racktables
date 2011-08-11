@@ -1,4 +1,5 @@
 0.19.8
+	update: switch to InnoDB completely
 	bugfix: dictionary chapter rename did not work
 	update: ER DWDM channel grid
 0.19.7 2011-07-31
