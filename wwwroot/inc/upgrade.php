@@ -1098,6 +1098,12 @@ CREATE TABLE `Attribute_new` (
 			$query[] = "INSERT INTO PortInterfaceCompat VALUES (10, 1588)";
 			$query[] = "UPDATE Config SET varvalue = '0.19.7' WHERE varname = 'DB_VERSION'";
 			break;
+		case '0.19.8':
+			$query = array_merge ($query, reloadDictionary ($batchid));
+			for ($i = 1424; $i <= 1466; $i++) # CX, then 42 ER channels
+				$query[] = "INSERT INTO `PortCompat` (`type1`, `type2`) VALUES (${i},${i})";
+			$query[] = "UPDATE Config SET varvalue = '0.19.8' WHERE varname = 'DB_VERSION'";
+			break;
 		default:
 			showError ("executeUpgradeBatch () failed, because batch '${batchid}' isn't defined", __FUNCTION__);
 			die;
