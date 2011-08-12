@@ -8874,7 +8874,7 @@ function renderDiscoveredNeighbors ($object_id)
 	switchportInfoJS($object_id); // load JS code to make portnames interactive
 	printOpFormIntro ('importDPData');
 	echo '<br><table cellspacing=0 cellpadding=5 align=center class=widetable>';
-	echo '<tr><th colspan=2>local port</th><th></th><th>remote device</th><th colspan=2>remote port</th><th><input type="checkbox" id="cb-toggle"></th></tr>';
+	echo '<tr><th colspan=2>local port</th><th></th><th>remote device</th><th colspan=2>remote port</th><th><input type="checkbox" checked id="cb-toggle"></th></tr>';
 	$inputno = 0;
 	foreach ($neighbors as $local_port => $remote_list)
 	{
@@ -8964,20 +8964,17 @@ function renderDiscoveredNeighbors ($object_id)
 					}
 
 				// no links found on both sides, search for a compatible port pair
-				$left_types = array();
-				foreach ($local_ports as $portinfo)
-					if (! isTransceiverEmpty ($portinfo))
-						$left_types[$portinfo['oif_id']][] = array ('id' => $portinfo['oif_id'], 'name' => $portinfo['oif_name'], 'portinfo' => $portinfo);
-					else
-						foreach (getExistingPortTypeOptions ($portinfo['id']) as $oif_id => $oif_name)
-							$left_types[$oif_id][] = array ('id' => $oif_id, 'name' => $oif_name, 'portinfo' => $portinfo);
-				$right_types = array();
-				foreach ($remote_ports as $portinfo)
-					if (! isTransceiverEmpty ($portinfo))
-						$right_types[$portinfo['oif_id']][] = array ('id' => $portinfo['oif_id'], 'name' => $portinfo['oif_name'], 'portinfo' => $portinfo);
-					else
-						foreach (getExistingPortTypeOptions ($portinfo['id']) as $oif_id => $oif_name)
-							$right_types[$oif_id][] = array ('id' => $oif_id, 'name' => $oif_name, 'portinfo' => $portinfo);
+				$port_types = array();
+				foreach (array ('left' => $local_ports, 'right' => $remote_ports) as $side => $port_list)
+					foreach ($port_list as $portinfo)
+					{
+						$tmp_types = ($portinfo['iif_id'] == 1) ?
+							array ($portinfo['oif_id'] => $portinfo['oif_name']) :
+							getExistingPortTypeOptions ($portinfo['id']);
+						foreach ($tmp_types as $oif_id => $oif_name)
+							$port_types[$side][$oif_id][] = array ('id' => $oif_id, 'name' => $oif_name, 'portinfo' => $portinfo);
+					}
+
 				if (! isset ($POIFC))
 				{
 					$POIFC = array();
@@ -8987,8 +8984,8 @@ function renderDiscoveredNeighbors ($object_id)
 						$POIFC[$item['type2']][$item['type1']] = TRUE;
 					}
 				}
-				foreach ($left_types as $left_id => $left)
-				foreach ($right_types as $right_id => $right)
+				foreach ($port_types['left'] as $left_id => $left)
+				foreach ($port_types['right'] as $right_id => $right)
 					if (isset ($POIFC[$left_id][$right_id]))
 						foreach ($left as $left_port)
 						foreach ($right as $right_port)
@@ -9047,18 +9044,22 @@ $(document).ready(function () {
 			var cb = list[i];
 			cb.checked = event.target.checked;
 		}
-	});
+	}).triggerHandler('click');
 });
 END
 		, TRUE
 	);
 }
 
+// $variants is an array of items like this:
+// array (
+//	'left' => array ('id' => oif_id, 'name' => oif_name, 'portinfo' => $port_info),
+//	'left' => array ('id' => oif_id, 'name' => oif_name, 'portinfo' => $port_info),
+// )
 function formatIfTypeVariants ($variants, $select_name)
 {
 	if (empty ($variants))
 		return;
-	static $transceivers_hint_shown = FALSE;
 	static $oif_usage_stat = NULL;
 	$select = array();
 	$creating_transceivers = FALSE;
@@ -9085,11 +9086,7 @@ function formatIfTypeVariants ($variants, $select_name)
 	{
 		// format text label for selectbox item
 		$left_text = ($multiple_left ? $item['left']['portinfo']['iif_name'] . '/' : '') . $item['left']['name'];
-		if (! $multiple_left && ! isTransceiverEmpty ($item['left']['portinfo']))
-			$left_text = '';
 		$right_text = ($multiple_right ? $item['right']['portinfo']['iif_name'] . '/' : '') . $item['right']['name'];
-		if (! $multiple_right && ! isTransceiverEmpty ($item['right']['portinfo']))
-			$right_text = '';
 		$text = $left_text;
 		if ($left_text != $right_text && strlen ($right_text))
 		{
@@ -9105,47 +9102,26 @@ function formatIfTypeVariants ($variants, $select_name)
 			'b_id' => $item['right']['portinfo']['id'],
 		);
 		$popularity_count = 0;
-		if (isTransceiverEmpty ($item['left']['portinfo']))
+		foreach (array ('left' => 'a', 'right' => 'b') as $side => $letter)
 		{
-			$creating_transceivers = TRUE;
-			$text = '&larr; ' . $text;
-			$params['a_oif'] = $item['left']['id'];
-			if (isset ($oif_usage_stat[$item['left']['id']]))
-				$popularity_count += $oif_usage_stat[$item['left']['id']];
-		}
-		if (isTransceiverEmpty ($item['right']['portinfo']))
-		{
-			$creating_transceivers = TRUE;
-			$text = $text . ' &rarr;';
-			$params['b_oif'] = $item['right']['id'];
-			if (isset ($oif_usage_stat[$item['right']['id']]))
-				$popularity_count += $oif_usage_stat[$item['right']['id']];
+			$params[$letter . '_oif'] = $item[$side]['id'];
+			$type_key = $item[$side]['portinfo']['iif_id'] . '-' . $item[$side]['id'];
+			if (isset ($oif_usage_stat[$type_key]))
+				$popularity_count += $oif_usage_stat[$type_key];
 		}
 
 		$key = ''; // key sample: a_id:id,a_oif:id,b_id:id,b_oif:id
 		foreach ($params as $i => $j)
-			$key .= ",$i:$j";
+			$key .= "$i:$j,";
 		$key = trim($key, ",");
-		$select[$key] = (count ($variants) == 1 && ! $creating_transceivers ? '' : $text); // empty string if there is simple single variant
-		if ($popularity_count > $most_used_count)
-		{
-			$most_used_count = $popularity_count;
-			$selected_key = $key;
-		}
+		$select[$key] = (count ($variants) == 1 ? '' : $text); // empty string if there is simple single variant
+		$weights[$key] = $popularity_count;
 	}
-
-	if ($creating_transceivers and ! $transceivers_hint_shown)
-	{
-		$transceivers_hint_shown = TRUE;
-		showNotice ('The arrow (&larr; or &rarr;) means to create a transceiver in the suitable port');
-	}
-
-	return getSelect ($select, array('name' => $select_name), $selected_key, !$creating_transceivers);
-}
-
-function isTransceiverEmpty ($portinfo)
-{
-	return (0 === strpos ($portinfo['oif_name'], 'empty '));
+	arsort ($weights, SORT_NUMERIC);
+	$sorted_select = array();
+	foreach (array_keys ($weights) as $key)
+		$sorted_select[$key] = $select[$key];
+	return getSelect ($sorted_select, array('name' => $select_name));
 }
 
 function formatAttributeValue ($record)

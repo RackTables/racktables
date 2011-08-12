@@ -4332,12 +4332,12 @@ function getPortTypeUsageStatistics()
 {
 	$result = usePreparedSelectBlade
 	(
-		'SELECT p.type, COUNT(p.id) AS count FROM Port p INNER JOIN Link l '.
-		'ON (p.id = l.porta or p.id = l.portb) WHERE p.type <> 0 GROUP BY type'
+		'SELECT p.iif_id, p.type, COUNT(p.id) AS count FROM Port p INNER JOIN Link l '.
+		'ON (p.id = l.porta or p.id = l.portb) WHERE p.type <> 0 GROUP BY iif_id, type'
 	);
 	$ret = array();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-		$ret[$row['type']] = $row['count'];
+		$ret[$row['iif_id'] . '-' . $row['type']] = $row['count'];
 	return $ret;
 }
 
