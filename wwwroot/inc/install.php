@@ -973,6 +973,34 @@ INSERT INTO `Attribute` (`id`, `type`, `name`) VALUES
 -- attributes are assigned IDs starting from 10000).
 (9999,'string','base MAC address');
 
+INSERT INTO `Chapter` (`id`, `sticky`, `name`) VALUES
+(1,'yes','ObjectType'),
+(2,'yes','PortOuterInterface'),
+(11,'no','server models'),
+(12,'no','network switch models'),
+(13,'no','server OS type'),
+(14,'no','switch OS type'),
+(16,'no','router OS type'),
+(17,'no','router models'),
+(18,'no','disk array models'),
+(19,'no','tape library models'),
+(21,'no','KVM switch models'),
+(23,'no','console models'),
+(24,'no','network security models'),
+(25,'no','wireless models'),
+(26,'no','fibre channel switch models'),
+(27,'no','PDU models'),
+(28,'no','Voice/video hardware'),
+(29,'no','Yes/No'),
+(30,'no','network chassis models'),
+(31,'no','server chassis models'),
+(32,'no','virtual switch models'),
+(33,'no','virtual switch OS type'),
+(34,'no','power supply chassis models'),
+(35,'no','power supply models'),
+-- Default chapters must have ID less than 10000, add them above this line.
+(9999,'no','multiplexer models');
+
 INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_id`) VALUES
 (2,1,NULL),
 (2,2,27),
@@ -1106,34 +1134,6 @@ INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_id`) VALUES
 (1507,21,NULL),
 (1507,22,NULL),
 (1560,27,NULL);
-
-INSERT INTO `Chapter` (`id`, `sticky`, `name`) VALUES
-(1,'yes','ObjectType'),
-(2,'yes','PortOuterInterface'),
-(11,'no','server models'),
-(12,'no','network switch models'),
-(13,'no','server OS type'),
-(14,'no','switch OS type'),
-(16,'no','router OS type'),
-(17,'no','router models'),
-(18,'no','disk array models'),
-(19,'no','tape library models'),
-(21,'no','KVM switch models'),
-(23,'no','console models'),
-(24,'no','network security models'),
-(25,'no','wireless models'),
-(26,'no','fibre channel switch models'),
-(27,'no','PDU models'),
-(28,'no','Voice/video hardware'),
-(29,'no','Yes/No'),
-(30,'no','network chassis models'),
-(31,'no','server chassis models'),
-(32,'no','virtual switch models'),
-(33,'no','virtual switch OS type'),
-(34,'no','power supply chassis models'),
-(35,'no','power supply models'),
--- Default chapters must have ID less than 10000, add them above this line.
-(9999,'no','multiplexer models');
 
 INSERT INTO `PortInnerInterface` VALUES
 (1,'hardwired'),
