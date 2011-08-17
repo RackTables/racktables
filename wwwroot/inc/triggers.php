@@ -340,11 +340,15 @@ function triggerIPv4AddressLog ()
 
 function triggerCactiGraphs ()
 {
-	if (count (getCactiGraphsForObject (getBypassValue())))
+	if
+	(
+		count (getCactiGraphsForObject (getBypassValue())) or
+		'' != getConfigVar ('CACTI_URL') and 
+		considerConfiguredConstraint (spotEntity ('object', getBypassValue()), 'CACTI_LISTSRC')
+	)
 		return 'std';
-	if (considerConfiguredConstraint (spotEntity ('object', getBypassValue()), 'CACTI_LISTSRC'))
-		return 'std';
-	return '';
+	else
+		return '';
 }
 
 ?>
