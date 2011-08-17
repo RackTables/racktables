@@ -32,7 +32,7 @@ function dispatchImageRequest()
 		break;
 	case 'cactigraph':
 		$pageno = 'object';
-		$tabno = 'cactigraph';
+		$tabno = 'cacti';
 		fixContext();
 		assertPermission();
 		genericAssertion ('graph_id', 'uint');
