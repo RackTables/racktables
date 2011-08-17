@@ -5760,18 +5760,13 @@ function renderTagRowForEditor ($taginfo, $level = 0)
 	printOpFormIntro ('updateTag', array ('tag_id' => $taginfo['id']));
 	echo "<input type=text size=48 name=tag_name ";
 	echo "value='${taginfo['tag']}'></td><td class=tdleft>";
-	$options = array (0 => '-- NONE --');
-	# The call below works, because taginfo is actually a tree node, not a
-	# pure "taginfo" structure.
-	$hidden = getTagIDListForNode ($taginfo);
-	# Exclude the current tag itself and all of its sub-tags from the "new parent
-	# tag" list of options, because setting any of these as the new parent will
-	# introduce a dependency loop into the tree. This hint does not prevent loops
-	# as such, but lowers the chances they are created unintentionally.
-	foreach ($taglist as $nominee)
-		if (! in_array ($nominee['id'], $hidden))
-			$options[$nominee['id']] = $nominee['tag'];
-	printSelect ($options, array ('name' => 'parent_id'), $taginfo['parent_id']);
+	echo getSelect
+	(
+		array ( $taginfo['parent_id'] => $taginfo['parent_id'] ? htmlspecialchars ($taglist[$taginfo['parent_id']]['tag']) : '-- NONE --'),
+		array ('name' => 'parent_id', 'id' => 'tagid_' . $taginfo['id'], 'class' => 'taglist-popup'),
+		$taginfo['parent_id'],
+		FALSE
+	);
 	echo '</td><td>' . getImageHREF ('save', 'Save changes', TRUE) . '</form></td></tr>';
 	foreach ($taginfo['kids'] as $kid)
 		$self ($kid, $level + 1);
@@ -5792,6 +5787,19 @@ function renderTagTree ()
 
 function renderTagTreeEditor ()
 {
+	addJS
+	(
+<<<END
+function tageditor_showselectbox(e) {
+	$(this).load('index.php', {module: 'ajax', ac: 'get-tag-select', tagid: this.id});
+	$(this).unbind('mousedown', tageditor_showselectbox);
+}
+$(document).ready(function () {
+	$('select.taglist-popup').bind('mousedown', tageditor_showselectbox);
+});
+END
+		, TRUE
+	);
 	function printNewItemTR ()
 	{
 		global $taglist;
