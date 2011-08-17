@@ -9460,4 +9460,40 @@ function renderIPv4AddressLog ()
 	finishPortlet();
 }
 
+function renderObjectCactiGraphs ($object_id)
+{
+	if (!extension_loaded ('curl'))
+		throw new RackTablesError ("The PHP cURL extension is not loaded.", RackTablesError::MISCONFIGURED);
+
+	if (!($cacti_url = getConfigVar('CACTI_URL')))
+		throw new RackTablesError ("Cacti URL not configured.", RackTablesError::MISCONFIGURED);
+
+	startPortlet ('Cacti Graphs');
+	echo "<table cellspacing=\"0\" align=\"center\" width=\"50%\">";
+	echo "<tr><td>&nbsp;</td><th>Cacti Graph ID</th><th>Caption</th><td>&nbsp;</td></tr>\n";
+	printOpFormIntro ('add');
+	echo "<tr><td>";
+	printImageHREF ('Attach', 'Link new graph', TRUE);
+	echo "</td><td><input type=text name=graph_id tabindex=100></td><td><input type=text name=caption tabindex=101></td><td>";
+	printImageHREF ('Attach', 'Link new graph', TRUE, 101);
+	echo "</td></tr></form>";
+	echo "</table>";
+	echo "<br/><br/>";
+
+	echo "<table cellspacing=\"0\" cellpadding=\"10\" align=\"center\" width=\"50%\">";
+
+	foreach (getCactiGraphsForObject ($object_id) as $graph_id => $graph)
+	{
+		echo "<tr><td>";
+		echo "<a href='${cacti_url}/graph.php?action=view&local_graph_id=${graph_id}&rra_id=all' target='_blank'>";
+		echo "<img src='index.php?module=image&img=cactigraph&object_id=${object_id}&graph_id=${graph_id}' alt='Cacti Graph ID: ${graph_id}'>";
+		echo "</a><br/>";
+		echo "<a href='" . makeHrefProcess (array ('op' => 'del', 'object_id'=> $object_id, 'graph_id' => $graph_id)) . "' onclick=\"javascript:return confirm('Are you sure you want to delete the graph?')\">" . getImageHREF ('Cut', 'Unlink graph') . "</a>";
+		echo "&nbsp; &nbsp;${graph['caption']}";
+		echo "</td></tr>";
+	}
+	echo '</table>';
+	finishPortlet ();
+}
+
 ?>

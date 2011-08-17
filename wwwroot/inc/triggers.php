@@ -338,4 +338,13 @@ function triggerIPv4AddressLog ()
 	return '';
 }
 
+function triggerCactiGraphs ()
+{
+	if (count (getCactiGraphsForObject (getBypassValue())))
+		return 'std';
+	if (considerConfiguredConstraint (spotEntity ('object', getBypassValue()), 'CACTI_LISTSRC'))
+		return 'std';
+	return '';
+}
+
 ?>

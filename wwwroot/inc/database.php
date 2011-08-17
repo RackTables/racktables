@@ -1058,6 +1058,8 @@ function commitResetObject ($object_id = 0)
 	commitUpdateAttrValue ($object_id, 3, "");
 	// log history
 	recordObjectHistory ($object_id);
+	# Cacti graphs
+	usePreparedDeleteBlade ('CactiGraph', array ('object_id' => $object_id));
 }
 
 function commitDeleteRack($rack_id)
@@ -4919,6 +4921,12 @@ function getConfiguredQuickLinks()
 				$ret[] = array ('href' => makeHref (array ('page' => $page_code)), 'title' => $title);
 		}
 	return $ret;
+}
+
+function getCactiGraphsForObject ($object_id)
+{
+	$result = usePreparedSelectBlade ('SELECT graph_id, caption FROM CactiGraph WHERE object_id = ? ORDER BY graph_id', array ($object_id));
+	return reindexById ($result->fetchAll (PDO::FETCH_ASSOC), 'graph_id');
 }
 
 ?>
