@@ -1,6 +1,7 @@
 0.19.8
 	update: switch to InnoDB completely
 	bugfix: dictionary chapter rename did not work
+	bugfix: searching for IPv6 address by its description caused an error
 	update: ER DWDM channel grid
 	update: use of AJAX in tag tree editor tab (by Alex Noskov)
 0.19.7 2011-07-31

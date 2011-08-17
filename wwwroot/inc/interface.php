@@ -3505,7 +3505,7 @@ function renderSearchResults ($terms, $summary)
 				$v6_ip_dq = $v6_ip->format();
 				$parentnet = getIPv6AddressNetworkId ($v6_ip);
 				if ($parentnet !== NULL)
-					echo "<script language='Javascript'>document.location='index.php?page=ipv4net&tab=default&id=${parentnet}&hl_ipv6_addr=${v6_ip_dq}';//</script>";
+					echo "<script language='Javascript'>document.location='index.php?page=ipv6net&tab=default&id=${parentnet}&hl_ipv6_addr=${v6_ip_dq}';//</script>";
 				break;
 			case 'ipv4network':
 				echo "<script language='Javascript'>document.location='index.php?page=ipv4net";
