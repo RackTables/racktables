@@ -4904,4 +4904,81 @@ function apply8021qChangeRequest ($switch_id, $changes, $verbose = TRUE, $mutex_
 	return $total;
 }
 
+// takes a full sublist of ipv4net entities ordered by (ip,mask)
+// fills ['atags'] field of each entity with {$hole_X} auto-tags if there is unallocated IP space
+function produceIPv4HoleTags (&$nets)
+{
+	$stack = array();
+	foreach ($nets as &$net)
+	{
+		$last = NULL; // last element popped from the stack
+		while (count ($stack)) // spin stack leaving only the parents of the $net.
+		{
+			$top = &$stack[count ($stack) - 1];
+			if (isset ($last))
+				// possible hole in the end of $top
+				setIPv4HoleTags ($top, $last['db_last'] + 1, $top['db_last']);
+			if (isIPv4NetNested  ($top, $net))
+				break;
+			$last = array_pop ($stack);
+		}
+		if (count ($stack))
+		{
+			$top = &$stack[count ($stack) - 1];
+			if (isset ($last))
+				// possible hole in the middle of $top
+				setIPv4HoleTags ($top, $last['db_last'] + 1, $net['db_first'] - 1);
+			else
+				// possible hole in the beginning of $top
+				setIPv4HoleTags ($top, $top['db_first'], $net['db_first'] - 1);
+		}
+		$stack[] = &$net;
+	}
+	// final stack spin
+	while (count ($stack))
+	{
+		$top = &$stack[count ($stack) - 1];
+		if (isset ($last))
+			// possible hole in the end of $top
+			setIPv4HoleTags ($top, $last['db_last'] + 1, $top['db_last']);
+		$last = array_pop ($stack);
+	}
+}
+
+// returns TRUE if $child is nested into $parent
+function isIPv4NetNested ($parent, $child)
+{
+	return $parent['db_first'] <= $child['db_first'] && $parent['db_last'] >= $child['db_last'];
+}
+
+// $a, $b - long integers (IPv4 addresses) meaning the beginning and the end of IP range.
+// $net is an entity for hole autotags to be set to.
+function setIPv4HoleTags (&$net, $a, $b)
+{
+	if ($a > $b)
+		return;
+	$b++;
+	while ($a < $b)
+	{
+		$i = getBinaryZeroes ($a);
+		while ($a + (1 << $i) > $b)
+			$i--;
+		$a += (1 << $i);
+		$atag = '$hole_' . (32 - $i);
+		if (! isset ($net['atags'][$atag]))
+			$net['atags'][$atag] = array ('tag' => $atag);
+	}
+}
+
+// returns the number of binary 0s in the minor part of integer value
+function getBinaryZeroes ($value)
+{
+	$ret = 0;
+	while ($value and ! ($value & 1)) { // while minor bit is zero
+		$ret++;
+		$value >>= 1;
+	}
+	return $ret;
+}
+
 ?>

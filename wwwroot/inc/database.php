@@ -422,37 +422,39 @@ function listCells ($realm, $parent_id = 0)
 		unset ($entityCache['partial'][$realm]);
 	if ($realm == 'object') // cache all attributes of all objects to speed up autotags calculation
 		cacheAllObjectsAttributes();
-	foreach (array_keys ($ret) as $entity_id)
+	foreach ($ret as $entity_id => &$entity)
 	{
-		$ret[$entity_id]['etags'] = getExplicitTagsOnly ($ret[$entity_id]['etags']);
-		$ret[$entity_id]['itags'] = getImplicitTags ($ret[$entity_id]['etags']);
-		$ret[$entity_id]['atags'] = generateEntityAutoTags ($ret[$entity_id]);
+		$entity['etags'] = getExplicitTagsOnly ($entity['etags']);
+		$entity['itags'] = getImplicitTags ($entity['etags']);
+		$entity['atags'] = generateEntityAutoTags ($entity);
 		switch ($realm)
 		{
 		case 'object':
-			setDisplayedName ($ret[$entity_id]);
+			setDisplayedName ($entity);
 			break;
 		case 'ipv4net':
-			$ret[$entity_id]['ip_bin'] = ip2long ($ret[$entity_id]['ip']);
-			$ret[$entity_id]['mask_bin'] = binMaskFromDec ($ret[$entity_id]['mask']);
-			$ret[$entity_id]['mask_bin_inv'] = binInvMaskFromDec ($ret[$entity_id]['mask']);
-			$ret[$entity_id]['db_first'] = sprintf ('%u', 0x00000000 + $ret[$entity_id]['ip_bin'] & $ret[$entity_id]['mask_bin']);
-			$ret[$entity_id]['db_last'] = sprintf ('%u', 0x00000000 + $ret[$entity_id]['ip_bin'] | ($ret[$entity_id]['mask_bin_inv']));
+			$entity['ip_bin'] = ip2long ($entity['ip']);
+			$entity['mask_bin'] = binMaskFromDec ($entity['mask']);
+			$entity['mask_bin_inv'] = binInvMaskFromDec ($entity['mask']);
+			$entity['db_first'] = sprintf ('%u', 0x00000000 + $entity['ip_bin'] & $entity['mask_bin']);
+			$entity['db_last'] = sprintf ('%u', 0x00000000 + $entity['ip_bin'] | ($entity['mask_bin_inv']));
 			break;
 		case 'ipv6net':
-			$ret[$entity_id]['ip_bin'] = new IPv6Address ($ret[$entity_id]['ip_bin']);
-			$ret[$entity_id]['ip'] = $ret[$entity_id]['ip_bin']->format();
-			$ret[$entity_id]['db_first'] = $ret[$entity_id]['ip_bin']->get_first_subnet_address($ret[$entity_id]['mask']);
-			$ret[$entity_id]['db_last'] = $ret[$entity_id]['ip_bin']->get_last_subnet_address($ret[$entity_id]['mask']);
+			$entity['ip_bin'] = new IPv6Address ($entity['ip_bin']);
+			$entity['ip'] = $entity['ip_bin']->format();
+			$entity['db_first'] = $entity['ip_bin']->get_first_subnet_address($entity['mask']);
+			$entity['db_last'] = $entity['ip_bin']->get_last_subnet_address($entity['mask']);
 			break;
 		default:
 			break;
 		}
 		if (!$parent_id)
-			$entityCache['complete'][$realm][$entity_id] = $ret[$entity_id];
+			$entityCache['complete'][$realm][$entity_id] = $entity;
 		else
-			$entityCache['partial'][$realm][$entity_id] = $ret[$entity_id];
+			$entityCache['partial'][$realm][$entity_id] = $entity;
 	}
+	if ($realm == 'ipv4net')
+		produceIPv4HoleTags ($ret);
 	return $ret;
 }
 
@@ -539,6 +541,30 @@ function spotEntity ($realm, $id, $ignore_cache = FALSE)
 	default:
 		break;
 	}
+	
+	if ($realm == 'ipv4net')
+	{
+		$result = usePreparedSelectBlade ("
+SELECT n2.* FROM
+	IPv4Network n1,
+	IPv4Network n2
+WHERE
+	n1.id = ?
+	AND n2.ip BETWEEN n1.ip AND (n1.ip + (1 << (32 - n1.mask)) - 1)
+	AND n2.mask >= n1.mask
+", array ($id));
+		$nets = $result->fetchAll (PDO::FETCH_ASSOC);
+		foreach ($nets as &$net_row)
+		{
+			$net_row['db_first'] = sprintf ('%u', 0x00000000 + $net_row['ip'] & binMaskFromDec ($net_row['mask']));
+			$net_row['db_last'] = sprintf ('%u', 0x00000000 + $net_row['ip'] | binInvMaskFromDec ($net_row['mask']));
+		}
+		produceIPv4HoleTags ($nets);
+		if (is_array ($nets[0]) and $nets[0]['id'] == $id and isset ($nets[0]['atags']))
+			$ret['atags'] = array_merge ($ret['atags'], $nets[0]['atags']);
+		unset ($result);
+	}
+	
 	$entityCache['partial'][$realm][$id] = $ret;
 	return $ret;
 }
