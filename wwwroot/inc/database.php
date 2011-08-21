@@ -4929,4 +4929,13 @@ function getCactiGraphsForObject ($object_id)
 	return reindexById ($result->fetchAll (PDO::FETCH_ASSOC), 'graph_id');
 }
 
+function touchVLANSwitch ($switch_id)
+{
+	usePreparedExecuteBlade
+	(
+		'UPDATE VLANSwitch SET mutex_rev=mutex_rev+1, last_change=NOW(), out_of_sync="yes" WHERE object_id=?',
+		array ($switch_id)
+	);
+}
+
 ?>

@@ -434,6 +434,7 @@ $opspec_list['vlandomain-vlanlist-del'] = array
 		array ('url_argname' => 'vlan_id', 'assertion' => 'vlan'),
 	),
 );
+$opspec_list['vlan-edit-upd'] = // both locations are using the same tableHandler op
 $opspec_list['vlandomain-vlanlist-upd'] = array
 (
 	'table' => 'VLANDescription',
@@ -2314,124 +2315,70 @@ function destroyVLANDomain ()
 	return showFuncMessage (__FUNCTION__, 'OK');
 }
 
-$msgcode['save8021QPorts']['OK1'] = 63;
-$msgcode['save8021QPorts']['OK2'] = 41;
-$msgcode['save8021QPorts']['ERR2'] = 109;
 function save8021QPorts ()
 {
-	global $sic, $dbxlink;
+	global $sic;
 	assertUIntArg ('mutex_rev', TRUE); // counts from 0
 	assertStringArg ('form_mode');
 	if ($sic['form_mode'] != 'save' and $sic['form_mode'] != 'duplicate')
 		throw new InvalidRequestArgException ('form_mode', $sic['form_mode']);
 	$extra = array();
-	$dbxlink->beginTransaction();
-	try
+
+	// prepare the $changes array
+	$changes = array();
+	switch ($sic['form_mode'])
 	{
-		if (NULL === $vswitch = getVLANSwitchInfo ($sic['object_id'], 'FOR UPDATE'))
-			throw new InvalidArgException ('object_id', $object_id, 'VLAN domain is not set for this object');
-		if ($vswitch['mutex_rev'] != $sic['mutex_rev'])
-			throw new InvalidRequestArgException ('mutex_rev', $sic['mutex_rev'], 'expired form data');
-		$after = $before = apply8021QOrder ($vswitch['template_id'], getStored8021QConfig ($sic['object_id'], 'desired'));
-		$changes = array();
-		switch ($sic['form_mode'])
+	case 'save':
+		assertUIntArg ('nports');
+		if ($sic['nports'] == 1)
 		{
-		case 'save':
-			assertUIntArg ('nports');
-			if ($sic['nports'] == 1)
+			assertStringArg ('pn_0');
+			$extra = array ('port_name' => $sic['pn_0']);
+		}
+		for ($i = 0; $i < $sic['nports']; $i++)
+		{
+			assertStringArg ('pn_' . $i);
+			assertStringArg ('pm_' . $i);
+			// An access port only generates form input for its native VLAN,
+			// which we derive allowed VLAN list from.
+			$native = isset ($sic['pnv_' . $i]) ? $sic['pnv_' . $i] : 0;
+			switch ($sic["pm_${i}"])
 			{
-				assertStringArg ('pn_0');
-				$extra = array ('port_name' => $sic['pn_0']);
-			}
-			for ($i = 0; $i < $sic['nports']; $i++)
-			{
-				assertStringArg ('pn_' . $i);
-				assertStringArg ('pm_' . $i);
-				// An access port only generates form input for its native VLAN,
-				// which we derive allowed VLAN list from.
-				$native = isset ($sic['pnv_' . $i]) ? $sic['pnv_' . $i] : 0;
-				switch ($sic["pm_${i}"])
-				{
-				case 'trunk':
+			case 'trunk':
 #				assertArrayArg ('pav_' . $i);
-					$allowed = isset ($sic['pav_' . $i]) ? $sic['pav_' . $i] : array();
-					break;
-				case 'access':
-					if ($native == 'same')
-						continue 2;
-					assertUIntArg ('pnv_' . $i);
-					$allowed = array ($native);
-					break;
-				default:
-					throw new InvalidRequestArgException ("pm_${i}", $_REQUEST["pm_${i}"], 'unknown port mode');
-				}
-				$changes[$sic['pn_' . $i]] = array
-				(
-					'mode' => $sic['pm_' . $i],
-					'allowed' => $allowed,
-					'native' => $native,
-				);
+				$allowed = isset ($sic['pav_' . $i]) ? $sic['pav_' . $i] : array();
+				break;
+			case 'access':
+				if ($native == 'same')
+					continue 2;
+				assertUIntArg ('pnv_' . $i);
+				$allowed = array ($native);
+				break;
+			default:
+				throw new InvalidRequestArgException ("pm_${i}", $_REQUEST["pm_${i}"], 'unknown port mode');
 			}
-			break;
-		case 'duplicate':
-			assertStringArg ('from_port');
+			$changes[$sic['pn_' . $i]] = array
+			(
+				'mode' => $sic['pm_' . $i],
+				'allowed' => $allowed,
+				'native' => $native,
+			);
+		}
+		break;
+	case 'duplicate':
+		assertStringArg ('from_port');
 #			assertArrayArg ('to_ports');
-			if (!array_key_exists ($sic['from_port'], $before))
-				throw new InvalidArgException ('from_port', $sic['from_port'], 'this port does not exist');
-			foreach ($sic['to_ports'] as $tpn)
-				if (!array_key_exists ($tpn, $before))
-					throw new InvalidArgException ('to_ports[]', $tpn, 'this port does not exist');
-				elseif ($tpn != $sic['from_port'])
-					$changes[$tpn] = $before[$sic['from_port']];
-			break;
-		}
-		$domain_vlanlist = getDomainVLANs ($vswitch['domain_id']);
-		$changes = filter8021QChangeRequests
-		(
-			$domain_vlanlist,
-			$before,
-			apply8021QOrder ($vswitch['template_id'], $changes)
-		);
-		$changes = authorize8021QChangeRequests ($before, $changes);
-		foreach ($changes as $port_name => $port)
-			$after[$port_name] = $port;
-		$new_uplinks = filter8021QChangeRequests ($domain_vlanlist, $after, produceUplinkPorts ($domain_vlanlist, $after, $vswitch['object_id']));
-		$npulled = replace8021QPorts ('desired', $vswitch['object_id'], $before, $changes);
-		$nsaved_uplinks = replace8021QPorts ('desired', $vswitch['object_id'], $before, $new_uplinks);
+		$before = getStored8021QConfig ($sic['object_id'], 'desired');
+		if (!array_key_exists ($sic['from_port'], $before))
+			throw new InvalidArgException ('from_port', $sic['from_port'], 'this port does not exist');
+		foreach ($sic['to_ports'] as $tpn)
+			if (!array_key_exists ($tpn, $before))
+				throw new InvalidArgException ('to_ports[]', $tpn, 'this port does not exist');
+			elseif ($tpn != $sic['from_port'])
+				$changes[$tpn] = $before[$sic['from_port']];
+		break;
 	}
-	catch (Exception $e)
-	{
-		$dbxlink->rollBack();
-		showFuncMessage (__FUNCTION__, 'ERR2');
-		return buildRedirectURL (NULL, NULL, $extra);
-	}
-	if ($npulled + $nsaved_uplinks)
-		usePreparedExecuteBlade
-		(
-			'UPDATE VLANSwitch SET mutex_rev=mutex_rev+1, last_change=NOW(), out_of_sync="yes" WHERE object_id=?',
-			array ($sic['object_id'])
-		);
-	$dbxlink->commit();
-	showOneLiner (63, array ($npulled + $nsaved_uplinks));
-	if ($nsaved_uplinks)
-	{
-		initiateUplinksReverb ($vswitch['object_id'], $new_uplinks);
-		showOneLiner (41);
-	}
-	if ($npulled + $nsaved_uplinks > 0 and getConfigVar ('8021Q_INSTANT_DEPLOY') == 'yes')
-	{
-		try
-		{
-			if (FALSE === $done = exec8021QDeploy ($sic['object_id'], TRUE))
-				showOneLiner (191);
-			else
-				showOneLiner (63, array ($done));
-		}
-		catch (Exception $e)
-		{
-			showOneLiner (109);
-		}
-	}
+	apply8021qChangeRequest ($sic['object_id'], $changes, TRUE, $sic['mutex_rev']);
 	return buildRedirectURL (NULL, NULL, $extra);
 }
 
@@ -2782,6 +2729,44 @@ function unlinkPort ()
 	assertUIntArg ('port_id');
 	commitUnlinkPort ($_REQUEST['port_id']);
 	showSuccess ("Port unlinked successfully");
+}
+
+function clearVlan()
+{
+	assertStringArg ('vlan_ck');
+	list ($vdom_id, $vlan_id) = decodeVLANCK ($_REQUEST['vlan_ck']);
+	
+	$n_cleared = 0;
+	foreach (getVLANConfiguredPorts ($_REQUEST['vlan_ck']) as $object_id => $portnames)
+	{
+		$D = getStored8021QConfig ($object_id);
+		$changes = array();
+		foreach ($portnames as $pn)
+		{
+			$conf = $D[$pn];
+			$conf['allowed'] = array_diff ($conf['allowed'], array ($vlan_id));
+			if ($conf['mode'] == 'access')
+				$conf['mode'] = 'trunk';
+			if ($conf['native'] == $vlan_id)
+				$conf['native'] = 0;
+			$changes[$pn] = $conf;
+		}
+		$n_cleared += apply8021qChangeRequest ($object_id, $changes, FALSE);
+	}
+	if ($n_cleared > 0)
+		showSuccess ("VLAN $vlan_id removed from $n_cleared ports");
+}
+
+function deleteVlan()
+{
+	assertStringArg ('vlan_ck');
+	$confports = getVLANConfiguredPorts ($_REQUEST['vlan_ck']);
+	if (! empty ($confports))
+		throw new RackTablesError ("You can not delete vlan which has assosiated ports");
+	list ($vdom_id, $vlan_id) = decodeVLANCK ($_REQUEST['vlan_ck']);
+	usePreparedDeleteBlade ('VLANDescription', array ('domain_id' => $vdom_id, 'vlan_id' => $vlan_id));
+	showSuccess ("VLAN $vlan_id has been deleted");
+	return buildRedirectURL ('vlandomain', 'default', array ('vdom_id' => $vdom_id));
 }
 
 function tableHandler()

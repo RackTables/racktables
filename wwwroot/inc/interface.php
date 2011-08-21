@@ -1505,7 +1505,6 @@ function showMessageOrError ()
 		26 => array ('code' => 'success', 'format' => 'updated %u records successfully'),
 		37 => array ('code' => 'success', 'format' => 'added %u records successfully'),
 		38 => array ('code' => 'success', 'format' => 'removed %u records successfully'),
-		41 => array ('code' => 'success', 'format' => 'uplink ports reverb queued'),
 		43 => array ('code' => 'success', 'format' => 'Saved successfully.'),
 		44 => array ('code' => 'success', 'format' => '%s failures and %s successfull changes.'),
 		48 => array ('code' => 'success', 'format' => 'added a record successfully'),
@@ -9507,6 +9506,61 @@ function renderObjectCactiGraphs ($object_id)
 	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')
 		printNewItemTR();
 	finishPortlet ();
+}
+
+function renderEditVlan ($vlan_ck)
+{
+	global $vtoptions;
+	$vlan = getVLANInfo ($vlan_ck);
+	startPortlet ('Modify');
+	printOpFormIntro ('upd');
+	// static attributes
+	echo '<table border=0 cellspacing=0 cellpadding=2 align=center>';
+	echo '<tr><th class=tdright>Name:</th><td class=tdleft>' .
+		"<input type=text name=vlan_descr value='${vlan['vlan_descr']}'>" .
+		'</td></tr>';
+	echo '<tr><th class=tdright>Type:</th><td class=tdleft>' .
+		getSelect ($vtoptions, array ('name' => 'vlan_type', 'tabindex' => 102), $vlan['vlan_prop']) .
+		'</td></tr>';
+	echo '</table>';
+	echo '<p>';
+	echo '<input type="hidden" name="vdom_id" value="' . htmlspecialchars ($vlan['domain_id'], ENT_QUOTES) . '">';
+	echo '<input type="hidden" name="vlan_id" value="' . htmlspecialchars ($vlan['vlan_id'], ENT_QUOTES) . '">';
+	printImageHREF ('SAVE', 'Update VLAN', TRUE);
+	echo '</form><p>';
+	// get configured ports count
+	$portc = 0;
+	foreach (getVLANConfiguredPorts ($vlan_ck) as $subarray)
+		$portc += count ($subarray);
+
+	$clear_line = '';
+	$delete_line = '';
+	if ($portc)
+	{
+		$clear_line .= '<p>';
+		$clear_line .= '<a href="' . makeHrefProcess (array ('op' => 'clear', 'vlan_ck' => $vlan_ck)) . '">';
+		$clear_line .= getImageHREF ('clear', "remove this vlan from $portc ports") . ' remove</a>' . 
+			' this VLAN from ' .
+			'<a href="' . makeHref (array ('page' => 'vlan', 'tab' => 'default', 'vlan_ck' => $vlan_ck)) . '">' .
+			"$portc ports</a>";
+	}
+	
+	$reason = '';
+	if ($vlan['vlan_id'] == VLAN_DFL_ID)
+		$reason = "You can not delete default VLAN";
+	elseif ($portc)
+		$reason = "Can not delete: $portc ports configured";
+	if (! empty ($reason))
+		$delete_line .= '<a href="#" class="noclick" onclick="return false" ' .
+		'title="' . htmlspecialchars($reason, ENT_QUOTES) . '">' . getImageHREF ('nodestroy');
+	else
+		$delete_line .= '<a href="' .
+			makeHrefProcess (array ('op' => 'del', 'vlan_ck' => $vlan_ck)) .
+			'" title="delete VLAN">' . getImageHREF ('destroy');
+	$delete_line .= ' delete VLAN</a>';
+	
+	echo $delete_line . $clear_line;
+	finishPortlet();
 }
 
 ?>

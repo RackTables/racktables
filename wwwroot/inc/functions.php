@@ -3692,15 +3692,9 @@ function exec8021QDeploy ($object_id, $do_push)
 	$new_uplinks = filter8021QChangeRequests ($domain_vlanlist, $Dnew, produceUplinkPorts ($domain_vlanlist, $Dnew, $vswitch['object_id']));
 	$nsaved_uplinks += replace8021QPorts ('desired', $vswitch['object_id'], $Dnew, $new_uplinks);
 	if ($nsaved + $nsaved_uplinks)
-	{
 		// saved configuration has changed (either "user" ports have changed,
 		// or uplinks, or both), so bump revision number up)
-		usePreparedExecuteBlade
-		(
-			'UPDATE VLANSwitch SET mutex_rev=mutex_rev+1, last_change=NOW(), out_of_sync="yes" WHERE object_id=?',
-			array ($vswitch['object_id'])
-		);
-	}
+		touchVLANSwitch ($vswitch['object_id']);
 	if ($conflict)
 		usePreparedExecuteBlade
 		(
@@ -3820,12 +3814,9 @@ function saveDownlinksReverb ($object_id, $requested_changes)
 			$nsaved++;
 		}
 	if ($nsaved)
-		usePreparedExecuteBlade
-		(
-			'UPDATE VLANSwitch SET mutex_rev=mutex_rev+1, last_change=NOW(), out_of_sync="yes" WHERE object_id=?',
-			array ($vswitch['object_id'])
-		);
+		touchVLANSwitch ($vswitch['object_id']);
 	$dbxlink->commit();
+	return $nsaved;
 }
 
 // Use records from Port and Link tables to run a series of tasks on remote
@@ -3851,8 +3842,10 @@ function initiateUplinksReverb ($object_id, $uplink_ports)
 	// remote objects (using different media types, perhaps). Such a case can
 	// be considered as normal, and each remote object will show up on the
 	// task list (with its actual remote port name, of course).
+	$done = 0;
 	foreach ($upstream_config as $remote_object_id => $remote_ports)
-		saveDownlinksReverb ($remote_object_id, $remote_ports);
+		$done += saveDownlinksReverb ($remote_object_id, $remote_ports);
+	return $done;
 }
 
 // checks if the desired config of all uplink/downlink ports of that switch, and
@@ -4005,11 +3998,7 @@ function queueChangesToSwitch ($switch_id, $order, $before, $check_only = FALSE)
 		}
 	
 	if (! $check_only && $nsaved)
-		usePreparedExecuteBlade
-		(
-			'UPDATE VLANSwitch SET mutex_rev=mutex_rev+1, last_change=NOW(), out_of_sync="yes" WHERE object_id=?',
-			array ($switch_id)
-		);
+		touchVLANSwitch ($switch_id);
 	return $nsaved;
 }
 
@@ -4842,6 +4831,77 @@ function explodeTableLine ($line, $table_schema)
 		$ret[$header] = trim ($value);
 	}
 	return $ret;
+}
+
+// returns number of changed ports (both local and remote)
+// shows error messages unconditionally, and success messages respecting  to $verbose setting
+// if $mutex_rev is set, checks if it is outdated
+function apply8021qChangeRequest ($switch_id, $changes, $verbose = TRUE, $mutex_rev = NULL)
+{
+	global $dbxlink;
+	$dbxlink->beginTransaction();
+	try
+	{
+		if (NULL === $vswitch = getVLANSwitchInfo ($switch_id, 'FOR UPDATE'))
+			throw new InvalidArgException ('object_id', $switch_id, 'VLAN domain is not set for this object');
+		if (isset ($mutex_rev) and $vswitch['mutex_rev'] != $mutex_rev)
+			throw new InvalidRequestArgException ('mutex_rev', $mutex_rev, 'expired form data');
+		$after = $before = apply8021QOrder ($vswitch['template_id'], getStored8021QConfig ($vswitch['object_id'], 'desired'));
+		$domain_vlanlist = getDomainVLANs ($vswitch['domain_id']);
+		$changes = filter8021QChangeRequests
+		(
+			$domain_vlanlist,
+			$before,
+			apply8021QOrder ($vswitch['template_id'], $changes)
+		);
+		$desired_ports_count = count ($changes);
+		$changes = authorize8021QChangeRequests ($before, $changes);
+		if (count ($changes) < $desired_ports_count)
+			showWarning (sprintf ("Permission denied to change %d ports", $desired_ports_count - count ($changes)));
+		foreach ($changes as $port_name => $port)
+			$after[$port_name] = $port;
+		$new_uplinks = filter8021QChangeRequests ($domain_vlanlist, $after, produceUplinkPorts ($domain_vlanlist, $after, $vswitch['object_id']));
+		$npulled = replace8021QPorts ('desired', $vswitch['object_id'], $before, $changes);
+		$nsaved_uplinks = replace8021QPorts ('desired', $vswitch['object_id'], $before, $new_uplinks);
+		if ($npulled + $nsaved_uplinks)
+			touchVLANSwitch ($vswitch['object_id']);
+		$dbxlink->commit();
+	}
+	catch (Exception $e)
+	{
+		$dbxlink->rollBack();
+		showError (sprintf ("Failed to update switchports: %s", $e->getMessage()));
+		return 0;
+	}
+	if ($nsaved_uplinks)
+		$nsaved_downlinks = initiateUplinksReverb ($vswitch['object_id'], $new_uplinks);
+	// instant deploy to that switch if configured
+	$done = 0;
+	if ($npulled + $nsaved_uplinks > 0 and getConfigVar ('8021Q_INSTANT_DEPLOY') == 'yes')
+	{
+		try
+		{
+			if (FALSE === $done = exec8021QDeploy ($vswitch['object_id'], TRUE))
+				showError ("deploy was blocked due to conflicting configuration versions");
+			elseif ($verbose)
+				showSuccess (sprintf ("Configuration for %u port(s) have been deployed", $done));
+		}
+		catch (Exception $e)
+		{
+			showError (sprintf ("Failed to deploy changes to switch: %s", $e->getMessage()));
+		}
+	}
+	// report number of changed ports
+	$total = $npulled + $nsaved_uplinks + $nsaved_downlinks;
+	if ($verbose)
+	{
+		$message = sprintf ('%u port(s) have been changed', $total);
+		if ($total > 0)
+			showSuccess ($message);
+		else
+			showNotice ($message);
+	}
+	return $total;
 }
 
 ?>
