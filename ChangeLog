@@ -13,13 +13,13 @@
 	update: ability to remove 802.1q VLAN from every port it belongs to in order to delete this VLAN
 	new feature: you can obtain who has made tag assignment, object's ports or IPv4 address changes by hovering cursor on these entities
 	new feature: adjustable quick links at the top of the page
-	new feature: integrated Cacti Graphs if you have the cURL extension for PHP loaded (#306, by Jonathan Thurman)
 0.19.8
 	update: switch to InnoDB completely
 	bugfix: dictionary chapter rename did not work
 	bugfix: searching for IPv6 address by its description caused an error
 	update: ER DWDM channel grid
 	update: use of AJAX in tag tree editor tab (by Alex Noskov)
+	new feature: integrated Cacti Graphs if you have the cURL extension for PHP loaded (#306, by Jonathan Thurman)
 0.19.7 2011-07-31
 	update: add SNMP support for several more switches
 	update: improve consistency of stored attribute data (#449)

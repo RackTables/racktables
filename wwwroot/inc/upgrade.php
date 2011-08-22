@@ -1119,6 +1119,20 @@ CREATE TABLE `Attribute_new` (
 			$query[] = "DELETE FROM AttributeMap WHERE chapter_id NOT IN (SELECT id FROM Chapter)";
 			$query[] = "ALTER TABLE AttributeMap ADD KEY (chapter_id)";
 			$query[] = "ALTER TABLE AttributeMap ADD CONSTRAINT `AttributeMap-FK-chapter_id` FOREIGN KEY (chapter_id) REFERENCES Chapter (id)";
+			$query[] = "
+CREATE TABLE `CactiGraph` (
+  `object_id` int(10) unsigned NOT NULL,
+  `graph_id` int(10) unsigned NOT NULL,
+  `caption`  char(255) DEFAULT NULL,
+  PRIMARY KEY  (`graph_id`),
+  KEY `object_id` (`object_id`),
+  CONSTRAINT `CactiGraph-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `Object` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB;
+";
+			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdefined, description) VALUES ('CACTI_LISTSRC','false','string','yes','no','no','List of object with Cacti graphs')";
+			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdefined, description) VALUES ('CACTI_URL','','string','yes','no','no','Cacti server base URL')";
+			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdefined, description) VALUES ('CACTI_USERNAME','','string','yes','no','no','Cacti user account')";
+			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdefined, description) VALUES ('CACTI_USERPASS','','string','yes','no','no','Cacti user password')";
 			$query[] = "UPDATE Config SET varvalue = '0.19.8' WHERE varname = 'DB_VERSION'";
 			break;
 		case '0.20.0':
@@ -1265,20 +1279,6 @@ CREATE VIEW `RackObject` AS SELECT * FROM `Object`
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdefined, description) VALUES ('SYNC_802Q_LISTSRC','','string','yes','no','no','List of VLAN switches sync is enabled on')";
 			$query[] = "UPDATE `Config` SET is_userdefined='yes' WHERE varname='PROXIMITY_RANGE'";
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdefined, description) VALUES ('QUICK_LINK_PAGES','','string','yes','no','yes','List of pages to dislay in quick links')";
-			$query[] = "
-CREATE TABLE `CactiGraph` (
-  `object_id` int(10) unsigned NOT NULL,
-  `graph_id` int(10) unsigned NOT NULL,
-  `caption`  char(255) DEFAULT NULL,
-  PRIMARY KEY  (`graph_id`),
-  KEY `object_id` (`object_id`),
-  CONSTRAINT `CactiGraph-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `Object` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB;
-";
-			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdefined, description) VALUES ('CACTI_LISTSRC','false','string','yes','no','no','List of object with Cacti graphs')";
-			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdefined, description) VALUES ('CACTI_URL','','string','yes','no','no','Cacti server base URL')";
-			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdefined, description) VALUES ('CACTI_USERNAME','','string','yes','no','no','Cacti user account')";
-			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdefined, description) VALUES ('CACTI_USERPASS','','string','yes','no','no','Cacti user password')";
 			$query[] = "ALTER TABLE `IPv4LB` MODIFY `prio` varchar(255) DEFAULT NULL";
 			$query[] = "UPDATE Config SET varvalue = '0.20.0' WHERE varname = 'DB_VERSION'";
 			break;
