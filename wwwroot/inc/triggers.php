@@ -337,4 +337,18 @@ function trigger_vst_editrules()
 	return count ($vst['rules']) ? 'std' : 'attn';
 }
 
+function triggerCactiGraphs ()
+{
+	if ('' == getConfigVar ('CACTI_URL'))
+		return '';
+	if
+	(
+		count (getCactiGraphsForObject (getBypassValue())) or
+		considerConfiguredConstraint (spotEntity ('object', getBypassValue()), 'CACTI_LISTSRC')
+	)
+		return 'std';
+	else
+		return '';
+}
+
 ?>

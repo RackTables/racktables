@@ -151,6 +151,27 @@ $opspec_list['object-editrspvs-updLB'] = array
 		array ('url_argname' => 'vs_id', 'assertion' => 'uint'),
 	),
 );
+$opspec_list['object-cacti-add'] = array
+(
+	'table' => 'CactiGraph',
+	'action' => 'INSERT',
+	'arglist' => array
+	(
+		array ('url_argname' => 'object_id', 'assertion' => 'uint'),
+		array ('url_argname' => 'graph_id', 'assertion' => 'uint'),
+		array ('url_argname' => 'caption', 'assertion' => 'string0'),
+	),
+);
+$opspec_list['object-cacti-del'] = array
+(
+	'table' => 'CactiGraph',
+	'action' => 'DELETE',
+	'arglist' => array
+	(
+		array ('url_argname' => 'object_id', 'assertion' => 'uint'),
+		array ('url_argname' => 'graph_id', 'assertion' => 'uint'),
+	),
+);
 $opspec_list['ipv4net-properties-editRange'] = array
 (
 	'table' => 'IPv4Network',

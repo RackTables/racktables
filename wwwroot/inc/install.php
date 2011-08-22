@@ -394,6 +394,15 @@ CREATE TABLE `CachedPVM` (
   CONSTRAINT `CachedPVM-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `RackObject` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
+CREATE TABLE `CactiGraph` (
+  `object_id` int(10) unsigned NOT NULL,
+  `graph_id` int(10) unsigned NOT NULL,
+  `caption`  char(255) DEFAULT NULL,
+  PRIMARY KEY  (`graph_id`),
+  KEY `object_id` (`object_id`),
+  CONSTRAINT `CactiGraph-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `Object` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
 CREATE TABLE `Chapter` (
   `id` int(10) unsigned NOT NULL auto_increment,
   `sticky` enum('yes','no') default 'no',
@@ -1439,6 +1448,10 @@ INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdef
 ('FILTER_RACKLIST_BY_TAGS','yes','string','yes','no','yes','Rackspace: show only racks matching the current object\'s tags'),
 ('SSH_OBJS_LISTSRC','none','string','yes','no','yes','Rackcode filter for SSH-managed objects'),
 ('TELNET_OBJS_LISTSRC','none','string','yes','no','yes','Rackcode filter for telnet-managed objects'),
+('CACTI_LISTSRC','false','string','yes','no','no','List of object with Cacti graphs'),
+('CACTI_URL','','string','yes','no','no','Cacti server base URL'),
+('CACTI_USERNAME','','string','yes','no','no','Cacti user account'),
+('CACTI_USERPASS','','string','yes','no','no','Cacti user password'),
 ('DB_VERSION','0.19.7','string','no','yes','no','Database version.');
 
 INSERT INTO `Script` VALUES ('RackCode','allow {\$userid_1}');

@@ -852,6 +852,8 @@ function commitResetObject ($object_id = 0)
 	commitUpdateAttrValue ($object_id, 3, "");
 	// log history
 	recordHistory ('RackObject', $object_id);
+	# Cacti graphs
+	usePreparedDeleteBlade ('CactiGraph', array ('object_id' => $object_id));
 }
 
 function commitDeleteRack($rack_id)
@@ -4562,6 +4564,12 @@ function resetUserConfigVar ($varname = '')
 		throw new InvalidRequestArgException ('$varname', $varname, 'a hidden variable cannot be changed by user');
 	// Update cache only if the changes went into DB.
 	usePreparedDeleteBlade ('UserConfig', array ('varname' => $varname, 'user' => $remote_username));
+}
+
+function getCactiGraphsForObject ($object_id)
+{
+	$result = usePreparedSelectBlade ('SELECT graph_id, caption FROM CactiGraph WHERE object_id = ? ORDER BY graph_id', array ($object_id));
+	return reindexById ($result->fetchAll (PDO::FETCH_ASSOC), 'graph_id');
 }
 
 ?>
