@@ -153,6 +153,7 @@ function queryTerminal ($object_id, $commands, $tolerate_remote_errors = TRUE)
 			break;
 		case 'ssh':
 			$params_from_settings['port'] = 'port';
+			$params_from_settings['proto'] = 'proto';
 			$params_from_settings['username'] = 'username';
 			$params_from_settings['i'] = 'identity_file';
 			$params_from_settings['sudo-user'] = 'sudo_user';
@@ -208,7 +209,7 @@ function callScript ($gwname, $params, $in, &$out, &$errors)
 				$cmd_line .= " " . escapeshellarg("--$key=$value");
 		}
 	}
-	
+
 	$pipes = array();
 	$child = proc_open 
 	(

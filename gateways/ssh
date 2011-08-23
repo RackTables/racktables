@@ -7,6 +7,7 @@ my @orig_params = @ARGV;
 
 # fetch command-line parameters
 my $op_help;
+my $op_proto;
 my $op_port;
 my $op_connect_timeout = 2;
 my $op_user;
@@ -15,6 +16,7 @@ my $op_dont_sudo;
 my $op_as_user;
 GetOptions (
     'h' => \$op_help,
+	'proto:i' => \$op_proto,
     'port|p:i' => \$op_port,
     'connect-timeout:i' => \$op_connect_timeout,
     'dont-sudo' => \$op_dont_sudo,
@@ -26,6 +28,9 @@ if ($op_help) {
     &display_help;
     exit;
 }
+if (defined $op_proto) {
+	$op_proto == 4 or $op_proto == 6 or die "ERROR: valid protocol version values are 4 and 6";
+}
 my $op_host = $ARGV[0];
 defined $op_host or die "ERROR: please specify remote host (-h for help)";
 
@@ -36,10 +41,11 @@ sub display_help {
 ssh batch client for RackTables.
 Takes commands list in standard input and gives the responses via standard output.
 Usage: 
-$0 <hostname> [-p <port>] [-l <username>] [-i <identity file>] [--connect-timeout=<seconds>] [--as-user=<username>]
+$0 <hostname> [-p <port>] [-l <username>] [-i <identity file>] [--connect-timeout=<seconds>] [--as-user=<username>] [--proto=<4|6>]
  -p, --port           TCP port number to connect to
+ --proto              exclicitly specify IP protocol version
  -l, --username       remote username for ssh
- -i, --identity      identity file to authenticate
+ -i, --identity       identity file to authenticate
  --connect-timeout    timeout for giving up connecting process, seconds
  --as-user            sudo self as specified username
 
@@ -60,6 +66,9 @@ sub become_user {
 my $port = $op_port || 22;
 my @params;
 push @params, '-T';
+if (defined $op_proto) {
+	push @params, "-$op_proto"
+}
 if (defined $op_connect_timeout) {
     push @params, '-o', "ConnectTimeout=$op_connect_timeout";
 }
