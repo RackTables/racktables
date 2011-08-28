@@ -102,29 +102,6 @@ function dispatchAJAXRequest()
 	genericAssertion ('ac', 'string');
 	switch ($_REQUEST['ac'])
 	{
-	case 'get-tag-select':
-		global $taglist;
-		$options = array();
-		$selected_id = '';
-		if (! isset($_REQUEST['tagid']))
-			$options['error'] = "Sorry, param 'tagid' is empty. Reload page and try again";
-		elseif (! preg_match("/tagid_(\d+)/i", $_REQUEST['tagid'], $m))
-			$options['error'] = "Sorry, wrong format tagid:'".$_REQUEST['tagid']."'. Reload page and try again";
-		else
-		{
-			$current_tag_id = $m[1];
-			$selected_id = $taglist[$current_tag_id]['parent_id'];
-			echo $selected_id;
-			$options[0] = '-- NONE --';
-			foreach ($taglist as $tag_id => $taginfo)
-				if (! in_array ($current_tag_id, $taginfo['trace']) && $current_tag_id != $tag_id)
-					$options[$tag_id] = $taginfo['tag'];
-		}
-		foreach ($options as $tag_id => $value)
-			echo "<option value='$tag_id'" .
-				($tag_id == $selected_id ? ' selected' : '') .
-				'>' . htmlspecialchars ($value) . '</option>';
-		break;
 	case 'verifyCode':
 		global $pageno, $tabno;
 		$pageno = 'perms';
