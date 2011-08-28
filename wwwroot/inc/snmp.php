@@ -1223,14 +1223,14 @@ function doSNMPmining ($object_id, $snmpsetup)
 	if (count ($endpoints) > 1)
 		return showFuncMessage (__FUNCTION__, 'ERR2'); // can't pick an address
 
-	$device = new RTSNMPDevice ($endpoints[0], $snmpsetup);
-
 	switch ($objectInfo['objtype_id'])
 	{
 	case 7:
 	case 8:
+		$device = new RTSNMPDevice ($endpoints[0], $snmpsetup);
 		return doSwitchSNMPmining ($objectInfo, $device);
 	case 2:
+		$device = new APCPowerSwitch ($endpoints[0], $snmpsetup);
 		return doPDUSNMPmining ($objectInfo, $device);
 	}	
 }
@@ -1499,10 +1499,9 @@ function doSwitchSNMPmining ($objectInfo, $device)
 	return buildRedirectURL (NULL, 'ports');
 }
 
-function doPDUSNMPmining ($objectInfo, $hostname, $snmpsetup)
+function doPDUSNMPmining ($objectInfo, $switch)
 {
 	global $known_APC_SKUs;
-	$switch = new APCPowerSwitch ($hostname, $snmpsetup);
 	if (FALSE !== ($dict_key = array_search ($switch->getHWModel(), $known_APC_SKUs)))
 		updateStickerForCell ($objectInfo, 2, $dict_key);
 	updateStickerForCell ($objectInfo, 1, $switch->getHWSerial());
