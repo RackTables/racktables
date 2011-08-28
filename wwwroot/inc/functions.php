@@ -998,13 +998,15 @@ function getAutoPorts ($type_id)
 		foreach (explode ('+', $portlist) as $product)
 		{
 			$tmp = explode ('*', $product);
-			if (count ($tmp) != 3)
+			if (count ($tmp) > 4 || count ($tmp) < 3)
 				continue;
+			# format: <number of ports>*<port_type_id>[*<sprintf_name>*<startnumber>]
 			$nports = $tmp[0];
 			$port_type = $tmp[1];
 			$format = $tmp[2];
+			$startnum = isset ($tmp[3]) ? $tmp[3] : 0;
 			for ($i = 0; $i < $nports; $i++)
-				$ret[] = array ('type' => $port_type, 'name' => @sprintf ($format, $i));
+				$ret[] = array ('type' => $port_type, 'name' => @sprintf ($format, $i + $startnum));
 		}
 	}
 	return $ret;
