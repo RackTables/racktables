@@ -1,4 +1,4 @@
-0.19.8
+0.19.8 2011-08-28
 	update: switch to InnoDB completely
 	bugfix: dictionary chapter rename did not work
 	bugfix: searching for IPv6 address by its description caused an error
