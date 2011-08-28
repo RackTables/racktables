@@ -2,6 +2,7 @@
 	update: switch to InnoDB completely
 	bugfix: dictionary chapter rename did not work
 	bugfix: searching for IPv6 address by its description caused an error
+	bugfix: SNMP for PDUs (#458)
 	update: ER DWDM channel grid
 	new feature: integrated Cacti Graphs if you have the cURL extension for PHP loaded (#306, by Jonathan Thurman)
 0.19.7 2011-07-31
