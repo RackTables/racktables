@@ -2087,13 +2087,15 @@ function updateRackProblems ()
 
 function querySNMPData ()
 {
-	assertStringArg ('community', TRUE);
-
+	genericAssertion ('ver', 'uint');
 	$snmpsetup = array ();
-	if ($_REQUEST['community'] != '')
-		$snmpsetup['community'] = $_REQUEST['community'];
-	else
+	switch ($_REQUEST['ver'])
 	{
+	case 1:
+		genericAssertion ('community', 'string');
+		$snmpsetup['community'] = $_REQUEST['community'];
+		break;
+	case 23:
 		assertStringArg ('sec_name');
 		assertStringArg ('sec_level');
 		assertStringArg ('auth_protocol');
@@ -2107,6 +2109,9 @@ function querySNMPData ()
 		$snmpsetup['auth_passphrase'] = $_REQUEST['auth_passphrase'];
 		$snmpsetup['priv_protocol'] = $_REQUEST['priv_protocol'];
 		$snmpsetup['priv_passphrase'] = $_REQUEST['priv_passphrase'];
+		break;
+	default:
+		throw new InvalidRequestArgException ('ver', $_REQUEST['ver']);
 	}
 	return doSNMPmining (getBypassValue(), $snmpsetup);
 }
