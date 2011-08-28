@@ -1515,7 +1515,6 @@ function showMessageOrError ()
 		67 => array ('code' => 'success', 'format' => "Tag rolling done, %u objects involved"),
 		71 => array ('code' => 'success', 'format' => 'File "%s" was linked successfully'),
 		72 => array ('code' => 'success', 'format' => 'File was unlinked successfully'),
-		81 => array ('code' => 'success', 'format' => "SNMP: completed '%s' work"),
 		82 => array ('code' => 'success', 'format' => "Bulk port creation was successful. %u ports created, %u failed"),
 		87 => array ('code' => 'success', 'format' => '802.1Q recalculate: %d ports changed on %d switches'),
 // records 100~199 with fatal error messages
@@ -4885,65 +4884,71 @@ function renderVLANMembership ($object_id)
 
 function renderSNMPPortFinder ($object_id)
 {
-	printOpFormIntro ('querySNMPData');
 	if (!extension_loaded ('snmp'))
 	{
 		echo "<div class=msg_error>The PHP SNMP extension is not loaded.  Cannot continue.</div>";
+		return;
 	}
-	else
-	{
-		$snmpcomm = getConfigVar('DEFAULT_SNMP_COMMUNITY');
-		if (empty($snmpcomm))
-			$snmpcomm = 'public';
+	$snmpcomm = getConfigVar('DEFAULT_SNMP_COMMUNITY');
+	if (empty($snmpcomm))
+		$snmpcomm = 'public';
 
-		echo "<p align=center>
-This object has no ports listed, that's why you see this form. I can try to automatically harvest the data.
-As soon as at least one port is added, this tab will not be seen any more. Good luck.
-<br />
-You may enter just the snmp community and use SNMPv3 (leave community empty and fill the other fields)
-<br />\n";
+	startPortlet ('SNMPv1');
+	printOpFormIntro ('querySNMPData', array ('ver' => 1));
+	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
+	echo '<tr><th class=tdright><label for=community>Community: </label></th>';
+	echo "<td class=tdleft><input type=text name=community id=community value='${snmpcomm}'></td></tr>";
+	echo '<tr><td colspan=2><input type=submit value="Try now"></td></tr>';
+	echo '</table></form>';
+	finishPortlet();
 
-		echo "<input type=text name=community value='" . $snmpcomm . "'><br /><br />\n";
-
-		echo '
-		<label for="sec_name">Security User</label>
-		<input type="text" id="sec_name" name="sec_name"><br />
-
-		
-		<label for="sec_level">Security Level</label>
-		<select id="sec_level" name="sec_level"> 
+	startPortlet ('SNMPv2/v3');
+	printOpFormIntro ('querySNMPData', array ('ver' => 23));
+?>
+	<table cellspacing=0 cellpadding=5 align=center class=widetable>
+	<tr>
+		<th class=tdright><label for=sec_name>Security User:</label></th>
+		<td class=tdleft><input type=text id=sec_name name=sec_name></td>
+	</tr>
+	<tr>
+		<th class=tdright><label for="sec_level">Security Level:</label></th>
+		<td class=tdleft><select id="sec_level" name="sec_level"> 
 			<option value="noAuthNoPriv" selected="selected">noAuth and no Priv</option>
 			<option value="authNoPriv" >auth without Priv</option>
 			<option value="authPriv" >auth with Priv</option>
-		</select>
-		<br />
-
-		<label for="auth_protocol_1">Auth Type</label>
-		<input id="auth_protocol_1" name="auth_protocol" type="radio" value="md5" />
-		<label for="auth_protocol_1">MD5</label>
-		<input id="auth_protocol_2" name="auth_protocol" type="radio" value="sha" />
-		<label for="auth_protocol_2">SHA</label>
-		<br />
-
-		<label for="auth_passphrase">Auth Key</label>
-		<input type="text" id="auth_passphrase" name="auth_passphrase">
-		<br />
-
-		<label for="priv_protocol_1">Priv Type</label>
-		<input id="priv_protocol_1" name="priv_protocol" type="radio" value="DES" />
-		<label for="priv_protocol_1">DES</label>
-		<input id="priv_protocol_2" name="priv_protocol" type="radio" value="AES" />
-		<label for="priv_protocol_2">AES</label>
-		<br />
-
-		<label for="priv_passphrase">Priv Key</label>
-		<input type="text" id="priv_passphrase" name="priv_passphrase">
-		<br />';
-		
-
-		echo "<input type=submit name='do_scan' value='Go!'> \n";
-		echo "</form></p>\n";
-	}
+		</select></td>
+	</tr>
+	<tr>
+		<th class=tdright><label for="auth_protocol_1">Auth Type:</label></th>
+		<td class=tdleft>
+		<input id=auth_protocol_1 name=auth_protocol type=radio value=md5 />
+		<label for=auth_protocol_1>MD5</label>
+		<input id=auth_protocol_2 name=auth_protocol type=radio value=sha />
+		<label for=auth_protocol_2>SHA</label>
+		</td>
+	</tr>
+	<tr>
+		<th class=tdright><label for=auth_passphrase>Auth Key:</label></th>
+		<td class=tdleft><input type=text id=auth_passphrase name=auth_passphrase></td>
+	</tr>
+	<tr>
+		<th class=tdright><label for=priv_protocol_1>Priv Type:</label></th>
+		<td class=tdleft>
+		<input id=priv_protocol_1 name=priv_protocol type=radio value=DES />
+		<label for=priv_protocol_1>DES</label>
+		<input id=priv_protocol_2 name=priv_protocol type=radio value=AES />
+		<label for=priv_protocol_2>AES</label>
+		</td>
+	</tr>
+	<tr>
+		<th class=tdright><label for=priv_passphrase>Priv Key</label></th>
+		<td class=tdleft><input type=text id=priv_passphrase name=priv_passphrase></td>
+	</tr>
+	<tr><td colspan=2><input type=submit value="Try now"></td></tr>
+	</table>
+<?php
+	echo '</form>';
+	finishPortlet();
 }
 
 function renderUIResetForm()

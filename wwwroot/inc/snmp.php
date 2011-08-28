@@ -1213,7 +1213,6 @@ function checkPIC ($port_type_id)
 
 $msgcode['doSNMPmining']['ERR1'] = 161;
 $msgcode['doSNMPmining']['ERR2'] = 162;
-$msgcode['doSNMPmining']['OK'] = 81;
 function doSNMPmining ($object_id, $snmpsetup)
 {
 	$objectInfo = spotEntity ('object', $object_id);
@@ -1250,6 +1249,7 @@ function doSwitchSNMPmining ($objectInfo, $device)
 	$sysDescr = str_replace (array ("\n", "\r"), " ", $sysDescr);  // Make it one line
 	if (!isset ($known_switches[$sysObjectID]))
 		return showFuncMessage (__FUNCTION__, 'ERR4', array ($sysObjectID)); // unknown OID
+	showSuccess ($known_switches[$sysObjectID]['text']);
 	foreach (array_keys ($known_switches[$sysObjectID]['processors']) as $pkey)
 		if (!array_key_exists ($known_switches[$sysObjectID]['processors'][$pkey], $iftable_processors))
 		{
@@ -1258,7 +1258,6 @@ function doSwitchSNMPmining ($objectInfo, $device)
 		}
 	updateStickerForCell ($objectInfo, 2, $known_switches[$sysObjectID]['dict_key']);
 	updateStickerForCell ($objectInfo, 3, $sysName);
-	showOneLiner (81, array ('generic'));
 	switch (1)
 	{
 	case preg_match ('/^9\.1\./', $sysObjectID): // Catalyst
@@ -1284,7 +1283,6 @@ function doSwitchSNMPmining ($objectInfo, $device)
 			checkPIC ('1-16'); // AC input
 			commitAddPort ($objectInfo['id'], 'AC-in', '1-16', '', '');
 		}
-		showOneLiner (81, array ('catalyst-generic'));
 		break;
 	case preg_match ('/^9\.12\.3\.1\.3\./', $sysObjectID): // Nexus
 		$exact_release = preg_replace ('/^.*, Version ([^ ]+), .*$/', '\\1', $sysDescr);
@@ -1302,7 +1300,6 @@ function doSwitchSNMPmining ($objectInfo, $device)
 		checkPIC ('1-16'); // AC input
 		commitAddPort ($objectInfo['id'], 'AC-in-1', '1-16', 'AC1', '');
 		commitAddPort ($objectInfo['id'], 'AC-in-2', '1-16', 'AC2', '');
-		showOneLiner (81, array ('nexus-generic'));
 		break;
 	case preg_match ('/^11\.2\.3\.7\.11\.(\d+)$/', $sysObjectID, $matches): // ProCurve
 		$console_per_product = array
@@ -1320,18 +1317,15 @@ function doSwitchSNMPmining ($objectInfo, $device)
 		}
 		$exact_release = preg_replace ('/^.* revision ([^ ]+), .*$/', '\\1', $sysDescr);
 		updateStickerForCell ($objectInfo, 5, $exact_release);
-		showOneLiner (81, array ('procurve-generic'));
 		break;
 	case preg_match ('/^4526\.100\.2\./', $sysObjectID): // NETGEAR
 		checkPIC ('1-681');
 		commitAddPort ($objectInfo['id'], 'console', '1-681', 'console', ''); // DB-9 RS-232 console
-		showOneLiner (81, array ('netgear-generic'));
 		break;
 	case preg_match ('/^2011\.2\.23\./', $sysObjectID): // Huawei
 		detectSoftwareType ($objectInfo, $sysDescr);
 		checkPIC ('1-681');
 		commitAddPort ($objectInfo['id'], 'con0', '1-681', 'console', ''); // DB-9 RS-232 console
-		showOneLiner (81, array ('huawei-generic'));
 		break;
 	case '2636.1.1.1.2.31' == $sysObjectID: // Juniper EX4200
 		detectSoftwareType ($objectInfo, $sysDescr);
@@ -1340,13 +1334,11 @@ function doSwitchSNMPmining ($objectInfo, $device)
 		// EX4200-24T is already in DB
 		if (preg_match ('/^Juniper Networks, Inc. ex4200-48t internet router/', $sysDescr))
 			updateStickerForCell ($objectInfo, 2, 907);
-		showOneLiner (81, array ('juniper-ex'));
 		break;
 	case preg_match ('/^2636\.1\.1\.1\.2\./', $sysObjectID): // Juniper
 		detectSoftwareType ($objectInfo, $sysDescr);
 		checkPIC ('1-681');
 		commitAddPort ($objectInfo['id'], 'console', '1-681', 'console', ''); // DB-9 RS-232 console
-		showOneLiner (81, array ('juniper-generic'));
 		break;
 	case preg_match ('/^1991\.1\.3\.45\./', $sysObjectID): // snFGSFamily
 	case preg_match ('/^1991\.1\.3\.46\./', $sysObjectID): // snFLSFamily
@@ -1395,7 +1387,6 @@ function doSwitchSNMPmining ($objectInfo, $device)
 		# fixed console port
 		checkPIC ('1-681');
 		commitAddPort ($objectInfo['id'], 'console', '1-681', 'console', ''); // DB-9 RS-232 console
-		showOneLiner (81, array ('brocade-generic'));
 		break;
 	case preg_match ('/^1916\.2\./', $sysObjectID): // Extreme Networks Summit
 		$xos_release = preg_replace ('/^ExtremeXOS version ([[:digit:]]+)\..*$/', '\\1', $sysDescr);
@@ -1411,7 +1402,6 @@ function doSwitchSNMPmining ($objectInfo, $device)
 		commitAddPort ($objectInfo['id'], 'console', '1-681', 'console', ''); // DB-9 RS-232
 		checkPIC ('1-16');
 		commitAddPort ($objectInfo['id'], 'AC-in', '1-16', '', '');
-		showOneLiner (81, array ('summit-generic'));
 		break;
 	case preg_match ('/^6027\.1\./', $sysObjectID): # Force10
 		commitAddPort ($objectInfo['id'], 'aux0', '1-29', 'RS-232', ''); // RJ-45 RS-232 console
@@ -1451,7 +1441,6 @@ function doSwitchSNMPmining ($objectInfo, $device)
 		commitAddPort ($objectInfo['id'], 'console', '1-681', '', ''); // DB-9 RS-232
 		checkPIC ('1-16');
 		commitAddPort ($objectInfo['id'], 'AC-in', '1-16', '', '');
-		$log = mergeLogs ($log, oneLiner (81, array ('smc-generic')));
 		break;
 	default: // Nortel...
 		break;
@@ -1506,8 +1495,6 @@ function doSwitchSNMPmining ($objectInfo, $device)
 			if (!$iftable_processors[$processor_name]['try_next_proc']) // done with this port
 				continue 2;
 		}
-	foreach ($known_switches[$sysObjectID]['processors'] as $processor_name)
-		showOneLiner (81, array ($processor_name));
 	// No failure up to this point, thus leave current tab for the "Ports" one.
 	return buildRedirectURL (NULL, 'ports');
 }
