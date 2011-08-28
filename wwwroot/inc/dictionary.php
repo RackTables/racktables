@@ -5,15 +5,11 @@ function reloadDictionary ($release = NULL)
 	global $dictionary;
 	// Not only update existing stuff, but make sure all obsolete records are gone.
 	$ret = array ("DELETE FROM Dictionary WHERE dict_key BETWEEN 1 AND 49999");
-	for ($i = 1; $i <= $maxkey; $i++)
-	{
-		if (!array_key_exists ($i, $dictionary))
-			continue;
-		$chapter_id = $dictionary[$i]['chapter_id'];
-		$dict_value = $dictionary[$i]['dict_value'];
+	# Iterating through 50K possible valid indices is way too slow in PHP and
+	# is likely to hit the default execution time limit of 30 seconds.
+	foreach ($dictionary as $dict_key => $record)
 		$ret[] = "INSERT INTO Dictionary (dict_key, chapter_id, dict_value) VALUES (" .
-			"${i}, ${chapter_id}, '${dict_value}')";
-	}
+			"${dict_key}, ${record['chapter_id']}, '${record['dict_value']}')";
 	return $ret;
 }
 
