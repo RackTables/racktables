@@ -1,7 +1,6 @@
 0.20.0
 	update: handle wide-band WDM transceivers
 	update: 802.1q: config deploy to Cisco IOS switches is no more requiring 'switchport trunk encapsulation dot1q' pre-set
-	update: dismiss HNDP support
 	update: markup IPv6 subnet-router on request (by Jens Weibler)
 	update: convert racks and rows into objects (by Aaron Dummer)
 	update: support for mounting zero-U objects (#173, by Aaron Dummer)
@@ -13,7 +12,10 @@
 	update: ability to remove 802.1q VLAN from every port it belongs to in order to delete this VLAN
 	new feature: you can obtain who has made tag assignment, object's ports or IPv4 address changes by hovering cursor on these entities
 	new feature: adjustable quick links at the top of the page
-0.19.8
+0.19.9
+	bugfix: a hotfix for Cacti feature
+	update: dismiss HNDP support
+0.19.8 2011-08-28
 	update: switch to InnoDB completely
 	bugfix: dictionary chapter rename did not work
 	bugfix: searching for IPv6 address by its description caused an error

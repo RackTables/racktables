@@ -13,6 +13,6 @@ committers' copies) can run into issues:
    have already been executed.
 */
 
-define ('CODE_VERSION', '0.19.7');
+define ('CODE_VERSION', '0.19.8');
 
 ?>

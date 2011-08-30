@@ -124,6 +124,7 @@ function getDBUpgradePath ($v1, $v2)
 		'0.19.6',
 		'0.19.7',
 		'0.20.0',
+		'0.19.9',
 	);
 	if (!in_array ($v1, $versionhistory) or !in_array ($v2, $versionhistory))
 		return NULL;
@@ -1135,6 +1136,11 @@ CREATE TABLE `CactiGraph` (
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdefined, description) VALUES ('CACTI_USERPASS','','string','yes','no','no','Cacti user password')";
 			$query[] = "UPDATE Config SET varvalue = '0.19.8' WHERE varname = 'DB_VERSION'";
 			break;
+		case '0.19.9':
+			$query = array_merge ($query, reloadDictionary ($batchid));
+			$query[] = "DELETE FROM Config WHERE varname = 'HNDP_RUNNERS_LISTSRC'";
+			$query[] = "UPDATE Config SET varvalue = '0.19.9' WHERE varname = 'DB_VERSION'";
+			break;
 		case '0.20.0':
 			$query = array_merge ($query, reloadDictionary ($batchid));
 			$query[] = "
@@ -1193,7 +1199,6 @@ CREATE TABLE `IPv4Log` (
 				$query[] = "UPDATE Port SET type = ${stays} WHERE type IN(${csv})";
 				$query[] = "DELETE FROM PortInterfaceCompat WHERE oif_id IN(${csv})";
 			}
-			$query[] = "DELETE FROM Config WHERE varname = 'HNDP_RUNNERS_LISTSRC'";
 			$query[] = "ALTER TABLE TagStorage MODIFY COLUMN entity_realm ENUM('file','ipv4net','ipv4vs','ipv4rspool','object','rack','user','ipv6net','vst') NOT NULL default 'object'";
 			$query[] = "ALTER TABLE `TagStorage` ADD COLUMN `user` char(64) DEFAULT NULL, ADD COLUMN `date` datetime DEFAULT NULL";
 
