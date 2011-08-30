@@ -1138,6 +1138,7 @@ CREATE TABLE `CactiGraph` (
 			break;
 		case '0.19.9':
 			$query = array_merge ($query, reloadDictionary ($batchid));
+			$query[] = "DELETE FROM Config WHERE varname = 'HNDP_RUNNERS_LISTSRC'";
 			$query[] = "UPDATE Config SET varvalue = '0.19.9' WHERE varname = 'DB_VERSION'";
 			break;
 		default:

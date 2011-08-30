@@ -53,8 +53,6 @@ $gwrxlator['getmaclist'] = array
 	'nxos4' => 'nxos4ReadMacList',
 );
 
-$gwrxlator['gethndp']['vrp53'] = 'vrp53ReadHNDPStatus';
-
 $gwpushxlator = array
 (
 	'ios12' => 'ios12TranslatePushQueue',
