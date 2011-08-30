@@ -1,3 +1,5 @@
+0.19.9
+	bugfix: a hotfix for Cacti feature
 0.19.8 2011-08-28
 	update: switch to InnoDB completely
 	bugfix: dictionary chapter rename did not work
