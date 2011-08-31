@@ -1139,6 +1139,39 @@ CREATE TABLE `CactiGraph` (
 		case '0.19.9':
 			$query = array_merge ($query, reloadDictionary ($batchid));
 			$query[] = "DELETE FROM Config WHERE varname = 'HNDP_RUNNERS_LISTSRC'";
+			# Dismiss some overly-specific OIF types in favour of more generic counterparts.
+			$squeeze = array
+			(
+				1202 => array # 1000Base-SX
+				(
+					25,   # 1000Base-SX (SC)
+					26,   # 1000Base-SX (LC)
+				),
+				1204 => array # 1000Base-LX
+				(
+					27,   # 1000Base-LX (SC)
+					28,   # 1000Base-LX (LC)
+				),
+				1196 => array # 100Base-SX
+				(
+					22,   # 100Base-SX (SC)
+					23,   # 100Base-SX (LC)
+				),
+				1195 => array # 100Base-FX
+				(
+					20,   # 100Base-FX (SC)
+					21,   # 100Base-FX (LC)
+					1083, # 100Base-FX (MT-RJ)
+				),
+			);
+			foreach ($squeeze as $stays => $leaves)
+			{
+				$csv = implode (', ', $leaves);
+				$query[] = "DELETE FROM PortCompat WHERE type1 IN(${csv}) OR type2 IN(${csv})";
+				$query[] = "INSERT IGNORE INTO PortInterfaceCompat (iif_id, oif_id) SELECT iif_id, ${stays} FROM Port WHERE type IN (${csv})";
+				$query[] = "UPDATE Port SET type = ${stays} WHERE type IN(${csv})";
+				$query[] = "DELETE FROM PortInterfaceCompat WHERE oif_id IN(${csv})";
+			}
 			$query[] = "UPDATE Config SET varvalue = '0.19.9' WHERE varname = 'DB_VERSION'";
 			break;
 		default:
