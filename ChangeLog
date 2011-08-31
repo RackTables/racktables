@@ -1,7 +1,6 @@
 0.20.0
 	update: handle wide-band WDM transceivers
 	update: 802.1q: config deploy to Cisco IOS switches is no more requiring 'switchport trunk encapsulation dot1q' pre-set
-	update: markup IPv6 subnet-router on request (by Jens Weibler)
 	update: convert racks and rows into objects (by Aaron Dummer)
 	update: support for mounting zero-U objects (#173, by Aaron Dummer)
 	update: create network and link to a VLAN at once
@@ -15,6 +14,7 @@
 0.19.9
 	bugfix: a hotfix for Cacti feature
 	update: dismiss HNDP support
+	update: markup IPv6 subnet-router on request (by Jens Weibler)
 0.19.8 2011-08-28
 	update: switch to InnoDB completely
 	bugfix: dictionary chapter rename did not work
