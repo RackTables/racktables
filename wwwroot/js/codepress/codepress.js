@@ -136,5 +136,25 @@ CodePress.run = function() {
 	}
 }
 
-if(window.attachEvent) window.attachEvent('onload',CodePress.run);
-else window.addEventListener('DOMContentLoaded',CodePress.run,false);
+$.fn.toggleEditor = function() { 
+    for (var i = 0; i < this.length; i++) {
+		if (typeof this[i].toggleEditor == 'function')
+			this[i].toggleEditor();
+	}
+}
+
+$.fn.getCode = function() {
+	if (this.length) {
+		if (typeof this[0].getCode == 'function')
+			return this[0].getCode();
+		else
+			return this.html();
+	}
+	else
+		return '';
+}
+
+if (! ($.browser.safari || $.browser.webkit)) {
+	if(window.attachEvent) window.attachEvent('onload',CodePress.run);
+	else window.addEventListener('DOMContentLoaded',CodePress.run,false);
+}

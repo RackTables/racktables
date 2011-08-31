@@ -1,5 +1,6 @@
 0.19.9
 	bugfix: a hotfix for Cacti feature
+	bugfix: disabled highlighting text editor in Google Chrome and Safari (closes #455, #462)
 	update: dismiss HNDP support
 	update: markup IPv6 subnet-router on request (by Jens Weibler)
 	update: dismiss connector specifics of optical Ethernet ports
