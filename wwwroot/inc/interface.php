@@ -6198,7 +6198,7 @@ function verify()
 	$.ajax({
 		type: "POST",
 		url: "index.php",
-		data: {'module': 'ajax', 'ac': 'verifyCode', 'code': RCTA.getCode()},
+		data: {'module': 'ajax', 'ac': 'verifyCode', 'code': $(RCTA).getCode()},
 		success: function (data)
 		{
 			arr = data.split("\\n");
@@ -6234,7 +6234,7 @@ ENDJAVASCRIPT
 	echo "<tr><td align=center>";
 	echo '<div id="ShowMessage"></div>';
 	echo "<input type='button' value='Verify' onclick='verify();'>";
-	echo "<input type='submit' value='Save' disabled='disabled' id='SaveChanges' onclick='RCTA.toggleEditor();'>";
+	echo "<input type='submit' value='Save' disabled='disabled' id='SaveChanges' onclick='$(RCTA).toggleEditor();'>";
 //	printImageHREF ('SAVE', 'Save changes', TRUE);
 	echo "</td></tr>";
 	echo '</table>';
@@ -6941,7 +6941,7 @@ function renderTextEditor ($file_id)
 	addJS ('js/codepress/codepress.js');
 	echo "<tr><td><textarea rows=45 cols=180 id=file_text name=file_text tabindex=101 class='codepress " . $syntax . "'>\n";
 	echo htmlspecialchars ($fullInfo['contents']) . '</textarea></td></tr>';
-	echo "<tr><td class=submit><input type=submit value='Save' onclick='file_text.toggleEditor();'>";
+	echo "<tr><td class=submit><input type=submit value='Save' onclick='$(file_text).toggleEditor();'>";
 	echo "</td></tr>\n</table></form>\n";
 }
 
