@@ -1139,33 +1139,6 @@ CREATE TABLE `CactiGraph` (
 		case '0.19.9':
 			$query = array_merge ($query, reloadDictionary ($batchid));
 			$query[] = "DELETE FROM Config WHERE varname = 'HNDP_RUNNERS_LISTSRC'";
-			$query[] = "UPDATE Config SET varvalue = '0.19.9' WHERE varname = 'DB_VERSION'";
-			break;
-		case '0.20.0':
-			$query = array_merge ($query, reloadDictionary ($batchid));
-			$query[] = "
-CREATE TABLE `PortLog` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `port_id` int(10) unsigned NOT NULL,
-  `date` datetime NOT NULL,
-  `user` varchar(64) NOT NULL,
-  `message` text NOT NULL,
-  PRIMARY KEY (`id`),
-  KEY `port_id-date` (`port_id`,`date`),
-  CONSTRAINT `PortLog_ibfk_1` FOREIGN KEY (`port_id`) REFERENCES `Port` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB;
-";
-			$query[] = "
-CREATE TABLE `IPv4Log` (
-  `id` int(10) NOT NULL AUTO_INCREMENT,
-  `ip` int(10) unsigned NOT NULL,
-  `date` datetime NOT NULL,
-  `user` varchar(64) NOT NULL,
-  `message` text NOT NULL,
-  PRIMARY KEY (`id`),
-  KEY `ip-date` (`ip`,`date`)
-) ENGINE=InnoDB;
-";
 			# Dismiss some overly-specific OIF types in favour of more generic counterparts.
 			$squeeze = array
 			(
@@ -1199,6 +1172,33 @@ CREATE TABLE `IPv4Log` (
 				$query[] = "UPDATE Port SET type = ${stays} WHERE type IN(${csv})";
 				$query[] = "DELETE FROM PortInterfaceCompat WHERE oif_id IN(${csv})";
 			}
+			$query[] = "UPDATE Config SET varvalue = '0.19.9' WHERE varname = 'DB_VERSION'";
+			break;
+		case '0.20.0':
+			$query = array_merge ($query, reloadDictionary ($batchid));
+			$query[] = "
+CREATE TABLE `PortLog` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `port_id` int(10) unsigned NOT NULL,
+  `date` datetime NOT NULL,
+  `user` varchar(64) NOT NULL,
+  `message` text NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `port_id-date` (`port_id`,`date`),
+  CONSTRAINT `PortLog_ibfk_1` FOREIGN KEY (`port_id`) REFERENCES `Port` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB;
+";
+			$query[] = "
+CREATE TABLE `IPv4Log` (
+  `id` int(10) NOT NULL AUTO_INCREMENT,
+  `ip` int(10) unsigned NOT NULL,
+  `date` datetime NOT NULL,
+  `user` varchar(64) NOT NULL,
+  `message` text NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `ip-date` (`ip`,`date`)
+) ENGINE=InnoDB;
+";
 			$query[] = "ALTER TABLE TagStorage MODIFY COLUMN entity_realm ENUM('file','ipv4net','ipv4vs','ipv4rspool','object','rack','user','ipv6net','vst') NOT NULL default 'object'";
 			$query[] = "ALTER TABLE `TagStorage` ADD COLUMN `user` char(64) DEFAULT NULL, ADD COLUMN `date` datetime DEFAULT NULL";
 
