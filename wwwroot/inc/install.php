@@ -1412,7 +1412,7 @@ INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdef
 ('CACTI_URL','','string','yes','no','no','Cacti server base URL'),
 ('CACTI_USERNAME','','string','yes','no','no','Cacti user account'),
 ('CACTI_USERPASS','','string','yes','no','no','Cacti user password'),
-('DB_VERSION','0.19.8','string','no','yes','no','Database version.');
+('DB_VERSION','0.19.9','string','no','yes','no','Database version.');
 
 INSERT INTO `Script` VALUES ('RackCode','allow {\$userid_1}');
 
