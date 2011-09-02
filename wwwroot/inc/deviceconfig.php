@@ -1963,11 +1963,11 @@ function vrp55ReadMacList ($text)
 		switch ($state)
 		{
 			case 'headerSearch':
-				if (preg_match('/MAC Address\s+VLAN\/\S*\s+PEVLAN\s+CEVLAN\s+Port/i', $line))
+				if (preg_match('/^MAC Address\s+VLAN/i', $line))
 					$state = 'readPort';
 				break;
 			case 'readPort':
-				if (! preg_match ('/([a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4})\s+(\d+)(?:\s+\S+){2}\s+(\S+)/', trim ($line), $matches))
+				if (! preg_match ('/([a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4})\s+(\d+)(?:(?:\s+\S+){2}|\/\S*)\s+(\S+)/', trim ($line), $matches))
 					break;
 				$portname = ios12ShortenIfName ($matches[3]);
 				$result[$portname][] = array
