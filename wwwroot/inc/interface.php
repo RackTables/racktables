@@ -928,7 +928,19 @@ function renderObject ($object_id)
 			permitted (NULL, NULL, NULL, array (array ('tag' => '$attr_' . $record['id'])))
 		)
 			$summary['{sticker}' . $record['name']] = formatAttributeValue ($record);
-	$summary['tags'] = '';
+	$summary[] = array (getOutputOf ('printTagTRs',
+		$info,
+		makeHref
+		(
+			array
+			(
+				'page'=>'depot',
+				'tab'=>'default',
+				'andor' => 'and',
+				'cfe' => '{$typeid_' . $info['objtype_id'] . '}',
+			)
+		)."&"
+	));
 	renderEntitySummary ($info, 'summary', $summary);
 
 	if (strlen ($info['comment']))
