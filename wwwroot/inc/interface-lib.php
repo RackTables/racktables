@@ -261,6 +261,16 @@ $image['html']['path'] = 'pix/tango-text-html.png';
 $image['html']['width'] = 16;
 $image['html']['height'] = 16;
 
+$page_by_realm = array();
+$page_by_realm['object'] = 'depot';
+$page_by_realm['rack'] = 'rackspace';
+$page_by_realm['ipv4net'] = 'ipv4space';
+$page_by_realm['ipv6net'] = 'ipv6space';
+$page_by_realm['ipv4vs'] = 'ipv4vslist';
+$page_by_realm['ipv4rspool'] = 'ipv4rsplist';
+$page_by_realm['file'] = 'files';
+$page_by_realm['user'] = 'userlist';
+
 function printSelect ($optionList, $select_attrs = array(), $selected_id = NULL)
 {
 	echo getSelect ($optionList, $select_attrs, $selected_id);
@@ -624,6 +634,71 @@ function getPageName ($page_code)
 	if (is_array ($title))
 		$title = $title['name'];
 	return $title;
+}
+
+function printTagTRs ($cell, $baseurl = '')
+{
+	if (getConfigVar ('SHOW_EXPLICIT_TAGS') == 'yes' and count ($cell['etags']))
+	{
+		echo "<tr><th width='50%' class=tagchain>Explicit tags:</th><td class=tagchain>";
+		echo serializeTags ($cell['etags'], $baseurl) . "</td></tr>\n";
+	}
+	if (getConfigVar ('SHOW_IMPLICIT_TAGS') == 'yes' and count ($cell['itags']))
+	{
+		echo "<tr><th width='50%' class=tagchain>Implicit tags:</th><td class=tagchain>";
+		echo serializeTags ($cell['itags'], $baseurl) . "</td></tr>\n";
+	}
+	if (getConfigVar ('SHOW_AUTOMATIC_TAGS') == 'yes' and count ($cell['atags']))
+	{
+		echo "<tr><th width='50%' class=tagchain>Automatic tags:</th><td class=tagchain>";
+		echo serializeTags ($cell['atags']) . "</td></tr>\n";
+	}
+}
+
+// renders 'summary' portlet, which persist on default tab of every realm page.
+// $values is a tricky array.
+// if its value is a string, it is treated as right td inner html, and the key is treated as left th text, colon appends there automatically.
+// if the value is a single-element array, its value rendered as-is instead of <tr> tag and all its contents.
+// if the value is an array, its first 2 items are treated as left and right contents of row, no colon is appended. Used to enable non-unique titles
+function renderEntitySummary ($cell, $title, $values = array())
+{
+	global $page_by_realm;
+	startPortlet ($title);
+	echo "<table border=0 cellspacing=0 cellpadding=3 width='100%'>\n";
+	foreach ($values as $name => $value)
+	{
+		if (is_array ($value) and count ($value) == 1)
+		{
+			$value = array_shift ($value);
+			echo $value;
+			continue;
+		}
+		if (is_array ($value))
+		{
+			$name = array_shift ($value);
+			$value = array_shift ($value);
+		}
+		elseif (! is_array ($value))
+			$name .= ':';
+		$class = 'tdright';
+		$m = array();
+		if (preg_match('/^\{(.*?)\}(.*)/', $name, $m))
+		{
+			$class .= ' ' . $m[1];
+			$name = $m[2];
+		}
+		if ($name == 'tags:') 
+		{
+			$baseurl = '';
+			if (isset ($page_by_realm[$cell['realm']]))
+				$baseurl =  makeHref(array('page'=>$page_by_realm[$cell['realm']], 'tab'=>'default'))."&";
+			printTagTRs ($cell, $baseurl);
+		}
+		else
+			echo "<tr><th width='50%' class='$class'>$name</th><td class=tdleft>$value</td></tr>";
+	}
+	echo "</table>\n";
+	finishPortlet();
 }
 
 ?>

@@ -807,34 +807,24 @@ function renderEditRackForm ($rack_id)
 // used by renderGridForm() and renderRackPage()
 function renderRackInfoPortlet ($rackData)
 {
-	startPortlet ('summary');
-	echo "<table border=0 cellspacing=0 cellpadding=3 width='100%'>\n";
-	echo "<tr><th width='50%' class=tdright>Rack row:</th><td class=tdleft>${rackData['row_name']}</td></tr>\n";
-	echo "<tr><th width='50%' class=tdright>Name:</th><td class=tdleft>${rackData['name']}</td></tr>\n";
-	echo "<tr><th width='50%' class=tdright>Height:</th><td class=tdleft>${rackData['height']}</td></tr>\n";
+	$summary = array();
+	$summary['Rack row'] = $rackData['row_name'];
+	$summary['Name'] = $rackData['name'];
+	$summary['Height'] = $rackData['height'];
 	if (strlen ($rackData['asset_no']))
-		echo "<tr><th width='50%' class=tdright>Asset tag:</th><td class=tdleft>${rackData['asset_no']}</td></tr>\n";
+		$summary['Asset tag'] = $rackData['asset_no'];
 	if ($rackData['has_problems'] == 'yes')
-		echo "<tr><td colspan=2 class=msg_error>Has problems</td></tr>\n";
+		$summary[] = array ('<tr><td colspan=2 class=msg_error>Has problems</td></tr>');
 	// Display populated attributes, but skip Height since it's already displayed above
 	foreach (getAttrValues ($rackData['id']) as $record)
 		if ($record['id'] != 27 && strlen ($record['value']))
-		{
-			echo "<tr><th width='50%' class=sticker>${record['name']}:</th><td class=sticker>" .
-				formatAttributeValue ($record) .
-				"</td></tr>\n";
-		}
-	echo "<tr><th width='50%' class=tdright>% used:</th><td class=tdleft>";
-	renderProgressBar (getRSUforRack ($rackData));
-	echo "</td></tr>\n";
-	echo "<tr><th width='50%' class=tdright>Objects:</th><td class=tdleft>";
-	echo count ($rackData['mountedObjects']);
-	echo "</td></tr>\n";
-	printTagTRs ($rackData, makeHref(array('page'=>'rackspace', 'tab'=>'default'))."&");
+			$summary['{sticker}' . $record['name']] = formatAttributeValue ($record);
+	$summary['% used'] = getProgressBar (getRSUforRack ($rackData));
+	$summary['Objects'] = count ($rackData['mountedObjects']);
+	$summary['tags'] = '';
 	if (strlen ($rackData['comment']))
-		echo "<tr><th width='50%' class=tdright>Comment:</th><td class=tdleft>${rackData['comment']}</td></tr>\n";
-	echo '</table>';
-	finishPortlet();
+		$summary['Comment'] = $rackData['comment'];
+	renderEntitySummary ($rackData, 'summary', $summary);
 }
 
 // This is a universal editor of rack design/waste.
@@ -895,76 +885,51 @@ function renderObject ($object_id)
 	echo "<tr><td colspan=2 align=center><h1>${info['dname']}</h1></td></tr>\n";
 	// left column with uknown number of portlets
 	echo "<tr><td class=pcleft>";
-	startPortlet ('summary');
-	echo "<table border=0 cellspacing=0 cellpadding=3 width='100%'>\n";
+
+	// display summary portlet
+	$summary  = array();
 	if (strlen ($info['name']))
-		echo "<tr><th width='50%' class=tdright>Common name:</th><td class=tdleft>${info['name']}</td></tr>\n";
+		$summary['Common name'] = $info['name'];
 	elseif (considerConfiguredConstraint ($info, 'NAMEWARN_LISTSRC'))
-		echo "<tr><td colspan=2 class=msg_error>Common name is missing.</td></tr>\n";
-	echo "<tr><th width='50%' class=tdright>Object type:</th><td class=tdleft><a href='";
-	echo makeHref (array (
+		$summary[] = array ('<tr><td colspan=2 class=msg_error>Common name is missing.</td></tr>');
+	$summary['Object type'] = '<a href="' . makeHref (array (
 		'page' => 'depot',
 		'tab' => 'default',
 		'cfe' => '{$typeid_' . $info['objtype_id'] . '}'
-	));
-	echo "'>" . decodeObjectType ($info['objtype_id'], 'o') . '</a></td></tr>';
+	)) . '">' .  decodeObjectType ($info['objtype_id'], 'o') . '</a>';
 	if (strlen ($info['label']))
-		echo "<tr><th width='50%' class=tdright>Visible label:</th><td class=tdleft>${info['label']}</td></tr>\n";
+		$summary['Visible label'] = $info['label'];
 	if (strlen ($info['asset_no']))
-		echo "<tr><th width='50%' class=tdright>Asset tag:</th><td class=tdleft>${info['asset_no']}</td></tr>\n";
+		$summary['Asset tag'] = $info['asset_no'];
 	elseif (considerConfiguredConstraint ($info, 'ASSETWARN_LISTSRC'))
-		echo "<tr><td colspan=2 class=msg_error>Asset tag is missing.</td></tr>\n";
-	if ($parents = getEntityRelatives ('parents', 'object', $object_id))
+		$summary[] = array ('<tr><td colspan=2 class=msg_error>Asset tag is missing.</td></tr>');
+	$parents = getEntityRelatives ('parents', 'object', $object_id);
+	if (count ($parents))
 	{
+		$fmt_parents = array();
 		foreach ($parents as $parent)
-		{
-			if (!isset($label))
-				$label = count($parents) > 1 ? 'Containers:' : 'Container:';
-			echo "<tr><th width='50%' class=tdright>${label}</th><td class=tdleft>";
-			echo "<a href='".makeHref(array('page'=>'object', 'object_id'=>$parent['entity_id']))."'>${parent['name']}</a>";
-			echo "</td></tr>\n";
-			$label = '&nbsp;';
-		}
-		unset ($label);
+			$fmt_parents[] =  "<a href='".makeHref(array('page'=>'object', 'object_id'=>$parent['entity_id']))."'>${parent['name']}</a>";
+		$summary[count($parents) > 1 ? 'Containers' : 'Container'] = implode ('<br>' . $fmt_parents);
 	}
-	if ($children = getEntityRelatives ('children', 'object', $object_id))
+	$children = getEntityRelatives ('children', 'object', $object_id);
+	if (count ($children))
 	{
+		$fmt_children = array();
 		foreach ($children as $child)
-		{
-			if (!isset($label))
-				$label = 'Contains:';
-			echo "<tr><th width='50%' class=tdright>${label}</th><td class=tdleft>";
-			echo "<a href='".makeHref(array('page'=>'object', 'object_id'=>$child['entity_id']))."'>${child['name']}</a>";
-			echo "</td></tr>\n";
-			$label = '&nbsp;';
-		}
+			$fmt_children[] = "<a href='".makeHref(array('page'=>'object', 'object_id'=>$child['entity_id']))."'>${child['name']}</a>";
+		$summary['Contains'] = implode ('<br>' . $fmt_children);
 	}
 	if ($info['has_problems'] == 'yes')
-		echo "<tr><td colspan=2 class=msg_error>Has problems</td></tr>\n";
+		$summary[] = array ('<tr><td colspan=2 class=msg_error>Has problems</td></tr>');
 	foreach (getAttrValues ($object_id) as $record)
 		if
 		(
 			strlen ($record['value']) and 
 			permitted (NULL, NULL, NULL, array (array ('tag' => '$attr_' . $record['id'])))
 		)
-			echo "<tr><th width='50%' class=sticker>${record['name']}:</th><td class=sticker>" .
-				formatAttributeValue ($record) . "</td></tr>";
-	printTagTRs
-	(
-		$info,
-		makeHref
-		(
-			array
-			(
-				'page'=>'depot',
-				'tab'=>'default',
-				'andor' => 'and',
-				'cfe' => '{$typeid_' . $info['objtype_id'] . '}',
-			)
-		)."&"
-	);
-	echo "</table><br>\n";
-	finishPortlet();
+			$summary['{sticker}' . $record['name']] = formatAttributeValue ($record);
+	$summary['tags'] = '';
+	renderEntitySummary ($info, 'summary', $summary);
 
 	if (strlen ($info['comment']))
 	{
@@ -2594,15 +2559,12 @@ function renderIPv4Network ($id)
 	echo htmlspecialchars ($range['name'], ENT_QUOTES, 'UTF-8') . "</h2></td></tr>\n";
 
 	echo "<tr><td class=pcleft width='50%'>";
-	startPortlet ('summary');
+
+	// render summary portlet
+	$summary = array();
 	$total = ($range['ip_bin'] | $range['mask_bin_inv']) - ($range['ip_bin'] & $range['mask_bin']) + 1;
 	$used = count ($range['addrlist']);
-	echo "<table border=0 cellspacing=0 cellpadding=3 width='100%'>\n";
-
-	echo "<tr><th width='50%' class=tdright>%% used:</th><td class=tdleft>";
-	renderProgressBar ($used/$total);
-	echo "&nbsp;${used}/${total}</td></tr>\n";
-
+	$summary['%% used'] = getProgressBar ($used/$total) . "&nbsp;${used}/${total}";
 	if (getConfigVar ('EXT_IPV4_VIEW') == 'yes')
 	{
 		// Build a backtrace from all parent networks.
@@ -2617,52 +2579,33 @@ function renderIPv4Network ($id)
 		$arrows = count ($backtrace);
 		foreach (array_reverse ($backtrace) as $ainfo)
 		{
-			echo "<tr><th width='50%' class=tdright>";
+			$name = '';
 			for ($i = 0; $i < $arrows; $i++)
-				echo '&uarr;';
+				$name .= '&uarr;';
 			$arrows--;
-			echo "</th><td class=tdleft>";
-			renderCell ($ainfo);
-			echo "</td></tr>";
+			$summary[] = array ($name, getOutputOf ('renderCell', $ainfo));
 		}
-		echo "<tr><th width='50%' class=tdright>&rarr;</th>";
-		echo "<td class=tdleft>";
-		renderCell ($range);
-		echo "</td></tr>";
+		$summary[] = array ('&rarr;', getOutputOf ('renderCell', $range));
 		// FIXME: get and display nested networks
 		// $theitem = pickLeaf ($ipv4tree, $id);
 	}
-
-	echo "<tr><th width='50%' class=tdright>Netmask:</th><td class=tdleft>";
-	echo $netmaskbylen[$range['mask']];
-	echo "</td></tr>\n";
-
-	echo "<tr><th width='50%' class=tdright>Netmask:</th><td class=tdleft>";
-	printf ('0x%08X', binMaskFromDec ($range['mask']));
-	echo "</td></tr>\n";
-
-	echo "<tr><th width='50%' class=tdright>Wildcard bits:</th><td class=tdleft>";
-	echo $wildcardbylen[$range['mask']];
-	echo "</td></tr>\n";
-
+	$summary[] = array ('Netmask:', $netmaskbylen[$range['mask']]);
+	$summary[] = array ('Netmask:', sprintf ('0x%08X', binMaskFromDec ($range['mask'])));
+	$summary['Wildcard bits'] = $wildcardbylen[$range['mask']];
+	
 	foreach ($range['8021q'] as $item)
 	{
 		$vlaninfo = getVLANInfo ($item['domain_id'] . '-' . $item['vlan_id']);
-		echo '<tr><th width="50%" class=tdright>VLAN:</th><td class=tdleft><a href="';
-		echo makeHref (array ('page' => 'vlan', 'vlan_ck' => $vlaninfo['vlan_ck'])) . '">';
-		echo formatVLANName ($vlaninfo, 'markup long');
-		echo '</a></td></tr>';
+		$summary[] = array ('VLAN:', '<a href="' . makeHref (array ('page' => 'vlan', 'vlan_ck' => $vlaninfo['vlan_ck'])) . '">' . formatVLANName ($vlaninfo, 'markup long') . '</a>');
 	}
 	if (getConfigVar ('EXT_IPV4_VIEW') == 'yes' and count ($routers = findRouters ($range['addrlist'])))
 	{
-		echo "<tr><th width='50%' class=tdright>Routed by:</th>";
-		printRoutersTD ($routers);
-		echo "</tr>\n";
+		$summary['Routed by'] = '';
+		foreach ($routers as $rtr)
+			$summary['Routed by'] .= getOutputOf ('renderRouterCell', $rtr['addr'], $rtr['iface'], spotEntity ('object', $rtr['id']));
 	}
-
-	printTagTRs ($range, makeHref(array('page'=>'ipv4space', 'tab'=>'default'))."&");
-	echo "</table><br>\n";
-	finishPortlet();
+	$summary['tags'] = '';
+	renderEntitySummary ($range, 'summary', $summary);
 
 	if (strlen ($range['comment']))
 	{
@@ -2803,11 +2746,10 @@ function renderIPv6Network ($id)
 	echo htmlspecialchars ($range['name'], ENT_QUOTES, 'UTF-8') . "</h2></td></tr>\n";
 
 	echo "<tr><td class=pcleft width='50%'>";
-	startPortlet ('summary');
-	echo "<table border=0 cellspacing=0 cellpadding=3 width='100%'>\n";
-	echo "<tr><th width='50%' class=tdright>%% used:</th><td class=tdleft>";
-	echo "&nbsp;" . formatIPv6NetUsage (count ($range['addrlist']), $range['mask']) . "</td></tr>\n";
 
+	// render summary portlet
+	$summary = array();
+	$summary['%% used'] = formatIPv6NetUsage (count ($range['addrlist']), $range['mask']);
 	if (getConfigVar ('EXT_IPV4_VIEW') == 'yes')
 	{
 		// Build a backtrace from all parent networks.
@@ -2821,39 +2763,29 @@ function renderIPv6Network ($id)
 		$arrows = count ($backtrace);
 		foreach (array_reverse ($backtrace) as $ainfo)
 		{
-			echo "<tr><th width='50%' class=tdright>";
+			$name = '';
 			for ($i = 0; $i < $arrows; $i++)
-				echo '&uarr;';
+				$name .= '&uarr;';
 			$arrows--;
-			echo "</th><td class=tdleft>";
-			renderCell ($ainfo);
-			echo "</td></tr>";
+			$summary[] = array ($name, getOutputOf ('renderCell', $ainfo));
 		}
-		echo "<tr><th width='50%' class=tdright>&rarr;</th>";
-		echo "<td class=tdleft>";
-		renderCell ($range);
-		echo "</td></tr>";
+		$summary[] = array ('&rarr;', getOutputOf ('renderCell', $range));
 		// FIXME: get and display nested networks
 	}
 
 	foreach ($range['8021q'] as $item)
 	{
 		$vlaninfo = getVLANInfo ($item['domain_id'] . '-' . $item['vlan_id']);
-		echo '<tr><th width="50%" class=tdright>VLAN:</th><td class=tdleft><a href="';
-		echo makeHref (array ('page' => 'vlan', 'vlan_ck' => $vlaninfo['vlan_ck'])) . '">';
-		echo formatVLANName ($vlaninfo, 'markup long');
-		echo '</a></td></tr>';
+		$summary[] = array ('VLAN:', '<a href="' . makeHref (array ('page' => 'vlan', 'vlan_ck' => $vlaninfo['vlan_ck'])) . '">' . formatVLANName ($vlaninfo, 'markup long') . '</a>');
 	}
 	if (getConfigVar ('EXT_IPV4_VIEW') == 'yes' and count ($routers = findRouters ($range['addrlist'])))
 	{
-		echo "<tr><th width='50%' class=tdright>Routed by:</th>";
-		printRoutersTD ($routers);
-		echo "</tr>\n";
+		$summary['Routed by'] = '';
+		foreach ($routers as $rtr)
+			$summary['Routed by'] .= getOutputOf ('renderRouterCell', $rtr['addr'], $rtr['iface'], spotEntity ('object', $rtr['id']));
 	}
-
-	printTagTRs ($range, makeHref (array ('page' => 'ipv6space', 'tab' => 'default')) . "&");
-	echo "</table><br>\n";
-	finishPortlet();
+	$summary['tags'] = '';
+	renderEntitySummary ($range, 'summary', $summary);
 
 	if (strlen ($range['comment']))
 	{
@@ -5944,25 +5876,6 @@ function renderEntityTags ($entity_id)
 	echo '</tr></table>';
 }
 
-function printTagTRs ($cell, $baseurl = '')
-{
-	if (getConfigVar ('SHOW_EXPLICIT_TAGS') == 'yes' and count ($cell['etags']))
-	{
-		echo "<tr><th width='50%' class=tagchain>Explicit tags:</th><td class=tagchain>";
-		echo serializeTags ($cell['etags'], $baseurl) . "</td></tr>\n";
-	}
-	if (getConfigVar ('SHOW_IMPLICIT_TAGS') == 'yes' and count ($cell['itags']))
-	{
-		echo "<tr><th width='50%' class=tagchain>Implicit tags:</th><td class=tagchain>";
-		echo serializeTags ($cell['itags'], $baseurl) . "</td></tr>\n";
-	}
-	if (getConfigVar ('SHOW_AUTOMATIC_TAGS') == 'yes' and count ($cell['atags']))
-	{
-		echo "<tr><th width='50%' class=tagchain>Automatic tags:</th><td class=tagchain>";
-		echo serializeTags ($cell['atags']) . "</td></tr>\n";
-	}
-}
-
 // This one is going to replace the tag filter.
 function renderCellFilterPortlet ($preselect, $realm, $cell_list = array(), $bypass_name = '', $bypass_value = '')
 {
@@ -6245,13 +6158,11 @@ function renderUser ($user_id)
 {
 	$userinfo = spotEntity ('user', $user_id);
 
-	startPortlet ('summary');
-	echo '<table border=0 align=center>';
-	echo "<tr><th class=tdright>Account name:</th><td class=tdleft>${userinfo['user_name']}</td></tr>";
-	echo '<tr><th class=tdright>Real name:</th><td class=tdleft>' . $userinfo['user_realname'] . '</td></tr>';
-	printTagTRs ($userinfo, makeHref(array('page'=>'userlist', 'tab'=>'default'))."&");
-	echo '</table>';
-	finishPortlet();
+	$summary = array();
+	$summary['Account name'] = $userinfo['user_name'];
+	$summary['Real name'] = $userinfo['user_realname'];
+	$summary['tags'] = '';
+	renderEntitySummary ($userinfo, 'summary', $summary);
 
 	renderFilesPortlet ('user', $user_id);
 }
@@ -6343,33 +6254,24 @@ function renderFile ($file_id)
 	echo "<table border=0 class=objectview cellspacing=0 cellpadding=0>";
 	echo "<tr><td colspan=2 align=center><h1>" . htmlspecialchars ($file['name']) . "</h1></td></tr>\n";
 	echo "<tr><td class=pcleft>";
-	startPortlet ('summary');
-	echo "<table border=0 cellspacing=0 cellpadding=3 width='100%'>\n";
-	echo "<tr><th width='50%' class=tdright>Type:</th>";
-	printf("<td class=tdleft>%s</td></tr>", htmlspecialchars ($file['type']));
-	echo "<tr><th width='50%' class=tdright>Size:</th><td class=tdleft>";
-	if (isolatedPermission ('file', 'download', $file))
-	{
-		echo "<a href='?module=download&file_id=${file_id}'>";
-		printImageHREF ('download', 'Download file');
-		echo '</a>&nbsp;';
-	}
-	printf("%s</td></tr>", formatFileSize($file['size']));
-	echo "<tr><th width='50%' class=tdright>Created:</th>";
-	printf("<td class=tdleft>%s</td></tr>", $file['ctime']);
-	echo "<tr><th width='50%' class=tdright>Modified:</th>";
-	printf("<td class=tdleft>%s</td></tr>", $file['mtime']);
-	echo "<tr><th width='50%' class=tdright>Accessed:</th>";
-	printf("<td class=tdleft>%s</td></tr>", $file['atime']);
 
-	printTagTRs ($file, makeHref(array('page'=>'files', 'tab'=>'default'))."&");
+	$summary = array();
+	$summary['Type'] = $file['type'];
+	$summary['Size'] =  
+	(
+		isolatedPermission ('file', 'download', $file) ?
+		(
+			"<a href='?module=download&file_id=${file_id}'>" .
+			getImageHREF ('download', 'Download file') . '</a>&nbsp;'
+		) : ''
+	) . formatFileSize ($file['size']);
+	$summary['Created'] = $file['ctime'];
+	$summary['Modified'] = $file['mtime'];
+	$summary['Accessed'] = $file['atime'];
+	$summary['tags'] = '';
 	if (strlen ($file['comment']))
-	{
-		echo '<tr><th class=slbconf>Comment:</th><td>&nbsp;</td></tr>';
-		echo '<tr><td colspan=2 class="dashed slbconf">' . string_insert_hrefs (htmlspecialchars ($file['comment'])) . '</td></tr>';
-	}
-	echo "</table><br>\n";
-	finishPortlet();
+		$summary['Comment'] = '<div class="dashed slbconf">' . string_insert_hrefs (htmlspecialchars ($file['comment'])) . '</div>';
+	renderEntitySummary ($file, 'summary', $summary);
 
 	$links = getFileLinks ($file_id);
 	if (count ($links))
@@ -8734,11 +8636,9 @@ function renderVST ($vst_id)
 	echo '<table border=0 class=objectview cellspacing=0 cellpadding=0>';
 	echo '<tr><td colspan=2 align=center><h1>' . niftyString ($vst['description'], 0) . '</h1><h2>';
 	echo "<tr><td class=pcleft width='50%'>";
-	startPortlet ('summary');
-	echo '<table border=0 cellspacing=0 cellpadding=3 width="100%">';
-	printTagTRs ($vst);
-	echo '</table>';
-	finishPortlet();
+
+	renderEntitySummary ($vst, 'summary', array ('tags' => ''));
+
 	renderVSTRules ($vst['rules']);
 	echo '</td><td class=pcright>';
 	if (!count ($vst['switches']))
