@@ -967,6 +967,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'N5K-C5010: 20 SFP+/10000',
 		'processors' => array ('nexus-any-10000SFP+', 'nexus-mgmt'),
 	),
+	'9.12.3.1.3.1008' => array
+	(
+		'dict_key' => 1412,
+		'text' => 'N5K-C5548P: 32 SFP+/10000',
+		'processors' => array ('nexus-any-10000SFP+', 'nexus-mgmt'),
+	),
 	'11.2.3.7.11.19' => array
 	(
 		'dict_key' => 859,
@@ -1295,6 +1301,9 @@ function doSwitchSNMPmining ($objectInfo, $device)
 		if (array_key_exists ($major_line, $nxos_codes))
 			updateStickerForCell ($objectInfo, 4, $nxos_codes[$major_line]);
 		updateStickerForCell ($objectInfo, 5, $exact_release);
+		$sysChassi = $device->snmpget ('1.3.6.1.2.1.47.1.1.1.1.11.149');
+		if ($sysChassi !== FALSE or $sysChassi !== NULL)
+			updateStickerForCell ($objectInfo, 1, str_replace ('"', '', substr ($sysChassi, strlen ('STRING: '))));
 		checkPIC ('1-29');
 		commitAddPort ($objectInfo['id'], 'con0', '1-29', 'console', ''); // RJ-45 RS-232 console
 		checkPIC ('1-16'); // AC input

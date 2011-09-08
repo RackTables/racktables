@@ -13,6 +13,7 @@
 	new feature: adjustable quick links at the top of the page
 0.19.10
 	bugfix: LivePorts MAC address lister was broken with Huawei S5300 V100R006
+	update: improve Nexus SNMP coverage
 0.19.9 2011-09-01
 	bugfix: a hotfix for Cacti feature
 	bugfix: disabled highlighting text editor in Google Chrome and Safari (closes #455, #462)
