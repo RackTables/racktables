@@ -155,14 +155,6 @@ function trigger_natv4 ()
 	return considerConfiguredConstraint (spotEntity ('object', $_REQUEST['object_id']), 'IPV4NAT_LISTSRC') ? 'std' : '';
 }
 
-function trigger_poolrscount ()
-{
-	assertUIntArg ('pool_id');
-	$poolInfo = spotEntity ('ipv4rspool', $_REQUEST['pool_id']);
-	amplifyCell ($poolInfo);
-	return count ($poolInfo['rslist']) ? 'std' : '';
-}
-
 function trigger_autoports ()
 {
 	assertUIntArg ('object_id');

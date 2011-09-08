@@ -1006,15 +1006,6 @@ function getRSUforRow ($rowData)
 	return ($counter['T'] + $counter['W'] + $counter['U']) / ($counter['T'] + $counter['W'] + $counter['U'] + $counter['F']);
 }
 
-// Make sure the string is always wrapped with LF characters
-function lf_wrap ($str)
-{
-	$ret = trim ($str, "\r\n");
-	if (strlen ($ret))
-		$ret .= "\n";
-	return $ret;
-}
-
 // Adopted from Mantis BTS code.
 function string_insert_hrefs ($s)
 {
@@ -1685,118 +1676,6 @@ function getRackImageWidth ()
 function getRackImageHeight ($units)
 {
 	return 3 + 3 + $units * 2;
-}
-
-// Perform substitutions and return resulting string
-// used solely by buildLVSConfig()
-function apply_macros ($macros, $subject, &$error_macro_stat)
-{
-	// clear all text before last %RESET% macro
-	$reset_keyword = '%RESET%';
-	$reset_position = mb_strpos($subject, $reset_keyword, 0);
-	if ($reset_position === FALSE)
-		$ret = $subject;
-	else
-		$ret = trim
-		(
-			mb_substr($subject, $reset_position + mb_strlen($reset_keyword)),
-			"\n\r"
-		);
-
-	foreach ($macros as $search => $replace)
-	{
-		if (empty($replace))
-		{
-			$replace = "<span class=\"msg_error\">$search</span>";
-			$count = 0;
-			$ret = str_replace ($search, $replace, $ret, $count);
-			if ($count)
-			{
-				if (array_key_exists($search, $error_macro_stat))
-					$error_macro_stat[$search] += $count;
-				else
-					$error_macro_stat[$search] = $count;
-			}
-		}
-		else
-			$ret = str_replace ($search, $replace, $ret);
-	}
-	return $ret;
-}
-
-// throws RTBuildLVSConfigError exception if undefined macros found
-function buildLVSConfig ($object_id)
-{
-	$oInfo = spotEntity ('object', $object_id);
-	$defaults = getSLBDefaults (TRUE);
-	$lbconfig = getSLBConfig ($object_id);
-	if ($lbconfig === NULL)
-	{
-		showWarning ('getSLBConfig() failed');
-		return;
-	}
-	$newconfig = "#\n#\n# This configuration has been generated automatically by RackTables\n";
-	$newconfig .= "# for object_id == ${object_id}\n# object name: ${oInfo['name']}\n#\n#\n\n\n";
-	
-	$error_stat = array();
-	foreach ($lbconfig as $vs_id => $vsinfo)
-	{
-		$newconfig .=  "########################################################\n" .
-			"# VS (id == ${vs_id}): " . (!strlen ($vsinfo['vs_name']) ? 'NO NAME' : $vsinfo['vs_name']) . "\n" .
-			"# RS pool (id == ${vsinfo['pool_id']}): " . (!strlen ($vsinfo['pool_name']) ? 'ANONYMOUS' : $vsinfo['pool_name']) . "\n" .
-			"########################################################\n";
-		# The order of inheritance is: VS -> LB -> pool [ -> RS ]
-		$macros = array
-		(
-			'%VIP%' => $vsinfo['vip'],
-			'%VPORT%' => $vsinfo['vport'],
-			'%PROTO%' => $vsinfo['proto'],
-			'%VNAME%' =>  $vsinfo['vs_name'],
-			'%RSPOOLNAME%' => $vsinfo['pool_name'],
-			'%PRIO%' => $vsinfo['prio']
-		);
-		$newconfig .=  "virtual_server ${vsinfo['vip']} ${vsinfo['vport']} {\n";
-		$newconfig .=  "\tprotocol ${vsinfo['proto']}\n";
-		$newconfig .= lf_wrap (apply_macros
-		(
-			$macros,
-			lf_wrap ($defaults['vs']) .
-			lf_wrap ($vsinfo['vs_vsconfig']) .
-			lf_wrap ($vsinfo['lb_vsconfig']) .
-			lf_wrap ($vsinfo['pool_vsconfig']),
-			$error_stat
-		));
-		foreach ($vsinfo['rslist'] as $rs)
-		{
-			if (!strlen ($rs['rsport']))
-				$rs['rsport'] = $vsinfo['vport'];
-			$macros['%RSIP%'] = $rs['rsip'];
-			$macros['%RSPORT%'] = $rs['rsport'];
-			$newconfig .=  "\treal_server ${rs['rsip']} ${rs['rsport']} {\n";
-			$newconfig .= lf_wrap (apply_macros
-			(
-				$macros,
-				lf_wrap ($defaults['rs']) .
-				lf_wrap ($vsinfo['vs_rsconfig']) .
-				lf_wrap ($vsinfo['lb_rsconfig']) .
-				lf_wrap ($vsinfo['pool_rsconfig']) .
-				lf_wrap ($rs['rs_rsconfig']),
-				$error_stat
-			));
-			$newconfig .=  "\t}\n";
-		}
-		$newconfig .=  "}\n\n\n";
-	}
-	if (! empty($error_stat))
-	{
-		$error_messages = array();
-		foreach ($error_stat as $macro => $count)
-			$error_messages[] = "Error: macro $macro can not be empty ($count occurences)";
-		throw new RTBuildLVSConfigError($error_messages, $newconfig, $object_id);
-	}
-	
-	// FIXME: deal somehow with Mac-styled text, the below replacement will screw it up
-	return dos2unix ($newconfig);
 }
 
 // Indicate occupation state of each IP address: none, ordinary or problematic.
@@ -2609,22 +2488,6 @@ function scanRealmByText ($realm = NULL, $ftext = '')
 		throw new InvalidArgException ('$realm', $realm);
 	}
 
-}
-
-function getIPv4VSOptions ()
-{
-	$ret = array();
-	foreach (listCells ('ipv4vs') as $vsid => $vsinfo)
-		$ret[$vsid] = $vsinfo['dname'] . (!strlen ($vsinfo['name']) ? '' : " (${vsinfo['name']})");
-	return $ret;
-}
-
-function getIPv4RSPoolOptions ()
-{
-	$ret = array();
-	foreach (listCells ('ipv4rspool') as $pool_id => $poolInfo)
-		$ret[$pool_id] = $poolInfo['name'];
-	return $ret;
 }
 
 function getVSTOptions()

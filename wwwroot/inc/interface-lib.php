@@ -658,6 +658,7 @@ function printTagTRs ($cell, $baseurl = '')
 // renders 'summary' portlet, which persist on default tab of every realm page.
 // $values is a tricky array.
 // if its value is a string, it is treated as right td inner html, and the key is treated as left th text, colon appends there automatically.
+// 'tags' key has a special meaning: instead of value, the result of printTagTRs call is appended to output
 // if the value is a single-element array, its value rendered as-is instead of <tr> tag and all its contents.
 // if the value is an array, its first 2 items are treated as left and right contents of row, no colon is appended. Used to enable non-unique titles
 function renderEntitySummary ($cell, $title, $values = array())

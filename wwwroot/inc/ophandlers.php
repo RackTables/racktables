@@ -1440,6 +1440,7 @@ $msgcode['addRealServer']['OK'] = 48;
 // Add single record.
 function addRealServer ()
 {
+	global $sic;
 	assertIPv4Arg ('remoteip');
 	assertStringArg ('rsport', TRUE);
 	assertStringArg ('rsconfig', TRUE);
@@ -1449,7 +1450,7 @@ function addRealServer ()
 		$_REQUEST['remoteip'],
 		$_REQUEST['rsport'],
 		getConfigVar ('DEFAULT_IPV4_RS_INSERVICE'),
-		$_REQUEST['rsconfig']
+		$sic['rsconfig']
 	);
 	return showFuncMessage (__FUNCTION__, 'OK');
 }
@@ -1462,7 +1463,6 @@ function addRealServers ()
 	assertStringArg ('format');
 	assertStringArg ('rawtext');
 	$ngood = 0;
-	$rsconfig = '';
 	// Keep in mind, that the text will have HTML entities (namely '>') escaped.
 	foreach (explode ("\n", dos2unix ($_REQUEST['rawtext'])) as $line)
 	{
@@ -1502,6 +1502,7 @@ function addRealServers ()
 $msgcode['addVService']['OK'] = 48;
 function addVService ()
 {
+	global $sic;
 	assertIPv4Arg ('vip');
 	assertUIntArg ('vport');
 	genericAssertion ('proto', 'enum/ipproto');
@@ -1517,8 +1518,8 @@ function addVService ()
 			$_REQUEST['vport'],
 			$_REQUEST['proto'],
 			!mb_strlen ($_REQUEST['name']) ? NULL : $_REQUEST['name'],
-			!strlen ($_REQUEST['vsconfig']) ? NULL : $_REQUEST['vsconfig'],
-			!strlen ($_REQUEST['rsconfig']) ? NULL : $_REQUEST['rsconfig'],
+			!strlen ($sic['vsconfig']) ? NULL : $sic['vsconfig'],
+			!strlen ($sic['rsconfig']) ? NULL : $sic['rsconfig'],
 		)
 	);
 	produceTagsForLastRecord ('ipv4vs', isset ($_REQUEST['taglist']) ? $_REQUEST['taglist'] : array());
@@ -1536,12 +1537,13 @@ function deleteVService ()
 $msgcode['updateSLBDefConfig']['OK'] = 43;
 function updateSLBDefConfig ()
 {
+	global $sic;
 	commitUpdateSLBDefConf
 	(
 		array
 		(
-			'vs' => $_REQUEST['vsconfig'],
-			'rs' => $_REQUEST['rsconfig'],
+			'vs' => $sic['vsconfig'],
+			'rs' => $sic['rsconfig'],
 		)
 	);
 	return showFuncMessage (__FUNCTION__, 'OK');
@@ -1550,6 +1552,7 @@ function updateSLBDefConfig ()
 $msgcode['updateRealServer']['OK'] = 51;
 function updateRealServer ()
 {
+	global $sic;
 	assertUIntArg ('rs_id');
 	assertIPv4Arg ('rsip');
 	assertStringArg ('rsport', TRUE);
@@ -1558,7 +1561,8 @@ function updateRealServer ()
 		$_REQUEST['rs_id'],
 		$_REQUEST['rsip'],
 		$_REQUEST['rsport'],
-		$_REQUEST['rsconfig']
+		(isset ($_REQUEST['inservice']) and $_REQUEST['inservice'] == 'on') ? 'yes' : 'no',
+		$sic['rsconfig']
 	);
 	return showFuncMessage (__FUNCTION__, 'OK');
 }
@@ -1566,6 +1570,7 @@ function updateRealServer ()
 $msgcode['updateVService']['OK'] = 51;
 function updateVService ()
 {
+	global $sic;
 	assertUIntArg ('vs_id');
 	assertIPv4Arg ('vip');
 	assertUIntArg ('vport');
@@ -1579,8 +1584,8 @@ function updateVService ()
 		$_REQUEST['vport'],
 		$_REQUEST['proto'],
 		$_REQUEST['name'],
-		$_REQUEST['vsconfig'],
-		$_REQUEST['rsconfig']
+		$sic['vsconfig'],
+		$sic['rsconfig']
 	);
 	return showFuncMessage (__FUNCTION__, 'OK');
 }
@@ -1588,6 +1593,7 @@ function updateVService ()
 $msgcode['addLoadBalancer']['OK'] = 48;
 function addLoadBalancer ()
 {
+	global $sic;
 	assertUIntArg ('pool_id');
 	assertUIntArg ('object_id');
 	assertUIntArg ('vs_id');
@@ -1599,8 +1605,8 @@ function addLoadBalancer ()
 		$_REQUEST['pool_id'],
 		$_REQUEST['object_id'],
 		$_REQUEST['vs_id'],
-		$_REQUEST['vsconfig'],
-		$_REQUEST['rsconfig'],
+		$sic['vsconfig'],
+		$sic['rsconfig'],
 		$_REQUEST['prio']
 	);
 	return showFuncMessage (__FUNCTION__, 'OK');
@@ -1609,14 +1615,15 @@ function addLoadBalancer ()
 $msgcode['addRSPool']['OK'] = 48;
 function addRSPool ()
 {
+	global $sic;
 	assertStringArg ('name');
 	assertStringArg ('vsconfig', TRUE);
 	assertStringArg ('rsconfig', TRUE);
 	commitCreateRSPool
 	(
 		$_REQUEST['name'],
-		$_REQUEST['vsconfig'],
-		$_REQUEST['rsconfig'],
+		$sic['vsconfig'],
+		$sic['rsconfig'],
 		isset ($_REQUEST['taglist']) ? $_REQUEST['taglist'] : array()
 	);
 	return showFuncMessage (__FUNCTION__, 'OK');
@@ -1628,29 +1635,6 @@ function deleteRSPool ()
 	assertUIntArg ('pool_id');
 	commitDeleteRSPool ($_REQUEST['pool_id']);
 	return showFuncMessage (__FUNCTION__, 'OK');
-}
-
-$msgcode['updateRSInService']['OK'] = 26;
-function updateRSInService ()
-{
-	assertUIntArg ('rscount');
-	$orig = spotEntity ('ipv4rspool', getBypassValue());
-	amplifyCell ($orig);
-	$ngood = 0;
-	for ($i = 1; $i <= $_REQUEST['rscount']; $i++)
-	{
-		$rs_id = $_REQUEST["rsid_${i}"];
-		if (isset ($_REQUEST["inservice_${i}"]) and $_REQUEST["inservice_${i}"] == 'on')
-			$newval = 'yes';
-		else
-			$newval = 'no';
-		if ($newval != $orig['rslist'][$rs_id]['inservice'])
-		{
-			commitSetInService ($rs_id, $newval);
-			$ngood++;
-		}
-	}
-	return showFuncMessage (__FUNCTION__, 'OK', array ($ngood));
 }
 
 $msgcode['importPTRData']['OK'] = 26;

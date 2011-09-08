@@ -484,14 +484,16 @@ div.commentblock {
 	color: silver;
 }
 
-th.slbconf {
-	width: 50%;
-	text-align: right;
-}
-
-td.slbconf {
+.slbconf {
 	text-align: left;
 	white-space: pre;
+	font-family: monospace;
+}
+
+.dashed {
+	border: 1px dashed gray;
+	padding: 0.5em;
+	overflow: auto;
 }
 
 table.slbcell {
@@ -513,10 +515,6 @@ table.vscell {
 
 table.vscell td {
 	text-align: left;
-}
-
-td.dashed {
-	border: 1px dashed gray;
 }
 
 div.tagselector {
@@ -722,4 +720,8 @@ ul.qlinks-form {
 
 a.noclick {
 	color: #757575;
+}
+
+a.slb-highlighted {
+	background-color: lime;
 }
