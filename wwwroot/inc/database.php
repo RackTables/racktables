@@ -3237,11 +3237,15 @@ function generateEntityAutoTags ($cell)
 			$ret[] = array ('tag' => '$ipv4vsid_' . $cell['id']);
 			$ret[] = array ('tag' => '$any_ipv4vs');
 			$ret[] = array ('tag' => '$any_vs');
+			if ($cell['refcnt'] == 0)
+				$ret[] = array ('tag' => '$unused');
 			break;
 		case 'ipv4rspool':
 			$ret[] = array ('tag' => '$ipv4rspid_' . $cell['id']);
 			$ret[] = array ('tag' => '$any_ipv4rsp');
 			$ret[] = array ('tag' => '$any_rsp');
+			if ($cell['refcnt'] == 0)
+				$ret[] = array ('tag' => '$unused');
 			break;
 		case 'user':
 			# {$username_XXX} autotag is generated always, but {$userid_XXX}
