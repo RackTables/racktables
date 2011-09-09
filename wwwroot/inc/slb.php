@@ -137,7 +137,7 @@ ORDER BY
 # LB (id == %LB_ID%): %LB_NAME%
 # VS (id == %VS_ID%): %VS_NAME%
 # RS (id == %RSP_ID%): %RSP_NAME%
-virtual_service %VIP% %VPORT% {
+virtual_server %VIP% %VPORT% {
 	protocol %PROTO%
 ");
 	$ret .= $parser->expand ("	%GLOBAL_VS_CONF%
