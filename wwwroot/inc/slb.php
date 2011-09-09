@@ -116,9 +116,11 @@ ORDER BY
 		$parser->addMacro ('LB_ID', $this->lb['id']);
 		$parser->addMacro ('LB_NAME', $this->lb['name']);
 		$parser->addMacro ('VS_ID', $this->vs['id']);
-		$parser->addMacro ('VNAME', $this->vs['name']);
+		$parser->addMacro ('VS_NAME', $this->vs['name']);
+		$parser->addMacro ('VNAME', $this->vs['name']); // for backwards compatibility
 		$parser->addMacro ('RSP_ID', $this->rs['id']);
-		$parser->addMacro ('RSPOOLNAME', $this->rs['name']); // for compatibility
+		$parser->addMacro ('RSP_NAME', $this->rs['name']);
+		$parser->addMacro ('RSPOOLNAME', $this->rs['name']); // for backwards compatibility
 		$parser->addMacro ('VIP', $this->vs['vip']);
 		$parser->addMacro ('VPORT', $this->vs['vport']);
 		$parser->addMacro ('PROTO', $this->vs['proto']);
