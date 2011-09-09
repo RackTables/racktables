@@ -322,9 +322,7 @@ $tabhandler['ipv4slb']['lbs'] = 'renderLBList';
 $tabhandler['ipv4slb']['rspools'] = 'renderRSPoolList';
 $tabhandler['ipv4slb']['rservers'] = 'renderRealServerList';
 $tabhandler['ipv4slb']['defconfig'] = 'renderSLBDefConfig';
-
-
-$ophandler['ipv4slb']['default']['save'] = 'updateSLBDefConfig';
+$ophandler['ipv4slb']['defconfig']['save'] = 'updateSLBDefConfig';
 
 $page['ipv4vslist']['title'] = 'Virtual services';
 $page['ipv4vslist']['parent'] = 'ipv4slb';
