@@ -3939,6 +3939,9 @@ function acceptable8021QConfig ($port)
 
 function authorize8021QChangeRequests ($before, $changes)
 {
+	global $script_mode;
+	if (isset ($script_mode) and $script_mode)
+		return $changes;
 	$ret = array();
 	foreach ($changes as $pn => $change)
 	{
@@ -4738,6 +4741,7 @@ function apply8021qChangeRequest ($switch_id, $changes, $verbose = TRUE, $mutex_
 		showError (sprintf ("Failed to update switchports: %s", $e->getMessage()));
 		return 0;
 	}
+	$nsaved_downlinks = 0;
 	if ($nsaved_uplinks)
 		$nsaved_downlinks = initiateUplinksReverb ($vswitch['object_id'], $new_uplinks);
 	// instant deploy to that switch if configured
