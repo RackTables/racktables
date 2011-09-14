@@ -1,5 +1,6 @@
 0.19.10
 	bugfix: LivePorts MAC address lister was broken with Huawei S5300 V100R006
+ 	bugfix: SNMP sync was broken when one of default attributes was removed from certain object type
 	update: improve Nexus SNMP coverage
 0.19.9 2011-09-01
 	bugfix: a hotfix for Cacti feature
