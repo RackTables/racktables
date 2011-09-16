@@ -2034,7 +2034,7 @@ function ftos8ReadMacList ($text)
 
 # Suppress login banner and "show configuration" command itself, as well as the
 # trailing lines of the session.
-function spotConfigText ($input, $first_line_re, $last_line_re = NULL)
+function spotText ($input, $first_line_re, $last_line_re = NULL)
 {
 	$copy = $first_line_re === NULL;
 	$ret = '';
