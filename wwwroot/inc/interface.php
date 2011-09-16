@@ -4707,13 +4707,22 @@ function renderSNMPPortFinder ($object_id)
 	echo '</table></form>';
 	finishPortlet();
 
-	startPortlet ('SNMPv2/v3');
-	printOpFormIntro ('querySNMPData', array ('ver' => 23));
+	startPortlet ('SNMPv2c');
+	printOpFormIntro ('querySNMPData', array ('ver' => 2));
+	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
+	echo '<tr><th class=tdright><label for=community>Community: </label></th>';
+	echo "<td class=tdleft><input type=text name=community id=community value='${snmpcomm}'></td></tr>";
+	echo '<tr><td colspan=2><input type=submit value="Try now"></td></tr>';
+	echo '</table></form>';
+	finishPortlet();
+
+	startPortlet ('SNMPv3');
+	printOpFormIntro ('querySNMPData', array ('ver' => 3));
 ?>
 	<table cellspacing=0 cellpadding=5 align=center class=widetable>
 	<tr>
 		<th class=tdright><label for=sec_name>Security User:</label></th>
-		<td class=tdleft><input type=text id=sec_name name=sec_name></td>
+		<td class=tdleft><input type=text id=sec_name name=sec_name value='<?php echo${snmpcomm};?>'></td>
 	</tr>
 	<tr>
 		<th class=tdright><label for="sec_level">Security Level:</label></th>

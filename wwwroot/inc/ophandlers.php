@@ -1978,10 +1978,11 @@ function querySNMPData ()
 	switch ($_REQUEST['ver'])
 	{
 	case 1:
+	case 2:
 		genericAssertion ('community', 'string');
 		$snmpsetup['community'] = $_REQUEST['community'];
 		break;
-	case 23:
+	case 3:
 		assertStringArg ('sec_name');
 		assertStringArg ('sec_level');
 		assertStringArg ('auth_protocol');
@@ -1999,6 +2000,7 @@ function querySNMPData ()
 	default:
 		throw new InvalidRequestArgException ('ver', $_REQUEST['ver']);
 	}
+	$snmpsetup['version'] = $_REQUEST['ver'];
 	doSNMPmining (getBypassValue(), $snmpsetup); // shows message by itself
 }
 
