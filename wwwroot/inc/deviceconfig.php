@@ -2044,7 +2044,7 @@ function spotText ($input, $first_line_re, $last_line_re = NULL)
 			$copy = TRUE;
 		if ($copy)
 		{
-			$ret .= $oneline;
+			$ret .= $oneline . "\n";
 			if ($last_line_re !== NULL and preg_match ($last_line_re, $oneline))
 				break;
 		}
