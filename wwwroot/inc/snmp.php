@@ -1551,13 +1551,18 @@ class RTSNMPDevice {
     protected $snmp;
 
     function __construct($hostname, $snmpsetup) {
-	if( isset($snmpsetup['community']) ) {
+    	switch($snmpsetup['version']) {
+    	case 1:
+    	default:
+	    $this->snmp = new RTSNMPv1($hostname, $snmpsetup);
+	    break;
+    	case 2:
 	    $this->snmp = new RTSNMPv2($hostname, $snmpsetup);
-	}
-	else {
+	    break;
+    	case 3:
 	    $this->snmp = new RTSNMPv3($hostname, $snmpsetup);
+	    break;
 	}
-
     }
 
     function getName() {
@@ -1599,7 +1604,7 @@ abstract class RTSNMP {
     abstract function snmpwalkoid($oid);
 }
 
-class RTSNMPv2 extends RTSNMP {
+class RTSNMPv1 extends RTSNMP {
     function snmpget($oid) {
 	return snmpget($this->hostname, $this->snmpsetup['community'], $oid);
     }
@@ -1610,6 +1615,20 @@ class RTSNMPv2 extends RTSNMP {
     
     function snmpwalkoid($oid) {
 	return snmpwalkoid($this->hostname, $this->snmpsetup['community'], $oid);
+    }
+}
+
+class RTSNMPv2 extends RTSNMP {
+    function snmpget($oid) {
+	return snmp2_get($this->hostname, $this->snmpsetup['community'], $oid);
+    }
+
+    function snmpset($oid, $type, $value) {
+	return snmp2_set($this->hostname, $this->snmpsetup['community'], $oid, $type, $value);
+    }
+    
+    function snmpwalkoid($oid) {
+	return snmp2_real_walk($this->hostname, $this->snmpsetup['community'], $oid);
     }
 }
 

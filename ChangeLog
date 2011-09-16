@@ -2,6 +2,7 @@
 	bugfix: LivePorts MAC address lister was broken with Huawei S5300 V100R006
  	bugfix: SNMP sync was broken when one of default attributes was removed from certain object type
 	update: improve Nexus SNMP coverage
+	update: justify the difference between SNMP versions (by Boris Lytochkin)
 0.19.9 2011-09-01
 	bugfix: a hotfix for Cacti feature
 	bugfix: disabled highlighting text editor in Google Chrome and Safari (closes #455, #462)
