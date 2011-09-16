@@ -1033,6 +1033,9 @@ show vlan brief
 		case 'getmaclist':
 			$ret .= "show mac address-table dynamic\n";
 			break;
+		case 'getallconf':
+			$ret .= "show running-config\n";
+			break;
 		default:
 			throw new InvalidArgException ('opcode', $cmd['opcode']);
 		}
@@ -1087,6 +1090,9 @@ function fdry5TranslatePushQueue ($dummy_object_id, $queue, $dummy_vlan_names)
 			break;
 		// query list
 		case 'get8021q':
+			$ret .= "show running-config\n";
+			break;
+		case 'getallconf':
 			$ret .= "show running-config\n";
 			break;
 		default:
@@ -1156,6 +1162,9 @@ function vrp53TranslatePushQueue ($dummy_object_id, $queue, $dummy_vlan_names)
 			break;
 		case 'getmaclist':
 			$ret .= "display mac-address dynamic\n";
+			break;
+		case 'getallconf':
+			$ret .= "display current-configuration\n";
 			break;
 		default:
 			throw new InvalidArgException ('opcode', $cmd['opcode']);
@@ -1239,6 +1248,9 @@ function vrp55TranslatePushQueue ($dummy_object_id, $queue, $dummy_vlan_names)
 		case 'getmaclist':
 			$ret .= "display mac-address dynamic\n";
 			break;
+		case 'getallconf':
+			$ret .= "display current-configuration\n";
+			break;
 		default:
 			throw new InvalidArgException ('opcode', $cmd['opcode']);
 		}
@@ -1306,6 +1318,9 @@ function xos12TranslatePushQueue ($dummy_object_id, $queue, $dummy_vlan_names)
 			break;
 		case 'getlldpstatus':
 			$ret .= "show lldp neighbors detailed\n";
+			break;
+		case 'getallconf':
+			$ret .= "show configuration\n";
 			break;
 		default:
 			throw new InvalidArgException ('opcode', $cmd['opcode']);
@@ -1390,6 +1405,9 @@ show configuration interfaces
 # END OF CONFIG
 ';
 			break;
+		case 'getallconf':
+			$ret .= "show configuration\n";
+			break;
 		default:
 			throw new InvalidArgException ('opcode', $cmd['opcode']);
 		}
@@ -1471,6 +1489,9 @@ function ftos8TranslatePushQueue ($dummy_object_id, $queue, $vlan_names)
 			$ret .= "exit\n";
 			break;
 		case 'set mode':
+			break;
+		case 'getallconf':
+			$ret .= "show running-config\n";
 			break;
 		default:
 			throw new InvalidArgException ('opcode', $cmd['opcode']);
