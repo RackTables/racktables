@@ -2032,4 +2032,59 @@ function ftos8ReadMacList ($text)
 	return $result;
 }
 
+# Suppress login banner and "show configuration" command itself, as well as the
+# trailing lines of the session.
+function spotConfigText ($input, $first_line_re, $last_line_re = NULL)
+{
+	$copy = $first_line_re === NULL;
+	$ret = '';
+	foreach (explode ("\n", $input) as $oneline)
+	{
+		if (! $copy and preg_match ($first_line_re, $oneline))
+			$copy = TRUE;
+		if ($copy)
+		{
+			$ret .= $oneline;
+			if ($last_line_re !== NULL and preg_match ($last_line_re, $oneline))
+				break;
+		}
+	}
+	return $ret;
+}
+
+function ios12SpotConfigText ($input)
+{
+	return spotText ($input, '/^Current configuration : \d+ bytes$/', '/^end$/');
+}
+
+function nxos4SpotConfigText ($input)
+{
+	return spotText ($input, '/^!Command: show running-config$/');
+}
+
+function fdry5SpotConfigText ($input)
+{
+	return $input;
+}
+
+function vrp5xSpotConfigText ($input)
+{
+	return spotText ($input, '/^!Software Version V/', '/^return$/');
+}
+
+function xos12SpotConfigText ($input)
+{
+	return spotText ($input, '/^# Module .+ configuration.$/');
+}
+
+function jun10SpotConfigText ($input)
+{
+	return spotText ($input, '/^## Last commit: /');
+}
+
+function ftos8SpotConfigText ($input)
+{
+	return spotText ($input, '/^! Version [0-9\.]+$/', '/^end$/');
+}
+
 ?>
