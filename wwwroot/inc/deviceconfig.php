@@ -2054,7 +2054,7 @@ function spotText ($input, $first_line_re, $last_line_re = NULL)
 
 function ios12SpotConfigText ($input)
 {
-	return spotText ($input, '/^Current configuration : \d+ bytes$/', '/^end$/');
+	return spotText ($input, '/^Current configuration : \d+ bytes$/');
 }
 
 function nxos4SpotConfigText ($input)
