@@ -128,8 +128,8 @@ ORDER BY
 
 		$defaults = getSLBDefaults (TRUE);
 		$parser->addMacro ('GLOBAL_VS_CONF', dos2unix ($defaults['vs']));
-		$parser->addMacro ('VS_VS_CONF', dos2unix ($this->vs['vsconfig']));
 		$parser->addMacro ('RSP_VS_CONF', dos2unix ($this->rs['vsconfig']));
+		$parser->addMacro ('VS_VS_CONF', dos2unix ($this->vs['vsconfig']));
 		$parser->addMacro ('SLB_VS_CONF', dos2unix ($this->slb['vsconfig']));
 
 		// return the expanded VS template using prepared $macros array
@@ -139,8 +139,7 @@ ORDER BY
 # RS (id == %RSP_ID%): %RSP_NAME%
 virtual_server %VIP% %VPORT% {
 	protocol %PROTO%
-");
-	$ret .= $parser->expand ("	%GLOBAL_VS_CONF%
+	%GLOBAL_VS_CONF%
 	%VS_VS_CONF%
 	%RSP_VS_CONF%
 	%SLB_VS_CONF%
@@ -161,8 +160,7 @@ virtual_server %VIP% %VPORT% {
 
 			$ret .= $parser->expand ("
 	real_server %RSIP% %RSPORT% {
-");
-			$ret .= $parser->expand ("		%GLOBAL_RS_CONF%
+		%GLOBAL_RS_CONF%
 		%VS_RS_CONF%
 		%RSP_RS_CONF%
 		%RS_RS_CONF%
@@ -180,15 +178,11 @@ class MacroParser
 {
 	protected $macros;
 	protected $stack;
-	protected $reset_mode;
-	protected $expand_deep;
 
 	function __construct()
 	{
 		$this->macros = array();
 		$this->stack = array();
-		$this->reset_mode = FALSE;
-		$this->expand_deep = 0;
 	}
 
 	function pushdefs()
@@ -264,7 +258,6 @@ class MacroParser
 	//  * trim last newline of expansion if there already is newline in source string after the macro reference
 	public function expand ($text)
 	{
-		$this->expand_deep++;
 		$ret = '';
 		foreach (explode ("\n", $text) as $line)
 		{
@@ -293,17 +286,10 @@ class MacroParser
 				}
 				if ($after_empty and substr ($mvalue, -1, 1) == "\n")
 					$mvalue = substr ($mvalue, 0, -1);
-				if ($this->reset_mode)
-				{
-					$ret = '';
-					$m[1] = '';
-				}
 				$ret .= $m[1] . $mvalue;
 			}
 			$ret .= $line;
 		}
-		if (0 == --$this->expand_deep)
-			$this->reset_mode = FALSE;
 		return substr ($ret, 0, -1); // trim last \n
 	}
 
@@ -312,11 +298,6 @@ class MacroParser
 	{
 		if (isset ($this->macros[$name]))
 			return $this->expand ($this->macros[$name]);
-		elseif ($name == 'RESET')
-		{
-			$this->reset_mode = TRUE;
-			return '';
-		}
 		else
 			return '';
 	}
