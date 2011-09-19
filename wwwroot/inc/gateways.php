@@ -330,8 +330,9 @@ function detectDeviceBreed ($object_id)
 		1361 => 'vrp55',
 		1369 => 'vrp55', // VRP versions 5.5 and 5.7 seem to be compatible
 		1363 => 'fdry5',
-		1367 => 'jun10',
-		1597 => 'jun10',
+		1367 => 'jun10', # 10S
+		1597 => 'jun10', # 10R
+		1598 => 'jun10', # 11R
 		1594 => 'ftos8',
 	);
 	foreach (getAttrValues ($object_id) as $record)
