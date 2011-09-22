@@ -154,7 +154,6 @@ function renderSLBTriplets ($cell)
 		}
 		echo "</table>\n";
 		finishPortlet();
-		addJS ('js/slb.js');
 	}
 }
 
