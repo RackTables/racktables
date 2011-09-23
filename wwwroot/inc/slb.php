@@ -58,7 +58,7 @@ class SLBTriplet
 				$display_cells = array('vs', 'lb');
 				break;
 			default:
-				throw new RackTablesError ("Invalid cell realm");
+				throw new InvalidArgException ('realm', $cell['realm']);
 		}
 		$result = usePreparedSelectBlade
 		(
