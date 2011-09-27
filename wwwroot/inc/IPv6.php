@@ -20,6 +20,17 @@ function getBin ()
 	return $this->words;
 }
 
+// returns string for PTR DNS query (reversed IPv6 address)
+function getArpa()
+{
+	$ret = '';
+	foreach (array_reverse (unpack('C*',$this->words)) as $octet) {
+		$ret .= dechex (($octet & 0xF)) . ".";
+		$ret .= dechex ($octet >> 4) . ".";
+	}
+	return $ret . "ip6.arpa";
+}
+
 private static function set_word_value (&$haystack, $nword, $hexvalue)
 {
 	// check that $hexvalue is like /^[0-9a-fA-F]*$/
