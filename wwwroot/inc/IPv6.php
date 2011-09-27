@@ -24,8 +24,9 @@ function getBin ()
 function getArpa()
 {
 	$ret = '';
-	foreach (array_reverse (unpack('C*',$this->words)) as $octet) {
-		$ret .= dechex (($octet & 0xF)) . ".";
+	foreach (array_reverse (unpack ('C*', $this->words)) as $octet)
+	{
+		$ret .= dechex ($octet & 0xF) . ".";
 		$ret .= dechex ($octet >> 4) . ".";
 	}
 	return $ret . "ip6.arpa";
