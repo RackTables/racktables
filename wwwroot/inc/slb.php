@@ -334,18 +334,19 @@ function getIPv4RSPoolOptions ()
 	return $ret;
 }
 
-function addRStoRSPool ($pool_id = 0, $rsip = '', $rsport = 0, $inservice = 'no', $rsconfig = '')
+function addRStoRSPool ($pool_id = 0, $rsip = '', $rsport = 0, $inservice = 'no', $rsconfig = '', $comment = '')
 {
 	usePreparedExecuteBlade
 	(
-		'INSERT INTO IPv4RS (rsip, rsport, rspool_id, inservice, rsconfig) VALUES (INET_ATON(?), ?, ?, ?, ?)',
+		'INSERT INTO IPv4RS (rsip, rsport, rspool_id, inservice, rsconfig, comment) VALUES (INET_ATON(?), ?, ?, ?, ?, ?)',
 		array
 		(
 			$rsip,
 			(!strlen ($rsport) or $rsport === 0) ? NULL : $rsport,
 			$pool_id,
 			$inservice == 'yes' ? 'yes' : 'no',
-			!strlen ($rsconfig) ? NULL : $rsconfig
+			!strlen ($rsconfig) ? NULL : $rsconfig,
+			!strlen ($comment) ? NULL : $comment,
 		)
 	);
 }
@@ -374,19 +375,20 @@ function commitDeleteVS ($id = 0)
 	usePreparedDeleteBlade ('IPv4VS', array ('id' => $id));
 }
 
-function commitUpdateRS ($rsid = 0, $rsip = '', $rsport = 0, $inservice = 'yes', $rsconfig = '')
+function commitUpdateRS ($rsid = 0, $rsip = '', $rsport = 0, $inservice = 'yes', $rsconfig = '', $comment = '')
 {
 	if (long2ip (ip2long ($rsip)) !== $rsip)
 		throw new InvalidArgException ('$rsip', $rsip);
 	usePreparedExecuteBlade
 	(
-		'UPDATE IPv4RS SET rsip=INET_ATON(?), rsport=?, inservice=?, rsconfig=? WHERE id=?',
+		'UPDATE IPv4RS SET rsip=INET_ATON(?), rsport=?, inservice=?, rsconfig=?, comment=? WHERE id=?',
 		array
 		(
 			$rsip,
 			(!strlen ($rsport) or $rsport === 0) ? NULL : $rsport,
 			$inservice,
 			!strlen ($rsconfig) ? NULL : $rsconfig,
+			!strlen ($comment) ? NULL : $comment,
 			$rsid,
 		)
 	);
@@ -488,17 +490,11 @@ function getRSList ()
 function getRSListInPool ($rspool_id)
 {
 	$ret = array();
-	$query = "select id, inservice, inet_ntoa(rsip) as rsip, rsport, rsconfig from " .
+	$query = "select id, inservice, inet_ntoa(rsip) as rsip, rsport, rsconfig, comment from " .
 		"IPv4RS where rspool_id = ? order by IPv4RS.rsip, rsport";
 	$result = usePreparedSelectBlade ($query, array ($rspool_id));
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-		$ret[$row['id']] = array
-		(
-			'inservice' => $row['inservice'],
-			'rsip' => $row['rsip'],
-			'rsport' => $row['rsport'],
-			'rsconfig' => $row['rsconfig'],
-		);
+		$ret[$row['id']] = $row;
 	return $ret;
 }
 

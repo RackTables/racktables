@@ -242,18 +242,43 @@ function renderRSPool ($pool_id)
 
 	if ($poolInfo['rscount'])
 	{
-		startPortlet ("Real servers ({$poolInfo['rscount']})");
+		$rs_list = getRSListInPool ($pool_id);
+		$columns = getRSDisplayColumns ($rs_list);		startPortlet ("Real servers ({$poolInfo['rscount']})");
 		echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
-		echo "<tr><th>in service</th><th>address</th><th>port</th><th>RS configuration</th></tr>";
-		foreach (getRSListInPool ($pool_id) as $rs)
+		echo "<tr>";
+		foreach ($columns as $title)
+			echo "<th>$title</th>";
+		echo "</tr>";
+		foreach ($rs_list as $rs)
 		{
-			echo "<tr valign=top><td align=center>";
-			if ($rs['inservice'] == 'yes')
-				printImageHREF ('inservice', 'in service');
-			else
-				printImageHREF ('notinservice', 'NOT in service');
-			echo "</td><td class=tdleft><a href='".makeHref(array('page'=>'ipaddress', 'ip'=>$rs['rsip']))."'>${rs['rsip']}</a></td>";
-			echo "<td class=tdleft>${rs['rsport']}</td><td class=slbconf>${rs['rsconfig']}</td></tr>\n";
+			echo "<tr valign=top>";
+			foreach (array_keys ($columns) as $field)
+			{
+				switch ($field)
+				{
+					case 'inservice':
+						echo "<td align=center>";
+						if ($rs['inservice'] == 'yes')
+							printImageHREF ('inservice', 'in service');
+						else
+							printImageHREF ('notinservice', 'NOT in service');
+						break;
+					case 'rsip':
+						echo "<td class=tdleft>";
+						echo "<a href='".makeHref(array('page'=>'ipaddress', 'ip'=>$rs[$field]))."'>${rs[$field]}</a>";
+						break;
+					case 'rsconfig':
+						echo "<td class=slbconf>";
+						echo $rs[$field];
+						break;
+					default:
+						echo "<td class=tdleft>";
+						echo $rs[$field];
+						break;
+				}
+				echo '</td>';
+			}
+			echo '</tr>';
 		}
 		echo "</table>\n";
 		finishPortlet();
@@ -266,6 +291,27 @@ function renderRSPool ($pool_id)
 	echo "</td></tr></table>\n";
 }
 
+function getRSDisplayColumns ($rs_list)
+{
+	$result = array
+	(
+		'inservice' => '',
+		'rsip' => 'address',
+		'rsport' => 'port',
+		'rsconfig' => 'RS config',
+		'comment' => 'comment',
+	);
+	$not_seen = $result;
+	foreach ($rs_list as $rs)
+		foreach ($rs as $key => $value)
+			if (! empty ($value) and isset ($not_seen[$key]))
+				unset ($not_seen[$key]);
+	foreach (array_keys ($not_seen) as $key)
+		if ($key != 'rsip')
+			unset ($result[$key]);
+	return $result;
+}
+
 function renderRSPoolServerForm ($pool_id)
 {
 	global $nextorder;
@@ -273,10 +319,26 @@ function renderRSPoolServerForm ($pool_id)
 
 	if ($poolInfo['rscount'])
 	{
-		startPortlet ("Manage existing (${poolInfo['rscount']})");
+		startPortlet ("Manage RS list (${poolInfo['rscount']})");
 		echo "<table cellspacing=0 cellpadding=5 align=center class=cooltable>\n";
-		echo "<tr><th>&nbsp;</th><th>Address</th><th>Port</th><th>in service</th><th>configuration</th><th>&nbsp;</th></tr>\n";
-		$order = 'odd';
+		echo "<tr><th>&nbsp;</th><th>Address</th><th>Port</th><th>Comment</th><th>in service</th><th>configuration</th><th>&nbsp;</th></tr>\n";
+		// new RS form
+		printOpFormIntro ('addRS');
+		echo "<tr class=row_odd valign=top><td>";
+		printImageHREF ('add', 'Add new real server');
+		echo "</td><td><input type=text name=rsip></td>";
+		$default_port = getConfigVar ('DEFAULT_SLB_RS_PORT');
+		if ($default_port == 0)
+			$default_port = '';
+		echo "<td><input type=text name=rsport size=5 value='$default_port'></td>";
+		echo "<td><input type=text name=comment size=15></td>";
+		$checked = (getConfigVar ('DEFAULT_IPV4_RS_INSERVICE') == 'yes') ? 'checked' : '';
+		echo "<td><input type=checkbox name=inservice $checked></td>";
+		echo "<td><textarea name=rsconfig></textarea></td><td>";
+		printImageHREF ('ADD', 'Add new real server', TRUE);
+		echo "</td></tr></form>\n";
+		
+		$order = 'even';
 		foreach (getRSListInPool ($pool_id) as $rsid => $rs)
 		{
 			printOpFormIntro ('updRS', array ('rs_id' => $rsid));
@@ -284,6 +346,7 @@ function renderRSPoolServerForm ($pool_id)
 			printImageHREF ('delete', 'Delete this real server');
 			echo "</td><td><input type=text name=rsip value='${rs['rsip']}'></td>";
 			echo "<td><input type=text name=rsport size=5 value='${rs['rsport']}'></td>";
+			echo "<td><input type=text name=comment size=15 value='${rs['comment']}'></td>";
 			$checked = $rs['inservice'] == 'yes' ? 'checked' : '';
 			echo "<td><input type=checkbox name=inservice $checked></td>";
 			echo "<td><textarea name=rsconfig>${rs['rsconfig']}</textarea></td><td>";
@@ -294,30 +357,6 @@ function renderRSPoolServerForm ($pool_id)
 		echo "</table>\n";
 		finishPortlet();
 	}
-
-	startPortlet ('Add one');
-	echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
-	echo "<tr><th>in service</th><th>Address</th><th>Port</th><th>&nbsp;</th></tr>\n";
-	printOpFormIntro ('addRS');
-	echo "<tr><td>";
-	if (getConfigVar ('DEFAULT_IPV4_RS_INSERVICE') == 'yes')
-		printImageHREF ('inservice', 'in service');
-	else
-		printImageHREF ('notinservice', 'NOT in service');
-	echo "</td><td><input type=text name=remoteip id=remoteip tabindex=1> ";
-	echo "<a href='javascript:;' onclick='window.open(\"" . makeHrefForHelper ('inet4list');
-	echo "\", \"findobjectip\", \"height=700, width=400, location=no, menubar=no, resizable=yes, scrollbars=no, status=no, titlebar=no, toolbar=no\");'>";
-	printImageHREF ('find', 'pick address');
-	echo "</a></td>";
-	$default_port = getConfigVar ('DEFAULT_SLB_RS_PORT');
-	if ($default_port == 0)
-		$default_port = '';
-	echo "<td><input type=text name=rsport size=5 value='${default_port}'  tabindex=2></td><td>";
-	printImageHREF ('add', 'Add new', TRUE, 3);
-	echo "</td></tr><tr><th colspan=4>configuration</th></tr>";
-	echo "<tr><td colspan=4><textarea name=rsconfig rows=10 cols=80 tabindex=4></textarea></td></tr>";
-	echo "</form></table>\n";
-	finishPortlet();
 
 	startPortlet ('Add many');
 	printOpFormIntro ('addMany');
@@ -336,7 +375,7 @@ function renderRSPoolServerForm ($pool_id)
 	);
 	printSelect ($formats, array ('name' => 'format'), 'ssv_1');
 	echo "</td><td><input type=submit value=Parse></td></tr>\n";
-	echo "<tr><td colspan=3><textarea name=rawtext cols=100 rows=50></textarea></td></tr>\n";
+	echo "<tr><td colspan=3><textarea name=rawtext cols=100 rows=25></textarea></td></tr>\n";
 	echo "</table>\n";
 	finishPortlet();
 }

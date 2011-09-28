@@ -542,6 +542,7 @@ CREATE TABLE `IPv4RS` (
   `rsport` smallint(5) unsigned default NULL,
   `rspool_id` int(10) unsigned default NULL,
   `rsconfig` text,
+  `comment` varchar(255) DEFAULT NULL,
   PRIMARY KEY  (`id`),
   KEY `rsip` (`rsip`),
   UNIQUE KEY `pool-endpoint` (`rspool_id`,`rsip`,`rsport`),

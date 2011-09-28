@@ -1441,16 +1441,18 @@ $msgcode['addRealServer']['OK'] = 48;
 function addRealServer ()
 {
 	global $sic;
-	assertIPv4Arg ('remoteip');
+	assertIPv4Arg ('rsip');
 	assertStringArg ('rsport', TRUE);
 	assertStringArg ('rsconfig', TRUE);
+	assertStringArg ('comment', TRUE);
 	addRStoRSPool
 	(
 		getBypassValue(),
-		$_REQUEST['remoteip'],
+		$_REQUEST['rsip'],
 		$_REQUEST['rsport'],
-		getConfigVar ('DEFAULT_IPV4_RS_INSERVICE'),
-		$sic['rsconfig']
+		(isset ($_REQUEST['inservice']) and $_REQUEST['inservice'] == 'on') ? 'yes' : 'no',
+		$sic['rsconfig'],
+		$sic['comment']
 	);
 	return showFuncMessage (__FUNCTION__, 'OK');
 }
@@ -1557,12 +1559,14 @@ function updateRealServer ()
 	assertIPv4Arg ('rsip');
 	assertStringArg ('rsport', TRUE);
 	assertStringArg ('rsconfig', TRUE);
+	assertStringArg ('comment', TRUE);
 	commitUpdateRS (
 		$_REQUEST['rs_id'],
 		$_REQUEST['rsip'],
 		$_REQUEST['rsport'],
 		(isset ($_REQUEST['inservice']) and $_REQUEST['inservice'] == 'on') ? 'yes' : 'no',
-		$sic['rsconfig']
+		$sic['rsconfig'],
+		$sic['comment']
 	);
 	return showFuncMessage (__FUNCTION__, 'OK');
 }

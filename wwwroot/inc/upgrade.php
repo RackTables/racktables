@@ -1285,6 +1285,7 @@ CREATE VIEW `RackObject` AS SELECT * FROM `Object`
 			$query[] = "UPDATE `Config` SET is_userdefined='yes' WHERE varname='PROXIMITY_RANGE'";
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdefined, description) VALUES ('QUICK_LINK_PAGES','','string','yes','no','yes','List of pages to dislay in quick links')";
 			$query[] = "ALTER TABLE `IPv4LB` MODIFY `prio` varchar(255) DEFAULT NULL";
+			$query[] = "ALTER TABLE `IPv4RS` ADD COLUMN `comment` varchar(255) NULL";
 			$query[] = "UPDATE Config SET varvalue = '0.20.0' WHERE varname = 'DB_VERSION'";
 			break;
 		default:
