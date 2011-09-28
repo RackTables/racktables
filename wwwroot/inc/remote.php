@@ -51,6 +51,7 @@ function queryTerminal ($object_id, $commands, $tolerate_remote_errors = TRUE)
 
 	// default telnet prompt specification
 	$prompt = NULL;
+	$protocol = 'telnet';
 	switch ($breed = detectDeviceBreed ($object_id))
 	{
 		# Correct prompt patterns for the breeds below are sometimes known, but
@@ -59,7 +60,9 @@ function queryTerminal ($object_id, $commands, $tolerate_remote_errors = TRUE)
 		# unless configured otherwise).
 		case 'ios12':
 		case 'fdry5':
-		case 'ftos8': // '^(Login|Password): $|^\S+[>#]$'
+		case 'ftos8': 
+			$protocol = 'netcat'; // default is netcat mode
+			$prompt = '^(Login|Password): $|^\S+[>#]$'; // set the prompt in case user would like to specify telnet protocol
 			break;
 		case 'vrp53':
 		case 'vrp55':
@@ -80,7 +83,7 @@ function queryTerminal ($object_id, $commands, $tolerate_remote_errors = TRUE)
 	$settings = array
 	(
 		'hostname' => $endpoints[0],
-		'protocol' => empty ($prompt) ? 'netcat' : 'telnet',
+		'protocol' => $protocol,
 		'port' => NULL,
 		'prompt' => $prompt,
 		'username' => NULL,
