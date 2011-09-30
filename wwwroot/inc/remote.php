@@ -49,15 +49,9 @@ function queryTerminal ($object_id, $commands, $tolerate_remote_errors = TRUE)
 	if (count ($endpoints) > 1)
 		throw new RTGatewayError ('cannot pick management address');
 
-	// default telnet prompt specification
-	$prompt = NULL;
-	$protocol = 'telnet';
+	// telnet prompt and mode specification
 	switch ($breed = detectDeviceBreed ($object_id))
 	{
-		# Correct prompt patterns for the breeds below are sometimes known, but
-		# left unset by intent. This makes "netcat" handling of these the
-		# default option (setting prompt pattern implies "telnet" handling,
-		# unless configured otherwise).
 		case 'ios12':
 		case 'fdry5':
 		case 'ftos8': 
@@ -66,17 +60,24 @@ function queryTerminal ($object_id, $commands, $tolerate_remote_errors = TRUE)
 			break;
 		case 'vrp53':
 		case 'vrp55':
+			$protocol = 'telnet';
 			$prompt = '^\[[^[\]]+\]$|^<[^<>]+>$|^(Username|Password):$|(?:\[Y\/N\]|\(Y\/N\)\[[YN]\]):?$';
 			break;
 		case 'nxos4':
+			$protocol = 'telnet';
 			$prompt = '[>:#] $';
 			break;
 		case 'xos12':
+			$protocol = 'telnet';
 			$prompt = ': $|\.\d+ # $';
 			break;
 		case 'jun10':
+			$protocol = 'telnet';
 			$prompt = '^login: $|^Password:$|^\S+@\S+[>#] $';
 			break;
+		default:
+			$protocol = 'netcat';
+			$prompt = NULL;
 	}
 
 	// set the default settings before calling user-defined callback
