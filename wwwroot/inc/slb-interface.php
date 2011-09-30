@@ -371,18 +371,23 @@ function renderRSPoolServerForm ($pool_id)
 	else
 		printImageHREF ('notinservice', 'NOT in service');
 	echo "</td><td>Format: ";
-	$formats = array
+	$formats = callHook ('getBulkRealsFormats');
+	printSelect ($formats, array ('name' => 'format'));
+	echo "</td><td><input type=submit value=Parse></td></tr>\n";
+	echo "<tr><td colspan=3><textarea name=rawtext cols=100 rows=25></textarea></td></tr>\n";
+	echo "</table>\n";
+	finishPortlet();
+}
+
+function getBulkRealsFormats()
+{
+	return array
 	(
 		'ssv_1' => 'SSV: &lt;IP address&gt;',
 		'ssv_2' => 'SSV: &lt;IP address&gt; &lt;port&gt;',
 		'ipvs_2' => 'ipvsadm -l -n (address and port)',
 		'ipvs_3' => 'ipvsadm -l -n (address, port and weight)',
 	);
-	printSelect ($formats, array ('name' => 'format'), 'ssv_1');
-	echo "</td><td><input type=submit value=Parse></td></tr>\n";
-	echo "<tr><td colspan=3><textarea name=rawtext cols=100 rows=25></textarea></td></tr>\n";
-	echo "</table>\n";
-	finishPortlet();
 }
 
 function renderRSPoolList ()

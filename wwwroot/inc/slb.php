@@ -336,7 +336,7 @@ function getIPv4RSPoolOptions ()
 
 function addRStoRSPool ($pool_id = 0, $rsip = '', $rsport = 0, $inservice = 'no', $rsconfig = '', $comment = '')
 {
-	usePreparedExecuteBlade
+	return usePreparedExecuteBlade
 	(
 		'INSERT INTO IPv4RS (rsip, rsport, rspool_id, inservice, rsconfig, comment) VALUES (INET_ATON(?), ?, ?, ?, ?, ?)',
 		array
