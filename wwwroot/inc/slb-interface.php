@@ -243,16 +243,17 @@ function renderRSPool ($pool_id)
 	if ($poolInfo['rscount'])
 	{
 		$rs_list = getRSListInPool ($pool_id);
-		$columns = getRSDisplayColumns ($rs_list);		startPortlet ("Real servers ({$poolInfo['rscount']})");
+		$rs_table = callHook ('prepareRealServersTable', $rs_list);
+		startPortlet ("Real servers ({$poolInfo['rscount']})");
 		echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
 		echo "<tr>";
-		foreach ($columns as $title)
+		foreach ($rs_table['columns'] as $title)
 			echo "<th>$title</th>";
 		echo "</tr>";
-		foreach ($rs_list as $rs)
+		foreach ($rs_table['rows'] as $rs)
 		{
 			echo "<tr valign=top>";
-			foreach (array_keys ($columns) as $field)
+			foreach (array_keys ($rs_table['columns']) as $field)
 			{
 				switch ($field)
 				{
@@ -291,9 +292,9 @@ function renderRSPool ($pool_id)
 	echo "</td></tr></table>\n";
 }
 
-function getRSDisplayColumns ($rs_list)
+function prepareRealServersTable ($rs_list)
 {
-	$result = array
+	$columns = array
 	(
 		'inservice' => '',
 		'rsip' => 'address',
@@ -301,15 +302,19 @@ function getRSDisplayColumns ($rs_list)
 		'rsconfig' => 'RS config',
 		'comment' => 'comment',
 	);
-	$not_seen = $result;
+	$not_seen = $columns;
 	foreach ($rs_list as $rs)
 		foreach ($rs as $key => $value)
 			if (! empty ($value) and isset ($not_seen[$key]))
 				unset ($not_seen[$key]);
 	foreach (array_keys ($not_seen) as $key)
 		if ($key != 'rsip')
-			unset ($result[$key]);
-	return $result;
+			unset ($columns[$key]);
+	return array
+		(
+			'columns' => $columns,
+			'rows' => $rs_list,
+		);
 }
 
 function renderRSPoolServerForm ($pool_id)

@@ -4670,6 +4670,18 @@ function getOutputOf ($func_name)
 	}
 }
 
+// calls function which can be overriden in $hook array. Takes any number of additional parameters
+function callHook ($func_name)
+{
+	global $hook;
+	if (isset ($hook[$func_name]))
+		$func_name = $hook[$func_name];
+	$params = func_get_args();
+	array_shift($params);
+	// if function named $func_name does not exists, an exception is thrown automatically
+	return call_user_func_array ($func_name, $params); 
+}
+
 // function to parse text table header, aligned by left side
 // returns array suitable to be used by explodeTableLine
 function guessTableStructure ($line)

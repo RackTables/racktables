@@ -21,6 +21,7 @@ $trigger = array();
 $ophandler = array();
 $tabhandler = array();
 $delayauth = array();
+$hook = array();
 
 $indexlayout = array
 (
