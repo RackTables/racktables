@@ -2566,6 +2566,7 @@ function renderIPv4Network ($id)
 	echo "<table class='widetable' border=0 cellspacing=0 cellpadding=5 align='center' width='100%'>\n";
 	echo "<tr><th>Address</th><th>Name</th><th>Allocation</th></tr>\n";
 
+	$slb_ips = getSLBRelatedIPs ($startip, $endip);
 	for ($ip = $startip; $ip <= $endip; $ip++) :
 		$dottedquad = ip_long2quad($ip);
 		$secondstyle = 'tdleft' . (isset ($hl_ip) && $hl_ip == $ip ? ' port_highlight' : '');
@@ -2590,7 +2591,6 @@ function renderIPv4Network ($id)
 			(empty ($addr['allocs']) || !empty ($addr['name']) ? 'rsv-port' : '') .
 			"'><span class='rsvtext'>${addr['name']}</span></td><td class='${secondstyle}'>";
 		$delim = '';
-		$prologue = '';
 		if ( $addr['reserved'] == 'yes')
 		{
 			echo "<strong>RESERVED</strong> ";
@@ -2605,32 +2605,21 @@ function renderIPv4Network ($id)
 			$delim = '; ';
 		}
 		if ($delim != '')
-		{
-			$delim = '';
-			$prologue = '<br>';
-		}
-		foreach ($range['addrlist'][$ip]['lblist'] as $ref)
-		{
-			echo $prologue;
-			$prologue = '';
-			echo "${delim}<a href='".makeHref(array('page'=>'object', 'object_id'=>$ref['object_id']))."'>";
-			echo "${ref['object_name']}</a>:<a href='".makeHref(array('page'=>'ipv4vs', 'vs_id'=>$ref['vs_id']))."'>";
-			echo "${ref['vport']}/${ref['proto']}</a>&rarr;";
-			$delim = '; ';
-		}
-		if ($delim != '')
-		{
-			$delim = '';
-			$prologue = '<br>';
-		}
-		foreach ($range['addrlist'][$ip]['rslist'] as $ref)
-		{
-			echo $prologue;
-			$prologue = '';
-			echo "${delim}&rarr;${ref['rsport']}@<a href='".makeHref(array('page'=>'ipv4rspool', 'pool_id'=>$ref['rspool_id']))."'>";
-			echo "${ref['rspool_name']}</a>";
-			$delim = '; ';
-		}
+			$delim = '<br>';
+		if (isset ($slb_ips[$ip]['vs']))
+			foreach ($slb_ips[$ip]['vs'] as $vs)
+			{
+				echo "${delim}<a href='".makeHref(array('page'=>'ipv4vs', 'vs_id'=>$vs['id']))."'>";
+				echo "${vs['name']}:${vs['vport']}/${vs['proto']}</a>&rarr;";
+				$delim = '<br>';
+			}
+		if (isset ($slb_ips[$ip]['rsp']))
+			foreach ($slb_ips[$ip]['rsp'] as $rsp)
+			{
+				echo "${delim}&rarr;<a href='".makeHref(array('page'=>'ipv4rspool', 'pool_id'=>$rsp['id']))."'>";
+				echo "${rsp['name']}</a>";
+				$delim = '<br>';
+			}
 		echo "</td></tr>\n";
 	endfor;
 	// end of iteration

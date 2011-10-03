@@ -496,4 +496,30 @@ function getRSListInPool ($rspool_id)
 	return $ret;
 }
 
+// returns array indexed by binary IP. Values are arrays like ('vs' => ..., 'rsp' => ...)
+function getSLBRelatedIPs ($startip, $endip)
+{
+	$ret = array();
+
+	$result = usePreparedSelectBlade
+	(
+		"SELECT * FROM IPv4VS WHERE vip BETWEEN ? AND ?",
+		array ($startip, $endip)
+	);
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
+		$ret[$row['vip']]['vs'][$row['id']] = $row;
+	unset ($result);
+
+	$result = usePreparedSelectBlade
+	(
+		"SELECT IPv4RSPool.*, rs.rsip FROM IPv4RSPool, (SELECT rsip, rspool_id FROM IPv4RS WHERE rsip BETWEEN ? AND ?) AS rs WHERE rs.rspool_id = IPv4RSPool.id",
+		array ($startip, $endip)
+	);
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
+		$ret[$row['rsip']]['rsp'][$row['id']] = $row;
+	unset ($result);
+	
+	return $ret;
+}
+
 ?>
