@@ -117,10 +117,8 @@ ORDER BY
 		$parser->addMacro ('LB_NAME', $this->lb['name']);
 		$parser->addMacro ('VS_ID', $this->vs['id']);
 		$parser->addMacro ('VS_NAME', $this->vs['name']);
-		$parser->addMacro ('VNAME', $this->vs['name']); // for backwards compatibility
 		$parser->addMacro ('RSP_ID', $this->rs['id']);
 		$parser->addMacro ('RSP_NAME', $this->rs['name']);
-		$parser->addMacro ('RSPOOLNAME', $this->rs['name']); // for backwards compatibility
 		$parser->addMacro ('VIP', $this->vs['vip']);
 		$parser->addMacro ('VPORT', $this->vs['vport']);
 		$parser->addMacro ('PROTO', $this->vs['proto']);
@@ -140,8 +138,8 @@ ORDER BY
 virtual_server %VIP% %VPORT% {
 	protocol %PROTO%
 	%GLOBAL_VS_CONF%
-	%VS_VS_CONF%
 	%RSP_VS_CONF%
+	%VS_VS_CONF%
 	%SLB_VS_CONF%
 ");
 		foreach (getRSListInPool ($this->rs['id']) as $rs)
@@ -163,8 +161,8 @@ virtual_server %VIP% %VPORT% {
 		%GLOBAL_RS_CONF%
 		%VS_RS_CONF%
 		%RSP_RS_CONF%
-		%RS_RS_CONF%
 		%SLB_RS_CONF%
+		%RS_RS_CONF%
 	}
 ");
 			$parser->popdefs(); // restore original (VS-driven) macros
