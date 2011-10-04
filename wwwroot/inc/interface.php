@@ -1442,11 +1442,21 @@ function renderIPv6ForObject ($object_id)
 // This function is deprecated. Do not rely on its internals,
 // it will probably be removed in the next major relese.
 // Use new showError, showWarning, showSuccess functions.
-// Log array is stored in $_SESSION['log']. Its format is simple: plain ordered array 
+// Log array is stored in global $log_messages. Its format is simple: plain ordered array 
 // with values having keys 'c' (both message code and severity) and 'a' (sprintf arguments array)
 function showMessageOrError ()
 {
-	if (empty ($_SESSION['log']))
+	global $log_messages;
+
+	@session_start();
+	if (isset ($_SESSION['log']))
+	{
+		$log_messages = array_merge ($_SESSION['log'], $log_messages);
+		unset ($_SESSION['log']);
+	}
+	session_commit();
+
+	if (empty ($log_messages))
 		return;
 	$msginfo = array
 	(
@@ -1504,7 +1514,7 @@ function showMessageOrError ()
 
 	);
 	// Handle the arguments. Is there any better way to do it?
-	foreach ($_SESSION['log'] as $record)
+	foreach ($log_messages as $record)
 	{
 		if (!isset ($record['c']) or !isset ($msginfo[$record['c']]))
 		{
@@ -1555,7 +1565,7 @@ function showMessageOrError ()
 			$msgtext = $msginfo[$record['c']]['format'];
 		echo '<div class=msg_' . $msginfo[$record['c']]['code'] . ">${msgtext}</div>";
 	}
-	unset ($_SESSION['log']);
+	$log_messages = array();
 }
 
 // renders two tables: port link status and learned MAC list
@@ -7895,6 +7905,7 @@ function renderVSTRulesEditor ($vst_id)
 	$row_html .= '<td><input type=text name=description value="%s"></td>';
 	$row_html .= '<td><a href="#" class="vst-add-rule">' . getImageHREF ('add', 'Duplicate rule') . '</a></td>';
 	addJS ("var new_vst_row = '" . addslashes (sprintf ($row_html, '', '', getSelect ($port_role_options, array ('name' => 'port_role'), 'anymode'), '', '')) . "';", TRUE);
+	@session_start();
 	foreach (isset ($_SESSION['vst_edited']) ? $_SESSION['vst_edited'] : $vst['rules'] as $item)
 		printf ('<tr>' . $row_html . '</tr>', $item['rule_no'], htmlspecialchars ($item['port_pcre'], ENT_QUOTES),  getSelect ($port_role_options, array ('name' => 'port_role'), $item['port_role']), $item['wrt_vlans'], $item['description']);
 	echo '</table>';

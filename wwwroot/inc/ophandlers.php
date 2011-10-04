@@ -451,27 +451,6 @@ $opspec_list['vlandomain-vlanlist-upd'] = array
 	),
 );
 
-function buildRedirectURL ($nextpage = NULL, $nexttab = NULL, $moreArgs = array())
-{
-	global $page, $pageno, $tabno;
-	if ($nextpage === NULL)
-		$nextpage = $pageno;
-	if ($nexttab === NULL)
-		$nexttab = $tabno;
-	$url = "index.php?page=${nextpage}&tab=${nexttab}";
-	if (isset ($page[$nextpage]['bypass']))
-		$url .= '&' . $page[$nextpage]['bypass'] . '=' . $_REQUEST[$page[$nextpage]['bypass']];
-
-	if (count ($moreArgs) > 0)
-		foreach ($moreArgs as $arg => $value)
-			if (is_array ($value))
-				foreach ($value as $v)
-					$url .= '&' . urlencode ($arg . '[]') . '=' . urlencode ($v);
-			elseif ($arg != 'module')
-				$url .= '&' . urlencode ($arg) . '=' . urlencode ($value);
-	return $url;
-}
-
 $msgcode['addPortForwarding']['OK'] = 48;
 function addPortForwarding ()
 {
@@ -2605,7 +2584,10 @@ function updVSTRule()
 	{
 		// Every case, which is soft-processed in process.php, will have the working copy available for a retry.
 		if ($e instanceof InvalidRequestArgException or $e instanceof RTDatabaseError)
+		{
+			@session_start();
 			$_SESSION['vst_edited'] = $data;
+		}
 		throw $e;
 	}
 	return showFuncMessage (__FUNCTION__, 'OK');

@@ -254,6 +254,8 @@ $wdm_packs = array
 	),
 );
 
+$log_messages = array(); // messages waiting for displaying
+
 // This function assures that specified argument was passed
 // and is a number greater than zero.
 function assertUIntArg ($argname, $allow_zero = FALSE)
@@ -1245,7 +1247,7 @@ function redirectIfNecessary ()
 		$trigger,
 		$pageno,
 		$tabno;
-
+	@session_start();
 	if
 	(
 		! isset ($_REQUEST['tab']) and
@@ -1254,7 +1256,7 @@ function redirectIfNecessary ()
 		permitted ($pageno, $_SESSION['RTLT'][$pageno]['tabname']) and
 		time() - $_SESSION['RTLT'][$pageno]['time'] <= TAB_REMEMBER_TIMEOUT
 	)
-		redirectUser ($pageno, $_SESSION['RTLT'][$pageno]['tabname']);
+		redirectUser (buildRedirectURL ($pageno, $_SESSION['RTLT'][$pageno]['tabname']));
 
 	// check if we accidentaly got on a dynamic tab that shouldn't be shown for this object
 	if
@@ -1264,8 +1266,14 @@ function redirectIfNecessary ()
 	)
 	{
 		$_SESSION['RTLT'][$pageno]['dont_remember'] = 1;
-		redirectUser ($pageno, 'default');
+		redirectUser (buildRedirectURL ($pageno, 'default'));
 	}
+	if (isset ($_SESSION['RTLT'][$pageno]['dont_remember']))
+		unset ($_SESSION['RTLT'][$pageno]['dont_remember']);
+	// store the last visited tab name
+	if (isset ($_REQUEST['tab']))
+		$_SESSION['RTLT'][$pageno] = array ('tabname' => $tabno, 'time' => time());
+	session_commit(); // if we are continuing to run, unlock session data
 }
 
 function prepareNavigation()
@@ -1502,6 +1510,7 @@ function getCellFilter ()
 	global $sic;
 	global $pageno;
 	$andor_used = FALSE;
+	@session_start();
 	// if the page is submitted we get an andor value so we know they are trying to start a new filter or clearing the existing one.
 	if(isset($_REQUEST['andor']))
 	{
@@ -1625,17 +1634,40 @@ function getCellFilter ()
 	return $ret;
 }
 
-function redirectUser ($p, $t)
+function buildRedirectURL ($nextpage = NULL, $nexttab = NULL, $moreArgs = array())
 {
-	global $page;
-	$l = "index.php?page=${p}&tab=${t}";
-	if (isset ($page[$p]['bypass']) and isset ($_REQUEST[$page[$p]['bypass']]))
-		$l .= '&' . $page[$p]['bypass'] . '=' . $_REQUEST[$page[$p]['bypass']];
-	if (isset ($page[$p]['bypass_tabs']))
-		foreach ($page[$p]['bypass_tabs'] as $param_name)
+	global $page, $pageno, $tabno;
+	if ($nextpage === NULL)
+		$nextpage = $pageno;
+	if ($nexttab === NULL)
+		$nexttab = $tabno;
+	$url = "index.php?page=${nextpage}&tab=${nexttab}";
+	if (isset ($page[$nextpage]['bypass']))
+		$url .= '&' . $page[$nextpage]['bypass'] . '=' . $_REQUEST[$page[$nextpage]['bypass']];
+	if (isset ($page[$nextpage]['bypass_tabs']))
+		foreach ($page[$nextpage]['bypass_tabs'] as $param_name)
 			if (isset ($_REQUEST[$param_name]))
-				$l .= '&' . urlencode ($param_name) . '=' . urlencode ($_REQUEST[$param_name]);
-	header ("Location: " . $l);
+				$url .= '&' . urlencode ($param_name) . '=' . urlencode ($_REQUEST[$param_name]);
+
+	if (count ($moreArgs) > 0)
+		foreach ($moreArgs as $arg => $value)
+			if (is_array ($value))
+				foreach ($value as $v)
+					$url .= '&' . urlencode ($arg . '[]') . '=' . urlencode ($v);
+			elseif ($arg != 'module')
+				$url .= '&' . urlencode ($arg) . '=' . urlencode ($value);
+	return $url;
+}
+
+function redirectUser ($url)
+{
+	global $log_messages;
+	if (! empty ($log_messages))
+	{
+		@session_start();
+		$_SESSION['log'] = $log_messages;
+	}
+	header ("Location: " . $url);
 	die;
 }
 
@@ -4456,12 +4488,11 @@ function setMessage ($type, $message, $direct_rendering)
 
 function showOneLiner ($code, $args = array())
 {
+	global $log_messages;
 	$line = array ('c' => $code);
 	if (! empty ($args))
 		$line['a'] = $args;
-	if (! isset ($_SESSION['log']))
-		$_SESSION['log'] = array();
-	$_SESSION['log'][] = $line;
+	$log_messages[] = $line;
 }
 
 function showFuncMessage ($callfunc, $status, $log_args = array())
@@ -4477,29 +4508,29 @@ function showFuncMessage ($callfunc, $status, $log_args = array())
 // message_type can be 'all', 'success', 'error', 'warning', 'neutral'.
 function getMessagesCount ($message_type = 'all')
 {
+	global $log_messages;
 	$result = 0;
-	if (isset ($_SESSION['log']))
-		foreach ($_SESSION['log'] as $msg)
-			if ($msg['c'] < 100)
-			{
-				if ($message_type == 'success' || $message_type == 'all')
-					++$result;
-			}
-			elseif ($msg['c'] < 200)
-			{
-				if ($message_type == 'error' || $message_type == 'all')
-					++$result;
-			}
-			elseif ($msg['c'] < 300)
-			{
-				if ($message_type == 'warning' || $message_type == 'all')
-					++$result;
-			}
-			else
-			{
-				if ($message_type == 'neutral' || $message_type == 'all')
-					++$result;
-			}
+	foreach ($log_messages as $msg)
+		if ($msg['c'] < 100)
+		{
+			if ($message_type == 'success' || $message_type == 'all')
+				++$result;
+		}
+		elseif ($msg['c'] < 200)
+		{
+			if ($message_type == 'error' || $message_type == 'all')
+				++$result;
+		}
+		elseif ($msg['c'] < 300)
+		{
+			if ($message_type == 'warning' || $message_type == 'all')
+				++$result;
+		}
+		else
+		{
+			if ($message_type == 'neutral' || $message_type == 'all')
+				++$result;
+		}
 	return $result;
 }
 

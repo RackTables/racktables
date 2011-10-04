@@ -106,7 +106,6 @@ if (!isset ($script_mode) or $script_mode !== TRUE)
 	// Authentication passed.
 	// Note that we don't perform autorization here, so each 1st level page
 	// has to do it in its way, e.g. by calling authorize() after fixContext().
-	session_start();
 }
 else
 {

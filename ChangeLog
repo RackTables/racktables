@@ -1,4 +1,5 @@
 0.20.0
+	bugfix: when long action takes place, RackTables allows user to work simultaneously in different tabs
 	update: handle wide-band WDM transceivers
 	update: 802.1q: config deploy to Cisco IOS switches is no more requiring 'switchport trunk encapsulation dot1q' pre-set
 	update: convert racks and rows into objects (by Aaron Dummer)

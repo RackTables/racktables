@@ -19,14 +19,6 @@ try {
 		redirectIfNecessary();
 		assertPermission();
 		header ('Content-Type: text/html; charset=UTF-8');
-		// Only store the tab name after clearance is got. Any failure is unhandleable.
-		if (isset ($_REQUEST['tab']))
-		{
-			if (isset ($_SESSION['RTLT'][$pageno]['dont_remember']))
-				unset ($_SESSION['RTLT'][$pageno]['dont_remember']);
-			else
-				$_SESSION['RTLT'][$pageno] = array ('tabname' => $tabno, 'time' => time());
-		}
 		// call the main handler - page or tab handler.
 		if (isset ($tabhandler[$pageno][$tabno]))
 		{
@@ -184,7 +176,7 @@ try {
 			ob_clean();
 			showError ('Operation not permitted');
 		}
-		header ('Location: ' . $location);
+		redirectUser ($location);
 		// any other error requires no special handling and will be caught outside
 		break;
 	case 'popup' == $_REQUEST['module']:
@@ -211,9 +203,6 @@ try {
 catch (Exception $e)
 {
 	ob_end_clean();
-	# prevent message appearing in foreign tab
-	if (isset ($_SESSION['log']))
-		unset ($_SESSION['log']);
 	printException ($e);
 }
 ?>
