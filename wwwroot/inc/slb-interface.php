@@ -604,22 +604,10 @@ function renderEditVService ($vsid)
 
 function renderLVSConfig ($object_id)
 {
-	echo '<br>';
-	try
-	{
-		$config = buildLVSConfig ($object_id);
-
-		printOpFormIntro ('submitSLBConfig');
-		echo "<center><input type=submit value='Submit for activation'></center>";
-		echo "</form>";
-	}
-	catch(RTBuildLVSConfigError $e)
-	{
-		$config = $e->config_to_display;
-		foreach ($e->message_list as $msg)
-			echo '<div class="msg_error">' . $msg . '</div>';
-	}
-	echo "<pre>$config</pre>";
+	printOpFormIntro ('submitSLBConfig');
+	echo "<center><input type=submit value='Submit for activation'></center>";
+	echo "</form>";
+	echo "<pre>" . buildLVSConfig ($object_id) . "</pre>";
 }
 
 ?>
