@@ -2566,7 +2566,6 @@ function renderIPv4Network ($id)
 	echo "<table class='widetable' border=0 cellspacing=0 cellpadding=5 align='center' width='100%'>\n";
 	echo "<tr><th>Address</th><th>Name</th><th>Allocation</th></tr>\n";
 
-	$slb_ips = getSLBRelatedIPs ($startip, $endip);
 	for ($ip = $startip; $ip <= $endip; $ip++) :
 		$dottedquad = ip_long2quad($ip);
 		$secondstyle = 'tdleft' . (isset ($hl_ip) && $hl_ip == $ip ? ' port_highlight' : '');
@@ -2596,7 +2595,7 @@ function renderIPv4Network ($id)
 			echo "<strong>RESERVED</strong> ";
 			$delim = '; ';
 		}
-		foreach ($range['addrlist'][$ip]['allocs'] as $ref)
+		foreach ($addr['allocs'] as $ref)
 		{
 			echo $delim . $aac2[$ref['type']];
 			echo "<a href='".makeHref(array('page'=>'object', 'object_id'=>$ref['object_id'], 'tab' => 'default', 'hl_ipv4_addr'=>$addr['ip']))."'>";
@@ -2606,20 +2605,20 @@ function renderIPv4Network ($id)
 		}
 		if ($delim != '')
 			$delim = '<br>';
-		if (isset ($slb_ips[$ip]['vs']))
-			foreach ($slb_ips[$ip]['vs'] as $vs)
-			{
-				echo "${delim}<a href='".makeHref(array('page'=>'ipv4vs', 'vs_id'=>$vs['id']))."'>";
-				echo "${vs['name']}:${vs['vport']}/${vs['proto']}</a>&rarr;";
-				$delim = '<br>';
-			}
-		if (isset ($slb_ips[$ip]['rsp']))
-			foreach ($slb_ips[$ip]['rsp'] as $rsp)
-			{
-				echo "${delim}&rarr;<a href='".makeHref(array('page'=>'ipv4rspool', 'pool_id'=>$rsp['id']))."'>";
-				echo "${rsp['name']}</a>";
-				$delim = '<br>';
-			}
+		foreach ($addr['vslist'] as $vs_id)
+		{
+			$vs = spotEntity ('ipv4vs', $vs_id);
+			echo "${delim}<a href='".makeHref(array('page'=>'ipv4vs', 'vs_id'=>$vs['id']))."'>";
+			echo "${vs['name']}:${vs['vport']}/${vs['proto']}</a>&rarr;";
+			$delim = '<br>';
+		}
+		foreach ($addr['rsplist'] as $rsp_id)
+		{
+			$rsp = spotEntity ('ipv4rspool', $rsp_id);
+			echo "${delim}&rarr;<a href='".makeHref(array('page'=>'ipv4rspool', 'pool_id'=>$rsp['id']))."'>";
+			echo "${rsp['name']}</a>";
+			$delim = '<br>';
+		}
 		echo "</td></tr>\n";
 	endfor;
 	// end of iteration
@@ -2885,10 +2884,28 @@ function renderIPAddress ($dottedquad)
 	{
 		$summary['Originated NAT connections'] = count ($address['outpf']);
 		$summary['Arriving NAT connections'] = count ($address['inpf']);
-		$summary['Virtual IP instances'] = count ($address['lblist']);
-		$summary['SLB real servers'] =  count ($address['rslist']);
 	}
 	renderEntitySummary ($address, 'summary', $summary);
+	
+	// render SLB portlet
+	if ($address['version'] == 4 and (! empty ($address['vslist']) or ! empty ($address['rsplist'])))
+	{
+		startPortlet ("");
+		if (! empty ($address['vslist']))
+		{
+			printf ("<h2>virtual services (%d):</h2>", count ($address['vslist']));
+			foreach ($address['vslist'] as $vs_id)
+				renderSLBEntityCell (spotEntity ('ipv4vs', $vs_id));
+		}
+
+		if (! empty ($address['rsplist']))
+		{
+			printf ("<h2>RS pools (%d):</h2>", count ($address['rsplist']));
+			foreach ($address['rsplist'] as $rsp_id)
+				renderSLBEntityCell (spotEntity ('ipv4rspool', $rsp_id));
+		}
+		finishPortlet();
+	}
 	echo "</td>\n";
 
 	echo "<td class=pcright>";

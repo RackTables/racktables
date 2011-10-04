@@ -1587,9 +1587,9 @@ function constructIPv4Address ($dottedquad = NULL)
 		'reserved' => 'no',
 		'outpf' => array(),
 		'inpf' => array(),
-		'rslist' => array(),
 		'allocs' => array(),
-		'lblist' => array()
+		'vslist' => array(),
+		'rsplist' => array(),
 	);
 	if ($dottedquad != NULL)
 		$ret['ip'] = $dottedquad;
@@ -1691,46 +1691,26 @@ function scanIPv4Space ($pairlist)
 		);
 	}
 
-	// 3. look for virtual services and related LB 
-	$query = "select vs_id, inet_ntoa(vip) as ip, vport, proto, vs.name, object_id " .
-		"from IPv4VS as vs inner join IPv4LB as lb on vs.id = lb.vs_id " .
-		"where ${whereexpr3} order by vport, proto, object_id";
+	// 3. look for virtual services
+	$query = "select id, vip as ip_bin, inet_ntoa(vip) as ip from IPv4VS where ${whereexpr3}";
 	$result = usePreparedSelectBlade ($query, $qparams);
 	$allRows = $result->fetchAll (PDO::FETCH_ASSOC);
 	unset ($result);
 	foreach ($allRows as $row)
 	{
-		$ip_bin = ip2long ($row['ip']);
-		if (!isset ($ret[$ip_bin]))
-			$ret[$ip_bin] = constructIPv4Address ($row['ip']);
-		$oinfo = spotEntity ('object', $row['object_id']);
-		$ret[$ip_bin]['lblist'][] = array
-		(
-			'vport' => $row['vport'],
-			'proto' => $row['proto'],
-			'vs_id' => $row['vs_id'],
-			'name' => $row['name'],
-			'vip' => $row['ip'],
-			'object_id' => $row['object_id'],
-			'object_name' => $oinfo['dname'],
-		);
+		if (!isset ($ret[$row['ip_bin']]))
+			$ret[$row['ip_bin']] = constructIPv4Address ($row['ip']);
+		$ret[$row['ip_bin']]['vslist'][] = $row['id'];
 	}
 
 	// 4. don't forget about real servers along with pools
-	$query = "select inet_ntoa(rsip) as ip, inservice, rsport, rspool_id, rsp.name as rspool_name from " .
-		"IPv4RS as rs inner join IPv4RSPool as rsp on rs.rspool_id = rsp.id " .
-		"where ${whereexpr4} " .
-		"order by ip, rsport, rspool_id";
+	$query = "select rsip as ip_bin, inet_ntoa(rsip) as ip, rspool_id from IPv4RS where ${whereexpr4}";
 	$result = usePreparedSelectBlade ($query, $qparams);
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
-		$ip_bin = ip2long ($row['ip']);
-		if (!isset ($ret[$ip_bin]))
-			$ret[$ip_bin] = constructIPv4Address ($row['ip']);
-		$tmp = array();
-		foreach (array ('rspool_id', 'rsport', 'rspool_name', 'inservice') as $cname)
-			$tmp[$cname] = $row[$cname];
-		$ret[$ip_bin]['rslist'][] = $tmp;
+		if (!isset ($ret[$row['ip_bin']]))
+			$ret[$row['ip_bin']] = constructIPv4Address ($row['ip']);
+		$ret[$row['ip_bin']]['rsplist'][] = $row['rspool_id'];
 	}
 	unset ($result);
 
@@ -1954,7 +1934,7 @@ function updateAddress ($ip = 0, $name = '', $reserved = 'no')
 // This function is actually used not only to update, but also to create records,
 // that's why ON DUPLICATE KEY UPDATE was replaced by DELETE-INSERT pair
 // (MySQL 4.0 workaround).
-function updateV4Address ($ip = 0, $name = '', $reserved = 'no')
+function updateV4Address ($ip, $name = '', $reserved = 'no')
 {
 	// compute update log message
 	$result = usePreparedSelectBlade ('SELECT name FROM IPv4Address WHERE ip = INET_ATON(?)', array ($ip));
