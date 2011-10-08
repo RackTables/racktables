@@ -659,7 +659,7 @@ $dictionary = array
 	582 => array ('chapter_id' => 12, 'dict_value' => '[[NETGEAR%GPASS%FSM7326P | http://www.netgear.com/Products/Switches/Layer3ManagedSwitches/FSM7326P.aspx]]'),
 	583 => array ('chapter_id' => 12, 'dict_value' => '[[NETGEAR%GPASS%FSM7352PS | http://www.netgear.com/Products/Switches/Layer3ManagedSwitches/FSM7352PS.aspx]]'),
 	584 => array ('chapter_id' => 12, 'dict_value' => '[[NETGEAR%GPASS%GSM7328FS | http://www.netgear.com/Products/Switches/Layer3ManagedSwitches/GSM7328FS.aspx]]'),
-	585 => array ('chapter_id' => 12, 'dict_value' => '[[NETGEAR%GPASS%GSM7328S | http://www.netgear.com/Products/Switches/Layer3ManagedSwitches/GSM7328S.aspx]]'),
+	585 => array ('chapter_id' => 12, 'dict_value' => 'NETGEAR%GPASS%GSM7328Sv1'),
 	586 => array ('chapter_id' => 12, 'dict_value' => '[[NETGEAR%GPASS%GSM7312 | http://www.netgear.com/Products/Switches/Layer3ManagedSwitches/GSM7312.aspx]]'),
 	587 => array ('chapter_id' => 12, 'dict_value' => '[[NETGEAR%GPASS%FSM7328S | http://www.netgear.com/Products/Switches/Layer3ManagedSwitches/FSM7328S.aspx]]'),
 	588 => array ('chapter_id' => 12, 'dict_value' => '[[NETGEAR%GPASS%FSM7352S | http://www.netgear.com/Products/Switches/Layer3ManagedSwitches/FSM7352S.aspx]]'),
@@ -1666,6 +1666,7 @@ $dictionary = array
 	1598 => array ('chapter_id' => 16, 'dict_value' => 'JunOS 11'),
 	1599 => array ('chapter_id' => 16, 'dict_value' => 'JunOS 12'),
 	1600 => array ('chapter_id' => 12, 'dict_value' => 'HP ProCurve%GPASS%E2910-48G-PoE+ J9148A'),
+	1601 => array ('chapter_id' => 12, 'dict_value' => 'NETGEAR%GPASS%GSM7328Sv2'),
 
 # Any new "default" dictionary records must go above this line (i.e., with
 # dict_key code less, than 50000). This is necessary to keep AUTO_INCREMENT
