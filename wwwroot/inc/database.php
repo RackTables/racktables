@@ -3732,6 +3732,13 @@ function getFileStats ()
 function commitAddFile ($name, $type, $contents, $comment)
 {
 	global $dbxlink;
+	switch ($type)
+	{
+	case 'image/x-png':
+		$type = 'image/png';
+		break;
+	default:
+	}
 	try
 	{
 		$query = $dbxlink->prepare ('INSERT INTO File (name, type, ctime, mtime, atime, contents, comment) VALUES (?, ?, NOW(), NOW(), NOW(), ?, ?)');
