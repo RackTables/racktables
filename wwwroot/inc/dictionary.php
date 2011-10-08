@@ -1412,7 +1412,7 @@ $dictionary = array
 	1346 => array ('chapter_id' => 12, 'dict_value' => 'Huawei%GPASS%Quidway S5348TP-PWR-SI'),
 	1347 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 2960G-24PC'),
 	1348 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 2350-48TD'),
-	1349 => array ('chapter_id' => 12, 'dict_value' => 'HP ProCurve%GPASS%E2910-48G'),
+	1349 => array ('chapter_id' => 12, 'dict_value' => 'HP ProCurve%GPASS%E2910-48G J9147A'),
 	1350 => array ('chapter_id' => 14, 'dict_value' => 'ExtremeXOS 10'),
 	1351 => array ('chapter_id' => 14, 'dict_value' => 'ExtremeXOS 11'),
 	1352 => array ('chapter_id' => 14, 'dict_value' => 'ExtremeXOS 12'),
@@ -1663,6 +1663,7 @@ $dictionary = array
 	1597 => array ('chapter_id' => 16, 'dict_value' => 'JunOS 10'),
 	1598 => array ('chapter_id' => 16, 'dict_value' => 'JunOS 11'),
 	1599 => array ('chapter_id' => 16, 'dict_value' => 'JunOS 12'),
+	1600 => array ('chapter_id' => 12, 'dict_value' => 'HP ProCurve%GPASS%E2910-48G-PoE+ J9148A'),
 
 # Any new "default" dictionary records must go above this line (i.e., with
 # dict_key code less, than 50000). This is necessary to keep AUTO_INCREMENT
