@@ -849,6 +849,32 @@ $msgcode['delIPv4Prefix']['OK'] = 49;
 function delIPv4Prefix ()
 {
 	assertUIntArg ('id');
+	$netinfo = spotEntity ('ipv4net', $_REQUEST['id']);
+	loadIPv4AddrList ($netinfo);
+	if
+	(
+		array_key_exists ($netinfo['db_first'], $netinfo['addrlist']) and
+		$netinfo['addrlist'][$netinfo['db_first']]['name'] == 'network' and
+		$netinfo['addrlist'][$netinfo['db_first']]['reserved'] == 'yes' and
+		! count ($netinfo['addrlist'][$netinfo['db_first']]['outpf']) and
+		! count ($netinfo['addrlist'][$netinfo['db_first']]['inpf']) and
+		! count ($netinfo['addrlist'][$netinfo['db_first']]['rslist']) and
+		! count ($netinfo['addrlist'][$netinfo['db_first']]['allocs']) and
+		! count ($netinfo['addrlist'][$netinfo['db_first']]['lblist'])
+	)
+		updateAddress ($netinfo['addrlist'][$netinfo['db_first']]['ip'], '', 'no');
+	if
+	(
+		array_key_exists ($netinfo['db_last'], $netinfo['addrlist']) and
+		$netinfo['addrlist'][$netinfo['db_last']]['name'] == 'broadcast' and
+		$netinfo['addrlist'][$netinfo['db_last']]['reserved'] == 'yes' and
+		! count ($netinfo['addrlist'][$netinfo['db_last']]['outpf']) and
+		! count ($netinfo['addrlist'][$netinfo['db_last']]['inpf']) and
+		! count ($netinfo['addrlist'][$netinfo['db_last']]['rslist']) and
+		! count ($netinfo['addrlist'][$netinfo['db_last']]['allocs']) and
+		! count ($netinfo['addrlist'][$netinfo['db_last']]['lblist'])
+	)
+		updateAddress ($netinfo['addrlist'][$netinfo['db_last']]['ip'], '', 'no');
 	destroyIPv4Prefix ($_REQUEST['id']);
 	return showFuncMessage (__FUNCTION__, 'OK');
 }

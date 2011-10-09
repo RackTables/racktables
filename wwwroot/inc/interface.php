@@ -2361,8 +2361,33 @@ END
 			$used = $netinfo['addrc'];
 			$maxdirect = $netinfo['addrt'];
 			$maxtotal = binInvMaskFromDec ($netinfo['mask']) + 1;
+			$pure_auto = 0;
+			if
+			(
+				array_key_exists ($netinfo['db_first'], $netinfo['addrlist']) and
+				$netinfo['addrlist'][$netinfo['db_first']]['name'] == 'network' and
+				$netinfo['addrlist'][$netinfo['db_first']]['reserved'] == 'yes' and
+				! count ($netinfo['addrlist'][$netinfo['db_first']]['outpf']) and
+				! count ($netinfo['addrlist'][$netinfo['db_first']]['inpf']) and
+				! count ($netinfo['addrlist'][$netinfo['db_first']]['rslist']) and
+				! count ($netinfo['addrlist'][$netinfo['db_first']]['allocs']) and
+				! count ($netinfo['addrlist'][$netinfo['db_first']]['lblist'])
+			)
+				$pure_auto++;
+			if
+			(
+				array_key_exists ($netinfo['db_last'], $netinfo['addrlist']) and
+				$netinfo['addrlist'][$netinfo['db_last']]['name'] == 'broadcast' and
+				$netinfo['addrlist'][$netinfo['db_last']]['reserved'] == 'yes' and
+				! count ($netinfo['addrlist'][$netinfo['db_last']]['outpf']) and
+				! count ($netinfo['addrlist'][$netinfo['db_last']]['inpf']) and
+				! count ($netinfo['addrlist'][$netinfo['db_last']]['rslist']) and
+				! count ($netinfo['addrlist'][$netinfo['db_last']]['allocs']) and
+				! count ($netinfo['addrlist'][$netinfo['db_last']]['lblist'])
+			)
+				$pure_auto++;
 			echo "<tr valign=top><td>";
-			if (count ($netinfo['addrlist']) && getConfigVar ('IPV4_JAYWALK') == 'no')
+			if (count ($netinfo['addrlist']) > $pure_auto && getConfigVar ('IPV4_JAYWALK') == 'no')
 				printImageHREF ('nodestroy', 'There are ' . count ($netinfo['addrlist']) . ' allocations inside');
 			else
 			{
