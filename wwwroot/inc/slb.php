@@ -418,7 +418,8 @@ function commitUpdateVS ($vsid = 0, $vip = '', $vport = 0, $proto = '', $name = 
 
 function commitCreateRSPool ($name = '', $vsconfig = '', $rsconfig = '', $taglist = array())
 {
-	usePreparedInsertBlade
+	$new_pool_id = FALSE;
+	if (usePreparedInsertBlade
 	(
 		'IPv4RSPool',
 		array
@@ -427,8 +428,10 @@ function commitCreateRSPool ($name = '', $vsconfig = '', $rsconfig = '', $taglis
 			'vsconfig' => (!strlen ($vsconfig) ? NULL : $vsconfig),
 			'rsconfig' => (!strlen ($rsconfig) ? NULL : $rsconfig)
 		)
-	);
+	))
+		$new_pool_id = lastInsertID();
 	produceTagsForLastRecord ('ipv4rspool', $taglist);
+	return $new_pool_id;
 }
 
 function commitDeleteRSPool ($pool_id = 0)

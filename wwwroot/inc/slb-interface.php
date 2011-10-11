@@ -581,6 +581,10 @@ function renderEditRSPool ($pool_id)
 	printImageHREF ('SAVE', 'Save changes', TRUE);
 	echo "</td></tr>\n";
 	echo "</table></form>\n";
+	echo '<div style="text-align: center; margin-top: 1em">';
+	printOpFormIntro ('cloneIPv4RSP');
+	printImageHREF ('COPY', 'clone RS Pool', TRUE);
+	echo '</form></div>';
 }
 
 function renderEditVService ($vsid)

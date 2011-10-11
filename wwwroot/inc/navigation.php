@@ -383,6 +383,7 @@ $tabhandler['ipv4rspool']['editlblist'] = 'renderSLBEditTab';
 $tabhandler['ipv4rspool']['tags'] = 'renderEntityTags';
 $tabhandler['ipv4rspool']['files'] = 'renderFilesForEntity';
 $ophandler['ipv4rspool']['edit']['updIPv4RSP'] = 'tableHandler';
+$ophandler['ipv4rspool']['edit']['cloneIPv4RSP'] = 'cloneRSPool';
 $ophandler['ipv4rspool']['editrslist']['addRS'] = 'addRealServer';
 $ophandler['ipv4rspool']['editrslist']['delRS'] = 'tableHandler';
 $ophandler['ipv4rspool']['editrslist']['updRS'] = 'updateRealServer';
