@@ -377,8 +377,8 @@ function getOptionTree ($tree_name, $tree_options, $tree_config = array())
 		# way, hence a structure transform is required.
 		foreach ($tree_options as $key => $value)
 			$tmp[] = is_array ($value) ?
-				"\"${key}\": " . $self ($value) :
-				"\"${value}\": \"${key}\"";
+				'"' . str_replace ('"', '\"', $key) . '": ' . $self ($value) :
+				'"' . str_replace ('"', '\"', $value) . '": "' . str_replace ('"', '\"', $key) . '"';
 		return '{' . implode (', ', $tmp) . "}\n";
 	}
 
