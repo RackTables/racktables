@@ -2777,7 +2777,10 @@ function cloneRSPool()
 	assertUIntArg ('pool_id');
 	$pool = spotEntity ('ipv4rspool', $_REQUEST['pool_id']);
 	$rs_list = getRSListInPool ($pool['id']);
-	$new_id = commitCreateRSPool ($pool['name'] . ' (copy)', $pool['vsconfig'], $pool['rsconfig'], $pool['etags']);
+	$tagidlist = array();
+	foreach ($pool['etags'] as $taginfo)
+		$tagidlist[] = $taginfo['id'];
+	$new_id = commitCreateRSPool ($pool['name'] . ' (copy)', $pool['vsconfig'], $pool['rsconfig'], $tagidlist);
 	foreach ($rs_list as $rs)
 		addRStoRSPool ($new_id, $rs['rsip'], $rs['rsport'], $rs['inservice'], $rs['rsconfig'], $rs['comment']);
 	showSuccess ("Created a copy of pool <a href='" . makeHref (array ('page' => 'ipv4rspool', 'tab' => 'default', 'pool_id' => $pool['id'])) . "'>${pool['name']}</a>");
