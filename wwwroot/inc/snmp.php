@@ -381,6 +381,15 @@ $iftable_processors['netgear-chassis-21-to-24-1000SFP'] = array
 	'try_next_proc' => TRUE,
 );
 
+$iftable_processors['netgear-chassis-any-1000SFPcombo'] = array
+(
+	'pattern' => '@^Unit: 1 Slot: 0 Port: ([[:digit:]]+) Gigabit - Level$@',
+	'replacement' => '\\1',
+	'dict_key' => '4-1077',
+	'label' => '\\1F',
+	'try_next_proc' => TRUE,
+);
+
 $iftable_processors['nortel-any-1000T'] = array
 (
 	'pattern' => '@^Ethernet Port on unit 1, port ([[:digit:]]+)$@',
@@ -1059,6 +1068,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'dict_key' => 562,
 		'text' => 'GSM7224: 20 RJ-45/10-100-1000T(X) + 4 combo-gig',
 		'processors' => array ('netgear-chassis-21-to-24-1000SFP', 'netgear-chassis-21-to-24-1000Tcombo', 'netgear-chassis-any-1000T'),
+	),
+	'4526.100.2.3' => array
+	(
+		'dict_key' => 559,
+		'text' => 'GSM7212: 12 combo-gig',
+		'processors' => array ('netgear-chassis-any-1000SFPcombo', 'netgear-chassis-any-1000T'),
 	),
 	'4526.100.11.1' => array
 	(
