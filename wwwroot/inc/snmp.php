@@ -390,6 +390,15 @@ $iftable_processors['netgear-chassis-any-1000SFPcombo'] = array
 	'try_next_proc' => TRUE,
 );
 
+$iftable_processors['netgear-chassis-any-100TX'] = array
+(
+	'pattern' => '@^Unit: 1 Slot: 0 Port: ([[:digit:]]+) 10/100 Copper - Level$@',
+	'replacement' => '\\1',
+	'dict_key' => 19,
+	'label' => '\\1',
+	'try_next_proc' => FALSE,
+);
+
 $iftable_processors['nortel-any-1000T'] = array
 (
 	'pattern' => '@^Ethernet Port on unit 1, port ([[:digit:]]+)$@',
@@ -1062,6 +1071,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'dict_key' => 863,
 		'text' => 'J9089A: 48 RJ-45/10-100TX PoE + 2 1000T + 2 SFP-1000',
 		'processors' => array ('procurve-49-to-50-1000T', 'procurve-51-to-52-1000SFP', 'procurve-chassis-100TX'),
+	),
+	'4526.100.1.1' => array
+	(
+		'dict_key' => 587,
+		'text' => 'FSM7328S: 24 RJ-45/10-100TX + 4 combo-gig',
+		'processors' => array ('netgear-chassis-any-100TX', 'netgear-chassis-any-1000SFPcombo', 'netgear-chassis-any-1000T'),
 	),
 	'4526.100.2.2' => array
 	(
