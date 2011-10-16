@@ -123,8 +123,10 @@ function getDBUpgradePath ($v1, $v2)
 		'0.19.5',
 		'0.19.6',
 		'0.19.7',
-		'0.20.0',
+		'0.19.8',
 		'0.19.9',
+		'0.19.10',
+		'0.20.0',
 	);
 	if (!in_array ($v1, $versionhistory) or !in_array ($v2, $versionhistory))
 		return NULL;
@@ -1173,6 +1175,11 @@ CREATE TABLE `CactiGraph` (
 				$query[] = "DELETE FROM PortInterfaceCompat WHERE oif_id IN(${csv})";
 			}
 			$query[] = "UPDATE Config SET varvalue = '0.19.9' WHERE varname = 'DB_VERSION'";
+			break;
+		case '0.19.10':
+			$query = array_merge ($query, reloadDictionary ($batchid));
+			$query[] = "INSERT INTO `PortCompat` (`type1`, `type2`) VALUES (1603,1603)";
+			$query[] = "UPDATE Config SET varvalue = '0.19.10' WHERE varname = 'DB_VERSION'";
 			break;
 		case '0.20.0':
 			$query = array_merge ($query, reloadDictionary ($batchid));
