@@ -363,6 +363,123 @@ $iftable_processors['procurve-51-to-52-1000SFP'] = array
 	'try_next_proc' => FALSE,
 );
 
+$iftable_processors['gbe2csfp-1-to-16'] = array
+(
+	'pattern' => '@^Downlink(\d+)$@',
+	'replacement' => '\\0',
+	'dict_key' => '1-1603',
+	'label' => '\\1',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['gbe2csfp-17'] = array
+(
+	'pattern' => '@^Xconnect1$@',
+	'replacement' => '\\0',
+	'dict_key' => '1-1603',
+	'label' => '17',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['gbe2csfp-18'] = array
+(
+	'pattern' => '@^Xconnect2$@',
+	'replacement' => '\\0',
+	'dict_key' => '1-1603',
+	'label' => '18',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['gbe2csfp-19'] = array
+(
+	'pattern' => '@^Mgmt$@',
+	'replacement' => '\\0',
+	'dict_key' => '1-1604',
+	'label' => '19',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['gbe2csfp-20'] = array
+(
+	'pattern' => '@^Uplink1$@',
+	'replacement' => '\\0',
+	'dict_key' => '1-24',
+	'label' => '20',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['gbe2csfp-21sfp'] = array
+(
+	'pattern' => '@^Uplink2$@',
+	'replacement' => '\\0',
+	'dict_key' => '4-1077',
+	'label' => '21',
+	'try_next_proc' => TRUE,
+);
+
+$iftable_processors['gbe2csfp-21'] = array
+(
+	'pattern' => '@^Uplink2$@',
+	'replacement' => '\\0',
+	'dict_key' => '1-24',
+	'label' => '21',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['gbe2csfp-22sfp'] = array
+(
+	'pattern' => '@^Uplink3$@',
+	'replacement' => '\\0',
+	'dict_key' => '4-1077',
+	'label' => '22',
+	'try_next_proc' => TRUE,
+);
+
+$iftable_processors['gbe2csfp-22'] = array
+(
+	'pattern' => '@^Uplink3$@',
+	'replacement' => '\\0',
+	'dict_key' => '1-24',
+	'label' => '22',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['gbe2csfp-23sfp'] = array
+(
+	'pattern' => '@^Uplink4$@',
+	'replacement' => '\\0',
+	'dict_key' => '4-1077',
+	'label' => '23',
+	'try_next_proc' => TRUE,
+);
+
+$iftable_processors['gbe2csfp-23'] = array
+(
+	'pattern' => '@^Uplink4$@',
+	'replacement' => '\\0',
+	'dict_key' => '1-24',
+	'label' => '23',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['gbe2csfp-24sfp'] = array
+(
+	'pattern' => '@^Uplink5$@',
+	'replacement' => '\\0',
+	'dict_key' => '4-1077',
+	'label' => '24',
+	'try_next_proc' => TRUE,
+);
+
+$iftable_processors['gbe2csfp-24'] = array
+(
+	'pattern' => '@^Uplink5$@',
+	'replacement' => '\\0',
+	'dict_key' => '1-24',
+	'label' => '24',
+	'try_next_proc' => FALSE,
+);
+
 $iftable_processors['netgear-chassis-any-1000T'] = array
 (
 	'pattern' => '@^Unit: 1 Slot: 0 Port: ([[:digit:]]+) Gigabit - Level$@',
@@ -1086,6 +1203,27 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'dict_key' => 863,
 		'text' => 'J9089A: 48 RJ-45/10-100TX PoE + 2 1000T + 2 SFP-1000',
 		'processors' => array ('procurve-49-to-50-1000T', 'procurve-51-to-52-1000SFP', 'procurve-chassis-100TX'),
+	),
+	'11.2.3.7.11.33.4.1.1' => array
+	(
+		'dict_key' => 1605,
+		'text' => 'HP GbE2c w/SFP',
+		'processors' => array
+		(
+			'gbe2csfp-1-to-16',
+			'gbe2csfp-17',
+			'gbe2csfp-18',
+			'gbe2csfp-19',
+			'gbe2csfp-20',
+			'gbe2csfp-21sfp',
+			'gbe2csfp-22sfp',
+			'gbe2csfp-23sfp',
+			'gbe2csfp-24sfp',
+			'gbe2csfp-21',
+			'gbe2csfp-22',
+			'gbe2csfp-23',
+			'gbe2csfp-24',
+		),
 	),
 	'4526.100.1.1' => array
 	(
