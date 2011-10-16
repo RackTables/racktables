@@ -127,7 +127,9 @@ function init_config ()
 		echo '<table>';
 		echo "<tr><td><label for=mysql_host>MySQL host:</label></td>";
 		echo "<td><input type=text name=mysql_host id=mysql_host value=localhost></td></tr>\n";
-		echo "<tr><td><label for=mysql_host>database:</label></td>";
+		echo "<tr><td><label for=mysql_port>MySQL port (if not 3306):</label></td>";
+		echo "<td><input type=text name=mysql_port id=mysql_port></td></tr>\n";
+		echo "<tr><td><label for=mysql_db>database:</label></td>";
 		echo "<td><input type=text name=mysql_db id=mysql_db value=racktables_db></td></tr>\n";
 		echo "<tr><td><label for=mysql_username>username:</label></td>";
 		echo "<td><input type=text name=mysql_username value=racktables_user></td></tr>\n";
@@ -136,7 +138,10 @@ function init_config ()
 		echo '</table>';
 		return FALSE;
 	}
-	$pdo_dsn = 'mysql:host=' . $_REQUEST['mysql_host'] . ';dbname=' . $_REQUEST['mysql_db'];
+	$pdo_dsn = 'mysql:host=' . $_REQUEST['mysql_host'];
+	if (!empty ($_REQUEST['mysql_port']) and $_REQUEST['mysql_port'] != '3306')
+		$pdo_dsn .= ';port=' . $_REQUEST['mysql_port'];
+	$pdo_dsn .= ';dbname=' . $_REQUEST['mysql_db'];
 	try
 	{
 		$dbxlink = new PDO ($pdo_dsn, $_REQUEST['mysql_username'], $_REQUEST['mysql_password']);
@@ -147,7 +152,9 @@ function init_config ()
 		echo '<table>';
 		echo "<tr><td><label for=mysql_host>MySQL host:</label></td>";
 		echo "<td><input type=text name=mysql_host id=mysql_host value='" . $_REQUEST['mysql_host'] . "'></td></tr>\n";
-		echo "<tr><td><label for=mysql_host>database:</label></td>";
+		echo "<tr><td><label for=mysql_port>MySQL port:</label></td>";
+		echo "<td><input type=text name=mysql_port id=mysql_port value='" . $_REQUEST['mysql_port'] . "'></td></tr>\n";
+		echo "<tr><td><label for=mysql_db>database:</label></td>";
 		echo "<td><input type=text name=mysql_db id=mysql_db value='" . $_REQUEST['mysql_db'] . "'></td></tr>\n";
 		echo "<tr><td><label for=mysql_username>username:</label></td>";
 		echo "<td><input type=text name=mysql_username value='" . $_REQUEST['mysql_username'] . "'></td></tr>\n";
