@@ -1595,6 +1595,7 @@ function getIPv6Address ($v6addr)
 
 function bindIpToObject ($ip = '', $object_id = 0, $name = '', $type = '')
 {
+	usePreparedExecuteBlade ('DELETE FROM IPv4Address WHERE ip = INET_ATON(?)', array ($ip));
 	return usePreparedExecuteBlade
 	(
 		'INSERT INTO IPv4Allocation (ip, object_id, name, type) VALUES (INET_ATON(?), ?, ?, ?)',
@@ -1604,6 +1605,7 @@ function bindIpToObject ($ip = '', $object_id = 0, $name = '', $type = '')
 
 function bindIPv6ToObject ($ip, $object_id = 0, $name = '', $type = '')
 {
+	usePreparedExecuteBlade ('DELETE FROM IPv6Address WHERE ip = ?', array ($ip->getBin()));
 	return usePreparedInsertBlade
 	(
 		'IPv6Allocation',
