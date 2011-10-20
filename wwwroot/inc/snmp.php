@@ -491,7 +491,7 @@ $iftable_processors['netgear-chassis-any-1000T'] = array
 
 $iftable_processors['netgear-chassis-21-to-24-1000Tcombo'] = array
 (
-	'pattern' => '@^Unit: 1 Slot: 0 Port: ([[:digit:]]+) Gigabit - Level$@',
+	'pattern' => '@^Unit: 1 Slot: 0 Port: (21|22|23|24) Gigabit - Level$@',
 	'replacement' => '\\1',
 	'dict_key' => 24,
 	'label' => '\\1T',
@@ -500,7 +500,7 @@ $iftable_processors['netgear-chassis-21-to-24-1000Tcombo'] = array
 
 $iftable_processors['netgear-chassis-21-to-24-1000SFP'] = array
 (
-	'pattern' => '@^Unit: 1 Slot: 0 Port: ([[:digit:]]+) Gigabit - Level$@',
+	'pattern' => '@^Unit: 1 Slot: 0 Port: (21|22|23|24) Gigabit - Level$@',
 	'replacement' => '\\1',
 	'dict_key' => '4-1077',
 	'label' => '\\1F',
@@ -1554,7 +1554,7 @@ function doSwitchSNMPmining ($objectInfo, $device)
 		$exact_release = preg_replace ('/^.* revision ([^ ]+), .*$/', '\\1', $sysDescr);
 		updateStickerForCell ($objectInfo, 5, $exact_release);
 		break;
-	case preg_match ('/^4526\.100\.2\./', $sysObjectID): // NETGEAR
+	case preg_match ('/^4526\.100\./', $sysObjectID): // NETGEAR
 		checkPIC ('1-681');
 		commitAddPort ($objectInfo['id'], 'console', '1-681', 'console', ''); // DB-9 RS-232 console
 		break;
@@ -1686,7 +1686,7 @@ function doSwitchSNMPmining ($objectInfo, $device)
 	foreach ($device->snmpwalkoid ($tablename) as $oid => $value)
 	{
 		$randomindex = preg_replace ("/^.*${tablename}\.(.+)\$/", '\\1', $oid);
-		$value = trim (preg_replace ('/^.+: (.+)$/', '\\1', $value), '"');
+		$value = trim (preg_replace ('/^[^:]+: (.+)$/', '\\1', $value), '"');
 		$ifInfo[$randomindex][$tablename] = $value;
 	}
 	$tablename = 'ifPhysAddress';
