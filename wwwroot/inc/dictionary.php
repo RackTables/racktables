@@ -1669,6 +1669,7 @@ $dictionary = array
 	1603 => array ('chapter_id' => 2, 'dict_value' => '1000Base-T (HP c-Class)'),
 	1604 => array ('chapter_id' => 2, 'dict_value' => '100Base-TX (HP c-Class)'),
 	1605 => array ('chapter_id' => 12, 'dict_value' => 'HP GbE2c w/SFP'),
+	1606 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 2360-48TD'),
 
 # Any new "default" dictionary records must go above this line (i.e., with
 # dict_key code less, than 50000). This is necessary to keep AUTO_INCREMENT

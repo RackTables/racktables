@@ -129,6 +129,15 @@ $iftable_processors['catalyst-chassis-uplinks-10000X2'] = array
 	'try_next_proc' => FALSE,
 );
 
+$iftable_processors['catalyst-chassis-uplinks-10000SFP+'] = array
+(
+	'pattern' => '@^TenGigabitEthernet([[:digit:]]+/)?([[:digit:]]+)$@',
+	'replacement' => 'te\\1\\2',
+	'dict_key' => '9-1084',
+	'label' => '\\2',
+	'try_next_proc' => FALSE,
+);
+
 $iftable_processors['catalyst-chassis-25-to-28-1000SFP'] = array
 (
 	'pattern' => '@^GigabitEthernet([[:digit:]]+/)?(25|26|27|28)$@',
@@ -1113,6 +1122,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 			'catalyst-chassis-any-1000T',
 			'catalyst-chassis-mgmt',
 		),
+	),
+	'9.1.1292' => array
+	(
+	 	'dict_key' => 1606,
+		'text' => 'WS-C2360-48TD: 48 RJ-45 GigE + 4 SFP+/10000',
+		'processors' => array ('catalyst-chassis-any-1000T', 'catalyst-chassis-mgmt', 'catalyst-chassis-uplinks-10000SFP+'),
 	),
 	'9.12.3.1.3.719' => array
 	(
