@@ -337,6 +337,7 @@ function proxyCactiRequest ($graph_id)
 		curl_setopt ($session, CURLOPT_HTTPGET, TRUE);
 		$ret['contents'] = curl_exec ($session);
 		$ret['type'] = curl_getinfo ($session, CURLINFO_CONTENT_TYPE);
+		$ret['size'] = curl_getinfo ($session, CURLINFO_SIZE_DOWNLOAD);
 	}
 
 	curl_close ($session);
