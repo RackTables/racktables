@@ -854,6 +854,12 @@ $iftable_processors['C3KX-NM-1000'] = array
 global $known_switches;
 $known_switches = array // key is system OID w/o "enterprises" prefix
 (
+	'9.1.217' => array
+	(
+		'dict_key' => 124,
+		'text' => 'WS-C2924-XL: 24 RJ-45/10-100TX',
+		'processors' => array ('catalyst-chassis-any-100TX'),
+	),
 	'9.1.248' => array
 	(
 		'dict_key' => 393,
