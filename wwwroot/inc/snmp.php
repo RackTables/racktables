@@ -491,46 +491,46 @@ $iftable_processors['gbe2csfp-24'] = array
 
 $iftable_processors['netgear-chassis-any-1000T'] = array
 (
-	'pattern' => '@^Unit: 1 Slot: 0 Port: ([[:digit:]]+) Gigabit - Level$@',
-	'replacement' => '\\1',
+	'pattern' => '@^Unit: (\d+) Slot: (\d+) Port: (\d+) Gigabit - Level$@',
+	'replacement' => '\\1/\\2/\\3',
 	'dict_key' => 24,
-	'label' => '\\1',
+	'label' => '\\3',
 	'try_next_proc' => FALSE,
 );
 
 $iftable_processors['netgear-chassis-21-to-24-1000Tcombo'] = array
 (
-	'pattern' => '@^Unit: 1 Slot: 0 Port: (21|22|23|24) Gigabit - Level$@',
-	'replacement' => '\\1',
+	'pattern' => '@^Unit: (\d+) Slot: (\d+) Port: (21|22|23|24) Gigabit - Level$@',
+	'replacement' => '\\1/\\2/\\3',
 	'dict_key' => 24,
-	'label' => '\\1T',
+	'label' => '\\3T',
 	'try_next_proc' => FALSE,
 );
 
 $iftable_processors['netgear-chassis-21-to-24-1000SFP'] = array
 (
-	'pattern' => '@^Unit: 1 Slot: 0 Port: (21|22|23|24) Gigabit - Level$@',
-	'replacement' => '\\1',
+	'pattern' => '@^Unit: (\d+) Slot: (\d+) Port: (21|22|23|24) Gigabit - Level$@',
+	'replacement' => '\\1/\\2/\\3',
 	'dict_key' => '4-1077',
-	'label' => '\\1F',
+	'label' => '\\3F',
 	'try_next_proc' => TRUE,
 );
 
 $iftable_processors['netgear-chassis-any-1000SFPcombo'] = array
 (
-	'pattern' => '@^Unit: 1 Slot: 0 Port: ([[:digit:]]+) Gigabit - Level$@',
-	'replacement' => '\\1',
+	'pattern' => '@^Unit: (\d+) Slot: (\d+) Port: (\d+) Gigabit - Level$@',
+	'replacement' => '\\1/\\2/\\3',
 	'dict_key' => '4-1077',
-	'label' => '\\1F',
+	'label' => '\\3F',
 	'try_next_proc' => TRUE,
 );
 
 $iftable_processors['netgear-chassis-any-100TX'] = array
 (
-	'pattern' => '@^Unit: 1 Slot: 0 Port: ([[:digit:]]+) 10/100 Copper - Level$@',
-	'replacement' => '\\1',
+	'pattern' => '@^Unit: (\d+) Slot: (\d+) Port: (\d+) 10/100 Copper - Level$@',
+	'replacement' => '\\1/\\2/\\3',
 	'dict_key' => 19,
-	'label' => '\\1',
+	'label' => '\\3',
 	'try_next_proc' => FALSE,
 );
 
