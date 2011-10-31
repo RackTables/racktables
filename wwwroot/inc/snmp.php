@@ -12,6 +12,15 @@ $iftable_processors['catalyst-chassis-mgmt'] = array
 	'try_next_proc' => FALSE,
 );
 
+$iftable_processors['catalyst-chassis-25-to-26-1000SFP'] = array
+(
+	'pattern' => '@^GigabitEthernet([[:digit:]]+/)?(25|26)$@',
+	'replacement' => 'gi\\1\\2',
+	'dict_key' => '4-1077',
+	'label' => '\\2X',
+	'try_next_proc' => FALSE,
+);
+
 $iftable_processors['catalyst-chassis-any-100TX'] = array
 (
 	'pattern' => '@^FastEthernet([[:digit:]]+/)?([[:digit:]]+)$@',
@@ -920,6 +929,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 			'catalyst-chassis-mgmt',
 		),
 	),
+	'9.1.1257' => array
+	(
+		'dict_key' => 167,
+		'text' => 'WS-C2960G-24TS-S: 24 RJ-45/10-100-1000T(X)',
+		'processors' => array ('catalyst-chassis-25-to-26-1000SFP', 'catalyst-chassis-mgmt', 'catalyst-chassis-any-1000T'),
+	),
 	'9.1.799' => array
 	(
 		'dict_key' => 168,
@@ -937,6 +952,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'dict_key' => 166,
 		'text' => 'WS-C2960G-48TC-L: 44 RJ-45/10-100-1000T(X) + 4 combo-gig',
 		'processors' => array ('catalyst-chassis-45-to-48-combo-1000SFP', 'catalyst-chassis-any-1000T'),
+	),
+	'9.1.928' => array
+	(
+		'dict_key' => 163,
+		'text' => 'WS-C2960-24TC-S: 24 RJ-45/10-100TX + 2 combo-gig',
+		'processors' => array ('catalyst-chassis-1-to-2-combo-1000SFP', 'catalyst-chassis-any-100TX'),
 	),
 	'9.1.716' => array
 	(
@@ -1324,6 +1345,18 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'dict_key' => 1341,
 		'text' => 'S5352C-SI: 48 RJ-45/10-100-1000T(X) + optional 2xXFP/4xSFP slots',
 		'processors' => array ('quidway-slot1-SFP', 'quidway-any-1000T', 'quidway-XFP', 'quidway-mgmt'),
+	),
+	'2011.2.23.97' => array
+	(
+		'dict_key' => 1337,
+		'text' => 'S5352C-EI: 48 RJ-45/10-100-1000T(X) + optional 2xXFP/4xSFP slots',
+		'processors' => array ('quidway-slot1-SFP', 'quidway-any-1000T', 'quidway-XFP', 'quidway-mgmt'),
+	),
+	'2011.2.23.95' => array
+	(
+		'dict_key' => 1335,
+		'text' => 'S5328C-EI: 20 RJ-45/10-100-1000T(X) + 4 combo-gig + 2 XFP slots',
+		'processors' => array ('quidway-21-to-24-comboSFP', 'quidway-any-1000T', 'quidway-XFP', 'quidway-mgmt'),
 	),
 	'2011.2.23.102' => array
 	(
