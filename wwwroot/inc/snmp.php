@@ -1484,24 +1484,33 @@ function updateStickerForCell ($cell, $attr_id, $new_value)
 // a record with IIF id = X and OIF id = Y.
 function checkPIC ($port_type_id)
 {
-	$matches = array();
-	switch (1)
+	// cache PortInterfaceCompat
+	static $compat_array = NULL;
+	if (! isset ($compat_array))
 	{
-	case preg_match ('/^([[:digit:]]+)-([[:digit:]]+)$/', $port_type_id, $matches):
-		$iif_id = $matches[1];
-		$oif_id = $matches[2];
-		break;
-	case preg_match ('/^([[:digit:]]+)$/', $port_type_id, $matches):
-		$iif_id = 1;
-		$oif_id = $matches[1];
-		break;
-	default:
-		return;
+		$compat_array = array();
+		foreach (getPortInterfaceCompat() as $record)
+		{
+			$key = $record['iif_id'] . '-' . $record['oif_id'];
+			$compat_array[$key] = 1;
+		}
 	}
-	foreach (getPortInterfaceCompat() as $record)
-		if ($record['iif_id'] == $iif_id and $record['oif_id'] == $oif_id)
-			return;
-	commitSupplementPIC ($iif_id, $oif_id);
+	
+	if (preg_match ('/^(\d+-)?(\d+)$/', $port_type_id, $m))
+	{
+		$iif_id = $m[1];
+		$oif_id = $m[2];
+		if (empty ($iif_id[1]))
+		{
+			$iif_id = 1;
+			$port_type_id = $iif_id . '-' . $port_type_id;
+		}
+		if (! array_key_exists ($port_type_id, $compat_array))
+		{
+			commitSupplementPIC ($iif_id, $oif_id);
+			$compat_array[$port_type_id] = 1;
+		}
+	}
 }
 
 $msgcode['doSNMPmining']['ERR1'] = 161;
