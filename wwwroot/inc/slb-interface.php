@@ -513,9 +513,8 @@ function renderVSList ()
 function renderVSListEditForm ()
 {
 	global $nextorder;
-	$protocols = array ('TCP' => 'TCP', 'UDP' => 'UDP');
 
-	function printNewItemTR ($protocols)
+	function printNewItemTR ()
 	{
 		startPortlet ('Add new');
 		printOpFormIntro ('add');
@@ -527,7 +526,8 @@ function renderVSListEditForm ()
 		if ($default_port == 0)
 			$default_port = '';
 		echo "<td><input type=text name=vport size=5 value='${default_port}' tabindex=102></td><td>";
-		printSelect ($protocols, array ('name' => 'proto'), 'TCP');
+		global $vs_proto;
+		printSelect ($vs_proto, array ('name' => 'proto'), array_shift (array_keys ($vs_proto)));
 		echo '</td><td><input type=text name=name tabindex=104></td><td>';
 		printImageHREF ('CREATE', 'create virtual service', TRUE, 105);
 		echo "</td><td rowspan=3>";
@@ -539,7 +539,7 @@ function renderVSListEditForm ()
 	}
 
 	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
-		printNewItemTR ($protocols);
+		printNewItemTR ();
 
 	if (count ($vslist = listCells ('ipv4vs')))
 	{
@@ -566,7 +566,7 @@ function renderVSListEditForm ()
 		finishPortlet();
 	}
 	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')
-		printNewItemTR ($protocols);
+		printNewItemTR ();
 }
 
 function renderEditRSPool ($pool_id)
@@ -595,7 +595,8 @@ function renderEditVService ($vsid)
 	echo "<tr><th class=tdright>VIP:</th><td class=tdleft><input tabindex=1 type=text name=vip value='${vsinfo['vip']}'></td></tr>\n";
 	echo "<tr><th class=tdright>port:</th><td class=tdleft><input tabindex=2 type=text name=vport value='${vsinfo['vport']}'></td></tr>\n";
 	echo "<tr><th class=tdright>proto:</th><td class=tdleft>";
-	printSelect (array ('TCP' => 'TCP', 'UDP' => 'UDP'), array ('name' => 'proto'), $vsinfo['proto']);
+	global $vs_proto;
+	printSelect ($vs_proto, array ('name' => 'proto'), $vsinfo['proto']);
 	echo "</td></tr>\n";
 	echo "<tr><th class=tdright>name:</th><td class=tdleft><input tabindex=4 type=text name=name value='${vsinfo['name']}'></td></tr>\n";
 	echo "<tr><th class=tdright>VS config:</th><td class=tdleft><textarea tabindex=5 name=vsconfig rows=20 cols=80>${vsinfo['vsconfig']}</textarea></td></tr>\n";

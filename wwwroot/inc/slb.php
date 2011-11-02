@@ -1,5 +1,11 @@
 <?php
 
+$vs_proto = array (
+	'TCP' => 'TCP',
+	'UDP' => 'UDP',
+	'MARK' => 'MARK',
+);
+
 // *********************  Config-generating functions  *********************
 
 // you may override the class name to make using your own triplet class
@@ -121,8 +127,20 @@ ORDER BY
 		$parser->addMacro ('RSP_NAME', $this->rs['name']);
 		$parser->addMacro ('VIP', $this->vs['vip']);
 		$parser->addMacro ('VPORT', $this->vs['vport']);
-		$parser->addMacro ('PROTO', $this->vs['proto']);
 		$parser->addMacro ('PRIO', $this->slb['prio']);
+
+		if ($this->vs['proto'] == 'MARK')
+		{
+			$parser->addMacro ('PROTO', 'TCP');
+			$mark = ip_quad2long ($this->vs['vip']);
+			$parser->addMacro ('MARK', $mark);
+			$parser->addMacro ('VS_HEADER', "fwmark $mark");
+		}
+		else
+		{
+			$parser->addMacro ('VS_HEADER', $this->vs['vip'] . ' ' . $this->vs['vport']);
+			$parser->addMacro ('PROTO', $this->vs['proto']);
+		}
 
 		$defaults = getSLBDefaults (TRUE);
 		$parser->addMacro ('GLOBAL_VS_CONF', dos2unix ($defaults['vs']));
@@ -135,7 +153,7 @@ ORDER BY
 # LB (id == %LB_ID%): %LB_NAME%
 # VS (id == %VS_ID%): %VS_NAME%
 # RS (id == %RSP_ID%): %RSP_NAME%
-virtual_server %VIP% %VPORT% {
+virtual_server %VS_HEADER% {
 	protocol %PROTO%
 	%GLOBAL_VS_CONF%
 	%RSP_VS_CONF%

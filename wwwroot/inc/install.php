@@ -568,7 +568,7 @@ CREATE TABLE `IPv4VS` (
   `id` int(10) unsigned NOT NULL auto_increment,
   `vip` int(10) unsigned default NULL,
   `vport` smallint(5) unsigned default NULL,
-  `proto` enum('TCP','UDP') NOT NULL default 'TCP',
+  `proto` enum('TCP','UDP','MARK') NOT NULL default 'TCP',
   `name` char(255) default NULL,
   `vsconfig` text,
   `rsconfig` text,

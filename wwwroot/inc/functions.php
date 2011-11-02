@@ -427,7 +427,8 @@ function genericAssertion ($argname, $argtype)
 		break;
 	case 'enum/ipproto':
 		assertStringArg ($argname);
-		if (!in_array ($sic[$argname], array ('TCP', 'UDP')))
+		global $vs_proto;
+		if (!array_key_exists ($sic[$argname], $vs_proto))
 			throw new InvalidRequestArgException ($argname, $sic[$argname], 'Unknown value');
 		break;
 	case 'enum/inet4alloc':

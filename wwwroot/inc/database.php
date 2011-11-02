@@ -102,7 +102,7 @@ $SQLSchema = array
 			'vsconfig' => 'vsconfig',
 			'rsconfig' => 'rsconfig',
 			'refcnt' => '(select count(vs_id) from IPv4LB where vs_id = id)',
-			'dname' => 'CONCAT_WS("/", CONCAT_WS(":", INET_NTOA(vip), vport), proto)',
+			'dname' => 'CASE proto WHEN "MARK" THEN CONCAT("fwmark: ", vip) ELSE CONCAT_WS("/", CONCAT_WS(":", INET_NTOA(vip), vport), proto) END',
 		),
 		'keycolumn' => 'id',
 		'ordcolumns' => array ('IPv4VS.vip', 'IPv4VS.proto', 'IPv4VS.vport'),
@@ -3221,6 +3221,7 @@ function generateEntityAutoTags ($cell)
 			$ret[] = array ('tag' => '$any_vs');
 			if ($cell['refcnt'] == 0)
 				$ret[] = array ('tag' => '$unused');
+			$ret[] = array ('tag' => '$type_' . strtolower ($cell['proto'])); // $type_tcp, $type_udp or $type_mark
 			break;
 		case 'ipv4rspool':
 			$ret[] = array ('tag' => '$ipv4rspid_' . $cell['id']);
