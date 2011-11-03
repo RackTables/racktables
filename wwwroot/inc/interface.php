@@ -909,15 +909,15 @@ function renderObject ($object_id)
 	{
 		$fmt_parents = array();
 		foreach ($parents as $parent)
-			$fmt_parents[] =  "<a href='".makeHref(array('page'=>'object', 'object_id'=>$parent['entity_id']))."'>${parent['name']}</a>";
-		$summary[count($parents) > 1 ? 'Containers' : 'Container'] = implode ('<br>' . $fmt_parents);
+			$fmt_parents[] =  "<a href='".makeHref(array('page'=>$parent['page'], $parent['id_name'] => $parent['entity_id']))."'>${parent['name']}</a>";
+		$summary[count($parents) > 1 ? 'Containers' : 'Container'] = implode ('<br>', $fmt_parents);
 	}
 	$children = getEntityRelatives ('children', 'object', $object_id);
 	if (count ($children))
 	{
 		$fmt_children = array();
 		foreach ($children as $child)
-			$fmt_children[] = "<a href='".makeHref(array('page'=>'object', 'object_id'=>$child['entity_id']))."'>${child['name']}</a>";
+			$fmt_children[] = "<a href='".makeHref(array('page'=>$child['page'], $child['id_name']=>$child['entity_id']))."'>${child['name']}</a>";
 		$summary['Contains'] = implode ('<br>' . $fmt_children);
 	}
 	if ($info['has_problems'] == 'yes')
