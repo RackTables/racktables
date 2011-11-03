@@ -703,7 +703,7 @@ function renderRackObject ($object_id)
 			if (!isset($label))
 				$label = count($parents) > 1 ? 'Containers:' : 'Container:';
 			echo "<tr><th width='50%' class=tdright>${label}</th><td class=tdleft>";
-			echo "<a href='".makeHref(array('page'=>'object', 'object_id'=>$parent['entity_id']))."'>${parent['name']}</a>";
+			echo "<a href='".makeHref(array('page'=>$parent['page'], $parent['id_name'] => $parent['entity_id']))."'>${parent['name']}</a>";
 			echo "</td></tr>\n";
 			$label = '&nbsp;';
 		}
@@ -716,7 +716,7 @@ function renderRackObject ($object_id)
 			if (!isset($label))
 				$label = 'Contains:';
 			echo "<tr><th width='50%' class=tdright>${label}</th><td class=tdleft>";
-			echo "<a href='".makeHref(array('page'=>'object', 'object_id'=>$child['entity_id']))."'>${child['name']}</a>";
+			echo "<a href='".makeHref(array('page'=>$child['page'], $child['id_name']=>$child['entity_id']))."'>${child['name']}</a>";
 			echo "</td></tr>\n";
 			$label = '&nbsp;';
 		}
