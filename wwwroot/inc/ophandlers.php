@@ -105,7 +105,7 @@ $opspec_list['object-log-del'] = array
 	'action' => 'DELETE',
 	'arglist' => array
 	(
-		array ('url_argname' => 'logid', 'table_colname' => 'id', 'assertion' => 'uint'),
+		array ('url_argname' => 'log_id', 'table_colname' => 'id', 'assertion' => 'uint'),
 		array ('url_argname' => 'object_id', 'assertion' => 'uint'),
 	),
 );
