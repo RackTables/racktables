@@ -5512,22 +5512,15 @@ function renderMyQuickLinks ()
 	finishPortlet();
 }
 
-// File-related functions
-function renderFile ($file_id)
+function renderFileSummary ($file)
 {
-	global $nextorder, $aac;
-	$file = spotEntity ('file', $file_id);
-	echo "<table border=0 class=objectview cellspacing=0 cellpadding=0>";
-	echo "<tr><td colspan=2 align=center><h1>" . htmlspecialchars ($file['name']) . "</h1></td></tr>\n";
-	echo "<tr><td class=pcleft>";
-
 	$summary = array();
 	$summary['Type'] = $file['type'];
 	$summary['Size'] =  
 	(
 		isolatedPermission ('file', 'download', $file) ?
 		(
-			"<a href='?module=download&file_id=${file_id}'>" .
+			"<a href='?module=download&file_id=${file['id']}'>" .
 			getImageHREF ('download', 'Download file') . '</a>&nbsp;'
 		) : ''
 	) . formatFileSize ($file['size']);
@@ -5537,48 +5530,72 @@ function renderFile ($file_id)
 	$summary['tags'] = '';
 	if (strlen ($file['comment']))
 		$summary['Comment'] = '<div class="dashed slbconf">' . string_insert_hrefs (htmlspecialchars ($file['comment'])) . '</div>';
+	if ($new_summary = callHook ('modifyFileSummary', $file, $summary))
+		$summary = $new_summary;
 	renderEntitySummary ($file, 'summary', $summary);
+}
+
+function renderFileLinks ($links)
+{
+	startPortlet ('Links (' . count ($links) . ')');
+	echo "<table cellspacing=0 cellpadding='5' align='center' class='widetable'>\n";
+	foreach ($links as $link)
+	{
+		echo '<tr><td class=tdleft>';
+		switch ($link['entity_type'])
+		{
+			case 'user':
+			case 'ipv4net':
+			case 'rack':
+			case 'ipv4vs':
+			case 'ipv4rspool':
+			case 'object':
+				renderCell (spotEntity ($link['entity_type'], $link['entity_id']));
+				break;
+			default:
+				echo formatEntityName ($link['entity_type']) . ': ';
+				echo "<a href='" . makeHref(array('page'=>$link['page'], $link['id_name']=>$link['entity_id']));
+				echo "'>${link['name']}</a>";
+				break;
+		}
+		echo '</td></tr>';
+	}
+	echo "</table><br>\n";
+	finishPortlet();
+}
+
+function renderFilePreview ($pcode)
+{
+	startPortlet ('preview');
+	echo $pcode;
+	finishPortlet();
+}
+
+// File-related functions
+function renderFile ($file_id)
+{
+	global $nextorder, $aac;
+	$file = spotEntity ('file', $file_id);
+	echo "<table border=0 class=objectview cellspacing=0 cellpadding=0>";
+	echo "<tr><td colspan=2 align=center><h1>" . htmlspecialchars ($file['name']) . "</h1></td></tr>\n";
+	echo "<tr><td class=pcleft>";
+	
+	callHook ('renderFileSummary', $file);
 
 	$links = getFileLinks ($file_id);
 	if (count ($links))
-	{
-		startPortlet ('Links (' . count ($links) . ')');
-		echo "<table cellspacing=0 cellpadding='5' align='center' class='widetable'>\n";
-		foreach ($links as $link)
-		{
-			echo '<tr><td class=tdleft>';
-			switch ($link['entity_type'])
-			{
-				case 'user':
-				case 'ipv4net':
-				case 'rack':
-				case 'ipv4vs':
-				case 'ipv4rspool':
-				case 'object':
-					renderCell (spotEntity ($link['entity_type'], $link['entity_id']));
-					break;
-				default:
-					echo formatEntityName ($link['entity_type']) . ': ';
-					echo "<a href='" . makeHref(array('page'=>$link['page'], $link['id_name']=>$link['entity_id']));
-					echo "'>${link['name']}</a>";
-					break;
-			}
-			echo '</td></tr>';
-		}
-		echo "</table><br>\n";
-		finishPortlet();
-	}
+		callHook ('renderFileLinks', $links);
+
+	echo "</td>";
 
 	if (isolatedPermission ('file', 'download', $file) and '' != ($pcode = getFilePreviewCode ($file)))
 	{
-		echo "</td><td class=pcright>";
-		startPortlet ('preview');
-		echo $pcode;
-		finishPortlet();
+		echo "<td class=pcright>";
+		callHook ('renderFilePreview', $pcode);
+		echo "</td>";
 	}
 
-	echo "</td></tr>";
-	echo "</table>\n";
+	echo "</tr></table>\n";
 }
 
 function renderFileReuploader ()
