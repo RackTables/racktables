@@ -4712,8 +4712,8 @@ function callHook ($func_name)
 		$func_name = $hook[$func_name];
 	$params = func_get_args();
 	array_shift($params);
-	// if function named $func_name does not exists, an exception is thrown automatically
-	return call_user_func_array ($func_name, $params); 
+	if (is_callable ($func_name))
+		return call_user_func_array ($func_name, $params); 
 }
 
 // function to parse text table header, aligned by left side
