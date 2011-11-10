@@ -279,7 +279,7 @@ function proxyStaticURI ($URI)
 	global $local_staticdir, $racktables_staticdir;
 	if (isset ($local_staticdir))
 		$fh = fopen ("${local_staticdir}/${URI}", 'r');
-	if (FALSE === $fh)
+	if (! isset ($fh) or FALSE === $fh)
 		$fh = fopen ("${racktables_staticdir}/${URI}", 'r');
 	if (FALSE === $fh)
 		printStatic404();
@@ -288,7 +288,7 @@ function proxyStaticURI ($URI)
 			exit;
 	header ('Content-type: ' . $content_type[$matches[2]]);
 	fpassthru ($fh);
-	fclose ($fh);	
+	fclose ($fh);
 }
 
 function proxyCactiRequest ($graph_id)
