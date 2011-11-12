@@ -272,7 +272,7 @@ function proxyStaticURI ($URI)
 	)
 		printStatic404();
 	global $racktables_staticdir;
-	if (FALSE === $fh = fopen ("${racktables_staticdir}/${URI}", 'r'))
+	if (FALSE === $fh = @fopen ("${racktables_staticdir}/${URI}", 'r'))
 		printStatic404();
 	if (FALSE !== $stat = fstat ($fh))
 		if (checkCachedResponse (max ($stat['mtime'], $stat['ctime']), 0))
