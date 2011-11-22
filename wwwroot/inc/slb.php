@@ -165,6 +165,7 @@ virtual_server %VS_HEADER% {
 			if ($rs['inservice'] != 'yes')
 				continue;
 			$parser->pushdefs(); // backup macros
+			$parser->addMacro ('RS_HEADER',  ($this->vs['proto'] == 'MARK' ? '%RSIP%' : '%RSIP% %RSPORT%'));
 			$parser->addMacro ('RSIP', $rs['rsip']);
 			$parser->addMacro ('RSPORT', isset ($rs['rsport']) ? $rs['rsport'] : $this->vs['vport']); // VS port is a default value for RS port
 
@@ -175,7 +176,7 @@ virtual_server %VS_HEADER% {
 			$parser->addMacro ('RS_RS_CONF', $rs['rsconfig']);
 
 			$ret .= $parser->expand ("
-	real_server %RSIP% %RSPORT% {
+	real_server %RS_HEADER% {
 		%GLOBAL_RS_CONF%
 		%VS_RS_CONF%
 		%RSP_RS_CONF%
