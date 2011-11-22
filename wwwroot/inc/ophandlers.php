@@ -1511,18 +1511,24 @@ function addVService ()
 {
 	global $sic;
 	assertIPv4Arg ('vip');
-	assertUIntArg ('vport');
 	genericAssertion ('proto', 'enum/ipproto');
 	assertStringArg ('name', TRUE);
 	assertStringArg ('vsconfig', TRUE);
 	assertStringArg ('rsconfig', TRUE);
+	if ($_REQUEST['proto'] == 'MARK')
+		$vport = NULL;
+	else
+	{
+		assertUIntArg ('vport');
+		$vport = $_REQUEST['vport'];
+	}
 	usePreparedExecuteBlade
 	(
 		'INSERT INTO IPv4VS (vip, vport, proto, name, vsconfig, rsconfig) VALUES (INET_ATON(?), ?, ?, ?, ?, ?)',
 		array
 		(
 			$_REQUEST['vip'],
-			$_REQUEST['vport'],
+			$vport,
 			$_REQUEST['proto'],
 			!mb_strlen ($_REQUEST['name']) ? NULL : $_REQUEST['name'],
 			!strlen ($sic['vsconfig']) ? NULL : $sic['vsconfig'],
