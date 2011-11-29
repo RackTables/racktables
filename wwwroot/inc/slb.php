@@ -168,6 +168,7 @@ virtual_server %VS_HEADER% {
 			$parser->addMacro ('RS_HEADER',  ($this->vs['proto'] == 'MARK' ? '%RSIP%' : '%RSIP% %RSPORT%'));
 			$parser->addMacro ('RSIP', $rs['rsip']);
 			$parser->addMacro ('RSPORT', isset ($rs['rsport']) ? $rs['rsport'] : $this->vs['vport']); // VS port is a default value for RS port
+			$parser->addMacro ('RS_COMMENT', $rs['comment']);
 
 			$parser->addMacro ('GLOBAL_RS_CONF', dos2unix ($defaults['rs']));
 			$parser->addMacro ('VS_RS_CONF', dos2unix ($this->vs['rsconfig']));
@@ -176,6 +177,7 @@ virtual_server %VS_HEADER% {
 			$parser->addMacro ('RS_RS_CONF', $rs['rsconfig']);
 
 			$ret .= $parser->expand ("
+	%RS_PREPEND%
 	real_server %RS_HEADER% {
 		%GLOBAL_RS_CONF%
 		%VS_RS_CONF%
