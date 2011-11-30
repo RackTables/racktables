@@ -1931,7 +1931,7 @@ function fetchIPv6AddressNetworkRow ($ip, $masklen = 128)
 	$query = 'select * from IPv6Network where ip <= ? AND last_ip >= ? and mask < ? order by mask desc limit 1';
 	$result = usePreparedSelectBlade ($query, array ($ip->getBin(), $ip->getBin(), $masklen));
 	if ($row = $result->fetch (PDO::FETCH_ASSOC))
-		return $row['id'];
+		return $row;
 	return NULL;
 }
 
