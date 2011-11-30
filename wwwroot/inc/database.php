@@ -1900,13 +1900,20 @@ function bindIPv6ToObject ($ip, $object_id = 0, $name = '', $type = '')
 // masks (they aren't going to be the right pick).
 function getIPv4AddressNetworkId ($dottedquad, $masklen = 32)
 {
-	$query = 'select id from IPv4Network where ' .
+	if ($row = fetchIPv4AddressNetworkRow ($dottedquad, $masklen))
+		return $row['id'];
+	return NULL;
+}
+
+function fetchIPv4AddressNetworkRow ($dottedquad, $masklen = 32)
+{
+	$query = 'select * from IPv4Network where ' .
 		"inet_aton(?) & (4294967295 >> (32 - mask)) << (32 - mask) = ip " .
 		"and mask < ? " .
 		'order by mask desc limit 1';
 	$result = usePreparedSelectBlade ($query, array ($dottedquad, $masklen));
 	if ($row = $result->fetch (PDO::FETCH_ASSOC))
-		return $row['id'];
+		return $row;
 	return NULL;
 }
 
@@ -1914,7 +1921,14 @@ function getIPv4AddressNetworkId ($dottedquad, $masklen = 32)
 // ($ip is an instance of IPv4Address class) or NULL, if nothing was found.
 function getIPv6AddressNetworkId ($ip, $masklen = 128)
 {
-	$query = 'select id from IPv6Network where ip <= ? AND last_ip >= ? and mask < ? order by mask desc limit 1';
+	if ($row = fetchIPv6AddressNetworkRow ($ip, $masklen))
+		return $row['id'];
+	return NULL;
+}
+
+function fetchIPv6AddressNetworkRow ($ip, $masklen = 128)
+{
+	$query = 'select * from IPv6Network where ip <= ? AND last_ip >= ? and mask < ? order by mask desc limit 1';
 	$result = usePreparedSelectBlade ($query, array ($ip->getBin(), $ip->getBin(), $masklen));
 	if ($row = $result->fetch (PDO::FETCH_ASSOC))
 		return $row['id'];
