@@ -1733,7 +1733,7 @@ function markupIPAddrList (&$addrlist)
 			$addrlist[$ip_bin]['class'] = 'trbusy';
 		elseif ($nrealms > 1)
 			$addrlist[$ip_bin]['class'] = 'trerror';
-		elseif (! empty ($addrlist[$ip_bin]['vslist']))
+		elseif (! empty ($addrlist[$ip_bin]['vslist']) or ! empty ($addrlist[$ip_bin]['rsplist']))
 			$addrlist[$ip_bin]['class'] = 'trbusy';
 		else
 			$addrlist[$ip_bin]['class'] = '';
