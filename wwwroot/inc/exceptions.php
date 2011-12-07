@@ -180,7 +180,9 @@ function stringTrace($trace)
 {
 	$ret = '';
 	foreach($trace as $line) {
-		$ret .= $line['file'].':'.$line['line'].' '.$line['function'].'(';
+		if (isset ($line['file']) && isset ($line['line']))
+			$ret .= $line['file'].':'.$line['line'].' ';
+		$ret .= $line['function'].'(';
 		$f = true;
 		if (isset($line['args']) and is_array($line['args'])) foreach ($line['args'] as $arg) {
 			if (!$f) $ret .= ', ';
