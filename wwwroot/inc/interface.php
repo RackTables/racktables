@@ -2385,12 +2385,12 @@ function renderIPNewNetForm ()
 	if ($pageno == 'ipv6space')
 	{
 		$realm = 'ipv6net';
-		$regexp = addslashes ('^[a-fA-F0-9:]*:[a-fA-F0-9:\.]*/\d{1,3}$');
+		$regexp = '^[a-fA-F0-9:]*:[a-fA-F0-9:\.]*/\d{1,3}$';
 	}
 	else
 	{
 		$realm = 'ipv4net';
-		$regexp = addslashes ('^(\d{1,3}\.){3}\d{1,3}/\d{1,2}$');
+		$regexp = '^(\d{1,3}\.){3}\d{1,3}/\d{1,2}$';
 	}
 
 	// IP prefix validator
