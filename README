@@ -106,6 +106,10 @@ Racks and Rows are now stored in the database as Objects.  The RackObject table
 was renamed to Object.  SQL views were created to ease the migration of custom 
 reports and scripts.
 
+Beginning with this version it is possible to delete IP networks and VLANs from within
+theirs properties tab. So please inspect your permissions rules to assure there are no
+undesired allows for deletion of these objects.
+
 *** Upgrading to 0.19.2 ***
 
 This release is different in filesystem layout. The "gateways" directory
