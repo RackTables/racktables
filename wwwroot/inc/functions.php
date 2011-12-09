@@ -4896,4 +4896,42 @@ function getBinaryZeroes ($value)
 	return $ret;
 }
 
+// returns TRUE if the network cell is allowed to be deleted, FALSE otherwise
+// $netinfo could be either ipv4net or ipv6net entity.
+// in case of returning FALSE, $netinfo['addrlist'] is set
+function isIPNetworkEmpty (&$netinfo)
+{
+	if (getConfigVar ('IPV4_JAYWALK') == 'yes')
+		return TRUE;
+	if (! isset ($netinfo['addrlist']))
+	{
+		if ($netinfo['realm'] == 'ipv4net')
+			loadIPv4AddrList ($netinfo);
+		else
+			loadIPv6AddrList ($netinfo);
+	}
+	$pure_array = ($netinfo['realm'] == 'ipv4net') ?
+		array ($netinfo['db_first'] => 'network', $netinfo['db_last'] => 'broadcast') :
+		array ($netinfo['db_first']->getBin() => 'Subnet-Router anycast');
+	$pure_auto = 0;
+	foreach ($pure_array as $ip => $comment)
+		if
+		(
+			array_key_exists ($ip, $netinfo['addrlist']) and
+			$netinfo['addrlist'][$ip]['name'] == $comment and
+			$netinfo['addrlist'][$ip]['reserved'] == 'yes' and
+			! count ($netinfo['addrlist'][$ip]['allocs']) and
+			(
+				$netinfo['realm'] == 'ipv6net' or (
+					! count ($netinfo['addrlist'][$ip]['outpf']) and
+					! count ($netinfo['addrlist'][$ip]['inpf']) and
+					! count ($netinfo['addrlist'][$ip]['rsplist']) and
+					! count ($netinfo['addrlist'][$ip]['vslist'])
+				)
+			)
+		)
+			$pure_auto++;
+	return (count ($netinfo['addrlist']) <= $pure_auto);
+}
+
 ?>

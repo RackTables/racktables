@@ -2305,48 +2305,10 @@ function renderIPv6Space ()
 
 function renderIPv4SpaceEditor ()
 {
-	// IPv4 validator
-	addJs ('js/live_validation.js');
-	$regexp = addslashes ('^(\d{1,3}\.){3}\d{1,3}/\d{1,2}$');
-	addJs (<<<END
-$(document).ready(function () {
-	document.add_new_range.range.setAttribute('match', '$regexp');
-	Validate.init();
-});
-END
-	, TRUE);
-
-	function printNewItemTR ()
+	$addrspaceList = listCells ('ipv4net');
+	startPortlet ('Manage existing (' . count ($addrspaceList) . ')');
+	if (count ($addrspaceList))
 	{
-		startPortlet ('Add new');
-		echo '<table border=0 cellpadding=10 align=center>';
-		// This form requires a name, so JavaScript validator can find it.
-		// No printOpFormIntro() hence
-		echo "<form method=post name='add_new_range' action='".makeHrefProcess()."'>\n";
-		echo "<input type=hidden name=op value=addIPv4Prefix>\n";
-		// tags column
-		echo '<tr><td rowspan=5><h3>assign tags</h3>';
-		renderNewEntityTags ('ipv4net');
-		echo '</td>';
-		// inputs column
-		$prefix_value = empty ($_REQUEST['set-prefix']) ? '' : $_REQUEST['set-prefix'];
-		echo "<th class=tdright>prefix</th><td class=tdleft><input type=text name='range' size=18 class='live-validate' tabindex=10 value='${prefix_value}'></td>";
-		echo '<tr><th class=tdright>VLAN</th><td class=tdleft>';
-		echo getOptionTree ('vlan_ck', getAllVLANOptions(), array ('select_class' => 'vertical', 'tabindex' => 20)) . '</td></tr>';
-		echo "<tr><th class=tdright>name</th><td class=tdleft><input type=text name='name' size='20' tabindex=30></td></tr>";
-		echo '<tr><td class=tdright><input type=checkbox name="is_bcast" tabindex=40></td><th class=tdleft>reserve network and router addresses</th></tr>';
-		echo "<tr><td colspan=2>";
-		printImageHREF ('CREATE', 'Add a new network', TRUE, 50);
-		echo '</td></tr>';
-		echo "</form></table><br><br>\n";
-		finishPortlet();
-	}
-
-	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
-		printNewItemTR();
-	if (count ($addrspaceList = listCells ('ipv4net')))
-	{
-		startPortlet ('Manage existing (' . count ($addrspaceList) . ')');
 		echo "<table class='widetable' border=0 cellpadding=5 cellspacing=0 align='center'>\n";
 		echo "<tr><th>&nbsp;</th><th>prefix</th><th>name</th><th>capacity</th></tr>";
 		array_walk ($addrspaceList, 'amplifyCell');
@@ -2361,29 +2323,11 @@ END
 			$used = $netinfo['addrc'];
 			$maxdirect = $netinfo['addrt'];
 			$maxtotal = binInvMaskFromDec ($netinfo['mask']) + 1;
-			$pure_auto = 0;
-			foreach (array ($netinfo['db_first'] => 'network', $netinfo['db_last'] => 'broadcast') as $ip => $comment)
-				if
-				(
-					array_key_exists ($ip, $netinfo['addrlist']) and
-					$netinfo['addrlist'][$ip]['name'] == $comment and
-					$netinfo['addrlist'][$ip]['reserved'] == 'yes' and
-					! count ($netinfo['addrlist'][$ip]['outpf']) and
-					! count ($netinfo['addrlist'][$ip]['inpf']) and
-					! count ($netinfo['addrlist'][$ip]['allocs']) and
-					! count ($netinfo['addrlist'][$ip]['rsplist']) and
-					! count ($netinfo['addrlist'][$ip]['vslist'])
-				)
-					$pure_auto++;
 			echo "<tr valign=top><td>";
-			if (count ($netinfo['addrlist']) > $pure_auto && getConfigVar ('IPV4_JAYWALK') == 'no')
+			if (! isIPNetworkEmpty ($netinfo))
 				printImageHREF ('nodestroy', 'There are ' . count ($netinfo['addrlist']) . ' allocations inside');
 			else
-			{
-				echo "<a href='".makeHrefProcess(array('op'=>'delIPv4Prefix', 'id'=>$netinfo['id']))."'>";
-				printImageHREF ('destroy', 'Delete this prefix');
-				echo "</a>";
-			}
+				echo getOpLink (array	('op' => 'del', 'id' => $netinfo['id']), '', 'destroy', 'Delete this prefix');
 			echo '</td><td class=tdleft><a href="' . makeHref (array ('page' => 'ipv4net', 'id' => $netinfo['id'])) . '">';
 			echo "${netinfo['ip']}/${netinfo['mask']}</a></td>";
 			echo '<td class=tdleft>' . niftyString ($netinfo['name']);
@@ -2397,54 +2341,14 @@ END
 		echo "</table>";
 		finishPortlet();
 	}
-	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')
-		printNewItemTR();
 }
 
 function renderIPv6SpaceEditor ()
 {
-	// IPv6 validator
-	addJs ('js/live_validation.js');
-	$regexp = addslashes ('^[a-fA-F0-9:]*:[a-fA-F0-9:\.]*/\d{1,3}$');
-	addJs (<<<END
-$(document).ready(function () {
-	document.add_new_range.range.setAttribute('match', '$regexp');
-	Validate.init();
-});
-END
-	, TRUE);
-
-	function printNewItemTR ()
+	$addrspaceList = listCells ('ipv6net');
+	startPortlet ('Manage existing (' . count ($addrspaceList) . ')');
+	if (count ($addrspaceList))
 	{
-		startPortlet ('Add new');
-		echo '<table border=0 cellpadding=10 align=center>';
-		// This form requires a name, so JavaScript validator can find it.
-		// No printOpFormIntro() hence
-		echo "<form method=post name='add_new_range' action='".makeHrefProcess()."'>\n";
-		echo "<input type=hidden name=op value=addIPv6Prefix>\n";
-		// tags column
-		echo '<tr><td rowspan=5><h3>assign tags</h3>';
-		renderNewEntityTags ('ipv4net');
-		echo '</td>';
-		// inputs column
-		$prefix_value = empty ($_REQUEST['set-prefix']) ? '' : $_REQUEST['set-prefix'];
-		echo "<th class=tdright>prefix</th><td class=tdleft><input type=text name='range' size=36 class='live-validate' tabindex=10 value='${prefix_value}'></td>";
-		echo '<tr><th class=tdright>VLAN</th><td class=tdleft>';
-		echo getOptionTree ('vlan_ck', getAllVLANOptions(), array ('select_class' => 'vertical', 'tabindex' => 20)) . '</td></tr>';
-		echo "<tr><th class=tdright>name</th><td class=tdleft><input type=text name='name' size='20' tabindex=30></td></tr>";
-		echo '<tr><td class=tdright><input type=checkbox name="is_connected" tabindex=40></td><th class=tdleft>reserve subnet-router anycast address</th></tr>';
-		echo "<tr><td colspan=2>";
-		printImageHREF ('CREATE', 'Add a new network', TRUE, 50);
-		echo '</td></tr>';
-		echo "</form></table><br><br>\n";
-		finishPortlet();
-	}
-
-	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
-		printNewItemTR();
-	if (count ($addrspaceList = listCells ('ipv6net')))
-	{
-		startPortlet ('Manage existing (' . count ($addrspaceList) . ')');
 		echo "<table class='widetable' border=0 cellpadding=5 cellspacing=0 align='center'>\n";
 		echo "<tr><th>&nbsp;</th><th>prefix</th><th>name</th><th>capacity</th></tr>";
 		array_walk ($addrspaceList, 'amplifyCell');
@@ -2457,14 +2361,10 @@ END
 			// now we have all subnets listed in netinfo
 			loadIPv6AddrList ($netinfo);
 			echo "<tr valign=top><td>";
-			if (count ($netinfo['addrlist']) && getConfigVar ('IPV4_JAYWALK') == 'no')
+			if (! isIPNetworkEmpty ($netinfo))
 				printImageHREF ('nodestroy', 'There are ' . count ($netinfo['addrlist']) . ' allocations inside');
 			else
-			{
-				echo "<a href='".makeHrefProcess (array	('op' => 'delIPv6Prefix', 'id' => $netinfo['id'])) . "'>";
-				printImageHREF ('destroy', 'Delete this prefix');
-				echo "</a>";
-			}
+				echo getOpLink (array	('op' => 'del', 'id' => $netinfo['id']), '', 'destroy', 'Delete this prefix');
 			echo '</td><td class=tdleft><a href="' . makeHref (array ('page' => 'ipv6net', 'id' => $netinfo['id'])) . '">';
 			echo "${netinfo['ip']}/${netinfo['mask']}</a></td>";
 			echo '<td class=tdleft>' . niftyString ($netinfo['name']);
@@ -2477,8 +2377,55 @@ END
 		echo "</table>";
 		finishPortlet();
 	}
-	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')
-		printNewItemTR();
+}
+
+function renderIPNewNetForm ()
+{
+	global $pageno;
+	if ($pageno == 'ipv6space')
+	{
+		$realm = 'ipv6net';
+		$regexp = addslashes ('^[a-fA-F0-9:]*:[a-fA-F0-9:\.]*/\d{1,3}$');
+	}
+	else
+	{
+		$realm = 'ipv4net';
+		$regexp = addslashes ('^(\d{1,3}\.){3}\d{1,3}/\d{1,2}$');
+	}
+
+	// IP prefix validator
+	addJs ('js/live_validation.js');
+	$regexp = addslashes ($regexp);
+	addJs (<<<END
+$(document).ready(function () {
+	document.add_new_range.range.setAttribute('match', '$regexp');
+	Validate.init();
+});
+END
+	, TRUE);
+	
+	startPortlet ('Add new');
+	echo '<table border=0 cellpadding=10 align=center>';
+	// This form requires a name, so JavaScript validator can find it.
+	// No printOpFormIntro() hence
+	echo "<form method=post name='add_new_range' action='".makeHrefProcess()."'>\n";
+	echo "<input type=hidden name=op value=add>\n";
+	// tags column
+	echo '<tr><td rowspan=5><h3>assign tags</h3>';
+	renderNewEntityTags ($realm);
+	echo '</td>';
+	// inputs column
+	$prefix_value = empty ($_REQUEST['set-prefix']) ? '' : $_REQUEST['set-prefix'];
+	echo "<th class=tdright>prefix</th><td class=tdleft><input type=text name='range' size=36 class='live-validate' tabindex=1 value='${prefix_value}'></td>";
+	echo '<tr><th class=tdright>VLAN</th><td class=tdleft>';
+	echo getOptionTree ('vlan_ck', getAllVLANOptions(), array ('select_class' => 'vertical', 'tabindex' => 2)) . '</td></tr>';
+	echo "<tr><th class=tdright>name</th><td class=tdleft><input type=text name='name' size='20' tabindex=3></td></tr>";
+	echo '<tr><td class=tdright><input type=checkbox name="is_connected" tabindex=4></td><th class=tdleft>reserve subnet-router anycast address</th></tr>';
+	echo "<tr><td colspan=2>";
+	printImageHREF ('CREATE', 'Add a new network', TRUE, 5);
+	echo '</td></tr>';
+	echo "</form></table><br><br>\n";
+	finishPortlet();
 }
 
 function renderIPv4Network ($id)
@@ -2888,6 +2835,13 @@ function renderIPNetworkProperties ($id)
 	echo "<tr><td colspan=2 class=tdcenter>";
 	printImageHREF ('SAVE', 'Save changes', TRUE);
 	echo "</td></form></tr></table>\n";
+
+	echo '<center>';
+	if (! isIPNetworkEmpty ($netdata))
+		echo getOpLink (NULL, 'delete this prefix', 'nodestroy', 'There are ' . count ($netdata['addrlist']) . ' allocations inside');
+	else
+		echo getOpLink (array('op'=>'del','id'=>$id), 'delete this prefix', 'destroy');
+	echo '</center>';
 }
 
 function renderIPAddress ($dottedquad)
@@ -8685,22 +8639,17 @@ function renderEditVlan ($vlan_ck)
 			'<a href="' . makeHref (array ('page' => 'vlan', 'tab' => 'default', 'vlan_ck' => $vlan_ck)) . '">' .
 			"$portc ports</a>";
 	}
-	
+
 	$reason = '';
 	if ($vlan['vlan_id'] == VLAN_DFL_ID)
 		$reason = "You can not delete default VLAN";
 	elseif ($portc)
 		$reason = "Can not delete: $portc ports configured";
 	if (! empty ($reason))
-		$delete_line .= '<a href="#" class="noclick" onclick="return false" ' .
-		'title="' . htmlspecialchars($reason, ENT_QUOTES) . '">' . getImageHREF ('nodestroy');
+		echo getOpLink (NULL, 'delete VLAN', 'nodestroy', $reason);
 	else
-		$delete_line .= '<a href="' .
-			makeHrefProcess (array ('op' => 'del', 'vlan_ck' => $vlan_ck)) .
-			'" title="delete VLAN">' . getImageHREF ('destroy');
-	$delete_line .= ' delete VLAN</a>';
-	
-	echo $delete_line . $clear_line;
+		echo getOpLink (array ('op' => 'del', 'vlan_ck' => $vlan_ck), 'delete VLAN', 'destroy');
+	echo $clear_line;
 	finishPortlet();
 }
 

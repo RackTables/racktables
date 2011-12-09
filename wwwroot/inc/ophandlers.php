@@ -851,40 +851,34 @@ function delIPv4Prefix ()
 	assertUIntArg ('id');
 	$netinfo = spotEntity ('ipv4net', $_REQUEST['id']);
 	loadIPv4AddrList ($netinfo);
-	if
-	(
-		array_key_exists ($netinfo['db_first'], $netinfo['addrlist']) and
-		$netinfo['addrlist'][$netinfo['db_first']]['name'] == 'network' and
-		$netinfo['addrlist'][$netinfo['db_first']]['reserved'] == 'yes' and
-		! count ($netinfo['addrlist'][$netinfo['db_first']]['outpf']) and
-		! count ($netinfo['addrlist'][$netinfo['db_first']]['inpf']) and
-		! count ($netinfo['addrlist'][$netinfo['db_first']]['rslist']) and
-		! count ($netinfo['addrlist'][$netinfo['db_first']]['allocs']) and
-		! count ($netinfo['addrlist'][$netinfo['db_first']]['lblist'])
-	)
+	if (! isIPNetworkEmpty ($netinfo))
+		return showError ("There are allocations within prefix, delete forbidden");
+	if (array_key_exists ($netinfo['db_first'], $netinfo['addrlist']))
 		updateAddress ($netinfo['addrlist'][$netinfo['db_first']]['ip'], '', 'no');
-	if
-	(
-		array_key_exists ($netinfo['db_last'], $netinfo['addrlist']) and
-		$netinfo['addrlist'][$netinfo['db_last']]['name'] == 'broadcast' and
-		$netinfo['addrlist'][$netinfo['db_last']]['reserved'] == 'yes' and
-		! count ($netinfo['addrlist'][$netinfo['db_last']]['outpf']) and
-		! count ($netinfo['addrlist'][$netinfo['db_last']]['inpf']) and
-		! count ($netinfo['addrlist'][$netinfo['db_last']]['rslist']) and
-		! count ($netinfo['addrlist'][$netinfo['db_last']]['allocs']) and
-		! count ($netinfo['addrlist'][$netinfo['db_last']]['lblist'])
-	)
+	if (array_key_exists ($netinfo['db_last'], $netinfo['addrlist']))
 		updateAddress ($netinfo['addrlist'][$netinfo['db_last']]['ip'], '', 'no');
 	destroyIPv4Prefix ($_REQUEST['id']);
-	return showFuncMessage (__FUNCTION__, 'OK');
+	showFuncMessage (__FUNCTION__, 'OK');
+	global $pageno;
+	if ($pageno == 'ipv4net')
+		return buildRedirectURL ('index', 'default');
 }
 
 $msgcode['delIPv6Prefix']['OK'] = 49;
 function delIPv6Prefix ()
 {
 	assertUIntArg ('id');
+	$netinfo = spotEntity ('ipv6net', $_REQUEST['id']);
+	loadIPv6AddrList ($netinfo);
+	if (! isIPNetworkEmpty ($netinfo))
+		return showError ("There are allocations within prefix, delete forbidden");
+	if (array_key_exists ($netinfo['db_first']->getBin(), $netinfo['addrlist']))
+		updateAddress ($netinfo['db_first'], '', 'no');
 	destroyIPv6Prefix ($_REQUEST['id']);
-	return showFuncMessage (__FUNCTION__, 'OK');
+	showFuncMessage (__FUNCTION__, 'OK');
+	global $pageno;
+	if ($pageno == 'ipv6net')
+		return buildRedirectURL ('index', 'default');
 }
 
 $msgcode['editAddress']['OK'] = 51;

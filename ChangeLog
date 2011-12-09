@@ -11,6 +11,8 @@
 	update: LiveCDP, LiveLLDP: more accurate default interface type detection, ability to overwrite the transceiver set on port, checkboxes are set by default
 	update: ability to remove 802.1q VLAN from every port it belongs to in order to delete this VLAN
 	update: API: you can selectively override the default static content by specifying the $local_staticdir global var
+	update: ability to delete IP prefixes from within its properties tab
+	update: adding and deleting forms of IP prefixes are separated
 	new feature: you can obtain who has made tag assignment, object's ports or IPv4 address changes by hovering cursor on these entities
 	new feature: adjustable quick links at the top of the page
 0.19.11
@@ -18,6 +20,8 @@
 	bugfix: SNMP did not work for Netgear
 	bugfix: Cacti integration improvements (#466)
 	bugfix: Could not delete objects' log entries
+	update: ability to delete IP prefixes from within its properties tab
+	update: adding and deleting forms of IP prefixes are separated
 0.19.10 2011-10-17
 	bugfix: LivePorts MAC address lister was broken with Huawei S5300 V100R006
 	bugfix: SNMP sync was broken when one of default attributes was removed from certain object type

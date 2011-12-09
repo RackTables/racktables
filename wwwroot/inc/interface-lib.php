@@ -702,4 +702,31 @@ function renderEntitySummary ($cell, $title, $values = array())
 	finishPortlet();
 }
 
+function getOpLink ($params, $title,  $img_name = '', $comment = '', $class = '')
+{
+	if (isset ($params))
+		$ret = '<a href="' . makeHrefProcess ($params) . '"';
+	else
+	{
+		$ret = '<a href="#" onclick="return false;"';
+		$class .= ' noclick';
+	}
+	if (! empty ($comment))
+		$ret .= ' title="' . htmlspecialchars ($comment, ENT_QUOTES) . '"';
+	$class = trim ($class);
+	if (! empty ($class))
+		$ret .= ' class="' . htmlspecialchars ($class, ENT_QUOTES) . '"';
+	if (! empty ($comment))
+		$ret .= 'title="' . htmlspecialchars($comment, ENT_QUOTES) . '"';
+	$ret .= '>';
+	if (! empty ($img_name))
+	{
+		$ret .= getImageHREF ($img_name, $comment);
+		if (! empty ($title))
+			$ret .= ' ';
+	}
+	$ret .= $title . '</a>';
+	return $ret;
+}
+
 ?>
