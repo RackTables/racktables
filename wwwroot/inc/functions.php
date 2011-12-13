@@ -2270,12 +2270,18 @@ function makeHref ($params = array())
 
 function makeHrefProcess ($params = array())
 {
-	global $pageno, $tabno;
+	global $pageno, $tabno, $page;
 	$tmp = array();
 	if (! array_key_exists ('page', $params))
 		$params['page'] = $pageno;
 	if (! array_key_exists ('tab', $params))
 		$params['tab'] = $tabno;
+	if (isset ($page[$pageno]['bypass']))
+	{
+		$bypass = $page[$pageno]['bypass'];
+		if (! array_key_exists ($bypass, $params) and array_key_exists ($bypass, $_REQUEST))
+			$params[$bypass] = $_REQUEST[$bypass];
+	}
 	foreach ($params as $key => $value)
 		$tmp[] = urlencode ($key) . '=' . urlencode ($value);
 	return '?module=redirect&' . implode ('&', $tmp);
