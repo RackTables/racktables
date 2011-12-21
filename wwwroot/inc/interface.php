@@ -161,6 +161,7 @@ function getRenderedAlloc ($object_id, $alloc)
 	$ret = array
 	(
 		'tr_class' => '',
+		'td_name_suffix' => '',
 		'td_ip' => '',
 		'td_network' => '',
 		'td_routed_by' => '',
@@ -876,6 +877,28 @@ function renderRackProblems ($rack_id)
 	renderGridForm ($rack_id, 'applyRackProblemMask', 'Rack problems', 'Mark unusable atoms', 'F', 'U');
 }
 
+function renderObjectPortRow ($port, $is_highlighted)
+{
+	echo '<tr';
+	if ($is_highlighted)
+		echo ' class=port_highlight';
+	$a_class = isEthernetPort ($port) ? 'port-menu' : '';
+	echo "><td class='tdleft' NOWRAP><a name='port-${port['id']}' class='ancor interactive-portname nolink $a_class'>${port['name']}</a></td>";
+	echo "<td class=tdleft>${port['label']}</td>";
+	echo "<td class=tdleft>" . formatPortIIFOIF ($port) . "</td><td class=tdleft><tt>${port['l2address']}</tt></td>";
+	if ($port['remote_object_id'])
+	{
+		echo "<td class=tdleft>" .
+			formatPortLink ($port['remote_object_id'], $port['remote_object_name'], $port['remote_id'], NULL) . 
+			"</td>";
+		echo "<td class=tdleft>" . formatLoggedSpan ($port['last_log'], $port['remote_name'], 'underline') . "</td>";
+		echo "<td class='tdleft rsvtext'>${port['cableid']}</td>";
+	}
+	else
+		echo implode ('', formatPortReservation ($port)) . '<td></td>';
+	echo "</tr>";
+}
+
 function renderObject ($object_id)
 {
 	global $nextorder, $virtual_obj_types;
@@ -987,26 +1010,7 @@ function renderObject ($object_id)
 		echo '<th class=tdcenter colspan=2>Remote object and port</th>';
 		echo '<th class=tdleft>Cable ID</th></tr>';
 		foreach ($info['ports'] as $port)
-		{
-			echo '<tr';
-			if ($hl_port_id == $port['id'])
-				echo ' class=port_highlight';
-			$a_class = isEthernetPort ($port) ? 'port-menu' : '';
-			echo "><td class='tdleft' NOWRAP><a name='port-${port['id']}' class='ancor interactive-portname nolink $a_class'>${port['name']}</a></td>";
-			echo "<td class=tdleft>${port['label']}</td>";
-			echo "<td class=tdleft>" . formatPortIIFOIF ($port) . "</td><td class=tdleft><tt>${port['l2address']}</tt></td>";
-			if ($port['remote_object_id'])
-			{
-				echo "<td class=tdleft>" .
-					formatPortLink ($port['remote_object_id'], $port['remote_object_name'], $port['remote_id'], NULL) . 
-					"</td>";
-				echo "<td class=tdleft>" . formatLoggedSpan ($port['last_log'], $port['remote_name'], 'underline') . "</td>";
-				echo "<td class='tdleft rsvtext'>${port['cableid']}</td>";
-			}
-			else
-				echo implode ('', formatPortReservation ($port)) . '<td></td>';
-			echo "</tr>";
-		}
+			callHook ('renderObjectPortRow', $port, ($hl_port_id == $port['id']));
 		if (permitted (NULL, 'ports', 'set_reserve_comment'))
 			addJS ('js/inplace-edit.js');
 		echo "</table><br>";
@@ -1034,14 +1038,14 @@ function renderObject ($object_id)
 			$is_first_row = TRUE;
 			foreach ($alloclist as $alloc)
 			{
-				$rendered_alloc = getRenderedAlloc ($object_id, $alloc);
+				$rendered_alloc = callHook ('getRenderedAlloc', $object_id, $alloc);
 				echo "<tr class='${rendered_alloc['tr_class']}' valign=top>";
 
 				// display iface name, same values are grouped into single cell
 				if ($is_first_row)
 				{
 					$rowspan = count ($alloclist) > 1 ? 'rowspan="' . count ($alloclist) . '"' : '';
-					echo "<td class=tdleft $rowspan>$iface_name</td>";
+					echo "<td class=tdleft $rowspan>" . $iface_name . $rendered_alloc['td_name_suffix'] . "</td>";
 					$is_first_row = FALSE;
 				}
 				echo $rendered_alloc['td_ip'];
@@ -1387,7 +1391,7 @@ function renderIPTabForObject ($object_id, $ip_v)
 			$used_alloc_types[$alloc['type']] = 0;
 		$used_alloc_types[$alloc['type']]++;
 
-		$rendered_alloc = getRenderedAlloc ($object_id, $alloc);
+		$rendered_alloc = callHook ('getRenderedAlloc', $object_id, $alloc);
 		$alloc_list .= getOutputOf ('printOpFormIntro', getOpnameByIPFamily ('upd', $ip_v), array ('ip' => $alloc['addrinfo']['ip']));
 		$alloc_list .= "<tr class='${rendered_alloc['tr_class']}' valign=top>";
 
@@ -1403,7 +1407,7 @@ function renderIPTabForObject ($object_id, $ip_v)
 			) . "'>" . 
 			getImageHREF ('delete', 'Delete this IP address') .
 			"</a></td>";
-		$alloc_list .= "<td class=tdleft><input type='text' name='bond_name' value='${alloc['osif']}' size=10></td>";
+		$alloc_list .= "<td class=tdleft><input type='text' name='bond_name' value='${alloc['osif']}' size=10>" . $rendered_alloc['td_name_suffix'] . "</td>";
 		$alloc_list .= $rendered_alloc['td_ip'];
 		if (getConfigVar ('EXT_IPV4_VIEW') == 'yes')
 		{
