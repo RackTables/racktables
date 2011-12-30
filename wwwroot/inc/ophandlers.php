@@ -1432,6 +1432,11 @@ function resetUIConfig()
 	setConfigVar ('TELNET_OBJS_LISTSRC', 'none');
 	setConfigVar ('SYNC_802Q_LISTSRC', '');
 	setConfigVar ('QUICK_LINK_PAGES', '');
+	setConfigVar ('CACTI_LISTSRC', 'false');
+	setConfigVar ('CACTI_URL', '');
+	setConfigVar ('CACTI_USERNAME', '');
+	setConfigVar ('CACTI_USERPASS', '');
+	setConfigVar ('VIRTUAL_OBJ_LISTSRC', '{$typeid_1504} or {$typeid_1505} or {$typeid_1506} or {$typeid_1507}');
 	return showFuncMessage (__FUNCTION__, 'OK');
 }
 

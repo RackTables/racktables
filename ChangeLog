@@ -21,6 +21,7 @@
 	bugfix: Cacti integration improvements (#466)
 	bugfix: Could not delete objects' log entries
 	bugfix: hovering over a mounted object displayed incorrect child data (#498)
+	update: list of virtual object types is now maintained as a Config setting (#488)
 	update: ability to delete IP prefixes from within its properties tab
 	update: adding and deleting forms of IP prefixes are separated
 0.19.10 2011-10-17
