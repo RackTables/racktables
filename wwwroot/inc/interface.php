@@ -372,6 +372,7 @@ function renderRack ($rack_id, $hl_obj_id = 0)
 					$objectChildren = getEntityRelatives ('children', 'object', $objectData['id']);
 					if (count($objectChildren) > 0)
 					{
+						$childNames = array();
 						foreach ($objectChildren as $child)
 							$childNames[] = $child['name'];
 						natsort($childNames);
