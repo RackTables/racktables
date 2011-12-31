@@ -17,7 +17,7 @@ $SQLSchema = array
 			'label' => 'label',
 			'asset_no' => 'asset_no',
 			'objtype_id' => 'objtype_id',
-			'rack_id' => '(SELECT rack_id FROM RackSpace WHERE object_id = id ORDER BY rack_id ASC LIMIT 1)',
+			'rack_id' => '(SELECT RS.rack_id FROM RackSpace RS LEFT JOIN EntityLink EL ON RS.object_id = EL.parent_entity_id WHERE RS.object_id = RackObject.id OR EL.child_entity_id = RackObject.id ORDER BY RS.rack_id ASC LIMIT 1)',
 			'has_problems' => 'has_problems',
 			'comment' => 'comment',
 			'nports' => '(SELECT COUNT(*) FROM Port WHERE object_id = RackObject.id)',
@@ -1230,13 +1230,16 @@ function getOperationMolecules ($op_id = 0)
 
 function getResidentRacksData ($object_id = 0, $fetch_rackdata = TRUE)
 {
-	// Include racks that the object is directly mounted in,
-	// as well as racks that is 'Zero-U' mounted in
-	$result = usePreparedSelectBlade (
-		'SELECT rack_id FROM RackSpace WHERE object_id = ? ' .
+	// Include racks that the object is directly mounted in, racks that it's parent is mounted in,
+	// and racks that it is 'Zero-U' mounted in
+	$result = usePreparedSelectBlade
+	(
+		'SELECT DISTINCT RS.rack_id FROM RackSpace RS LEFT JOIN EntityLink EL ON RS.object_id = EL.parent_entity_id ' .
+		'WHERE RS.object_id = ? or EL.child_entity_id = ? ' .
 		'UNION ' .
-		"SELECT parent_entity_id AS rack_id FROM EntityLink where parent_entity_type = 'rack' AND child_entity_type = 'object' AND child_entity_id = ?" .
-		'ORDER BY rack_id', array ($object_id, $object_id));
+		"SELECT parent_entity_id AS rack_id FROM EntityLink where parent_entity_type = 'rack' AND child_entity_type = 'object' AND child_entity_id = ? " .
+		'ORDER BY rack_id', array ($object_id, $object_id, $object_id)
+	);
 	$rows = $result->fetchAll (PDO::FETCH_NUM);
 	unset ($result);
 	$ret = array();

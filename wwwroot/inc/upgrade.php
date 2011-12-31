@@ -1183,6 +1183,11 @@ CREATE TABLE `CactiGraph` (
 			break;
 		case '0.19.11':
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdefined, description) VALUES ('VIRTUAL_OBJ_LISTSRC','{\$typeid_1504} or {\$typeid_1505} or {\$typeid_1506} or {\$typeid_1507}','string','no','no','no','List source: virtual objects')";
+			$query[] = "INSERT INTO `Attribute` (`id`,`type`,`name`) VALUES (28,'string','Slot number')";
+			$query[] = 'INSERT INTO `AttributeMap` (`objtype_id`,`attr_id`,`chapter_id`) VALUES (4,28,NULL)';
+			$query[] = 'INSERT INTO `AttributeMap` (`objtype_id`,`attr_id`,`chapter_id`) VALUES (8,28,NULL)';
+			$query[] = 'INSERT INTO `AttributeMap` (`objtype_id`,`attr_id`,`chapter_id`) VALUES (798,28,NULL)';
+			$query[] = 'INSERT INTO `AttributeMap` (`objtype_id`,`attr_id`,`chapter_id`) VALUES (1055,28,NULL)';
 			$query[] = "UPDATE Config SET varvalue = '0.19.11' WHERE varname = 'DB_VERSION'";
 			break;
 		case '0.20.0':

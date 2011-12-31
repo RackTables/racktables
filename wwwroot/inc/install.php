@@ -962,7 +962,8 @@ INSERT INTO `Attribute` (`id`, `type`, `name`) VALUES
 (24,'string','SW warranty expiration'),
 (25,'string','UUID'),
 (26,'dict','Hypervisor'),
-(27,'uint','Height'),
+(27,'uint','Height, units'),
+(28,'string','Slot number'),
 -- ^^^^^ Any new "default" attributes must go above this line! ^^^^^
 -- Primary key value 9999 makes sure, that AUTO_INCREMENT on server restart
 -- doesn't drop below 10000 (other code relies on this, site-specific
