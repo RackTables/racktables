@@ -68,14 +68,6 @@ $rtwidth = array
 	2 => 9
 );
 
-$virtual_obj_types = array
-(
-	1504,
-	1505,
-	1506,
-	1507
-);
-
 $netmaskbylen = array
 (
 	32 => '255.255.255.255',
