@@ -855,9 +855,9 @@ function renderGridForm ($rack_id, $filter, $header, $submit, $state1, $state2)
 	echo "<center>\n";
 	echo "<table class=rack border=0 cellspacing=0 cellpadding=1>\n";
 	echo "<tr><th width='10%'>&nbsp;</th>";
-	echo "<th width='20%'><a href='javascript:;' oncontextmenu=\"blockToggleColumnOfAtoms('${rack_id}', '0', ${rackData['height']}); return false;\" onclick=\"toggleColumnOfAtoms('${rack_id}', '0', ${rackData['height']})\">Front</a></th>";
-	echo "<th width='50%'><a href='javascript:;' oncontextmenu=\"blockToggleColumnOfAtoms('${rack_id}', '1', ${rackData['height']}); return false;\" onclick=\"toggleColumnOfAtoms('${rack_id}', '1', ${rackData['height']})\">Interior</a></th>";
-	echo "<th width='20%'><a href='javascript:;' oncontextmenu=\"blockToggleColumnOfAtoms('${rack_id}', '2', ${rackData['height']}); return false;\" onclick=\"toggleColumnOfAtoms('${rack_id}', '2', ${rackData['height']})\">Back</a></th></tr>\n";
+	echo "<th width='20%'><a href='javascript:;' onclick=\"toggleColumnOfAtoms('${rack_id}', '0', ${rackData['height']})\">Front</a></th>";
+	echo "<th width='50%'><a href='javascript:;' onclick=\"toggleColumnOfAtoms('${rack_id}', '1', ${rackData['height']})\">Interior</a></th>";
+	echo "<th width='20%'><a href='javascript:;' onclick=\"toggleColumnOfAtoms('${rack_id}', '2', ${rackData['height']})\">Back</a></th></tr>\n";
 	printOpFormIntro ('updateRack');
 	markupAtomGrid ($rackData, $state2);
 	renderAtomGrid ($rackData);
@@ -1761,14 +1761,14 @@ function renderRackSpaceForObject ($object_id)
 		echo "<center>\n<h2>${rackData['name']}</h2>\n";
 		echo "<table class=rack border=0 cellspacing=0 cellpadding=1>\n";
 		echo "<tr><th width='10%'>&nbsp;</th>";
-		echo "<th width='20%'><a href='javascript:;' oncontextmenu=\"blockToggleColumnOfAtoms('${rack_id}', '0', ${rackData['height']}); return false;\" onclick=\"toggleColumnOfAtoms('${rack_id}', '0', ${rackData['height']})\">Front</a></th>";
-		echo "<th width='50%'><a href='javascript:;' oncontextmenu=\"blockToggleColumnOfAtoms('${rack_id}', '1', ${rackData['height']}); return false;\" onclick=\"toggleColumnOfAtoms('${rack_id}', '1', ${rackData['height']})\">Interior</a></th>";
-		echo "<th width='20%'><a href='javascript:;' oncontextmenu=\"blockToggleColumnOfAtoms('${rack_id}', '2', ${rackData['height']}); return false;\" onclick=\"toggleColumnOfAtoms('${rack_id}', '2', ${rackData['height']})\">Back</a></th></tr>\n";
+		echo "<th width='20%'><a href='javascript:;' onclick=\"toggleColumnOfAtoms('${rack_id}', '0', ${rackData['height']})\">Front</a></th>";
+		echo "<th width='50%'><a href='javascript:;' onclick=\"toggleColumnOfAtoms('${rack_id}', '1', ${rackData['height']})\">Interior</a></th>";
+		echo "<th width='20%'><a href='javascript:;' onclick=\"toggleColumnOfAtoms('${rack_id}', '2', ${rackData['height']})\">Back</a></th></tr>\n";
 		renderAtomGrid ($rackData);
 		echo "<tr><th width='10%'>&nbsp;</th>";
-		echo "<th width='20%'><a href='javascript:;' oncontextmenu=\"blockToggleColumnOfAtoms('${rack_id}', '0', ${rackData['height']}); return false;\" onclick=\"toggleColumnOfAtoms('${rack_id}', '0', ${rackData['height']})\">Front</a></th>";
-		echo "<th width='50%'><a href='javascript:;' oncontextmenu=\"blockToggleColumnOfAtoms('${rack_id}', '1', ${rackData['height']}); return false;\" onclick=\"toggleColumnOfAtoms('${rack_id}', '1', ${rackData['height']})\">Interior</a></th>";
-		echo "<th width='20%'><a href='javascript:;' oncontextmenu=\"blockToggleColumnOfAtoms('${rack_id}', '2', ${rackData['height']}); return false;\" onclick=\"toggleColumnOfAtoms('${rack_id}', '2', ${rackData['height']})\">Back</a></th></tr>\n";
+		echo "<th width='20%'><a href='javascript:;' onclick=\"toggleColumnOfAtoms('${rack_id}', '0', ${rackData['height']})\">Front</a></th>";
+		echo "<th width='50%'><a href='javascript:;' onclick=\"toggleColumnOfAtoms('${rack_id}', '1', ${rackData['height']})\">Interior</a></th>";
+		echo "<th width='20%'><a href='javascript:;' onclick=\"toggleColumnOfAtoms('${rack_id}', '2', ${rackData['height']})\">Back</a></th></tr>\n";
 		echo "</table>\n<br>\n";
 		// Determine zero-u checkbox status.
 		// If form has been submitted, use form data, otherwise use DB data.
@@ -1776,7 +1776,8 @@ function renderRackSpaceForObject ($object_id)
 			$checked = isset($_REQUEST['zerou_'.$rack_id]) ? 'checked' : '';
 		else
 			$checked = in_array($rack_id, $parentRacks) ? 'checked' : '';
-		echo "Zero-U: <input type=checkbox ${checked} name=zerou_${rack_id} id=zerou_${rack_id}>";
+		echo "Zero-U: <input type=checkbox ${checked} name=zerou_${rack_id} id=zerou_${rack_id}>\n<br><br>\n";
+		echo "<input type='button' onclick='uncheckAll();' value='Uncheck all'>\n";
 		echo '</center></td>';
 	}
 	echo "</tr></table>";
@@ -3596,7 +3597,7 @@ function renderAtomGrid ($data)
 	addJS ('js/racktables.js');
 	for ($unit_no = $data['height']; $unit_no > 0; $unit_no--)
 	{
-		echo "<tr><th><a href='javascript:;' oncontextmenu=\"blockToggleRowOfAtoms('${rack_id}','${unit_no}'); return false;\" onclick=\"toggleRowOfAtoms('${rack_id}','${unit_no}')\">${unit_no}</a></th>";
+		echo "<tr><th><a href='javascript:;' onclick=\"toggleRowOfAtoms('${rack_id}','${unit_no}')\">${unit_no}</a></th>";
 		for ($locidx = 0; $locidx < 3; $locidx++)
 		{
 			$name = "atom_${rack_id}_${unit_no}_${locidx}";
