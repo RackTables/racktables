@@ -17,7 +17,7 @@ $SQLSchema = array
 			'label' => 'label',
 			'asset_no' => 'asset_no',
 			'objtype_id' => 'objtype_id',
-			'rack_id' => '(select rack_id from RackSpace where object_id = id order by rack_id asc limit 1)',
+			'rack_id' => '(SELECT RS.rack_id FROM RackSpace RS LEFT JOIN EntityLink EL ON RS.object_id = EL.parent_entity_id WHERE RS.object_id = RackObject.id OR EL.child_entity_id = RackObject.id ORDER BY RS.rack_id ASC LIMIT 1)',
 			'Rack_name' => '(select name from Rack where id = rack_id)',
 			'row_id' => '(select row_id from Rack where id = rack_id)',
 			'Row_name' => '(select name from RackRow where id = row_id)',
@@ -1050,7 +1050,12 @@ function getOperationMolecules ($op_id = 0)
 
 function getResidentRacksData ($object_id = 0, $fetch_rackdata = TRUE)
 {
-	$result = usePreparedSelectBlade ('SELECT DISTINCT rack_id FROM RackSpace WHERE object_id = ? ORDER BY rack_id', array ($object_id));
+	$result = usePreparedSelectBlade
+	(
+		'SELECT DISTINCT RS.rack_id FROM RackSpace RS LEFT JOIN EntityLink EL ON RS.object_id = EL.parent_entity_id ' .
+		'WHERE RS.object_id = ? or EL.child_entity_id = ? ORDER BY RS.rack_id', array ($object_id, $object_id)
+	);
+
 	$rows = $result->fetchAll (PDO::FETCH_NUM);
 	unset ($result);
 	$ret = array();

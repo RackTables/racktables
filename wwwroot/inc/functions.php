@@ -594,12 +594,18 @@ function applyRackProblemMask (&$rackData)
 // This function highlights specified object (and removes previous highlight).
 function highlightObject (&$rackData, $object_id)
 {
+	// Also highlight parent objects
+	$parents = getEntityRelatives ('parents', 'object', $object_id);
+	$parent_ids = array();
+	foreach ($parents as $parent)
+		$parent_ids[] = $parent['entity_id'];
+
 	for ($unit_no = $rackData['height']; $unit_no > 0; $unit_no--)
 		for ($locidx = 0; $locidx < 3; $locidx++)
 			if
 			(
 				$rackData[$unit_no][$locidx]['state'] == 'T' and
-				$rackData[$unit_no][$locidx]['object_id'] == $object_id
+				($rackData[$unit_no][$locidx]['object_id'] == $object_id or	in_array($rackData[$unit_no][$locidx]['object_id'], $parent_ids))
 			)
 				$rackData[$unit_no][$locidx]['hl'] = 'h';
 			else
