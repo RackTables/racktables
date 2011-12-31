@@ -1424,7 +1424,7 @@ function linkPorts ($porta, $portb, $cable = NULL)
 		(
 			'porta' => $porta,
 			'portb' => $portb,
-			'cable' => mb_strlen ($cable) ? $cable : ''
+			'cable' => mb_strlen ($cable) ? $cable : NULL
 		)
 	);
 	$dbxlink->exec ('UNLOCK TABLES');
@@ -1447,6 +1447,17 @@ function linkPorts ($porta, $portb, $cable = NULL)
 		addPortLogEntry ($pair_id, sprintf ("linked to %s %s", $row['obj_name'], $row['port_name']));
 	}
 	unset ($result);
+}
+
+function commitUpdatePortLink ($port_id, $cable = NULL)
+{
+	return usePreparedUpdateBlade
+	(
+		'Link',
+		array ('cable' => mb_strlen ($cable) ? $cable : NULL),
+		array ('porta' => $port_id, 'portb' => $port_id),
+		'OR'
+	);
 }
 
 function commitUnlinkPort ($port_id)
