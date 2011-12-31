@@ -7,6 +7,7 @@
 	update: list of virtual object types is now maintained as a Config setting (#488)
 	update: when an object is contained within another, display the parent's rackspace allocation info when viewing the child (#432) 
 	update: added the 'Slot number' attribute to object types which may be mounted in a blade chassis (#474)
+	update: added an 'Uncheck all' button to the rackspace allocation page (#490)
 0.19.10 2011-10-17
 	bugfix: LivePorts MAC address lister was broken with Huawei S5300 V100R006
  	bugfix: SNMP sync was broken when one of default attributes was removed from certain object type
