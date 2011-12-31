@@ -1067,7 +1067,7 @@ function renderPortsForObject ($object_id)
 		echo "<td><input type=text name=port_label tabindex=101></td><td>";
 		printNiftySelect (getNewPortTypeOptions(), array ('name' => 'port_type_id', 'tabindex' => 102), $prefs['selected']);
 		echo "<td><input type=text name=port_l2address tabindex=103 size=18 maxlength=24></td>\n";
-		echo "<td colspan=3>&nbsp;</td><td>";
+		echo "<td colspan=4>&nbsp;</td><td>";
 		printImageHREF ('add', 'add a port', TRUE, 104);
 		echo "</td></tr></form>";
 	}
@@ -1097,7 +1097,7 @@ function renderPortsForObject ($object_id)
 	
 	echo "<table cellspacing=0 cellpadding='5' align='center' class='widetable'>\n";
 	echo "<tr><th>&nbsp;</th><th class=tdleft>Local name</th><th class=tdleft>Visible label</th><th class=tdleft>Interface</th><th class=tdleft>L2 address</th>";
-	echo "<th class=tdcenter colspan=2>Cable, Remote object and port</th><th class=tdcenter>(Un)link or (un)reserve</th><th>&nbsp;</th></tr>\n";
+	echo "<th class=tdcenter colspan=2>Remote object and port</th><th>Cable ID</th><th class=tdcenter>(Un)link or (un)reserve</th><th>&nbsp;</th></tr>\n";
 	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
 		printNewItemTR ($prefs);
 
@@ -1144,8 +1144,9 @@ function renderPortsForObject ($object_id)
 		if ($port['remote_object_id'])
 		{
 			$remote_object = spotEntity ('object', $port['remote_object_id']);
-			echo "<td>${port['cableid']}&nbsp;<a href='".makeHref(array('page'=>'object', 'object_id'=>$port['remote_object_id']))."'>${remote_object['dname']}</a></td>";
+			echo "<td><a href='".makeHref(array('page'=>'object', 'object_id'=>$port['remote_object_id']))."'>${remote_object['dname']}</a></td>";
 			echo "<td>${port['remote_name']}<input type=hidden name=reservation_comment value=''></td>";
+			echo "<td><input type=text name=cable value='${port['cableid']}'></td>";
 			echo "<td class=tdcenter><a href='".
 				makeHrefProcess(array(
 					'op'=>'unlinkPort', 
@@ -1159,6 +1160,7 @@ function renderPortsForObject ($object_id)
 		{
 			echo "<td><b>Reserved:</b></td>";
 			echo "<td><input type=text name=reservation_comment value='${port['reservation_comment']}'></td>";
+			echo "<td></td>";
 			echo "<td class=tdcenter><a href='".
 				makeHrefProcess(array(
 					'op'=>'useup',
@@ -1170,8 +1172,7 @@ function renderPortsForObject ($object_id)
 		}
 		else
 		{
-			//echo "<td>&nbsp;</td><td>&nbsp;</td><td class=tdcenter><a href='javascript:;'";
-			echo "<td>&nbsp;</td><td>&nbsp;</td><td class=tdcenter><span";
+			echo "<td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td class=tdcenter><span";
 			$helper_args = array
 			(
 				'port' => $port['id'],

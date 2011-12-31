@@ -1223,7 +1223,7 @@ function linkPorts ($porta, $portb, $cable = NULL)
 		(
 			'porta' => $porta,
 			'portb' => $portb,
-			'cable' => mb_strlen ($cable) ? $cable : ''
+			'cable' => mb_strlen ($cable) ? $cable : NULL
 		)
 	);
 	$dbxlink->exec ('UNLOCK TABLES');
@@ -1233,6 +1233,17 @@ function linkPorts ($porta, $portb, $cable = NULL)
 		array ($porta, $portb)
 	);
 	return $ret ? '' : 'query failed';
+}
+
+function commitUpdatePortLink ($port_id, $cable = NULL)
+{
+	return usePreparedUpdateBlade
+	(
+		'Link',
+		array ('cable' => mb_strlen ($cable) ? $cable : NULL),
+		array ('porta' => $port_id, 'portb' => $port_id),
+		'OR'
+	);
 }
 
 // Returns all IPv4 addresses allocated to object, but does not attach detailed info about address
