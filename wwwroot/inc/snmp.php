@@ -896,6 +896,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'WS-C2924-XL: 24 RJ-45/10-100TX',
 		'processors' => array ('catalyst-chassis-any-100TX'),
 	),
+	'9.1.246' => array
+	(
+		'dict_key' => 391,
+		'text' => 'WS-C3508G-XL: 8 GBIC/1000',
+		'processors' => array ('catalyst-chassis-any-1000GBIC'),
+	),
 	'9.1.248' => array
 	(
 		'dict_key' => 393,
