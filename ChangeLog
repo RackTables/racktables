@@ -26,6 +26,7 @@
 	update: added the 'Slot number' attribute to object types which may be mounted in a blade chassis (#474)
 	update: added an 'Uncheck all' button to the rackspace allocation page (#490)
 	update: ability to change cable ID without deleting & re-adding the link (#457)
+	update: vertically position racks to the bottom of the row instead of the center (#469)
 	update: ability to delete IP prefixes from within its properties tab
 	update: adding and deleting forms of IP prefixes are separated
 0.19.10 2011-10-17
