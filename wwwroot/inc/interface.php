@@ -201,7 +201,7 @@ function renderRackspace ()
 						echo "<tr class=row_${order}><th class=tdleft>${row_name} (continued)";
 						echo "</th><td><table border=0 cellspacing=5><tr>";
 					}
-					echo "<td align=center><a href='".makeHref(array('page'=>'rack', 'rack_id'=>$rack['id']))."'>";
+					echo "<td align=center valign=bottom><a href='".makeHref(array('page'=>'rack', 'rack_id'=>$rack['id']))."'>";
 					echo "<img border=0 width=${rackwidth} height=";
 					echo getRackImageHeight ($rack['height']);
 					echo " title='${rack['height']} units'";
