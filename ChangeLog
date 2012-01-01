@@ -29,6 +29,7 @@
 	update: vertically position racks to the bottom of the row instead of the center (#469)
 	update: SNMP support for WS-C2960-48TC-L (#499), Fortinet Fortigate 310B (#374)
 	update: allow duplicate 'router' IP assignments without warning to accommodate VRRP (#419, by Tyler J. Wagner)
+	update: change display name of unnamed objects to "[$objtype]" (#487)
 	update: ability to delete IP prefixes from within its properties tab
 	update: adding and deleting forms of IP prefixes are separated
 0.19.10 2011-10-17
