@@ -925,7 +925,7 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 	),
 	'9.1.930' => array
 	(
-		'dict_key' => 50030,
+		'dict_key' => 1607,
 		'text' => 'WS-C3560E-12D-S: 12 X2/10000 w/TwinGig + OOBM',
 		'processors' => array
 		(
