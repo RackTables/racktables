@@ -1723,10 +1723,10 @@ function markupIPAddrList (&$addrlist)
 		);
 		foreach ($addrlist[$ip_bin]['allocs'] as $a)
 			$refc[$a['type']]++;
-		$nvirtloopback = ($refc['shared'] + $refc['virtual'] > 0) ? 1 : 0; // modulus of virtual + shared
+		$nvirtloopback = ($refc['shared'] + $refc['virtual'] + $refc['router'] > 0) ? 1 : 0; // modulus of virtual + shared + router
 		$nreserved = ($addrlist[$ip_bin]['reserved'] == 'yes') ? 1 : 0; // only one reservation is possible ever
-		$nrealms = $nreserved + $nvirtloopback + $refc['regular'] + $refc['router']; // latter two are connected and router allocations
-		
+		$nrealms = $nreserved + $nvirtloopback + $refc['regular']; // last is connected allocation
+
 		if ($nrealms == 1)
 			$addrlist[$ip_bin]['class'] = 'trbusy';
 		elseif ($nrealms > 1)
