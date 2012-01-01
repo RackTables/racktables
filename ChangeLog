@@ -27,7 +27,7 @@
 	update: added an 'Uncheck all' button to the rackspace allocation page (#490)
 	update: ability to change cable ID without deleting & re-adding the link (#457)
 	update: vertically position racks to the bottom of the row instead of the center (#469)
-	update: SNMP support for WS-C2960-48TC-L (#499)
+	update: SNMP support for WS-C2960-48TC-L (#499), Fortinet Fortigate 310B (#374)
 	update: allow duplicate 'router' IP assignments without warning to accommodate VRRP (#419, by Tyler J. Wagner)
 	update: ability to delete IP prefixes from within its properties tab
 	update: adding and deleting forms of IP prefixes are separated
