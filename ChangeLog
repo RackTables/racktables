@@ -11,6 +11,7 @@
 	update: ability to change cable ID without deleting & re-adding the link (#457)
 	update: vertically position racks to the bottom of the row instead of the center (#469)
 	update: SNMP support for WS-C2960-48TC-L (#499)
+	update: allow duplicate 'router' IP assignments without warning to accommodate VRRP (#419, by Tyler J. Wagner)
 0.19.10 2011-10-17
 	bugfix: LivePorts MAC address lister was broken with Huawei S5300 V100R006
  	bugfix: SNMP sync was broken when one of default attributes was removed from certain object type
