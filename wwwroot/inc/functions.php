@@ -423,10 +423,7 @@ function setDisplayedName (&$cell)
 	else
 	{
 		$cell['atags'][] = array ('tag' => '$nameless');
-		if (considerConfiguredConstraint ($cell, 'NAMEWARN_LISTSRC'))
-			$cell['dname'] = 'ANONYMOUS ' . decodeObjectType ($cell['objtype_id'], 'o');
-		else
-			$cell['dname'] = '[' . decodeObjectType ($cell['objtype_id'], 'o') . ']';
+		$cell['dname'] = '[' . decodeObjectType ($cell['objtype_id'], 'o') . ']';
 	}
 }
 
