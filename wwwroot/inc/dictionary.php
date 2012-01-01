@@ -1674,6 +1674,7 @@ $dictionary = array
 	1606 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 2360-48TD'),
 	1607 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 3560E-12D'),
 	1608 => array ('chapter_id' => 13, 'dict_value' => 'VMWare Hypervisor%GSKIP%VMware ESXi 5.0'),
+	1609 => array ('chapter_id' => 17, 'dict_value' => 'Fortinet%GPASS%Fortigate 310B'),
 
 # Any new "default" dictionary records must go above this line (i.e., with
 # dict_key code less, than 50000). This is necessary to keep AUTO_INCREMENT

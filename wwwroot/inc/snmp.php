@@ -878,6 +878,15 @@ $iftable_processors['C3KX-NM-1000'] = array
 	'try_next_proc' => FALSE,
 );
 
+$iftable_processors['fortinet-chassis-any-1000T'] = array
+(
+	'pattern' => '@^port([[:digit:]]+)$@',
+	'replacement' => '\\1',
+	'dict_key' => 24,
+	'label' => '\\1',
+	'try_next_proc' => FALSE,
+);
+
 global $known_switches;
 $known_switches = array // key is system OID w/o "enterprises" prefix
 (
@@ -1494,6 +1503,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'dict_key' => 1567,
 		'text' => 'SMC6128L2: 24 RJ-45/10-100TX + 4 combo-gig ports',
 		'processors' => array ('smc2-combo-25-to-28', 'smc2-1000T-25-to-28', 'smc2-any-100TX'),
+	),
+	'12356.101.1.3002'=> array
+	(
+		'dict_key' => 1609,
+		'text' => 'FG310B: 10 RJ-45/10-1000T',
+		'processors' => array('fortinet-chassis-any-1000T'),
 	),
 );
 
