@@ -17,7 +17,8 @@ $SQLSchema = array
 			'label' => 'label',
 			'asset_no' => 'asset_no',
 			'objtype_id' => 'objtype_id',
-			'rack_id' => '(SELECT RS.rack_id FROM RackSpace RS LEFT JOIN EntityLink EL ON RS.object_id = EL.parent_entity_id WHERE RS.object_id = RackObject.id OR EL.child_entity_id = RackObject.id ORDER BY RS.rack_id ASC LIMIT 1)',
+			'rack_id' => '(SELECT rack_id FROM RackSpace WHERE object_id = RackObject.id ORDER BY rack_id ASC LIMIT 1)',
+			'rack_id_2' => "(SELECT parent_entity_id AS rack_id FROM EntityLink WHERE child_entity_type='object' AND child_entity_id = RackObject.id AND parent_entity_type = 'rack' ORDER BY rack_id ASC LIMIT 1)",
 			'has_problems' => 'has_problems',
 			'comment' => 'comment',
 			'nports' => '(SELECT COUNT(*) FROM Port WHERE object_id = RackObject.id)',
@@ -397,6 +398,13 @@ function listCells ($realm, $parent_id = 0)
 		$ret[$entity_id]['etags'] = array();
 		foreach (array_keys ($SQLinfo['columns']) as $alias)
 			$ret[$entity_id][$alias] = $row[$alias];
+		// use the temporary rack_id_2 key and remove this key from the result array
+		if ($realm == 'object')
+		{
+			if (! isset ($ret[$entity_id]['rack_id']))
+				$ret[$entity_id]['rack_id'] = $ret[$entity_id]['rack_id_2'];
+			unset ($ret[$entity_id]['rack_id_2']);
+		}
 	}
 	unset($result);
 
@@ -494,6 +502,13 @@ function spotEntity ($realm, $id, $ignore_cache = FALSE)
 			$ret = array ('realm' => $realm);
 			foreach (array_keys ($SQLinfo['columns']) as $alias)
 				$ret[$alias] = $row[$alias];
+			// use the temporary rack_id_2 key and remove this key from the result array
+			if ($realm == 'object')
+			{
+				if (! isset ($ret['rack_id']))
+					$ret['rack_id'] = $ret['rack_id_2'];
+				unset ($ret['rack_id_2']);
+			}
 			$ret['etags'] = array();
 			if ($row['tag_id'] != NULL && isset ($taglist[$row['tag_id']]))
 				$ret['etags'][] = array

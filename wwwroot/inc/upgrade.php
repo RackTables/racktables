@@ -1303,6 +1303,7 @@ CREATE VIEW `RackObject` AS SELECT * FROM `Object`
 			$query[] = "ALTER TABLE `IPv4LB` MODIFY `prio` varchar(255) DEFAULT NULL";
 			$query[] = "ALTER TABLE `IPv4RS` ADD COLUMN `comment` varchar(255) NULL";
 			$query[] = "ALTER TABLE `IPv4VS` MODIFY `proto` enum('TCP','UDP','MARK') NOT NULL default 'TCP'";
+			$query[] = "ALTER TABLE `EntityLink` ADD KEY `EntityLink-child` (`child_entity_type`,`child_entity_id`,`parent_entity_type`) USING BTREE";
 			$query[] = "UPDATE Config SET varvalue = '0.20.0' WHERE varname = 'DB_VERSION'";
 			break;
 		default:
