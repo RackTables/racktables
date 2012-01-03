@@ -22,6 +22,7 @@
 	bugfix: Could not delete objects' log entries
 	bugfix: hovering over a mounted object displayed incorrect child data (#498)
 	bugfix: links which include username/password weren't parsed correctly (#400)
+	bugfix: resolve attribute FK issue introduced in 0.19.7
 	update: list of virtual object types is now maintained as a Config setting (#488)
 	update: when an object is contained within another, display the parent's rackspace allocation info when viewing the child (#432) 
 	update: added the 'Slot number' attribute to object types which may be mounted in a blade chassis (#474)

@@ -1188,6 +1188,15 @@ CREATE TABLE `CactiGraph` (
 			$query[] = 'INSERT INTO `AttributeMap` (`objtype_id`,`attr_id`,`chapter_id`) VALUES (8,28,NULL)';
 			$query[] = 'INSERT INTO `AttributeMap` (`objtype_id`,`attr_id`,`chapter_id`) VALUES (798,28,NULL)';
 			$query[] = 'INSERT INTO `AttributeMap` (`objtype_id`,`attr_id`,`chapter_id`) VALUES (1055,28,NULL)';
+			$query[] = 'ALTER TABLE AttributeValue ADD COLUMN object_tid int(10) unsigned NOT NULL default 0 AFTER object_id';
+			$query[] = 'UPDATE AttributeValue SET object_tid = (SELECT objtype_id FROM Object WHERE id = object_id)';
+			$query[] = 'ALTER TABLE AttributeValue DROP FOREIGN KEY `AttributeValue-FK-attr_id`';
+			$query[] = 'ALTER TABLE AttributeValue DROP FOREIGN KEY `AttributeValue-FK-object_id`';
+			$query[] = 'ALTER TABLE AttributeValue ADD KEY `id-tid` (object_id, object_tid)';
+			$query[] = 'ALTER TABLE AttributeValue ADD KEY `object_tid-attr_id` (`object_tid`,`attr_id`)';
+			$query[] = 'ALTER TABLE Object ADD KEY `id-tid` (id, objtype_id)';
+			$query[] = 'ALTER TABLE AttributeValue ADD CONSTRAINT `AttributeValue-FK-object` FOREIGN KEY (`object_id`, `object_tid`) REFERENCES `Object` (`id`, `objtype_id`) ON DELETE CASCADE';
+			$query[] = 'ALTER TABLE AttributeValue ADD CONSTRAINT `AttributeValue-FK-map` FOREIGN KEY (`object_tid`, `attr_id`) REFERENCES `AttributeMap` (`objtype_id`, `attr_id`)';
 			$query[] = "UPDATE Config SET varvalue = '0.19.11' WHERE varname = 'DB_VERSION'";
 			break;
 		case '0.20.0':

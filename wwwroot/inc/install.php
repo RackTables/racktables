@@ -363,6 +363,9 @@ CREATE TABLE `AttributeMap` (
 
 CREATE TABLE `AttributeValue` (
   `object_id` int(10) unsigned default NULL,
+  -- Default value intentionally breaks the constraint, this blocks
+  -- any insertion, which doesn't have 'object_tid' on the column list.
+  `object_tid` int(10) unsigned NOT NULL default '0',
   `attr_id` int(10) unsigned default NULL,
   `string_value` char(255) default NULL,
   `uint_value` int(10) unsigned default NULL,
@@ -370,8 +373,10 @@ CREATE TABLE `AttributeValue` (
   UNIQUE KEY `object_id` (`object_id`,`attr_id`),
   KEY `attr_id-uint_value` (`attr_id`,`uint_value`),
   KEY `attr_id-string_value` (`attr_id`,`string_value`(12)),
-  CONSTRAINT `AttributeValue-FK-attr_id` FOREIGN KEY (`attr_id`) REFERENCES `AttributeMap` (`attr_id`),
-  CONSTRAINT `AttributeValue-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `Object` (`id`) ON DELETE CASCADE
+  KEY `id-tid` (`object_id`,`object_tid`),
+  KEY `object_tid-attr_id` (`object_tid`,`attr_id`),
+  CONSTRAINT `AttributeValue-FK-map` FOREIGN KEY (`object_tid`, `attr_id`) REFERENCES `AttributeMap` (`objtype_id`, `attr_id`),
+  CONSTRAINT `AttributeValue-FK-object` FOREIGN KEY (`object_id`, `object_tid`) REFERENCES `Object` (`id`, `objtype_id`) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
 CREATE TABLE `CachedPAV` (
@@ -752,6 +757,7 @@ CREATE TABLE `Object` (
   PRIMARY KEY  (`id`),
   UNIQUE KEY `asset_no` (`asset_no`),
   UNIQUE KEY `name` (`name`),
+  KEY `id-tid` (`id`,`objtype_id`),
   KEY `type_id` (`objtype_id`,`id`)
 ) ENGINE=InnoDB;
 
