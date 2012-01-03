@@ -1290,7 +1290,7 @@ CREATE VIEW `Rack` AS SELECT O.id, O.label AS name, O.asset_no, O.has_problems, 
   WHERE O.objtype_id = 1560;
 ";
 			$query[] = "
-CREATE VIEW `RackObject` AS SELECT * FROM `Object`
+CREATE VIEW `RackObject` AS SELECT id, name, label, objtype_id, asset_no, has_problems, comment FROM `Object`
  WHERE `objtype_id` NOT IN (1560, 1561, 1562)
 ";
 			$query[] = 'ALTER TABLE `EntityLink` ADD KEY `EntityLink-compound` (`parent_entity_type`,`child_entity_type`,`child_entity_id`)';

@@ -935,7 +935,7 @@ CREATE VIEW `Rack` AS SELECT O.id, O.label AS name, O.asset_no, O.has_problems, 
   INNER JOIN `Row` ON EL.parent_entity_id = Row.id
   WHERE O.objtype_id = 1560;
 
-CREATE VIEW `RackObject` AS SELECT * FROM `Object`
+CREATE VIEW `RackObject` AS SELECT id, name, label, objtype_id, asset_no, has_problems, comment FROM `Object`
  WHERE `objtype_id` NOT IN (1560, 1561, 1562);
 
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
