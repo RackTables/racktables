@@ -1197,6 +1197,41 @@ CREATE TABLE `CactiGraph` (
 			$query[] = 'ALTER TABLE Object ADD KEY `id-tid` (id, objtype_id)';
 			$query[] = 'ALTER TABLE AttributeValue ADD CONSTRAINT `AttributeValue-FK-object` FOREIGN KEY (`object_id`, `object_tid`) REFERENCES `Object` (`id`, `objtype_id`) ON DELETE CASCADE';
 			$query[] = 'ALTER TABLE AttributeValue ADD CONSTRAINT `AttributeValue-FK-map` FOREIGN KEY (`object_tid`, `attr_id`) REFERENCES `AttributeMap` (`objtype_id`, `attr_id`)';
+			# 0.19.9 did it right, but kept the IDs in the dictionary. This time
+			# the dictionary is reduced, but the procedure needs to be repeated,
+			# in case the user had enough time to use the wrong IDs again.
+			$squeeze = array
+			(
+				1202 => array # 1000Base-SX
+				(
+					25,   # 1000Base-SX (SC)
+					26,   # 1000Base-SX (LC)
+				),
+				1204 => array # 1000Base-LX
+				(
+					27,   # 1000Base-LX (SC)
+					28,   # 1000Base-LX (LC)
+				),
+				1196 => array # 100Base-SX
+				(
+					22,   # 100Base-SX (SC)
+					23,   # 100Base-SX (LC)
+				),
+				1195 => array # 100Base-FX
+				(
+					20,   # 100Base-FX (SC)
+					21,   # 100Base-FX (LC)
+					1083, # 100Base-FX (MT-RJ)
+				),
+			);
+			foreach ($squeeze as $stays => $leaves)
+			{
+				$csv = implode (', ', $leaves);
+				$query[] = "DELETE FROM PortCompat WHERE type1 IN(${csv}) OR type2 IN(${csv})";
+				$query[] = "INSERT IGNORE INTO PortInterfaceCompat (iif_id, oif_id) SELECT iif_id, ${stays} FROM Port WHERE type IN (${csv})";
+				$query[] = "UPDATE Port SET type = ${stays} WHERE type IN(${csv})";
+				$query[] = "DELETE FROM PortInterfaceCompat WHERE oif_id IN(${csv})";
+			}
 			$query[] = "UPDATE Config SET varvalue = '0.19.11' WHERE varname = 'DB_VERSION'";
 			break;
 		case '0.20.0':
