@@ -2990,7 +2990,7 @@ function commitUpdateAttrValue ($object_id, $attr_id, $value = '')
 	usePreparedDeleteBlade ('AttributeValue', array ('object_id' => $object_id, 'attr_id' => $attr_id));
 	if ($value == '')
 		return;
-	$object = spotEntity ('object', getBypassValue());
+	$object = spotEntity ('object', $object_id);
 	usePreparedInsertBlade
 	(
 		'AttributeValue',
