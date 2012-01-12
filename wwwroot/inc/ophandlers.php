@@ -548,11 +548,11 @@ function editPortForObject ()
 	assertUIntArg ('port_id');
 	assertUIntArg ('port_type_id');
 	assertStringArg ('reservation_comment', TRUE);
-	assertStringArg ('cable', TRUE);
 	genericAssertion ('l2address', 'l2address0');
 	genericAssertion ('name', 'string');
 	commitUpdatePort ($sic['object_id'], $sic['port_id'], $sic['name'], $sic['port_type_id'], $sic['label'], $sic['l2address'], $sic['reservation_comment']);
-	commitUpdatePortLink ($sic['port_id'], $sic['cable']);
+	if (array_key_exists ('cable', $_REQUEST))
+		commitUpdatePortLink ($sic['port_id'], $sic['cable']);
 	return showFuncMessage (__FUNCTION__, 'OK', array ($_REQUEST['name']));
 }
 
