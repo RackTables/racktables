@@ -1539,7 +1539,7 @@ function resetUIConfig()
 	setConfigVar ('CACTI_URL', '');
 	setConfigVar ('CACTI_USERNAME', '');
 	setConfigVar ('CACTI_USERPASS', '');
-	setConfigVar ('VIRTUAL_OBJ_LISTSRC', '{$typeid_1504} or {$typeid_1505} or {$typeid_1506} or {$typeid_1507}');
+	setConfigVar ('VIRTUAL_OBJ_LISTSRC', '1504,1505,1506,1507');
 	return buildRedirectURL (__FUNCTION__, 'OK');
 }
 

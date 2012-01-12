@@ -202,9 +202,13 @@ function trigger_file_editText ()
 
 function trigger_rackspace ()
 {
+	global $virtual_obj_types;
+
 	// Hide the tab if the object type is virtual
 	assertUIntArg ('object_id');
-	if (considerConfiguredConstraint (spotEntity ('object', $_REQUEST['object_id']), 'VIRTUAL_OBJ_LISTSRC'))
+	$object = spotEntity ('object', $_REQUEST['object_id']);
+
+	if (in_array($object['objtype_id'], $virtual_obj_types))
 		return '';
 
 	$rackspace = getRackspaceStats();

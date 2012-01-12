@@ -116,6 +116,8 @@ else
 	unset ($admin_account);
 }
 
+$virtual_obj_types = explode (',', getConfigVar ('VIRTUAL_OBJ_LISTSRC'));
+
 alterConfigWithUserPreferences();
 $op = '';
 // local.php may be missing, this case requires no special treatment
