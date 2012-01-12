@@ -601,7 +601,7 @@ function renderNewRackForm ($row_id)
 
 function renderEditObjectForm()
 {
-	global $pageno;
+	global $pageno, $virtual_obj_types;
 	$object_id = getBypassValue();
 	$object = spotEntity ('object', $object_id);
 	startPortlet ();
@@ -615,7 +615,7 @@ function renderEditObjectForm()
 	echo '</td></tr>';
 	// baseline info
 	echo "<tr><td>&nbsp;</td><th class=tdright>Common name:</th><td class=tdleft><input type=text name=object_name value='${object['name']}'></td></tr>\n";
-	if (considerConfiguredConstraint ($object, 'VIRTUAL_OBJ_LISTSRC'))
+	if (in_array($object['objtype_id'], $virtual_obj_types))
 	{
 		echo "<input type=hidden name=object_label value=''>\n";
 		echo "<input type=hidden name=object_asset_no value=''>\n";
@@ -901,7 +901,7 @@ function renderObjectPortRow ($port, $is_highlighted)
 
 function renderObject ($object_id)
 {
-	global $nextorder;
+	global $nextorder, $virtual_obj_types;
 	$info = spotEntity ('object', $object_id);
 	amplifyCell ($info);
 	// Main layout starts.
@@ -1122,7 +1122,7 @@ function renderObject ($object_id)
 
 	// After left column we have (surprise!) right column with rackspace portlet only.
 	echo "<td class=pcright>";
-	if (!considerConfiguredConstraint ($info, 'VIRTUAL_OBJ_LISTSRC'))
+	if (!in_array($info['objtype_id'], $virtual_obj_types))
 	{
 		// rackspace portlet
 		startPortlet ('rackspace allocation');
@@ -3164,7 +3164,7 @@ function renderNATv4ForObject ($object_id)
 
 function renderAddMultipleObjectsForm ()
 {
-	global $location_obj_types;
+	global $location_obj_types, $virtual_obj_types;
 	$typelist = readChapter (CHAP_OBJTYPE, 'o');
 	$typelist[0] = 'select type...';
 	$typelist = cookOptgroups ($typelist);
@@ -3172,10 +3172,6 @@ function renderAddMultipleObjectsForm ()
 	$tabindex = 100;
 
 	// create a list of object types to exclude (virtual and location-related ones)
-	// FIXME: a RackCode expert should sanitize this hack
-	$virt_listsrc = str_replace(array('{$typeid_','}','or'), '', getConfigVar ('VIRTUAL_OBJ_LISTSRC'));
-	$virt_listsrc = preg_replace('/\s+/', ' ', $virt_listsrc);
-	$virtual_obj_types = explode(' ', $virt_listsrc);
 	$exclude_typelist = array_merge($location_obj_types, $virtual_obj_types);
 
 	$phys_typelist = $typelist;
