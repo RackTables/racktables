@@ -294,7 +294,7 @@ function renderRow ($row_id)
 				echo '</tr>';
 			echo '<tr>';
 		}
-		echo "<td align=center class=row_${order}><a href='".makeHref(array('page'=>'rack', 'rack_id'=>$rack['id']))."'>";
+		echo "<td align=center valign=bottom class=row_${order}><a href='".makeHref(array('page'=>'rack', 'rack_id'=>$rack['id']))."'>";
 		echo "<img border=0 width=${rackwidth} height=" . (getRackImageHeight ($rack['height']) * getConfigVar ('ROW_SCALE'));
 		echo " title='${rack['height']} units'";
 		echo "src='?module=image&img=minirack&rack_id=${rack['id']}'>";
