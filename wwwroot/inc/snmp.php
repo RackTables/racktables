@@ -381,6 +381,15 @@ $iftable_processors['procurve-25-to-26-1000T'] = array
 	'try_next_proc' => FALSE,
 );
 
+$iftable_processors['procurve-27-to-28-1000SFP'] = array
+(
+	'pattern' => '@^(27|28)$@',
+	'replacement' => '\\1',
+	'dict_key' => '4-1077',
+	'label' => '\\1',
+	'try_next_proc' => FALSE,
+);
+
 $iftable_processors['procurve-49-to-50-1000T'] = array
 (
 	'pattern' => '@^(49|50)$@',
@@ -1295,6 +1304,18 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'J9028A: 22 RJ-45/10-100-1000T(X) + 2 combo-gig',
 		'processors' => array ('smc2-combo-23-to-24', 'smc2-any-1000T'),
 	),
+	'11.2.3.7.11.78' => array
+	(
+		'dict_key' => 861,
+		'text' => 'J9087A: 24 RJ-45/10-100TX PoE + 2 1000T + 2 SFP-1000',
+		'processors' => array ('procurve-25-to-26-1000T', 'procurve-27-to-28-1000SFP', 'procurve-chassis-100TX'),
+	),
+	'11.2.3.7.11.80' => array
+	(
+		'dict_key' => 1570,
+		'text' => 'J9086A: 24 RJ-45/10-100TX 12 PoE + 2 1000T + 2 SFP-1000',
+		'processors' => array ('procurve-25-to-26-1000T', 'procurve-27-to-28-1000SFP', 'procurve-chassis-100TX'),
+	),
 	'11.2.3.7.11.86' => array
 	(
 		'dict_key' => 1571,
@@ -1689,10 +1710,12 @@ function doSwitchSNMPmining ($objectInfo, $device)
 	case preg_match ('/^11\.2\.3\.7\.11\.(\d+)$/', $sysObjectID, $matches): // ProCurve
 		$console_per_product = array
 		(
-			79 => '1-29', # RJ-45 RS-232
+			63 => '1-29', # RJ-45 RS-232
+			78 => '1-29',
+			79 => '1-29',
+			80 => '1-29',
 			86 => '1-29',
 			87 => '1-29',
-			63 => '1-29',
 			19 => '1-681', # DB-9 RS-232
 		);
 		if (array_key_exists ($matches[1], $console_per_product))
