@@ -434,7 +434,6 @@ function listCells ($realm, $parent_id = 0)
 	{
 		$entity['etags'] = getExplicitTagsOnly ($entity['etags']);
 		$entity['itags'] = getImplicitTags ($entity['etags']);
-		$entity['atags'] = generateEntityAutoTags ($entity);
 		switch ($realm)
 		{
 		case 'object':
@@ -447,6 +446,7 @@ function listCells ($realm, $parent_id = 0)
 			$entity['db_first'] = sprintf ('%u', 0x00000000 + $entity['ip_bin'] & $entity['mask_bin']);
 			$entity['db_last'] = sprintf ('%u', 0x00000000 + $entity['ip_bin'] | ($entity['mask_bin_inv']));
 			$entity['spare_ranges'] = array();
+			$entity['child_netc'] = 0;
 			break;
 		case 'ipv6net':
 			$entity['ip_bin'] = new IPv6Address ($entity['ip_bin']);
@@ -463,7 +463,11 @@ function listCells ($realm, $parent_id = 0)
 			$entityCache['partial'][$realm][$entity_id] = $entity;
 	}
 	if ($realm == 'ipv4net')
-		produceIPv4HoleTags ($ret);
+		fillIPv4NetsCorrelation ($ret);
+
+	foreach ($ret as &$entity)
+		$entity['atags'] = generateEntityAutoTags ($entity);
+
 	return $ret;
 }
 
@@ -535,7 +539,6 @@ function spotEntity ($realm, $id, $ignore_cache = FALSE)
 		throw new EntityNotFoundException ($realm, $id);
 	$ret['etags'] = getExplicitTagsOnly ($ret['etags']);
 	$ret['itags'] = getImplicitTags ($ret['etags']);
-	$ret['atags'] = generateEntityAutoTags ($ret);
 	switch ($realm)
 	{
 	case 'object':
@@ -547,6 +550,8 @@ function spotEntity ($realm, $id, $ignore_cache = FALSE)
 		$ret['mask_bin_inv'] = binInvMaskFromDec ($ret['mask']);
 		$ret['db_first'] = sprintf ('%u', 0x00000000 + $ret['ip_bin'] & $ret['mask_bin']);
 		$ret['db_last'] = sprintf ('%u', 0x00000000 + $ret['ip_bin'] | ($ret['mask_bin_inv']));
+		$ret['spare_ranges'] = array();
+		$ret['child_netc'] = 0;
 		break;
 	case 'ipv6net':
 		$ret['ip_bin'] = new IPv6Address ($ret['ip_bin']);
@@ -575,15 +580,17 @@ WHERE
 			$net_row['db_first'] = sprintf ('%u', 0x00000000 + $net_row['ip'] & binMaskFromDec ($net_row['mask']));
 			$net_row['db_last'] = sprintf ('%u', 0x00000000 + $net_row['ip'] | binInvMaskFromDec ($net_row['mask']));
 			$net_row['spare_ranges'] = array();
+			$net_row['child_netc'] = 0;
 		}
-		produceIPv4HoleTags ($nets);
-		if (is_array ($nets[0]) and $nets[0]['id'] == $id and isset ($nets[0]['atags']))
+		fillIPv4NetsCorrelation ($nets);
+		if (is_array ($nets[0]) and $nets[0]['id'] == $id)
 		{
-			$ret['atags'] = array_merge ($ret['atags'], $nets[0]['atags']);
 			$ret['spare_ranges'] = $nets[0]['spare_ranges'];
+			$ret['child_netc'] = $nets[0]['child_netc'];
 		}
 		unset ($result);
 	}
+	$ret['atags'] = generateEntityAutoTags ($ret);
 	
 	$entityCache['partial'][$realm][$id] = $ret;
 	return $ret;
@@ -3255,6 +3262,10 @@ function generateEntityAutoTags ($cell)
 				if ($cell['mask'] == $i)
 					$ret[] = array ('tag' => '$masklen_eq_' . $i);
 			}
+			foreach (array_keys ($cell['spare_ranges']) as $mask)
+				$ret[] = array ('tag' => '$hole_' . $mask);
+			if ($cell['child_netc'] > 0)
+				$ret[] = array ('tag' => '$aggregate');
 			$ret[] = array ('tag' => '$any_ip4net');
 			$ret[] = array ('tag' => '$any_net');
 			break;
