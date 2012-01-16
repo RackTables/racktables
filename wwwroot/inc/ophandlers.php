@@ -816,11 +816,11 @@ function addIPv4Prefix ()
 	assertStringArg ('range');
 	assertStringArg ('name', TRUE);
 
-	$is_bcast = isset ($_REQUEST['is_bcast']) ? $_REQUEST['is_bcast'] : 'off';
 	$taglist = isset ($_REQUEST['taglist']) ? $_REQUEST['taglist'] : array();
+	$is_connected = isset ($_REQUEST['is_connected']) ? $_REQUEST['is_connected'] : 'off';
 	global $sic;
 	$vlan_ck = empty ($sic['vlan_ck']) ? NULL : $sic['vlan_ck'];
-	$net_id = createIPv4Prefix ($_REQUEST['range'], $sic['name'], $is_bcast == 'on', $taglist, $vlan_ck);
+	$net_id = createIPv4Prefix ($_REQUEST['range'], $sic['name'], $is_connected == 'on', $taglist, $vlan_ck);
 	showSuccess
 	(
 		'IP network <a href="' .

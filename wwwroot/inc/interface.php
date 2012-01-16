@@ -4835,6 +4835,9 @@ function renderLivePTR ($id)
 		echo "<input type=hidden name=rsvd_${idx} value=${addr['reserved']}>\n";
 		echo '<tr';
 		$print_cbox = FALSE;
+		// Ignore network and broadcast addresses
+		if (($ip == $startip && $addr['name'] == 'network') || ($ip == $endip && $addr['name'] == 'broadcast'))
+			echo ' class=trbusy';
 		if ($addr['name'] == $ptrname)
 		{
 			if (strlen ($ptrname))

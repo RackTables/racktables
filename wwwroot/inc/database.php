@@ -3433,7 +3433,7 @@ function produceTagsForLastRecord ($realm, $tagidlist, $last_insert_id = 0)
 		addTagForEntity ($realm, $last_insert_id, $taginfo['id']);
 }
 
-function createIPv4Prefix ($range = '', $name = '', $is_bcast = FALSE, $taglist = array(), $vlan_ck = NULL)
+function createIPv4Prefix ($range = '', $name = '', $is_connected = FALSE, $taglist = array(), $vlan_ck = NULL)
 {
 	// $range is in x.x.x.x/x format, split into ip/mask vars
 	$rangeArray = explode('/', $range);
@@ -3484,7 +3484,7 @@ function createIPv4Prefix ($range = '', $name = '', $is_bcast = FALSE, $taglist 
 	);
 	$network_id = lastInsertID();
 
-	if ($is_bcast and $maskL < 31)
+	if ($is_connected and $maskL < 31)
 	{
 		$network_addr = long2ip ($ipL);
 		$broadcast_addr = long2ip ($ipL | binInvMaskFromDec ($maskL));
