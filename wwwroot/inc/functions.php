@@ -4882,6 +4882,7 @@ function apply8021qChangeRequest ($switch_id, $changes, $verbose = TRUE, $mutex_
 
 // takes a full sublist of ipv4net entities ordered by (ip,mask)
 // fills ['atags'] field of each entity with {$hole_X} auto-tags if there is unallocated IP space
+// fills ['spare_ranges'] field of each item of $nets.
 function produceIPv4HoleTags (&$nets)
 {
 	$stack = array();
@@ -4895,18 +4896,23 @@ function produceIPv4HoleTags (&$nets)
 				break;
 			if (isset ($last))
 				// possible hole in the end of $top
-				setIPv4HoleTags ($top, $last['db_last'] + 1, $top['db_last']);
+				if ($mask = setIPv4HoleTags ($top, $last['db_last'] + 1, $top['db_last']))
+					$top['spare_ranges'][$mask][] = $last['db_last'] + 1;
 			$last = array_pop ($stack);
 		}
 		if (count ($stack))
 		{
 			$top = &$stack[count ($stack) - 1];
 			if (isset ($last))
+			{
 				// possible hole in the middle of $top
-				setIPv4HoleTags ($top, $last['db_last'] + 1, $net['db_first'] - 1);
+				if ($mask = setIPv4HoleTags ($top, $last['db_last'] + 1, $net['db_first'] - 1))
+					$top['spare_ranges'][$mask][] = $last['db_last'] + 1;
+			}
 			else
 				// possible hole in the beginning of $top
-				setIPv4HoleTags ($top, $top['db_first'], $net['db_first'] - 1);
+				if ($mask = setIPv4HoleTags ($top, $top['db_first'], $net['db_first'] - 1))
+					$top['spare_ranges'][$mask][] = $top['db_first'];
 		}
 		$stack[] = &$net;
 	}
@@ -4916,7 +4922,8 @@ function produceIPv4HoleTags (&$nets)
 		$top = &$stack[count ($stack) - 1];
 		if (isset ($last))
 			// possible hole in the end of $top
-			setIPv4HoleTags ($top, $last['db_last'] + 1, $top['db_last']);
+			if ($mask = setIPv4HoleTags ($top, $last['db_last'] + 1, $top['db_last']))
+				$top['spare_ranges'][$mask][] = $last['db_last'] + 1;
 		$last = array_pop ($stack);
 	}
 }
@@ -4929,10 +4936,11 @@ function isIPv4NetNested ($parent, $child)
 
 // $a, $b - long integers (IPv4 addresses) meaning the beginning and the end of IP range.
 // $net is an entity for hole autotags to be set to.
+// returns non-zero integer (netmask) of spare network range, or 0
 function setIPv4HoleTags (&$net, $a, $b)
 {
 	if ($a > $b)
-		return;
+		return 0;
 	$b++;
 	while ($a < $b)
 	{
@@ -4940,10 +4948,13 @@ function setIPv4HoleTags (&$net, $a, $b)
 		while ($a + (1 << $i) > $b)
 			$i--;
 		$a += (1 << $i);
-		$atag = '$hole_' . (32 - $i);
+		$mask = 32 - $i;
+		$atag = '$hole_' . $mask;
 		if (! isset ($net['atags'][$atag]))
 			$net['atags'][$atag] = array ('tag' => $atag);
+		return $mask;
 	}
+	return 0;
 }
 
 // returns the number of binary 0s in the minor part of integer value

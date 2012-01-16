@@ -446,6 +446,7 @@ function listCells ($realm, $parent_id = 0)
 			$entity['mask_bin_inv'] = binInvMaskFromDec ($entity['mask']);
 			$entity['db_first'] = sprintf ('%u', 0x00000000 + $entity['ip_bin'] & $entity['mask_bin']);
 			$entity['db_last'] = sprintf ('%u', 0x00000000 + $entity['ip_bin'] | ($entity['mask_bin_inv']));
+			$entity['spare_ranges'] = array();
 			break;
 		case 'ipv6net':
 			$entity['ip_bin'] = new IPv6Address ($entity['ip_bin']);
@@ -573,10 +574,14 @@ WHERE
 		{
 			$net_row['db_first'] = sprintf ('%u', 0x00000000 + $net_row['ip'] & binMaskFromDec ($net_row['mask']));
 			$net_row['db_last'] = sprintf ('%u', 0x00000000 + $net_row['ip'] | binInvMaskFromDec ($net_row['mask']));
+			$net_row['spare_ranges'] = array();
 		}
 		produceIPv4HoleTags ($nets);
 		if (is_array ($nets[0]) and $nets[0]['id'] == $id and isset ($nets[0]['atags']))
+		{
 			$ret['atags'] = array_merge ($ret['atags'], $nets[0]['atags']);
+			$ret['spare_ranges'] = $nets[0]['spare_ranges'];
+		}
 		unset ($result);
 	}
 	
