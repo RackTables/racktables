@@ -457,16 +457,19 @@ function listCells ($realm, $parent_id = 0)
 		default:
 			break;
 		}
+	}
+	if ($realm == 'ipv4net')
+		fillIPv4NetsCorrelation ($ret);
+
+	foreach (array_keys ($ret) as $entity_id)
+	{
+		$entity = &$ret[$entity_id];
+		$entity['atags'] = generateEntityAutoTags ($entity);
 		if (!$parent_id)
 			$entityCache['complete'][$realm][$entity_id] = $entity;
 		else
 			$entityCache['partial'][$realm][$entity_id] = $entity;
 	}
-	if ($realm == 'ipv4net')
-		fillIPv4NetsCorrelation ($ret);
-
-	foreach ($ret as &$entity)
-		$entity['atags'] = generateEntityAutoTags ($entity);
 
 	return $ret;
 }
