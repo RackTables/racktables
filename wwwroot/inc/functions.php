@@ -4891,11 +4891,11 @@ function produceIPv4HoleTags (&$nets)
 		while (count ($stack)) // spin stack leaving only the parents of the $net.
 		{
 			$top = &$stack[count ($stack) - 1];
+			if (isIPv4NetNested  ($top, $net))
+				break;
 			if (isset ($last))
 				// possible hole in the end of $top
 				setIPv4HoleTags ($top, $last['db_last'] + 1, $top['db_last']);
-			if (isIPv4NetNested  ($top, $net))
-				break;
 			$last = array_pop ($stack);
 		}
 		if (count ($stack))
