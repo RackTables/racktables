@@ -920,10 +920,10 @@ function addIPv4Prefix ()
 	assertStringArg ('range');
 	assertStringArg ('name', TRUE);
 
-	$is_bcast = isset ($_REQUEST['is_bcast']) ? $_REQUEST['is_bcast'] : 'off';
 	$taglist = isset ($_REQUEST['taglist']) ? $_REQUEST['taglist'] : array();
+	$is_connected = isset ($_REQUEST['is_connected']) ? $_REQUEST['is_connected'] : 'off';
 	global $sic;
-	createIPv4Prefix ($_REQUEST['range'], $sic['name'], $is_bcast == 'on', $taglist);
+	createIPv4Prefix ($_REQUEST['range'], $sic['name'], $is_connected == 'on', $taglist);
 	return buildRedirectURL (__FUNCTION__, 'OK');
 }
 

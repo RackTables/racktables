@@ -2455,7 +2455,7 @@ END
 		$prefix_value = empty ($_REQUEST['set-prefix']) ? '' : $_REQUEST['set-prefix'];
 		echo "<th class=tdright>prefix</th><td class=tdleft><input type=text name='range' size=18 class='live-validate' tabindex=1 value='${prefix_value}'></td>";
 		echo "<tr><th class=tdright>name</th><td class=tdleft><input type=text name='name' size='20' tabindex=2></td></tr>";
-		echo '<tr><td class=tdright><input type=checkbox name="is_bcast" tabindex=3></td><th class=tdleft>reserve network and router addresses</th></tr>';
+		echo '<tr><td class=tdright><input type=checkbox name="is_connected" tabindex=3></td><th class=tdleft>reserve network and router addresses</th></tr>';
 		echo "<tr><td colspan=2>";
 		printImageHREF ('CREATE', 'Add a new network', TRUE, 4);
 		echo '</td></tr>';
@@ -5645,7 +5645,10 @@ function renderLivePTR ($id)
 		echo "<input type=hidden name=rsvd_${idx} value=${addr['reserved']}>\n";
 		echo '<tr';
 		$print_cbox = FALSE;
-		if ($addr['name'] == $ptrname)
+		// Ignore network and broadcast addresses
+		if (($ip == $startip && $addr['name'] == 'network') || ($ip == $endip && $addr['name'] == 'broadcast'))
+			echo ' class=trbusy';
+		elseif ($addr['name'] == $ptrname)
 		{
 			if (strlen ($ptrname))
 			{
