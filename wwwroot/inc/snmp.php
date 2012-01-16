@@ -1334,12 +1334,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'J9148A: 44 RJ-45/10-100-1000T(X) + 4 combo-gig + varying uplinks',
 		'processors' => array ('procurve-45-to-48-combo-1000SFP', 'procurve-chassis-1000T'),
 	),
-        '11.2.3.7.11.88' => array
-        (
-               'dict_key' => 1349,
-               'text' => 'J9279A: 22 RJ-45/10-100-1000T(X) + 2 combo-gig + varying uplinks',
-               'processors' => array ('procurve-23-to-24-combo-1000SFP', 'procurve-chassis-1000T'),
-        ),
+	'11.2.3.7.11.88' => array
+	(
+		'dict_key' => 1349,
+		'text' => 'J9279A: 22 RJ-45/10-100-1000T(X) + 2 combo-gig + varying uplinks',
+		'processors' => array ('procurve-23-to-24-combo-1000SFP', 'procurve-chassis-1000T'),
+	),
 	'11.2.3.7.11.79' => array
 	(
 		'dict_key' => 863,
@@ -1925,151 +1925,183 @@ define('APC_STATUS_ON', 1);
 define('APC_STATUS_OFF', 2);
 define('APC_STATUS_REBOOT', 3);
 
-class RTSNMPDevice {
-    protected $snmp;
+class RTSNMPDevice
+{
+	protected $snmp;
 
-    function __construct($hostname, $snmpsetup) {
-    	switch($snmpsetup['version']) {
-    	case 1:
-    	default:
-	    $this->snmp = new RTSNMPv1($hostname, $snmpsetup);
-	    break;
-    	case 2:
-	    $this->snmp = new RTSNMPv2($hostname, $snmpsetup);
-	    break;
-    	case 3:
-	    $this->snmp = new RTSNMPv3($hostname, $snmpsetup);
-	    break;
+	function __construct($hostname, $snmpsetup)
+	{
+		switch($snmpsetup['version']) {
+		case 1:
+		default:
+			$this->snmp = new RTSNMPv1($hostname, $snmpsetup);
+			break;
+		case 2:
+			$this->snmp = new RTSNMPv2($hostname, $snmpsetup);
+			break;
+		case 3:
+			$this->snmp = new RTSNMPv3($hostname, $snmpsetup);
+			break;
+		}
 	}
-    }
 
-    function getName() {
-	return $this->getString('sysName.0');
-    }
+	function getName()
+	{
+		return $this->getString('sysName.0');
+	}
  
-    function getDescription() {
-	return $this->getString('sysDescr.0');
-    }
-    
-    function snmpget($oid) {
-	return $this->snmp->snmpget($oid);
-    }
-    
-    function snmpwalkoid($oid) {
-	return $this->snmp->snmpwalkoid($oid);
-    }
+	function getDescription()
+	{
+		return $this->getString('sysDescr.0');
+	}
+	
+	function snmpget($oid)
+	{
+		return $this->snmp->snmpget($oid);
+	}
+	
+	function snmpwalkoid($oid)
+	{
+		return $this->snmp->snmpwalkoid($oid);
+	}
 
-    protected function snmpSet($oid, $type, $value) {
-        return $this->snmp->snmpset($oid, $type, $value);
-    }
+	protected function snmpSet($oid, $type, $value)
+	{
+		return $this->snmp->snmpset($oid, $type, $value);
+	}
 
-    protected function getString($oid) {
-	return trim(str_replace('STRING: ', '', $this->snmp->snmpget($oid)), '"');
-    }
+	protected function getString($oid)
+	{
+		return trim(str_replace('STRING: ', '', $this->snmp->snmpget($oid)), '"');
+	}
 }
 
-abstract class RTSNMP {
-    protected $hostname;
-    protected $snmpsetup;
+abstract class RTSNMP
+{
+	protected $hostname;
+	protected $snmpsetup;
 
-    function __construct($hostname, $snmpsetup) {
-	$this->hostname = $hostname;
-	$this->snmpsetup = $snmpsetup;
-    }
-    
-    abstract function snmpget($oid);
-    abstract function snmpset($oid, $type, $value);
-    abstract function snmpwalkoid($oid);
+	function __construct($hostname, $snmpsetup)
+	{
+		$this->hostname = $hostname;
+		$this->snmpsetup = $snmpsetup;
+	}
+	
+	abstract function snmpget($oid);
+	abstract function snmpset($oid, $type, $value);
+	abstract function snmpwalkoid($oid);
 }
 
-class RTSNMPv1 extends RTSNMP {
-    function snmpget($oid) {
-	return snmpget($this->hostname, $this->snmpsetup['community'], $oid);
-    }
+class RTSNMPv1 extends RTSNMP
+{
+	function snmpget($oid)
+	{
+		return snmpget($this->hostname, $this->snmpsetup['community'], $oid);
+	}
 
-    function snmpset($oid, $type, $value) {
-	return snmpset($this->hostname, $this->snmpsetup['community'], $oid, $type, $value);
-    }
-    
-    function snmpwalkoid($oid) {
-	return snmpwalkoid($this->hostname, $this->snmpsetup['community'], $oid);
-    }
+	function snmpset($oid, $type, $value)
+	{
+		return snmpset($this->hostname, $this->snmpsetup['community'], $oid, $type, $value);
+	}
+	
+	function snmpwalkoid($oid)
+	{
+		return snmpwalkoid($this->hostname, $this->snmpsetup['community'], $oid);
+	}
 }
 
-class RTSNMPv2 extends RTSNMP {
-    function snmpget($oid) {
-	return snmp2_get($this->hostname, $this->snmpsetup['community'], $oid);
-    }
+class RTSNMPv2 extends RTSNMP
+{
+	function snmpget($oid)
+	{
+		return snmp2_get($this->hostname, $this->snmpsetup['community'], $oid);
+	}
 
-    function snmpset($oid, $type, $value) {
-	return snmp2_set($this->hostname, $this->snmpsetup['community'], $oid, $type, $value);
-    }
-    
-    function snmpwalkoid($oid) {
-	return snmp2_real_walk($this->hostname, $this->snmpsetup['community'], $oid);
-    }
+	function snmpset($oid, $type, $value)
+	{
+		return snmp2_set($this->hostname, $this->snmpsetup['community'], $oid, $type, $value);
+	}
+	
+	function snmpwalkoid($oid)
+	{
+		return snmp2_real_walk($this->hostname, $this->snmpsetup['community'], $oid);
+	}
 }
 
-class RTSNMPv3 extends RTSNMP {
-    function snmpget($oid) {
-	return snmp3_get($this->hostname, $this->snmpsetup['sec_name'], $this->snmpsetup['sec_level'], $this->snmpsetup['auth_protocol'], $this->snmpsetup['auth_passphrase'], $this->snmpsetup['priv_protocol'], $this->snmpsetup['priv_passphrase'], $oid);
-    }
+class RTSNMPv3 extends RTSNMP
+{
+	function snmpget($oid)
+	{
+		return snmp3_get($this->hostname, $this->snmpsetup['sec_name'], $this->snmpsetup['sec_level'], $this->snmpsetup['auth_protocol'], $this->snmpsetup['auth_passphrase'], $this->snmpsetup['priv_protocol'], $this->snmpsetup['priv_passphrase'], $oid);
+	}
 
-    function snmpset($oid, $type, $value) {
-	return snmp3_set($this->hostname, $this->snmpsetup['sec_name'], $this->snmpsetup['sec_level'], $this->snmpsetup['auth_protocol'], $this->snmpsetup['auth_passphrase'], $this->snmpsetup['priv_protocol'], $this->snmpsetup['priv_passphrase'], $oid, $type, $value);
-    }
-    
-    function snmpwalkoid($oid) {
-	return snmp3_real_walk($this->hostname, $this->snmpsetup['sec_name'], $this->snmpsetup['sec_level'], $this->snmpsetup['auth_protocol'], $this->snmpsetup['auth_passphrase'], $this->snmpsetup['priv_protocol'], $this->snmpsetup['priv_passphrase'], $oid);
-    }
+	function snmpset($oid, $type, $value)
+	{
+		return snmp3_set($this->hostname, $this->snmpsetup['sec_name'], $this->snmpsetup['sec_level'], $this->snmpsetup['auth_protocol'], $this->snmpsetup['auth_passphrase'], $this->snmpsetup['priv_protocol'], $this->snmpsetup['priv_passphrase'], $oid, $type, $value);
+	}
+	
+	function snmpwalkoid($oid)
+	{
+		return snmp3_real_walk($this->hostname, $this->snmpsetup['sec_name'], $this->snmpsetup['sec_level'], $this->snmpsetup['auth_protocol'], $this->snmpsetup['auth_passphrase'], $this->snmpsetup['priv_protocol'], $this->snmpsetup['priv_passphrase'], $oid);
+	}
 }
 
-class APCPowerSwitch extends RTSNMPDevice {
-    protected $snmpMib = 'SNMPv2-SMI::enterprises.318';
+class APCPowerSwitch extends RTSNMPDevice
+{
+	protected $snmpMib = 'SNMPv2-SMI::enterprises.318';
 
-    function getPorts() {
-        $data = $this->snmpwalk("{$this->snmpMib}.1.1.12.3.3.1.1.2");
-        $status = $this->snmpwalk("{$this->snmpMib}.1.1.12.3.3.1.1.4");
-        $out = array();
-        foreach ($data as $id => $d) {
-            $out[$id + 1] = array(trim(str_replace('STRING: ', '', $d), '"'), str_replace('INTEGER: ', '', $status[$id]));
-        }
-        return $out;
-    }
-    
-    function getPortStatus($id) {
-        return trim($this->snmpget("{$this->snmpMib}.1.1.12.3.3.1.1.4.$id"), 'INTEGER: ');
-    }
+	function getPorts()
+	{
+		$data = $this->snmpwalk("{$this->snmpMib}.1.1.12.3.3.1.1.2");
+		$status = $this->snmpwalk("{$this->snmpMib}.1.1.12.3.3.1.1.4");
+		$out = array();
+		foreach ($data as $id => $d)
+			$out[$id + 1] = array(trim(str_replace('STRING: ', '', $d), '"'), str_replace('INTEGER: ', '', $status[$id]));
+		return $out;
+	}
+	
+	function getPortStatus($id)
+	{
+		return trim($this->snmpget("{$this->snmpMib}.1.1.12.3.3.1.1.4.$id"), 'INTEGER: ');
+	}
 
-    function getPortName($id) {
-        return trim(str_replace('STRING: ', '', $this->snmpget("{$this->snmpMib}.1.1.12.3.3.1.1.2.$id")), '"');
-    }
+	function getPortName($id)
+	{
+		return trim(str_replace('STRING: ', '', $this->snmpget("{$this->snmpMib}.1.1.12.3.3.1.1.2.$id")), '"');
+	}
 
-    function setPortName($id, $name) {
-        return $this->snmpset("{$this->snmpMib}.1.1.4.5.2.1.3.$id", 's', $name);
-    }
+	function setPortName($id, $name)
+	{
+		return $this->snmpset("{$this->snmpMib}.1.1.4.5.2.1.3.$id", 's', $name);
+	}
 
-    function portOff($id) {
-        return $this->snmpSet("{$this->snmpMib}.1.1.12.3.3.1.1.4.$id", 'i', APC_STATUS_OFF);
-    }
+	function portOff($id)
+	{
+		return $this->snmpSet("{$this->snmpMib}.1.1.12.3.3.1.1.4.$id", 'i', APC_STATUS_OFF);
+	}
 
-    function portOn($id) {
-        return $this->snmpSet("{$this->snmpMib}.1.1.12.3.3.1.1.4.$id", 'i', APC_STATUS_ON);
-    }
+	function portOn($id)
+	{
+		return $this->snmpSet("{$this->snmpMib}.1.1.12.3.3.1.1.4.$id", 'i', APC_STATUS_ON);
+	}
 
-    function portReboot($id) {
-        return $this->snmpSet("{$this->snmpMib}.1.1.12.3.3.1.1.4.$id", 'i', APC_STATUS_REBOOT);
-    }
+	function portReboot($id)
+	{
+		return $this->snmpSet("{$this->snmpMib}.1.1.12.3.3.1.1.4.$id", 'i', APC_STATUS_REBOOT);
+	}
+
 	// rPDUIdentFirmwareRev.0 == .1.3.6.1.4.1.318.1.1.12.1.3.0 = STRING: "vN.N.N"
 	function getFWRev()
 	{
 		return preg_replace ('/^STRING: "(.+)"$/', '\\1', $this->snmpget ("{$this->snmpMib}.1.1.12.1.3.0"));
 	}
+
 	// rPDUIdentSerialNumber.0 == .1.3.6.1.4.1.318.1.1.12.1.6.0 = STRING: "XXXXXXXXXXX"
 	function getHWSerial()
 	{
 		return preg_replace ('/^STRING: "(.+)"$/', '\\1', $this->snmpget ("{$this->snmpMib}.1.1.12.1.6.0"));
 	}
+
 	// rPDUIdentModelNumber.0 == .1.3.6.1.4.1.318.1.1.12.1.5.0 = STRING: "APnnnn"
 	function getHWModel()
 	{
