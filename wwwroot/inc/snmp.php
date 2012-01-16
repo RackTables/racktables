@@ -1957,17 +1957,17 @@ class RTSNMPDevice
 	{
 		return $this->getString('sysName.0');
 	}
- 
+
 	function getDescription()
 	{
 		return $this->getString('sysDescr.0');
 	}
-	
+
 	function snmpget($oid)
 	{
 		return $this->snmp->snmpget($oid);
 	}
-	
+
 	function snmpwalkoid($oid)
 	{
 		return $this->snmp->snmpwalkoid($oid);
@@ -1994,7 +1994,7 @@ abstract class RTSNMP
 		$this->hostname = $hostname;
 		$this->snmpsetup = $snmpsetup;
 	}
-	
+
 	abstract function snmpget($oid);
 	abstract function snmpset($oid, $type, $value);
 	abstract function snmpwalkoid($oid);
@@ -2011,7 +2011,7 @@ class RTSNMPv1 extends RTSNMP
 	{
 		return snmpset($this->hostname, $this->snmpsetup['community'], $oid, $type, $value);
 	}
-	
+
 	function snmpwalkoid($oid)
 	{
 		return snmpwalkoid($this->hostname, $this->snmpsetup['community'], $oid);
@@ -2029,7 +2029,7 @@ class RTSNMPv2 extends RTSNMP
 	{
 		return snmp2_set($this->hostname, $this->snmpsetup['community'], $oid, $type, $value);
 	}
-	
+
 	function snmpwalkoid($oid)
 	{
 		return snmp2_real_walk($this->hostname, $this->snmpsetup['community'], $oid);
@@ -2047,7 +2047,7 @@ class RTSNMPv3 extends RTSNMP
 	{
 		return snmp3_set($this->hostname, $this->snmpsetup['sec_name'], $this->snmpsetup['sec_level'], $this->snmpsetup['auth_protocol'], $this->snmpsetup['auth_passphrase'], $this->snmpsetup['priv_protocol'], $this->snmpsetup['priv_passphrase'], $oid, $type, $value);
 	}
-	
+
 	function snmpwalkoid($oid)
 	{
 		return snmp3_real_walk($this->hostname, $this->snmpsetup['sec_name'], $this->snmpsetup['sec_level'], $this->snmpsetup['auth_protocol'], $this->snmpsetup['auth_passphrase'], $this->snmpsetup['priv_protocol'], $this->snmpsetup['priv_passphrase'], $oid);
@@ -2060,14 +2060,14 @@ class APCPowerSwitch extends RTSNMPDevice
 
 	function getPorts()
 	{
-		$data = $this->snmpwalk("{$this->snmpMib}.1.1.12.3.3.1.1.2");
-		$status = $this->snmpwalk("{$this->snmpMib}.1.1.12.3.3.1.1.4");
+		$data = $this->snmpwalkoid("{$this->snmpMib}.1.1.12.3.3.1.1.2");
+		$status = $this->snmpwalkoid("{$this->snmpMib}.1.1.12.3.3.1.1.4");
 		$out = array();
 		foreach ($data as $id => $d)
 			$out[$id + 1] = array(trim(str_replace('STRING: ', '', $d), '"'), str_replace('INTEGER: ', '', $status[$id]));
 		return $out;
 	}
-	
+
 	function getPortStatus($id)
 	{
 		return trim($this->snmpget("{$this->snmpMib}.1.1.12.3.3.1.1.4.$id"), 'INTEGER: ');
