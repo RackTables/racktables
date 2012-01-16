@@ -2056,7 +2056,7 @@ class APCPowerSwitch extends RTSNMPDevice
 		$status = $this->snmpwalkoid("{$this->snmpMib}.1.1.12.3.3.1.1.4");
 		$out = array();
 		foreach ($data as $id => $d)
-			$out[$id + 1] = array(trim(str_replace('STRING: ', '', $d), '"'), str_replace('INTEGER: ', '', $status[$id]));
+			$out[] = array(trim(str_replace('STRING: ', '', $d), '"'), str_replace('INTEGER: ', '', $status[$id]));
 		return $out;
 	}
 
