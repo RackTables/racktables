@@ -1846,13 +1846,15 @@ $msgcode['addRack']['OK'] = 48;
 $msgcode['addRack']['ERR2'] = 172;
 function addRack ()
 {
-	$taglist = isset ($_REQUEST['taglist']) ? $_REQUEST['taglist'] : array();
+	$taglist = isset ($_REQUEST['taglist']) && is_array ($_REQUEST['taglist']) ? $_REQUEST['taglist'] : array();
+	
 	if (isset ($_REQUEST['got_data']))
 	{
 		assertStringArg ('name');
 		assertUIntArg ('height1');
 		assertStringArg ('asset_no', TRUE);
 		$rack_id = commitAddObject (NULL, $_REQUEST['name'], 1560, $_REQUEST['asset_no'], $taglist);
+		produceTagsForLastRecord ('rack', $taglist, $rack_id);
 
 		// Update the height
 		commitUpdateAttrValue ($rack_id, 27, $_REQUEST['height1']);
@@ -1881,6 +1883,7 @@ function addRack ()
 		foreach ($names2 as $cname)
 		{
 			$rack_id = commitAddObject (NULL, $cname, 1560, NULL, $taglist);
+			produceTagsForLastRecord ('rack', $taglist, $rack_id);
 
 			// Update the height
 			commitUpdateAttrValue ($rack_id, 27, $_REQUEST['height2']);
