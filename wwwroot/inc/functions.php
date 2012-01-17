@@ -4947,9 +4947,9 @@ function fillIPv4SpareList (&$net, $a, $b)
 		
 		while ($a + (1 << $i) > $b)
 			$i--;
-		$a += (1 << $i);
 		$mask = 32 - $i;
 		$net['spare_ranges'][$mask][] = $a;
+		$a += (1 << $i);
 	}
 }
 
