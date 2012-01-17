@@ -896,6 +896,24 @@ $iftable_processors['fortinet-chassis-any-1000T'] = array
 	'try_next_proc' => FALSE,
 );
 
+$iftable_processors['arista-any-SFP'] = array
+(
+    'pattern' => '@^Ethernet([[:digit:]]+)$@',
+    'replacement' => '\\1',
+    'dict_key' => '9-1084',
+    'label' => '\\1',
+    'try_next_proc' => FALSE,
+);
+
+$iftable_processors['arista-management'] = array
+(
+    'pattern' => '@^Management(1|2)$@',
+    'replacement' => 'mgmt\\1',
+    'dict_key' => '1-24',
+    'label' => 'Management',
+    'try_next_proc' => FALSE,
+);
+
 global $known_switches;
 $known_switches = array // key is system OID w/o "enterprises" prefix
 (
@@ -1554,6 +1572,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'dict_key' => 1609,
 		'text' => 'FG310B: 10 RJ-45/10-1000T',
 		'processors' => array('fortinet-chassis-any-1000T'),
+	),
+	'30065.1.3011.7124.3282' => array
+	(
+    	'dict_key' => 1610,
+    	'text' => 'DCS-7124S: 24 SFP/1000',
+    	'processors' => array ('arista-any-SFP', 'arista-management'),
 	),
 );
 
