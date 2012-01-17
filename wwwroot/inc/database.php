@@ -3005,7 +3005,15 @@ function commitUpdateAttrValue ($object_id, $attr_id, $value = '')
 	usePreparedDeleteBlade ('AttributeValue', array ('object_id' => $object_id, 'attr_id' => $attr_id));
 	if ($value == '')
 		return;
-	$object = spotEntity ('object', $object_id);
+	// fetch object type via SQL.
+	// We can not use spotEntity here, because commitUpdateAttrValue is called also for racks
+	$result = usePreparedSelectBlade ("SELECT objtype_id from Object WHERE id = ?", array ($object_id));
+	if ($row = $result->fetch(PDO::FETCH_ASSOC))
+		$object_type = $row['objtype_id'];
+	else
+		throw EntityNotFoundException('object', $object_id);
+	unset ($result);
+	
 	usePreparedInsertBlade
 	(
 		'AttributeValue',
@@ -3013,7 +3021,7 @@ function commitUpdateAttrValue ($object_id, $attr_id, $value = '')
 		(
 			$column => $value,
 			'object_id' => $object_id,
-			'object_tid' => $object['objtype_id'],
+			'object_tid' => $object_type,
 			'attr_id' => $attr_id,
 		)
 	);
