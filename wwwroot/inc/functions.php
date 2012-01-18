@@ -481,10 +481,7 @@ function setDisplayedName (&$cell)
 	if ($cell['name'] != '')
 		$cell['dname'] = $cell['name'];
 	else
-	{
-		$cell['atags'][] = array ('tag' => '$nameless');
 		$cell['dname'] = '[' . decodeObjectType ($cell['objtype_id'], 'o') . ']';
-	}
 }
 
 // This function finds height of solid rectangle of atoms, which are all
