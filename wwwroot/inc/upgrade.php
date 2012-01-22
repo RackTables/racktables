@@ -1194,7 +1194,7 @@ CREATE TABLE `CactiGraph` (
 			$query[] = 'ALTER TABLE AttributeValue ADD KEY `id-tid` (object_id, object_tid)';
 			$query[] = 'ALTER TABLE AttributeValue ADD KEY `object_tid-attr_id` (`object_tid`,`attr_id`)';
 			$query[] = 'ALTER TABLE RackObject ADD KEY `id-tid` (id, objtype_id)';
-			$query[] = 'ALTER TABLE AttributeValue ADD CONSTRAINT `AttributeValue-FK-object` FOREIGN KEY (`object_id`, `object_tid`) REFERENCES `RackObject` (`id`, `objtype_id`) ON DELETE CASCADE';
+			$query[] = 'ALTER TABLE AttributeValue ADD CONSTRAINT `AttributeValue-FK-object` FOREIGN KEY (`object_id`, `object_tid`) REFERENCES `RackObject` (`id`, `objtype_id`) ON DELETE CASCADE ON UPDATE CASCADE';
 			$query[] = 'ALTER TABLE AttributeValue ADD CONSTRAINT `AttributeValue-FK-map` FOREIGN KEY (`object_tid`, `attr_id`) REFERENCES `AttributeMap` (`objtype_id`, `attr_id`)';
 			# 0.19.9 did it right, but kept the IDs in the dictionary. This time
 			# the dictionary is reduced, but the procedure needs to be repeated,
