@@ -19,6 +19,7 @@
 	update: suppress fiber connector specifics again
 	update: improved support of Nexus switches (#500)
 	update: LivePTR now ignores auto-reserved network & broadcast addresses (#425)
+	update: VLAN-to-ipnet bindings are now displayed in net cells
 0.19.10 2011-10-17
 	bugfix: LivePorts MAC address lister was broken with Huawei S5300 V100R006
  	bugfix: SNMP sync was broken when one of default attributes was removed from certain object type

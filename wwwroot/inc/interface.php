@@ -2244,7 +2244,6 @@ function renderIPv4Space ()
 	$netlist = listCells ('ipv4net');
 	$allcount = count ($netlist);
 	$netlist = filterCellList ($netlist, $cellfilter['expression']);
-	array_walk ($netlist, 'amplifyCell');
 
 	$netcount = count ($netlist);
 	// expand request can take either natural values or "ALL". Zero means no expanding.
@@ -2298,7 +2297,6 @@ function renderIPv6Space ()
 	$netlist = listCells ('ipv6net');
 	$allcount = count ($netlist);
 	$netlist = filterCellList ($netlist, $cellfilter['expression']);
-	array_walk ($netlist, 'amplifyCell');
 
 	$netcount = count ($netlist);
 	// expand request can take either natural values or "ALL". Zero means no expanding.
@@ -2470,7 +2468,6 @@ END
 		startPortlet ('Manage existing (' . count ($addrspaceList) . ')');
 		echo "<table class='widetable' border=0 cellpadding=5 cellspacing=0 align='center'>\n";
 		echo "<tr><th>&nbsp;</th><th>prefix</th><th>name</th><th>capacity</th></tr>";
-		array_walk ($addrspaceList, 'amplifyCell');
 		$tree = prepareIPv4Tree ($addrspaceList, 'ALL');
 		// this is only called for having "trace" set
 		treeFromList ($addrspaceList);
@@ -2566,7 +2563,6 @@ END
 		startPortlet ('Manage existing (' . count ($addrspaceList) . ')');
 		echo "<table class='widetable' border=0 cellpadding=5 cellspacing=0 align='center'>\n";
 		echo "<tr><th>&nbsp;</th><th>prefix</th><th>name</th><th>capacity</th></tr>";
-		array_walk ($addrspaceList, 'amplifyCell');
 		$tree = prepareIPv6Tree ($addrspaceList, 'ALL');
 		// this is only called for having "trace" set
 		treeFromList ($addrspaceList);
@@ -2605,7 +2601,6 @@ function renderIPv4Network ($id)
 	global $pageno, $tabno, $aac2, $netmaskbylen, $wildcardbylen;
 
 	$range = spotEntity ('ipv4net', $id);
-	amplifyCell ($range);
 	loadIPv4AddrList ($range);
 	echo "<table border=0 class=objectview cellspacing=0 cellpadding=0>";
 	echo "<tr><td colspan=2 align=center><h1>${range['ip']}/${range['mask']}</h1><h2>";
@@ -2804,7 +2799,6 @@ function renderIPv4Network ($id)
 function renderIPv6Network ($id)
 {
 	$range = spotEntity ('ipv6net', $id);
-	amplifyCell ($range);
 	loadIPv6AddrList ($range);
 	echo "<table border=0 class=objectview cellspacing=0 cellpadding=0>";
 	echo "<tr><td colspan=2 align=center><h1>${range['ip']}/${range['mask']}</h1><h2>";
@@ -6755,9 +6749,24 @@ function renderCell ($cell)
 		echo '</td></tr>';
 
 		if (strlen ($cell['name']))
-			echo "<tr><td><strong>" . niftyString ($cell['name']) . "</strong></td></tr>";
+			echo "<tr><td><strong>" . niftyString ($cell['name']) . "</strong>";
 		else
-			echo "<tr><td class=sparenetwork>no name</td></tr>";
+			echo "<tr><td class=sparenetwork>no name";
+		// render VLAN
+		if (! empty ($cell['8021q']))
+		{
+			$seen = array();
+			foreach ($cell['8021q'] as $vlan_info)
+				$seen[$vlan_info['vlan_id']] = $vlan_info['domain_id'] . '-' . $vlan_info['vlan_id'];
+			echo '<div class="net-usage"><strong><small>VLAN' . (count ($seen) > 1 ? 'S' : '') . '</small> ';
+			$links = array();
+			foreach ($seen as $vlan_id => $vlan_ck)
+				$links[] = '<a href="' . makeHref (array ('page' => 'vlan', 'vlan_ck' => $vlan_ck)) . '">' . $vlan_id . '</a>';
+			echo implode (', ', $links);
+			echo '</strong></div>';
+		}
+		
+		echo "</td></tr>";
 		echo '<tr><td>';
 		echo count ($cell['etags']) ? ("<small>" . serializeTags ($cell['etags']) . "</small>") : '&nbsp;';
 		echo "</td></tr></table>";
@@ -8222,7 +8231,6 @@ function renderVLANIPLinks ($some_id)
 	case 'ipv6net':
 		echo '<th>VLAN</th>';
 		$netinfo = spotEntity ($pageno, $some_id);
-		amplifyCell ($netinfo);
 		// find out list of VLAN domains, where the current network is already linked
 		foreach ($netinfo['8021q'] as $item)
 			$minuslines[] = array
