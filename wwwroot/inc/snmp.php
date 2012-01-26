@@ -898,20 +898,119 @@ $iftable_processors['fortinet-chassis-any-1000T'] = array
 
 $iftable_processors['arista-any-SFP+'] = array
 (
-    'pattern' => '@^Ethernet([[:digit:]]+)$@',
-    'replacement' => '\\1',
-    'dict_key' => '9-1084',
-    'label' => '\\1',
-    'try_next_proc' => FALSE,
+	'pattern' => '@^Ethernet([[:digit:]]+)$@',
+	'replacement' => '\\1',
+	'dict_key' => '9-1084',
+	'label' => '\\1',
+	'try_next_proc' => FALSE,
 );
 
 $iftable_processors['arista-management'] = array
 (
-    'pattern' => '@^Management(1|2)$@',
-    'replacement' => 'mgmt\\1',
-    'dict_key' => '1-24',
-    'label' => 'Management',
-    'try_next_proc' => FALSE,
+	'pattern' => '@^Management(1|2)$@',
+	'replacement' => 'mgmt\\1',
+	'dict_key' => '1-24',
+	'label' => 'Management',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['dell-33xx-any-combo-1000SFP'] = array
+(
+	'pattern' => '@^1/g(\d+)$@',
+	'replacement' => 'g\\1',
+	'dict_key' => '4-1077',
+	'label' => 'g\\1',
+	'try_next_proc' => TRUE,
+);
+
+$iftable_processors['dell-33xx-any-1000T'] = array
+(
+	'pattern' => '@^1/g(\d+)$@',
+	'replacement' => 'g\\1',
+	'dict_key' => '1-24',
+	'label' => 'g\\1',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['dell-33xx-any-100TX'] = array
+(
+	'pattern' => '@^1/e(\d+)$@',
+	'replacement' => 'e\\1',
+	'dict_key' => 19,
+	'label' => 'e\\1',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['dell-g1-to-g2-1000SFP'] = array
+(
+	'pattern' => '@^g(1|2)$@',
+	'replacement' => 'g\\1',
+	'dict_key' => '4-1077',
+	'label' => 'g\\1',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['dell-g3-to-g4-1000T'] = array
+(
+	'pattern' => '@^g(3|4)$@',
+	'replacement' => 'g\\1',
+	'dict_key' => '1-24',
+	'label' => 'g\\1',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['dell-g21-to-g24-combo-1000SFP'] = array
+(
+	'pattern' => '@^g(21|22|23|24)$@',
+	'replacement' => 'g\\1',
+	'dict_key' => '4-1077',
+	'label' => 'g\\1',
+	'try_next_proc' => TRUE,
+);
+
+$iftable_processors['dell-g21-to-g24-combo-1000T'] = array
+(
+	'pattern' => '@^g(21|22|23|24)$@',
+	'replacement' => 'g\\1',
+	'dict_key' => '1-24',
+	'label' => 'g\\1',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['dell-g45-to-g48-combo-1000SFP'] = array
+(
+	'pattern' => '@^g(45|46|47|48)$@',
+	'replacement' => 'g\\1',
+	'dict_key' => '4-1077',
+	'label' => 'g\\1',
+	'try_next_proc' => TRUE,
+);
+
+$iftable_processors['dell-g45-to-g48-combo-1000T'] = array
+(
+	'pattern' => '@^g(45|46|47|48)$@',
+	'replacement' => 'g\\1',
+	'dict_key' => '1-24',
+	'label' => 'g\\1',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['dell-any-100TX'] = array
+(
+	'pattern' => '@^e(\d+)$@',
+	'replacement' => 'e\\1',
+	'dict_key' => 19,
+	'label' => 'e\\1',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['dell-any-1000T'] = array
+(
+	'pattern' => '@^g(\d+)$@',
+	'replacement' => 'g\\1',
+	'dict_key' => 24,
+	'label' => 'g\\1',
+	'try_next_proc' => FALSE,
 );
 
 global $known_switches;
@@ -1575,9 +1674,63 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 	),
 	'30065.1.3011.7124.3282' => array
 	(
-    	'dict_key' => 1610,
-    	'text' => 'DCS-7124S: 24 SFP+/10000',
-    	'processors' => array ('arista-any-SFP+', 'arista-management'),
+		'dict_key' => 1610,
+		'text' => 'DCS-7124S: 24 SFP+/10000',
+		'processors' => array ('arista-any-SFP+', 'arista-management'),
+	),
+	'674.10895.3003' => array
+	(
+		'dict_key' => 1611,
+		'text' => 'PowerConnect 3348: 48 RJ-45/10-100TX + 2 combo ports',
+		'processors' => array ('dell-33xx-any-combo-1000SFP', 'dell-33xx-any-1000T', 'dell-33xx-any-100TX'),
+		'ifDescrOID' => 'entPhysicalName',
+	),
+	'674.10895.3007' => array
+	(
+		'dict_key' => 347,
+		'text' => 'PowerConnect 3448: 48 RJ-45/10-100TX + 2 SFP/1000 + 2 RJ-45/10-100-1000T(X) ports',
+		'processors' => array ('dell-g1-to-g2-1000SFP', 'dell-g3-to-g4-1000T', 'dell-any-100TX'),
+		'ifDescrOID' => 'ifName',
+	),
+	'674.10895.3009' => array
+	(
+		'dict_key' => 348,
+		'text' => 'PowerConnect 3448P: 48 RJ-45/10-100TX PoE + 2 SFP/1000 + 2 RJ-45/10-100-1000T(X) ports',
+		'processors' => array ('dell-g1-to-g2-1000SFP', 'dell-g3-to-g4-1000T', 'dell-any-100TX'),
+		'ifDescrOID' => 'ifName',
+	),
+	'674.10895.3017' => array
+	(
+		'dict_key' => 1067,
+		'text' => 'PowerConnect 3548: 48 RJ-45/10-100TX + 2 SFP/1000 + 2 RJ-45/10-100-1000T(X) ports',
+		'processors' => array ('dell-g1-to-g2-1000SFP', 'dell-g3-to-g4-1000T', 'dell-any-100TX'),
+	),
+	'674.10895.3019' => array
+	(
+		'dict_key' => 1068,
+		'text' => 'PowerConnect 3548P: 48 RJ-45/10-100TX PoE + 2 SFP/1000 + 2 RJ-45/10-100-1000T(X) ports',
+		'processors' => array ('dell-g1-to-g2-1000SFP', 'dell-g3-to-g4-1000T', 'dell-any-100TX'),
+	),
+	'674.10895.3004' => array
+	(
+		'dict_key' => 349,
+		'text' => 'PowerConnect 5324: 20 RJ-45/10-100-1000T(X) + 4 combo ports',
+		'processors' => array ('dell-g21-to-g24-combo-1000SFP', 'dell-g21-to-g24-combo-1000T', 'dell-any-1000T'),
+		'ifDescrOID' => 'ifName',
+	),
+	'674.10895.3020' => array
+	(
+		'dict_key' => 1069,
+		'text' => 'PowerConnect 5424: 20 RJ-45/10-100-1000T(X) + 4 combo ports',
+		'processors' => array ('dell-g21-to-g24-combo-1000SFP', 'dell-g21-to-g24-combo-1000T', 'dell-any-1000T'),
+		'ifDescrOID' => 'ifName',
+	),
+	'674.10895.3021' => array
+	(
+		'dict_key' => 1070,
+		'text' => 'PowerConnect 5448: 44 RJ-45/10-100-1000T(X) + 4 combo ports',
+		'processors' => array ('dell-g45-to-g48-combo-1000SFP', 'dell-g45-to-g48-combo-1000T', 'dell-any-1000T'),
+		'ifDescrOID' => 'ifName',
 	),
 );
 
@@ -1619,7 +1772,7 @@ function checkPIC ($port_type_id)
 			$compat_array[$key] = 1;
 		}
 	}
-	
+
 	if (preg_match ('/^(\d+-)?(\d+)$/', $port_type_id, $m))
 	{
 		$iif_id = $m[1];
@@ -1658,7 +1811,7 @@ function doSNMPmining ($object_id, $snmpsetup)
 	case 2:
 		$device = new APCPowerSwitch ($endpoints[0], $snmpsetup);
 		return doPDUSNMPmining ($objectInfo, $device);
-	}	
+	}
 }
 
 $msgcode['doSwitchSNMPmining']['ERR3'] = 188;
@@ -1666,13 +1819,14 @@ $msgcode['doSwitchSNMPmining']['ERR4'] = 189;
 function doSwitchSNMPmining ($objectInfo, $device)
 {
 	global $known_switches, $iftable_processors;
-	
+
 	if (FALSE === ($sysObjectID = $device->snmpget ('sysObjectID.0')))
 		return showFuncMessage (__FUNCTION__, 'ERR3'); // // fatal SNMP failure
 	$sysObjectID = preg_replace ('/^.*(enterprises\.)([\.[:digit:]]+)$/', '\\2', $sysObjectID);
 	$sysName = substr ($device->snmpget ('sysName.0'), strlen ('STRING: '));
 	$sysDescr = substr ($device->snmpget ('sysDescr.0'), strlen ('STRING: '));
 	$sysDescr = str_replace (array ("\n", "\r"), " ", $sysDescr);  // Make it one line
+	$ifDescr_tablename = (isset($known_switches[$sysObjectID]['ifDescrOID'])) ? $known_switches[$sysObjectID]['ifDescrOID'] : 'ifDescr';
 	if (!isset ($known_switches[$sysObjectID]))
 		return showFuncMessage (__FUNCTION__, 'ERR4', array ($sysObjectID)); // unknown OID
 	showSuccess ($known_switches[$sysObjectID]['text']);
@@ -1868,6 +2022,9 @@ function doSwitchSNMPmining ($objectInfo, $device)
 			updateStickerForCell ($objectInfo, 1, str_replace ('"', '', substr ($serialNo, strlen ('STRING: '))));
 		break;
 	case preg_match ('/^202\.20\./', $sysObjectID): // SMC TigerSwitch
+	case preg_match ('/^674\.10895\.300(3|4|7|9)/', $sysObjectID): // Dell PowerConnect
+	case preg_match ('/^674\.10895\.301(7|9)/', $sysObjectID):
+	case preg_match ('/^674\.10895\.302(0|1)/', $sysObjectID):
 		checkPIC ('1-681');
 		commitAddPort ($objectInfo['id'], 'console', '1-681', '', ''); // DB-9 RS-232
 		checkPIC ('1-16');
@@ -1877,17 +2034,15 @@ function doSwitchSNMPmining ($objectInfo, $device)
 		break;
 	}
 	$ifInfo = array();
-	$tablename = 'ifDescr';
-	foreach ($device->snmpwalkoid ($tablename) as $oid => $value)
+	foreach ($device->snmpwalkoid ($ifDescr_tablename) as $oid => $value)
 	{
-		$randomindex = preg_replace ("/^.*${tablename}\.(.+)\$/", '\\1', $oid);
+		$randomindex = preg_replace ("/^.*${ifDescr_tablename}\.(.+)\$/", '\\1', $oid);
 		$value = trim (preg_replace ('/^[^:]+: (.+)$/', '\\1', $value), '"');
-		$ifInfo[$randomindex][$tablename] = $value;
+		$ifInfo[$randomindex]['ifDescr'] = $value;
 	}
-	$tablename = 'ifPhysAddress';
-	foreach ($device->snmpwalkoid ($tablename) as $oid => $value)
+	foreach ($device->snmpwalkoid ('ifPhysAddress') as $oid => $value)
 	{
-		$randomindex = preg_replace ("/^.*${tablename}\.(.+)\$/", '\\1', $oid);
+		$randomindex = preg_replace ("/^.*ifPhysAddress\.(.+)\$/", '\\1', $oid);
 		$value = trim ($value);
 		// NET-SNMP may return MAC addresses in one of two (?) formats depending on
 		// DISPLAY-HINT internal database. The best we can do about it is to accept both.
@@ -1906,7 +2061,7 @@ function doSwitchSNMPmining ($objectInfo, $device)
 			$addrbytes = array (substr (bin2hex ($value), -14, 12));
 		else
 			continue; // martian format
-		$ifInfo[$randomindex][$tablename] = implode ('', $addrbytes);
+		$ifInfo[$randomindex]['ifPhysAddress'] = implode ('', $addrbytes);
 	}
 	// process each interface only once regardless of how many processors we have to run
 	foreach ($ifInfo as $iface)
