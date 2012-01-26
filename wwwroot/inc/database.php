@@ -52,7 +52,7 @@ $SQLSchema = array
 			'name' => 'name',
 			'comment' => 'comment',
 			'parent_id' => '(SELECT id FROM IPv4Network AS subt WHERE IPv4Network.ip & (4294967295 >> (32 - subt.mask)) << (32 - subt.mask) = subt.ip and subt.mask < IPv4Network.mask ORDER BY subt.mask DESC limit 1)',
-			'vlanc' => '(SELECT COUNT(*) FROM VLANIPv4 WHERE ipv4net_id = id)',
+			'8021q' => '(SELECT GROUP_CONCAT(CONCAT(domain_id, "-", vlan_id) ORDER BY domain_id) FROM VLANIPv4 WHERE ipv4net_id = id)',
 		),
 		'keycolumn' => 'id',
 		'ordcolumns' => array ('IPv4Network.ip', 'IPv4Network.mask'),
@@ -68,7 +68,7 @@ $SQLSchema = array
 			'name' => 'name',
 			'comment' => 'comment',
 			'parent_id' => '(SELECT id FROM IPv6Network AS subt WHERE IPv6Network.ip >= subt.ip AND IPv6Network.last_ip <= subt.last_ip AND IPv6Network.mask > subt.mask ORDER BY subt.mask DESC limit 1)',
-			'vlanc' => '(SELECT COUNT(*) FROM VLANIPv6 WHERE ipv6net_id = id)',
+			'8021q' => '(SELECT GROUP_CONCAT(CONCAT(domain_id, "-", vlan_id) ORDER BY domain_id) FROM VLANIPv6 WHERE ipv6net_id = id)',
 		),
 		'keycolumn' => 'id',
 		'ordcolumns' => array ('IPv6Network.ip', 'IPv6Network.mask'),
@@ -440,6 +440,7 @@ function listCells ($realm, $parent_id = 0)
 			setDisplayedName ($entity);
 			break;
 		case 'ipv4net':
+			processIPNetVlans ($entity);
 			$entity['ip_bin'] = ip2long ($entity['ip']);
 			$entity['mask_bin'] = binMaskFromDec ($entity['mask']);
 			$entity['mask_bin_inv'] = binInvMaskFromDec ($entity['mask']);
@@ -449,6 +450,7 @@ function listCells ($realm, $parent_id = 0)
 			$entity['child_netc'] = 0;
 			break;
 		case 'ipv6net':
+			processIPNetVlans ($entity);
 			$entity['ip_bin'] = new IPv6Address ($entity['ip_bin']);
 			$entity['ip'] = $entity['ip_bin']->format();
 			$entity['db_first'] = $entity['ip_bin']->get_first_subnet_address($entity['mask']);
@@ -548,6 +550,7 @@ function spotEntity ($realm, $id, $ignore_cache = FALSE)
 		setDisplayedName ($ret);
 		break;
 	case 'ipv4net':
+		processIPNetVlans ($ret);
 		$ret['ip_bin'] = ip2long ($ret['ip']);
 		$ret['mask_bin'] = binMaskFromDec ($ret['mask']);
 		$ret['mask_bin_inv'] = binInvMaskFromDec ($ret['mask']);
@@ -557,6 +560,7 @@ function spotEntity ($realm, $id, $ignore_cache = FALSE)
 		$ret['child_netc'] = 0;
 		break;
 	case 'ipv6net':
+		processIPNetVlans ($ret);
 		$ret['ip_bin'] = new IPv6Address ($ret['ip_bin']);
 		$ret['ip'] = $ret['ip_bin']->format();
 		$ret['db_first'] = $ret['ip_bin']->get_first_subnet_address($ret['mask']);
@@ -640,12 +644,6 @@ function amplifyCell (&$record, $dummy = NULL)
 		$record['mountedObjects'] = array_keys ($mounted_objects);
 		unset ($result);
 		break;
-	case 'ipv4net':
-		$record['8021q'] = getIPv4Network8021QBindings ($record['id']);
-		break;
-	case 'ipv6net':
-		$record['8021q'] = getIPv6Network8021QBindings ($record['id']);
-		break;
 	case 'vst':
 		$record['rules'] = array();
 		$record['switches'] = array();
@@ -664,6 +662,26 @@ function amplifyCell (&$record, $dummy = NULL)
 		break;
 	default:
 	}
+}
+
+// is called by spotEntity and listCells.
+// replaces ['8021q'] text value in cell by an array with 'domain_id' and 'vlan_id' subkeys
+// also sets ['vlanc'] cell key to the binded vlans count.
+function processIPNetVlans (&$cell)
+{
+	if (empty ($cell['8021q']))
+		$cell['8021q'] = array();
+	else
+	{
+		$ck_list = explode (',', $cell['8021q']);
+		$cell['8021q'] = array();
+		foreach ($ck_list as $vlan_ck)
+		{
+			list ($domain_id, $vlan_id) = decodeVLANCK ($vlan_ck);
+			$cell['8021q'][] = array ('domain_id' => $domain_id, 'vlan_id' => $vlan_id);
+		}
+	}
+	$cell['vlanc'] = count ($cell['8021q']);
 }
 
 function fetchPortList ($sql_where_clause, $query_params = array())
@@ -4552,28 +4570,6 @@ function commitUpdateVSTRules ($vst_id, $mutex_rev, $rules)
 		usePreparedInsertBlade ('VLANSTRule', array_merge (array ('vst_id' => $vst_id), $rule));
 	usePreparedExecuteBlade ('UPDATE VLANSwitchTemplate SET mutex_rev=mutex_rev+1, saved_by=? WHERE id=?', array ($remote_username, $vst_id));
 	$dbxlink->commit();
-}
-
-function getIPv4Network8021QBindings ($ipv4net_id)
-{
-	$prepared = usePreparedSelectBlade
-	(
-		'SELECT domain_id, vlan_id FROM VLANIPv4 ' .
-		'WHERE ipv4net_id = ? ORDER BY domain_id',
-		array ($ipv4net_id)
-	);
-	return $prepared->fetchAll (PDO::FETCH_ASSOC);
-}
-
-function getIPv6Network8021QBindings ($ipv6net_id)
-{
-	$prepared = usePreparedSelectBlade
-	(
-		'SELECT domain_id, vlan_id FROM VLANIPv6 ' .
-		'WHERE ipv6net_id = ? ORDER BY domain_id',
-		array ($ipv6net_id)
-	);
-	return $prepared->fetchAll (PDO::FETCH_ASSOC);
 }
 
 // Return entity ID, if its 'name' column equals to provided string, or NULL otherwise (nothing

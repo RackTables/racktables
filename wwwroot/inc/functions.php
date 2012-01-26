@@ -3345,7 +3345,6 @@ function getEmployedVlans ($object_id, $domain_vlanlist)
 				else
 					continue;
 				$net = spotEntity ("${family}net", $net_id);
-				amplifyCell ($net);
 				foreach ($net['8021q'] as $vlan)
 					if (! isset ($employed[$vlan['vlan_id']]))
 						$employed[$vlan['vlan_id']] = 1;
