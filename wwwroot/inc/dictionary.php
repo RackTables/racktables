@@ -1676,6 +1676,15 @@ $dictionary = array
 	1610 => array ('chapter_id' => 12, 'dict_value' => 'Arista%GPASS%7124S'),
 	1611 => array ('chapter_id' => 12, 'dict_value' => 'Dell PowerConnect%GPASS%3348'),
 	1612 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%SF300-48'),
+	1613 => array ('chapter_id' => 12, 'dict_value' => 'Huawei%GPASS%Quidway S2309TP-EI'),
+	1614 => array ('chapter_id' => 12, 'dict_value' => 'Huawei%GPASS%Quidway S2309TP-SI'),
+	1615 => array ('chapter_id' => 12, 'dict_value' => 'Huawei%GPASS%Quidway S2318TP-EI'),
+	1616 => array ('chapter_id' => 12, 'dict_value' => 'Huawei%GPASS%Quidway S2318TP-SI'),
+	1617 => array ('chapter_id' => 12, 'dict_value' => 'Huawei%GPASS%Quidway S2326TP-EI'),
+	1618 => array ('chapter_id' => 12, 'dict_value' => 'Huawei%GPASS%Quidway S2326TP-SI'),
+	1619 => array ('chapter_id' => 12, 'dict_value' => 'Huawei%GPASS%Quidway S2352P-EI'),
+	1620 => array ('chapter_id' => 12, 'dict_value' => 'Huawei%GPASS%Quidway S2309TP-PWR-EI'),
+	1621 => array ('chapter_id' => 12, 'dict_value' => 'Huawei%GPASS%Quidway S2326TP-PWR-EI'),
 
 # Any new "default" dictionary records must go above this line (i.e., with
 # dict_key code less, than 50000). This is necessary to keep AUTO_INCREMENT
