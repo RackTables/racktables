@@ -5921,10 +5921,11 @@ function renderCell ($cell)
 		}
 		echo '</td></tr>';
 
+		echo "<tr><td>";
 		if (strlen ($cell['name']))
-			echo "<tr><td><strong>" . niftyString ($cell['name']) . "</strong>";
+			echo "<strong>" . niftyString ($cell['name']) . "</strong>";
 		else
-			echo "<tr><td class=sparenetwork>no name";
+			echo "<span class=sparenetwork>no name</span>";
 		// render VLAN
 		if (! empty ($cell['8021q']))
 		{
