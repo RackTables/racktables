@@ -1231,6 +1231,7 @@ CREATE TABLE `CactiGraph` (
 				$query[] = "UPDATE Port SET type = ${stays} WHERE type IN(${csv})";
 				$query[] = "DELETE FROM PortInterfaceCompat WHERE oif_id IN(${csv})";
 			}
+			$query = array_merge ($query, reloadDictionary ());
 			$query[] = "UPDATE Config SET varvalue = '0.19.11' WHERE varname = 'DB_VERSION'";
 			break;
 		default:
