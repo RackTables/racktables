@@ -1675,7 +1675,7 @@ $dictionary = array
 	1609 => array ('chapter_id' => 17, 'dict_value' => 'Fortinet%GPASS%Fortigate 310B'),
 	1610 => array ('chapter_id' => 12, 'dict_value' => 'Arista%GPASS%7124S'),
 	1611 => array ('chapter_id' => 12, 'dict_value' => 'Dell PowerConnect%GPASS%3348'),
-	1612 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%SF300-48'),
+	1612 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%SF 300-48'),
 	1613 => array ('chapter_id' => 12, 'dict_value' => 'Huawei%GPASS%Quidway S2309TP-EI'),
 	1614 => array ('chapter_id' => 12, 'dict_value' => 'Huawei%GPASS%Quidway S2309TP-SI'),
 	1615 => array ('chapter_id' => 12, 'dict_value' => 'Huawei%GPASS%Quidway S2318TP-EI'),

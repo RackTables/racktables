@@ -8,7 +8,7 @@ $iftable_processors['generic-fa-any-100TX'] = array
 	'pattern' => '@^fa(\d+)$@',
 	'replacement' => 'fa\\1',
 	'dict_key' => 19,
-	'label' => 'fa\\1',
+	'label' => '\\1',
 	'try_next_proc' => FALSE,
 );
 
@@ -17,7 +17,7 @@ $iftable_processors['generic-gi-1-to-2-1000T'] = array
 	'pattern' => '@^gi(\d+)$@',
 	'replacement' => 'gi\\1',
 	'dict_key' => 24,
-	'label' => 'gi\\1',
+	'label' => 'G\\1',
 	'try_next_proc' => FALSE,
 );
 
@@ -26,7 +26,7 @@ $iftable_processors['generic-gi-3-to-4-combo-1000SFP'] = array
 	'pattern' => '@^gi(3|4)$@',
 	'replacement' => 'gi\\1',
 	'dict_key' => '4-1077',
-	'label' => 'gi\\1',
+	'label' => 'G\\1',
 	'try_next_proc' => TRUE,
 );
 
@@ -35,7 +35,7 @@ $iftable_processors['generic-gi-3-to-4-combo-1000T'] = array
 	'pattern' => '@^gi(3|4)$@',
 	'replacement' => 'gi\\1',
 	'dict_key' => '1-24',
-	'label' => 'gi\\1',
+	'label' => 'G\\1',
 	'try_next_proc' => FALSE,
 );
 
@@ -1913,9 +1913,9 @@ function doSwitchSNMPmining ($objectInfo, $device)
 			commitAddPort ($objectInfo['id'], 'AC-in', '1-16', '', '');
 		}
 		break;
-	case preg_match ('/^9\.6\.1\./', $sysObjectID): // Cisco SP series
-		checkPIC ('1-29');
-		commitAddPort ($objectInfo['id'], 'con0', '1-29', 'console', ''); // RJ-45 RS-232 console
+	case preg_match ('/^9\.6\.1\./', $sysObjectID): // Cisco SF series
+		checkPIC ('1-681');
+		commitAddPort ($objectInfo['id'], 'con0', '1-681', 'console', ''); // DB-9 RS-232 console
 		checkPIC ('1-16');
 		commitAddPort ($objectInfo['id'], 'AC-in', '1-16', '', '');
 		break;
