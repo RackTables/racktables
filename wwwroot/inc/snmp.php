@@ -986,6 +986,24 @@ $iftable_processors['dell-33xx-any-1000T'] = array
 	'try_next_proc' => FALSE,
 );
 
+$iftable_processors['dell-5224-21-to-24-combo-1000SFP'] = array
+(
+	'pattern' => '@^EtherNet Port on unit 1, port:(21|22|23|24)$@',
+	'replacement' => 'g\\1',
+	'dict_key' => '4-1077',
+	'label' => 'g\\1',
+	'try_next_proc' => TRUE,
+);
+
+$iftable_processors['dell-52xx-any-1000T'] = array
+(
+	'pattern' => '@^EtherNet Port on unit 1, port:(\d+)$@',
+	'replacement' => 'g\\1',
+	'dict_key' => 24,
+	'label' => 'g\\1',
+	'try_next_proc' => FALSE,
+);
+
 $iftable_processors['dell-33xx-any-100TX'] = array
 (
 	'pattern' => '@^1/e(\d+)$@',
@@ -1751,6 +1769,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'DCS-7124S: 24 SFP+/10000',
 		'processors' => array ('arista-any-SFP+', 'arista-management'),
 	),
+	'674.10895.4' => array
+	(
+		'dict_key' => 1622,
+		'text' => 'PowerConnect 5224: 20 RJ-45/10-100-1000T(X) + 4 combo ports',
+		'processors' => array ('dell-5224-21-to-24-combo-1000SFP', 'dell-52xx-any-1000T'),
+	),
 	'674.10895.3003' => array
 	(
 		'dict_key' => 1611,
@@ -2101,7 +2125,8 @@ function doSwitchSNMPmining ($objectInfo, $device)
 			updateStickerForCell ($objectInfo, 1, str_replace ('"', '', substr ($serialNo, strlen ('STRING: '))));
 		break;
 	case preg_match ('/^202\.20\./', $sysObjectID): // SMC TigerSwitch
-	case preg_match ('/^674\.10895\.300(3|4|7|9)/', $sysObjectID): // Dell PowerConnect
+	case preg_match ('/^674\.10895\.4/', $sysObjectID): // Dell PowerConnect
+	case preg_match ('/^674\.10895\.300(3|4|7|9)/', $sysObjectID):
 	case preg_match ('/^674\.10895\.301(7|9)/', $sysObjectID):
 	case preg_match ('/^674\.10895\.302(0|1)/', $sysObjectID):
 		checkPIC ('1-681');
