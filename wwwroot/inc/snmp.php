@@ -3,6 +3,42 @@
 global $iftable_processors;
 $iftable_processors = array();
 
+$iftable_processors['generic-fa-any-100TX'] = array
+(
+	'pattern' => '@^fa(\d+)$@',
+	'replacement' => 'fa\\1',
+	'dict_key' => 19,
+	'label' => 'fa\\1',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['generic-gi-1-to-2-1000T'] = array
+(
+	'pattern' => '@^gi(\d+)$@',
+	'replacement' => 'gi\\1',
+	'dict_key' => 24,
+	'label' => 'gi\\1',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['generic-gi-3-to-4-combo-1000SFP'] = array
+(
+	'pattern' => '@^gi(3|4)$@',
+	'replacement' => 'gi\\1',
+	'dict_key' => '4-1077',
+	'label' => 'gi\\1',
+	'try_next_proc' => TRUE,
+);
+
+$iftable_processors['generic-gi-3-to-4-combo-1000T'] = array
+(
+	'pattern' => '@^gi(3|4)$@',
+	'replacement' => 'gi\\1',
+	'dict_key' => '1-24',
+	'label' => 'gi\\1',
+	'try_next_proc' => FALSE,
+);
+
 $iftable_processors['catalyst-chassis-mgmt'] = array
 (
 	'pattern' => '@^FastEthernet([[:digit:]])$@',
@@ -1345,9 +1381,22 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 	),
 	'9.1.1292' => array
 	(
-	 	'dict_key' => 1606,
+		'dict_key' => 1606,
 		'text' => 'WS-C2360-48TD: 48 RJ-45 GigE + 4 SFP+/10000',
 		'processors' => array ('catalyst-chassis-any-1000T', 'catalyst-chassis-mgmt', 'catalyst-chassis-uplinks-10000SFP+'),
+	),
+	'9.6.1.82.48.1' => array
+	(
+		'dict_key' => 1612,
+		'text' => 'SF 300-48: 48 RJ-45/10/100 + 2 RJ-45/10-100-1000T(X) + 2 combo-gig',
+		'processors' => array
+		(
+			'generic-gi-3-to-4-combo-1000SFP',
+			'generic-gi-3-to-4-combo-1000T',
+			'generic-gi-1-to-2-1000T',
+			'generic-fa-any-100TX',
+		),
+		'ifDescrOID' => 'ifName',
 	),
 	'9.12.3.1.3.719' => array
 	(
@@ -1863,6 +1912,12 @@ function doSwitchSNMPmining ($objectInfo, $device)
 			checkPIC ('1-16'); // AC input
 			commitAddPort ($objectInfo['id'], 'AC-in', '1-16', '', '');
 		}
+		break;
+	case preg_match ('/^9\.6\.1\./', $sysObjectID): // Cisco SP series
+		checkPIC ('1-29');
+		commitAddPort ($objectInfo['id'], 'con0', '1-29', 'console', ''); // RJ-45 RS-232 console
+		checkPIC ('1-16');
+		commitAddPort ($objectInfo['id'], 'AC-in', '1-16', '', '');
 		break;
 	case preg_match ('/^9\.12\.3\.1\.3\./', $sysObjectID): // Nexus
 		$exact_release = preg_replace ('/^.*, Version ([^ ]+), .*$/', '\\1', $sysDescr);
