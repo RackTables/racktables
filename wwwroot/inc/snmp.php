@@ -2466,7 +2466,7 @@ class APCPowerSwitch extends RTSNMPDevice
 		return preg_replace ('/^STRING: "(.*)"$/', '\\1', $this->snmpget ("{$this->snmpMib}.1.1.12.1.5.0"));
 	}
 }
-
+ 
 // Take address in the form XX:XX:XX:XX:XX:XX and return the next
 // address in the same form.
 function nextMACAddress ($addr)
