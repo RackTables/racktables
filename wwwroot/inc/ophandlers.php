@@ -2575,7 +2575,8 @@ $msgcode['bindVLANtoIPv4']['OK'] = 48;
 $msgcode['bindVLANtoIPv4']['ERR'] = 110;
 function bindVLANtoIPv4 ()
 {
-	assertUIntArg ('id'); // network id
+	genericAssertion ('id', 'uint');
+	genericAssertion ('vlan_ck', 'uint-uint');
 	global $sic;
 	$result = commitSupplementVLANIPv4 ($sic['vlan_ck'], $sic['id']);
 	return buildRedirectURL (__FUNCTION__, $result ? 'OK' : 'ERR');
@@ -2585,7 +2586,8 @@ $msgcode['bindVLANtoIPv6']['OK'] = 48;
 $msgcode['bindVLANtoIPv6']['ERR'] = 110;
 function bindVLANtoIPv6 ()
 {
-	assertUIntArg ('id'); // network id
+	genericAssertion ('id', 'uint');
+	genericAssertion ('vlan_ck', 'uint-uint');
 	global $sic;
 	$result = commitSupplementVLANIPv6 ($sic['vlan_ck'], $_REQUEST['id']);
 	return buildRedirectURL (__FUNCTION__, $result ? 'OK' : 'ERR');
@@ -2595,7 +2597,8 @@ $msgcode['unbindVLANfromIPv4']['OK'] = 49;
 $msgcode['unbindVLANfromIPv4']['ERR'] = 111;
 function unbindVLANfromIPv4 ()
 {
-	assertUIntArg ('id'); // network id
+	genericAssertion ('id', 'uint');
+	genericAssertion ('vlan_ck', 'uint-uint');
 	global $sic;
 	$result = commitReduceVLANIPv4 ($sic['vlan_ck'], $sic['id']);
 	return buildRedirectURL (__FUNCTION__, $result ? 'OK' : 'ERR');
@@ -2605,7 +2608,8 @@ $msgcode['unbindVLANfromIPv6']['OK'] = 49;
 $msgcode['unbindVLANfromIPv6']['ERR'] = 111;
 function unbindVLANfromIPv6 ()
 {
-	assertUIntArg ('id'); // network id
+	genericAssertion ('id', 'uint');
+	genericAssertion ('vlan_ck', 'uint-uint');
 	global $sic;
 	$result = commitReduceVLANIPv6 ($sic['vlan_ck'], $sic['id']);
 	return buildRedirectURL (__FUNCTION__, $result ? 'OK' : 'ERR');

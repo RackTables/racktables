@@ -300,6 +300,11 @@ function genericAssertion ($argname, $argtype)
 	case 'uint':
 		assertUIntArg ($argname);
 		break;
+	case 'uint-uint':
+		assertStringArg ($argname);
+		if (1 != preg_match ('/^[1-9][0-9]*-[1-9][0-9]*$/', $_REQUEST[$argname]))
+			throw new InvalidRequestArgException ($argname, $_REQUEST[$argname], 'illegal format');
+		break;
 	case 'uint0':
 		assertUIntArg ($argname, TRUE);
 		break;
