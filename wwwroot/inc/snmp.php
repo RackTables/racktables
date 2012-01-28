@@ -57,6 +57,24 @@ $iftable_processors['catalyst-any-1000T'] = array
 	'try_next_proc' => FALSE,
 );
 
+$iftable_processors['catalyst-9-to-12-1000SFP'] = array
+(
+	'pattern' => '@^GigabitEthernet(9|10|11|12)$@',
+	'replacement' => 'gi\\1',
+	'dict_key' => '4-1077',
+	'label' => 'gi\\1',
+	'try_next_proc' => TRUE,
+);
+
+$iftable_processors['catalyst-9-to-12-1000T'] = array
+(
+	'pattern' => '@^GigabitEthernet(9|10|11|12)$@',
+	'replacement' => 'gi\\1',
+	'dict_key' => 24,
+	'label' => 'gi\\1',
+	'try_next_proc' => FALSE,
+);
+
 $iftable_processors['catalyst-chassis-mgmt'] = array
 (
 	'pattern' => '@^FastEthernet([[:digit:]])$@',
@@ -1251,6 +1269,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'dict_key' => 160,
 		'text' => 'WS-CE500-24TT: 24 RJ-45/10-100TX + 2 RJ-45/10-100-1000T(X)',
 		'processors' => array ('catalyst-any-100TX', 'catalyst-any-1000T'),
+	),
+	'9.1.727' => array
+	(
+		'dict_key' => 161,
+		'text' => 'WS-CE500G-12TC: 8 RJ-45/10-100/1000T(X) + 4 combo',
+		'processors' => array ('catalyst-9-to-12-1000SFP', 'catalyst-9-to-12-1000T', 'catalyst-any-1000T'),
 	),
 	'9.1.950' => array
 	(
