@@ -1861,6 +1861,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'processors' => array ('dell-g1-to-g2-1000SFP', 'dell-g3-to-g4-1000T', 'dell-any-100TX'),
 		'ifDescrOID' => 'ifName',
 	),
+	'674.10895.3010' => array
+	(
+		'dict_key' => 350,
+		'text' => 'PowerConnect 6224: 20 RJ-45/10-100-1000T(X) + 4 combo-gig',
+		'processors' => array ('netgear-chassis-21-to-24-1000SFP', 'netgear-chassis-21-to-24-1000Tcombo', 'netgear-chassis-any-1000T'),
+	),
 	'674.10895.3017' => array
 	(
 		'dict_key' => 1067,
@@ -2185,7 +2191,7 @@ function doSwitchSNMPmining ($objectInfo, $device)
 	case preg_match ('/^202\.20\./', $sysObjectID): // SMC TigerSwitch
 	case preg_match ('/^674\.10895\.4/', $sysObjectID): // Dell PowerConnect
 	case preg_match ('/^674\.10895\.300(3|4|7|9)/', $sysObjectID):
-	case preg_match ('/^674\.10895\.301(7|9)/', $sysObjectID):
+	case preg_match ('/^674\.10895\.301(0|7|9)/', $sysObjectID):
 	case preg_match ('/^674\.10895\.302(0|1)/', $sysObjectID):
 		checkPIC ('1-681');
 		commitAddPort ($objectInfo['id'], 'console', '1-681', '', ''); // DB-9 RS-232
@@ -2466,7 +2472,7 @@ class APCPowerSwitch extends RTSNMPDevice
 		return preg_replace ('/^STRING: "(.*)"$/', '\\1', $this->snmpget ("{$this->snmpMib}.1.1.12.1.5.0"));
 	}
 }
- 
+
 // Take address in the form XX:XX:XX:XX:XX:XX and return the next
 // address in the same form.
 function nextMACAddress ($addr)
