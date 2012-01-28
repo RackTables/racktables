@@ -13,7 +13,7 @@
 	update: API: you can selectively override the default static content by specifying the $local_staticdir global var
 	update: ability to delete IP prefixes from within its properties tab
 	update: adding and deleting forms of IP prefixes are separated
-	update: SNMP support for Cisco SF 300-48 (#507), WS-CE500-24TT (#511), WS-CE500G-12TC (#512), 3Com 4200G (#342), 
+	update: SNMP support for Cisco SF 300-48 (#507), WS-CE500-24TT (#511), WS-CE500G-12TC (#512), 3Com 4200G (#342), Netgear FS750T2 (#479),
 		Dell PowerConnect 3348, 3448, 3548, 5224, 5324, 54xx, 6024F, 6224, 6224F (#383, #390, #427, #502)
 	new feature: you can obtain who has made tag assignment, object's ports or IPv4 address changes by hovering cursor on these entities
 	new feature: adjustable quick links at the top of the page

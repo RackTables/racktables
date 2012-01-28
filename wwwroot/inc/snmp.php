@@ -651,6 +651,33 @@ $iftable_processors['netgear-chassis-any-100TX'] = array
 	'try_next_proc' => FALSE,
 );
 
+$iftable_processors['netgear-49-to-50-combo-1000SFP'] = array
+(
+	'pattern' => '@^GbE_(49|50)$@',
+	'replacement' => '\\1',
+	'dict_key' => '4-1077',
+	'label' => '\\1F',
+	'try_next_proc' => TRUE,
+);
+
+$iftable_processors['netgear-49-to-50-combo-1000T'] = array
+(
+	'pattern' => '@^GbE_(49|50)$@',
+	'replacement' => '\\1',
+	'dict_key' => '1-24',
+	'label' => '\\1T',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['netgear-any-100TX'] = array
+(
+	'pattern' => '@^FE_(\d+)$@',
+	'replacement' => '\\1',
+	'dict_key' => 19,
+	'label' => '\\1',
+	'try_next_proc' => FALSE,
+);
+
 $iftable_processors['nortel-any-1000T'] = array
 (
 	'pattern' => '@^Ethernet Port on unit 1, port ([[:digit:]]+)$@',
@@ -1932,6 +1959,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'processors' => array ('dell-g45-to-g48-combo-1000SFP', 'dell-g45-to-g48-combo-1000T', 'dell-any-1000T'),
 		'ifDescrOID' => 'ifName',
 	),
+	'10977.11825.11833.97.25451.12800.100.4.4' => array
+	(
+		'dict_key' => 577,
+		'text' => 'FS750T2: 48 RJ-45/10-100TX + 2 combo-gig',
+		'processors' => array ('netgear-49-to-50-combo-1000SFP', 'netgear-49-to-50-combo-1000T', 'netgear-any-100TX'),
+	),
 );
 
 global $swtype_pcre;
@@ -2022,7 +2055,7 @@ function doSwitchSNMPmining ($objectInfo, $device)
 
 	if (FALSE === ($sysObjectID = $device->snmpget ('sysObjectID.0')))
 		return showFuncMessage (__FUNCTION__, 'ERR3'); // // fatal SNMP failure
-	$sysObjectID = preg_replace ('/^.*(enterprises\.)([\.[:digit:]]+)$/', '\\2', $sysObjectID);
+	$sysObjectID = preg_replace ('/^.*(enterprises\.|joint-iso-ccitt\.)([\.[:digit:]]+)$/', '\\2', $sysObjectID);
 	$sysName = substr ($device->snmpget ('sysName.0'), strlen ('STRING: '));
 	$sysDescr = substr ($device->snmpget ('sysDescr.0'), strlen ('STRING: '));
 	$sysDescr = str_replace (array ("\n", "\r"), " ", $sysDescr);  // Make it one line
@@ -2253,6 +2286,14 @@ function doSwitchSNMPmining ($objectInfo, $device)
 		// one RJ-45 RS-232 and one AC port
 		checkPIC ('1-29');
 		commitAddPort ($objectInfo['id'], 'console', '1-29', '', ''); // RJ-45 RS-232 console
+		checkPIC ('1-16');
+		commitAddPort ($objectInfo['id'], 'AC-in', '1-16', '', '');
+		break;
+	case preg_match ('/^10977\.11825\.11833\.97\.25451\.12800\.100\.4\.4/', $sysObjectID): // Netgear
+		$sw_version = preg_replace('/^.* V([^ ]+).*$/', '\\1', $sysDescr);
+		updateStickerForCell ($objectInfo, 5, $sw_version);
+
+		// one AC port, no console
 		checkPIC ('1-16');
 		commitAddPort ($objectInfo['id'], 'AC-in', '1-16', '', '');
 		break;
