@@ -3362,6 +3362,11 @@ function createIPv4Prefix ($range = '', $name = '', $is_connected = FALSE, $tagl
 	if (!strlen ($ip) or !strlen ($mask))
 		throw new InvalidRequestArgException ('range', $range, 'Invalid IPv4 prefix');
 	$ipL = ip2long($ip);
+	# deny 0.0.0.0/8 and 240.0.0.0/4
+	preg_match ('/^(\d+)\.\d+\.\d+\.\d+$/', long2ip ($ipL), $m);
+	if ($m[1] == 0 or $m[1] >= 240)
+		throw new InvalidRequestArgException ('range', $range, 'Reserved IPv4 network');
+
 	$maskL = ip2long($mask);
 	if ($ipL == -1 || $ipL === FALSE)
 		throw new InvalidRequestArgException ('range', $range, 'Invalid IPv4 address');
