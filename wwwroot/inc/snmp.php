@@ -1031,6 +1031,24 @@ $iftable_processors['dell-g3-to-g4-1000T'] = array
 	'try_next_proc' => FALSE,
 );
 
+$iftable_processors['dell-g17-to-g24-combo-1000SFP'] = array
+(
+	'pattern' => '@^g(17|18|19|20|21|22|23|24)$@',
+	'replacement' => 'g\\1',
+	'dict_key' => '4-1077',
+	'label' => 'g\\1',
+	'try_next_proc' => TRUE,
+);
+
+$iftable_processors['dell-g17-to-g24-combo-1000T'] = array
+(
+	'pattern' => '@^g(17|18|19|20|21|22|23|24)$@',
+	'replacement' => 'g\\1',
+	'dict_key' => '1-24',
+	'label' => 'g\\1',
+	'try_next_proc' => FALSE,
+);
+
 $iftable_processors['dell-g21-to-g24-combo-1000SFP'] = array
 (
 	'pattern' => '@^g(21|22|23|24)$@',
@@ -1081,6 +1099,15 @@ $iftable_processors['dell-any-1000T'] = array
 	'pattern' => '@^g(\d+)$@',
 	'replacement' => 'g\\1',
 	'dict_key' => 24,
+	'label' => 'g\\1',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['dell-any-1000SFP'] = array
+(
+	'pattern' => '@^g(\d+)$@',
+	'replacement' => 'g\\1',
+	'dict_key' => '4-1077',
 	'label' => 'g\\1',
 	'try_next_proc' => FALSE,
 );
@@ -1775,12 +1802,26 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'PowerConnect 5224: 20 RJ-45/10-100-1000T(X) + 4 combo ports',
 		'processors' => array ('dell-5224-21-to-24-combo-1000SFP', 'dell-52xx-any-1000T'),
 	),
+	'674.10895.3000' => array
+	(
+		'dict_key' => 1623,
+		'text' => 'PowerConnect 6024F: 16 SFP + 8 combo ports',
+		'processors' => array ('dell-g17-to-g24-combo-1000SFP', 'dell-g17-to-g24-combo-1000T', 'dell-any-1000SFP'),
+		'ifDescrOID' => 'ifName',
+	),
 	'674.10895.3003' => array
 	(
 		'dict_key' => 1611,
 		'text' => 'PowerConnect 3348: 48 RJ-45/10-100TX + 2 combo ports',
 		'processors' => array ('dell-33xx-any-combo-1000SFP', 'dell-33xx-any-1000T', 'dell-33xx-any-100TX'),
 		'ifDescrOID' => 'entPhysicalName',
+	),
+	'674.10895.3004' => array
+	(
+		'dict_key' => 349,
+		'text' => 'PowerConnect 5324: 20 RJ-45/10-100-1000T(X) + 4 combo ports',
+		'processors' => array ('dell-g21-to-g24-combo-1000SFP', 'dell-g21-to-g24-combo-1000T', 'dell-any-1000T'),
+		'ifDescrOID' => 'ifName',
 	),
 	'674.10895.3007' => array
 	(
@@ -1807,13 +1848,6 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'dict_key' => 1068,
 		'text' => 'PowerConnect 3548P: 48 RJ-45/10-100TX PoE + 2 SFP/1000 + 2 RJ-45/10-100-1000T(X) ports',
 		'processors' => array ('dell-g1-to-g2-1000SFP', 'dell-g3-to-g4-1000T', 'dell-any-100TX'),
-	),
-	'674.10895.3004' => array
-	(
-		'dict_key' => 349,
-		'text' => 'PowerConnect 5324: 20 RJ-45/10-100-1000T(X) + 4 combo ports',
-		'processors' => array ('dell-g21-to-g24-combo-1000SFP', 'dell-g21-to-g24-combo-1000T', 'dell-any-1000T'),
-		'ifDescrOID' => 'ifName',
 	),
 	'674.10895.3020' => array
 	(
@@ -2131,6 +2165,15 @@ function doSwitchSNMPmining ($objectInfo, $device)
 	case preg_match ('/^674\.10895\.302(0|1)/', $sysObjectID):
 		checkPIC ('1-681');
 		commitAddPort ($objectInfo['id'], 'console', '1-681', '', ''); // DB-9 RS-232
+		checkPIC ('1-16');
+		commitAddPort ($objectInfo['id'], 'AC-in', '1-16', '', '');
+		break;
+	case preg_match ('/^674\.10895\.3000/', $sysObjectID):
+		// one DB-9 RS-232, one 100Mb OOB mgmt, and one AC port
+		checkPIC ('1-681');
+		commitAddPort ($objectInfo['id'], 'console', '1-681', '', ''); // DB-9 RS-232
+		checkPIC ('1-19');
+		commitAddPort ($objectInfo['id'], 'mgmt', '1-19', '', '');
 		checkPIC ('1-16');
 		commitAddPort ($objectInfo['id'], 'AC-in', '1-16', '', '');
 		break;
