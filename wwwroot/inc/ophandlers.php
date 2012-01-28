@@ -2395,7 +2395,8 @@ function save8021QPorts ()
 $msgcode['bindVLANtoIPv4']['OK'] = 48;
 function bindVLANtoIPv4 ()
 {
-	assertUIntArg ('id'); // network id
+	genericAssertion ('id', 'uint');
+	genericAssertion ('vlan_ck', 'uint-uint');
 	global $sic;
 	commitSupplementVLANIPv4 ($sic['vlan_ck'], $sic['id']);
 	return showFuncMessage (__FUNCTION__, 'OK');
@@ -2404,7 +2405,8 @@ function bindVLANtoIPv4 ()
 $msgcode['bindVLANtoIPv6']['OK'] = 48;
 function bindVLANtoIPv6 ()
 {
-	assertUIntArg ('id'); // network id
+	genericAssertion ('id', 'uint');
+	genericAssertion ('vlan_ck', 'uint-uint');
 	global $sic;
 	commitSupplementVLANIPv6 ($sic['vlan_ck'], $_REQUEST['id']);
 	return showFuncMessage (__FUNCTION__, 'OK');
@@ -2413,7 +2415,8 @@ function bindVLANtoIPv6 ()
 $msgcode['unbindVLANfromIPv4']['OK'] = 49;
 function unbindVLANfromIPv4 ()
 {
-	assertUIntArg ('id'); // network id
+	genericAssertion ('id', 'uint');
+	genericAssertion ('vlan_ck', 'uint-uint');
 	global $sic;
 	commitReduceVLANIPv4 ($sic['vlan_ck'], $sic['id']);
 	return showFuncMessage (__FUNCTION__, 'OK');
@@ -2422,7 +2425,8 @@ function unbindVLANfromIPv4 ()
 $msgcode['unbindVLANfromIPv6']['OK'] = 49;
 function unbindVLANfromIPv6 ()
 {
-	assertUIntArg ('id'); // network id
+	genericAssertion ('id', 'uint');
+	genericAssertion ('vlan_ck', 'uint-uint');
 	global $sic;
 	commitReduceVLANIPv6 ($sic['vlan_ck'], $sic['id']);
 	return showFuncMessage (__FUNCTION__, 'OK');
