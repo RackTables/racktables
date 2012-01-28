@@ -606,6 +606,15 @@ $iftable_processors['netgear-chassis-any-1000T'] = array
 	'try_next_proc' => FALSE,
 );
 
+$iftable_processors['netgear-chassis-any-1000SFP'] = array
+(
+	'pattern' => '@^Unit: (\d+) Slot: (\d+) Port: (\d+) Gigabit - Level$@',
+	'replacement' => '\\1/\\2/\\3',
+	'dict_key' => '4-1077',
+	'label' => '\\3',
+	'try_next_proc' => FALSE,
+);
+
 $iftable_processors['netgear-chassis-21-to-24-1000Tcombo'] = array
 (
 	'pattern' => '@^Unit: (\d+) Slot: (\d+) Port: (21|22|23|24) Gigabit - Level$@',
@@ -1867,6 +1876,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'PowerConnect 6224: 20 RJ-45/10-100-1000T(X) + 4 combo-gig',
 		'processors' => array ('netgear-chassis-21-to-24-1000SFP', 'netgear-chassis-21-to-24-1000Tcombo', 'netgear-chassis-any-1000T'),
 	),
+	'674.10895.3014' => array
+	(
+		'dict_key' => 352,
+		'text' => 'PowerConnect 6224F: 20 SFP + 4 combo-gig',
+		'processors' => array ('netgear-chassis-21-to-24-1000SFP', 'netgear-chassis-21-to-24-1000Tcombo', 'netgear-chassis-any-1000SFP'),
+	),
 	'674.10895.3017' => array
 	(
 		'dict_key' => 1067,
@@ -2191,7 +2206,7 @@ function doSwitchSNMPmining ($objectInfo, $device)
 	case preg_match ('/^202\.20\./', $sysObjectID): // SMC TigerSwitch
 	case preg_match ('/^674\.10895\.4/', $sysObjectID): // Dell PowerConnect
 	case preg_match ('/^674\.10895\.300(3|4|7|9)/', $sysObjectID):
-	case preg_match ('/^674\.10895\.301(0|7|9)/', $sysObjectID):
+	case preg_match ('/^674\.10895\.301(0|4|7|9)/', $sysObjectID):
 	case preg_match ('/^674\.10895\.302(0|1)/', $sysObjectID):
 		checkPIC ('1-681');
 		commitAddPort ($objectInfo['id'], 'console', '1-681', '', ''); // DB-9 RS-232
