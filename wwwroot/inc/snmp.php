@@ -1139,6 +1139,24 @@ $iftable_processors['dell-any-1000SFP'] = array
 	'try_next_proc' => FALSE,
 );
 
+$iftable_processors['3com-49-to-52-1000SFP'] = array
+(
+	'pattern' => '@^GigabitEthernet(\d+)/(\d+)/(49|50|51|52)$@',
+	'replacement' => '\\1/\\2/\\3',
+	'dict_key' => '4-1077',
+	'label' => '\\3',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['3com-any-1000T'] = array
+(
+	'pattern' => '@^GigabitEthernet(\d+)/(\d+)/(\d+)$@',
+	'replacement' => '\\1/\\2/\\3',
+	'dict_key' => 24,
+	'label' => '\\3',
+	'try_next_proc' => FALSE,
+);
+
 global $known_switches;
 $known_switches = array // key is system OID w/o "enterprises" prefix
 (
@@ -1634,6 +1652,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 			'gbe2csfp-23',
 			'gbe2csfp-24',
 		),
+	),
+	'43.1.16.4.3.29' => array
+	(
+		'dict_key' => 758,
+		'text' => '4200G: 44 RJ-45/10-100-1000T(X) + 4 combo-gig',
+		'processors' => array ('3com-49-to-52-1000SFP', '3com-any-1000T'),
 	),
 	'4526.100.1.1' => array
 	(
@@ -2219,6 +2243,16 @@ function doSwitchSNMPmining ($objectInfo, $device)
 		commitAddPort ($objectInfo['id'], 'console', '1-681', '', ''); // DB-9 RS-232
 		checkPIC ('1-19');
 		commitAddPort ($objectInfo['id'], 'mgmt', '1-19', '', '');
+		checkPIC ('1-16');
+		commitAddPort ($objectInfo['id'], 'AC-in', '1-16', '', '');
+		break;
+	case preg_match ('/^43\.1\.16\.4\.3\.29/', $sysObjectID): // 3Com
+		$sw_version = preg_replace('/^.* Version 3Com OS ([^ ]+).*$/', '\\1', $sysDescr);
+		updateStickerForCell ($objectInfo, 5, $sw_version);
+
+		// one RJ-45 RS-232 and one AC port
+		checkPIC ('1-29');
+		commitAddPort ($objectInfo['id'], 'console', '1-29', '', ''); // RJ-45 RS-232 console
 		checkPIC ('1-16');
 		commitAddPort ($objectInfo['id'], 'AC-in', '1-16', '', '');
 		break;
