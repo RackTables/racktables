@@ -1741,6 +1741,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 	// EX4500 2636.1.1.1.1.44
 	// There is a special workaround in code below to derive specific
 	// product number from sysDescr string.
+	'2636.1.1.1.2.30' => array
+	(
+		'dict_key' => 902,
+		'text' => 'Juniper EX3200 series',
+		'processors' => array ('juniper-ex-pic0-1000T', 'juniper-ex-mgmt'),
+	),
 	'2636.1.1.1.2.31' => array
 	(
 		'dict_key' => 905,
@@ -2151,11 +2157,18 @@ function doSwitchSNMPmining ($objectInfo, $device)
 		checkPIC ('1-681');
 		commitAddPort ($objectInfo['id'], 'con0', '1-681', 'console', ''); // DB-9 RS-232 console
 		break;
-	case '2636.1.1.1.2.31' == $sysObjectID: // Juniper EX4200
+	case preg_match ('/^2636\.1\.1\.1\.2\.3(0|1)/', $sysObjectID): // Juniper EX3200/EX4200
 		detectSoftwareType ($objectInfo, $sysDescr);
+		$sw_version = preg_replace ('/^.*, kernel JUNOS ([^ ]+).*$/', '\\1', $sysDescr);
+		updateStickerForCell ($objectInfo, 5, $sw_version);
+		// one RJ-45 RS-232 and one AC port (it could be DC, but chances are it's AC)
 		checkPIC ('1-29');
 		commitAddPort ($objectInfo['id'], 'con', '1-29', 'CON', ''); // RJ-45 RS-232 console
-		// EX4200-24T is already in DB
+		checkPIC ('1-16');
+		commitAddPort ($objectInfo['id'], 'AC-in', '1-16', '', '');
+		// Juniper uses the same sysObjectID for multiple HW models, override if necessary
+		if (preg_match ('/^Juniper Networks, Inc. ex3200-48t internet router/', $sysDescr))
+			updateStickerForCell ($objectInfo, 2, 902);
 		if (preg_match ('/^Juniper Networks, Inc. ex4200-48t internet router/', $sysDescr))
 			updateStickerForCell ($objectInfo, 2, 907);
 		break;
