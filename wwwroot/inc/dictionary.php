@@ -1680,6 +1680,7 @@ $dictionary = array
 	1621 => array ('chapter_id' => 12, 'dict_value' => 'Huawei%GPASS%Quidway S2326TP-PWR-EI'),
 	1622 => array ('chapter_id' => 12, 'dict_value' => 'Dell PowerConnect%GPASS%5224'),
 	1623 => array ('chapter_id' => 12, 'dict_value' => 'Dell PowerConnect%GPASS%6024F'),
+	1624 => array ('chapter_id' => 12, 'dict_value' => 'Linksys%GPASS%SRW2048'),
 
 # Any new "default" dictionary records must go above this line (i.e., with
 # dict_key code less, than 50000). This is necessary to keep AUTO_INCREMENT
