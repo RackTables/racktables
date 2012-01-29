@@ -297,7 +297,6 @@ function listCells ($realm, $parent_id = 0)
 	{
 		$ret[$entity_id]['etags'] = getExplicitTagsOnly ($ret[$entity_id]['etags']);
 		$ret[$entity_id]['itags'] = getImplicitTags ($ret[$entity_id]['etags']);
-		$ret[$entity_id]['atags'] = generateEntityAutoTags ($ret[$entity_id]);
 		switch ($realm)
 		{
 		case 'object':
@@ -321,6 +320,7 @@ function listCells ($realm, $parent_id = 0)
 		default:
 			break;
 		}
+		$ret[$entity_id]['atags'] = generateEntityAutoTags ($ret[$entity_id]);
 		if (!$parent_id)
 			$entityCache['complete'][$realm][$entity_id] = $ret[$entity_id];
 		else
@@ -383,7 +383,6 @@ function spotEntity ($realm, $id)
 		throw new EntityNotFoundException ($realm, $id);
 	$ret['etags'] = getExplicitTagsOnly ($ret['etags']);
 	$ret['itags'] = getImplicitTags ($ret['etags']);
-	$ret['atags'] = generateEntityAutoTags ($ret);
 	switch ($realm)
 	{
 	case 'object':
@@ -407,6 +406,7 @@ function spotEntity ($realm, $id)
 	default:
 		break;
 	}
+	$ret['atags'] = generateEntityAutoTags ($ret);
 	$entityCache['partial'][$realm][$id] = $ret;
 	return $ret;
 }
