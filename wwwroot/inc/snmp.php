@@ -12,6 +12,24 @@ $iftable_processors['generic-fa-any-100TX'] = array
 	'try_next_proc' => FALSE,
 );
 
+$iftable_processors['generic-g45-to-g48-combo-1000SFP'] = array
+(
+	'pattern' => '@^g(45|46|47|48)$@',
+	'replacement' => 'g\\1',
+	'dict_key' => '4-1077',
+	'label' => 'g\\1',
+	'try_next_proc' => TRUE,
+);
+
+$iftable_processors['generic-g-any-1000T'] = array
+(
+	'pattern' => '@^g(\d+)$@',
+	'replacement' => 'g\\1',
+	'dict_key' => 24,
+	'label' => 'g\\1',
+	'try_next_proc' => FALSE,
+);
+
 $iftable_processors['generic-gi-1-to-2-1000T'] = array
 (
 	'pattern' => '@^gi(\d+)$@',
@@ -1040,6 +1058,15 @@ $iftable_processors['dell-33xx-any-1000T'] = array
 	'try_next_proc' => FALSE,
 );
 
+$iftable_processors['dell-33xx-any-100TX'] = array
+(
+	'pattern' => '@^1/e(\d+)$@',
+	'replacement' => 'e\\1',
+	'dict_key' => 19,
+	'label' => 'e\\1',
+	'try_next_proc' => FALSE,
+);
+
 $iftable_processors['dell-5224-21-to-24-combo-1000SFP'] = array
 (
 	'pattern' => '@^EtherNet Port on unit 1, port:(21|22|23|24)$@',
@@ -1055,15 +1082,6 @@ $iftable_processors['dell-52xx-any-1000T'] = array
 	'replacement' => 'g\\1',
 	'dict_key' => 24,
 	'label' => 'g\\1',
-	'try_next_proc' => FALSE,
-);
-
-$iftable_processors['dell-33xx-any-100TX'] = array
-(
-	'pattern' => '@^1/e(\d+)$@',
-	'replacement' => 'e\\1',
-	'dict_key' => 19,
-	'label' => 'e\\1',
 	'try_next_proc' => FALSE,
 );
 
@@ -1085,22 +1103,13 @@ $iftable_processors['dell-g3-to-g4-1000T'] = array
 	'try_next_proc' => FALSE,
 );
 
-$iftable_processors['dell-g17-to-g24-combo-1000SFP'] = array
-(
-	'pattern' => '@^g(17|18|19|20|21|22|23|24)$@',
-	'replacement' => 'g\\1',
-	'dict_key' => '4-1077',
-	'label' => 'g\\1',
-	'try_next_proc' => TRUE,
-);
-
 $iftable_processors['dell-g17-to-g24-combo-1000T'] = array
 (
 	'pattern' => '@^g(17|18|19|20|21|22|23|24)$@',
 	'replacement' => 'g\\1',
 	'dict_key' => '1-24',
 	'label' => 'g\\1',
-	'try_next_proc' => FALSE,
+	'try_next_proc' => TRUE,
 );
 
 $iftable_processors['dell-g21-to-g24-combo-1000SFP'] = array
@@ -1112,48 +1121,12 @@ $iftable_processors['dell-g21-to-g24-combo-1000SFP'] = array
 	'try_next_proc' => TRUE,
 );
 
-$iftable_processors['dell-g21-to-g24-combo-1000T'] = array
-(
-	'pattern' => '@^g(21|22|23|24)$@',
-	'replacement' => 'g\\1',
-	'dict_key' => '1-24',
-	'label' => 'g\\1',
-	'try_next_proc' => FALSE,
-);
-
-$iftable_processors['dell-g45-to-g48-combo-1000SFP'] = array
-(
-	'pattern' => '@^g(45|46|47|48)$@',
-	'replacement' => 'g\\1',
-	'dict_key' => '4-1077',
-	'label' => 'g\\1',
-	'try_next_proc' => TRUE,
-);
-
-$iftable_processors['dell-g45-to-g48-combo-1000T'] = array
-(
-	'pattern' => '@^g(45|46|47|48)$@',
-	'replacement' => 'g\\1',
-	'dict_key' => '1-24',
-	'label' => 'g\\1',
-	'try_next_proc' => FALSE,
-);
-
 $iftable_processors['dell-any-100TX'] = array
 (
 	'pattern' => '@^e(\d+)$@',
 	'replacement' => 'e\\1',
 	'dict_key' => 19,
 	'label' => 'e\\1',
-	'try_next_proc' => FALSE,
-);
-
-$iftable_processors['dell-any-1000T'] = array
-(
-	'pattern' => '@^g(\d+)$@',
-	'replacement' => 'g\\1',
-	'dict_key' => 24,
-	'label' => 'g\\1',
 	'try_next_proc' => FALSE,
 );
 
@@ -1743,7 +1716,7 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 	// product number from sysDescr string.
 	'2636.1.1.1.2.30' => array
 	(
-		'dict_key' => 902,
+		'dict_key' => 900,
 		'text' => 'Juniper EX3200 series',
 		'processors' => array ('juniper-ex-pic0-1000T', 'juniper-ex-mgmt'),
 	),
@@ -1896,7 +1869,7 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 	(
 		'dict_key' => 1623,
 		'text' => 'PowerConnect 6024F: 16 SFP + 8 combo ports',
-		'processors' => array ('dell-g17-to-g24-combo-1000SFP', 'dell-g17-to-g24-combo-1000T', 'dell-any-1000SFP'),
+		'processors' => array ('dell-g17-to-g24-combo-1000T', 'dell-any-1000SFP'),
 		'ifDescrOID' => 'ifName',
 	),
 	'674.10895.3003' => array
@@ -1910,7 +1883,7 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 	(
 		'dict_key' => 349,
 		'text' => 'PowerConnect 5324: 20 RJ-45/10-100-1000T(X) + 4 combo ports',
-		'processors' => array ('dell-g21-to-g24-combo-1000SFP', 'dell-g21-to-g24-combo-1000T', 'dell-any-1000T'),
+		'processors' => array ('dell-g21-to-g24-combo-1000SFP', 'generic-g-any-1000T'),
 		'ifDescrOID' => 'ifName',
 	),
 	'674.10895.3007' => array
@@ -1955,14 +1928,14 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 	(
 		'dict_key' => 1069,
 		'text' => 'PowerConnect 5424: 20 RJ-45/10-100-1000T(X) + 4 combo ports',
-		'processors' => array ('dell-g21-to-g24-combo-1000SFP', 'dell-g21-to-g24-combo-1000T', 'dell-any-1000T'),
+		'processors' => array ('dell-g21-to-g24-combo-1000SFP', 'generic-g-any-1000T'),
 		'ifDescrOID' => 'ifName',
 	),
 	'674.10895.3021' => array
 	(
 		'dict_key' => 1070,
 		'text' => 'PowerConnect 5448: 44 RJ-45/10-100-1000T(X) + 4 combo ports',
-		'processors' => array ('dell-g45-to-g48-combo-1000SFP', 'dell-g45-to-g48-combo-1000T', 'dell-any-1000T'),
+		'processors' => array ('generic-g45-to-g48-combo-1000SFP', 'generic-g-any-1000T'),
 		'ifDescrOID' => 'ifName',
 	),
 	'10977.11825.11833.97.25451.12800.100.4.4' => array
@@ -1970,6 +1943,13 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'dict_key' => 577,
 		'text' => 'FS750T2: 48 RJ-45/10-100TX + 2 combo-gig',
 		'processors' => array ('netgear-49-to-50-combo-1000SFP', 'netgear-49-to-50-combo-1000T', 'netgear-any-100TX'),
+	),
+	'3955.6.1.2048.1' => array
+	(
+		'dict_key' => 1624,
+		'text' => 'Linksys SRW2048: 44 RJ-45/10-100-1000T(X) + 4 combo ports',
+		'processors' => array ('generic-g45-to-g48-combo-1000SFP', 'generic-g-any-1000T'),
+		'ifDescrOID' => 'ifName',
 	),
 );
 
@@ -2278,6 +2258,8 @@ function doSwitchSNMPmining ($objectInfo, $device)
 	case preg_match ('/^674\.10895\.300(3|4|7|9)/', $sysObjectID):
 	case preg_match ('/^674\.10895\.301(0|4|7|9)/', $sysObjectID):
 	case preg_match ('/^674\.10895\.302(0|1)/', $sysObjectID):
+	case preg_match ('/^3955\.6\.1\.2048\.1/', $sysObjectID): // Linksys
+		// one DB-9 RS-232 and one AC port
 		checkPIC ('1-681');
 		commitAddPort ($objectInfo['id'], 'console', '1-681', '', ''); // DB-9 RS-232
 		checkPIC ('1-16');
