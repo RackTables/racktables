@@ -2071,6 +2071,7 @@ function addFileWithoutLink ()
 }
 
 $msgcode['addFileToEntity']['OK'] = 5;
+$msgcode['addFileToEntity']['ERR1'] = 207;
 function addFileToEntity ()
 {
 	global $pageno, $etype_by_pageno;
@@ -2082,6 +2083,10 @@ function addFileToEntity ()
 	// Make sure the file can be uploaded
 	if (get_cfg_var('file_uploads') != 1)
 		throw new RackTablesError ('file uploads not allowed, change "file_uploads" parameter in php.ini', RackTablesError::MISCONFIGURED);
+
+	// Exit if the upload failed
+	if ($_FILES['file']['error'])
+		return showFuncMessage (__FUNCTION__, 'ERR1', array ($_FILES['file']['error']));
 
 	$fp = fopen($_FILES['file']['tmp_name'], 'rb');
 	global $sic;

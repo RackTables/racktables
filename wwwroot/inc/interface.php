@@ -1513,6 +1513,7 @@ function showMessageOrError ()
 		200 => array ('code' => 'warning', 'format' => '%s'),
 		201 => array ('code' => 'warning', 'format' => 'nothing happened...'),
 		206 => array ('code' => 'warning', 'format' => 'Rack is not empty'),
+		207 => array ('code' => 'warning', 'format' => 'File upload failed, error: %s'),
 
 // records 300~399 with notices
 		300 => array ('code' => 'neutral', 'format' => '%s'),
