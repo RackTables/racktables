@@ -111,7 +111,8 @@ function format ()
 
 	for ($i = 0; $i < 8; $i++)
 	{
-		$value = array_shift (unpack ('n', substr ($this->words, $i * 2, 2)));
+		$unpacked = unpack ('n', substr ($this->words, $i * 2, 2));
+		$value = array_shift ($unpacked);
 		$result[] = dechex ($value & 0xffff);
 		if ($value != 0)
 		{
