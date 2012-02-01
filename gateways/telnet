@@ -59,7 +59,18 @@ my $buff = '';
 my $nohang_read;
 until ($session->eof) {
 	# read output from the device
-    $buff .= $session->get (Timeout => $nohang_read ? 0 : $op_timeout, Errmode => $nohang_read ? 'return' : 'die');
+    eval {
+		$buff .= $session->get (Timeout => $nohang_read ? 0 : $op_timeout, Errmode => $nohang_read ? 'return' : 'die');
+	};
+	if ($@) {
+		# check if there is something else in <STDIN>
+		if (defined <STDIN>) {
+			die $@;
+		}
+		else {
+			last; # no more input, seems like session was closed remotely by our last command
+		}
+	}
     $nohang_read = 0;
 	print $1 if ($buff =~ s/(.*\n)//s);
 
