@@ -941,7 +941,7 @@ function renderObject ($object_id)
 		$fmt_children = array();
 		foreach ($children as $child)
 			$fmt_children[] = "<a href='".makeHref(array('page'=>$child['page'], $child['id_name']=>$child['entity_id']))."'>${child['name']}</a>";
-		$summary['Contains'] = implode ('<br>' . $fmt_children);
+		$summary['Contains'] = implode ('<br>', $fmt_children);
 	}
 	if ($info['has_problems'] == 'yes')
 		$summary[] = array ('<tr><td colspan=2 class=msg_error>Has problems</td></tr>');
