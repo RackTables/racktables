@@ -217,8 +217,8 @@ function renderSLBTripletsEdit ($cell)
 function renderLBList ()
 {
 	$cells = array();
-	foreach (getLBList() as $object_id => $poolcount)
-		$cells[$object_id] = spotEntity ('object', $object_id);
+	foreach (scanRealmByText('object', getConfigVar ('IPV4LB_LISTSRC')) as $object)
+		$cells[$object['id']] = $object;
 	renderCellList ('object', 'items', FALSE, $cells);
 }
 
