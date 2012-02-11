@@ -1420,6 +1420,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'WS-C2950G-48: 48 RJ-45/10-100TX + 2 GBIC/1000',
 		'processors' => array ('catalyst-chassis-any-1000GBIC', 'catalyst-chassis-any-100TX'),
 	),
+	'9.1.471' => array
+	(
+		'dict_key' => 270,
+		'text' => '2651XM: 2 RJ-45/10-100TX',
+		'processors' => array ('catalyst-chassis-any-100TX'),
+	),
 	'9.1.559' => array
 	(
 		'dict_key' => 387,
@@ -2097,6 +2103,8 @@ function doSwitchSNMPmining ($objectInfo, $device)
 			updateStickerForCell ($objectInfo, 1, str_replace ('"', '', substr ($sysChassi, strlen ('STRING: '))));
 		checkPIC ('1-29');
 		commitAddPort ($objectInfo['id'], 'con0', '1-29', 'console', ''); // RJ-45 RS-232 console
+		if (preg_match ('/Cisco IOS Software, C2600/', $sysDescr))
+			commitAddPort ($objectInfo['id'], 'aux0', '1-29', 'auxillary', ''); // RJ-45 RS-232 aux port
 		// blade devices are powered through internal circuitry of chassis
 		if ($sysObjectID != '9.1.749' and $sysObjectID != '9.1.920')
 		{
