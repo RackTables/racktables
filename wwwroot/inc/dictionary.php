@@ -1705,6 +1705,7 @@ $dictionary = array
 	1639 => array ('chapter_id' => 12, 'dict_value' => 'HP ProCurve%GPASS%6600-24XG J9265A'),
 	1640 => array ('chapter_id' => 12, 'dict_value' => 'HP ProCurve%GPASS%6600-48G J9451A'),
 	1641 => array ('chapter_id' => 12, 'dict_value' => 'HP ProCurve%GPASS%6600-48G-4XG J9452A'),
+	1642 => array ('chapter_id' => 2, 'dict_value' => '10GBase-T'),
 
 # Any new "default" dictionary records must go above this line (i.e., with
 # dict_key code less, than 50000). This is necessary to keep AUTO_INCREMENT
