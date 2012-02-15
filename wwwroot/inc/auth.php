@@ -384,6 +384,13 @@ function queryLDAPServer ($username, $password)
 	if ($connect === FALSE)
 		return array ('result' => 'CAN');
 
+	if (isset ($LDAP_options['use_tls']) && $LDAP_options['use_tls'] >= 1)
+	{
+		$tls = ldap_start_tls ($connect);
+		if ($LDAP_options['use_tls'] >= 2 && $tls == FALSE)
+			throw new RackTablesError ('LDAP misconfiguration: LDAP TLS required but not successfully negotiated.', RackTablesError::MISCONFIGURED);
+	}
+
 	// Decide on the username we will actually authenticate for.
 	if (isset ($LDAP_options['domain']) and strlen ($LDAP_options['domain']))
 		$auth_user_name = $username . "@" . $LDAP_options['domain'];

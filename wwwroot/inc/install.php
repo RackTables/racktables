@@ -192,6 +192,7 @@ function init_config ()
 #	'search_dn' => '',
 #	'displayname_attrs' => '',
 #	'options' => array (LDAP_OPT_PROTOCOL_VERSION => 3),
+#	'use_tls' => 2,         // 0 == don't attempt, 1 == attempt, 2 == require
 #);
 
 
