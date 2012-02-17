@@ -354,4 +354,42 @@ function proxyCactiRequest ($graph_id)
 	echo $ret['contents'];
 }
 
+function printSVGMessageBar ($text = 'lost message', $textattrs = array(), $rectattrs = array())
+{
+	$mytextattrs = array
+	(
+		'fill' => 'black',
+		'x' => '85',
+		'y' => '15',
+		'font-size' => '100%',
+		'text-anchor' => 'middle',
+		'font-family' => 'monospace',
+		'font-weight' => 'bold',
+	);
+	$myrectattrs = array
+	(
+		'fill' => 'white',
+		'stroke' => 'black',
+		'x' => '0',
+		'y' => '0',
+		'width' => '170px',
+		'height' => '20px',
+		'stroke-width' => '1px',
+	);
+	foreach ($textattrs as $k => $v)
+		$mytextattrs[$k] = $v;
+	foreach ($rectattrs as $k => $v)
+		$myrectattrs[$k] = $v;
+	echo "<svg width='" . $myrectattrs['width'] . "' height='" . $myrectattrs['height'] . "' version='1.1' ";
+	echo "xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'>\n";
+	echo '<rect';
+	foreach ($myrectattrs as $k => $v)
+		echo " ${k}='${v}'";
+	echo " />\n<text";
+	foreach ($mytextattrs as $k => $v)
+		echo " ${k}='${v}'";
+	echo ">${text}</text>\n";
+	echo "</svg>\n";
+}
+
 ?>

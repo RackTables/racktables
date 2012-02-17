@@ -83,6 +83,47 @@ try {
 			renderErrorImage();
 		}
 		break;
+	case 'svg' == $_REQUEST['module']:
+		require_once 'inc/init.php';
+		require_once 'inc/solutions.php';
+		header ('Content-Type: image/svg+xml');
+		echo '<?xml version="1.0" encoding="iso-8859-1" standalone="no"?>' . "\n";
+		echo '<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">' . "\n";
+		try
+		{
+			genericAssertion ('view', 'string');
+			if (! array_key_exists ($_REQUEST['view'], $svghandler))
+				throw new InvalidRequestArgException ('view', $_REQUEST['view'], 'undefined view');
+			if (! function_exists ($svghandler[$_REQUEST['view']]))
+				throw new RackTablesError ('missing handler function', RackTablesError::INTERNAL);
+			call_user_func ($svghandler[$_REQUEST['view']]);
+		}
+		catch (RTPermissionDenied $e)
+		{
+			ob_clean();
+			printSVGMessageBar ('permission denied', array ('fill' => 'white'), array ('fill' => 'black', 'stroke' => 'gray'));
+		}
+		catch (InvalidRequestArgException $e)
+		{
+			ob_clean();
+			printSVGMessageBar ('malformed HTTP request', array(), array ('fill' => 'yellow', 'stroke' => 'black'));
+		}
+		catch (EntityNotFoundException $e)
+		{
+			ob_clean();
+			printSVGMessageBar ('no such record', array(), array ('fill' => 'yellow', 'stroke' => 'black'));
+		}
+		catch (RackTablesError $e)
+		{
+			ob_clean();
+			printSVGMessageBar ('RT error: ' . $e->getMessage(), array(), array ('fill' => 'red', 'stroke' => 'black'));
+		}
+		catch (Exception $e)
+		{
+			ob_clean();
+			printSVGMessageBar ('unknown error', array(), array ('fill' => 'red', 'stroke' => 'black'));
+		}
+		break;
 	case 'progressbar' == $_REQUEST['module']:
 		# Unlike images (and like static content), progress bars are processed
 		# without a permission check, but only for authenticated users.
