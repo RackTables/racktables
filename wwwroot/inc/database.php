@@ -4251,7 +4251,7 @@ FROM
 WHERE domain_id = ?
 ORDER BY vlan_id
 END
-		, array ($vdom_id, $vdom_id, $vdom_id, $vdom_id)
+		, array ($vdom_id)
 	);
 	$ret = array();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
