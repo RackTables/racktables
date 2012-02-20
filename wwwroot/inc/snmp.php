@@ -1604,8 +1604,8 @@ function updateStickerForCell ($cell, $attr_id, $new_value)
 		commitUpdateAttrValue ($cell['id'], $attr_id, $new_value);
 }
 
-// Accept "X-Y" on input and make sure, that PortInterfaceCompat contains
-// a record with IIF id = X and OIF id = Y.
+// Accepts "X-Y" or "Y" assuming X = "1" on input.
+// Makes sure, that PortInterfaceCompat contains a record with IIF id = X and OIF id = Y.
 function checkPIC ($port_type_id)
 {
 	// cache PortInterfaceCompat
@@ -1620,14 +1620,14 @@ function checkPIC ($port_type_id)
 		}
 	}
 	
-	if (preg_match ('/^(\d+-)?(\d+)$/', $port_type_id, $m))
+	if (preg_match ('/^(?:(\d+)-)?(\d+)$/', $port_type_id, $m))
 	{
 		$iif_id = $m[1];
 		$oif_id = $m[2];
-		if (empty ($iif_id[1]))
+		if (empty ($iif_id))
 		{
 			$iif_id = 1;
-			$port_type_id = $iif_id . '-' . $port_type_id;
+			$port_type_id = $iif_id . '-' . $oif_id;
 		}
 		if (! array_key_exists ($port_type_id, $compat_array))
 		{
