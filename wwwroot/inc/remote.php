@@ -251,7 +251,17 @@ function setDevice8021QConfig ($object_id, $pseudocode, $vlan_names)
 	// $object_id argument isn't used by default translating functions, but
 	// may come in handy for overloaded versions of these.
 	$commands = translateDeviceCommands ($object_id, $pseudocode, $vlan_names);
-	queryTerminal ($object_id, $commands, FALSE);
+	$breed = detectDeviceBreed ($object_id);
+	$output = queryTerminal ($object_id, $commands, FALSE);
+	
+	// throw an exception if Juniper did not allow to enter config mode or to commit changes
+	if ($breed == 'jun10')
+	{
+		if (preg_match ('/>\s*configure exclusive\s*$[^#>]*?^error:/sm', $output))
+			throw new RTGatewayError ("Configuration is locked by other user");
+		elseif (preg_match ('/#\s*commit\s*$([^#]*?^error: .*?)$/sm', $output, $m))
+			throw new RTGatewayError ("Commit failed: ${m[1]}");
+	}
 }
 
 ?>

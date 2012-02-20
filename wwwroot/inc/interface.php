@@ -7551,6 +7551,10 @@ function renderObject8021QSync ($object_id)
 	}
 	if ($vswitch['last_errno'])
 		$rows['failed'] = $vswitch['last_error_ts'] . ' (' . strerror8021Q ($vswitch['last_errno']) . ')';
+
+	if (NULL !== $new_rows = callHook ('alter8021qSyncSummaryItems', $rows))
+		$rows = $new_rows;
+	
 	foreach ($rows as $th => $td)
 		echo "<tr><th width='50%' class=tdright>${th}:</th><td class=tdleft colspan=2>${td}</td></tr>";
 

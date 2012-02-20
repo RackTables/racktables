@@ -3708,6 +3708,7 @@ function exec8021QDeploy ($object_id, $do_push)
 					'UPDATE VLANSwitch SET out_of_sync="yes", last_error_ts=NOW(), last_errno=? WHERE object_id=?',
 					array (E_8021Q_PUSH_REMOTE_ERROR, $vswitch['object_id'])
 				);
+				callHook ('pushErrorHandler', $object_id, $r);
 			}
 		}
 	}

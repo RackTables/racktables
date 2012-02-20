@@ -1387,7 +1387,8 @@ function jun10TranslatePushQueue ($dummy_object_id, $queue, $vlan_names)
 			$ret .= "configure exclusive\n";
 			break;
 		case 'end configuration':
-			$ret .= "commit confirmed 120\n";
+			$ret .= "commit\n";
+			$ret .= "rollback 0\n"; // discard all changes if commit failed
 			break;
 		case 'save configuration':
 			break; // JunOS can`t apply configuration without saving it
