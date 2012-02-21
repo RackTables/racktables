@@ -126,6 +126,7 @@ function getDBUpgradePath ($v1, $v2)
 		'0.19.8',
 		'0.19.9',
 		'0.19.10',
+		'0.19.11',
 	);
 	if (!in_array ($v1, $versionhistory) or !in_array ($v2, $versionhistory))
 		return NULL;
