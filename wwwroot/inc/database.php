@@ -17,7 +17,7 @@ $SQLSchema = array
 			'label' => 'label',
 			'asset_no' => 'asset_no',
 			'objtype_id' => 'objtype_id',
-			'rack_id' => '(SELECT RS.rack_id FROM RackSpace RS LEFT JOIN EntityLink EL ON RS.object_id = EL.parent_entity_id WHERE RS.object_id = RackObject.id OR EL.child_entity_id = RackObject.id ORDER BY RS.rack_id ASC LIMIT 1)',
+			'rack_id' => '(SELECT RS.rack_id FROM RackSpace RS WHERE RS.object_id = RackObject.id UNION SELECT RS.rack_id FROM RackSpace RS LEFT JOIN EntityLink EL ON RS.object_id = EL.parent_entity_id WHERE EL.child_entity_id = RackObject.id ORDER BY rack_id ASC LIMIT 1)',
 			'Rack_name' => '(select name from Rack where id = rack_id)',
 			'row_id' => '(select row_id from Rack where id = rack_id)',
 			'Row_name' => '(select name from RackRow where id = row_id)',
