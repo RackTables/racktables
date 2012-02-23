@@ -1233,6 +1233,7 @@ CREATE TABLE `CactiGraph` (
 				$query[] = "DELETE FROM PortInterfaceCompat WHERE oif_id IN(${csv})";
 			}
 			$query[] = "INSERT INTO `PortCompat` (`type1`, `type2`) VALUES (1642,1642)";
+			$query[] = 'ALTER TABLE `EntityLink` ADD KEY `EntityLink-compound` (`parent_entity_type`,`child_entity_type`,`child_entity_id`)';
 			$query = array_merge ($query, reloadDictionary ());
 			$query[] = "UPDATE Config SET varvalue = '0.19.11' WHERE varname = 'DB_VERSION'";
 			break;

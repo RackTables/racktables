@@ -451,7 +451,8 @@ CREATE TABLE `EntityLink` (
   `child_entity_type` enum('file','object') NOT NULL,
   `child_entity_id` int(10) unsigned NOT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `EntityLink-unique` (`parent_entity_type`,`parent_entity_id`,`child_entity_type`,`child_entity_id`)
+  UNIQUE KEY `EntityLink-unique` (`parent_entity_type`,`parent_entity_id`,`child_entity_type`,`child_entity_id`),
+  KEY `EntityLink-compound` (`parent_entity_type`,`child_entity_type`,`child_entity_id`)
 ) ENGINE=InnoDB;
 
 CREATE TABLE `File` (
