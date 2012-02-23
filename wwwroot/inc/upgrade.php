@@ -1234,6 +1234,7 @@ CREATE TABLE `CactiGraph` (
 				$query[] = "DELETE FROM PortInterfaceCompat WHERE oif_id IN(${csv})";
 			}
 			$query[] = "INSERT INTO `PortCompat` (`type1`, `type2`) VALUES (1642,1642)";
+			$query[] = 'ALTER TABLE `EntityLink` ADD KEY `EntityLink-compound` (`parent_entity_type`,`child_entity_type`,`child_entity_id`)';
 			$query = array_merge ($query, reloadDictionary ());
 			$query[] = "UPDATE Config SET varvalue = '0.19.11' WHERE varname = 'DB_VERSION'";
 			break;
@@ -1340,7 +1341,6 @@ CREATE VIEW `Rack` AS SELECT O.id, O.label AS name, O.asset_no, O.has_problems, 
 CREATE VIEW `RackObject` AS SELECT id, name, label, objtype_id, asset_no, has_problems, comment FROM `Object`
  WHERE `objtype_id` NOT IN (1560, 1561, 1562)
 ";
-			$query[] = 'ALTER TABLE `EntityLink` ADD KEY `EntityLink-compound` (`parent_entity_type`,`child_entity_type`,`child_entity_id`)';
 			$query[] = "UPDATE `Chapter` SET `name` = 'ObjectType' WHERE `id` = 1";
 			$query[] = "DELETE FROM RackSpace WHERE object_id IS NULL AND state = 'T'";
 
@@ -1350,7 +1350,6 @@ CREATE VIEW `RackObject` AS SELECT id, name, label, objtype_id, asset_no, has_pr
 			$query[] = "ALTER TABLE `IPv4LB` MODIFY `prio` varchar(255) DEFAULT NULL";
 			$query[] = "ALTER TABLE `IPv4RS` ADD COLUMN `comment` varchar(255) NULL";
 			$query[] = "ALTER TABLE `IPv4VS` MODIFY `proto` enum('TCP','UDP','MARK') NOT NULL default 'TCP'";
-			$query[] = "ALTER TABLE `EntityLink` ADD KEY `EntityLink-child` (`child_entity_type`,`child_entity_id`,`parent_entity_type`) USING BTREE";
 			$query[] = "UPDATE Config SET varvalue = '0.20.0' WHERE varname = 'DB_VERSION'";
 			break;
 		default:

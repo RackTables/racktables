@@ -452,8 +452,7 @@ CREATE TABLE `EntityLink` (
   `child_entity_id` int(10) unsigned NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `EntityLink-unique` (`parent_entity_type`,`parent_entity_id`,`child_entity_type`,`child_entity_id`),
-  KEY `EntityLink-compound` (`parent_entity_type`,`child_entity_type`,`child_entity_id`),
-  KEY `EntityLink-child` (`child_entity_type`,`child_entity_id`,`parent_entity_type`) USING BTREE
+  KEY `EntityLink-compound` (`parent_entity_type`,`child_entity_type`,`child_entity_id`)
 ) ENGINE=InnoDB;
 
 CREATE TABLE `File` (
