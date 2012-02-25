@@ -998,6 +998,7 @@ INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_id`) VALUES
 (4,24,NULL),
 (4,25,NULL),
 (4,26,29),
+(4,28,NULL),
 (5,1,NULL),
 (5,2,18),
 (6,1,NULL),
@@ -1028,6 +1029,7 @@ INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_id`) VALUES
 (8,21,NULL),
 (8,22,NULL),
 (8,24,NULL),
+(8,28,NULL),
 (9,6,NULL),
 (12,1,NULL),
 (12,3,NULL),
@@ -1060,10 +1062,12 @@ INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_id`) VALUES
 (798,21,NULL),
 (798,22,NULL),
 (798,24,NULL),
+(798,28,NULL),
 (965,1,NULL),
 (965,3,NULL),
 (965,2,25),
 (1055,2,26),
+(1055,28,NULL),
 (1323,1,NULL),
 (1323,2,28),
 (1323,3,NULL),
@@ -1431,7 +1435,7 @@ INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdef
 ('CACTI_USERNAME','','string','yes','no','no','Cacti user account'),
 ('CACTI_USERPASS','','string','yes','no','no','Cacti user password'),
 ('VIRTUAL_OBJ_LISTSRC','1504,1505,1506,1507','string','no','no','no','List source: virtual objects'),
-('DB_VERSION','0.19.10','string','no','yes','no','Database version.');
+('DB_VERSION','0.19.11','string','no','yes','no','Database version.');
 
 INSERT INTO `Script` VALUES ('RackCode','allow {\$userid_1}');
 
