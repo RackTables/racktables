@@ -1,4 +1,4 @@
-0.19.11
+0.19.11 2012-02-26
 	bugfix: IP address reservation release on allocation works again
 	bugfix: SNMP did not work for Netgear
 	bugfix: Cacti integration improvements (#466)
