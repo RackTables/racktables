@@ -1460,7 +1460,7 @@ INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdef
 ('CACTI_USERNAME','','string','yes','no','no','Cacti user account'),
 ('CACTI_USERPASS','','string','yes','no','no','Cacti user password'),
 ('VIRTUAL_OBJ_LISTSRC','1504,1505,1506,1507','string','no','no','no','List source: virtual objects'),
-('DB_VERSION','0.19.10','string','no','yes','no','Database version.');
+('DB_VERSION','0.19.11','string','no','yes','no','Database version.');
 
 INSERT INTO `Script` VALUES ('RackCode','allow {\$userid_1}');
 
