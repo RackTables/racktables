@@ -756,12 +756,13 @@ function renderRackObject ($object_id)
 		finishPortlet ();
 	}
 
-	if (count ($logrecords = getLogRecordsForObject ($_REQUEST['object_id'])))
+	$logrecords = getLogRecordsForObject ($_REQUEST['object_id']);
+	if (count ($logrecords))
 	{
 		startPortlet ('log records');
 		echo "<table cellspacing=0 cellpadding=5 align=center class=widetable width='100%'>";
 		$order = 'odd';
-		foreach (getLogRecordsForObject ($_REQUEST['object_id']) as $row)
+		foreach ($logrecords as $row)
 		{
 			echo "<tr class=row_${order} valign=top>";
 			echo '<td class=tdleft>' . $row['date'] . '<br>' . $row['user'] . '</td>';
@@ -9110,8 +9111,11 @@ function renderObjectLogEditor ()
 {
 	global $nextorder;
 
-	echo '<center><h3>log records for this object (<a href=?page=objectlog>complete list</a>)</h3></center>';
+	$entity = 'object';
+	$id_name = 'object_id';
+	$object_id = $_REQUEST['object_id'];
 
+	echo "<center><h2>Log records for this ${entity} (<a href=?page=objectlog>complete list</a>)</h2></center>";
 	printOpFormIntro ('add');
 	echo "<table with=80% align=center border=0 cellpadding=5 cellspacing=0 align=center class=cooltable><tr valign=top class=row_odd>";
 	echo '<td class=tdcenter>' . getImageHREF ('CREATE', 'add record', TRUE, 101) . '</td>';
@@ -9120,14 +9124,14 @@ function renderObjectLogEditor ()
 	echo '</tr></form>';
 
 	$order = 'even';
-	foreach (getLogRecordsForObject ($_REQUEST['object_id']) as $row)
+	foreach (getLogRecordsForObject ($object_id) as $row)
 	{
 		echo "<tr class=row_${order} valign=top>";
 		echo '<td class=tdleft>' . $row['date'] . '<br>' . $row['user'] . '</td>';
 		echo '<td class="slbconf rsvtext">' . string_insert_hrefs (htmlspecialchars ($row['content'], ENT_NOQUOTES)) . '</td>';
-		echo "<td class=tdleft><a href=\"".makeHrefProcess(array('op'=>'del', 'logid'=>$row['id'], 'object_id'=>$_REQUEST['object_id']))."\">";
+		echo "<td class=tdleft><a href=\"".makeHrefProcess(array('op'=>'del', 'log_id'=>$row['id'], $id_name=>$object_id))."\">";
 		echo getImageHREF ('DESTROY', 'Delete log entry') . '</a></td>';
-		echo '</tr>';
+		echo "</tr>\n";
 		$order = $nextorder[$order];
 	}
 	echo '</table>';

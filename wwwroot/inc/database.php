@@ -4534,9 +4534,9 @@ function getLogRecords()
 {
 	$result = usePreparedSelectBlade
 	(
-		'SELECT o.id as logid, r.name, o.content, o.date, o.user, r.id as object_id ' .
-		'FROM ObjectLog o Left JOIN RackObject r ON o.object_id = r.id ' .
-		'ORDER BY o.date DESC'
+		'SELECT OL.id AS log_id, O.objtype_id, O.name, OL.content, OL.date, OL.user, O.id AS object_id ' .
+		'FROM ObjectLog OL LEFT JOIN RackObject O ON OL.object_id = O.id ' .
+		'ORDER BY OL.date DESC'
 	);
 	return $result->fetchAll (PDO::FETCH_ASSOC);
 }
