@@ -974,12 +974,13 @@ function renderObject ($object_id)
 		finishPortlet ();
 	}
 
-	if (count ($logrecords = getLogRecordsForObject ($_REQUEST['object_id'])))
+	$logrecords = getLogRecordsForObject ($_REQUEST['object_id']);
+	if (count ($logrecords))
 	{
 		startPortlet ('log records');
 		echo "<table cellspacing=0 cellpadding=5 align=center class=widetable width='100%'>";
 		$order = 'odd';
-		foreach (getLogRecordsForObject ($_REQUEST['object_id']) as $row)
+		foreach ($logrecords as $row)
 		{
 			echo "<tr class=row_${order} valign=top>";
 			echo '<td class=tdleft>' . $row['date'] . '<br>' . $row['user'] . '</td>';
