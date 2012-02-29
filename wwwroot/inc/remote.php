@@ -69,7 +69,7 @@ function queryTerminal ($object_id, $commands, $tolerate_remote_errors = TRUE)
 			break;
 		case 'xos12':
 			$protocol = 'telnet';
-			$prompt = ': $|\.\d+ # $';
+			$prompt = ': $|\.\d+ # $|\?\s*\([Yy]\/[Nn]\)\s*$';
 			break;
 		case 'jun10':
 			$protocol = 'telnet';
