@@ -1705,7 +1705,6 @@ function ftos8Read8021QConfig ($input)
 		'portdata' => array(),
 		'portconfig' => array(),
 	);
-	$lines = explode ("\n", $input);
 	$iface = NULL;
 	foreach (explode ("\n", $input) as $line)
 	{
@@ -1716,10 +1715,8 @@ function ftos8Read8021QConfig ($input)
 				'name' => ios12ShortenIfName (str_replace (' ', '', $m[1])),
 				'lines' => array(),
 				'is_switched' => FALSE,
-				'vlan' => 0,
+				'vlan' => 1 === preg_match ('/^Vlan (\d+)$/', $m[1], $m2) ? $m2[1] : 0,
 			);
-			$name_parts = explode (' ', $m[1]);
-			$iface['vlan'] = (count ($name_parts) == 2 and $name_parts[0] == 'Vlan') ? $name_parts[1] : 0;
 		}
 		if (isset ($iface))
 		{
@@ -1728,6 +1725,11 @@ function ftos8Read8021QConfig ($input)
 			if ($line == ' switchport')
 			{
 				$iface['is_switched'] = TRUE;
+				# In "no default-vlan disable" mode (active by default) FTOS monitors
+				# switchport/VLAN configuration and once a port is removed from all
+				# VLANs, the software assigns it to the default VLAN in access mode.
+				# In this case every port is guaranteed to belong to at least one VLAN
+				# and assuming "access" mode is a reasonable default, but see below.
 				$ret['portdata'][$iface['name']] = array
 				(
 					'allowed' => array (),
@@ -1771,6 +1773,13 @@ function ftos8Read8021QConfig ($input)
 			}
 		}
 	}
+	# In "default-vlan disable" mode a port can be removed from all VLANs and
+	# still remain a switchport without a bridge group. If that was the case,
+	# this extra round makes sure all ports without allowed VLANs are "T" ports,
+	# because pure "A" mode is defined illegal in RackTables 802.1Q data model.
+	foreach (array_keys ($ret['portdata']) as $if_name)
+		if (! count ($ret['portdata'][$if_name]['allowed']))
+			$ret['portdata'][$if_name]['mode'] = 'trunk';
 	return $ret;
 }
 
