@@ -22,6 +22,7 @@ $gwrxlator['getcdpstatus'] = array
 );
 $gwrxlator['getlldpstatus'] = array
 (
+	'dlink' => 'dlinkReadVLANConfig',
 	'ios12' => 'ios12ReadLLDPStatus',
 	'xos12' => 'xos12ReadLLDPStatus',
 	'vrp53' => 'vrp5xReadLLDPStatus',
@@ -30,6 +31,7 @@ $gwrxlator['getlldpstatus'] = array
 );
 $gwrxlator['get8021q'] = array
 (
+	
 	'ios12' => 'ios12ReadVLANConfig',
 	'fdry5' => 'fdry5ReadVLANConfig',
 	'vrp53' => 'vrp53ReadVLANConfig',
@@ -40,6 +42,7 @@ $gwrxlator['get8021q'] = array
 );
 $gwrxlator['getportstatus'] = array
 (
+	'dlink' => 'dlinkReadInterfaceStatus',
 	'ios12' => 'ciscoReadInterfaceStatus',
 	'vrp53' => 'vrpReadInterfaceStatus',
 	'vrp55' => 'vrpReadInterfaceStatus',
@@ -47,6 +50,7 @@ $gwrxlator['getportstatus'] = array
 );
 $gwrxlator['getmaclist'] = array
 (
+	'dlink' => 'dlinkReadMacList',
 	'ios12' => 'ios12ReadMacList',
 	'vrp53' => 'vrp53ReadMacList',
 	'vrp55' => 'vrp55ReadMacList',
@@ -334,8 +338,14 @@ function detectDeviceBreed ($object_id)
 		1367 => 'jun10',
 	);
 	foreach (getAttrValues ($object_id) as $record)
+	{
+		// See Attribute table: ID = 4, Type = 'dict', Name = 'SW Type'
 		if ($record['id'] == 4 and array_key_exists ($record['key'], $breed_by_swcode))
 			return $breed_by_swcode[$record['key']];
+		// See Attribute table: ID = 2, Type = 'dict', Name = 'HW Type'
+		if ($record['id'] == 2 and $record['key'] >= 589 and $record['key'] <= 637)
+			return 'dlink';
+	}
 	return '';
 }
 

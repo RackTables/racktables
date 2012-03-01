@@ -183,6 +183,119 @@ function nxos4ReadLLDPStatus ($input)
 	return $ret;
 }
 
+/*
+D-Link VLAN info sample:
+========================
+VID             : 72          VLAN Name       : v72
+VLAN Type       : Static      Advertisement   : Disabled
+Member Ports    : 1-16,25-28
+Static Ports    : 1-16,25-28
+Current Tagged Ports   : 25-28
+Current Untagged Ports : 1-16
+Static Tagged Ports    : 25-28
+Static Untagged Ports  : 1-16
+Forbidden Ports        :
+*/
+function dlinkReadVLANConfig ($input)
+{
+	$ret = array
+	(
+		'vlanlist' => array(),
+		'portdata' => array(),
+	);
+	$procfunc = 'dlinkScanTopLevel';
+	foreach (preg_split("/\n\r?/", $input) as $line)
+		$procfunc = $procfunc ($ret, $line);
+	return $ret;
+}
+
+function dlinkScanTopLevel(&$work, $line)
+{
+	$matches = array();
+	switch(TRUE)
+	{
+	case (preg_match('@^\s*VID\s*:\s*(\d+)\s+.*name\s*:\s*(.+)$@i', $line, $matches)):
+		$work['current'] = array
+		(
+			'vlan_id' => $matches[1],
+			'vlan_name' => $matches[2],
+			'tagged_ports' => '',
+			'untagged_ports' => '',
+		);
+		return 'dlinkPickVLANCommand';
+	default:
+		return __FUNCTION__;
+	}
+}
+
+function dlinkPickVLANCommand(&$work, $line)
+{
+	switch(TRUE)
+	{
+	case (preg_match ('@END OF VLAN LIST@', $line)):
+	case (trim($line) === ''):
+		if (!isset($work['current']))
+			break;
+		$work['vlanlist'][] = $work['current']['vlan_id'];
+		foreach (dlinkParsePortList ($work['current']['tagged_ports']) as $port_name)
+			dlinkStorePortInfo ($work, $port_name, 'trunk', 'trunk');
+		foreach (dlinkParsePortList ($work['current']['untagged_ports']) as $port_name)
+			dlinkStorePortInfo ($work, $port_name, 'access');
+		unset ($work['current']);
+		return 'dlinkScanTopLevel';
+	case (preg_match('@current tagged ports\s*:\s*([[:digit:]]+.*)$@i', $line, $matches)):
+		$work['current']['tagged_ports'] = $matches[1];
+		break;
+	case (preg_match('@current untagged ports\s*:\s*([[:digit:]]+.*)$@i', $line, $matches)):
+		$work['current']['untagged_ports'] = $matches[1];
+		break;
+//	default:
+//		error_log("dlinkPickVLANCommand: skip: \"$line\".");
+	}
+	return __FUNCTION__;
+}
+
+function dlinkStorePortInfo (&$work, $port_name, $new_mode, $overwrite_mode = '')
+{
+	if (!array_key_exists($port_name, $work['portdata']))
+	{
+		$work['portdata'][$port_name] = array
+		(
+			'mode' => $new_mode,
+			'allowed' => array($work['current']['vlan_id']),
+			'native' => $work['current']['vlan_id']
+		);
+		return;
+	}
+	$work['portdata'][$port_name]['allowed'][] = $work['current']['vlan_id'];
+	if ($overwrite_mode !== '')
+		$work['portdata'][$port_name]['mode'] = $overwrite_mode;
+}
+
+// portlist = range[,range..]
+// range = N[-N]
+function dlinkParsePortList($portlist)
+{
+	$ret = array();
+	foreach(explode(',', $portlist) as $port_range)
+	{
+		$a = explode('-', $port_range);
+		switch (count($a))
+		{
+		case 1:
+			$ret[] = $port_range;
+			break;
+		case 2:
+			for ($p = $a[0]; $p <= $a[1]; $p++)
+				$ret[] = $p;
+			break;
+		default:
+			// ..impossible?
+		}
+	}
+	return $ret;
+}
+
 function ios12ReadVLANConfig ($input)
 {
 	$ret = array
@@ -1416,6 +1529,43 @@ function jun10Read8021QConfig ($input)
 	return $ret;
 }
 
+/*
+ D-Link "show ports" output sample
+ =================================
+
+ Port   State/          Settings             Connection           Address
+        MDI       Speed/Duplex/FlowCtrl  Speed/Duplex/FlowCtrl    Learning
+ -----  --------  ---------------------  ---------------------    --------
+ 1      Enabled   Auto/Disabled          100M/Full/None           Enabled
+        Auto
+ ...
+ 26(C)  Enabled   Auto/Disabled          LinkDown                 Enabled
+        Auto
+ 26(F)  Enabled   Auto/Disabled          LinkDown                 Enabled
+*/
+function dlinkReadInterfaceStatus ($text)
+{
+	$result = array();
+	foreach (preg_split ("/\n\r?/", $text) as $line)
+	{
+		if (!preg_match ('/^\s*\d+/', $line))
+			continue;
+		$w = preg_split ('/\s+/', strtolower($line));
+		if (count($w) != 5)
+			continue;
+		$port_name = $w[0];
+		if ($w[1] != 'enabled') {
+			$result[$portname] = array ('status'=>'disabled', 'speed'=>0, 'duplex'=>'');
+		} elseif ($w[3] == 'linkdown') {
+			$result[$portname] = array ('status'=>'down', 'speed'=>0, 'duplex'=>'');
+		} else {
+			$s = split('/', $w[3]);
+			$result[$portname] = array ('status'=>'up', 'speed'=>$s[0], 'duplex'=>$s[1]);
+		}
+	}
+	return $result;
+}
+
 function ciscoReadInterfaceStatus ($text)
 {
 	$result = array();
@@ -1499,6 +1649,37 @@ function maclist_sort ($a, $b)
 	if ($a['vid'] == $b['vid'])
 		return 0;
 	return ($a['vid'] < $b['vid']) ? -1 : 1;
+}
+
+/*
+D-Link "show fdb" output sample
+===============================
+
+VID  VLAN Name                        MAC Address       Port Type
+---- -------------------------------- ----------------- ---- ---------------
+1    default                          00-1B-2C-5F-4E-AE 27   Dynamic
+99   switch                           00-00-3E-11-B7-52 27   Dynamic
+99   switch                           84-C9-B2-36-80-F2 27   Dynamic
+*/
+function dlinkReadMacList ($text)
+{
+       $result = array();
+       foreach (preg_split ("/\n\r?/", $text) as $line)
+       {
+               if (!preg_match ('/^\s*\d+\s+/', $line))
+                       continue;
+               $w = preg_split ('/\s+/', $line);
+               if (count($w) != 5)
+                       continue;
+               $result[$w[3]][] = array
+               (
+                       'mac' => $w[2],
+                       'vid' => $w[0],
+               );
+       }
+       foreach ($result as $portname => &$maclist)
+               usort ($maclist, 'maclist_sort');
+       return $result;
 }
 
 function ios12ReadMacList ($text)
