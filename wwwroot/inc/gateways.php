@@ -61,6 +61,16 @@ $breedfunc = array
 	'nxos4-getmaclist-main'    => 'nxos4ReadMacList',
 	'nxos4-xlatepushq-main'    => 'nxos4TranslatePushQueue',
 	'nxos4-getallconf-main'    => 'nxos4SpotConfigText',
+	'dlink-get8021q-main'      => 'dlinkReadVLANConfig',
+	'dlink-get8021q-top'       => 'dlinkScanTopLevel',
+	'dlink-get8021q-pickvlan'  => 'dlinkPickVLANCommand',
+	'dlink-getportstatus-main' => 'dlinkReadInterfaceStatus',
+	'dlink-getmaclist-main'    => 'dlinkReadMacList',
+	'dlink-xlatepushq-main'    => 'dlinkTranslatePushQueue',
+	'linux-get8021q-main'      => 'linuxReadVLANConfig',
+	'linux-getportstatus-main' => 'linuxReadInterfaceStatus',
+	'linux-getmaclist-main'    => 'linuxReadMacList',
+	'linux-xlatepushq-main'    => 'linuxTranslatePushQueue',
 	'xos12-getlldpstatus-main' => 'xos12ReadLLDPStatus',
 	'xos12-get8021q-main'      => 'xos12Read8021QConfig',
 	'xos12-xlatepushq-main'    => 'xos12TranslatePushQueue',
@@ -366,10 +376,29 @@ function detectDeviceBreed ($object_id)
 		1675 => 'eos4',
 		1759 => 'iosxr4', # Cisco IOS XR 4.2
 		1786 => 'ros11', # Marvell ROS 1.1
+		242 => 'linux',
+		243 => 'linux',
+		1331 => 'linux',
+		1332 => 'linux',
+		1333 => 'linux',
+		1334 => 'linux',
+		1395 => 'linux',
+		1396 => 'linux',
 	);
+	for ($i = 225; $i <= 235; $i++)
+		$breed_by_swcode[$i] = 'linux';
+	for ($i = 418; $i <= 436; $i++)
+		$breed_by_swcode[$i] = 'linux';
+	for ($i = 1417; $i <= 1422; $i++)
+		$breed_by_swcode[$i] = 'linux';
+	$breed_by_hwcode = array();
+	for ($i = 589; $i <= 637; $i++)
+		$breed_by_hwcode[$i] = 'dlink';
 	foreach (getAttrValues ($object_id) as $record)
 		if ($record['id'] == 4 and array_key_exists ($record['key'], $breed_by_swcode))
 			return $breed_by_swcode[$record['key']];
+		elseif ($record['id'] == 2 and array_key_exists ($record['key'], $breed_by_hwcode))
+			return $breed_by_hwcode[$record['key']];
 	return '';
 }
 

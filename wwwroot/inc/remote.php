@@ -160,7 +160,9 @@ function queryTerminal ($object_id, $commands, $tolerate_remote_errors = TRUE)
 				case 'iosxr4':
 					$commands = "terminal length 0\nterminal monitor disable\n" . $commands;
 					break;
-
+				case 'dlink':
+					$commands = "disable clipaging\n" . $commands;
+					break;
 			}
 			// prepend telnet commands by credentials
 			if (isset ($settings['password']))
