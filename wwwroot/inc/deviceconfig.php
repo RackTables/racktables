@@ -1663,23 +1663,23 @@ VID  VLAN Name                        MAC Address       Port Type
 */
 function dlinkReadMacList ($text)
 {
-       $result = array();
-       foreach (preg_split ("/\n\r?/", $text) as $line)
-       {
-               if (!preg_match ('/^\s*\d+\s+/', $line))
-                       continue;
-               $w = preg_split ('/\s+/', $line);
-               if (count($w) != 5)
-                       continue;
-               $result[$w[3]][] = array
-               (
-                       'mac' => $w[2],
-                       'vid' => $w[0],
-               );
-       }
-       foreach ($result as $portname => &$maclist)
-               usort ($maclist, 'maclist_sort');
-       return $result;
+	$result = array();
+	foreach (preg_split ("/\n\r?/", $text) as $line)
+	{
+		if (!preg_match ('/^\s*\d+\s+/', $line))
+			continue;
+		$w = preg_split ('/\s+/', $line);
+		if (count($w) != 5)
+			continue;
+		$result[$w[3]][] = array
+		(
+			'mac' => $w[2],
+			'vid' => $w[0],
+		);
+	}
+	foreach ($result as $portname => &$maclist)
+		usort ($maclist, 'maclist_sort');
+	return $result;
 }
 
 function ios12ReadMacList ($text)

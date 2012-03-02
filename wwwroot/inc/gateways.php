@@ -22,7 +22,6 @@ $gwrxlator['getcdpstatus'] = array
 );
 $gwrxlator['getlldpstatus'] = array
 (
-	'dlink' => 'dlinkReadVLANConfig',
 	'ios12' => 'ios12ReadLLDPStatus',
 	'xos12' => 'xos12ReadLLDPStatus',
 	'vrp53' => 'vrp5xReadLLDPStatus',
@@ -31,7 +30,7 @@ $gwrxlator['getlldpstatus'] = array
 );
 $gwrxlator['get8021q'] = array
 (
-	
+	'dlink' => 'dlinkReadVLANConfig',
 	'ios12' => 'ios12ReadVLANConfig',
 	'fdry5' => 'fdry5ReadVLANConfig',
 	'vrp53' => 'vrp53ReadVLANConfig',
