@@ -15,7 +15,7 @@ Unicode support and configured appropriately. It also requires an Apache
 httpd with PHP 5 module and several PHP extensions. Below is a list of
 know-good distributions with respective setup notes.
 
-*** Fedora 14
+*** Fedora 8-16
 * MySQL: yum install mysql-server mysql
 * Apache/PHP: yum install httpd php php-mysql php-pdo php-gd php-snmp php-mbstring
 * To enable Unicode, add "character-set-server=utf8" line to "[mysqld]"
