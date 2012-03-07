@@ -329,6 +329,7 @@ function detectDeviceBreed ($object_id)
 		1365 => 'nxos4', // NX-OS 4.2
 		1410 => 'nxos4', // NX-OS 5.0, seems compatible
 		1411 => 'nxos4', // NX-OS 5.1
+		1643 => 'nxos4', // NX-OS 6.0
 		1352 => 'xos12',
 		1360 => 'vrp53',
 		1361 => 'vrp55',
