@@ -948,6 +948,7 @@ SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
 END_OF_FILE;
 ##########################################################################
 	case 'dictbase':
+		$db_version = CODE_VERSION;
 		return <<<END_OF_FILE
 INSERT INTO `Attribute` (`id`, `type`, `name`) VALUES
 (1,'string','OEM S/N 1'),
@@ -1453,7 +1454,7 @@ INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdef
 ('CACTI_USERNAME','','string','yes','no','no','Cacti user account'),
 ('CACTI_USERPASS','','string','yes','no','no','Cacti user password'),
 ('VIRTUAL_OBJ_LISTSRC','1504,1505,1506,1507','string','no','no','no','List source: virtual objects'),
-('DB_VERSION','0.19.11','string','no','yes','no','Database version.');
+('DB_VERSION','${db_version}','string','no','yes','no','Database version.');
 
 INSERT INTO `Script` VALUES ('RackCode','allow {\$userid_1}');
 

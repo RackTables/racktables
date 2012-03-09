@@ -233,6 +233,7 @@ try {
 		break;
 	case 'installer' == $_REQUEST['module']:
 		require_once 'inc/dictionary.php';
+		require_once 'inc/config.php';
 		require_once 'inc/install.php';
 		renderInstallerHTML();
 		break;
