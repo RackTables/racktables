@@ -1374,13 +1374,6 @@ INSERT INTO `PortCompat` (`type1`, `type2`) VALUES
 (1642,1642);
 
 INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdefined, description) VALUES
-('color_F','8fbfbf','string','no','yes','no','HSV: 180-25-75. Free atoms, they are available for allocation to objects.'),
-('color_A','bfbfbf','string','no','yes','no','HSV: 0-0-75. Absent atoms.'),
-('color_U','bf8f8f','string','no','yes','no','HSV: 0-25-75. Unusable atoms. Some problems keep them from being free.'),
-('color_T','408080','string','no','yes','no','HSV: 180-50-50. Taken atoms, object_id should be set for such.'),
-('color_Th','80ffff','string','no','yes','no','HSV: 180-50-100. Taken atoms with highlight. They are not stored in the database and are only used for highlighting.'),
-('color_Tw','804040','string','no','yes','no','HSV: 0-50-50. Taken atoms with object problem. This is detected at runtime.'),
-('color_Thw','ff8080','string','no','yes','no','HSV: 0-50-100. An object can be both current and problematic. We run highlightObject() first and markupObjectProblems() second.'),
 ('MASSCOUNT','8','uint','no','no','yes','&quot;Fast&quot; form is this many records tall'),
 ('MAXSELSIZE','30','uint','no','no','yes','&lt;SELECT&gt; lists height'),
 ('enterprise','MyCompanyName','string','no','no','no','Organization name'),
