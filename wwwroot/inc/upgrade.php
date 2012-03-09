@@ -1237,6 +1237,11 @@ CREATE TABLE `CactiGraph` (
 			$query = array_merge ($query, reloadDictionary ());
 			$query[] = "UPDATE Config SET varvalue = '0.19.11' WHERE varname = 'DB_VERSION'";
 			break;
+		case '0.19.12':
+			$query = "DELETE FROM Config WHERE varname IN('color_F', 'color_A', 'color_U', 'color_T', 'color_Th', 'color_Tw', 'color_Thw')";
+			$query = array_merge ($query, reloadDictionary ());
+			$query[] = "UPDATE Config SET varvalue = '0.19.12' WHERE varname = 'DB_VERSION'";
+			break;
 		default:
 			showError ("executeUpgradeBatch () failed, because batch '${batchid}' isn't defined", __FUNCTION__);
 			die;

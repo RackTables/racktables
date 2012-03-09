@@ -338,7 +338,6 @@ function renderRack ($rack_id, $hl_obj_id = 0)
 	echo "<table class=rack border=0 cellspacing=0 cellpadding=1>\n";
 	echo "<tr><th width='10%'>&nbsp;</th><th width='20%'>Front</th>";
 	echo "<th width='50%'>Interior</th><th width='20%'>Back</th></tr>\n";
-	addAtomCSS();
 	for ($i = $rackData['height']; $i > 0; $i--)
 	{
 		echo "<tr><th>${i}</th>";
@@ -1836,7 +1835,6 @@ function renderMolecule ($mdata, $object_id)
 		$rackpack[$rack_id][$unit_no][$loclist[$atom]]['object_id'] = $object_id;
 	}
 	// now we have some racks to render
-	addAtomCSS();
 	foreach ($rackpack as $rackData)
 	{
 		markAllSpans ($rackData);
@@ -3806,7 +3804,6 @@ function renderSearchResults ($terms, $summary)
 function renderAtomGrid ($data)
 {
 	$rack_id = $data['id'];
-	addAtomCSS();
 	addJS ('js/racktables.js');
 	for ($unit_no = $data['height']; $unit_no > 0; $unit_no--)
 	{
@@ -9310,20 +9307,6 @@ function switchportInfoJS($object_id)
 	addJS ('js/jquery.contextmenu.js');
 	addJS ("enabled_elements = [ $list ];", TRUE);
 	addJS ('js/portinfo.js');
-}
-
-function addAtomCSS()
-{
-	// do not add generated css to page twice
-	static $is_first_call = TRUE;
-	if (! $is_first_call)
-		return;
-	$is_first_call = FALSE;
-
-	$style = '';
-	foreach (array ('F', 'A', 'U', 'T', 'Th', 'Tw', 'Thw') as $statecode)
-		$style .= "td.atom.state_${statecode} { background-color: #" . (getConfigVar ('color_' . $statecode)) . "; }\n";
-	addCSS ($style, TRUE);
 }
 
 // Formats VLAN packs: if they are different, the old appears stroken, and the new appears below it

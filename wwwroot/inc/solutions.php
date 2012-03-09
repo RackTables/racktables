@@ -123,12 +123,21 @@ function generateMiniRack ($rack_id)
 	$totalwidth = $offset[2] + $rtwidth[2] + 3;
 	$img = @imagecreatetruecolor ($totalwidth, $totalheight)
 		or die("Cannot Initialize new GD image stream");
-	// cache our palette as well
-	$color = array();
-	foreach (array ('F', 'A', 'U', 'T', 'Th', 'Tw', 'Thw') as $statecode)
-		$color[$statecode] = colorFromHex ($img, getConfigVar ('color_' . $statecode));
-	$color['black'] = colorFromHex ($img, '000000');
-	$color['gray'] = colorFromHex ($img, 'c0c0c0');
+	# It was measured, that caching palette in an array is faster, than
+	# calling colorFromHex() multiple times. It matters, when user's
+	# browser is trying to fetch many minirack images in parallel.
+	$color = array
+	(
+		'F' => colorFromHex ($img, '8fbfbf'),
+		'A' => colorFromHex ($img, 'bfbfbf'),
+		'U' => colorFromHex ($img, 'bf8f8f'),
+		'T' => colorFromHex ($img, '408080'),
+		'Th' => colorFromHex ($img, '80ffff'),
+		'Tw' => colorFromHex ($img, '804040'),
+		'Thw' => colorFromHex ($img, 'ff8080'),
+		'black' => colorFromHex ($img, '000000'),
+		'gray' => colorFromHex ($img, 'c0c0c0'),
+	);
 	imagerectangle ($img, 0, 0, $totalwidth - 1, $totalheight - 1, $color['black']);
 	imagerectangle ($img, 1, 1, $totalwidth - 2, $totalheight - 2, $color['gray']);
 	imagerectangle ($img, 2, 2, $totalwidth - 3, $totalheight - 3, $color['black']);
@@ -168,8 +177,8 @@ function renderProgressBarImage ($done)
 			break;
 		case 'rackspace': // teal
 		default:
-			$color['T'] = colorFromHex ($img, getConfigVar ('color_T'));
-			$color['F'] = colorFromHex ($img, getConfigVar ('color_F'));
+			$color['T'] = colorFromHex ($img, '408080');
+			$color['F'] = colorFromHex ($img, '8fbfbf');
 	}
 	imagefilledrectangle ($img, 0, 0, $done, 10, $color['T']);
 	imagefilledrectangle ($img, $done, 0, 100, 10, $color['F']);

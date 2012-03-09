@@ -641,6 +641,13 @@ a.toggleTreeMode {
 	text-align: center;
 	font: bold 10px Verdana, sans-serif;
 }
+.state_F   { background-color: #8fbfbf; }
+.state_A   { background-color: #bfbfbf; }
+.state_U   { background-color: #bf8f8f; }
+.state_T   { background-color: #408080; }
+.state_Th  { background-color: #80ffff; }
+.state_Tw  { background-color: #804040; }
+.state_Thw { background-color: #ff8080; }
 
 /* link with single image as body */
 a.img-link {
