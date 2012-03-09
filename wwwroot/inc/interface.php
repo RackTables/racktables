@@ -4309,7 +4309,7 @@ function render8021QReport ()
 	ksort ($output, SORT_NUMERIC);
 	$header_delay = 0;
 	startPortlet ('VLAN existence per domain');
-	echo '<table border=1 cellspacing=0 cellpadding=5 align=center>';
+	echo '<table border=1 cellspacing=0 cellpadding=5 align=center class=rackspace>';
 	foreach ($output as $vlan_id => $tbc)
 	{
 		if (--$header_delay <= 0)
@@ -4317,7 +4317,8 @@ function render8021QReport ()
 			echo $header;
 			$header_delay = 25;
 		}
-		echo '<tr><th class=tdright>' . $vlan_id . '</th>';
+		echo '<tr class="state_' . (count ($vlanstats[$vlan_id]) ? 'T' : 'F');
+		echo '"><th class=tdright>' . $vlan_id . '</th>';
 		foreach (array_keys ($domains) as $domain_id)
 		{
 			echo '<td class=tdcenter>';
@@ -4329,7 +4330,7 @@ function render8021QReport ()
 		}
 		echo '</tr>';
 		if ($tbc)
-			echo '<tr><th>...</th><td colspan=' . count ($domains) . '>&nbsp;</td></tr>';
+			echo '<tr class="state_A"><th>...</th><td colspan=' . count ($domains) . '>&nbsp;</td></tr>';
 	}
 	echo '</table>';
 	finishPortlet();
