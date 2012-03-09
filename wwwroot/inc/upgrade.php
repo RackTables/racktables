@@ -1512,12 +1512,26 @@ else
 	{
 		echo "<tr><th>Upgrade path</th><td>${dbver} &rarr; " . implode (' &rarr; ', $path) . "</td></tr>\n";
 		foreach ($path as $batchid)
-		{
-			executeUpgradeBatch ($batchid);
 			if (isset ($relnotes[$batchid]))
 				echo "<tr><th>Release notes for ${batchid}</th><td><pre>" . $relnotes[$batchid] . "</pre></td></tr>\n";
+		if (array_key_exists ('reallyreally', $_REQUEST))
+		{
+			foreach ($path as $batchid)
+				executeUpgradeBatch ($batchid);
+			echo "<tr><th>Summary</th><td>Upgrade complete, it is Ok to ";
+			echo "<a href='index.php'>enter</a> the system.</td></tr>\n";
 		}
-		echo "<tr><th>Summary</th><td>Upgrade complete, it is Ok to <a href='index.php'>enter</a> the system.</td></tr>\n";
+		else
+		{
+			echo '<form method=post action="index.php?module=upgrade"><tr><th>Wait!</th>';
+			echo '<td><p>RackTables database upgrades sometimes go wrong because of assorted reasons. ';
+			echo 'It is <strong>highly recommended</strong> to make a database backup before ';
+			echo 'proceeding any further. <tt>mysqldump</tt> and <tt>PHPMyAdmin</tt> are convenient ';
+			echo 'tools for doing this.</p>';
+			echo '<p><input type=checkbox name=reallyreally id=reallyreally><label for=reallyreally>';
+			echo 'I am ready to bear all risks of this upgrade. I am ready to roll it back in case of ';
+			echo 'a failure.</label> <input type=submit value="Yes, I am."></p></td></tr></form>';
+		}
 	}
 }
 echo '</table>';
