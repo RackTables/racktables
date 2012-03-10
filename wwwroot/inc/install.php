@@ -195,6 +195,12 @@ function init_config ()
 #	'use_tls' => 2,         // 0 == don't attempt, 1 == attempt, 2 == require
 #);
 
+# This HTML banner is intended to assist users in dispatching their issues
+# to the local tech support service. Its text (in its verbatim form) will
+# be appended to assorted error messages visible in user's browser (including
+# "not authenticated" message). Beware of placing any sensitive information
+# here, it will be readable by unauthorized visitors.
+#$helpdesk_banner = '<B>This RackTables instance is supported by Example Inc. IT helpdesk, dial ext. 1234 to report a problem.</B>';
 
 ENDOFTEXT
 );
