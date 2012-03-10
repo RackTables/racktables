@@ -103,6 +103,40 @@ function not_already_installed()
 // credentials.
 function init_config ()
 {
+	function print_form
+	(
+		$use_tcp = TRUE,
+		$tcp_host = 'localhost',
+		$tcp_port = '',
+		$unix_socket = '/var/lib/mysql/mysql.sock',
+		$database = 'racktables_db',
+		$username = 'racktables_user',
+		$password = ''
+	)
+	{
+		echo "<input type=hidden name=save_config value=1>\n";
+		echo '<h3>Server-side MySQL setup of the database:</h3><div align=left><pre class=trok>';
+		echo "mysql&gt;\nCREATE DATABASE racktables_db CHARACTER SET utf8 COLLATE utf8_general_ci;\n";
+		echo "GRANT ALL PRIVILEGES ON racktables_db.* TO racktables_user@localhost IDENTIFIED BY 'MY_SECRET_PASSWORD';\n</pre></div>";
+		echo '<table>';
+		echo '<tr><td><label for=conn_tcp>TCP connection</label></td>';
+		echo '<td><input type=radio name=conn value=conn_tcp id=conn_tcp' . ($use_tcp ? ' checked' : '') . '></td></tr>';
+		echo '<tr><td><label for=conn_unix>UNIX socket</label></td>';
+		echo '<td><input type=radio name=conn value=conn_unix id=conn_unix' . ($use_tcp ? '' : ' checked') . '></td></tr>';
+		echo "<tr><td><label for=mysql_host>TCP host:</label></td>";
+		echo "<td><input type=text name=mysql_host id=mysql_host value='${tcp_host}'></td></tr>\n";
+		echo "<tr><td><label for=mysql_port>TCP port (if not 3306):</label></td>";
+		echo "<td><input type=text name=mysql_port id=mysql_port value='${tcp_port}'></td></tr>\n";
+		echo "<tr><td><label for=mysql_socket>UNIX socket:</label></td>";
+		echo "<td><input type=text name=mysql_socket id=mysql_socket value='${unix_socket}'></td></tr>\n";
+		echo "<tr><td><label for=mysql_db>database:</label></td>";
+		echo "<td><input type=text name=mysql_db id=mysql_db value='${database}'></td></tr>\n";
+		echo "<tr><td><label for=mysql_username>username:</label></td>";
+		echo "<td><input type=text name=mysql_username id=mysql_username value='${username}'></td></tr>\n";
+		echo "<tr><td><label for=mysql_password>password:</label></td>";
+		echo "<td><input type=password name=mysql_password id=mysql_password value='${password}'></td></tr>\n";
+		echo '</table>';
+	}
 	global $path_to_secret_php;
 	if (!is_writable ($path_to_secret_php))
 	{
@@ -112,35 +146,73 @@ function init_config ()
 		echo 'SELinux may be turned back on with "setenforce 1" command.<br>';
 		return FALSE;
 	}
-	if
-	(
-		!isset ($_REQUEST['save_config']) or
-		empty ($_REQUEST['mysql_host']) or
-		empty ($_REQUEST['mysql_db']) or
-		empty ($_REQUEST['mysql_username'])
-	)
+	if (! array_key_exists ('save_config', $_REQUEST))
 	{
-		echo "<input type=hidden name=save_config value=1>\n";
-		echo '<h3>Hint on setting up a database:</h3><pre>';
-		echo "mysql&gt;\nCREATE DATABASE racktables_db CHARACTER SET utf8 COLLATE utf8_general_ci;\n";
-		echo "GRANT ALL PRIVILEGES ON racktables_db.* TO racktables_user@localhost IDENTIFIED BY 'MY_SECRET_PASSWORD';\n</pre>";
-		echo '<table>';
-		echo "<tr><td><label for=mysql_host>MySQL host:</label></td>";
-		echo "<td><input type=text name=mysql_host id=mysql_host value=localhost></td></tr>\n";
-		echo "<tr><td><label for=mysql_port>MySQL port (if not 3306):</label></td>";
-		echo "<td><input type=text name=mysql_port id=mysql_port></td></tr>\n";
-		echo "<tr><td><label for=mysql_db>database:</label></td>";
-		echo "<td><input type=text name=mysql_db id=mysql_db value=racktables_db></td></tr>\n";
-		echo "<tr><td><label for=mysql_username>username:</label></td>";
-		echo "<td><input type=text name=mysql_username id=mysql_username value=racktables_user></td></tr>\n";
-		echo "<tr><td><label for=mysql_password>password:</label></td>";
-		echo "<td><input type=password name=mysql_password id=mysql_password></td></tr>\n";
-		echo '</table>';
+		print_form();
 		return FALSE;
 	}
-	$pdo_dsn = 'mysql:host=' . $_REQUEST['mysql_host'];
-	if (!empty ($_REQUEST['mysql_port']) and $_REQUEST['mysql_port'] != '3306')
-		$pdo_dsn .= ';port=' . $_REQUEST['mysql_port'];
+	if (empty ($_REQUEST['mysql_db']) or empty ($_REQUEST['mysql_username']))
+	{
+		print_form
+		(
+			$_REQUEST['conn'] == 'conn_tcp',
+			$_REQUEST['mysql_host'],
+			$_REQUEST['mysql_port'],
+			$_REQUEST['mysql_socket'],
+			$_REQUEST['mysql_db'],
+			$_REQUEST['mysql_username'],
+			$_REQUEST['mysql_password']
+		);
+		echo '<h2 class=trerror>Missing database/username parameter!</h2>';
+		return FALSE;
+	}
+	if ($_REQUEST['conn'] == 'conn_tcp' and empty ($_REQUEST['mysql_host']))
+	{
+		print_form
+		(
+			$_REQUEST['conn'] == 'conn_tcp',
+			$_REQUEST['mysql_host'],
+			$_REQUEST['mysql_port'],
+			$_REQUEST['mysql_socket'],
+			$_REQUEST['mysql_db'],
+			$_REQUEST['mysql_username'],
+			$_REQUEST['mysql_password']
+		);
+		echo '<h2 class=trerror>Missing TCP hostname parameter!</h2>';
+		return FALSE;
+	}
+	if ($_REQUEST['conn'] == 'conn_unix' and empty ($_REQUEST['mysql_socket']))
+	{
+		print_form
+		(
+			$_REQUEST['conn'] == 'conn_tcp',
+			$_REQUEST['mysql_host'],
+			$_REQUEST['mysql_port'],
+			$_REQUEST['mysql_socket'],
+			$_REQUEST['mysql_db'],
+			$_REQUEST['mysql_username'],
+			$_REQUEST['mysql_password']
+		);
+		echo '<h2 class=trerror>Missing UNIX socket parameter!</h2>';
+		return FALSE;
+	}
+	# finally OK to make a connection attempt
+	$pdo_dsn = 'mysql:';
+	switch ($_REQUEST['conn'])
+	{
+	case 'conn_tcp':
+		$pdo_dsn .= 'host=' . $_REQUEST['mysql_host'];
+		if (!empty ($_REQUEST['mysql_port']) and $_REQUEST['mysql_port'] != '3306')
+			$pdo_dsn .= ';port=' . $_REQUEST['mysql_port'];
+		break;
+	case 'conn_unix':
+		$pdo_dsn .= 'unix_socket=' . $_REQUEST['mysql_socket'];
+		break;
+	default:
+		print_form();
+		echo '<h2 class=trerror>form error</h2>';
+		return FALSE;
+	}
 	$pdo_dsn .= ';dbname=' . $_REQUEST['mysql_db'];
 	try
 	{
@@ -148,20 +220,18 @@ function init_config ()
 	}
 	catch (PDOException $e)
 	{
-		echo "<input type=hidden name=save_config value=1>\n";
-		echo '<table>';
-		echo "<tr><td><label for=mysql_host>MySQL host:</label></td>";
-		echo "<td><input type=text name=mysql_host id=mysql_host value='" . $_REQUEST['mysql_host'] . "'></td></tr>\n";
-		echo "<tr><td><label for=mysql_port>MySQL port:</label></td>";
-		echo "<td><input type=text name=mysql_port id=mysql_port value='" . $_REQUEST['mysql_port'] . "'></td></tr>\n";
-		echo "<tr><td><label for=mysql_db>database:</label></td>";
-		echo "<td><input type=text name=mysql_db id=mysql_db value='" . $_REQUEST['mysql_db'] . "'></td></tr>\n";
-		echo "<tr><td><label for=mysql_username>username:</label></td>";
-		echo "<td><input type=text name=mysql_username value='" . $_REQUEST['mysql_username'] . "'></td></tr>\n";
-		echo "<tr><td><label for=mysql_password>password:</label></td>";
-		echo "<td><input type=password name=mysql_password value='" . $_REQUEST['mysql_password'] . "'></td></tr>\n";
-		echo "<tr><td colspan=2>The above parameters did not work. Check and try again.</td></tr>\n";
-		echo '</table>';
+		print_form
+		(
+			$_REQUEST['conn'] == 'conn_tcp',
+			$_REQUEST['mysql_host'],
+			$_REQUEST['mysql_port'],
+			$_REQUEST['mysql_socket'],
+			$_REQUEST['mysql_db'],
+			$_REQUEST['mysql_username'],
+			$_REQUEST['mysql_password']
+		);
+		echo "<h2 class=trerror>Datase connection failed. Check parameters and try again.</h2>\n";
+		echo "PDO DSN: <tt class=trwarning>${pdo_dsn}</tt><br>";
 		return FALSE;
 	}
 
