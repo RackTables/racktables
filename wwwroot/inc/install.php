@@ -132,9 +132,9 @@ function init_config ()
 		echo "<tr><td><label for=mysql_db>database:</label></td>";
 		echo "<td><input type=text name=mysql_db id=mysql_db value=racktables_db></td></tr>\n";
 		echo "<tr><td><label for=mysql_username>username:</label></td>";
-		echo "<td><input type=text name=mysql_username value=racktables_user></td></tr>\n";
+		echo "<td><input type=text name=mysql_username id=mysql_username value=racktables_user></td></tr>\n";
 		echo "<tr><td><label for=mysql_password>password:</label></td>";
-		echo "<td><input type=password name=mysql_password></td></tr>\n";
+		echo "<td><input type=password name=mysql_password id=mysql_password></td></tr>\n";
 		echo '</table>';
 		return FALSE;
 	}
