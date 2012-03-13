@@ -1,0 +1,56 @@
+#!/bin/sh
+#
+#  racktables/gateways/deviceconfig/linux.connector
+#
+#  Pre-Requirements:
+#    1) SSH key-based authorization on remote hosts.
+#       See SSHUSER and KEYFILE below.
+#    2) Password-less sudo on remote side:
+#         /sbin/ip -o a
+#         /sbin/ethtool eth*
+#         /usr/sbin/arp -an
+#    3) Correct hostname resolution via DNS or /etc/hosts.
+#
+#  Written by evseev@fastvps.ru at Mar-2011
+#
+
+[ $# = 3 ] || exit 1
+
+ENDPOINT=$1
+COMMAND=$2
+WORKFILE=$3
+
+SSHUSER=racktbl
+KEYFILE=/etc/racktables/id_rsa
+
+test -r "$KEYFILE" || exit 3
+
+case $COMMAND in
+get8021q)
+	cmd='sudo /sbin/ip -o a'
+	outfile="$WORKFILE"
+	;;
+getportstatus)
+	cmd='cd /sys/class/net && for d in eth*; do sudo /sbin/ethtool $d; done'
+	outfile="$WORKFILE"
+	;;
+getmaclist)
+	cmd='sudo /usr/sbin/arp -an'
+	outfile="$WORKFILE"
+	;;
+deploy)
+	cmd=$(cat "$WORKFILE")
+	outfile=/dev/null
+	;;
+*)
+	exit 6
+	;;
+esac
+rc=0
+ssh -o 'BatchMode yes'  \
+    -o 'CheckHostIP no' \
+    -o 'StrictHostKeyChecking no' \
+    -yqni "$KEYFILE" \
+    $SSHUSER@$ENDPOINT "$cmd" > "$outfile" 2>&1 || rc=4
+#cp -p $outfile $outfile.out; echo "cmd=$cmd, rc=$rc" > $outfile.cmd
+exit $rc

@@ -30,6 +30,7 @@ $gwrxlator['getlldpstatus'] = array
 );
 $gwrxlator['get8021q'] = array
 (
+	'linux' => 'linuxReadVLANConfig',
 	'dlink' => 'dlinkReadVLANConfig',
 	'ios12' => 'ios12ReadVLANConfig',
 	'fdry5' => 'fdry5ReadVLANConfig',
@@ -41,6 +42,7 @@ $gwrxlator['get8021q'] = array
 );
 $gwrxlator['getportstatus'] = array
 (
+	'linux' => 'linuxReadInterfaceStatus',
 	'dlink' => 'dlinkReadInterfaceStatus',
 	'ios12' => 'ciscoReadInterfaceStatus',
 	'vrp53' => 'vrpReadInterfaceStatus',
@@ -49,6 +51,7 @@ $gwrxlator['getportstatus'] = array
 );
 $gwrxlator['getmaclist'] = array
 (
+	'linux' => 'linuxReadMacList',
 	'dlink' => 'dlinkReadMacList',
 	'ios12' => 'ios12ReadMacList',
 	'vrp53' => 'vrp53ReadMacList',
@@ -317,6 +320,21 @@ function gwRecvFileFromObject ($object_id, $handlername, &$output)
 	gwRecvFile (str_replace (' ', '+', $endpoints[0]), $handlername, $output);
 }
 
+function isLinuxSWID($swid)
+{
+	//error_log("isLinuxSWID: check $swid");
+	if (
+		($swid >=  225 and $swid <=  235) ||
+		($swid >=  242 and $swid <=  243) ||
+		($swid >=  418 and $swid <=  436) ||
+		($swid >= 1331 and $swid <= 1334) ||
+		($swid >= 1395 and $swid <= 1396) ||
+		($swid >= 1417 and $swid <= 1422)
+	)
+		return TRUE;
+	return FALSE;
+}
+
 function detectDeviceBreed ($object_id)
 {
 	$breed_by_swcode = array
@@ -342,6 +360,8 @@ function detectDeviceBreed ($object_id)
 		// See Attribute table: ID = 4, Type = 'dict', Name = 'SW Type'
 		if ($record['id'] == 4 and array_key_exists ($record['key'], $breed_by_swcode))
 			return $breed_by_swcode[$record['key']];
+		if ($record['id'] == 4 and isLinuxSWID($record['key']))
+			return 'linux';
 		// See Attribute table: ID = 2, Type = 'dict', Name = 'HW Type'
 		if ($record['id'] == 2 and $record['key'] >= 589 and $record['key'] <= 637)
 			return 'dlink';

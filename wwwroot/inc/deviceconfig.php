@@ -183,6 +183,46 @@ function nxos4ReadLLDPStatus ($input)
 	return $ret;
 }
 
+function linuxReadVLANConfig($input)
+{
+	$ret = array
+	(
+		'vlanlist' => array(VLAN_DFL_ID),  // linear array of VIDs
+		'portdata' => array(), // portname => (mode=>trunk/access, native=>vid, allowed=>(vids))
+	);
+	foreach (explode ("\n", $input) as $line)
+	{
+		// 13: vlan11@eth0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP \    link/ether 00:1e:34:ae:75:21 brd ff:ff:ff:ff:ff:ff
+		$matches = array();
+		if (!preg_match ('/^[[:digit:]]+:\s+([^\s]+):\s.*\slink\/ether\s/', $line, $matches))
+			continue;
+		$iface = $matches[1];
+		if (preg_match ('/^(eth[[:digit:]]+)\.0*([[:digit:]]+):?$/', $iface, $matches))
+			linuxStoreVLANInfo ($ret, 'vlan'.$matches[2], $matches[1], $matches[2]);
+		elseif (preg_match('/^vlan0*([[:digit:]]+)\@(.*)$/', $iface, $matches))
+			linuxStoreVLANInfo ($ret, 'vlan'.$matches[1], $matches[2], $matches[1]);
+		elseif (!array_key_exists($iface, $ret['portdata']))
+			$ret['portdata'][$iface] = array ('mode'=>'access', 'native'=>0, 'allowed'=>array() );
+	}
+	return $ret;
+}
+
+function linuxStoreVLANInfo(&$ret, $iface, $baseport, $vid)
+{
+	$ret['vlanlist'][] = $vid;
+	if (!array_key_exists ($baseport, $ret['portdata']))
+	{
+		$ret['portdata'][$baseport] = array ('mode'=>'trunk', 'native'=>0, 'allowed'=>array($vid) );
+	}
+	else
+	{
+		$ret['portdata'][$baseport]['mode'] = 'trunk';
+		$ret['portdata'][$baseport]['allowed'][] = $vid;
+	}
+	if (!array_key_exists($iface, $ret['portdata']))
+		$ret['portdata'][$iface] = array ('mode'=>'access', 'native'=>$vid, 'allowed'=>array($vid) );
+}
+
 /*
 D-Link VLAN info sample:
 ========================
@@ -1530,6 +1570,87 @@ function jun10Read8021QConfig ($input)
 }
 
 /*
+ Linux "ethtool" output sample
+ =============================
+
+Settings for eth0:
+        Supported ports: [ TP ]
+        Supported link modes:   10baseT/Half 10baseT/Full
+                                100baseT/Half 100baseT/Full
+                                1000baseT/Full
+        Supports auto-negotiation: Yes
+        Advertised link modes:  10baseT/Half 10baseT/Full
+                                100baseT/Half 100baseT/Full
+                                1000baseT/Full
+        Advertised pause frame use: No
+        Advertised auto-negotiation: Yes
+        Speed: 1000Mb/s
+        Duplex: Full
+        Port: Twisted Pair
+        PHYAD: 2
+        Transceiver: internal
+        Auto-negotiation: on
+        MDI-X: off
+        Supports Wake-on: pumbg
+        Wake-on: g
+        Current message level: 0x00000001 (1)
+        Link detected: yes
+
+Settings for eth1:
+        Supported ports: [ TP ]
+        Supported link modes:   10baseT/Half 10baseT/Full
+                                100baseT/Half 100baseT/Full
+                                1000baseT/Full
+        Supports auto-negotiation: Yes
+        Advertised link modes:  10baseT/Half 10baseT/Full
+                                100baseT/Half 100baseT/Full
+                                1000baseT/Full
+        Advertised pause frame use: No
+        Advertised auto-negotiation: Yes
+        Speed: Unknown!
+        Duplex: Unknown! (255)
+        Port: Twisted Pair
+        PHYAD: 1
+        Transceiver: internal
+        Auto-negotiation: on
+        MDI-X: Unknown
+        Supports Wake-on: pumbg
+        Wake-on: g
+        Current message level: 0x00000001 (1)
+        Link detected: no
+*/
+function linuxReadInterfaceStatus($text)
+{
+	$result = array();
+	$iface = '';
+	$status = 'down';
+	$speed = '0';
+	$duplex = '';
+	foreach (explode ("\n", $text) as $line)
+	{
+		$m = array();
+		if (preg_match ('/^[^\s].* (.*):$/', $line, $m))
+		{
+			if ($iface !== '')
+				$result[$iface] = array ('status'=>$status, 'speed'=>$speed, 'duplex'=>$duplex);
+			$iface = $m[1];
+			$status = 'down';
+			$speed = 0;
+			$duplex = '';
+		}
+		elseif (preg_match ('/^\s*Speed: (.*)$/', $line, $m))
+			$speed = $m[1];
+		elseif (preg_match ('/^\s*Duplex: (.*)$/', $line, $m))
+			$duplex = $m[1];
+		elseif (preg_match ('/^\s*Link detected: (.*)$/', $line, $m))
+			$status = ( ($m[1] === 'yes') ? 'up' : 'down' );
+	}
+	if ($iface !== '')
+		$result[$iface] = array ('status' => $status, 'speed' => $speed, 'duplex' => $duplex);
+	return $result;
+}
+
+/*
  D-Link "show ports" output sample
  =================================
 
@@ -1649,6 +1770,29 @@ function maclist_sort ($a, $b)
 	if ($a['vid'] == $b['vid'])
 		return 0;
 	return ($a['vid'] < $b['vid']) ? -1 : 1;
+}
+
+function linuxReadMacList($text)
+{
+	$result = array();
+	$passed;
+	foreach (explode ("\n", $text) as $line)
+	{
+		$m = array();
+		if (!preg_match ('/\(([^\s]+)\) at ([^\s]+) \[ether\] on (.*)$/', $line, $m))
+			continue;
+
+		// prevent multiple additions
+		if (array_key_exists ($m[2].$m[3], $passed))
+			continue;
+		$passed[$m[2].$m[3]] = 1;
+
+		$result[$m[3]][] = array ('mac' => $m[2], 'vid'=>1);
+		//error_log("linuxReadMacList: $m[1], $m[2], $m[3].");
+	}
+	foreach ($result as $portname => &$maclist)
+		usort ($maclist, 'maclist_sort');
+	return $result;
 }
 
 /*
