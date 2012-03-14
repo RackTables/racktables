@@ -1,10 +1,11 @@
 #!/bin/sh
-#
-#  ./racktables/gateways/deviceconfig/dlink.connector
+
+# This file is a part of RackTables, a datacenter and server room management
+# framework. See accompanying file "COPYING" for the full copyright and
+# licensing information.
 #
 #  Written by evseev@fastvps.ru at Feb-2011
 #  Based on ios12.connector
-#
 
 [ $# = 3 ] || exit 1
 

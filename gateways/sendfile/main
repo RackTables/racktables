@@ -1,5 +1,9 @@
 #!/bin/sh
 
+# This file is a part of RackTables, a datacenter and server room management
+# framework. See accompanying file "COPYING" for the full copyright and
+# licensing information.
+#
 # This is a RackTables gateway for arbitrary file export. File contents doesn't
 # matter here and will only be somehow sent to the remote host for further
 # processing.

@@ -1,4 +1,9 @@
 <?php
+
+# This file is a part of RackTables, a datacenter and server room management
+# framework. See accompanying file "COPYING" for the full copyright and
+# licensing information.
+
 /*
 
 "Ophandler" in RackTables stands for "operation handler", or a function,

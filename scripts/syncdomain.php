@@ -1,6 +1,10 @@
 #!/usr/local/bin/php
 <?php
 
+# This file is a part of RackTables, a datacenter and server room management
+# framework. See accompanying file "COPYING" for the full copyright and
+# licensing information.
+
 $script_mode = TRUE;
 require 'inc/init.php';
 

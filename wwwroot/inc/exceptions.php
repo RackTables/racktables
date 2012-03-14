@@ -1,5 +1,9 @@
 <?php
 
+# This file is a part of RackTables, a datacenter and server room management
+# framework. See accompanying file "COPYING" for the full copyright and
+# licensing information.
+
 // The default approach is to treat an error as fatal, in which case
 // some message is output and the user is left there. Inheriting classes
 // represent more specific cases, some of which can be handled in a

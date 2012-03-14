@@ -1,6 +1,8 @@
 #!/bin/sh
-#
-#  racktables/gateways/deviceconfig/linux.connector
+
+# This file is a part of RackTables, a datacenter and server room management
+# framework. See accompanying file "COPYING" for the full copyright and
+# licensing information.
 #
 #  Pre-Requirements:
 #    1) SSH key-based authorization on remote hosts.
@@ -12,7 +14,6 @@
 #    3) Correct hostname resolution via DNS or /etc/hosts.
 #
 #  Written by evseev@fastvps.ru at Mar-2011
-#
 
 [ $# = 3 ] || exit 1
 
