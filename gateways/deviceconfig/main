@@ -1,5 +1,9 @@
 #!/bin/sh
 
+# This file is a part of RackTables, a datacenter and server room management
+# framework. See accompanying file "COPYING" for the full copyright and
+# licensing information.
+#
 # This gateway retrieves the output of "show run" command (or its
 # equivalent) and prints it onto stdout. When run, it accepts the
 # following commands on stdin:

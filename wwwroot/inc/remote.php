@@ -1,5 +1,9 @@
 <?php
 
+# This file is a part of RackTables, a datacenter and server room management
+# framework. See accompanying file "COPYING" for the full copyright and
+# licensing information.
+
 function queryDevice ($object_id, $command)
 {
 	$breed = detectDeviceBreed ($object_id);

@@ -1,5 +1,9 @@
 #!/bin/sh
 
+# This file is a part of RackTables, a datacenter and server room management
+# framework. See accompanying file "COPYING" for the full copyright and
+# licensing information.
+#
 # This is a RackTables gateway for changing switch ports membership
 # across VLANs. It works accordingly to the gateway protocol described
 # in gateways.php and accepts the following commands on its stdin:
@@ -18,7 +22,6 @@
 #
 # * listmacs: output unsorted list of all dynamically learned MAC
 #   addresses present on the switch
-#
 
 endpoint=
 hw=
