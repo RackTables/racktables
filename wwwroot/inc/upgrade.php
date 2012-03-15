@@ -1244,6 +1244,8 @@ CREATE TABLE `CactiGraph` (
 			break;
 		case '0.19.12':
 			$query[] = "DELETE FROM Config WHERE varname IN('color_F', 'color_A', 'color_U', 'color_T', 'color_Th', 'color_Tw', 'color_Thw')";
+			$query[] = "INSERT INTO Chapter (id, sticky, name) VALUES (36,'no','serial console server models')";
+			$query[] = "INSERT INTO AttributeMap (objtype_id, attr_id, chapter_id) VALUES (1644, 1, NULL), (1644, 2, 36), (1644, 3, NULL)";
 			$query = array_merge ($query, reloadDictionary ());
 			$query[] = "UPDATE Config SET varvalue = '0.19.12' WHERE varname = 'DB_VERSION'";
 			break;
