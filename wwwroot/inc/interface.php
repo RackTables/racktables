@@ -8286,7 +8286,7 @@ function formatAttributeValue ($record)
 		);
 		$result = "<a href='$href'>" . $record['a_value'] . "</a>";
 		if (isset ($record['href']))
-			$result .= "&nbsp;<a class='img-link' href='${record['href']}'>" . getImageHREF ('html', 'vendor`s info page') . "</a>";
+			$result .= "&nbsp;<a class='img-link' href='${record['href']}'>" . getImageHREF ('html', 'vendor&apos;s info page') . "</a>";
 		return $result;
 	}
 }
