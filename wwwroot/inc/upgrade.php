@@ -1464,7 +1464,13 @@ function renderUpgraderHTML()
 	{
 		header ('WWW-Authenticate: Basic realm="RackTables upgrade"');
 		header ('HTTP/1.0 401 Unauthorized');
-		showError ('You must be authenticated as an administrator to complete the upgrade.', __FUNCTION__);
+?>
+<h1>Trouble logging in?</h1>
+You are trying to authenticate for the RackTables upgrade screen. This means,
+you must authenticate with the username and password of the main RackTables
+administrator. There is only one such account in each installation, its default
+username is "admin". RackTables wiki provides more information on this topic.
+<?php
 		die;
 	}
 
