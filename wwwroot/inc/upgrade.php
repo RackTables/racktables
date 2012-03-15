@@ -1353,7 +1353,7 @@ function renderUpgraderHTML()
 		header ('HTTP/1.0 401 Unauthorized');
 ?>
 <h1>Trouble logging in?</h1>
-You are trying to authenticate for the RackTables upgrade screen. This means,
+You are trying to authenticate for the RackTables upgrade screen. This means that
 you must authenticate with the username and password of the main RackTables
 administrator. There is only one such account in each installation, its default
 username is "admin". RackTables wiki provides more information on this topic.
