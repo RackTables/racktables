@@ -1727,6 +1727,23 @@ $dictionary = array
 	1641 => array ('chapter_id' => 12, 'dict_value' => 'HP ProCurve%GPASS%6600-48G-4XG J9452A'),
 	1642 => array ('chapter_id' => 2, 'dict_value' => '10GBase-T'),
 	1643 => array ('chapter_id' => 14, 'dict_value' => 'Cisco NX-OS 6.0'),
+	1644 => array ('chapter_id' => 1, 'dict_value' => 'serial console server'),
+	1645 => array ('chapter_id' => 36, 'dict_value' => '[[Moxa%GPASS%NPort 6150 | http://www.moxa.com/product/NPort_6150.htm]]'),
+	1646 => array ('chapter_id' => 36, 'dict_value' => '[[Moxa%GPASS%NPort 6610-8 | http://www.moxa.com/product/NPort_6650.htm]]'),
+	1647 => array ('chapter_id' => 36, 'dict_value' => '[[Moxa%GPASS%NPort 6610-16 | http://www.moxa.com/product/NPort_6650.htm]]'),
+	1648 => array ('chapter_id' => 36, 'dict_value' => '[[Moxa%GPASS%NPort 6610-32 | http://www.moxa.com/product/NPort_6650.htm]]'),
+	1649 => array ('chapter_id' => 36, 'dict_value' => '[[Moxa%GPASS%NPort 6650-8 | http://www.moxa.com/product/NPort_6650.htm]]'),
+	1650 => array ('chapter_id' => 36, 'dict_value' => '[[Moxa%GPASS%NPort 6650-16 | http://www.moxa.com/product/NPort_6650.htm]]'),
+	1651 => array ('chapter_id' => 36, 'dict_value' => '[[Moxa%GPASS%NPort 6650-32 | http://www.moxa.com/product/NPort_6650.htm]]'),
+	1652 => array ('chapter_id' => 36, 'dict_value' => '[[Moxa%GPASS%CN2510-8 | http://www.moxa.com/product/CN2510.htm]]'),
+	1653 => array ('chapter_id' => 36, 'dict_value' => '[[Moxa%GPASS%CN2510-16 | http://www.moxa.com/product/CN2510.htm]]'),
+	1654 => array ('chapter_id' => 36, 'dict_value' => '[[Moxa%GPASS%CN2610-8 | http://www.moxa.com/product/CN2610.htm]]'),
+	1655 => array ('chapter_id' => 36, 'dict_value' => '[[Moxa%GPASS%CN2610-16 | http://www.moxa.com/product/CN2610.htm]]'),
+	1656 => array ('chapter_id' => 36, 'dict_value' => '[[Moxa%GPASS%CN2650-8 | http://www.moxa.com/product/CN2610.htm]]'),
+	1657 => array ('chapter_id' => 36, 'dict_value' => '[[Moxa%GPASS%CN2650-16 | http://www.moxa.com/product/CN2610.htm]]'),
+	1658 => array ('chapter_id' => 36, 'dict_value' => '[[Moxa%GPASS%NPort 6250 | http://www.moxa.com/product/NPort_6250.htm]]'),
+	1659 => array ('chapter_id' => 36, 'dict_value' => '[[Moxa%GPASS%NPort 6450 | http://www.moxa.com/product/NPort_6450.htm]]'),
+	1660 => array ('chapter_id' => 36, 'dict_value' => '[[Moxa%GPASS%NPort S8458 | http://www.moxa.com/product/NPort_S8458_Series.htm]]'),
 
 # Any new "default" dictionary records must go above this line (i.e., with
 # dict_key code less, than 50000). This is necessary to keep AUTO_INCREMENT

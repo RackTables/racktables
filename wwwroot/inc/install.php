@@ -1084,6 +1084,7 @@ INSERT INTO `Chapter` (`id`, `sticky`, `name`) VALUES
 (33,'no','virtual switch OS type'),
 (34,'no','power supply chassis models'),
 (35,'no','power supply models'),
+(36,'no','serial console server models'),
 -- Default chapters must have ID less than 10000, add them above this line.
 (9999,'no','multiplexer models');
 
@@ -1223,7 +1224,10 @@ INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_id`) VALUES
 (1507,20,NULL),
 (1507,21,NULL),
 (1507,22,NULL),
-(1560,27,NULL);
+(1560,27,NULL),
+(1644, 1, NULL),
+(1644, 2, 36),
+(1644, 3, NULL);
 
 INSERT INTO `PortInnerInterface` VALUES
 (1,'hardwired'),
