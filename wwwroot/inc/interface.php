@@ -4711,7 +4711,7 @@ function renderSNMPPortFinder ($object_id)
 	<table cellspacing=0 cellpadding=5 align=center class=widetable>
 	<tr>
 		<th class=tdright><label for=sec_name>Security User:</label></th>
-		<td class=tdleft><input type=text id=sec_name name=sec_name value='<?php echo${snmpcomm};?>'></td>
+		<td class=tdleft><input type=text id=sec_name name=sec_name value='<?php echo $snmpcomm;?>'></td>
 	</tr>
 	<tr>
 		<th class=tdright><label for="sec_level">Security Level:</label></th>
