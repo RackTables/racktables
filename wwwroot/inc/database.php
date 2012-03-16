@@ -694,8 +694,9 @@ function fetchPortList ($sql_where_clause, $query_params = array())
 	$query = <<<END
 SELECT
 	Port.id,
-	Port.object_id,
 	Port.name,
+	Port.object_id,
+	Object.name AS object_name,
 	Port.l2address,
 	Port.label,
 	Port.reservation_comment,
@@ -703,29 +704,23 @@ SELECT
 	Port.type AS oif_id,
 	(SELECT PortInnerInterface.iif_name FROM PortInnerInterface WHERE PortInnerInterface.id = Port.iif_id) AS iif_name,
 	(SELECT Dictionary.dict_value FROM Dictionary WHERE Dictionary.dict_key = Port.type) AS oif_name,
+	IF(la.porta, la.cable, lb.cable) AS cable_id,
+	IF(la.porta, pa.id, pb.id) AS remote_id,
+	IF(la.porta, pa.name, pb.name) AS remote_name,
+	IF(la.porta, pa.object_id, pb.object_id) AS remote_object_id,
+	IF(la.porta, oa.name, ob.name) AS remote_object_name,
 	(SELECT COUNT(*) FROM PortLog WHERE PortLog.port_id = Port.id) AS log_count,
-	(SELECT name FROM Object WHERE Port.object_id = Object.id) AS object_name,
-	Link.cable as cableid,
-	pa.id as pa_id,
-	pa.name as pa_name,
-	pa.object_id as pa_object_id,
-	oa.name as pa_object_name,
-	pb.id as pb_id,
-	pb.name as pb_name,
-	pb.object_id as pb_object_id,
-	ob.name as pb_object_name,
 	PortLog.user,
 	UNIX_TIMESTAMP(PortLog.date) as time
 FROM
 	Port
-	LEFT JOIN
-	(
-		Link
-		INNER JOIN Port AS pa ON Link.porta = pa.id
-		INNER JOIN Port AS pb ON Link.portb = pb.id
-		INNER JOIN Object AS oa ON pa.object_id = oa.id
-		INNER JOIN Object AS ob ON pb.object_id = ob.id
-	) ON (Port.id = Link.porta OR Port.id = Link.portb)
+	INNER JOIN Object ON Port.object_id = Object.id
+	LEFT JOIN Link AS la ON la.porta = Port.id
+	LEFT JOIN Port AS pa ON pa.id = la.portb
+	LEFT JOIN Object AS oa ON pa.object_id = oa.id
+	LEFT JOIN Link AS lb on lb.portb = Port.id
+	LEFT JOIN Port AS pb ON pb.id = lb.porta
+	LEFT JOIN Object AS ob ON pb.object_id = ob.id
 	LEFT JOIN PortLog ON PortLog.id = (SELECT id FROM PortLog WHERE PortLog.port_id = Port.id ORDER BY date DESC LIMIT 1)
 WHERE
 	$sql_where_clause
@@ -736,22 +731,9 @@ END;
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
 		$row['l2address'] = l2addressFromDatabase ($row['l2address']);
-		
-		// link
-		$row['remote_id'] = ($row['id'] === $row['pa_id'] ? $row['pb_id'] : ($row['id'] === $row['pb_id'] ? $row['pa_id'] : NULL));
-		$row['remote_name'] = ($row['id'] === $row['pa_id'] ? $row['pb_name'] : ($row['id'] === $row['pb_id'] ? $row['pa_name'] : NULL));
-		$row['remote_object_id'] = ($row['id'] === $row['pa_id'] ? $row['pb_object_id'] : ($row['id'] === $row['pb_id'] ? $row['pa_object_id'] : NULL));
-		$row['remote_object_name'] = ($row['id'] === $row['pa_id'] ? $row['pb_object_name'] : ($row['id'] === $row['pb_id'] ? $row['pa_object_name'] : NULL));
 		$row['linked'] = isset ($row['remote_id']) ? 1 : 0;
-		unset ($row['pa_id']);
-		unset ($row['pb_id']);
-		unset ($row['pa_name']);
-		unset ($row['pa_object_name']);
-		unset ($row['pb_name']);
-		unset ($row['pa_object_id']);
-		unset ($row['pb_object_name']);
 
-		// lsat changed log
+		// last changed log
 		$row['last_log'] = array();
 		if ($row['log_count'])
 		{
