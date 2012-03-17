@@ -264,6 +264,9 @@ function init_config ()
 #	'domain' => 'example.com',
 #	'search_attr' => '',
 #	'search_dn' => '',
+# // The following credentials will be used when searching for the user's DN:
+#	'search_bind_rdn' => NULL,
+#	'search_bind_password' => NULL,
 #	'displayname_attrs' => '',
 #	'options' => array (LDAP_OPT_PROTOCOL_VERSION => 3),
 #	'use_tls' => 2,         // 0 == don't attempt, 1 == attempt, 2 == require
