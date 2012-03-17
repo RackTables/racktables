@@ -1744,6 +1744,10 @@ $dictionary = array
 	1658 => array ('chapter_id' => 36, 'dict_value' => '[[Moxa%GPASS%NPort 6250 | http://www.moxa.com/product/NPort_6250.htm]]'),
 	1659 => array ('chapter_id' => 36, 'dict_value' => '[[Moxa%GPASS%NPort 6450 | http://www.moxa.com/product/NPort_6450.htm]]'),
 	1660 => array ('chapter_id' => 36, 'dict_value' => '[[Moxa%GPASS%NPort S8458 | http://www.moxa.com/product/NPort_S8458_Series.htm]]'),
+	1661 => array ('chapter_id' => 2, 'dict_value' => '40GBase-KR4'),
+	1662 => array ('chapter_id' => 2, 'dict_value' => '40GBase-CR4'),
+	1663 => array ('chapter_id' => 2, 'dict_value' => '40GBase-SR4'),
+	1664 => array ('chapter_id' => 2, 'dict_value' => '40GBase-LR4'),
 
 # Any new "default" dictionary records must go above this line (i.e., with
 # dict_key code less, than 50000). This is necessary to keep AUTO_INCREMENT
