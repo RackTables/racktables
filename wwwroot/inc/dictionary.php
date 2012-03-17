@@ -527,10 +527,10 @@ $dictionary = array
 	438 => array ('chapter_id' => 18, 'dict_value' => 'Dell PowerVault 221S'),
 	439 => array ('chapter_id' => 2, 'dict_value' => 'dry contact'),
 	440 => array ('chapter_id' => 2, 'dict_value' => 'unknown'),
-	441 => array ('chapter_id' => 13, 'dict_value' => 'CentOS%GSKIP%CentOS V2'),
-	442 => array ('chapter_id' => 13, 'dict_value' => 'CentOS%GSKIP%CentOS V3'),
-	443 => array ('chapter_id' => 13, 'dict_value' => 'CentOS%GSKIP%CentOS V4'),
-	444 => array ('chapter_id' => 13, 'dict_value' => 'CentOS%GSKIP%CentOS V5'),
+	441 => array ('chapter_id' => 13, 'dict_value' => '[[CentOS%GSKIP%CentOS V2 | http://www.centos.org/]]'),
+	442 => array ('chapter_id' => 13, 'dict_value' => '[[CentOS%GSKIP%CentOS V3 | http://www.centos.org/]]'),
+	443 => array ('chapter_id' => 13, 'dict_value' => '[[CentOS%GSKIP%CentOS V4 | http://www.centos.org/]]'),
+	444 => array ('chapter_id' => 13, 'dict_value' => '[[CentOS%GSKIP%CentOS V5 | http://www.centos.org/]]'),
 	445 => array ('chapter_id' => 1, 'dict_value' => 'KVM switch'),
 	446 => array ('chapter_id' => 2, 'dict_value' => 'KVM (console)'),
 	447 => array ('chapter_id' => 1, 'dict_value' => 'multiplexer'),
@@ -1748,6 +1748,9 @@ $dictionary = array
 	1662 => array ('chapter_id' => 2, 'dict_value' => '40GBase-CR4'),
 	1663 => array ('chapter_id' => 2, 'dict_value' => '40GBase-SR4'),
 	1664 => array ('chapter_id' => 2, 'dict_value' => '40GBase-LR4'),
+	1665 => array ('chapter_id' => 13, 'dict_value' => '[[SciLin%GSKIP%SL6.x | https://www.scientificlinux.org/]]'),
+	1666 => array ('chapter_id' => 13, 'dict_value' => '[[SciLin%GSKIP%SL5.x | https://www.scientificlinux.org/]]'),
+	1667 => array ('chapter_id' => 13, 'dict_value' => '[[CentOS%GSKIP%CentOS V6 | http://www.centos.org/]]'),
 
 # Any new "default" dictionary records must go above this line (i.e., with
 # dict_key code less, than 50000). This is necessary to keep AUTO_INCREMENT
