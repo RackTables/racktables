@@ -396,6 +396,10 @@ function queryLDAPServer ($username, $password)
 			throw new RackTablesError ('LDAP misconfiguration: LDAP TLS required but not successfully negotiated.', RackTablesError::MISCONFIGURED);
 	}
 
+	if (array_key_exists ('options', $LDAP_options) and is_array ($LDAP_options['options']))
+		foreach ($LDAP_options['options'] as $opt_code => $opt_value)
+			ldap_set_option ($connect, $opt_code, $opt_value);
+
 	// Decide on the username we will actually authenticate for.
 	if (isset ($LDAP_options['domain']) and strlen ($LDAP_options['domain']))
 		$auth_user_name = $username . "@" . $LDAP_options['domain'];
@@ -407,6 +411,27 @@ function queryLDAPServer ($username, $password)
 		strlen ($LDAP_options['search_attr'])
 	)
 	{
+		// If a search_bind_rdn is supplied, bind to that and use it to search.
+		// This is required unless a server offers anonymous searching.
+		// Using bind again on the connection works as expected.
+		// The password is optional as it might be optional on server, too.
+		if (isset ($LDAP_options['search_bind_rdn']) && strlen ($LDAP_options['search_bind_rdn']))
+		{
+			$search_bind = @ldap_bind
+			(
+				$connect,
+				$LDAP_options['search_bind_rdn'],
+				isset ($LDAP_options['search_bind_password']) ? $LDAP_options['search_bind_password'] : NULL
+			);
+			if ($search_bind === FALSE)
+				throw new RackTablesError
+				(
+					'LDAP misconfiguration. You have specified a search_bind_rdn ' .
+					(isset ($LDAP_options['search_bind_password']) ? 'with' : 'without') .
+					' a search_bind_password, but the server refused it with: ' . ldap_error ($connect),
+					RackTablesError::MISCONFIGURED
+				);
+		}
 		$results = @ldap_search ($connect, $LDAP_options['search_dn'], '(' . $LDAP_options['search_attr'] . "=${username})", array("dn"));
 		if ($results === FALSE)
 			return array ('result' => 'CAN');
@@ -421,9 +446,6 @@ function queryLDAPServer ($username, $password)
 	}
 	else
 		throw new RackTablesError ('LDAP misconfiguration. Cannon build username for authentication.', RackTablesError::MISCONFIGURED);
-	if (array_key_exists ('options', $LDAP_options) and is_array ($LDAP_options['options']))
-		foreach ($LDAP_options['options'] as $opt_code => $opt_value)
-			ldap_set_option ($connect, $opt_code, $opt_value);
 	$bind = @ldap_bind ($connect, $auth_user_name, $password);
 	if ($bind === FALSE)
 		switch (ldap_errno ($connect))

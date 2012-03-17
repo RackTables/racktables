@@ -2,6 +2,7 @@
 	bugfix: Could not delete objects' log entries
 	new feature: initial D-Link and Linux gateway support by Ilya Evseev
 	new feature: helpdesk banner
+	new feature: non-anonymous LDAP search (#442) by Hannes Georg
 	update: 8021q and portinfo support for NX-OS 6.0
 	update: serial console servers by Boris
 0.19.11 2012-02-26
