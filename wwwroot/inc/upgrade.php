@@ -1246,6 +1246,9 @@ CREATE TABLE `CactiGraph` (
 			$query[] = "DELETE FROM Config WHERE varname IN('color_F', 'color_A', 'color_U', 'color_T', 'color_Th', 'color_Tw', 'color_Thw')";
 			$query[] = "INSERT INTO Chapter (id, sticky, name) VALUES (36,'no','serial console server models')";
 			$query[] = "INSERT INTO AttributeMap (objtype_id, attr_id, chapter_id) VALUES (1644, 1, NULL), (1644, 2, 36), (1644, 3, NULL)";
+			$query[] = "UPDATE Config SET varvalue = CONCAT (varvalue, '; 10=1588') WHERE varname = 'DEFAULT_PORT_OIF_IDS' AND 0 = INSTR (varvalue, '10=') ";
+			$query[] = "INSERT INTO PortInterfaceCompat VALUES (10,1662), (10,1663), (10,1664)";
+			$query[] = "INSERT INTO PortCompat VALUES (1588,1588), (1661,1661), (1662,1662), (1663,1663), (1664,1664)";
 			$query = array_merge ($query, reloadDictionary ());
 			$query[] = "UPDATE Config SET varvalue = '0.19.12' WHERE varname = 'DB_VERSION'";
 			break;
