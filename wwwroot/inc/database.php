@@ -704,7 +704,7 @@ SELECT
 	Port.type AS oif_id,
 	(SELECT PortInnerInterface.iif_name FROM PortInnerInterface WHERE PortInnerInterface.id = Port.iif_id) AS iif_name,
 	(SELECT Dictionary.dict_value FROM Dictionary WHERE Dictionary.dict_key = Port.type) AS oif_name,
-	IF(la.porta, la.cable, lb.cable) AS cable_id,
+	IF(la.porta, la.cable, lb.cable) AS cableid,
 	IF(la.porta, pa.id, pb.id) AS remote_id,
 	IF(la.porta, pa.name, pb.name) AS remote_name,
 	IF(la.porta, pa.object_id, pb.object_id) AS remote_object_id,
