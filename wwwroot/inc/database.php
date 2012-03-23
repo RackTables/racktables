@@ -2019,7 +2019,7 @@ function spotNetworkByIP ($ip_bin, $masklen = NULL)
 // masks (they aren't going to be the right pick).
 function getIPv4AddressNetworkId ($ip_bin, $masklen = 32)
 {
-	if ($row = fetchIPv4AddressNetworkRow ($ip_bin, $masklen))
+	if ($row = callHook ('fetchIPv4AddressNetworkRow', $ip_bin, $masklen))
 		return $row['id'];
 	return NULL;
 }
@@ -2040,7 +2040,7 @@ function fetchIPv4AddressNetworkRow ($ip_bin, $masklen = 32)
 // ($ip is an instance of IPv4Address class) or NULL, if nothing was found.
 function getIPv6AddressNetworkId ($ip_bin, $masklen = 128)
 {
-	if ($row = fetchIPv6AddressNetworkRow ($ip_bin, $masklen))
+	if ($row = callHook ('fetchIPv6AddressNetworkRow', $ip_bin, $masklen))
 		return $row['id'];
 	return NULL;
 }
