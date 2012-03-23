@@ -1750,6 +1750,10 @@ $dictionary = array
 	1665 => array ('chapter_id' => 13, 'dict_value' => '[[SciLin%GSKIP%SL6.x | https://www.scientificlinux.org/]]'),
 	1666 => array ('chapter_id' => 13, 'dict_value' => '[[SciLin%GSKIP%SL5.x | https://www.scientificlinux.org/]]'),
 	1667 => array ('chapter_id' => 13, 'dict_value' => '[[CentOS%GSKIP%CentOS V6 | http://www.centos.org/]]'),
+	1668 => array ('chapter_id' => 2, 'dict_value' => 'empty CFP'),
+	1669 => array ('chapter_id' => 2, 'dict_value' => '100GBase-SR10'),
+	1670 => array ('chapter_id' => 2, 'dict_value' => '100GBase-LR4'),
+	1671 => array ('chapter_id' => 2, 'dict_value' => '100GBase-ER4'),
 
 # Any new "default" dictionary records must go above this line (i.e., with
 # dict_key code less, than 50000). This is necessary to keep AUTO_INCREMENT

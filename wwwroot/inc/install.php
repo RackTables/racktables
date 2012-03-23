@@ -1252,7 +1252,8 @@ INSERT INTO `PortInnerInterface` VALUES
 (7,'XPAK'),
 (8,'XFP'),
 (9,'SFP+'),
-(10,'QSFP+');
+(10,'QSFP+'),
+(11,'CFP');
 
 INSERT INTO `ObjectParentCompat` VALUES
 (3,13),
@@ -1278,6 +1279,7 @@ INSERT INTO `PortInterfaceCompat` VALUES
 (8,1082),(8,30),(8,35),(8,36),(8,37),(8,38),(8,39),(8,40),
 (9,1084),(9,30),(9,35),(9,36),(9,37),(9,38),(9,39),(9,40),
 (10,1588),(10,1663),(10,1664),
+(11,1668),(11,1669),(11,1670),(11,1671),
 (1,16),(1,19),(1,24),(1,29),(1,31),(1,33),(1,446),(1,681),(1,682),(1,1322),(1,1399),(1,1469);
 
 INSERT INTO `PortCompat` (`type1`, `type2`) VALUES
@@ -1474,6 +1476,10 @@ INSERT INTO `PortCompat` (`type1`, `type2`) VALUES
 (1661,1661),
 (1663,1663),
 (1664,1664),
+(1668,1668),
+(1669,1669),
+(1670,1670),
+(1671,1671),
 (1642,1642);
 
 INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdefined, description) VALUES
@@ -1525,7 +1531,7 @@ INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdef
 ('TAGS_QUICKLIST_THRESHOLD','50','uint','yes','no','no','Tags quick list threshold'),
 ('ENABLE_MULTIPORT_FORM','no','string','no','no','no','Enable "Add/update multiple ports" form'),
 ('DEFAULT_PORT_IIF_ID','1','uint','no','no','no','Default port inner interface ID'),
-('DEFAULT_PORT_OIF_IDS','1=24; 3=1078; 4=1077; 5=1079; 6=1080; 8=1082; 9=1084; 10=1588','string','no','no','no','Default port outer interface IDs'),
+('DEFAULT_PORT_OIF_IDS','1=24; 3=1078; 4=1077; 5=1079; 6=1080; 8=1082; 9=1084; 10=1588; 11=1668','string','no','no','no','Default port outer interface IDs'),
 ('IPV4_TREE_RTR_AS_CELL','yes','string','no','no','no','Show full router info for each network in IPv4 tree view'),
 ('PROXIMITY_RANGE','0','uint','yes','no','yes','Proximity range (0 is current rack only)'),
 ('VLANSWITCH_LISTSRC', '', 'string', 'yes', 'no', 'yes', 'List of VLAN running switches'),
