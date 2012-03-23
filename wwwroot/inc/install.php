@@ -607,6 +607,16 @@ CREATE TABLE `IPv4Log` (
   KEY `ip-date` (`ip`,`date`)
 ) ENGINE=InnoDB;
 
+CREATE TABLE `IPv6Log` (
+  `id` int(10) NOT NULL AUTO_INCREMENT,
+  `ip` binary(16) NOT NULL,
+  `date` datetime NOT NULL,
+  `user` varchar(64) NOT NULL,
+  `message` text NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `ip-date` (`ip`,`date`)
+) ENGINE=InnoDB;
+
 CREATE TABLE `IPv4NAT` (
   `object_id` int(10) unsigned NOT NULL default '0',
   `proto` enum('TCP','UDP') NOT NULL default 'TCP',

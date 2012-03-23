@@ -208,26 +208,27 @@ function dispatchAJAXRequest()
 	case 'upd-reservation-ip':
 		global $sic;
 		assertStringArg ('comment', TRUE);
-		$ip = assertIPArg ('id');
-		if (isset ($ip))
-		{
-			$net_realm = 'ipv6net';
-			$net_id = getIPv6AddressNetworkId ($ip);
-		}
-		else
-		{
-			$ip = $sic['id'];
-			$net_realm = 'ipv4net';
-			$net_id = getIPv4AddressNetworkId ($ip);
-		}
-		$addr = getIPAddress ($ip);
+		$ip_bin = assertIPArg ('id');
+		$addr = getIPAddress ($ip_bin);
 		if (! empty ($addr['allocs']) && empty ($addr['name']))
 			throw new RackTablesError ('Cant update IP comment: address is allocated');
-		if (isset ($net_id))
-			fixContext (spotEntity ($net_realm, $net_id));
-		assertPermission ($net_realm, NULL, 'set_reserve_comment');
-		updateAddress ($ip, $sic['comment'], $addr['reserved']);
+		$net = spotNetworkByIP ($ip_bin);
+		if (isset ($net))
+			fixContext ($net);
+		assertPermission ((strlen ($ip_bin) == 16 ? 'ipv6net' : 'ipv4net'), NULL, 'set_reserve_comment');
+		$reserved = (empty ($sic['comment']) ? 'no' : $addr['reserved']); // unset reservation if user clears comment
+		updateAddress ($ip_bin, $sic['comment'], $reserved);
 		echo json_encode ('OK');
+		break;
+	case 'net-usage':
+		assertStringArg ('net_id');
+		list ($ip, $mask) = explode ('/', $_REQUEST['net_id']);
+		$ip_bin = ip_parse ($ip);
+		$net = spotNetworkByIP ($ip_bin, $mask + 1);
+		if (! isset ($net) or $net['mask'] != $mask)
+			$net = constructIPRange ($ip_bin, $mask);
+		loadIPAddrList ($net);
+		echo getRenderedIPNetCapacity ($net);
 		break;
 	default:
 		throw new InvalidRequestArgException ('ac', $_REQUEST['ac']);

@@ -85,16 +85,8 @@ class InvalidArgException extends RackTablesError
 
 // this simplifies construction and helps in catching "soft"
 // errors (invalid input from the user)
-class InvalidRequestArgException extends RackTablesError
+class InvalidRequestArgException extends InvalidArgException
 {
-	function __construct ($name, $value, $reason=NULL)
-	{
-		$message = "Argument '${name}' of value " . var_export ($value, TRUE) . " is invalid";
-		if (!is_null($reason))
-			$message .= ' ('.$reason.')';
-		$message .= '.';
-		parent::__construct ($message);
-	}
 	public function dispatch()
 	{
 		RackTablesError::genHTMLPage ('Assertion failed', '<h2>Assertion failed</h2><br>' . $this->message);

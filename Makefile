@@ -16,6 +16,15 @@ INSTALL_DATA    := $(INSTALL) -m 644
 INSTALL_DIR     := $(INSTALL) -m 755 -d
 INSTALL_PROGRAM := $(INSTALL) -m 755
 
+push:
+	rsync -avz ./ noc:rt-svn/trunk-iptree/
+
+pull:
+	rsync -avz noc:rt-svn/trunk-iptree/ ./
+
+tags:
+	ctags -R .
+
 install-docs: COPYING ChangeLog LICENSE README
 	$(INSTALL_DIR) $(DESTDIR)$(docdir)
 	$(INSTALL_DATA) $^ $(DESTDIR)$(docdir)
@@ -40,3 +49,5 @@ install-index: wwwroot/index.php
 	$(INSTALL_DATA) wwwroot/index.php $(DESTDIR)$(indexdir)
 
 install: install-helpers install-static install-applib install-index
+
+.PHONY: tags

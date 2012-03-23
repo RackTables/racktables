@@ -148,8 +148,24 @@ try {
 			renderProgressBarError();
 		}
 		break;
+	case 'progressbar4' == $_REQUEST['module']:
+		# Unlike images (and like static content), progress bars are processed
+		# without a permission check, but only for authenticated users.
+		require_once 'inc/init.php';
+		require_once 'inc/solutions.php';
+		try
+		{
+			renderProgressBar4Image ($_REQUEST['px1'], $_REQUEST['px2'], $_REQUEST['px3']);
+		}
+		catch (Exception $e)
+		{
+			ob_clean();
+			renderProgressBarError();
+		}
+		break;
 	case 'ajax' == $_REQUEST['module']:
 		require_once 'inc/ajax-interface.php';
+		require_once 'inc/solutions.php';
 		require_once 'inc/init.php';
 		try
 		{
@@ -250,6 +266,6 @@ try {
 catch (Exception $e)
 {
 	ob_end_clean();
-	printException ($e);
+	printGenericException ($e);
 }
 ?>

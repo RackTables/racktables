@@ -1277,6 +1277,17 @@ CREATE TABLE `IPv4Log` (
   KEY `ip-date` (`ip`,`date`)
 ) ENGINE=InnoDB;
 ";
+			$query[] = "
+CREATE TABLE `IPv6Log` (
+  `id` int(10) NOT NULL AUTO_INCREMENT,
+  `ip` binary(16) NOT NULL,
+  `date` datetime NOT NULL,
+  `user` varchar(64) NOT NULL,
+  `message` text NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `ip-date` (`ip`,`date`)
+) ENGINE=InnoDB;
+";
 			$query[] = "ALTER TABLE TagStorage MODIFY COLUMN entity_realm ENUM('file','ipv4net','ipv4vs','ipv4rspool','object','rack','user','ipv6net','vst') NOT NULL default 'object'";
 			$query[] = "ALTER TABLE `TagStorage` ADD COLUMN `user` char(64) DEFAULT NULL, ADD COLUMN `date` datetime DEFAULT NULL";
 

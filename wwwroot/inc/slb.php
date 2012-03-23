@@ -47,7 +47,7 @@ class SLBTriplet
 
 	public static function getTriplets ($cell)
 	{
-		if (isset ($cell['ip']) and isset ($cell['version']) and $cell['version'] == 4)
+		if (isset ($cell['ip']) and isset ($cell['vslist']))
 			return self::getTripletsByIP ($cell['ip']);
 		$ret = array();
 		switch ($cell['realm'])
@@ -90,7 +90,7 @@ class SLBTriplet
 	private static function getTripletsByIP ($ip)
 	{
 		$ret = array();
-		$bin_ip = ip_quad2long ($ip);
+		$db_ip = ip4_bin2db (ip4_parse($ip));
 		$result = usePreparedSelectBlade ("
 SELECT DISTINCT IPv4LB.* 
 FROM 
@@ -100,7 +100,7 @@ WHERE
 	rsip = ? OR vip = ?
 ORDER BY
 	vs_id
-	", array ($bin_ip, $bin_ip)
+	", array ($db_ip, $db_ip)
 		);
 		$rows = $result->fetchAll (PDO::FETCH_ASSOC);
 		unset ($result);
@@ -136,7 +136,7 @@ ORDER BY
 		if ($this->vs['proto'] == 'MARK')
 		{
 			$parser->addMacro ('PROTO', 'TCP');
-			$mark = ip_quad2long ($this->vs['vip']);
+			$mark = ip4_bin2db (ip4_parse ($this->vs['vip']));
 			$parser->addMacro ('MARK', $mark);
 			$parser->addMacro ('VS_HEADER', "fwmark $mark");
 		}
@@ -357,19 +357,19 @@ function getIPv4RSPoolOptions ()
 	return $ret;
 }
 
-function addRStoRSPool ($pool_id = 0, $rsip = '', $rsport = 0, $inservice = 'no', $rsconfig = '', $comment = '')
+function addRStoRSPool ($pool_id, $rsip_bin, $rsport = 0, $inservice = 'no', $rsconfig = '', $comment = '')
 {
-	return usePreparedExecuteBlade
+	return usePreparedInsertBlade
 	(
-		'INSERT INTO IPv4RS (rsip, rsport, rspool_id, inservice, rsconfig, comment) VALUES (INET_ATON(?), ?, ?, ?, ?, ?)',
+		'IPv4RS',
 		array
 		(
-			$rsip,
-			(!strlen ($rsport) or $rsport === 0) ? NULL : $rsport,
-			$pool_id,
-			$inservice == 'yes' ? 'yes' : 'no',
-			!strlen ($rsconfig) ? NULL : $rsconfig,
-			!strlen ($comment) ? NULL : $comment,
+			'rspool_id' => $pool_id,
+			'rsip' => ip4_bin2db ($rsip_bin),
+			'rsport' => (!strlen ($rsport) or $rsport === 0) ? NULL : $rsport,
+			'inservice' => $inservice == 'yes' ? 'yes' : 'no', 
+			'rsconfig' => !strlen ($rsconfig) ? NULL : $rsconfig,
+			'comment' => !strlen ($comment) ? NULL : $comment,
 		)
 	);
 }
@@ -398,16 +398,14 @@ function commitDeleteVS ($id = 0)
 	usePreparedDeleteBlade ('IPv4VS', array ('id' => $id));
 }
 
-function commitUpdateRS ($rsid = 0, $rsip = '', $rsport = 0, $inservice = 'yes', $rsconfig = '', $comment = '')
+function commitUpdateRS ($rsid, $rsip_bin, $rsport = 0, $inservice = 'yes', $rsconfig = '', $comment = '')
 {
-	if (long2ip (ip2long ($rsip)) !== $rsip)
-		throw new InvalidArgException ('$rsip', $rsip);
 	usePreparedExecuteBlade
 	(
-		'UPDATE IPv4RS SET rsip=INET_ATON(?), rsport=?, inservice=?, rsconfig=?, comment=? WHERE id=?',
+		'UPDATE IPv4RS SET rsip=?, rsport=?, inservice=?, rsconfig=?, comment=? WHERE id=?',
 		array
 		(
-			$rsip,
+			ip4_bin2db ($rsip_bin),
 			(!strlen ($rsport) or $rsport === 0) ? NULL : $rsport,
 			$inservice,
 			!strlen ($rsconfig) ? NULL : $rsconfig,
@@ -417,27 +415,25 @@ function commitUpdateRS ($rsid = 0, $rsip = '', $rsport = 0, $inservice = 'yes',
 	);
 }
 
-function commitUpdateVS ($vsid = 0, $vip = '', $vport = 0, $proto = '', $name = '', $vsconfig = '', $rsconfig = '')
+function commitUpdateVS ($vsid, $vip_bin, $vport = 0, $proto = '', $name = '', $vsconfig = '', $rsconfig = '')
 {
-	if (!strlen ($vip))
-		throw new InvalidArgException ('$vip', $vip);
 	if ($vport <= 0)
 		throw new InvalidArgException ('$vport', $vport);
 	if (!strlen ($proto))
 		throw new InvalidArgException ('$proto', $proto);
-	usePreparedExecuteBlade
+	return usePreparedUpdateBlade
 	(
-		'UPDATE IPv4VS SET vip=INET_ATON(?), vport=?, proto=?, name=?, vsconfig=?, rsconfig=? WHERE id=?',
+		'IPv4VS',
 		array
 		(
-			$vip,
-			$vport,
-			$proto,
-			!strlen ($name) ? NULL : $name,
-			!strlen ($vsconfig) ? NULL : $vsconfig,
-			!strlen ($rsconfig) ? NULL : $rsconfig,
-			$vsid,
-		)
+			'vip' => ip4_bin2db ($vip_bin),
+			'vport' => $vport,
+			'proto' => $proto,
+			'name' => !strlen ($name) ? NULL : $name,
+			'vsconfig' => !strlen ($vsconfig) ? NULL : $vsconfig,
+			'rsconfig' => !strlen ($rsconfig) ? NULL : $rsconfig,
+		),
+		array ('id' => $vsid)
 	);
 }
 
@@ -455,7 +451,7 @@ function commitCreateRSPool ($name = '', $vsconfig = '', $rsconfig = '', $tagidl
 		)
 	))
 		$new_pool_id = lastInsertID();
-	produceTagsForLastRecord ('ipv4rspool', $tagidlist, $new_pool_id);
+	produceTagsForNewRecord ('ipv4rspool', $tagidlist, $new_pool_id);
 	return $new_pool_id;
 }
 

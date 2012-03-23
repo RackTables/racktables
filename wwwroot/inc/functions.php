@@ -81,115 +81,6 @@ $location_obj_types = array
 	1562
 );
 
-$netmaskbylen = array
-(
-	32 => '255.255.255.255',
-	31 => '255.255.255.254',
-	30 => '255.255.255.252',
-	29 => '255.255.255.248',
-	28 => '255.255.255.240',
-	27 => '255.255.255.224',
-	26 => '255.255.255.192',
-	25 => '255.255.255.128',
-	24 => '255.255.255.0',
-	23 => '255.255.254.0',
-	22 => '255.255.252.0',
-	21 => '255.255.248.0',
-	20 => '255.255.240.0',
-	19 => '255.255.224.0',
-	18 => '255.255.192.0',
-	17 => '255.255.128.0',
-	16 => '255.255.0.0',
-	15 => '255.254.0.0',
-	14 => '255.252.0.0',
-	13 => '255.248.0.0',
-	12 => '255.240.0.0',
-	11 => '255.224.0.0',
-	10 => '255.192.0.0',
-	9 => '255.128.0.0',
-	8 => '255.0.0.0',
-	7 => '254.0.0.0',
-	6 => '252.0.0.0',
-	5 => '248.0.0.0',
-	4 => '240.0.0.0',
-	3 => '224.0.0.0',
-	2 => '192.0.0.0',
-	1 => '128.0.0.0'
-);
-
-$wildcardbylen = array
-(
-	32 => '0.0.0.0',
-	31 => '0.0.0.1',
-	30 => '0.0.0.3',
-	29 => '0.0.0.7',
-	28 => '0.0.0.15',
-	27 => '0.0.0.31',
-	26 => '0.0.0.63',
-	25 => '0.0.0.127',
-	24 => '0.0.0.255',
-	23 => '0.0.1.255',
-	22 => '0.0.3.255',
-	21 => '0.0.7.255',
-	20 => '0.0.15.255',
-	19 => '0.0.31.255',
-	18 => '0.0.63.255',
-	17 => '0.0.127.255',
-	16 => '0.0.255.25',
-	15 => '0.1.255.255',
-	14 => '0.3.255.255',
-	13 => '0.7.255.255',
-	12 => '0.15.255.255',
-	11 => '0.31.255.255',
-	10 => '0.63.255.255',
-	9 => '0.127.255.255',
-	8 => '0.255.255.255',
-	7 => '1.255.255.255',
-	6 => '3.255.255.255',
-	5 => '7.255.255.255',
-	4 => '15.255.255.255',
-	3 => '31.255.255.255',
-	2 => '63.255.255.255',
-	1 => '127.255.255.255'
-);
-
-$masklenByDQ = array
-(
-	'255.255.255.255' => 32,
-	'255.255.255.254' => 31,
-	'255.255.255.252' => 30,
-	'255.255.255.248' => 29,
-	'255.255.255.240' => 28,
-	'255.255.255.224' => 27,
-	'255.255.255.192' => 26,
-	'255.255.255.128' => 25,
-	'255.255.255.0' => 24,
-	'255.255.254.0' => 23,
-	'255.255.252.0' => 22,
-	'255.255.248.0' => 21,
-	'255.255.240.0' => 20,
-	'255.255.224.0' => 19,
-	'255.255.192.0' => 18,
-	'255.255.128.0' => 17,
-	'255.255.0.0' => 16,
-	'255.254.0.0' => 15,
-	'255.252.0.0' => 14,
-	'255.248.0.0' => 13,
-	'255.240.0.0' => 12,
-	'255.224.0.0' => 11,
-	'255.192.0.0' => 10,
-	'255.128.0.0' => 9,
-	'255.0.0.0' => 8,
-	'254.0.0.0' => 7,
-	'252.0.0.0' => 6,
-	'248.0.0.0' => 5,
-	'240.0.0.0' => 4,
-	'224.0.0.0' => 3,
-	'192.0.0.0' => 2,
-	'128.0.0.0' => 1,
-	'0.0.0.0' => 0,
-);
-
 // 802.1Q deploy queue titles
 $dqtitle = array
 (
@@ -298,42 +189,44 @@ function assertBoolArg ($argname, $ok_if_empty = FALSE)
 		throw new InvalidRequestArgException($argname, $_REQUEST[$argname], 'parameter is an empty string');
 }
 
-// function returns IPv6Address object, null if arg is correct IPv4, or throws an exception
-function assertIPArg ($argname, $ok_if_empty = FALSE)
+// function returns binary IP address, or throws an exception
+function assertIPArg ($argname)
 {
-	assertStringArg ($argname, $ok_if_empty);
-	$ip = $_REQUEST[$argname];
-	if (FALSE !== strpos ($ip, ':'))
+	assertStringArg ($argname, FALSE);
+	try
 	{
-		$v6address = new IPv6Address;
-		$result = $v6address->parse ($ip);
-		$ret = $v6address;
+		return ip_parse ($_REQUEST[$argname]);
 	}
-	else
+	catch (InvalidArgException $e)
 	{
-		$result = long2ip (ip2long ($ip)) === $ip;
-		$ret = NULL;
+		throw new InvalidRequestArgException ($argname, $_REQUEST[$argname], $e->getMessage());
 	}
-	if (! $result)
-		throw new InvalidRequestArgException ($argname, $ip, 'parameter is not a valid IPv4 or IPv6 address');
-	return $ret;
 }
 
-function assertIPv4Arg ($argname, $ok_if_empty = FALSE)
+// function returns binary IPv4 address, or throws an exception
+function assertIPv4Arg ($argname)
 {
-	assertStringArg ($argname, $ok_if_empty);
-	if (strlen ($_REQUEST[$argname]) and long2ip (ip2long ($_REQUEST[$argname])) !== $_REQUEST[$argname])
-		throw new InvalidRequestArgException($argname, $_REQUEST[$argname], 'parameter is not a valid ipv4 address');
+	try
+	{
+		return ip4_parse ($_REQUEST[$argname]);
+	}
+	catch (InvalidArgException $e)
+	{
+		throw new InvalidRequestArgException ($argname, $_REQUEST[$argname], $e->getMessage());
+	}
 }
 
-// function returns IPv6Address object, or throws an exception
-function assertIPv6Arg ($argname, $ok_if_empty = FALSE)
+// function returns binary IPv6 address, or throws an exception
+function assertIPv6Arg ($argname)
 {
-	assertStringArg ($argname, $ok_if_empty);
-	$ipv6 = new IPv6Address;
-	if (strlen ($_REQUEST[$argname]) and ! $ok_if_empty and ! $ipv6->parse ($_REQUEST[$argname]))
-		throw new InvalidRequestArgException($argname, $_REQUEST[$argname], 'parameter is not a valid ipv6 address');
-	return $ipv6;
+	try
+	{
+		return ip6_parse ($_REQUEST[$argname]);
+	}
+	catch (InvalidArgException $e)
+	{
+		throw new InvalidRequestArgException ($argname, $_REQUEST[$argname], $e->getMessage());
+	}
 }
 
 function assertPCREArg ($argname)
@@ -371,6 +264,9 @@ function genericAssertion ($argname, $argtype)
 		break;
 	case 'uint0':
 		assertUIntArg ($argname, TRUE);
+		break;
+	case 'inet':
+		assertIPArg ($argname);
 		break;
 	case 'inet4':
 		assertIPv4Arg ($argname);
@@ -433,8 +329,7 @@ function genericAssertion ($argname, $argtype)
 		if (!array_key_exists ($sic[$argname], $vs_proto))
 			throw new InvalidRequestArgException ($argname, $sic[$argname], 'Unknown value');
 		break;
-	case 'enum/inet4alloc':
-	case 'enum/inet6alloc':
+	case 'enum/alloc_type':
 		assertStringArg ($argname);
 		if (!in_array ($sic[$argname], array ('regular', 'shared', 'virtual', 'router')))
 			throw new InvalidRequestArgException ($argname, $sic[$argname], 'Unknown value');
@@ -467,6 +362,18 @@ function genericAssertion ($argname, $argtype)
 		break;
 	default:
 		throw new InvalidArgException ('argtype', $argtype); // comes not from user's input
+	}
+}
+
+// return HTML form checkbox value (TRUE of FALSE) by name of its input control
+function isCheckSet ($input_name, $mode = 'bool')
+{
+	$value = isset ($_REQUEST[$input_name]) && $_REQUEST[$input_name] == 'on';
+	switch ($mode)
+	{
+		case 'bool' : return $value;
+		case 'yesno': return $value ? 'yes' : 'no';
+		default: throw new InvalidArgException ('mode', $mode);
 	}
 }
 
@@ -711,86 +618,206 @@ function mergeGridFormToRack (&$rackData)
 		}
 }
 
-// netmask conversion from length to number
-function binMaskFromDec ($maskL)
+// wrapper around ip4_mask and ip6_mask
+// netmask conversion from length to binary string
+// v4/v6 mode is toggled by $is_ipv6 parameter
+// Throws exception if $prefix_len is invalid
+function ip_mask ($prefix_len, $is_ipv6)
 {
-	$map_straight = array (
-		0  => 0x00000000,
-		1  => 0x80000000,
-		2  => 0xc0000000,
-		3  => 0xe0000000,
-		4  => 0xf0000000,
-		5  => 0xf8000000,
-		6  => 0xfc000000,
-		7  => 0xfe000000,
-		8  => 0xff000000,
-		9  => 0xff800000,
-		10 => 0xffc00000,
-		11 => 0xffe00000,
-		12 => 0xfff00000,
-		13 => 0xfff80000,
-		14 => 0xfffc0000,
-		15 => 0xfffe0000,
-		16 => 0xffff0000,
-		17 => 0xffff8000,
-		18 => 0xffffc000,
-		19 => 0xffffe000,
-		20 => 0xfffff000,
-		21 => 0xfffff800,
-		22 => 0xfffffc00,
-		23 => 0xfffffe00,
-		24 => 0xffffff00,
-		25 => 0xffffff80,
-		26 => 0xffffffc0,
-		27 => 0xffffffe0,
-		28 => 0xfffffff0,
-		29 => 0xfffffff8,
-		30 => 0xfffffffc,
-		31 => 0xfffffffe,
-		32 => 0xffffffff,
-	);
-	return $map_straight[$maskL];
+	if ($is_ipv6)
+		return ip6_mask ($prefix_len);
+	else
+		return ip4_mask ($prefix_len);
 }
 
-// complementary value
-function binInvMaskFromDec ($maskL)
+// netmask conversion from length to binary string
+// Throws exception if $prefix_len is invalid
+function ip4_mask ($prefix_len)
 {
-	$map_compl = array (
-		0  => 0xffffffff,
-		1  => 0x7fffffff,
-		2  => 0x3fffffff,
-		3  => 0x1fffffff,
-		4  => 0x0fffffff,
-		5  => 0x07ffffff,
-		6  => 0x03ffffff,
-		7  => 0x01ffffff,
-		8  => 0x00ffffff,
-		9  => 0x007fffff,
-		10 => 0x003fffff,
-		11 => 0x001fffff,
-		12 => 0x000fffff,
-		13 => 0x0007ffff,
-		14 => 0x0003ffff,
-		15 => 0x0001ffff,
-		16 => 0x0000ffff,
-		17 => 0x00007fff,
-		18 => 0x00003fff,
-		19 => 0x00001fff,
-		20 => 0x00000fff,
-		21 => 0x000007ff,
-		22 => 0x000003ff,
-		23 => 0x000001ff,
-		24 => 0x000000ff,
-		25 => 0x0000007f,
-		26 => 0x0000003f,
-		27 => 0x0000001f,
-		28 => 0x0000000f,
-		29 => 0x00000007,
-		30 => 0x00000003,
-		31 => 0x00000001,
-		32 => 0x00000000,
+	static $mask = array
+	(
+		"\x00\x00\x00\x00", // 0
+		"\x80\x00\x00\x00", // 1
+		"\xC0\x00\x00\x00", // 2
+		"\xE0\x00\x00\x00", // 3
+		"\xF0\x00\x00\x00", // 4
+		"\xF8\x00\x00\x00", // 5
+		"\xFC\x00\x00\x00", // 6
+		"\xFE\x00\x00\x00", // 7
+		"\xFF\x00\x00\x00", // 8
+		"\xFF\x80\x00\x00", // 9
+		"\xFF\xC0\x00\x00", // 10
+		"\xFF\xE0\x00\x00", // 11
+		"\xFF\xF0\x00\x00", // 12
+		"\xFF\xF8\x00\x00", // 13
+		"\xFF\xFC\x00\x00", // 14
+		"\xFF\xFE\x00\x00", // 15
+		"\xFF\xFF\x00\x00", // 16
+		"\xFF\xFF\x80\x00", // 17
+		"\xFF\xFF\xC0\x00", // 18
+		"\xFF\xFF\xE0\x00", // 19
+		"\xFF\xFF\xF0\x00", // 20
+		"\xFF\xFF\xF8\x00", // 21
+		"\xFF\xFF\xFC\x00", // 22
+		"\xFF\xFF\xFE\x00", // 23
+		"\xFF\xFF\xFF\x00", // 24
+		"\xFF\xFF\xFF\x80", // 25
+		"\xFF\xFF\xFF\xC0", // 26
+		"\xFF\xFF\xFF\xE0", // 27
+		"\xFF\xFF\xFF\xF0", // 28
+		"\xFF\xFF\xFF\xF8", // 29
+		"\xFF\xFF\xFF\xFC", // 30
+		"\xFF\xFF\xFF\xFE", // 31
+		"\xFF\xFF\xFF\xFF", // 32
 	);
-	return $map_compl[$maskL];
+
+	if ($prefix_len >= 0 and $prefix_len <= 32)
+		return $mask[$prefix_len];
+	else
+		throw new InvalidArgException ('prefix_len', $prefix_len);
+}
+
+// netmask conversion from length to binary string
+// Throws exception if $prefix_len is invalid
+function ip6_mask ($prefix_len)
+{
+	static $mask = array
+	(
+		"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // 0
+		"\x80\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // 1
+		"\xC0\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // 2
+		"\xE0\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // 3
+		"\xF0\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // 4
+		"\xF8\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // 5
+		"\xFC\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // 6
+		"\xFE\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // 7
+		"\xFF\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // 8
+		"\xFF\x80\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // 9
+		"\xFF\xC0\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // 10
+		"\xFF\xE0\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // 11
+		"\xFF\xF0\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // 12
+		"\xFF\xF8\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // 13
+		"\xFF\xFC\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // 14
+		"\xFF\xFE\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // 15
+		"\xFF\xFF\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // 16
+		"\xFF\xFF\x80\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // 17
+		"\xFF\xFF\xC0\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // 18
+		"\xFF\xFF\xE0\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // 19
+		"\xFF\xFF\xF0\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // 20
+		"\xFF\xFF\xF8\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // 21
+		"\xFF\xFF\xFC\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // 22
+		"\xFF\xFF\xFE\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // 23
+		"\xFF\xFF\xFF\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // 24
+		"\xFF\xFF\xFF\x80\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // 25
+		"\xFF\xFF\xFF\xC0\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // 26
+		"\xFF\xFF\xFF\xE0\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // 27
+		"\xFF\xFF\xFF\xF0\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // 28
+		"\xFF\xFF\xFF\xF8\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // 29
+		"\xFF\xFF\xFF\xFC\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // 30
+		"\xFF\xFF\xFF\xFE\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // 31
+		"\xFF\xFF\xFF\xFF\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // 32
+		"\xFF\xFF\xFF\xFF\x80\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // 33
+		"\xFF\xFF\xFF\xFF\xC0\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // 34
+		"\xFF\xFF\xFF\xFF\xE0\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // 35
+		"\xFF\xFF\xFF\xFF\xF0\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // 36
+		"\xFF\xFF\xFF\xFF\xF8\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // 37
+		"\xFF\xFF\xFF\xFF\xFC\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // 38
+		"\xFF\xFF\xFF\xFF\xFE\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // 39
+		"\xFF\xFF\xFF\xFF\xFF\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // 40
+		"\xFF\xFF\xFF\xFF\xFF\x80\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // 41
+		"\xFF\xFF\xFF\xFF\xFF\xC0\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // 42
+		"\xFF\xFF\xFF\xFF\xFF\xE0\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // 43
+		"\xFF\xFF\xFF\xFF\xFF\xF0\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // 44
+		"\xFF\xFF\xFF\xFF\xFF\xF8\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // 45
+		"\xFF\xFF\xFF\xFF\xFF\xFC\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // 46
+		"\xFF\xFF\xFF\xFF\xFF\xFE\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // 47
+		"\xFF\xFF\xFF\xFF\xFF\xFF\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", // 48
+		"\xFF\xFF\xFF\xFF\xFF\xFF\x80\x00\x00\x00\x00\x00\x00\x00\x00\x00", // 49
+		"\xFF\xFF\xFF\xFF\xFF\xFF\xC0\x00\x00\x00\x00\x00\x00\x00\x00\x00", // 50
+		"\xFF\xFF\xFF\xFF\xFF\xFF\xE0\x00\x00\x00\x00\x00\x00\x00\x00\x00", // 51
+		"\xFF\xFF\xFF\xFF\xFF\xFF\xF0\x00\x00\x00\x00\x00\x00\x00\x00\x00", // 52
+		"\xFF\xFF\xFF\xFF\xFF\xFF\xF8\x00\x00\x00\x00\x00\x00\x00\x00\x00", // 53
+		"\xFF\xFF\xFF\xFF\xFF\xFF\xFC\x00\x00\x00\x00\x00\x00\x00\x00\x00", // 54
+		"\xFF\xFF\xFF\xFF\xFF\xFF\xFE\x00\x00\x00\x00\x00\x00\x00\x00\x00", // 55
+		"\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x00\x00\x00\x00\x00\x00\x00\x00\x00", // 56
+		"\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x80\x00\x00\x00\x00\x00\x00\x00\x00", // 57
+		"\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xC0\x00\x00\x00\x00\x00\x00\x00\x00", // 58
+		"\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xE0\x00\x00\x00\x00\x00\x00\x00\x00", // 59
+		"\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xF0\x00\x00\x00\x00\x00\x00\x00\x00", // 60
+		"\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xF8\x00\x00\x00\x00\x00\x00\x00\x00", // 61
+		"\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFC\x00\x00\x00\x00\x00\x00\x00\x00", // 62
+		"\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFE\x00\x00\x00\x00\x00\x00\x00\x00", // 63
+		"\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x00\x00\x00\x00\x00\x00\x00\x00", // 64
+		"\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x80\x00\x00\x00\x00\x00\x00\x00", // 65
+		"\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xC0\x00\x00\x00\x00\x00\x00\x00", // 66
+		"\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xE0\x00\x00\x00\x00\x00\x00\x00", // 67
+		"\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xF0\x00\x00\x00\x00\x00\x00\x00", // 68
+		"\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xF8\x00\x00\x00\x00\x00\x00\x00", // 69
+		"\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFC\x00\x00\x00\x00\x00\x00\x00", // 70
+		"\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFE\x00\x00\x00\x00\x00\x00\x00", // 71
+		"\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x00\x00\x00\x00\x00\x00\x00", // 72
+		"\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x80\x00\x00\x00\x00\x00\x00", // 73
+		"\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xC0\x00\x00\x00\x00\x00\x00", // 74
+		"\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xE0\x00\x00\x00\x00\x00\x00", // 75
+		"\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xF0\x00\x00\x00\x00\x00\x00", // 76
+		"\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xF8\x00\x00\x00\x00\x00\x00", // 77
+		"\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFC\x00\x00\x00\x00\x00\x00", // 78
+		"\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFE\x00\x00\x00\x00\x00\x00", // 79
+		"\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x00\x00\x00\x00\x00\x00", // 80
+		"\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x80\x00\x00\x00\x00\x00", // 81
+		"\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xC0\x00\x00\x00\x00\x00", // 82
+		"\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xE0\x00\x00\x00\x00\x00", // 83
+		"\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xF0\x00\x00\x00\x00\x00", // 84
+		"\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xF8\x00\x00\x00\x00\x00", // 85
+		"\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFC\x00\x00\x00\x00\x00", // 86
+		"\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFE\x00\x00\x00\x00\x00", // 87
+		"\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x00\x00\x00\x00\x00", // 88
+		"\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x80\x00\x00\x00\x00", // 89
+		"\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xC0\x00\x00\x00\x00", // 90
+		"\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xE0\x00\x00\x00\x00", // 91
+		"\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xF0\x00\x00\x00\x00", // 92
+		"\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xF8\x00\x00\x00\x00", // 93
+		"\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFC\x00\x00\x00\x00", // 94
+		"\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFE\x00\x00\x00\x00", // 95
+		"\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x00\x00\x00\x00", // 96
+		"\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x80\x00\x00\x00", // 97
+		"\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xC0\x00\x00\x00", // 98
+		"\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xE0\x00\x00\x00", // 99
+		"\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xF0\x00\x00\x00", // 100
+		"\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xF8\x00\x00\x00", // 101
+		"\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFC\x00\x00\x00", // 102
+		"\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFE\x00\x00\x00", // 103
+		"\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x00\x00\x00", // 104
+		"\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x80\x00\x00", // 105
+		"\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xC0\x00\x00", // 106
+		"\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xE0\x00\x00", // 107
+		"\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xF0\x00\x00", // 108
+		"\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xF8\x00\x00", // 109
+		"\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFC\x00\x00", // 110
+		"\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFE\x00\x00", // 111
+		"\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x00\x00", // 112
+		"\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x80\x00", // 113
+		"\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xC0\x00", // 114
+		"\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xE0\x00", // 115
+		"\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xF0\x00", // 116
+		"\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xF8\x00", // 117
+		"\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFC\x00", // 118
+		"\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFE\x00", // 119
+		"\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x00", // 120
+		"\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x80", // 121
+		"\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xC0", // 122
+		"\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xE0", // 123
+		"\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xF0", // 124
+		"\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xF8", // 125
+		"\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFC", // 126
+		"\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFE", // 127
+		"\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF", // 128
+	);
+
+	if ($prefix_len >= 0 and $prefix_len <= 128)
+		return $mask[$prefix_len];
+	else
+		throw new InvalidArgException ('prefix_len', $prefix_len);
 }
 
 // This function looks up 'has_problems' flag for 'T' atoms
@@ -944,9 +971,10 @@ function findAllEndpoints ($object_id, $fallback = '')
 		if ($record['id'] == 3 && strlen ($record['value'])) // FQDN
 			return array ($record['value']);
 	$regular = array();
-	foreach (getObjectIPv4Allocations ($object_id) as $dottedquad => $alloc)
+	foreach (getObjectIPv4AllocationList ($object_id) as $ip_bin => $alloc)
 		if ($alloc['type'] == 'regular')
-			$regular[] = $dottedquad;
+			$regular[] = ip4_format ($ip_bin);
+	// FIXME: add IPv6 allocations to this list
 	if (!count ($regular) && strlen ($fallback))
 		return array ($fallback);
 	return $regular;
@@ -1575,11 +1603,11 @@ function getCellFilter ()
 	$andor_used = FALSE;
 	@session_start();
 	// if the page is submitted we get an andor value so we know they are trying to start a new filter or clearing the existing one.
-	if(isset($_REQUEST['andor']))
-	{
+	if (isset($_REQUEST['andor']))
 		$andor_used = TRUE;
+	if ($andor_used || array_key_exists ('clear-cf', $_REQUEST))
 		unset($_SESSION[$pageno]); // delete saved filter
-	}
+
 	// otherwise inject saved filter to the $_REQUEST and $sic vars
 	elseif (isset ($_SESSION[$pageno]['filter']) and is_array ($_SESSION[$pageno]['filter']) and getConfigVar ('STATIC_FILTER') == 'yes')
 		foreach (array('andor', 'cfe', 'cft[]', 'cfp[]', 'nft[]', 'nfp[]') as $param)
@@ -1814,7 +1842,7 @@ function findRouters ($addrlist)
 					'id' => $alloc['object_id'],
 					'iface' => $alloc['name'],
 					'dname' => $alloc['object_name'],
-					'addr' => $addr['ip']
+					'ip_bin' => $addr['ip_bin'],
 				);
 	return $ret;
 }
@@ -1830,44 +1858,25 @@ function taginfoCmp ($tagA, $tagB)
 // "The comparison function must return an integer less than, equal to, or greater
 // than zero if the first argument is considered to be respectively less than,
 // equal to, or greater than the second." (c) PHP manual
-function IPv4NetworkCmp ($netA, $netB)
+function IPNetworkCmp ($netA, $netB)
 {
-	// On 64-bit systems this function can be reduced to just this:
-	if (PHP_INT_SIZE == 8)
-		return $netA['ip_bin'] - $netB['ip_bin'];
-	// There's a problem just substracting one u32 integer from another,
-	// because the result may happen big enough to become a negative i32
-	// integer itself (PHP tries to cast everything it sees to signed int)
-	// The comparison below must treat positive and negative values of both
-	// arguments.
-	// Equal values give instant decision regardless of their [equal] sign.
-	if ($netA['ip_bin'] == $netB['ip_bin'])
-		return 0;
-	// Same-signed values compete arithmetically within one of i32 contiguous ranges:
-	// 0x00000001~0x7fffffff 1~2147483647
-	// 0 doesn't have any sign, and network 0.0.0.0 isn't allowed
-	// 0x80000000~0xffffffff -2147483648~-1
-	$signA = $netA['ip_bin'] / abs ($netA['ip_bin']);
-	$signB = $netB['ip_bin'] / abs ($netB['ip_bin']);
-	if ($signA == $signB)
-	{
-		if ($netA['ip_bin'] > $netB['ip_bin'])
-			return 1;
-		else
-			return -1;
-	}
-	else // With only one of two values being negative, it... wins!
-	{
-		if ($netA['ip_bin'] < $netB['ip_bin'])
-			return 1;
-		else
-			return -1;
-	}
+	$ret = strcmp ($netA['ip_bin'], $netB['ip_bin']);
+	if ($ret == 0)
+		$ret = $netA['mask'] < $netB['mask'] ? -1 : ($netA['mask'] > $netB['mask'] ? 1 : 0);
+	if ($ret == -1 and $netA['ip_bin'] === ($netB['ip_bin'] & $netA['mask_bin']))
+		$ret = -2;
+	return $ret;
 }
 
-function IPv6NetworkCmp ($netA, $netB)
+function IPNetContainsOrEqual ($netA, $netB)
 {
-	return strcmp ($netA['ip_bin']->getBin(), $netB['ip_bin']->getBin());
+	$res = IPNetworkCmp ($netA, $netB);
+	return ($res == -2 || $res == 0);
+}
+
+function IPNetContains ($netA, $netB)
+{
+	return (-2 == IPNetworkCmp ($netA, $netB));
 }
 
 // Modify the given tag tree so, that each level's items are sorted alphabetically.
@@ -1888,30 +1897,10 @@ function iptree_fill (&$netdata)
 	if (!isset ($netdata['kids']) or !count ($netdata['kids']))
 		return;
 	// If we really have nested prefixes, they must fit into the tree.
-	$worktree = array
-	(
-		'ip_bin' => $netdata['ip_bin'],
-		'mask' => $netdata['mask']
-	);
+	$worktree = $netdata;
 	foreach ($netdata['kids'] as $pfx)
 		iptree_embed ($worktree, $pfx);
 	$netdata['kids'] = iptree_construct ($worktree);
-	$netdata['kidc'] = count ($netdata['kids']);
-}
-
-function ipv6tree_fill (&$netdata)
-{
-	if (!isset ($netdata['kids']) or !count ($netdata['kids']))
-		return;
-	// If we really have nested prefixes, they must fit into the tree.
-	$worktree = array
-	(
-		'ip_bin' => $netdata['ip_bin'],
-		'mask' => $netdata['mask']
-	);
-	foreach ($netdata['kids'] as $pfx)
-		ipv6tree_embed ($worktree, $pfx);
-	$netdata['kids'] = ipv6tree_construct ($worktree);
 	$netdata['kidc'] = count ($netdata['kids']);
 }
 
@@ -1921,9 +1910,8 @@ function iptree_construct ($node)
 
 	if (!isset ($node['right']))
 	{
-		if (!isset ($node['ip']))
+		if (!isset ($node['kids']))
 		{
-			$node['ip'] = long2ip ($node['ip_bin']);
 			$node['kids'] = array();
 			$node['kidc'] = 0;
 			$node['name'] = '';
@@ -1934,23 +1922,314 @@ function iptree_construct ($node)
 		return array_merge ($self ($node['left']), $self ($node['right']));
 }
 
-function ipv6tree_construct ($node)
+function ip_format ($ip_bin)
 {
-	$self = __FUNCTION__;
-
-	if (!isset ($node['right']))
+	switch (strlen ($ip_bin))
 	{
-		if (!isset ($node['ip']))
-		{
-			$node['ip'] = $node['ip_bin']->format();
-			$node['kids'] = array();
-			$node['kidc'] = 0;
-			$node['name'] = '';
-		}
-		return array ($node);
+		case 4:  return ip4_format ($ip_bin);
+		case 16: return ip6_format ($ip_bin);
+		default: throw new InvalidArgException ('ip_bin', $ip_bin, "Invalid binary IP");
 	}
+}
+
+function ip4_format ($ip_bin)
+{
+	if (4 != ($len = strlen ($ip_bin)))
+		throw new InvalidArgException ('ip_bin', $ip_bin, "Invalid binary IP");
+	return implode ('.', unpack ('C*', $ip_bin));
+}
+
+function ip6_format ($ip_bin)
+{
+	// maybe this is IPv6-to-IPv4 address?
+	if (substr ($ip_bin, 0, 12) == "\0\0\0\0\0\0\0\0\0\0\xff\xff")
+		return '::ffff:' . implode ('.', unpack ('C*', substr ($ip_bin, 12, 4)));
+
+	$result = array();
+	$hole_index = NULL;
+	$max_hole_index = NULL;
+	$hole_length = 0;
+	$max_hole_length = 0;
+
+	for ($i = 0; $i < 8; $i++)
+	{
+		$unpacked = unpack ('n', substr ($ip_bin, $i * 2, 2));
+		$value = array_shift ($unpacked);
+		$result[] = dechex ($value & 0xffff);
+		if ($value != 0)
+		{
+			unset ($hole_index);
+			$hole_length = 0;
+		}
+		else
+		{
+			if (! isset ($hole_index))
+				$hole_index = $i;
+			if (++$hole_length >= $max_hole_length)
+			{
+				$max_hole_index = $hole_index;
+				$max_hole_length = $hole_length;
+			}
+		}
+	}
+	if (isset ($max_hole_index))
+	{
+		array_splice ($result, $max_hole_index, $max_hole_length, array (''));
+		if ($max_hole_index == 0 && $max_hole_length == 8)
+			return '::';
+		elseif ($max_hole_index == 0)
+			return ':' . implode (':', $result);
+		elseif ($max_hole_index + $max_hole_length == 8)
+			return implode (':', $result) . ':';
+	}
+	return implode (':', $result);
+}
+
+function ip_parse ($ip)
+{
+	if (FALSE !== strpos ($ip, ':'))
+		return ip6_parse ($ip);
 	else
-		return array_merge ($self ($node['left']), $self ($node['right']));
+		return ip4_parse ($ip);
+}
+
+function ip4_parse ($ip)
+{
+	if (FALSE === ($int = ip2long ($ip)))
+		throw new InvalidArgException ('ip', $ip, "Invalid IPv4 address");
+	else
+		return pack ('N', $int);
+}
+
+// returns 16-byte string ip_bin
+// throws exception if unable to parse
+function ip6_parse ($ip)
+{
+	do {
+		if (empty ($ip))
+			break;
+
+		$result = "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"; // 16 bytes
+		// remove one of double beginning/tailing colons
+		if (substr ($ip, 0, 2) == '::')
+			$ip = substr ($ip, 1);
+		elseif (substr ($ip, -2, 2) == '::')
+			$ip = substr ($ip, 0, strlen ($ip) - 1);
+
+		$tokens = explode (':', $ip);
+		$last_token = $tokens[count ($tokens) - 1];
+		$split = explode ('.', $last_token);
+		if (count ($split) == 4)
+		{
+			$hex_tokens = array();
+			$hex_tokens[] = dechex ($split[0] * 256 + $split[1]);
+			$hex_tokens[] = dechex ($split[2] * 256 + $split[3]);
+			array_splice ($tokens, -1, 1, $hex_tokens);
+		}
+		if (count ($tokens) > 8)
+			break;
+		for ($i = 0; $i < count ($tokens); $i++)
+		{
+			if ($tokens[$i] != '')
+			{
+				if (! set_word_value ($result, $i, $tokens[$i]))
+					break;
+			}
+			else
+			{
+				$k = 8; //index in result string (last word)
+				for ($j = count ($tokens) - 1; $j > $i; $j--) // $j is an index in $tokens for reverse walk
+					if ($tokens[$j] == '')
+						break;
+					elseif (! set_word_value ($result, --$k, $tokens[$j]))
+						break;
+				if ($i != $j)
+					break; //error, more than 1 '::' range
+				break;
+			}
+		}
+		if (! isset ($k) && count ($tokens) != 8)
+			break;
+		return $result;
+	} while (FALSE);
+
+	throw new InvalidArgException ('ip', $ip, "Invalid IPv6 address");
+}
+
+function set_word_value (&$haystack, $nword, $hexvalue)
+{
+	// check that $hexvalue is like /^[0-9a-fA-F]*$/
+	for ($i = 0; $i < strlen ($hexvalue); $i++)
+	{
+		$char = ord ($hexvalue[$i]);
+		if (! ($char >= 0x30 && $char <= 0x39 || $char >= 0x41 && $char <= 0x46 || $char >=0x61 && $char <= 0x66))
+			return FALSE;
+	}
+	$haystack = substr_replace ($haystack, pack ('n', hexdec ($hexvalue)), $nword * 2, 2);
+	return TRUE;
+}
+
+// returns binary IP or FALSE
+function ip_checkparse ($ip)
+{
+	try
+	{
+		return ip_parse ($ip);
+	}
+	catch (InvalidArgException $e)
+	{
+		return FALSE;
+	}
+}
+
+// returns binary IP or FALSE
+function ip4_checkparse ($ip)
+{
+	try
+	{
+		return ip4_parse ($ip);
+	}
+	catch (InvalidArgException $e)
+	{
+		return FALSE;
+	}
+}
+
+// returns binary IP or FALSE
+function ip6_checkparse ($ip)
+{
+	try
+	{
+		return ip6_parse ($ip);
+	}
+	catch (InvalidArgException $e)
+	{
+		return FALSE;
+	}
+}
+
+function ip4_int2bin ($ip_int)
+{
+	return pack ('N', $ip_int);
+}
+
+function ip4_bin2int ($ip_bin)
+{
+	if (4 != strlen ($ip_bin))
+		throw new InvalidArgException ('ip_bin', $ip_bin, "Invalid binary IP");
+	$list = unpack ('N', $ip_bin);
+	return array_shift ($list);
+}
+
+// Use this function only when you need to export binary ip out of PHP running context (e.g., DB)
+// !DO NOT perform arithmetic and bitwise operations with the result of this function!
+function ip4_bin2db ($ip_bin)
+{
+	$ip_int = ip4_bin2int ($ip_bin);
+	if ($ip_int < 0)
+		return sprintf ('%u', 0x00000000 + $ip_int);
+	else
+		return $ip_int;
+}
+
+function ip_last ($net)
+{
+	return $net['ip_bin'] | ~$net['mask_bin'];
+}
+
+function ip_next ($ip_bin)
+{
+	$ret = $ip_bin;
+	$p = 1;
+	for ($i = strlen ($ret) - 1; $i >= 0; $i--)
+	{
+		$oct = $p + ord ($ret[$i]);
+		$ret[$i] = chr ($oct & 0xff);
+		if ($oct <= 255 and $oct >= 0)
+			break;
+	}
+	return $ret;
+}
+
+function ip_prev ($ip_bin)
+{
+	$ret = $ip_bin;
+	$p = -1;
+	for ($i = strlen ($ret) - 1; $i >= 0; $i--)
+	{
+		$oct = $p + ord ($ret[$i]);
+		$ret[$i] = chr ($oct & 0xff);
+		if ($oct <= 255 and $oct >= 0)
+			break;
+	}
+	return $ret;
+}
+
+function ip4_range_size ($range)
+{
+	return ip4_mask_size ($range['mask']);
+}
+
+function ip4_mask_size ($mask)
+{
+	return (0xffffffff >> $mask) + 1;
+}
+
+// returns array with keys 'ip', 'ip_bin', 'mask', 'mask_bin'
+function constructIPRange ($ip_bin, $mask)
+{
+	$node = array();
+	switch (strlen ($ip_bin))
+	{
+		case 4: // IPv4
+			if ($mask < 0 || $mask > 32)
+				throw new InvalidArgException ('mask', $mask, "Invalid v4 prefix length");
+			$node['mask_bin'] = ip4_mask ($mask);
+			$node['mask'] = $mask;
+			$node['ip_bin'] = $ip_bin & $node['mask_bin'];
+			$node['ip'] = ip4_format ($node['ip_bin']);
+			break;
+		case 16: // IPv6
+			if ($mask < 0 || $mask > 128)
+				throw new InvalidArgException ('mask', $mask, "Invalid v6 prefix length");
+			$node['mask_bin'] = ip6_mask ($mask);
+			$node['mask'] = $mask;
+			$node['ip_bin'] = $ip_bin & $node['mask_bin'];
+			$node['ip'] = ip6_format ($node['ip_bin']);
+			break;
+		default:
+			throw new InvalidArgException ('ip_bin', $ip_bin, "Invalid binary IP");
+	}
+	return $node;
+}
+
+// Return minimal IP address structure
+function constructIPAddress ($ip_bin)
+{
+	// common v4/v6 part
+	$ret = array
+	(
+		'ip' => ip_format ($ip_bin),
+		'ip_bin' => $ip_bin,
+		'name' => '',
+		'reserved' => 'no',
+		'allocs' => array(),
+	);
+
+	// specific v4 part
+	if (strlen ($ip_bin) == 4)
+		$ret = array_merge
+		(
+			$ret,
+			array
+			(
+				'outpf' => array(),
+				'inpf' => array(),
+				'vslist' => array(),
+				'rsplist' => array(),
+			)
+		);
+	return $ret;
 }
 
 function iptree_embed (&$node, $pfx)
@@ -1958,7 +2237,7 @@ function iptree_embed (&$node, $pfx)
 	$self = __FUNCTION__;
 
 	// hit?
-	if ($node['ip_bin'] == $pfx['ip_bin'] and $node['mask'] == $pfx['mask'])
+	if (0 == IPNetworkCmp ($node, $pfx))
 	{
 		$node = $pfx;
 		return;
@@ -1969,58 +2248,13 @@ function iptree_embed (&$node, $pfx)
 	// split?
 	if (!isset ($node['right']))
 	{
-		// Fill in db_first/db_last to make it possible to run scanIPv4Space() on the node.
-		$node['left']['mask'] = $node['mask'] + 1;
-		$node['left']['ip_bin'] = $node['ip_bin'];
-		$node['left']['db_first'] = sprintf ('%u', $node['left']['ip_bin']);
-		$node['left']['db_last'] = sprintf ('%u', $node['left']['ip_bin'] | binInvMaskFromDec ($node['left']['mask']));
-
-		$node['right']['mask'] = $node['mask'] + 1;
-		$node['right']['ip_bin'] = $node['ip_bin'] + binInvMaskFromDec ($node['mask'] + 1) + 1;
-		$node['right']['db_first'] = sprintf ('%u', $node['right']['ip_bin']);
-		$node['right']['db_last'] = sprintf ('%u', $node['right']['ip_bin'] | binInvMaskFromDec ($node['right']['mask']));
+		$node['left']  = constructIPRange ($node['ip_bin'], $node['mask'] + 1);
+		$node['right'] = constructIPRange (ip_last ($node), $node['mask'] + 1);
 	}
 
-	// repeat!
-	if (($node['left']['ip_bin'] & binMaskFromDec ($node['left']['mask'])) == ($pfx['ip_bin'] & binMaskFromDec ($node['left']['mask'])))
+	if (IPNetContainsOrEqual ($node['left'], $pfx))
 		$self ($node['left'], $pfx);
-	elseif (($node['right']['ip_bin'] & binMaskFromDec ($node['right']['mask'])) == ($pfx['ip_bin'] & binMaskFromDec ($node['left']['mask'])))
-		$self ($node['right'], $pfx);
-	else
-		throw new RackTablesError ('cannot decide between left and right', RackTablesError::INTERNAL);
-}
-
-function ipv6tree_embed (&$node, $pfx)
-{
-	$self = __FUNCTION__;
-
-	// hit?
-	if ($node['ip_bin'] == $pfx['ip_bin'] and $node['mask'] == $pfx['mask'])
-	{
-		$node = $pfx;
-		return;
-	}
-	if ($node['mask'] == $pfx['mask'])
-		throw new RackTablesError ('the recurring loop lost control', RackTablesError::INTERNAL);
-
-	// split?
-	if (!isset ($node['right']))
-	{
-		$node['left']['mask'] = $node['mask'] + 1;
-		$node['left']['ip_bin'] = $node['ip_bin'];
-		$node['left']['db_first'] = $node['ip_bin']->get_first_subnet_address ($node['mask'] + 1);
-		$node['left']['db_last'] = $node['ip_bin']->get_last_subnet_address ($node['mask'] + 1);
-
-		$node['right']['mask'] = $node['mask'] + 1;
-		$node['right']['ip_bin'] = $node['ip_bin']->get_last_subnet_address ($node['mask'] + 1)->next();
-		$node['right']['db_first'] = $node['right']['ip_bin'];
-		$node['right']['db_last'] = $node['right']['ip_bin']->get_last_subnet_address ($node['mask'] + 1);
-	}
-
-	// repeat!
-	if ($node['left']['db_first'] == $pfx['ip_bin']->get_first_subnet_address ($node['left']['mask']))
-		$self ($node['left'], $pfx);
-	elseif ($node['right']['db_first'] == $pfx['ip_bin']->get_first_subnet_address ($node['left']['mask']))
+	elseif (IPNetContainsOrEqual ($node['right'], $pfx))
 		$self ($node['right'], $pfx);
 	else
 		throw new RackTablesError ('cannot decide between left and right', RackTablesError::INTERNAL);
@@ -2040,104 +2274,104 @@ function treeApplyFunc (&$tree, $func = '', $stopfunc = '')
 	}
 }
 
-function loadIPv4AddrList (&$netinfo)
-{
-	loadOwnIPv4Addresses ($netinfo);
-	markupIPAddrList ($netinfo['addrlist']);
-}
-
-function countOwnIPv4Addresses (&$node)
-{
-	$node['addrt'] = 0;
-	if (empty ($node['kids']))
-		$node['addrt'] = binInvMaskFromDec ($node['mask']) + 1;
-	else
-		foreach ($node['kids'] as $nested)
-			if (!isset ($nested['id'])) // spare
-				$node['addrt'] += binInvMaskFromDec ($nested['mask']) + 1;
-}
-
 function nodeIsCollapsed ($node)
 {
 	return $node['symbol'] == 'node-collapsed';
 }
 
-// implies countOwnIPv4Addresses
-function loadOwnIPv4Addresses (&$node)
+function loadIPAddrList (&$node)
 {
-	$toscan = array();
-	$node['addrt'] = 0;
-	if (!isset ($node['kids']) or !count ($node['kids']))
-	{
-		$toscan[] = array ('i32_first' => $node['db_first'], 'i32_last' => $node['db_last']);
-		$node['addrt'] = $node['db_last'] - $node['db_first'] + 1;
-	}
+	$node['addrlist'] = scanIPSpace (array (array ('first' => $node['ip_bin'], 'last' => ip_last ($node))));
+
+	if (! isset ($node['id']))
+		$node['own_addrlist'] = $node['addrlist'];
 	else
 	{
-		$node['addrt'] = 0;
-		foreach ($node['kids'] as $nested)
-			if (!isset ($nested['id'])) // spare
-			{
-				$toscan[] = array ('i32_first' => $nested['db_first'], 'i32_last' => $nested['db_last']);
-				$node['addrt'] += $nested['db_last'] - $nested['db_first'] + 1;
-			}
+		$node['own_addrlist'] = array();
+		if ($node['kidc'] != 0)
+			// node has childs
+			foreach ($node['spare_ranges'] as $mask => $spare_list)
+				foreach ($spare_list as $spare_ip)
+				{
+					$spare_range = constructIPRange ($spare_ip, $mask);
+					foreach ($node['addrlist'] as $bin_ip => $addr)
+						if (($bin_ip & $spare_range['mask_bin']) == $spare_range['ip_bin'])
+							$node['own_addrlist'][$bin_ip] = $addr;
+				}
 	}
-	$node['addrlist'] = scanIPv4Space ($toscan);
 	$node['addrc'] = count ($node['addrlist']);
+	$node['own_addrc'] = count ($node['own_addrlist']);
 }
 
-function loadIPv6AddrList (&$netinfo)
+function getIPv4OwnRangeSize ($range)
 {
-	loadOwnIPv6Addresses ($netinfo);
-	markupIPAddrList ($netinfo['addrlist']);
+	if (! isset ($range['id']))
+		return ip4_range_size ($range);
+	$ret = 0;
+	if (isset ($range['spare_ranges']))
+		foreach ($range['spare_ranges'] as $mask => $spare_list)
+			$ret += count ($spare_list) * ip4_mask_size ($mask);
+	return $ret;
 }
 
-function loadOwnIPv6Addresses (&$node)
+// returns the array of structure described by constructIPAddress
+function getIPAddress ($ip_bin)
 {
-	$toscan = array();
-	$node['addrt'] = 0;
-	if (empty ($node['kids']))
-		$toscan[] = array ('first' => $node['ip_bin'], 'last' => $node['ip_bin']->get_last_subnet_address ($node['mask']));
-	else
-		foreach ($node['kids'] as $nested)
-			if (!isset ($nested['id'])) // spare
-				$toscan[] = array ('first' => $nested['ip_bin'], 'last' => $nested['ip_bin']->get_last_subnet_address ($nested['mask']));
-	$node['addrlist'] = scanIPv6Space ($toscan);
-	$node['addrc'] = count ($node['addrlist']);
+	$scanres = scanIPSpace (array (array ('first' => $ip_bin, 'last' => $ip_bin)));
+	if (empty ($scanres))
+		return constructIPAddress ($ip_bin);
+	markupIPAddrList ($scanres);
+	return $scanres[$ip_bin];
 }
 
-function prepareIPv4Tree ($netlist, $expanded_id = 0)
+function getIPv4Address ($ip_bin)
+{
+	if (strlen ($ip_bin) != 4)
+		throw new InvalidArgException ('ip_bin', $ip_bin, "Invalid binary IP");
+	return getIPAddress ($ip_bin);
+}
+
+function getIPv6Address ($ip_bin)
+{
+	if (strlen ($ip_bin) != 16)
+		throw new InvalidArgException ('ip_bin', $ip_bin, "Invalid binary IP");
+	return getIPAddress ($ip_bin);
+}
+
+function makeIPTree ($netlist)
 {
 	// treeFromList() requires parent_id to be correct for an item to get onto the tree,
-	// so perform necessary pre-processing to make orphans belong to root. This trick
-	// was earlier performed by getIPv4NetworkList().
-	$netids = array_keys ($netlist);
-	foreach ($netids as $cid)
-		if (!in_array ($netlist[$cid]['parent_id'], $netids))
-			$netlist[$cid]['parent_id'] = NULL;
+	// so perform necessary pre-processing to calculate parent_id of each item of $netlist.
+	$stack = array();
+	foreach ($netlist as $net_id => &$net)
+	{
+		while (! empty ($stack))
+		{
+			$top_id = $stack[count ($stack) - 1];
+			if (! IPNetContains ($netlist[$top_id], $net)) // unless $net is a child of stack top
+				array_pop ($stack);
+			else
+			{
+				$net['parent_id'] = $top_id;
+				break;
+			}
+		}
+		if (empty ($stack))
+			$net['parent_id'] = NULL;
+		array_push ($stack, $net_id);
+	}
+	unset ($stack);
+
 	$tree = treeFromList ($netlist); // medium call
-	sortTree ($tree, 'IPv4NetworkCmp');
-	// complement the tree before markup to make the spare networks have "symbol" set
-	treeApplyFunc ($tree, 'iptree_fill');
-	iptree_markup_collapsion ($tree, getConfigVar ('TREE_THRESHOLD'), $expanded_id);
-	// count addresses after the markup to skip computation for hidden tree nodes
-	treeApplyFunc ($tree, 'countOwnIPv4Addresses', 'nodeIsCollapsed');
+	sortTree ($tree, 'IPNetworkCmp');
 	return $tree;
 }
 
-function prepareIPv6Tree ($netlist, $expanded_id = 0)
+function prepareIPTree ($netlist, $expanded_id = 0)
 {
-	// treeFromList() requires parent_id to be correct for an item to get onto the tree,
-	// so perform necessary pre-processing to make orphans belong to root. This trick
-	// was earlier performed by getIPv4NetworkList().
-	$netids = array_keys ($netlist);
-	foreach ($netids as $cid)
-		if (!in_array ($netlist[$cid]['parent_id'], $netids))
-			$netlist[$cid]['parent_id'] = NULL;
-	$tree = treeFromList ($netlist); // medium call
-	sortTree ($tree, 'IPv6NetworkCmp');
+	$tree = makeIPTree ($netlist);
 	// complement the tree before markup to make the spare networks have "symbol" set
-	treeApplyFunc ($tree, 'ipv6tree_fill');
+	treeApplyFunc ($tree, 'iptree_fill');
 	iptree_markup_collapsion ($tree, getConfigVar ('TREE_THRESHOLD'), $expanded_id);
 	return $tree;
 }
@@ -2167,11 +2401,12 @@ function iptree_markup_collapsion (&$tree, $threshold = 1024, $target = 0)
 	{
 		$here = ($target === 'ALL' or ($target > 0 and isset ($tree[$key]['id']) and $tree[$key]['id'] == $target));
 		$below = $self ($tree[$key]['kids'], $threshold, $target);
+		$expand_enabled = ($target !== 'NONE');
 		if (!$tree[$key]['kidc']) // terminal node
 			$tree[$key]['symbol'] = 'spacer';
-		elseif ($tree[$key]['kidc'] < $threshold)
+		elseif ($expand_enabled and $tree[$key]['kidc'] < $threshold)
 			$tree[$key]['symbol'] = 'node-expanded-static';
-		elseif ($here or $below)
+		elseif ($expand_enabled and ($here or $below))
 			$tree[$key]['symbol'] = 'node-expanded';
 		else
 			$tree[$key]['symbol'] = 'node-collapsed';
@@ -2275,16 +2510,6 @@ function convertToBytes ($value) {
 	}
 
 	return $value;
-}
-
-function ip_quad2long ($ip)
-{
-      return sprintf("%u", ip2long($ip));
-}
-
-function ip_long2quad ($quad)
-{
-      return long2ip($quad);
 }
 
 // make "A" HTML element
@@ -3344,11 +3569,8 @@ function getEmployedVlans ($object_id, $domain_vlanlist)
 	foreach (array ('ipv4', 'ipv6') as $family)
 	{
 		$seen_nets = array();
-		foreach ($cell[$family] as $ip => $allocation)
-		{
-			if ($family == 'ipv6')
-				$ip = new IPv6Address ($ip);
-			if ($net_id = ($family == 'ipv6' ? getIPv6AddressNetworkId ($ip) : getIPv4AddressNetworkId ($ip)))
+		foreach ($cell[$family] as $ip_bin => $allocation)
+			if ($net_id = getIPAddressNetworkId ($ip_bin))
 			{
 				if (! isset($seen_nets[$net_id]))
 					$seen_nets[$net_id]	= 1;
@@ -3359,7 +3581,6 @@ function getEmployedVlans ($object_id, $domain_vlanlist)
 					if (! isset ($employed[$vlan['vlan_id']]))
 						$employed[$vlan['vlan_id']] = 1;
 			}
-		}
 	}
 	return array_keys ($employed);
 }
@@ -4253,32 +4474,31 @@ function questionMarks ($count = 0)
 function searchEntitiesByText ($terms)
 {
 	$summary = array();
-	$ipv6 = new IPv6Address;
 
 	if (preg_match (RE_IP4_ADDR, $terms))
 	// Search for IPv4 address.
 	{
-		if ($net_id = getIPv4AddressNetworkId ($terms))
+		if ($net_id = getIPv4AddressNetworkId (ip4_parse ($terms)))
 			$summary['ipv4addressbydq'][$terms] = array ('net_id' => $net_id, 'ip' => $terms);
 		
 	}
-	elseif ($ipv6->parse ($terms))
+	elseif (FALSE !== ($ip_bin = ip6_checkparse ($terms)))
 	// Search for IPv6 address
 	{
-		if ($net_id = getIPv6AddressNetworkId ($ipv6))
-			$summary['ipv6addressbydq'][$net_id] = array ('net_id' => $net_id, 'ip' => $ipv6);
+		if ($net_id = getIPv6AddressNetworkId ($ip_bin))
+			$summary['ipv6addressbydq'][$net_id] = array ('net_id' => $net_id, 'ip' => $ip_bin);
 	}
 	elseif (preg_match (RE_IP4_NET, $terms))
 	// Search for IPv4 network
 	{
 		list ($base, $len) = explode ('/', $terms);
-		if (NULL !== ($net_id = getIPv4AddressNetworkId ($base, $len + 1)))
+		if (NULL !== ($net_id = getIPv4AddressNetworkId (ip4_parse ($base), $len + 1)))
 			$summary['ipv4network'][$net_id] = spotEntity('ipv4net', $net_id);
 	}
-	elseif (preg_match ('@(.*)/(\d+)$@', $terms, $matches) && $ipv6->parse ($matches[1]))
+	elseif (preg_match ('@(.*)/(\d+)$@', $terms, $matches) && FALSE !== ($ip_bin = ip6_checkparse ($matches[1])))
 	// Search for IPv6 network
 	{
-		if (NULL !== ($net_id = getIPv6AddressNetworkId ($ipv6, $matches[2] + 1)))
+		if (NULL !== ($net_id = getIPv6AddressNetworkId ($ip_bin, $matches[2] + 1)))
 			$summary['ipv6network'][$net_id] = spotEntity('ipv6net', $net_id);
 	}
 	elseif ($found_id = searchByMgmtHostname ($terms))
@@ -4888,8 +5108,8 @@ function apply8021qChangeRequest ($switch_id, $changes, $verbose = TRUE, $mutex_
 }
 
 // takes a full sublist of ipv4net entities ordered by (ip,mask)
-// fills ['spare_ranges'] and ['child_netc'] fields of each item of $nets.
-function fillIPv4NetsCorrelation (&$nets)
+// fills ['spare_ranges'] and ['kidc'] fields of each item of $nets.
+function fillIPNetsCorrelation (&$nets)
 {
 	$stack = array();
 	foreach ($nets as &$net)
@@ -4898,15 +5118,14 @@ function fillIPv4NetsCorrelation (&$nets)
 		while (count ($stack)) // spin stack leaving only the parents of the $net.
 		{
 			$top = &$stack[count ($stack) - 1];
-			if ($top['db_first'] <= $net['db_first'] && $top['db_last'] >= $net['db_last'])
+			if (IPNetContains ($top, $net))
 			{
-				// $net is nested into $top
-				$top['child_netc']++;
+				$top['kidc']++;
 				break;
 			}
 			if (isset ($last))
 				// possible hole in the end of $top
-				fillIPv4SpareList ($top, $last['db_last'] + 1, $top['db_last']);
+				fillIPSpareListBstr ($top, ip_next (ip_last ($last)), ip_last ($top));
 			$last = array_pop ($stack);
 		}
 		if (count ($stack))
@@ -4914,10 +5133,10 @@ function fillIPv4NetsCorrelation (&$nets)
 			$top = &$stack[count ($stack) - 1];
 			if (isset ($last))
 				// possible hole in the middle of $top
-				fillIPv4SpareList ($top, $last['db_last'] + 1, $net['db_first'] - 1);
+				fillIPSpareListBstr ($top, ip_next (ip_last ($last)), ip_prev ($net['ip_bin']));
 			else
 				// possible hole in the beginning of $top
-				fillIPv4SpareList ($top, $top['db_first'], $net['db_first'] - 1);
+				fillIPSpareListBstr ($top, $top['ip_bin'], ip_prev ($net['ip_bin']));
 		}
 		$stack[] = &$net;
 	}
@@ -4927,36 +5146,46 @@ function fillIPv4NetsCorrelation (&$nets)
 		$top = &$stack[count ($stack) - 1];
 		if (isset ($last))
 			// possible hole in the end of $top
-			fillIPv4SpareList ($top, $last['db_last'] + 1, $top['db_last']);
+			fillIPSpareListBstr ($top, ip_next (ip_last ($last)), ip_last ($top));
 		$last = array_pop ($stack);
 	}
 }
 
-// $a, $b - long integers (IPv4 addresses) meaning the beginning and the end of IP range.
+// $a, $b - binary strings (IP addresses) meaning the beginning and the end of IP range.
 // $net is an entity for hole autotags to be set to.
-// returns non-zero integer (netmask) of spare network range, or 0
-function fillIPv4SpareList (&$net, $a, $b)
+function fillIPSpareListBstr (&$net, $a, $b)
 {
-	if ($a > $b)
-		return;
-	$b++;
-	while ($a < $b)
+	$len = strlen ($a) * 8;
+	while (0 >= strcmp ($a, $b))
 	{
-		
-		$i = 0; // the number of binary 0s in the minor part of $a
-		$tmp = $a;
-		while ($tmp and ! ($tmp & 1))
+		$max_mask = 0; // the number of common binary bits in the major of $a and $b
+		$xor = $a ^ $b;
+		for ($i = 0; $i < strlen ($xor); $i++)
 		{
-			// while minor bit is zero
-			$i++;
-			$tmp >>= 1;
+			$max_mask += 8;
+			if ($xor[$i] != "\0")
+			{
+				$byte = ord ($xor[$i]);
+				do
+				{
+					$max_mask--;
+					$byte >>= 1;
+				} while ($byte != 0);
+				break;
+			}
 		}
-		
-		while ($a + (1 << $i) > $b)
-			$i--;
-		$mask = 32 - $i;
-		$net['spare_ranges'][$mask][] = $a;
-		$a += (1 << $i);
+
+		for ($mask = $max_mask; $mask <= $len; $mask++)
+		{
+			$bmask = ip_mask ($mask, $len == 128);
+			$last_a = $a | ~ $bmask;
+			if ($a == ($a & $bmask) and 0 >= strcmp ($last_a, $b))
+			{
+				$net['spare_ranges'][$mask][] = $a;
+				$a = ip_next ($last_a);
+				break;
+			}
+		}
 	}
 }
 
@@ -4968,15 +5197,10 @@ function isIPNetworkEmpty (&$netinfo)
 	if (getConfigVar ('IPV4_JAYWALK') == 'yes')
 		return TRUE;
 	if (! isset ($netinfo['addrlist']))
-	{
-		if ($netinfo['realm'] == 'ipv4net')
-			loadIPv4AddrList ($netinfo);
-		else
-			loadIPv6AddrList ($netinfo);
-	}
+		loadIPAddrList ($netinfo);
 	$pure_array = ($netinfo['realm'] == 'ipv4net') ?
-		array ($netinfo['db_first'] => 'network', $netinfo['db_last'] => 'broadcast') :
-		array ($netinfo['db_first']->getBin() => 'Subnet-Router anycast');
+		array ($netinfo['ip_bin'] => 'network', ip_last ($netinfo) => 'broadcast') : // v4
+		array ($netinfo['ip_bin'] => 'Subnet-Router anycast'); // v6
 	$pure_auto = 0;
 	foreach ($pure_array as $ip => $comment)
 		if
@@ -4995,7 +5219,7 @@ function isIPNetworkEmpty (&$netinfo)
 			)
 		)
 			$pure_auto++;
-	return (count ($netinfo['addrlist']) <= $pure_auto);
+	return ($netinfo['own_addrc'] <= $pure_auto);
 }
 
 ?>

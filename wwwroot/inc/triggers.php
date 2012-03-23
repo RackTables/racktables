@@ -134,19 +134,10 @@ function trigger_isloadbalancer ()
 	return considerConfiguredConstraint (spotEntity ('object', $_REQUEST['object_id']), 'IPV4LB_LISTSRC') ? 'std' : '';
 }
 
-function trigger_ipv4 ()
+function trigger_ip ()
 {
 	assertUIntArg ('object_id');
-	if (count (getObjectIPv4Allocations ($_REQUEST['object_id'])))
-		return 'std';
-	// Only hide the tab, if there are no addresses allocated.
-	return considerConfiguredConstraint (spotEntity ('object', $_REQUEST['object_id']), 'IPV4OBJ_LISTSRC') ? 'std' : '';
-}
-
-function trigger_ipv6 ()
-{
-	assertUIntArg ('object_id');
-	if (count (getObjectIPv6Allocations ($_REQUEST['object_id'])))
+	if (count (getObjectIPAllocationList ($_REQUEST['object_id'])))
 		return 'std';
 	// Only hide the tab, if there are no addresses allocated.
 	return considerConfiguredConstraint (spotEntity ('object', $_REQUEST['object_id']), 'IPV4OBJ_LISTSRC') ? 'std' : '';
@@ -155,7 +146,7 @@ function trigger_ipv6 ()
 function trigger_natv4 ()
 {
 	assertUIntArg ('object_id');
-	if (!count (getObjectIPv4Allocations ($_REQUEST['object_id'])))
+	if (!count (getObjectIPv4AllocationList ($_REQUEST['object_id'])))
 		return '';
 	return considerConfiguredConstraint (spotEntity ('object', $_REQUEST['object_id']), 'IPV4NAT_LISTSRC') ? 'std' : '';
 }
@@ -325,10 +316,18 @@ function trigger_vst_editrules()
 	return $vst['rulec'] ? 'std' : 'attn';
 }
 
-function triggerIPv4AddressLog ()
+function triggerIPAddressLog ()
 {
-	assertIPv4Arg ('ip');
-	$result = usePreparedSelectBlade ("SELECT COUNT(id) FROM IPv4Log WHERE ip = INET_ATON(?)", array ($_REQUEST['ip']));
+	$ip_bin = assertIPArg ('ip');
+	switch (strlen ($ip_bin))
+	{
+		case 4:
+			$result = usePreparedSelectBlade ("SELECT COUNT(id) FROM IPv4Log WHERE ip = ?", array (ip4_bin2db ($ip_bin)));
+			break;
+		case 16:
+			$result = usePreparedSelectBlade ("SELECT COUNT(id) FROM IPv6Log WHERE ip = ?", array ($ip_bin));
+			break;
+	}
 	if ($row = $result->fetch(PDO::FETCH_NUM))
 		if ($row[0] > 0)
 			return 'std';

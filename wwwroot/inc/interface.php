@@ -29,9 +29,9 @@ $aat = array
 $aac = array
 (
 	'regular' => '',
-	'virtual' => '<strong>L</strong>',
-	'shared' => '<strong>S</strong>',
-	'router' => '<strong>R</strong>',
+	'virtual' => '<span class="aac">L</span>',
+	'shared' => '<span class="aac">S</span>',
+	'router' => '<span class="aac">R</span>',
 );
 // address allocation code, IPv4 networks view
 $aac2 = array
@@ -173,44 +173,18 @@ function getRenderedAlloc ($object_id, $alloc)
 		'td_peers' => '',
 	);
 	$dottedquad = $alloc['addrinfo']['ip'];
+	$ip_bin = $alloc['addrinfo']['ip_bin'];
 
-	$hl_ip_addr = '';
-	if (isset ($_REQUEST['hl_ipv6_addr']))
+	$hl_ip_bin = NULL;
+	if (isset ($_REQUEST['hl_ip']))
 	{
-		if ($hl_ipv6 = assertIPv6Arg ('hl_ipv6_addr'))
-			$hl_ip_addr = $hl_ipv6->format();
-	}
-	elseif (isset ($_REQUEST['hl_ipv4_addr']))
-		$hl_ip_addr = $_REQUEST['hl_ipv4_addr'];
-	if ($hl_ip_addr)
-		addAutoScrollScript ("ip-$hl_ip_addr");
-
-	// prepare realm and network info
-	if ($alloc['addrinfo']['version'] == 6)
-	{
-		$ipv6_address = new IPv6Address();
-		$ipv6_address->parse ($dottedquad);
-		$addr_page_name = 'ipv6address';
-		if ($netid = getIPv6AddressNetworkId ($ipv6_address))
-		{
-			$netinfo = spotEntity ('ipv6net', $netid);
-			loadIPv6AddrList ($netinfo);
-		}
-	}
-	else
-	{
-		$addr_page_name = 'ipaddress';
-		if ($netid = getIPv4AddressNetworkId ($dottedquad))
-		{
-			$netinfo = spotEntity ('ipv4net', $netid);
-			loadIPv4AddrList ($netinfo);
-		}
+		$hl_ip_bin = ip_parse ($_REQUEST['hl_ip']);
+		addAutoScrollScript ("ip-" . $_REQUEST['hl_ip']);
 	}
 
 	$ret['tr_class'] = $alloc['addrinfo']['class'];
-	$td_class = 'tdleft';
-	if ($hl_ip_addr == $dottedquad)
-		$td_class .= ' port_highlight';
+	if ($hl_ip_bin === $ip_bin)
+		$ret['tr_class'] .= ' port_highlight';
 	
 	// render IP change history
 	$ip_title = '';
@@ -229,28 +203,33 @@ function getRenderedAlloc ($object_id, $alloc)
 
 	// render IP address td
 	global $aac;
-	$ret['td_ip'] = "<td class='$td_class'>";
-	if (NULL !== $netid)
+	$netinfo = spotNetworkByIP ($ip_bin);
+	$ret['td_ip'] = "<td class='tdleft'>";
+	if (isset ($netinfo))
+	{
+		$title = $dottedquad;
+		if (getConfigVar ('EXT_IPV4_VIEW') != 'yes')
+			$title .= '/' . $netinfo['mask'];
 		$ret['td_ip'] .= "<a name='ip-$dottedquad' class='$ip_class' $ip_title href='" .
 			makeHref (
 				array
 				(
-					'page' => $addr_page_name,
+					'page' => 'ipaddress',
 					'hl_object_id' => $object_id,
 					'ip' => $dottedquad,
 				)
-			) . "'>" . $dottedquad . "</a>";
+			) . "'>$title</a>";
+	}
 	else
 		$ret['td_ip'] .= "<span class='$ip_class' $ip_title>$dottedquad</span>";
-	if (getConfigVar ('EXT_IPV4_VIEW') != 'yes')
-		$ret['td_ip'] .= '<small>/' . (NULL === $netid ? '??' : $netinfo['mask']) . '</small>';
-	$ret['td_ip'] .= '&nbsp;' . $aac[$alloc['type']];
+	$ret['td_ip'] .= $aac[$alloc['type']];
 	if (strlen ($alloc['addrinfo']['name']))
 		$ret['td_ip'] .= ' (' . niftyString ($alloc['addrinfo']['name']) . ')';
 	$ret['td_ip'] .= '</td>';
 
 	// render network and routed_by tds
-	if (NULL === $netid)
+	$td_class = 'tdleft';
+	if (! isset ($netinfo))
 	{
 		$ret['td_network'] = "<td class='$td_class sparenetwork'>N/A</td>";
 		$ret['td_routed_by'] = $ret['td_network'];
@@ -261,8 +240,9 @@ function getRenderedAlloc ($object_id, $alloc)
 			getOutputOf ('renderCell', $netinfo) . '</td>';
 
 		// filter out self-allocation
+		loadIPAddrList ($netinfo);
 		$other_routers = array();
-		foreach (findRouters ($netinfo['addrlist']) as $router)
+		foreach (findRouters ($netinfo['own_addrlist']) as $router)
 			if ($router['id'] != $object_id)
 				$other_routers[] = $router;
 		if (count ($other_routers))
@@ -1034,8 +1014,8 @@ function renderObject ($object_id)
 		// group IP allocations by interface name instead of address family
 		$allocs_by_iface = array();
 		foreach (array ('ipv4', 'ipv6') as $ip_v)
-			foreach ($info[$ip_v] as $dottedquad => $alloc)
-				$allocs_by_iface[$alloc['osif']][$dottedquad] = $alloc;
+			foreach ($info[$ip_v] as $ip_bin => $alloc)
+				$allocs_by_iface[$alloc['osif']][$ip_bin] = $alloc;
 				
 		// sort allocs array by portnames
 		foreach (sortPortList ($allocs_by_iface) as $iface_name => $alloclist)
@@ -1093,7 +1073,7 @@ function renderObject ($object_id)
 				echo "<tr class='$class'>";
 				echo "<td>${pf['proto']}</td><td class=tdleft>${osif}<a href='".makeHref(array('page'=>'ipaddress', 'tab'=>'default', 'ip'=>$pf['localip']))."'>${pf['localip']}</a>:${pf['localport']}</td>";
 				echo "<td class=tdleft><a href='".makeHref(array('page'=>'ipaddress', 'tab'=>'default', 'ip'=>$pf['remoteip']))."'>${pf['remoteip']}</a>:${pf['remoteport']}</td>";
-				$address = getIPv4Address ($pf['remoteip']);
+				$address = getIPAddress (ip4_parse ($pf['remoteip']));
 				echo "<td class='description'>";
 				if (count ($address['allocs']))
 					foreach($address['allocs'] as $bond)
@@ -1348,57 +1328,51 @@ function renderPortsForObject ($object_id)
 	finishPortlet();
 }
 
-function renderIPTabForObject ($object_id, $ip_v)
+function renderIPForObject ($object_id)
 {
-	function getOpnameByIPFamily ($opname, $ip_v)
-	{
-		// do not assemble opnames from the peaces to be able to grep the code by opnames
-		switch ($opname . '-'. $ip_v)
-		{
-			case 'add-4': return 'addIPv4Allocation';
-			case 'add-6': return 'addIPv6Allocation';
-			case 'upd-4': return 'updIPv4Allocation';
-			case 'upd-6': return 'updIPv6Allocation';
-			case 'del-4': return 'delIPv4Allocation';
-			case 'del-6': return 'delIPv6Allocation';
-			default: throw new InvalidArgException ('$opname or $ip_v', "$opname or $ip_v");
-		}
-	}
-	function printNewItemTR ($ip_v, $default_type)
+	function printNewItemTR ($default_type)
 	{
 		global $aat;
-		printOpFormIntro (getOpnameByIPFamily ('add', $ip_v));
-		echo "<tr><td>";
-		printImageHREF ('add', 'allocate', TRUE);
+		printOpFormIntro ('add');
+		echo "<tr><td>"; // left btn
+		printImageHREF ('add', 'allocate', TRUE); 
 		echo "</td>";
-		echo "<td class=tdleft><input type='text' size='10' name='bond_name' tabindex=100></td>\n";
-		echo "<td class=tdleft><input type=text name='ip' tabindex=101></td>\n";
-		echo "<td colspan=2>&nbsp;</td><td>";
-		printSelect ($aat, array ('name' => 'bond_type', 'tabindex' => 102), $default_type);
-		echo "</td><td>&nbsp;</td><td>";
-		printImageHREF ('add', 'allocate', TRUE, 103);
+		echo "<td class=tdleft><input type='text' size='10' name='bond_name' tabindex=100></td>\n"; // if-name
+		echo "<td class=tdleft><input type=text name='ip' tabindex=101></td>\n"; // IP
+		if (getConfigVar ('EXT_IPV4_VIEW') == 'yes')
+			echo "<td colspan=2>&nbsp;</td>"; // network, routed by
+		echo '<td>';
+		printSelect ($aat, array ('name' => 'bond_type', 'tabindex' => 102), $default_type); // type
+		echo "</td><td>&nbsp;</td><td>"; // misc
+		printImageHREF ('add', 'allocate', TRUE, 103); // right btn
 		echo "</td></tr></form>";
 	}
-	$focus = spotEntity ('object', $object_id);
-	amplifyCell ($focus);
 	global $aat;
 	startPortlet ('Allocations');
-	echo "<table cellspacing=0 cellpadding='5' align='center' class='widetable'>\n";
-	echo '<tr><th>&nbsp;</th><th>OS interface</th><th>IP address</th>';
+	echo "<table cellspacing=0 cellpadding='5' align='center' class='widetable'><tr>\n";
+	echo '<th>&nbsp;</th>';
+	echo '<th>OS interface</th>';
+	echo '<th>IP address</th>';
 	if (getConfigVar ('EXT_IPV4_VIEW') == 'yes')
-		echo '<th>network</th><th>routed by</th>';
-	echo '<th>type</th><th>misc</th><th>&nbsp</th></tr>';
+	{
+		echo '<th>network</th>';
+		echo '<th>routed by</th>';
+	}
+	echo '<th>type</th>';
+	echo '<th>misc</th>';
+	echo '<th>&nbsp</th>';
+	echo '</tr>';
 
 	$alloc_list = ''; // most of the output is stored here
 	$used_alloc_types = array();
-	foreach ($focus['ipv' . $ip_v] as $alloc) // ['ipv4'] or ['ipv6']
+	foreach (getObjectIPAllocations ($object_id) as $alloc)
 	{
 		if (! isset ($used_alloc_types[$alloc['type']]))
 			$used_alloc_types[$alloc['type']] = 0;
 		$used_alloc_types[$alloc['type']]++;
 
 		$rendered_alloc = callHook ('getRenderedAlloc', $object_id, $alloc);
-		$alloc_list .= getOutputOf ('printOpFormIntro', getOpnameByIPFamily ('upd', $ip_v), array ('ip' => $alloc['addrinfo']['ip']));
+		$alloc_list .= getOutputOf ('printOpFormIntro', 'upd', array ('ip' => $alloc['addrinfo']['ip']));
 		$alloc_list .= "<tr class='${rendered_alloc['tr_class']}' valign=top>";
 
 		$alloc_list .= "<td><a href='" .
@@ -1406,7 +1380,7 @@ function renderIPTabForObject ($object_id, $ip_v)
 			(
 				array
 				(
-					'op' => getOpnameByIPFamily ('del', $ip_v),
+					'op' => 'del',
 					'ip' => $alloc['addrinfo']['ip'],
 					'object_id' => $object_id
 				)
@@ -1431,22 +1405,12 @@ function renderIPTabForObject ($object_id, $ip_v)
 
 	if ($list_on_top = (getConfigVar ('ADDNEW_AT_TOP') != 'yes'))
 		echo $alloc_list;
-	printNewItemTR ($ip_v, $most_popular_type);
+	printNewItemTR ($most_popular_type);
 	if (! $list_on_top)
 		echo $alloc_list;
 
 	echo "</table><br>\n";
 	finishPortlet();
-}
-
-function renderIPv4ForObject ($object_id)
-{
-	renderIPTabForObject ($object_id, '4');
-}
-
-function renderIPv6ForObject ($object_id)
-{
-	renderIPTabForObject ($object_id, '6');
 }
 
 // This function is deprecated. Do not rely on its internals,
@@ -1862,22 +1826,18 @@ function renderDepot ()
 			$mountinfo = getMountInfo ($idlist);
 			foreach ($objects as $obj)
 			{
-				if (isset ($_REQUEST['hl_object_id']) and $_REQUEST['hl_object_id'] == $obj['id'])
-					$secondclass = 'tdleft port_highlight';
-				else
-					$secondclass = 'tdleft';
-				echo "<tr class=row_${order} valign=top><td class='${secondclass}'><a href='".makeHref(array('page'=>'object', 'object_id'=>$obj['id']))."'><strong>${obj['dname']}</strong></a>";
+				echo "<tr class='row_${order} tdleft' valign=top><td><a href='".makeHref(array('page'=>'object', 'object_id'=>$obj['id']))."'><strong>${obj['dname']}</strong></a>";
 				if (count ($obj['etags']))
 					echo '<br><small>' . serializeTags ($obj['etags'], makeHref(array('page'=>$pageno, 'tab'=>'default')) . '&') . '</small>';
-				echo "</td><td class='${secondclass}'>${obj['label']}</td>";
-				echo "<td class='${secondclass}'>${obj['asset_no']}</td>";
+				echo "</td><td>${obj['label']}</td>";
+				echo "<td>${obj['asset_no']}</td>";
 				$places = array();
 				if (! array_key_exists ($obj['id'], $mountinfo))
 					$places[] = 'Unmounted';
 				else
 					foreach ($mountinfo[$obj['id']] as $mi)
 						$places[] = mkA ($mi['row_name'], 'row', $mi['row_id']) . '/' . mkA ($mi['rack_name'], 'rack', $mi['rack_id']);
-				echo "<td class='${secondclass}'>" . implode (', ', $places) . '</td>';
+				echo "<td>" . implode (', ', $places) . '</td>';
 				echo '</tr>';
 				$order = $nextorder[$order];
 			}
@@ -2010,12 +1970,10 @@ function renderRackspaceHistory ()
 	echo '</td></tr></table>';
 }
 
-function renderIPv4SpaceRecords ($tree, $baseurl, $target = 0, $knight, $level = 1)
+function renderIPSpaceRecords ($tree, $baseurl, $target = 0, $level = 1)
 {
 	$self = __FUNCTION__;
-	static $vdomlist = NULL;
-	if ($vdomlist == NULL and getConfigVar ('IPV4_TREE_SHOW_VLAN') == 'yes')
-		$vdomlist = getVLANDomainOptions();
+	$knight = (getConfigVar ('IPV4_ENABLE_KNIGHT') == 'yes');
 
 	// scroll page to the highlighted item
 	if ($target && isset ($_REQUEST['hl_net']))
@@ -2023,233 +1981,106 @@ function renderIPv4SpaceRecords ($tree, $baseurl, $target = 0, $knight, $level =
 
 	foreach ($tree as $item)
 	{
-		if (getConfigVar ('IPV4_TREE_SHOW_USAGE') == 'yes')
-			loadIPv4AddrList ($item); // necessary to compute router list and address counter
-		else
-		{
-			$item['addrlist'] = array();
-			$item['addrc'] = 0;
-		}
-		$used = $item['addrc'];
-		$maxdirect = $item['addrt'];
-		$maxtotal = binInvMaskFromDec ($item['mask']) + 1;
+		if ($display_routers = (getConfigVar ('IPV4_TREE_RTR_AS_CELL') != 'none'))
+			loadIPAddrList ($item); // necessary to compute router list and address counter
+
 		if (isset ($item['id']))
 		{
 			$decor = array ('indent' => $level);
 			if ($item['symbol'] == 'node-collapsed')
-				$decor['symbolurl'] = "${baseurl}&eid=" . $item['id'];
+				$decor['symbolurl'] = "${baseurl}&eid=${item['id']}&hl_net=1";
 			elseif ($item['symbol'] == 'node-expanded')
-				$decor['symbolurl'] = $baseurl . ($item['parent_id'] ? "&eid=${item['parent_id']}" : '');
-			echo "<tr valign=top>";
+				$decor['symbolurl'] = $baseurl . ($item['parent_id'] ? "&eid=${item['parent_id']}&hl_net=1" : '');
+			$tr_class = '';
 			if ($target == $item['id'] && isset ($_REQUEST['hl_net']))
-				$decor['tdclass'] = 'port_highlight';
-			printIPNetInfoTDs ($item, $decor);
-			echo "<td class=tdcenter>";
-			if (getConfigVar ('IPV4_TREE_SHOW_USAGE') == 'yes')
 			{
-				renderProgressBar ($maxdirect ? $used/$maxdirect : 0);
-				echo "<br><small>${used}/${maxdirect}" . ($maxdirect == $maxtotal ? '' : "/${maxtotal}") . '</small>';
-			}
-			else
-				echo "<small>${maxdirect}</small>";
-			echo "</td>";
-			if (getConfigVar ('IPV4_TREE_SHOW_VLAN') == 'yes')
-			{
-				echo '<td class=tdleft>';
-				if (count ($item['8021q']))
-				{
-					echo '<ul>';
-					foreach ($item['8021q'] as $binding)
-					{
-						echo '<li><a href="' . makeHref (array ('page' => 'vlan', 'vlan_ck' => $binding['domain_id'] . '-' . $binding['vlan_id'])) . '">';
-						// FIXME: would formatVLANName() do this?
-						echo $binding['vlan_id'] . '@' . niftyString ($vdomlist[$binding['domain_id']], 15) . '</a></li>';
-					}
-					echo '</ul>';
-				}
-				echo '</td>';
-			}
-			if (getConfigVar ('EXT_IPV4_VIEW') == 'yes')
-				printRoutersTD (findRouters ($item['addrlist']), getConfigVar ('IPV4_TREE_RTR_AS_CELL'));
-			echo "</tr>";
-			if ($item['symbol'] == 'node-expanded' or $item['symbol'] == 'node-expanded-static')
-				$self ($item['kids'], $baseurl, $target, $knight, $level + 1);
-		}
-		else
-		{
-			echo "<tr valign=top>";
-			printIPNetInfoTDs ($item, array ('indent' => $level, 'knight' => $knight, 'tdclass' => 'sparenetwork'));
-			echo "<td class=tdcenter>";
-			if (getConfigVar ('IPV4_TREE_SHOW_USAGE') == 'yes')
-			{
-				renderProgressBar ($used/$maxtotal, 'sparenetwork');
-				echo "<br><small>${used}/${maxtotal}</small>";
-			}
-			else
-				echo "<small>${maxtotal}</small>";
-			if (getConfigVar ('IPV4_TREE_SHOW_VLAN') == 'yes')
-				echo '</td><td>&nbsp;</td>';
-			echo "</td><td>&nbsp;</td></tr>";
-		}
-	}
-}
-
-function renderIPv6SpaceRecords ($tree, $baseurl, $target = 0, $knight, $level = 1)
-{
-	$self = __FUNCTION__;
-	static $vdomlist = NULL;
-	if ($vdomlist == NULL and getConfigVar ('IPV4_TREE_SHOW_VLAN') == 'yes')
-		$vdomlist = getVLANDomainOptions();
-
-	// scroll page to the highlighted item
-	if ($target && isset ($_REQUEST['hl_net']))
-		addAutoScrollScript ("net-$target");
-
-	foreach ($tree as $item)
-	{
-		if (getConfigVar ('IPV4_TREE_SHOW_USAGE') == 'yes')
-			loadIPv6AddrList ($item); // necessary to compute router list and address counter
-		else
-		{
-			$item['addrlist'] = array();
-			$item['addrc'] = 0;
-		}
-		if (isset ($item['id']))
-		{
-			$decor = array ('indent' => $level);
-			if ($item['symbol'] == 'node-collapsed')
-				$decor['symbolurl'] = "${baseurl}&eid=" . $item['id'];
-			elseif ($item['symbol'] == 'node-expanded')
-				$decor['symbolurl'] = $baseurl . ($item['parent_id'] ? "&eid=${item['parent_id']}#net6id${item['parent_id']}" : '');
-			echo "<tr valign=top>";
-			if ($target == $item['id'] && isset ($_REQUEST['hl_net']))
 				$decor['tdclass'] = ' port_highlight';
-			printIPNetInfoTDs ($item, $decor);
-			echo "<td class=tdcenter>";
-			// show net usage
-			echo formatIPv6NetUsage ($item['addrc'], $item['mask']);
-			echo "</td>";
-			if (getConfigVar ('IPV4_TREE_SHOW_VLAN') == 'yes')
-			{
-				echo '<td class=tdleft>';
-				if (count ($item['8021q']))
-				{
-					echo '<ul>';
-					foreach ($item['8021q'] as $binding)
-					{
-						echo '<li><a href="' . makeHref (array ('page' => 'vlan', 'vlan_ck' => $binding['domain_id'] . '-' . $binding['vlan_id'])) . '">';
-						// FIXME: would formatVLANName() do this?
-						echo $binding['vlan_id'] . '@' . niftyString ($vdomlist[$binding['domain_id']], 15) . '</a></li>';
-					}
-					echo '</ul>';
-				}
-				echo '</td>';
+				$tr_class = $decor['tdclass'];
 			}
-			if (getConfigVar ('EXT_IPV4_VIEW') == 'yes')
+			echo "<tr valign=top class=\"$tr_class\">";
+			printIPNetInfoTDs ($item, $decor);
+
+			// capacity and usage
+			echo "<td class=tdcenter>";
+			echo getRenderedIPNetCapacity ($item);
+			echo "</td>";
+
+			if ($display_routers)
 				printRoutersTD (findRouters ($item['addrlist']), getConfigVar ('IPV4_TREE_RTR_AS_CELL'));
 			echo "</tr>";
 			if ($item['symbol'] == 'node-expanded' or $item['symbol'] == 'node-expanded-static')
-				$self ($item['kids'], $baseurl, $target, $knight, $level + 1);
+				$self ($item['kids'], $baseurl, $target, $level + 1);
 		}
-		/* do not display spare networks
 		else
-		{ // display spare networks
+		{
+			// non-allocated (spare) IP range
 			echo "<tr valign=top>";
 			printIPNetInfoTDs ($item, array ('indent' => $level, 'knight' => $knight, 'tdclass' => 'sparenetwork'));
+
+			// capacity and usage
 			echo "<td class=tdcenter>";
-			echo formatIPv6NetUsage ($item['addrc'], $item['mask']);
-			if (getConfigVar ('IPV4_TREE_SHOW_VLAN') == 'yes')
-				echo '</td><td>&nbsp;</td>';
-			echo "</td><td>&nbsp;</td></tr>";
-		}*/
+			echo getRenderedIPNetCapacity ($item);
+			echo "</td>";
+			if ($display_routers)
+				echo "<td></td>";
+			echo "</tr>";
+		}
 	}
 }
 
-// if $used is NULL, returns only human-formatted mask.
-// Otherwise returns "$used in/of " . human-formatted-mask
-function formatIPv6NetUsage ($used, $mask)
-{
-	$prefixes = array
-	(
-		0 =>  '',
-		3 =>  'k',
-		6 =>  'M',
-		9 =>  'G',
-		12 => 'T',
-		15 => 'P',
-		18 => 'E',
-		21 => 'Z',
-		24 => 'Y',
-	);
-
-	if ($mask <= 64)
-	{
-		$what = '/64 net';
-		$preposition = 'in';
-		$mask += 64;
-	}
-	else
-	{
-		$what = 'IP';
-		$preposition = 'of';
-	}
-	$what .= (0 == $mask % 64 ? '' : 's');
-	$addrc = isset ($used) ? "$used $preposition " : '';
-
-	$dec_order = intval ((128 - $mask) / 10) * 3;
-	$mult = isset ($prefixes[$dec_order]) ? $prefixes[$dec_order] : '??';
-	
-	$cnt = 1 << ((128 - $mask) % 10);
-	if ($cnt == 1 && $mult == '')
-		$cnt = 'single';
-
-	return "<small>${addrc}${cnt}${mult} ${what}</small>";
-}
-
-function renderIPv4Space ()
+function renderIPSpace()
 {
 	global $pageno, $tabno;
+	$realm = ($pageno == 'ipv4space' ? 'ipv4net' : 'ipv6net');
 	$cellfilter = getCellFilter();
-	$netlist = listCells ('ipv4net');
-	$allcount = count ($netlist);
-	$netlist = filterCellList ($netlist, $cellfilter['expression']);
-
+	$top = NULL;
+	$netlist = array();
+	foreach (listCells ($realm) as $net)
+	{
+		if (isset ($top) and IPNetContains ($top, $net))
+			;
+		elseif (! count ($cellfilter['expression']) or judgeCell ($net, $cellfilter['expression']))
+			$top = $net;
+		else
+			continue;
+		$netlist[$net['id']] = $net;
+	}
 	$netcount = count ($netlist);
 	// expand request can take either natural values or "ALL". Zero means no expanding.
 	$eid = isset ($_REQUEST['eid']) ? $_REQUEST['eid'] : 0;
-	$tree = prepareIPv4Tree ($netlist, $eid);
+	$tree = prepareIPTree ($netlist, $eid);
 
 	echo "<table border=0 class=objectview>\n";
 	echo "<tr><td class=pcleft>";
-	if (! renderEmptyResults($cellfilter, 'IPv4 nets', count($tree)))
+	if (! renderEmptyResults($cellfilter, 'IP nets', count($tree)))
 	{
 		startPortlet ("networks (${netcount})");
 		echo '<h4>';
+		$all = "<a href='".makeHref(array('page'=>$pageno, 'tab'=>$tabno, 'eid'=>'ALL')) .
+				$cellfilter['urlextra'] . "'>expand&nbsp;all</a>";
+		$none = "<a href='".makeHref(array('page'=>$pageno, 'tab'=>$tabno, 'eid'=>'NONE')) .
+				$cellfilter['urlextra'] . "'>collapse&nbsp;all</a>";
+		$auto = "<a href='".makeHref(array('page'=>$pageno, 'tab'=>$tabno)) .
+			$cellfilter['urlextra'] . "'>auto-collapse</a>";
+
 		if ($eid === 0)
-			echo 'auto-collapsing at threshold ' . getConfigVar ('TREE_THRESHOLD') .
-				" (<a href='".makeHref(array('page'=>$pageno, 'tab'=>$tabno, 'eid'=>'ALL')) .
-				$cellfilter['urlextra'] . "'>expand all</a>)";
+			echo 'auto-collapsing at threshold ' . getConfigVar ('TREE_THRESHOLD') . " ($all / $none)";
 		elseif ($eid === 'ALL')
-			echo "expanding all (<a href='".makeHref(array('page'=>$pageno, 'tab'=>$tabno)) .
-				$cellfilter['urlextra'] . "'>auto-collapse</a>)";
+			echo "expanding all ($auto / $none)";
+		elseif ($eid === 'NONE')
+			echo "collapsing all ($all / $auto)";
 		else
 		{
-			$netinfo = spotEntity ('ipv4net', $eid);
-			echo "expanding ${netinfo['ip']}/${netinfo['mask']} (<a href='" .
-				makeHref (array ('page' => $pageno, 'tab' => $tabno)) .
-				$cellfilter['urlextra'] . "'>auto-collapse</a> / <a href='" .
-				makeHref (array ('page' => $pageno, 'tab' => $tabno, 'eid' => 'ALL')) .
-				$cellfilter['urlextra'] . "'>expand&nbsp;all</a>)";
+			$netinfo = spotEntity ($realm, $eid);
+			echo "expanding ${netinfo['ip']}/${netinfo['mask']} ($auto / $all / $none)";
 		}
 		echo "</h4><table class='widetable' border=0 cellpadding=5 cellspacing=0 align='center'>\n";
 		echo "<tr><th>prefix</th><th>name/tags</th><th>capacity</th>";
-		if (getConfigVar ('IPV4_TREE_SHOW_VLAN') == 'yes')
-			echo '<th>VLAN</th>';
-		if (getConfigVar ('EXT_IPV4_VIEW') == 'yes')
+		if (getConfigVar ('IPV4_TREE_RTR_AS_CELL') != 'none')
 			echo "<th>routed by</th>";
 		echo "</tr>\n";
 		$baseurl = makeHref(array('page'=>$pageno, 'tab'=>$tabno)) . $cellfilter['urlextra'];
-		renderIPv4SpaceRecords ($tree, $baseurl, $eid, $netcount == $allcount and getConfigVar ('IPV4_ENABLE_KNIGHT') == 'yes');
+		renderIPSpaceRecords ($tree, $baseurl, $eid);
 		echo "</table>\n";
 		finishPortlet();
 	}
@@ -2259,126 +2090,31 @@ function renderIPv4Space ()
 	echo "</td></tr></table>\n";
 }
 
-function renderIPv6Space ()
+function renderIPSpaceEditor()
 {
-	global $pageno, $tabno;
-	$cellfilter = getCellFilter();
-	$netlist = listCells ('ipv6net');
-	$allcount = count ($netlist);
-	$netlist = filterCellList ($netlist, $cellfilter['expression']);
-
-	$netcount = count ($netlist);
-	// expand request can take either natural values or "ALL". Zero means no expanding.
-	$eid = isset ($_REQUEST['eid']) ? $_REQUEST['eid'] : 0;
-	$tree = prepareIPv6Tree ($netlist, $eid);
-
-	echo "<table border=0 class=objectview>\n";
-	echo "<tr><td class=pcleft>";
-	if (! renderEmptyResults($cellfilter, 'IPv6 nets', count($tree)))
-	{
-		startPortlet ("networks (${netcount})");
-		echo '<h4>';
-		if ($eid === 0)
-			echo 'auto-collapsing at threshold ' . getConfigVar ('TREE_THRESHOLD') .
-				" (<a href='".makeHref(array('page'=>$pageno, 'tab'=>$tabno, 'eid'=>'ALL')) .
-				$cellfilter['urlextra'] . "'>expand all</a>)";
-		elseif ($eid === 'ALL')
-			echo "expanding all (<a href='".makeHref(array('page'=>$pageno, 'tab'=>$tabno)) .
-				$cellfilter['urlextra'] . "'>auto-collapse</a>)";
-		else
-		{
-			$netinfo = spotEntity ('ipv6net', $eid);
-			echo "expanding ${netinfo['ip']}/${netinfo['mask']} (<a href='" .
-				makeHref (array ('page' => $pageno, 'tab' => $tabno)) .
-				$cellfilter['urlextra'] . "'>auto-collapse</a> / <a href='" .
-				makeHref (array ('page' => $pageno, 'tab' => $tabno, 'eid' => 'ALL')) .
-				$cellfilter['urlextra'] . "'>expand&nbsp;all</a>)";
-		}
-		echo "</h4><table class='widetable' border=0 cellpadding=5 cellspacing=0 align='center'>\n";
-		echo "<tr><th>prefix</th><th>name/tags</th><th>capacity</th>";
-		if (getConfigVar ('IPV4_TREE_SHOW_VLAN') == 'yes')
-			echo '<th>VLAN</th>';
-		if (getConfigVar ('EXT_IPV4_VIEW') == 'yes')
-			echo "<th>routed by</th>";
-		echo "</tr>\n";
-		$baseurl = makeHref(array('page'=>$pageno, 'tab'=>$tabno)) . $cellfilter['urlextra'];
-		renderIPv6SpaceRecords ($tree, $baseurl, $eid, $netcount == $allcount and getConfigVar ('IPV4_ENABLE_KNIGHT') == 'yes');
-		echo "</table>\n";
-		finishPortlet();
-	}
-
-	echo '</td><td class=pcright>';
-	renderCellFilterPortlet ($cellfilter, 'ipv6net', $netlist);
-	echo "</td></tr></table>\n";
-}
-
-function renderIPv4SpaceEditor ()
-{
-	$addrspaceList = listCells ('ipv4net');
+	global $pageno;
+	$realm = ($pageno == 'ipv4space' ? 'ipv4net' : 'ipv6net');
+	$net_page = $realm; // 'ipv4net', 'ipv6net'
+	$addrspaceList = listCells ($realm);
 	startPortlet ('Manage existing (' . count ($addrspaceList) . ')');
 	if (count ($addrspaceList))
 	{
 		echo "<table class='widetable' border=0 cellpadding=5 cellspacing=0 align='center'>\n";
 		echo "<tr><th>&nbsp;</th><th>prefix</th><th>name</th><th>capacity</th></tr>";
-		$tree = prepareIPv4Tree ($addrspaceList, 'ALL');
-		// this is only called for having "trace" set
-		treeFromList ($addrspaceList);
 		foreach ($addrspaceList as $netinfo)
 		{
-			$netinfo = peekNode ($tree, $netinfo['trace'], $netinfo['id']);
-			// now we have all subnets listed in netinfo
-			loadIPv4AddrList ($netinfo);
-			$used = $netinfo['addrc'];
-			$maxdirect = $netinfo['addrt'];
-			$maxtotal = binInvMaskFromDec ($netinfo['mask']) + 1;
 			echo "<tr valign=top><td>";
 			if (! isIPNetworkEmpty ($netinfo))
 				printImageHREF ('nodestroy', 'There are ' . count ($netinfo['addrlist']) . ' allocations inside');
 			else
 				echo getOpLink (array	('op' => 'del', 'id' => $netinfo['id']), '', 'destroy', 'Delete this prefix');
-			echo '</td><td class=tdleft><a href="' . makeHref (array ('page' => 'ipv4net', 'id' => $netinfo['id'])) . '">';
+			echo '</td><td class=tdleft><a href="' . makeHref (array ('page' => $net_page, 'id' => $netinfo['id'])) . '">';
 			echo "${netinfo['ip']}/${netinfo['mask']}</a></td>";
 			echo '<td class=tdleft>' . niftyString ($netinfo['name']);
 			if (count ($netinfo['etags']))
 				echo '<br><small>' . serializeTags ($netinfo['etags']) . '</small>';
 			echo '</td><td>';
-			renderProgressBar ($maxdirect ? $used/$maxdirect : 0);
-			echo "<br><small>${used}/${maxdirect}" . ($maxdirect == $maxtotal ? '' : "/${maxtotal}") . '</small></td>';
-			echo '</tr>';
-		}
-		echo "</table>";
-		finishPortlet();
-	}
-}
-
-function renderIPv6SpaceEditor ()
-{
-	$addrspaceList = listCells ('ipv6net');
-	startPortlet ('Manage existing (' . count ($addrspaceList) . ')');
-	if (count ($addrspaceList))
-	{
-		echo "<table class='widetable' border=0 cellpadding=5 cellspacing=0 align='center'>\n";
-		echo "<tr><th>&nbsp;</th><th>prefix</th><th>name</th><th>capacity</th></tr>";
-		$tree = prepareIPv6Tree ($addrspaceList, 'ALL');
-		// this is only called for having "trace" set
-		treeFromList ($addrspaceList);
-		foreach ($addrspaceList as $netinfo)
-		{
-			$netinfo = peekNode ($tree, $netinfo['trace'], $netinfo['id']);
-			// now we have all subnets listed in netinfo
-			loadIPv6AddrList ($netinfo);
-			echo "<tr valign=top><td>";
-			if (! isIPNetworkEmpty ($netinfo))
-				printImageHREF ('nodestroy', 'There are ' . count ($netinfo['addrlist']) . ' allocations inside');
-			else
-				echo getOpLink (array	('op' => 'del', 'id' => $netinfo['id']), '', 'destroy', 'Delete this prefix');
-			echo '</td><td class=tdleft><a href="' . makeHref (array ('page' => 'ipv6net', 'id' => $netinfo['id'])) . '">';
-			echo "${netinfo['ip']}/${netinfo['mask']}</a></td>";
-			echo '<td class=tdleft>' . niftyString ($netinfo['name']);
-			if (count ($netinfo['etags']))
-				echo '<br><small>' . serializeTags ($netinfo['etags']) . '</small>';
-			echo '</td><td>';
-			echo formatIPv6NetUsage ($netinfo['addrc'], $netinfo['mask']);
+			echo getRenderedIPNetCapacity ($netinfo);
 			echo '</tr>';
 		}
 		echo "</table>";
@@ -2435,12 +2171,49 @@ END
 	finishPortlet();
 }
 
-function renderIPv4Network ($id)
+function getRenderedIPNetBacktrace ($range)
 {
-	global $pageno, $tabno, $aac2, $netmaskbylen, $wildcardbylen;
+	if (getConfigVar ('EXT_IPV4_VIEW') != 'yes')
+		return array();
 
-	$range = spotEntity ('ipv4net', $id);
-	loadIPv4AddrList ($range);
+	$v = ($range['realm'] == 'ipv4net') ? 4 : 6;
+	$space = "ipv${v}space"; // ipv4space, ipv6space
+	$tag = "\$ip${v}netid_"; // $ip4netid_, $ip6netid_
+	
+	$ret = array();
+	// Build a backtrace from all parent networks.
+	$clen = $range['mask'];
+	$backtrace = array();
+	$backtrace['&rarr;'] = $range;
+	$key = '';
+	while (NULL !== ($upperid = getIPAddressNetworkId ($range['ip_bin'], $clen)))
+	{
+		$upperinfo = spotEntity ($range['realm'], $upperid);
+		$clen = $upperinfo['mask'];
+		$key .= '&uarr;';
+		$backtrace[$key] = $upperinfo;
+	}
+	foreach (array_reverse ($backtrace) as $arrow => $ainfo)
+	{
+		$link = '<a href="' . makeHref (array (
+			'page' => $space,
+			'tab' => 'default',
+			'clear-cf' => '',
+			'cfe' => '{' . $tag . $ainfo['id'] . '}',
+			'hl_net' => 1,
+			'eid' => $range['id'],
+		)) . '" title="View IP tree with this net as root">' . $arrow . '</a>';
+		$ret[] = array ($link, getOutputOf ('renderCell', $ainfo));
+	}
+	return $ret;
+}
+
+function renderIPNetwork ($id)
+{
+	global $pageno;
+	$realm = $pageno; // 'ipv4net', 'ipv6net'
+	$range = spotEntity ($realm, $id);
+	loadIPAddrList ($range);
 	echo "<table border=0 class=objectview cellspacing=0 cellpadding=0>";
 	echo "<tr><td colspan=2 align=center><h1>${range['ip']}/${range['mask']}</h1><h2>";
 	echo htmlspecialchars ($range['name'], ENT_QUOTES, 'UTF-8') . "</h2></td></tr>\n";
@@ -2449,36 +2222,14 @@ function renderIPv4Network ($id)
 
 	// render summary portlet
 	$summary = array();
-	$total = ($range['ip_bin'] | $range['mask_bin_inv']) - ($range['ip_bin'] & $range['mask_bin']) + 1;
-	$used = count ($range['addrlist']);
-	$summary['%% used'] = getProgressBar ($used/$total) . "&nbsp;${used}/${total}";
-	if (getConfigVar ('EXT_IPV4_VIEW') == 'yes')
+	$summary['%% used'] = getRenderedIPNetCapacity ($range);
+	$summary = array_merge ($summary, getRenderedIPNetBacktrace ($range));
+	if ($realm == 'ipv4net')
 	{
-		// Build a backtrace from all parent networks.
-		$clen = $range['mask'];
-		$backtrace = array();
-		while (NULL !== ($upperid = getIPv4AddressNetworkId ($range['ip'], $clen)))
-		{
-			$upperinfo = spotEntity ('ipv4net', $upperid);
-			$clen = $upperinfo['mask'];
-			$backtrace[] = $upperinfo;
-		}
-		$arrows = count ($backtrace);
-		foreach (array_reverse ($backtrace) as $ainfo)
-		{
-			$name = '';
-			for ($i = 0; $i < $arrows; $i++)
-				$name .= '&uarr;';
-			$arrows--;
-			$summary[] = array ($name, getOutputOf ('renderCell', $ainfo));
-		}
-		$summary[] = array ('&rarr;', getOutputOf ('renderCell', $range));
-		// FIXME: get and display nested networks
-		// $theitem = pickLeaf ($ipv4tree, $id);
+		$summary[] = array ('Netmask:', ip4_format ($range['mask_bin']));
+		$summary[] = array ('Netmask:', "0x" . strtoupper (implode ('', unpack ('H*', $range['mask_bin']))));
+		$summary['Wildcard bits'] = ip4_format ( ~ $range['mask_bin']);
 	}
-	$summary[] = array ('Netmask:', $netmaskbylen[$range['mask']]);
-	$summary[] = array ('Netmask:', sprintf ('0x%08X', binMaskFromDec ($range['mask'])));
-	$summary['Wildcard bits'] = $wildcardbylen[$range['mask']];
 	
 	foreach ($range['8021q'] as $item)
 	{
@@ -2489,7 +2240,7 @@ function renderIPv4Network ($id)
 	{
 		$summary['Routed by'] = '';
 		foreach ($routers as $rtr)
-			$summary['Routed by'] .= getOutputOf ('renderRouterCell', $rtr['addr'], $rtr['iface'], spotEntity ('object', $rtr['id']));
+			$summary['Routed by'] .= getOutputOf ('renderRouterCell', $rtr['ip_bin'], $rtr['iface'], spotEntity ('object', $rtr['id']));
 	}
 	$summary['tags'] = '';
 	renderEntitySummary ($range, 'summary', $summary);
@@ -2501,21 +2252,80 @@ function renderIPv4Network ($id)
 		finishPortlet ();
 	}
 
-	renderFilesPortlet ('ipv4net', $id);
+	renderFilesPortlet ($realm, $id);
 	echo "</td>\n";
 
 	echo "<td class=pcright>";
 	startPortlet ('details');
-	$startip = $range['ip_bin'] & $range['mask_bin'];
-	$endip = $range['ip_bin'] | $range['mask_bin_inv'];
-	$realstartip = $startip;
-	$realendip = $endip;
+	renderIPNetworkAddresses ($range);
+	finishPortlet();
+	echo "</td></tr></table>\n";
+}
 
-	if (isset ($_REQUEST['hl_ipv4_addr']))
+// Used solely by renderSeparator
+function renderEmptyIPv6 ($ip_bin, $hl_ip)
+{
+	$class = 'tdleft';
+	if ($ip_bin === $hl_ip)
+		$class .= ' port_highlight';
+	$fmt = ip6_format ($ip_bin);
+	echo "<tr class='$class'><td><a class='ancor' name='ip-$fmt' href='" . makeHref (array ('page' => 'ipaddress', 'ip' => $fmt)) . "'>" . $fmt;
+	echo "</a></td><td class='rsv-port'><span class='rsvtext'></span></td><td>&nbsp;</td></tr>\n";
+}
+
+// Renders empty table line to shrink empty IPv6 address ranges.
+// If the range consists of single address, renders the address instead of empty line.
+// Renders address $hl_ip inside the range.
+// Used solely by renderIPv6NetworkAddresses
+function renderSeparator ($first, $last, $hl_ip)
+{
+	$self = __FUNCTION__;
+	if (strcmp ($first, $last) > 0)
+		return;
+	if ($first == $last)
+		renderEmptyIPv6 ($first, $hl_ip);
+	elseif (isset ($hl_ip) && strcmp ($hl_ip, $first) >= 0 && strcmp ($hl_ip, $last) <= 0)
+	{ // $hl_ip is inside the range $first - $last
+		$self ($first, ip_prev ($hl_ip), $hl_ip);
+		renderEmptyIPv6 ($hl_ip, $hl_ip);
+		$self (ip_next ($hl_ip), $last, $hl_ip);
+	}
+	else
+		echo "<tr><td colspan=3 class=tdleft></td></tr>\n";
+}
+
+// calculates page number which contains given $ip (used by renderIPv6NetworkAddresses)
+function getPageNumOfIPv6 ($list, $ip_bin, $maxperpage)
+{
+	if (intval ($maxperpage) <= 0 || count ($list) <= $maxperpage)
+		return 0;
+	$keys = array_keys ($list);
+	for ($i = 1; $i <= count ($keys); $i++)
+		if (strcmp ($keys[$i-1], $ip_bin) >= 0)
+			return intval ($i / $maxperpage);
+	return intval (count ($list) / $maxperpage);
+}
+
+function renderIPNetworkAddresses ($range)
+{
+	switch (strlen ($range['ip_bin']))
 	{
-		$hl_ip = ip2long ($_REQUEST['hl_ipv4_addr']);
-		$hl_dottedquad = ip_long2quad ($hl_ip);
-		addAutoScrollScript ("ip-$hl_dottedquad"); // scroll page to highlighted ip
+		case 4:  return renderIPv4NetworkAddresses ($range);
+		case 16: return renderIPv6NetworkAddresses ($range);
+		default: throw new InvalidArgException ("range['ip_bin']", $range['ip_bin']);
+	}
+}
+
+function renderIPv4NetworkAddresses ($range)
+{
+	global $pageno, $tabno, $aac2;
+	$startip = ip4_bin2int ($range['ip_bin']);
+	$endip = ip4_bin2int (ip_last ($range));
+
+	if (isset ($_REQUEST['hl_ip']))
+	{
+		$hl_ip = ip4_bin2int (ip4_parse ($_REQUEST['hl_ip']));
+		addAutoScrollScript ('ip-' . $_REQUEST['hl_ip']); // scroll page to highlighted ip
 	}
 
 	// pager
@@ -2528,12 +2338,12 @@ function renderIPv4Network ($id)
 		$page = isset ($_REQUEST['pg']) ? $_REQUEST['pg'] : (isset ($hl_ip) ? intval (($hl_ip - $startip) / $maxperpage) : 0);
 		if ($numpages = ceil ($address_count / $maxperpage))
 		{
-			echo '<h3>' . long2ip ($startip) . ' ~ ' . long2ip ($endip) . '</h3>';
+			echo '<h3>' . ip4_format (ip4_int2bin ($startip)) . ' ~ ' . ip4_format (ip4_int2bin ($endip)) . '</h3>';
 			for ($i = 0; $i < $numpages; $i++)
 				if ($i == $page)
 					$rendered_pager .= "<b>$i</b> ";
 				else
-					$rendered_pager .= "<a href='".makeHref (array ('page' => $pageno, 'tab' => $tabno, 'id' => $id, 'pg' => $i)) . "'>$i</a> ";
+					$rendered_pager .= "<a href='".makeHref (array ('page' => $pageno, 'tab' => $tabno, 'id' => $range['id'], 'pg' => $i)) . "'>$i</a> ";
 		}
 		$startip = $startip + $page * $maxperpage;
 		$endip = min ($startip + $maxperpage - 1, $endip);
@@ -2543,16 +2353,19 @@ function renderIPv4Network ($id)
 	echo "<table class='widetable' border=0 cellspacing=0 cellpadding=5 align='center' width='100%'>\n";
 	echo "<tr><th>Address</th><th>Name</th><th>Allocation</th></tr>\n";
 
-	for ($ip = $startip; $ip <= $endip; $ip++) :
-		$dottedquad = ip_long2quad($ip);
-		$secondstyle = 'tdleft' . (isset ($hl_ip) && $hl_ip == $ip ? ' port_highlight' : '');
-		if (!isset ($range['addrlist'][$ip]))
+	markupIPAddrList ($range['addrlist']);
+	for ($ip = $startip; $ip <= $endip; $ip++)
+	{
+		$ip_bin = ip4_int2bin ($ip);
+		$dottedquad = ip4_format ($ip_bin);
+		$tr_class = (isset ($hl_ip) && $hl_ip == $ip ? 'port_highlight' : '');
+		if (!isset ($range['addrlist'][$ip_bin]))
 		{
-			echo "<tr><td class=tdleft><a class='ancor' name='ip-$dottedquad' href='" . makeHref(array('page'=>'ipaddress', 'ip' => $dottedquad)) . "'>$dottedquad</a></td>";
-			echo "<td class='rsv-port ${secondstyle}'><span class='rsvtext'></span></td><td class='${secondstyle}'>&nbsp;</td></tr>\n";
+			echo "<tr class='tdleft $tr_class'><td class=tdleft><a class='ancor' name='ip-$dottedquad' href='" . makeHref(array('page'=>'ipaddress', 'ip' => $dottedquad)) . "'>$dottedquad</a></td>";
+			echo "<td class='rsv-port'><span class='rsvtext'></span></td><td>&nbsp;</td></tr>\n";
 			continue;
 		}
-		$addr = $range['addrlist'][$ip];
+		$addr = $range['addrlist'][$ip_bin];
 		// render IP change history
 		$title = '';
 		$history_class = '';
@@ -2561,11 +2374,12 @@ function renderIPv4Network ($id)
 			$title = ' title="' . htmlspecialchars ($addr['last_log']['user'] . ', ' . formatAge ($addr['last_log']['time']) , ENT_QUOTES) . '"';
 			$history_class = 'hover-history underline';
 		}
-		echo "<tr class='${addr['class']}'>";
-		echo "<td class=tdleft><a class='ancor $history_class' $title name='ip-$dottedquad' href='".makeHref(array('page'=>'ipaddress', 'ip'=>$addr['ip']))."'>${addr['ip']}</a></td>";
-		echo "<td class='${secondstyle} " .
+		$tr_class .= ' ' . $addr['class'];
+		echo "<tr class='tdleft $tr_class'>";
+		echo "<td><a class='ancor $history_class' $title name='ip-$dottedquad' href='".makeHref(array('page'=>'ipaddress', 'ip'=>$addr['ip']))."'>${addr['ip']}</a></td>";
+		echo "<td class='" .
 			(empty ($addr['allocs']) || !empty ($addr['name']) ? 'rsv-port' : '') .
-			"'><span class='rsvtext'>${addr['name']}</span></td><td class='${secondstyle}'>";
+			"'><span class='rsvtext'>${addr['name']}</span></td><td>";
 		$delim = '';
 		if ( $addr['reserved'] == 'yes')
 		{
@@ -2575,7 +2389,7 @@ function renderIPv4Network ($id)
 		foreach ($addr['allocs'] as $ref)
 		{
 			echo $delim . $aac2[$ref['type']];
-			echo "<a href='".makeHref(array('page'=>'object', 'object_id'=>$ref['object_id'], 'tab' => 'default', 'hl_ipv4_addr'=>$addr['ip']))."'>";
+			echo "<a href='".makeHref(array('page'=>'object', 'object_id'=>$ref['object_id'], 'tab' => 'default', 'hl_ip'=>$addr['ip']))."'>";
 			echo $ref['name'] . (!strlen ($ref['name']) ? '' : '@');
 			echo "${ref['object_name']}</a>";
 			$delim = '; ';
@@ -2597,7 +2411,7 @@ function renderIPv4Network ($id)
 			$delim = '<br>';
 		}
 		echo "</td></tr>\n";
-	endfor;
+	}
 	// end of iteration
 	if (permitted (NULL, NULL, 'set_reserve_comment'))
 		addJS ('js/inplace-edit.js');
@@ -2605,123 +2419,6 @@ function renderIPv4Network ($id)
 	echo "</table>";
 	if (! empty ($rendered_pager))
 		echo '<p>' . $rendered_pager . '</p>';
-
-	finishPortlet();
-	echo "</td></tr></table>\n";
-}
-
-// based on renderIPv4Network
-function renderIPv6Network ($id)
-{
-	$range = spotEntity ('ipv6net', $id);
-	loadIPv6AddrList ($range);
-	echo "<table border=0 class=objectview cellspacing=0 cellpadding=0>";
-	echo "<tr><td colspan=2 align=center><h1>${range['ip']}/${range['mask']}</h1><h2>";
-	echo htmlspecialchars ($range['name'], ENT_QUOTES, 'UTF-8') . "</h2></td></tr>\n";
-
-	echo "<tr><td class=pcleft width='50%'>";
-
-	// render summary portlet
-	$summary = array();
-	$summary['%% used'] = formatIPv6NetUsage (count ($range['addrlist']), $range['mask']);
-	if (getConfigVar ('EXT_IPV4_VIEW') == 'yes')
-	{
-		// Build a backtrace from all parent networks.
-		$backtrace = array();
-		$current = $range;
-		while ($current['parent_id'])
-		{
-			$current = spotEntity ('ipv6net', $current['parent_id']);
-			$backtrace[] = $current;
-		}
-		$arrows = count ($backtrace);
-		foreach (array_reverse ($backtrace) as $ainfo)
-		{
-			$name = '';
-			for ($i = 0; $i < $arrows; $i++)
-				$name .= '&uarr;';
-			$arrows--;
-			$summary[] = array ($name, getOutputOf ('renderCell', $ainfo));
-		}
-		$summary[] = array ('&rarr;', getOutputOf ('renderCell', $range));
-		// FIXME: get and display nested networks
-	}
-
-	foreach ($range['8021q'] as $item)
-	{
-		$vlaninfo = getVLANInfo ($item['domain_id'] . '-' . $item['vlan_id']);
-		$summary[] = array ('VLAN:', '<a href="' . makeHref (array ('page' => 'vlan', 'vlan_ck' => $vlaninfo['vlan_ck'])) . '">' . formatVLANName ($vlaninfo, 'markup long') . '</a>');
-	}
-	if (getConfigVar ('EXT_IPV4_VIEW') == 'yes' and count ($routers = findRouters ($range['addrlist'])))
-	{
-		$summary['Routed by'] = '';
-		foreach ($routers as $rtr)
-			$summary['Routed by'] .= getOutputOf ('renderRouterCell', $rtr['addr'], $rtr['iface'], spotEntity ('object', $rtr['id']));
-	}
-	$summary['tags'] = '';
-	renderEntitySummary ($range, 'summary', $summary);
-
-	if (strlen ($range['comment']))
-	{
-		startPortlet ('Comment');
-		echo '<div class=commentblock>' . string_insert_hrefs (htmlspecialchars ($range['comment'], ENT_QUOTES, 'UTF-8')) . '</div>';
-		finishPortlet ();
-	}
-
-	renderFilesPortlet ('ipv6net', $id);
-	echo "</td>\n";
-
-	// render address list
-	echo "<td class=pcright>";
-	startPortlet ('details');
-	renderIPv6NetworkAddresses ($range);
-	finishPortlet();
-	echo "</td></tr></table>\n";
-}
-
-// Used solely by renderSeparator
-function renderEmptyIPv6 ($ip, $hl_ip)
-{
-	$class = 'tdleft';
-	if (isset ($hl_ip) && $ip == $hl_ip)
-		$class .= ' port_highlight';
-	$fmt = $ip->format();
-	echo "<tr><td class=tdleft><a class='ancor' name='ip-$fmt' href='" . makeHref (array ('page' => 'ipv6address', 'ip' => $fmt)) . "'>" . $fmt;
-	echo "</a></td><td class='${class} rsv-port'><span class='rsvtext'></span></td><td class='${class}'>&nbsp;</td></tr>\n";
-}
-
-// Renders empty table line to shrink empty IPv6 address ranges.
-// If the range consists of single address, renders the address instead of empty line.
-// Renders address $hl_ip inside the range.
-// Used solely by renderIPv6NetworkAddresses
-function renderSeparator ($first, $after, $hl_ip)
-{
-	$self = __FUNCTION__;
-	if (strcmp ($first->getBin(), $after->getBin()) >= 0)
-		return;
-	if ($first->next() == $after)
-		renderEmptyIPv6 ($first, $hl_ip);
-	elseif (isset ($hl_ip) && strcmp ($hl_ip->getBin(), $first->getBin()) >= 0 && strcmp ($hl_ip->getBin(), $after->getBin()) < 0)
-	{ // $hl_ip is inside the range $first - ($after-1)
-		$self ($first, $hl_ip, $hl_ip);
-		renderEmptyIPv6 ($hl_ip, $hl_ip);
-		$self ($hl_ip->next(), $after, $hl_ip);
-	}
-	else
-		echo "<tr><td colspan=3 class=tdleft></td></tr>\n";
-}
-
-// calculates page number which contains given $ip (used by renderIPv6NetworkAddresses)
-function getPageNumOfIPv6 ($list, $ip, $maxperpage)
-{
-	if (intval ($maxperpage) <= 0 || count ($list) <= $maxperpage)
-		return 0;
-	$bin_ip = $ip->getBin();
-	$keys = array_keys ($list);
-	for ($i = 1; $i <= count ($keys); $i++)
-		if (strcmp ($keys[$i-1], $bin_ip) >= 0)
-			return intval ($i / $maxperpage);
-	return intval (count ($list) / $maxperpage);
 }
 
 function renderIPv6NetworkAddresses ($netinfo)
@@ -2730,15 +2427,16 @@ function renderIPv6NetworkAddresses ($netinfo)
 	echo "<table class='widetable' border=0 cellspacing=0 cellpadding=5 align='center' width='100%'>\n";
 	echo "<tr><th>Address</th><th>Name</th><th>Allocation</th></tr>\n";
 
-	$hl_ip = new IPv6Address;
-	if (! isset ($_REQUEST['hl_ipv6_addr']) || ! $hl_ip->parse ($_REQUEST['hl_ipv6_addr']))
-		$hl_ip = NULL;
-	else
-		addAutoScrollScript ('ip-' . $hl_ip->format());
+	$hl_ip = NULL;
+	if (isset ($_REQUEST['hl_ip']))
+	{
+		$hl_ip = ip6_parse ($_REQUEST['hl_ip']);
+		addAutoScrollScript ('ip-' . ip6_format ($hl_ip));
+	}
 
-	$prev_ip = $netinfo['ip_bin']; // really this is the next to previosly seen ip.
 	$addresses = $netinfo['addrlist'];
 	ksort ($addresses);
+	markupIPAddrList ($addresses);
 
 	// pager
 	$maxperpage = getConfigVar ('IPV4_ADDRS_PER_PAGE');
@@ -2759,7 +2457,8 @@ function renderIPv6NetworkAddresses ($netinfo)
 
 	$i = 0;
 	$interruped = FALSE; 
-	foreach ($addresses as $bin_ip => $addr)
+	$prev_ip = ip_prev ($netinfo['ip_bin']);
+	foreach ($addresses as $ip_bin => $addr)
 	{
 		if (isset ($page))
 		{
@@ -2773,19 +2472,25 @@ function renderIPv6NetworkAddresses ($netinfo)
 			}
 		}
 
-		$ipv6 = new IPv6Address ($bin_ip);
-		if ($ipv6 != $prev_ip)
-			renderSeparator ($prev_ip, $ipv6, $hl_ip);
-		$prev_ip = $ipv6->next();
-		
-		$secondstyle = 'tdleft';
-		if (isset ($hl_ip) && $hl_ip == $ipv6)
-			$secondstyle .= ' port_highlight';
-		echo "<tr class='${addr['class']}'>";
-		echo "<td class=tdleft><a class='ancor' name='ip-${addr['ip']}' href='" . makeHref (array ('page' => 'ipv6address', 'ip' => $addr['ip'])) . "'>${addr['ip']}</a></td>";
-		echo "<td class='${secondstyle} " .
+		if ($ip_bin != ip_next ($prev_ip))
+			renderSeparator (ip_next ($prev_ip), ip_prev ($ip_bin), $hl_ip);
+		$prev_ip = $ip_bin;
+
+		// render IP change history
+		$title = '';
+		$history_class = '';
+		if (isset ($addr['last_log']))
+		{
+			$title = ' title="' . htmlspecialchars ($addr['last_log']['user'] . ', ' . formatAge ($addr['last_log']['time']) , ENT_QUOTES) . '"';
+			$history_class = 'hover-history underline';
+		}
+
+		$tr_class = $addr['class'] . ' tdleft' . ($hl_ip === $ip_bin ? ' port_highlight' : '');
+		echo "<tr class='$tr_class'>";
+		echo "<td><a class='ancor $history_class' $title name='ip-${addr['ip']}' href='" . makeHref (array ('page' => 'ipaddress', 'ip' => $addr['ip'])) . "'>${addr['ip']}</a></td>";
+		echo "<td class='" .
 			(empty ($addr['allocs']) || !empty ($addr['name']) ? 'rsv-port' : '') .
-			"'><span class='rsvtext'>${addr['name']}</span></td><td class='${secondstyle}'>";
+			"'><span class='rsvtext'>${addr['name']}</span></td><td>";
 		$delim = '';
 		$prologue = '';
 		if ( $addr['reserved'] == 'yes')
@@ -2796,7 +2501,7 @@ function renderIPv6NetworkAddresses ($netinfo)
 		foreach ($addr['allocs'] as $ref)
 		{
 			echo $delim . $aac2[$ref['type']];
-			echo "<a href='" . makeHref (array ('page' => 'object', 'object_id' => $ref['object_id'], 'hl_ipv6_addr' => $addr['ip'])) . "'>";
+			echo "<a href='" . makeHref (array ('page' => 'object', 'object_id' => $ref['object_id'], 'hl_ip' => $addr['ip'])) . "'>";
 			echo $ref['name'] . (!strlen ($ref['name']) ? '' : '@');
 			echo "${ref['object_name']}</a>";
 			$delim = '; ';
@@ -2809,7 +2514,7 @@ function renderIPv6NetworkAddresses ($netinfo)
 		echo "</td></tr>\n";
 	}
 	if (! $interruped)
-		renderSeparator ($prev_ip, $netinfo['ip_bin']->get_last_subnet_address ($netinfo['mask'])->next(), $hl_ip);
+		renderSeparator (ip_next ($prev_ip), ip_last ($netinfo), $hl_ip);
 	if (isset ($page))
 	{ // bottom pager
 		echo "<tr><td colspan=3>";
@@ -2849,10 +2554,10 @@ function renderIPNetworkProperties ($id)
 	echo '</center>';
 }
 
-function renderIPAddress ($dottedquad)
+function renderIPAddress ($ip)
 {
 	global $aat, $nextorder;
-	$address = getIPAddress ($dottedquad);
+	$address = getIPAddress (ip_parse ($ip));
 	echo "<table border=0 class=objectview cellspacing=0 cellpadding=0>";
 	echo "<tr><td colspan=2 align=center><h1>${address['ip']}</h1></td></tr>\n";
 
@@ -2863,15 +2568,14 @@ function renderIPAddress ($dottedquad)
 		$summary['Comment'] = $address['name'];
 	$summary['Reserved'] = $address['reserved'];
 	$summary['Allocations'] = count ($address['allocs']);
-	if ($address['version'] == 4)
-	{
+	if (isset ($address['outpf']))
 		$summary['Originated NAT connections'] = count ($address['outpf']);
+	if (isset ($address['inpf']))
 		$summary['Arriving NAT connections'] = count ($address['inpf']);
-	}
 	renderEntitySummary ($address, 'summary', $summary);
 	
 	// render SLB portlet
-	if ($address['version'] == 4 and (! empty ($address['vslist']) or ! empty ($address['rsplist'])))
+	if (! empty ($address['vslist']) or ! empty ($address['rsplist']))
 	{
 		startPortlet ("");
 		if (! empty ($address['vslist']))
@@ -2897,23 +2601,23 @@ function renderIPAddress ($dottedquad)
 		startPortlet ('allocations');
 		echo "<table class='widetable' cellpadding=5 cellspacing=0 border=0 align='center' width='100%'>\n";
 		echo "<tr><th>object</th><th>OS interface</th><th>allocation type</th></tr>\n";
-		$class = $address['class'];
 		// render all allocation records for this address the same way
 		foreach ($address['allocs'] as $bond)
 		{
+			$tr_class = "${address['class']} tdleft";
 			if (isset ($_REQUEST['hl_object_id']) and $_REQUEST['hl_object_id'] == $bond['object_id'])
-				$secondclass = 'tdleft port_highlight';
-			else
-				$secondclass = 'tdleft';
-			echo "<tr class='$class'><td class=tdleft><a href='" . makeHref (array ('page' => 'object', 'object_id' => $bond['object_id'], 'tab' => 'default', 'hl_ipv' . $address['version'] . '_addr' => $address['ip'])) . "'>${bond['object_name']}</td><td class='${secondclass}'>${bond['name']}</td><td class='${secondclass}'><strong>";
-			echo $aat[$bond['type']];
-			echo "</strong></td></tr>\n";
+				$tr_class .= ' port_highlight';
+			echo "<tr class='$tr_class'>" .
+				"<td><a href='" . makeHref (array ('page' => 'object', 'object_id' => $bond['object_id'], 'tab' => 'default', 'hl_ip' => $address['ip'])) . "'>${bond['object_name']}</td>" .
+				"<td>${bond['name']}</td>" .
+				"<td><strong>" . $aat[$bond['type']] . "</strong></td>" .
+				"</tr>\n";
 		}
 		echo "</table><br><br>";
 		finishPortlet();
 	}
 
-	if ($address['version'] == 4)
+	if (! empty ($address['vslist']) or ! empty ($address['rsplist']))
 		renderSLBTriplets ($address);
 
 	if (! empty ($address['outpf']))
@@ -2942,9 +2646,9 @@ function renderIPAddress ($dottedquad)
 	echo "</table>\n";
 }
 
-function renderIPAddressProperties ($dottedquad)
+function renderIPAddressProperties ($ip)
 {
-	$address = getIPAddress ($dottedquad);
+	$address = getIPAddress (ip_parse ($ip));
 	echo "<center><h1>${address['ip']}</h1></center>\n";
 
 	startPortlet ('update');
@@ -2968,12 +2672,12 @@ function renderIPAddressProperties ($dottedquad)
 	finishPortlet();
 }
 
-function renderIPAddressAllocations ($dottedquad)
+function renderIPAddressAllocations ($ip)
 {
-	function printNewItemTR ($opname)
+	function printNewItemTR ()
 	{
 		global $aat;
-		printOpFormIntro ($opname);
+		printOpFormIntro ('add');
 		echo "<tr><td>";
 		printImageHREF ('add', 'allocate', TRUE);
 		echo "</td><td>";
@@ -2986,14 +2690,13 @@ function renderIPAddressAllocations ($dottedquad)
 	}
 	global $aat;
 
-	$address = getIPAddress ($dottedquad);
-	$opname = $address['version'] == 6 ? 'addIPv6Allocation' : 'addIPv4Allocation';
+	$address = getIPAddress (ip_parse ($ip));
 	echo "<center><h1>${address['ip']}</h1></center>\n";
 	echo "<table class='widetable' cellpadding=5 cellspacing=0 border=0 align='center'>\n";
 	echo "<tr><th>&nbsp;</th><th>object</th><th>OS interface</th><th>allocation type</th><th>&nbsp;</th></tr>\n";
 
 	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
-		printNewItemTR($opname);
+		printNewItemTR();
 	if (isset ($address['class']))
 	{
 		$class = $address['class'];
@@ -3002,17 +2705,13 @@ function renderIPAddressAllocations ($dottedquad)
 		foreach ($address['allocs'] as $bond)
 		{
 			echo "<tr class='$class'>";
-			printOpFormIntro
-			(
-				$address['version'] == 6 ? 'updIPv6Allocation' : 'updIPv4Allocation',
-				array ('object_id' => $bond['object_id'])
-			);
+			printOpFormIntro ('upd', array ('object_id' => $bond['object_id']));
 			echo "<td><a href='"
 				. makeHrefProcess
 				(
 					array
 					(
-						'op' => $address['version'] == 6 ? 'delIPv6Allocation' : 'delIPv4Allocation',
+						'op' => 'del',
 						'ip' => $address['ip'],
 						'object_id' => $bond['object_id']
 					)
@@ -3020,7 +2719,7 @@ function renderIPAddressAllocations ($dottedquad)
 				. "'>";
 			printImageHREF ('delete', 'Unallocate address');
 			echo "</a></td>";
-			echo "<td><a href='" . makeHref (array ('page' => 'object', 'object_id' => $bond['object_id'], 'hl_ipv' . $address['version'] . '_addr' => $address['ip'])) . "'>${bond['object_name']}</td>";
+			echo "<td><a href='" . makeHref (array ('page' => 'object', 'object_id' => $bond['object_id'], 'hl_ip' => $address['ip'])) . "'>${bond['object_name']}</td>";
 			echo "<td><input type='text' name='bond_name' value='${bond['name']}' size=10></td><td>";
 			printSelect ($aat, array ('name' => 'bond_type'), $bond['type']);
 			echo "</td><td>";
@@ -3029,7 +2728,7 @@ function renderIPAddressAllocations ($dottedquad)
 		}
 	}
 	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')
-		printNewItemTR($opname);
+		printNewItemTR();
 	echo "</table><br><br>";
 }
 
@@ -3044,11 +2743,12 @@ function renderNATv4ForObject ($object_id)
 		printSelect (array ('TCP' => 'TCP', 'UDP' => 'UDP'), array ('name' => 'proto'));
 		echo "<select name='localip' tabindex=1>";
 
-		foreach ($alloclist as $dottedquad => $alloc)
+		foreach ($alloclist as $ip_bin => $alloc)
 		{
+			$ip = $alloc['addrinfo']['ip'];
 			$name = (!isset ($alloc['addrinfo']['name']) or !strlen ($alloc['addrinfo']['name'])) ? '' : (' (' . niftyString ($alloc['addrinfo']['name']) . ')');
 			$osif = (!isset ($alloc['osif']) or !strlen ($alloc['osif'])) ? '' : ($alloc['osif'] . ': ');
-			echo "<option value='${dottedquad}'>${osif}${dottedquad}${name}</option>";
+			echo "<option value='${ip}'>${osif}${ip}${name}</option>";
 		}
 
 		echo "</select>:<input type='text' name='localport' size='4' tabindex=2></td>";
@@ -3076,10 +2776,11 @@ function renderNATv4ForObject ($object_id)
 	{
 		$class = 'trerror';
 		$osif = '';
-		if (isset ($focus['ipv4'][$pf['localip']]))
+		$localip_bin = ip4_parse ($pf['localip']);
+		if (isset ($focus['ipv4'][$localip_bin]))
 		{
-			$class = $focus['ipv4'][$pf['localip']]['addrinfo']['class'];
-			$osif = $focus['ipv4'][$pf['localip']]['osif'] . ': ';
+			$class = $focus['ipv4'][$localip_bin]['addrinfo']['class'];
+			$osif = $focus['ipv4'][$localip_bin]['osif'] . ': ';
 		}
 
 		echo "<tr class='$class'>";
@@ -3101,7 +2802,7 @@ function renderNATv4ForObject ($object_id)
 		echo "</td>";
 		echo "<td><a href='".makeHref(array('page'=>'ipaddress', 'tab'=>'default', 'ip'=>$pf['remoteip']))."'>${pf['remoteip']}</a>:${pf['remoteport']}</td>";
 
-		$address = getIPv4Address ($pf['remoteip']);
+		$address = getIPAddress (ip4_parse ($pf['remoteip']));
 
 		echo "<td class='description'>";
 		if (count ($address['allocs']))
@@ -3284,24 +2985,28 @@ function renderSearchResults ($terms, $summary)
 		{
 			case 'ipv4addressbydq':
 				if ($record['net_id'] !== NULL)
-					echo "<script language='Javascript'>document.location='index.php?page=ipv4net&tab=default&id=${record['net_id']}&hl_ipv4_addr=${record['ip']}';//</script>";
+					echo "<script language='Javascript'>document.location='index.php?page=ipv4net&tab=default&id=${record['net_id']}&hl_ip=${record['ip']}';//</script>";
 				break;
 			case 'ipv6addressbydq':
-				$v6_ip_dq = $record['ip']->format();
+				$fmt = ip6_format ($record['ip']);
 				if ($record['net_id'] !== NULL)
-					echo "<script language='Javascript'>document.location='index.php?page=ipv6net&tab=default&id=${record['net_id']}&hl_ipv6_addr=${v6_ip_dq}';//</script>";
+					echo "<script language='Javascript'>document.location='index.php?page=ipv6net&tab=default&id=${record['net_id']}&hl_ip=${fmt}';//</script>";
 				break;
 			case 'ipv4addressbydescr':
 				$parentnet = getIPv4AddressNetworkId ($record['ip']);
 				if ($parentnet !== NULL)
-					echo "<script language='Javascript'>document.location='index.php?page=ipv4net&tab=default&id=${parentnet}&hl_ipv4_addr=${record['ip']}';//</script>";
+				{
+					$fmt = ip4_format ($record['ip']);
+					echo "<script language='Javascript'>document.location='index.php?page=ipv4net&tab=default&id=${parentnet}&hl_ip=${fmt}';//</script>";
+				}
 				break;
 			case 'ipv6addressbydescr':
-				$v6_ip = new IPv6Address ($record['ip']);
-				$v6_ip_dq = $v6_ip->format();
-				$parentnet = getIPv6AddressNetworkId ($v6_ip);
+				$parentnet = getIPv6AddressNetworkId ($record['ip']);
 				if ($parentnet !== NULL)
-					echo "<script language='Javascript'>document.location='index.php?page=ipv6net&tab=default&id=${parentnet}&hl_ipv6_addr=${v6_ip_dq}';//</script>";
+				{
+					$fmt = ip6_format ($record['ip']);
+					echo "<script language='Javascript'>document.location='index.php?page=ipv6net&tab=default&id=${parentnet}&hl_ip=${fmt}';//</script>";
+				}
 				break;
 			case 'ipv4network':
 				echo "<script language='Javascript'>document.location='index.php?page=ipv4net";
@@ -3459,11 +3164,12 @@ function renderSearchResults ($terms, $summary)
 					foreach ($what as $addr)
 					{
 						echo "<tr class=row_${order}><td class=tdleft>";
+						$fmt = ip4_format ($addr['ip']);
 						$parentnet = getIPv4AddressNetworkId ($addr['ip']);
 						if ($parentnet !== NULL)
-							echo "<a href='index.php?page=ipv4net&tab=default&id=${parentnet}&hl_ipv4_addr=${addr['ip']}'>${addr['ip']}</a></td>";
+							echo "<a href='index.php?page=ipv4net&tab=default&id=${parentnet}&hl_ip=${fmt}'>${fmt}</a></td>";
 						else
-							echo "<a href='index.php?page=ipaddress&ip=${addr['ip']}'>${addr['ip']}</a></td>";
+							echo "<a href='index.php?page=ipaddress&ip=${fmt}'>${fmt}</a></td>";
 						echo "<td class=tdleft>${addr['name']}</td></tr>";
 						$order = $nextorder[$order];
 					}
@@ -3478,13 +3184,12 @@ function renderSearchResults ($terms, $summary)
 					foreach ($what as $addr)
 					{
 						echo "<tr class=row_${order}><td class=tdleft>";
-						$v6_ip = new IPv6Address ($addr['ip']);
-						$v6_ip_dq = $v6_ip->format();
-						$parentnet = getIPv6AddressNetworkId ($v6_ip);
+						$fmt = ip6_format ($addr['ip']);
+						$parentnet = getIPv6AddressNetworkId ($addr['ip']);
 						if ($parentnet !== NULL)
-							echo "<a href='index.php?page=ipv6net&tab=default&id=${parentnet}&hl_ipv6_addr=${v6_ip_dq}'>${v6_ip_dq}</a></td>";
+							echo "<a href='index.php?page=ipv6net&tab=default&id=${parentnet}&hl_ip=${fmt}'>${fmt}</a></td>";
 						else
-							echo "<a href='index.php?page=ipaddress&ip=${v6_ip_dq}'>${v6_ip_dq}</a></td>";
+							echo "<a href='index.php?page=ipaddress&ip=${fmt}'>${fmt}</a></td>";
 						echo "<td class=tdleft>${addr['name']}</td></tr>";
 						$order = $nextorder[$order];
 					}
@@ -4762,21 +4467,6 @@ function renderUIResetForm()
 	echo "</form>";
 }
 
-function renderProgressBar ($percentage = 0, $theme = '')
-{
-	echo getProgressBar ($percentage, $theme);
-}
-
-function getProgressBar ($percentage = 0, $theme = '')
-{
-	$done = ((int) ($percentage * 100));
-	$ret = "<img width=100 height=10 border=0 title='${done}%' src='?module=progressbar&done=${done}";
-	if ($theme != '')
-		$ret .= "&theme=${theme}";
-	$ret .= "'>";
-	return $ret;
-}
-
 function renderLivePTR ($id)
 {
 	if (isset($_REQUEST['pg']))
@@ -4786,15 +4476,13 @@ function renderLivePTR ($id)
 	global $pageno, $tabno;
 	$maxperpage = getConfigVar ('IPV4_ADDRS_PER_PAGE');
 	$range = spotEntity ('ipv4net', $id);
-	loadIPv4AddrList ($range);
+	loadIPAddrList ($range);
 	echo "<center><h1>${range['ip']}/${range['mask']}</h1><h2>${range['name']}</h2></center>\n";
 
 	echo "<table class=objview border=0 width='100%'><tr><td class=pcleft>";
 	startPortlet ('current records');
-	$startip = $range['ip_bin'] & $range['mask_bin'];
-	$endip = $range['ip_bin'] | $range['mask_bin_inv'];
-	$realstartip = $startip;
-	$realendip = $endip;
+	$startip = ip4_bin2int ($range['ip_bin']);
+	$endip = ip4_bin2int (ip_last ($range));
 	$numpages = 0;
 	if ($endip - $startip > $maxperpage)
 	{
@@ -4804,7 +4492,7 @@ function renderLivePTR ($id)
 	}
 	echo "<center>";
 	if ($numpages)
-		echo '<h3>' . long2ip ($startip) . ' ~ ' . long2ip ($endip) . '</h3>';
+		echo '<h3>' . ip4_format (ip4_int2bin ($startip)) . ' ~ ' . ip4_format (ip4_int2bin ($endip)) . '</h3>';
 	for ($i=0; $i<$numpages; $i++)
 		if ($i == $page)
 			echo "<b>$i</b> ";
@@ -4824,8 +4512,9 @@ function renderLivePTR ($id)
 	{
 		// Find the (optional) DB name and the (optional) DNS record, then
 		// compare values and produce a table row depending on the result.
-		$addr = isset ($range['addrlist'][$ip]) ? $range['addrlist'][$ip] : array ('name' => '', 'reserved' => 'no');
-		$straddr = long2ip ($ip);
+		$ip_bin = ip4_int2bin ($ip);
+		$addr = isset ($range['addrlist'][$ip_bin]) ? $range['addrlist'][$ip_bin] : array ('name' => '', 'reserved' => 'no');
+		$straddr = ip4_format ($ip_bin);
 		$ptrname = gethostbyaddr ($straddr);
 		if ($ptrname == $straddr)
 			$ptrname = '';
@@ -4858,8 +4547,8 @@ function renderLivePTR ($id)
 			$cnt_mismatch++;
 		}
 		echo "><td class='tdleft";
-		if (isset ($range['addrlist'][$ip]['class']) and strlen ($range['addrlist'][$ip]['class']))
-			echo ' ' . $range['addrlist'][$ip]['class'];
+		if (isset ($range['addrlist'][$ip_bin]['class']) and strlen ($range['addrlist'][$ip_bin]['class']))
+			echo ' ' . $range['addrlist'][$ip_bin]['class'];
 		echo "'><a href='".makeHref(array('page'=>'ipaddress', 'ip'=>$straddr))."'>${straddr}</a></td>";
 		echo "<td class=tdleft>${addr['name']}</td><td class=tdleft>${ptrname}</td><td>";
 		if ($print_cbox)
@@ -5767,7 +5456,7 @@ function printRoutersTD ($rlist, $as_cell = 'yes')
 	$rtrclass = 'tdleft';
 	foreach ($rlist as $rtr)
 	{
-		$tmp = getIPAddress ($rtr['addr']);
+		$tmp = getIPAddress ($rtr['ip_bin']);
 		if ($tmp['class'] == 'trerror')
 		{
 			$rtrclass = 'tdleft trerror';
@@ -5780,7 +5469,7 @@ function printRoutersTD ($rlist, $as_cell = 'yes')
 	{
 		$rinfo = spotEntity ('object', $rtr['id']);
 		if ($as_cell == 'yes')
-			renderRouterCell ($rtr['addr'], $rtr['iface'], $rinfo);
+			renderRouterCell ($rtr['ip_bin'], $rtr['iface'], $rinfo);
 		else
 			echo $pfx . '<a href="' . makeHref (array ('page' => 'object', 'object_id' => $rinfo['id'])) . '">' . $rinfo['dname'] . '</a>';
 		$pfx = "<br>\n";
@@ -5791,7 +5480,7 @@ function printRoutersTD ($rlist, $as_cell = 'yes')
 // Same as for routers, but produce two TD cells to lay the content out better.
 function printIPNetInfoTDs ($netinfo, $decor = array())
 {
-	$ip_ver = is_a ($netinfo['ip_bin'], 'IPv6Address') ? 6 : 4;
+	$ip_ver = strlen ($netinfo['ip_bin']) == 16 ? 6 : 4;
 	$formatted = $netinfo['ip'] . "/" . $netinfo['mask'];
 	if ($netinfo['symbol'] == 'spacer')
 	{
@@ -5815,6 +5504,11 @@ function printIPNetInfoTDs ($netinfo, $decor = array())
 	echo $formatted;
 	if (isset ($netinfo['id']))
 		echo '</a>';
+	if (getConfigVar ('IPV4_TREE_SHOW_VLAN') == 'yes' and ! empty ($netinfo['8021q']))
+	{
+		echo '<br>';
+		renderNetVLAN ($netinfo);
+	}
 	echo '</td><td class="tdleft';
 	if (array_key_exists ('tdclass', $decor))
 		echo ' ' . $decor['tdclass'];
@@ -5841,6 +5535,22 @@ function printIPNetInfoTDs ($netinfo, $decor = array())
 			echo '<br><small>' . serializeTags ($netinfo['etags'], "index.php?page=ipv${ip_ver}space&tab=default&") . '</small>';
 	}
 	echo "</td>";
+}
+
+function renderNetVLAN ($cell)
+{
+	if (! empty ($cell['8021q']))
+	{
+		$seen = array();
+		foreach ($cell['8021q'] as $vlan_info)
+			$seen[$vlan_info['vlan_id']] = $vlan_info['domain_id'] . '-' . $vlan_info['vlan_id'];
+		echo '<div class="vlan"><strong><small>VLAN' . (count ($seen) > 1 ? 'S' : '') . '</small> ';
+		$links = array();
+		foreach ($seen as $vlan_id => $vlan_ck)
+			$links[] = '<a href="' . makeHref (array ('page' => 'vlan', 'vlan_ck' => $vlan_ck)) . '">' . $vlan_id . '</a>';
+		echo implode (', ', $links);
+		echo '</strong></div>';
+	}
 }
 
 function renderCell ($cell)
@@ -5906,27 +5616,7 @@ function renderCell ($cell)
 		printImageHREF ('NET');
 		echo '</td>';
 		echo "<td><a href='index.php?page={$cell['realm']}&id=${cell['id']}'>${cell['ip']}/${cell['mask']}</a>";
-		if (getConfigVar ('IPV4_TREE_SHOW_USAGE') == 'yes')
-		{
-			echo '<div class="net-usage">';
-			if ($cell['realm'] == 'ipv4net')
-			{
-				loadOwnIPv4Addresses ($cell);
-				$used = $cell['addrc'];
-				$maxdirect = $cell['addrt'];
-				
-				echo "<small>$used/$maxdirect</small> ";
-				renderProgressBar ($maxdirect ? $used/$maxdirect : 0);
-				
-			}
-			elseif ($cell['realm'] == 'ipv6net')
-			{
-				loadOwnIPv6Addresses ($cell);
-				$used = $cell['addrc'];
-				echo formatIPv6NetUsage ($used, $cell['mask']);
-			}
-			echo '</div>';
-		}
+		echo getRenderedIPNetCapacity ($cell);
 		echo '</td></tr>';
 
 		echo "<tr><td>";
@@ -5935,19 +5625,7 @@ function renderCell ($cell)
 		else
 			echo "<span class=sparenetwork>no name</span>";
 		// render VLAN
-		if (! empty ($cell['8021q']))
-		{
-			$seen = array();
-			foreach ($cell['8021q'] as $vlan_info)
-				$seen[$vlan_info['vlan_id']] = $vlan_info['domain_id'] . '-' . $vlan_info['vlan_id'];
-			echo '<div class="net-usage"><strong><small>VLAN' . (count ($seen) > 1 ? 'S' : '') . '</small> ';
-			$links = array();
-			foreach ($seen as $vlan_id => $vlan_ck)
-				$links[] = '<a href="' . makeHref (array ('page' => 'vlan', 'vlan_ck' => $vlan_ck)) . '">' . $vlan_id . '</a>';
-			echo implode (', ', $links);
-			echo '</strong></div>';
-		}
-		
+		renderNetVLAN ($cell);
 		echo "</td></tr>";
 		echo '<tr><td>';
 		echo count ($cell['etags']) ? ("<small>" . serializeTags ($cell['etags']) . "</small>") : '&nbsp;';
@@ -5982,15 +5660,14 @@ function renderCell ($cell)
 	}
 }
 
-function renderRouterCell ($dottedquad, $ifname, $cell)
+function renderRouterCell ($ip_bin, $ifname, $cell)
 {
+	$dottedquad = ip_format ($ip_bin);
 	echo "<table class=slbcell><tr><td rowspan=3>${dottedquad}";
 	if (strlen ($ifname))
 		echo '@' . $ifname;
 	echo "</td>";
-	$ipv6 = new IPv6Address;
-	$ip_type = $ipv6->parse ($dottedquad) ? 'ipv6' : 'ipv4';
-	echo "<td><a href='index.php?page=object&object_id=${cell['id']}&hl_${ip_type}_addr=${dottedquad}'><strong>${cell['dname']}</strong></a></td>";
+	echo "<td><a href='index.php?page=object&object_id=${cell['id']}&hl_ip=${dottedquad}'><strong>${cell['dname']}</strong></a></td>";
 	echo "</td></tr><tr><td>";
 	printImageHREF ('router');
 	echo "</td></tr><tr><td>";
@@ -6074,7 +5751,15 @@ function showPathAndSearch ($pageno)
 		global $page;
 		$path = array();
 		// Recursion breaks at first parentless page.
-		if (!isset ($page[$targetno]['parent']))
+		if ($targetno == 'ipaddress')
+		{
+			// case ipaddress is a universal v4/v6 page, it has two parents and requires special handling
+			$ip_bin = ip_parse ($_REQUEST['ip']);
+			$parent = (strlen ($ip_bin) == 16 ? 'ipv6net' : 'ipv4net');
+			$path = $self ($parent);
+			$path[] = $targetno;
+		}
+		elseif (!isset ($page[$targetno]['parent']))
 			$path = array ($targetno);
 		else
 		{
@@ -6180,7 +5865,7 @@ function showTabs ($pageno, $tabno)
 // fires for both row and its racks. Use pageno for decision in such cases.
 function dynamic_title_decoder ($path_position)
 {
-	global $sic;
+	global $sic, $page_by_realm;
 	static $net_id;
 	switch ($path_position)
 	{
@@ -6274,14 +5959,7 @@ function dynamic_title_decoder ($path_position)
 			'params' => array ('file_id' => $_REQUEST['file_id'])
 		);
 	case 'ipaddress':
-		$address = getIPv4Address ($_REQUEST['ip']);
-		return array
-		(
-			'name' => niftyString ($_REQUEST['ip'] . ($address['name'] != '' ? ' (' . $address['name'] . ')' : ''), 50, FALSE),
-			'params' => array ('ip' => $_REQUEST['ip'])
-		);
-	case 'ipv6address':
-		$address = getIPv6Address (assertIPArg ('ip'));
+		$address = getIPAddress (ip_parse ($_REQUEST['ip']));
 		return array
 		(
 			'name' => niftyString ($address['ip'] . ($address['name'] != '' ? ' (' . $address['name'] . ')' : ''), 50, FALSE),
@@ -6293,48 +5971,48 @@ function dynamic_title_decoder ($path_position)
         switch ($pageno)
 		{
 			case 'ipaddress':
-				$range = spotEntity ('ipv4net', getIPv4AddressNetworkId ($_REQUEST['ip']));
-				$net_id = $range['id'];
-				return array
+				$net = spotNetworkByIP (ip_parse ($_REQUEST['ip']));
+				$ret = array
 				(
-					'name' => $range['ip'] . '/' . $range['mask'],
+					'name' => $net['ip'] . '/' . $net['mask'],
 					'params' => array
 					(
-						'id' => $range['id'],
-						'page' => 'ipv4net',
-						'hl_ipv4_addr' => $_REQUEST['ip']
+						'id' => $net['id'],
+						'page' => $net['realm'], // 'ipv4net', 'ipv6net'
+						'hl_ip' => $_REQUEST['ip'],
 					)
 				);
-			case 'ipv6address':
-				$ipv6 = assertIPArg ('ip');
-				$range = spotEntity ('ipv6net', getIPv6AddressNetworkId ($ipv6));
-				$net_id = $range['id'];
-				return array
-				(
-					'name' => $range['ip'] . '/' . $range['mask'],
-					'params' => array
-					(
-						'id' => $range['id'],
-						'page' => 'ipv6net',
-						'hl_ipv6_addr' => $_REQUEST['ip']
-					)
-				);
+				return ($ret);
 			default:
 				assertUIntArg ('id');
-				$range = spotEntity ($path_position, $_REQUEST['id']);
-				$net_id = $range['id'];
+				$net = spotEntity ($path_position, $_REQUEST['id']);
 				return array
 				(
-					'name' => $range['ip'] . '/' . $range['mask'],
-					'params' => array ('id' => $_REQUEST['id'])
+					'name' => $net['ip'] . '/' . $net['mask'],
+					'params' => array ('id' => $net['id'])
 				);
 		}
+		break;
 	case 'ipv4space':
 	case 'ipv6space':
 		global $pageno;
-		$ip_ver = preg_replace ('/[^\d]*/', '', $path_position);
-		$params = isset ($net_id) ? array ('eid' => $net_id, 'hl_net' => 1) : array();
+        switch ($pageno)
+		{
+			case 'ipaddress':
+				$net_id = getIPAddressNetworkId (ip_parse ($_REQUEST['ip']));
+				break;
+			case 'ipv4net':
+			case 'ipv6net':
+				$net_id = $_REQUEST['id'];
+				break;
+			default:
+				$net_id = NULL;
+		}
+		$params = array();
+		if (isset ($net_id))
+			$params = array ('eid' => $net_id, 'hl_net' => 1, 'clear-cf' => '');
 		unset ($net_id);
+		$ip_ver = preg_replace ('/[^\d]*/', '', $path_position);
 		return array
 		(
 			'name' => "IPv$ip_ver space",
@@ -8554,9 +8232,9 @@ function formatVLANPackDiff ($old, $current)
 	return $ret;
 }
 
-function renderIPv4AddressLog ()
+function renderIPAddressLog ()
 {
-	assertIPv4Arg('ip');
+	$ip_bin = assertIPArg ('ip');
 	startPortlet ('Log messages');
 	echo '<table class="widetable" cellspacing="0" cellpadding="5" align="center" width="50%"><tr>';
 	echo '<th>Date &uarr;</th>';
@@ -8564,7 +8242,7 @@ function renderIPv4AddressLog ()
 	echo '<th>Log message</th>';
 	echo '</tr>';
 	$odd = FALSE;
-	foreach (array_reverse (fetchIPv4LogEntry($_REQUEST['ip'])) as $line)
+	foreach (array_reverse (fetchIPLogEntry ($ip_bin)) as $line)
 	{
 		$tr_class = $odd ? 'row_odd' : 'row_even';
 		echo "<tr class='$tr_class'>";

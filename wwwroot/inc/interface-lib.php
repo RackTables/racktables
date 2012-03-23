@@ -570,6 +570,134 @@ function addCSS ($data, $inline = FALSE)
 	}
 }
 
+function getRenderedIPNetCapacity ($range)
+{
+	switch (strlen ($range['ip_bin']))
+	{
+		case 4:  return getRenderedIPv4NetCapacity ($range);
+		case 16: return getRenderedIPv6NetCapacity ($range);
+		default: throw new InvalidArgException ('range["ip_bin"]', $range['ip_bin'], "Invalid binary IP");
+	}
+}
+
+function getRenderedIPv4NetCapacity ($range)
+{
+	$class = 'net-usage';
+	if (isset ($range['addrc']))
+	{
+		// full mode
+		$total = ip4_range_size ($range);
+		$a_total = $total - getIPv4OwnRangeSize ($range);
+		$b_used = $range['own_addrc'];
+		$a_used = $range['addrc'] - $b_used;
+
+		// generate link to progress bar image
+		$width = 100;
+		if ($total > 0)
+		{
+			$px_a = round ($a_total / $total * $width);
+			$px1 = round ($a_used / $total * $width);
+			$px2 = $px_a - $px1;
+			$px3 = round ($b_used / $total * $width);
+			if ($px3 + $px1 + $px2 > $width)
+				$px3 = $width - $px1 - $px2;
+		}
+		else
+			$px1 = $px2 = $px3 = 0;
+
+		$b_total = $total - $a_total;
+		$title_items = array();
+		$title2_items = array();
+		if ($a_total)
+		{
+			$title_items[] = "$a_used / $a_total";
+			$title2_items[] = sprintf ("%d%% used", $a_used / $a_total * 100);
+		}
+		if ($b_total)
+		{
+			$title_items[] = ($b_used ? "$b_used / " : "") . $b_total;
+			$title2_items[] = sprintf ("%d%% not allocated", $b_total / $total * 100);
+		}
+		$title = implode (', ', $title_items);
+		$title2 = implode (', ', $title2_items);
+		$text = "<img width='$width' height=10 border=0 title='$title2' src='?module=progressbar4&px1=$px1&px2=$px2&px3=$px3'>" .
+			" <small class='title'>$title</small>";
+	}
+	else
+	{
+		// fast mode
+		$class .= ' pending';
+		addJS ('js/net-usage.js');
+
+		$free_text = '';
+		if (isset ($range['kidc']) and $range['kidc'] > 0)
+		{
+			$free_masks = array_keys ($range['spare_ranges']);
+			sort ($free_masks, SORT_NUMERIC);
+			if ($mask = array_shift ($free_masks))
+			{
+				$cnt = count ($range['spare_ranges'][$mask]);
+				$free_text = ', ' . ($cnt > 1 ? "<small>${cnt}x</small>" : "") . "/$mask free";
+			}
+		}
+		$text =  ip4_range_size ($range) . $free_text;
+	}
+
+	$div_id = $range['ip'] . '/' . $range['mask'];
+
+	return "<div class=\"$class\" id=\"$div_id\">" . $text . "</div>";
+}
+
+function getRenderedIPv6NetCapacity ($range)
+{
+	$div_id = $range['ip'] . '/' . $range['mask'];
+	$class = 'net-usage';
+	if (isset ($range['addrc']))
+		$used = $range['addrc'];
+	else
+	{
+		$used = NULL;
+		$class .= ' pending';
+		addJS ('js/net-usage.js');
+	}
+
+	static $prefixes = array
+	(
+		0 =>  '',
+		3 =>  'k',
+		6 =>  'M',
+		9 =>  'G',
+		12 => 'T',
+		15 => 'P',
+		18 => 'E',
+		21 => 'Z',
+		24 => 'Y',
+	);
+
+	if ($range['mask'] <= 64)
+	{
+		$what = 'net';
+		$preposition = 'in';
+		$range['mask'] += 64;
+	}
+	else
+	{
+		$what = 'IP';
+		$preposition = 'of';
+	}
+	$what .= (0 == $range['mask'] % 64 ? '' : 's');
+	$addrc = isset ($used) ? "$used $preposition " : '';
+
+	$dec_order = intval ((128 - $range['mask']) / 10) * 3;
+	$mult = isset ($prefixes[$dec_order]) ? $prefixes[$dec_order] : '??';
+	
+	$cnt = 1 << ((128 - $range['mask']) % 10);
+	if ($cnt == 1 && $mult == '')
+		$cnt = '1';
+
+	return "<div class=\"$class\" id=\"$div_id\">" . "{$addrc}${cnt}${mult} ${what}" . "</div>";
+}
+
 // print part of HTML HEAD block
 function printPageHeaders ()
 {
@@ -730,6 +858,28 @@ function getOpLink ($params, $title,  $img_name = '', $comment = '', $class = ''
 			$ret .= ' ';
 	}
 	$ret .= $title . '</a>';
+	return $ret;
+}
+
+function renderProgressBar ($percentage = 0, $theme = '', $inline = FALSE)
+{
+	echo getProgressBar ($percentage, $theme, $inline);
+}
+
+function getProgressBar ($percentage = 0, $theme = '', $inline = FALSE)
+{
+	$done = ((int) ($percentage * 100));
+	if (! $inline)
+		$src = "?module=progressbar&done=$done" . (empty ($theme) ? '' : "&theme=${theme}");
+	else
+	{
+		$bk_request = $_REQUEST;
+		$_REQUEST['theme'] = $theme;
+		$src = 'data:image/png;base64,' . chunk_split (base64_encode (getOutputOf ('renderProgressBarImage', $done)));
+		$_REQUEST = $bk_request;
+		header ('Content-type: text/html');
+	}
+	$ret = "<img width=100 height=10 border=0 title='${done}%' src='$src'>";
 	return $ret;
 }
 

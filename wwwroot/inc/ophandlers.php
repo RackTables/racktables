@@ -460,8 +460,8 @@ $msgcode['addPortForwarding']['OK'] = 48;
 function addPortForwarding ()
 {
 	assertUIntArg ('object_id');
-	assertIPv4Arg ('localip');
-	assertIPv4Arg ('remoteip');
+	$localip_bin = assertIPv4Arg ('localip');
+	$remoteip_bin = assertIPv4Arg ('remoteip');
 	assertUIntArg ('localport');
 	assertStringArg ('proto');
 	assertStringArg ('description', TRUE);
@@ -472,9 +472,9 @@ function addPortForwarding ()
 	newPortForwarding
 	(
 		$_REQUEST['object_id'],
-		$_REQUEST['localip'],
+		$localip_bin,
 		$_REQUEST['localport'],
-		$_REQUEST['remoteip'],
+		$remoteip_bin,
 		$remoteport,
 		$_REQUEST['proto'],
 		$_REQUEST['description']
@@ -487,8 +487,8 @@ $msgcode['delPortForwarding']['OK'] = 49;
 function delPortForwarding ()
 {
 	assertUIntArg ('object_id');
-	assertIPv4Arg ('localip');
-	assertIPv4Arg ('remoteip');
+	$localip_bin = assertIPv4Arg ('localip');
+	$remoteip_bin = assertIPv4Arg ('remoteip');
 	assertUIntArg ('localport');
 	assertUIntArg ('remoteport');
 	assertStringArg ('proto');
@@ -496,9 +496,9 @@ function delPortForwarding ()
 	deletePortForwarding
 	(
 		$_REQUEST['object_id'],
-		$_REQUEST['localip'],
+		$localip_bin,
 		$_REQUEST['localport'],
-		$_REQUEST['remoteip'],
+		$remoteip_bin,
 		$_REQUEST['remoteport'],
 		$_REQUEST['proto']
 	);
@@ -509,8 +509,8 @@ $msgcode['updPortForwarding']['OK'] = 51;
 function updPortForwarding ()
 {
 	assertUIntArg ('object_id');
-	assertIPv4Arg ('localip');
-	assertIPv4Arg ('remoteip');
+	$localip_bin = assertIPv4Arg ('localip');
+	$remoteip_bin = assertIPv4Arg ('remoteip');
 	assertUIntArg ('localport');
 	assertUIntArg ('remoteport');
 	assertStringArg ('proto');
@@ -519,9 +519,9 @@ function updPortForwarding ()
 	updatePortForwarding
 	(
 		$_REQUEST['object_id'],
-		$_REQUEST['localip'],
+		$localip_bin,
 		$_REQUEST['localport'],
-		$_REQUEST['remoteip'],
+		$remoteip_bin,
 		$_REQUEST['remoteport'],
 		$_REQUEST['proto'],
 		$_REQUEST['description']
@@ -715,65 +715,42 @@ function addBulkPorts ()
 	return showFuncMessage (__FUNCTION__, 'OK', array ($added_count, $error_count));
 }
 
-$msgcode['updIPv4Allocation']['OK'] = 51;
-function updIPv4Allocation ()
+$msgcode['updIPAllocation']['OK'] = 51;
+function updIPAllocation ()
 {
-	assertIPv4Arg ('ip');
+	$ip_bin = assertIPArg ('ip');
 	assertUIntArg ('object_id');
 	assertStringArg ('bond_name', TRUE);
-	genericAssertion ('bond_type', 'enum/inet4alloc');
+	genericAssertion ('bond_type', 'enum/alloc_type');
+	updateIPBond ($ip_bin, $_REQUEST['object_id'], $_REQUEST['bond_name'], $_REQUEST['bond_type']);
+	showFuncMessage (__FUNCTION__, 'OK');
+	return buildRedirectURL (NULL, NULL, array ('hl_ip' => ip_format ($ip_bin)));
+}
 
-	updateBond ($_REQUEST['ip'], $_REQUEST['object_id'], $_REQUEST['bond_name'], $_REQUEST['bond_type']);
+$msgcode['delIPAllocation']['OK'] = 49;
+function delIPAllocation ()
+{
+	$ip_bin = assertIPArg ('ip');
+	assertUIntArg ('object_id');
+
+	unbindIPFromObject ($ip_bin, $_REQUEST['object_id']);
 	return showFuncMessage (__FUNCTION__, 'OK');
 }
 
-$msgcode['updIPv6Allocation']['OK'] = 51;
-function updIPv6Allocation ()
+$msgcode['addIPAllocation']['OK'] = 48;
+$msgcode['addIPAllocation']['ERR1'] = 170;
+function addIPAllocation ()
 {
-	$ipv6 = assertIPv6Arg ('ip');
+	$ip_bin = assertIPArg ('ip');
 	assertUIntArg ('object_id');
 	assertStringArg ('bond_name', TRUE);
-	genericAssertion ('bond_type', 'enum/inet6alloc');
+	genericAssertion ('bond_type', 'enum/alloc_type');
 
-	updateIPv6Bond ($ipv6, $_REQUEST['object_id'], $_REQUEST['bond_name'], $_REQUEST['bond_type']);
-	return showFuncMessage (__FUNCTION__, 'OK');
-}
+	if  (getConfigVar ('IPV4_JAYWALK') != 'yes' and NULL === getIPAddressNetworkId ($ip_bin))
+		return showFuncMessage (__FUNCTION__, 'ERR1', array (ip_format ($ip_bin)));
 
-$msgcode['delIPv4Allocation']['OK'] = 49;
-function delIPv4Allocation ()
-{
-	assertIPv4Arg ('ip');
-	assertUIntArg ('object_id');
-
-	unbindIpFromObject ($_REQUEST['ip'], $_REQUEST['object_id']);
-	return showFuncMessage (__FUNCTION__, 'OK');
-}
-
-$msgcode['delIPv6Allocation']['OK'] = 49;
-function delIPv6Allocation ()
-{
-	assertUIntArg ('object_id');
-	$ipv6 = assertIPv6Arg ('ip');
-	unbindIPv6FromObject ($ipv6, $_REQUEST['object_id']);
-	return showFuncMessage (__FUNCTION__, 'OK');
-}
-
-$msgcode['addIPv4Allocation']['OK'] = 48;
-$msgcode['addIPv4Allocation']['ERR1'] = 170;
-function addIPv4Allocation ()
-{
-	assertIPv4Arg ('ip');
-	assertUIntArg ('object_id');
-	assertStringArg ('bond_name', TRUE);
-	genericAssertion ('bond_type', 'enum/inet4alloc');
-
-	// Strip masklen.
-	$ip = preg_replace ('@/[[:digit:]]+$@', '', $_REQUEST['ip']);
-	if  (getConfigVar ('IPV4_JAYWALK') != 'yes' and NULL === getIPv4AddressNetworkId ($ip))
-		return showFuncMessage (__FUNCTION__, 'ERR1', array ($ip));
-	
-	bindIpToObject ($ip, $_REQUEST['object_id'], $_REQUEST['bond_name'], $_REQUEST['bond_type']);
-	$address = getIPv4Address ($ip);
+	bindIPToObject ($ip_bin, $_REQUEST['object_id'], $_REQUEST['bond_name'], $_REQUEST['bond_type']);
+	$address = getIPAddress ($ip_bin);
 	if ($address['reserved'] == 'yes' or strlen ($address['name']))
 	{
 		$release = getConfigVar ('IPV4_AUTO_RELEASE');
@@ -781,39 +758,10 @@ function addIPv4Allocation ()
 			$address['reserved'] = 'no';
 		if ($release >= 2)
 			$address['name'] = '';
-		updateAddress ($ip, $address['name'], $address['reserved']);
+		updateAddress ($ip_bin, $address['name'], $address['reserved']);
 	}
-	return showFuncMessage (__FUNCTION__, 'OK');
-}
-
-$msgcode['addIPv6Allocation']['OK'] = 48;
-$msgcode['addIPv6Allocation']['ERR1'] = 170;
-function addIPv6Allocation ()
-{
-	assertUIntArg ('object_id');
-	assertStringArg ('bond_name', TRUE);
-	genericAssertion ('bond_type', 'enum/inet6alloc');
-
-	// Strip masklen.
-	$ipv6 = new IPv6Address;
-	if (! $ipv6->parse (preg_replace ('@/\d+$@', '', $_REQUEST['ip'])))
-		throw new InvalidRequestArgException('ip', $_REQUEST['ip'], 'parameter is not a valid ipv6 address');
-
-	if  (getConfigVar ('IPV4_JAYWALK') != 'yes' and NULL === getIPv6AddressNetworkId ($ipv6))
-		return showFuncMessage (__FUNCTION__, 'ERR1', array ($ip));
-
-	bindIPv6ToObject ($ipv6, $_REQUEST['object_id'], $_REQUEST['bond_name'], $_REQUEST['bond_type']);
-	$address = getIPv6Address ($ipv6);
-	if ($address['reserved'] == 'yes' or strlen ($address['name']))
-	{
-		$release = getConfigVar ('IPV4_AUTO_RELEASE');
-		if ($release >= 1)
-			$address['reserved'] = 'no';
-		if ($release >= 2)
-			$address['name'] = '';
-		updateAddress ($ipv6, $address['name'], $address['reserved']);
-	}
-	return showFuncMessage (__FUNCTION__, 'OK');
+	showFuncMessage (__FUNCTION__, 'OK');
+	return buildRedirectURL (NULL, NULL, array ('hl_ip' => ip_format ($ip_bin)));
 }
 
 function addIPv4Prefix ()
@@ -822,10 +770,9 @@ function addIPv4Prefix ()
 	assertStringArg ('name', TRUE);
 
 	$taglist = isset ($_REQUEST['taglist']) ? $_REQUEST['taglist'] : array();
-	$is_connected = isset ($_REQUEST['is_connected']) ? $_REQUEST['is_connected'] : 'off';
 	global $sic;
 	$vlan_ck = empty ($sic['vlan_ck']) ? NULL : $sic['vlan_ck'];
-	$net_id = createIPv4Prefix ($_REQUEST['range'], $sic['name'], $is_connected == 'on', $taglist, $vlan_ck);
+	$net_id = createIPv4Prefix ($_REQUEST['range'], $sic['name'], isCheckSet ('is_connected'), $taglist, $vlan_ck);
 	showSuccess
 	(
 		'IP network <a href="' .
@@ -840,10 +787,9 @@ function addIPv6Prefix ()
 	assertStringArg ('name', TRUE);
 
 	$taglist = isset ($_REQUEST['taglist']) ? $_REQUEST['taglist'] : array();
-	$is_connected = isset ($_REQUEST['is_connected']) ? ($_REQUEST['is_connected'] == 'on') : FALSE;
 	global $sic;
 	$vlan_ck = empty ($sic['vlan_ck']) ? NULL : $sic['vlan_ck'];
-	$net_id = createIPv6Prefix ($_REQUEST['range'], $sic['name'], $is_connected, $taglist, $vlan_ck);
+	$net_id = createIPv6Prefix ($_REQUEST['range'], $sic['name'], isCheckSet ('is_connected'), $taglist, $vlan_ck);
 	showSuccess
 	(
 		'IP network <a href="' .
@@ -857,13 +803,14 @@ function delIPv4Prefix ()
 {
 	assertUIntArg ('id');
 	$netinfo = spotEntity ('ipv4net', $_REQUEST['id']);
-	loadIPv4AddrList ($netinfo);
+	loadIPAddrList ($netinfo);
 	if (! isIPNetworkEmpty ($netinfo))
 		return showError ("There are allocations within prefix, delete forbidden");
-	if (array_key_exists ($netinfo['db_first'], $netinfo['addrlist']))
-		updateAddress ($netinfo['addrlist'][$netinfo['db_first']]['ip'], '', 'no');
-	if (array_key_exists ($netinfo['db_last'], $netinfo['addrlist']))
-		updateAddress ($netinfo['addrlist'][$netinfo['db_last']]['ip'], '', 'no');
+	if (array_key_exists ($netinfo['ip_bin'], $netinfo['addrlist']))
+		updateV4Address ($netinfo['ip_bin'], '', 'no');
+	$last_ip = ip_last ($netinfo);
+	if (array_key_exists ($last_ip, $netinfo['addrlist']))
+		updateV4Address ($last_ip, '', 'no');
 	destroyIPv4Prefix ($_REQUEST['id']);
 	showFuncMessage (__FUNCTION__, 'OK');
 	global $pageno;
@@ -876,11 +823,11 @@ function delIPv6Prefix ()
 {
 	assertUIntArg ('id');
 	$netinfo = spotEntity ('ipv6net', $_REQUEST['id']);
-	loadIPv6AddrList ($netinfo);
+	loadIPAddrList ($netinfo);
 	if (! isIPNetworkEmpty ($netinfo))
 		return showError ("There are allocations within prefix, delete forbidden");
-	if (array_key_exists ($netinfo['db_first']->getBin(), $netinfo['addrlist']))
-		updateAddress ($netinfo['db_first'], '', 'no');
+	if (array_key_exists ($netinfo['ip_bin'], $netinfo['addrlist']))
+		updateV6Address ($netinfo['ip_bin'], '', 'no');
 	destroyIPv6Prefix ($_REQUEST['id']);
 	showFuncMessage (__FUNCTION__, 'OK');
 	global $pageno;
@@ -892,26 +839,8 @@ $msgcode['editAddress']['OK'] = 51;
 function editAddress ()
 {
 	assertStringArg ('name', TRUE);
-
-	if (isset ($_REQUEST['reserved']))
-		$reserved = $_REQUEST['reserved'];
-	else
-		$reserved = 'off';
-	updateAddress ($_REQUEST['ip'], $_REQUEST['name'], $reserved == 'on' ? 'yes' : 'no');
-	return showFuncMessage (__FUNCTION__, 'OK');
-}
-
-$msgcode['editv6Address']['OK'] = 51;
-function editv6Address ()
-{
-	$ipv6 = assertIPArg ('ip');
-	assertStringArg ('name', TRUE);
-
-	if (isset ($_REQUEST['reserved']))
-		$reserved = $_REQUEST['reserved'];
-	else
-		$reserved = 'off';
-	updateAddress ($ipv6, $_REQUEST['name'], $reserved == 'on' ? 'yes' : 'no');
+	$ip_bin = assertIPArg ('ip');
+	updateAddress ($ip_bin, $_REQUEST['name'], isCheckSet ('reserved', 'yesno'));
 	return showFuncMessage (__FUNCTION__, 'OK');
 }
 
@@ -923,9 +852,9 @@ function createUser ()
 	assertStringArg ('password');
 	$username = $_REQUEST['username'];
 	$password = sha1 ($_REQUEST['password']);
-	commitCreateUserAccount ($username, $_REQUEST['realname'], $password);
+	$user_id = commitCreateUserAccount ($username, $_REQUEST['realname'], $password);
 	if (isset ($_REQUEST['taglist']))
-		produceTagsForLastRecord ('user', $_REQUEST['taglist']);
+		produceTagsForNewRecord ('user', $_REQUEST['taglist'], $user_id);
 	return showFuncMessage (__FUNCTION__, 'OK', array ($username));
 }
 
@@ -1125,10 +1054,6 @@ function updateObject ()
 	genericAssertion ('object_asset_no', 'string0');
 	genericAssertion ('object_comment', 'string0');
 	genericAssertion ('object_type_id', 'uint');
-	if (array_key_exists ('object_has_problems', $_REQUEST) and $_REQUEST['object_has_problems'] == 'on')
-		$has_problems = 'yes';
-	else
-		$has_problems = 'no';
 	$object_id = getBypassValue();
 
 	global $dbxlink, $sic;
@@ -1138,7 +1063,7 @@ function updateObject ()
 		$object_id,
 		$_REQUEST['object_name'],
 		$_REQUEST['object_label'],
-		$has_problems,
+		isCheckSet ('object_has_problems', 'yesno'),
 		$_REQUEST['object_asset_no'],
 		$_REQUEST['object_comment']
 	);
@@ -1452,16 +1377,16 @@ $msgcode['addRealServer']['OK'] = 48;
 function addRealServer ()
 {
 	global $sic;
-	assertIPv4Arg ('rsip');
+	$rsip_bin = assertIPv4Arg ('rsip');
 	assertStringArg ('rsport', TRUE);
 	assertStringArg ('rsconfig', TRUE);
 	assertStringArg ('comment', TRUE);
 	addRStoRSPool
 	(
 		getBypassValue(),
-		$_REQUEST['rsip'],
+		$rsip_bin,
 		$_REQUEST['rsport'],
-		(isset ($_REQUEST['inservice']) and $_REQUEST['inservice'] == 'on') ? 'yes' : 'no',
+		isCheckSet ('inservice', 'yesno'),
 		$sic['rsconfig'],
 		$sic['comment']
 	);
@@ -1487,22 +1412,22 @@ function addRealServers ()
 			case 'ipvs_2': // address and port only
 				if (!preg_match ('/^  -&gt; ([0-9\.]+):([0-9]+) /', $line, $match))
 					continue;
-				addRStoRSPool (getBypassValue(), $match[1], $match[2], getConfigVar ('DEFAULT_IPV4_RS_INSERVICE'), '');
+				addRStoRSPool (getBypassValue(), ip4_parse ($match[1]), $match[2], getConfigVar ('DEFAULT_IPV4_RS_INSERVICE'), '');
 				break;
 			case 'ipvs_3': // address, port and weight
 				if (!preg_match ('/^  -&gt; ([0-9\.]+):([0-9]+) +[a-zA-Z]+ +([0-9]+) /', $line, $match))
 					continue;
-				addRStoRSPool (getBypassValue(), $match[1], $match[2], getConfigVar ('DEFAULT_IPV4_RS_INSERVICE'), 'weight ' . $match[3]);
+				addRStoRSPool (getBypassValue(), ip4_parse ($match[1]), $match[2], getConfigVar ('DEFAULT_IPV4_RS_INSERVICE'), 'weight ' . $match[3]);
 				break;
 			case 'ssv_2': // IP address and port
 				if (!preg_match ('/^([0-9\.]+) ([0-9]+)$/', $line, $match))
 					continue;
-				addRStoRSPool (getBypassValue(), $match[1], $match[2], getConfigVar ('DEFAULT_IPV4_RS_INSERVICE'), '');
+				addRStoRSPool (getBypassValue(), ip4_parse ($match[1]), $match[2], getConfigVar ('DEFAULT_IPV4_RS_INSERVICE'), '');
 				break;
 			case 'ssv_1': // IP address
 				if (!preg_match ('/^([0-9\.]+)$/', $line, $match))
 					continue;
-				addRStoRSPool (getBypassValue(), $match[1], 0, getConfigVar ('DEFAULT_IPV4_RS_INSERVICE'), '');
+				addRStoRSPool (getBypassValue(), ip4_parse ($match[1]), 0, getConfigVar ('DEFAULT_IPV4_RS_INSERVICE'), '');
 				break;
 			default:
 				return showFuncMessage (__FUNCTION__, 'ERR1');
@@ -1516,7 +1441,7 @@ $msgcode['addVService']['OK'] = 48;
 function addVService ()
 {
 	global $sic;
-	assertIPv4Arg ('vip');
+	$vip_bin = assertIPv4Arg ('vip');
 	genericAssertion ('proto', 'enum/ipproto');
 	assertStringArg ('name', TRUE);
 	assertStringArg ('vsconfig', TRUE);
@@ -1528,20 +1453,22 @@ function addVService ()
 		assertUIntArg ('vport');
 		$vport = $_REQUEST['vport'];
 	}
-	usePreparedExecuteBlade
+	usePreparedInsertBlade
 	(
-		'INSERT INTO IPv4VS (vip, vport, proto, name, vsconfig, rsconfig) VALUES (INET_ATON(?), ?, ?, ?, ?, ?)',
+		'IPv4VS',
 		array
 		(
-			$_REQUEST['vip'],
-			$vport,
-			$_REQUEST['proto'],
-			!mb_strlen ($_REQUEST['name']) ? NULL : $_REQUEST['name'],
-			!strlen ($sic['vsconfig']) ? NULL : $sic['vsconfig'],
-			!strlen ($sic['rsconfig']) ? NULL : $sic['rsconfig'],
+			'vip' => ip4_bin2db ($vip_bin),
+			'vport' => $vport,
+			'proto' => $_REQUEST['proto'],
+			'name' => !mb_strlen ($_REQUEST['name']) ? NULL : $_REQUEST['name'],
+			'vsconfig' => !strlen ($sic['vsconfig']) ? NULL : $sic['vsconfig'],
+			'rsconfig' => !strlen ($sic['rsconfig']) ? NULL : $sic['rsconfig'],
 		)
 	);
-	produceTagsForLastRecord ('ipv4vs', isset ($_REQUEST['taglist']) ? $_REQUEST['taglist'] : array());
+	$vs_id = lastInsertID();
+	if (isset ($_REQUEST['taglist']))
+		produceTagsForNewRecord ('ipv4vs', $_REQUEST['taglist'], $vs_id);
 	return showFuncMessage (__FUNCTION__, 'OK');
 }
 
@@ -1573,15 +1500,15 @@ function updateRealServer ()
 {
 	global $sic;
 	assertUIntArg ('rs_id');
-	assertIPv4Arg ('rsip');
+	$rsip_bin = assertIPv4Arg ('rsip');
 	assertStringArg ('rsport', TRUE);
 	assertStringArg ('rsconfig', TRUE);
 	assertStringArg ('comment', TRUE);
 	commitUpdateRS (
 		$_REQUEST['rs_id'],
-		$_REQUEST['rsip'],
+		$rsip_bin,
 		$_REQUEST['rsport'],
-		(isset ($_REQUEST['inservice']) and $_REQUEST['inservice'] == 'on') ? 'yes' : 'no',
+		isCheckSet ('inservice', 'yesno'),
 		$sic['rsconfig'],
 		$sic['comment']
 	);
@@ -1593,7 +1520,7 @@ function updateVService ()
 {
 	global $sic;
 	assertUIntArg ('vs_id');
-	assertIPv4Arg ('vip');
+	$vip_bin = assertIPv4Arg ('vip');
 	assertUIntArg ('vport');
 	genericAssertion ('proto', 'enum/ipproto');
 	assertStringArg ('name', TRUE);
@@ -1601,7 +1528,7 @@ function updateVService ()
 	assertStringArg ('rsconfig', TRUE);
 	commitUpdateVS (
 		$_REQUEST['vs_id'],
-		$_REQUEST['vip'],
+		$vip_bin,
 		$_REQUEST['vport'],
 		$_REQUEST['proto'],
 		$_REQUEST['name'],
@@ -1666,19 +1593,19 @@ function importPTRData ()
 {
 	assertUIntArg ('addrcount');
 	$nbad = $ngood = 0;
-	for ($i = 0; $i < $_REQUEST['addrcount']; $i++)
+	for ($i = 1; $i <= $_REQUEST['addrcount']; $i++)
 	{
 		$inputname = "import_${i}";
-		if (!isset ($_REQUEST[$inputname]) or $_REQUEST[$inputname] != 'on')
+		if (! isCheckSet ($inputname))
 			continue;
-		assertIPv4Arg ("addr_${i}");
+		$ip_bin = assertIPv4Arg ("addr_${i}");
 		assertStringArg ("descr_${i}", TRUE);
 		assertStringArg ("rsvd_${i}");
 		// Non-existent addresses will not have this argument set in request.
 		$rsvd = 'no';
 		if ($_REQUEST["rsvd_${i}"] == 'yes')
 			$rsvd = 'yes';
-		if (updateAddress ($_REQUEST["addr_${i}"], $_REQUEST["descr_${i}"], $rsvd) == '')
+		if (updateV4Address ($ip_bin, $_REQUEST["descr_${i}"], $rsvd) == '')
 			$ngood++;
 		else
 			$nbad++;
@@ -1859,7 +1786,7 @@ function addRack ()
 		assertUIntArg ('height1');
 		assertStringArg ('asset_no', TRUE);
 		$rack_id = commitAddObject (NULL, $_REQUEST['name'], 1560, $_REQUEST['asset_no'], $taglist);
-		produceTagsForLastRecord ('rack', $taglist, $rack_id);
+		produceTagsForNewRecord ('rack', $taglist, $rack_id);
 
 		// Update the height
 		commitUpdateAttrValue ($rack_id, 27, $_REQUEST['height1']);
@@ -1888,7 +1815,7 @@ function addRack ()
 		foreach ($names2 as $cname)
 		{
 			$rack_id = commitAddObject (NULL, $cname, 1560, NULL, $taglist);
-			produceTagsForLastRecord ('rack', $taglist, $rack_id);
+			produceTagsForNewRecord ('rack', $taglist, $rack_id);
 
 			// Update the height
 			commitUpdateAttrValue ($rack_id, 27, $_REQUEST['height2']);
@@ -1921,13 +1848,21 @@ function updateRack ()
 	assertUIntArg ('row_id');
 	assertStringArg ('name');
 	assertUIntArg ('height');
-	$has_problems = (isset ($_REQUEST['has_problems']) and $_REQUEST['has_problems'] == 'on') ? 'yes' : 'no';
 	assertStringArg ('asset_no', TRUE);
 	assertStringArg ('comment', TRUE);
 
 	$rack_id = getBypassValue();
 	usePreparedDeleteBlade ('RackThumbnail', array ('rack_id' => $rack_id));
-	commitUpdateRack ($rack_id, $_REQUEST['row_id'], $_REQUEST['name'], $_REQUEST['height'], $has_problems, $_REQUEST['asset_no'], $_REQUEST['comment']);
+	commitUpdateRack
+	(
+		$rack_id,
+		$_REQUEST['row_id'],
+		$_REQUEST['name'],
+		$_REQUEST['height'],
+		isCheckSet ('has_problems', 'yesno'),
+		$_REQUEST['asset_no'],
+		$_REQUEST['comment']
+	);
 
 	// Update optional attributes
 	$oldvalues = getAttrValues ($rack_id);
@@ -2069,9 +2004,9 @@ function addFileWithoutLink ()
 
 	$fp = fopen($_FILES['file']['tmp_name'], 'rb');
 	global $sic;
-	commitAddFile ($_FILES['file']['name'], $_FILES['file']['type'], $fp, $sic['comment']);
+	$file_id = commitAddFile ($_FILES['file']['name'], $_FILES['file']['type'], $fp, $sic['comment']);
 	if (isset ($_REQUEST['taglist']))
-		produceTagsForLastRecord ('file', $_REQUEST['taglist']);
+		produceTagsForNewRecord ('file', $_REQUEST['taglist'], $file_id);
 	return showFuncMessage (__FUNCTION__, 'OK', array (htmlspecialchars ($_FILES['file']['name'])));
 }
 
@@ -2806,7 +2741,7 @@ function cloneRSPool()
 		$tagidlist[] = $taginfo['id'];
 	$new_id = commitCreateRSPool ($pool['name'] . ' (copy)', $pool['vsconfig'], $pool['rsconfig'], $tagidlist);
 	foreach ($rs_list as $rs)
-		addRStoRSPool ($new_id, $rs['rsip'], $rs['rsport'], $rs['inservice'], $rs['rsconfig'], $rs['comment']);
+		addRStoRSPool ($new_id, ip4_parse ($rs['rsip']), $rs['rsport'], $rs['inservice'], $rs['rsconfig'], $rs['comment']);
 	showSuccess ("Created a copy of pool <a href='" . makeHref (array ('page' => 'ipv4rspool', 'tab' => 'default', 'pool_id' => $pool['id'])) . "'>${pool['name']}</a>");
 	return buildRedirectURL ('ipv4rspool', 'default', array ('pool_id' => $new_id));
 }

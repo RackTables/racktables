@@ -106,7 +106,7 @@ function renderNewSLBItemForm ($realm1, $realm2)
 // supports object, ipv4vs, ipv4rspool, ipaddress cell types
 function renderSLBTriplets ($cell)
 {
-	$is_cell_ip = (isset ($cell['ip']) and isset ($cell['version']));
+	$is_cell_ip = (isset ($cell['ip']) && isset ($cell['vslist']));
 	$additional_js_params = $is_cell_ip ? '' : ", {'" . $cell['realm'] . "': " . $cell['id'] . '}';
 	$triplets = SLBTriplet::getTriplets ($cell);
 	if (count ($triplets))

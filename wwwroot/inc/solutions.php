@@ -207,6 +207,67 @@ function renderProgressBarImage ($done)
 	imagedestroy ($img);
 }
 
+function renderProgressBar4Image ($px1, $px2, $px3)
+{
+	$width = 100;
+	$height = 10;
+	$img = @imagecreatetruecolor ($width, 10);
+	$offsets = array ($px1, $px2, $px3, $width - $px1 - $px2 - $px3);
+	$colors = array
+	(
+		colorFromHex ($img, '408080'),
+		colorFromHex ($img, '8fbfbf'),
+		colorFromHex ($img, '808080'),
+		colorFromHex ($img, 'c0c0c0'),
+	);
+	$pos =  0;
+	for ($i = 0; $i < count ($offsets); $i++)
+	{
+		$off = $offsets[$i];
+		$clr = $colors[$i];
+		if ($pos + $off > $width or $off < 0)
+			throw new InvalidArgException ('px' . $i, $offsets[$i]);
+		if ($off > 0)
+			imagefilledrectangle ($img, $pos, 0, $pos + $off, $height, $clr);
+		$pos += $off;
+	}
+
+	for ($x = $width / 5; $x < $width; $x += $width / 5)
+	{
+		$p = 0; $k = count ($offsets) - 1;
+		for ($j = 0; $j < count ($offsets); $j++)
+			if ($x < ($p += $offsets[$j]))
+			{
+				$k = $j;
+				break;
+			}
+		switch ($k)
+		{
+			case 0:
+				$cc = 1;
+				break;
+			case 1:
+				$cc = 0;
+				break;
+			case 2:
+				$cc = 3;
+				break;
+			case 3:
+				$cc = 2;
+				break;
+		}
+		imagesetpixel ($img, $x, 0, $colors[$cc]);
+		imagesetpixel ($img, $x, 1, $colors[$cc]);
+		imagesetpixel ($img, $x, 4, $colors[$cc]);
+		imagesetpixel ($img, $x, 5, $colors[$cc]);
+		imagesetpixel ($img, $x, 8, $colors[$cc]);
+		imagesetpixel ($img, $x, 9, $colors[$cc]);
+	}
+	header("Content-type: image/png");
+	imagepng ($img);
+	imagedestroy ($img);
+}
+
 function renderProgressBarError()
 {
 	header ('Content-type: image/png');

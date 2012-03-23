@@ -165,7 +165,7 @@ td.sticker {
 }
 
 tr.port_highlight, td.port_highlight {
-	background-color: lime;
+	background-color: #A0FFA0;
 }
 
 .row_even {
@@ -551,9 +551,12 @@ div.tagselector td {
 a.toggleTreeMode {
 }
 
-.net-usage {
-	float: right;
+div.vlan {
 	margin-left: 15px;
+}
+
+.slbcell div.vlan {
+	float: right;
 }
 
 .btns-8021q-sync li {
@@ -730,5 +733,25 @@ a.noclick {
 }
 
 a.slb-highlighted {
-	background-color: lime;
+	background-color: #A0FFA0;
+}
+
+.net-usage.pending {
+	cursor: pointer;
+	border-bottom: dashed 1px;
+	display: inline;
+	padding: 0px 5px;
+}
+.slbcell .net-usage {
+	float: right;
+	margin-left: 15px;
+}
+
+.net-usage .title {
+	display: block;
+}
+
+.aac {
+	font-weight: bold;
+	margin-left: 1em;
 }
