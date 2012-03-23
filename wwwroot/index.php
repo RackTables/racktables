@@ -266,6 +266,6 @@ try {
 catch (Exception $e)
 {
 	ob_end_clean();
-	printGenericException ($e);
+	printException ($e);
 }
 ?>
