@@ -1248,6 +1248,10 @@ CREATE TABLE `CactiGraph` (
 			$query[] = "UPDATE Config SET varvalue = CONCAT (varvalue, '; 10=1588') WHERE varname = 'DEFAULT_PORT_OIF_IDS' AND 0 = INSTR (varvalue, '10=') ";
 			$query[] = "INSERT INTO PortInterfaceCompat VALUES (10,1663), (10,1664)";
 			$query[] = "INSERT INTO PortCompat VALUES (1588,1588), (1661,1661), (1663,1663), (1664,1664)";
+			$query[] = "INSERT INTO PortInnerInterface (id, iif_name) VALUES (11, 'CFP')";
+			$query[] = "INSERT INTO PortInterfaceCompat (iif_id, oif_id) VALUES (11,1668),(11,1669),(11,1670),(11,1671)";
+			$query[] = "INSERT INTO PortCompat (type1, type2) VALUES (1668,1668), (1669,1669), (1670,1670), (1671,1671)";
+			$query[] = "UPDATE Config SET varvalue = CONCAT (varvalue, '; 11=1668') WHERE varname = 'DEFAULT_PORT_OIF_IDS'";
 			$query = array_merge ($query, reloadDictionary ());
 			$query[] = "UPDATE Config SET varvalue = '0.19.12' WHERE varname = 'DB_VERSION'";
 			break;
