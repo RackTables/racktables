@@ -2786,10 +2786,12 @@ function tableHandler()
 	{
 	case 'INSERT':
 		usePreparedInsertBlade ($opspec['table'], $columns['arglist']);
+		$retcode = 48;
 		break;
 	case 'DELETE':
 		$conjunction = array_key_exists ('conjunction', $opspec) ? $opspec['conjunction'] : 'AND';
 		usePreparedDeleteBlade ($opspec['table'], $columns['arglist'], $conjunction);
+		$retcode = 49;
 		break;
 	case 'UPDATE':
 		usePreparedUpdateBlade
@@ -2799,11 +2801,12 @@ function tableHandler()
 			$columns['where_arglist'],
 			array_key_exists ('conjunction', $opspec) ? $opspec['conjunction'] : 'AND'
 		);
+		$retcode = 51;
 		break;
 	default:
 		throw new InvalidArgException ('opspec/action', $opspec['action']);
 	}
-	showOneLiner (51);
+	showOneLiner ($retcode);
 }
 
 ?>
