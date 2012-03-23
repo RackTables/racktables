@@ -1745,7 +1745,6 @@ $dictionary = array
 	1659 => array ('chapter_id' => 36, 'dict_value' => '[[Moxa%GPASS%NPort 6450 | http://www.moxa.com/product/NPort_6450.htm]]'),
 	1660 => array ('chapter_id' => 36, 'dict_value' => '[[Moxa%GPASS%NPort S8458 | http://www.moxa.com/product/NPort_S8458_Series.htm]]'),
 	1661 => array ('chapter_id' => 2, 'dict_value' => '40GBase-KR4'),
-	1662 => array ('chapter_id' => 2, 'dict_value' => '40GBase-CR4'),
 	1663 => array ('chapter_id' => 2, 'dict_value' => '40GBase-SR4'),
 	1664 => array ('chapter_id' => 2, 'dict_value' => '40GBase-LR4'),
 	1665 => array ('chapter_id' => 13, 'dict_value' => '[[SciLin%GSKIP%SL6.x | https://www.scientificlinux.org/]]'),
