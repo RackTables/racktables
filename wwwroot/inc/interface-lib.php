@@ -731,9 +731,28 @@ function validTagName ($s, $allow_autotag = FALSE)
 	return FALSE;
 }
 
+function cmpTags ($a, $b)
+{
+	global $taglist;
+	if (isset ($a['id']) && isset ($b['id']))
+	{
+		$a_root = array_last ($taglist[$a['id']]['trace']);
+		$b_root = array_last ($taglist[$b['id']]['trace']);
+		return ($a_root < $b_root) ? -1 : ($a_root > $b_root ? 1 : 0);
+	}
+	elseif (isset ($a['id']))
+		return -1;
+	elseif (isset ($b['id']))
+		return 1;
+	else
+		return strcmp ($a['tag'], $b['tag']);
+	
+}
+
 function serializeTags ($chain, $baseurl = '')
 {
 	$tmp = array();
+	usort ($chain, 'cmpTags');
 	foreach ($chain as $taginfo)
 	{
 		if ($baseurl == '')
@@ -881,6 +900,22 @@ function getProgressBar ($percentage = 0, $theme = '', $inline = FALSE)
 	}
 	$ret = "<img width=100 height=10 border=0 title='${done}%' src='$src'>";
 	return $ret;
+}
+
+function renderNetVLAN ($cell)
+{
+	if (! empty ($cell['8021q']))
+	{
+		$seen = array();
+		foreach ($cell['8021q'] as $vlan_info)
+			$seen[$vlan_info['vlan_id']] = $vlan_info['domain_id'] . '-' . $vlan_info['vlan_id'];
+		echo '<div class="vlan"><strong><small>VLAN' . (count ($seen) > 1 ? 'S' : '') . '</small> ';
+		$links = array();
+		foreach ($seen as $vlan_id => $vlan_ck)
+			$links[] = '<a href="' . makeHref (array ('page' => 'vlan', 'vlan_ck' => $vlan_ck)) . '">' . $vlan_id . '</a>';
+		echo implode (', ', $links);
+		echo '</strong></div>';
+	}
 }
 
 ?>

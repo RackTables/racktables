@@ -5537,22 +5537,6 @@ function printIPNetInfoTDs ($netinfo, $decor = array())
 	echo "</td>";
 }
 
-function renderNetVLAN ($cell)
-{
-	if (! empty ($cell['8021q']))
-	{
-		$seen = array();
-		foreach ($cell['8021q'] as $vlan_info)
-			$seen[$vlan_info['vlan_id']] = $vlan_info['domain_id'] . '-' . $vlan_info['vlan_id'];
-		echo '<div class="vlan"><strong><small>VLAN' . (count ($seen) > 1 ? 'S' : '') . '</small> ';
-		$links = array();
-		foreach ($seen as $vlan_id => $vlan_ck)
-			$links[] = '<a href="' . makeHref (array ('page' => 'vlan', 'vlan_ck' => $vlan_ck)) . '">' . $vlan_id . '</a>';
-		echo implode (', ', $links);
-		echo '</strong></div>';
-	}
-}
-
 function renderCell ($cell)
 {
 	switch ($cell['realm'])
