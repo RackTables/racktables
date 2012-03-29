@@ -2056,6 +2056,33 @@ function ip6_parse ($ip)
 	throw new InvalidArgException ('ip', $ip, "Invalid IPv6 address");
 }
 
+function ip_get_arpa ($ip_bin)
+{
+	switch (strlen ($ip_bin))
+	{
+		case 4:  return ip4_get_arpa ($ip_bin);
+		case 16: return ip6_get_arpa ($ip_bin);
+		default: throw new InvalidArgException ('ip_bin', $ip_bin, "Invalid binary IP");
+	}
+}
+
+function ip4_get_arpa ($ip_bin)
+{
+	$ret = '';
+	for ($i = 3; $i >= 0; $i--)
+		$ret .= ord($ip_bin[$i]) . '.';
+	return $ret . 'in-addr.arpa';
+}
+
+function ip6_get_arpa ($ip_bin)
+{
+	$ret = '';
+	$hex = implode ('', unpack('H32', $ip_bin));
+	for ($i = 31; $i >= 0; $i--)
+		$ret .= $hex[$i] . '.';
+	return $ret . 'ip6.arpa';
+}
+
 function set_word_value (&$haystack, $nword, $hexvalue)
 {
 	// check that $hexvalue is like /^[0-9a-fA-F]*$/
@@ -5220,6 +5247,14 @@ function isIPNetworkEmpty (&$netinfo)
 		)
 			$pure_auto++;
 	return ($netinfo['own_addrc'] <= $pure_auto);
+}
+
+// returns the last element of given array, or NULL if array is empty
+function array_last ($array)
+{
+	$single = array_slice ($array, -1, 1);
+	if (count ($single))
+		return $single[0];
 }
 
 ?>
