@@ -12,13 +12,14 @@
 			//popupId: "thumbPopup",
 			cursorTopOffset: 15,
 			cursorLeftOffset: 15,
+			event: null, // if set, the popup will be displayed immediately, and no mouse handlers will be binded to target
 			showFreezeHint: true
 		}, options);
 
 		var freezeHint = null;
 		var timeout_id = null;
 		var hintHeight = 0;
-		if (! freezeHint && settings.showFreezeHint) {
+		if (! freezeHint && settings.showFreezeHint && settings.event == null) {
 			freezeHint = $('<div />').html('click to freeze').css('position', 'absolute').css('border', '1px solid black').css('background-color', 'white').appendTo('body');
 			hintHeight = freezeHint[0].offsetHeight;
 			freezeHint.hide();
@@ -30,11 +31,18 @@
 		$(this).css("cursor", "pointer");
 		
 		//Attach hover events that manage the popup
-		$(this)
-		.bind('mouseenter', setPopup)
-		.bind('mousemove', updatePopupPosition)
-		.bind('mouseleave', hidePopup)
-		.click(stickPopup);
+		if (settings.event != null)
+		{
+			setPopup (settings.event);
+			stickPopup (settings.event);
+		}
+		else {
+			$(this)
+			.bind('mouseenter', setPopup)
+			.bind('mousemove', updatePopupPosition)
+			.bind('mouseleave', hidePopup)
+			.click(stickPopup);
+		}
 		
 		function stickPopup(event) {
 			popup.data("sticked", true);
@@ -44,7 +52,7 @@
 				if (event.target == popup[0] || $(event.target).parents().filter(popup).length)
 					return false;
 				popup.data("sticked", false);
-				popup.hide();
+				hidePopup (event);
 				return true;
 			});
 			return false;
@@ -96,6 +104,8 @@
 			if (popup.data("sticked"))
 				return;
 			$(popup).hide();
+			if (settings.event != null)
+				$(popup).remove();
 		}
 		
 		function getWindowSize() {
