@@ -164,17 +164,20 @@ try {
 		}
 		break;
 	case 'ajax' == $_REQUEST['module']:
+		require_once 'inc/init.php';
 		require_once 'inc/ajax-interface.php';
 		require_once 'inc/solutions.php';
-		require_once 'inc/init.php';
 		try
 		{
-			dispatchAJAXRequest();
-		}
-		catch (InvalidRequestArgException $e)
-		{
-			ob_clean();
-			echo "NAK\nMalformed request";
+			genericAssertion ('ac', 'string');
+			$ac = $_REQUEST['ac'];
+			if (isset ($ajaxhandler[$ac]))
+				$ajaxhandler[$ac]();
+			else
+			{
+				ob_clean();
+				echo "NAK\nMalformed request";
+			}
 		}
 		catch (RTPermissionDenied $e)
 		{

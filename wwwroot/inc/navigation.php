@@ -27,6 +27,7 @@ $ophandler = array();
 $tabhandler = array();
 $delayauth = array();
 $svghandler = array();
+$ajaxhandler = array();
 $hook = array();
 
 $indexlayout = array
@@ -671,5 +672,14 @@ $page['virtual']['title'] = 'Virtual Resources';
 $page['virtual']['parent'] = 'index';
 $tab['virtual']['default'] = 'Summary';
 $tabhandler['virtual']['default'] = 'renderVirtualResourcesSummary';
+
+$ajaxhandler['get-tag-select'] = 'getTagSelectAJAX';
+$ajaxhandler['verifyCode'] = 'verifyCodeAJAX';
+$ajaxhandler['get-port-link'] = 'getPortInfoAJAX';
+$ajaxhandler['get-port-mac'] = 'getPortInfoAJAX';
+$ajaxhandler['get-port-conf'] = 'getPortInfoAJAX';
+$ajaxhandler['upd-reservation-port'] = 'updatePortRsvAJAX';
+$ajaxhandler['upd-reservation-ip'] = 'updateIPRsvAJAX';
+$ajaxhandler['net-usage'] = 'getNetUsageAJAX';
 
 ?>

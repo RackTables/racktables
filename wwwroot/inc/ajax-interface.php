@@ -124,115 +124,115 @@ function formatPortReservation ($port)
 	return $ret;
 }
 
-function dispatchAJAXRequest()
+function getTagSelectAJAX()
 {
-	genericAssertion ('ac', 'string');
-	switch ($_REQUEST['ac'])
+	global $taglist;
+	$options = array();
+	$selected_id = '';
+	if (! isset($_REQUEST['tagid']))
+		$options['error'] = "Sorry, param 'tagid' is empty. Reload page and try again";
+	elseif (! preg_match("/tagid_(\d+)/i", $_REQUEST['tagid'], $m))
+		$options['error'] = "Sorry, wrong format tagid:'".$_REQUEST['tagid']."'. Reload page and try again";
+	else
 	{
-	case 'get-tag-select':
-		global $taglist;
-		$options = array();
-		$selected_id = '';
-		if (! isset($_REQUEST['tagid']))
-			$options['error'] = "Sorry, param 'tagid' is empty. Reload page and try again";
-		elseif (! preg_match("/tagid_(\d+)/i", $_REQUEST['tagid'], $m))
-			$options['error'] = "Sorry, wrong format tagid:'".$_REQUEST['tagid']."'. Reload page and try again";
-		else
-		{
-			$current_tag_id = $m[1];
-			$selected_id = $taglist[$current_tag_id]['parent_id'];
-			echo $selected_id;
-			$options[0] = '-- NONE --';
-			foreach ($taglist as $tag_id => $taginfo)
-				if (! in_array ($current_tag_id, $taginfo['trace']) && $current_tag_id != $tag_id)
-					$options[$tag_id] = $taginfo['tag'];
-		}
-		foreach ($options as $tag_id => $value)
-			echo "<option value='$tag_id'" .
-				($tag_id == $selected_id ? ' selected' : '') .
-				'>' . htmlspecialchars ($value) . '</option>';
-		break;
-	case 'verifyCode':
-		global $pageno, $tabno;
-		$pageno = 'perms';
-		$tabno = 'edit';
-		fixContext();
-		assertPermission();
-		genericAssertion ('code', 'string');
-		$result = getRackCode (dos2unix ($_REQUEST['code']));
-		if ($result['result'] == 'ACK')
-			echo "ACK\n";
-		else
-			echo "NAK\n" . $result['load'];
-		break;
-	# returns JSON-encoded text
-	case 'get-port-link':
-	case 'get-port-mac':
-	case 'get-port-conf':
-		$funcmap = array
-		(
-			'get-port-link' => 'formatPortLinkHints',
-			'get-port-mac'  => 'formatPortMacHints',
-			'get-port-conf' => 'formatPortConfigHints',
-		);
-		$opmap = array
-		(
-			'get-port-link' => 'get_link_status',
-			'get-port-mac'  => 'get_mac_list',
-			'get-port-conf' => 'get_port_conf',
-		);
-		genericAssertion ('object_id', 'uint');
-		fixContext (spotEntity ('object', $_REQUEST['object_id']));
-		assertPermission ('object', 'liveports', $opmap[$_REQUEST['ac']]);
-		echo json_encode ($funcmap[$_REQUEST['ac']] ($_REQUEST['object_id']));
-		break;
-	case 'upd-reservation-port':
-		global $sic;
-		assertUIntArg ('id');
-		assertStringArg ('comment', TRUE);
-		$port_info = getPortInfo ($sic['id']);
-		fixContext (spotEntity ('object', $port_info['object_id']));
-		assertPermission ('object', 'ports', 'set_reserve_comment');
-		if ($port_info['linked'])
-			throw new RackTablesError ('Cant update port comment: port is already linked');
-		if (! isset ($port_info['reservation_comment']))
-			$port_info['reservation_comment'] = '';
-		if ($port_info['reservation_comment'] !== $sic['comment'])
-		{
-			commitUpdatePortComment ($sic['id'], $sic['comment']);
-			$port_info = getPortInfo ($sic['id']);
-		}
-		$tds = formatPortReservation ($port_info);
-		echo json_encode ($tds);
-		break;
-	case 'upd-reservation-ip':
-		global $sic;
-		assertStringArg ('comment', TRUE);
-		$ip_bin = assertIPArg ('id');
-		$addr = getIPAddress ($ip_bin);
-		if (! empty ($addr['allocs']) && empty ($addr['name']))
-			throw new RackTablesError ('Cant update IP comment: address is allocated');
-		$net = spotNetworkByIP ($ip_bin);
-		if (isset ($net))
-			fixContext ($net);
-		assertPermission ((strlen ($ip_bin) == 16 ? 'ipv6net' : 'ipv4net'), NULL, 'set_reserve_comment');
-		$reserved = (empty ($sic['comment']) ? 'no' : $addr['reserved']); // unset reservation if user clears comment
-		updateAddress ($ip_bin, $sic['comment'], $reserved);
-		echo json_encode ('OK');
-		break;
-	case 'net-usage':
-		assertStringArg ('net_id');
-		list ($ip, $mask) = explode ('/', $_REQUEST['net_id']);
-		$ip_bin = ip_parse ($ip);
-		$net = spotNetworkByIP ($ip_bin, $mask + 1);
-		if (! isset ($net) or $net['mask'] != $mask)
-			$net = constructIPRange ($ip_bin, $mask);
-		loadIPAddrList ($net);
-		echo getRenderedIPNetCapacity ($net);
-		break;
-	default:
-		throw new InvalidRequestArgException ('ac', $_REQUEST['ac']);
+		$current_tag_id = $m[1];
+		$selected_id = $taglist[$current_tag_id]['parent_id'];
+		echo $selected_id;
+		$options[0] = '-- NONE --';
+		foreach ($taglist as $tag_id => $taginfo)
+			if (! in_array ($current_tag_id, $taginfo['trace']) && $current_tag_id != $tag_id)
+				$options[$tag_id] = $taginfo['tag'];
 	}
+	foreach ($options as $tag_id => $value)
+		echo "<option value='$tag_id'" .
+			($tag_id == $selected_id ? ' selected' : '') .
+			'>' . htmlspecialchars ($value) . '</option>';
+}
+
+function verifyCodeAJAX()
+{
+	global $pageno, $tabno;
+	$pageno = 'perms';
+	$tabno = 'edit';
+	fixContext();
+	assertPermission();
+	genericAssertion ('code', 'string');
+	$result = getRackCode (dos2unix ($_REQUEST['code']));
+	if ($result['result'] == 'ACK')
+		echo "ACK\n";
+	else
+		echo "NAK\n" . $result['load'];
+}
+
+// echoes JSON-encoded text
+function getPortInfoAJAX()
+{
+	$funcmap = array
+	(
+		'get-port-link' => 'formatPortLinkHints',
+		'get-port-mac'  => 'formatPortMacHints',
+		'get-port-conf' => 'formatPortConfigHints',
+	);
+	$opmap = array
+	(
+		'get-port-link' => 'get_link_status',
+		'get-port-mac'  => 'get_mac_list',
+		'get-port-conf' => 'get_port_conf',
+	);
+	genericAssertion ('object_id', 'uint');
+	fixContext (spotEntity ('object', $_REQUEST['object_id']));
+	assertPermission ('object', 'liveports', $opmap[$_REQUEST['ac']]);
+	echo json_encode ($funcmap[$_REQUEST['ac']] ($_REQUEST['object_id']));
+}
+
+function updatePortRsvAJAX()
+{
+	global $sic;
+	assertUIntArg ('id');
+	assertStringArg ('comment', TRUE);
+	$port_info = getPortInfo ($sic['id']);
+	fixContext (spotEntity ('object', $port_info['object_id']));
+	assertPermission ('object', 'ports', 'set_reserve_comment');
+	if ($port_info['linked'])
+		throw new RackTablesError ('Cant update port comment: port is already linked');
+	if (! isset ($port_info['reservation_comment']))
+		$port_info['reservation_comment'] = '';
+	if ($port_info['reservation_comment'] !== $sic['comment'])
+	{
+		commitUpdatePortComment ($sic['id'], $sic['comment']);
+		$port_info = getPortInfo ($sic['id']);
+	}
+	$tds = formatPortReservation ($port_info);
+	echo json_encode ($tds);
+}
+
+function updateIPRsvAJAX()
+{
+	global $sic;
+	assertStringArg ('comment', TRUE);
+	$ip_bin = assertIPArg ('id');
+	$addr = getIPAddress ($ip_bin);
+	if (! empty ($addr['allocs']) && empty ($addr['name']))
+		throw new RackTablesError ('Cant update IP comment: address is allocated');
+	$net = spotNetworkByIP ($ip_bin);
+	if (isset ($net))
+		fixContext ($net);
+	assertPermission ((strlen ($ip_bin) == 16 ? 'ipv6net' : 'ipv4net'), NULL, 'set_reserve_comment');
+	$reserved = (empty ($sic['comment']) ? 'no' : $addr['reserved']); // unset reservation if user clears comment
+	updateAddress ($ip_bin, $sic['comment'], $reserved);
+	echo json_encode ('OK');
+}
+
+function getNetUsageAJAX()
+{
+	assertStringArg ('net_id');
+	list ($ip, $mask) = explode ('/', $_REQUEST['net_id']);
+	$ip_bin = ip_parse ($ip);
+	$net = spotNetworkByIP ($ip_bin, $mask + 1);
+	if (! isset ($net) or $net['mask'] != $mask)
+		$net = constructIPRange ($ip_bin, $mask);
+	loadIPAddrList ($net);
+	echo getRenderedIPNetCapacity ($net);
 }
 
 ?>
