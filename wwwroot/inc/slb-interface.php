@@ -585,10 +585,19 @@ function renderEditRSPool ($pool_id)
 	printImageHREF ('SAVE', 'Save changes', TRUE);
 	echo "</td></tr>\n";
 	echo "</table></form>\n";
-	echo '<div style="text-align: center; margin-top: 1em">';
-	printOpFormIntro ('cloneIPv4RSP');
-	printImageHREF ('COPY', 'clone RS Pool', TRUE);
-	echo '</form></div>';
+
+	// clone link
+	echo '<p class="centered">';
+	echo getOpLink (array	('op' => 'cloneIPv4RSP', 'pool_id' => $poolinfo['id']), 'Clone RS pool', 'copy');
+	echo '</p>';
+
+	// delete link
+	echo '<p class="centered">';
+	if ($poolinfo['refcnt'] > 0)
+		echo getOpLink (NULL, 'Delete RS pool', 'nodestroy', "Could not delete: there are ${poolinfo['refcnt']} LB links");
+	else
+		echo getOpLink (array	('op' => 'del', 'id' => $poolinfo['id']), 'Delete RS pool', 'destroy');
+	echo '</p>';
 }
 
 function renderEditVService ($vsid)

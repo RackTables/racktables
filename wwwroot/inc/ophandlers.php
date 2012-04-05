@@ -1580,9 +1580,15 @@ function addRSPool ()
 $msgcode['deleteRSPool']['OK'] = 49;
 function deleteRSPool ()
 {
+	global $pageno;
 	assertUIntArg ('pool_id');
-	commitDeleteRSPool ($_REQUEST['pool_id']);
-	return showFuncMessage (__FUNCTION__, 'OK');
+	$poolinfo = spotEntity ('ipv4rspool', $_REQUEST['pool_id']);
+	if ($poolinfo['refcnt'] != 0)
+		return showError ("Could not delete linked RS pool");
+	commitDeleteRSPool ($poolinfo['id']);
+	showFuncMessage (__FUNCTION__, 'OK');
+	if ($pageno == 'ipv4rspool')
+		return buildRedirectURL ('index', 'default');
 }
 
 $msgcode['importPTRData']['OK'] = 26;

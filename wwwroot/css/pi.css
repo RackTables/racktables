@@ -76,6 +76,9 @@ table.molecule {
 .tdcenter {
 	text-align: center;
 }
+.centered {
+	text-align: center;
+}
 table.objectview {
 	width: 100%;
 }
