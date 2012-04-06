@@ -1504,6 +1504,36 @@ function ftos8TranslatePushQueue ($dummy_object_id, $queue, $vlan_names)
 	return $ret;
 }
 
+function air12TranslatePushQueue ($dummy_object_id, $queue, $dummy_vlan_names)
+{
+	$ret = '';
+	foreach ($queue as $cmd)
+		switch ($cmd['opcode'])
+		{
+		case 'begin configuration':
+			$ret .= "configure terminal\n";
+			break;
+		case 'end configuration':
+			$ret .= "end\n";
+			break;
+		case 'save configuration':
+			$ret .= "copy running-config startup-config\n\n";
+			break;
+		case 'cite':
+			$ret .= $cmd['arg1'];
+			break;
+		case 'getcdpstatus':
+			$ret .= "show cdp neighbors detail\n";
+			break;
+		case 'getallconf':
+			$ret .= "show running-config\n";
+			break;
+		default:
+			throw new InvalidArgException ('opcode', $cmd['opcode']);
+		}
+	return $ret;
+}
+
 function xos12Read8021QConfig ($input)
 {
 	$ret = array

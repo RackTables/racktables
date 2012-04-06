@@ -73,6 +73,7 @@ $breedfunc = array
 	'ftos8-getportstatus-main' => 'ftos8ReadInterfaceStatus',
 	'ftos8-get8021q-main'      => 'ftos8Read8021QConfig',
 	'ftos8-getallconf-main'    => 'ftos8SpotConfigText',
+	'air12-xlatepushq-main'    => 'air12TranslatePushQueue',
 );
 
 // This function launches specified gateway with specified
@@ -340,6 +341,8 @@ function detectDeviceBreed ($object_id)
 		1597 => 'jun10', # 10R
 		1598 => 'jun10', # 11R
 		1594 => 'ftos8',
+		1673 => 'air12', # AIR IOS 12.3
+		1674 => 'air12', # AIR IOS 12.4
 	);
 	foreach (getAttrValues ($object_id) as $record)
 		if ($record['id'] == 4 and array_key_exists ($record['key'], $breed_by_swcode))
