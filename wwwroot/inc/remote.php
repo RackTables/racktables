@@ -59,9 +59,12 @@ function queryTerminal ($object_id, $commands, $tolerate_remote_errors = TRUE)
 		case 'ios12':
 		case 'fdry5':
 		case 'ftos8': 
-		case 'air12':
 			$protocol = 'netcat'; // default is netcat mode
 			$prompt = '^(Login|Password): $|^\S+[>#]$'; // set the prompt in case user would like to specify telnet protocol
+			break;
+		case 'air12':
+			$protocol = 'telnet'; # Aironet IOS is broken
+			$prompt = '^(Username|Password): $|^\S+[>#]$';
 			break;
 		case 'vrp53':
 		case 'vrp55':
