@@ -1066,6 +1066,7 @@ INSERT INTO `Chapter` (`id`, `sticky`, `name`) VALUES
 (34,'no','power supply chassis models'),
 (35,'no','power supply models'),
 (36,'no','serial console server models'),
+(37,'no','wireless OS type'),
 -- Default chapters must have ID less than 10000, add them above this line.
 (9999,'no','multiplexer models');
 
@@ -1152,6 +1153,7 @@ INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_id`) VALUES
 (965,1,NULL),
 (965,3,NULL),
 (965,2,25),
+(965,4,37),
 (1055,2,26),
 (1055,28,NULL),
 (1323,1,NULL),
