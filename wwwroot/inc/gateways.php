@@ -74,6 +74,7 @@ $breedfunc = array
 	'ftos8-get8021q-main'      => 'ftos8Read8021QConfig',
 	'ftos8-getallconf-main'    => 'ftos8SpotConfigText',
 	'air12-xlatepushq-main'    => 'air12TranslatePushQueue',
+	'air12-getallconf-main'    => 'ios12SpotConfigText',
 );
 
 // This function launches specified gateway with specified
