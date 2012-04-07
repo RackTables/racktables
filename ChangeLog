@@ -22,6 +22,7 @@
 	bugfix: Could not delete objects' log entries
 	new feature: helpdesk banner
 	new feature: non-anonymous LDAP search (#442) by Hannes Georg
+	new feature: hardware warranty report by Ernest Shaffer
 	update: 8021q and portinfo support for NX-OS 6.0
 	update: serial console servers by Boris
 	update: 40GbE and 100GbE port types

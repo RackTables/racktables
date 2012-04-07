@@ -540,6 +540,7 @@ $tab['reports']['ipv4'] = 'IPv4';
 $tab['reports']['ipv6'] = 'IPv6';
 $tab['reports']['ports'] = 'Ports';
 $tab['reports']['8021q'] = '802.1Q';
+$tab['reports']['warranty'] = 'HW Warranty Expires';
 $tab['reports']['local'] = 'local'; // this one is set later in init.php
 $trigger['reports']['local'] = 'trigger_localreports';
 $tabhandler['reports']['default'] = 'renderSystemReports';
@@ -548,6 +549,7 @@ $tabhandler['reports']['ipv4'] = 'renderIPv4Reports';
 $tabhandler['reports']['ipv6'] = 'renderIPv6Reports';
 $tabhandler['reports']['ports'] = 'renderPortsReport';
 $tabhandler['reports']['8021q'] = 'render8021QReport';
+$tabhandler['reports']['warranty'] = 'hwExpireReport';
 $tabhandler['reports']['local'] = 'renderLocalReports';
 
 $page['files']['title'] = 'Files';

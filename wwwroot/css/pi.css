@@ -183,6 +183,14 @@ tr.port_highlight, td.port_highlight {
 	background-color: #ffa0a0;
 }
 
+tr.has_problems_even {
+	background-color: #ffa0a0;
+}
+
+tr.has_problems_odd {
+	background-color: #ffd0d0;
+}
+
 table.cooltable {
 	border: 1px solid black;
 }

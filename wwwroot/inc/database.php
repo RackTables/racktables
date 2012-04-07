@@ -4802,4 +4802,21 @@ function touchVLANSwitch ($switch_id)
 	);
 }
 
+# Return list of rows for objects, which have the date stored in the given
+# attribute belonging to the given range (relative to today's date).
+function scanAttrRelativeDays ($attr_id, $date_format, $not_before_days, $not_after_days)
+{
+	$attrmap = getAttrMap();
+	if ($attrmap[$attr_id]['type'] != 'string')
+		throw new InvalidArgException ('attr_id', $attr_id, 'attribute cannot store dates');
+	$result = usePreparedSelectBlade
+	(
+		'SELECT string_value, object_id FROM AttributeValue ' .
+		'WHERE attr_id=? and STR_TO_DATE(string_value, ?) BETWEEN '.
+		'DATE_ADD(curdate(), INTERVAL ? DAY) and DATE_ADD(curdate(), INTERVAL ? DAY)',
+		array ($attr_id, $date_format, $not_before_days, $not_after_days)
+	);
+	return $result->fetchAll (PDO::FETCH_ASSOC);
+}
+
 ?>
