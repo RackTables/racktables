@@ -1377,7 +1377,7 @@ $msgcode['addRealServer']['OK'] = 48;
 function addRealServer ()
 {
 	global $sic;
-	$rsip_bin = assertIPv4Arg ('rsip');
+	$rsip_bin = assertIPArg ('rsip');
 	assertStringArg ('rsport', TRUE);
 	assertStringArg ('rsconfig', TRUE);
 	assertStringArg ('comment', TRUE);
@@ -1398,11 +1398,12 @@ $msgcode['addRealServers']['ERR1'] = 131;
 // Parse textarea submitted and try adding a real server for each line.
 function addRealServers ()
 {
+	global $sic;
 	assertStringArg ('format');
 	assertStringArg ('rawtext');
 	$ngood = 0;
 	// Keep in mind, that the text will have HTML entities (namely '>') escaped.
-	foreach (explode ("\n", dos2unix ($_REQUEST['rawtext'])) as $line)
+	foreach (explode ("\n", dos2unix ($sic['rawtext'])) as $line)
 	{
 		if (!strlen ($line))
 			continue;
@@ -1410,24 +1411,26 @@ function addRealServers ()
 		switch ($_REQUEST['format'])
 		{
 			case 'ipvs_2': // address and port only
-				if (!preg_match ('/^  -&gt; ([0-9\.]+):([0-9]+) /', $line, $match))
-					continue;
-				addRStoRSPool (getBypassValue(), ip4_parse ($match[1]), $match[2], getConfigVar ('DEFAULT_IPV4_RS_INSERVICE'), '');
+				if (!preg_match ('/^  -> ([0-9\.]+):([0-9]+) /', $line, $match))
+					if (!preg_match ('/^  -> \[([0-9a-fA-F:]+)\]:([0-9]+) /', $line, $match))
+						continue;
+				addRStoRSPool (getBypassValue(), ip_parse ($match[1]), $match[2], getConfigVar ('DEFAULT_IPV4_RS_INSERVICE'), '');
 				break;
 			case 'ipvs_3': // address, port and weight
-				if (!preg_match ('/^  -&gt; ([0-9\.]+):([0-9]+) +[a-zA-Z]+ +([0-9]+) /', $line, $match))
-					continue;
-				addRStoRSPool (getBypassValue(), ip4_parse ($match[1]), $match[2], getConfigVar ('DEFAULT_IPV4_RS_INSERVICE'), 'weight ' . $match[3]);
+				if (!preg_match ('/^  -> ([0-9\.]+):([0-9]+) +[a-zA-Z]+ +([0-9]+) /', $line, $match))
+					if (!preg_match ('/^  -> \[([0-9a-fA-F:]+)\]:([0-9]+) +[a-zA-Z]+ +([0-9]+) /', $line, $match))
+						continue;
+				addRStoRSPool (getBypassValue(), ip_parse ($match[1]), $match[2], getConfigVar ('DEFAULT_IPV4_RS_INSERVICE'), 'weight ' . $match[3]);
 				break;
 			case 'ssv_2': // IP address and port
-				if (!preg_match ('/^([0-9\.]+) ([0-9]+)$/', $line, $match))
+				if (!preg_match ('/^([0-9\.a-fA-F:]+) ([0-9]+)$/', $line, $match))
 					continue;
-				addRStoRSPool (getBypassValue(), ip4_parse ($match[1]), $match[2], getConfigVar ('DEFAULT_IPV4_RS_INSERVICE'), '');
+				addRStoRSPool (getBypassValue(), ip_parse ($match[1]), $match[2], getConfigVar ('DEFAULT_IPV4_RS_INSERVICE'), '');
 				break;
 			case 'ssv_1': // IP address
-				if (!preg_match ('/^([0-9\.]+)$/', $line, $match))
+				if (! $ip_bin = ip_checkparse ($line))
 					continue;
-				addRStoRSPool (getBypassValue(), ip4_parse ($match[1]), 0, getConfigVar ('DEFAULT_IPV4_RS_INSERVICE'), '');
+				addRStoRSPool (getBypassValue(), $ip_bin, 0, getConfigVar ('DEFAULT_IPV4_RS_INSERVICE'), '');
 				break;
 			default:
 				return showFuncMessage (__FUNCTION__, 'ERR1');
@@ -1437,11 +1440,10 @@ function addRealServers ()
 	return showFuncMessage (__FUNCTION__, 'OK', array ($ngood));
 }
 
-$msgcode['addVService']['OK'] = 48;
 function addVService ()
 {
 	global $sic;
-	$vip_bin = assertIPv4Arg ('vip');
+	$vip_bin = assertIPArg ('vip');
 	genericAssertion ('proto', 'enum/ipproto');
 	assertStringArg ('name', TRUE);
 	assertStringArg ('vsconfig', TRUE);
@@ -1458,7 +1460,7 @@ function addVService ()
 		'IPv4VS',
 		array
 		(
-			'vip' => ip4_bin2db ($vip_bin),
+			'vip' => $vip_bin,
 			'vport' => $vport,
 			'proto' => $_REQUEST['proto'],
 			'name' => !mb_strlen ($_REQUEST['name']) ? NULL : $_REQUEST['name'],
@@ -1469,15 +1471,20 @@ function addVService ()
 	$vs_id = lastInsertID();
 	if (isset ($_REQUEST['taglist']))
 		produceTagsForNewRecord ('ipv4vs', $_REQUEST['taglist'], $vs_id);
-	return showFuncMessage (__FUNCTION__, 'OK');
+	$vsinfo = spotEntity ('ipv4vs', $vs_id);
+	return showSuccess ('Virtual service <a href="' . makeHref (array ('page' => 'ipv4vs', 'tab' => 'default', 'vs_id' => $vs_id)) . '">' . $vsinfo['dname'] . '</a> created successfully');
 }
 
 $msgcode['deleteVService']['OK'] = 49;
 function deleteVService ()
 {
 	assertUIntArg ('vs_id');
-	commitDeleteVS ($_REQUEST['vs_id']);
-	return showFuncMessage (__FUNCTION__, 'OK');
+	$vsinfo = spotEntity ('ipv4vs', $_REQUEST['vs_id']);
+	if ($vsinfo['refcnt'] != 0)
+		return showError ("Could not delete linked virtual service");
+	commitDeleteVS ($vsinfo['id']);
+	showFuncMessage (__FUNCTION__, 'OK');
+	return buildRedirectURL ('ipv4slb', 'default');
 }
 
 $msgcode['updateSLBDefConfig']['OK'] = 43;
@@ -1500,7 +1507,7 @@ function updateRealServer ()
 {
 	global $sic;
 	assertUIntArg ('rs_id');
-	$rsip_bin = assertIPv4Arg ('rsip');
+	$rsip_bin = assertIPArg ('rsip');
 	assertStringArg ('rsport', TRUE);
 	assertStringArg ('rsconfig', TRUE);
 	assertStringArg ('comment', TRUE);
@@ -1520,7 +1527,7 @@ function updateVService ()
 {
 	global $sic;
 	assertUIntArg ('vs_id');
-	$vip_bin = assertIPv4Arg ('vip');
+	$vip_bin = assertIPArg ('vip');
 	assertUIntArg ('vport');
 	genericAssertion ('proto', 'enum/ipproto');
 	assertStringArg ('name', TRUE);
@@ -1560,35 +1567,32 @@ function addLoadBalancer ()
 	return showFuncMessage (__FUNCTION__, 'OK');
 }
 
-$msgcode['addRSPool']['OK'] = 48;
 function addRSPool ()
 {
 	global $sic;
 	assertStringArg ('name');
 	assertStringArg ('vsconfig', TRUE);
 	assertStringArg ('rsconfig', TRUE);
-	commitCreateRSPool
+	$pool_id = commitCreateRSPool
 	(
 		$_REQUEST['name'],
 		$sic['vsconfig'],
 		$sic['rsconfig'],
 		isset ($_REQUEST['taglist']) ? $_REQUEST['taglist'] : array()
 	);
-	return showFuncMessage (__FUNCTION__, 'OK');
+	return showSuccess ('RS pool <a href="' . makeHref (array ('page' => 'ipv4rspool', 'tab' => 'default', 'pool_id' => $pool_id)) . '">' . $_REQUEST['name'] . '</a> created successfully');
 }
 
 $msgcode['deleteRSPool']['OK'] = 49;
 function deleteRSPool ()
 {
-	global $pageno;
 	assertUIntArg ('pool_id');
 	$poolinfo = spotEntity ('ipv4rspool', $_REQUEST['pool_id']);
 	if ($poolinfo['refcnt'] != 0)
 		return showError ("Could not delete linked RS pool");
 	commitDeleteRSPool ($poolinfo['id']);
 	showFuncMessage (__FUNCTION__, 'OK');
-	if ($pageno == 'ipv4rspool')
-		return buildRedirectURL ('index', 'default');
+	return buildRedirectURL ('ipv4slb', 'rspools');
 }
 
 $msgcode['importPTRData']['OK'] = 26;
@@ -2747,7 +2751,7 @@ function cloneRSPool()
 		$tagidlist[] = $taginfo['id'];
 	$new_id = commitCreateRSPool ($pool['name'] . ' (copy)', $pool['vsconfig'], $pool['rsconfig'], $tagidlist);
 	foreach ($rs_list as $rs)
-		addRStoRSPool ($new_id, ip4_parse ($rs['rsip']), $rs['rsport'], $rs['inservice'], $rs['rsconfig'], $rs['comment']);
+		addRStoRSPool ($new_id, $rs['rsip_bin'], $rs['rsport'], $rs['inservice'], $rs['rsconfig'], $rs['comment']);
 	showSuccess ("Created a copy of pool <a href='" . makeHref (array ('page' => 'ipv4rspool', 'tab' => 'default', 'pool_id' => $pool['id'])) . "'>${pool['name']}</a>");
 	return buildRedirectURL ('ipv4rspool', 'default', array ('pool_id' => $new_id));
 }

@@ -47,8 +47,9 @@ class SLBTriplet
 
 	public static function getTriplets ($cell)
 	{
-		if (isset ($cell['ip']) and isset ($cell['vslist']))
-			return self::getTripletsByIP ($cell['ip']);
+		if (isset ($cell['ip_bin']) and isset ($cell['vslist']))
+			// cell is IPAddress
+			return self::getTripletsByIP ($cell['ip_bin']);
 		$ret = array();
 		switch ($cell['realm'])
 		{
@@ -87,10 +88,9 @@ class SLBTriplet
 		return $ret;
 	}
 
-	private static function getTripletsByIP ($ip)
+	private static function getTripletsByIP ($ip_bin)
 	{
 		$ret = array();
-		$db_ip = ip4_bin2db (ip4_parse($ip));
 		$result = usePreparedSelectBlade ("
 SELECT DISTINCT IPv4LB.* 
 FROM 
@@ -100,7 +100,7 @@ WHERE
 	rsip = ? OR vip = ?
 ORDER BY
 	vs_id
-	", array ($db_ip, $db_ip)
+	", array ($ip_bin, $ip_bin)
 		);
 		$rows = $result->fetchAll (PDO::FETCH_ASSOC);
 		unset ($result);
@@ -132,11 +132,12 @@ ORDER BY
 		$parser->addMacro ('VIP', $this->vs['vip']);
 		$parser->addMacro ('VPORT', $this->vs['vport']);
 		$parser->addMacro ('PRIO', $this->slb['prio']);
+		$parser->addMacro ('IP_VER', (strlen ($this->vs['vip_bin']) == 16) ? 6 : 4);
 
 		if ($this->vs['proto'] == 'MARK')
 		{
 			$parser->addMacro ('PROTO', 'TCP');
-			$mark = ip4_bin2db (ip4_parse ($this->vs['vip']));
+			$mark = implode ('', unpack ('N', substr ($this->vs['vip_bin'], 0, 4)));
 			$parser->addMacro ('MARK', $mark);
 			$parser->addMacro ('VS_HEADER', "fwmark $mark");
 		}
@@ -166,6 +167,9 @@ virtual_server %VS_HEADER% {
 ");
 		foreach (getRSListInPool ($this->rs['id']) as $rs)
 		{
+			// do not add v6 reals into v4 service and vice versa
+			if (strlen ($rs['rsip_bin']) != strlen ($this->vs['vip_bin']))
+				continue;
 			if ($rs['inservice'] != 'yes')
 				continue;
 			$parser->pushdefs(); // backup macros
@@ -365,7 +369,7 @@ function addRStoRSPool ($pool_id, $rsip_bin, $rsport = 0, $inservice = 'no', $rs
 		array
 		(
 			'rspool_id' => $pool_id,
-			'rsip' => ip4_bin2db ($rsip_bin),
+			'rsip' => $rsip_bin,
 			'rsport' => (!strlen ($rsport) or $rsport === 0) ? NULL : $rsport,
 			'inservice' => $inservice == 'yes' ? 'yes' : 'no', 
 			'rsconfig' => !strlen ($rsconfig) ? NULL : $rsconfig,
@@ -405,7 +409,7 @@ function commitUpdateRS ($rsid, $rsip_bin, $rsport = 0, $inservice = 'yes', $rsc
 		'UPDATE IPv4RS SET rsip=?, rsport=?, inservice=?, rsconfig=?, comment=? WHERE id=?',
 		array
 		(
-			ip4_bin2db ($rsip_bin),
+			$rsip_bin,
 			(!strlen ($rsport) or $rsport === 0) ? NULL : $rsport,
 			$inservice,
 			!strlen ($rsconfig) ? NULL : $rsconfig,
@@ -418,15 +422,15 @@ function commitUpdateRS ($rsid, $rsip_bin, $rsport = 0, $inservice = 'yes', $rsc
 function commitUpdateVS ($vsid, $vip_bin, $vport = 0, $proto = '', $name = '', $vsconfig = '', $rsconfig = '')
 {
 	if ($vport <= 0)
-		throw new InvalidArgException ('$vport', $vport);
+		throw new InvalidArgException ('vport', $vport);
 	if (!strlen ($proto))
-		throw new InvalidArgException ('$proto', $proto);
+		throw new InvalidArgException ('proto', $proto);
 	return usePreparedUpdateBlade
 	(
 		'IPv4VS',
 		array
 		(
-			'vip' => ip4_bin2db ($vip_bin),
+			'vip' => $vip_bin,
 			'vport' => $vport,
 			'proto' => $proto,
 			'name' => !strlen ($name) ? NULL : $name,
@@ -499,24 +503,30 @@ function getRSList ()
 {
 	$result = usePreparedSelectBlade
 	(
-		"select id, inservice, inet_ntoa(rsip) as rsip, rsport, rspool_id, rsconfig " .
+		"select id, inservice, rsip as rsip_bin, rsport, rspool_id, rsconfig " .
 		"from IPv4RS order by rspool_id, IPv4RS.rsip, rsport"
 	);
 	$ret = array ();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-		foreach (array ('inservice', 'rsip', 'rsport', 'rspool_id', 'rsconfig') as $cname)
+	{
+		$row['rsip'] = ip_format ($row['rsip_bin']);
+		foreach (array ('inservice', 'rsip_bin', 'rsip', 'rsport', 'rspool_id', 'rsconfig') as $cname)
 			$ret[$row['id']][$cname] = $row[$cname];
+	}
 	return $ret;
 }
 
 function getRSListInPool ($rspool_id)
 {
 	$ret = array();
-	$query = "select id, inservice, inet_ntoa(rsip) as rsip, rsport, rsconfig, comment from " .
+	$query = "select id, inservice, rsip as rsip_bin, rsport, rsconfig, comment from " .
 		"IPv4RS where rspool_id = ? order by IPv4RS.rsip, rsport";
 	$result = usePreparedSelectBlade ($query, array ($rspool_id));
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
+	{
+		$row['rsip'] = ip_format ($row['rsip_bin']);
 		$ret[$row['id']] = $row;
+	}
 	return $ret;
 }
 

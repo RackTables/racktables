@@ -645,7 +645,7 @@ CREATE TABLE `IPv4Network` (
 CREATE TABLE `IPv4RS` (
   `id` int(10) unsigned NOT NULL auto_increment,
   `inservice` enum('yes','no') NOT NULL default 'no',
-  `rsip` int(10) unsigned default NULL,
+  `rsip` varbinary(16) NOT NULL,
   `rsport` smallint(5) unsigned default NULL,
   `rspool_id` int(10) unsigned default NULL,
   `rsconfig` text,
@@ -666,7 +666,7 @@ CREATE TABLE `IPv4RSPool` (
 
 CREATE TABLE `IPv4VS` (
   `id` int(10) unsigned NOT NULL auto_increment,
-  `vip` int(10) unsigned default NULL,
+  `vip` varbinary(16) NOT NULL,
   `vport` smallint(5) unsigned default NULL,
   `proto` enum('TCP','UDP','MARK') NOT NULL default 'TCP',
   `name` char(255) default NULL,

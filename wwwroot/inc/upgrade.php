@@ -178,7 +178,7 @@ function executeUpgradeBatch ($batchid)
 			// create tables for storing files (requires InnoDB support)
 			if (!isInnoDBSupported ())
 			{
-				showError ("Cannot upgrade because InnoDB tables are not supported by your MySQL server. See the README for details.", __FUNCTION__);
+				showUpgradeError ("Cannot upgrade because InnoDB tables are not supported by your MySQL server. See the README for details.", __FUNCTION__);
 				die;
 			}
 
@@ -1347,15 +1347,17 @@ CREATE VIEW `RackObject` AS SELECT id, name, label, objtype_id, asset_no, has_pr
 			$query[] = "UPDATE `Config` SET is_userdefined='yes' WHERE varname='PROXIMITY_RANGE'";
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdefined, description) VALUES ('QUICK_LINK_PAGES','','string','yes','no','yes','List of pages to dislay in quick links')";
 			$query[] = "ALTER TABLE `IPv4LB` MODIFY `prio` varchar(255) DEFAULT NULL";
-			$query[] = "ALTER TABLE `IPv4RS` ADD COLUMN `comment` varchar(255) NULL";
-			$query[] = "ALTER TABLE `IPv4VS` MODIFY `proto` enum('TCP','UDP','MARK') NOT NULL default 'TCP'";
+
+			// change IP address format of IPv4VS and IPv4RS tables
+			convertSLBTablesToBinIPs();
+
 			$query[] = "UPDATE Config SET varvalue = '0.20.0' WHERE varname = 'DB_VERSION'";
 			break;
 		case 'dictionary':
 			$query = reloadDictionary();
 			break;
 		default:
-			showError ("unknown batch '${batchid}'", __FUNCTION__);
+			showUpgradeError ("unknown batch '${batchid}'", __FUNCTION__);
 			die;
 			break;
 	}
@@ -1417,7 +1419,7 @@ function getDatabaseVersion ()
 	return $ret;
 }
 
-function showError ($info = '', $location = 'N/A')
+function showUpgradeError ($info = '', $location = 'N/A')
 {
 	if (preg_match ('/\.php$/', $location))
 		$location = basename ($location);
@@ -1540,6 +1542,98 @@ else
 }
 echo '</table>';
 echo '</body></html>';
+}
+
+function convertSLBTablesToBinIPs()
+{
+	global $dbxlink;
+
+	$dbxlink->query ("DROP TABLE IF EXISTS `IPv4VS_new`, `IPv4RS_new`, `IPv4VS_old`, `IPv4RS_old`");
+
+	$dbxlink->query (<<<END
+CREATE TABLE `IPv4VS_new` (
+  `id` int(10) unsigned NOT NULL auto_increment,
+  `vip` varbinary(16) NOT NULL,
+  `vport` smallint(5) unsigned default NULL,
+  `proto` enum('TCP','UDP','MARK') NOT NULL default 'TCP',
+  `name` char(255) default NULL,
+  `vsconfig` text,
+  `rsconfig` text,
+  PRIMARY KEY  (`id`),
+  KEY `vip` (`vip`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8
+END
+	);
+	$result = $dbxlink->query ("SELECT * FROM IPv4VS");
+	$rows = $result->fetchAll (PDO::FETCH_ASSOC);
+	unset ($result);
+	foreach ($rows as $row)
+	{
+		$row['vip'] = ip4_int2bin ($row['vip']);
+		usePreparedInsertBlade ('IPv4VS_new', $row);
+	}
+	
+	$dbxlink->query (<<<END
+CREATE TABLE `IPv4RS_new` (
+  `id` int(10) unsigned NOT NULL auto_increment,
+  `inservice` enum('yes','no') NOT NULL default 'no',
+  `rsip` varbinary(16) NOT NULL,
+  `rsport` smallint(5) unsigned default NULL,
+  `rspool_id` int(10) unsigned default NULL,
+  `rsconfig` text,
+  `comment` varchar(255) DEFAULT NULL,
+  PRIMARY KEY  (`id`),
+  KEY `rsip` (`rsip`),
+  UNIQUE KEY `pool-endpoint` (`rspool_id`,`rsip`,`rsport`),
+  CONSTRAINT `IPRS-FK` FOREIGN KEY (`rspool_id`) REFERENCES `IPv4RSPool` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8
+END
+	);
+	$result = $dbxlink->query ("SELECT * FROM IPv4RS");
+	$rows = $result->fetchAll (PDO::FETCH_ASSOC);
+	unset ($result);
+	foreach ($rows as $row)
+	{
+		$row['rsip'] = ip4_int2bin ($row['rsip']);
+		usePreparedInsertBlade ('IPv4RS_new', $row);
+	}
+
+	$dbxlink->query (<<<END
+RENAME TABLE
+	`IPv4VS` TO `IPv4VS_old`,
+	`IPv4VS_new` TO `IPv4VS`,
+	`IPv4RS` TO `IPv4RS_old`,
+	`IPv4RS_new` TO `IPv4RS`
+END
+	);
+	// re-create foreign key in IPv4LB
+	$dbxlink->query ("ALTER TABLE `IPv4LB` DROP FOREIGN KEY `IPv4LB-FK-vs_id`");
+	$dbxlink->query ("ALTER TABLE `IPv4LB` ADD CONSTRAINT `IPv4LB-FK-vs_id` FOREIGN KEY (`vs_id`) REFERENCES `IPv4VS` (`id`)");
+
+	$dbxlink->query ("DROP TABLE `IPv4VS_old`, `IPv4RS_old`");
+}
+
+// This is a swiss-knife blade to insert a record into a table.
+// The first argument is table name.
+// The second argument is an array of "name" => "value" pairs.
+// returns integer - affected rows count. Throws exception on error
+function usePreparedInsertBlade ($tablename, $columns)
+{
+	global $dbxlink;
+	$query = "INSERT INTO ${tablename} (" . implode (', ', array_keys ($columns));
+	$query .= ') VALUES (' . questionMarks (count ($columns)) . ')';
+	// Now the query should be as follows:
+	// INSERT INTO table (c1, c2, c3) VALUES (?, ?, ?)
+	try
+	{
+		$prepared = $dbxlink->prepare ($query);
+		$prepared->execute (array_values ($columns));
+		return $prepared->rowCount();
+	}
+	catch (PDOException $e)
+	{
+		throw convertPDOException ($e);
+	}
 }
 
 ?>

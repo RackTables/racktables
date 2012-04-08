@@ -99,14 +99,15 @@ $SQLSchema = array
 		'columns' => array
 		(
 			'id' => 'id',
-			'vip' => 'INET_NTOA(vip)',
+			'vip_bin' => 'vip',
 			'vport' => 'vport',
 			'proto' => 'proto',
 			'name' => 'name',
 			'vsconfig' => 'vsconfig',
 			'rsconfig' => 'rsconfig',
 			'refcnt' => '(select count(vs_id) from IPv4LB where vs_id = id)',
-			'dname' => 'CASE proto WHEN "MARK" THEN CONCAT("fwmark: ", vip) ELSE CONCAT_WS("/", CONCAT_WS(":", INET_NTOA(vip), vport), proto) END',
+			//'vip' =>
+			//'dname' => 
 		),
 		'keycolumn' => 'id',
 		'ordcolumns' => array ('IPv4VS.vip', 'IPv4VS.proto', 'IPv4VS.vport'),
@@ -440,7 +441,7 @@ function listCells ($realm, $parent_id = 0)
 		switch ($realm)
 		{
 		case 'object':
-			setDisplayedName ($entity);
+			setDisplayedName ($entity); // set $entity['dname']
 			break;
 		case 'ipv4net':
 			$entity = array_merge ($entity, constructIPRange (ip4_int2bin ($entity['ip_bin']), $entity['mask']));
@@ -453,6 +454,10 @@ function listCells ($realm, $parent_id = 0)
 			processIPNetVlans ($entity);
 			$entity['spare_ranges'] = array();
 			$entity['kidc'] = 0;
+			break;
+		case 'ipv4vs':
+			$entity['vip'] = ip_format ($entity['vip_bin']);
+			setDisplayedName ($entity); // set $entity['dname']
 			break;
 		default:
 			break;
@@ -545,7 +550,7 @@ function spotEntity ($realm, $id, $ignore_cache = FALSE)
 	switch ($realm)
 	{
 	case 'object':
-		setDisplayedName ($ret);
+		setDisplayedName ($ret); // set $ret['dname']
 		break;
 	case 'ipv4net':
 		processIPNetVlans ($ret);
@@ -558,6 +563,10 @@ function spotEntity ($realm, $id, $ignore_cache = FALSE)
 		$ret = array_merge ($ret, constructIPRange ($ret['ip_bin'], $ret['mask']));
 		$ret['spare_ranges'] = array();
 		$ret['kidc'] = 0;
+		break;
+	case 'ipv4vs':
+		$ret['vip'] = ip_format ($ret['vip_bin']);
+		setDisplayedName ($ret); // set $ret['dname']
 		break;
 	default:
 		break;
@@ -1735,7 +1744,7 @@ function scanIPv4Space ($pairlist)
 		$whereexpr4 .= $or . "rsip between ? and ?";
 		$whereexpr5a .= $or . "remoteip between ? and ?";
 		$whereexpr5b .= $or . "localip between ? and ?";
-		$whereexpr6 .= $or . "ip between ? and ?";
+		$whereexpr6 .= $or . "l.ip between ? and ?";
 		$or = ' or ';
 		$qparams[] = ip4_bin2db ($tmp['first']);
 		$qparams[] = ip4_bin2db ($tmp['last']);
@@ -1854,7 +1863,7 @@ function scanIPv4Space ($pairlist)
 	unset ($result);
 	// 6. collect last log message
 	$query = "select l.ip, l.user, UNIX_TIMESTAMP(l.date) AS time from IPv4Log l INNER JOIN " .
-		" (SELECT MAX(id) as id FROM IPv4Log GROUP BY ip) v USING (id)";
+		" (SELECT MAX(id) as id FROM IPv4Log GROUP BY ip) v USING (id) WHERE ${whereexpr6}";
 	$result = usePreparedSelectBlade ($query, $qparams);
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
@@ -1878,20 +1887,36 @@ function scanIPv4Space ($pairlist)
 function scanIPv6Space ($pairlist)
 {
 	$ret = array();
-	$wheres = array();
-	foreach ($pairlist as $pair)
-	{
-		$wheres[] = "ip >= ? AND ip <= ?";
-		$qparams[] = $pair['first'];
-		$qparams[] = $pair['last'];
-	}
-	if (! count ($wheres))  // this is normal for a network completely divided into smaller parts
+	if (!count ($pairlist)) // this is normal for a network completely divided into smaller parts
 		return $ret;
-	$whereexpr = '(' .implode (' OR ', $wheres) . ')';
+
+	$or = '';
+	$whereexpr1 = '(';
+	$whereexpr2 = '(';
+	$whereexpr3 = '(';
+	$whereexpr4 = '(';
+	$whereexpr6 = '(';
+	$qparams = array();
+	foreach ($pairlist as $tmp)
+	{
+		$whereexpr1 .= $or . "ip between ? and ?";
+		$whereexpr2 .= $or . "ip between ? and ?";
+		$whereexpr3 .= $or . "vip between ? and ?";
+		$whereexpr4 .= $or . "rsip between ? and ?";
+		$whereexpr6 .= $or . "l.ip between ? and ?";
+		$or = ' or ';
+		$qparams[] = $tmp['first'];
+		$qparams[] = $tmp['last'];
+	}
+	$whereexpr1 .= ')';
+	$whereexpr2 .= ')';
+	$whereexpr3 .= ')';
+	$whereexpr4 .= ')';
+	$whereexpr6 .= ')';
 
 	// 1. collect labels and reservations
 	$query = "select ip, name, reserved from IPv6Address ".
-		"where ${whereexpr} and (reserved = 'yes' or name != '')";
+		"where ${whereexpr1} and (reserved = 'yes' or name != '')";
 	$result = usePreparedSelectBlade ($query, $qparams);
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
@@ -1906,7 +1931,7 @@ function scanIPv6Space ($pairlist)
 	// 2. check for allocations
 	$query =
 		"select ip, object_id, name, type " .
-		"from IPv6Allocation where ${whereexpr} order by type";
+		"from IPv6Allocation where ${whereexpr2} order by type";
 	$result = usePreparedSelectBlade ($query, $qparams);
 	// release DBX early to avoid issues with nested spotEntity() calls
 	$allRows = $result->fetchAll (PDO::FETCH_ASSOC);
@@ -1925,10 +1950,35 @@ function scanIPv6Space ($pairlist)
 			'object_name' => $oinfo['dname'],
 		);
 	}
+	
+	// 3. look for virtual services
+	$query = "select id, vip from IPv4VS where ${whereexpr3}";
+	$result = usePreparedSelectBlade ($query, $qparams);
+	$allRows = $result->fetchAll (PDO::FETCH_ASSOC);
+	unset ($result);
+	foreach ($allRows as $row)
+	{
+		$ip_bin = $row['vip'];
+		if (!isset ($ret[$ip_bin]))
+			$ret[$ip_bin] = constructIPAddress ($ip_bin);
+		$ret[$ip_bin]['vslist'][] = $row['id'];
+	}
 
-	// 3. collect last log message
+	// 4. don't forget about real servers along with pools
+	$query = "select rsip, rspool_id from IPv4RS where ${whereexpr4}";
+	$result = usePreparedSelectBlade ($query, $qparams);
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
+	{
+		$ip_bin = $row['rsip'];
+		if (!isset ($ret[$ip_bin]))
+			$ret[$ip_bin] = constructIPAddress ($ip_bin);
+		$ret[$ip_bin]['rsplist'][] = $row['rspool_id'];
+	}
+	unset ($result);
+
+	// 6. collect last log message
 	$query = "select l.ip, l.user, UNIX_TIMESTAMP(l.date) AS time from IPv6Log l INNER JOIN " .
-		" (SELECT MAX(id) as id FROM IPv6Log GROUP BY ip) v USING (id)";
+		" (SELECT MAX(id) as id FROM IPv6Log GROUP BY ip) v USING (id) WHERE ${whereexpr6}";
 	$result = usePreparedSelectBlade ($query, $qparams);
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
@@ -2022,6 +2072,27 @@ function getIPv4AddressNetworkId ($ip_bin, $masklen = 32)
 	if ($row = callHook ('fetchIPv4AddressNetworkRow', $ip_bin, $masklen))
 		return $row['id'];
 	return NULL;
+}
+
+function fetchIPAddressNetworkRow ($ip_bin, $masklen = NULL)
+{
+	switch (strlen ($ip_bin))
+	{
+	case 4:
+		if (isset ($masklen))
+			return fetchIPv4AddressNetworkRow ($ip_bin, $masklen);
+		else
+			return fetchIPv4AddressNetworkRow ($ip_bin);
+		break;
+	case 16:
+		if (isset ($masklen))
+			return fetchIPv6AddressNetworkRow ($ip_bin, $masklen);
+		else
+			return fetchIPv6AddressNetworkRow ($ip_bin);
+		break;
+	default:
+		throw new InvalidArgException ('ip_bin', $ip_bin, "Invalid binary address");
+	}
 }
 
 function fetchIPv4AddressNetworkRow ($ip_bin, $masklen = 32)
@@ -3407,8 +3478,11 @@ function generateEntityAutoTags ($cell)
 				$ret[] = array ('tag' => '$aggregate');
 			break;
 		case 'ipv4vs':
-			$ret[] = array ('tag' => '$ipv4vsid_' . $cell['id']);
-			$ret[] = array ('tag' => '$any_ipv4vs');
+			$ret[] = array ('tag' => '$ipvsid_' . $cell['id']);
+			if (strlen ($cell['vip_bin']) == 16)
+				$ret[] = array ('tag' => '$any_ipv6vs');
+			else
+				$ret[] = array ('tag' => '$any_ipv4vs');
 			$ret[] = array ('tag' => '$any_vs');
 			if ($cell['refcnt'] == 0)
 				$ret[] = array ('tag' => '$unused');

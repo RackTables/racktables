@@ -2492,7 +2492,6 @@ function renderIPv6NetworkAddresses ($netinfo)
 			(empty ($addr['allocs']) || !empty ($addr['name']) ? 'rsv-port' : '') .
 			"'><span class='rsvtext'>${addr['name']}</span></td><td>";
 		$delim = '';
-		$prologue = '';
 		if ( $addr['reserved'] == 'yes')
 		{
 			echo "<strong>RESERVED</strong> ";
@@ -2501,15 +2500,26 @@ function renderIPv6NetworkAddresses ($netinfo)
 		foreach ($addr['allocs'] as $ref)
 		{
 			echo $delim . $aac2[$ref['type']];
-			echo "<a href='" . makeHref (array ('page' => 'object', 'object_id' => $ref['object_id'], 'hl_ip' => $addr['ip'])) . "'>";
+			echo "<a href='".makeHref(array('page'=>'object', 'object_id'=>$ref['object_id'], 'tab' => 'default', 'hl_ip'=>$addr['ip']))."'>";
 			echo $ref['name'] . (!strlen ($ref['name']) ? '' : '@');
 			echo "${ref['object_name']}</a>";
 			$delim = '; ';
 		}
 		if ($delim != '')
+			$delim = '<br>';
+		foreach ($addr['vslist'] as $vs_id)
 		{
-			$delim = '';
-			$prologue = '<br>';
+			$vs = spotEntity ('ipv4vs', $vs_id);
+			echo "${delim}<a href='".makeHref(array('page'=>'ipv4vs', 'vs_id'=>$vs['id']))."'>";
+			echo "${vs['name']}:${vs['vport']}/${vs['proto']}</a>&rarr;";
+			$delim = '<br>';
+		}
+		foreach ($addr['rsplist'] as $rsp_id)
+		{
+			$rsp = spotEntity ('ipv4rspool', $rsp_id);
+			echo "${delim}&rarr;<a href='".makeHref(array('page'=>'ipv4rspool', 'pool_id'=>$rsp['id']))."'>";
+			echo "${rsp['name']}</a>";
+			$delim = '<br>';
 		}
 		echo "</td></tr>\n";
 	}

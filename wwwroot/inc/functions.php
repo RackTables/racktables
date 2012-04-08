@@ -395,10 +395,20 @@ function getBypassValue()
 // decision about displayed name is made.
 function setDisplayedName (&$cell)
 {
-	if ($cell['name'] != '')
-		$cell['dname'] = $cell['name'];
-	else
-		$cell['dname'] = '[' . decodeObjectType ($cell['objtype_id'], 'o') . ']';
+	if ($cell['realm'] == 'object')
+	{
+		if ($cell['name'] != '')
+			$cell['dname'] = $cell['name'];
+		else
+			$cell['dname'] = '[' . decodeObjectType ($cell['objtype_id'], 'o') . ']';
+	}
+	elseif ($cell['realm'] == 'ipv4vs')
+	{
+		if ($cell['proto'] == 'MARK')
+			$cell['dname'] = "fwmark: " . implode ('', unpack('N', substr ($cell['vip_bin'], 0, 4)));
+		else
+			$cell['dname'] = $cell['vip'] . ':' . $cell['vport'] . '/' . $cell['proto'];
+	}
 }
 
 // This function finds height of solid rectangle of atoms, which are all
@@ -1879,6 +1889,11 @@ function IPNetContains ($netA, $netB)
 	return (-2 == IPNetworkCmp ($netA, $netB));
 }
 
+function ip_in_range ($ip_bin, $range)
+{
+	return ($ip_bin & $range['mask_bin']) === $range['ip_bin'];
+}
+
 // Modify the given tag tree so, that each level's items are sorted alphabetically.
 function sortTree (&$tree, $sortfunc = '')
 {
@@ -2241,6 +2256,8 @@ function constructIPAddress ($ip_bin)
 		'name' => '',
 		'reserved' => 'no',
 		'allocs' => array(),
+		'vslist' => array(),
+		'rsplist' => array(),
 	);
 
 	// specific v4 part
@@ -2252,8 +2269,6 @@ function constructIPAddress ($ip_bin)
 			(
 				'outpf' => array(),
 				'inpf' => array(),
-				'vslist' => array(),
-				'rsplist' => array(),
 			)
 		);
 	return $ret;
@@ -5236,12 +5251,13 @@ function isIPNetworkEmpty (&$netinfo)
 			$netinfo['addrlist'][$ip]['name'] == $comment and
 			$netinfo['addrlist'][$ip]['reserved'] == 'yes' and
 			! count ($netinfo['addrlist'][$ip]['allocs']) and
+			! count ($netinfo['addrlist'][$ip]['rsplist']) and
+			! count ($netinfo['addrlist'][$ip]['vslist']) and
 			(
 				$netinfo['realm'] == 'ipv6net' or (
 					! count ($netinfo['addrlist'][$ip]['outpf']) and
-					! count ($netinfo['addrlist'][$ip]['inpf']) and
-					! count ($netinfo['addrlist'][$ip]['rsplist']) and
-					! count ($netinfo['addrlist'][$ip]['vslist'])
+					! count ($netinfo['addrlist'][$ip]['inpf'])
+
 				)
 			)
 		)
