@@ -192,8 +192,6 @@ function executeUpgradeBatch ($batchid)
 			$query[] = "alter table Attribute add UNIQUE KEY name (name)";
 			$query[] = "alter table AttributeMap change chapter_no chapter_id int(10) unsigned NOT NULL";
 			$query[] = "alter table Dictionary change chapter_no chapter_id int(10) unsigned NOT NULL";
-			// Only after the above call it is Ok to use reloadDictionary()
-			$query = array_merge ($query, reloadDictionary ($batchid));
 			// schema changes for file management
 			$query[] = "
 CREATE TABLE `File` (
@@ -323,14 +321,12 @@ CREATE TABLE `LDAPCache` (
 			break;
 		case '0.17.1':
 			$query[] = "ALTER TABLE Dictionary DROP KEY `chap_to_key`";
-			$query = array_merge ($query, reloadDictionary ($batchid));
 			// Token set has changed, so the cache isn't valid any more.
 			$query[] = "UPDATE Script SET script_text = NULL WHERE script_name = 'RackCodeCache'";
 			$query[] = "UPDATE Config SET varvalue = '0.17.1' WHERE varname = 'DB_VERSION'";
 			break;
 		case '0.17.2':
 			$query[] = "INSERT INTO `Chapter` (`id`, `sticky`, `name`) VALUES (26,'no','fibre channel switch models')";
-			$query = array_merge ($query, reloadDictionary ($batchid));
 			$query[] = "INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_id`) VALUES (1055,2,26)";
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('DEFAULT_SNMP_COMMUNITY','public','string','no','no','Default SNMP Community string')";
 			// wipe irrelevant records (ticket:250)
@@ -362,7 +358,6 @@ CREATE TABLE `LDAPCache` (
 			// ticket:239
 			$query[] = 'UPDATE AttributeValue SET uint_value = 1018 WHERE uint_value = 731 AND attr_id IN (SELECT attr_id FROM AttributeMap WHERE chapter_id = 12)';
 			$query[] = 'DELETE FROM Dictionary WHERE dict_key = 731';
-			$query = array_merge ($query, reloadDictionary ($batchid));
 			$query[] = "UPDATE Config SET vartype='uint' WHERE varname='RACKS_PER_ROW'";
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('ENABLE_MULTIPORT_FORM','no','string','no','no','Enable \"Add/update multiple ports\" form')";
 			$query[] = "UPDATE Config SET varvalue = '0.17.3' WHERE varname = 'DB_VERSION'";
@@ -387,7 +382,6 @@ CREATE TABLE `LDAPCache` (
 			$query[] = "ALTER TABLE IPv4LB ADD CONSTRAINT `IPv4LB-FK-rspool_id` FOREIGN KEY (rspool_id) REFERENCES IPv4RSPool (id)";
 			$query[] = "ALTER TABLE IPv4LB ADD CONSTRAINT `IPv4LB-FK-object_id` FOREIGN KEY (object_id) REFERENCES RackObject (id)";
 			$query[] = "ALTER TABLE IPv4LB ADD CONSTRAINT `IPv4LB-FK-vs_id` FOREIGN KEY (vs_id) REFERENCES IPv4VS (id)";
-			$query = array_merge ($query, reloadDictionary ($batchid));
 			$query[] = "UPDATE Config SET varvalue = '0.17.4' WHERE varname = 'DB_VERSION'";
 			break;
 		case '0.17.5':
@@ -494,7 +488,6 @@ CREATE TABLE `PortInterfaceCompat` (
 					$query[] = "INSERT INTO PortInterfaceCompat (iif_id, oif_id) VALUES (${iif_id}, ${oif_id})";
 			$query[] = "ALTER TABLE Port ADD CONSTRAINT `Port-FK-iif-oif` FOREIGN KEY (`iif_id`, `type`) REFERENCES `PortInterfaceCompat` (`iif_id`, `oif_id`)";
 			$query[] = 'UPDATE Port SET type = 1322 WHERE type = 16 AND (SELECT objtype_id FROM RackObject WHERE id = object_id) IN (2, 12)';
-			$query = array_merge ($query, reloadDictionary ($batchid));
 			$query[] = "DELETE FROM Config WHERE varname = 'default_port_type'";
 			$query[] = "INSERT INTO Config VALUES ('DEFAULT_PORT_IIF_ID','1','uint','no','no','Default port inner interface ID')";
 			$query[] = "INSERT INTO Config VALUES ('DEFAULT_PORT_OIF_IDS','1=24; 3=1078; 4=1077; 5=1079; 6=1080; 8=1082; 9=1084','string','no','no','Default port outer interface IDs')";
@@ -513,14 +506,12 @@ CREATE TABLE `PortInterfaceCompat` (
 			$query[] = "INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_id`) VALUES (1323,3,NULL)";
 			$query[] = "INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_id`) VALUES (1323,5,NULL)";
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, description) VALUES ('PROXIMITY_RANGE','0','uint','yes','no','Proximity range (0 is current rack only)')";
-			$query = array_merge ($query, reloadDictionary ($batchid));
 			$query[] = "UPDATE Config SET varvalue = '0.17.6' WHERE varname = 'DB_VERSION'";
 			break;
 		case '0.17.7':
 			$query[] = "UPDATE Config SET varvalue = '0.17.7' WHERE varname = 'DB_VERSION'";
 			break;
 		case '0.17.8':
-			$query = array_merge ($query, reloadDictionary ($batchid));
 			$query[] = "ALTER TABLE TagTree DROP COLUMN valid_realm";
 			$query[] = "UPDATE Config SET varvalue = '0.17.8' WHERE varname = 'DB_VERSION'";
 			break;
@@ -566,19 +557,16 @@ CREATE TABLE `UserConfig` (
 			$query[] = "UPDATE Config SET varvalue = '0.17.9' WHERE varname = 'DB_VERSION'";
 			break;
 		case '0.17.10':
-			$query = array_merge ($query, reloadDictionary ($batchid));
 			$query[] = "ALTER TABLE MountOperation ADD KEY (object_id)";
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdefined, description) VALUES ('STATIC_FILTER','yes','string','no','no','yes','Enable Filter Caching');";
 			$query[] = "UPDATE Config SET varvalue = '0.17.10' WHERE varname = 'DB_VERSION'";
 			break;
 		case '0.17.11':
-			$query = array_merge ($query, reloadDictionary ($batchid));
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdefined, description) VALUES ('ENABLE_BULKPORT_FORM','yes','string','no','no','yes','Enable \"Bulk Port\" form');";
 			$query[] = "DELETE AttributeValue FROM AttributeValue JOIN Attribute where AttributeValue.attr_id = Attribute.id AND Attribute.type = 'dict' AND AttributeValue.uint_value = 0";
 			$query[] = "UPDATE Config SET varvalue = '0.17.11' WHERE varname = 'DB_VERSION'";
 			break;
 		case '0.18.0':
-			$query = array_merge ($query, reloadDictionary ($batchid));
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdefined, description) VALUES ('VLANSWITCH_LISTSRC', '', 'string', 'yes', 'no', 'yes', 'List of VLAN running switches')";
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdefined, description) VALUES ('VLANIPV4NET_LISTSRC', '', 'string', 'yes', 'no', 'yes', 'List of VLAN-based IPv4 networks')";
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdefined, description) VALUES ('DEFAULT_VDOM_ID','','uint','yes','no','yes','Default VLAN domain ID')";
@@ -737,7 +725,6 @@ CREATE TABLE `VLANValidID` (
 			$query[] = "UPDATE Config SET varvalue = '0.18.0' WHERE varname = 'DB_VERSION'";
 			break;
 		case '0.18.1':
-			$query = array_merge ($query, reloadDictionary ($batchid));
 			$query[] = "ALTER TABLE Atom ENGINE=InnoDB";
 			$query[] = "ALTER TABLE AttributeMap ENGINE=InnoDB";
 			$query[] = "ALTER TABLE Config ENGINE=InnoDB";
@@ -794,7 +781,6 @@ CREATE TABLE `VLANValidID` (
 			$query[] = "UPDATE Config SET varvalue = '0.18.1' WHERE varname = 'DB_VERSION'";
 			break;
 		case '0.18.2':
-			$query = array_merge ($query, reloadDictionary ($batchid));
 			$query[] = "ALTER TABLE Rack ADD CONSTRAINT `Rack-FK-row_id` FOREIGN KEY (row_id) REFERENCES RackRow (id)";
 			$query[] = "ALTER TABLE RackRow ADD UNIQUE KEY `name` (name)";
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdefined, description) VALUES ('CDP_RUNNERS_LISTSRC', '', 'string', 'yes', 'no', 'no', 'List of devices running CDP')";
@@ -802,33 +788,27 @@ CREATE TABLE `VLANValidID` (
 			$query[] = "UPDATE Config SET varvalue = '0.18.2' WHERE varname = 'DB_VERSION'";
 			break;
 		case '0.18.3':
-			$query = array_merge ($query, reloadDictionary ($batchid));
 			$query[] = "UPDATE Config SET varname='8021Q_WRI_AFTER_CONFT_LISTSRC', varvalue='false', description='802.1Q: save device configuration after deploy (RackCode)' WHERE varname='8021Q_WRI_AFTER_CONFT'";
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdefined, description) VALUES ('HNDP_RUNNERS_LISTSRC', '', 'string', 'yes', 'no', 'no', 'List of devices running HNDP (RackCode)')";
 			$query[] = "UPDATE Config SET varvalue = '0.18.3' WHERE varname = 'DB_VERSION'";
 			break;
 		case '0.18.4':
-			$query = array_merge ($query, reloadDictionary ($batchid));
 			$query[] = "ALTER TABLE VLANSTRule MODIFY port_role enum('access','trunk','anymode','uplink','downlink','none') NOT NULL default 'none'";
 			$query[] = "UPDATE Config SET varvalue = '0.18.4' WHERE varname = 'DB_VERSION'";
 			break;
 		case '0.18.5':
-			$query = array_merge ($query, reloadDictionary ($batchid));
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdefined, description) VALUES ('SHRINK_TAG_TREE_ON_CLICK','yes','string','no','no','yes','Dynamically hide useless tags in tagtree')";
 			$query[] = "ALTER TABLE `IPv4LB` ADD COLUMN `prio` int(10) unsigned DEFAULT NULL AFTER `vs_id`";
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdefined, description) VALUES ('MAX_UNFILTERED_ENTITIES','0','uint','no','no','yes','Max item count to display on unfiltered result page')";
 			$query[] = "UPDATE Config SET varvalue = '0.18.5' WHERE varname = 'DB_VERSION'";
 			break;
 		case '0.18.6':
-			$query = array_merge ($query, reloadDictionary ($batchid));
 			$query[] = "UPDATE Config SET varvalue = '0.18.6' WHERE varname = 'DB_VERSION'";
 			break;
 		case '0.18.7':
-			$query = array_merge ($query, reloadDictionary ($batchid));
 			$query[] = "UPDATE Config SET varvalue = '0.18.7' WHERE varname = 'DB_VERSION'";
 			break;
 		case '0.19.0':
-			$query = array_merge ($query, reloadDictionary ($batchid));
 			$query[] = 'ALTER TABLE `File` ADD `thumbnail` LONGBLOB NULL AFTER `atime`';
 			$query[] = "
 CREATE TABLE `IPv6Address` (
@@ -1005,7 +985,6 @@ CREATE TABLE `EntityLink` (
 			$query[] = "UPDATE Config SET varvalue = '0.19.0' WHERE varname = 'DB_VERSION'";
 			break;
 		case '0.19.1':
-			$query = array_merge ($query, reloadDictionary ($batchid));
 			$query[] = "ALTER TABLE `Config` CHANGE COLUMN `varvalue` `varvalue` text NOT NULL";
 			$query[] = "ALTER TABLE `UserConfig` CHANGE COLUMN `varvalue` `varvalue` text NOT NULL";
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdefined, description) VALUES ('FILTER_RACKLIST_BY_TAGS','yes','string','yes','no','yes','Rackspace: show only racks matching the current object\'s tags')";
@@ -1031,7 +1010,6 @@ CREATE TABLE `EntityLink` (
 			$query[] = "UPDATE Config SET varvalue = '0.19.1' WHERE varname = 'DB_VERSION'";
 			break;
 		case '0.19.2':
-			$query = array_merge ($query, reloadDictionary ($batchid));
 			$query[] = "ALTER TABLE IPv4Allocation ADD KEY `ip` (`ip`)";
 			$query[] = "ALTER TABLE IPv6Allocation ADD KEY `ip` (`ip`)";
 			$query[] = "ALTER TABLE IPv4VS ADD KEY `vip` (`vip`)";
@@ -1057,16 +1035,13 @@ CREATE TABLE `EntityLink` (
 			$query[] = "UPDATE Config SET varvalue = '0.19.2' WHERE varname = 'DB_VERSION'";
 			break;
 		case '0.19.3':
-			$query = array_merge ($query, reloadDictionary ($batchid));
 			$query[] = "DELETE FROM RackSpace WHERE object_id IS NULL AND state = 'T'";
 			$query[] = "UPDATE Config SET varvalue = '0.19.3' WHERE varname = 'DB_VERSION'";
 			break;
 		case '0.19.4':
-			$query = array_merge ($query, reloadDictionary ($batchid));
 			$query[] = "UPDATE Config SET varvalue = '0.19.4' WHERE varname = 'DB_VERSION'";
 			break;
 		case '0.19.5':
-			$query = array_merge ($query, reloadDictionary ($batchid));
 			// Add 'virtual port' to 'virtual port' mapping
 			$query[] = "INSERT INTO `PortCompat` (`type1`,`type2`) VALUES (1469,1469)";
 			$query[] = "INSERT INTO `PortInterfaceCompat` (`iif_id`,`oif_id`) VALUES (1,1469)";
@@ -1077,11 +1052,9 @@ CREATE TABLE `EntityLink` (
 			$query[] = "UPDATE Config SET varvalue = '0.19.5' WHERE varname = 'DB_VERSION'";
 			break;
 		case '0.19.6':
-			$query = array_merge ($query, reloadDictionary ($batchid));
 			$query[] = "UPDATE Config SET varvalue = '0.19.6' WHERE varname = 'DB_VERSION'";
 			break;
 		case '0.19.7':
-			$query = array_merge ($query, reloadDictionary ($batchid));
 			# A plain "ALTER TABLE Attribute" can leave AUTO_INCREMENT in an odd
 			# state, hence the table swap.
 			$query[] = "
@@ -1108,7 +1081,6 @@ CREATE TABLE `Attribute_new` (
 			$query[] = "UPDATE Config SET varvalue = '0.19.7' WHERE varname = 'DB_VERSION'";
 			break;
 		case '0.19.8':
-			$query = array_merge ($query, reloadDictionary ($batchid));
 			for ($i = 1424; $i <= 1466; $i++) # CX, then 42 ER channels
 				$query[] = "INSERT INTO `PortCompat` (`type1`, `type2`) VALUES (${i},${i})";
 			$query[] = "ALTER TABLE UserAccount ENGINE=InnoDB";
@@ -1144,7 +1116,6 @@ CREATE TABLE `CactiGraph` (
 			$query[] = "UPDATE Config SET varvalue = '0.19.8' WHERE varname = 'DB_VERSION'";
 			break;
 		case '0.19.9':
-			$query = array_merge ($query, reloadDictionary ($batchid));
 			$query[] = "DELETE FROM Config WHERE varname = 'HNDP_RUNNERS_LISTSRC'";
 			# Dismiss some overly-specific OIF types in favour of more generic counterparts.
 			$squeeze = array
@@ -1182,7 +1153,6 @@ CREATE TABLE `CactiGraph` (
 			$query[] = "UPDATE Config SET varvalue = '0.19.9' WHERE varname = 'DB_VERSION'";
 			break;
 		case '0.19.10':
-			$query = array_merge ($query, reloadDictionary ($batchid));
 			$query[] = "INSERT INTO `PortCompat` (`type1`, `type2`) VALUES (1603,1603)";
 			$query[] = "UPDATE Config SET varvalue = '0.19.10' WHERE varname = 'DB_VERSION'";
 			break;
@@ -1239,7 +1209,6 @@ CREATE TABLE `CactiGraph` (
 			}
 			$query[] = "INSERT INTO `PortCompat` (`type1`, `type2`) VALUES (1642,1642)";
 			$query[] = 'ALTER TABLE `EntityLink` ADD KEY `EntityLink-compound` (`parent_entity_type`,`child_entity_type`,`child_entity_id`)';
-			$query = array_merge ($query, reloadDictionary ());
 			$query[] = "UPDATE Config SET varvalue = '0.19.11' WHERE varname = 'DB_VERSION'";
 			break;
 		case '0.19.12':
@@ -1255,8 +1224,10 @@ CREATE TABLE `CactiGraph` (
 			$query[] = "UPDATE Config SET varvalue = CONCAT (varvalue, '; 11=1668') WHERE varname = 'DEFAULT_PORT_OIF_IDS'";
 			$query[] = "INSERT INTO Chapter (id, sticky, name) VALUES (37, 'no', 'wireless OS type')";
 			$query[] = "INSERT INTO AttributeMap (objtype_id, attr_id, chapter_id) VALUES (965, 4, 37)";
-			$query = array_merge ($query, reloadDictionary ());
 			$query[] = "UPDATE Config SET varvalue = '0.19.12' WHERE varname = 'DB_VERSION'";
+			break;
+		case 'dictionary':
+			$query = reloadDictionary();
 			break;
 		default:
 			showError ("unknown batch '${batchid}'", __FUNCTION__);
@@ -1425,6 +1396,7 @@ else
 		{
 			foreach ($path as $batchid)
 				executeUpgradeBatch ($batchid);
+			executeUpgradeBatch ('dictionary');
 			echo "<tr><th>Summary</th><td>Upgrade complete, it is Ok to ";
 			echo "<a href='index.php'>enter</a> the system.</td></tr>\n";
 		}
