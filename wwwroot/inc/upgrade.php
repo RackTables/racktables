@@ -1225,11 +1225,9 @@ CREATE TABLE `CactiGraph` (
 			$query[] = "UPDATE Config SET varvalue = CONCAT (varvalue, '; 11=1668') WHERE varname = 'DEFAULT_PORT_OIF_IDS'";
 			$query[] = "INSERT INTO Chapter (id, sticky, name) VALUES (37, 'no', 'wireless OS type')";
 			$query[] = "INSERT INTO AttributeMap (objtype_id, attr_id, chapter_id) VALUES (965, 4, 37)";
-			$query = array_merge ($query, reloadDictionary ());
 			$query[] = "UPDATE Config SET varvalue = '0.19.12' WHERE varname = 'DB_VERSION'";
 			break;
 		case '0.20.0':
-			$query = array_merge ($query, reloadDictionary ($batchid));
 			$query[] = "
 CREATE TABLE `PortLog` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
