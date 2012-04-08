@@ -131,6 +131,7 @@ function getDBUpgradePath ($v1, $v2)
 		'0.19.9',
 		'0.19.10',
 		'0.19.11',
+		'0.19.12',
 	);
 	if (!in_array ($v1, $versionhistory) or !in_array ($v2, $versionhistory))
 		return NULL;
@@ -1258,7 +1259,7 @@ CREATE TABLE `CactiGraph` (
 			$query[] = "UPDATE Config SET varvalue = '0.19.12' WHERE varname = 'DB_VERSION'";
 			break;
 		default:
-			showError ("executeUpgradeBatch () failed, because batch '${batchid}' isn't defined", __FUNCTION__);
+			showError ("unknown batch '${batchid}'", __FUNCTION__);
 			die;
 			break;
 	}
