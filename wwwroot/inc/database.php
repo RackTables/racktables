@@ -1736,6 +1736,7 @@ function scanIPv4Space ($pairlist)
 	$whereexpr5b = '(';
 	$whereexpr6 = '(';
 	$qparams = array();
+	$qparams_bin = array();
 	foreach ($pairlist as $tmp)
 	{
 		$whereexpr1 .= $or . "ip between ? and ?";
@@ -1748,6 +1749,8 @@ function scanIPv4Space ($pairlist)
 		$or = ' or ';
 		$qparams[] = ip4_bin2db ($tmp['first']);
 		$qparams[] = ip4_bin2db ($tmp['last']);
+		$qparams_bin[] = $tmp['first'];
+		$qparams_bin[] = $tmp['last'];
 	}
 	$whereexpr1 .= ')';
 	$whereexpr2 .= ')';
@@ -1796,12 +1799,12 @@ function scanIPv4Space ($pairlist)
 
 	// 3. look for virtual services
 	$query = "select id, vip from IPv4VS where ${whereexpr3}";
-	$result = usePreparedSelectBlade ($query, $qparams);
+	$result = usePreparedSelectBlade ($query, $qparams_bin);
 	$allRows = $result->fetchAll (PDO::FETCH_ASSOC);
 	unset ($result);
 	foreach ($allRows as $row)
 	{
-		$ip_bin = ip4_int2bin ($row['vip']);
+		$ip_bin = $row['vip'];
 		if (!isset ($ret[$ip_bin]))
 			$ret[$ip_bin] = constructIPAddress ($ip_bin);
 		$ret[$ip_bin]['vslist'][] = $row['id'];
@@ -1809,10 +1812,10 @@ function scanIPv4Space ($pairlist)
 
 	// 4. don't forget about real servers along with pools
 	$query = "select rsip, rspool_id from IPv4RS where ${whereexpr4}";
-	$result = usePreparedSelectBlade ($query, $qparams);
+	$result = usePreparedSelectBlade ($query, $qparams_bin);
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
-		$ip_bin = ip4_int2bin ($row['rsip']);
+		$ip_bin = $row['rsip'];
 		if (!isset ($ret[$ip_bin]))
 			$ret[$ip_bin] = constructIPAddress ($ip_bin);
 		$ret[$ip_bin]['rsplist'][] = $row['rspool_id'];
