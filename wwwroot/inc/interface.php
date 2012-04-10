@@ -3207,7 +3207,7 @@ function renderSearchResults ($terms, $summary)
 					finishPortlet();
 					break;
 				case 'ipv4rspool':
-					startPortlet ("<a href='index.php?page=ipv4rsplist'>RS pools</a>");
+					startPortlet ("<a href='index.php?page=ipv4slb&tab=rspools'>RS pools</a>");
 					echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
 					foreach ($what as $cell)
 					{
@@ -3220,7 +3220,7 @@ function renderSearchResults ($terms, $summary)
 					finishPortlet();
 					break;
 				case 'ipv4vs':
-					startPortlet ("<a href='index.php?page=ipv4vslist'>Virtual services</a>");
+					startPortlet ("<a href='index.php?page=ipv4slb&tab=default'>Virtual services</a>");
 					echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
 					foreach ($what as $cell)
 					{
@@ -4117,8 +4117,8 @@ function renderTagStats ()
 		'file' => 'files&tab=default',
 		'ipv4net' => 'ipv4space&tab=default',
 		'ipv6net' => 'ipv6space&tab=default',
-		'ipv4vs' => 'ipv4vslist&tab=default',
-		'ipv4rspool' => 'ipv4rsplist&tab=default',
+		'ipv4vs' => 'ipv4slb&tab=default',
+		'ipv4rspool' => 'ipv4slb&tab=rspools',
 		'object' => 'depot&tab=default',
 		'rack' => 'rackspace&tab=default',
 		'user' => 'userlist&tab=default'

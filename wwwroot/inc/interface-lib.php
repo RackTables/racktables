@@ -273,8 +273,8 @@ $page_by_realm['object'] = 'depot';
 $page_by_realm['rack'] = 'rackspace';
 $page_by_realm['ipv4net'] = 'ipv4space';
 $page_by_realm['ipv6net'] = 'ipv6space';
-$page_by_realm['ipv4vs'] = 'ipv4vslist';
-$page_by_realm['ipv4rspool'] = 'ipv4rsplist';
+$page_by_realm['ipv4vs'] = 'ipv4slb';
+$page_by_realm['ipv4rspool'] = 'ipv4slb';
 $page_by_realm['file'] = 'files';
 $page_by_realm['user'] = 'userlist';
 
