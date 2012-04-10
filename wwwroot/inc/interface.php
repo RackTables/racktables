@@ -2664,8 +2664,10 @@ function renderIPAddressProperties ($ip)
 	startPortlet ('update');
 	echo "<table border=0 cellpadding=10 cellpadding=1 align='center'>\n";
 	printOpFormIntro ('editAddress');
-	echo "<tr><td class='tdright'>Name:</td><td class='tdleft'><input type=text name=name size=20 value='${address['name']}'></tr>";
-	echo "<td class='tdright'>Reserved:</td><td class='tdleft'><input type=checkbox name=reserved size=20 ";
+	echo '<tr><td class=tdright><label for=id_name>Name:</label></td>';
+	echo "<td class=tdleft><input type=text name=name id=id_name size=20 value='${address['name']}'></tr>";
+	echo '<td class=tdright><label for=id_reserved>Reserved:</label></td>';
+	echo "<td class=tdleft><input type=checkbox name=reserved id=id_reserved size=20 ";
 	echo ($address['reserved']=='yes') ? 'checked' : '';
 	echo "></tr><tr><td class=tdleft>";
 	printImageHREF ('SAVE', 'Save changes', TRUE);
