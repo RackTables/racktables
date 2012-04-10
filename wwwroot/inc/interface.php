@@ -4890,8 +4890,8 @@ function renderSNMPPortFinder ($object_id)
 	startPortlet ('SNMPv1');
 	printOpFormIntro ('querySNMPData', array ('ver' => 1));
 	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
-	echo '<tr><th class=tdright><label for=community>Community: </label></th>';
-	echo "<td class=tdleft><input type=text name=community id=community value='${snmpcomm}'></td></tr>";
+	echo '<tr><th class=tdright><label for=communityv1>Community: </label></th>';
+	echo "<td class=tdleft><input type=text name=community id=communityv1 value='${snmpcomm}'></td></tr>";
 	echo '<tr><td colspan=2><input type=submit value="Try now"></td></tr>';
 	echo '</table></form>';
 	finishPortlet();
@@ -4899,8 +4899,8 @@ function renderSNMPPortFinder ($object_id)
 	startPortlet ('SNMPv2c');
 	printOpFormIntro ('querySNMPData', array ('ver' => 2));
 	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
-	echo '<tr><th class=tdright><label for=community>Community: </label></th>';
-	echo "<td class=tdleft><input type=text name=community id=community value='${snmpcomm}'></td></tr>";
+	echo '<tr><th class=tdright><label for=communityv2>Community: </label></th>';
+	echo "<td class=tdleft><input type=text name=community id=communityv2 value='${snmpcomm}'></td></tr>";
 	echo '<tr><td colspan=2><input type=submit value="Try now"></td></tr>';
 	echo '</table></form>';
 	finishPortlet();
