@@ -18,15 +18,17 @@
 		Netgear FS750T2 (#479), Juniper EX3200-48T (#510), Linksys SRW2048 (#350)
 	new feature: you can obtain who has made tag assignment, object's ports or IPv4 address changes by hovering cursor on these entities
 	new feature: adjustable quick links at the top of the page
-0.19.12
+	new feature: IPv6 SLB support
+0.19.12 2012-04-12
 	bugfix: Could not delete objects' log entries
+	new feature: initial D-Link and Linux gateway support by Ilya Evseev
 	new feature: helpdesk banner
 	new feature: non-anonymous LDAP search (#442) by Hannes Georg
 	new feature: hardware warranty report by Ernest Shaffer
-	new feature: IPv6 SLB support
 	update: 8021q and portinfo support for NX-OS 6.0
 	update: serial console servers by Boris
 	update: 40GbE and 100GbE port types
+	update: improved install/upgrade procedures
 0.19.11 2012-02-26
 	bugfix: IP address reservation release on allocation works again
 	bugfix: SNMP did not work for Netgear
