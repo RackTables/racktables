@@ -1,3 +1,5 @@
+0.19.13
+	update: IE spoils JPEG uploads, work around
 0.19.12 2012-04-12
 	bugfix: Could not delete objects' log entries
 	new feature: initial D-Link and Linux gateway support by Ilya Evseev

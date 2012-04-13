@@ -3802,6 +3802,9 @@ function commitAddFile ($name, $type, $contents, $comment)
 	case 'image/x-png':
 		$type = 'image/png';
 		break;
+	case 'image/pjpeg':
+		$type = 'image/jpeg';
+		break;
 	default:
 	}
 	try
