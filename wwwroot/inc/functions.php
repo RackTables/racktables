@@ -1488,6 +1488,14 @@ function buildTagChainFromIds ($tagidlist)
 	return $ret;
 }
 
+function buildTagIdsFromChain ($tagchain)
+{
+	$ret = array();
+	foreach ($tagchain as $taginfo)
+		$ret[] = $taginfo['id'];
+	return array_unique ($ret);
+}
+
 // Process a given tag tree and return only meaningful branches. The resulting
 // (sub)tree will have refcnt leaves on every last branch.
 function getObjectiveTagTree ($tree, $realm, $preselect)
