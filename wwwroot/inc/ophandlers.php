@@ -2029,7 +2029,7 @@ function submitSLBConfig ()
 	return buildRedirectURL (__FUNCTION__, 'OK', array ('slbconfig'));
 }
 
-$msgcode['addRack']['OK'] = 48;
+$msgcode['addRack']['OK'] = 5;
 $msgcode['addRack']['ERR2'] = 172;
 function addRack ()
 {
