@@ -1784,7 +1784,6 @@ function submitSLBConfig ()
 	showNotice ("You should redefine submitSLBConfig ophandler in your local extension to install SLB config");
 }
 
-$msgcode['addRack']['OK'] = 48;
 $msgcode['addRack']['ERR2'] = 172;
 function addRack ()
 {
@@ -1803,8 +1802,7 @@ function addRack ()
 
 		// Link it to the row
 		commitLinkEntities ('object', $_REQUEST['row_id'], 'object', $rack_id);
-
-		return showFuncMessage (__FUNCTION__, 'OK', array ($_REQUEST['name']));
+		showSuccess ('added rack ' . mkA ($_REQUEST['name'], 'rack', $rack_id));
 	}
 	elseif (isset ($_REQUEST['got_mdata']))
 	{
@@ -1832,6 +1830,7 @@ function addRack ()
 
 			// Link it to the row
 			commitLinkEntities ('object', $_REQUEST['row_id'], 'object', $rack_id);
+			showSuccess ('added rack ' . mkA ($cname, 'rack', $rack_id));
 		}
 	}
 	else
