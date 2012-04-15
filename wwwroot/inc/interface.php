@@ -8039,16 +8039,17 @@ function allObjectLogs ()
 			// Link to a different page if the object is a Rack
 			if ($row['objtype_id'] == 1560)
 			{
+				$text = $row['name'];
 				$entity = 'rack';
-				$id_name = 'rack_id';
 			}
 			else
 			{
+				$object = spotEntity ('object', $row['object_id']);
+				$text = $object['dname'];
 				$entity = 'object';
-				$id_name = 'object_id';
 			}
 			echo "<tr class=row_${order} valign=top>";
-			echo "<td align=left><a href='".makeHref(array('page'=>$entity, 'tab'=>'log', $id_name=>$row['object_id']))."'>${row['name']}</a></td>";
+			echo '<td class=tdleft>' . mkA ($text, $entity, $row['object_id'], 'log') . '</td>';
 			echo '<td class=tdleft>' . $row['date'] . '<br>' . $row['user'] . '</td>';
 			echo '<td class="slbconf rsvtext">' . string_insert_hrefs (htmlspecialchars ($row['content'], ENT_NOQUOTES)) . '</td>';
 			echo "</tr>\n";
