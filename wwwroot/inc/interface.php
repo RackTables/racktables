@@ -9160,7 +9160,8 @@ function allObjectLogs ()
 		foreach ($logs as $row)
 		{
 			echo "<tr class=row_${order} valign=top>";
-			echo "<td align=left><a href='".makeHref(array('page'=>'object', 'tab'=>'log', 'object_id'=>$row['object_id']))."'>${row['name']}</a></td>";
+			$object = spotEntity ('object', $row['object_id']);
+			echo '<td class=tdleft>' . mkA ($object['dname'], 'object', $object['id'], 'log') . '</td>';
 			echo '<td class=tdleft>' . $row['date'] . '<br>' . $row['user'] . '</td>';
 			echo '<td class="slbconf rsvtext">' . string_insert_hrefs (htmlspecialchars ($row['content'], ENT_NOQUOTES)) . '</td>';
 			echo '</tr>';
