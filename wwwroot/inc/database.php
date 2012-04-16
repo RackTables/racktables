@@ -2004,13 +2004,23 @@ function bindIPToObject ($ip_bin, $object_id = 0, $name = '', $type = '')
 		case 4:
 			$db_ip = ip4_bin2db ($ip_bin);
 			$table = 'IPv4Allocation';
+			$table2 = 'IPv4Address';
 			break;
 		case 16:
 			$db_ip = $ip_bin;
 			$table = 'IPv6Allocation';
+			$table2 = 'IPv6Address';
 			break;
 		default: throw new InvalidArgException ('ip_bin', $ip_bin, "Invalid binary IP");
 	}
+
+	// release IP reservation and/or comment if configured
+	$release = getConfigVar ('IPV4_AUTO_RELEASE');
+	if ($release >= 2)
+		usePreparedExecuteBlade ("DELETE FROM $table2 WHERE ip = ?", array ($db_ip));
+	elseif ($release >= 1)
+		usePreparedExecuteBlade ("UPDATE $table2 SET reserved = 'no' WHERE ip = ?", array ($db_ip));
+
 	usePreparedInsertBlade
 	(
 		$table,

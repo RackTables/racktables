@@ -750,16 +750,7 @@ function addIPAllocation ()
 		return showFuncMessage (__FUNCTION__, 'ERR1', array (ip_format ($ip_bin)));
 
 	bindIPToObject ($ip_bin, $_REQUEST['object_id'], $_REQUEST['bond_name'], $_REQUEST['bond_type']);
-	$address = getIPAddress ($ip_bin);
-	if ($address['reserved'] == 'yes' or strlen ($address['name']))
-	{
-		$release = getConfigVar ('IPV4_AUTO_RELEASE');
-		if ($release >= 1)
-			$address['reserved'] = 'no';
-		if ($release >= 2)
-			$address['name'] = '';
-		updateAddress ($ip_bin, $address['name'], $address['reserved']);
-	}
+
 	showFuncMessage (__FUNCTION__, 'OK');
 	return buildRedirectURL (NULL, NULL, array ('hl_ip' => ip_format ($ip_bin)));
 }
