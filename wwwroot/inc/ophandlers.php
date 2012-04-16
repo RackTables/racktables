@@ -874,16 +874,7 @@ function addIPv4Allocation ()
 	
 	if (FALSE === bindIpToObject ($ip, $_REQUEST['object_id'], $_REQUEST['bond_name'], $_REQUEST['bond_type']))
 		return buildRedirectURL (__FUNCTION__, 'ERR2', array ($error));
-	$address = getIPv4Address ($ip);
-	if ($address['reserved'] == 'yes' or strlen ($address['name']))
-	{
-		$release = getConfigVar ('IPV4_AUTO_RELEASE');
-		if ($release >= 1)
-			$address['reserved'] = 'no';
-		if ($release >= 2)
-			$address['name'] = '';
-		updateAddress ($ip, $address['name'], $address['reserved']);
-	}
+
 	return buildRedirectURL (__FUNCTION__, 'OK');
 }
 
@@ -906,16 +897,7 @@ function addIPv6Allocation ()
 
 	if (FALSE === bindIPv6ToObject ($ipv6, $_REQUEST['object_id'], $_REQUEST['bond_name'], $_REQUEST['bond_type']))
 		return buildRedirectURL (__FUNCTION__, 'ERR2', array ($error));
-	$address = getIPv6Address ($ipv6);
-	if ($address['reserved'] == 'yes' or strlen ($address['name']))
-	{
-		$release = getConfigVar ('IPV4_AUTO_RELEASE');
-		if ($release >= 1)
-			$address['reserved'] = 'no';
-		if ($release >= 2)
-			$address['name'] = '';
-		updateAddress ($ipv6, $address['name'], $address['reserved']);
-	}
+
 	return buildRedirectURL (__FUNCTION__, 'OK');
 }
 

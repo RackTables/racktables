@@ -1649,7 +1649,13 @@ function getIPv6Address ($v6addr)
 
 function bindIpToObject ($ip = '', $object_id = 0, $name = '', $type = '')
 {
-	usePreparedExecuteBlade ('DELETE FROM IPv4Address WHERE ip = INET_ATON(?)', array ($ip));
+	// release IP reservation and/or comment if configured
+	$release = getConfigVar ('IPV4_AUTO_RELEASE');
+	if ($release >= 2)
+		usePreparedExecuteBlade ('DELETE FROM IPv4Address WHERE ip = INET_ATON(?)', array ($ip));
+	elseif ($release >= 1)
+		usePreparedExecuteBlade ("UPDATE IPv4Address SET reserved = 'no' WHERE ip = INET_ATON(?)", array ($ip));
+
 	return usePreparedExecuteBlade
 	(
 		'INSERT INTO IPv4Allocation (ip, object_id, name, type) VALUES (INET_ATON(?), ?, ?, ?)',
@@ -1659,7 +1665,13 @@ function bindIpToObject ($ip = '', $object_id = 0, $name = '', $type = '')
 
 function bindIPv6ToObject ($ip, $object_id = 0, $name = '', $type = '')
 {
-	usePreparedExecuteBlade ('DELETE FROM IPv6Address WHERE ip = ?', array ($ip->getBin()));
+	// release IP reservation and/or comment if configured
+	$release = getConfigVar ('IPV4_AUTO_RELEASE');
+	if ($release >= 2)
+		usePreparedExecuteBlade ('DELETE FROM IPv6Address WHERE ip = ?', array ($ip->getBin()));
+	elseif ($release >= 1)
+		usePreparedExecuteBlade ("UPDATE IPv6Address SET reserved = 'no' WHERE ip = ?", array ($ip->getBin()));
+
 	return usePreparedInsertBlade
 	(
 		'IPv6Allocation',
