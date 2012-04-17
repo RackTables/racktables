@@ -2173,7 +2173,7 @@ function eos4ReadInterfaceStatus ($text)
 					$status = 'down';
 				else
 					$status = 'disabled';
-				$result[$fields['Port']] = array
+				$result[ios12ShortenIfName ($fields['Port'])] = array
 				(
 					'status' => $status,
 					'speed' => $fields['Speed'],
@@ -2347,7 +2347,7 @@ function eos4ReadMacList ($text)
 			if (substr ($line, 0, 19) == 'Total Mac Addresses') # end of table
 				break;
 			if (preg_match ('/^(\d+)\s+(\S+)\s+DYNAMIC\s+(\S+)\s/', $line, $m))
-				$result[$m[3]][] = array
+				$result[ios12ShortenIfName ($m[3])][] = array
 				(
 					'mac' => $m[2],
 					'vid' => $m[1],
