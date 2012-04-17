@@ -83,6 +83,10 @@ function queryTerminal ($object_id, $commands, $tolerate_remote_errors = TRUE)
 			$protocol = 'telnet';
 			$prompt = '^login: $|^Password:$|^\S+@\S+[>#] $';
 			break;
+		case 'eos4':
+			$protocol = 'telnet'; # strict RFC854 implementation, netcat won't work
+			$prompt = '^(\xf2?login|Username|Password): $|^\S+[>#]$';
+			break;
 		default:
 			$protocol = 'netcat';
 			$prompt = NULL;
@@ -137,6 +141,9 @@ function queryTerminal ($object_id, $commands, $tolerate_remote_errors = TRUE)
 					break;
 				case 'jun10':
 					$commands = "set cli screen-length 0\n" . $commands;
+					break;
+				case 'eos4':
+					$commands = "enable\nno terminal monitor\nterminal length 0\n" . $commands;
 					break;
 			}
 			// prepend telnet commands by credentials

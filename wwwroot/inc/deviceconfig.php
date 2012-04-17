@@ -233,6 +233,51 @@ function ftos8ReadLLDPStatus ($input)
 	return $ret;
 }
 
+function eos4ReadLLDPStatus ($input)
+{
+	$ret = array();
+	$valid_subtypes = array
+	(
+		'Interface name (5)',
+	);
+	foreach (explode ("\n", $input) as $line)
+	{
+		$matches = array();
+		switch (TRUE)
+		{
+		case preg_match ('/^Interface (.+) detected \d+ LLDP neighbors/', $line, $matches):
+			$ret['current']['local_port'] = ios12ShortenIfName ($matches[1]);
+			break;
+		case preg_match ('/^    - Port ID type: (.+)$/', $line, $matches):
+			$ret['current']['remote_subtype'] = $matches[1];
+			break;
+		case preg_match ('/^      Port ID     : "(.+)"$/', $line, $matches):
+			$ret['current']['remote_port'] = $matches[1];
+			break;
+		case preg_match ('/^    - System Name: "(.+)"$/', $line, $matches):
+			if
+			(
+				array_key_exists ('current', $ret) and
+				array_key_exists ('remote_subtype', $ret['current']) and
+				in_array ($ret['current']['remote_subtype'], $valid_subtypes) and
+				array_key_exists ('remote_port', $ret['current']) and
+				array_key_exists ('local_port', $ret['current'])
+			)
+				$ret[$ret['current']['local_port']][] = array
+				(
+					'device' => $matches[1],
+					'port' => ios12ShortenIfName ($ret['current']['remote_port']),
+				);
+			unset ($ret['current']['remote_subtype']);
+			unset ($ret['current']['remote_port']);
+			break;
+		default:
+		}
+	}
+	unset ($ret['current']);
+	return $ret;
+}
+
 function ios12ReadVLANConfig ($input)
 {
 	$ret = array
@@ -1534,6 +1579,79 @@ function air12TranslatePushQueue ($dummy_object_id, $queue, $dummy_vlan_names)
 	return $ret;
 }
 
+function eos4TranslatePushQueue ($dummy_object_id, $queue, $dummy_vlan_names)
+{
+	$ret = '';
+	foreach ($queue as $cmd)
+		switch ($cmd['opcode'])
+		{
+		case 'begin configuration':
+			$ret .= "enable\nconfigure terminal\n";
+			break;
+		case 'end configuration':
+			$ret .= "end\n";
+			break;
+		case 'save configuration':
+			$ret .= "copy running-config startup-config\n\n";
+			break;
+		case 'create VLAN':
+			$ret .= "vlan ${cmd['arg1']}\nexit\n";
+			break;
+		case 'destroy VLAN':
+			if (isset ($vlan_names[$cmd['arg1']]))
+				$ret .= "no vlan ${cmd['arg1']}\n";
+			break;
+		case 'set access':
+			$ret .= "interface ${cmd['arg1']}\nswitchport access vlan ${cmd['arg2']}\nexit\n";
+			break;
+		case 'unset access':
+			$ret .= "interface ${cmd['arg1']}\nno switchport access vlan\nexit\n";
+			break;
+		case 'set mode':
+			$ret .= "interface ${cmd['arg1']}\n";
+			$ret .= "switchport mode ${cmd['arg2']}\n";
+			if ($cmd['arg2'] == 'trunk')
+				$ret .= "no switchport trunk native vlan\nswitchport trunk allowed vlan none\n";
+			$ret .= "exit\n";
+			break;
+		case 'add allowed':
+		case 'rem allowed':
+			$clause = $cmd['opcode'] == 'add allowed' ? 'add' : 'remove';
+			$ret .= "interface ${cmd['port']}\n";
+			foreach (listToRanges ($cmd['vlans']) as $range)
+				$ret .= "switchport trunk allowed vlan ${clause} " .
+					($range['from'] == $range['to'] ? $range['to'] : "${range['from']}-${range['to']}") .
+					"\n";
+			$ret .= "exit\n";
+			break;
+		case 'set native':
+			$ret .= "interface ${cmd['arg1']}\nswitchport trunk native vlan ${cmd['arg2']}\nexit\n";
+			break;
+		case 'unset native':
+			$ret .= "interface ${cmd['arg1']}\nswitchport trunk native vlan tag\nexit\n";
+			break;
+		case 'getlldpstatus':
+			$ret .= "show lldp neighbors detail\n";
+			break;
+		case 'getportstatus':
+			$ret .= "show interfaces status\n";
+			break;
+		case 'getmaclist':
+			$ret .= "show mac-address-table dynamic\n";
+			break;
+		case 'cite':
+			$ret .= $cmd['arg1'];
+			break;
+		case 'getallconf':
+		case 'get8021q':
+			$ret .= "show running-config\n";
+			break;
+		default:
+			throw new InvalidArgException ('opcode', $cmd['opcode']);
+		}
+	return $ret;
+}
+
 function xos12Read8021QConfig ($input)
 {
 	$ret = array
@@ -1817,6 +1935,114 @@ function ftos8Read8021QConfig ($input)
 	return $ret;
 }
 
+function eos4BuildSwitchport ($mined)
+{
+	switch (TRUE)
+	{
+	case ! array_key_exists ('mode', $mined):
+	case $mined['mode'] == 'access':
+		if (! array_key_exists ('access', $mined))
+			$mined['access'] = VLAN_DFL_ID;
+		return array
+		(
+			'mode' => 'access',
+			'allowed' => array ($mined['access']),
+			'native' => $mined['access'],
+		);
+	case $mined['mode'] == 'trunk':
+		if (! array_key_exists ('allowed', $mined))
+			$mined['allowed'] = range (VLAN_MIN_ID, VLAN_MAX_ID);
+		if (! array_key_exists ('native', $mined))
+			$mined['native'] = $mined['default1'] ? VLAN_DFL_ID : 0;
+		if ($mined['native'] and ! in_array ($mined['native'], $mined['allowed']))
+			$mined['allowed'][] = $mined['native'];
+		return array
+		(
+			'mode' => 'trunk',
+			'allowed' => $mined['allowed'],
+			'native' => $mined['native'],
+		);
+	case $mined['mode'] == 'none':
+		return array
+		(
+			'mode' => 'none',
+			'allowed' => array(),
+			'native' => 0,
+		);
+	default:
+		throw new RackTablesError ('malformed switchport data', RackTablesError::INTERNAL);
+	}
+}
+
+function eos4Read8021QConfig ($input)
+{
+	$ret = array
+	(
+		'vlanlist' => array (VLAN_DFL_ID),
+		'vlannames' => array (),
+		'portdata' => array(),
+		'portconfig' => array(),
+	);
+	foreach (explode ("\n", $input) as $line)
+	{
+		$matches = array();
+		if (! array_key_exists ('current', $ret))
+		{
+			switch (TRUE)
+			{
+			case preg_match ('/^vlan ([[:alnum:],-]+)$/', $line, $matches):
+				foreach (iosParseVLANString ($matches[1]) as $vlan_id)
+					$ret['vlanlist'][] = $vlan_id;
+				break;
+			case preg_match ('/^interface ((Ethernet|Port-Channel)\d+)$/', $line, $matches):
+				$ret['current'] = array
+				(
+					'port_name' => ios12ShortenIfName ($matches[1]),
+					'mode' => 'access',
+					'default1' => TRUE,
+				);
+				break;
+			}
+			continue;
+		}
+		switch (TRUE)
+		{
+			case $line == '   switchport mode dot1q-tunnel':
+				throw new RTGatewayError ('unsupported switchport mode for port ' . $ret['current']['portname']);
+			case $line == '   no switchport':
+				$ret['current']['mode'] = 'none';
+				break;
+			case $line == '   switchport mode trunk':
+				$ret['current']['mode'] = 'trunk';
+				break;
+			case $line == '   switchport trunk native vlan tag':
+				$ret['current']['default1'] = FALSE;
+				break;
+			case preg_match ('/^   switchport trunk native vlan (\d+)$/', $line, $matches):
+				$ret['current']['native'] = $matches[1];
+				break;
+			case preg_match ('/^   switchport trunk allowed vlan (\S+)$/', $line, $matches):
+				$ret['current']['allowed'] = iosParseVLANString ($matches[1]);
+				break;
+			case preg_match ('/^   switchport trunk allowed vlan add (\S+)$/', $line, $matches):
+				$ret['current']['allowed'] = array_merge ($ret['current']['allowed'], iosParseVLANString ($matches[1]));
+				break;
+			case preg_match ('/^   switchport access vlan (\d+)$/', $line, $matches):
+				$ret['current']['access'] = $matches[1];
+				break;
+			case $line == '!': # end of interface section
+				if (! array_key_exists ('current', $ret))
+					break;
+				$ret['portdata'][$ret['current']['port_name']] = eos4BuildSwitchport ($ret['current']);
+				unset ($ret['current']);
+				break;
+			continue;
+		}
+	}
+	unset ($ret['current']);
+	return $ret;
+}
+
 function ciscoReadInterfaceStatus ($text)
 {
 	$result = array();
@@ -1915,6 +2141,39 @@ function ftos8ReadInterfaceStatus ($text)
 					$status = 'disabled';
 				$portname = ios12ShortenIfName (str_replace (' ', '', $fields['Port']));
 				$result[$portname] = array
+				(
+					'status' => $status,
+					'speed' => $fields['Speed'],
+					'duplex' => $fields['Duplex'],
+				);
+			}
+		}
+	return $result;
+}
+
+function eos4ReadInterfaceStatus ($text)
+{
+	$result = array();
+	$table_schema = array();
+	foreach (explode ("\n", $text) as $line)
+		if (empty ($table_schema))
+		{
+			if (preg_match('/^Port\s+Name\s+Status\s+Vlan\s+Duplex\s+Speed\b/', $line))
+				$table_schema = guessTableStructure ($line);
+		}
+		else
+		{
+			$fields = explodeTableLine ($line, $table_schema);
+			if (! empty ($fields['Port']) and ! empty ($fields['Speed']) and ! empty ($fields['Duplex']))
+			{
+				$status = strtolower ($fields['Status']);
+				if ($status == 'connected')
+					$status = 'up';
+				elseif ($status == 'notconnect')
+					$status = 'down';
+				else
+					$status = 'disabled';
+				$result[$fields['Port']] = array
 				(
 					'status' => $status,
 					'speed' => $fields['Speed'],
@@ -2076,6 +2335,29 @@ function ftos8ReadMacList ($text)
 	return $result;
 }
 
+function eos4ReadMacList ($text)
+{
+	$result = array();
+	$seen_header = FALSE;
+	foreach (explode ("\n", $text) as $line)
+		if (! $seen_header)
+			$seen_header = $line == '----    -----------       ----        -----      -----   ---------';
+		else
+		{
+			if (substr ($line, 0, 19) == 'Total Mac Addresses') # end of table
+				break;
+			if (preg_match ('/^(\d+)\s+(\S+)\s+DYNAMIC\s+(\S+)\s/', $line, $m))
+				$result[$m[3]][] = array
+				(
+					'mac' => $m[2],
+					'vid' => $m[1],
+				);
+		}
+	foreach (array_keys ($result) as $portname)
+		usort ($result[$portname], 'maclist_sort');
+	return $result;
+}
+
 # Suppress login banner and "show configuration" command itself, as well as the
 # trailing lines of the session.
 function spotText ($input, $first_line_re, $last_line_re = NULL)
@@ -2129,6 +2411,11 @@ function jun10SpotConfigText ($input)
 function ftos8SpotConfigText ($input)
 {
 	return spotText ($input, '/^! Version [0-9\.]+$/', '/^end$/');
+}
+
+function eos4SpotConfigText ($input)
+{
+	return spotText ($input, '/^! device: .*EOS-/', '/^end$/');
 }
 
 ?>
