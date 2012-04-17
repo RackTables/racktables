@@ -903,7 +903,7 @@ $iftable_processors['fortinet-chassis-any-1000T'] = array
 $iftable_processors['arista-any-SFP+'] = array
 (
     'pattern' => '@^Ethernet([[:digit:]]+)$@',
-    'replacement' => 'Et\\1',
+    'replacement' => 'e\\1',
     'dict_key' => '9-1084',
     'label' => '\\1',
     'try_next_proc' => FALSE,
