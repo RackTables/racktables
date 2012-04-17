@@ -118,12 +118,12 @@ function queryTerminal ($object_id, $commands, $tolerate_remote_errors = TRUE)
 			// prepend command list with vendor-specific disabling pager command
 			switch ($breed)
 			{
-				case 'ftos8':
 				case 'ios12':
 					$commands = "terminal length 0\n" . $commands;
 					break;
 				case 'nxos4':
 				case 'air12':
+				case 'ftos8':
 					$commands = "terminal length 0\nterminal no monitor\n" . $commands;
 					break;
 				case 'xos12':
