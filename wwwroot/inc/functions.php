@@ -3120,8 +3120,9 @@ function ios12ShortenIfName ($ifname)
 	$ifname = preg_replace ('@^FastEthernet(.+)$@', 'fa\\1', $ifname);
 	$ifname = preg_replace ('@^(?:GigabitEthernet|GE)(.+)$@', 'gi\\1', $ifname);
 	$ifname = preg_replace ('@^TenGigabitEthernet(.+)$@', 'te\\1', $ifname);
-	$ifname = preg_replace ('@^[Pp]ort-channel(.+)$@', 'po\\1', $ifname);
+	$ifname = preg_replace ('@^port-channel(.+)$@i', 'po\\1', $ifname);
 	$ifname = preg_replace ('@^(?:XGigabitEthernet|XGE)(.+)$@', 'xg\\1', $ifname);
+	$ifname = preg_replace ('@^Management(.+)$@', 'ma\\1', $ifname);
 	$ifname = strtolower ($ifname);
 	return $ifname;
 }
