@@ -1636,7 +1636,7 @@ $dictionary = array
 	1550 => array ('chapter_id' => 12, 'dict_value' => 'Cisco (blade)%GPASS%WS-X6748-GE-TX'),
 	1551 => array ('chapter_id' => 12, 'dict_value' => 'Cisco (blade)%GPASS%WS-X6748-SFP'),
 	1552 => array ('chapter_id' => 12, 'dict_value' => 'Cisco (blade)%GPASS%WS-SUP720-3B'),
-	1553 => array ('chapter_id' => 12, 'dict_value' => 'Cisco (blade)%GPASS%WS-XSUP720-3BX'),
+	1553 => array ('chapter_id' => 12, 'dict_value' => 'Cisco (blade)%GPASS%WS-XSUP720-3BXL'),
 	1554 => array ('chapter_id' => 12, 'dict_value' => 'Cisco (blade)%GPASS%WS-SUP32-GE-3B'),
 	1555 => array ('chapter_id' => 12, 'dict_value' => 'Cisco (blade)%GPASS%WS-SUP32-10GE-3B'),
 	1556 => array ('chapter_id' => 32, 'dict_value' => 'VMware%GPASS%Standard vSwitch'),
