@@ -1995,48 +1995,61 @@ function eos4Read8021QConfig ($input)
 					$ret['vlanlist'][] = $vlan_id;
 				break;
 			case preg_match ('/^interface ((Ethernet|Port-Channel)\d+)$/', $line, $matches):
+				$portname = ios12ShortenIfName ($matches[1]);
 				$ret['current'] = array
 				(
-					'port_name' => ios12ShortenIfName ($matches[1]),
+					'port_name' => $portname,
 					'mode' => 'access',
 					'default1' => TRUE,
 				);
+				$ret['portconfig'][$portname][] = array ('type' => 'line-header', 'line' => $line);
 				break;
 			}
 			continue;
 		}
+		# $portname == $ret['current']['port_name']
 		switch (TRUE)
 		{
 			case $line == '   switchport mode dot1q-tunnel':
 				throw new RTGatewayError ('unsupported switchport mode for port ' . $ret['current']['portname']);
 			case $line == '   no switchport':
 				$ret['current']['mode'] = 'none';
+				$ret['portconfig'][$portname][] = array ('type' => 'line-other', 'line' => $line);
 				break;
 			case $line == '   switchport mode trunk':
 				$ret['current']['mode'] = 'trunk';
+				$ret['portconfig'][$portname][] = array ('type' => 'line-8021q', 'line' => $line);
 				break;
 			case $line == '   switchport trunk native vlan tag':
 				$ret['current']['default1'] = FALSE;
+				$ret['portconfig'][$portname][] = array ('type' => 'line-8021q', 'line' => $line);
 				break;
 			case preg_match ('/^   switchport trunk native vlan (\d+)$/', $line, $matches):
 				$ret['current']['native'] = $matches[1];
+				$ret['portconfig'][$portname][] = array ('type' => 'line-8021q', 'line' => $line);
 				break;
 			case preg_match ('/^   switchport trunk allowed vlan (\S+)$/', $line, $matches):
 				$ret['current']['allowed'] = iosParseVLANString ($matches[1]);
+				$ret['portconfig'][$portname][] = array ('type' => 'line-8021q', 'line' => $line);
 				break;
 			case preg_match ('/^   switchport trunk allowed vlan add (\S+)$/', $line, $matches):
 				$ret['current']['allowed'] = array_merge ($ret['current']['allowed'], iosParseVLANString ($matches[1]));
+				$ret['portconfig'][$portname][] = array ('type' => 'line-8021q', 'line' => $line);
 				break;
 			case preg_match ('/^   switchport access vlan (\d+)$/', $line, $matches):
 				$ret['current']['access'] = $matches[1];
+				$ret['portconfig'][$portname][] = array ('type' => 'line-8021q', 'line' => $line);
 				break;
 			case $line == '!': # end of interface section
 				if (! array_key_exists ('current', $ret))
 					break;
 				$ret['portdata'][$ret['current']['port_name']] = eos4BuildSwitchport ($ret['current']);
 				unset ($ret['current']);
+				$ret['portconfig'][$portname][] = array ('type' => 'line-header', 'line' => $line);
 				break;
-			continue;
+			default:
+				$ret['portconfig'][$portname][] = array ('type' => 'line-other', 'line' => $line);
+				break;
 		}
 	}
 	unset ($ret['current']);
