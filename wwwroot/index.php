@@ -35,13 +35,13 @@ try {
 		// call the main handler - page or tab handler.
 		if (isset ($tabhandler[$pageno][$tabno]))
 		{
-			if (! function_exists ($tabhandler[$pageno][$tabno]))
+			if (! is_callable ($tabhandler[$pageno][$tabno]))
 				throw new RackTablesError ("Missing handler function for node '${pageno}-${tabno}'", RackTablesError::INTERNAL);
 			call_user_func ($tabhandler[$pageno][$tabno], getBypassValue());
 		}
 		elseif (isset ($page[$pageno]['handler']))
 		{
-			if (! function_exists ($page[$pageno]['handler']))
+			if (! is_callable ($page[$pageno]['handler']))
 				throw new RackTablesError ("Missing handler function for node '${pageno}'", RackTablesError::INTERNAL);
 			$page[$pageno]['handler'] ($tabno);
 		}
@@ -107,7 +107,7 @@ try {
 			genericAssertion ('view', 'string');
 			if (! array_key_exists ($_REQUEST['view'], $svghandler))
 				throw new InvalidRequestArgException ('view', $_REQUEST['view'], 'undefined view');
-			if (! function_exists ($svghandler[$_REQUEST['view']]))
+			if (! is_callable ($svghandler[$_REQUEST['view']]))
 				throw new RackTablesError ('missing handler function', RackTablesError::INTERNAL);
 			call_user_func ($svghandler[$_REQUEST['view']]);
 		}
@@ -200,7 +200,7 @@ try {
 			if
 			(
 				!isset ($ophandler[$pageno][$tabno][$op]) or
-				!function_exists ($ophandler[$pageno][$tabno][$op])
+				! is_callable ($ophandler[$pageno][$tabno][$op])
 			)
 				throw new RackTablesError ("Invalid navigation data for '${pageno}-${tabno}-${op}'", RackTablesError::INTERNAL);
 			// We have a chance to handle an error before starting HTTP header.
