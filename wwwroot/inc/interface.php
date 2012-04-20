@@ -1817,7 +1817,7 @@ function renderDepot ()
 		{
 			startPortlet ('Objects (' . count ($objects) . ')');
 			echo '<br><br><table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
-			echo '<tr><th>Common name</th><th>Visible label</th><th>Asset tag</th><th>Row/Rack</th></tr>';
+			echo '<tr><th>Common name</th><th>Visible label</th><th>Asset tag</th><th>Row/Rack or Container</th></tr>';
 			$order = 'odd';
 			# gather IDs of all objects and fetch rackspace info in one pass
 			$idlist = array();
@@ -1832,7 +1832,9 @@ function renderDepot ()
 				echo "</td><td>${obj['label']}</td>";
 				echo "<td>${obj['asset_no']}</td>";
 				$places = array();
-				if (! array_key_exists ($obj['id'], $mountinfo))
+				if ($obj['container_id'])
+					$places[] = mkA ($obj['container_name'], 'object', $obj['container_id']);
+				elseif (! array_key_exists ($obj['id'], $mountinfo))
 					$places[] = 'Unmounted';
 				else
 					foreach ($mountinfo[$obj['id']] as $mi)
