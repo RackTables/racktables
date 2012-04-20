@@ -23,10 +23,11 @@ $SQLSchema = array
 			'asset_no' => 'asset_no',
 			'objtype_id' => 'objtype_id',
 			'rack_id' => '(SELECT rack_id FROM RackSpace WHERE object_id = RackObject.id ORDER BY rack_id ASC LIMIT 1)',
-			'rack_id_2' => "(SELECT parent_entity_id AS rack_id FROM EntityLink WHERE child_entity_type='object' AND child_entity_id = RackObject.id AND parent_entity_type = 'rack' ORDER BY rack_id ASC LIMIT 1)",
 			'Rack_name' => '(select name from Rack where id = rack_id)',
 			'row_id' => '(select row_id from Rack where id = rack_id)',
 			'Row_name' => '(select name from RackRow where id = row_id)',
+			'container_id' => "(SELECT parent_entity_id FROM EntityLink WHERE child_entity_type='object' AND child_entity_id = RackObject.id AND parent_entity_type = 'object' ORDER BY parent_entity_id ASC LIMIT 1)",
+			'container_name' => '(SELECT name FROM RackObject WHERE id = container_id)',
 			'has_problems' => 'has_problems',
 			'comment' => 'comment',
 			'nports' => '(SELECT COUNT(*) FROM Port WHERE object_id = RackObject.id)',
@@ -276,13 +277,6 @@ function listCells ($realm, $parent_id = 0)
 		$ret[$entity_id]['etags'] = array();
 		foreach (array_keys ($SQLinfo['columns']) as $alias)
 			$ret[$entity_id][$alias] = $row[$alias];
-		// use the temporary rack_id_2 key and remove this key from the result array
-		if ($realm == 'object')
-		{
-			if (! isset ($ret[$entity_id]['rack_id']))
-				$ret[$entity_id]['rack_id'] = $ret[$entity_id]['rack_id_2'];
-			unset ($ret[$entity_id]['rack_id_2']);
-		}
 	}
 	unset($result);
 
@@ -375,13 +369,6 @@ function spotEntity ($realm, $id)
 			$ret = array ('realm' => $realm);
 			foreach (array_keys ($SQLinfo['columns']) as $alias)
 				$ret[$alias] = $row[$alias];
-			// use the temporary rack_id_2 key and remove this key from the result array
-			if ($realm == 'object')
-			{
-				if (! isset ($ret['rack_id']))
-					$ret['rack_id'] = $ret['rack_id_2'];
-				unset ($ret['rack_id_2']);
-			}
 			$ret['etags'] = array();
 			if ($row['tag_id'] != NULL && isset ($taglist[$row['tag_id']]))
 				$ret['etags'][] = array

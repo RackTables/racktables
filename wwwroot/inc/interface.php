@@ -1875,7 +1875,7 @@ function renderDepot ()
 		{
 			startPortlet ('Objects (' . count ($objects) . ')');
 			echo '<br><br><table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
-			echo '<tr><th>Common name</th><th>Visible label</th><th>Asset tag</th><th>Row/Rack</th></tr>';
+			echo '<tr><th>Common name</th><th>Visible label</th><th>Asset tag</th><th>Row/Rack or Container</th></tr>';
 			$order = 'odd';
 			foreach ($objects as $obj)
 			{
@@ -1888,7 +1888,9 @@ function renderDepot ()
 					echo '<br><small>' . serializeTags ($obj['etags'], makeHref(array('page'=>$pageno, 'tab'=>'default')) . '&') . '</small>';
 				echo "</td><td class='${secondclass}'>${obj['label']}</td>";
 				echo "<td class='${secondclass}'>${obj['asset_no']}</td>";
-				if ($obj['rack_id'])
+				if ($obj['container_id'])
+					echo "<td class='${secondclass}'><a href='".makeHref(array('page'=>'object', 'object_id'=>$obj['container_id']))."'>${obj['container_name']}</a></td>";
+				elseif ($obj['rack_id'])
 					echo "<td class='${secondclass}'><a href='".makeHref(array('page'=>'row', 'row_id'=>$obj['row_id']))."'>${obj['Row_name']}</a>/<a href='".makeHref(array('page'=>'rack', 'rack_id'=>$obj['rack_id']))."'>${obj['Rack_name']}</a></td>";
 				else
 					echo "<td class='${secondclass}'>Unmounted</td>";
