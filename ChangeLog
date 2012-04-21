@@ -1,6 +1,7 @@
 0.19.13
 	update: IE spoils JPEG uploads, work around
 	update: use is_callable() (#551)
+	update: tag filter is always on the right side (#484)
 	bugfix: IPV4_AUTO_RELEASE config var was not working since 0.19.11
 	bugfix: containers weren't displayed properly on the list objects page (#547)
 0.19.12 2012-04-12
