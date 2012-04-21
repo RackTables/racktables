@@ -292,8 +292,6 @@ function renderRackspace ()
 	}
 
 	echo "<table class=objview border=0 width='100%'><tr><td class=pcleft>";
-	renderCellFilterPortlet ($cellfilter, 'rack', $found_racks);
-	echo '</td><td class=pcright>';
 
 	if (! renderEmptyResults($cellfilter, 'racks', $rackCount))
 	{
@@ -340,6 +338,8 @@ function renderRackspace ()
 		}
 		echo "</table>\n";
 	}
+	echo '</td><td class=pcright width="25%">';
+	renderCellFilterPortlet ($cellfilter, 'rack', $found_racks);
 	echo "</td></tr></table>\n";
 }
 
