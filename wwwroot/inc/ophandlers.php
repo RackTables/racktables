@@ -1239,8 +1239,9 @@ function updateObject ()
 		$value = $_REQUEST["${i}_value"];
 
 		if ('date' == $oldvalues[$attr_id]['type']) {
-			assertDateArg("${i}_value");
-			$value = strtotime($value);
+			assertDateArg ("${i}_value", TRUE);
+			if ($value != '')
+				$value = strtotime ($value);
 		}
 
 		# Delete attribute and move on, when the field is empty or if the field

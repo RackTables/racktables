@@ -220,8 +220,9 @@ function isInteger ($arg, $allow_zero = FALSE)
 // make sure the arg is a parsable date
 function assertDateArg ($argname, $ok_if_empty = FALSE)
 {
+	assertStringArg ($argname, $ok_if_empty);
 	// different versions of PHP return false/-1
-	if(strtotime($_REQUEST[$argname]) <= 0)
+	if ($_REQUEST[$argname] != '' and strtotime ($_REQUEST[$argname]) <= 0)
 		throw new InvalidRequestArgException($argname, $_REQUEST[$argname], 'parameter is not a parsable date');
 }
 
