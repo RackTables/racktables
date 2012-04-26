@@ -1238,6 +1238,11 @@ function updateObject ()
 			throw new InvalidRequestArgException ('attr_id', $attr_id, 'malformed request');
 		$value = $_REQUEST["${i}_value"];
 
+		if ('date' == $oldvalues[$attr_id]['type']) {
+			assertDateArg("${i}_value");
+			$value = strtotime($value);
+		}
+
 		# Delete attribute and move on, when the field is empty or if the field
 		# type is a dictionary and it is the "--NOT SET--" value of 0.
 		if ($value == '' || ($oldvalues[$attr_id]['type'] == 'dict' && $value == 0))
@@ -1257,6 +1262,7 @@ function updateObject ()
 			case 'uint':
 			case 'float':
 			case 'string':
+			case 'date':
 				$oldvalue = $oldvalues[$attr_id]['value'];
 				break;
 			case 'dict':

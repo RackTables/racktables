@@ -2643,6 +2643,9 @@ function fetchAttrsForObjects ($object_set = array())
 				$record['value'] = $row[$row['attr_type'] . '_value'];
 				parseWikiLink ($record);
 				break;
+			case 'date':
+				$record['value'] = $row['uint_value'];
+				break;
 			default:
 				$record['value'] = NULL;
 				break;
@@ -2688,6 +2691,7 @@ function commitUpdateAttrValue ($object_id, $attr_id, $value = '')
 			$column = $attr_type . '_value';
 			break;
 		case 'dict':
+		case 'date':
 			$column = 'uint_value';
 			break;
 		default:
@@ -4629,17 +4633,17 @@ function getCactiGraphsForObject ($object_id)
 
 # Return list of rows for objects, which have the date stored in the given
 # attribute belonging to the given range (relative to today's date).
-function scanAttrRelativeDays ($attr_id, $date_format, $not_before_days, $not_after_days)
+function scanAttrRelativeDays ($attr_id, $not_before_days, $not_after_days)
 {
 	$attrmap = getAttrMap();
-	if ($attrmap[$attr_id]['type'] != 'string')
+	if ($attrmap[$attr_id]['type'] != 'date')
 		throw new InvalidArgException ('attr_id', $attr_id, 'attribute cannot store dates');
 	$result = usePreparedSelectBlade
 	(
-		'SELECT string_value, object_id FROM AttributeValue ' .
-		'WHERE attr_id=? and STR_TO_DATE(string_value, ?) BETWEEN '.
+		'SELECT uint_value, object_id FROM AttributeValue ' .
+		'WHERE attr_id=? and FROM_UNIXTIME(uint_value) BETWEEN '.
 		'DATE_ADD(curdate(), INTERVAL ? DAY) and DATE_ADD(curdate(), INTERVAL ? DAY)',
-		array ($attr_id, $date_format, $not_before_days, $not_after_days)
+		array ($attr_id, $not_before_days, $not_after_days)
 	);
 	return $result->fetchAll (PDO::FETCH_ASSOC);
 }

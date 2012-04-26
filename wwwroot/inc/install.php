@@ -429,7 +429,7 @@ CREATE TABLE `Atom` (
 
 CREATE TABLE `Attribute` (
   `id` int(10) unsigned NOT NULL auto_increment,
-  `type` enum('string','uint','float','dict') default NULL,
+  `type` enum('string','uint','float','dict','date') default NULL,
   `name` char(64) default NULL,
   PRIMARY KEY  (`id`),
   UNIQUE KEY `name` (`name`)
@@ -1028,9 +1028,9 @@ INSERT INTO `Attribute` (`id`, `type`, `name`) VALUES
 (17,'uint','DRAM, MB'),
 (18,'uint','CPU, MHz'),
 (20,'string','OEM S/N 2'),
-(21,'string','support contract expiration'),
-(22,'string','HW warranty expiration'),
-(24,'string','SW warranty expiration'),
+(21,'date','support contract expiration'),
+(22,'date','HW warranty expiration'),
+(24,'date','SW warranty expiration'),
 (25,'string','UUID'),
 (26,'dict','Hypervisor'),
 (28,'string','Slot number'),
@@ -1529,6 +1529,8 @@ INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdef
 ('CACTI_USERNAME','','string','yes','no','no','Cacti user account'),
 ('CACTI_USERPASS','','string','yes','no','no','Cacti user password'),
 ('VIRTUAL_OBJ_LISTSRC','1504,1505,1506,1507','string','no','no','no','List source: virtual objects'),
+('DATETIME_ZONE','UTC','string','yes','no','no','Timezone to use for displaying/calculating dates'),
+('DATETIME_FORMAT','m/d/Y','string','no','no','no','PHP date() format to use for date output'),
 ('DB_VERSION','${db_version}','string','no','yes','no','Database version.');
 
 INSERT INTO `Script` VALUES ('RackCode','allow {\$userid_1}');

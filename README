@@ -94,6 +94,12 @@ should be sufficient:
 *                                                     *
 *******************************************************
 
+*** Upgrading to 0.19.13 ***
+A new "date" attribute type has been added. Existing date based fields
+("HW warranty expiration", "support contract expiration" and "SW warranty
+expiration") will be converted to this new type but must be in the format
+"mm/dd/yyyy" otherwise the conversion will fail.
+
 *** Upgrading to 0.19.2 ***
 
 This release is different in filesystem layout. The "gateways" directory
