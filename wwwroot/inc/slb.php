@@ -203,13 +203,15 @@ virtual_server %VS_HEADER% {
 
 class MacroParser
 {
-	protected $macros;
-	protected $stack;
+	protected $macros; // current macro context
+	protected $stack; // macro contexts saved by pushdefs()
+	protected $trace; // recursive macro expansion path
 
 	function __construct()
 	{
 		$this->macros = array();
 		$this->stack = array();
+		$this->trace = array();
 	}
 
 	function pushdefs()
@@ -323,10 +325,13 @@ class MacroParser
 	// returns the result of expanding the named define, or '' if unset
 	public function expandMacro ($name)
 	{
+		array_push ($this->trace, $name);
 		if (isset ($this->macros[$name]))
-			return $this->expand ($this->macros[$name]);
+			$ret = $this->expand ($this->macros[$name]);
 		else
-			return '';
+			$ret = '';
+		array_pop ($this->trace);
+		return $ret;
 	}
 }
 
