@@ -9398,32 +9398,39 @@ function renderObjectCactiGraphs ($object_id)
 	finishPortlet ();
 }
 
-function hwExpireReport ()
+function renderExpirations ()
 {
 	global $nextorder;
-	$breakdown = array
+	$breakdown = array();
+	$breakdown[21] = array
 	(
-		array ('from' => -365, 'to' => 0, 'class' => 'has_problems_', 'title' => 'HW warranty has expired within last year'),
-		array ('from' => 0, 'to' => 30, 'class' => 'row_', 'title' => 'HW warranty expires within 30 days'),
-		array ('from' => 30, 'to' => 60, 'class' => 'row_', 'title' => 'HW warranty expires within 60 days'),
-		array ('from' => 60, 'to' => 90, 'class' => 'row_', 'title' => 'HW warranty expires within 90 days'),
+		array ('from' => -365, 'to' => 0, 'class' => 'has_problems_', 'title' => 'has expired within last year'),
+		array ('from' => 0, 'to' => 30, 'class' => 'row_', 'title' => 'expires within 30 days'),
+		array ('from' => 30, 'to' => 60, 'class' => 'row_', 'title' => 'expires within 60 days'),
+		array ('from' => 60, 'to' => 90, 'class' => 'row_', 'title' => 'expires within 90 days'),
 	);
-	foreach ($breakdown as $section)
+	$breakdown[22] = $breakdown[21];
+	$breakdown[24] = $breakdown[21];
+	$attrmap = getAttrMap();
+	foreach ($breakdown as $attr_id => $sections)
 	{
-		$count = 1;
-		$order = 'odd';
-		$result = scanAttrRelativeDays (22, $section['from'], $section['to']);
+		startPortlet ($attrmap[$attr_id]['name']);
+		foreach ($sections as $section)
+		{
+			$count = 1;
+			$order = 'odd';
+			$result = scanAttrRelativeDays ($attr_id, $section['from'], $section['to']);
 
-		startPortlet ($section['title']);
-		echo "<table align=center width=60% border=0 cellpadding=5 cellspacing=0 align=center class=cooltable><tr valign=top>";
-		echo "<th align=center>Count</th>";
-		echo "<th align=center>Name</th>";
-		echo "<th align=center>Asset Tag</th>";
-		echo "<th align=center>Date Warranty <br> Expires</th></tr>\n";
+			echo '<table align=center width=60% border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
+			echo "<caption>${section['title']}</caption>\n";
 
-		if (! count ($result))
-			echo '<tr><td colspan=4>(none)</td></tr>';
-		else
+			if (! count ($result))
+			{
+				echo "<tr><td colspan=4>(none)</td></tr></table><br>\n";
+				continue;
+			}
+			echo '<tr valign=top><th align=center>Count</th><th align=center>Name</th>';
+			echo "<th align=center>Asset Tag</th><th align=center>Date Warranty <br> Expires</th></tr>\n";
 			foreach ($result as $row)
 			{
 				$date_value = date(getConfigVar('DATETIME_FORMAT'), $row['uint_value']);	
@@ -9438,7 +9445,8 @@ function hwExpireReport ()
 				$order = $nextorder[$order];
 				$count++;
 			}
-		echo "</table>\n";
+			echo "</table><br>\n";
+		}
 		finishPortlet ();
 	}
 }
