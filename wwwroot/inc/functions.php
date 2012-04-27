@@ -167,6 +167,15 @@ function isInteger ($arg, $allow_zero = FALSE)
 	return TRUE;
 }
 
+// make sure the arg is a parsable date
+function assertDateArg ($argname, $ok_if_empty = FALSE)
+{
+	// different versions of PHP return false/-1
+	if(strtotime($_REQUEST[$argname]) <= 0)
+		throw new InvalidRequestArgException($argname, $_REQUEST[$argname], 'parameter is not a parsable date');
+}
+
+
 // This function assures that specified argument was passed
 // and is a non-empty string.
 function assertStringArg ($argname, $ok_if_empty = FALSE)
@@ -308,7 +317,7 @@ function genericAssertion ($argname, $argtype)
 		break;
 	case 'enum/attr_type':
 		assertStringArg ($argname);
-		if (!in_array ($sic[$argname], array ('uint', 'float', 'string', 'dict')))
+		if (!in_array ($sic[$argname], array ('uint', 'float', 'string', 'dict','date')))
 			throw new InvalidRequestArgException ($argname, $sic[$argname], 'Unknown value');
 		break;
 	case 'enum/vlan_type':

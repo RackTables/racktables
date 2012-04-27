@@ -83,6 +83,13 @@ Full list of filesystem paths which could be specified in custom index.php or se
  \$path_to_local_php:     idem for local.php.
 ENDOFTEXT
 ,
+
+	'0.19.13' => <<<ENDOFTEXT
+A new "date" attribute type has been added. Existing date based fields ("HW warranty expiration",
+"support contract expiration" and "SW warranty expiration") will be converted to this new type but
+must be in the format "mm/dd/yyyy" otherwise the conversion will fail.
+ENDOFTEXT
+
 );
 
 // At the moment we assume, that for any two releases we can
@@ -132,6 +139,7 @@ function getDBUpgradePath ($v1, $v2)
 		'0.19.10',
 		'0.19.11',
 		'0.19.12',
+		'0.19.13',
 		'0.20.0',
 	);
 	if (!in_array ($v1, $versionhistory) or !in_array ($v2, $versionhistory))
@@ -1226,6 +1234,18 @@ CREATE TABLE `CactiGraph` (
 			$query[] = "INSERT INTO Chapter (id, sticky, name) VALUES (37, 'no', 'wireless OS type')";
 			$query[] = "INSERT INTO AttributeMap (objtype_id, attr_id, chapter_id) VALUES (965, 4, 37)";
 			$query[] = "UPDATE Config SET varvalue = '0.19.12' WHERE varname = 'DB_VERSION'";
+			break;
+		case '0.19.13':
+			// add the date attribute type
+			$query[] = "ALTER TABLE `Attribute` CHANGE COLUMN `type` `type` enum('string','uint','float','dict','date') DEFAULT NULL";
+			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdefined, description) VALUES ('DATETIME_ZONE','UTC','string','yes','no','no','Timezone to use for displaying/calculating dates')";
+			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdefined, description) VALUES ('DATETIME_FORMAT','m/d/Y','string','no','no','no','PHP date() format to use for date output')";
+
+			// port over existing fields to new date attr type
+			$query[] = "UPDATE Attribute SET type='date' WHERE id IN (21,22,24)";
+			$query[] = "UPDATE AttributeValue SET uint_value=UNIX_TIMESTAMP(STR_TO_DATE(string_value, '%m/%d/%Y')) WHERE attr_id IN(21,22,24)";
+
+			$query[] = "UPDATE Config SET varvalue = '0.19.13' WHERE varname = 'DB_VERSION'";
 			break;
 		case '0.20.0':
 			$query[] = "

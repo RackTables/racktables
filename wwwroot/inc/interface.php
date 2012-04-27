@@ -74,7 +74,8 @@ $attrtypes = array
 	'uint' => '[U] unsigned integer',
 	'float' => '[F] floating point',
 	'string' => '[S] string',
-	'dict' => '[D] dictionary record'
+	'dict' => '[D] dictionary record',
+	'date' => '[T] date'
 );
 
 $quick_links = NULL; // you can override this in your local.php, but first initialize it with getConfiguredQuickLinks()
@@ -677,6 +678,10 @@ function renderEditObjectForm()
 					$chapter[0] = '-- NOT SET --';
 					$chapter = cookOptgroups ($chapter, $object['objtype_id'], $record['key']);
 					printNiftySelect ($chapter, array ('name' => "${i}_value"), $record['key']);
+					break;
+				case 'date':
+					$date_value = $record['value'] ? date(getConfigVar('DATETIME_FORMAT'), $record['value']) : '';
+					echo "<input type=text name=${i}_value value='${date_value}'>";
 					break;
 			}
 			echo "</td></tr>\n";
@@ -3841,6 +3846,7 @@ function renderEditAttrMapForm ()
 		$shortType['float'] = 'F';
 		$shortType['string'] = 'S';
 		$shortType['dict'] = 'D';
+		$shortType['date'] = 'T';
 		foreach ($attrMap as $attr)
 			echo "<option value=${attr['id']}>[" . $shortType[$attr['type']] . "] ${attr['name']}</option>";
 		echo "</select></td><td class=tdleft>";
@@ -7934,7 +7940,11 @@ function formatIfTypeVariants ($variants, $select_name)
 
 function formatAttributeValue ($record)
 {
-	if (! isset ($record['key'])) // if record is a dictionary value, generate href with autotag in cfe
+	if ('date' == $record['type'])
+	{
+		return date(getConfigVar('DATETIME_FORMAT'), $record['value']);
+	}
+	else if (! isset ($record['key'])) // if record is a dictionary value, generate href with autotag in cfe
 	{
 		if ($record['id'] == 3) // FQDN attribute
 		{
@@ -8360,7 +8370,7 @@ function hwExpireReport ()
 	{
 		$count = 1;
 		$order = 'odd';
-		$result = scanAttrRelativeDays (22, '%m/%d/%Y', $section['from'], $section['to']);
+		$result = scanAttrRelativeDays (22, $section['from'], $section['to']);
 
 		startPortlet ($section['title']);
 		echo "<table align=center width=60% border=0 cellpadding=5 cellspacing=0 align=center class=cooltable><tr valign=top>";
@@ -8374,12 +8384,14 @@ function hwExpireReport ()
 		else
 			foreach ($result as $row)
 			{
+				$date_value = date(getConfigVar('DATETIME_FORMAT'), $row['uint_value']);	
+
 				$object = spotEntity ('object', $row['object_id']);
 				echo '<tr class=' . $section['class'] . $order . ' valign=top>';
 				echo "<td>${count}</td>";
 				echo '<td>' . mkA ($object['dname'], 'object', $object['id']) . '</td>';
 				echo "<td>${object['asset_no']}</td>";
-				echo "<td>${row['string_value']}</td>";
+				echo "<td>${date_value}</td>";
 				echo "</tr>\n";
 				$order = $nextorder[$order];
 				$count++;
