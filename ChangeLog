@@ -26,6 +26,7 @@
 	update: tag filter is always on the right side (#484)
 	bugfix: IPV4_AUTO_RELEASE config var was not working since 0.19.11
 	bugfix: containers weren't displayed properly on the list objects page (#547)
+	bugfix: 'FUNCTION * does not exist' SQL errors when upgrading 0.19.11 -> 0.19.12
 	new feature: new attribute type "date" by James Cohen
 0.19.12 2012-04-12
 	bugfix: Could not delete objects' log entries

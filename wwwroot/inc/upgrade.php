@@ -1224,13 +1224,13 @@ CREATE TABLE `CactiGraph` (
 			$query[] = "DELETE FROM Config WHERE varname IN('color_F', 'color_A', 'color_U', 'color_T', 'color_Th', 'color_Tw', 'color_Thw')";
 			$query[] = "INSERT INTO Chapter (id, sticky, name) VALUES (36,'no','serial console server models')";
 			$query[] = "INSERT INTO AttributeMap (objtype_id, attr_id, chapter_id) VALUES (1644, 1, NULL), (1644, 2, 36), (1644, 3, NULL)";
-			$query[] = "UPDATE Config SET varvalue = CONCAT (varvalue, '; 10=1588') WHERE varname = 'DEFAULT_PORT_OIF_IDS' AND 0 = INSTR (varvalue, '10=') ";
+			$query[] = "UPDATE Config SET varvalue = CONCAT(varvalue, '; 10=1588') WHERE varname = 'DEFAULT_PORT_OIF_IDS' AND 0 = INSTR(varvalue, '10=') ";
 			$query[] = "INSERT INTO PortInterfaceCompat VALUES (10,1663), (10,1664)";
 			$query[] = "INSERT INTO PortCompat VALUES (1588,1588), (1661,1661), (1663,1663), (1664,1664)";
 			$query[] = "INSERT INTO PortInnerInterface (id, iif_name) VALUES (11, 'CFP')";
 			$query[] = "INSERT INTO PortInterfaceCompat (iif_id, oif_id) VALUES (11,1668),(11,1669),(11,1670),(11,1671)";
 			$query[] = "INSERT INTO PortCompat (type1, type2) VALUES (1668,1668), (1669,1669), (1670,1670), (1671,1671)";
-			$query[] = "UPDATE Config SET varvalue = CONCAT (varvalue, '; 11=1668') WHERE varname = 'DEFAULT_PORT_OIF_IDS'";
+			$query[] = "UPDATE Config SET varvalue = CONCAT(varvalue, '; 11=1668') WHERE varname = 'DEFAULT_PORT_OIF_IDS'";
 			$query[] = "INSERT INTO Chapter (id, sticky, name) VALUES (37, 'no', 'wireless OS type')";
 			$query[] = "INSERT INTO AttributeMap (objtype_id, attr_id, chapter_id) VALUES (965, 4, 37)";
 			$query[] = "UPDATE Config SET varvalue = '0.19.12' WHERE varname = 'DB_VERSION'";
