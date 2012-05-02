@@ -1752,7 +1752,7 @@ function renderRackSpaceForObject ($object_id)
 			$checked = isset($_REQUEST['zerou_'.$rack_id]) ? 'checked' : '';
 		else
 			$checked = in_array($rack_id, $parentRacks) ? 'checked' : '';
-		echo "Zero-U: <input type=checkbox ${checked} name=zerou_${rack_id} id=zerou_${rack_id}>\n<br><br>\n";
+		echo "<label for=zerou_${rack_id}>Zero-U:</label> <input type=checkbox ${checked} name=zerou_${rack_id} id=zerou_${rack_id}>\n<br><br>\n";
 		echo "<input type='button' onclick='uncheckAll();' value='Uncheck all'>\n";
 		echo '</center></td>';
 	}
