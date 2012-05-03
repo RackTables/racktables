@@ -241,10 +241,48 @@ function callScript ($gwname, $params, $in, &$out, &$errors)
 	);
 	if (! is_resource ($child))
 		throw new RTGatewayError ("cant execute $dir/$gwname");
-	fwrite ($pipes[0], $in);
-	fclose ($pipes[0]);
-	$out = stream_get_contents ($pipes[1]);
-	$errors = stream_get_contents ($pipes[2]);
+
+	$buff_size = 4096;
+	$write_left = array ($pipes[0]);
+	$read_left = array ($pipes[1], $pipes[2]);
+	$write_fd = $write_left;
+	$read_fd = $read_left;
+	$except_fd = array();
+	while ((! empty ($read_fd) || ! empty ($write_fd)) && stream_select ($read_fd, $write_fd, $except_fd, NULL))
+	{
+		foreach ($write_fd as $fd)
+		{
+			$written = fwrite ($fd, $in, $buff_size);
+			$in = substr ($in, $written);
+			if ($written == 0 || empty ($in))
+			{
+				// close input fd
+				$write_left = array_diff ($write_left, array ($fd));
+				fclose ($fd);
+			}
+		}
+		foreach ($read_fd as $fd)
+		{
+			$str = fread ($fd, $buff_size);
+			if (strlen ($str) == 0)
+			{
+				// close output fd
+				$read_left = array_diff ($read_left, array ($fd));
+				fclose ($fd);
+			}
+			else
+			{
+				if ($fd == $pipes[1])
+					$out .= $str;
+				elseif ($fd == $pipes[2])
+					$errors .= $str;
+			}
+		}
+
+		$write_fd = $write_left;
+		$read_fd = $read_left;
+	}
+
 	return proc_close ($child);
 }
 
