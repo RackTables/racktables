@@ -3335,6 +3335,12 @@ function generate8021QDeployOps ($vswitch, $device_vlanlist, $before, $changes)
 	// Like for old_managed_vlans, a VLANs is never listed, only if it
 	// exists and belongs to "alien" type.
 	$new_managed_vlans = array();
+	// We need to count down the number of ports still using specific vlan
+	// in order to delete it from device as soon as vlan will be removed from the last port
+	// This array tracks port count:
+	//  * keys are vlan_id's;
+	//  * values are the number of changed ports which were using this vlan in old configuration
+	$used_vlans = array(); 
 	// 1
 	foreach ($domain_vlanlist as $vlan_id => $vlan)
 		if ($vlan['vlan_type'] == 'compulsory')
@@ -3355,6 +3361,13 @@ function generate8021QDeployOps ($vswitch, $device_vlanlist, $before, $changes)
 				if (in_array ($vlan_id, $device_vlanlist))
 					$new_managed_vlans[] = $vlan_id;
 			}
+		else
+			foreach ($port['allowed'] as $vlan_id)
+			{
+				if (!array_key_exists ($vlan_id, $used_vlans))
+					$used_vlans[$vlan_id] = 0;
+				$used_vlans[$vlan_id]++;
+			}
 	// 3
 	foreach ($changes as $port)
 		foreach ($port['allowed'] as $vlan_id)
@@ -3365,12 +3378,17 @@ function generate8021QDeployOps ($vswitch, $device_vlanlist, $before, $changes)
 				!in_array ($vlan_id, $new_managed_vlans)
 			)
 				$new_managed_vlans[] = $vlan_id;
+
+	$vlans_to_add = array_diff ($new_managed_vlans, $old_managed_vlans);
+	$vlans_to_del = array_diff ($old_managed_vlans, $new_managed_vlans);
 	$crq = array();
-	// Before removing each old VLAN as such it is necessary to unassign
-	// ports from it (to remove VLAN from each ports' list of "allowed"
-	// VLANs). This change in turn requires, that a port's "native"
-	// VLAN isn't set to the one being removed from its "allowed" list.
-	foreach ($ports_to_do as $port_name => $port)
+	
+	foreach (sortPortList ($ports_to_do) as $port_name => $port)
+	{
+		// Before removing each old VLAN as such it is necessary to unassign
+		// ports from it (to remove VLAN from each ports' list of "allowed"
+		// VLANs). This change in turn requires, that a port's "native"
+		// VLAN isn't set to the one being removed from its "allowed" list.
 		switch ($port['old_mode'] . '->' . $port['new_mode'])
 		{
 		case 'trunk->trunk':
@@ -3388,21 +3406,28 @@ function generate8021QDeployOps ($vswitch, $device_vlanlist, $before, $changes)
 			$queues[] = array_diff ($vlans_to_remove, $employed_vlans);// remove other vlans afterwards
 			foreach ($queues as $queue)
 				if (! empty ($queue))
+				{
 					$crq[] = array
 					(
 						'opcode' => 'rem allowed',
 						'port' => $port_name,
 						'vlans' => $queue,
 					);
+					foreach ($queue as $vlan_id)
+						$used_vlans[$vlan_id]--;
+				}
 			break;
 		case 'access->access':
 			if ($port['old_native'] and $port['old_native'] != $port['new_native'])
+			{
 				$crq[] = array
 				(
 					'opcode' => 'unset access',
 					'arg1' => $port_name,
 					'arg2' => $port['old_native'],
 				);
+				$used_vlans[$port['old_native']]--;
+			}
 			break;
 		case 'access->trunk':
 			$crq[] = array
@@ -3411,6 +3436,7 @@ function generate8021QDeployOps ($vswitch, $device_vlanlist, $before, $changes)
 				'arg1' => $port_name,
 				'arg2' => $port['old_native'],
 			);
+			$used_vlans[$port['old_native']]--;
 			break;
 		case 'trunk->access':
 			if ($port['old_native'])
@@ -3426,37 +3452,57 @@ function generate8021QDeployOps ($vswitch, $device_vlanlist, $before, $changes)
 			$queues[] = array_diff ($vlans_to_remove, $employed_vlans);// remove other vlans afterwards
 			foreach ($queues as $queue)
 				if (! empty ($queue))
+				{
 					$crq[] = array
 					(
 						'opcode' => 'rem allowed',
 						'port' => $port_name,
 						'vlans' => $queue,
 					);
+					foreach ($queue as $vlan_id)
+						$used_vlans[$vlan_id]--;
+				}
 			break;
 		default:
 			throw new InvalidArgException ('ports_to_do', '(hidden)', 'error in structure');
 		}
-	// Now it is safe to unconfigure VLANs, which still exist on device,
-	// but are not present on the "new" list.
-	// FIXME: put all IDs into one pseudo-command to make it easier
-	// for translators to create/destroy VLANs in batches, where
-	// target platform allows them to do.
-	foreach (array_diff ($old_managed_vlans, $new_managed_vlans) as $vlan_id)
-		$crq[] = array
-		(
-			'opcode' => 'destroy VLAN',
-			'arg1' => $vlan_id,
-		);
-	// Configure VLANs, which must be present on the device, but are not yet.
-	foreach (array_diff ($new_managed_vlans, $old_managed_vlans) as $vlan_id)
-		$crq[] = array
-		(
-			'opcode' => 'create VLAN',
-			'arg1' => $vlan_id,
-		);
-	// Now, when all new VLANs are created (queued), it is safe to assign (queue)
-	// ports to the new VLANs.
-	foreach ($ports_to_do as $port_name => $port)
+
+		// destroy unneeded VLANs on device
+		$deleted_vlans = array();
+		foreach ($vlans_to_del as $vlan_id)
+			if ($used_vlans[$vlan_id] == 0)
+			{
+				$crq[] = array
+				(
+					'opcode' => 'destroy VLAN',
+					'arg1' => $vlan_id,
+				);
+				unset ($used_vlans[$vlan_id]);
+				$deleted_vlans[] = $vlan_id;
+			}
+		$vlans_to_del = array_diff ($vlans_to_del, $deleted_vlans);
+
+		// create new VLANs on device
+		$added_vlans = array_intersect ($vlans_to_add, $port['new_allowed']);
+		foreach ($added_vlans as $vlan_id)
+			$crq[] = array
+			(
+				'opcode' => 'create VLAN',
+				'arg1' => $vlan_id,
+			);
+		$vlans_to_add = array_diff ($vlans_to_add, $added_vlans);
+
+		// change port mode if needed
+		if ($port['old_mode'] != $port['new_mode'])
+			$crq[] = array
+			(
+				'opcode' => 'set mode',
+				'arg1' => $port_name,
+				'arg2' => $port['new_mode'],
+			);
+
+		// Now, when all new VLANs are created (queued), it is safe to assign (queue)
+		// ports to the new VLANs.
 		switch ($port['old_mode'] . '->' . $port['new_mode'])
 		{
 		case 'trunk->trunk':
@@ -3489,12 +3535,6 @@ function generate8021QDeployOps ($vswitch, $device_vlanlist, $before, $changes)
 				);
 			break;
 		case 'access->trunk':
-			$crq[] = array
-			(
-				'opcode' => 'set mode',
-				'arg1' => $port_name,
-				'arg2' => $port['new_mode'],
-			);
 			if (count ($port['new_allowed']))
 				$crq[] = array
 				(
@@ -3513,12 +3553,6 @@ function generate8021QDeployOps ($vswitch, $device_vlanlist, $before, $changes)
 		case 'trunk->access':
 			$crq[] = array
 			(
-				'opcode' => 'set mode',
-				'arg1' => $port_name,
-				'arg2' => $port['new_mode'],
-			);
-			$crq[] = array
-			(
 				'opcode' => 'set access',
 				'arg1' => $port_name,
 				'arg2' => $port['new_native'],
@@ -3527,6 +3561,22 @@ function generate8021QDeployOps ($vswitch, $device_vlanlist, $before, $changes)
 		default:
 			throw new InvalidArgException ('ports_to_do', '(hidden)', 'error in structure');
 		}
+	}
+	// remove the rest of VLANs from device (this list normally should be empty)
+	foreach ($vlans_to_del as $vlan_id)
+		$crq[] = array
+		(
+			'opcode' => 'destroy VLAN',
+			'arg1' => $vlan_id,
+		);
+	// add the rest of VLANs to device (this list normally should be empty)
+	foreach ($vlans_to_add as $vlan_id)
+		$crq[] = array
+		(
+			'opcode' => 'create VLAN',
+			'arg1' => $vlan_id,
+		);
+
 	return $crq;
 }
 
