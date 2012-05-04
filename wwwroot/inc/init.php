@@ -72,7 +72,7 @@ else
 }
 
 // avoid notices being thrown
-date_default_timezone_set(getConfigVar("DATETIME_ZONE"));
+date_default_timezone_set (getConfigVar ('DATETIME_ZONE'));
 
 // Depending on the 'result' value the 'load' carries either the
 // parse tree or error message. The latter case is a bug, because
