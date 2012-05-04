@@ -247,7 +247,7 @@ function getRenderedAlloc ($object_id, $alloc)
 			if ($router['id'] != $object_id)
 				$other_routers[] = $router;
 		if (count ($other_routers))
-			$ret['td_routed_by'] = getOutputOf ('printRoutersTD', $other_routers);
+			$ret['td_routed_by'] = getOutputOf ('printRoutersTD', $other_routers, getConfigVar ('IPV4_TREE_RTR_AS_CELL'));
 		else
 			$ret['td_routed_by'] = "<td class='$td_class'>&nbsp;</td>";
 	}

@@ -589,10 +589,12 @@ function getRenderedIPv4NetCapacity ($range)
 	if (isset ($range['addrc']))
 	{
 		// full mode
+		// $a is "aquamarine zone", $b is "gray zone"
 		$total = ip4_range_size ($range);
-		$a_total = $total - getIPv4OwnRangeSize ($range);
-		$b_used = $range['own_addrc'];
-		$a_used = $range['addrc'] - $b_used;
+		$a_total = getIPv4OwnRangeSize ($range);
+		$a_used = $range['own_addrc'];
+		$b_total = $total - $a_total;
+		$b_used = $range['addrc'] - $a_used;
 
 		// generate link to progress bar image
 		$width = 100;
@@ -608,7 +610,6 @@ function getRenderedIPv4NetCapacity ($range)
 		else
 			$px1 = $px2 = $px3 = 0;
 
-		$b_total = $total - $a_total;
 		$title_items = array();
 		$title2_items = array();
 		if ($a_total)

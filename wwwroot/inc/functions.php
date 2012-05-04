@@ -2339,6 +2339,9 @@ function nodeIsCollapsed ($node)
 	return $node['symbol'] == 'node-collapsed';
 }
 
+// sets 'addrlist', 'own_addrlist', 'addrc', 'own_addrc' keys of $node
+// 'addrc' and 'own_addrc' are sizes of 'addrlist' and 'own_addrlist', respectively
+// 'own_addrlist' is empty if the node network has no children
 function loadIPAddrList (&$node)
 {
 	$node['addrlist'] = scanIPSpace (array (array ('first' => $node['ip_bin'], 'last' => ip_last ($node))));
@@ -2347,8 +2350,12 @@ function loadIPAddrList (&$node)
 		$node['own_addrlist'] = $node['addrlist'];
 	else
 	{
-		$node['own_addrlist'] = array();
-		if ($node['kidc'] != 0)
+		if ($node['kidc'] == 0)
+			$node['own_addrlist'] = $node['addrlist'];
+			//$node['own_addrlist'] = array();
+		else
+		{
+			$node['own_addrlist'] = array();
 			// node has childs
 			foreach ($node['spare_ranges'] as $mask => $spare_list)
 				foreach ($spare_list as $spare_ip)
@@ -2358,6 +2365,7 @@ function loadIPAddrList (&$node)
 						if (($bin_ip & $spare_range['mask_bin']) == $spare_range['ip_bin'])
 							$node['own_addrlist'][$bin_ip] = $addr;
 				}
+		}
 	}
 	$node['addrc'] = count ($node['addrlist']);
 	$node['own_addrc'] = count ($node['own_addrlist']);
@@ -2365,13 +2373,15 @@ function loadIPAddrList (&$node)
 
 function getIPv4OwnRangeSize ($range)
 {
-	if (! isset ($range['id']))
+	if (empty ($range['spare_ranges']))
 		return ip4_range_size ($range);
-	$ret = 0;
-	if (isset ($range['spare_ranges']))
+	else
+	{
+		$ret = 0;
 		foreach ($range['spare_ranges'] as $mask => $spare_list)
 			$ret += count ($spare_list) * ip4_mask_size ($mask);
-	return $ret;
+		return $ret;
+	}
 }
 
 // returns the array of structure described by constructIPAddress
