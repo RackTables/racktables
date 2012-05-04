@@ -1237,12 +1237,15 @@ CREATE TABLE `CactiGraph` (
 		case '0.19.13':
 			// add the date attribute type
 			$query[] = "ALTER TABLE `Attribute` CHANGE COLUMN `type` `type` enum('string','uint','float','dict','date') DEFAULT NULL";
-			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdefined, description) VALUES ('DATETIME_ZONE','UTC','string','yes','no','no','Timezone to use for displaying/calculating dates')";
-			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdefined, description) VALUES ('DATETIME_FORMAT','m/d/Y','string','no','no','no','PHP date() format to use for date output')";
+			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdefined, description) VALUES ('DATETIME_ZONE','UTC','string','yes','no','yes','Timezone to use for displaying/calculating dates')";
+			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdefined, description) VALUES ('DATETIME_FORMAT','m/d/Y','string','no','no','yes','PHP date() format to use for date output')";
 
 			// port over existing fields to new date attr type
 			$query[] = "UPDATE Attribute SET type='date' WHERE id IN (21,22,24)";
 			$query[] = "UPDATE AttributeValue SET uint_value=UNIX_TIMESTAMP(STR_TO_DATE(string_value, '%m/%d/%Y')) WHERE attr_id IN(21,22,24)";
+
+			// some config variables should be configurable in per-user basis
+			$query[] = "UPDATE `Config` SET `is_userdefined` = 'yes' WHERE `varname` IN ('ENABLE_MULTIPORT_FORM','FILTER_DEFAULT_ANDOR','FILTER_PREDICATE_SIEVE','FILTER_SUGGEST_ANDOR','FILTER_SUGGEST_EXTRA','FILTER_SUGGEST_PREDICATES','FILTER_SUGGEST_TAGS','IPV4_ENABLE_KNIGHT','IPV4_TREE_RTR_AS_CELL','TAGS_QUICKLIST_SIZE','TAGS_QUICKLIST_THRESHOLD','TAGS_TOPLIST_SIZE')";
 
 			$query[] = "UPDATE Config SET varvalue = '0.19.13' WHERE varname = 'DB_VERSION'";
 			break;
