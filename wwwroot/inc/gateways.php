@@ -56,6 +56,7 @@ $breedfunc = array
 	'nxos4-get8021q-main'      => 'nxos4Read8021QConfig',
 	'nxos4-get8021q-top'       => 'nxos4ScanTopLevel',
 	'nxos4-get8021q-readport'  => 'nxos4PickSwitchportCommand',
+	'nxos4-get8021q-readvlan'  => 'nxos4PickVLANCommand',
 	'nxos4-getportstatus-main' => 'ciscoReadInterfaceStatus',
 	'nxos4-getmaclist-main'    => 'nxos4ReadMacList',
 	'nxos4-xlatepushq-main'    => 'nxos4TranslatePushQueue',

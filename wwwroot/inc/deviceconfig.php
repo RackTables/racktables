@@ -422,8 +422,7 @@ function ios12PickVLANCommand (&$work, $line)
 	case (preg_match ('@! END OF VLAN LIST$@', $line)):
 		return 'ios12-get8021q-top';
 	case (preg_match ('@^([[:digit:]]+) {1,4}.{32} active    @', $line, $matches)):
-		if (!array_key_exists ($matches[1], $work['vlanlist']))
-			$work['vlanlist'][] = $matches[1];
+		$work['vlanlist'][] = $matches[1];
 		break;
 	default:
 	}
@@ -879,13 +878,29 @@ function nxos4ScanTopLevel (&$work, $line)
 		$work['current'] = array ('port_name' => $port_name);
 		$work['portconfig'][$port_name][] = array ('type' => 'line-header', 'line' => $line);
 		return 'nxos4-get8021q-readport';
-	case (preg_match ('@^vlan (.+)$@', $line, $matches)):
-		foreach (iosParseVLANString ($matches[1]) as $vlan_id)
-			$work['vlanlist'][] = $vlan_id;
-		return 'nxos4-get8021q-top';
+	case (preg_match ('/^VLAN Name                             Status    Ports$/', $line, $matches)):
+		return 'nxos4-get8021q-readvlan';
 	default:
 		return 'nxos4-get8021q-top'; // continue scan
 	}
+}
+
+function nxos4PickVLANCommand (&$work, $line)
+{
+	$matches = array();
+	switch (TRUE)
+	{
+	case ($line == '---- -------------------------------- --------- -------------------------------'):
+		// ignore the rest of VLAN table header;
+		break;
+	case (preg_match ('@! END OF VLAN LIST$@', $line)):
+		return 'nxos4-get8021q-top';
+	case (preg_match ('@^([[:digit:]]+) {1,4}.{32} active    @', $line, $matches)):
+		$work['vlanlist'][] = $matches[1];
+		break;
+	default:
+	}
+	return 'nxos4-get8021q-readvlan';
 }
 
 function nxos4PickSwitchportCommand (&$work, $line)

@@ -3392,6 +3392,16 @@ function generate8021QDeployOps ($vswitch, $device_vlanlist, $before, $changes)
 	$vlans_to_add = array_diff ($new_managed_vlans, $old_managed_vlans);
 	$vlans_to_del = array_diff ($old_managed_vlans, $new_managed_vlans);
 	$crq = array();
+
+	// destroy unused VLANs on device
+	$deleted_vlans = array_diff ($vlans_to_del, array_keys ($used_vlans));
+	foreach ($deleted_vlans as $vlan_id)
+		$crq[] = array
+		(
+			'opcode' => 'destroy VLAN',
+			'arg1' => $vlan_id,
+		);
+	$vlans_to_del = array_diff ($vlans_to_del, $deleted_vlans);
 	
 	foreach (sortPortList ($ports_to_do) as $port_name => $port)
 	{
@@ -3487,7 +3497,6 @@ function generate8021QDeployOps ($vswitch, $device_vlanlist, $before, $changes)
 					'opcode' => 'destroy VLAN',
 					'arg1' => $vlan_id,
 				);
-				unset ($used_vlans[$vlan_id]);
 				$deleted_vlans[] = $vlan_id;
 			}
 		$vlans_to_del = array_diff ($vlans_to_del, $deleted_vlans);
@@ -3572,14 +3581,8 @@ function generate8021QDeployOps ($vswitch, $device_vlanlist, $before, $changes)
 			throw new InvalidArgException ('ports_to_do', '(hidden)', 'error in structure');
 		}
 	}
-	// remove the rest of VLANs from device (this list normally should be empty)
-	foreach ($vlans_to_del as $vlan_id)
-		$crq[] = array
-		(
-			'opcode' => 'destroy VLAN',
-			'arg1' => $vlan_id,
-		);
-	// add the rest of VLANs to device (this list normally should be empty)
+
+	// add the rest of VLANs to device (compulsory VLANs)
 	foreach ($vlans_to_add as $vlan_id)
 		$crq[] = array
 		(
