@@ -24,6 +24,7 @@
 	update: IE spoils JPEG uploads, work around
 	update: use is_callable() (#551)
 	update: tag filter is always on the right side (#484)
+	update: more config variables can be overriden per user
 	bugfix: IPV4_AUTO_RELEASE config var was not working since 0.19.11
 	bugfix: containers weren't displayed properly on the list objects page (#547)
 	bugfix: 'FUNCTION * does not exist' SQL errors when upgrading 0.19.11 -> 0.19.12
