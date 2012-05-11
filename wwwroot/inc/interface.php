@@ -881,7 +881,10 @@ function renderObjectPortRow ($port, $is_highlighted)
 			formatPortLink ($port['remote_object_id'], $port['remote_object_name'], $port['remote_id'], NULL) . 
 			"</td>";
 		echo "<td class=tdleft>" . formatLoggedSpan ($port['last_log'], $port['remote_name'], 'underline') . "</td>";
-		echo "<td class='tdleft rsvtext'>${port['cableid']}</td>";
+		$editable = permitted ('object', 'ports', 'editPort')
+			? 'editable'
+			: '';
+		echo "<td class=tdleft><span class='rsvtext $editable id-${port['id']} op-upd-reservation-cable'>${port['cableid']}</span></td>";
 	}
 	else
 		echo implode ('', formatPortReservation ($port)) . '<td></td>';
@@ -973,7 +976,7 @@ function renderObject ($object_id)
 		{
 			echo "<tr class=row_${order} valign=top>";
 			echo '<td class=tdleft>' . $row['date'] . '<br>' . $row['user'] . '</td>';
-			echo '<td class="slbconf rsvtext">' . string_insert_hrefs (htmlspecialchars ($row['content'], ENT_NOQUOTES)) . '</td>';
+			echo '<td class="logentry">' . string_insert_hrefs (htmlspecialchars ($row['content'], ENT_NOQUOTES)) . '</td>';
 			echo '</tr>';
 			$order = $nextorder[$order];
 		}
@@ -2277,7 +2280,10 @@ function renderEmptyIPv6 ($ip_bin, $hl_ip)
 		$class .= ' port_highlight';
 	$fmt = ip6_format ($ip_bin);
 	echo "<tr class='$class'><td><a class='ancor' name='ip-$fmt' href='" . makeHref (array ('page' => 'ipaddress', 'ip' => $fmt)) . "'>" . $fmt;
-	echo "</a></td><td class='rsv-port'><span class='rsvtext'></span></td><td>&nbsp;</td></tr>\n";
+	$editable = permitted ('ipaddress', 'properties', 'editAddress')
+		? 'editable'
+		: '';
+	echo "</a></td><td><span class='rsvtext $editable id-$fmt op-upd-reservation-ip'></span></td><td>&nbsp;</td></tr>\n";
 }
 
 // Renders empty table line to shrink empty IPv6 address ranges.
@@ -2369,7 +2375,10 @@ function renderIPv4NetworkAddresses ($range)
 		if (!isset ($range['addrlist'][$ip_bin]))
 		{
 			echo "<tr class='tdleft $tr_class'><td class=tdleft><a class='ancor' name='ip-$dottedquad' href='" . makeHref(array('page'=>'ipaddress', 'ip' => $dottedquad)) . "'>$dottedquad</a></td>";
-			echo "<td class='rsv-port'><span class='rsvtext'></span></td><td>&nbsp;</td></tr>\n";
+			$editable = permitted ('ipaddress', 'properties', 'editAddress')
+				? 'editable'
+				: '';
+			echo "<td><span class='rsvtext $editable id-$dottedquad op-upd-reservation-ip'></span></td><td>&nbsp;</td></tr>\n";
 			continue;
 		}
 		$addr = $range['addrlist'][$ip_bin];
@@ -2384,9 +2393,13 @@ function renderIPv4NetworkAddresses ($range)
 		$tr_class .= ' ' . $addr['class'];
 		echo "<tr class='tdleft $tr_class'>";
 		echo "<td><a class='ancor $history_class' $title name='ip-$dottedquad' href='".makeHref(array('page'=>'ipaddress', 'ip'=>$addr['ip']))."'>${addr['ip']}</a></td>";
-		echo "<td class='" .
-			(empty ($addr['allocs']) || !empty ($addr['name']) ? 'rsv-port' : '') .
-			"'><span class='rsvtext'>${addr['name']}</span></td><td>";
+		$editable =
+			(empty ($addr['allocs']) || !empty ($addr['name']))
+			&& permitted ('ipaddress', 'properties', 'editAddress')
+			? 'editable'
+			: '';
+		echo "<td><span class='rsvtext $editable id-$dottedquad op-upd-reservation-ip'>${addr['name']}</span></td>";
+		echo "<td>";
 		$delim = '';
 		if ( $addr['reserved'] == 'yes')
 		{
@@ -2495,9 +2508,12 @@ function renderIPv6NetworkAddresses ($netinfo)
 		$tr_class = $addr['class'] . ' tdleft' . ($hl_ip === $ip_bin ? ' port_highlight' : '');
 		echo "<tr class='$tr_class'>";
 		echo "<td><a class='ancor $history_class' $title name='ip-${addr['ip']}' href='" . makeHref (array ('page' => 'ipaddress', 'ip' => $addr['ip'])) . "'>${addr['ip']}</a></td>";
-		echo "<td class='" .
-			(empty ($addr['allocs']) || !empty ($addr['name']) ? 'rsv-port' : '') .
-			"'><span class='rsvtext'>${addr['name']}</span></td><td>";
+		$editable =
+			(empty ($addr['allocs']) || !empty ($addr['name'])
+			&& permitted ('ipaddress', 'properties', 'editAddress')
+			? 'editable'
+			: '');
+		echo "<td><span class='rsvtext $editable id-${addr['ip']} op-upd-reservation-ip'>${addr['name']}</span></td><td>";
 		$delim = '';
 		if ( $addr['reserved'] == 'yes')
 		{
@@ -8035,7 +8051,7 @@ function renderObjectLogEditor ()
 	{
 		echo "<tr class=row_${order} valign=top>";
 		echo '<td class=tdleft>' . $row['date'] . '<br>' . $row['user'] . '</td>';
-		echo '<td class="slbconf rsvtext">' . string_insert_hrefs (htmlspecialchars ($row['content'], ENT_NOQUOTES)) . '</td>';
+		echo '<td class="logentry">' . string_insert_hrefs (htmlspecialchars ($row['content'], ENT_NOQUOTES)) . '</td>';
 		echo "<td class=tdleft><a href=\"".makeHrefProcess(array('op'=>'del', 'log_id'=>$row['id'], $id_name=>$object_id))."\">";
 		echo getImageHREF ('DESTROY', 'Delete log entry') . '</a></td>';
 		echo "</tr>\n";
@@ -8076,7 +8092,7 @@ function allObjectLogs ()
 			echo "<tr class=row_${order} valign=top>";
 			echo '<td class=tdleft>' . mkA ($text, $entity, $row['object_id'], 'log') . '</td>';
 			echo '<td class=tdleft>' . $row['date'] . '<br>' . $row['user'] . '</td>';
-			echo '<td class="slbconf rsvtext">' . string_insert_hrefs (htmlspecialchars ($row['content'], ENT_NOQUOTES)) . '</td>';
+			echo '<td class="logentry">' . string_insert_hrefs (htmlspecialchars ($row['content'], ENT_NOQUOTES)) . '</td>';
 			echo "</tr>\n";
 			$order = $nextorder[$order];
 		}
@@ -8420,6 +8436,22 @@ function renderExpirations ()
 		}
 		finishPortlet ();
 	}
+}
+
+// returns an array with two items - each is HTML-formatted <TD> tag
+function formatPortReservation ($port)
+{
+	$ret = array();
+	$ret[] = '<td class=tdleft>' .
+		(strlen ($port['reservation_comment']) ? formatLoggedSpan ($port['last_log'], 'Reserved:', 'strong underline') : '').
+		'</td>';
+	$editable = permitted ('object', 'ports', 'editPort')
+		? 'editable'
+		: '';
+	$ret[] = '<td class=tdleft>' .
+		formatLoggedSpan ($port['last_log'], $port['reservation_comment'], "rsvtext $editable id-${port['id']} op-upd-reservation-port") .
+		'</td>';
+	return $ret;
 }
 
 ?>

@@ -672,6 +672,7 @@ $ajaxhandler['get-port-mac'] = 'getPortInfoAJAX';
 $ajaxhandler['get-port-conf'] = 'getPortInfoAJAX';
 $ajaxhandler['upd-reservation-port'] = 'updatePortRsvAJAX';
 $ajaxhandler['upd-reservation-ip'] = 'updateIPRsvAJAX';
+$ajaxhandler['upd-reservation-cable'] = 'updateCableIdAJAX';
 $ajaxhandler['net-usage'] = 'getNetUsageAJAX';
 
 ?>

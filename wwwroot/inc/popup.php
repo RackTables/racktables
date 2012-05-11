@@ -455,9 +455,9 @@ header ('Content-Type: text/html; charset=UTF-8');
 			assertPermission();
 			$text .= '<div style="background-color: #f0f0f0; border: 1px solid #3c78b5; padding: 10px; height: 100%; text-align: center; margin: 5px;">';
 			if (isset ($_REQUEST['do_link']))
-				$text .= getOutputOf ('handlePopupPortLink');
+				$text .= getOutputOf ('callHook', 'handlePopupPortLink');
 			else
-				$text .= getOutputOf ('renderPopupPortSelector');
+				$text .= getOutputOf ('callHook' , 'renderPopupPortSelector');
 			$text .= '</div>';
 			break;
 		case 'inet4list':

@@ -4,31 +4,36 @@ var editMode = false;
 var visible_pen = $();
 var stop_propagation = false;
 var waiting_response = false;
+var editable_filter = 'span.editable';
 
 var span = null;
 var group = null;
 var input = null;
 var btn = null;
 
-$(document).ready(function() {
-	initCommentTD($('.rsv-port'));
+$(document).ready (function() {
+	$(editable_filter).each (function (i, iSpan) {
+		var container = $('<div class="edit-container"/>')
+			.mouseover(onSpanMouseOver);
+		$(iSpan)
+			.after (container)
+			.detach()
+			.appendTo (container);
+		container
+			.append
+			(
+				$('<div class="empty" style="margin-left: 10px; width:12px; height:12px;"><img class="edit-btn" src="?module=chrome&uri=pix/pencil-icon.png" title="Edit text" /></div>')
+				.click(onPencilClick)
+			);
+	});
 	$('body').mouseover(onBodyMouseOver);
 });
 
-function initCommentTD (jqSet) {
-	jqSet
-		.append('<div class="empty" style="margin-left: 10px; width:12px; height:12px;"><img class="edit-btn" src="?module=chrome&uri=pix/pencil-icon.png" title="Edit reservation comment" /></div>')
-		.mouseover(onTDMouseOver);
-	jqSet.find('.edit-btn')
-		.css('cursor', 'pointer')
-		.click(onPencilClick);
-}
-
-function onTDMouseOver (event) {
+function onSpanMouseOver (event) {
 	if (editMode)
 		return;
 	stop_propagation = true;
-	var pen = $(event.target).closest('.rsv-port').find('.edit-btn');
+	var pen = $(event.target).closest('.edit-container').find('.edit-btn');
 	if (! visible_pen.length || visible_pen[0] != pen[0]) {
 		visible_pen.hide();
 		visible_pen = pen;
@@ -54,7 +59,7 @@ function hideEditForm () {
 
 function onPencilClick (event) {
 	// hide original plain text comment
-	span = $(event.target).closest('.rsv-port').find('.rsvtext');
+	span = $(event.target).closest('.edit-container').find(editable_filter);
 	var width = span[0].offsetWidth + 50;
 	if (width < 150)
 		width = 150;
@@ -92,7 +97,7 @@ function onPencilClick (event) {
 		function (event) {
 			if (! waiting_response)
 				hideEditForm();
-			onTDMouseOver(event);
+			onSpanMouseOver(event);
 		});
 	event.stopPropagation(); // prevent the initial click to immediately close edit form
 }
@@ -110,47 +115,41 @@ function doSetCaretPosition (input, iCaretPos) {
 }
 
 function onFormSubmit () {
-	var comment = input.val();
-	var item_id = 0;
-	var a = $(input).closest('tr').find('a.ancor');
-	var mode;
-	if (a.length) {
-		item_id = a[0].name.replace(/^(port|ip)-/, '');
-		mode = a[0].name.replace(/^(port|ip)-.*/, '$1');
-	}
-	if (mode == undefined)
-		throw "cant determine run mode: neither 'port' nor 'ip'";
-
-	waiting_response = true;
+	var text = input.val();
 	input.attr('disabled', 'true');
 	btn.replaceWith('<img src="?module=chrome&uri=pix/ajax-loader.gif" title="Please wait" />');
+	waiting_response = true;
+	
+	var op = '';
+	var item_id = '';
+	var list = span[0].className.split (/\s+/);
+	for (var i in list) {
+		var cn = list[i];
+		var m;
+		if (m = cn.match (/^id-(.*)/)) {
+			item_id = m[1];
+		}
+		else if (m = cn.match (/^op-(.*)/)) {
+			op = m[1];
+		}
+	}
+	
 	$.ajax({
 		type: 'POST',
 		url: 'index.php',
 		data: {
 			'module': 'ajax',
-			'ac': 'upd-reservation-' + mode,
+			'ac': op,
 			'id': item_id,
-			'comment': comment
+			'text': text
 		},
-		dataType: 'json',
 		success: function(data, textStatus, XMLHttpRequest) {
-			if (mode == 'port') {
-				var td1 = input.closest('td.rsv-port');
-				var td0 = td1.prev('td');
-				hideEditForm();
-				var tr = td1.closest('tr');
-				td0.replaceWith(data[0]);
-				td1.replaceWith(data[1]);
-				initCommentTD($(tr).find('.rsv-port'));
-			}
-			else if (mode == 'ip' && data == 'OK') {
-				span.html(input.val());
-				hideEditForm();
-			}
+			if (data == 'OK')
+				span.html(text);
+			else
+				alert ('Error updating port: ' + data);
 		},
 		error: function(jqXHR, textStatus, errorThrown) {
-			hideEditForm();
 			alert ('Error updating port: ' + textStatus);
 		},
 		complete: function() {

@@ -549,6 +549,7 @@ div.tagselector td {
 
 .edit-btn {
 	display: none;
+	cursor: pointer;
 }
 
 .tagtree.compact td {
@@ -765,4 +766,11 @@ a.slb-highlighted {
 .aac {
 	font-weight: bold;
 	margin-left: 1em;
+}
+
+.logentry {
+	text-align: left;
+	white-space: pre;
+	font-family: monospace;
+	font-style: italic;
 }

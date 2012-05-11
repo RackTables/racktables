@@ -111,19 +111,6 @@ function formatLoggedSpan ($log_item, $text, $html_class = '')
 		">$text</span>";
 }
 
-// returns an array with two items - each is HTML-formatted <TD> tag
-function formatPortReservation ($port)
-{
-	$ret = array();
-	$ret[] = '<td class=tdleft>' .
-		(strlen ($port['reservation_comment']) ? formatLoggedSpan ($port['last_log'], 'Reserved:', 'strong underline') : '').
-		'</td>';
-	$ret[] = '<td class="rsv-port tdleft">' .
-		formatLoggedSpan ($port['last_log'], $port['reservation_comment'], 'rsvtext') .
-		'</td>';
-	return $ret;
-}
-
 function getTagSelectAJAX()
 {
 	global $taglist;
@@ -189,27 +176,23 @@ function updatePortRsvAJAX()
 {
 	global $sic;
 	assertUIntArg ('id');
-	assertStringArg ('comment', TRUE);
+	assertStringArg ('text', TRUE);
 	$port_info = getPortInfo ($sic['id']);
 	fixContext (spotEntity ('object', $port_info['object_id']));
-	assertPermission ('object', 'ports', 'set_reserve_comment');
+	assertPermission ('object', 'ports', 'editPort');
 	if ($port_info['linked'])
 		throw new RackTablesError ('Cant update port comment: port is already linked');
 	if (! isset ($port_info['reservation_comment']))
 		$port_info['reservation_comment'] = '';
-	if ($port_info['reservation_comment'] !== $sic['comment'])
-	{
-		commitUpdatePortComment ($sic['id'], $sic['comment']);
-		$port_info = getPortInfo ($sic['id']);
-	}
-	$tds = formatPortReservation ($port_info);
-	echo json_encode ($tds);
+	if ($port_info['reservation_comment'] !== $sic['text'])
+		commitUpdatePortComment ($sic['id'], $sic['text']);
+	echo 'OK';
 }
 
 function updateIPRsvAJAX()
 {
 	global $sic;
-	assertStringArg ('comment', TRUE);
+	assertStringArg ('text', TRUE);
 	$ip_bin = assertIPArg ('id');
 	$addr = getIPAddress ($ip_bin);
 	if (! empty ($addr['allocs']) && empty ($addr['name']))
@@ -217,10 +200,25 @@ function updateIPRsvAJAX()
 	$net = spotNetworkByIP ($ip_bin);
 	if (isset ($net))
 		fixContext ($net);
-	assertPermission ((strlen ($ip_bin) == 16 ? 'ipv6net' : 'ipv4net'), NULL, 'set_reserve_comment');
-	$reserved = (empty ($sic['comment']) ? 'no' : $addr['reserved']); // unset reservation if user clears comment
-	updateAddress ($ip_bin, $sic['comment'], $reserved);
-	echo json_encode ('OK');
+	assertPermission ('ipaddress', 'properties', 'editAddress');
+	$reserved = (empty ($sic['text']) ? 'no' : $addr['reserved']); // unset reservation if user clears comment
+	updateAddress ($ip_bin, $sic['text'], $reserved);
+	echo 'OK';
+}
+
+function updateCableIdAJAX()
+{
+	global $sic;
+	assertUIntArg ('id');
+	assertStringArg ('text', TRUE);
+	$port_info = getPortInfo ($sic['id']);
+	fixContext (spotEntity ('object', $port_info['object_id']));
+	assertPermission ('object', 'ports', 'editPort');
+	if (! $port_info['linked'])
+		throw new RackTablesError ('Cant update cable ID: port is not linked');
+	if ($port_info['reservation_comment'] !== $sic['text'])
+		commitUpdatePortLink ($sic['id'], $sic['text']);
+	echo 'OK';
 }
 
 function getNetUsageAJAX()
