@@ -4955,8 +4955,10 @@ function renderCellFilterPortlet ($preselect, $realm, $cell_list = array(), $byp
 		}
 	}
 	// extra code
+	$enable_textify = FALSE;
 	if (getConfigVar ('FILTER_SUGGEST_EXTRA') == 'yes' or strlen ($preselect['extratext']))
 	{
+		$enable_textify = !empty ($preselect['text']) || !empty($preselect['extratext']);
 		$enable_apply = TRUE;
 		if (strlen ($preselect['extratext']))
 			$enable_reset = TRUE;
@@ -4984,6 +4986,33 @@ function renderCellFilterPortlet ($preselect, $realm, $cell_list = array(), $byp
 		else
 			printImageHREF ('setfilter', 'set filter', TRUE);
 		echo '</form>';
+		if ($enable_textify)
+		{
+			$text = empty ($preselect['text']) || empty ($preselect['extratext'])
+				? $preselect['text']
+				: '(' . $preselect['text'] . ')';
+			$text .= !empty ($preselect['extratext']) && !empty ($preselect['text'])
+				? ' ' . $preselect['andor'] . ' '
+				: '';
+			$text .= empty ($preselect['text']) || empty ($preselect['extratext'])
+				? $preselect['extratext']
+				: '(' . $preselect['extratext'] . ')';
+			$text = addslashes ($text);
+			echo " <a href=\"#\" onclick=\"textifyCellFilter(this, '$text'); return false\">";
+			printImageHREF ('COPY', 'Make text expression from current filter');
+			echo '</a>';
+			addJS (<<<END
+function textifyCellFilter(target, text)
+{
+	var portlet = $(target).closest ('.portlet');
+	portlet.find ('textarea[name="cfe"]').html (text);
+	portlet.find ('input[type="checkbox"]').attr('checked', '');
+	portlet.find ('input[type="radio"][value="and"]').attr('checked','true');
+}
+END
+				, TRUE
+			);
+		}
 		echo '</td><td class=tdright>';
 		// "reset"
 		if (!$enable_reset)
