@@ -1294,7 +1294,7 @@ function getResidentRacksData ($object_id = 0, $fetch_rackdata = TRUE)
 	// and racks that it is 'Zero-U' mounted in
 	$result = usePreparedSelectBlade
 	(
-		'SELECT DISTINCT RS.rack_id FROM RackSpace RS LEFT JOIN EntityLink EL ON RS.object_id = EL.parent_entity_id AND EL.parent_entity_type = ?' .
+		'SELECT DISTINCT RS.rack_id FROM RackSpace RS LEFT JOIN EntityLink EL ON RS.object_id = EL.parent_entity_id AND EL.parent_entity_type = ? ' .
 		'WHERE RS.object_id = ? or EL.child_entity_id = ? ' .
 		'UNION ' .
 		"SELECT parent_entity_id AS rack_id FROM EntityLink where parent_entity_type = 'rack' AND child_entity_type = 'object' AND child_entity_id = ? " .
