@@ -424,9 +424,10 @@ function commitUpdateRS ($rsid, $rsip_bin, $rsport = 0, $inservice = 'yes', $rsc
 	);
 }
 
+// $vport is ignored if $proto == 'MARK'
 function commitUpdateVS ($vsid, $vip_bin, $vport = 0, $proto = '', $name = '', $vsconfig = '', $rsconfig = '')
 {
-	if ($vport <= 0)
+	if ($proto != 'MARK' && $vport <= 0)
 		throw new InvalidArgException ('vport', $vport);
 	if (!strlen ($proto))
 		throw new InvalidArgException ('proto', $proto);
@@ -436,7 +437,7 @@ function commitUpdateVS ($vsid, $vip_bin, $vport = 0, $proto = '', $name = '', $
 		array
 		(
 			'vip' => $vip_bin,
-			'vport' => $vport,
+			'vport' => ($proto == 'MARK' ? NULL : $vport),
 			'proto' => $proto,
 			'name' => !strlen ($name) ? NULL : $name,
 			'vsconfig' => !strlen ($vsconfig) ? NULL : $vsconfig,

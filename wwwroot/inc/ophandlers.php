@@ -1528,8 +1528,11 @@ function updateVService ()
 	global $sic;
 	assertUIntArg ('vs_id');
 	$vip_bin = assertIPArg ('vip');
-	assertUIntArg ('vport');
 	genericAssertion ('proto', 'enum/ipproto');
+	if ($_REQUEST['proto'] == 'MARK')
+		assertStringArg ('vport', TRUE);
+	else
+		assertUIntArg ('vport');
 	assertStringArg ('name', TRUE);
 	assertStringArg ('vsconfig', TRUE);
 	assertStringArg ('rsconfig', TRUE);
