@@ -5249,8 +5249,6 @@ function renderFileSummary ($file)
 	$summary['tags'] = '';
 	if (strlen ($file['comment']))
 		$summary['Comment'] = '<div class="dashed slbconf">' . string_insert_hrefs (htmlspecialchars ($file['comment'])) . '</div>';
-	if ($new_summary = callHook ('modifyFileSummary', $file, $summary))
-		$summary = $new_summary;
 	renderEntitySummary ($file, 'summary', $summary);
 }
 

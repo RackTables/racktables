@@ -819,6 +819,10 @@ function printTagTRs ($cell, $baseurl = '')
 function renderEntitySummary ($cell, $title, $values = array())
 {
 	global $page_by_realm;
+	// allow plugins to override summary table
+	if ($new_values = callHook ('modifyEntitySummary', $cell, $values))
+		$values = $new_values;
+
 	startPortlet ($title);
 	echo "<table border=0 cellspacing=0 cellpadding=3 width='100%'>\n";
 	foreach ($values as $name => $value)
