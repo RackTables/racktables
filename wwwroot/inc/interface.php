@@ -185,7 +185,7 @@ function getRenderedAlloc ($object_id, $alloc)
 
 	$ret['tr_class'] = $alloc['addrinfo']['class'];
 	if ($hl_ip_bin === $ip_bin)
-		$ret['tr_class'] .= ' port_highlight';
+		$ret['tr_class'] .= ' highlight';
 	
 	// render IP change history
 	$ip_title = '';
@@ -870,7 +870,7 @@ function renderObjectPortRow ($port, $is_highlighted)
 {
 	echo '<tr';
 	if ($is_highlighted)
-		echo ' class=port_highlight';
+		echo ' class=highlight';
 	$a_class = isEthernetPort ($port) ? 'port-menu' : '';
 	echo "><td class='tdleft' NOWRAP><a name='port-${port['id']}' class='ancor interactive-portname nolink $a_class'>${port['name']}</a></td>";
 	echo "<td class=tdleft>${port['label']}</td>";
@@ -1213,7 +1213,7 @@ function renderPortsForObject ($object_id)
 	switchportInfoJS ($object_id); // load JS code to make portnames interactive
 	foreach ($object['ports'] as $port)
 	{
-		$tr_class = isset ($hl_port_id) && $hl_port_id == $port['id'] ? 'class="port_highlight"' : '';
+		$tr_class = isset ($hl_port_id) && $hl_port_id == $port['id'] ? 'class="highlight"' : '';
 		printOpFormIntro ('editPort', array ('port_id' => $port['id']));
 		echo "<tr $tr_class><td><a name='port-${port['id']}' href='".makeHrefProcess(array('op'=>'delPort', 'port_id'=>$port['id'], 'object_id'=>$object_id))."'>";
 		printImageHREF ('delete', 'Unlink and Delete this port');
@@ -2004,7 +2004,7 @@ function renderIPSpaceRecords ($tree, $baseurl, $target = 0, $level = 1)
 			$tr_class = '';
 			if ($target == $item['id'] && isset ($_REQUEST['hl_net']))
 			{
-				$decor['tdclass'] = ' port_highlight';
+				$decor['tdclass'] = ' highlight';
 				$tr_class = $decor['tdclass'];
 			}
 			echo "<tr valign=top class=\"$tr_class\">";
@@ -2277,7 +2277,7 @@ function renderEmptyIPv6 ($ip_bin, $hl_ip)
 {
 	$class = 'tdleft';
 	if ($ip_bin === $hl_ip)
-		$class .= ' port_highlight';
+		$class .= ' highlight';
 	$fmt = ip6_format ($ip_bin);
 	echo "<tr class='$class'><td><a class='ancor' name='ip-$fmt' href='" . makeHref (array ('page' => 'ipaddress', 'ip' => $fmt)) . "'>" . $fmt;
 	$editable = permitted ('ipaddress', 'properties', 'editAddress')
@@ -2371,7 +2371,7 @@ function renderIPv4NetworkAddresses ($range)
 	{
 		$ip_bin = ip4_int2bin ($ip);
 		$dottedquad = ip4_format ($ip_bin);
-		$tr_class = (isset ($hl_ip) && $hl_ip == $ip ? 'port_highlight' : '');
+		$tr_class = (isset ($hl_ip) && $hl_ip == $ip ? 'highlight' : '');
 		if (!isset ($range['addrlist'][$ip_bin]))
 		{
 			echo "<tr class='tdleft $tr_class'><td class=tdleft><a class='ancor' name='ip-$dottedquad' href='" . makeHref(array('page'=>'ipaddress', 'ip' => $dottedquad)) . "'>$dottedquad</a></td>";
@@ -2505,7 +2505,7 @@ function renderIPv6NetworkAddresses ($netinfo)
 			$history_class = 'hover-history underline';
 		}
 
-		$tr_class = $addr['class'] . ' tdleft' . ($hl_ip === $ip_bin ? ' port_highlight' : '');
+		$tr_class = $addr['class'] . ' tdleft' . ($hl_ip === $ip_bin ? ' highlight' : '');
 		echo "<tr class='$tr_class'>";
 		echo "<td><a class='ancor $history_class' $title name='ip-${addr['ip']}' href='" . makeHref (array ('page' => 'ipaddress', 'ip' => $addr['ip'])) . "'>${addr['ip']}</a></td>";
 		$editable =
@@ -2639,7 +2639,7 @@ function renderIPAddress ($ip)
 		{
 			$tr_class = "${address['class']} tdleft";
 			if (isset ($_REQUEST['hl_object_id']) and $_REQUEST['hl_object_id'] == $bond['object_id'])
-				$tr_class .= ' port_highlight';
+				$tr_class .= ' highlight';
 			echo "<tr class='$tr_class'>" .
 				"<td><a href='" . makeHref (array ('page' => 'object', 'object_id' => $bond['object_id'], 'tab' => 'default', 'hl_ip' => $address['ip'])) . "'>${bond['object_name']}</td>" .
 				"<td>${bond['name']}</td>" .
