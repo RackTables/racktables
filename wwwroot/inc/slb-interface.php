@@ -22,7 +22,7 @@ function renderSLBDefConfig()
 function renderSLBEntityCell ($cell, $highlighted = FALSE)
 {
 	$class = "slbcell realm-${cell['realm']} id-${cell['id']}";
-	$a_class = $highlighted ? 'highlighted' : '';
+	$a_class = $highlighted ? 'highlight' : '';
 
 	echo "<table class='$class'>";
 	switch ($cell['realm']) {
