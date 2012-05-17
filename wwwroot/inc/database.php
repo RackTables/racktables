@@ -1356,6 +1356,7 @@ function commitAddPort ($object_id = 0, $port_name, $port_type_id, $port_label, 
 		)
 	);
 	$dbxlink->exec ('UNLOCK TABLES');
+	return lastInsertID();
 }
 
 function getPortReservationComment ($port_id)
