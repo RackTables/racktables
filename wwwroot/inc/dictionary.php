@@ -1784,6 +1784,8 @@ $dictionary = array
 	1699 => array ('chapter_id' => 12, 'dict_value' => 'Dell PowerConnect (blade)%GPASS%M6348'),
 	1700 => array ('chapter_id' => 12, 'dict_value' => 'Dell PowerConnect (blade)%GPASS%M8428'),
 	1701 => array ('chapter_id' => 13, 'dict_value' => '[[RH Fedora%GSKIP%Fedora 16 | http://docs.fedoraproject.org/en-US/Fedora/16/html/Release_Notes/]]'),
+	1702 => array ('chapter_id' => 12, 'dict_value' => 'Dell PowerConnect%GPASS%8024'),
+	1703 => array ('chapter_id' => 12, 'dict_value' => 'Dell PowerConnect%GPASS%8024F'),
 
 # Any new "default" dictionary records must go above this line (i.e., with
 # dict_key code less, than 50000). This is necessary to keep AUTO_INCREMENT
