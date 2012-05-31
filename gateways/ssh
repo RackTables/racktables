@@ -18,6 +18,7 @@ my $op_user;
 my $op_identity;
 my $op_dont_sudo;
 my $op_as_user;
+my $op_sh;
 GetOptions (
     'h' => \$op_help,
 	'proto:i' => \$op_proto,
@@ -27,6 +28,7 @@ GetOptions (
     'sudo-user:s' => \$op_as_user,
     'username|l:s' => \$op_user,
     'identity|i:s' => \$op_identity,
+    'no-login|L' => \$op_sh,
 );
 if ($op_help) {
     &display_help;
@@ -50,6 +52,7 @@ $0 <hostname> [-p <port>] [-l <username>] [-i <identity file>] [--connect-timeou
  --proto              exclicitly specify IP protocol version
  -l, --username       remote username for ssh
  -i, --identity       identity file to authenticate
+ -L, --no-login       disable login shell (exec sh)
  --connect-timeout    timeout for giving up connecting process, seconds
  --as-user            sudo self as specified username
 
@@ -90,4 +93,4 @@ push @params, '-o', 'BatchMode=yes';
 push @params, '-o', 'CheckHostIP=no';
 push @params, '-o', 'LogLevel=ERROR';
 
-exec ('ssh', @params, $op_host) or die "cant exec ssh: $!"; 
+exec ('ssh', @params, $op_host, ($op_sh) ? ('sh') : ()) or die "cant exec ssh: $!"; 
