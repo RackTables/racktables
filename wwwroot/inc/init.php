@@ -119,7 +119,11 @@ elseif (! isset ($remote_username))
 	// Some functions require remote_username to be set to something to act correctly,
 	// even though they don't use the value itself.
 	$admin_account = spotEntity ('user', 1);
-	$remote_username = $admin_account['user_name'];
+	if (FALSE !== $env_user = getenv('USER'))
+		$remote_username = $env_user;
+	else
+		$remote_username = $admin_account['user_name'];
+	unset ($env_user);
 	unset ($admin_account);
 }
 
