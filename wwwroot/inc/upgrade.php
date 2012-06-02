@@ -1115,7 +1115,7 @@ CREATE TABLE `CactiGraph` (
   `caption`  char(255) DEFAULT NULL,
   PRIMARY KEY  (`graph_id`),
   KEY `object_id` (`object_id`),
-  CONSTRAINT `CactiGraph-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `Object` (`id`) ON DELETE CASCADE
+  CONSTRAINT `CactiGraph-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `RackObject` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 ";
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdefined, description) VALUES ('CACTI_LISTSRC','false','string','yes','no','no','List of object with Cacti graphs')";
@@ -1173,13 +1173,13 @@ CREATE TABLE `CactiGraph` (
 			$query[] = 'INSERT INTO `AttributeMap` (`objtype_id`,`attr_id`,`chapter_id`) VALUES (798,28,NULL)';
 			$query[] = 'INSERT INTO `AttributeMap` (`objtype_id`,`attr_id`,`chapter_id`) VALUES (1055,28,NULL)';
 			$query[] = 'ALTER TABLE AttributeValue ADD COLUMN object_tid int(10) unsigned NOT NULL default 0 AFTER object_id';
-			$query[] = 'UPDATE AttributeValue SET object_tid = (SELECT objtype_id FROM Object WHERE id = object_id)';
+			$query[] = 'UPDATE AttributeValue SET object_tid = (SELECT objtype_id FROM RackObject WHERE id = object_id)';
 			$query[] = 'ALTER TABLE AttributeValue DROP FOREIGN KEY `AttributeValue-FK-attr_id`';
 			$query[] = 'ALTER TABLE AttributeValue DROP FOREIGN KEY `AttributeValue-FK-object_id`';
 			$query[] = 'ALTER TABLE AttributeValue ADD KEY `id-tid` (object_id, object_tid)';
 			$query[] = 'ALTER TABLE AttributeValue ADD KEY `object_tid-attr_id` (`object_tid`,`attr_id`)';
-			$query[] = 'ALTER TABLE Object ADD KEY `id-tid` (id, objtype_id)';
-			$query[] = 'ALTER TABLE AttributeValue ADD CONSTRAINT `AttributeValue-FK-object` FOREIGN KEY (`object_id`, `object_tid`) REFERENCES `Object` (`id`, `objtype_id`) ON DELETE CASCADE ON UPDATE CASCADE';
+			$query[] = 'ALTER TABLE RackObject ADD KEY `id-tid` (id, objtype_id)';
+			$query[] = 'ALTER TABLE AttributeValue ADD CONSTRAINT `AttributeValue-FK-object` FOREIGN KEY (`object_id`, `object_tid`) REFERENCES `RackObject` (`id`, `objtype_id`) ON DELETE CASCADE ON UPDATE CASCADE';
 			$query[] = 'ALTER TABLE AttributeValue ADD CONSTRAINT `AttributeValue-FK-map` FOREIGN KEY (`object_tid`, `attr_id`) REFERENCES `AttributeMap` (`objtype_id`, `attr_id`)';
 			# 0.19.9 did it right, but kept the IDs in the dictionary. This time
 			# the dictionary is reduced, but the procedure needs to be repeated,
