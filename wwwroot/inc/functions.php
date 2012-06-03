@@ -61,6 +61,7 @@ $etype_by_pageno = array
 	'ipv4vs' => 'ipv4vs',
 	'object' => 'object',
 	'rack' => 'rack',
+	'location' => 'location',
 	'user' => 'user',
 	'file' => 'file',
 	'vst' => 'vst',
@@ -2501,6 +2502,8 @@ function formatEntityName ($name) {
 			return 'Object';
 		case 'rack':
 			return 'Rack';
+		case 'location':
+			return 'Location';
 		case 'user':
 			return 'User';
 	}
@@ -2534,6 +2537,9 @@ function serializeFileLinks ($links, $scissors = FALSE)
 				break;
 			case 'rack':
 				$params = "page=rack&rack_id=";
+				break;
+			case 'location':
+				$params = "page=location&location_id=";
 				break;
 			case 'user':
 				$params = "page=user&user_id=";

@@ -154,6 +154,23 @@ $SQLSchema = array
 		(
 			'id' => 'id',
 			'name' => 'name',
+			'location_id' => 'location_id',
+			'location_name' => 'location_name',
+		),
+		'keycolumn' => 'id',
+		'ordcolumns' => array ('location_name', 'name'),
+	),
+	'location' => array
+	(
+		'table' => 'Location',
+		'columns' => array
+		(
+			'id' => 'id',
+			'name' => 'name',
+			'has_problems' => 'has_problems',
+			'comment' => 'comment',
+			'parent_id' => 'parent_id',
+			'parent_name' => 'parent_name',
 		),
 		'keycolumn' => 'id',
 		'ordcolumns' => array ('name'),
@@ -217,6 +234,55 @@ $port_role_options = array
 
 $object_attribute_cache = array();
 
+// Return a chain of locations
+function getLocationList ()
+{
+	$ret = array();
+	$result = usePreparedSelectBlade
+	(
+		"SELECT P.id, P.name, P.parent_id, P.parent_name, count(C.id) AS refcnt " .
+		"FROM Location P LEFT JOIN Location C ON P.id = C.parent_id " .
+		"GROUP BY P.id, P.parent_id ORDER BY P.name"
+	);
+	// Collation index. The resulting rows are ordered according to default collation,
+	// which is utf8_general_ci for UTF-8.
+	$ci = 0;
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
+	{
+		if (!isset ($ret[$row['id']]))
+		$ret[$row['id']] = array
+		(
+				'id' => $row['id'],
+				'name' => $row['name'],
+				'ci' => $ci++,
+				'parent_id' => $row['parent_id'],
+				'parent_name' => $row['parent_name'],
+				'childcnt' => $row['refcnt'],
+				'refcnt' => array ('total' => 0)
+		);
+		if ($row['parent_id'])
+		{
+			$ret[$row['id']]['refcnt'][$row['parent_id']] = $row['refcnt'];
+			$ret[$row['id']]['refcnt']['total'] += $row['refcnt'];
+		}
+	}
+	return $ret;
+}
+
+// Return list of locations directly under a specified location
+function getLocations ($location_id)
+{
+	$result = usePreparedSelectBlade
+	(
+		'SELECT id, name FROM Location WHERE parent_id = ? ORDER BY name',
+		array ($location_id)
+	);
+	$rows = array();
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
+		$rows[$row['id']] = $row['name'];
+	return $rows;
+}
+
 // Return detailed information about one rack row.
 function getRowInfo ($row_id)
 {
@@ -233,9 +299,33 @@ function getRowInfo ($row_id)
 		throw new EntityNotFoundException ('rackrow', $row_id);
 }
 
-function getRows ()
+function getAllRows ()
 {
-	$result = usePreparedSelectBlade ('SELECT id, name FROM Row ORDER BY name');
+	$result = usePreparedSelectBlade ('SELECT * FROM Row ORDER BY location_name, name');
+	$ret = array();
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
+		$ret[$row['id']] = array (
+			'name' => $row['name'],
+			'location_id' => $row['location_id'],
+			'location_name' => $row['location_name'],
+		);
+	return $ret;
+}
+
+// Return list of rows directly under a specified location
+function getRows ($location_id)
+{
+	$result = usePreparedSelectBlade
+	(
+		'SELECT R.id, R.name FROM Location L ' .
+		'LEFT JOIN EntityLink EL ON L.id = EL.parent_entity_id ' .
+		'LEFT JOIN Row R ON EL.child_entity_id = R.id ' .
+		"WHERE EL.parent_entity_type = 'location' " .
+		"AND EL.child_entity_type = 'row' " .
+		'AND EL.parent_entity_id = ? ' .
+		'ORDER BY R.name',
+		array ($location_id)
+	);
 	$rows = array();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 		$rows[$row['id']] = $row['name'];
@@ -246,7 +336,7 @@ function getRacks ($row_id)
 {
 	$query = usePreparedSelectBlade
 	(
-		'SELECT  id, name, label, asset_no, height, comment, row_name FROM Rack WHERE row_id = ?',
+		'SELECT  id, name, asset_no, height, comment, row_name FROM Rack WHERE row_id = ?',
 		array ($row_id)
 	);
 	$ret = array();
@@ -306,9 +396,9 @@ function getMountInfo ($object_ids)
 	$result = usePreparedSelectBlade
 	(
 		'SELECT Rack_.id as rack_id, Rack_.name AS rack_name, Rack_.label as rack_label, ' .
-		'parent_entity_id AS row_id, Row_.name AS row_name, Row_.label as row_label ' .
+		'parent_entity_id AS row_id, Row_.name AS row_name ' .
 		'FROM Object Rack_ ' .
-		"LEFT JOIN EntityLink ON (Rack_.id = child_entity_id AND parent_entity_type = 'object' AND child_entity_type = 'object') " .
+		"LEFT JOIN EntityLink ON (Rack_.id = child_entity_id AND parent_entity_type = 'row' AND child_entity_type = 'rack') " .
 		'LEFT JOIN Object Row_ ON parent_entity_id = Row_.id ' .
 		'WHERE Rack_.id IN(' . questionMarks (count ($rackidlist)) . ') ',
 		$rackidlist
@@ -329,8 +419,6 @@ function getMountInfo ($object_ids)
 			$rackinfo[$row['rack_id']]['rack_name'] = 'rack#' . $row['rack_id'];
 		if ('' != $row['row_name'])
 			$rackinfo[$row['rack_id']]['row_name'] = $row['row_name'];
-		elseif ('' != $row['row_label'])
-			$rackinfo[$row['rack_id']]['row_name'] = $row['row_label'];
 		else
 			$rackinfo[$row['rack_id']]['row_name'] = 'row#' . $row['row_id'];
 	}
@@ -648,6 +736,10 @@ function amplifyCell (&$record, $dummy = NULL)
 	case 'file':
 		$record['links'] = getFileLinks ($record['id']);
 		break;
+	case 'location':
+		$record['locations'] = getLocations ($record['id']);
+		$record['rows'] = getRows ($record['id']);
+		break;
 	case 'row':
 		$record['racks'] = getRacks ($record['id']);
 	case 'rack':
@@ -898,12 +990,21 @@ function commitLinkEntities ($parent_entity_type, $parent_entity_id, $child_enti
 	);
 }
 
-function commitUpdateEntityLink ($link_id, $parent_entity_type, $parent_entity_id, $child_entity_type, $child_entity_id)
+function commitUpdateEntityLink
+(
+	$old_parent_entity_type, $old_parent_entity_id, $old_child_entity_type, $old_child_entity_id,
+	$new_parent_entity_type, $new_parent_entity_id, $new_child_entity_type, $new_child_entity_id
+)
 {
 	usePreparedExecuteBlade
 	(
-		'UPDATE EntityLink SET parent_entity_type=?, parent_entity_id=?, child_entity_type=?, child_entity_id=? WHERE id=?',
-		array ($parent_entity_type, $parent_entity_id, $child_entity_type, $child_entity_id, $link_id)
+		'UPDATE EntityLink SET parent_entity_type=?, parent_entity_id=?, child_entity_type=?, child_entity_id=? ' .
+		'WHERE parent_entity_type=? AND parent_entity_id=? AND child_entity_type=? AND child_entity_id=?',
+		array
+		(
+			$new_parent_entity_type, $new_parent_entity_id, $new_child_entity_type, $new_child_entity_id,
+			$old_parent_entity_type, $old_parent_entity_id, $old_child_entity_type, $old_child_entity_id
+		)
 	);
 }
 
@@ -1048,6 +1149,14 @@ function commitDeleteObject ($object_id = 0)
 	commitResetObject ($object_id);
 	// Object itself
 	usePreparedDeleteBlade ('Object', array ('id' => $object_id));
+	// Dangling links
+	usePreparedExecuteBlade
+	(
+		'DELETE FROM EntityLink WHERE ' .
+		"(parent_entity_type IN ('rack', 'row', 'location') AND parent_entity_id = ?) OR " .
+		"(child_entity_type IN ('rack', 'row', 'location') AND child_entity_id = ?)",
+		array ($object_id, $object_id)
+	);
 }
 
 function commitResetObject ($object_id = 0)
@@ -1118,18 +1227,7 @@ function commitUpdateRack ($rack_id, $new_row_id, $new_name, $new_height, $new_h
 	commitUpdateAttrValue ($rack_id, 27, $new_height);
 
 	// Update the rack
-	usePreparedUpdateBlade
-	(
-		'Object',
-		array
-		(
-			'label' => $new_name,
-			'has_problems' => $new_has_problems,
-			'asset_no' => !mb_strlen ($new_asset_no) ? NULL : $new_asset_no,
-			'comment' => $new_comment,
-		),
-		array ('id' => $rack_id)
-	);
+	commitUpdateObject ($rack_id, $new_name, NULL, $new_has_problems, $new_asset_no, $new_comment);
 	recordObjectHistory ($rack_id);
 }
 
@@ -3226,7 +3324,7 @@ function commitUpdateAttrValue ($object_id, $attr_id, $value = '')
 	else
 		throw EntityNotFoundException('object', $object_id);
 	unset ($result);
-	
+
 	usePreparedInsertBlade
 	(
 		'AttributeValue',
@@ -3441,6 +3539,14 @@ function generateEntityAutoTags ($cell)
 		throw new InvalidArgException ('cell', '(array)', 'malformed structure');
 	switch ($cell['realm'])
 	{
+		case 'location':
+			$ret[] = array ('tag' => '$locationid_' . $cell['id']);
+			$ret[] = array ('tag' => '$any_location');
+			break;
+		case 'row':
+			$ret[] = array ('tag' => '$rowid_' . $cell['id']);
+			$ret[] = array ('tag' => '$any_row');
+			break;
 		case 'rack':
 			$ret[] = array ('tag' => '$rackid_' . $cell['id']);
 			$ret[] = array ('tag' => '$any_rack');
@@ -4038,6 +4144,12 @@ function getFileLinks ($file_id)
 				$id_name = 'object_id';
 				$parent = spotEntity ($row['entity_type'], $row['entity_id']);
 				$name = $parent['dname'];
+				break;
+			case 'location':
+				$page = 'location';
+				$id_name = 'location_id';
+				$parent = spotEntity ($row['entity_type'], $row['entity_id']);
+				$name = $parent['name'];
 				break;
 			case 'rack':
 				$page = 'rack';

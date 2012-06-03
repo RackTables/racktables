@@ -53,38 +53,6 @@ $msgcode = array();
 global $opspec_list;
 $opspec_list = array();
 
-$opspec_list['rackspace-edit-addRow'] = array
-(
-	'table' => 'Object',
-	'action' => 'INSERT',
-	'arglist' => array
-	(
-		array ('url_argname' => 'objtype_id', 'assertion' => 'uint'),
-		array ('url_argname' => 'name', 'table_colname' => 'label', 'assertion' => 'string')
-	),
-);
-$opspec_list['rackspace-edit-updateRow'] = array
-(
-	'table' => 'Object',
-	'action' => 'UPDATE',
-	'set_arglist' => array
-	(
-		array ('url_argname' => 'name', 'table_colname' => 'label', 'assertion' => 'string')
-	),
-	'where_arglist' => array
-	(
-		array ('url_argname' => 'row_id', 'table_colname' => 'id', 'assertion' => 'uint')
-	),
-);
-$opspec_list['rackspace-edit-deleteRow'] = array
-(
-	'table' => 'Object',
-	'action' => 'DELETE',
-	'arglist' => array
-	(
-		array ('url_argname' => 'row_id', 'table_colname' => 'id', 'assertion' => 'uint')
-	),
-);
 $opspec_list['object-ports-delPort'] = array
 (
 	'table' => 'Port',
@@ -104,6 +72,16 @@ $opspec_list['object-ports-deleteAll'] = array
 		array ('url_argname' => 'object_id', 'assertion' => 'uint'),
 	),
 );
+$opspec_list['location-log-del'] = array
+(
+	'table' => 'ObjectLog',
+	'action' => 'DELETE',
+	'arglist' => array
+	(
+		array ('url_argname' => 'log_id', 'table_colname' => 'id', 'assertion' => 'uint'),
+		array ('url_argname' => 'location_id', 'table_colname' => 'object_id', 'assertion' => 'uint'),
+	),
+);
 $opspec_list['object-log-del'] = array
 (
 	'table' => 'ObjectLog',
@@ -112,6 +90,16 @@ $opspec_list['object-log-del'] = array
 	(
 		array ('url_argname' => 'log_id', 'table_colname' => 'id', 'assertion' => 'uint'),
 		array ('url_argname' => 'object_id', 'assertion' => 'uint'),
+	),
+);
+$opspec_list['rack-log-del'] = array
+(
+	'table' => 'ObjectLog',
+	'action' => 'DELETE',
+	'arglist' => array
+	(
+		array ('url_argname' => 'log_id', 'table_colname' => 'id', 'assertion' => 'uint'),
+		array ('url_argname' => 'rack_id', 'table_colname' => 'object_id', 'assertion' => 'uint'),
 	),
 );
 $opspec_list['ipv4vs-editlblist-delLB'] =
@@ -1787,6 +1775,119 @@ function submitSLBConfig ()
 	showNotice ("You should redefine submitSLBConfig ophandler in your local extension to install SLB config");
 }
 
+$msgcode['addLocation']['OK'] = 5;
+function addLocation ()
+{
+	assertUIntArg ('parent_id', TRUE);
+	assertStringArg ('name');
+	
+	$location_id = commitAddObject ($_REQUEST['name'], NULL, 1562, NULL);
+	if ($_REQUEST['parent_id'])
+		commitLinkEntities ('location', $_REQUEST['parent_id'], 'location', $location_id);
+	return showFuncMessage (__FUNCTION__, 'OK', array ($_REQUEST['name']));
+}
+
+$msgcode['updateLocation']['OK'] = 6;
+function updateLocation ()
+{
+	assertUIntArg ('location_id');
+	assertUIntArg ('parent_id', TRUE);
+	assertStringArg ('name');
+	$has_problems = (isset ($_REQUEST['has_problems']) and $_REQUEST['has_problems'] == 'on') ? 'yes' : 'no';
+	assertStringArg ('comment', TRUE);
+
+	commitUpdateObject ($_REQUEST['location_id'], $_REQUEST['name'], NULL, $has_problems, NULL, $_REQUEST['comment']);
+
+	$locationData = spotEntity ('location', $_REQUEST['location_id']);
+
+	// parent_id was submitted, but no link exists - create it
+	if ($_REQUEST['parent_id'] > 0 && !$locationData['parent_id'])
+		commitLinkEntities ('location', $_REQUEST['parent_id'], 'location', $_REQUEST['location_id']);
+
+	// parent_id was submitted, but it doesn't match the existing link - update it
+	if ($_REQUEST['parent_id'] > 0 && $_REQUEST['parent_id'] != $locationData['parent_id'])
+		commitUpdateEntityLink
+		(
+			'location', $locationData['parent_id'], 'location', $_REQUEST['location_id'],
+			'location', $_REQUEST['parent_id'], 'location', $_REQUEST['location_id']
+		);
+
+	// no parent_id was submitted, but a link exists - delete it
+	if ($_REQUEST['parent_id'] == 0 && $locationData['parent_id'])
+		commitUnlinkEntities ('location', $locationData['parent_id'], 'location', $_REQUEST['location_id']);
+
+	return showFuncMessage (__FUNCTION__, 'OK', array ($_REQUEST['name']));
+}
+
+$msgcode['deleteLocation']['OK'] = 7;
+$msgcode['deleteLocation']['ERR1'] = 206;
+function deleteLocation ()
+{
+	assertUIntArg ('location_id');
+	$locationData = spotEntity ('location', $_REQUEST['location_id']);
+	amplifyCell ($locationData);
+	if (count ($locationData['locations']) || count ($locationData['rows']))
+		return showFuncMessage (__FUNCTION__, 'ERR1', array ($locationData['name']));
+	commitDeleteObject ($_REQUEST['location_id']);
+	showFuncMessage (__FUNCTION__, 'OK', array ($locationData['name']));
+	return buildRedirectURL ('rackspace', 'editlocations');
+}
+
+$msgcode['addRow']['OK'] = 5;
+function addRow ()
+{
+	assertUIntArg ('location_id', TRUE);
+	assertStringArg ('name');
+	$row_id = commitAddObject ($_REQUEST['name'], NULL, 1561, NULL);
+	if ($_REQUEST['location_id'])
+		commitLinkEntities ('location', $_REQUEST['location_id'], 'row', $row_id);
+	return showFuncMessage (__FUNCTION__, 'OK', array ($_REQUEST['name']));
+}
+
+$msgcode['updateRow']['OK'] = 6;
+function updateRow ()
+{
+	assertUIntArg ('row_id');
+	assertUIntArg ('location_id', TRUE);
+	assertStringArg ('name');
+
+	commitUpdateObject ($_REQUEST['row_id'], $_REQUEST['name'], NULL, NULL, NULL, NULL);
+
+	$rowData = spotEntity ('row', $_REQUEST['row_id']);
+
+	// location_id was submitted, but no link exists - create it
+	if ($_REQUEST['location_id'] > 0 && !$rowData['location_id'])
+		commitLinkEntities ('location', $_REQUEST['location_id'], 'row', $_REQUEST['row_id']);
+
+	// location_id was submitted, but it doesn't match the existing link - update it
+	if ($_REQUEST['location_id'] > 0 && $_REQUEST['location_id'] != $rowData['location_id'])
+		commitUpdateEntityLink
+		(
+			'location', $rowData['location_id'], 'row', $_REQUEST['row_id'],
+			'location', $_REQUEST['location_id'], 'row', $_REQUEST['row_id']
+		);
+
+	// no parent_id was submitted, but a link exists - delete it
+	if ($_REQUEST['location_id'] == 0 && $rowData['location_id'])
+		commitUnlinkEntities ('location', $rowData['location_id'], 'row', $_REQUEST['row_id']);
+
+	return showFuncMessage (__FUNCTION__, 'OK', array ($_REQUEST['name']));
+}
+
+$msgcode['deleteRow']['OK'] = 7;
+$msgcode['deleteRow']['ERR1'] = 206;
+function deleteRow ()
+{
+	assertUIntArg ('row_id');
+	$rowData = spotEntity ('row', $_REQUEST['row_id']);
+	amplifyCell ($rowData);
+	if (count ($rowData['racks']))
+		return showFuncMessage (__FUNCTION__, 'ERR1', array ($rowData['name']));
+	commitDeleteObject ($_REQUEST['row_id']);
+	showFuncMessage (__FUNCTION__, 'OK', array ($rowData['name']));
+	return buildRedirectURL ('rackspace', 'editrows');
+}
+
 $msgcode['addRack']['ERR2'] = 172;
 function addRack ()
 {
@@ -1797,14 +1898,14 @@ function addRack ()
 		assertStringArg ('name');
 		assertUIntArg ('height1');
 		assertStringArg ('asset_no', TRUE);
-		$rack_id = commitAddObject (NULL, $_REQUEST['name'], 1560, $_REQUEST['asset_no'], $taglist);
+		$rack_id = commitAddObject ($_REQUEST['name'], NULL, 1560, $_REQUEST['asset_no'], $taglist);
 		produceTagsForNewRecord ('rack', $taglist, $rack_id);
 
 		// Update the height
 		commitUpdateAttrValue ($rack_id, 27, $_REQUEST['height1']);
 
 		// Link it to the row
-		commitLinkEntities ('object', $_REQUEST['row_id'], 'object', $rack_id);
+		commitLinkEntities ('row', $_REQUEST['row_id'], 'rack', $rack_id);
 		showSuccess ('added rack ' . mkA ($_REQUEST['name'], 'rack', $rack_id));
 	}
 	elseif (isset ($_REQUEST['got_mdata']))
@@ -1825,33 +1926,19 @@ function addRack ()
 		}
 		foreach ($names2 as $cname)
 		{
-			$rack_id = commitAddObject (NULL, $cname, 1560, NULL, $taglist);
+			$rack_id = commitAddObject ($cname, NULL, 1560, NULL, $taglist);
 			produceTagsForNewRecord ('rack', $taglist, $rack_id);
 
 			// Update the height
 			commitUpdateAttrValue ($rack_id, 27, $_REQUEST['height2']);
 
 			// Link it to the row
-			commitLinkEntities ('object', $_REQUEST['row_id'], 'object', $rack_id);
+			commitLinkEntities ('row', $_REQUEST['row_id'], 'rack', $rack_id);
 			showSuccess ('added rack ' . mkA ($cname, 'rack', $rack_id));
 		}
 	}
 	else
 		return showFuncMessage (__FUNCTION__, 'ERR2');
-}
-
-$msgcode['deleteRack']['OK'] = 6;
-$msgcode['deleteRack']['ERR1'] = 206;
-function deleteRack ()
-{
-	assertUIntArg ('rack_id');
-	$rackData = spotEntity ('rack', $_REQUEST['rack_id']);
-	amplifyCell ($rackData);
-	if (count ($rackData['mountedObjects']))
-		return showFuncMessage (__FUNCTION__, 'ERR1');
-	commitDeleteObject ($_REQUEST['rack_id']);
-	showFuncMessage (__FUNCTION__, 'OK', array ($rackData['name']));
-	return buildRedirectURL ('rackspace', 'default');
 }
 
 $msgcode['updateRack']['OK'] = 6;
@@ -1916,6 +2003,20 @@ function updateRack ()
 		commitUpdateAttrValue ($rack_id, $attr_id, $value);
 	}
 	return showFuncMessage (__FUNCTION__, 'OK', array ($_REQUEST['name']));
+}
+
+$msgcode['deleteRack']['OK'] = 7;
+$msgcode['deleteRack']['ERR1'] = 206;
+function deleteRack ()
+{
+	assertUIntArg ('rack_id');
+	$rackData = spotEntity ('rack', $_REQUEST['rack_id']);
+	amplifyCell ($rackData);
+	if (count ($rackData['mountedObjects']))
+		return showFuncMessage (__FUNCTION__, 'ERR1');
+	commitDeleteObject ($_REQUEST['rack_id']);
+	showFuncMessage (__FUNCTION__, 'OK', array ($rackData['name']));
+	return buildRedirectURL ('rackspace', 'default');
 }
 
 function updateRackDesign ()
@@ -2667,7 +2768,12 @@ function addObjectlog ()
 {
 	assertStringArg ('logentry');
 	global $remote_username, $sic;
-	$object_id = isset($sic['object_id']) ? $sic['object_id'] : $sic['rack_id'];
+	if (isset ($sic['object_id']))
+		$object_id = $sic['object_id'];
+	elseif (isset ($sic['location_id']))
+		$object_id = $sic['location_id'];
+	else
+		$object_id = $sic['rack_id'];
 	usePreparedExecuteBlade ('INSERT INTO ObjectLog SET object_id=?, user=?, date=NOW(), content=?', array ($object_id, $remote_username, $sic['logentry']));
 	showSuccess ('Log entry added');
 }

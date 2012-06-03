@@ -1285,28 +1285,39 @@ CREATE TABLE `IPv6Log` (
   KEY `ip-date` (`ip`,`date`)
 ) ENGINE=InnoDB;
 ";
-			$query[] = "ALTER TABLE TagStorage MODIFY COLUMN entity_realm ENUM('file','ipv4net','ipv4vs','ipv4rspool','object','rack','user','ipv6net','vst') NOT NULL default 'object'";
+			$query[] = "ALTER TABLE `FileLink` MODIFY COLUMN `entity_type` ENUM('ipv4net','ipv4rspool','ipv4vs','ipv6net','location','object','rack','user') NOT NULL DEFAULT 'object'";
+			$query[] = "ALTER TABLE `TagStorage` MODIFY COLUMN `entity_realm` ENUM('file','ipv4net','ipv4vs','ipv4rspool','ipv6net','object','rack','user','vst') NOT NULL default 'object'";
 			$query[] = "ALTER TABLE `TagStorage` ADD COLUMN `user` char(64) DEFAULT NULL, ADD COLUMN `date` datetime DEFAULT NULL";
 
-			// Rename object tables and keys
+			// Rename object tables and keys, 'name' no longer needs to be unique
 			$dbxlink->query ('ALTER TABLE `RackObject` RENAME TO `Object`');
 			$dbxlink->query ('ALTER TABLE `RackObjectHistory` RENAME TO `ObjectHistory`');
+			$dbxlink->query ('ALTER TABLE `Object` DROP KEY `name`');
 			$query[] = 'ALTER TABLE `Object` DROP KEY `RackObject_asset_no`';
 			$query[] = 'ALTER TABLE `Object` ADD UNIQUE KEY `asset_no` (`asset_no`)';
 			$query[] = 'ALTER TABLE `Object` ADD KEY `type_id` (`objtype_id`,`id`)';
 			$query[] = 'ALTER TABLE `ObjectHistory` DROP FOREIGN KEY `RackObjectHistory-FK-object_id`';
 			$query[] = 'ALTER TABLE `ObjectHistory` ADD CONSTRAINT `ObjectHistory-FK-object_id` FOREIGN KEY (`id`) REFERENCES `Object` (`id`) ON DELETE CASCADE';
 			$query[] = 'ALTER TABLE `RackSpace` DROP FOREIGN KEY `RackSpace-FK-rack_id`';
+
 			// Rack height is now an attribute
 			$query[] = "INSERT INTO `Attribute` (`id`,`type`,`name`) VALUES (27,'uint','Height, units')";
 			$query[] = 'INSERT INTO `AttributeMap` (`objtype_id`,`attr_id`,`chapter_id`) VALUES (1560,27,NULL)';
+
+			// Relate 'contact person' with locations
+			$query[] = 'INSERT INTO `AttributeMap` (`objtype_id`,`attr_id`,`chapter_id`) VALUES (1562,14,NULL)';
+
+			// Allow relationships between racks/rows/locations
+			$query[] = "ALTER TABLE `EntityLink` MODIFY COLUMN `parent_entity_type` ENUM('ipv4net','ipv4rspool','ipv4vs','ipv6net','location','object','rack','row','user') NOT NULL";
+			$query[] = "ALTER TABLE `EntityLink` MODIFY COLUMN `child_entity_type` ENUM('file','location','object','rack','row') NOT NULL";
+
 			// Turn rows into objects
 			$result = $dbxlink->query ('SELECT * FROM RackRow');
 			$rows = $result->fetchAll (PDO::FETCH_ASSOC);
 			unset ($result);
 			foreach ($rows as $row)
 			{
-				$prepared = $dbxlink->prepare ('INSERT INTO `Object` (`label`,`objtype_id`) VALUES (?,?)');
+				$prepared = $dbxlink->prepare ('INSERT INTO `Object` (`name`,`objtype_id`) VALUES (?,?)');
 				$prepared->execute (array($row['name'], 1561));
 				$row_id = $dbxlink->lastInsertId();
 				// Turn all racks in this row into objects
@@ -1317,11 +1328,11 @@ CREATE TABLE `IPv6Log` (
 				{
 					// Add the rack as an object, set the height as an attribute, link the rack to the row,
 					//   update rackspace, tags and files to reflect new rack_id, move history
-					$prepared = $dbxlink->prepare ('INSERT INTO `Object` (`label`,`objtype_id`,`comment`) VALUES (?,?,?)');
+					$prepared = $dbxlink->prepare ('INSERT INTO `Object` (`name`,`objtype_id`,`comment`) VALUES (?,?,?)');
 					$prepared->execute (array($rack['name'], 1560, $rack['comment']));
 					$rack_id = $dbxlink->lastInsertId();
-					$query[] = "INSERT INTO `AttributeValue` (`object_id`,`attr_id`,`uint_value`) VALUES (${rack_id},27,${rack['height']})";
-					$query[] = "INSERT INTO `EntityLink` (`parent_entity_type`,`parent_entity_id`,`child_entity_type`,`child_entity_id`) VALUES ('object',${row_id},'object',${rack_id})";
+					$query[] = "INSERT INTO `AttributeValue` (`object_id`,`object_tid`,`attr_id`,`uint_value`) VALUES (${rack_id},1560,27,${rack['height']})";
+					$query[] = "INSERT INTO `EntityLink` (`parent_entity_type`,`parent_entity_id`,`child_entity_type`,`child_entity_id`) VALUES ('row',${row_id},'rack',${rack_id})";
 					$query[] = "UPDATE `RackSpace` SET `rack_id`=${rack_id} WHERE `rack_id`=${rack['id']}";
 					$query[] = "UPDATE `Atom` SET `rack_id`=${rack_id} WHERE `rack_id`=${rack['id']}";
 					$query[] = "UPDATE `TagStorage` SET `entity_id`=${rack_id} WHERE `entity_realm`='rack' AND `entity_id`=${rack['id']}";
@@ -1342,22 +1353,31 @@ CREATE TABLE `RackThumbnail` (
 ) ENGINE=InnoDB
 ";
 			$query[] = "
-CREATE VIEW `Row` AS SELECT id, label AS name
-  FROM `Object`
-  WHERE objtype_id = 1561
+CREATE VIEW `Location` AS SELECT O.id, O.name, O.has_problems, O.comment, P.id AS parent_id, P.name AS parent_name 
+  FROM `Object` O
+  LEFT JOIN `EntityLink` EL ON O.id = EL.child_entity_id 
+  LEFT JOIN `Object` P ON (EL.parent_entity_id = P.id AND P.objtype_id = 1562 AND EL.parent_entity_type = 'location' AND EL.child_entity_type = 'location')
+  WHERE O.objtype_id = 1562
+";
+			$query[] = "
+CREATE VIEW `Row` AS SELECT O.id, O.name, L.id AS location_id, L.name AS location_name
+  FROM `Object` O
+  LEFT JOIN `EntityLink` EL ON O.id = EL.child_entity_id AND EL.parent_entity_type = 'location' AND EL.child_entity_type = 'row'
+  LEFT JOIN `Object` L ON EL.parent_entity_id = L.id AND L.objtype_id = 1562
+  WHERE O.objtype_id = 1561
 ";
 			$query[] = "
 CREATE VIEW `Rack` AS SELECT O.id, O.label AS name, O.asset_no, O.has_problems, O.comment,
   AV.uint_value AS height,
   RT.thumb_data,
-  Row.id AS row_id,
-  Row.name AS row_name
+  R.id AS row_id,
+  R.name AS row_name
   FROM `Object` O
   LEFT JOIN `AttributeValue` AV ON O.id = AV.object_id AND AV.attr_id = 27
   LEFT JOIN `RackThumbnail` RT ON O.id = RT.rack_id
-  LEFT JOIN `EntityLink` EL ON O.id = EL.child_entity_id  AND EL.parent_entity_type = 'object' AND EL.child_entity_type = 'object'
-  INNER JOIN `Row` ON EL.parent_entity_id = Row.id
-  WHERE O.objtype_id = 1560;
+  LEFT JOIN `EntityLink` EL ON O.id = EL.child_entity_id  AND EL.parent_entity_type = 'row' AND EL.child_entity_type = 'rack'
+  INNER JOIN `Object` R ON R.id = EL.parent_entity_id
+  WHERE O.objtype_id = 1560
 ";
 			$query[] = "
 CREATE VIEW `RackObject` AS SELECT id, name, label, objtype_id, asset_no, has_problems, comment FROM `Object`

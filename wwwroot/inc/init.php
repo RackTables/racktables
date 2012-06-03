@@ -94,6 +94,14 @@ $taglist = getTagList();
 $tagtree = treeFromList ($taglist);
 sortTree ($tagtree, 'taginfoCmp');
 
+$locationlist = getLocationList();
+$locationtree = treeFromList ($locationlist);
+sortTree ($locationtree, 'taginfoCmp'); // should be locationinfoCmp, but re-using the tag function is good enough
+// Add all locations to the filter upon login
+@session_start();
+if (!isset ($_SESSION['locationFilter']))
+	$_SESSION['locationFilter'] = array_keys ($locationlist);
+
 $auto_tags = array();
 // Initial chain for the current user.
 $user_given_tags = array();

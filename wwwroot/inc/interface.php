@@ -275,18 +275,84 @@ function getRenderedAlloc ($object_id, $alloc)
 	return $ret;
 }
 
+function renderLocationFilterPortlet ()
+{
+	@session_start();
+	global $locationlist;
+	// Recursive function used to build the location tree
+	function renderLocationCheckbox ($parent_id, $level)
+	{
+		$self = __FUNCTION__;
+		global $locationlist;
+
+		foreach ($locationlist as $location_id => $location)
+		{
+			if ($location['parent_id'] == $parent_id)
+			{
+				echo "<tr><td class=tagbox style='padding-left: " . ($level * 16) . "px;'><label>";
+				$checked = (in_array ($location['id'], $_SESSION['locationFilter'])) ? 'checked' : '';
+				echo "<label><input type=checkbox name='location_id[]' value='${location['id']}'${checked}>${location['name']}";
+				echo "</label></td></tr>\n";
+				if ($location['childcnt'] > 0)
+					$self ($location['id'], $level + 1);
+			}
+		}
+	}
+
+	// TODO: add some javascript to toggle all children when a parent is toggled
+	startPortlet ('Location filter');
+	echo <<<END
+<table border=0 align=center cellspacing=0 class="tagtree">
+    <form method=get>
+    <input type=hidden name=page value=rackspace>
+    <input type=hidden name=tab value=default>
+    <input type=hidden name=changeLocationFilter value=true>
+END;
+	if (count ($locationlist))
+	{
+		echo "<tr><td class=tagbox><hr></td></tr>\n";
+		renderLocationCheckbox ('', 0);
+		echo "<tr><td class=tagbox><hr></td></tr>\n";
+		echo "<tr><td>";
+		printImageHREF ('setfilter', 'set filter', TRUE);
+		echo "</td></tr>\n";
+	}
+	else
+	{
+		echo "<tr><td class='tagbox sparenetwork'>(no locations exist)</td></tr>\n";
+		echo "<tr><td>";
+		printImageHREF ('setfilter gray');
+		echo "</td></tr>\n";
+	}
+
+	echo "</form></table>\n";
+	finishPortlet ();
+}
+
 function renderRackspace ()
 {
+	// Handle the location filter
+	@session_start();
+	if (isset ($_REQUEST['changeLocationFilter']))
+		unset ($_SESSION['locationFilter']);
+	if (isset ($_REQUEST['location_id']))
+		$_SESSION['locationFilter'] = $_REQUEST['location_id'];
+	if (!isset ($_SESSION['locationFilter']))
+		$_SESSION['locationFilter'] = array ();
+
 	$found_racks = array();
 	$rows = array();
 	$cellfilter = getCellFilter();
 	$rackCount = 0;
-	foreach (getRows() as $row_id => $row_name) {
+	foreach (getAllRows() as $row_id => $rowInfo)
+	{
 		$rackList = filterCellList (listCells ('rack', $row_id), $cellfilter['expression']);
-		$found_racks = array_merge($found_racks, $rackList);
-		$rows[] = array(
+		$found_racks = array_merge ($found_racks, $rackList);
+		$rows[] = array (
+			'location_id' => $rowInfo['location_id'],
+			'location_name' => $rowInfo['location_name'],
 			'row_id' => $row_id,
-			'row_name' => $row_name,
+			'row_name' => $rowInfo['name'],
 			'racks' => $rackList
 		);
 		$rackCount += count($rackList);
@@ -296,72 +362,165 @@ function renderRackspace ()
 
 	if (! renderEmptyResults($cellfilter, 'racks', $rackCount))
 	{
-		echo '<table border=0 cellpadding=10 cellpadding=1>';
 		// generate thumb gallery
 		global $nextorder;
 		$rackwidth = getRackImageWidth();
 		// Zero value effectively disables the limit.
 		$maxPerRow = getConfigVar ('RACKS_PER_ROW');
 		$order = 'odd';
-		foreach ($rows as $row)
+		if (count ($rows))
 		{
-			$row_id = $row['row_id'];
-			$row_name = $row['row_name'];
-			$rackList = $row['racks'];
+			echo '<table border=0 cellpadding=10 class=cooltable>';
+			echo '<tr><th class=tdleft>Location</th><th class=tdleft>Row</th><th class=tdleft>Racks</th></tr>';
+			foreach ($rows as $row)
+			{
+				$location_id = $row['location_id'];
+				$row_id = $row['row_id'];
+				$row_name = $row['row_name'];
+				$rackList = $row['racks'];
 
-			if (!count ($rackList) and count ($cellfilter['expression']))
-				continue;
-			$rackListIdx = 0;
-			echo "<tr class=row_${order}><th class=tdleft>";
-			echo "<a href='".makeHref(array('page'=>'row', 'row_id'=>$row_id))."${cellfilter['urlextra']}'>";
-			echo "${row_name}</a></th><td><table border=0 cellspacing=5><tr>";
-			if (!count ($rackList))
-				echo "<td>(empty row)</td>";
-			else
-				foreach ($rackList as $rack)
-				{
-					if ($rackListIdx > 0 and $maxPerRow > 0 and $rackListIdx % $maxPerRow == 0)
+				if (($location_id != '' and !in_array ($location_id, $_SESSION['locationFilter'])) or (!count ($rackList) and count ($cellfilter['expression'])))
+					continue;
+				$rackListIdx = 0;
+				echo "<tr class=row_${order}><th class=tdleft>";
+				if ($location_id)
+					echo "<a href='".makeHref(array('page'=>'location', 'location_id'=>$location_id))."${cellfilter['urlextra']}'>${row['location_name']}</a>";
+				echo "</th><th class=tdleft><a href='".makeHref(array('page'=>'row', 'row_id'=>$row_id))."${cellfilter['urlextra']}'>${row_name}</a></th>";
+				echo "<th class=tdleft><table border=0 cellspacing=5><tr>";
+				if (!count ($rackList))
+					echo "<td>(empty row)</td>";
+				else
+					foreach ($rackList as $rack)
 					{
-						echo '</tr></table></tr>';
-						echo "<tr class=row_${order}><th class=tdleft>${row_name} (continued)";
-						echo "</th><td><table border=0 cellspacing=5><tr>";
+						if ($rackListIdx > 0 and $maxPerRow > 0 and $rackListIdx % $maxPerRow == 0)
+						{
+							echo '</tr></table></tr>';
+							echo "<tr class=row_${order}><th class=tdleft></th><th class=tdleft>${row_name} (continued)";
+							echo "</th><th class=tdleft><table border=0 cellspacing=5><tr>";
+						}
+						echo "<td align=center valign=bottom><a href='".makeHref(array('page'=>'rack', 'rack_id'=>$rack['id']))."'>";
+						echo "<img border=0 width=${rackwidth} height=";
+						echo getRackImageHeight ($rack['height']);
+						echo " title='${rack['height']} units'";
+						echo "src='?module=image&img=minirack&rack_id=${rack['id']}'>";
+						echo "<br>${rack['name']}</a></td>";
+						$rackListIdx++;
 					}
-					echo "<td align=center valign=bottom><a href='".makeHref(array('page'=>'rack', 'rack_id'=>$rack['id']))."'>";
-					echo "<img border=0 width=${rackwidth} height=";
-					echo getRackImageHeight ($rack['height']);
-					echo " title='${rack['height']} units'";
-					echo "src='?module=image&img=minirack&rack_id=${rack['id']}'>";
-					echo "<br>${rack['name']}</a></td>";
-					$rackListIdx++;
-				}
-			$order = $nextorder[$order];
-			echo "</tr></table></tr>\n";
+				$order = $nextorder[$order];
+				echo "</tr></table></tr>\n";
+			}
 		}
+		else
+			echo "<h2>No rows found</h2>\n";
 		echo "</table>\n";
 	}
 	echo '</td><td class=pcright width="25%">';
 	renderCellFilterPortlet ($cellfilter, 'rack', $found_racks);
+	echo "<br>\n";
+	renderLocationFilterPortlet ();
 	echo "</td></tr></table>\n";
+}
+
+function renderLocationRowForEditor ($locationinfo, $level = 0)
+{
+	$self = __FUNCTION__;
+	global $locationlist;
+	if (!count ($locationinfo['kids']))
+		$level++; // Idem
+	echo "<tr><td align=left style='padding-left: " . ($level * 16) . "px;'>";
+	if ($locationinfo['kidc'])
+		printImageHREF ('node-expanded-static');
+	if ($locationinfo['refcnt']['total'] > 0 or $locationinfo['kidc'])
+		printImageHREF ('nodestroy');
+	else
+		echo '<a href="' . makeHrefProcess (array ('op' => 'deleteLocation', 'location_id' => $locationinfo['id']))
+			. '">' . getImageHREF ('destroy', 'Delete location') . '</a>';
+	echo '</td><td class=tdleft>';
+	printOpFormIntro ('updateLocation', array ('location_id' => $locationinfo['id']));
+	echo getSelect
+	(
+		array ( $locationinfo['parent_id'] => $locationinfo['parent_id'] ? htmlspecialchars ($locationlist[$locationinfo['parent_id']]['name']) : '-- NONE --'),
+		array ('name' => 'parent_id', 'id' => 'locationid_' . $locationinfo['id'], 'class' => 'locationlist-popup'),
+		$locationinfo['parent_id'],
+		FALSE
+	);
+	echo "</td><td class=tdleft>";
+	echo "<input type=text size=48 name=name value='${locationinfo['name']}'>";
+	echo '</td><td>' . getImageHREF ('save', 'Save changes', TRUE) . "</form></td></tr>\n";
+	foreach ($locationinfo['kids'] as $kid)
+		$self ($kid, $level + 1);
+}
+
+function renderRackspaceLocationEditor ()
+{
+	addJS
+	(
+<<<END
+function locationeditor_showselectbox(e) {
+	$(this).load('index.php', {module: 'ajax', ac: 'get-location-select', locationid: this.id});
+	$(this).unbind('mousedown', locationeditor_showselectbox);
+}
+$(document).ready(function () {
+	$('select.locationlist-popup').bind('mousedown', locationeditor_showselectbox);
+});
+END
+		, TRUE
+	);
+	function printNewItemTR ()
+	{
+		global $locationlist;
+		printOpFormIntro ('addLocation');
+		echo "<tr><td>";
+		printImageHREF ('create', 'Add new location', TRUE);
+		echo "</td><td><select name=parent_id tabindex=100>";
+		echo "<option value=0>-- NONE --</option>";
+		foreach ($locationlist as $location)
+			echo "<option value=${location['id']}>${location['name']}</option>";
+		echo "</select></td>";
+		echo "<td><input type=text size=48 name=name tabindex=101></td><td>";
+		printImageHREF ('create', 'Add new location', TRUE, 102);
+		echo "</td></tr></form>\n";
+	}
+	global $locationlist, $locationtree;
+
+	startPortlet ('Locations');
+	echo "<table border=0 cellspacing=0 cellpadding=5 align=center class=widetable>\n";
+	echo "<tr><th>&nbsp;</th><th>Parent</th><th>Name</th><th>&nbsp;</th></tr>\n";
+	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
+		printNewItemTR();
+	foreach ($locationtree as $locationinfo)
+		renderLocationRowForEditor ($locationinfo);
+	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')
+		printNewItemTR();
+	echo "</table><br>\n";
+	finishPortlet();
 }
 
 function renderRackspaceRowEditor ()
 {
 	function printNewItemTR ()
 	{
+		global $locationlist;
 		printOpFormIntro ('addRow');
-		echo "<input type=hidden name=objtype_id value=1561>\n";
 		echo "<tr><td>";
 		printImageHREF ('create', 'Add new row', TRUE);
-		echo "</td><td><input type=text name=name tabindex=100></td><td>";
-		printImageHREF ('create', 'Add new row', TRUE, 101);
+		echo "</td><td><select name=location_id tabindex=100>";
+		echo "<option value=0>-- NONE --</option>";
+		foreach ($locationlist as $location)
+			echo "<option value=${location['id']}>${location['name']}</option>";
+		echo "</select></td>";
+		echo "<td><input type=text name=name tabindex=101></td><td>";
+		printImageHREF ('create', 'Add new row', TRUE, 102);
 		echo "</td></tr></form>";
 	}
+	global $locationlist;
+
 	startPortlet ('Rows');
 	echo "<table border=0 cellspacing=0 cellpadding=5 align=center class=widetable>\n";
-	echo "<tr><th>&nbsp;</th><th>Name</th><th>&nbsp;</th></tr>\n";
+	echo "<tr><th>&nbsp;</th><th>Location</th><th>Name</th><th>&nbsp;</th></tr>\n";
 	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
 		printNewItemTR();
-	foreach (getRows() as $row_id => $row_name)
+	foreach (getAllRows() as $row_id => $rowInfo)
 	{
 		echo "<tr><td>";
 		if ($rc = count (listCells ('rack', $row_id)))
@@ -373,7 +532,13 @@ function renderRackspaceRowEditor ()
 			echo "</a>";
 		}
 		printOpFormIntro ('updateRow', array ('row_id' => $row_id));
-		echo "</td><td><input type=text name=name value='${row_name}'></td><td>";
+		echo "</td><td>";
+		$selectlist = array();
+		$selectlist['other'][0] = '-- NONE --';
+		foreach ($locationlist as $location_id => $locationdata)
+			$selectlist['other'][$location_id] = $locationdata['name'];
+		printNiftySelect ($selectlist, array ('name' => 'location_id'), $rowInfo['location_id']);
+		echo "</td><td><input type=text name=name value='${rowInfo['name']}'></td><td>";
 		printImageHREF ('save', 'Save changes', TRUE);
 		echo "</form></td></tr>\n";
 	}
@@ -726,7 +891,10 @@ function renderEditRackForm ($rack_id)
 	printOpFormIntro ('updateRack');
 	echo '<table border=0 align=center>';
 	echo "<tr><td>&nbsp;</td><th class=tdright>Rack row:</th><td class=tdleft>";
-	printSelect (getRows(), array ('name' => 'row_id'), $rack['row_id']);
+	foreach (getAllRows () as $row_id => $rowInfo)
+		$rows[$row_id] = $rowInfo['name'];
+    natcasesort ($rows);
+	printSelect ($rows, array ('name' => 'row_id'), $rack['row_id']);
 	echo "</td></tr>\n";
 	echo "<tr><td>&nbsp;</td><th class=tdright>Name (required):</th><td class=tdleft><input type=text name=name value='${rack['name']}'></td></tr>\n";
 	echo "<tr><td>&nbsp;</td><th class=tdright>Height (required):</th><td class=tdleft><input type=text name=height value='${rack['height']}'></td></tr>\n";
@@ -1489,7 +1657,7 @@ function showMessageOrError ()
 // records 200~299 with warnings
 		200 => array ('code' => 'warning', 'format' => '%s'),
 		201 => array ('code' => 'warning', 'format' => 'nothing happened...'),
-		206 => array ('code' => 'warning', 'format' => 'Rack is not empty'),
+		206 => array ('code' => 'warning', 'format' => '%s is not empty'),
 		207 => array ('code' => 'warning', 'format' => 'File upload failed, error: %s'),
 
 // records 300~399 with notices
@@ -3537,9 +3705,12 @@ function renderObjectParentCompatEditor()
 		echo '<tr><th class=tdleft>';
 		printImageHREF ('add', 'add pair', TRUE);
 		echo '</th><th class=tdleft>';
-		printSelect (readChapter (CHAP_OBJTYPE), array ('name' => 'parent_objtype_id'));
+		$chapter = readChapter (CHAP_OBJTYPE);
+		// remove rack, row, location
+		unset ($chapter['1560'], $chapter['1561'], $chapter['1562']);
+		printSelect ($chapter, array ('name' => 'parent_objtype_id'));
 		echo '</th><th class=tdleft>';
-		printSelect (readChapter (CHAP_OBJTYPE), array ('name' => 'child_objtype_id'));
+		printSelect ($chapter, array ('name' => 'child_objtype_id'));
 		echo "</th></tr></form>\n";
 	}
 
@@ -3578,6 +3749,119 @@ function renderConfigMainpage ()
 		if (isset ($cpage['parent']) and $cpage['parent'] == $pageno  && permitted($cpageno))
 			echo "<li><a href='index.php?page=${cpageno}'>" . $cpage['title'] . "</li>\n";
 	echo '</ul>';
+}
+
+function renderLocationPage ($location_id)
+{
+	$locationData = spotEntity ('location', $location_id);
+	amplifyCell ($locationData);
+	echo "<table border=0 class=objectview cellspacing=0 cellpadding=0><tr>";
+
+	// Left column with information.
+	echo "<td class=pcleft>";
+	$summary = array();
+	$summary['Name'] = $locationData['name'];
+	$summary['Child locations'] = count($locationData['locations']);
+	$summary['Rows'] = count($locationData['rows']);
+	if ($locationData['has_problems'] == 'yes')
+		$summary[] = array ('<tr><td colspan=2 class=msg_error>Has problems</td></tr>');
+	foreach (getAttrValues ($locationData['id']) as $record)
+		$summary['{sticker}' . $record['name']] = formatAttributeValue ($record);
+	$summary['tags'] = '';
+	if (strlen ($locationData['comment']))
+		$summary['Comment'] = $locationData['comment'];
+	renderEntitySummary ($locationData, 'Summary', $summary);
+	renderFilesPortlet ('location', $location_id);
+	echo '</td>';
+
+	// Right column with list of rows
+	echo '<td class=pcright>';
+	startPortlet ('Rows');
+	echo "<table border=0 cellspacing=0 cellpadding=5 align=center>\n";
+	foreach ($locationData['rows'] as $row_id => $name)
+		echo "<tr><td><a href='".makeHref(array('page'=>'row', 'row_id'=>$row_id))."'>".$name."</td></tr>\n";
+	echo "</table>\n";
+	finishPortlet();
+	echo '</td>';
+	echo '</tr></table>';
+}
+
+function renderEditLocationForm ($location_id)
+{
+	global $pageno;
+	$location = spotEntity ('location', $location_id);
+	amplifyCell ($location);
+
+	startPortlet ('Attributes');
+	printOpFormIntro ('updateLocation');
+	echo '<table border=0 align=center>';
+	echo "<tr><td>&nbsp;</td><th class=tdright>Parent location:</th><td class=tdleft>";
+	$locations = array ();
+	$locations[0] = '-- NOT SET --';
+	foreach (getLocationList () as $id => $locationInfo)
+		$locations[$id] = $locationInfo['name'];
+	natcasesort($locations);
+	printSelect ($locations, array ('name' => 'parent_id'), $location['parent_id']);
+	echo "</td></tr>\n";
+	echo "<tr><td>&nbsp;</td><th class=tdright>Name (required):</th><td class=tdleft><input type=text name=name value='${location['name']}'></td></tr>\n";
+	// optional attributes
+	$values = getAttrValues ($location_id);
+	$num_attrs = count($values);
+	echo "<input type=hidden name=num_attrs value=${num_attrs}>\n";
+	$i = 0;
+	foreach ($values as $record)
+	{
+		echo "<input type=hidden name=${i}_attr_id value=${record['id']}>";
+		echo '<tr><td>';
+		if (strlen ($record['value']))
+		{
+			echo "<a href='".makeHrefProcess(array('op'=>'clearSticker', 'location_id'=>$location_id, 'attr_id'=>$record['id']))."'>";
+			printImageHREF ('clear', 'Clear value');
+			echo '</a>';
+		}
+		else
+			echo '&nbsp;';
+		echo '</td>';
+		echo "<th class=sticker>${record['name']}:</th><td class=tdleft>";
+		switch ($record['type'])
+		{
+			case 'uint':
+			case 'float':
+			case 'string':
+				echo "<input type=text name=${i}_value value='${record['value']}'>";
+				break;
+			case 'dict':
+				$chapter = readChapter ($record['chapter_id'], 'o');
+				$chapter[0] = '-- NOT SET --';
+				$chapter = cookOptgroups ($chapter, 1562, $record['key']);
+				printNiftySelect ($chapter, array ('name' => "${i}_value"), $record['key']);
+				break;
+		}
+		echo "</td></tr>\n";
+		$i++;
+	}
+	echo "<tr><td>&nbsp;</td><th class=tdright>Has problems:</th><td class=tdleft><input type=checkbox name=has_problems";
+	if ($location['has_problems'] == 'yes')
+		echo ' checked';
+	echo "></td></tr>\n";
+	if (count ($location['locations']) == 0 and count ($location['rows']) == 0)
+	{
+		echo "<tr><td>&nbsp;</td><th class=tdright>Actions:</th><td class=tdleft>"; 
+		echo "<a href='".
+			makeHrefProcess(array('op'=>'deleteLocation', 'location_id'=>$location_id)).
+			"' onclick=\"javascript:return confirm('Are you sure you want to delete the location?')\">" . getImageHREF ('destroy', 'Delete location') . "</a>";
+		echo "&nbsp;</td></tr>\n";
+	}
+	echo "<tr><td colspan=3><b>Comment:</b><br><textarea name=comment rows=10 cols=80>${location['comment']}</textarea></td></tr>";
+	echo "<tr><td class=submit colspan=3>";
+	printImageHREF ('SAVE', 'Save changes', TRUE);
+	echo "</td></tr>\n";
+	echo '</form></table><br>';
+	finishPortlet();
+	
+	startPortlet ('History');
+	renderObjectHistory ($location_id);
+	finishPortlet();
 }
 
 function renderRackPage ($rack_id)
@@ -3869,7 +4153,7 @@ function renderEditAttrMapForm ()
 		printImageHREF ('add', '', TRUE);
 		echo ' ';
 		$objtypes = readChapter (CHAP_OBJTYPE, 'o');
-		unset ($objtypes[1561], $objtypes[1562]); // attributes may not be assigned to rows or locations yet
+		unset ($objtypes[1561]); // attributes may not be assigned to rows yet
 		printNiftySelect (cookOptgroups ($objtypes), array ('name' => 'objtype_id', 'tabindex' => 101));
 		echo ' <select name=chapter_no tabindex=102><option value=0>-- dictionary chapter for [D] attributes --</option>';
 		foreach (getChapterList() as $chapter)
@@ -4876,7 +5160,7 @@ function renderCellFilterPortlet ($preselect, $realm, $cell_list = array(), $byp
 		count ($preselect['pnamelist']) +
 		(mb_strlen ($preselect['extratext']) ? 1 : 0)
 	);
-	$title = $filterc ? "filters (${filterc})" : 'filters';
+	$title = $filterc ? "Tag filters (${filterc})" : 'Tag filters';
 	startPortlet ($title);
 	echo "<form method=get>\n";
 	echo '<table border=0 align=center cellspacing=0 class="tagtree">';
@@ -5970,6 +6254,41 @@ function dynamic_title_decoder ($path_position)
 			'name' => $object['dname'],
 			'params' => array ('object_id' => $_REQUEST['object_id'])
 		);
+	case 'location':
+		assertUIntArg ('location_id');
+		$location = spotEntity ('location', $_REQUEST['location_id']);
+		return array
+		(
+			'name' => $location['name'],
+			'params' => array ('location_id' => $_REQUEST['location_id'])
+		);
+	case 'row':
+		global $pageno;
+		switch ($pageno)
+		{
+		case 'rack':
+			assertUIntArg ('rack_id');
+			$rack = spotEntity ('rack', $_REQUEST['rack_id']);
+			return array
+			(
+				'name' => $rack['row_name'],
+				'params' => array ('row_id' => $rack['row_id'])
+			);
+		case 'row':
+			assertUIntArg ('row_id');
+			$rowInfo = getRowInfo ($_REQUEST['row_id']);
+			return array
+			(
+				'name' => $rowInfo['name'],
+				'params' => array ('row_id' => $_REQUEST['row_id'])
+			);
+		default:
+			return array
+			(
+				'name' => __FUNCTION__ . '() failure',
+				'params' => array()
+			);
+		}
 	case 'rack':
 		assertUIntArg ('rack_id');
 		$rack = spotEntity ('rack', $_REQUEST['rack_id']);
@@ -6065,33 +6384,6 @@ function dynamic_title_decoder ($path_position)
 			'name' => "IPv$ip_ver space",
 			'params' => $params,
 		);
-	case 'row':
-		global $pageno;
-		switch ($pageno)
-		{
-		case 'rack':
-			assertUIntArg ('rack_id');
-			$rack = spotEntity ('rack', $_REQUEST['rack_id']);
-			return array
-			(
-				'name' => $rack['row_name'],
-				'params' => array ('row_id' => $rack['row_id'])
-			);
-		case 'row':
-			assertUIntArg ('row_id');
-			$rowInfo = getRowInfo ($_REQUEST['row_id']);
-			return array
-			(
-				'name' => $rowInfo['name'],
-				'params' => array ('row_id' => $_REQUEST['row_id'])
-			);
-		default:
-			return array
-			(
-				'name' => __FUNCTION__ . '() failure',
-				'params' => array()
-			);
-		}
 	case 'vlandomain':
 		global $pageno;
 		switch ($pageno)
@@ -8052,11 +8344,17 @@ function renderObjectLogEditor ()
 {
 	global $nextorder;
 
-	if (isset($_REQUEST['object_id']))
+	if (isset ($_REQUEST['object_id']))
 	{
 		$entity = 'object';
 		$id_name = 'object_id';
 		$object_id = $_REQUEST['object_id'];
+	}
+	elseif (isset ($_REQUEST['location_id']))
+	{
+		$entity = 'location';
+		$id_name = 'location_id';
+		$object_id = $_REQUEST['location_id'];
 	}
 	else
 	{

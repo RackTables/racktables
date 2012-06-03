@@ -1,19 +1,19 @@
 set names 'utf8';
 
 INSERT INTO `Object` (id, name, label, objtype_id, asset_no, has_problems, comment) VALUES 
-(905,'london router','bbrtr1',7,'net247','no',''),
-(906,'londonswitch1','',8,NULL,'no',''),
-(907,'New-York router 1','bbrtr2a',7,'net55','no',''),
+(905,'london router','bbrtr1',7,'net247','no',NULL),
+(906,'londonswitch1','',8,NULL,'no',NULL),
+(907,'New-York router 1','bbrtr2a',7,'net55','no',NULL),
 (908,'moscow router','bbrtr3',7,NULL,'no',NULL),
 (909,'tokyo router','bbrtr4',7,NULL,'no',NULL),
-(910,'London server 1','lserver01',4,'srv500','no',''),
-(911,'London server 2','lserver02',4,'srv501','no',''),
-(912,'London server 3','lserver03',4,'srv502','no',''),
+(910,'London server 1','lserver01',4,'srv500','no',NULL),
+(911,'London server 2','lserver02',4,'srv501','no',NULL),
+(912,'London server 3','lserver03',4,'srv502','no',NULL),
 (913,'London server 4','lserver04',4,'srv503','yes','this one needs replacement'),
-(914,'London server 5','lserver05',4,'srv504','no',''),
-(915,'london LB','llb',8,'net1000','no',''),
-(916,'shared storage','',5,NULL,'no',''),
-(917,'london-NAS','',7,'net1001','no',''),
+(914,'London server 5','lserver05',4,'srv504','no',NULL),
+(915,'london LB','llb',8,'net1000','no',NULL),
+(916,'shared storage','',5,NULL,'no',NULL),
+(917,'london-NAS','',7,'net1001','no',NULL),
 (918,'London server 6','lserver06',4,'srv505','no',NULL),
 (919,'London server 7','lserver07',4,'srv506','no',NULL),
 (920,'backup library','lbackup',6,'misc200','no',NULL),
@@ -38,49 +38,57 @@ INSERT INTO `Object` (id, name, label, objtype_id, asset_no, has_problems, comme
 (939,'New-York server 4B','nysrv4b',4,NULL,'no',NULL),
 (940,'New-York server 5A','nysrv5a',4,NULL,'no',NULL),
 (941,'New-York server 5B','nysrv5b',4,NULL,'no',NULL),
-(942,'wing A UPS','',12,NULL,'no',NULL),
-(943,'wing B UPS','',12,NULL,'no',NULL),
-(944,'network UPS','',12,NULL,'no',NULL),
-(945,NULL,'',9,NULL,'no',NULL),
-(946,NULL,'',9,NULL,'no',NULL),
-(947,NULL,'',2,NULL,'no',NULL),
-(948,NULL,'',2,NULL,'no',NULL),
-(949,NULL,'',2,NULL,'no',NULL),
-(950,NULL,'',2,NULL,'no',NULL),
-(951,NULL,'',2,NULL,'no',NULL),
-(952,NULL,'',2,NULL,'no',NULL),
-(953,NULL,'',2,NULL,'no',NULL),
-(954,NULL,'',2,NULL,'no',NULL),
-(955,NULL,'',2,NULL,'no',NULL),
-(956,'mps1','',4,NULL,'no',NULL),
-(957,'mps2','',4,NULL,'no',NULL),
-(958,'mps3','',4,NULL,'no',NULL),
-(959,'mps4','',4,NULL,'no',NULL),
-(960,'mps5','',4,NULL,'no',NULL),
-(961,'mskswitch','',8,'sw0001','no',NULL),
-(962,'moscow kvm switch','',445,'sw0002','no',NULL),
-(963,NULL,'Moscow',1561,NULL,'no',NULL),
-(964,NULL,'Tokyo',1561,NULL,'no',NULL),
-(965,NULL,'New-York',1561,NULL,'no',NULL),
-(966,NULL,'London',1561,NULL,'no',NULL),
-(967,NULL,'L01',1560,NULL,'no','test'),
-(968,NULL,'L02',1560,NULL,'no','network equipment mini-rack'),
-(969,NULL,'L03',1560,NULL,'no',NULL),
-(970,NULL,'NY100',1560,NULL,'no',NULL),
-(971,NULL,'NY101',1560,NULL,'no','server farm wing A'),
-(972,NULL,'M01',1560,NULL,'no',NULL),
-(973,NULL,'NY102',1560,NULL,'no','server farm wing B'),
-(974,NULL,'T01',1560,NULL,'no',NULL);
+(942,'wing A UPS',NULL,12,NULL,'no',NULL),
+(943,'wing B UPS',NULL,12,NULL,'no',NULL),
+(944,'network UPS',NULL,12,NULL,'no',NULL),
+(945,NULL,NULL,9,NULL,'no',NULL),
+(946,NULL,NULL,9,NULL,'no',NULL),
+(947,NULL,NULL,2,NULL,'no',NULL),
+(948,NULL,NULL,2,NULL,'no',NULL),
+(949,NULL,NULL,2,NULL,'no',NULL),
+(950,NULL,NULL,2,NULL,'no',NULL),
+(951,NULL,NULL,2,NULL,'no',NULL),
+(952,NULL,NULL,2,NULL,'no',NULL),
+(953,NULL,NULL,2,NULL,'no',NULL),
+(954,NULL,NULL,2,NULL,'no',NULL),
+(955,NULL,NULL,2,NULL,'no',NULL),
+(956,'mps1',NULL,4,NULL,'no',NULL),
+(957,'mps2',NULL,4,NULL,'no',NULL),
+(958,'mps3',NULL,4,NULL,'no',NULL),
+(959,'mps4',NULL,4,NULL,'no',NULL),
+(960,'mps5',NULL,4,NULL,'no',NULL),
+(961,'mskswitch',NULL,8,'sw0001','no',NULL),
+(962,'moscow kvm switch',NULL,445,'sw0002','no',NULL),
+(963,'Row 1',NULL,1561,NULL,'no',NULL),
+(964,'Row A',NULL,1561,NULL,'no',NULL),
+(965,'CF-4',NULL,1561,NULL,'no',NULL),
+(966,'Row 1',NULL,1561,NULL,'no',NULL),
+(967,'L01',NULL,1560,NULL,'no','test'),
+(968,'L02',NULL,1560,NULL,'no','network equipment mini-rack'),
+(969,'L03',NULL,1560,NULL,'no',NULL),
+(970,'NY100',NULL,1560,NULL,'no',NULL),
+(971,'NY101',NULL,1560,NULL,'no','server farm wing A'),
+(972,'M01',NULL,1560,NULL,'no',NULL),
+(973,'NY102',NULL,1560,NULL,'no','server farm wing B'),
+(974,'T01',NULL,1560,NULL,'no',NULL),
+(975,'Moscow',NULL,1562,NULL,'no',NULL),
+(976,'Tokyo',NULL,1562,NULL,'no',NULL),
+(977,'New-York',NULL,1562,NULL,'no',NULL),
+(978,'London',NULL,1562,NULL,'no',NULL);
 
 INSERT INTO `EntityLink` (`parent_entity_type`, `parent_entity_id`, `child_entity_type`, `child_entity_id`) VALUES
-('object',966,'object',967),
-('object',966,'object',968),
-('object',966,'object',969),
-('object',965,'object',970),
-('object',965,'object',971),
-('object',963,'object',972),
-('object',965,'object',973),
-('object',964,'object',974);
+('row',966,'rack',967),
+('row',966,'rack',968),
+('row',966,'rack',969),
+('row',965,'rack',970),
+('row',965,'rack',971),
+('row',963,'rack',972),
+('row',965,'rack',973),
+('row',964,'rack',974),
+('location',975,'row',963),
+('location',976,'row',964),
+('location',977,'row',965),
+('location',978,'row',966);
 
 INSERT INTO `AttributeValue` VALUES (905,7,2,NULL,269,NULL);
 INSERT INTO `AttributeValue` VALUES (906,8,2,NULL,165,NULL);
@@ -721,130 +729,61 @@ INSERT INTO `RackSpace` VALUES (972,35,'rear','T',961);
 INSERT INTO `RackSpace` VALUES (972,34,'interior','T',962);
 INSERT INTO `RackSpace` VALUES (972,34,'rear','T',962);
 
-INSERT INTO `TagTree` (`id`, `parent_id`, `tag`) VALUES (16,NULL,'Geo');
-INSERT INTO `TagTree` (`id`, `parent_id`, `tag`) VALUES (17,NULL,'network');
-INSERT INTO `TagTree` (`id`, `parent_id`, `tag`) VALUES (1,16,'east');
-INSERT INTO `TagTree` (`id`, `parent_id`, `tag`) VALUES (2,16,'west');
-INSERT INTO `TagTree` (`id`, `parent_id`, `tag`) VALUES (3,NULL,'testing');
-INSERT INTO `TagTree` (`id`, `parent_id`, `tag`) VALUES (4,NULL,'production');
-INSERT INTO `TagTree` (`id`, `parent_id`, `tag`) VALUES (5,1,'far east');
-INSERT INTO `TagTree` (`id`, `parent_id`, `tag`) VALUES (6,2,'far west');
-INSERT INTO `TagTree` (`id`, `parent_id`, `tag`) VALUES (7,1,'Москва');
-INSERT INTO `TagTree` (`id`, `parent_id`, `tag`) VALUES (8,2,'London');
-INSERT INTO `TagTree` (`id`, `parent_id`, `tag`) VALUES (9,6,'New-York');
-INSERT INTO `TagTree` (`id`, `parent_id`, `tag`) VALUES (10,5,'東京');
-INSERT INTO `TagTree` (`id`, `parent_id`, `tag`) VALUES (11,17,'WAN link');
-INSERT INTO `TagTree` (`id`, `parent_id`, `tag`) VALUES (12,NULL,'racks');
-INSERT INTO `TagTree` (`id`, `parent_id`, `tag`) VALUES (13,12,'tall racks');
-INSERT INTO `TagTree` (`id`, `parent_id`, `tag`) VALUES (14,12,'low racks');
-INSERT INTO `TagTree` (`id`, `parent_id`, `tag`) VALUES (15,NULL,'load balancer');
-INSERT INTO `TagTree` (`id`, `parent_id`, `tag`) VALUES (18,17,'small network');
-INSERT INTO `TagTree` (`id`, `parent_id`, `tag`) VALUES (19,17,'medium network');
-INSERT INTO `TagTree` (`id`, `parent_id`, `tag`) VALUES (20,5,'北京');
-INSERT INTO `TagTree` (`id`, `parent_id`, `tag`) VALUES (21,5,'서울');
-INSERT INTO `TagTree` (`id`, `parent_id`, `tag`) VALUES (22,5,'Владивосток');
-INSERT INTO `TagTree` (`id`, `parent_id`, `tag`) VALUES (23,NULL,'XKCD');
-INSERT INTO `TagTree` (`id`, `parent_id`, `tag`) VALUES (24,23,'romance');
-INSERT INTO `TagTree` (`id`, `parent_id`, `tag`) VALUES (25,23,'sarcasm');
-INSERT INTO `TagTree` (`id`, `parent_id`, `tag`) VALUES (26,23,'math');
-INSERT INTO `TagTree` (`id`, `parent_id`, `tag`) VALUES (27,23,'language');
+INSERT INTO `TagTree` (`id`, `parent_id`, `tag`) VALUES (1,NULL,'testing');
+INSERT INTO `TagTree` (`id`, `parent_id`, `tag`) VALUES (2,NULL,'production');
+INSERT INTO `TagTree` (`id`, `parent_id`, `tag`) VALUES (10,NULL,'network');
+INSERT INTO `TagTree` (`id`, `parent_id`, `tag`) VALUES (5,10,'WAN link');
+INSERT INTO `TagTree` (`id`, `parent_id`, `tag`) VALUES (6,NULL,'racks');
+INSERT INTO `TagTree` (`id`, `parent_id`, `tag`) VALUES (7,6,'tall racks');
+INSERT INTO `TagTree` (`id`, `parent_id`, `tag`) VALUES (8,6,'low racks');
+INSERT INTO `TagTree` (`id`, `parent_id`, `tag`) VALUES (9,NULL,'load balancer');
+INSERT INTO `TagTree` (`id`, `parent_id`, `tag`) VALUES (11,10,'small network');
+INSERT INTO `TagTree` (`id`, `parent_id`, `tag`) VALUES (12,10,'medium network');
+INSERT INTO `TagTree` (`id`, `parent_id`, `tag`) VALUES (16,NULL,'XKCD');
+INSERT INTO `TagTree` (`id`, `parent_id`, `tag`) VALUES (17,16,'romance');
+INSERT INTO `TagTree` (`id`, `parent_id`, `tag`) VALUES (18,16,'sarcasm');
+INSERT INTO `TagTree` (`id`, `parent_id`, `tag`) VALUES (19,16,'math');
+INSERT INTO `TagTree` (`id`, `parent_id`, `tag`) VALUES (20,16,'language');
 
-INSERT INTO `TagStorage` VALUES ('object',905,3,NULL,NULL);
-INSERT INTO `TagStorage` VALUES ('object',905,8,NULL,NULL);
-INSERT INTO `TagStorage` VALUES ('object',908,4,NULL,NULL);
-INSERT INTO `TagStorage` VALUES ('object',908,7,NULL,NULL);
-INSERT INTO `TagStorage` VALUES ('object',909,3,NULL,NULL);
-INSERT INTO `TagStorage` VALUES ('object',909,10,NULL,NULL);
-INSERT INTO `TagStorage` VALUES ('object',910,8,NULL,NULL);
-INSERT INTO `TagStorage` VALUES ('object',911,8,NULL,NULL);
-INSERT INTO `TagStorage` VALUES ('object',912,8,NULL,NULL);
-INSERT INTO `TagStorage` VALUES ('object',913,8,NULL,NULL);
-INSERT INTO `TagStorage` VALUES ('object',914,8,NULL,NULL);
-INSERT INTO `TagStorage` VALUES ('object',918,8,NULL,NULL);
-INSERT INTO `TagStorage` VALUES ('object',919,8,NULL,NULL);
-INSERT INTO `TagStorage` VALUES ('object',923,10,NULL,NULL);
-INSERT INTO `TagStorage` VALUES ('object',924,10,NULL,NULL);
-INSERT INTO `TagStorage` VALUES ('object',925,10,NULL,NULL);
+INSERT INTO `TagStorage` VALUES ('object',905,1,NULL,NULL);
+INSERT INTO `TagStorage` VALUES ('object',908,2,NULL,NULL);
+INSERT INTO `TagStorage` VALUES ('object',909,1,NULL,NULL);
 INSERT INTO `TagStorage` VALUES ('object',928,9,NULL,NULL);
-INSERT INTO `TagStorage` VALUES ('object',928,15,NULL,NULL);
 INSERT INTO `TagStorage` VALUES ('object',929,9,NULL,NULL);
-INSERT INTO `TagStorage` VALUES ('object',929,15,NULL,NULL);
-INSERT INTO `TagStorage` VALUES ('object',932,9,NULL,NULL);
-INSERT INTO `TagStorage` VALUES ('object',933,9,NULL,NULL);
-INSERT INTO `TagStorage` VALUES ('object',934,9,NULL,NULL);
-INSERT INTO `TagStorage` VALUES ('object',935,9,NULL,NULL);
-INSERT INTO `TagStorage` VALUES ('object',936,9,NULL,NULL);
-INSERT INTO `TagStorage` VALUES ('object',937,9,NULL,NULL);
-INSERT INTO `TagStorage` VALUES ('object',938,9,NULL,NULL);
-INSERT INTO `TagStorage` VALUES ('object',939,9,NULL,NULL);
-INSERT INTO `TagStorage` VALUES ('object',940,9,NULL,NULL);
-INSERT INTO `TagStorage` VALUES ('object',941,9,NULL,NULL);
-INSERT INTO `TagStorage` VALUES ('object',956,4,NULL,NULL);
-INSERT INTO `TagStorage` VALUES ('object',956,7,NULL,NULL);
-INSERT INTO `TagStorage` VALUES ('object',957,4,NULL,NULL);
-INSERT INTO `TagStorage` VALUES ('object',957,7,NULL,NULL);
-INSERT INTO `TagStorage` VALUES ('object',958,4,NULL,NULL);
-INSERT INTO `TagStorage` VALUES ('object',958,7,NULL,NULL);
-INSERT INTO `TagStorage` VALUES ('object',959,4,NULL,NULL);
-INSERT INTO `TagStorage` VALUES ('object',959,7,NULL,NULL);
-INSERT INTO `TagStorage` VALUES ('object',960,4,NULL,NULL);
-INSERT INTO `TagStorage` VALUES ('object',960,7,NULL,NULL);
-INSERT INTO `TagStorage` VALUES ('object',961,4,NULL,NULL);
-INSERT INTO `TagStorage` VALUES ('object',961,7,NULL,NULL);
-INSERT INTO `TagStorage` VALUES ('object',962,4,NULL,NULL);
-INSERT INTO `TagStorage` VALUES ('object',962,7,NULL,NULL);
-INSERT INTO `TagStorage` VALUES ('ipv4net',96,8,NULL,NULL);
-INSERT INTO `TagStorage` VALUES ('ipv4net',96,19,NULL,NULL);
-INSERT INTO `TagStorage` VALUES ('ipv4net',97,8,NULL,NULL);
-INSERT INTO `TagStorage` VALUES ('ipv4net',97,19,NULL,NULL);
-INSERT INTO `TagStorage` VALUES ('ipv4net',98,9,NULL,NULL);
-INSERT INTO `TagStorage` VALUES ('ipv4net',98,19,NULL,NULL);
-INSERT INTO `TagStorage` VALUES ('ipv4net',99,9,NULL,NULL);
-INSERT INTO `TagStorage` VALUES ('ipv4net',99,19,NULL,NULL);
-INSERT INTO `TagStorage` VALUES ('ipv4net',102,7,NULL,NULL);
-INSERT INTO `TagStorage` VALUES ('ipv4net',102,8,NULL,NULL);
+INSERT INTO `TagStorage` VALUES ('object',956,2,NULL,NULL);
+INSERT INTO `TagStorage` VALUES ('object',957,2,NULL,NULL);
+INSERT INTO `TagStorage` VALUES ('object',958,2,NULL,NULL);
+INSERT INTO `TagStorage` VALUES ('object',959,2,NULL,NULL);
+INSERT INTO `TagStorage` VALUES ('object',960,2,NULL,NULL);
+INSERT INTO `TagStorage` VALUES ('object',961,2,NULL,NULL);
+INSERT INTO `TagStorage` VALUES ('object',962,2,NULL,NULL);
+INSERT INTO `TagStorage` VALUES ('ipv4net',96,12,NULL,NULL);
+INSERT INTO `TagStorage` VALUES ('ipv4net',97,12,NULL,NULL);
+INSERT INTO `TagStorage` VALUES ('ipv4net',98,12,NULL,NULL);
+INSERT INTO `TagStorage` VALUES ('ipv4net',99,12,NULL,NULL);
+INSERT INTO `TagStorage` VALUES ('ipv4net',102,5,NULL,NULL);
 INSERT INTO `TagStorage` VALUES ('ipv4net',102,11,NULL,NULL);
-INSERT INTO `TagStorage` VALUES ('ipv4net',102,18,NULL,NULL);
-INSERT INTO `TagStorage` VALUES ('ipv4net',103,8,NULL,NULL);
-INSERT INTO `TagStorage` VALUES ('ipv4net',103,9,NULL,NULL);
+INSERT INTO `TagStorage` VALUES ('ipv4net',103,5,NULL,NULL);
 INSERT INTO `TagStorage` VALUES ('ipv4net',103,11,NULL,NULL);
-INSERT INTO `TagStorage` VALUES ('ipv4net',103,18,NULL,NULL);
-INSERT INTO `TagStorage` VALUES ('ipv4net',104,9,NULL,NULL);
-INSERT INTO `TagStorage` VALUES ('ipv4net',104,10,NULL,NULL);
+INSERT INTO `TagStorage` VALUES ('ipv4net',104,5,NULL,NULL);
 INSERT INTO `TagStorage` VALUES ('ipv4net',104,11,NULL,NULL);
-INSERT INTO `TagStorage` VALUES ('ipv4net',104,18,NULL,NULL);
-INSERT INTO `TagStorage` VALUES ('ipv4net',105,7,NULL,NULL);
-INSERT INTO `TagStorage` VALUES ('ipv4net',105,10,NULL,NULL);
+INSERT INTO `TagStorage` VALUES ('ipv4net',105,5,NULL,NULL);
 INSERT INTO `TagStorage` VALUES ('ipv4net',105,11,NULL,NULL);
-INSERT INTO `TagStorage` VALUES ('ipv4net',105,18,NULL,NULL);
-INSERT INTO `TagStorage` VALUES ('ipv4net',106,7,NULL,NULL);
-INSERT INTO `TagStorage` VALUES ('ipv4net',106,19,NULL,NULL);
-INSERT INTO `TagStorage` VALUES ('ipv4net',107,7,NULL,NULL);
-INSERT INTO `TagStorage` VALUES ('ipv4net',107,19,NULL,NULL);
-INSERT INTO `TagStorage` VALUES ('ipv4net',108,10,NULL,NULL);
-INSERT INTO `TagStorage` VALUES ('ipv4net',108,19,NULL,NULL);
-INSERT INTO `TagStorage` VALUES ('rack',967,8,NULL,NULL);
-INSERT INTO `TagStorage` VALUES ('rack',967,13,NULL,NULL);
+INSERT INTO `TagStorage` VALUES ('ipv4net',106,12,NULL,NULL);
+INSERT INTO `TagStorage` VALUES ('ipv4net',107,12,NULL,NULL);
+INSERT INTO `TagStorage` VALUES ('ipv4net',108,12,NULL,NULL);
+INSERT INTO `TagStorage` VALUES ('rack',967,7,NULL,NULL);
 INSERT INTO `TagStorage` VALUES ('rack',968,8,NULL,NULL);
-INSERT INTO `TagStorage` VALUES ('rack',968,14,NULL,NULL);
-INSERT INTO `TagStorage` VALUES ('rack',969,8,NULL,NULL);
-INSERT INTO `TagStorage` VALUES ('rack',969,13,NULL,NULL);
-INSERT INTO `TagStorage` VALUES ('rack',970,9,NULL,NULL);
-INSERT INTO `TagStorage` VALUES ('rack',970,14,NULL,NULL);
-INSERT INTO `TagStorage` VALUES ('rack',971,9,NULL,NULL);
-INSERT INTO `TagStorage` VALUES ('rack',971,13,NULL,NULL);
+INSERT INTO `TagStorage` VALUES ('rack',969,7,NULL,NULL);
+INSERT INTO `TagStorage` VALUES ('rack',970,8,NULL,NULL);
+INSERT INTO `TagStorage` VALUES ('rack',971,7,NULL,NULL);
 INSERT INTO `TagStorage` VALUES ('rack',972,7,NULL,NULL);
-INSERT INTO `TagStorage` VALUES ('rack',972,13,NULL,NULL);
-INSERT INTO `TagStorage` VALUES ('rack',973,9,NULL,NULL);
-INSERT INTO `TagStorage` VALUES ('rack',973,13,NULL,NULL);
-INSERT INTO `TagStorage` VALUES ('rack',974,10,NULL,NULL);
-INSERT INTO `TagStorage` VALUES ('rack',974,14,NULL,NULL);
-INSERT INTO `TagStorage` VALUES ('ipv6net','1','17',NULL,NULL);
-INSERT INTO `TagStorage` VALUES ('ipv6net','2','19',NULL,NULL);
-INSERT INTO `TagStorage` VALUES ('ipv6net','3','19',NULL,NULL);
-INSERT INTO `TagStorage` VALUES ('ipv6net','4','8',NULL,NULL);
+INSERT INTO `TagStorage` VALUES ('rack',973,7,NULL,NULL);
+INSERT INTO `TagStorage` VALUES ('rack',974,8,NULL,NULL);
+INSERT INTO `TagStorage` VALUES ('ipv6net','1','10',NULL,NULL);
+INSERT INTO `TagStorage` VALUES ('ipv6net','2','12',NULL,NULL);
+INSERT INTO `TagStorage` VALUES ('ipv6net','3','12',NULL,NULL);
 INSERT INTO `TagStorage` VALUES ('ipv6net','4','18',NULL,NULL);
-INSERT INTO `TagStorage` VALUES ('ipv6net','5','7',NULL,NULL);
 INSERT INTO `TagStorage` VALUES ('ipv6net','5','18',NULL,NULL);
 
 INSERT INTO `VLANDomain` VALUES

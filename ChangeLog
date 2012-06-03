@@ -20,6 +20,7 @@
 	new feature: adjustable quick links at the top of the page
 	new feature: IPv6 SLB support
 	new feature: Arista EOS support
+	new feature: locations
 0.19.13
 	update: IE spoils JPEG uploads, work around
 	update: use is_callable() (#551)

@@ -136,6 +136,31 @@ function getTagSelectAJAX()
 			'>' . htmlspecialchars ($value) . '</option>';
 }
 
+function getLocationSelectAJAX()
+{
+	global $locationlist;
+	$options = array();
+	$selected_id = '';
+	if (! isset($_REQUEST['locationid']))
+		$options['error'] = "Sorry, param 'locationid' is empty. Reload page and try again";
+	elseif (! preg_match("/locationid_(\d+)/i", $_REQUEST['locationid'], $m))
+		$options['error'] = "Sorry, wrong format locationid:'".$_REQUEST['locationid']."'. Reload page and try again";
+	else
+	{
+		$current_location_id = $m[1];
+		$selected_id = $locationlist[$current_location_id]['parent_id'];
+		echo $selected_id;
+		$options[0] = '-- NONE --';
+		foreach ($locationlist as $location_id => $locationinfo)
+			if (! in_array ($current_location_id, $locationinfo['trace']) && $current_location_id != $location_id)
+				$options[$location_id] = $locationinfo['name'];
+	}
+	foreach ($options as $location_id => $value)
+		echo "<option value='$location_id'" .
+			($location_id == $selected_id ? ' selected' : '') .
+			'>' . htmlspecialchars ($value) . '</option>';
+}
+
 function verifyCodeAJAX()
 {
 	global $pageno, $tabno;
