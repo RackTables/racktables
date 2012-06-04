@@ -1367,7 +1367,7 @@ CREATE VIEW `Row` AS SELECT O.id, O.name, L.id AS location_id, L.name AS locatio
   WHERE O.objtype_id = 1561
 ";
 			$query[] = "
-CREATE VIEW `Rack` AS SELECT O.id, O.label AS name, O.asset_no, O.has_problems, O.comment,
+CREATE VIEW `Rack` AS SELECT O.id, O.name AS name, O.asset_no, O.has_problems, O.comment,
   AV.uint_value AS height,
   RT.thumb_data,
   R.id AS row_id,
