@@ -1790,13 +1790,20 @@ function addLocation ()
 $msgcode['updateLocation']['OK'] = 6;
 function updateLocation ()
 {
+	global $pageno;
 	assertUIntArg ('location_id');
 	assertUIntArg ('parent_id', TRUE);
 	assertStringArg ('name');
-	$has_problems = (isset ($_REQUEST['has_problems']) and $_REQUEST['has_problems'] == 'on') ? 'yes' : 'no';
-	assertStringArg ('comment', TRUE);
-
-	commitUpdateObject ($_REQUEST['location_id'], $_REQUEST['name'], NULL, $has_problems, NULL, $_REQUEST['comment']);
+	
+	if ($pageno != 'rackspace')
+	{
+		$has_problems = (isset ($_REQUEST['has_problems']) and $_REQUEST['has_problems'] == 'on') ? 'yes' : 'no';
+		assertStringArg ('comment', TRUE);
+	
+		commitUpdateObject ($_REQUEST['location_id'], $_REQUEST['name'], NULL, $has_problems, NULL, $_REQUEST['comment']);
+	}
+	else
+		commitRenameObject ($_REQUEST['location_id'], $_REQUEST['name']);
 
 	$locationData = spotEntity ('location', $_REQUEST['location_id']);
 

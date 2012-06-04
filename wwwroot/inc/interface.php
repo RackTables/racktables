@@ -437,11 +437,12 @@ function renderLocationRowForEditor ($locationinfo, $level = 0)
 			. '">' . getImageHREF ('destroy', 'Delete location') . '</a>';
 	echo '</td><td class=tdleft>';
 	printOpFormIntro ('updateLocation', array ('location_id' => $locationinfo['id']));
+	$parent = isset ($locationinfo['parent_id']) ? $locationinfo['parent_id'] : 0;
 	echo getSelect
 	(
-		array ( $locationinfo['parent_id'] => $locationinfo['parent_id'] ? htmlspecialchars ($locationlist[$locationinfo['parent_id']]['name']) : '-- NONE --'),
+		array ( $parent => $parent ? htmlspecialchars ($locationlist[$parent]['name']) : '-- NONE --'),
 		array ('name' => 'parent_id', 'id' => 'locationid_' . $locationinfo['id'], 'class' => 'locationlist-popup'),
-		$locationinfo['parent_id'],
+		$parent,
 		FALSE
 	);
 	echo "</td><td class=tdleft>";

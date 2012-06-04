@@ -250,8 +250,8 @@ function getLocationList ()
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
 		if (!isset ($ret[$row['id']]))
-		$ret[$row['id']] = array
-		(
+			$ret[$row['id']] = array
+			(
 				'id' => $row['id'],
 				'name' => $row['name'],
 				'ci' => $ci++,
@@ -259,7 +259,7 @@ function getLocationList ()
 				'parent_name' => $row['parent_name'],
 				'childcnt' => $row['refcnt'],
 				'refcnt' => array ('total' => 0)
-		);
+			);
 		if ($row['parent_id'])
 		{
 			$ret[$row['id']]['refcnt'][$row['parent_id']] = $row['refcnt'];
@@ -891,6 +891,23 @@ function commitAddObject ($new_name, $new_label, $new_type_id, $new_asset_no, $t
 	produceTagsForNewRecord ('object', $taglist, $object_id);
 	recordObjectHistory ($object_id);
 	return $object_id;
+}
+
+function commitRenameObject ($object_id, $new_name)
+{
+	usePreparedUpdateBlade
+	(
+		'Object',
+		array
+		(
+			'name' => !mb_strlen ($new_name) ? NULL : $new_name,
+		),
+		array
+		(
+			'id' => $object_id
+		)
+	);
+	recordObjectHistory ($object_id);
 }
 
 function commitUpdateObject ($object_id, $new_name, $new_label, $new_has_problems, $new_asset_no, $new_comment)
