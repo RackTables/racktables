@@ -1449,7 +1449,8 @@ INSERT INTO `PortCompat` (`type1`, `type2`) VALUES
 (1669,1669),
 (1670,1670),
 (1671,1671),
-(1642,1642);
+(1642,1642),
+(1710,1710);
 
 INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdefined, description) VALUES
 ('MASSCOUNT','8','uint','no','no','yes','&quot;Fast&quot; form is this many records tall'),

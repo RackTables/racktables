@@ -1235,6 +1235,8 @@ CREATE TABLE `CactiGraph` (
 			$query[] = "UPDATE Config SET varvalue = '0.19.12' WHERE varname = 'DB_VERSION'";
 			break;
 		case '0.19.13':
+			$query[] = "INSERT INTO PortCompat (type1, type2) VALUES (1710,1710)";
+
 			// add the date attribute type
 			$query[] = "ALTER TABLE `Attribute` CHANGE COLUMN `type` `type` enum('string','uint','float','dict','date') DEFAULT NULL";
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdefined, description) VALUES ('DATETIME_ZONE','UTC','string','yes','no','yes','Timezone to use for displaying/calculating dates')";
