@@ -1792,7 +1792,6 @@ $dictionary = array
 	1707 => array ('chapter_id' => 13, 'dict_value' => 'Ubuntu%GSKIP%Ubuntu 11.10'),
 	1708 => array ('chapter_id' => 13, 'dict_value' => 'Ubuntu%GSKIP%Ubuntu 12.04 LTS'),
 	1709 => array ('chapter_id' => 13, 'dict_value' => '[[Debian%GSKIP%Debian 7.0 (wheezy) | http://debian.org/releases/wheezy/]]'),
-	1710 => array ('chapter_id' => 2, 'dict_value' => '10GBase-CX1'),
 
 # Any new "default" dictionary records must go above this line (i.e., with
 # dict_key code less, than 50000). This is necessary to keep AUTO_INCREMENT
