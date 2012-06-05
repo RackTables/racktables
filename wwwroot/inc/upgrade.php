@@ -1237,6 +1237,7 @@ CREATE TABLE `CactiGraph` (
 			break;
 		case '0.19.13':
 			$query[] = "INSERT INTO PortCompat (type1, type2) VALUES (1710,1710)";
+			$query[] = "INSERT INTO PortInterfaceCompat VALUES (9, 1710)";
 
 			// add the date attribute type
 			$query[] = "ALTER TABLE `Attribute` CHANGE COLUMN `type` `type` enum('string','uint','float','dict','date') DEFAULT NULL";
