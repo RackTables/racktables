@@ -576,7 +576,7 @@ CREATE TABLE `IPv4Allocation` (
   `object_id` int(10) unsigned NOT NULL default '0',
   `ip` int(10) unsigned NOT NULL default '0',
   `name` char(255) NOT NULL default '',
-  `type` enum('regular','shared','virtual','router') default NULL,
+  `type` enum('regular','shared','virtual','router') NOT NULL DEFAULT 'regular',
   PRIMARY KEY  (`object_id`,`ip`),
   KEY `ip` (`ip`),
   CONSTRAINT `IPv4Allocation-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `Object` (`id`) ON DELETE CASCADE
@@ -687,7 +687,7 @@ CREATE TABLE `IPv6Allocation` (
   `object_id` int(10) unsigned NOT NULL default '0',
   `ip` binary(16) NOT NULL,
   `name` char(255) NOT NULL default '',
-  `type` enum('regular','shared','virtual','router') default NULL,
+  `type` enum('regular','shared','virtual','router') NOT NULL DEFAULT 'regular',
   PRIMARY KEY  (`object_id`,`ip`),
   KEY `ip` (`ip`),
   CONSTRAINT `IPv6Allocation-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `Object` (`id`) ON DELETE CASCADE
