@@ -138,7 +138,8 @@ function getTagSelectAJAX()
 
 function getLocationSelectAJAX()
 {
-	global $locationlist;
+	$locationlist = listCells ('location');
+	$locationtree = treeFromList ($locationlist); // adds ['trace'] keys into $locationlist items
 	$options = array();
 	$selected_id = '';
 	if (! isset($_REQUEST['locationid']))

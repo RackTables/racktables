@@ -171,6 +171,7 @@ $SQLSchema = array
 			'comment' => 'comment',
 			'parent_id' => 'parent_id',
 			'parent_name' => 'parent_name',
+			'refcnt' => "(SELECT COUNT(child_entity_id) FROM EntityLink EL WHERE EL.parent_entity_type = 'location' AND EL.parent_entity_id = Location.id)",
 		),
 		'keycolumn' => 'id',
 		'ordcolumns' => array ('name'),
@@ -233,41 +234,6 @@ $port_role_options = array
 );
 
 $object_attribute_cache = array();
-
-// Return a chain of locations
-function getLocationList ()
-{
-	$ret = array();
-	$result = usePreparedSelectBlade
-	(
-		"SELECT P.id, P.name, P.parent_id, P.parent_name, count(C.id) AS refcnt " .
-		"FROM Location P LEFT JOIN Location C ON P.id = C.parent_id " .
-		"GROUP BY P.id, P.parent_id ORDER BY P.name"
-	);
-	// Collation index. The resulting rows are ordered according to default collation,
-	// which is utf8_general_ci for UTF-8.
-	$ci = 0;
-	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-	{
-		if (!isset ($ret[$row['id']]))
-			$ret[$row['id']] = array
-			(
-				'id' => $row['id'],
-				'name' => $row['name'],
-				'ci' => $ci++,
-				'parent_id' => $row['parent_id'],
-				'parent_name' => $row['parent_name'],
-				'childcnt' => $row['refcnt'],
-				'refcnt' => array ('total' => 0)
-			);
-		if ($row['parent_id'])
-		{
-			$ret[$row['id']]['refcnt'][$row['parent_id']] = $row['refcnt'];
-			$ret[$row['id']]['refcnt']['total'] += $row['refcnt'];
-		}
-	}
-	return $ret;
-}
 
 // Return list of locations directly under a specified location
 function getLocations ($location_id)
@@ -3687,9 +3653,6 @@ function getTagList ()
 		"from TagTree left join TagStorage on id = tag_id " .
 		"group by id, entity_realm order by tag"
 	);
-	// Collation index. The resulting rows are ordered according to default collation,
-	// which is utf8_general_ci for UTF-8.
-	$ci = 0;
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
 		if (!isset ($ret[$row['id']]))
@@ -3697,7 +3660,6 @@ function getTagList ()
 			(
 				'id' => $row['id'],
 				'tag' => $row['tag'],
-				'ci' => $ci++,
 				'parent_id' => $row['parent_id'],
 				'refcnt' => array ('total' => 0)
 			);

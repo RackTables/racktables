@@ -278,24 +278,19 @@ function getRenderedAlloc ($object_id, $alloc)
 function renderLocationFilterPortlet ()
 {
 	@session_start();
-	global $locationlist;
 	// Recursive function used to build the location tree
-	function renderLocationCheckbox ($parent_id, $level)
+	function renderLocationCheckbox ($subtree, $level = 0)
 	{
 		$self = __FUNCTION__;
-		global $locationlist;
 
-		foreach ($locationlist as $location_id => $location)
+		foreach ($subtree as $location_id => $location)
 		{
-			if ($location['parent_id'] == $parent_id)
-			{
-				echo "<tr><td class=tagbox style='padding-left: " . ($level * 16) . "px;'><label>";
-				$checked = (in_array ($location['id'], $_SESSION['locationFilter'])) ? 'checked' : '';
-				echo "<label><input type=checkbox name='location_id[]' value='${location['id']}'${checked}>${location['name']}";
-				echo "</label></td></tr>\n";
-				if ($location['childcnt'] > 0)
-					$self ($location['id'], $level + 1);
-			}
+			echo "<tr><td class=tagbox style='padding-left: " . ($level * 16) . "px;'><label>";
+			$checked = (in_array ($location['id'], $_SESSION['locationFilter'])) ? 'checked' : '';
+			echo "<label><input type=checkbox name='location_id[]' value='${location['id']}'${checked}>${location['name']}";
+			echo "</label></td></tr>\n";
+			if ($location['kidc'])
+				$self ($location['kids'], $level + 1);
 		}
 	}
 
@@ -308,10 +303,12 @@ function renderLocationFilterPortlet ()
     <input type=hidden name=tab value=default>
     <input type=hidden name=changeLocationFilter value=true>
 END;
+
+	$locationlist = listCells ('location');
 	if (count ($locationlist))
 	{
 		echo "<tr><td class=tagbox><hr></td></tr>\n";
-		renderLocationCheckbox ('', 0);
+		renderLocationCheckbox (treeFromList ($locationlist));
 		echo "<tr><td class=tagbox><hr></td></tr>\n";
 		echo "<tr><td>";
 		printImageHREF ('setfilter', 'set filter', TRUE);
@@ -421,35 +418,35 @@ function renderRackspace ()
 	echo "</td></tr></table>\n";
 }
 
-function renderLocationRowForEditor ($locationinfo, $level = 0)
+function renderLocationRowForEditor ($subtree, $level = 0)
 {
 	$self = __FUNCTION__;
-	global $locationlist;
-	if (!count ($locationinfo['kids']))
-		$level++; // Idem
-	echo "<tr><td align=left style='padding-left: " . ($level * 16) . "px;'>";
-	if ($locationinfo['kidc'])
-		printImageHREF ('node-expanded-static');
-	if ($locationinfo['refcnt']['total'] > 0 or $locationinfo['kidc'])
-		printImageHREF ('nodestroy');
-	else
-		echo '<a href="' . makeHrefProcess (array ('op' => 'deleteLocation', 'location_id' => $locationinfo['id']))
-			. '">' . getImageHREF ('destroy', 'Delete location') . '</a>';
-	echo '</td><td class=tdleft>';
-	printOpFormIntro ('updateLocation', array ('location_id' => $locationinfo['id']));
-	$parent = isset ($locationinfo['parent_id']) ? $locationinfo['parent_id'] : 0;
-	echo getSelect
-	(
-		array ( $parent => $parent ? htmlspecialchars ($locationlist[$parent]['name']) : '-- NONE --'),
-		array ('name' => 'parent_id', 'id' => 'locationid_' . $locationinfo['id'], 'class' => 'locationlist-popup'),
-		$parent,
-		FALSE
-	);
-	echo "</td><td class=tdleft>";
-	echo "<input type=text size=48 name=name value='${locationinfo['name']}'>";
-	echo '</td><td>' . getImageHREF ('save', 'Save changes', TRUE) . "</form></td></tr>\n";
-	foreach ($locationinfo['kids'] as $kid)
-		$self ($kid, $level + 1);
+	foreach ($subtree as $locationinfo)
+	{
+		echo "<tr><td align=left style='padding-left: " . ($locationinfo['kidc'] ? $level : ($level + 1) * 16) . "px;'>";
+		if ($locationinfo['kidc'])
+			printImageHREF ('node-expanded-static');
+		if ($locationinfo['refcnt'] > 0 || $locationinfo['kidc'] > 0)
+			printImageHREF ('nodestroy');
+		else
+			echo '<a href="' . makeHrefProcess (array ('op' => 'deleteLocation', 'location_id' => $locationinfo['id']))
+				. '">' . getImageHREF ('destroy', 'Delete location') . '</a>';
+		echo '</td><td class=tdleft>';
+		printOpFormIntro ('updateLocation', array ('location_id' => $locationinfo['id']));
+		$parent = isset ($locationinfo['parent_id']) ? $locationinfo['parent_id'] : 0;
+		echo getSelect
+		(
+			array ( $parent => $parent ? htmlspecialchars ($locationinfo['parent_name']) : '-- NONE --'),
+			array ('name' => 'parent_id', 'id' => 'locationid_' . $locationinfo['id'], 'class' => 'locationlist-popup'),
+			$parent,
+			FALSE
+		);
+		echo "</td><td class=tdleft>";
+		echo "<input type=text size=48 name=name value='${locationinfo['name']}'>";
+		echo '</td><td>' . getImageHREF ('save', 'Save changes', TRUE) . "</form></td></tr>\n";
+		if ($locationinfo['kidc'])
+			$self ($locationinfo['kids'], $level + 1);
+	}
 }
 
 function renderRackspaceLocationEditor ()
@@ -469,28 +466,28 @@ END
 	);
 	function printNewItemTR ()
 	{
-		global $locationlist;
 		printOpFormIntro ('addLocation');
 		echo "<tr><td>";
 		printImageHREF ('create', 'Add new location', TRUE);
 		echo "</td><td><select name=parent_id tabindex=100>";
 		echo "<option value=0>-- NONE --</option>";
-		foreach ($locationlist as $location)
+		foreach (listCells ('location') as $location)
 			echo "<option value=${location['id']}>${location['name']}</option>";
 		echo "</select></td>";
 		echo "<td><input type=text size=48 name=name tabindex=101></td><td>";
 		printImageHREF ('create', 'Add new location', TRUE, 102);
 		echo "</td></tr></form>\n";
 	}
-	global $locationlist, $locationtree;
+	global $locationtree;
 
 	startPortlet ('Locations');
 	echo "<table border=0 cellspacing=0 cellpadding=5 align=center class=widetable>\n";
 	echo "<tr><th>&nbsp;</th><th>Parent</th><th>Name</th><th>&nbsp;</th></tr>\n";
 	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
 		printNewItemTR();
-	foreach ($locationtree as $locationinfo)
-		renderLocationRowForEditor ($locationinfo);
+
+	renderLocationRowForEditor (treeFromList (listCells ('location')));
+
 	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')
 		printNewItemTR();
 	echo "</table><br>\n";
@@ -499,9 +496,8 @@ END
 
 function renderRackspaceRowEditor ()
 {
-	function printNewItemTR ()
+	function printNewItemTR ($locationlist)
 	{
-		global $locationlist;
 		printOpFormIntro ('addRow');
 		echo "<tr><td>";
 		printImageHREF ('create', 'Add new row', TRUE);
@@ -514,13 +510,13 @@ function renderRackspaceRowEditor ()
 		printImageHREF ('create', 'Add new row', TRUE, 102);
 		echo "</td></tr></form>";
 	}
-	global $locationlist;
+	$locationlist = listCells ('location');
 
 	startPortlet ('Rows');
 	echo "<table border=0 cellspacing=0 cellpadding=5 align=center class=widetable>\n";
 	echo "<tr><th>&nbsp;</th><th>Location</th><th>Name</th><th>&nbsp;</th></tr>\n";
 	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
-		printNewItemTR();
+		printNewItemTR($locationlist);
 	foreach (getAllRows() as $row_id => $rowInfo)
 	{
 		echo "<tr><td>";
@@ -544,7 +540,7 @@ function renderRackspaceRowEditor ()
 		echo "</form></td></tr>\n";
 	}
 	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')
-		printNewItemTR();
+		printNewItemTR($locationlist);
 	echo "</table><br>\n";
 	finishPortlet();
 }
@@ -3799,7 +3795,7 @@ function renderEditLocationForm ($location_id)
 	echo "<tr><td>&nbsp;</td><th class=tdright>Parent location:</th><td class=tdleft>";
 	$locations = array ();
 	$locations[0] = '-- NOT SET --';
-	foreach (getLocationList () as $id => $locationInfo)
+	foreach (listCells ('location') as $id => $locationInfo)
 		$locations[$id] = $locationInfo['name'];
 	natcasesort($locations);
 	printSelect ($locations, array ('name' => 'parent_id'), $location['parent_id']);

@@ -1218,6 +1218,11 @@ function peekNode ($tree, $trace, $target_id)
 	throw new RackTablesError ('inconsistent tree data', RackTablesError::INTERNAL);
 }
 
+function treeItemCmp ($a, $b)
+{
+	return $a['__tree_index'] - $b['__tree_index'];
+}
+
 // Build a tree from the item list and return it. Input and output data is
 // indexed by item id (nested items in output are recursively stored in 'kids'
 // key, which is in turn indexed by id. Functions, which are ready to handle
@@ -1227,6 +1232,12 @@ function treeFromList (&$orig_nodelist, $threshold = 0, $return_main_payload = T
 {
 	$tree = array();
 	$nodelist = $orig_nodelist;
+
+	// index the tree items by their order in $orig_nodelist
+	$ti = 0;
+	foreach ($nodelist as &$node)
+		$node['__tree_index'] = $ti++;
+
 	// Array equivalent of traceEntity() function.
 	$trace = array();
 	// set kidc and kids only once
@@ -1271,6 +1282,7 @@ function treeFromList (&$orig_nodelist, $threshold = 0, $return_main_payload = T
 	// update each input node with its backtrace route
 	foreach ($trace as $nodeid => $route)
 		$orig_nodelist[$nodeid]['trace'] = $route;
+	sortTree ($tree, 'treeItemCmp'); // sort the resulting tree by the order in original list
 	return $tree;
 }
 
@@ -1876,12 +1888,6 @@ function findRouters ($addrlist)
 	return $ret;
 }
 
-// Assist in tag chain sorting.
-function taginfoCmp ($tagA, $tagB)
-{
-	return $tagA['ci'] - $tagB['ci'];
-}
-
 // Compare networks. When sorting a tree, the records on the list will have
 // distinct base IP addresses.
 // "The comparison function must return an integer less than, equal to, or greater
@@ -2434,7 +2440,6 @@ function makeIPTree ($netlist)
 	unset ($stack);
 
 	$tree = treeFromList ($netlist); // medium call
-	sortTree ($tree, 'IPNetworkCmp');
 	return $tree;
 }
 
