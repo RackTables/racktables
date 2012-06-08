@@ -478,7 +478,6 @@ END
 		printImageHREF ('create', 'Add new location', TRUE, 102);
 		echo "</td></tr></form>\n";
 	}
-	global $locationtree;
 
 	startPortlet ('Locations');
 	echo "<table border=0 cellspacing=0 cellpadding=5 align=center class=widetable>\n";
