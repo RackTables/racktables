@@ -277,7 +277,6 @@ function getRenderedAlloc ($object_id, $alloc)
 
 function renderLocationFilterPortlet ()
 {
-	@session_start();
 	// Recursive function used to build the location tree
 	function renderLocationCheckbox ($subtree, $level = 0)
 	{
@@ -335,7 +334,8 @@ function renderRackspace ()
 	if (isset ($_REQUEST['location_id']))
 		$_SESSION['locationFilter'] = $_REQUEST['location_id'];
 	if (!isset ($_SESSION['locationFilter']))
-		$_SESSION['locationFilter'] = array ();
+		$_SESSION['locationFilter'] = array_keys (listCells ('location')); // Add all locations to the filter 
+	session_commit();
 
 	$found_racks = array();
 	$rows = array();
@@ -7961,6 +7961,7 @@ function renderVSTRulesEditor ($vst_id)
 		renderVSTRules ($vst['rules'], 'currently saved tamplate');
 		unset ($_SESSION['vst_edited']);
 	}
+	session_commit();
 	
 	if (count ($source_options))
 		finishPortlet();

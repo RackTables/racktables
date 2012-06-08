@@ -93,11 +93,6 @@ $tagRelCache = array();
 $taglist = getTagList();
 $tagtree = treeFromList ($taglist);
 
-// Add all locations to the filter upon login
-@session_start();
-if (!isset ($_SESSION['locationFilter']))
-	$_SESSION['locationFilter'] = array_keys (listCells ('location'));
-
 $auto_tags = array();
 // Initial chain for the current user.
 $user_given_tags = array();
