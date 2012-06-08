@@ -283,12 +283,12 @@ function getRows ($location_id)
 {
 	$result = usePreparedSelectBlade
 	(
-		'SELECT R.id, R.name FROM Location L ' .
-		'LEFT JOIN EntityLink EL ON L.id = EL.parent_entity_id ' .
-		'LEFT JOIN Row R ON EL.child_entity_id = R.id ' .
-		"WHERE EL.parent_entity_type = 'location' " .
+		'SELECT R.id, R.name FROM Row R ' . 
+		'INNER JOIN EntityLink EL ON ' .
+		"EL.parent_entity_type = 'location' " .
 		"AND EL.child_entity_type = 'row' " .
-		'AND EL.parent_entity_id = ? ' .
+		"AND EL.child_entity_id = R.id " .
+		'WHERE EL.parent_entity_id = ? ' .
 		'ORDER BY R.name',
 		array ($location_id)
 	);
