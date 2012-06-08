@@ -1019,10 +1019,12 @@ CREATE TABLE `VLANValidID` (
 ) ENGINE=InnoDB;
 
 CREATE VIEW `Location` AS SELECT O.id, O.name, O.has_problems, O.comment, P.id AS parent_id, P.name AS parent_name
-  FROM `Object` O
-  LEFT JOIN `EntityLink` EL ON O.id = EL.child_entity_id
-  LEFT JOIN `Object` P ON (EL.parent_entity_id = P.id AND P.objtype_id = 1562 AND EL.parent_entity_type = 'location' AND EL.child_entity_type = 'location')
-  WHERE O.objtype_id = 1562;
+FROM `Object` O
+LEFT JOIN (
+  `Object` P INNER JOIN `EntityLink` EL
+  ON EL.parent_entity_id = P.id AND P.objtype_id = 1562 AND EL.parent_entity_type = 'location' AND EL.child_entity_type = 'location'
+) ON EL.child_entity_id = O.id
+WHERE O.objtype_id = 1562;
 
 CREATE VIEW `Row` AS SELECT O.id, O.name, L.id AS location_id, L.name AS location_name
   FROM `Object` O
