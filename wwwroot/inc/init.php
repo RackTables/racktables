@@ -97,6 +97,10 @@ $auto_tags = array();
 // Initial chain for the current user.
 $user_given_tags = array();
 
+// list of regexps used in findAutoTagWarnings to check RackCode.
+// add your regexps here to suppress 'Martian autotag' warnings
+$user_defined_atags = array();
+
 // This also can be modified in local.php.
 $pageheaders = array
 (

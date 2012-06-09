@@ -878,6 +878,7 @@ function refRCLineno ($ln)
 // Scan the given expression and return any issues found about its autotags.
 function findAutoTagWarnings ($expr)
 {
+	global $user_defined_atags;
 	$self = __FUNCTION__;
 	switch ($expr['type'])
 	{
@@ -971,8 +972,13 @@ function findAutoTagWarnings ($expr)
 				case (preg_match ('/^\$(unmounted|untagged|no_asset_tag|runs_8021Q)$/', $expr['load'])):
 				case (preg_match ('/^\$masklen_(eq|le|ge)_[[:digit:]][[:digit:]]?$/', $expr['load'])):
 				case (preg_match ('/^\$attr_\d+(_\d+)?$/', $expr['load'])):
+				case (preg_match ('/^\$8021Q_domain_\d+$/', $expr['load'])):
+				case ('$aggregate' === $expr['load']):
 					return array();
 				default:
+					foreach ($user_defined_atags as $regexp)
+						if (preg_match ($regexp, $expr['load']))
+							return array();
 					return array (array
 					(
 						'header' => refRCLineno ($expr['lineno']),
