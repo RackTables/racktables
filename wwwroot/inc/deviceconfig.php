@@ -2386,34 +2386,14 @@ function eos4ReadMacList ($text)
 	return $result;
 }
 
-# Suppress login banner and "show configuration" command itself, as well as the
-# trailing lines of the session.
-function spotText ($input, $first_line_re, $last_line_re = NULL)
-{
-	$copy = $first_line_re === NULL;
-	$ret = '';
-	foreach (explode ("\n", $input) as $oneline)
-	{
-		if (! $copy and preg_match ($first_line_re, $oneline))
-			$copy = TRUE;
-		if ($copy)
-		{
-			$ret .= $oneline . "\n";
-			if ($last_line_re !== NULL and preg_match ($last_line_re, $oneline))
-				break;
-		}
-	}
-	return $ret;
-}
-
 function ios12SpotConfigText ($input)
 {
-	return spotText ($input, '/^Current configuration : \d+ bytes$/');
+	return preg_replace ('/.*?^Current configuration : \d+ bytes$\n(.*)^\S+#\s*\Z/sm', '$1', $input);
 }
 
 function nxos4SpotConfigText ($input)
 {
-	return spotText ($input, '/^!Command: show running-config$/');
+	return preg_replace ('/.*?^!Command: show running-config$\n(.*)^\S+#\s*\Z/sm', '$1', $input);
 }
 
 function fdry5SpotConfigText ($input)
@@ -2423,27 +2403,27 @@ function fdry5SpotConfigText ($input)
 
 function vrp5xSpotConfigText ($input)
 {
-	return spotText ($input, '/^!Software Version V/', '/^return$/');
+	return preg_replace ('/.*?^!Software Version V\N*\n(.*)^return$.*/sm', '$1', $input);
 }
 
 function xos12SpotConfigText ($input)
 {
-	return spotText ($input, '/^# Module .+ configuration.$/');
+	return preg_replace ('/.*?^# Module \N+ configuration.$\n/sm', '', $input);
 }
 
 function jun10SpotConfigText ($input)
 {
-	return spotText ($input, '/^## Last commit: /');
+	return preg_replace ('/.*?^## Last commit: \N*\n(.*)^\S+@\S+>\s*\Z/sm', '$1', $input);
 }
 
 function ftos8SpotConfigText ($input)
 {
-	return spotText ($input, '/^! Version [0-9\.]+$/', '/^end$/');
+	return preg_replace ('/.*?^! Version [0-9\.]+\n(.*)^end$.*/sm', '$1', $input);
 }
 
 function eos4SpotConfigText ($input)
 {
-	return spotText ($input, '/^! device: .*EOS-/', '/^end$/');
+	return preg_replace ('/.*?^! device: \N*EOS-\N*$\n(.*)^end$.*/sm', '$1', $input);
 }
 
 ?>
