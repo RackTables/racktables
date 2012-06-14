@@ -880,6 +880,20 @@ function findAutoTagWarnings ($expr)
 {
 	global $user_defined_atags;
 	$self = __FUNCTION__;
+	static $entityIDs = array // $Xid_YY auto tags
+	(
+		'' => array ('object', 'Object'),
+		'ipv4net' => array ('ipv4net', 'IPv4 network'),
+		'ipv6net' => array ('ipv6net', 'IPv6 network'),
+		'rack' => array ('rack', 'Rack'),
+		'row' => array ('row', 'Row'),
+		'location' => array ('location', 'Location'),
+		'ipvs' => array ('ipv4vs', 'Virtual service'),
+		'ipv4rsp' => array ('ipv4rspool', 'RS pool'),
+		'file' => array ('file', 'File'),
+		'vst' => array ('vst', '802.1Q template'),
+		'user' => array ('user', 'User'),
+	);
 	switch ($expr['type'])
 	{
 		case 'LEX_TRUE':
@@ -890,11 +904,11 @@ function findAutoTagWarnings ($expr)
 		case 'LEX_AUTOTAG':
 			switch (1)
 			{
-				case (preg_match ('/^\$id_/', $expr['load'])):
-					$recid = preg_replace ('/^\$id_/', '', $expr['load']);
+				case preg_match ('/^\$(.*)?id_(\d+)$/', $expr['load'], $m) && isset ($entityIDs[$m[1]]):
+					list ($realm, $description) = $entityIDs[$m[1]];
 					try
 					{
-						spotEntity ('object', $recid);
+						spotEntity ($realm, $m[2]);
 						return array();
 					}
 					catch (EntityNotFoundException $e)
@@ -903,39 +917,7 @@ function findAutoTagWarnings ($expr)
 						(
 							'header' => refRCLineno ($expr['lineno']),
 							'class' => 'warning',
-							'text' => "An object with ID '${recid}' does not exist."
-						));
-					}
-				case (preg_match ('/^\$ipv4netid_/', $expr['load'])):
-					$recid = preg_replace ('/^\$ipv4netid_/', '', $expr['load']);
-					try
-					{
-						spotEntity ('ipv4net', $recid);
-						return array();
-					}
-					catch (EntityNotFoundException $e)
-					{
-						return array (array
-						(
-							'header' => refRCLineno ($expr['lineno']),
-							'class' => 'warning',
-							'text' => "IPv4 network with ID '${recid}' does not exist."
-						));
-					}
-				case (preg_match ('/^\$userid_/', $expr['load'])):
-					$recid = preg_replace ('/^\$userid_/', '', $expr['load']);
-					try
-					{
-						spotEntity ('user', $recid);
-						return array();
-					}
-					catch (EntityNotFoundException $e)
-					{
-						return array (array
-						(
-							'header' => refRCLineno ($expr['lineno']),
-							'class' => 'warning',
-							'text' => "User account with ID '${recid}' does not exist."
+							'text' => "$description with ID '${recid}' does not exist."
 						));
 					}
 				case (preg_match ('/^\$username_/', $expr['load'])):
@@ -951,9 +933,8 @@ function findAutoTagWarnings ($expr)
 						'class' => 'warning',
 						'text' => "Local user account '${recid}' does not exist."
 					));
-				// FIXME: pull identifier at the same pass, which does the matching
-				case (preg_match ('/^\$page_[\p{L}0-9]+$/u', $expr['load'])):
-					$recid = preg_replace ('/^\$page_/', '', $expr['load']);
+				case (preg_match ('/^\$page_([\p{L}0-9]+)$/u', $expr['load'], $m)):
+					$recid = $m[1];
 					global $page;
 					if (isset ($page[$recid]))
 						return array();
@@ -964,16 +945,17 @@ function findAutoTagWarnings ($expr)
 						'text' => "Page number '${recid}' does not exist."
 					));
 				case (preg_match ('/^\$(tab|op)_[\p{L}0-9_]+$/u', $expr['load'])):
-				case (preg_match ('/^\$any_(op|rack|object|ip4net|net|ipv4vs|vs|ipv4rsp|rsp|file)$/', $expr['load'])):
-				case (preg_match ('/^\$typeid_[[:digit:]]+$/', $expr['load'])): // FIXME: check value validity
+				case (preg_match ('/^\$any_(op|rack|object|ip4net|ip6net|net|ipv4vs|vs|ipv4rsp|rsp|file|location|row)$/', $expr['load'])):
+				case (preg_match ('/^\$typeid_\d+$/', $expr['load'])): // FIXME: check value validity
 				case (preg_match ('/^\$cn_.+$/', $expr['load'])): // FIXME: check name validity and asset existence
 				case (preg_match ('/^\$lgcn_.+$/', $expr['load'])): // FIXME: check name validity
-				case (preg_match ('/^\$(vlan|fromvlan|tovlan)_[[:digit:]]+$/', $expr['load'])):
-				case (preg_match ('/^\$(unmounted|untagged|no_asset_tag|runs_8021Q)$/', $expr['load'])):
-				case (preg_match ('/^\$masklen_(eq|le|ge)_[[:digit:]][[:digit:]]?$/', $expr['load'])):
+				case (preg_match ('/^\$(vlan|fromvlan|tovlan)_\d+$/', $expr['load'])):
+				case (preg_match ('/^\$(aggregate|unused|nameless|portless|unmounted|untagged|no_asset_tag|runs_8021Q)$/', $expr['load'])):
+				case (preg_match ('/^\$(masklen_eq|spare)_\d{1,3}$/', $expr['load'])):
 				case (preg_match ('/^\$attr_\d+(_\d+)?$/', $expr['load'])):
-				case (preg_match ('/^\$8021Q_domain_\d+$/', $expr['load'])):
-				case ('$aggregate' === $expr['load']):
+				case (preg_match ('/^\$ip4net(-\d{1,3}){5}$/', $expr['load'])):
+				case (preg_match ('/^\$(8021Q_domain|8021Q_tpl)_\d+$/', $expr['load'])):
+				case (preg_match ('/^\$type_(tcp|udp|mark)$/', $expr['load'])):
 					return array();
 				default:
 					foreach ($user_defined_atags as $regexp)
