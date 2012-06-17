@@ -134,11 +134,12 @@ $virtual_obj_types = explode (',', getConfigVar ('VIRTUAL_OBJ_LISTSRC'));
 
 alterConfigWithUserPreferences();
 $op = '';
-// local.php may be missing, this case requires no special treatment
-// and must not generate any warnings
+
+// load additional plugins
 ob_start();
-if (fileSearchExists ($path_to_local_php))
-	include_once $path_to_local_php;
+foreach (glob("$racktables_plugins_dir/*.php") as $filename)
+    require_once $filename;
+// display plugins output if it contains something but newlines
 $tmp = ob_get_clean();
 if ($tmp != '' and ! preg_match ("/^\n+$/D", $tmp))
 	echo $tmp;

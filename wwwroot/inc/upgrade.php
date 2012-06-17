@@ -89,6 +89,25 @@ A new "date" attribute type has been added. Existing date based fields ("HW warr
 "support contract expiration" and "SW warranty expiration") will be converted to this new type but
 must be in the format "mm/dd/yyyy" otherwise the conversion will fail.
 ENDOFTEXT
+,
+
+	'0.20.0' => <<<ENDOFTEXT
+Racks and Rows are now stored in the database as Objects.  The RackObject table 
+was renamed to Object.  SQL views were created to ease the migration of custom 
+reports and scripts.
+
+New plugins engine instead of local.php file. To make your own code stored in local.php work,
+you must move the local.php file into the plugins/ directory. The name of this file does not
+matter any more. You also can store multiple files in that dir, separate your plugins by features,
+share them and try the plugins from other people just placing them into plugins/ dir, no more merging.
+\$path_to_local_php variable has no special meaning any more. 
+\$racktables_confdir variable is now used only to search for secret.php file.
+\$racktables_plugins_dir is a new overridable special variable pointing to plugins/ directory.
+
+Beginning with this version it is possible to delete IP networks and VLANs from within
+theirs properties tab. So please inspect your permissions rules to assure there are no
+undesired allows for deletion of these objects.
+ENDOFTEXT
 
 );
 

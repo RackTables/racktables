@@ -21,6 +21,7 @@
 	new feature: IPv6 SLB support
 	new feature: Arista EOS support
 	new feature: locations
+	new feature: plugin installation is as simple as copying a file into plugins/ dir
 0.19.13
 	update: IE spoils JPEG uploads, work around
 	update: use is_callable() (#551)

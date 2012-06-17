@@ -28,14 +28,16 @@ if (! isset ($racktables_staticdir)) // the directory containing 'pix', 'js', 'c
 	$racktables_staticdir = $racktables_rootdir;
 if (! isset ($racktables_gwdir)) // the directory containing the 'telnet' and 'ssh' scripts
 	$racktables_gwdir = realpath ($racktables_rootdir . '/../gateways');
-if (! isset ($racktables_confdir)) // the directory containing local.php and secret.php (default is wwwroot/inc)
+if (! isset ($racktables_confdir)) // the directory containing secret.php (default is wwwroot/inc)
 	$racktables_confdir = dirname (__FILE__);
-if (! isset ($path_to_secret_php))
+if (! isset ($path_to_secret_php)) // you can overrride the path to secret.php separately from $racktables_confdir (legacy feature)
 	$path_to_secret_php = $racktables_confdir . '/secret.php';
-if (! isset ($path_to_local_php))
-	$path_to_local_php = $racktables_confdir . '/local.php';
-if (! isset ($local_gwdir))
-	$local_gwdir = $racktables_confdir . '/gateways';
+if (! isset ($racktables_plugins_dir)) // the directory where RT will load additional *.php files (like local.php) from
+	$racktables_plugins_dir = realpath ($racktables_rootdir . '/../plugins');
+if (! isset ($local_gwdir)) // the directory where RT will search gateway scripts if not found in $racktables_gwdir
+	$local_gwdir = $racktables_plugins_dir . '/gateways';
+if (! isset ($local_staticdir)) // the directory where RT will search static files (js/*, css/*, pix/*) if not found in $racktables_staticdir
+	$local_staticdir = $racktables_plugins_dir;
 
 // secret.php may be missing, generally it is OK
 if (fileSearchExists ($path_to_secret_php))

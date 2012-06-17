@@ -85,8 +85,8 @@ should be sufficient:
 
 0. BACKUP YOUR DATABASE and check the release notes (below) before actually
    starting the upgrade,.
-1. Remove all existing files except inc/secret.php, gateways'
-   configuration (in the gateways directory) and local mod (inc/local.php).
+1. Remove all existing files except inc/secret.php and the gateways'
+   configuration (in the gateways directory).
 2. Unpack the new tarball into the place.
 3. Open your RackTables page in a browser. The software detects version
    mismatch and displays a message telling to log in as admin to finish
@@ -105,6 +105,14 @@ should be sufficient:
 Racks and Rows are now stored in the database as Objects.  The RackObject table 
 was renamed to Object.  SQL views were created to ease the migration of custom 
 reports and scripts.
+
+New plugins engine instead of local.php file. To make your own code stored in local.php work,
+you must move the local.php file into the plugins/ directory. The name of this file does not
+matter any more. You also can store multiple files in that dir, separate your plugins by features,
+share them and try the plugins from other people just placing them into plugins/ dir, no more merging.
+$path_to_local_php variable has no special meaning any more. 
+$racktables_confdir variable is now used only to search for secret.php file.
+$racktables_plugins_dir is a new overridable special variable pointing to plugins/ directory.
 
 Beginning with this version it is possible to delete IP networks and VLANs from within
 theirs properties tab. So please inspect your permissions rules to assure there are no

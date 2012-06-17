@@ -10,10 +10,9 @@ directory, which is actually used as wwwroot. This greatly improves
 security and allows for the two use cases described below.
 
 1. Single RackTables instance per server. By default the application
-expects its configuration files (mandatory secret.php and optional
-local.php) in /etc/RackTables directory, which is a part of the RPM. In
-a fresh installation both files are missing, no MySQL database is setup
-and there is no symlink.
+expects its configuration file (secret.php) in /etc/RackTables directory,
+which is a part of the RPM. In a fresh installation the files is missing,
+no MySQL database is setup and there is no symlink.
 
 Setting up the symlink is simple: one needs to decide on the URL of the
 RackTables system and map it to filesystem path. For example, the commands

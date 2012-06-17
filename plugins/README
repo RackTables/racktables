@@ -1,0 +1,33 @@
+Put your custom RackTables add-ons into this folder.
+
+Old local.php file is the sample of such add-ons and should be put here
+to continue working.
+
+Files should be named with .php extension to be loaded automatically.
+Files are loaded in alphabetical order.
+
+It is recommended to override existing tabhandlers and ophandlers using
+registerTabHandler and registerOpHandler functions, respectively.
+This is preferred over overwriting of items in $tabhandler and $ophandler, 
+because allows overriding the same tab or operation in multiple plugins.
+
+Consider the following sample:
+
+<?php
+
+registerTabHandler ('object', 'default', 'renderObject_add_FQDN_waring');
+
+function renderObject_add_FQDN_waring ($object_id)
+{
+	$object = spotEntity ('object', $object_id);
+	$attrs = getAttrValues ($object_id);
+	$fqdn = @$attrs[3]['value'];
+	if
+	(
+		considerGivenConstraint ($object, '{server} and not {offline}') &&
+		$fqdn == ''
+	)
+		showWarning ("Please set FQDN for this server");
+}
+
+?>
