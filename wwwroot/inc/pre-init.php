@@ -34,10 +34,6 @@ if (! isset ($path_to_secret_php)) // you can overrride the path to secret.php s
 	$path_to_secret_php = $racktables_confdir . '/secret.php';
 if (! isset ($racktables_plugins_dir)) // the directory where RT will load additional *.php files (like local.php) from
 	$racktables_plugins_dir = realpath ($racktables_rootdir . '/../plugins');
-if (! isset ($local_gwdir)) // the directory where RT will search gateway scripts if not found in $racktables_gwdir
-	$local_gwdir = $racktables_plugins_dir . '/gateways';
-if (! isset ($local_staticdir)) // the directory where RT will search static files (js/*, css/*, pix/*) if not found in $racktables_staticdir
-	$local_staticdir = $racktables_plugins_dir;
 
 // secret.php may be missing, generally it is OK
 if (fileSearchExists ($path_to_secret_php))
@@ -47,6 +43,12 @@ if (fileSearchExists ($path_to_secret_php))
 }
 else
 	$found_secret_file = FALSE;
+
+// determine local paths after loading of secret.php (maybe it has overrided racktables_plugins_dir)
+if (! isset ($local_gwdir)) // the directory where RT will search gateway scripts if not found in $racktables_gwdir
+	$local_gwdir = $racktables_plugins_dir . '/gateways';
+if (! isset ($local_staticdir)) // the directory where RT will search static files (js/*, css/*, pix/*) if not found in $racktables_staticdir
+	$local_staticdir = $racktables_plugins_dir;
 
 // (re)connects to DB, stores PDO object in $dbxlink global var
 function connectDB()
