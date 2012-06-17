@@ -5367,4 +5367,129 @@ function array_last ($array)
 		return $single[0];
 }
 
+// Registers additional ophandler on page-tab-opname triplet.
+// Valid $method values are 'before' and 'after'.
+//   'before' puts your ophandler in the beginning of the list (and thus before the default)
+//   'after' puts your ophandler to the end of the list (and thus after the default)
+function registerOpHandler ($page, $tab, $opname, $callback, $method = 'before')
+{
+	global $ophandlers_stack;
+	global $ophandler;
+	if (! isset ($ophandler[$page][$tab][$opname]))
+		$ophandlers_stack[$page][$tab][$opname] = array();
+	if (isset ($ophandler[$page][$tab][$opname]) && $ophandler[$page][$tab][$opname] != 'universalOpHandler')
+	{
+		$ophandlers_stack[$page][$tab][$opname] = array ($ophandler[$page][$tab][$opname]);
+		$ophandler[$page][$tab][$opname] = 'universalOpHandler';
+	}
+	$ophandler[$page][$tab][$opname] = 'universalOpHandler';
+	if ($method == 'before')
+		array_unshift ($ophandlers_stack[$page][$tab][$opname], $callback);
+	elseif ($method == 'after')
+		array_push ($ophandlers_stack[$page][$tab][$opname], $callback);
+	else
+		throw new RacktablesError ("unknown ophandler injection method '$method'");
+}
+
+// call this from custom ophandler registered by registerOpHandler
+// to prevent the rest of the ophanlers to run
+function stopOpPropagation()
+{
+	global $ophandler_propagation_stop;
+	$ophandler_propagation_stop = TRUE;
+}
+
+function universalOpHandler()
+{
+	global $ophandler_propagation_stop;
+	$ophandler_propagation_stop = FALSE;
+	global $ophandlers_stack;
+	global $pageno, $tabno, $op;
+	$op_stack = $ophandlers_stack[$pageno][$tabno][$op];
+	$ret = NULL;
+	foreach ($op_stack as $callback)
+	{
+		$ret = call_user_func ($callback);
+		if ($ophandler_propagation_stop)
+			break;
+	}
+	return $ret;
+}
+
+// Registers additional tabhandler on page-tab pair.
+// Valid $method values are 'before', 'after' and 'replace'.
+//   'before' puts your tabhandler in the beginning of the list (and thus before the default)
+//   'after' puts your tabhandler to the end of the list (and thus after the default)
+//   'replace': the same as 'after', but the rendered tab is replaced by your output, not appended. See also getRenderedTab
+function registerTabHandler ($page, $tab, $callback, $method = 'after')
+{
+	global $tabhandlers_stack;
+	global $tabhandler;
+
+	if (! isset ($tabhandlers_stack[$page][$tab]))
+		$tabhandlers_stack[$page][$tab] = array();
+
+	if (isset ($tabhandler[$page][$tab]) && $tabhandler[$page][$tab] != 'universalTabHandler')
+		array_push ($tabhandlers_stack[$page][$tab], $tabhandler[$page][$tab]);
+	$tabhandler[$page][$tab] = 'universalTabHandler';
+
+	if ($method == 'before')
+		array_unshift ($tabhandlers_stack[$page][$tab], $callback);
+	elseif ($method == 'after')
+		array_push ($tabhandlers_stack[$page][$tab], $callback);
+	elseif ($method == 'replace')
+		array_push ($tabhandlers_stack[$page][$tab], '!' . $callback);
+	else
+		throw new RacktablesError ("unknown tabhandler injection method '$method'");
+}
+
+// Returns  tab content already rendered by previous tabhandlers in the chain registered by registerTabHandler.
+// It is useful in custom tabhandlers registered with 'replace' method.
+function getRenderedTab()
+{
+	global $tabhandler_output;
+	return $tabhandler_output;
+}
+
+// call this from custom tabhandler registered by registerTabHandler
+// to prevent the rest of the tabhanlers to run
+function stopTabPropagation()
+{
+	global $tabhandler_propagation_stop;
+	$tabhandler_propagation_stop = TRUE;
+}
+
+function universalTabHandler($bypass = NULL)
+{
+	global $tabhandler_propagation_stop;
+	$tabhandler_propagation_stop = FALSE;
+	global $tabhandlers_stack;
+	global $tabhandler_output;
+	global $pageno, $tabno;
+	$tab_stack = $tabhandlers_stack[$pageno][$tabno];
+	$ret = NULL;
+	$tabhandler_output = '';
+	foreach ($tab_stack as $callback)
+	{
+		$do_replace = FALSE;
+		if ($callback[0] == '!')
+		{
+			$callback = substr ($callback, 1);
+			$do_replace = TRUE;
+		}
+		ob_start();
+		$ret = call_user_func ($callback, $bypass);
+		$current_output = ob_get_contents();
+		ob_end_clean();
+		if ($do_replace)
+			$tabhandler_output = $current_output;
+		else
+			$tabhandler_output .= $current_output;
+		if ($tabhandler_propagation_stop)
+			break;
+	}
+	echo $tabhandler_output;
+	return $ret;
+}
+
 ?>
