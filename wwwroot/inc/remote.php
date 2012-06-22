@@ -283,7 +283,13 @@ function callScript ($gwname, $params, $in, &$out, &$errors)
 		$read_fd = $read_left;
 	}
 
-	return proc_close ($child);
+	$exit_code = proc_close ($child);
+	if (pcntl_wifexited ($exit_code))
+		return pcntl_wexitstatus ($exit_code);
+	elseif (pcntl_wifsignaled ($exit_code))
+		throw new RTGatewayError ("Gateway '$gwname' was killed by SIG " . pcntl_wtermsig ($exit_code));
+	elseif (pcntl_wifstopped ($exit_code))
+		throw new RTGatewayError ("Gateway '$gwname' was stopped");
 }
 
 function getRunning8021QConfig ($object_id)
