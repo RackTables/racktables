@@ -27,7 +27,7 @@ try {
 		// Only store the tab name after clearance is got. Any failure is unhandleable.
 		if (isset ($_REQUEST['tab']))
 		{
-			if (is_array ($_SESSION['RTLT'][$pageno]) && isset ($_SESSION['RTLT'][$pageno]['dont_remember']))
+			if (is_array (@$_SESSION['RTLT'][$pageno]) && isset ($_SESSION['RTLT'][$pageno]['dont_remember']))
 				unset ($_SESSION['RTLT'][$pageno]['dont_remember']);
 			else
 				$_SESSION['RTLT'][$pageno] = array ('tabname' => $tabno, 'time' => time());
