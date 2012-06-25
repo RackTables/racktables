@@ -1392,7 +1392,7 @@ function redirectIfNecessary ()
 		$_SESSION['RTLT'][$pageno]['dont_remember'] = 1;
 		redirectUser (buildRedirectURL ($pageno, 'default'));
 	}
-	if (is_array ($_SESSION['RTLT'][$pageno]) && isset ($_SESSION['RTLT'][$pageno]['dont_remember']))
+	if (is_array (@$_SESSION['RTLT'][$pageno]) && isset ($_SESSION['RTLT'][$pageno]['dont_remember']))
 		unset ($_SESSION['RTLT'][$pageno]['dont_remember']);
 	// store the last visited tab name
 	if (isset ($_REQUEST['tab']))
