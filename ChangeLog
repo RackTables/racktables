@@ -7,6 +7,7 @@
 	bugfix: containers weren't displayed properly on the list objects page (#547)
 	bugfix: 'FUNCTION * does not exist' SQL errors when upgrading 0.19.11 -> 0.19.12
 	bugfix: displaying of 802.1Q ports tab could take too long
+	bugfix: upgrade from 0.18.8 caused fatal errors till session expiration (#506)
 	new feature: new attribute type "date" by James Cohen
 0.19.12 2012-04-12
 	bugfix: Could not delete objects' log entries
