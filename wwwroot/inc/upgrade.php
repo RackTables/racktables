@@ -1239,6 +1239,11 @@ CREATE TABLE `CactiGraph` (
 			$query[] = 'ALTER TABLE `EntityLink` ADD KEY `EntityLink-compound` (`parent_entity_type`,`child_entity_type`,`child_entity_id`)';
 			$query[] = "UPDATE Config SET varvalue = '0.19.11' WHERE varname = 'DB_VERSION'";
 			break;
+		# Batch 0.19.12 contained minor, but annoying bugs and was modified after the
+		# release of version 0.19.12 (which should be avoided if possible). The best
+		# way to resolve this particular case was to recall RackTables-0.19.12.tar.gz
+		# from the download area and provide RackTables-0.19.13.tar.gz containing the
+		# modified 0.19.12 batch.
 		case '0.19.12':
 			$query[] = "DELETE FROM Config WHERE varname IN('color_F', 'color_A', 'color_U', 'color_T', 'color_Th', 'color_Tw', 'color_Thw')";
 			$query[] = "INSERT INTO Chapter (id, sticky, name) VALUES (36,'no','serial console server models')";

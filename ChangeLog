@@ -22,7 +22,7 @@
 	new feature: Arista EOS support
 	new feature: locations
 	new feature: plugin installation is as simple as copying a file into plugins/ dir
-0.19.13
+0.19.13 2012-06-28
 	update: IE spoils JPEG uploads, work around
 	update: use is_callable() (#551)
 	update: tag filter is always on the right side (#484)
