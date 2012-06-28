@@ -2213,7 +2213,7 @@ function addFileToEntity ()
 
 	// Exit if the upload failed
 	if ($_FILES['file']['error'])
-		return showFuncMessage (__FUNCTION__, 'ERR1', array ($_FILES['file']['error']));
+		return buildRedirectURL (__FUNCTION__, 'ERR1', array ($_FILES['file']['error']));
 
 	$fp = fopen($_FILES['file']['tmp_name'], 'rb');
 	global $sic;
