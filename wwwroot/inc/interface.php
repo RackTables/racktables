@@ -1776,7 +1776,7 @@ function renderRackSpaceForObject ($object_id)
 
 	// Middle portlet with comment and submit.
 	echo "<td class=pcleft>";
-	startPortlet ('Comment');
+	startPortlet ('Comment (for Rackspace History)');
 	echo "<textarea name=comment rows=10 cols=40></textarea><br>\n";
 	echo "<input type=submit value='Save' name=got_atoms>\n";
 	echo "<br><br>";
