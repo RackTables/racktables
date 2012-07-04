@@ -1895,6 +1895,8 @@ function findRouters ($addrlist)
 // equal to, or greater than the second." (c) PHP manual
 function IPNetworkCmp ($netA, $netB)
 {
+	if (strlen ($netA['ip_bin']) !== strlen ($netB['ip_bin']))
+		return strlen ($netA['ip_bin']) < strlen ($netB['ip_bin']) ? -1 : 1;
 	$ret = strcmp ($netA['ip_bin'], $netB['ip_bin']);
 	if ($ret == 0)
 		$ret = $netA['mask'] < $netB['mask'] ? -1 : ($netA['mask'] > $netB['mask'] ? 1 : 0);
@@ -5357,6 +5359,14 @@ function isIPNetworkEmpty (&$netinfo)
 		)
 			$pure_auto++;
 	return ($netinfo['own_addrc'] <= $pure_auto);
+}
+
+// returns the first element of given array, or NULL if array is empty
+function array_first ($array)
+{
+	$single = array_slice ($array, 0, 1);
+	if (count ($single))
+		return $single[0];
 }
 
 // returns the last element of given array, or NULL if array is empty

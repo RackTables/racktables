@@ -740,17 +740,19 @@ function cmpTags ($a, $b)
 	global $taglist;
 	if (isset ($a['id']) && isset ($b['id']))
 	{
-		$a_root = array_last ($taglist[$a['id']]['trace']);
-		$b_root = array_last ($taglist[$b['id']]['trace']);
-		return ($a_root < $b_root) ? -1 : ($a_root > $b_root ? 1 : 0);
+		$a_root = array_first ($taglist[$a['id']]['trace']);
+		$b_root = array_first ($taglist[$b['id']]['trace']);
+		if ($a_root < $b_root)
+			return -1;
+		elseif ($a_root > $b_root)
+			return 1;
 	}
 	elseif (isset ($a['id']))
 		return -1;
 	elseif (isset ($b['id']))
 		return 1;
-	else
-		return strcmp ($a['tag'], $b['tag']);
-	
+
+	return strcmp ($a['tag'], $b['tag']);
 }
 
 function serializeTags ($chain, $baseurl = '')
