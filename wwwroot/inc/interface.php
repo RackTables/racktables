@@ -563,7 +563,7 @@ function renderRow ($row_id)
 	echo "</td></tr>\n";
 	echo "</table><br>\n";
 	finishPortlet();
-	renderCellFilterPortlet ($cellfilter, 'rack', $rackList, 'row_id', $row_id);
+	renderCellFilterPortlet ($cellfilter, 'rack', $rackList, array ('row_id' => $row_id));
 
 	echo "</td><td class=pcright>";
 
@@ -5144,7 +5144,7 @@ function renderEntityTags ($entity_id)
 }
 
 // This one is going to replace the tag filter.
-function renderCellFilterPortlet ($preselect, $realm, $cell_list = array(), $bypass_name = '', $bypass_value = '')
+function renderCellFilterPortlet ($preselect, $realm, $cell_list = array(), $bypass_params = array())
 {
 	addJS ('js/tag-cb.js');
 	addJS ('tag_cb.enableNegation()', TRUE);
@@ -5256,8 +5256,8 @@ function renderCellFilterPortlet ($preselect, $realm, $cell_list = array(), $byp
 		// "apply"
 		echo "<input type=hidden name=page value=${pageno}>\n";
 		echo "<input type=hidden name=tab value=${tabno}>\n";
-		if ($bypass_name != '')
-			echo "<input type=hidden name=${bypass_name} value='${bypass_value}'>\n";
+		foreach ($bypass_params as $bypass_name => $bypass_value)
+			echo '<input type=hidden name="' . htmlspecialchars ($bypass_name, ENT_QUOTES) . '" value="' . htmlspecialchars ($bypass_value, ENT_QUOTES) . '">' . "\n";
 		// FIXME: The user will be able to "submit" the empty form even without a "submit"
 		// input. To make things consistent, it is necessary to avoid pritning both <FORM>
 		// and "and/or" radio-buttons, when enable_apply isn't TRUE.
@@ -5307,8 +5307,8 @@ END
 			echo "<input type=hidden name='nft[]' value=''>\n";
 			echo "<input type=hidden name='nfp[]' value=''>\n";
 			echo "<input type=hidden name='cfe' value=''>\n";
-			if ($bypass_name != '')
-				echo "<input type=hidden name=${bypass_name} value='${bypass_value}'>\n";
+			foreach ($bypass_params as $bypass_name => $bypass_value)
+				echo '<input type=hidden name="' . htmlspecialchars ($bypass_name, ENT_QUOTES) . '" value="' . htmlspecialchars ($bypass_value, ENT_QUOTES) . '">' . "\n";
 			printImageHREF ('resetfilter', 'reset filter', TRUE);
 			echo '</form>';
 		}
