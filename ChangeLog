@@ -1,4 +1,5 @@
 0.19.14
+	update: Port linker selects nearest rack by default (#562) by Hannes Georg
 	bugfix: file upload error handler by Hannes Georg
 0.19.13 2012-06-28
 	update: IE spoils JPEG uploads, work around
