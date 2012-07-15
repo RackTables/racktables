@@ -24,7 +24,7 @@
 	new feature: plugin installation is as simple as copying a file into plugins/ dir
 0.19.14
 	update: Port linker selects nearest rack by default (#562) by Hannes Georg
-	update: SNMP support for Cisco 2960-24TC-L (#554)
+	update: SNMP support for Cisco 2960-24TC-L (#554), ProCurves (#558)
 	bugfix: file upload error handler by Hannes Georg
 0.19.13 2012-06-28
 	update: IE spoils JPEG uploads, work around
