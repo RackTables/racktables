@@ -2,6 +2,7 @@
 	update: Port linker selects nearest rack by default (#562) by Hannes Georg
 	update: SNMP support for Cisco 2960-24TC-L (#554), ProCurves (#558)
 	bugfix: file upload error handler by Hannes Georg
+	update: do not display edit box for an attribute unless user has permissions to update it
 0.19.13 2012-06-28
 	update: IE spoils JPEG uploads, work around
 	update: use is_callable() (#551)

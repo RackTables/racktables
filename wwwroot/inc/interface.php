@@ -508,12 +508,16 @@ function renderEditObjectForm()
 	}
 	// optional attributes
 	$values = getAttrValues ($object_id);
-	echo '<input type=hidden name=num_attrs value=' . count($values) . ">\n";
 	if (count($values) > 0)
 	{
 		$i = 0;
 		foreach ($values as $record)
 		{
+			if (! permitted (NULL, NULL, NULL, array (
+				array ('tag' => '$attr_' . $record['id']),
+				array ('tag' => '$any_op'),
+			)))
+				continue;
 			echo "<input type=hidden name=${i}_attr_id value=${record['id']}>";
 			echo '<tr><td>';
 			if (strlen ($record['value']))
@@ -547,6 +551,7 @@ function renderEditObjectForm()
 			echo "</td></tr>\n";
 			$i++;
 		}
+		echo '<input type=hidden name=num_attrs value=' . $i . ">\n";
 	}
 	echo "<tr><td>&nbsp;</td><th class=tdright>Has problems:</th><td class=tdleft><input type=checkbox name=object_has_problems";
 	if ($object['has_problems'] == 'yes')
