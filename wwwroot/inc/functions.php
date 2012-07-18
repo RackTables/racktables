@@ -5419,7 +5419,9 @@ function universalOpHandler()
 	$ret = NULL;
 	foreach ($op_stack as $callback)
 	{
-		$ret = call_user_func ($callback);
+		$ret_i = call_user_func ($callback);
+		if (strlen ($ret_i) || ! isset ($ret))
+			$ret = $ret_i;
 		if ($ophandler_propagation_stop)
 			break;
 	}
