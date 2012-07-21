@@ -4,3 +4,4 @@ gateways/switchvlans/changes.log
 gateways/switchvlans/cisco.secrets.php
 gateways/switchvlans/vlandecoder
 gateways/switchvlans/vlantable
+/.project
