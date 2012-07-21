@@ -7,6 +7,15 @@
 global $iftable_processors;
 $iftable_processors = array();
 
+$iftable_processors['generic-port-any-1000T'] = array
+(
+	'pattern' => '@^port([[:digit:]]+)$@',
+	'replacement' => '\\1',
+	'dict_key' => 24,
+	'label' => '\\1',
+	'try_next_proc' => FALSE,
+);
+
 $iftable_processors['catalyst-chassis-mgmt'] = array
 (
 	'pattern' => '@^FastEthernet([[:digit:]])$@',
@@ -900,15 +909,6 @@ $iftable_processors['C3KX-NM-1000'] = array
 	'try_next_proc' => FALSE,
 );
 
-$iftable_processors['fortinet-chassis-any-1000T'] = array
-(
-	'pattern' => '@^port([[:digit:]]+)$@',
-	'replacement' => '\\1',
-	'dict_key' => 24,
-	'label' => '\\1',
-	'try_next_proc' => FALSE,
-);
-
 $iftable_processors['arista-any-SFP+'] = array
 (
     'pattern' => '@^Ethernet([[:digit:]]+)$@',
@@ -1434,6 +1434,36 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 			'gbe2csfp-24',
 		),
 	),
+	'45.3.68.5' => array
+	(
+		'dict_key' => 1085,
+		'text' => 'BES50GE-12T PWR: 12 RJ-45/10-100-1000T(X)',
+		'processors' => array ('nortel-any-1000T'),
+	),
+	'202.20.59' => array
+	(
+		'dict_key' => 1371,
+		'text' => 'SMC8124L2: 20 RJ-45/10-100-1000T(X) + 4 combo ports',
+		'processors' => array ('smc2-combo-21-to-24', 'smc2-any-1000T'),
+	),
+	'202.20.66' => array
+	(
+		'dict_key' => 1567,
+		'text' => 'SMC6128L2: 24 RJ-45/10-100TX + 4 combo-gig ports',
+		'processors' => array ('smc2-combo-25-to-28', 'smc2-1000T-25-to-28', 'smc2-any-100TX'),
+	),
+	'202.20.68' => array
+	(
+		'dict_key' => 1374,
+		'text' => 'SMC8150L2: 46 RJ-45/10-100-1000T(X) + 4 combo ports',
+		'processors' => array ('smc-combo-45-to-48', 'nortel-any-1000T'),
+	),
+	'207.1.14.53' => array
+	(
+		'dict_key' => 1720,
+		'text' => 'AT9924T: 24 RJ-45/10-100-1000T(X) ports',
+		'processors' => array ('generic-port-any-1000T'),
+	),
 	'4526.100.1.1' => array
 	(
 		'dict_key' => 587,
@@ -1469,12 +1499,6 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'dict_key' => 1601,
 		'text' => 'GSM7328Sv2: 20 RJ-45/10-100-1000T(X) + 4 combo-gig',
 		'processors' => array ('netgear-chassis-21-to-24-1000SFP', 'netgear-chassis-21-to-24-1000Tcombo', 'netgear-chassis-any-1000T'),
-	),
-	'45.3.68.5' => array
-	(
-		'dict_key' => 1085,
-		'text' => 'BES50GE-12T PWR: 12 RJ-45/10-100-1000T(X)',
-		'processors' => array ('nortel-any-1000T'),
 	),
 	'2636.1.1.1.2.29' => array
 	(
@@ -1580,12 +1604,6 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 			'summit-management'
 		),
 	),
-	'202.20.68' => array
-	(
-		'dict_key' => 1374,
-		'text' => 'SMC8150L2: 46 RJ-45/10-100-1000T(X) + 4 combo ports',
-		'processors' => array ('smc-combo-45-to-48', 'nortel-any-1000T'),
-	),
 	'6027.1.3.12' => array
 	(
 		'dict_key' => 1471,
@@ -1604,23 +1622,11 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'Force10 S4810: 48 SFP+-1000/10000 + 4 QSFP-40000 ports',
 		'processors' => array ('ftos-any-10000SFP+', 'ftos-any-QSFP+', 'ftos-mgmt'),
 	),
-	'202.20.59' => array
-	(
-		'dict_key' => 1371,
-		'text' => 'SMC8124L2: 20 RJ-45/10-100-1000T(X) + 4 combo ports',
-		'processors' => array ('smc2-combo-21-to-24', 'smc2-any-1000T'),
-	),
-	'202.20.66' => array
-	(
-		'dict_key' => 1567,
-		'text' => 'SMC6128L2: 24 RJ-45/10-100TX + 4 combo-gig ports',
-		'processors' => array ('smc2-combo-25-to-28', 'smc2-1000T-25-to-28', 'smc2-any-100TX'),
-	),
 	'12356.101.1.3002'=> array
 	(
 		'dict_key' => 1609,
 		'text' => 'FG310B: 10 RJ-45/10-1000T',
-		'processors' => array('fortinet-chassis-any-1000T'),
+		'processors' => array('generic-port-any-1000T'),
 	),
 	'30065.1.3011.7124.3282' => array
 	(
@@ -1911,6 +1917,13 @@ function doSwitchSNMPmining ($objectInfo, $device)
 		commitAddPort ($objectInfo['id'], 'console', '1-681', '', ''); // DB-9 RS-232
 		checkPIC ('1-16');
 		commitAddPort ($objectInfo['id'], 'AC-in', '1-16', '', '');
+		break;
+	case preg_match ('/^207\.1\.14\./', $sysObjectID): // Allied Telesyn
+		checkPIC ('1-29');
+		commitAddPort ($objectInfo['id'], 'console', '1-29', 'console', ''); // RJ-45 RS-232 console
+		checkPIC ('1-16'); // AC input
+		commitAddPort ($objectInfo['id'], 'AC-in-1', '1-16', 'AC1', '');
+		commitAddPort ($objectInfo['id'], 'AC-in-2', '1-16', 'AC2', '');
 		break;
 	default: // Nortel...
 		break;
