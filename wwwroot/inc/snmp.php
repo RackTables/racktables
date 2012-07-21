@@ -1265,6 +1265,17 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 			'catalyst-chassis-mgmt',
 		),
 	),
+	'9.1.956' => array
+	(
+		'dict_key' => 1721,
+		'text' => 'WS-C3560E-12SD: 12 SFP/1000 +2 X2/10000 + OOBM',
+		'processors' => array
+		(
+			'catalyst-chassis-any-1000SFP',
+			'catalyst-chassis-uplinks-10000X2',
+			'catalyst-chassis-mgmt',
+		),
+	),
 	'9.1.793' => array
 	(
 		'dict_key' => 1575,
@@ -2141,7 +2152,7 @@ function doSwitchSNMPmining ($objectInfo, $device)
 	updateStickerForCell ($objectInfo, 3, $sysName);
 	switch (1)
 	{
-	case preg_match ('/^9\.1\./', $sysObjectID): // Catalyst
+	case preg_match ('/^9\.1\./', $sysObjectID): // Catalyst w/one AC port
 		$exact_release = preg_replace ('/^.*, Version ([^ ]+), .*$/', '\\1', $sysDescr);
 		$major_line = preg_replace ('/^([[:digit:]]+\.[[:digit:]]+)[^[:digit:]].*/', '\\1', $exact_release);
 		$ios_codes = array
@@ -2160,9 +2171,16 @@ function doSwitchSNMPmining ($objectInfo, $device)
 		commitAddPort ($objectInfo['id'], 'con0', '1-29', 'console', ''); // RJ-45 RS-232 console
 		if (preg_match ('/Cisco IOS Software, C2600/', $sysDescr))
 			commitAddPort ($objectInfo['id'], 'aux0', '1-29', 'auxillary', ''); // RJ-45 RS-232 aux port
-		// blade devices are powered through internal circuitry of chassis
-		if ($sysObjectID != '9.1.749' and $sysObjectID != '9.1.920')
+		if ($sysObjectID == '9.1.956')
 		{
+			// models with two AC inputs
+			checkPIC ('1-16');
+			commitAddPort ($objectInfo['id'], 'AC-in-1', '1-16', 'AC1', '');
+			commitAddPort ($objectInfo['id'], 'AC-in-2', '1-16', 'AC2', '');
+		}
+		elseif ($sysObjectID != '9.1.749' and $sysObjectID != '9.1.920')
+		{
+			// assume the rest have one AC input, but exclude blade devices
 			checkPIC ('1-16'); // AC input
 			commitAddPort ($objectInfo['id'], 'AC-in', '1-16', '', '');
 		}
