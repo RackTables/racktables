@@ -215,20 +215,35 @@ function updatePortRsvAJAX()
 	echo 'OK';
 }
 
-function updateIPRsvAJAX()
+function updateIPNamevAJAX()
 {
 	global $sic;
 	assertStringArg ('text', TRUE);
 	$ip_bin = assertIPArg ('id');
 	$addr = getIPAddress ($ip_bin);
 	if (! empty ($addr['allocs']) && empty ($addr['name']))
-		throw new RackTablesError ('Cant update IP comment: address is allocated');
+		throw new RackTablesError ('Cant update IP name: address is allocated');
 	$net = spotNetworkByIP ($ip_bin);
 	if (isset ($net))
 		fixContext ($net);
 	assertPermission ('ipaddress', 'properties', 'editAddress');
-	$reserved = (empty ($sic['text']) ? 'no' : $addr['reserved']); // unset reservation if user clears comment
-	updateAddress ($ip_bin, $sic['text'], $reserved);
+	$reserved = (empty ($sic['text']) ? 'no' : $addr['reserved']); // unset reservation if user clears name
+    $comment = (empty ($addr['comment']) ? '' : $addr['comment']);
+	updateAddress ($ip_bin, $sic['text'], $comment, $reserved);
+	echo 'OK';
+}
+
+function updateIPCommentvAJAX()
+{
+	global $sic;
+	assertStringArg ('text', TRUE);
+	$ip_bin = assertIPArg ('id');
+	$addr = getIPAddress ($ip_bin);
+	$net = spotNetworkByIP ($ip_bin);
+	if (isset ($net))
+		fixContext ($net);
+	assertPermission ('ipaddress', 'properties', 'editAddress');
+	updateAddress ($ip_bin, $addr['name'], $sic['text'], $addr['reserved']);
 	echo 'OK';
 }
 

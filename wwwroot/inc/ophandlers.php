@@ -818,8 +818,9 @@ $msgcode['editAddress']['OK'] = 51;
 function editAddress ()
 {
 	assertStringArg ('name', TRUE);
+	assertStringArg ('comment', TRUE);
 	$ip_bin = assertIPArg ('ip');
-	updateAddress ($ip_bin, $_REQUEST['name'], isCheckSet ('reserved', 'yesno'));
+	updateAddress ($ip_bin, $_REQUEST['name'], $_REQUEST['comment'], isCheckSet ('reserved', 'yesno'));
 	return showFuncMessage (__FUNCTION__, 'OK');
 }
 

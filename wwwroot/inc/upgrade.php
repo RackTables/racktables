@@ -1417,6 +1417,9 @@ CREATE VIEW `RackObject` AS SELECT id, name, label, objtype_id, asset_no, has_pr
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdefined, description) VALUES ('QUICK_LINK_PAGES','','string','yes','no','yes','List of pages to dislay in quick links')";
 			$query[] = "ALTER TABLE `IPv4LB` MODIFY `prio` varchar(255) DEFAULT NULL";
 
+			$query[] = "ALTER TABLE `IPv4Address` ADD COLUMN `comment` char(255) NOT NULL default '' AFTER `name`";
+			$query[] = "ALTER TABLE `IPv6Address` ADD COLUMN `comment` char(255) NOT NULL default '' AFTER `name`";
+
 			// change IP address format of IPv4VS and IPv4RS tables
 			convertSLBTablesToBinIPs();
 

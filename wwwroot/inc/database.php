@@ -1845,8 +1845,8 @@ function scanIPv4Space ($pairlist)
 	$whereexpr6 .= ')';
 
 	// 1. collect labels and reservations
-	$query = "select ip, name, reserved from IPv4Address ".
-		"where ${whereexpr1} and (reserved = 'yes' or name != '')";
+	$query = "select ip, name, comment, reserved from IPv4Address ".
+		"where ${whereexpr1} and (reserved = 'yes' or name != '' or comment != '')";
 	$result = usePreparedSelectBlade ($query, $qparams);
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
@@ -1854,6 +1854,7 @@ function scanIPv4Space ($pairlist)
 		if (!isset ($ret[$ip_bin]))
 			$ret[$ip_bin] = constructIPAddress ($ip_bin);
 		$ret[$ip_bin]['name'] = $row['name'];
+		$ret[$ip_bin]['comment'] = $row['comment'];
 		$ret[$ip_bin]['reserved'] = $row['reserved'];
 	}
 	unset ($result);
@@ -2002,8 +2003,8 @@ function scanIPv6Space ($pairlist)
 	$whereexpr6 .= ')';
 
 	// 1. collect labels and reservations
-	$query = "select ip, name, reserved from IPv6Address ".
-		"where ${whereexpr1} and (reserved = 'yes' or name != '')";
+	$query = "select ip, name, comment, reserved from IPv6Address ".
+		"where ${whereexpr1} and (reserved = 'yes' or name != '' or comment != '')";
 	$result = usePreparedSelectBlade ($query, $qparams);
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
@@ -2011,6 +2012,7 @@ function scanIPv6Space ($pairlist)
 		if (!isset ($ret[$ip_bin]))
 			$ret[$ip_bin] = constructIPAddress ($ip_bin);
 		$ret[$ip_bin]['name'] = $row['name'];
+		$ret[$ip_bin]['comment'] = $row['comment'];
 		$ret[$ip_bin]['reserved'] = $row['reserved'];
 	}
 	unset ($result);
@@ -2225,7 +2227,7 @@ function fetchIPv6AddressNetworkRow ($ip_bin, $masklen = 128)
 // This function is actually used not only to update, but also to create records,
 // that's why ON DUPLICATE KEY UPDATE was replaced by DELETE-INSERT pair
 // (MySQL 4.0 workaround).
-function updateAddress ($ip_bin, $name = '', $reserved = 'no')
+function updateAddress ($ip_bin, $name = '', $comment = '', $reserved = 'no')
 {
 	switch (strlen ($ip_bin))
 	{
@@ -2241,33 +2243,46 @@ function updateAddress ($ip_bin, $name = '', $reserved = 'no')
 	}
 
 	// compute update log message
-	$result = usePreparedSelectBlade ("SELECT name FROM $table WHERE ip = ?", array ($db_ip));
+	$result = usePreparedSelectBlade ("SELECT name, comment FROM $table WHERE ip = ?", array ($db_ip));
 	$old_name = '';
+	$old_comment = '';
 	if ($row = $result->fetch (PDO::FETCH_ASSOC))
+	{
 		$old_name = $row['name'];
+		$old_comment = $row['comment'];
+	}
 	unset ($result);
-	$message = NULL;
+	$messages = array ();
 	if ($name != $old_name)
 	{
 		if ($name == '')
-			$message = "Reservation '$old_name' removed";
+			$messages[] = "name '$old_name' removed";
 		elseif ($old_name == '')
-			$message = "Reservation set to '$name'";
+			$messages[] = "name set to '$name'";
 		else
-			$message = "Reservation changed from '$old_name' to '$name'";
+			$messages[] = "name changed from '$old_name' to '$name'";
+	}
+	if ($comment != $old_comment)
+	{
+		if ($comment == '')
+			$messages[] = "comment '$old_comment' removed";
+		elseif ($old_name == '')
+			$messages[] = "comment set to '$comment'";
+		else
+			$messages[] = "comment changed from '$old_comment' to '$comment'";
 	}
 
 	usePreparedDeleteBlade ($table, array ('ip' => $db_ip));
 	// INSERT may appear not necessary.
-	if ($name != '' or $reserved != 'no')
+	if ($name != '' or $comment != '' or $reserved != 'no')
 		usePreparedInsertBlade
 		(
 			$table,
-			array ('name' => $name, 'reserved' => $reserved, 'ip' => $db_ip)
+			array ('name' => $name, 'comment' => $comment, 'reserved' => $reserved, 'ip' => $db_ip)
 		);
 	// store history line
-	if (isset ($message))
-		addIPLogEntry ($ip_bin, $message);
+	if ($messages)
+		addIPLogEntry ($ip_bin, ucfirst (implode (', ', $messages)));
 }
 
 function updateV4Address ($ip_bin, $name = '', $reserved = 'no')

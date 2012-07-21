@@ -568,6 +568,7 @@ CREATE TABLE `FileLink` (
 CREATE TABLE `IPv4Address` (
   `ip` int(10) unsigned NOT NULL default '0',
   `name` char(255) NOT NULL default '',
+  `comment` char(255) NOT NULL default '',
   `reserved` enum('yes','no') default NULL,
   PRIMARY KEY  (`ip`)
 ) ENGINE=InnoDB;
@@ -679,6 +680,7 @@ CREATE TABLE `IPv4VS` (
 CREATE TABLE `IPv6Address` (
   `ip` binary(16) NOT NULL,
   `name` char(255) NOT NULL default '',
+  `comment` char(255) NOT NULL default '',
   `reserved` enum('yes','no') default NULL,
   PRIMARY KEY  (`ip`)
 ) ENGINE=InnoDB;

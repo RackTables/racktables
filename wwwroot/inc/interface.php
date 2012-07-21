@@ -2452,7 +2452,8 @@ function renderEmptyIPv6 ($ip_bin, $hl_ip)
 	$editable = permitted ('ipaddress', 'properties', 'editAddress')
 		? 'editable'
 		: '';
-	echo "</a></td><td><span class='rsvtext $editable id-$fmt op-upd-reservation-ip'></span></td><td>&nbsp;</td></tr>\n";
+	echo "</a></td><td><span class='rsvtext $editable id-$fmt op-upd-ip-name'></span></td>";
+	echo "<td><span class='rsvtext $editable id-$fmt op-upd-ip-comment'></span></td><td>&nbsp;</td></tr>\n";
 }
 
 // Renders empty table line to shrink empty IPv6 address ranges.
@@ -2473,7 +2474,7 @@ function renderSeparator ($first, $last, $hl_ip)
 		$self (ip_next ($hl_ip), $last, $hl_ip);
 	}
 	else
-		echo "<tr><td colspan=3 class=tdleft></td></tr>\n";
+		echo "<tr><td colspan=4 class=tdleft></td></tr>\n";
 }
 
 // calculates page number which contains given $ip (used by renderIPv6NetworkAddresses)
@@ -2533,13 +2534,14 @@ function renderIPv4NetworkAddresses ($range)
 
 	echo $rendered_pager;
 	echo "<table class='widetable' border=0 cellspacing=0 cellpadding=5 align='center' width='100%'>\n";
-	echo "<tr><th>Address</th><th>Name</th><th>Allocation</th></tr>\n";
+	echo "<tr><th>Address</th><th>Name</th><th>Comment</th><th>Allocation</th></tr>\n";
 
 	markupIPAddrList ($range['addrlist']);
 	for ($ip = $startip; $ip <= $endip; $ip++)
 	{
 		$ip_bin = ip4_int2bin ($ip);
 		$dottedquad = ip4_format ($ip_bin);
+		$addr = $range['addrlist'][$ip_bin];
 		$tr_class = (isset ($hl_ip) && $hl_ip == $ip ? 'highlight' : '');
 		if (!isset ($range['addrlist'][$ip_bin]))
 		{
@@ -2547,10 +2549,10 @@ function renderIPv4NetworkAddresses ($range)
 			$editable = permitted ('ipaddress', 'properties', 'editAddress')
 				? 'editable'
 				: '';
-			echo "<td><span class='rsvtext $editable id-$dottedquad op-upd-reservation-ip'></span></td><td>&nbsp;</td></tr>\n";
+			echo "<td><span class='rsvtext $editable id-$dottedquad op-upd-ip-name'></span></td>";
+			echo "<td><span class='rsvtext $editable id-$dottedquad op-upd-ip-comment'></span></td><td></td></tr>\n";
 			continue;
 		}
-		$addr = $range['addrlist'][$ip_bin];
 		// render IP change history
 		$title = '';
 		$history_class = '';
@@ -2563,11 +2565,12 @@ function renderIPv4NetworkAddresses ($range)
 		echo "<tr class='tdleft $tr_class'>";
 		echo "<td><a class='ancor $history_class' $title name='ip-$dottedquad' href='".makeHref(array('page'=>'ipaddress', 'ip'=>$addr['ip']))."'>${addr['ip']}</a></td>";
 		$editable =
-			(empty ($addr['allocs']) || !empty ($addr['name']))
+			(empty ($addr['allocs']) || !empty ($addr['name']) || !empty ($addr['comment']))
 			&& permitted ('ipaddress', 'properties', 'editAddress')
 			? 'editable'
 			: '';
-		echo "<td><span class='rsvtext $editable id-$dottedquad op-upd-reservation-ip'>${addr['name']}</span></td>";
+		echo "<td><span class='rsvtext $editable id-$dottedquad op-upd-ip-name'>${addr['name']}</span></td>";
+		echo "<td><span class='rsvtext $editable id-$dottedquad op-upd-ip-comment'>${addr['comment']}</span></td>";
 		echo "<td>";
 		$delim = '';
 		if ( $addr['reserved'] == 'yes')
@@ -2614,7 +2617,7 @@ function renderIPv6NetworkAddresses ($netinfo)
 {
 	global $pageno, $tabno, $aac2;
 	echo "<table class='widetable' border=0 cellspacing=0 cellpadding=5 align='center' width='100%'>\n";
-	echo "<tr><th>Address</th><th>Name</th><th>Allocation</th></tr>\n";
+	echo "<tr><th>Address</th><th>Name</th><th>Comment</th><th>Allocation</th></tr>\n";
 
 	$hl_ip = NULL;
 	if (isset ($_REQUEST['hl_ip']))
@@ -2682,7 +2685,8 @@ function renderIPv6NetworkAddresses ($netinfo)
 			&& permitted ('ipaddress', 'properties', 'editAddress')
 			? 'editable'
 			: '');
-		echo "<td><span class='rsvtext $editable id-${addr['ip']} op-upd-reservation-ip'>${addr['name']}</span></td><td>";
+		echo "<td><span class='rsvtext $editable id-${addr['ip']} op-upd-ip-name'>${addr['name']}</span></td>";
+		echo "<td><span class='rsvtext $editable id-${addr['ip']} op-upd-ip-comment'>${addr['comment']}</span></td><td>";
 		$delim = '';
 		if ( $addr['reserved'] == 'yes')
 		{
@@ -2767,7 +2771,9 @@ function renderIPAddress ($ip)
 	
 	$summary = array();
 	if (strlen ($address['name']))
-		$summary['Comment'] = $address['name'];
+		$summary['Name'] = $address['name'];
+	if (strlen ($address['comment']))
+		$summary['Comment'] = $address['comment'];
 	$summary['Reserved'] = $address['reserved'];
 	$summary['Allocations'] = count ($address['allocs']);
 	if (isset ($address['outpf']))
@@ -2858,6 +2864,8 @@ function renderIPAddressProperties ($ip)
 	printOpFormIntro ('editAddress');
 	echo '<tr><td class=tdright><label for=id_name>Name:</label></td>';
 	echo "<td class=tdleft><input type=text name=name id=id_name size=20 value='${address['name']}'></tr>";
+	echo '<tr><td class=tdright><label for=id_comment>Comment:</label></td>';
+	echo "<td class=tdleft><input type=text name=comment id=id_comment size=20 value='${address['comment']}'></tr>";
 	echo '<td class=tdright><label for=id_reserved>Reserved:</label></td>';
 	echo "<td class=tdleft><input type=checkbox name=reserved id=id_reserved size=20 ";
 	echo ($address['reserved']=='yes') ? 'checked' : '';

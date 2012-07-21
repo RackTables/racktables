@@ -317,7 +317,7 @@ $ophandler['ipv6net']['files']['unlinkFile'] = 'unlinkFile';
 $ophandler['ipv6net']['8021q']['bind'] = 'bindVLANtoIPv6';
 $ophandler['ipv6net']['8021q']['unbind'] = 'unbindVLANfromIPv6';
 
-//$page['ipaddress']['parent'] = 'ipnet'; - this is commened intensinally, there is a special hack in getPath
+//$page['ipaddress']['parent'] = 'ipnet'; - this is commented intentionally, there is a special hack in getPath
 $page['ipaddress']['bypass'] = 'ip';
 $page['ipaddress']['bypass_type'] = 'inet';
 $tab['ipaddress']['default'] = 'Browse';
@@ -701,8 +701,9 @@ $ajaxhandler['verifyCode'] = 'verifyCodeAJAX';
 $ajaxhandler['get-port-link'] = 'getPortInfoAJAX';
 $ajaxhandler['get-port-mac'] = 'getPortInfoAJAX';
 $ajaxhandler['get-port-conf'] = 'getPortInfoAJAX';
+$ajaxhandler['upd-ip-name'] = 'updateIPNamevAJAX';
+$ajaxhandler['upd-ip-comment'] = 'updateIPCommentvAJAX';
 $ajaxhandler['upd-reservation-port'] = 'updatePortRsvAJAX';
-$ajaxhandler['upd-reservation-ip'] = 'updateIPRsvAJAX';
 $ajaxhandler['upd-reservation-cable'] = 'updateCableIdAJAX';
 $ajaxhandler['net-usage'] = 'getNetUsageAJAX';
 
