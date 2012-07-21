@@ -1803,6 +1803,7 @@ $dictionary = array
 	1718 => array ('chapter_id' => 13, 'dict_value' => '[[OpenBSD%GSKIP%OpenBSD 5.1 | http://www.openbsd.org/51.html]]'),
 	1719 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 2924M-XL'),
 	1720 => array ('chapter_id' => 12, 'dict_value' => 'Allied Telesyn%GPASS%AT9924T'),
+	1721 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 3560E-12SD'),
 
 # Any new "default" dictionary records must go above this line (i.e., with
 # dict_key code less, than 50000). This is necessary to keep AUTO_INCREMENT
