@@ -1599,6 +1599,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'N5K-C5548P: 32 SFP+/10000',
 		'processors' => array ('nexus-any-10000SFP+', 'nexus-mgmt'),
 	),
+	'11.2.3.7.11.9' => array
+	(
+		'dict_key' => 1086,
+		'text' => 'J4121A: modular system',
+		'processors' => array ('procurve-modular-100TX'),
+	),
 	'11.2.3.7.11.19' => array
 	(
 		'dict_key' => 859,
@@ -1641,11 +1647,11 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'J8165A: 48 RJ-45/10-100TX PoE + 2 RJ-45/10-100-1000T(X)',
 		'processors' => array ('procurve-49-to-50-1000T', 'procurve-chassis-100TX'),
 	),
-	'11.2.3.7.11.9' => array
+	'11.2.3.7.11.44' => array
 	(
-		'dict_key' => 1086,
-		'text' => 'J4121A: modular system',
-		'processors' => array ('procurve-modular-100TX'),
+		'dict_key' => 866,
+		'text' => 'J4899B: 48 RJ-45/10-100TX + 2 RJ-45/10-100-1000T(X)',
+		'processors' => array ('procurve-49-to-50-1000T', 'procurve-chassis-100TX'),
 	),
 	'11.2.3.7.11.53' => array
 	(
@@ -1664,6 +1670,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'dict_key' => 850,
 		'text' => 'J9028A: 22 RJ-45/10-100-1000T(X) + 2 combo-gig',
 		'processors' => array ('smc2-combo-23-to-24', 'smc2-any-1000T'),
+	),
+	'11.2.3.7.11.68' => array
+	(
+		'dict_key' => 873,
+		'text' => 'J9050A: 48 RJ-45/10-100-1000T',
+		'processors' => array ('procurve-chassis-1000T'),
 	),
 	'11.2.3.7.11.78' => array
 	(
