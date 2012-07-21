@@ -188,7 +188,7 @@ function getDBUpgradePath ($v1, $v2)
 
 // Upgrade batches are named exactly as the release where they first appear.
 // That is simple, but seems sufficient for beginning.
-function executeUpgradeBatch ($batchid)
+function getUpgradeBatch ($batchid)
 {
 	$query = array();
 	global $dbxlink;
@@ -1433,9 +1433,18 @@ CREATE VIEW `RackObject` AS SELECT id, name, label, objtype_id, asset_no, has_pr
 			$query = reloadDictionary();
 			break;
 		default:
-			showUpgradeError ("unknown batch '${batchid}'", __FUNCTION__);
-			die;
-			break;
+			return NULL;
+	}
+	return $query;
+}
+
+function executeUpgradeBatch ($batchid)
+{
+	global $dbxlink;
+	$query = getUpgradeBatch($batchid);
+	if ($query === NULL) {
+		showError ("unknown batch '${batchid}'", __FUNCTION__);
+		die;
 	}
 	$failures = array();
 	echo "<tr><th>Executing batch '${batchid}'</th><td>";
