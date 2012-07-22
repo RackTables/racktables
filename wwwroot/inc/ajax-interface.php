@@ -215,7 +215,7 @@ function updatePortRsvAJAX()
 	echo 'OK';
 }
 
-function updateIPNamevAJAX()
+function updateIPNameAJAX()
 {
 	global $sic;
 	assertStringArg ('text', TRUE);
@@ -233,7 +233,7 @@ function updateIPNamevAJAX()
 	echo 'OK';
 }
 
-function updateIPCommentvAJAX()
+function updateIPCommentAJAX()
 {
 	global $sic;
 	assertStringArg ('text', TRUE);
