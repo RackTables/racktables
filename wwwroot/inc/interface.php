@@ -6989,7 +6989,7 @@ function renderObject8021QPorts ($object_id)
 			$trclass = 'trbusy';
 			break;
 		case 'uplink':
-			$text_right = serializeVLANPack ($uplinks[$port_name]);
+			$text_right = '(uplink)';
 			$trclass = same8021QConfigs ($port, $uplinks[$port_name]) ? 'trbusy' : 'trwarning';
 			break;
 		case 'trunk':
