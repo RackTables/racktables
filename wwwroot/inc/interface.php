@@ -2541,9 +2541,10 @@ function renderIPv4NetworkAddresses ($range)
 	{
 		$ip_bin = ip4_int2bin ($ip);
 		$dottedquad = ip4_format ($ip_bin);
-		$addr = $range['addrlist'][$ip_bin];
 		$tr_class = (isset ($hl_ip) && $hl_ip == $ip ? 'highlight' : '');
-		if (!isset ($range['addrlist'][$ip_bin]))
+		if (isset ($range['addrlist'][$ip_bin]))
+			$addr = $range['addrlist'][$ip_bin];
+		else
 		{
 			echo "<tr class='tdleft $tr_class'><td class=tdleft><a class='ancor' name='ip-$dottedquad' href='" . makeHref(array('page'=>'ipaddress', 'ip' => $dottedquad)) . "'>$dottedquad</a></td>";
 			$editable = permitted ('ipaddress', 'properties', 'editAddress')

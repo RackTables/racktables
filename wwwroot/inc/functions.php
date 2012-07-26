@@ -2281,6 +2281,7 @@ function constructIPAddress ($ip_bin)
 		'ip' => ip_format ($ip_bin),
 		'ip_bin' => $ip_bin,
 		'name' => '',
+		'comment' => '',
 		'reserved' => 'no',
 		'allocs' => array(),
 		'vslist' => array(),
