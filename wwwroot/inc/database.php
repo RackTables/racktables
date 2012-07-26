@@ -2908,15 +2908,20 @@ function commitUpdateUserAccount ($id, $new_username, $new_realname, $new_passwo
 }
 
 // This function returns an array of all port type pairs from PortCompat table.
-function getPortOIFCompat ()
+function getPortOIFCompat ($ignore_cache = FALSE)
 {
+	static $cache = NULL;
+	if (! $ignore_cache && isset ($cache))
+		return $cache;
+
 	$query =
 		"select type1, type2, d1.dict_value as type1name, d2.dict_value as type2name from " .
 		"PortCompat as pc inner join Dictionary as d1 on pc.type1 = d1.dict_key " .
 		"inner join Dictionary as d2 on pc.type2 = d2.dict_key " .
 		'ORDER BY type1name, type2name';
 	$result = usePreparedSelectBlade ($query);
-	return $result->fetchAll (PDO::FETCH_ASSOC);
+	$cache = $result->fetchAll (PDO::FETCH_ASSOC);
+	return $cache;
 }
 
 // Returns an array of all object type pairs from the ObjectParentCompat table.

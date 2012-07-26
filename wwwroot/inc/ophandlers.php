@@ -2705,7 +2705,6 @@ function importDPData()
 	global $sic, $dbxlink;
 	assertUIntArg ('nports');
 	$nignored = $ndone = 0;
-	$POIFC = getPortOIFCompat();
 	for ($i = 0; $i < $sic['nports']; $i++)
 		if (array_key_exists ("do_${i}", $sic))
 		{
@@ -2738,36 +2737,36 @@ function importDPData()
 			$oif_b = intval (@$params['b_oif']);
 			
 			$dbxlink->beginTransaction();
-			if ($oif_a || $oif_b)
-				try
+			try
+			{
+				if ($oif_a)
 				{
-					if ($oif_a)
-					{
-						commitUpdatePortOIF ($params['a_id'], $oif_a);
-						$porta['oif_id'] = $oif_a;
-					}
-					if ($oif_b)
-					{
-						commitUpdatePortOIF ($params['b_id'], $oif_b);
-						$portb['oif_id'] = $oif_b;
-					}
+					commitUpdatePortOIF ($params['a_id'], $oif_a);
+					$porta['oif_id'] = $oif_a;
 				}
-				catch (RTDatabaseError $e)
+				if ($oif_b)
 				{
-					$dbxlink->rollBack();
-					$nignored++;
-					continue;
+					commitUpdatePortOIF ($params['b_id'], $oif_b);
+					$portb['oif_id'] = $oif_b;
 				}
 
-			foreach ($POIFC as $item)
-				if ($item['type1'] == $porta['oif_id'] and $item['type2'] == $portb['oif_id'])
+				if (arePortsCompatible ($porta, $portb))
 				{
 					linkPorts ($params['a_id'], $params['b_id']);
 					$ndone++;
 					$dbxlink->commit();
-					continue 2; //next port
 				}
-			$dbxlink->rollback();
+				else
+				{
+					$dbxlink->rollback();
+					$nignored++;
+				}
+			}
+			catch (RTDatabaseError $e)
+			{
+				$dbxlink->rollBack();
+				$nignored++;
+			}
 		}
 	return showFuncMessage (__FUNCTION__, 'OK', array ($nignored, $ndone));
 }

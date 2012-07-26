@@ -8009,7 +8009,6 @@ function renderDeployQueue()
 function renderDiscoveredNeighbors ($object_id)
 {
 	global $tabno;
-	static $POIFC;
 	
 	$opcode_by_tabno = array
 	(
@@ -8147,18 +8146,9 @@ function renderDiscoveredNeighbors ($object_id)
 							$port_types[$side][$oif_id][] = array ('id' => $oif_id, 'name' => $oif_name, 'portinfo' => $portinfo);
 					}
 
-				if (! isset ($POIFC))
-				{
-					$POIFC = array();
-					foreach (getPortOIFCompat() as $item)
-					{
-						$POIFC[$item['type1']][$item['type2']] = TRUE;
-						$POIFC[$item['type2']][$item['type1']] = TRUE;
-					}
-				}
 				foreach ($port_types['left'] as $left_id => $left)
 				foreach ($port_types['right'] as $right_id => $right)
-					if (isset ($POIFC[$left_id][$right_id]))
+					if (arePortTypesCompatible ($left_id, $right_id))
 						foreach ($left as $left_port)
 						foreach ($right as $right_port)
 							$variants[] = array ('left' => $left_port, 'right' => $right_port);

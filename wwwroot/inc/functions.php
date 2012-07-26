@@ -5504,4 +5504,17 @@ function universalTabHandler($bypass = NULL)
 	return $ret;
 }
 
+function arePortTypesCompatible ($oif1, $oif2)
+{
+	foreach (getPortOIFCompat() as $item)
+		if ($item['type1'] == $oif1 && $item['type2'] == $oif2)
+			return TRUE;
+	return FALSE;
+}
+
+function arePortsCompatible ($portinfo_a, $portinfo_b)
+{
+	return arePortTypesCompatible ($portinfo_a['oif_id'], $portinfo_b['oif_id']);
+}
+
 ?>
