@@ -1737,13 +1737,29 @@ function renderPortsInfo($object_id)
 		{
 			echo "<td valign='top' width='50%'>";
 			startPortlet('Link status');
-			echo "<table width='80%' class='widetable' cellspacing=0 cellpadding='5px' align='center'><tr><th>Port<th>Link status<th>Link info</tr>";
+			echo "<table width='80%' class='widetable' cellspacing=0 cellpadding='5px' align='center'><tr><th>Port<th><th>Link status<th>Link info</tr>";
 			$order = 'even';
 			foreach ($linkStatus as $pn => $link)
 			{
+				switch ($link['status'])
+				{
+					case 'up':
+						$img_filename = 'link-up.png';
+						break;
+					case 'down':
+						$img_filename = 'link-down.png';
+						break;
+					case 'disabled':
+						$img_filename = 'link-disabled.png';
+						break;
+					default:
+						$img_filename = '1x1t.gif';
+				}
+
 				echo "<tr class='row_$order'>";
 				$order = $nextorder[$order];
 				echo '<td>' . $pn;
+				echo '<td>' . '<img width=16 height=16 src="?module=chrome&uri=pix/' . $img_filename . '">';
 				echo '<td>' . $link['status'];
 				$info = '';
 				if (isset ($link['speed']))
