@@ -8670,7 +8670,7 @@ function renderEditVlan ($vlan_ck)
 	// static attributes
 	echo '<table border=0 cellspacing=0 cellpadding=2 align=center>';
 	echo '<tr><th class=tdright>Name:</th><td class=tdleft>' .
-		"<input type=text name=vlan_descr value='${vlan['vlan_descr']}'>" .
+		"<input type=text size=40 name=vlan_descr value='${vlan['vlan_descr']}'>" .
 		'</td></tr>';
 	echo '<tr><th class=tdright>Type:</th><td class=tdleft>' .
 		getSelect ($vtoptions, array ('name' => 'vlan_type', 'tabindex' => 102), $vlan['vlan_prop']) .
