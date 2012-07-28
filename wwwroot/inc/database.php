@@ -2918,6 +2918,42 @@ function searchByMgmtHostname ($string)
 	return $rows[0][0];
 }
 
+// returns an array of object ids
+function searchByAttrValue ($attr_id, $value)
+{
+	$map = getAttrMap();
+	if (! isset ($map[$attr_id]))
+		throw new InvalidArgException ('attr_id', $attr_id, "No such attribute");
+
+	$field = NULL;
+	switch ($map[$attr_id]['type'])
+	{
+		case 'string':
+			$field = 'string_value';
+			break;
+		case 'float':
+			$field = 'float_value';
+			break;
+		case 'uint':
+		case 'dict':
+		case 'date':
+			$field = 'uint_value';
+			break;
+		default:
+			throw new InvalidArgException ('type', $map[$attr_id]['type']);
+	}
+
+	$result = usePreparedSelectBlade ("
+SELECT object_id FROM AttributeValue
+WHERE
+	attr_id = ?
+	AND $field = ?
+", array ($attr_id, $value)
+);
+	return $result->fetchAll (PDO::FETCH_COLUMN, 0);
+}
+
+
 // returns user_id
 // throws an exception if error occured
 function commitCreateUserAccount ($username, $realname, $password)
@@ -2951,15 +2987,20 @@ function commitUpdateUserAccount ($id, $new_username, $new_realname, $new_passwo
 }
 
 // This function returns an array of all port type pairs from PortCompat table.
-function getPortOIFCompat ()
+function getPortOIFCompat ($ignore_cache = FALSE)
 {
+	static $cache = NULL;
+	if (! $ignore_cache && isset ($cache))
+		return $cache;
+
 	$query =
 		"select type1, type2, d1.dict_value as type1name, d2.dict_value as type2name from " .
 		"PortCompat as pc inner join Dictionary as d1 on pc.type1 = d1.dict_key " .
 		"inner join Dictionary as d2 on pc.type2 = d2.dict_key " .
 		'ORDER BY type1name, type2name';
 	$result = usePreparedSelectBlade ($query);
-	return $result->fetchAll (PDO::FETCH_ASSOC);
+	$cache = $result->fetchAll (PDO::FETCH_ASSOC);
+	return $cache;
 }
 
 // Returns an array of all object type pairs from the ObjectParentCompat table.
@@ -3192,6 +3233,10 @@ function getChapterRefc ($chapter_id, $keylist)
 // list all its ways on the map with refcnt set.
 function getAttrMap ()
 {
+	static $cached_result = NULL;
+	if (isset ($cached_result))
+		return $cached_result;
+
 	$result = usePreparedSelectBlade
 	(
 		'SELECT id, type, name, chapter_id, (SELECT dict_value FROM Dictionary WHERE dict_key = objtype_id) '.
@@ -3225,6 +3270,7 @@ function getAttrMap ()
 		}
 		$ret[$row['id']]['application'][] = $application;
 	}
+	$cached_result = $ret;
 	return $ret;
 }
 

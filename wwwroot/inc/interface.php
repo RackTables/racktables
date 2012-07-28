@@ -1773,13 +1773,29 @@ function renderPortsInfo($object_id)
 		{
 			echo "<td valign='top' width='50%'>";
 			startPortlet('Link status');
-			echo "<table width='80%' class='widetable' cellspacing=0 cellpadding='5px' align='center'><tr><th>Port<th>Link status<th>Link info</tr>";
+			echo "<table width='80%' class='widetable' cellspacing=0 cellpadding='5px' align='center'><tr><th>Port<th><th>Link status<th>Link info</tr>";
 			$order = 'even';
 			foreach ($linkStatus as $pn => $link)
 			{
+				switch ($link['status'])
+				{
+					case 'up':
+						$img_filename = 'link-up.png';
+						break;
+					case 'down':
+						$img_filename = 'link-down.png';
+						break;
+					case 'disabled':
+						$img_filename = 'link-disabled.png';
+						break;
+					default:
+						$img_filename = '1x1t.gif';
+				}
+
 				echo "<tr class='row_$order'>";
 				$order = $nextorder[$order];
 				echo '<td>' . $pn;
+				echo '<td>' . '<img width=16 height=16 src="?module=chrome&uri=pix/' . $img_filename . '">';
 				echo '<td>' . $link['status'];
 				$info = '';
 				if (isset ($link['speed']))
@@ -2577,9 +2593,10 @@ function renderIPv4NetworkAddresses ($range)
 	{
 		$ip_bin = ip4_int2bin ($ip);
 		$dottedquad = ip4_format ($ip_bin);
-		$addr = $range['addrlist'][$ip_bin];
 		$tr_class = (isset ($hl_ip) && $hl_ip == $ip ? 'highlight' : '');
-		if (!isset ($range['addrlist'][$ip_bin]))
+		if (isset ($range['addrlist'][$ip_bin]))
+			$addr = $range['addrlist'][$ip_bin];
+		else
 		{
 			echo "<tr class='tdleft $tr_class'><td class=tdleft><a class='ancor' name='ip-$dottedquad' href='" . makeHref(array('page'=>'ipaddress', 'ip' => $dottedquad)) . "'>$dottedquad</a></td>";
 			$editable = permitted ('ipaddress', 'properties', 'editAddress')
@@ -7025,7 +7042,7 @@ function renderObject8021QPorts ($object_id)
 			$trclass = 'trbusy';
 			break;
 		case 'uplink':
-			$text_right = serializeVLANPack ($uplinks[$port_name]);
+			$text_right = '(uplink)';
 			$trclass = same8021QConfigs ($port, $uplinks[$port_name]) ? 'trbusy' : 'trwarning';
 			break;
 		case 'trunk':
@@ -8045,7 +8062,6 @@ function renderDeployQueue()
 function renderDiscoveredNeighbors ($object_id)
 {
 	global $tabno;
-	static $POIFC;
 	
 	$opcode_by_tabno = array
 	(
@@ -8183,18 +8199,9 @@ function renderDiscoveredNeighbors ($object_id)
 							$port_types[$side][$oif_id][] = array ('id' => $oif_id, 'name' => $oif_name, 'portinfo' => $portinfo);
 					}
 
-				if (! isset ($POIFC))
-				{
-					$POIFC = array();
-					foreach (getPortOIFCompat() as $item)
-					{
-						$POIFC[$item['type1']][$item['type2']] = TRUE;
-						$POIFC[$item['type2']][$item['type1']] = TRUE;
-					}
-				}
 				foreach ($port_types['left'] as $left_id => $left)
 				foreach ($port_types['right'] as $right_id => $right)
-					if (isset ($POIFC[$left_id][$right_id]))
+					if (arePortTypesCompatible ($left_id, $right_id))
 						foreach ($left as $left_port)
 						foreach ($right as $right_port)
 							$variants[] = array ('left' => $left_port, 'right' => $right_port);
@@ -8715,7 +8722,7 @@ function renderEditVlan ($vlan_ck)
 	// static attributes
 	echo '<table border=0 cellspacing=0 cellpadding=2 align=center>';
 	echo '<tr><th class=tdright>Name:</th><td class=tdleft>' .
-		"<input type=text name=vlan_descr value='${vlan['vlan_descr']}'>" .
+		"<input type=text size=40 name=vlan_descr value='${vlan['vlan_descr']}'>" .
 		'</td></tr>';
 	echo '<tr><th class=tdright>Type:</th><td class=tdleft>' .
 		getSelect ($vtoptions, array ('name' => 'vlan_type', 'tabindex' => 102), $vlan['vlan_prop']) .
