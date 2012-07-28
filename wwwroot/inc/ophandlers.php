@@ -1900,7 +1900,11 @@ $msgcode['addRack']['ERR2'] = 172;
 function addRack ()
 {
 	$taglist = isset ($_REQUEST['taglist']) && is_array ($_REQUEST['taglist']) ? $_REQUEST['taglist'] : array();
-	
+
+	// The new rack(s) should be placed on the bottom of the list, sort-wise
+	$rowInfo = getRowInfo($_REQUEST['row_id']);
+	$sort_order = $rowInfo['count']+1;
+
 	if (isset ($_REQUEST['got_data']))
 	{
 		assertStringArg ('name');
@@ -1909,8 +1913,9 @@ function addRack ()
 		$rack_id = commitAddObject ($_REQUEST['name'], NULL, 1560, $_REQUEST['asset_no'], $taglist);
 		produceTagsForNewRecord ('rack', $taglist, $rack_id);
 
-		// Update the height
+		// Set the height and sort order
 		commitUpdateAttrValue ($rack_id, 27, $_REQUEST['height1']);
+		commitUpdateAttrValue ($rack_id, 29, $sort_order);
 
 		// Link it to the row
 		commitLinkEntities ('row', $_REQUEST['row_id'], 'rack', $rack_id);
@@ -1937,8 +1942,10 @@ function addRack ()
 			$rack_id = commitAddObject ($cname, NULL, 1560, NULL, $taglist);
 			produceTagsForNewRecord ('rack', $taglist, $rack_id);
 
-			// Update the height
+			// Set the height and sort order
 			commitUpdateAttrValue ($rack_id, 27, $_REQUEST['height2']);
+			commitUpdateAttrValue ($rack_id, 29, $sort_order);
+			$sort_order++;
 
 			// Link it to the row
 			commitLinkEntities ('row', $_REQUEST['row_id'], 'rack', $rack_id);
@@ -1980,7 +1987,8 @@ function updateRack ()
 		$attr_id = $_REQUEST["${i}_attr_id"];
 
 		// Skip the 'height' attribute as it's already handled by commitUpdateRack
-		if ($attr_id == 27)
+		// Also skip 'sort_order'
+		if ($attr_id == 27 or $attr_id == 29)
 			continue;
 
 		// Field is empty, delete attribute and move on. OR if the field type is a dictionary and it is the --NOT SET-- value of 0
@@ -2023,6 +2031,7 @@ function deleteRack ()
 	if (count ($rackData['mountedObjects']))
 		return showFuncMessage (__FUNCTION__, 'ERR1');
 	commitDeleteObject ($_REQUEST['rack_id']);
+	resetRackSortOrder ($rackData['row_id']);
 	showFuncMessage (__FUNCTION__, 'OK', array ($rackData['name']));
 	return buildRedirectURL ('rackspace', 'default');
 }

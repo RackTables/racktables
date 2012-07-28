@@ -262,6 +262,12 @@ function updateCableIdAJAX()
 	echo 'OK';
 }
 
+function updateRackSortOrderAJAX()
+{
+	updateRackSortOrder ($_REQUEST['racks']);
+	echo 'OK';
+}
+
 function getNetUsageAJAX()
 {
 	assertStringArg ('net_id');

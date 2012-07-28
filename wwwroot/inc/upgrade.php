@@ -1328,6 +1328,10 @@ CREATE TABLE `IPv6Log` (
 			$query[] = "INSERT INTO `Attribute` (`id`,`type`,`name`) VALUES (27,'uint','Height, units')";
 			$query[] = 'INSERT INTO `AttributeMap` (`objtype_id`,`attr_id`,`chapter_id`) VALUES (1560,27,NULL)';
 
+			// Racks are now sorted using an attribute
+			$query[] = "INSERT INTO `Attribute` (`id`,`type`,`name`) VALUES (29,'uint','Sort order')";
+			$query[] = 'INSERT INTO `AttributeMap` (`objtype_id`,`attr_id`,`chapter_id`) VALUES (1560,29,NULL)';
+
 			// Relate 'contact person' with locations
 			$query[] = 'INSERT INTO `AttributeMap` (`objtype_id`,`attr_id`,`chapter_id`) VALUES (1562,14,NULL)';
 
@@ -1345,23 +1349,26 @@ CREATE TABLE `IPv6Log` (
 				$prepared->execute (array($row['name'], 1561));
 				$row_id = $dbxlink->lastInsertId();
 				// Turn all racks in this row into objects
-				$result = $dbxlink->query ("SELECT id, name, height, comment FROM Rack WHERE row_id=${row['id']}");
+				$result = $dbxlink->query ("SELECT id, name, height, comment FROM Rack WHERE row_id=${row['id']} ORDER BY name");
 				$racks = $result->fetchAll (PDO::FETCH_ASSOC);
 				unset ($result);
+				$sort_order = 1;
 				foreach ($racks as $rack) 
 				{
-					// Add the rack as an object, set the height as an attribute, link the rack to the row,
+					// Add the rack as an object, set the height and sort order as attributes, link the rack to the row,
 					//   update rackspace, tags and files to reflect new rack_id, move history
 					$prepared = $dbxlink->prepare ('INSERT INTO `Object` (`name`,`objtype_id`,`comment`) VALUES (?,?,?)');
 					$prepared->execute (array($rack['name'], 1560, $rack['comment']));
 					$rack_id = $dbxlink->lastInsertId();
 					$query[] = "INSERT INTO `AttributeValue` (`object_id`,`object_tid`,`attr_id`,`uint_value`) VALUES (${rack_id},1560,27,${rack['height']})";
+					$query[] = "INSERT INTO `AttributeValue` (`object_id`,`object_tid`,`attr_id`,`uint_value`) VALUES (${rack_id},1560,29,${sort_order})";
 					$query[] = "INSERT INTO `EntityLink` (`parent_entity_type`,`parent_entity_id`,`child_entity_type`,`child_entity_id`) VALUES ('row',${row_id},'rack',${rack_id})";
 					$query[] = "UPDATE `RackSpace` SET `rack_id`=${rack_id} WHERE `rack_id`=${rack['id']}";
 					$query[] = "UPDATE `Atom` SET `rack_id`=${rack_id} WHERE `rack_id`=${rack['id']}";
 					$query[] = "UPDATE `TagStorage` SET `entity_id`=${rack_id} WHERE `entity_realm`='rack' AND `entity_id`=${rack['id']}";
 					$query[] = "UPDATE `FileLink` SET `entity_id`=${rack_id} WHERE `entity_type`='rack' AND `entity_id`=${rack['id']}";
 					$query[] = "INSERT INTO `ObjectHistory` (`id`,`name`,`objtype_id`,`comment`,`ctime`,`user_name`) SELECT ${rack_id},`name`,1560,`comment`,`ctime`,`user_name` FROM `RackHistory` WHERE `id`=${rack['id']}";
+					$sort_order++;
 				}
 			}
 			$query[] = 'ALTER TABLE `RackSpace` ADD CONSTRAINT `RackSpace-FK-rack_id` FOREIGN KEY (`rack_id`) REFERENCES `Object` (`id`)';
@@ -1394,12 +1401,14 @@ CREATE VIEW `Row` AS SELECT O.id, O.name, L.id AS location_id, L.name AS locatio
 ";
 			$query[] = "
 CREATE VIEW `Rack` AS SELECT O.id, O.name AS name, O.asset_no, O.has_problems, O.comment,
-  AV.uint_value AS height,
+  AV_H.uint_value AS height,
+  AV_S.uint_value AS sort_order,
   RT.thumb_data,
   R.id AS row_id,
   R.name AS row_name
   FROM `Object` O
-  LEFT JOIN `AttributeValue` AV ON O.id = AV.object_id AND AV.attr_id = 27
+  LEFT JOIN `AttributeValue` AV_H ON O.id = AV_H.object_id AND AV_H.attr_id = 27
+  LEFT JOIN `AttributeValue` AV_S ON O.id = AV_S.object_id AND AV_S.attr_id = 29
   LEFT JOIN `RackThumbnail` RT ON O.id = RT.rack_id
   LEFT JOIN `EntityLink` EL ON O.id = EL.child_entity_id  AND EL.parent_entity_type = 'row' AND EL.child_entity_type = 'rack'
   INNER JOIN `Object` R ON R.id = EL.parent_entity_id

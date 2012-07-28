@@ -144,7 +144,7 @@ $SQLSchema = array
 			'row_name' => 'row_name',
 		),
 		'keycolumn' => 'id',
-		'ordcolumns' => array ('row_name', 'Rack.name'),
+		'ordcolumns' => array ('row_name', 'sort_order', 'Rack.name'),
 		'pidcolumn' => 'row_id',
 	),
 	'row' => array
@@ -253,11 +253,11 @@ function getLocations ($location_id)
 function getRowInfo ($row_id)
 {
 	$query =
-		"select Row.id as id, Row.name as name, count(Rack.id) as count, " .
-		"if(isnull(sum(Rack.height)),0,sum(Rack.height)) as sum " .
-		"from Row left join Rack on Rack.row_id = Row.id " .
-		"where Row.id = ? " .
-		"group by Row.id";
+		"SELECT Row.id AS id, Row.name AS name, COUNT(Rack.id) AS count, " .
+		"IF(ISNULL(SUM(Rack.height)),0,SUM(Rack.height)) AS sum " .
+		"FROM Row LEFT JOIN Rack ON Rack.row_id = Row.id " .
+		"WHERE Row.id = ? " .
+		"GROUP BY Row.id";
 	$result = usePreparedSelectBlade ($query, array ($row_id));
 	if ($row = $result->fetch (PDO::FETCH_ASSOC))
 		return $row;
@@ -302,18 +302,18 @@ function getRacks ($row_id)
 {
 	$query = usePreparedSelectBlade
 	(
-		'SELECT  id, name, asset_no, height, comment, row_name FROM Rack WHERE row_id = ?',
+		'SELECT id, name, asset_no, height, sort_order, comment, row_name FROM Rack WHERE row_id = ? ORDER BY sort_order',
 		array ($row_id)
 	);
 	$ret = array();
 	while ($row = $query->fetch (PDO::FETCH_ASSOC))
-		$ret[$row['rack_id']] = array (
+		$ret[$row['id']] = array (
 			'name' => $row['name'],
-			'label' => $row['type'],
-			'asset_no' => $row['size'],
-			'height' => $row['ctime'],
-			'comment' => $row['mtime'],
-			'row_name' => $row['atime'],
+			'asset_no' => $row['asset_no'],
+			'height' => $row['height'],
+			'sort_order' => $row['sort_order'],
+			'comment' => $row['comment'],
+			'row_name' => $row['row_name'],
 		);
 	return $ret;
 }
@@ -1198,13 +1198,31 @@ function commitUpdateRack ($rack_id, $new_row_id, $new_name, $new_height, $new_h
 	if ($check_row['count'] > 0)
 		throw new InvalidArgException ('new_height', $new_height, 'Cannot shrink rack, objects are still mounted there');
 
-	// Update the row
-	usePreparedUpdateBlade
-	(
-		'EntityLink',
-		array ('parent_entity_id' => $new_row_id),
-		array ('child_entity_type' => 'object', 'child_entity_id' => $rack_id)
-	);
+	// Determine if the row changed
+	$old_rack =  spotEntity ('rack', $rack_id);
+	$old_row_id = $old_rack['row_id'];
+	if ($old_row_id != $new_row_id)
+	{
+		// Move it to the specified row
+		usePreparedUpdateBlade
+		(
+			'EntityLink',
+			array ('parent_entity_id' => $new_row_id),
+			array ('child_entity_type' => 'rack', 'child_entity_id' => $rack_id)
+		);
+
+		// Set the sort_order attribute so it's placed at the end of the new row
+		$rowInfo = getRowInfo ($new_row_id);
+		usePreparedUpdateBlade
+		(
+			'AttributeValue',
+			array ('uint_value' => $rowInfo['count']),
+			array ('object_id' => $rack_id, 'attr_id' => 29)
+		);
+
+		// Reset the sort order of the old row
+		resetRackSortOrder ($old_row_id);
+	}
 
 	// Update the height
 	commitUpdateAttrValue ($rack_id, 27, $new_height);
@@ -1212,6 +1230,31 @@ function commitUpdateRack ($rack_id, $new_row_id, $new_name, $new_height, $new_h
 	// Update the rack
 	commitUpdateObject ($rack_id, $new_name, NULL, $new_has_problems, $new_asset_no, $new_comment);
 	recordObjectHistory ($rack_id);
+}
+
+// Used when sort order is manually changed, and when a rack is moved or deleted
+// Input is expected to be a pre-sorted array of rack IDs
+function updateRackSortOrder ($racks)
+{
+	for ($i = 0; $i<count($racks); $i++)
+	{
+		usePreparedUpdateBlade
+		(
+			'AttributeValue',
+			array ('uint_value' => $i+1),
+			array ('object_id' => $racks[$i], 'attr_id' => 29)
+		);
+	}
+}
+
+function resetRackSortOrder ($row_id)
+{
+	// Re-order the row's racks
+	$racks = getRacks($row_id);
+	$rack_ids = array ();
+	foreach ($racks as $rack_id => $rackDetails)
+		$rack_ids[] = $rack_id;
+	updateRackSortOrder ($rack_ids);
 }
 
 // This function accepts rack data returned by amplifyCell(), validates and applies changes

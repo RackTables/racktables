@@ -4,6 +4,7 @@
 	update: 802.1q: config deploy to Cisco IOS switches is no more requiring 'switchport trunk encapsulation dot1q' pre-set
 	update: convert racks and rows into objects (by Aaron Dummer)
 	update: support for mounting zero-U objects (#173, by Aaron Dummer)
+	update: ability to manually sort racks (#370)
 	update: create network and link to a VLAN at once
 	update: 8021Q switch autosync status is now managed by SYNC_802Q_LISTSRC config constraint
 	update: priority field of SLB triplet can now store any text, not only integers

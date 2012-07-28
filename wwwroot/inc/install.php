@@ -1035,12 +1035,14 @@ CREATE VIEW `Row` AS SELECT O.id, O.name, L.id AS location_id, L.name AS locatio
   WHERE O.objtype_id = 1561;
 
 CREATE VIEW `Rack` AS SELECT O.id, O.name AS name, O.asset_no, O.has_problems, O.comment,
-  AV.uint_value AS height,
+  AV_H.uint_value AS height,
+  AV_S.uint_value AS sort_order,
   RT.thumb_data,
   R.id AS row_id,
   R.name AS row_name
   FROM `Object` O
-  LEFT JOIN `AttributeValue` AV ON O.id = AV.object_id AND AV.attr_id = 27
+  LEFT JOIN `AttributeValue` AV_H ON O.id = AV_H.object_id AND AV_H.attr_id = 27
+  LEFT JOIN `AttributeValue` AV_S ON O.id = AV_S.object_id AND AV_S.attr_id = 29
   LEFT JOIN `RackThumbnail` RT ON O.id = RT.rack_id
   LEFT JOIN `EntityLink` EL ON O.id = EL.child_entity_id  AND EL.parent_entity_type = 'row' AND EL.child_entity_type = 'rack'
   INNER JOIN `Object` R ON R.id = EL.parent_entity_id
@@ -1077,6 +1079,7 @@ INSERT INTO `Attribute` (`id`, `type`, `name`) VALUES
 (26,'dict','Hypervisor'),
 (27,'uint','Height, units'),
 (28,'string','Slot number'),
+(29,'uint','Sort order'),
 -- ^^^^^ Any new "default" attributes must go above this line! ^^^^^
 -- Primary key value 9999 makes sure, that AUTO_INCREMENT on server restart
 -- doesn't drop below 10000 (other code relies on this, site-specific
@@ -1251,6 +1254,7 @@ INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_id`) VALUES
 (1507,21,NULL),
 (1507,22,NULL),
 (1560,27,NULL),
+(1560,29,NULL),
 (1562,14,NULL),
 (1644, 1, NULL),
 (1644, 2, 36),

@@ -736,6 +736,18 @@ ul.qlinks-form {
 	padding: 0;
 }
 
+/* basic list - no bullets nor indentation */
+ul.uflist {
+	list-style-type: none;
+	margin: 0;
+	padding: 0;
+}
+ul.uflist li {
+	list-type: none;
+	margin: 0;
+	padding: 5px 0 5px 0;
+}
+
 a.noclick {
 	color: #757575;
 }

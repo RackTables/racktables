@@ -391,7 +391,7 @@ function renderRackspace ()
 					{
 						if ($rackListIdx > 0 and $maxPerRow > 0 and $rackListIdx % $maxPerRow == 0)
 						{
-							echo '</tr></table></tr>';
+							echo '</tr></table></th></tr>';
 							echo "<tr class=row_${order}><th class=tdleft></th><th class=tdleft>${row_name} (continued)";
 							echo "</th><th class=tdleft><table border=0 cellspacing=5><tr>";
 						}
@@ -404,12 +404,12 @@ function renderRackspace ()
 						$rackListIdx++;
 					}
 				$order = $nextorder[$order];
-				echo "</tr></table></tr>\n";
+				echo "</tr></table></th></tr>\n";
 			}
+			echo "</table>\n";
 		}
 		else
 			echo "<h2>No rows found</h2>\n";
-		echo "</table>\n";
 	}
 	echo '</td><td class=pcright width="25%">';
 	renderCellFilterPortlet ($cellfilter, 'rack', $found_racks);
@@ -712,6 +712,40 @@ function renderRack ($rack_id, $hl_obj_id = 0)
 	echo "</center>\n";
 }
 
+function renderRackSortForm ($row_id)
+{
+	addJS ('js/jquery-ui-1.8.21.min.js');
+	addJS
+	(
+<<<END
+  $(document).ready(
+    function () {
+      $("#sortRacks").sortable({
+        update : function () {
+          serial = $('#sortRacks').sortable('serialize');
+          $.ajax({
+            url: 'index.php?module=ajax&ac=upd-rack-sort-order',
+            type: 'post',
+            data: serial,
+          });
+        }
+      });
+    }
+  );
+END
+		, TRUE
+	);
+
+	startPortlet ('Racks');
+	echo "<table border=0 cellspacing=0 cellpadding=5 align=center class=widetable>\n";
+	echo "<tr><th>Drag to change order</th></tr>\n";
+	echo "<tr><td><ul class='uflist' id='sortRacks'>\n";
+	foreach (getRacks($row_id) as $rack_id => $rackInfo)
+		echo "<li id=racks_${rack_id}>${rackInfo['name']}</li>\n";
+	echo "</ul></td></tr></table>\n";
+	finishPortlet();
+}
+
 function renderNewRackForm ($row_id)
 {
 	$default_height = getConfigVar ('DEFAULT_RACK_HEIGHT');
@@ -903,13 +937,14 @@ function renderEditRackForm ($rack_id)
 	// optional attributes
 	$values = getAttrValues ($rack_id);
 	$num_attrs = count($values);
-	$num_attrs = $num_attrs-1; // subtract for the 'height' attribute
+	$num_attrs = $num_attrs-2; // subtract for the 'height' and 'sort_order' attributes
 	echo "<input type=hidden name=num_attrs value=${num_attrs}>\n";
 	$i = 0;
 	foreach ($values as $record)
 	{
 		// Skip the 'height' attribute as it's already displayed as a required field
-		if ($record['id'] == 27)
+		// Also skip the 'sort_order' attribute
+		if ($record['id'] == 27 or $record['id'] == 29)
 			continue;
 		echo "<input type=hidden name=${i}_attr_id value=${record['id']}>";
 		echo '<tr><td>';
@@ -975,9 +1010,10 @@ function renderRackInfoPortlet ($rackData)
 		$summary['Asset tag'] = $rackData['asset_no'];
 	if ($rackData['has_problems'] == 'yes')
 		$summary[] = array ('<tr><td colspan=2 class=msg_error>Has problems</td></tr>');
-	// Display populated attributes, but skip Height since it's already displayed above
+	// Display populated attributes, but skip 'height' since it's already displayed above
+	// and skip 'sort_order' because it's modified using AJAX
 	foreach (getAttrValues ($rackData['id']) as $record)
-		if ($record['id'] != 27 && strlen ($record['value']))
+		if ($record['id'] != 27 && $record['id'] != 29 && strlen ($record['value']))
 			$summary['{sticker}' . $record['name']] = formatAttributeValue ($record);
 	$summary['% used'] = getProgressBar (getRSUforRack ($rackData));
 	$summary['Objects'] = count ($rackData['mountedObjects']);
