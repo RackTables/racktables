@@ -23,14 +23,17 @@ read-only.
 $page = array();
 $tab = array();
 $trigger = array();
+
 $ophandler = array();
 $tabhandler = array();
+$hook = array();
 $ophandlers_stack = array();
 $tabhandlers_stack = array();
+$hooks_stack = array();
+
 $delayauth = array();
 $svghandler = array();
 $ajaxhandler = array();
-$hook = array();
 
 $indexlayout = array
 (

@@ -5132,15 +5132,17 @@ function getOutputOf ($func_name)
 }
 
 // calls function which can be overriden in $hook array. Takes any number of additional parameters
-function callHook ($func_name)
+function callHook ($hook_name)
 {
 	global $hook;
-	if (isset ($hook[$func_name]))
-		$func_name = $hook[$func_name];
+	$callback = $hook_name;
+	if (isset ($hook[$hook_name]))
+		$callback = $hook[$hook_name];
 	$params = func_get_args();
-	array_shift($params);
-	if (is_callable ($func_name))
-		return call_user_func_array ($func_name, $params); 
+	if ($callback !== 'universalHookHandler')
+		array_shift ($params);
+	if (is_callable ($callback))
+		return call_user_func_array ($callback, $params);
 }
 
 // function to parse text table header, aligned by left side
@@ -5503,6 +5505,65 @@ function universalTabHandler($bypass = NULL)
 	}
 	echo $tabhandler_output;
 	return $ret;
+}
+
+// $method could be 'before', 'after', 'chain'
+function registerHook ($hook_name, $callback, $method = 'after')
+{
+	global $hooks_stack, $hook;
+
+	if (! isset ($hooks_stack[$hook_name]))
+		$hooks_stack[$hook_name] = array();
+
+	if (isset ($hook[$hook_name]) && $hook[$hook_name] != 'universalHookHandler')
+		array_push ($hooks_stack[$hook_name], $hook[$hook_name]);
+	$hook[$hook_name] = 'universalHookHandler';
+
+	if ($method == 'before')
+		array_unshift ($hooks_stack[$hook_name], $callback);
+	elseif ($method == 'after')
+		array_push ($hooks_stack[$hook_name], $callback);
+	elseif ($method == 'chain')
+		array_push ($hooks_stack[$hook_name], '!' . $callback);
+	else
+		throw new RacktablesError ("unknown hook injection method '$method'");
+}
+
+// hook handlers dispatcher. registerHook leaves 'universalHookHandler' in $hook
+function universalHookHandler()
+{
+	global $hook_propagation_stop;
+	$hook_propagation_stop = FALSE;
+	global $hooks_stack;
+
+	$ret = NULL;
+	$bk_params = func_get_args();
+	$hook_name = array_shift ($bk_params);
+	if (! array_key_exists ($hook_name, $hooks_stack) || ! is_array ($hooks_stack[$hook_name]))
+		throw new InvalidRequestArgException ('$hooks_stack["' . $hook_name . '"]', $hooks_stack[$hook_name]);
+
+	foreach ($hooks_stack[$hook_name] as $callback)
+	{
+		$params = $bk_params;
+		if ('!' === substr ($callback, 0, 1))
+		{
+			$callback = substr ($callback, 1);
+			array_unshift ($params, $ret);
+		}
+		if (is_callable ($callback))
+			$ret = call_user_func_array ($callback, $params);
+		if ($hook_propagation_stop)
+			break;
+	}
+	return $ret;
+}
+
+// call this from custom hook registered by registerHook
+// to prevent the rest of the hooks to run
+function stopHookPropagation()
+{
+	global $hook_propagation_stop;
+	$hook_propagation_stop = TRUE;
 }
 
 function arePortTypesCompatible ($oif1, $oif2)
