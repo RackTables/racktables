@@ -2179,7 +2179,7 @@ function ip6_checkparse ($ip)
 
 function ip4_int2bin ($ip_int)
 {
-	return pack ('N', $ip_int);
+	return pack ('N', $ip_int + 0);
 }
 
 function ip4_bin2int ($ip_bin)
