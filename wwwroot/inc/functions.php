@@ -5524,9 +5524,15 @@ function registerHook ($hook_name, $callback, $method = 'after')
 	elseif ($method == 'after')
 		array_push ($hooks_stack[$hook_name], $callback);
 	elseif ($method == 'chain')
+	{
+		// if we are trying to chain on the built-in function, push it to the stack
+		if (empty ($hooks_stack[$hook_name]))
+			array_push ($hooks_stack[$hook_name], $hook_name);
+
 		array_push ($hooks_stack[$hook_name], '!' . $callback);
+	}
 	else
-		throw new RacktablesError ("unknown hook injection method '$method'");
+		throw new InvalidRequestArgException ('method', $method, "Invalid hook method");
 }
 
 // hook handlers dispatcher. registerHook leaves 'universalHookHandler' in $hook
@@ -5535,7 +5541,6 @@ function universalHookHandler()
 	global $hook_propagation_stop;
 	$hook_propagation_stop = FALSE;
 	global $hooks_stack;
-
 	$ret = NULL;
 	$bk_params = func_get_args();
 	$hook_name = array_shift ($bk_params);
@@ -5552,6 +5557,8 @@ function universalHookHandler()
 		}
 		if (is_callable ($callback))
 			$ret = call_user_func_array ($callback, $params);
+		else
+			throw new RackTablesError ("Call of non-existant callback '$callback'", RackTablesError::INTERNAL);
 		if ($hook_propagation_stop)
 			break;
 	}

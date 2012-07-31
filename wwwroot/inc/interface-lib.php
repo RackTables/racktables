@@ -812,6 +812,12 @@ function printTagTRs ($cell, $baseurl = '')
 	}
 }
 
+// stub function to override it by chain-connected hooks
+function modifyEntitySummary ($cell, $summary)
+{
+	return $summary;
+}
+
 // renders 'summary' portlet, which persist on default tab of every realm page.
 // $values is a tricky array.
 // if its value is a string, it is treated as right td inner html, and the key is treated as left th text, colon appends there automatically.
@@ -822,8 +828,7 @@ function renderEntitySummary ($cell, $title, $values = array())
 {
 	global $page_by_realm;
 	// allow plugins to override summary table
-	if ($new_values = callHook ('modifyEntitySummary', $cell, $values))
-		$values = $new_values;
+	$values = callHook ('modifyEntitySummary', $cell, $values);
 
 	startPortlet ($title);
 	echo "<table border=0 cellspacing=0 cellpadding=3 width='100%'>\n";
