@@ -151,4 +151,6 @@ $impl_tags = array();
 // Initial chain for the current target.
 $target_given_tags = array();
 
+callHook ('initFinished');
+
 ?>
