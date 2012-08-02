@@ -5282,6 +5282,7 @@ function fillIPNetsCorrelation (&$nets)
 		$stack[] = &$net;
 	}
 	// final stack spin
+	$last = NULL;
 	while (count ($stack))
 	{
 		$top = &$stack[count ($stack) - 1];
