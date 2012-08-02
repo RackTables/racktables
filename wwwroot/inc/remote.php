@@ -248,6 +248,8 @@ function callScript ($gwname, $params, $in, &$out, &$errors)
 	$write_fd = $write_left;
 	$read_fd = $read_left;
 	$except_fd = array();
+	$out = '';
+	$errors = '';
 	while ((! empty ($read_fd) || ! empty ($write_fd)) && stream_select ($read_fd, $write_fd, $except_fd, NULL))
 	{
 		foreach ($write_fd as $fd)
