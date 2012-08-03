@@ -49,10 +49,11 @@
 			if (freezeHint)
 				freezeHint.hide();
 			$('body').bind('click', function(event) {
-				if (event.target == popup[0] || $(event.target).parents().filter(popup).length)
-					return false;
-				popup.data("sticked", false);
-				hidePopup (event);
+				if (! (event.target == popup[0] || $(event.target).parents().filter(popup).length))
+				{
+					popup.data("sticked", false);
+					hidePopup (event);
+				}
 				return true;
 			});
 			return false;
