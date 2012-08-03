@@ -267,6 +267,9 @@ $image['COPY']['height'] = 32;
 $image['html']['path'] = 'pix/tango-text-html.png';
 $image['html']['width'] = 16;
 $image['html']['height'] = 16;
+$image['pencil']['path'] = 'pix/pencil-icon.png';
+$image['pencil']['width'] = 12;
+$image['pencil']['height'] = 12;
 
 $page_by_realm = array();
 $page_by_realm['object'] = 'depot';
