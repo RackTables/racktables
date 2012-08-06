@@ -714,7 +714,7 @@ function renderRack ($rack_id, $hl_obj_id = 0)
 
 function renderRackSortForm ($row_id)
 {
-	addJS ('js/jquery-ui-1.8.21.min.js');
+	includeJQueryUI (FALSE);
 	addJS
 	(
 <<<END
@@ -6175,7 +6175,7 @@ function showPathAndSearch ($pageno)
 				'params' => array()
 			);
 		else
-			$title = dynamic_title_decoder ($no);
+			$title = callHook ('dynamic_title_decoder', $no);
 		$item = "<a href='index.php?";
 		if (! isset ($title['params']['page']))
 			$title['params']['page'] = $no;
@@ -6212,7 +6212,7 @@ function getTitle ($pageno)
 	global $page;
 	if (isset ($page[$pageno]['title']))
 		return $page[$pageno]['title'];
-	$tmp = dynamic_title_decoder ($pageno);
+	$tmp = callHook ('dynamic_title_decoder', $pageno);
 	return $tmp['name'];
 }
 

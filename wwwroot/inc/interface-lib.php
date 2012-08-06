@@ -790,7 +790,7 @@ function finishPortlet ()
 function getPageName ($page_code)
 {
 	global $page;
-	$title = isset ($page[$page_code]['title']) ? $page[$page_code]['title'] : dynamic_title_decoder ($page_code);
+	$title = isset ($page[$page_code]['title']) ? $page[$page_code]['title'] : callHook ('dynamic_title_decoder' ,$page_code);
 	if (is_array ($title))
 		$title = $title['name'];
 	return $title;
@@ -934,6 +934,13 @@ function renderNetVLAN ($cell)
 		echo implode (', ', $links);
 		echo '</strong></div>';
 	}
+}
+
+function includeJQueryUI ($do_css = TRUE)
+{
+	addJS ('js/jquery-ui-1.8.21.min.js');
+	if ($do_css)
+		addCSS ('css/jquery-ui-1.8.22.redmond.css');
 }
 
 ?>
