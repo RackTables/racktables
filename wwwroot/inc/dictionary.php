@@ -1804,6 +1804,16 @@ $dictionary = array
 	1719 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 2924M-XL'),
 	1720 => array ('chapter_id' => 12, 'dict_value' => 'Allied Telesyn%GPASS%AT9924T'),
 	1721 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 3560E-12SD'),
+	1722 => array ('chapter_id' => 12, 'dict_value' => 'Arista%GPASS%7148S'),
+	1723 => array ('chapter_id' => 12, 'dict_value' => 'Arista%GPASS%7124SX'),
+	1724 => array ('chapter_id' => 12, 'dict_value' => 'Arista%GPASS%7148SX'),
+	1725 => array ('chapter_id' => 12, 'dict_value' => 'Arista%GPASS%7124FX'),
+	1726 => array ('chapter_id' => 12, 'dict_value' => 'Arista%GPASS%7048T-A'),
+	1727 => array ('chapter_id' => 12, 'dict_value' => 'Arista%GPASS%7050T-64'),
+	1728 => array ('chapter_id' => 12, 'dict_value' => 'Arista%GPASS%7050T-52'),
+	1729 => array ('chapter_id' => 12, 'dict_value' => 'Arista%GPASS%7050Q-16'),
+	1730 => array ('chapter_id' => 12, 'dict_value' => 'Arista%GPASS%7050S-64'),
+	1731 => array ('chapter_id' => 12, 'dict_value' => 'Arista%GPASS%7050S-52'),
 
 # Any new "default" dictionary records must go above this line (i.e., with
 # dict_key code less, than 50000). This is necessary to keep AUTO_INCREMENT
