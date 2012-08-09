@@ -1358,6 +1358,7 @@ function resetUIConfig()
 	setConfigVar ('VIRTUAL_OBJ_LISTSRC', '1504,1505,1506,1507');
 	setConfigVar ('DATETIME_ZONE', 'UTC');
 	setConfigVar ('DATETIME_FORMAT', 'm/d/Y');
+	setConfigVar ('SEARCH_DOMAINS', '');
 	return showFuncMessage (__FUNCTION__, 'OK');
 }
 

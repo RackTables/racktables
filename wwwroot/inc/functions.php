@@ -4640,28 +4640,48 @@ function searchEntitiesByText ($terms)
 		if (NULL !== ($net_id = getIPv6AddressNetworkId ($ip_bin, $matches[2] + 1)))
 			$summary['ipv6network'][$net_id] = spotEntity('ipv6net', $net_id);
 	}
-	elseif ($found_id = searchByMgmtHostname ($terms))
-	{
-		$summary['object'][$found_id] = array
-		(
-			'id' => $found_id,
-			'method' => 'fqdn',
-		);
-	}
 	else
 	// Search for objects, addresses, networks, virtual services and RS pools by their description.
 	{
-		$summary['object'] = getObjectSearchResults ($terms);
-		$summary['ipv4addressbydescr'] = getIPv4AddressSearchResult ($terms);
-		$summary['ipv6addressbydescr'] = getIPv6AddressSearchResult ($terms);
-		$summary['ipv4network'] = getIPv4PrefixSearchResult ($terms);
-		$summary['ipv6network'] = getIPv6PrefixSearchResult ($terms);
-		$summary['ipv4rspool'] = getIPv4RSPoolSearchResult ($terms);
-		$summary['ipv4vs'] = getIPv4VServiceSearchResult ($terms);
-		$summary['user'] = getAccountSearchResult ($terms);
-		$summary['file'] = getFileSearchResult ($terms);
-		$summary['rack'] = getRackSearchResult ($terms);
-		$summary['vlan'] = getVLANSearchResult ($terms);
+		// search by FQDN has special treatment - if single object found, do not search by other fields
+		$object_id_by_fqdn = NULL;
+		$domains = preg_split ('/\s*,\s*/', strtolower (getConfigVar ('SEARCH_DOMAINS')));
+		if (! empty ($domains) and $object_id = searchByMgmtHostname ($terms))
+		{
+			// get FQDN
+			$attrs = getAttrValues ($object_id);
+			$fqdn = '';
+			if (isset ($attrs[3]['value']))
+				$fqdn = strtolower (trim ($attrs[3]['value']));
+			foreach ($domains as $domain)
+				if ('.' . $domain === substr ($fqdn, -strlen ($domain) - 1))
+				{
+					$object_id_by_fqdn = $object_id;
+					break;
+				}
+		}
+		if ($object_id_by_fqdn)
+		{
+			$summary['object'][$object_id_by_fqdn] = array
+			(
+				'id' => $object_id_by_fqdn,
+				'method' => 'fqdn',
+			);
+		}
+		else
+		{
+			$summary['object'] = getObjectSearchResults ($terms);
+			$summary['ipv4addressbydescr'] = getIPv4AddressSearchResult ($terms);
+			$summary['ipv6addressbydescr'] = getIPv6AddressSearchResult ($terms);
+			$summary['ipv4network'] = getIPv4PrefixSearchResult ($terms);
+			$summary['ipv6network'] = getIPv6PrefixSearchResult ($terms);
+			$summary['ipv4rspool'] = getIPv4RSPoolSearchResult ($terms);
+			$summary['ipv4vs'] = getIPv4VServiceSearchResult ($terms);
+			$summary['user'] = getAccountSearchResult ($terms);
+			$summary['file'] = getFileSearchResult ($terms);
+			$summary['rack'] = getRackSearchResult ($terms);
+			$summary['vlan'] = getVLANSearchResult ($terms);
+		}
 	}
 	# Filter search results in a way in some realms to omit records, which the
 	# user would not be able to browse anyway.
