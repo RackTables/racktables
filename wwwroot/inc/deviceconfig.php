@@ -108,7 +108,6 @@ function vrp5xReadLLDPStatus ($input)
 	(
 		'interfaceName',
 		'interfaceAlias',
-		'local',
 	);
 	foreach (explode ("\n", $input) as $line)
 	{
@@ -124,20 +123,29 @@ function vrp5xReadLLDPStatus ($input)
 		case preg_match ('/^Port ?ID\s*:\s*(.+)$/i', $line, $matches):
 			$ret['current']['PortId'] = $matches[1];
 			break;
+		case preg_match ('/^Port description\s*:\s*(.*)$/i', $line, $matches):
+			$ret['current']['PortDescription'] = $matches[1];
+			break;
 		case preg_match ('/^Sys(?:tem)? ?name\s*:\s*(.+)$/i', $line, $matches):
 			if
 			(
 				array_key_exists ('current', $ret) and
 				array_key_exists ('PortIdSubtype', $ret['current']) and
-				in_array ($ret['current']['PortIdSubtype'], $valid_subtypes) and
-				array_key_exists ('PortId', $ret['current']) and
 				array_key_exists ('local_port', $ret['current'])
 			)
-				$ret[$ret['current']['local_port']][] = array
-				(
-					'device' => $matches[1],
-					'port' => ios12ShortenIfName ($ret['current']['PortId']),
-				);
+			{
+				$port = NULL;
+				if (array_key_exists ('PortId', $ret['current']) && in_array ($ret['current']['PortIdSubtype'], $valid_subtypes))
+					$port = $ret['current']['PortId'];
+				elseif (array_key_exists ('PortDescription', $ret['current']) && 'local' == $ret['current']['PortIdSubtype'])
+					$port = $ret['current']['PortDescription'];
+				if (isset ($port))
+					$ret[$ret['current']['local_port']][] = array
+					(
+						'device' => $matches[1],
+						'port' => ios12ShortenIfName ($port),
+					);
+			}
 			unset ($ret['current']);
 			break;
 		default:
@@ -152,20 +160,32 @@ function nxos4ReadLLDPStatus ($input)
 	$ret = array();
 	$current = array();
 	$if_name = NULL;
+	$sys_descr = NULL;
+	$port_descr = NULL;
 	foreach (explode ("\n", $input) as $line)
 	{
 		$line = trim ($line);
 		if ($line == '')
 		{
 			if (isset ($if_name) and isset ($current['port']) and isset ($current['device']))
+			{
+				// Juniper MX routers sends SNMP if-id in PortID TLV. Use Port Description instead
+				if (isset ($port_descr) && preg_match ('/juniper/i', $sys_descr) && preg_match ('/^\d+$/', $current['port']))
+				{
+					$port_descr = preg_replace ('/[^\x20-z]/', '', $port_descr); // cut non-printable chars
+					$current['port'] = ios12ShortenIfName ($port_descr);
+				}
 				$ret[$if_name][] = $current;
+			}
 			$current = array();
 			$if_name = NULL;
+			$sys_descr = NULL;
+			$port_descr = NULL;
 		}
 		else
 		{
 			$pair = explode (': ', $line);
-			if (count ($pair) == 2 and isset ($pair[1]))
+			if (count ($pair) >= 2 and isset ($pair[1]))
 			{
 				list ($key, $value) = $pair;
 				$value = trim ($value, "\x06\x10\x13");
@@ -173,6 +193,12 @@ function nxos4ReadLLDPStatus ($input)
 				{
 					case 'Port id':
 						$current['port'] = ios12ShortenIfName ($value);
+						break;
+					case 'Port Description':
+						$port_descr = $value;
+						break;
+					case 'System Description':
+						$sys_descr = $value;
 						break;
 					case 'System Name':
 						$current['device'] = $value;
