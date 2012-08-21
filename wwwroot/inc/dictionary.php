@@ -877,7 +877,7 @@ $dictionary = array
 	788 => array ('chapter_id' => 12, 'dict_value' => '3Com%GPASS%8810'),
 	789 => array ('chapter_id' => 12, 'dict_value' => '3Com%GPASS%8814'),
 	790 => array ('chapter_id' => 13, 'dict_value' => 'RH Fedora%GSKIP%Fedora 9'),
-	791 => array ('chapter_id' => 13, 'dict_value' => 'OpenSUSE%GSKIP%openSUSE 11.0'),
+	791 => array ('chapter_id' => 13, 'dict_value' => 'OpenSUSE%GSKIP%openSUSE 11.x'),
 	792 => array ('chapter_id' => 11, 'dict_value' => 'SGI%GPASS%Altix XE250'),
 	793 => array ('chapter_id' => 11, 'dict_value' => 'SGI%GPASS%Altix XE310'),
 	794 => array ('chapter_id' => 11, 'dict_value' => 'SGI%GPASS%Altix XE320'),
@@ -1814,6 +1814,9 @@ $dictionary = array
 	1729 => array ('chapter_id' => 12, 'dict_value' => 'Arista%GPASS%7050Q-16'),
 	1730 => array ('chapter_id' => 12, 'dict_value' => 'Arista%GPASS%7050S-64'),
 	1731 => array ('chapter_id' => 12, 'dict_value' => 'Arista%GPASS%7050S-52'),
+	1732 => array ('chapter_id' => 13, 'dict_value' => '[[RH Fedora%GSKIP%Fedora 17 | http://docs.fedoraproject.org/en-US/Fedora/17/html/Release_Notes/]]'),
+	1733 => array ('chapter_id' => 13, 'dict_value' => 'OpenSUSE%GSKIP%openSUSE 12.x'),
+	1734 => array ('chapter_id' => 13, 'dict_value' => 'FreeBSD%GSKIP%FreeBSD 9.x'),
 
 # Any new "default" dictionary records must go above this line (i.e., with
 # dict_key code less, than 50000). This is necessary to keep AUTO_INCREMENT
