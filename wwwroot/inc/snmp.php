@@ -853,6 +853,15 @@ $iftable_processors['quidway-slot1-SFP'] = array
 	'try_next_proc' => FALSE,
 );
 
+$iftable_processors['quidway-any-100TX'] = array
+(
+	'pattern' => '@^Ethernet([[:digit:]]+/[[:digit:]]+/)([[:digit:]]+)$@',
+	'replacement' => 'e\\1\\2',
+	'dict_key' => '1-19',
+	'label' => '\\2',
+	'try_next_proc' => FALSE,
+);
+
 $iftable_processors['quidway-any-1000SFP'] = array
 (
 	'pattern' => '@^GigabitEthernet([[:digit:]]+/[[:digit:]]+/)([[:digit:]]+)$@',
@@ -1848,6 +1857,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'dict_key' => 905,
 		'text' => 'Juniper EX4200 series',
 		'processors' => array ('juniper-ex-pic0-1000T', 'juniper-ex-mgmt'),
+	),
+	'2011.2.23.94' => array
+	(
+		'dict_key' => 1619,
+		'text' => 'S2352P-EI: 48 RJ-45/10-100TX + 4 SFP-1000',
+		'processors' => array ('quidway-any-100TX', 'quidway-any-1000SFP'),
 	),
 	'2011.2.23.96' => array
 	(
