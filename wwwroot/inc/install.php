@@ -447,15 +447,15 @@ CREATE TABLE `AttributeMap` (
 ) ENGINE=InnoDB;
 
 CREATE TABLE `AttributeValue` (
-  `object_id` int(10) unsigned default NULL,
+  `object_id` int(10) unsigned NOT NULL,
   -- Default value intentionally breaks the constraint, this blocks
   -- any insertion, which doesn't have 'object_tid' on the column list.
   `object_tid` int(10) unsigned NOT NULL default '0',
-  `attr_id` int(10) unsigned default NULL,
+  `attr_id` int(10) unsigned NOT NULL,
   `string_value` char(255) default NULL,
   `uint_value` int(10) unsigned default NULL,
   `float_value` float default NULL,
-  UNIQUE KEY `object_id` (`object_id`,`attr_id`),
+  PRIMARY KEY (`object_id`,`attr_id`),
   KEY `attr_id-uint_value` (`attr_id`,`uint_value`),
   KEY `attr_id-string_value` (`attr_id`,`string_value`(12)),
   KEY `id-tid` (`object_id`,`object_tid`),

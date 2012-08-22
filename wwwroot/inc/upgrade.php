@@ -159,6 +159,7 @@ function getDBUpgradePath ($v1, $v2)
 		'0.19.11',
 		'0.19.12',
 		'0.19.13',
+		'0.19.14',
 		'0.20.0',
 	);
 	if (!in_array ($v1, $versionhistory) or !in_array ($v2, $versionhistory))
@@ -1273,6 +1274,12 @@ CREATE TABLE `CactiGraph` (
 			$query[] = "UPDATE `Config` SET `is_userdefined` = 'yes' WHERE `varname` IN ('ENABLE_MULTIPORT_FORM','FILTER_DEFAULT_ANDOR','FILTER_PREDICATE_SIEVE','FILTER_SUGGEST_ANDOR','FILTER_SUGGEST_EXTRA','FILTER_SUGGEST_PREDICATES','FILTER_SUGGEST_TAGS','IPV4_ENABLE_KNIGHT','IPV4_TREE_RTR_AS_CELL','TAGS_QUICKLIST_SIZE','TAGS_QUICKLIST_THRESHOLD','TAGS_TOPLIST_SIZE')";
 
 			$query[] = "UPDATE Config SET varvalue = '0.19.13' WHERE varname = 'DB_VERSION'";
+			break;
+		case '0.19.14':
+			$query[] = "ALTER TABLE AttributeValue CHANGE COLUMN `object_id` `object_id` INT(10) UNSIGNED NOT NULL";
+			$query[] = "ALTER TABLE AttributeValue CHANGE COLUMN `attr_id` `attr_id` INT(10) UNSIGNED NOT NULL";
+			$query[] = "ALTER TABLE AttributeValue ADD PRIMARY KEY (`object_id`, `attr_id`), DROP INDEX `object_id`";
+			$query[] = "UPDATE Config SET varvalue = '0.19.14' WHERE varname = 'DB_VERSION'";
 			break;
 		case '0.20.0':
 			$query[] = "
