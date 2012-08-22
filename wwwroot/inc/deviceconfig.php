@@ -657,7 +657,7 @@ function vrp53ScanTopLevel (&$work, $line)
 		foreach (vrp53ParseVLANString ($matches[1]) as $vlan_id)
 			$work['vlanlist'][] = $vlan_id;
 		return 'vrp53-get8021q-top';
-	case (preg_match ('@^interface ((GigabitEthernet|XGigabitEthernet|Eth-Trunk)([[:digit:]]+(/[[:digit:]]+)*))$@', $line, $matches)):
+	case (preg_match ('@^interface ((Ethernet|GigabitEthernet|XGigabitEthernet|Eth-Trunk)([[:digit:]]+(/[[:digit:]]+)*))$@', $line, $matches)):
 		$port_name = ios12ShortenIfName ($matches[1]);
 		$work['current'] = array ('port_name' => $port_name);
 		$work['portconfig'][$port_name][] = array ('type' => 'line-header', 'line' => $line);
@@ -779,7 +779,7 @@ function vrp55Read8021QConfig ($input)
 				foreach (vrp53ParseVLANString ($matches[1]) as $vlan_id)
 					$ret['vlanlist'][] = $vlan_id;
 				break;
-			case (preg_match ('@^interface ((GigabitEthernet|XGigabitEthernet|Eth-Trunk)([[:digit:]]+(/[[:digit:]]+)*))$@', $line, $matches)):
+			case (preg_match ('@^interface ((Ethernet|GigabitEthernet|XGigabitEthernet|Eth-Trunk)([[:digit:]]+(/[[:digit:]]+)*))$@', $line, $matches)):
 				$port_name = ios12ShortenIfName ($matches[1]);
 				$ret['current'] = array ('port_name' => $port_name);
 				$ret['portconfig'][$port_name][] = array ('type' => 'line-header', 'line' => $line);
