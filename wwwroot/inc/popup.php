@@ -354,7 +354,7 @@ function renderPopupPortSelector()
 	assertUIntArg ('port');
 	$port_id = $_REQUEST['port'];
 	$port_info = getPortInfo ($port_id);
-	$in_rack = $_REQUEST['in_rack'] != 'off';
+	$in_rack = isCheckSet ('in_rack');
 
 	// fill port filter structure
 	$filter = array
