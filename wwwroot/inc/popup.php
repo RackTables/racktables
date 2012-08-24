@@ -269,6 +269,7 @@ window.opener.location.reload(true);
 window.close();
 END
 		, TRUE);
+		backupLogMessages();
 	}
 	else
 	{

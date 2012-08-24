@@ -1791,7 +1791,8 @@ function buildRedirectURL ($nextpage = NULL, $nexttab = NULL, $moreArgs = array(
 	return $url;
 }
 
-function redirectUser ($url)
+// store the accumulated message list into he $SESSION array to display them later
+function backupLogMessages()
 {
 	global $log_messages;
 	if (! empty ($log_messages))
@@ -1799,6 +1800,11 @@ function redirectUser ($url)
 		@session_start();
 		$_SESSION['log'] = $log_messages;
 	}
+}
+
+function redirectUser ($url)
+{
+	backupLogMessages();
 	header ("Location: " . $url);
 	die;
 }
