@@ -5,3 +5,4 @@ gateways/switchvlans/cisco.secrets.php
 gateways/switchvlans/vlandecoder
 gateways/switchvlans/vlantable
 /.project
+tags
