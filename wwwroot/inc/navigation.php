@@ -206,7 +206,6 @@ $ophandler['object']['edit']['unlinkEntities'] = 'unlinkEntities';
 $ophandler['object']['rackspace']['updateObjectAllocation'] = 'updateObjectAllocation';
 $ophandler['object']['ports']['addPort'] = 'addPortForObject';
 $ophandler['object']['ports']['editPort'] = 'editPortForObject';
-$ophandler['object']['ports']['linkPort'] = 'linkPortForObject';
 $ophandler['object']['ports']['addMultiPorts'] = 'addMultiPorts';
 $ophandler['object']['ports']['addBulkPorts'] = 'addBulkPorts';
 $ophandler['object']['ports']['useup'] = 'useupPort';

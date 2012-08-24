@@ -549,28 +549,6 @@ function editPortForObject ()
 	return showFuncMessage (__FUNCTION__, 'OK', array ($_REQUEST['name']));
 }
 
-$msgcode['linkPortForObject']['OK'] = 8;
-function linkPortForObject ()
-{
-	assertUIntArg ('port_id');
-	assertUIntArg ('remote_port_id');
-	assertStringArg ('cable', TRUE);
-
-	// FIXME: ensure, that at least one of these ports belongs to the current object
-	linkPorts ($_REQUEST['port_id'], $_REQUEST['remote_port_id'], $_REQUEST['cable']);
-	$port_info = getPortInfo ($_REQUEST['port_id']);
-	return showFuncMessage
-	(
-		__FUNCTION__,
-		'OK',
-		array
-		(
-			formatPortLink ($port_info['id'], $port_info['name'], NULL, NULL),
-			formatLinkedPort ($port_info),
-		)
-	);
-}
-
 $msgcode['addMultiPorts']['OK'] = 10;
 function addMultiPorts ()
 {
