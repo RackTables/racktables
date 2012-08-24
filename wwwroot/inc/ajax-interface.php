@@ -229,7 +229,7 @@ function updateIPNameAJAX()
 	assertPermission ('ipaddress', 'properties', 'editAddress');
 	$reserved = (empty ($sic['text']) ? 'no' : $addr['reserved']); // unset reservation if user clears name
     $comment = (empty ($addr['comment']) ? '' : $addr['comment']);
-	updateAddress ($ip_bin, $sic['text'], $comment, $reserved);
+	updateAddress ($ip_bin, $sic['text'], $reserved, $comment);
 	echo 'OK';
 }
 
@@ -243,7 +243,7 @@ function updateIPCommentAJAX()
 	if (isset ($net))
 		fixContext ($net);
 	assertPermission ('ipaddress', 'properties', 'editAddress');
-	updateAddress ($ip_bin, $addr['name'], $sic['text'], $addr['reserved']);
+	updateAddress ($ip_bin, $addr['name'], $addr['reserved'], $sic['text']);
 	echo 'OK';
 }
 

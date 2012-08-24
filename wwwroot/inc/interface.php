@@ -2929,7 +2929,7 @@ function renderIPAddressProperties ($ip)
 		printImageHREF ('CLEAR gray');
 	else
 	{
-		printOpFormIntro ('editAddress', array ('name' => '', 'reserved' => ''));
+		printOpFormIntro ('editAddress', array ('name' => '', 'reserved' => '', 'comment' => ''));
 		printImageHREF ('CLEAR', 'Release', TRUE);
 		echo "</form>";
 	}
