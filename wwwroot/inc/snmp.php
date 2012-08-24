@@ -1053,6 +1053,24 @@ $iftable_processors['C3KX-NM-1000'] = array
 	'try_next_proc' => FALSE,
 );
 
+$iftable_processors['arista-any-1000T'] = array
+(
+	'pattern' => '@^Ethernet([[:digit:]]+)$@',
+	'replacement' => 'e\\1',
+	'dict_key' => '1-24',
+	'label' => '\\1',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['arista-49-to-52-SFP+'] = array
+(
+	'pattern' => '@^Ethernet(49|50|51|52)$@',
+	'replacement' => 'e\\1',
+	'dict_key' => '9-1084',
+	'label' => '\\1',
+	'try_next_proc' => FALSE,
+);
+
 $iftable_processors['arista-any-SFP+'] = array
 (
 	'pattern' => '@^Ethernet([[:digit:]]+)$@',
@@ -1065,9 +1083,9 @@ $iftable_processors['arista-any-SFP+'] = array
 $iftable_processors['arista-management'] = array
 (
 	'pattern' => '@^Management(1|2)$@',
-	'replacement' => 'Ma\\1',
+	'replacement' => 'ma\\1',
 	'dict_key' => '1-24',
-	'label' => '\\0',
+	'label' => '<--->',
 	'try_next_proc' => FALSE,
 );
 
@@ -1973,6 +1991,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'FG310B: 10 RJ-45/10-1000T',
 		'processors' => array('generic-port-any-1000T'),
 	),
+	'30065.1.3011.7048.427.3648' => array
+	(
+		'dict_key' => 1726,
+		'text' => 'DCS-7048T-A: 48 1000T + 4 SFP+/10000',
+		'processors' => array ('arista-49-to-52-SFP+', 'arista-any-1000T', 'arista-management'),
+	),
 	'30065.1.3011.7124.3282' => array
 	(
 		'dict_key' => 1610,
@@ -2083,6 +2107,7 @@ $swtype_pcre = array
 	'/^Brocade Communications Systems.+, IronWare Version 07\./' => 1364,
 	'/^Juniper Networks,.+JUNOS 9\./' => 1366,
 	'/^Juniper Networks,.+JUNOS 10\./' => 1367,
+	'/^Arista Networks EOS version 4\./' => 1675,
 );
 
 function updateStickerForCell ($cell, $attr_id, $new_value)
@@ -2440,6 +2465,13 @@ function doSwitchSNMPmining ($objectInfo, $device)
 		// one AC port, no console
 		checkPIC ('1-16');
 		commitAddPort ($objectInfo['id'], 'AC-in', '1-16', '', '');
+		break;
+	case preg_match ('/^30065\.1\.3011\./', $sysObjectID): // Arista
+		detectSoftwareType ($objectInfo, $sysDescr);
+		checkPIC ('1-29');
+		commitAddPort ($objectInfo['id'], 'console', '1-29', 'IOIOI', '');
+		$sw_version = preg_replace ('/^Arista Networks EOS version (.+) running on .*$/', '\\1', $sysDescr);
+		updateStickerForCell ($objectInfo, 5, $sw_version);
 		break;
 	default: // Nortel...
 		break;
