@@ -735,12 +735,14 @@ CREATE TABLE `LDAPCache` (
 ) ENGINE=InnoDB;
 
 CREATE TABLE `Link` (
+  `id` int(10) unsigned NOT NULL auto_increment,
   `porta` int(10) unsigned NOT NULL default '0',
   `portb` int(10) unsigned NOT NULL default '0',
   `cable` char(64) DEFAULT NULL,
-  PRIMARY KEY  (`porta`,`portb`),
-  UNIQUE KEY `porta` (`porta`),
-  UNIQUE KEY `portb` (`portb`),
+  PRIMARY KEY  (`id`),
+  UNIQUE KEY `porta-portb-unique` (`porta`,`portb`),
+  KEY `porta` (`porta`),
+  KEY `portb` (`portb`),
   CONSTRAINT `Link-FK-a` FOREIGN KEY (`porta`) REFERENCES `Port` (`id`) ON DELETE CASCADE,
   CONSTRAINT `Link-FK-b` FOREIGN KEY (`portb`) REFERENCES `Port` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB;
@@ -1060,6 +1062,66 @@ CREATE TABLE `VLANValidID` (
   `vlan_id` int(10) unsigned NOT NULL default '1',
   PRIMARY KEY  (`vlan_id`)
 ) ENGINE=InnoDB;
+
+DELIMITER ;;
+CREATE TRIGGER `checkLinkBeforeInsert` BEFORE INSERT ON `Link`
+  FOR EACH ROW
+BEGIN
+  DECLARE tmp, porta_type, portb_type, count INTEGER;
+  IF NEW.porta = NEW.portb THEN
+    SET NEW.porta = NULL;
+  ELSEIF NEW.porta > NEW.portb THEN
+    SET tmp = NEW.porta;
+    SET NEW.porta = NEW.portb;
+    SET NEW.portb = tmp;
+  END IF; 
+  SELECT type INTO porta_type FROM Port WHERE id = NEW.porta;
+  SELECT type INTO portb_type FROM Port WHERE id = NEW.portb;
+  SELECT COUNT(*) INTO count FROM PortCompat WHERE (type1 = porta_type AND type2 = portb_type) OR (type1 = portb_type AND type2 = porta_type);
+  IF count = 0 THEN
+    SET NEW.porta = NULL;
+  END IF;
+END;;
+
+CREATE TRIGGER `checkLinkBeforeUpdate` BEFORE UPDATE ON `Link`
+  FOR EACH ROW
+BEGIN
+  DECLARE tmp, porta_type, portb_type, count INTEGER;
+  IF NEW.porta = NEW.portb THEN
+    SET NEW.porta = NULL;
+  ELSEIF NEW.porta > NEW.portb THEN
+    SET tmp = NEW.porta;
+    SET NEW.porta = NEW.portb;
+    SET NEW.portb = tmp;
+  END IF; 
+  SELECT type INTO porta_type FROM Port WHERE id = NEW.porta;
+  SELECT type INTO portb_type FROM Port WHERE id = NEW.portb;
+  SELECT COUNT(*) INTO count FROM PortCompat WHERE (type1 = porta_type AND type2 = portb_type) OR (type1 = portb_type AND type2 = porta_type);
+  IF count = 0 THEN
+    SET NEW.porta = NULL;
+  END IF;
+END;;
+
+CREATE TRIGGER `checkPortCompatBeforeDelete` BEFORE DELETE ON `PortCompat`
+  FOR EACH ROW
+BEGIN
+  DECLARE count INTEGER;
+  SELECT COUNT(*) INTO count FROM Link LEFT JOIN Port AS PortA ON Link.porta = PortA.id LEFT JOIN Port AS PortB ON Link.portb = PortB.id WHERE (PortA.type = OLD.type1 AND PortB.type = OLD.type2) OR (PortA.type = OLD.type2 AND PortB.type = OLD.type1);
+  IF count > 0 THEN
+    UPDATE `Cannot delete: rule still used` SET x = 1;
+  END IF;
+END;;
+
+CREATE TRIGGER `checkPortCompatBeforeUpdate` BEFORE UPDATE ON `PortCompat`
+  FOR EACH ROW
+BEGIN
+  DECLARE count INTEGER;
+  SELECT COUNT(*) INTO count FROM Link LEFT JOIN Port AS PortA ON Link.porta = PortA.id LEFT JOIN Port AS PortB ON Link.portb = PortB.id WHERE (PortA.type = OLD.type1 AND PortB.type = OLD.type2) OR (PortA.type = OLD.type2 AND PortB.type = OLD.type1);
+  IF count > 0 THEN
+    UPDATE `Cannot update: rule still used` SET x = 1;
+  END IF;
+END;;
+DELIMITER ;
 
 CREATE VIEW `Location` AS SELECT O.id, O.name, O.has_problems, O.comment, P.id AS parent_id, P.name AS parent_name
 FROM `Object` O

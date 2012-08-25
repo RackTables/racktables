@@ -252,13 +252,16 @@ function updateCableIdAJAX()
 	global $sic;
 	assertUIntArg ('id');
 	assertStringArg ('text', TRUE);
-	$port_info = getPortInfo ($sic['id']);
-	fixContext (spotEntity ('object', $port_info['object_id']));
+	$link_info = getPortLinkInfo ($sic['id']);
+	// verify permissions for both sides of the link
+	$porta_info = getPortInfo ($link_info['porta']);
+	$portb_info = getPortInfo ($link_info['portb']);
+	fixContext (spotEntity ('object', $porta_info['object_id']));
+	fixContext (spotEntity ('object', $portb_info['object_id']));
 	assertPermission ('object', 'ports', 'editPort');
-	if (! $port_info['linked'])
+	if (! $link_info['porta'])
 		throw new RackTablesError ('Cant update cable ID: port is not linked');
-	if ($port_info['reservation_comment'] !== $sic['text'])
-		commitUpdatePortLink ($sic['id'], $sic['text']);
+	commitUpdatePortLink ($sic['id'], $sic['text']);
 	echo 'OK';
 }
 
