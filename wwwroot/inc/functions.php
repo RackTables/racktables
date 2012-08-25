@@ -420,6 +420,18 @@ function genericAssertion ($argname, $argtype)
 	}
 }
 
+// return HTML form checkbox value (TRUE of FALSE) by name of its input control
+function isCheckSet ($input_name, $mode = 'bool')
+{
+	$value = isset ($_REQUEST[$input_name]) && $_REQUEST[$input_name] == 'on';
+	switch ($mode)
+	{
+		case 'bool' : return $value;
+		case 'yesno': return $value ? 'yes' : 'no';
+		default: throw new InvalidArgException ('mode', $mode);
+	}
+}
+
 // Validate and return "bypass" value for the current context, if one is
 // defined for it, or NULL otherwise.
 function getBypassValue()
