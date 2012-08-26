@@ -2911,16 +2911,16 @@ function getOpspec()
 }
 
 # validate user input and produce SQL columns per the opspec descriptor
-function buildOpspecColumns ($opspec, $listnames)
+function buildOpspecColumns ($opspec, $listname)
 {
 	global $sic;
 	$columns = array();
-	foreach ($listnames as $listname)
-	{
-		if (! array_key_exists ($listname, $opspec))
-			throw new InvalidArgException ('opspec', '(malformed structure)', "missing '${listname}'");
-		foreach ($opspec[$listname] as $argspec)
+	if (! array_key_exists ($listname, $opspec))
+		throw new InvalidArgException ('opspec', '(malformed structure)', "missing '${listname}'");
+	foreach ($opspec[$listname] as $argspec)
+		switch (TRUE)
 		{
+		case array_key_exists ('url_argname', $argspec): # HTTP input
 			genericAssertion ($argspec['url_argname'], $argspec['assertion']);
 			// "table_colname" is normally used for an override, if it is not
 			// set, use the URL argument name
@@ -2943,9 +2943,16 @@ function buildOpspecColumns ($opspec, $listnames)
 				default:
 					throw new InvalidArgException ('opspec', '(malformed array structure)', '"if_empty" not recognized');
 				}
-			$columns[$listname][$table_colname] = $arg_value;
-		}
-	}
+			$columns[$table_colname] = $arg_value;
+			break;
+		case array_key_exists ('fix_argname', $argspec): # fixed column
+			if (! array_key_exists ('fix_argvalue', $argspec))
+				throw new InvalidArgException ('opspec', '(malformed structure)', 'missing "fix_argvalue"');
+			$columns[$argspec['fix_argname']] = $argspec['fix_argvalue'];
+			break;
+		default:
+			throw new InvalidArgException ('opspec', '(malformed structure)', 'unknown argument source');
+		} // switch (TRUE)
 	return $columns;
 }
 
@@ -2956,21 +2963,18 @@ function tableHandler()
 	switch ($opspec['action'])
 	{
 	case 'INSERT':
-		$columns = buildOpspecColumns ($opspec, array ('arglist'));
-		$retcode = TRUE === usePreparedInsertBlade ($opspec['table'], $columns['arglist']) ? 48 : 110;
+		$retcode = TRUE === usePreparedInsertBlade ($opspec['table'], buildOpspecColumns ($opspec, array ('arglist'))) ? 48 : 110;
 		break;
 	case 'DELETE':
 		$conjunction = array_key_exists ('conjunction', $opspec) ? $opspec['conjunction'] : 'AND';
-		$columns = buildOpspecColumns ($opspec, array ('arglist'));
-		$retcode = FALSE !== usePreparedDeleteBlade ($opspec['table'], $columns['arglist'], $conjunction) ? 49 : 111;
+		$retcode = FALSE !== usePreparedDeleteBlade ($opspec['table'], buildOpspecColumns ($opspec, array ('arglist')), $conjunction) ? 49 : 111;
 		break;
 	case 'UPDATE':
-		$columns = buildOpspecColumns ($opspec, array ('set_arglist', 'where_arglist'));
 		usePreparedUpdateBlade
 		(
 			$opspec['table'],
-			$columns['set_arglist'],
-			$columns['where_arglist'],
+			buildOpspecColumns ($opspec, 'set_arglist'),
+			buildOpspecColumns ($opspec, 'where_arglist'),
 			array_key_exists ('conjunction', $opspec) ? $opspec['conjunction'] : 'AND'
 		);
 		$retcode = 51;
