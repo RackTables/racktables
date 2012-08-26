@@ -84,6 +84,41 @@ $opspec_list['rackspace-edit-updateRow'] = array
 		array ('url_argname' => 'row_id', 'table_colname' => 'id', 'assertion' => 'uint')
 	),
 );
+$opspec_list['object-edit-linkEntities'] = array
+(
+	'table' => 'EntityLink',
+	'action' => 'INSERT',
+	'arglist' => array
+	(
+		array ('url_argname' => 'parent_entity_type', 'assertion' => 'string'), # FIXME enum
+		array ('url_argname' => 'parent_entity_id', 'assertion' => 'uint'),
+		array ('url_argname' => 'child_entity_type', 'assertion' => 'string'), # FIXME enum
+		array ('url_argname' => 'child_entity_id', 'assertion' => 'uint'),
+	),
+);
+$opspec_list['object-edit-unlinkEntities'] = array
+(
+	'table' => 'EntityLink',
+	'action' => 'DELETE',
+	'arglist' => array
+	(
+		array ('url_argname' => 'link_id', 'table_colname' => 'id', 'assertion' => 'uint'),
+	),
+);
+$opspec_list['object-ports-useup'] = array
+(
+	'table' => 'Port',
+	'action' => 'UPDATE',
+	'set_arglist' => array
+	(
+		array ('fix_argname' => 'reservation_comment', 'fix_argvalue' => NULL),
+	),
+	'where_arglist' => array
+	(
+		array ('url_argname' => 'port_id', 'table_colname' => 'id', 'assertion' => 'uint'),
+		array ('url_argname' => 'object_id', 'assertion' => 'uint'), # preserve context
+	),
+);
 $opspec_list['object-ports-delPort'] = array
 (
 	'table' => 'Port',
@@ -368,6 +403,21 @@ $opspec_list['chapter-edit-del'] = array
 		array ('url_argname' => 'dict_key', 'assertion' => 'uint'),
 	),
 );
+$opspec_list['chapter-edit-upd'] = array
+(
+	'table' => 'Dictionary',
+	'action' => 'UPDATE',
+	'set_arglist' => array
+	(
+		array ('url_argname' => 'dict_value', 'assertion' => 'string'),
+	),
+	'where_arglist' => array
+	(
+		# same as above for listing chapter_no
+		array ('url_argname' => 'chapter_no', 'table_colname' => 'chapter_id', 'assertion' => 'uint'),
+		array ('url_argname' => 'dict_key', 'assertion' => 'uint'),
+	),
+);
 $opspec_list['tagtree-edit-createTag'] = array
 (
 	'table' => 'TagTree',
@@ -401,6 +451,24 @@ $opspec_list['tagtree-edit-updateTag'] = array
 		array ('url_argname' => 'tag_id', 'table_colname' => 'id', 'assertion' => 'uint'),
 	),
 );
+$opspec_list['8021q-vstlist-add'] = array
+(
+	'table' => 'VLANSwitchTemplate',
+	'action' => 'INSERT',
+	'arglist' => array
+	(
+		array ('url_argname' => 'vst_descr', 'table_colname' => 'description', 'assertion' => 'string'),
+	),
+);
+$opspec_list['8021q-vstlist-del'] = array
+(
+	'table' => 'VLANSwitchTemplate',
+	'action' => 'DELETE',
+	'arglist' => array
+	(
+		array ('url_argname' => 'vst_id', 'table_colname' => 'id', 'assertion' => 'uint'),
+	),
+);
 $opspec_list['8021q-vstlist-upd'] = array
 (
 	'table' => 'VLANSwitchTemplate',
@@ -412,6 +480,15 @@ $opspec_list['8021q-vstlist-upd'] = array
 	'where_arglist' => array
 	(
 		array ('url_argname' => 'vst_id', 'table_colname' => 'id', 'assertion' => 'uint'),
+	),
+);
+$opspec_list['8021q-vdlist-del'] = array
+(
+	'table' => 'VLANDomain',
+	'action' => 'DELETE',
+	'arglist' => array
+	(
+		array ('url_argname' => 'vdom_id', 'table_colname' => 'id', 'assertion' => 'uint'),
 	),
 );
 $opspec_list['8021q-vdlist-upd'] = array
@@ -462,6 +539,30 @@ $opspec_list['vlandomain-vlanlist-upd'] = array
 	(
 		array ('url_argname' => 'vdom_id', 'table_colname' => 'domain_id', 'assertion' => 'uint'),
 		array ('url_argname' => 'vlan_id', 'assertion' => 'vlan'),
+	),
+);
+$opspec_list['dict-chapters-upd'] = array
+(
+	'table' => 'Chapter',
+	'action' => 'UPDATE',
+	'set_arglist' => array
+	(
+		array ('url_argname' => 'chapter_name', 'table_colname' => 'name', 'assertion' => 'string'),
+	),
+	'where_arglist' => array
+	(
+		array ('url_argname' => 'chapter_no', 'table_colname' => 'id', 'assertion' => 'uint'),
+		array ('fix_argname' => 'sticky', 'fix_argvalue' => 'no'), # protect system chapters
+	),
+);
+$opspec_list['dict-chapters-del'] = array
+(
+	'table' => 'Chapter',
+	'action' => 'DELETE',
+	'arglist' => array
+	(
+		array ('url_argname' => 'chapter_no', 'table_colname' => 'id', 'assertion' => 'uint'),
+		array ('fix_argname' => 'sticky', 'fix_argvalue' => 'no'), # protect system chapters
 	),
 );
 
@@ -1042,59 +1143,6 @@ function updateUser ()
 		return buildRedirectURL (__FUNCTION__, 'ERR2', array ($username));
 }
 
-$msgcode['updateDictionary']['OK'] = 51;
-function updateDictionary ()
-{
-	global $sic;
-	assertUIntArg ('dict_key');
-	assertStringArg ('dict_value');
-	// this request must be built with chapter_no
-	usePreparedUpdateBlade
-	(
-		'Dictionary',
-		array ('dict_value' => $sic['dict_value']),
-		array
-		(
-			'chapter_id' => getBypassValue(),
-			'dict_key' => $sic['dict_key'],
-		)
-	);
-	return buildRedirectURL (__FUNCTION__, 'OK');
-}
-
-$msgcode['updateChapter']['OK'] = 51;
-function updateChapter ()
-{
-	assertUIntArg ('chapter_no');
-	assertStringArg ('chapter_name');
-	global $sic;
-	usePreparedUpdateBlade
-	(
-		'Chapter',
-		array
-		(
-			'name' => $sic['chapter_name'],
-		),
-		array
-		(
-			'id' => $sic['chapter_no'],
-			'sticky' => 'no', // note this constant, it protects system chapters
-		)
-	);
-	return buildRedirectURL (__FUNCTION__, 'OK');
-}
-
-$msgcode['delChapter']['OK'] = 49;
-$msgcode['delChapter']['ERR'] = 111;
-function delChapter ()
-{
-	assertUIntArg ('chapter_no');
-	if (commitDeleteChapter ($_REQUEST['chapter_no']))
-		return buildRedirectURL (__FUNCTION__, 'OK');
-	else
-		return buildRedirectURL (__FUNCTION__, 'ERR');
-}
-
 $msgcode['supplementAttrMap']['OK'] = 48;
 $msgcode['supplementAttrMap']['ERR1'] = 154;
 $msgcode['supplementAttrMap']['ERR2'] = 110;
@@ -1396,14 +1444,6 @@ function resetObject ()
 	commitResetObject (getBypassValue());
 	foreach ($racklist as $rack_id)
 		usePreparedUpdateBlade ('Rack', array ('thumb_data' => NULL), array ('id' => $rack_id));
-	return buildRedirectURL (__FUNCTION__, 'OK');
-}
-
-$msgcode['useupPort']['OK'] = 49;
-function useupPort ()
-{
-	assertUIntArg ('port_id');
-	commitUpdatePortComment ($_REQUEST['port_id'], '');
 	return buildRedirectURL (__FUNCTION__, 'OK');
 }
 
@@ -2147,38 +2187,6 @@ function querySNMPData ()
 	return doSNMPmining (getBypassValue(), $snmpsetup);
 }
 
-$msgcode['linkEntities']['OK'] = 51;
-$msgcode['linkEntities']['ERR2'] = 109;
-function linkEntities ()
-{
-	assertStringArg ('parent_entity_type');
-	assertUIntArg ('parent_entity_id');
-	assertStringArg ('child_entity_type');
-	assertUIntArg ('child_entity_id');
-	$result = usePreparedInsertBlade
-	(
-		'EntityLink',
-		array
-		(
-			'parent_entity_type' => $_REQUEST['parent_entity_type'],
-			'parent_entity_id' => $_REQUEST['parent_entity_id'],
-			'child_entity_type' => $_REQUEST['child_entity_type'],
-			'child_entity_id' => $_REQUEST['child_entity_id'],
-		)
-	);
-	if ($result === FALSE)
-		return buildRedirectURL (__FUNCTION__, 'ERR2');
-	return buildRedirectURL (__FUNCTION__, 'OK');
-}
-
-$msgcode['unlinkEntities']['OK'] = 49;
-$msgcode['unlinkEntities']['ERR'] = 111;
-function unlinkEntities ()
-{
-	assertUIntArg ('link_id');
-	return buildRedirectURL (__FUNCTION__, commitUnlinkEntities ($_REQUEST['link_id']) === FALSE ? 'ERR' : 'OK');
-}
-
 $msgcode['addFileWithoutLink']['OK'] = 5;
 // File-related functions
 function addFileWithoutLink ()
@@ -2439,16 +2447,6 @@ function createVLANDomain ()
 			'vlan_descr' => 'default',
 		)
 	);
-	return buildRedirectURL (__FUNCTION__, $result ? 'OK' : 'ERR');
-}
-
-$msgcode['destroyVLANDomain']['OK'] = 49;
-$msgcode['destroyVLANDomain']['ERR'] = 111;
-function destroyVLANDomain ()
-{
-	assertUIntArg ('vdom_id');
-	global $sic;
-	$result = FALSE !== usePreparedDeleteBlade ('VLANDomain', array ('id' => $sic['vdom_id']));
 	return buildRedirectURL (__FUNCTION__, $result ? 'OK' : 'ERR');
 }
 
@@ -2724,33 +2722,6 @@ function resolve8021QConflicts ()
 	}
 	$dbxlink->commit();
 	return buildRedirectURL (__FUNCTION__, 'OK', array ($ndone));
-}
-
-$msgcode['addVLANSwitchTemplate']['OK'] = 48;
-$msgcode['addVLANSwitchTemplate']['ERR'] = 110;
-function addVLANSwitchTemplate()
-{
-	assertStringArg ('vst_descr');
-	global $sic;
-	$result = usePreparedInsertBlade
-	(
-		'VLANSwitchTemplate',
-		array
-		(
-			'description' => $sic['vst_descr'],
-		)
-	);
-	return buildRedirectURL (__FUNCTION__, $result ? 'OK' : 'ERR');
-}
-
-$msgcode['delVLANSwitchTemplate']['OK'] = 49;
-$msgcode['delVLANSwitchTemplate']['ERR'] = 111;
-function delVLANSwitchTemplate()
-{
-	assertUIntArg ('vst_id');
-	global $sic;
-	$result = FALSE !== usePreparedDeleteBlade ('VLANSwitchTemplate', array ('id' => $sic['vst_id']));
-	return buildRedirectURL (__FUNCTION__, $result ? 'OK' : 'ERR');
 }
 
 $msgcode['cloneVST']['OK'] = 48;
