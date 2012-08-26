@@ -3167,6 +3167,7 @@ mysql> select tag_id from TagStorage left join TagTree on tag_id = id where id i
 
 */
 
+# FIXME: this function is not used any more
 function commitDeleteChapter ($chapter_no = 0)
 {
 	usePreparedDeleteBlade ('Chapter', array ('id' => $chapter_no, 'sticky' => 'no'));
