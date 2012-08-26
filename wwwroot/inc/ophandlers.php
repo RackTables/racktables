@@ -2859,15 +2859,15 @@ function cloneRSPool()
 	return buildRedirectURL ('ipv4rspool', 'default', array ('pool_id' => $new_id));
 }
 
-function tableHandler()
+# validate user input and produce SQL columns per the opspec descriptor
+function buildOpspecColumns ($opspec, $listnames)
 {
-	$opspec = getOpspec();
 	global $sic;
 	$columns = array();
-	foreach (array ('arglist', 'set_arglist', 'where_arglist') as $listname)
+	foreach ($listnames as $listname)
 	{
 		if (! array_key_exists ($listname, $opspec))
-			continue;
+			throw new InvalidArgException ('opspec', '(malformed structure)', "missing '${listname}'");
 		foreach ($opspec[$listname] as $argspec)
 		{
 			genericAssertion ($argspec['url_argname'], $argspec['assertion']);
@@ -2895,18 +2895,28 @@ function tableHandler()
 			$columns[$listname][$table_colname] = $arg_value;
 		}
 	}
+	return $columns;
+}
+
+# execute a single SQL statement defined by an opspec descriptor
+function tableHandler()
+{
+	$opspec = getOpspec();
 	switch ($opspec['action'])
 	{
 	case 'INSERT':
+		$columns = buildOpspecColumns ($opspec, array ('arglist'));
 		usePreparedInsertBlade ($opspec['table'], $columns['arglist']);
 		$retcode = 48;
 		break;
 	case 'DELETE':
 		$conjunction = array_key_exists ('conjunction', $opspec) ? $opspec['conjunction'] : 'AND';
+		$columns = buildOpspecColumns ($opspec, array ('arglist'));
 		usePreparedDeleteBlade ($opspec['table'], $columns['arglist'], $conjunction);
 		$retcode = 49;
 		break;
 	case 'UPDATE':
+		$columns = buildOpspecColumns ($opspec, array ('set_arglist', 'where_arglist'));
 		usePreparedUpdateBlade
 		(
 			$opspec['table'],
