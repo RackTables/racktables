@@ -522,9 +522,10 @@ CREATE TABLE `Config` (
 CREATE TABLE `Dictionary` (
   `chapter_id` int(10) unsigned NOT NULL,
   `dict_key` int(10) unsigned NOT NULL auto_increment,
+  `dict_sticky` enum('yes','no') DEFAULT 'no',
   `dict_value` char(255) default NULL,
   PRIMARY KEY  (`dict_key`),
-  UNIQUE KEY `chap_to_val` (`chapter_id`,`dict_value`),
+  UNIQUE KEY `dict_unique` (`chapter_id`,`dict_value`,`dict_sticky`),
   CONSTRAINT `Dictionary-FK-chapter_id` FOREIGN KEY (`chapter_id`) REFERENCES `Chapter` (`id`)
 ) ENGINE=InnoDB;
 
