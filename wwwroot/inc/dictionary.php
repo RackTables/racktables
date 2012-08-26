@@ -16,12 +16,12 @@ function reloadDictionary ($release = NULL)
 	{
 		if (! $buffered)
 		{
-			$insert = 'INSERT INTO Dictionary (dict_key, chapter_id, dict_value) VALUES (' .
-				"${dict_key}, ${record['chapter_id']}, '${record['dict_value']}')";
+			$insert = 'INSERT INTO Dictionary (dict_key, chapter_id, dict_value, dict_sticky) VALUES (' .
+				"${dict_key}, ${record['chapter_id']}, '${record['dict_value']}', 'yes')";
 			$buffered = 1;
 			continue;
 		}
-		$insert .= ", (${dict_key}, ${record['chapter_id']}, '${record['dict_value']}')";
+		$insert .= ", (${dict_key}, ${record['chapter_id']}, '${record['dict_value']}', 'yes')";
 		if (++$buffered == 25)
 		{
 			$ret[] = $insert;
