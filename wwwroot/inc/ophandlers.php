@@ -379,6 +379,7 @@ $opspec_list['chapter-edit-del'] = array
 		// chapter, which authorization was granted for.
 		array ('url_argname' => 'chapter_no', 'table_colname' => 'chapter_id', 'assertion' => 'uint'),
 		array ('url_argname' => 'dict_key', 'assertion' => 'uint'),
+		array ('fix_argname' => 'dict_sticky', 'fix_argvalue' => 'no'), # protect system rows
 	),
 );
 $opspec_list['chapter-edit-upd'] = array
@@ -394,6 +395,7 @@ $opspec_list['chapter-edit-upd'] = array
 		# same as above for listing chapter_no
 		array ('url_argname' => 'chapter_no', 'table_colname' => 'chapter_id', 'assertion' => 'uint'),
 		array ('url_argname' => 'dict_key', 'assertion' => 'uint'),
+		array ('fix_argname' => 'dict_sticky', 'fix_argvalue' => 'no'), # protect system rows
 	),
 );
 $opspec_list['tagtree-edit-createTag'] = array
