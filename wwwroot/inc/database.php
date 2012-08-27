@@ -870,10 +870,8 @@ function getNeighborPorts ($port_id, $neighbors = array (), $level = 0)
 {
 	$self = __FUNCTION__;
 	if ($level >= 10)
-	{
-		echo ('<p>Error: Tracing depth too deep - a loop probably exists</p>');
-		return;
-	}
+		throw new InvalidArgException ('port', $port_id, 'tracing depth too deep - a loop probably exists');
+
 	$query = "
 SELECT L.portb AS port_id, P.name AS port_name, P.object_id, O.name AS object_name 
 FROM Link L 
@@ -1675,7 +1673,6 @@ function linkPorts ($porta, $portb, $cable = NULL)
 	if ($porta == $portb)
 		throw new InvalidArgException ('porta/portb', $porta, "Ports can't be the same");
 
-	global $dbxlink;
 	usePreparedInsertBlade
 	(
 		'Link',
@@ -4588,10 +4585,7 @@ function getPortInfo ($port_id)
 	$result = fetchPortList ('Port.id = ?', array ($port_id));
 	if (empty ($result))
 		return NULL;
-
-	// return the first element
-	$key = key ($result);
-	return $result[$key];
+	return array_first ($result);
 }
 
 function getPortLinkInfo ($link_id)

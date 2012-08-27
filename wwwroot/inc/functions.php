@@ -5826,10 +5826,7 @@ function sortLinks ($port_id, $unsorted_links, $sorted_links = array (), $level 
 	$self = __FUNCTION__;
 
 	if ($level >= 10)
-	{
-		echo ('<p>Error: Tracing depth too deep - a loop probably exists</p>');
-		return;
-	}
+		throw new InvalidArgException ('port', $port_id, 'tracing depth too deep - a loop probably exists');
 
 	// add the provided link to the sorted array
 	foreach ($unsorted_links as $link_id => $link)
