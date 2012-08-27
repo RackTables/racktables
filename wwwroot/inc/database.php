@@ -814,8 +814,7 @@ END;
 				'remote_object_id' => $row['remote_object_id'],
 				'remote_object_name' => $row['remote_object_name'],
 			);
-			if (count ($row['last_log']) > 0)
-				$link_details['last_log'] = $row['last_log'];
+			$link_details['last_log'] = $row['last_log'];
 		}
 		unset ($row['cableid'], $row['remote_id'], $row['remote_name'], $row['remote_object_id'], $row['remote_object_name']);
 
