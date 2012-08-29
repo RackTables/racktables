@@ -87,6 +87,10 @@ function queryTerminal ($object_id, $commands, $tolerate_remote_errors = TRUE)
 			$protocol = 'telnet'; # strict RFC854 implementation, netcat won't work
 			$prompt = '^(\xf2?login|Username|Password): $|^\S+[>#]$';
 			break;
+		case 'ros11':
+			$protocol = 'netcat'; # see ftos8 case
+			$prompt = '^(User Name|\rPassword):$|^\r?\S+# $';
+			break;
 		default:
 			$protocol = 'netcat';
 			$prompt = NULL;
@@ -144,6 +148,10 @@ function queryTerminal ($object_id, $commands, $tolerate_remote_errors = TRUE)
 					break;
 				case 'eos4':
 					$commands = "enable\nno terminal monitor\nterminal length 0\n" . $commands;
+					break;
+				case 'ros11':
+					$commands = "terminal datadump\n" . $commands;
+					$commands .= "\n\n"; # temporary workaround for telnet server
 					break;
 			}
 			// prepend telnet commands by credentials

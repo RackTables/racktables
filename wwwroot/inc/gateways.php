@@ -82,6 +82,15 @@ $breedfunc = array
 	'eos4-getlldpstatus-main'  => 'eos4ReadLLDPStatus',
 	'eos4-get8021q-main'       => 'eos4Read8021QConfig',
 	'eos4-xlatepushq-main'     => 'eos4TranslatePushQueue',
+	'ros11-getallconf-main'    => 'ros11SpotConfigText',
+	'ros11-xlatepushq-main'    => 'ros11TranslatePushQueue',
+	'ros11-getlldpstatus-main' => 'ros11ReadLLDPStatus',
+	'ros11-getportstatus-main' => 'ros11ReadInterfaceStatus',
+	'ros11-getmaclist-main'    => 'ros11ReadMacList',
+	'ros11-get8021q-main'      => 'ros11Read8021QConfig',
+	'ros11-get8021q-scantop'   => 'ros11Read8021QScanTop',
+	'ros11-get8021q-vlandb'    => 'ros11Read8021QVLANDatabase',
+	'ros11-get8021q-readports' => 'ros11Read8021QPorts',
 );
 
 // This function launches specified gateway with specified
@@ -352,6 +361,7 @@ function detectDeviceBreed ($object_id)
 		1673 => 'air12', # AIR IOS 12.3
 		1674 => 'air12', # AIR IOS 12.4
 		1675 => 'eos4',
+		1786 => 'ros11', # Marvell ROS 1.1
 	);
 	foreach (getAttrValues ($object_id) as $record)
 		if ($record['id'] == 4 and array_key_exists ($record['key'], $breed_by_swcode))
