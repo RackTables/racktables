@@ -1896,6 +1896,8 @@ function findRouters ($addrlist)
 
 // Compare networks. When sorting a tree, the records on the list will have
 // distinct base IP addresses.
+// valid return values are: 1, 0, -1, -2
+// -2 has special meaning: $netA includes $netB
 // "The comparison function must return an integer less than, equal to, or greater
 // than zero if the first argument is considered to be respectively less than,
 // equal to, or greater than the second." (c) PHP manual
@@ -1904,6 +1906,7 @@ function IPNetworkCmp ($netA, $netB)
 	if (strlen ($netA['ip_bin']) !== strlen ($netB['ip_bin']))
 		return strlen ($netA['ip_bin']) < strlen ($netB['ip_bin']) ? -1 : 1;
 	$ret = strcmp ($netA['ip_bin'], $netB['ip_bin']);
+	$ret = ($ret > 0 ? 1 : ($ret < 0 ? -1 : 0));
 	if ($ret == 0)
 		$ret = $netA['mask'] < $netB['mask'] ? -1 : ($netA['mask'] > $netB['mask'] ? 1 : 0);
 	if ($ret == -1 and $netA['ip_bin'] === ($netB['ip_bin'] & $netA['mask_bin']))
