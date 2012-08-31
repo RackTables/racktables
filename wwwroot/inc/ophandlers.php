@@ -2936,11 +2936,11 @@ function tableHandler()
 	switch ($opspec['action'])
 	{
 	case 'INSERT':
-		$retcode = TRUE === usePreparedInsertBlade ($opspec['table'], buildOpspecColumns ($opspec, array ('arglist'))) ? 48 : 110;
+		$retcode = TRUE === usePreparedInsertBlade ($opspec['table'], buildOpspecColumns ($opspec, 'arglist')) ? 48 : 110;
 		break;
 	case 'DELETE':
 		$conjunction = array_key_exists ('conjunction', $opspec) ? $opspec['conjunction'] : 'AND';
-		$retcode = FALSE !== usePreparedDeleteBlade ($opspec['table'], buildOpspecColumns ($opspec, array ('arglist')), $conjunction) ? 49 : 111;
+		$retcode = FALSE !== usePreparedDeleteBlade ($opspec['table'], buildOpspecColumns ($opspec, 'arglist'), $conjunction) ? 49 : 111;
 		break;
 	case 'UPDATE':
 		usePreparedUpdateBlade
