@@ -3172,6 +3172,8 @@ function ios12ShortenIfName ($ifname)
 	return $ifname;
 }
 
+# Produce a list of integers from a string in the following format:
+# A,B,C-D,E-F,G,H,I-J,K ...
 function iosParseVLANString ($string)
 {
 	$ret = array();
@@ -3183,6 +3185,8 @@ function iosParseVLANString ($string)
 			$ret[] = $matches[1];
 		elseif (preg_match ('/^([[:digit:]]+)-([[:digit:]]+)$/', $item, $matches))
 			$ret = array_merge ($ret, range ($matches[1], $matches[2]));
+		else
+			throw new InvalidArgException ('string', $string, 'format mismatch');
 	}
 	return $ret;
 }

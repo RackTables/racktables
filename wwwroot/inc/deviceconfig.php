@@ -584,6 +584,10 @@ function fdry5PickInterfaceSubcommand (&$work, $line)
 	return 'fdry5-get8021q-readport';
 }
 
+# Produce a list of interfaces from a string in the following format:
+# ethe 1 ethe 3 ethe 5 to 7 ethe 9
+# ethe 1/1 to 1/24 ethe 2/1 to 2/24 ethe 3/1 ethe 3/3 ethe 3/5 to 3/8
+# ethe 1/1/1 to 1/1/10 ethe 1/1/12 ethe 1/1/15 to 1/1/20 ethe 2/1/1 to 2/1/24 ethe 3/1/1
 function fdry5ParsePortString ($string)
 {
 	$ret = array();
@@ -604,7 +608,7 @@ function fdry5ParsePortString ($string)
 			$prev_numbers = NULL; // no action on next token
 			break;
 		default: // ???
-			return array();
+			throw new InvalidArgException ('string', $string, 'format mismatch');
 		}
 	}
 	// flush delayed item
@@ -667,6 +671,8 @@ function vrp53ScanTopLevel (&$work, $line)
 	}
 }
 
+# Produce a list of integers from a string in the following format:
+# A B C to D E F to G H to I J to K L ...
 function vrp53ParseVLANString ($string)
 {
 	$string = preg_replace ('/ to /', '-', $string);
