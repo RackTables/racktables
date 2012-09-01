@@ -3053,7 +3053,7 @@ function commitCreateRSPool ($name = '', $vsconfig = '', $rsconfig = '', $taglis
 function commitDeleteRSPool ($pool_id = 0)
 {
 	releaseFiles ('ipv4rspool', $pool_id);
-	return usePreparedDeleteBlade ('IPv4RSPool', array ('id' => $pool_id)) && destroyTagsForEntity ('ipv4rspool', $pool_id);
+	return FALSE !== usePreparedDeleteBlade ('IPv4RSPool', array ('id' => $pool_id)) && FALSE !== destroyTagsForEntity ('ipv4rspool', $pool_id);
 }
 
 function getRSList ()
