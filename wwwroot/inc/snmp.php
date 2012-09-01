@@ -30,7 +30,7 @@ $iftable_processors['generic-g-any-1000T'] = array
 	'pattern' => '@^g(\d+)$@',
 	'replacement' => 'g\\1',
 	'dict_key' => 24,
-	'label' => 'g\\1',
+	'label' => '\\1',
 	'try_next_proc' => FALSE,
 );
 
@@ -39,7 +39,7 @@ $iftable_processors['generic-gi-any-1000T'] = array
 	'pattern' => '@^gi(\d+)$@',
 	'replacement' => 'gi\\1',
 	'dict_key' => 24,
-	'label' => 'gi\\1',
+	'label' => '\\1',
 	'try_next_proc' => FALSE,
 );
 
@@ -48,7 +48,7 @@ $iftable_processors['generic-gi-1-to-2-1000T'] = array
 	'pattern' => '@^gi(\d+)$@',
 	'replacement' => 'gi\\1',
 	'dict_key' => 24,
-	'label' => 'gi\\1',
+	'label' => 'G\\1',
 	'try_next_proc' => FALSE,
 );
 
@@ -57,7 +57,7 @@ $iftable_processors['generic-gi-3-to-4-combo-1000SFP'] = array
 	'pattern' => '@^gi(3|4)$@',
 	'replacement' => 'gi\\1',
 	'dict_key' => '4-1077',
-	'label' => 'gi\\1',
+	'label' => 'G\\1',
 	'try_next_proc' => TRUE,
 );
 
@@ -66,7 +66,7 @@ $iftable_processors['generic-gi-3-to-4-combo-1000T'] = array
 	'pattern' => '@^gi(3|4)$@',
 	'replacement' => 'gi\\1',
 	'dict_key' => '1-24',
-	'label' => 'gi\\1',
+	'label' => 'G\\1',
 	'try_next_proc' => FALSE,
 );
 
@@ -75,7 +75,7 @@ $iftable_processors['generic-gi-9-to-10-combo-1000SFP'] = array
 	'pattern' => '@^gi(9|10)$@',
 	'replacement' => 'gi\\1',
 	'dict_key' => '4-1077',
-	'label' => 'gi\\1',
+	'label' => 'G\\1',
 	'try_next_proc' => TRUE,
 );
 
@@ -84,7 +84,7 @@ $iftable_processors['generic-gi-9-to-10-combo-1000T'] = array
 	'pattern' => '@^gi(9|10)$@',
 	'replacement' => 'gi\\1',
 	'dict_key' => '1-24',
-	'label' => 'gi\\1',
+	'label' => 'G\\1',
 	'try_next_proc' => FALSE,
 );
 
@@ -93,7 +93,7 @@ $iftable_processors['generic-gi-51-to-52-combo-1000SFP'] = array
 	'pattern' => '@^gi(51|52)$@',
 	'replacement' => 'gi\\1',
 	'dict_key' => '4-1077',
-	'label' => 'gi\\1',
+	'label' => 'G\\1',
 	'try_next_proc' => TRUE,
 );
 
@@ -102,7 +102,7 @@ $iftable_processors['generic-gi-51-to-52-combo-1000T'] = array
 	'pattern' => '@^gi(51|52)$@',
 	'replacement' => 'gi\\1',
 	'dict_key' => '1-24',
-	'label' => 'gi\\1',
+	'label' => 'G\\1',
 	'try_next_proc' => FALSE,
 );
 
