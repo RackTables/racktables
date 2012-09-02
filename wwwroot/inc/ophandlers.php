@@ -1133,7 +1133,7 @@ function updateObject ()
 	{
 		if (! array_key_exists ($sic['object_type_id'], getObjectTypeChangeOptions ($object_id)))
 			throw new InvalidRequestArgException ('new type_id', $sic['object_type_id'], 'incompatible with requested attribute values');
-		usePreparedUpdateBlade ('RackObject', array ('objtype_id' => $sic['object_type_id']), array ('id' => $object_id));
+		usePreparedUpdateBlade ('Object', array ('objtype_id' => $sic['object_type_id']), array ('id' => $object_id));
 	}
 	// Invalidate thumb cache of all racks objects could occupy.
 	foreach (getResidentRacksData ($object_id, FALSE) as $rack_id)
