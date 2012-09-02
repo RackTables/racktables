@@ -67,34 +67,62 @@ function renderSLBEditTab ($entity_id)
 // realms 1 and 2 are realms to draw inputs for
 function renderNewSLBItemForm ($realm1, $realm2)
 {
-	function print_realm_select_input($realm)
+	/**
+	 * Returns a list of values, a human readable name and options
+	 * for the selecttag for a given realm.
+	 */
+	function get_realm_data ($realm)
 	{
+		$name = NULL;
+		$list = array();
+		$options = array();
 		switch ($realm)
 		{
 			case 'object':
-				echo "<tr valign=top><th class=tdright>Load balancer</th><td class=tdleft>";
-				printSelect (getNarrowObjectList ('IPV4LB_LISTSRC'), array ('name' => 'object_id', 'tabindex' => 100));
+				$name = 'Load balancer';
+				$list = getNarrowObjectList ('IPV4LB_LISTSRC');
+				$options = array ('name' => 'object_id', 'tabindex' => 100);
 				break;
 			case 'ipv4vs':
-				echo '</td></tr><tr><th class=tdright>Virtual service</th><td class=tdleft>';
-				printSelect (getIPv4VSOptions(), array ('name' => 'vs_id', 'tabindex' => 101));
+				$name = 'Virtual service';
+				$list = getIPv4VSOptions();
+				$options = array ('name' => 'vs_id', 'tabindex' => 101);
 				break;
 			case 'ipv4rspool':
-				echo '</td></tr><tr><th class=tdright>RS pool</th><td class=tdleft>';
-				printSelect (getIPv4RSPoolOptions(), array ('name' => 'pool_id', 'tabindex' => 102));
+				$name = 'RS pool';
+				$list = getIPv4RSPoolOptions();
+				$options = array ('name' => 'pool_id', 'tabindex' => 102);
 				break;
 			default:
 				throw new InvalidArgException('realm', $realm);
 		}
+		return array ('name' => $name, 'list' => $list, 'options' => $options);
 	}
 
+	$realm1_data = get_realm_data ($realm1);
+	$realm2_data = get_realm_data ($realm2);
 	startPortlet ('Add new');
 	echo "<table cellspacing=0 cellpadding=5 align=center>";
-	printOpFormIntro ('addLB');
-	print_realm_select_input($realm1);
+	if (count ($realm1_data['list']) && count ($realm2_data['list']))
+		printOpFormIntro ('addLB');
+	echo "<tr valign=top><th class=tdright>{$realm1_data['name']}</th><td class=tdleft>";
+	printSelect ($realm1_data['list'], $realm1_data['options']);
 	echo '</td><td class=tdcenter valign=middle rowspan=2>';
-	printImageHREF ('ADD', 'Configure LB', TRUE, 120);
-	print_realm_select_input($realm2);
+	if (count ($realm1_data['list']) && count ($realm2_data['list']))
+		printImageHREF ('ADD', 'Configure LB', TRUE, 120);
+	else
+	{
+		$names = array();
+		if (! count ($realm1_data['list']))
+			$names[] = 'a ' . $realm1_data['name'];
+		if (! count ($realm2_data['list']))
+			$names[] = 'a ' . $realm2_data['name'];
+		$message = 'Please create ' . (implode (' and ', $names)) . '.';
+		showNotice ($message);
+		printImageHREF ('DENIED', $message, FALSE);
+	}
+	echo "<tr valign=top><th class=tdright>{$realm2_data['name']}</th><td class=tdleft>";
+	printSelect ($realm2_data['list'], $realm2_data['options']);
 	echo "</td></tr>\n";
 	echo "<tr><th class=tdright>VS config</th><td colspan=2><textarea tabindex=110 name=vsconfig rows=10 cols=80></textarea></td></tr>";
 	echo "<tr><th class=tdright>RS config</th><td colspan=2><textarea tabindex=111 name=rsconfig rows=10 cols=80></textarea></td></tr>";
