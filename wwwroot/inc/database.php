@@ -837,8 +837,40 @@ function getObjectPortsAndLinks ($object_id)
 	return sortPortList ($ret, TRUE);
 }
 
+// If the given name is used by any object other than the current object,
+// raise an exception.  Validation is bypassed for certain object types
+// where duplicates are acceptable.
+// NOTE: This could be enforced more strictly at the database level using triggers.
+function checkObjectNameUniqueness ($name, $object_id = 0)
+{
+	// Some object types do not need unique names
+	// 1560 - Rack
+	// 1561 - Row
+	$dupes_allowed = array (1560, 1561);
+
+	// If a valid object_id was passed, lookup the object type
+	$type_id = 0;
+	if ($object_id != 0)
+	{
+		$object = spotEntity ('object', $object_id);
+		$type_id = $object['objtype_id'];
+	}
+	if (in_array ($type_id, $dupes_allowed))
+		return;
+
+	$result = usePreparedSelectBlade
+	(
+		'SELECT COUNT(*) FROM Object WHERE name = ? AND id != ?',
+		array ($name, $object_id)
+	);
+	$row = $result->fetch (PDO::FETCH_NUM);
+	if ($row[0] != 0)
+		throw new InvalidRequestArgException ('name', $name, 'An object with that name already exists');
+}
+
 function commitAddObject ($new_name, $new_label, $new_type_id, $new_asset_no, $taglist = array())
 {
+	checkObjectNameUniqueness ($new_name);
 	usePreparedInsertBlade
 	(
 		'Object',
@@ -861,6 +893,7 @@ function commitAddObject ($new_name, $new_label, $new_type_id, $new_asset_no, $t
 
 function commitRenameObject ($object_id, $new_name)
 {
+	checkObjectNameUniqueness ($new_name, $object_id);
 	usePreparedUpdateBlade
 	(
 		'Object',
@@ -878,6 +911,7 @@ function commitRenameObject ($object_id, $new_name)
 
 function commitUpdateObject ($object_id, $new_name, $new_label, $new_has_problems, $new_asset_no, $new_comment)
 {
+	checkObjectNameUniqueness ($new_name, $object_id);
 	usePreparedUpdateBlade
 	(
 		'Object',
