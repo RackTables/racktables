@@ -20,7 +20,6 @@
 		Dell PowerConnect 3348, 3448, 3548, 5224, 5324, 54xx, 6024F, 6224, 6224F (#383, #390, #427, #502), HP ProCurve 6600-48G-4XG (#522), 2650, 2900,
 		Netgear FS750T2 (#479), Juniper EX3200-48T (#510), Linksys SRW2048 (#350)
 	update: new config var SEARCH_DOMAINS to control the FQDN-search feature introduced by 0.19.3
-	update: improve Dictionary unique constraint (#593)
 	new feature: you can obtain who has made tag assignment, object's ports or IPv4 address changes by hovering cursor on these entities
 	new feature: adjustable quick links at the top of the page
 	new feature: IPv6 SLB support
@@ -35,6 +34,7 @@
 	bugfix: file upload error handler by Hannes Georg
 	update: do not display edit box for an attribute unless user has permissions to update it
 	update: SQL index tweak by Hannes Georg (#586)
+	update: improve Dictionary unique constraint (#593)
 0.19.13 2012-06-28
 	update: IE spoils JPEG uploads, work around
 	update: use is_callable() (#551)
