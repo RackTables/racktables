@@ -1,4 +1,4 @@
-0.19.14
+0.19.14 2012-09-02
 	update: Port linker selects nearest rack by default (#562) by Hannes Georg
 	update: SNMP support for Cisco 2960-24TC-L (#554), 2924M-XL (#582), 3560E-12SD (#564), ProCurves (#558),
 		Allied Telesyn AT9924T (#581)
