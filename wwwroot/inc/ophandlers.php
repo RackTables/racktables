@@ -2540,7 +2540,7 @@ function resolve8021QConflicts ()
 			$F[$sic["pn_${i}"]] = array
 			(
 				'mode' => $sic["rm_${i}"],
-				'allowed' => $sic["ra_${i}"],
+				'allowed' => array_key_exists ("ra_${i}", $sic) ? $sic["ra_${i}"] : array(),
 				'native' => $sic["rn_${i}"],
 				'decision' => $sic["i_${i}"],
 			);
