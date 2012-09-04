@@ -2197,9 +2197,10 @@ function eos4Read8021QConfig ($input)
 		{
 			switch (TRUE)
 			{
-			case preg_match ('/^vlan ([[:alnum:],-]+)$/', $line, $matches):
+			case preg_match ('/^vlan ([\d,-]+)$/', $line, $matches):
 				foreach (iosParseVLANString ($matches[1]) as $vlan_id)
-					$ret['vlanlist'][] = $vlan_id;
+					if ($vlan_id != VLAN_DFL_ID)
+						$ret['vlanlist'][] = $vlan_id;
 				break;
 			case preg_match ('/^interface ((Ethernet|Port-Channel)\d+)$/', $line, $matches):
 				$portname = ios12ShortenIfName ($matches[1]);
