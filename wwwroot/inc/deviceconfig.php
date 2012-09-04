@@ -419,6 +419,9 @@ function ios12PickSwitchportCommand (&$work, $line)
 			iosParseVLANString ($matches[1])
 		);
 		break;
+	case $line == ' switchport trunk allowed vlan none':
+		$work['current']['trunk allowed vlan'] = array();
+		break;
 	case (preg_match ('@^ switchport trunk allowed vlan (.+)$@', $line, $matches)):
 		$work['current']['trunk allowed vlan'] = iosParseVLANString ($matches[1]);
 		break;
@@ -1013,6 +1016,9 @@ function nxos4PickSwitchportCommand (&$work, $line)
 			$work['current']['trunk allowed vlan'],
 			iosParseVLANString ($matches[1])
 		);
+		break;
+	case $line == '  switchport trunk allowed vlan none':
+		$work['current']['trunk allowed vlan'] = array();
 		break;
 	case (preg_match ('@^  switchport trunk allowed vlan (.+)$@', $line, $matches)):
 		$work['current']['trunk allowed vlan'] = iosParseVLANString ($matches[1]);
@@ -2073,6 +2079,10 @@ function eos4Read8021QConfig ($input)
 				break;
 			case preg_match ('/^   switchport trunk native vlan (\d+)$/', $line, $matches):
 				$ret['current']['native'] = $matches[1];
+				$ret['portconfig'][$portname][] = array ('type' => 'line-8021q', 'line' => $line);
+				break;
+			case $line == '   switchport trunk allowed vlan none':
+				$ret['current']['allowed'] = array();
 				$ret['portconfig'][$portname][] = array ('type' => 'line-8021q', 'line' => $line);
 				break;
 			case preg_match ('/^   switchport trunk allowed vlan (\S+)$/', $line, $matches):
