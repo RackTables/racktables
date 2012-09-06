@@ -2554,6 +2554,8 @@ function doSwitchSNMPmining ($objectInfo, $device)
 		commitAddPort ($objectInfo['id'], 'console', '1-29', 'IOIOI', '');
 		$sw_version = preg_replace ('/^Arista Networks EOS version (.+) running on .*$/', '\\1', $sysDescr);
 		updateStickerForCell ($objectInfo, 5, $sw_version);
+		if (strlen ($serialNo = $device->snmpget ('mib-2.47.1.1.1.1.11.1'))) # entPhysicalSerialNumber.1
+			updateStickerForCell ($objectInfo, 1, str_replace ('"', '', substr ($serialNo, strlen ('STRING: '))));
 		break;
 	default: // Nortel...
 		break;
