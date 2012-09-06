@@ -58,7 +58,7 @@ function queryTerminal ($object_id, $commands, $tolerate_remote_errors = TRUE)
 	{
 		case 'ios12':
 		case 'fdry5':
-		case 'ftos8': 
+		case 'ftos8':
 			$protocol = 'netcat'; // default is netcat mode
 			$prompt = '^(Login|Username|Password): $|^\S+[>#]$'; // set the prompt in case user would like to specify telnet protocol
 			break;
@@ -90,6 +90,10 @@ function queryTerminal ($object_id, $commands, $tolerate_remote_errors = TRUE)
 		case 'ros11':
 			$protocol = 'netcat'; # see ftos8 case
 			$prompt = '^(User Name|\rPassword):$|^\r?\S+# $';
+			break;
+		case 'iosxr4':
+			$protocol = 'telnet';
+			$prompt = '^\r?(Login|Username|Password): $|^\r?\S+[>#]$';
 			break;
 		default:
 			$protocol = 'netcat';
@@ -153,6 +157,10 @@ function queryTerminal ($object_id, $commands, $tolerate_remote_errors = TRUE)
 					$commands = "terminal datadump\n" . $commands;
 					$commands .= "\n\n"; # temporary workaround for telnet server
 					break;
+				case 'iosxr4':
+					$commands = "terminal length 0\nterminal monitor disable\n" . $commands;
+					break;
+
 			}
 			// prepend telnet commands by credentials
 			if (isset ($settings['password']))

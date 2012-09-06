@@ -2336,6 +2336,24 @@ function ros11Read8021QConfig ($input)
 	return $ret;
 }
 
+function iosxr4TranslatePushQueue ($dummy_object_id, $queue, $dummy_vlan_names)
+{
+	$ret = '';
+	foreach ($queue as $cmd)
+		switch ($cmd['opcode'])
+		{
+		case 'cite':
+			$ret .= $cmd['arg1'];
+			break;
+		case 'getallconf':
+			$ret .= "show running-config\n";
+			break;
+		default:
+			throw new InvalidArgException ('opcode', $cmd['opcode']);
+		}
+	return $ret;
+}
+
 function ros11Read8021QScanTop (&$work, $line)
 {
 	switch (TRUE)
@@ -2853,6 +2871,11 @@ function eos4SpotConfigText ($input)
 function ros11SpotConfigText ($input)
 {
 	return $input;
+}
+
+function iosxr4SpotConfigText ($input)
+{
+	return preg_replace ('/.*?^!! IOS XR Configuration [^\n]*$\n(.*)^\S+#\s*\Z/sm', '$1', $input);
 }
 
 ?>

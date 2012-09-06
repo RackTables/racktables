@@ -91,6 +91,8 @@ $breedfunc = array
 	'ros11-get8021q-scantop'   => 'ros11Read8021QScanTop',
 	'ros11-get8021q-vlandb'    => 'ros11Read8021QVLANDatabase',
 	'ros11-get8021q-readports' => 'ros11Read8021QPorts',
+	'iosxr4-xlatepushq-main'    => 'iosxr4TranslatePushQueue',
+	'iosxr4-getallconf-main'    => 'iosxr4SpotConfigText',
 );
 
 // This function launches specified gateway with specified
@@ -362,6 +364,7 @@ function detectDeviceBreed ($object_id)
 		1673 => 'air12', # AIR IOS 12.3
 		1674 => 'air12', # AIR IOS 12.4
 		1675 => 'eos4',
+		1759 => 'iosxr4', # Cisco IOS XR 4.2
 		1786 => 'ros11', # Marvell ROS 1.1
 	);
 	foreach (getAttrValues ($object_id) as $record)
