@@ -580,7 +580,7 @@ function spotEntity ($realm, $id, $ignore_cache = FALSE)
 			}
 			$ret['etags'] = array();
 			if ($row['tag_id'] != NULL && isset ($taglist[$row['tag_id']]))
-				$ret['etags'][] = array
+				$ret['etags'][$row['tag_id']] = array
 				(
 					'id' => $row['tag_id'],
 					'tag' => $taglist[$row['tag_id']]['tag'],
