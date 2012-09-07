@@ -8840,4 +8840,26 @@ function formatPortReservation ($port)
 	return $ret;
 }
 
+function renderEditUCSForm()
+{
+	startPortlet ('UCS Actions');
+	printOpFormIntro ('autoPopulateUCS');
+	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
+	echo "<tr><th class=tdright><label for=ucs_login>Login:</label></th>";
+	echo "<td class=tdleft colspan=2><input type=text name=ucs_login id=ucs_login></td></tr>\n";
+	echo "<tr><th class=tdright><label for=ucs_password>Password:</label></th>";
+	echo "<td class=tdleft colspan=2><input type=password name=ucs_password id=ucs_password></td></tr>\n";
+	echo "<tr><th colspan=3><input type=checkbox name=use_terminal_settings id=use_terminal_settings>";
+	echo "<label for=use_terminal_settings>Use Credentials from terminal_settings()</label></th></tr>\n";
+	echo "<tr><th class=tdright>Actions:</th><td class=tdleft>";
+	printImageHREF ('DQUEUE sync_ready', 'Auto-populate UCS', TRUE);
+	echo '</td><td class=tdright>';
+	echo "<a href='".
+		makeHrefProcess (array ('op' => 'cleanupUCS', 'object_id' => getBypassValue())) .
+		"'  onclick=\"javascript:return confirm('Are you sure you want to cleanup UCS Domain?')\">" .
+		getImageHREF ('CLEAR', 'Clean-up UCS domain') . "</a>";
+	echo "</td></tr></table></form>\n";
+	finishPortlet();
+}
+
 ?>

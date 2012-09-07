@@ -2530,6 +2530,24 @@ function iosxr4TranslatePushQueue ($dummy_object_id, $queue, $dummy_vlan_names)
 	return $ret;
 }
 
+function ucsTranslatePushQueue ($dummy_object_id, $queue, $dummy_vlan_names)
+{
+	$ret = '';
+	foreach ($queue as $cmd)
+		switch ($cmd['opcode'])
+		{
+		case 'cite':
+			$ret .= $cmd['arg1'];
+			break;
+		case 'getinventory':
+			$ret .= "getmo\n";
+			break;
+		default:
+			throw new InvalidArgException ('opcode', $cmd['opcode']);
+		}
+	return $ret;
+}
+
 function ros11Read8021QScanTop (&$work, $line)
 {
 	switch (TRUE)
@@ -3164,6 +3182,50 @@ function ros11ReadMacList ($text)
 	foreach (array_keys ($result) as $portname)
 		usort ($result[$portname], 'maclist_sort');
 	return $result;
+}
+
+# The types of objects returned are 'NetworkElement', 'EquipmentChassis' and
+# 'ComputeBlade', just like their respective UCS classes.
+function ucsReadInventory ($text)
+{
+	# transform plain-text response into array
+	$tmp = $replies = array();
+	foreach (explode ("\n", $text) as $line)
+		if (1 !== preg_match ('/^(OK|ERR)( .+)?$/', $line, $m))
+			$tmp[] = $line;
+		else
+		{
+			$replies[] = array ('code' => $m[1], 'text' => $m[2], 'body' => $tmp);
+			$tmp = array();
+		}
+	# validate the array
+	if (count ($replies) != 2)
+		throw new RTGatewayError ('replies count does not match commands count');
+	if ($replies[0]['code'] != 'OK')
+		throw new RTGatewayError ('UCS login failed');
+	if ($replies[1]['code'] != 'OK')
+		throw new RTGatewayError ('UCS enumeration failed');
+	$ret = array();
+	foreach ($replies[1]['body'] as $line)
+		switch (1)
+		{
+		case preg_match ('/^COLUMNS (.+)$/', $line, $m):
+			if (! count ($hcols = explode (',', $m[1])))
+				throw new RTGatewayError ("UCS format error: '${line}'");
+			break;
+		case preg_match ('/^ROW (.+)$/', $line, $m):
+			if (count ($cols = explode (',', $m[1])) != count ($hcols))
+				throw new RTGatewayError ("UCS format error: '${line}'");
+			# $hcols and $cols have same array keys
+			$tmp = array();
+			foreach ($cols as $key => $value)
+				$tmp[$hcols[$key]] = $value;
+			$ret[] = $tmp;
+			break;
+		default:
+			throw new RTGatewayError ("Unrecognized line: '${line}'");
+		}
+	return $ret;
 }
 
 function ios12SpotConfigText ($input)
