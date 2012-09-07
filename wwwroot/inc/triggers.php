@@ -348,4 +348,15 @@ function triggerCactiGraphs ()
 		return '';
 }
 
+function trigger_ucs()
+{
+	return checkTypeAndAttribute
+	(
+		getBypassValue(),
+		1502, # server chassis
+		2, # HW type
+		array (1787) # UCS Manager
+	);
+}
+
 ?>

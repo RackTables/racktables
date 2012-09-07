@@ -103,6 +103,8 @@ $breedfunc = array
 	'ros11-get8021q-readports' => 'ros11Read8021QPorts',
 	'iosxr4-xlatepushq-main'    => 'iosxr4TranslatePushQueue',
 	'iosxr4-getallconf-main'    => 'iosxr4SpotConfigText',
+	'ucs-xlatepushq-main'      => 'ucsTranslatePushQueue',
+	'ucs-getinventory-main'    => 'ucsReadInventory',
 );
 
 // This function launches specified gateway with specified
@@ -391,7 +393,10 @@ function detectDeviceBreed ($object_id)
 		$breed_by_swcode[$i] = 'linux';
 	for ($i = 1417; $i <= 1422; $i++)
 		$breed_by_swcode[$i] = 'linux';
-	$breed_by_hwcode = array();
+	$breed_by_hwcode = array
+	(
+		1787 => 'ucs',
+	);
 	for ($i = 589; $i <= 637; $i++)
 		$breed_by_hwcode[$i] = 'dlink';
 	foreach (getAttrValues ($object_id) as $record)

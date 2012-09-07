@@ -995,6 +995,29 @@ function getEntityRelatives ($type, $entity_type, $entity_id)
 	return $ret;
 }
 
+# This function is recursive and returns only object IDs.
+function getObjectContentsList ($object_id)
+{
+	$ret = array();
+	$result = usePreparedSelectBlade
+	(
+		'SELECT child_entity_id FROM EntityLink ' .
+		'WHERE parent_entity_type = "object" AND child_entity_type = "object" AND parent_entity_id = ?',
+		array ($object_id)
+	);
+	# Free this result before the called copy builds its one.
+	$rows = $result->fetchAll (PDO::FETCH_ASSOC);
+	unset ($result);
+	foreach ($rows as $row)
+	{
+		if (in_array ($row['child_entity_id'], $ret))
+			throw new RackTablesError ("Cyclic dependency for object ${object_id}", RackTablesError::INTERNAL);
+		$ret[] = $row['child_entity_id'];
+		$ret = array_merge ($ret, call_user_func (__FUNCTION__, $row['child_entity_id']));
+	}
+	return $ret;
+}
+
 function commitLinkEntities ($parent_entity_type, $parent_entity_id, $child_entity_type, $child_entity_id)
 {
 	usePreparedInsertBlade

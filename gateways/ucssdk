@@ -1,0 +1,76 @@
+#!/usr/local/bin/python
+
+# This script provides an online stdin/stdout interface to the list of an UCS
+# domain components. This is done through Python UcsSdk interfacing with the UCS
+# manager (domain controller) instance, a virtual service provided by physical
+# UCS Fabric Interconnect switches. The list is output in a text format and is
+# eventually available as PHP array through queryDevice() RackTables function.
+#
+# Script stdin is a multiline text in the following format:
+#
+# login <hostname> <username> <password>
+# getmo
+#
+# Script stdout is also a multiline text consisting of OK/ERR lines optionally
+# preceded with other content. In the case of enumeration the content is a
+# series of COLUMNS and ROW lines with CSV data.
+
+import sys
+try:
+	from UcsSdk import *
+	handle = UcsHandle()
+except Exception, err:
+	sys.stderr.write('UCS Python SDK is missing\n')
+	sys.exit(2)
+
+loggedin = 0
+for line in sys.stdin:
+	words = line.split()
+	if len(words) == 0:
+		continue
+	elif len(words) >= 1 and words[0] == "help":
+		print "HELP: login <hostname> <username> <password>"
+		print "HELP: Immediately try to log into specified UCS manager instance with given credentials."
+		print "HELP: getmo"
+		print "HELP: Retrieve lists of managed objects and output as a set of tables (requires active login)."
+		print "OK"
+	# endif "help"
+	elif len(words) == 4 and words[0] == "login":
+		try:
+			if loggedin == 1:
+				print "INFO Closing previous connection..."
+				handle.Logout()
+			handle.Login(words[1], words[2], words[3])
+			loggedin = 1
+			print "OK logged into " + words[1]
+		except Exception, err:
+			loggedin = 0
+			print "ERR could not log into " + words[1]
+	# endif "login"
+	elif len(words) == 1 and words[0] == "getmo":
+		if loggedin != 1:
+			print "ERR not logged in"
+		else:
+			try:
+				print "COLUMNS type,serial,DN,model,OOB"
+				for mo in handle.GetManagedObject(None, NetworkElement.ClassId()):
+					print "ROW NetworkElement,"   + mo.Serial + "," + mo.Dn + "," + mo.Model + "," + mo.OobIfIp
+				print "COLUMNS type,serial,DN,model"
+				for ch in handle.GetManagedObject(None, EquipmentChassis.ClassId()):
+					print "ROW EquipmentChassis," + ch.Serial + "," + ch.Dn + "," + ch.Model
+				print "COLUMNS type,serial,DN,model,assigned,slot"
+				for bl in handle.GetManagedObject(None, ComputeBlade.ClassId()):
+					print "ROW ComputeBlade,"     + bl.Serial + "," + bl.Dn + "," + bl.Model + "," + bl.AssignedToDn + "," + bl.SlotId
+				print "OK enumeration complete"
+			except Exception, err:
+				print "ERR exception occured, logging out"
+				loggedin = 0
+				handle.Logout()
+	# endif "getmo"
+	else:
+		print "ERR command not supported (type \"help\" for help)"
+# endfor
+if loggedin == 1:
+	handle.Logout()
+sys.exit(0)
+
