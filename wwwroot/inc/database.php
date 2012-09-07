@@ -3340,26 +3340,14 @@ function cacheAllObjectsAttributes()
 function fetchAttrsForObjects ($object_set = array())
 {
 	$ret = array();
-	$query = <<<END
-SELECT
-	AV.attr_id,
-	A.name AS attr_name,
-	A.type AS attr_type,
-	C.name AS chapter_name,
-	C.id AS chapter_id,
-	AV.uint_value,
-	AV.float_value,
-	AV.string_value,
-	D.dict_value,
-	O.id AS object_id
-FROM
-	Object AS O
-	LEFT JOIN AttributeValue AS AV ON AV.object_id = O.id
-	LEFT JOIN AttributeMap AS AM ON O.objtype_id = AM.objtype_id AND AV.attr_id = AM.attr_id
-	LEFT JOIN Attribute AS A ON AM.attr_id = A.id
-	LEFT JOIN Dictionary AS D ON D.dict_key = AV.uint_value AND AM.chapter_id = D.chapter_id
-	LEFT JOIN Chapter AS C ON AM.chapter_id = C.id
-END;
+	$query =
+		"select AM.attr_id, A.name as attr_name, A.type as attr_type, C.name as chapter_name, " .
+		"C.id as chapter_id, AV.uint_value, AV.float_value, AV.string_value, D.dict_value, O.id as object_id from " .
+		"Object as O left join AttributeMap as AM on O.objtype_id = AM.objtype_id " .
+		"left join Attribute as A on AM.attr_id = A.id " .
+		"left join AttributeValue as AV on AV.attr_id = AM.attr_id and AV.object_id = O.id " .
+		"left join Dictionary as D on D.dict_key = AV.uint_value and AM.chapter_id = D.chapter_id " .
+		"left join Chapter as C on AM.chapter_id = C.id";
 	if (count ($object_set))
 		$query .= ' WHERE O.id IN (' . implode (', ', $object_set) . ')';
 	$query .= " ORDER BY A.name, A.type";
@@ -3372,7 +3360,7 @@ END;
 			$ret[$object_id] = array();
 		# Objects with zero attributes also matter due to the LEFT JOIN. Create
 		# keys for them too to enable negative caching.
-		if ($row['attr_id'] === NULL)
+		if ($row['attr_id'] == NULL)
 			continue;
 
 		$record = array();
