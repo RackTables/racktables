@@ -474,12 +474,13 @@ function listCells ($realm, $parent_id = 0)
 	global $taglist;
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
+		$tag_id = $row['tag_id'];
 		if (array_key_exists($row['entity_id'], $ret))
-			$ret[$row['entity_id']]['etags'][] = array
+			$ret[$row['entity_id']]['etags'][$tag_id] = array
 			(
-				'id' => $row['tag_id'],
-				'tag' => $taglist[$row['tag_id']]['tag'],
-				'parent_id' => $taglist[$row['tag_id']]['parent_id'],
+				'id' => $tag_id,
+				'tag' => $taglist[$tag_id]['tag'],
+				'parent_id' => $taglist[$tag_id]['parent_id'],
 				'user' => $row['tag_user'],
 				'time' => $row['tag_time'],
 			);
@@ -492,8 +493,7 @@ function listCells ($realm, $parent_id = 0)
 		cacheAllObjectsAttributes();
 	foreach ($ret as $entity_id => &$entity)
 	{
-		$entity['etags'] = getExplicitTagsOnly ($entity['etags']);
-		$entity['itags'] = getImplicitTags ($entity['etags']);
+		sortEntityTags ($entity); // changes ['etags'] and ['itags']
 		switch ($realm)
 		{
 		case 'object':
@@ -590,7 +590,7 @@ function spotEntity ($realm, $id, $ignore_cache = FALSE)
 				);
 		}
 		elseif (isset ($taglist[$row['tag_id']]))
-			$ret['etags'][] = array
+			$ret['etags'][$row['tag_id']] = array
 			(
 				'id' => $row['tag_id'],
 				'tag' => $taglist[$row['tag_id']]['tag'],
@@ -601,8 +601,7 @@ function spotEntity ($realm, $id, $ignore_cache = FALSE)
 	unset ($result);
 	if (!isset ($ret['realm'])) // no rows were returned
 		throw new EntityNotFoundException ($realm, $id);
-	$ret['etags'] = getExplicitTagsOnly ($ret['etags']);
-	$ret['itags'] = getImplicitTags ($ret['etags']);
+	sortEntityTags ($ret); // changes ['etags'] and ['itags']
 	switch ($realm)
 	{
 	case 'object':
@@ -3341,17 +3340,29 @@ function cacheAllObjectsAttributes()
 function fetchAttrsForObjects ($object_set = array())
 {
 	$ret = array();
-	$query =
-		"select AM.attr_id, A.name as attr_name, A.type as attr_type, C.name as chapter_name, " .
-		"C.id as chapter_id, AV.uint_value, AV.float_value, AV.string_value, D.dict_value, O.id as object_id from " .
-		"Object as O left join AttributeMap as AM on O.objtype_id = AM.objtype_id " .
-		"left join Attribute as A on AM.attr_id = A.id " .
-		"left join AttributeValue as AV on AV.attr_id = AM.attr_id and AV.object_id = O.id " .
-		"left join Dictionary as D on D.dict_key = AV.uint_value and AM.chapter_id = D.chapter_id " .
-		"left join Chapter as C on AM.chapter_id = C.id";
+	$query = <<<END
+SELECT
+	AV.attr_id,
+	A.name AS attr_name,
+	A.type AS attr_type,
+	C.name AS chapter_name,
+	C.id AS chapter_id,
+	AV.uint_value,
+	AV.float_value,
+	AV.string_value,
+	D.dict_value,
+	O.id AS object_id
+FROM
+	Object AS O
+	LEFT JOIN AttributeValue AS AV ON AV.object_id = O.id
+	LEFT JOIN AttributeMap AS AM ON O.objtype_id = AM.objtype_id AND AV.attr_id = AM.attr_id
+	LEFT JOIN Attribute AS A ON AM.attr_id = A.id
+	LEFT JOIN Dictionary AS D ON D.dict_key = AV.uint_value AND AM.chapter_id = D.chapter_id
+	LEFT JOIN Chapter AS C ON AM.chapter_id = C.id
+END;
 	if (count ($object_set))
 		$query .= ' WHERE O.id IN (' . implode (', ', $object_set) . ')';
-	$query .= " order by A.name, A.type";
+	$query .= " ORDER BY A.name, A.type";
 
 	$result = usePreparedSelectBlade ($query);
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
@@ -3361,7 +3372,7 @@ function fetchAttrsForObjects ($object_set = array())
 			$ret[$object_id] = array();
 		# Objects with zero attributes also matter due to the LEFT JOIN. Create
 		# keys for them too to enable negative caching.
-		if ($row['attr_id'] == NULL)
+		if ($row['attr_id'] === NULL)
 			continue;
 
 		$record = array();
