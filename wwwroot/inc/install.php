@@ -234,7 +234,7 @@ function init_config ()
 			$_REQUEST['mysql_username'],
 			$_REQUEST['mysql_password']
 		);
-		echo "<h2 class=trerror>Datase connection failed. Check parameters and try again.</h2>\n";
+		echo "<h2 class=trerror>Database connection failed. Check parameters and try again.</h2>\n";
 		echo "PDO DSN: <tt class=trwarning>${pdo_dsn}</tt><br>";
 		return FALSE;
 	}
