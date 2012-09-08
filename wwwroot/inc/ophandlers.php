@@ -1813,18 +1813,20 @@ function addLocation ()
 }
 
 $msgcode['updateLocation']['OK'] = 6;
+// This function is used by two forms:
+//  - renderEditLocationForm - all attributes may be modified
+//  - renderRackspaceLocationEditor - only the name and parent may be modified
 function updateLocation ()
 {
 	global $pageno;
 	assertUIntArg ('location_id');
 	assertUIntArg ('parent_id', TRUE);
 	assertStringArg ('name');
-	
-	if ($pageno != 'rackspace')
+
+	if ($pageno == 'location')
 	{
 		$has_problems = (isset ($_REQUEST['has_problems']) and $_REQUEST['has_problems'] == 'on') ? 'yes' : 'no';
 		assertStringArg ('comment', TRUE);
-	
 		commitUpdateObject ($_REQUEST['location_id'], $_REQUEST['name'], NULL, $has_problems, NULL, $_REQUEST['comment']);
 	}
 	else

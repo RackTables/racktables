@@ -836,6 +836,13 @@ function getObjectPortsAndLinks ($object_id)
 	return sortPortList ($ret, TRUE);
 }
 
+// Fetch the object type via SQL.
+// spotEntity cannot be used because it references RackObject, which doesn't suit Racks, Rows, or Locations.
+function getObjectType ($object_id) {
+	$result = usePreparedSelectBlade ('SELECT objtype_id from Object WHERE id = ?', array ($object_id));
+	return $result->fetchColumn ();
+}
+
 // If the given name is used by any object other than the current object,
 // raise an exception.  Validation is bypassed for certain object types
 // where duplicates are acceptable.
@@ -850,10 +857,7 @@ function checkObjectNameUniqueness ($name, $object_id = 0)
 	// If a valid object_id was passed, lookup the object type
 	$type_id = 0;
 	if ($object_id != 0)
-	{
-		$object = spotEntity ('object', $object_id);
-		$type_id = $object['objtype_id'];
-	}
+		$type_id = getObjectType ($object_id);
 	if (in_array ($type_id, $dupes_allowed))
 		return;
 
@@ -3437,15 +3441,8 @@ function commitUpdateAttrValue ($object_id, $attr_id, $value = '')
 	usePreparedDeleteBlade ('AttributeValue', array ('object_id' => $object_id, 'attr_id' => $attr_id));
 	if ($value == '')
 		return;
-	// fetch object type via SQL.
-	// We can not use spotEntity here, because commitUpdateAttrValue is called also for racks
-	$result = usePreparedSelectBlade ("SELECT objtype_id from Object WHERE id = ?", array ($object_id));
-	if ($row = $result->fetch(PDO::FETCH_ASSOC))
-		$object_type = $row['objtype_id'];
-	else
-		throw EntityNotFoundException('object', $object_id);
-	unset ($result);
 
+	$type_id = getObjectType ($object_id);
 	usePreparedInsertBlade
 	(
 		'AttributeValue',
@@ -3453,7 +3450,7 @@ function commitUpdateAttrValue ($object_id, $attr_id, $value = '')
 		(
 			$column => $value,
 			'object_id' => $object_id,
-			'object_tid' => $object_type,
+			'object_tid' => $type_id,
 			'attr_id' => $attr_id,
 		)
 	);
