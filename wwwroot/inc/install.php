@@ -1081,6 +1081,7 @@ INSERT INTO `Attribute` (`id`, `type`, `name`) VALUES
 (27,'uint','Height, units'),
 (28,'string','Slot number'),
 (29,'uint','Sort order'),
+(30,'dict','Mgmt type'),
 -- ^^^^^ Any new "default" attributes must go above this line! ^^^^^
 -- Primary key value 9999 makes sure, that AUTO_INCREMENT on server restart
 -- doesn't drop below 10000 (other code relies on this, site-specific
@@ -1114,6 +1115,7 @@ INSERT INTO `Chapter` (`id`, `sticky`, `name`) VALUES
 (35,'no','power supply models'),
 (36,'no','serial console server models'),
 (37,'no','wireless OS type'),
+(38,'no','management interface type'),
 -- Default chapters must have ID less than 10000, add them above this line.
 (9999,'no','multiplexer models');
 
@@ -1259,7 +1261,10 @@ INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_id`) VALUES
 (1562,14,NULL),
 (1644, 1, NULL),
 (1644, 2, 36),
-(1644, 3, NULL);
+(1644, 3, NULL),
+(1787,3,NULL),
+(1787,14,NULL),
+(1787,30,38);
 
 INSERT INTO `PortInnerInterface` VALUES
 (1,'hardwired'),

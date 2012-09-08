@@ -393,17 +393,17 @@ function detectDeviceBreed ($object_id)
 		$breed_by_swcode[$i] = 'linux';
 	for ($i = 1417; $i <= 1422; $i++)
 		$breed_by_swcode[$i] = 'linux';
-	$breed_by_hwcode = array
-	(
-		1787 => 'ucs',
-	);
+	$breed_by_hwcode = array();
 	for ($i = 589; $i <= 637; $i++)
 		$breed_by_hwcode[$i] = 'dlink';
+	$breed_by_mgmtcode = array (1788 => 'ucs');
 	foreach (getAttrValues ($object_id) as $record)
 		if ($record['id'] == 4 and array_key_exists ($record['key'], $breed_by_swcode))
 			return $breed_by_swcode[$record['key']];
 		elseif ($record['id'] == 2 and array_key_exists ($record['key'], $breed_by_hwcode))
 			return $breed_by_hwcode[$record['key']];
+		elseif ($record['id'] == 30 and array_key_exists ($record['key'], $breed_by_mgmtcode))
+			return $breed_by_mgmtcode[$record['key']];
 	return '';
 }
 
