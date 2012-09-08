@@ -353,9 +353,9 @@ function trigger_ucs()
 	return checkTypeAndAttribute
 	(
 		getBypassValue(),
-		1502, # server chassis
-		2, # HW type
-		array (1787) # UCS Manager
+		1787, # management interface
+		30, # mgmt type
+		array (1788) # UCS Manager
 	);
 }
 
