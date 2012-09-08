@@ -3206,12 +3206,19 @@ function renderAddMultipleObjectsForm ()
 	echo "</form></table>\n";
 	finishPortlet();
 
+	// create a list excluding location object types
+	$lot_typelist = $typelist;
+	foreach ($lot_typelist['other'] as $key => $value)
+	{
+		if ($key > 0 && in_array($key, $location_obj_types))
+			unset($lot_typelist['other'][$key]);
+	}
 	startPortlet ('Same type, same tags');
 	printOpFormIntro ('addLotOfObjects');
 	echo "<table border=0 align=center><tr><th>names</th><th>type</th></tr>";
 	echo "<tr><td rowspan=3><textarea name=namelist cols=40 rows=25>\n";
 	echo "</textarea></td><td valign=top>";
-	printNiftySelect ($typelist, array ('name' => 'global_type_id'), getConfigVar ('DEFAULT_OBJECT_TYPE'));
+	printNiftySelect ($lot_typelist, array ('name' => 'global_type_id'), getConfigVar ('DEFAULT_OBJECT_TYPE'));
 	echo "</td></tr>";
 	echo "<tr><th>Tags</th></tr>";
 	echo "<tr><td valign=top>";
