@@ -1,4 +1,4 @@
-0.20.0
+0.20.0 2012-09-09
 	bugfix: when long action takes place, other tabs in browser are functional now
 	bugfix: LLDP discovery was not working on some Cisco Nexus devices
 	update: LLDP: proper handling of Juniper MX neighbors for NX-OS and VRP devices
