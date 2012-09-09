@@ -5,12 +5,12 @@
 	update: LiveCDP, LiveLLDP: more accurate default interface type detection, ability to overwrite the transceiver set on port, checkboxes are set by default
 	bugfix: object portlist was not always sorted correctly
 	update: tag chains are now sorted by the root tags (e.g., your geo-tags will always precede hw model tags or vice versa)
-	update: 802.1q: config deploy to Cisco IOS switches is no more requiring 'switchport trunk encapsulation dot1q' pre-set
-	update: 802.1q: deploy is performed per-port, respecting portname sort order.
+	update: 802.1Q: config deploy to Cisco IOS switches is no more requiring 'switchport trunk encapsulation dot1q' pre-set
+	update: 802.1Q: deploy is performed per-port, respecting portname sort order.
 		Do not begin with the next port until the previous one is totally done.
-	update: 802.1q: 'Non-switch devices' portlet in VLAN info page (displays linked ports if their remotes have no 802.1q orders)
-	update: 802.1q switch templates became one of "generic" realms (you can assign tags to them)
-	update: ability to remove 802.1q VLAN from every port it belongs to in order to delete this VLAN
+	update: 802.1Q: 'Non-switch devices' portlet in VLAN info page (displays linked ports if their remotes have no 802.1Q orders)
+	update: 802.1Q switch templates became one of "generic" realms (you can assign tags to them)
+	update: ability to remove 802.1Q VLAN from every port it belongs to in order to delete this VLAN
 	update: convert racks and rows into objects (database change only, no visible differences)
 	new feature: support for mounting object without specifying units (zero-U, #173)
 	update: ability to manually reorder racks in row (#370)
