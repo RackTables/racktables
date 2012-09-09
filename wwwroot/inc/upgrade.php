@@ -1434,7 +1434,7 @@ CREATE VIEW `RackObject` AS SELECT id, name, label, objtype_id, asset_no, has_pr
 
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdefined, description) VALUES ('SYNC_802Q_LISTSRC','','string','yes','no','no','List of VLAN switches sync is enabled on')";
 			$query[] = "UPDATE `Config` SET is_userdefined='yes' WHERE varname='PROXIMITY_RANGE'";
-			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdefined, description) VALUES ('QUICK_LINK_PAGES','','string','yes','no','yes','List of pages to dislay in quick links')";
+			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdefined, description) VALUES ('QUICK_LINK_PAGES','depot,ipv4space,rackspace','string','yes','no','yes','List of pages to dislay in quick links')";
 			$query[] = "ALTER TABLE `IPv4LB` MODIFY `prio` varchar(255) DEFAULT NULL";
 
 			$query[] = "ALTER TABLE `IPv4Address` ADD COLUMN `comment` char(255) NOT NULL default '' AFTER `name`";
@@ -1448,6 +1448,16 @@ CREATE VIEW `RackObject` AS SELECT id, name, label, objtype_id, asset_no, has_pr
 			$query[] = "ALTER TABLE `IPv6Allocation` MODIFY `type` enum('regular','shared','virtual','router') NOT NULL DEFAULT 'regular'";
 
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdefined, description) VALUES ('SEARCH_DOMAINS','','string','yes','no','yes','DNS domain list (comma-separated) to search in FQDN attributes')";
+
+			// update some config variables which changed their defaults in this verison
+			replaceConfigVarValue ('SHOW_LAST_TAB', 'yes');
+			replaceConfigVarValue ('IPV4_TREE_SHOW_USAGE','no');
+			replaceConfigVarValue ('IPV4LB_LISTSRC', 'false', '{$typeid_4}');
+			replaceConfigVarValue ('FILTER_DEFAULT_ANDOR', 'and');
+			replaceConfigVarValue ('FILTER_SUGGEST_EXTRA', 'yes');
+			replaceConfigVarValue ('IPV4_TREE_RTR_AS_CELL', 'no');
+			replaceConfigVarValue ('SSH_OBJS_LISTSRC', 'false', 'none');
+			replaceConfigVarValue ('TELNET_OBJS_LISTSRC', 'false', 'none');
 
 			$query[] = "UPDATE Config SET varvalue = '0.20.0' WHERE varname = 'DB_VERSION'";
 			break;
@@ -1538,6 +1548,23 @@ function showUpgradeError ($info = '', $location = 'N/A')
 	else
 		echo "Additional information:<br><p>\n<pre>\n${info}\n</pre></p>";
 	echo "Go back or try starting from <a href='index.php'>index page</a>.<br></div>\n";
+}
+
+// changes the value of config variable. If $old_value_filter is set, value is changed only if current value equals to it.
+function replaceConfigVarValue ($varname, $new_value, $old_value_filter = NULL)
+{
+	global $dbxlink;
+	if (isset ($old_value_filter))
+	{
+		$result = $dbxlink->prepare ("SELECT varvalue FROM Config WHERE varname = ?");
+		$result->execute (array ($varname));
+		if ($row = $result->fetch (PDO::FETCH_ASSOC))
+			if ($row['varvalue'] != $old_value_filter)
+				return;
+		unset ($result);
+	}
+	$result = $dbxlink->prepare ("UPDATE Config set varvalue = ? WHERE varname = ?");
+	$result->execute (array ($new_value, $varname));
 }
 
 function renderUpgraderHTML()
