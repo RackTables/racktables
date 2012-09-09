@@ -382,7 +382,7 @@ function validBreedFunction ($breed, $command)
 function assertBreedFunction ($breed, $command)
 {
 	global $breedfunc;
-	if (! array_key_exists ("${breed}-${command}-main", $breedfunc))
+	if (! validBreedFunction ($breed, $command))
 		throw new RTGatewayError ('unsupported command for this breed');
 }
 
