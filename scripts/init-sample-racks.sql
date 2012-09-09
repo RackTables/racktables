@@ -270,23 +270,23 @@ INSERT INTO `IPv6Network` (`id`, `ip`, `mask`, `last_ip`, `name`, `comment`) VAL
 INSERT INTO `IPv4RSPool` VALUES (1,'Apache servers',NULL,NULL);
 INSERT INTO `IPv4RSPool` VALUES (2,'Resin servers',NULL,NULL);
 
-INSERT INTO `IPv4VS` VALUES (1,180879877,80,'TCP','virtual web','lvs_sched wlc\r\nlvs_method NAT\r\ndelay_loop 3\r\nalpha\r\nomega\r\nquorum 3\r\nhysteresis 1\r\n\r\n# this is a comment\r\n# VS name is %VNAME%\r\n#\r\n','HTTP_GET {\r\nurl {\r\npath /\r\nstatus_code 200\r\n}\r\nconnect_timeout 1\r\n}');
-INSERT INTO `IPv4VS` VALUES (2,180879878,80,'TCP','virtual app','lvs_sched wlc\r\nlvs_method NAT\r\ndelay_loop 3\r\nalpha\r\nomega\r\nquorum 3\r\nhysteresis 1\r\n\r\n','HTTP_GET {\r\nurl {\r\npath /\r\nstatus_code 200\r\n}\r\nconnect_timeout 1\r\n}');
+INSERT INTO `IPv4VS` VALUES (1,0x0AC80205,80,'TCP','virtual web','lvs_sched wlc\r\nlvs_method NAT\r\ndelay_loop 3\r\nalpha\r\nomega\r\nquorum 3\r\nhysteresis 1\r\n\r\n# this is a comment\r\n# VS name is %VNAME%\r\n#\r\n','HTTP_GET {\r\nurl {\r\npath /\r\nstatus_code 200\r\n}\r\nconnect_timeout 1\r\n}');
+INSERT INTO `IPv4VS` VALUES (2,0x0AC80206,80,'TCP','virtual app','lvs_sched wlc\r\nlvs_method NAT\r\ndelay_loop 3\r\nalpha\r\nomega\r\nquorum 3\r\nhysteresis 1\r\n\r\n','HTTP_GET {\r\nurl {\r\npath /\r\nstatus_code 200\r\n}\r\nconnect_timeout 1\r\n}');
 
 INSERT INTO `IPv4LB` VALUES (928,1,1,NULL,NULL,NULL);
 INSERT INTO `IPv4LB` VALUES (929,1,1,NULL,NULL,NULL);
 INSERT INTO `IPv4LB` VALUES (929,2,2,NULL,NULL,NULL);
 
-INSERT INTO `IPv4RS` VALUES (1,'yes',180879973,80,1,NULL,NULL);
-INSERT INTO `IPv4RS` VALUES (2,'yes',180879974,80,1,NULL,NULL);
-INSERT INTO `IPv4RS` VALUES (3,'no',180879975,80,1,NULL,NULL);
-INSERT INTO `IPv4RS` VALUES (4,'yes',180879976,80,1,NULL,NULL);
-INSERT INTO `IPv4RS` VALUES (5,'yes',180879977,80,1,NULL,NULL);
-INSERT INTO `IPv4RS` VALUES (6,'no',180879978,8080,2,NULL,NULL);
-INSERT INTO `IPv4RS` VALUES (7,'yes',180879979,8080,2,NULL,NULL);
-INSERT INTO `IPv4RS` VALUES (8,'yes',180879980,8080,2,NULL,NULL);
-INSERT INTO `IPv4RS` VALUES (9,'yes',180879981,8080,2,NULL,NULL);
-INSERT INTO `IPv4RS` VALUES (10,'yes',180879982,8080,2,NULL,NULL);
+INSERT INTO `IPv4RS` VALUES (1,'yes',0x0AC80265,80,1,NULL,NULL);
+INSERT INTO `IPv4RS` VALUES (2,'yes',0x0AC80266,80,1,NULL,NULL);
+INSERT INTO `IPv4RS` VALUES (3,'no',0x0AC80267,80,1,NULL,NULL);
+INSERT INTO `IPv4RS` VALUES (4,'yes',0x0AC80268,80,1,NULL,NULL);
+INSERT INTO `IPv4RS` VALUES (5,'yes',0x0AC80269,80,1,NULL,NULL);
+INSERT INTO `IPv4RS` VALUES (6,'no',0x0AC8026A,8080,2,NULL,NULL);
+INSERT INTO `IPv4RS` VALUES (7,'yes',0x0AC8026B,8080,2,NULL,NULL);
+INSERT INTO `IPv4RS` VALUES (8,'yes',0x0AC8026C,8080,2,NULL,NULL);
+INSERT INTO `IPv4RS` VALUES (9,'yes',0x0AC8026D,8080,2,NULL,NULL);
+INSERT INTO `IPv4RS` VALUES (10,'yes',0x0AC8026E,8080,2,NULL,NULL);
 
 INSERT INTO PortInterfaceCompat (iif_id, oif_id) VALUES
 (1,32);
