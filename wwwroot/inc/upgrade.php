@@ -92,21 +92,65 @@ ENDOFTEXT
 ,
 
 	'0.20.0' => <<<ENDOFTEXT
-Racks and Rows are now stored in the database as Objects.  The RackObject table 
-was renamed to Object.  SQL views were created to ease the migration of custom 
+WARNING: This release have too many internal changes, some of them were waiting more than a year
+to be released. So this release is considered "BETA" and is recommended only to curiuos users,
+who agree to sacrifice the stability to the progress.
+
+Racks and Rows are now stored in the database as Objects.  The RackObject table
+was renamed to Object.  SQL views were created to ease the migration of custom
 reports and scripts.
 
 New plugins engine instead of local.php file. To make your own code stored in local.php work,
 you must move the local.php file into the plugins/ directory. The name of this file does not
 matter any more. You also can store multiple files in that dir, separate your plugins by features,
 share them and try the plugins from other people just placing them into plugins/ dir, no more merging.
-\$path_to_local_php variable has no special meaning any more. 
+\$path_to_local_php variable has no special meaning any more.
 \$racktables_confdir variable is now used only to search for secret.php file.
 \$racktables_plugins_dir is a new overridable special variable pointing to plugins/ directory.
 
-Beginning with this version it is possible to delete IP networks and VLANs from within
-theirs properties tab. So please inspect your permissions rules to assure there are no
-undesired allows for deletion of these objects.
+Beginning with this version it is possible to delete IP prefixes, VLANs, Virtual services
+and RS pools from within theirs properties tab. So please inspect your permissions rules
+to assure there are no undesired allows for deletion of these objects. To ensure this, you could
+try this code in the beginning of permissions script:
+
+	allow {userid_1} and {\$op_del}
+	deny {\$op_del} and ({\$tab_edit} or {\$tab_properties})
+
+Hardware gateways engine was rewritten in this version of RackTables. This means that
+the file gateways/deviceconfig/switch.secrets.php is not used any more. To get information
+about configuring connection properties and credentials in a new way please visit
+http://wiki.racktables.org/index.php/Gateways
+
+This also means that recently added features based on old API (D-Link switches and Linux
+gateway support contributed by Ilya Evseev) are not working any more and waiting to be
+forward-ported to new gateways API. Sorry for that.
+
+Two new config variables appeared in this version:
+  - SEARCH_DOMAINS. Comma-separated list of DNS domains which are considered "base" for your
+    network. If RackTables search engine finds multiple objects based on your search input, but
+    there is only one which FQDN consists of your input and one of these search domains, you will
+    be redirected to this object and other results will be discarded. Such behavior was unconditional
+    since 0.19.3, which caused many objections from users. So welcome this config var.
+  - QUICK_LINK_PAGES. Comma-separated list of RackTables pages to display links to them on top.
+    Each user could have his own list.
+
+Also some of config variables have changed their default values in this version.
+This means that upgrade script will change their values if you have them in previous default state.
+This could be inconvenient, but it is the most effective way to encourage users to use new features.
+If this behavior is not what you want, simply revert these variables' values:
+  - SHOW_LAST_TAB               no => yes
+  - IPV4_TREE_SHOW_USAGE        yes =>no (networks' usage is still available by click)
+  - IPV4LB_LISTSRC              {\$typeid_4} => false
+  - FILTER_DEFAULT_ANDOR        or => and (this implicitly enables the feature of dynamic tree shrinking)
+  - FILTER_SUGGEST_EXTRA        no => yes (yes, we have extra logical filters!)
+  - IPV4_TREE_RTR_AS_CELL       yes => no (display routers as simple text, not cell)
+
+Also please note that variable IPV4_TREE_RTR_AS_CELL now has third special value
+besides 'yes' and 'no': 'none'. Use 'none' value if you are experiencing low performance
+on IP tree page. It will completely disable IP ranges scan for used/spare IPs and the
+speed of IP tree will increase radically. The price is you will not see the routers in
+IP tree at all.
+
 ENDOFTEXT
 
 );
