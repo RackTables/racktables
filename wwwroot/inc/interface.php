@@ -8600,7 +8600,7 @@ function renderVirtualResourcesSummary ()
 
 function switchportInfoJS($object_id)
 {
-	$availible_ops = array
+	$available_ops = array
 	(
 		'link' => array ('op' => 'get_link_status', 'gw' => 'getportstatus'),
 		'conf' => array ('op' => 'get_port_conf', 'gw' => 'get8021q'),
@@ -8608,7 +8608,7 @@ function switchportInfoJS($object_id)
 	);
 	$breed = detectDeviceBreed ($object_id);
 	$allowed_ops = array();
-	foreach ($availible_ops as $prefix => $data)
+	foreach ($available_ops as $prefix => $data)
 		if
 		(
 			permitted ('object', 'liveports', $data['op']) and
