@@ -2880,52 +2880,43 @@ function eos4ReadInterfaceStatus ($text)
 
 function ros11ReadInterfaceStatus ($text)
 {
-	$result = array();
-	$mode = NULL;
+	$ret = array();
+	$state = 'headerscan';
 	foreach (explode ("\n", $text) as $line)
-		if (preg_match ('/^Port\s+Type\s+Duplex\s+Speed\s+Neg\s+ctrl\s+State\s+Pressure Mode\b/', $line))
+		switch ($state)
 		{
-			$mode = 'physical interfaces';
-			$table_schema = guessTableStructure ($line);
-		}
-		elseif (preg_match ('/^Ch\s+Type\s+Duplex\s+Speed\s+Neg\s+control\s+State\b/', $line))
-		{
-			$mode = 'LACP interfaces';
-			$table_schema = guessTableStructure ($line);
-		}
-		elseif (substr ($line, 0, 9) == '-------- ') # ruler
-			continue;
-		else
-			switch ($mode)
-			{
-			case 'physical interfaces':
-				$fields = explodeTableLine ($line, $table_schema);
-				foreach (array ('Port', 'Duplex', 'Speed', 'State') as $column)
-					if (empty ($fields[$column]))
-						break 2; # next line
-				$result[ios12ShortenIfName ($fields['Port'])] = array
+		case 'headerscan':
+			if (preg_match ('/^Port\s+Type\s+Duplex\s+Speed\s+Neg\s+ctrl\s+State\s+Pressure Mode\b/', $line))
+				$state = 'physical';
+			elseif (preg_match ('/^Ch\s+Type\s+Duplex\s+Speed\s+Neg\s+control\s+State\b/', $line))
+				$state = 'group';
+			break;
+		case 'physical':
+			if (preg_match ('#^([a-z]+\d+/\d+)\s+\S+\s+(\S+)\s+(\S+)\s+\S+\s+\S+\s+(\S+)\s#', $line, $m))
+				$ret[$m[1]] = array
 				(
-					'status' => strtolower ($fields['State']),
-					'speed' => $fields['Speed'],
-					'duplex' => $fields['Duplex'],
+					'status' => strtolower ($m[4]),
+					'speed' => $m[3],
+					'duplex' => $m[2],
 				);
-				break;
-			case 'LACP interfaces':
-				$fields = explodeTableLine ($line, $table_schema);
-				foreach (array ('Ch', 'Duplex', 'Speed', 'State') as $column)
-					if (empty ($fields[$column]))
-						break 2; # next line
-				if ($fields['State'] != 'Not Present')
-					$result[ios12ShortenIfName ($fields['Ch'])] = array
-					(
-						'status' => strtolower ($fields['State']),
-						'speed' => $fields['Speed'],
-						'duplex' => $fields['Duplex'],
-					);
-				break;
-			default: # NOP
-			}
-	return $result;
+			elseif (substr ($line, 0, 9) != '-------- ') # ruler
+				$state = 'headerscan'; # end of first table
+			break;
+		case 'group':
+			if (preg_match ('#^(Po\d+)\s+\S+\s+(\S+)\s+(\S+)\s+\S+\s+\S+\s+(\S.+)\s+$#', $line, $m) && $m[4] != 'Not Present')
+				$ret[strtolower ($m[1])] = array
+				(
+					'status' => $m[4],
+					'speed' => $m[3],
+					'duplex' => $m[2],
+				);
+			elseif (substr ($line, 0, 9) != '-------- ') # ruler
+				break 2; # end of the last table
+			break;
+		default:
+			throw new RackTablesError ('state error', RackTablesError::INTERNAL);
+		}
+	return $ret;
 }
 
 function maclist_sort ($a, $b)
@@ -3162,14 +3153,14 @@ function ros11ReadMacList ($text)
 	foreach (explode ("\n", $text) as $line)
 		if (! $got_header)
 			$got_header = (1 == preg_match('/Vlan\s+Mac Address\s+Port\s+Type\b/', $line));
-		elseif ($line == '') # end of table
-			break;
 		elseif (preg_match ('/\b(\d+)\s+([a-f0-9]{2}:[a-f0-9]{2}:[a-f0-9]{2}:[a-f0-9]{2}:[a-f0-9]{2}:[a-f0-9]{2})\s+(\S+)\b/', $line, $m))
 			$result[ios12ShortenIfName ($m[3])][] = array
 			(
 				'mac' => $m[2],
 				'vid' => $m[1],
 			);
+		elseif (! preg_match ('/^--------/', $line)) # ruler
+			break; # end of table
 	foreach (array_keys ($result) as $portname)
 		usort ($result[$portname], 'maclist_sort');
 	return $result;
