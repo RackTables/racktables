@@ -371,7 +371,6 @@ function detectDeviceBreed ($object_id)
 		1367 => 'jun10', # 10S
 		1597 => 'jun10', # 10R
 		1598 => 'jun10', # 11R
-		1599 => 'jun10', # 12R
 		1594 => 'ftos8',
 		1673 => 'air12', # AIR IOS 12.3
 		1674 => 'air12', # AIR IOS 12.4

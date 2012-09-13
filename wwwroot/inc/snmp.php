@@ -30,16 +30,7 @@ $iftable_processors['generic-g-any-1000T'] = array
 	'pattern' => '@^g(\d+)$@',
 	'replacement' => 'g\\1',
 	'dict_key' => 24,
-	'label' => '\\1',
-	'try_next_proc' => FALSE,
-);
-
-$iftable_processors['generic-gi-any-1000T'] = array
-(
-	'pattern' => '@^gi(\d+)$@',
-	'replacement' => 'gi\\1',
-	'dict_key' => 24,
-	'label' => '\\1',
+	'label' => 'g\\1',
 	'try_next_proc' => FALSE,
 );
 
@@ -64,42 +55,6 @@ $iftable_processors['generic-gi-3-to-4-combo-1000SFP'] = array
 $iftable_processors['generic-gi-3-to-4-combo-1000T'] = array
 (
 	'pattern' => '@^gi(3|4)$@',
-	'replacement' => 'gi\\1',
-	'dict_key' => '1-24',
-	'label' => 'G\\1',
-	'try_next_proc' => FALSE,
-);
-
-$iftable_processors['generic-gi-9-to-10-combo-1000SFP'] = array
-(
-	'pattern' => '@^gi(9|10)$@',
-	'replacement' => 'gi\\1',
-	'dict_key' => '4-1077',
-	'label' => 'G\\1',
-	'try_next_proc' => TRUE,
-);
-
-$iftable_processors['generic-gi-9-to-10-combo-1000T'] = array
-(
-	'pattern' => '@^gi(9|10)$@',
-	'replacement' => 'gi\\1',
-	'dict_key' => '1-24',
-	'label' => 'G\\1',
-	'try_next_proc' => FALSE,
-);
-
-$iftable_processors['generic-gi-51-to-52-combo-1000SFP'] = array
-(
-	'pattern' => '@^gi(51|52)$@',
-	'replacement' => 'gi\\1',
-	'dict_key' => '4-1077',
-	'label' => 'G\\1',
-	'try_next_proc' => TRUE,
-);
-
-$iftable_processors['generic-gi-51-to-52-combo-1000T'] = array
-(
-	'pattern' => '@^gi(51|52)$@',
 	'replacement' => 'gi\\1',
 	'dict_key' => '1-24',
 	'label' => 'G\\1',
@@ -1634,19 +1589,6 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'WS-C2360-48TD: 48 RJ-45 GigE + 4 SFP+/10000',
 		'processors' => array ('catalyst-chassis-any-1000T', 'catalyst-chassis-mgmt', 'catalyst-chassis-uplinks-10000SFP+'),
 	),
-	'9.6.1.82.24.2' => array
-	(
-		'dict_key' => 1784,
-		'text' => 'SF 300-24P: RJ-45/10/100 + 2 RJ-45/10/100/1000T(X) + 2 combo-gig',
-		'processors' => array
-		(
-			'generic-gi-3-to-4-combo-1000SFP',
-			'generic-gi-3-to-4-combo-1000T',
-			'generic-gi-1-to-2-1000T',
-			'generic-fa-any-100TX',
-		),
-		'ifDescrOID' => 'ifName',
-	),
 	'9.6.1.82.48.1' => array
 	(
 		'dict_key' => 1612,
@@ -1657,30 +1599,6 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 			'generic-gi-3-to-4-combo-1000T',
 			'generic-gi-1-to-2-1000T',
 			'generic-fa-any-100TX',
-		),
-		'ifDescrOID' => 'ifName',
-	),
-	'9.6.1.83.10.1' => array
-	(
-		'dict_key' => 1785,
-		'text' => 'SG 300-10: 8 RJ-45/10/100/1000T(X) + 2 combo-gig',
-		'processors' => array
-		(
-			'generic-gi-9-to-10-combo-1000SFP',
-			'generic-gi-9-to-10-combo-1000T',
-			'generic-gi-any-1000T',
-		),
-		'ifDescrOID' => 'ifName',
-	),
-	'9.6.1.83.52.1' => array
-	(
-		'dict_key' => 1783,
-		'text' => 'SG 300-52: 50 RJ-45/10/100/1000T(X) + 2 combo-gig',
-		'processors' => array
-		(
-			'generic-gi-51-to-52-combo-1000SFP',
-			'generic-gi-51-to-52-combo-1000T',
-			'generic-gi-any-1000T',
 		),
 		'ifDescrOID' => 'ifName',
 	),
@@ -2554,8 +2472,6 @@ function doSwitchSNMPmining ($objectInfo, $device)
 		commitAddPort ($objectInfo['id'], 'console', '1-29', 'IOIOI', '');
 		$sw_version = preg_replace ('/^Arista Networks EOS version (.+) running on .*$/', '\\1', $sysDescr);
 		updateStickerForCell ($objectInfo, 5, $sw_version);
-		if (strlen ($serialNo = $device->snmpget ('mib-2.47.1.1.1.1.11.1'))) # entPhysicalSerialNumber.1
-			updateStickerForCell ($objectInfo, 1, str_replace ('"', '', substr ($serialNo, strlen ('STRING: '))));
 		break;
 	default: // Nortel...
 		break;

@@ -254,10 +254,12 @@ function getRowInfo ($row_id)
 {
 	$query =
 		"SELECT Row.id AS id, Row.name AS name, COUNT(Rack.id) AS count, " .
-		"IF(ISNULL(SUM(Rack.height)),0,SUM(Rack.height)) AS sum " .
-		"FROM Row LEFT JOIN Rack ON Rack.row_id = Row.id " .
-		"WHERE Row.id = ? " .
-		"GROUP BY Row.id";
+                "IF(ISNULL(SUM(Rack.height)),0,SUM(Rack.height)) AS sum, " .
+		  "Location.id AS Location_id, Location.name AS Location " .
+                "FROM Row LEFT JOIN Rack ON Rack.row_id = Row.id " .
+		  "LEFT OUTER JOIN Location ON Row.Location_id = Location.id " .
+                "WHERE Row.id = ? " .
+                "GROUP BY Row.id";
 	$result = usePreparedSelectBlade ($query, array ($row_id));
 	if ($row = $result->fetch (PDO::FETCH_ASSOC))
 		return $row;
@@ -474,13 +476,12 @@ function listCells ($realm, $parent_id = 0)
 	global $taglist;
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
-		$tag_id = $row['tag_id'];
 		if (array_key_exists($row['entity_id'], $ret))
-			$ret[$row['entity_id']]['etags'][$tag_id] = array
+			$ret[$row['entity_id']]['etags'][] = array
 			(
-				'id' => $tag_id,
-				'tag' => $taglist[$tag_id]['tag'],
-				'parent_id' => $taglist[$tag_id]['parent_id'],
+				'id' => $row['tag_id'],
+				'tag' => $taglist[$row['tag_id']]['tag'],
+				'parent_id' => $taglist[$row['tag_id']]['parent_id'],
 				'user' => $row['tag_user'],
 				'time' => $row['tag_time'],
 			);
@@ -493,7 +494,8 @@ function listCells ($realm, $parent_id = 0)
 		cacheAllObjectsAttributes();
 	foreach ($ret as $entity_id => &$entity)
 	{
-		sortEntityTags ($entity); // changes ['etags'] and ['itags']
+		$entity['etags'] = getExplicitTagsOnly ($entity['etags']);
+		$entity['itags'] = getImplicitTags ($entity['etags']);
 		switch ($realm)
 		{
 		case 'object':
@@ -580,7 +582,7 @@ function spotEntity ($realm, $id, $ignore_cache = FALSE)
 			}
 			$ret['etags'] = array();
 			if ($row['tag_id'] != NULL && isset ($taglist[$row['tag_id']]))
-				$ret['etags'][$row['tag_id']] = array
+				$ret['etags'][] = array
 				(
 					'id' => $row['tag_id'],
 					'tag' => $taglist[$row['tag_id']]['tag'],
@@ -590,7 +592,7 @@ function spotEntity ($realm, $id, $ignore_cache = FALSE)
 				);
 		}
 		elseif (isset ($taglist[$row['tag_id']]))
-			$ret['etags'][$row['tag_id']] = array
+			$ret['etags'][] = array
 			(
 				'id' => $row['tag_id'],
 				'tag' => $taglist[$row['tag_id']]['tag'],
@@ -601,7 +603,8 @@ function spotEntity ($realm, $id, $ignore_cache = FALSE)
 	unset ($result);
 	if (!isset ($ret['realm'])) // no rows were returned
 		throw new EntityNotFoundException ($realm, $id);
-	sortEntityTags ($ret); // changes ['etags'] and ['itags']
+	$ret['etags'] = getExplicitTagsOnly ($ret['etags']);
+	$ret['itags'] = getImplicitTags ($ret['etags']);
 	switch ($realm)
 	{
 	case 'object':
@@ -873,7 +876,6 @@ function checkObjectNameUniqueness ($name, $object_id = 0)
 
 function commitAddObject ($new_name, $new_label, $new_type_id, $new_asset_no, $taglist = array())
 {
-	checkObjectNameUniqueness ($new_name);
 	usePreparedInsertBlade
 	(
 		'Object',
@@ -896,7 +898,6 @@ function commitAddObject ($new_name, $new_label, $new_type_id, $new_asset_no, $t
 
 function commitRenameObject ($object_id, $new_name)
 {
-	checkObjectNameUniqueness ($new_name, $object_id);
 	usePreparedUpdateBlade
 	(
 		'Object',
@@ -914,7 +915,6 @@ function commitRenameObject ($object_id, $new_name)
 
 function commitUpdateObject ($object_id, $new_name, $new_label, $new_has_problems, $new_asset_no, $new_comment)
 {
-	checkObjectNameUniqueness ($new_name, $object_id);
 	usePreparedUpdateBlade
 	(
 		'Object',
@@ -979,7 +979,7 @@ function getEntityRelatives ($type, $entity_type, $entity_id)
 		}
 
 		// name needs to have some value for hrefs to work
-		if (!strlen ($name))
+        if (!strlen ($name))
 			$name = sprintf("[Unnamed %s]", formatEntityName($row['entity_type']));
 
 		$ret[$row['id']] = array(
@@ -3377,7 +3377,7 @@ function fetchAttrsForObjects ($object_set = array())
 		"left join Chapter as C on AM.chapter_id = C.id";
 	if (count ($object_set))
 		$query .= ' WHERE O.id IN (' . implode (', ', $object_set) . ')';
-	$query .= " ORDER BY A.name, A.type";
+	$query .= " order by A.name, A.type";
 
 	$result = usePreparedSelectBlade ($query);
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))

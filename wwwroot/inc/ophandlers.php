@@ -1133,7 +1133,7 @@ function updateObject ()
 	{
 		if (! array_key_exists ($sic['object_type_id'], getObjectTypeChangeOptions ($object_id)))
 			throw new InvalidRequestArgException ('new type_id', $sic['object_type_id'], 'incompatible with requested attribute values');
-		usePreparedUpdateBlade ('Object', array ('objtype_id' => $sic['object_type_id']), array ('id' => $object_id));
+		usePreparedUpdateBlade ('RackObject', array ('objtype_id' => $sic['object_type_id']), array ('id' => $object_id));
 	}
 	// Invalidate thumb cache of all racks objects could occupy.
 	foreach (getResidentRacksData ($object_id, FALSE) as $rack_id)
@@ -2542,7 +2542,7 @@ function resolve8021QConflicts ()
 			$F[$sic["pn_${i}"]] = array
 			(
 				'mode' => $sic["rm_${i}"],
-				'allowed' => array_key_exists ("ra_${i}", $sic) ? $sic["ra_${i}"] : array(),
+				'allowed' => $sic["ra_${i}"],
 				'native' => $sic["rn_${i}"],
 				'decision' => $sic["i_${i}"],
 			);

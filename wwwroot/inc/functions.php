@@ -1295,22 +1295,6 @@ function getOrphanedTags ()
 	return treeFromList ($taglist, 0, FALSE);
 }
 
-// removes implicit tags from ['etags'] array and fills ['itags'] array
-// Replaces call sequence "getExplicitTagsOnly, getImplicitTags"
-function sortEntityTags (&$cell)
-{
-	global $taglist;
-	if (! is_array ($cell['etags']))
-		throw new InvalidArgException ('$cell[etags]', $cell['etags']);
-	$cell['itags'] = array();
-	foreach ($cell['etags'] as $tag_id => $taginfo)
-		foreach ($taglist[$tag_id]['trace'] as $parent_id)
-		{
-			$cell['itags'][$parent_id] = $taglist[$parent_id];
-			unset ($cell['etags'][$parent_id]);
-		}
-}
-
 // Return the list of missing implicit tags.
 function getImplicitTags ($oldtags)
 {

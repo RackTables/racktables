@@ -304,40 +304,6 @@ function eos4ReadLLDPStatus ($input)
 	return $ret;
 }
 
-function ros11ReadLLDPStatus ($input)
-{
-	$ret = array();
-	foreach (explode ("\n", $input) as $line)
-	{
-		switch (1)
-		{
-		case preg_match ('/^Local port: (.+)$/', $line, $m):
-			$ret['current']['local_port'] = ios12ShortenIfName ($m[1]);
-			break;
-		case preg_match ('/^Port ID: (.+)$/', $line, $m):
-			$ret['current']['remote_port'] = $m[1];
-			break;
-		case preg_match ('/^System Name: (.+)$/', $line, $m):
-			if
-			(
-				array_key_exists ('current', $ret) and
-				array_key_exists ('remote_port', $ret['current']) and
-				array_key_exists ('local_port', $ret['current'])
-			)
-				$ret[$ret['current']['local_port']][] = array
-				(
-					'device' => $m[1],
-					'port' => ios12ShortenIfName ($ret['current']['remote_port']),
-				);
-			unset ($ret['current']['remote_port']);
-			break;
-		default: # NOP
-		}
-	}
-	unset ($ret['current']);
-	return $ret;
-}
-
 function ios12ReadVLANConfig ($input)
 {
 	$ret = array
@@ -452,9 +418,6 @@ function ios12PickSwitchportCommand (&$work, $line)
 			$work['current']['trunk allowed vlan'],
 			iosParseVLANString ($matches[1])
 		);
-		break;
-	case $line == ' switchport trunk allowed vlan none':
-		$work['current']['trunk allowed vlan'] = array();
 		break;
 	case (preg_match ('@^ switchport trunk allowed vlan (.+)$@', $line, $matches)):
 		$work['current']['trunk allowed vlan'] = iosParseVLANString ($matches[1]);
@@ -670,28 +633,6 @@ function fdry5GenPortRange ($from, $to)
 	$to_idx = $matches[3];
 	for ($i = $from_idx; $i <= $to_idx; $i++)
 		$ret[] = $prefix . $i;
-	return $ret;
-}
-
-# Produce a list of interfaces from a string in the following format:
-# gi0/1-5,gi0/7,gi0/9-11,gi0/13,gi0/15,gi0/24
-function ros11ParsePortString ($string)
-{
-	$ret = array();
-	foreach (explode (',', $string) as $item)
-		if (preg_match ('#^[a-z]+\d+/\d+$#', $item)) # a single interface
-			$ret[] = $item;
-		elseif (preg_match ('#^([a-z]+\d+/)(\d+)-(\d+)$#', $item, $matches)) # a range
-		{
-			# Produce a list of interfaces from the given base interface
-			# name and upper index.
-			if ($matches[3] <= $matches[2])
-				throw new InvalidArgException ('string', $string, "format error in '${item}'");
-			for ($i = $matches[2]; $i <= $matches[3]; $i++)
-				$ret[] = "${matches[1]}{$i}";
-		}
-		else
-			throw new InvalidArgException ('string', $string, "format error in '${item}'");
 	return $ret;
 }
 
@@ -1072,9 +1013,6 @@ function nxos4PickSwitchportCommand (&$work, $line)
 			$work['current']['trunk allowed vlan'],
 			iosParseVLANString ($matches[1])
 		);
-		break;
-	case $line == '  switchport trunk allowed vlan none':
-		$work['current']['trunk allowed vlan'] = array();
 		break;
 	case (preg_match ('@^  switchport trunk allowed vlan (.+)$@', $line, $matches)):
 		$work['current']['trunk allowed vlan'] = iosParseVLANString ($matches[1]);
@@ -2373,10 +2311,9 @@ function eos4Read8021QConfig ($input)
 		{
 			switch (TRUE)
 			{
-			case preg_match ('/^vlan ([\d,-]+)$/', $line, $matches):
+			case preg_match ('/^vlan ([[:alnum:],-]+)$/', $line, $matches):
 				foreach (iosParseVLANString ($matches[1]) as $vlan_id)
-					if ($vlan_id != VLAN_DFL_ID)
-						$ret['vlanlist'][] = $vlan_id;
+					$ret['vlanlist'][] = $vlan_id;
 				break;
 			case preg_match ('/^interface ((Ethernet|Port-Channel)\d+)$/', $line, $matches):
 				$portname = ios12ShortenIfName ($matches[1]);
@@ -2412,10 +2349,6 @@ function eos4Read8021QConfig ($input)
 				$ret['current']['native'] = $matches[1];
 				$ret['portconfig'][$portname][] = array ('type' => 'line-8021q', 'line' => $line);
 				break;
-			case $line == '   switchport trunk allowed vlan none':
-				$ret['current']['allowed'] = array();
-				$ret['portconfig'][$portname][] = array ('type' => 'line-8021q', 'line' => $line);
-				break;
 			case preg_match ('/^   switchport trunk allowed vlan (\S+)$/', $line, $matches):
 				$ret['current']['allowed'] = iosParseVLANString ($matches[1]);
 				$ret['portconfig'][$portname][] = array ('type' => 'line-8021q', 'line' => $line);
@@ -2444,6 +2377,8 @@ function eos4Read8021QConfig ($input)
 	return $ret;
 }
 
+<<<<<<< HEAD
+=======
 # ROS 1.1 config file sytax is derived from that of IOS, but has a few configuration
 # traits regarding 802.1Q.
 #
@@ -2637,6 +2572,7 @@ function ros11Read8021QPorts (&$work, $line)
 	}
 }
 
+>>>>>>> upstream/master
 function ciscoReadInterfaceStatus ($text)
 {
 	$result = array();
@@ -2896,6 +2832,8 @@ function eos4ReadInterfaceStatus ($text)
 	return $result;
 }
 
+<<<<<<< HEAD
+=======
 function ros11ReadInterfaceStatus ($text)
 {
 	$ret = array();
@@ -2937,6 +2875,7 @@ function ros11ReadInterfaceStatus ($text)
 	return $ret;
 }
 
+>>>>>>> upstream/master
 function maclist_sort ($a, $b)
 {
 	if ($a['vid'] == $b['vid'])
@@ -3164,6 +3103,8 @@ function eos4ReadMacList ($text)
 	return $result;
 }
 
+<<<<<<< HEAD
+=======
 function ros11ReadMacList ($text)
 {
 	$result = array();
@@ -3228,6 +3169,7 @@ function ucsReadInventory ($text)
 	return $ret;
 }
 
+>>>>>>> upstream/master
 function ios12SpotConfigText ($input)
 {
 	return preg_replace ('/.*?^Current configuration : \d+ bytes$\n(.*)^\S+#\s*\Z/sm', '$1', $input);
@@ -3266,16 +3208,6 @@ function ftos8SpotConfigText ($input)
 function eos4SpotConfigText ($input)
 {
 	return preg_replace ('/.*?^! device: \N*EOS-\N*$\n(.*)^end$.*/sm', '$1', $input);
-}
-
-function ros11SpotConfigText ($input)
-{
-	return $input;
-}
-
-function iosxr4SpotConfigText ($input)
-{
-	return preg_replace ('/.*?^!! IOS XR Configuration [^\n]*$\n(.*)^\S+#\s*\Z/sm', '$1', $input);
 }
 
 ?>

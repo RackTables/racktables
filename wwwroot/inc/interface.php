@@ -556,6 +556,7 @@ function renderRow ($row_id)
 	echo "<tr><td class=pcleft>";
 	startPortlet ($rowInfo['name']);
 	echo "<table border=0 cellspacing=0 cellpadding=3 width='100%'>\n";
+	echo "<tr><th width='50%' class=tdright>Location:</th><td class=tdleft><a href=\"".makeHref(array('page'=>'location','location_id'=>$rowInfo['Location_id']))."\">${rowInfo['Location']}</a></td></tr>\n";
 	echo "<tr><th width='50%' class=tdright>Racks:</th><td class=tdleft>${rowInfo['count']}</td></tr>\n";
 	echo "<tr><th width='50%' class=tdright>Units:</th><td class=tdleft>${rowInfo['sum']}</td></tr>\n";
 	echo "<tr><th width='50%' class=tdright>% used:</th><td class=tdleft>";
