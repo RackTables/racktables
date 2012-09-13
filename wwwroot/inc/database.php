@@ -254,10 +254,12 @@ function getRowInfo ($row_id)
 {
 	$query =
 		"SELECT Row.id AS id, Row.name AS name, COUNT(Rack.id) AS count, " .
-		"IF(ISNULL(SUM(Rack.height)),0,SUM(Rack.height)) AS sum " .
-		"FROM Row LEFT JOIN Rack ON Rack.row_id = Row.id " .
-		"WHERE Row.id = ? " .
-		"GROUP BY Row.id";
+                 "IF(ISNULL(SUM(Rack.height)),0,SUM(Rack.height)) AS sum, " .
+                 "Location.id AS Location_id, Location.name AS Location " .
+                 "FROM Row LEFT JOIN Rack ON Rack.row_id = Row.id " .
+                 "LEFT OUTER JOIN Location ON Row.Location_id = Location.id " .
+                 "WHERE Row.id = ? " .
+                 "GROUP BY Row.id";
 	$result = usePreparedSelectBlade ($query, array ($row_id));
 	if ($row = $result->fetch (PDO::FETCH_ASSOC))
 		return $row;
