@@ -1,0 +1,476 @@
+
+#rms_pluginWrapper {
+font: bold 11px Verdana, sans-serif;
+}
+
+.rmsobjecttypes {
+	padding: 3px 0px 3px 8px;
+	margin-left: 0;
+	border-bottom: 1px solid #3c78b5;
+	color: white;
+	background: #cc0033;
+	width:856px;
+	text-transform: uppercase;
+}
+
+
+
+#rmsobjects  table {
+border-collapse:collapse;
+}
+
+#rmsobjects  th{
+
+	font: bold 11px "Trebuchet MS", Verdana, Arial, Helvetica, sans-serif;
+	color: #4f6b72;
+	border-right: 1px solid #C1DAD7;
+	border-bottom: 1px solid #C1DAD7;
+	border-top: 1px solid #C1DAD7;
+	letter-spacing: 2px;
+	text-transform: uppercase;
+	text-align: left;
+	padding: 6px 6px 6px 12px;
+}
+#rmsobjects  th.ObjectHWType{
+	width: 200px;
+}
+
+
+#rmsobjects  th.ObjectName{
+	width: 400px;
+}
+
+#rmsobjects  th.ObjectLabel{
+	width: 200px;
+}
+#rmsobjects  td {
+padding-top: 0.1em;
+padding-right: 0.5em;
+padding-bottom: 0.1em;
+padding-left: 0.5em;
+margin-top: 0.1em;
+margin-right: 0.1em;
+margin-bottom: 0.1em;
+margin-left: 0.1em;
+vertical-align: top;
+}
+
+#rmsobjects  tr.odd {
+	background-color: #e5e5e5;
+	background-image: none;
+	background-repeat: repeat;
+	background-attachment: scroll;
+	background-position: 0% 0%;
+}
+
+#rmsobjects  tr.even {
+	background-color: #d5d5d5;
+	background-image: none;
+	background-repeat: repeat;
+	background-attachment: scroll;
+	background-position: 0% 0%;
+}
+
+
+#partaddform  # table {
+border-collapse:collapse;
+}
+
+#partaddform  th{
+
+	font: bold 11px "Trebuchet MS", Verdana, Arial, Helvetica, sans-serif;
+	color: #4f6b72;
+	border-right: 1px solid #C1DAD7;
+	border-bottom: 1px solid #C1DAD7;
+	border-top: 1px solid #C1DAD7;
+	letter-spacing: 2px;
+	text-transform: uppercase;
+	text-align: left;
+	padding: 6px 6px 6px 12px;
+}
+#partaddform  th.ObjectHWType{
+	width: 200px;
+}
+
+
+#partaddform  th.ObjectName{
+	width: 400px;
+}
+
+#partaddform  th.ObjectLabel{
+	width: 200px;
+}
+
+
+#partaddform  td {
+padding-top: 0.1em;
+padding-right: 0.5em;
+padding-bottom: 0.1em;
+padding-left: 0.5em;
+margin-top: 0.1em;
+margin-right: 0.1em;
+margin-bottom: 0.1em;
+margin-left: 0.1em;
+vertical-align: top;
+}
+
+#partaddform   tr:nth-child(odd) {
+	background-color: #e5e5e5;
+}
+
+#partaddform   tr:nth-child(even){
+	background-color: #d5d5d5;
+}
+
+#PartType  # table {
+border-collapse:collapse;
+}
+
+#PartType  th{
+
+	font: bold 11px "Trebuchet MS", Verdana, Arial, Helvetica, sans-serif;
+	color: #4f6b72;
+	border-right: 1px solid #C1DAD7;
+	border-bottom: 1px solid #C1DAD7;
+	border-top: 1px solid #C1DAD7;
+	letter-spacing: 2px;
+	text-transform: uppercase;
+	text-align: left;
+	padding: 6px 6px 6px 12px;
+}
+
+#PartType   tr:nth-child(odd) {
+	background-color: #e5e5e5;
+}
+
+#PartType  tr:nth-child(even){
+	background-color: #d5d5d5;
+}
+
+#Category  # table {
+border-collapse:collapse;
+}
+
+#Category  th{
+
+	font: bold 11px "Trebuchet MS", Verdana, Arial, Helvetica, sans-serif;
+	color: #4f6b72;
+	border-right: 1px solid #C1DAD7;
+	border-bottom: 1px solid #C1DAD7;
+	border-top: 1px solid #C1DAD7;
+	letter-spacing: 2px;
+	text-transform: uppercase;
+	text-align: left;
+	padding: 6px 6px 6px 12px;
+}
+
+#Category   tr:nth-child(odd) {
+	background-color: #e5e5e5;
+}
+
+#Category  tr:nth-child(even){
+	background-color: #d5d5d5;
+}
+
+#brands  # table {
+border-collapse:collapse;
+}
+
+#brands  th{
+
+	font: bold 11px "Trebuchet MS", Verdana, Arial, Helvetica, sans-serif;
+	color: #4f6b72;
+	border-right: 1px solid #C1DAD7;
+	border-bottom: 1px solid #C1DAD7;
+	border-top: 1px solid #C1DAD7;
+	letter-spacing: 2px;
+	text-transform: uppercase;
+	text-align: left;
+	padding: 6px 6px 6px 12px;
+}
+
+#brands   tr:nth-child(odd) {
+	background-color: #e5e5e5;
+}
+
+#brands  tr:nth-child(even){
+	background-color: #d5d5d5;
+}
+
+#partupdateform  # table {
+border-collapse:collapse;
+}
+
+#partupdateform  th{
+
+	font: bold 11px "Trebuchet MS", Verdana, Arial, Helvetica, sans-serif;
+	color: #4f6b72;
+	border-right: 1px solid #C1DAD7;
+	border-bottom: 1px solid #C1DAD7;
+	border-top: 1px solid #C1DAD7;
+	letter-spacing: 2px;
+	text-transform: uppercase;
+	text-align: left;
+	padding: 6px 6px 6px 12px;
+}
+#partupdateform  th.ObjectHWType{
+	width: 200px;
+}
+
+
+#partupdateform  th.ObjectName{
+	width: 400px;
+}
+
+#partupdateform  th.ObjectLabel{
+	width: 200px;
+}
+#partupdateform  td {
+padding-top: 0.1em;
+padding-right: 0.5em;
+padding-bottom: 0.1em;
+padding-left: 0.5em;
+margin-top: 0.1em;
+margin-right: 0.1em;
+margin-bottom: 0.1em;
+margin-left: 0.1em;
+vertical-align: top;
+}
+
+#partupdateform  tr:nth-child(odd) {
+	background-color: #e5e5e5;
+}
+
+#partupdateform  tr:nth-child(even) {
+	background-color: #d5d5d5;
+}
+
+
+
+#statushistory  # table {
+border-collapse:collapse;
+}
+
+#statushistory  th{
+
+	font: bold 11px "Trebuchet MS", Verdana, Arial, Helvetica, sans-serif;
+	color: #4f6b72;
+	border-right: 1px solid #C1DAD7;
+	border-bottom: 1px solid #C1DAD7;
+	border-top: 1px solid #C1DAD7;
+	letter-spacing: 2px;
+	text-transform: uppercase;
+	text-align: left;
+	padding: 6px 6px 6px 12px;
+}
+#statushistory  th.ObjectHWType{
+	width: 200px;
+}
+
+
+#statushistory  th.ObjectName{
+	width: 400px;
+}
+
+#statushistory  th.ObjectLabel{
+	width: 200px;
+}
+#statushistory  td {
+padding-top: 0.1em;
+padding-right: 0.5em;
+padding-bottom: 0.1em;
+padding-left: 0.5em;
+margin-top: 0.1em;
+margin-right: 0.1em;
+margin-bottom: 0.1em;
+margin-left: 0.1em;
+vertical-align: top;
+}
+
+#statushistory  tr:nth-child(odd) {
+	background-color: #e5e5e5;
+}
+
+#statushistory  tr:nth-child(even) {
+	background-color: #d5d5d5;
+}
+
+
+
+#partslist  # table {
+border-collapse:collapse;
+}
+
+#partslist  th{
+
+	font: bold 11px "Trebuchet MS", Verdana, Arial, Helvetica, sans-serif;
+	color: #4f6b72;
+	border-right: 1px solid #C1DAD7;
+	border-bottom: 1px solid #C1DAD7;
+	border-top: 1px solid #C1DAD7;
+	letter-spacing: 2px;
+	text-transform: uppercase;
+	text-align: left;
+	padding: 6px 6px 6px 12px;
+}
+#partslist  th.ObjectHWType{
+	width: 200px;
+}
+
+
+#partslist  th.ObjectName{
+	width: 400px;
+}
+
+#partslist  th.ObjectLabel{
+	width: 200px;
+}
+#partslist  td {
+padding-top: 0.1em;
+padding-right: 0.5em;
+padding-bottom: 0.1em;
+padding-left: 0.5em;
+margin-top: 0.1em;
+margin-right: 0.1em;
+margin-bottom: 0.1em;
+margin-left: 0.1em;
+vertical-align: top;
+}
+
+#partslist  tr:nth-child(odd) {
+	background-color: #e5e5e5;
+}
+
+#partslist  tr:nth-child(even) {
+	background-color: #d5d5d5;
+}
+
+
+/**************************FORM  ELEMENTS***************************************/
+#iteminfo form {counter-reset: fieldsets; padding-bottom: 20px;width: 1000px;}
+#iteminfo form ol li {
+border:1px solid #CCC;
+line-height:20px;
+list-style-image:none;
+list-style-position:outside;
+list-style-type:none;
+margin-bottom:10px;
+padding:5px 10px;
+background-color:#b71e32;
+
+
+}
+
+#iteminfo .DBMatchExact {
+float: left;font-size: 90%;width: 350px;color:#00ff22;font-weight:bold;
+}
+
+#iteminfo .DBMatch {
+float: left;font-size: 90%;width: 350px;color:#FFCC00;font-weight:bold;
+}
+
+
+/*form ol ol li {background: none;border: none;float: left;}*/
+#iteminfo form  label {float: left;font-size: 90%;width: 80px;color:#FFF;font-weight:bold;}
+
+
+#iteminfo form input {
+width:400px;
+}
+
+#iteminfo form input[type=submit] {background: #eaeaea;
+width:200px;
+}
+
+
+/**************************FORM  ELEMENTS***************************************/
+
+
+/**************************FORM  ELEMENTS***************************************/
+#ripeupdate form {counter-reset: fieldsets; padding-bottom: 20px;width: 1000px;}
+#ripeupdate form ol li {background:url('http://www.redstonemanaged.co.uk/assets/templates/rms/images/TestimonialsHeader.jpg') repeat-x;
+-moz-background-clip:border;
+-moz-background-inline-policy:continuous;
+-moz-background-origin:padding;
+-moz-border-radius-bottomleft:5px;
+-moz-border-radius-bottomright:5px;
+-moz-border-radius-topleft:5px;
+-moz-border-radius-topright:5px;
+border:1px solid #CCC;
+line-height:30px;
+list-style-image:none;
+list-style-position:outside;
+list-style-type:none;
+margin-bottom:10px;
+padding:5px 10px;
+background-color:#b71e32;
+
+
+}
+
+#ripeupdate .DBMatchExact {
+float: left;font-size: 90%;width: 350px;color:#00ff22;font-weight:bold;
+}
+
+#ripeupdate .DBMatch {
+float: left;font-size: 90%;width: 350px;color:#FFCC00;font-weight:bold;
+}
+
+
+/*form ol ol li {background: none;border: none;float: left;}*/
+#ripeupdate form  label {float: left;font-size: 90%;width: 80px;color:#FFF;font-weight:bold;}
+
+
+#ripeupdate form input {
+width:400px;
+}
+
+#ripeupdate form input[type=submit] {background: #eaeaea;
+width:200px;
+}
+
+#partnav  # table {
+border-collapse:collapse;
+}
+
+#partnav  td {
+	padding-top: 0.1em;
+	padding-right: 1em;
+	padding-bottom: 0.1em;
+	padding-left: 1em;
+	margin-top: 0.1em;
+	margin-right: 0.1em;
+	margin-bottom: 0.1em;
+	margin-left: 0.1em;
+	vertical-align: top;
+}
+#partnav a {
+	padding-top: 0.1em;
+	padding-right: 0.5em;
+	padding-bottom: 0.1em;
+	padding-left: 0.5em;
+    text-decoration: none;
+	font: bold 11px Verdana, sans-serif;
+	color: white;
+    height: 100%;
+    width: 100%;
+    display: block;
+    background-color: #cc0033;
+    border-style: solid;
+    border-bottom-color: #333333;
+    border-right-color: #555555;
+    border-left-color: #BBBBBB;
+    border-top-color: #DDDDDD;
+
+}
+
+
+
+
+
+
+
+
+
+
+/**************************FORM  ELEMENTS***************************************/

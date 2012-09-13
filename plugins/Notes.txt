@@ -1,0 +1,17 @@
+
+Version seems to ship with function_exists needs chaanging isset for plugins arch to work.
+
+// call the main handler - page or tab handler.
+                if (isset ($tabhandler[$pageno][$tabno]))
+                {
+                        if (! isset ($tabhandler[$pageno][$tabno]))
+                                throw new RackTablesError ("Missing handler function for node '${pageno}-${tabno}'", RackTablesError::INTERNAL);
+                        call_user_func ($tabhandler[$pageno][$tabno], getBypassValue());
+                }
+                elseif (isset ($page[$pageno]['handler']))
+                {
+                        if (! function_exists ($page[$pageno]['handler']))
+                                throw new RackTablesError ("Missing handler function for node '${pageno}'", RackTablesError::INTERNAL);
+                        $page[$pageno]['handler'] ($tabno);
+                }
+

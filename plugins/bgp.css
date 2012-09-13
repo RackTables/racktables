@@ -1,0 +1,79 @@
+#bgpsessions  # table {
+border-collapse:collapse;
+}
+
+#bgpsessions  td {
+	padding-top: 0.1em;
+	padding-right: 1em;
+	padding-bottom: 0.1em;
+	padding-left: 1em;
+	margin-top: 0.1em;
+	margin-right: 0.1em;
+	margin-bottom: 0.1em;
+	margin-left: 0.1em;
+	vertical-align: top;
+}
+
+#bgpsessions  tr.BGPSession:nth-child(odd) {
+	background-color: #e5e5e5;
+}
+
+#bgpsessions  tr.BGPSession:nth-child(even) {
+	background-color: #d5d5d5;
+}
+
+#bgpsessions  td.ConfiguredASN {
+	background-color: #4CC417;
+}
+
+#bgpsessions  div.ConfiguredPeer {
+	background-color: #4CC417;
+	width:100%;
+}
+
+#bgpsessions  div.MissConfiguredPeer {
+	background-color: #ffb1b1;
+	width:100%;
+	font-weight:bold;
+}
+
+
+#bgpsessions  th.Name{
+	width: 150px;
+}
+
+#bgpsessions  th.Description{
+	width: 200px;
+}
+
+#bgpsessions  th.Password{
+	width: 100px;
+}
+
+#bgpsessions  th.Address{
+	width: 550px;
+}
+#bgpsessions  th.PeerPoints{
+	width: 500px;
+}
+
+
+table.PeeringLan {
+	border: 1px solid #3c78b5;
+	width:100%;
+}
+
+table.PeeringLan td.name {
+	width: 110px;
+	text-align: left;
+	border: 1px solid black;
+	padding: 0px 0px 0px 0px;
+	margin: 0px 0px 0px 0px;
+	vertical-align:: middle;
+}
+
+table.PeeringLan td.session {
+	width: 390px;
+	text-align: left;
+	border: 1px solid black;
+}

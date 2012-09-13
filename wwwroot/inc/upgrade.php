@@ -1279,10 +1279,6 @@ CREATE TABLE `CactiGraph` (
 			$query[] = "ALTER TABLE AttributeValue CHANGE COLUMN `object_id` `object_id` INT(10) UNSIGNED NOT NULL";
 			$query[] = "ALTER TABLE AttributeValue CHANGE COLUMN `attr_id` `attr_id` INT(10) UNSIGNED NOT NULL";
 			$query[] = "ALTER TABLE AttributeValue ADD PRIMARY KEY (`object_id`, `attr_id`), DROP INDEX `object_id`";
-			$query[] = "ALTER TABLE Dictionary ADD COLUMN `dict_sticky` enum('yes','no') DEFAULT 'no' AFTER `dict_key`";
-			$query[] = "UPDATE Dictionary SET dict_sticky = 'yes' WHERE dict_key < 50000";
-			$query[] = "ALTER TABLE Dictionary ADD UNIQUE KEY dict_unique (chapter_id, dict_value, dict_sticky)";
-			$query[] = "ALTER TABLE Dictionary DROP KEY `chap_to_val`";
 			$query[] = "UPDATE Config SET varvalue = '0.19.14' WHERE varname = 'DB_VERSION'";
 			break;
 		case '0.20.0':
@@ -1449,6 +1445,10 @@ CREATE VIEW `RackObject` AS SELECT id, name, label, objtype_id, asset_no, has_pr
 
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdefined, description) VALUES ('SEARCH_DOMAINS','','string','yes','no','yes','DNS domain list (comma-separated) to search in FQDN attributes')";
 
+			$query[] = "ALTER TABLE Dictionary ADD COLUMN `dict_sticky` enum('yes','no') DEFAULT 'no' AFTER `dict_key`";
+			$query[] = "UPDATE Dictionary SET dict_sticky = 'yes' WHERE dict_key < 50000";
+			$query[] = "ALTER TABLE Dictionary ADD UNIQUE KEY dict_unique (chapter_id, dict_value, dict_sticky)";
+			$query[] = "ALTER TABLE Dictionary DROP KEY `chap_to_val`";
 			$query[] = "UPDATE Config SET varvalue = '0.20.0' WHERE varname = 'DB_VERSION'";
 			break;
 		case 'dictionary':
