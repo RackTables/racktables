@@ -61,6 +61,16 @@ $breedfunc = array
 	'nxos4-getmaclist-main'    => 'nxos4ReadMacList',
 	'nxos4-xlatepushq-main'    => 'nxos4TranslatePushQueue',
 	'nxos4-getallconf-main'    => 'nxos4SpotConfigText',
+	'dlink-get8021q-main'      => 'dlinkReadVLANConfig',
+	'dlink-get8021q-top'       => 'dlinkScanTopLevel',
+	'dlink-get8021q-pickvlan'  => 'dlinkPickVLANCommand',
+	'dlink-getportstatus-main' => 'dlinkReadInterfaceStatus',
+	'dlink-getmaclist-main'    => 'dlinkReadMacList',
+	'dlink-xlatepushq-main'    => 'dlinkTranslatePushQueue',
+	'linux-get8021q-main'      => 'linuxReadVLANConfig',
+	'linux-getportstatus-main' => 'linuxReadInterfaceStatus',
+	'linux-getmaclist-main'    => 'linuxReadMacList',
+	'linux-xlatepushq-main'    => 'linuxTranslatePushQueue',
 	'xos12-getlldpstatus-main' => 'xos12ReadLLDPStatus',
 	'xos12-get8021q-main'      => 'xos12Read8021QConfig',
 	'xos12-xlatepushq-main'    => 'xos12TranslatePushQueue',
@@ -82,6 +92,19 @@ $breedfunc = array
 	'eos4-getlldpstatus-main'  => 'eos4ReadLLDPStatus',
 	'eos4-get8021q-main'       => 'eos4Read8021QConfig',
 	'eos4-xlatepushq-main'     => 'eos4TranslatePushQueue',
+	'ros11-getallconf-main'    => 'ros11SpotConfigText',
+	'ros11-xlatepushq-main'    => 'ros11TranslatePushQueue',
+	'ros11-getlldpstatus-main' => 'ros11ReadLLDPStatus',
+	'ros11-getportstatus-main' => 'ros11ReadInterfaceStatus',
+	'ros11-getmaclist-main'    => 'ros11ReadMacList',
+	'ros11-get8021q-main'      => 'ros11Read8021QConfig',
+	'ros11-get8021q-scantop'   => 'ros11Read8021QScanTop',
+	'ros11-get8021q-vlandb'    => 'ros11Read8021QVLANDatabase',
+	'ros11-get8021q-readports' => 'ros11Read8021QPorts',
+	'iosxr4-xlatepushq-main'    => 'iosxr4TranslatePushQueue',
+	'iosxr4-getallconf-main'    => 'iosxr4SpotConfigText',
+	'ucs-xlatepushq-main'      => 'ucsTranslatePushQueue',
+	'ucs-getinventory-main'    => 'ucsReadInventory',
 );
 
 // This function launches specified gateway with specified
@@ -352,10 +375,34 @@ function detectDeviceBreed ($object_id)
 		1673 => 'air12', # AIR IOS 12.3
 		1674 => 'air12', # AIR IOS 12.4
 		1675 => 'eos4',
+		1759 => 'iosxr4', # Cisco IOS XR 4.2
+		1786 => 'ros11', # Marvell ROS 1.1
+		242 => 'linux',
+		243 => 'linux',
+		1331 => 'linux',
+		1332 => 'linux',
+		1333 => 'linux',
+		1334 => 'linux',
+		1395 => 'linux',
+		1396 => 'linux',
 	);
+	for ($i = 225; $i <= 235; $i++)
+		$breed_by_swcode[$i] = 'linux';
+	for ($i = 418; $i <= 436; $i++)
+		$breed_by_swcode[$i] = 'linux';
+	for ($i = 1417; $i <= 1422; $i++)
+		$breed_by_swcode[$i] = 'linux';
+	$breed_by_hwcode = array();
+	for ($i = 589; $i <= 637; $i++)
+		$breed_by_hwcode[$i] = 'dlink';
+	$breed_by_mgmtcode = array (1788 => 'ucs');
 	foreach (getAttrValues ($object_id) as $record)
 		if ($record['id'] == 4 and array_key_exists ($record['key'], $breed_by_swcode))
 			return $breed_by_swcode[$record['key']];
+		elseif ($record['id'] == 2 and array_key_exists ($record['key'], $breed_by_hwcode))
+			return $breed_by_hwcode[$record['key']];
+		elseif ($record['id'] == 30 and array_key_exists ($record['key'], $breed_by_mgmtcode))
+			return $breed_by_mgmtcode[$record['key']];
 	return '';
 }
 
@@ -368,7 +415,7 @@ function validBreedFunction ($breed, $command)
 function assertBreedFunction ($breed, $command)
 {
 	global $breedfunc;
-	if (! array_key_exists ("${breed}-${command}-main", $breedfunc))
+	if (! validBreedFunction ($breed, $command))
 		throw new RTGatewayError ('unsupported command for this breed');
 }
 

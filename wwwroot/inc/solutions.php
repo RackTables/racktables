@@ -33,7 +33,7 @@ function dispatchImageRequest()
 		$tabno = 'download';
 		fixContext();
 		assertPermission();
-		renderFilePreview (getBypassValue());
+		renderImagePreview (getBypassValue());
 		break;
 	case 'cactigraph':
 		$pageno = 'object';
@@ -283,7 +283,7 @@ function renderProgressBarError()
 	);
 }
 
-function renderFilePreview ($file_id)
+function renderImagePreview ($file_id)
 {
 	if ($image = getFileCache ($file_id)) //Cache Hit
 	{

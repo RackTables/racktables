@@ -87,6 +87,17 @@ function queryTerminal ($object_id, $commands, $tolerate_remote_errors = TRUE)
 			$protocol = 'telnet'; # strict RFC854 implementation, netcat won't work
 			$prompt = '^(\xf2?login|Username|Password): $|^\S+[>#]$';
 			break;
+		case 'ros11':
+			$protocol = 'netcat'; # see ftos8 case
+			$prompt = '^(User Name|\rPassword):$|^\r?\S+# $';
+			break;
+		case 'iosxr4':
+			$protocol = 'telnet';
+			$prompt = '^\r?(Login|Username|Password): $|^\r?\S+[>#]$';
+			break;
+		case 'ucs':
+			$protocol = 'ucssdk';
+			break;
 		default:
 			$protocol = 'netcat';
 			$prompt = NULL;
@@ -145,6 +156,16 @@ function queryTerminal ($object_id, $commands, $tolerate_remote_errors = TRUE)
 				case 'eos4':
 					$commands = "enable\nno terminal monitor\nterminal length 0\n" . $commands;
 					break;
+				case 'ros11':
+					$commands = "terminal datadump\n" . $commands;
+					$commands .= "\n\n"; # temporary workaround for telnet server
+					break;
+				case 'iosxr4':
+					$commands = "terminal length 0\nterminal monitor disable\n" . $commands;
+					break;
+				case 'dlink':
+					$commands = "disable clipaging\n" . $commands;
+					break;
 			}
 			// prepend telnet commands by credentials
 			if (isset ($settings['password']))
@@ -175,6 +196,24 @@ function queryTerminal ($object_id, $commands, $tolerate_remote_errors = TRUE)
 			$params_from_settings['i'] = 'identity_file';
 			$params_from_settings['sudo-user'] = 'sudo_user';
 			$params_from_settings['connect-timeout'] = 'connect_timeout';
+			break;
+		case 'ucssdk': # remote XML through a Python backend
+			$params = array(); # reset
+			# UCS in its current implementation besides the terminal_settings() provides
+			# an additional username/password feed through the HTML from. Whenever the
+			# user provides the credentials through the form, use these instead of the
+			# credentials [supposedly] set by terminal_settings().
+			if ($script_mode != TRUE && ! isCheckSet ('use_terminal_settings'))
+			{
+				genericAssertion ('ucs_login', 'string');
+				genericAssertion ('ucs_password', 'string');
+				$settings['username'] = $_REQUEST['ucs_login'];
+				$settings['password'] = $_REQUEST['ucs_password'];
+			}
+			foreach (array ('hostname', 'username', 'password') as $item)
+				if (empty ($settings[$item]))
+					throw new RTGatewayError ("${item} not available, check terminal_settings()");
+			$commands = "login ${settings['hostname']} ${settings['username']} ${settings['password']}\n" . $commands;
 			break;
 		default:
 			throw RTGatewayError ("Invalid terminal protocol '${settings['protocol']}' specified");

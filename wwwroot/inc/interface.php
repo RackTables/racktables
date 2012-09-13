@@ -3207,12 +3207,19 @@ function renderAddMultipleObjectsForm ()
 	echo "</form></table>\n";
 	finishPortlet();
 
+	// create a list excluding location object types
+	$lot_typelist = $typelist;
+	foreach ($lot_typelist['other'] as $key => $value)
+	{
+		if ($key > 0 && in_array($key, $location_obj_types))
+			unset($lot_typelist['other'][$key]);
+	}
 	startPortlet ('Same type, same tags');
 	printOpFormIntro ('addLotOfObjects');
 	echo "<table border=0 align=center><tr><th>names</th><th>type</th></tr>";
 	echo "<tr><td rowspan=3><textarea name=namelist cols=40 rows=25>\n";
 	echo "</textarea></td><td valign=top>";
-	printNiftySelect ($typelist, array ('name' => 'global_type_id'), getConfigVar ('DEFAULT_OBJECT_TYPE'));
+	printNiftySelect ($lot_typelist, array ('name' => 'global_type_id'), getConfigVar ('DEFAULT_OBJECT_TYPE'));
 	echo "</td></tr>";
 	echo "<tr><th>Tags</th></tr>";
 	echo "<tr><td valign=top>";
@@ -8594,7 +8601,7 @@ function renderVirtualResourcesSummary ()
 
 function switchportInfoJS($object_id)
 {
-	$availible_ops = array
+	$available_ops = array
 	(
 		'link' => array ('op' => 'get_link_status', 'gw' => 'getportstatus'),
 		'conf' => array ('op' => 'get_port_conf', 'gw' => 'get8021q'),
@@ -8602,7 +8609,7 @@ function switchportInfoJS($object_id)
 	);
 	$breed = detectDeviceBreed ($object_id);
 	$allowed_ops = array();
-	foreach ($availible_ops as $prefix => $data)
+	foreach ($available_ops as $prefix => $data)
 		if
 		(
 			permitted ('object', 'liveports', $data['op']) and
@@ -8832,6 +8839,28 @@ function formatPortReservation ($port)
 		formatLoggedSpan ($port['last_log'], $port['reservation_comment'], "rsvtext $editable id-${port['id']} op-upd-reservation-port") .
 		'</td>';
 	return $ret;
+}
+
+function renderEditUCSForm()
+{
+	startPortlet ('UCS Actions');
+	printOpFormIntro ('autoPopulateUCS');
+	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
+	echo "<tr><th class=tdright><label for=ucs_login>Login:</label></th>";
+	echo "<td class=tdleft colspan=2><input type=text name=ucs_login id=ucs_login></td></tr>\n";
+	echo "<tr><th class=tdright><label for=ucs_password>Password:</label></th>";
+	echo "<td class=tdleft colspan=2><input type=password name=ucs_password id=ucs_password></td></tr>\n";
+	echo "<tr><th colspan=3><input type=checkbox name=use_terminal_settings id=use_terminal_settings>";
+	echo "<label for=use_terminal_settings>Use Credentials from terminal_settings()</label></th></tr>\n";
+	echo "<tr><th class=tdright>Actions:</th><td class=tdleft>";
+	printImageHREF ('DQUEUE sync_ready', 'Auto-populate UCS', TRUE);
+	echo '</td><td class=tdright>';
+	echo "<a href='".
+		makeHrefProcess (array ('op' => 'cleanupUCS', 'object_id' => getBypassValue())) .
+		"'  onclick=\"javascript:return confirm('Are you sure you want to cleanup UCS Domain?')\">" .
+		getImageHREF ('CLEAR', 'Clean-up UCS domain') . "</a>";
+	echo "</td></tr></table></form>\n";
+	finishPortlet();
 }
 
 ?>

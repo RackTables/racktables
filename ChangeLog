@@ -1,33 +1,66 @@
-0.20.0
-	bugfix: when long action takes place, RackTables allows user to work simultaneously in different tabs
-	bugfix: make SLB form rendering conditional (#403, by Hannes Georg)
-	update: handle wide-band WDM transceivers
-	update: 802.1q: config deploy to Cisco IOS switches is no more requiring 'switchport trunk encapsulation dot1q' pre-set
-	update: convert racks and rows into objects (by Aaron Dummer)
-	update: support for mounting zero-U objects (#173, by Aaron Dummer)
-	update: ability to manually sort racks (#370)
-	update: create network and link to a VLAN at once
-	update: 8021Q switch autosync status is now managed by SYNC_802Q_LISTSRC config constraint
-	update: priority field of SLB triplet can now store any text, not only integers
-	update: 802.1q, LLDP and LivePorts features support for Force10 OSv8 switches
+0.20.1
+	bugfix: restore D-Link (#533) and Linux (#541) gateway support
+	new feature: initial Cisco UCS support
+0.20.0 2012-09-09
+	bugfix: when long action takes place, other tabs in browser are functional now
+	bugfix: LLDP discovery was not working on some Cisco Nexus devices
+	update: LLDP: proper handling of Juniper MX neighbors for NX-OS and VRP devices
 	update: LiveCDP, LiveLLDP: more accurate default interface type detection, ability to overwrite the transceiver set on port, checkboxes are set by default
-	update: ability to remove 802.1q VLAN from every port it belongs to in order to delete this VLAN
-	update: API: you can selectively override the default static content by specifying the $local_staticdir global var
-	update: ability to delete IP prefixes from within its properties tab
-	update: adding and deleting forms of IP prefixes are separated
+	bugfix: object portlist was not always sorted correctly
+	update: tag chains are now sorted by the root tags (e.g., your geo-tags will always precede hw model tags or vice versa)
+	update: 802.1Q: config deploy to Cisco IOS switches is no more requiring 'switchport trunk encapsulation dot1q' pre-set
+	update: 802.1Q: deploy is performed per-port, respecting portname sort order.
+		Do not begin with the next port until the previous one is totally done.
+	update: 802.1Q: 'Non-switch devices' portlet in VLAN info page (displays linked ports if their remotes have no 802.1Q orders)
+	update: 802.1Q switch templates became one of "generic" realms (you can assign tags to them)
+	update: ability to remove 802.1Q VLAN from every port it belongs to in order to delete this VLAN
+	update: convert racks and rows into objects (database change only, no visible differences)
+	new feature: support for mounting object without specifying units (zero-U, #173)
+	update: ability to manually reorder racks in row (#370)
+	update: ability to delete IP prefixes, VLANs, Virtual services and RS pools on their Properties tab
+	update: display a link to just created IP network/VS/RS pool entity in creation success message
+	update: new config var SEARCH_DOMAINS to control the annoying FQDN-search feature introduced by 0.19.3
+	update: cable ids for links could be edited through AJAX
+	new feature: adjustable quick links at the top of the page, logo removed
 	update: support for performing DB upgrades from a console using contrib code (#556) by Hannes Georg
-	update: added comment field to IP addresses (#555)
+	update: in CLI mode the error and warning messages are echoed to stderr
 	update: SNMP support for Cisco SF/SG 300s (#507, #594), 2651XM (#526), WS-CE500-24TT (#511), WS-CE500G-12TC (#512), WS-C3550-24 (#525), 3Com 4200G (#342),
 		Dell PowerConnect 3348, 3448, 3548, 5224, 5324, 54xx, 6024F, 6224, 6224F (#383, #390, #427, #502), HP ProCurve 6600-48G-4XG (#522), 2650, 2900,
 		Netgear FS750T2 (#479), Juniper EX3200-48T (#510), Linksys SRW2048 (#350)
-	update: new config var SEARCH_DOMAINS to control the FQDN-search feature introduced by 0.19.3
+	update: handle wide-band WDM transceivers
+	new feature: Force10 OSv8, Arista EOS and Marvell ROS switches support
+	new feature: SLB feature was rewritten (configuration macro processor, IPv6 SLB, fwmark services, RS pool cloning added)
+	update: significant part of IP-related code was rewritten for clarity, unification and extendability. Visible changes are:
+		- IP tree rendering speed has been increased
+		- IP tree filtering does not affect child networks of the filtered ones
+		- In "do not show IPv4 usage" mode the network usage is available by click through AJAX
+		- Each arrow aside backtrace element in IP net pages is now click-able to display IP subtree
+		- Clicking on 'IP space' link in navigation bar from within IP net page resets saved filter
+		- VLAN numbers in IP tree are rendered below CIDR, no more dedicated column
+		- Auto scroll-down is performed when clicking on 'expand IP tree element' button
+		- Row highlight color became nicer
+		- 'knights' support for IPv6
+		- IP log (allocation history) support
+		- new IP allocation form offers the most popular allocation type
+		- 'collapse all' link in IP tree
+		- v4 net usage progress bar displays both allocated and unallocated spaces
+		- '$spare_XX' and '$aggregate' autotags (to filter nets based on the size of available spare subnetworks)
+		- '$vlan_XX' autotags added to ipv4net/ipv6net cells
+		- '$masklen_ge_XX' and '$masklen_le_XX' autotags removed from 'ipv4net' cells
+		- IPV4_TREE_RTR_AS_CELL config variable has another state 'none' (see release notes)
+		- Object's 'IPv4' and 'IPv6' tabs were merged into single 'IP' tab
+		- added comment field to IP addresses (#555)
+		- create network and link it to a VLAN at once
 	new feature: you can obtain who has made tag assignment, object's ports or IPv4 address changes by hovering cursor on these entities
-	new feature: adjustable quick links at the top of the page
-	new feature: IPv6 SLB support
-	new feature: Arista EOS and Marvell ROS support
-	new feature: locations
-	new feature: plugin installation is as simple as copying a file into plugins/ dir
-0.19.14
+	new feature: locations: you can document objects' locations by creating special container objects and put other objects/rows into them
+	new feature: API: plugin installation is as simple as copying a file into plugins/ dir (see release notes)
+	new feature: API: you can selectively override the default static content by specifying the $local_staticdir global var
+	new feature: API: ability to redefine/override internal RackTables functions (hooks introduced)
+	new feature: API: chaining of custom ophandlers, tabhandlers, hookhandlers
+	new feature: API: gateway engine was rewritten.
+		Ability to set up different connection protocols, properties and credentials using flexible filtering (see release notes)
+
+0.19.14 2012-09-02
 	update: Port linker selects nearest rack by default (#562) by Hannes Georg
 	update: SNMP support for Cisco 2960-24TC-L (#554), 2924M-XL (#582), 3560E-12SD (#564), ProCurves (#558),
 		Allied Telesyn AT9924T (#581)

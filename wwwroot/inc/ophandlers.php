@@ -1319,25 +1319,25 @@ function resetUIConfig()
 	setConfigVar ('SHOW_AUTOMATIC_TAGS','no');
 	setConfigVar ('DEFAULT_OBJECT_TYPE','4');
 	setConfigVar ('IPV4_AUTO_RELEASE','1');
-	setConfigVar ('SHOW_LAST_TAB', 'no');
+	setConfigVar ('SHOW_LAST_TAB', 'yes');
 	setConfigVar ('EXT_IPV4_VIEW', 'yes');
 	setConfigVar ('TREE_THRESHOLD', '25');
 	setConfigVar ('IPV4_JAYWALK', 'no');
 	setConfigVar ('ADDNEW_AT_TOP', 'yes');
-	setConfigVar ('IPV4_TREE_SHOW_USAGE', 'yes');
+	setConfigVar ('IPV4_TREE_SHOW_USAGE', 'no');
 	setConfigVar ('PREVIEW_TEXT_MAXCHARS', '10240');
 	setConfigVar ('PREVIEW_TEXT_ROWS', '25');
 	setConfigVar ('PREVIEW_TEXT_COLS', '80');
 	setConfigVar ('PREVIEW_IMAGE_MAXPXS', '320');
 	setConfigVar ('VENDOR_SIEVE', '');
-	setConfigVar ('IPV4LB_LISTSRC', '{$typeid_4}');
-	setConfigVar ('IPV4OBJ_LISTSRC','{$typeid_4} or {$typeid_7} or {$typeid_8} or {$typeid_12} or {$typeid_445} or {$typeid_447} or {$typeid_798} or {$typeid_1504}');
+	setConfigVar ('IPV4LB_LISTSRC', 'false');
+	setConfigVar ('IPV4OBJ_LISTSRC','{$typeid_4} or {$typeid_7} or {$typeid_8} or {$typeid_12} or {$typeid_445} or {$typeid_447} or {$typeid_798} or {$typeid_1504} or {\$typeid_1507} or {\$typeid_1788}');
 	setConfigVar ('IPV4NAT_LISTSRC','{$typeid_4} or {$typeid_7} or {$typeid_8} or {$typeid_798}');
 	setConfigVar ('ASSETWARN_LISTSRC','{$typeid_4} or {$typeid_7} or {$typeid_8}');
 	setConfigVar ('NAMEWARN_LISTSRC','{$typeid_4} or {$typeid_7} or {$typeid_8}');
 	setConfigVar ('RACKS_PER_ROW','12');
 	setConfigVar ('FILTER_PREDICATE_SIEVE','');
-	setConfigVar ('FILTER_DEFAULT_ANDOR','or');
+	setConfigVar ('FILTER_DEFAULT_ANDOR','and');
 	setConfigVar ('FILTER_SUGGEST_ANDOR','yes');
 	setConfigVar ('FILTER_SUGGEST_TAGS','yes');
 	setConfigVar ('FILTER_SUGGEST_PREDICATES','yes');
@@ -1350,7 +1350,7 @@ function resetUIConfig()
 	setConfigVar ('ENABLE_MULTIPORT_FORM', 'no');
 	setConfigVar ('DEFAULT_PORT_IIF_ID', '1');
 	setConfigVar ('DEFAULT_PORT_OIF_IDS', '1=24; 3=1078; 4=1077; 5=1079; 6=1080; 8=1082; 9=1084; 10=1588; 11=1668');
-	setConfigVar ('IPV4_TREE_RTR_AS_CELL', 'yes');
+	setConfigVar ('IPV4_TREE_RTR_AS_CELL', 'no');
 	setConfigVar ('PROXIMITY_RANGE', 0);
 	setConfigVar ('IPV4_TREE_SHOW_VLAN', 'yes');
 	setConfigVar ('VLANSWITCH_LISTSRC', '');
@@ -1370,10 +1370,10 @@ function resetUIConfig()
 	setConfigVar ('SYNCDOMAIN_MAX_PROCESSES', '0');
 	setConfigVar ('PORT_EXCLUSION_LISTSRC', '{$typeid_3} or {$typeid_10} or {$typeid_11} or {$typeid_1505} or {$typeid_1506}');
 	setConfigVar ('FILTER_RACKLIST_BY_TAGS', 'yes');
-	setConfigVar ('SSH_OBJS_LISTSRC', 'none');
-	setConfigVar ('TELNET_OBJS_LISTSRC', 'none');
+	setConfigVar ('SSH_OBJS_LISTSRC', 'false');
+	setConfigVar ('TELNET_OBJS_LISTSRC', 'false');
 	setConfigVar ('SYNC_802Q_LISTSRC', '');
-	setConfigVar ('QUICK_LINK_PAGES', '');
+	setConfigVar ('QUICK_LINK_PAGES', 'depot,ipv4space,rackspace');
 	setConfigVar ('CACTI_LISTSRC', 'false');
 	setConfigVar ('CACTI_URL', '');
 	setConfigVar ('CACTI_USERNAME', '');
@@ -1813,18 +1813,20 @@ function addLocation ()
 }
 
 $msgcode['updateLocation']['OK'] = 6;
+// This function is used by two forms:
+//  - renderEditLocationForm - all attributes may be modified
+//  - renderRackspaceLocationEditor - only the name and parent may be modified
 function updateLocation ()
 {
 	global $pageno;
 	assertUIntArg ('location_id');
 	assertUIntArg ('parent_id', TRUE);
 	assertStringArg ('name');
-	
-	if ($pageno != 'rackspace')
+
+	if ($pageno == 'location')
 	{
 		$has_problems = (isset ($_REQUEST['has_problems']) and $_REQUEST['has_problems'] == 'on') ? 'yes' : 'no';
 		assertStringArg ('comment', TRUE);
-	
 		commitUpdateObject ($_REQUEST['location_id'], $_REQUEST['name'], NULL, $has_problems, NULL, $_REQUEST['comment']);
 	}
 	else
@@ -2763,6 +2765,126 @@ function saveQuickLinks()
 		setUserConfigVar ('QUICK_LINK_PAGES', implode(',', $_REQUEST['page_list']));	
 		showSuccess ('Quick links list is saved');
 	}
+}
+
+$ucsproductmap = array
+(
+	'N20-B6620-1' => 1736, # B200 M1
+	'N20-B6625-1' => 1737, # B200 M2
+	'N20-B6620-2' => 1741, # B250 M1
+	'N20-B6625-2' => 1742, # B250 M2
+	'B230-BASE-M2' => 1740, # B230 M2
+	'N20-B6730-1' => 1739, # B230 M1
+	'B440-BASE-M2' => 1743, # B440 M2
+	'UCSB-B200-M3' => 1738, # B200 M3
+	'N10-S6100' => 1755, # 6120 FI
+	'UCS-FI-6248UP' => 1757, # 6248 FI
+	'UCS-FI-6296UP' => 1758, # 6296 FI
+	'N20-C6508' => 1735, # 5108 chassis
+);
+
+function autoPopulateUCS()
+{
+	global $ucsproductmap;
+	$ucsm_id = getBypassValue();
+	$oinfo = spotEntity ('object', $ucsm_id);
+	$chassis_id = array();
+	$done = 0;
+	# There are three request parameters (use_terminal_settings, ucs_login and
+	# ucs_password) not processed here. These are asserted and used inside
+	# queryTerminal().
+
+	try
+	{
+		$contents = queryDevice ($ucsm_id, 'getinventory');
+	}
+	catch (RTGatewayError $e)
+	{
+		showError ($e->getMessage());
+		return;
+	}
+	foreach ($contents as $item)
+	{
+		$mname = preg_replace ('#^sys/(.+)$#', $oinfo['name'] . '/\\1', $item['DN']);
+		if ($item['type'] == 'NetworkElement')
+		{
+			$new_object_id = commitAddObject ($mname, NULL, 8, NULL);
+			#    Set H/W Type for Network Switch
+			if (array_key_exists ($item['model'], $ucsproductmap))
+				commitUpdateAttrValue ($new_object_id, 2, $ucsproductmap[$item['model']]);
+			#  	 Set Serial#
+			commitUpdateAttrValue ($new_object_id, 1, $item['serial']);
+			commitLinkEntities ('object', $ucsm_id, 'object', $new_object_id);
+			bindIPToObject (ip_parse ($item['OOB']), $new_object_id, 'mgmt0', 'regular');
+			$done++;
+		}
+		elseif ($item['type'] == 'EquipmentChassis')
+		{
+			$chassis_id[$item['DN']] = $new_object_id = commitAddObject ($mname, NULL, 1502, NULL);
+			#    Set H/W Type for Server Chassis
+			if (array_key_exists ($item['model'], $ucsproductmap))
+				commitUpdateAttrValue ($new_object_id, 2, $ucsproductmap[$item['model']]);
+			#  	 Set Serial#
+			commitUpdateAttrValue ($new_object_id, 1, $item['serial']);
+			commitLinkEntities ('object', $ucsm_id, 'object', $new_object_id);
+			$done++;
+		}
+		elseif ($item['type'] == 'ComputeBlade')
+		{
+			if ($item['assigned'] == '')
+				$new_object_id = commitAddObject ($mname, NULL, 4, NULL);
+			else
+			{
+				$spname = preg_replace ('#.+/ls-(.+)#i', '${1}', $item['assigned']);
+				$new_object_id = commitAddObject ($spname, NULL, 4, NULL);
+			}
+			#    Set H/W Type for Blade Server
+			if (array_key_exists ($item['model'], $ucsproductmap))
+				commitUpdateAttrValue ($new_object_id, 2, $ucsproductmap[$item['model']]);
+			#  	 Set Serial#
+			commitUpdateAttrValue ($new_object_id, 1, $item['serial']);
+			#  	 Set Slot#
+			commitUpdateAttrValue ($new_object_id, 28, $item['slot']);
+			$parent_name = preg_replace ('#^([^/]+)/([^/]+)/([^/]+)$#', '${1}/${2}', $item['DN']);
+			if (array_key_exists ($parent_name, $chassis_id))
+				commitLinkEntities ('object', $chassis_id[$parent_name], 'object', $new_object_id);
+			$done++;
+		}
+	} # endfor
+	showSuccess ("Auto-populated UCS Domain '${oinfo['name']}' with ${done} items");
+}
+
+function cleanupUCS()
+{
+	global $ucsproductmap;
+	$oinfo = spotEntity ('object', getBypassValue());
+	$contents = getObjectContentsList ($oinfo['id']);
+
+	$clear = TRUE;
+	foreach ($contents as $item_id)
+	{
+		$o = spotEntity ('object', $item_id);
+		$attrs = getAttrValues ($item_id);
+		# use HW type to decide if the object was produced by autoPopulateUCS()
+		if (! array_key_exists (2, $attrs) or ! in_array ($attrs[2]['key'], $ucsproductmap))
+		{
+			showWarning ('Contained object ' . mkA ($o['dname'], 'object', $item_id) . ' is not an automatic UCS object');
+			$clear = FALSE;
+		}
+	}
+	if (! $clear)
+	{
+		showNotice ('nothing was deleted');
+		return;
+	}
+
+	$done = 0;
+	foreach ($contents as $item_id)
+	{
+		commitDeleteObject ($item_id);
+		$done++;
+	}
+	showSuccess ("Removed ${done} items from UCS Domain '${oinfo['name']}'");
 }
 
 function getOpspec()

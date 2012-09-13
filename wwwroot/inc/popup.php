@@ -376,7 +376,7 @@ function renderPopupPortSelector()
 	$spare_ports = array();
 	if
 	(
-		$in_rack ||
+		! empty ($filter['racks'])  ||
 		! empty ($filter['objects']) ||
 		! empty ($filter['ports'])
 	)

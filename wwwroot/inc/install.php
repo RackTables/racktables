@@ -234,7 +234,7 @@ function init_config ()
 			$_REQUEST['mysql_username'],
 			$_REQUEST['mysql_password']
 		);
-		echo "<h2 class=trerror>Datase connection failed. Check parameters and try again.</h2>\n";
+		echo "<h2 class=trerror>Database connection failed. Check parameters and try again.</h2>\n";
 		echo "PDO DSN: <tt class=trwarning>${pdo_dsn}</tt><br>";
 		return FALSE;
 	}
@@ -256,7 +256,7 @@ function init_config ()
 # Default setting is to authenticate users locally, but it is possible to
 # employ existing LDAP or Apache user accounts. Check RackTables wiki for
 # more information, in particular, this page for LDAP configuration details:
-# http://sourceforge.net/apps/mediawiki/racktables/index.php?title=LDAP
+# http://wiki.racktables.org/index.php?title=LDAP
 
 #\$LDAP_options = array
 #(
@@ -404,7 +404,7 @@ function congrats ()
 {
 	echo 'Congratulations! RackTables installation is complete. After pressing Proceed you will ';
 	echo 'enter the system. Authenticate with <strong>admin</strong> username.<br>RackTables project has a ';
-	echo "<a href='http://sourceforge.net/apps/mediawiki/racktables/index.php?title=RackTablesAdminGuide'>";
+	echo "<a href='http://wiki.racktables.org/index.php?title=RackTablesAdminGuide'>";
 	echo "wiki</a> and a ";
 	echo "<a href='http://www.freelists.org/list/racktables-users'>mailing list</a> for users. Have fun.<br>";
 	return TRUE;
@@ -1081,6 +1081,7 @@ INSERT INTO `Attribute` (`id`, `type`, `name`) VALUES
 (27,'uint','Height, units'),
 (28,'string','Slot number'),
 (29,'uint','Sort order'),
+(30,'dict','Mgmt type'),
 -- ^^^^^ Any new "default" attributes must go above this line! ^^^^^
 -- Primary key value 9999 makes sure, that AUTO_INCREMENT on server restart
 -- doesn't drop below 10000 (other code relies on this, site-specific
@@ -1114,6 +1115,7 @@ INSERT INTO `Chapter` (`id`, `sticky`, `name`) VALUES
 (35,'no','power supply models'),
 (36,'no','serial console server models'),
 (37,'no','wireless OS type'),
+(38,'no','management interface type'),
 -- Default chapters must have ID less than 10000, add them above this line.
 (9999,'no','multiplexer models');
 
@@ -1259,7 +1261,10 @@ INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_id`) VALUES
 (1562,14,NULL),
 (1644, 1, NULL),
 (1644, 2, 36),
-(1644, 3, NULL);
+(1644, 3, NULL),
+(1787,3,NULL),
+(1787,14,NULL),
+(1787,30,38);
 
 INSERT INTO `PortInnerInterface` VALUES
 (1,'hardwired'),
@@ -1520,29 +1525,29 @@ INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdef
 ('SHOW_IMPLICIT_TAGS','yes','string','no','no','yes','Show implicit tags'),
 ('SHOW_AUTOMATIC_TAGS','no','string','no','no','yes','Show automatic tags'),
 ('IPV4_AUTO_RELEASE','1','uint','no','no','yes','Auto-release IPv4 addresses on allocation'),
-('SHOW_LAST_TAB','no','string','yes','no','yes','Remember last tab shown for each page'),
+('SHOW_LAST_TAB','yes','string','yes','no','yes','Remember last tab shown for each page'),
 ('EXT_IPV4_VIEW','yes','string','no','no','yes','Extended IPv4 view'),
 ('TREE_THRESHOLD','25','uint','yes','no','yes','Tree view auto-collapse threshold'),
 ('IPV4_JAYWALK','no','string','no','no','no','Enable IPv4 address allocations w/o covering network'),
 ('ADDNEW_AT_TOP','yes','string','no','no','yes','Render "add new" line at top of the list'),
-('IPV4_TREE_SHOW_USAGE','yes','string','no','no','yes','Show address usage in IPv4 tree'),
+('IPV4_TREE_SHOW_USAGE','no','string','no','no','yes','Show address usage in IPv4 tree'),
 ('PREVIEW_TEXT_MAXCHARS','10240','uint','yes','no','yes','Max chars for text file preview'),
 ('PREVIEW_TEXT_ROWS','25','uint','yes','no','yes','Rows for text file preview'),
 ('PREVIEW_TEXT_COLS','80','uint','yes','no','yes','Columns for text file preview'),
 ('PREVIEW_IMAGE_MAXPXS','320','uint','yes','no','yes','Max pixels per axis for image file preview'),
 ('VENDOR_SIEVE','','string','yes','no','yes','Vendor sieve configuration'),
-('IPV4LB_LISTSRC','{\$typeid_4}','string','yes','no','no','List source: IPv4 load balancers'),
-('IPV4OBJ_LISTSRC','{\$typeid_4} or {\$typeid_7} or {\$typeid_8} or {\$typeid_12} or {\$typeid_445} or {\$typeid_447} or {\$typeid_798} or {\$typeid_1397} or {\$typeid_1502} or {\$typeid_1503} or {\$typeid_1504} or {\$typeid_1507}','string','yes','no','no','List source: IPv4-enabled objects'),
+('IPV4LB_LISTSRC','false','string','yes','no','no','List source: IPv4 load balancers'),
+('IPV4OBJ_LISTSRC','{\$typeid_4} or {\$typeid_7} or {\$typeid_8} or {\$typeid_12} or {\$typeid_445} or {\$typeid_447} or {\$typeid_798} or {\$typeid_1397} or {\$typeid_1502} or {\$typeid_1503} or {\$typeid_1504} or {\$typeid_1507} or {\$typeid_1787}','string','yes','no','no','List source: IPv4-enabled objects'),
 ('IPV4NAT_LISTSRC','{\$typeid_4} or {\$typeid_7} or {\$typeid_8} or {\$typeid_798}','string','yes','no','no','List source: IPv4 NAT performers'),
 ('ASSETWARN_LISTSRC','{\$typeid_4} or {\$typeid_7} or {\$typeid_8}','string','yes','no','no','List source: object, for which asset tag should be set'),
 ('NAMEWARN_LISTSRC','{\$typeid_4} or {\$typeid_7} or {\$typeid_8}','string','yes','no','no','List source: object, for which common name should be set'),
 ('RACKS_PER_ROW','12','uint','yes','no','yes','Racks per row'),
 ('FILTER_PREDICATE_SIEVE','','string','yes','no','yes','Predicate sieve regex(7)'),
-('FILTER_DEFAULT_ANDOR','or','string','no','no','yes','Default list filter boolean operation (or/and)'),
+('FILTER_DEFAULT_ANDOR','and','string','no','no','yes','Default list filter boolean operation (or/and)'),
 ('FILTER_SUGGEST_ANDOR','yes','string','no','no','yes','Suggest and/or selector in list filter'),
 ('FILTER_SUGGEST_TAGS','yes','string','no','no','yes','Suggest tags in list filter'),
 ('FILTER_SUGGEST_PREDICATES','yes','string','no','no','yes','Suggest predicates in list filter'),
-('FILTER_SUGGEST_EXTRA','no','string','no','no','yes','Suggest extra expression in list filter'),
+('FILTER_SUGGEST_EXTRA','yes','string','no','no','yes','Suggest extra expression in list filter'),
 ('DEFAULT_SNMP_COMMUNITY','public','string','no','no','no','Default SNMP Community string'),
 ('IPV4_ENABLE_KNIGHT','yes','string','no','no','yes','Enable IPv4 knight feature'),
 ('TAGS_TOPLIST_SIZE','50','uint','yes','no','yes','Tags top list size'),
@@ -1551,7 +1556,7 @@ INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdef
 ('ENABLE_MULTIPORT_FORM','no','string','no','no','yes','Enable "Add/update multiple ports" form'),
 ('DEFAULT_PORT_IIF_ID','1','uint','no','no','no','Default port inner interface ID'),
 ('DEFAULT_PORT_OIF_IDS','1=24; 3=1078; 4=1077; 5=1079; 6=1080; 8=1082; 9=1084; 10=1588; 11=1668','string','no','no','no','Default port outer interface IDs'),
-('IPV4_TREE_RTR_AS_CELL','yes','string','no','no','yes','Show full router info for each network in IPv4 tree view'),
+('IPV4_TREE_RTR_AS_CELL','no','string','no','no','yes','Show full router info for each network in IPv4 tree view'),
 ('PROXIMITY_RANGE','0','uint','yes','no','yes','Proximity range (0 is current rack only)'),
 ('VLANSWITCH_LISTSRC', '', 'string', 'yes', 'no', 'yes', 'List of VLAN running switches'),
 ('VLANIPV4NET_LISTSRC', '', 'string', 'yes', 'no', 'yes', 'List of VLAN-based IPv4 networks'),
@@ -1572,10 +1577,10 @@ INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdef
 ('SYNCDOMAIN_MAX_PROCESSES','0','uint','yes','no', 'no', 'How many worker proceses syncdomain cron script should create'),
 ('PORT_EXCLUSION_LISTSRC','{\$typeid_3} or {\$typeid_10} or {\$typeid_11} or {\$typeid_1505} or {\$typeid_1506}','string','yes','no','no','List source: objects without ports'),
 ('FILTER_RACKLIST_BY_TAGS','yes','string','yes','no','yes','Rackspace: show only racks matching the current object\'s tags'),
-('SSH_OBJS_LISTSRC','none','string','yes','no','yes','Rackcode filter for SSH-managed objects'),
-('TELNET_OBJS_LISTSRC','none','string','yes','no','yes','Rackcode filter for telnet-managed objects'),
+('SSH_OBJS_LISTSRC','false','string','yes','no','yes','Rackcode filter for SSH-managed objects'),
+('TELNET_OBJS_LISTSRC','false','string','yes','no','yes','Rackcode filter for telnet-managed objects'),
 ('SYNC_802Q_LISTSRC','','string','yes','no','no','List of VLAN switches sync is enabled on'),
-('QUICK_LINK_PAGES','','string','yes','no','yes','List of pages to dislay in quick links'),
+('QUICK_LINK_PAGES','depot,ipv4space,rackspace','string','yes','no','yes','List of pages to dislay in quick links'),
 ('CACTI_LISTSRC','false','string','yes','no','no','List of object with Cacti graphs'),
 ('CACTI_URL','','string','yes','no','no','Cacti server base URL'),
 ('CACTI_USERNAME','','string','yes','no','no','Cacti user account'),

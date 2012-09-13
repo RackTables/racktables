@@ -839,6 +839,41 @@ function getObjectPortsAndLinks ($object_id)
 	return sortPortList ($ret, TRUE);
 }
 
+// Fetch the object type via SQL.
+// spotEntity cannot be used because it references RackObject, which doesn't suit Racks, Rows, or Locations.
+function getObjectType ($object_id) {
+	$result = usePreparedSelectBlade ('SELECT objtype_id from Object WHERE id = ?', array ($object_id));
+	return $result->fetchColumn ();
+}
+
+// If the given name is used by any object other than the current object,
+// raise an exception.  Validation is bypassed for certain object types
+// where duplicates are acceptable.
+// NOTE: This could be enforced more strictly at the database level using triggers.
+function checkObjectNameUniqueness ($name, $object_id = 0)
+{
+	// Some object types do not need unique names
+	// 1560 - Rack
+	// 1561 - Row
+	$dupes_allowed = array (1560, 1561);
+
+	// If a valid object_id was passed, lookup the object type
+	$type_id = 0;
+	if ($object_id != 0)
+		$type_id = getObjectType ($object_id);
+	if (in_array ($type_id, $dupes_allowed))
+		return;
+
+	$result = usePreparedSelectBlade
+	(
+		'SELECT COUNT(*) FROM Object WHERE name = ? AND id != ?',
+		array ($name, $object_id)
+	);
+	$row = $result->fetch (PDO::FETCH_NUM);
+	if ($row[0] != 0)
+		throw new InvalidRequestArgException ('name', $name, 'An object with that name already exists');
+}
+
 function commitAddObject ($new_name, $new_label, $new_type_id, $new_asset_no, $taglist = array())
 {
 	usePreparedInsertBlade
@@ -957,6 +992,29 @@ function getEntityRelatives ($type, $entity_type, $entity_id)
 	}
 	// sort by name
 	uasort($ret, 'compare_name');
+	return $ret;
+}
+
+# This function is recursive and returns only object IDs.
+function getObjectContentsList ($object_id)
+{
+	$ret = array();
+	$result = usePreparedSelectBlade
+	(
+		'SELECT child_entity_id FROM EntityLink ' .
+		'WHERE parent_entity_type = "object" AND child_entity_type = "object" AND parent_entity_id = ?',
+		array ($object_id)
+	);
+	# Free this result before the called copy builds its one.
+	$rows = $result->fetchAll (PDO::FETCH_ASSOC);
+	unset ($result);
+	foreach ($rows as $row)
+	{
+		if (in_array ($row['child_entity_id'], $ret))
+			throw new RackTablesError ("Cyclic dependency for object ${object_id}", RackTablesError::INTERNAL);
+		$ret[] = $row['child_entity_id'];
+		$ret = array_merge ($ret, call_user_func (__FUNCTION__, $row['child_entity_id']));
+	}
 	return $ret;
 }
 
@@ -3406,15 +3464,8 @@ function commitUpdateAttrValue ($object_id, $attr_id, $value = '')
 	usePreparedDeleteBlade ('AttributeValue', array ('object_id' => $object_id, 'attr_id' => $attr_id));
 	if ($value == '')
 		return;
-	// fetch object type via SQL.
-	// We can not use spotEntity here, because commitUpdateAttrValue is called also for racks
-	$result = usePreparedSelectBlade ("SELECT objtype_id from Object WHERE id = ?", array ($object_id));
-	if ($row = $result->fetch(PDO::FETCH_ASSOC))
-		$object_type = $row['objtype_id'];
-	else
-		throw EntityNotFoundException('object', $object_id);
-	unset ($result);
 
+	$type_id = getObjectType ($object_id);
 	usePreparedInsertBlade
 	(
 		'AttributeValue',
@@ -3422,7 +3473,7 @@ function commitUpdateAttrValue ($object_id, $attr_id, $value = '')
 		(
 			$column => $value,
 			'object_id' => $object_id,
-			'object_tid' => $object_type,
+			'object_tid' => $type_id,
 			'attr_id' => $attr_id,
 		)
 	);
