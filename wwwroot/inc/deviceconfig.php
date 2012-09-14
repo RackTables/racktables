@@ -1002,9 +1002,7 @@ function nxos4PickSwitchportCommand (&$work, $line)
 		$work['portconfig'][$port_name][] = array ('type' => 'line-header', 'line' => $line);
 		// fill in defaults
 		if (!array_key_exists ('mode', $work['current']))
-			$work['current']['mode'] = array_key_exists ('switchport', $work['current'])
-				? 'access'
-				: 'SKIP';
+			$work['current']['mode'] = 'access';
 		// save work, if it makes sense
 		switch ($work['current']['mode'])
 		{
@@ -1059,9 +1057,6 @@ function nxos4PickSwitchportCommand (&$work, $line)
 	$line_class = 'line-8021q';
 	switch (TRUE)
 	{
-	case (preg_match ('@^  switchport$@', $line)):
-		$work['current']['switchport'] = TRUE;
-		break;
 	case (preg_match ('@^  switchport mode (.+)$@', $line, $matches)):
 		$work['current']['mode'] = $matches[1];
 		break;
