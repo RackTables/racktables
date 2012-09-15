@@ -7589,49 +7589,58 @@ function renderObject8021QSync ($object_id)
 {
 	$vswitch = getVLANSwitchInfo ($object_id);
 	$object = spotEntity ('object', $object_id);
+	amplifyCell ($object);
+	$maxdecisions = 0;
+	$D = getStored8021QConfig ($vswitch['object_id'], 'desired');
+	$C = getStored8021QConfig ($vswitch['object_id'], 'cached');
 	try
 	{
 		$R = getRunning8021QConfig ($object_id);
+		$plan = apply8021QOrder ($vswitch['template_id'], get8021QSyncOptions ($vswitch, $D, $C, $R['portdata']));
+		foreach ($plan as $port)
+			if
+			(
+				$port['status'] == 'delete_conflict' or
+				$port['status'] == 'merge_conflict' or
+				$port['status'] == 'add_conflict' or
+				$port['status'] == 'martian_conflict'
+			)
+				$maxdecisions++;
 	}
-	catch (Exception $re)
+	catch (RTGatewayError $re)
 	{
-		showWarning ('Device configuration unavailable:<br>' . $re->getMessage());
-		return;
+		$error = $re->getMessage();
+		$R = NULL;
 	}
-	$D = getStored8021QConfig ($vswitch['object_id'], 'desired');
-	$C = getStored8021QConfig ($vswitch['object_id'], 'cached');
-	$plan = apply8021QOrder ($vswitch['template_id'], get8021QSyncOptions ($vswitch, $D, $C, $R['portdata']));
-	$maxdecisions = 0;
-	foreach ($plan as $port)
-		if
-		(
-			$port['status'] == 'delete_conflict' or
-			$port['status'] == 'merge_conflict' or
-			$port['status'] == 'add_conflict' or
-			$port['status'] == 'martian_conflict'
-		)
-			$maxdecisions++;
 
-	if (isset ($_REQUEST['hl_port_id']))
-	{
-		assertUIntArg ('hl_port_id');
-		$hl_port_id = intval ($_REQUEST['hl_port_id']);
-		$hl_port_name = NULL;
-		addAutoScrollScript ("port-$hl_port_id");
-
-		amplifyCell ($object);
-		foreach ($object['ports'] as $port)
-			if (mb_strlen ($port['name']) && $port['id'] == $hl_port_id)
-			{
-				$hl_port_name = $port['name'];
-				break;
-			}
-	}
-	
 	echo '<table border=0 class=objectview cellspacing=0 cellpadding=0>';
 	echo '<tr><td class=pcleft width="50%">';
-
 	startPortlet ('schedule');
+	renderObject8021QSyncSchedule ($vswitch, $maxdecisions);
+	finishPortlet();
+	startPortlet ('preview legend');
+	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
+	echo '<tr><th>status</th><th width="50%">color code</th></tr>';
+	echo '<tr><td class=tdright>with template role:</td><td class=trbusy>&nbsp;</td></tr>';
+	echo '<tr><td class=tdright>without template role:</td><td>&nbsp;</td></tr>';
+	echo '<tr><td class=tdright>new data:</td><td class=trok>&nbsp;</td></tr>';
+	echo '<tr><td class=tdright>warnings in new data:</td><td class=trwarning>&nbsp;</td></tr>';
+	echo '<tr><td class=tdright>fatal errors in new data:</td><td class=trerror>&nbsp;</td></tr>';
+	echo '<tr><td class=tdright>deleted data:</td><td class=trnull>&nbsp;</td></tr>';
+	echo '</table>';
+	finishPortlet();
+	echo '</td><td class=pcright>';
+	startPortlet ('sync plan live preview');
+	if ($R !== NULL)
+		renderObject8021QSyncPreview ($object, $vswitch, $plan, $R, $maxdecisions);
+	else
+		echo "<p class=row_error>gateway error: ${error}</p>";
+	finishPortlet();
+	echo '</td></tr></table>';
+}
+
+function renderObject8021QSyncSchedule ($vswitch, $maxdecisions)
+{
 	echo '<table border=0 cellspacing=0 cellpadding=3 align=center>';
 	// FIXME: sort rows newest event last
 	$rows = array();
@@ -7665,27 +7674,29 @@ function renderObject8021QSync ($object_id)
 	}
 	echo '</td></tr>';
 	echo '</table>';
-	finishPortlet();
+}
 
-	startPortlet ('preview legend');
-	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
-	echo '<tr><th>status</th><th width="50%">color code</th></tr>';
-	echo '<tr><td class=tdright>with template role:</td><td class=trbusy>&nbsp;</td></tr>';
-	echo '<tr><td class=tdright>without template role:</td><td>&nbsp;</td></tr>';
-	echo '<tr><td class=tdright>new data:</td><td class=trok>&nbsp;</td></tr>';
-	echo '<tr><td class=tdright>warnings in new data:</td><td class=trwarning>&nbsp;</td></tr>';
-	echo '<tr><td class=tdright>fatal errors in new data:</td><td class=trerror>&nbsp;</td></tr>';
-	echo '<tr><td class=tdright>deleted data:</td><td class=trnull>&nbsp;</td></tr>';
-	echo '</table>';
-	finishPortlet();
+function renderObject8021QSyncPreview ($object, $vswitch, $plan, $R, $maxdecisions)
+{
+	if (isset ($_REQUEST['hl_port_id']))
+	{
+		assertUIntArg ('hl_port_id');
+		$hl_port_id = intval ($_REQUEST['hl_port_id']);
+		$hl_port_name = NULL;
+		addAutoScrollScript ("port-$hl_port_id");
 
-	echo '</td><td class=pcright>';
+		foreach ($object['ports'] as $port)
+			if (mb_strlen ($port['name']) && $port['id'] == $hl_port_id)
+			{
+				$hl_port_name = $port['name'];
+				break;
+			}
+		unset ($object);
+	}
 
-	startPortlet ('preview/resolve');
-
-	switchportInfoJS ($object_id); // load JS code to make portnames interactive
+	switchportInfoJS ($vswitch['object_id']); // load JS code to make portnames interactive
 	// initialize one of three popups: we've got data already
-	$port_config = addslashes (json_encode (formatPortConfigHints ($object_id, $R)));
+	$port_config = addslashes (json_encode (formatPortConfigHints ($vswitch['object_id'], $R)));
 	addJS (<<<END
 $(document).ready(function(){
 	var confData = $.parseJSON('$port_config');
@@ -7871,9 +7882,6 @@ END
 	}
 	echo '</table>';
 	echo '</form>';
-	finishPortlet();
-
-	echo '</td></tr></table>';
 }
 
 function renderVSTListEditor()
