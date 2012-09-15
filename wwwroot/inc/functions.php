@@ -2266,7 +2266,19 @@ function ip4_range_size ($range)
 
 function ip4_mask_size ($mask)
 {
-	return (0xffffffff >> $mask) + 1;
+	switch (TRUE)
+	{
+		case ($mask > 1 && $mask <= 32):
+			return (0x7fffffff >> ($mask - 1)) + 1;
+		// constants below are not representable in 32-bit PHP's int type,
+		// so they are literally hardcoded and returned as strings on 32-bit architecture.
+		case ($mask == 1):
+			return 2147483648;
+		case ($mask == 0):
+			return 4294967296;
+		default:
+			throw new InvalidArgException ('mask', $mask, 'Invalid IPv4 prefix length');
+	}
 }
 
 // returns array with keys 'ip', 'ip_bin', 'mask', 'mask_bin'
@@ -2404,19 +2416,6 @@ function loadIPAddrList (&$node)
 	}
 	$node['addrc'] = count ($node['addrlist']);
 	$node['own_addrc'] = count ($node['own_addrlist']);
-}
-
-function getIPv4OwnRangeSize ($range)
-{
-	if (empty ($range['spare_ranges']))
-		return ip4_range_size ($range);
-	else
-	{
-		$ret = 0;
-		foreach ($range['spare_ranges'] as $mask => $spare_list)
-			$ret += count ($spare_list) * ip4_mask_size ($mask);
-		return $ret;
-	}
 }
 
 // returns the array of structure described by constructIPAddress
