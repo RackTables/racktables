@@ -274,16 +274,14 @@ function trigger_vlan_ipv6net ()
 
 function trigger_object_8021qports ()
 {
-	global $sic;
-	if (NULL === getVLANSwitchInfo ($sic['object_id']))
+	if (NULL === getVLANSwitchInfo (getBypassValue()))
 		return '';
-	return count (getStored8021QConfig ($sic['object_id'], 'desired')) ? 'std' : '';
+	return count (getStored8021QConfig (getBypassValue(), 'desired')) ? 'std' : '';
 }
 
 function trigger_object_8021qsync ()
 {
-	global $sic;
-	if (NULL === $vswitch = getVLANSwitchInfo ($sic['object_id']))
+	if (NULL === $vswitch = getVLANSwitchInfo (getBypassValue()))
 		return '';
 	return $vswitch['out_of_sync'] == 'yes' ? 'attn' : 'std';
 }
