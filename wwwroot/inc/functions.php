@@ -5336,8 +5336,15 @@ function fillIPNetsCorrelation (&$nets)
 	{
 		$top = &$stack[count ($stack) - 1];
 		if (isset ($last))
+		{
 			// possible hole in the end of $top
-			fillIPSpareListBstr ($top, ip_next (ip_last ($last)), ip_last ($top));
+			$last = ip_last ($last);
+			$a = ip_next ($last);
+			// check for crossing 0
+			if (0 > strcmp ($a, $last))
+				break;
+			fillIPSpareListBstr ($top, $a, ip_last ($top));
+		}
 		$last = array_pop ($stack);
 	}
 }
@@ -5374,6 +5381,9 @@ function fillIPSpareListBstr (&$net, $a, $b)
 			{
 				$net['spare_ranges'][$mask][] = $a;
 				$a = ip_next ($last_a);
+				// check for crossing 0
+				if (0 > strcmp ($a, $last_a))
+					break 2;
 				break;
 			}
 		}
