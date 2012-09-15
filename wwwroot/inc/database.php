@@ -4118,9 +4118,9 @@ function getNATv4ForObject ($object_id)
 	(
 		"select ".
 		"proto, ".
-		"INET_NTOA(localip) as localip, ".
+		"localip, ".
 		"localport, ".
-		"INET_NTOA(remoteip) as remoteip, ".
+		"remoteip, ".
 		"remoteport, ".
 		"ipa1.name as local_addr_name, " .
 		"ipa2.name as remote_addr_name, " .
@@ -4132,12 +4132,13 @@ function getNATv4ForObject ($object_id)
 		"order by localip, localport, proto, remoteip, remoteport",
 		array ($object_id)
 	);
-	$count=0;
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
-		foreach (array ('proto', 'localport', 'localip', 'remoteport', 'remoteip', 'description', 'local_addr_name', 'remote_addr_name') as $cname)
-			$ret['out'][$count][$cname] = $row[$cname];
-		$count++;
+		$row['localip_bin'] = ip4_int2bin ($row['localip']);
+		$row['localip'] = ip_format ($row['localip_bin']);
+		$row['remoteip_bin'] = ip4_int2bin ($row['remoteip']);
+		$row['remoteip'] = ip_format ($row['remoteip_bin']);
+		$ret['out'][] = $row;
 	}
 	unset ($result);
 
@@ -4145,9 +4146,9 @@ function getNATv4ForObject ($object_id)
 	(
 		"select ".
 		"proto, ".
-		"INET_NTOA(localip) as localip, ".
+		"localip, ".
 		"localport, ".
-		"INET_NTOA(remoteip) as remoteip, ".
+		"remoteip, ".
 		"remoteport, ".
 		"IPv4NAT.object_id as object_id, ".
 		"Object.name as object_name, ".
@@ -4157,12 +4158,13 @@ function getNATv4ForObject ($object_id)
 		"order by remoteip, remoteport, proto, localip, localport",
 		array ($object_id)
 	);
-	$count=0;
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
-		foreach (array ('proto', 'localport', 'localip', 'remoteport', 'remoteip', 'object_id', 'object_name', 'description') as $cname)
-			$ret['in'][$count][$cname] = $row[$cname];
-		$count++;
+		$row['localip_bin'] = ip4_int2bin ($row['localip']);
+		$row['localip'] = ip_format ($row['localip_bin']);
+		$row['remoteip_bin'] = ip4_int2bin ($row['remoteip']);
+		$row['remoteip'] = ip_format ($row['remoteip_bin']);
+		$ret['in'][] = $row;
 	}
 	return $ret;
 }
