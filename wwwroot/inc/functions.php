@@ -2266,7 +2266,7 @@ function ip4_range_size ($range)
 
 function ip4_mask_size ($mask)
 {
-	return (0xffffffff >> $mask) + 1;
+	return bcdiv(0xffffffff , bcpow(2, $mask)) + 1;
 }
 
 // returns array with keys 'ip', 'ip_bin', 'mask', 'mask_bin'
