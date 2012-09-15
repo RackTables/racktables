@@ -602,20 +602,20 @@ function getRenderedIPv4NetCapacity ($range)
 		{
 			$a_total = 0;
 			foreach ($range['spare_ranges'] as $mask => $spare_list)
-				$a_total = bcadd ($a_total, bcmul (count ($spare_list), ip4_mask_size ($mask)));
+				$a_total = bcadd ($a_total, bcmul (count ($spare_list), ip4_mask_size ($mask)), 0);
 		}
 		$a_used = $range['own_addrc'];
-		$b_total = bcsub ($total, $a_total);
+		$b_total = bcsub ($total, $a_total, 0);
 		$b_used = $range['addrc'] - $a_used;
 
 		// generate link to progress bar image
 		$width = 100;
 		if ($total != 0)
 		{
-			$px_a = round (bcdiv ($a_total, $total) * $width);
-			$px1 = round (bcdiv ($a_used, $total) * $width);
+			$px_a = round (bcdiv ($a_total, $total, 4) * $width);
+			$px1 = round (bcdiv ($a_used, $total, 4) * $width);
 			$px2 = $px_a - $px1;
-			$px3 = round (bcdiv ($b_used, $total) * $width);
+			$px3 = round (bcdiv ($b_used, $total, 4) * $width);
 			if ($px3 + $px1 + $px2 > $width)
 				$px3 = $width - $px1 - $px2;
 		}
@@ -627,12 +627,12 @@ function getRenderedIPv4NetCapacity ($range)
 		if ($a_total != 0)
 		{
 			$title_items[] = "$a_used / $a_total";
-			$title2_items[] = sprintf ("%d%% used", bcdiv ($a_used, $a_total) * 100);
+			$title2_items[] = sprintf ("%d%% used", bcdiv ($a_used, $a_total, 4) * 100);
 		}
 		if ($b_total != 0)
 		{
 			$title_items[] = ($b_used ? "$b_used / " : "") . $b_total;
-			$title2_items[] = sprintf ("%d%% not allocated", bcdiv ($b_total, $total) * 100);
+			$title2_items[] = sprintf ("%d%% sub-allocated", bcdiv ($b_total, $total, 4) * 100);
 		}
 		$title = implode (', ', $title_items);
 		$title2 = implode (', ', $title2_items);
