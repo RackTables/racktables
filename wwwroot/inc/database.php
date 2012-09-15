@@ -2027,10 +2027,15 @@ function scanIPv4Space ($pairlist)
 	$result = usePreparedSelectBlade ($query, $qparams);
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
-		$ip_bin = ip4_int2bin ($row['remoteip']);
-		if (!isset ($ret[$ip_bin]))
-			$ret[$ip_bin] = constructIPAddress ($ip_bin);
-		$ret[$ip_bin]['inpf'][] = $row;
+		$ip_bin_local = ip4_int2bin ($row['localip']);
+		$ip_bin_remote = ip4_int2bin ($row['remoteip']);
+		$row['localip_bin'] = $ip_bin_local;
+		$row['remoteip_bin'] = $ip_bin_remote;
+		$row['localip'] = ip_format ($ip_bin_local);
+		$row['remoteip'] = ip_format ($ip_bin_remote);
+		if (!isset ($ret[$ip_bin_remote]))
+			$ret[$ip_bin_remote] = constructIPAddress ($ip_bin_remote);
+		$ret[$ip_bin_remote]['inpf'][] = $row;
 	}
 	unset ($result);
 	// 5. add NAT rules, local ip
@@ -2048,10 +2053,15 @@ function scanIPv4Space ($pairlist)
 	$result = usePreparedSelectBlade ($query, $qparams);
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
-		$ip_bin = ip4_int2bin ($row['localip']);
-		if (!isset ($ret[$ip_bin]))
-			$ret[$ip_bin] = constructIPAddress ($ip_bin);
-		$ret[$ip_bin]['outpf'][] = $row;
+		$ip_bin_local = ip4_int2bin ($row['localip']);
+		$ip_bin_remote = ip4_int2bin ($row['remoteip']);
+		$row['localip_bin'] = $ip_bin_local;
+		$row['remoteip_bin'] = $ip_bin_remote;
+		$row['localip'] = ip_format ($ip_bin_local);
+		$row['remoteip'] = ip_format ($ip_bin_remote);
+		if (!isset ($ret[$ip_bin_local]))
+			$ret[$ip_bin_local] = constructIPAddress ($ip_bin_local);
+		$ret[$ip_bin_local]['outpf'][] = $row;
 	}
 	unset ($result);
 	// 6. collect last log message
