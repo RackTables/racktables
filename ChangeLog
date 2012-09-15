@@ -2,6 +2,7 @@
 	bugfix: restore D-Link (#533) and Linux (#541) gateway support
 	bugfix: IPv4 network capacity was not displayed on 32-bit machines (#602)
 	bugfix: fixed infinite loop when creating default (/0) IP networks
+	bugfix: IPs in NAT rules were displayed incorrectly (#600)
 	new feature: initial Cisco UCS support
 0.20.0 2012-09-09
 	bugfix: when long action takes place, other tabs in browser are functional now
