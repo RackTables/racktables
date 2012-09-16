@@ -849,17 +849,12 @@ function getObjectType ($object_id) {
 // raise an exception.  Validation is bypassed for certain object types
 // where duplicates are acceptable.
 // NOTE: This could be enforced more strictly at the database level using triggers.
-function checkObjectNameUniqueness ($name, $object_id = 0)
+function checkObjectNameUniqueness ($name, $type_id, $object_id = 0)
 {
 	// Some object types do not need unique names
 	// 1560 - Rack
 	// 1561 - Row
 	$dupes_allowed = array (1560, 1561);
-
-	// If a valid object_id was passed, lookup the object type
-	$type_id = 0;
-	if ($object_id != 0)
-		$type_id = getObjectType ($object_id);
 	if (in_array ($type_id, $dupes_allowed))
 		return;
 
@@ -875,7 +870,7 @@ function checkObjectNameUniqueness ($name, $object_id = 0)
 
 function commitAddObject ($new_name, $new_label, $new_type_id, $new_asset_no, $taglist = array())
 {
-	checkObjectNameUniqueness ($new_name);
+	checkObjectNameUniqueness ($new_name, $new_type_id);
 	usePreparedInsertBlade
 	(
 		'Object',
@@ -898,7 +893,8 @@ function commitAddObject ($new_name, $new_label, $new_type_id, $new_asset_no, $t
 
 function commitRenameObject ($object_id, $new_name)
 {
-	checkObjectNameUniqueness ($new_name, $object_id);
+	$type_id = getObjectType ($object_id);
+	checkObjectNameUniqueness ($new_name, $type_id, $object_id);
 	usePreparedUpdateBlade
 	(
 		'Object',
@@ -916,7 +912,8 @@ function commitRenameObject ($object_id, $new_name)
 
 function commitUpdateObject ($object_id, $new_name, $new_label, $new_has_problems, $new_asset_no, $new_comment)
 {
-	checkObjectNameUniqueness ($new_name, $object_id);
+	$type_id = getObjectType ($object_id);
+	checkObjectNameUniqueness ($new_name, $type_id, $object_id);
 	usePreparedUpdateBlade
 	(
 		'Object',
