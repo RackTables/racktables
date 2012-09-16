@@ -1291,7 +1291,6 @@ function commitUpdateRack ($rack_id, $new_row_id, $new_name, $new_height, $new_h
 
 	// Update the rack
 	commitUpdateObject ($rack_id, $new_name, NULL, $new_has_problems, $new_asset_no, $new_comment);
-	recordObjectHistory ($rack_id);
 }
 
 // Used when sort order is manually changed, and when a rack is moved or deleted
