@@ -1078,9 +1078,29 @@ function updateObject ()
 		$_REQUEST['object_asset_no'],
 		$_REQUEST['object_comment']
 	);
-	// Update optional attributes
+	updateObjectAttributes ($object_id);
+	$object = spotEntity ('object', $object_id);
+	if ($sic['object_type_id'] != $object['objtype_id'])
+	{
+		if (! array_key_exists ($sic['object_type_id'], getObjectTypeChangeOptions ($object_id)))
+			throw new InvalidRequestArgException ('new type_id', $sic['object_type_id'], 'incompatible with requested attribute values');
+		usePreparedUpdateBlade ('Object', array ('objtype_id' => $sic['object_type_id']), array ('id' => $object_id));
+	}
+	// Invalidate thumb cache of all racks objects could occupy.
+	foreach (getResidentRacksData ($object_id, FALSE) as $rack_id)
+		usePreparedDeleteBlade ('RackThumbnail', array ('rack_id' => $rack_id));
+	$dbxlink->commit();
+	return showFuncMessage (__FUNCTION__, 'OK');
+}
+
+// Used when updating an object, location or rack
+function updateObjectAttributes ($object_id)
+{
+	global $dbxlink;
+    $type_id = getObjectType ($object_id);
 	$oldvalues = getAttrValues ($object_id);
-	for ($i = 0; $i < $_REQUEST['num_attrs']; $i++)
+	$num_attrs = isset ($_REQUEST['num_attrs']) ? $_REQUEST['num_attrs'] : 0;
+	for ($i = 0; $i < $num_attrs; $i++)
 	{
 		genericAssertion ("${i}_attr_id", 'uint');
 		$attr_id = $_REQUEST["${i}_attr_id"];
@@ -1088,14 +1108,19 @@ function updateObject ()
 			throw new InvalidRequestArgException ('attr_id', $attr_id, 'malformed request');
 		$value = $_REQUEST["${i}_value"];
 
+		// If the object is a rack, skip certain attributes as they are handled elsewhere
+		// (height, sort_order)
+		if ($type_id == 1560 and ($attr_id == 27 or $attr_id == 29))
+			continue;
+
 		if ('date' == $oldvalues[$attr_id]['type']) {
 			assertDateArg ("${i}_value", TRUE);
 			if ($value != '')
 				$value = strtotime ($value);
 		}
 
-		# Delete attribute and move on, when the field is empty or if the field
-		# type is a dictionary and it is the "--NOT SET--" value of 0.
+		// Delete attribute and move on, when the field is empty or if the field
+		// type is a dictionary and it is the "--NOT SET--" value of 0.
 		if ($value == '' || ($oldvalues[$attr_id]['type'] == 'dict' && $value == 0))
 		{
 			if (permitted (NULL, NULL, NULL, array (array ('tag' => '$attr_' . $attr_id))))
@@ -1128,18 +1153,6 @@ function updateObject ()
 		else
 			showError ('Permission denied, "' . $oldvalues[$attr_id]['name'] . '" left unchanged');
 	}
-	$object = spotEntity ('object', $object_id);
-	if ($sic['object_type_id'] != $object['objtype_id'])
-	{
-		if (! array_key_exists ($sic['object_type_id'], getObjectTypeChangeOptions ($object_id)))
-			throw new InvalidRequestArgException ('new type_id', $sic['object_type_id'], 'incompatible with requested attribute values');
-		usePreparedUpdateBlade ('Object', array ('objtype_id' => $sic['object_type_id']), array ('id' => $object_id));
-	}
-	// Invalidate thumb cache of all racks objects could occupy.
-	foreach (getResidentRacksData ($object_id, FALSE) as $rack_id)
-		usePreparedDeleteBlade ('RackThumbnail', array ('rack_id' => $rack_id));
-	$dbxlink->commit();
-	return showFuncMessage (__FUNCTION__, 'OK');
 }
 
 function addMultipleObjects()
@@ -1828,6 +1841,7 @@ function updateLocation ()
 		$has_problems = (isset ($_REQUEST['has_problems']) and $_REQUEST['has_problems'] == 'on') ? 'yes' : 'no';
 		assertStringArg ('comment', TRUE);
 		commitUpdateObject ($_REQUEST['location_id'], $_REQUEST['name'], NULL, $has_problems, NULL, $_REQUEST['comment']);
+		updateObjectAttributes ($_REQUEST['location_id']);
 	}
 	else
 		commitRenameObject ($_REQUEST['location_id'], $_REQUEST['name']);
@@ -2003,47 +2017,7 @@ function updateRack ()
 		$_REQUEST['asset_no'],
 		$_REQUEST['comment']
 	);
-
-	// Update optional attributes
-	$oldvalues = getAttrValues ($rack_id);
-	$num_attrs = isset ($_REQUEST['num_attrs']) ? $_REQUEST['num_attrs'] : 0;
-	for ($i = 0; $i < $num_attrs; $i++)
-	{
-		assertUIntArg ("${i}_attr_id");
-		$attr_id = $_REQUEST["${i}_attr_id"];
-
-		// Skip the 'height' attribute as it's already handled by commitUpdateRack
-		// Also skip 'sort_order'
-		if ($attr_id == 27 or $attr_id == 29)
-			continue;
-
-		// Field is empty, delete attribute and move on. OR if the field type is a dictionary and it is the --NOT SET-- value of 0
-		if (!strlen ($_REQUEST["${i}_value"]) || ($oldvalues[$attr_id]['type']=='dict' && $_REQUEST["${i}_value"] == 0))
-		{
-			commitUpdateAttrValue ($rack_id, $attr_id);
-			continue;
-		}
-
-		// The value could be uint/float, but we don't know ATM. Let SQL
-		// server check this and complain.
-		assertStringArg ("${i}_value");
-		$value = $_REQUEST["${i}_value"];
-		switch ($oldvalues[$attr_id]['type'])
-		{
-			case 'uint':
-			case 'float':
-			case 'string':
-				$oldvalue = $oldvalues[$attr_id]['value'];
-				break;
-			case 'dict':
-				$oldvalue = $oldvalues[$attr_id]['key'];
-				break;
-			default:
-		}
-		if ($value === $oldvalue) // ('' == 0), but ('' !== 0)
-			continue;
-		commitUpdateAttrValue ($rack_id, $attr_id, $value);
-	}
+	updateObjectAttributes ($rack_id);
 	return showFuncMessage (__FUNCTION__, 'OK', array ($_REQUEST['name']));
 }
 
