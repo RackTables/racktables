@@ -424,7 +424,9 @@ CREATE TABLE `Atom` (
   `molecule_id` int(10) unsigned default NULL,
   `rack_id` int(10) unsigned default NULL,
   `unit_no` int(10) unsigned default NULL,
-  `atom` enum('front','interior','rear') default NULL
+  `atom` enum('front','interior','rear') default NULL,
+  CONSTRAINT `Atom-FK-molecule_id` FOREIGN KEY (`molecule_id`) REFERENCES `Molecule` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `Atom-FK-rack_id` FOREIGN KEY (`rack_id`) REFERENCES `Object` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
 CREATE TABLE `Attribute` (
@@ -744,7 +746,9 @@ CREATE TABLE `MountOperation` (
   `comment` text,
   PRIMARY KEY  (`id`),
   KEY `object_id` (`object_id`),
-  CONSTRAINT `MountOperation-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `Object` (`id`) ON DELETE CASCADE
+  CONSTRAINT `MountOperation-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `Object` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `MountOperation-FK-old_molecule_id` FOREIGN KEY (`old_molecule_id`) REFERENCES `Molecule` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `MountOperation-FK-new_molecule_id` FOREIGN KEY (`new_molecule_id`) REFERENCES `Molecule` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
 CREATE TABLE `ObjectLog` (
