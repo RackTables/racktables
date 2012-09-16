@@ -1395,6 +1395,7 @@ function resetUIConfig()
 	setConfigVar ('DATETIME_ZONE', 'UTC');
 	setConfigVar ('DATETIME_FORMAT', 'm/d/Y');
 	setConfigVar ('SEARCH_DOMAINS', '');
+	setConfigVar ('8021Q_EXTSYNC_LISTSRC', 'false');
 	return showFuncMessage (__FUNCTION__, 'OK');
 }
 
@@ -2586,6 +2587,30 @@ function resolve8021QConflicts ()
 	}
 	$dbxlink->commit();
 	return showFuncMessage (__FUNCTION__, 'OK', array ($ndone));
+}
+
+$msgcode['create8021QPortConfig']['OK'] = 48;
+function create8021QPortConfig()
+{
+	global $sic;
+	genericAssertion ('portname', 'string');
+	$default_port = array
+	(
+		'mode' => 'access',
+		'allowed' => array (VLAN_DFL_ID),
+		'native' => VLAN_DFL_ID,
+	);
+	add8021QPort (getBypassValue(), $sic['portname'], $default_port);
+	showFuncMessage (__FUNCTION__, 'OK');
+}
+
+$msgcode['destroy8021QPortConfig']['OK'] = 49;
+function destroy8021QPortConfig()
+{
+	global $sic;
+	genericAssertion ('portname', 'string');
+	del8021QPort (getBypassValue(), $sic['portname']);
+	showFuncMessage (__FUNCTION__, 'OK');
 }
 
 $msgcode['cloneVST']['OK'] = 48;

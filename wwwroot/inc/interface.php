@@ -7629,6 +7629,12 @@ function renderObject8021QSync ($object_id)
 	echo '<tr><td class=tdright>deleted data:</td><td class=trnull>&nbsp;</td></tr>';
 	echo '</table>';
 	finishPortlet();
+	if (considerConfiguredConstraint ($object, '8021Q_EXTSYNC_LISTSRC'))
+	{
+		startPortlet ('add/remove 802.1Q ports');
+		renderObject8021QSyncPorts ($object, $C, $D);
+		finishPortlet();
+	}
 	echo '</td><td class=pcright>';
 	startPortlet ('sync plan live preview');
 	if ($R !== NULL)
@@ -7882,6 +7888,38 @@ END
 	}
 	echo '</table>';
 	echo '</form>';
+}
+
+function renderObject8021QSyncPorts ($object, $C, $D)
+{
+	$allports = array();
+	foreach ($object['ports'] as $port)
+		if (isEthernetPort ($port))
+			$allports[$port['name']]['ifstr'] = formatPortIIFOIF ($port);
+	foreach ($D as $portname => $portconfig)
+		$allports[$portname]['vlanstr'] = formatVLANPackDiff ($C[$portname], $portconfig);
+	$allports = sortPortList ($allports);
+	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
+	foreach ($allports as $portname => $port)
+	{
+		echo "<tr valign=top class=trbusy><td class=tdleft>${portname}</td><td class=tdleft>";
+		echo array_key_exists ('ifstr', $port) ? $port['ifstr'] : '&nbsp;';
+		echo '</td><td class=tdleft>';
+		echo array_key_exists ('vlanstr', $port) ? $port['vlanstr'] : '&nbsp;';
+		echo '</td><td>';
+		if (array_key_exists ('vlanstr', $port))
+		{
+			echo '<a href="' . makeHrefProcess (array ('op' => 'delPort', 'portname' => $portname)) . '">';
+			echo getImageHREF ('delete', 'delete 802.1Q configuration for this port') . '</a>';
+		}
+		else
+		{
+			echo '<a href="' . makeHrefProcess (array ('op' => 'addPort', 'portname' => $portname)) . '">';
+			echo getImageHREF ('add', 'add 802.1Q configuration for this port') . '</a>';
+		}
+		echo '</td></tr>';
+	}
+	echo '</table>';
 }
 
 function renderVSTListEditor()
