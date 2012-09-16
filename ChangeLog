@@ -4,6 +4,7 @@
 	bugfix: fixed infinite loop when creating default (/0) IP networks
 	bugfix: IPs in NAT rules were displayed incorrectly (#600)
 	bugfix: Location attributes weren't being saved (#605)
+	bugfix: duplicate names for Racks and Rows weren't allowed (#606)
 	new feature: initial Cisco UCS support
 0.20.0 2012-09-09
 	bugfix: when long action takes place, other tabs in browser are functional now
