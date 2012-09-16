@@ -546,7 +546,7 @@ function renderRackspaceRowEditor ()
 
 function renderRow ($row_id)
 {
-	$rowInfo = getRowInfo ($row_id);
+	$rowInfo = getRowInfo ($row_id); //var_dump($rowInfo); die;
 	$cellfilter = getCellFilter();
 	$rackList = filterCellList (listCells ('rack', $row_id), $cellfilter['expression']);
 	// Main layout starts.
@@ -556,7 +556,8 @@ function renderRow ($row_id)
 	echo "<tr><td class=pcleft>";
 	startPortlet ($rowInfo['name']);
 	echo "<table border=0 cellspacing=0 cellpadding=3 width='100%'>\n";
-	echo "<tr><th width='50%' class=tdright>Location:</th><td class=tdleft>".mkA ($rowInfo['location'], 'location', $rowInfo['location_id'])."</td></tr>\n";
+	if ($rowInfo['location_id'])
+		echo "<tr><th width='50%' class=tdright>Location:</th><td class=tdleft>".mkA ($rowInfo['location'], 'location', $rowInfo['location_id'])."</td></tr>\n";
 	echo "<tr><th width='50%' class=tdright>Racks:</th><td class=tdleft>${rowInfo['count']}</td></tr>\n";
 	echo "<tr><th width='50%' class=tdright>Units:</th><td class=tdleft>${rowInfo['sum']}</td></tr>\n";
 	echo "<tr><th width='50%' class=tdright>% used:</th><td class=tdleft>";
