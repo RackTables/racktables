@@ -3,6 +3,7 @@
 	bugfix: IPv4 network capacity was not displayed on 32-bit machines (#602)
 	bugfix: fixed infinite loop when creating default (/0) IP networks
 	bugfix: IPs in NAT rules were displayed incorrectly (#600)
+	bugfix: delete Rack history when a Rack is deleted (#604)
 	bugfix: Location attributes weren't being saved (#605)
 	bugfix: duplicate names for Racks and Rows weren't allowed (#606)
 	new feature: initial Cisco UCS support
