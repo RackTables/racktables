@@ -401,6 +401,22 @@ function getBypassValue()
 	return $sic[$page[$pageno]['bypass']];
 }
 
+// fills $args array with the bypass values of specified $pageno which are provided in $_REQUEST
+function fillBypassValues ($pageno, &$args)
+{
+	global $page, $sic;
+	if (isset ($page[$pageno]['bypass']))
+	{
+		$param_name = $page[$pageno]['bypass'];
+		if (! array_key_exists ($param_name) && isset ($sic[$param_name]))
+			$args[$param_name] = $sic[$param_name];
+	}
+	if (isset ($page[$pageno]['bypass_tabs']))
+		foreach ($page[$pageno]['bypass_tabs'] as $param_name)
+			if (! array_key_exists ($param_name, $args) && isset ($sic[$param_name]))
+				$args[$param_name] = $sic[$param_name];
+}
+
 // Objects of some types should be explicitly shown as
 // anonymous (labelless). This function is a single place where the
 // decision about displayed name is made.
@@ -1453,10 +1469,7 @@ function fixContext ($target = NULL)
 	elseif (array_key_exists ($pageno, $etype_by_pageno))
 	{
 		// Each page listed in the map above requires one uint argument.
-		$target_realm = $etype_by_pageno[$pageno];
-		assertUIntArg ($page[$pageno]['bypass']);
-		$target_id = $_REQUEST[$page[$pageno]['bypass']];
-		$target = spotEntity ($target_realm, $target_id);
+		$target = spotEntity ($etype_by_pageno[$pageno], getBypassValue());
 		$target_given_tags = $target['etags'];
 		if ($target['realm'] != 'user')
 			$auto_tags = array_merge ($auto_tags, $target['atags']);
@@ -1790,20 +1803,15 @@ function buildRedirectURL ($nextpage = NULL, $nexttab = NULL, $moreArgs = array(
 	if ($nexttab === NULL)
 		$nexttab = $tabno;
 	$url = "index.php?page=${nextpage}&tab=${nexttab}";
-	if (isset ($page[$nextpage]['bypass']))
-		$url .= '&' . $page[$nextpage]['bypass'] . '=' . $_REQUEST[$page[$nextpage]['bypass']];
-	if (isset ($page[$nextpage]['bypass_tabs']))
-		foreach ($page[$nextpage]['bypass_tabs'] as $param_name)
-			if (isset ($_REQUEST[$param_name]))
-				$url .= '&' . urlencode ($param_name) . '=' . urlencode ($_REQUEST[$param_name]);
 
-	if (count ($moreArgs) > 0)
-		foreach ($moreArgs as $arg => $value)
-			if (is_array ($value))
-				foreach ($value as $v)
-					$url .= '&' . urlencode ($arg . '[]') . '=' . urlencode ($v);
-			elseif ($arg != 'module')
-				$url .= '&' . urlencode ($arg) . '=' . urlencode ($value);
+	if ($nextpage === $pageno)
+		fillBypassValues ($nextpage, $moreArgs);
+	foreach ($moreArgs as $arg => $value)
+		if (is_array ($value))
+			foreach ($value as $v)
+				$url .= '&' . urlencode ($arg . '[]') . '=' . urlencode ($v);
+		elseif ($arg != 'module')
+			$url .= '&' . urlencode ($arg) . '=' . urlencode ($value);
 	return $url;
 }
 
@@ -2671,12 +2679,8 @@ function makeHrefProcess ($params = array())
 		$params['page'] = $pageno;
 	if (! array_key_exists ('tab', $params))
 		$params['tab'] = $tabno;
-	if (isset ($page[$pageno]['bypass']))
-	{
-		$bypass = $page[$pageno]['bypass'];
-		if (! array_key_exists ($bypass, $params) and array_key_exists ($bypass, $_REQUEST))
-			$params[$bypass] = $_REQUEST[$bypass];
-	}
+	if ($params['page'] === $pageno)
+		fillBypassValues ($pageno, $params);
 	foreach ($params as $key => $value)
 		$tmp[] = urlencode ($key) . '=' . urlencode ($value);
 	return '?module=redirect&' . implode ('&', $tmp);
