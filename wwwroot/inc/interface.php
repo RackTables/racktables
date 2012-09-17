@@ -7638,7 +7638,7 @@ function renderObject8021QSync ($object_id)
 	echo '</td><td class=pcright>';
 	startPortlet ('sync plan live preview');
 	if ($R !== NULL)
-		renderObject8021QSyncPreview ($object, $vswitch, $plan, $R, $maxdecisions);
+		renderObject8021QSyncPreview ($object, $vswitch, $plan, $C, $R, $maxdecisions);
 	else
 		echo "<p class=row_error>gateway error: ${error}</p>";
 	finishPortlet();
@@ -7682,7 +7682,7 @@ function renderObject8021QSyncSchedule ($object, $vswitch, $maxdecisions)
 	echo '</table>';
 }
 
-function renderObject8021QSyncPreview ($object, $vswitch, $plan, $R, $maxdecisions)
+function renderObject8021QSyncPreview ($object, $vswitch, $plan, $C, $R, $maxdecisions)
 {
 	if (isset ($_REQUEST['hl_port_id']))
 	{
