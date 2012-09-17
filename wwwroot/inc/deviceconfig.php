@@ -2921,13 +2921,16 @@ function ros11ReadInterfaceStatus ($text)
 				$state = 'headerscan'; # end of first table
 			break;
 		case 'group':
-			if (preg_match ('#^(Po\d+)\s+\S+\s+(\S+)\s+(\S+)\s+\S+\s+\S+\s+(\S.+)\s+$#', $line, $m) && $m[4] != 'Not Present')
-				$ret[strtolower ($m[1])] = array
-				(
-					'status' => $m[4],
-					'speed' => $m[3],
-					'duplex' => $m[2],
-				);
+			if (preg_match ('#^(Po\d+)\s+\S+\s+(\S+)\s+(\S+)\s+\S+\s+\S+\s+(\S.+)\s+$#', $line, $m))
+			{
+				if ($m[4] != 'Not Present')
+					$ret[strtolower ($m[1])] = array
+					(
+						'status' => strtolower (trim ($m[4])),
+						'speed' => $m[3],
+						'duplex' => $m[2],
+					);
+			}
 			elseif (substr ($line, 0, 9) != '-------- ') # ruler
 				break 2; # end of the last table
 			break;
