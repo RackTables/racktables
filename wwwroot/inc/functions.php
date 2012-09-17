@@ -408,7 +408,7 @@ function fillBypassValues ($pageno, &$args)
 	if (isset ($page[$pageno]['bypass']))
 	{
 		$param_name = $page[$pageno]['bypass'];
-		if (! array_key_exists ($param_name) && isset ($sic[$param_name]))
+		if (! array_key_exists ($param_name, $args) && isset ($sic[$param_name]))
 			$args[$param_name] = $sic[$param_name];
 	}
 	if (isset ($page[$pageno]['bypass_tabs']))
