@@ -270,6 +270,9 @@ try {
 catch (Exception $e)
 {
 	ob_end_clean();
-	printException ($e);
+	if (isset ($debug_mode) && $debug_mode)
+		printGenericException ($e);
+	else
+		printException ($e);
 }
 ?>
