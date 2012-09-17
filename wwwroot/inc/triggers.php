@@ -74,7 +74,7 @@ function trigger_livevlans ()
 {
 	return checkTypeAndAttribute
 	(
-		$_REQUEST['object_id'],
+		getBypassValue(),
 		8, // network switch
 		4, // SW type
 		// Cisco IOS 12.0
@@ -104,8 +104,7 @@ function trigger_liveports ()
 function trigger_snmpportfinder ()
 {
 
-	assertUIntArg ('object_id');
-	$object = spotEntity ('object', $_REQUEST['object_id']);
+	$object = spotEntity ('object', getBypassValue());
 	switch ($object['objtype_id'])
 	{
 	case 7: // any router
@@ -130,31 +129,27 @@ function trigger_snmpportfinder ()
 
 function trigger_isloadbalancer ()
 {
-	assertUIntArg ('object_id');
-	return considerConfiguredConstraint (spotEntity ('object', $_REQUEST['object_id']), 'IPV4LB_LISTSRC') ? 'std' : '';
+	return considerConfiguredConstraint (spotEntity ('object', getBypassValue()), 'IPV4LB_LISTSRC') ? 'std' : '';
 }
 
 function trigger_ip ()
 {
-	assertUIntArg ('object_id');
-	if (count (getObjectIPAllocationList ($_REQUEST['object_id'])))
+	if (count (getObjectIPAllocationList (getBypassValue())))
 		return 'std';
 	// Only hide the tab, if there are no addresses allocated.
-	return considerConfiguredConstraint (spotEntity ('object', $_REQUEST['object_id']), 'IPV4OBJ_LISTSRC') ? 'std' : '';
+	return considerConfiguredConstraint (spotEntity ('object', getBypassValue()), 'IPV4OBJ_LISTSRC') ? 'std' : '';
 }
 
 function trigger_natv4 ()
 {
-	assertUIntArg ('object_id');
-	if (!count (getObjectIPv4AllocationList ($_REQUEST['object_id'])))
+	if (!count (getObjectIPv4AllocationList (getBypassValue())))
 		return '';
-	return considerConfiguredConstraint (spotEntity ('object', $_REQUEST['object_id']), 'IPV4NAT_LISTSRC') ? 'std' : '';
+	return considerConfiguredConstraint (spotEntity ('object', getBypassValue()), 'IPV4NAT_LISTSRC') ? 'std' : '';
 }
 
 function trigger_autoports ()
 {
-	assertUIntArg ('object_id');
-	$object = spotEntity ('object', $_REQUEST['object_id']);
+	$object = spotEntity ('object', getBypassValue());
 	amplifyCell ($object);
 	if (count ($object['ports']))
 		return '';
@@ -181,8 +176,7 @@ function trigger_localreports ()
 
 function trigger_file_editText ()
 {
-	assertUIntArg ('file_id');
-	$fileInfo = spotEntity ('file', $_REQUEST['file_id']);
+	$fileInfo = spotEntity ('file', getBypassValue());
 	return ($fileInfo['type'] == 'text/plain') ? 'std' : '';
 }
 
@@ -191,8 +185,7 @@ function trigger_rackspace ()
 	global $virtual_obj_types;
 
 	// Hide the tab if the object type is virtual
-	assertUIntArg ('object_id');
-	$object = spotEntity ('object', $_REQUEST['object_id']);
+	$object = spotEntity ('object', getBypassValue());
 	if (in_array($object['objtype_id'], $virtual_obj_types))
 		return '';
 
@@ -203,9 +196,8 @@ function trigger_rackspace ()
 
 function trigger_ports ()
 {
-	assertUIntArg ('object_id');
 	// Hide the tab if the object type exists in the exclusion config option
-	if (considerConfiguredConstraint (spotEntity ('object', $_REQUEST['object_id']), 'PORT_EXCLUSION_LISTSRC')) 
+	if (considerConfiguredConstraint (spotEntity ('object', getBypassValue()), 'PORT_EXCLUSION_LISTSRC')) 
 		return '';
 
 	return 'std';
@@ -216,11 +208,11 @@ function trigger_ports ()
 // case additionally heat the tab, if no domain is set.
 function trigger_object_8021qorder ()
 {
-	if (NULL !== getVLANSwitchInfo ($_REQUEST['object_id']))
+	if (NULL !== getVLANSwitchInfo (getBypassValue()))
 		return 'std';
 	if (!count (getVLANDomainOptions()) or !count (getVSTOptions()))
 		return '';
-	if (considerConfiguredConstraint (spotEntity ('object', $_REQUEST['object_id']), 'VLANSWITCH_LISTSRC'))
+	if (considerConfiguredConstraint (spotEntity ('object', getBypassValue()), 'VLANSWITCH_LISTSRC'))
 		return 'attn';
 	return '';
 }
@@ -237,7 +229,7 @@ function trigger_ipv4net_vlanconfig ()
 {
 	if (!count (getVLANDomainOptions())) // no domains -- no VLANs to bind with
 		return '';
-	$netinfo = spotEntity ('ipv4net', $_REQUEST['id']);
+	$netinfo = spotEntity ('ipv4net', getBypassValue());
 	if ($netinfo['vlanc'])
 		return 'std';
 	elseif (considerConfiguredConstraint ($netinfo, 'VLANIPV4NET_LISTSRC'))
@@ -251,7 +243,7 @@ function trigger_ipv6net_vlanconfig ()
 {
 	if (!count (getVLANDomainOptions())) // no domains -- no VLANs to bind with
 		return '';
-	$netinfo = spotEntity ('ipv6net', $_REQUEST['id']);
+	$netinfo = spotEntity ('ipv6net', getBypassValue());
 	if ($netinfo['vlanc'])
 		return 'std';
 	elseif (considerConfiguredConstraint ($netinfo, 'VLANIPV4NET_LISTSRC'))
@@ -262,13 +254,13 @@ function trigger_ipv6net_vlanconfig ()
 
 function trigger_vlan_ipv4net ()
 {
-	$vlan_info = getVLANInfo ($_REQUEST['vlan_ck']);
+	$vlan_info = getVLANInfo (getBypassValue());
 	return count ($vlan_info['ipv4nets']) ? 'std' : 'attn';
 }
 
 function trigger_vlan_ipv6net ()
 {
-	$vlan_info = getVLANInfo ($_REQUEST['vlan_ck']);
+	$vlan_info = getVLANInfo (getBypassValue());
 	return count ($vlan_info['ipv6nets']) ? 'std' : 'attn';
 }
 
