@@ -1631,6 +1631,7 @@ $msgcode['importPTRData']['ERR'] = 141;
 function importPTRData ()
 {
 	assertUIntArg ('addrcount');
+	assertUIntArg ('pg');
 	$nbad = $ngood = 0;
 	for ($i = 1; $i <= $_REQUEST['addrcount']; $i++)
 	{
@@ -1650,9 +1651,10 @@ function importPTRData ()
 			$nbad++;
 	}
 	if (!$nbad)
-		return showFuncMessage (__FUNCTION__, 'OK', array ($ngood));
+		showFuncMessage (__FUNCTION__, 'OK', array ($ngood));
 	else
-		return showFuncMessage (__FUNCTION__, 'ERR', array ($nbad, $ngood));
+		showFuncMessage (__FUNCTION__, 'ERR', array ($nbad, $ngood));
+	return buildRedirectURL (NULL, NULL, array ('pg' => $_REQUEST['pg']));
 }
 
 $msgcode['generateAutoPorts']['OK'] = 21;
