@@ -822,10 +822,8 @@ function renderEditObjectForm()
 			echo "<a href='".
 				makeHrefProcess(array(
 					'op'=>'unlinkEntities', 
-					'link_id'=>$link_id,
-					'object_id'=>$object_id,
-					'page='=>'object',
-					'tab'=>'edit')).
+					'link_id'=>$link_id)).
+
 			"'>";
 			printImageHREF ('cut', 'Unlink container');
 			echo "</a>";
@@ -859,7 +857,7 @@ function renderEditObjectForm()
 			echo '<tr><td>';
 			if (strlen ($record['value']))
 			{
-				echo "<a href='".makeHrefProcess(array('op'=>'clearSticker', 'object_id'=>$object_id, 'attr_id'=>$record['id']))."'>";
+				echo "<a href='".makeHrefProcess(array('op'=>'clearSticker', 'attr_id'=>$record['id']))."'>";
 				printImageHREF ('clear', 'Clear value');
 				echo '</a>';
 			}
@@ -900,7 +898,7 @@ function renderEditObjectForm()
 		"' onclick=\"javascript:return confirm('Are you sure you want to delete the object?')\">" . getImageHREF ('destroy', 'Delete object') . "</a>";
 	echo "&nbsp;";
 	echo "<a href='".
-		makeHrefProcess(array ('op'=>'resetObject', 'page' => 'object', 'tab' => 'edit', 'object_id' => $object_id)).
+		makeHrefProcess(array ('op'=>'resetObject')).
 		"' onclick=\"javascript:return confirm('Are you sure you want to reset most of object properties?')\">" . getImageHREF ('clear', 'Reset (cleanup) object') . "</a>";
 	echo "</td></tr>\n";
 	echo "<tr><td colspan=3><b>Comment:</b><br><textarea name=object_comment rows=10 cols=80>${object['comment']}</textarea></td></tr>";
@@ -952,7 +950,7 @@ function renderEditRackForm ($rack_id)
 		echo '<tr><td>';
 		if (strlen ($record['value']))
 		{
-			echo "<a href='".makeHrefProcess(array('op'=>'clearSticker', 'rack_id'=>$rack_id, 'attr_id'=>$record['id']))."'>";
+			echo "<a href='".makeHrefProcess(array('op'=>'clearSticker', 'attr_id'=>$record['id']))."'>";
 			printImageHREF ('clear', 'Clear value');
 			echo '</a>';
 		}
@@ -985,7 +983,7 @@ function renderEditRackForm ($rack_id)
 	{
 		echo "<tr><td>&nbsp;</td><th class=tdright>Actions:</th><td class=tdleft>"; 
 		echo "<a href='".
-			makeHrefProcess(array('op'=>'deleteRack', 'rack_id'=>$rack_id)).
+			makeHrefProcess(array('op'=>'deleteRack')).
 			"' onclick=\"javascript:return confirm('Are you sure you want to delete the rack?')\">" . getImageHREF ('destroy', 'Delete rack') . "</a>";
 		echo "&nbsp;</td></tr>\n";
 	}
@@ -1408,7 +1406,7 @@ function renderPortsForObject ($object_id)
 
 	// clear ports link
 	echo "<a href='".
-		makeHrefProcess(array ('op'=>'deleteAll', 'page' => 'object', 'tab' => 'ports', 'object_id' => $object_id)).
+		makeHrefProcess(array ('op'=>'deleteAll')).
 		"' onclick=\"javascript:return confirm('Are you sure you want to delete all existing ports?')\">" . getImageHREF ('clear', 'Clear port list') . " Clear port list</a>";
 
 	if (isset ($_REQUEST['hl_port_id']))
@@ -1422,7 +1420,7 @@ function renderPortsForObject ($object_id)
 	{
 		$tr_class = isset ($hl_port_id) && $hl_port_id == $port['id'] ? 'class="highlight"' : '';
 		printOpFormIntro ('editPort', array ('port_id' => $port['id']));
-		echo "<tr $tr_class><td><a name='port-${port['id']}' href='".makeHrefProcess(array('op'=>'delPort', 'port_id'=>$port['id'], 'object_id'=>$object_id))."'>";
+		echo "<tr $tr_class><td><a name='port-${port['id']}' href='".makeHrefProcess(array('op'=>'delPort', 'port_id'=>$port['id']))."'>";
 		printImageHREF ('delete', 'Unlink and Delete this port');
 		echo "</a></td>\n";
 		$a_class = isEthernetPort ($port) ? 'port-menu' : '';
@@ -1458,7 +1456,7 @@ function renderPortsForObject ($object_id)
 				makeHrefProcess(array(
 					'op'=>'unlinkPort', 
 					'port_id'=>$port['id'],
-					'object_id'=>$object_id)).
+					)).
 			"'>";
 			printImageHREF ('cut', 'Unlink this port');
 			echo "</a></td>";
@@ -1472,7 +1470,7 @@ function renderPortsForObject ($object_id)
 				makeHrefProcess(array(
 					'op'=>'useup',
 					'port_id'=>$port['id'], 
-					'object_id'=>$object_id)).
+					)).
 			"'>";
 			printImageHREF ('clear', 'Use up this port');
 			echo "</a></td>";
@@ -1598,7 +1596,6 @@ function renderIPForObject ($object_id)
 				(
 					'op' => 'del',
 					'ip' => $alloc['addrinfo']['ip'],
-					'object_id' => $object_id
 				)
 			) . "'>" . 
 			getImageHREF ('delete', 'Delete this IP address') .
@@ -2385,8 +2382,7 @@ END
 	echo '<table border=0 cellpadding=10 align=center>';
 	// This form requires a name, so JavaScript validator can find it.
 	// No printOpFormIntro() hence
-	echo "<form method=post name='add_new_range' action='".makeHrefProcess()."'>\n";
-	echo "<input type=hidden name=op value=add>\n";
+	echo "<form method=post name='add_new_range' action='".makeHrefProcess(array ('op'=>'add'))."'>\n";
 	// tags column
 	echo '<tr><td rowspan=5><h3>assign tags</h3>';
 	renderNewEntityTags ($realm);
@@ -2980,7 +2976,6 @@ function renderIPAddressAllocations ($ip)
 					array
 					(
 						'op' => 'del',
-						'ip' => $address['ip'],
 						'object_id' => $bond['object_id']
 					)
 				)
@@ -3060,7 +3055,7 @@ function renderNATv4ForObject ($object_id)
 				'remoteip'=>$pf['remoteip'],
 				'remoteport'=>$pf['remoteport'],
 				'proto'=>$pf['proto'], 
-				'object_id'=>$object_id)).
+			)).
 		"'>";
 		printImageHREF ('delete', 'Delete NAT rule');
 		echo "</a></td>";
@@ -3116,7 +3111,6 @@ function renderNATv4ForObject ($object_id)
 				'remoteip'=>$pf['remoteip'],
 				'remoteport'=>$pf['remoteport'],
 				'proto'=>$pf['proto'],
-				'object_id'=>$pf['object_id']
 				)).
 		"'>";
 		printImageHREF ('delete', 'Delete NAT rule');
@@ -3887,7 +3881,7 @@ function renderEditLocationForm ($location_id)
 		echo '<tr><td>';
 		if (strlen ($record['value']))
 		{
-			echo "<a href='".makeHrefProcess(array('op'=>'clearSticker', 'location_id'=>$location_id, 'attr_id'=>$record['id']))."'>";
+			echo "<a href='".makeHrefProcess(array('op'=>'clearSticker', 'attr_id'=>$record['id']))."'>";
 			printImageHREF ('clear', 'Clear value');
 			echo '</a>';
 		}
@@ -3920,7 +3914,7 @@ function renderEditLocationForm ($location_id)
 	{
 		echo "<tr><td>&nbsp;</td><th class=tdright>Actions:</th><td class=tdleft>"; 
 		echo "<a href='".
-			makeHrefProcess(array('op'=>'deleteLocation', 'location_id'=>$location_id)).
+			makeHrefProcess(array('op'=>'deleteLocation')).
 			"' onclick=\"javascript:return confirm('Are you sure you want to delete the location?')\">" . getImageHREF ('destroy', 'Delete location') . "</a>";
 		echo "&nbsp;</td></tr>\n";
 	}
@@ -4064,7 +4058,7 @@ function renderChapterEditor ($tgt_chapter_no)
 			printImageHREF ('nodelete', 'referenced ' . $refcnt[$key] . ' time(s)');
 		else
 		{
-			echo "<a href='".makeHrefProcess(array('op'=>'del', 'chapter_no'=>$tgt_chapter_no, 'dict_key'=>$key))."'>";
+			echo "<a href='".makeHrefProcess(array('op'=>'del', 'dict_key'=>$key))."'>";
 			printImageHREF ('delete', 'Delete word');
 			echo "</a>";
 		}
@@ -5800,10 +5794,9 @@ function renderFilesPortlet ($entity_type = NULL, $entity_id = 0)
 
 function renderFilesForEntity ($entity_id)
 {
-	global $page, $pageno, $etype_by_pageno;
-	// Now derive entity_type and bypass_name from pageno.
+	global $pageno, $etype_by_pageno;
+	// Now derive entity_type from pageno.
 	$entity_type = $etype_by_pageno[$pageno];
-	$id_name = $page[$pageno]['bypass'];
 	
 	startPortlet ('Upload and link new');
 	echo "<table border=0 cellspacing=0 cellpadding='5' align='center' class='widetable'>\n";
@@ -5843,7 +5836,7 @@ function renderFilesForEntity ($entity_id)
 			echo "<tr valign=top><td class=tdleft>";
 			renderCell (spotEntity ('file', $file_id));
 			echo "</td><td class=tdleft>${file['comment']}</td><td class=tdcenter>";
-			echo "<a href='".makeHrefProcess(array('op'=>'unlinkFile', 'link_id'=>$file['link_id'], $id_name=>$entity_id))."'>";
+			echo "<a href='".makeHrefProcess(array('op'=>'unlinkFile', 'link_id'=>$file['link_id']))."'>";
 			printImageHREF ('CUT', 'Unlink file');
 			echo "</a></td></tr>\n";
 		}
@@ -5863,10 +5856,9 @@ function printOpFormIntro ($opname, $extra = array(), $upload = FALSE)
 	if ($upload)
 		echo " enctype='multipart/form-data'";
 	echo ">";
-	if (isset ($page[$pageno]['bypass']) and isset ($_REQUEST[$page[$pageno]['bypass']]))
-		$extra[$page[$pageno]['bypass']] = $_REQUEST[$page[$pageno]['bypass']];
+	fillBypassValues ($pageno, $extra);
 	foreach ($extra as $inputname => $inputvalue)
-		echo "<input type=hidden name=${inputname} value='${inputvalue}'>";
+		printf ('<input type=hidden name="%s" value="%s">', htmlspecialchars ($inputname, ENT_QUOTES), htmlspecialchars ($inputvalue, ENT_QUOTES));
 }
 
 // Iterate over what findRouters() returned and output some text suitable for a TD element.
@@ -6246,16 +6238,10 @@ function showTabs ($pageno, $tabno)
 			$tabclass = 'current'; // override any class for an active selection
 		echo "<li><a class=${tabclass}";
 		echo " href='index.php?page=${pageno}&tab=${tabidx}";
-		if (isset ($page[$pageno]['bypass']) and isset ($_REQUEST[$page[$pageno]['bypass']]))
-		{
-			$bpname = $page[$pageno]['bypass'];
-			$bpval = $_REQUEST[$bpname];
-			echo "&${bpname}=${bpval}";
-		}
-		if (isset ($page[$pageno]['bypass_tabs']))
-			foreach ($page[$pageno]['bypass_tabs'] as $param_name)
-				if (isset ($_REQUEST[$param_name]))
-					echo "&" . urlencode ($param_name) . '=' . urlencode ($_REQUEST[$param_name]);
+		$args = array();
+		fillBypassValues ($pageno, $args);
+		foreach ($args as $param_name => $param_value)
+			echo "&" . urlencode ($param_name) . '=' . urlencode ($param_value);
 		
 		echo "'>${tabtitle}</a></li>\n";
 	}
@@ -6972,7 +6958,7 @@ function renderVLANDomainVLANList ($vdom_id)
 		else
 		{
 			echo '<a href="';
-			echo makeHrefProcess (array ('op' => 'del', 'vdom_id' => $vdom_id, 'vlan_id' => $vlan_id)) . '">';
+			echo makeHrefProcess (array ('op' => 'del', 'vlan_id' => $vlan_id)) . '">';
 			echo getImageHREF ('destroy', 'delete VLAN') . '</a>';
 		}
 		echo '</td><td class=tdright><tt>' . $vlan_id . '</tt></td><td>';
@@ -7125,7 +7111,7 @@ function renderObject8021QPorts ($object_id)
 	}
 	echo '</form>';
 	if (permitted (NULL, NULL, NULL, array (array ('tag' => '$op_recalc8021Q'))))
-		echo '<li><a href="' . makeHrefProcess (array ('op' => 'exec8021QRecalc', 'object_id' => $object_id)) . '">' .
+		echo '<li><a href="' . makeHrefProcess (array ('op' => 'exec8021QRecalc')) . '">' .
 			getImageHREF ('RECALC', 'Recalculate uplinks and downlinks') . '</a></li>';
 	echo '</ul></td></tr></table>';
 	if ($req_port_name == '');
@@ -8407,26 +8393,7 @@ function renderObjectLogEditor ()
 {
 	global $nextorder;
 
-	if (isset ($_REQUEST['object_id']))
-	{
-		$entity = 'object';
-		$id_name = 'object_id';
-		$object_id = $_REQUEST['object_id'];
-	}
-	elseif (isset ($_REQUEST['location_id']))
-	{
-		$entity = 'location';
-		$id_name = 'location_id';
-		$object_id = $_REQUEST['location_id'];
-	}
-	else
-	{
-		$entity = 'rack';
-		$id_name = 'rack_id';
-		$object_id = $_REQUEST['rack_id'];
-	}
-
-	echo "<center><h2>Log records for this ${entity} (<a href=?page=objectlog>complete list</a>)</h2></center>";
+	echo "<center><h2>Log records for this object (<a href=?page=objectlog>complete list</a>)</h2></center>";
 	printOpFormIntro ('add');
 	echo "<table with=80% align=center border=0 cellpadding=5 cellspacing=0 align=center class=cooltable><tr valign=top class=row_odd>";
 	echo '<td class=tdcenter>' . getImageHREF ('CREATE', 'add record', TRUE, 101) . '</td>';
@@ -8435,12 +8402,12 @@ function renderObjectLogEditor ()
 	echo '</tr></form>';
 
 	$order = 'even';
-	foreach (getLogRecordsForObject ($object_id) as $row)
+	foreach (getLogRecordsForObject (getBypassValue()) as $row)
 	{
 		echo "<tr class=row_${order} valign=top>";
 		echo '<td class=tdleft>' . $row['date'] . '<br>' . $row['user'] . '</td>';
 		echo '<td class="logentry">' . string_insert_hrefs (htmlspecialchars ($row['content'], ENT_NOQUOTES)) . '</td>';
-		echo "<td class=tdleft><a href=\"".makeHrefProcess(array('op'=>'del', 'log_id'=>$row['id'], $id_name=>$object_id))."\">";
+		echo "<td class=tdleft><a href=\"".makeHrefProcess(array('op'=>'del', 'log_id'=>$row['id']))."\">";
 		echo getImageHREF ('DESTROY', 'Delete log entry') . '</a></td>';
 		echo "</tr>\n";
 		$order = $nextorder[$order];
@@ -8713,7 +8680,7 @@ function renderObjectCactiGraphs ($object_id)
 		echo "<a href='${cacti_url}/graph.php?action=view&local_graph_id=${graph_id}&rra_id=all' target='_blank'>";
 		echo "<img src='index.php?module=image&img=cactigraph&object_id=${object_id}&graph_id=${graph_id}' alt='Cacti Graph ID: ${graph_id}'>";
 		echo "</a><br/>";
-		echo "<a href='" . makeHrefProcess (array ('op' => 'del', 'object_id'=> $object_id, 'graph_id' => $graph_id)) . "' onclick=\"javascript:return confirm('Are you sure you want to delete the graph?')\">" . getImageHREF ('Cut', 'Unlink graph') . "</a>";
+		echo "<a href='" . makeHrefProcess (array ('op' => 'del', 'graph_id' => $graph_id)) . "' onclick=\"javascript:return confirm('Are you sure you want to delete the graph?')\">" . getImageHREF ('Cut', 'Unlink graph') . "</a>";
 		echo "&nbsp; &nbsp;${graph['caption']}";
 		echo "</td></tr>";
 	}
@@ -8753,7 +8720,7 @@ function renderEditVlan ($vlan_ck)
 	if ($portc)
 	{
 		$clear_line .= '<p>';
-		$clear_line .= '<a href="' . makeHrefProcess (array ('op' => 'clear', 'vlan_ck' => $vlan_ck)) . '">';
+		$clear_line .= '<a href="' . makeHrefProcess (array ('op' => 'clear')) . '">';
 		$clear_line .= getImageHREF ('clear', "remove this vlan from $portc ports") . ' remove</a>' . 
 			' this VLAN from ' .
 			'<a href="' . makeHref (array ('page' => 'vlan', 'tab' => 'default', 'vlan_ck' => $vlan_ck)) . '">' .
@@ -8857,7 +8824,7 @@ function renderEditUCSForm()
 	printImageHREF ('DQUEUE sync_ready', 'Auto-populate UCS', TRUE);
 	echo '</td><td class=tdright>';
 	echo "<a href='".
-		makeHrefProcess (array ('op' => 'cleanupUCS', 'object_id' => getBypassValue())) .
+		makeHrefProcess (array ('op' => 'cleanupUCS')) .
 		"'  onclick=\"javascript:return confirm('Are you sure you want to cleanup UCS Domain?')\">" .
 		getImageHREF ('CLEAR', 'Clean-up UCS domain') . "</a>";
 	echo "</td></tr></table></form>\n";
