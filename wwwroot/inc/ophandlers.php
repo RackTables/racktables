@@ -2836,7 +2836,7 @@ function autoPopulateUCS()
 				$new_object_id = commitAddObject ($mname, NULL, 4, NULL);
 			else
 			{
-				$spname = preg_replace ('#.+/ls-(.+)#i', '${1}', $item['assigned']);
+				$spname = preg_replace ('#.+/ls-(.+)#i', '${1}', $item['assigned']) . "(" . $oinfo['name'] . ")";
 				$new_object_id = commitAddObject ($spname, NULL, 4, NULL);
 			}
 			#    Set H/W Type for Blade Server
