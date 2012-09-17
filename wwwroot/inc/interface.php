@@ -857,7 +857,8 @@ function renderEditObjectForm()
 			echo '<tr><td>';
 			if (strlen ($record['value']))
 			{
-				echo "<a href='".makeHrefProcess(array('op'=>'clearSticker', 'attr_id'=>$record['id']))."'>";
+				echo "<a href='".makeHrefProcess(array('op'=>'clearSticker', 'attr_id'=>$record['id']))."'" .
+				" onclick=\"javascript:return confirm('Are you sure you want to clear attribute value?')\">";
 				printImageHREF ('clear', 'Clear value');
 				echo '</a>';
 			}
@@ -950,7 +951,8 @@ function renderEditRackForm ($rack_id)
 		echo '<tr><td>';
 		if (strlen ($record['value']))
 		{
-			echo "<a href='".makeHrefProcess(array('op'=>'clearSticker', 'attr_id'=>$record['id']))."'>";
+			echo "<a href='".makeHrefProcess(array('op'=>'clearSticker', 'attr_id'=>$record['id']))."'" .
+				" onclick=\"javascript:return confirm('Are you sure you want to clear attribute value?')\">";
 			printImageHREF ('clear', 'Clear value');
 			echo '</a>';
 		}
@@ -3881,7 +3883,8 @@ function renderEditLocationForm ($location_id)
 		echo '<tr><td>';
 		if (strlen ($record['value']))
 		{
-			echo "<a href='".makeHrefProcess(array('op'=>'clearSticker', 'attr_id'=>$record['id']))."'>";
+			echo "<a href='".makeHrefProcess(array('op'=>'clearSticker', 'attr_id'=>$record['id']))."'" .
+				" onclick=\"javascript:return confirm('Are you sure you want to clear attribute value?')\">";
 			printImageHREF ('clear', 'Clear value');
 			echo '</a>';
 		}
