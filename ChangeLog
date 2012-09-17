@@ -8,6 +8,7 @@
 	bugfix: duplicate names for Racks and Rows weren't allowed (#606)
 	bugfix: ports and IPs highlighting is kept after edit operation
 	bugfix: preserve page number after data importing on LivePTR tab (#424)
+	update: confirmation boxes when clearing attribute values (#565)
 	new feature: initial Cisco UCS support
 0.20.0 2012-09-09
 	bugfix: when long action takes place, other tabs in browser are functional now
