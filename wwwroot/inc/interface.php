@@ -7616,7 +7616,7 @@ function renderObject8021QSync ($object_id)
 	echo '<table border=0 class=objectview cellspacing=0 cellpadding=0>';
 	echo '<tr><td class=pcleft width="50%">';
 	startPortlet ('schedule');
-	renderObject8021QSyncSchedule ($vswitch, $maxdecisions);
+	renderObject8021QSyncSchedule ($object, $vswitch, $maxdecisions);
 	finishPortlet();
 	startPortlet ('preview legend');
 	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
@@ -7645,7 +7645,7 @@ function renderObject8021QSync ($object_id)
 	echo '</td></tr></table>';
 }
 
-function renderObject8021QSyncSchedule ($vswitch, $maxdecisions)
+function renderObject8021QSyncSchedule ($object, $vswitch, $maxdecisions)
 {
 	echo '<table border=0 cellspacing=0 cellpadding=3 align=center>';
 	// FIXME: sort rows newest event last
