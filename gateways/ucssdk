@@ -1,4 +1,4 @@
-#!/usr/local/bin/python
+#!/usr/bin/python
 
 # This script provides an online stdin/stdout interface to the list of an UCS
 # domain components. This is done through Python UcsSdk interfacing with the UCS
