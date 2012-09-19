@@ -1507,6 +1507,10 @@ CREATE VIEW `RackObject` AS SELECT id, name, label, objtype_id, asset_no, has_pr
 			$query[] = "UPDATE Config SET varvalue = '0.20.0' WHERE varname = 'DB_VERSION'";
 			break;
 		case '0.20.1':
+			// some HW types were moved from the 'Network switch' chapter to the 'Network chassis' chapter
+			// change the type of affected objects to 'Network chassis'
+			$query[] = "UPDATE `Object` SET objtype_id = 1503 WHERE id IN (SELECT object_id FROM `AttributeValue` WHERE attr_id = 2 and uint_value IN (888,889,890,891))";
+
 			// new 'management interface' object type
 			$query[] = "INSERT INTO `Chapter` (`id`,`sticky`,`name`) VALUES (38,'no','management interface type')";
 			$query[] = "INSERT INTO `Attribute` (`id`,`type`,`name`) VALUES (30,'dict','Mgmt type')";
