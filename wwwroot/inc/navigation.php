@@ -564,6 +564,16 @@ $ophandler['myaccount']['interface']['upd'] = 'saveMyPreferences';
 $ophandler['myaccount']['interface']['reset'] = 'resetMyPreference';
 $ophandler['myaccount']['qlinks']['save'] = 'saveQuickLinks';
 
+$page['cacti']['title'] = 'Cacti';
+$page['cacti']['parent'] = 'config';
+$tab['cacti']['default'] = 'View';
+$tab['cacti']['servers'] = 'Manage servers';
+$tabhandler['cacti']['default'] = 'renderCactiConfig';
+$tabhandler['cacti']['servers'] = 'renderCactiServersEditor';
+$ophandler['cacti']['servers']['add'] = 'tableHandler';
+$ophandler['cacti']['servers']['del'] = 'tableHandler';
+$ophandler['cacti']['servers']['upd'] = 'tableHandler';
+
 $page['reports']['title'] = 'Reports';
 $page['reports']['parent'] = 'index';
 $tab['reports']['default'] = 'System';

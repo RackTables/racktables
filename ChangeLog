@@ -12,6 +12,7 @@
 	update: confirmation boxes when clearing attribute values (#565)
 	new feature: initial Cisco UCS support
 	new feature: offline management of 802.1Q port list
+	new feature: multiple Cacti servers (#534)
 0.20.0 2012-09-09
 	bugfix: when long action takes place, other tabs in browser are functional now
 	bugfix: LLDP discovery was not working on some Cisco Nexus devices

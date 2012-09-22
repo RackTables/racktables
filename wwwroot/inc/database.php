@@ -5145,7 +5145,11 @@ function getConfiguredQuickLinks()
 
 function getCactiGraphsForObject ($object_id)
 {
-	$result = usePreparedSelectBlade ('SELECT graph_id, caption FROM CactiGraph WHERE object_id = ? ORDER BY graph_id', array ($object_id));
+	$result = usePreparedSelectBlade
+	(
+		'SELECT server_id, graph_id, caption FROM CactiGraph WHERE object_id = ? ORDER BY server_id, graph_id',
+		array ($object_id)
+	);
 	return reindexById ($result->fetchAll (PDO::FETCH_ASSOC), 'graph_id');
 }
 
@@ -5173,6 +5177,16 @@ function scanAttrRelativeDays ($attr_id, $not_before_days, $not_after_days)
 		array ($attr_id, $not_before_days, $not_after_days)
 	);
 	return $result->fetchAll (PDO::FETCH_ASSOC);
+}
+
+function getCactiServers()
+{
+	$result = usePreparedSelectBlade
+	(
+		'SELECT id, base_url, username, password, COUNT(graph_id) AS num_graphs ' .
+		'FROM CactiServer AS CS LEFT JOIN CactiGraph AS CG ON CS.id = CG.server_id GROUP BY id'
+	);
+	return reindexById ($result->fetchAll (PDO::FETCH_ASSOC));
 }
 
 ?>

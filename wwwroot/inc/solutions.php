@@ -40,10 +40,11 @@ function dispatchImageRequest()
 		$tabno = 'cacti';
 		fixContext();
 		assertPermission();
+		genericAssertion ('server_id', 'uint');
 		genericAssertion ('graph_id', 'uint');
 		if (! array_key_exists ($_REQUEST['graph_id'], getCactiGraphsForObject (getBypassValue())))
 			throw new InvalidRequestArgException ('graph_id', $_REQUEST['graph_id']);
-		proxyCactiRequest ($_REQUEST['graph_id']);
+		proxyCactiRequest ($_REQUEST['server_id'], $_REQUEST['graph_id']);
 		break;
 	default:
 		renderErrorImage();
@@ -366,14 +367,16 @@ function proxyStaticURI ($URI)
 	fclose ($fh);
 }
 
-function proxyCactiRequest ($graph_id)
+function proxyCactiRequest ($server_id, $graph_id)
 {
 	$ret = array();
-	$cacti_url = getConfigVar('CACTI_URL');
-	$cacti_user = getConfigVar('CACTI_USERNAME');
-	$cacti_pass = getConfigVar('CACTI_USERPASS');
+	$servers = getCactiServers();
+	if (! array_key_exists ($server_id, $servers))
+		throw new InvalidRequestArgException ('server_id', $server_id);
+	$cacti_url = $servers[$server_id]['base_url'];
 	$url = $cacti_url . "/graph_image.php?action=view&local_graph_id=" . $graph_id;
-	$postvars = "action=login&login_username=" . $cacti_user . "&login_password=" . $cacti_pass;
+	$postvars = 'action=login&login_username=' . $servers[$server_id]['username'];
+	$postvars .= '&login_password=' . $servers[$server_id]['password'];
 
 	$session = curl_init();
 //	curl_setopt ($session, CURLOPT_VERBOSE, TRUE);

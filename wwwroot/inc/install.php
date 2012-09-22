@@ -495,11 +495,22 @@ CREATE TABLE `CachedPVM` (
 
 CREATE TABLE `CactiGraph` (
   `object_id` int(10) unsigned NOT NULL,
+  `server_id` int(10) unsigned NOT NULL,
   `graph_id` int(10) unsigned NOT NULL,
   `caption`  char(255) DEFAULT NULL,
-  PRIMARY KEY  (`graph_id`),
+  PRIMARY KEY (`server_id`,`graph_id`),
   KEY `object_id` (`object_id`),
+  KEY `graph_id` (`graph_id`),
+  CONSTRAINT `CactiGraph-FK-server_id` FOREIGN KEY (`server_id`) REFERENCES `CactiServer` (`id`),
   CONSTRAINT `CactiGraph-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `Object` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE `CactiServer` (
+  `id` int(10) unsigned NOT NULL auto_increment,
+  `base_url` char(255) DEFAULT NULL,
+  `username` char(64) DEFAULT NULL,
+  `password` char(64) DEFAULT NULL,
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB;
 
 CREATE TABLE `Chapter` (
@@ -1586,9 +1597,6 @@ INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdef
 ('SYNC_802Q_LISTSRC','','string','yes','no','no','List of VLAN switches sync is enabled on'),
 ('QUICK_LINK_PAGES','depot,ipv4space,rackspace','string','yes','no','yes','List of pages to dislay in quick links'),
 ('CACTI_LISTSRC','false','string','yes','no','no','List of object with Cacti graphs'),
-('CACTI_URL','','string','yes','no','no','Cacti server base URL'),
-('CACTI_USERNAME','','string','yes','no','no','Cacti user account'),
-('CACTI_USERPASS','','string','yes','no','no','Cacti user password'),
 ('VIRTUAL_OBJ_LISTSRC','1504,1505,1506,1507','string','no','no','no','List source: virtual objects'),
 ('DATETIME_ZONE','UTC','string','yes','no','yes','Timezone to use for displaying/calculating dates'),
 ('DATETIME_FORMAT','m/d/Y','string','no','no','yes','PHP date() format to use for date output'),
