@@ -8700,13 +8700,14 @@ function renderIPAddressLog ()
 
 function renderObjectCactiGraphs ($object_id)
 {
-	function printNewItemTR()
+	function printNewItemTR ($options)
 	{
 		echo "<table cellspacing=\"0\" align=\"center\" width=\"50%\">";
-		echo "<tr><td>&nbsp;</td><th>Cacti Graph ID</th><th>Caption</th><td>&nbsp;</td></tr>\n";
+		echo "<tr><td>&nbsp;</td><th>Server</th><th>Graph ID</th><th>Caption</th><td>&nbsp;</td></tr>\n";
 		printOpFormIntro ('add');
 		echo "<tr><td>";
 		printImageHREF ('Attach', 'Link new graph', TRUE);
+		echo '</td><td>' . getSelect ($options, array ('name' => 'server_id'));
 		echo "</td><td><input type=text name=graph_id tabindex=100></td><td><input type=text name=caption tabindex=101></td><td>";
 		printImageHREF ('Attach', 'Link new graph', TRUE, 101);
 		echo "</td></tr></form>";
@@ -8716,26 +8717,29 @@ function renderObjectCactiGraphs ($object_id)
 	if (!extension_loaded ('curl'))
 		throw new RackTablesError ("The PHP cURL extension is not loaded.", RackTablesError::MISCONFIGURED);
 
-	if (!($cacti_url = getConfigVar('CACTI_URL')))
-		throw new RackTablesError ("Cacti URL not configured.", RackTablesError::MISCONFIGURED);
-
+	$servers = getCactiServers();
+	$options = array();
+	foreach ($servers as $server)
+		$options[$server['id']] = "${server['id']}: ${server['base_url']}";
 	startPortlet ('Cacti Graphs');
 	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
-		printNewItemTR();
+		printNewItemTR ($options);
 	echo "<table cellspacing=\"0\" cellpadding=\"10\" align=\"center\" width=\"50%\">";
 	foreach (getCactiGraphsForObject ($object_id) as $graph_id => $graph)
 	{
+		$cacti_url = $servers[$graph['server_id']]['base_url'];
+		$text = "(graph ${graph_id} on server ${graph['server_id']})";
 		echo "<tr><td>";
 		echo "<a href='${cacti_url}/graph.php?action=view&local_graph_id=${graph_id}&rra_id=all' target='_blank'>";
-		echo "<img src='index.php?module=image&img=cactigraph&object_id=${object_id}&graph_id=${graph_id}' alt='Cacti Graph ID: ${graph_id}'>";
-		echo "</a><br/>";
-		echo "<a href='" . makeHrefProcess (array ('op' => 'del', 'graph_id' => $graph_id)) . "' onclick=\"javascript:return confirm('Are you sure you want to delete the graph?')\">" . getImageHREF ('Cut', 'Unlink graph') . "</a>";
-		echo "&nbsp; &nbsp;${graph['caption']}";
+		echo "<img src='index.php?module=image&img=cactigraph&object_id=${object_id}&server_id=${graph['server_id']}&graph_id=${graph_id}' alt='${text}' title='${text}'></a></td>";
+		echo "<td><a href='" . makeHrefProcess (array ('op' => 'del', 'server_id' => $graph['server_id'], 'graph_id' => $graph_id));
+		echo "' onclick=\"javascript:return confirm('Are you sure you want to delete the graph?')\">";
+		echo getImageHREF ('Cut', 'Unlink graph') . "</a>&nbsp; &nbsp;${graph['caption']}";
 		echo "</td></tr>";
 	}
 	echo '</table>';
 	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')
-		printNewItemTR();
+		printNewItemTR ($options);
 	finishPortlet ();
 }
 
@@ -8878,6 +8882,63 @@ function renderEditUCSForm()
 		getImageHREF ('CLEAR', 'Clean-up UCS domain') . "</a>";
 	echo "</td></tr></table></form>\n";
 	finishPortlet();
+}
+
+function renderCactiConfig()
+{
+	$servers = getCactiServers();
+	startPortlet ('Cacti servers (' . count ($servers) . ')');
+	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
+	echo '<tr><th>base URL</th><th>username</th><th>graph(s)</th></tr>';
+	foreach ($servers as $server)
+	{
+		echo '<tr align=left valign=top><td>' . niftyString ($server['base_url']) . '</td>';
+		echo "<td>${server['username']}</td><td class=tdright>${server['num_graphs']}</td></tr>";
+	}
+	echo '</table>';
+	finishPortlet();
+}
+
+function renderCactiServersEditor()
+{
+	function printNewItemTR ()
+	{
+		printOpFormIntro ('add');
+		echo '<tr>';
+		echo '<td>' . getImageHREF ('create', 'add a new server', TRUE, 112) . '</td>';
+		echo '<td><input type=text size=48 name=base_url tabindex=101></td>';
+		echo '<td><input type=text size=24 name=username tabindex=102></td>';
+		echo '<td><input type=password size=24 name=password tabindex=103></td>';
+		echo '<td>&nbsp;</td>';
+		echo '<td>' . getImageHREF ('create', 'add a new server', TRUE, 111) . '</td>';
+		echo '</tr></form>';
+	}
+	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
+	echo '<tr><th>&nbsp;</th><th>base URL</th><th>username</th><th>password</th><th>graph(s)</th><th>&nbsp;</th></tr>';
+	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
+		printNewItemTR();
+	foreach (getCactiServers() as $server)
+	{
+		printOpFormIntro ('upd', array ('id' => $server['id']));
+		echo '<tr><td>';
+		if ($server['num_graphs'])
+			printImageHREF ('nodestroy', 'cannot delete, graphs exist');
+		else
+		{
+			echo '<a href="' . makeHrefProcess (array ('op' => 'del', 'id' => $server['id'])) . '">';
+			echo getImageHREF ('destroy', 'delete this server') . '</a>';
+		}
+		echo '</td>';
+		echo '<td><input type=text size=48 name=base_url value="' . htmlspecialchars ($server['base_url'], ENT_QUOTES, 'UTF-8') . '"></td>';
+		echo '<td><input type=text size=24 name=username value="' . htmlspecialchars ($server['username'], ENT_QUOTES, 'UTF-8') . '"></td>';
+		echo '<td><input type=password size=24 name=password value="' . htmlspecialchars ($server['password'], ENT_QUOTES, 'UTF-8') . '"></td>';
+		echo "<td class=tdright>${server['num_graphs']}</td>";
+		echo '<td>' . getImageHREF ('save', 'update this server', TRUE) . '</td>';
+		echo '</tr></form>';
+	}
+	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')
+		printNewItemTR();
+	echo '</table>';
 }
 
 ?>

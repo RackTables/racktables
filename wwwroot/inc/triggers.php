@@ -326,7 +326,7 @@ function triggerIPAddressLog ()
 
 function triggerCactiGraphs ()
 {
-	if ('' == getConfigVar ('CACTI_URL'))
+	if (! count (getCactiServers()))
 		return '';
 	if
 	(

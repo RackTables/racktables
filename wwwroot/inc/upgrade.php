@@ -1526,7 +1526,33 @@ CREATE VIEW `RackObject` AS SELECT id, name, label, objtype_id, asset_no, has_pr
 			$query[] = "ALTER TABLE `Atom` ADD CONSTRAINT `Atom-FK-rack_id` FOREIGN KEY (`rack_id`) REFERENCES `Object` (`id`) ON DELETE CASCADE";
 			$query[] = "ALTER TABLE `MountOperation` ADD CONSTRAINT `MountOperation-FK-old_molecule_id` FOREIGN KEY (`old_molecule_id`) REFERENCES `Molecule` (`id`) ON DELETE CASCADE";
 			$query[] = "ALTER TABLE `MountOperation` ADD CONSTRAINT `MountOperation-FK-new_molecule_id` FOREIGN KEY (`new_molecule_id`) REFERENCES `Molecule` (`id`) ON DELETE CASCADE";
-
+			# multiple Cacti servers
+			$query[] = "
+CREATE TABLE `CactiServer` (
+  `id` int(10) unsigned NOT NULL auto_increment,
+  `base_url` char(255) DEFAULT NULL,
+  `username` char(64) DEFAULT NULL,
+  `password` char(64) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB
+";
+			$query[] = "ALTER TABLE CactiGraph ADD COLUMN server_id int(10) unsigned NOT NULL AFTER object_id";
+			$result = $dbxlink->query ('SELECT COUNT(*) AS cnt FROM CactiGraph');
+			$row = $result->fetchAll (PDO::FETCH_ASSOC);
+			unset ($result);
+			if ($row['cnt'] != 0)
+			{
+				$query[] = "INSERT INTO CactiServer (id) VALUES (1)";
+				$query[] = "UPDATE CactiServer SET base_url = (SELECT varvalue FROM Config WHERE varname = 'CACTI_URL') WHERE id = 1";
+				$query[] = "UPDATE CactiServer SET username = (SELECT varvalue FROM Config WHERE varname = 'CACTI_USERNAME') WHERE id = 1";
+				$query[] = "UPDATE CactiServer SET password = (SELECT varvalue FROM Config WHERE varname = 'CACTI_USERPASS') WHERE id = 1";
+				$query[] = "UPDATE CactiGraph SET server_id = 1";
+			}
+			$query[] = "ALTER TABLE CactiGraph DROP PRIMARY KEY";
+			$query[] = "ALTER TABLE CactiGraph ADD PRIMARY KEY (server_id, graph_id)";
+			$query[] = "ALTER TABLE CactiGraph ADD KEY (graph_id)";
+			$query[] = "ALTER TABLE CactiGraph ADD CONSTRAINT `CactiGraph-FK-server_id` FOREIGN KEY (server_id) REFERENCES CactiServer (id)";
+			$query[] = "DELETE FROM Config WHERE varname IN('CACTI_URL', 'CACTI_USERNAME', 'CACTI_USERPASS')";
 			$query[] = "UPDATE Config SET varvalue = '0.20.1' WHERE varname = 'DB_VERSION'";
 			break;
 		case 'dictionary':
