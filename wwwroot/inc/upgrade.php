@@ -1517,6 +1517,8 @@ CREATE VIEW `RackObject` AS SELECT id, name, label, objtype_id, asset_no, has_pr
 			$query[] = "INSERT INTO `AttributeMap` (`objtype_id`,`attr_id`,`chapter_id`) VALUES (1787,3,NULL),(1787,14,NULL),(1787,30,38)";
 			$query[] = "UPDATE `Config` SET varvalue = CONCAT(varvalue, ' or {\$typeid_1787}') WHERE varname = 'IPV4OBJ_LISTSRC'";
 
+			$query[] = "INSERT INTO Config VALUES ('8021Q_EXTSYNC_LISTSRC','false','string','yes','no','no','List source: objects with extended 802.1Q sync')";
+
 			// constraints to prevent orphan records
 			$query[] = "DELETE A FROM `Atom` A LEFT JOIN `Molecule` M ON A.molecule_id = M.id LEFT JOIN `Object` O ON A.rack_id = O.id WHERE M.id IS NULL OR O.id IS NULL";
 			$query[] = "DELETE FROM `MountOperation` WHERE old_molecule_id NOT IN (SELECT id FROM `Molecule`) OR new_molecule_id NOT IN (SELECT id FROM `Molecule`)";
