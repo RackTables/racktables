@@ -10,6 +10,7 @@
 	bugfix: preserve page number after data importing on LivePTR tab (#421)
 	bugfix: 0.19.10 moved some HW models to a different dict chapter, update the type of affected objects accordingly (#609)
 	update: confirmation boxes when clearing attribute values (#565)
+	update: log records containing long lines are now word-wrapped (#608) by Stephen Groat
 	new feature: initial Cisco UCS support
 	new feature: offline management of 802.1Q port list
 	new feature: multiple Cacti servers (#534)
