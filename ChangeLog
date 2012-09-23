@@ -7,7 +7,7 @@
 	bugfix: Location attributes weren't being saved (#605)
 	bugfix: duplicate names for Racks and Rows weren't allowed (#606)
 	bugfix: ports and IPs highlighting is kept after edit operation
-	bugfix: preserve page number after data importing on LivePTR tab (#424)
+	bugfix: preserve page number after data importing on LivePTR tab (#421)
 	bugfix: 0.19.10 moved some HW models to a different dict chapter, update the type of affected objects accordingly (#609)
 	update: confirmation boxes when clearing attribute values (#565)
 	new feature: initial Cisco UCS support
