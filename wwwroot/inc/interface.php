@@ -1761,66 +1761,70 @@ function showMessageOrError ()
 // renders two tables: port link status and learned MAC list
 function renderPortsInfo($object_id)
 {
-	global $nextorder;
-	echo "<table width='100%'><tr>";
-	
-	if (permitted (NULL, NULL, 'get_link_status'))
-	{
-		try
-		{
-			$linkStatus = queryDevice ($object_id, 'getportstatus');
-		}
-		catch (RackTablesError $e) {}
-		if (! empty ($linkStatus))
-		{
-			echo "<td valign='top' width='50%'>";
-			startPortlet('Link status');
-			echo "<table width='80%' class='widetable' cellspacing=0 cellpadding='5px' align='center'><tr><th>Port<th><th>Link status<th>Link info</tr>";
-			$order = 'even';
-			foreach ($linkStatus as $pn => $link)
-			{
-				switch ($link['status'])
-				{
-					case 'up':
-						$img_filename = 'link-up.png';
-						break;
-					case 'down':
-						$img_filename = 'link-down.png';
-						break;
-					case 'disabled':
-						$img_filename = 'link-disabled.png';
-						break;
-					default:
-						$img_filename = '1x1t.gif';
-				}
-
-				echo "<tr class='row_$order'>";
-				$order = $nextorder[$order];
-				echo '<td>' . $pn;
-				echo '<td>' . '<img width=16 height=16 src="?module=chrome&uri=pix/' . $img_filename . '">';
-				echo '<td>' . $link['status'];
-				$info = '';
-				if (isset ($link['speed']))
-					$info .= $link['speed'];
-				if (isset ($link['duplex']))
-				{
-					if (! empty ($info))
-						$info .= ', ';
-					$info .= $link['duplex'];
-				}
-				echo '<td>' . $info;
-				echo '</tr>';
-			}
-			echo "</table></td>";
-			finishPortlet();
-		}
-	}
-
 	try
 	{
-		$macList = sortPortList (queryDevice ($object_id, 'getmaclist'));
+		if (permitted (NULL, NULL, 'get_link_status'))
+			$linkStatus = queryDevice ($object_id, 'getportstatus');
+		else
+			showWarning ("You don't have permission to view ports link status");
+
+		if (permitted (NULL, NULL, 'get_mac_list'))
+			$macList = sortPortList (queryDevice ($object_id, 'getmaclist'));
+		else
+			showWarning ("You don't have permission to view learned MAC list");
 	}
-	catch (RackTablesError $e) {}	
+	catch (RTGatewayError $e)
+	{
+		showError ($e->getMessage());
+		return;
+	}
+
+	global $nextorder;
+	echo "<table width='100%'><tr>";
+	if (! empty ($linkStatus))
+	{
+		echo "<td valign='top' width='50%'>";
+		startPortlet('Link status');
+		echo "<table width='80%' class='widetable' cellspacing=0 cellpadding='5px' align='center'><tr><th>Port<th><th>Link status<th>Link info</tr>";
+		$order = 'even';
+		foreach ($linkStatus as $pn => $link)
+		{
+			switch ($link['status'])
+			{
+				case 'up':
+					$img_filename = 'link-up.png';
+					break;
+				case 'down':
+					$img_filename = 'link-down.png';
+					break;
+				case 'disabled':
+					$img_filename = 'link-disabled.png';
+					break;
+				default:
+					$img_filename = '1x1t.gif';
+			}
+
+			echo "<tr class='row_$order'>";
+			$order = $nextorder[$order];
+			echo '<td>' . $pn;
+			echo '<td>' . '<img width=16 height=16 src="?module=chrome&uri=pix/' . $img_filename . '">';
+			echo '<td>' . $link['status'];
+			$info = '';
+			if (isset ($link['speed']))
+				$info .= $link['speed'];
+			if (isset ($link['duplex']))
+			{
+				if (! empty ($info))
+					$info .= ', ';
+				$info .= $link['duplex'];
+			}
+			echo '<td>' . $info;
+			echo '</tr>';
+		}
+		echo "</table></td>";
+		finishPortlet();
+	}
+
 	if (! empty ($macList))
 	{
 		echo "<td valign='top' width='50%'>";
@@ -8120,7 +8124,7 @@ function renderDiscoveredNeighbors ($object_id)
 	}
 	catch (RTGatewayError $e)
 	{
-		showWarning ($e->getMessage());
+		showError ($e->getMessage());
 		return;
 	}
 	$mydevice = spotEntity ('object', $object_id);
