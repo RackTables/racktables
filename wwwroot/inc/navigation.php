@@ -282,6 +282,7 @@ $ophandler['ipv6space']['manage']['del'] = 'delIPv6Prefix';
 $page['ipv4net']['parent'] = 'ipv4space';
 $page['ipv4net']['bypass'] = 'id';
 $page['ipv4net']['bypass_type'] = 'uint';
+$page['ipv4net']['bypass_tabs'] = array ('pg');
 $tab['ipv4net']['default'] = 'Browse';
 $tab['ipv4net']['properties'] = 'Properties';
 $tab['ipv4net']['liveptr'] = 'Live PTR';

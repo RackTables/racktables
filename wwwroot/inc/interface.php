@@ -4891,7 +4891,7 @@ function renderLivePTR ($id)
 	echo "</center>";
 
 	// FIXME: address counter could be calculated incorrectly in some cases
-	printOpFormIntro ('importPTRData', array ('addrcount' => ($endip - $startip + 1), 'pg' => $page));
+	printOpFormIntro ('importPTRData', array ('addrcount' => ($endip - $startip + 1)));
 
 	echo "<table class='widetable' border=0 cellspacing=0 cellpadding=5 align='center'>\n";
 	echo "<tr><th>address</th><th>current name</th><th>DNS data</th><th>import</th></tr>\n";
