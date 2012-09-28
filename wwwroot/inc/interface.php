@@ -5040,9 +5040,11 @@ function renderTagRowForEditor ($taginfo, $level = 0)
 	printOpFormIntro ('updateTag', array ('tag_id' => $taginfo['id']));
 	echo "<input type=text size=48 name=tag_name ";
 	echo "value='${taginfo['tag']}'></td><td class=tdleft>";
+	$parent_id = $taginfo['parent_id'] ? $taginfo['parent_id'] : 0;
+	$parent_name = $taginfo['parent_id'] ? htmlspecialchars ($taglist[$taginfo['parent_id']]['tag']) : '-- NONE --';
 	echo getSelect
 	(
-		array ( $taginfo['parent_id'] => $taginfo['parent_id'] ? htmlspecialchars ($taglist[$taginfo['parent_id']]['tag']) : '-- NONE --'),
+		array ($parent_id => $parent_name),
 		array ('name' => 'parent_id', 'id' => 'tagid_' . $taginfo['id'], 'class' => 'taglist-popup'),
 		$taginfo['parent_id'],
 		FALSE
