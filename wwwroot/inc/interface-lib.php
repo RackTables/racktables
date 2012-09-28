@@ -952,4 +952,12 @@ function includeJQueryUI ($do_css = TRUE)
 		addCSS ('css/jquery-ui-1.8.22.redmond.css');
 }
 
+function getRenderedIPPortPair ($ip, $port = NULL)
+{
+	return "<a href=\"" .
+		makeHref (array ('page' => 'ipaddress',  'tab'=>'default', 'ip' => $ip)) .
+		"\">" . $ip . "</a>" .
+		(isset ($port) ? ":" . $port : "");
+}
+
 ?>

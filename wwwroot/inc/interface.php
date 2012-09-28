@@ -1286,8 +1286,8 @@ function renderObject ($object_id)
 					$osif = $alloclist [$pf['localip']]['osif'] . ': ';
 				}
 				echo "<tr class='$class'>";
-				echo "<td>${pf['proto']}</td><td class=tdleft>${osif}<a href='".makeHref(array('page'=>'ipaddress', 'tab'=>'default', 'ip'=>$pf['localip']))."'>${pf['localip']}</a>:${pf['localport']}</td>";
-				echo "<td class=tdleft><a href='".makeHref(array('page'=>'ipaddress', 'tab'=>'default', 'ip'=>$pf['remoteip']))."'>${pf['remoteip']}</a>:${pf['remoteport']}</td>";
+				echo "<td>${pf['proto']}</td><td class=tdleft>${osif}" . getRenderedIPPortPair ($pf['localip'], $pf['localport']) . "</td>";
+				echo "<td class=tdleft>" . getRenderedIPPortPair ($pf['remoteip'], $pf['remoteport']) . "</td>";
 				$address = getIPAddress (ip4_parse ($pf['remoteip']));
 				echo "<td class='description'>";
 				if (count ($address['allocs']))
@@ -1307,9 +1307,9 @@ function renderObject ($object_id)
 			foreach ($forwards['in'] as $pf)
 			{
 				echo "<tr>";
-				echo "<td>${pf['proto']}/<a href='".makeHref(array('page'=>'ipaddress', 'tab'=>'default', 'ip'=>$pf['localip']))."'>${pf['localip']}</a>:${pf['localport']}</td>";
+				echo "<td>${pf['proto']}/" . getRenderedIPPortPair ($pf['localip'], $pf['localport']) . "</td>";
 				echo "<td class='description'><a href='".makeHref(array('page'=>'object', 'tab'=>'default', 'object_id'=>$pf['object_id']))."'>${pf['object_name']}</a>";
-				echo "</td><td><a href='".makeHref(array('page'=>'ipaddress', 'tab'=>'default', 'ip'=>$pf['remoteip']))."'>${pf['remoteip']}</a>:${pf['remoteport']}</td>";
+				echo "</td><td>" . getRenderedIPPortPair ($pf['remoteip'], $pf['remoteport']) . "</td>";
 				echo "<td class='description'>${pf['description']}</td></tr>";
 			}
 			echo "</table><br><br>";
@@ -2886,27 +2886,24 @@ function renderIPAddress ($ip)
 	if (! empty ($address['vslist']) or ! empty ($address['rsplist']))
 		renderSLBTriplets ($address);
 
-	if (! empty ($address['outpf']))
-	{
-		startPortlet ('departing NAT rules');
-		echo "<table class='widetable' cellpadding=5 cellspacing=0 border=0 align='center' width='100%'>\n";
-		echo "<tr><th>proto</th><th>from</th><th>to</th><th>comment</th></tr>\n";
-		foreach ($address['outpf'] as $rule)
-			echo "<tr><td>${rule['proto']}</td><td>${rule['localip']}:${rule['localport']}</td><td>${rule['remoteip']}:${rule['remoteport']}</td><td>${rule['description']}</td></tr>";
-		echo "</table>";
-		finishPortlet();
-	}
-
-	if (! empty ($address['inpf']))
-	{
-		startPortlet ('arriving NAT rules');
-		echo "<table class='widetable' cellpadding=5 cellspacing=0 border=0 align='center' width='100%'>\n";
-		echo "<tr><th>proto</th><th>from</th><th>to</th><th>comment</th></tr>\n";
-		foreach ($address['inpf'] as $rule)
-			echo "<tr><td>${rule['proto']}</td><td>${rule['localip']}:${rule['localport']}</td><td>${rule['remoteip']}:${rule['remoteport']}</td><td>${rule['description']}</td></tr>";
-		echo "</table>";
-		finishPortlet();
-	}
+	foreach (array ('outpf' => 'departing NAT rules', 'inpf' => 'arriving NAT rules') as $key => $title)
+		if (! empty ($address[$key]))
+		{
+			startPortlet ($title);
+			echo "<table class='widetable' cellpadding=5 cellspacing=0 border=0 align='center' width='100%'>\n";
+			echo "<tr><th>proto</th><th>from</th><th>to</th><th>comment</th></tr>\n";
+			foreach ($address[$key] as $rule)
+			{
+				echo "<tr>";
+				echo "<td>" . $rule['proto'] . "</td>";
+				echo "<td>" . getRenderedIPPortPair ($rule['localip'], $rule['localport']) . "</td>";
+				echo "<td>" . getRenderedIPPortPair ($rule['remoteip'], $rule['remoteport']) . "</td>";
+				echo "<td>" . $rule['description'] . "</td></tr>";
+				echo "</tr>";
+			}
+			echo "</table>";
+			finishPortlet();
+		}
 
 	echo "</td></tr>";
 	echo "</table>\n";
@@ -3065,11 +3062,11 @@ function renderNATv4ForObject ($object_id)
 		"'>";
 		printImageHREF ('delete', 'Delete NAT rule');
 		echo "</a></td>";
-		echo "<td>${pf['proto']}/${osif}<a href='".makeHref(array('page'=>'ipaddress', 'tab'=>'default', 'ip'=>$pf['localip']))."'>${pf['localip']}</a>:${pf['localport']}";
+		echo "<td>${pf['proto']}/${osif}" . getRenderedIPPortPair ($pf['localip'], $pf['localport']);
 		if (strlen ($pf['local_addr_name']))
 			echo ' (' . $pf['local_addr_name'] . ')';
 		echo "</td>";
-		echo "<td><a href='".makeHref(array('page'=>'ipaddress', 'tab'=>'default', 'ip'=>$pf['remoteip']))."'>${pf['remoteip']}</a>:${pf['remoteport']}</td>";
+		echo "<td>" . getRenderedIPPortPair ($pf['remoteip'], $pf['remoteport']) . "</td>";
 
 		$address = getIPAddress (ip4_parse ($pf['remoteip']));
 
@@ -3121,9 +3118,9 @@ function renderNATv4ForObject ($object_id)
 		"'>";
 		printImageHREF ('delete', 'Delete NAT rule');
 		echo "</a></td>";
-		echo "<td>${pf['proto']}/<a href='".makeHref(array('page'=>'ipaddress', 'tab'=>'default', 'ip'=>$pf['localip']))."'>${pf['localip']}</a>:${pf['localport']}</td>";
+		echo "<td>${pf['proto']}/" . getRenderedIPPortPair ($pf['localip'], $pf['localport']) . "</td>";
 		echo "<td class='description'><a href='".makeHref(array('page'=>'object', 'tab'=>'default', 'object_id'=>$pf['object_id']))."'>${pf['object_name']}</a>";
-		echo "</td><td><a href='".makeHref(array('page'=>'ipaddress', 'tab'=>'default', 'ip'=>$pf['remoteip']))."'>${pf['remoteip']}</a>:${pf['remoteport']}</td>";
+		echo "</td><td>" . getRenderedIPPortPair ($pf['remoteip'], $pf['remoteport']) . "</td>";
 		echo "<td class='description'>${pf['description']}</td></tr>";
 	}
 
