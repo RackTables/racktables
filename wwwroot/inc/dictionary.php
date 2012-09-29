@@ -1876,6 +1876,7 @@ $dictionary = array
 	1790 => array ('chapter_id' => 38, 'dict_value' => 'VMware%GPASS%vSphere instance'),
 	1791 => array ('chapter_id' => 12, 'dict_value' => 'Dell PowerConnect%GPASS%5524'),
 	1792 => array ('chapter_id' => 12, 'dict_value' => 'Dell PowerConnect%GPASS%5548'),
+	1793 => array ('chapter_id' => 12, 'dict_value' => 'TPLink%GPASS%TL-SG5426'),
 
 # Any new "default" dictionary records must go above this line (i.e., with
 # dict_key code less, than 50000). This is necessary to keep AUTO_INCREMENT
