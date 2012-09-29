@@ -1251,6 +1251,24 @@ $iftable_processors['3com-any-1000T'] = array
 	'try_next_proc' => FALSE,
 );
 
+$iftable_processors['tplink-21-to-24-combo-1000SFP'] = array
+(
+	'pattern' => '@^.+ Port on unit .+ port (21|22|23|24)$@',
+	'replacement' => 'g\\1',
+	'dict_key' => '4-1077',
+	'label' => '\\1',
+	'try_next_proc' => TRUE,
+);
+
+$iftable_processors['tplink-any-1000T'] = array
+(
+	'pattern' => '@^.+ Port on unit .+ port ([[:digit:]]+)$@',
+	'replacement' => 'g\\1',
+	'dict_key' => 24,
+	'label' => '\\1',
+	'try_next_proc' => FALSE,
+);
+
 global $known_switches;
 $known_switches = array // key is system OID w/o "enterprises" prefix
 (
@@ -2195,6 +2213,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'processors' => array ('generic-g45-to-g48-combo-1000SFP', 'generic-g-any-1000T'),
 		'ifDescrOID' => 'ifName',
 	),
+	'11863.6.10.58' => array
+	(
+		'dict_key' => 1793,
+		'text' => 'TL-SG5426: 22 RJ-45/10-100-1000T(X) + 4 combo ports',
+		'processors' => array ('tplink-21-to-24-combo-1000SFP', 'tplink-any-1000T'),
+	),
 );
 
 global $swtype_pcre;
@@ -2525,6 +2549,7 @@ function doSwitchSNMPmining ($objectInfo, $device)
 	case preg_match ('/^674\.10895\.301(0|4|7|9)/', $sysObjectID):
 	case preg_match ('/^674\.10895\.302(0|1)/', $sysObjectID):
 	case preg_match ('/^3955\.6\.1\.2048\.1/', $sysObjectID): // Linksys
+	case preg_match ('/^11863\.6\.10\.58/', $sysObjectID): // TPLink
 		// one DB-9 RS-232 and one AC port
 		checkPIC ('1-681');
 		commitAddPort ($objectInfo['id'], 'console', '1-681', '', ''); // DB-9 RS-232
