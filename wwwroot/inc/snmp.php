@@ -1768,6 +1768,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'J8773A: modular system',
 		'processors' => array ('procurve-modular-1000T'),
 	),
+	'11.2.3.7.11.62' => array
+	(
+		'dict_key' => 855,
+		'text' => 'J9020A: 48 RJ-45/10-100TX + 2 RJ-45/10-1000-1000T(x) + 2 SFP-1000',
+		'processors' => array ('procurve-51-to-52-1000SFP', 'procurve-49-to-50-1000T', 'procurve-chassis-100TX'),
+	),
 	'11.2.3.7.11.63' => array
 	(
 		'dict_key' => 868,
@@ -1821,6 +1827,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'dict_key' => 1349,
 		'text' => 'J9279A: 22 RJ-45/10-100-1000T(X) + 2 combo-gig + varying uplinks',
 		'processors' => array ('procurve-23-to-24-combo-1000SFP', 'procurve-chassis-1000T'),
+	),
+	'11.2.3.7.11.89' => array
+	(
+		'dict_key' => 857,
+		'text' => 'J9280A: 44 RJ-45/10-100-1000T(X) + 4 combo-gig + varying uplinks',
+		'processors' => array ('procurve-45-to-48-combo-1000SFP', 'procurve-chassis-1000T'),
 	),
 	'11.2.3.7.11.79' => array
 	(
