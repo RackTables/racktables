@@ -14,6 +14,7 @@
 	update: confirmation boxes when clearing attribute values (#565)
 	update: log records containing long lines are now word-wrapped (#608) by Stephen Groat
 	update: SNMP support for HP J9020A (#619), HP J9280A (#615), TL-SG5426 (#590)
+	new feature: IP addresses inherit tags from their parent networks (#375)
 	new feature: initial Cisco UCS support
 	new feature: offline management of 802.1Q port list
 	new feature: multiple Cacti servers (#534)
