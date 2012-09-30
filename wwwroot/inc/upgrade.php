@@ -152,7 +152,16 @@ speed of IP tree will increase radically. The price is you will not see the rout
 IP tree at all.
 
 ENDOFTEXT
+,
 
+	'0.20.1' => <<<ENDOFTEXT
+Security context of 'ipaddress' page now includes tags from the network containing an IP address. This means that you should audit your permission rules to check there is no unintended allows of changing IPs based on network's tagset. Example:
+	allow {client network} and {New York}
+This rule now not only allows any operation on NY client networks, but also any operation with IP addresses included in those networks. To fix this, you should change the rule this way:
+	allow {client network} and {New York} and not {\$page_ipaddress}
+
+ENDOFTEXT
+,
 );
 
 // At the moment we assume, that for any two releases we can

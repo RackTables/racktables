@@ -1474,6 +1474,12 @@ function fixContext ($target = NULL)
 		if ($target['realm'] != 'user')
 			$auto_tags = array_merge ($auto_tags, $target['atags']);
 	}
+	elseif ($pageno == 'ipaddress' && $net = spotNetworkByIP (ip_parse (getBypassValue())))
+	{
+		// IP addresses inherit context tags from their parent networks
+		$target_given_tags = $net['etags'];
+		$auto_tags = array_merge ($auto_tags, $net['atags']);
+	}
 	// Explicit and implicit chains should be normally empty at this point, so
 	// overwrite the contents anyway.
 	$expl_tags = mergeTagChains ($user_given_tags, $target_given_tags);
