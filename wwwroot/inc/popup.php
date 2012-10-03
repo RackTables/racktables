@@ -364,9 +364,9 @@ function renderPopupPortSelector()
 		'ports' => '',
 	);
 	if (isset ($_REQUEST['filter-obj']))
-		$filter['objects'] = $_REQUEST['filter-obj'];
+		$filter['objects'] = trim($_REQUEST['filter-obj']);
 	if (isset ($_REQUEST['filter-port']))
-		$filter['ports'] = $_REQUEST['filter-port'];
+		$filter['ports'] = trim($_REQUEST['filter-port']);
 	if ($in_rack)
 	{
 		$object = spotEntity ('object', $port_info['object_id']);
