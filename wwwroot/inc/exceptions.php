@@ -16,7 +16,15 @@ class RackTablesError extends Exception
 	const MISCONFIGURED = 6;
 	protected final function genHTMLPage ($title, $text)
 	{
-		global $helpdesk_banner;
+		global $helpdesk_banner, $debug_mode;
+		if (isset ($debug_mode) && $debug_mode && $this->code != RackTablesError::NOT_AUTHENTICATED)
+		{
+			// in debug mode, dump backtrace instead of standard page
+			// NOT_AUTHENTICATED exception does not need debugging, so it is skipped
+			printGenericException ($this);
+			return;
+		}
+
 		header ('Content-Type: text/html; charset=UTF-8');
 		echo '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">'."\n";
 		echo '<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">'."\n";
@@ -30,14 +38,12 @@ class RackTablesError extends Exception
 	{
 		$msgheader = array
 		(
-			self::NOT_AUTHENTICATED => 'Not authenticated',
 			self::MISCONFIGURED => 'Configuration error',
 			self::INTERNAL => 'Internal error',
 			self::DB_WRITE_FAILED => 'Database write failed',
 		);
 		$msgbody = array
 		(
-			self::NOT_AUTHENTICATED => '<h2>This system requires authentication. You should use a username and a password.</h2>',
 			self::MISCONFIGURED => '<h2>Configuration error</h2><br>' . $this->message,
 			self::INTERNAL => '<h2>Internal error</h2><br>' . $this->message,
 			self::DB_WRITE_FAILED => '<h2>Database write failed</h2><br>' . $this->message,
@@ -47,6 +53,8 @@ class RackTablesError extends Exception
 		case self::NOT_AUTHENTICATED:
 			header ('WWW-Authenticate: Basic realm="' . getConfigVar ('enterprise') . ' RackTables access"');
 			header ("HTTP/1.1 401 Unauthorized");
+			$this->genHTMLPage ('Not authenticated', '<h2>This system requires authentication. You should use a username and a password.</h2>');
+			break;
 		case self::MISCONFIGURED:
 		case self::INTERNAL:
 		case self::DB_WRITE_FAILED:
@@ -260,14 +268,7 @@ function printException($e)
 {
 	global $debug_mode;
 	if ($e instanceof RackTablesError)
-	{
-		if (isset ($debug_mode) && $debug_mode && $e->code != RackTablesError::NOT_AUTHENTICATED)
-			// in debug mode, do not call exception dispatcher, dump backtrace instead
-			// exception dispatcher  for NOT_AUTHENTICATED is mandatory
-			printGenericException($e);
-		else
-			$e->dispatch();
-	}
+		$e->dispatch();
 	elseif ($e instanceof PDOException)
 		printPDOException($e);
 	else
