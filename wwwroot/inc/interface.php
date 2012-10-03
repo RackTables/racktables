@@ -546,7 +546,7 @@ function renderRackspaceRowEditor ()
 
 function renderRow ($row_id)
 {
-	$rowInfo = getRowInfo ($row_id); //var_dump($rowInfo); die;
+	$rowInfo = getRowInfo ($row_id);
 	$cellfilter = getCellFilter();
 	$rackList = filterCellList (listCells ('rack', $row_id), $cellfilter['expression']);
 	// Main layout starts.
