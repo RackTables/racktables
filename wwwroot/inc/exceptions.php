@@ -258,8 +258,16 @@ function printGenericException($e)
 
 function printException($e)
 {
+	global $debug_mode;
 	if ($e instanceof RackTablesError)
-		$e->dispatch();
+	{
+		if (isset ($debug_mode) && $debug_mode && $e->code != RackTablesError::NOT_AUTHENTICATED)
+			// in debug mode, do not call exception dispatcher, dump backtrace instead
+			// exception dispatcher  for NOT_AUTHENTICATED is mandatory
+			printGenericException($e);
+		else
+			$e->dispatch();
+	}
 	elseif ($e instanceof PDOException)
 		printPDOException($e);
 	else
