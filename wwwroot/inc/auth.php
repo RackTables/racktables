@@ -243,7 +243,7 @@ function processAdjustmentSentence ($modlist, &$chain)
 // a wrapper for two LDAP auth methods below
 function authenticated_via_ldap ($username, $password, &$ldap_displayname)
 {
-	global $LDAP_options;
+	global $LDAP_options, $debug_mode;
 	if
 	(
 		$LDAP_options['cache_retry'] > $LDAP_options['cache_refresh'] or
@@ -262,7 +262,12 @@ function authenticated_via_ldap ($username, $password, &$ldap_displayname)
 	}
 	catch (PDOException $e)
 	{
-		throw new RackTablesError ('LDAP caching error', RackTablesError::DB_WRITE_FAILED);
+		if (isset ($debug_mode) && $debug_mode)
+			// in debug mode re-throw DB exception as-is
+			throw $e;
+		else
+			// re-create exception to hide private data from its backtrace
+			throw new RackTablesError ('LDAP caching error', RackTablesError::DB_WRITE_FAILED);
 	}
 }
 
