@@ -1548,10 +1548,16 @@ CREATE TABLE `CactiServer` (
 ) ENGINE=InnoDB
 ";
 			$query[] = "ALTER TABLE CactiGraph ADD COLUMN server_id int(10) unsigned NOT NULL AFTER object_id";
+
 			$result = $dbxlink->query ('SELECT COUNT(*) AS cnt FROM CactiGraph');
 			$row = $result->fetch (PDO::FETCH_ASSOC);
 			unset ($result);
-			if ($row['cnt'] != 0)
+
+			$result = $dbxlink->query ("SELECT varvalue FROM Config WHERE varname = 'CACTI_URL'");
+			$cacti_url_row = $result->fetch (PDO::FETCH_ASSOC);
+			unset ($result);
+
+			if ($row['cnt'] != 0 || is_array ($cacti_url_row) && strlen ($cacti_url_row['varvalue']))
 			{
 				$query[] = "INSERT INTO CactiServer (id) VALUES (1)";
 				$query[] = "UPDATE CactiServer SET base_url = (SELECT varvalue FROM Config WHERE varname = 'CACTI_URL') WHERE id = 1";
