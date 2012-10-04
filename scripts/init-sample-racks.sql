@@ -1,8 +1,5 @@
 set names 'utf8';
 
-INSERT INTO `Atom` VALUES (1,967,35,'front');
-INSERT INTO `Atom` VALUES (1,967,35,'interior');
-
 INSERT INTO `Molecule` VALUES (1);
 
 INSERT INTO `Object` (id, name, label, objtype_id, asset_no, has_problems, comment) VALUES 
@@ -83,6 +80,9 @@ INSERT INTO `Object` (id, name, label, objtype_id, asset_no, has_problems, comme
 (979,'sw-a1',NULL,8,NULL,'no',NULL),
 (980,'sw-a2',NULL,8,NULL,'no',NULL),
 (981,'sw-d1',NULL,8,NULL,'no',NULL);
+
+INSERT INTO `Atom` VALUES (1,967,35,'front');
+INSERT INTO `Atom` VALUES (1,967,35,'interior');
 
 INSERT INTO `EntityLink` (`parent_entity_type`, `parent_entity_id`, `child_entity_type`, `child_entity_id`) VALUES
 ('row',966,'rack',967),
