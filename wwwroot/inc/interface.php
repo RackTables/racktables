@@ -5604,7 +5604,7 @@ function renderFileSummary ($file)
 	$summary['Accessed'] = $file['atime'];
 	$summary['tags'] = '';
 	if (strlen ($file['comment']))
-		$summary['Comment'] = '<div class="dashed slbconf">' . string_insert_hrefs (htmlspecialchars ($file['comment'])) . '</div>';
+		$summary['Comment'] = '<div class="dashed commentblock">' . string_insert_hrefs (htmlspecialchars ($file['comment'])) . '</div>';
 	renderEntitySummary ($file, 'summary', $summary);
 }
 

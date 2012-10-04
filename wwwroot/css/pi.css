@@ -493,7 +493,7 @@ div.commentblock {
 
 .slbconf {
 	text-align: left;
-	white-space: pre-wrap;
+	white-space: pre;
 	font-family: monospace;
 }
 
@@ -631,7 +631,7 @@ div.vlan {
 	background-color: #FFFFFF;
 	padding: 5px;
 	font-family: monospace;
-	white-space: pre-wrap;
+	white-space: pre;
 }
 
 /*header line in port conf popup div*/
