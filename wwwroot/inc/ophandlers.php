@@ -1381,7 +1381,7 @@ function resetUIConfig()
 	setConfigVar ('PREVIEW_IMAGE_MAXPXS', '320');
 	setConfigVar ('VENDOR_SIEVE', '');
 	setConfigVar ('IPV4LB_LISTSRC', 'false');
-	setConfigVar ('IPV4OBJ_LISTSRC','{$typeid_4} or {$typeid_7} or {$typeid_8} or {$typeid_12} or {$typeid_445} or {$typeid_447} or {$typeid_798} or {$typeid_1504} or {$typeid_1507} or {$typeid_1788}');
+	setConfigVar ('IPV4OBJ_LISTSRC','{$typeid_4} or {$typeid_7} or {$typeid_8} or {$typeid_12} or {$typeid_445} or {$typeid_447} or {$typeid_798} or {$typeid_1504} or {$typeid_1507} or {$typeid_1787}');
 	setConfigVar ('IPV4NAT_LISTSRC','{$typeid_4} or {$typeid_7} or {$typeid_8} or {$typeid_798}');
 	setConfigVar ('ASSETWARN_LISTSRC','{$typeid_4} or {$typeid_7} or {$typeid_8}');
 	setConfigVar ('NAMEWARN_LISTSRC','{$typeid_4} or {$typeid_7} or {$typeid_8}');
