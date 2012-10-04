@@ -1549,7 +1549,7 @@ CREATE TABLE `CactiServer` (
 ";
 			$query[] = "ALTER TABLE CactiGraph ADD COLUMN server_id int(10) unsigned NOT NULL AFTER object_id";
 			$result = $dbxlink->query ('SELECT COUNT(*) AS cnt FROM CactiGraph');
-			$row = $result->fetchAll (PDO::FETCH_ASSOC);
+			$row = $result->fetch (PDO::FETCH_ASSOC);
 			unset ($result);
 			if ($row['cnt'] != 0)
 			{
