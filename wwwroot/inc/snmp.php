@@ -727,6 +727,15 @@ $iftable_processors['netgear-chassis-21-to-24-1000SFP'] = array
 	'try_next_proc' => TRUE,
 );
 
+$iftable_processors['netgear-chassis-45-to-48-1000SFPcombo'] = array
+(
+	'pattern' => '@^Unit: (\d+) Slot: (\d+) Port: (45|46|47|48) Gigabit - Level$@',
+	'replacement' => '\\1/\\2/\\3',
+	'dict_key' => '4-1077',
+	'label' => '\\3F',
+	'try_next_proc' => TRUE,
+);
+
 $iftable_processors['netgear-chassis-any-1000SFPcombo'] = array
 (
 	'pattern' => '@^Unit: (\d+) Slot: (\d+) Port: (\d+) Gigabit - Level$@',
@@ -741,6 +750,15 @@ $iftable_processors['netgear-chassis-any-100TX'] = array
 	'pattern' => '@^Unit: (\d+) Slot: (\d+) Port: (\d+) 10/100 Copper - Level$@',
 	'replacement' => '\\1/\\2/\\3',
 	'dict_key' => 19,
+	'label' => '\\3',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['netgear-chassis-any-SFP+'] = array
+(
+	'pattern' => '@^Unit: (\d+) Slot: (\d+) Port: (\d+) 10G - Level$@',
+	'replacement' => '\\1/\\2/\\3',
+	'dict_key' => '9-1084',
 	'label' => '\\3',
 	'try_next_proc' => FALSE,
 );
@@ -2167,6 +2185,13 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'dict_key' => 350,
 		'text' => 'PowerConnect 6224: 20 RJ-45/10-100-1000T(X) + 4 combo-gig',
 		'processors' => array ('netgear-chassis-21-to-24-1000SFP', 'netgear-chassis-21-to-24-1000Tcombo', 'netgear-chassis-any-1000T'),
+	),
+	'674.10895.3011' => array
+	(
+		'dict_key' => 353,
+		'text' => 'PowerConnect 6248: 44 RJ-45/10-100-1000T(X) + 4 combo-gig + optional uplinks',
+		# 10G uplinks actually may be SFP+, T, CX4 or XFP
+		'processors' => array ('netgear-chassis-45-to-48-1000SFPcombo', 'netgear-chassis-any-1000T', 'netgear-chassis-any-SFP+'),
 	),
 	'674.10895.3014' => array
 	(
