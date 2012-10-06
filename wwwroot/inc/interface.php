@@ -5079,21 +5079,22 @@ $(document).ready(function () {
 END
 		, TRUE
 	);
-	function printNewItemTR ()
+	function printNewItemTR ($options)
 	{
 		global $taglist;
 		printOpFormIntro ('createTag');
-		echo "<tr><td align=left style='padding-left: 16px;'>";
-		printImageHREF ('create', 'Create tag', TRUE);
-		echo '</td><td><input type=text size=48 name=tag_name tabindex=100></td><td><select name=parent_id tabindex=101>';
-		echo "<option value=0>-- NONE --</option>\n";
-		foreach ($taglist as $taginfo)
-			echo "<option value=${taginfo['id']}>${taginfo['tag']}</option>";
-		echo "</select></td><td>";
-		printImageHREF ('create', 'Create tag', TRUE, 102);
-		echo "</td></tr></form>\n";
+		echo '<tr>';
+		echo '<td align=left style="padding-left: 16px;">' . getImageHREF ('create', 'Create tag', TRUE) . '</td>';
+		echo '<td><input type=text size=48 name=tag_name tabindex=100></td>';
+		echo '<td>' . getSelect ($options, array ('name' => 'parent_id', 'tabindex' => 110)) . '</td>';
+		echo '<td>' . getImageHREF ('create', 'Create tag', TRUE, 120) . '</td>';
+		echo '</tr></form>';
 	}
 	global $taglist, $tagtree;
+
+	$options = array (0 => '-- NONE --');
+	foreach ($taglist as $taginfo)
+		$options[$taginfo['id']] = htmlspecialchars ($taginfo['tag']);
 
 	$otags = getOrphanedTags();
 	if (count ($otags))
@@ -5104,16 +5105,11 @@ END
 		foreach ($otags as $taginfo)
 		{
 			printOpFormIntro ('updateTag', array ('tag_id' => $taginfo['id'], 'tag_name' => $taginfo['tag']));
-			echo "<tr><td>${taginfo['tag']}</td><td><select name=parent_id>";
-			echo "<option value=0>-- NONE --</option>\n";
-			foreach ($taglist as $tlinfo)
-			{
-				echo "<option value=${tlinfo['id']}" . ($tlinfo['id'] == $taglist[$taginfo['id']]['parent_id'] ? ' selected' : '');
-				echo ">${tlinfo['tag']}</option>";
-			}
-			echo "</select></td><td>";
-			printImageHREF ('save', 'Save changes', TRUE);
-			echo "</form></td></tr>\n";
+			echo '<tr>';
+			echo '<td>' . $taginfo['tag'] . '</td>';
+			echo '<td>' . getSelect ($options, array ('name' => 'parent_id'), $taglist[$taginfo['id']]['parent_id']) . '</td>';
+			echo '<td>' . getImageHREF ('save', 'Save changes', TRUE) . '</td>';
+			echo '</tr></form>';
 		}
 		echo '</table>';
 		finishPortlet();
@@ -5123,11 +5119,11 @@ END
 	echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
 	echo '<tr><th>&nbsp;</th><th>tag name</th><th>parent tag</th><th>&nbsp;</th></tr>';
 	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
-		printNewItemTR();
+		printNewItemTR ($options);
 	foreach ($tagtree as $taginfo)
 		renderTagRowForEditor ($taginfo);
 	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')
-		printNewItemTR();
+		printNewItemTR ($options);
 	echo '</table>';
 	finishPortlet();
 }
