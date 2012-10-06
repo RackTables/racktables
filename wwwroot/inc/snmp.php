@@ -1981,6 +1981,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'GSM7328Sv2: 20 RJ-45/10-100-1000T(X) + 4 combo-gig',
 		'processors' => array ('netgear-chassis-21-to-24-1000SFP', 'netgear-chassis-21-to-24-1000Tcombo', 'netgear-chassis-any-1000T'),
 	),
+	'4526.100.1.14' => array
+	(
+		'dict_key' => 1794,
+		'text' => 'GSM7352Sv2: 44 RJ-45/10-100-1000T(X) + 4 combo-gig + SFP+ uplinks',
+		'processors' => array ('netgear-chassis-45-to-48-1000SFPcombo', 'netgear-chassis-any-1000T', 'netgear-chassis-any-SFP+'),
+	),
 	'2636.1.1.1.2.29' => array
 	(
 		'dict_key' => 925,
