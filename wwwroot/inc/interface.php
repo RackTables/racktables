@@ -5056,11 +5056,7 @@ function renderTagTree ()
 	global $tagtree;
 	echo '<center><table>';
 	foreach ($tagtree as $taginfo)
-	{
-		echo '<tr>';
 		renderTagRowForViewer ($taginfo);
-		echo "</tr>\n";
-	}
 	echo '</table></center>';
 }
 
