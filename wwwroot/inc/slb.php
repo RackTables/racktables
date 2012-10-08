@@ -114,7 +114,7 @@ ORDER BY
 		return $ret;
 	}
 
-	protected function createParser()
+	protected function createParser ($triplet)
 	{
 		return new MacroParser();
 	}
@@ -122,7 +122,7 @@ ORDER BY
 	function generateConfig()
 	{
 		// fill the predefined macros
-		$parser = $this->createParser();
+		$parser = $this->createParser ($this);
 		$parser->addMacro ('LB_ID', $this->lb['id']);
 		$parser->addMacro ('LB_NAME', $this->lb['name']);
 		$parser->addMacro ('VS_ID', $this->vs['id']);
