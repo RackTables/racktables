@@ -40,7 +40,10 @@ for line in sys.stdin:
 			if loggedin == 1:
 				print "INFO Closing previous connection..."
 				handle.Logout()
-			handle.Login(words[1], words[2], words[3])
+			if (handle.Login(words[1], words[2], words[3]) == False):
+				loggedin = 0
+				print "ERR could not log into " + words[1]
+				sys.exit(0)
 			loggedin = 1
 			print "OK logged into " + words[1]
 		except Exception, err:
@@ -48,7 +51,7 @@ for line in sys.stdin:
 			print "ERR could not log into " + words[1]
 	# endif "login"
 	elif len(words) == 1 and words[0] == "getmo":
-		if loggedin != 1:
+		if (loggedin != 1 or handle.cookie == ""):
 			print "ERR not logged in"
 		else:
 			try:
@@ -65,12 +68,9 @@ for line in sys.stdin:
 			except Exception, err:
 				print "ERR exception occured, logging out"
 				loggedin = 0
-				handle.Logout()
 	# endif "getmo"
 	else:
 		print "ERR command not supported (type \"help\" for help)"
 # endfor
-if loggedin == 1:
-	handle.Logout()
 sys.exit(0)
 
