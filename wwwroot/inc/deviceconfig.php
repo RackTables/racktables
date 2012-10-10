@@ -3202,7 +3202,7 @@ function ucsReadInventory ($text)
 			$tmp = array();
 		}
 	# validate the array
-	if (count ($replies) != 2)
+	if (count ($replies) != 2 and count ($replies) != 1)
 		throw new RTGatewayError ('replies count does not match commands count');
 	if ($replies[0]['code'] != 'OK')
 		throw new RTGatewayError ('UCS login failed');
