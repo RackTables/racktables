@@ -356,22 +356,6 @@ function buildLVSConfig ($object_id)
 
 // *********************  Database functions  *********************
 
-function getIPv4VSOptions ()
-{
-	$ret = array();
-	foreach (listCells ('ipv4vs') as $vsid => $vsinfo)
-		$ret[$vsid] = $vsinfo['dname'] . (!strlen ($vsinfo['name']) ? '' : " (${vsinfo['name']})");
-	return $ret;
-}
-
-function getIPv4RSPoolOptions ()
-{
-	$ret = array();
-	foreach (listCells ('ipv4rspool') as $pool_id => $poolInfo)
-		$ret[$pool_id] = $poolInfo['name'];
-	return $ret;
-}
-
 function addRStoRSPool ($pool_id, $rsip_bin, $rsport = 0, $inservice = 'no', $rsconfig = '', $comment = '')
 {
 	return usePreparedInsertBlade

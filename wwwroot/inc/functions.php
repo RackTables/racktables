@@ -5656,4 +5656,28 @@ function arePortsCompatible ($portinfo_a, $portinfo_b)
 	return arePortTypesCompatible ($portinfo_a['oif_id'], $portinfo_b['oif_id']);
 }
 
+// takes an array of cells,
+// returns an array indexed by cell id, values are simple text representation of a cell.
+// Intended to pass its return value to printSelect routine.
+function formatEntityList ($list)
+{
+	$ret = array();
+	foreach ($list as $entity)
+		switch ($entity['realm'])
+		{
+			case 'object':
+				$ret[$entity['id']] = $entity['dname'];
+				break;
+			case 'ipv4vs':
+				$ret[$entity['id']] = $entity['dname'] . (!strlen ($entity['name']) ? '' : " (${entity['name']})");
+				break;
+			case 'ipv4rspool':
+				$ret[$entity['id']] = $entity['name'];
+				break;
+			default:
+				$ret[$entity['id']] = $entity['realm'] . '#' . $entity['id'];
+		}
+	return $ret;
+}
+
 ?>
