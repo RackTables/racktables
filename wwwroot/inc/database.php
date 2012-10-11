@@ -414,10 +414,7 @@ function getNarrowObjectList ($varname = '')
 			return array();
 		$wideList = filterCellList ($wideList, $parseCache[$varname]['load']);
 	}
-	$ret = array();
-	foreach ($wideList as $cell)
-		$ret[$cell['id']] = $cell['dname'];
-	return $ret;
+	return formatEntityList ($wideList);
 }
 
 // For a given realm return a list of entity records, each with
