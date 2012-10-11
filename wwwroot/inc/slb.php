@@ -184,7 +184,11 @@ virtual_server %VS_HEADER% {
 			$parser->addMacro ('SLB_RS_CONF', dos2unix ($this->slb['rsconfig']));
 			$parser->addMacro ('RS_RS_CONF', $rs['rsconfig']);
 
-			$ret .= $parser->expand ("
+			foreach (explode (',', $parser->expandMacro ('RSPORT')) as $rsport) {
+				$parser->pushdefs();
+				$parser->addMacro ('RSPORT', $rsport);
+
+				$ret .= $parser->expand ("
 	%RS_PREPEND%
 	real_server %RS_HEADER% {
 		%GLOBAL_RS_CONF%
@@ -194,6 +198,8 @@ virtual_server %VS_HEADER% {
 		%RS_RS_CONF%
 	}
 ");
+				$parser->popdefs();
+			}
 			$parser->popdefs(); // restore original (VS-driven) macros
 		}
 		$ret .= "}\n";

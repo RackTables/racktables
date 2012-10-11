@@ -1,6 +1,7 @@
 0.20.2
 	bugfix: explicitly request Cacti RRA ID 1 (#466)
 	bugfix: improve UCS error handling
+	update: SLB: ability to specify multiple RS ports
 0.20.1 2012-10-04
 	bugfix: restore D-Link (#533) and Linux (#541) gateway support
 	bugfix: IPv4 network capacity was not displayed on 32-bit machines (#602)
