@@ -351,6 +351,10 @@ function genericAssertion ($argname, $argtype)
 		if (! array_key_exists ($sic[$argname], $dqtitle))
 			throw new InvalidRequestArgException ($argname, $sic[$argname], 'Unknown value');
 		break;
+	case 'enum/yesno':
+		if (! in_array ($sic[$argname], array ('yes', 'no')))
+			throw new InvalidRequestArgException ($argname, $sic[$argname], 'Unknown value');
+		break;
 	case 'iif':
 		if (!array_key_exists ($sic[$argname], getPortIIFOptions()))
 			throw new InvalidRequestArgException ($argname, $sic[$argname], 'Unknown value');

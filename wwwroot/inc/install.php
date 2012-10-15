@@ -915,21 +915,25 @@ CREATE TABLE `TagStorage` (
   `entity_realm` enum('file','ipv4net','ipv4rspool','ipv4vs','ipv6net','location','object','rack','user','vst') NOT NULL default 'object',
   `entity_id` int(10) unsigned NOT NULL,
   `tag_id` int(10) unsigned NOT NULL default '0',
+  `tag_is_assignable` enum('yes','no') NOT NULL DEFAULT 'yes',
   `user` char(64) DEFAULT NULL,
   `date` datetime DEFAULT NULL,
   UNIQUE KEY `entity_tag` (`entity_realm`,`entity_id`,`tag_id`),
   KEY `entity_id` (`entity_id`),
   KEY `TagStorage-FK-tag_id` (`tag_id`),
-  CONSTRAINT `TagStorage-FK-tag_id` FOREIGN KEY (`tag_id`) REFERENCES `TagTree` (`id`)
+  KEY `tag_id-tag_is_assignable` (`tag_id`,`tag_is_assignable`),
+  CONSTRAINT `TagStorage-FK-TagTree` FOREIGN KEY (`tag_id`, `tag_is_assignable`) REFERENCES `TagTree` (`id`, `is_assignable`)
 ) ENGINE=InnoDB;
 
 CREATE TABLE `TagTree` (
   `id` int(10) unsigned NOT NULL auto_increment,
   `parent_id` int(10) unsigned default NULL,
+  `is_assignable` enum('yes','no') NOT NULL DEFAULT 'yes',
   `tag` char(255) default NULL,
   PRIMARY KEY  (`id`),
   UNIQUE KEY `tag` (`tag`),
   KEY `TagTree-K-parent_id` (`parent_id`),
+  KEY `id-is_assignable` (`id`,`is_assignable`),
   CONSTRAINT `TagTree-K-parent_id` FOREIGN KEY (`parent_id`) REFERENCES `TagTree` (`id`)
 ) ENGINE=InnoDB;
 

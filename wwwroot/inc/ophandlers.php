@@ -408,6 +408,7 @@ $opspec_list['tagtree-edit-createTag'] = array
 	(
 		array ('url_argname' => 'tag_name', 'table_colname' => 'tag', 'assertion' => 'tag'),
 		array ('url_argname' => 'parent_id', 'assertion' => 'uint0', 'if_empty' => 'NULL'),
+		array ('url_argname' => 'is_assignable', 'assertion' => 'enum/yesno'),
 	),
 );
 $opspec_list['tagtree-edit-destroyTag'] = array
@@ -427,6 +428,7 @@ $opspec_list['tagtree-edit-updateTag'] = array
 	(
 		array ('url_argname' => 'tag_name', 'table_colname' => 'tag', 'assertion' => 'tag'),
 		array ('url_argname' => 'parent_id', 'assertion' => 'uint0', 'if_empty' => 'NULL'),
+		array ('url_argname' => 'is_assignable', 'assertion' => 'enum/yesno'),
 	),
 	'where_arglist' => array
 	(
