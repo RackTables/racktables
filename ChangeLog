@@ -3,6 +3,7 @@
 	bugfix: improve UCS error handling
 	bugfix: proper handling of VLAN 1 in Huawei VRP 5.7 802.1Q gateway
 	update: SLB: ability to specify multiple RS ports
+	new feature: abstract tags, which cannot be assigned (#577)
 0.20.1 2012-10-04
 	bugfix: restore D-Link (#533) and Linux (#541) gateway support
 	bugfix: IPv4 network capacity was not displayed on 32-bit machines (#602)

@@ -3812,7 +3812,7 @@ function getTagList ()
 	$ret = array();
 	$result = usePreparedSelectBlade
 	(
-		"select id, parent_id, tag, entity_realm as realm, count(entity_id) as refcnt " .
+		"select id, parent_id, is_assignable, tag, entity_realm as realm, count(entity_id) as refcnt " .
 		"from TagTree left join TagStorage on id = tag_id " .
 		"group by id, entity_realm order by tag"
 	);
@@ -3822,6 +3822,7 @@ function getTagList ()
 			$ret[$row['id']] = array
 			(
 				'id' => $row['id'],
+				'is_assignable' => $row['is_assignable'],
 				'tag' => $row['tag'],
 				'parent_id' => $row['parent_id'],
 				'refcnt' => array ('total' => 0)

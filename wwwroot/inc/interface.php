@@ -5005,7 +5005,8 @@ function renderTagRowForViewer ($taginfo, $level = 0)
 	if (!count ($taginfo['kids']))
 		$level++; // Shift instead of placing a spacer. This won't impact any nested nodes.
 	$refc = $taginfo['refcnt']['total'];
-	echo "<tr><td align=left style='padding-left: " . ($level * 16) . "px;'>";
+	$trclass = $taginfo['is_assignable'] == 'yes' ? '' : ($taginfo['kidc'] ? ' class=trnull' : ' class=trwarning');
+	echo "<tr${trclass}><td align=left style='padding-left: " . ($level * 16) . "px;'>";
 	if (count ($taginfo['kids']))
 		printImageHREF ('node-expanded-static');
 	$stats = array ("tag ID = ${taginfo['id']}");
@@ -5025,7 +5026,8 @@ function renderTagRowForEditor ($taginfo, $level = 0)
 	global $taglist;
 	if (!count ($taginfo['kids']))
 		$level++; // Idem
-	echo "<tr><td align=left style='padding-left: " . ($level * 16) . "px;'>";
+	$trclass = $taginfo['is_assignable'] == 'yes' ? '' : ($taginfo['kidc'] ? ' class=trnull' : ' class=trwarning');
+	echo "<tr${trclass}><td align=left style='padding-left: " . ($level * 16) . "px;'>";
 	if ($taginfo['kidc'])
 		printImageHREF ('node-expanded-static');
 	if ($taginfo['refcnt']['total'] > 0 or $taginfo['kidc'])
@@ -5037,6 +5039,11 @@ function renderTagRowForEditor ($taginfo, $level = 0)
 	printOpFormIntro ('updateTag', array ('tag_id' => $taginfo['id']));
 	echo "<input type=text size=48 name=tag_name ";
 	echo "value='${taginfo['tag']}'></td><td class=tdleft>";
+	if ($taginfo['refcnt']['total'])
+		printSelect (array ('yes' => 'yes'), array ('name' => 'is_assignable')); # locked
+	else
+		printSelect (array ('yes' => 'yes', 'no' => 'no'), array ('name' => 'is_assignable'), $taginfo['is_assignable']);
+	echo '</td><td class=tdleft>';
 	$parent_id = $taginfo['parent_id'] ? $taginfo['parent_id'] : 0;
 	$parent_name = $taginfo['parent_id'] ? htmlspecialchars ($taglist[$taginfo['parent_id']]['tag']) : '-- NONE --';
 	echo getSelect
@@ -5082,6 +5089,7 @@ END
 		echo '<tr>';
 		echo '<td align=left style="padding-left: 16px;">' . getImageHREF ('create', 'Create tag', TRUE) . '</td>';
 		echo '<td><input type=text size=48 name=tag_name tabindex=100></td>';
+		echo '<td class=tdleft>' . getSelect (array ('yes' => 'yes', 'no' => 'no'), array ('name' => 'is_assignable', 'tabindex' => 105), 'yes') . '</td>';
 		echo '<td>' . getSelect ($options, array ('name' => 'parent_id', 'tabindex' => 110)) . '</td>';
 		echo '<td>' . getImageHREF ('create', 'Create tag', TRUE, 120) . '</td>';
 		echo '</tr></form>';
@@ -5113,7 +5121,7 @@ END
 
 	startPortlet ('tag tree');
 	echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
-	echo '<tr><th>&nbsp;</th><th>tag name</th><th>parent tag</th><th>&nbsp;</th></tr>';
+	echo '<tr><th>&nbsp;</th><th>tag name</th><th>assignable</th><th>parent tag</th><th>&nbsp;</th></tr>';
 	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
 		printNewItemTR ($options);
 	foreach ($tagtree as $taginfo)
@@ -5152,6 +5160,11 @@ function buildTagCheckboxRows ($inputname, $preselect, $neg_preselect, $taginfo,
 	{
 		$ret['td_class'] .= $inverted ? ' selected-inverted' : ' selected';
 		$ret['input_extraattrs'] = 'checked';
+	}
+	if (array_key_exists ('is_assignable', $taginfo) and $taginfo['is_assignable'] == 'no')
+	{
+		$ret['input_extraattrs'] = 'disabled';
+		$ret['tr_class'] .= (array_key_exists ('kidc', $taginfo) and $taginfo['kidc'] == 0) ? ' trwarning' : ' trnull';
 	}
 	if (strlen ($refcnt_realm) and isset ($taginfo['refcnt'][$refcnt_realm]))
 		$ret['text_refcnt'] = $taginfo['refcnt'][$refcnt_realm];
