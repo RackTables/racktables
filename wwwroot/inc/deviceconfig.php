@@ -846,7 +846,12 @@ function vrp55Read8021QConfig ($input)
 				break;
 			case (preg_match ('@^interface ((Ethernet|GigabitEthernet|XGigabitEthernet|Eth-Trunk)([[:digit:]]+(/[[:digit:]]+)*))$@', $line, $matches)):
 				$port_name = ios12ShortenIfName ($matches[1]);
-				$ret['current'] = array ('port_name' => $port_name);
+				$ret['current'] = array
+				(
+					'port_name' => $port_name,
+					'allowed' => array (VLAN_DFL_ID),
+					'native' => VLAN_DFL_ID,
+				);
 				$ret['portconfig'][$port_name][] = array ('type' => 'line-header', 'line' => $line);
 				break;
 			}
@@ -869,17 +874,16 @@ function vrp55Read8021QConfig ($input)
 		// we get a problem).
 		case preg_match ('/^ port (default|trunk pvid) vlan ([[:digit:]]+)$/', $line, $matches):
 			$ret['current']['native'] = $matches[2];
-			if (!array_key_exists ('allowed', $ret['current']))
-				$ret['current']['allowed'] = array();
 			if (!in_array ($ret['current']['native'], $ret['current']['allowed']))
 				$ret['current']['allowed'][] = $ret['current']['native'];
 			break;
 		case preg_match ('/^ port trunk allow-pass vlan (.+)$/', $line, $matches):
-			if (!array_key_exists ('allowed', $ret['current']))
-				$ret['current']['allowed'] = array();
 			foreach (vrp53ParseVLANString ($matches[1]) as $vlan_id)
 				if (!in_array ($vlan_id, $ret['current']['allowed']))
 					$ret['current']['allowed'][] = $vlan_id;
+			break;
+		case preg_match ('/^ undo port trunk allow-pass vlan (.+)$/', $line, $matches):
+			$ret['current']['allowed'] = array_diff ($ret['current']['allowed'], vrp53ParseVLANString ($matches[1]));
 			break;
 		case $line == ' undo portswitch':
 		case preg_match ('/^ ip address /', $line):
@@ -893,10 +897,6 @@ function vrp55Read8021QConfig ($input)
 			$line_class = 'line-header';
 			if (!array_key_exists ('link-type', $ret['current']))
 				$ret['current']['link-type'] = 'hybrid';
-			if (!array_key_exists ('allowed', $ret['current']))
-				$ret['current']['allowed'] = array();
-			if (!array_key_exists ('native', $ret['current']))
-				$ret['current']['native'] = 0;
 			switch ($ret['current']['link-type'])
 			{
 			case 'access':
@@ -905,7 +905,7 @@ function vrp55Read8021QConfig ($input)
 					$ret['current']['native'] ? array
 					(
 						'mode' => 'access',
-						'allowed' => $ret['current']['allowed'],
+						'allowed' => array ($ret['current']['native']),
 						'native' => $ret['current']['native'],
 					) : array
 					(
@@ -919,7 +919,7 @@ function vrp55Read8021QConfig ($input)
 				(
 					'mode' => 'trunk',
 					'allowed' => $ret['current']['allowed'],
-					'native' => $ret['current']['native'],
+					'native' => in_array ($ret['current']['native'], $ret['current']['allowed']) ? $ret['current']['native'] : 0,
 				);
 				break;
 			case 'hybrid': // hybrid ports are not supported
