@@ -5097,7 +5097,7 @@ END
 	{
 		startPortlet ('fallen leaves');
 		echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
-		echo '<tr><th>tag name</th><th>parent tag</th><th>&nbsp;</th></tr>';
+		echo '<tr class=trerror><th>tag name</th><th>parent tag</th><th>&nbsp;</th></tr>';
 		foreach ($otags as $taginfo)
 		{
 			printOpFormIntro ('updateTag', array ('tag_id' => $taginfo['id'], 'tag_name' => $taginfo['tag']));
