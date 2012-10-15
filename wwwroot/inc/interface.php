@@ -5124,35 +5124,59 @@ END
 	finishPortlet();
 }
 
-function renderTagCheckbox ($inputname, $preselect, $taginfo, $refcnt_realm = '', $level = 0, $inverted_preselect = array())
+# Return a list of items representing tags with checkboxes.
+function buildTagCheckboxRows ($inputname, $preselect, $neg_preselect, $taginfo, $refcnt_realm = '', $level = 0)
 {
-	$self = __FUNCTION__;
-	$td_class = 'tagbox';
-	$inverted = tagOnChain ($taginfo, $inverted_preselect);
+	static $is_first_time = TRUE;
+	$inverted = tagOnChain ($taginfo, $neg_preselect);
 	$selected = tagOnChain ($taginfo, $preselect);
+	$ret = array
+	(
+		'tr_class' => ($level == 0 && $taginfo['id'] > 0 && ! $is_first_time) ? 'separator' : '',
+		'td_class' => 'tagbox',
+		'level' => $level,
+		# calculate HTML classnames for separators feature
+		'input_class' => $level ? 'tag-cb' : 'tag-cb root',
+		'input_value' => $taginfo['id'],
+		'text_tagname' => $taginfo['tag'],
+	);
+	$is_first_time = FALSE;
 	$prepared_inputname = $inputname;
 	if ($inverted)
 	{
-		$td_class .= ' inverted';
+		$ret['td_class'] .= ' inverted';
 		$prepared_inputname = preg_replace ('/^cf/', 'nf', $prepared_inputname);
 	}
+	$ret['input_name'] = $prepared_inputname;
 	if ($selected)
-		$td_class .= ' ' . ($inverted ? 'selected-inverted' : 'selected');
-	// calculate html classnames for separators feature 
-	static $is_first_time = TRUE;
-	$input_class = 'tag-cb' . ($level == 0 ? ' root' : '');
-	$tr_class = ($level == 0 && $taginfo['id'] > 0 && !$is_first_time ? 'separator' : '');
-	$is_first_time = FALSE;
-	
-	echo "<tr class='$tr_class'><td colspan=2 class='$td_class' style='padding-left: " . ($level * 16) . "px;'>";
-	echo "<label><input type=checkbox class='$input_class' name='${prepared_inputname}[]' value='${taginfo['id']}'" . ($selected ? ' checked' : '') . "> ";
-	echo $taginfo['tag'];
+	{
+		$ret['td_class'] .= $inverted ? ' selected-inverted' : ' selected';
+		$ret['input_extraattrs'] = 'checked';
+	}
 	if (strlen ($refcnt_realm) and isset ($taginfo['refcnt'][$refcnt_realm]))
-		echo ' <i>(' . $taginfo['refcnt'][$refcnt_realm] . ')</i>';
-	echo "</label></td></tr>";
-	if (isset ($taginfo['kids']))
+		$ret['text_refcnt'] = $taginfo['refcnt'][$refcnt_realm];
+	$ret = array ($ret);
+	if (array_key_exists ('kids', $taginfo))
 		foreach ($taginfo['kids'] as $kid)
-			$self ($inputname, $preselect, $kid, $refcnt_realm, $level + 1, $inverted_preselect);
+			$ret = array_merge ($ret, call_user_func (__FUNCTION__, $inputname, $preselect, $neg_preselect, $kid, $refcnt_realm, $level + 1));
+	return $ret;
+}
+
+# generate HTML from the data produced by the above function
+function printTagCheckboxTable ($input_name, $preselect, $neg_preselect, $taglist, $realm = '')
+{
+	foreach ($taglist as $taginfo)
+		foreach (buildTagCheckboxRows ($input_name, $preselect, $neg_preselect, $taginfo, $realm) as $row)
+		{
+			echo "<tr class='${row['tr_class']}'><td class='${row['td_class']}' style='padding-left: " . ($row['level'] * 16) . "px;'>";
+			echo "<label><input type=checkbox class='${row['input_class']}' name='${row['input_name']}[]' value='${row['input_value']}'";
+			if (array_key_exists ('input_extraattrs', $row))
+				echo ' ' . $row['input_extraattrs'];
+			echo '> ' . $row['text_tagname'];
+			if (array_key_exists ('text_refcnt', $row))
+				echo " <i>(${row['text_refcnt']})</i>";
+			echo '</label></td></tr>';
+		}
 }
 
 function renderEntityTagsPortlet ($title, $tags, $preselect, $realm)
@@ -5161,8 +5185,7 @@ function renderEntityTagsPortlet ($title, $tags, $preselect, $realm)
 	echo  '<a class="toggleTreeMode" style="display:none" href="#"></a>';
 	echo '<table border=0 cellspacing=0 cellpadding=3 align=center class="tagtree">';
 	printOpFormIntro ('saveTags');
-	foreach ($tags as $taginfo)
-		renderTagCheckbox ('taglist', $preselect, $taginfo, $realm);
+	printTagCheckboxTable ('taglist', $preselect, array(), $tags, $realm);
 	echo '<tr><td class=tdleft>';
 	printImageHREF ('SAVE', 'Save changes', TRUE);
 	echo "</form></td><td class=tdright>";
@@ -5268,8 +5291,7 @@ function renderCellFilterPortlet ($preselect, $realm, $cell_list = array(), $byp
 		else
 		{
 			$enable_apply = TRUE;
-			foreach ($objectivetags as $taginfo)
-				renderTagCheckbox ('cft', buildTagChainFromIds ($preselect['tagidlist']), $taginfo, $realm, 0, $negated_chain);
+			printTagCheckboxTable ('cft', buildTagChainFromIds ($preselect['tagidlist']), $negated_chain, $objectivetags, $realm);
 		}
 
 		if (getConfigVar('SHRINK_TAG_TREE_ON_CLICK') == 'yes')
@@ -5298,8 +5320,7 @@ function renderCellFilterPortlet ($preselect, $realm, $cell_list = array(), $byp
 			$myPreselect = array();
 			foreach ($preselect['pnamelist'] as $pname)
 				$myPreselect[] = array ('id' => $pname);
-			foreach ($myPredicates as $pinfo)
-				renderTagCheckbox ('cfp', $myPreselect, $pinfo, '', 0, $negated_chain);
+			printTagCheckboxTable ('cfp', $myPreselect, $negated_chain, $myPredicates);
 		}
 	}
 	// extra code
@@ -5396,8 +5417,7 @@ function renderNewEntityTags ($for_realm = '')
 		return;
 	}
 	echo '<div class=tagselector><table border=0 align=center cellspacing=0 class="tagtree">';
-	foreach ($tagtree as $taginfo)
-		renderTagCheckbox ('taglist', array(), $taginfo, $for_realm);
+	printTagCheckboxTable ('taglist', array(), array(), $tagtree, $for_realm);
 	echo '</table></div>';
 }
 
