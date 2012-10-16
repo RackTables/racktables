@@ -1499,15 +1499,23 @@ function vrp55TranslatePushQueue ($dummy_object_id, $queue, $dummy_vlan_names)
 			// (unlike the way VRP 5.30 defines "trunk" and "hybrid"),
 			// but it is necessary to undo configured VLANs on a port
 			// for mode change command to succeed.
-			$undo = array
+			$before = array
 			(
 				'access' => "undo port trunk allow-pass vlan all\n" .
 					"port trunk allow-pass vlan 1\n" .
 					"undo port trunk pvid vlan\n",
 				'trunk' => "undo port default vlan\n",
 			);
-			$ret .= "interface ${cmd['arg1']}\n" . $undo[$cmd['arg2']];
-			$ret .= "port link-type ${cmd['arg2']}\nquit\n";
+			$after = array
+			(
+				'access' => '',
+				'trunk' => "undo port trunk allow-pass vlan 1\n",
+			);
+			$ret .= "interface ${cmd['arg1']}\n";
+			$ret .= $before[$cmd['arg2']];
+			$ret .= "port link-type ${cmd['arg2']}\n";
+			$ret .= $after[$cmd['arg2']];
+			$ret .= "quit\n";
 			break;
 		case 'begin configuration':
 			$ret .= "system-view\n";
