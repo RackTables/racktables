@@ -23,13 +23,13 @@ install-docs: COPYING ChangeLog LICENSE README
 install-helpers: scripts gateways
 	$(INSTALL_DIR) $(DESTDIR)$(scriptdir)
 	cp -r $^ $(DESTDIR)$(scriptdir)
-	find $(DESTDIR)$(scriptdir)/scripts -type d -a -name '.svn' -exec rm -rf \{\} \; -prune
-	find $(DESTDIR)$(scriptdir)/gateways -type d -a -name '.svn' -exec rm -rf \{\} \; -prune
+	find $(DESTDIR)$(scriptdir)/scripts -type d -a -name '.git' -exec rm -rf \{\} \; -prune
+	find $(DESTDIR)$(scriptdir)/gateways -type d -a -name '.git' -exec rm -rf \{\} \; -prune
 
 install-static: wwwroot/css wwwroot/js wwwroot/pix
 	$(INSTALL_DIR) $(DESTDIR)$(staticdir)
 	cp -r $^ $(DESTDIR)$(staticdir)
-	find $(DESTDIR)$(staticdir) -type d -a -name '.svn' -exec rm -rf \{\} \; -prune
+	find $(DESTDIR)$(staticdir) -type d -a -name '.git' -exec rm -rf \{\} \; -prune
 
 install-applib: wwwroot/inc
 	$(INSTALL_DIR) $(DESTDIR)$(applibdir)/inc
