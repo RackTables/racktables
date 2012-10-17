@@ -1628,10 +1628,7 @@ function getAllIPv4Allocations ()
 		"INET_NTOA(ip) as ip ".
 		"from IPv4Allocation join Object on id=object_id "
 	);
-	$ret = array();
-	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-		$ret[] = $row;
-	return $ret;
+	return $result->fetchAll (PDO::FETCH_ASSOC);
 }
 
 function linkPorts ($porta, $portb, $cable = NULL)
