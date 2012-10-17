@@ -1,5 +1,9 @@
 #!/usr/bin/env python
 
+# This file is a part of RackTables, a datacenter and server room management
+# framework. See accompanying file "COPYING" for the full copyright and
+# licensing information.
+
 # This script provides an online stdin/stdout interface to the list of an UCS
 # domain components. This is done through Python UcsSdk interfacing with the UCS
 # manager (domain controller) instance, a virtual service provided by physical
