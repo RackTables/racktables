@@ -1,8 +1,4 @@
 wwwroot/inc/secret.php
 wwwroot/inc/local.php
-gateways/switchvlans/changes.log
-gateways/switchvlans/cisco.secrets.php
-gateways/switchvlans/vlandecoder
-gateways/switchvlans/vlantable
 /.project
 tags

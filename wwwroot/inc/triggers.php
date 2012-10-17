@@ -68,22 +68,6 @@ function checkTypeAndAttribute ($object_id, $type_id, $attr_id, $values, $hit = 
 	return '';
 }
 
-// This trigger filters out everything except switches with known-good
-// software.
-function trigger_livevlans ()
-{
-	return checkTypeAndAttribute
-	(
-		getBypassValue(),
-		8, // network switch
-		4, // SW type
-		// Cisco IOS 12.0
-		// Cisco IOS 12.1
-		// Cisco IOS 12.2
-		array (244, 251, 252)
-	);
-}
-
 // This trigger is on when any of the (get_mac_list, get_link_status) ops permitted
 function trigger_liveports ()
 {
