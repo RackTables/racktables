@@ -21,7 +21,6 @@ require_once 'database.php';
 require_once 'auth.php';
 require_once 'navigation.php';
 require_once 'triggers.php';
-require_once 'gateways.php';
 require_once 'remote.php';
 require_once 'caching.php';
 require_once 'slb.php';
