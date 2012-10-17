@@ -150,6 +150,13 @@ function detectDeviceBreed ($object_id)
 	return '';
 }
 
+function assertDeviceBreed ($object_id)
+{
+	if ('' == $breed = detectDeviceBreed ($object_id))
+		throw new RTGatewayError ('Cannot determine device breed');
+	return $breed;
+}
+
 function validBreedFunction ($breed, $command)
 {
 	global $breedfunc;
@@ -160,44 +167,29 @@ function assertBreedFunction ($breed, $command)
 {
 	global $breedfunc;
 	if (! validBreedFunction ($breed, $command))
-		throw new RTGatewayError ('unsupported command for this breed');
+		throw new RTGatewayError ("unsupported command '${command}' for breed '${breed}'");
+	return $breedfunc["${breed}-${command}-main"];
 }
 
 function queryDevice ($object_id, $command)
 {
-	$breed = detectDeviceBreed ($object_id);
-	if (empty ($breed))
-		throw new RTGatewayError ("Can not determine device breed");
-
-	if (! validBreedFunction ($breed, $command))
-		throw new RTGatewayError ("unsupported command '$command' for the breed '$breed'");
-
+	$breed = assertDeviceBreed ($object_id);
+	$funcname = assertBreedFunction ($breed, $command);
 	require_once 'deviceconfig.php';
-	global $breedfunc;
-	if (! is_callable ($breedfunc["$breed-$command-main"]))
-		throw new RTGatewayError ("undeclared function '" . $breedfunc["$breed-$command-main"] . "'");
+	if (! is_callable ($funcname))
+		throw new RTGatewayError ("undeclared function '${funcname}'");
 	$query = translateDeviceCommands ($object_id, array (array ('opcode' => $command)));
-	if ($command == 'xlatepushq')
-		return $query;
-	else
-	{
-		$answer = queryTerminal ($object_id, $query, FALSE);
-		return $breedfunc["$breed-$command-main"] ($answer);
-	}
+	return $command == 'xlatepushq' ? $query : $funcname (queryTerminal ($object_id, $query, FALSE));
 }
 
 function translateDeviceCommands ($object_id, $crq, $vlan_names = NULL)
 {
+	$breed = assertDeviceBreed ($object_id);
+	$funcname = assertBreedFunction ($breed, 'xlatepushq');
 	require_once 'deviceconfig.php';
-	$breed = detectDeviceBreed ($object_id);
-	if (empty ($breed))
-		throw new RTGatewayError ("Can not determine device breed");
-
-	if (! validBreedFunction ($breed, 'xlatepushq'))
-		throw new RTGatewayError ("unsupported command 'xlatepushq' for the breed '$breed'");
-
-	global $breedfunc;
-	return $breedfunc["$breed-xlatepushq-main"] ($object_id, $crq, $vlan_names);
+	if (! is_callable ($funcname))
+		throw new RTGatewayError ("undeclared function '${funcname}'");
+	return $funcname ($object_id, $crq, $vlan_names);
 }
 
 // This function returns a text output received from the device
