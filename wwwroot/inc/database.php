@@ -3068,12 +3068,13 @@ function getPortOIFCompat ($ignore_cache = FALSE)
 // Returns an array of all object type pairs from the ObjectParentCompat table.
 function getObjectParentCompat ()
 {
-	$query =
+	$result = usePreparedSelectBlade
+	(
 		'SELECT parent_objtype_id, child_objtype_id, d1.dict_value AS parent_name, d2.dict_value AS child_name FROM ' .
 		'ObjectParentCompat AS pc INNER JOIN Dictionary AS d1 ON pc.parent_objtype_id = d1.dict_key ' .
 		'INNER JOIN Dictionary AS d2 ON pc.child_objtype_id = d2.dict_key ' .
-		'ORDER BY parent_name, child_name';
-	$result = usePreparedSelectBlade ($query);
+		'ORDER BY parent_name, child_name'
+	);
 	return $result->fetchAll (PDO::FETCH_ASSOC);
 }
 
