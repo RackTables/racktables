@@ -2229,8 +2229,10 @@ function ip4_bin2int ($ip_bin)
 {
 	if (4 != strlen ($ip_bin))
 		throw new InvalidArgException ('ip_bin', $ip_bin, "Invalid binary IP");
-	$list = unpack ('N', $ip_bin);
-	return array_shift ($list);
+	$ret = array_first (unpack ('N', $ip_bin));
+	if (PHP_INT_SIZE > 4 && $ret < 0)
+		$ret = $ret & 0xffffffff;
+	return $ret;
 }
 
 // Use this function only when you need to export binary ip out of PHP running context (e.g., DB)
