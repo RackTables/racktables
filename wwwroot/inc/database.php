@@ -243,10 +243,7 @@ function getLocations ($location_id)
 		'SELECT id, name FROM Location WHERE parent_id = ? ORDER BY name',
 		array ($location_id)
 	);
-	$rows = array();
-	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-		$rows[$row['id']] = $row['name'];
-	return $rows;
+	return reduceSubarraysToColumn (reindexByID ($result->fetchAll (PDO::FETCH_ASSOC)), 'name');
 }
 
 // Return detailed information about one rack row.
@@ -287,10 +284,7 @@ function getRows ($location_id)
 		'ORDER BY R.name',
 		array ($location_id)
 	);
-	$rows = array();
-	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-		$rows[$row['id']] = $row['name'];
-	return $rows;
+	return reduceSubarraysToColumn (reindexByID ($result->fetchAll (PDO::FETCH_ASSOC)), 'name');
 }
 
 function getRacks ($row_id)
@@ -2935,11 +2929,8 @@ function searchCableIDs ($what)
 // This function returns either port ID or NULL for specified arguments.
 function getPortIDs ($object_id, $port_name)
 {
-	$ret = array();
 	$result = usePreparedSelectBlade ('SELECT id FROM Port WHERE object_id = ? AND name = ?', array ($object_id, $port_name));
-	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-		$ret[] = $row['id'];
-	return $ret;
+	return reduceSubarraysToColumn ($result->fetchAll (PDO::FETCH_ASSOC), 'id');
 }
 
 // Search in "FQDN" attribute only, and return object ID, when there is exactly
@@ -4143,10 +4134,7 @@ function getAllUnlinkedFiles ($entity_type = NULL, $entity_id = 0)
 		'ORDER BY name, id',
 		array ($entity_type, $entity_id)
 	);
-	$ret=array();
-	while ($row = $query->fetch (PDO::FETCH_ASSOC))
-		$ret[$row['id']] = $row['name'];
-	return $ret;
+	return reduceSubarraysToColumn (reindexByID ($query->fetchAll (PDO::FETCH_ASSOC)), 'name');
 }
 
 // FIXME: return a standard cell list, so upper layer can iterate over
@@ -4529,10 +4517,7 @@ function getExistingPortTypeOptions ($port_id)
 		'ORDER BY oif_name',
 		array ($port_id)
 	);
-	$ret = array();
-	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-		$ret[$row['oif_id']] = $row['oif_name'];
-	return $ret;
+	return reduceSubarraysToColumn (reindexByID ($result->fetchAll (PDO::FETCH_ASSOC), 'oif_id'), 'oif_name');
 }
 
 function getPortTypeUsageStatistics()
@@ -4550,11 +4535,8 @@ function getPortTypeUsageStatistics()
 
 function getPortIIFOptions()
 {
-	$ret = array();
 	$result = usePreparedSelectBlade ('SELECT id, iif_name FROM PortInnerInterface ORDER BY iif_name');
-	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-		$ret[$row['id']] = $row['iif_name'];
-	return $ret;
+	return reduceSubarraysToColumn (reindexByID ($result->fetchAll (PDO::FETCH_ASSOC)), 'iif_name');
 }
 
 function commitSupplementPIC ($iif_id, $oif_id)
@@ -4603,10 +4585,7 @@ function getVLANDomainStats ()
 function getVLANDomainOptions()
 {
 	$result = usePreparedSelectBlade ('SELECT id, description FROM VLANDomain ORDER BY description');
-	$ret = array();
-	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-		$ret[$row['id']] = $row['description'];
-	return $ret;
+	return reduceSubarraysToColumn (reindexByID ($result->fetchAll (PDO::FETCH_ASSOC)), 'description');
 }
 
 function getVLANDomain ($vdid)
@@ -4656,11 +4635,8 @@ END
 
 function getVLANSwitches()
 {
-	$ret = array();
 	$result = usePreparedSelectBlade ('SELECT object_id FROM VLANSwitch');
-	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-		$ret[] = $row['object_id'];
-	return $ret;
+	return reduceSubarraysToColumn ($result->fetchAll (PDO::FETCH_ASSOC), 'object_id');
 }
 
 function getVLANSwitchInfo ($object_id, $extrasql = '')
@@ -4730,26 +4706,26 @@ function getVLANInfo ($vlan_ck)
 	if (NULL == ($ret = $result->fetch (PDO::FETCH_ASSOC)))
 		throw new EntityNotFoundException ('VLAN', $vlan_ck);
 	$ret['vlan_ck'] = $vlan_ck;
-	$ret['ipv4nets'] = array();
-	$ret['ipv6nets'] = array();
 	unset ($result);
-	$query = 'SELECT ipv4net_id FROM VLANIPv4 WHERE domain_id = ? AND vlan_id = ? ORDER BY ipv4net_id';
-	$result = usePreparedSelectBlade ($query, array ($vdom_id, $vlan_id));
-	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-		$ret['ipv4nets'][] = $row['ipv4net_id'];
+	$result = usePreparedSelectBlade
+	(
+	 	'SELECT ipv4net_id FROM VLANIPv4 WHERE domain_id = ? AND vlan_id = ? ORDER BY ipv4net_id',
+		array ($vdom_id, $vlan_id)
+	);
+	$ret['ipv4nets'] = reduceSubarraysToColumn ($result->fetchAll (PDO::FETCH_ASSOC), 'ipv4net_id');
 	unset ($result);
-	$query = 'SELECT ipv6net_id FROM VLANIPv6 WHERE domain_id = ? AND vlan_id = ? ORDER BY ipv6net_id';
-	$result = usePreparedSelectBlade ($query, array ($vdom_id, $vlan_id));
-	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-		$ret['ipv6nets'][] = $row['ipv6net_id'];
-
+	$result = usePreparedSelectBlade
+	(
+	 	'SELECT ipv6net_id FROM VLANIPv6 WHERE domain_id = ? AND vlan_id = ? ORDER BY ipv6net_id',
+		array ($vdom_id, $vlan_id)
+	);
+	$ret['ipv6nets'] = reduceSubarraysToColumn ($result->fetchAll (PDO::FETCH_ASSOC), 'ipv6net_id');
 	return $ret;
 }
 
 // return list of network IDs, which are not bound to the given VLAN domain
 function getVLANIPv4Options ($except_vdid)
 {
-	$ret = array();
 	$prepared = usePreparedSelectBlade
 	(
 		'SELECT id FROM IPv4Network WHERE id NOT IN ' .
@@ -4757,15 +4733,12 @@ function getVLANIPv4Options ($except_vdid)
 		'ORDER BY ip, mask',
 		array ($except_vdid)
 	);
-	while ($row = $prepared->fetch (PDO::FETCH_ASSOC))
-		$ret[] = $row['id'];
-	return $ret;
+	return reduceSubarraysToColumn ($prepared->fetchAll (PDO::FETCH_ASSOC), 'id');
 }
 
 // return list of network IDs, which are not bound to the given VLAN domain
 function getVLANIPv6Options ($except_vdid)
 {
-	$ret = array();
 	$prepared = usePreparedSelectBlade
 	(
 		'SELECT id FROM IPv6Network WHERE id NOT IN ' .
@@ -4773,9 +4746,7 @@ function getVLANIPv6Options ($except_vdid)
 		'ORDER BY ip, mask',
 		array ($except_vdid)
 	);
-	while ($row = $prepared->fetch (PDO::FETCH_ASSOC))
-		$ret[] = $row['id'];
-	return $ret;
+	return reduceSubarraysToColumn ($prepared->fetchAll (PDO::FETCH_ASSOC), 'id');
 }
 
 function commitSupplementVLANIPv4 ($vlan_ck, $ipv4net_id)

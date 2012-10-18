@@ -3256,6 +3256,23 @@ function reindexById ($input, $column_name = 'id')
 	return $ret;
 }
 
+# Given an array consisting of subarrays, each typically with the same set
+# of keys, produce a result indexed the same way as the input array, but
+# having each subarray replaced with one of the subarray values (using the
+# provided subindex name, e.g.:
+# array (10 => array ('a' => 'x1', 'b' => 'y1'), 20 => array ('a' => 'x2', 'b' => 'y2'))
+# would map to (using subindex 'b'): array (10 => 'y1', 20 => 'y2')
+function reduceSubarraysToColumn ($input, $column)
+{
+	$ret = array();
+	foreach ($input as $key => $item)
+		if (array_key_exists ($column, $item))
+			$ret[$key] = $item[$column];
+		else
+			throw new InvalidArgException ('input', '(array)', "column '${column}' is not set for subarray at index '${key}'");
+	return $ret;
+}
+
 // Use the VLAN switch template to set VST role for each port of
 // the provided list. Return resulting list.
 function apply8021QOrder ($vst_id, $portlist)
