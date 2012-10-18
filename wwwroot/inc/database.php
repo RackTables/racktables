@@ -269,15 +269,8 @@ function getRowInfo ($row_id)
 
 function getAllRows ()
 {
-	$result = usePreparedSelectBlade ('SELECT * FROM Row ORDER BY location_name, name');
-	$ret = array();
-	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-		$ret[$row['id']] = array (
-			'name' => $row['name'],
-			'location_id' => $row['location_id'],
-			'location_name' => $row['location_name'],
-		);
-	return $ret;
+	$result = usePreparedSelectBlade ('SELECT id, name, location_id, location_name FROM Row ORDER BY location_name, name');
+	return reindexById ($result->fetchAll (PDO::FETCH_ASSOC));
 }
 
 // Return list of rows directly under a specified location
@@ -307,17 +300,7 @@ function getRacks ($row_id)
 		'SELECT id, name, asset_no, height, sort_order, comment, row_name FROM Rack WHERE row_id = ? ORDER BY sort_order',
 		array ($row_id)
 	);
-	$ret = array();
-	while ($row = $query->fetch (PDO::FETCH_ASSOC))
-		$ret[$row['id']] = array (
-			'name' => $row['name'],
-			'asset_no' => $row['asset_no'],
-			'height' => $row['height'],
-			'sort_order' => $row['sort_order'],
-			'comment' => $row['comment'],
-			'row_name' => $row['row_name'],
-		);
-	return $ret;
+	return reindexById ($query->fetchAll (PDO::FETCH_ASSOC));
 }
 
 # Return rack and row details for those objects on the list, which have
@@ -2560,10 +2543,7 @@ function getIPv6AddressSearchResult ($terms)
 		$qparams[] = "%${term}%";
 	}
 	$result = usePreparedSelectBlade ($query, $qparams);
-	$ret = array();
-	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-		$ret[$row['ip']] = $row;
-	return $ret;
+	return reindexById ($result->fetchAll (PDO::FETCH_ASSOC), 'ip');
 }
 
 function getIPv4RSPoolSearchResult ($terms)
@@ -3618,10 +3598,7 @@ function usePreparedExecuteBlade ($query, $args = array())
 function loadConfigCache ()
 {
 	$result = usePreparedSelectBlade ('SELECT varname, varvalue, vartype, is_hidden, emptyok, description, is_userdefined FROM Config ORDER BY varname');
-	$cache = array();
-	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-		$cache[$row['varname']] = $row;
-	return $cache;
+	return reindexById ($result->fetchAll (PDO::FETCH_ASSOC), 'varname');
 }
 
 function loadUserConfigCache ($username = NULL)
@@ -3629,10 +3606,7 @@ function loadUserConfigCache ($username = NULL)
 	if (!strlen ($username))
 		throw new InvalidArgException ('$username', $username);
 	$result = usePreparedSelectBlade ('SELECT varname, varvalue FROM UserConfig WHERE user = ?', array ($username));
-	$cache = array();
-	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-		$cache[$row['varname']] = $row;
-	return $cache;
+	return reindexById ($result->fetchAll (PDO::FETCH_ASSOC), 'varname');
 }
 
 function loadThumbCache ($rack_id = 0)
@@ -3660,7 +3634,6 @@ function executeAutoPorts ($object_id = 0, $type_id = 0)
 // Result is a chain: randomly indexed taginfo list.
 function loadEntityTags ($entity_realm = '', $entity_id = 0)
 {
-	$ret = array();
 	$result = usePreparedSelectBlade
 	(
 		"select tt.id, tag from " .
@@ -3669,9 +3642,7 @@ function loadEntityTags ($entity_realm = '', $entity_id = 0)
 		"order by tt.tag",
 		array ($entity_realm, $entity_id)
 	);
-	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-		$ret[$row['id']] = $row;
-	return $ret;
+	return reindexById ($result->fetchAll (PDO::FETCH_ASSOC));
 }
 
 # Universal autotags generator, a complementing function for loadEntityTags().
@@ -4412,16 +4383,13 @@ function commitDeleteFile ($file_id)
 
 function getChapterList ()
 {
-	$ret = array();
 	$result = usePreparedSelectBlade
 	(
 		'SELECT id, sticky, name, count(chapter_id) as wordc ' .
 		'FROM Chapter LEFT JOIN Dictionary ON Chapter.id = chapter_id ' .
 		'GROUP BY id ORDER BY name'
 	);
-	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-		$ret[$row['id']] = $row;
-	return $ret;
+	return reindexById ($result->fetchAll (PDO::FETCH_ASSOC));
 }
 
 // Return file id by file name.
@@ -4629,10 +4597,7 @@ function getVLANDomainStats ()
 		'(SELECT COUNT(port_name) FROM VLANSwitch AS VS INNER JOIN PortVLANMode AS PVM ON VS.object_id = PVM.object_id WHERE domain_id = id) AS portc ' .
 		'FROM VLANDomain ORDER BY description'
 	);
-	$ret = array();
-	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-		$ret[$row['id']] = $row;
-	return $ret;
+	return reindexById ($result->fetchAll (PDO::FETCH_ASSOC));
 }
 
 function getVLANDomainOptions()
@@ -4686,10 +4651,7 @@ ORDER BY vlan_id
 END
 		, array ($vdom_id)
 	);
-	$ret = array();
-	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-		$ret[$row['vlan_id']] = $row;
-	return $ret;
+	return reindexByID ($result->fetchAll (PDO::FETCH_ASSOC), 'vlan_id');
 }
 
 function getVLANSwitches()
