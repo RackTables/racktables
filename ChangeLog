@@ -2,6 +2,7 @@
 	bugfix: explicitly request Cacti RRA ID 1 (#466)
 	bugfix: improve UCS error handling
 	bugfix: proper handling of VLAN 1 in Huawei VRP 5.7 802.1Q gateway
+	bugfix: database was corruped after IPv4 networks creation on some PHP versions (#643)
 	update: SLB: ability to specify multiple RS ports
 	update: remove old gateways code, including Live VLANs
 	new feature: abstract tags, which cannot be assigned (#577)
