@@ -2997,7 +2997,7 @@ function commitCreateUserAccount ($username, $realname, $password)
 		array
 		(
 			'user_name' => $username,
-			'user_realname' => $realname,
+			'user_realname' => $realname == '' ? NULL : $realname,
 			'user_password_hash' => $password,
 		)
 	);
@@ -3012,7 +3012,7 @@ function commitUpdateUserAccount ($id, $new_username, $new_realname, $new_passwo
 		array
 		(
 			'user_name' => $new_username,
-			'user_realname' => $new_realname,
+			'user_realname' => $new_realname == '' ? NULL : $new_realname,
 			'user_password_hash' => $new_password,
 		),
 		array ('user_id' => $id)
