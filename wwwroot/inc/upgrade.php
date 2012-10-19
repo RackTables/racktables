@@ -1580,6 +1580,7 @@ CREATE TABLE `CactiServer` (
 			$query[] = "ALTER TABLE TagTree ADD KEY `id-is_assignable` (id, is_assignable)";
 			$query[] = "ALTER TABLE TagStorage DROP FOREIGN KEY `TagStorage-FK-tag_id`";
 			$query[] = "ALTER TABLE TagStorage ADD CONSTRAINT `TagStorage-FK-TagTree` FOREIGN KEY (tag_id, tag_is_assignable) REFERENCES TagTree (id, is_assignable)";
+			$query[] = "UPDATE UserAccount SET user_realname = NULL WHERE user_realname = ''";
 			$query[] = "UPDATE Config SET varvalue = '0.20.2' WHERE varname = 'DB_VERSION'";
 			break;
 		case 'dictionary':
