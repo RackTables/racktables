@@ -4,7 +4,9 @@
 # framework. See accompanying file "COPYING" for the full copyright and
 # licensing information.
 
-// translating functions maps
+# The array below maps availability of particular commands for each particular
+# device breed. Array values are functions implemented in deviceconfig.php, which
+# is not normally included until any of the functions is actually called.
 $breedfunc = array
 (
 	'ios12-getcdpstatus-main'  => 'ios12ReadCDPStatus',
@@ -87,8 +89,8 @@ $breedfunc = array
 	'ros11-get8021q-scantop'   => 'ros11Read8021QScanTop',
 	'ros11-get8021q-vlandb'    => 'ros11Read8021QVLANDatabase',
 	'ros11-get8021q-readports' => 'ros11Read8021QPorts',
-	'iosxr4-xlatepushq-main'    => 'iosxr4TranslatePushQueue',
-	'iosxr4-getallconf-main'    => 'iosxr4SpotConfigText',
+	'iosxr4-xlatepushq-main'   => 'iosxr4TranslatePushQueue',
+	'iosxr4-getallconf-main'   => 'iosxr4SpotConfigText',
 	'ucs-xlatepushq-main'      => 'ucsTranslatePushQueue',
 	'ucs-getinventory-main'    => 'ucsReadInventory',
 );
