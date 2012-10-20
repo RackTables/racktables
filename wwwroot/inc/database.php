@@ -289,12 +289,12 @@ function getRows ($location_id)
 
 function getRacks ($row_id)
 {
-	$query = usePreparedSelectBlade
+	$result = usePreparedSelectBlade
 	(
 		'SELECT id, name, asset_no, height, sort_order, comment, row_name FROM Rack WHERE row_id = ? ORDER BY sort_order',
 		array ($row_id)
 	);
-	return reindexById ($query->fetchAll (PDO::FETCH_ASSOC));
+	return reindexById ($result->fetchAll (PDO::FETCH_ASSOC));
 }
 
 # Return rack and row details for those objects on the list, which have
@@ -4127,21 +4127,21 @@ function getNATv4ForObject ($object_id)
 // will be used by printSelect().
 function getAllUnlinkedFiles ($entity_type = NULL, $entity_id = 0)
 {
-	$query = usePreparedSelectBlade
+	$result = usePreparedSelectBlade
 	(
 		'SELECT id, name FROM File ' .
 		'WHERE id NOT IN (SELECT file_id FROM FileLink WHERE entity_type = ? AND entity_id = ?) ' .
 		'ORDER BY name, id',
 		array ($entity_type, $entity_id)
 	);
-	return reduceSubarraysToColumn (reindexByID ($query->fetchAll (PDO::FETCH_ASSOC)), 'name');
+	return reduceSubarraysToColumn (reindexByID ($result->fetchAll (PDO::FETCH_ASSOC)), 'name');
 }
 
 // FIXME: return a standard cell list, so upper layer can iterate over
 // it conveniently.
 function getFilesOfEntity ($entity_type = NULL, $entity_id = 0)
 {
-	$query = usePreparedSelectBlade
+	$result = usePreparedSelectBlade
 	(
 		'SELECT FileLink.file_id, FileLink.id AS link_id, name, type, size, ctime, mtime, atime, comment ' .
 		'FROM FileLink LEFT JOIN File ON FileLink.file_id = File.id ' .
@@ -4149,7 +4149,7 @@ function getFilesOfEntity ($entity_type = NULL, $entity_id = 0)
 		array ($entity_type, $entity_id)
 	);
 	$ret = array();
-	while ($row = $query->fetch (PDO::FETCH_ASSOC))
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 		$ret[$row['file_id']] = array (
 			'id' => $row['file_id'],
 			'link_id' => $row['link_id'],
@@ -4166,13 +4166,13 @@ function getFilesOfEntity ($entity_type = NULL, $entity_id = 0)
 
 function getFile ($file_id)
 {
-	$query = usePreparedSelectBlade
+	$result = usePreparedSelectBlade
 	(
 		'SELECT id, name, type, size, ctime, mtime, atime, contents, comment ' .
 		'FROM File WHERE id = ?',
 		array ($file_id)
 	);
-	if (($row = $query->fetch (PDO::FETCH_ASSOC)) == NULL)
+	if (($row = $result->fetch (PDO::FETCH_ASSOC)) == NULL)
 		// FIXME: isn't this repeating the code already in spotEntity()?
 		throw new EntityNotFoundException ('file', $file_id);
 	return $row;
@@ -4180,13 +4180,13 @@ function getFile ($file_id)
 
 function getFileCache ($file_id)
 {
-	$query = usePreparedSelectBlade
+	$result = usePreparedSelectBlade
 	(
 		'SELECT File.thumbnail FROM File ' .
 		'WHERE File.id = ? and File.thumbnail IS NOT NULL',
 		array ($file_id)
 	);
-	if (($row = $query->fetch (PDO::FETCH_ASSOC)) == NULL)
+	if (($row = $result->fetch (PDO::FETCH_ASSOC)) == NULL)
 		return FALSE;
 	return $row['thumbnail'];
 }
@@ -4209,13 +4209,13 @@ function commitAddFileCache ($file_id, $contents)
 
 function getFileLinks ($file_id)
 {
-	$query = usePreparedSelectBlade
+	$result = usePreparedSelectBlade
 	(
 		'SELECT id, file_id, entity_type, entity_id FROM FileLink ' .
 		'WHERE file_id = ? ORDER BY entity_type, entity_id',
 		array ($file_id)
 	);
-	$rows = $query->fetchAll (PDO::FETCH_ASSOC);
+	$rows = $result->fetchAll (PDO::FETCH_ASSOC);
 	$ret = array();
 	foreach ($rows as $row)
 	{
@@ -4383,8 +4383,8 @@ function getChapterList ()
 // Return file id by file name.
 function findFileByName ($filename)
 {
-	$query = usePreparedSelectBlade ('SELECT id FROM File WHERE name = ?', array ($filename));
-	if (($row = $query->fetch (PDO::FETCH_ASSOC)))
+	$result = usePreparedSelectBlade ('SELECT id FROM File WHERE name = ?', array ($filename));
+	if (($row = $result->fetch (PDO::FETCH_ASSOC)))
 		return $row['id'];
 
 	return NULL;
