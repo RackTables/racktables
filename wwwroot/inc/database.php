@@ -4268,7 +4268,7 @@ function getFileLinks ($file_id)
 		}
 
 		// name needs to have some value for hrefs to work
-        if (!strlen ($name))
+		if (! strlen ($name))
 			$name = sprintf("[Unnamed %s]", formatEntityName($row['entity_type']));
 
 		$ret[$row['id']] = array(
