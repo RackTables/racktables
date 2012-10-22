@@ -1211,6 +1211,8 @@ function commitResetObject ($object_id = 0)
 	recordObjectHistory ($object_id);
 	# Cacti graphs
 	usePreparedDeleteBlade ('CactiGraph', array ('object_id' => $object_id));
+	# Munin graphs
+	usePreparedDeleteBlade ('MuninGraph', array ('object_id' => $object_id));
 }
 
 function commitDeleteRack($rack_id)
@@ -5082,6 +5084,16 @@ function getCactiGraphsForObject ($object_id)
 	return reindexById ($result->fetchAll (PDO::FETCH_ASSOC), 'graph_id');
 }
 
+function getMuninGraphsForObject ($object_id)
+{
+	$result = usePreparedSelectBlade
+	(
+		'SELECT server_id, graph, caption FROM MuninGraph WHERE object_id = ? ORDER BY server_id, graph',
+		array ($object_id)
+	);
+	return reindexById ($result->fetchAll (PDO::FETCH_ASSOC), 'graph');
+}
+
 function touchVLANSwitch ($switch_id)
 {
 	usePreparedExecuteBlade
@@ -5114,6 +5126,16 @@ function getCactiServers()
 	(
 		'SELECT id, base_url, username, password, COUNT(graph_id) AS num_graphs ' .
 		'FROM CactiServer AS CS LEFT JOIN CactiGraph AS CG ON CS.id = CG.server_id GROUP BY id'
+	);
+	return reindexById ($result->fetchAll (PDO::FETCH_ASSOC));
+}
+
+function getMuninServers()
+{
+	$result = usePreparedSelectBlade
+	(
+		'SELECT id, base_url, COUNT(MG.object_id) AS num_graphs ' .
+		'FROM MuninServer AS MS LEFT JOIN MuninGraph AS MG ON MS.id = MG.server_id GROUP BY id'
 	);
 	return reindexById ($result->fetchAll (PDO::FETCH_ASSOC));
 }
