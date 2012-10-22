@@ -103,7 +103,7 @@ function not_already_installed()
 // Check that we can write to configuration file.
 // If so, ask for DB connection paramaters and test
 // the connection. Neither save the parameters nor allow
-// going further until we succeed with the given 
+// going further until we succeed with the given
 // credentials.
 function init_config ()
 {
@@ -356,7 +356,7 @@ function init_database_static ()
 		}
 	}
 	echo "<td>${nq}</td><td>${nerrs}</td></tr>\n";
-			
+
 	echo '</table>';
 	if (count ($errlist))
 	{

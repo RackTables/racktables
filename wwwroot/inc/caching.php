@@ -13,14 +13,14 @@
 
 define ('CACHE_DURATION', 604800); // 7 * 24 * 3600
 
-// if client passes If-Modified-Since header, and it is greater or equal to $creation_ts, and 
+// if client passes If-Modified-Since header, and it is greater or equal to $creation_ts, and
 // $expire seconds not elapsed since IMS, the function sends HTTP-304 with $creation_ts
 // returns TRUE on cache-hit, FALSE otherwise. Calling side should call exit if the result is TRUE.
 function checkCachedResponse ($creation_ts, $expire)
 {
 	$client_time = HTTPDateToUnixTime (@$_SERVER['HTTP_IF_MODIFIED_SINCE']);
 	$server_time = time();
-	$result = 
+	$result =
 	(
 		$client_time !== FALSE && $client_time !== -1 && // IMS header is readable
 		! in_array ('no-cache', preg_split ('/\s*,\s*/', @$_SERVER['HTTP_CACHE_CONTROL'])) && // no-cache parameter unset
