@@ -109,7 +109,7 @@ $SQLSchema = array
 			'rsconfig' => 'rsconfig',
 			'refcnt' => '(select count(vs_id) from IPv4LB where vs_id = id)',
 			//'vip' =>
-			//'dname' => 
+			//'dname' =>
 		),
 		'keycolumn' => 'id',
 		'ordcolumns' => array ('IPv4VS.vip', 'IPv4VS.proto', 'IPv4VS.vport'),
@@ -275,7 +275,7 @@ function getRows ($location_id)
 {
 	$result = usePreparedSelectBlade
 	(
-		'SELECT R.id, R.name FROM Row R ' . 
+		'SELECT R.id, R.name FROM Row R ' .
 		'INNER JOIN EntityLink EL ON ' .
 		"EL.parent_entity_type = 'location' " .
 		"AND EL.child_entity_type = 'row' " .
@@ -602,7 +602,7 @@ function spotEntity ($realm, $id, $ignore_cache = FALSE)
 	default:
 		break;
 	}
-	
+
 	if ($realm == 'ipv4net')
 	{
 		$result = usePreparedSelectBlade ("
@@ -1570,7 +1570,7 @@ function commitUpdatePortComment ($port_id, $port_reservation_comment)
 	usePreparedUpdateBlade
 	(
 		'Port',
-		array 
+		array
 		(
 			'reservation_comment' => $reservation_comment,
 		),
@@ -1697,7 +1697,7 @@ function commitUnlinkPort ($port_id)
 		addPortLogEntry ($row['id_b'], sprintf ("unlinked from %s %s", $row['obj_name_a'], $row['port_name_a']));
 	}
 	unset ($result);
-	
+
 	// remove existing link
 	usePreparedDeleteBlade ('Link', array ('porta' => $port_id, 'portb' => $port_id), 'OR');
 }
@@ -2121,7 +2121,7 @@ function scanIPv6Space ($pairlist)
 			'object_name' => $oinfo['dname'],
 		);
 	}
-	
+
 	// 3. look for virtual services
 	$query = "select id, vip from IPv4VS where ${whereexpr3}";
 	$result = usePreparedSelectBlade ($query, $qparams);
@@ -3250,8 +3250,8 @@ function getChapterRefc ($chapter_id, $keylist)
 	default:
 		// Find the list of all assigned values of dictionary-addressed attributes, each with
 		// chapter/word keyed reference counters.
-		$query = "select uint_value, count(object_id) as refcnt 
-			from AttributeMap am 
+		$query = "select uint_value, count(object_id) as refcnt
+			from AttributeMap am
 			inner join AttributeValue av on am.attr_id = av.attr_id
 			inner join Object o on o.id = av.object_id
 			where am.chapter_id = ? and o.objtype_id = am.objtype_id
@@ -3394,7 +3394,7 @@ function fetchAttrsForObjects ($object_set = array())
 }
 
 // This function returns all optional attributes for requested object
-// as an array of records. 
+// as an array of records.
 // Empty array is returned, if there are no attributes found.
 function getAttrValues ($object_id)
 {
@@ -4192,9 +4192,9 @@ function getFileCache ($file_id)
 }
 
 function commitAddFileCache ($file_id, $contents)
-{               
+{
 	global $dbxlink;
-	try     
+	try
 	{
 		$query = $dbxlink->prepare ('UPDATE File SET thumbnail = ? WHERE id = ?');
 		$query->bindParam (1, $contents, PDO::PARAM_LOB);
@@ -4205,7 +4205,7 @@ function commitAddFileCache ($file_id, $contents)
 	{
 		throw convertPDOException ($e);
 	}
-}               
+}
 
 function getFileLinks ($file_id)
 {
@@ -4616,15 +4616,15 @@ SELECT
 	vlan_id,
 	vlan_type,
 	vlan_descr,
-	(SELECT COUNT(ipv4net_id) FROM VLANIPv4 AS VI WHERE VI.domain_id = VD.domain_id and VI.vlan_id = VD.vlan_id) + 
+	(SELECT COUNT(ipv4net_id) FROM VLANIPv4 AS VI WHERE VI.domain_id = VD.domain_id and VI.vlan_id = VD.vlan_id) +
 	(SELECT COUNT(ipv6net_id) FROM VLANIPv6 AS VI WHERE VI.domain_id = VD.domain_id and VI.vlan_id = VD.vlan_id) AS netc,
 	(
 		SELECT COUNT(port_name)
 		FROM VLANSwitch AS VS INNER JOIN PortAllowedVLAN AS PAV ON VS.object_id = PAV.object_id
 		WHERE VS.domain_id = VD.domain_id and PAV.vlan_id = VD.vlan_id
 	) AS portc
-FROM 
-	VLANDescription AS VD 
+FROM
+	VLANDescription AS VD
 WHERE domain_id = ?
 ORDER BY vlan_id
 END
@@ -4911,7 +4911,7 @@ function replace8021QPorts ($instance = 'desired', $object_id, $before, $changes
 {
 	$done = 0;
 	foreach ($changes as $port_name => $port)
-		if 
+		if
 		(
 			!array_key_exists ($port_name, $before) or
 			!same8021QConfigs ($port, $before[$port_name])
@@ -4954,13 +4954,13 @@ function lookupEntityByString ($realm, $value, $column = 'name')
 	$SQLinfo = $SQLSchema[$realm];
 	$query = "SELECT ${SQLinfo['keycolumn']} AS id FROM ${SQLinfo['table']} WHERE ${SQLinfo['table']}.${column}=? LIMIT 2";
 	$result = usePreparedSelectBlade ($query, array ($value));
-	$rows = $result->fetchAll (PDO::FETCH_ASSOC);	
+	$rows = $result->fetchAll (PDO::FETCH_ASSOC);
 	if (count ($rows) != 1)
 		return NULL;
 	return $rows[0]['id'];
 }
 
-// returns an array of attribute_id`s wich use specified chapter id.  
+// returns an array of attribute_id`s wich use specified chapter id.
 function getChapterAttributes($chapter_id)
 {
 	$prepared = usePreparedSelectBlade ('SELECT DISTINCT attr_id FROM AttributeMap WHERE chapter_id = ?', array ($chapter_id));

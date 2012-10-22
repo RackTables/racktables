@@ -48,7 +48,7 @@ function ios12ReadLLDPStatus ($input)
 			continue;
 
 		$matches = preg_split ('/\s+/', $line);
-		
+
 		switch (count ($matches))
 		{
 		case 5:
@@ -2104,7 +2104,7 @@ function jun10Read8021QConfig ($input)
 		'portconfig' => array(),
 	);
 	$lines = explode ("\n", $input);
-	
+
 	// get vlan list
 	$vlans = array('default' => 1);
 	$names = array();
@@ -2150,7 +2150,7 @@ function jun10Read8021QConfig ($input)
 		if (preg_match ('/# END OF CONFIG|^(interface-range )?(\S+)\s+{$/', $line, $m)) // line starts with interface name
 		{ // found interface section opening, or end-of-file
 			if (isset ($current['name']) and $current['is_ethernet'])
-			{ 
+			{
 				// add previous interface to the results
 				if (! isset ($current['config']['mode']))
 					$current['config']['mode'] = 'access';
@@ -2235,7 +2235,7 @@ function jun10Read8021QConfig ($input)
 			$ret['portconfig'][$current['name']][] = array ('type' => $line_class, 'line' => $line);
 		}
 	}
-	
+
 	return $ret;
 }
 

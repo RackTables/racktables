@@ -288,7 +288,7 @@ function renderImagePreview ($file_id)
 {
 	if ($image = getFileCache ($file_id)) //Cache Hit
 	{
-		header("Content-type: image/jpeg"); 
+		header("Content-type: image/jpeg");
 		echo $image;
 		return;
 	}
@@ -382,7 +382,7 @@ function proxyCactiRequest ($server_id, $graph_id)
 //	curl_setopt ($session, CURLOPT_VERBOSE, TRUE);
 
 	// Initial options up here so a specific type can override them
-	curl_setopt ($session, CURLOPT_FOLLOWLOCATION, FALSE); 
+	curl_setopt ($session, CURLOPT_FOLLOWLOCATION, FALSE);
 	curl_setopt ($session, CURLOPT_TIMEOUT, 10);
 	curl_setopt ($session, CURLOPT_RETURNTRANSFER, TRUE);
 	curl_setopt ($session, CURLOPT_URL, $url);
@@ -404,7 +404,7 @@ function proxyCactiRequest ($server_id, $graph_id)
 
 		// Get the cookies from the headers
 		preg_match('/Set-Cookie: ([^;]*)/i', $headers, $cookies);
-		array_shift($cookies);  // Remove 'Set-Cookie: ...' value			
+		array_shift($cookies);  // Remove 'Set-Cookie: ...' value
 		$cookie_header = implode(";", $cookies);
 		$_SESSION['CACTICOOKIE'][$cacti_url] = $cookie_header; // store for later use by this user
 

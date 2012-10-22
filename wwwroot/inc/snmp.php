@@ -2267,10 +2267,10 @@ $swtype_pcre = array
 
 function updateStickerForCell ($cell, $attr_id, $new_value)
 {
-	if 
+	if
 	(
-		isset ($cell['attrs'][$attr_id]) 
-		and !strlen ($cell['attrs'][$attr_id]['value']) 
+		isset ($cell['attrs'][$attr_id])
+		and !strlen ($cell['attrs'][$attr_id]['value'])
 		and	strlen ($new_value)
 	)
 		commitUpdateAttrValue ($cell['id'], $attr_id, $new_value);
