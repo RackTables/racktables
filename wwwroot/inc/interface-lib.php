@@ -506,7 +506,7 @@ function addJS ($data, $inline = FALSE, $group = 'default')
 {
 	static $javascript = array();
 	static $seen_filenames = array();
-	
+
 	if (! isset ($data))
 	{
 		ksort ($javascript);
@@ -556,7 +556,7 @@ function addCSS ($data, $inline = FALSE)
 {
 	static $styles = array();
 	static $seen_filenames = array();
-	
+
 	if (! isset ($data))
 		return $styles;
 	if ($inline)
@@ -706,7 +706,7 @@ function getRenderedIPv6NetCapacity ($range)
 
 	$dec_order = intval ((128 - $range['mask']) / 10) * 3;
 	$mult = isset ($prefixes[$dec_order]) ? $prefixes[$dec_order] : '??';
-	
+
 	$cnt = 1 << ((128 - $range['mask']) % 10);
 	if ($cnt == 1 && $mult == '')
 		$cnt = '1';
@@ -866,7 +866,7 @@ function renderEntitySummary ($cell, $title, $values = array())
 			$class .= ' ' . $m[1];
 			$name = $m[2];
 		}
-		if ($name == 'tags:') 
+		if ($name == 'tags:')
 		{
 			$baseurl = '';
 			if (isset ($page_by_realm[$cell['realm']]))

@@ -181,7 +181,7 @@ function trigger_rackspace ()
 function trigger_ports ()
 {
 	// Hide the tab if the object type exists in the exclusion config option
-	if (considerConfiguredConstraint (spotEntity ('object', getBypassValue()), 'PORT_EXCLUSION_LISTSRC')) 
+	if (considerConfiguredConstraint (spotEntity ('object', getBypassValue()), 'PORT_EXCLUSION_LISTSRC'))
 		return '';
 
 	return 'std';

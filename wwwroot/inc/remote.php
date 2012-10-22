@@ -420,7 +420,7 @@ function callScript ($gwname, $params, $in, &$out, &$errors)
 	}
 
 	$pipes = array();
-	$child = proc_open 
+	$child = proc_open
 	(
 		$cmd_line,
 		array (
@@ -498,7 +498,7 @@ function setDevice8021QConfig ($object_id, $pseudocode, $vlan_names)
 	$commands = translateDeviceCommands ($object_id, $pseudocode, $vlan_names);
 	$breed = detectDeviceBreed ($object_id);
 	$output = queryTerminal ($object_id, $commands, FALSE);
-	
+
 	// throw an exception if Juniper did not allow to enter config mode or to commit changes
 	if ($breed == 'jun10')
 	{

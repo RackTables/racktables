@@ -92,8 +92,8 @@ class SLBTriplet
 	{
 		$ret = array();
 		$result = usePreparedSelectBlade ("
-SELECT DISTINCT IPv4LB.* 
-FROM 
+SELECT DISTINCT IPv4LB.*
+FROM
 	IPv4LB INNER JOIN IPv4VS ON IPv4VS.id = IPv4LB.vs_id
 	LEFT JOIN IPv4RS USING (rspool_id)
 WHERE
@@ -266,7 +266,7 @@ class MacroParser
 			{
 				for ($i = 0; $i < strlen ($line); $i++)
 				{
-					$c = $line[$i]; 
+					$c = $line[$i];
 					if ($c == "'" and 0 == --$macro_deep)
 					{
 						$this->addMacro ($mname, $mvalue);
@@ -366,7 +366,7 @@ function addRStoRSPool ($pool_id, $rsip_bin, $rsport = 0, $inservice = 'no', $rs
 			'rspool_id' => $pool_id,
 			'rsip' => $rsip_bin,
 			'rsport' => (!strlen ($rsport) or $rsport === 0) ? NULL : $rsport,
-			'inservice' => $inservice == 'yes' ? 'yes' : 'no', 
+			'inservice' => $inservice == 'yes' ? 'yes' : 'no',
 			'rsconfig' => !strlen ($rsconfig) ? NULL : $rsconfig,
 			'comment' => !strlen ($comment) ? NULL : $comment,
 		)
