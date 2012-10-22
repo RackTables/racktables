@@ -64,9 +64,9 @@ function onPencilClick (event) {
 	if (width < 150)
 		width = 150;
 	span.hide();
-	
+
 	// hide pencil
-	onBodyMouseOver(); 
+	onBodyMouseOver();
 	editMode = true;
 
 	// construct editor form
@@ -77,7 +77,7 @@ function onPencilClick (event) {
 		.keydown(
 			function (event) {
 				var code = event.keyCode ? event.keyCode : event.which;
-				if (code == 13) 
+				if (code == 13)
 					onFormSubmit();
 				else if (code == 27)
 					hideEditForm();
@@ -119,7 +119,7 @@ function onFormSubmit () {
 	input.attr('disabled', 'true');
 	btn.replaceWith('<img src="?module=chrome&uri=pix/ajax-loader.gif" title="Please wait" />');
 	waiting_response = true;
-	
+
 	var op = '';
 	var item_id = '';
 	var list = span[0].className.split (/\s+/);
@@ -133,7 +133,7 @@ function onFormSubmit () {
 			op = m[1];
 		}
 	}
-	
+
 	$.ajax({
 		type: 'POST',
 		url: 'index.php',

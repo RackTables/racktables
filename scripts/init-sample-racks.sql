@@ -2,7 +2,7 @@ set names 'utf8';
 
 INSERT INTO `Molecule` VALUES (1);
 
-INSERT INTO `Object` (id, name, label, objtype_id, asset_no, has_problems, comment) VALUES 
+INSERT INTO `Object` (id, name, label, objtype_id, asset_no, has_problems, comment) VALUES
 (905,'london router','bbrtr1',7,'net247','no',NULL),
 (906,'londonswitch1','',8,NULL,'no',NULL),
 (907,'New-York router 1','bbrtr2a',7,'net55','no',NULL),

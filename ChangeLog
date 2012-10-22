@@ -127,7 +127,7 @@
 	bugfix: SNMP discovery of APC PDUs returned error (#504)
 	bugfix: catch errors when uploading files (#420)
 	update: list of virtual object types is now maintained as a Config setting (#488)
-	update: when an object is contained within another, display the parent's rackspace allocation info when viewing the child (#432) 
+	update: when an object is contained within another, display the parent's rackspace allocation info when viewing the child (#432)
 	update: added the 'Slot number' attribute to object types which may be mounted in a blade chassis (#474)
 	update: added an 'Uncheck all' button to the rackspace allocation page (#490)
 	update: ability to change cable ID without deleting & re-adding the link (#457)
@@ -603,7 +603,7 @@
 	bugfix: rowspan attribute was computed incorrectly sometimes
 	bugfix: protect referenced dictionary records from deletion
 	bugfix: config reset was wrong for default port type
-	bugfix: fixed incorrect string escaping caused by PHP magic_quotes 
+	bugfix: fixed incorrect string escaping caused by PHP magic_quotes
 	update: Live VLANs color legend now distinguishes between 1 and 0
 		MAC addresses on a port
 	update: fixed tabindex in NATv4 rules form

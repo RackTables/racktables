@@ -28,7 +28,7 @@ defined $op_host or die "ERROR: missing hostname argument (-h for help)";
 sub display_help {
     print <<END;
 netcat wrapper script for RackTables
-Usage: 
+Usage:
 $0 <hostname> [-b </path/to/netcat/binary>] [-p <port>] [--connect-timeout=<seconds>]
  -p, --port             TCP port number to connect to (defaults to 23)
  -b, --ncbin            Full path to netcat binary (defaults to $op_ncbin)
@@ -39,4 +39,4 @@ END
 
 my @params = ('-w', $op_timeout);
 
-exec ($op_ncbin, $op_host, $op_port, @params) or die "cannot exec $op_ncbin: $!"; 
+exec ($op_ncbin, $op_host, $op_port, @params) or die "cannot exec $op_ncbin: $!";
