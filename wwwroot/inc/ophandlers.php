@@ -192,6 +192,29 @@ $opspec_list['object-cacti-del'] = array
 		array ('url_argname' => 'graph_id', 'assertion' => 'uint'),
 	),
 );
+$opspec_list['object-munin-add'] = array
+(
+	'table' => 'MuninGraph',
+	'action' => 'INSERT',
+	'arglist' => array
+	(
+		array ('url_argname' => 'object_id', 'assertion' => 'uint'),
+		array ('url_argname' => 'server_id', 'assertion' => 'uint'),
+		array ('url_argname' => 'graph', 'assertion' => 'string'),
+		array ('url_argname' => 'caption', 'assertion' => 'string0'),
+	),
+);
+$opspec_list['object-munin-del'] = array
+(
+	'table' => 'MuninGraph',
+	'action' => 'DELETE',
+	'arglist' => array
+	(
+		array ('url_argname' => 'object_id', 'assertion' => 'uint'),
+		array ('url_argname' => 'server_id', 'assertion' => 'uint'),
+		array ('url_argname' => 'graph', 'assertion' => 'string'),
+	),
+);
 $opspec_list['ipv4net-properties-editRange'] = array
 (
 	'table' => 'IPv4Network',
@@ -579,6 +602,37 @@ $opspec_list['cacti-servers-upd'] = array
 		array ('url_argname' => 'base_url', 'assertion' => 'string'),
 		array ('url_argname' => 'username', 'assertion' => 'string0'),
 		array ('url_argname' => 'password', 'assertion' => 'string0'),
+	),
+	'where_arglist' => array
+	(
+		array ('url_argname' => 'id', 'assertion' => 'uint'),
+	),
+);
+$opspec_list['munin-servers-add'] = array
+(
+	'table' => 'MuninServer',
+	'action' => 'INSERT',
+	'arglist' => array
+	(
+		array ('url_argname' => 'base_url', 'assertion' => 'string')
+	),
+);
+$opspec_list['munin-servers-del'] = array
+(
+	'table' => 'MuninServer',
+	'action' => 'DELETE',
+	'arglist' => array
+	(
+		array ('url_argname' => 'id', 'assertion' => 'uint'),
+	),
+);
+$opspec_list['munin-servers-upd'] = array
+(
+	'table' => 'MuninServer',
+	'action' => 'UPDATE',
+	'set_arglist' => array
+	(
+		array ('url_argname' => 'base_url', 'assertion' => 'string'),
 	),
 	'where_arglist' => array
 	(
@@ -1427,6 +1481,7 @@ function resetUIConfig()
 	setConfigVar ('SYNC_802Q_LISTSRC', '');
 	setConfigVar ('QUICK_LINK_PAGES', 'depot,ipv4space,rackspace');
 	setConfigVar ('CACTI_LISTSRC', 'false');
+	setConfigVar ('MUNIN_LISTSRC', 'false');
 	setConfigVar ('VIRTUAL_OBJ_LISTSRC', '1504,1505,1506,1507');
 	setConfigVar ('DATETIME_ZONE', 'UTC');
 	setConfigVar ('DATETIME_FORMAT', 'm/d/Y');
