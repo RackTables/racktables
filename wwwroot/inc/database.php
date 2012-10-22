@@ -2367,18 +2367,18 @@ function updateAddress ($ip_bin, $name = '', $reserved = 'no', $comment = '')
 		addIPLogEntry ($ip_bin, ucfirst (implode (', ', $messages)));
 }
 
-function updateV4Address ($ip_bin, $name = '', $reserved = 'no')
+function updateV4Address ($ip_bin, $name = '', $reserved = 'no', $comment = '')
 {
 	if (strlen ($ip_bin) != 4)
 		throw new InvalidArgException ('ip_bin', $ip_bin, "Invalid binary IP");
-	return updateAddress ($ip_bin, $name, $reserved);
+	return updateAddress ($ip_bin, $name, $reserved, $comment);
 }
 
-function updateV6Address ($ip_bin, $name = '', $reserved = 'no')
+function updateV6Address ($ip_bin, $name = '', $reserved = 'no', $comment = '')
 {
 	if (strlen ($ip_bin) != 16)
 		throw new InvalidArgException ('ip_bin', $ip_bin, "Invalid binary IP");
-	return updateAddress ($ip_bin, $name, $reserved);
+	return updateAddress ($ip_bin, $name, $reserved, $comment);
 }
 
 function updateIPBond ($ip_bin, $object_id=0, $name='', $type='')

@@ -1663,10 +1663,9 @@ function deleteRSPool ()
 
 $msgcode['importPTRData']['OK'] = 26;
 $msgcode['importPTRData']['ERR'] = 141;
-// FIXME: check, that each submitted address belongs to the prefix we
-// are operating on.
 function importPTRData ()
 {
+	$net = spotEntity ('ipv4net', getBypassValue());
 	assertUIntArg ('addrcount');
 	$nbad = $ngood = 0;
 	for ($i = 1; $i <= $_REQUEST['addrcount']; $i++)
@@ -1681,10 +1680,17 @@ function importPTRData ()
 		$rsvd = 'no';
 		if ($_REQUEST["rsvd_${i}"] == 'yes')
 			$rsvd = 'yes';
-		if (updateV4Address ($ip_bin, $_REQUEST["descr_${i}"], $rsvd) == '')
+		try
+		{
+			if (! ip_in_range ($ip_bin, $net))
+				throw new InvalidArgException ('ip_bin', $ip_bin);
+			updateAddress ($ip_bin, $_REQUEST["descr_${i}"], $rsvd, '');
 			$ngood++;
-		else
+		}
+		catch (RackTablesError $e)
+		{
 			$nbad++;
+		}
 	}
 	if (!$nbad)
 		return showFuncMessage (__FUNCTION__, 'OK', array ($ngood));
