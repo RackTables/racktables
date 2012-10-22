@@ -37,7 +37,7 @@ sub display_help {
 telnet batch client for RackTables.
 Takes commands list in standard input and gives the responses via standard output.
 Login credentials are not specially handled and should be placed as first lines of input
-Usage: 
+Usage:
 $0 {hostname} [--port={port}] [--connect-timeout={seconds}] --prompt={regexp} [--timeout={seconds}]
 
 port: TCP port number to connect to
@@ -51,7 +51,7 @@ END
 my $port = $op_port || 23;
 
 my $session = Net::Telnet->new (
-    Host => $op_host, 
+    Host => $op_host,
     Port => $port,
     Timeout => $op_connect_timeout,
 );

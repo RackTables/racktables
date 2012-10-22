@@ -8,7 +8,7 @@ Files are loaded in alphabetical order.
 
 It is recommended to override existing tabhandlers and ophandlers using
 registerTabHandler and registerOpHandler functions, respectively.
-This is preferred over overwriting of items in $tabhandler and $ophandler, 
+This is preferred over overwriting of items in $tabhandler and $ophandler,
 because allows overriding the same tab or operation in multiple plugins.
 
 Consider the following sample:

@@ -76,7 +76,7 @@ function menuItemClicked(menuItem, menu) {
 	if (! matches)
 		return;
 	var type = matches[1];
-	
+
 	var bSuccessIcon = false;
 	$.ajax({
 		async: true,

@@ -46,7 +46,7 @@ var Validate = {
 		var character = String.fromCharCode(code);
 
 		//We need only valid keypresses - not stuff like shift, Enter, Backspace etc.
-		if(	e.ctrlKey || 
+		if(	e.ctrlKey ||
 			code == 46 //Delete Key
 		) return;
 		if(e.shiftKey) {
@@ -54,7 +54,7 @@ var Validate = {
 		} else {
 			if(!(code >= 41 && code <= 126)) return;
 		}
-	
+
 		if(ele.getAttribute("allowedkeys")) {
 			var allowed_chars = new RegExp(ele.getAttribute("allowedkeys"));
 			if(!allowed_chars.test(character)) { //If a character was entered that is not allowed.
@@ -103,7 +103,7 @@ var Validate = {
 					//Insert an error message span after the input element.
 					var msg = ele.getAttribute('errormessage');
 					if(!msg) msg = "Error!!";
-					
+
 					var error_message = document.createElement("span");
 					error_message.className = "validation-error-message";
 					error_message.setAttribute("id","validation-error-message-"+ele.id);
