@@ -8593,6 +8593,55 @@ function renderObjectCactiGraphs ($object_id)
 	finishPortlet ();
 }
 
+function renderObjectMuninGraphs ($object_id)
+{
+	function printNewItem ($options)
+	{
+		echo "<table cellspacing=\"0\" align=\"center\" width=\"50%\">";
+		echo "<tr><td>&nbsp;</td><th>Server</th><th>Graph</th><th>Caption</th><td>&nbsp;</td></tr>\n";
+		printOpFormIntro ('add');
+		echo "<tr><td>";
+		printImageHREF ('Attach', 'Link new graph', TRUE);
+		echo '</td><td>' . getSelect ($options, array ('name' => 'server_id'));
+		echo "</td><td><input type=text name=graph tabindex=100></td><td><input type=text name=caption tabindex=101></td><td>";
+		printImageHREF ('Attach', 'Link new graph', TRUE, 101);
+		echo "</td></tr></form>";
+		echo "</table>";
+		echo "<br/><br/>";
+	}
+	if (!extension_loaded ('curl'))
+		throw new RackTablesError ("The PHP cURL extension is not loaded.", RackTablesError::MISCONFIGURED);
+
+	$servers = getMuninServers();
+	$options = array();
+	foreach ($servers as $server)
+		$options[$server['id']] = "${server['id']}: ${server['base_url']}";
+	startPortlet ('Munin Graphs');
+	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
+		printNewItem ($options);
+	echo "<table cellspacing=\"0\" cellpadding=\"10\" align=\"center\" width=\"50%\">";
+
+	$object = spotEntity ('object', $object_id);
+	list ($host, $domain) = preg_split ("/\./", $object['dname'], 2);
+
+	foreach (getMuninGraphsForObject ($object_id) as $graph_name => $graph)
+	{
+		$munin_url = $servers[$graph['server_id']]['base_url'];
+		$text = "(graph ${graph_name} on server ${graph['server_id']})";
+		echo "<tr><td>";
+		echo "<a href='${munin_url}/${domain}/${object['dname']}/${graph_name}.html' target='_blank'>";
+		echo "<img src='index.php?module=image&img=muningraph&object_id=${object_id}&server_id=${graph['server_id']}&graph=${graph_name}' alt='${text}' title='${text}'></a></td>";
+		echo "<td><a href='" . makeHrefProcess (array ('op' => 'del', 'server_id' => $graph['server_id'], 'graph' => $graph_name));
+		echo "' onclick=\"javascript:return confirm('Are you sure you want to delete the graph?')\">";
+		echo getImageHREF ('Cut', 'Unlink graph') . "</a>&nbsp; &nbsp;${graph['caption']}";
+		echo "</td></tr>";
+	}
+	echo '</table>';
+	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')
+		printNewItem ($options);
+	finishPortlet ();
+}
+
 function renderEditVlan ($vlan_ck)
 {
 	global $vtoptions;
@@ -8782,6 +8831,59 @@ function renderCactiServersEditor()
 		echo '<td><input type=text size=48 name=base_url value="' . htmlspecialchars ($server['base_url'], ENT_QUOTES, 'UTF-8') . '"></td>';
 		echo '<td><input type=text size=24 name=username value="' . htmlspecialchars ($server['username'], ENT_QUOTES, 'UTF-8') . '"></td>';
 		echo '<td><input type=password size=24 name=password value="' . htmlspecialchars ($server['password'], ENT_QUOTES, 'UTF-8') . '"></td>';
+		echo "<td class=tdright>${server['num_graphs']}</td>";
+		echo '<td>' . getImageHREF ('save', 'update this server', TRUE) . '</td>';
+		echo '</tr></form>';
+	}
+	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')
+		printNewItemTR();
+	echo '</table>';
+}
+
+function renderMuninConfig()
+{
+	$servers = getMuninServers();
+	startPortlet ('Munin servers (' . count ($servers) . ')');
+	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
+	echo '<tr><th>base URL</th><th>graph(s)</th></tr>';
+	foreach ($servers as $server)
+	{
+		echo '<tr align=left valign=top><td>' . niftyString ($server['base_url']) . '</td>';
+		echo "<td class=tdright>${server['num_graphs']}</td></tr>";
+	}
+	echo '</table>';
+	finishPortlet();
+}
+
+function renderMuninServersEditor()
+{
+	function printNewItemTR()
+	{
+		printOpFormIntro ('add');
+		echo '<tr>';
+		echo '<td>' . getImageHREF ('create', 'add a new server', TRUE, 112) . '</td>';
+		echo '<td><input type=text size=48 name=base_url tabindex=101></td>';
+		echo '<td>&nbsp;</td>';
+		echo '<td>' . getImageHREF ('create', 'add a new server', TRUE, 111) . '</td>';
+		echo '</tr></form>';
+	}
+	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
+	echo '<tr><th>&nbsp;</th><th>base URL</th><th>graph(s)</th><th>&nbsp;</th></tr>';
+	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
+		printNewItemTR();
+	foreach (getMuninServers() as $server)
+	{
+		printOpFormIntro ('upd', array ('id' => $server['id']));
+		echo '<tr><td>';
+		if ($server['num_graphs'])
+			printImageHREF ('nodestroy', 'cannot delete, graphs exist');
+		else
+		{
+			echo '<a href="' . makeHrefProcess (array ('op' => 'del', 'id' => $server['id'])) . '">';
+			echo getImageHREF ('destroy', 'delete this server') . '</a>';
+		}
+		echo '</td>';
+		echo '<td><input type=text size=48 name=base_url value="' . htmlspecialchars ($server['base_url'], ENT_QUOTES, 'UTF-8') . '"></td>';
 		echo "<td class=tdright>${server['num_graphs']}</td>";
 		echo '<td>' . getImageHREF ('save', 'update this server', TRUE) . '</td>';
 		echo '</tr></form>';
