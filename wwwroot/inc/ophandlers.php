@@ -804,14 +804,14 @@ function addBulkPorts ()
 	assertStringArg ('port_label', TRUE);
 	assertUIntArg ('port_numbering_start', TRUE);
 	assertUIntArg ('port_numbering_count');
-	
+
 	$object_id = $_REQUEST['object_id'];
 	$port_name = $_REQUEST['port_name'];
 	$port_type_id = $_REQUEST['port_type_id'];
 	$port_label = $_REQUEST['port_label'];
 	$port_numbering_start = $_REQUEST['port_numbering_start'];
 	$port_numbering_count = $_REQUEST['port_numbering_count'];
-	
+
 	$added_count = $error_count = 0;
 	if(strrpos($port_name, "%u") === false )
 		$port_name .= '%u';
@@ -1081,7 +1081,7 @@ function updateObjectAllocation ()
 		$newMolecule = getMoleculeForObject ($object_id);
 		usePreparedInsertBlade
 		(
-			'MountOperation', 
+			'MountOperation',
 			array
 			(
 				'object_id' => $object_id,
@@ -1789,7 +1789,7 @@ function addLocation ()
 {
 	assertUIntArg ('parent_id', TRUE);
 	assertStringArg ('name');
-	
+
 	$location_id = commitAddObject ($_REQUEST['name'], NULL, 1562, NULL);
 	if ($_REQUEST['parent_id'])
 		commitLinkEntities ('location', $_REQUEST['parent_id'], 'location', $location_id);
@@ -2661,7 +2661,7 @@ function importDPData()
 			if (! isset ($params['a_id']) || ! isset ($params['b_id']) ||
 				! intval ($params['a_id']) || ! intval ($params['b_id']))
 				throw new InvalidArgException ("ports_${i}", $_REQUEST["ports_${i}"], "can not unpack port ids");
-			
+
 			$porta = getPortInfo ($params['a_id']);
 			$portb = getPortInfo ($params['b_id']);
 			if
@@ -2676,7 +2676,7 @@ function importDPData()
 			}
 			$oif_a = intval (@$params['a_oif']); // these parameters are optional
 			$oif_b = intval (@$params['b_oif']);
-			
+
 			$dbxlink->beginTransaction();
 			try
 			{
@@ -2731,7 +2731,7 @@ function saveQuickLinks()
 	genericAssertion ('page_list', 'array');
 	if (is_array ($_REQUEST['page_list']))
 	{
-		setUserConfigVar ('QUICK_LINK_PAGES', implode(',', $_REQUEST['page_list']));	
+		setUserConfigVar ('QUICK_LINK_PAGES', implode(',', $_REQUEST['page_list']));
 		showSuccess ('Quick links list is saved');
 	}
 }
@@ -2883,7 +2883,7 @@ function clearVlan()
 {
 	assertStringArg ('vlan_ck');
 	list ($vdom_id, $vlan_id) = decodeVLANCK ($_REQUEST['vlan_ck']);
-	
+
 	$n_cleared = 0;
 	foreach (getVLANConfiguredPorts ($_REQUEST['vlan_ck']) as $object_id => $portnames)
 	{

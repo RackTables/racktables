@@ -1121,7 +1121,7 @@ function string_insert_hrefs ($s)
 		if (!$protocol && $password)
 		{
 			$html .= htmlspecialchars($username);
-				
+
 			// Continue text parsing at the ':' following the "username".
 			$position = $urlPosition + strlen($username);
 			continue;
@@ -1598,7 +1598,7 @@ function getShrinkedTagTree($entity_list, $realm, $preselect) {
 	global $tagtree;
 	if ($preselect['andor'] != 'and' || empty($entity_list) && $preselect['is_empty'])
 		return getObjectiveTagTree($tagtree, $realm, $preselect['tagidlist']);
-	
+
 	$used_tags = array(); //associative, keys - tag ids, values - taginfos
 	foreach ($entity_list as $entity)
 	{
@@ -1607,12 +1607,12 @@ function getShrinkedTagTree($entity_list, $realm, $preselect) {
 				$used_tags[$etag['id']] = 1;
 			else
 				$used_tags[$etag['id']]++;
-	
+
 		foreach ($entity['itags'] as $itag)
 			if (! array_key_exists($itag['id'], $used_tags))
 				$used_tags[$itag['id']] = 0;
 	}
-	
+
 	$shrinked_tree = shrinkSubtree($tagtree, $used_tags, $preselect, $realm);
 	return getObjectiveTagTree($shrinked_tree, $realm, $preselect['tagidlist']);
 }
@@ -1620,13 +1620,13 @@ function getShrinkedTagTree($entity_list, $realm, $preselect) {
 // deletes item from tag subtree unless it exists in $used_tags and not preselected
 function shrinkSubtree($tree, $used_tags, $preselect, $realm) {
 	$self = __FUNCTION__;
-	
+
 	foreach($tree as $i => &$item) {
 		$item['kids'] = $self($item['kids'], $used_tags, $preselect, $realm);
 		$item['kidc'] = count($item['kids']);
 		if
 		(
-			! array_key_exists($item['id'], $used_tags) && 
+			! array_key_exists($item['id'], $used_tags) &&
 			! in_array($item['id'], $preselect['tagidlist']) &&
 			! $item['kidc']
 		)
@@ -2618,7 +2618,7 @@ function formatFileSize ($bytes) {
 	// kilobytes
 	if ($bytes < 1024000)
 		return sprintf ("%.1fk", round (($bytes / 1024), 1));
-	
+
 	// megabytes
 	return sprintf ("%.1f MB", round (($bytes / 1024000), 1));
 }
@@ -2627,7 +2627,7 @@ function formatFileSize ($bytes) {
 function convertToBytes ($value) {
 	$value = trim($value);
 	$last = strtolower($value[strlen($value)-1]);
-	switch ($last) 
+	switch ($last)
 	{
 		case 'g':
 			$value *= 1024;
@@ -3402,7 +3402,7 @@ function generate8021QDeployOps ($vswitch, $device_vlanlist, $before, $changes)
 		);
 		// put the ports with employed vlans first, the others - below them
 		if (! count (array_intersect ($changeset['old_allowed'], $employed_vlans)))
-			$ports_to_do_queue2[$port_name] = $changeset; 
+			$ports_to_do_queue2[$port_name] = $changeset;
 		else
 			$ports_to_do_queue1[$port_name] = $changeset;
 		$after[$port_name] = $port;
@@ -3426,7 +3426,7 @@ function generate8021QDeployOps ($vswitch, $device_vlanlist, $before, $changes)
 	// This array tracks port count:
 	//  * keys are vlan_id's;
 	//  * values are the number of changed ports which were using this vlan in old configuration
-	$used_vlans = array(); 
+	$used_vlans = array();
 	// 1
 	foreach ($domain_vlanlist as $vlan_id => $vlan)
 		if ($vlan['vlan_type'] == 'compulsory')
@@ -3478,7 +3478,7 @@ function generate8021QDeployOps ($vswitch, $device_vlanlist, $before, $changes)
 			'arg1' => $vlan_id,
 		);
 	$vlans_to_del = array_diff ($vlans_to_del, $deleted_vlans);
-	
+
 	foreach (sortPortList ($ports_to_do) as $port_name => $port)
 	{
 		// Before removing each old VLAN as such it is necessary to unassign
@@ -4359,7 +4359,7 @@ function produceDownlinkPort ($domain_vlanlist, $portname, $order, $uplink_order
 	foreach ($uplink_order['allowed'] as $vlan_id)
 	{
 		if (matchVLANFilter ($vlan_id, $new_order[$portname]['wrt_vlans']))
-		$new_order[$portname]['allowed'][] = $vlan_id;	
+		$new_order[$portname]['allowed'][] = $vlan_id;
 	}
 	return filter8021QChangeRequests ($domain_vlanlist, $order, $new_order);
 }
@@ -4386,7 +4386,7 @@ function queueChangesToSwitch ($switch_id, $order, $before, $check_only = FALSE)
 				$nsaved++;
 			}
 		}
-	
+
 	if (! $check_only && $nsaved)
 		touchVLANSwitch ($switch_id);
 	return $nsaved;
@@ -4503,13 +4503,13 @@ function formatPortLink($host_id, $hostname, $port_id, $portname, $a_class = '')
 	}
 	if (! empty($a_class))
 		$additional .= (empty($additional) ? '' : ' '). "class='$a_class'";
-	
+
 	$text_items = array();
 	if (isset ($hostname))
 		$text_items[] = $hostname;
 	if (isset ($portname))
 		$text_items[] = $portname;
-		
+
 	return "<a $additional href=\"$href\">" . implode(' ', $text_items) . '</a>';
 }
 
@@ -4681,7 +4681,7 @@ function searchEntitiesByText ($terms)
 	{
 		if ($net_id = getIPv4AddressNetworkId (ip4_parse ($terms)))
 			$summary['ipv4addressbydq'][$terms] = array ('net_id' => $net_id, 'ip' => $terms);
-		
+
 	}
 	elseif (FALSE !== ($ip_bin = ip6_checkparse ($terms)))
 	// Search for IPv6 address

@@ -604,10 +604,10 @@ CREATE TABLE `PortInterfaceCompat` (
 		case '0.17.9':
 			$query[] = "ALTER table Config add `is_userdefined` enum('yes','no') NOT NULL default 'no' AFTER `is_hidden`";
 			$query[] = "
-CREATE TABLE `UserConfig` ( 
-	`varname` char(32) NOT NULL, 
-	`varvalue` char(255) NOT NULL, 
-	`user` char(64) NOT NULL, 
+CREATE TABLE `UserConfig` (
+	`varname` char(32) NOT NULL,
+	`varvalue` char(255) NOT NULL,
+	`user` char(64) NOT NULL,
 	UNIQUE KEY `user_varname` (`user`,`varname`)
 ) TYPE=InnoDB";
 			$query[] = "UPDATE Config SET is_userdefined = 'yes' WHERE varname IN
@@ -1421,7 +1421,7 @@ CREATE TABLE `IPv6Log` (
 				$racks = $result->fetchAll (PDO::FETCH_ASSOC);
 				unset ($result);
 				$sort_order = 1;
-				foreach ($racks as $rack) 
+				foreach ($racks as $rack)
 				{
 					// Add the rack as an object, set the height and sort order as attributes, link the rack to the row,
 					//   update rackspace, tags and files to reflect new rack_id, move history
@@ -1703,7 +1703,7 @@ function renderUpgraderHTML()
 	{
 		die ("Database connection failed:\n\n" . $e->getMessage());
 	}
-	
+
 	if
 	(
 		!isset ($_SERVER['PHP_AUTH_USER']) or
@@ -1828,7 +1828,7 @@ END
 		$row['vip'] = ip4_int2bin ($row['vip']);
 		usePreparedInsertBlade ('IPv4VS_new', $row);
 	}
-	
+
 	$dbxlink->query (<<<END
 CREATE TABLE `IPv4RS_new` (
   `id` int(10) unsigned NOT NULL auto_increment,

@@ -374,7 +374,7 @@ function renderRSPoolServerForm ($pool_id)
 		echo "<td><textarea name=rsconfig></textarea></td><td>";
 		printImageHREF ('ADD', 'Add new real server', TRUE);
 		echo "</td></tr></form>\n";
-		
+
 		$order = 'even';
 		foreach (getRSListInPool ($pool_id) as $rsid => $rs)
 		{
