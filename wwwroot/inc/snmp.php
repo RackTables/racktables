@@ -2139,6 +2139,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'DCS-7048T-A: 48 1000T + 4 SFP+/10000',
 		'processors' => array ('arista-49-to-52-SFP+', 'arista-any-1000T', 'arista-management'),
 	),
+	'30065.1.3011.7050.3282.52' => array
+	(
+		'dict_key' => 1731,
+		'text' => 'DCS-7050S-52: 52 SFP+',
+		'processors' => array ('arista-any-SFP+', 'arista-management'),
+	),
 	'30065.1.3011.7124.3282' => array
 	(
 		'dict_key' => 1610,
