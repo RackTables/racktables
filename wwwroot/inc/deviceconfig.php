@@ -3163,7 +3163,7 @@ function eos4ReadMacList ($text)
 		{
 			if (substr ($line, 0, 19) == 'Total Mac Addresses') # end of table
 				break;
-			if (preg_match ('/^(\d+)\s+(\S+)\s+DYNAMIC\s+(\S+)\s/', $line, $m))
+			if (preg_match ('/^ *(\d+)\s+(\S+)\s+DYNAMIC\s+(\S+)\s/', $line, $m))
 				$result[ios12ShortenIfName ($m[3])][] = array
 				(
 					'mac' => $m[2],
