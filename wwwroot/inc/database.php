@@ -2311,7 +2311,7 @@ function fetchIPv6AddressNetworkRow ($ip_bin, $masklen = 128)
 // This function is actually used not only to update, but also to create records,
 // that's why ON DUPLICATE KEY UPDATE was replaced by DELETE-INSERT pair
 // (MySQL 4.0 workaround).
-function updateAddress ($ip_bin, $name = '', $reserved = 'no', $comment = '')
+function updateAddress ($ip_bin, $name = '', $reserved = 'no', $comment)
 {
 	switch (strlen ($ip_bin))
 	{
@@ -2335,6 +2335,11 @@ function updateAddress ($ip_bin, $name = '', $reserved = 'no', $comment = '')
 		$old_name = $row['name'];
 		$old_comment = $row['comment'];
 	}
+
+	// If the 'comment' argument was specified when this function was called, use it.
+	// If not, retain the old value.
+	$comment = (func_num_args () == 4 ) ? $comment : $old_comment;
+
 	unset ($result);
 	$messages = array ();
 	if ($name != $old_name)
