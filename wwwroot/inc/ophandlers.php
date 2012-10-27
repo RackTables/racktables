@@ -1739,7 +1739,7 @@ function importPTRData ()
 		{
 			if (! ip_in_range ($ip_bin, $net))
 				throw new InvalidArgException ('ip_bin', $ip_bin);
-			updateAddress ($ip_bin, $_REQUEST["descr_${i}"], $rsvd, '');
+			updateAddress ($ip_bin, $_REQUEST["descr_${i}"], $rsvd);
 			$ngood++;
 		}
 		catch (RackTablesError $e)
