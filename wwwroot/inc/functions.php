@@ -3200,7 +3200,7 @@ function ios12ShortenIfName ($ifname)
 	$ifname = preg_replace ('@^Management(.+)$@', 'ma\\1', $ifname);
 	$ifname = preg_replace ('@^Et(\d.*)$@', 'e\\1', $ifname);
 	$ifname = strtolower ($ifname);
-	$ifname = preg_replace ('/^(e|fa|gu|te|po|xg|lo|ma)\s+(\d.*)/', '$1$2', $ifname);
+	$ifname = preg_replace ('/^(e|fa|gi|te|po|xg|lo|ma)\s+(\d.*)/', '$1$2', $ifname);
 	return $ifname;
 }
 
