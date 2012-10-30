@@ -386,7 +386,7 @@ function queryTerminal ($object_id, $commands, $tolerate_remote_errors = TRUE)
 		elseif ($ret_code !== 0)
 			throw new RTGatewayError ("${settings['protocol']} error: result code $ret_code");
 	}
-	elseif (! empty ($errors)) // ssh and not tolerate and non-empty $errors
+	elseif (! empty ($errors)) // ssh and tolerate and non-empty $errors
 		foreach (explode ("\n", $errors) as $line)
 			if (strlen ($line))
 				showWarning ("${settings['protocol']} ${settings['hostname']}: $line");
