@@ -5696,7 +5696,7 @@ function formatEntityList ($list)
 				$ret[$entity['id']] = $entity['dname'];
 				break;
 			case 'ipv4vs':
-				$ret[$entity['id']] = $entity['dname'] . (!strlen ($entity['name']) ? '' : " (${entity['name']})");
+				$ret[$entity['id']] = $entity['name'] . (strlen ($entity['name']) ? ' ' : '') . '(' . $entity['dname'] . ')';
 				break;
 			case 'ipv4rspool':
 				$ret[$entity['id']] = $entity['name'];
@@ -5704,6 +5704,7 @@ function formatEntityList ($list)
 			default:
 				$ret[$entity['id']] = $entity['realm'] . '#' . $entity['id'];
 		}
+	asort ($ret);
 	return $ret;
 }
 
