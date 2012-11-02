@@ -220,6 +220,7 @@ function ftos8ReadLLDPStatus ($input)
 	(
 		'Interface name (5)',
 		'Interface Alias (1)',
+		'Locally assigned (7)',
 	);
 	foreach (explode ("\n", $input) as $line)
 	{
