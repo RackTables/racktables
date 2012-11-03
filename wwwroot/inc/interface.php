@@ -2470,7 +2470,7 @@ function renderIPNetwork ($id)
 	foreach ($range['8021q'] as $item)
 	{
 		$vlaninfo = getVLANInfo ($item['domain_id'] . '-' . $item['vlan_id']);
-		$summary[] = array ('VLAN:', '<a href="' . makeHref (array ('page' => 'vlan', 'vlan_ck' => $vlaninfo['vlan_ck'])) . '">' . formatVLANName ($vlaninfo, 'markup long') . '</a>');
+		$summary[] = array ('VLAN:', formatVLANAsHyperlink ($vlaninfo));
 	}
 	if (getConfigVar ('EXT_IPV4_VIEW') == 'yes' and count ($routers = findRouters ($range['addrlist'])))
 	{
@@ -3539,7 +3539,7 @@ function renderSearchResults ($terms, $summary)
 					foreach ($what as $vlan_ck)
 					{
 						echo "<tr class=row_${order}><td class=tdleft>";
-						echo formatVLANName (getVLANInfo ($vlan_ck), 'hyperlink') . "</td></tr>";
+						echo formatVLANAsHyperlink (getVLANInfo ($vlan_ck)) . "</td></tr>";
 						$order = $nextorder[$order];
 					}
 					echo '</table>';
@@ -6324,7 +6324,7 @@ function dynamic_title_decoder ($path_position)
 	case 'vlan':
 		return array
 		(
-			'name' => formatVLANName (getVLANInfo ($sic['vlan_ck']), 'plain long'),
+			'name' => formatVLANAsPlainText (getVLANInfo ($sic['vlan_ck'])),
 			'params' => array ('vlan_ck' => $sic['vlan_ck'])
 		);
 	case 'vst':
@@ -7019,7 +7019,7 @@ function getAccessPortControlCode ($req_port_name, $vdom, $port_name, $port, &$n
 		array_key_exists ($port['native'], $vdom['vlanlist']) and
 		$vdom['vlanlist'][$port['native']]['vlan_type'] == 'alien'
 	)
-		return formatVLANName ($vdom['vlanlist'][$port['native']], 'label');
+		return formatVLANAsLabel ($vdom['vlanlist'][$port['native']]);
 
 	static $vlanpermissions = array();
 	if (!array_key_exists ($port['native'], $vlanpermissions))
@@ -7061,7 +7061,7 @@ function getAccessPortControlCode ($req_port_name, $vdom, $port_name, $port, &$n
 			in_array ($vlan_id, $vlanpermissions[$port['native']]) and
 			matchVLANFilter ($vlan_id, $port['wrt_vlans'])
 		)
-			$options[$vlan_id] = formatVLANName ($vlan_info, 'option');
+			$options[$vlan_id] = formatVLANAsOption ($vlan_info);
 	ksort ($options);
 	$options['same'] = '-- no change --';
 	$ret .= getSelect ($options, array ('name' => "pnv_${nports}"), 'same');
@@ -7119,7 +7119,7 @@ function renderTrunkPortControls ($vswitch, $vdom, $port_name, $vlanport)
 		$allowed_options[$vlan_id] = array
 		(
 			'vlan_type' => $vlan_info['vlan_type'],
-			'text' => formatVLANName ($vlan_info, 'label'),
+			'text' => formatVLANAsLabel ($vlan_info),
 		);
 	foreach ($vlanport['allowed'] as $vlan_id)
 		if (!array_key_exists ($vlan_id, $allowed_options))
@@ -7160,7 +7160,7 @@ function renderTrunkPortControls ($vswitch, $vdom, $port_name, $vlanport)
 			$native_options[$vlan_id] = array_key_exists ($vlan_id, $vdom['vlanlist']) ? array
 				(
 					'vlan_type' => $vdom['vlanlist'][$vlan_id]['vlan_type'],
-					'text' => formatVLANName ($vdom['vlanlist'][$vlan_id], 'label'),
+					'text' => formatVLANAsLabel ($vdom['vlanlist'][$vlan_id]),
 				) : array
 				(
 					'vlan_type' => 'none',
@@ -7212,7 +7212,7 @@ function renderVLANInfo ($vlan_ck)
 	global $vtoptions, $nextorder;
 	$vlan = getVLANInfo ($vlan_ck);
 	echo '<table border=0 class=objectview cellspacing=0 cellpadding=0>';
-	echo '<tr><td colspan=2 align=center><h1>' . formatVLANName ($vlan, 'markup long') . '</h1></td></tr>';
+	echo '<tr><td colspan=2 align=center><h1>' . formatVLANAsRichText ($vlan) . '</h1></td></tr>';
 	echo "<tr><td class=pcleft width='50%'>";
 	startPortlet ('summary');
 	echo "<table border=0 cellspacing=0 cellpadding=3 width='100%'>";
@@ -7235,7 +7235,7 @@ function renderVLANInfo ($vlan_ck)
 	foreach ($others as $other)
 		if ($other['domain_id'] != $vlan['domain_id'])
 			echo '<tr><th class=tdright>Counterpart:</th><td class=tdleft>' .
-				formatVLANName (getVLANInfo ("${other['domain_id']}-${vlan['vlan_id']}"), 'hyperlink') .
+				formatVLANAsHyperlink (getVLANInfo ("${other['domain_id']}-${vlan['vlan_id']}")) .
 				'</td></tr>';
 	echo '</table>';
 	finishPortlet();
@@ -7414,7 +7414,7 @@ function renderVLANIPLinks ($some_id)
 		case 'ipv4net':
 		case 'ipv6net':
 			$vlaninfo = getVLANInfo ($item['domain_id'] . '-' . $item['vlan_id']);
-			echo formatVLANName ($vlaninfo, 'markup long');
+			echo formatVLANAsRichText ($vlaninfo);
 			break;
 		}
 		echo '</td><td><a href="';
