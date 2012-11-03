@@ -1602,6 +1602,11 @@ CREATE TABLE `MuninGraph` (
 ) ENGINE=InnoDB
 ";
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdefined, description) VALUES ('MUNIN_LISTSRC','false','string','yes','no','no','List of object with Munin graphs')";
+			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdefined, description) VALUES ('8021Q_MULTILINK_LISTSRC','false','string','yes','no','no','List source: IPv4/IPv6 networks allowing multiple VLANs from same domain')";
+			$query[] = "ALTER TABLE VLANIPv4 ADD UNIQUE `network-domain-vlan` (ipv4net_id, domain_id, vlan_id)";
+			$query[] = "ALTER TABLE VLANIPv4 DROP KEY `network-domain`";
+			$query[] = "ALTER TABLE VLANIPv6 ADD UNIQUE `network-domain-vlan` (ipv6net_id, domain_id, vlan_id)";
+			$query[] = "ALTER TABLE VLANIPv6 DROP KEY `network-domain`";
 			$query[] = "UPDATE Config SET varvalue = '0.20.2' WHERE varname = 'DB_VERSION'";
 			break;
 		case 'dictionary':

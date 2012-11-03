@@ -2950,15 +2950,15 @@ function getVSTOptions()
 	return $ret;
 }
 
-# Return a 2-dimensional array in the format understood by getNiftySelect(),
-# which would contain all VLANs of all VLAN domains except domains, which IDs
-# are present in $except_domains argument.
-function getAllVLANOptions ($except_domains = array())
+# Return an array in the format understood by getNiftySelect() and getOptionTree(),
+# so that the options stand for all VLANs grouped by respective VLAN domains, except
+# those listed on the "except" array.
+function getAllVLANOptions ($except = array())
 {
 	$ret = array();
 	foreach (getVLANDomainStats() as $domain)
-		if (! in_array ($domain['id'], $except_domains))
-			foreach (getDomainVLANs ($domain['id']) as $vlan)
+		foreach (getDomainVLANs ($domain['id']) as $vlan)
+			if (! array_key_exists ($domain['id'], $except) or ! in_array ($vlan['vlan_id'], $except[$domain['id']]))
 				$ret[$domain['description']]["${domain['id']}-${vlan['vlan_id']}"] =
 					"${vlan['vlan_id']} (${vlan['netc']}) ${vlan['vlan_descr']}";
 	return $ret;

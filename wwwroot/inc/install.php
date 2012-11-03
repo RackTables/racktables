@@ -996,7 +996,7 @@ CREATE TABLE `VLANIPv4` (
   `domain_id` int(10) unsigned NOT NULL,
   `vlan_id` int(10) unsigned NOT NULL,
   `ipv4net_id` int(10) unsigned NOT NULL,
-  UNIQUE KEY `network-domain` (`ipv4net_id`,`domain_id`),
+  UNIQUE KEY `network-domain-vlan` (`ipv4net_id`,`domain_id`,`vlan_id`),
   KEY `VLANIPv4-FK-compound` (`domain_id`,`vlan_id`),
   CONSTRAINT `VLANIPv4-FK-compound` FOREIGN KEY (`domain_id`, `vlan_id`) REFERENCES `VLANDescription` (`domain_id`, `vlan_id`) ON DELETE CASCADE,
   CONSTRAINT `VLANIPv4-FK-ipv4net_id` FOREIGN KEY (`ipv4net_id`) REFERENCES `IPv4Network` (`id`) ON DELETE CASCADE
@@ -1006,7 +1006,7 @@ CREATE TABLE `VLANIPv6` (
   `domain_id` int(10) unsigned NOT NULL,
   `vlan_id` int(10) unsigned NOT NULL,
   `ipv6net_id` int(10) unsigned NOT NULL,
-  UNIQUE KEY `network-domain` (`ipv6net_id`,`domain_id`),
+  UNIQUE KEY `network-domain-vlan` (`ipv6net_id`,`domain_id`,`vlan_id`),
   KEY `VLANIPv6-FK-compound` (`domain_id`,`vlan_id`),
   CONSTRAINT `VLANIPv6-FK-compound` FOREIGN KEY (`domain_id`, `vlan_id`) REFERENCES `VLANDescription` (`domain_id`, `vlan_id`) ON DELETE CASCADE,
   CONSTRAINT `VLANIPv6-FK-ipv6net_id` FOREIGN KEY (`ipv6net_id`) REFERENCES `IPv6Network` (`id`) ON DELETE CASCADE
@@ -1625,6 +1625,7 @@ INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdef
 ('DATETIME_FORMAT','m/d/Y','string','no','no','yes','PHP date() format to use for date output'),
 ('SEARCH_DOMAINS','','string','yes','no','yes','DNS domain list (comma-separated) to search in FQDN attributes'),
 ('8021Q_EXTSYNC_LISTSRC','false','string','yes','no','no','List source: objects with extended 802.1Q sync'),
+('8021Q_MULTILINK_LISTSRC','false','string','yes','no','no','List source: IPv4/IPv6 networks allowing multiple VLANs from same domain'),
 ('DB_VERSION','${db_version}','string','no','yes','no','Database version.');
 
 INSERT INTO `Script` VALUES ('RackCode','allow {\$userid_1}');
