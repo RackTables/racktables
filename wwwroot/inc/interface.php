@@ -2467,11 +2467,12 @@ function renderIPNetwork ($id)
 		$summary['Wildcard bits'] = ip4_format ( ~ $range['mask_bin']);
 	}
 
+	$reuse_domain = considerConfiguredConstraint ($range, '8021Q_MULTILINK_LISTSRC');
+	$domainclass = array();
+	foreach (array_count_values (reduceSubarraysToColumn ($range['8021q'], 'domain_id')) as $domain_id => $vlan_count)
+		$domainclass[$domain_id] = $vlan_count == 1 ? '' : ($reuse_domain ? '{trwarning}' : '{trerror}');
 	foreach ($range['8021q'] as $item)
-	{
-		$vlaninfo = getVLANInfo ($item['domain_id'] . '-' . $item['vlan_id']);
-		$summary[] = array ('VLAN:', formatVLANAsHyperlink ($vlaninfo));
-	}
+		$summary[] = array ($domainclass[$item['domain_id']] . 'VLAN:', formatVLANAsHyperlink (getVLANInfo ($item['domain_id'] . '-' . $item['vlan_id'])));
 	if (getConfigVar ('EXT_IPV4_VIEW') == 'yes' and count ($routers = findRouters ($range['addrlist'])))
 	{
 		$summary['Routed by'] = '';
@@ -7382,11 +7383,21 @@ function renderVLANIPLinks ($some_id)
 	case 'ipv6net':
 		echo '<th>VLAN</th>';
 		$netinfo = spotEntity ($pageno, $some_id);
-		# find out VLAN domains, where the current network already has a VLAN linked
-		$except_domains = array();
+		$reuse_domain = considerConfiguredConstraint ($netinfo, '8021Q_MULTILINK_LISTSRC');
+		# For each of the domains linked to the network produce class name based on
+		# number of VLANs linked and the current "reuse" setting.
+		$domainclass = array();
+		foreach (array_count_values (reduceSubarraysToColumn ($netinfo['8021q'], 'domain_id')) as $domain_id => $vlan_count)
+			$domainclass[$domain_id] = $vlan_count == 1 ? 'trbusy' : ($reuse_domain ? 'trwarning' : 'trerror');
+		# Depending on the setting and the currently linked VLANs reduce the list of new
+		# options by either particular VLANs or whole domains.
+		$except = array();
 		foreach ($netinfo['8021q'] as $item)
 		{
-			$except_domains[] = $item['domain_id'];
+			if ($reuse_domain)
+				$except[$item['domain_id']][] = $item['vlan_id'];
+			elseif (! array_key_exists ($item['domain_id'], $except))
+				$except[$item['domain_id']] = range (VLAN_MIN_ID, VLAN_MAX_ID);
 			$minuslines[] = array
 			(
 				'net_id' => $netinfo['id'],
@@ -7394,8 +7405,7 @@ function renderVLANIPLinks ($some_id)
 				'vlan_id' => $item['vlan_id'],
 			);
 		}
-		# offer VLANs from all other domains
-		$plusoptions = getAllVLANOptions ($except_domains);
+		$plusoptions = getAllVLANOptions ($except);
 		$select_name = 'vlan_ck';
 		$extra = array ('id' => $netinfo['id']);
 		break;
@@ -7405,7 +7415,7 @@ function renderVLANIPLinks ($some_id)
 		printNewItemTR ($select_name, $plusoptions, $extra);
 	foreach ($minuslines as $item)
 	{
-		echo '<tr class=trbusy><td>';
+		echo '<tr class=' . $domainclass[$item['domain_id']] . '><td>';
 		switch ($pageno)
 		{
 		case 'vlan':
