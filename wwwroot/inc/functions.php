@@ -3151,38 +3151,42 @@ function decodeVLANCK ($string)
 
 // Return VLAN name formatted for HTML output (note, that input
 // argument comes from database unescaped).
-function formatVLANName ($vlaninfo, $context = 'markup long')
+function formatVLANAsOption ($vlaninfo)
 {
-	switch ($context)
-	{
-	case 'option':
-		$ret = $vlaninfo['vlan_id'];
-		if ($vlaninfo['vlan_descr'] != '')
-			$ret .= ' ' . niftyString ($vlaninfo['vlan_descr']);
-		return $ret;
-	case 'label':
-		$ret = $vlaninfo['vlan_id'];
-		if ($vlaninfo['vlan_descr'] != '')
-			$ret .= ' <i>(' . niftyString ($vlaninfo['vlan_descr']) . ')</i>';
-		return $ret;
-	case 'plain long':
-		$ret = 'VLAN' . $vlaninfo['vlan_id'];
-		if ($vlaninfo['vlan_descr'] != '')
-			$ret .= ' (' . niftyString ($vlaninfo['vlan_descr'], 20, FALSE) . ')';
-		return $ret;
-	case 'hyperlink':
-		$ret = '<a href="';
-		$ret .= makeHref (array ('page' => 'vlan', 'vlan_ck' => $vlaninfo['domain_id'] . '-' . $vlaninfo['vlan_id']));
-		$ret .= '">' . formatVLANName ($vlaninfo, 'markup long') . '</a>';
-		return $ret;
-	case 'markup long':
-	default:
-		$ret = 'VLAN' . $vlaninfo['vlan_id'];
-		$ret .= ' @' . niftyString ($vlaninfo['domain_descr']);
-		if ($vlaninfo['vlan_descr'] != '')
-			$ret .= ' <i>(' . niftyString ($vlaninfo['vlan_descr']) . ')</i>';
-		return $ret;
-	}
+	$ret = $vlaninfo['vlan_id'];
+	if ($vlaninfo['vlan_descr'] != '')
+		$ret .= ' ' . niftyString ($vlaninfo['vlan_descr']);
+	return $ret;
+}
+
+function formatVLANAsLabel ($vlaninfo)
+{
+	$ret = $vlaninfo['vlan_id'];
+	if ($vlaninfo['vlan_descr'] != '')
+		$ret .= ' <i>(' . niftyString ($vlaninfo['vlan_descr']) . ')</i>';
+	return $ret;
+}
+
+function formatVLANAsPlainText ($vlaninfo)
+{
+	$ret = 'VLAN' . $vlaninfo['vlan_id'];
+	if ($vlaninfo['vlan_descr'] != '')
+		$ret .= ' (' . niftyString ($vlaninfo['vlan_descr'], 20, FALSE) . ')';
+	return $ret;
+}
+
+function formatVLANAsHyperlink ($vlaninfo)
+{
+	return mkA (formatVLANAsRichText ($vlaninfo), 'vlan', $vlaninfo['domain_id'] . '-' . $vlaninfo['vlan_id']);
+}
+
+function formatVLANAsRichText ($vlaninfo)
+{
+	$ret = 'VLAN' . $vlaninfo['vlan_id'];
+	$ret .= ' @' . niftyString ($vlaninfo['domain_descr']);
+	if ($vlaninfo['vlan_descr'] != '')
+		$ret .= ' <i>(' . niftyString ($vlaninfo['vlan_descr']) . ')</i>';
+	return $ret;
 }
 
 // map interface name
