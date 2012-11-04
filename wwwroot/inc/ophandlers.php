@@ -2619,28 +2619,35 @@ function resolve8021QConflicts ()
 	return showFuncMessage (__FUNCTION__, 'OK', array ($ndone));
 }
 
-$msgcode['create8021QPortConfig']['OK'] = 48;
-function create8021QPortConfig()
+function update8021QPortList()
 {
+	genericAssertion ('ports', 'array');
+	$enabled = $disabled = 0;
 	global $sic;
-	genericAssertion ('portname', 'string');
 	$default_port = array
 	(
 		'mode' => 'access',
 		'allowed' => array (VLAN_DFL_ID),
 		'native' => VLAN_DFL_ID,
 	);
-	add8021QPort (getBypassValue(), $sic['portname'], $default_port);
-	showFuncMessage (__FUNCTION__, 'OK');
-}
-
-$msgcode['destroy8021QPortConfig']['OK'] = 49;
-function destroy8021QPortConfig()
-{
-	global $sic;
-	genericAssertion ('portname', 'string');
-	del8021QPort (getBypassValue(), $sic['portname']);
-	showFuncMessage (__FUNCTION__, 'OK');
+	foreach ($sic['ports'] as $line)
+		if (preg_match ('/^enable (.+)$/', $line, $m))
+		{
+			add8021QPort (getBypassValue(), $m[1], $default_port);
+			$enabled++;
+		}
+		elseif (preg_match ('/^disable (.+)$/', $line, $m))
+		{
+			del8021QPort (getBypassValue(), $m[1]);
+			$disabled++;
+		}
+		else
+			throw new InvalidRequestArgException ('ports[]', $line, 'malformed array item');
+	# $enabled + $disabled > 0
+	if ($enabled)
+		showSuccess ("enabled 802.1Q for ${enabled} port(s)");
+	if ($disabled)
+		showSuccess ("disabled 802.1Q for ${disabled} port(s)");
 }
 
 $msgcode['cloneVST']['OK'] = 48;
