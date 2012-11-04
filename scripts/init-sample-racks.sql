@@ -1554,52 +1554,53 @@ INSERT INTO `TagTree` (`id`, `parent_id`, `tag`) VALUES (21,NULL,'vlan template'
 INSERT INTO `TagTree` (`id`, `parent_id`, `tag`) VALUES (22,21,'access switch template');
 INSERT INTO `TagTree` (`id`, `parent_id`, `tag`) VALUES (23,21,'distribution switch template');
 
-INSERT INTO `TagStorage` VALUES ('object',905,1,'john_doe','2012-06-01');
-INSERT INTO `TagStorage` VALUES ('object',908,2,'john_doe','2012-06-01');
-INSERT INTO `TagStorage` VALUES ('object',909,1,'john_doe','2012-06-01');
-INSERT INTO `TagStorage` VALUES ('object',928,9,'john_doe','2012-06-01');
-INSERT INTO `TagStorage` VALUES ('object',929,9,'john_doe','2012-06-01');
-INSERT INTO `TagStorage` VALUES ('object',956,2,'john_doe','2012-06-01');
-INSERT INTO `TagStorage` VALUES ('object',957,2,'john_doe','2012-06-01');
-INSERT INTO `TagStorage` VALUES ('object',958,2,'john_doe','2012-06-01');
-INSERT INTO `TagStorage` VALUES ('object',959,2,'john_doe','2012-06-01');
-INSERT INTO `TagStorage` VALUES ('object',960,2,'john_doe','2012-06-01');
-INSERT INTO `TagStorage` VALUES ('object',961,2,'john_doe','2012-06-01');
-INSERT INTO `TagStorage` VALUES ('object',962,2,'john_doe','2012-06-01');
-INSERT INTO `TagStorage` VALUES ('ipv4net',96,12,'john_doe','2012-06-01');
-INSERT INTO `TagStorage` VALUES ('ipv4net',97,12,'john_doe','2012-06-01');
-INSERT INTO `TagStorage` VALUES ('ipv4net',98,12,'john_doe','2012-06-01');
-INSERT INTO `TagStorage` VALUES ('ipv4net',99,12,'john_doe','2012-06-01');
-INSERT INTO `TagStorage` VALUES ('ipv4net',102,5,'john_doe','2012-06-01');
-INSERT INTO `TagStorage` VALUES ('ipv4net',102,11,'john_doe','2012-06-01');
-INSERT INTO `TagStorage` VALUES ('ipv4net',103,5,'john_doe','2012-06-01');
-INSERT INTO `TagStorage` VALUES ('ipv4net',103,11,'john_doe','2012-06-01');
-INSERT INTO `TagStorage` VALUES ('ipv4net',104,5,'john_doe','2012-06-01');
-INSERT INTO `TagStorage` VALUES ('ipv4net',104,11,'john_doe','2012-06-01');
-INSERT INTO `TagStorage` VALUES ('ipv4net',105,5,'john_doe','2012-06-01');
-INSERT INTO `TagStorage` VALUES ('ipv4net',105,11,'john_doe','2012-06-01');
-INSERT INTO `TagStorage` VALUES ('ipv4net',106,12,'john_doe','2012-06-01');
-INSERT INTO `TagStorage` VALUES ('ipv4net',107,12,'john_doe','2012-06-01');
-INSERT INTO `TagStorage` VALUES ('ipv4net',108,12,'john_doe','2012-06-01');
-INSERT INTO `TagStorage` VALUES ('rack',967,7,'john_doe','2012-06-01');
-INSERT INTO `TagStorage` VALUES ('rack',968,8,'john_doe','2012-06-01');
-INSERT INTO `TagStorage` VALUES ('rack',969,7,'john_doe','2012-06-01');
-INSERT INTO `TagStorage` VALUES ('rack',970,8,'john_doe','2012-06-01');
-INSERT INTO `TagStorage` VALUES ('rack',971,7,'john_doe','2012-06-01');
-INSERT INTO `TagStorage` VALUES ('rack',972,7,'john_doe','2012-06-01');
-INSERT INTO `TagStorage` VALUES ('rack',973,7,'john_doe','2012-06-01');
-INSERT INTO `TagStorage` VALUES ('rack',974,8,'john_doe','2012-06-01');
-INSERT INTO `TagStorage` VALUES ('ipv6net','1','10','john_doe','2012-06-01');
-INSERT INTO `TagStorage` VALUES ('ipv6net','2','12','john_doe','2012-06-01');
-INSERT INTO `TagStorage` VALUES ('ipv6net','3','12','john_doe','2012-06-01');
-INSERT INTO `TagStorage` VALUES ('ipv6net','4','18','john_doe','2012-06-01');
-INSERT INTO `TagStorage` VALUES ('ipv6net','5','18','john_doe','2012-06-01');
-INSERT INTO `TagStorage` VALUES ('object',979,12,'john_doe','2012-06-01');
-INSERT INTO `TagStorage` VALUES ('object',980,12,'john_doe','2012-06-01');
-INSERT INTO `TagStorage` VALUES ('object',981,12,'john_doe','2012-06-01');
-INSERT INTO `TagStorage` VALUES ('vst',1,22,'john_doe','2012-06-01');
-INSERT INTO `TagStorage` VALUES ('vst',2,22,'john_doe','2012-06-01');
-INSERT INTO `TagStorage` VALUES ('vst',3,23,'john_doe','2012-06-01');
+INSERT INTO `TagStorage` (`entity_realm`, `entity_id`, `tag_id`, `user`, `date`) VALUES
+('object',905,1,'john_doe','2012-06-01'),
+('object',908,2,'john_doe','2012-06-01'),
+('object',909,1,'john_doe','2012-06-01'),
+('object',928,9,'john_doe','2012-06-01'),
+('object',929,9,'john_doe','2012-06-01'),
+('object',956,2,'john_doe','2012-06-01'),
+('object',957,2,'john_doe','2012-06-01'),
+('object',958,2,'john_doe','2012-06-01'),
+('object',959,2,'john_doe','2012-06-01'),
+('object',960,2,'john_doe','2012-06-01'),
+('object',961,2,'john_doe','2012-06-01'),
+('object',962,2,'john_doe','2012-06-01'),
+('ipv4net',96,12,'john_doe','2012-06-01'),
+('ipv4net',97,12,'john_doe','2012-06-01'),
+('ipv4net',98,12,'john_doe','2012-06-01'),
+('ipv4net',99,12,'john_doe','2012-06-01'),
+('ipv4net',102,5,'john_doe','2012-06-01'),
+('ipv4net',102,11,'john_doe','2012-06-01'),
+('ipv4net',103,5,'john_doe','2012-06-01'),
+('ipv4net',103,11,'john_doe','2012-06-01'),
+('ipv4net',104,5,'john_doe','2012-06-01'),
+('ipv4net',104,11,'john_doe','2012-06-01'),
+('ipv4net',105,5,'john_doe','2012-06-01'),
+('ipv4net',105,11,'john_doe','2012-06-01'),
+('ipv4net',106,12,'john_doe','2012-06-01'),
+('ipv4net',107,12,'john_doe','2012-06-01'),
+('ipv4net',108,12,'john_doe','2012-06-01'),
+('rack',967,7,'john_doe','2012-06-01'),
+('rack',968,8,'john_doe','2012-06-01'),
+('rack',969,7,'john_doe','2012-06-01'),
+('rack',970,8,'john_doe','2012-06-01'),
+('rack',971,7,'john_doe','2012-06-01'),
+('rack',972,7,'john_doe','2012-06-01'),
+('rack',973,7,'john_doe','2012-06-01'),
+('rack',974,8,'john_doe','2012-06-01'),
+('ipv6net','1','10','john_doe','2012-06-01'),
+('ipv6net','2','12','john_doe','2012-06-01'),
+('ipv6net','3','12','john_doe','2012-06-01'),
+('ipv6net','4','18','john_doe','2012-06-01'),
+('ipv6net','5','18','john_doe','2012-06-01'),
+('object',979,12,'john_doe','2012-06-01'),
+('object',980,12,'john_doe','2012-06-01'),
+('object',981,12,'john_doe','2012-06-01'),
+('vst',1,22,'john_doe','2012-06-01'),
+('vst',2,22,'john_doe','2012-06-01'),
+('vst',3,23,'john_doe','2012-06-01');
 
 INSERT INTO `VLANDomain` VALUES
 (2,'English'),
