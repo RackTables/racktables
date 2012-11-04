@@ -7492,7 +7492,7 @@ function renderObject8021QSync ($object_id)
 	if (considerConfiguredConstraint ($object, '8021Q_EXTSYNC_LISTSRC'))
 	{
 		startPortlet ('add/remove 802.1Q ports');
-		renderObject8021QSyncPorts ($object, $C, $D);
+		renderObject8021QSyncPorts ($object, $D);
 		finishPortlet();
 	}
 	echo '</td><td class=pcright>';
@@ -7750,36 +7750,33 @@ END
 	echo '</form>';
 }
 
-function renderObject8021QSyncPorts ($object, $C, $D)
+function renderObject8021QSyncPorts ($object, $D)
 {
-	$allports = array();
-	foreach ($object['ports'] as $port)
-		if (isEthernetPort ($port))
-			$allports[$port['name']]['ifstr'] = formatPortIIFOIF ($port);
-	foreach ($D as $portname => $portconfig)
-		$allports[$portname]['vlanstr'] = formatVLANPackDiff ($C[$portname], $portconfig);
-	$allports = sortPortList ($allports);
+	$allethports = array();
+	foreach (array_filter ($object['ports'], 'isEthernetPort') as $port)
+		$allethports[$port['name']] = formatPortIIFOIF ($port);
+	$enabled = array();
+	# OPTIONSs for existing 802.1Q ports
+	foreach (sortPortList ($D) as $portname => $portconfig)
+		$enabled["disable ${portname}"] = "${portname} ("
+			. (array_key_exists ($portname, $allethports) ? $allethports[$portname] : 'N/A')
+			. ') ' . serializeVLANPack ($portconfig);
+	# OPTIONs for potential 802.1Q ports
+	$disabled = array();
+	foreach (sortPortList ($allethports) as $portname => $iifoif)
+		if (! array_key_exists ("disable ${portname}", $enabled))
+			$disabled["enable ${portname}"] = "${portname} (${iifoif})";
+	printOpFormIntro ('updPortList');
 	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
-	foreach ($allports as $portname => $port)
-	{
-		echo "<tr valign=top class=trbusy><td class=tdleft>${portname}</td><td class=tdleft>";
-		echo array_key_exists ('ifstr', $port) ? $port['ifstr'] : '&nbsp;';
-		echo '</td><td class=tdleft>';
-		echo array_key_exists ('vlanstr', $port) ? $port['vlanstr'] : '&nbsp;';
-		echo '</td><td>';
-		if (array_key_exists ('vlanstr', $port))
-		{
-			echo '<a href="' . makeHrefProcess (array ('op' => 'delPort', 'portname' => $portname)) . '">';
-			echo getImageHREF ('delete', 'delete 802.1Q configuration for this port') . '</a>';
-		}
-		else
-		{
-			echo '<a href="' . makeHrefProcess (array ('op' => 'addPort', 'portname' => $portname)) . '">';
-			echo getImageHREF ('add', 'add 802.1Q configuration for this port') . '</a>';
-		}
-		echo '</td></tr>';
-	}
-	echo '</table>';
+	echo '<tr><td>';
+	printNiftySelect
+	(
+		array ('select ports to disable 802.1Q' => $enabled, 'select ports to enable 802.1Q' => $disabled),
+		array ('name' => 'ports[]', 'multiple' => 1, 'size' => getConfigVar ('MAXSELSIZE'))
+	);
+	echo '</td></tr>';
+	echo '<tr><td>' . getImageHREF ('RECALC', 'process changes', TRUE) . '</td></tr>';
+	echo '</table></form>';
 }
 
 function renderVSTListEditor()
