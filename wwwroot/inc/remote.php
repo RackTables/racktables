@@ -226,7 +226,7 @@ function queryTerminal ($object_id, $commands, $tolerate_remote_errors = TRUE)
 			break;
 		case 'nxos4':
 			$protocol = 'telnet';
-			$prompt = '[>:#] $';
+			$prompt = '(^([Ll]ogin|[Pp]assword):|[>#]) $';
 			break;
 		case 'xos12':
 			$protocol = 'telnet';
