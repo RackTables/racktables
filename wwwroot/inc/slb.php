@@ -201,13 +201,22 @@ virtual_server %VS_HEADER% {
 			if ($rs['inservice'] != 'yes')
 				continue;
 			$parser->pushdefs(); // backup macros
+			$this->prepareParserForRS ($parser, $rs);
+			foreach (explode (',', $parser->expandMacro ('RSPORT')) as $rsp_token)
+			{
+				$port_range = explode ('-', $rsp_token);
+				if (count ($port_range) < 1)
+					throw new InvalidArgException ('RSPORT', $rsp_token, "invalid RS port range");
+				if (count ($port_range) < 2)
+					$port_range[] = $port_range[0];
+				if ($port_range[0] > $port_range[1])
+					throw new InvalidArgException ('RSPORT', $rsp_token, "invalid RS port range");
 
-			foreach (explode (',', $parser->expandMacro ('RSPORT')) as $rsport) {
-				$parser->pushdefs();
-				$this->prepareParserForRS ($parser, $rs);
-				$parser->addMacro ('RSPORT', $rsport);
-
-				$ret .= $parser->expand ("
+				for ($rsport = $port_range[0]; $rsport <= $port_range[1]; $rsport++)
+				{
+					$parser->pushdefs();
+					$parser->addMacro ('RSPORT', $rsport);
+					$ret .= $parser->expand ("
 	%RS_PREPEND%
 	real_server %RS_HEADER% {
 		%GLOBAL_RS_CONF%
@@ -217,7 +226,8 @@ virtual_server %VS_HEADER% {
 		%RS_RS_CONF%
 	}
 ");
-				$parser->popdefs();
+					$parser->popdefs();
+				}
 			}
 			$parser->popdefs(); // restore original (VS-driven) macros
 		}
