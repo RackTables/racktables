@@ -396,14 +396,23 @@ function queryTerminal ($object_id, $commands, $tolerate_remote_errors = TRUE)
 function callScript ($gwname, $params, $in, &$out, &$errors)
 {
 	global $racktables_gwdir, $local_gwdir;
-	if (isset ($local_gwdir) && file_exists ("$local_gwdir/$gwname"))
-		$dir = $local_gwdir;
-	elseif (isset ($racktables_gwdir) && file_exists ("$racktables_gwdir/$gwname"))
-		$dir = $racktables_gwdir;
-	if (! isset ($dir))
-		throw new RTGatewayError ("Could not find the gateway file called '$gwname'");
+	$cwd = NULL;
+	if ('/' === substr ($gwname, 0, 1))
+		// absolute path to executable
+		$binary = $gwname;
+	else
+	{
+		// path relative to one of RackTables' gwdirs
+		if (isset ($local_gwdir) && file_exists ("$local_gwdir/$gwname"))
+			$cwd = $local_gwdir;
+		elseif (isset ($racktables_gwdir) && file_exists ("$racktables_gwdir/$gwname"))
+			$cwd = $racktables_gwdir;
+		if (! isset ($cwd))
+			throw new RTGatewayError ("Could not find the gateway file called '$gwname'");
+		$binary = "./$gwname";
+	}
 
-	$cmd_line = "./$gwname";
+	$cmd_line = $binary;
 	foreach ($params as $key => $value)
 	{
 		if (! isset ($value))
@@ -429,10 +438,10 @@ function callScript ($gwname, $params, $in, &$out, &$errors)
 			2 => array ('pipe', 'w'),
 		),
 		$pipes,
-		$dir
+		$cwd
 	);
 	if (! is_resource ($child))
-		throw new RTGatewayError ("cant execute $dir/$gwname");
+		throw new RTGatewayError ("cant execute $binary");
 
 	$buff_size = 4096;
 	$write_left = array ($pipes[0]);
