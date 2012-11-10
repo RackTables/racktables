@@ -1287,6 +1287,33 @@ $iftable_processors['tplink-any-1000T'] = array
 	'try_next_proc' => FALSE,
 );
 
+$iftable_processors['motorola-rfs-any-1000T'] = array
+(
+	'pattern' => '@^ge(\d+)$@',
+	'replacement' => 'ge\\1',
+	'dict_key' => '1-24',
+	'label' => '\\1',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['motorola-rfs-uplink-comboSFP'] = array
+(
+	'pattern' => '@^up(\d+)$@',
+	'replacement' => 'up\\1',
+	'dict_key' => '4-1077',
+	'label' => 'uplink',
+	'try_next_proc' => TRUE,
+);
+
+$iftable_processors['motorola-rfs-uplink-comboT'] = array
+(
+	'pattern' => '@^up(\d+)$@',
+	'replacement' => 'up\\1',
+	'dict_key' => '1-24',
+	'label' => 'uplink',
+	'try_next_proc' => FALSE,
+);
+
 global $known_switches;
 $known_switches = array // key is system OID w/o "enterprises" prefix
 (
@@ -1945,6 +1972,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'AT9924T: 24 RJ-45/10-100-1000T(X) ports',
 		'processors' => array ('generic-port-any-1000T'),
 	),
+	'388.18' => array
+	(
+		'dict_key' => 1795,
+		'text' => 'RFS 4000: 5 RJ-45/10-100-1000T(X) + 1 combo uplink ports',
+		'processors' => array ('motorola-rfs-uplink-comboSFP', 'motorola-rfs-uplink-comboT', 'motorola-rfs-any-1000T'),
+	),
 	'4526.100.1.1' => array
 	(
 		'dict_key' => 587,
@@ -2590,6 +2623,13 @@ function doSwitchSNMPmining ($objectInfo, $device)
 		// one DB-9 RS-232 and one AC port
 		checkPIC ('1-681');
 		commitAddPort ($objectInfo['id'], 'console', '1-681', '', ''); // DB-9 RS-232
+		checkPIC ('1-16');
+		commitAddPort ($objectInfo['id'], 'AC-in', '1-16', '', '');
+		break;
+	case preg_match ('/^388\.18/', $sysObjectID): // Motorola RFS 4000
+		// one RJ-45 RS-232 and one AC port
+		checkPIC ('1-29');
+		commitAddPort ($objectInfo['id'], 'console', '1-29', 'console', '');
 		checkPIC ('1-16');
 		commitAddPort ($objectInfo['id'], 'AC-in', '1-16', '', '');
 		break;
