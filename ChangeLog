@@ -10,7 +10,7 @@
 	update: remove old gateways code, including Live VLANs
 	update: allow linking more than one VLAN from same domain per a network
 	update: make 802.1Q port list offline management multi-port (#653)
-	update: SNMP support for Motorola RFS4000 (#657)
+	update: SNMP support for Cisco WS-C2948 (#546), Motorola RFS4000 (#657)
 	new feature: abstract tags, which cannot be assigned (#577)
 	new feature: added support for munin graphs (#406) by Michael Holm
 0.20.1 2012-10-04

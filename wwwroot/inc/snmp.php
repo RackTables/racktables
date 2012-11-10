@@ -403,6 +403,24 @@ $iftable_processors['catalyst-stack-25-to-28-SFP'] = array
 	'try_next_proc' => FALSE,
 );
 
+$iftable_processors['catalyst-2948-49-to-50-SFP'] = array
+(
+	'pattern' => '@^port 2/(49|50)$@',
+	'replacement' => 'gi\\1',
+	'dict_key' => '4-1077',
+	'label' => '\\1',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['catalyst-2948-any-100TX'] = array
+(
+	'pattern' => '@^port 2/(\d+)$@',
+	'replacement' => 'fa\\1',
+	'dict_key' => 19,
+	'label' => '\\1',
+	'try_next_proc' => FALSE,
+);
+
 $iftable_processors['nexus-any-10000SFP+'] = array
 (
 	'pattern' => '@^Ethernet([[:digit:]]/[[:digit:]]+)$@',
@@ -1697,6 +1715,13 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'WS-C2360-48TD: 48 RJ-45 GigE + 4 SFP+/10000',
 		'processors' => array ('catalyst-chassis-any-1000T', 'catalyst-chassis-mgmt', 'catalyst-chassis-uplinks-10000SFP+'),
 	),
+	'9.5.42' => array
+	(
+		'dict_key' => 1796,
+		'text' => 'WS-C2948G-L3: 48 RJ-45/10-100TX + 2 SFP/1000 ports',
+		'processors' => array ('catalyst-2948-49-to-50-SFP', 'catalyst-2948-any-100TX'),
+		'ifDescrOID' => 'entPhysicalName',
+	),
 	'9.6.1.82.24.2' => array
 	(
 		'dict_key' => 1784,
@@ -2431,6 +2456,7 @@ function doSwitchSNMPmining ($objectInfo, $device)
 			commitAddPort ($objectInfo['id'], 'AC-in', '1-16', '', '');
 		}
 		break;
+	case preg_match ('/^9\.5\.42/', $sysObjectID): // Catalyst 2948 running CatOS
 	case preg_match ('/^9\.6\.1\./', $sysObjectID): // Cisco SF series
 		checkPIC ('1-681');
 		commitAddPort ($objectInfo['id'], 'con0', '1-681', 'console', ''); // DB-9 RS-232 console
