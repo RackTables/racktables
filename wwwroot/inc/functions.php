@@ -432,6 +432,15 @@ function setDisplayedName (&$cell)
 			$cell['dname'] = $cell['name'];
 		else
 			$cell['dname'] = '[' . decodeObjectType ($cell['objtype_id'], 'o') . ']';
+		// If the object has a container, apply the same logic to the container name
+		$cell['container_dname'] = NULL;
+		if ($cell['container_id'])
+		{
+			if ($cell['container_name'] != '')
+				$cell['container_dname'] = $cell['container_name'];
+			else
+				$cell['container_dname'] = '[' . decodeObjectType ($cell['container_objtype_id'], 'o') . ']';
+		}
 	}
 	elseif ($cell['realm'] == 'ipv4vs')
 	{
