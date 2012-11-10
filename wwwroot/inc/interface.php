@@ -2068,7 +2068,7 @@ function renderDepot ()
 				echo "<td>${obj['asset_no']}</td>";
 				$places = array();
 				if ($obj['container_id'])
-					$places[] = mkA ($obj['container_name'], 'object', $obj['container_id']);
+					$places[] = mkA ($obj['container_dname'], 'object', $obj['container_id']);
 				elseif (! array_key_exists ($obj['id'], $mountinfo))
 					$places[] = 'Unmounted';
 				else
