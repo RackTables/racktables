@@ -1332,6 +1332,33 @@ $iftable_processors['motorola-rfs-uplink-comboT'] = array
 	'try_next_proc' => FALSE,
 );
 
+$iftable_processors['dlink-21-to-24-comboSFP'] = array
+(
+	'pattern' => '@^Slot0/(21|22|23|24)$@',
+	'replacement' => '\\1F',
+	'dict_key' => '4-1077',
+	'label' => '\\1F',
+	'try_next_proc' => TRUE,
+);
+
+$iftable_processors['dlink-21-to-24-comboT'] = array
+(
+	'pattern' => '@^Slot0/(21|22|23|24)$@',
+	'replacement' => '\\1T',
+	'dict_key' => '1-24',
+	'label' => '\\1T',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['dlink-any-1000T'] = array
+(
+	'pattern' => '@^Slot0/(\d+)$@',
+	'replacement' => '\\1',
+	'dict_key' => '1-24',
+	'label' => '\\1',
+	'try_next_proc' => FALSE,
+);
+
 global $known_switches;
 $known_switches = array // key is system OID w/o "enterprises" prefix
 (
@@ -1972,6 +1999,13 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'dict_key' => 1085,
 		'text' => 'BES50GE-12T PWR: 12 RJ-45/10-100-1000T(X)',
 		'processors' => array ('nortel-any-1000T'),
+	),
+	'171.10.76.10' => array
+	(
+		'dict_key' => 1799,
+		'text' => 'DGS-1210-24: 20 RJ-45/10-100-1000T(X) + 4 combo ports',
+		'processors' => array ('dlink-21-to-24-comboSFP', 'dlink-21-to-24-comboT', 'dlink-any-1000T'),
+		'ifDescrOID' => 'ifName',
 	),
 	'202.20.59' => array
 	(
@@ -2690,6 +2724,11 @@ function doSwitchSNMPmining ($objectInfo, $device)
 		$sw_version = preg_replace('/^.* V([^ ]+).*$/', '\\1', $sysDescr);
 		updateStickerForCell ($objectInfo, 5, $sw_version);
 
+		// one AC port, no console
+		checkPIC ('1-16');
+		commitAddPort ($objectInfo['id'], 'AC-in', '1-16', '', '');
+		break;
+	case preg_match ('/^171\.10\.76\.10/', $sysObjectID): // D-Link DGS-1210-24
 		// one AC port, no console
 		checkPIC ('1-16');
 		commitAddPort ($objectInfo['id'], 'AC-in', '1-16', '', '');
