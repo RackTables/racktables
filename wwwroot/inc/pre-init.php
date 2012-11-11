@@ -55,17 +55,21 @@ function connectDB()
 {
 	global $dbxlink, $pdo_dsn, $db_username, $db_password;
 	$dbxlink = NULL;
-	// Now try to connect...
+	$drvoptions = array
+	(
+		PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+		PDO::MYSQL_ATTR_INIT_COMMAND => 'set names "utf8"',
+	);
+	if (isset ($pdo_bufsize))
+		$drvoptions[PDO::MYSQL_ATTR_MAX_BUFFER_SIZE] = $pdo_bufsize;
 	try
 	{
-		$dbxlink = new PDO ($pdo_dsn, $db_username, $db_password);
+		$dbxlink = new PDO ($pdo_dsn, $db_username, $db_password, $drvoptions);
 	}
 	catch (PDOException $e)
 	{
 		throw new RackTablesError ("Database connection failed:\n\n" . $e->getMessage(), RackTablesError::INTERNAL);
 	}
-	$dbxlink->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-	$dbxlink->exec ("set names 'utf8'");
 }
 
 // tries to guess the existance of the file before the php's include using the same searching method.
