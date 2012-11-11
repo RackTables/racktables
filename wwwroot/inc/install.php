@@ -249,6 +249,9 @@ function init_config ()
 	fwrite ($conf, "\$pdo_dsn = '${pdo_dsn}';\n");
 	fwrite ($conf, "\$db_username = '" . $_REQUEST['mysql_username'] . "';\n");
 	fwrite ($conf, "\$db_password = '" . $_REQUEST['mysql_password'] . "';\n\n");
+	fwrite ($conf, "# Setting MySQL client buffer size may be required to make downloading work for\n");
+	fwrite ($conf, "# larger files, but it does not work with mysqlnd.\n");
+	fwrite ($conf, "# \$pdo_bufsize = 50 * 1024 * 1024;\n\n");
 	fwrite ($conf, <<<ENDOFTEXT
 
 \$user_auth_src = 'database';
