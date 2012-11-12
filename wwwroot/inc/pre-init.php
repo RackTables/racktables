@@ -53,7 +53,7 @@ if (! isset ($local_staticdir)) // the directory where RT will search static fil
 // (re)connects to DB, stores PDO object in $dbxlink global var
 function connectDB()
 {
-	global $dbxlink, $pdo_dsn, $db_username, $db_password;
+	global $dbxlink, $pdo_dsn, $db_username, $db_password, $pdo_bufsize;
 	$dbxlink = NULL;
 	$drvoptions = array
 	(
