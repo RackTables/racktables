@@ -378,6 +378,8 @@ function queryTerminal ($object_id, $commands, $tolerate_remote_errors = TRUE)
 			else
 				$params[$param_name] = $settings[$setting_name];
 
+	callHook ('alterTerminalParams', $object_id, $tolerate_remote_errors, array (&$settings['protocol']), array (&$params));
+
 	$ret_code = callScript ($settings['protocol'], $params, $commands, $out, $errors);
 	if ($settings['protocol'] != 'ssh' || ! $tolerate_remote_errors)
 	{
