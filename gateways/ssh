@@ -28,7 +28,6 @@ GetOptions (
     'sudo-user:s' => \$op_as_user,
     'username|l:s' => \$op_user,
     'identity|i:s' => \$op_identity,
-    'no-login|L' => \$op_sh,
 );
 if ($op_help) {
     &display_help;
@@ -37,7 +36,7 @@ if ($op_help) {
 if (defined $op_proto) {
 	$op_proto == 4 or $op_proto == 6 or die "ERROR: valid protocol version values are 4 and 6";
 }
-my $op_host = $ARGV[0];
+my $op_host = shift @ARGV;
 defined $op_host or die "ERROR: please specify remote host (-h for help)";
 
 &become_user;
@@ -93,4 +92,4 @@ push @params, '-o', 'BatchMode=yes';
 push @params, '-o', 'CheckHostIP=no';
 push @params, '-o', 'LogLevel=ERROR';
 
-exec ('ssh', @params, $op_host, ($op_sh) ? ('sh') : ()) or die "cant exec ssh: $!";
+exec ('ssh', @params, $op_host, @ARGV) or die "cant exec ssh: $!";
