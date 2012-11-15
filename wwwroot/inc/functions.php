@@ -86,10 +86,9 @@ $location_obj_types = array
 $dqtitle = array
 (
 	'sync_aging' => 'Normal, aging',
-	'resync_aging' => 'Version conflict, aging',
+	'resync_aging' => 'Failed, aging',
 	'sync_ready' => 'Normal, ready for sync',
-	'resync_ready' => 'Version conflict, ready for retry',
-	'failed' => 'Failed',
+	'resync_ready' => 'Failed, ready for retry',
 	'disabled' => 'Sync disabled',
 	'done' => 'Up to date',
 );
@@ -4395,13 +4394,12 @@ function detectVLANSwitchQueue ($vswitch)
 		else
 			return 'sync_ready';
 	case E_8021Q_VERSION_CONFLICT:
+	case E_8021Q_PULL_REMOTE_ERROR:
+	case E_8021Q_PUSH_REMOTE_ERROR:
 		if ($vswitch['last_error_age_seconds'] < getConfigVar ('8021Q_DEPLOY_RETRY'))
 			return 'resync_aging';
 		else
 			return 'resync_ready';
-	case E_8021Q_PULL_REMOTE_ERROR:
-	case E_8021Q_PUSH_REMOTE_ERROR:
-		return 'failed';
 	case E_8021Q_SYNC_DISABLED:
 		return 'sync_ready';
 	}
