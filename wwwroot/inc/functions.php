@@ -4253,10 +4253,10 @@ function initiateUplinksReverb ($object_id, $uplink_ports)
 }
 
 // checks if the desired config of all uplink/downlink ports of that switch, and
-// his neighbors, equals to the recalculated config. If not, and $check_only is FALSE,
+// his neighbors, equals to the recalculated config. If not,
 // sets the recalculated configs as desired and puts switches into out-of-sync state.
 // Returns an array with object_id as key and portname subkey
-function recalc8021QPorts ($switch_id, $check_only = FALSE)
+function recalc8021QPorts ($switch_id)
 {
 	function find_connected_portinfo ($ports, $name)
 	{
@@ -4309,8 +4309,9 @@ function recalc8021QPorts ($switch_id, $check_only = FALSE)
 				$local_port_order = $new_order[$pn]; // this updates $order
 
 				// queue changes in D-config of remote switch
-				if ($changed = queueChangesToSwitch ($portinfo['remote_object_id'], array ($remote_pn => $remote_port_order), $remote_before, $check_only))
+				if ($changed = replace8021QPorts ('desired', $portinfo['remote_object_id'], $remote_before, array ($remote_pn => $remote_port_order)))
 				{
+					touchVLANSwitch ($portinfo['remote_object_id']);
 					$ret['switches'] ++;
 					$ret['ports'] += $changed;
 				}
@@ -4322,8 +4323,9 @@ function recalc8021QPorts ($switch_id, $check_only = FALSE)
 	foreach (filter8021QChangeRequests ($domain_vlanlist, $before, produceUplinkPorts ($domain_vlanlist, $order, $vswitch['object_id'])) as $pn => $portorder)
 		$order[$pn] = $portorder;
 	// queue changes in D-config of local switch
-	if ($changed = queueChangesToSwitch ($switch_id, $order, $before, $check_only))
+	if ($changed = replace8021QPorts ('desired', $switch_id, $before, $order))
 	{
+		touchVLANSwitch ($portinfo['remote_object_id']);
 		$ret['switches'] ++;
 		$ret['ports'] += $changed;
 	}
@@ -4349,8 +4351,9 @@ function recalc8021QPorts ($switch_id, $check_only = FALSE)
 			{
 				$new_order = produceDownlinkPort ($remote_domain_vlanlist, $remote_pn, $remote_order, $local_port_order);
 				// queue changes in D-config of remote switch
-				if ($changed = queueChangesToSwitch ($portinfo['remote_object_id'], $new_order, $remote_before, $check_only))
+				if ($changed = replace8021QPorts ('desired', $portinfo['remote_object_id'], $remote_before, $new_order))
 				{
+					touchVLANSwitch ($portinfo['remote_object_id']);
 					$ret['switches'] ++;
 					$ret['ports'] += $changed;
 				}
@@ -4376,34 +4379,6 @@ function produceDownlinkPort ($domain_vlanlist, $portname, $order, $uplink_order
 		$new_order[$portname]['allowed'][] = $vlan_id;
 	}
 	return filter8021QChangeRequests ($domain_vlanlist, $order, $new_order);
-}
-
-// does upd8021QPort on any port from $order array which is not equal to the corresponding $before port.
-// returns changed port count.
-// If $check_only is TRUE, return port count that could be changed unless $check_only, does nothing to DB.
-function queueChangesToSwitch ($switch_id, $order, $before, $check_only = FALSE)
-{
-	global $script_mode;
-	$ret = array();
-	$nsaved = 0;
-	foreach ($order as $portname => $portorder)
-		if (! same8021QConfigs ($portorder, $before[$portname]))
-		{
-			if ($script_mode)
-			{
-				$object = spotEntity ('object', $switch_id);
-				print $object['name'] . " $portname: " . serializeVLANPack ($before[$portname]) . ' -> ' . serializeVLANPack ($portorder) . "\n";
-			}
-			if (! $check_only)
-			{
-				upd8021QPort ('desired', $switch_id, $portname, $portorder);
-				$nsaved++;
-			}
-		}
-
-	if (! $check_only && $nsaved)
-		touchVLANSwitch ($switch_id);
-	return $nsaved;
 }
 
 function detectVLANSwitchQueue ($vswitch)
