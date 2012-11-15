@@ -4247,7 +4247,11 @@ function initiateUplinksReverb ($object_id, $uplink_ports)
 	// task list (with its actual remote port name, of course).
 	$done = 0;
 	foreach ($upstream_config as $remote_object_id => $remote_ports)
-		$done += saveDownlinksReverb ($remote_object_id, $remote_ports);
+		if ($changed = saveDownlinksReverb ($remote_object_id, $remote_ports))
+		{
+			$done += $changed;
+			$done += apply8021qChangeRequest ($remote_object_id, array(), FALSE);
+		}
 	return $done;
 }
 
@@ -5251,6 +5255,8 @@ function explodeTableLine ($line, $table_schema)
 // returns number of changed ports (both local and remote)
 // shows error messages unconditionally, and success messages respecting  to $verbose setting
 // if $mutex_rev is set, checks if it is outdated
+// NOTE: this function is calling itself through initiateUplinksReverb. It is important that
+// the call to initiateUplinksReverb is outside of DB transaction scope.
 function apply8021qChangeRequest ($switch_id, $changes, $verbose = TRUE, $mutex_rev = NULL)
 {
 	global $dbxlink;
