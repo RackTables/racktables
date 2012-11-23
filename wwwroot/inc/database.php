@@ -1787,11 +1787,9 @@ function fetchIPv6LogEntry ($ip_bin)
 // wrapper around getObjectIPv4AllocationList and getObjectIPv6AllocationList
 function getObjectIPAllocationList ($object_id)
 {
-	return array_merge
-	(
-		getObjectIPv4AllocationList ($object_id),
-		getObjectIPv6AllocationList ($object_id)
-	);
+	return
+		getObjectIPv4AllocationList ($object_id) +
+		getObjectIPv6AllocationList ($object_id);
 }
 
 // Returns all IPv4 addresses allocated to object, but does not attach detailed info about address
@@ -1868,11 +1866,9 @@ function scanIPSpace ($pairlist)
 		elseif (strlen ($pair['first']) == 16)
 			$v6_pairs[] = $pair;
 	}
-	return array_merge
-	(
-		scanIPv4Space ($v4_pairs),
-		scanIPv6Space ($v6_pairs)
-	);
+	return
+		scanIPv4Space ($v4_pairs) +
+		scanIPv6Space ($v6_pairs);
 }
 
 // Check the range requested for meaningful IPv4 records, build them

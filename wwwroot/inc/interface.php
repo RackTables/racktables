@@ -2459,7 +2459,7 @@ function renderIPNetwork ($id)
 	// render summary portlet
 	$summary = array();
 	$summary['%% used'] = getRenderedIPNetCapacity ($range);
-	$summary = array_merge ($summary, getRenderedIPNetBacktrace ($range));
+	$summary = getRenderedIPNetBacktrace ($range) + $summary;
 	if ($realm == 'ipv4net')
 	{
 		$summary[] = array ('Netmask:', ip4_format ($range['mask_bin']));
