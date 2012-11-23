@@ -472,7 +472,7 @@ function transformRequestData()
 	$sic = array();
 	// walk through merged GET and POST instead of REQUEST array because it
 	// can contain cookies with data which could not be decoded from UTF-8
-	foreach (array_merge($_GET, $_POST) as $key => $value)
+	foreach (($_POST + $_GET) as $key => $value)
 	{
 		if (is_array ($value))
 			$_REQUEST[$key] = $value;

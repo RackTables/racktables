@@ -6,6 +6,7 @@
 	bugfix: LivePTR erased comments when performing an import (#645)
 	bugfix: NX-OS LLDP-fetching connection was sometimes hanged up prematurely
 	bugfix: list objects page threw exception if an object's container was nameless (#661)
+	bugfix: Invalid binary IP exceptions on certain IPs (#673, #675)
 	update: SLB: ability to specify multiple RS ports
 	update: remove old gateways code, including Live VLANs
 	update: allow linking more than one VLAN from same domain per a network
