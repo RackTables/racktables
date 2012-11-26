@@ -1969,8 +1969,8 @@ function IPNetContains ($netA, $netB)
 
 function IPNetsIntersect ($netA, $netB)
 {
-	return $netA['ip_bin'] & $netB['mask_bin'] === $netB['ip_bin'] ||
-		$netB['ip_bin'] & $netA['mask_bin'] === $netA['ip_bin'];
+	return ($netA['ip_bin'] & $netB['mask_bin']) === $netB['ip_bin'] ||
+		($netB['ip_bin'] & $netA['mask_bin']) === $netA['ip_bin'];
 }
 
 function ip_in_range ($ip_bin, $range)
