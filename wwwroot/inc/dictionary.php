@@ -1887,6 +1887,11 @@ $dictionary = array
 	1801 => array ('chapter_id' => 12, 'dict_value' => 'Extreme Networks%GPASS%Summit X670-48x'),
 	1802 => array ('chapter_id' => 12, 'dict_value' => 'Extreme Networks%GPASS%Summit X670V-48x'),
 	1803 => array ('chapter_id' => 12, 'dict_value' => 'Extreme Networks%GPASS%Summit X670V-48t'),
+	1804 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 3560V2-24TS'),
+	1805 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 3560V2-48TS'),
+	1806 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 3560V2-24PS'),
+	1807 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 3560V2-48PS'),
+	1808 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 3560V2-24TS-SD'),
 
 # Any new "default" dictionary records must go above this line (i.e., with
 # dict_key code less, than 50000). This is necessary to keep AUTO_INCREMENT
