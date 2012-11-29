@@ -13,6 +13,7 @@
 	update: make 802.1Q port list offline management multi-port (#653)
 	update: SNMP support for Cisco WS-C2948 (#546), D-Link DGS-1210-24 (#629), Motorola RFS4000 (#657)
 	update: allow setting MySQL client buffer size (#659)
+	update: cut 'Quidway' word from Huawei switch dictionary items for unification with newer products
 	update: 802.1Q: treat connection errors as recoverable
 	new feature: abstract tags, which cannot be assigned (#577)
 	new feature: added support for munin graphs (#406) by Michael Holm
