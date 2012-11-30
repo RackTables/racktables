@@ -960,4 +960,20 @@ function getRenderedIPPortPair ($ip, $port = NULL)
 		(isset ($port) ? ":" . $port : "");
 }
 
+// Print common operation form prologue, include bypass argument, if
+// appropriate, and some extra hidden inputs, if requested.
+// Use special encoding for upload forms
+function printOpFormIntro ($opname, $extra = array(), $upload = FALSE)
+{
+	global $pageno, $tabno, $page;
+
+	echo "<form method=post id=${opname} name=${opname} action='?module=redirect&page=${pageno}&tab=${tabno}&op=${opname}'";
+	if ($upload)
+		echo " enctype='multipart/form-data'";
+	echo ">";
+	fillBypassValues ($pageno, $extra);
+	foreach ($extra as $inputname => $inputvalue)
+		printf ('<input type=hidden name="%s" value="%s">', htmlspecialchars ($inputname, ENT_QUOTES), htmlspecialchars ($inputvalue, ENT_QUOTES));
+}
+
 ?>
