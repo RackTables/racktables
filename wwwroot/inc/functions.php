@@ -1264,40 +1264,40 @@ function treeFromList (&$orig_nodelist, $threshold = 0, $return_main_payload = T
 	// index the tree items by their order in $orig_nodelist
 	$ti = 0;
 	foreach ($nodelist as &$node)
+	{
 		$node['__tree_index'] = $ti++;
+		$node['kidc'] = 0;
+		$node['kids'] = array();
+	}
 
 	// Array equivalent of traceEntity() function.
 	$trace = array();
-	// set kidc and kids only once
-	foreach (array_keys ($nodelist) as $nodeid)
-	{
-		$nodelist[$nodeid]['kidc'] = 0;
-		$nodelist[$nodeid]['kids'] = array();
-	}
 	do
 	{
 		$nextpass = FALSE;
 		foreach (array_keys ($nodelist) as $nodeid)
 		{
+			$node = $nodelist[$nodeid];
+			$parentid = $node['parent_id'];
 			// When adding a node to the working tree, book another
 			// iteration, because the new item could make a way for
 			// others onto the tree. Also remove any item added from
 			// the input list, so iteration base shrinks.
 			// First check if we can assign directly.
-			if ($nodelist[$nodeid]['parent_id'] == NULL)
+			if ($parentid == NULL)
 			{
-				$tree[$nodeid] = $nodelist[$nodeid];
+				$tree[$nodeid] = $node;
 				$trace[$nodeid] = array(); // Trace to root node is empty
 				unset ($nodelist[$nodeid]);
 				$nextpass = TRUE;
 			}
 			// Now look if it fits somewhere on already built tree.
-			elseif (isset ($trace[$nodelist[$nodeid]['parent_id']]))
+			elseif (isset ($trace[$parentid]))
 			{
 				// Trace to a node is a trace to its parent plus parent id.
-				$trace[$nodeid] = $trace[$nodelist[$nodeid]['parent_id']];
-				$trace[$nodeid][] = $nodelist[$nodeid]['parent_id'];
-				pokeNode ($tree, $trace[$nodeid], $nodeid, $nodelist[$nodeid], $threshold);
+				$trace[$nodeid] = $trace[$parentid];
+				$trace[$nodeid][] = $parentid;
+				pokeNode ($tree, $trace[$nodeid], $nodeid, $node, $threshold);
 				// path to any other node is made of all parent nodes plus the added node itself
 				unset ($nodelist[$nodeid]);
 				$nextpass = TRUE;
