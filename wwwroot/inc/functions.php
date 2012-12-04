@@ -2422,7 +2422,6 @@ function nodeIsCollapsed ($node)
 
 // sets 'addrlist', 'own_addrlist', 'addrc', 'own_addrc' keys of $node
 // 'addrc' and 'own_addrc' are sizes of 'addrlist' and 'own_addrlist', respectively
-// 'own_addrlist' is empty if the node network has no children
 function loadIPAddrList (&$node)
 {
 	$node['addrlist'] = scanIPSpace (array (array ('first' => $node['ip_bin'], 'last' => ip_last ($node))));
