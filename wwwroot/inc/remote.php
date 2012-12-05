@@ -95,6 +95,8 @@ $breedfunc = array
 	'ucs-getinventory-main'    => 'ucsReadInventory',
 );
 
+define ('MAX_GW_LOGSIZE', 1024*1024); // do not store more than 1 MB of log data
+
 function detectDeviceBreed ($object_id)
 {
 	$breed_by_swcode = array
@@ -397,7 +399,10 @@ function queryTerminal ($object_id, $commands, $tolerate_remote_errors = TRUE)
 
 function callScript ($gwname, $params, $in, &$out, &$errors)
 {
-	global $racktables_gwdir, $local_gwdir;
+	global $racktables_gwdir, $local_gwdir, $gateway_log;
+	if (isset ($gateway_log))
+		$gateway_log = '';
+
 	$cwd = NULL;
 	if ('/' === substr ($gwname, 0, 1))
 		// absolute path to executable
@@ -458,7 +463,11 @@ function callScript ($gwname, $params, $in, &$out, &$errors)
 		foreach ($write_fd as $fd)
 		{
 			$written = fwrite ($fd, $in, $buff_size);
+			// log all communication data into global var
+			if ($written != 0 && isset ($gateway_log))
+				$gateway_log .= preg_replace ('/^/m', '> ', substr ($in, 0, $written));
 			$in = substr ($in, $written);
+
 			if ($written == 0 || empty ($in))
 			{
 				// close input fd
@@ -477,6 +486,10 @@ function callScript ($gwname, $params, $in, &$out, &$errors)
 			}
 			else
 			{
+				// log all communication data into global var
+				if (isset ($gateway_log))
+					$gateway_log .= $str;
+
 				if ($fd == $pipes[1])
 					$out .= $str;
 				elseif ($fd == $pipes[2])
@@ -486,8 +499,12 @@ function callScript ($gwname, $params, $in, &$out, &$errors)
 
 		$write_fd = $write_left;
 		$read_fd = $read_left;
-	}
 
+		// limit the size of gateway_log
+		if (isset ($gateway_log) && strlen ($gateway_log) > MAX_GW_LOGSIZE * 1.1)
+			$gateway_log = substr ($gateway_log, -MAX_GW_LOGSIZE);
+
+	}
 	return proc_close ($child);
 }
 
