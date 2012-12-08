@@ -1359,6 +1359,33 @@ $iftable_processors['dlink-any-1000T'] = array
 	'try_next_proc' => FALSE,
 );
 
+$iftable_processors['nec-mgmt'] = array
+(
+	'pattern' => '@^MGMT0$@',
+	'replacement' => 'mgmt 0', # note the space
+	'dict_key' => '1-24',
+	'label' => 'MNG',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['nec-any-1000T'] = array
+(
+	'pattern' => '@^GigabitEther 0/(\d+)$@',
+	'replacement' => 'gi 0/\\1', # note the space
+	'dict_key' => '1-24',
+	'label' => '\\1',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['nec-any-SFP+'] = array
+(
+	'pattern' => '@^TenGigabitEther 0/(\d+)$@',
+	'replacement' => 'te 0/\\1', # note the space
+	'dict_key' => '9-1084',
+	'label' => '\\1',
+	'try_next_proc' => FALSE,
+);
+
 global $known_switches;
 $known_switches = array // key is system OID w/o "enterprises" prefix
 (
@@ -2354,6 +2381,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'TL-SG5426: 22 RJ-45/10-100-1000T(X) + 4 combo ports',
 		'processors' => array ('tplink-21-to-24-combo-1000SFP', 'tplink-any-1000T'),
 	),
+	'119.1.203.2.2.41' => array
+	(
+		'dict_key' => 1810,
+		'text' => 'PF5240: 48 RJ-45/10-100-1000T(X) + 4 SFP+',
+		'processors' => array ('nec-any-1000T', 'nec-any-SFP+', 'nec-mgmt'),
+	),
 );
 
 global $swtype_pcre;
@@ -2747,6 +2780,13 @@ function doSwitchSNMPmining ($objectInfo, $device)
 		updateStickerForCell ($objectInfo, 5, $sw_version);
 		if (strlen ($serialNo = $device->snmpget ('mib-2.47.1.1.1.1.11.1'))) # entPhysicalSerialNumber.1
 			updateStickerForCell ($objectInfo, 1, str_replace ('"', '', substr ($serialNo, strlen ('STRING: '))));
+		break;
+	case preg_match ('/^119\.1\.203\.2\.2\./', $sysObjectID): # NEC
+		checkPIC ('1-681');
+		commitAddPort ($objectInfo['id'], 'console 0', '1-681', 'console', '');
+		checkPIC ('1-16');
+		commitAddPort ($objectInfo['id'], 'PS1', '1-16', '', '');
+		commitAddPort ($objectInfo['id'], 'PS2', '1-16', '', '');
 		break;
 	default: // Nortel...
 		break;
