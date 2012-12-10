@@ -4863,6 +4863,8 @@ function del8021QPort ($object_id, $port_name)
 		$tablemap_8021q['cached']['pvm'],
 		array ('object_id' => $object_id, 'port_name' => $port_name)
 	);
+
+	callHook ('portConfChanged', $object_id, $port_name, NULL);
 }
 
 function upd8021QPort ($instance = 'desired', $object_id, $port_name, $port)
@@ -4908,6 +4910,9 @@ function upd8021QPort ($instance = 'desired', $object_id, $port_name, $port)
 			$tablemap_8021q[$instance]['pnv'],
 			array ('object_id' => $object_id, 'port_name' => $port_name, 'vlan_id' => $port['native'])
 		);
+
+	if ($instance == 'desired')
+		callHook ('portConfChanged', $object_id, $port_name, $port);
 	return 1;
 }
 
