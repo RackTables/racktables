@@ -3983,14 +3983,14 @@ function renderChapter ($tgt_chapter_no)
 	$refcnt = getChapterRefc ($tgt_chapter_no, array_keys ($words));
 	$attrs = getChapterAttributes($tgt_chapter_no);
 	echo "<br><table class=cooltable border=0 cellpadding=5 cellspacing=0 align=center>\n";
-	echo "<tr><th colspan=3>${wc} record(s)</th></tr>\n";
-	echo "<tr><th>Origin</th><th>Refcnt</th><th>Word</th></tr>\n";
+	echo "<tr><th colspan=4>${wc} record(s)</th></tr>\n";
+	echo "<tr><th>Origin</th><th>Key</th><th>Refcnt</th><th>Word</th></tr>\n";
 	$order = 'odd';
 	foreach ($words as $key => $value)
 	{
 		echo "<tr class=row_${order}><td>";
 		printImageHREF ($key < 50000 ? 'computer' : 'favorite');
-		echo '</td><td>';
+		echo "</td><td>${key}</td><td>";
 		if ($refcnt[$key])
 		{
 			$cfe = '';
@@ -4018,7 +4018,7 @@ function renderChapter ($tgt_chapter_no)
 			else
 				echo $refcnt[$key];
 		}
-		echo "</td><td><div title='key=${key}'>${value}</div></td></tr>\n";
+		echo "</td><td>${value}</td></tr>\n";
 		$order = $nextorder[$order];
 	}
 	echo "</table>\n<br>";
@@ -4030,7 +4030,7 @@ function renderChapterEditor ($tgt_chapter_no)
 	function printNewItemTR ()
 	{
 		printOpFormIntro ('add');
-		echo '<tr><td>&nbsp;</td><td>';
+		echo '<tr><td>&nbsp;</td><td>&nbsp;</td><td>';
 		printImageHREF ('add', 'Add new', TRUE);
 		echo "</td>";
 		echo "<td class=tdleft><input type=text name=dict_value size=64 tabindex=100></td><td>";
@@ -4041,7 +4041,7 @@ function renderChapterEditor ($tgt_chapter_no)
 	$words = readChapter ($tgt_chapter_no);
 	$refcnt = getChapterRefc ($tgt_chapter_no, array_keys ($words));
 	$order = 'odd';
-	echo "<tr><th>Origin</th><th>&nbsp;</th><th>Word</th><th>&nbsp;</th></tr>\n";
+	echo "<tr><th>Origin</th><th>Key</th><th>&nbsp;</th><th>Word</th><th>&nbsp;</th></tr>\n";
 	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
 		printNewItemTR();
 	foreach ($words as $key => $value)
@@ -4052,12 +4052,12 @@ function renderChapterEditor ($tgt_chapter_no)
 		if ($key < 50000)
 		{
 			printImageHREF ('computer');
-			echo "</td><td>&nbsp;</td><td>${value}</td><td>&nbsp;</td></tr>";
+			echo "</td><td>${key}</td><td>&nbsp;</td><td>${value}</td><td>&nbsp;</td></tr>";
 			continue;
 		}
 		printOpFormIntro ('upd', array ('dict_key' => $key));
 		printImageHREF ('favorite');
-		echo "</td><td>";
+		echo "</td><td>${key}</td><td>";
 		// Prevent deleting words currently used somewhere.
 		if ($refcnt[$key])
 			printImageHREF ('nodelete', 'referenced ' . $refcnt[$key] . ' time(s)');
