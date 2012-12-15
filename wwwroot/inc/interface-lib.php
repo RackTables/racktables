@@ -931,18 +931,13 @@ function getProgressBar ($percentage = 0, $theme = '', $inline = FALSE)
 
 function renderNetVLAN ($cell)
 {
-	if (! empty ($cell['8021q']))
-	{
-		$seen = array();
-		foreach ($cell['8021q'] as $vlan_info)
-			$seen[$vlan_info['vlan_id']] = $vlan_info['domain_id'] . '-' . $vlan_info['vlan_id'];
-		echo '<div class="vlan"><strong><small>VLAN' . (count ($seen) > 1 ? 'S' : '') . '</small> ';
-		$links = array();
-		foreach ($seen as $vlan_id => $vlan_ck)
-			$links[] = '<a href="' . makeHref (array ('page' => 'vlan', 'vlan_ck' => $vlan_ck)) . '">' . $vlan_id . '</a>';
-		echo implode (', ', $links);
-		echo '</strong></div>';
-	}
+	if (! array_key_exists ('8021q', $cell))
+		return;
+	$links = array();
+	foreach ($cell['8021q'] as $vi)
+		$links[] = mkA ($vi['vlan_id'], 'vlan', "${vi['domain_id']}-${vi['vlan_id']}");
+	$noun = count ($cell['8021q']) > 1 ? 'VLANs' : 'VLAN';
+	echo "<div class='vlan'><strong><small>${noun}</small> " . implode (', ', $links) . '</strong></div>';
 }
 
 function includeJQueryUI ($do_css = TRUE)
