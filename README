@@ -17,7 +17,7 @@ known-good distributions with respective setup notes.
 
 *** Fedora 8-16
 * MySQL: yum install mysql-server mysql
-* Apache/PHP: yum install httpd php php-mysql php-pdo php-gd php-snmp php-mbstring
+* Apache/PHP: yum install httpd php php-mysql php-pdo php-gd php-snmp php-mbstring php-bcmath
 * To enable Unicode, add "character-set-server=utf8" line to "[mysqld]"
 section of "/etc/my.cnf" file and restart mysqld.
 
@@ -37,13 +37,13 @@ and restart mysqld.
 *** openSUSE 11.0
 * MySQL: YaST -> Software -> software management -> Web and LAMP server -> mysql
 * Apache/PHP: use YaST to install apache2-mod_php5, php5-gd, php5-mbstring,
-php5-mysql, php5-snmp and php5-ldap
+php5-mysql, php5-bcmath, php5-snmp and php5-ldap
 * To enable Unicode, add "default-character-set=utf8" line to "[mysql]"
 section of "/etc/my.cnf" file and restart mysqld.
 
 *** Scientific Linux 6
 * MySQL: yum install mysql-server mysql
-* Apache/PHP: httpd php php-mysql php-pdo php-gd php-mbstring
+* Apache/PHP: httpd php php-mysql php-pdo php-gd php-mbstring php-bcmath
 * To enable Unicode, add "character-set-server=utf8" line to "[mysqld]"
 section of "/etc/my.cnf" file and restart mysqld.
 
