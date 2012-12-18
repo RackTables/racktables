@@ -931,7 +931,7 @@ function getProgressBar ($percentage = 0, $theme = '', $inline = FALSE)
 
 function renderNetVLAN ($cell)
 {
-	if (! array_key_exists ('8021q', $cell))
+	if (empty ($cell['8021q']))
 		return;
 	$links = array();
 	foreach ($cell['8021q'] as $vi)
