@@ -1659,12 +1659,13 @@ function linkPorts ($porta, $portb, $cable = NULL)
 		"INNER JOIN Object ON Port.object_id = Object.id WHERE Port.id IN (?, ?)",
 		array ($porta, $portb)
 	);
-	while ($row = $result->fetch (PDO::FETCH_ASSOC))
+	$rows = $result->fetchAll (PDO::FETCH_ASSOC);
+	unset ($result);
+	foreach ($rows as $row)
 	{
 		$pair_id = ($row['id'] == $porta ? $portb : $porta);
 		addPortLogEntry ($pair_id, sprintf ("linked to %s %s", $row['obj_name'], $row['port_name']));
 	}
-	unset ($result);
 }
 
 function commitUpdatePortLink ($port_id, $cable = NULL)
@@ -1694,12 +1695,13 @@ function commitUnlinkPort ($port_id)
 		"Link.porta = ? OR Link.portb = ?",
 		array ($port_id, $port_id)
 	);
-	if ($row = $result->fetch (PDO::FETCH_ASSOC))
+	$rows = $result->fetchAll (PDO::FETCH_ASSOC);
+	unset ($result);
+	foreach ($rows as $row)
 	{
 		addPortLogEntry ($row['id_a'], sprintf ("unlinked from %s %s", $row['obj_name_b'], $row['port_name_b']));
 		addPortLogEntry ($row['id_b'], sprintf ("unlinked from %s %s", $row['obj_name_a'], $row['port_name_a']));
 	}
-	unset ($result);
 
 	// remove existing link
 	usePreparedDeleteBlade ('Link', array ('porta' => $port_id, 'portb' => $port_id), 'OR');
