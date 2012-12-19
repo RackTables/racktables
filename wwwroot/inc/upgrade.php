@@ -218,6 +218,7 @@ function getDBUpgradePath ($v1, $v2)
 		'0.20.0',
 		'0.20.1',
 		'0.20.2',
+		'0.20.3',
 	);
 	if (!in_array ($v1, $versionhistory) or !in_array ($v2, $versionhistory))
 		return NULL;
@@ -1609,6 +1610,9 @@ CREATE TABLE `MuninGraph` (
 			$query[] = "ALTER TABLE VLANIPv6 ADD UNIQUE `network-domain-vlan` (ipv6net_id, domain_id, vlan_id)";
 			$query[] = "ALTER TABLE VLANIPv6 DROP KEY `network-domain`";
 			$query[] = "UPDATE Config SET varvalue = '0.20.2' WHERE varname = 'DB_VERSION'";
+			break;
+		case '0.20.3':
+			$query[] = "UPDATE Config SET varvalue = '0.20.3' WHERE varname = 'DB_VERSION'";
 			break;
 		case 'dictionary':
 			$query = reloadDictionary();
