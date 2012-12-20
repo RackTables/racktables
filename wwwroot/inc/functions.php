@@ -2726,21 +2726,16 @@ function makeHrefForHelper ($helper_name, $params = array())
 function cookOptgroups ($recordList, $object_type_id = 0, $existing_value = 0)
 {
 	$ret = array();
-	// Always keep "other" OPTGROUP at the SELECT bottom.
 	$therest = array();
 	foreach ($recordList as $dict_key => $dict_value)
-		if (strpos ($dict_value, '%GSKIP%') !== FALSE)
-		{
-			$tmp = explode ('%GSKIP%', $dict_value, 2);
-			$ret[$tmp[0]][$dict_key] = $tmp[1];
-		}
-		elseif (strpos ($dict_value, '%GPASS%') !== FALSE)
-		{
-			$tmp = explode ('%GPASS%', $dict_value, 2);
-			$ret[$tmp[0]][$dict_key] = $tmp[1];
-		}
+		if (preg_match ('/^(.*)%(GPASS|GSKIP)%/', $dict_value, $m))
+			$ret[$m[1]][$dict_key] = execGMarker ($dict_value);
 		else
 			$therest[$dict_key] = $dict_value;
+
+	// Always keep "other" OPTGROUP at the SELECT bottom.
+	$ret['other'] = $therest;
+
 	if ($object_type_id != 0)
 	{
 		$screenlist = array();
@@ -2763,7 +2758,6 @@ function cookOptgroups ($recordList, $object_type_id = 0, $existing_value = 0)
 					unset ($ret[$vendor]);
 			}
 	}
-	$ret['other'] = $therest;
 	return $ret;
 }
 
