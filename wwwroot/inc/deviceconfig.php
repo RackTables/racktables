@@ -1744,8 +1744,7 @@ function ftos8TranslatePushQueue ($dummy_object_id, $queue, $vlan_names)
 			$ret .= "int vlan ${cmd['arg1']}\nexit\n";
 			break;
 		case 'destroy VLAN':
-			if (isset ($vlan_names[$cmd['arg1']]))
-				$ret .= "no int vlan ${cmd['arg1']}\n";
+			$ret .= "no int vlan ${cmd['arg1']}\n";
 			break;
 		case 'rem allowed':
 			while (! empty ($cmd['vlans']))
@@ -1761,7 +1760,6 @@ function ftos8TranslatePushQueue ($dummy_object_id, $queue, $vlan_names)
 			{
 				$vlan = array_shift ($cmd['vlans']);
 				$ret .= "int vlan $vlan\n";
-				$ret .= "no untagged ${cmd['port']}\n"; // redundant, switch often responses with error
 				$ret .= "tagged ${cmd['port']}\n";
 				$ret .= "exit\n";
 			}
@@ -1778,9 +1776,13 @@ function ftos8TranslatePushQueue ($dummy_object_id, $queue, $vlan_names)
 			$ret .= "exit\n";
 			break;
 		case 'set native':
+			$ret .= "int vlan ${cmd['arg2']}\n";
+			$ret .= "no tagged ${cmd['arg1']}\n";
+			$ret .= "untagged ${cmd['arg1']}\n";
+			$ret .= "exit\n";
+			break;
 		case 'set access':
 			$ret .= "int vlan ${cmd['arg2']}\n";
-			$ret .= "no tagged ${cmd['arg1']}\n"; // redundant, switch often responses with error
 			$ret .= "untagged ${cmd['arg1']}\n";
 			$ret .= "exit\n";
 			break;
