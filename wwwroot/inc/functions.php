@@ -3397,6 +3397,8 @@ function generate8021QDeployOps ($vswitch, $device_vlanlist, $before, $changes)
 			$domain_vlanlist[$vlan_id]['vlan_type'] != 'alien'
 		)
 			$old_managed_vlans[] = $vlan_id;
+	$old_managed_vlans = array_unique ($old_managed_vlans);
+
 	$ports_to_do = array();
 	$ports_to_do_queue1 = array();
 	$ports_to_do_queue2 = array();
@@ -3476,6 +3478,7 @@ function generate8021QDeployOps ($vswitch, $device_vlanlist, $before, $changes)
 				!in_array ($vlan_id, $new_managed_vlans)
 			)
 				$new_managed_vlans[] = $vlan_id;
+	$new_managed_vlans = array_unique ($new_managed_vlans);
 
 	$vlans_to_add = array_diff ($new_managed_vlans, $old_managed_vlans);
 	$vlans_to_del = array_diff ($old_managed_vlans, $new_managed_vlans);
