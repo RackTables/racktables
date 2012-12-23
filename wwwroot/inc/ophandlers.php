@@ -1488,6 +1488,7 @@ function resetUIConfig()
 	setConfigVar ('SEARCH_DOMAINS', '');
 	setConfigVar ('8021Q_EXTSYNC_LISTSRC', 'false');
 	setConfigVar ('8021Q_MULTILINK_LISTSRC', 'false');
+	setConfigVar ('REVERSED_RACKS_LISTSRC', 'false');
 	return showFuncMessage (__FUNCTION__, 'OK');
 }
 

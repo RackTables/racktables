@@ -659,7 +659,7 @@ function renderRack ($rack_id, $hl_obj_id = 0)
 	echo "<th width='50%'>Interior</th><th width='20%'>Back</th></tr>\n";
 	for ($i = $rackData['height']; $i > 0; $i--)
 	{
-		echo "<tr><th>${i}</th>";
+		echo "<tr><th>" . inverseRackUnit ($i, $rackData) . "</th>";
 		for ($locidx = 0; $locidx < 3; $locidx++)
 		{
 			if (isset ($rackData[$i][$locidx]['skipped']))
@@ -2025,7 +2025,7 @@ function renderMolecule ($mdata, $object_id)
 		echo "<tr><th width='10%'>&nbsp;</th><th width='20%'>Front</th><th width='50%'>Interior</th><th width='20%'>Back</th></tr>\n";
 		for ($i = $rackData['height']; $i > 0; $i--)
 		{
-			echo "<tr><th>$i</th>";
+			echo "<tr><th>" . inverseRackUnit ($i, $rackData) . "</th>";
 			for ($locidx = 0; $locidx < 3; $locidx++)
 			{
 				$state = $rackData[$i][$locidx]['state'];
@@ -3570,7 +3570,7 @@ function renderAtomGrid ($data)
 	addJS ('js/racktables.js');
 	for ($unit_no = $data['height']; $unit_no > 0; $unit_no--)
 	{
-		echo "<tr><th><a href='javascript:;' onclick=\"toggleRowOfAtoms('${rack_id}','${unit_no}')\">${unit_no}</a></th>";
+		echo "<tr><th><a href='javascript:;' onclick=\"toggleRowOfAtoms('${rack_id}','${unit_no}')\">" . inverseRackUnit ($unit_no, $data) . "</a></th>";
 		for ($locidx = 0; $locidx < 3; $locidx++)
 		{
 			$name = "atom_${rack_id}_${unit_no}_${locidx}";

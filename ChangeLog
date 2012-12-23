@@ -1,6 +1,7 @@
 0.20.4
 	bugfix: %GPASS% dictionary markers were ignored in selectboxes
 	bugfix: 802.1Q: better Force10 switches support
+	new feature: configurable top-to-bottom units order in particular racks (#601)
 0.20.3 2012-12-19
 	bugfix: DB exception on ports linking (#699)
 0.20.2 2012-12-19

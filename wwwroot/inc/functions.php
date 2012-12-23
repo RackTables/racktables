@@ -5702,4 +5702,13 @@ function formatEntityList ($list)
 	return $ret;
 }
 
+// returns reversed (top-to-bottom) $unit_no if $rack_cell is configured to be reversed,
+// or unchanged $unit_no otherwise.
+function inverseRackUnit ($unit_no, $rack_cell)
+{
+	if (considerConfiguredConstraint ($rack_cell, 'REVERSED_RACKS_LISTSRC'))
+		$unit_no = $rack_cell['height'] - $unit_no + 1;
+	return $unit_no;
+}
+
 ?>
