@@ -2602,6 +2602,7 @@ function getAccountSearchResult ($terms)
 		foreach ($array as $user)
 		{
 			$user['realm'] = 'user';
+			$user['id'] = $user['user_id'];
 			$ret[$user['user_id']] = $user;
 		}
 	return $ret;
@@ -2684,38 +2685,18 @@ function getRackSearchResult ($terms)
 function getVLANSearchResult ($terms)
 {
 	$ret = array();
-	$matches = array();
-	if (preg_match ('/^vlan\s*(\d+)$/i', $terms, $matches))
+	$byDescr = getSearchResultByField
+	(
+		'VLANDescription',
+		array ('domain_id', 'vlan_id'),
+		'vlan_descr',
+		$terms
+	);
+	foreach ($byDescr as $row)
 	{
-		$byID = getSearchResultByField
-		(
-			'VLANDescription',
-			array ('domain_id', 'vlan_id'),
-			'vlan_id',
-			$matches[1],
-			'domain_id',
-			1
-		);
-		foreach ($byID as $row)
-		{
-			$vlan_ck = $row['domain_id'] . '-' . $row['vlan_id'];
-			$ret[$vlan_ck] = $vlan_ck;
-		}
-	}
-	else
-	{
-		$byDescr = getSearchResultByField
-		(
-			'VLANDescription',
-			array ('domain_id', 'vlan_id'),
-			'vlan_descr',
-			$terms
-		);
-		foreach ($byDescr as $row)
-		{
-			$vlan_ck = $row['domain_id'] . '-' . $row['vlan_id'];
-			$ret[$vlan_ck] = $vlan_ck;
-		}
+		$vlan_ck = $row['domain_id'] . '-' . $row['vlan_id'];
+		$row['id'] = $vlan_ck;
+		$ret[$vlan_ck] = $row;
 	}
 	return $ret;
 }

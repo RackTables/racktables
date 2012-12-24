@@ -4669,31 +4669,55 @@ function searchEntitiesByText ($terms)
 {
 	$summary = array();
 
-	if (preg_match (RE_IP4_ADDR, $terms))
+	if (FALSE !== ($ip_bin = ip4_checkparse ($terms)))
 	// Search for IPv4 address.
 	{
-		if ($net_id = getIPv4AddressNetworkId (ip4_parse ($terms)))
-			$summary['ipv4addressbydq'][$terms] = array ('net_id' => $net_id, 'ip' => $terms);
-
+		if ($net_id = getIPv4AddressNetworkId ($ip_bin))
+			$summary['ipv4addressbydq'][$ip_bin] = array ('net_id' => $net_id, 'ip' => $ip_bin);
 	}
 	elseif (FALSE !== ($ip_bin = ip6_checkparse ($terms)))
 	// Search for IPv6 address
 	{
 		if ($net_id = getIPv6AddressNetworkId ($ip_bin))
-			$summary['ipv6addressbydq'][$net_id] = array ('net_id' => $net_id, 'ip' => $ip_bin);
+			$summary['ipv6addressbydq'][$ip_bin] = array ('net_id' => $net_id, 'ip' => $ip_bin);
 	}
 	elseif (preg_match (RE_IP4_NET, $terms))
 	// Search for IPv4 network
 	{
 		list ($base, $len) = explode ('/', $terms);
 		if (NULL !== ($net_id = getIPv4AddressNetworkId (ip4_parse ($base), $len + 1)))
-			$summary['ipv4network'][$net_id] = spotEntity('ipv4net', $net_id);
+			$summary['ipv4net'][$net_id] = spotEntity('ipv4net', $net_id);
 	}
 	elseif (preg_match ('@(.*)/(\d+)$@', $terms, $matches) && FALSE !== ($ip_bin = ip6_checkparse ($matches[1])))
 	// Search for IPv6 network
 	{
 		if (NULL !== ($net_id = getIPv6AddressNetworkId ($ip_bin, $matches[2] + 1)))
-			$summary['ipv6network'][$net_id] = spotEntity('ipv6net', $net_id);
+			$summary['ipv6net'][$net_id] = spotEntity('ipv6net', $net_id);
+	}
+	elseif (preg_match ('/^vlan\s*(\d+)$/i', $terms, $matches))
+	{
+		$byID = getSearchResultByField
+		(
+			'VLANDescription',
+			array ('domain_id', 'vlan_id'),
+			'vlan_id',
+			$matches[1],
+			'domain_id',
+			1
+		);
+		foreach ($byID as $vlan)
+		{
+			// add vlans to results
+			$vlan_ck = $vlan['domain_id'] . '-' . $vlan['vlan_id'];
+			$vlan['id'] = $vlan_ck;
+			$summary['vlan'][$vlan_ck] = $vlan;
+			// add linked networks to results
+			$vlan_info = getVLANInfo ($vlan_ck);
+			foreach ($vlan_info['ipv4nets'] as $net_id)
+				$summary['ipv4net'][$net_id] = spotEntity ("ipv4net", $net_id);
+			foreach ($vlan_info['ipv6nets'] as $net_id)
+				$summary['ipv6net'][$net_id] = spotEntity ("ipv6net", $net_id);
+		}
 	}
 	else
 	// Search for objects, addresses, networks, virtual services and RS pools by their description.
@@ -4728,8 +4752,8 @@ function searchEntitiesByText ($terms)
 			$summary['object'] = getObjectSearchResults ($terms);
 			$summary['ipv4addressbydescr'] = getIPv4AddressSearchResult ($terms);
 			$summary['ipv6addressbydescr'] = getIPv6AddressSearchResult ($terms);
-			$summary['ipv4network'] = getIPv4PrefixSearchResult ($terms);
-			$summary['ipv6network'] = getIPv6PrefixSearchResult ($terms);
+			$summary['ipv4net'] = getIPv4PrefixSearchResult ($terms);
+			$summary['ipv6net'] = getIPv6PrefixSearchResult ($terms);
 			$summary['ipv4rspool'] = getIPv4RSPoolSearchResult ($terms);
 			$summary['ipv4vs'] = getIPv4VServiceSearchResult ($terms);
 			$summary['user'] = getAccountSearchResult ($terms);
@@ -4740,28 +4764,60 @@ function searchEntitiesByText ($terms)
 	}
 	# Filter search results in a way in some realms to omit records, which the
 	# user would not be able to browse anyway.
-	if (isset ($summary['object']))
-		foreach ($summary['object'] as $key => $record)
-			if (! isolatedPermission ('object', 'default', spotEntity ('object', $record['id'])))
-				unset ($summary['object'][$key]);
-	if (isset ($summary['ipv4network']))
-		foreach ($summary['ipv4network'] as $key => $netinfo)
-			if (! isolatedPermission ('ipv4net', 'default', $netinfo))
-				unset ($summary['ipv4network'][$key]);
-	if (isset ($summary['ipv6network']))
-		foreach ($summary['ipv6network'] as $key => $netinfo)
-			if (! isolatedPermission ('ipv6net', 'default', $netinfo))
-				unset ($summary['ipv6network'][$key]);
-	if (isset ($summary['file']))
-		foreach ($summary['file'] as $key => $fileinfo)
-			if (! isolatedPermission ('file', 'default', $fileinfo))
-				unset ($summary['file'][$key]);
-
+	foreach (array ('object', 'ipv4net', 'ipv6net', 'ipv4rspool', 'ipv4vs', 'file', 'rack') as $realm)
+		if (isset ($summary[$realm]))
+			foreach ($summary[$realm] as $key => $record)
+				if (! isolatedPermission ($realm, 'default', spotEntity ($realm, $record['id'])))
+					unset ($summary[$realm][$key]);
 	// clear empty search result realms
 	foreach ($summary as $key => $data)
 		if (! count ($data))
 			unset ($summary[$key]);
 	return $summary;
+}
+
+// returns URL to redirect to, or NULL if $result_type is unknown
+function buildSearchRedirectURL ($result_type, $record)
+{
+	global $page;
+	$next_page = $result_type;
+	$id = isset ($record['id']) ? $record['id'] : NULL;
+	$params = array();
+	switch ($result_type)
+	{
+		case 'ipv4addressbydq':
+		case 'ipv6addressbydq':
+		case 'ipv4addressbydescr':
+		case 'ipv6addressbydescr':
+			$next_page = strlen ($record['ip']) == 16 ? 'ipv6net' : 'ipv4net';
+			$id = isset ($record['net_id']) ? $record['net_id'] : getIPAddressNetworkId ($record['ip']);
+			$params['hl_ip'] = ip_format ($record['ip']);
+			break;
+		case 'object':
+			if (isset ($record['by_port']) and 1 == count ($record['by_port']))
+			{
+				$found_ports_ids = array_keys ($record['by_port']);
+				$params['hl_port_id'] = $found_ports_ids[0];
+			}
+			break;
+		case 'ipv4net':
+		case 'ipv6net':
+		case 'vlan':
+		case 'user':
+		case 'ipv4rspool':
+		case 'ipv4vs':
+		case 'file':
+		case 'rack':
+			break;
+		default:
+			return NULL;
+	}
+	if (array_key_exists ($next_page, $page) && isset ($page[$next_page]['bypass']))
+		$key = $page[$next_page]['bypass'];
+	if (! isset ($key) || ! isset ($id))
+		return NULL;
+	$params[$key] = $id;
+	return buildRedirectURL ($next_page, 'default', $params);
 }
 
 function getRackCodeWarnings ()

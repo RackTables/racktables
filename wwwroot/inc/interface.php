@@ -3254,77 +3254,15 @@ function renderSearchResults ($terms, $summary)
 				$record = array_shift ($record);
 			break;
 		}
-		switch ($realm)
+		$url = buildSearchRedirectURL ($realm, $record);
+		if (isset ($url))
+			redirectUser ($url);
+		else
 		{
-			case 'ipv4addressbydq':
-				if ($record['net_id'] !== NULL)
-					echo "<script language='Javascript'>document.location='index.php?page=ipv4net&tab=default&id=${record['net_id']}&hl_ip=${record['ip']}';//</script>";
-				break;
-			case 'ipv6addressbydq':
-				$fmt = ip6_format ($record['ip']);
-				if ($record['net_id'] !== NULL)
-					echo "<script language='Javascript'>document.location='index.php?page=ipv6net&tab=default&id=${record['net_id']}&hl_ip=${fmt}';//</script>";
-				break;
-			case 'ipv4addressbydescr':
-				$parentnet = getIPv4AddressNetworkId ($record['ip']);
-				if ($parentnet !== NULL)
-				{
-					$fmt = ip4_format ($record['ip']);
-					echo "<script language='Javascript'>document.location='index.php?page=ipv4net&tab=default&id=${parentnet}&hl_ip=${fmt}';//</script>";
-				}
-				break;
-			case 'ipv6addressbydescr':
-				$parentnet = getIPv6AddressNetworkId ($record['ip']);
-				if ($parentnet !== NULL)
-				{
-					$fmt = ip6_format ($record['ip']);
-					echo "<script language='Javascript'>document.location='index.php?page=ipv6net&tab=default&id=${parentnet}&hl_ip=${fmt}';//</script>";
-				}
-				break;
-			case 'ipv4network':
-				echo "<script language='Javascript'>document.location='index.php?page=ipv4net";
-				echo "&id=${record['id']}";
-				echo "';//</script>";
-				break;
-			case 'ipv6network':
-				echo "<script language='Javascript'>document.location='index.php?page=ipv6net";
-				echo "&id=${record['id']}";
-				echo "';//</script>";
-				break;
-			case 'object':
-				if (isset ($record['by_port']) and 1 == count ($record['by_port']))
-				{
-					$found_ports_ids = array_keys ($record['by_port']);
-					$hl = '&hl_port_id=' . $found_ports_ids[0];
-				}
-				else
-					$hl = '';
-				echo "<script language='Javascript'>document.location='index.php?page=object&object_id=${record['id']}${hl}';//</script>";
-				break;
-			case 'ipv4rspool':
-				echo "<script language='Javascript'>document.location='index.php?page=ipv4rspool&pool_id=${record['id']}';//</script>";
-				break;
-			case 'ipv4vs':
-				echo "<script language='Javascript'>document.location='index.php?page=ipv4vs&vs_id=${record['id']}';//</script>";
-				break;
-			case 'user':
-				echo "<script language='Javascript'>document.location='index.php?page=user&user_id=${record['user_id']}';//</script>";
-				break;
-			case 'file':
-				echo "<script language='Javascript'>document.location='index.php?page=file&file_id=${record['id']}';//</script>";
-				break;
-			case 'rack':
-				echo "<script language='Javascript'>document.location='index.php?page=rack&rack_id=${record['id']}';//</script>";
-				break;
-			case 'vlan':
-				echo "<script language='Javascript'>document.location='index.php?page=vlan&vlan_ck=${record}';//</script>";
-				break;
-			default:
-				startPortlet($realm);
-				echo $record;
-				finishPortlet();
+			startPortlet($realm);
+			echo $record;
+			finishPortlet();
 		}
-		return;
 	}
 	else
 	{
@@ -3412,10 +3350,11 @@ function renderSearchResults ($terms, $summary)
 					echo '</table>';
 					finishPortlet();
 					break;
-				case 'ipv4network':
-					startPortlet ("<a href='index.php?page=ipv4space'>IPv4 networks</a>");
-				case 'ipv6network':
-					if ($where == 'ipv6network')
+				case 'ipv4net':
+				case 'ipv6net':
+					if ($where == 'ipv4net')
+						startPortlet ("<a href='index.php?page=ipv4space'>IPv4 networks</a>");
+					elseif ($where == 'ipv6net')
 						startPortlet ("<a href='index.php?page=ipv6space'>IPv6 networks</a>");
 
 					echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
@@ -3430,39 +3369,28 @@ function renderSearchResults ($terms, $summary)
 					finishPortlet();
 					break;
 				case 'ipv4addressbydescr':
-					startPortlet ('IPv4 addresses');
-					echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
-					// FIXME: address, parent network, routers (if extended view is enabled)
-					echo '<tr><th>Address</th><th>Description</th></tr>';
-					foreach ($what as $addr)
-					{
-						echo "<tr class=row_${order}><td class=tdleft>";
-						$fmt = ip4_format ($addr['ip']);
-						$parentnet = getIPv4AddressNetworkId ($addr['ip']);
-						if ($parentnet !== NULL)
-							echo "<a href='index.php?page=ipv4net&tab=default&id=${parentnet}&hl_ip=${fmt}'>${fmt}</a></td>";
-						else
-							echo "<a href='index.php?page=ipaddress&ip=${fmt}'>${fmt}</a></td>";
-						echo "<td class=tdleft>${addr['name']}</td></tr>";
-						$order = $nextorder[$order];
-					}
-					echo '</table>';
-					finishPortlet();
-					break;
 				case 'ipv6addressbydescr':
-					startPortlet ('IPv6 addresses');
+					if ($where == 'ipv4net')
+						startPortlet ('IPv4 addresses');
+					elseif ($where == 'ipv6net')
+						startPortlet ('IPv6 addresses');
+
 					echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
 					// FIXME: address, parent network, routers (if extended view is enabled)
 					echo '<tr><th>Address</th><th>Description</th></tr>';
 					foreach ($what as $addr)
 					{
 						echo "<tr class=row_${order}><td class=tdleft>";
-						$fmt = ip6_format ($addr['ip']);
-						$parentnet = getIPv6AddressNetworkId ($addr['ip']);
+						$fmt = ip_format ($addr['ip']);
+						$parentnet = getIPAddressNetworkId ($addr['ip']);
 						if ($parentnet !== NULL)
-							echo "<a href='index.php?page=ipv6net&tab=default&id=${parentnet}&hl_ip=${fmt}'>${fmt}</a></td>";
+							echo "<a href='" . makeHref (array (
+									'page' => strlen ($addr['ip']) == 16 ? 'ipv6net' : 'ipv4net',
+									'tab' => 'default',
+									'hl_ip' => $fmt,
+								)) . "'>${fmt}</a></td>";
 						else
-							echo "<a href='index.php?page=ipaddress&ip=${fmt}'>${fmt}</a></td>";
+							echo "<a href='index.php?page=ipaddress&tab=default&ip=${fmt}'>${fmt}</a></td>";
 						echo "<td class=tdleft>${addr['name']}</td></tr>";
 						$order = $nextorder[$order];
 					}
@@ -3537,10 +3465,10 @@ function renderSearchResults ($terms, $summary)
 				case 'vlan':
 					startPortlet ("<a href='index.php?page=8021q'>VLANs</a>");
 					echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
-					foreach ($what as $vlan_ck)
+					foreach ($what as $vlan)
 					{
 						echo "<tr class=row_${order}><td class=tdleft>";
-						echo formatVLANAsHyperlink (getVLANInfo ($vlan_ck)) . "</td></tr>";
+						echo formatVLANAsHyperlink (getVLANInfo ($vlan['id'])) . "</td></tr>";
 						$order = $nextorder[$order];
 					}
 					echo '</table>';
