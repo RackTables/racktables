@@ -5458,7 +5458,7 @@ function isIPNetworkEmpty (&$netinfo)
 // returns the first element of given array, or NULL if array is empty
 function array_first ($array)
 {
-	$single = array_slice ($array, 0, 1);
+	$single = array_slice (array_values ($array), 0, 1);
 	if (count ($single))
 		return $single[0];
 }
@@ -5466,7 +5466,7 @@ function array_first ($array)
 // returns the last element of given array, or NULL if array is empty
 function array_last ($array)
 {
-	$single = array_slice ($array, -1, 1);
+	$single = array_slice (array_values ($array), -1, 1);
 	if (count ($single))
 		return $single[0];
 }
