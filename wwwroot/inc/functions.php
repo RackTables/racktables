@@ -4046,7 +4046,7 @@ function exec8021QDeploy ($object_id, $do_push)
 			array (E_8021Q_PULL_REMOTE_ERROR, $vswitch['object_id'])
 		);
 		$dbxlink->commit();
-		return 0;
+		throw $e;
 	}
 	$conflict = FALSE;
 	$ok_to_push = array();
@@ -4161,7 +4161,7 @@ function exec8021QDeploy ($object_id, $do_push)
 	// TODO: only process changed uplink ports
 	if ($nsaved_uplinks)
 		initiateUplinksReverb ($vswitch['object_id'], $new_uplinks);
-	return $nsaved + $npushed + $nsaved_uplinks;
+	return $conflict ? FALSE : $nsaved + $npushed + $nsaved_uplinks;
 }
 
 function strerror8021Q ($errno)
