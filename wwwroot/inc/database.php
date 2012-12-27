@@ -2710,6 +2710,10 @@ function getSearchResultByField ($tablename, $retcolumns, $scancolumn, $terms, $
 	{
 		switch ($exactness)
 		{
+		case 3:
+			$query .= $pfx . "${scancolumn} REGEXP ?";
+			$qparams[] = $term;
+			break;
 		case 2: // does this work as expected?
 			$query .= $pfx . "BINARY ${scancolumn} = ?";
 			$qparams[] = $term;
