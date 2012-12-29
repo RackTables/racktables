@@ -769,6 +769,7 @@ SELECT
 	rp.name AS remote_name,
 	rp.object_id AS remote_object_id,
 	ro.name AS remote_object_name,
+	Dictionary.dict_value AS remote_object_type,
 	(SELECT COUNT(*) FROM PortLog WHERE PortLog.port_id = rp.id) AS log_count,
 	PortLog.user,
 	UNIX_TIMESTAMP(PortLog.date) AS time
@@ -778,6 +779,7 @@ FROM
 	LEFT JOIN Link ON Port.id = Link.porta OR Port.id = Link.portb
 	LEFT JOIN Port AS rp ON (IF(Link.porta = Port.id, Link.portb, Link.porta)) = rp.id
 	LEFT JOIN Object AS ro ON rp.object_id = ro.id
+	LEFT JOIN Dictionary ON ro.objtype_id = Dictionary.dict_key
 	LEFT JOIN PortLog ON PortLog.id = (SELECT id FROM PortLog WHERE PortLog.port_id = rp.id ORDER BY date DESC LIMIT 1)
 WHERE
 	$sql_where_clause
@@ -805,6 +807,7 @@ END;
 		if (isset ($row['remote_id']))
 		{
 			$row['linked'] = 1;
+			$remote_object_name = empty($row['remote_object_name']) ? '['.$row['remote_object_type'].']' : $row['remote_object_name'];
 			$link_details = array
 			(
 				'link_id' => $row['link_id'],
@@ -812,7 +815,7 @@ END;
 				'remote_id' => $row['remote_id'],
 				'remote_name' => $row['remote_name'],
 				'remote_object_id' => $row['remote_object_id'],
-				'remote_object_name' => $row['remote_object_name'],
+				'remote_object_name' => $remote_object_name,
 			);
 			$link_details['last_log'] = $row['last_log'];
 		}
