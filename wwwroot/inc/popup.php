@@ -558,6 +558,8 @@ function renderPopupPatchPanelSelector ()
 
 function renderPopupTraceRoute ()
 {
+	// disable strict error reporting (GraphViz generates several)
+	error_reporting(E_ERROR | E_WARNING | E_PARSE);
 	@include_once 'Image/GraphViz.php';
 	if (!class_exists ('Image_GraphViz'))
 	{
