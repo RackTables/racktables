@@ -3355,11 +3355,10 @@ function renderSearchResults ($terms, $summary)
 					break;
 				case 'ipv4addressbydescr':
 				case 'ipv6addressbydescr':
-					if ($where == 'ipv4net')
+					if ($where == 'ipv4addressbydescr')
 						startPortlet ('IPv4 addresses');
-					elseif ($where == 'ipv6net')
+					elseif ($where == 'ipv6addressbydescr')
 						startPortlet ('IPv6 addresses');
-
 					echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
 					// FIXME: address, parent network, routers (if extended view is enabled)
 					echo '<tr><th>Address</th><th>Description</th></tr>';
@@ -3371,6 +3370,7 @@ function renderSearchResults ($terms, $summary)
 						if ($parentnet !== NULL)
 							echo "<a href='" . makeHref (array (
 									'page' => strlen ($addr['ip']) == 16 ? 'ipv6net' : 'ipv4net',
+									'id' => $parentnet,
 									'tab' => 'default',
 									'hl_ip' => $fmt,
 								)) . "'>${fmt}</a></td>";
