@@ -1970,6 +1970,14 @@ $dictionary = array
 	1884 => array ('chapter_id' => 18, 'dict_value' => '[[Infortrend%GPASS%ES S16S-J1000-S1 | http://www.infortrend.com/global/products/models/ES%20S16S-J1000-S1]]'),
 	1885 => array ('chapter_id' => 18, 'dict_value' => '[[Infortrend%GPASS%ES S12S-J1000-G | http://www.infortrend.com/global/products/models/ES%20S12S-J1000-G]]'),
 	1886 => array ('chapter_id' => 18, 'dict_value' => '[[Infortrend%GPASS%ES S12S-J1002-R | http://www.infortrend.com/global/products/models/ES%20S12S-J1002-R]]'),
+	1887 => array ('chapter_id' => 12, 'dict_value' => '[[IBM%GPASS%RackSwitch G8052 | http://www-03.ibm.com/systems/networking/switches/rack/g8052/]]'),
+	1888 => array ('chapter_id' => 12, 'dict_value' => '[[IBM%GPASS%RackSwitch G8264 | http://www-03.ibm.com/systems/networking/switches/rack/g8264/]]'),
+	1889 => array ('chapter_id' => 12, 'dict_value' => '[[Brocade%GPASS%ICX-6610-48-PE | http://www.brocade.com/products/all/switches/product-details/icx-6610-switch/index.page'),
+	1890 => array ('chapter_id' => 12, 'dict_value' => '[[Brocade%GPASS%ICX-6650-48-E-ADV | http://www.brocade.com/products/all/switches/product-details/icx-6650-switch/index.page'),
+	1891 => array ('chapter_id' => 12, 'dict_value' => '[[Fortinet%GPASS%Fortigate 3140B| http://www.fortinet.com/products/fortigate/3140B.html'),
+	1892 => array ('chapter_id' => 12, 'dict_value' => '[[Fortinet%GPASS%Fortigate 300C | http://www.fortinet.com/products/fortigate/300C.html'), 
+	1893 => array ('chapter_id' => 12, 'dict_value' => '[[Fortinet%GPASS%Fortigate 800C | http://www.fortinet.com/products/fortigate/800C.html'),
+
 # Any new "default" dictionary records must go above this line (i.e., with
 # dict_key code less, than 50000). This is necessary to keep AUTO_INCREMENT
 # and dictionary updates working properly.
