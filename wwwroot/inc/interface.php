@@ -622,8 +622,7 @@ function printObjectDetailsForRenderRack ($object_id)
 	}
 	else
 		$suffix = "'>";
-	echo $prefix . $body . $suffix;
-	echo "<a href='".makeHref(array('page'=>'object', 'object_id'=>$objectData['id']))."'>${objectData['dname']}</a></div>";
+	echo "${prefix}${body}${suffix}" . mkA ($objectData['dname'], 'object', $objectData['id']) . '</div>';
 }
 
 // This function renders rack as HTML table.
@@ -638,21 +637,12 @@ function renderRack ($rack_id, $hl_obj_id = 0)
 	$prev_id = getPrevIDforRack ($rackData['row_id'], $rack_id);
 	$next_id = getNextIDforRack ($rackData['row_id'], $rack_id);
 	echo "<center><table border=0><tr valign=middle>";
-	echo "<td><h2><a href='".makeHref(array('page'=>'row', 'row_id'=>$rackData['row_id']))."'>${rackData['row_name']}</a> :</h2></td>";
-	// FIXME: use 'bypass'?
+	echo '<td><h2>' . mkA ($rackData['row_name'], 'row', $rackData['row_id']) . ' :</h2></td>';
 	if ($prev_id != NULL)
-	{
-		echo "<td><a href='".makeHref(array('page'=>'rack', 'rack_id'=>$prev_id))."'>";
-		printImageHREF ('prev', 'previous rack');
-		echo "</a></td>";
-	}
-	echo "<td><h2><a href='".makeHref(array('page'=>'rack', 'rack_id'=>$rackData['id']))."'>${rackData['name']}</a></h2></td>";
+		echo '<td>' . mkA (getImageHREF ('prev', 'previous rack'), 'rack', $prev_id) . '</td>';
+	echo '<td><h2>' . mkA ($rackData['name'], 'rack', $rackData['id']) . '</h2></td>';
 	if ($next_id != NULL)
-	{
-		echo "<td><a href='".makeHref(array('page'=>'rack', 'rack_id'=>$next_id))."'>";
-		printImageHREF ('next', 'next rack');
-		echo "</a></td>";
-	}
+		echo '<td>' . mkA (getImageHREF ('next', 'next rack'), 'rack', $next_id) . '</td>';
 	echo "</h2></td></tr></table>\n";
 	echo "<table class=rack border=0 cellspacing=0 cellpadding=1>\n";
 	echo "<tr><th width='10%'>&nbsp;</th><th width='20%'>Front</th>";
@@ -817,7 +807,7 @@ function renderEditObjectForm()
 				$label = count($parents) > 1 ? 'Containers:' : 'Container:';
 			echo "<tr><td>&nbsp;</td>";
 			echo "<th class=tdright>${label}</th><td class=tdleft>";
-			echo "<a href='".makeHref(array('page'=>'object', 'object_id'=>$parent_details['entity_id']))."'>${parent_details['name']}</a>";
+			echo mkA ($parent_details['name'], 'object', $parent_details['entity_id']);
 			echo "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
 			echo "<a href='".
 				makeHrefProcess(array(
@@ -1292,7 +1282,7 @@ function renderObject ($object_id)
 				echo "<td class='description'>";
 				if (count ($address['allocs']))
 					foreach($address['allocs'] as $bond)
-						echo "<a href='".makeHref(array('page'=>'object', 'tab'=>'default', 'object_id'=>$bond['object_id']))."'>${bond['object_name']}(${bond['name']})</a> ";
+						echo mkA ("${bond['object_name']}(${bond['name']})", 'object', $bond['object_id']) . ' ';
 				elseif (strlen ($pf['remote_addr_name']))
 					echo '(' . $pf['remote_addr_name'] . ')';
 				echo "</td><td class='description'>${pf['description']}</td></tr>";
@@ -1308,7 +1298,7 @@ function renderObject ($object_id)
 			{
 				echo "<tr>";
 				echo "<td>${pf['proto']}/" . getRenderedIPPortPair ($pf['localip'], $pf['localport']) . "</td>";
-				echo "<td class='description'><a href='".makeHref(array('page'=>'object', 'tab'=>'default', 'object_id'=>$pf['object_id']))."'>${pf['object_name']}</a>";
+				echo '<td class="description">' . mkA ($pf['object_name'], 'object', $pf['object_id']);
 				echo "</td><td>" . getRenderedIPPortPair ($pf['remoteip'], $pf['remoteport']) . "</td>";
 				echo "<td class='description'>${pf['description']}</td></tr>";
 			}
@@ -2061,7 +2051,7 @@ function renderDepot ()
 			$mountinfo = getMountInfo ($idlist);
 			foreach ($objects as $obj)
 			{
-				echo "<tr class='row_${order} tdleft' valign=top><td><a href='".makeHref(array('page'=>'object', 'object_id'=>$obj['id']))."'><strong>${obj['dname']}</strong></a>";
+				echo "<tr class='row_${order} tdleft' valign=top><td>" . mkA ("<strong>${obj['dname']}</strong>", 'object', $obj['id']);
 				if (count ($obj['etags']))
 					echo '<br><small>' . serializeTags ($obj['etags'], makeHref(array('page'=>$pageno, 'tab'=>'default')) . '&') . '</small>';
 				echo "</td><td>${obj['label']}</td>";
@@ -2345,8 +2335,7 @@ function renderIPSpaceEditor()
 				printImageHREF ('nodestroy', 'There are ' . count ($netinfo['addrlist']) . ' allocations inside');
 			else
 				echo getOpLink (array	('op' => 'del', 'id' => $netinfo['id']), '', 'destroy', 'Delete this prefix');
-			echo '</td><td class=tdleft><a href="' . makeHref (array ('page' => $net_page, 'id' => $netinfo['id'])) . '">';
-			echo "${netinfo['ip']}/${netinfo['mask']}</a></td>";
+			echo '</td><td class=tdleft>' . mkA ("${netinfo['ip']}/${netinfo['mask']}", $net_page, $netinfo['id']) . '</td>';
 			echo '<td class=tdleft>' . niftyString ($netinfo['name']);
 			if (count ($netinfo['etags']))
 				echo '<br><small>' . serializeTags ($netinfo['etags']) . '</small>';
@@ -2650,15 +2639,13 @@ function renderIPv4NetworkAddresses ($range)
 		foreach ($addr['vslist'] as $vs_id)
 		{
 			$vs = spotEntity ('ipv4vs', $vs_id);
-			echo "${delim}<a href='".makeHref(array('page'=>'ipv4vs', 'vs_id'=>$vs['id']))."'>";
-			echo "${vs['name']}:${vs['vport']}/${vs['proto']}</a>&rarr;";
+			echo $delim . mkA ("${vs['name']}:${vs['vport']}/${vs['proto']}", 'ipv4vs', $vs['id']) . '&rarr;';
 			$delim = '<br>';
 		}
 		foreach ($addr['rsplist'] as $rsp_id)
 		{
 			$rsp = spotEntity ('ipv4rspool', $rsp_id);
-			echo "${delim}&rarr;<a href='".makeHref(array('page'=>'ipv4rspool', 'pool_id'=>$rsp['id']))."'>";
-			echo "${rsp['name']}</a>";
+			echo "${delim}&rarr;" . mkA ($rsp['name'], 'ipv4rspool', $rsp['id']);
 			$delim = '<br>';
 		}
 		echo "</td></tr>\n";
@@ -2765,15 +2752,13 @@ function renderIPv6NetworkAddresses ($netinfo)
 		foreach ($addr['vslist'] as $vs_id)
 		{
 			$vs = spotEntity ('ipv4vs', $vs_id);
-			echo "${delim}<a href='".makeHref(array('page'=>'ipv4vs', 'vs_id'=>$vs['id']))."'>";
-			echo "${vs['name']}:${vs['vport']}/${vs['proto']}</a>&rarr;";
+			echo $delim . mkA ("${vs['name']}:${vs['vport']}/${vs['proto']}", 'ipv4vs', $vs['id']) . '&rarr;';
 			$delim = '<br>';
 		}
 		foreach ($addr['rsplist'] as $rsp_id)
 		{
 			$rsp = spotEntity ('ipv4rspool', $rsp_id);
-			echo "${delim}&rarr;<a href='".makeHref(array('page'=>'ipv4rspool', 'pool_id'=>$rsp['id']))."'>";
-			echo "${rsp['name']}</a>";
+			echo "${delim}&rarr;" . mkA ($rsp['name'], 'ipv4rspool', $rsp['id']);
 			$delim = '<br>';
 		}
 		echo "</td></tr>\n";
@@ -3074,7 +3059,7 @@ function renderNATv4ForObject ($object_id)
 		echo "<td class='description'>";
 		if (count ($address['allocs']))
 			foreach ($address['allocs'] as $bond)
-				echo "<a href='".makeHref(array('page'=>'object', 'tab'=>'default', 'object_id'=>$bond['object_id']))."'>${bond['object_name']}(${bond['name']})</a> ";
+				echo mkA ("${bond['object_name']}(${bond['name']})", 'object', $bond['object_id']) . ' ';
 		elseif (strlen ($pf['remote_addr_name']))
 			echo '(' . $pf['remote_addr_name'] . ')';
 		printOpFormIntro
@@ -3120,7 +3105,7 @@ function renderNATv4ForObject ($object_id)
 		printImageHREF ('delete', 'Delete NAT rule');
 		echo "</a></td>";
 		echo "<td>${pf['proto']}/" . getRenderedIPPortPair ($pf['localip'], $pf['localport']) . "</td>";
-		echo "<td class='description'><a href='".makeHref(array('page'=>'object', 'tab'=>'default', 'object_id'=>$pf['object_id']))."'>${pf['object_name']}</a>";
+		echo '<td class="description">' . mkA ($pf['object_name'], 'object', $pf['object_id']);
 		echo "</td><td>" . getRenderedIPPortPair ($pf['remoteip'], $pf['remoteport']) . "</td>";
 		echo "<td class='description'>${pf['description']}</td></tr>";
 	}
@@ -3777,7 +3762,7 @@ function renderLocationPage ($location_id)
 	startPortlet ('Rows');
 	echo "<table border=0 cellspacing=0 cellpadding=5 align=center>\n";
 	foreach ($locationData['rows'] as $row_id => $name)
-		echo "<tr><td><a href='".makeHref(array('page'=>'row', 'row_id'=>$row_id))."'>".$name."</td></tr>\n";
+		echo '<tr><td>' . mkA ($name, 'row', $row_id) . '</td></tr>';
 	echo "</table>\n";
 	finishPortlet();
 	echo '</td>';
@@ -3887,14 +3872,9 @@ function renderRackPage ($rack_id)
 
 function renderDictionary ()
 {
-	global $nextorder;
 	echo '<ul>';
 	foreach (getChapterList() as $chapter_no => $chapter)
-	{
-		$wc = $chapter['wordc'];
-		echo "<li><a href='".makeHref(array('page'=>'chapter', 'chapter_no'=>$chapter_no))."'>${chapter['name']}</a>";
-		echo " (${wc} records)</li>";
-	}
+		echo '<li>' . mkA ($chapter['name'], 'chapter', $chapter_no) . " (${chapter['wordc']} records)</li>";
 	echo '</ul>';
 }
 
@@ -4690,7 +4670,7 @@ function renderLivePTR ($id)
 		echo "><td class='tdleft";
 		if (isset ($range['addrlist'][$ip_bin]['class']) and strlen ($range['addrlist'][$ip_bin]['class']))
 			echo ' ' . $range['addrlist'][$ip_bin]['class'];
-		echo "'><a href='".makeHref(array('page'=>'ipaddress', 'ip'=>$straddr))."'>${straddr}</a></td>";
+		echo "'>" . mkA ($straddr, 'ipaddress', $straddr) . '</td>';
 		echo "<td class=tdleft>${addr['name']}</td><td class=tdleft>${ptrname}</td><td>";
 		if ($print_cbox)
 			echo "<input type=checkbox name=import_${idx} tabindex=${idx} id=atom_1_" . $box_counter++ . "_1>";
@@ -5649,7 +5629,7 @@ function printRoutersTD ($rlist, $as_cell = 'yes')
 		if ($as_cell == 'yes')
 			renderRouterCell ($rtr['ip_bin'], $rtr['iface'], $rinfo);
 		else
-			echo $pfx . '<a href="' . makeHref (array ('page' => 'object', 'object_id' => $rinfo['id'])) . '">' . $rinfo['dname'] . '</a>';
+			echo $pfx . mkA ($rinfo['dname'], 'object', $rinfo['id']);
 		$pfx = "<br>\n";
 	}
 	echo '</td>';
@@ -5722,8 +5702,7 @@ function renderCell ($cell)
 	case 'user':
 		echo "<table class='slbcell vscell'><tr><td rowspan=3 width='5%'>";
 		printImageHREF ('USER');
-		echo '</td>';
-		echo "<td><a href='index.php?page=user&user_id=${cell['user_id']}'>${cell['user_name']}</a></td></tr>";
+		echo '</td><td>' . mkA ($cell['user_name'], 'user', $cell['user_id']) . '</td></tr>';
 		if (strlen ($cell['user_realname']))
 			echo "<tr><td><strong>" . niftyString ($cell['user_realname']) . "</strong></td></tr>";
 		else
@@ -5751,7 +5730,7 @@ function renderCell ($cell)
 				break;
 		}
 		echo "</td><td>";
-		printf ("<a href='index.php?page=file&file_id=%s'><strong>%s</strong></a>", $cell['id'], niftyString ($cell['name']));
+		echo mkA ('<strong>' . niftyString ($cell['name']) . '</strong>', 'file', $cell['id']);
 		echo "</td><td rowspan=3 valign=top>";
 		if (isset ($cell['links']) and count ($cell['links']))
 			printf ("<small>%s</small>", serializeFileLinks ($cell['links']));
@@ -5776,8 +5755,7 @@ function renderCell ($cell)
 	case 'ipv6net':
 		echo "<table class='slbcell vscell'><tr><td rowspan=3 width='5%'>";
 		printImageHREF ('NET');
-		echo '</td>';
-		echo "<td><a href='index.php?page={$cell['realm']}&id=${cell['id']}'>${cell['ip']}/${cell['mask']}</a>";
+		echo '</td><td>' . mkA ("${cell['ip']}/${cell['mask']}", $cell['realm'], $cell['id']);
 		echo getRenderedIPNetCapacity ($cell);
 		echo '</td></tr>';
 
@@ -5800,7 +5778,7 @@ function renderCell ($cell)
 		echo "<img border=0 width=${thumbwidth} height=${thumbheight} title='${cell['height']} units' ";
 		echo "src='?module=image&img=minirack&rack_id=${cell['id']}'>";
 		echo "</td><td>";
-		printf ("<a href='index.php?page=rack&rack_id=%s'><strong>%s</strong></a>", $cell['id'], niftyString ($cell['name']));
+		echo mkA ('<strong>' . niftyString ($cell['name']) . '</strong>', 'rack', $cell['id']);
 		echo "</td></tr><tr><td>";
 		echo niftyString ($cell['comment']);
 		echo "</td></tr><tr><td>";
@@ -5810,10 +5788,9 @@ function renderCell ($cell)
 	case 'object':
 		echo "<table class='slbcell vscell'><tr><td rowspan=2 width='5%'>";
 		printImageHREF ('OBJECT');
-		echo '</td>';
-		echo "<td><a href='index.php?page=object&object_id=${cell['id']}'>";
-		echo "<strong>" . niftyString ($cell['dname']) . "</strong></a></td></tr>";
-		echo '<td>';
+		echo '</td><td>';
+		echo mkA ('<strong>' . niftyString ($cell['dname']) . '</strong>', 'object', $cell['id']);
+		echo '</td></tr><tr><td>';
 		echo count ($cell['etags']) ? ("<small>" . serializeTags ($cell['etags']) . "</small>") : '&nbsp;';
 		echo "</td></tr></table>";
 		break;
@@ -6481,15 +6458,12 @@ function render8021QOrderForm ($some_id)
 		if ($pageno != 'object')
 		{
 			$object = spotEntity ('object', $item_object_id);
-			echo '<td><a href="' . makeHREF (array ('page' => 'object', 'object_id' => $object['id'])) . '">';
-			echo "${object['dname']}</a></td>";
+			echo '<td>' . mkA ($object['dname'], 'object', $object['id']) . '</td>';
 		}
 		if ($pageno != 'vlandomain')
-			echo '<td><a href="' . makeHREF (array ('page' => 'vlandomain', 'vdom_id' => $item['vdom_id'])) . '">' .
-				$vdomlist[$item['vdom_id']] . '</a></td>';
+			echo '<td>' . mkA ($vdomlist[$item['vdom_id']], 'vlandomain', $item['vdom_id']) . '</td>';
 		if ($pageno != 'vst')
-			echo '<td><a href="' . makeHREF (array ('page' => 'vst', 'vst_id' => $item['vst_id'])) . '">' .
-				$vstlist[$item['vst_id']] . '</a></td>';
+			echo '<td>' . mkA ($vstlist[$item['vst_id']], 'vst', $item['vst_id']) . '</td>';
 		echo "<td>${cutblock}</td></tr>";
 	}
 	if
@@ -6522,9 +6496,7 @@ function render8021QStatus ()
 		{
 			foreach ($columns as $cname)
 				$stats[$cname] += $dominfo[$cname];
-			echo "<tr align=left><td><a href='";
-			echo makeHref (array ('page' => 'vlandomain', 'vdom_id' => $vdom_id)) . "'>";
-			echo niftyString ($dominfo['description']) . '</a></td>';
+			echo '<tr align=left><td>' . mkA (niftyString ($dominfo['description']), 'vlandomain', $vdom_id) . '</td>';
 			foreach ($columns as $cname)
 				echo '<td>' . $dominfo[$cname] . '</td>';
 			echo '</tr>';
@@ -6570,8 +6542,7 @@ function render8021QStatus ()
 	echo '<table border=0 cellspacing=0 cellpadding=3 width="100%">';
 	foreach (get8021QDeployQueues() as $qcode => $qitems)
 	{
-		echo '<tr><th width="50%" class=tdright><a href="' . makeHREF (array ('page' => 'dqueue', 'dqcode' => $qcode));
-		echo '">' . $dqtitle[$qcode] . '</a>:</th>';
+		echo '<tr><th width="50%" class=tdright>' . mkA ($dqtitle[$qcode], 'dqueue', $qcode) . ':</th>';
 		echo '<td class=tdleft>' . count ($qitems['enabled']) . '</td></tr>';
 
 		$enabled_total += count ($qitems['enabled']);
@@ -6581,8 +6552,7 @@ function render8021QStatus ()
 	$total = $enabled_total + $disabled_total;
 	echo "<p align=left>$total switches total";
 	if ($disabled_total)
-		echo ', <a href="' . makeHREF (array ('page' => 'dqueue', 'dqcode' => 'disabled')) . '">' .
-		$disabled_total . "</a> disabled";
+		echo ', ' . mkA ($disabled_total, 'dqueue', 'disabled') . ' disabled';
 	echo '</p>';
 	finishPortlet();
 	echo '</td></tr></table>';
@@ -6678,9 +6648,8 @@ function renderVLANDomain ($vdom_id)
 		echo '</th><th>ports</th><th>description</th></tr>';
 		foreach ($myvlans as $vlan_id => $vlan_info)
 		{
-			echo "<tr class=row_${order}><td class=tdright><a href='";
-			echo makeHref (array ('page' => 'vlan', 'vlan_ck' => "${vdom_id}-${vlan_id}"));
-			echo "'>${vlan_id}</a></td>";
+			echo "<tr class=row_${order}>";
+			echo '<td class=tdright>' . mkA ($vlan_id, 'vlan', "${vdom_id}-${vlan_id}") . '</td>';
 			echo '<td>' . $vtdecoder[$vlan_info['vlan_type']] . '</td>';
 			echo '<td class=tdright>' . ($vlan_info['netc'] ? $vlan_info['netc'] : '&nbsp;') . '</td>';
 			echo '<td class=tdright>' . ($vlan_info['portc'] ? $vlan_info['portc'] : '&nbsp;') . '</td>';
@@ -8304,7 +8273,8 @@ function renderVirtualResourcesSummary ()
 		$order = 'odd';
 		foreach ($clusters as $cluster)
 		{
-			echo "<tr class=row_${order} valign=top><td class='tdleft'><a href='".makeHref(array('page'=>'object', 'object_id'=>$cluster['id']))."'><strong>${cluster['name']}</strong></a></td>";
+			echo "<tr class=row_${order} valign=top>";
+			echo '<td class="tdleft">' . mkA ("<strong>${cluster['name']}</strong>", 'object', $cluster['id']) . '</td>';
 			echo "<td class='tdleft'>${cluster['hypervisors']}</td>";
 			echo "<td class='tdleft'>${cluster['VMs']}</td>";
 			echo "</tr>\n";
@@ -8327,8 +8297,9 @@ function renderVirtualResourcesSummary ()
 		$order = 'odd';
 		foreach ($pools as $pool)
 		{
-			echo "<tr class=row_${order} valign=top><td class='tdleft'><a href='".makeHref(array('page'=>'object', 'object_id'=>$pool['id']))."'><strong>${pool['name']}</strong></a></td>";
-			echo "<td class='tdleft'><a href='".makeHref(array('page'=>'object', 'object_id'=>$pool['cluster_id']))."'><strong>${pool['cluster_name']}</strong></a></td>";
+			echo "<tr class=row_${order} valign=top>";
+			echo '<td class="tdleft">' . mkA ("<strong>${pool['name']}</strong>", 'object', $pool['id']) . '</td>';
+			echo '<td class="tdleft">' . mkA ("<strong>${pool['cluster_name']}</strong>", 'object', $pool['cluster_id']) . '</td>';
 			echo "<td class='tdleft'>${pool['VMs']}</td>";
 			echo "</tr>\n";
 			$order = $nextorder[$order];
@@ -8350,8 +8321,9 @@ function renderVirtualResourcesSummary ()
 		$order = 'odd';
 		foreach ($hypervisors as $hypervisor)
 		{
-			echo "<tr class=row_${order} valign=top><td class='tdleft'><a href='".makeHref(array('page'=>'object', 'object_id'=>$hypervisor['id']))."'><strong>${hypervisor['name']}</strong></a></td>";
-			echo "<td class='tdleft'><a href='".makeHref(array('page'=>'object', 'object_id'=>$hypervisor['cluster_id']))."'><strong>${hypervisor['cluster_name']}</strong></a></td>";
+			echo "<tr class=row_${order} valign=top>";
+			echo '<td class="tdleft">' . mkA ("<strong>${hypervisor['name']}</strong>", 'object', $hypervisor['id']) . '</td>';
+			echo '<td class="tdleft">' . mkA ("<strong>${hypervisor['cluster_name']}</strong>", 'object', $hypervisor['cluster_id']) . '</td>';
 			echo "<td class='tdleft'>${hypervisor['VMs']}</td>";
 			echo "</tr>\n";
 			$order = $nextorder[$order];
@@ -8373,7 +8345,8 @@ function renderVirtualResourcesSummary ()
 		$order = 'odd';
 		foreach ($switches as $switch)
 		{
-			echo "<tr class=row_${order} valign=top><td class='tdleft'><a href='".makeHref(array('page'=>'object', 'object_id'=>$switch['id']))."'><strong>${switch['name']}</strong></a></td>";
+			echo "<tr class=row_${order} valign=top>";
+			echo '<td class="tdleft">' . mkA ("<strong>${switch['name']}</strong>", 'object', $switch['id']) . '</td>';
 			echo "</tr>\n";
 			$order = $nextorder[$order];
 		}
@@ -8594,9 +8567,7 @@ function renderEditVlan ($vlan_ck)
 		$clear_line .= '<p>';
 		$clear_line .= '<a href="' . makeHrefProcess (array ('op' => 'clear')) . '">';
 		$clear_line .= getImageHREF ('clear', "remove this vlan from $portc ports") . ' remove</a>' .
-			' this VLAN from ' .
-			'<a href="' . makeHref (array ('page' => 'vlan', 'tab' => 'default', 'vlan_ck' => $vlan_ck)) . '">' .
-			"$portc ports</a>";
+			' this VLAN from ' . mkA ("${portc} ports", 'vlan', $vlan_ck);
 	}
 
 	$reason = '';
