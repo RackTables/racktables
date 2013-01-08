@@ -26,7 +26,7 @@ function dispatchImageRequest()
 		$tabno = 'default';
 		fixContext();
 		assertPermission();
-		renderRackThumb (getBypassValue());
+		dispatchMiniRackThumbRequest (getBypassValue());
 		break;
 	case 'preview': // file security context
 		$pageno = 'file';
@@ -101,42 +101,35 @@ function colorFromHex ($image, $hex)
 	return $c;
 }
 
-function renderRackThumb ($rack_id = 0)
+# Generate a complete HTTP response for a 1:1 minirack image, use and update
+# SQL cache where appropriate.
+function dispatchMiniRackThumbRequest ($rack_id)
 {
-	// Don't call DB extra times, hence we are most probably not the
-	// only script wishing to access the same data now.
 	if (NULL !== ($thumbcache = loadThumbCache ($rack_id)))
 	{
-		header("Content-type: image/png");
+		header ('Content-type: image/png');
 		echo $thumbcache;
 		return;
 	}
 	ob_start();
-	if (FALSE !== generateMiniRack ($rack_id))
-	{
-		$capture = ob_get_clean();
-		header("Content-type: image/png");
-		echo $capture;
-		usePreparedExecuteBlade
-		(
-			'REPLACE INTO RackThumbnail SET rack_id=?, thumb_data=?',
-			array ($rack_id, base64_encode ($capture))
-		);
-		return;
-	}
-	// error text in the buffer
-	ob_end_flush();
+	printRackThumbImage ($rack_id);
+	$capture = ob_get_clean();
+	header ('Content-type: image/png');
+	echo $capture;
+	usePreparedExecuteBlade
+	(
+		'REPLACE INTO RackThumbnail SET rack_id=?, thumb_data=?',
+		array ($rack_id, base64_encode ($capture))
+	);
 }
 
-// Output a binary string containing the PNG minirack. Indicate error with return code.
-function generateMiniRack ($rack_id)
+# Generate a binary PNG image for a rack contents.
+function printRackThumbImage ($rack_id)
 {
-	if (NULL === ($rackData = spotEntity ('rack', $rack_id)))
-		return FALSE;
+	$rackData = spotEntity ('rack', $rack_id);
 	amplifyCell ($rackData);
 	markupObjectProblems ($rackData);
 	global $rtwidth;
-	$rtdepth = 9;
 	$offset[0] = 3;
 	$offset[1] = 3 + $rtwidth[0];
 	$offset[2] = 3 + $rtwidth[0] + $rtwidth[1];
@@ -164,7 +157,6 @@ function generateMiniRack ($rack_id)
 	imagerectangle ($img, 1, 1, $totalwidth - 2, $totalheight - 2, $border_color);
 	imagerectangle ($img, 2, 2, $totalwidth - 3, $totalheight - 3, $color['black']);
 	for ($unit_no = 1; $unit_no <= $rackData['height']; $unit_no++)
-	{
 		for ($locidx = 0; $locidx < 3; $locidx++)
 		{
 			$colorcode = $rackData[$unit_no][$locidx]['state'];
@@ -180,10 +172,8 @@ function generateMiniRack ($rack_id)
 				$color[$colorcode]
 			);
 		}
-	}
 	imagepng ($img);
 	imagedestroy ($img);
-	return TRUE;
 }
 
 function renderProgressBarImage ($done)
