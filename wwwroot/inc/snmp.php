@@ -1386,6 +1386,24 @@ $iftable_processors['nec-any-SFP+'] = array
 	'try_next_proc' => FALSE,
 );
 
+$iftable_processors['ibm-any-1000T'] = array
+(
+	'pattern' => '@^Ethernet(\d+)$@',
+	'replacement' => 'port \\1',
+	'dict_key' => '1-24',
+	'label' => '\\1',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['ibm-49-to-52-SFP+'] = array
+(
+	'pattern' => '@^Ethernet(49|50|51|52)$@',
+	'replacement' => 'port \\1',
+	'dict_key' => '9-1084',
+	'label' => '\\1',
+	'try_next_proc' => FALSE,
+);
+
 global $known_switches;
 $known_switches = array // key is system OID w/o "enterprises" prefix
 (
@@ -2393,6 +2411,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'PF5240: 48 RJ-45/10-100-1000T(X) + 4 SFP+',
 		'processors' => array ('nec-any-1000T', 'nec-any-SFP+', 'nec-mgmt'),
 	),
+	'26543.1.7.7' => array
+	(
+		'dict_key' => 1887,
+		'text' => 'G8052: 48 RJ-45/10-100-1000T(X) + 4 SFP+',
+		'processors' => array ('ibm-49-to-52-SFP+', 'ibm-any-1000T'),
+	),
 );
 
 global $swtype_pcre;
@@ -2793,6 +2817,10 @@ function doSwitchSNMPmining ($objectInfo, $device)
 		checkPIC ('1-16');
 		commitAddPort ($objectInfo['id'], 'PS1', '1-16', '', '');
 		commitAddPort ($objectInfo['id'], 'PS2', '1-16', '', '');
+		break;
+	case preg_match ('/^26543\.1\.7\./', $sysObjectID): # IBM
+		checkPIC ('1-29');
+		commitAddPort ($objectInfo['id'], 'console', '1-29', '', ''); # RJ-45 RS-232 console
 		break;
 	default: // Nortel...
 		break;
