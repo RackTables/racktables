@@ -6572,7 +6572,7 @@ function render8021QStatus ()
 	{
 		echo '<tr><th width="50%" class=tdright><a href="' . makeHREF (array ('page' => 'dqueue', 'dqcode' => $qcode));
 		echo '">' . $dqtitle[$qcode] . '</a>:</th>';
-	    echo '<td class=tdleft>' . count ($qitems['enabled']) . '</td></tr>';
+		echo '<td class=tdleft>' . count ($qitems['enabled']) . '</td></tr>';
 
 		$enabled_total += count ($qitems['enabled']);
 		$disabled_total += count ($qitems['disabled']);
