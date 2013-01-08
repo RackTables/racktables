@@ -1386,6 +1386,15 @@ $iftable_processors['nec-any-SFP+'] = array
 	'try_next_proc' => FALSE,
 );
 
+$iftable_processors['ibm-mgmt'] = array
+(
+	'pattern' => '@^Management1$@',
+	'replacement' => 'mgmt',
+	'dict_key' => '1-24',
+	'label' => 'Mgmt',
+	'try_next_proc' => FALSE,
+);
+
 $iftable_processors['ibm-any-1000T'] = array
 (
 	'pattern' => '@^Ethernet(\d+)$@',
@@ -1398,6 +1407,15 @@ $iftable_processors['ibm-any-1000T'] = array
 $iftable_processors['ibm-49-to-52-SFP+'] = array
 (
 	'pattern' => '@^Ethernet(49|50|51|52)$@',
+	'replacement' => 'port \\1',
+	'dict_key' => '9-1084',
+	'label' => '\\1',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['ibm-any-SFP+'] = array
+(
+	'pattern' => '@^Ethernet(\d+)$@',
 	'replacement' => 'port \\1',
 	'dict_key' => '9-1084',
 	'label' => '\\1',
@@ -2410,6 +2428,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'dict_key' => 1810,
 		'text' => 'PF5240: 48 RJ-45/10-100-1000T(X) + 4 SFP+',
 		'processors' => array ('nec-any-1000T', 'nec-any-SFP+', 'nec-mgmt'),
+	),
+	'26543.1.7.6' => array
+	(
+		'dict_key' => 1888,
+		'text' => 'G8264: 48 SFP+ + 4 QSFP+ w/breakout',
+		'processors' => array ('ibm-any-SFP+', 'ibm-mgmt'),
 	),
 	'26543.1.7.7' => array
 	(
