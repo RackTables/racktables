@@ -589,7 +589,7 @@ function renderRow ($row_id)
 		echo "<td align=center valign=bottom class=row_${class}><a href='".makeHref(array('page'=>'rack', 'rack_id'=>$rack['id']))."'>";
 		echo "<img border=0 width=${rackwidth} height=" . (getRackImageHeight ($rack['height']) * getConfigVar ('ROW_SCALE'));
 		echo " title='${rack['height']} units'";
-		echo "src='?module=image&img=minirack&rack_id=${rack['id']}'>";
+		echo "src='?module=image&img=midirack&rack_id=${rack['id']}&scale=" . getConfigVar ('ROW_SCALE') . "'>";
 		echo "<br>${rack['name']}</a></td>";
 		$order = $nextorder[$order];
 		$rackListIdx++;

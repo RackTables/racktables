@@ -28,6 +28,16 @@ function dispatchImageRequest()
 		assertPermission();
 		dispatchMiniRackThumbRequest (getBypassValue());
 		break;
+	case 'midirack': // rack security context
+		$pageno = 'rack';
+		$tabno = 'default';
+		fixContext();
+		assertPermission();
+		genericAssertion ('scale', 'uint');
+		# Scaling implies no caching, there is no special dispatching.
+		header ('Content-type: image/png');
+		printRackThumbImage (getBypassValue(), $_REQUEST['scale']);
+		break;
 	case 'preview': // file security context
 		$pageno = 'file';
 		$tabno = 'download';
@@ -124,7 +134,7 @@ function dispatchMiniRackThumbRequest ($rack_id)
 }
 
 # Generate a binary PNG image for a rack contents.
-function printRackThumbImage ($rack_id)
+function printRackThumbImage ($rack_id, $scale = 1)
 {
 	$rackData = spotEntity ('rack', $rack_id);
 	amplifyCell ($rackData);
@@ -172,6 +182,13 @@ function printRackThumbImage ($rack_id)
 				$color[$colorcode]
 			);
 		}
+	if ($scale > 1)
+	{
+		$resized = imagecreate ($totalwidth * $scale, $totalheight * $scale);
+		imagecopyresized ($resized, $img, 0, 0, 0, 0, $totalwidth * $scale, $totalheight * $scale, $totalwidth, $totalheight);
+		imagedestroy ($img);
+		$img = $resized;
+	}
 	imagepng ($img);
 	imagedestroy ($img);
 }
