@@ -101,6 +101,20 @@ should be sufficient:
 *                                                     *
 *******************************************************
 
+*** Upgrading to 0.20.4 ***
+
+Please note that some dictionary items of Cisco Catalyst 2960 series switches were renamed to meet official Cisco classification:
+	2960-48TT   => 2960-48TT-L
+	2960-24TC   => 2960-24TC-L
+	2960-24TT   => 2960-24TT-L
+	2960-8TC    => 2960-8TC-L
+	2960G-48TC  => 2960G-48TC-L
+	2960G-24TC  => 2960G-24TC-L
+	2960G-8TC   => 2960G-8TC-L
+	C2960-24    => C2960-24-S
+	C2960G-24PC => C2960-24PC-L
+
+
 *** Upgrading to 0.20.1 ***
 
 The 0.20.0 release includes bug which breaks IP networks' capacity displaying on 32-bit architecture machines. To fix this, this release makes use of PHP's BC Math module. It is a new reqiurement. Most PHP distributions have this module already enabled, but if yours does not - you need yo recompile PHP.
