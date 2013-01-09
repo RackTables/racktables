@@ -1545,7 +1545,7 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 	),
 	'9.1.1257' => array
 	(
-		'dict_key' => 167,
+		'dict_key' => 1391,
 		'text' => 'WS-C2960G-24TS-S: 24 RJ-45/10-100-1000T(X)',
 		'processors' => array ('catalyst-chassis-25-to-26-1000SFP', 'catalyst-chassis-mgmt', 'catalyst-chassis-any-1000T'),
 	),
@@ -1569,7 +1569,7 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 	),
 	'9.1.928' => array
 	(
-		'dict_key' => 163,
+		'dict_key' => 1894,
 		'text' => 'WS-C2960-24TC-S: 24 RJ-45/10-100TX + 2 combo-gig',
 		'processors' => array ('catalyst-chassis-1-to-2-combo-1000SFP', 'catalyst-chassis-any-100TX'),
 	),
@@ -1605,7 +1605,7 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 	),
 	'9.1.1147' => array
 	(
-		'dict_key' => 1347,
+		'dict_key' => 1897,
 		'text' => 'WS-C2960-24PC-S: 24 RJ-45/10-100TX + 2 combo-gig',
 		'processors' => array ('catalyst-chassis-1-to-2-combo-1000SFP', 'catalyst-chassis-any-1000T', 'catalyst-chassis-any-100TX'),
 	),
