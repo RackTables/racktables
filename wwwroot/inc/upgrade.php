@@ -1617,6 +1617,8 @@ CREATE TABLE `MuninGraph` (
 			break;
 		case '0.20.4':
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdefined, description) VALUES ('REVERSED_RACKS_LISTSRC', 'false', 'string', 'yes', 'no', 'no', 'List of racks with reversed (top to bottom) units order')";
+			$query[] = "UPDATE AttributeValue INNER JOIN AttributeMap USING (attr_id) SET AttributeValue.uint_value = 1572 WHERE chapter_id = 12 AND uint_value = 162";
+			$query[] = "UPDATE AttributeValue INNER JOIN AttributeMap USING (attr_id) SET AttributeValue.uint_value = 1710 WHERE chapter_id = 12 AND uint_value = 163";
 			$query[] = "UPDATE Config SET varvalue = '0.20.4' WHERE varname = 'DB_VERSION'";
 			break;
 		case 'dictionary':
