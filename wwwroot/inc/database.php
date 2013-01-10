@@ -2261,17 +2261,9 @@ function fetchIPAddressNetworkRow ($ip_bin, $masklen = NULL)
 	switch (strlen ($ip_bin))
 	{
 	case 4:
-		if (isset ($masklen))
-			return fetchIPv4AddressNetworkRow ($ip_bin, $masklen);
-		else
-			return fetchIPv4AddressNetworkRow ($ip_bin);
-		break;
+		return callHook ('fetchIPv4AddressNetworkRow', $ip_bin, isset ($masklen) ? $masklen : 32);
 	case 16:
-		if (isset ($masklen))
-			return fetchIPv6AddressNetworkRow ($ip_bin, $masklen);
-		else
-			return fetchIPv6AddressNetworkRow ($ip_bin);
-		break;
+		return callHook ('fetchIPv6AddressNetworkRow', $ip_bin, isset ($masklen) ? $masklen : 128);
 	default:
 		throw new InvalidArgException ('ip_bin', $ip_bin, "Invalid binary address");
 	}
