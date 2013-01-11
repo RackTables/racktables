@@ -4912,11 +4912,12 @@ function printTagCheckboxTable ($input_name, $preselect, $neg_preselect, $taglis
 	foreach ($taglist as $taginfo)
 		foreach (buildTagCheckboxRows ($input_name, $preselect, $neg_preselect, $taginfo, $realm) as $row)
 		{
+			$tag_class = isset ($taginfo['id']) && isset ($taginfo['refcnt']) ? getTagClassName ($taginfo['id']) : '';
 			echo "<tr class='${row['tr_class']}'><td class='${row['td_class']}' style='padding-left: " . ($row['level'] * 16) . "px;'>";
 			echo "<label><input type=checkbox class='${row['input_class']}' name='${row['input_name']}[]' value='${row['input_value']}'";
 			if (array_key_exists ('input_extraattrs', $row))
 				echo ' ' . $row['input_extraattrs'];
-			echo '> ' . $row['text_tagname'];
+			echo '> <span class="' . $tag_class . '">' . $row['text_tagname'] . '</span>';
 			if (array_key_exists ('text_refcnt', $row))
 				echo " <i>(${row['text_refcnt']})</i>";
 			echo '</label></td></tr>';
