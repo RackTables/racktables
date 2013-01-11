@@ -926,12 +926,7 @@ function addIPv4Prefix ()
 	global $sic;
 	$vlan_ck = empty ($sic['vlan_ck']) ? NULL : $sic['vlan_ck'];
 	$net_id = createIPv4Prefix ($_REQUEST['range'], $sic['name'], isCheckSet ('is_connected'), $taglist, $vlan_ck);
-	showSuccess
-	(
-		'IP network <a href="' .
-		makeHref (array ('page' => 'ipv4net', 'tab' => 'default', 'id' => $net_id)) .
-		'">' . $_REQUEST['range'] . '</a> has been created'
-	);
+	showSuccess ('IP network ' . mkA ($_REQUEST['range'], 'ipv4net', $net_id) . ' has been created');
 }
 
 function addIPv6Prefix ()
@@ -943,12 +938,7 @@ function addIPv6Prefix ()
 	global $sic;
 	$vlan_ck = empty ($sic['vlan_ck']) ? NULL : $sic['vlan_ck'];
 	$net_id = createIPv6Prefix ($_REQUEST['range'], $sic['name'], isCheckSet ('is_connected'), $taglist, $vlan_ck);
-	showSuccess
-	(
-		'IP network <a href="' .
-		makeHref (array ('page' => 'ipv6net', 'tab' => 'default', 'id' => $net_id)) .
-		'">' . $_REQUEST['range'] . '</a> has been created'
-	);
+	showSuccess ('IP network ' . mkA ($_REQUEST['range'], 'ipv6net', $net_id) . ' has been created');
 }
 
 $msgcode['delIPv4Prefix']['OK'] = 49;
@@ -1592,7 +1582,7 @@ function addVService ()
 	if (isset ($_REQUEST['taglist']))
 		produceTagsForNewRecord ('ipv4vs', $_REQUEST['taglist'], $vs_id);
 	$vsinfo = spotEntity ('ipv4vs', $vs_id);
-	return showSuccess ('Virtual service <a href="' . makeHref (array ('page' => 'ipv4vs', 'tab' => 'default', 'vs_id' => $vs_id)) . '">' . $vsinfo['dname'] . '</a> created successfully');
+	return showSuccess ('Virtual service ' . mkA ($vsinfo['dname'], 'ipv4vs', $vs_id) . ' created successfully');
 }
 
 $msgcode['deleteVService']['OK'] = 49;
@@ -1703,7 +1693,7 @@ function addRSPool ()
 		$sic['rsconfig'],
 		isset ($_REQUEST['taglist']) ? $_REQUEST['taglist'] : array()
 	);
-	return showSuccess ('RS pool <a href="' . makeHref (array ('page' => 'ipv4rspool', 'tab' => 'default', 'pool_id' => $pool_id)) . '">' . $_REQUEST['name'] . '</a> created successfully');
+	return showSuccess ('RS pool ' . mkA ($_REQUEST['name'], 'ipv4rspool', $pool_id) . ' created successfully');
 }
 
 $msgcode['deleteRSPool']['OK'] = 49;
@@ -2998,7 +2988,7 @@ function cloneRSPool()
 	$new_id = commitCreateRSPool ($pool['name'] . ' (copy)', $pool['vsconfig'], $pool['rsconfig'], $tagidlist);
 	foreach ($rs_list as $rs)
 		addRStoRSPool ($new_id, $rs['rsip_bin'], $rs['rsport'], $rs['inservice'], $rs['rsconfig'], $rs['comment']);
-	showSuccess ("Created a copy of pool <a href='" . makeHref (array ('page' => 'ipv4rspool', 'tab' => 'default', 'pool_id' => $pool['id'])) . "'>${pool['name']}</a>");
+	showSuccess ('Created a copy of pool  ' . mkA ($pool['name'], 'ipv4rspool', $pool_id));
 	return buildRedirectURL ('ipv4rspool', 'default', array ('pool_id' => $new_id));
 }
 
