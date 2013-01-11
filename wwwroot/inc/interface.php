@@ -4745,7 +4745,7 @@ function renderTagRowForViewer ($taginfo, $level = 0)
 		foreach ($taginfo['refcnt'] as $article => $count)
 			if (array_key_exists ($article, $statsdecoder))
 				$stats[] = $count . $statsdecoder[$article];
-	echo '<span title="' . implode (', ', $stats) . '">' . $taginfo['tag'];
+	echo '<span title="' . implode (', ', $stats) . '" class="' . getTagClassName ($taginfo['id']) . '">' . $taginfo['tag'];
 	echo ($refc ? " <i>(${refc})</i>" : '') . '</span></td></tr>';
 	foreach ($taginfo['kids'] as $kid)
 		$self ($kid, $level + 1);
