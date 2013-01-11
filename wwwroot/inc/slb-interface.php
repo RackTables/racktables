@@ -297,8 +297,7 @@ function renderRSPool ($pool_id)
 							printImageHREF ('notinservice', 'NOT in service');
 						break;
 					case 'rsip':
-						echo "<td class=tdleft>";
-						echo "<a href='".makeHref(array('page'=>'ipaddress', 'ip'=>$rs[$field]))."'>${rs[$field]}</a>";
+						echo '<td class=tdleft>' . mkA ($rs[$field], 'ipaddress', $rs[$field]);
 						break;
 					case 'rsconfig':
 						echo "<td class=slbconf>";
@@ -443,14 +442,15 @@ function renderRealServerList ()
 			$order = $nextorder[$order];
 			$last_pool_id = $rsinfo['rspool_id'];
 		}
-		echo "<tr valign=top class=row_${order}><td><a href='".makeHref(array('page'=>'ipv4rspool', 'pool_id'=>$rsinfo['rspool_id']))."'>";
-		echo !strlen ($pool_list[$rsinfo['rspool_id']]['name']) ? 'ANONYMOUS' : $pool_list[$rsinfo['rspool_id']]['name'];
-		echo '</a></td><td align=center>';
+		echo "<tr valign=top class=row_${order}><td>";
+		$dname = strlen ($pool_list[$rsinfo['rspool_id']]['name']) ? $pool_list[$rsinfo['rspool_id']]['name'] : 'ANONYMOUS';
+		echo mkA ($dname, 'ipv4rspool', $rsinfo['rspool_id']);
+		echo '</td><td align=center>';
 		if ($rsinfo['inservice'] == 'yes')
 			printImageHREF ('inservice', 'in service');
 		else
 			printImageHREF ('notinservice', 'NOT in service');
-		echo "</td><td><a href='".makeHref(array('page'=>'ipaddress', 'ip'=>$rsinfo['rsip']))."'>${rsinfo['rsip']}</a></td>";
+		echo '</td><td>' . mkA ($rsinfo['rsip'], 'ipaddress', $rsinfo['rsip']) . '</td>';
 		echo "<td>${rsinfo['rsport']}</td>";
 		echo "<td><pre>${rsinfo['rsconfig']}</pre></td>";
 		echo "</tr>\n";
@@ -489,7 +489,7 @@ function renderVirtualService ($vsid)
 	$summary = array();
 	$summary['Name'] = $vsinfo['name'];
 	$summary['Protocol'] = $vsinfo['proto'];
-	$summary['Virtual IP address'] = "<a href='".makeHref(array('page'=>'ipaddress', 'tab'=>'default', 'ip'=>$vsinfo['vip']))."'>${vsinfo['vip']}</a>";
+	$summary['Virtual IP address'] = mkA ($vsinfo['vip'], 'ipaddress', $vsinfo['vip']);
 	$summary['Virtual port'] = $vsinfo['vport'];
 	$summary['tags'] = '';
 	$summary['VS configuration'] = '<div class="dashed slbconf">' . $vsinfo['vsconfig'] . '</div>';
