@@ -767,21 +767,41 @@ function cmpTags ($a, $b)
 	return strcmp ($a['tag'], $b['tag']);
 }
 
+function getTagClassName ($tagid)
+{
+	global $taglist;
+
+	$class = '';
+	foreach ($taglist[$tagid]['trace'] as $parent)
+		$class .= 'tag-' . $parent . ' ';
+	$class .= 'tag-' . $tagid . ' etag-' . $tagid;
+
+	return $class;
+}
+
 function serializeTags ($chain, $baseurl = '')
 {
 	$tmp = array();
 	usort ($chain, 'cmpTags');
 	foreach ($chain as $taginfo)
 	{
+		$title = '';
+		if (isset ($taginfo['user']) and isset ($taginfo['time']))
+			$title = 'title="' . htmlspecialchars ($taginfo['user'] . ', ' . formatAge ($taginfo['time']), ENT_QUOTES) . '"';
+
+		$class = '';
+		if (isset ($taginfo['id']))
+			$class = 'class="' . getTagClassName ($taginfo['id']) . '"';
+
+		$href = '';
 		if ($baseurl == '')
-			$tmp[] = $taginfo['tag'];
+			$tag = 'span';
 		else
 		{
-			$title = '';
-			if (isset ($taginfo['user']) and isset ($taginfo['time']))
-				$title = 'title="' . htmlspecialchars ($taginfo['user'] . ', ' . formatAge ($taginfo['time']), ENT_QUOTES) . '"';
-			$tmp[] = "<a $title href='${baseurl}cft[]=${taginfo['id']}'>" . $taginfo['tag'] . "</a>";
+			$tag = 'a';
+			$href = "href='${baseurl}cft[]=${taginfo['id']}'";
 		}
+		$tmp[] = "<$tag $href $title $class>" . $taginfo['tag'] . "</$tag>";
 	}
 	return implode (', ', $tmp);
 }
