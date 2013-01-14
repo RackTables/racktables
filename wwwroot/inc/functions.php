@@ -156,6 +156,7 @@ function assertUIntArg ($argname, $allow_zero = FALSE)
 		throw new InvalidRequestArgException($argname, $_REQUEST[$argname], 'parameter is less than zero');
 	if (!$allow_zero and $_REQUEST[$argname] == 0)
 		throw new InvalidRequestArgException($argname, $_REQUEST[$argname], 'parameter is zero');
+	return $_REQUEST[$argname];
 }
 
 function isInteger ($arg, $allow_zero = FALSE)
@@ -174,6 +175,7 @@ function assertDateArg ($argname, $ok_if_empty = FALSE)
 	// different versions of PHP return false/-1
 	if ($_REQUEST[$argname] != '' and strtotime ($_REQUEST[$argname]) <= 0)
 		throw new InvalidRequestArgException($argname, $_REQUEST[$argname], 'parameter is not a parsable date');
+	return $_REQUEST[$argname];
 }
 
 
@@ -187,6 +189,7 @@ function assertStringArg ($argname, $ok_if_empty = FALSE)
 		throw new InvalidRequestArgException($argname, $_REQUEST[$argname], 'parameter is not a string');
 	if (!$ok_if_empty and !strlen ($_REQUEST[$argname]))
 		throw new InvalidRequestArgException($argname, $_REQUEST[$argname], 'parameter is an empty string');
+	return $_REQUEST[$argname];
 }
 
 function assertBoolArg ($argname, $ok_if_empty = FALSE)
@@ -197,6 +200,7 @@ function assertBoolArg ($argname, $ok_if_empty = FALSE)
 		throw new InvalidRequestArgException($argname, $_REQUEST[$argname], 'parameter is not a string');
 	if (!$ok_if_empty and !strlen ($_REQUEST[$argname]))
 		throw new InvalidRequestArgException($argname, $_REQUEST[$argname], 'parameter is an empty string');
+	return $_REQUEST[$argname] == TRUE;
 }
 
 // function returns binary IP address, or throws an exception
@@ -244,6 +248,7 @@ function assertPCREArg ($argname)
 	assertStringArg ($argname, TRUE); // empty pattern is Ok
 	if (FALSE === preg_match ($_REQUEST[$argname], 'test'))
 		throw new InvalidRequestArgException($argname, $_REQUEST[$argname], 'PCRE validation failed');
+	return $_REQUEST[$argname];
 }
 
 function isPCRE ($arg)
@@ -259,33 +264,25 @@ function genericAssertion ($argname, $argtype)
 	switch ($argtype)
 	{
 	case 'string':
-		assertStringArg ($argname);
-		break;
+		return assertStringArg ($argname);
 	case 'string0':
-		assertStringArg ($argname, TRUE);
-		break;
+		return assertStringArg ($argname, TRUE);
 	case 'uint':
-		assertUIntArg ($argname);
-		break;
+		return assertUIntArg ($argname);
 	case 'uint-uint':
-		assertStringArg ($argname);
-		if (1 != preg_match ('/^[1-9][0-9]*-[1-9][0-9]*$/', $_REQUEST[$argname]))
-			throw new InvalidRequestArgException ($argname, $_REQUEST[$argname], 'illegal format');
-		break;
+		if (! preg_match ('/^([1-9][0-9]*)-([1-9][0-9]*)$/', assertStringArg ($argname), $m))
+			throw new InvalidRequestArgException ($argname, $sic[$argname], 'illegal format');
+		return $m;
 	case 'uint0':
-		assertUIntArg ($argname, TRUE);
-		break;
+		return assertUIntArg ($argname, TRUE);
 	case 'inet':
-		assertIPArg ($argname);
-		break;
+		return assertIPArg ($argname);
 	case 'inet4':
-		assertIPv4Arg ($argname);
-		break;
+		return assertIPv4Arg ($argname);
 	case 'inet6':
-		assertIPv6Arg ($argname);
-		break;
+		return assertIPv6Arg ($argname);
 	case 'l2address':
-		assertStringArg ($argname);
+		return assertStringArg ($argname);
 	case 'l2address0':
 		assertStringArg ($argname, TRUE);
 		try
@@ -296,84 +293,82 @@ function genericAssertion ($argname, $argtype)
 		{
 			throw new InvalidRequestArgException ($argname, $sic[$argname], 'malformed MAC/WWN address');
 		}
+		return $sic[$argname];
 		break;
 	case 'tag':
-		assertStringArg ($argname);
-		if (!validTagName ($sic[$argname]))
+		if (!validTagName (assertStringArg ($argname)))
 			throw new InvalidRequestArgException ($argname, $sic[$argname], 'Invalid tag name');
-		break;
+		return $sic[$argname];
 	case 'pcre':
-		assertPCREArg ($argname);
-		break;
+		return assertPCREArg ($argname);
 	case 'json':
-		assertStringArg ($argname);
-		if (NULL === json_decode ($sic[$argname], TRUE))
+		if (NULL === ($ret = json_decode (assertStringArg ($argname), TRUE)))
 			throw new InvalidRequestArgException ($argname, '(omitted)', 'Invalid JSON code received from client');
-		break;
+		return $ret;
 	case 'array':
 		if (! array_key_exists ($argname, $_REQUEST))
 			throw new InvalidRequestArgException ($argname, '(missing argument)');
 		if (! is_array ($_REQUEST[$argname]))
 			throw new InvalidRequestArgException ($argname, '(omitted)', 'argument is not an array');
-		break;
+		return $_REQUEST[$argname];
 	case 'enum/attr_type':
 		assertStringArg ($argname);
 		if (!in_array ($sic[$argname], array ('uint', 'float', 'string', 'dict','date')))
 			throw new InvalidRequestArgException ($argname, $sic[$argname], 'Unknown value');
-		break;
+		return $sic[$argname];
 	case 'enum/vlan_type':
 		assertStringArg ($argname);
 		// "Alien" type is not valid until the logic is fixed to implement it in full.
 		if (!in_array ($sic[$argname], array ('ondemand', 'compulsory')))
 			throw new InvalidRequestArgException ($argname, $sic[$argname], 'Unknown value');
-		break;
+		return $sic[$argname];
 	case 'enum/wdmstd':
 		assertStringArg ($argname);
 		global $wdm_packs;
 		if (! array_key_exists ($sic[$argname], $wdm_packs))
 			throw new InvalidRequestArgException ($argname, $sic[$argname], 'Unknown value');
-		break;
+		return $sic[$argname];
 	case 'enum/ipproto':
 		assertStringArg ($argname);
 		global $vs_proto;
 		if (!array_key_exists ($sic[$argname], $vs_proto))
 			throw new InvalidRequestArgException ($argname, $sic[$argname], 'Unknown value');
-		break;
+		return $sic[$argname];
 	case 'enum/alloc_type':
 		assertStringArg ($argname);
 		if (!in_array ($sic[$argname], array ('regular', 'shared', 'virtual', 'router')))
 			throw new InvalidRequestArgException ($argname, $sic[$argname], 'Unknown value');
-		break;
+		return $sic[$argname];
 	case 'enum/dqcode':
 		assertStringArg ($argname);
 		global $dqtitle;
 		if (! array_key_exists ($sic[$argname], $dqtitle))
 			throw new InvalidRequestArgException ($argname, $sic[$argname], 'Unknown value');
-		break;
+		return $sic[$argname];
 	case 'enum/yesno':
 		if (! in_array ($sic[$argname], array ('yes', 'no')))
 			throw new InvalidRequestArgException ($argname, $sic[$argname], 'Unknown value');
-		break;
+		return $sic[$argname];
 	case 'iif':
+		assertUIntArg ($argname);
 		if (!array_key_exists ($sic[$argname], getPortIIFOptions()))
 			throw new InvalidRequestArgException ($argname, $sic[$argname], 'Unknown value');
-		break;
+		return $sic[$argname];
 	case 'vlan':
 	case 'vlan1':
-		genericAssertion ($argname, 'uint');
+		assertUIntArg ($argname);
 		if ($argtype == 'vlan' and $sic[$argname] == VLAN_DFL_ID)
 			throw new InvalidRequestArgException ($argname, $sic[$argname], 'default VLAN cannot be changed');
 		if ($sic[$argname] > VLAN_MAX_ID or $sic[$argname] < VLAN_MIN_ID)
 			throw new InvalidRequestArgException ($argname, $sic[$argname], 'out of valid range');
-		break;
+		return $sic[$argname];
 	case 'rackcode/expr':
-		genericAssertion ($argname, 'string0');
-		if ($sic[$argname] == '')
-			return;
+		if ('' == assertStringArg ($argname, TRUE))
+			return array();
 		$parse = spotPayload ($sic[$argname], 'SYNT_EXPR');
 		if ($parse['result'] != 'ACK')
 			throw new InvalidRequestArgException ($argname, $sic[$argname], 'RackCode parsing error');
-		break;
+		return $parse['load'];
 	default:
 		throw new InvalidArgException ('argtype', $argtype); // comes not from user's input
 	}
@@ -400,8 +395,7 @@ function getBypassValue()
 		return NULL;
 	if (!array_key_exists ('bypass_type', $page[$pageno]))
 		throw new RackTablesError ("Internal structure error at node '${pageno}' (bypass_type is not set)", RackTablesError::INTERNAL);
-	genericAssertion ($page[$pageno]['bypass'], $page[$pageno]['bypass_type']);
-	return $sic[$page[$pageno]['bypass']];
+	return genericAssertion ($page[$pageno]['bypass'], $page[$pageno]['bypass_type']);
 }
 
 // fills $args array with the bypass values of specified $pageno which are provided in $_REQUEST
