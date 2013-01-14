@@ -512,8 +512,8 @@ function listCells ($realm, $parent_id = 0)
 	return $ret;
 }
 
-// Very much like listCells(), but return only one record requested (or NULL,
-// if it does not exist).
+// Very much like listCells(), but return only one record requested
+// throws an exception if entity not exists
 function spotEntity ($realm, $id, $ignore_cache = FALSE)
 {
 	global $entityCache;
