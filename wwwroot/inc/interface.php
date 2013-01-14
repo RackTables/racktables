@@ -6001,6 +6001,7 @@ function dynamic_title_decoder ($path_position)
 {
 	global $sic, $page_by_realm;
 	static $net_id;
+	try {
 	switch ($path_position)
 	{
 	case 'index':
@@ -6010,9 +6011,8 @@ function dynamic_title_decoder ($path_position)
 			'params' => array()
 		);
 	case 'chapter':
-		assertUIntArg ('chapter_no');
+		$chapter_no = assertUIntArg ('chapter_no');
 		$chapters = getChapterList();
-		$chapter_no = $_REQUEST['chapter_no'];
 		$chapter_name = isset ($chapters[$chapter_no]) ? $chapters[$chapter_no]['name'] : 'N/A';
 		return array
 		(
@@ -6020,85 +6020,67 @@ function dynamic_title_decoder ($path_position)
 			'params' => array ('chapter_no' => $chapter_no)
 		);
 	case 'user':
-		assertUIntArg ('user_id');
-		$userinfo = spotEntity ('user', $_REQUEST['user_id']);
+		$userinfo = spotEntity ('user', assertUIntArg ('user_id'));
 		return array
 		(
 			'name' => "Local user '" . $userinfo['user_name'] . "'",
-			'params' => array ('user_id' => $_REQUEST['user_id'])
+			'params' => array ('user_id' => $userinfo['user_id'])
 		);
 	case 'ipv4rspool':
-		assertUIntArg ('pool_id');
-		$poolInfo = spotEntity ('ipv4rspool', $_REQUEST['pool_id']);
+		$pool_info = spotEntity ('ipv4rspool', assertUIntArg ('pool_id'));
 		return array
 		(
-			'name' => !strlen ($poolInfo['name']) ? 'ANONYMOUS' : $poolInfo['name'],
-			'params' => array ('pool_id' => $_REQUEST['pool_id'])
+			'name' => !strlen ($pool_info['name']) ? 'ANONYMOUS' : $pool_info['name'],
+			'params' => array ('pool_id' => $pool_info['id'])
 		);
 	case 'ipv4vs':
-		assertUIntArg ('vs_id');
-		$tmp = spotEntity ('ipv4vs', $_REQUEST['vs_id']);
+		$vs_info = spotEntity ('ipv4vs', assertUIntArg ('vs_id'));
 		return array
 		(
-			'name' => $tmp['dname'],
-			'params' => array ('vs_id' => $_REQUEST['vs_id'])
+			'name' => $vs_info['dname'],
+			'params' => array ('vs_id' => $vs_info['id'])
 		);
 	case 'object':
-		assertUIntArg ('object_id');
-		$object = spotEntity ('object', $_REQUEST['object_id']);
-		if ($object == NULL)
-			return array
-			(
-				'name' => __FUNCTION__ . '() failure',
-				'params' => array()
-			);
+		$object = spotEntity ('object', assertUIntArg ('object_id'));
 		return array
 		(
 			'name' => $object['dname'],
-			'params' => array ('object_id' => $_REQUEST['object_id'])
+			'params' => array ('object_id' => $object['id'])
 		);
 	case 'location':
-		assertUIntArg ('location_id');
-		$location = spotEntity ('location', $_REQUEST['location_id']);
+		$location = spotEntity ('location', assertUIntArg ('location_id'));
 		return array
 		(
 			'name' => $location['name'],
-			'params' => array ('location_id' => $_REQUEST['location_id'])
+			'params' => array ('location_id' => $location['id'])
 		);
 	case 'row':
 		global $pageno;
 		switch ($pageno)
 		{
 		case 'rack':
-			assertUIntArg ('rack_id');
-			$rack = spotEntity ('rack', $_REQUEST['rack_id']);
+			$rack = spotEntity ('rack', assertUIntArg ('rack_id'));
 			return array
 			(
 				'name' => $rack['row_name'],
 				'params' => array ('row_id' => $rack['row_id'])
 			);
 		case 'row':
-			assertUIntArg ('row_id');
-			$rowInfo = getRowInfo ($_REQUEST['row_id']);
+			$row_info = getRowInfo (assertUIntArg ('row_id'));
 			return array
 			(
-				'name' => $rowInfo['name'],
-				'params' => array ('row_id' => $_REQUEST['row_id'])
+				'name' => $row_info['name'],
+				'params' => array ('row_id' => $row_info['id'])
 			);
 		default:
-			return array
-			(
-				'name' => __FUNCTION__ . '() failure',
-				'params' => array()
-			);
+			break;
 		}
 	case 'rack':
-		assertUIntArg ('rack_id');
-		$rack = spotEntity ('rack', $_REQUEST['rack_id']);
+		$rack_info = spotEntity ('rack', assertUIntArg ('rack_id'));
 		return array
 		(
-			'name' => $rack['name'],
-			'params' => array ('rack_id' => $_REQUEST['rack_id'])
+			'name' => $rack_info['name'],
+			'params' => array ('rack_id' => $rack_info['id'])
 		);
 	case 'search':
 		if (isset ($_REQUEST['q']))
@@ -6114,14 +6096,7 @@ function dynamic_title_decoder ($path_position)
 				'params' => array()
 			);
 	case 'file':
-		assertUIntArg ('file_id');
-		$file = spotEntity ('file', $_REQUEST['file_id']);
-		if ($file == NULL)
-			return array
-			(
-				'name' => __FUNCTION__ . '() failure',
-				'params' => array()
-			);
+		$file = spotEntity ('file', assertUIntArg ('file_id'));
 		return array
 		(
 			'name' => niftyString ($file['name'], 30, FALSE),
@@ -6153,8 +6128,7 @@ function dynamic_title_decoder ($path_position)
 				);
 				return ($ret);
 			default:
-				assertUIntArg ('id');
-				$net = spotEntity ($path_position, $_REQUEST['id']);
+				$net = spotEntity ($path_position, assertUIntArg ('id'));
 				return array
 				(
 					'name' => $net['ip'] . '/' . $net['mask'],
@@ -6198,12 +6172,7 @@ function dynamic_title_decoder ($path_position)
 			list ($vdom_id, $dummy) = decodeVLANCK ($_REQUEST['vlan_ck']);
 			break;
 		default:
-			return array
-			(
-				'name' => __FUNCTION__ . '() failure',
-				'params' => array()
-			);
-
+			break;
 		}
 		$vdlist = getVLANDomainOptions();
 		if (!array_key_exists ($vdom_id, $vdlist))
@@ -6234,6 +6203,14 @@ function dynamic_title_decoder ($path_position)
 			'params' => array ('qcode' => $sic['dqcode'])
 		);
 	default:
+		break;
+	}
+
+	// default behaviour is throwing an exception
+	throw new RackTablesError ('dynamic_title decoding error', RackTablesError::INTERNAL);
+	} // end-of try block
+	catch (RackTablesError $e)
+	{
 		return array
 		(
 			'name' => __FUNCTION__ . '() failure',
