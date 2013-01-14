@@ -292,7 +292,7 @@ function trigger_vst_editrules()
 
 function triggerIPAddressLog ()
 {
-	$ip_bin = assertIPArg ('ip');
+	$ip_bin = getBypassValue();
 	switch (strlen ($ip_bin))
 	{
 		case 4:
