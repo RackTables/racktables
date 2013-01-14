@@ -2804,10 +2804,10 @@ function renderIPNetworkProperties ($id)
 	echo '</center>';
 }
 
-function renderIPAddress ($ip)
+function renderIPAddress ($ip_bin)
 {
 	global $aat, $nextorder;
-	$address = getIPAddress (ip_parse ($ip));
+	$address = getIPAddress ($ip_bin);
 	echo "<table border=0 class=objectview cellspacing=0 cellpadding=0>";
 	echo "<tr><td colspan=2 align=center><h1>${address['ip']}</h1></td></tr>\n";
 
@@ -2895,9 +2895,9 @@ function renderIPAddress ($ip)
 	echo "</table>\n";
 }
 
-function renderIPAddressProperties ($ip)
+function renderIPAddressProperties ($ip_bin)
 {
-	$address = getIPAddress (ip_parse ($ip));
+	$address = getIPAddress ($ip_bin);
 	echo "<center><h1>${address['ip']}</h1></center>\n";
 
 	startPortlet ('update');
@@ -2925,7 +2925,7 @@ function renderIPAddressProperties ($ip)
 	finishPortlet();
 }
 
-function renderIPAddressAllocations ($ip)
+function renderIPAddressAllocations ($ip_bin)
 {
 	function printNewItemTR ()
 	{
@@ -2943,7 +2943,7 @@ function renderIPAddressAllocations ($ip)
 	}
 	global $aat;
 
-	$address = getIPAddress (ip_parse ($ip));
+	$address = getIPAddress ($ip_bin);
 	echo "<center><h1>${address['ip']}</h1></center>\n";
 	echo "<table class='widetable' cellpadding=5 cellspacing=0 border=0 align='center'>\n";
 	echo "<tr><th>&nbsp;</th><th>object</th><th>OS interface</th><th>allocation type</th><th>&nbsp;</th></tr>\n";
@@ -8395,9 +8395,8 @@ function formatVLANPackDiff ($old, $current)
 	return $ret;
 }
 
-function renderIPAddressLog ()
+function renderIPAddressLog ($ip_bin)
 {
-	$ip_bin = assertIPArg ('ip');
 	startPortlet ('Log messages');
 	echo '<table class="widetable" cellspacing="0" cellpadding="5" align="center" width="50%"><tr>';
 	echo '<th>Date &uarr;</th>';

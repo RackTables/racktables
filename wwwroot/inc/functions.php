@@ -1524,7 +1524,7 @@ function fixContext ($target = NULL)
 		if ($target['realm'] != 'user')
 			$auto_tags = array_merge ($auto_tags, $target['atags']);
 	}
-	elseif ($pageno == 'ipaddress' && $net = spotNetworkByIP (ip_parse (getBypassValue())))
+	elseif ($pageno == 'ipaddress' && $net = spotNetworkByIP (getBypassValue()))
 	{
 		// IP addresses inherit context tags from their parent networks
 		$target_given_tags = $net['etags'];
