@@ -108,6 +108,7 @@ function vrp5xReadLLDPStatus ($input)
 	(
 		'interfaceName',
 		'interfaceAlias',
+		'local',
 	);
 	foreach (explode ("\n", $input) as $line)
 	{
