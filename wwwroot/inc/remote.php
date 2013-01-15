@@ -101,6 +101,7 @@ function detectDeviceBreed ($object_id)
 {
 	$breed_by_swcode = array
 	(
+		244 => 'ios12',
 		251 => 'ios12',
 		252 => 'ios12',
 		254 => 'ios12',
