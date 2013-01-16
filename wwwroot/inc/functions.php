@@ -171,11 +171,11 @@ function isInteger ($arg, $allow_zero = FALSE)
 // make sure the arg is a parsable date
 function assertDateArg ($argname, $ok_if_empty = FALSE)
 {
-	assertStringArg ($argname, $ok_if_empty);
+	$arg = assertStringArg ($argname, $ok_if_empty);
 	// different versions of PHP return false/-1
-	if ($_REQUEST[$argname] != '' and strtotime ($_REQUEST[$argname]) <= 0)
-		throw new InvalidRequestArgException($argname, $_REQUEST[$argname], 'parameter is not a parsable date');
-	return $_REQUEST[$argname];
+	if ($arg != '' and strtotime ($arg) <= 0)
+		throw new InvalidRequestArgException($argname, $arg, 'parameter is not a parsable date');
+	return $arg;
 }
 
 
@@ -183,13 +183,14 @@ function assertDateArg ($argname, $ok_if_empty = FALSE)
 // and is a non-empty string.
 function assertStringArg ($argname, $ok_if_empty = FALSE)
 {
+	global $sic;
 	if (!isset ($_REQUEST[$argname]))
 		throw new InvalidRequestArgException($argname, '', 'parameter is missing');
 	if (!is_string ($_REQUEST[$argname]))
 		throw new InvalidRequestArgException($argname, $_REQUEST[$argname], 'parameter is not a string');
 	if (!$ok_if_empty and !strlen ($_REQUEST[$argname]))
 		throw new InvalidRequestArgException($argname, $_REQUEST[$argname], 'parameter is an empty string');
-	return $_REQUEST[$argname];
+	return $sic[$argname];
 }
 
 function assertBoolArg ($argname, $ok_if_empty = FALSE)
@@ -206,10 +207,9 @@ function assertBoolArg ($argname, $ok_if_empty = FALSE)
 // function returns binary IP address, or throws an exception
 function assertIPArg ($argname)
 {
-	assertStringArg ($argname, FALSE);
 	try
 	{
-		return ip_parse ($_REQUEST[$argname]);
+		return ip_parse (assertStringArg ($argname));
 	}
 	catch (InvalidArgException $e)
 	{
@@ -222,7 +222,7 @@ function assertIPv4Arg ($argname)
 {
 	try
 	{
-		return ip4_parse ($_REQUEST[$argname]);
+		return ip4_parse (assertStringArg ($argname));
 	}
 	catch (InvalidArgException $e)
 	{
@@ -235,7 +235,7 @@ function assertIPv6Arg ($argname)
 {
 	try
 	{
-		return ip6_parse ($_REQUEST[$argname]);
+		return ip6_parse (assertStringArg ($argname));
 	}
 	catch (InvalidArgException $e)
 	{
@@ -245,10 +245,10 @@ function assertIPv6Arg ($argname)
 
 function assertPCREArg ($argname)
 {
-	assertStringArg ($argname, TRUE); // empty pattern is Ok
-	if (FALSE === preg_match ($_REQUEST[$argname], 'test'))
-		throw new InvalidRequestArgException($argname, $_REQUEST[$argname], 'PCRE validation failed');
-	return $_REQUEST[$argname];
+	$arg = assertStringArg ($argname, TRUE); // empty pattern is Ok
+	if (FALSE === @preg_match ($arg, 'test'))
+		throw new InvalidRequestArgException($argname, $arg, 'PCRE validation failed');
+	return $arg;
 }
 
 function isPCRE ($arg)
