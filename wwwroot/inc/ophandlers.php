@@ -2664,8 +2664,7 @@ function updVSTRule()
 
 	global $port_role_options, $sic;
 	assertUIntArg ('mutex_rev', TRUE);
-	genericAssertion ('template_json', 'json');
-	$data = json_decode ($sic['template_json'], TRUE);
+	$data = genericAssertion ('template_json', 'json');
 	$rule_no = 0;
 	try
 	{
