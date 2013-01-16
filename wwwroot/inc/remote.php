@@ -97,55 +97,65 @@ $breedfunc = array
 
 define ('MAX_GW_LOGSIZE', 1024*1024); // do not store more than 1 MB of log data
 
+$breed_by_swcode = array
+(
+	244 => 'ios12',
+	251 => 'ios12',
+	252 => 'ios12',
+	254 => 'ios12',
+	963 => 'nxos4', // NX-OS 4.0
+	964 => 'nxos4', // NX-OS 4.1
+	1365 => 'nxos4', // NX-OS 4.2
+	1410 => 'nxos4', // NX-OS 5.0, seems compatible
+	1411 => 'nxos4', // NX-OS 5.1
+	1809 => 'nxos4', // NX-OS 5.2
+	1643 => 'nxos4', // NX-OS 6.0
+	1352 => 'xos12',
+	1360 => 'vrp53',
+	1361 => 'vrp55',
+	1369 => 'vrp55', // VRP versions 5.5 and 5.7 seem to be compatible
+	1363 => 'fdry5',
+	1367 => 'jun10', # 10S
+	1597 => 'jun10', # 10R
+	1598 => 'jun10', # 11R
+	1599 => 'jun10', # 12R
+	1594 => 'ftos8',
+	1673 => 'air12', # AIR IOS 12.3
+	1674 => 'air12', # AIR IOS 12.4
+	1675 => 'eos4',
+	1759 => 'iosxr4', # Cisco IOS XR 4.2
+	1786 => 'ros11', # Marvell ROS 1.1
+
+	//... linux items added by the loop below
+);
+
+$breed_by_hwcode = array (
+	//... dlink items added by the loop below
+);
+
+$breed_by_mgmtcode = array (
+	1788 => 'ucs',
+);
+
+// add 'linux' items into $breed_by_swcode
+$linux_sw_ranges = array (
+	225,235,
+	418,436,
+	1331,1334,
+	1395,1396,
+	1417,1422,
+);
+for ($i = 0; $i + 1 < count ($linux_sw_ranges); $i += 2)
+	for ($j = $i; $j <= $linux_sw_ranges[$i + 1]; $j++)
+		$breed_by_swcode[$j] = 'linux';
+
+// add 'dlink' items into $breed_by_hwcode
+for ($i = 589; $i <= 637; $i++)
+	$breed_by_hwcode[$i] = 'dlink';
+
 function detectDeviceBreed ($object_id)
 {
-	$breed_by_swcode = array
-	(
-		244 => 'ios12',
-		251 => 'ios12',
-		252 => 'ios12',
-		254 => 'ios12',
-		963 => 'nxos4', // NX-OS 4.0
-		964 => 'nxos4', // NX-OS 4.1
-		1365 => 'nxos4', // NX-OS 4.2
-		1410 => 'nxos4', // NX-OS 5.0, seems compatible
-		1411 => 'nxos4', // NX-OS 5.1
-		1809 => 'nxos4', // NX-OS 5.2
-		1643 => 'nxos4', // NX-OS 6.0
-		1352 => 'xos12',
-		1360 => 'vrp53',
-		1361 => 'vrp55',
-		1369 => 'vrp55', // VRP versions 5.5 and 5.7 seem to be compatible
-		1363 => 'fdry5',
-		1367 => 'jun10', # 10S
-		1597 => 'jun10', # 10R
-		1598 => 'jun10', # 11R
-		1599 => 'jun10', # 12R
-		1594 => 'ftos8',
-		1673 => 'air12', # AIR IOS 12.3
-		1674 => 'air12', # AIR IOS 12.4
-		1675 => 'eos4',
-		1759 => 'iosxr4', # Cisco IOS XR 4.2
-		1786 => 'ros11', # Marvell ROS 1.1
-		242 => 'linux',
-		243 => 'linux',
-		1331 => 'linux',
-		1332 => 'linux',
-		1333 => 'linux',
-		1334 => 'linux',
-		1395 => 'linux',
-		1396 => 'linux',
-	);
-	for ($i = 225; $i <= 235; $i++)
-		$breed_by_swcode[$i] = 'linux';
-	for ($i = 418; $i <= 436; $i++)
-		$breed_by_swcode[$i] = 'linux';
-	for ($i = 1417; $i <= 1422; $i++)
-		$breed_by_swcode[$i] = 'linux';
-	$breed_by_hwcode = array();
-	for ($i = 589; $i <= 637; $i++)
-		$breed_by_hwcode[$i] = 'dlink';
-	$breed_by_mgmtcode = array (1788 => 'ucs');
+	global $breed_by_swcode, $breed_by_hwcode, $breed_by_mgmtcode;
 	foreach (getAttrValues ($object_id) as $record)
 		if ($record['id'] == 4 and array_key_exists ($record['key'], $breed_by_swcode))
 			return $breed_by_swcode[$record['key']];
