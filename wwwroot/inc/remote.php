@@ -146,7 +146,7 @@ $linux_sw_ranges = array (
 	1417,1422,
 );
 for ($i = 0; $i + 1 < count ($linux_sw_ranges); $i += 2)
-	for ($j = $i; $j <= $linux_sw_ranges[$i + 1]; $j++)
+	for ($j = $linux_sw_ranges[$i]; $j <= $linux_sw_ranges[$i + 1]; $j++)
 		$breed_by_swcode[$j] = 'linux';
 
 // add 'dlink' items into $breed_by_hwcode
