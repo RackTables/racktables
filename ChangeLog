@@ -5,6 +5,7 @@
 	bugfix: some dictionary items of Cisco Catalyst 2960 switches were renamed to meet official Cisco classification (refer the release notes)
 	update: vlan search results now include binded IP networks
 	update: make scaled rack thumb images sharp again
+	update: Cisco IOS 15.0 support
 	new feature: configurable top-to-bottom units order in particular racks (#601)
 	new feature: overridable tag names display style (via CSS and plug-ins)
 0.20.3 2012-12-19

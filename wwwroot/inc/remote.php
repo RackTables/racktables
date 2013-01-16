@@ -99,32 +99,33 @@ define ('MAX_GW_LOGSIZE', 1024*1024); // do not store more than 1 MB of log data
 
 $breed_by_swcode = array
 (
-	244 => 'ios12',
-	251 => 'ios12',
-	252 => 'ios12',
-	254 => 'ios12',
-	963 => 'nxos4', // NX-OS 4.0
-	964 => 'nxos4', // NX-OS 4.1
+	244  => 'ios12', // IOS 12.0
+	251  => 'ios12', // IOS 12.1
+	252  => 'ios12', // IOS 12.2
+	254  => 'ios12', // IOS 12.0 (router OS)
+	1901 => 'ios12', // IOS 15.0
+	963  => 'nxos4', // NX-OS 4.0
+	964  => 'nxos4', // NX-OS 4.1
 	1365 => 'nxos4', // NX-OS 4.2
-	1410 => 'nxos4', // NX-OS 5.0, seems compatible
+	1410 => 'nxos4', // NX-OS 5.0
 	1411 => 'nxos4', // NX-OS 5.1
 	1809 => 'nxos4', // NX-OS 5.2
 	1643 => 'nxos4', // NX-OS 6.0
-	1352 => 'xos12',
-	1360 => 'vrp53',
-	1361 => 'vrp55',
-	1369 => 'vrp55', // VRP versions 5.5 and 5.7 seem to be compatible
-	1363 => 'fdry5',
-	1367 => 'jun10', # 10S
-	1597 => 'jun10', # 10R
-	1598 => 'jun10', # 11R
-	1599 => 'jun10', # 12R
-	1594 => 'ftos8',
-	1673 => 'air12', # AIR IOS 12.3
-	1674 => 'air12', # AIR IOS 12.4
-	1675 => 'eos4',
-	1759 => 'iosxr4', # Cisco IOS XR 4.2
-	1786 => 'ros11', # Marvell ROS 1.1
+	1352 => 'xos12', // Extreme XOS 12
+	1360 => 'vrp53', // Huawei VRP 5.3
+	1361 => 'vrp55', // Huawei VRP 5.5
+	1369 => 'vrp55', // Huawei VRP 5.7
+	1363 => 'fdry5', // IronWare 5
+	1367 => 'jun10', // 10S
+	1597 => 'jun10', // 10R
+	1598 => 'jun10', // 11R
+	1599 => 'jun10', // 12R
+	1594 => 'ftos8', // Force10 FTOS 8
+	1673 => 'air12', // AIR IOS 12.3
+	1674 => 'air12', // AIR IOS 12.4
+	1675 => 'eos4',  // Arista EOS 4
+	1759 => 'iosxr4', // Cisco IOS XR 4.2
+	1786 => 'ros11', // Marvell ROS 1.1
 
 	//... linux items added by the loop below
 );
