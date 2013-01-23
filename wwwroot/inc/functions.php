@@ -1974,6 +1974,17 @@ function findRouters ($addrlist)
 	return $ret;
 }
 
+// compare binary IPs (IPv4 are less than IPv6)
+// valid return values are: 1, 0, -1
+function IPCmp ($ip_binA, $ip_binB)
+{
+	if (strlen ($ip_binA) !== strlen ($ip_binB))
+		return strlen ($ip_binA) < strlen ($ip_binB) ? -1 : 1;
+	$ret = strcmp ($ip_binA, $ip_binB);
+	$ret = ($ret > 0 ? 1 : ($ret < 0 ? -1 : 0));
+	return $ret;
+}
+
 // Compare networks. When sorting a tree, the records on the list will have
 // distinct base IP addresses.
 // valid return values are: 1, 0, -1, -2
@@ -1983,10 +1994,7 @@ function findRouters ($addrlist)
 // equal to, or greater than the second." (c) PHP manual
 function IPNetworkCmp ($netA, $netB)
 {
-	if (strlen ($netA['ip_bin']) !== strlen ($netB['ip_bin']))
-		return strlen ($netA['ip_bin']) < strlen ($netB['ip_bin']) ? -1 : 1;
-	$ret = strcmp ($netA['ip_bin'], $netB['ip_bin']);
-	$ret = ($ret > 0 ? 1 : ($ret < 0 ? -1 : 0));
+	$ret = IPCmp ($netA['ip_bin'], $netB['ip_bin']);
 	if ($ret == 0)
 		$ret = $netA['mask'] < $netB['mask'] ? -1 : ($netA['mask'] > $netB['mask'] ? 1 : 0);
 	if ($ret == -1 and $netA['ip_bin'] === ($netB['ip_bin'] & $netA['mask_bin']))
