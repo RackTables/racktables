@@ -1,11 +1,13 @@
 0.20.4
 	bugfix: %GPASS% dictionary markers were ignored in selectboxes
 	bugfix: 802.1Q: better Force10 switches support
+	bugfix: 802.1Q: properly detect non-switched ports on Cisco NX-OS devices
 	bugfix: racks, vs, rspools were displayed in search results even if user had no permissions to view them
 	bugfix: some dictionary items of Cisco Catalyst 2960 switches were renamed to meet official Cisco classification (refer the release notes)
 	update: vlan search results now include binded IP networks
 	update: make scaled rack thumb images sharp again
 	update: Cisco IOS 15.0 support
+	update: 802.1Q: non-switched ports do not need 'none' template role any more
 	new feature: configurable top-to-bottom units order in particular racks (#601)
 	new feature: overridable tag names display style (via CSS and plug-ins)
 0.20.3 2012-12-19

@@ -348,10 +348,17 @@ function ios12ReadVLANConfig ($input)
 		'portdata' => array(),
 		'portconfig' => array(),
 	);
+	$schema = $ret;
+
 	global $breedfunc;
-	$nextfunc = 'ios12-get8021q-top';
+	$nextfunc = 'ios12-get8021q-swports';
 	foreach (explode ("\n", $input) as $line)
 		$nextfunc = $breedfunc[$nextfunc] ($ret, $line);
+
+	// clear $ret from temporary keys created by parser functions
+	foreach ($ret as $key => $value)
+		if (! isset ($schema[$key]))
+			unset ($ret[$key]);
 	return $ret;
 }
 
@@ -360,7 +367,7 @@ function ios12ScanTopLevel (&$work, $line)
 	$matches = array();
 	switch (TRUE)
 	{
-	case (preg_match ('@^interface ((Ethernet|FastEthernet|GigabitEthernet|TenGigabitEthernet|Port-channel)[[:digit:]]+(/[[:digit:]]+)*)$@', $line, $matches)):
+	case (preg_match ('@^interface ((Ethernet|FastEthernet|GigabitEthernet|TenGigabitEthernet|[Pp]ort-channel)[[:digit:]]+(/[[:digit:]]+)*)$@', $line, $matches)):
 		$port_name = ios12ShortenIfName ($matches[1]);
 		$work['current'] = array ('port_name' => $port_name);
 		$work['portconfig'][$port_name][] = array ('type' => 'line-header', 'line' => $line);
@@ -372,13 +379,35 @@ function ios12ScanTopLevel (&$work, $line)
 	}
 }
 
+function ios12ReadSwitchPortList (&$work, $line)
+{
+	if (0 < strpos ($line, '! END OF SWITCHPORTS'))
+		return 'ios12-get8021q-top';
+	if (preg_match ('@^\s*Name:\s+(\S+)@', $line, $m))
+		$work['current_switchport'] = $m[1];
+	elseif (preg_match ('@^\s*Switchport:\s+(Enabled)@', $line, $m) && isset ($work['current_switchport']))
+	{
+		$work['switchports'][] = ios12ShortenIfName ($work['current_switchport']);
+		unset ($work['current_switchport']);
+	}
+	return 'ios12-get8021q-swports';
+}
+
 function ios12PickSwitchportCommand (&$work, $line)
 {
 	$port_name = $work['current']['port_name'];
-	if ($line[0] != ' ') // end of interface section
+	if (! strlen ($line) || $line[0] != ' ') // end of interface section
 	{
 		$work['portconfig'][$port_name][] = array ('type' => 'line-header', 'line' => $line);
+
 		// save work, if it makes sense
+		if (! in_array ($port_name, $work['switchports']))
+			$work['current']['mode'] = 'SKIP'; // skip not switched ports
+		else
+		{
+			if (! isset ($work['current']['mode']))
+				$work['current']['mode'] = 'access';
+		}
 		switch (@$work['current']['mode'])
 		{
 		case 'access':
@@ -411,8 +440,9 @@ function ios12PickSwitchportCommand (&$work, $line)
 			);
 			break;
 		case 'SKIP':
-			break;
+		case 'fex-fabric': // associated port-channel
 		case 'IP':
+			break;
 		default:
 			// dot1q-tunnel, dynamic, private-vlan or even none --
 			// show in returned config and let user decide, if they
@@ -434,38 +464,33 @@ function ios12PickSwitchportCommand (&$work, $line)
 	$line_class = 'line-8021q';
 	switch (TRUE)
 	{
-	case (preg_match ('@^\s*switchport\s*$@', $line, $matches)):
-		// treat switchport-only interfaces as access ports by default
-		if (! isset ($work['current']['mode']))
-			$work['current']['mode'] = 'access';
-		break;
-	case (preg_match ('@^ switchport mode (.+)$@', $line, $matches)):
+	case (preg_match ('@^\s+switchport mode (.+)$@', $line, $matches)):
 		$work['current']['mode'] = $matches[1];
 		break;
-	case (preg_match ('@^ switchport access vlan (.+)$@', $line, $matches)):
+	case (preg_match ('@^\s+switchport access vlan (.+)$@', $line, $matches)):
 		$work['current']['access vlan'] = $matches[1];
 		break;
-	case (preg_match ('@^ switchport trunk native vlan (.+)$@', $line, $matches)):
+	case (preg_match ('@^\s+switchport trunk native vlan (.+)$@', $line, $matches)):
 		$work['current']['trunk native vlan'] = $matches[1];
 		break;
-	case (preg_match ('@^ switchport trunk allowed vlan add (.+)$@', $line, $matches)):
+	case (preg_match ('@^\s+switchport trunk allowed vlan add (.+)$@', $line, $matches)):
 		$work['current']['trunk allowed vlan'] = array_merge
 		(
 			$work['current']['trunk allowed vlan'],
 			iosParseVLANString ($matches[1])
 		);
 		break;
-	case $line == ' switchport trunk allowed vlan none':
+	case preg_match ('@^\s+switchport trunk allowed vlan none$@', $line, $matches):
 		$work['current']['trunk allowed vlan'] = array();
 		break;
-	case (preg_match ('@^ switchport trunk allowed vlan (.+)$@', $line, $matches)):
+	case (preg_match ('@^\s+switchport trunk allowed vlan (.+)$@', $line, $matches)):
 		$work['current']['trunk allowed vlan'] = iosParseVLANString ($matches[1]);
 		break;
-	case preg_match ('@^ channel-group @', $line):
+	case preg_match ('@^\s+channel-group @', $line):
 	// port-channel subinterface config follows that of the master interface
 		$work['current']['mode'] = 'SKIP';
 		break;
-	case preg_match ('@^ ip address @', $line):
+	case preg_match ('@^\s+ip address @', $line):
 	// L3 interface does no switchport functions
 		$work['current']['mode'] = 'IP';
 		break;
@@ -481,9 +506,6 @@ function ios12PickVLANCommand (&$work, $line)
 	$matches = array();
 	switch (TRUE)
 	{
-	case ($line == '---- -------------------------------- --------- -------------------------------'):
-		// ignore the rest of VLAN table header;
-		break;
 	case (preg_match ('@! END OF VLAN LIST$@', $line)):
 		return 'ios12-get8021q-top';
 	case (preg_match ('@^([[:digit:]]+) {1,4}.{32} active    @', $line, $matches)):
@@ -924,8 +946,11 @@ function vrp55Read8021QConfig ($input)
 					'native' => in_array ($ret['current']['native'], $ret['current']['allowed']) ? $ret['current']['native'] : 0,
 				);
 				break;
-			case 'hybrid': // hybrid ports are not supported
 			case 'IP':
+			case 'SKIP':
+				break;
+			case 'hybrid': // hybrid ports are not supported
+			default: // dot1q-tunnel ?
 				$ret['portdata'][$port_name] = array
 				(
 					'mode' => 'none',
@@ -933,8 +958,6 @@ function vrp55Read8021QConfig ($input)
 					'native' => 0,
 				);
 				break;
-			case 'SKIP':
-			default: // dot1q-tunnel ?
 			}
 			unset ($ret['current']);
 			break;
@@ -944,151 +967,6 @@ function vrp55Read8021QConfig ($input)
 		$ret['portconfig'][$port_name][] = array ('type' => $line_class, 'line' => $line);
 	}
 	return $ret;
-}
-
-function nxos4Read8021QConfig ($input)
-{
-	$ret = array
-	(
-		'vlanlist' => array(),
-		'portdata' => array(),
-		'portconfig' => array(),
-	);
-	global $breedfunc;
-	$nextfunc = 'nxos4-get8021q-top';
-	foreach (explode ("\n", $input) as $line)
-		$nextfunc = $breedfunc[$nextfunc] ($ret, $line);
-	return $ret;
-}
-
-function nxos4ScanTopLevel (&$work, $line)
-{
-	$matches = array();
-	switch (TRUE)
-	{
-	case (preg_match ('@^interface ((Ethernet|Port-channel)[[:digit:]]+(/[[:digit:]]+)*)$@i', $line, $matches)):
-		$port_name = ios12ShortenIfName ($matches[1]);
-		$work['current'] = array ('port_name' => $port_name);
-		$work['portconfig'][$port_name][] = array ('type' => 'line-header', 'line' => $line);
-		return 'nxos4-get8021q-readport';
-	case (preg_match ('/^VLAN Name                             Status    Ports$/', $line, $matches)):
-		return 'nxos4-get8021q-readvlan';
-	default:
-		return 'nxos4-get8021q-top'; // continue scan
-	}
-}
-
-function nxos4PickVLANCommand (&$work, $line)
-{
-	$matches = array();
-	switch (TRUE)
-	{
-	case ($line == '---- -------------------------------- --------- -------------------------------'):
-		// ignore the rest of VLAN table header;
-		break;
-	case (preg_match ('@! END OF VLAN LIST$@', $line)):
-		return 'nxos4-get8021q-top';
-	case (preg_match ('@^([[:digit:]]+) {1,4}.{32} active    @', $line, $matches)):
-		$work['vlanlist'][] = $matches[1];
-		break;
-	default:
-	}
-	return 'nxos4-get8021q-readvlan';
-}
-
-function nxos4PickSwitchportCommand (&$work, $line)
-{
-	$port_name = $work['current']['port_name'];
-	if ($line == '') // end of interface section
-	{
-		$work['portconfig'][$port_name][] = array ('type' => 'line-header', 'line' => $line);
-		// fill in defaults
-		if (!array_key_exists ('mode', $work['current']))
-			$work['current']['mode'] = 'access';
-		// save work, if it makes sense
-		switch ($work['current']['mode'])
-		{
-		case 'access':
-			if (!array_key_exists ('access vlan', $work['current']))
-				$work['current']['access vlan'] = 1;
-			$work['portdata'][$port_name] = array
-			(
-				'mode' => 'access',
-				'allowed' => array ($work['current']['access vlan']),
-				'native' => $work['current']['access vlan'],
-			);
-			break;
-		case 'trunk':
-			if (!array_key_exists ('trunk native vlan', $work['current']))
-				$work['current']['trunk native vlan'] = 1;
-			// FIXME: NX-OS reserves VLANs 3968 through 4047 plus 4094 for itself
-			if (!array_key_exists ('trunk allowed vlan', $work['current']))
-				$work['current']['trunk allowed vlan'] = range (VLAN_MIN_ID, VLAN_MAX_ID);
-			// Having configured VLAN as "native" doesn't mean anything
-			// as long as it's not listed on the "allowed" line.
-			$effective_native = in_array
-			(
-				$work['current']['trunk native vlan'],
-				$work['current']['trunk allowed vlan']
-			) ? $work['current']['trunk native vlan'] : 0;
-			$work['portdata'][$port_name] = array
-			(
-				'mode' => 'trunk',
-				'allowed' => $work['current']['trunk allowed vlan'],
-				'native' => $effective_native,
-			);
-			break;
-		case 'SKIP':
-		case 'fex-fabric': // associated port-channel
-			break;
-		default:
-			// dot1q-tunnel, dynamic, private-vlan
-			$work['portdata'][$port_name] = array
-			(
-				'mode' => 'none',
-				'allowed' => array(),
-				'native' => 0,
-			);
-			// unset (routed), dot1q-tunnel, dynamic, private-vlan --- skip these
-		}
-		unset ($work['current']);
-		return 'nxos4-get8021q-top';
-	}
-	// not yet
-	$matches = array();
-	$line_class = 'line-8021q';
-	switch (TRUE)
-	{
-	case (preg_match ('@^  switchport mode (.+)$@', $line, $matches)):
-		$work['current']['mode'] = $matches[1];
-		break;
-	case (preg_match ('@^  switchport access vlan (.+)$@', $line, $matches)):
-		$work['current']['access vlan'] = $matches[1];
-		break;
-	case (preg_match ('@^  switchport trunk native vlan (.+)$@', $line, $matches)):
-		$work['current']['trunk native vlan'] = $matches[1];
-		break;
-	case (preg_match ('@^  switchport trunk allowed vlan add (.+)$@', $line, $matches)):
-		$work['current']['trunk allowed vlan'] = array_merge
-		(
-			$work['current']['trunk allowed vlan'],
-			iosParseVLANString ($matches[1])
-		);
-		break;
-	case $line == '  switchport trunk allowed vlan none':
-		$work['current']['trunk allowed vlan'] = array();
-		break;
-	case (preg_match ('@^  switchport trunk allowed vlan (.+)$@', $line, $matches)):
-		$work['current']['trunk allowed vlan'] = iosParseVLANString ($matches[1]);
-		break;
-	case preg_match ('/^ +channel-group /', $line):
-		$work['current']['mode'] = 'SKIP';
-		break;
-	default: // suppress warning on irrelevant config clause
-		$line_class = 'line-other';
-	}
-	$work['portconfig'][$port_name][] = array ('type' => $line_class, 'line' => $line);
-	return 'nxos4-get8021q-readport';
 }
 
 /*
@@ -1303,7 +1181,9 @@ function ios12TranslatePushQueue ($dummy_object_id, $queue, $dummy_vlan_names)
 		// query list
 		case 'get8021q':
 			$ret .=
-'show run
+'show interface switchport | incl Name:|Switchport:
+! END OF SWITCHPORTS
+show run
 ! END OF CONFIG
 show vlan brief
 ! END OF VLAN LIST
