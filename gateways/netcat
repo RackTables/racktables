@@ -37,6 +37,6 @@ $0 <hostname> [-b </path/to/netcat/binary>] [-p <port>] [--connect-timeout=<seco
 END
 }
 
-my @params = ('-w', $op_timeout);
+my @params = ('-w', $op_timeout, '-v');
 
 exec ($op_ncbin, $op_host, $op_port, @params) or die "cannot exec $op_ncbin: $!";
