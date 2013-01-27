@@ -6,11 +6,12 @@
 
 use strict;
 use Getopt::Long;
+use POSIX ":sys_wait_h";
 
 # fetch command-line parameters
 my $op_help;
 my $op_port = 23;
-my $op_ncbin = '/usr/bin/nc';
+my $op_ncbin = 'nc';
 my $op_timeout = 30;
 GetOptions (
     'h' => \$op_help,
@@ -39,4 +40,24 @@ END
 
 my @params = ('-w', $op_timeout, '-v');
 
-exec ($op_ncbin, $op_host, $op_port, @params) or die "cannot exec $op_ncbin: $!";
+pipe (RD, WR);
+my $child_pid = fork();
+defined $child_pid or die "fork: $!";
+if (! $child_pid) {
+	close RD;
+	open (STDERR, ">&WR") or die "open: $!";
+	exec ($op_ncbin, $op_host, $op_port, @params) or die "exec $op_ncbin: $!";
+}
+close WR;
+
+# suppress error output if nc returns 0
+my $error_buff = '';
+while (<RD>) {
+	$error_buff .= $_;
+}
+waitpid $child_pid, 0;
+if ($?) {
+	print STDERR $error_buff;
+	$? = $? >> 8;
+	exit $? ? $? : 1;
+}
