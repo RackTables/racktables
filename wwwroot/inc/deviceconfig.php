@@ -1109,6 +1109,20 @@ function nxos4TranslatePushQueue ($dummy_object_id, $queue, $dummy_vlan_names)
 		case 'getlldpstatus':
 			$ret .= "show lldp neighbors detail\n";
 			break;
+		case 'set mode':
+			if ($cmd['arg2'] == 'trunk')
+			{
+				// some NX-OS platforms ask for confirmation if user tries to
+				// overwrite allowed vlan list. Hence, we need to use
+				// the differentiative remove syntax here
+				$ret .= "interface ${cmd['arg1']}\n";
+				$ret .= "switchport trunk encapsulation dot1q\n";
+				$ret .= "switchport mode ${cmd['arg2']}\n";
+				$ret .= "no switchport trunk native vlan\n";
+				$ret .= "switchport trunk allowed vlan remove 1-4094\n";
+				break;
+			}
+			// fall-through
 		default:
 			$ret .= ios12TranslatePushQueue ($dummy_object_id, array ($cmd), $dummy_vlan_names);
 			break;
