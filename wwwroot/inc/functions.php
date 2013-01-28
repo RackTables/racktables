@@ -5815,4 +5815,9 @@ function inverseRackUnit ($unit_no, $rack_cell)
 	return $unit_no;
 }
 
+function isCLIMode ()
+{
+	return !isset ($_SERVER['REQUEST_METHOD']);
+}
+
 ?>

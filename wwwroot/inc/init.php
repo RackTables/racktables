@@ -121,7 +121,7 @@ elseif (! isset ($remote_username))
 	// Some functions require remote_username to be set to something to act correctly,
 	// even though they don't use the value itself.
 	$admin_account = spotEntity ('user', 1);
-	if (isset ($_SERVER['argc']) && FALSE !== $env_user = getenv('USER'))
+	if (isCLIMode() && FALSE !== $env_user = getenv('USER'))
 		// use USER env var if we are in CLI mode
 		$remote_username = $env_user;
 	else
