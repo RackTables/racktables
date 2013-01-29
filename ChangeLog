@@ -4,6 +4,7 @@
 	bugfix: 802.1Q: properly detect non-switched ports on Cisco NX-OS devices
 	bugfix: racks, vs, rspools were displayed in search results even if user had no permissions to view them
 	bugfix: some dictionary items of Cisco Catalyst 2960 switches were renamed to meet official Cisco classification (refer the release notes)
+	bugfix: file upload failed in MySQL strict mode (#717)
 	update: vlan search results now include binded IP networks
 	update: make scaled rack thumb images sharp again
 	update: Cisco IOS 15.0 support

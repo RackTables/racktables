@@ -4308,7 +4308,8 @@ function commitAddFile ($name, $type, $contents, $comment)
 	}
 	try
 	{
-		$query = $dbxlink->prepare ('INSERT INTO File (name, type, ctime, mtime, atime, contents, comment) VALUES (?, ?, NOW(), NOW(), NOW(), ?, ?)');
+		# File.size has no default value, set to 0 with MySQL strict mode in mind.
+		$query = $dbxlink->prepare ('INSERT INTO File (name, type, size, ctime, mtime, atime, contents, comment) VALUES (?, ?, 0, NOW(), NOW(), NOW(), ?, ?)');
 		$query->bindParam (1, $name);
 		$query->bindParam (2, $type);
 		$query->bindParam (3, $contents, PDO::PARAM_LOB);
