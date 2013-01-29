@@ -383,7 +383,7 @@ function ios12ReadSwitchPortList (&$work, $line)
 {
 	if (0 < strpos ($line, '! END OF SWITCHPORTS'))
 		return 'ios12-get8021q-top';
-	if (preg_match ('@^\s*Name:\s+(\S+)@', $line, $m))
+	if (preg_match ('@^(?:\s*|vdc .*)Name:\s+(\S+)@', $line, $m))
 		$work['current_switchport'] = $m[1];
 	elseif (preg_match ('@^\s*Switchport:\s+(Enabled)@', $line, $m) && isset ($work['current_switchport']))
 	{
