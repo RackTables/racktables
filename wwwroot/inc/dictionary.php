@@ -2047,6 +2047,8 @@ $dictionary = array
 	1961 => array ('chapter_id' => 12, 'dict_value' => 'Huawei%GPASS%S5710-52C-PWR-LI'),
 	1962 => array ('chapter_id' => 12, 'dict_value' => 'Force10%GPASS%S4820T'),
 	1963 => array ('chapter_id' => 16, 'dict_value' => 'Cisco IOS 15.1'),
+	1964 => array ('chapter_id' => 25, 'dict_value' => 'Cisco%GPASS%AIR-AP1041N'),
+	1965 => array ('chapter_id' => 25, 'dict_value' => 'Cisco%GPASS%AIR-AP1042N'),
 
 # Any new "default" dictionary records must go above this line (i.e., with
 # dict_key code less, than 50000). This is necessary to keep AUTO_INCREMENT
