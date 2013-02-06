@@ -195,28 +195,28 @@ virtual_server %VS_HEADER% {
 ");
 		foreach (getRSListInPool ($this->rs['id']) as $rs)
 		{
-			// do not add v6 reals into v4 service and vice versa
-			if (strlen ($rs['rsip_bin']) != strlen ($this->vs['vip_bin']))
-				continue;
 			if ($rs['inservice'] != 'yes')
 				continue;
 			$parser->pushdefs(); // backup macros
 			$this->prepareParserForRS ($parser, $rs);
-			foreach (explode (',', $parser->expandMacro ('RSPORT')) as $rsp_token)
-			{
-				$port_range = explode ('-', $rsp_token);
-				if (count ($port_range) < 1)
-					throw new InvalidArgException ('RSPORT', $rsp_token, "invalid RS port range");
-				if (count ($port_range) < 2)
-					$port_range[] = $port_range[0];
-				if ($port_range[0] > $port_range[1])
-					throw new InvalidArgException ('RSPORT', $rsp_token, "invalid RS port range");
-
-				for ($rsport = $port_range[0]; $rsport <= $port_range[1]; $rsport++)
+			// do not add v6 reals into v4 service and vice versa
+			$rsip_bin = ip_checkparse ($parser->expandMacro ('RSIP'));
+			if ($rsip_bin !== FALSE && strlen ($rsip_bin) == strlen ($this->vs['vip_bin']))
+				foreach (explode (',', $parser->expandMacro ('RSPORT')) as $rsp_token)
 				{
-					$parser->pushdefs();
-					$parser->addMacro ('RSPORT', $rsport);
-					$ret .= $parser->expand ("
+					$port_range = explode ('-', $rsp_token);
+					if (count ($port_range) < 1)
+						throw new InvalidArgException ('RSPORT', $rsp_token, "invalid RS port range");
+					if (count ($port_range) < 2)
+						$port_range[] = $port_range[0];
+					if ($port_range[0] > $port_range[1])
+						throw new InvalidArgException ('RSPORT', $rsp_token, "invalid RS port range");
+
+					for ($rsport = $port_range[0]; $rsport <= $port_range[1]; $rsport++)
+					{
+						$parser->pushdefs();
+						$parser->addMacro ('RSPORT', $rsport);
+						$ret .= $parser->expand ("
 	%RS_PREPEND%
 	real_server %RS_HEADER% {
 		%GLOBAL_RS_CONF%
@@ -226,9 +226,9 @@ virtual_server %VS_HEADER% {
 		%RS_RS_CONF%
 	}
 ");
-					$parser->popdefs();
+						$parser->popdefs();
+					}
 				}
-			}
 			$parser->popdefs(); // restore original (VS-driven) macros
 		}
 		$ret .= "}\n";
