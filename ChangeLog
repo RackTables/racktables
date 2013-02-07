@@ -9,6 +9,7 @@
 	update: make scaled rack thumb images sharp again
 	update: Cisco IOS 15.0 support
 	update: 802.1Q: non-switched ports do not need 'none' template role any more
+	update: 802.1Q: misconfigured uplink/downlink ports are highlighed red on '802.1Q Ports' tab
 	new feature: configurable top-to-bottom units order in particular racks (#601)
 	new feature: overridable tag names display style (via CSS and plug-ins)
 0.20.3 2012-12-19

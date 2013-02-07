@@ -5853,4 +5853,47 @@ function sortLinks ($port_id, $unsorted_links, $sorted_links = array (), $level 
 	return $sorted_links;
 }
 
+// Checks if 802.1Q port uplink/downlink feature is misconfigured.
+// Returns FALSE if 802.1Q port role/linking is wrong, TRUE otherwise.
+function checkPortRole ($vswitch, $port_name, $port_order)
+{
+	static $links_cache = array();
+	if (! isset ($links_cache[$vswitch['object_id']]))
+		$links_cache[$vswitch['object_id']] = getObjectPortsAndLinks ($vswitch['object_id']);
+
+	$local_auto = ($port_order['vst_role'] == 'uplink' || $port_order['vst_role'] == 'downlink') ?
+		$port_order['vst_role'] :
+		FALSE;
+
+	// find linked port with the same name
+	foreach ($links_cache[$vswitch['object_id']] as $portinfo)
+		if ($portinfo['linked'] && ios12ShortenIfName ($portinfo['name']) == $port_name)
+		{
+			if ($port_name != $portinfo['name'])
+				return FALSE; // typo in local port name
+			$remote_vswitch = getVLANSwitchInfo ($portinfo['remote_object_id']);
+			if (! $remote_vswitch)
+				return ! $local_auto;
+
+			$remote_ports = apply8021QOrder ($remote_vswitch['template_id'], getStored8021QConfig ($remote_vswitch['object_id'], 'desired'));
+			if (! $remote = @$remote_ports[$portinfo['remote_name']])
+				// linked auto-port must have corresponding remote 802.1Q port
+				return
+					! $local_auto &&
+					! isset ($remote_ports[ios12ShortenIfName ($portinfo['remote_name'])]); // typo in remote port name
+
+			$remote_auto = ($remote['vst_role'] == 'uplink' || $remote['vst_role'] == 'downlink') ?
+				$remote['vst_role'] :
+				FALSE;
+
+			if (! $remote_auto && ! $local_auto)
+				return TRUE;
+			elseif ($remote_auto && $local_auto && $local_auto != $remote_auto && $vswitch['domain_id'] == $remote_vswitch['domain_id'])
+				return TRUE; // auto-calc link ends must belong to the same domain
+			else
+				return FALSE;
+		}
+	return TRUE; // not linked port
+}
+
 ?>

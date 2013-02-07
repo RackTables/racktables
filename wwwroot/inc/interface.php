@@ -6860,6 +6860,9 @@ function renderObject8021QPorts ($object_id)
 		default:
 			throw new InvalidArgException ('vst_role', $port['vst_role']);
 		}
+		if (!checkPortRole ($vswitch, $port_name, $port))
+			$trclass = 'trerror';
+
 		if (!array_key_exists ($port_name, $sockets))
 		{
 			$socket_columns = '<td>&nbsp;</td><td>&nbsp;</td>';
