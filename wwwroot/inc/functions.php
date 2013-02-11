@@ -5859,7 +5859,7 @@ function checkPortRole ($vswitch, $port_name, $port_order)
 {
 	static $links_cache = array();
 	if (! isset ($links_cache[$vswitch['object_id']]))
-		$links_cache[$vswitch['object_id']] = getObjectPortsAndLinks ($vswitch['object_id']);
+		$links_cache = array ($vswitch['object_id'] => getObjectPortsAndLinks ($vswitch['object_id']));
 
 	$local_auto = ($port_order['vst_role'] == 'uplink' || $port_order['vst_role'] == 'downlink') ?
 		$port_order['vst_role'] :
