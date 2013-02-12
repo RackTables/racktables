@@ -7,89 +7,39 @@
 use strict;
 use Getopt::Long;
 
-my @orig_params = @ARGV;
-
 # fetch command-line parameters
 my $op_help;
-my $op_proto;
-my $op_port;
-my $op_connect_timeout = 2;
-my $op_user;
-my $op_identity;
-my $op_dont_sudo;
 my $op_as_user;
-my $op_sh;
 GetOptions (
     'h' => \$op_help,
-	'proto:i' => \$op_proto,
-    'port|p:i' => \$op_port,
-    'connect-timeout:i' => \$op_connect_timeout,
-    'dont-sudo' => \$op_dont_sudo,
     'sudo-user:s' => \$op_as_user,
-    'username|l:s' => \$op_user,
-    'identity|i:s' => \$op_identity,
 );
 if ($op_help) {
     &display_help;
     exit;
 }
-if (defined $op_proto) {
-	$op_proto == 4 or $op_proto == 6 or die "ERROR: valid protocol version values are 4 and 6";
-}
-my $op_host = shift @ARGV;
-defined $op_host or die "ERROR: please specify remote host (-h for help)";
 
 &become_user;
+exec ('ssh', @ARGV) or die "exec ssh: $!";
 
 sub display_help {
     print <<END;
 ssh batch client for RackTables.
 Takes commands list in standard input and gives the responses via standard output.
 Usage:
-$0 <hostname> [-p <port>] [-l <username>] [-i <identity file>] [--connect-timeout=<seconds>] [--as-user=<username>] [--proto=<4|6>]
- -p, --port           TCP port number to connect to
- --proto              exclicitly specify IP protocol version
- -l, --username       remote username for ssh
- -i, --identity       identity file to authenticate
- -L, --no-login       disable login shell (exec sh)
- --connect-timeout    timeout for giving up connecting process, seconds
+$0 [--as-user=<username>] [ -- ] [ ssh params ]
  --as-user            sudo self as specified username
-
 END
 }
 
 sub become_user {
-    if (defined $op_as_user && (my $uid = getpwnam($op_as_user)) != $>) {
-        if ($op_dont_sudo) {
-            die "Cant become user $op_as_user";
+    if (defined $op_as_user) {
+        my $uid = getpwnam ($op_as_user);
+        if (! defined $uid) {
+            die "getpwnam $op_as_user: $!";
         }
-        else {
-            exec ('sudo', '-u', "#$uid", $0, @orig_params, '--dont-sudo') or die "cant exec: $!";
+        if ($uid != $>) {
+            exec ('sudo', '-u', "#$uid", $0, '--', @ARGV) or die "exec sudo: $!";
         }
     }
 }
-
-my $port = $op_port || 22;
-my @params;
-push @params, '-T';
-if (defined $op_proto) {
-	push @params, "-$op_proto"
-}
-if (defined $op_connect_timeout) {
-    push @params, '-o', "ConnectTimeout=$op_connect_timeout";
-}
-if ($port) {
-    push @params, '-p', $port;
-}
-if (defined $op_user) {
-    push @params, '-l', $op_user;
-}
-if (defined $op_identity) {
-    push @params, '-i', $op_identity;
-}
-push @params, '-o', 'StrictHostKeyChecking=no';
-push @params, '-o', 'BatchMode=yes';
-push @params, '-o', 'CheckHostIP=no';
-push @params, '-o', 'LogLevel=ERROR';
-
-exec ('ssh', @params, $op_host, @ARGV) or die "cant exec ssh: $!";
