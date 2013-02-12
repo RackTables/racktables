@@ -209,6 +209,101 @@ function translateDeviceCommands ($object_id, $crq, $vlan_names = NULL)
 	return $funcname ($object_id, $crq, $vlan_names);
 }
 
+// takes settings struct (declared in queryTerminal) and CLI commands (plain text) as input by reference
+// returns an array of command-line parameters to $ref_settings[0]['protocol']
+// this function is called by callHook, so you can override/chain it
+// to customize command-line options to particular gateways.
+function makeGatewayParams ($object_id, $tolerate_remote_errors, /*array(&)*/$ref_settings, /*array(&)*/$ref_commands)
+{
+	$ret = array();
+	$settings = &$ref_settings[0];
+	$commands = &$ref_commands[0];
+
+	switch ($settings['protocol'])
+	{
+		case 'telnet':
+		case 'netcat':
+			// prepend telnet commands by credentials
+			if (isset ($settings['password']))
+				$commands = $settings['password'] . "\n" . $commands;
+			if (isset ($settings['username']))
+				$commands = $settings['username'] . "\n" . $commands;
+			break;
+		case 'ucssdk': # remote XML through a Python backend
+			# UCS in its current implementation besides the terminal_settings() provides
+			# an additional username/password feed through the HTML from. Whenever the
+			# user provides the credentials through the form, use these instead of the
+			# credentials [supposedly] set by terminal_settings().
+			global $script_mode;
+			if ($script_mode != TRUE && ! isCheckSet ('use_terminal_settings'))
+			{
+				$settings['username'] = assertStringArg ('ucs_login');
+				$settings['password'] = assertStringArg ('ucs_password');
+			}
+			foreach (array ('hostname', 'username', 'password') as $item)
+				if (empty ($settings[$item]))
+					throw new RTGatewayError ("${item} not available, check terminal_settings()");
+			$commands = "login ${settings['hostname']} ${settings['username']} ${settings['password']}\n" . $commands;
+			break;
+	}
+
+	$ret = array();
+	switch ($settings['protocol'])
+	{
+		case 'telnet':
+			$params_from_settings['port'] = 'port';
+			$params_from_settings['prompt'] = 'prompt';
+			$params_from_settings['connect-timeout'] = 'connect_timeout';
+			$params_from_settings['timeout'] = 'timeout';
+			$params_from_settings['prompt-delay'] = 'prompt_delay';
+			$params_from_settings[] = $settings['hostname'];
+			break;
+		case 'netcat':
+			$params_from_settings['p'] = 'port';
+			$params_from_settings['w'] = 'timeout';
+			$params_from_settings['b'] = 'ncbin';
+			$params_from_settings[] = $settings['hostname'];
+			break;
+		case 'ssh':
+			$params_from_settings['sudo-user'] = 'sudo_user';
+			$params_from_settings[] = '--';
+			$params_from_settings['p'] = 'port';
+			$params_from_settings['l'] = 'username';
+			$params_from_settings['i'] = 'identity_file';
+			if (isset ($settings['proto']))
+				switch ($settings['proto'])
+				{
+					case 4:
+						$params_from_settings[] = '-4';
+						break;
+					case 6:
+						$params_from_settings[] = '-6';
+						break;
+					default:
+						throw new RTGatewayError ("Proto '${settings['proto']}' is invalid. Valid protocols are: '4', '6'");
+				}
+			if (isset ($settings['connect_timeout']))
+				$params_from_settings[] = '-oConnectTimeout=' . $settings['connect_timeout'];
+			$params_from_settings[] = '-T';
+			$params_from_settings[] = '-oStrictHostKeyChecking=no';
+			$params_from_settings[] = '-oBatchMode=yes';
+			$params_from_settings[] = '-oCheckHostIP=no';
+			$params_from_settings[] = '-oLogLevel=ERROR';
+			$params_from_settings[] = $settings['hostname'];
+			break;
+		default:
+			throw RTGatewayError ("Invalid terminal protocol '${settings['protocol']}' specified");
+	}
+
+	foreach ($params_from_settings as $param_name => $setting_name)
+		if (is_int ($param_name))
+			$ret[] = $setting_name;
+		elseif (isset ($settings[$setting_name]))
+			$ret[$param_name] = $settings[$setting_name];
+
+	return $ret;
+}
+
 // This function returns a text output received from the device
 // You can override connection settings by implement a callback named 'terminal_settings'.
 // Errors are thrown as exceptions if not $tolerate_remote_errors, and shown as warnings otherwise.
@@ -225,51 +320,71 @@ function queryTerminal ($object_id, $commands, $tolerate_remote_errors = TRUE)
 	switch ($breed = detectDeviceBreed ($object_id))
 	{
 		case 'ios12':
-		case 'fdry5':
 		case 'ftos8':
 			$protocol = 'netcat'; // default is netcat mode
 			$prompt = '^(Login|Username|Password): $|^\S+[>#]$'; // set the prompt in case user would like to specify telnet protocol
+			$commands = "terminal length 0\nterminal no monitor\n" . $commands;
 			break;
 		case 'air12':
 			$protocol = 'telnet'; # Aironet IOS is broken
 			$prompt = '^(Username|Password): $|^\S+[>#]$';
+			$commands = "terminal length 0\nterminal no monitor\n" . $commands;
 			break;
-		case 'vrp53':
+		case 'fdry5':
+			$protocol = 'netcat'; // default is netcat mode
+			$prompt = '^(Login|Username|Password): $|^\S+[>#]$'; // set the prompt in case user would like to specify telnet protocol
+			$commands = "skip-page-display\n" . $commands;
+			break;
 		case 'vrp55':
+			$commands = "screen-length 0 temporary\n" . $commands;
+			/* fall-through */
+		case 'vrp53':
 			$protocol = 'telnet';
 			$prompt = '^\[[^[\]]+\]$|^<[^<>]+>$|^(Username|Password):$|(?:\[Y\/N\]|\(Y\/N\)\[[YN]\]):?$';
 			break;
 		case 'nxos4':
 			$protocol = 'telnet';
 			$prompt = '(^([Ll]ogin|[Pp]assword):|[>#]) $';
+			$commands = "terminal length 0\nterminal no monitor\n" . $commands;
 			break;
 		case 'xos12':
 			$protocol = 'telnet';
 			$prompt = ': $|\.\d+ # $|\?\s*\([Yy]\/[Nn]\)\s*$';
+			$commands = "disable clipaging\n" . $commands;
 			break;
 		case 'jun10':
 			$protocol = 'telnet';
 			$prompt = '^login: $|^Password:$|^\S+@\S+[>#] $';
+			$commands = "set cli screen-length 0\n" . $commands;
 			break;
 		case 'eos4':
 			$protocol = 'telnet'; # strict RFC854 implementation, netcat won't work
 			$prompt = '^(\xf2?login|Username|Password): $|^\S+[>#]$';
+			$commands = "enable\nno terminal monitor\nterminal length 0\n" . $commands;
 			break;
 		case 'ros11':
 			$protocol = 'netcat'; # see ftos8 case
 			$prompt = '^(User Name|\rPassword):$|^\r?\S+# $';
+			$commands = "terminal datadump\n" . $commands;
+			$commands .= "\n\n"; # temporary workaround for telnet server
 			break;
 		case 'iosxr4':
 			$protocol = 'telnet';
 			$prompt = '^\r?(Login|Username|Password): $|^\r?\S+[>#]$';
+			$commands = "terminal length 0\nterminal monitor disable\n" . $commands;
 			break;
 		case 'ucs':
 			$protocol = 'ucssdk';
 			break;
-		default:
+		case 'dlink':
 			$protocol = 'netcat';
-			$prompt = NULL;
+			$commands = "disable clipaging\n" . $commands;
+			break;
 	}
+	if (! isset ($protocol))
+		$protocol = 'netcat';
+	if (! isset ($prompt))
+		$prompt = NULL;
 
 	// set the default settings before calling user-defined callback
 	$settings = array
@@ -286,116 +401,15 @@ function queryTerminal ($object_id, $commands, $tolerate_remote_errors = TRUE)
 		'sudo_user' => NULL,
 		'identity_file' => NULL,
 	);
+
+	// override default settings
 	if (is_callable ('terminal_settings'))
-		call_user_func ('terminal_settings', $objectInfo, array (&$settings)); // override settings
-
-	if (! isset ($settings['port']) and $settings['protocol'] == 'netcat')
-		$settings['port'] = 23;
-
-	$params = array	( $settings['hostname'] );
-	$params_from_settings = array();
-	switch ($settings['protocol'])
-	{
-		case 'telnet':
-		case 'netcat':
-			// prepend command list with vendor-specific disabling pager command
-			switch ($breed)
-			{
-				case 'ios12':
-					$commands = "terminal length 0\n" . $commands;
-					break;
-				case 'nxos4':
-				case 'air12':
-				case 'ftos8':
-					$commands = "terminal length 0\nterminal no monitor\n" . $commands;
-					break;
-				case 'xos12':
-					$commands = "disable clipaging\n" . $commands;
-					break;
-				case 'vrp55':
-					$commands = "screen-length 0 temporary\n" . $commands;
-					break;
-				case 'fdry5':
-					$commands = "skip-page-display\n" . $commands;
-					break;
-				case 'jun10':
-					$commands = "set cli screen-length 0\n" . $commands;
-					break;
-				case 'eos4':
-					$commands = "enable\nno terminal monitor\nterminal length 0\n" . $commands;
-					break;
-				case 'ros11':
-					$commands = "terminal datadump\n" . $commands;
-					$commands .= "\n\n"; # temporary workaround for telnet server
-					break;
-				case 'iosxr4':
-					$commands = "terminal length 0\nterminal monitor disable\n" . $commands;
-					break;
-				case 'dlink':
-					$commands = "disable clipaging\n" . $commands;
-					break;
-			}
-			// prepend telnet commands by credentials
-			if (isset ($settings['password']))
-				$commands = $settings['password'] . "\n" . $commands;
-			if (isset ($settings['username']))
-				$commands = $settings['username'] . "\n" . $commands;
-			// command-line options are specific to client: telnet or netcat
-			switch ($settings['protocol'])
-			{
-				case 'telnet':
-					$params_from_settings['port'] = 'port';
-					$params_from_settings['prompt'] = 'prompt';
-					$params_from_settings['connect-timeout'] = 'connect_timeout';
-					$params_from_settings['timeout'] = 'timeout';
-					$params_from_settings['prompt-delay'] = 'prompt_delay';
-					break;
-				case 'netcat':
-					$params_from_settings['p'] = 'port';
-					$params_from_settings['w'] = 'timeout';
-					$params_from_settings['b'] = 'ncbin';
-					break;
-			}
-			break;
-		case 'ssh':
-			$params_from_settings['port'] = 'port';
-			$params_from_settings['proto'] = 'proto';
-			$params_from_settings['username'] = 'username';
-			$params_from_settings['i'] = 'identity_file';
-			$params_from_settings['sudo-user'] = 'sudo_user';
-			$params_from_settings['connect-timeout'] = 'connect_timeout';
-			break;
-		case 'ucssdk': # remote XML through a Python backend
-			$params = array(); # reset
-			# UCS in its current implementation besides the terminal_settings() provides
-			# an additional username/password feed through the HTML from. Whenever the
-			# user provides the credentials through the form, use these instead of the
-			# credentials [supposedly] set by terminal_settings().
-			if ($script_mode != TRUE && ! isCheckSet ('use_terminal_settings'))
-			{
-				genericAssertion ('ucs_login', 'string');
-				genericAssertion ('ucs_password', 'string');
-				$settings['username'] = $_REQUEST['ucs_login'];
-				$settings['password'] = $_REQUEST['ucs_password'];
-			}
-			foreach (array ('hostname', 'username', 'password') as $item)
-				if (empty ($settings[$item]))
-					throw new RTGatewayError ("${item} not available, check terminal_settings()");
-			$commands = "login ${settings['hostname']} ${settings['username']} ${settings['password']}\n" . $commands;
-			break;
-		default:
-			throw RTGatewayError ("Invalid terminal protocol '${settings['protocol']}' specified");
-	}
-	foreach ($params_from_settings as $param_name => $setting_name)
-		if (isset ($settings[$setting_name]))
-			if (is_int ($param_name))
-				$params[] = $settings[$setting_name];
-			else
-				$params[$param_name] = $settings[$setting_name];
-
-	callHook ('alterTerminalParams', $object_id, $tolerate_remote_errors, array (&$settings['protocol']), array (&$params));
-
+		call_user_func ('terminal_settings', $objectInfo, array (&$settings));
+	// make gateway-specific CLI params out of settings
+	$params = callHook ('makeGatewayParams', $object_id, $tolerate_remote_errors, array (&$settings), array (&$commands));
+	// call gateway
 	$ret_code = callScript ($settings['protocol'], $params, $commands, $out, $errors);
+
 	if ($settings['protocol'] != 'ssh' || ! $tolerate_remote_errors)
 	{
 		if (! empty ($errors))
