@@ -2993,7 +2993,7 @@ function cloneRSPool()
 	$new_id = commitCreateRSPool ($pool['name'] . ' (copy)', $pool['vsconfig'], $pool['rsconfig'], $tagidlist);
 	foreach ($rs_list as $rs)
 		addRStoRSPool ($new_id, $rs['rsip_bin'], $rs['rsport'], $rs['inservice'], $rs['rsconfig'], $rs['comment']);
-	showSuccess ('Created a copy of pool  ' . mkA ($pool['name'], 'ipv4rspool', $pool_id));
+	showSuccess ('Created a copy of pool  ' . mkA ($pool['name'], 'ipv4rspool', $pool['id']));
 	return buildRedirectURL ('ipv4rspool', 'default', array ('pool_id' => $new_id));
 }
 
