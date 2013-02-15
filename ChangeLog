@@ -6,6 +6,7 @@
 	bugfix: some dictionary items of Cisco Catalyst 2960 switches were renamed to meet official Cisco classification (refer the release notes)
 	bugfix: file upload failed in MySQL strict mode (#717)
 	bugfix: bulk port creation failed with empty prefix
+	bugfix: RS pool cloner was throwing an exception
 	update: vlan search results now include binded IP networks
 	update: make scaled rack thumb images sharp again
 	update: Cisco IOS 15.0 support
