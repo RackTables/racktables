@@ -860,7 +860,7 @@ $msgcode['addBulkPorts']['OK'] = 82;
 function addBulkPorts ()
 {
 	assertStringArg ('port_type_id');
-	assertStringArg ('port_name');
+	assertStringArg ('port_name', TRUE);
 	assertStringArg ('port_label', TRUE);
 	assertUIntArg ('port_numbering_start', TRUE);
 	assertUIntArg ('port_numbering_count');
