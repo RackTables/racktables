@@ -194,13 +194,18 @@ function assertBreedFunction ($breed, $command)
 
 function queryDevice ($object_id, $command)
 {
+	$query = translateDeviceCommands ($object_id, array (array ('opcode' => $command)));
+	if ($command == 'xlatepushq')
+		return $query;
 	$breed = assertDeviceBreed ($object_id);
 	$funcname = assertBreedFunction ($breed, $command);
 	require_once 'deviceconfig.php';
 	if (! is_callable ($funcname))
 		throw new RTGatewayError ("undeclared function '${funcname}'");
-	$query = translateDeviceCommands ($object_id, array (array ('opcode' => $command)));
-	return $command == 'xlatepushq' ? $query : $funcname (queryTerminal ($object_id, $query, FALSE));
+	$ret = $funcname (queryTerminal ($object_id, $query, FALSE));
+	if (NULL !== ($subst = callHook ('alterDeviceQueryResult', $ret, $object_id, $command)))
+		$ret = $subst;
+	return $ret;
 }
 
 function translateDeviceCommands ($object_id, $crq, $vlan_names = NULL)

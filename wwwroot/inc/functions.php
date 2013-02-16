@@ -5721,7 +5721,7 @@ function registerHook ($hook_name, $callback, $method = 'after')
 	elseif ($method == 'chain')
 	{
 		// if we are trying to chain on the built-in function, push it to the stack
-		if (empty ($hooks_stack[$hook_name]))
+		if (empty ($hooks_stack[$hook_name]) && is_callable ($hook_name))
 			array_push ($hooks_stack[$hook_name], $hook_name);
 
 		array_push ($hooks_stack[$hook_name], '!' . $callback);
