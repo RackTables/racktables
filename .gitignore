@@ -2,3 +2,4 @@ wwwroot/inc/secret.php
 wwwroot/inc/local.php
 /.project
 tags
+plugins/*
