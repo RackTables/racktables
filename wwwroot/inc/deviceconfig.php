@@ -1599,6 +1599,10 @@ show configuration interfaces
 		case 'getallconf':
 			$ret .= "show configuration\n";
 			break;
+		case 'getlldpstatus':
+			$ret .= "show lldp neighbors\n";
+			$ret .= "# object_id=$dummy_object_id";
+			break;
 		default:
 			throw new InvalidArgException ('opcode', $cmd['opcode']);
 		}
@@ -3185,6 +3189,29 @@ function ros11SpotConfigText ($input)
 function iosxr4SpotConfigText ($input)
 {
 	return preg_replace ('/.*?^!! IOS XR Configuration [^\n]*$\n(.*)^\S+#\s*\Z/sm', '$1', $input);
+}
+
+function jun10ReadLLDPStatus ($input)
+{
+	$ret = array();
+
+	$lldp_mode = FALSE;
+	foreach (explode ("\n", $input) as $line)
+	{
+		$line = rtrim ($line);
+		if (preg_match ('/^Local Interface\s+Chassis Id\s+Port info\s+System Name$/', $line))
+			$lldp_mode = TRUE;
+		elseif ($line == "")
+			$lldp_mode = FALSE;
+		elseif ($lldp_mode && preg_match ('/^(\S+)\s+([0-9a-f:]{17})\s+(.*?)\s+(\S+)\s*$/', $line, $m))
+			$ret[ios12ShortenIfName ($m[1])][] = array
+			(
+				'port' => ios12ShortenIfName ($m[3]),
+				'device' => $m[4],
+			);
+	}
+
+	return $ret;
 }
 
 ?>
