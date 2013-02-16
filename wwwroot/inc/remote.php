@@ -64,6 +64,7 @@ $breedfunc = array
 	'jun10-get8021q-main'      => 'jun10Read8021QConfig',
 	'jun10-xlatepushq-main'    => 'jun10TranslatePushQueue',
 	'jun10-getallconf-main'    => 'jun10SpotConfigText',
+	'jun10-getlldpstatus-main' => 'jun10ReadLLDPStatus',
 	'ftos8-xlatepushq-main'    => 'ftos8TranslatePushQueue',
 	'ftos8-getlldpstatus-main' => 'ftos8ReadLLDPStatus',
 	'ftos8-getmaclist-main'    => 'ftos8ReadMacList',
