@@ -3749,7 +3749,12 @@ function renderLocationPage ($location_id)
 	if ($locationData['has_problems'] == 'yes')
 		$summary[] = array ('<tr><td colspan=2 class=msg_error>Has problems</td></tr>');
 	foreach (getAttrValues ($locationData['id']) as $record)
-		$summary['{sticker}' . $record['name']] = formatAttributeValue ($record);
+		if
+		(
+			$record['value'] != '' and
+			permitted (NULL, NULL, NULL, array (array ('tag' => '$attr_' . $record['id'])))
+		)
+			$summary['{sticker}' . $record['name']] = formatAttributeValue ($record);
 	$summary['tags'] = '';
 	if (strlen ($locationData['comment']))
 		$summary['Comment'] = $locationData['comment'];
