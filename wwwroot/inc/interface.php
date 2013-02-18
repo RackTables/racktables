@@ -803,10 +803,12 @@ function renderEditObjectForm()
 		$parents = getEntityRelatives ('parents', 'object', $object_id);
 		foreach ($parents as $link_id => $parent_details)
 		{
+			$objectData = spotEntity ('object', $parent_details['entity_id']);
+			$containerType = decodeObjectType ($objectData['objtype_id']);
 			if (!isset($label))
 				$label = count($parents) > 1 ? 'Containers:' : 'Container:';
 			echo "<tr><td>&nbsp;</td>";
-			echo "<th class=tdright>${label}</th><td class=tdleft>";
+			echo "<th class=tdright>${containerType}:</th><td class=tdleft>";
 			echo mkA ($parent_details['name'], 'object', $parent_details['entity_id']);
 			echo "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
 			echo "<a href='".
@@ -1119,18 +1121,33 @@ function renderObject ($object_id)
 	$parents = getEntityRelatives ('parents', 'object', $object_id);
 	if (count ($parents))
 	{
-		$fmt_parents = array();
-		foreach ($parents as $parent)
-			$fmt_parents[] =  "<a href='".makeHref(array('page'=>$parent['page'], $parent['id_name'] => $parent['entity_id']))."'>${parent['name']}</a>";
-		$summary[count($parents) > 1 ? 'Containers' : 'Container'] = implode ('<br>', $fmt_parents);
+		$fmt_parents = array( array() );
+		$fmt_parenttypes = array();
+		foreach ($parents as $link_id => $parent_details) {
+                        $objectData = spotEntity ('object', $parent_details['entity_id']);
+                        $containerType = $objectData['objtype_id'];	
+
+			// Make sure to include all parents, so add a number if theres >1 of a kind
+			$fmt_parents[$containerType][] = mkA ($parent_details['name'], 'object', $parent_details['entity_id']);
+			$fmt_parenttypes[] = $containerType;
+		}
+		foreach ($fmt_parenttypes as $parenttype)
+			$summary[decodeObjectType ($parenttype)] = implode ('<br>', $fmt_parents[$parenttype]);
 	}
 	$children = getEntityRelatives ('children', 'object', $object_id);
 	if (count ($children))
 	{
-		$fmt_children = array();
-		foreach ($children as $child)
-			$fmt_children[] = "<a href='".makeHref(array('page'=>$child['page'], $child['id_name']=>$child['entity_id']))."'>${child['name']}</a>";
-		$summary['Contains'] = implode ('<br>', $fmt_children);
+		$fmt_children = array( array() );
+		$fmt_childtypes = array();
+		foreach ($children as $child) {
+			$objectData = spotEntity ('object', $child['entity_id']);
+			$childType = $objectData['objtype_id'];
+
+			$fmt_children[$childType][] = mkA ($child['name'], 'object', $child['entity_id']);
+			$fmt_childtypes[] = $childType;
+		}
+		foreach ($fmt_childtypes as $childtype)
+			$summary[decodeObjectType ($childtype)] = implode ('<br>', $fmt_children[$childtype]);
 	}
 	if ($info['has_problems'] == 'yes')
 		$summary[] = array ('<tr><td colspan=2 class=msg_error>Has problems</td></tr>');
