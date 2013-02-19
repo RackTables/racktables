@@ -2434,6 +2434,9 @@ function iosxr4TranslatePushQueue ($dummy_object_id, $queue, $dummy_vlan_names)
 		case 'getallconf':
 			$ret .= "show running-config\n";
 			break;
+		case 'getlldpstatus':
+			$ret .= "show lldp neighbors\n";
+			break;
 		default:
 			throw new InvalidArgException ('opcode', $cmd['opcode']);
 		}
@@ -3209,6 +3212,34 @@ function jun10ReadLLDPStatus ($input)
 				'port' => ios12ShortenIfName ($m[3]),
 				'device' => $m[4],
 			);
+	}
+
+	return $ret;
+}
+
+function iosxr4ReadLLDPStatus ($input)
+{
+	$ret = array();
+
+	$lldp_mode = FALSE;
+	foreach (explode ("\n", $input) as $line)
+	{
+		$line = rtrim ($line);
+		if (preg_match ('/^Device ID\s+Local Intf\s+Hold-time\s+Capability\s+Port ID$/', $line))
+			$lldp_mode = TRUE;
+		elseif ($line == "")
+			$lldp_mode = FALSE;
+		elseif ($lldp_mode && preg_match ('/^(\S+)\s+([^\s\[\]]+)[^\s]*\s+\d+\s+\S+\s+(.*)$/', $line, $m))
+		{
+			$local_port = ios12ShortenIfName ($m[2]);
+			$remote_port = ios12ShortenIfName ($m[3]);
+			if (!preg_match ('@^bundle-ether\d+$@', $remote_port) || preg_match ('@^bundle-ether\d+$@', $local_port))
+				$ret[$local_port][] = array
+				(
+					'port' => $remote_port,
+					'device' => $m[1],
+				);
+		}
 	}
 
 	return $ret;

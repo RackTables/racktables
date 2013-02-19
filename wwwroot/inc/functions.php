@@ -3258,6 +3258,7 @@ function ios12ShortenIfName ($ifname)
 	$ifname = preg_replace ('@^Et(\d.*)$@', 'e\\1', $ifname);
 	$ifname = preg_replace ('@^TenGigE(.*)$@', 'te\\1', $ifname); // IOS XR4
 	$ifname = preg_replace ('@^Mg(?:mtEth)?(.*)$@', 'mg\\1', $ifname); // IOS XR4
+	$ifname = preg_replace ('@^BE(\d+)$@', 'bundle-ether\\1', $ifname); // IOS XR4
 	$ifname = strtolower ($ifname);
 	$ifname = preg_replace ('/^(e|fa|gi|te|po|xg|lo|ma)\s+(\d.*)/', '$1$2', $ifname);
 	return $ifname;
