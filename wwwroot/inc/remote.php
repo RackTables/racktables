@@ -90,6 +90,7 @@ $breedfunc = array
 	'ros11-get8021q-readports' => 'ros11Read8021QPorts',
 	'iosxr4-xlatepushq-main'   => 'iosxr4TranslatePushQueue',
 	'iosxr4-getallconf-main'   => 'iosxr4SpotConfigText',
+	'iosxr4-getlldpstatus-main'=> 'iosxr4ReadLLDPStatus',
 	'ucs-xlatepushq-main'      => 'ucsTranslatePushQueue',
 	'ucs-getinventory-main'    => 'ucsReadInventory',
 );
