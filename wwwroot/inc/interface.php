@@ -101,7 +101,7 @@ function renderInterfaceHTML ($pageno, $tabno, $payload)
 <body>
 <table border=0 cellpadding=0 cellspacing=0 width="100%" height="100%" class="maintable">
  <tr class="mainheader"><td>
- <?php echo getConfigVar ('enterprise') ?> RackTables <a href="http://racktables.org" title="Visit RackTables site"><?php echo CODE_VERSION ?></a><?php renderQuickLinks() ?>
+ <img src="../pix/hpi.png"><?php renderQuickLinks() ?>
  <div style="float: right" class=greeting><a href='index.php?page=myaccount&tab=default'><?php global $remote_displayname; echo $remote_displayname ?></a> [ <a href='?logout'>logout</a> ]</div>
  </td></tr>
  <tr><td class="menubar">
