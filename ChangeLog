@@ -7,6 +7,7 @@
 	bugfix: file upload failed in MySQL strict mode (#717)
 	bugfix: bulk port creation failed with empty prefix
 	bugfix: RS pool cloner was throwing an exception
+	bugfix: PHP notice displayed on object's IP tab (#759)
 	update: vlan search results now include binded IP networks
 	update: make scaled rack thumb images sharp again
 	update: Cisco IOS 15.0 support
