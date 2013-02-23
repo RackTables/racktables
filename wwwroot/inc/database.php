@@ -1275,15 +1275,6 @@ function commitResetObject ($object_id = 0)
 	usePreparedDeleteBlade ('MuninGraph', array ('object_id' => $object_id));
 }
 
-function commitDeleteRack($rack_id)
-{
-	releaseFiles ('rack', $rack_id);
-	destroyTagsForEntity ('rack', $rack_id);
-	usePreparedDeleteBlade ('RackSpace', array ('rack_id' => $rack_id));
-	usePreparedDeleteBlade ('RackHistory', array ('id' => $rack_id));
-	usePreparedDeleteBlade ('Rack', array ('id' => $rack_id));
-}
-
 function commitUpdateRack ($rack_id, $new_row_id, $new_name, $new_height, $new_has_problems, $new_asset_no, $new_comment)
 {
 	// Can't shrink a rack if rows being deleted contain mounted objects

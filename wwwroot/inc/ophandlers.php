@@ -2060,6 +2060,9 @@ function deleteRack ()
 	amplifyCell ($rackData);
 	if (count ($rackData['mountedObjects']))
 		return showFuncMessage (__FUNCTION__, 'ERR1');
+	releaseFiles ('rack', $_REQUEST['rack_id']);
+	destroyTagsForEntity ('rack', $_REQUEST['rack_id']);
+	usePreparedDeleteBlade ('RackSpace', array ('rack_id' => $_REQUEST['rack_id']));
 	commitDeleteObject ($_REQUEST['rack_id']);
 	resetRackSortOrder ($rackData['row_id']);
 	showFuncMessage (__FUNCTION__, 'OK', array ($rackData['name']));
