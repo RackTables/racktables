@@ -4227,6 +4227,12 @@ function getFileLinks ($file_id)
 				$parent = spotEntity ($row['entity_type'], $row['entity_id']);
 				$name = $parent['name'];
 				break;
+			case 'row':
+				$page = 'row';
+				$id_name = 'row_id';
+				$parent = spotEntity ($row['entity_type'], $row['entity_id']);
+				$name = $parent['name'];
+				break;
 			case 'rack':
 				$page = 'rack';
 				$id_name = 'rack_id';

@@ -103,12 +103,17 @@ $tab['row']['default'] = 'View';
 $tab['row']['editracks'] = 'Manage racks';
 $tab['row']['newrack'] = 'Add new rack';
 $tab['row']['tagroller'] = 'Tag roller';
+$tab['row']['files'] = 'Files';
 $tabhandler['row']['default'] = 'renderRow';
 $tabhandler['row']['editracks'] = 'renderRackSortForm';
 $tabhandler['row']['newrack'] = 'renderNewRackForm';
 $tabhandler['row']['tagroller'] = 'renderTagRollerForRow';
+$tabhandler['row']['files'] = 'renderFilesForEntity';
 $ophandler['row']['tagroller']['rollTags'] = 'rollTags';
 $ophandler['row']['newrack']['addRack'] = 'addRack';
+$ophandler['row']['files']['addFile'] = 'addFileToEntity';
+$ophandler['row']['files']['linkFile'] = 'linkFileToEntity';
+$ophandler['row']['files']['unlinkFile'] = 'unlinkFile';
 
 $page['rack']['bypass'] = 'rack_id';
 $page['rack']['bypass_type'] = 'uint';
