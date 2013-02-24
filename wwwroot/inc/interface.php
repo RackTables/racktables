@@ -485,7 +485,8 @@ END
 	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
 		printNewItemTR();
 
-	renderLocationRowForEditor (treeFromList (listCells ('location')));
+	$locations = listCells ('location');
+	renderLocationRowForEditor (treeFromList ($locations));
 
 	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')
 		printNewItemTR();

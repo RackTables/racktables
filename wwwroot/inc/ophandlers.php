@@ -1900,6 +1900,8 @@ function deleteLocation ()
 	amplifyCell ($locationData);
 	if (count ($locationData['locations']) || count ($locationData['rows']))
 		return showFuncMessage (__FUNCTION__, 'ERR1', array ($locationData['name']));
+	releaseFiles ('location', $_REQUEST['location_id']);
+	destroyTagsForEntity ('location', $_REQUEST['location_id']);
 	commitDeleteObject ($_REQUEST['location_id']);
 	showFuncMessage (__FUNCTION__, 'OK', array ($locationData['name']));
 	return buildRedirectURL ('rackspace', 'editlocations');

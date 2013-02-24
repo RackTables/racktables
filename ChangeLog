@@ -9,6 +9,7 @@
 	bugfix: RS pool cloner was throwing an exception
 	bugfix: PHP notice displayed on object's IP tab (#759)
 	bugfix: sometimes racks could not be deleted (#757)
+	bugfix: references to tags and files remained when a location was deleted (#747)
 	update: vlan search results now include binded IP networks
 	update: make scaled rack thumb images sharp again
 	update: Cisco IOS 15.0 support
