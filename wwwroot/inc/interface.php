@@ -568,6 +568,7 @@ function renderRow ($row_id)
 	finishPortlet();
 	renderCellFilterPortlet ($cellfilter, 'rack', $rackList, array ('row_id' => $row_id));
 
+	renderFilesPortlet ('row',$row_id);
 	echo "</td><td class=pcright>";
 
 	global $nextorder;

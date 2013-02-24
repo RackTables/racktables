@@ -61,6 +61,7 @@ $etype_by_pageno = array
 	'ipv4vs' => 'ipv4vs',
 	'object' => 'object',
 	'rack' => 'rack',
+	'row' => 'row',
 	'location' => 'location',
 	'user' => 'user',
 	'file' => 'file',
@@ -2613,6 +2614,8 @@ function formatEntityName ($name) {
 			return 'Object';
 		case 'rack':
 			return 'Rack';
+		case 'row':
+			return 'Row';
 		case 'location':
 			return 'Location';
 		case 'user':
