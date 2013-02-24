@@ -1616,6 +1616,7 @@ CREATE TABLE `MuninGraph` (
 			$query[] = "UPDATE Config SET varvalue = '0.20.3' WHERE varname = 'DB_VERSION'";
 			break;
 		case '0.20.4':
+			$query[] = "ALTER TABLE `FileLink` MODIFY COLUMN `entity_type` ENUM('ipv4net','ipv4rspool','ipv4vs','ipv6net','location','object','rack','row','user') NOT NULL DEFAULT 'object'";
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdefined, description) VALUES ('REVERSED_RACKS_LISTSRC', 'false', 'string', 'yes', 'no', 'no', 'List of racks with reversed (top to bottom) units order')";
 			$query[] = "UPDATE `Config` SET varvalue = CONCAT(varvalue, ' or {\$typeid_965}') WHERE varname = 'IPV4OBJ_LISTSRC'";
 			$query[] = "UPDATE AttributeValue INNER JOIN AttributeMap USING (attr_id) SET AttributeValue.uint_value = 1572 WHERE chapter_id = 12 AND uint_value = 162";
