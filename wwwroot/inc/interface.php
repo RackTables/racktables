@@ -8192,10 +8192,9 @@ function formatIfTypeVariants ($variants, $select_name)
 function formatAttributeValue ($record)
 {
 	if ('date' == $record['type'])
-	{
 		return date(getConfigVar('DATETIME_FORMAT'), $record['value']);
-	}
-	else if (! isset ($record['key'])) // if record is a dictionary value, generate href with autotag in cfe
+
+	if (! isset ($record['key'])) // if record is a dictionary value, generate href with autotag in cfe
 	{
 		if ($record['id'] == 3) // FQDN attribute
 		{
@@ -8209,23 +8208,21 @@ function formatAttributeValue ($record)
 		}
 		return isset ($record['href']) ? "<a href=\"".$record['href']."\">${record['a_value']}</a>" : $record['a_value'];
 	}
-	else
-	{
-		$href = makeHref
+
+	$href = makeHref
+	(
+		array
 		(
-			array
-			(
-				'page'=>'depot',
-				'tab'=>'default',
-				'andor' => 'and',
-				'cfe' => '{$attr_' . $record['id'] . '_' . $record['key'] . '}',
-			)
-		);
-		$result = "<a href='$href'>" . $record['a_value'] . "</a>";
-		if (isset ($record['href']))
-			$result .= "&nbsp;<a class='img-link' href='${record['href']}'>" . getImageHREF ('html', 'vendor&apos;s info page') . "</a>";
-		return $result;
-	}
+			'page'=>'depot',
+			'tab'=>'default',
+			'andor' => 'and',
+			'cfe' => '{$attr_' . $record['id'] . '_' . $record['key'] . '}',
+		)
+	);
+	$result = "<a href='$href'>" . $record['a_value'] . "</a>";
+	if (isset ($record['href']))
+		$result .= "&nbsp;<a class='img-link' href='${record['href']}'>" . getImageHREF ('html', 'vendor&apos;s info page') . "</a>";
+	return $result;
 }
 
 function addAutoScrollScript ($ancor_name)
