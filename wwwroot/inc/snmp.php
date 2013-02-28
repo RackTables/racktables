@@ -1296,11 +1296,29 @@ $iftable_processors['dell-any-1000SFP'] = array
 	'try_next_proc' => FALSE,
 );
 
+$iftable_processors['3com-49-to-50-1000T'] = array
+(
+	'pattern' => '@^GigabitEthernet(\d+)/(\d+)/(49|50)$@',
+	'replacement' => '\\1/\\2/\\3',
+	'dict_key' => '1-24',
+	'label' => '\\3',
+	'try_next_proc' => FALSE,
+);
+
 $iftable_processors['3com-49-to-52-1000SFP'] = array
 (
 	'pattern' => '@^GigabitEthernet(\d+)/(\d+)/(49|50|51|52)$@',
 	'replacement' => '\\1/\\2/\\3',
 	'dict_key' => '4-1077',
+	'label' => '\\3',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['3com-any-100TX'] = array
+(
+	'pattern' => '@^Ethernet(\d+)/(\d+)/(\d+)$@',
+	'replacement' => '\\1/\\2/\\3',
+	'dict_key' => '1-19',
 	'label' => '\\3',
 	'try_next_proc' => FALSE,
 );
@@ -2096,6 +2114,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => '4200G: 44 RJ-45/10-100-1000T(X) + 4 combo-gig',
 		'processors' => array ('3com-49-to-52-1000SFP', '3com-any-1000T'),
 	),
+	'43.1.16.4.3.45' => array
+	(
+		'dict_key' => 760,
+		'text' => '4210 52-port: 48 100TX + 2 1000T + 2 SFP',
+		'processors' => array ('3com-49-to-50-1000T', '3com-49-to-52-1000SFP', '3com-any-100TX'),
+	),
 	'45.3.68.5' => array
 	(
 		'dict_key' => 1085,
@@ -2839,7 +2863,7 @@ function doSwitchSNMPmining ($objectInfo, $device)
 		checkPIC ('1-16');
 		commitAddPort ($objectInfo['id'], 'AC-in', '1-16', '', '');
 		break;
-	case preg_match ('/^43\.1\.16\.4\.3\.29/', $sysObjectID): // 3Com
+	case preg_match ('/^43\.1\.16\.4\.3\./', $sysObjectID): // 3Com
 		$sw_version = preg_replace('/^.* Version 3Com OS ([^ ]+).*$/', '\\1', $sysDescr);
 		updateStickerForCell ($objectInfo, 5, $sw_version);
 
