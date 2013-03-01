@@ -2,20 +2,24 @@
 	bugfix: %GPASS% dictionary markers were ignored in selectboxes
 	bugfix: 802.1Q: better Force10 switches support
 	bugfix: 802.1Q: properly detect non-switched ports on Cisco NX-OS devices
-	bugfix: racks, vs, rspools were displayed in search results even if user had no permissions to view them
-	bugfix: some dictionary items of Cisco Catalyst 2960 switches were renamed to meet official Cisco classification (refer the release notes)
+	bugfix: racks, vs, rspools were displayed in search results even if user had
+		no permissions to view them
+	bugfix: some dictionary items of Cisco Catalyst 2960 switches were renamed to
+		meet official Cisco classification (refer the release notes)
 	bugfix: file upload failed in MySQL strict mode (#717)
 	bugfix: bulk port creation failed with empty prefix
 	bugfix: RS pool cloner was throwing an exception
 	bugfix: PHP notice displayed on object's IP tab (#759)
 	bugfix: sometimes racks could not be deleted (#757)
-	bugfix: references to tags and files remained when a location was deleted (#747)
+	bugfix: references to tags and files remained when a location was deleted
+		(#747)
 	update: vlan search results now include binded IP networks
 	update: make scaled rack thumb images sharp again
 	update: Cisco IOS 15.0 support
 	update: LLDP support for Juniper and Cisco ASR devices
 	update: 802.1Q: non-switched ports do not need 'none' template role any more
-	update: 802.1Q: misconfigured uplink/downlink ports are highlighed red on '802.1Q Ports' tab
+	update: 802.1Q: misconfigured uplink/downlink ports are highlighed red on
+		'802.1Q Ports' tab
 	update: assign IP addresses to objects whose type is Wireless (#755)
 	update: SNMP support for Linksys SRW224G4 (#743)
 	update: files may be linked to rows (#733)
@@ -27,19 +31,23 @@
 	bugfix: explicitly request Cacti RRA ID 1 (#466)
 	bugfix: improve UCS error handling
 	bugfix: proper handling of VLAN 1 in Huawei VRP 5.7 802.1Q gateway
-	bugfix: database was corrupted after IPv4 networks creation on some PHP versions (#643)
+	bugfix: database was corrupted after IPv4 networks creation on some PHP
+		versions (#643)
 	bugfix: LivePTR erased comments when performing an import (#645)
 	bugfix: NX-OS LLDP-fetching connection was sometimes hanged up prematurely
-	bugfix: list objects page threw exception if an object's container was nameless (#661)
+	bugfix: list objects page threw exception if an object's container was
+		nameless (#661)
 	bugfix: Invalid binary IP exceptions on certain IPs (#673, #675)
 	bugfix: list all VLANs of a network in tree view (#697)
 	update: SLB: ability to specify multiple RS ports
 	update: remove old gateways code, including Live VLANs
 	update: allow linking more than one VLAN from same domain per a network
 	update: make 802.1Q port list offline management multi-port (#653)
-	update: SNMP support for Cisco WS-C2948 (#546), D-Link DGS-1210-24 (#629), Motorola RFS4000 (#657)
+	update: SNMP support for Cisco WS-C2948 (#546), D-Link DGS-1210-24 (#629),
+		Motorola RFS4000 (#657)
 	update: allow setting MySQL client buffer size (#659)
-	update: cut 'Quidway' word from Huawei switch dictionary items for unification with newer products
+	update: cut 'Quidway' word from Huawei switch dictionary items for unification
+		with newer products
 	update: 802.1Q: treat connection errors as recoverable
 	new feature: abstract tags, which cannot be assigned (#577)
 	new feature: added support for munin graphs (#406) by Michael Holm
@@ -53,12 +61,15 @@
 	bugfix: duplicate names for Racks and Rows weren't allowed (#606)
 	bugfix: ports and IPs highlighting is kept after edit operation
 	bugfix: preserve page number after data importing on LivePTR tab (#421)
-	bugfix: 0.19.10 moved some HW models to a different dict chapter, update the type of affected objects accordingly (#609)
+	bugfix: 0.19.10 moved some HW models to a different dict chapter, update the
+		type of affected objects accordingly (#609)
 	bugfix: Tab "Live ports" is blank if network error occurs (#489)
 	bugfix: renaming top-level tag is impossible (#621)
-	bugfix: IPv4 network capacity of fully-allocated parent range was shown incorrectly (#611)
+	bugfix: IPv4 network capacity of fully-allocated parent range was shown
+		incorrectly (#611)
 	update: confirmation boxes when clearing attribute values (#565)
-	update: log records containing long lines are now word-wrapped (#608) by Stephen Groat
+	update: log records containing long lines are now word-wrapped (#608) by
+		Stephen Groat
 	update: SNMP support for HP J9020A (#619), HP J9280A (#615), TL-SG5426 (#590)
 	new feature: IP addresses inherit tags from their parent networks (#375)
 	new feature: initial Cisco UCS support
@@ -67,69 +78,101 @@
 0.20.0 2012-09-09
 	bugfix: when long action takes place, other tabs in browser are functional now
 	bugfix: LLDP discovery was not working on some Cisco Nexus devices
-	update: LLDP: proper handling of Juniper MX neighbors for NX-OS and VRP devices
-	update: LiveCDP, LiveLLDP: more accurate default interface type detection, ability to overwrite the transceiver set on port, checkboxes are set by default
+	update: LLDP: proper handling of Juniper MX neighbors for NX-OS and VRP
+		devices
+	update: LiveCDP, LiveLLDP: more accurate default interface type detection,
+		ability to overwrite the transceiver set on port, checkboxes are set by
+		default
 	bugfix: object portlist was not always sorted correctly
-	update: tag chains are now sorted by the root tags (e.g., your geo-tags will always precede hw model tags or vice versa)
-	update: 802.1Q: config deploy to Cisco IOS switches is no more requiring 'switchport trunk encapsulation dot1q' pre-set
+	update: tag chains are now sorted by the root tags (e.g., your geo-tags will
+		always precede hw model tags or vice versa)
+	update: 802.1Q: config deploy to Cisco IOS switches is no more requiring
+		'switchport trunk encapsulation dot1q' pre-set
 	update: 802.1Q: deploy is performed per-port, respecting portname sort order.
 		Do not begin with the next port until the previous one is totally done.
-	update: 802.1Q: 'Non-switch devices' portlet in VLAN info page (displays linked ports if their remotes have no 802.1Q orders)
-	update: 802.1Q switch templates became one of "generic" realms (you can assign tags to them)
-	update: ability to remove 802.1Q VLAN from every port it belongs to in order to delete this VLAN
-	update: convert racks and rows into objects (database change only, no visible differences)
-	new feature: support for mounting object without specifying units (zero-U, #173)
+	update: 802.1Q: 'Non-switch devices' portlet in VLAN info page (displays
+		linked ports if their remotes have no 802.1Q orders)
+	update: 802.1Q switch templates became one of "generic" realms (you can assign
+		tags to them)
+	update: ability to remove 802.1Q VLAN from every port it belongs to in order
+		to delete this VLAN
+	update: convert racks and rows into objects (database change only, no visible
+		differences)
+	new feature: support for mounting object without specifying units (zero-U,
+		#173)
 	update: ability to manually reorder racks in row (#370)
-	update: ability to delete IP prefixes, VLANs, Virtual services and RS pools on their Properties tab
-	update: display a link to just created IP network/VS/RS pool entity in creation success message
-	update: new config var SEARCH_DOMAINS to control the annoying FQDN-search feature introduced by 0.19.3
+	update: ability to delete IP prefixes, VLANs, Virtual services and RS pools on
+		their Properties tab
+	update: display a link to just created IP network/VS/RS pool entity in
+		creation success message
+	update: new config var SEARCH_DOMAINS to control the annoying FQDN-search
+		feature introduced by 0.19.3
 	update: cable ids for links could be edited through AJAX
 	new feature: adjustable quick links at the top of the page, logo removed
-	update: support for performing DB upgrades from a console using contrib code (#556) by Hannes Georg
+	update: support for performing DB upgrades from a console using contrib code
+		(#556) by Hannes Georg
 	update: in CLI mode the error and warning messages are echoed to stderr
-	update: SNMP support for Cisco SF/SG 300s (#507, #594), 2651XM (#526), WS-CE500-24TT (#511), WS-CE500G-12TC (#512), WS-C3550-24 (#525), 3Com 4200G (#342),
-		Dell PowerConnect 3348, 3448, 3548, 5224, 5324, 54xx, 6024F, 6224, 6224F (#383, #390, #427, #502), HP ProCurve 6600-48G-4XG (#522), 2650, 2900,
+	update: SNMP support for Cisco SF/SG 300s (#507, #594), 2651XM (#526),
+		WS-CE500-24TT (#511), WS-CE500G-12TC (#512), WS-C3550-24 (#525), 3Com 4200G
+		(#342), Dell PowerConnect 3348, 3448, 3548, 5224, 5324, 54xx, 6024F, 6224,
+		6224F (#383, #390, #427, #502), HP ProCurve 6600-48G-4XG (#522), 2650, 2900,
 		Netgear FS750T2 (#479), Juniper EX3200-48T (#510), Linksys SRW2048 (#350)
 	update: handle wide-band WDM transceivers
 	new feature: Force10 OSv8, Arista EOS and Marvell ROS switches support
-	new feature: SLB feature was rewritten (configuration macro processor, IPv6 SLB, fwmark services, RS pool cloning added)
-	update: significant part of IP-related code was rewritten for clarity, unification and extendability. Visible changes are:
+	new feature: SLB feature was rewritten (configuration macro processor, IPv6
+		SLB, fwmark services, RS pool cloning added)
+	update: significant part of IP-related code was rewritten for clarity,
+		unification and extendability. Visible changes are:
 		- IP tree rendering speed has been increased
 		- IP tree filtering does not affect child networks of the filtered ones
-		- In "do not show IPv4 usage" mode the network usage is available by click through AJAX
-		- Each arrow aside backtrace element in IP net pages is now click-able to display IP subtree
-		- Clicking on 'IP space' link in navigation bar from within IP net page resets saved filter
+		- In "do not show IPv4 usage" mode the network usage is available by click
+			through AJAX
+		- Each arrow aside backtrace element in IP net pages is now click-able to
+			display IP subtree
+		- Clicking on 'IP space' link in navigation bar from within IP net page
+			resets saved filter
 		- VLAN numbers in IP tree are rendered below CIDR, no more dedicated column
-		- Auto scroll-down is performed when clicking on 'expand IP tree element' button
+		- Auto scroll-down is performed when clicking on 'expand IP tree element'
+			button
 		- Row highlight color became nicer
 		- 'knights' support for IPv6
 		- IP log (allocation history) support
 		- new IP allocation form offers the most popular allocation type
 		- 'collapse all' link in IP tree
 		- v4 net usage progress bar displays both allocated and unallocated spaces
-		- '$spare_XX' and '$aggregate' autotags (to filter nets based on the size of available spare subnetworks)
+		- '$spare_XX' and '$aggregate' autotags (to filter nets based on the size of
+			available spare subnetworks)
 		- '$vlan_XX' autotags added to ipv4net/ipv6net cells
-		- '$masklen_ge_XX' and '$masklen_le_XX' autotags removed from 'ipv4net' cells
-		- IPV4_TREE_RTR_AS_CELL config variable has another state 'none' (see release notes)
+		- '$masklen_ge_XX' and '$masklen_le_XX' autotags removed from 'ipv4net'
+			cells
+		- IPV4_TREE_RTR_AS_CELL config variable has another state 'none' (see
+			release notes)
 		- Object's 'IPv4' and 'IPv6' tabs were merged into single 'IP' tab
 		- added comment field to IP addresses (#555)
 		- create network and link it to a VLAN at once
-	new feature: you can obtain who has made tag assignment, object's ports or IPv4 address changes by hovering cursor on these entities
-	new feature: locations: you can document objects' locations by creating special container objects and put other objects/rows into them
-	new feature: API: plugin installation is as simple as copying a file into plugins/ dir (see release notes)
-	new feature: API: you can selectively override the default static content by specifying the $local_staticdir global var
-	new feature: API: ability to redefine/override internal RackTables functions (hooks introduced)
+	new feature: you can obtain who has made tag assignment, object's ports or
+		IPv4 address changes by hovering cursor on these entities
+	new feature: locations: you can document objects' locations by creating
+		special container objects and put other objects/rows into them
+	new feature: API: plugin installation is as simple as copying a file into
+		plugins/ dir (see release notes)
+	new feature: API: you can selectively override the default static content by
+		specifying the $local_staticdir global var
+	new feature: API: ability to redefine/override internal RackTables functions
+		(hooks introduced)
 	new feature: API: chaining of custom ophandlers, tabhandlers, hookhandlers
-	new feature: API: gateway engine was rewritten.
-		Ability to set up different connection protocols, properties and credentials using flexible filtering (see release notes)
+	new feature: API: gateway engine was rewritten. Ability to set up different
+		connection protocols, properties and credentials using flexible filtering
+		(see release notes)
 
 0.19.14 2012-09-02
 	update: Port linker selects nearest rack by default (#562) by Hannes Georg
-	update: SNMP support for Cisco 2960-24TC-L (#554), 2924M-XL (#582), 3560E-12SD (#564), ProCurves (#558),
-		Allied Telesyn AT9924T (#581)
+	update: SNMP support for Cisco 2960-24TC-L (#554), 2924M-XL (#582), 3560E-12SD
+		(#564), ProCurves (#558), Allied Telesyn AT9924T (#581)
 	update: fix for LongReachEthernet interfaces (#589)
 	bugfix: file upload error handler by Hannes Georg
-	update: do not display edit box for an attribute unless user has permissions to update it
+	update: do not display edit box for an attribute unless user has permissions
+		to update it
 	update: SQL index tweak by Hannes Georg (#586)
 	update: improve Dictionary unique constraint (#593)
 0.19.13 2012-06-28
@@ -139,7 +182,8 @@
 	update: more config variables can be overriden per user
 	bugfix: IPV4_AUTO_RELEASE config var was not working since 0.19.11
 	bugfix: containers weren't displayed properly on the list objects page (#547)
-	bugfix: 'FUNCTION * does not exist' SQL errors when upgrading 0.19.11 -> 0.19.12
+	bugfix: 'FUNCTION * does not exist' SQL errors when upgrading 0.19.11 ->
+		0.19.12
 	bugfix: displaying of 802.1Q ports tab could take too long
 	bugfix: upgrade from 0.18.8 caused fatal errors till session expiration (#506)
 	new feature: new attribute type "date" by James Cohen
@@ -163,14 +207,21 @@
 	bugfix: resolve attribute FK issue introduced in 0.19.7
 	bugfix: SNMP discovery of APC PDUs returned error (#504)
 	bugfix: catch errors when uploading files (#420)
-	update: list of virtual object types is now maintained as a Config setting (#488)
-	update: when an object is contained within another, display the parent's rackspace allocation info when viewing the child (#432)
-	update: added the 'Slot number' attribute to object types which may be mounted in a blade chassis (#474)
+	update: list of virtual object types is now maintained as a Config setting
+		(#488)
+	update: when an object is contained within another, display the parent's
+		rackspace allocation info when viewing the child (#432)
+	update: added the 'Slot number' attribute to object types which may be mounted
+		in a blade chassis (#474)
 	update: added an 'Uncheck all' button to the rackspace allocation page (#490)
-	update: ability to change cable ID without deleting & re-adding the link (#457)
-	update: vertically position racks to the bottom of the row instead of the center (#469)
-	update: SNMP support for WS-C2960-48TC-L (#499), Fortinet Fortigate 310B (#374), ProCurves (#501, #503), Arista 7124S (#505)
-	update: allow duplicate 'router' IP assignments without warning to accommodate VRRP (#419, by Tyler J. Wagner)
+	update: ability to change cable ID without deleting & re-adding the link
+		(#457)
+	update: vertically position racks to the bottom of the row instead of the
+		center (#469)
+	update: SNMP support for WS-C2960-48TC-L (#499), Fortinet Fortigate 310B
+		(#374), ProCurves (#501, #503), Arista 7124S (#505)
+	update: allow duplicate 'router' IP assignments without warning to accommodate
+		VRRP (#419, by Tyler J. Wagner)
 	update: change display name of unnamed objects to "[$objtype]" (#487)
 	update: suppress fiber connector specifics again
 	update: ability to delete IP prefixes from within its properties tab
@@ -182,7 +233,8 @@
 	new feature: SVG dispatcher module
 0.19.10 2011-10-17
 	bugfix: LivePorts MAC address lister was broken with Huawei S5300 V100R006
-	bugfix: SNMP sync was broken when one of default attributes was removed from certain object type
+	bugfix: SNMP sync was broken when one of default attributes was removed from
+		certain object type
 	update: improve SNMP coverage
 	update: justify the difference between SNMP versions (by Boris Lytochkin)
 	update: IE spoils PNG uploads, work around (#468)
@@ -190,7 +242,8 @@
 	update: port-aware MySQL server config in installer (#471)
 0.19.9 2011-09-01
 	bugfix: a hotfix for Cacti feature
-	bugfix: disabled highlighting text editor in Google Chrome and Safari (closes #455, #462)
+	bugfix: disabled highlighting text editor in Google Chrome and Safari (closes
+		#455, #462)
 	update: dismiss HNDP support
 	update: markup IPv6 subnet-router on request (by Jens Weibler)
 	update: dismiss connector specifics of optical Ethernet ports
@@ -201,7 +254,8 @@
 	bugfix: SNMP for PDUs (#458)
 	update: ER DWDM channel grid
 	update: use of AJAX in tag tree editor tab (by Alex Noskov)
-	new feature: integrated Cacti Graphs if you have the cURL extension for PHP loaded (#306, by Jonathan Thurman)
+	new feature: integrated Cacti Graphs if you have the cURL extension for PHP
+		loaded (#306, by Jonathan Thurman)
 0.19.7 2011-07-31
 	update: add SNMP support for several more switches
 	update: improve consistency of stored attribute data (#449)
@@ -227,27 +281,40 @@
 	update: restrict search results according to user's permissions
 	update: make link cable IDs searchable
 	update: set default timeouts for LDAP cache
-	update: ability to search a remote port while linking ports together and to resolve port type conflicts in-place
+	update: ability to search a remote port while linking ports together and to
+		resolve port type conflicts in-place
 	new feature: attribute-level access control for objects
-	new feature: ability to open a terminal session to a device by clicking on its FQDN
-	new feature: inverting tags on cell filter pages by clicking the checkboxes with Ctrl key
+	new feature: ability to open a terminal session to a device by clicking on its
+		FQDN
+	new feature: inverting tags on cell filter pages by clicking the checkboxes
+		with Ctrl key
 0.19.4 2011-04-14
 	bugfix: tag selector was not working with magic_quotes enabled
-	update: new techniques of changing the directory layout are now supported by installer and upgrader
+	update: new techniques of changing the directory layout are now supported by
+		installer and upgrader
 	bugfix: in-place editing of unallocated IPv4 address was not working
-	bugfix: wrong calculation of total IPv4 address count in networks with spare blocks (by Jens Rosenboom)
+	bugfix: wrong calculation of total IPv4 address count in networks with spare
+		blocks (by Jens Rosenboom)
 	bugfix: VST editor: unsaved regexps were sometimes undesirably modified
 0.19.3 2011-04-05
-	update: when searching for object by its hostname (FQDN attr) and single match is found, no searching by other fields is done
-	update: introduce "{$vlan_NNNN}" autotag to convoy both {$fromvlan_NNNN} and {$tovlan_NNNN}
-	update: remove extraneous barcode column header from 'add objects' form (by Tyler J. Wagner)
+	update: when searching for object by its hostname (FQDN attr) and single match
+		is found, no searching by other fields is done
+	update: introduce "{$vlan_NNNN}" autotag to convoy both {$fromvlan_NNNN} and
+		{$tovlan_NNNN}
+	update: remove extraneous barcode column header from 'add objects' form (by
+		Tyler J. Wagner)
 	update: refresh dictionary record groups (by Michael C Tiernan)
-	update: in-place AJAX editing of reservation comments on object ports and IP addresses
+	update: in-place AJAX editing of reservation comments on object ports and IP
+		addresses
 	update: restore object type changer
 	bugfix: handle SQL remnants of bug 399/415
-	bugfix: magic_quotes-eliminating code was broken (e.g. VST editor was not working with PHP's magic_quotes enabled)
-	update: 802.1q: if something goes wrong and RT is going to remove needed VLANs from port, now it's more likely to firstly remove management VLAN, keeping the others working
-	bugfix: in default installation RT was not able to find its own gateways directory
+	bugfix: magic_quotes-eliminating code was broken (e.g. VST editor was not
+		working with PHP's magic_quotes enabled)
+	update: 802.1q: if something goes wrong and RT is going to remove needed VLANs
+		from port, now it's more likely to firstly remove management VLAN, keeping
+		the others working
+	bugfix: in default installation RT was not able to find its own gateways
+		directory
 0.19.2 2011-03-24
 	new feature: JunOS10 802.1q gateway
 	bugfix: port linking was broken for some users due to open PDO cursor (#413)
@@ -256,40 +323,57 @@
 	update: tolerate user-visible newlines in secret.php and local.php
 	update: ability to delete a file entity from the Edit tab of the File page
 	update: 802.1q: links to switchports allowing the vlan added in page Vlan info
-	update: 802.1q: a diff between new and former VLAN packs appears in 802.1q port config if the config is complicated
-	update: 802.1q: improved compatibility with Cisco IOS 12 devices (the case of switchports with default configuration)
+	update: 802.1q: a diff between new and former VLAN packs appears in 802.1q
+		port config if the config is complicated
+	update: 802.1q: improved compatibility with Cisco IOS 12 devices (the case of
+		switchports with default configuration)
 	update: new object types: power supply chassis, power supply (#409)
 	new feature: Cisco NX-OS v4, v5 LLDP gateway
 	bugfix: VRP linkstatus gateway now properly handles port-channels
-	update: LiveCDP, LiveLLDP, etc: ability to install tranceivers into ports in-place, while linking the ports
+	update: LiveCDP, LiveLLDP, etc: ability to install tranceivers into ports
+		in-place, while linking the ports
 	bugfix: LiveLLDP now supports 'local' port type with Huawei VRP v5 devices
 0.19.1 2011-02-22
-	update: UI: rack lists are now reduced by common tags with object on Rackspace tab (FILTER_RACKLIST_BY_TAGS config var)
-	update: 802.1q: If switch has IP interface in some VLAN linked to IP subnet, this VLAN is not pruned from switch's uplink
-	bugfix: on some platforms search for exact object name returned empty result (#391)
-	bugfix: adding object throw "Same type, same tags" was broken since 0.19.0 (#394)
+	update: UI: rack lists are now reduced by common tags with object on Rackspace
+		tab (FILTER_RACKLIST_BY_TAGS config var)
+	update: 802.1q: If switch has IP interface in some VLAN linked to IP subnet,
+		this VLAN is not pruned from switch's uplink
+	bugfix: on some platforms search for exact object name returned empty result
+		(#391)
+	bugfix: adding object throw "Same type, same tags" was broken since 0.19.0
+		(#394)
 	bugfix: IPv6 functionality was not working with PHP prior to 5.2 (#396)
-	bugfix: change Config.varvalue column type to accommodate contents > 255 characters (#397)
+	bugfix: change Config.varvalue column type to accommodate contents > 255
+		characters (#397)
 	bugfix: delete container relationships when an object is deleted (#398)
 	bugfix: SQL syntax error in some versions of MySQL+PDO
 	bugfix: image caching was broken with some browsers
 	bugfix: finalize ObjectLog merge (#392)
 	bugfix: fix barcode migration code, PDO concurrent query issue (#402)
 0.19.0 2011-02-12
-	new feature: IPv6 support, except of LivePTR, NAT and SLB functionality (by Alexey Andriyanov)
-	new feature: cable ID column for links (#328, by Giovani Zamboni and Jens Weibler)
+	new feature: IPv6 support, except of LivePTR, NAT and SLB functionality (by
+		Alexey Andriyanov)
+	new feature: cable ID column for links (#328, by Giovani Zamboni and Jens
+		Weibler)
 	new feature: SNMPv3 support (#379, by Jens Weibler)
 	new feature: 802.1Q template copier
 	new feature: merge "objectlog" extension (by Ernest Shaffer)
-	new feature: add support for "container" objects to handle blades, VMs, etc. (by Aaron Dummer)
-	new feature: syncdomain.php now can create child processes to speed up 802.1Q sync
-	new feature: UI: live switchport info (port config, link status, learned mac list) showed inline on any object tab
-	bugfix: the feature of remembering last opened tab of realm page is now working
+	new feature: add support for "container" objects to handle blades, VMs, etc.
+		(by Aaron Dummer)
+	new feature: syncdomain.php now can create child processes to speed up 802.1Q
+		sync
+	new feature: UI: live switchport info (port config, link status, learned mac
+		list) showed inline on any object tab
+	bugfix: the feature of remembering last opened tab of realm page is now
+		working
 	bugfix: UI: pager in ipv4net shows appropriate page when IP is highlighted
-	bugfix: create IPv4 network button, if pressed to open in a new window, was redirecting the parent window, too
-	bugfix: when searching for IP not belonging to any known network, the ugly assertion failed page was shown.
+	bugfix: create IPv4 network button, if pressed to open in a new window, was
+		redirecting the parent window, too
+	bugfix: when searching for IP not belonging to any known network, the ugly
+		assertion failed page was shown.
 	bugfix: prevent invalid port links (#363, by Aaron Dummer)
-	bugfix: the 'Refcnt' counter on Configuration: Dictionary page was sometimes broken (closes mantis:0000381)
+	bugfix: the 'Refcnt' counter on Configuration: Dictionary page was sometimes
+		broken (closes mantis:0000381)
 	update: cache image files thumbnails and make them JPEGs (#369, by Matt Mills)
 	update: enhance rackspace click helpers (by Jeroen Benda)
 	update: object type cannot be changed after the object is created
@@ -297,23 +381,29 @@
 	update: UI: ports/IPs/nets highlighting enhancements
 	update: links to ports added to object search results
 	update: custom search results provided by users' plugins now supported
-	update: Huawei VRP 5.70 pseudo-interactive telnet support (fixes multiple problems caused by fast commands post through netcat)
-	update: selective including of JS and CSS files. No more unneeded js code loaded.
-	update: 802.1Q template editor now supports single-submit edit and concerns concurrent submits
+	update: Huawei VRP 5.70 pseudo-interactive telnet support (fixes multiple
+		problems caused by fast commands post through netcat)
+	update: selective including of JS and CSS files. No more unneeded js code
+		loaded.
+	update: 802.1Q template editor now supports single-submit edit and concerns
+		concurrent submits
 	update: new API for dispaying messages (showError, showWarning, showSuccess)
-	update: dictionary attribute values with external links are formatted differently to distinguish the filter and external info links
+	update: dictionary attribute values with external links are formatted
+		differently to distinguish the filter and external info links
 	update: UI: ability to clear object ports list at one blow
 0.18.7 2011-02-09
 	bugfix: adjust 802.1Q command generation
 	bugfix: fixed telnet session hanging in NX-OS4 connector
 	bugfix: adjust installer check for mysqlnd
 0.18.6 2010-11-26
-	bugfix: draw administrator's attention to missing LDAP extension (by Matt Mills)
+	bugfix: draw administrator's attention to missing LDAP extension (by Matt
+		Mills)
 	bugfix: minor issues on LiveCDP/LLDP tab
 	update: SNMP data for FastIron LS (#357)
 	update: upon deleting 802.1Q order record focus SELECTs on the deleted values
 	bugfix: SQL error issue on some versions of PHP introduced in 0.18.5
-	new feature: 802.1Q: ability to recalculate the switch uplinks and downlinks by pressing a button on 8021q ports page
+	new feature: 802.1Q: ability to recalculate the switch uplinks and downlinks
+		by pressing a button on 8021q ports page
 	bugfix: when clearing object, allowed VLANs are also cleared now
 0.18.5 2010-10-25
 	bugfix: attribute map editor was broken (#353)
@@ -331,14 +421,19 @@
 	update: disable knight button for a filtered IPv4 tree view
 	update: initial support of VRP version 5.70
 	new feature: enable IMS caching of progress bars (by Alexey Andrianov)
-	new feature: rebuild tag filter as soon as user changes it (by Alexey Andrianov)
-	new feature: default SLB configuration lines stored in DB (by Alexey Andrianov)
+	new feature: rebuild tag filter as soon as user changes it (by Alexey
+		Andrianov)
+	new feature: default SLB configuration lines stored in DB (by Alexey
+		Andrianov)
 	new feature: {$attr_X_Y} autotags (by Alexey Andrianov)
-	new feature: action "reset object" deleting it's non-hardware properties (Boris Lytochkin)
+	new feature: action "reset object" deleting it's non-hardware properties
+		(Boris Lytochkin)
 	new feature: LLDP neighbour support on Cisco IOS switches (by Boris Lytochkin)
-	new feature: Links added for displaying object lists filtered by dictionary keys (Alexey Andrianov)
+	new feature: Links added for displaying object lists filtered by dictionary
+		keys (Alexey Andrianov)
 	bugfix: fixed an issue with LiveCDP remote device names of Nexus switches
-	update: users could set MAX_UNFILTERED_ENTITIES cfg var to suppress display of entire entity sets before filters are applied (Alexey Andrianov)
+	update: users could set MAX_UNFILTERED_ENTITIES cfg var to suppress display of
+		entire entity sets before filters are applied (Alexey Andrianov)
 	update: objects' ports are now sorted by module numbers in all tabs
 	update: LiveCDP page: some bugs removed, user interface improvements
 0.18.4 2010-07-13
@@ -424,7 +519,8 @@
 0.17.5 2009-09-16
 	bugfix: corrected reference counters in tag tree
 	bugfix: "cn" autotag was not generated for objects
-	new feature: make text in the "added new object X" message clickable (ticket:280) (by Boris Lytochkin)
+	new feature: make text in the "added new object X" message clickable
+		(ticket:280) (by Boris Lytochkin)
 	new feature: support for Ethernet transceivers (ticket:64) and WDM grids
 	new feature: initial support of APC switched rack PDUs (ticket:175)
 	update: power port type was split into input and output (ticket:261)
@@ -448,12 +544,15 @@
 	bugfix: dictionary stats report didn't work correctly
 0.17.2 2009-07-22
 	new feature: configure default SNMP community (by jthurman)
-	new feature: "$untagged", "$portless", "$nameless" and "$masklen_OP_NN" autotags
+	new feature: "$untagged", "$portless", "$nameless" and "$masklen_OP_NN"
+		autotags
 	new feature: knight button in IPv4 tree
 	new feature: searching by attribute value or port reservation comment
 	update: show appropriate message, if a record cannot be found
-	update: add Cisco dictionary entry for WS-CBS3030-DEL. closes ticket 225 (by jthurman)
-	update: add OS, router, fibre switch dictionary entries for ticket 238 (by Aaron)
+	update: add Cisco dictionary entry for WS-CBS3030-DEL. closes ticket 225 (by
+		jthurman)
+	update: add OS, router, fibre switch dictionary entries for ticket 238 (by
+		Aaron)
 	update: allow variations of FC WWN as an L2 address (by killsystem)
 	update: port L2 address can be reused on the same object
 	update: same port name can be repeated for an object with different types
@@ -462,10 +561,13 @@
 	update: APC records (by Ray Robertson)
 	bugfix: do not produce PHP warning on LivePTR tab
 	bugfix: wrong port type set for WS-C2950-24. closes ticket 229 (by jthurman)
-	bugfix: improved IOS detection and fixed a logic error. closes ticket 232 (by jthurman)
-	bugfix: user account autotags were not generated under certain conditions (reported by Jason Hamilton)
+	bugfix: improved IOS detection and fixed a logic error. closes ticket 232 (by
+		jthurman)
+	bugfix: user account autotags were not generated under certain conditions
+		(reported by Jason Hamilton)
 	bugfix: correctly remove tags, when deleting files
-	bugfix: switchvlans failed on "%" or "~" character in port name (by Boris Lytochkin)
+	bugfix: switchvlans failed on "%" or "~" character in port name (by Boris
+		Lytochkin)
 	bugfix: search failed, when only one RS pool was found for request
 	bugfix: large images could not be rendered often due to memory limit hit
 	new feature: rackspace tab is shown only if there is at least one rack
@@ -476,7 +578,8 @@
 	bugfix: user's displayed name was sometimes lost with LDAP auth
 	bugfix: rackspace rows highlightling was broken in previous release
 	bugfix: IPv4 address picker window was broken
-	bugfix: string value "0" was incorrectly handled, when displaying or entering data
+	bugfix: string value "0" was incorrectly handled, when displaying or entering
+		data
 	bugfix: rackspace allocation history recording did not work in 0.17.0
 	bugfix: boolean expressions parsing in RackCode now honours priorities
 	bugfix: upgrade script could fail sometimes
@@ -492,11 +595,16 @@
 	new feature: "racks per row" option (by Frank Brodbeck)
 	new feature: LDAP cache
 	update: display row name when listing objects. closes ticket 16 (by Aaron)
-	update: ability to manage rows from the Rackspace page in addition to the Dictionary (by Aaron)
-	update: allow port type to be changed if it isn't linked.  closes ticket 137 (by Aaron)
-	update: add network security chapter and dictionary entries.  closes ticket 148 (by Aaron)
-	update: add HP and Juniper dictionary entries.  closes tickets 145 and 165 (by Aaron)
-	update: combined two forms on object properties page into one.  closes tickets 36 and 87 (by Aaron)
+	update: ability to manage rows from the Rackspace page in addition to the
+		Dictionary (by Aaron)
+	update: allow port type to be changed if it isn't linked.  closes ticket 137
+		(by Aaron)
+	update: add network security chapter and dictionary entries.  closes ticket
+		148 (by Aaron)
+	update: add HP and Juniper dictionary entries.  closes tickets 145 and 165 (by
+		Aaron)
+	update: combined two forms on object properties page into one.  closes tickets
+		36 and 87 (by Aaron)
 	update: display and edit the dictionary chapter by chapter (ticket:151)
 	update: 'enabled' user acount flag was dropped
 	update: switchvlans gateway has been updated
@@ -506,8 +614,10 @@
 	update: rack thumb dimensions aren't configured any more
 	update: SNMP code for Nexus and HP switches (with help from killsystem)
 	update: tag filter has been completely rewritten
-	bugfix: show error message if snmp module isn't loaded.  closes ticket 43 (by Aaron)
-	bugfix: fixed IIS-specific issues with accessing via HTTP or from docroot (reported by Sean Brown)
+	bugfix: show error message if snmp module isn't loaded.  closes ticket 43 (by
+		Aaron)
+	bugfix: fixed IIS-specific issues with accessing via HTTP or from docroot
+		(reported by Sean Brown)
 0.16.6 2009-01-12
 	bugfix: it was possible to access the system as any existing
 		LDAP user w/o his password (reported by Igor Shishkin)
@@ -530,7 +640,8 @@
 	update: allow empty names for IPv4 networks
 	update: refactor snmp.php to support Cisco 3032, 3750, 4506 switches
 		(by Aaron, w/data & testing from Luis Fernando Lacayo and Ray Robertson)
-	update: add SNMP discovery support for Cisco 2950-24 (patch by Russ, ticket 177)
+	update: add SNMP discovery support for Cisco 2950-24 (patch by Russ, ticket
+		177)
 0.16.3 2008-10-02
 	new feature: tell line number for lexical and syntax errors
 	new feature: CodePress editor enables line numbers and syntax
@@ -563,7 +674,8 @@
 	update: added a missing DB index (Aaron Dummer's advice)
 	update: "slbconfig" gateway has been replaced by "sendfile"
 	update: more detailed tag report
-	update: "virtual" addresses are now "loopback" and "regular" became "connected"
+	update: "virtual" addresses are now "loopback" and "regular" became
+		"connected"
 	update: "placeholders" are now "spacers"
 	update: more records were put into the demo data
 0.16.1 2008-07-30
@@ -630,7 +742,8 @@
 	bugfix: rack operations were broken in 0.14.9
 	bugfix: upgrade script didn't authenticate users properly
 	new feature: LDAP authentication
-	new feature: borrow URL detection from Mantis BTS (suggested by Joakim Kasimir)
+	new feature: borrow URL detection from Mantis BTS (suggested by Joakim
+		Kasimir)
 	new feature: Live PTR tab for DNS sync
 	new feature: rack population threshold for rackspace allocation
 0.14.9 2008-01-30
