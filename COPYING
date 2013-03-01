@@ -1,6 +1,7 @@
 RackTables - datacenter and server room management framework
 
-Copyright (c) 2013 Alexey Andriyanov, Aaron Dummer, Denis Ovsienko and contributors
+Copyright (c) 2013 Alexey Andriyanov, Aaron Dummer, Denis Ovsienko and
+                   contributors
 Copyright (c) 2011-2012 Denis Ovsienko, Alexey Andriyanov, Aaron Dummer,
                    Jonathan Thurman and contributors
 Copyright (c) 2010 Denis Ovsienko, Ryan Farrington, Alexey Andriyanov,
@@ -103,7 +104,8 @@ The pgAdmin Development Team. pgAdmin is released under the BSD license.
 ----------------------8<----------------------8<----------------------
 
 RackTables uses icons from Sweetie icon set, http://sweetie.sublink.ca
-Sweetie icon set is licensed under the Creative Commons Attribution Share-alike 3.0.
+Sweetie icon set is licensed under the Creative Commons Attribution
+Share-alike 3.0.
 
 ----------------------8<----------------------8<----------------------
 
