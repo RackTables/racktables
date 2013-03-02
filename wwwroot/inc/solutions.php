@@ -152,11 +152,11 @@ function printRackThumbImage ($rack_id, $scale = 1)
 	# browser is trying to fetch many minirack images in parallel.
 	$color = array
 	(
-		'F' => colorFromHex ($img, '8fbfbf'),
+		'F' => colorFromHex ($img, 'e16e34'),
 		'A' => colorFromHex ($img, 'bfbfbf'),
 		'U' => colorFromHex ($img, 'bf8f8f'),
-		'T' => colorFromHex ($img, '408080'),
-		'Th' => colorFromHex ($img, '80ffff'),
+		'T' => colorFromHex ($img, 'b32a47'),
+		'Th' => colorFromHex ($img, 'e16e34'),
 		'Tw' => colorFromHex ($img, '804040'),
 		'Thw' => colorFromHex ($img, 'ff8080'),
 		'black' => colorFromHex ($img, '000000'),
@@ -206,8 +206,8 @@ function renderProgressBarImage ($done)
 			break;
 		case 'rackspace': // teal
 		default:
-			$color['T'] = colorFromHex ($img, '408080');
-			$color['F'] = colorFromHex ($img, '8fbfbf');
+			$color['T'] = colorFromHex ($img, 'b32a47');
+			$color['F'] = colorFromHex ($img, 'e16e34');
 	}
 	imagefilledrectangle ($img, 0, 0, $done, 10, $color['T']);
 	imagefilledrectangle ($img, $done, 0, 100, 10, $color['F']);
@@ -234,8 +234,8 @@ function renderProgressBar4Image ($px1, $px2, $px3)
 	$offsets = array ($px1, $px2, $px3, $width - $px1 - $px2 - $px3);
 	$colors = array
 	(
-		colorFromHex ($img, '408080'),
-		colorFromHex ($img, '8fbfbf'),
+		colorFromHex ($img, 'b32a47'),
+		colorFromHex ($img, 'e16e34'),
 		colorFromHex ($img, '808080'),
 		colorFromHex ($img, 'c0c0c0'),
 	);
