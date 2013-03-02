@@ -1404,6 +1404,42 @@ $iftable_processors['dlink-any-1000T'] = array
 	'try_next_proc' => FALSE,
 );
 
+$iftable_processors['dlink-rmon-any-100TX'] = array
+(
+	'pattern' => '@^RMON Port (\d+) on Unit (\d+)$@',
+	'replacement' => '\\2/\\1',
+	'dict_key' => '1-19',
+	'label' => 'unit \\2 port \\1',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['dlink-rmon-49-to-50-comboSFP'] = array
+(
+	'pattern' => '@^RMON Port (49|50) on Unit (\d+)$@',
+	'replacement' => '\\2/\\1',
+	'dict_key' => '4-1077',
+	'label' => 'unit \\2 port \\1',
+	'try_next_proc' => TRUE,
+);
+
+$iftable_processors['dlink-rmon-49-to-50-comboT'] = array
+(
+	'pattern' => '@^RMON Port (49|50) on Unit (\d+)$@',
+	'replacement' => '\\2/\\1',
+	'dict_key' => '1-24',
+	'label' => 'unit \\2 port \\1',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['dlink-rmon-51-to-52-1000T'] = array
+(
+	'pattern' => '@^RMON Port (51|52) on Unit (\d+)$@',
+	'replacement' => '\\2/\\1',
+	'dict_key' => 24,
+	'label' => 'unit \\2 port \\1',
+	'try_next_proc' => FALSE,
+);
+
 $iftable_processors['nec-mgmt'] = array
 (
 	'pattern' => '@^MGMT0$@',
@@ -2126,6 +2162,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'BES50GE-12T PWR: 12 RJ-45/10-100-1000T(X)',
 		'processors' => array ('nortel-any-1000T'),
 	),
+	'171.10.63.8' => array
+	(
+		'dict_key' => 616,
+		'text' => 'DES-3052: 48 RJ-45/10-100TX + 2 RJ-45/10-100-1000T(X) + 2 combo ports',
+		'processors' => array ('dlink-rmon-49-to-50-comboSFP', 'dlink-rmon-49-to-50-comboT', 'dlink-rmon-51-to-52-1000T', 'dlink-rmon-any-100TX'),
+	),
 	'171.10.76.10' => array
 	(
 		'dict_key' => 1799,
@@ -2825,6 +2867,7 @@ function doSwitchSNMPmining ($objectInfo, $device)
 		if (strlen ($serialNo))
 			updateStickerForCell ($objectInfo, 1, str_replace ('"', '', substr ($serialNo, strlen ('STRING: '))));
 		break;
+	case preg_match ('/^171\.10\.63\.8/', $sysObjectID): // D-Link DES-3052
 	case preg_match ('/^202\.20\./', $sysObjectID): // SMC TigerSwitch
 	case preg_match ('/^674\.10895\.4/', $sysObjectID): // Dell PowerConnect
 	case preg_match ('/^674\.10895\.300(3|4|7|9)/', $sysObjectID):
