@@ -87,6 +87,21 @@ class InvalidArgException extends RackTablesError
 		$message = "Argument '${name}' of value " . var_export ($value, TRUE) . ' is invalid';
 		$message .= is_null ($reason) ? '.' : " (${reason}).";
 		parent::__construct ($message, parent::INTERNAL);
+		$this->name = $name;
+		$this->value = $value;
+		$this->reason = $reason;
+	}
+	public function getName()
+	{
+		return $this->name;
+	}
+	public function getValue()
+	{
+		return $this->value;
+	}
+	public function getReason()
+	{
+		return $this->reason;
 	}
 }
 
