@@ -908,7 +908,6 @@ function renderEditObjectForm()
 	echo '</td></tr></table>';
 }
 
-// This is a clone of renderEditObjectForm().
 function renderEditRackForm ($rack_id)
 {
 	global $pageno;
@@ -973,7 +972,7 @@ function renderEditRackForm ($rack_id)
 	if ($rack['has_problems'] == 'yes')
 		echo ' checked';
 	echo "></td></tr>\n";
-	if (count ($rack['mountedObjects']) == 0)
+	if ($rack['isDeletable'])
 	{
 		echo "<tr><td>&nbsp;</td><th class=tdright>Actions:</th><td class=tdleft>";
 		echo "<a href='".

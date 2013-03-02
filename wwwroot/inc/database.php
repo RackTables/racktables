@@ -685,7 +685,6 @@ function amplifyCell (&$record, $dummy = NULL)
 	case 'row':
 		$record['racks'] = getRacks ($record['id']);
 	case 'rack':
-		$record['mountedObjects'] = array();
 		// start with default rackspace
 		for ($i = $record['height']; $i > 0; $i--)
 			for ($locidx = 0; $locidx < 3; $locidx++)
@@ -698,7 +697,9 @@ function amplifyCell (&$record, $dummy = NULL)
 		$result = usePreparedSelectBlade ($query, array ($record['id'], $record['height']));
 		global $loclist;
 		$mounted_objects = array();
-		while ($row = $result->fetch (PDO::FETCH_ASSOC))
+		$rows = $result->fetchAll (PDO::FETCH_ASSOC); 
+		$record['isDeletable'] = (count ($rows)) ? FALSE : TRUE;
+		foreach ($rows as $row)
 		{
 			$record[$row['unit_no']][$loclist[$row['atom']]]['state'] = $row['state'];
 			$record[$row['unit_no']][$loclist[$row['atom']]]['object_id'] = $row['object_id'];
