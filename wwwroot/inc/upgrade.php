@@ -164,6 +164,21 @@ This rule now not only allows any operation on NY client networks, but also any 
 
 ENDOFTEXT
 ,
+
+	'0.20.4' => <<<ENDOFTEXT
+Please note that some dictionary items of Cisco Catalyst 2960 series switches
+were renamed to meet official Cisco classification:
+	2960-48TT   => 2960-48TT-L
+	2960-24TC   => 2960-24TC-L
+	2960-24TT   => 2960-24TT-L
+	2960-8TC    => 2960-8TC-L
+	2960G-48TC  => 2960G-48TC-L
+	2960G-24TC  => 2960G-24TC-L
+	2960G-8TC   => 2960G-8TC-L
+	C2960-24    => C2960-24-S
+	C2960G-24PC => C2960-24PC-L
+ENDOFTEXT
+,
 );
 
 // At the moment we assume, that for any two releases we can
