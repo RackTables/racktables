@@ -22,7 +22,8 @@
 	update: 802.1Q: misconfigured uplink/downlink ports are highlighed red on
 		'802.1Q Ports' tab
 	update: assign IP addresses to objects whose type is Wireless (#755)
-	update: SNMP support for Linksys SRW224G4 (#743)
+	update: SNMP support for 3Com 4210 (#763), D-Link DES-3052 (#765),
+		Linksys SRW224G4 (#743), 
 	update: files may be linked to rows (#733)
 	update: prevent deletion of system-level attributes (#761)
 	update: hide controls in cacti tab if user doesn't have permission (#707)
