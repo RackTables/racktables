@@ -84,9 +84,8 @@ class InvalidArgException extends RackTablesError
 {
 	function __construct ($name, $value, $reason=NULL)
 	{
-		$message = "Argument '${name}' of value '".var_export($value,true)."' is invalid.";
-		if (!is_null($reason))
-			$message .= ' ('.$reason.')';
+		$message = "Argument '${name}' of value " . var_export ($value, TRUE) . ' is invalid';
+		$message .= is_null ($reason) ? '.' : " (${reason}).";
 		parent::__construct ($message, parent::INTERNAL);
 	}
 }
