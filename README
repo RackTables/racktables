@@ -124,6 +124,11 @@ were renamed to meet official Cisco classification:
 	C2960-24    => C2960-24-S
 	C2960G-24PC => C2960-24PC-L
 
+The DATETIME_FORMAT configuration option used in setting date and time output
+format now uses a different [1] syntax. During upgrade the option is reset to
+the default value, which is now %Y-%m-%d (YYYY-MM-DD) per ISO 8601.
+
+[1] http://php.net/manual/en/function.strftime.php
 
 *** Upgrading to 0.20.1 ***
 

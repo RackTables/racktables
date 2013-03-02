@@ -169,16 +169,21 @@ function isInteger ($arg, $allow_zero = FALSE)
 	return TRUE;
 }
 
-// make sure the arg is a parsable date
+# Make sure the arg is a parsable date, return its UNIX timestamp equivalent
+# (or empty string for empty input, when allowed).
 function assertDateArg ($argname, $ok_if_empty = FALSE)
 {
-	$arg = assertStringArg ($argname, $ok_if_empty);
-	// different versions of PHP return false/-1
-	if ($arg != '' and strtotime ($arg) <= 0)
-		throw new InvalidRequestArgException($argname, $arg, 'parameter is not a parsable date');
-	return $arg;
+	if ('' == $arg = assertStringArg ($argname, $ok_if_empty))
+		return '';
+	try
+	{
+		return timestampFromDatetimestr ($arg);
+	}
+	catch (InvalidArgException $e)
+	{
+		throw convertToIRAE ($e, $argname);
+	}
 }
-
 
 // This function assures that specified argument was passed
 // and is a non-empty string.
@@ -5920,6 +5925,29 @@ function convertToIRAE ($iae, $override_argname = NULL)
 		$reported_argvalue = $_REQUEST[$override_argname];
 	}
 	return new InvalidRequestArgException ($reported_argname, $reported_argvalue, $iae->getReason());
+}
+
+# produce a textual date/time from a given UNIX timestamp
+function datetimestrFromTimestamp ($ts)
+{
+	return strftime (getConfigVar ('DATETIME_FORMAT'), $ts);
+}
+
+# vice versa
+function timestampFromDatetimestr ($s)
+{
+	$format = getConfigVar ('DATETIME_FORMAT');
+	if (FALSE === $tmp = strptime ($s, $format))
+		throw new InvalidArgException ('s', $s, "not a date in format '${format}'");
+	return mktime
+	(
+		$tmp['tm_hour'],       # 0~23
+		$tmp['tm_min'],        # 0~59
+		$tmp['tm_sec'],        # 0~59
+		$tmp['tm_mon'] + 1,    # 0~11 -> 1~12
+		$tmp['tm_mday'],       # 1~31
+		$tmp['tm_year'] + 1900 # 0~n -> 1900~n
+	);
 }
 
 ?>

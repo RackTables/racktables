@@ -1202,12 +1202,6 @@ function updateObjectAttributes ($object_id)
 		if ($type_id == 1560 and ($attr_id == 27 or $attr_id == 29))
 			continue;
 
-		if ('date' == $oldvalues[$attr_id]['type']) {
-			assertDateArg ("${i}_value", TRUE);
-			if ($value != '')
-				$value = strtotime ($value);
-		}
-
 		// Delete attribute and move on, when the field is empty or if the field
 		// type is a dictionary and it is the "--NOT SET--" value of 0.
 		if ($value == '' || ($oldvalues[$attr_id]['type'] == 'dict' && $value == 0))
@@ -1221,7 +1215,11 @@ function updateObjectAttributes ($object_id)
 
 		// The value could be uint/float, but we don't know ATM. Let SQL
 		// server check this and complain.
-		assertStringArg ("${i}_value");
+		if ('date' == $oldvalues[$attr_id]['type'])
+			$value = assertDateArg ("${i}_value");
+		else
+			assertStringArg ("${i}_value");
+
 		switch ($oldvalues[$attr_id]['type'])
 		{
 			case 'uint':
@@ -1480,7 +1478,7 @@ function resetUIConfig()
 	setConfigVar ('MUNIN_LISTSRC', 'false');
 	setConfigVar ('VIRTUAL_OBJ_LISTSRC', '1504,1505,1506,1507');
 	setConfigVar ('DATETIME_ZONE', 'UTC');
-	setConfigVar ('DATETIME_FORMAT', 'm/d/Y');
+	setConfigVar ('DATETIME_FORMAT', '%Y-%m-%d');
 	setConfigVar ('SEARCH_DOMAINS', '');
 	setConfigVar ('8021Q_EXTSYNC_LISTSRC', 'false');
 	setConfigVar ('8021Q_MULTILINK_LISTSRC', 'false');
