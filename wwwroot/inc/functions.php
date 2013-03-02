@@ -214,7 +214,7 @@ function assertIPArg ($argname)
 	}
 	catch (InvalidArgException $e)
 	{
-		throw new InvalidRequestArgException ($argname, $_REQUEST[$argname], $e->getMessage());
+		throw convertToIRAE ($e, $argname);
 	}
 }
 
@@ -227,7 +227,7 @@ function assertIPv4Arg ($argname)
 	}
 	catch (InvalidArgException $e)
 	{
-		throw new InvalidRequestArgException ($argname, $_REQUEST[$argname], $e->getMessage());
+		throw convertToIRAE ($e, $argname);
 	}
 }
 
@@ -240,7 +240,7 @@ function assertIPv6Arg ($argname)
 	}
 	catch (InvalidArgException $e)
 	{
-		throw new InvalidRequestArgException ($argname, $_REQUEST[$argname], $e->getMessage());
+		throw convertToIRAE ($e, $argname);
 	}
 }
 
@@ -5900,6 +5900,26 @@ function checkPortRole ($vswitch, $port_name, $port_order)
 				return FALSE;
 		}
 	return TRUE; // not linked port
+}
+
+# Convert InvalidArgException to InvalidRequestArgException with a choice of
+# replacing the reference to the failed argument or leaving it unchanged.
+function convertToIRAE ($iae, $override_argname = NULL)
+{
+	if (! ($iae instanceof InvalidArgException))
+		throw new InvalidArgException ('iae', '(object)', 'not an instance of InvalidArgException class');
+
+	if (is_null ($override_argname))
+	{
+		$reported_argname = $iae->getName();
+		$reported_argvalue = $iae->getValue();
+	}
+	else
+	{
+		$reported_argname = $override_argname;
+		$reported_argvalue = $_REQUEST[$override_argname];
+	}
+	return new InvalidRequestArgException ($reported_argname, $reported_argvalue, $iae->getReason());
 }
 
 ?>
