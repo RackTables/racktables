@@ -24,6 +24,7 @@
 	update: assign IP addresses to objects whose type is Wireless (#755)
 	update: SNMP support for Linksys SRW224G4 (#743)
 	update: files may be linked to rows (#733)
+	update: prevent deletion of system-level attributes (#761)
 	new feature: configurable top-to-bottom units order in particular racks (#601)
 	new feature: overridable tag names display style (via CSS and plug-ins)
 0.20.3 2012-12-19
