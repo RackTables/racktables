@@ -911,7 +911,7 @@ CREATE TABLE `RackSpace` (
   `rack_id` int(10) unsigned NOT NULL default '0',
   `unit_no` int(10) unsigned NOT NULL default '0',
   `atom` enum('front','interior','rear') NOT NULL default 'interior',
-  `state` enum('A','U','T','W') NOT NULL default 'A',
+  `state` enum('A','U','T') NOT NULL default 'A',
   `object_id` int(10) unsigned default NULL,
   PRIMARY KEY  (`rack_id`,`unit_no`,`atom`),
   KEY `RackSpace_object_id` (`object_id`),
