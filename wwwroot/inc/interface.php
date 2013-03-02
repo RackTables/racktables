@@ -872,7 +872,7 @@ function renderEditObjectForm()
 					printNiftySelect ($chapter, array ('name' => "${i}_value"), $record['key']);
 					break;
 				case 'date':
-					$date_value = $record['value'] ? date(getConfigVar('DATETIME_FORMAT'), $record['value']) : '';
+					$date_value = $record['value'] ? datetimestrFromTimestamp ($record['value']) : '';
 					echo "<input type=text name=${i}_value value='${date_value}'>";
 					break;
 			}
@@ -8114,7 +8114,7 @@ function formatIfTypeVariants ($variants, $select_name)
 function formatAttributeValue ($record)
 {
 	if ('date' == $record['type'])
-		return date(getConfigVar('DATETIME_FORMAT'), $record['value']);
+		return datetimestrFromTimestamp ($record['value']);
 
 	if (! isset ($record['key'])) // if record is a dictionary value, generate href with autotag in cfe
 	{
@@ -8602,7 +8602,7 @@ function renderExpirations ()
 			echo "<th align=center>Asset Tag</th><th align=center>Date Warranty <br> Expires</th></tr>\n";
 			foreach ($result as $row)
 			{
-				$date_value = date(getConfigVar('DATETIME_FORMAT'), $row['uint_value']);
+				$date_value = datetimestrFromTimestamp ($row['uint_value']);
 
 				$object = spotEntity ('object', $row['object_id']);
 				echo '<tr class=' . $section['class'] . $order . ' valign=top>';

@@ -177,6 +177,12 @@ were renamed to meet official Cisco classification:
 	2960G-8TC   => 2960G-8TC-L
 	C2960-24    => C2960-24-S
 	C2960G-24PC => C2960-24PC-L
+
+The DATETIME_FORMAT configuration option used in setting date and time output
+format now uses a different [1] syntax. During upgrade the option is reset to
+the default value, which is now %Y-%m-%d (YYYY-MM-DD) per ISO 8601.
+
+[1] http://php.net/manual/en/function.strftime.php
 ENDOFTEXT
 ,
 );
@@ -1636,6 +1642,7 @@ CREATE TABLE `MuninGraph` (
 			$query[] = "UPDATE `Config` SET varvalue = CONCAT(varvalue, ' or {\$typeid_965}') WHERE varname = 'IPV4OBJ_LISTSRC'";
 			$query[] = "UPDATE AttributeValue INNER JOIN AttributeMap USING (attr_id) SET AttributeValue.uint_value = 1572 WHERE chapter_id = 12 AND uint_value = 162";
 			$query[] = "UPDATE AttributeValue INNER JOIN AttributeMap USING (attr_id) SET AttributeValue.uint_value = 1710 WHERE chapter_id = 12 AND uint_value = 163";
+			$query[] = "UPDATE Config SET varvalue = '%Y-%m-%d' WHERE varname = 'DATETIME_FORMAT'";
 			$query[] = "UPDATE Config SET varvalue = '0.20.4' WHERE varname = 'DB_VERSION'";
 			break;
 		case 'dictionary':
