@@ -14,6 +14,7 @@
 	bugfix: references to tags and files remained when a location was deleted
 		(#747)
 	bugfix: date/time attributes handling code had a bug (#719)
+	bugfix: deleting objects without FQDN attribute (#761)
 	update: vlan search results now include binded IP networks
 	update: make scaled rack thumb images sharp again
 	update: Cisco IOS 15.0 support
@@ -25,7 +26,6 @@
 	update: SNMP support for 3Com 4210 (#763), D-Link DES-3052 (#765),
 		Linksys SRW224G4 (#743), 
 	update: files may be linked to rows (#733)
-	update: prevent deletion of system-level attributes (#761)
 	update: hide controls in cacti tab if user doesn't have permission (#707)
 	new feature: configurable top-to-bottom units order in particular racks (#601)
 	new feature: overridable tag names display style (via CSS and plug-ins)

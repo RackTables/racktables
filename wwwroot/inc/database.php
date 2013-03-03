@@ -1178,6 +1178,12 @@ function commitDeleteObject ($object_id = 0)
 	);
 }
 
+// returns the number of rows deleted from DB (1 or 0)
+function clearObjectAttribute ($object_id, $attr_id)
+{
+	return usePreparedDeleteBlade ('AttributeValue', array ('object_id' => $object_id, 'attr_id' => $attr_id));
+}
+
 function commitResetObject ($object_id = 0)
 {
 	releaseFiles ('object', $object_id);
@@ -1208,8 +1214,9 @@ function commitResetObject ($object_id = 0)
 	usePreparedDeleteBlade ('Port', array ('object_id' => $object_id));
 	// CN
 	usePreparedUpdateBlade ('Object', array ('name' => NULL, 'label' => ''), array ('id' => $object_id));
-	// FQDN
-	commitUpdateAttrValue ($object_id, 3, "");
+	// volatile system attributes
+	clearObjectAttribute ($object_id, 3);  // FQDN
+	clearObjectAttribute ($object_id, 14); // contact person
 	// log history
 	recordObjectHistory ($object_id);
 	# Cacti graphs
@@ -3411,7 +3418,7 @@ function commitUpdateAttrValue ($object_id, $attr_id, $value = '')
 		default:
 			throw new InvalidArgException ('$attr_type', $attr_type, 'Unknown attribute type found in object #'.$object_id.', attribute #'.$attr_id);
 	}
-	usePreparedDeleteBlade ('AttributeValue', array ('object_id' => $object_id, 'attr_id' => $attr_id));
+	clearObjectAttribute ($object_id, $attr_id);
 	if ($value == '')
 		return;
 

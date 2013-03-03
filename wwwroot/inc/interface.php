@@ -4093,9 +4093,7 @@ function renderEditAttributesForm ()
 	{
 		printOpFormIntro ('upd', array ('attr_id' => $attr['id']));
 		echo '<tr><td>';
-		if ($attr['id'] < 10000)
-			printImageHREF ('nodestroy', 'system attribute');
-		elseif (count ($attr['application']))
+		if (count ($attr['application']))
 			printImageHREF ('nodestroy', count ($attr['application']) . ' reference(s) in attribute map');
 		else
 		{
