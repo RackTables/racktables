@@ -119,18 +119,14 @@ function renderInterfaceHTML ($pageno, $tabno, $payload)
 }
 
 // Main menu.
-function renderIndexItem ($ypageno) {
-  global $page;
-  if (permitted($ypageno)) {
-	  $title = getPageName ($ypageno);
-	print "          <td>\n";
-    print "            <h1><a href='".makeHref(array('page'=>$ypageno))."'>".$title."<br>\n";
-    printImageHREF ($ypageno);
-    print "</a></h1>\n";
-    print "          </td>\n";
-  } else {
-    print "          <td>&nbsp;</td>\n";
-  }
+function renderIndexItem ($ypageno)
+{
+	echo (! permitted ($ypageno)) ? "          <td>&nbsp;</td>\n" :
+		"          <td>\n" .
+		"            <h1><a href='" . makeHref (array ('page' => $ypageno)) . "'>" .
+		getPageName ($ypageno) . "<br>\n" . getImageHREF ($ypageno) .
+		"</a></h1>\n" .
+		"          </td>\n";
 }
 
 function renderIndex ()
