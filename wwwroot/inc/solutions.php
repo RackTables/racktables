@@ -414,7 +414,8 @@ function proxyCactiRequest ($server_id, $graph_id)
 	$ret['size'] = curl_getinfo ($session, CURLINFO_SIZE_DOWNLOAD);
 
 	// Not an image, probably the login page
-	if (preg_match('/^text\/html.*/i', $ret['type'])) {
+	if (preg_match ('/^text\/html.*/i', $ret['type']))
+	{
 		// Request to set the cookies
 		curl_setopt ($session, CURLOPT_HEADER, TRUE);
 		curl_setopt ($session, CURLOPT_COOKIE, "");	// clear the old cookie

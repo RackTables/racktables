@@ -201,24 +201,27 @@ function dumpArray($arr)
 function stringTrace($trace)
 {
 	$ret = '';
-	foreach($trace as $line) {
+	foreach ($trace as $line)
+	{
 		if (isset ($line['file']) && isset ($line['line']))
 			$ret .= $line['file'].':'.$line['line'].' ';
 		$ret .= $line['function'].'(';
 		$f = true;
-		if (isset($line['args']) and is_array($line['args'])) foreach ($line['args'] as $arg) {
-			if (!$f) $ret .= ', ';
-			if (is_string($arg))
-				$printarg = "'".$arg."'";
-			elseif (is_null($arg))
-				$printarg = 'NULL';
-			elseif (is_array($arg))
-				$printarg = print_r($arg, 1);
-			else
-				$printarg = $arg;
-			$ret .= $printarg;
-			$f = false;
-		}
+		if (isset ($line['args']) and is_array ($line['args']))
+			foreach ($line['args'] as $arg)
+			{
+				if (! $f) $ret .= ', ';
+				if (is_string ($arg))
+					$printarg = "'" . $arg . "'";
+				elseif (is_null ($arg))
+					$printarg = 'NULL';
+				elseif (is_array ($arg))
+					$printarg = print_r ($arg, 1);
+				else
+					$printarg = $arg;
+				$ret .= $printarg;
+				$f = false;
+			}
 		$ret .= ")\n";
 	}
 	return $ret;

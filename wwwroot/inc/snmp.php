@@ -3037,7 +3037,8 @@ class RTSNMPDevice
 
 	function __construct($hostname, $snmpsetup)
 	{
-		switch($snmpsetup['version']) {
+		switch ($snmpsetup['version'])
+		{
 		case 1:
 		default:
 			$this->snmp = new RTSNMPv1($hostname, $snmpsetup);

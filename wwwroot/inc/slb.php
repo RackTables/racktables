@@ -497,7 +497,8 @@ function commitUpdateSLBDefConf ($data)
 	saveScript('DefaultRSConfig', $data['rs']);
 }
 
-function getSLBDefaults ($do_cache_result = FALSE) {
+function getSLBDefaults ($do_cache_result = FALSE)
+{
 	static $ret = array();
 
 	if (! $do_cache_result)

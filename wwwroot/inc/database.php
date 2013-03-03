@@ -816,7 +816,8 @@ function getObjectPortsAndLinks ($object_id)
 
 // Fetch the object type via SQL.
 // spotEntity cannot be used because it references RackObject, which doesn't suit Racks, Rows, or Locations.
-function getObjectType ($object_id) {
+function getObjectType ($object_id)
+{
 	$result = usePreparedSelectBlade ('SELECT objtype_id from Object WHERE id = ?', array ($object_id));
 	return $result->fetchColumn ();
 }

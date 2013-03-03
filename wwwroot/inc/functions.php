@@ -1646,7 +1646,8 @@ function getObjectiveTagTree ($tree, $realm, $preselect)
 // This makes sense only if andor mode is 'and', otherwise function does not modify tree.
 // 'Given filter' is a pair of $entity_list(filter result) and $preselect(filter data).
 // 'Effectively' means reduce to non-empty result.
-function getShrinkedTagTree($entity_list, $realm, $preselect) {
+function getShrinkedTagTree ($entity_list, $realm, $preselect)
+{
 	global $tagtree;
 	if ($preselect['andor'] != 'and' || empty($entity_list) && $preselect['is_empty'])
 		return getObjectiveTagTree($tagtree, $realm, $preselect['tagidlist']);
@@ -1670,10 +1671,12 @@ function getShrinkedTagTree($entity_list, $realm, $preselect) {
 }
 
 // deletes item from tag subtree unless it exists in $used_tags and not preselected
-function shrinkSubtree($tree, $used_tags, $preselect, $realm) {
+function shrinkSubtree ($tree, $used_tags, $preselect, $realm)
+{
 	$self = __FUNCTION__;
 
-	foreach($tree as $i => &$item) {
+	foreach ($tree as $i => &$item)
+	{
 		$item['kids'] = $self($item['kids'], $used_tags, $preselect, $realm);
 		$item['kidc'] = count($item['kids']);
 		if
@@ -2604,7 +2607,8 @@ function iptree_markup_collapsion (&$tree, $threshold = 1024, $target = 0)
 }
 
 // Convert entity name to human-readable value
-function formatEntityName ($name) {
+function formatEntityName ($name)
+{
 	switch ($name)
 	{
 		case 'ipv4net':
@@ -2677,7 +2681,8 @@ function serializeFileLinks ($links, $scissors = FALSE)
 }
 
 // Convert filesize to appropriate unit and make it human-readable
-function formatFileSize ($bytes) {
+function formatFileSize ($bytes)
+{
 	// bytes
 	if($bytes < 1024) // bytes
 		return "${bytes} bytes";
@@ -2691,7 +2696,8 @@ function formatFileSize ($bytes) {
 }
 
 // Reverse of formatFileSize, it converts human-readable value to bytes
-function convertToBytes ($value) {
+function convertToBytes ($value)
+{
 	$value = trim($value);
 	$last = strtolower($value[strlen($value)-1]);
 	switch ($last)
@@ -4340,9 +4346,8 @@ function recalc8021QPorts ($switch_id)
 	amplifyCell ($object);
 	$vlan_config = getStored8021QConfig ($switch_id, 'desired');
 	$vswitch = getVLANSwitchInfo ($switch_id);
-	if (! $vswitch) {
+	if (! $vswitch)
 		return $ret;
-	}
 	$domain_vlanlist = getDomainVLANs ($vswitch['domain_id']);
 	$order = apply8021QOrder ($vswitch['template_id'], $vlan_config);
 	$before = $order;
@@ -5068,10 +5073,25 @@ function getColumnCoordinates ($line, $column_name, $align = 'left')
 // You can call them multiple times to show multiple messages.
 // $option can be 'inline' to echo message div, instead of putting it into $_SESSION and draw on next index page show
 // These functions always return NULL
-function showError   ($message, $option = '') { setMessage ('error',   $message, $option == 'inline'); }
-function showWarning ($message, $option = '') { setMessage ('warning', $message, $option == 'inline'); }
-function showSuccess ($message, $option = '') { setMessage ('success', $message, $option == 'inline'); }
-function showNotice  ($message, $option = '') { setMessage ('neutral', $message, $option == 'inline'); }
+function showError   ($message, $option = '')
+{
+	setMessage ('error',   $message, $option == 'inline');
+}
+
+function showWarning ($message, $option = '')
+{
+	setMessage ('warning', $message, $option == 'inline');
+}
+
+function showSuccess ($message, $option = '')
+{
+	setMessage ('success', $message, $option == 'inline');
+}
+
+function showNotice  ($message, $option = '')
+{
+	setMessage ('neutral', $message, $option == 'inline');
+}
 
 // do not call this directly, use showError and its siblings instead
 // $type could be 'error', 'warning', 'success' or 'neutral'
@@ -5160,25 +5180,30 @@ function isEthernetPort($port)
 	return ($port['iif_id'] != 1 or preg_match('/Base|LACP/i', $port['oif_name']));
 }
 
-function loadConfigDefaults() {
+function loadConfigDefaults()
+{
 	global $configCache;
 	$configCache = loadConfigCache();
 	if (!count ($configCache))
 		throw new RackTablesError ('Failed to load configuration from the database.', RackTablesError::INTERNAL);
-	foreach ($configCache as $varname => &$row) {
+	foreach ($configCache as $varname => &$row)
+	{
 		$row['is_altered'] = 'no';
 		if ($row['vartype'] == 'uint') $row['varvalue'] = 0 + $row['varvalue'];
 		$row['defaultvalue'] = $row['varvalue'];
 	}
 }
 
-function alterConfigWithUserPreferences() {
+function alterConfigWithUserPreferences()
+{
 	global $configCache;
 	global $userConfigCache;
 	global $remote_username;
 	$userConfigCache = loadUserConfigCache($remote_username);
-	foreach($userConfigCache as $key => $row) {
-		if ($configCache[$key]['is_userdefined'] == 'yes') {
+	foreach ($userConfigCache as $key => $row)
+	{
+		if ($configCache[$key]['is_userdefined'] == 'yes')
+		{
 			$configCache[$key]['varvalue'] = $row['varvalue'];
 			$configCache[$key]['is_altered'] = 'yes';
 		}
@@ -5186,7 +5211,8 @@ function alterConfigWithUserPreferences() {
 }
 
 // Returns true if varname has a different value or varname is new
-function isConfigVarChanged($varname, $varvalue) {
+function isConfigVarChanged ($varname, $varvalue)
+{
 	global $configCache;
 	if (!isset ($configCache))
 		throw new RackTablesError ('configuration cache is unavailable', RackTablesError::INTERNAL);

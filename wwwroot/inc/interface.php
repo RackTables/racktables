@@ -687,7 +687,8 @@ function renderRack ($rack_id, $hl_obj_id = 0)
 	echo "</table>\n";
 	// Get a list of all of objects Zero-U mounted to this rack
 	$zeroUObjects = getEntityRelatives('children', 'rack', $rack_id);
-	if (count($zeroUObjects) > 0) {
+	if (count ($zeroUObjects) > 0)
+	{
 		echo "<br><table width='75%' class=rack border=0 cellspacing=0 cellpadding=1>\n";
 		echo "<tr><th>Zero-U:</th></tr>\n";
 		foreach ($zeroUObjects as $zeroUObject)
@@ -4963,7 +4964,8 @@ function renderEntityTags ($entity_id)
 		{
 			$js_code = "tag_cb.setTagShortList ({";
 			$is_first = TRUE;
-			foreach($minilist as $tag) {
+			foreach ($minilist as $tag)
+			{
 				if (! $is_first)
 					$js_code .= ",";
 				$is_first = FALSE;
