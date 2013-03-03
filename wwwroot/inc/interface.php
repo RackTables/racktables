@@ -99,20 +99,16 @@ function renderInterfaceHTML ($pageno, $tabno, $payload)
 <?php printPageHeaders(); ?>
 </head>
 <body>
-<table border=0 cellpadding=0 cellspacing=0 width="100%" height="100%" class="maintable">
- <tr class="mainheader"><td>
+<div class="maintable">
+ <div class="mainheader">
+  <div style="float: right" class=greeting><a href='index.php?page=myaccount&tab=default'><?php global $remote_displayname; echo $remote_displayname ?></a> [ <a href='?logout'>logout</a> ]</div>
  <?php echo getConfigVar ('enterprise') ?> RackTables <a href="http://racktables.org" title="Visit RackTables site"><?php echo CODE_VERSION ?></a><?php renderQuickLinks() ?>
- <div style="float: right" class=greeting><a href='index.php?page=myaccount&tab=default'><?php global $remote_displayname; echo $remote_displayname ?></a> [ <a href='?logout'>logout</a> ]</div>
- </td></tr>
- <tr><td class="menubar">
-  <table border="0" width="100%" cellpadding="3" cellspacing="0">
-  <tr><?php showPathAndSearch ($pageno); ?></tr>
-  </table>
- </td></tr>
- <tr><td><?php showTabs ($pageno, $tabno); ?></td></tr>
- <tr><td><?php showMessageOrError(); ?></td></tr>
- <tr><td><?php echo $payload; ?></td></tr>
-</table>
+ </div>
+ <div class="menubar"><?php showPathAndSearch ($pageno); ?></div>
+ <div class="tabbar"><?php showTabs ($pageno, $tabno); ?></div>
+ <div class="msgbar"><?php showMessageOrError(); ?></div>
+ <div class="pagebar"><?php echo $payload; ?></div>
+</div>
 </body>
 </html>
 <?php
@@ -5916,7 +5912,6 @@ function showPathAndSearch ($pageno)
 	}
 	global $page;
 	// Path.
-	echo "<td class=activemenuitem width='99%'>";
 	$path = getPath ($pageno);
 	$items = array();
 	foreach (array_reverse ($path) as $no)
@@ -5950,14 +5945,15 @@ function showPathAndSearch ($pageno)
 		$item .= "'>" . $title['name'] . "</a>";
 		$items[] = $item;
 	}
-	echo implode(' : ', array_reverse ($items));
-	echo "</td>";
 	// Search form.
-	echo "<td><table border=0 cellpadding=0 cellspacing=0><tr><td>Search:</td>";
-	echo "<form name=search method=get><td>";
+	echo "<div class='searchbox' style='float:right'>";
+	echo "<form name=search method=get>";
 	echo '<input type=hidden name=page value=search>';
 	// This input will be the first, if we don't add ports or addresses.
-	echo "<input type=text name=q size=20 tabindex=1000></td></form></tr></table></td>";
+	echo "<label>Search:<input type=text name=q size=20 tabindex=1000></label></form></div>";
+
+	// Path (breadcrumbs)
+	echo implode(' : ', array_reverse ($items));
 }
 
 function getTitle ($pageno)
