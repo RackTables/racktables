@@ -25,7 +25,8 @@ function renderSLBEntityCell ($cell, $highlighted = FALSE)
 	$a_class = $highlighted ? 'highlight' : '';
 
 	echo "<table class='$class'>";
-	switch ($cell['realm']) {
+	switch ($cell['realm'])
+	{
 	case 'object':
 		echo "<tr><td><a class='$a_class' href='index.php?page=object&object_id=${cell['id']}'>${cell['dname']}</a>";
 		echo "</td></tr><tr><td>";

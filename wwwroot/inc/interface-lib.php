@@ -297,7 +297,8 @@ function getSelect ($optionList, $select_attrs = array(), $selected_id = NULL, $
 		return '(none)';
 	if (count ($optionList) == 1 && $treat_single_special)
 	{
-		foreach ($optionList as $key => $value) { break; }
+		foreach ($optionList as $key => $value)
+			break;
 		return "<input type=hidden name=${select_attrs['name']} id=${select_attrs['name']} value=${key}>" . $value;
 	}
 	if (!array_key_exists ('id', $select_attrs))

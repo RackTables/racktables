@@ -1736,7 +1736,8 @@ function executeUpgradeBatch ($batchid)
 {
 	global $dbxlink;
 	$query = getUpgradeBatch($batchid);
-	if ($query === NULL) {
+	if ($query === NULL)
+	{
 		showError ("unknown batch '${batchid}'", __FUNCTION__);
 		die;
 	}
