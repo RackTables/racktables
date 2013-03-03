@@ -279,24 +279,49 @@ textarea {
 	border-style : solid;
 	border-color : #000000;
 }
-.menubar, .menubar a {
-	font-family: Verdana, arial, sans-serif;
+
+.maintable {
+	width: 100%;
+	height: 100%;
+}
+
+/* main header line (black one) */
+.mainheader {
+	background-color: black;
+	color: white;
+	padding: 5px;
+}
+.mainheader a {
+	color: #5C98D5;
+	font-family: Arial,Sans-Serif,sans-serif;
+}
+
+/* search and path bar (blue one) */
+.menubar {
+	padding: 5px 3px;
 	font-size: 17px;
 	line-height: 20px;
 	background-color : #3c78b5;
+
+	font-family: Verdana, arial, sans-serif;
+	color : #ffffff;
+}
+
+.menubar a {
+	font-family: Verdana, arial, sans-serif;
 	color : #ffffff;
 	text-decoration : none;
 }
 
-.activemenuitem, .activemenuitem a {
-	background-color : #3c78b5;
-}
-.activemenuitem a:hover {
+.menubar a:hover {
 	text-decoration: underline;
 }
 
-.maintable {
-	height : 100%;
+/* tab bar */
+.greynavbar {
+	background-color: #f0f0f0;
+	border-top: 1px solid #3c78b5;
+	margin-top: 0px;
 }
 
 #foldertab {
@@ -359,8 +384,6 @@ color: white;
 background: #ff8c00;
 border-color: #ff8c00;
 }
-
-.greynavbar {background-color: #f0f0f0; border-top: 1px solid #3c78b5; margin-top: 0px}
 
 .rack {
 	font: bold 12px Verdana, sans-serif;
@@ -702,17 +725,6 @@ a.img-link {
 /* for OptionTree */
 select.vertical {
 	display: block;
-}
-
-/* main header line (black one) */
-tr.mainheader td {
-	background-color: black;
-	color: white;
-	padding: 5px;
-}
-tr.mainheader td a {
-	color: #5C98D5;
-	font-family: Arial,Sans-Serif,sans-serif;
 }
 
 /* quick links within the main header line */
