@@ -1643,7 +1643,7 @@ CREATE TABLE `MuninGraph` (
 			$query[] = "UPDATE `Config` SET varvalue = CONCAT(varvalue, ' or {\$typeid_965}') WHERE varname = 'IPV4OBJ_LISTSRC'";
 			$query[] = "UPDATE AttributeValue INNER JOIN AttributeMap USING (attr_id) SET AttributeValue.uint_value = 1572 WHERE chapter_id = 12 AND uint_value = 162";
 			$query[] = "UPDATE AttributeValue INNER JOIN AttributeMap USING (attr_id) SET AttributeValue.uint_value = 1710 WHERE chapter_id = 12 AND uint_value = 163";
-			$query[] = "UPDATE Config SET varvalue = '%Y-%m-%d' WHERE varname = 'DATETIME_FORMAT'";
+			$query[] = "UPDATE Config SET varvalue = '%Y-%m-%d', description='PHP strftime() format to use for date output' WHERE varname = 'DATETIME_FORMAT'";
 			$query[] = "UPDATE Config SET varvalue = '0.20.4' WHERE varname = 'DB_VERSION'";
 			break;
 		case 'dictionary':

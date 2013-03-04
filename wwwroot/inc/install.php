@@ -1625,7 +1625,7 @@ INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdef
 ('MUNIN_LISTSRC','false','string','yes','no','no','List of object with Munin graphs'),
 ('VIRTUAL_OBJ_LISTSRC','1504,1505,1506,1507','string','no','no','no','List source: virtual objects'),
 ('DATETIME_ZONE','UTC','string','yes','no','yes','Timezone to use for displaying/calculating dates'),
-('DATETIME_FORMAT','%Y-%m-%d','string','no','no','yes','PHP date() format to use for date output'),
+('DATETIME_FORMAT','%Y-%m-%d','string','no','no','yes','PHP strftime() format to use for date output'),
 ('SEARCH_DOMAINS','','string','yes','no','yes','DNS domain list (comma-separated) to search in FQDN attributes'),
 ('8021Q_EXTSYNC_LISTSRC','false','string','yes','no','no','List source: objects with extended 802.1Q sync'),
 ('8021Q_MULTILINK_LISTSRC','false','string','yes','no','no','List source: IPv4/IPv6 networks allowing multiple VLANs from same domain'),
