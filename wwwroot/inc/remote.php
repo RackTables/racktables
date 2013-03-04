@@ -332,7 +332,7 @@ function queryTerminal ($object_id, $commands, $tolerate_remote_errors = TRUE)
 		case 'ios12':
 		case 'ftos8':
 			$protocol = 'netcat'; // default is netcat mode
-			$prompt = '^(Login|Username|Password): $|^\S+[>#]$'; // set the prompt in case user would like to specify telnet protocol
+			$prompt = '^(Login|Username|Password): $|^\S+[>#]$|\[[^][]*\]\? $'; // set the prompt in case user would like to specify telnet protocol
 			$commands = "terminal length 0\nterminal no monitor\n" . $commands;
 			break;
 		case 'air12':
