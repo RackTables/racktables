@@ -4457,16 +4457,18 @@ function detectVLANSwitchQueue ($vswitch)
 	switch ($vswitch['last_errno'])
 	{
 	case E_8021Q_NOERROR:
-		if ($vswitch['last_change_age_seconds'] > getConfigVar ('8021Q_DEPLOY_MAXAGE'))
+		$last_change_age = time() - $vswitch['last_change'];
+		if ($last_change_age > getConfigVar ('8021Q_DEPLOY_MAXAGE'))
 			return 'sync_ready';
-		elseif ($vswitch['last_change_age_seconds'] < getConfigVar ('8021Q_DEPLOY_MINAGE'))
+		elseif ($last_change_age < getConfigVar ('8021Q_DEPLOY_MINAGE'))
 			return 'sync_aging';
 		else
 			return 'sync_ready';
 	case E_8021Q_VERSION_CONFLICT:
 	case E_8021Q_PULL_REMOTE_ERROR:
 	case E_8021Q_PUSH_REMOTE_ERROR:
-		if ($vswitch['last_error_age_seconds'] < getConfigVar ('8021Q_DEPLOY_RETRY'))
+		$last_error_age = time() - $vswitch['last_error_ts'];
+		if ($last_error_age < getConfigVar ('8021Q_DEPLOY_RETRY'))
 			return 'resync_aging';
 		else
 			return 'resync_ready';
@@ -5920,9 +5922,12 @@ function convertToIRAE ($iae, $override_argname = NULL)
 	return new InvalidRequestArgException ($reported_argname, $reported_argvalue, $iae->getReason());
 }
 
-# produce a textual date/time from a given UNIX timestamp
-function datetimestrFromTimestamp ($ts)
+# Produce a textual date/time from a given UNIX timestamp
+# If timestamp is omitted, time() value is used
+function datetimestrFromTimestamp ($ts = NULL)
 {
+	if (! isset ($ts))
+		$ts = time();
 	return strftime (getConfigVar ('DATETIME_FORMAT'), $ts);
 }
 

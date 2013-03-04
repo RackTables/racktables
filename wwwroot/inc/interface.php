@@ -7375,15 +7375,16 @@ function renderObject8021QSyncSchedule ($object, $vswitch, $maxdecisions)
 	$rows = array();
 	if (! considerConfiguredConstraint ($object, 'SYNC_802Q_LISTSRC'))
 		$rows['auto sync'] = '<span class="trerror">disabled by operator</span>';
-	$rows['last local change'] = $vswitch['last_change'] . ' (' . $vswitch['last_change_age'] . ' ago)';
+	$rows['last local change'] = datetimestrFromTimestamp ($vswitch['last_change']) . ' (' . formatAge ($vswitch['last_change']) . ')';
 	$rows['device out of sync'] = $vswitch['out_of_sync'];
 	if ($vswitch['out_of_sync'] == 'no')
 	{
-		$rows['last sync session with device'] = $vswitch['last_push_finished'] . ' (' . $vswitch['last_push_age'] .
-			' ago, lasted ' . $vswitch['last_push_lasted'] . ')';
+		$push_duration = $vswitch['last_push_finished'] - $vswitch['last_push_started'];
+		$rows['last sync session with device'] = datetimestrFromTimestamp ($vswitch['last_push_started']) . ' (' . formatAge ($vswitch['last_push_started']) .
+			', ' . ($push_duration < 0 ?  'interrupted' : "lasted ${push_duration}s") . ')';
 	}
 	if ($vswitch['last_errno'])
-		$rows['failed'] = $vswitch['last_error_ts'] . ' (' . strerror8021Q ($vswitch['last_errno']) . ')';
+		$rows['failed'] = datetimestrFromTimestamp ($vswitch['last_error_ts']) . ' (' . strerror8021Q ($vswitch['last_errno']) . ')';
 
 	if (NULL !== $new_rows = callHook ('alter8021qSyncSummaryItems', $rows))
 		$rows = $new_rows;
@@ -7812,12 +7813,12 @@ function renderDeployQueue()
 			if ($dqcode == 'disabled')
 				echo "<h2 align=center>Queue " . $dqtitle[$qcode] . " (" . count ($data[$en_key]) . ")</h2>";
 			echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
-			echo '<tr><th>switch</th><th>age</th><th>';
+			echo '<tr><th>switch</th><th>changed</th><th>';
 			foreach ($data[$en_key] as $item)
 			{
 				echo "<tr class=row_${order}><td>";
 				renderCell (spotEntity ('object', $item['object_id']));
-				echo "</td><td>${item['last_change_age']}</td></tr>";
+				echo "</td><td>" . formatAge ($item['last_change']) . "</td></tr>";
 				$order = $nextorder[$order];
 			}
 			echo '</table>';
