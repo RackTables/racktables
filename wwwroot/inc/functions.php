@@ -2076,6 +2076,15 @@ function iptree_construct ($node)
 		return array_merge ($self ($node['left']), $self ($node['right']));
 }
 
+// returns TRUE if inet_ntop and inet_pton functions exist and support IPv6
+function is_inet_avail()
+{
+	static $ret = NULL;
+	if (! isset ($ret))
+		$ret = is_callable ('inet_pton') && ! is_callable ('inet_ntop') && defined ('AF_INET6');
+	return $ret;
+}
+
 function ip_format ($ip_bin)
 {
 	switch (strlen ($ip_bin))
@@ -2088,71 +2097,107 @@ function ip_format ($ip_bin)
 
 function ip4_format ($ip_bin)
 {
-	if (4 != ($len = strlen ($ip_bin)))
-		throw new InvalidArgException ('ip_bin', $ip_bin, "Invalid binary IP");
-	return implode ('.', unpack ('C*', $ip_bin));
+	if (4 == strlen ($ip_bin))
+	{
+		if (is_inet_avail())
+		{
+			$ret = @inet_ntop ($ip_bin);
+			if ($ret !== FALSE)
+				return $ret;
+		}
+		else
+			return implode ('.', unpack ('C*', $ip_bin));
+	}
+	throw new InvalidArgException ('ip_bin', $ip_bin, "Invalid binary IP");
 }
 
 function ip6_format ($ip_bin)
 {
-	// maybe this is IPv6-to-IPv4 address?
-	if (substr ($ip_bin, 0, 12) == "\0\0\0\0\0\0\0\0\0\0\xff\xff")
-		return '::ffff:' . implode ('.', unpack ('C*', substr ($ip_bin, 12, 4)));
+	do {
+		if (16 != strlen ($ip_bin))
+			break;
 
-	$result = array();
-	$hole_index = NULL;
-	$max_hole_index = NULL;
-	$hole_length = 0;
-	$max_hole_length = 0;
-
-	for ($i = 0; $i < 8; $i++)
-	{
-		$unpacked = unpack ('n', substr ($ip_bin, $i * 2, 2));
-		$value = array_shift ($unpacked);
-		$result[] = dechex ($value & 0xffff);
-		if ($value != 0)
+		if (is_inet_avail())
 		{
-			unset ($hole_index);
-			$hole_length = 0;
+			$ret = @inet_ntop ($ip_bin);
+			if ($ret !== FALSE)
+				return $ret;
+			break;
 		}
-		else
+
+		// maybe this is IPv6-to-IPv4 address?
+		if (substr ($ip_bin, 0, 12) == "\0\0\0\0\0\0\0\0\0\0\xff\xff")
+			return '::ffff:' . implode ('.', unpack ('C*', substr ($ip_bin, 12, 4)));
+
+		$result = array();
+		$hole_index = NULL;
+		$max_hole_index = NULL;
+		$hole_length = 0;
+		$max_hole_length = 0;
+
+		for ($i = 0; $i < 8; $i++)
 		{
-			if (! isset ($hole_index))
-				$hole_index = $i;
-			if (++$hole_length >= $max_hole_length)
+			$unpacked = unpack ('n', substr ($ip_bin, $i * 2, 2));
+			$value = array_shift ($unpacked);
+			$result[] = dechex ($value & 0xffff);
+			if ($value != 0)
 			{
-				$max_hole_index = $hole_index;
-				$max_hole_length = $hole_length;
+				unset ($hole_index);
+				$hole_length = 0;
+			}
+			else
+			{
+				if (! isset ($hole_index))
+					$hole_index = $i;
+				if (++$hole_length >= $max_hole_length)
+				{
+					$max_hole_index = $hole_index;
+					$max_hole_length = $hole_length;
+				}
 			}
 		}
-	}
-	if (isset ($max_hole_index))
-	{
-		array_splice ($result, $max_hole_index, $max_hole_length, array (''));
-		if ($max_hole_index == 0 && $max_hole_length == 8)
-			return '::';
-		elseif ($max_hole_index == 0)
-			return ':' . implode (':', $result);
-		elseif ($max_hole_index + $max_hole_length == 8)
-			return implode (':', $result) . ':';
-	}
-	return implode (':', $result);
+		if (isset ($max_hole_index))
+		{
+			array_splice ($result, $max_hole_index, $max_hole_length, array (''));
+			if ($max_hole_index == 0 && $max_hole_length == 8)
+				return '::';
+			elseif ($max_hole_index == 0)
+				return ':' . implode (':', $result);
+			elseif ($max_hole_index + $max_hole_length == 8)
+				return implode (':', $result) . ':';
+		}
+		return implode (':', $result);
+	} while (FALSE);
+
+	throw new InvalidArgException ('ip_bin', $ip_bin, "Invalid binary IP");
 }
 
 function ip_parse ($ip)
 {
-	if (FALSE !== strpos ($ip, ':'))
+	if (is_inet_avail())
+	{
+		if (FALSE !== ($ret = @inet_pton ($ip)))
+			return $ret;
+	}
+	elseif (FALSE !== strpos ($ip, ':'))
 		return ip6_parse ($ip);
 	else
 		return ip4_parse ($ip);
+
+	throw new InvalidArgException ('ip', $ip, "Invalid IP address");
 }
 
 function ip4_parse ($ip)
 {
-	if (FALSE === ($int = ip2long ($ip)))
-		throw new InvalidArgException ('ip', $ip, "Invalid IPv4 address");
-	else
+	if (is_inet_avail())
+	{
+		if (FALSE !== ($ret = @inet_pton ($ip)))
+			return $ret;
+	}
+	elseif (FALSE !== ($int = ip2long ($ip)))
 		return pack ('N', $int);
+
+	throw new InvalidArgException ('ip', $ip, "Invalid IPv4 address");
 }
 
 // returns 16-byte string ip_bin
@@ -2160,6 +2205,13 @@ function ip4_parse ($ip)
 function ip6_parse ($ip)
 {
 	do {
+		if (is_inet_avail())
+		{
+			if (FALSE !== ($ret = @inet_pton ($ip)))
+				return $ret;
+			break;
+		}
+
 		if (empty ($ip))
 			break;
 
