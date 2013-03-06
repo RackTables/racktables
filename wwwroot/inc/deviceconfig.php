@@ -2245,12 +2245,10 @@ function eos4BuildSwitchport ($mined)
 			'native' => $mined['access'],
 		);
 	case $mined['mode'] == 'trunk':
+		if (! array_key_exists ('native', $mined))
+			$mined['native'] = ! array_key_exists ('allowed', $mined) || in_array (VLAN_DFL_ID, $mined['allowed']) ? VLAN_DFL_ID : 0;
 		if (! array_key_exists ('allowed', $mined))
 			$mined['allowed'] = range (VLAN_MIN_ID, VLAN_MAX_ID);
-		if (! array_key_exists ('native', $mined))
-			$mined['native'] = $mined['default1'] ? VLAN_DFL_ID : 0;
-		if ($mined['native'] and ! in_array ($mined['native'], $mined['allowed']))
-			$mined['allowed'][] = $mined['native'];
 		return array
 		(
 			'mode' => 'trunk',
