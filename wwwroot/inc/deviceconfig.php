@@ -349,6 +349,8 @@ function ios12ReadVLANConfig ($input)
 		'portconfig' => array(),
 	);
 	$schema = $ret;
+	if (preg_match ('/\nUnable to get configuration. Try again later/s', $input))
+		throw new ERetryNeeded ("device is busy. 'show run' did not work");
 
 	global $breedfunc;
 	$nextfunc = 'ios12-get8021q-swports';
@@ -3147,6 +3149,8 @@ function ucsReadInventory ($text)
 
 function ios12SpotConfigText ($input)
 {
+	if (preg_match ('/\nUnable to get configuration. Try again later/s', $input))
+		throw new ERetryNeeded ("device is busy. 'show run' did not work");
 	return preg_replace ('/.*?^Current configuration : \d+ bytes$\n(.*)^\S+#\s*\Z/sm', '$1', $input);
 }
 

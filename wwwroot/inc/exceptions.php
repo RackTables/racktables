@@ -79,6 +79,15 @@ class EntityNotFoundException extends RackTablesError
 	}
 }
 
+class ERetryNeeded extends RackTablesError
+{
+	function __construct($message)
+	{
+		$this->code = parent::INTERNAL;
+		parent::__construct ($message);
+	}
+}
+
 // this simplifies construction of RackTablesError, but is never caught
 class InvalidArgException extends RackTablesError
 {

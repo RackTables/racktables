@@ -203,7 +203,22 @@ function queryDevice ($object_id, $command)
 	require_once 'deviceconfig.php';
 	if (! is_callable ($funcname))
 		throw new RTGatewayError ("undeclared function '${funcname}'");
-	$ret = $funcname (queryTerminal ($object_id, $query, FALSE));
+
+	for ($i = 0; $i < 3; $i++)
+		try
+		{
+			$ret = $funcname (queryTerminal ($object_id, $query, FALSE));
+			break;
+		}
+		catch (ERetryNeeded $e)
+		{
+			// some devices (e.g. Cisco IOS) refuse to print running configuration
+			// while they are busy. The best way of treating this is retry a few times
+			// before failing the request
+			sleep (3);
+			continue;
+		}
+
 	if (NULL !== ($subst = callHook ('alterDeviceQueryResult', $ret, $object_id, $command)))
 		$ret = $subst;
 	return $ret;
