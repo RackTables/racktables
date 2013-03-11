@@ -6690,6 +6690,15 @@ function renderVLANDomainVLANList ($vdom_id)
 	echo '</table>';
 }
 
+function get8021QPortTrClass ($port, $domain_vlans, $desired_mode = NULL)
+{
+	if (isset ($desired_mode) && $desired_mode != $port['mode'])
+		return 'trwarning';
+	if (count (array_diff ($port['allowed'], array_keys ($domain_vlans))))
+		return 'trwarning';
+	return 'trbusy';
+}
+
 // Show a list of 802.1Q-eligible ports in any way, but when one of
 // them is selected as current, also display a form for its setup.
 function renderObject8021QPorts ($object_id)
@@ -6746,40 +6755,30 @@ function renderObject8021QPorts ($object_id)
 		case 'none':
 			if ($port['mode'] == 'none')
 				continue 2; // early miss
-			$trclass = 'trerror'; // stuck ghost port
 			$text_right = '&nbsp;';
+			$trclass = 'trerror'; // stuck ghost port
 			break;
 		case 'downlink':
 			$text_right = '(downlink)';
-			$trclass = 'trbusy';
+			$trclass = get8021QPortTrClass ($port, $vdom['vlanlist'], 'trunk');
 			break;
 		case 'uplink':
 			$text_right = '(uplink)';
 			$trclass = same8021QConfigs ($port, $uplinks[$port_name]) ? 'trbusy' : 'trwarning';
 			break;
 		case 'trunk':
-			$trclass =
-			(
-				$port['vst_role'] != $port['mode'] or
-				count (array_diff ($port['allowed'], array_keys ($vdom['vlanlist'])))
-			) ? 'trwarning' : 'trbusy';
 			$text_right = getTrunkPortCursorCode ($object_id, $port_name, $req_port_name);
+			$trclass = get8021QPortTrClass ($port, $vdom['vlanlist'], 'trunk');
 			break;
 		case 'access':
-			$trclass =
-			(
-				$port['vst_role'] != $port['mode'] or
-				!array_key_exists ($port['native'], $vdom['vlanlist'])
-			) ? 'trwarning' : 'trbusy';
-			// ---
 			$text_right = getAccessPortControlCode ($req_port_name, $vdom, $port_name, $port, $nports);
+			$trclass = get8021QPortTrClass ($port, $vdom['vlanlist'], 'access');
 			break;
 		case 'anymode':
-			$trclass = count (array_diff ($port['allowed'], array_keys ($vdom['vlanlist']))) ?
-				'trwarning' : 'trbusy';
 			$text_right = getAccessPortControlCode ($req_port_name, $vdom, $port_name, $port, $nports);
 			$text_right .= '&nbsp;';
 			$text_right .= getTrunkPortCursorCode ($object_id, $port_name, $req_port_name);
+			$trclass = get8021QPortTrClass ($port, $vdom['vlanlist'], NULL);
 			break;
 		default:
 			throw new InvalidArgException ('vst_role', $port['vst_role']);
