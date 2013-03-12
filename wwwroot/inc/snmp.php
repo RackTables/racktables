@@ -2278,6 +2278,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'S2352P-EI: 48 RJ-45/10-100TX + 4 SFP-1000',
 		'processors' => array ('quidway-any-100TX', 'quidway-any-1000SFP'),
 	),
+	'2011.2.23.119' => array
+	(
+		'dict_key' => 1914,
+		'text' => 'S2700-52P-EI: 48 RJ-45/10-100TX + 4 SFP-1000',
+		'processors' => array ('quidway-any-100TX', 'quidway-any-1000SFP'),
+	),
 	'2011.2.23.96' => array
 	(
 		'dict_key' => 1321,
