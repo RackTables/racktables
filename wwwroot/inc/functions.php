@@ -4446,7 +4446,7 @@ function recalc8021QPorts ($switch_id)
 	// queue changes in D-config of local switch
 	if ($changed = replace8021QPorts ('desired', $switch_id, $before, $order))
 	{
-		touchVLANSwitch ($portinfo['remote_object_id']);
+		touchVLANSwitch ($switch_id);
 		$ret['switches'] ++;
 		$ret['ports'] += $changed;
 	}
