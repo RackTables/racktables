@@ -1206,6 +1206,15 @@ function renderObject ($object_id)
 			$hl_port_id = $_REQUEST['hl_port_id'];
 			addAutoScrollScript ("port-$hl_port_id");
 		}
+
+		$helper_args = array ('object_id' => $object_id);
+		$popup_args = 'height=700, width=700, location=no, menubar=no, resizable=yes, scrollbars=yes, status=no, titlebar=no, toolbar=no';
+		echo "<a href='javascript:;' ";
+		echo "onclick='window.open(\"" . makeHrefForHelper ('traceroute', $helper_args);
+		echo "\",\"findlink\",\"${popup_args}\");'>";
+		printImageHREF ('find', 'Trace all port links');
+		echo 'Trace all ports</a>';
+
 		echo "<table border=0 cellspacing=0 cellpadding='5' align='center' class='widetable'>";
 		echo '<tr><th class=tdleft>Local name</th><th class=tdleft>Visible label</th>';
 		echo '<th class=tdleft>Interface</th><th class=tdleft>L2 address</th>';
