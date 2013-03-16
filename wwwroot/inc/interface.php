@@ -6225,7 +6225,7 @@ function renderIIFOIFCompat()
 {
 	global $nextorder;
 	echo '<br><table class=cooltable align=center border=0 cellpadding=5 cellspacing=0>';
-	echo '<tr><th class=tdleft>inner interface</th><th class=tdleft>outer interface</th></tr>';
+	echo '<tr><th class=tdleft>inner interface</th><th></th><th class=tdleft>outer interface</th><th></th></tr>';
 	$last_iif_id = 0;
 	$order = 'even';
 	foreach (getPortInterfaceCompat() as $record)
@@ -6235,7 +6235,7 @@ function renderIIFOIFCompat()
 			$order = $nextorder[$order];
 			$last_iif_id = $record['iif_id'];
 		}
-		echo "<tr class=row_${order}><td class=tdleft>${record['iif_name']}</td><td class=tdleft>${record['oif_name']}</td></tr>";
+		echo "<tr class=row_${order}><td class=tdleft>${record['iif_name']}</td><td>${record['iif_id']}</td><td class=tdleft>${record['oif_name']}</td><td>${record['oif_id']}</td></tr>";
 	}
 	echo '</table>';
 }
