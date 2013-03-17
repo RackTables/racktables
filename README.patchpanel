@@ -1,0 +1,70 @@
+OVERVIEW
+The patchpanel branch was created by adoom42. It adds support for linking ports 
+multiple times and tracing cable paths.  Several people have created patches 
+for this already.  I haven't seen one which handles all potential use cases.  
+
+Generally speaking, a port is linked to one other port, but there are 
+exceptions.
+1.  Patch panels.  The front of the port is linked to an object's port.  The 
+back of the port is usually linked to the back of a port on another patch panel.
+2.  "Y" power cables and other splitters.  Example: the male end connects to an 
+outlet, and each female end connects to an object's power supply.  The cable 
+has a varying number of female ends (my personal favorite is the 'octo-cable').
+3.  Multi-point wireless links.  Although less common in data centers, they are
+used in areas such as college campuses.  An access point is mounted in a central
+location and multiple buildings have client units, with multiple clients 
+associating to the same AP.
+
+CHANGELOG
+The installer & upgrader check for the GraphViz PEAR module.  A non-blocking 
+warning is displayed if it is not found.
+
+The port linker pop-up includes a checkbox which allows already-linked ports to 
+be linked again.
+
+Triggers are used to prevent duplicate links.  They ensure that the value of 
+portb is always greater than porta, which forces the UNIQUE KEY (porta,portb) 
+to take effect.  They also ensure that porta is compatible with portb.
+
+The (porta,portb) primary key was removed from the Link table.  An 
+auto-increment id column was added to uniquely identify links.  This results in
+less PHP code.  For example, assume that rows exist where porta > portb 
+(they were entered manually before the triggers were installed).  In that case,
+all update and delete operations would need to identify a specific row using 
+something like ((porta = X AND portb = Y) OR (porta = Y AND portb = X)).  Now 
+such operations can identify the row using a single id.
+
+Triggers are used to maintain integrity of the PortCompat table.  Without them,
+you would be able to add a compatibility rule, link ports using that rule, then
+delete the rule without warning.  The ports would still be linked, even though
+they are now incompatible.  The trigger checks for the existence of such links
+before allowing rules to be updated or deleted.  MySQL doesn't support trigger
+exceptions, so I used a workaround to display a more meaningful error message:
+UPDATE `Cannot update: rule still used` SET x = 1.
+
+
+HELP/FEEDBACK REQUESTED
+fetchPortList() has been modified to include all links as a nested array.  The
+SQL query works but is not optimal.  Performance tips would be appreciated.
+
+A new pop-up provides the ability to link two patch panels.  The link is only
+displayed for objects of the type "PatchPanel".  The list includes all patch
+panels with the same number of ports.  It doesn't check for port compatibility.
+When the form is submitted, the handler function adds a link for each port.
+The handler function does check for port compatibility.  If any port is
+incompatible, the entire linking operation is rolled back.  Ideally, the pop-up
+would only list panels which are fully compatible.  SQL help in this area would
+also be appreciated.  It should be possible using a single query, but I'm not
+sure how to do it.
+
+A common usage scenario involves connecting an object's port to patch panel A,
+which is connected to patch panel B, which is then connected to another
+object's port.  When the patch panel A's ports are linked to patch panel B's,
+the ports will be excluded from the 'Link this port' pop-up unless you check
+the 'Include linked ports' box.  Patch panel ports which are linked less than
+twice should be included without having to check the 'Include linked ports'
+box.  I'm not sure how to deal with this efficiently.
+
+MISC. NOTES
+This branch should only be tested in a development environment.  It sets the
+RackTables version to 0.21.0 which will break any future upgrades to 0.20.x.

@@ -5937,6 +5937,39 @@ function isCLIMode ()
 	return !isset ($_SERVER['REQUEST_METHOD']);
 }
 
+// Used to sort a chain of links from start to finish (sorts by port_id)
+function sortLinks ($port_id, $unsorted_links, $sorted_links = array (), $level = 0)
+{
+	$self = __FUNCTION__;
+
+	if ($level >= 10)
+		throw new InvalidArgException ('port', $port_id, 'tracing depth too deep - a loop probably exists');
+
+	// add the provided link to the sorted array
+	foreach ($unsorted_links as $link_id => $link)
+	{
+		$remote_port_id = FALSE;
+		if ($link[0] == $port_id) $remote_port_id = $link[1];
+		if ($link[1] == $port_id) $remote_port_id = $link[0];
+		if ($remote_port_id)
+		{
+			// note that this link has been sorted
+			unset ($unsorted_links[$link_id]);
+
+			//make sure this port_id is on the left (except if it's the last link, then it should be on the right)
+			if ($remote_port_id == $link[0])
+			{
+				$tmp = $link[0];
+				$link[0] = $link[1];
+				$link[1] = $tmp;
+			}
+			$sorted_links[] = $link;
+			$sorted_links = $self ($remote_port_id, $unsorted_links, $sorted_links, $level+1);
+		}
+	}
+	return $sorted_links;
+}
+
 // Checks if 802.1Q port uplink/downlink feature is misconfigured.
 // Returns FALSE if 802.1Q port role/linking is wrong, TRUE otherwise.
 function checkPortRole ($vswitch, $port_name, $port_order)

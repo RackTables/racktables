@@ -102,6 +102,15 @@ should be sufficient:
 *                                                     *
 *******************************************************
 
+*** Upgrading to 0.21.0 ***
+
+Database triggers are used for some data consistency measures.  The database
+user account must have the 'TRIGGER' privilege, which was introduced in
+MySQL 5.1.7.
+
+Cable paths can be traced and displayed in a graphical format. This requires
+the Image_GraphViz  PEAR module (http://pear.php.net/package/Image_GraphViz).
+
 *** Upgrading to 0.20.5 ***
 
 This release introduces the VS groups feature. VS groups is a new way to store

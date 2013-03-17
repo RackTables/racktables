@@ -85,12 +85,15 @@ INNER JOIN (
 ) AS sub2 ON sub2.id = p.id
 ";
 	$qparams[] = $port_info['oif_id'];
-
-	// self and linked ports filter
-	$query .= " WHERE p.id <> ? " .
-		"AND p.id NOT IN (SELECT porta FROM Link) " .
-		"AND p.id NOT IN (SELECT portb FROM Link) ";
 	$qparams[] = $port_info['id'];
+
+	// don't allow a port to be linked to itself
+	$query .= " WHERE p.id <> ? ";
+
+	// don't allow already linked ports
+	if (!$filter['linked'])
+		$query .= "AND p.id NOT IN (SELECT porta FROM Link) AND p.id NOT IN (SELECT portb FROM Link) ";
+
 	// rack filter
 	if (! empty ($filter['racks']))
 	{
@@ -152,6 +155,46 @@ INNER JOIN (
 			break;
 	}
 
+	return $ret;
+}
+
+// Return a list of all compatible patch panels
+function findPatchPanelCandidates ($panel_info, $filter)
+{
+	// return patch panels which have the same number of ports
+	// exclude those with ports which are linked more than once
+	// TODO: add port compatibility checks
+	$query = "
+SELECT Object.id, 
+IF(ISNULL(Object.name),CONCAT('[PatchPanel] - object_id: ',Object.id),Object.name) AS name 
+FROM Object 
+WHERE Object.objtype_id = 9 
+AND Object.id != ? 
+AND (SELECT COUNT(Port.id) FROM Port WHERE Port.object_id = Object.id) = (SELECT COUNT(Port.id) FROM Port WHERE Port.object_id = ?) ";
+	$qparams = array ($panel_info['id'], $panel_info['id']);
+
+	// name filter
+	if (! empty ($filter['name']))
+	{
+		$query .= 'AND Object.name LIKE ? ';
+		$qparams[] = '%' . $filter['name'] . '%';
+	}
+
+	// exclude panels which contain one or more ports which are already linked to two or more other ports
+	if (!$filter['linked'])
+		$query .= "AND Object.id NOT IN (SELECT DISTINCT(Object.id) 
+FROM Object 
+LEFT JOIN Port ON Object.id = Port.object_id 
+WHERE Object.objtype_id = 9 
+AND Port.id IN (SELECT Port.id FROM Port WHERE (SELECT COUNT(*) FROM Link WHERE Link.porta = Port.id OR Link.portb = Port.id) > 1)) ";
+
+	// ordering
+	$query .= ' ORDER BY Object.name';
+
+	$ret = array();
+	$result = usePreparedSelectBlade ($query, $qparams);
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
+		$ret[$row['id']] = $row['name'];
 	return $ret;
 }
 
@@ -356,9 +399,10 @@ END
 function renderPopupPortSelector()
 {
 	assertUIntArg ('port');
-	$port_id = $_REQUEST['port'];
+	$port_id = $_REQUEST['port']; 
 	$port_info = getPortInfo ($port_id);
 	$in_rack = isCheckSet ('in_rack');
+	$linked = isCheckSet ('linked');
 
 	// fill port filter structure
 	$filter = array
@@ -366,6 +410,7 @@ function renderPopupPortSelector()
 		'racks' => array(),
 		'objects' => '',
 		'ports' => '',
+		'linked' => $linked
 	);
 	if (isset ($_REQUEST['filter-obj']))
 		$filter['objects'] = trim($_REQUEST['filter-obj']);
@@ -401,10 +446,11 @@ function renderPopupPortSelector()
 	echo '<input type=hidden name="port" value="' . $port_id . '">';
 	echo '<table align="center" valign="bottom"><tr>';
 	echo '<td class="tdleft"><label>Object name:<br><input type=text size=8 name="filter-obj" value="' . htmlspecialchars ($filter['objects'], ENT_QUOTES) . '"></label></td>';
-	echo '<td class="tdleft"><label>Port name:<br><input type=text size=6 name="filter-port" value="' . htmlspecialchars ($filter['ports'], ENT_QUOTES) . '"></label></td>';
+	echo '<td class="tdleft"><label>Port name:<br><input type=text size=6 name="filter-port" value="' . htmlspecialchars ($filter['ports'], ENT_QUOTES) . '"></label></td></tr>';
 	echo '<td class="tdleft" valign="bottom"><label><input type=checkbox name="in_rack"' . ($in_rack ? ' checked' : '') . '>Nearest racks</label></td>';
-	echo '<td valign="bottom"><input type=submit value="show ports"></td>';
-	echo '</tr></table>';
+	echo '<td class="tdleft" vlaign="bottom"><label><input type=checkbox name="linked"'. ($linked ? ' checked' : '') .'>Include linked ports</label></td></tr>';
+	echo '<tr><td colspan=2 valign="bottom"><input type=submit value="show ports"></td></tr>';
+	echo '</table>';
 	finishPortlet();
 
 	// display results
@@ -419,6 +465,184 @@ function renderPopupPortSelector()
 	}
 	finishPortlet();
 	echo '</form>';
+}
+
+function handlePopupPatchPanelLink()
+{
+	global $dbxlink;
+	assertUIntArg ('object_id');
+	assertUIntArg ('remote_object_id');
+	$object_id = $_REQUEST['object_id']; 
+	$object = spotEntity ('object', $object_id);
+	amplifyCell ($object);
+	$remote_object_id = $_REQUEST['remote_object_id']; 
+	$remote_object = spotEntity ('object', $remote_object_id);
+	amplifyCell ($remote_object);
+
+	// reindex numerically instead of by port_id
+	$ports = array_values ($object['ports']);
+	$remote_ports = array_values ($remote_object['ports']);
+
+	$POIFC = getPortOIFCompat();
+	$dbxlink->beginTransaction();
+	$error = FALSE;
+	for ($i=0; $i<count($ports); $i++)
+	{
+		$matches = FALSE;
+		foreach ($POIFC as $pair)
+		{
+			if ($pair['type1'] == $ports[$i]['oif_id'] && $pair['type2'] == $remote_ports[$i]['oif_id'])
+			{
+				$matches = TRUE;
+				break;
+			}
+		}
+		if ($matches)
+			linkPorts ($ports[$i]['id'], $remote_ports[$i]['id']);
+		else
+		{
+			$error = TRUE;
+			break;
+		}
+	}
+	if ($error)
+	{
+		$dbxlink->rollBack();
+		showError ('Not all ports are compatible');
+	}
+	else
+	{
+		$dbxlink->commit();
+		showSuccess ('Patch panels linked successfully');
+	}
+	addJS (<<<END
+window.opener.location.reload(true);
+window.close();
+END
+	, TRUE);
+}
+
+function renderPopupPatchPanelSelector ()
+{
+	assertUIntArg ('object_id');
+	$object_id = $_REQUEST['object_id']; 
+	$object = spotEntity ('object', $object_id);
+	amplifyCell ($object);
+	$linked = isset ($_REQUEST['linked']);
+
+	$filter = array
+	(
+		'name' => '',
+		'linked' => $linked
+	);
+	if (isset ($_REQUEST['filter-name']))
+		$filter['name'] = $_REQUEST['filter-name'];
+	$found_panels = findPatchPanelCandidates ($object, $filter);
+
+	// display search form
+	echo "Link <a href='index.php?page=object&object_id=${object_id}'>${object['name']}</a> to...";
+	echo '<form method=GET>';
+	startPortlet ('Patch panel list filter');
+	echo '<input type=hidden name="module" value="popup">';
+	echo '<input type=hidden name="helper" value="patchpanellist">';
+	echo '<input type=hidden name="object_id" value="' . $object_id . '">';
+	echo '<table border=0 align="center" valign="bottom"><tr>';
+	echo '<td class="tdleft"><label>Panel name:<br><input type=text size=10 name="filter-name" value="' . htmlspecialchars ($filter['name'], ENT_QUOTES) . '"></label></td></tr>';
+	echo '<tr><td class="tdleft" vlaign="bottom"><label><input type=checkbox name="linked"'. ($linked ? ' checked' : '') .'>Include panels already linked</label></td></tr>';
+	echo '<tr><td valign="bottom"><input type=submit value="Show panels"></td></tr>';
+	echo '</table>';
+	finishPortlet();
+
+	// display results
+	startPortlet ('Compatible patch panels');
+	if (empty ($found_panels))
+		echo '(nothing found)';
+	else
+	{
+		echo getSelect ($found_panels, array ('name' => 'remote_object_id', 'size' => getConfigVar ('MAXSELSIZE')), NULL, FALSE);
+		echo "<p><input type='submit' value='Link' name='do_link'>";
+	}
+	finishPortlet();
+	echo '</form>';
+}
+
+function renderPopupTraceRoute ()
+{
+	// disable strict error reporting (GraphViz generates several)
+	error_reporting(E_ERROR | E_WARNING | E_PARSE);
+	@include_once 'Image/GraphViz.php';
+	if (!class_exists ('Image_GraphViz'))
+	{
+		echo ('<p>The GraphViz PEAR module could not be found.</p>');
+		return;
+	}
+	// determine if an object or port is being traced
+	if (isset ($_REQUEST['object_id']))
+	{
+		assertUIntArg ('object_id');
+		$object = spotEntity ('object', $_REQUEST['object_id']);
+		amplifyCell ($object);
+		$port_data = array ();
+		foreach ($object['ports'] as $port_id => $port_details)
+			$port_data = $port_data + getNeighborPorts ($port_id);
+	}
+	else
+	{
+		assertUIntArg ('port');
+		$port_id = intval ($_REQUEST['port']);
+		$port_data = getNeighborPorts ($port_id);
+	}
+
+	$graph = new Image_GraphViz(NULL, NULL, 'Trace route');
+
+	// add a cluster to the graph for each unique object
+	$objects = array ();
+	foreach ($port_data as $port_id => $port_details)
+	{
+		$object_id = $port_details['object_id'];
+		if (!array_key_exists ($object_id, $objects))
+		{
+			$objects[$object_id] = $port_details['object_name'];
+			$graph->addCluster("${object_id}Cluster", $port_details['object_name'], array ('URL' => "index.php?page=object&object_id=${object_id}"));
+		}
+	}
+
+	// add ports to the graph
+	foreach ($port_data as $port_id => $port_details)
+	{
+		$object_id = $port_details['object_id'];
+		$graph->addNode("${port_id}Node", array ('fontsize' => 8, 'label' => $port_details['port_name'], 'tooltip' => $port_details['port_name']), "${object_id}Cluster");
+	}
+
+	// identify the links
+	$links = $link_count = array ();
+	foreach ($port_data as $port_id => $port_details)
+	{
+		$remote_port_id = $port_details['remote_port_id'];
+		// skip this if the link has already been recorded
+		if (in_array (array ($port_id, $remote_port_id), $links) || in_array (array ($remote_port_id, $port_id), $links))
+			continue;
+
+		// record the link, also increment the endpoint counters
+		$links[] = array ($port_id, $remote_port_id);
+		$link_count[$port_id] = (!isset ($link_count[$port_id])) ? 1 : $link_count[$port_id]+1;
+		$link_count[$remote_port_id] = (!isset ($link_count[$remote_port_id])) ? 1 : $link_count[$remote_port_id]+1;
+	}
+
+	// if there are only two endpoints, flatten the graph
+	$endpoints = array_keys ($link_count, 1);
+	if (count ($endpoints) == 2)
+	{
+		sort ($endpoints);
+		$links = sortLinks ($endpoints[0], $links);
+	}
+
+	// add links to the graph
+	foreach ($links as $link)
+		$graph->addEdge(array ("${link[0]}Node" => "${link[1]}Node"), array ('arrowhead' => 'none', 'tooltip' => 'link'));
+
+	// display the graph
+	$graph->image();
 }
 
 function renderPopupIPv4Selector()
@@ -444,10 +668,6 @@ function renderPopupIPv4Selector()
 function renderPopupHTML()
 {
 	global $pageno, $tabno;
-header ('Content-Type: text/html; charset=UTF-8');
-?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en" style="height: 100%;">
-<?php
 	assertStringArg ('helper');
 	$text = '';
 	switch ($_REQUEST['helper'])
@@ -460,16 +680,26 @@ header ('Content-Type: text/html; charset=UTF-8');
 			$text .= getOutputOf ('renderPopupObjectSelector');
 			break;
 		case 'portlist':
+		case 'patchpanellist':
+			$target = ($_REQUEST['helper'] == 'portlist') ? 'Port' : 'PatchPanel';
 			$pageno = 'depot';
 			$tabno = 'default';
 			fixContext();
 			assertPermission();
 			$text .= '<div style="background-color: #f0f0f0; border: 1px solid #3c78b5; padding: 10px; height: 100%; text-align: center; margin: 5px;">';
 			if (isset ($_REQUEST['do_link']))
-				$text .= getOutputOf ('callHook', 'handlePopupPortLink');
+				$text .= getOutputOf ('callHook', "handlePopup${target}Link");
 			else
-				$text .= getOutputOf ('callHook' , 'renderPopupPortSelector');
+				$text .= getOutputOf ('callHook' , "renderPopup${target}Selector");
 			$text .= '</div>';
+			break;
+		case 'traceroute':
+			$pageno = 'depot';
+			$tabno = 'default';
+			fixContext();
+			assertPermission();
+			renderPopupTraceroute ();
+			exit;
 			break;
 		case 'inet4list':
 			$pageno = 'ipv4space';
@@ -481,6 +711,10 @@ header ('Content-Type: text/html; charset=UTF-8');
 		default:
 			throw new InvalidRequestArgException ('helper', $_REQUEST['helper']);
 	}
+header ('Content-Type: text/html; charset=UTF-8');
+?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en" style="height: 100%;">
+<?php
 	echo '<head><title>RackTables pop-up</title>';
 	printPageHeaders();
 	echo '</head>';
