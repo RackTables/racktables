@@ -198,7 +198,6 @@ $searchfunc = array
 (
 	'object' => array
 	(
-		'by_sticker' => 'getStickerSearchResults',
 		'by_port' => 'getPortSearchResults',
 		'by_attr' => 'getObjectAttrsSearchResults',
 		'by_iface' => 'getObjectIfacesSearchResults',
@@ -2651,19 +2650,58 @@ function getRackSearchResult ($terms)
 		$terms,
 		'name'
 	);
+	$bySticker = getStickerSearchResults ('Rack', $terms);
 	// Filter out dupes.
 	foreach ($byName as $res1)
 	{
 		foreach (array_keys ($byComment) as $key2)
 			if ($res1['id'] == $byComment[$key2]['id'])
 				unset ($byComment[$key2]);
-		foreach (array_keys ($byAssetNo) as $key4)
-			if ($res1['id'] == $byAssetNo[$key4]['id'])
-				unset ($byAssetNo[$key4]);
+		foreach (array_keys ($byAssetNo) as $key3)
+			if ($res1['id'] == $byAssetNo[$key3]['id'])
+				unset ($byAssetNo[$key3]);
+		foreach (array_keys ($bySticker) as $key4)
+			if ($res1['id'] == $bySticker[$key4]['id'])
+				unset ($bySticker[$key4]);
 	}
 	$ret = array();
-	foreach (array_merge ($byName, $byComment, $byAssetNo) as $row)
+	foreach (array_merge ($byName, $byComment, $byAssetNo, $bySticker) as $row)
 		$ret[$row['id']] = spotEntity ('rack', $row['id']);
+	return $ret;
+}
+
+function getLocationSearchResult ($terms)
+{
+	$byName = getSearchResultByField
+	(
+		'Location',
+		array ('id'),
+		'name',
+		$terms,
+		'name'
+	);
+	$byComment = getSearchResultByField
+	(
+		'Location',
+		array ('id'),
+		'comment',
+		$terms,
+		'name'
+	);
+	$bySticker = getStickerSearchResults ('Location', $terms);
+	// Filter out dupes.
+	foreach ($byName as $res1)
+	{
+		foreach (array_keys ($byComment) as $key2)
+			if ($res1['id'] == $byComment[$key2]['id'])
+				unset ($byComment[$key2]);
+		foreach (array_keys ($bySticker) as $key3)
+			if ($res1['id'] == $bySticker[$key3]['id'])
+				unset ($bySticker[$key3]);
+	}
+	$ret = array();
+	foreach (array_merge ($byName, $byComment, $bySticker) as $location)
+		$ret[$location['id']] = spotEntity ('location', $location['id']);
 	return $ret;
 }
 
@@ -2730,6 +2768,11 @@ function getObjectSearchResults ($what)
 			$ret[$objRecord['id']]['id'] = $objRecord['id'];
 			$ret[$objRecord['id']][$method] = $objRecord[$method];
 		}
+	foreach (getStickerSearchResults ('RackObject', $what) as $objRecord)
+	{
+		$ret[$objRecord['id']]['id'] = $objRecord['id'];
+		$ret[$objRecord['id']]['by_sticker'] = $objRecord['by_sticker'];			
+	}
 	return $ret;
 }
 
@@ -2755,28 +2798,29 @@ function getObjectAttrsSearchResults ($what)
 	return $ret;
 }
 
-// Look for EXACT value in stickers and return a list of pairs "object_id-attribute_id",
-// which matched. A partilar object_id could be returned more, than once, if it has
+// Search stickers and return a list of pairs "object_id-attribute_id",
+// which matched. A partilar object_id could be returned more than once, if it has
 // multiple matching stickers. Search is only performed on "string" attributes.
-function getStickerSearchResults ($what, $exactness = 0)
+function getStickerSearchResults ($tablename, $what)
 {
-	$stickers = getSearchResultByField
+	$result = usePreparedSelectBlade
 	(
-		'AttributeValue',
-		array ('object_id', 'attr_id'),
-		'string_value',
-		$what,
-		'object_id',
-		$exactness
+		'SELECT object_id, attr_id FROM AttributeValue AV ' .
+		"INNER JOIN ${tablename} O ON AV.object_id = O.id " .
+		'WHERE string_value LIKE ? ORDER BY object_id',
+		array ("%${what}%")
 	);
+
 	$map = getAttrMap();
 	$ret = array();
-	foreach ($stickers as $sticker)
-		if ($map[$sticker['attr_id']]['type'] == 'string')
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
+	{
+		if ($map[$row['attr_id']]['type'] == 'string')
 		{
-			$ret[$sticker['object_id']]['id'] = $sticker['object_id'];
-			$ret[$sticker['object_id']]['by_sticker'][] = $sticker['attr_id'];
+			$ret[$row['object_id']]['id'] = $row['object_id'];
+			$ret[$row['object_id']]['by_sticker'][] = $row['attr_id'];
 		}
+	}
 	return $ret;
 }
 

@@ -3441,6 +3441,19 @@ function renderSearchResults ($terms, $summary)
 					echo '</table>';
 					finishPortlet();
 					break;
+				case 'location':
+					startPortlet ("<a href='index.php?page=rackspace'>Locations</a>");
+					echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
+					foreach ($what as $cell)
+					{
+						echo "<tr class=row_${order}><td class=tdleft>";
+						renderCell ($cell);
+						echo "</td></tr>";
+						$order = $nextorder[$order];
+					}
+					echo '</table>';
+					finishPortlet();
+					break;
 				case 'vlan':
 					startPortlet ("<a href='index.php?page=8021q'>VLANs</a>");
 					echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
@@ -5782,6 +5795,17 @@ function renderCell ($cell)
 		echo "src='?module=image&img=minirack&rack_id=${cell['id']}'>";
 		echo "</td><td>";
 		echo mkA ('<strong>' . niftyString ($cell['name']) . '</strong>', 'rack', $cell['id']);
+		echo "</td></tr><tr><td>";
+		echo niftyString ($cell['comment']);
+		echo "</td></tr><tr><td>";
+		echo count ($cell['etags']) ? ("<small>" . serializeTags ($cell['etags']) . "</small>") : '&nbsp;';
+		echo "</td></tr></table>";
+		break;
+	case 'location':
+		echo "<table class='slbcell vscell'><tr><td rowspan=3 width='5%'>";
+		printImageHREF ('LOCATION');
+		echo "</td><td>";
+		echo mkA ('<strong>' . niftyString ($cell['name']) . '</strong>', 'location', $cell['id']);
 		echo "</td></tr><tr><td>";
 		echo niftyString ($cell['comment']);
 		echo "</td></tr><tr><td>";
