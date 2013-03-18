@@ -1794,7 +1794,7 @@ $dictionary = array
 	1708 => array ('chapter_id' => 13, 'dict_value' => 'Ubuntu%GSKIP%Ubuntu 12.04 LTS'),
 	1709 => array ('chapter_id' => 13, 'dict_value' => '[[Debian%GSKIP%Debian 7.0 (wheezy) | http://debian.org/releases/wheezy/]]'),
 	1710 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 2960-24TC-L'),
-	1711 => array ('chapter_id' => 12, 'dict_value' => 'HP ProCurve%GPASS%2520-24-POE J9138A'),
+	1711 => array ('chapter_id' => 12, 'dict_value' => 'HP ProCurve%GPASS%2520-24-PoE J9138A'),
 	1712 => array ('chapter_id' => 11, 'dict_value' => 'Dell PowerEdge%GPASS%R210 II'),
 	1713 => array ('chapter_id' => 13, 'dict_value' => '[[OpenBSD%GSKIP%OpenBSD 4.6 | http://www.openbsd.org/46.html]]'),
 	1714 => array ('chapter_id' => 13, 'dict_value' => '[[OpenBSD%GSKIP%OpenBSD 4.7 | http://www.openbsd.org/47.html]]'),
@@ -2050,6 +2050,7 @@ $dictionary = array
 	1964 => array ('chapter_id' => 25, 'dict_value' => 'Cisco%GPASS%AIR-AP1041N'),
 	1965 => array ('chapter_id' => 25, 'dict_value' => 'Cisco%GPASS%AIR-AP1042N'),
 	1966 => array ('chapter_id' => 12, 'dict_value' => 'Linksys%GPASS%SRW224G4'),
+	1967 => array ('chapter_id' => 12, 'dict_value' => 'HP ProCurve%GPASS%2520-8-PoE J9137A'),
 
 # Any new "default" dictionary records must go above this line (i.e., with
 # dict_key code less, than 50000). This is necessary to keep AUTO_INCREMENT

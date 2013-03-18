@@ -592,6 +592,42 @@ $iftable_processors['procurve-25-to-26-1000T'] = array
 	'try_next_proc' => FALSE,
 );
 
+$iftable_processors['procurve-9-to-10-combo-1000SFP'] = array
+(
+	'pattern' => '@^(9|10)$@',
+	'replacement' => '\\1',
+	'dict_key' => '4-1077',
+	'label' => '\\1',
+	'try_next_proc' => TRUE,
+);
+
+$iftable_processors['procurve-9-to-10-1000T'] = array
+(
+	'pattern' => '@^(9|10)$@',
+	'replacement' => '\\1',
+	'dict_key' => 24,
+	'label' => '\\1',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['procurve-27-to-28-1000T'] = array
+(
+	'pattern' => '@^(27|28)$@',
+	'replacement' => '\\1',
+	'dict_key' => 24,
+	'label' => '\\1',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['procurve-27-to-28-combo-1000SFP'] = array
+(
+	'pattern' => '@^(27|28)$@',
+	'replacement' => '\\1',
+	'dict_key' => '4-1077',
+	'label' => '\\1',
+	'try_next_proc' => TRUE,
+);
+
 $iftable_processors['procurve-27-to-28-1000SFP'] = array
 (
 	'pattern' => '@^(27|28)$@',
@@ -2111,11 +2147,17 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'J9089A: 48 RJ-45/10-100TX PoE + 2 1000T + 2 SFP-1000',
 		'processors' => array ('procurve-49-to-50-1000T', 'procurve-51-to-52-1000SFP', 'procurve-chassis-100TX'),
 	),
+	'11.2.3.7.11.94' => array
+	(
+		'dict_key' => 1967,
+		'text' => 'J9137A: 8 RJ-45/10-100TX PoE + 2 combo-gig',
+		'processors' => array ('procurve-9-to-10-combo-1000SFP', 'procurve-9-to-10-1000T', 'procurve-chassis-100TX'),
+	),
 	'11.2.3.7.11.95' => array
 	(
 		'dict_key' => 1711,
 		'text' => 'J9138A: 24 RJ-45/10-100TX PoE + 2 1000T + 2 combo-gig',
-		'processors' => array ('procurve-25-to-26-1000T', 'procurve-27-to-28-1000SFP', 'procurve-chassis-100TX'),
+		'processors' => array ('procurve-25-to-26-1000T', 'procurve-27-to-28-combo-1000SFP', 'procurve-27-to-28-1000T', 'procurve-chassis-100TX'),
 	),
 	'11.2.3.7.11.105' => array
 	(
@@ -2727,7 +2769,11 @@ function doSwitchSNMPmining ($objectInfo, $device)
 			80 => '1-29',
 			86 => '1-29',
 			87 => '1-29',
+			94 => '1-29',
+			95 => '1-29',
 			19 => '1-681', # DB-9 RS-232
+			31 => '1-681',
+			34 => '1-681',
 		);
 		if (array_key_exists ($matches[1], $console_per_product))
 		{
