@@ -2602,6 +2602,7 @@ $swtype_pcre = array
 	'/^Juniper Networks,.+JUNOS 9\./' => 1366,
 	'/^Juniper Networks,.+JUNOS 10\./' => 1367,
 	'/^Arista Networks EOS version 4\./' => 1675,
+	'/^Dell Force10 OS\b.*\bApplication Software Version: 8(\.\d+){3}/' => 1594,
 );
 
 function updateStickerForCell ($cell, $attr_id, $new_value)
@@ -2696,6 +2697,7 @@ function doSwitchSNMPmining ($objectInfo, $device)
 		}
 	updateStickerForCell ($objectInfo, 2, $known_switches[$sysObjectID]['dict_key']);
 	updateStickerForCell ($objectInfo, 3, $sysName);
+	detectSoftwareType ($objectInfo, $sysDescr);
 	switch (1)
 	{
 	case preg_match ('/^9\.1\./', $sysObjectID): // Catalyst w/one AC port
@@ -2799,12 +2801,10 @@ function doSwitchSNMPmining ($objectInfo, $device)
 		commitAddPort ($objectInfo['id'], 'console', '1-681', 'console', ''); // DB-9 RS-232 console
 		break;
 	case preg_match ('/^2011\.2\.23\./', $sysObjectID): // Huawei
-		detectSoftwareType ($objectInfo, $sysDescr);
 		checkPIC ('1-681');
 		commitAddPort ($objectInfo['id'], 'con0', '1-681', 'console', ''); // DB-9 RS-232 console
 		break;
 	case preg_match ('/^2636\.1\.1\.1\.2\.3(0|1)/', $sysObjectID): // Juniper EX3200/EX4200
-		detectSoftwareType ($objectInfo, $sysDescr);
 		$sw_version = preg_replace ('/^.*, kernel JUNOS ([^ ]+).*$/', '\\1', $sysDescr);
 		updateStickerForCell ($objectInfo, 5, $sw_version);
 		// one RJ-45 RS-232 and one AC port (it could be DC, but chances are it's AC)
@@ -2819,14 +2819,12 @@ function doSwitchSNMPmining ($objectInfo, $device)
 			updateStickerForCell ($objectInfo, 2, 907);
 		break;
 	case preg_match ('/^2636\.1\.1\.1\.2\./', $sysObjectID): // Juniper
-		detectSoftwareType ($objectInfo, $sysDescr);
 		checkPIC ('1-681');
 		commitAddPort ($objectInfo['id'], 'console', '1-681', 'console', ''); // DB-9 RS-232 console
 		break;
 	case preg_match ('/^1991\.1\.3\.45\./', $sysObjectID): // snFGSFamily
 	case preg_match ('/^1991\.1\.3\.46\./', $sysObjectID): // snFLSFamily
 	case preg_match ('/^1991\.1\.3\.54\.2\.4\.1\.1$/', $sysObjectID): // FCX 648
-		detectSoftwareType ($objectInfo, $sysDescr);
 		$exact_release = preg_replace ('/^.*, IronWare Version ([^ ]+) .*$/', '\\1', $sysDescr);
 		updateStickerForCell ($objectInfo, 5, $exact_release);
 		# FOUNDRY-SN-AGENT-MIB::snChasSerNum.0
@@ -2982,7 +2980,6 @@ function doSwitchSNMPmining ($objectInfo, $device)
 		commitAddPort ($objectInfo['id'], 'AC-in', '1-16', '', '');
 		break;
 	case preg_match ('/^30065\.1\.3011\./', $sysObjectID): // Arista
-		detectSoftwareType ($objectInfo, $sysDescr);
 		checkPIC ('1-29');
 		commitAddPort ($objectInfo['id'], 'console', '1-29', 'IOIOI', '');
 		$sw_version = preg_replace ('/^Arista Networks EOS version (.+) running on .*$/', '\\1', $sysDescr);
