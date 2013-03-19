@@ -1,0 +1,134 @@
+#!/usr/bin/perl
+# This file is a part of RackTables, a datacenter and server room management
+# framework. See accompanying file "COPYING" for the full copyright and
+# licensing information.
+#
+# NOTE: Logging in via ssh using a password, whilst better then doing
+# the same via telnet/netcat, is still a bad idea when your network is
+# not properly secured. If you try to login to a compromised system
+# using a password, this password is now in the hands of the attackers.
+#
+# If possible, use the public key authenticated version instead. In case
+# that is not an option, consider different passwords for every system.
+# 
+# To summerise, treat this as a slighhtly-better telnet client and make
+# sure the network this runs in is secure.
+
+use strict;
+use Getopt::Long;
+use Net::Telnet;
+use Net::OpenSSH;
+
+# fetch command-line parameters
+my $op_help;
+my $op_port;
+my $op_username;
+my $op_password;
+my $op_connect_timeout = 2;
+my $op_timeout = 10;
+my $op_prompt;
+my $op_delay = 0.01;
+GetOptions (
+    'h' => \$op_help,
+    'port:i' => \$op_port,
+    'connect-timeout:i' => \$op_connect_timeout,
+    'timeout:i' => \$op_timeout,
+    'prompt-delay:f' => \$op_delay,
+    'prompt:s' => \$op_prompt,
+    'username:s' => \$op_username,
+    'password:s' => \$op_password
+);
+if ($op_help) {
+    &display_help;
+    exit;
+}
+my $op_host = $ARGV[0];
+defined $op_host or die "ERROR: please specify remote host (-h for help)";
+defined $op_prompt or die "ERROR: please specify prompt regexp (-h for help)";
+my $prompt_re = qr/$op_prompt/;
+
+sub display_help {
+    print <<END;
+OpenSSH-Hardened telnet batch client for RackTables.
+Takes commands list in standard input and gives the responses via standard output.
+Login credentials are not specially handled and should be placed as first lines of input
+Usage:
+$0 {hostname} [--port={port}] [--connect-timeout={seconds}] --prompt={regexp} [--timeout={seconds}] --username={username} --password={password} --prompt-delay={prompt_delay}
+
+port: TCP port number to connect to
+connect-timeout: timeout for giving up connecting process, seconds
+prompt: command prompt regexp for interactive telnet (auth prompts too)
+timeout: wait time for activity of remote telnet peer in seconds
+NOTE: this help may be incorrect - functionality within RackTables was tested.
+
+END
+}
+
+my $port = $op_port || 22;
+
+my $ssh = Net::OpenSSH->new(
+	$op_host,
+	'port' => $op_port,
+	'user' => $op_username,
+	'password' => $op_password
+);
+$ssh->error and
+  die "Couldn't establish SSH connection: ". $ssh->error;
+
+my ($pty, $pid) = $ssh->open2pty({stderr_to_stdout => 1})
+  or die "unable to start remote shell: " . $ssh->error;
+
+my $session = Net::Telnet->new (
+    Fhopen => $pty,
+#    Host => $op_host,
+#    Port => $port,
+#    Timeout => $op_connect_timeout,
+    Prompt => "/$op_prompt/",
+    Telnetmode => 0,
+    Cmd_remove_mode => 1,
+    Output_record_separator => "\r"
+);
+
+#$session->cmd("term len 0");
+
+
+use IO::Select;
+my $sel = new IO::Select($session);
+
+my $buff = '';
+my $nohang_read;
+until ($session->eof) {
+	# read output from the device
+    eval {
+		$buff .= $session->get (Timeout => $nohang_read ? 0 : $op_timeout, Errmode => $nohang_read ? 'return' : 'die');
+	};
+	if ($@) {
+		# check if there is something else in <STDIN>
+		if (defined <STDIN>) {
+			die $@;
+		}
+		else {
+			last; # no more input, seems like session was closed remotely by our last command
+		}
+	}
+    $nohang_read = 0;
+	print $1 if ($buff =~ s/(.*\n)//s);
+
+    next unless ($buff =~ $prompt_re);
+    # send pending commands to the device
+    if ($op_delay and IO::Select->select ($sel, undef, undef, $op_delay)) {
+        # something is received, no prompt detection at this time
+        # set NOHANG options for next reading, cause it can be telnet control sequence
+        $nohang_read = 1;
+    }
+    elsif (defined ($_ = <STDIN>)) {
+        # replace all CR and LF symbols with single trailing LF
+        s/[\015\012]//g;
+        $session->put($_ . "\012");
+    }
+    else {
+        # no more commands in input
+        last;
+    }
+}
+print $buff;

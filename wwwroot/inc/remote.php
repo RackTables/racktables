@@ -246,6 +246,12 @@ function makeGatewayParams ($object_id, $tolerate_remote_errors, /*array(&)*/$re
 
 	switch ($settings['protocol'])
 	{
+		case 'sshnokey':
+			$params_from_settings['proto'] = 'proto';
+			$params_from_settings['prompt'] = 'prompt';
+			$params_from_settings['prompt-delay'] = 'prompt_delay';
+			$params_from_settings['username'] = 'username';
+			$params_from_settings['password'] = 'password';
 		case 'telnet':
 		case 'netcat':
 			// prepend telnet commands by credentials
