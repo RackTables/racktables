@@ -1463,11 +1463,12 @@ function renderPortsForObject ($object_id)
 		}
 		else
 		{
+			$in_rack = getConfigVar ('NEAREST_RACKS_CHECKBOX');
 			echo "<td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td class=tdcenter><span";
 			$helper_args = array
 			(
 				'port' => $port['id'],
-				'in_rack' => 'on'
+				'in_rack' => ($in_rack == "yes" ? "on" : "")
 			);
 			$popup_args = 'height=700, width=400, location=no, menubar=no, '.
 				'resizable=yes, scrollbars=yes, status=no, titlebar=no, toolbar=no';
