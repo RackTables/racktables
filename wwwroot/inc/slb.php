@@ -380,7 +380,7 @@ function buildEntityLVSConfig ($cell)
 
 function buildLVSConfig ($object_id)
 {
-	return buildEntityLVSConfig (spotEntity ('object', $object_id));
+	return callHook ('buildEntityLVSConfig', spotEntity ('object', $object_id));
 }
 
 // *********************  Database functions  *********************
