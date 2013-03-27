@@ -3169,7 +3169,7 @@ function vrp5xSpotConfigText ($input)
 
 function xos12SpotConfigText ($input)
 {
-	return preg_replace ('/.*?^# Module \N+ configuration.$\n/sm', '', $input);
+	return preg_replace ('/.*?^(#\n^# Module \N+ configuration.$\n.*)^\S+\.\d+ # /sm', '$1', $input, 1);
 }
 
 function jun10SpotConfigText ($input)
