@@ -3149,12 +3149,12 @@ function ios12SpotConfigText ($input)
 {
 	if (preg_match ('/\nUnable to get configuration. Try again later/s', $input))
 		throw new ERetryNeeded ("device is busy. 'show run' did not work");
-	return preg_replace ('/.*?^Current configuration : \d+ bytes$\n(.*)^\S+#\s*\Z/sm', '$1', $input);
+	return preg_replace ('/.*?^Current configuration : \d+ bytes$\n(.*)^\S+#\s*\Z/sm', '$1', $input, 1);
 }
 
 function nxos4SpotConfigText ($input)
 {
-	return preg_replace ('/.*?^!Command: show running-config$\n(.*)^\S+#\s*\Z/sm', '$1', $input);
+	return preg_replace ('/.*?^!Command: show running-config$\n(.*)^\S+#\s*\Z/sm', '$1', $input, 1);
 }
 
 function fdry5SpotConfigText ($input)
@@ -3164,7 +3164,7 @@ function fdry5SpotConfigText ($input)
 
 function vrp5xSpotConfigText ($input)
 {
-	return preg_replace ('/.*?^!Software Version V\N*\n(.*)^return$.*/sm', '$1', $input);
+	return preg_replace ('/.*?^!Software Version V\N*\n(.*)^return$.*/sm', '$1', $input, 1);
 }
 
 function xos12SpotConfigText ($input)
@@ -3174,17 +3174,17 @@ function xos12SpotConfigText ($input)
 
 function jun10SpotConfigText ($input)
 {
-	return preg_replace ('/.*?^## Last commit: \N*\n(.*)^\S+@\S+>\s*\Z/sm', '$1', $input);
+	return preg_replace ('/.*?^## Last commit: \N*\n(.*)^\S+@\S+>\s*\Z/sm', '$1', $input, 1);
 }
 
 function ftos8SpotConfigText ($input)
 {
-	return preg_replace ('/.*?^! Version [0-9\.]+\n(.*)^end$.*/sm', '$1', $input);
+	return preg_replace ('/.*?^! Version [0-9\.]+\n(.*)^end$.*/sm', '$1', $input, 1);
 }
 
 function eos4SpotConfigText ($input)
 {
-	return preg_replace ('/.*?^! device: \N*EOS-\N*$\n(.*)^end$.*/sm', '$1', $input);
+	return preg_replace ('/.*?^! device: \N*EOS-\N*$\n(.*)^end$.*/sm', '$1', $input, 1);
 }
 
 function ros11SpotConfigText ($input)
@@ -3194,7 +3194,7 @@ function ros11SpotConfigText ($input)
 
 function iosxr4SpotConfigText ($input)
 {
-	return preg_replace ('/.*?^!! IOS XR Configuration [^\n]*$\n(.*)^\S+#\s*\Z/sm', '$1', $input);
+	return preg_replace ('/.*?^!! IOS XR Configuration [^\n]*$\n(.*)^\S+#\s*\Z/sm', '$1', $input, 1);
 }
 
 function jun10ReadLLDPStatus ($input)
