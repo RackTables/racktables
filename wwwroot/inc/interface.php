@@ -7248,6 +7248,7 @@ function renderVLANIPLinks ($some_id)
 		$ip_ver = $tabno == 'ipv6' ? 'ipv6' : 'ipv4';
 		echo '<th>' . getImageHREF ('net') . '</th>';
 		$vlan = getVLANInfo ($some_id);
+		$domainclass = array ($vlan['domain_id'] => 'trbusy');
 		foreach ($vlan[$ip_ver . "nets"] as $net_id)
 			$minuslines[] = array
 			(

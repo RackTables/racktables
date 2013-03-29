@@ -16,6 +16,7 @@
 	bugfix: date/time attributes handling code had a bug (#719)
 	bugfix: 802.1Q recalc button wasn't turning switch in out-of-sync state
 	bugfix: searching attributes of locations & racks didn't work (#787)
+	bugfix: address a PHP warning (#809)
 	update: vlan search results now include binded IP networks
 	update: make scaled rack thumb images sharp again
 	update: Cisco IOS 15.0 support
