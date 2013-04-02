@@ -5873,6 +5873,34 @@ function arePortsCompatible ($portinfo_a, $portinfo_b)
 	return arePortTypesCompatible ($portinfo_a['oif_id'], $portinfo_b['oif_id']);
 }
 
+// returns HTML-formatted link to the given entity
+function mkCellA ($cell)
+{
+	global $page, $etype_by_pageno;
+	$cell_page = NULL;
+	foreach ($etype_by_pageno as $page_name => $realm)
+		if ($realm == $cell['realm'])
+		{
+			$cell_page = $page_name;
+			break;
+		}
+	if (! isset ($cell_page))
+		throw new RackTablesError ("Internal structure error in array \$etype_by_pageno. Page for realm '$realm' is not set", RackTablesError::INTERNAL);
+
+	if ($cell['realm'] == 'user')
+		$cell_key = $cell['userid'];
+	else
+		$cell_key = $cell['id'];
+
+	if (! isset ($page[$cell_page]['bypass']))
+		throw new RackTablesError ("Internal structure error. Bypass key for page '$cell_page' is not set", RackTablesError::INTERNAL);
+	else
+		$bypass_key = $page[$cell_page]['bypass'];
+
+	$title = array_first (formatEntityList (array ($cell)));
+	return '<a href="' . makeHref (array ('page' => $cell_page, $bypass_key => $cell_key)) . '">' . $title . '</a>';
+}
+
 // takes an array of cells,
 // returns an array indexed by cell id, values are simple text representation of a cell.
 // Intended to pass its return value to printSelect routine.
@@ -5890,6 +5918,10 @@ function formatEntityList ($list)
 				break;
 			case 'ipv4rspool':
 				$ret[$entity['id']] = $entity['name'];
+				break;
+			case 'ipv4net':
+			case 'ipv6net':
+				$ret[$entity['id']] = $entity['ip'] . '/' . $entity['mask'];
 				break;
 			default:
 				$ret[$entity['id']] = $entity['realm'] . '#' . $entity['id'];
