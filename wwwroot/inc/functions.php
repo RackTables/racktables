@@ -5158,7 +5158,7 @@ function setMessage ($type, $message, $direct_rendering)
 	elseif (isset ($script_mode) and $script_mode)
 	{
 		if ($type == 'warning' or $type == 'error')
-			file_put_contents ('php://stderr', strtoupper ($type) . ': ' . $message . "\n");
+			file_put_contents ('php://stderr', strtoupper ($type) . ': ' . strip_tags ($message) . "\n");
 	}
 	else
 	{
