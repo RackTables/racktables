@@ -141,6 +141,7 @@ th.sticker {
 
 td.tagbox {
 	text-align: left;
+	white-space: nowrap;
 }
 td.tagbox.selected {
 	background-color: #a0ffa0;
