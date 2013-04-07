@@ -57,9 +57,9 @@ function authenticate ()
 			break;
 		case 'saml' == $user_auth_src:
 			$saml_username = '';
-			$saml_success = authenticated_via_saml ($saml_username);
-			if (! $saml_success)
-				break; //failure
+			$saml_dispname = '';
+			if (! authenticated_via_saml ($saml_username, $saml_dispname))
+				throw new RackTablesError ('', RackTablesError::NOT_AUTHENTICATED);
 			$remote_username = $saml_username;
 			break;
 		default:
@@ -98,14 +98,7 @@ function authenticate ()
 				(strlen ($ldap_dispname) ? $ldap_dispname : $remote_username); // then one from LDAP
 			return; // success
 		case 'saml' == $user_auth_src:
-			$saml_username = '';
-			$saml_dispname = '';
-			$saml_success = authenticated_via_saml ($saml_username, $saml_dispname);
-			if (! $saml_success)
-				break; //failure
-			$remote_displayname = strlen ($saml_dispname) ?
-				$saml_dispname :
-				$saml_username;
+			$remote_displayname = strlen ($saml_dispname) ? $saml_dispname : $saml_username;
 			return; // success
 		default:
 			throw new RackTablesError ('Invalid authentication source!', RackTablesError::MISCONFIGURED);
@@ -274,21 +267,14 @@ function authenticated_via_saml (&$saml_username = NULL, &$saml_displayname = NU
 	$attributes = $as->getAttributes();
 	$saml_username = saml_getAttributeValue ($attributes, $SAML_options['usernameAttribute']);
 	$saml_displayname = saml_getAttributeValue ($attributes, $SAML_options['fullnameAttribute']);
-	if ($as->isAuthenticated())
-		return true;
-	return false;
+	return $as->isAuthenticated();
 }
 
 function saml_getAttributeValue ($attributes, $name)
 {
-	if (isset ($attributes[$name]))
-	{
-		if (is_array ($attributes[$name]))
-			return $attributes[$name][0];
-		else
-			return $attributes[$name];
-	}
-	return '';
+	if (! isset ($attributes[$name]))
+		return '';
+	return is_array ($attributes[$name]) ? $attributes[$name][0] : $attributes[$name];
 }
 
 // a wrapper for two LDAP auth methods below
