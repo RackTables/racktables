@@ -56,7 +56,6 @@ function authenticate ()
 				break;
 			default:
 				throw new RackTablesError ('Invalid authentication source!', RackTablesError::MISCONFIGURED);
-				die;
 		}
 	$userinfo = constructUserCell ($remote_username);
 	if ($require_local_account and !isset ($userinfo['user_id']))
