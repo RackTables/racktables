@@ -55,6 +55,13 @@ function authenticate ()
 				throw new RackTablesError ('The web-server didn\'t authenticate the user, although ought to do.', RackTablesError::MISCONFIGURED);
 			$remote_username = $_SERVER['REMOTE_USER'];
 			break;
+		case 'saml' == $user_auth_src:
+			$saml_username = '';
+			$saml_success = authenticated_via_saml ($saml_username);
+			if (! $saml_success)
+				break; //failure
+			$remote_username = $saml_username;
+			break;
 		default:
 			throw new RackTablesError ('Invalid authentication source!', RackTablesError::MISCONFIGURED);
 	}
@@ -89,6 +96,16 @@ function authenticate ()
 			$remote_displayname = strlen ($userinfo['user_realname']) ? // local value is most preferred
 				$userinfo['user_realname'] :
 				(strlen ($ldap_dispname) ? $ldap_dispname : $remote_username); // then one from LDAP
+			return; // success
+		case 'saml' == $user_auth_src:
+			$saml_username = '';
+			$saml_dispname = '';
+			$saml_success = authenticated_via_saml ($saml_username, $saml_dispname);
+			if (! $saml_success)
+				break; //failure
+			$remote_displayname = strlen ($saml_dispname) ?
+				$saml_dispname :
+				$saml_username;
 			return; // success
 		default:
 			throw new RackTablesError ('Invalid authentication source!', RackTablesError::MISCONFIGURED);
@@ -242,6 +259,36 @@ function processAdjustmentSentence ($modlist, &$chain)
 				throw new RackTablesError ('invalid structure', RackTablesError::INTERNAL);
 		}
 	return $didChanges;
+}
+
+// a wrapper for SAML auth method
+function authenticated_via_saml (&$saml_username = NULL, &$saml_displayname = NULL)
+{
+	global $SAML_options, $debug_mode;
+	if (! file_exists ($SAML_options['simplesamlphp_basedir'] . '/lib/_autoload.php'))
+		throw new RackTablesError ('Configured for SAML authentication, but simplesaml is not found.', RackTablesError::MISCONFIGURED);
+	require_once ($SAML_options['simplesamlphp_basedir'] . '/lib/_autoload.php');
+	$as = new SimpleSAML_Auth_Simple ($SAML_options['sp_profile']);
+	if (! $as->isAuthenticated())
+		$as->requireAuth();
+	$attributes = $as->getAttributes();
+	$saml_username = saml_getAttributeValue ($attributes, $SAML_options['usernameAttribute']);
+	$saml_displayname = saml_getAttributeValue ($attributes, $SAML_options['fullnameAttribute']);
+	if ($as->isAuthenticated())
+		return true;
+	return false;
+}
+
+function saml_getAttributeValue ($attributes, $name)
+{
+	if (isset ($attributes[$name]))
+	{
+		if (is_array ($attributes[$name]))
+			return $attributes[$name][0];
+		else
+			return $attributes[$name];
+	}
+	return '';
 }
 
 // a wrapper for two LDAP auth methods below

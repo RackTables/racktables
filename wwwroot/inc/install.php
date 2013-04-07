@@ -275,6 +275,17 @@ function init_config ()
 #	'use_tls' => 2,         // 0 == don't attempt, 1 == attempt, 2 == require
 #);
 
+# For SAML configuration details:
+# http://wiki.racktables.org/index.php?title=SAML
+
+#\$SAML_options = array
+#(
+#	'simplesamlphp_basedir' => '../simplesaml',
+#	'sp_profile' => 'default-sp',
+#	'usernameAttribute' => 'eduPersonPrincipName',
+#	'fullnameAttribute' => 'fullName',
+#);
+
 # This HTML banner is intended to assist users in dispatching their issues
 # to the local tech support service. Its text (in its verbatim form) will
 # be appended to assorted error messages visible in user's browser (including
