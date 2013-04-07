@@ -82,8 +82,7 @@ function authenticate ()
 			break; // failure
 		case ('ldap' == $user_auth_src):
 			$ldap_dispname = '';
-			$ldap_success = authenticated_via_ldap ($remote_username, $_SERVER['PHP_AUTH_PW'], $ldap_dispname);
-			if (!$ldap_success)
+			if (! authenticated_via_ldap ($remote_username, $_SERVER['PHP_AUTH_PW'], $ldap_dispname))
 				break; // failure
 			$remote_displayname = strlen ($userinfo['user_realname']) ? // local value is most preferred
 				$userinfo['user_realname'] :
