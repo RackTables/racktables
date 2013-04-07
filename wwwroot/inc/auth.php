@@ -26,10 +26,12 @@ function authenticate ()
 		$user_auth_src,
 		$script_mode,
 		$require_local_account;
+	// Phase 1. Assert basic pre-requisites, short-circuit the logout request.
 	if (!isset ($user_auth_src) or !isset ($require_local_account))
 		throw new RackTablesError ('secret.php: either user_auth_src or require_local_account are missing', RackTablesError::MISCONFIGURED);
 	if (isset ($_REQUEST['logout']))
 		throw new RackTablesError ('', RackTablesError::NOT_AUTHENTICATED); // Reset browser credentials cache.
+	// Phase 2. Do some method-specific processing, initialize $remote_username on success.
 	switch (TRUE)
 	{
 		case isset ($script_mode) && $script_mode && isset ($remote_username) && strlen ($remote_username):
@@ -65,11 +67,13 @@ function authenticate ()
 		default:
 			throw new RackTablesError ('Invalid authentication source!', RackTablesError::MISCONFIGURED);
 	}
+	// Phase 3. Handle local account requirement, pull user tags into security context.
 	$userinfo = constructUserCell ($remote_username);
 	if ($require_local_account and !isset ($userinfo['user_id']))
 		throw new RackTablesError ('', RackTablesError::NOT_AUTHENTICATED);
 	$user_given_tags = $userinfo['etags'];
 	$auto_tags = array_merge ($auto_tags, $userinfo['atags']);
+	// Phase 4. Do more method-specific processing, initialize $remote_displayname on success.
 	switch (TRUE)
 	{
 		case isset ($script_mode) && $script_mode:
