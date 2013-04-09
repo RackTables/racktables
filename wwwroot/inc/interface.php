@@ -4469,6 +4469,14 @@ function dragon ()
 	finishPortlet();
 }
 
+// $v is a $configCache item
+// prints HTML-formatted varname and description
+function renderConfigVarName ($v)
+{
+	echo '<span class="varname">' . $v['varname'] . '</span>';
+	echo '<p class="vardescr">' . $v['description'] . ($v['is_userdefined'] == 'yes' ? '' : ' (system-wide)') . '</p>';
+}
+
 function renderUIConfig ()
 {
 	global $configCache, $nextorder;
@@ -4481,39 +4489,13 @@ function renderUIConfig ()
 		if ($v['is_hidden'] != 'no')
 			continue;
 		echo "<tr class=row_${order}>";
-		echo "<td nowrap valign=top class=tdright>${v['description']}</td>";
+		echo "<td nowrap valign=top class=tdright>";
+		renderConfigVarName ($v);
+		echo '</td>';
 		echo "<td valign=top class=tdleft>${v['varvalue']}</td></tr>";
 		$order = $nextorder[$order];
 	}
 	echo "</table>\n";
-	finishPortlet();
-}
-
-function renderUIConfigEditForm ()
-{
-	global $configCache;
-	startPortlet ('Current configuration');
-	echo "<table cellspacing=0 cellpadding=5 align=center class=widetable width='50%'>\n";
-	echo "<tr><th class=tdleft>Option</th>";
-	echo "<th class=tdleft>Value</th></tr>";
-	printOpFormIntro ('upd');
-
-	$i = 0;
-	foreach ($configCache as $v)
-	{
-		if ($v['is_hidden'] != 'no')
-			continue;
-		echo "<input type=hidden name=${i}_varname value='${v['varname']}'>";
-		echo "<tr><td class=tdright>${v['description']}</td>";
-		echo "<td class=tdleft><input type=text name=${i}_varvalue value='${v['varvalue']}' size=24></td>";
-		echo "</tr>\n";
-		$i++;
-	}
-	echo "<input type=hidden name=num_vars value=${i}>\n";
-	echo "<tr><td colspan=2>";
-	printImageHREF ('SAVE', 'Save changes', TRUE);
-	echo "</td></tr>";
-	echo "</form>";
 	finishPortlet();
 }
 
@@ -5289,8 +5271,10 @@ function renderMyPasswordEditor ()
 	echo '</table></form>';
 }
 
-function renderMyPreferences ()
+function renderConfigEditor ()
 {
+	global $pageno;
+	$per_user = ($pageno == 'myaccount');
 	global $configCache;
 	startPortlet ('Current configuration');
 	echo "<table cellspacing=0 cellpadding=5 align=center class=widetable width='50%'>\n";
@@ -5303,17 +5287,17 @@ function renderMyPreferences ()
 	{
 		if ($v['is_hidden'] != 'no')
 			continue;
-		if ($v['is_userdefined'] != 'yes')
+		if ($per_user && $v['is_userdefined'] != 'yes')
 			continue;
 		echo "<input type=hidden name=${i}_varname value='${v['varname']}'>";
-		echo "<tr><td class=\"tdright\">${v['description']}</td>";
-		echo "<td class=\"tdleft\"><input type=text name=${i}_varvalue value='${v['varvalue']}' size=24></td>";
-		if ($v['is_altered'] == 'yes')
-			echo "<td class=\"tdleft\"><a href=\"".
-				makeHrefProcess(array('op'=>'reset', 'varname'=>$v['varname']))
-				."\">reset</a></td>";
-		else
-			echo "<td class=\"tdleft\">(default)</td>";
+		echo '<tr><td class="tdright">';
+		echo renderConfigVarName ($v);
+		echo '</td>';
+		echo "<td class=\"tdleft\"><input type=text name=${i}_varvalue value='" . htmlspecialchars ($v['varvalue'], ENT_QUOTES) . "' size=24></td>";
+		echo '<td class="tdleft">';
+		if ($per_user && $v['is_altered'] == 'yes')
+			echo getOpLink (array('op'=>'reset', 'varname'=>$v['varname']), 'reset');
+		echo '</td>';
 		echo "</tr>\n";
 		$i++;
 	}

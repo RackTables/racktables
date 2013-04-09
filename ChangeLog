@@ -31,6 +31,7 @@
 	update: files may be linked to rows (#733)
 	update: prevent deletion of system-level attributes (#761)
 	update: hide controls in cacti tab if user doesn't have permission (#707)
+	update: configuration editor displays variable names along with descriptions
 	new feature: configurable top-to-bottom units order in particular racks
 		(#601)
 	new feature: overridable tag names display style (via CSS and plug-ins)

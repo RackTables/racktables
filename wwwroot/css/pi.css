@@ -795,3 +795,14 @@ a.noclick {
 	font-family: monospace;
 	font-style: italic;
 }
+
+.varname {
+	font-family: "Courier New",Courier,monospace;
+	font-weight: bold;
+}
+
+.vardescr {
+	font-style: italic;
+	margin: 0 0;
+	font-size: 90%;
+}
