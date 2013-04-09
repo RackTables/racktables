@@ -6033,4 +6033,16 @@ function timestampFromDatetimestr ($s)
 	);
 }
 
+// Return TRUE, if the object belongs to specified type and has
+// specified attribute belonging to the given set of values.
+function checkTypeAndAttribute ($object_id, $type_id, $attr_id, $values)
+{
+	$object = spotEntity ('object', $object_id);
+	if ($object['objtype_id'] == $type_id)
+		foreach (getAttrValues ($object_id) as $record)
+			if ($record['id'] == $attr_id and in_array ($record['key'], $values))
+				return TRUE;
+	return FALSE;
+}
+
 ?>

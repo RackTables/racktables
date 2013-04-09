@@ -55,19 +55,6 @@ $known_APC_SKUs = array
 	1154 => 'AP7957',
 );
 
-// Return 'std', if the object belongs to specified type and has
-// specified attribute belonging to the given set of values.
-function checkTypeAndAttribute ($object_id, $type_id, $attr_id, $values, $hit = 'std')
-{
-	$object = spotEntity ('object', $object_id);
-	if ($object['objtype_id'] != $type_id)
-		return '';
-	foreach (getAttrValues ($object_id) as $record)
-		if ($record['id'] == $attr_id and in_array ($record['key'], $values))
-			return $hit;
-	return '';
-}
-
 // This trigger is on when any of the (get_mac_list, get_link_status) ops permitted
 function trigger_liveports ()
 {
@@ -103,9 +90,8 @@ function trigger_snmpportfinder ()
 			$object['id'],
 			2, // PDU
 			2, // HW type
-			array_keys ($known_APC_SKUs),
-			'attn'
-		);
+			array_keys ($known_APC_SKUs)
+		) ? 'attn' : '';
 	default:
 		return '';
 	}
@@ -344,7 +330,7 @@ function trigger_ucs()
 		1787, # management interface
 		30, # mgmt type
 		array (1788) # UCS Manager
-	);
+	) ? 'std' : '';
 }
 
 ?>
