@@ -182,6 +182,9 @@ The DATETIME_FORMAT configuration option used in setting date and time output
 format now uses a different [1] syntax. During upgrade the option is reset to
 the default value, which is now %Y-%m-%d (YYYY-MM-DD) per ISO 8601.
 
+This release intoduces two new configuration options:
+REVERSED_RACKS_LISTSRC and NEAREST_RACKS_CHECKBOX.
+
 [1] http://php.net/manual/en/function.strftime.php
 ENDOFTEXT
 ,
