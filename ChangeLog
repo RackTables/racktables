@@ -1,4 +1,4 @@
-0.20.4
+0.20.4 2013-04-15
 	bugfix: %GPASS% dictionary markers were ignored in selectboxes
 	bugfix: 802.1Q: better Force10 switches support
 	bugfix: 802.1Q: properly detect non-switched ports on Cisco NX-OS devices
