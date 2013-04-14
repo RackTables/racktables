@@ -1840,6 +1840,7 @@ else
 	else
 	{
 		echo "<tr><th>Upgrade path</th><td>${dbver} &rarr; " . implode (' &rarr; ', $path) . "</td></tr>\n";
+		global $relnotes;
 		foreach ($path as $batchid)
 			if (isset ($relnotes[$batchid]))
 				echo "<tr><th>Release notes for ${batchid}</th><td><pre>" . $relnotes[$batchid] . "</pre></td></tr>\n";
