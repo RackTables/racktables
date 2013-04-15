@@ -271,11 +271,12 @@ class MacroParser
 		{
 			if (! $macro_deep)
 			{
-				if (preg_match ('/^([A-Za-z_0-9]+)=(.*)/', $line, $m))
+				if (preg_match ('/^([A-Za-z_0-9]+)([\?:]?=)(.*)/', $line, $m))
 				{
 					// found macro definition
 					$mname = $m[1];
-					$mvalue = ltrim ($m[2]);
+					$op = $m[2];
+					$mvalue = ltrim ($m[3]);
 					if (substr ($mvalue, 0, 1) == '`') // quoted define value
 					{
 						$line = substr ($mvalue, 1);
@@ -284,7 +285,12 @@ class MacroParser
 					}
 					else
 					{
-						$this->addMacro ($mname, rtrim ($mvalue));
+						if ($op !== '?=' || '' === $this->expandMacro ($mname))
+						{
+							$this->addMacro ($mname, rtrim ($mvalue));
+							if ($op === ':=')
+								$this->macros[$mname] = $this->expandMacro ($mname);
+						}
 					}
 				}
 				else
@@ -298,7 +304,12 @@ class MacroParser
 					$c = $line[$i];
 					if ($c == "'" and 0 == --$macro_deep)
 					{
-						$this->addMacro ($mname, $mvalue);
+						if ($op !== '?=' || '' !== $this->expandMacro ($mname))
+						{
+							$this->addMacro ($mname, $mvalue);
+							if ($op === ':=')
+								$this->macros[$mname] = $this->expandMacro ($mname);
+						}
 						$rest = substr ($line, $i + 1);
 						if (preg_match ('/\S/', $rest))
 							$new_value .= $rest . "\n";
@@ -315,6 +326,17 @@ class MacroParser
 		$this->macros[$name] = substr ($new_value, 0, -1); // trim last \n
 	}
 
+	// like strpos, but for any symbol of $char_class
+	static function strp ($haystack, $char_class, $offset = 0)
+	{
+		$ret = FALSE;
+		for ($i = 0; $i < strlen ($char_class); $i++)
+			if (FALSE !== ($j = strpos($haystack, $char_class[$i], $offset)))
+				if ($ret === FALSE || $ret > $j)
+					$ret = $j;
+		return $ret;
+	}
+
 	// replaces all macro expansions (like %THIS%) by the results of expandMacro calls
 	// Has some formatting logic:
 	//  * indent each line of expansion if the expanding line contains only the macro reference
@@ -323,38 +345,188 @@ class MacroParser
 	public function expand ($text)
 	{
 		$ret = '';
-		foreach (explode ("\n", $text) as $line)
-		{
-			$line .= "\n";
-			$prev = '';
-			while (preg_match ('/(.*?)%([A-Za-z_0-9]+)%(.*)/s', $line, $m))
+		$len = strlen ($text);
+		$pos = 0;
+		$state = 0;
+		$lazy = 0;
+		while ($pos < $len || $pos == $len && $state == 100)
+			switch ($state)
 			{
-				$prev .= $m[1];
-				$mname = $m[2];
-				$line = $m[3];
-				$mvalue = $this->expandMacro ($mname);
-				$before_empty = preg_match ('/^\s*$/', $prev);
-				$after_empty = preg_match ('/^[\s\n]*$/s', $line);
-				$macro_empty = preg_match ('/^[\s\n]*$/s', $mvalue);
-				$prev .= $mvalue;
-				if ($before_empty and $after_empty)
-				{
-					if ($macro_empty)
+				case 99: // expansion failed, cat it untouched into $ret
+					$ret .= '%';
+					$pos = $exp_start + 1;
+					$state = 0;
+					break;
+				case 100: // expand from $exp_start to $pos with $e_value
+					$pre_blank = TRUE;
+					$indent = '';
+					$line_start = 0;
+					for ($i = $exp_start - 1; $i >= 0; $i--)
+						if ($text[$i] == "\n")
+						{
+							$line_start = $i + 1;
+							break;
+						}
+						elseif ($text[$i] != ' ' && $text[$i] != "\t")
+						{
+							$pre_blank = FALSE;
+							break;
+						}
+					if ($pre_blank)
+						$indent = substr ($text, $line_start, $exp_start - $line_start);
+
+					$after_blank = TRUE;
+					$line_end = $len;
+					for ($i = $pos; $i < $len; $i++)
+						if ($text[$i] == "\n")
+						{
+							$line_end = $i;
+							break;
+						}
+						elseif ($text[$i] != ' ' && $text[$i] != "\t")
+						{
+							$after_blank = FALSE;
+							break;
+						}
+					// do actual expansion
+					if ($e_value == '')
 					{
-						$line = '';
-						break;
+						// skip entire line if empty expansion was lazy
+						if ($lazy)
+						{
+							$ret = preg_replace ('/.*$/', '', $ret, 1);
+							$pos = $line_end + 1;
+						}
+						// skip newline if expansion is empty and alone
+						elseif ($pre_blank && $after_blank)
+						{
+							$ret = rtrim ($ret, " \t");
+							$pos = $line_end + 1;
+						}
 					}
-					// indent every line in $mvalue by $m[1]
-					$mvalue = preg_replace ('/^/m', $m[1], $mvalue);
-					$m[1] = '';
-				}
-				if ($after_empty and substr ($mvalue, -1, 1) == "\n")
-					$mvalue = substr ($mvalue, 0, -1);
-				$ret .= $m[1] . $mvalue;
+					else
+					{
+						// trim last newline of expansion
+						if ($after_blank && strlen ($e_value) && $e_value[strlen ($e_value) - 1] == "\n")
+							$e_value = substr ($e_value, 0, -1);
+						// indent each line of $e_value
+						if ($indent != '')
+							$e_value = preg_replace ('/\n(?!$)/', "\n$indent", $e_value);
+						$ret .= $e_value;
+					}
+					$lazy = 0;
+					$state = 0;
+					break;
+				case 0: // initial state, search for %
+					if (FALSE === ($exp_start = strpos ($text, '%', $pos)))
+					{
+						$ret .= substr ($text, $pos);
+						$pos = $len;
+					}
+					else
+					{
+						$ret .= substr ($text, $pos, $exp_start - $pos);
+						$pos = $exp_start + 1;
+						$mname_begin = $pos;
+						if ($pos < $len)
+						{
+							if ($text[$pos] == '{')
+							{
+								$state = 2;
+								$pos++;
+							}
+							else
+							{
+								$state = 1;
+								if ($text[$pos] == '?')
+								{
+									$lazy = 1;
+									$pos++;
+								}
+							}
+							$mname_begin = $pos;
+						}
+					}
+					break;
+				case 1: // simple expansion (%ABC%) ending
+					if (FALSE !== ($i = self::strp ($text, "%\n", $pos)) && $text[$i] != "\n")
+					{
+						$macro_name = substr ($text, $mname_begin, $i - $mname_begin);
+						if (preg_match('/^[A-Za-z_0-9]+$/', $macro_name))
+						{
+							$pos = $i + 1; // skip '%''
+							$e_value = $this->expandMacro ($macro_name);
+							$state = 100;
+							break;
+						}
+					}
+					$state = 99; // rollback expansion
+					break;
+				case 2: // enhanced expansion (%{ABC}% or %{ABC:[+-]smthng}%) stage 1
+					if (FALSE !== ($i = self::strp ($text, "}:\n", $pos)) && $text[$i] != "\n")
+					{
+						$macro_name = substr ($text, $mname_begin, $i - $mname_begin);
+						if (preg_match('/^[A-Za-z_0-9]+$/', $macro_name))
+						{
+							if ($text[$i] == '}' && $i + 1 < $len && $text[$i + 1] == '%')
+							{
+								$e_value = $this->expandMacro ($macro_name);
+								$pos = $i + 2; // skip '}%'
+								$state = 100;
+								break;
+							}
+							elseif ($text[$i] == ':')
+							{
+								$i++;
+								if ($i < $len && ($text[$i] == '+' || $text[$i] == '-'))
+								{
+									$condition_type = $text[$i];
+									$deep = 1;
+									$pos = $i + 1;
+									$cond_start = $pos;
+									$state = 3;
+									break;
+								}
+							}
+						}
+					}
+					$state = 99; // rollback expansion
+					break;
+				case 3: // conditional expansion (%{ABC:[+-]smthng}%) ending
+					if (FALSE === ($i = self::strp ($text, "{}", $pos)))
+						$state = 99;
+					else
+					{
+						$pos = $i + 1;
+						if ($text[$i] == '{' && $i > 0 && $text[$i - 1] == '%')
+						{
+							$deep++;
+							$pos++; // skip '%{'
+						}
+						elseif ($text[$i] == '}' && $i + 1 < $len && $text[$i + 1] == '%')
+						{
+							$deep--;
+							$pos++;
+							if ($deep == 0)
+							{
+								$exp = substr ($text, $cond_start, $i - $cond_start);
+								$m_value = $this->expandMacro ($macro_name);
+								if ($condition_type == '+')
+									$e_value = ($m_value == '') ? '' : $this->expand ($exp);
+								elseif ($condition_type == '-')
+									$e_value = ($m_value != '') ? $m_value : $this->expand ($exp);
+								$state = 100;
+							}
+						}
+					}
+					break;
+				default:
+					throw new RackTablesError ("Unexpected state $state in " . __CLASS__ . '::' . __METHOD__ . " FSM", RackTablesError::INTERNAL);
 			}
-			$ret .= $line;
-		}
-		return substr ($ret, 0, -1); // trim last \n
+
+		if ($state != 0)
+			$ret .= substr ($text, $exp_start - 1);
+		return $ret;
 	}
 
 	// returns the result of expanding the named define, or '' if unset
