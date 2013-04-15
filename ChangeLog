@@ -1,3 +1,6 @@
+0.20.5
+	bugfix: 500 server error if protocol was not specified in
+		terminal_settings subroutine
 0.20.4 2013-04-15
 	bugfix: %GPASS% dictionary markers were ignored in selectboxes
 	bugfix: 802.1Q: better Force10 switches support

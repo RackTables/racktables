@@ -323,7 +323,7 @@ function makeGatewayParams ($object_id, $tolerate_remote_errors, /*array(&)*/$re
 			$params_from_settings[] = $settings['hostname'];
 			break;
 		default:
-			throw RTGatewayError ("Invalid terminal protocol '${settings['protocol']}' specified");
+			throw new RTGatewayError ("Invalid terminal protocol '${settings['protocol']}' specified");
 	}
 
 	foreach ($params_from_settings as $param_name => $setting_name)
