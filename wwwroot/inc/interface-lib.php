@@ -448,11 +448,6 @@ function getImageHREF ($tag, $title = '', $do_input = FALSE, $tabindex = 0)
 			">";
 }
 
-function dos2unix ($text)
-{
-	return str_replace ("\r\n", "\n", $text);
-}
-
 function escapeString ($value, $do_db_escape = FALSE)
 {
 	$ret = htmlspecialchars ($value, ENT_QUOTES, 'UTF-8');
