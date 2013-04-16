@@ -479,7 +479,7 @@ class MacroParser
 					$state = 99; // rollback expansion
 					break;
 				case 3: // conditional expansion (%{ABC:[+-]smthng}%) ending
-					if (! preg_match ('/{}]/', $text, $m, PREG_OFFSET_CAPTURE, $pos))
+					if (! preg_match ('/[{}]/', $text, $m, PREG_OFFSET_CAPTURE, $pos))
 						$state = 99;
 					else
 					{
