@@ -285,12 +285,13 @@ class MacroParser
 					}
 					else
 					{
-						if ($op !== '?=' || '' === $this->expandMacro ($mname))
-						{
-							$this->addMacro ($mname, rtrim ($mvalue));
-							if ($op === ':=')
-								$this->macros[$mname] = $this->expandMacro ($mname);
-						}
+						$mvalue = rtrim ($mvalue);
+						if ($op === ':=')
+							$this->macros[$mname] = $this->expand ($mvalue);
+						elseif ($op === '?=' && '' === $this->expandMacro ($mname))
+							$this->macros[$mname] = $mvalue;
+						else
+							$this->macros[$mname] = $mvalue;
 					}
 				}
 				else
@@ -304,12 +305,12 @@ class MacroParser
 					$c = $line[$i];
 					if ($c == "'" and 0 == --$macro_deep)
 					{
-						if ($op !== '?=' || '' !== $this->expandMacro ($mname))
-						{
-							$this->addMacro ($mname, $mvalue);
-							if ($op === ':=')
-								$this->macros[$mname] = $this->expandMacro ($mname);
-						}
+						if ($op === ':=')
+							$this->macros[$mname] = $this->expand ($mvalue);
+						elseif ($op === '?=' && '' === $this->expandMacro ($mname))
+							$this->macros[$mname] = $mvalue;
+						else
+							$this->macros[$mname] = $mvalue;
 						$rest = substr ($line, $i + 1);
 						if (preg_match ('/\S/', $rest))
 							$new_value .= $rest . "\n";
