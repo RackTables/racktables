@@ -14,6 +14,7 @@ $vs_proto = array (
 
 // you may override the class name to make using your own triplet class
 $triplet_class = 'SLBTriplet';
+$parser_class = 'MacroParser';
 
 class SLBTriplet
 {
@@ -113,76 +114,74 @@ ORDER BY
 		}
 		return $ret;
 	}
+}
 
-	// this method is here to allow using of custom MacroParser implementation
-	// override this function in the ancestor of SLBTriplet and return an instance 
-	// of your custom parser (probably ancested of MacroParser)
-	protected function createParser ($triplet)
+function generateSLBConfig ($triplet_list)
+{
+	$ret = '';
+
+	global $parser_class;
+	$gl_parser = new $parser_class;
+	$defaults = getSLBDefaults (TRUE);
+	$gl_parser->addMacro ('GLOBAL_VS_CONF', dos2unix ($defaults['vsconfig']));
+	$gl_parser->addMacro ('GLOBAL_RS_CONF', dos2unix ($defaults['rsconfig']));
+	$gl_parser->addMacro ('RSPORT', '%VPORT%');
+
+	// group triplets by object_id, vs_id
+	$grouped = array();
+	foreach ($triplet_list as $triplet)
+		$grouped[$triplet->lb['id']][$triplet->vs['id']][] = $triplet;
+
+	foreach ($grouped as $object_id => $subarr)
 	{
-		return new MacroParser();
-	}
-
-	// creates parser and fills it with pre-defined macros
-	public function prepareParser()
-	{
-		// fill the predefined macros
-		$parser = $this->createParser ($this);
-		$parser->addMacro ('LB_ID', $this->lb['id']);
-		$parser->addMacro ('LB_NAME', $this->lb['name']);
-		$parser->addMacro ('VS_ID', $this->vs['id']);
-		$parser->addMacro ('VS_NAME', $this->vs['name']);
-		$parser->addMacro ('RSP_ID', $this->rs['id']);
-		$parser->addMacro ('RSP_NAME', $this->rs['name']);
-		$parser->addMacro ('VIP', $this->vs['vip']);
-		$parser->addMacro ('VPORT', $this->vs['vport']);
-		$parser->addMacro ('PRIO', $this->slb['prio']);
-		$parser->addMacro ('IP_VER', (strlen ($this->vs['vip_bin']) == 16) ? 6 : 4);
-
-		if ($this->vs['proto'] == 'MARK')
+		$lb = array_first (array_first ($subarr))->lb;
+		$lb_parser = clone $gl_parser;
+		$lb_parser->addMacro ('LB_ID', $lb['id']);
+		$lb_parser->addMacro ('LB_NAME', $lb['name']);
+		foreach ($subarr as $vs_id => $triplets)
 		{
-			$parser->addMacro ('PROTO', 'TCP');
-			$mark = implode ('', unpack ('N', substr ($this->vs['vip_bin'], 0, 4)));
-			$parser->addMacro ('MARK', $mark);
-			$parser->addMacro ('VS_HEADER', "fwmark $mark");
-		}
-		else
-		{
-			$parser->addMacro ('VS_HEADER', $this->vs['vip'] . ' ' . $this->vs['vport']);
-			$parser->addMacro ('PROTO', $this->vs['proto']);
-		}
+			$vs = array_first ($triplets)->vs;
+			$vs_parser = clone $lb_parser;
+			$vs_parser->addMacro ('VS_ID', $vs['id']);
+			$vs_parser->addMacro ('VS_NAME', $vs['name']);
+			$vs_parser->addMacro ('VIP', $vs['vip']);
+			$vs_parser->addMacro ('VPORT', $vs['vport']);
+			$vs_parser->addMacro ('IP_VER', (strlen ($vs['vip_bin']) == 16) ? 6 : 4);
+			if ($vs['proto'] == 'MARK')
+			{
+				$vs_parser->addMacro ('PROTO', 'TCP');
+				$mark = implode ('', unpack ('N', substr ($vs['vip_bin'], 0, 4)));
+				$vs_parser->addMacro ('MARK', $mark);
+				$vs_parser->addMacro ('VS_HEADER', "fwmark $mark");
+			}
+			else
+			{
+				$vs_parser->addMacro ('VS_HEADER', $vs['vip'] . ' ' . $vs['vport']);
+				$vs_parser->addMacro ('PROTO', $vs['proto']);
+			}
+			$vs_parser->addMacro ('VS_RS_CONF', dos2unix ($vs['rsconfig']));
 
-		$defaults = getSLBDefaults (TRUE);
-		$parser->addMacro ('GLOBAL_VS_CONF', dos2unix ($defaults['vsconfig']));
-		$parser->addMacro ('RSP_VS_CONF', dos2unix ($this->rs['vsconfig']));
-		$parser->addMacro ('VS_VS_CONF', dos2unix ($this->vs['vsconfig']));
-		$parser->addMacro ('SLB_VS_CONF', dos2unix ($this->slb['vsconfig']));
+			$vip_bin = ip_checkparse ($vs_parser->expandMacro ('VIP'));
+			if ($vip_bin === FALSE)
+				$family_length = 4;
+			else
+				$family_length = strlen ($vip_bin);
 
-		return $parser;
-	}
+			foreach ($triplets as $triplet)
+			{
+				$rsp = $triplet->rs;
+				$rs_parser = clone $vs_parser;
+				$rs_parser->addMacro ('RSP_ID', $rsp['id']);
+				$rs_parser->addMacro ('RSP_NAME', $rsp['name']);
+				$rs_parser->addMacro ('RSP_VS_CONF', dos2unix ($rsp['vsconfig']));
+				$rs_parser->addMacro ('RSP_RS_CONF', dos2unix ($rsp['rsconfig']));
+				$rs_parser->addMacro ('VS_VS_CONF', dos2unix ($vs['vsconfig'])); // VS-driven vsconfig has higher priority than RSP-driven
 
-	// fills the existing parser with RS-specific pre-defined macros.
-	// $parser is the result of prepareParser, $rs_row - an item of getRSListInPool() result
-	public function prepareParserForRS (&$parser, $rs_row)
-	{
-		$parser->addMacro ('RS_HEADER',  ($this->vs['proto'] == 'MARK' ? '%RSIP%' : '%RSIP% %RSPORT%'));
-		$parser->addMacro ('RSIP', $rs_row['rsip']);
-		$parser->addMacro ('RSPORT', isset ($rs_row['rsport']) ? $rs_row['rsport'] : $this->vs['vport']); // VS port is a default value for RS port
-		$parser->addMacro ('RS_COMMENT', $rs_row['comment']);
+				$rs_parser->addMacro ('PRIO', $triplet->slb['prio']);
+				$rs_parser->addMacro ('SLB_VS_CONF', dos2unix ($triplet->slb['vsconfig']));
+				$rs_parser->addMacro ('SLB_RS_CONF', dos2unix ($triplet->slb['rsconfig']));
 
-		$defaults = getSLBDefaults (TRUE);
-		$parser->addMacro ('GLOBAL_RS_CONF', dos2unix ($defaults['rsconfig']));
-		$parser->addMacro ('VS_RS_CONF', dos2unix ($this->vs['rsconfig']));
-		$parser->addMacro ('RSP_RS_CONF', dos2unix ($this->rs['rsconfig']));
-		$parser->addMacro ('SLB_RS_CONF', dos2unix ($this->slb['rsconfig']));
-		$parser->addMacro ('RS_RS_CONF', $rs_row['rsconfig']);
-	}
-
-	public function generateConfig()
-	{
-		$parser = $this->prepareParser();
-
-		// return the expanded VS template using prepared $macros array
-		$ret = $parser->expand ("
+				$ret .= $rs_parser->expand ("
 # LB (id == %LB_ID%): %LB_NAME%
 # VS (id == %VS_ID%): %VS_NAME%
 # RS (id == %RSP_ID%): %RSP_NAME%
@@ -193,30 +192,37 @@ virtual_server %VS_HEADER% {
 	%VS_VS_CONF%
 	%SLB_VS_CONF%
 ");
-		foreach (getRSListInPool ($this->rs['id']) as $rs)
-		{
-			if ($rs['inservice'] != 'yes')
-				continue;
-			$parser->pushdefs(); // backup macros
-			$this->prepareParserForRS ($parser, $rs);
-			// do not add v6 reals into v4 service and vice versa
-			$rsip_bin = ip_checkparse ($parser->expandMacro ('RSIP'));
-			if ($rsip_bin !== FALSE && strlen ($rsip_bin) == strlen ($this->vs['vip_bin']))
-				foreach (explode (',', $parser->expandMacro ('RSPORT')) as $rsp_token)
-				{
-					$port_range = explode ('-', $rsp_token);
-					if (count ($port_range) < 1)
-						throw new InvalidArgException ('RSPORT', $rsp_token, "invalid RS port range");
-					if (count ($port_range) < 2)
-						$port_range[] = $port_range[0];
-					if ($port_range[0] > $port_range[1])
-						throw new InvalidArgException ('RSPORT', $rsp_token, "invalid RS port range");
 
-					for ($rsport = $port_range[0]; $rsport <= $port_range[1]; $rsport++)
-					{
-						$parser->pushdefs();
-						$parser->addMacro ('RSPORT', $rsport);
-						$ret .= $parser->expand ("
+				foreach (getRSListInPool ($rsp['id']) as $rs_row)
+				{
+					if ($rs_row['inservice'] != 'yes')
+						continue;
+					$parser = clone $rs_parser;
+					$parser->addMacro ('RS_HEADER',  ($parser->expandMacro ('PROTO') == 'MARK' ? '%RSIP%' : '%RSIP% %RSPORT%'));
+					$parser->addMacro ('RSIP', $rs_row['rsip']);
+					if (isset ($rs_row['rsport']))
+						$parser->addMacro ('RSPORT', $rs_row['rsport']);
+					$parser->addMacro ('RS_COMMENT', $rs_row['comment']);
+					$parser->addMacro ('RS_RS_CONF', dos2unix ($rs_row['rsconfig']));
+
+					// do not add v6 reals into v4 service and vice versa
+					$rsip_bin = ip_checkparse ($parser->expandMacro ('RSIP'));
+					if ($rsip_bin !== FALSE && strlen ($rsip_bin) == $family_length)
+						foreach (explode (',', $parser->expandMacro ('RSPORT')) as $rsp_token)
+						{
+							$port_range = explode ('-', $rsp_token);
+							if (count ($port_range) < 1)
+								throw new InvalidArgException ('RSPORT', $rsp_token, "invalid RS port range");
+							if (count ($port_range) < 2)
+								$port_range[] = $port_range[0];
+							if ($port_range[0] > $port_range[1])
+								throw new InvalidArgException ('RSPORT', $rsp_token, "invalid RS port range");
+
+							for ($rsport = $port_range[0]; $rsport <= $port_range[1]; $rsport++)
+							{
+								$r_parser = clone $parser;
+								$r_parser->addMacro ('RSPORT', $rsport);
+								$ret .= $r_parser->expand ("
 	%RS_PREPEND%
 	real_server %RS_HEADER% {
 		%GLOBAL_RS_CONF%
@@ -226,37 +232,25 @@ virtual_server %VS_HEADER% {
 		%RS_RS_CONF%
 	}
 ");
-						$parser->popdefs();
-					}
+							}
+						}
 				}
-			$parser->popdefs(); // restore original (VS-driven) macros
+				$ret .= "}\n";
+			}
 		}
-		$ret .= "}\n";
-		return $ret;
 	}
+	return $ret;
 }
 
 class MacroParser
 {
 	protected $macros; // current macro context
-	protected $stack; // macro contexts saved by pushdefs()
 	protected $trace; // recursive macro expansion path
 
 	public function __construct()
 	{
 		$this->macros = array();
-		$this->stack = array();
 		$this->trace = array();
-	}
-
-	public function pushdefs()
-	{
-		$this->stack[] = $this->macros;
-	}
-
-	public function popdefs()
-	{
-		$this->macros = array_pop ($this->stack);
 	}
 
 	// cuts the subsequent defines from $value and stores the $name-$value define
@@ -325,17 +319,6 @@ class MacroParser
 			}
 		}
 		$this->macros[$name] = substr ($new_value, 0, -1); // trim last \n
-	}
-
-	// like strpos, but for any symbol of $char_class
-	static function strp ($haystack, $char_class, $offset = 0)
-	{
-		$ret = FALSE;
-		for ($i = 0; $i < strlen ($char_class); $i++)
-			if (FALSE !== ($j = strpos($haystack, $char_class[$i], $offset)))
-				if ($ret === FALSE || $ret > $j)
-					$ret = $j;
-		return $ret;
 	}
 
 	// replaces all macro expansions (like %THIS%) by the results of expandMacro calls
@@ -450,8 +433,9 @@ class MacroParser
 					}
 					break;
 				case 1: // simple expansion (%ABC%) ending
-					if (FALSE !== ($i = self::strp ($text, "%\n", $pos)) && $text[$i] != "\n")
+					if (preg_match ('/[%\n]/s', $text, $m, PREG_OFFSET_CAPTURE, $pos) && $m[0][0] != "\n")
 					{
+						$i = $m[0][1];
 						$macro_name = substr ($text, $mname_begin, $i - $mname_begin);
 						if (preg_match('/^[A-Za-z_0-9]+$/', $macro_name))
 						{
@@ -464,8 +448,9 @@ class MacroParser
 					$state = 99; // rollback expansion
 					break;
 				case 2: // enhanced expansion (%{ABC}% or %{ABC:[+-]smthng}%) stage 1
-					if (FALSE !== ($i = self::strp ($text, "}:\n", $pos)) && $text[$i] != "\n")
+					if (preg_match ('/[}:\n]/s', $text, $m, PREG_OFFSET_CAPTURE, $pos) && $m[0][0] != "\n")
 					{
+						$i = $m[0][1];
 						$macro_name = substr ($text, $mname_begin, $i - $mname_begin);
 						if (preg_match('/^[A-Za-z_0-9]+$/', $macro_name))
 						{
@@ -494,10 +479,11 @@ class MacroParser
 					$state = 99; // rollback expansion
 					break;
 				case 3: // conditional expansion (%{ABC:[+-]smthng}%) ending
-					if (FALSE === ($i = self::strp ($text, "{}", $pos)))
+					if (! preg_match ('/{}]/', $text, $m, PREG_OFFSET_CAPTURE, $pos))
 						$state = 99;
 					else
 					{
+						$i = $m[0][1];
 						$pos = $i + 1;
 						if ($text[$i] == '{' && $i > 0 && $text[$i - 1] == '%')
 						{
@@ -545,10 +531,9 @@ class MacroParser
 
 function buildEntityLVSConfig ($cell)
 {
-	$newconfig = "#\n#\n# This configuration has been generated automatically by RackTables\n#\n#\n";
-	foreach (SLBTriplet::getTriplets ($cell) as $slb)
-		$newconfig .= $slb->generateConfig();
-	return $newconfig;
+	$ret = "#\n#\n# This configuration has been generated automatically by RackTables\n#\n#\n";
+	$ret .= generateSLBConfig (SLBTriplet::getTriplets ($cell));
+	return $ret;
 }
 
 function buildLVSConfig ($object_id)
