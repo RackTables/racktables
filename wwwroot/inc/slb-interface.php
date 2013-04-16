@@ -6,15 +6,15 @@
 
 function renderSLBDefConfig()
 {
-	$defaults = getSLBDefaults ();
+	$defaults = getSLBDefaults();
 	startPortlet ('SLB default configs');
 	echo '<table cellspacing=0 cellpadding=5 align=center>';
 	printOpFormIntro ('save');
-	echo '<tr><th class=tdright>VS config</th><td colspan=2><textarea tabindex=103 name=vsconfig rows=10 cols=80>' . htmlspecialchars($defaults['vs']) . '</textarea></td>';
+	echo '<tr><th class=tdright>VS config</th><td colspan=2><textarea tabindex=103 name=vsconfig rows=10 cols=80>' . htmlspecialchars($defaults['vsconfig']) . '</textarea></td>';
 	echo '<td rowspan=2>';
 	printImageHREF ('SAVE', 'Save changes', TRUE);
 	echo '</td></tr>';
-	echo '<tr><th class=tdright>RS config</th><td colspan=2><textarea tabindex=104 name=rsconfig rows=10 cols=80>' . htmlspecialchars($defaults['rs']) . '</textarea></td></tr>';
+	echo '<tr><th class=tdright>RS config</th><td colspan=2><textarea tabindex=104 name=rsconfig rows=10 cols=80>' . htmlspecialchars($defaults['rsconfig']) . '</textarea></td></tr>';
 	echo '</form></table>';
 	finishPortlet();
 }

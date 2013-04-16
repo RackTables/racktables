@@ -152,7 +152,7 @@ ORDER BY
 		}
 
 		$defaults = getSLBDefaults (TRUE);
-		$parser->addMacro ('GLOBAL_VS_CONF', dos2unix ($defaults['vs']));
+		$parser->addMacro ('GLOBAL_VS_CONF', dos2unix ($defaults['vsconfig']));
 		$parser->addMacro ('RSP_VS_CONF', dos2unix ($this->rs['vsconfig']));
 		$parser->addMacro ('VS_VS_CONF', dos2unix ($this->vs['vsconfig']));
 		$parser->addMacro ('SLB_VS_CONF', dos2unix ($this->slb['vsconfig']));
@@ -170,7 +170,7 @@ ORDER BY
 		$parser->addMacro ('RS_COMMENT', $rs_row['comment']);
 
 		$defaults = getSLBDefaults (TRUE);
-		$parser->addMacro ('GLOBAL_RS_CONF', dos2unix ($defaults['rs']));
+		$parser->addMacro ('GLOBAL_RS_CONF', dos2unix ($defaults['rsconfig']));
 		$parser->addMacro ('VS_RS_CONF', dos2unix ($this->vs['rsconfig']));
 		$parser->addMacro ('RSP_RS_CONF', dos2unix ($this->rs['rsconfig']));
 		$parser->addMacro ('SLB_RS_CONF', dos2unix ($this->slb['rsconfig']));
@@ -678,8 +678,8 @@ function getSLBDefaults ($do_cache_result = FALSE)
 	elseif (! empty ($ret))
 		return $ret;
 
-	$ret['vs'] = loadScript('DefaultVSConfig');
-	$ret['rs'] = loadScript('DefaultRSConfig');
+	$ret['vsconfig'] = loadScript ('DefaultVSConfig');
+	$ret['rsconfig'] = loadScript ('DefaultRSConfig');
 	return $ret;
 }
 
