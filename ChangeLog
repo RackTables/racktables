@@ -1,6 +1,10 @@
 0.20.5
 	bugfix: 500 server error if protocol was not specified in
 		terminal_settings subroutine
+	update: search improvements:
+	        - redirect to object when search by IP lead to valid allocation
+		- if search result is same type of object, preserve opened tab
+		- display search query in form field when search return multiple results
 0.20.4 2013-04-15
 	bugfix: %GPASS% dictionary markers were ignored in selectboxes
 	bugfix: 802.1Q: better Force10 switches support

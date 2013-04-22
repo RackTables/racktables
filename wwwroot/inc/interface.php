@@ -104,7 +104,7 @@ function renderInterfaceHTML ($pageno, $tabno, $payload)
   <div style="float: right" class=greeting><a href='index.php?page=myaccount&tab=default'><?php global $remote_displayname; echo $remote_displayname ?></a> [ <a href='?logout'>logout</a> ]</div>
  <?php echo getConfigVar ('enterprise') ?> RackTables <a href="http://racktables.org" title="Visit RackTables site"><?php echo CODE_VERSION ?></a><?php renderQuickLinks() ?>
  </div>
- <div class="menubar"><?php showPathAndSearch ($pageno); ?></div>
+ <div class="menubar"><?php showPathAndSearch ($pageno, $tabno); ?></div>
  <div class="tabbar"><?php showTabs ($pageno, $tabno); ?></div>
  <div class="msgbar"><?php showMessageOrError(); ?></div>
  <div class="pagebar"><?php echo $payload; ?></div>
@@ -5891,7 +5891,7 @@ function renderTextEditor ($file_id)
 	echo "</td></tr>\n</table></form>\n";
 }
 
-function showPathAndSearch ($pageno)
+function showPathAndSearch ($pageno, $tabno)
 {
 	// This function returns array of page numbers leading to the target page
 	// plus page number of target page itself. The first element is the target
@@ -5958,8 +5958,10 @@ function showPathAndSearch ($pageno)
 	echo "<div class='searchbox' style='float:right'>";
 	echo "<form name=search method=get>";
 	echo '<input type=hidden name=page value=search>';
+	echo "<input type=hidden name=last_page value=$pageno>";
+	echo "<input type=hidden name=last_tab value=$tabno>";
 	// This input will be the first, if we don't add ports or addresses.
-	echo "<label>Search:<input type=text name=q size=20 tabindex=1000></label></form></div>";
+	echo "<label>Search:<input type=text name=q size=20 tabindex=1000 value='".(isset ($_REQUEST['q']) ? htmlspecialchars ($_REQUEST['q'], ENT_QUOTES) : '')."'></label></form></div>";
 
 	// Path (breadcrumbs)
 	echo implode(' : ', array_reverse ($items));

@@ -4913,9 +4913,19 @@ function buildSearchRedirectURL ($result_type, $record)
 		case 'ipv6addressbydq':
 		case 'ipv4addressbydescr':
 		case 'ipv6addressbydescr':
-			$next_page = strlen ($record['ip']) == 16 ? 'ipv6net' : 'ipv4net';
-			$id = isset ($record['net_id']) ? $record['net_id'] : getIPAddressNetworkId ($record['ip']);
-			$params['hl_ip'] = ip_format ($record['ip']);
+			$address = getIPAddress ($record['ip']);
+			if (isset ($address['allocs']) and count ($address['allocs']) == 1 and count ($address['vslist']) == 0 and count ($address['rsplist']) == 0)
+			{
+				$next_page = 'object';
+				$id = $address['allocs'][0]['object_id'];
+				$params['hl_ip'] = ip_format ($record['ip']);
+			}
+			else
+			{
+				$next_page = strlen ($record['ip']) == 16 ? 'ipv6net' : 'ipv4net';
+				$id = isset ($record['net_id']) ? $record['net_id'] : getIPAddressNetworkId ($record['ip']);
+				$params['hl_ip'] = ip_format ($record['ip']);
+			}
 			break;
 		case 'object':
 			if (isset ($record['by_port']) and 1 == count ($record['by_port']))
@@ -4941,7 +4951,9 @@ function buildSearchRedirectURL ($result_type, $record)
 	if (! isset ($key) || ! isset ($id))
 		return NULL;
 	$params[$key] = $id;
-	return buildRedirectURL ($next_page, 'default', $params);
+	if (isset ($_REQUEST['last_tab']) and isset ($_REQUEST['last_page']) and $next_page == $_REQUEST['last_page'])
+		$next_tab = assertStringArg('last_tab');
+	return buildRedirectURL ($next_page, isset ($next_tab) ? $next_tab : 'default', $params);
 }
 
 function getRackCodeWarnings ()
