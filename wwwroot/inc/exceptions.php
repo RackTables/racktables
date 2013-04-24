@@ -75,7 +75,8 @@ class EntityNotFoundException extends RackTablesError
 	}
 	public function dispatch()
 	{
-		RackTablesError::genHTMLPage ('Missing record', "<h2>Missing record</h2><br>" . $this->message);
+		showError ($this->message);
+		redirectUser (buildRedirectURL('index', 'default'));
 	}
 }
 
