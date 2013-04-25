@@ -1465,6 +1465,7 @@ function resetUIConfig()
 	setConfigVar ('PORT_EXCLUSION_LISTSRC', '{$typeid_3} or {$typeid_10} or {$typeid_11} or {$typeid_1505} or {$typeid_1506}');
 	setConfigVar ('FILTER_RACKLIST_BY_TAGS', 'yes');
 	setConfigVar ('SSH_OBJS_LISTSRC', 'false');
+	setConfigVar ('RDP_OBJS_LISTSRC', 'false');
 	setConfigVar ('TELNET_OBJS_LISTSRC', 'false');
 	setConfigVar ('SYNC_802Q_LISTSRC', '');
 	setConfigVar ('QUICK_LINK_PAGES', 'depot,ipv4space,rackspace');
