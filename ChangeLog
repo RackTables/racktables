@@ -5,6 +5,7 @@
 		- redirect to object when search by IP lead to valid allocation
 		- if search result is same type of object, preserve opened tab
 		- display search query in form field when search return multiple results
+	new feature: Rackcode filter for RDP-managed objects (#819)
 0.20.4 2013-04-15
 	bugfix: %GPASS% dictionary markers were ignored in selectboxes
 	bugfix: 802.1Q: better Force10 switches support

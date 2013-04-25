@@ -8128,8 +8128,9 @@ function formatAttributeValue ($record)
 		if ($record['id'] == 3) // FQDN attribute
 		{
 			$protos_to_try = array (
-				'ssh' => 'SSH_OBJS_LISTSRC',
+				'ssh'    => 'SSH_OBJS_LISTSRC',
 				'telnet' => 'TELNET_OBJS_LISTSRC',
+				'rdp'    => 'RDP_OBJS_LISTSRC',
 			);
 			foreach ($protos_to_try as $proto => $cfgvar)
 				if (considerConfiguredConstraint (NULL, $cfgvar))
