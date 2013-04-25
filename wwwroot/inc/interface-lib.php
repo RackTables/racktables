@@ -922,6 +922,8 @@ function getOpLink ($params, $title,  $img_name = '', $comment = '', $class = ''
 		if (! empty ($title))
 			$ret .= ' ';
 	}
+	if (FALSE !== strpos ($class, 'need-confirmation'))
+		addJS ('js/racktables.js');
 	$ret .= $title . '</a>';
 	return $ret;
 }
@@ -988,6 +990,28 @@ function printOpFormIntro ($opname, $extra = array(), $upload = FALSE)
 	fillBypassValues ($pageno, $extra);
 	foreach ($extra as $inputname => $inputvalue)
 		printf ('<input type=hidden name="%s" value="%s">', htmlspecialchars ($inputname, ENT_QUOTES), htmlspecialchars ($inputvalue, ENT_QUOTES));
+}
+
+
+// Display hrefs for all of a file's parents. If scissors are requested,
+// prepend cutting button to each of them.
+function serializeFileLinks ($links, $scissors = FALSE)
+{
+	global $etype_by_pageno, $page;
+	$comma = '';
+	$ret = '';
+	foreach ($links as $link_id => $li)
+		if (FALSE === ($pageno = array_search ($li['entity_type'], $etype_by_pageno)))
+			throw new RackTablesError ("Unknown etype '${li['entity_type']}'", RackTablesError::INTERNAL);
+		else
+		{
+			$ret .= $comma;
+			if ($scissors)
+				$ret .= getOpLink (array('op'=>'unlinkFile', 'link_id'=>$link_id), '', 'cut', 'Unlink file') . ' ';
+			$ret .= mkA ($li['name'], $pageno, $li['entity_id']);
+			$comma = '<br>';
+		}
+	return $ret;
 }
 
 ?>

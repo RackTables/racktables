@@ -2685,53 +2685,6 @@ function formatEntityName ($name)
 	return 'invalid';
 }
 
-// Display hrefs for all of a file's parents. If scissors are requested,
-// prepend cutting button to each of them.
-function serializeFileLinks ($links, $scissors = FALSE)
-{
-	$comma = '';
-	$ret = '';
-	foreach ($links as $link_id => $li)
-	{
-		switch ($li['entity_type'])
-		{
-			case 'ipv4net':
-				$params = "page=ipv4net&id=";
-				break;
-			case 'ipv6net':
-				$params = "page=ipv6net&id=";
-				break;
-			case 'ipv4rspool':
-				$params = "page=ipv4rspool&pool_id=";
-				break;
-			case 'ipv4vs':
-				$params = "page=ipv4vs&vs_id=";
-				break;
-			case 'object':
-				$params = "page=object&object_id=";
-				break;
-			case 'rack':
-				$params = "page=rack&rack_id=";
-				break;
-			case 'location':
-				$params = "page=location&location_id=";
-				break;
-			case 'user':
-				$params = "page=user&user_id=";
-				break;
-		}
-		$ret .= $comma;
-		if ($scissors)
-		{
-			$ret .= "<a href='" . makeHrefProcess(array('op'=>'unlinkFile', 'link_id'=>$link_id)) . "'";
-			$ret .= getImageHREF ('cut') . '</a> ';
-		}
-		$ret .= sprintf("<a href='index.php?%s%s'>%s</a>", $params, $li['entity_id'], $li['name']);
-		$comma = '<br>';
-	}
-	return $ret;
-}
-
 // Convert filesize to appropriate unit and make it human-readable
 function formatFileSize ($bytes)
 {

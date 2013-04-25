@@ -91,3 +91,9 @@ function getQueryString(key, default_)
 	else
 		return qs[1];
 }
+
+$(document).ready (function (e) {
+	$('a.need-confirmation').click (function (e) {
+		return confirm ("Are you sure?");
+	})
+});
