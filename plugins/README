@@ -15,9 +15,9 @@ Consider the following sample:
 
 <?php
 
-registerTabHandler ('object', 'default', 'renderObject_add_FQDN_waring');
+registerTabHandler ('object', 'default', 'renderObject_add_FQDN_warning');
 
-function renderObject_add_FQDN_waring ($object_id)
+function renderObject_add_FQDN_warning ($object_id)
 {
 	$object = spotEntity ('object', $object_id);
 	$attrs = getAttrValues ($object_id);
