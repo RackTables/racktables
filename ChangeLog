@@ -1,6 +1,8 @@
 0.20.5
 	bugfix: 500 server error if protocol was not specified in
 		terminal_settings subroutine
+	bugfix: Virtual Resources page threw exception if a hypervisor/resource pool
+		was not associated with a cluster (#823)
 	update: search improvements:
 		- redirect to object when search by IP lead to valid allocation
 		- if search result is same type of object, preserve opened tab
