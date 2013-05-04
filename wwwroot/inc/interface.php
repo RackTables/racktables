@@ -4083,7 +4083,9 @@ function renderEditAttrMapForm ()
 		echo "<td class=tdleft>" . $attrtypes[$attr['type']] . "</td><td colspan=2 class=tdleft>";
 		foreach ($attr['application'] as $app)
 		{
-			if ($app['refcnt'])
+			if ($app['sticky'] == 'yes')
+				printImageHREF ('nodelete', 'system mapping');
+			elseif ($app['refcnt'])
 				printImageHREF ('nodelete', $app['refcnt'] . ' value(s) stored for objects');
 			else
 				echo getOpLink (array('op'=>'del', 'attr_id'=>$attr['id'], 'objtype_id'=>$app['objtype_id']), '', 'delete', 'Remove mapping');

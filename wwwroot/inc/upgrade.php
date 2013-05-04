@@ -244,6 +244,7 @@ function getDBUpgradePath ($v1, $v2)
 		'0.20.2',
 		'0.20.3',
 		'0.20.4',
+		'0.20.5',
 	);
 	if (!in_array ($v1, $versionhistory) or !in_array ($v2, $versionhistory))
 		return NULL;
@@ -1651,7 +1652,17 @@ CREATE TABLE `MuninGraph` (
 			$query[] = "UPDATE Config SET varvalue = '0.20.4' WHERE varname = 'DB_VERSION'";
 			break;
 		case '0.20.5':
+			// prevent some AttributeMap entries from being deleted
+			$query[] = "ALTER TABLE AttributeMap ADD COLUMN sticky enum('yes','no') default 'no'";
+			$query[] = "UPDATE AttributeMap SET sticky = 'yes' WHERE objtype_id = 4 AND attr_id IN (26,28)"; // Server -> Hypervisor, Slot number
+			$query[] = "UPDATE AttributeMap SET sticky = 'yes' WHERE objtype_id = 8 AND attr_id IN (1,2,4,28)"; // Network switch -> OEM S/N 1, HW type, SW type, Slot number
+			$query[] = "UPDATE AttributeMap SET sticky = 'yes' WHERE objtype_id = 798 AND attr_id = 28"; // Network security -> Slot number
+			$query[] = "UPDATE AttributeMap SET sticky = 'yes' WHERE objtype_id = 1055 AND attr_id = 28"; // FC switch -> Slot number
+			$query[] = "UPDATE AttributeMap SET sticky = 'yes' WHERE objtype_id = 1560 AND attr_id IN (27,29)"; // Rack -> Height, Sort order
+			$query[] = "UPDATE AttributeMap SET sticky = 'yes' WHERE objtype_id = 1787 AND attr_id = 30"; // Management interface -> Mgmt type
+
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdefined, description) VALUES ('RDP_OBJS_LISTSRC','false','string','yes','no','yes','Rackcode filter for RDP-managed objects')";
+			$query[] = "UPDATE Config SET varvalue = '0.20.5' WHERE varname = 'DB_VERSION'";
 			break;
 		case 'dictionary':
 			$query = reloadDictionary();

@@ -3294,7 +3294,7 @@ function getAttrMap ()
 
 	$result = usePreparedSelectBlade
 	(
-		'SELECT id, type, name, chapter_id, (SELECT dict_value FROM Dictionary WHERE dict_key = objtype_id) '.
+		'SELECT id, type, name, chapter_id, sticky, (SELECT dict_value FROM Dictionary WHERE dict_key = objtype_id) '.
 		'AS objtype_name, (SELECT name FROM Chapter WHERE id = chapter_id) ' .
 		'AS chapter_name, objtype_id, (SELECT COUNT(object_id) FROM AttributeValue AS av INNER JOIN Object AS o ' .
 		'ON av.object_id = o.id WHERE av.attr_id = Attribute.id AND o.objtype_id = AttributeMap.objtype_id) ' .
@@ -3316,6 +3316,7 @@ function getAttrMap ()
 		$application = array
 		(
 			'objtype_id' => $row['objtype_id'],
+			'sticky' => $row['sticky'],
 			'refcnt' => $row['refcnt'],
 		);
 		if ($row['type'] == 'dict')

@@ -11,6 +11,7 @@
 		- display search query in form field when search return multiple results
 	update: handle EntityNotFoundException as redirect to main page and
 		show appropriate error message
+	update: prevent deletion of system-level attribute mappings (#771)
 	new feature: Rackcode filter for RDP-managed objects (#819)
 0.20.4 2013-04-15
 	bugfix: %GPASS% dictionary markers were ignored in selectboxes
