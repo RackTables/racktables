@@ -8168,7 +8168,7 @@ function renderVirtualResourcesSummary ()
 			echo '<td class="tdleft">' . mkA ("<strong>${pool['name']}</strong>", 'object', $pool['id']) . '</td>';
 			echo '<td class="tdleft">';
 			if ($pool['cluster_id'])
-				mkA ("<strong>${pool['cluster_name']}</strong>", 'object', $pool['cluster_id']);
+				echo mkA ("<strong>${pool['cluster_name']}</strong>", 'object', $pool['cluster_id']);
 			echo '</td>';
 			echo "<td class='tdleft'>${pool['VMs']}</td>";
 			echo "</tr>\n";
@@ -8195,7 +8195,7 @@ function renderVirtualResourcesSummary ()
 			echo '<td class="tdleft">' . mkA ("<strong>${hypervisor['name']}</strong>", 'object', $hypervisor['id']) . '</td>';
 			echo '<td class="tdleft">';
 			if ($hypervisor['cluster_id'])
-				mkA ("<strong>${hypervisor['cluster_name']}</strong>", 'object', $hypervisor['cluster_id']);
+				echo mkA ("<strong>${hypervisor['cluster_name']}</strong>", 'object', $hypervisor['cluster_id']);
 			echo '</td>';
 			echo "<td class='tdleft'>${hypervisor['VMs']}</td>";
 			echo "</tr>\n";
