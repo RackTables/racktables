@@ -3,6 +3,8 @@
 		terminal_settings subroutine
 	bugfix: Virtual Resources page threw exception if a hypervisor/resource pool
 		was not associated with a cluster (#823)
+	bugfix: contained objects were displayed without container's rackspace
+		allocation information (#825)
 	update: search improvements:
 		- redirect to object when search by IP lead to valid allocation
 		- if search result is same type of object, preserve opened tab

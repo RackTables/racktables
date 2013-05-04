@@ -94,8 +94,12 @@ INNER JOIN (
 	// rack filter
 	if (! empty ($filter['racks']))
 	{
+		// include objects mounted directly in the specified racks, as well as children of those objects
 		$query .= 'AND p.object_id IN (SELECT DISTINCT object_id FROM RackSpace WHERE rack_id IN (' .
-			questionMarks (count ($filter['racks'])) . ')) ';
+			questionMarks (count ($filter['racks'])) . ') ' .
+			"UNION SELECT child_entity_id FROM EntityLink WHERE parent_entity_type='object' AND child_entity_type = 'object' AND parent_entity_id IN (SELECT DISTINCT object_id FROM RackSpace WHERE rack_id IN (" .
+			questionMarks (count ($filter['racks'])) . '))) ';
+		$qparams = array_merge ($qparams, $filter['racks']);
 		$qparams = array_merge ($qparams, $filter['racks']);
 	}
 	// objectname filter
@@ -370,8 +374,14 @@ function renderPopupPortSelector()
 	if ($in_rack)
 	{
 		$object = spotEntity ('object', $port_info['object_id']);
-		if ($object['rack_id'])
+		if ($object['rack_id']) // the object itself is mounted in a rack
 			$filter['racks'] = getProximateRacks ($object['rack_id'], getConfigVar ('PROXIMITY_RANGE'));
+		elseif ($object['container_id']) // the object is not mounted in a rack, but it's container may be
+		{
+			$container = spotEntity ('object', $object['container_id']);
+			if ($container['rack_id'])
+				$filter['racks'] = getProximateRacks ($container['rack_id'], getConfigVar ('PROXIMITY_RANGE'));
+		}
 	}
 	$spare_ports = array();
 	if
