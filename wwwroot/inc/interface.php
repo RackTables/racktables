@@ -3652,7 +3652,10 @@ function renderObjectParentCompatEditor()
 			$last_left_parent_id = $pair['parent_objtype_id'];
 		}
 		echo "<tr class=row_${order}><td>";
-		echo getOpLink (array ('op' => 'del', 'parent_objtype_id' => $pair['parent_objtype_id'], 'child_objtype_id' => $pair['child_objtype_id']), '', 'delete', 'remove pair');
+		if ($pair['count'] > 0)
+			printImageHREF ('nodelete', $pair['count'] . ' relationship(s) stored');
+		else
+			echo getOpLink (array ('op' => 'del', 'parent_objtype_id' => $pair['parent_objtype_id'], 'child_objtype_id' => $pair['child_objtype_id']), '', 'delete', 'remove pair');
 		echo "</td><td class=tdleft>${pair['parent_name']}</td><td class=tdleft>${pair['child_name']}</td></tr>\n";
 	}
 	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')

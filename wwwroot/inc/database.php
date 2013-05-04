@@ -3061,8 +3061,12 @@ function getObjectParentCompat ()
 {
 	$result = usePreparedSelectBlade
 	(
-		'SELECT parent_objtype_id, child_objtype_id, d1.dict_value AS parent_name, d2.dict_value AS child_name FROM ' .
-		'ObjectParentCompat AS pc INNER JOIN Dictionary AS d1 ON pc.parent_objtype_id = d1.dict_key ' .
+		'SELECT parent_objtype_id, child_objtype_id, d1.dict_value AS parent_name, d2.dict_value AS child_name, ' .
+		'(SELECT COUNT(*) FROM EntityLink EL ' .
+		"LEFT JOIN Object PO ON (EL.parent_entity_id = PO.id AND EL.parent_entity_type = 'object') " .
+		"LEFT JOIN Object CO ON (EL.child_entity_id = CO.id AND EL.child_entity_type = 'object') " .
+		'WHERE PO.objtype_id = parent_objtype_id AND CO.objtype_id = child_objtype_id) AS count ' .
+		'FROM ObjectParentCompat AS pc INNER JOIN Dictionary AS d1 ON pc.parent_objtype_id = d1.dict_key ' .
 		'INNER JOIN Dictionary AS d2 ON pc.child_objtype_id = d2.dict_key ' .
 		'ORDER BY parent_name, child_name'
 	);
