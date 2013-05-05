@@ -477,6 +477,7 @@ border-color: #ff8c00;
 div.commentblock {
 	white-space: pre-wrap;
 	text-align: left;
+	font-family: monospace;
 }
 
 .port_connected_none {
