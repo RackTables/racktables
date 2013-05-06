@@ -143,9 +143,11 @@ $SQLSchema = array
 			'comment' => 'comment',
 			'row_id' => 'row_id',
 			'row_name' => 'row_name',
+			'location_id' => 'location_id',
+			'location_name' => 'location_name',
 		),
 		'keycolumn' => 'id',
-		'ordcolumns' => array ('row_name', 'sort_order', 'Rack.name'),
+		'ordcolumns' => array ('location_name', 'row_name', 'sort_order', 'Rack.name'),
 		'pidcolumn' => 'row_id',
 	),
 	'row' => array

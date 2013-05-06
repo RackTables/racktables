@@ -1296,10 +1296,10 @@ function renderRackMultiSelect ($sname, $racks, $selected)
 	// Transform the given flat list into a list of groups, each representing a rack row.
 	$rdata = array();
 	foreach ($racks as $rack)
-		if (!isset ($rdata[$rack['row_name']]))
-			$rdata[$rack['row_name']] = array ($rack['id'] => $rack['name']);
-		else
-			$rdata[$rack['row_name']][$rack['id']] = $rack['name'];
+	{
+		$row_name = ($rack['location_id']) ? $rack['location_name'] . '/' . $rack['row_name'] : $rack['row_name'];
+		$rdata[$row_name][$rack['id']] = $rack['name'];
+	}
 	echo "<select name=${sname} multiple size=" . getConfigVar ('MAXSELSIZE') . " onchange='getElementsByName(\"updateObjectAllocation\")[0].submit()'>\n";
 	foreach ($rdata as $optgroup => $racklist)
 	{

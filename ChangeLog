@@ -5,6 +5,8 @@
 		was not associated with a cluster (#823)
 	bugfix: contained objects were displayed without container's rackspace
 		allocation information (#825)
+	bugfix: when mounting an object, list of racks was improperly grouped if
+		duplicate row names existed (#839)
 	update: search improvements:
 		- redirect to object when search by IP lead to valid allocation
 		- if search result is same type of object, preserve opened tab

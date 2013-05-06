@@ -1652,6 +1652,26 @@ CREATE TABLE `MuninGraph` (
 			$query[] = "UPDATE Config SET varvalue = '0.20.4' WHERE varname = 'DB_VERSION'";
 			break;
 		case '0.20.5':
+			$query[] = "
+CREATE OR REPLACE VIEW `Rack` AS SELECT O.id, O.name AS name, O.asset_no, O.has_problems, O.comment,
+  AV_H.uint_value AS height,
+  AV_S.uint_value AS sort_order,
+  RT.thumb_data,
+  R.id AS row_id,
+  R.name AS row_name,
+  L.id AS location_id,
+  L.name AS location_name
+  FROM `Object` O
+  LEFT JOIN `AttributeValue` AV_H ON O.id = AV_H.object_id AND AV_H.attr_id = 27
+  LEFT JOIN `AttributeValue` AV_S ON O.id = AV_S.object_id AND AV_S.attr_id = 29
+  LEFT JOIN `RackThumbnail` RT ON O.id = RT.rack_id
+  LEFT JOIN `EntityLink` RL ON O.id = RL.child_entity_id  AND RL.parent_entity_type = 'row' AND RL.child_entity_type = 'rack'
+  INNER JOIN `Object` R ON R.id = RL.parent_entity_id
+  LEFT JOIN `EntityLink` LL ON R.id = LL.child_entity_id AND LL.parent_entity_type = 'location' AND LL.child_entity_type = 'row'
+  LEFT JOIN `Object` L ON L.id = LL.parent_entity_id
+  WHERE O.objtype_id = 1560
+";
+
 			// prevent some AttributeMap entries from being deleted
 			$query[] = "ALTER TABLE AttributeMap ADD COLUMN sticky enum('yes','no') default 'no'";
 			$query[] = "UPDATE AttributeMap SET sticky = 'yes' WHERE objtype_id = 4 AND attr_id IN (26,28)"; // Server -> Hypervisor, Slot number
