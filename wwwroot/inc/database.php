@@ -698,7 +698,7 @@ function amplifyCell (&$record, $dummy = NULL)
 		$result = usePreparedSelectBlade ($query, array ($record['id'], $record['height']));
 		global $loclist;
 		$mounted_objects = array();
-		$rows = $result->fetchAll (PDO::FETCH_ASSOC); 
+		$rows = $result->fetchAll (PDO::FETCH_ASSOC);
 		$record['isDeletable'] = (count ($rows)) ? FALSE : TRUE;
 		foreach ($rows as $row)
 		{
@@ -1443,30 +1443,34 @@ function getOperationMolecules ($op_id = 0)
 
 function getResidentRacksData ($object_id = 0, $fetch_rackdata = TRUE)
 {
-	// Include racks that the object is directly mounted in, racks that it's parent is mounted in,
-	// and racks that it is 'Zero-U' mounted in
 	$result = usePreparedSelectBlade
 	(
-		'SELECT DISTINCT RS.rack_id FROM RackSpace RS LEFT JOIN EntityLink EL ON RS.object_id = EL.parent_entity_id ' .
-		'WHERE RS.object_id = ? or EL.child_entity_id = ? ' .
-		'UNION ' .
-		"SELECT parent_entity_id AS rack_id FROM EntityLink where parent_entity_type = 'rack' AND child_entity_type = 'object' AND child_entity_id = ? " .
+		// Include racks that the object is directly mounted in
+		"SELECT rack_id FROM RackSpace WHERE object_id = ? " .
+		"UNION " .
+		// Include racks that it's parent is mounted in
+		"SELECT RS.rack_id FROM RackSpace RS INNER JOIN EntityLink EL ON RS.object_id = EL.parent_entity_id AND EL.parent_entity_type = 'object' WHERE EL.child_entity_id = ? AND EL.child_entity_type = 'object' " .
+		"UNION " .
+		// and racks that it is 'Zero-U' mounted in
+		"SELECT parent_entity_id AS rack_id FROM EntityLink WHERE parent_entity_type = 'rack' AND child_entity_type = 'object' AND child_entity_id = ? " .
 		'ORDER BY rack_id', array ($object_id, $object_id, $object_id)
 	);
 	$rows = $result->fetchAll (PDO::FETCH_NUM);
 	unset ($result);
+
 	$ret = array();
 	foreach ($rows as $row)
-	{
-		if (!$fetch_rackdata)
+		if (! isset ($ret[$row[0]]))
 		{
-			$ret[$row[0]] = $row[0];
-			continue;
+			if (!$fetch_rackdata)
+				$rackData = $row[0];
+			else
+			{
+				$rackData = spotEntity ('rack', $row[0]);
+				amplifyCell ($rackData);
+			}
+			$ret[$row[0]] = $rackData;
 		}
-		$rackData = spotEntity ('rack', $row[0]);
-		amplifyCell ($rackData);
-		$ret[$row[0]] = $rackData;
-	}
 	return $ret;
 }
 
@@ -2773,7 +2777,7 @@ function getObjectSearchResults ($what)
 	foreach (getStickerSearchResults ('RackObject', $what) as $objRecord)
 	{
 		$ret[$objRecord['id']]['id'] = $objRecord['id'];
-		$ret[$objRecord['id']]['by_sticker'] = $objRecord['by_sticker'];			
+		$ret[$objRecord['id']]['by_sticker'] = $objRecord['by_sticker'];
 	}
 	return $ret;
 }
