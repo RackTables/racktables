@@ -19,6 +19,7 @@
 		which are being used (#835)
 	update: use the monospace font family when displaying comments (#781)
 	update: display parent locations when browsing rackspace (#845)
+	update: display parent and child location(s) on View Location page (#847)
 	new feature: Rackcode filter for RDP-managed objects (#819)
 0.20.4 2013-04-15
 	bugfix: %GPASS% dictionary markers were ignored in selectboxes

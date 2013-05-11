@@ -3705,6 +3705,8 @@ function renderLocationPage ($location_id)
 	echo "<td class=pcleft>";
 	$summary = array();
 	$summary['Name'] = $locationData['name'];
+	if (! empty ($locationData['parent_id']))
+		$summary['Parent location'] = mkA ($locationData['parent_name'], 'location', $locationData['parent_id']);
 	$summary['Child locations'] = count($locationData['locations']);
 	$summary['Rows'] = count($locationData['rows']);
 	if ($locationData['has_problems'] == 'yes')
@@ -3723,12 +3725,18 @@ function renderLocationPage ($location_id)
 	renderFilesPortlet ('location', $location_id);
 	echo '</td>';
 
-	// Right column with list of rows
+	// Right column with list of rows and child locations
 	echo '<td class=pcright>';
-	startPortlet ('Rows');
+	startPortlet ('Rows ('. count ($locationData['rows']) . ')');
 	echo "<table border=0 cellspacing=0 cellpadding=5 align=center>\n";
 	foreach ($locationData['rows'] as $row_id => $name)
 		echo '<tr><td>' . mkA ($name, 'row', $row_id) . '</td></tr>';
+	echo "</table>\n";
+	finishPortlet();
+	startPortlet ('Child Locations (' . count ($locationData['locations']) . ')');
+	echo "<table border=0 cellspacing=0 cellpadding=5 align=center>\n";
+	foreach ($locationData['locations'] as $location_id => $name)
+		echo '<tr><td>' . mkA ($name, 'location', $location_id) . '</td></tr>';
 	echo "</table>\n";
 	finishPortlet();
 	echo '</td>';
