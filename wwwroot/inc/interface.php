@@ -3173,7 +3173,16 @@ function renderSearchResults ($terms, $summary)
 		else
 		{
 			startPortlet($realm);
-			echo $record;
+			if(is_array ($record))
+			{
+				echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
+				echo "<tr class=row_odd><td class=tdleft>";
+				renderCell ($record);
+				echo "</td></tr>";
+				echo '</table>';
+			}
+			else
+				echo $record;
 			finishPortlet();
 		}
 	}

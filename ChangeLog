@@ -7,6 +7,7 @@
 		allocation information (#825)
 	bugfix: when mounting an object, list of racks was improperly grouped if
 		duplicate row names existed (#839)
+	bugfix: invalid search result when only one location matched (#843)
 	update: search improvements:
 		- redirect to object when search by IP lead to valid allocation
 		- if search result is same type of object, preserve opened tab
