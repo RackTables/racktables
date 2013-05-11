@@ -372,8 +372,18 @@ function renderRackspace ()
 					continue;
 				$rackListIdx = 0;
 				echo "<tr class=row_${order}><th class=tdleft>";
-				if ($location_id)
-					echo "<a href='".makeHref(array('page'=>'location', 'location_id'=>$location_id))."${cellfilter['urlextra']}'>${row['location_name']}</a>";
+				$locationTree = '';
+				while ($location_id)
+				{
+						$parentLocation = spotEntity ('location', $location_id);
+						$locationTree = "&raquo; <a href='" . 
+							makeHref(array('page'=>'location', 'location_id'=>$parentLocation['id'])) .
+							"${cellfilter['urlextra']}'>${parentLocation['name']}</a> " .
+							$locationTree;
+						$location_id = $parentLocation['parent_id'];
+				}
+				$locationTree = substr ($locationTree, 8);
+				echo $locationTree;
 				echo "</th><th class=tdleft><a href='".makeHref(array('page'=>'row', 'row_id'=>$row_id))."${cellfilter['urlextra']}'>${row_name}</a></th>";
 				echo "<th class=tdleft><table border=0 cellspacing=5><tr>";
 				if (!count ($rackList))
